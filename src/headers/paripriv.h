@@ -103,7 +103,7 @@ long   dblexpo(double x);
 ulong  dblmantissa(double x);
 void   dcxlog(double s, double t, double *a, double *b);
 double dnorm(double s, double t);
-double mylog2(GEN z);
+double dbllog2(GEN z);
 ulong  usqrtsafe(ulong a);
 
 /* "abs" routines for t_REAL ( disregard sign ) */
@@ -828,6 +828,5 @@ GEN     inv_szeta_euler(long n, double lba, long prec);
 GEN     kbesselnew(GEN n, GEN z, long prec);
 GEN     polylogd0(long m, GEN x, long flag, long prec);
 GEN     twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff);
-GEN     wf1(GEN x, long prec);
 
 ENDEXTERN

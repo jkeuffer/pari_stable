@@ -2839,8 +2839,8 @@ ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
     if (typ(t) == t_POL) t = gnorml1(t, 0);
     b = addii(b, sqri(t));
   }
-  loga = mylog2(a);
-  logb = mylog2(b); if (dB) logb -= 2 * mylog2(dB);
+  loga = dbllog2(a);
+  logb = dbllog2(b); if (dB) logb -= 2 * dbllog2(dB);
   i = (long)((degpol(B) * loga + degpol(A) * logb) / 2);
   avma = av; return (i <= 0)? 1: 1 + (ulong)i;
 }
@@ -3333,7 +3333,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
         bound = gexpo(R) + 1;
         if (!gcmp0(R) || bound <= 0) break;
       }
-      if (dB) bound -= (long)(mylog2(dB)*degA);
+      if (dB) bound -= (long)(dbllog2(dB)*degA);
     }
   }
   if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);

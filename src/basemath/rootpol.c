@@ -363,7 +363,7 @@ static GEN /* beware overflow */
 dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }
 
 double
-mylog2(GEN z)
+dbllog2(GEN z)
 {
   double x, y;
 
@@ -382,11 +382,11 @@ findpower(GEN p)
   double x, L, mins = pariINFINITY;
   long n = degpol(p),i;
 
-  L = mylog2(gel(p,n+2)); /* log2(lc * binom(n,i)) */
+  L = dbllog2(gel(p,n+2)); /* log2(lc * binom(n,i)) */
   for (i=n-1; i>=0; i--)
   {
     L += log2((double)(i+1) / (double)(n-i));
-    x = mylog2(gel(p,i+2));
+    x = dbllog2(gel(p,i+2));
     if (x != -pariINFINITY)
     {
       double s = (L - x) / (double)(n-i);
@@ -411,7 +411,7 @@ newton_polygon(GEN p, long k)
   vertex = (long*)new_chunk(n+1);
 
   /* vertex[i] = 1 if i a vertex of convex hull, 0 otherwise */
-  for (i=0; i<=n; i++) { logcoef[i] = mylog2(gel(p,2+i)); vertex[i] = 0; }
+  for (i=0; i<=n; i++) { logcoef[i] = dbllog2(gel(p,2+i)); vertex[i] = 0; }
   vertex[0] = 1; /* sentinel */
   for (i=0; i < n; i=h)
   {
@@ -634,7 +634,7 @@ logmax_modulus(GEN p, double tau)
 
     bit = (long) ((double)k * log2(1./tau2) +
                      (double)(nn-k)*log2(1./eps) + 3*log2((double)nn)) + 1;
-    homothetie_gauss(q, e, bit-(long)floor(mylog2(gel(q,2+nn))+0.5));
+    homothetie_gauss(q, e, bit-(long)floor(dbllog2(gel(q,2+nn))+0.5));
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(av, graeffe(q));
@@ -745,7 +745,7 @@ ind_maxlog2(GEN q)
   double L = - pariINFINITY;
   for (i=0; i<=degpol(q); i++)
   {
-    double d = mylog2(gel(q,2+i));
+    double d = dbllog2(gel(q,2+i));
     if (d > L) { L = d; k = i; }
   }
   return k;
@@ -1512,7 +1512,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
 {
   GEN q, b, FF, GG;
   long n = degpol(p), k, bit2, eq;
-  double aux = mylog2(gel(p,n+1)) - mylog2(gel(p,n+2));
+  double aux = dbllog2(gel(p,n+1)) - dbllog2(gel(p,n+2));
 
   /* beware double overflow */
   if (aux >= 0 && (aux > 1e4 || exp2(aux) > 2.5*n)) return 0;
