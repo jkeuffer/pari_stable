@@ -1403,7 +1403,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
   if (degpol(nup) == 1)
   {
     GEN c = gel(nup,2); /* nup = X + c */
-    chin = signe(c)? TR_pol(chip, negi(c)): chip;
+    chin = signe(c)? translate_pol(chip, negi(c)): chip;
   }
   else
     chin = ZX_caract(chip, nup, varn(chip));
@@ -1667,7 +1667,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       }
       
       if (typ(delt) == t_INT)
-        chie = TR_pol(chig, delt); /* frequent special case */
+        chie = translate_pol(chig, delt); /* frequent special case */
       else
       {
         if (!dvdii(ZX_QX_resultant(S->chi, eta), S->p)) continue;

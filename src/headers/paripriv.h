@@ -235,7 +235,7 @@ GEN  revpol(GEN x);
 GEN  ser_to_pol_i(GEN x, long lx);
 GEN  shiftpol_i(GEN x, long v);
 GEN  swap_vars(GEN b0, long v);
-GEN  TR_pol(GEN P, GEN c);
+GEN  translate_pol(GEN P, GEN c);
 
 /* b) Modular */
 GEN  bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);

@@ -1484,7 +1484,7 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   imax = polreal? 3: 4;
   for (i=1; i<=imax; i++)
   {
-    qq = TR_pol(q, gel(v,i));
+    qq = translate_pol(q, gel(v,i));
     lrmin = logmin_modulus(qq,0.05);
     if (LOG3 > lrmin + lthick)
     {
@@ -1497,8 +1497,8 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   bit2 = bit + gexpo(newq) - ep + (long)(n*LOG3/LOG2 + 1);
   split_2(newq, bit2, ctr, lthick, &FF, &GG);
   r = gneg(mygprec(ctr,bit2));
-  FF = TR_pol(FF,r);
-  GG = TR_pol(GG,r);
+  FF = translate_pol(FF,r);
+  GG = translate_pol(GG,r);
 
   gr = ginv(gr); bit2 = bit - ep + gexpo(FF)+gexpo(GG);
   *F = scalepol(FF,gr,bit2);
@@ -1522,7 +1522,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
 
   q = mygprec(p,bit2);
   b = gdivgs(gdiv(gel(q,n+1),gel(q,n+2)),-n);
-  q = TR_pol(q,b); gel(q,n+1) = gen_0; eq = gexpo(q);
+  q = translate_pol(q,b); gel(q,n+1) = gen_0; eq = gexpo(q);
   k = 0;
   while (k <= n/2 && (- gexpo(gel(q,k+2)) > bit2 + 2*(n-k) + eq
                       || gcmp0(gel(q,k+2)))) k++;
@@ -1540,8 +1540,8 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
     FF = mygprec(FF,bit2);
   }
   GG = mygprec(GG,bit2); b = mygprec(gneg(b),bit2);
-  *F = TR_pol(FF, b);
-  *G = TR_pol(GG, b); return 1;
+  *F = translate_pol(FF, b);
+  *G = translate_pol(GG, b); return 1;
 }
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bit)|P|.

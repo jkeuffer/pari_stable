@@ -57,7 +57,7 @@ static GEN test_block(blockdata *B, GEN L, GEN D);
 
 /* return P(X + c) using destructive Horner, optimize for c = 1,-1 */
 GEN
-TR_pol(GEN P, GEN c)
+translate_pol(GEN P, GEN c)
 {
   pari_sp av = avma, lim;
   GEN Q, *R;
@@ -478,7 +478,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = gel(DATA,5);
-  if (!gcmp0(TR)) w1_Q = TR_pol(w1_Q, TR);
+  if (!gcmp0(TR)) w1_Q = translate_pol(w1_Q, TR);
   return gdiv(w1_Q,den);
 }
 
@@ -685,7 +685,7 @@ compute_data(blockdata *B)
     GEN mTR = negi(TR), interp, bezoutC;
 
     gel(DATA,5) = TR;
-    pol = TR_pol(gel(DATA,1), gen_m1);
+    pol = translate_pol(gel(DATA,1), gen_m1);
     l = lg(roo); p1 = cgetg(l, t_VEC);
     for (i=1; i<l; i++) gel(p1,i) = gadd(TR, gel(roo,i));
     roo = p1;
@@ -699,18 +699,18 @@ compute_data(blockdata *B)
     {
       if (degpol(interp[i]) > 0) /* do not turn pol_1[0] into gen_1 */
       {
-        p1 = TR_pol(gel(interp,i), gen_m1);
+        p1 = translate_pol(gel(interp,i), gen_m1);
         gel(interp,i) = FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-        p1 = TR_pol(gel(bezoutC,i), gen_m1);
+        p1 = translate_pol(gel(bezoutC,i), gen_m1);
         gel(bezoutC,i) = FpXX_red(p1, p);
       }
     }
     ff = cgetg(lff, t_VEC); /* copy, don't overwrite! */
     for (i=1; i<lff; i++)
-      gel(ff,i) = FpX_red(TR_pol((GEN)S->ff[i], mTR), p);
+      gel(ff,i) = FpX_red(translate_pol((GEN)S->ff[i], mTR), p);
   }
   else
   {
