@@ -660,9 +660,9 @@ GEN galois(GEN x, long prec) {return polgalois(x,prec);}
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {
-  pari_sp av=avma,tetpil;
-  long lx,j,N;
-  GEN p,p1,y,pol;
+  pari_sp av = avma;
+  long lx, j, N;
+  GEN p, p1, y, pol;
 
   nf=checknf(nf); pol=gel(nf,1);
   if (typ(aut)==t_POL) aut = gmodulcp(aut,pol);
@@ -694,7 +694,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       p = gel(x,1);
       p1=centermod(galoisapply(nf,aut,gel(x,2)), p);
       if (is_pm1(x[3]))
-	if (Z_pval(subres(gmul(gel(nf,7),p1),pol), p) > itos(gel(x,4)))
+	if (Z_pval(subres(coltoliftalg(nf,p1),pol), p) > itos(gel(x,4)))
 	  gel(p1,1) =  (signe(p1[1]) > 0)? subii(gel(p1,1), p)
 	                                 : addii(gel(p1,1), p);
       gel(y,2) = p1;
@@ -702,10 +702,10 @@ galoisapply(GEN nf, GEN aut, GEN x)
       return gerepilecopy(av,y);
 
     case t_COL:
-      N=degpol(pol);
+      N = degpol(pol);
       if (lg(x)!=N+1) err(typeer,"galoisapply");
-      p1=galoisapply(nf,aut,gmul(gel(nf,7),x)); tetpil=avma;
-      return gerepile(av,tetpil,algtobasis(nf,p1));
+      p1 = gsubst(coltoliftalg(nf,x), varn(pol), aut);
+      return gerepileupto(av, algtobasis_i(nf,p1));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);

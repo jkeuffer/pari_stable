@@ -111,7 +111,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
   r1 = nf_get_r1(nf);
   if (!b)
   {
-    be = _algtobasis(nf, be);
+    be = algtobasis_i(nf, be);
     b = gmul(gmael(nf,5,1), be);
   }
   n = max((itos(ell)>>1), 3);
@@ -147,7 +147,7 @@ static GEN
 reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
 {
   GEN c, fa;
-  be = _algtobasis(bnfz, be);
+  be = algtobasis_i(bnfz, be);
   be = primitive_part(be, &c);
   if (c)
   {
@@ -596,7 +596,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
         be = compute_beta(X, vecWB, gell, bnf);
-        be = lift_if_rational(basistoalg(bnf, be));
+        be = lift_if_rational(coltoalg(bnf, be));
         P = gsub(monomial(gen_1, ell, 0), be);
         if (all) res = shallowconcat(res, gerepileupto(av, P));
         else
@@ -849,7 +849,7 @@ static GEN
 lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 {
   GEN I = ideal_two_elt(nf,id);
-  GEN x = gmul(gel(nf,7), gel(I,2));
+  GEN x = coltoliftalg(nf, gel(I,2));
   gel(I,2) = algtobasis(nfz, RgX_RgXQ_compo(x, C->p, C->R));
   return prime_to_ideal(nfz,I);
 }

@@ -121,6 +121,17 @@ GEN  log_gen_arch(zlog_S *S, long index);
 GEN  log_gen_pr(zlog_S *S, long index, GEN nf, long e);
 GEN  zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);
 
+/* conversions basis / alg */
+
+/* nf a genuine NF, x an nfelt (t_COL) or t_MAT whose columns represent nfelts.
+ * Return the corresponding elements as t_POLs (implicitly mod nf.pol) */
+#define coltoliftalg(nf,x) (gmul(gel((nf),7), (x)))
+GEN    algtobasis_i(GEN nf, GEN x);
+GEN    algtobasis_cp(GEN nf, GEN x);
+GEN    basistoalg_i(GEN nf, GEN x);
+GEN    poltobasis(GEN nf,GEN x);
+GEN    coltoalg(GEN nf,GEN x);
+
 /* Other number fields routines */
 GEN    arch_mul(GEN x, GEN y);
 GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);

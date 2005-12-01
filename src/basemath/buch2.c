@@ -584,7 +584,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N)
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN m)
 {
-  GEN Nm = absi( subres(gmul(gel(nf,7),m), gel(nf,1)) ); /* |Nm| */
+  GEN Nm = absi( subres(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
   GEN N  = diviiexact(Nm, dethnf_i(I)); /* N(m / I) */
   return can_factor(F, nf, I, m, N);
 }
@@ -740,7 +740,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   A = gmul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
-  y = gmul(gel(nf,7), y);
+  y = coltoliftalg(nf, y);
   vec = cgetg(RU+1,t_COL);
   p1 = PiI2n(0,prec); for (i=1; i<=R1; i++) gel(vec,i) = p1;
   p2 = PiI2n(1,prec); for (   ; i<=RU; i++) gel(vec,i) = p2;
@@ -2941,7 +2941,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   N = degpol(nf[1]);
   if (N <= 1) return buchall_for_degree_one_pol(nf, flun);
   zu = rootsof1(nf);
-  gel(zu,2) = gmul(gel(nf,7),gel(zu,2));
+  gel(zu,2) = coltoliftalg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;

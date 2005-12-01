@@ -545,11 +545,7 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 /* base3.c */
 
 int     RgV_isscalar(GEN x);
-GEN     _algtobasis(GEN nf, GEN x);
-GEN     algtobasis_cp(GEN nf, GEN x);
-GEN     basistoalg_i(GEN nf, GEN x);
 GEN     algtobasis(GEN nf, GEN x);
-GEN     algtobasis_i(GEN nf,GEN x);
 GEN     arch_to_perm(GEN arch);
 GEN     basistoalg(GEN nf, GEN x);
 GEN     dethnf(GEN x);
@@ -577,7 +573,10 @@ GEN     ideallistzstar(GEN nf,long bound);
 GEN     ideallistzstargen(GEN nf,long bound);
 GEN     idealstar0(GEN nf, GEN x,long flag);
 int     isnfscalar(GEN x);
+GEN     lift_to_pol(GEN x);
 GEN     lllreducemodmatrix(GEN x,GEN y);
+GEN     matalgtobasis(GEN nf, GEN x);
+GEN     matbasistoalg(GEN nf, GEN x);
 GEN     nfdiveuc(GEN nf, GEN a, GEN b);
 GEN     nfdivrem(GEN nf, GEN a, GEN b);
 GEN     nfmod(GEN nf, GEN a, GEN b);
@@ -586,6 +585,8 @@ GEN     nfreducemodidele(GEN nf,GEN g,GEN idele,GEN structarch);
 GEN     reducemodinvertible(GEN x, GEN y);
 GEN     reducemodmatrix(GEN x, GEN y);
 GEN     reducemodHNF(GEN x, GEN y, GEN *Q);
+GEN     rnfalgtobasis(GEN rnf, GEN x);
+GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 GEN     vecmodii(GEN a, GEN b);
 GEN     zarchstar(GEN nf,GEN x,GEN arch);
@@ -665,11 +666,6 @@ GEN     vecpow(GEN x, GEN n);
 
 /* base5.c */
 
-GEN     lift_to_pol(GEN x);
-GEN     matalgtobasis(GEN nf, GEN x);
-GEN     matbasistoalg(GEN nf, GEN x);
-GEN     rnfalgtobasis(GEN rnf, GEN x);
-GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     rnfelementabstorel(GEN rnf, GEN x);
 GEN     rnfelementdown(GEN rnf, GEN x);
 GEN     rnfelementreltoabs(GEN rnf, GEN x);

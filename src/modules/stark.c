@@ -1765,7 +1765,6 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   GEN beta = d->beta, B = d->B;
   long N = d->N, v = d->v, e;
   long i, j, k, l, ct = 0, prec2;
-  pari_sp av = avma;
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, 0 };
   chk.data = (void*)d;
 
@@ -1817,7 +1816,7 @@ LABrcf: ct++;
 
   if (!cand)
   {
-    if (ct > 3) { avma = av; return NULL; }
+    if (ct > 3) return NULL;
 
     prec2 = (prec2 << 1) - 2;
     if (DEBUGLEVEL>1) err(warnprec,"RecCoeff", prec2);
@@ -1829,17 +1828,17 @@ LABrcf: ct++;
   cand = gel(cand,1);
   l = lg(cand) - 1;
 
-  if (l == 1) return gerepileupto(av, basistoalg(nf, gel(cand,1)));
+  if (l == 1) return coltoalg(nf, gel(cand,1));
 
   if (DEBUGLEVEL>1) fprintferr("RecCoeff3: no solution found!\n");
-  avma = av; return NULL;
+  return NULL;
 }
 
 /* Using linear dependance relations */
 static GEN
 RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
-  pari_sp av = avma, av2;
+  pari_sp av;
   GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
   long i, imin, imax, lM = lg(M);
 
@@ -1849,16 +1848,16 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   imin = (long)bit_accuracy_mul(prec, .225);
   imax = (long)bit_accuracy_mul(prec, .315);
 
-  av2 = avma;
-  for (i = imax; i >= imin; i-=16, avma = av2)
+  av = avma;
+  for (i = imax; i >= imin; i-=16, avma = av)
   {
     long e;
     GEN v = lindep2(vec, i), z = gel(v,1);
     if (!signe(z)) continue;
     *++v = evaltyp(t_COL) | evallg(lM);
     v = grndtoi(gdiv(v, z), &e);
-    if (e > 0) return RecCoeff3(nf,d,prec); /* failure */
-    if (TestOne(gmul(M, v), d)) return gerepileupto(av, basistoalg(nf, v));
+    if (e > 0) break;
+    if (TestOne(gmul(M, v), d)) return coltoalg(nf, v);
   }
   /* failure */
   return RecCoeff3(nf,d,prec);

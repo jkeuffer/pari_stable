@@ -48,7 +48,7 @@ scal_mul(GEN nf, GEN x, GEN y, long ty)
   if (!is_extscalar_t(ty))
   {
     if (ty!=t_COL) err(typeer,"nfmul");
-    y = gmul(gel(nf,7),y);
+    y = coltoliftalg(nf, y);
   }
   p1 = gmul(x,y); tetpil=avma;
   return gerepile(av,tetpil,algtobasis(nf,p1));
@@ -157,8 +157,8 @@ element_inv(GEN nf, GEN x)
     for (i=2; i<=N; i++) gel(p1,i) = gcopy(gel(x,i));
     return p1;
   }
-  p1 = QXQ_inv(gmul(gel(nf,7),x), gel(nf,1));
-  return gerepileupto(av, algtobasis_i(nf,p1));
+  p1 = QXQ_inv(coltoliftalg(nf,x), gel(nf,1));
+  return gerepileupto(av, poltobasis(nf,p1));
 }
 
 /* quotient of x and y in nf */
@@ -182,14 +182,14 @@ element_div(GEN nf, GEN x, GEN y)
     else
     {
       if (ty!=t_COL) err(typeer,"nfdiv");
-      p1=gdiv(x,gmodulcp(gmul(gel(nf,7),y),gel(nf,1)));
+      p1 = gdiv(x, coltoalg(nf, y));
     }
     return gerepileupto(av, algtobasis(nf,p1));
   }
   if (is_extscalar_t(ty))
   {
     if (tx!=t_COL) err(typeer,"nfdiv");
-    p1=gdiv(gmodulcp(gmul(gel(nf,7),x),gel(nf,1)),y);
+    p1 = gdiv(coltoalg(nf,x), y);
     return gerepileupto(av, algtobasis(nf,p1));
   }
   if (tx != t_COL || ty != t_COL) err(typeer,"element_div");
@@ -201,9 +201,9 @@ element_div(GEN nf, GEN x, GEN y)
     return gerepileupto(av, gmul(gel(x,1),p1));
   }
 
-  p1 = gmul(gmul(gel(nf,7),x), QXQ_inv(gmul(gel(nf,7),y), gel(nf,1)));
+  p1 = gmul(coltoliftalg(nf,x), QXQ_inv(coltoliftalg(nf,y), gel(nf,1)));
   p1 = RgX_rem(p1, gel(nf,1));
-  return gerepileupto(av, algtobasis_i(nf,p1));
+  return gerepileupto(av, poltobasis(nf,p1));
 }
 
 /* product of INTEGERS (i.e vectors with integral coeffs) x and y in nf */
@@ -508,7 +508,7 @@ eltmul_get_table(GEN nf, GEN x)
   {
     long i, N = degpol(nf[1]);
     GEN mul = cgetg(N+1,t_MAT);
-    x = _algtobasis(nf, x);
+    x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) return gscalmat(gel(x,1), N);
     gel(mul,1) = x; /* assume w_1 = 1 */
     for (i=2; i<=N; i++) gel(mul,i) = element_mulid(nf,x,i);
@@ -561,18 +561,11 @@ element_val(GEN nf, GEN x, GEN vp)
   e = itos(gel(vp,3));
   switch(typ(x))
   {
-    case t_INT:
-      return Z_pval(x,p)*e;
-    case t_FRAC:
-      return e*(Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p));
-    case t_POLMOD: x = gel(x,2); /* fall through */
-    case t_POL:
-      x = algtobasis_i(nf,x); break;
-    case t_COL:
-      if (lg(x)==N+1) break;
-    default: err(typeer,"element_val");
+    case t_INT: return e*Z_pval(x,p);
+    case t_FRAC:return e*(Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p));
+    default: x = algtobasis_i(nf,x); break;
   }
-  if (RgV_isscalar(x)) return ggval(gel(x,1),p)*e;
+  if (RgV_isscalar(x)) return e*ggval(gel(x,1),p);
 
   cx = content(x);
   if (gcmp1(cx)) vcx=0; else { x = gdiv(x,cx); vcx = ggval(cx,p); }
@@ -593,12 +586,18 @@ polegal_spec(GEN x, GEN y)
 }
 
 GEN
+coltoalg(GEN nf, GEN x)
+{
+  return mkpolmod( coltoliftalg(nf, x), gel(nf,1) );
+}
+
+GEN
 basistoalg(GEN nf, GEN x)
 {
   long tx=typ(x),lx=lg(x),i,j,l;
   GEN z;
 
-  nf=checknf(nf);
+  nf = checknf(nf);
   switch(tx)
   {
     case t_COL:
@@ -607,11 +606,9 @@ basistoalg(GEN nf, GEN x)
         long t = typ(x[i]);
 	if (is_matvec_t(t)) break;
       }
-      if (i==lx)
-      {
-        z = cgetg(3,t_POLMOD);
-        gel(z,1) = gcopy(gel(nf,1));
-	gel(z,2) = gmul(gel(nf,7),x); return z;
+      if (i==lx) {
+        pari_sp av = avma;
+        return gerepilecopy(av, coltoalg(nf, x));
       }
       /* fall through */
 
@@ -638,21 +635,31 @@ basistoalg(GEN nf, GEN x)
   }
 }
 
+/* FIXME: basistoalg and algtobasis should not treat recursive objects
+ * since t_COLs are ambiguous, and the functionnality is almost useless.
+ * (Even then, matbasistoalg and matalgtobasis can be used instead.)
+ * The following shallow functions do what the public functions should do,
+ * without sanity checks. 
+ * Assume nf is a genuine nf. */
 GEN
 basistoalg_i(GEN nf, GEN x)
-{ return typ(x) == t_COL? basistoalg(nf, x): x; }
+{ return typ(x) == t_COL? coltoalg(nf, x): x; }
 GEN
-_algtobasis(GEN nf, GEN x)
+algtobasis_i(GEN nf, GEN x)
 {
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      return gscalcol_i(x, degpol( checknf(nf)[1] ));
-    case t_POLMOD: case t_POL:
-      return algtobasis(nf,x);
+      return gscalcol_i(x, degpol( gel(nf,1) ));
+    case t_POLMOD:
+      x = gel(x,2);
+      if (typ(x) != t_POL) return gscalcol_i(x, degpol( gel(nf,1) ));
+      /* fall through */
+    case t_POL:
+      return poltobasis(nf,x);
     case t_COL:
-      if (lg(x) == lg(nf[7])) break;
-    default: err(typeer,"_algtobasis");
+      if (lg(x) == lg(gel(nf,7))) break;
+    default: err(typeer,"algtobasis_i");
   }
   return x;
 }
@@ -674,23 +681,14 @@ mulmat_pol(GEN A, GEN x)
   return z;
 }
 
-/* valid for scalars and polynomial, degree less than N.
+/* valid for t_POL, nf a genuine nf or an rnf !
  * No garbage collecting. No check.  */
 GEN
-algtobasis_i(GEN nf, GEN x)
+poltobasis(GEN nf, GEN x)
 {
   GEN P = gel(nf,1);
-  long tx = typ(x), N = degpol(P);
-
-  if (tx==t_POLMOD) { x=gel(x,2); tx=typ(x); }
-  if (tx==t_POL)
-  {
-    if (varn(x) != varn(P))
-      err(talker,"incompatible variables in algtobasis");
-    if (degpol(x) >= N) x = RgX_rem(x,P);
-    return mulmat_pol(gel(nf,8), x);
-  }
-  return gscalcol(x,N);
+  if (degpol(x) >= degpol(P)) x = RgX_rem(x,P);
+  return mulmat_pol(gel(nf,8), x);
 }
 
 GEN
@@ -700,7 +698,7 @@ algtobasis(GEN nf, GEN x)
   pari_sp av=avma;
   GEN z;
 
-  nf=checknf(nf);
+  nf = checknf(nf);
   switch(tx)
   {
     case t_VEC: case t_COL: case t_MAT:
@@ -710,12 +708,114 @@ algtobasis(GEN nf, GEN x)
     case t_POLMOD:
       if (!polegal_spec(gel(nf,1),gel(x,1)))
 	err(talker,"not the same number field in algtobasis");
-      x = gel(x,2); /* fall through */
+      x = gel(x,2);
+      if (typ(x) != t_POL) break;
+      /* fall through */
     case t_POL:
-      return gerepileupto(av,algtobasis_i(nf,x));
+      if (varn(x) != varn(gel(nf,1)))
+        err(talker,"incompatible variables in algtobasis");
+      return gerepileupto(av,poltobasis(nf,x));
 
-    default: N=degpol(nf[1]); return gscalcol(x,N);
   }
+  N=degpol(nf[1]); return gscalcol(x,N);
+}
+
+GEN
+rnfbasistoalg(GEN rnf,GEN x)
+{
+  long tx = typ(x), lx = lg(x), i;
+  pari_sp av = avma;
+  GEN p1, z, nf;
+
+  checkrnf(rnf);
+  switch(tx)
+  {
+    case t_VEC: case t_COL:
+      p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
+      for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
+      p1 = gmul(gmael(rnf,7,1), p1);
+      return gerepileupto(av, gmodulcp(p1,gel(rnf,1)));
+
+    case t_MAT:
+      z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) gel(z,i) = rnfbasistoalg(rnf,gel(x,i));
+      return z;
+
+    case t_POLMOD:
+      return gcopy(x);
+
+    default: z = cgetg(3,t_POLMOD);
+      gel(z,1) = gcopy(gel(rnf,1));
+      gel(z,2) = gmul(x,pol_1[varn(rnf[1])]); return z;
+  }
+}
+
+GEN
+matbasistoalg(GEN nf,GEN x)
+{
+  long i, j, li, lx = lg(x);
+  GEN c, z = cgetg(lx,t_MAT);
+
+  if (typ(x) != t_MAT) err(talker,"not a matrix in matbasistoalg");
+  if (lx == 1) return z;
+  li = lg(x[1]);
+  for (j=1; j<lx; j++)
+  {
+    c = cgetg(li,t_COL); gel(z,j) = c;
+    for (i=1; i<li; i++) gel(c,i) = basistoalg(nf,gcoeff(x,i,j));
+  }
+  return z;
+}
+
+GEN
+matalgtobasis(GEN nf,GEN x)
+{
+  long i, j, li, lx = lg(x);
+  GEN c, z = cgetg(lx, t_MAT);
+
+  if (typ(x) != t_MAT) err(talker,"not a matrix in matalgtobasis");
+  if (lx == 1) return z;
+  li = lg(x[1]);
+  for (j=1; j<lx; j++)
+  {
+    c = cgetg(li,t_COL); gel(z,j) = c;
+    for (i=1; i<li; i++) gel(c,i) = algtobasis_cp(nf, gcoeff(x,i,j));
+  }
+  return z;
+}
+
+/* assume x is a t_POLMOD */
+GEN
+lift_to_pol(GEN x)
+{
+  GEN y = gel(x,2);
+  return (typ(y) != t_POL)? scalarpol(y,varn(x[1])): y;
+}
+
+GEN
+rnfalgtobasis(GEN rnf,GEN x)
+{
+  long tx = typ(x), i, lx;
+  GEN z;
+
+  checkrnf(rnf);
+  switch(tx)
+  {
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) gel(z,i) = rnfalgtobasis(rnf,gel(x,i));
+      return z;
+
+    case t_POLMOD:
+      if (!polegal_spec(gel(rnf,1),gel(x,1)))
+	err(talker,"not the same number field in rnfalgtobasis");
+      x = lift_to_pol(x); /* fall through */
+    case t_POL: {
+      pari_sp av = avma;
+      return gerepileupto(av, poltobasis(rnf, x));
+    }
+  }
+  return gscalcol(x, degpol(rnf[1]));
 }
 
 /* Given a and b in nf, gives an algebraic integer y in nf such that a-b.y
@@ -1005,7 +1105,7 @@ element_sqrmodideal(GEN nf, GEN x, GEN id) {
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? nfreducemodideal_i(element_mul(nf,x,y),id): _algtobasis(nf, y);
+  return x? nfreducemodideal_i(element_mul(nf,x,y),id): algtobasis_i(nf, y);
 }
 /* assume k >= 0, ideal in HNF */
 GEN
@@ -1437,7 +1537,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
     g = ff_to_nf(FpXQ_gener(T,p), modpr);
-    g = algtobasis(nf, g);
+    g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */
   prh = prime_to_ideal(nf,pr);
@@ -1699,7 +1799,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
   pari_sp av = avma;
   long i, k, kmin, kmax;
 
-  if (typ(a) != t_INT) a = _algtobasis(nf,a);
+  if (typ(a) != t_INT) a = algtobasis_i(nf,a);
   if (DEBUGLEVEL>3)
   {
     fprintferr("entering zlog, "); flusherr();

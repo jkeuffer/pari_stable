@@ -77,8 +77,8 @@ unifpol0(GEN nf,GEN x,long flag)
 
 /* Let x be a polynomial with coefficients in Z or nf (vectors or polymods)
  * return the same polynomial with coefficients expressed:
- *  if flag=0: as vectors (on the integral basis).
- *  if flag=1: as polymods.
+ *  if flag=t_COL: as vectors (on the integral basis).
+ *  if flag=t_POLMOD: as polmods.
  */
 GEN
 unifpol(GEN nf, GEN x, long flag)

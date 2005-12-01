@@ -142,7 +142,7 @@ idealhermite_aux(GEN nf, GEN x)
 
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
-    x = _algtobasis(nf, x);
+    x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) return gscalmat(gabs(gel(x,1),0), lg(x)-1);
     x = Q_primitive_part(x, &cx);
     x = eltmul_get_table(nf, x);
@@ -640,7 +640,7 @@ idealfactor(GEN nf, GEN x)
   N = degpol(nf[1]);
   if (tx == id_PRINCIPAL) 
   {
-    x = _algtobasis(nf, x);
+    x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) x = gel(x,1);
     tx = typ(x);
     if (tx == t_INT || tx == t_FRAC)
@@ -1334,7 +1334,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   prkZ = gcoeff(prk, 1,1);
   for (i=1; i < l; i++)
   {
-    x = _algtobasis(nf, gel(g,i));
+    x = algtobasis_i(nf, gel(g,i));
     x = Q_remove_denom(x, &cx);
     if (cx)
     {
@@ -1389,7 +1389,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   e = gel(fa,2); l = lg(e);
   for (i=1; i<l; i++)
   {
-    GEN t, x = _algtobasis(nf, gel(g,i));
+    GEN t, x = algtobasis_i(nf, gel(g,i));
     x = Q_primpart(x);
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
@@ -1565,7 +1565,7 @@ idealnorm(GEN nf, GEN x)
     case id_PRIME:
       return pr_norm(x);
     case id_PRINCIPAL:
-      x = gnorm(basistoalg(nf,x)); break;
+      x = gnorm(basistoalg_i(nf,x)); break;
     default:
       if (lg(x) != lg(nf[1])-2) x = idealhermite_aux(nf,x);
       x = dethnf(x);
@@ -1634,7 +1634,7 @@ idealinv(GEN nf, GEN x)
       {
         switch(tx)
         {
-          case t_COL: x = gmul(gel(nf,7),x); break;
+          case t_COL: x = coltoliftalg(nf,x); break;
           case t_POLMOD: x = gel(x,2); break;
         }
         if (typ(x) != t_POL) { x = ginv(x); break; }
@@ -1759,7 +1759,7 @@ idealpow(GEN nf, GEN x, GEN n)
         if (!is_const_t(tx))
           switch(tx)
           {
-            case t_COL: x = gmul(gel(nf,7),x);
+            case t_COL: x = coltoalg(nf,x); break;
             case t_POL: x = gmodulcp(x,gel(nf,1));
           }
         x = powgi(x,n);
@@ -2061,9 +2061,9 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     y = NULL; goto END;
   }
 
-  x = gmul(gel(nf,7), y); /* algebraic integer */
+  x = coltoliftalg(nf, y); /* algebraic integer */
   b = Q_remove_denom(QXQ_inv(x,pol), &T);
-  b = algtobasis_i(nf,b);
+  b = poltobasis(nf,b);
   if (T)
   {
     GEN T2; b = Q_primitive_part(b, &T2);
@@ -2459,7 +2459,7 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
   GEN cx, b;
 
   nf = checknf(nf);
-  a = _algtobasis(nf, a);
+  a = algtobasis_i(nf, a);
   x = idealhermite_aux(nf,x);
   if (gcmp0(x))
   {
@@ -2558,7 +2558,7 @@ element_reduce(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
   long tx = typ(x);
-  if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
+  if (is_extscalar_t(tx)) x = poltobasis(checknf(nf), x);
   return gerepileupto(av, reducemodinvertible(x, ideal));
 }
 /* Given an element x and an ideal in matrix form (not necessarily HNF),
@@ -2568,7 +2568,7 @@ element_close(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
   long tx = typ(x);
-  if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
+  if (is_extscalar_t(tx)) x = poltobasis(checknf(nf), x);
   return gerepileupto(av, close_modinvertible(x, ideal));
 }
 
@@ -2858,12 +2858,12 @@ GEN
 element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
-  GEN p1;
+  GEN p1, T = gel(nf,1);
 
   nf = checknf(nf);
-  p1 = lift_intern(gdiv(gmodulcp(gmul(gel(nf,7),trivlift(x)), gel(nf,1)),
-                        gmodulcp(gmul(gel(nf,7),trivlift(y)), gel(nf,1))));
-  p1 = algtobasis_i(nf,p1);
+  p1 = QXQ_inv(coltoliftalg(nf,trivlift(y)), T);
+  p1 = RgXQ_mul(coltoliftalg(nf,trivlift(x)), p1, T);
+  p1 = poltobasis(nf,p1);
   return gerepileupto(av,nfreducemodpr(nf,p1,modpr));
 }
 
@@ -2873,8 +2873,8 @@ element_invmodpr(GEN nf, GEN y, GEN modpr)
   pari_sp av=avma;
   GEN p1;
 
-  p1 = QXQ_inv(gmul(gel(nf,7),trivlift(y)), gel(nf,1));
-  p1 = algtobasis_i(nf,p1);
+  p1 = QXQ_inv(coltoliftalg(nf,trivlift(y)), gel(nf,1));
+  p1 = poltobasis(nf,p1);
   return gerepileupto(av, nfreducemodpr(nf,p1,modpr));
 }
 
@@ -2889,7 +2889,7 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
   z = nf_to_ff(nf,lift(x),modpr);
   z = Fq_pow(z,k,T,p);
   z = ff_to_nf(z,modpr);
-  return gerepilecopy(av, _algtobasis(nf,z));
+  return gerepilecopy(av, algtobasis_i(nf,z));
 }
 
 GEN

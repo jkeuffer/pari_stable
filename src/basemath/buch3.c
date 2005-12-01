@@ -142,7 +142,7 @@ redideal(GEN nf,GEN x,GEN f)
 static int
 too_big(GEN nf, GEN bet)
 {
-  GEN x = gnorm(basistoalg(nf,bet));
+  GEN x = gnorm(coltoalg(nf,bet));
   switch (typ(x))
   {
     case t_INT: return absi_cmp(x, gen_1);
@@ -297,7 +297,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     la = lg(e); newL = cgetg(la, t_VEC);
     for (k=1; k<la; k++)
     {
-      GEN L0, cx, LL = _algtobasis(nf, gel(L,k));
+      GEN L0, cx, LL = algtobasis_i(nf, gel(L,k));
       L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
       for (j=1; j<lp; j++)
       {
@@ -1167,11 +1167,8 @@ certifybuchall(GEN bnf)
   }
   /* p | bad <--> p | some element occurring in cycgen[i]  */
 
-  funits = shallowcopy(funits);
-  for (i=1; i<lg(funits); i++)
-    gel(funits,i) = algtobasis(nf, gel(funits,i));
-  zu = shallowcopy(zu);
-  gel(zu,2) = algtobasis(nf, gel(zu,2));
+  funits = algtobasis(nf, funits);
+  zu = mkvec2(gel(zu,1), algtobasis(nf, gel(zu,2)));
 
   for (p = *delta++; p <= bound; ) {  
     check_prime(p,bnf,cyc,cycgen,funits,zu,bad);

@@ -135,7 +135,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
     {
       setlg(p1, n + 1);
       settyp(p1, t_COL);
-      p2 = gdiv(gmul(gel(nf,7), p1), negi(gel(p1,n + 1)));
+      p2 = gdiv(coltoliftalg(nf, p1), negi(gel(p1,n + 1)));
       if (gdvd(poleval(x, p2), x))
       {
 	gel(y,++nbauto) = p2;

@@ -2038,7 +2038,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
-    t = algtobasis_i(nf, FpX_div(T,u,p));
+    t = poltobasis(nf, FpX_div(T,u,p));
     t = centermod(t, p);
     u = FpX_center(u, p);
     if (e == 1)
@@ -2047,7 +2047,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
       S.D = S.w = S.M = NULL; S.T = T;
       if (!is_uniformizer(u, powiu(p,f+1), &S)) gel(u,2) = addii(gel(u,2), p);
     }
-    u = algtobasis_i(nf,u);
+    u = poltobasis(nf,u);
   }
   return mk_pr(p,u,e,f,t);
 }
@@ -2159,7 +2159,7 @@ _primedec(GEN nf, GEN p)
     for (i=1; i<k; i++)
       if (!E[i]) beta = beta? FpX_mul(beta, gel(F,i), p): gel(F,i);
     if (!beta) errprime(p);
-    beta = FpC_red(algtobasis_i(nf,beta), p);
+    beta = FpC_red(poltobasis(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
     p1 = shallowconcat(mulbeta, Ip);
@@ -2423,7 +2423,7 @@ modprinit(GEN nf, GEN pr, int zk)
   T = RgV_to_RgX(FpM_deplin(pow, p), varn(nf[1]));
   nfproj = cgetg(f+1, t_MAT);
   for (i=1; i<=f; i++) gel(nfproj,i) = lift_to_zk(gel(pow,i), c, N);
-  nfproj = gmul(gel(nf,7), nfproj);
+  nfproj = coltoliftalg(nf, nfproj);
 
   setlg(pow, f+1);
   ffproj = FpM_mul(FpM_inv(pow, p), ffproj, p);
@@ -2530,18 +2530,15 @@ GEN
 nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  long i;
   GEN pr, p;
 
   checkmodpr(modpr);
   pr = gel(modpr,mpr_PR);
   p = gel(pr,1);
-  x = _algtobasis(nf,x);
-  for (i=lg(x)-1; i>0; i--)
-    if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
+  x = algtobasis_i(nf,x);
   x = kill_denom(x, nf, p, modpr);
   x = ff_to_nf(zk_to_ff(x,modpr), modpr);
-  return gerepilecopy(av, _algtobasis(nf,x));
+  return gerepilecopy(av, algtobasis_i(nf,x));
 }
 
 GEN
@@ -2553,11 +2550,12 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
   long t = typ(x);
 
   if (t == t_POLMOD) { x = gel(x,2); t = typ(x); }
+  nf = checknf(nf);
   switch(t)
   {
     case t_INT: return modii(x, p);
     case t_FRAC: return Rg_to_Fp(x, p);
-    case t_POL: x = algtobasis(nf, x); break;
+    case t_POL: x = poltobasis(nf, x); break;
     case t_COL: break;
     default: err(typeer,"nf_to_ff");
   }
@@ -2728,7 +2726,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   P = lift(P);
   nf = checknf(nf); nfT = gel(nf,1);
   modpr = nf_to_ff_init(nf,&pr, &T, &p);
-  tau = gmul(gel(nf,7), gel(pr,5));
+  tau = coltoliftalg(nf, gel(pr,5));
   n = degpol(nfT);
   m = degpol(P);
 
@@ -2822,7 +2820,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   W = gmael(p1,2,1);
   I = gmael(p1,2,2);
 
-  pip = basistoalg(nf, gel(pr,2));
+  pip = coltoalg(nf, gel(pr,2));
   nfT = gel(nf,1);
   n = degpol(pol); vpol = varn(pol);
   q = T? powiu(p,degpol(T)): p;
@@ -2861,7 +2859,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       gel(I,j) = idealmul(nf,    tauinv, gel(I,j));
     }
     /* W = (Z_K/pr)-basis of O/pr. O = (W0,I0) ~ (W, I) */
-    Wa = basistoalg(nf,W);
+    Wa = matbasistoalg(nf,W);
 
    /* compute MW: W_i*W_j = sum MW_k,(i,j) W_k */
     Waa = lift_intern(RgM_to_RgXV(Wa,vpol));
@@ -2918,7 +2916,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
-    W = algtobasis(nf, gmul(Wa, basistoalg(nf,gel(pseudo,1))));
+    W = algtobasis(nf, gmul(Wa, matbasistoalg(nf,gel(pseudo,1))));
     I = gel(pseudo,2);
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */
@@ -2984,7 +2982,7 @@ static GEN
 get_d(GEN nf, GEN pol, GEN A)
 {
   long i, j, n = degpol(pol);
-  GEN W = RgM_to_RgXV(lift_intern(basistoalg(nf,A)), varn(pol));
+  GEN W = RgM_to_RgXV(lift_intern(matbasistoalg(nf,A)), varn(pol));
   GEN T, nfT = gel(nf,1), sym = polsym_gen(pol, NULL, n-1, nfT, NULL);
   T = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(T,j) = cgetg(n+1,t_COL);
@@ -2996,7 +2994,7 @@ get_d(GEN nf, GEN pol, GEN A)
       c = simplify_i(quicktrace(c,sym));
       gcoeff(T,j,i) = gcoeff(T,i,j) = c;
     }
-  return algtobasis_i(nf, det(T));
+  return poltobasis(nf, det(T));
 }
 
 /* nf = base field K
@@ -3476,7 +3474,7 @@ initmat(long l)
 static GEN
 nftocomplex(GEN nf, GEN x)
 {
-  return gmul(gmael(nf,5,1), _algtobasis(nf, x));
+  return gmul(gmael(nf,5,1), algtobasis_i(nf, x));
 }
 /* assume x a square t_MAT, return a t_VEC of embeddings of its columns */
 static GEN
@@ -3569,7 +3567,7 @@ RED(long k, long l, GEN U, GEN mu, GEN MC, GEN nf, GEN I, GEN *Ik_inv)
 
   xc = nftocomplex(nf,x);
   gel(MC,k) = gsub(gel(MC,k), vecmul(xc,gel(MC,l)));
-  gel(U,k) = gsub(gel(U,k), gmul(basistoalg(nf,x), gel(U,l)));
+  gel(U,k) = gsub(gel(U,k), gmul(coltoalg(nf,x), gel(U,l)));
   gcoeff(mu,k,l) = gsub(gcoeff(mu,k,l), xc);
   for (i=1; i<l; i++)
     gcoeff(mu,k,i) = gsub(gcoeff(mu,k,i), vecmul(xc,gcoeff(mu,l,i)));
@@ -3798,9 +3796,9 @@ rnfpolred(GEN nf, GEN pol, long prec)
     GEN p1, newpol;
 
     p1 = gel(I,j); al = gmul(gcoeff(p1,1,1),gel(O,j));
-    p1 = basistoalg(nf,gel(al,n));
+    p1 = coltoalg(nf,gel(al,n));
     for (i=n-1; i; i--)
-      p1 = gadd(basistoalg(nf,gel(al,i)), gmul(pol_x[v],p1));
+      p1 = gadd(coltoalg(nf,gel(al,i)), gmul(pol_x[v],p1));
     newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
     newpol = Q_primpart(newpol);
 

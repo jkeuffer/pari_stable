@@ -298,15 +298,14 @@ getallelts(GEN bnr)
 static GEN
 findbezk(GEN nf, GEN x)
 {
-  GEN a,b, M = gmael(nf,5,1), y = cgetg(3, t_COL), u = gcoeff(M,1,2);
+  GEN a,b, M = gmael(nf,5,1), u = gcoeff(M,1,2);
   long ea, eb;
 
   b = grndtoi(gdiv(imag_i(x), imag_i(u)), &eb);
   a = grndtoi(real_i(gsub(x, gmul(b,u))), &ea);
   if (ea > -20 || eb > -20) return NULL;
   if (!signe(b)) return a;
-  gel(y,1) = a;
-  gel(y,2) = b; return basistoalg(nf,y);
+  return coltoalg(nf, mkcol2(a,b));
 }
 
 static GEN
@@ -393,7 +392,7 @@ computeP2(GEN bnr, GEN la, long prec)
   GEN listray,P0,P,f,lanum, nf = checknf(bnr);
 
   f = gmael3(bnr,2,1,1);
-  la = _algtobasis(nf,la);
+  la = algtobasis_i(nf,la);
   listray = getallelts(bnr);
   clrayno = lg(listray)-1; av2 = avma;
 PRECPB:
@@ -566,14 +565,21 @@ treatspecialsigma(GEN nf, GEN gf)
   return compocyclo(nf,i,2);
 }
 
+/* return a vector of all roots of 1 in bnf [not necessarily quadratic] */
 static GEN
 getallrootsof1(GEN bnf)
 {
-  GEN T, u, nf = checknf(bnf), racunit = algtobasis_i(nf, gmael3(bnf,8,4,2));
+  GEN T, u, nf = checknf(bnf), tu;
   long i, n = itos(gmael3(bnf,8,4,1));
 
-  T = eltmul_get_table(nf, racunit);
-  u = cgetg(n+1, t_VEC); gel(u,1) = racunit;
+  if (n == 2) {
+    long N = degpol(gel(nf,1));
+    return mkvec2(gscalcol_i(gen_m1, N),
+                  gscalcol_i(gen_1, N));
+  }
+  tu = poltobasis(nf, gmael3(bnf,8,4,2));
+  T = eltmul_get_table(nf, tu);
+  u = cgetg(n+1, t_VEC); gel(u,1) = tu;
   for (i=2; i <= n; i++) gel(u,i) = gmul(T, gel(u,i-1));
   return u;
 }
@@ -581,18 +587,18 @@ getallrootsof1(GEN bnf)
 static GEN
 get_lambda(GEN bnr)
 {
-  GEN allf, bnf, nf, pol, w, f, la, P, labas, lamodf, u;
-  long a, b, f2, i, lu;
+  GEN allf, bnf, nf, pol, f, la, P, labas, lamodf, u;
+  long a, b, f2, i, lu, v;
 
-  allf = conductor(bnr,NULL,2); bnr = gel(allf,2);
+  allf = conductor(bnr,NULL,2);
+  bnr = gel(allf,2);
   f = gmael(allf,1,1);
   bnf= gel(bnr,1);
   nf = gel(bnf,7);
-  pol= gel(nf,1);
+  pol= gel(nf,1); v = varn(pol);
   P = treatspecialsigma(nf,f);
   if (P) return P;
 
-  w = gmodulcp(pol_x[varn(pol)], pol);
   f2 = 2 * itos(gcoeff(f,1,1));
   u = getallrootsof1(bnf); lu = lg(u);
   for (i=1; i<lu; i++)
@@ -602,11 +608,11 @@ get_lambda(GEN bnr)
   for (a=0; a<f2; a++)
     for (b=0; b<f2; b++)
     {
-      la = gaddgs(gmulsg(a,w),b);
-      if (umodiu(gnorm(la), f2) != 1) continue;
+      la = deg1pol_i(stoi(a), stoi(b), v); /* ax + b */
+      if (umodiu(gnorm(mkpolmod(la, pol)), f2) != 1) continue;
       if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 
-      labas = algtobasis(nf, la);
+      labas = poltobasis(nf, la);
       lamodf = colreducemodHNF(labas, f, NULL);
       for (i=1; i<lu; i++)
         if (gequal(lamodf, gel(u,i))) break;

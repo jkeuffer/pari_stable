@@ -137,7 +137,7 @@ psquarenf(GEN nf,GEN a,GEN pr)
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(basistoalg(nf, gel(pr,2)), v));
+  if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
 
   norm = gshift(pr_norm(pr), -1);
   a = gmul(a, gmodulsg(1,gel(pr,1)));
@@ -171,7 +171,7 @@ psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(basistoalg(nf, gel(pr,2)), v));
+  if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
   /* now (a,pr) = 1 */
   v = check2(nf,a,zinit); avma = ltop; return v;
 }
@@ -220,7 +220,7 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
     q=(nu<<1)-lambda; res=0;
   }
   if (q > itos(gel(pr,3))<<1)  return -1;
-  p1 = gpowgs(basistoalg(nf, gel(pr,2)), lambda);
+  p1 = gpowgs(coltoalg(nf, gel(pr,2)), lambda);
 
   zinit = zidealstarinit(nf, idealpows(nf,pr,q));
   if (!check2(nf,gdiv(gx,p1),zinit)) res = -1;
@@ -239,7 +239,7 @@ zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma = ltop;
   if (result== 1) return 1;
   if (result==-1) return 0;
-  pnup = gmul(pnu, basistoalg(nf,gel(pr,2)));
+  pnup = gmul(pnu, coltoalg(nf,gel(pr,2)));
   nu++;
   for (i=1; i<lg(repr); i++)
     if (zpsolnf(nf,pol,pr,nu,pnup,gadd(x0,gmul(pnu,gel(repr,i))),repr,zinit))
@@ -300,7 +300,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
-  p1 = basistoalg(nf, gel(pr,2));
+  p1 = coltoalg(nf, gel(pr,2));
   if (zpsolnf(nf,polrecip(pol),pr,1,p1,gen_0,repr,zinit))
     { avma=ltop; return 1; }
 
@@ -343,8 +343,8 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
   long rep;
   GEN pol;
 
-  if (typ(a) != t_POLMOD) a = basistoalg(nf, a);
-  if (typ(b) != t_POLMOD) b = basistoalg(nf, b);
+  if (typ(a) != t_POLMOD) a = basistoalg_i(nf, a);
+  if (typ(b) != t_POLMOD) b = basistoalg_i(nf, b);
   pol = mkpoln(3, lift(a), gen_0, lift(b));
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
@@ -405,8 +405,8 @@ nfhilbert(GEN nf,GEN a,GEN b)
   if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbert");
   nf = checknf(nf);
 
-  if (typ(a) != t_POLMOD) a = basistoalg(nf, a);
-  if (typ(b) != t_POLMOD) b = basistoalg(nf, b);
+  if (typ(a) != t_POLMOD) a = basistoalg_i(nf, a);
+  if (typ(b) != t_POLMOD) b = basistoalg_i(nf, b);
 
   al = lift(a);
   bl = lift(b);
@@ -521,15 +521,19 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
     setlg(Sperm, lH);
     for (i=1; i<lH; i++)
-      sunit[i] = isprincipalfact(bnf,Sperm,gel(H,i),NULL,fl)[2];
+    {
+      GEN v = isprincipalfact(bnf,Sperm,gel(H,i),NULL,fl);
+      gel(sunit,i) = coltoliftalg(nf, gel(v,2));
+    }
     for (j=1; j<lB; j++,i++)
-      sunit[i] = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i),fl)[2];
-
+    {
+      GEN v = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i),fl);
+      gel(sunit,i) = coltoliftalg(nf, gel(v,2));
+   }
     den = dethnf_i(H); H = ZM_inv(H,den);
     A = shallowconcat(H, gneg(gmul(H,B))); /* top part of inverse * den */
-    sunit = basistoalg(nf,sunit);
     /* HNF in split form perm + (H B) [0 Id missing] */
-    gel(res,1) = lift_intern(sunit);
+    gel(res,1) = sunit;
     gel(res,2) = mkvec3(perm,A,den);
   }
 
@@ -555,7 +559,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   S = gel(suni,6); ls=lg(S);
   if (ls==1) return cgetg(1, t_COL);
 
-  xb = algtobasis(bnf,*px); p1 = Q_denom(xb);
+  xb = algtobasis_i(bnf,*px); p1 = Q_denom(xb);
   N = mulii(gnorm(gmul(*px,p1)), p1); /* relevant primes divide N */
   if (is_pm1(N)) return zerocol(ls -1);
 
@@ -793,8 +797,8 @@ rnfisnorm(GEN T, GEN x, long flag)
   tu = gmael3(rel,8,4,2);
   futu = shallowconcat(check_units(rel,"rnfisnorm"), tu);
   suni = bnfsunit(bnf,S1,3);
-  sunitrel = (GEN)bnfsunit(rel,S2,3)[1];
-  if (lg(sunitrel) > 1) sunitrel = lift_intern(basistoalg(rel,sunitrel));
+  sunitrel = gel(bnfsunit(rel,S2,3), 1);
+  if (lg(sunitrel) > 1) sunitrel = coltoliftalg(checknf(rel), sunitrel);
   sunitrel = shallowconcat(futu, sunitrel);
 
   A = lift(bnfissunit(bnf,suni,x));

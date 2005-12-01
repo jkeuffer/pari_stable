@@ -22,40 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-GEN
-matbasistoalg(GEN nf,GEN x)
-{
-  long i, j, li, lx = lg(x);
-  GEN c, z = cgetg(lx,t_MAT);
-
-  if (typ(x) != t_MAT) err(talker,"not a matrix in matbasistoalg");
-  if (lx == 1) return z;
-  li = lg(x[1]);
-  for (j=1; j<lx; j++)
-  {
-    c = cgetg(li,t_COL); gel(z,j) = c;
-    for (i=1; i<li; i++) gel(c,i) = basistoalg(nf,gcoeff(x,i,j));
-  }
-  return z;
-}
-
-GEN
-matalgtobasis(GEN nf,GEN x)
-{
-  long i, j, li, lx = lg(x);
-  GEN c, z = cgetg(lx, t_MAT);
-
-  if (typ(x) != t_MAT) err(talker,"not a matrix in matalgtobasis");
-  if (lx == 1) return z;
-  li = lg(x[1]);
-  for (j=1; j<lx; j++)
-  {
-    c = cgetg(li,t_COL); gel(z,j) = c;
-    for (i=1; i<li; i++) gel(c,i) = algtobasis_cp(nf, gcoeff(x,i,j));
-  }
-  return z;
-}
-
 static GEN
 _checkrnfeq(GEN x)
 {
@@ -315,74 +281,6 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   gel(rnf,12) = gen_0;
   gel(rnf,5) = rnfmakematrices(rnf);
   return gerepilecopy(av, rnf);
-}
-
-GEN
-rnfbasistoalg(GEN rnf,GEN x)
-{
-  long tx = typ(x), lx = lg(x), i;
-  pari_sp av = avma;
-  GEN p1, z, nf;
-
-  checkrnf(rnf);
-  switch(tx)
-  {
-    case t_VEC: case t_COL:
-      p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
-      for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
-      p1 = gmul(gmael(rnf,7,1), p1);
-      return gerepileupto(av, gmodulcp(p1,gel(rnf,1)));
-
-    case t_MAT:
-      z = cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(z,i) = rnfbasistoalg(rnf,gel(x,i));
-      return z;
-
-    case t_POLMOD:
-      return gcopy(x);
-
-    default: z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(gel(rnf,1));
-      gel(z,2) = gmul(x,pol_1[varn(rnf[1])]); return z;
-  }
-}
-
-/* assume x is a t_POLMOD */
-GEN
-lift_to_pol(GEN x)
-{
-  GEN y = gel(x,2);
-  return (typ(y) != t_POL)? scalarpol(y,varn(x[1])): y;
-}
-
-GEN
-rnfalgtobasis(GEN rnf,GEN x)
-{
-  long tx = typ(x), i, lx;
-  pari_sp av = avma;
-  GEN z;
-
-  checkrnf(rnf);
-  switch(tx)
-  {
-    case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); z = cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(z,i) = rnfalgtobasis(rnf,gel(x,i));
-      return z;
-
-    case t_POLMOD:
-      if (!polegal_spec(gel(rnf,1),gel(x,1)))
-	err(talker,"not the same number field in rnfalgtobasis");
-      x = lift_to_pol(x); /* fall through */
-    case t_POL:
-    { /* cf algtobasis_i */
-      GEN P = gel(rnf,1);
-      long N = degpol(P);
-      if (degpol(x) >= N) x = grem(x,P);
-      return gerepileupto(av, mulmat_pol(gel(rnf,8), x));
-    }
-  }
-  return gscalcol(x, degpol(rnf[1]));
 }
 
 GEN
