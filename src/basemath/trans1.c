@@ -1569,31 +1569,6 @@ agm(GEN x, GEN y, long prec)
 /**                             LOG(X)                             **/
 /**                                                                **/
 /********************************************************************/
-/* 2 * atanh(1/3), slower than AGM, even at 1 word */
-GEN
-log2old(long prec)
-{
-  const long _3 = 3, _9 = _3*_3;
-  pari_sp av, av0 = avma;
-  long k, l = prec+1, G = bit_accuracy(l+1);
-  GEN s, u, S, U, z = cgetr(prec);
-
-  s = S = divrs(real_1(l), _3);
-  u = U = mpcopy(s); av = avma;
-  for (k = 3; ; k += 2)
-  {
-    u = divrs(u, _9);
-    if (bit_accuracy(l) - expo(u) > G) {
-      l--; if (l <= 2) break;
-      setlg(U,l);
-      affrr(s,S); s = S;
-      affrr(u,U); u = U; avma = av;
-    }
-    s = addrr(s, divrs(u,k));
-  }
-  setexpo(s, -1); affrr(s, z);
-  avma = av0; return z;
-}
 /* cf logagmr_abs(). Compute Pi/2agm(1, 4/2^n) ~ log(2^n) = n log(2) */
 GEN
 constlog2(long prec)

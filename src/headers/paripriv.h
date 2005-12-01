@@ -814,10 +814,8 @@ GEN     bnfisintnormabs(GEN bnf, GEN a);
 /* trans1.c */
 
 GEN     constlog2(long prec);
-GEN     log2old(long prec);
 GEN     padic_sqrtn_ram(GEN x, long e);
 GEN     padic_sqrtn_unram(GEN x, GEN n, GEN *zetan);
-GEN     piold(long prec);
 GEN     rootsof1complex(GEN n, long prec);
 GEN     rootsof1padic(GEN n, GEN y);
 

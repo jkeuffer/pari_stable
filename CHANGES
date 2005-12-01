@@ -111,6 +111,7 @@ BA 18- define INLINE to 'inline static' for C++ compilers also
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
     2- has_sigrelse.c & has_sigsetmask.c [ deprecated, unused after C-10 ]
     3- src/desc/Makefile
+    4- log2old ( = 2atanh(1/3) )
 
   Added
     1- new library function ellisoncurve()
