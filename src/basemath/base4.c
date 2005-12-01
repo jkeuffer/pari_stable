@@ -1032,10 +1032,6 @@ idealmulprime(GEN nf, GEN x, GEN vp)
   return cx? gmul(x,cx): x;
 }
 
-GEN arch_mul(GEN x, GEN y);
-GEN vecpow(GEN x, GEN n);
-GEN vecmul(GEN x, GEN y);
-
 static GEN
 mul(GEN nf, GEN x, GEN y)
 {
