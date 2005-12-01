@@ -2136,7 +2136,7 @@ redallbar(pslqL2_M *Mbar, long i, long jsup)
   double t;
   double *hi = Mbar->H[i], *ai = Mbar->A[i], *hj, *aj;
 
-#if 0
+#ifdef DEBUGPSLQ
 fprintferr("%ld:\n==\n",i);
 #endif
   for (j=jsup; j>=1; j--)
@@ -2144,7 +2144,7 @@ fprintferr("%ld:\n==\n",i);
     hj = Mbar->H[j];
     t = floor(0.5 + hi[j] / hj[j]);
     if (!t) continue;
-#if 0
+#ifdef DEBUGPSLQ
 fprintferr("%15.15e ",t);
 #endif
     aj = Mbar->A[j];
@@ -2155,7 +2155,7 @@ fprintferr("%15.15e ",t);
       ai[k]         -= t * aj[k];
       Mbar->B[k][j] += t * Mbar->B[k][i];
     }
-#if 0
+#ifdef DEBUGPSLQ
 fprintferr("  %ld:\n",j); dprintmat(Mbar->H,n,n-1);
 #endif
   }
@@ -2483,6 +2483,7 @@ dLQdec(pslqL2_M *Mbar, double **Pbar)
   }
 }
 
+#ifdef DEBUGPSLQ
 static void
 dprintvec(double *V, long m)
 {
@@ -2505,6 +2506,7 @@ dprintmat(double **M, long r, long c)
   for (j=1; j<c; j++) fprintferr("%15.15e, ",M[r][j]);
   fprintferr("%15.15e]\n",M[r][c]); pariflush();
 }
+#endif
 
 static long
 initializedoubles(pslqL2_M *Mbar, pslq_M *M, long prec)
