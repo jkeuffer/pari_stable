@@ -3203,7 +3203,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
 /********************************************************************/
 
 /* h' := h_oo(a) + 1/2 log(denom(a)) */
-GEN
+static GEN
 hell(GEN e, GEN a, long prec)
 {
   long n;
@@ -3254,7 +3254,7 @@ hells(GEN e, GEN x, long prec)
   return mu;
 }
 
-GEN
+static GEN
 hell2(GEN e, GEN x, long prec)
 {
   GEN e3, ro, v, D;
