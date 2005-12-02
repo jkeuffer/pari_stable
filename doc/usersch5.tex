@@ -1236,7 +1236,6 @@ precision \kbd{prec}.
 \fun{void}{rdivss}{long x, long y, long prec}, return the quotient x/y as a
 \typ{REAL} of precision \kbd{prec}.
 
-%%%%%%%%
 \section{Level 2 kernel (modular arithmetic)}
 
 \noindent These routines implement univariate polynomial arithmetic and
@@ -1341,21 +1340,11 @@ argument.
 resp.~a~\kbd{ZX}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT},
 resp.~\typ{POL}) with \typ{INT} coefficients.
 
-%GEN     ZX_caract(GEN A, GEN B, long v);
-%GEN     ZX_disc(GEN x);
-%int     ZX_is_squarefree(GEN x);
-%GEN     ZX_QX_resultant(GEN A, GEN B);
-%GEN     ZX_resultant(GEN A, GEN B);
-%GEN     QX_invmod(GEN A, GEN B);
-%
-%GEN     ZM_inv(GEN M, GEN dM);
-%GEN     QM_inv(GEN M, GEN dM);
-
 \subsubsec{\kbd{ZV}}
 
 \fun{GEN}{ZV_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
 
-\fun{GEN}{ZV_sub}{GEN x, GEN y} subtractss \kbd{x} and \kbd{y}.
+\fun{GEN}{ZV_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
 
 \subsubsec{\kbd{ZX}}
 
@@ -1374,7 +1363,46 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}. 
 
-\fun{GEN}{ZX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. 
+\fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$. 
+
+\fun{GEN}{ZX_caract}{GEN T, GEN A, long v} returns the characteristic
+polynomial of \kbd{Mod(A, T)}, where \kbd{T} is a \kbd{ZX}, \kbd{A}
+is a \kbd{ZX}. More generally, \kbd{A} is allowed to be a
+\kbd{QX}, hence possibly has rational coefficients, \emph{assuming}
+the result is a \kbd{ZX}, i.e.~the algebraic number \kbd{Mod(A,T)} is
+integral over \kbd{Z}.
+
+\fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
+\kbd{T}.
+
+\fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
+\kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
+
+\fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{ZX}~\kbd{A} and \kbd{B}.
+
+\fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result 
+is an integer.
+
+\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B, long *lambda},
+assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
+\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$.
+Otherwise, \kbd{lambda} must point to some integer, e.g. $0$ which
+is used as a seed. The function then finds a small $\lambda \in \Z$
+(starting from \kbd{*lambda}) such that 
+$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree,
+resets \kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+
+\subsubsec{\kbd{ZM}}
+
+\fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
+is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
+return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
+determinant of \kbd{M} is computed and used instead.
+
+\fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
+still assume that $M'$ has integer coefficients.
 
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
@@ -1428,7 +1456,7 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}. 
 
-\fun{GEN}{FpX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. 
+\fun{GEN}{FpX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$. 
 
 \fun{GEN}{FpX_divrem}{GEN x, GEN y, GEN p, GEN *pr} returns the quotient
 of \kbd{x} by \kbd{y}, and sets \kbd{pr} to the remainder.
@@ -1529,10 +1557,15 @@ Assumes that \kbd{p} is prime.
 \fun{GEN}{FpX_rand}{long d, long v, GEN p} returns a random \kbd{FpX}
 in variable \kbd{v}, of degree less than~\kbd{d}.
 
+\fun{GEN}{FpX_resultant}{GEN x, GEN y, GEN p} returns the resultant
+of \kbd{x} and \kbd{y}, both \kbd{FpX}. The result is a \typ{INT}
+belonging to $[0,p-1]$.
+
 \fun{GEN}{FpY_FpXY_resultant}{GEN a, GEN b, GEN p}, \kbd{a} a \typ{POL} of
 \typ{INT}s (say in variable $Y$), \kbd{b} a \typ{POL} (say in variable $X$)
 whose coefficients are either \typ{POL}s in $\Z[Y]$ or \typ{INT}s.
-Returns $\text{Res}_Y(a, b)$, which is an \kbd{FpX}.
+Returns $\text{Res}_Y(a, b)$, which is an \kbd{FpX}. The function assumes
+that $Y$ has lower priority than $X$.
 
 \subsec{\kbd{FpXQ}, \kbd{Fq}}. Let \kbd{p} a \typ{INT} and \kbd{T} an
 \kbd{FpX} for \kbd{p}, both to be given in the function arguments; an \kbd{FpXQ}
