@@ -2437,7 +2437,7 @@ factorback_i(GEN fa, GEN e, GEN OBJ, int red)
   if (!OBJ)
   {
     if (e) {
-      OBJ = _checknf(e); if (OBJ) e = NULL;
+      OBJ = checknf_i(e); if (OBJ) e = NULL;
     }
     if (!OBJ) return factorback_aux(fa, e, &_agmul, &_apowgi, NULL);
   }

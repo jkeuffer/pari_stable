@@ -3398,7 +3398,7 @@ nfissquarefree(GEN nf, GEN x)
 }
 
 GEN
-_rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
+rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
 {
   long k, lA, lB;
   GEN nf, C;
@@ -3429,7 +3429,7 @@ rnfequation0(GEN A, GEN B, long flall)
   GEN LPRS, nf, C;
 
   A = get_nfpol(A, &nf);
-  C = _rnfequation(A, B, &k, flall? &LPRS: NULL);
+  C = rnfequation_i(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   { /* a,b,c root of A,B,C = compositum, c = b + k a */
     GEN a = gmul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), C));/* inv is costly !*/
@@ -3882,7 +3882,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   {
     long sa;
     fl |= nf_PARTIALFACT;
-    POL = _rnfequation(nf, relpol, &sa, NULL);
+    POL = rnfequation_i(nf, relpol, &sa, NULL);
     bas = POL;
     a = stoi(sa);
   }

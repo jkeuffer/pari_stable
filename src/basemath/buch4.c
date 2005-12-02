@@ -698,7 +698,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     else
     {
       long sk;
-      polabs = _rnfequation(bnf, relpol, &sk, NULL);
+      polabs = rnfequation_i(bnf, relpol, &sk, NULL);
       k = stoi(sk);
     }
   }

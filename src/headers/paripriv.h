@@ -760,7 +760,6 @@ GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r);
 GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
-GEN     FpX_resultant(GEN a, GEN b, GEN p);
 GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
 GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);
 int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p);

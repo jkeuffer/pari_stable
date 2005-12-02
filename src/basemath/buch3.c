@@ -1487,7 +1487,7 @@ rnf_is_abelian(GEN nf, GEN pol)
   eq = rnfequation2(nf,pol);
   C =   shallowcopy(gel(eq,1)); setvarn(C, v);
   a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
-  nfL = _initalg(C, nf_PARTIALFACT, DEFAULTPREC);
+  nfL = initalg_i(C, nf_PARTIALFACT, DEFAULTPREC);
   z = nfrootsall_and_pr(nfL, liftpol(pol, a));
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;

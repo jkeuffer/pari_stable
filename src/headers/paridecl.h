@@ -1635,6 +1635,7 @@ GEN     FpX_mul(GEN x,GEN y,GEN p);
 GEN     FpX_neg(GEN x,GEN p);
 GEN     FpX_normalize(GEN z, GEN p);
 GEN     FpX_red(GEN z, GEN p);
+GEN     FpX_resultant(GEN a, GEN b, GEN p);
 GEN     FpX_sqr(GEN x,GEN p);
 GEN     FpX_sub(GEN x,GEN y,GEN p);
 GEN     FpX_to_mod(GEN z, GEN p);

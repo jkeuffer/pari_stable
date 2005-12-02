@@ -46,7 +46,7 @@ void remake_GM(GEN nf, nffp_t *F, long prec);
 #define id_PRIME     1
 #define id_MAT       2
 
-/* for _initalg */
+/* for initalg_i */
 #define nf_ROUND2      64
 #define nf_NOROOTS     32
 #define nf_PARTIALFACT 16 /* and allbase */
@@ -102,7 +102,7 @@ typedef struct FP_chk_fun {
   long skipfirst;
 } FP_chk_fun;
 
-GEN _initalg(GEN x, long flag, long prec);
+GEN initalg_i(GEN x, long flag, long prec);
 GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
 GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
 
@@ -138,8 +138,8 @@ GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
 GEN    bnrGetSurj(GEN bnr1, GEN bnr2);
 GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);
-GEN    _checkbnf(GEN bnf);
-GEN    _checknf(GEN nf);
+GEN    checkbnf_i(GEN bnf);
+GEN    checknf_i(GEN nf);
 void   check_ZKmodule(GEN x, char *s);
 void   dbg_rel(long s, GEN col);
 GEN    element_mulidid(GEN nf, long i, long j);
@@ -178,7 +178,7 @@ GEN    prodid(GEN nf, GEN I);
 GEN    pr_norm(GEN pr);
 GEN    quadhilbertreal(GEN D, long prec);
 GEN    rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
-GEN    _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
+GEN    rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
 GEN    sqr_by_tab(GEN tab, GEN x);
 GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);

@@ -2280,7 +2280,7 @@ closure11(buildroot *BR)
     if (degpol(r) == 22) return 2; /* D11 */
     h = shallowcopy(h); setvarn(h, MAXVARN);
     setvarn(r, 0);
-    r = nffactor(_initalg(h, nf_PARTIALFACT, DEFAULTPREC), r);
+    r = nffactor(initalg_i(h, nf_PARTIALFACT, DEFAULTPREC), r);
     /* S11 of F_110[11] */
     if (lg(r[1]) == 3) return 8; else return 4;
 #if 0

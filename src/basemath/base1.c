@@ -30,7 +30,7 @@ checkrnf(GEN rnf)
 }
 
 GEN
-_checkbnf(GEN bnf)
+checkbnf_i(GEN bnf)
 {
   if (typ(bnf) == t_VEC)
     switch (lg(bnf))
@@ -42,7 +42,7 @@ _checkbnf(GEN bnf)
 }
 
 GEN
-_checknf(GEN nf)
+checknf_i(GEN nf)
 {
   if (typ(nf)==t_VEC)
     switch(lg(nf))
@@ -58,10 +58,10 @@ _checknf(GEN nf)
 GEN
 checkbnf(GEN x)
 {
-  GEN bnf = _checkbnf(x);
+  GEN bnf = checkbnf_i(x);
   if (!bnf)
   {
-    if (_checknf(x)) err(talker,"please apply bnfinit first");
+    if (checknf_i(x)) err(talker,"please apply bnfinit first");
     err(typeer,"checkbnf");
   }
   return bnf;
@@ -70,7 +70,7 @@ checkbnf(GEN x)
 GEN
 checknf(GEN x)
 {
-  GEN nf = _checknf(x);
+  GEN nf = checknf_i(x);
   if (!nf)
   {
     if (typ(x)==t_POL) err(talker,"please apply nfinit first");
@@ -727,8 +727,8 @@ int cmp_pol(GEN x, GEN y);
 GEN
 get_bnfpol(GEN x, GEN *bnf, GEN *nf)
 {
-  *bnf = _checkbnf(x);
-  *nf  = _checknf(x);
+  *bnf = checkbnf_i(x);
+  *nf  = checknf_i(x);
   if (*nf) x = gel(*nf, 1);
   if (typ(x) != t_POL) err(typeer,"get_bnfpol");
   return x;
@@ -1490,7 +1490,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
  *    do a polred and return [nfinit(x), Mod(a,red)], where
  *    Mod(a,red) = Mod(v,x) (i.e return the base change). */
 GEN
-_initalg(GEN x, long flag, long prec)
+initalg_i(GEN x, long flag, long prec)
 {
   const pari_sp av = avma;
   GEN nf, rev = NULL, ro = NULL;
@@ -1523,11 +1523,11 @@ _initalg(GEN x, long flag, long prec)
 }
 
 GEN
-initalgred(GEN x, long prec)  { return _initalg(x, nf_RED, prec); }
+initalgred(GEN x, long prec)  { return initalg_i(x, nf_RED, prec); }
 GEN
-initalgred2(GEN x, long prec) { return _initalg(x, nf_RED|nf_ORIG, prec); }
+initalgred2(GEN x, long prec) { return initalg_i(x, nf_RED|nf_ORIG, prec); }
 GEN
-initalg(GEN x, long prec)     { return _initalg(x, 0, prec); }
+initalg(GEN x, long prec)     { return initalg_i(x, 0, prec); }
 
 GEN
 nfinit0(GEN x, long flag,long prec)
@@ -1535,11 +1535,11 @@ nfinit0(GEN x, long flag,long prec)
   switch(flag)
   {
     case 0:
-    case 1: return _initalg(x,0,prec);
-    case 2: return _initalg(x,nf_RED,prec);
-    case 3: return _initalg(x,nf_RED|nf_ORIG,prec);
-    case 4: return _initalg(x,nf_PARTRED,prec);
-    case 5: return _initalg(x,nf_PARTRED|nf_ORIG,prec);
+    case 1: return initalg_i(x,0,prec);
+    case 2: return initalg_i(x,nf_RED,prec);
+    case 3: return initalg_i(x,nf_RED|nf_ORIG,prec);
+    case 4: return initalg_i(x,nf_PARTRED,prec);
+    case 5: return initalg_i(x,nf_PARTRED|nf_ORIG,prec);
     default: err(flagerr,"nfinit");
   }
   return NULL; /* not reached */
@@ -2293,7 +2293,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 GEN
 initzeta(GEN pol, long prec)
 {
-  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef, bnf = _checkbnf(pol);
+  GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef, bnf = checkbnf_i(pol);
   GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
