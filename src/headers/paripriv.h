@@ -45,6 +45,7 @@ GEN sort_vecpol(GEN a, int (*cmp)(GEN,GEN));
 
 /* loops */
 GEN incloop(GEN a);
+GEN incneg(GEN a);
 GEN incpos(GEN a);
 GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
@@ -702,10 +703,6 @@ GEN     squfof(GEN n);
 void    err_recover(long numerr);
 GEN     gcopy_av(GEN x, GEN *AVMA);
 int     ok_gerepileupto(GEN x);
-
-/* mp.c */
-
-GEN     incneg(GEN a);
 
 /* nffactor.c */
 
