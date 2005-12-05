@@ -596,7 +596,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
         be = compute_beta(X, vecWB, gell, bnf);
-        be = lift_if_rational(coltoalg(bnf, be));
+        be = lift_if_rational(coltoalg(nf, be));
         P = gsub(monomial(gen_1, ell, 0), be);
         if (all) res = shallowconcat(res, gerepileupto(av, P));
         else
