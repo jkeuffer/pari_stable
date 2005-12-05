@@ -2164,7 +2164,7 @@ polfnf(GEN a, GEN T)
   if (!sqfree)
   {
     G = poleval(G, gadd(pol_x[varn(A)], gmulsg(k, pol_x[varn(T)])));
-    G = ZY_ZXY_rnfequation(T, G);
+    G = ZY_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
   fa = ZX_DDF(n,0); lx = lg(fa);
