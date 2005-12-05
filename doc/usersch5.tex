@@ -829,7 +829,7 @@ except \kbd{x} and \kbd{r} are now \kbd{ulong}s.
 \fun{long}{u_lval}{ulong x, ulong p} as \kbd{Z\_pval},
 except the inputs/outputs are now \kbd{ulong}s.
 
-\subsec{Factorisation}
+\subsec{Factorization}
 
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
 in the factorization are actually strong pseudoprimes.
@@ -1395,16 +1395,18 @@ integral over \kbd{Z}.
 \kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result 
 is an integer.
 
-\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B, long *lambda},
+\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B},
 assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
-\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$.
-Otherwise, \kbd{lambda} must point to some integer, e.g. $0$ which
-is used as a seed. The function then finds a small $\lambda \in \Z$
-(starting from \kbd{*lambda}) such that 
-$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree,
-resets \kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+\text{Res}_Y(A, B) \in \Z[X]$, returns $R$.
 
-\subsubsec{\kbd{ZM}}
+\fun{GEN}{ZY_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
+assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
+\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
+as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to
+some integer, e.g. $0$ which is used as a seed. The function then finds a
+small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
+$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
+\kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
 
 \fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
 is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,

@@ -3227,7 +3227,7 @@ INIT:
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
-      if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_resultant");
+      if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_rnfequation");
       gerepilemany(av2,gptr,LERS? 4: 2); 
     }
   }
@@ -3243,7 +3243,7 @@ END:
 }
 
 GEN
-ZY_ZXY_resultant(GEN A, GEN B, long *lambda)
+ZY_ZXY_rnfequation(GEN A, GEN B, long *lambda)
 {
   return ZY_ZXY_resultant_all(A, B, lambda, NULL);
 }
@@ -3279,7 +3279,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   B0[1] = evalsigne(1);
   gel(B0,2) = gneg_i(B);
   gel(B0,3) = gen_1;
-  R = ZY_ZXY_resultant(A, B0, lambda);
+  R = ZY_ZXY_rnfequation(A, B0, lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
   if (!gcmp1(a)) R = gdiv(R, powiu(a, dB));

@@ -123,6 +123,7 @@ BA  2- library functions related to sorting: gen_sort_aux, gen_search_aux,
 BA  4- function minpoly()
     5- function zeromatcopy()
 BA  6- support for GNU/kFreeBSD and other GNU userlands.
+    7- document ZY_ZXY_rnfequation and ZY_ZXY_resultant
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
