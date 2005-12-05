@@ -300,7 +300,8 @@ scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
   for (i=1; i<=RU; i++) gel(x,i) = u;
 
   v = cgetg(RU+1, t_COL);
-  p1 = (s > 0)? glog(u,prec): gen_0;
+  if (s < 0) u = gneg(u);
+  p1 = glog(u,prec);
   for (i=1; i<=R1; i++) gel(v,i) = p1;
   if (i <= RU)
   {

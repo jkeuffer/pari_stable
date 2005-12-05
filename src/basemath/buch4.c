@@ -796,7 +796,8 @@ rnfisnorm(GEN T, GEN x, long flag)
   futu = shallowconcat(check_units(rel,"rnfisnorm"), tu);
   bnfS = bnfsunit(bnf,S1,3);
   sunitrel = gel(bnfsunit(rel,S2,3), 1);
-  if (lg(sunitrel) > 1) sunitrel = coltoliftalg(checknf(rel), sunitrel);
+  if (lg(sunitrel) > 1)
+    sunitrel = lift_intern(basistoalg(rel, sunitrel));
   sunitrel = shallowconcat(futu, sunitrel);
 
   A = lift(bnfissunit(bnf,bnfS,x));
