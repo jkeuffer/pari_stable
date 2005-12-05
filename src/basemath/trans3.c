@@ -2262,7 +2262,7 @@ jell(GEN x, long prec)
 }
 
 GEN
-wf2(GEN x, long prec)
+weberf2(GEN x, long prec)
 {
   pari_sp av=avma, tetpil;
   GEN p1,p2;
@@ -2274,7 +2274,7 @@ wf2(GEN x, long prec)
 }
 
 GEN
-wf1(GEN x, long prec)
+weberf1(GEN x, long prec)
 {
   pari_sp av=avma, tetpil;
   GEN p1,p2;
@@ -2285,7 +2285,7 @@ wf1(GEN x, long prec)
 }
 
 GEN
-wf(GEN x, long prec)
+weberf(GEN x, long prec)
 {
   pari_sp av = avma, tetpil;
   GEN p1, p2;
@@ -2301,9 +2301,9 @@ weber0(GEN x, long flag,long prec)
 {
   switch(flag)
   {
-    case 0: return wf(x,prec);
-    case 1: return wf1(x,prec);
-    case 2: return wf2(x,prec);
+    case 0: return weberf(x,prec);
+    case 1: return weberf1(x,prec);
+    case 2: return weberf2(x,prec);
     default: err(flagerr,"weber");
   }
   return NULL; /* not reached */
