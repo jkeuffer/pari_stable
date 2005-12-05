@@ -782,7 +782,7 @@ nfiso0(GEN a, GEN b, long fliso)
     else
     {
       long q=n/m;
-      GEN fa=decomp(da), ex=gel(fa,2);
+      GEN fa=Z_factor(da), ex=gel(fa,2);
       fa=gel(fa,1); lx=lg(fa);
       for (i=1; i<lx; i++)
         if (mod2(gel(ex,i)) && !dvdii(db, powiu(gel(fa,i),q)))
@@ -2155,7 +2155,7 @@ rootsof1(GEN nf)
   w = gel(y,1); ws = itos(w);
   if (ws == 2) { avma = av; return trivroots(nf); }
 
-  d = decomp(w); list = gel(y,3); k = lg(list);
+  d = Z_factor(w); list = gel(y,3); k = lg(list);
   for (i=1; i<k; i++)
   {
     z = is_primitive_root(nf, d, gel(list,i), ws);

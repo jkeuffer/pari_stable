@@ -176,7 +176,7 @@ GEN vconcat(GEN Q1, GEN Q2);
 int   BSW_isprime(GEN x);
 int   BSW_isprime_small(GEN x);
 GEN   coprime_part(GEN x, GEN f);
-GEN   decomp_limit(GEN n, GEN limit);
+GEN   Z_factor_limit(GEN n, GEN limit);
 GEN   Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 GEN   Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);

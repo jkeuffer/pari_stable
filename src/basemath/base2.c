@@ -718,7 +718,7 @@ update_fact(GEN x, GEN f)
     if (k) { q[iq] = p[i]; gel(e,iq) = utoipos(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);
-  return merge_factor_i(decomp(d), mkmat2(q,e));
+  return merge_factor_i(Z_factor(d), mkmat2(q,e));
 }
 
 /* FIXME: have to deal with compatibility flags */

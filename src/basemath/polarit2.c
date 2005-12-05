@@ -2116,11 +2116,11 @@ factor(GEN x)
   av = avma;
   switch(tx)
   {
-    case t_INT: return decomp(x);
+    case t_INT: return Z_factor(x);
 
     case t_FRAC:
-      p1 = decomp(gel(x,1));
-      p2 = decomp(gel(x,2)); gel(p2,2) = gneg_i(gel(p2,2));
+      p1 = Z_factor(gel(x,1));
+      p2 = Z_factor(gel(x,2)); gel(p2,2) = gneg_i(gel(p2,2));
       return gerepilecopy(av, merge_factor_i(p1,p2));
 
     case t_POL:

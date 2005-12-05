@@ -107,6 +107,7 @@ VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
 BA 18- define INLINE to 'inline static' for C++ compilers also
    19- rename polx -> pol_x, polun -> pol_1
    20- make hell, hell2 static to elliptic.c
+   21- rename decomp -> Z_factor, decomp_limit -> Z_factor_limit
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

@@ -1890,7 +1890,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   v = init_ch();
   c4 = gel(e,10);
   c6 = gel(e,11);
-  P = (GEN)decomp(gcdii(c4,c6))[1];
+  P = (GEN)Z_factor(gcdii(c4,c6))[1];
   l = lg(P);
   for (k = 1; k < l; k++)
   {
@@ -1928,10 +1928,10 @@ ellglobalred(GEN E)
   c4 = gel(e,10);
   c6 = gel(e,11);
   D  = gel(e,12);
-  P = (GEN)decomp(gcdii(c4,c6))[1];
+  P = (GEN)Z_factor(gcdii(c4,c6))[1];
   l = lg(P);
   for (k = 1; k < l; k++) (long)Z_pvalrem(D, gel(P,k), &D);
-  if (!is_pm1(D)) P = shallowconcat(P, (GEN)decomp(absi(D))[1]);
+  if (!is_pm1(D)) P = shallowconcat(P, (GEN)Z_factor(absi(D))[1]);
   l = lg(P); c = N = gen_1;
   for (k = 1; k < l; k++)
   {
@@ -2214,7 +2214,7 @@ ellrootno_global(GEN e, GEN N)
   
   v = Z_lvalrem(N, 2, &N); if (v) s *= ellrootno_2(e);
   v = Z_lvalrem(N, 3, &N); if (v) s *= ellrootno_3(e);
-  fa = decomp(N);
+  fa = Z_factor(N);
   P = gel(fa,1);
   E = gel(fa,2);
   for (i=1; i<lg(P); i++) s *= ellrootno_p(e, gel(P,i), itou(gel(E,i)));
@@ -2418,7 +2418,7 @@ powsell(GEN e, GEN z, GEN n, GEN p)
 static GEN
 exact_order(GEN H, GEN f, GEN c4, GEN p)
 {
-  GEN P, e, h = H, fa = decomp(H);
+  GEN P, e, h = H, fa = Z_factor(H);
   long i, j, l;
 
   P = gel(fa,1); l = lg(P);
@@ -3101,7 +3101,7 @@ akell(GEN e, GEN n)
   s = 1;
   if (!equalii(u, n))
   { /* bad reduction at primes dividing n/u */
-    fa = decomp(diviiexact(n, u));
+    fa = Z_factor(diviiexact(n, u));
     P = gel(fa,1);
     E = gel(fa,2);
     for (i=1; i<lg(P); i++)
@@ -3115,7 +3115,7 @@ akell(GEN e, GEN n)
       }
     }
   }
-  y = stoi(s); fa = decomp(u);
+  y = stoi(s); fa = Z_factor(u);
   P = gel(fa,1);
   E = gel(fa,2);
   for (i=1; i<lg(P); i++)
@@ -3368,7 +3368,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
     gsub(gadd(gel(e,4),gmul(x,gadd(shifti(gel(e,2),1),gmulsg(3,x)))),
          gmul(gel(e,1),y)) );
-  Lp = (GEN)decomp(gcdii(psi2,phi2))[1];
+  Lp = (GEN)Z_factor(gcdii(psi2,phi2))[1];
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
@@ -3698,7 +3698,7 @@ nagelllutz(GEN e)
     GEN x = gel(lr,i), y = gmul2n(gneg(ellLHS0(e,x)), -1);
     gel(r,++t) = mkvec2(x, y);
   }
-  ld = decomp(gmul2n(absi(gel(e,12)), 4));
+  ld = Z_factor(gmul2n(absi(gel(e,12)), 4));
   p1 = gel(ld,2); k = lg(p1);
   for (i=1; i<k; i++) gel(p1,i) = shifti(gel(p1,i), -1);
   ld = divisors(ld);

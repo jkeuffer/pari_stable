@@ -467,7 +467,7 @@ plisprime(GEN N, long flag)
   N = absi(N);
   if (!F)
   {
-    F = (GEN)decomp_limit(addis(N,-1), sqrti(N))[1];
+    F = (GEN)Z_factor_limit(addis(N,-1), sqrti(N))[1];
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
 

@@ -859,14 +859,14 @@ factorint(GEN n, long flag)
 }
 
 GEN
-decomp(GEN n)
+Z_factor(GEN n)
 {
   return auxdecomp0(n,1,decomp_default_hint);
 }
 
 /* Factor until the unfactored part is smaller than limit. */
 GEN
-decomp_limit(GEN n, GEN limit)
+Z_factor_limit(GEN n, GEN limit)
 {
   GEN state = cgetg(3,t_VEC);
  /* icopy is mainly done to allocate memory for affect().
@@ -918,7 +918,7 @@ GEN
 factoru(ulong n)
 {
   pari_sp ltop = avma;
-  GEN F = decomp(utoi(n)), P = gel(F,1), E = gel(F,2);
+  GEN F = Z_factor(utoi(n)), P = gel(F,1), E = gel(F,2);
   long i, l = lg(P);
   GEN f = cgetg(3,t_VEC);
   GEN p = cgetg(l,t_VECSMALL);
@@ -939,7 +939,7 @@ GEN
 factoru_pow(ulong n)
 {
   pari_sp ltop = avma;
-  GEN F = decomp(utoi(n)), P = gel(F,1), E = gel(F,2);
+  GEN F = Z_factor(utoi(n)), P = gel(F,1), E = gel(F,2);
   long i, l = lg(P);
   GEN f = cgetg(4,t_VEC);
   GEN p = cgetg(l,t_VECSMALL);

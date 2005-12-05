@@ -1352,7 +1352,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
   lim = stack_lim(ltop,1);
   if (!gcmp1(m))
   {
-    m = decomp(m); av1 = avma;
+    m = Z_factor(m); av1 = avma;
     for (i = lg(m[1])-1; i; i--)
     {
       l = gcoeff(m,i,1);
@@ -1635,7 +1635,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
      * in the other case either, but this special case is more efficient) */
     {
       GEN L, An, Bn, z;
-      z = gener_Fp_local(l, gel(decomp(ipg), 1));
+      z = gener_Fp_local(l, gel(Z_factor(ipg), 1));
       z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
       z = negi(z);
       if (DEBUGLEVEL>=4) (void)timer2();

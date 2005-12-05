@@ -144,7 +144,7 @@ znorder(GEN x, GEN o)
     o = phi(b); 
   else if(typ(o) != t_INT) err(arither1);
 
-  m = decomp(o);
+  m = Z_factor(o);
   for (i = lg(m[1])-1; i; i--)
   {
     p = gcoeff(m,i,1); e = itos(gcoeff(m,i,2));
@@ -222,7 +222,7 @@ gener_Fp_local(GEN p, GEN L0)
 
   q = subis(p, 1);
   if (!L0) {
-    L0 = L = gel(decomp(q), 1);
+    L0 = L = gel(Z_factor(q), 1);
     k = lg(L)-1;
   } else {
     k = lg(L0)-1;
@@ -294,7 +294,7 @@ gener(GEN m)
     gel(z,2) = gerepileuptoint(av, x); return z;
   }
 
-  t = decomp(m);
+  t = Z_factor(m);
   if (lg(t[1]) != 2) err(talker,"primitive root mod %Z does not exist", m);
   p = gcoeff(t,1,1);
   e = itos(gcoeff(t,1,2));
@@ -324,7 +324,7 @@ znstar(GEN n)
     gel(z,3) = cgetg(1,t_VEC); return z;
   }
   av = avma; if (signe(n) < 0) n = negi(n);
-  z = decomp(n);
+  z = Z_factor(n);
   P = gel(z,1);
   E = gel(z,2); nbp = lg(P)-1;
   cyc = cgetg(nbp+2,t_VEC);
@@ -604,7 +604,7 @@ gcarreparfait(GEN x)
       if (i==0)
       {
         GEN d = gcdii(a,q);
-        p = (GEN)decomp(d)[1]; l = lg(p);
+        p = (GEN)Z_factor(d)[1]; l = lg(p);
         for (i=1; i<l; i++)
         {
           v = Z_pvalrem(a,gel(p,i),&p1);
@@ -617,7 +617,7 @@ gcarreparfait(GEN x)
       }
       /* kro(a,q) = 1, q odd: need to factor q and check all p|q 
        * (can't use product formula in case v_p(q) is even for some p) */
-      p = (GEN)decomp(q)[1]; l = lg(p);
+      p = (GEN)Z_factor(q)[1]; l = lg(p);
       for (i=1; i<l; i++)
         if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
       return gen_1;
@@ -1478,7 +1478,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
   lim = stack_lim(ltop,1);
   if (!is_pm1(m))
   {
-    GEN F = decomp(m);
+    GEN F = Z_factor(m);
     long i, j, e;
     GEN r, zeta, y, l;
     pari_sp av1 = avma;
@@ -2662,7 +2662,7 @@ find_order(GEN f, GEN h)
   GEN fh, p,e;
   long i,j,lim;
 
-  p = decomp(h);
+  p = Z_factor(h);
   e =gel(p,2);
   p =gel(p,1);
   for (i=1; i<lg(p); i++)
@@ -2764,7 +2764,7 @@ conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
 static long
 two_rank(GEN x)
 {
-  GEN p = (GEN)decomp(absi(x))[1];
+  GEN p = (GEN)Z_factor(absi(x))[1];
   long l = lg(p)-1;
 #if 0 /* positive disc not needed */
   if (signe(x) > 0)
