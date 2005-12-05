@@ -829,6 +829,16 @@ except \kbd{x} and \kbd{r} are now \kbd{ulong}s.
 \fun{long}{u_lval}{ulong x, ulong p} as \kbd{Z\_pval},
 except the inputs/outputs are now \kbd{ulong}s.
 
+\subsec{Factorisation}
+
+\fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
+in the factorization are actually strong pseudoprimes.
+
+\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but factors
+the \typ{INT} \kbd{n} until the unfactored part is smaller than
+\kbd{lim}. In particular, the last entry o nthe first factorization
+column is in general a composite number.
+
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
 \op=\key{neg}: negation ($-$\kbd{x}).

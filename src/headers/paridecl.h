@@ -397,7 +397,6 @@ GEN     core2partial(GEN n, long l);
 GEN     coredisc(GEN n);
 GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
-GEN     Z_factor(GEN n);
 GEN     divisors(GEN n);
 GEN     factorint(GEN n, long flag);
 GEN     factoru(ulong n);
@@ -433,6 +432,7 @@ GEN     removeprimes(GEN primes);
 GEN     smallfact(GEN n);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
+GEN     Z_factor(GEN n);
 
 /* base1.c */
 
