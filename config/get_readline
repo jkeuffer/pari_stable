@@ -22,16 +22,17 @@ fi
 
 if test -n "$readline"; then
 # Readline -- Headers
+  incpth="`echo $C_INCLUDE_PATH | sed -e \"s%\([^$dir_sep]*\)$dir_sep*%\1 \1/readline %g\"`"
   case "$osname" in
-    os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
-    cygwin*) incpth="\
+    os2);;
+    cygwin*) incpth="$incpth\
       $cygtop/usr/local/include/readline\
       $cygtop/usr/local/include\
       $cygtop/usr/include/readline\
       $cygtop/usr/include\
       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
       ";;
-    *) incpth="`echo $C_INCLUDE_PATH | sed -e 's%\([^:]*\):*%\1 \1/readline %g'`\
+    *) incpth="$incpth\
       /usr/local/include/readline\
       /usr/include/readline\
       /opt/include/readline\
