@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                               PI                               **/
 /**                                                                **/
 /********************************************************************/
+#if 0
 /* Ramanujan's formula:
  *                         ----
  *  53360 (640320)^(1/2)   \    (6n)! (545140134 n + 13591409)
@@ -86,6 +87,7 @@ piold(long prec)
   p1 = divsr(53360,p1);
   return gerepileuptoleaf(av, mulrr(p1,sqrtr_abs(stor(k3,prec))));
 }
+#endif
 /* Gauss - Brent-Salamin AGM iteration */
 void
 constpi(long prec)
