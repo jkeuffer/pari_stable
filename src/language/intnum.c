@@ -34,7 +34,7 @@ typedef struct {
 
 /* f(x) */
 GEN
-_gp_eval(GEN x, void *dat)
+gp_eval(GEN x, void *dat)
 {
   exprdat *E = (exprdat*)dat;
   E->ep->value = x;
@@ -43,7 +43,7 @@ _gp_eval(GEN x, void *dat)
 
 #if 0
 static GEN
-_gp_eval2(GEN x, GEN y, void *dat)
+gp_eval2(GEN x, GEN y, void *dat)
 {
   exprdoub *E = (exprdoub*)dat;
   E->epx->value = x;
@@ -1707,7 +1707,7 @@ intnumdoub0(entree *epx, GEN a, GEN b, entree *epy, char *chc, char *chd, char *
   Ef.epx = epx; push_val(epx, NULL);
   Ef.epy = epy; push_val(epy, NULL);
   Ef.ch = chf;
-  z = intnumdoub(&Ef, &_gp_eval2, &Ec, &_gp_eval, &Ed, &_gp_eval, a, b, tabext, tabint, prec);
+  z = intnumdoub(&Ef, &gp_eval2, &Ec, &gp_eval, &Ed, &gp_eval, a, b, tabext, tabint, prec);
   pop_val(epy);
   pop_val(epx); return z;
 }

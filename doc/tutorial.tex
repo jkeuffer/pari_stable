@@ -1110,6 +1110,7 @@ Hence type
 \bprog
   fun(z) = local(u = exp(z)); (u-1) / (u-z)
   zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, real( fun(r*exp(I*t)) * exp(I*t) ))
+  zero2(r) = intcirc(z=0, r, fun(z))
 @eprog\noindent
 (Here \kbd{u} is a local variable to the function \kbd{f}: whenever
 a function is called, \kbd{gp} fills its argument list with the actual arguments
@@ -1123,15 +1124,16 @@ The function \kbd{zero(r)} will then count the number of zeros of modulus
 less than \kbd{r}: we simply made the change of variable $z = r*\exp(i*t)$,
 and took the real part to avoid integrating the imaginary part.
 
-Now type \kbd{\b{p} 9} (otherwise the computation would take too long, and
-anyway we know that the result is a small integer), then \kbd{zero(1)},
-\kbd{zero(1.5)}. The result tells us that there are no zeros inside the unit
-disk, but that there are two (necessarily complex conjugate) in the
-annulus $1<|z|<1.5$. For the sake of completeness, let us compute them. Let
-$z = x+iy$ be such a zero, with $x$ and $y$ real. Then the equation $e^z-z=0$
-implies, after elementary transformations, that $e^{2x}=x^2+y^2$ and that
-$e^x\cos(y)=x$. Hence $y=\pm\sqrt{e^{2x}-x^2}$ and hence
-$e^x\cos(\sqrt{e^{2x}-x^2})=x$. Therefore, type
+We may type \kbd{\b{p} 9} since we know that the result is a small integer
+(but the computations should be instantaneous even at \b{p} 100 or so),
+then \kbd{zero(1)}, \kbd{zero(1.5)}. The result tells us that there are
+no zeros inside the unit disk, but that there are two (necessarily
+complex conjugate) in the annulus $1<|z|<1.5$. For the sake of
+completeness, let us compute them. Let $z = x+iy$ be such a zero, with
+$x$ and $y$ real. Then the equation $e^z-z=0$ implies, after elementary
+transformations, that $e^{2x}=x^2+y^2$ and that $e^x\cos(y)=x$. Hence
+$y=\pm\sqrt{e^{2x}-x^2}$ and hence $e^x\cos(\sqrt{e^{2x}-x^2})=x$.
+Therefore, type
 \bprog
   fun(x) = local(u = exp(x)); u * cos(sqrt(u^2 - x^2)) - x
 @eprog\noindent
