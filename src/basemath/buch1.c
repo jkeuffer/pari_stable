@@ -676,7 +676,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
  * 2 | index), hence the low order bit is not useful. So we hash
  * HASHBITS bits starting at bit 1, not bit 0 */
 #define HASHBITS 10
-const long HASHT = 1 << HASHBITS;
+static const long HASHT = 1 << HASHBITS;
 
 static long
 hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }

@@ -915,7 +915,7 @@ gerfc(GEN x, long prec)
 /**		        FONCTION ZETA DE RIEMANN                      **/
 /**								      **/
 /***********************************************************************/
-const double log2PI = 1.83787706641;
+static const double log2PI = 1.83787706641;
 
 static double
 get_xinf(double beta)

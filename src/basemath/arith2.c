@@ -693,7 +693,7 @@ removeprimes(GEN prime)
 /**       COMPUTING THE MATRIX OF PRIME DIVISORS AND EXPONENTS        **/
 /**                                                                   **/
 /***********************************************************************/
-const long decomp_default_hint = 0;
+static const long decomp_default_hint = 0;
 
 /* where to stop trial dividing in factorization */
 static ulong

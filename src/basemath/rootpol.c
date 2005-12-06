@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-const double pariINFINITY = 100000.;
+static const double pariINFINITY = 100000.;
 
 /********************************************************************/
 /**                                                                **/
@@ -1271,7 +1271,7 @@ conformal_pol(GEN p, GEN a, long bit)
   }
 }
 
-const double UNDEF = -100000.;
+static const double UNDEF = -100000.;
 
 static double
 logradius(double *radii, GEN p, long k, double aux, double *delta)
