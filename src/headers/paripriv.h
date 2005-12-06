@@ -29,6 +29,10 @@ typedef int (*QSCOMP)(const void *, const void *);
 /* */
 #define both_odd(x,y) ((x)&(y)&1)
 
+/* unused */
+void ellprint(GEN e);
+GEN mpinv(GEN b);
+
 /* generic */
 GEN arith_proto(long f(GEN), GEN x, int do_error);
 GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
