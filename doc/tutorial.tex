@@ -1106,11 +1106,9 @@ number of zeros in a disk of radius $r$ centered around the origin is
 equal to
 $$\dfrac{1}{2i\pi}\int_{C_r}\dfrac{h'(z)}{h(z)}\,dz\enspace,$$
 where $C_r$ is the circle of radius $r$ centered at the origin.
-Hence type
+The function we want to integrate is
 \bprog
   fun(z) = local(u = exp(z)); (u-1) / (u-z)
-  zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, real( fun(r*exp(I*t)) * exp(I*t) ))
-  zero2(r) = intcirc(z=0, r, fun(z))
 @eprog\noindent
 (Here \kbd{u} is a local variable to the function \kbd{f}: whenever
 a function is called, \kbd{gp} fills its argument list with the actual arguments
@@ -1120,9 +1118,20 @@ given, and initializes the other declared parameters and local variables to
 variable, whose value would be permanently changed. It is not mandatory to
 declare in this way all parameters, but beware of side effects!)
 
-The function \kbd{zero(r)} will then count the number of zeros of modulus
-less than \kbd{r}: we simply made the change of variable $z = r*\exp(i*t)$,
-and took the real part to avoid integrating the imaginary part.
+Type now:
+\bprog
+  zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, real( fun(r*exp(I*t)) * exp(I*t) ))
+@eprog
+The function \kbd{zero(r)} will count the number of zeros of \kbd{fun}
+whose modulus is less than \kbd{r}: we simply made the change of variable
+$z = r*\exp(i*t)$, and took the real part to avoid integrating the
+imaginary part. Actually, there is a built-in function \kbd{intcirc}
+to integrate over a circle, yielding the much simpler:
+\bprog
+  zero(r) = intcirc(z=0, r, fun(z))
+@eprog
+(This is a little faster than the previous implementation, and no less
+accurate.)
 
 We may type \kbd{\b{p} 9} since we know that the result is a small integer
 (but the computations should be instantaneous even at \b{p} 100 or so),
