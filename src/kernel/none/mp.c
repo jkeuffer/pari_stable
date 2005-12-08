@@ -77,7 +77,7 @@ resetloop(GEN a, GEN b) {
 }
 
 /* assume a > 0, initialized by setloop. Do a++ */
-GEN
+static GEN
 incpos(GEN a)
 {
   long i, l = lgefint(a);
@@ -90,7 +90,7 @@ incpos(GEN a)
 }
 
 /* assume a < 0, initialized by setloop. Do a++ */
-GEN
+static GEN
 incneg(GEN a)
 {
   long l = lgefint(a)-1;

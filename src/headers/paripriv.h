@@ -49,8 +49,6 @@ GEN sort_vecpol(GEN a, int (*cmp)(GEN,GEN));
 
 /* loops */
 GEN incloop(GEN a);
-GEN incneg(GEN a);
-GEN incpos(GEN a);
 GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
 

@@ -760,14 +760,14 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
 static void
 splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 {
-  long l, v, dv;
+  long l, v, dv = degpol(*t);
   pari_sp av;
   GEN w;
 
-  dv=degpol(*t); if (dv==d) return;
-  v=varn(*t); m=setloop(m); m=incpos(m);
-  av=avma;
-  for(;; avma=av, m=incpos(m))
+  if (dv==d) return;
+  v = varn(*t);
+  av = avma; m = addis(m,1);
+  for(;; m = gerepileuptoint(av, addis(m,1)))
   {
     w = FpX_rem(stopoly_gen(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
@@ -775,7 +775,6 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
     w = ZX_Z_add(w, gen_m1);
     w = FpX_gcd(*t,w, p); l=degpol(w);
     if (l && l!=dv) break;
-
   }
   w = FpX_normalize(w, p);
   w = gerepileupto(av, w);
