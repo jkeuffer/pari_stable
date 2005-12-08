@@ -110,7 +110,7 @@ cyclo(long n, long v)
   pari_sp av=avma, tetpil;
   GEN yn,yd;
 
-  if (n <= 0) err(talker, "degree <= in cyclo");
+  if (n <= 0) err(talker, "argument must be positive in polcyclo");
   if (v<0) v = 0;
   yn = yd = pol_1[0];
   for (d=1; d*d<=n; d++)
