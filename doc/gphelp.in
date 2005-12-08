@@ -596,7 +596,7 @@ sub detex {
     last if /^\\(section|sub[sub]*sec)/i;
     &presubst();
   }
-  if ($raw) { join("\n", @text); return; }
+  if ($raw) { print join("\n", @text); return; }
 #  for (@text) { print("AA{$_}BB\n"); } # DEBUG
   &format_text();
   for (@f_text) { &TeXprint($_); }
