@@ -1,17 +1,3 @@
-Function: _declaration
-Class: gp2c_internal
-Help: Obsoleted by gp2c-0.0.4
-Description: 
- (C!void)          void $1
- (C!long)          long $1
- (C!int)           int $1
- (C!GEN)           GEN $1
- (C!char*)         char *$1
- (C!byteptr)       byteptr $1
- (C!GEN*[])        GEN *$1[]
- (C!pari_sp)       pari_sp $1
- (C!func_GG)       GEN (*$1)(GEN, GEN)
-
 Function: _decl_base
 Class: gp2c_internal
 Description: 
@@ -84,14 +70,6 @@ Description:
  (C!long)       L
  (C!GEN)        G
  (C!char*)      s
-
-Function: _proto_default
-Class: gp2c_internal
-Help: Obsoleted by gp2c-0.0.4
-Description:
- (C!long)       0
- (C!GEN)        0
- (C!char*)      \"\"
 
 Function: _default_marker
 Class: gp2c_internal
