@@ -766,9 +766,11 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 
   if (dv==d) return;
   v = varn(*t);
-  av = avma; m = addis(m,1);
-  for(;; m = gerepileuptoint(av, addis(m,1)))
+  m = setloop(m);
+  av = avma; 
+  for(;; avma = av)
   {
+    m = incloop(m);
     w = FpX_rem(stopoly_gen(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
