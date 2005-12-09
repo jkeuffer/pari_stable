@@ -43,7 +43,7 @@ up to the maximum of \kbd{maxprime} and $2^{16}$.
 initialized with \kbd{pari\_init}) and frees all allocated objects.
 
 \fun{void}{pari_init_opts}{size_t parisize, ulong maxprime, ulong
-init_opts, module *newfun, module *oldfun} as \kbd{pari\_init}, with
+init_opts, entree **newfun, entree **oldfun} as \kbd{pari\_init}, with
 extra flexibility. \kbd{init\_opts} is a mask of flags among the
 following:
 
@@ -70,7 +70,9 @@ for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. The same mask must be provided for initialization
 and closing.
 
-\fun{void}{pari_addfunctions}{module **modlist, entree *func, char **help}
+\fun{void}{pari_addfunctions}{entree ***list, entree *func, char **help}
+add list of routines \kbd{func} list of modules \kbd{*list} (which is
+allowed to be \kbd{NULL} for an empty list).
 
 \fun{void}{pari_sig_init}{void (*f)(int)}
 
