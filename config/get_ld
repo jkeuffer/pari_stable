@@ -30,16 +30,19 @@ if test "$LD" = "$CC"; then
 fi
 if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
+if test "$GNULDused" = "yes"; then
+  tmp=`./ldflags "$LDneedsWl" "--export-dynamic"`
+  ldflags="$ldflags $tmp"
+else
+  case "$osname-$arch" in
+    aix-*) ldflags='-brtl' ;; # in case we link against a shared library
+  esac
+fi
 case "$osname-$arch" in
-  gnu*|linux-*|cygwin*|freebsd-*|netbsd-*)
-    tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
-    ldflags="$ldflags $tmp" ;;
-  aix-*)  ldflags='-brtl' ;; # in case we link against a shared library
   os2-*)  ldflags="$ldflags -Zexe"
-          case "$optimization" in
-            full) ldflags="$ldflags -s";;
-          esac;;
+          if test "$optimization" = "full"; then ldflags="$ldflags -s"; fi
 esac
+
 LDFLAGS="$ldflags $LDFLAGS"
 
 if test "$fastread" != yes; then
