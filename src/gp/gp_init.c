@@ -42,22 +42,6 @@ gsettype(GEN x,long t)
   x=gcopy(x); settyp(x,t); return x;
 }
 
-static long
-setserieslength(long n)
-{
-  long m=precdl;
-  if(n>0) precdl=n;
-  return m;
-}
-
-static long
-setprecr(long n)
-{
-  long m = GP_DATA->fmt->sigd;
-  if (n > 0) { GP_DATA->fmt->sigd = n; precreal = ndec2prec(n); }
-  return m;
-}
-
 entree functions_oldgp[] = {
 {"allocatemem",11,(void *)allocatemoremem,2,"vLp"},
 {"box",35,(void *)rectbox,10,"vLGG"},
@@ -94,8 +78,8 @@ entree functions_oldgp[] = {
 {"rpoint",35,(void *)rectrpoint,10,"vLGG"},
 {"rpoints",35,(void *)rectpoints,10,"vLGG"},
 {"scale",59,(void *)rectscale,10,"vLGGGG"},
-{"setprecision",15,(void *)setprecr,2,"lL"},
-{"setserieslength",15,(void *)setserieslength,2,"lL"},
+{"setprecision",15,(void *)setrealprecision,2,"lL"},
+{"setserieslength",15,(void *)setseriesprecision,2,"lL"},
 {"settype",21,(void *)gsettype,2,"GL"},
 {"string",57,(void*)rectstring,10,"vLs"},
 {"system",70,(void*) system0,11,"vs"},

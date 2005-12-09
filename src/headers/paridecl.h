@@ -863,6 +863,8 @@ long    zpsolublenf(GEN bnf,GEN pol,GEN p);
 /* default.c */
 
 GEN default0(char *a, char *b, long flag);
+long setseriesprecision(long n);
+long setrealprecision(long n);
 
 /* elldata.c */
 

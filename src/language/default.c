@@ -182,6 +182,22 @@ do_strftime(const char *s, char *buf, long max)
 
 /**************************************************************************/
 
+long
+setseriesprecision(long n)
+{
+  long m = precdl;
+  if(n > 0) precdl = n;
+  return m;
+}
+
+long
+setrealprecision(long n)
+{
+  long m = GP_DATA->fmt->sigd;
+  if (n > 0) { GP_DATA->fmt->sigd = n; precreal = ndec2prec(n); }
+  return m;
+}
+
 static GEN
 sd_toggle(const char *v, long flag, char *s, int *ptn)
 {
