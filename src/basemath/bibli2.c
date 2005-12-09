@@ -80,7 +80,7 @@ legendre(long n, long v)
   GEN p0,p1,p2;
 
   if (v<0) v = 0;
-  if (n < 0) err(talker,"negative degree in legendre");
+  if (n < 0) pari_err(talker,"negative degree in legendre");
   if (n==0) return pol_1[v];
   if (n==1) return pol_x[v];
 
@@ -94,7 +94,7 @@ legendre(long n, long v)
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2];
-      if(DEBUGMEM>1) err(warnmem,"legendre");
+      if(DEBUGMEM>1) pari_err(warnmem,"legendre");
       p0=gcopy(p0); gptr[0]=&p0; gptr[1]=&p1;
       gerepilemanysp(av,tetpil,gptr,2);
     }
@@ -110,7 +110,7 @@ cyclo(long n, long v)
   pari_sp av=avma, tetpil;
   GEN yn,yd;
 
-  if (n <= 0) err(talker, "argument must be positive in polcyclo");
+  if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (v<0) v = 0;
   yn = yd = pol_1[0];
   for (d=1; d*d<=n; d++)
@@ -268,11 +268,11 @@ laplace(GEN x)
   long i,l,ec;
   GEN y,p1;
 
-  if (typ(x)!=t_SER) err(talker,"not a series in laplace");
+  if (typ(x)!=t_SER) pari_err(talker,"not a series in laplace");
   if (gcmp0(x)) return gcopy(x);
 
   ec = valp(x);
-  if (ec<0) err(talker,"negative valuation in laplace");
+  if (ec<0) pari_err(talker,"negative valuation in laplace");
   l=lg(x); y=cgetg(l,t_SER);
   p1=mpfact(ec); y[1]=x[1];
   for (i=2; i<l; i++)
@@ -295,8 +295,8 @@ convol(GEN x, GEN y)
   long j, lx, ly, ex, ey, vx = varn(x);
   GEN z;
 
-  if (typ(x) != t_SER || typ(y) != t_SER) err(talker,"not a series in convol");
-  if (varn(y) != vx) err(talker,"different variables in convol");
+  if (typ(x) != t_SER || typ(y) != t_SER) pari_err(talker,"not a series in convol");
+  if (varn(y) != vx) pari_err(talker,"different variables in convol");
   ex = valp(x); lx = lg(x) + ex; x -= ex;
   ey = valp(y); ly = lg(y) + ey; y -= ey;
   /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
@@ -322,7 +322,7 @@ gprec(GEN x, long l)
   long tx = typ(x), lx, i;
   GEN y;
 
-  if (l <= 0) err(talker,"precision<=0 in gprec");
+  if (l <= 0) pari_err(talker,"precision<=0 in gprec");
   switch(tx)
   {
     case t_REAL:
@@ -410,7 +410,7 @@ polrecip(GEN x)
   long lx = lg(x), i, j;
   GEN y = cgetg(lx,t_POL);
 
-  if (typ(x) != t_POL) err(typeer,"polrecip");
+  if (typ(x) != t_POL) pari_err(typeer,"polrecip");
   y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gcopy(gel(x,j));
   return normalizepol_i(y,lx);
 }
@@ -440,7 +440,7 @@ binomial(GEN n, long k)
 
   if (k <= 1)
   {
-    if (is_noncalc_t(typ(n))) err(typeer,"binomial");
+    if (is_noncalc_t(typ(n))) pari_err(typeer,"binomial");
     if (k < 0) return gen_0;
     if (k == 0) return gen_1;
     return gcopy(n);
@@ -541,7 +541,7 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
     {
       GEN ho = gsub(gel(xa,i),x);
       GEN hp = gsub(gel(xa,i+m),x), den = gsub(ho,hp);
-      if (gcmp0(den)) err(talker,"two abcissas are equal in polint");
+      if (gcmp0(den)) pari_err(talker,"two abcissas are equal in polint");
       den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
       gel(c,i) = gmul(ho,den);
       gel(d,i) = gmul(hp,den);
@@ -567,12 +567,12 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
   if (ya) ty = typ(ya); else { ya = xa; ty = tx; xa = NULL; }
 
   if (! is_vec_t(tx) || ! is_vec_t(ty))
-    err(talker,"not vectors in polinterpolate");
+    pari_err(talker,"not vectors in polinterpolate");
   if (lx != lg(ya))
-    err(talker,"different lengths in polinterpolate");
+    pari_err(talker,"different lengths in polinterpolate");
   if (lx <= 2)
   {
-    if (lx == 1) err(talker,"no data in polinterpolate");
+    if (lx == 1) pari_err(talker,"no data in polinterpolate");
     ya=gcopy(gel(ya,1)); if (ptdy) *ptdy = ya;
     return ya;
   }
@@ -631,7 +631,7 @@ gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
   if (tx==t_VEC) lx = lg(x);
   else
   {
-    if (tx!=t_LIST) err(talker,"not a set in setsearch");
+    if (tx!=t_LIST) pari_err(talker,"not a set in setsearch");
     lx=lgeflist(x)-1; x++;
   }
   if (lx==1) return flag? 1: 0;
@@ -692,7 +692,7 @@ ZV_sort_uniq(GEN L)
 GEN
 gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN))
 {
-  if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
+  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(talker,"not a set in setunion");
 
 }
 #endif
@@ -703,7 +703,7 @@ setunion(GEN x, GEN y)
   pari_sp av=avma, tetpil;
   GEN z;
 
-  if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
+  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(talker,"not a set in setunion");
   z=shallowconcat(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
 }
 
@@ -714,7 +714,7 @@ setintersect(GEN x, GEN y)
   pari_sp av=avma;
   GEN z;
 
-  if (!setisset(x) || !setisset(y)) err(talker,"not a set in setintersect");
+  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setintersect");
   lx=lg(x); z=cgetg(lx,t_VEC); c=1;
   for (i=1; i<lx; i++)
     if (setsearch(y, gel(x,i), 0)) z[c++] = x[i];
@@ -747,7 +747,7 @@ gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
 GEN
 setminus(GEN x, GEN y)
 {
-  if (!setisset(x) || !setisset(y)) err(talker,"not a set in setminus");
+  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setminus");
   return gen_setminus(x,y,gcmp);
 }
 
@@ -775,7 +775,7 @@ dirmul(GEN x, GEN y)
   long lx, ly, lz, dx, dy, i, j, k;
   GEN z;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(typeer,"dirmul");
+  if (typ(x)!=t_VEC || typ(y)!=t_VEC) pari_err(typeer,"dirmul");
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (ly-dy < lx-dx) { swap(x,y); lswap(lx,ly); lswap(dx,dy); }
@@ -810,10 +810,10 @@ dirdiv(GEN x, GEN y)
   long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(typeer,"dirmul");
+  if (typ(x)!=t_VEC || typ(y)!=t_VEC) pari_err(typeer,"dirmul");
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
-  if (dy != 1 || ly == 1) err(talker,"not an invertible dirseries in dirdiv");
+  if (dy != 1 || ly == 1) pari_err(talker,"not an invertible dirseries in dirdiv");
   lz = min(lx,ly*dx); p1 = gel(y,1);
   if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = shallowcopy(x);
   z = zerovec(lz-1);
@@ -844,7 +844,7 @@ GEN
 genrand(GEN N)
 {
   if (!N) return stoi( pari_rand31() );
-  if (typ(N)!=t_INT || signe(N)<=0) err(talker,"invalid bound in random");
+  if (typ(N)!=t_INT || signe(N)<=0) pari_err(talker,"invalid bound in random");
   return randomi(N);
 }
 
@@ -867,8 +867,8 @@ numtoperm(long n, GEN x)
   long i, r;
   GEN v;
 
-  if (n < 0) err(talker,"n too small (%ld) in numtoperm",n);
-  if (typ(x) != t_INT) err(arither1);
+  if (n < 0) pari_err(talker,"n too small (%ld) in numtoperm",n);
+  if (typ(x) != t_INT) pari_err(arither1);
   v = cgetg(n+1, t_VEC);
   v[1] = 1; av = avma;
   if (signe(x) <= 0) x = modii(x, mpfact(n));
@@ -891,12 +891,12 @@ permtonum(GEN x)
   pari_sp av=avma;
   GEN ary,res;
 
-  if (!is_vec_t(tx)) err(talker,"not a vector in permtonum");
+  if (!is_vec_t(tx)) pari_err(talker,"not a vector in permtonum");
   ary = cgetg(lx+1,t_VECSMALL);
   for (ind=1; ind<=lx; ind++)
   {
     res = gel(++x, 0);
-    if (typ(res) != t_INT) err(typeer,"permtonum");
+    if (typ(res) != t_INT) pari_err(typeer,"permtonum");
     ary[ind] = itos(res);
   }
   ary++; res = gen_0;
@@ -927,7 +927,7 @@ modreverse_i(GEN a, GEN T)
   if (n <= 0) return gcopy(a);
   if (n == 1)
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
-  if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
+  if (gcmp0(a) || typ(a) != t_POL) pari_err(talker,"reverse polmod does not exist");
 
   y = RgXV_to_RgM(RgX_powers(a,T,n-1), n);
   y = gauss(y, col_ei(n, 2));
@@ -940,7 +940,7 @@ polymodrecip(GEN x)
   long v, n;
   GEN T, a, y;
 
-  if (typ(x)!=t_POLMOD) err(talker,"not a polmod in modreverse");
+  if (typ(x)!=t_POLMOD) pari_err(talker,"not a polmod in modreverse");
   T = gel(x,1);
   a = gel(x,2);
   n = degpol(T); if (n <= 0) return gcopy(x);
@@ -1042,7 +1042,7 @@ gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
   GEN y;
 
   if (tx == t_LIST) { lx = lgeflist(x)-1; tx = t_VEC; x++; }
-  if (!is_matvec_t(tx) && tx != t_VECSMALL) err(typeer,"gen_sort");
+  if (!is_matvec_t(tx) && tx != t_VECSMALL) pari_err(typeer,"gen_sort");
   if      (flag & cmp_C)   tx = t_VECSMALL;
   else if (flag & cmp_IND) tx = t_VEC;
   if (lx<=2)
@@ -1104,7 +1104,7 @@ gen_vecsort(GEN x, GEN k, long flag)
   }
   else
   {
-    if (! is_vec_t(t)) err(talker,"incorrect lextype in vecsort");
+    if (! is_vec_t(t)) pari_err(talker,"incorrect lextype in vecsort");
     v.lk = lg(k);
   }
   l = 0;
@@ -1112,16 +1112,16 @@ gen_vecsort(GEN x, GEN k, long flag)
   for (i=1; i<v.lk; i++)
   {
     j = itos(gel(k,i));
-    if (j<=0) err(talker,"negative index in vecsort");
+    if (j<=0) pari_err(talker,"negative index in vecsort");
     v.k[i]=j; if (j>l) l=j;
   }
   t = typ(x);
-  if (! is_matvec_t(t)) err(typeer,"vecsort");
+  if (! is_matvec_t(t)) pari_err(typeer,"vecsort");
   for (j=1; j<lx; j++)
   {
     t = typ(x[j]);
-    if (! is_vec_t(t)) err(typeer,"vecsort");
-    if (lg(gel(x,j)) <= l) err(talker,"index too large in vecsort");
+    if (! is_vec_t(t)) pari_err(typeer,"vecsort");
+    if (lg(gel(x,j)) <= l) pari_err(talker,"index too large in vecsort");
   }
   x = gen_sort_aux(x, flag, (void *) &v, veccmp);
   free(v.k); return x;
@@ -1130,7 +1130,7 @@ gen_vecsort(GEN x, GEN k, long flag)
 GEN
 vecsort0(GEN x, GEN k, long flag)
 {
-  if (flag < 0 || flag >= cmp_C) err(flagerr,"vecsort");
+  if (flag < 0 || flag >= cmp_C) pari_err(flagerr,"vecsort");
   if (k) return gen_vecsort(x, k, flag);
   return gen_sort(x, flag, (typ(x) == t_VECSMALL)?
                        pari_compare_small:sort_fun(flag));

@@ -889,7 +889,7 @@ initRUgen(long N, long bit)
 GEN
 FFTinit(long k, long prec)
 {
-  if (k <= 0) err(typeer,"FFTinit");
+  if (k <= 0) pari_err(typeer,"FFTinit");
   return initRU(1 << k, bit_accuracy(prec)) - 1;
 }
 
@@ -898,7 +898,7 @@ FFT(GEN x, GEN Omega)
 {
   long i, l = lg(Omega), n = lg(x);
   GEN y, z;
-  if (n > l || !is_vec_t(typ(x)) || typ(Omega) != t_VEC) err(typeer,"FFT");
+  if (n > l || !is_vec_t(typ(x)) || typ(Omega) != t_VEC) pari_err(typeer,"FFT");
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
     for (i = 1; i < n; i++) z[i] = x[i];
@@ -995,7 +995,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
     RU = gmul(RU, prim);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"parameters");
+      if(DEBUGMEM>1) pari_err(warnmem,"parameters");
       gerepileall(av2,2, &g,&RU);
     }
   }
@@ -1108,7 +1108,7 @@ refine_H(GEN F, GEN G, GEN HH, long bit, long Sbit)
   {
     if (low_stack(lim, stack_lim(ltop,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"refine_H");
+      if(DEBUGMEM>1) pari_err(warnmem,"refine_H");
       gerepileall(ltop,2, &D,&H);
     }
     bit1 = -error + Sbit;
@@ -1145,7 +1145,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
     if (bit1 == bit2 && i >= 2) { Sbit += n; Sbit2 += n; bit2 += n; }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"refine_F");
+      if(DEBUGMEM>1) pari_err(warnmem,"refine_F");
       gerepileall(av,4, &FF,&GG,&r,&HH);
     }
 
@@ -1265,7 +1265,7 @@ conformal_pol(GEN p, GEN a, long bit)
     z = addmulXn(gmul(z,ca), gneg(z), 1); /* z *= conj(a)X - 1 */
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"conformal_pol");
+      if(DEBUGMEM>1) pari_err(warnmem,"conformal_pol");
       gerepileall(av,2, &r,&z);
     }
   }
@@ -1606,7 +1606,7 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
 /********************************************************************/
 
 static GEN
-root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
+root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
 {
   GEN rho, d, eps, epsbis, eps2, prod, aux, rap = NULL;
   long i, j, m;
@@ -1623,7 +1623,7 @@ root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
   rho = gabs(mygprec(gel(roots_pol,k),31), DEFAULTPREC);
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
-  aux = shiftr(gpowgs(rho,n), err);
+  aux = shiftr(gpowgs(rho,n), pari_err);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap, dbltor(1.2)) > 0); j++)
   {
@@ -1666,19 +1666,19 @@ mygprec_absolute(GEN x, long bit)
 }
 
 static long
-a_posteriori_errors(GEN p, GEN roots_pol, long err)
+a_posteriori_errors(GEN p, GEN roots_pol, long pari_err)
 {
   long i, e, n = degpol(p), e_max = -(long)EXPOBITS;
   GEN sigma, shatzle, x;
 
-  err += (long)log2((double)n) + 1;
-  if (err > -2) return 0;
-  sigma = real2n(-err, 3);
+  pari_err += (long)log2((double)n) + 1;
+  if (pari_err > -2) return 0;
+  sigma = real2n(-pari_err, 3);
   /*  2 / ((s - 1)^(1/n) - 1) */
   shatzle = divsr(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
   for (i=1; i<=n; i++)
   {
-    x = root_error(n,i,roots_pol,err,shatzle);
+    x = root_error(n,i,roots_pol,pari_err,shatzle);
     e = gexpo(x); if (e > e_max) e_max = e;
     gel(roots_pol,i) = mygprec_absolute(gel(roots_pol,i), -e);
   }
@@ -1736,7 +1736,7 @@ cauchy_bound(GEN p)
   GEN lc, y, q = gmul(p, real_1(prec));
   double L = 0, Lmax = -pariINFINITY;
 
-  if (n <= 0) err(constpoler,"cauchy_bound");
+  if (n <= 0) pari_err(constpoler,"cauchy_bound");
 
   lc = gabs(gel(q,n+2),prec); /* leading coefficient */
   lc = ginv(lc);
@@ -1972,7 +1972,7 @@ isrealappr(GEN x, long e)
       for (i=lontyp[tx]; i<lx; i++)
         if (! isrealappr(gel(x,i),e)) return 0;
       return 1;
-    default: err(typeer,"isrealappr"); return 0;
+    default: pari_err(typeer,"isrealappr"); return 0;
   }
 }
 
@@ -1994,13 +1994,13 @@ roots(GEN p, long l)
   long n, i, k, s, t, e;
   GEN c, L, p1, res, rea, com;
 
-  if (gcmp0(p)) err(zeropoler,"roots");
+  if (gcmp0(p)) pari_err(zeropoler,"roots");
   if (typ(p) != t_POL)
   {
-    if (!isvalidcoeff(p)) err(typeer,"roots");
+    if (!isvalidcoeff(p)) pari_err(typeer,"roots");
     return cgetg(1,t_VEC); /* constant polynomial */
   }
-  if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
+  if (!isvalidpol(p)) pari_err(talker,"invalid coefficients in roots");
   if (lg(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
 
   if (l < 3) l = 3;
@@ -2039,7 +2039,7 @@ roots(GEN p, long l)
         com[k] = 0; break;
       }
     }
-    if (k==n) err(bugparier,"roots (conjugates)");
+    if (k==n) pari_err(bugparier,"roots (conjugates)");
   }
   return gerepileupto(av,res);
 }
@@ -2051,7 +2051,7 @@ roots0(GEN p, long flag,long l)
   {
     case 0: return roots(p,l);
     case 1: return rootsold(p,l);
-    default: err(flagerr,"polroots");
+    default: pari_err(flagerr,"polroots");
   }
   return NULL; /* not reached */
 }

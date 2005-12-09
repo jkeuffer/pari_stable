@@ -145,7 +145,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     if (low_stack(limite, stack_lim(av2,1)))
     {
       pari_sp tetpil=avma;
-      if (DEBUGMEM>1) err(warnmem,"plot");
+      if (DEBUGMEM>1) pari_err(warnmem,"plot");
       x = gerepile(av2,tetpil,rcopy(x));
     }
   }
@@ -227,7 +227,7 @@ static PariRect *
 check_rect(long ne)
 {
   if (!GOODRECT(ne))
-    err(talker,
+    pari_err(talker,
         "incorrect rectwindow number in graphic function (%ld not in [0, %ld])",
         ne, NUMRECT-1);
   return rectgraph[ne];
@@ -237,7 +237,7 @@ static PariRect *
 check_rect_init(long ne)
 {
   PariRect *e = check_rect(ne);
-  if (!RHead(e)) err(talker,"you must initialize the rectwindow first");
+  if (!RHead(e)) pari_err(talker,"you must initialize the rectwindow first");
   return e;
 }
 
@@ -269,7 +269,7 @@ initrect(long ne, long x, long y)
   PariRect *e;
   RectObj *z;
 
-  if (x<=1 || y<=1) err(talker,"incorrect dimensions in initrect");
+  if (x<=1 || y<=1) pari_err(talker,"incorrect dimensions in initrect");
   e = check_rect(ne); if (RHead(e)) killrect(ne);
 
   z = (RectObj*) gpmalloc(sizeof(RectObj));
@@ -376,7 +376,7 @@ void
 rectcolor(long ne, long color)
 {
   check_rect(ne);
-  if (!GOODCOLOR(color)) err(talker,"This is not a valid color");
+  if (!GOODCOLOR(color)) pari_err(talker,"This is not a valid color");
   current_color[ne]=color;
 }
 
@@ -648,7 +648,7 @@ rectpoints(long ne, GEN listx, GEN listy)
     rectpoint(ne, listx, listy); return;
   }
   lx = lg(listx);
-  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) err(typeer,"rectpoints");
+  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectpoints");
   lx--; if (!lx) return;
 
   px = (double*) gpmalloc(lx*sizeof(double));
@@ -699,7 +699,7 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   {
     rectline(ne, listx, listy); return;
   }
-  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) err(typeer,"rectlines");
+  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectlines");
   lx--; if (!lx) return;
 
   x = (double*) gpmalloc(lx*sizeof(double));
@@ -1178,11 +1178,11 @@ gtodblList(GEN data, long flags)
   long param=(flags & PLOT_PARAMETRIC);
   GEN x,y;
 
-  if (! is_vec_t(tx)) err(typeer,"gtodblList");
+  if (! is_vec_t(tx)) pari_err(typeer,"gtodblList");
   if (!nl) return NULL;
   lx1 = lg(data[1]);
 
-  if (nl == 1) err(talker,"single vector in gtodblList");
+  if (nl == 1) pari_err(talker,"single vector in gtodblList");
   /* Allocate memory, then convert coord. to double */
   l = (dblPointList*) gpmalloc(nl*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
@@ -1191,7 +1191,7 @@ gtodblList(GEN data, long flags)
     x = gel(data,u);   tx = typ(x); lx = lg(x);
     y = gel(data,u+1); ty = typ(y);
     if (!is_vec_t(tx) || !is_vec_t(ty) || lg(y) != lx
-        || (!param && lx != lx1)) err(typeer,"gtodblList");
+        || (!param && lx != lx1)) pari_err(typeer,"gtodblList");
 
     lx--;
     l[i].d = (double*) gpmalloc(lx*sizeof(double));
@@ -1354,16 +1354,16 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     xbig = gtodouble(b);
     ysml = ybig = gtodouble(p1);
     nc=1; nl=2; /* nc = nb of curves; nl = nb of coord. lists */
-    if (param) err(warner,"flag PLOT_PARAMETRIC ignored");
+    if (param) pari_err(warner,"flag PLOT_PARAMETRIC ignored");
     single_c=1; param=0;
   }
   else
   {
-    if (tx != t_VEC) err(talker,"not a row vector in ploth");
+    if (tx != t_VEC) pari_err(talker,"not a row vector in ploth");
     nl=lg(p1)-1; if (!nl) { avma=av; return 0; }
     single_c=0;
     if (param) nc=nl/2; else { nc=nl; nl++; }
-    if (recur && nc > 1) err(talker,"multi-curves cannot be plot recursively");
+    if (recur && nc > 1) pari_err(talker,"multi-curves cannot be plot recursively");
 
     if (param)
     {
@@ -1409,7 +1409,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 	 }
 	gaddz(tleft,dx,tright);
         p1 = READ_EXPR(ch,ep,tright);
-        if (lg(p1) != 3) err(talker,"inconsistent data in rectplothin");
+        if (lg(p1) != 3) pari_err(talker,"inconsistent data in rectplothin");
         gaffect(gel(p1,1),xright); gaffect(gel(p1,2),yright);
 
 	Appendx(&pl[0],&pl[0],rtodbl(xleft));
@@ -1460,7 +1460,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
       for (i=0; i<testpoints; i++)
       {
 	p1 = READ_EXPR(ch,ep,x);
-        if (lg(p1) != nl+1) err(talker,"inconsistent data in rectplothin");
+        if (lg(p1) != nl+1) pari_err(talker,"inconsistent data in rectplothin");
 	for (j=0; j<nl; j=k)
 	{
 	  k=j+1; z=gtodouble(gel(p1,k));
@@ -1476,7 +1476,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
       for (i=0; i<testpoints; i++)
       {
 	p1 = READ_EXPR(ch,ep,x);
-        if (lg(p1) != nl) err(talker,"inconsistent data in rectplothin");
+        if (lg(p1) != nl) pari_err(talker,"inconsistent data in rectplothin");
 	pl[0].d[i]=gtodouble(x);
 	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(p1,j))); }
 	gaddz(x,dx,x); avma=av2;
@@ -1498,7 +1498,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   GEN tas, xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
   entree *var0 = varentries[ordvar[0]];
 
-  if (lx < 4) err(talker, "Too few points (%ld) for spline plot", lx);
+  if (lx < 4) pari_err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
     gel(xa,i) = dbltor(x[i-1]);
     gel(ya,i) = dbltor(y[i-1]);
@@ -1887,9 +1887,9 @@ gendraw(GEN list, long ps, long flag)
 {
   long i,n,ne,*w,*x,*y;
 
-  if (typ(list) != t_VEC) err(talker,"not a vector in rectdraw");
+  if (typ(list) != t_VEC) pari_err(talker,"not a vector in rectdraw");
   n = lg(list)-1; if (!n) return;
-  if (n%3) err(talker,"incorrect number of components in rectdraw");
+  if (n%3) pari_err(talker,"incorrect number of components in rectdraw");
   n = n/3;
   w = (long*)gpmalloc(n*sizeof(long));
   x = (long*)gpmalloc(n*sizeof(long));
@@ -1900,12 +1900,12 @@ gendraw(GEN list, long ps, long flag)
   {
     GEN win = gel(list,3*i+1), x0 = gel(list,3*i+2), y0 = gel(list,3*i+3);
     long xi, yi;
-    if (typ(win)!=t_INT) err(typeer,"rectdraw");
+    if (typ(win)!=t_INT) pari_err(typeer,"rectdraw");
     if (flag) {
       xi = DTOL(gtodouble(x0)*(pari_plot.width - 1));
       yi = DTOL(gtodouble(y0)*(pari_plot.height - 1));
     } else {
-      if (typ(x0)!=t_INT || typ(y0)!= t_INT) err(typeer,"rectdraw");
+      if (typ(x0)!=t_INT || typ(y0)!= t_INT) pari_err(typeer,"rectdraw");
       xi = itos(x0);
       yi = itos(y0);
     }
@@ -2013,7 +2013,7 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
   }
   psfile = fopen(current_psfile, "a");
   if (!psfile)
-    err(openfiler,"postscript",current_psfile);
+    pari_err(openfiler,"postscript",current_psfile);
 
   /* Definitions taken from post terminal of Gnuplot. */
   fprintf(psfile,"%%!\n\

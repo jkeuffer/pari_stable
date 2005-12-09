@@ -47,7 +47,7 @@ static GEN
 _factpol(GEN x, long t/*unused*/, long hint) {(void)t; return factpol(x,hint);}
 
 static void
-suppressed(void) {err(talker,"this function has been suppressed");}
+suppressed(void) {pari_err(talker,"this function has been suppressed");}
 
 #define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
 #define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec
@@ -281,7 +281,7 @@ entree oldfonctions[]={
 {"idealtwoelt",2,(void *)ideal_two_elt,6,"GG"},
 {"idealtwoelt2",3,(void *)ideal_two_elt2,6,"GGG"},
 {"idealval",30,(void *)idealval,6,"lGGG"},
-{"idmat",11,(void *)idmat,8,"L"},
+{"idmat",11,(void *)matid,8,"L"},
 {"if",80,NULL,11,NULL},
 {"imag",1,(void *)gimag,2,"G"},
 {"image",1,(void *)image,8,"G"},

@@ -32,7 +32,7 @@ checktnf(GEN tnf)
   if (lg(tnf) != 8) return 1; /* S=0 */
 
   n = degpol(tnf[1]);
-  if (n <= 2) err(talker,"invalid polynomial in thue (need n>2)");
+  if (n <= 2) pari_err(talker,"invalid polynomial in thue (need n>2)");
   S = sturm(gel(tnf,1)); T = (n-S)>>1; R = S+T-1;
   (void)checkbnf(gel(tnf,2));
   if (typ(tnf[3]) != t_COL || lg(tnf[3]) != n+1) return 0;
@@ -118,7 +118,7 @@ get_emb(GEN x, GEN r, long prec)
   GEN e, y = cgetg(l, t_COL);
 
   tx = typ(x);
-  if (tx != t_INT && tx != t_POL) err(typeer,"get_emb");
+  if (tx != t_INT && tx != t_POL) pari_err(typeer,"get_emb");
   for (i=1; i<l; i++)
   {
     e = poleval(x, gel(r,i));
@@ -166,7 +166,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
   p1 = gadd(gmulsg(r, gmul2n(nia, e)), eps2);
-  if (gexpo(p1) < -2*r) err(precer,"thue");
+  if (gexpo(p1) < -2*r) pari_err(precer,"thue");
 
   p1 = gadd(gmulsg(r, gmul2n(nia,-e)), eps2);
   eps3 = gmul(gmulsg(2*r*r,nia), p1);
@@ -194,7 +194,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
   if (!bnf)
   {
-    if (!gcmp1(leading_term(P))) err(talker,"non-monic polynomial in thue");
+    if (!gcmp1(leading_term(P))) pari_err(talker,"non-monic polynomial in thue");
     bnf = bnfinit0(P,1,NULL,DEFAULTPREC);
     if (flag) (void)certifybuchall(bnf);
     else 
@@ -209,7 +209,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
     if (MatFU) break;
     prec_roots = (prec_roots << 1) - 2;
-    if (DEBUGLEVEL>1) err(warnprec, "inithue", prec_roots); 
+    if (DEBUGLEVEL>1) pari_err(warnprec, "inithue", prec_roots); 
   }
 
   dP = derivpol(P);
@@ -516,7 +516,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
           if (d % 2 == 1) add_sol(pS, negi(p), negi(q)); 
       }
     }
-    if (j == lg(t)) err(talker, "Not enough precision in thue"); 
+    if (j == lg(t)) pari_err(talker, "Not enough precision in thue"); 
   }
   return bndcf;
 }
@@ -562,7 +562,7 @@ SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
       if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), stoi(x)); 
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"SmallSols");
+      if(DEBUGMEM>1) pari_err(warnmem,"SmallSols");
       S = gerepilecopy(av, S);
       P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 
     }
@@ -590,8 +590,8 @@ thueinit(GEN pol, long flag, long prec)
   long k, s;
 
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
-  if (typ(pol)!=t_POL) err(notpoler,"thueinit");
-  if (degpol(pol) <= 2) err(talker,"invalid polynomial in thue (need deg>2)");
+  if (typ(pol)!=t_POL) pari_err(notpoler,"thueinit");
+  if (degpol(pol) <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
 
   s = sturm(pol);
   if (s)
@@ -616,14 +616,14 @@ thueinit(GEN pol, long flag, long prec)
     {
       if (( tnf = inithue(pol, bnf, flag, PREC) )) break;
       PREC = (PREC<<1)-2;
-      if (DEBUGLEVEL>1) err(warnprec,"thueinit",PREC);
+      if (DEBUGLEVEL>1) pari_err(warnprec,"thueinit",PREC);
       bnf = NULL; avma = av;
     }
   }
   else
   {
     GEN c0 = gen_1, ro = roots(pol, DEFAULTPREC);
-    if (!gisirreducible(pol)) err(redpoler,"thueinit");
+    if (!gisirreducible(pol)) pari_err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i(gel(ro,k)));
     c0 = ginv( mpabs(c0) );
     tnf = mkvec2(pol, c0);
@@ -708,7 +708,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  err(bugparier,"thue (totally rational case)");
+  pari_err(bugparier,"thue (totally rational case)");
   return NULL; /* not reached */
 }
 
@@ -762,7 +762,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     i2++; if (i2 == i1) i2++;
     if (i2 > BS->r) break;
   }
-  err(bugparier,"thue (totally rational case)");
+  pari_err(bugparier,"thue (totally rational case)");
   return NULL; /* not reached */
 }
 
@@ -781,7 +781,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     ne = bnfisintnorm(bnf, rhs);
     if (!gcmp1(gmael(tnf, 7, 7)) &&
         !gcmp1(gmael3(bnf, 8, 1, 1)) && !is_pm1(rhs))
-      err(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation"); 
+      pari_err(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation"); 
   }
   if (lg(ne)==1) return NULL;
 
@@ -853,7 +853,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     {
       if (( MatNE = Conj_LH(ne, &Hmu, ro, prec) )) break;
       prec = (prec<<1)-2;
-      if (DEBUGLEVEL>1) err(warnprec,"thue",prec);
+      if (DEBUGLEVEL>1) pari_err(warnprec,"thue",prec);
       ro = tnf_get_roots(P, prec, s, t);
     }
     BS.ro    = ro;
@@ -941,7 +941,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
 PRECPB:
   ne = gerepilecopy(av, ne);
   prec += 5 * (DEFAULTPREC-2);
-  if (DEBUGLEVEL>1) err(warnprec,"thue",prec);
+  if (DEBUGLEVEL>1) pari_err(warnprec,"thue",prec);
   tnf = inithue(P, bnf, 0, prec);
   return LargeSols(tnf, rhs, ne, pro, pS);
 }
@@ -956,8 +956,8 @@ thue(GEN tnf, GEN rhs, GEN ne)
   pari_sp av = avma;
   GEN P, ro, x3, S;
 
-  if (!checktnf(tnf)) err(talker,"not a tnf in thue");
-  if (typ(rhs) != t_INT) err(typeer,"thue");
+  if (!checktnf(tnf)) pari_err(talker,"not a tnf in thue");
+  if (typ(rhs) != t_INT) pari_err(typeer,"thue");
 
   P = gel(tnf,1);
   if (lg(tnf) == 8)
@@ -1214,7 +1214,7 @@ bnfisintnormabs(GEN bnf, GEN a)
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(a)!=t_INT)
-    err(talker,"expected an integer in bnfisintnorm");
+    pari_err(talker,"expected an integer in bnfisintnorm");
   if (!signe(a))  return mkvec(gen_0);
   if (gcmp1(a)) return mkvec(gen_1);
 

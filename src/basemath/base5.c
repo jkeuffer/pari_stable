@@ -38,7 +38,7 @@ GEN
 checkrnfeq(GEN x)
 {
   x = _checkrnfeq(x);
-  if (!x) err(talker,"please apply rnfequation(,,1)");
+  if (!x) pari_err(talker,"please apply rnfequation(,,1)");
   return x;
 }
 
@@ -68,7 +68,7 @@ eltreltoabs(GEN rnfeq, GEN x)
       case t_POLMOD: c = gel(c,2); /* fall through */
       case t_POL:    c = RgX_RgXQ_compo(c, alpha, polabs); break;
       default:
-        if (!is_const_t(tc)) err(talker, "incorrect data in eltreltoabs");
+        if (!is_const_t(tc)) pari_err(talker, "incorrect data in eltreltoabs");
     }
     s = RgX_rem(gadd(c, gmul(teta,s)), polabs);
   }
@@ -257,11 +257,11 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   long vpol;
   GEN rnf, delta, bas, D,d,f, B;
 
-  if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
+  if (typ(pol)!=t_POL) pari_err(notpoler,"rnfinitalg");
   nf = checknf(nf); vpol = varn(pol);
   pol = fix_relative_pol(nf,pol,0);
   if (vpol >= varn(nf[1]))
-    err(talker,"main variable must be of higher priority in rnfinitalg");
+    pari_err(talker,"main variable must be of higher priority in rnfinitalg");
 
   bas = rnfallbase(nf,pol, &D,&d, &f);
   B = matbasistoalg(nf,gel(bas,1));
@@ -398,7 +398,7 @@ rnfelementdown(GEN rnf,GEN x)
         lx = lg(z);
         if (lx == 2) { avma = av; return gen_0; }
         if (lx > 3)
-          err(talker,"element is not in the base field in rnfelementdown");
+          pari_err(talker,"element is not in the base field in rnfelementdown");
         z = gel(z,2);
       }
       return gerepilecopy(av, z);
@@ -446,7 +446,7 @@ rnfidealhermite(GEN rnf, GEN x)
     case t_POLMOD: case t_POL: case t_COL:
       return rnfprincipaltohermite(rnf,x);
   }
-  err(typeer,"rnfidealhermite");
+  pari_err(typeer,"rnfidealhermite");
   return NULL; /* not reached */
 }
 
@@ -521,8 +521,8 @@ rnfidealabstorel(GEN rnf, GEN x)
   checkrnf(rnf); nf = gel(rnf,10); invbas = gel(rnf,8);
   m = degpol(nf[1]);
   N = m * degpol(rnf[1]);
-  if (lg(x)-1 != N) err(typeer, "rnfidealabstorel");
-  if (typ(x) != t_VEC) err(typeer,"rnfidealabstorel");
+  if (lg(x)-1 != N) pari_err(typeer, "rnfidealabstorel");
+  if (typ(x) != t_VEC) pari_err(typeer,"rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
   I = cgetg(N+1,t_VEC); z = mkvec2(A,I); id = matid(m);
   for (j=1; j<=N; j++)

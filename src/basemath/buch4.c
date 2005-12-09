@@ -111,7 +111,7 @@ long
 zpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
-    err(typeer,"zpsoluble");
+    pari_err(typeer,"zpsoluble");
   return zpsol(pol,p,0,gen_1,gen_0);
 }
 
@@ -122,7 +122,7 @@ long
 qpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
-    err(typeer,"qpsoluble");
+    pari_err(typeer,"qpsoluble");
   if (zpsol(pol,p,0,gen_1,gen_0)) return 1;
   return zpsol(polrecip(pol),p,1,p,gen_0);
 }
@@ -282,7 +282,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
-  if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
+  if (typ(pol)!=t_POL) pari_err(notpoler,"qpsolublenf");
   checkprimeid(pr);
   nf = checknf(nf);
 
@@ -317,7 +317,7 @@ zpsolublenf(GEN nf,GEN pol,GEN pr)
   pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
-  if (typ(pol)!=t_POL) err(notpoler,"zpsolublenf");
+  if (typ(pol)!=t_POL) pari_err(notpoler,"zpsolublenf");
   checkprimeid(pr);
   nf = checknf(nf);
 
@@ -361,7 +361,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   long va, vb, rep;
   pari_sp av = avma;
 
-  if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbertp");
+  if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
   checkprimeid(pr); nf = checknf(nf);
   p = gel(pr,1);
 
@@ -383,7 +383,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
   if (typ(t) == t_POL)
   {
-    if (degpol(t)) err(bugparier,"nfhilbertp");
+    if (degpol(t)) pari_err(bugparier,"nfhilbertp");
     t = constant_term(t);
   }
   rep = kronecker(t, p);
@@ -402,7 +402,7 @@ nfhilbert(GEN nf,GEN a,GEN b)
   long r1, i;
   GEN S, al, bl, ro;
 
-  if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbert");
+  if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbert");
   nf = checknf(nf);
 
   if (typ(a) != t_POLMOD) a = basistoalg_i(nf, a);
@@ -458,7 +458,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN p1,nf,classgp,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
 
-  if (typ(S) != t_VEC) err(typeer,"bnfsunit");
+  if (typ(S) != t_VEC) pari_err(typeer,"bnfsunit");
   bnf = checkbnf(bnf); nf=gel(bnf,7);
   classgp=gmael(bnf,8,1);
   gen = gel(classgp,3);
@@ -511,7 +511,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     H = mathnfspec(U1,&perm,&dep,&B,&p1);
     lH = lg(H);
     lB = lg(B);
-    if (lg(dep) > 1 && lg(dep[1]) > 1) err(bugparier,"bnfsunit");
+    if (lg(dep) > 1 && lg(dep[1]) > 1) pari_err(bugparier,"bnfsunit");
    /*                   [ H B  ]            [ H^-1   - H^-1 B ]
     * perm o HNF(U1) =  [ 0 Id ], inverse = [  0         Id   ]
     * (permute the rows)
@@ -614,13 +614,13 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
 
   bnf = checkbnf(bnf);
   nf = checknf(bnf);
-  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) err(typeer,"bnfissunit");
+  if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
   switch (typ(x))
   {
     case t_INT: case t_FRAC: case t_POL: case t_COL:
       x = basistoalg(nf,x); break;
     case t_POLMOD: break;
-    default: err(typeer,"bnfissunit");
+    default: pari_err(typeer,"bnfissunit");
   }
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = isunit(bnf, x);
@@ -675,10 +675,10 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!nf) nf = checknf(bnf);
 
   relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
-  if (!gcmp1(leading_term(relpol))) err(impl,"non monic relative equation");
+  if (!gcmp1(leading_term(relpol))) pari_err(impl,"non monic relative equation");
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
-    err(talker,"main variable must be of higher priority in rnfisnorminit");
+    pari_err(talker,"main variable must be of higher priority in rnfisnorminit");
 
   rnfeq = NULL; /* no reltoabs needed */
   if (degpol(nf[1]) == 1)
@@ -705,7 +705,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
   if (!nfabs) nfabs = checknf(bnfabs);
 
-  if (galois < 0 || galois > 2) err(flagerr, "rnfisnorminit");
+  if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
@@ -753,12 +753,12 @@ rnfisnorm(GEN T, GEN x, long flag)
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
-    err(talker,"please apply rnfisnorminit first");
+    pari_err(talker,"please apply rnfisnorminit first");
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
   nf = checknf(bnf);
   x = basistoalg(nf,x);
-  if (typ(x) != t_POLMOD) err(typeer, "rnfisnorm");
+  if (typ(x) != t_POLMOD) pari_err(typeer, "rnfisnorm");
   drel = degpol(relpol);
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
@@ -772,7 +772,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   S1   = gel(T,6);
   S2   = gel(T,7);
   if (flag && !gcmp0(gel(T,8)))
-    err(warner,"useless flag in rnfisnorm: the extension is Galois");
+    pari_err(warner,"useless flag in rnfisnorm: the extension is Galois");
   if (flag > 0)
   {
     byteptr d = diffptr;
@@ -810,7 +810,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     if (typ(u) != t_POLMOD) u = mkpolmod(u, gel(theta,1));
     gel(sunitrel,i) = u;
     u = bnfissunit(bnf,bnfS, gnorm(u));
-    if (lg(u) == 1) err(bugparier,"rnfisnorm");
+    if (lg(u) == 1) pari_err(bugparier,"rnfisnorm");
     gel(u,itu) = lift_intern(gel(u,itu)); /* lift root of 1 part */
     gel(M,i) = u;
   }

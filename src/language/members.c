@@ -272,7 +272,7 @@ member_reg(GEN x) /* regulator */
     }
     member_err("reg");
   }
-  if (t == typ_BNR) err(impl,"ray regulator");
+  if (t == typ_BNR) pari_err(impl,"ray regulator");
   y = check_RES(y, "reg");
   return gel(y,2);
 }
@@ -293,7 +293,7 @@ member_fu(GEN x) /* fundamental units */
     }
     member_err("fu");
   }
-  if (t == typ_BNR) err(impl,"ray units");
+  if (t == typ_BNR) pari_err(impl,"ray units");
   return basistoalg(y, check_units(y,".fu"));
 }
 
@@ -328,7 +328,7 @@ member_tu(GEN x)
   }
   else
   {
-    if (t == typ_BNR) err(impl,"ray torsion units");
+    if (t == typ_BNR) pari_err(impl,"ray torsion units");
     x = gel(bnf,7);
     y = gel(bnf,8);
     if (typ(y) == t_VEC && lg(y) > 5) y = gel(y,4);
@@ -516,7 +516,7 @@ GEN
 member_omega(GEN x)
 {
   if (!is_bigell(x)) member_err("omega");
-  if (gcmp0(gel(x,19))) err(talker,"curve not defined over R");
+  if (gcmp0(gel(x,19))) pari_err(talker,"curve not defined over R");
   return mkvec2(gel(x,15), gel(x,16));
 }
 
@@ -524,7 +524,7 @@ GEN
 member_eta(GEN x)
 {
   if (!is_bigell(x)) member_err("eta");
-  if (gcmp0(gel(x,19))) err(talker,"curve not defined over R");
+  if (gcmp0(gel(x,19))) pari_err(talker,"curve not defined over R");
   return mkvec2(gel(x,17), gel(x,18));
 }
 
@@ -532,7 +532,7 @@ GEN
 member_area(GEN x)
 {
   if (!is_bigell(x)) member_err("area");
-  if (gcmp0(gel(x,19))) err(talker,"curve not defined over R");
+  if (gcmp0(gel(x,19))) pari_err(talker,"curve not defined over R");
   return gel(x,19);
 }
 
@@ -540,7 +540,7 @@ GEN
 member_tate(GEN x)
 {
   if (!is_bigell(x)) member_err("tate");
-  if (!gcmp0(gel(x,19))) err(talker,"curve not defined over a p-adic field");
+  if (!gcmp0(gel(x,19))) pari_err(talker,"curve not defined over a p-adic field");
   return mkvec3(gel(x,15), gel(x,16), gel(x,17));
 }
 
@@ -548,6 +548,6 @@ GEN
 member_w(GEN x)
 {
   if (!is_bigell(x)) member_err("w");
-  if (!gcmp0(gel(x,19))) err(talker,"curve not defined over a p-adic field");
+  if (!gcmp0(gel(x,19))) pari_err(talker,"curve not defined over a p-adic field");
   return gel(x,18);
 }

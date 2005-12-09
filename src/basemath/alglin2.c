@@ -37,7 +37,7 @@ charpoly0(GEN x, long v, long flag)
     case 1: return caract(x,v);
     case 2: return carhess(x,v);
   }
-  err(flagerr,"charpoly"); return NULL; /* not reached */
+  pari_err(flagerr,"charpoly"); return NULL; /* not reached */
 }
 
 /* (v - x)^d */
@@ -106,7 +106,7 @@ easychar(GEN x, long v, GEN *py)
       return p1;
 
     case t_COMPLEX: case t_QUAD:
-      if (py) err(typeer,"easychar");
+      if (py) pari_err(typeer,"easychar");
       p1 = cgetg(5,t_POL);
       p1[1] = evalsigne(1) | evalvarn(v);
       gel(p1,2) = gnorm(x); av = avma;
@@ -114,7 +114,7 @@ easychar(GEN x, long v, GEN *py)
       gel(p1,4) = gen_1; return p1;
 
     case t_POLMOD:
-      if (py) err(typeer,"easychar");
+      if (py) pari_err(typeer,"easychar");
       return caract2(gel(x,1), gel(x,2), v);
 
     case t_MAT:
@@ -127,7 +127,7 @@ easychar(GEN x, long v, GEN *py)
       if (lg(x[1]) != lx) break;
       return NULL;
   }
-  err(mattype1,"easychar");
+  pari_err(mattype1,"easychar");
   return NULL; /* not reached */
 }
 
@@ -224,7 +224,7 @@ caradj(GEN x, long v, GEN *py)
   for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
   gel(p,2) = gerepileupto(av, forcecopy(gneg(t)));
   i = gvar2(p);
-  if (i == v) err(talker,"incorrect variable in caradj");
+  if (i == v) pari_err(talker,"incorrect variable in caradj");
   if (i < v) p = gerepileupto(av0, poleval(p, pol_x[v]));
   if (py) *py = (l & 1)? stackify(gneg(y)): forcecopy(y);
   gunclone(y); return p;
@@ -272,7 +272,7 @@ minpoly(GEN x, long v)
     return RgXQ_minpoly_naive(gel(x,2),gel(x,1));
   if (typ(x)==t_MAT)
     return gerepilecopy(ltop,gel(matfrobenius(x,1),1));
-  err(typeer,"minpoly"); return NULL; /* not reached */
+  pari_err(typeer,"minpoly"); return NULL; /* not reached */
 }
 
 /*******************************************************************/
@@ -287,9 +287,9 @@ hess(GEN x)
   long lx = lg(x), m, i, j;
   GEN p, p1, p2;
 
-  if (typ(x) != t_MAT) err(mattype1,"hess");
+  if (typ(x) != t_MAT) pari_err(mattype1,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
-  if (lg(x[1]) != lx) err(mattype1,"hess");
+  if (lg(x[1]) != lx) pari_err(mattype1,"hess");
   x = shallowcopy(x); lim = stack_lim(av,1);
 
   for (m=2; m<lx-1; m++)
@@ -314,7 +314,7 @@ hess(GEN x)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"hess, m = %ld", m);
+        if (DEBUGMEM>1) pari_err(warnmem,"hess, m = %ld", m);
         x = gerepilecopy(av2, x);
       }
       break;
@@ -398,7 +398,7 @@ gnorm(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = gnorm(gel(x,i));
       return y;
   }
-  err(typeer,"gnorm");
+  pari_err(typeer,"gnorm");
   return NULL; /* not reached */
 }
 
@@ -418,7 +418,7 @@ gnorml2(GEN x)
     y = gadd(y, gnorml2(gel(x,i)));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"gnorml2");
+      if (DEBUGMEM>1) pari_err(warnmem,"gnorml2");
       y = gerepileupto(av, y);
     }
   }
@@ -455,7 +455,7 @@ gnorml1(GEN x,long prec)
       for (i=1; i<lx; i++) s = gadd(s, gabs(gel(x,i),prec));
       break;
 
-    default: err(typeer,"gnorml1");
+    default: pari_err(typeer,"gnorml1");
       return NULL; /* not reached */
   }
   return gerepileupto(av, s);
@@ -493,7 +493,7 @@ QuickNormL1(GEN x,long prec)
       for (i=1; i<lx; i++) s=gadd(s,QuickNormL1(gel(x,i),prec));
       return gerepileupto(av, s);
   }
-  err(typeer,"QuickNormL1");
+  pari_err(typeer,"QuickNormL1");
   return NULL; /* not reached */
 }
 
@@ -574,7 +574,7 @@ gconj(GEN x)
       }
     }
     default:
-      err(typeer,"gconj");
+      pari_err(typeer,"gconj");
       return NULL; /* not reached */
   }
   return z;
@@ -601,7 +601,7 @@ conjvec(GEN x,long prec)
       if (lx == 1) break;
       s = lg(z[1]);
       for (i=2; i<lx; i++)
-        if (lg(z[i])!=s) err(talker,"incompatible field degrees in conjvec");
+        if (lg(z[i])!=s) pari_err(talker,"incompatible field degrees in conjvec");
       break;
 
     case t_POLMOD:
@@ -614,7 +614,7 @@ conjvec(GEN x,long prec)
 	if (tx==t_INTMOD) p = gmael(y,i,1);
 	else
 	  if (!is_rational_t(tx))
-            err(talker,"not a rational polynomial in conjvec");
+            pari_err(talker,"not a rational polynomial in conjvec");
       }
       if (!p)
       {
@@ -632,7 +632,7 @@ conjvec(GEN x,long prec)
       break;
 
     default:
-      err(typeer,"conjvec");
+      pari_err(typeer,"conjvec");
       return NULL; /* not reached */
   }
   return z;
@@ -650,8 +650,8 @@ assmat(GEN x)
   long lx,i,j;
   GEN y,p1,p2;
 
-  if (typ(x)!=t_POL) err(notpoler,"assmat");
-  if (gcmp0(x)) err(zeropoler,"assmat");
+  if (typ(x)!=t_POL) pari_err(notpoler,"assmat");
+  if (gcmp0(x)) pari_err(zeropoler,"assmat");
 
   lx=lg(x)-2; y=cgetg(lx,t_MAT);
   if (lx == 1) return y;
@@ -720,10 +720,10 @@ gtrace(GEN x)
     case t_MAT:
       lx = lg(x); if (lx == 1) return gen_0;
       /*now lx >= 2*/
-      if (lx != lg(x[1])) err(mattype1,"gtrace");
+      if (lx != lg(x[1])) pari_err(mattype1,"gtrace");
       return mattrace(x);
   }
-  err(typeer,"gtrace");
+  pari_err(typeer,"gtrace");
   return NULL; /* not reached */
 }
 
@@ -738,9 +738,9 @@ sqred1intern(GEN a)
   GEN b,p;
   long i,j,k, n = lg(a);
 
-  if (typ(a)!=t_MAT) err(typeer,"sqred1");
+  if (typ(a)!=t_MAT) pari_err(typeer,"sqred1");
   if (n == 1) return cgetg(1, t_MAT);
-  if (lg(a[1])!=n) err(mattype1,"sqred1");
+  if (lg(a[1])!=n) pari_err(mattype1,"sqred1");
   b=cgetg(n,t_MAT);
   for (j=1; j<n; j++)
   {
@@ -763,7 +763,7 @@ sqred1intern(GEN a)
       gcoeff(b,k,j) = gmul(gcoeff(b,k,j), p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"sqred1");
+      if (DEBUGMEM>1) pari_err(warnmem,"sqred1");
       b=gerepilecopy(av,b);
     }
   }
@@ -774,7 +774,7 @@ GEN
 sqred1(GEN a)
 {
   GEN x = sqred1intern(a);
-  if (!x) err(talker,"not a positive definite matrix in sqred1");
+  if (!x) pari_err(talker,"not a positive definite matrix in sqred1");
   return x;
 }
 
@@ -785,8 +785,8 @@ sqred3(GEN a)
   long i,j,k,l, n = lg(a);
   GEN p1,b;
 
-  if (typ(a)!=t_MAT) err(typeer,"sqred3");
-  if (lg(a[1])!=n) err(mattype1,"sqred3");
+  if (typ(a)!=t_MAT) pari_err(typeer,"sqred3");
+  if (lg(a[1])!=n) pari_err(mattype1,"sqred3");
   av=avma; b=cgetg(n,t_MAT);
   for (j=1; j<n; j++)
   {
@@ -808,7 +808,7 @@ sqred3(GEN a)
     gcoeff(b,i,k) = gsub(gcoeff(a,i,i),p1);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"sqred3");
+      if (DEBUGMEM>1) pari_err(warnmem,"sqred3");
       b=gerepilecopy(av,b);
     }
   }
@@ -825,8 +825,8 @@ sqred2(GEN a, long signature)
   pari_sp av, av1, lim;
   long n, i, j, k, l, sp, sn, t;
 
-  if (typ(a) != t_MAT) err(typeer,"sqred2");
-  n = lg(a); if (n > 1 && lg(a[1]) != n) err(mattype1,"sqred2");
+  if (typ(a) != t_MAT) pari_err(typeer,"sqred2");
+  n = lg(a); if (n > 1 && lg(a[1]) != n) pari_err(mattype1,"sqred2");
   n--;
 
   av = avma;
@@ -883,7 +883,7 @@ sqred2(GEN a, long signature)
           gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
 	  if (low_stack(lim, stack_lim(av1,1)))
 	  {
-	    if(DEBUGMEM>1) err(warnmem,"sqred2");
+	    if(DEBUGMEM>1) pari_err(warnmem,"sqred2");
 	    a = gerepilecopy(av1, a);
 	  }
 	  break;
@@ -919,12 +919,12 @@ jacobi(GEN a, long prec)
   long de, e, e1, e2, i, j, p, q, l = lg(a);
   GEN c, s, t, u, ja, L, r, unr, x, y;
 
-  if (typ(a) != t_MAT) err(mattype1,"jacobi");
+  if (typ(a) != t_MAT) pari_err(mattype1,"jacobi");
   ja = cgetg(3,t_VEC);
   L = cgetg(l,t_COL); gel(ja,1) = L;
   r = cgetg(l,t_MAT); gel(ja,2) = r;
   if (l == 1) return ja;
-  if (lg(a[1]) != l) err(mattype1,"jacobi");
+  if (lg(a[1]) != l) pari_err(mattype1,"jacobi");
 
   e1 = HIGHEXPOBIT-1;
   for (j=1; j<l; j++)
@@ -1000,11 +1000,11 @@ jacobi(GEN a, long prec)
 GEN
 matrixqz0(GEN x,GEN p)
 {
-  if (typ(p)!=t_INT) err(typeer,"matrixqz0");
+  if (typ(p)!=t_INT) pari_err(typeer,"matrixqz0");
   if (signe(p)>=0) return matrixqz(x,p);
   if (equaliu(p,1)) return matrixqz2(x);
   if (equaliu(p,2)) return matrixqz3(x);
-  err(flagerr,"matrixqz"); return NULL; /* not reached */
+  pari_err(flagerr,"matrixqz"); return NULL; /* not reached */
 }
 
 static int
@@ -1023,14 +1023,14 @@ matrixqz(GEN x, GEN p)
   long i,j,j1,m,n,nfact;
   GEN p1,p2,p3;
 
-  if (typ(x) != t_MAT) err(typeer,"matrixqz");
+  if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   n = lg(x)-1; if (!n) return gcopy(x);
   m = lg(x[1])-1;
-  if (n > m) err(talker,"more rows than columns in matrixqz");
+  if (n > m) pari_err(talker,"more rows than columns in matrixqz");
   if (n==m)
   {
     p1 = det(x);
-    if (gcmp0(p1)) err(talker,"matrix of non-maximal rank in matrixqz");
+    if (gcmp0(p1)) pari_err(talker,"matrix of non-maximal rank in matrixqz");
     avma = av; return matid(n);
   }
   /* m > n */
@@ -1038,7 +1038,7 @@ matrixqz(GEN x, GEN p)
   for (j=1; j<=n; j++)
   {
     gel(x,j) = primpart(gel(p1,j));
-    if (!ZV_isin(gel(x,j))) err(talker, "not a rational matrix in matrixqz");
+    if (!ZV_isin(gel(x,j))) pari_err(talker, "not a rational matrix in matrixqz");
   }
   /* x integral */
 
@@ -1047,7 +1047,7 @@ matrixqz(GEN x, GEN p)
     p1 = gtrans(x); setlg(p1,n+1);
     p2 = det(p1); p1[n] = p1[n+1]; p2 = ggcd(p2,det(p1));
     if (!signe(p2))
-      err(impl,"matrixqz when the first 2 dets are zero");
+      pari_err(impl,"matrixqz when the first 2 dets are zero");
     if (gcmp1(p2)) return gerepilecopy(av,x);
 
     p1 = (GEN)factor(p2)[1];
@@ -1071,7 +1071,7 @@ matrixqz(GEN x, GEN p)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if (DEBUGMEM>1) err(warnmem,"matrixqz");
+	if (DEBUGMEM>1) pari_err(warnmem,"matrixqz");
 	x = gerepilecopy(av1,x);
       }
     }
@@ -1159,7 +1159,7 @@ matrixqz_aux(GEN A)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"matrixqz_aux");
+      if(DEBUGMEM>1) pari_err(warnmem,"matrixqz_aux");
       A = gerepilecopy(av,A);
     }
   }
@@ -1170,7 +1170,7 @@ GEN
 matrixqz2(GEN x)
 {
   pari_sp av = avma;
-  if (typ(x)!=t_MAT) err(typeer,"matrixqz2");
+  if (typ(x)!=t_MAT) pari_err(typeer,"matrixqz2");
   x = shallowcopy(x);
   return gerepileupto(av, matrixqz_aux(x));
 }
@@ -1182,7 +1182,7 @@ matrixqz3(GEN x)
   long j,j1,k,m,n;
   GEN c;
 
-  if (typ(x)!=t_MAT) err(typeer,"matrixqz3");
+  if (typ(x)!=t_MAT) pari_err(typeer,"matrixqz3");
   n = lg(x); if (n==1) return gcopy(x);
   m = lg(x[1]); x = shallowcopy(x);
   c = cgetg(n,t_VECSMALL);
@@ -1202,7 +1202,7 @@ matrixqz3(GEN x)
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"matrixqz3");
+      if(DEBUGMEM>1) pari_err(warnmem,"matrixqz3");
       x = gerepilecopy(av1,x);
     }
   }
@@ -1216,7 +1216,7 @@ intersect(GEN x, GEN y)
   long j, lx = lg(x);
   GEN z;
 
-  if (typ(x)!=t_MAT || typ(y)!=t_MAT) err(typeer,"intersect");
+  if (typ(x)!=t_MAT || typ(y)!=t_MAT) pari_err(typeer,"intersect");
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
 
   av=avma; z=ker(shallowconcat(x,y));
@@ -1256,7 +1256,7 @@ mathnf0(GEN x, long flag)
     case 1: return hnfall(x);
     case 3: return hnfperm(x);
     case 4: return hnflll(x);
-    default: err(flagerr,"mathnf");
+    default: pari_err(flagerr,"mathnf");
   }
   return NULL; /* not reached */
 }
@@ -1264,7 +1264,7 @@ mathnf0(GEN x, long flag)
 static GEN
 init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
 {
-  if (typ(x) != t_MAT) err(typeer,"mathnf");
+  if (typ(x) != t_MAT) pari_err(typeer,"mathnf");
   *co=lg(x); if (*co==1) return NULL; /* empty matrix */
   *li=lg(x[1]); *denx=denom(x); *av=avma;
 
@@ -1481,7 +1481,7 @@ hnf_special(GEN x, long remove)
   long s,li,co,i,j,k,def,ldef;
   GEN p1,u,v,d,denx,a,b, x2,res;
 
-  if (typ(x) != t_VEC || lg(x) !=3) err(typeer,"hnf_special");
+  if (typ(x) != t_VEC || lg(x) !=3) pari_err(typeer,"hnf_special");
   res = cgetg(3,t_VEC);
   av0 = avma;
   x2 = gel(x,2);
@@ -1491,7 +1491,7 @@ hnf_special(GEN x, long remove)
 
   lim = stack_lim(av,1);
   def=co-1; ldef=(li>co)? li-co: 0;
-  if (lg(x2) != co) err(talker,"incompatible matrices in hnf_special");
+  if (lg(x2) != co) pari_err(talker,"incompatible matrices in hnf_special");
   x2 = shallowcopy(x2);
   for (i=li-1; i>ldef; i--)
   {
@@ -1512,7 +1512,7 @@ hnf_special(GEN x, long remove)
       if (low_stack(lim, stack_lim(av,1)))
       {
         GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
-        if (DEBUGMEM>1) err(warnmem,"hnf_special[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_err(warnmem,"hnf_special[1]. i=%ld",i);
         gerepilemany(av,gptr,2);
       }
     }
@@ -1537,7 +1537,7 @@ hnf_special(GEN x, long remove)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
-      if (DEBUGMEM>1) err(warnmem,"hnf_special[2]. i=%ld",i);
+      if (DEBUGMEM>1) pari_err(warnmem,"hnf_special[2]. i=%ld",i);
       gerepilemany(av,gptr,2);
     }
   }
@@ -1655,7 +1655,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"hnffinal, i = %ld",i);
+      if(DEBUGMEM>1) pari_err(warnmem,"hnffinal, i = %ld",i);
       gerepileall(av, 2, &Cnew, &B);
     }
   }
@@ -1882,7 +1882,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     lig--; col--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[1]");
+      if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[1]");
       if (T) T = gerepilecopy(av, T); else avma = av;
     }
   }
@@ -1924,7 +1924,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     lig--; col--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"hnfspec[2]");
+      if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[2]");
       if (T) T = gerepilecopy(av,T); else avma = av;
     }
   }
@@ -1966,7 +1966,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       if (T) elt_col(gel(T,j), gel(T,k), negi(v));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
+        if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
         for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
         gerepileall(av, T? 2: 1, &matb, &T);
         Bk = gel(matb,k);
@@ -2115,7 +2115,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 
 TOOLARGE:
   if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
-    err(impl,"mathnfspec with large entries");
+    pari_err(impl,"mathnfspec with large entries");
   x = hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {
@@ -2342,7 +2342,7 @@ hnfmerge_get_1(GEN A, GEN B)
     }
     if (signe(t) && is_pm1(t)) break;
   }
-  if (j >= l) err(talker, "non coprime ideals in hnfmerge");
+  if (j >= l) pari_err(talker, "non coprime ideals in hnfmerge");
   return gerepileupto(av, gmul(A,gel(U,1)));
 
 }
@@ -2374,7 +2374,7 @@ hnf0(GEN A, int remove)
 
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"hnf[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_err(warnmem,"hnf[1]. i=%ld",i);
         A = gerepilecopy(av, A);
       }
     }
@@ -2389,7 +2389,7 @@ hnf0(GEN A, int remove)
       if (ldef) ldef--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"hnf[2]. i=%ld",i);
+      if (DEBUGMEM>1) pari_err(warnmem,"hnf[2]. i=%ld",i);
       A = gerepilecopy(av, A);
     }
   }
@@ -2447,9 +2447,9 @@ allhnfmod(GEN x, GEN dm, int flag)
   long li, co, i, j, k, def, ldef, ldm;
   GEN a, b, p1, p2, u, v;
 
-  if (typ(dm)!=t_INT) err(typeer,"allhnfmod");
+  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
-  if (typ(x)!=t_MAT) err(typeer,"allhnfmod");
+  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]);
@@ -2460,7 +2460,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (li > co)
   {
     ldef = li - co;
-    if (!modid) err(talker,"nb lines > nb columns in hnfmod");
+    if (!modid) pari_err(talker,"nb lines > nb columns in hnfmod");
   }
   /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
   ldm = lgefint(dm);
@@ -2485,7 +2485,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"allhnfmod[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[1]. i=%ld",i);
 	x = gerepilecopy(av, x);
       }
     }
@@ -2531,7 +2531,7 @@ allhnfmod(GEN x, GEN dm, int flag)
         FpV_red_part_ip(gel(x,j),  dm, j-1);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
+          if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[2]. i=%ld", i);
           x = gerepilecopy(av, x);
         }
       }
@@ -2572,7 +2572,7 @@ allhnfmod(GEN x, GEN dm, int flag)
         if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
+        if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[2]. i=%ld", i);
         gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
       }
     }
@@ -2718,7 +2718,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   long do_swap,i,n,k;
   GEN z,B, **lambda, *D;
 
-  if (typ(A) != t_MAT) err(typeer,"hnflll");
+  if (typ(A) != t_MAT) pari_err(typeer,"hnflll");
   n = lg(A);
   A = ZM_copy(fix_rows(A));
   B = ptB? matid(n-1): NULL;
@@ -2756,7 +2756,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
         if (low_stack(lim, stack_lim(av,3)))
         {
           GEN b = (GEN)(D-1);
-          if (DEBUGMEM) err(warnmem,"hnflll (reducing), i = %ld",i);
+          if (DEBUGMEM) pari_err(warnmem,"hnflll (reducing), i = %ld",i);
           gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
           D = (GEN*)(b+1);
         }
@@ -2766,7 +2766,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     if (low_stack(lim, stack_lim(av,3)))
     {
       GEN b = (GEN)(D-1);
-      if (DEBUGMEM) err(warnmem,"hnflll, k = %ld / %ld",k,n-1);
+      if (DEBUGMEM) pari_err(warnmem,"hnflll, k = %ld / %ld",k,n-1);
       gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
       D = (GEN*)(b+1);
     }
@@ -2831,7 +2831,7 @@ extendedgcd(GEN A)
 
   n = lg(A);
   for (i=1; i<n; i++)
-    if (typ(A[i]) != t_INT) err(typeer,"extendedgcd");
+    if (typ(A[i]) != t_INT) pari_err(typeer,"extendedgcd");
   A = shallowcopy(A);
   B = matid(n-1);
   D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
@@ -2878,7 +2878,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
   pari_sp av = avma, av1, lim;
   long r, t, i, j, j1, k, m, n;
 
-  if (typ(A) != t_MAT) err(typeer,"hnfperm");
+  if (typ(A) != t_MAT) pari_err(typeer,"hnfperm");
   n = lg(A)-1;
   if (!n)
   {
@@ -2951,7 +2951,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"hnfperm");
+      if (DEBUGMEM>1) pari_err(warnmem,"hnfperm");
       gerepileall(av1, U? 2: 1, &A, &U);
     }
   }
@@ -3008,7 +3008,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
   pari_sp av = avma, av1, lim;
   long m,n,r,i,j,k,li;
 
-  if (typ(A)!=t_MAT) err(typeer,"hnfall");
+  if (typ(A)!=t_MAT) pari_err(typeer,"hnfall");
   n=lg(A)-1;
   if (!n)
   {
@@ -3036,7 +3036,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
         ZM_reduce(A,B, i,k);
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if (DEBUGMEM>1) err(warnmem,"hnfall[1], li = %ld", li);
+          if (DEBUGMEM>1) pari_err(warnmem,"hnfall[1], li = %ld", li);
           gerepileall(av1, B? 2: 1, &A, &B);
         }	
       }
@@ -3061,7 +3061,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     ZM_reduce(A,B, li,r);
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"hnfall[2], li = %ld", li);
+      if (DEBUGMEM>1) pari_err(warnmem,"hnfall[2], li = %ld", li);
       gerepileall(av1, B? 2: 1, &A, &B);
     }	
   }
@@ -3078,7 +3078,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       ZM_reduce(A,B, i,k);
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"hnfall[3], j = %ld", j);
+        if (DEBUGMEM>1) pari_err(warnmem,"hnfall[3], j = %ld", j);
         gerepileall(av1, B? 2: 1, &A, &B);
       }	
     }
@@ -3200,7 +3200,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   long i, j, k, m0, m, n0, n;
   GEN p1, u, v, U, V, V0, mdet, ys, perm = NULL;
 
-  if (typ(x)!=t_MAT) err(typeer,"smithall");
+  if (typ(x)!=t_MAT) pari_err(typeer,"smithall");
   n0 = n = lg(x)-1;
   if (!n) {
     if (ptU) *ptU = cgetg(1,t_MAT);
@@ -3212,7 +3212,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   for (j=1; j<=n; j++)
     for (i=1; i<=m; i++)
       if (typ(gcoeff(x,i,j)) != t_INT)
-        err(talker,"non integral matrix in smithall");
+        pari_err(talker,"non integral matrix in smithall");
 
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
@@ -3304,7 +3304,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         ZV_elem(b, a, x,V, j,i);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) err(warnmem,"[1]: smithall i = %ld", i);
+          if (DEBUGMEM>1) pari_err(warnmem,"[1]: smithall i = %ld", i);
           snf_pile(av, &x,&U,&V);
         }
       }
@@ -3327,7 +3327,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) err(warnmem,"[2]: smithall, i = %ld", i);
+          if (DEBUGMEM>1) pari_err(warnmem,"[2]: smithall, i = %ld", i);
           snf_pile(av, &x,&U,&V);
         }
         c = 1;
@@ -3351,7 +3351,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"[3]: smithall");
+        if (DEBUGMEM>1) pari_err(warnmem,"[3]: smithall");
         snf_pile(av, &x,&U,&V);
       }
     }
@@ -3406,7 +3406,7 @@ smithclean(GEN z)
   long i,j,l,c;
   GEN u,v,y,d,p1;
 
-  if (typ(z) != t_VEC) err(typeer,"smithclean");
+  if (typ(z) != t_VEC) pari_err(typeer,"smithclean");
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
   u=gel(z,1);
   if (l != 4 || typ(u) != t_MAT)
@@ -3476,10 +3476,10 @@ gsmithall(GEN x,long all)
   long i, j, k, n;
   GEN z, u, v, U, V;
 
-  if (typ(x)!=t_MAT) err(typeer,"gsmithall");
+  if (typ(x)!=t_MAT) pari_err(typeer,"gsmithall");
   n = lg(x)-1;
   if (!n) return trivsmith(all);
-  if (lg(x[1]) != n+1) err(mattype1,"gsmithall");
+  if (lg(x[1]) != n+1) pari_err(mattype1,"gsmithall");
   av = avma; lim = stack_lim(av,1);
   x = shallowcopy(x);
   if (all) { U = matid(n); V = matid(n); }
@@ -3543,7 +3543,7 @@ gsmithall(GEN x,long all)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) err(warnmem,"gsmithall");
+	if (DEBUGMEM>1) pari_err(warnmem,"gsmithall");
         gerepileall(av, all? 3: 1, &x, &U, &V);
       }
     }
@@ -3575,7 +3575,7 @@ GEN
 matsnf0(GEN x,long flag)
 {
   pari_sp av = avma;
-  if (flag > 7) err(flagerr,"matsnf");
+  if (flag > 7) pari_err(flagerr,"matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
   if (flag & 2) x = flag&1 ? gsmith2(x): gsmith(x);
   else          x = flag&1 ?  smith2(x):  smith(x);
@@ -3648,7 +3648,7 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    if (k+d-1 > n) err(talker, "accuracy lost in matfrobenius");
+    if (k+d-1 > n) pari_err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
       gcoeff(M,k+1,k) = gen_1;
     for (j=0; j<d; j++)
@@ -3672,7 +3672,7 @@ build_frobeniusbc(GEN V, long n)
     GEN  P = gel(V,i);
     long d = degpol(P);
     if (d <= 0) continue;
-    if (l+d-2 > n) err(talker, "accuracy lost in matfrobenius");
+    if (l+d-2 > n) pari_err(talker, "accuracy lost in matfrobenius");
     gcoeff(M,k,i) = gen_1;
     for (j=1; j<d; j++,k++,l++)
     {
@@ -3706,11 +3706,11 @@ matfrobenius(GEN M, long flag)
   pari_sp ltop=avma;
   long n;
   GEN D, A, N, B, R, M_x;
-  if (typ(M)!=t_MAT) err(typeer,"matfrobenius");
+  if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius");
   if (gvar(M)==0)
-    err(talker,"matrix coefficients must no use variable x");
+    pari_err(talker,"matrix coefficients must no use variable x");
   n = lg(M)-1;
-  if (n && lg(M[1])!=n+1) err(mattype1,"matfrobenius");
+  if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");
   M_x = gaddmat(monomial(gen_m1, 1, 0), M);
   if (flag<2)
   {
@@ -3718,7 +3718,7 @@ matfrobenius(GEN M, long flag)
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
-  if (flag>2) err(flagerr,"matfrobenius");
+  if (flag>2) pari_err(flagerr,"matfrobenius");
   A = matsnf0(M_x,3);
   D = smithclean(mattodiagonal_i(gel(A,3)));
   N = Frobeniusform(D, n);

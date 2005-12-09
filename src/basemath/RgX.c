@@ -108,7 +108,7 @@ RgX_RgXQ_compo(GEN f, GEN x, GEN T)
     y = grem(gadd(gmul(y,x), gel(f,l)), T);
     if (low_stack(limit,stack_lim(av,1)))
     {
-      if (DEBUGMEM > 1) err(warnmem, "RgX_RgXQ_compo");
+      if (DEBUGMEM > 1) pari_err(warnmem, "RgX_RgXQ_compo");
       y = gerepileupto(av, y);
     }
   }
@@ -122,7 +122,7 @@ RgX_powers(GEN a, GEN T, long l)
   long i;
   GEN v;
 
-  if (typ(a) != t_POL) err(typeer,"RgX_powers");
+  if (typ(a) != t_POL) pari_err(typeer,"RgX_powers");
   l += 2;
   v = cgetg(l,t_VEC);
   gel(v,1) = gen_1; if (l == 2) return v;
@@ -683,13 +683,13 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
 
   dy = degpol(y);
   y_lead = gel(y,dy+2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
-    err(warner,"normalizing a polynomial with 0 leading term");
+    pari_err(warner,"normalizing a polynomial with 0 leading term");
     for (dy--; dy>=0; dy--)
     {
       y_lead = gel(y,dy+2);
@@ -808,7 +808,7 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   vx = varn(x);
   dx = degpol(x);
   dy = degpol(y);

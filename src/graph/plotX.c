@@ -145,9 +145,9 @@ exiterr(char *str)
 #define MAX_BUF 256
 
 static int
-Xerror(Display *d, XErrorEvent *err) {
+Xerror(Display *d, XErrorEvent *pari_err) {
   char buf[MAX_BUF];
-  XGetErrorText(d,err->error_code,buf,MAX_BUF);
+  XGetErrorText(d,pari_err->error_code,buf,MAX_BUF);
   exiterr(buf); return 0;
 }
 
@@ -276,7 +276,7 @@ PARI_get_plot(long fatal)
   if (!(display = XOpenDisplay(NULL)))
   {
     if (fatal) exiterr("no X server");
-    err(talker, "no X server");
+    pari_err(talker, "no X server");
   }
   screen = DefaultScreen(display);
   pari_plot.width  = DisplayWidth(display, screen) - 40;

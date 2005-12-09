@@ -65,14 +65,14 @@ idealtyp(GEN *ideal, GEN *arch)
       }
       break;
 
-    case t_VEC: if (lg(x)!=6) err(talker, "incorrect ideal in idealtyp");
+    case t_VEC: if (lg(x)!=6) pari_err(talker, "incorrect ideal in idealtyp");
       t = id_PRIME; break;
 
     case t_POL: case t_POLMOD: case t_COL:
     case t_INT: case t_FRAC:
       t = id_PRINCIPAL; break;
     default:
-      err(talker, "incorrect ideal in idealtyp");
+      pari_err(talker, "incorrect ideal in idealtyp");
       return 0; /*not reached*/
   }
   *ideal = x; return t;
@@ -148,7 +148,7 @@ idealhermite_aux(GEN nf, GEN x)
     x = eltmul_get_table(nf, x);
   } else {
     long N = degpol(nf[1]), nx = lg(x)-1;
-    if (lg(x[1]) != N+1) err(typeer,"idealhermite");
+    if (lg(x[1]) != N+1) pari_err(typeer,"idealhermite");
 
     if (nx == N && RgM_ishnf(x)) return x;
     x = Q_primitive_part(x, &cx);
@@ -187,11 +187,11 @@ principalideal(GEN nf, GEN x)
       break;
 
     case t_MAT:
-      if (lg(x)!=2) err(typeer,"principalideal");
+      if (lg(x)!=2) pari_err(typeer,"principalideal");
       x = gel(x,1);
     case t_COL:
       if (lg(x)-1==degpol(nf[1])) { x = gcopy(x); break; }
-    default: err(typeer,"principalideal");
+    default: pari_err(typeer,"principalideal");
   }
   gel(z,1) = x; return z;
 }
@@ -199,7 +199,7 @@ principalideal(GEN nf, GEN x)
 static GEN
 mylog(GEN x, long prec)
 {
-  if (gcmp0(x)) err(precer,"get_arch");
+  if (gcmp0(x)) pari_err(precer,"get_arch");
   return glog(x,prec);
 }
 
@@ -295,7 +295,7 @@ scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
   long i, s;
 
   s = gsigne(u);
-  if (!s) err(talker,"0 in get_arch_real");
+  if (!s) pari_err(talker,"0 in get_arch_real");
   x = cgetg(RU+1, t_COL);
   for (i=1; i<=RU; i++) gel(x,i) = u;
 
@@ -394,7 +394,7 @@ idealdiv0(GEN nf, GEN x, GEN y, long flag)
   {
     case 0: return idealdiv(nf,x,y);
     case 1: return idealdivexact(nf,x,y);
-    default: err(flagerr,"idealdiv");
+    default: pari_err(flagerr,"idealdiv");
   }
   return NULL; /* not reached */
 }
@@ -508,7 +508,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   long N = degpol(nf[1]);
   pari_sp av, tetpil;
 
-  if (lg(x[1]) != N+1) err(typeer,"ideal_two_elt");
+  if (lg(x[1]) != N+1) pari_err(typeer,"ideal_two_elt");
   if (N == 2) return mkvec2copy(gcoeff(x,1,1), gel(x,2));
 
   y = cgetg(3,t_VEC); av = avma;
@@ -591,7 +591,7 @@ ideal_two_elt(GEN nf, GEN x)
           gel(z,2) = gcopy(x); return z;
         }
     }
-  err(typeer,"ideal_two_elt");
+  pari_err(typeer,"ideal_two_elt");
   return NULL; /* not reached */
 }
 
@@ -671,7 +671,7 @@ idealfactor(GEN nf, GEN x)
     if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
     X = x;
   }
-  if (lg(X)==1) err(talker,"zero ideal in idealfactor");
+  if (lg(X)==1) pari_err(talker,"zero ideal in idealfactor");
   if (!cx)
   {
     c1 = c2 = NULL; /* gcc -Wall */
@@ -829,7 +829,7 @@ idealval(GEN nf, GEN ix, GEN P)
       gel(B,j) = y; y = x;
       if (low_stack(lim,stack_lim(av1,3)))
       {
-	if(DEBUGMEM>1) err(warnmem,"idealval");
+	if(DEBUGMEM>1) pari_err(warnmem,"idealval");
         gerepileall(av1,3, &y,&B,&pk);
       }
     }
@@ -912,7 +912,7 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
   if (!arch) return u;
 
   if (typ(arch) != t_VEC && lg(arch)-1 != nf_get_r1(nf))
-    err(talker,"incorrect idele in idealaddtoone");
+    pari_err(talker,"incorrect idele in idealaddtoone");
   archp = arch_to_perm(arch);
   if (lg(archp) == 1) return u;
 
@@ -971,10 +971,10 @@ idealaddmultoone(GEN nf, GEN list)
   GEN z, H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  if (!is_vec_t(tx)) err(talker,"not a vector of ideals in idealaddmultoone");
+  if (!is_vec_t(tx)) pari_err(talker,"not a vector of ideals in idealaddmultoone");
   l = lg(list); z = cgetg(1,t_MAT);
   L = cgetg(l, tx);
-  if (l == 1) err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  if (l == 1) pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<l; i++)
   {
     GEN I = gel(list,i);
@@ -983,7 +983,7 @@ idealaddmultoone(GEN nf, GEN list)
   }
   H = hnfperm_i(z, &U, &perm);
   if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
-    err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+    pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
   U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
@@ -1307,7 +1307,7 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
   {
     case t_COL: return nf_to_Fp_simple(x,modpr,p);
     case t_MAT: return famat_to_Fp_simple(nf,x,modpr,p);
-    default: err(impl,"generic conversion to finite field");
+    default: pari_err(impl,"generic conversion to finite field");
   }
   return NULL;
 }
@@ -1569,7 +1569,7 @@ idealnorm(GEN nf, GEN x)
   }
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
-  if (tx != t_FRAC) err(typeer, "idealnorm");
+  if (tx != t_FRAC) pari_err(typeer, "idealnorm");
   return gerepileupto(av, gabs(x,0));
 }
 
@@ -1587,9 +1587,9 @@ hnfideal_inv(GEN nf, GEN I)
   GEN J, dI, IZ,dual;
 
   I = Q_remove_denom(I, &dI);
-  if (lg(I)==1) err(talker, "cannot invert zero ideal");
+  if (lg(I)==1) pari_err(talker, "cannot invert zero ideal");
   IZ = gcoeff(I,1,1); /* I \cap Z */
-  if (!signe(IZ)) err(talker, "cannot invert zero ideal");
+  if (!signe(IZ)) pari_err(talker, "cannot invert zero ideal");
   J = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
@@ -1623,7 +1623,7 @@ idealinv(GEN nf, GEN x)
   {
     case id_MAT:
       if (lg(x) != lg(x[1])) x = idealmat_to_hnf(nf,x);
-      if (lg(x)-1 != degpol(nf[1])) err(consister,"idealinv");
+      if (lg(x)-1 != degpol(nf[1])) pari_err(consister,"idealinv");
       x = hnfideal_inv(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
@@ -1636,7 +1636,7 @@ idealinv(GEN nf, GEN x)
         }
         if (typ(x) != t_POL) { x = ginv(x); break; }
         if (varn(x) != varn(nf[1]))
-          err(talker,"incompatible variables in idealinv");
+          pari_err(talker,"incompatible variables in idealinv");
         x = QXQ_inv(x,gel(nf,1));
       }
       x = idealhermite_aux(nf,x); break;
@@ -1655,7 +1655,7 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
   GEN n1, x, r;
   long s = signe(n);
 
-  if (s == 0) err(talker, "0th power in idealpowprime_spec");
+  if (s == 0) pari_err(talker, "0th power in idealpowprime_spec");
   if (s < 0) n = negi(n);
   /* now n > 0 */
   x = shallowcopy(vp);
@@ -1743,7 +1743,7 @@ idealpow(GEN nf, GEN x, GEN n)
   long tx, N, s = signe(n);
   GEN res,ax,m,cx,n1,a,alpha;
 
-  if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpow");
+  if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpow");
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
   nf = checknf(nf);
@@ -1827,7 +1827,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   idealred_muldata D;
   GEN y;
 
-  if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpowred");
+  if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpowred");
   if (s == 0) return idealpow(nf,x,n);
   D.nf  = nf;
   D.prec= prec;
@@ -1906,14 +1906,14 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   GEN x,y,Nx,Ny,Nz, cy = Q_content(y0);
 
   nf = checknf(nf);
-  if (gcmp0(cy)) err(talker, "cannot invert zero ideal");
+  if (gcmp0(cy)) pari_err(talker, "cannot invert zero ideal");
 
   x = gdiv(x0,cy); Nx = idealnorm(nf,x);
   if (gcmp0(Nx)) { avma = av; return gcopy(x0); } /* numerator is zero */
 
   y = gdiv(y0,cy); Ny = idealnorm(nf,y);
   if (!gcmp1(denom(x)) || !dvdii(Nx,Ny))
-    err(talker, "quotient not integral in idealdivexact");
+    pari_err(talker, "quotient not integral in idealdivexact");
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
   {
@@ -1970,10 +1970,10 @@ chk_vdir(GEN nf, GEN vdir)
   GEN v;
   if (!vdir || gcmp0(vdir)) return NULL;
   l = lg(vdir);
-  if (l != lg(nf[6])) err(talker, "incorrect vector length in idealred");
+  if (l != lg(nf[6])) pari_err(talker, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) err(talker, "not a vector in idealred");
+  if (t != t_VEC) pari_err(talker, "not a vector in idealred");
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil(gel(vdir,i)));
   return v;
@@ -2251,7 +2251,7 @@ unif_mod_fZ(GEN pr, GEN F)
   {
     GEN u, v, q, e = gel(pr,3), a = diviiexact(F,p);
     q = is_pm1(e)? sqri(p): p;
-    if (!gcmp1(bezout(q, a, &u,&v))) err(bugparier,"unif_mod_fZ");
+    if (!gcmp1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
     t = gmul(v, t); /* return u + vt */
@@ -2314,7 +2314,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   if (!z) return gscalcol_i(gen_1, degpol(nf[1]));
   if (nored)
   {
-    if (flagden) err(impl,"nored + denominator in idealapprfact");
+    if (flagden) pari_err(impl,"nored + denominator in idealapprfact");
     return z;
   }
   e2 = cgetg(r, t_VEC);
@@ -2336,7 +2336,7 @@ GEN
 idealapprfact(GEN nf, GEN x) {
   pari_sp av = avma;
   if (typ(x) != t_MAT || lg(x) != 3)
-    err(talker,"not a factorization in idealapprfact");
+    pari_err(talker,"not a factorization in idealapprfact");
   check_listpr(gel(x,1));
   return gerepileupto(av, idealapprfact_i(nf, x, 0));
 }
@@ -2395,11 +2395,11 @@ idealchinese(GEN nf, GEN x, GEN w)
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (typ(x) != t_MAT || lg(x) != 3)
-    err(talker,"not a prime ideal factorization in idealchinese");
+    pari_err(talker,"not a prime ideal factorization in idealchinese");
   L = gel(x,1); r = lg(L);
   e = gel(x,2);
   if (!is_vec_t(ty) || lg(w) != r)
-    err(talker,"not a suitable vector of elements in idealchinese");
+    pari_err(talker,"not a suitable vector of elements in idealchinese");
   if (r == 1) return gscalcol_i(gen_1,N);
 
   w = Q_remove_denom(w, &den);
@@ -2460,13 +2460,13 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
   x = idealhermite_aux(nf,x);
   if (gcmp0(x))
   {
-    if (!gcmp0(a)) err(talker,"element not in ideal in ideal_two_elt2");
+    if (!gcmp0(a)) pari_err(talker,"element not in ideal in ideal_two_elt2");
     avma = av; return gcopy(a);
   }
   x = Q_primitive_part(x, &cx);
   if (cx) a = gdiv(a, cx);
   if (!hnf_invimage(x, a))
-    err(talker,"element does not belong to ideal in ideal_two_elt2");
+    pari_err(talker,"element does not belong to ideal in ideal_two_elt2");
 
   b = mat_ideal_two_elt2(nf, x, a);
   b = centermod(b, gcoeff(x,1,1));
@@ -2505,10 +2505,10 @@ idealcoprime(GEN nf, GEN x, GEN y)
 void
 check_ZKmodule(GEN x, char *s)
 {
-  if (typ(x) != t_VEC || lg(x) < 3) err(talker,"not a module in %s", s);
-  if (typ(x[1]) != t_MAT) err(talker,"not a matrix in %s", s);
+  if (typ(x) != t_VEC || lg(x) < 3) pari_err(talker,"not a module in %s", s);
+  if (typ(x[1]) != t_MAT) pari_err(talker,"not a matrix in %s", s);
   if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
-    err(talker,"not a correct ideal list in %s", s);
+    pari_err(talker,"not a correct ideal list in %s", s);
 }
 
 static GEN
@@ -2685,9 +2685,9 @@ nfhermite(GEN nf, GEN x)
   check_ZKmodule(x, "nfhermite");
   A = gel(x,1);
   I = gel(x,2); k = lg(A)-1;
-  if (!k) err(talker,"not a matrix of maximal rank in nfhermite");
+  if (!k) pari_err(talker,"not a matrix of maximal rank in nfhermite");
   m = lg(A[1])-1;
-  if (k < m) err(talker,"not a matrix of maximal rank in nfhermite");
+  if (k < m) pari_err(talker,"not a matrix of maximal rank in nfhermite");
 
   av = avma; lim = stack_lim(av, 2);
   A = matalgtobasis(nf,A);
@@ -2698,7 +2698,7 @@ nfhermite(GEN nf, GEN x)
     GEN d, di = NULL;
 
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
-    if (!j) err(talker,"not a matrix of maximal rank in nfhermite");
+    if (!j) pari_err(talker,"not a matrix of maximal rank in nfhermite");
     if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
 
     y = gcoeff(A,i,def);
@@ -2726,7 +2726,7 @@ nfhermite(GEN nf, GEN x)
     }
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"nfhermite, i = %ld", i);
+      if(DEBUGMEM>1) pari_err(warnmem,"nfhermite, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }
@@ -2752,18 +2752,18 @@ nfsmith(GEN nf, GEN x)
   GEN z,u,v,w,d,dinv,A,I,J;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  if (typ(x)!=t_VEC || lg(x)!=4) err(talker,"not a module in nfsmith");
+  if (typ(x)!=t_VEC || lg(x)!=4) pari_err(talker,"not a module in nfsmith");
   A = gel(x,1);
   I = gel(x,2);
   J = gel(x,3);
-  if (typ(A)!=t_MAT) err(talker,"not a matrix in nfsmith");
+  if (typ(A)!=t_MAT) pari_err(talker,"not a matrix in nfsmith");
   n = lg(A)-1;
   if (typ(I)!=t_VEC || lg(I)!=n+1 || typ(J)!=t_VEC || lg(J)!=n+1)
-    err(talker,"not a correct ideal list in nfsmith");
-  if (!n) err(talker,"not a matrix of maximal rank in nfsmith");
+    pari_err(talker,"not a correct ideal list in nfsmith");
+  if (!n) pari_err(talker,"not a matrix of maximal rank in nfsmith");
   m = lg(A[1])-1;
-  if (n < m) err(talker,"not a matrix of maximal rank in nfsmith");
-  if (n > m) err(impl,"nfsmith for non square matrices");
+  if (n < m) pari_err(talker,"not a matrix of maximal rank in nfsmith");
+  if (n > m) pari_err(impl,"nfsmith for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
   A = shallowcopy(A);
@@ -2820,7 +2820,7 @@ nfsmith(GEN nf, GEN x)
           p2 = idealdiv(nf,gel(J,i), idealmulelt(nf,p1,gel(J,l)));
           p3 = gauss(p2, b);
           l=1; while (l<=N && gcmp1(denom(gel(p3,l)))) l++;
-          if (l>N) err(talker,"bug2 in nfsmith");
+          if (l>N) pari_err(talker,"bug2 in nfsmith");
           p1 = element_mulvecrow(nf,gel(b,l),A,k,i);
           for (l=1; l<=i; l++)
             gcoeff(A,i,l) = gadd(gcoeff(A,i,l),gel(p1,l));
@@ -2829,7 +2829,7 @@ nfsmith(GEN nf, GEN x)
         }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if(DEBUGMEM>1) err(warnmem,"nfsmith");
+	if(DEBUGMEM>1) pari_err(warnmem,"nfsmith");
         gerepileall(av,3, &A,&I,&J);
       }
     }
@@ -2896,7 +2896,7 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
   GEN T,p,modpr;
 
   nf = checknf(nf);
-  if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
+  if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr");
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   x = modprM(lift(x), nf, modpr);
   return gerepilecopy(av, modprM_lift(FqM_ker(x,T,p), modpr));
@@ -2909,7 +2909,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
   GEN T,p,modpr;
 
   nf = checknf(nf);
-  if (typ(a)!=t_MAT) err(typeer,"nfsolvemodpr");
+  if (typ(a)!=t_MAT) pari_err(typeer,"nfsolvemodpr");
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   a = modprM(lift(a), nf, modpr);
   b = modprM(lift(b), nf, modpr);
@@ -2924,7 +2924,7 @@ nfsuppl(GEN nf, GEN x, GEN pr)
   GEN T,p,modpr;
 
   nf = checknf(nf);
-  if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
+  if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr");
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   x = modprM(lift(x), nf, modpr);
   return gerepilecopy(av, modprM_lift(FqM_suppl(x,T,p), modpr));
@@ -3006,7 +3006,7 @@ nfdetint(GEN nf, GEN x)
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"nfdetint");
+      if(DEBUGMEM>1) pari_err(warnmem,"nfdetint");
       gerepileall(av1,6, &det1,&piv,&pivprec,&pass,&v,&idprod);
     }
   }
@@ -3067,7 +3067,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[1]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_err(warnmem,"[1]: nfhermitemod, i = %ld", i);
       gerepileall(av,2, &A,&I);
     }
   }
@@ -3098,7 +3098,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[2]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_err(warnmem,"[2]: nfhermitemod, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }

@@ -30,11 +30,11 @@ allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
   GEN w = *ptw;
 
   if (DEBUGLEVEL) (void)timer2();
-  if (typ(f)!=t_POL) err(notpoler,"allbase");
-  if (degpol(f) <= 0) err(constpoler,"allbase");
+  if (typ(f)!=t_POL) pari_err(notpoler,"allbase");
+  if (degpol(f) <= 0) pari_err(constpoler,"allbase");
 
   *dx = w? factorback(w, NULL): ZX_disc(f);
-  if (!signe(*dx)) err(talker,"reducible polynomial in allbase");
+  if (!signe(*dx)) pari_err(talker,"reducible polynomial in allbase");
   if (!w) *ptw = auxdecomp(absi(*dx), (flag & nf_PARTIALFACT)? 0: 1);
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
@@ -208,7 +208,7 @@ rowred(GEN a, GEN rmod)
     {
       long j1,k1;
       GEN p1 = a;
-      if(DEBUGMEM>1) err(warnmem,"rowred j=%ld", j);
+      if(DEBUGMEM>1) pari_err(warnmem,"rowred j=%ld", j);
       p1 = gerepilecopy(av,a);
       for (j1=1; j1<r; j1++)
         for (k1=1; k1<c; k1++) gcoeff(a,j1,k1) = gcoeff(p1,j1,k1);
@@ -413,7 +413,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     if (epsilon < 2) break;
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ordmax");
+      if(DEBUGMEM>1) pari_err(warnmem,"ordmax");
       gerepileall(av2, 2, &m, &delta);
     }
   }
@@ -609,7 +609,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       GEN x = (GEN)global_err_data;
       GEN p = gcdii(gel(x,1), gel(x,2));
       GEN N, u;
-      if (DEBUGLEVEL) err(warner,"impossible inverse: %Z", x);
+      if (DEBUGLEVEL) pari_err(warner,"impossible inverse: %Z", x);
 
       u = get_coprimes(p, diviiexact(gel(x,1),p));
       l = lg(u);
@@ -708,7 +708,7 @@ update_fact(GEN x, GEN f)
 {
   GEN e, q, d = ZX_disc(x), p = gel(f,1);
   long iq, i, k, l;
-  if (typ(f)!=t_MAT || lg(f)!=3) err(talker,"not a factorisation in nfbasis");
+  if (typ(f)!=t_MAT || lg(f)!=3) pari_err(talker,"not a factorisation in nfbasis");
   l = lg(p);
   q = cgetg(l,t_COL); 
   e = cgetg(l,t_COL); iq = 1;
@@ -728,8 +728,8 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   GEN x, dx, dK, basis, lead, index;
   long fl = 0;
 
-  if (typ(x0)!=t_POL) err(typeer,"nfbasis");
-  if (!degpol(x0)) err(zeropoler,"nfbasis");
+  if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis");
+  if (!degpol(x0)) pari_err(zeropoler,"nfbasis");
   check_ZX(x0, "nfbasis");
 
   x = pol_to_monic(x0, &lead);
@@ -1014,7 +1014,7 @@ Decomp(decomp_t *S, long flag)
     fprintferr("\n");
   }
   if (!FpX_val(S->chi, S->nu, p, &b1))
-    err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
+    pari_err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
   b2 = FpX_div(S->chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
@@ -1201,7 +1201,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) err(warnmem, "newtonsums");
+      if(DEBUGMEM>1) pari_err(warnmem, "newtonsums");
       gerepileall(av, 4, &pa, &va, &pp, &dpa);
     }
   }
@@ -1651,7 +1651,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     if (degpol(w[1]) != 1)
     {
       if (fm) { fm = -1; continue; }
-      err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
+      pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
     }
 
     for (i = 1; i < lg(w); i++)
@@ -1694,7 +1694,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     if (i == lg(w))
     {
       if (fm) { fm = -1; continue; }
-      err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
+      pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
     }
 
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
@@ -1703,7 +1703,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
 
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      if (DEBUGMEM > 1) err(warnmem, "nilord");
+      if (DEBUGMEM > 1) pari_err(warnmem, "nilord");
       gerepileall(av2, S->invnu? 3: 1, &beta, &(S->invnu), &(S->Dinvnu));
     }
   }
@@ -1864,7 +1864,7 @@ get_norm(norm_S *S, GEN a)
   {
     long e;
     GEN N = grndtoi( norm_by_embed(S->r1, gmul(S->M, a)), &e );
-    if (e > -5) err(precer, "get_norm");
+    if (e > -5) pari_err(precer, "get_norm");
     return N;
   }
   if (S->w) a = gmul(S->w, a);
@@ -1925,7 +1925,7 @@ get_LV(GEN nf, GEN L, GEN p, long N)
 }
 
 static void
-errprime(GEN p) { err(talker, "primedec: %Z is not prime", p); }
+errprime(GEN p) { pari_err(talker, "primedec: %Z is not prime", p); }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
@@ -2224,7 +2224,7 @@ GEN
 primedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  if (typ(p) != t_INT) err(typeer, "primedec");
+  if (typ(p) != t_INT) pari_err(typeer, "primedec");
   return gerepileupto(av, gen_sort(_primedec(checknf(nf),p),
                                    0, cmp_prime_over_p));
 }
@@ -2445,7 +2445,7 @@ void
 checkmodpr(GEN modpr)
 {
   if (typ(modpr) != t_COL || lg(modpr) < SMALLMODPR)
-    err(talker,"incorrect modpr format");
+    pari_err(talker,"incorrect modpr format");
   checkprimeid(gel(modpr,mpr_PR));
 }
 
@@ -2496,7 +2496,7 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   if (v)
   {
     GEN tau = modpr_TAU(modpr);
-    if (!tau) err(talker,"modpr initialized for integers only!");
+    if (!tau) pari_err(talker,"modpr initialized for integers only!");
     x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
   }
   x = Q_primitive_part(x, &cx);
@@ -2557,7 +2557,7 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
     case t_FRAC: return Rg_to_Fp(x, p);
     case t_POL: x = poltobasis(nf, x); break;
     case t_COL: break;
-    default: err(typeer,"nf_to_ff");
+    default: pari_err(typeer,"nf_to_ff");
   }
   x = kill_denom(x, nf, p, modpr);
   return gerepilecopy(av, zk_to_ff(x, modpr));
@@ -2732,7 +2732,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 
   Prd = modprX(P, nf, modpr);
   A = (GEN)FqX_factor(Prd,T,p)[1];
-  r = lg(A); if (r < 2) err(constpoler,"rnfdedekind");
+  r = lg(A); if (r < 2) pari_err(constpoler,"rnfdedekind");
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
   h = FqX_div(Prd,g, T, p);
@@ -2931,7 +2931,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
-      if(DEBUGMEM>1) err(warnmem,"rnfordmax");
+      if(DEBUGMEM>1) pari_err(warnmem,"rnfordmax");
       gerepileall(av1,2, &W,&I);
     }
   }
@@ -2943,11 +2943,11 @@ check_pol(GEN x, long v)
 {
   long i,tx, lx = lg(x);
   if (varn(x) != v)
-    err(talker,"incorrect variable in rnf function");
+    pari_err(talker,"incorrect variable in rnf function");
   for (i=2; i<lx; i++)
   {
     tx = typ(x[i]);
-    if (!is_const_t(tx)) err(talker,"incorrect coeff in rnf function");
+    if (!is_const_t(tx)) pari_err(talker,"incorrect coeff in rnf function");
   }
 }
 
@@ -2957,7 +2957,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
   GEN xnf = (typ(nf) == t_POL)? nf: gel(nf,1);
   long i, vnf = varn(xnf), lx = lg(x);
   if (typ(x) != t_POL || varncmp(varn(x), vnf) >= 0)
-    err(talker,"incorrect polynomial in rnf function");
+    pari_err(talker,"incorrect polynomial in rnf function");
   x = shallowcopy(x);
   for (i=2; i<lx; i++)
     switch(typ(x[i]))
@@ -2967,13 +2967,13 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
         check_pol(gel(x,i), vnf);
         gel(x,i) = gmodulcp(gel(x,i), xnf); break;
       case t_POLMOD:
-        if (!gequal(gmael(x,i,1), xnf)) err(consister,"rnf function");
+        if (!gequal(gmael(x,i,1), xnf)) pari_err(consister,"rnf function");
         break;
-      default: err(typeer, "rnf function");
+      default: pari_err(typeer, "rnf function");
     }
 
   if (chk_lead && !gcmp1(leading_term(x)))
-    err(impl,"non-monic relative polynomials");
+    pari_err(impl,"non-monic relative polynomials");
   return x;
 }
 
@@ -3092,7 +3092,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(x)!=t_VEC || lg(x)<3)
-    err(talker,"not a pseudo-basis in nfsimplifybasis");
+    pari_err(talker,"not a pseudo-basis in nfsimplifybasis");
   x = shallowcopy(x);
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
@@ -3123,7 +3123,7 @@ rnfdet2(GEN nf, GEN A, GEN I)
   pari_sp av = avma;
   GEN p1;
   nf = checknf(nf);
-  if (typ(I) != t_VEC) err(typeer,"rnfdet2");
+  if (typ(I) != t_VEC) pari_err(typeer,"rnfdet2");
   p1 = idealmul(nf, det(matbasistoalg(nf, A)), prodid(nf, I));
   return gerepileupto(av, p1);
 }
@@ -3132,7 +3132,7 @@ GEN
 rnfdet(GEN nf, GEN order)
 {
   if (typ(order)!=t_VEC || lg(order)<3)
-    err(talker,"not a pseudo-matrix in rnfdet");
+    pari_err(talker,"not a pseudo-matrix in rnfdet");
   return rnfdet2(nf,gel(order,1),gel(order,2));
 }
 
@@ -3172,7 +3172,7 @@ get_order(GEN nf, GEN O, char *s)
   if (typ(O) == t_POL)
     return rnfpseudobasis(nf, O);
   if (typ(O)!=t_VEC || lg(O) < 3)
-    err(talker,"not a pseudo-matrix in %s", s);
+    pari_err(talker,"not a pseudo-matrix in %s", s);
   return O;
 }
 
@@ -3193,7 +3193,7 @@ rnfsteinitz(GEN nf, GEN order)
   A = matalgtobasis(nf, gel(order,1));
   I = shallowcopy(gel(order,2)); n=lg(A)-1;
   if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
-    err(typeer,"rnfsteinitz");
+    pari_err(typeer,"rnfsteinitz");
   for (i=1; i<n; i++)
   {
     GEN c1,c2;
@@ -3331,15 +3331,15 @@ polcompositum0(GEN A, GEN B, long flall)
   long v, k;
   GEN C, D, LPRS;
 
-  if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
-  if (degpol(A)<=0 || degpol(B)<=0) err(constpoler,"compositum");
+  if (typ(A)!=t_POL || typ(B)!=t_POL) pari_err(typeer,"polcompositum0");
+  if (degpol(A)<=0 || degpol(B)<=0) pari_err(constpoler,"compositum");
   v = varn(A);
-  if (varn(B) != v) err(talker,"not the same variable in compositum");
+  if (varn(B) != v) pari_err(talker,"not the same variable in compositum");
   A = Q_primpart(A); check_ZX(A,"compositum");
-  if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z inseparable", A);
+  if (!ZX_is_squarefree(A)) pari_err(talker,"compositum: %Z inseparable", A);
   if (!same) {
     B = Q_primpart(B); check_ZX(B,"compositum");
-    if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z inseparable", B);
+    if (!ZX_is_squarefree(B)) pari_err(talker,"compositum: %Z inseparable", B);
   }
 
   D = NULL; /* -Wall */
@@ -3405,7 +3405,7 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
 
   A = get_nfpol(A, &nf);       lA = lg(A);
   B = fix_relative_pol(A,B,1); lB = lg(B);
-  if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
+  if (lA<=3 || lB<=3) pari_err(constpoler,"rnfequation");
 
   check_ZX(A,"rnfequation");
   B = primpart(lift_intern(B));
@@ -3414,7 +3414,7 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
     if (lg(B[k]) >= lA) gel(B,k) = grem(gel(B,k),A);
 
   if (!nfissquarefree(A,B))
-    err(talker,"inseparable relative equation in rnfequation");
+    pari_err(talker,"inseparable relative equation in rnfequation");
 
   *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leading_term(C)) < 0) C = gneg_i(C);
@@ -3540,7 +3540,7 @@ findmin(GEN nf, GEN x, GEN muf)
     {
       x = lllint_ip(x,4);
       m = lllintern(gmul(G, x), 4, 1, 0);
-      if (!m) err(precer,"rnflllgram");
+      if (!m) pari_err(precer,"rnflllgram");
     }
     x = gmul(x, m);
     y = gmul(M, x);
@@ -3679,7 +3679,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   M = gel(order,1);
   I = gel(order,2); lx = lg(I);
   if (lx < 3) return gcopy(order);
-  if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
+  if (lx-1 != degpol(pol)) pari_err(consister,"rnflllgram");
   I = shallowcopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);
@@ -3688,7 +3688,7 @@ PRECNF:
   if (count == MAX_COUNT)
   {
     prec = (prec<<1)-2; count = 0;
-    if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"rnflllgram",prec);
     nf = nfnewprec(nf,prec);
   }
   mth = rel_T2(nf, pol, lx, prec);
@@ -3744,7 +3744,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"rnflllgram");
+      if(DEBUGMEM>1) pari_err(warnmem,"rnflllgram");
       gerepileall(av, H?10:9, &nf,&mth,&h,&MPOL,&B,&MC,&MCS,&mu,&I,&H);
     }
   }
@@ -3764,7 +3764,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   long i, j, n, v = varn(pol);
   GEN id, al, w, I, O, bnf, nfpol;
 
-  if (typ(pol)!=t_POL) err(typeer,"rnfpolred");
+  if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
   if (degpol(pol) <= 1) return mkvec(pol_x[v]);
@@ -3871,13 +3871,13 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   long v, fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
-  if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
+  if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
   nf = checknf(nf); v = varn(relpol);
   if (DEBUGLEVEL>1) (void)timer2();
   relpol = unifpol(nf, relpol, t_POLMOD);
   T = gel(nf,1);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
-    err(impl,"this combination of flags in rnfpolredabs");
+    pari_err(impl,"this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)
   {
     long sa;

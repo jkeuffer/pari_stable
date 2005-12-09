@@ -454,7 +454,7 @@ CplxModulus(GEN data, long *newprec, long prec)
       cpl = QuickNormL2(pol, DEFAULTPREC);
       if (!gcmp0(cpl)) break;
     }
-    if (DEBUGLEVEL>1) err(warnprec, "CplxModulus", dprec);
+    if (DEBUGLEVEL>1) pari_err(warnprec, "CplxModulus", dprec);
   }
   ex = gexpo(cpl); avma = av;
   if (DEBUGLEVEL>1) fprintferr("cpl = 2^%ld\n", ex);
@@ -697,7 +697,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (i = 1; i <= nz; i++)
   {
     if (is_bigint(cyc[i]))
-      err(talker,"conductor too large in ArtinNumber");
+      pari_err(talker,"conductor too large in ArtinNumber");
     gel(gen,i) = set_sign_mod_idele(nf, NULL, gel(gen,i), cond,sarch);
     classe = isprincipalray(bnr, gel(gen,i));
     for (ic = 1; ic <= nChar; ic++) {
@@ -749,7 +749,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      if (DEBUGMEM > 1) err(warnmem,"ArtinNumber");
+      if (DEBUGMEM > 1) pari_err(warnmem,"ArtinNumber");
       gerepileall(av2, 2, &s, &vB);
     }
   }
@@ -762,7 +762,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     s0 = gmul(gel(s,ic), EvalChar(lC[ic], classe));
     s0 = gdiv(s0, sqrtnc);
     if (check && - expo(subrs(gnorm(s0), 1)) < bit_accuracy(prec) >> 1)
-      err(bugparier, "ArtinNumber");
+      pari_err(bugparier, "ArtinNumber");
     gel(W, indW[ic]) = gmul(s0, z);
   }
   return gerepilecopy(av, W);
@@ -802,7 +802,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   pari_sp av = avma;
   GEN cond, condc, bnrc, CHI, cyc;
 
-  if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
+  if (flag < 0 || flag > 1) pari_err(flagerr,"bnrrootnumber");
 
   checkbnr(bnr);
   cyc = gmael(bnr, 5, 2);
@@ -810,7 +810,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   l    = lg(cyc);
 
   if (typ(chi) != t_VEC || lg(chi) != l)
-    err(talker, "incorrect character in bnrrootnumber");
+    pari_err(talker, "incorrect character in bnrrootnumber");
 
   if (flag) condc = NULL;
   else
@@ -1819,7 +1819,7 @@ LABrcf: ct++;
     if (ct > 3) return NULL;
 
     prec2 = (prec2 << 1) - 2;
-    if (DEBUGLEVEL>1) err(warnprec,"RecCoeff", prec2);
+    if (DEBUGLEVEL>1) pari_err(warnprec,"RecCoeff", prec2);
     nf2 = nfnewprec(nf2, prec2);
     beta2 = gprec_w(beta2, prec2);
     goto LABrcf;
@@ -2054,7 +2054,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (n0 < N0[j]) n0 = N0[j];
   }
   if ((ulong)n0 > maxprime())
-    err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
+    pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
   if (DEBUGLEVEL>1) fprintferr("N0 = %ld\n", n0);
   InitPrimesQuad(bnr, n0, &LIST);
 
@@ -2232,7 +2232,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     if (n0 < N0[j]) n0  = N0[j];
   }
   if ((ulong)n0 > maxprime())
-    err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
+    pari_err(talker, "Not enough precomputed primes (need all p <= %ld)", n0);
   i0 = zeta_get_i0(r1, r2, bit_accuracy(prec), limx);
   InitPrimes(bnr, n0, &LIST);
 
@@ -2357,7 +2357,7 @@ makescindold(GEN nf, GEN polrel, long cl)
         if (degpol(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
       }
     if (i == l)
-      err(bugparier, "makescindold (no polynomial found)");
+      pari_err(bugparier, "makescindold (no polynomial found)");
   }
   pol = polredabs0(pol, nf_PARTIALFACT);
   return gerepileupto(av, pol);
@@ -2533,7 +2533,7 @@ LABDOUB:
   if (!polrel) /* if it fails... */
   {
     long incr_pr;
-    if (++cpt >= 3) err(precer, "stark (computation impossible)");
+    if (++cpt >= 3) pari_err(precer, "stark (computation impossible)");
 
     /* compute the precision, we need 
           a) get at least EXTRA_PREC fractional digits if there is none;
@@ -2545,7 +2545,7 @@ LABDOUB:
       incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + max(ADD_PREC, cpt*incr_pr);
 
-    if (DEBUGLEVEL) err(warnprec, "AllStark", newprec);
+    if (DEBUGLEVEL) pari_err(warnprec, "AllStark", newprec);
 
     nf = nfnewprec(nf, newprec);
     dataCR = CharNewPrec(dataCR, nf, newprec);
@@ -2662,7 +2662,7 @@ START:
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
-    err (warnprec, "quadhilbertreal", prec);
+    pari_err (warnprec, "quadhilbertreal", prec);
   } TRY {
     /* find the modulus defining N */
     bnr  = buchrayinitgen(bnf, gen_1);
@@ -2721,13 +2721,13 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
 
   /* check the bnf */
-  if (!varn(nf[1])) err(talker, "main variable in bnrstark must not be x");
-  if (nf_get_r2(nf)) err(talker, "base field not totally real in bnrstark");
+  if (!varn(nf[1])) pari_err(talker, "main variable in bnrstark must not be x");
+  if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
 
   /* check the subgrp */
   Mcyc = diagonal_i(gmael(bnr, 5, 2));
   if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
-    err(talker, "incorrect subgrp in bnrstark");
+    pari_err(talker, "incorrect subgrp in bnrstark");
 
   /* compute bnr(conductor) */
   p1     = conductor(bnr, subgrp, 2);
@@ -2737,7 +2737,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))
-    err(talker, "class field not totally real in bnrstark");
+    pari_err(talker, "class field not totally real in bnrstark");
 
   if (DEBUGLEVEL) (void)timer2();
 
@@ -2795,8 +2795,8 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   nf   = gel(bnf,7);
   N    = degpol(nf[1]);
 
-  if (N == 1) err(talker, "the ground field must be distinct from Q");
-  if (flag < 0 || flag > 8) err(flagerr,"bnrL1");
+  if (N == 1) pari_err(talker, "the ground field must be distinct from Q");
+  if (flag < 0 || flag > 8) pari_err(flagerr,"bnrL1");
 
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = (GEN)conductor(bnr, NULL, 2)[2];
@@ -2806,7 +2806,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 
   /* check the subgroup */
   if (! (subgp = get_subgroup(subgp,Mcyc)) )
-    err(talker, "incorrect subgroup in bnrL1");
+    pari_err(talker, "incorrect subgroup in bnrL1");
 
   cl = itou( dethnf_i(subgp) );
   Qt = InitQuotient(subgp);
@@ -2845,7 +2845,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   settyp(allCR[cl], t_VEC);
 
   setlg(listCR, nc + 1);
-  if (nc == 0) err(talker, "no non-trivial character in bnrL1");
+  if (nc == 0) pari_err(talker, "no non-trivial character in bnrL1");
 
   /* compute the data for these characters */
   dataCR = InitChar(bnr, listCR, prec);

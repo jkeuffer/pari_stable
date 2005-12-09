@@ -34,7 +34,7 @@ prime(long n)
   byteptr p;
   ulong prime;
 
-  if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
+  if (n <= 0) pari_err(talker, "n-th prime meaningless if n = %ld",n);
   if (n < 1000) {
     p = diffptr;
     prime = 0;
@@ -81,7 +81,7 @@ primepi(GEN x)
   ulong prime = 0, res = 0, n;
   GEN N = typ(x) == t_INT? x: gfloor(x);
 
-  if (typ(N) != t_INT || signe(N) <= 0) err(typeer, "primepi");
+  if (typ(N) != t_INT || signe(N) <= 0) pari_err(typeer, "primepi");
   avma = av; n = itou(N); maxprime_check(n);
   while (prime <= n) { res++; NEXT_PRIME_VIADIFF(prime,p); }
   return utoi(res-1);
@@ -316,7 +316,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
    */
 
   if (model_type != 0)
-      err(talker, "unsupported type of cache model"); /* Future expansion */
+      pari_err(talker, "unsupported type of cache model"); /* Future expansion */
 
   /* The simplest case: we fit into cache */
   if (total + fixed_to_cache <= cache_arena)
@@ -407,7 +407,7 @@ set_optimize(long what, GEN g)
     ret = (long)(cache_model.cutoff * 1000);
     break;
   default:
-    err(talker, "panic: set_optimize");
+    pari_err(talker, "panic: set_optimize");
     break;
   }
   if (g != NULL) {
@@ -576,7 +576,7 @@ maxprime(void) { return _maxprime; }
 void
 maxprime_check(ulong c)
 {
-  if (_maxprime < c) err(primer2, c);
+  if (_maxprime < c) pari_err(primer2, c);
 }
 
 byteptr
@@ -589,7 +589,7 @@ initprimes(ulong maxnum)
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
   if ((maxnum>>1) > VERYBIGINT - 1024)
-      err(talker, "Too large primelimit");
+      pari_err(talker, "Too large primelimit");
   p = initprimes0(maxnum1, &len, &last);
 #if 0 /* not yet... GN */
   static int build_the_tables = 1;
@@ -625,10 +625,10 @@ addprimes(GEN p)
     for (i=1; i < lg(p); i++) (void)addprimes(gel(p,i));
     return primetab;
   }
-  if (tx != t_INT) err(typeer,"addprime");
+  if (tx != t_INT) pari_err(typeer,"addprime");
   if (is_pm1(p)) return primetab;
   av = avma; i = signe(p);
-  if (i == 0) err(talker,"can't accept 0 in addprimes");
+  if (i == 0) pari_err(talker,"can't accept 0 in addprimes");
   if (i < 0) p = absi(p);
 
   lp = lg(primetab);
@@ -654,14 +654,14 @@ removeprime(GEN prime)
 {
   long i;
 
-  if (typ(prime) != t_INT) err(typeer,"removeprime");
+  if (typ(prime) != t_INT) pari_err(typeer,"removeprime");
   for (i=lg(primetab) - 1; i; i--)
     if (absi_equal(gel(primetab,i), prime))
     {
       gunclone(gel(primetab,i)); primetab[i]=0;
       cleanprimetab(); break;
     }
-  if (!i) err(talker,"prime %Z is not in primetable", prime);
+  if (!i) pari_err(talker,"prime %Z is not in primetable", prime);
   return primetab;
 }
 
@@ -747,8 +747,8 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 #define STOREu(x,e) STORE(utoipos(x), e)
 #define STOREi(x,e) STORE(icopy(x),   e)
 
-  if (typ(n) != t_INT) err(arither1);
-  i = signe(n); if (!i) err(talker, "zero argument in factorint");
+  if (typ(n) != t_INT) pari_err(arither1);
+  i = signe(n); if (!i) pari_err(talker, "zero argument in factorint");
   (void)cgetg(3,t_MAT);
   if (i < 0) STORE(utoineg(1), 1);
   if (is_pm1(n)) return aux_end(NULL,nb);
@@ -903,7 +903,7 @@ boundfact(GEN n, long lim)
       p2 = auxdecomp(gel(n,2),lim); gel(p2,2) = gneg_i(gel(p2,2));
       return gerepilecopy(av, merge_factor_i(p1,p2));
   }
-  err(arither1);
+  pari_err(arither1);
   return NULL; /* not reached */
 }
 /***********************************************************************/
@@ -969,8 +969,8 @@ gmu(GEN n) { return arith_proto(mu,n,1); }
 
 INLINE void
 chk_arith(GEN n) {
-  if (typ(n) != t_INT) err(arither1);
-  if (!signe(n)) err(talker, "zero argument in an arithmetic function");
+  if (typ(n) != t_INT) pari_err(arither1);
+  if (!signe(n)) pari_err(talker, "zero argument in an arithmetic function");
 }
 
 long
@@ -1048,7 +1048,7 @@ issquarefree(GEN x)
       if (!signe(x)) return 0;
       av = avma; d = ggcd(x, derivpol(x));
       avma = av; return (lg(d) == 3);
-    default: err(typeer,"issquarefree");
+    default: pari_err(typeer,"issquarefree");
       return 0; /* not reached */
   }
 }
@@ -1311,7 +1311,7 @@ divisors(GEN n)
     nbdiv = itos_or_0( mulss(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)
-    err(talker, "too many divisors (more than %ld)", LGBITS - 1);
+    pari_err(talker, "too many divisors (more than %ld)", LGBITS - 1);
   d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
   *++d = gen_1;
   for (i=1; i<l; i++)
@@ -1433,7 +1433,7 @@ binaire(GEN x)
       }
 
       lx=lg(x); y=cgetg(3,t_VEC);
-      if (ex > bit_accuracy(lx)) err(precer,"binary");
+      if (ex > bit_accuracy(lx)) pari_err(precer,"binary");
       p1 = cgetg(max(ex,0)+2,t_VEC);
       p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
       gel(y,1) = p1;
@@ -1469,7 +1469,7 @@ binaire(GEN x)
       lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) gel(y,i) = binaire(gel(x,i));
       break;
-    default: err(typeer,"binary");
+    default: pari_err(typeer,"binary");
       return NULL; /* not reached */
   }
   return y;
@@ -1541,9 +1541,9 @@ gbitneg(GEN x, long bits)
   long xl, len_out, i;
 
   if (typ(x) != t_INT)
-      err(typeer, "bitwise negation");
+      pari_err(typeer, "bitwise negation");
   if (bits < -1)
-      err(talker, "negative exponent in bitwise negation");
+      pari_err(talker, "negative exponent in bitwise negation");
   if (bits == -1) return inegate(x);
   if (bits == 0) return gen_0;
   if (signe(x) < 0) { /* Consider as if mod big power of 2 */
@@ -1722,7 +1722,7 @@ gbitor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise or");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise or");
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -1747,7 +1747,7 @@ gbitand(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise and");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise and");
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -1772,7 +1772,7 @@ gbitxor(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise xor");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise xor");
   switch (signs(x, y))
   {
     case 3: /*1,1*/
@@ -1798,7 +1798,7 @@ gbitnegimply(GEN x, GEN y)
   pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise negated imply");
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(typeer, "bitwise negated imply");
   switch (signs(x, y))
   {
     case 3: /*1,1*/

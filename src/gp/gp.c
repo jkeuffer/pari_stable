@@ -117,12 +117,12 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   growarray A;
 
   if (*s != DATA_BEGIN || *send-- != DATA_END)
-    err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
+    pari_err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
   s++;
-  if (strncmp(s, "special:", 8)) err(talker, "unrecognized TeXmacs command");
+  if (strncmp(s, "special:", 8)) pari_err(talker, "unrecognized TeXmacs command");
   s += 8;
   if (*s != '(' || *send-- != ')')
-    err(talker, "missing enclosing parentheses for TeXmacs command");
+    pari_err(talker, "missing enclosing parentheses for TeXmacs command");
   s++; t = s;
   skip_alpha(s);
   c->cmd = pari_strndup(t, s - t);
@@ -156,16 +156,16 @@ handle_texmacs_command(const char *s)
   tm_cmd c;
   parse_texmacs_command(&c, s);
   if (strcmp(c.cmd, "complete"))
-    err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
+    pari_err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
   if (c.n != 2)
-    err(talker,"was expecting 2 arguments for Texmacs_stdin command");
+    pari_err(talker,"was expecting 2 arguments for Texmacs_stdin command");
   texmacs_completion(c.v[0], atol(c.v[1]));
   free_cmd(&c);
   tm_did_complete = 1;
 }
 #else
 static void
-handle_texmacs_command(const char *s) { err(talker, "readline not available"); }
+handle_texmacs_command(const char *s) { pari_err(talker, "readline not available"); }
 #endif
 
 /*******************************************************************/
@@ -534,7 +534,7 @@ external_help(char *s, int num)
   pariFILE *z;
   FILE *f;
 
-  if (!GP_DATA->help) err(talker,"no external help program");
+  if (!GP_DATA->help) pari_err(talker,"no external help program");
   s = filter_quotes(s);
   str = gpmalloc(strlen(GP_DATA->help) + strlen(s) + 64);
   *ar = 0;
@@ -604,7 +604,7 @@ aide0(char *s, int flag)
     n = atoi(s);
     if (n == 12) { community(); return; }
     if (n < 0 || n > 12)
-      err(talker2,"no such section in help: ?",s,s);
+      pari_err(talker2,"no such section in help: ?",s,s);
     if (long_help) external_help(s,3); else commands(n);
     return;
   }
@@ -675,7 +675,7 @@ aide0(char *s, int flag)
   if (long_help) { external_help(ep->name,3); return; }
   if (ep->help) { print_text(ep->help); return; }
 
-  err(bugparier,"aide (no help found)");
+  pari_err(bugparier,"aide (no help found)");
 }
 
 void
@@ -929,7 +929,7 @@ escape0(char *tch)
         if (isclone(x)) /* many BIN_GEN */
         {
           long i, l = lg(x);
-          err(warner,"setting %ld history entries", l-1);
+          pari_err(warner,"setting %ld history entries", l-1);
           for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
         }
       }
@@ -948,7 +948,7 @@ escape0(char *tch)
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
-    default: err(caracer1,tch,tch-1);
+    default: pari_err(caracer1,tch,tch-1);
   }
 }
 
@@ -1051,7 +1051,7 @@ check_meta(char *buf)
 #endif
 
 static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
-#define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
+#define err_gprc(s,t,u) { fprintferr("\n"); pari_err(talker2,s,t,u); }
 
 /* LOCATE GPRC */
 
@@ -1509,7 +1509,7 @@ gp_main_loop(int ismain)
 /*                                                                  */
 /********************************************************************/
 void
-gp_sigint_fun(void) { err(siginter, gp_format_time(ti_INTERRUPT)); }
+gp_sigint_fun(void) { pari_err(siginter, gp_format_time(ti_INTERRUPT)); }
 
 static void
 gp_handle_SIGINT(void)
@@ -1555,7 +1555,7 @@ gp_sighandler(int sig)
       pariFILE *f = GP_DATA->pp->file;
       if (f && pari_outfile == f->file)
       {
-        err(talker, "Broken Pipe, resetting file stack...");
+        pari_err(talker, "Broken Pipe, resetting file stack...");
         GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
       }
@@ -1565,7 +1565,7 @@ gp_sighandler(int sig)
 #endif
     default: msg = "signal handling"; break;
   }
-  err(bugparier, msg);
+  pari_err(bugparier, msg);
 }
 
 int
@@ -1661,7 +1661,7 @@ static void
 check_secure(char *s)
 {
   if (GP_DATA->flags & SECURE)
-    err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
+    pari_err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
 GEN
@@ -1701,7 +1701,7 @@ system0(char *s)
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   check_secure(s); system(s);
 #else
-  err(archer);
+  pari_err(archer);
 #endif
 }
 
@@ -1757,7 +1757,7 @@ read_opt(growarray *A, long argc, char **argv)
     switch(*t++)
     {
       case 'b': b = read_arg(&i,t,argc,argv);
-        err(warner, "buffersize is no longer used. -b ignored");
+        pari_err(warner, "buffersize is no longer used. -b ignored");
         break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
@@ -1909,7 +1909,7 @@ prettyp_init(void)
     pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST);
   if (pp->file) return 1;
 
-  err(warner,"broken prettyprinter: '%s'",pp->cmd);
+  pari_err(warner,"broken prettyprinter: '%s'",pp->cmd);
   free(pp->cmd); pp->cmd = NULL; return 0;
 }
 

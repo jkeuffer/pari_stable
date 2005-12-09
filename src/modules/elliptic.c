@@ -25,20 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void
 checkpt(GEN z)
-{ if (typ(z)!=t_VEC) err(elliper1); }
+{ if (typ(z)!=t_VEC) pari_err(elliper1); }
 void
 checksell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 6) err(elliper1); }
+{ if (typ(e)!=t_VEC || lg(e) < 6) pari_err(elliper1); }
 void
 checkell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 14) err(elliper1); }
+{ if (typ(e)!=t_VEC || lg(e) < 14) pari_err(elliper1); }
 void /* check for roots, we don't want a curve over Fp */
 checkbell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 20 || typ(e[14]) != t_COL) err(elliper1); }
+{ if (typ(e)!=t_VEC || lg(e) < 20 || typ(e[14]) != t_COL) pari_err(elliper1); }
 
 static void
 checkch(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) != 5) err(elliper1); }
+{ if (typ(z)!=t_VEC || lg(z) != 5) pari_err(elliper1); }
 
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
@@ -137,7 +137,7 @@ smallinitell0(GEN x, GEN y)
   D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
            gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
   gel(y,12) = D;
-  if (gcmp0(D)) err(talker,"singular curve in ellinit");
+  if (gcmp0(D)) pari_err(talker,"singular curve in ellinit");
 
   j = gdiv(gmul(gsqr(c4),c4), D);
   gel(y,13) = j;
@@ -160,7 +160,7 @@ ellinit0(GEN x, long flag,long prec)
   {
     case 0: return initell(x,prec);
     case 1: return smallinitell(x);
-    default: err(flagerr,"ellinit");
+    default: pari_err(flagerr,"ellinit");
   }
   return NULL; /* not reached */
 }
@@ -192,7 +192,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
   else
   {
     GEN b4 = gel(e,7);
-    if (!is_const_t(ty)) err(typeer,"zell");
+    if (!is_const_t(ty)) pari_err(typeer,"zell");
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
     w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulur(6,e1)))),1) );
@@ -222,7 +222,7 @@ do_agm(GEN *ptx, GEN a1, GEN b1)
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
-  if (!signe(x)) err(precer,"initell");
+  if (!signe(x)) pari_err(precer,"initell");
   for(;;)
   {
     GEN d;
@@ -270,11 +270,11 @@ padic_initell(GEN y, GEN p, long prec)
 
   for (i=1; i<=13; i++) gel(y,i) = gcvtop(gel(y,i), p, prec);
   if (gcmp0(gel(y,13)) || valp(gel(y,13)) >= 0) /* p | j */
-    err(talker,"valuation of j must be negative in p-adic ellinit");
+    pari_err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
   {
     pv = utoipos(4);
-    err(impl,"initell for 2-adic numbers");
+    pari_err(impl,"initell for 2-adic numbers");
   }
   else
     pv = p;
@@ -310,7 +310,7 @@ padic_initell(GEN y, GEN p, long prec)
 
   w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
   w = gadd(w,gsqrt(gaddgs(gsqr(w),-1),0));
-  if (gcmp0(w)) err(precer,"initell");
+  if (gcmp0(w)) pari_err(precer,"initell");
   q = ginv(w);
   if (valp(q) < 0) q = ginv(q);
 
@@ -359,7 +359,7 @@ initell0(GEN x, long prec)
         if (e2 < e) e = e2;
         if (!p) p = gel(q,2);
         else if (!equalii(p,gel(q,2)))
-          err(talker,"incompatible p-adic numbers in initell");
+          pari_err(talker,"incompatible p-adic numbers in initell");
         break;
       }
       case t_INT: case t_REAL: case t_FRAC:
@@ -406,7 +406,7 @@ initell0(GEN x, long prec)
   gel(y,15) = w1;
   gel(y,16) = w2;
   T = vecthetanullk(q, 2, prec);
-  if (gcmp0(gel(T,1))) err(precer,"initell");
+  if (gcmp0(gel(T,1))) pari_err(precer,"initell");
   T = check_real(gdiv(gel(T,2), gel(T,1)));
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
   gel(y,17) = gdiv(gmul(gsqr(pi),T), gmulsg(6,w1));
@@ -698,7 +698,7 @@ ellisoncurve(GEN e, GEN a)
 {
   long i, tx = typ(a), lx = lg(a);
 
-  checksell(e); if (!is_vec_t(tx)) err(elliper1);
+  checksell(e); if (!is_vec_t(tx)) pari_err(elliper1);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_vec_t(tx))
@@ -840,12 +840,12 @@ CM_ellpow(GEN e, GEN z, GEN n)
 
   if (is_inf(z)) return gcopy(z);
   pol = gel(n,1);
-  if (signe(pol[2]) < 0) err(typeer,"CM_ellpow");
+  if (signe(pol[2]) < 0) pari_err(typeer,"CM_ellpow");
   if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
-    err(impl, "powell for nonintegral CM exponent");
+    pari_err(impl, "powell for nonintegral CM exponent");
 
   ln = itos_or_0( shifti(addsi(1, quadnorm(n)), 2) );
-  if (!ln) err(talker, "norm too large in CM");
+  if (!ln) pari_err(talker, "norm too large in CM");
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, monomial(n, 1, 0));
@@ -870,7 +870,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
   }
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
-    err(talker,"not a complex multiplication in powell");
+    pari_err(talker,"not a complex multiplication in powell");
   x = gdiv(p1,q1);
   y = gdiv(deriv(x,0),n);
   x = gsub(poleval(x,grdx), b2ov12);
@@ -893,7 +893,7 @@ powell(GEN e, GEN z, GEN n)
 
   checksell(e); checkpt(z);
   if (typ(n)==t_QUAD) return CM_ellpow(e,z,n);
-  if (typ(n) != t_INT) err(impl,"powell for non integral, non CM, exponents");
+  if (typ(n) != t_INT) pari_err(impl,"powell for non integral, non CM, exponents");
   s = signe(n);
   if (!s || is_inf(z)) return mkvec(gen_0);
   if (s < 0) z = invell(e,z);
@@ -921,7 +921,7 @@ zell(GEN e, GEN z, long prec)
   GEN t, u, p1, p2, a, b, x1, u2, D = gel(e,12);
 
   checkbell(e); checkpt(z);
-  ty = typ(D); if (ty == t_INTMOD) err(typeer,"zell");
+  ty = typ(D); if (ty == t_INTMOD) pari_err(typeer,"zell");
   if (is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
   x1 = new_coords(e,gel(z,1),&a,&b,1, prec);
@@ -1037,7 +1037,7 @@ red_modSL2(SL2_red *T)
   long s;
   T->tau = gdiv(T->w1,T->w2);
   s = gsigne(imag_i(T->tau));
-  if (!s) err(talker,"w1 and w2 R-linearly dependent in elliptic function");
+  if (!s) pari_err(talker,"w1 and w2 R-linearly dependent in elliptic function");
   T->swap = (s < 0);
   if (T->swap) { swap(T->w1, T->w2); T->tau = ginv(T->tau); }
   set_gamma(T);
@@ -1080,7 +1080,7 @@ trueE(GEN tau, long k, long prec)
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"elleisnum");
+      if(DEBUGMEM>1) pari_err(warnmem,"elleisnum");
       gerepileall(av, 2, &y,&qn);
     }
   }
@@ -1106,8 +1106,8 @@ elleisnum(GEN om, long k, long flag, long prec)
   GEN p1, y;
   SL2_red T;
 
-  if (k&1 || k<=0) err(talker,"k not a positive even integer in elleisnum");
-  if (!get_periods(om, &T)) err(typeer,"elleisnum");
+  if (k&1 || k<=0) pari_err(talker,"k not a positive even integer in elleisnum");
+  if (!get_periods(om, &T)) pari_err(typeer,"elleisnum");
   y = _elleisnum(&T, k, prec);
   if (k==2 && signe(T.c))
   {
@@ -1138,7 +1138,7 @@ elleta(GEN om, long prec)
   pari_sp av = avma;
   GEN y1, y2, E2, pi = mppi(prec);
   SL2_red T;
-  if (!get_periods(om, &T)) err(typeer,"elleta");
+  if (!get_periods(om, &T)) pari_err(typeer,"elleta");
   E2 = trueE(T.Tau, 2, prec); /* E_2(Tau) */
   if (signe(T.c))
   {
@@ -1164,7 +1164,7 @@ reduce_z(GEN z, SL2_red *T)
   long t = typ(z), pr;
 
   if (!is_scalar_t(t) || t == t_INTMOD || t == t_PADIC || t == t_POLMOD)
-    err(typeer,"reduction mod SL2 (reduce_z)");
+    pari_err(typeer,"reduction mod SL2 (reduce_z)");
   T->x = ground(gdiv(imag_i(Z), imag_i(T->Tau)));
   Z = gsub(Z, gmul(T->x,T->Tau));
   T->y = ground(real_i(Z));
@@ -1220,7 +1220,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     if (low_stack(lim, stack_lim(av1,1)))
     {
       GEN *gptr[3]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&yp;
-      if(DEBUGMEM>1) err(warnmem,"weipellnum");
+      if(DEBUGMEM>1) pari_err(warnmem,"weipellnum");
       gerepilemany(av1,gptr,flall?3:2);
     }
   }
@@ -1245,9 +1245,9 @@ ellzeta(GEN om, GEN z, long prec)
   GEN Z, pi2, q, u, y, qn, et = NULL;
   SL2_red T;
 
-  if (!get_periods(om, &T)) err(typeer,"ellzeta");
+  if (!get_periods(om, &T)) pari_err(typeer,"ellzeta");
   Z = reduce_z(z, &T);
-  if (!Z) err(talker,"can't evaluate ellzeta at a pole");
+  if (!Z) pari_err(talker,"can't evaluate ellzeta at a pole");
   if (!gcmp0(T.x) || !gcmp0(T.y))
   {
     et = _elleta(&T,prec);
@@ -1273,7 +1273,7 @@ ellzeta(GEN om, GEN z, long prec)
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ellzeta");
+      if(DEBUGMEM>1) pari_err(warnmem,"ellzeta");
       gerepileall(av1,2, &y,&qn);
     }
   }
@@ -1291,12 +1291,12 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   int doprod = (flag >= 2), dolog = (flag & 1);
   SL2_red T;
 
-  if (!get_periods(w, &T)) err(typeer,"ellsigma");
+  if (!get_periods(w, &T)) pari_err(typeer,"ellsigma");
   Z = reduce_z(z, &T);
   if (!Z)
   {
     if (!dolog) return gen_0;
-    err(talker,"can't evaluate log(ellsigma) at lattice point");
+    pari_err(talker,"can't evaluate log(ellsigma) at lattice point");
   }
   et = _elleta(&T, prec);
   etnew = gadd(gmul(T.x,gel(et,1)), gmul(T.y,gel(et,2)));
@@ -1328,7 +1328,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"ellsigma");
+        if(DEBUGMEM>1) pari_err(warnmem,"ellsigma");
         gerepileall(av1,2, &y,&qn);
       }
     }
@@ -1352,7 +1352,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"ellsigma");
+        if(DEBUGMEM>1) pari_err(warnmem,"ellsigma");
         gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
       }
     }
@@ -1452,11 +1452,11 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
   if (!z) return weipell0(w,prec,PREC);
   if (typ(z)==t_POL)
   {
-    if (!is_simple_var(z)) err(talker,"expecting a simple variable in ellwp");
+    if (!is_simple_var(z)) pari_err(talker,"expecting a simple variable in ellwp");
     v = weipell0(w,prec,PREC); setvarn(v, varn(z));
     return v;
   }
-  if (!get_periods(w, &T)) err(typeer,"ellwp");
+  if (!get_periods(w, &T)) pari_err(typeer,"ellwp");
   switch(flag)
   {
     case 0: v = weipellnumall(&T,z,0,prec);
@@ -1473,7 +1473,7 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
       }
       return v;
     case 2: return pointell(w,z,prec);
-    default: err(flagerr,"ellwp"); return NULL;
+    default: pari_err(flagerr,"ellwp"); return NULL;
   }
 }
 
@@ -1514,8 +1514,8 @@ localred_result(long f, long kod, long c, GEN v)
 static GEN
 localredbug(GEN p, char *s)
 {
-  if (BSW_psp(p)) err(bugparier, s);
-  err(talker,"not a prime in localred");
+  if (BSW_psp(p)) pari_err(bugparier, s);
+  pari_err(talker,"not a prime in localred");
   return NULL; /* not reached */
 }
 
@@ -1805,7 +1805,7 @@ localred(GEN e, GEN p, int minim)
   {
     long l = itos(p);
     GEN z;
-    if (l < 2) err(talker,"not a prime in localred");
+    if (l < 2) pari_err(talker,"not a prime in localred");
     z = localred_23(e, l);
     return minim? gel(z,3): z;
   }
@@ -1817,8 +1817,8 @@ elllocalred(GEN e, GEN p)
   pari_sp av = avma;
   checkell(e);
   if (typ(e[12]) != t_INT)
-    err(talker,"not an integral curve in elllocalred");
-  if (typ(p) != t_INT || signe(p) <= 0) err(typeer,"elllocalred");
+    pari_err(talker,"not an integral curve in elllocalred");
+  if (typ(p) != t_INT || signe(p) <= 0) pari_err(typeer,"elllocalred");
   return gerepileupto(av, localred(e, p, 0));
 }
 
@@ -1839,7 +1839,7 @@ ellintegralmodel(GEN e)
       case t_FRAC: /* partial factorization */
         L = shallowconcat(L, (GEN)auxdecomp(gel(u,2), 0)[1]);
         break;
-      default: err(talker, "not a rational curve in ellintegralmodel");
+      default: pari_err(talker, "not a rational curve in ellintegralmodel");
     }
   }
   /* a = [a1, a2, a3, a4, a6] */
@@ -2236,7 +2236,7 @@ ellrootno(GEN e, GEN p)
     s = ellrootno_global(e, N);
   else
   {
-    if (typ(p) != t_INT || signe(p) < 0) err(typeer,"ellrootno");
+    if (typ(p) != t_INT || signe(p) < 0) pari_err(typeer,"ellrootno");
     if (cmpiu(p,3) > 0) s = ellrootno_p(e,p, Z_pval(N, p));
     else switch(itou(p))
     {
@@ -2296,8 +2296,8 @@ ap_jacobi(GEN e, ulong p)
 GEN
 apell2(GEN e, GEN pp)
 {
-  checkell(e); if (typ(pp)!=t_INT) err(elliper1);
-  if (expi(pp) > 29) err(talker,"prime too large in apell2, use apell");
+  checkell(e); if (typ(pp)!=t_INT) pari_err(elliper1);
+  if (expi(pp) > 29) pari_err(talker,"prime too large in apell2, use apell");
   return ap_jacobi(e, (ulong)pp[2]);
 }
 
@@ -2774,7 +2774,7 @@ apell0(GEN e, ulong p)
     while (!KRO || KRO == KROold)
     {
       ulong t;
-      if (++x >= p) err(talker, "%lu is not prime, use ellak", p);
+      if (++x >= p) pari_err(talker, "%lu is not prime, use ellak", p);
       t = Fl_add(c4, Fl_mul(x,x,p), p);
       u = Fl_add(c6, Fl_mul(x, t, p), p);
       KRO = kross(u,p);
@@ -2807,8 +2807,8 @@ apell0(GEN e, ulong p)
     for (i=1; ; i++)
     {
       if (ftest.isnull) {
-        if (!isprime(utoi(p))) err(talker,"%lu is not prime, use ellak", p);
-        err(bugparier,"apell (f^(i*s) = 1)");
+        if (!isprime(utoi(p))) pari_err(talker,"%lu is not prime, use ellak", p);
+        pari_err(bugparier,"apell (f^(i*s) = 1)");
       }
       l=0; r=s;
       while (l<r)
@@ -2996,7 +2996,7 @@ apell(GEN e, GEN p)
 {
   GEN a;
   checkell(e);
-  if (typ(p)!=t_INT || signe(p) <= 0) err(talker,"not a prime in apell");
+  if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in apell");
   a = CM_ellap(e, p); if (a) return a;
 
   if (cmpiu(p, 0x3fffffff) > 0) return apell1(e, p);
@@ -3012,7 +3012,7 @@ checkell_int(GEN e)
   checkell(e);
   if (typ(e[1]) != t_INT || typ(e[2]) != t_INT || typ(e[3]) != t_INT
    || typ(e[4]) != t_INT || typ(e[5]) != t_INT)
-    err(talker,"not an integral model");
+    pari_err(talker,"not an integral model");
 }
 
 GEN
@@ -3029,7 +3029,7 @@ anell(GEN e, long n0)
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
-  if (n >= LGBITS) err(impl,"anell for n >= %lu", LGBITS);
+  if (n >= LGBITS) pari_err(impl,"anell for n >= %lu", LGBITS);
   c6= gel(e,11);
   D = gel(e,12);
 
@@ -3091,12 +3091,12 @@ akell(GEN e, GEN n)
   GEN fa, P, E, D, c6, ap, u, v, w, y, p;
 
   checkell(e);
-  if (typ(n) != t_INT) err(typeer,"akell");
+  if (typ(n) != t_INT) pari_err(typeer,"akell");
   if (signe(n)<= 0) return gen_0;
   if (gcmp1(n)) return gen_1;
   c6= gel(e,11);
   D = gel(e,12);
-  if (typ(D) != t_INT) err(talker,"not an integral model in akell");
+  if (typ(D) != t_INT) pari_err(talker,"not an integral model in akell");
   u = coprime_part(n, D);
   s = 1;
   if (!equalii(u, n))
@@ -3146,7 +3146,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   else
   {
     if (gsigne(A)<=0)
-      err(talker,"cut-off point must be positive in lseriesell");
+      pari_err(talker,"cut-off point must be positive in lseriesell");
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
   if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
@@ -3189,7 +3189,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
     z = gadd(z, gmul(p1, an));
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lseriesell");
+      if(DEBUGMEM>1) pari_err(warnmem,"lseriesell");
       z = gerepilecopy(av1,z);
     }
   }
@@ -3330,8 +3330,8 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
-  if (flag > 2 || flag < 0) err(flagerr,"ellheight");
-  checkbell(e); if (!is_matvec_t(tx)) err(elliper1);
+  if (flag > 2 || flag < 0) pari_err(flagerr,"ellheight");
+  checkbell(e); if (!is_matvec_t(tx)) pari_err(elliper1);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
@@ -3341,7 +3341,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
     return z;
   }
   if (is_inf(a)) return gen_0;
-  if (!oncurve(e,a)) err(talker, "point not on elliptic curve");
+  if (!oncurve(e,a)) pari_err(talker, "point not on elliptic curve");
 
   psi2 = numer(d_ellLHS(e,a));
   if (!signe(psi2)) { avma = av; return gen_0; }
@@ -3408,7 +3408,7 @@ mathell(GEN e, GEN x, long prec)
   long lx = lg(x),i,j,tx=typ(x);
   pari_sp av = avma;
 
-  if (!is_vec_t(tx)) err(elliper1);
+  if (!is_vec_t(tx)) pari_err(elliper1);
   y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
   for (i=1; i<lx; i++)
   {
@@ -3456,7 +3456,7 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   long tz1 = typ(z1), tz2 = typ(z2);
   pari_sp av = avma;
 
-  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) err(elliper1);
+  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) pari_err(elliper1);
   if (lg(z1)==1) return cgetg(1,tz1);
   if (lg(z2)==1) return cgetg(1,tz2);
 
@@ -3464,7 +3464,7 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   tz2 = typ(z2[1]);
   if (is_matvec_t(tz2))
   {
-    if (is_matvec_t(tz1)) err(talker,"two vector/matrix types in bilhell");
+    if (is_matvec_t(tz1)) pari_err(talker,"two vector/matrix types in bilhell");
     p1 = z1; z1 = z2; z2 = p1;
   }
   h2 = ghell(e,z2,prec);
@@ -3631,7 +3631,7 @@ orderell(GEN e, GEN p)
 {
   long t;
   checkell(e); checkpt(p); t = typ(e[13]);
-  if (!is_rational_t(t)) err(impl,"orderell for nonrational elliptic curves");
+  if (!is_rational_t(t)) pari_err(impl,"orderell for nonrational elliptic curves");
   return utoi( _orderell(e, p) );
 }
 
@@ -3724,18 +3724,18 @@ nagelllutz(GEN e)
     w2 = mkvec( utoipos(t) );
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t) break;
-    if (k>t) err(bugparier,"torsell (bug1)");
+    if (k>t) pari_err(bugparier,"torsell (bug1)");
 
     w3 = mkvec( gel(r,k) );
   }
   else
   {
-    if (t&3) err(bugparier,"torsell (bug2)");
+    if (t&3) pari_err(bugparier,"torsell (bug2)");
     t2 = t>>1;
     w2 = mkvec2(utoipos(t2), gen_2);
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t2) break;
-    if (k>t) err(bugparier,"torsell (bug3)");
+    if (k>t) pari_err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,gel(r,k),utoipos(t>>2));
     k2 = (!is_inf(p1) && gequal(gel(r,2),p1))? 3: 2;
@@ -3782,7 +3782,7 @@ myround(GEN x, long *e)
 {
   GEN y = grndtoi(x,e);
   if (*e > -5 && bit_accuracy(gprecision(x)) < gexpo(y) - 10)
-    err(talker, "ellinit data not accurate enough. Increase precision");
+    pari_err(talker, "ellinit data not accurate enough. Increase precision");
   return y;
 }
 
@@ -3819,7 +3819,7 @@ torsell(GEN e)
   pr = DEFAULTPREC + ((lgefint(gel(e,12))-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = gel(e,15);
   prec = precision(w1);
-  if (prec < pr) err(precer, "torsell");
+  if (prec < pr) pari_err(precer, "torsell");
   if (pr < prec) { prec = pr; e = gprec_w(e, pr); w1 = gel(e,15); }
   if (v) gel(v,1) = ginv(gel(v,1));
   w22 = gmul2n(gel(e,16),-1);
@@ -3918,7 +3918,7 @@ elltors0(GEN e, long flag)
   {
     case 0: return torsell(e);
     case 1: return nagelllutz(e);
-    default: err(flagerr,"torsell");
+    default: pari_err(flagerr,"torsell");
   }
   return NULL; /* not reached */
 }

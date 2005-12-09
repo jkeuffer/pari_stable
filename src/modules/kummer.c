@@ -174,7 +174,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
   {
     long ex = itos(gel(Ex,i));
     GEN e = stoi(ex / n);
-    if (strict && ex % n) err(talker,"not an n-th power in idealsqrtn");
+    if (strict && ex % n) pari_err(talker,"not an n-th power in idealsqrtn");
     if (q) q = idealmulpowprime(nf, q, gel(Pr,i), e);
     else   q = idealpow(nf, gel(Pr,i), e);
   }
@@ -207,7 +207,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     z = get_arch_real(nf, be, &emb, prec);
     if (z) break;
     prec = (prec-1)<<1;
-    if (DEBUGLEVEL) err(warnprec,"reducebeta",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"reducebeta",prec);
     nf = nfnewprec(nf,prec);
   }
   z = shallowconcat(matunit, z);
@@ -332,7 +332,7 @@ downtoK(toK_s *T, GEN x)
 static GEN
 no_sol(long all, long i)
 {
-  if (!all) err(talker,"bug%d in kummer",i);
+  if (!all) pari_err(talker,"bug%d in kummer",i);
   return cgetg(1,t_VEC);
 }
 
@@ -343,7 +343,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   if (all)        gell = stoi(all);
   else if (subgp) gell = det(subgp);
   else            gell = det(diagonal_i(gmael(bnr,5,2)));
-  if (typ(gell) != t_INT) err(arither1);
+  if (typ(gell) != t_INT) pari_err(arither1);
   return gell;
 }
 
@@ -634,7 +634,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
   }
   setlg(y, rc+1);
   b = isunit(bnf,eps);
-  if (lg(b) == 1) err(bugparier,"isvirtualunit");
+  if (lg(b) == 1) pari_err(bugparier,"isvirtualunit");
   return shallowconcat(lift_intern(b), y);
 }
 
@@ -895,7 +895,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnf = gel(bnr,1);
   nf  = gel(bnf,7);
   polnf = gel(nf,1); vnf = varn(polnf);
-  if (!vnf) err(talker,"main variable in kummer must not be x");
+  if (!vnf) pari_err(talker,"main variable in kummer must not be x");
   wk = gmael3(bnf,8,4,1);
   /* step 7 */
   p1 = conductor(bnr, subgroup, 2);
@@ -904,7 +904,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   subgroup = gel(p1,3);
   gell = get_gell(bnr,subgroup,all);
   if (gcmp1(gell)) return pol_x[vnf];
-  if (!isprime(gell)) err(impl,"kummer for composite relative degree");
+  if (!isprime(gell)) pari_err(impl,"kummer for composite relative degree");
   if (dvdii(wk,gell)) return rnfkummersimple(bnr, subgroup, gell, all);
 
   bid = gel(bnr,2);

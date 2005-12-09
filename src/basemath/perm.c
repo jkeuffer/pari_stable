@@ -135,7 +135,7 @@ vecsmall_copy(GEN x)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_VECSMALL);
-  if (typ(x)!=t_VECSMALL) err(typeer,"vecsmall_copy");
+  if (typ(x)!=t_VECSMALL) pari_err(typeer,"vecsmall_copy");
   for (i=1; i<l; i++) z[i] = x[i];
   return z;
 }
@@ -460,7 +460,7 @@ perm_mul(GEN s, GEN t)
   GEN u;
   long i, l = lg(s);
   if (l < lg(t))
-    err(talker, "First permutation shorter than second in perm_mul");
+    pari_err(talker, "First permutation shorter than second in perm_mul");
   u = cgetg(l, typ(s));
   for (i = 1; i < l; i++) u[i] = s[ t[i] ];
   return u;
@@ -630,7 +630,7 @@ perm_to_GAP(GEN p)
   char *s;
   long sz;
   long lp=lg(p)-1;
-  if (typ(p) != t_VECSMALL)  err(typeer, "perm_to_GAP");
+  if (typ(p) != t_VECSMALL)  pari_err(typeer, "perm_to_GAP");
   x = perm_cycles(p);
   sz = (long) ((bfffo(lp)+1) * L2SL10 + 1);
   /*Dry run*/
@@ -732,7 +732,7 @@ group_order(GEN G)
 long
 group_domain(GEN G)
 {
-  if (lg(G[1]) < 2) err(talker,"empty group in group_domain");
+  if (lg(G[1]) < 2) pari_err(talker,"empty group in group_domain");
   return lg(gmael(G,1,1)) - 1;
 }
 
@@ -853,7 +853,7 @@ long
 cosets_perm_search(GEN C, GEN p)
 {
   long n = gen_search(gel(C,2),p,0,vecsmall_prefixcmp);
-  if (!n) err(talker, "coset not found in cosets_perm_search");
+  if (!n) pari_err(talker, "coset not found in cosets_perm_search");
   return mael3(C,2,n,lg(p));
 }
 
@@ -907,7 +907,7 @@ quotient_group(GEN C, GEN G)
   }
   setlg(Qgen,j);
   setlg(Qord,j); Q = mkvec2(Qgen, Qord);
-  if (group_order(Q) != n) err(talker,"galoissubgroup: not a WSS group");
+  if (group_order(Q) != n) pari_err(talker,"galoissubgroup: not a WSS group");
   return gerepilecopy(ltop,Q);
 }
 
@@ -1111,7 +1111,7 @@ group_abelianHNF(GEN G, GEN S)
     for(j=1; j<lg(S); j++)
       if (gequal(P, gel(S,j))) break;
     avma = av;
-    if (j==lg(S)) err(talker,"wrong argument in galoisisabelian");
+    if (j==lg(S)) pari_err(talker,"wrong argument in galoisisabelian");
     j--;
     for(k=1; k<i; k++)
     {
@@ -1251,6 +1251,6 @@ group_export(GEN G, long format)
   case 0: return group_export_GAP(G);
   case 1: return group_export_MAGMA(G);
   }
-  err(flagerr,"galoisexport");
+  pari_err(flagerr,"galoisexport");
   return NULL; /*-Wall*/
 }

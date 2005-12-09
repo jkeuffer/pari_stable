@@ -102,9 +102,9 @@ nffactormod(GEN nf, GEN x, GEN pr)
 
   nf = checknf(nf);
   vn = varn(nf[1]);
-  if (typ(x)!=t_POL) err(typeer,"nffactormod");
+  if (typ(x)!=t_POL) pari_err(typeer,"nffactormod");
   if (varncmp(vx,vn) >= 0)
-    err(talker,"polynomial variable must have highest priority in nffactormod");
+    pari_err(talker,"polynomial variable must have highest priority in nffactormod");
 
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
   xrd = modprX(x, nf, modpr);
@@ -145,9 +145,9 @@ nfroots(GEN nf,GEN pol)
   if (!nf) return nfrootsQ(pol);
 
   nf = checknf(nf); T = gel(nf,1);
-  if (typ(pol) != t_POL) err(notpoler,"nfroots");
+  if (typ(pol) != t_POL) pari_err(notpoler,"nfroots");
   if (varncmp(varn(pol), varn(T)) >= 0)
-    err(talker,"polynomial variable must have highest priority in nfroots");
+    pari_err(talker,"polynomial variable must have highest priority in nfroots");
   d = degpol(pol);
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
@@ -177,7 +177,7 @@ nfissplit(GEN nf, GEN x)
 {
   pari_sp av = avma;
   long l;
-  if (typ(x) != t_POL) err(typeer, "nfissplit");
+  if (typ(x) != t_POL) pari_err(typeer, "nfissplit");
   l = lg(nfsqff(checknf(nf), x, 2));
   avma = av; return l != 1;
 }
@@ -186,7 +186,7 @@ nfissplit(GEN nf, GEN x)
 int
 nfisgalois(GEN nf, GEN P)
 {
-  if (typ(P) != t_POL) err(typeer, "nfissplit");
+  if (typ(P) != t_POL) pari_err(typeer, "nfissplit");
   return degpol(P) <= 2 || nfissplit(nf, P);
 }
 
@@ -253,9 +253,9 @@ nffactor(GEN nf,GEN pol)
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   nf = checknf(nf); T = gel(nf,1);
-  if (typ(pol) != t_POL) err(notpoler,"nffactor");
+  if (typ(pol) != t_POL) pari_err(notpoler,"nffactor");
   if (varncmp(varn(pol), varn(T)) >= 0)
-    err(talker,"polynomial variable must have highest priority in nffactor");
+    pari_err(talker,"polynomial variable must have highest priority in nffactor");
 
   if (d == 0) return trivfact();
   rep = cgetg(3, t_MAT); av = avma;
@@ -365,7 +365,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
 PRECPB:
     prec = (prec<<1)-2;
     remake_GM(nf, &F, prec); G = F.G;
-    if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
+    if (DEBUGLEVEL>1) pari_err(warnprec, "nf_factor_bound", prec);
   }
 
   /* Take sup over 0 <= i <= d of
@@ -422,7 +422,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     if (prec > precnf)
     {
       nffp_t F; remake_GM(nf, &F, prec); G = F.G;
-      if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
+      if (DEBUGLEVEL>1) pari_err(warnprec, "nf_factor_bound", prec);
     }
   }
   lt = leading_term(polbase);
@@ -1253,7 +1253,7 @@ AGAIN:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
+      if(DEBUGMEM>1) pari_err(warnmem,"nf_LLL_cmbf");
       gerepileall(av, Tpk? 9: 8,
                       &CM_L,&TT,&Tra,&famod,&pk,&GSmin,&PRK,&PRKinv,&Tpk);
     }
@@ -1455,7 +1455,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   n = degpol(nfpol);
   polbase = unifpol(nf, pol, t_COL);
-  if (typ(polbase) != t_POL) err(typeer, "nfsqff");
+  if (typ(polbase) != t_POL) pari_err(typeer, "nfsqff");
   polmod  = unifpol(nf, pol, t_POLMOD);
   if (dpol == 1) /* irreducible */
     return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
@@ -1580,7 +1580,7 @@ rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
     return gerepileupto(av, gpowgs(gsub(pol_x[v], alpha), lT - 3));
   vT = varn(T);
   if (varn(alpha) != vT || varncmp(v, vnf)>=0)
-    err(talker,"incorrect variables in rnfcharpoly");
+    pari_err(talker,"incorrect variables in rnfcharpoly");
   if (lg(alpha) >= lT) alpha = RgX_rem(alpha, T);
   if (lT <= 4)
     return gerepileupto(av, gsub(pol_x[v], alpha));

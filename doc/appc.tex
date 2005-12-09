@@ -90,14 +90,14 @@ is slightly faster. It should be used in the following way:
 byteptr ptr = diffptr;
 ulong p = 0;
 
-if (maxprime() < goal) err(primer1); /*@Ccom not enough primes */
+if (maxprime() < goal) pari_err(primer1); /*@Ccom not enough primes */
 while (p <= goal) /*@Ccom run through all primes up to \kbd{goal} */
 {
   NEXT_PRIME_VIADIFF(p, ptr);
   ...
 }
 @eprog\noindent
-Here, we use the general error handling function \kbd{err} (see
+Here, we use the general error handling function \kbd{pari\_err} (see
 \secref{se:err}), with the codeword \kbd{primer1}, raising the ``not enough
 primes'' error.
 

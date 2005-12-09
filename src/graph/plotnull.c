@@ -29,5 +29,5 @@ void
 PARI_get_plot(long f)
 {
   (void)f;
-  err(talker,"high resolution graphics disabled");
+  pari_err(talker,"high resolution graphics disabled");
 }

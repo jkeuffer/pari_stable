@@ -23,23 +23,23 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 check_quaddisc(GEN x, long *s, long *r, char *f)
 {
-  if (typ(x) != t_INT) err(arither1);
-  *s = signe(x); if (!*s) err(talker,"zero discriminant in %s", f);
-  if (carreparfait(x)) err(talker,"square discriminant in %s", f);
+  if (typ(x) != t_INT) pari_err(arither1);
+  *s = signe(x); if (!*s) pari_err(talker,"zero discriminant in %s", f);
+  if (carreparfait(x)) pari_err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
-  if (*r > 1) err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
+  if (*r > 1) pari_err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
 }
 void
 check_quaddisc_real(GEN x, long *r, char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
-  if (sx < 0) err(talker, "negative discriminant in %s", f);
+  if (sx < 0) pari_err(talker, "negative discriminant in %s", f);
 }
 void
 check_quaddisc_imag(GEN x, long *r, char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
-  if (sx > 0) err(talker, "positive discriminant in %s", f);
+  if (sx > 0) pari_err(talker, "positive discriminant in %s", f);
 }
 
 GEN
@@ -97,7 +97,7 @@ GEN
 qfi(GEN x, GEN y, GEN z)
 {
   GEN t = cgetg(4,t_QFI);
-  if (signe(x) < 0) err(impl,"negative definite t_QFI");
+  if (signe(x) < 0) pari_err(impl,"negative definite t_QFI");
   gel(t,1) = icopy(x);
   gel(t,2) = icopy(y);
   gel(t,3) = icopy(z); return t;
@@ -106,7 +106,7 @@ GEN
 qfr(GEN x, GEN y, GEN z, GEN d)
 {
   GEN t = cgetg(5,t_QFR);
-  if (typ(d) != t_REAL) err(talker,"Shanks distance must be a t_REAL in qfr");
+  if (typ(d) != t_REAL) pari_err(talker,"Shanks distance must be a t_REAL in qfr");
   gel(t,1) = icopy(x);
   gel(t,2) = icopy(y);
   gel(t,3) = icopy(z);
@@ -118,9 +118,9 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 {
   pari_sp av = avma;
   long s;
-  if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) err(typeer,"Qfb");
+  if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) pari_err(typeer,"Qfb");
   s = signe(qf_disc0(x,y,z)); avma = av;
-  if (!s) err(talker,"zero discriminant in Qfb");
+  if (!s) pari_err(talker,"zero discriminant in Qfb");
   if (s < 0) return qfi(x, y, z);
 
   d = d? gtofp(d,prec): real_0(prec);
@@ -186,7 +186,7 @@ qfb_comp(GEN z, GEN x, GEN y)
   gel(z,1) = mulii(v1,v2);
   gel(z,2) = addii(gel(y,2), shifti(p1,1));
   gel(z,3) = dvmdii(c3,v1, &s);
-  if (signe(s)) err(talker,"different discriminants in qfb_comp");
+  if (signe(s)) pari_err(talker,"different discriminants in qfb_comp");
 }
 
 static GEN
@@ -195,7 +195,7 @@ compimag0(GEN x, GEN y, int raw)
   pari_sp av = avma;
   long tx = typ(x);
   GEN z = cgetg(4,t_QFI);
-  if (typ(y) != tx || tx != t_QFI) err(typeer,"composition");
+  if (typ(y) != tx || tx != t_QFI) pari_err(typeer,"composition");
   if (absi_cmp(gel(x,1), gel(y,1)) > 0) swap(x, y);
   qfb_comp(z, x,y);
   if (raw) return gerepilecopy(av,z);
@@ -207,7 +207,7 @@ compreal0(GEN x, GEN y, int raw)
   pari_sp av = avma;
   long tx = typ(x);
   GEN z = cgetg(5,t_QFR);
-  if (typ(y) != tx || tx != t_QFR) err(typeer,"composition");
+  if (typ(y) != tx || tx != t_QFR) pari_err(typeer,"composition");
   qfb_comp(z, x,y); gel(z,4) = addrr(gel(x,4),gel(y,4));
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redreal(z));
@@ -230,7 +230,7 @@ sqcompimag0(GEN x, long raw)
   pari_sp av = avma;
   GEN z = cgetg(4,t_QFI);
 
-  if (typ(x)!=t_QFI) err(typeer,"composition");
+  if (typ(x)!=t_QFI) pari_err(typeer,"composition");
   qfb_sqr(z,x);
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redimag(z));
@@ -241,7 +241,7 @@ sqcompreal0(GEN x, long raw)
   pari_sp av = avma;
   GEN z = cgetg(5,t_QFR);
 
-  if (typ(x)!=t_QFR) err(typeer,"composition");
+  if (typ(x)!=t_QFR) pari_err(typeer,"composition");
   qfb_sqr(z,x); gel(z,4) = shiftr(gel(x,4),1);
   if (raw) return gerepilecopy(av,z);
   return gerepileupto(av, redreal(z));
@@ -274,9 +274,9 @@ GEN
 qfr_unit(GEN x)
 {
   long prec;
-  if (typ(x) != t_QFR) err(typeer,"qfr_unit");
+  if (typ(x) != t_QFR) pari_err(typeer,"qfr_unit");
   prec = precision(gel(x,4));
-  if (!prec) err(talker,"not a t_REAL in 4th component of a t_QFR");
+  if (!prec) pari_err(talker,"not a t_REAL in 4th component of a t_QFR");
   return qfr_unit_by_disc(qf_disc(x), prec);
 }
 
@@ -301,7 +301,7 @@ qfi_unit_by_disc(GEN D)
 GEN
 qfi_unit(GEN x)
 {
-  if (typ(x) != t_QFI) err(typeer,"qfi_unit");
+  if (typ(x) != t_QFI) pari_err(typeer,"qfi_unit");
   return qfi_unit_by_disc(qf_disc(x));
 }
 
@@ -320,7 +320,7 @@ powrealraw(GEN x, long n)
   long m;
   GEN y;
 
-  if (typ(x) != t_QFR) err(talker,"not a t_QFR in powrealraw");
+  if (typ(x) != t_QFR) pari_err(talker,"not a t_QFR in powrealraw");
   if (!n) return qfr_unit(x);
   if (n== 1) return gcopy(x);
   if (n==-1) return invraw(x);
@@ -342,7 +342,7 @@ powimagraw(GEN x, long n)
   long m;
   GEN y;
 
-  if (typ(x) != t_QFI) err(talker,"not a t_QFI in powimag");
+  if (typ(x) != t_QFI) pari_err(talker,"not a t_QFI in powimag");
   if (!n) return qfi_unit(x);
   if (n== 1) return gcopy(x);
   if (n==-1) return invraw(x);
@@ -385,7 +385,7 @@ nucomp(GEN x, GEN y, GEN L)
   GEN a, a1, a2, b2, b, d, d1, g, n, p1, q1, q2, s, u, u1, v, v1, v2, v3, Q;
 
   if (x==y) return nudupl(x,L);
-  if (typ(x) != t_QFI || typ(y) != t_QFI) err(talker,"not a t_QFI in nucomp");
+  if (typ(x) != t_QFI || typ(y) != t_QFI) pari_err(talker,"not a t_QFI in nucomp");
 
   if (absi_cmp(gel(x,1),gel(y,1)) < 0) swap(x, y);
   s = shifti(addii(gel(x,2),gel(y,2)), -1);
@@ -452,7 +452,7 @@ nudupl(GEN x, GEN L)
   long z;
   GEN u, v, d, d1, p1, a, b, c, a2, b2, c2, Q, v2, v3, g;
 
-  if (typ(x) != t_QFI) err(talker,"not a t_QFI in nudupl");
+  if (typ(x) != t_QFI) pari_err(talker,"not a t_QFI in nudupl");
   a = gel(x,1);
   b = gel(x,2);
   d1 = bezout(b,a, &u,&v);
@@ -496,7 +496,7 @@ nupow(GEN x, GEN n)
   pari_sp av;
   GEN y, l;
 
-  if (typ(n) != t_INT) err(talker,"not an integer exponent in nupow");
+  if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nupow");
   if (gcmp1(n)) return gcopy(x);
   av = avma; y = qfi_unit(x);
   if (!signe(n)) return y;
@@ -544,7 +544,7 @@ redimagsl2(GEN q, GEN *U)
     z = u1; u1 = u2; u2 = negi(z);
     REDBU(a,b,c, u1,u2);
     if (low_stack(lim, stack_lim(av, 1))) {
-      if (DEBUGMEM>1) err(warnmem, "redimagsl2");
+      if (DEBUGMEM>1) pari_err(warnmem, "redimagsl2");
       gerepileall(av, 5, &a,&b,&c, &u1,&u2);
     }
   }
@@ -591,7 +591,7 @@ redimag(GEN q)
     swap(a,c); b = negi(b); /* apply rho */
     REDB(a,b,c);
     if (low_stack(lim, stack_lim(av, 1))) {
-      if (DEBUGMEM>1) err(warnmem, "redimag");
+      if (DEBUGMEM>1) pari_err(warnmem, "redimag");
       gerepileall(av, 3, &a,&b,&c);
     }
   }
@@ -669,7 +669,7 @@ static void
 rho_get_BC(GEN *B, GEN *C, GEN b, GEN c, GEN D, GEN isqrtD)
 {
   GEN t, u;
-  u = shifti(c,1); if (u == gen_0) err(talker, "reducible form in qfr_rho");
+  u = shifti(c,1); if (u == gen_0) pari_err(talker, "reducible form in qfr_rho");
   t = (absi_cmp(isqrtD,c) >= 0)? isqrtD: c;
   u = remii(addii_sign(t,1, b,signe(b)), u);
   *B = addii_sign(t, 1, u, -signe(u)); /* |t| - (|t|+b) % |2c| */
@@ -806,23 +806,23 @@ qfr5_init(GEN x, GEN *D, GEN *isqrtD, GEN *sqrtD)
   x = qfr_to_qfr5(x,prec);
 
   if (!*D) *D = qf_disc(x);
-  else if (typ(*D) != t_INT) err(arither1);
+  else if (typ(*D) != t_INT) pari_err(arither1);
 
   if (!*sqrtD) *sqrtD = sqrtr(itor(*D,prec));
-  else if (typ(*sqrtD) != t_REAL) err(arither1);
+  else if (typ(*sqrtD) != t_REAL) pari_err(arither1);
 
   if (!*isqrtD) *isqrtD = truncr(*sqrtD);
-  else if (typ(*isqrtD) != t_INT) err(arither1);
+  else if (typ(*isqrtD) != t_INT) pari_err(arither1);
   return x;
 }
 static GEN
 qfr3_init(GEN x, GEN *D, GEN *isqrtD)
 {
   if (!*D) *D = qf_disc(x);
-  else if (typ(*D) != t_INT) err(arither1);
+  else if (typ(*D) != t_INT) pari_err(arither1);
 
   if (!*isqrtD) *isqrtD = sqrti(*D);
-  else if (typ(*isqrtD) != t_INT) err(arither1);
+  else if (typ(*isqrtD) != t_INT) pari_err(arither1);
   return x;
 }
 
@@ -834,7 +834,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
   pari_sp av = avma;
   GEN d = gel(x,4);
-  if (typ(x) != t_QFR) err(talker,"not a real quadratic form in redreal");
+  if (typ(x) != t_QFR) pari_err(talker,"not a real quadratic form in redreal");
   x = (flag & qf_NOD)? qfr3_init(x, &D,&isqrtD)
                      : qfr5_init(x, &D,&isqrtD,&sqrtD);
   switch(flag) {
@@ -842,7 +842,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
     case qf_NOD:         x = qfr3_red(x,D,isqrtD); break;
     case qf_STEP:        x = qfr5_rho(x,D,sqrtD,isqrtD); break;
     case qf_STEP|qf_NOD: x = qfr3_rho(x,D,isqrtD); break;
-    default: err(flagerr,"qfbred");
+    default: pari_err(flagerr,"qfbred");
   }
   return gerepilecopy(av, qfr5_to_qfr(x,d));
 }
@@ -974,17 +974,17 @@ primeform_u(GEN x, ulong p)
 
   s = mod8(x); if (signe(x) < 0 && s) s = 8-s;
   /* 2 or 3 mod 4 */
-  if (s & 2) err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
+  if (s & 2) pari_err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
   if (p == 2) {
     switch(s) {
       case 0: b = 0; break;
       case 1: b = 1; break;
       case 4: b = 2; break;
-      default: err(sqrter5); b = 0; /* -Wall */
+      default: pari_err(sqrter5); b = 0; /* -Wall */
     }
     c = shifti(subsi(s,x), -3);
   } else {
-    b = Fl_sqrt(umodiu(x,p), p); if (b == ~0UL) err(sqrter5);
+    b = Fl_sqrt(umodiu(x,p), p); if (b == ~0UL) pari_err(sqrter5);
     /* mod(b) != mod2(x) ? */
     if ((b & 1) != (s & 1)) b = p - b;
     c = diviuexact(shifti(subii(sqru(b), x), -2), p);
@@ -1002,15 +1002,15 @@ primeform(GEN x, GEN p, long prec)
   long s, sx = signe(x), sp = signe(p);
   GEN y, b, absp;
 
-  if (typ(x) != t_INT || !sx) err(arither1);
-  if (typ(p) != t_INT || !sp) err(arither1);
+  if (typ(x) != t_INT || !sx) pari_err(arither1);
+  if (typ(p) != t_INT || !sp) pari_err(arither1);
   if (is_pm1(p)) {
     if (sx < 0) return qfi_unit_by_disc(x);
     y = qfr_unit_by_disc(x,prec);
     if (sp < 0) { gel(y,1) = negi(gel(y,1)); gel(y,3) = negi(gel(y,3)); }
     return y;
   }
-  if (sp < 0 && sx < 0) err(impl,"negative definite t_QFI");
+  if (sp < 0 && sx < 0) pari_err(impl,"negative definite t_QFI");
   if (lgefint(p) == 3)
   { 
     y = primeform_u(x, p[2]);
@@ -1030,9 +1030,9 @@ primeform(GEN x, GEN p, long prec)
     gel(y,4) = real_0(prec);
   }
   /* 2 or 3 mod 4 */
-  if (s & 2) err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
+  if (s & 2) pari_err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");
   absp = absi(p); av = avma;
-  b = Fp_sqrt(x, absp); if (!b) err(sqrter5);
+  b = Fp_sqrt(x, absp); if (!b) pari_err(sqrter5);
   s &= 1; /* s = x mod 2 */
   /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
   if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(absp,b));
@@ -1220,13 +1220,13 @@ qfbrealsolvep(GEN Q, GEN p)
 GEN
 qfbsolve(GEN Q,GEN n)
 {
-  if (typ(n)!=t_INT) err(typeer,"qfbsolve");
+  if (typ(n)!=t_INT) pari_err(typeer,"qfbsolve");
   switch(typ(Q))
   {
   case t_QFI: return qfbimagsolvep(Q,n);
   case t_QFR: return qfbrealsolvep(Q,n);
   default:
-    err(typeer,"qfbsolve");
+    pari_err(typeer,"qfbsolve");
     return NULL; /* NOT REACHED */
   }
 }
@@ -1238,8 +1238,8 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   pari_sp av = avma, av2, lim;
   GEN a, b, c, L, r;
 
-  if (typ(d) != t_INT || typ(p) != t_INT) err(typeer, "cornacchia");
-  if (signe(d) <= 0) err(talker, "d must be positive");
+  if (typ(d) != t_INT || typ(p) != t_INT) pari_err(typeer, "cornacchia");
+  if (signe(d) <= 0) pari_err(talker, "d must be positive");
   *px = *py = gen_0;
   b = subii(p, d);
   if (signe(b) < 0) return 0;
@@ -1253,7 +1253,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   {
     r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
-      if (DEBUGMEM>1) err(warnmem,"cornacchia");
+      if (DEBUGMEM>1) pari_err(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);
     }
   }
@@ -1272,11 +1272,11 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   GEN a, b, c, L, r, px4;
   long k;
 
-  if (typ(d) != t_INT || typ(p) != t_INT) err(typeer, "cornacchia");
-  if (signe(d) <= 0) err(talker, "d must be positive");
+  if (typ(d) != t_INT || typ(p) != t_INT) pari_err(typeer, "cornacchia");
+  if (signe(d) <= 0) pari_err(talker, "d must be positive");
   *px = *py = gen_0;
   k = mod4(d);
-  if (k == 1 || k == 2) err(talker,"d must be 0 or 3 mod 4");
+  if (k == 1 || k == 2) pari_err(talker,"d must be 0 or 3 mod 4");
   px4 = shifti(p,2);
   if (absi_cmp(px4, d) < 0) { avma = av; return 0; }
   if (equaliu(p, 2))
@@ -1304,7 +1304,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   {
     r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
-      if (DEBUGMEM>1) err(warnmem,"cornacchia");
+      if (DEBUGMEM>1) pari_err(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);
     }
   }

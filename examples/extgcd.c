@@ -10,7 +10,7 @@ extgcd(GEN A, GEN B, GEN *U, GEN *V)
 {
   pari_sp av = avma;
   GEN ux = gen_1, vx = gen_0, a = A, b = B;
-  if (typ(a) != t_INT || typ(b) != t_INT) err(typeer, "extgcd");
+  if (typ(a) != t_INT || typ(b) != t_INT) pari_err(typeer, "extgcd");
   if (signe(a) < 0) { a = negi(a); ux = negi(ux); }
   while (!gcmp0(b))
   {

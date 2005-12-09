@@ -74,7 +74,7 @@ check_pq(GEN gp, GEN z, long d, GEN D)
   ulong p = itou(gp);
   if (!umodiu(z,p) || kross(d,(long)p) <= 0 || 
     gcmp1((GEN)redimag(primeform_u(D,p))[1]));
-      err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
+      pari_err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
   return p;
 }
 #define MOD4(x) ((x)&3)
@@ -92,7 +92,7 @@ get_pq(GEN D, GEN z, GEN pq, ulong *ptp, ulong *ptq)
 
   if (pq && typ(pq)==t_VEC)
   {
-    if (lg(pq) != 3) err(typeer, "quadhilbert (pq)");
+    if (lg(pq) != 3) pari_err(typeer, "quadhilbert (pq)");
     *ptp = check_pq(gel(pq,1),z,d,D);
     *ptq = check_pq(gel(pq,2),z,d,D); return;
   }
@@ -126,7 +126,7 @@ get_pq(GEN D, GEN z, GEN pq, ulong *ptp, ulong *ptq)
         if (!oki) oki = i; /* not too bad, still e = 2 */
       }
     if (i==l) i = oki;
-    if (!i) err(bugparier,"quadhilbertimag (can't find p,q)");
+    if (!i) pari_err(bugparier,"quadhilbertimag (can't find p,q)");
   }
   else
   {
@@ -213,7 +213,7 @@ quadhilbertimag(GEN D, GEN pq)
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
-    if (DEBUGLEVEL) err(warnprec,"quadhilbertimag",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"quadhilbertimag",prec);
   }
   return gerepileupto(av,P);
 }
@@ -225,11 +225,11 @@ quadhilbert(GEN D, GEN flag, long prec)
   {
     D = checkbnf(D);
     if (degpol(gmael(D,7,1)) != 2)
-      err(talker,"not a polynomial of degree 2 in quadhilbert");
+      pari_err(talker,"not a polynomial of degree 2 in quadhilbert");
     D = gmael(D,7,3);
   }
   else if (!isfundamental(D))
-    err(talker,"quadhilbert needs a fundamental discriminant");
+    pari_err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,prec)
                      : quadhilbertimag(D,flag);
 }
@@ -325,7 +325,7 @@ form_to_ideal(GEN x)
   long tx = typ(x);
   GEN b;
   if ((is_vec_t(tx) || lg(x) != 4)
-       && tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
+       && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal");
   b = negi(gel(x,2)); if (mpodd(b)) b = addis(b,1);
   return mkmat2( mkcol2(gel(x,1), gen_0),
                  mkcol2((GEN)shifti(b,-1), gen_1) );
@@ -398,7 +398,7 @@ computeP2(GEN bnr, GEN la, long prec)
 PRECPB:
   if (!first)
   {
-    if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"computeP2",prec);
     nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
   }
   first = 0; lanum = to_approx(nf,la);
@@ -457,7 +457,7 @@ findquad(GEN a, GEN x, GEN p)
   u = simplify(u); tu = typ(u);
   v = simplify(v); tv = typ(v);
   if (!is_scalar_t(tu) || !is_scalar_t(tv))
-    err(talker, "incorrect data in findquad");
+    pari_err(talker, "incorrect data in findquad");
   x = v;
   if (!gcmp0(u)) x = gadd(gmul(u, pol_x[varn(a)]), x);
   if (typ(x) == t_POL) x = gmodulcp(x,p);
@@ -624,7 +624,7 @@ get_lambda(GEN bnr)
       }
       return labas;
     }
-  err(bugparier,"get_lambda");
+  pari_err(bugparier,"get_lambda");
   return NULL;
 }
 
@@ -636,19 +636,19 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 
   if (flag)
   {
-    if (typ(flag) != t_VEC || lg(flag)!=3) err(flagerr,"quadray");
+    if (typ(flag) != t_VEC || lg(flag)!=3) pari_err(flagerr,"quadray");
   }
   if (typ(D) != t_INT)
   {
     bnf = checkbnf(D);
     if (degpol(gmael(bnf,7,1)) != 2)
-      err(talker,"not a polynomial of degree 2 in quadray");
+      pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = gmael(bnf,7,3);
   }
   else
   {
     if (!isfundamental(D))
-      err(talker,"quadray needs a fundamental discriminant");
+      pari_err(talker,"quadray needs a fundamental discriminant");
     pol = quadpoly0(D, fetch_user_var("y"));
     bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
   }
@@ -737,7 +737,7 @@ qrf5_rho_pow(GEN x, long n)
     x = qfr5_rho(x,Disc,sqrtD,isqrtD);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"qrf5_rho_pow");
+      if(DEBUGMEM>1) pari_err(warnmem,"qrf5_rho_pow");
       x = gerepilecopy(av, x);
     }
   }
@@ -806,7 +806,7 @@ double
 check_bach(double cbach, double B)
 {
   if (cbach >= B)
-   err(talker,"sorry, couldn't deal with this field. PLEASE REPORT");
+   pari_err(talker,"sorry, couldn't deal with this field. PLEASE REPORT");
   cbach *= 2; if (cbach > B) cbach = B;
   if (DEBUGLEVEL) fprintferr("\n*** Bach constant: %f\n", cbach);
   return cbach;
@@ -1311,7 +1311,7 @@ CYCLE:
     if (endcycle || rho > 5000) continue;
     if (low_stack(limstack, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"real_relations");
+      if(DEBUGMEM>1) pari_err(warnmem,"real_relations");
       gerepileall(av1, form1? 2: 1, &form, &form1);
     }
     if (rho < 0) rho = 0; /* first time in */
@@ -1564,7 +1564,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 6.;
   }
-  if (cbach <= 0.) err(talker,"Bach constant <= 0 in buchquad");
+  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buchquad");
   av = avma; cbach /= 2;
   powsubFB = subFB = NULL;
 
@@ -1681,7 +1681,7 @@ buchimag(GEN D, GEN c, GEN c2, GEN REL)
 
 GEN
 buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
-  if (signe(flag)) err(impl,"narrow class group");
+  if (signe(flag)) pari_err(impl,"narrow class group");
   return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), prec);
 }
 
@@ -1696,7 +1696,7 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
   {
     lx = lg(data);
     if (typ(data)!=t_VEC || lx > 7)
-      err(talker,"incorrect parameters in quadclassunit");
+      pari_err(talker,"incorrect parameters in quadclassunit");
     if (lx > 4) lx = 4;
   }
   cbach = cbach2 = 0.2; /* was 0.1, but slower on average for 20 digits disc */
@@ -1707,6 +1707,6 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
     case 3: cbach2 = gtodouble(gel(data,2));
     case 2: cbach  = gtodouble(gel(data,1));
   }
-  if (flag) err(impl,"narrow class group");
+  if (flag) pari_err(impl,"narrow class group");
   return buchquad(x,cbach,cbach2,RELSUP,prec);
 }

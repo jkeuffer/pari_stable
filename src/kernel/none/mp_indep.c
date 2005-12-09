@@ -215,7 +215,7 @@ GEN U;
 KARATSUBA_MULR_LIMIT = 100000;
 U = mulrr(x, y);
 KARATSUBA_MULR_LIMIT = 4;
-if (!gequal(U, z)) err(talker,"toto");
+if (!gequal(U, z)) pari_err(talker,"toto");
 }
 #endif
     avma = av; return;
@@ -359,7 +359,7 @@ divsi(long x, GEN y)
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) err(gdiver);
+  if (!s) pari_err(gdiver);
   if (!x || lgefint(y)>3 || ((long)y[2])<0) return gen_0;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
@@ -374,7 +374,7 @@ divir(GEN x, GEN y)
   long ly;
   pari_sp av;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   if (!signe(x)) return gen_0;
   ly = lg(y); z = cgetr(ly); av = avma; 
   affrr(divrr(itor(x, ly+1), y), z);
@@ -391,7 +391,7 @@ mpdivz(GEN x, GEN y, GEN z)
   if (typ(z) == t_REAL) affrr(q, z);
   else
   {
-    if (typ(q) == t_REAL) err(gdiver);
+    if (typ(q) == t_REAL) pari_err(gdiver);
     affii(q, z); 
   }
   avma = av;
@@ -404,7 +404,7 @@ divsr(long x, GEN y)
   long ly;
   GEN z;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   if (!x) return gen_0;
   ly = lg(y); z = cgetr(ly); av = avma;
   affrr(divrr(stor(x,ly+1), y), z);
@@ -443,7 +443,7 @@ divrs(GEN x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) err(gdiver);
+  if (!y) pari_err(gdiver);
   if (!s) return real_0_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
   if (y<0) { s = -s; y = -y; }
   if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
@@ -575,7 +575,7 @@ remiimul(GEN x, GEN sy)
 #if 0
   q = subii(r,remii(x,y));
   if (signe(q))
-    err(talker,"bug in remiimul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
+    pari_err(talker,"bug in remiimul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
 #endif
   return gerepileuptoint(av, r); /* = remii(x, y) */
 }
@@ -727,7 +727,7 @@ dbltor(double x)
     const ulong a = fi.i;
     ulong A;
     e = ((a & (HIGHBIT-1)) >> mant_len) - exp_mid;
-    if (e == exp_mid+1) err(talker, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err(talker, "NaN or Infinity in dbltor");
     A = a << expo_len;
     if (e == -exp_mid)
     { /* unnormalized values */
@@ -753,13 +753,13 @@ rtodbl(GEN x)
   const int expo_len = 11; /* number of bits of exponent */
 
   if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
+  if (typ(x)!=t_REAL) pari_err(typeer,"rtodbl");
   if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
 
   /* start by rounding to closest */
   a = (x[2] & (HIGHBIT-1)) + 0x400;
   if (a & HIGHBIT) { ex++; a=0; }
-  if (ex >= exp_mid) err(rtodber);
+  if (ex >= exp_mid) pari_err(rtodber);
   fi.i = ((ex + exp_mid) << mant_len) | (a >> expo_len);
   if (s<0) fi.i |= HIGHBIT;
   return fi.f;
@@ -824,7 +824,7 @@ dbltor(double x)
     const ulong b = fi.i[INDEX1];
     ulong A, B;
     e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-    if (e == exp_mid+1) err(talker, "NaN or Infinity in dbltor");
+    if (e == exp_mid+1) pari_err(talker, "NaN or Infinity in dbltor");
     A = b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
     B = b << expo_len;
     if (e == -exp_mid)
@@ -867,7 +867,7 @@ rtodbl(GEN x)
   const int shift = mant_len-32;
 
   if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
+  if (typ(x)!=t_REAL) pari_err(typeer,"rtodbl");
   if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
 
   /* start by rounding to closest */
@@ -878,7 +878,7 @@ rtodbl(GEN x)
     if (a & HIGHBIT) { ex++; a=0; }
   }
   else b = 0;
-  if (ex >= exp_mid) err(rtodber);
+  if (ex >= exp_mid) pari_err(rtodber);
   ex += exp_mid;
   k = (a >> expo_len) | (ex << shift);
   if (s<0) k |= HIGHBIT;

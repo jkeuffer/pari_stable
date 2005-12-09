@@ -132,13 +132,13 @@ filtre0(filtre_t *F)
 
       case LBRACE:
         t--;
-        if (F->wait_for_brace) err(impl,"embedded braces (in parser)");
+        if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
         F->more_input = 2;
         F->wait_for_brace = 1;
         break;
 
       case RBRACE:
-        if (!F->wait_for_brace) err(talker,"unexpected closing brace");
+        if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
         F->more_input = 0; t--;
         F->wait_for_brace = 0;
         break;
@@ -958,7 +958,7 @@ GENtocanonicalstr(GEN x)
 static char
 ltoc(long n) {
   if (n <= 0 || n > 255)
-    err(talker, "out of range in integer -> character conversion (%ld)", n);
+    pari_err(talker, "out of range in integer -> character conversion (%ld)", n);
   return (char)n;
 }
 static char
@@ -1295,7 +1295,7 @@ type_name(long t)
     case t_LIST   : s="t_LIST";    break;
     case t_STR    : s="t_STR";     break;
     case t_VECSMALL:s="t_VECSMALL";break;
-    default: err(talker,"unknown type %ld",t);
+    default: pari_err(talker,"unknown type %ld",t);
       s = NULL; /* not reached */
   }
   return s;
@@ -1479,21 +1479,21 @@ print_functions_hash(const char *s)
     /*FIXME: the cast below is a C++ kludge because
      * it is difficult to change is_entry_intern to take a const*/
     ep = is_entry_intern((char *)s,functions_hash,&n);
-    if (!ep) err(talker,"no such function");
+    if (!ep) pari_err(talker,"no such function");
     print_entree(ep,n); return;
   }
   if (isdigit((int)*s) || *s == '$')
   {
     m = functions_tblsz-1; n = atol(s);
     if (*s=='$') n = m;
-    if (m<n) err(talker,"invalid range in print_functions_hash");
+    if (m<n) pari_err(talker,"invalid range in print_functions_hash");
     while (isdigit((int)*s)) s++;
 
     if (*s++ != '-') m = n;
     else
     {
       if (*s !='$') m = min(atol(s),m);
-      if (m<n) err(talker,"invalid range in print_functions_hash");
+      if (m<n) pari_err(talker,"invalid range in print_functions_hash");
     }
 
     for(; n<=m; n++)
@@ -1544,7 +1544,7 @@ static void
 do_append(char **sp, char c, char *last, int count)
 {
   if (*sp + count > last)
-    err(talker, "TeX variable name too long");
+    pari_err(talker, "TeX variable name too long");
   while (count--)
     *(*sp)++ = c;
 }
@@ -1555,9 +1555,9 @@ get_texvar(long v, char *buf, unsigned int len)
   entree *ep = varentries[v];
   char *s, *t = buf, *e = buf + len - 1;
 
-  if (!ep) err(talker, "this object uses debugging variables");
+  if (!ep) pari_err(talker, "this object uses debugging variables");
   s = ep->name;
-  if (strlen(s) >= len) err(talker, "TeX variable name too long");
+  if (strlen(s) >= len) pari_err(talker, "TeX variable name too long");
   while(isalpha((int)*s)) *t++ = *s++;
   *t = 0;
   if (isdigit((int)*s) || *s == '_') {
@@ -2619,18 +2619,18 @@ pari_kill_file(pariFILE *f)
 {
   if ((f->type & mf_PIPE) == 0)
   {
-    if (fclose(f->file)) err(warnfile, "close", f->name);
+    if (fclose(f->file)) pari_err(warnfile, "close", f->name);
   }
 #ifdef HAVE_PIPES
   else
   {
     if (f->type & mf_FALSE)
     {
-      if (fclose(f->file)) err(warnfile, "close", f->name);
-      if (unlink(f->name)) err(warnfile, "delete", f->name);
+      if (fclose(f->file)) pari_err(warnfile, "close", f->name);
+      if (unlink(f->name)) pari_err(warnfile, "delete", f->name);
     }
     else
-      if (pclose(f->file) < 0) err(warnfile, "close pipe", f->name);
+      if (pclose(f->file) < 0) pari_err(warnfile, "close pipe", f->name);
   }
 #endif
   if (DEBUGFILES)
@@ -2651,7 +2651,7 @@ pari_fclose(pariFILE *f)
 static pariFILE *
 pari_open_file(FILE *f, char *s, char *mode)
 {
-  if (!f) err(talker, "could not open requested file %s", s);
+  if (!f) pari_err(talker, "could not open requested file %s", s);
   if (DEBUGFILES)
     fprintferr("I/O: opening file %s (mode %s)\n", s, mode);
   return newfile(f,s,0);
@@ -2670,7 +2670,7 @@ pari_safefopen(char *s, char *mode)
 {
   long fd = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
 
-  if (fd == -1) err(talker,"tempfile %s already exists",s);
+  if (fd == -1) pari_err(talker,"tempfile %s already exists",s);
   return pari_open_file(fdopen(fd, mode), s, mode);
 }
 #else
@@ -2684,7 +2684,7 @@ pari_safefopen(char *s, char *mode)
 void
 pari_unlink(char *s)
 {
-  if (unlink(s)) err(warner, "I/O: can\'t remove file %s", s);
+  if (unlink(s)) pari_err(warner, "I/O: can\'t remove file %s", s);
   else if (DEBUGFILES)
     fprintferr("I/O: removed file %s\n", s);
 }
@@ -2694,12 +2694,12 @@ check_filtre(filtre_t *T)
 {
   if (T && T->in_string)
   {
-    err(warner,"run-away string. Closing it");
+    pari_err(warner,"run-away string. Closing it");
     T->in_string = 0;
   }
   if (T && T->in_comment)
   {
-    err(warner,"run-away comment. Closing it");
+    pari_err(warner,"run-away comment. Closing it");
     T->in_comment = 0;
   }
 }
@@ -2715,7 +2715,7 @@ popinfile()
   for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;
-    err(warner, "I/O: leaked file descriptor (%d): %s",
+    pari_err(warner, "I/O: leaked file descriptor (%d): %s",
 		f->type, f->name);
     pari_fclose(f);
   }
@@ -2770,7 +2770,7 @@ pariFILE *
 try_pipe(char *cmd, int fl)
 {
 #ifndef HAVE_PIPES
-  err(archer); return NULL;
+  pari_err(archer); return NULL;
 #else
   FILE *file;
   char *f;
@@ -2780,7 +2780,7 @@ try_pipe(char *cmd, int fl)
   if (_osmode == DOS_MODE) /* no pipes under DOS */
   {
     char *s;
-    if (flag & mf_OUT) err(archer);
+    if (flag & mf_OUT) pari_err(archer);
     f = pari_unique_filename("pipe");
     s = gpmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
@@ -2795,7 +2795,7 @@ try_pipe(char *cmd, int fl)
     if ((flag & (mf_TEST | mf_OUT)) && !ok_pipe(file)) return NULL;
     f = cmd;
   }
-  if (!file) err(talker,"[pipe:] '%s' failed",cmd);
+  if (!file) pari_err(talker,"[pipe:] '%s' failed",cmd);
   return newfile(file, f, mf_PIPE|flag);
 #endif
 }
@@ -2848,7 +2848,7 @@ os_open(char *s, int mode)
 #ifdef WINCE
   HANDLE h;
   short ws[256];
-  if (mode != O_RDONLY) err(impl,"generic open for Windows");
+  if (mode != O_RDONLY) pari_err(impl,"generic open for Windows");
   MultiByteToWideChar(CP_ACP, 0, s, strlen(s)+1, ws, 256);
   h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
   fd = (h == INVALID_HANDLE_VALUE)? (long)-1: (long)h;
@@ -2932,7 +2932,7 @@ _expand_tilde(const char *s)
     if (!p)
     { /* host badly configured, don't kill session on startup
        * (when expanding path) */
-      err(warner,"can't expand ~");
+      pari_err(warner,"can't expand ~");
       return pari_strdup(s);
     }
   }
@@ -2945,7 +2945,7 @@ _expand_tilde(const char *s)
     tmp[len] = 0;
     p = getpwnam(tmp); free(tmp);
   }
-  if (!p) err(talker2,"unknown user ",s,s-1);
+  if (!p) pari_err(talker2,"unknown user ",s,s-1);
   ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
   sprintf(ret,"%s%s",p->pw_dir,u); return ret;
 #endif
@@ -2985,7 +2985,7 @@ _expand_env(char *str)
     s0 = getenv(env);
     if (!s0)
     {
-      err(warner,"undefined environment variable: %s",env);
+      pari_err(warner,"undefined environment variable: %s",env);
       s0 = "";
     }
     l = strlen(s0);
@@ -3074,7 +3074,7 @@ accept_file(char *name, FILE *file)
 {
   if (pari_is_dir(name))
   {
-    err(warner,"skipping directory %s",name);
+    pari_err(warner,"skipping directory %s",name);
     return NULL;
   }
   if (! last_tmp_file)
@@ -3134,7 +3134,7 @@ switchin(const char *name0)
   else
   {
     if (last_filename == NULL)
-      err(talker,"You never gave me anything to read!");
+      pari_err(talker,"You never gave me anything to read!");
     name0 = last_filename;
     name = pari_strdup(name0);
   }
@@ -3151,7 +3151,7 @@ switchin(const char *name0)
       if (try_name(s)) return;
     }
   }
-  err(openfiler,"input",name0);
+  pari_err(openfiler,"input",name0);
 }
 
 static int is_magic_ok(FILE *f);
@@ -3165,11 +3165,11 @@ switchout(char *name)
     if (f)
     {
       if (is_magic_ok(f))
-        err(talker,"%s is a GP binary file. Please use writebin", name);
+        pari_err(talker,"%s is a GP binary file. Please use writebin", name);
       fclose(f);
     }
     f = fopen(name, "a");
-    if (!f) err(openfiler,"output",name);
+    if (!f) pari_err(openfiler,"output",name);
     pari_outfile = f;
   }
   else if (pari_outfile != stdout)
@@ -3185,9 +3185,9 @@ switchout(char *name)
 /**                                                               **/
 /*******************************************************************/
 #define _fwrite(a,b,c,d) \
-  if (fwrite((a),(b),(c),(d)) < (c)) err(talker,"write failed")
+  if (fwrite((a),(b),(c),(d)) < (c)) pari_err(talker,"write failed")
 #define _fread(a,b,c,d) \
-  if (fread((a),(b),(c),(d)) < (c)) err(talker,"read failed")
+  if (fread((a),(b),(c),(d)) < (c)) pari_err(talker,"read failed")
 #define _lfread(a,b,c) _fread((a),sizeof(long),(b),(c))
 #define _cfread(a,b,c) _fread((a),sizeof(char),(b),(c))
 #define _lfwrite(a,b,c) _fwrite((a),sizeof(long),(b),(c))
@@ -3288,14 +3288,14 @@ readobj(FILE *f, int *ptc)
     case NAM_GEN:
     {
       char *s = rdstr(f);
-      if (!s) err(talker,"malformed binary file (no name)");
+      if (!s) pari_err(talker,"malformed binary file (no name)");
       x = rdGEN(f);
       fprintferr("setting %s\n",s);
       changevalue(fetch_named_var(s), x);
       break;
     }
     case EOF: break;
-    default: err(talker,"unknown code in readobj");
+    default: pari_err(talker,"unknown code in readobj");
   }
   *ptc = c; return x;
 }
@@ -3335,14 +3335,14 @@ static void
 check_magic(const char *name, FILE *f)
 {
   if (!is_magic_ok(f))
-    err(talker, "%s is not a GP binary file",name);
+    pari_err(talker, "%s is not a GP binary file",name);
   if (!is_sizeoflong_ok(f))
-    err(talker, "%s not written for a %ld bit architecture",
+    pari_err(talker, "%s not written for a %ld bit architecture",
                name, sizeof(long)*8);
   if (!is_long_ok(f, ENDIAN_CHECK))
-    err(talker, "unexpected endianness in %s",name);
+    pari_err(talker, "unexpected endianness in %s",name);
   if (!is_long_ok(f, BINARY_VERSION))
-    err(talker, "%s written by an incompatible version of GP",name);
+    pari_err(talker, "%s written by an incompatible version of GP",name);
 }
 
 static void
@@ -3369,7 +3369,7 @@ writebin(char *name, GEN x)
 
   if (f) { check_magic(name,f); fclose(f); }
   f = fopen(name,"a");
-  if (!f) err(openfiler,"binary output",name);
+  if (!f) pari_err(openfiler,"binary output",name);
   if (!already) write_magic(f);
 
   if (x) writeGEN(x,f);
@@ -3406,7 +3406,7 @@ readbin(const char *name, FILE *f)
   {
     if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
     if (DEBUGLEVEL)
-      err(warner,"%ld unnamed objects read. Returning then in a vector",
+      pari_err(warner,"%ld unnamed objects read. Returning then in a vector",
           lg(z)-1);
     x = gerepilecopy(av, z);
     setisclone(x); /* HACK */
@@ -3441,7 +3441,7 @@ void printtex(GEN g) { print0(g, f_TEX);       PR_NL(); }
 void print1  (GEN g) { print0(g, f_RAW);       PR_NO(); }
 void printp1 (GEN g) { print0(g, f_PRETTYOLD); PR_NO(); }
 
-void error0(GEN g) { err(user, g); }
+void error0(GEN g) { pari_err(user, g); }
 
 static char *
 wr_check(const char *s) {
@@ -3478,11 +3478,11 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
 
   if (p <= 0) p += H->total; /* count |p| entries starting from last */
   if ((ulong)p > H->total)
-    err(talker2, "I can't see into the future", old, entry);
+    pari_err(talker2, "I can't see into the future", old, entry);
 
   z = H->res[ (p-1) % H->size ];
   if (!z || p <= 0 || p <= (long)(H->total - H->size))
-    err(talker2, "I can't remember before the big bang", old, entry);
+    pari_err(talker2, "I can't remember before the big bang", old, entry);
   return z;
 }
 
@@ -3555,12 +3555,12 @@ env_ok(char *s)
   char *t = os_getenv(s);
   if (t && !pari_is_rwx(t))
   {
-    err(warner,"%s is set (%s), but is not writeable", s,t);
+    pari_err(warner,"%s is set (%s), but is not writeable", s,t);
     t = NULL;
   }
   if (t && !pari_is_dir(t))
   {
-    err(warner,"%s is set (%s), but is not a directory", s,t);
+    pari_err(warner,"%s is set (%s), but is not a directory", s,t);
     t = NULL;
   }
   return t;
@@ -3646,6 +3646,6 @@ pari_unique_filename(char *s)
   }
   sprintf(pre, "%.8s%s", s, post);
   if (pari_file_exists(buf) && !get_file(buf))
-    err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
+    pari_err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
   return buf;
 }

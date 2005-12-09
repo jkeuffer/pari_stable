@@ -92,7 +92,7 @@ Flx_to_Flv(GEN x, long N)
 {
   long i, l;
   GEN z = cgetg(N+1,t_VECSMALL);
-  if (typ(x) != t_VECSMALL) err(typeer,"Flx_to_Flv");
+  if (typ(x) != t_VECSMALL) pari_err(typeer,"Flx_to_Flv");
   l = lg(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=0;
@@ -1426,7 +1426,7 @@ Flxq_inv(GEN x,GEN T,ulong p)
 {
   pari_sp av=avma;
   GEN U = Flxq_invsafe(x, T, p);
-  if (!U) err(talker,"non invertible polynomial in Flxq_inv");
+  if (!U) pari_err(talker,"non invertible polynomial in Flxq_inv");
   return gerepileuptoleaf(av, U);
 }
 
@@ -1823,7 +1823,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -1990,7 +1990,7 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"FlxqX_safegcd");
+      if (DEBUGMEM>1) pari_err(warnmem,"FlxqX_safegcd");
       gerepileall(btop, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;

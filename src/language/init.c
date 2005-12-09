@@ -137,7 +137,7 @@ fprintferr("+ %ld\n", ++NUM);
 #endif
   if (DEBUGMEM)
   {
-    if (!n) err(warner,"mallocing NULL object in newbloc");
+    if (!n) pari_err(warner,"mallocing NULL object in newbloc");
     if (DEBUGMEM > 2)
       fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
   }
@@ -270,10 +270,10 @@ gpmalloc(size_t size)
   if (size)
   {
     char *tmp = (char*)__gpmalloc(size);
-    if (!tmp) err(memer);
+    if (!tmp) pari_err(memer);
     return tmp;
   }
-  if (DEBUGMEM) err(warner,"mallocing NULL object");
+  if (DEBUGMEM) pari_err(warner,"mallocing NULL object");
   return NULL;
 }
 
@@ -284,7 +284,7 @@ gprealloc(void *pointer, size_t size)
 
   if (!pointer) tmp = (char *) malloc(size);
   else tmp = (char *) realloc(pointer,size);
-  if (!tmp) err(memer);
+  if (!tmp) pari_err(memer);
   return tmp;
 }
 
@@ -296,7 +296,7 @@ cgetalloc(long t, size_t l)
 }
 
 static void
-dflt_sigint_fun(void) { err(talker, "user interrupt"); }
+dflt_sigint_fun(void) { pari_err(talker, "user interrupt"); }
 
 static void
 pari_handle_SIGINT(void)
@@ -352,7 +352,7 @@ pari_sighandler(int sig)
     default:
       msg="unknown signal";
   }
-  err(talker,msg);
+  pari_err(talker,msg);
 }
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
@@ -556,7 +556,7 @@ static void
 reset_traps()
 {
   long i;
-  if (DEBUGLEVEL) err(warner,"Resetting all traps");
+  if (DEBUGLEVEL) pari_err(warner,"Resetting all traps");
   for (i=0; i <= noer; i++) dft_handler[i] = NULL;
 }
 
@@ -611,8 +611,8 @@ init_stack(size_t size)
   if (!bot)
     for (s = old;; s>>=1)
     {
-      if (!s) err(memer); /* no way out. Die */
-      err(warner,"not enough memory, new stack %lu",s);
+      if (!s) pari_err(memer); /* no way out. Die */
+      pari_err(warner,"not enough memory, new stack %lu",s);
       bot = (pari_sp)__gpmalloc(s);
       if (bot) break;
     }
@@ -653,7 +653,7 @@ pari_init(size_t parisize, ulong maxprime)
   (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
   init_universal_constants();
-  if (pari_kernel_init()) err(talker,"Cannot initialize kernel");
+  if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
@@ -785,7 +785,7 @@ changevar(GEN x, GEN y)
 
   if (var_not_changed && y==polvar) return x;
   tx = typ(x); if (!is_recursive_t(tx)) return gcopy(x);
-  ty = typ(y); if (!is_vec_t(ty)) err(typeer, "changevar");
+  ty = typ(y); if (!is_vec_t(ty)) pari_err(typeer, "changevar");
   if (is_const_t(tx)) return gcopy(x);
 
   if (tx == t_POLMOD)
@@ -810,7 +810,7 @@ changevar(GEN x, GEN y)
     p1 = gel(y,vx);
     if (!signe(x))
     {
-      vy = gvar(p1); if (vy == BIGINT) err(typeer, "changevar");
+      vy = gvar(p1); if (vy == BIGINT) pari_err(typeer, "changevar");
       z = gcopy(x); setvarn(z,vy); return z;
     }
     av = avma; p2 = changevar(gel(x,lx-1),y);
@@ -837,7 +837,7 @@ reorder(GEN x)
 
   if (!x) return polvar;
   tx=typ(x); lx=lg(x)-1;
-  if (!is_vec_t(tx)) err(typeer,"reorder");
+  if (!is_vec_t(tx)) pari_err(typeer,"reorder");
   if (!lx) return polvar;
 
   av = avma;
@@ -850,10 +850,10 @@ reorder(GEN x)
   for (n=0; n<lx; n++)
   {
     var[n] = i = gvar(gel(x,n+1));
-    if (i >= nvar) err(talker,"variable out of range in reorder");
+    if (i >= nvar) pari_err(talker,"variable out of range in reorder");
     varsort[n] = ordvar[i]; /* position in polvar */
     /* check if x is a permutation */
-    if (t1[i]) err(talker,"duplicate indeterminates in reorder");
+    if (t1[i]) pari_err(talker,"duplicate indeterminates in reorder");
     t1[i] = 1;
   }
   qsort(varsort,lx,sizeof(long),(QSCOMP)pari_compare_long);
@@ -976,9 +976,9 @@ err_catch(long errnum, jmp_buf *penv)
 {
   cell *v;
   /* for fear of infinite recursion... */
-  if (errnum == memer) err(talker, "can't trap memory errors");
+  if (errnum == memer) pari_err(talker, "can't trap memory errors");
   if (errnum == CATCH_ALL) errnum = noer;
-  if (errnum > noer) err(talker, "no such error number: %ld", errnum);
+  if (errnum > noer) pari_err(talker, "no such error number: %ld", errnum);
   v = (cell*)gpmalloc(sizeof(cell));
   v->penv  = penv;
   v->flag = errnum;
@@ -1084,14 +1084,14 @@ pari_err(long numerr, ...)
   }
 
   if (!pari_last_was_newline())
-    pariputc('\n'); /* make sure err msg starts at the beginning of line */
+    pariputc('\n'); /* make sure pari_err msg starts at the beginning of line */
   pariflush(); pariOut = pariErr;
   pariflush(); term_color(c_ERR);
 
   if (numerr <= cant_deflate)
   {
     sprintf(s, "uncaught error: %ld", numerr);
-    err(bugparier, s);
+    pari_err(bugparier, s);
   }
   else if (numerr < talker)
   {
@@ -1237,7 +1237,7 @@ trap0(char *e, char *r, char *f)
   else if (!strcmp(e,"siginter")) numerr = siginter;
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
-  else if (*e) err(impl,"this trap keyword");
+  else if (*e) pari_err(impl,"this trap keyword");
   /* TO BE CONTINUED */
 
   if (f && r)
@@ -1710,7 +1710,7 @@ dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
   if (*x < av && *x >= av0)
   { /* update address if in stack */
     if (*x < tetpil) *x += dec;
-    else err(talker, "significant pointers lost in gerepile! (please report)");
+    else pari_err(talker, "significant pointers lost in gerepile! (please report)");
   }
 }
 
@@ -1759,7 +1759,7 @@ gerepileupto(pari_sp av, GEN q)
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by identifier() and they can be in the
    * stack: if we put a gerepileupto in readseq(), we get an error. Maybe add,
-   * if (DEBUGMEM) err(warner,"av>q in gerepileupto") ???
+   * if (DEBUGMEM) pari_err(warner,"av>q in gerepileupto") ???
    */
 
   /* Beware: (long)(q+i) --> ((long)q)+i*sizeof(long) */
@@ -1794,7 +1794,7 @@ _ok_gerepileupto(GEN av, GEN x)
   if (!isonstack(x)) return 1;
   if (x > av)
   {
-    err(warner,"bad object %Z",x);
+    pari_err(warner,"bad object %Z",x);
     return 0;
   }
   tx = typ(x);
@@ -1804,7 +1804,7 @@ _ok_gerepileupto(GEN av, GEN x)
   for (i=lontyp[tx]; i<lx; i++)
     if (!_ok_gerepileupto(av, gel(x,i)))
     {
-      err(warner,"bad component %ld in object %Z",i,x);
+      pari_err(warner,"bad component %ld in object %Z",i,x);
       return 0;
     }
   return 1;
@@ -1822,7 +1822,7 @@ gerepile(pari_sp av, pari_sp tetpil, GEN q)
   GEN x, a;
 
   if (dec == 0) return q;
-  if ((long)dec < 0) err(talker,"lbot>ltop in gerepile");
+  if ((long)dec < 0) pari_err(talker,"lbot>ltop in gerepile");
 
   /* dec_gerepile(&q, av0, av, tetpil, dec), saving 1 comparison */
   if (q >= (GEN)av0 && q < (GEN)tetpil)
@@ -1849,7 +1849,7 @@ allocatemoremem(size_t newsize)
   if (!newsize)
   {
     newsize = (top - bot) << 1;
-    err(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
+    pari_err(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
   return init_stack(newsize);

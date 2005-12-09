@@ -60,7 +60,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   if (n <= 0)
     return cgetg(1, t_VEC);
   if (gisirreducible(x) == gen_0)
-    err(redpoler, "galoisconj2pol");
+    pari_err(redpoler, "galoisconj2pol");
   polr = roots(x, prec);
   p1 = gel(polr,1);
   nbauto = 1;
@@ -243,7 +243,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   else
   {
     if (typ(dn) != t_INT || signe(dn) <= 0)
-      err(talker, "incorrect denominator in initgaloisborne: %Z", dn);
+      pari_err(talker, "incorrect denominator in initgaloisborne: %Z", dn);
     den = dn;
   }
   if (ptprep) *ptprep = prep;
@@ -640,7 +640,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   NQ=divis_rem(NN,N1,&R1);
   if (cmpiu(NQ,1000000000)>0)
   {
-    err(warner,"Combinatorics too hard : would need %Z tests!\n"
+    pari_err(warner,"Combinatorics too hard : would need %Z tests!\n"
 	"I will skip it, but it may induce an infinite loop",NN);
     avma = ltop; *psi = NULL; return 0;
   }
@@ -940,7 +940,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   if (cmpiu(NQ,100000000)>0)
   {
     avma=avm;
-    err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
+    pari_err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
     return perm_identity(n);
   }
   N2=itos(NQ);
@@ -1247,7 +1247,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
     if (sympol_is1to1_lg(NS,i+1))
       sym=fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
-  if (!sym) err(talker,"p too small in fixedfieldsympol");
+  if (!sym) pari_err(talker,"p too small in fixedfieldsympol");
   if (DEBUGLEVEL>=2) fprintferr("FixedField: Found: %Z\n",gel(sym,1));
   return gerepilecopy(ltop,sym);
 }
@@ -1339,7 +1339,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   long n = lg(L), i, k;
   pari_sp av;
   GEN z = cgetg(n+1,t_POL),p1,mod2;
-  if (lg(p) != n) err(talker,"incorrect permutation in permtopol");
+  if (lg(p) != n) pari_err(talker,"incorrect permutation in permtopol");
   av=avma;
   mod2=gclone(shifti(mod,-1)); /*clone*/
   avma=av;
@@ -1401,7 +1401,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   byteptr primepointer,pp;
 
   if (!ZX_is_squarefree(T))
-    err(talker, "Polynomial not squarefree in galoisinit");
+    pari_err(talker, "Polynomial not squarefree in galoisinit");
   if (DEBUGLEVEL >= 1) (void)timer2();
   n = degpol(T);
   O = cgetg(n+1,t_VECSMALL);
@@ -1539,7 +1539,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   if (plift == 0 || ((group&ga_non_wss) && order == Fp[np]))
   {
     deg = 0;
-    err(warner, "Galois group almost certainly not weakly super solvable");
+    pari_err(warner, "Galois group almost certainly not weakly super solvable");
   }
   /*linf=(n*(n-1))>>2;*/
   linf=n;
@@ -2465,7 +2465,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
 	}
 	Try++;
 	if ( (ga->group&ga_non_wss) && Try > n )
-	  err(warner, "galoisconj _may_ hang up for this polynomial");
+	  pari_err(warner, "galoisconj _may_ hang up for this polynomial");
       }
     }
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
@@ -2789,12 +2789,12 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   n = degpol(T);
   if (n <= 0)
-    err(constpoler, "galoisconj4");
+    pari_err(constpoler, "galoisconj4");
   for (k = 2; k <= n + 2; k++)
     if (typ(T[k]) != t_INT)
-      err(talker, "polynomial not in Z[X] in galoisconj4");
+      pari_err(talker, "polynomial not in Z[X] in galoisconj4");
   if (!gcmp1(gel(T,n + 2)))
-    err(talker, "non-monic polynomial in galoisconj4");
+    pari_err(talker, "non-monic polynomial in galoisconj4");
   n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
@@ -2813,7 +2813,7 @@ galoisconj4(GEN T, GEN den, long flag)
   if (den)
   {
     if (typ(den) != t_INT)
-      err(talker, "Second arg. must be integer in galoisconj4");
+      pari_err(talker, "Second arg. must be integer in galoisconj4");
     den = absi(den);
   }
   gb.l = utoipos(ga.l);
@@ -2957,7 +2957,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
 	{
 	  G = galoisconj2pol(nf, card, prec);
 	  if (lg(G) <= card)
-	    err(warner, "conjugates list may be incomplete in nfgaloisconj");
+	    pari_err(warner, "conjugates list may be incomplete in nfgaloisconj");
 	  return G;
 	}
 	else
@@ -2974,7 +2974,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
     if (typ(G) != t_INT) return G;
     break;			/* Failure */
   default:
-    err(flagerr, "nfgaloisconj");
+    pari_err(flagerr, "nfgaloisconj");
   }
   return mkcol( pol_x[varn(T)] );	/* Failure */
 }
@@ -3003,9 +3003,9 @@ isomborne(GEN P, GEN den, GEN p)
 GEN
 checkgal(GEN gal)
 {
-  if (typ(gal) == t_POL) err(talker, "please apply galoisinit first");
+  if (typ(gal) == t_POL) pari_err(talker, "please apply galoisinit first");
   if (typ(gal) != t_VEC || lg(gal) != 9)
-    err(talker, "Not a Galois field in a Galois related function");
+    pari_err(talker, "Not a Galois field in a Galois related function");
   return gal;
 }
 
@@ -3014,7 +3014,7 @@ galoisinit(GEN nf, GEN den)
 {
   GEN G = galoisconj4(nf, den, 1);
   if (typ(G) == t_INT)
-    err(talker, "field not Galois or Galois group not weakly super solvable");
+    pari_err(talker, "field not Galois or Galois group not weakly super solvable");
   return G;
 }
 
@@ -3037,7 +3037,7 @@ galoispermtopol(GEN gal, GEN perm)
       gel(v,i) = galoispermtopol(gal, gel(perm,i));
     return v;
   }
-  err(typeer, "galoispermtopol");
+  pari_err(typeer, "galoispermtopol");
   return NULL;			/* not reached */
 }
 
@@ -3122,17 +3122,17 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   L = gel(gal,3); n=lg(L)-1;
   mod = gmael(gal,2,3);
   if (flag<0 || flag>2)
-    err(flagerr, "galoisfixedfield");
+    pari_err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
   {
     for (i = 1; i < lg(perm); i++)
       if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
-        err(typeer, "galoisfixedfield");
+        pari_err(typeer, "galoisfixedfield");
     O = vecperm_orbits(perm, n);
   }
   else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
   {
-    err(typeer, "galoisfixedfield");
+    pari_err(typeer, "galoisfixedfield");
     return NULL; /* not reached */
   }
   else
@@ -3178,7 +3178,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     if (y==-1)
       y = fetch_user_var("y");
     if (y<=x)
-      err(talker,"priority of optional variable too high in galoisfixedfield");
+      pari_err(talker,"priority of optional variable too high in galoisfixedfield");
     res = cgetg(4, t_VEC);
     gel(res,1) = gcopy(P);
     gel(res,2) = gmodulcp(S, gel(gal,1));
@@ -3214,7 +3214,7 @@ galoisisabelian(GEN gal, long flag)
   if (!group_isabelian(G)) {avma=ltop;return gen_0;}
   if (flag==1) {avma=ltop;return gen_1;}
   if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,S));
-  if (flag) err(flagerr,"galoisisabelian");
+  if (flag) pari_err(flagerr,"galoisisabelian");
   return gerepileupto(ltop, group_abelianHNF(G,S));
 }
 

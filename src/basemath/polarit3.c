@@ -146,7 +146,7 @@ Rg_to_Fp(GEN x, GEN p)
       if (equalii(q, p)) return icopy(a);
       return remii(a, p);
     }
-    default: err(typeer, "Rg_to_Fp");
+    default: pari_err(typeer, "Rg_to_Fp");
       return NULL; /* not reached */
   }
 }
@@ -167,7 +167,7 @@ Rg_to_Fl(GEN x, ulong p)
       if (equaliu(q, p)) return itou(a);
       return umodiu(a, p);
     }
-    default: err(typeer, "Rg_to_Fl");
+    default: pari_err(typeer, "Rg_to_Fl");
       return 0; /* not reached */
   }
 }
@@ -195,7 +195,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
       b = Rg_to_FpXQ(gel(x,2), T,p);
       return FpXQ_div(a,b, T,p);
   }
-  err(typeer,"Rg_to_FpXQ");
+  pari_err(typeer,"Rg_to_FpXQ");
   return NULL; /* not reached */
 }
 GEN
@@ -402,7 +402,7 @@ FpXQ_inv(GEN x,GEN T,GEN p)
 {
   pari_sp av = avma;
   GEN U = FpXQ_invsafe(x, T, p);
-  if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
+  if (!U) pari_err(talker,"non invertible polynomial in FpXQ_inv");
   return gerepileupto(av, U);
 }
 
@@ -514,7 +514,7 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
     return gerepileupto(ltop,FpX_red(z,p));
   }
   if (l<=1)
-    err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
+    pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
   z=spec_compo_powers(P,V,d-l+1,l-1);
   d-=l;
   while(d>=l-1)
@@ -858,7 +858,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
     if (!signe(Ql)) { avma = av; return gcopy(P); }
     Tl = ZX_to_Flx(T, pp);
     U = FlxqX_safegcd(Pl, Ql, Tl, pp);
-    if (!U) err(talker, "non-invertible polynomial in FpXQX_gcd");
+    if (!U) pari_err(talker, "non-invertible polynomial in FpXQX_gcd");
     return gerepileupto(av, FlxX_to_ZXX(U));
   }
   P = FpXX_red(P, p); av2 = avma;
@@ -883,7 +883,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 
     if (low_stack(st_lim, stack_lim(av2, 1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"FpXQX_gcd");
+      if (DEBUGMEM>1) pari_err(warnmem,"FpXQX_gcd");
       gerepileall(av2, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;
@@ -1316,7 +1316,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     w = FpXQ_mul(y,w,T,p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"FpXQ_sqrtl");
+      if(DEBUGMEM>1) pari_err(warnmem,"FpXQ_sqrtl");
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
@@ -1339,9 +1339,9 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
   GEN q,r,zeta,y,l,z;
 
   if (typ(a) != t_POL || typ(n) != t_INT || typ(T) != t_POL || typ(p)!=t_INT)
-    err(typeer,"FpXQ_sqrtn");
-  if (!degpol(T)) err(constpoler,"FpXQ_sqrtn");
-  if (!signe(n)) err(talker,"1/0 exponent in FpXQ_sqrtn");
+    pari_err(typeer,"FpXQ_sqrtn");
+  if (!degpol(T)) pari_err(constpoler,"FpXQ_sqrtn");
+  if (!signe(n)) pari_err(talker,"1/0 exponent in FpXQ_sqrtn");
   if (gcmp1(n)) {if (zetan) *zetan=gen_1;return gcopy(a);}
   if (gcmp0(a)) {if (zetan) *zetan=gen_1;return gen_0;}
 
@@ -1369,7 +1369,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
       }
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors */
-	if(DEBUGMEM>1) err(warnmem,"FpXQ_sqrtn");
+	if(DEBUGMEM>1) pari_err(warnmem,"FpXQ_sqrtn");
         gerepileall(av1,zetan? 2: 1, &a,&z);
       }
     }
@@ -1578,7 +1578,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   }
   if (DEBUGLEVEL>=4) msgtimer("matrix cyclo");
   if (lg(A)!=r+1)
-    err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
+    pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
         ,l,pol_x[vp],P);
   A=gerepileupto(ltop,A);
   /*The formula is 
@@ -1621,7 +1621,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   vp = varn(P); np = degpol(P);
   vq = varn(Q); nq = degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
+    pari_err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
   e = u_pvalrem(n, l, &pg);
   if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x[vp],l,P,l),np,np,P,l);
   if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x[vq],l,Q,l),nq,nq,Q,l);
@@ -1641,13 +1641,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) (void)timer2();
       A = FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
+	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,pol_x[vp],P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
-	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
+	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,pol_x[vq],Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
@@ -1655,11 +1655,11 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       An = (GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn = (GEN) FpXQ_pow(B,ipg,Q,l)[2];
       if (!invmod(Bn,l,&z))
-        err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       z = modii(mulii(An,z),l);
       L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
-        err(talker,"Polynomials not irreducible in FpX_ffintersect");
+        pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
       B = FpX_Fp_mul(B,L,l);
     }
@@ -1677,7 +1677,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z = FpXQ_mul(An,z,U,l);
       L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
-      if (!L) err(talker,"Polynomials not irreducible in FpX_ffintersect");
+      if (!L) pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       B = FqX_Fq_mul(B,L,U,l);
       B = gsubst(B,MAXVARN,gen_0);
       A = gsubst(A,MAXVARN,gen_0);
@@ -2057,7 +2057,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   vx = varn(x);
   dy = degpol(y);
   dx = degpol(x);
@@ -2161,7 +2161,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   GEN z,p1,rem,lead;
 
   if (!T) return FpX_divrem(x,y,p,pr);
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -2575,7 +2575,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (!gcmp1(lb)) res = muliimod(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) err(warnmem,"FpX_resultant (da = %ld)",da);
+      if (DEBUGMEM>1) pari_err(warnmem,"FpX_resultant (da = %ld)",da);
       gerepileall(av,3, &a,&b,&res);
     }
     da = db; /* = degpol(a) */
@@ -2688,7 +2688,7 @@ polint_triv(GEN xa, GEN ya)
     P = P? gadd(P, dP): dP;
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) err(warnmem,"polint_triv2 (i = %ld)",i);
+      if (DEBUGMEM>1) pari_err(warnmem,"polint_triv2 (i = %ld)",i);
       P = gerepileupto(av, P);
     }
   }
@@ -2735,7 +2735,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
     P = P? FpX_add(P, dP, p): dP;
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) err(warnmem,"FpV_polint");
+      if (DEBUGMEM>1) pari_err(warnmem,"FpV_polint");
       if (!P) avma = av; else P = gerepileupto(av, P);
     }
   }
@@ -2892,7 +2892,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2, lim;
 
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   (void)new_chunk(2);
   dx=degpol(x); x = revpol(x);
   dy=degpol(y); y = revpol(y); dz=dx-dy; dp = dz+1;
@@ -2909,7 +2909,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_err(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
@@ -2985,7 +2985,7 @@ FlxX_subres(GEN u, GEN v, ulong p)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"subresall, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_err(warnmem,"subresall, dr = %ld",dr);
       gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
@@ -3093,7 +3093,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
   if (LERS)
   {
-    if (!lambda) err(talker,"ZY_ZXY_resultant_all: LERS needs lambda");
+    if (!lambda) pari_err(talker,"ZY_ZXY_resultant_all: LERS needs lambda");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
@@ -3227,7 +3227,7 @@ INIT:
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
-      if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_rnfequation");
+      if (DEBUGMEM>1) pari_err(warnmem,"ZY_ZXY_rnfequation");
       gerepilemany(av2,gptr,LERS? 4: 2); 
     }
   }
@@ -3367,7 +3367,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
-      if (DEBUGMEM>1) err(warnmem,"ZX_resultant");
+      if (DEBUGMEM>1) pari_err(warnmem,"ZX_resultant");
       gerepilemany(av2,gptr, 2);
     }
   }
@@ -3446,13 +3446,13 @@ modulargcd(GEN A0, GEN B0)
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
   byteptr d;
 
-  if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"modulargcd");
+  if ((typ(A0) | typ(B0)) !=t_POL) pari_err(notpoler,"modulargcd");
   if (!signe(A0)) return gcopy(B0);
   if (!signe(B0)) return gcopy(A0);
   A = primitive_part(A0, &a); check_ZX(A, "modulargcd");
   B = primitive_part(B0, &b); check_ZX(B, "modulargcd");
   D = _gcd(a,b);
-  if (varn(A) != varn(B)) err(talker,"different variables in modulargcd");
+  if (varn(A) != varn(B)) pari_err(talker,"different variables in modulargcd");
  
   /* A, B in Z[X] */
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
@@ -3510,7 +3510,7 @@ next:
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"modulargcd");
+      if (DEBUGMEM>1) pari_err(warnmem,"modulargcd");
       gerepileall(av2, 2, &H, &q);
     }
   }
@@ -3527,11 +3527,11 @@ QXQ_inv(GEN A0, GEN B0)
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
   byteptr d;
 
-  if (typ(B0) != t_POL) err(notpoler,"QXQ_inv");
+  if (typ(B0) != t_POL) pari_err(notpoler,"QXQ_inv");
   if (typ(A0) != t_POL)
   {
     if (is_scalar_t(typ(A0))) return ginv(A0);
-    err(notpoler,"QXQ_inv");
+    pari_err(notpoler,"QXQ_inv");
   }
   if (degpol(A0) < 15) return ginvmod(A0,B0);
   A = Q_primitive_part(A0, &D);
@@ -3566,7 +3566,7 @@ QXQ_inv(GEN A0, GEN B0)
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"QXQ_inv");
+      if (DEBUGMEM>1) pari_err(warnmem,"QXQ_inv");
       gerepileall(av2, 3, &q,&U,&V);
     }
   }
@@ -3746,8 +3746,8 @@ static GEN
 init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
-  if (n <= 0) err(talker,"non positive degree in ffinit");
-  if (typ(p) != t_INT) err(typeer, "ffinit");
+  if (n <= 0) pari_err(talker,"non positive degree in ffinit");
+  if (typ(p) != t_INT) pari_err(typeer, "ffinit");
   if (v < 0) v = 0;
   if (n == 1) return pol_x[v];
   /*If easy case, use cyclo*/

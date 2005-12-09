@@ -148,7 +148,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */
 
-  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
+  if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   s = absi_cmp(a,b);
   if (s < 0)
   {
@@ -308,7 +308,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     {
       GEN *gptr[6]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&u; gptr[3]=&u1;
       gptr[4]=&v; gptr[5]=&v1;
-      if(DEBUGMEM>1) err(warnmem,"bezout");
+      if(DEBUGMEM>1) pari_err(warnmem,"bezout");
       gerepilemany(av1,gptr,6);
     }
   } /* end while */

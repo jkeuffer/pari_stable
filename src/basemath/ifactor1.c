@@ -60,7 +60,7 @@ miller_ok(miller_t *S, GEN c)
     { /* too many sqrt(-1)s mod n */
       if (DEBUGLEVEL) {
         GEN z = gcdii(addii(c, S->sqrt1), S->n);
-        err(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
+        pari_err(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
       }
       return 1;
     }
@@ -89,7 +89,7 @@ bad_for_base(miller_t *S, GEN a)
     if (equalii(S->t, c)) return miller_ok(S, c2);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"miller(rabin)");
+      if(DEBUGMEM>1) pari_err(warnmem,"miller(rabin)");
       c = gerepileuptoint(av, c);
     }
   }
@@ -220,7 +220,7 @@ LucasMod(GEN n, ulong P, GEN N)
       v1= modii(v1,N);
       if (low_stack(lim,stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"LucasMod");
+        if(DEBUGMEM>1) pari_err(warnmem,"LucasMod");
         gerepileall(av, 2, &v,&v1);
       }
     }
@@ -323,7 +323,7 @@ BSW_psp(GEN N)
   long n;
   int k;
 
-  if (typ(N) != t_INT) err(arither1);
+  if (typ(N) != t_INT) pari_err(arither1);
   if (signe(N) <= 0) return 0;
   n = itos_or_0(N);
   if (n && n < 103)
@@ -458,7 +458,7 @@ plisprime(GEN N, long flag)
     F = gel(N,2);
     N = gel(N,1); t = typ(N);
   }
-  if (t != t_INT) err(arither1);
+  if (t != t_INT) pari_err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
 
   eps = cmpiu(N,2);
@@ -491,7 +491,7 @@ plisprime(GEN N, long flag)
       else                      r = plisprime(p,flag);
     }
     gmael(C,3,i) = r;
-    if (r == gen_0) err(talker,"False prime number %Z in plisprime", p);
+    if (r == gen_0) pari_err(talker,"False prime number %Z in plisprime", p);
   }
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
@@ -546,7 +546,7 @@ nextprime(GEN n)
   pari_sp av = avma;
 
   if (typ(n) != t_INT) n = gceil(n);
-  if (typ(n) != t_INT) err(arither1);
+  if (typ(n) != t_INT) pari_err(arither1);
   if (signe(n) <= 0) { avma = av; return gen_2; }
   if (lgefint(n) <= 3)
   { /* check if n <= 7 */
@@ -586,7 +586,7 @@ precprime(GEN n)
   pari_sp av = avma;
 
   if (typ(n) != t_INT) n = gfloor(n);
-  if (typ(n) != t_INT) err(arither1);
+  if (typ(n) != t_INT) pari_err(arither1);
   if (signe(n) <= 0) { avma = av; return gen_0; }
   if (lgefint(n) <= 3)
   { /* check if n <= 10 */
@@ -655,7 +655,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
       if (d1 < 0)
       {
 	fprintferr("snextpr: %lu != prc210_rp[%ld] mod 210\n", p, rcn0);
-	err(bugparier, "[caller of] snextpr");
+	pari_err(bugparier, "[caller of] snextpr");
       }
     }
     NEXT_PRIME_VIADIFF(p,*d);
@@ -668,7 +668,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (*rcn == NPRC)
     {
       fprintferr("snextpr: %lu should have been prime but isn\'t\n", p);
-      err(bugparier, "[caller of] snextpr");
+      pari_err(bugparier, "[caller of] snextpr");
     }
   }
   /* look for the next one */
@@ -682,7 +682,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     if (*pp2 <= 11)		/* wraparound mod 2^BITS_IN_LONG */
     {
       fprintferr("snextpr: integer wraparound after prime %lu\n", p);
-      err(bugparier, "[caller of] snextpr");
+      pari_err(bugparier, "[caller of] snextpr");
     }
   }
   return *pp2;
@@ -768,7 +768,7 @@ elladd0(long nbc, long nbc1,
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
   if (nbc1 == 4) mask = 3;
-  else if (nbc1 < nbc) err(bugparier, "[caller of] elladd0");
+  else if (nbc1 < nbc) pari_err(bugparier, "[caller of] elladd0");
 
   W[1] = subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -1374,7 +1374,7 @@ ellfacteur(GEN n, int insist)
       if (rcn == NPRC)
       {
 	fprintferr("ECM: %lu should have been prime but isn\'t\n", p);
-	err(bugparier, "ellfacteur");
+	pari_err(bugparier, "ellfacteur");
       }
     }
 
@@ -1992,9 +1992,9 @@ squfof(GEN n)
   d1 = itou(sqrti(D1));
   b1 = (long)((d1-1) | 1); /* largest odd number not exceeding d1 */
   c1 = itos(shifti(subii(D1, sqru((ulong)b1)), -2));
-  if (!c1) err(bugparier,"squfof [caller of] (n or 3n is a square)");
+  if (!c1) pari_err(bugparier,"squfof [caller of] (n or 3n is a square)");
   c2 = itos(shifti(subii(D2, sqru((ulong)b2)), -2));
-  if (!c2) err(bugparier,"squfof [caller of] (5n is a square)");
+  if (!c2) pari_err(bugparier,"squfof [caller of] (5n is a square)");
   L1 = (long)usqrtsafe(d1);
   L2 = (long)usqrtsafe(d2);
   /* dd1 used to compute floor((d1+b1)/2) as dd1+floor(b1/2), without
@@ -2771,8 +2771,8 @@ ifac_start(GEN n, long moebius, long hint)
 {
   GEN part, here;
 
-  if (typ(n) != t_INT) err(typeer, "ifac_start");
-  if (!signe(n)) err(talker, "factoring 0 in ifac_start");
+  if (typ(n) != t_INT) pari_err(typeer, "ifac_start");
+  if (!signe(n)) pari_err(talker, "factoring 0 in ifac_start");
 
   part = cgetg(ifac_initial_length, t_VEC);
   here = part + ifac_initial_length;
@@ -2798,11 +2798,11 @@ ifac_find(GEN *partial, GEN *where)
   GEN scan = *where + 3;
 
 #ifdef IFAC_DEBUG
-  if (!*partial || typ(*partial) != t_VEC) err(typeer, "ifac_find");
+  if (!*partial || typ(*partial) != t_VEC) pari_err(typeer, "ifac_find");
   if (lg(*partial) < ifac_initial_length)
-    err(talker, "partial impossibly short in ifac_find");
+    pari_err(talker, "partial impossibly short in ifac_find");
   if (!(*where) || *where > *partial + lgp - 3 || *where < *partial)
-    err(talker, "`*where\' out of bounds in ifac_find");
+    pari_err(talker, "`*where\' out of bounds in ifac_find");
 #endif
   while (scan < end && !*scan) scan += 3;
   /* paranoia -- check completely NULLed ? nope -- we never inspect the
@@ -2810,7 +2810,7 @@ ifac_find(GEN *partial, GEN *where)
   if (scan < end)
   {
     if (DEBUGLEVEL >= 5 && !scan[1])
-      err(talker, "factor has NULL exponent in ifac_find");
+      pari_err(talker, "factor has NULL exponent in ifac_find");
     return scan;
   }
   return NULL;
@@ -2909,13 +2909,13 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   {
     long lgp;
     if (!*partial || typ(*partial) != t_VEC)
-      err(typeer, "ifac_sort_one");
+      pari_err(typeer, "ifac_sort_one");
     if ((lgp = lg(*partial)) < ifac_initial_length)
-      err(talker, "partial impossibly short in ifac_sort_one");
+      pari_err(talker, "partial impossibly short in ifac_sort_one");
     if (!(*where) || *where < *partial + 3 || *where > *partial + lgp - 3)
-      err(talker, "`*where\' out of bounds in ifac_sort_one");
+      pari_err(talker, "`*where\' out of bounds in ifac_sort_one");
     if (!washere || washere < *where || washere > *partial + lgp - 3)
-      err(talker, "`washere\' out of bounds in ifac_sort_one");
+      pari_err(talker, "`washere\' out of bounds in ifac_sort_one");
   }
   value    = gel(washere,0);
   exponent = gel(washere,1);
@@ -2952,7 +2952,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   if (cmp_res)
   {
     if (cmp_res < 0 && scan != *where)
-      err(talker, "misaligned partial detected in ifac_sort_one");
+      pari_err(talker, "misaligned partial detected in ifac_sort_one");
     gel(scan,0) = value;
     gel(scan,1) = exponent;
     gel(scan,2) = class0; return 0;
@@ -2970,9 +2970,9 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     if (class1)
     {
       if (class0 == gen_0 && class1 != gen_0)
-	err(talker, "composite equals prime in ifac_sort_one");
+	pari_err(talker, "composite equals prime in ifac_sort_one");
       else if (class0 != gen_0 && class1 == gen_0)
-	err(talker, "prime equals composite in ifac_sort_one");
+	pari_err(talker, "prime equals composite in ifac_sort_one");
       else if (class0 == gen_2)	/* should happen even less */
 	gel(scan,2) = class0;	/* use it */
     }
@@ -3019,11 +3019,11 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 
 #ifdef IFAC_DEBUG
   if (!*partial || typ(*partial) != t_VEC)
-    err(typeer, "ifac_whoiswho");
+    pari_err(typeer, "ifac_whoiswho");
   if (lg(*partial) < ifac_initial_length)
-    err(talker, "partial impossibly short in ifac_whoiswho");
+    pari_err(talker, "partial impossibly short in ifac_whoiswho");
   if (!(*where) || *where > scan_end || *where < *partial + 3)
-    err(talker, "`*where\' out of bounds in ifac_whoiswho");
+    pari_err(talker, "`*where\' out of bounds in ifac_whoiswho");
 #endif
   if (after_crack == 0) return;
   if (after_crack > 0)
@@ -3033,7 +3033,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 				/* check at most after_crack entries */
     if (scan > scan_end)	/* ooops... */
     {
-      err(warner, "avoiding nonexistent factors in ifac_whoiswho");
+      pari_err(warner, "avoiding nonexistent factors in ifac_whoiswho");
       scan = scan_end;
     }
   }
@@ -3079,15 +3079,15 @@ ifac_divide(GEN *partial, GEN *where)
 
 #ifdef IFAC_DEBUG
   if (!*partial || typ(*partial) != t_VEC)
-    err(typeer, "ifac_divide");
+    pari_err(typeer, "ifac_divide");
   if (lg(*partial) < ifac_initial_length)
-    err(talker, "partial impossibly short in ifac_divide");
+    pari_err(talker, "partial impossibly short in ifac_divide");
   if (!(*where) || *where > *partial + lgp - 3 || *where < *partial + 3)
-    err(talker, "`*where\' out of bounds in ifac_divide");
+    pari_err(talker, "`*where\' out of bounds in ifac_divide");
   if (gel(*where,2) != gen_1)
-    err(talker, "division by composite or finished prime in ifac_divide");
+    pari_err(talker, "division by composite or finished prime in ifac_divide");
   if (!(**where))
-    err(talker, "division by nothing in ifac_divide");
+    pari_err(talker, "division by nothing in ifac_divide");
 #endif
   newexp = exponent = itos(gel(*where,1));
   if (exponent > 1 && moebius_mode) return 1;
@@ -3153,15 +3153,15 @@ ifac_crack(GEN *partial, GEN *where)
 #ifdef IFAC_DEBUG
   long lgp;
   if (!*partial || typ(*partial) != t_VEC)
-    err(typeer, "ifac_crack");
+    pari_err(typeer, "ifac_crack");
   if ((lgp = lg(*partial)) < ifac_initial_length)
-    err(talker, "partial impossibly short in ifac_crack");
+    pari_err(talker, "partial impossibly short in ifac_crack");
   if (!(*where) || *where < *partial + 6 || *where > *partial + lgp - 3)
-    err(talker, "`*where\' out of bounds in ifac_crack");
+    pari_err(talker, "`*where\' out of bounds in ifac_crack");
   if (!(**where) || typ(**where) != t_INT)
-    err(typeer, "ifac_crack");
+    pari_err(typeer, "ifac_crack");
   if (gel(*where,2) != gen_0)
-    err(talker, "operand not known composite in ifac_crack");
+    pari_err(talker, "operand not known composite in ifac_crack");
 #endif
   hint = itos(gel(*partial,2)) & 15;
   exponent = gel(*where,1);
@@ -3280,9 +3280,9 @@ ifac_crack(GEN *partial, GEN *where)
       if (DEBUGLEVEL >= 2)
       {
         if (hint != 15)
-          err(warner, "IFAC: unfactored composite declared prime");
+          pari_err(warner, "IFAC: unfactored composite declared prime");
         else
-          err(warner, "IFAC: untested integer declared prime");
+          pari_err(warner, "IFAC: untested integer declared prime");
 
 	/* don't print it out at level 3 or above, where it would appear
 	 * several times before and after this message already */
@@ -3299,7 +3299,7 @@ ifac_crack(GEN *partial, GEN *where)
   {
     fprintferr("IFAC: factorizer returned strange object to ifac_crack\n");
     outerr(factor);
-    err(bugparier, "factoring");
+    pari_err(bugparier, "factoring");
   }
 #endif
   /* got single integer back:  work out the cofactor (in place) */
@@ -3307,7 +3307,7 @@ ifac_crack(GEN *partial, GEN *where)
   {
     fprintferr("IFAC: factoring %Z\n", **where);
     fprintferr("\tyielded `factor\' %Z\n\twhich isn't!\n", factor);
-    err(bugparier, "factoring");
+    pari_err(bugparier, "factoring");
   }
 
   /* the factoring engines report the factor found when DEBUGLEVEL is
@@ -3329,7 +3329,7 @@ ifac_crack(GEN *partial, GEN *where)
     gel(*where,0) = gel(*where,3); /* move cofactor pointer to lowest slot */
     gel(*where,3) = factor;	/* save factor */
   }
-  else err(bugparier,"ifac_crack [carrecomplet miss]");
+  else pari_err(bugparier,"ifac_crack [carrecomplet miss]");
   return 2;
 }
 
@@ -3442,7 +3442,7 @@ ifac_main(GEN *partial)
 #if IFAC_DEBUG
     if (gel(here,2) == NULL)
     { /* unknown: something is wrong. Try to recover */
-      err(warner, "IFAC: unknown factor seen in main loop");
+      pari_err(warner, "IFAC: unknown factor seen in main loop");
       /* can only happen in Moebius mode */
       if (ifac_resort(partial, &here)) return gen_0;
 
@@ -3493,7 +3493,7 @@ ifac_main(GEN *partial)
       }
       continue;
     }
-    err(talker, "non-existent factor class in ifac_main");
+    pari_err(talker, "non-existent factor class in ifac_main");
   } /* while */
   if (moebius_mode && gel(here,1) != gen_1)
   {
@@ -3579,8 +3579,8 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
    *    sum_{p | n} ( log_{2^BIL} (p) + 6 ) <= log_{2^BIL} n + 6 log_2 n */
   workspc = new_chunk((expi(n) + 1) * 7);
 
-  if (!n || typ(n) != t_INT) err(typeer, "ifac_decomp");
-  if (!signe(n)) err(talker, "factoring 0 in ifac_decomp");
+  if (!n || typ(n) != t_INT) pari_err(typeer, "ifac_decomp");
+  if (!signe(n)) pari_err(talker, "factoring 0 in ifac_decomp");
 
   part = ifac_start(n, 0, hint);
   here = ifac_main(&part);
@@ -3604,7 +3604,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[2] ifac_decomp");
+      if(DEBUGMEM>1) pari_err(warnmem,"[2] ifac_decomp");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto((pari_sp)workspc, part);
     }
@@ -3638,7 +3638,7 @@ ifac_moebius(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ifac_moebius");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_moebius");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3660,7 +3660,7 @@ ifac_issquarefree(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ifac_issquarefree");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_issquarefree");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3683,7 +3683,7 @@ ifac_omega(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ifac_omega");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_omega");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3706,7 +3706,7 @@ ifac_bigomega(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ifac_bigomega");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_bigomega");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3738,7 +3738,7 @@ ifac_totient(GEN n, long hint)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gsav[2];
-      if(DEBUGMEM>1) err(warnmem,"ifac_totient");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_totient");
       tetpil = avma;
       ifac_realloc(&part, &here, 0);
       phi = icopy(phi);
@@ -3768,7 +3768,7 @@ ifac_numdiv(GEN n, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) err(warnmem,"ifac_numdiv");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_numdiv");
       tetpil = avma;
       ifac_realloc(&part, &here, 0);
       tau = icopy(tau);
@@ -3803,7 +3803,7 @@ ifac_sumdiv(GEN n, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) err(warnmem,"ifac_sumdiv");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_sumdiv");
       ifac_realloc(&part, &here, 0);
       sigma = icopy(sigma);
       gsav[0] = &sigma; gsav[1] = &part;
@@ -3839,7 +3839,7 @@ ifac_sumdivk(GEN n, long k, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) err(warnmem,"ifac_sumdivk");
+      if(DEBUGMEM>1) pari_err(warnmem,"ifac_sumdivk");
       ifac_realloc(&part, &here, 0);
       sigma = icopy(sigma);
       gsav[0] = &sigma; gsav[1] = &part;

@@ -613,7 +613,7 @@ whatnow(char *s, int flag)
     if (!is_identifier(s) || !is_entry_intern(s,funct_old_hash,NULL))
     {
       if (flag) return 0;
-      err(talker,"as far as I can recall, this function never existed");
+      pari_err(talker,"as far as I can recall, this function never existed");
     }
     n = 0;
     do
@@ -633,12 +633,12 @@ whatnow(char *s, int flag)
   if (def == SAME)
   {
     if (flag) return 0;
-    err(talker,"this function did not change");
+    pari_err(talker,"this function did not change");
   }
   if (flag) return n;
 
   if (def == REMOV)
-    err(talker,"this function was suppressed");
+    pari_err(talker,"this function was suppressed");
   if (!strcmp(def,"x*y"))
   {
     pariputsf("  %s is now called *.\n\n",s);
@@ -646,7 +646,7 @@ whatnow(char *s, int flag)
     return 1;
   }
   ep = is_entry(wp.name);
-  if (!ep) err(bugparier,"whatnow");
+  if (!ep) pari_err(bugparier,"whatnow");
   pariputs("New syntax: "); term_color(c_ERR);
   pariputsf("%s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
   term_color(c_HELP);

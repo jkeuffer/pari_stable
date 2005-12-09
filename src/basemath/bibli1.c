@@ -646,7 +646,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   if (s == 0) B[k+1] = B[k];
   else
   {
-    if (s < 0) err(lllger3);
+    if (s < 0) pari_err(lllger3);
     B[k+1] = coeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
   }
 }
@@ -660,13 +660,13 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   pari_sp av, lim;
   GEN B,L,h,fl;
 
-  if (typ(x) != t_MAT) err(typeer,"lllint");
+  if (typ(x) != t_MAT) pari_err(typeer,"lllint");
   fl = cgetg(lx,t_VECSMALL);
   if (ptfl) *ptfl = fl;
   n = lx-1; if (n <= 1) return NULL;
   MARKED = pMARKED? *pMARKED: 0;
   hx = lg(x[1]);
-  if (gram && hx != lx) err(mattype1,"lllint");
+  if (gram && hx != lx) pari_err(mattype1,"lllint");
 
   av = avma; lim = stack_lim(av,1); x = shallowcopy(x);
   B = gscalcol_i(gen_1, lx);
@@ -674,7 +674,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   for (j=1; j<lx; j++)
   {
     for (i=1; i<hx; i++)
-      if (typ(gcoeff(x,i,j)) != t_INT) err(typeer,"lllint_marked");
+      if (typ(gcoeff(x,i,j)) != t_INT) pari_err(typeer,"lllint_marked");
     fl[j] = 0; gel(L,j) = zerocol(n);
   }
   h = pth? matid(n): NULL;
@@ -709,7 +709,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
           else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) err(warnmem,"lllint[1], kmax = %ld", kmax);
+            if(DEBUGMEM>1) pari_err(warnmem,"lllint[1], kmax = %ld", kmax);
             gerepileall(av,h?4:3,&B,&L,&x,&h);
           }
         }
@@ -717,7 +717,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllint[2], kmax = %ld", kmax);
+      if(DEBUGMEM>1) pari_err(warnmem,"lllint[2], kmax = %ld", kmax);
       gerepileall(av,h?4:3,&B,&L,&x,&h);
     }
   }
@@ -896,7 +896,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
     if (j==k || fl[j])
     {
       u = gcoeff(x,k,j); tu = typ(u);
-      if (! is_extscalar_t(tu)) err(typeer,"incrementalGSgen");
+      if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen");
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -920,9 +920,9 @@ lllgramallgen(GEN x, long flag)
   GEN B, L, h, fl;
   int flc;
 
-  if (typ(x) != t_MAT) err(typeer,"lllgramallgen");
+  if (typ(x) != t_MAT) pari_err(typeer,"lllgramallgen");
   n = lx-1; if (n<=1) return lll_trivial(x,flag);
-  if (lg(x[1]) != lx) err(mattype1,"lllgramallgen");
+  if (lg(x[1]) != lx) pari_err(mattype1,"lllgramallgen");
 
   fl = cgetg(lx, t_VECSMALL);
 
@@ -947,7 +947,7 @@ lllgramallgen(GEN x, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllgramallgen");
+      if(DEBUGMEM>1) pari_err(warnmem,"lllgramallgen");
       gerepileall(av,3,&B,&L,&h);
     }
   }
@@ -1115,7 +1115,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllfp[1]");
+      if(DEBUGMEM>1) pari_err(warnmem,"lllfp[1]");
       gerepileall(av,5,&X,&Xs, &R,&h,&Q);
     }
   }
@@ -1152,7 +1152,7 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   int isexact, exact_can_leave;
   const int in_place = (flag == 3);
 
-  if (typ(x) != t_MAT) err(typeer,"lllfp");
+  if (typ(x) != t_MAT) pari_err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return matid(n);
 #if 0 /* doesn't work yet */
   return lll_scaled(MARKED, x, D);
@@ -1161,8 +1161,8 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   hx = lg(x[1]);
   if (hx != lx)
   {
-    if (gram) err(mattype1,"lllfp");
-    if (lx > hx) err(talker,"dependent vectors in lllfp");
+    if (gram) pari_err(mattype1,"lllfp");
+    if (lx > hx) pari_err(talker,"dependent vectors in lllfp");
   }
   delta = divrs(stor(D-1, DEFAULTPREC), D);
   xinit = x;
@@ -1222,7 +1222,7 @@ PRECPB:
           prec = (long)((prec-2) * 1.25 + 2);
         if (isexact)
         {
-          if (DEBUGLEVEL>2) err(warnprec,"lllfp (exact)",prec);
+          if (DEBUGLEVEL>2) pari_err(warnprec,"lllfp (exact)",prec);
           if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
           gerepileall(av, in_place? 1: 2, &xinit, &H);
@@ -1234,7 +1234,7 @@ PRECPB:
         }
         else
         {
-          if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
+          if (DEBUGLEVEL) pari_err(warnprec,"lllfp",prec);
           x = gprec_w(xinit,prec);
           x = gram? qf_base_change(x, h, 1): gmul(x, h);
           gerepileall(av, 2, &h, &x);
@@ -1243,9 +1243,9 @@ PRECPB:
       } /* fall through */
     case 0: /* give up */
       if (DEBUGLEVEL>3) fprintferr("\n");
-      if (DEBUGLEVEL) err(warner,"lllfp giving up");
+      if (DEBUGLEVEL) pari_err(warner,"lllfp giving up");
       if (flag) { avma=av; return NULL; }
-      err(lllger3);
+      pari_err(lllger3);
   }
   exact_can_leave = 1;
   count = 0;
@@ -1256,7 +1256,7 @@ PRECPB:
   if (gram && !incrementalGS(x, L, B, 1))
   {
     if (flag) return NULL;
-    err(lllger3);
+    pari_err(lllger3);
   }
   if (DEBUGLEVEL>5) fprintferr("k =");
   for(k=2;;)
@@ -1318,7 +1318,7 @@ PRECPB:
           if (!j) goto PRECPB;
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) err(warnmem,"lllfp[1], kmax = %ld", kmax);
+            if(DEBUGMEM>1) pari_err(warnmem,"lllfp[1], kmax = %ld", kmax);
             gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
           }
         }
@@ -1351,7 +1351,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllfp[2], kmax = %ld", kmax);
+      if(DEBUGMEM>1) pari_err(warnmem,"lllfp[2], kmax = %ld", kmax);
       gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
     }
   }
@@ -1397,7 +1397,7 @@ qflll0(GEN x, long flag, long prec)
     case 4: return lllkerim(x);
     case 5: return lllkerimgen(x);
     case 8: return lllgen(x);
-    default: err(flagerr,"qflll");
+    default: pari_err(flagerr,"qflll");
   }
   return NULL; /* not reached */
 }
@@ -1412,7 +1412,7 @@ qflllgram0(GEN x, long flag, long prec)
     case 4: return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
     case 8: return lllgramgen(x);
-    default: err(flagerr,"qflllgram");
+    default: pari_err(flagerr,"qflllgram");
   }
   return NULL; /* not reached */
 }
@@ -1422,7 +1422,7 @@ gram_matrix(GEN b)
 {
   long i,j, lx = lg(b);
   GEN g;
-  if (typ(b) != t_MAT) err(typeer,"gram");
+  if (typ(b) != t_MAT) pari_err(typeer,"gram");
   g = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
@@ -1480,7 +1480,7 @@ lllintpartialall(GEN m, long flag)
   const pari_sp av = avma;
   GEN tm1, tm2, mid;
 
-  if (typ(m) != t_MAT) err(typeer,"lllintpartial");
+  if (typ(m) != t_MAT) pari_err(typeer,"lllintpartial");
   if (ncol <= 1) return flag? matid(ncol): gcopy(m);
 
   tm1 = flag? matid(ncol): NULL;
@@ -1617,7 +1617,7 @@ lllintpartialall(GEN m, long flag)
         } /* for ijdif */
         if (low_stack(lim, stack_lim(av3,2)))
 	{
-          if(DEBUGMEM>1) err(warnmem,"lllintpartialall");
+          if(DEBUGMEM>1) pari_err(warnmem,"lllintpartialall");
 	  gerepileall(av3, 2, &dot,&tm2);
         }
       } /* for i */
@@ -1702,7 +1702,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   long delta, t;
   tau = gtodouble(glog(X, DEFAULTPREC)) / logN;
   beta = gtodouble(glog(B, DEFAULTPREC)) / logN;
-  if (tau >= beta * beta / d) err(talker, "bound too large");
+  if (tau >= beta * beta / d) pari_err(talker, "bound too large");
   /* TODO : remove P0 completely ! */
   rho = gtodouble(glog(P0, DEFAULTPREC)) / logN;
 
@@ -1750,12 +1750,12 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   long delta, i, j, row, d, l, dim, t, bnd = 10;
   pari_sp av = avma;
 
-  if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "zncoppersmith");
+  if (typ(P0) != t_POL || typ(N) != t_INT) pari_err(typeer, "zncoppersmith");
   if (typ(X) != t_INT) {
     X = gfloor(X);
-    if (typ(X) != t_INT) err(typeer, "zncoppersmith");
+    if (typ(X) != t_INT) pari_err(typeer, "zncoppersmith");
   }
-  if (signe(X) < 0) err(talker, "negative bound in zncoppersmith");
+  if (signe(X) < 0) pari_err(talker, "negative bound in zncoppersmith");
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
@@ -1767,7 +1767,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
   P = shallowcopy(P0); d = degpol(P);
   if (d == 0) { avma = av; return cgetg(1, t_VEC); }
-  if (d < 0) err(talker, "zero polynomial forbidden");
+  if (d < 0) pari_err(talker, "zero polynomial forbidden");
 
   if (!gcmp1(gel(P,d+2)))
   {
@@ -1909,7 +1909,7 @@ lindep2(GEN x, long bit)
   pari_sp av = avma;
   GEN re,im,p1,p2;
 
-  if (! is_vec_t(tx)) err(typeer,"lindep2");
+  if (! is_vec_t(tx)) pari_err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
   re = real_i(x);
   im = imag_i(x); bit = (long) (bit/L2SL10);
@@ -1942,7 +1942,7 @@ lindep(GEN x, long prec)
   pari_sp av = avma, lim = stack_lim(av,1), av0, av1;
   const long EXP = - bit_accuracy(prec) + 2*n;
 
-  if (! is_vec_t(tx)) err(typeer,"lindep");
+  if (! is_vec_t(tx)) pari_err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
   x = gmul(x, real_1(prec)); if (tx != t_COL) settyp(x,t_COL);
   re = real_i(x);
@@ -1950,7 +1950,7 @@ lindep(GEN x, long prec)
   /* independent over R ? */
   if (n == 2 && real_indep(re,im,bit_accuracy(prec)))
     { avma = av; return cgetg(1, t_VEC); }
-  if (EXP > -10) err(precer,"lindep");
+  if (EXP > -10) pari_err(precer,"lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
   b = (GEN*)matid(n);
@@ -2011,7 +2011,7 @@ lindep(GEN x, long prec)
     }
     i=j; k=i+1;
     avma = av1; r = grndtoi(m[k][i], &e);
-    if (e >= 0) err(precer,"lindep");
+    if (e >= 0) pari_err(precer,"lindep");
     r  = negi(r);
     p1 = ZV_lincomb(gen_1,r, b[k],b[i]);
     b[k] = b[i];
@@ -2047,7 +2047,7 @@ lindep(GEN x, long prec)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lindep");
+      if(DEBUGMEM>1) pari_err(warnmem,"lindep");
       b = (GEN*)gerepilecopy(av0, (GEN)b);
       av1 = avma;
     }
@@ -2236,7 +2236,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   long tx = typ(x), lx = lg(x), n = lx-1, i, j, k, prec;
   GEN s1, s, sinv;
 
-  if (! is_vec_t(tx)) err(typeer,"pslq");
+  if (! is_vec_t(tx)) pari_err(typeer,"pslq");
   /* check trivial cases */
   for (k = 1; k <= n; k++)
     if (gcmp0(gel(x,k))) return col_ei(n, k);
@@ -2412,7 +2412,7 @@ pslq(GEN x)
 
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"pslq");
+      if(DEBUGMEM>1) pari_err(warnmem,"pslq");
       gerepileall(av,4,&M.y,&M.H,&M.A,&M.B);
     }
   }
@@ -2671,7 +2671,7 @@ RESTART:
   {
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"pslq");
+      if(DEBUGMEM>1) pari_err(warnmem,"pslq");
       gerepileall(av,4,&M.y,&M.H,&M.A,&M.B);
     }
     if (flit)
@@ -2716,7 +2716,7 @@ RESTART:
         {
           if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
-          if (! applybar(&M, &Mbar, Abargen,Bbargen)) err(bugparier,"pslqL2");
+          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(bugparier,"pslqL2");
 	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
           goto RESTART;
         }
@@ -2748,9 +2748,9 @@ plindep(GEN x)
     j = precp(p1); if (j < prec) prec = j;
     if (!p) p = gel(p1,2);
     else if (!equalii(p, gel(p1,2)))
-      err(talker,"inconsistent primes in plindep");
+      pari_err(talker,"inconsistent primes in plindep");
   }
-  if (!p) err(talker,"not a p-adic vector in plindep");
+  if (!p) pari_err(talker,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = powiu(p,prec);
   if (v != 0) x = gmul(x, gpowgs(p, -v));
   x = RgV_to_FpV(x, pn);
@@ -2773,7 +2773,7 @@ GEN
 lindep0(GEN x,long bit,long prec)
 {
   long i, tx = typ(x);
-  if (! is_vec_t(tx) && tx != t_MAT) err(typeer,"lindep");
+  if (! is_vec_t(tx) && tx != t_MAT) pari_err(typeer,"lindep");
   for (i = 1; i < lg(x); i++)
     if (typ(gel(x,i)) == t_PADIC) return plindep(x);
   switch (bit)
@@ -2793,13 +2793,13 @@ algdep0(GEN x, long n, long bit, long prec)
   pari_sp av;
   GEN y,p1;
 
-  if (! is_scalar_t(tx)) err(typeer,"algdep0");
+  if (! is_scalar_t(tx)) pari_err(typeer,"algdep0");
   if (tx==t_POLMOD) { y = forcecopy(gel(x,1)); setvarn(y,0); return y; }
   if (gcmp0(x)) return pol_x[0];
   if (n <= 0)
   {
     if (!n) return gen_1;
-    err(talker,"negative polynomial degree in algdep");
+    pari_err(talker,"negative polynomial degree in algdep");
   }
 
   av = avma; p1 = cgetg(n+2,t_COL);
@@ -2811,7 +2811,7 @@ algdep0(GEN x, long n, long bit, long prec)
   else
     p1 = lindep0(p1, bit, prec);
   if (typ(p1) == t_REAL) return gerepileupto(av, p1);
-  if (lg(p1) < 2) err(talker,"higher degree than expected in algdep");
+  if (lg(p1) < 2) pari_err(talker,"higher degree than expected in algdep");
   y = cgetg(n+3,t_POL);
   y[1] = evalsigne(1) | evalvarn(0);
   k = 1; while (k < n && gcmp0(gel(p1,k))) k++;
@@ -2846,7 +2846,7 @@ matkerint0(GEN x, long flag)
   {
     case 0: return kerint(x);
     case 1: return kerint1(x);
-    default: err(flagerr,"matkerint");
+    default: pari_err(flagerr,"matkerint");
   }
   return NULL; /* not reached */
 }
@@ -2981,14 +2981,14 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   BORNE = gfloor(BORNE);
-  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim0");
-  if (typ(a) != t_MAT) err(typeer,"minim0");
+  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
+  if (typ(a) != t_MAT) pari_err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
     case min_FIRST:
-      if (gcmp0(BORNE)) err(talker,"bound = 0 in minim2");
+      if (gcmp0(BORNE)) pari_err(talker,"bound = 0 in minim2");
       res = cgetg(3,t_VEC); break;
     case min_ALL: res = cgetg(4,t_VEC); break;
     case min_PERF: break;
@@ -3001,7 +3001,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
       break;
-    default: err(talker, "incorrect flag in minim0");
+    default: pari_err(talker, "incorrect flag in minim0");
   }
   if (n == 1)
   {
@@ -3021,7 +3021,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   av1 = avma;
 
   u = lllgramint(a);
-  if (lg(u) != n) err(talker,"not a definite form in minim0");
+  if (lg(u) != n) pari_err(talker,"not a definite form in minim0");
   a = qf_base_change(a,u,1);
 
   n--;
@@ -3051,7 +3051,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_ALL:
       maxrank = itos(STOCKMAX);
-      if (maxrank < 0) err(talker,"negative number of vectors in minim0");
+      if (maxrank < 0) pari_err(talker,"negative number of vectors in minim0");
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
@@ -3159,7 +3159,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"minim0, rank>=%ld",s);
+          if(DEBUGMEM>1) pari_err(warnmem,"minim0, rank>=%ld",s);
           invp = gerepilecopy(av1, invp);
         }
       }
@@ -3207,10 +3207,10 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 2:
     {
       GEN x = fincke_pohst(a,borne,itos(stockmax),prec,NULL);
-      if (!x) err(precer,"fincke_pohst");
+      if (!x) pari_err(precer,"fincke_pohst");
       return x;
     }
-    default: err(flagerr,"qfminim");
+    default: pari_err(flagerr,"qfminim");
   }
   return NULL; /* not reached */
 }
@@ -3342,7 +3342,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) err(warnmem,"smallvectors");
+	if(DEBUGMEM>1) pari_err(warnmem,"smallvectors");
 	if (stockmax) S = clonefill(S, s, stockmax);
         if (check) {
           GEN dummy = cgetg(1, t_STR);
@@ -3481,7 +3481,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     l = lg(a);
     if (l == 1)
     {
-      if (CHECK) err(talker, "dimension 0 in fincke_pohst");
+      if (CHECK) pari_err(talker, "dimension 0 in fincke_pohst");
       z = cgetg(4,t_VEC);
       gel(z,1) = gel(z,2) = gen_0;
       gel(z,3) = cgetg(1,t_MAT); return z;
@@ -3525,17 +3525,17 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (CHECK && CHECK->f_init)
     { /* f_init allowed to permute the columns of u and r */
       bound = CHECK->f_init(CHECK, r, u);
-      if (!bound) err(precer,"fincke_pohst");
+      if (!bound) pari_err(precer,"fincke_pohst");
     }
     r = sqred1_from_QR(r, gprecision(r));
-    if (!r) err(precer,"fincke_pohst");
+    if (!r) pari_err(precer,"fincke_pohst");
     if (!bound) bound = gsqr(gcoeff(r,1,1));
 
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
   if (CHECK) return res;
-  if (!res) err(precer,"fincke_pohst");
+  if (!res) pari_err(precer,"fincke_pohst");
 
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));

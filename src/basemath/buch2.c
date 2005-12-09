@@ -171,7 +171,7 @@ INLINE GEN
 col_0(long n)
 {
    GEN c = (GEN)calloc(n + 1, sizeof(long));
-   if (!c) err(memer);
+   if (!c) pari_err(memer);
    c[0] = evaltyp(t_VECSMALL) | evallg(n + 1);
    return c;
 }
@@ -621,7 +621,7 @@ cleanarch(GEN x, long N, long prec)
       gel(y,i) = cleanarch(gel(x,i), N, prec);
     return y;
   }
-  if (!is_vec_t(tx)) err(talker,"not a vector/matrix in cleanarch");
+  if (!is_vec_t(tx)) pari_err(talker,"not a vector/matrix in cleanarch");
   RU = lg(x)-1; R1 = (RU<<1)-N;
   s = gdivgs(sum(real_i(x), 1, RU), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
@@ -646,9 +646,9 @@ not_given(pari_sp av, long fl, long reason)
     default: s="unknown problem with fundamental units";
   }
   if (fl & nf_FORCE)
-  { if (reason != fupb_PRECI) err(talker, "bnfinit: %s", s); }
+  { if (reason != fupb_PRECI) pari_err(talker, "bnfinit: %s", s); }
   else
-    err(warner,"%s, not given",s);
+    pari_err(warner,"%s, not given",s);
   avma = av; return cgetg(1,t_MAT);
 }
 
@@ -785,7 +785,7 @@ init_units(GEN BNF)
   if (lg(x) == 5) funits = buchfu(bnf);
   else
   {
-    if (lg(x) != 6) err(talker,"incorrect big number field");
+    if (lg(x) != 6) pari_err(talker,"incorrect big number field");
     funits = gel(x,5);
   }
   l = lg(funits) + 1;
@@ -924,7 +924,7 @@ pr_index(GEN L, GEN pr)
   GEN al = gel(pr,2);
   for (j=1; j<l; j++)
     if (gequal(al, gmael(L,j,2))) return j;
-  err(bugparier,"codeprime");
+  pari_err(bugparier,"codeprime");
   return 0; /* not reached */
 }
 
@@ -1151,7 +1151,7 @@ red_mod_units(GEN col, GEN z, long prec)
   if (!x) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);
-  if (!gcmp1(gel(x,RU))) err(bugparier,"red_mod_units");
+  if (!gcmp1(gel(x,RU))) pari_err(bugparier,"red_mod_units");
   setlg(x,RU); return x;
 }
 
@@ -1176,7 +1176,7 @@ get_Garch(GEN nf, GEN gen, GEN clg2, long prec)
       {
         z = ideallllred(nf,z,NULL,prec); J = gel(z,1);
         if (!gequal(g,J))
-          err(bugparier,"isprincipal (incompatible bnf generators)");
+          pari_err(bugparier,"isprincipal (incompatible bnf generators)");
       }
     }
     Garch[i] = z[2];
@@ -1356,10 +1356,10 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
     if (flag & nf_FORCE)
     {
-      if (DEBUGLEVEL) err(warner,"precision too low for generators, e = %ld",e);
+      if (DEBUGLEVEL) pari_err(warner,"precision too low for generators, e = %ld",e);
       return NULL;
     }
-    err(warner,"precision too low for generators, not given");
+    pari_err(warner,"precision too low for generators, not given");
   }
   if (xc && col) col = gmul(xc, col);
   if (!col) col = cgetg(1, t_COL);
@@ -1387,11 +1387,11 @@ isprincipalall(GEN bnf,GEN x,long flag)
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (tx == id_PRINCIPAL)
   {
-    if (gcmp0(x)) err(talker,"zero ideal in isprincipal");
+    if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
     return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
   }
   x = idealhermite_aux(nf, x);
-  if (lg(x)==1) err(talker,"zero ideal in isprincipal");
+  if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
   if (degpol(nf[1]) == 1)
     return gerepileupto(av, triv_gen(nf, gcoeff(x,1,1), 0, flag));
 
@@ -1403,7 +1403,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
     GEN y = _isprincipal(bnf,x,&pr,flag);
     if (y) return gerepilecopy(av, y);
 
-    if (DEBUGLEVEL) err(warnprec,"isprincipal",pr);
+    if (DEBUGLEVEL) pari_err(warnprec,"isprincipal",pr);
     avma = av1; bnf = bnfnewprec(bnf,pr); (void)setrand(c);
   }
 }
@@ -1471,10 +1471,10 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     if (flag & nf_GIVEPREC)
     {
       if (DEBUGLEVEL)
-        err(warner,"insufficient precision for generators, not given");
+        pari_err(warner,"insufficient precision for generators, not given");
       avma = av; return utoipos(prec);
     }
-    if (DEBUGLEVEL) err(warnprec,"isprincipal",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"isprincipal",prec);
     avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
   }
 }
@@ -1533,12 +1533,12 @@ isunit(GEN bnf,GEN x)
 
     case t_MAT: /* famat */
       if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
-        err(talker, "not a factorization matrix in isunit");
+        pari_err(talker, "not a factorization matrix in isunit");
       break;
 
     case t_COL:
       if (degpol(nf[1]) != lg(x)-1)
-        err(talker,"not an algebraic number in isunit");
+        pari_err(talker,"not an algebraic number in isunit");
       break;
 
     default: x = algtobasis(nf, x);
@@ -1578,11 +1578,11 @@ isunit(GEN bnf,GEN x)
       prec = MEDDEFAULTPREC + (gexpo(x) >> TWOPOTBITS_IN_LONG);
     else
     {
-      if (i > 4) err(precer,"isunit");
+      if (i > 4) pari_err(precer,"isunit");
       prec = (prec-1)<<1;
     }
     i++;
-    if (DEBUGLEVEL) err(warnprec,"isunit",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"isunit",prec);
     nf = nfnewprec(nf, prec);
   }
 
@@ -1832,7 +1832,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
     IDEAL = prime_to_ideal(nf,ideal);
 #endif
     r = red_ideal(&IDEAL, F->G0, G, prec);
-    if (!r) err(bugparier, "small_norm (precision too low)");
+    if (!r) pari_err(bugparier, "small_norm (precision too low)");
 
     for (k=1; k<=N; k++)
     {
@@ -2113,7 +2113,7 @@ be_honest(FB_t *F, GEN nf)
 	avma = av2; if (k < ru) break;
         if (++nbtest > 50)
         {
-          err(warner,"be_honest() failure on prime %Z\n", P[j]);
+          pari_err(warner,"be_honest() failure on prime %Z\n", P[j]);
           return 0;
         }
       }
@@ -2400,7 +2400,7 @@ makecycgen(GEN bnf)
   GEN cyc,gen,h,nf,y,GD,D;
   long e,i,l;
 
-  if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
+  if (DEBUGLEVEL) pari_err(warner,"completing bnf (building cycgen)");
   nf = checknf(bnf);
   cyc = gmael3(bnf,8,1,2); D = diagonal_i(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
@@ -2427,7 +2427,7 @@ makematal(GEN bnf)
   GEN W,B,pFB,nf,ma, WB_C;
   long lW,lma,j,prec;
 
-  if (DEBUGLEVEL) err(warner,"completing bnf (building matal)");
+  if (DEBUGLEVEL) pari_err(warner,"completing bnf (building matal)");
   W   = gel(bnf,1);
   B   = gel(bnf,2);
   WB_C= gel(bnf,4);
@@ -2459,7 +2459,7 @@ makematal(GEN bnf)
     }
 
     prec = itos(y); j--;
-    if (DEBUGLEVEL) err(warnprec,"makematal",prec);
+    if (DEBUGLEVEL) pari_err(warnprec,"makematal",prec);
     nf = nfnewprec(nf,prec);
     bnf = bnfinit0(nf,1,NULL,prec); (void)setrand(c);
   }
@@ -2653,7 +2653,7 @@ bnfmake(GEN sbnf, long prec)
   GEN pfc, C, clgp, clgp2, res, y, W, zu, matal, Vbase;
   nfbasic_t T;
 
-  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) err(typeer,"bnfmake");
+  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) pari_err(typeer,"bnfmake");
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
 
   nfbasic_from_sbnf(sbnf, &T);
@@ -2698,7 +2698,7 @@ classgroupall(GEN P, GEN data, long flag, long prec)
   {
     lx = lg(data);
     if (typ(data)!=t_VEC || lx > 5)
-      err(talker,"incorrect parameters in classgroup");
+      pari_err(talker,"incorrect parameters in classgroup");
   }
   switch(lx)
   {
@@ -2715,7 +2715,7 @@ classgroupall(GEN P, GEN data, long flag, long prec)
     case 4: fl = nf_UNITS; break;
     case 5: fl = nf_UNITS | nf_FORCE; break;
     case 6: fl = 0; break;
-    default: err(flagerr,"classgroupall");
+    default: pari_err(flagerr,"classgroupall");
       return NULL; /* not reached */
   }
   return buchall(P, bach, bach2, nbrelpid, fl, prec);
@@ -2725,7 +2725,7 @@ GEN
 bnfclassunit0(GEN P, long flag, GEN data, long prec)
 {
   if (typ(P)==t_INT) return quadclassunit0(P,0,data,prec);
-  if (flag < 0 || flag > 2) err(flagerr,"bnfclassunit");
+  if (flag < 0 || flag > 2) pari_err(flagerr,"bnfclassunit");
   return classgroupall(P,data,flag+4,prec);
 }
 
@@ -2736,11 +2736,11 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
   /* TODO: synchronize quadclassunit output with bnfinit */
   if (typ(P)==t_INT)
   {
-    if (flag<4) err(impl,"specific bnfinit for quadratic fields");
+    if (flag<4) pari_err(impl,"specific bnfinit for quadratic fields");
     return quadclassunit0(P,0,data,prec);
   }
 #endif
-  if (flag < 0 || flag > 3) err(flagerr,"bnfinit");
+  if (flag < 0 || flag > 3) pari_err(flagerr,"bnfinit");
   return classgroupall(P,data,flag,prec);
 }
 
@@ -2954,7 +2954,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 12.;
   }
-  if (cbach <= 0.) err(talker,"Bach constant <= 0 in buch");
+  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buch");
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), gel(zu,1)),
@@ -3014,7 +3014,7 @@ PRECPB:
     if (DEBUGLEVEL)
     {
       char str[64]; sprintf(str,"buchall (%s)",precpb);
-      err(warnprec,str,PRECREG);
+      pari_err(warnprec,str,PRECREG);
     }
     precdouble++; precpb = NULL;
     nf = nf_cloneprec(nf, PRECREG, pnf);
@@ -3140,7 +3140,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   {
     nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
     if (lg(nf)==3) {
-      err(warner,"non-monic polynomial. Change of variables discarded");
+      pari_err(warner,"non-monic polynomial. Change of variables discarded");
       nf = gel(nf,1); 
     }
   }

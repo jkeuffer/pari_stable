@@ -51,7 +51,7 @@ get_sep(const char *t)
 	if (outer) { s[-1] = 0; return buf; } break;
     }
     if (s == lim)
-      err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
+      pari_err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
   }
 }
 
@@ -73,10 +73,10 @@ my_int(char *s)
 
   while (isdigit((int)*p)) { 
     ulong m;
-    if (n > (~0UL / 10)) err(talker2,"integer too large",s,s);
+    if (n > (~0UL / 10)) pari_err(talker2,"integer too large",s,s);
     n *= 10; m = n;
     n += *p++ - '0';
-    if (n < m) err(talker2,"integer too large",s,s);
+    if (n < m) pari_err(talker2,"integer too large",s,s);
   }
   if (n)
   {
@@ -86,9 +86,9 @@ my_int(char *s)
       case 'm': case 'M': n = safe_mul(n,1000000UL);    p++; break;
       case 'g': case 'G': n = safe_mul(n,1000000000UL); p++; break;
     }
-    if (!n) err(talker2,"integer too large",s,s);
+    if (!n) pari_err(talker2,"integer too large",s,s);
   }
-  if (*p) err(talker2,"I was expecting an integer here", s, s);
+  if (*p) pari_err(talker2,"I was expecting an integer here", s, s);
   return n;
 }
 
@@ -103,7 +103,7 @@ get_int(const char *s, long dflt)
   if (!isdigit((int)*p)) return dflt;
 
   n = (long)my_int(p);
-  if (n < 0) err(talker2,"integer too large",s,s);
+  if (n < 0) pari_err(talker2,"integer too large",s,s);
   return minus? -n: n;
 }
 
@@ -111,7 +111,7 @@ ulong
 get_uint(const char *s)
 {
   char *p = get_sep(s);
-  if (*p == '-') err(talker2,"arguments must be positive integers",s,s);
+  if (*p == '-') pari_err(talker2,"arguments must be positive integers",s,s);
   return my_int(p);
 }
 
@@ -210,7 +210,7 @@ sd_toggle(const char *v, long flag, char *s, int *ptn)
     {
       char *t = stackmalloc(64 + strlen(s));
       (void)sprintf(t, "default: incorrect value for %s [0:off / 1:on]", s);
-      err(talker2, t, v,v);
+      pari_err(talker2, t, v,v);
     }
     state = *ptn = n;
   }
@@ -249,7 +249,7 @@ sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
                     s, Min, Max);
-      err(talker2, buf, v,v);
+      pari_err(talker2, buf, v,v);
     }
     *ptn = n;
   }
@@ -321,7 +321,7 @@ sd_format(const char *v, long flag)
   {
     char c = *v;
     if (c!='e' && c!='f' && c!='g')
-      err(talker2,"default: inexistent format",v,v);
+      pari_err(talker2,"default: inexistent format",v,v);
     fmt->format = c; v++;
 
     if (isdigit((int)*v))
@@ -360,7 +360,7 @@ gp_get_color(char **st)
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
         if (*s == ',') { *s = 0; a[++i] = s+1; }
-      if (*s != ']') err(talker2,"expected character: ']'",s, *st);
+      if (*s != ']') pari_err(talker2,"expected character: ']'",s, *st);
       *s = 0; for (i++; i<3; i++) a[i] = "";
       /*    properties    |   color    | background */
       c = (atoi(a[2])<<8) | atoi(a[0]) | (atoi(a[1])<<4);
@@ -442,7 +442,7 @@ sd_compatible(const char *v, long flag)
   GEN r = sd_ulong(v,flag,"compatible",&compatible, 0,3,msg);
 
   if (old != compatible && flag != d_INITRC && gp_init_functions(0))
-    err(warner,"user functions re-initialized");
+    pari_err(warner,"user functions re-initialized");
   return r;
 }
 
@@ -565,7 +565,7 @@ sd_log(const char *v, long flag)
     else
     { /* open log */
       logfile = fopen(current_logfile, "a");
-      if (!logfile) err(openfiler,"logfile",current_logfile);
+      if (!logfile) pari_err(openfiler,"logfile",current_logfile);
 #ifndef WINCE
       setbuf(logfile,(char *)NULL);
 #endif
@@ -674,7 +674,7 @@ sd_logfile(const char *v, long flag)
   {
     fclose(logfile);
     logfile = fopen(current_logfile, "a");
-    if (!logfile) err(openfiler,"logfile",current_logfile);
+    if (!logfile) pari_err(openfiler,"logfile",current_logfile);
 #ifndef WINCE
     setbuf(logfile,(char *)NULL);
 #endif
@@ -696,7 +696,7 @@ sd_psfile(const char *v, long flag)
 
 static void
 err_secure(char *d, char *v)
-{ err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
+{ pari_err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
 
 GEN
 sd_help(char *v, long flag)
@@ -768,7 +768,7 @@ sd_prettyprinter(char *v, long flag)
         f = try_pipe(v, mf_OUT | mf_TEST);
         if (!f)
         {
-          err(warner,"broken prettyprinter: '%s'",v);
+          pari_err(warner,"broken prettyprinter: '%s'",v);
           return gnil;
         }
       }
@@ -882,7 +882,7 @@ setdefault(const char *s, const char *v, long flag)
       return ((GEN (*)(const char*,long)) dft->fun)(v,flag);
     }
   if (flag == d_EXISTS) return gen_0;
-  err(talker,"unknown default: %s",s);
+  pari_err(talker,"unknown default: %s",s);
   return NULL; /* not reached */
 }
 

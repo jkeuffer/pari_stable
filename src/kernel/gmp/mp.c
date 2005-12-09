@@ -409,7 +409,7 @@ truncr(GEN x)
   if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gen_0;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  if (d > lg(x)) err(precer, "truncr (precision loss in truncation)");
+  if (d > lg(x)) pari_err(precer, "truncr (precision loss in truncation)");
 
   y=cgeti(d); y[1] = evalsigne(s) | evallgefint(d);
   if (++m == BITS_IN_LONG)
@@ -434,7 +434,7 @@ floorr(GEN x)
   if ((e=expo(x)) < 0) return gen_m1;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  lx=lg(x); if (d>lx) err(precer, "floorr (precision loss in truncation)");
+  lx=lg(x); if (d>lx) pari_err(precer, "floorr (precision loss in truncation)");
   y = cgeti(d+1);
   if (++m == BITS_IN_LONG)
   {
@@ -582,7 +582,7 @@ umodiu(GEN y, ulong x)
 {
   long sy=signe(y);
   ulong hi;
-  if (!x) err(gdiver);
+  if (!x) pari_err(gdiver);
   if (!sy) return 0;
   hi = mpn_mod_1(LIMBS(y),NLIMBS(y),x);
   if (!hi) return 0;
@@ -596,7 +596,7 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   long ly;
   GEN z;
 
-  if (!x) err(gdiver);
+  if (!x) pari_err(gdiver);
   if (!signe(y)) { *rem = 0; return gen_0; }
 
   ly = lgefint(y);
@@ -615,7 +615,7 @@ divis_rem(GEN y, long x, long *rem)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) err(gdiver);
+  if (!x) pari_err(gdiver);
   if (!sy) { *rem = 0; return gen_0; }
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
@@ -636,7 +636,7 @@ divis(GEN y, long x)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) err(gdiver);
+  if (!x) pari_err(gdiver);
   if (!sy) return gen_0;
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
@@ -731,7 +731,7 @@ divri(GEN x, GEN y)
 {
   long  s = signe(y);
 
-  if (!s) err(gdiver);
+  if (!s) pari_err(gdiver);
   if (!signe(x)) return real_0_bit(expo(x) - expi(y));
   if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
   return divri_with_gmp(x,y);
@@ -744,7 +744,7 @@ divrr(GEN x, GEN y)
   ulong y0,y1;
   GEN r, r1;
 
-  if (!sy) err(gdiver);
+  if (!sy) pari_err(gdiver);
   e = expo(x) - expo(y);
   if (!sx) return real_0_bit(e);
   if (sy<0) sx = -sx;
@@ -862,7 +862,7 @@ dvmdii(GEN x, GEN y, GEN *z)
   pari_sp av;
   GEN r,q;
 
-  if (!sy) { if (z == ONLY_REM && !sx) return gen_0; err(gdiver); }
+  if (!sy) { if (z == ONLY_REM && !sx) return gen_0; pari_err(gdiver); }
   if (!sx)
   {
     if (!z || z == ONLY_REM) return gen_0;
@@ -971,7 +971,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   if (k == 0) return gen_0;
   d = lgefint(T)-2; /* <= 2*k */
 #ifdef DEBUG
-  if (d > 2*k) err(bugparier,"red_montgomery");
+  if (d > 2*k) pari_err(bugparier,"red_montgomery");
 #endif
   if (k == 1)
   { /* as below, special cased for efficiency */
@@ -1040,7 +1040,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
     GEN res = remii(mulii(T, Fp_inv(R, N)), N);
     if (k > lgefint(N)
         || !equalii(remii(Td,N),res)
-        || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
+        || cmpii(Td, addii(shifti(T, -s), N)) >= 0) pari_err(bugparier,"red_montgomery");
   }
 #endif
   avma = (pari_sp)Td; return Td;

@@ -328,15 +328,15 @@ lift_check_modulus(GEN H, long n)
   {
     case t_INTMOD:
       if (!equalsi(n, gel(H,1)))
-	err(talker,"wrong modulus in galoissubcyclo");
+	pari_err(talker,"wrong modulus in galoissubcyclo");
       H = gel(H,2);
     case t_INT:
       h=smodis(H,n);
       if (cgcd(h,n)!=1)
-	err(talker,"generators must be prime to conductor in galoissubcyclo");
+	pari_err(talker,"generators must be prime to conductor in galoissubcyclo");
       return h;
   }
-  err(talker,"wrong type in galoissubcyclo");
+  pari_err(talker,"wrong type in galoissubcyclo");
   return 0;/*not reached*/
 }
 
@@ -580,7 +580,7 @@ bnr_to_znstar(GEN bnr, long *complex)
   long l2, i;
   checkbnrgen(bnr);
   if (degpol(gmael3(bnr,1,7,1))!=1)
-    err(talker,"bnr must be over Q in bnr_to_znstar");
+    pari_err(talker,"bnr must be over Q in bnr_to_znstar");
   zk = gel(bnr,5);
   gen = gel(zk,3);
   /* cond is the finite part of the conductor,
@@ -613,14 +613,14 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long val,l;
   long n, cnd, complex=1;
   long card, phi_n;
-  if (flag<0 || flag>2) err(flagerr,"galoissubcyclo");
+  if (flag<0 || flag>2) pari_err(flagerr,"galoissubcyclo");
   if ( v==-1 ) v=0;
   if (!sg) sg=gen_1;
   switch(typ(N))
   {
     case t_INT:
       n = itos(N);
-      if (n < 1) err(talker,"degree <= 0 in galoissubcyclo");
+      if (n < 1) pari_err(talker,"degree <= 0 in galoissubcyclo");
       break;
     case t_VEC:
       if (lg(N)==7)
@@ -629,23 +629,23 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       {
         Z = N;
         if (typ(Z[3])!=t_VEC)
-          err(typeer,"galoissubcyclo");
+          pari_err(typeer,"galoissubcyclo");
         if (lg(Z[3])==1)
           n=1;
         else
         {
           if (typ(gmael(Z,3,1))!= t_INTMOD)
 #ifdef NETHACK_MESSAGES
-            err(talker,"You have transgressed!");
+            pari_err(talker,"You have transgressed!");
 #else
-            err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
+            pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
 #endif
           n=itos(gmael3(Z,3,1,1));
         }
         break;
       }
     default: /*fall through*/
-      err(typeer,"galoissubcyclo");
+      pari_err(typeer,"galoissubcyclo");
       return NULL;/*Not reached*/
   }
   if (n==1) {avma=ltop; return deg1pol(gen_1,gen_m1,v);}
@@ -669,16 +669,16 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     case t_MAT:/*Fall through*/
       {
         if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
-          err(talker,"not a HNF matrix in galoissubcyclo");
+          pari_err(talker,"not a HNF matrix in galoissubcyclo");
         if (!Z)
-          err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
+          pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
         if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
-          err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+          pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
         V = znstar_hnf_generators(znstar_small(Z),sg);
       }
       break;
     default:
-      err(typeer,"galoissubcyclo");
+      pari_err(typeer,"galoissubcyclo");
       return NULL;/*Not reached*/
   }
   if (!complex) /*Add complex conjugation*/
@@ -752,20 +752,20 @@ subcyclo(long n, long d, long v)
   GEN B,powz;
   if (v<0) v = 0;
   if (d==1) return deg1pol(gen_1,gen_m1,v);
-  if (d<=0 || n<=0) err(typeer,"subcyclo");
+  if (d<=0 || n<=0) pari_err(typeer,"subcyclo");
   if ((n & 3) == 2) n >>= 1;
-  if (n == 1 || d >= n) err(talker,"degree does not divide phi(n) in subcyclo");
+  if (n == 1 || d >= n) pari_err(talker,"degree does not divide phi(n) in subcyclo");
   fa = factoru(n);
   p = mael(fa,1,1);
   al= mael(fa,2,1);
   if (lg(gel(fa,1)) > 2 || (p==2 && al>2))
-    err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
+    pari_err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
   avma=ltop;
   r = cgcd(d,n); /* = p^(v_p(d))*/
   n = r*p;
   o = n-r; /* = phi(n) */
   if (o == d) return cyclo(n,v);
-  if (o % d) err(talker,"degree does not divide phi(n) in subcyclo");
+  if (o % d) pari_err(talker,"degree does not divide phi(n) in subcyclo");
   o /= d;
   if (p==2) {
     GEN z = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */

@@ -638,7 +638,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
     i = 0;
   else if (h->digit_size_kN > MPQS_MAX_DIGIT_SIZE_KN)
   {
-    err(warner,
+    pari_err(warner,
         "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     return 0;
   }
@@ -652,7 +652,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
    * that the current sizing parameters for 90 or more digits are based
    * on 100% theory and 0% practice. */
   if (i >= 79)
-    err(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
+    pari_err(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
         i >= 86 ? "many": "several", h->N);
 
   if (DEBUGLEVEL >= 5)
@@ -684,7 +684,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   mb = (h->size_of_FB + 1)/(8.*1048576.) * h->target_no_rels;
   if (mb > 128.)
   {
-    err(warner,
+    pari_err(warner,
         "MPQS: Gauss elimination will require more than\n\t128MBy of memory");
     if (DEBUGLEVEL >= 1)
       fprintferr("\t(estimated memory needed: %4.1fMBy)\n", mb);
@@ -1212,7 +1212,7 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
    * up in the 150...170 range.) */
   if (h->sieve_threshold < 128) {
     h->sieve_threshold = 128;
-    err(warner,
+    pari_err(warner,
         "MPQS: sizing out of tune, FB size or tolerance\n\ttoo large");
   }
 
@@ -1235,7 +1235,7 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
  * FB prime resides.  The ideal corner is about (sqrt(kN)/M) ^ (1/omega_A),
  * so that A will end up of size comparable to sqrt(kN)/M;  experimentally
  * it seems desirable to stay very slightly below this.  Moreover, the
- * selection of the individual primes happens to err on the large side, for
+ * selection of the individual primes happens to pari_err on the large side, for
  * which it is wise to compensate a bit.  This is what the (small positive)
  * quantity MPQS_A_FUDGE is for.
  * We rely on a few auxiliary fields in the handle to be already set by
@@ -1270,7 +1270,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
   if (i > h->size_of_FB - 3)
   {
     /* ok now, now this isn't going to work at all. */
-    err(warner,
+    pari_err(warner,
         "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
   }
@@ -1529,7 +1529,7 @@ mpqs_relations_cmp(const void *a, const void *b)
   else return strcmp(*sa, *sb);
 }
 
-#define bummer(fn) err(talker, "error whilst writing to file %s", fn)
+#define bummer(fn) pari_err(talker, "error whilst writing to file %s", fn)
 #define min_bufspace 120UL /* use new buffer when < min_bufspace left */
 #define buflist_size 1024  /* size of list-of-buffers blocks */
 
@@ -1648,7 +1648,7 @@ mpqs_sort_lp_file(char *filename)
       bufspace = MPQS_STRING_LENGTH - length + 1;
       /* read remainder of line */
       if (fgets(cur_line, bufspace, TMP) == NULL)
-        err(talker,"MPQS: relations file truncated?!\n");
+        pari_err(talker,"MPQS: relations file truncated?!\n");
       lg1 = strlen(cur_line);
       length += lg1; /* we already counted the \0 once */
       bufspace -= (lg1 + 1); /* but here we must take it into account */
@@ -1706,10 +1706,10 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
   while (fgets(line, MPQS_STRING_LENGTH, fp1) != NULL)
   {
     if (fputs(line, fp) < 0)
-      err(talker, "error whilst appending to file %s", f->name);
+      pari_err(talker, "error whilst appending to file %s", f->name);
     c++;
   }
-  if (fflush(fp)) err(warner, "error whilst flushing file %s", f->name);
+  if (fflush(fp)) pari_err(warner, "error whilst flushing file %s", f->name);
   pari_fclose(f); return c;
 }
 
@@ -1947,7 +1947,7 @@ mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, long mode)
   pari_fclose(pNEW);
   pari_unlink(REL_str);
   if (rename(TMP_str,REL_str))
-    err(talker, "cannot rename file %s to %s", TMP_str, REL_str);
+    pari_err(talker, "cannot rename file %s to %s", TMP_str, REL_str);
   if (MPQS_DEBUGLEVEL >= 6)
     fprintferr("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
   return tp;
@@ -1975,7 +1975,7 @@ check_root(mpqs_handle_t *h, long p, long start)
     fprintferr("MPQS: B = %Z\n", h->B);
     fprintferr("MPQS: C = %Z\n", h->C);
     fprintferr("MPQS: z = %ld\n", z);
-    err(bugparier, "MPQS: self_init: found wrong polynomial");
+    pari_err(bugparier, "MPQS: self_init: found wrong polynomial");
   }
 }
 #endif
@@ -2803,7 +2803,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
           fprintferr("\tQx_2 = %Z\n", Qx_2);
           fprintferr("\t rhs = %Z\n", rhs);
-          err(talker, "MPQS: wrong full relation found!!");
+          pari_err(talker, "MPQS: wrong full relation found!!");
         }
         else
           PRINT_IF_VERBOSE("\b(:)");
@@ -2840,7 +2840,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
           fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
           fprintferr("\tQx_2 = %Z\n", Qx_2);
           fprintferr("\t rhs = %Z\n", rhs);
-          err(talker, "MPQS: wrong large prime relation found!!");
+          pari_err(talker, "MPQS: wrong large prime relation found!!");
         }
         else
           PRINT_IF_VERBOSE("\b(;)");
@@ -3041,7 +3041,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       avma = av1;
 
       if (!equalii(Qx_2, prod_pi_ei))
-        err(talker, "MPQS: combined large prime relation is false");
+        pari_err(talker, "MPQS: combined large prime relation is false");
     }
 #endif
 
@@ -3208,7 +3208,7 @@ F2_read_matrix(FILE *FREL, long rows, long cols, long *fpos)
   char buf[MPQS_STRING_LENGTH], *s;
 
   if ((fpos[0] = ftell(FREL)) < 0)
-    err(talker, "ftell error on full relations file");
+    pari_err(talker, "ftell error on full relations file");
   while (fgets(buf, MPQS_STRING_LENGTH, FREL))
   {
     s = strchr(buf, ':') + 2;
@@ -3223,13 +3223,13 @@ F2_read_matrix(FILE *FREL, long rows, long cols, long *fpos)
     }
     i++;
     if (i < cols && (fpos[i] = ftell(FREL)) < 0)
-      err(talker, "ftell error on full relations file");
+      pari_err(talker, "ftell error on full relations file");
   }
   if (i != cols)
   {
     fprintferr("MPQS: full relations file %s than expected",
                i > cols ? "longer" : "shorter");
-    err(talker, "MPQS panicking");
+    pari_err(talker, "MPQS panicking");
   }
   return m;
 }
@@ -3314,9 +3314,9 @@ static char*
 mpqs_get_relation(long pos, FILE *FREL)
 {
   static char buf[MPQS_STRING_LENGTH];
-  if (fseek(FREL, pos, SEEK_SET)) err(talker, "cannot seek FREL file");
+  if (fseek(FREL, pos, SEEK_SET)) pari_err(talker, "cannot seek FREL file");
   if (!fgets(buf, MPQS_STRING_LENGTH, FREL))
-    err(talker, "FREL file truncated?!");
+    pari_err(talker, "FREL file truncated?!");
   return buf;
 }
 
@@ -3396,7 +3396,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
   if (!H_cols)
   { /* trivial kernel. Fail gracefully: main loop may look for more relations */
     if (DEBUGLEVEL >= 3)
-      err(warner, "MPQS: no solutions found from linear system solver");
+      pari_err(warner, "MPQS: no solutions found from linear system solver");
     pari_fclose(pFREL);
     F2_destroy_matrix(m, h->size_of_FB+1);
     F2_destroy_matrix(ker_m, rel);
@@ -3438,7 +3438,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
                                    mpqs_get_relation(fpos[j], FREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"[1]: mpqs_solve_linear_system");
+        if(DEBUGMEM>1) pari_err(warnmem,"[1]: mpqs_solve_linear_system");
         Y_prod = gerepileuptoint(av3, Y_prod);
       }
     }
@@ -3448,13 +3448,13 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
     for (j = 2; j <= h->size_of_FB + 1; j++)
       if (ei[j])
       {
-        if (ei[j] & 1) err(bugparier, "MPQS (relation is a nonsquare)");
+        if (ei[j] & 1) pari_err(bugparier, "MPQS (relation is a nonsquare)");
         X = remii(mulii(X,
                         Fp_powu(utoipos(FB[j].fbe_p), (ulong)ei[j]>>1, N)),
                   N);
         if (low_stack(lim3, stack_lim(av3,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"[2]: mpqs_solve_linear_system");
+          if(DEBUGMEM>1) pari_err(warnmem,"[2]: mpqs_solve_linear_system");
           X = gerepileupto(av3, X);
         }
       }
@@ -3465,7 +3465,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
       { /* shouldn't happen */
         fprintferr("MPQS: X^2 - Y^2 != 0 mod N\n");
         fprintferr("\tindex i = %ld\n", i);
-        err(warner, "MPQS: wrong relation found after Gauss");
+        pari_err(warner, "MPQS: wrong relation found after Gauss");
       }
     }
     /* At this point, X^2 == Y^2 mod N.  Indeed, something stronger is true:
@@ -3581,7 +3581,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
     if (low_stack(lim, stack_lim(av2,1)))
     {
       long i1;
-      if(DEBUGMEM>1) err(warnmem,"[3]: mpqs_solve_linear_system");
+      if(DEBUGMEM>1) pari_err(warnmem,"[3]: mpqs_solve_linear_system");
       /* gcopy would have a problem with our NULL pointers... */
       new_res = cgetg(lg(res), t_VEC);
       for (i1=2*res_size; i1>=res_next; i1--) new_res[i1] = 0;
@@ -3696,7 +3696,7 @@ mpqs(GEN N)
   handle->digit_size_N = decimal_len(N);
   if (handle->digit_size_N > MPQS_MAX_DIGIT_SIZE_KN)
   {
-    err(warner, "MPQS: number too big to be factored with MPQS,\n\tgiving up");
+    pari_err(warner, "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     mpqs_handle_dtor(handle); return NULL;
   }
 

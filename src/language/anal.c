@@ -108,11 +108,11 @@ enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
 #define ERR(reason)	STMT_START {	\
     if (failure && first) {		\
 	*failure = reason; *failure_arg = NULL; return 0;		\
-    } else err(talker,reason); } STMT_END
+    } else pari_err(talker,reason); } STMT_END
 #define ERR2(reason,s)	STMT_START {	\
     if (failure && first) {		\
 	*failure = reason; *failure_arg = s; return 0;		\
-    } else err(talker,reason,s); } STMT_END
+    } else pari_err(talker,reason,s); } STMT_END
 
 unsigned long
 parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg)
@@ -216,7 +216,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	    }
 	} else if (id[0] == '^') {
 	    if (id[1] != '~')
-		err(talker, "Unrecognized action in a template");
+		pari_err(talker, "Unrecognized action in a template");
 	    id += 2;
 	    if (negate)
 		action = A_ACTION_SET;
@@ -236,7 +236,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	while (isspace((int)*e))
 	    e++;
 	if (*e && (*e != ';') && (*e != ','))
-	    err(talker, "Non-numeric argument of an action in a template");
+	    pari_err(talker, "Non-numeric argument of an action in a template");
 	numarg = atol(id);		/* Now it is safe to get it... */
 	switch (action) {
 	case A_ACTION_SET:
@@ -402,7 +402,7 @@ readseq0_nobreak(char *t, GEN (*f)(void))
 
   seq_init(t); z = f();
   analyseur = olds; mark.start = olde;
-  if (br_status) err(talker,"break not allowed");
+  if (br_status) pari_err(talker,"break not allowed");
   av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   /* ep->value, beware: it may be killed anytime.  */
   if (isclone(z)) { avma = av; return forcecopy(z); }
@@ -443,7 +443,7 @@ unused_chars(char *c, int strict)
 {
   long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
   char *s;
-  if (strict) err(talker2,"unused characters", analyseur, c);
+  if (strict) pari_err(talker2,"unused characters", analyseur, c);
   if ((long)strlen(analyseur) > n)
   {
     s = gpmalloc(n + 1);
@@ -453,7 +453,7 @@ unused_chars(char *c, int strict)
   }
   else
     s = pari_strdup(analyseur);
-  err(warner, "unused characters: %s", s);
+  pari_err(warner, "unused characters: %s", s);
   free(s);
 }
 
@@ -506,15 +506,15 @@ check_proto(char *code)
         s++; break;
       }
       old = s; while (*s != ',') s++;
-      if (*s != ',') err(talker2, "missing comma", old, code);
+      if (*s != ',') pari_err(talker2, "missing comma", old, code);
       break;
     case ',': break;
     case '\n': return; /* Before the mnemonic */
 
     case 'l':
     case 'i':
-    case 'v': err(talker2, "this code has to come first", s-1, code);
-    default: err(talker2, "unknown parser code", s-1, code);
+    case 'v': pari_err(talker2, "this code has to come first", s-1, code);
+    default: pari_err(talker2, "unknown parser code", s-1, code);
   }
 }
 
@@ -528,8 +528,8 @@ install(void *f, char *name, char *code)
   if (ep)
   {
     if (ep->valence != EpINSTALL)
-      err(talker,"[install] identifier '%s' already in use", name);
-    err(warner, "[install] updating '%s' prototype; module not reloaded", name);
+      pari_err(talker,"[install] identifier '%s' already in use", name);
+    pari_err(warner, "[install] updating '%s' prototype; module not reloaded", name);
     if (ep->code) free(ep->code);
   }
   else
@@ -537,7 +537,7 @@ install(void *f, char *name, char *code)
     char *s = name;
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
-    if (*s) err(talker2,"not a valid identifier", s, name);
+    if (*s) pari_err(talker2,"not a valid identifier", s, name);
     ep = installep(f, name, strlen(name), EpINSTALL, 0, functions_hash + hash);
   }
   ep->code = pari_strdup(code);
@@ -614,7 +614,7 @@ static entree*
 get_ep(long v)
 {
   entree *ep = varentries[v];
-  if (!ep) err(talker2,"this function uses a killed variable",
+  if (!ep) pari_err(talker2,"this function uses a killed variable",
                mark.identifier, mark.start);
   return ep;
 }
@@ -745,7 +745,7 @@ kill0(entree *ep)
   long v;
 
   if (EpSTATIC(ep))
-    err(talker2,"can't kill that",mark.symbol,mark.start);
+    pari_err(talker2,"can't kill that",mark.symbol,mark.start);
   switch(EpVALENCE(ep))
   {
     case EpVAR:
@@ -784,7 +784,7 @@ type0(GEN x)
 
 static void
 allocate_loop_err(void) {
-  err(talker2,"can't allow allocatemem() in loops", analyseur, mark.start);
+  pari_err(talker2,"can't allow allocatemem() in loops", analyseur, mark.start);
 }
 
 static GEN
@@ -807,7 +807,7 @@ seq(void)
 
     if (top - avma > ((top - av)>>1))
     {
-      if(DEBUGMEM>1) err(warnmem,"seq");
+      if(DEBUGMEM>1) pari_err(warnmem,"seq");
       if (is_universal_constant(res)) avma = top - av;
       else
 	res = gerepilecopy(top - av, res);
@@ -822,12 +822,12 @@ seq(void)
 
 static GEN
 gshift_l(GEN x, GEN n)  {
-  if (is_bigint(n)) err(talker2,"integer too big",analyseur,mark.start);
+  if (is_bigint(n)) pari_err(talker2,"integer too big",analyseur,mark.start);
   return gshift(x, itos(n));
 }
 static GEN
 gshift_r(GEN x, GEN n) {
-  if (is_bigint(n)) err(talker2,"integer too big",analyseur,mark.start);
+  if (is_bigint(n)) pari_err(talker2,"integer too big",analyseur,mark.start);
   return gshift(x,-itos(n));
 }
 
@@ -864,8 +864,8 @@ L:
       analyseur += 2;
       { char *old = analyseur; /* act(shift_l) + error checks */
         aux = facteur(); if (br_status) return aux;
-        if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
-        if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
+        if (typ(aux) != t_INT) pari_err(talker2,"not an integer",old,mark.start);
+        if (is_bigint(aux)) pari_err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3, itos(aux)); goto L;
       }
     case '>':
@@ -873,8 +873,8 @@ L:
       analyseur += 2;
       { char *old = analyseur; /* act(shift_r) + error checks */
         aux = facteur(); if (br_status) return aux;
-        if (typ(aux) != t_INT) err(talker2,"not an integer",old,mark.start);
-        if (is_bigint(aux)) err(talker2,"shift operand too big",old,mark.start);
+        if (typ(aux) != t_INT) pari_err(talker2,"not an integer",old,mark.start);
+        if (is_bigint(aux)) pari_err(talker2,"shift operand too big",old,mark.start);
         e3 = gshift(e3,-itos(aux)); goto L;
       }
   }
@@ -886,7 +886,7 @@ L2:
   e3 = UNDEF;
   if (top - avma > ((top - bot)>>1))
   {
-    if(DEBUGMEM>1) err(warnmem,"expr");
+    if(DEBUGMEM>1) pari_err(warnmem,"expr");
     gerepileall(top - av, (e1==UNDEF)?1: 2, &e2, &e1);
   }
 
@@ -969,7 +969,7 @@ err_new_fun()
   if (compatible != NONE) return;
 
   if (whatnow_fun && (n = whatnow_fun(s,1)))
-    err(obsoler,mark.identifier,mark.start, s,n);
+    pari_err(obsoler,mark.identifier,mark.start, s,n);
 }
 #undef LEN
 
@@ -979,14 +979,14 @@ err_match(char *s, char c)
   char str[64];
   if (check_new_fun && (c == '(' || c == '=' || c == ',')) err_new_fun();
   sprintf(str,"expected character: '%c' instead of",c);
-  err(talker2,str,s,mark.start);
+  pari_err(talker2,str,s,mark.start);
 }
 
 #define match2(s,c) if (*s != c) err_match(s,c);
 #define match(c) \
   STMT_START { match2(analyseur, c); analyseur++; } STMT_END
 #define NO_BREAK(s, old)\
-  if (br_status) err(talker2, "break not allowed "/**/s, (old), mark.start)
+  if (br_status) pari_err(talker2, "break not allowed "/**/s, (old), mark.start)
 
 static long
 readlong()
@@ -997,8 +997,8 @@ readlong()
   GEN x = expr();
 
   NO_BREAK("here (reading long)", old);
-  if (typ(x) != t_INT) err(talker2,"this should be an integer", old,mark.start);
-  if (is_bigint(x)) err(talker2,"integer too big",old,mark.start);
+  if (typ(x) != t_INT) pari_err(talker2,"this should be an integer", old,mark.start);
+  if (is_bigint(x)) pari_err(talker2,"integer too big",old,mark.start);
   m = itos(x); avma=av; return m;
 }
 
@@ -1015,7 +1015,7 @@ check_array_index(long max)
     if (max == 1) strcat(s, "[none]");
     else if (max == 2) strcat(s, "[1]");
     else sprintf(s,"%s[1-%ld]",s,max-1);
-    err(talker2,s,old,mark.start);
+    pari_err(talker2,s,old,mark.start);
   }
   return c;
 }
@@ -1027,7 +1027,7 @@ readvar()
   const GEN x = expr();
 
   if (typ(x) != t_POL || lg(x) != 4 ||
-    !gcmp0(gel(x,2)) || !gcmp1(gel(x,3))) err(varer1,old,mark.start);
+    !gcmp0(gel(x,2)) || !gcmp1(gel(x,3))) pari_err(varer1,old,mark.start);
   return varn(x);
 }
 
@@ -1121,7 +1121,7 @@ translate(char **src, char *s, char **ptbuf, char **ptlim)
 	case 'e':  *s='\033'; break; /* escape */
 	case 'n':  *s='\n'; break;
 	case 't':  *s='\t'; break;
-	default:   *s=*t; if (!*t) err(talker,"unfinished string");
+	default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
       }
       t++; s++;
     }
@@ -1234,12 +1234,12 @@ matcell(GEN p, matcomp *C)
       case t_VECSMALL:
         c = check_array_index(lg(p));
         pt = (GEN*)(p + c); match(']');
-        if (*analyseur == '[') err(caracer1,analyseur,mark.start);
+        if (*analyseur == '[') pari_err(caracer1,analyseur,mark.start);
         C->parent = p;
         C->ptcell = pt; return stoi((long)*pt);
 
       case t_MAT:
-        if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
+        if (lg(p)==1) pari_err(talker2,"a 0x0 matrix has no elements",
                                   analyseur,mark.start);
         C->full_col = C->full_row = 0;
         if (*analyseur==',') /* whole column */
@@ -1291,7 +1291,7 @@ matcell(GEN p, matcomp *C)
         break;
 
       default:
-        err(caracer1,analyseur-1,mark.start);
+        pari_err(caracer1,analyseur-1,mark.start);
     }
   } while (*analyseur == '[');
   C->parent = p;
@@ -1318,7 +1318,7 @@ facteur(void)
     {
       case '.':
 	analyseur++; x = read_member(x);
-        if (!x) err(talker2, "not a proper member definition",
+        if (!x) pari_err(talker2, "not a proper member definition",
                     mark.member, mark.start);
         break;
       case '^':
@@ -1339,9 +1339,9 @@ facteur(void)
       case '!':
 	if (analyseur[1] != '=')
 	{
-	  if (typ(x) != t_INT) err(talker2,"this should be an integer",
+	  if (typ(x) != t_INT) pari_err(talker2,"this should be an integer",
                                            old,mark.start);
-          if (is_bigint(x)) err(talker2,"integer too big",old,mark.start);
+          if (is_bigint(x)) pari_err(talker2,"integer too big",old,mark.start);
 	  analyseur++; x=mpfact(itos(x)); break;
 	} /* Fall through */
 
@@ -1365,7 +1365,7 @@ _append(GEN **table, long *n, long *N)
 }
 
 #define check_var_name() \
-  if (!isalpha((int)*analyseur)) err(varer1,analyseur,mark.start);
+  if (!isalpha((int)*analyseur)) pari_err(varer1,analyseur,mark.start);
 
 static GEN
 truc(void)
@@ -1393,7 +1393,7 @@ truc(void)
       {
         case EpVAR: case EpGVAR:
           return (GEN)initial_value(ep);
-        default: err(varer1,old,mark.start);
+        default: pari_err(varer1,old,mark.start);
       }
     }
     case '#': /* cardinal */
@@ -1426,7 +1426,7 @@ truc(void)
       while (*analyseur == ',') {
         analyseur++; _append(&table, &n, &N);
         if (low_stack(lim, stack_lim(av,2))) {
-          if(DEBUGMEM>1) err(warnmem,"truc(): n = %ld", n);
+          if(DEBUGMEM>1) pari_err(warnmem,"truc(): n = %ld", n);
           gerepilecoeffs(av0, (GEN)(table+1), n);
           av = avma; lim = stack_lim(av,2);
         }
@@ -1460,7 +1460,7 @@ truc(void)
 	  break;
 
 	default: /* can only occur in library mode */
-          err(talker,"incorrect vector or matrix");
+          pari_err(talker,"incorrect vector or matrix");
           return NULL; /* not reached */
       }
       free(table); return z;
@@ -1476,12 +1476,12 @@ truc(void)
       if (p) return gp_history(H, -p, old, mark.start);
       if (!isdigit((int)*analyseur)) return gp_history(H, 0, old, mark.start);
       p = (long)number(&junk,&analyseur);
-      if (!p) err(talker2, "I can't remember before the big bang",
+      if (!p) pari_err(talker2, "I can't remember before the big bang",
                   old, mark.start);
       return gp_history(H, p, old, mark.start);
     }
   }
-  err(caracer1,analyseur,mark.start);
+  pari_err(caracer1,analyseur,mark.start);
   return NULL; /* not reached */
 }
 
@@ -1570,13 +1570,13 @@ change_compo(pari_sp av, matcomp *c, GEN res)
   if (typ(p) == t_VECSMALL)
   {
     if (typ(res) != t_INT || is_bigint(res))
-      err(talker2,"not a suitable VECSMALL component",old,mark.start);
+      pari_err(talker2,"not a suitable VECSMALL component",old,mark.start);
     *pt = (GEN)itos(res); return res;
   }
   if (c->full_row)
   {
     if (typ(res) != t_VEC || lg(res) != lg(p))
-      err(talker2,"incorrect type or length in matrix assignment",
+      pari_err(talker2,"incorrect type or length in matrix assignment",
           old,mark.start);
     for (i=1; i<lg(p); i++)
     {
@@ -1587,7 +1587,7 @@ change_compo(pari_sp av, matcomp *c, GEN res)
   }
   if (c->full_col)
     if (typ(res) != t_COL || lg(res) != lg(*pt))
-      err(talker2,"incorrect type or length in matrix assignment",
+      pari_err(talker2,"incorrect type or length in matrix assignment",
           old,mark.start);
 
   res = gclone(res); avma = av;
@@ -1757,15 +1757,15 @@ check_args()
     if (!isalpha((int)*analyseur))
     {
       err_new_fun();
-      err(paramer1, mark.identifier, mark.start);
+      pari_err(paramer1, mark.identifier, mark.start);
     }
     ep = entry();
     if (EpVALENCE(ep) != EpVAR)
     {
       err_new_fun();
       if (EpVALENCE(ep) == EpGVAR)
-        err(talker2,"global variable: ",old , mark.start);
-      err(paramer1, old, mark.start);
+        pari_err(talker2,"global variable: ",old , mark.start);
+      pari_err(paramer1, old, mark.start);
     }
     cell[0] = varn(initial_value(ep));
     skipdecl();
@@ -1803,7 +1803,7 @@ num_deriv(void *call, GEN argvec[])
   GEN eps,a,b, y, x = argvec[0];
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
-  if (!is_const_t(typ(x))) err(impl, "formal derivation");
+  if (!is_const_t(typ(x))) pari_err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = precreal-2;
   ex = gexpo(x);
@@ -1827,7 +1827,7 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
 
-  if (!is_const_t(typ(x))) err(impl, "formal derivation");
+  if (!is_const_t(typ(x))) pari_err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = precreal-2;
   ex = gexpo(x);
@@ -1912,7 +1912,7 @@ identifier(void)
   ep = do_alias(ep);
 #ifdef STACK_CHECK
   if (PARI_stack_limit && (void*) &ptr <= PARI_stack_limit)
-      err(talker2, "deep recursion", mark.identifier, mark.start);
+      pari_err(talker2, "deep recursion", mark.identifier, mark.start);
 #endif
 
   if (ep->code)
@@ -1982,7 +1982,7 @@ identifier(void)
           entree *e = entry();
           long v = EpVALENCE(e);
           if (v != EpVAR && v != EpGVAR)
-            err(talker2,"not a variable:",mark.symbol,mark.start);
+            pari_err(talker2,"not a variable:",mark.symbol,mark.start);
 	  argvec[i++] = (GEN)e; break;
         }
         case '&': /* *GEN */
@@ -2034,7 +2034,7 @@ identifier(void)
 	    if (!flags) flags = ep->code;
 	    flags = strchr(flags, '\n'); /* Skip to the following '\n' */
 	    if (!flags)
-	        err(talker, "not enough flags in string function signature");
+	        pari_err(talker, "not enough flags in string function signature");
 	    flags++;
 	    argvec[i] = (GEN) parse_option_string((char*)(argvec[i] + 1),
 			flags, PARSEMNU_ARG_WHITESP | PARSEMNU_TEMPL_TERM_NL,
@@ -2110,7 +2110,7 @@ identifier(void)
 	     oldanalyseur = NULL; matchcomma=1;
 	   }
 	   break;
-	 default: err(bugparier,"identifier (unknown code)");
+	 default: pari_err(bugparier,"identifier (unknown code)");
       }
 #if 0 /* uncomment if using purify: UMR otherwise */
     for ( ; i<9; i++) argvec[i]=NULL;
@@ -2121,7 +2121,7 @@ identifier(void)
     if (deriv)
     {
       if (!i || (ep->code)[0] != 'G')
-        err(talker2, "can't derive this", mark.identifier, mark.start);
+        pari_err(talker2, "can't derive this", mark.identifier, mark.start);
       res = num_deriv(call, argvec);
     }
     else switch (ret)
@@ -2231,7 +2231,7 @@ identifier(void)
           {
             case EpGVAR:
             case EpVAR: break;
-            default: err(talker2,"symbol already in use",ch1,mark.start);
+            default: pari_err(talker2,"symbol already in use",ch1,mark.start);
           }
           analyseur = ch1; ep = entry();
           if (*analyseur == '=')
@@ -2246,7 +2246,7 @@ identifier(void)
         }
         res = gnil; break;
 
-      default: err(valencer1);
+      default: pari_err(valencer1);
         return NULL; /* not reached */
     }
     gp_function_name=oldname;
@@ -2299,7 +2299,7 @@ identifier(void)
         if (deriv)
         {
           if (!f->narg)
-            err(talker2, "can't derive this", mark.identifier, mark.start);
+            pari_err(talker2, "can't derive this", mark.identifier, mark.start);
           return num_derivU((GEN)ep->value, arglist, f);
         }
         return call_fun((GEN)ep->value, arglist, f);
@@ -2308,7 +2308,7 @@ identifier(void)
       while (*analyseur == ',') { analyseur++; skipexpr(); }
       match(')');
       if (*analyseur != '=' || analyseur[1] == '=')
-        err(talker2,"too many parameters in user-defined function call",
+        pari_err(talker2,"too many parameters in user-defined function call",
             mark.identifier,mark.start);
 
       analyseur = ch1-1; /* points to '(' */
@@ -2333,13 +2333,13 @@ identifier(void)
       narg = check_args(); nloc = 0;
       /* Dirty, but don't want to define a local() function */
       if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
-        err(talker2, "local() bloc must appear before any other expression",
+        pari_err(talker2, "local() bloc must appear before any other expression",
                      mark.identifier,mark.start);
       if (*analyseur != '=')
       {
         char *str = stackmalloc(128 + strlen(ep->name));
         sprintf(str,"unknown function '%s', expected '=' instead of", ep->name);
-        err(talker2,str, analyseur, mark.start);
+        pari_err(talker2,str, analyseur, mark.start);
       }
       analyseur++;
 
@@ -2379,7 +2379,7 @@ identifier(void)
         qsort(x,narg,sizeof(long),(QSCOMP)pari_compare_long);
         for (k=x[0],i=1; i<narg; k=x[i],i++)
           if (x[i] == k)
-            err(talker,"user function %s: variable %Z declared twice",
+            pari_err(talker,"user function %s: variable %Z declared twice",
                 ep->name, pol_x[k]);
       }
 
@@ -2395,7 +2395,7 @@ identifier(void)
       avma = (pari_sp)tmpargs; return gnil;
     }
   }
-  err(valencer1); return NULL; /* not reached */
+  pari_err(valencer1); return NULL; /* not reached */
 }
 
 static ulong
@@ -2613,7 +2613,7 @@ manage_var(long n, entree *ep)
       case manage_var_pop:
       {
         long v = (long)ep;
-        if (v != nvar-1) err(talker,"can't pop gp variable");
+        if (v != nvar-1) pari_err(talker,"can't pop gp variable");
         setlg(polvar, nvar);
         return --nvar;
       }
@@ -2623,10 +2623,10 @@ manage_var(long n, entree *ep)
 	free(pol_x[++max_avail]); /* frees both pol_1 and pol_x */
 	return max_avail+1;
       case manage_var_create: break;
-      default: err(talker, "panic");
+      default: pari_err(talker, "panic");
   }
 
-  if (nvar == max_avail) err(talker2,"no more variables available",
+  if (nvar == max_avail) pari_err(talker2,"no more variables available",
                              mark.identifier, mark.start);
   if (ep)
   {
@@ -2675,7 +2675,7 @@ fetch_named_var(char *s)
     switch (EpVALENCE(ep))
     {
       case EpVAR: case EpGVAR: break;
-      default: err(talker, "%s already exists with incompatible valence", s);
+      default: pari_err(talker, "%s already exists with incompatible valence", s);
     }
     return ep;
   }
@@ -2709,9 +2709,9 @@ name_var(long n, char *s)
   char *u;
 
   if (n < manage_var(manage_var_next,NULL))
-    err(talker, "renaming a GP variable is forbidden");
+    pari_err(talker, "renaming a GP variable is forbidden");
   if (n > (long)MAXVARN)
-    err(talker, "variable number too big");
+    pari_err(talker, "variable number too big");
 
   ep = (entree*)gpmalloc(sizeof(entree) + strlen(s) + 1);
   u = (char *)initial_value(ep);
@@ -2898,7 +2898,7 @@ skipfacteur(void)
       {
         char *old;
 	skip_matrix_block(); old = analyseur;
-        if (skip_affect_block()) err(caracer1,old,mark.start);
+        if (skip_affect_block()) pari_err(caracer1,old,mark.start);
         break;
       }
       case '!':
@@ -2956,7 +2956,7 @@ skiptruc(void)
           }
           analyseur++; return;
 	default:
-	  err(talker2,"; or ] expected",old,mark.start);
+	  pari_err(talker2,"; or ] expected",old,mark.start);
       }
 
     case '%':
@@ -2968,7 +2968,7 @@ skiptruc(void)
       (void)number(&junk, &analyseur); return;
     }
   }
-  err(caracer1,analyseur,mark.start);
+  pari_err(caracer1,analyseur,mark.start);
 }
 
 static void
@@ -2980,8 +2980,8 @@ check_var()
   {
     case EpVAR: break;
     case EpGVAR:
-      err(talker2,"global variable not allowed", old,mark.start);
-    default: err(varer1,old,mark.start);
+      pari_err(talker2,"global variable not allowed", old,mark.start);
+    default: pari_err(varer1,old,mark.start);
   }
 }
 
@@ -2994,7 +2994,7 @@ check_matcell()
   {
     case EpVAR:
     case EpGVAR: break;
-    default: err(varer1,old,mark.start);
+    default: pari_err(varer1,old,mark.start);
   }
   skip_matrix_block();
 }
@@ -3086,7 +3086,7 @@ skipidentifier(void)
       case '\n':			/* Before the mnemonic */
 	break;
       default:
-        err(bugparier,"skipidentifier (unknown code)");
+        pari_err(bugparier,"skipidentifier (unknown code)");
     }
     match(')');
     return;
@@ -3116,7 +3116,7 @@ skipidentifier(void)
         matchcomma = 0;
         while (*analyseur != ')') { match_comma(); skipexpr(); };
         break;
-      default: err(valencer1);
+      default: pari_err(valencer1);
     }
     match(')'); return;
   }
@@ -3149,7 +3149,7 @@ skipidentifier(void)
       if (*analyseur != '=' || analyseur[1] == '=')
       {
         if (skipping_fun_def) return;
-        err(talker2,"too many parameters in user-defined function call",
+        pari_err(talker2,"too many parameters in user-defined function call",
             mark.identifier,mark.start);
       }
       analyseur = ch1;
@@ -3159,7 +3159,7 @@ skipidentifier(void)
       if (check_new_fun && ! skipping_fun_def)
       {
 	err_new_fun(); /* ep not created yet: no need to kill it */
-	err(paramer1, mark.identifier, mark.start);
+	pari_err(paramer1, mark.identifier, mark.start);
       }
       check_new_fun = NOT_CREATED_YET; match('(');
       matchcomma = 0;
@@ -3176,7 +3176,7 @@ skipidentifier(void)
       }
       check_new_fun=NULL; return;
 
-    default: err(valencer1);
+    default: pari_err(valencer1);
   }
 }
 
@@ -3227,7 +3227,7 @@ skipentry(void)
     ep = findentry(old,len,funct_old_hash[hash]);
     if (ep)
     {
-      err(warner,"using obsolete function %s",ep->name);
+      pari_err(warner,"using obsolete function %s",ep->name);
       return ep;
     }
   }
@@ -3256,7 +3256,7 @@ read_member(GEN x)
     if (*analyseur == '=' && analyseur[1] != '=')
     {
       if (EpPREDEFINED(ep))
-        err(talker2,"can't modify a pre-defined member: ",
+        pari_err(talker2,"can't modify a pre-defined member: ",
             mark.member,mark.start);
       gunclone((GEN)ep->value); return NULL;
     }
@@ -3270,7 +3270,7 @@ read_member(GEN x)
     }
   }
   if (*analyseur != '=' || analyseur[1] == '=')
-    err(talker2,"unknown member function",mark.member,mark.start);
+    pari_err(talker2,"unknown member function",mark.member,mark.start);
   return NULL; /* to be redefined */
 }
 
@@ -3279,7 +3279,7 @@ member_err(char *s)
 {
   char *str = stackmalloc(strlen(s) + 128);
   sprintf(str, "incorrect type in %s", s);
-  err(talker2,str,mark.member,mark.start);
+  pari_err(talker2,str,mark.member,mark.start);
 }
 
 /********************************************************************/
@@ -3319,7 +3319,7 @@ GEN
 next0(long n)
 {
   if (n < 1)
-    err(talker2,"positive integer expected",mark.identifier,mark.start);
+    pari_err(talker2,"positive integer expected",mark.identifier,mark.start);
   if (n == 1) br_status = br_NEXT;
   else
   {
@@ -3333,7 +3333,7 @@ GEN
 break0(long n)
 {
   if (n < 1)
-    err(talker2,"positive integer expected",mark.identifier,mark.start);
+    pari_err(talker2,"positive integer expected",mark.identifier,mark.start);
   br_count = n;
   br_status = br_BREAK; return NULL;
 }
@@ -3353,17 +3353,17 @@ alias0(char *s, char *old)
   GEN x;
 
   ep = is_entry(old);
-  if (!ep) err(talker2,"unknown function",mark.raw,mark.start);
+  if (!ep) pari_err(talker2,"unknown function",mark.raw,mark.start);
   switch(EpVALENCE(ep))
   {
     case EpVAR: case EpGVAR:
-      err(talker2,"only functions can be aliased",mark.raw,mark.start);
+      pari_err(talker2,"only functions can be aliased",mark.raw,mark.start);
   }
 
   if ( (e = is_entry_intern(s, functions_hash, &hash)) )
   {
     if (EpVALENCE(e) != EpALIAS)
-      err(talker2,"can't replace an existing symbol by an alias",
+      pari_err(talker2,"can't replace an existing symbol by an alias",
           mark.raw, mark.start);
     kill0(e);
   }

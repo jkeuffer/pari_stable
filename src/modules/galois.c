@@ -74,7 +74,7 @@ partitions(long n)
     case 9: p = 30; break;
     case 10:p = 42; break;
     default:
-      if (n < 0) err(talker, "partitions( %ld ) is meaningless", n);
+      if (n < 0) pari_err(talker, "partitions( %ld ) is meaningless", n);
       av = avma; p = itos( numbpart(stoi(n)) ); avma = av; break;
   }
   T = new_chunk(p + 1); T[0] = 0;
@@ -249,7 +249,7 @@ preci(buildroot *BR, long p)
   GEN r = BR->r;
   long i, j, l = lg(r);
 
-  if (p > BR->prmax) err(talker,"too large precision in preci()");
+  if (p > BR->prmax) pari_err(talker,"too large precision in preci()");
   for (j = 1; j < l; j++)
   {
     GEN x, o = gel(r,j);
@@ -309,7 +309,7 @@ galopen(char *pre, long n, long n1, long n2, long no)
   sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
   if (no) sprintf(s + strlen(s), "_%ld", no);
   fd = os_open(s, O_RDONLY);
-  if (fd == -1) err(talker,"galois files not available\n[missing %s]",s);
+  if (fd == -1) pari_err(talker,"galois files not available\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
   free(s); return fd;
 }
@@ -320,7 +320,7 @@ bin(char c)
   if (c>='0' && c<='9') c=c-'0';
   else if (c>='A' && c<='Z') c=c-'A'+10;
   else if (c>='a' && c<='z') c=c-'a'+36;
-  else err(talker,"incorrect value in bin()");
+  else pari_err(talker,"incorrect value in bin()");
   return c;
 }
 
@@ -683,7 +683,7 @@ gpoly(GEN rr, long n1, long n2)
       return gsub(p1,p2);
     }
   }
-  err(talker,"indefinite invariant polynomial in gpoly()");
+  pari_err(talker,"indefinite invariant polynomial in gpoly()");
   return NULL; /* not reached */
 }
 
@@ -710,7 +710,7 @@ tschirn(buildroot *BR)
   long i, k, v = varn(BR->p), l = lg(BR->r);
   GEN a, h;
 
-  if (l >= N) err(bugparier,"tschirn");
+  if (l >= N) pari_err(bugparier,"tschirn");
   if (DEBUGLEVEL)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
@@ -883,7 +883,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
           nbrac++;
           if (nbrac >= M)
           {
-            err(warner, "more than %ld rational integer roots\n", M);
+            pari_err(warner, "more than %ld rational integer roots\n", M);
             avma = av1; goto NEXT;
           }
           for (j=1; j<=nbracint; j++)
@@ -2440,13 +2440,13 @@ polgaloisnamesbig(long n, long k)
   stream = fopen(s,"r");
   if (!stream) 
   {
-    err(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
+    pari_err(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
     free(s); 
     return strtoGENstr("");
   }
   V = gp_read_stream(stream);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
-    err(talker,"galois files %s not compatible\n",s);
+    pari_err(talker,"galois files %s not compatible\n",s);
   fclose(stream);
   free(s); 
   return gerepilecopy(ltop,gel(V,k));
@@ -2486,7 +2486,7 @@ galoisbig(GEN pol, long prec)
     case 9: t = galoismodulo9(pol,dpol);  tab=tab9; break;
     case 10:t = galoismodulo10(pol,dpol); tab=tab10; break;
     case 11:t = galoismodulo11(pol,dpol); tab=tab11; break;
-    default: err(impl,"galois in degree > 11");
+    default: pari_err(impl,"galois in degree > 11");
       return NULL; /* not reached */
   }
   if (!t) 

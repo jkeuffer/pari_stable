@@ -43,14 +43,14 @@ install0(char *name, char *code, char *gpname, char *lib)
   if (!handle)
   {
     const char *s = dlerror(); if (s) fprintferr("%s\n\n",s);
-    if (lib) err(talker,"couldn't open dynamic library '%s'",lib);
-    err(talker,"couldn't open dynamic symbol table of process");
+    if (lib) pari_err(talker,"couldn't open dynamic library '%s'",lib);
+    pari_err(talker,"couldn't open dynamic symbol table of process");
   }
   f = dlsym(handle, name);
   if (!f)
   {
-    if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
-    err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
+    if (lib) pari_err(talker,"can't find symbol '%s' in library '%s'",name,lib);
+    pari_err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
   if (lib) free(lib);
   install(f, gpname, code);
@@ -81,21 +81,21 @@ install0(char *name, char *code, char *gpname, char *lib)
   handle = LoadLibrary(lib);
   if (!handle)
   {
-    if (lib) err(talker,"couldn't open dynamic library '%s'",lib);
-    err(talker,"couldn't open dynamic symbol table of process");
+    if (lib) pari_err(talker,"couldn't open dynamic library '%s'",lib);
+    pari_err(talker,"couldn't open dynamic symbol table of process");
   }
   f = GetProcAddress(handle,name);
   if (!f)
   {
-    if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
-    err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
+    if (lib) pari_err(talker,"can't find symbol '%s' in library '%s'",name,lib);
+    pari_err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
   if (lib) free(lib);
   install((void*)f,gpname,code);
 }
 #  else
 void 
-install0(char *name, char *code, char *gpname, char *lib) { err(archer); }
+install0(char *name, char *code, char *gpname, char *lib) { pari_err(archer); }
 #endif
 #endif
 

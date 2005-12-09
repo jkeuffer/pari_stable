@@ -361,7 +361,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
           if (!equaliu(p1,T->countsub))
           {
             fprintferr("  alpha = %Z\n",p1);
-            err(bugparier,"forsubgroup (alpha != countsub)");
+            pari_err(bugparier,"forsubgroup (alpha != countsub)");
           }
         }
       }
@@ -381,19 +381,19 @@ parse_bound(subgp_iter *T)
     break;
   case t_VEC: /* exact value */
     b = gel(B,1);
-    if (lg(B) != 2 || typ(b) != t_INT) err(typeer,"subgroup");
+    if (lg(B) != 2 || typ(b) != t_INT) pari_err(typeer,"subgroup");
     T->boundtype = b_EXACT;
     T->bound = b;
     break;
   case t_COL: /* exact type */
-    err(impl,"exact type in subgrouplist");
-    if (lg(B) > len(T->L)+1) err(typeer,"subgroup");
+    pari_err(impl,"exact type in subgrouplist");
+    if (lg(B) > len(T->L)+1) pari_err(typeer,"subgroup");
     T->boundtype = b_TYPE;
     break;
-  default: err(typeer,"subgroup");
+  default: pari_err(typeer,"subgroup");
   }
   if (signe(T->bound) <= 0)
-    err(talker,"subgroup: index bound must be positive");
+    pari_err(talker,"subgroup: index bound must be positive");
 }
 
 static GEN
@@ -436,12 +436,12 @@ subgroup_engine(subgp_iter *T)
 
   if (typ(cyc) != t_VEC)
   {
-    if (typ(cyc) != t_MAT) err(typeer,"forsubgroup");
+    if (typ(cyc) != t_MAT) pari_err(typeer,"forsubgroup");
     cyc = mattodiagonal_i(cyc);
   }
   for (i=1; i<n-1; i++)
     if (!dvdii(gel(cyc,i), gel(cyc,i+1)))
-      err(talker,"not a group in forsubgroup");
+      pari_err(talker,"not a group in forsubgroup");
   if (n == 1) {
     parse_bound(T);
     switch(T->boundtype)
@@ -451,7 +451,7 @@ subgroup_engine(subgp_iter *T)
     }
     avma = av; return;
   }
-  if (!signe(cyc[1])) err(talker,"infinite group in forsubgroup");
+  if (!signe(cyc[1])) pari_err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) (void)timer2();
   fa = factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
@@ -564,7 +564,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 
   T.fun = &std_fun;
   cyc = get_snf(cyc,&N);
-  if (!cyc) err(typeer,"forsubgroup");
+  if (!cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
   T.cyc = cyc;
   E.s = ch;
@@ -587,7 +587,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   GEN z,H;
 
   cyc = get_snf(cyc, &N);
-  if (!cyc) err(typeer,"subgrouplist");
+  if (!cyc) pari_err(typeer,"subgrouplist");
   n = lg(cyc)-1; /* not necessarily = N */
 
   S.list = sublist = (slist*) gpmalloc(sizeof(slist));

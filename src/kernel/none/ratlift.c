@@ -59,20 +59,20 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */
 
-  if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) err(arither1);
+  if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) pari_err(arither1);
   if (signe(bmax) <= 0)
-    err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Z\n", bmax);
+    pari_err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Z\n", bmax);
   if (signe(amax) < 0)
-    err(talker, "ratilft: amax must be >= 0, found\n\tamax=%Z\n", amax);
+    pari_err(talker, "ratilft: amax must be >= 0, found\n\tamax=%Z\n", amax);
   /* check 2*amax*bmax < m */
   if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-    err(talker, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Z\n\tbmax=%Z\n\tm=%Z\n", amax,bmax,m);
+    pari_err(talker, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Z\n\tbmax=%Z\n\tm=%Z\n", amax,bmax,m);
   /* we _could_ silently replace x with modii(x,m) instead of the following,
    * but let's leave this up to the caller
    */
   avma = av; s = signe(x);
   if (s < 0 || cmpii(x,m) >= 0)
-    err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Z\n\tm=%Z\n", x,m);
+    pari_err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Z\n\tm=%Z\n", x,m);
 
   /* special cases x=0 and/or amax=0 */
   if (s == 0)
@@ -286,7 +286,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[4]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&v; gptr[3]=&v1;
-      if(DEBUGMEM>1) err(warnmem,"ratlift");
+      if(DEBUGMEM>1) pari_err(warnmem,"ratlift");
       gerepilemany(av1,gptr,4);
     }
   } /* end while */
@@ -410,7 +410,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   /* get here when we have run into d1 == 0 before returning... in fact,
    * this cannot happen.
    */
-  err(talker, "ratlift failed to catch d1 == 0\n");
+  pari_err(talker, "ratlift failed to catch d1 == 0\n");
   /* NOTREACHED */
   return 0;
 }

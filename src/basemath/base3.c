@@ -47,7 +47,7 @@ scal_mul(GEN nf, GEN x, GEN y, long ty)
 
   if (!is_extscalar_t(ty))
   {
-    if (ty!=t_COL) err(typeer,"nfmul");
+    if (ty!=t_COL) pari_err(typeer,"nfmul");
     y = coltoliftalg(nf, y);
   }
   p1 = gmul(x,y); tetpil=avma;
@@ -127,7 +127,7 @@ element_mul(GEN nf, GEN x, GEN y)
   if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
   if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
   if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
-  if (tx != t_COL || ty != t_COL) err(typeer,"element_mul");
+  if (tx != t_COL || ty != t_COL) pari_err(typeer,"element_mul");
   if (RgV_isscalar(x)) return gmul(gel(x,1),y);
   if (RgV_isscalar(y)) return gmul(gel(y,1),x);
 
@@ -150,7 +150,7 @@ element_inv(GEN nf, GEN x)
     else if (tx==t_POL) x=gmodulcp(x,gel(nf,1));
     return gerepileupto(av, algtobasis(nf, ginv(x)));
   }
-  if (tx != t_COL) err(typeer,"element_inv");
+  if (tx != t_COL) pari_err(typeer,"element_inv");
   if (RgV_isscalar(x))
   {
     p1=cgetg(N+1,t_COL); gel(p1,1) = ginv(gel(x,1));
@@ -181,18 +181,18 @@ element_div(GEN nf, GEN x, GEN y)
     if (is_extscalar_t(ty)) p1=gdiv(x,y);
     else
     {
-      if (ty!=t_COL) err(typeer,"nfdiv");
+      if (ty!=t_COL) pari_err(typeer,"nfdiv");
       p1 = gdiv(x, coltoalg(nf, y));
     }
     return gerepileupto(av, algtobasis(nf,p1));
   }
   if (is_extscalar_t(ty))
   {
-    if (tx!=t_COL) err(typeer,"nfdiv");
+    if (tx!=t_COL) pari_err(typeer,"nfdiv");
     p1 = gdiv(coltoalg(nf,x), y);
     return gerepileupto(av, algtobasis(nf,p1));
   }
-  if (tx != t_COL || ty != t_COL) err(typeer,"element_div");
+  if (tx != t_COL || ty != t_COL) pari_err(typeer,"element_div");
 
   if (RgV_isscalar(y)) return gdiv(x,gel(y,1));
   if (RgV_isscalar(x))
@@ -215,7 +215,7 @@ element_muli(GEN nf, GEN x, GEN y)
 
   if (tx == t_INT) { return ty == t_INT? gscalcol(mulii(x,y), N): gmul(x, y); }
   if (tx != t_COL || lg(x) != N+1
-   || ty != t_COL || lg(y) != N+1) err(typeer,"element_muli");
+   || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
@@ -373,7 +373,7 @@ element_sqr(GEN nf, GEN x)
     pari_sp av = avma;
     return gerepileupto(av, algtobasis(nf, gsqr(x)));
   }
-  if (tx != t_COL) err(typeer,"element_sqr");
+  if (tx != t_COL) pari_err(typeer,"element_sqr");
 
   tab = get_tab(nf, &N);
   return sqr_by_tabi(tab,x);
@@ -392,13 +392,13 @@ element_pow(GEN nf, GEN x, GEN n)
   long s,N;
   GEN y, cx;
 
-  if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
+  if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n); if (!s) return gscalcol_i(gen_1,N);
   if (typ(x) != t_COL)
   {
     x = algtobasis(nf,x);
-    if (typ(x) != t_COL) err(typeer,"element_pow");
+    if (typ(x) != t_COL) pari_err(typeer,"element_pow");
   }
 
   if (RgV_isscalar(x))
@@ -441,10 +441,10 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   long s,N;
   GEN y;
 
-  if (typ(n) != t_INT) err(talker,"not an integer exponent in nfpow");
+  if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nfpow");
   nf = checknf(nf); N = degpol(nf[1]);
   s = signe(n);
-  if (s < 0) err(talker,"negative power in element_powid_mod_p");
+  if (s < 0) pari_err(talker,"negative power in element_powid_mod_p");
   if (!s || I == 1) return gscalcol_i(gen_1,N);
   D.nf = nf;
   D.p = p;
@@ -470,7 +470,7 @@ element_mulid(GEN nf, GEN x, long i)
 
   if (i==1) return gcopy(x);
   tab = get_tab(nf, &N);
-  if (typ(x) != t_COL || lg(x) != N+1) err(typeer,"element_mulid");
+  if (typ(x) != t_COL || lg(x) != N+1) pari_err(typeer,"element_mulid");
   tab += (i-1)*N;
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
@@ -627,7 +627,7 @@ basistoalg(GEN nf, GEN x)
 
     case t_POLMOD:
       if (!polegal_spec(gel(nf,1),gel(x,1)))
-	err(talker,"not the same number field in basistoalg");
+	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
     default: z=cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(nf,1));
@@ -659,7 +659,7 @@ algtobasis_i(GEN nf, GEN x)
       return poltobasis(nf,x);
     case t_COL:
       if (lg(x) == lg(gel(nf,7))) break;
-    default: err(typeer,"algtobasis_i");
+    default: pari_err(typeer,"algtobasis_i");
   }
   return x;
 }
@@ -707,13 +707,13 @@ algtobasis(GEN nf, GEN x)
       return z;
     case t_POLMOD:
       if (!polegal_spec(gel(nf,1),gel(x,1)))
-	err(talker,"not the same number field in algtobasis");
+	pari_err(talker,"not the same number field in algtobasis");
       x = gel(x,2);
       if (typ(x) != t_POL) break;
       /* fall through */
     case t_POL:
       if (varn(x) != varn(gel(nf,1)))
-        err(talker,"incompatible variables in algtobasis");
+        pari_err(talker,"incompatible variables in algtobasis");
       return gerepileupto(av,poltobasis(nf,x));
 
   }
@@ -756,7 +756,7 @@ matbasistoalg(GEN nf,GEN x)
   long i, j, li, lx = lg(x);
   GEN c, z = cgetg(lx,t_MAT);
 
-  if (typ(x) != t_MAT) err(talker,"not a matrix in matbasistoalg");
+  if (typ(x) != t_MAT) pari_err(talker,"not a matrix in matbasistoalg");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -773,7 +773,7 @@ matalgtobasis(GEN nf,GEN x)
   long i, j, li, lx = lg(x);
   GEN c, z = cgetg(lx, t_MAT);
 
-  if (typ(x) != t_MAT) err(talker,"not a matrix in matalgtobasis");
+  if (typ(x) != t_MAT) pari_err(talker,"not a matrix in matalgtobasis");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
@@ -808,7 +808,7 @@ rnfalgtobasis(GEN rnf,GEN x)
 
     case t_POLMOD:
       if (!polegal_spec(gel(rnf,1),gel(x,1)))
-	err(talker,"not the same number field in rnfalgtobasis");
+	pari_err(talker,"not the same number field in rnfalgtobasis");
       x = lift_to_pol(x); /* fall through */
     case t_POL: {
       pari_sp av = avma;
@@ -867,7 +867,7 @@ eval_sign(GEN M, GEN x, long k)
   GEN z = mpmul(gcoeff(M,k,1), gel(x,1));
   for (i = 2; i < l; i++)
     z = mpadd(z, mpmul(gcoeff(M,k,i), gel(x,i)));
-  if (lg(z) < DEFAULTPREC) err(precer,"zsigne");
+  if (lg(z) < DEFAULTPREC) pari_err(precer,"zsigne");
   return signe(z);
 }
 
@@ -882,7 +882,7 @@ arch_to_perm(GEN arch)
   {
    case t_VECSMALL: return arch;
    case t_VEC: break;
-   default: err(typeer,"arch_to_perm");
+   default: pari_err(typeer,"arch_to_perm");
   }
   l = lg(arch);
   perm = cgetg(l, t_VECSMALL);
@@ -939,7 +939,7 @@ zsigne(GEN nf,GEN x,GEN arch)
     case t_COL: if (!RgV_isscalar(x)) break;
                 x = gel(x,1);         /* fall through */
     case t_INT: case t_FRAC:
-      s = gsigne(x); if (!s) err(talker,"zero element in zsigne");
+      s = gsigne(x); if (!s) pari_err(talker,"zero element in zsigne");
       return vec_setconst(V, (s < 0)? gen_1: gen_0);
   }
   x = Q_primpart(x); M = gmael(nf,5,1);
@@ -1092,7 +1092,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
   {
     case t_POL: case t_POLMOD: case t_COL:
       xh = idealhermite_aux(nf,x); break;
-    default: err(typeer,"element_invmodideal");
+    default: pari_err(typeer,"element_invmodideal");
       return NULL; /* not reached */
   }
   a = element_div(nf, hnfmerge_get_1(xh, yh), x);
@@ -1202,7 +1202,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   p1 = addsi(-1, p); if (!q) q = p1;
   if (equalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
-  if (cmpiu(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
+  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in Fp_shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fp_inv(g0, p); p1 = x;
 
@@ -1232,7 +1232,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"Fp_shanks, k = %ld", k);
+      if(DEBUGMEM>1) pari_err(warnmem,"Fp_shanks, k = %ld", k);
       p1 = gerepileuptoint(av1, p1);
     }
   }
@@ -1295,7 +1295,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 
   if (gcmp1(a)) { avma = av; return gen_0; }
   if (equaliu(p,2)) {
-    if (!signe(a)) err(talker,"a not invertible in ff_PHlog_Fp");
+    if (!signe(a)) pari_err(talker,"a not invertible in ff_PHlog_Fp");
     avma = av; return gen_0;
   }
   ordp = subis(p, 1);
@@ -1334,7 +1334,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
   }
 
   p1 = sqrti(N);
-  if (cmpiu(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
+  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fq_inv(g0,T,p);
   p1 = x;
@@ -1364,7 +1364,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"ffshanks");
+      if(DEBUGMEM>1) pari_err(warnmem,"ffshanks");
       p1 = gerepileupto(av1, p1);
     }
   }
@@ -1428,7 +1428,7 @@ znlog(GEN x, GEN g0)
 {
   pari_sp av = avma;
   GEN p = gel(g0,1);
-  if (typ(g0) != t_INTMOD) err(talker,"not an element of (Z/pZ)* in znlog");
+  if (typ(g0) != t_INTMOD) pari_err(talker,"not an element of (Z/pZ)* in znlog");
   return gerepileuptoint(av, Fp_PHlog(Rg_to_Fp(x,p),gel(g0,2),p,NULL));
 }
 
@@ -1918,7 +1918,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
     arch = gel(ideal,2); ideal = gel(ideal,1);
     i = typ(arch);
     if (!is_vec_t(i) || lg(arch) != R1+1)
-      err(talker,"incorrect archimedean component in Idealstar");
+      pari_err(talker,"incorrect archimedean component in Idealstar");
     archp = arch_to_perm(arch);
   }
   else
@@ -1928,7 +1928,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   }
   x = idealhermite_aux(nf, ideal);
   if (lg(x) == 1 || !gcmp1(denom(gcoeff(x,1,1))))
-    err(talker,"Idealstar needs an integral non-zero ideal: %Z",x);
+    pari_err(talker,"Idealstar needs an integral non-zero ideal: %Z",x);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);
   E = gel(fa,2); nbp = lg(P)-1;
@@ -2016,7 +2016,7 @@ idealstar0(GEN nf, GEN ideal,long flag)
     case 0: return zidealstar(nf,ideal);
     case 1: return zidealstarinit(nf,ideal);
     case 2: return zidealstarinitgen(nf,ideal);
-    default: err(flagerr,"idealstar");
+    default: pari_err(flagerr,"idealstar");
   }
   return NULL; /* not reached */
 }
@@ -2026,7 +2026,7 @@ check_nfelt(GEN x, GEN *den)
 {
   long l = lg(x), i;
   GEN t, d = NULL;
-  if (typ(x) != t_COL) err(talker,"%Z not a nfelt", x);
+  if (typ(x) != t_COL) pari_err(talker,"%Z not a nfelt", x);
   for (i=1; i<l; i++)
   {
     t = gel(x,i);
@@ -2036,7 +2036,7 @@ check_nfelt(GEN x, GEN *den)
       case t_FRAC:
         if (!d) d = gel(t,2); else d = lcmii(d, gel(t,2));
         break;
-      default: err(talker,"%Z not a nfelt", x);
+      default: pari_err(talker,"%Z not a nfelt", x);
     }
   }
   *den = d;
@@ -2080,11 +2080,11 @@ zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
       y = famat_zlog(nf, gel(x,1), gel(x,2), sgn, bid);
       goto END;
 
-    default: err(talker,"not an element in zideallog");
+    default: pari_err(talker,"not an element in zideallog");
   }
   if (!ok)
   {
-    if (lg(x) != N+1) err(talker,"not an element in zideallog");
+    if (lg(x) != N+1) pari_err(talker,"not an element in zideallog");
     check_nfelt(x, &den);
   }
   if (den)
@@ -2346,7 +2346,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"Ideallist");
+      if(DEBUGMEM>1) pari_err(warnmem,"Ideallist");
       z = gerepilecopy(av, z);
     }
   }
@@ -2363,7 +2363,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
 }
 GEN
 ideallist0(GEN bnf,long bound, long flag) {
-  if (flag<0 || flag>4) err(flagerr,"ideallist");
+  if (flag<0 || flag>4) pari_err(flagerr,"ideallist");
   return Ideallist(bnf,bound,flag);
 }
 GEN
@@ -2398,13 +2398,13 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   ideal_data ID;
   GEN (*join_z)(ideal_data*, GEN) = &join_arch;
 
-  if (typ(L) != t_VEC) err(typeer, "ideallistarch");
+  if (typ(L) != t_VEC) pari_err(typeer, "ideallistarch");
   if (l == 1) return cgetg(1,t_VEC);
   z = gel(L,1);
-  if (typ(z) != t_VEC) err(typeer, "ideallistarch");
+  if (typ(z) != t_VEC) pari_err(typeer, "ideallistarch");
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
-    if (typ(z) != t_VEC) err(typeer,"ideallistarch");
+    if (typ(z) != t_VEC) pari_err(typeer,"ideallistarch");
     join_z = &join_archunit;
     ID.sgnU = zsignunits(bnf, NULL, 1);
   }

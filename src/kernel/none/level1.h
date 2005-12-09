@@ -181,7 +181,7 @@ GEN    vec_ei(long n, long i);
 INLINE long
 evallg(long x)
 {
-  if (x & ~LGBITS) err(errlg);
+  if (x & ~LGBITS) pari_err(errlg);
   return _evallg(x);
 }
 
@@ -189,7 +189,7 @@ INLINE long
 evalvalp(long x)
 {
   const long v = _evalvalp(x);
-  if (v & ~VALPBITS) err(errvalp);
+  if (v & ~VALPBITS) pari_err(errvalp);
   return v;
 }
 
@@ -197,7 +197,7 @@ INLINE long
 evalexpo(long x)
 {
   const long v = _evalexpo(x);
-  if (v & ~EXPOBITS) err(errexpo);
+  if (v & ~EXPOBITS) pari_err(errexpo);
   return v;
 }
 
@@ -210,7 +210,7 @@ INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */
 {
   const GEN z = ((GEN) avma) - x;
-  if (x > ((avma-bot)>>TWOPOTBYTES_IN_LONG)) err(errpile);
+  if (x > ((avma-bot)>>TWOPOTBYTES_IN_LONG)) pari_err(errpile);
 #if defined(_WIN32) || defined(__CYGWIN32__)
   if (win32ctrlc) dowin32ctrlc();
 #endif
@@ -502,7 +502,7 @@ itos(GEN x)
   long u;
 
   if (!s) return 0;
-  u = x[2]; if (lgefint(x) > 3 || u < 0) err(affer2);
+  u = x[2]; if (lgefint(x) > 3 || u < 0) pari_err(affer2);
   return (s>0) ? u : -u;
 }
 
@@ -532,7 +532,7 @@ affii(GEN x, GEN y)
   long lx;
 
   if (x==y) return;
-  lx=lgefint(x); if (lg(y)<lx) err(affer3);
+  lx=lgefint(x); if (lg(y)<lx) pari_err(affer3);
   while (--lx) y[lx]=x[lx];
 }
 
@@ -634,7 +634,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) err(talker,"overflow in real shift");
+  if (e & ~EXPOBITS) pari_err(talker,"overflow in real shift");
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 
@@ -709,7 +709,7 @@ sdivss_rem(long x, long y, long *rem)
 {
   long q;
   LOCAL_HIREMAINDER;
-  if (!y) err(gdiver);
+  if (!y) pari_err(gdiver);
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
@@ -733,7 +733,7 @@ sdivsi_rem(long x, GEN y, long *rem)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) err(gdiver);
+  if (!s) pari_err(gdiver);
   if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *rem = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
@@ -810,7 +810,7 @@ INLINE ulong
 umodui(ulong x, GEN y)
 {
   LOCAL_HIREMAINDER;
-  if (!signe(y)) err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
   if (!x || lgefint(y) > 3) return x;
   hiremainder = 0; (void)divll(x, y[2]); return hiremainder;
 }
@@ -980,7 +980,7 @@ itou(GEN x)
   const long s = signe(x);
 
   if (!s) return 0;
-  if (lgefint(x) > 3) err(affer2);
+  if (lgefint(x) > 3) pari_err(affer2);
   return x[2];
 }
 

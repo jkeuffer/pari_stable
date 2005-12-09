@@ -40,7 +40,7 @@ invmod(GEN a, GEN b, GEN *res)
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */
 
-  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
+  if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   if (!signe(b)) { *res=absi(a); return 0; }
   av = avma;
   if (lgefint(b) == 3) /* single-word affair */
@@ -138,7 +138,7 @@ invmod(GEN a, GEN b, GEN *res)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[4]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&v; gptr[3]=&v1;
-      if(DEBUGMEM>1) err(warnmem,"invmod");
+      if(DEBUGMEM>1) pari_err(warnmem,"invmod");
       gerepilemany(av1,gptr,4);
     }
   } /* end while */

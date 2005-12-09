@@ -197,7 +197,7 @@ enum manage_var_t {
   GEN __x = (x), __y = (y);\
   long prec = precision(__y);\
   pari_sp __av = avma;\
-  if (!prec) err(infprecer, fstr);\
+  if (!prec) pari_err(infprecer, fstr);\
   gaffect(f(__x), __y); avma=__av; } STMT_END
 #define gopgz(f, x, y)  STMT_START {\
   GEN __x = (x), __y = (y);\
@@ -423,4 +423,4 @@ enum manage_var_t {
 #define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
-  { if (!*(d)) err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
+  { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END

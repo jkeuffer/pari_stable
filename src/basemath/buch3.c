@@ -148,7 +148,7 @@ too_big(GEN nf, GEN bet)
     case t_INT: return absi_cmp(x, gen_1);
     case t_FRAC: return absi_cmp(gel(x,1), gel(x,2));
   }
-  err(bugparier, "wrong type in too_big");
+  pari_err(bugparier, "wrong type in too_big");
   return 0; /* not reached */
 }
 
@@ -483,7 +483,7 @@ bnrclass0(GEN bnf, GEN ideal, long flag)
     case 0: flag = nf_GEN; break;
     case 1: flag = nf_INIT; break;
     case 2: flag = nf_INIT | nf_GEN; break;
-    default: err(flagerr,"bnrclass");
+    default: pari_err(flagerr,"bnrclass");
   }
   return Buchray(bnf,ideal,flag);
 }
@@ -495,7 +495,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
   {
     case 0: flag = nf_INIT; break;
     case 1: flag = nf_INIT | nf_GEN; break;
-    default: err(flagerr,"bnrinit");
+    default: pari_err(flagerr,"bnrinit");
   }
   return Buchray(bnf,ideal,flag);
 }
@@ -557,11 +557,11 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
 
   /* compute generator */
   if (lg(rayclass)<=3)
-    err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
+    pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
 
   genray = gel(rayclass,3);
   p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GENMAT | nf_FORCE);
-  if (!gcmp0(gel(p1,1))) err(bugparier,"isprincipalray");
+  if (!gcmp0(gel(p1,1))) pari_err(bugparier,"isprincipalray");
   p1 = gel(p1,2); alpha = factorbackelt(p1, nf, NULL);
   if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
   {
@@ -647,9 +647,9 @@ zimmertbound(long N,long R2,GEN DK)
     w = minkowski_bound(DK, N, R2, DEFAULTPREC);
   }
   n = itos_or_0( gceil(w) );
-  if (!n) err(talker,"Minkowski bound is too large");
+  if (!n) pari_err(talker,"Minkowski bound is too large");
   if (n > 500000)
-      err(warner,"large Minkowski bound: certification will be VERY long");
+      pari_err(warner,"large Minkowski bound: certification will be VERY long");
   avma = av; return n;
 }
 
@@ -1141,7 +1141,7 @@ certifybuchall(GEN bnf)
   cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3); zu = gmael(bnf,8,4);
   bound = itou_or_0( ground(gdiv(reg, lowerboundforregulator(bnf))) );
-  if (!bound) err(talker,"sorry, too many primes to check");
+  if (!bound) pari_err(talker,"sorry, too many primes to check");
   maxprime_check(bound);
   if (DEBUGLEVEL>1)
   {
@@ -1226,7 +1226,7 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, int gen)
   GEN bnr,bnf;
 
   if (typ(arg0)!=t_VEC)
-    err(talker,"neither bnf nor bnr in conductor or discray");
+    pari_err(talker,"neither bnf nor bnr in conductor or discray");
   if (!arg1) arg1 = gen_0;
   if (!arg2) arg2 = gen_0;
 
@@ -1241,14 +1241,14 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, int gen)
       bnr = Buchray(bnf,arg1, gen? nf_INIT | nf_GEN: nf_INIT);
       *subgroup = arg2; break;
 
-    default: err(talker,"neither bnf nor bnr in conductor or discray");
+    default: pari_err(talker,"neither bnf nor bnr in conductor or discray");
       return NULL; /* not reached */
   }
   if (!gcmp0(*subgroup))
   {
     long tx = typ(*subgroup);
     if (!is_matvec_t(tx))
-      err(talker,"bad subgroup in conductor or discray");
+      pari_err(talker,"bad subgroup in conductor or discray");
   }
   return bnr;
 }
@@ -1277,7 +1277,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, char *s)
   {
     D = diagonal_i(gmael(bnr,5,2));
     H = hnf(H);
-    if (!hnfdivide(H, D)) err(talker,"incorrect subgroup in %s", s);
+    if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
     h = dethnf_i(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
@@ -1405,7 +1405,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
   nf=gel(bnf,7);
   polrel = fix_relative_pol(nf,polrel,1);
-  if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
+  if (typ(polrel)!=t_POL) pari_err(typeer,"rnfnormgroup");
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = utoipos(reldeg);
@@ -1415,7 +1415,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   detgroup = dethnf_i(group);
   k = cmpiu(detgroup,reldeg);
   if (k < 0)
-    err(talker,"not an Abelian extension in rnfnormgroup?");
+    pari_err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!k) return gerepilecopy(av, group);
 
   discnf = gel(nf,3);
@@ -1450,7 +1450,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
         if (degpol(fac[j]) != f)
-          err(talker,"non Galois extension in rnfnormgroup");
+          pari_err(talker,"non Galois extension in rnfnormgroup");
       if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
       if (f == reldeg) continue; /* reldeg-th powers already included */
 
@@ -1461,7 +1461,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       group = hnf(shallowconcat(group, col));
       detgroup = dethnf_i(group);
       k = cmpiu(detgroup,reldeg);
-      if (k < 0) err(talker,"not an Abelian extension in rnfnormgroup");
+      if (k < 0) pari_err(talker,"not an Abelian extension in rnfnormgroup");
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
@@ -1527,7 +1527,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   GEN nf, module, bnr, group, p1, pol2;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  if (typ(polrel) != t_POL) err(typeer,"rnfconductor");
+  if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
   p1 = unifpol(nf, polrel, t_COL);
   pol2 = RgX_rescale(polrel, Q_denom(p1));
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
@@ -1642,12 +1642,12 @@ KerChar(GEN chi, GEN cyc)
   long i, l = lg(cyc);
   GEN m, U, d1;
 
-  if (lg(chi) != l) err(talker,"incorrect character length in KerChar");
+  if (lg(chi) != l) pari_err(talker,"incorrect character length in KerChar");
   if (l == 1) return NULL; /* trivial subgroup */
   d1 = gel(cyc,1); m = cgetg(l+1,t_MAT);
   for (i=1; i<l; i++)
   {
-    if (typ(chi[i]) != t_INT) err(typeer,"conductorofchar");
+    if (typ(chi[i]) != t_INT) pari_err(typeer,"conductorofchar");
     gel(m,i) = mkcol(mulii(gel(chi,i), diviiexact(d1, gel(cyc,i))));
   }
   gel(m,i) = mkcol(d1);
@@ -1677,13 +1677,13 @@ get_classno(GEN t, GEN h)
 
 static void
 chk_listBU(GEN L, char *s) {
-  if (typ(L) != t_VEC) err(typeer,s);
+  if (typ(L) != t_VEC) pari_err(typeer,s);
   if (lg(L) > 1) {
     GEN z = gel(L,1);
-    if (typ(z) != t_VEC) err(typeer, s);
+    if (typ(z) != t_VEC) pari_err(typeer, s);
     if (lg(z) == 1) return;
     z = gel(z,1); /* [bid,U] */
-    if (typ(z) != t_VEC || lg(z) != 3) err(typeer, s);
+    if (typ(z) != t_VEC || lg(z) != 3) pari_err(typeer, s);
     checkbid(gel(z,1));
   }
 }
@@ -1716,7 +1716,7 @@ Lbnrclassno(GEN L, GEN fac)
   long i, l = lg(L);
   for (i=1; i<l; i++)
     if (gequal(gmael(L,i,1),fac)) return gmael(L,i,2);
-  err(bugparier,"Lbnrclassno");
+  pari_err(bugparier,"Lbnrclassno");
   return NULL; /* not reached */
 }
 
@@ -1747,7 +1747,7 @@ factordivexact(GEN fa1,GEN fa2)
     else
     {
       p1 = subii(gel(E1,i), gel(E2,j)); k = signe(p1);
-      if (k < 0) err(talker,"factordivexact is not exact!");
+      if (k < 0) pari_err(talker,"factordivexact is not exact!");
       if (k > 0) { P[c] = P1[i]; gel(E,c) = p1; c++; }
     }
   }
@@ -2041,7 +2041,7 @@ decodemodule(GEN nf, GEN fa)
 
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
-    err(talker,"not a factorisation in decodemodule");
+    pari_err(talker,"not a factorisation in decodemodule");
   n = degpol(nf[1]); nn = n*n; id = NULL;
   G = gel(fa,1);
   E = gel(fa,2);
@@ -2049,7 +2049,7 @@ decodemodule(GEN nf, GEN fa)
   {
     long code = itos(gel(G,k)), p = code / nn, j = (code%n)+1;
     GEN P = primedec(nf, utoipos(p)), e = gel(E,k);
-    if (lg(P) <= j) err(talker, "incorrect hash code in decodemodule");
+    if (lg(P) <= j) pari_err(talker, "incorrect hash code in decodemodule");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)
            : idealpow(nf, pr,e);
@@ -2080,7 +2080,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
   GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
 
-  if (bound <= 0) err(talker,"non-positive bound in Discrayabslist");
+  if (bound <= 0) pari_err(talker,"non-positive bound in Discrayabslist");
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
@@ -2096,7 +2096,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
     bidp = Idealstar(nf,matid(degk),0);
-    if (r1>15) err(talker,"r1>15 in discrayabslistarch");
+    if (r1>15) pari_err(talker,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {
     matarchunit = (GEN)NULL;
@@ -2177,7 +2177,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"[1]: discrayabslistarch");
+      if(DEBUGMEM>1) pari_err(warnmem,"[1]: discrayabslistarch");
       gerepileall(av, flbou? 2: 1, &Z, &Ray);
     }
     NEXT_PRIME_VIADIFF(p[2], dif);
@@ -2263,7 +2263,7 @@ STORE:  gel(discall,karch+1) = res;
       gel(sousdisc,j) = res;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) err(warnmem,"[2]: discrayabslistarch");
+        if(DEBUGMEM>1) pari_err(warnmem,"[2]: discrayabslistarch");
         Disc = gerepilecopy(av1, Disc);
       }
     }
@@ -2306,7 +2306,7 @@ subgroupcond(GEN bnr, GEN indexbound)
 GEN
 subgrouplist0(GEN bnr, GEN indexbound, long all)
 {
-  if (typ(bnr)!=t_VEC) err(typeer,"subgrouplist");
+  if (typ(bnr)!=t_VEC) pari_err(typeer,"subgrouplist");
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
   {
     if (!all) return subgroupcond(bnr,indexbound);

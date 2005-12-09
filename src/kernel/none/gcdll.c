@@ -1056,7 +1056,7 @@ Fl_inv(ulong x, ulong p)
 {
   long s;
   ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
-  if (g != 1UL) err(invmoder, "%Z", gmodulcp(utoi(x), utoi(p)));
+  if (g != 1UL) pari_err(invmoder, "%Z", gmodulcp(utoi(x), utoi(p)));
   xv = xv1 % p; if (s < 0) xv = p - xv;
   return xv;
 }

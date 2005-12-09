@@ -326,7 +326,7 @@ static GEN
 intinit_end(intdata *D, long pnt, long mnt)
 {
   GEN v = cgetg(8, t_VEC);
-  if (pnt < 0) err(talker,"incorrect table length in intnum initialization");
+  if (pnt < 0) pari_err(talker,"incorrect table length in intnum initialization");
   gel(v,1) = stoi(D->m);
   TABx0(v) = D->tabx0;
   TABw0(v) = D->tabw0;
@@ -547,12 +547,12 @@ suminit_start(GEN sig)
 
   if (typ(sig) == t_VEC)
   {
-    if (lg(sig) != 3) err(typeer,"sumnum");
+    if (lg(sig) != 3) pari_err(typeer,"sumnum");
     sig2 = gel(sig,2);
     sig  = gel(sig,1);
   }
   else sig2 = gen_0;
-  if (!isinR(sig) || !isinR(sig2)) err(talker, "incorrect abscissa in sumnum");
+  if (!isinR(sig) || !isinR(sig2)) pari_err(talker, "incorrect abscissa in sumnum");
   if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
   return mkvec2(mkvec(gen_1), sig2);
 }
@@ -630,8 +630,8 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabsimp(tab)) err(typeer,"intnum");
-  if (!isinC(a) || !isinC(b)) err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
+  if (!isinC(a) || !isinC(b)) pari_err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -666,7 +666,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabsimp(tab)) err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -707,7 +707,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
   long m, L, k, h = 0, pas, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabdoub(tab)) err(typeer,"intnum");
+  if (!checktabdoub(tab)) pari_err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -744,7 +744,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   long m, L, k, i, spf;
   pari_sp ltop = avma;
 
-  if (!checktabsimp(tab)) err(typeer,"intnum");
+  if (!checktabsimp(tab)) pari_err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -829,12 +829,12 @@ code_aux(GEN a2, int warn)
   if (s)
   {
     if(warn && !gcmp0(a2R))
-      err(warner,"both nonzero real and imag. part in coding, real ignored");
+      pari_err(warner,"both nonzero real and imag. part in coding, real ignored");
     return s > 0 ? f_YOSCC : f_YOSCS;
   }
   if (gcmp0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
   if (gsigne(a2R) > 0) return f_YFAST;
-  if (gcmpgs(a2R, -1) >= 0) err(talker,"incorrect a or b in intnum");
+  if (gcmpgs(a2R, -1) >= 0) pari_err(talker,"incorrect a or b in intnum");
   return f_YVSLO;
 }
 
@@ -846,17 +846,17 @@ transcode(GEN a, long warn)
 
   if (typ(a) != t_VEC) return f_REG;
   la = lg(a);
-  if (la == 1 || la > 3) err(talker,"incorrect a or b in intnum");
+  if (la == 1 || la > 3) pari_err(talker,"incorrect a or b in intnum");
   if (la == 2) return gsigne(gel(a,1)) > 0 ? f_YSLOW : -f_YSLOW;
   a1 = gel(a,1);
   a2 = gel(a,2);
   if (typ(a1) != t_VEC)
   {
     if (!isinC(a1) || !isinR(a2) || gcmpgs(a2, -1) <= 0)
-      err(talker,"incorrect a or b in intnum");
+      pari_err(talker,"incorrect a or b in intnum");
     return gsigne(a2) < 0 ? f_SING : f_REG;
   }
-  if (lg(a1) != 2 || !isinC(a2)) err(talker,"incorrect a or b in intnum");
+  if (lg(a1) != 2 || !isinC(a2)) pari_err(talker,"incorrect a or b in intnum");
   return gsigne(gel(a1,1)) * code_aux(a2, warn);
 }
 
@@ -927,7 +927,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
   long codea, codeb, l;
   GEN T, U, km, kma, kmb, tmp;
 
-  if (m > 30) err(talker,"m too large in intnuminit");
+  if (m > 30) pari_err(talker,"m too large in intnuminit");
   l = prec + 1;
   codea = transcode(a, 1);
   codeb = transcode(b, 1);
@@ -1026,7 +1026,7 @@ intnuminit0(GEN a, GEN b, GEN tab, long prec)
   if (!tab) m = 0;
   else if (typ(tab) != t_INT)
   {
-    if (!checktab(tab)) err(typeer,"intnuminit0");
+    if (!checktab(tab)) pari_err(typeer,"intnuminit0");
     return tab;
   }
   else
@@ -1040,7 +1040,7 @@ sumnuminit0(GEN a, GEN tab, long sgn, long prec)
   if (!tab) m = 0;
   else if (typ(tab) != t_INT)
   {
-    if (!checktab(tab)) err(typeer,"sumnuminit0");
+    if (!checktab(tab)) pari_err(typeer,"sumnuminit0");
     return tab;
   }
   else
@@ -1125,7 +1125,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   long flag = f_SEMI, codea = transcode(a, 1), codeb = transcode(b, 1);
   intdata D; intinit_start(&D, m, flext, precl);
 
-  if (flag < 0 || flag >= 3) err(flagerr,"intnuminitgen");
+  if (flag < 0 || flag >= 3) pari_err(flagerr,"intnuminitgen");
   lim = lg(D.tabxp) - 1;
   if (is_osc_f(labs(codea)) || is_osc_f(labs(codeb)))
     { pisurh = Pi2n(D.m, precl); flag = f_OSC1; }
@@ -1133,9 +1133,9 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   else if (!is_fin_f(codea) && !is_fin_f(codeb))
   {
     if (codea * codeb > 0)
-      err(talker,"infinities of the same sign in intnuminitgen");
+      pari_err(talker,"infinities of the same sign in intnuminitgen");
     if (labs(codea) != labs(codeb))
-      err(talker,"infinities of different type in intnuminitgen");
+      pari_err(talker,"infinities of different type in intnuminitgen");
     flag = (flag == f_SEMI) ? f_INF : f_OSC2;
   }
   newprec = (3*precl - 1)>>1;
@@ -1313,7 +1313,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   /* now a and b are infinite */
   if (codea * codeb > 0)
   {
-    err(warner, "integral from infty to infty or from -infty to -infty");
+    pari_err(warner, "integral from infty to infty or from -infty to -infty");
     return gen_0;
   }
   if (codea > 0) { lswap(codea, codeb); swap(a, b); sgns = -sgns; }
@@ -1334,7 +1334,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
       SP = intninfpm(E, eval, coupeb, 1, gel(tab,2), prec);
     else
     {
-      if (codeb != f_YOSCC) err(bugparier, "code error in intnum");
+      if (codeb != f_YOSCC) pari_err(bugparier, "code error in intnum");
       if (gequal(kma, kmb))
 	SP = intninfpm(E, eval, coupeb, 1, gel(tab,2), prec);
       else
@@ -1430,9 +1430,9 @@ intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long fla
 
   if (typ(sig) != t_VEC) sig = mkvec2(sig, stoi(flag));
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
-    err(typeer,"integral transform");
+    pari_err(typeer,"integral transform");
   if (gsigne(gel(sig,2)) < 0)
-    err(talker,"exponential increase in integral transform");
+    pari_err(talker,"exponential increase in integral transform");
   D.a = gel(sig,1);
   D.prec = prec;
   D.f = eval;
@@ -1494,9 +1494,9 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
 
   if (typ(sig) != t_VEC) sig = mkvec2(sig, gen_1);
   if (lg(sig) != 3 || !isinR(gel(sig,1)) || !isinR(gel(sig,2)))
-    err(typeer,"intmellininvshort");
+    pari_err(typeer,"intmellininvshort");
   if (gsigne(gel(sig,2)) <= 0)
-    err(talker,"need exponential decrease in intinvmellinshort");
+    pari_err(talker,"need exponential decrease in intinvmellinshort");
   D.L = mulcxI(LX);
   D.prec = prec;
   tmpP = gettmpP(gel(sig,2));
@@ -1516,14 +1516,14 @@ mytra(GEN a, GEN x, long flag)
     case f_REG: case f_SING: case f_YFAST: return a;
     case f_YSLOW: case f_YVSLO:
       xa = real_i(x); s = gsigne(xa);
-      if (!s) err(talker,"x = 0 in Fourier");
+      if (!s) pari_err(talker,"x = 0 in Fourier");
       if (s < 0) xa = gneg(xa);
       b = cgetg(3, t_VEC);
       gel(b,1) = mkvec( codea > 0 ? gen_1 : gen_m1 );
       gel(b,2) = (flag? mulcxI(xa): mulcxmI(xa));
       return b;
     case f_YOSCS: case f_YOSCC:
-      err(impl,"Fourier transform of oscillating functions");
+      pari_err(impl,"Fourier transform of oscillating functions");
   }
   return 0;
 }
@@ -1587,9 +1587,9 @@ intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
     case 1: z = rombint(E, eval, a, b, prec); break;
     case 2: z = qromi  (E, eval, a, b, prec); break;
     case 3: z = qrom2  (E, eval, a, b, prec); break;
-    default: err(flagerr); return NULL; /* not reached */
+    default: pari_err(flagerr); return NULL; /* not reached */
   }
-  if (!z) err(intger2);
+  if (!z) pari_err(intger2);
   return gerepileupto(av, z);
 }
 
@@ -1761,7 +1761,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
 
   b = suminit_start(sig);
   flii = gcmp0(gel(b,2));
-  if (!is_scalar_t(typ(a))) err(talker, "incorrect beginning value in sumnum");
+  if (!is_scalar_t(typ(a))) pari_err(talker, "incorrect beginning value in sumnum");
   tab = sumnuminit0(sig, tab, sgn, prec);
 
   signew = (typ(sig) == t_VEC) ? gel(sig,1) : sig;

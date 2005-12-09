@@ -131,11 +131,11 @@ gatan(GEN x, long prec)
     case t_COMPLEX:
       av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gatan");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gatan");
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) err(negexper,"gatan");
+      if (valp(y) < 0) pari_err(negexper,"gatan");
       if (lg(y)==2) return gcopy(y);
       /* lg(y) > 2 */
       a = integ(gdiv(derivser(y), gaddsg(1,gsqr(y))), varn(y));
@@ -192,12 +192,12 @@ gasin(GEN x, long prec)
       av = avma;
       return gerepilecopy(av, mulcxmI(gash(mulcxI(x), prec)));
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gasin");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gasin");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       /* lg(y) > 2*/
-      if (valp(y) < 0) err(negexper,"gasin");
+      if (valp(y) < 0) pari_err(negexper,"gasin");
       p1 = gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec));
       a = integ(p1,varn(y));
       if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
@@ -257,10 +257,10 @@ gacos(GEN x, long prec)
     case t_COMPLEX: av = avma;
       return gerepilecopy(av, mulcxmI(gach(x,prec)));
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gacos");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gacos");
     case t_SER:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) err(negexper,"gacos");
+      if (valp(y) < 0) pari_err(negexper,"gacos");
       if (lg(y) > 2)
       {
 	p1 = integ(gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec)), varn(y));
@@ -315,7 +315,7 @@ rfix(GEN x,long prec)
     case t_INT: return itor(x, prec);
     case t_FRAC: return rdivii(gel(x,1),gel(x,2), prec);
     case t_REAL: break;
-    default: err(typeer,"rfix (conversion to t_REAL)");
+    default: pari_err(typeer,"rfix (conversion to t_REAL)");
   }
   return x;
 }
@@ -334,7 +334,7 @@ garg(GEN x, long prec)
   long tx = typ(x);
   pari_sp av;
 
-  if (gcmp0(x)) err(talker,"zero argument in garg");
+  if (gcmp0(x)) pari_err(talker,"zero argument in garg");
   switch(tx)
   {
     case t_REAL: prec = lg(x); /* fall through */
@@ -351,7 +351,7 @@ garg(GEN x, long prec)
     case t_VEC: case t_COL: case t_MAT:
       return transc(garg,x,prec);
   }
-  err(typeer,"garg");
+  pari_err(typeer,"garg");
   return NULL; /* not reached */
 }
 
@@ -389,7 +389,7 @@ gch(GEN x, long prec)
     case t_COMPLEX: case t_PADIC: 
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: err(typeer,"gch");
+    case t_INTMOD: pari_err(typeer,"gch");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gcopy(y);
@@ -476,7 +476,7 @@ gth(GEN x, long prec)
       t = gexp(gmul2n(x,1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
-    case t_INTMOD: err(typeer,"gth");
+    case t_INTMOD: pari_err(typeer,"gth");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
@@ -530,11 +530,11 @@ gash(GEN x, long prec)
 
       p1 = mppi(prec); if (sy<0) setsigne(p1,-1);
       return gerepileupto(av, gadd(gneg_i(y), pureimag(p1)));
-    case t_INTMOD: case t_PADIC: err(typeer,"gash");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
-      if (valp(y) < 0) err(negexper,"gash");
+      if (valp(y) < 0) pari_err(negexper,"gash");
 
       p1 = gdiv(derivser(y), gsqrt(gaddsg(1,gsqr(y)),prec));
       a = integ(p1,varn(y));
@@ -587,12 +587,12 @@ gach(GEN x, long prec)
       if (typ(y) == t_COMPLEX && signe(y[2]) < 0) y = gneg(y);
       return gerepileupto(av, y);
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gach");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gach");
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
-      if (v < 0) err(negexper,"gach");
+      if (v < 0) pari_err(negexper,"gach");
       if (gcmp0(y))
       {
         if (!v) return gcopy(y);
@@ -641,7 +641,7 @@ gath(GEN x, long prec)
       y = cgetg(3,t_COMPLEX);
       av = avma;
       p1 = addrs(divsr(2,addsr(-1,x)),1);
-      if (!signe(p1)) err(talker,"singular argument in atanh");
+      if (!signe(p1)) pari_err(talker,"singular argument in atanh");
       p1 = logr_abs(p1);
       setexpo(p1, expo(p1)-1);
       gel(y,1) = gerepileuptoleaf(av, p1);
@@ -651,10 +651,10 @@ gath(GEN x, long prec)
       av = avma; p1 = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
       return gerepileupto(av, gmul2n(p1,-1));
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gath");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gath");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y) < 0) err(negexper,"gath");
+      if (valp(y) < 0) pari_err(negexper,"gath");
       p1 = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integ(p1, varn(y));
       if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
@@ -771,7 +771,7 @@ bernfracspec(long k)
     gel(N,2) = n; s = addii(s, powiu(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) err(warnmem,"bernfrac");
+      if (DEBUGMEM>1) pari_err(warnmem,"bernfrac");
       gerepileall(av,3, &c,&b,&s);
     }
   }
@@ -808,7 +808,7 @@ bernvec_old(long nb)
   GEN y;
 
   if (nb < 0) return cgetg(1, t_VEC);
-  if (nb > 46340 && BITS_IN_LONG == 32) err(impl, "bernvec for n > 46340");
+  if (nb > 46340 && BITS_IN_LONG == 32) pari_err(impl, "bernvec for n > 46340");
 
   y = cgetg(nb+2, t_VEC); gel(y,1) = gen_1;
   for (n = 1; n <= nb; n++)
@@ -1040,14 +1040,14 @@ cxgamma(GEN s0, int dolog, long prec)
   y = s;
   if (typ(s0) == t_INT)
   {
-    if (signe(s0) <= 0) err(talker,"non-positive integer argument in cxgamma");
+    if (signe(s0) <= 0) pari_err(talker,"non-positive integer argument in cxgamma");
     if (is_bigint(s0)) {
       for (i=1; i < nn; i++)
       {
         y = mulri(y, addis(s0, i));
         if (low_stack(avlim,stack_lim(av2,3)))
         {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
+          if(DEBUGMEM>1) pari_err(warnmem,"gamma");
           y = gerepileuptoleaf(av2, y);
         }
       }
@@ -1058,7 +1058,7 @@ cxgamma(GEN s0, int dolog, long prec)
         y = mulru(y, ss + i);
         if (low_stack(avlim,stack_lim(av2,3)))
         {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
+          if(DEBUGMEM>1) pari_err(warnmem,"gamma");
           y = gerepileuptoleaf(av2, y);
         }
       }
@@ -1072,7 +1072,7 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gmul(y, gaddgs(s,i));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) err(warnmem,"gamma");
+        if(DEBUGMEM>1) pari_err(warnmem,"gamma");
         y = gerepileupto(av2, y);
       }
     }
@@ -1086,7 +1086,7 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gadd(y, glog(gaddgs(s,i), prec));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) err(warnmem,"gamma");
+        if(DEBUGMEM>1) pari_err(warnmem,"gamma");
         y = gerepileupto(av2, y);
       }
     }
@@ -1193,15 +1193,15 @@ ggamd(GEN x, long prec)
     case t_INT:
     {
       long k = itos(x);
-      if (labs(k) > 962353) err(talker, "argument too large in ggamd");
+      if (labs(k) > 962353) pari_err(talker, "argument too large in ggamd");
       return gammahs(k<<1, prec);
     }
     case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
       av=avma; x = gadd(x,ghalf); tetpil=avma;
       return gerepile(av,tetpil,ggamma(x,prec));
 
-    case t_INTMOD: case t_PADIC: err(typeer,"ggamd");
-    case t_SER: err(impl,"gamd of a power series");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"ggamd");
+    case t_SER: pari_err(impl,"gamd of a power series");
   }
   return transc(ggamd,x,prec);
 }
@@ -1328,7 +1328,7 @@ gammap(GEN x)
   long e= precp(x);
   GEN n,m,nm;
   if (valp(x)<0) 
-    err(talker,"Gamma not defined for non-integral p-adic number");
+    pari_err(talker,"Gamma not defined for non-integral p-adic number");
   n = gtrunc(x);
   m = gtrunc(gneg(x));
   nm= cmpii(n,m)<=0?n:m;
@@ -1353,8 +1353,8 @@ ggamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) err(talker,"non-positive integer argument in ggamma");
-      if (cmpiu(x,481177) > 0) err(talker,"argument too large in ggamma");
+      if (signe(x) <= 0) pari_err(talker,"non-positive integer argument in ggamma");
+      if (cmpiu(x,481177) > 0) pari_err(talker,"argument too large in ggamma");
       return mpfactr(itos(x) - 1, prec);
 
     case t_REAL: case t_COMPLEX:
@@ -1365,13 +1365,13 @@ ggamma(GEN x, long prec)
       z = gel(x,1); /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
-        err(talker, "argument too large in ggamma");
+        pari_err(talker, "argument too large in ggamma");
         return NULL; /* not reached */
       }
       return gammahs(m-1, prec);
 
     case t_PADIC: return gammap(x);
-    case t_INTMOD: err(typeer,"ggamma");
+    case t_INTMOD: pari_err(typeer,"ggamma");
     default:
       av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, gexp(glngamma(y,prec),prec));
@@ -1402,7 +1402,7 @@ glngamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) err(talker,"non-positive integer in glngamma");
+      if (signe(x) <= 0) pari_err(talker,"non-positive integer in glngamma");
       if (cmpiu(x,200 + 50*(prec-2)) > 0) /* heuristic */
 	return cxgamma(x, 1, prec);
       av = avma;
@@ -1413,17 +1413,17 @@ glngamma(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (valp(y)) err(negexper,"glngamma");
+      if (valp(y)) pari_err(negexper,"glngamma");
       p1 = gsubsg(1,y);
-      if (!valp(p1)) err(impl,"lngamma around a!=1");
+      if (!valp(p1)) pari_err(impl,"lngamma around a!=1");
       n = (lg(y)-3) / valp(p1);
       a = zeroser(varn(y), lg(y)-2);
       for (i=n; i>=2; i--) a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
       a = gadd(a, mpeuler(prec));
       return gerepileupto(av, gmul(a, p1));
 
-    case t_PADIC:  err(impl,"p-adic lngamma function");
-    case t_INTMOD: err(typeer,"glngamma");
+    case t_PADIC:  pari_err(impl,"p-adic lngamma function");
+    case t_INTMOD: pari_err(typeer,"glngamma");
   }
   return transc(glngamma,x,prec);
 }
@@ -1446,7 +1446,7 @@ cxpsi(GEN s0, long prec)
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (signe(sig) <= 0) { funeq = 1; s = gsub(gen_1, s); sig = real_i(s); }
   if (typ(s0) == t_INT && signe(s0) <= 0)
-    err(talker,"non-positive integer argument in cxpsi");
+    pari_err(talker,"non-positive integer argument in cxpsi");
 
   {
     double ssig = rtodbl(sig);
@@ -1510,8 +1510,8 @@ gpsi(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: case t_COMPLEX: return cxpsi(x,prec);
-    case t_INTMOD: case t_PADIC: err(typeer,"gpsi");
-    case t_SER: err(impl,"psi of power series");
+    case t_INTMOD: case t_PADIC: pari_err(typeer,"gpsi");
+    case t_SER: pari_err(impl,"psi of power series");
   }
   return transc(gpsi,x,prec);
 }

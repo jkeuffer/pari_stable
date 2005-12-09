@@ -238,12 +238,12 @@ gred_rfrac2_i(GEN n, GEN d)
   {
     if (tx!=t_POL) return gred_rfrac_copy(n,d);
     if (varncmp(gvar2(d), varn(n)) > 0) return gdiv(n,d);
-    err(talker,"incompatible variables in gred");
+    pari_err(talker,"incompatible variables in gred");
   }
   if (tx!=t_POL)
   {
     if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
-    err(talker,"incompatible variables in gred");
+    pari_err(talker,"incompatible variables in gred");
   }
   if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
   if (varncmp(varn(d), varn(n)) > 0) return gdiv(n,d);
@@ -596,7 +596,7 @@ add_scal(GEN y, GEN x, long ty, long vy)
       if (!is_matvec_t(tx) && isexactzero(x)) return gcopy(y);
       break;
   }
-  err(operf,"+",x,y);
+  pari_err(operf,"+",x,y);
   return NULL; /* not reached */
 }
 
@@ -713,10 +713,10 @@ gadd(GEN x, GEN y)
       gel(z,1) = gadd(gel(x,1),gel(y,1));
       return z;
     case t_PADIC:
-      if (!equalii(gel(x,2),gel(y,2))) err(operi,"+",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
       return addpp(x,y);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!gequal(gel(x,1),gel(y,1))) err(operi,"+",x,y);
+      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
       copyifstack(x[1], z[1]);
       gel(z,2) = gadd(gel(x,2),gel(y,2));
       gel(z,3) = gadd(gel(x,3),gel(y,3)); return z;
@@ -799,12 +799,12 @@ gadd(GEN x, GEN y)
       return add_rfrac(x,y);
     case t_VEC: case t_COL: case t_MAT:
       ly = lg(y);
-      if (ly != lg(x)) err(operi,"+",x,y);
+      if (ly != lg(x)) pari_err(operi,"+",x,y);
       z = cgetg(ly, ty);
       for (i = 1; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
       return z;
 
-    default: err(operf,"+",x,y);
+    default: pari_err(operf,"+",x,y);
   }
   /* tx != ty */
   if (tx > ty) { swap(x,y); lswap(tx,ty); }
@@ -841,7 +841,7 @@ gadd(GEN x, GEN y)
         case t_COMPLEX: return addRc(x, y);
         case t_QUAD: return gcmp0(y)? rcopy(x): addqf(y, x, lg(x));
 
-        default: err(operf,"+",x,y);
+        default: pari_err(operf,"+",x,y);
       }
 
     case t_INTMOD:
@@ -874,7 +874,7 @@ gadd(GEN x, GEN y)
         case t_PADIC:
           return Zp_nosquare_m1(gel(y,2))? addRc(y, x): addTp(x, y);
         case t_QUAD:
-          lx = precision(x); if (!lx) err(operi,"+",x,y);
+          lx = precision(x); if (!lx) pari_err(operi,"+",x,y);
           return gcmp0(y)? rcopy(x): addqf(y, x, lx);
       }
 
@@ -883,7 +883,7 @@ gadd(GEN x, GEN y)
   }
   /* tx < ty, !is_const_t(y) */
   if (ty == t_MAT) {
-    if (is_matvec_t(tx)) err(operf,"+",x,y);
+    if (is_matvec_t(tx)) pari_err(operf,"+",x,y);
     if (isexactzero(x)) return gcopy(y);
     return gaddmat(x,y);
   }
@@ -904,7 +904,7 @@ gadd(GEN x, GEN y)
   /* x and y are not scalars, ty != t_MAT */
   vx = gvar(x);
   if (vx != vy) { /* x or y is treated as a scalar */
-    if (is_vec_t(tx) || is_vec_t(ty)) err(operf,"+",x,y);
+    if (is_vec_t(tx) || is_vec_t(ty)) pari_err(operf,"+",x,y);
     return (varncmp(vx, vy) < 0)? add_scal(x, y, tx, vx)
                                 : add_scal(y, x, ty, vy);
   }
@@ -952,7 +952,7 @@ gadd(GEN x, GEN y)
       }
       break;
   }
-  err(operf,"+",x,y);
+  pari_err(operf,"+",x,y);
   return NULL; /* not reached */
 }
 
@@ -1134,7 +1134,7 @@ mul_scal(GEN y, GEN x, long ty)
     case t_QFI: case t_QFR:
       if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
   }
-  err(operf,"*",x,y);
+  pari_err(operf,"*",x,y);
   return NULL; /* not reached */
 }
 
@@ -1206,7 +1206,7 @@ mulpp(GEN x, GEN y) {
   long l = valp(x) + valp(y);
   pari_sp av;
   GEN z, t;
-  if (!equalii(gel(x,2),gel(y,2))) err(operi,"*",x,y);
+  if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"*",x,y);
   if (!signe(x[4])) return zeropadic(gel(x,2), l);
   if (!signe(y[4])) return zeropadic(gel(x,2), l);
 
@@ -1221,7 +1221,7 @@ mulqq(GEN x, GEN y) {
   GEN p1,p2,p3,p4, z = cgetg(4,t_QUAD);
   pari_sp av, tetpil;
   p1 = gel(x,1);
-  if (!gequal(p1, gel(y,1))) err(operi,"*",x,y);
+  if (!gequal(p1, gel(y,1))) pari_err(operi,"*",x,y);
 
   copyifstack(p1, z[1]); av = avma;
   p2 = gmul(gel(x,2),gel(y,2));
@@ -1380,7 +1380,7 @@ gmul(GEN x, GEN y)
     case t_MAT:
       ly = lg(y); if (ly == 1) return cgetg(1,t_MAT);
       lx = lg(x);
-      if (lx != lg(y[1])) err(operi,"*",x,y);
+      if (lx != lg(y[1])) pari_err(operi,"*",x,y);
       z = cgetg(ly,t_MAT);
       l = (lx == 1)? 1: lg(x[1]);
       for (j=1; j<ly; j++) gel(z,j) = MC_mul(x, gel(y,j), lx, l);
@@ -1392,14 +1392,14 @@ gmul(GEN x, GEN y)
       for (i=1; i<l; i++)
       {
         long yi = y[i];
-        if (yi < 1 || yi >= l) err(operf,"*",x,y);
+        if (yi < 1 || yi >= l) pari_err(operf,"*",x,y);
         z[i] = x[yi];
       }
       return z;
 
 
     default:
-      err(operf,"*",x,y);
+      pari_err(operf,"*",x,y);
   }
   /* tx != ty */
   if (is_const_t(ty) && is_const_t(tx))  {
@@ -1444,7 +1444,7 @@ gmul(GEN x, GEN y)
           return gerepileuptoleaf(av, divri(mulri(x,gel(y,1)), gel(y,2)));
         case t_COMPLEX: return mulRc(x, y);
         case t_QUAD: return mulqf(y, x, lg(x));
-        default: err(operf,"*",x,y);
+        default: pari_err(operf,"*",x,y);
       }
 
     case t_INTMOD:
@@ -1476,7 +1476,7 @@ gmul(GEN x, GEN y)
         case t_PADIC:
           return Zp_nosquare_m1(gel(y,2))? mulRc(y, x): mulTp(x, y);
         case t_QUAD:
-          lx = precision(x); if (!lx) err(operi,"*",x,y);
+          lx = precision(x); if (!lx) pari_err(operi,"*",x,y);
           return mulqf(y, x, lx);
       }
 
@@ -1490,7 +1490,7 @@ gmul(GEN x, GEN y)
     ly = lg(y);
     if (!is_matvec_t(tx))
     {
-      if (is_noncalc_t(tx)) err(operf, "*",x,y); /* necessary if ly = 1 */
+      if (is_noncalc_t(tx)) pari_err(operf, "*",x,y); /* necessary if ly = 1 */
       z = cgetg(ly,ty);
       for (i=1; i<ly; i++) gel(z,i) = gmul(x,gel(y,i));
       return z;
@@ -1503,12 +1503,12 @@ gmul(GEN x, GEN y)
         switch(ty)
         {
           case t_COL:
-            if (lx != ly) err(operi,"*",x,y);
+            if (lx != ly) pari_err(operi,"*",x,y);
             return VC_mul(x, y, lx);
 
           case t_MAT:
             if (ly == 1) return cgetg(1,t_VEC);
-            if (lx != lg(y[1])) err(operi,"*",x,y);
+            if (lx != lg(y[1])) pari_err(operi,"*",x,y);
             z = cgetg(ly, t_VEC);
             for (i=1; i<ly; i++) gel(z,i) = VC_mul(x, gel(y,i), lx);
             return z;
@@ -1523,13 +1523,13 @@ gmul(GEN x, GEN y)
             for (i=1; i<ly; i++)
             {
               p1 = gmul(gel(y,i),x);
-              if (typ(p1) != t_COL) err(operi,"*",x,y);
+              if (typ(p1) != t_COL) pari_err(operi,"*",x,y);
               gel(z,i) = p1;
             }
             return z;
 
           case t_MAT:
-            if (ly != 1 && lg(y[1]) != 2) err(operi,"*",x,y);
+            if (ly != 1 && lg(y[1]) != 2) pari_err(operi,"*",x,y);
             z = cgetg(ly,t_MAT);
             for (i=1; i<ly; i++) gel(z,i) = gmul(gcoeff(y,1,i),x);
             return z;
@@ -1540,20 +1540,20 @@ gmul(GEN x, GEN y)
         switch(ty)
         {
           case t_VEC:
-            if (lx != 2) err(operi,"*",x,y);
+            if (lx != 2) pari_err(operi,"*",x,y);
             z = cgetg(ly,t_MAT);
             for (i=1; i<ly; i++) gel(z,i) = gmul(gel(y,i),gel(x,1));
             return z;
 
           case t_COL:
-            if (lx != ly) err(operi,"*",x,y);
+            if (lx != ly) pari_err(operi,"*",x,y);
             return MC_mul(x, y, lx, (lx == 1)? 1: lg(x[1]));
         }
     }
   }
   if (is_matvec_t(tx))
   {
-    if (is_noncalc_t(ty)) err(operf, "*",x,y); /* necessary if lx = 1 */
+    if (is_noncalc_t(ty)) pari_err(operf, "*",x,y); /* necessary if lx = 1 */
     lx = lg(x); z = cgetg(lx,tx);
     for (i=1; i<lx; i++) gel(z,i) = gmul(y,gel(x,i));
     return z;
@@ -1621,7 +1621,7 @@ gmul(GEN x, GEN y)
       }
       break;
   }
-  err(operf,"*",x,y);
+  pari_err(operf,"*",x,y);
   return NULL; /* not reached */
 }
 
@@ -1642,10 +1642,10 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     {
       if (!gequal(p2, Q))
       {
-        if (DEBUGMEM) err(warner,"different modulus in ff_poltype");
+        if (DEBUGMEM) pari_err(warner,"different modulus in ff_poltype");
         return 0;
       }
-      if (DEBUGMEM > 2) err(warner,"different pointers in ff_poltype");
+      if (DEBUGMEM > 2) pari_err(warner,"different pointers in ff_poltype");
     }
   }
   if (Q) {
@@ -1671,10 +1671,10 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     {
       if (!equalii(p2, pr))
       {
-        if (DEBUGMEM) err(warner,"different modulus in ff_poltype");
+        if (DEBUGMEM) pari_err(warner,"different modulus in ff_poltype");
         return 0;
       }
-      if (DEBUGMEM > 2) err(warner,"different pointers in ff_poltype");
+      if (DEBUGMEM > 2) pari_err(warner,"different pointers in ff_poltype");
     }
     y[i] = p1[2];
   }
@@ -1801,7 +1801,7 @@ gsqr(GEN x)
 
     case t_MAT:
       lx = lg(x);
-      if (lx!=1 && lx != lg(x[1])) err(operi,"*",x,x);
+      if (lx!=1 && lx != lg(x[1])) pari_err(operi,"*",x,x);
       z = cgetg(lx, t_MAT);
       for (j=1; j<lx; j++) gel(z,j) = MC_mul(x, gel(x,j), lx, lx);
       return z;
@@ -1813,12 +1813,12 @@ gsqr(GEN x)
       for (i=1; i<l; i++)
       {
         long xi = x[i];
-        if (xi < 1 || xi >= l) err(operf,"*",x,x);
+        if (xi < 1 || xi >= l) pari_err(operf,"*",x,x);
         z[i] = x[xi];
       }
       return z;
   }
-  err(operf,"*",x,x);
+  pari_err(operf,"*",x,x);
   return NULL; /* not reached */
 }
 
@@ -1859,7 +1859,7 @@ div_T_scal(GEN x, GEN y, long tx) {
     case t_SER: return div_ser_scal(x, y);
     case t_RFRAC: return div_rfrac_scal(x,y);
   }
-  err(operf,"/",x,y);
+  pari_err(operf,"/",x,y);
   return NULL; /* not reached */
 }
 
@@ -1889,7 +1889,7 @@ div_scal_T(GEN x, GEN y, long ty) {
     case t_SER: return div_scal_ser(x, y);
     case t_RFRAC: return div_scal_rfrac(x, y);
   }
-  err(operf,"/",x,y);
+  pari_err(operf,"/",x,y);
   return NULL; /* not reached */
 }
 
@@ -1902,17 +1902,17 @@ div_ser(GEN x, GEN y, long vx)
   pari_sp av;
 
   if (gcmp0(x)) return zeroser(vx, l);
-  if (ly <= 2) err(gdiver);
+  if (ly <= 2) pari_err(gdiver);
   y_lead = gel(y,2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
-    err(warner,"normalizing a series with 0 leading term");
+    pari_err(warner,"normalizing a series with 0 leading term");
     for (i=3,y++; i<ly; i++,y++)
     {
       y_lead = gel(y,2); ly--; l--;
       if (!gcmp0(y_lead)) break;
     }
-    if (i>=ly) err(gdiver);
+    if (i>=ly) pari_err(gdiver);
   }
   if (ly < lx) lx = ly;
   p2 = (GEN)gpmalloc(lx*sizeof(long));
@@ -1975,7 +1975,7 @@ gdiv(GEN x, GEN y)
       if (is_pm1(y)) return (signe(y) < 0)? negi(x): icopy(x);
       if (is_pm1(x)) {
         long s = signe(y);
-        if (!s) err(gdiver);
+        if (!s) pari_err(gdiver);
         if (signe(x) < 0) s = -s;
         z = cgetg(3, t_FRAC);
         gel(z,1) = s<0? gen_m1: gen_1;
@@ -2012,11 +2012,11 @@ gdiv(GEN x, GEN y)
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_PADIC:
-      if (!equalii(gel(x,2),gel(y,2))) err(operi,"/",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"/",x,y);
       return divpp(x, y);
 
     case t_QUAD:
-      if (!gequal(gel(x,1),gel(y,1))) err(operi,"/",x,y);
+      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"/",x,y);
       av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
@@ -2042,7 +2042,7 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return div_pol_scal(x, y);
                             else return div_scal_pol(x, y);
       }
-      if (!signe(y)) err(gdiver);
+      if (!signe(y)) pari_err(gdiver);
       if (lg(y) == 3) return gdiv(x,gel(y,2));
       if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
@@ -2054,7 +2054,7 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return div_ser_scal(x, y);
                             else return div_scal_ser(x, y);
       }
-      if (!signe(y)) err(gdiver);
+      if (!signe(y)) pari_err(gdiver);
       return div_ser(x, y, vx);
     case t_RFRAC:
       vx = gvar(x);
@@ -2081,14 +2081,14 @@ gdiv(GEN x, GEN y)
       av = avma;
       return gerepileupto(av, gmul(x, invmat(y)));
 
-    default: err(operf,"/",x,y);
+    default: pari_err(operf,"/",x,y);
   }
 
   if (tx==t_INT && is_const_t(ty)) /* optimized for speed */
   {
     long s = signe(x);
     if (!s) {
-      if (gcmp0(y)) err(gdiver);
+      if (gcmp0(y)) pari_err(gdiver);
       if (ty != t_INTMOD) return gen_0;
       z = cgetg(3,t_INTMOD); icopyifstack(y[1],z[1]); gel(z,2) = gen_0;
       return z;
@@ -2130,7 +2130,7 @@ gdiv(GEN x, GEN y)
         return gerepile(av, tetpil, gdiv(p2,p1));
     }
   }
-  if (gcmp0(y) && ty != t_MAT) err(gdiver);
+  if (gcmp0(y) && ty != t_MAT) pari_err(gdiver);
 
   if (is_const_t(tx) && is_const_t(ty)) switch(tx)
   {
@@ -2143,7 +2143,7 @@ gdiv(GEN x, GEN y)
           return gerepileuptoleaf(av, z);
         case t_COMPLEX: return divRc(x, y);
         case t_QUAD: return divfq(x, y, lg(x));
-        default: err(operf,"/",x,y);
+        default: pari_err(operf,"/",x,y);
       }
 
     case t_INTMOD:
@@ -2168,7 +2168,7 @@ gdiv(GEN x, GEN y)
           z = cgetg(3, t_INTMOD);
           return div_intmod_same(z, X, gel(x,2), padic_to_Fp(y, X));
         }
-        case t_REAL: err(operf,"/",x,y);
+        case t_REAL: pari_err(operf,"/",x,y);
       }
 
     case t_FRAC:
@@ -2217,7 +2217,7 @@ gdiv(GEN x, GEN y)
         case t_PADIC:
           return Zp_nosquare_m1(gel(y,2))? divcR(x,y): divTp(x, y);
         case t_QUAD:
-          lx = precision(x); if (!lx) err(operi,"/",x,y);
+          lx = precision(x); if (!lx) pari_err(operi,"/",x,y);
           return divfq(x, y, lx);
       }
 
@@ -2236,7 +2236,7 @@ gdiv(GEN x, GEN y)
           av=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;
           return gerepile(av,tetpil,gdiv(p1,p2));
 
-        case t_REAL: err(operf,"/",x,y);
+        case t_REAL: pari_err(operf,"/",x,y);
       }
 
     case t_QUAD:
@@ -2249,7 +2249,7 @@ gdiv(GEN x, GEN y)
         case t_REAL: return divqf(x, y, lg(y));
         case t_PADIC: return divTp(x, y);
         case t_COMPLEX:
-          ly = precision(y); if (!ly) err(operi,"/",x,y);
+          ly = precision(y); if (!ly) pari_err(operi,"/",x,y);
           return divqf(x, y, ly);
       }
   }
@@ -2321,7 +2321,7 @@ gdiv(GEN x, GEN y)
       }
       break;
   }
-  err(operf,"/",x,y);
+  pari_err(operf,"/",x,y);
   return NULL; /* not reached */
 }
 
@@ -2415,7 +2415,7 @@ gmulsg(long s, GEN y)
       for (i=1; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return z;
   }
-  err(typeer,"gmulsg");
+  pari_err(typeer,"gmulsg");
   return NULL; /* not reached */
 }
 
@@ -2432,7 +2432,7 @@ gdivgs(GEN x, long s)
   pari_sp av;
   GEN z, y, p1;
 
-  if (!s) err(gdiver);
+  if (!s) pari_err(gdiver);
   switch(tx)
   {
     case t_INT:
@@ -2522,7 +2522,7 @@ gdivgs(GEN x, long s)
       return z;
     
   }
-  err(operf,"/",x, stoi(s));
+  pari_err(operf,"/",x, stoi(s));
   return NULL; /* not reached */
 }
 
@@ -2597,6 +2597,6 @@ gmul2n(GEN x, long n)
     case t_PADIC: /* int2n wrong if n < 0 */
       return gmul(gmul2n(gen_1,n),x);
   }
-  err(typeer,"gmul2n");
+  pari_err(typeer,"gmul2n");
   return NULL; /* not reached */
 }

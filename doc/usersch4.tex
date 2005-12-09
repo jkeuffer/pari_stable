@@ -1650,16 +1650,16 @@ probably means you are rewriting \kbd{gp}. In that case, have a look at the code
 
 \noindent
 If you want your functions to issue error messages, you can use the general
-error handling routine \teb{err}. The basic syntax is
+error handling routine \teb{pari_err}. The basic syntax is
 %
 \bprog
-  err(talker, "error message");
+  pari_err(talker, "error message");
 @eprog\noindent
 This prints the corresponding error message and exit the program (in
 library mode; go back to the \kbd{gp} prompt otherwise).\label{se:err} You can
 also use it in the more versatile guise
 \bprog
-  err(talker, format, ...);
+  pari_err(talker, format, ...);
 @eprog\noindent
 where \kbd{format} describes the format to use to write the remaining
 operands, as in the \teb{printf} function (however, see the next section).
@@ -1669,23 +1669,23 @@ remaining arguments.
 \noindent
 The general syntax is
 
-\fun{void}{err}{numerr,...}
+\fun{void}{pari_err}{numerr,...}
 
 \noindent where \kbd{numerr} is a codeword which indicates what to do with
 the remaining arguments and what message to print. The list of valid keywords
 is in \kbd{language/errmessages.c} together with the basic corresponding
-message. For instance, \kbd{err(typeer,"extgcd")} prints the message:
+message. For instance, \kbd{pari_err(typeer,"extgcd")} prints the message:
 
 \kbd{ ***   incorrect type in extgcd.}
 
 \noindent
 Among the codewords are \emph{warning} keywords (all those which start with
-the prefix \kbd{warn}). In that case, \teb{err} does \emph{not} abort the
+the prefix \kbd{warn}). In that case, \teb{pari_err} does \emph{not} abort the
 computation, just print the requested message and go on. The basic example is
 
-\kbd{err(warner, "Strategy 1 failed. Trying strategy 2")}
+\kbd{pari_err(warner, "Strategy 1 failed. Trying strategy 2")}
 
-\noindent which is the exact equivalent of \kbd{err(talker,...)} except that
+\noindent which is the exact equivalent of \kbd{pari_err(talker,...)} except that
 you certainly do not want to stop the program at this point, just inform the
 user that something important has occurred (in particular, this output would be
 suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not).
@@ -1714,9 +1714,9 @@ But, in addition to the standard format types, you can use \kbd{\%Z} to
 denote a \kbd{GEN} object (we would have liked to pick \kbd{\%G} but it was
 already in use!). For instance you could write:
 \bprog
-err(talker, "x[%d] = %Z is not invertible!", i, x[i])
+pari_err(talker, "x[%d] = %Z is not invertible!", i, x[i])
 @eprog
-\noindent since the \teb{err} function accepts PARI formats. Here \kbd{i}
+\noindent since the \teb{pari_err} function accepts PARI formats. Here \kbd{i}
 is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf and this would
 insert in raw format the value of the \kbd{GEN} \kbd{x[i]}.
 
@@ -1969,7 +1969,7 @@ make sure this \kbd{GEN} is suitable for \kbd{gerepileupto} (see
 \secref{se:garbage}).
 
 If error messages are to be generated in your function, use the general
-error handling routine \kbd{err} (see \secref{se:err}). Recall that, apart
+error handling routine \kbd{pari\_err} (see \secref{se:err}). Recall that, apart
 from the \kbd{warn} variants, this function does not return but ends with
 a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
 \kbd{fprintf} statements, use the following encapsulated variants:
