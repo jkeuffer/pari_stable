@@ -1395,9 +1395,9 @@ integral over \kbd{Z}.
 \kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result 
 is an integer.
 
-\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B},
-assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
-\text{Res}_Y(A, B) \in \Z[X]$, returns $R$.
+\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B}
+under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
+$R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
 
 \fun{GEN}{ZY_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
 assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
