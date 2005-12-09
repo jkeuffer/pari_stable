@@ -7,7 +7,6 @@ Description:
  (C!GEN)           GEN
  (C!char*)         char
  (C!byteptr)       byteptr
- (C!GEN*[])        GEN
  (C!pari_sp)       pari_sp
  (C!func_GG)       GEN
 
@@ -15,7 +14,6 @@ Function: _decl_ext
 Class: gp2c_internal
 Description: 
  (C!char*)         *$1
- (C!GEN*[])        *$1[]
  (C!func_GG)       (*$1)(GEN, GEN)
 
 Function: _typedef
@@ -41,7 +39,6 @@ Description:
  (str)          char*
  (bptr)         byteptr
  (func_GG)      func_GG
- (gptr)         GEN*[]
  (pari_sp)      pari_sp
  (typ)          long
  (nf)           GEN
