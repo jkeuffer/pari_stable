@@ -221,13 +221,13 @@ STRIPFLAGS =
 
 # Change these installation directories to suit your needs.
 # DESTDIR is used to install to a false hierachy (to build a Debian package)
-INCLUDEDIR= \$(DESTDIR)$includedir
-LIBDIR    = \$(DESTDIR)$libdir
-BINDIR    = \$(DESTDIR)$bindir
-MANDIR    = \$(DESTDIR)$mandir
-EMACSDIR  = \$(DESTDIR)$emacsdir
-DATADIR   = \$(DESTDIR)$datadir
-SYSDATADIR= \$(DESTDIR)$sysdatadir
+INCLUDEDIR= "\$(DESTDIR)$includedir"
+LIBDIR    = "\$(DESTDIR)$libdir"
+BINDIR    = "\$(DESTDIR)$bindir"
+MANDIR    = "\$(DESTDIR)$mandir"
+EMACSDIR  = "\$(DESTDIR)$emacsdir"
+DATADIR   = "\$(DESTDIR)$datadir"
+SYSDATADIR= "\$(DESTDIR)$sysdatadir"
 
 EXDIR     = \$(DATADIR)/examples
 MISCDIR   = \$(DATADIR)/misc
@@ -251,7 +251,7 @@ CPLUSPLUS  = g++
 
 FLTKDIR    = $FLTKDIR
 
-TOPLDDYN   = -L$TOP/$objdir \$(RLLIBS)
+TOPLDDYN   = -L"$TOP/$objdir" \$(RLLIBS)
 # Description system
 DESC          = pari.desc
 DESC_HELP_GEN = $desc/gen_proto $desc/gen_help $desc/PARI/822.pm
