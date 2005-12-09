@@ -167,7 +167,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     jpre = jnew;
   }
   pariputc('\n');
-  pariputsf("%s ", dsprintf9(todbl(ybig), buf));
+  pariprintf("%s ", dsprintf9(todbl(ybig), buf));
   for (i=1; i<=ISCR; i++) pariputc(scr[i][JSCR]);
   pariputc('\n');
   for (j=(JSCR-1); j>=2; j--)
@@ -176,10 +176,10 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     for (i=1; i<=ISCR; i++) pariputc(scr[i][j]);
     pariputc('\n');
   }
-  pariputsf("%s ", dsprintf9(todbl(ysml), buf));
+  pariprintf("%s ", dsprintf9(todbl(ysml), buf));
   for (i=1; i<=ISCR; i++)  pariputc(scr[i][1]);
   pariputc('\n');
-  pariputsf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
+  pariprintf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
   pop_val(ep); avma=av;
 }
 

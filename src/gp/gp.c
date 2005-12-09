@@ -589,7 +589,7 @@ ok_external_help(char *s)
 
 /* don't mess readline display */
 static void
-aide_print(char *s1, char *s2) { pariputsf("%s: %s\n", s1, s2); }
+aide_print(char *s1, char *s2) { pariprintf("%s: %s\n", s1, s2); }
 
 static void
 aide0(char *s, int flag)
@@ -651,7 +651,7 @@ aide0(char *s, int flag)
   }
 
   ep1 = ep;  ep = do_alias(ep);
-  if (ep1 != ep) pariputsf("%s is aliased to:\n\n",s);
+  if (ep1 != ep) pariprintf("%s is aliased to:\n\n",s);
 
   switch(EpVALENCE(ep))
   {
@@ -736,7 +736,7 @@ print_shortversion(void)
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
   minor = n & mask; n >>= PARI_VERSION_SHIFT;
   major = n;
-  pariputsf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
+  pariprintf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
 }
 
 static char *
@@ -797,7 +797,7 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
 Type ? for help, \\q to quit.\n\
 Type ?12 for how to get moral (and possibly technical) support.\n\n");
-  pariputsf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
+  pariprintf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
 }
 
 /********************************************************************/

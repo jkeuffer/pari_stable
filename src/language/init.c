@@ -1120,15 +1120,15 @@ pari_err(long numerr, ...)
   else if (numerr == user)
   {
     GEN g = va_arg(ap, GEN);
-    pariputsf("  ###   user error: ");
+    pariprintf("  ###   user error: ");
     print0(g, f_RAW);
   }
   else
   {
     if (gp_function_name)
-      pariputsf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+      pariprintf("  *** %s: %s", gp_function_name, errmessage[numerr]);
     else
-      pariputsf("  ***   %s", errmessage[numerr]);
+      pariprintf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
       case talker: case siginter: case invmoder:
@@ -1137,16 +1137,16 @@ pari_err(long numerr, ...)
 
       case impl:
         ch1=va_arg(ap, char*);
-        pariputsf(" %s is not yet implemented.",ch1); break;
+        pariprintf(" %s is not yet implemented.",ch1); break;
 
       case typeer: case mattype1: case overwriter:
       case accurer: case infprecer: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
-        pariputsf(" in %s.",va_arg(ap, char*)); break;
+        pariprintf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-        pariputsf(" %s, please report",va_arg(ap, char*)); break;
+        pariprintf(" %s, please report",va_arg(ap, char*)); break;
 
       case operi: case operf:
       {
@@ -1158,12 +1158,12 @@ pari_err(long numerr, ...)
         else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
         else if (*op == 'g') { op = ","; f = "gcd"; }
         else { op = "-->"; f = "assignment"; }
-        pariputsf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
+        pariprintf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
         break;
       }
 
       case primer2:
-        pariputsf("%lu.", va_arg(ap, ulong));
+        pariprintf("%lu.", va_arg(ap, ulong));
         break;
 
       /* the following 4 are only warnings (they return) */
@@ -1178,7 +1178,7 @@ pari_err(long numerr, ...)
 
       case warnfile:
         ch1=va_arg(ap, char*);
-        pariputsf(" %s: %s\n", ch1, va_arg(ap, char*));
+        pariprintf(" %s: %s\n", ch1, va_arg(ap, char*));
         ret = 1; break;
     }
   }
@@ -2001,7 +2001,7 @@ msgTIMER(pari_timer *T, char *format, ...)
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n", TIMER(T)); pariflush();
+  pariprintf(": %ld\n", TIMER(T)); pariflush();
   pariOut = out;
 }
 
@@ -2013,7 +2013,7 @@ msgtimer(char *format, ...)
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n", timer2()); pariflush();
+  pariprintf(": %ld\n", timer2()); pariflush();
   pariOut = out;
 }
 

@@ -972,7 +972,7 @@ void    pari_unlink(char *s);
 void    pariflush(void);
 void    pariputc(char c);
 void    pariputs(const char *s);
-void    pariputsf(const char *format, ...);
+void    pariprintf(const char *format, ...);
 int     popinfile(void);
 void    print(GEN g); 
 void    print1(GEN g);

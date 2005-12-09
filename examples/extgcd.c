@@ -33,6 +33,6 @@ main()
   printf("x = "); x = gp_read_stream(stdin);
   printf("y = "); y = gp_read_stream(stdin);
   d = extgcd(x, y, &u, &v);
-  pariputsf("gcd = %Z\nu = %Z\nv = %Z\n", d,u,v);
+  pariprintf("gcd = %Z\nu = %Z\nv = %Z\n", d,u,v);
   return 0;
 }

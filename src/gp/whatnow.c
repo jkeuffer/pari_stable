@@ -641,14 +641,14 @@ whatnow(char *s, int flag)
     pari_err(talker,"this function was suppressed");
   if (!strcmp(def,"x*y"))
   {
-    pariputsf("  %s is now called *.\n\n",s);
-    pariputsf("    %s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
+    pariprintf("  %s is now called *.\n\n",s);
+    pariprintf("    %s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
     return 1;
   }
   ep = is_entry(wp.name);
   if (!ep) pari_err(bugparier,"whatnow");
   pariputs("New syntax: "); term_color(c_ERR);
-  pariputsf("%s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
+  pariprintf("%s%s ===> %s%s\n\n",s,wp.oldarg,wp.name,wp.newarg);
   term_color(c_HELP);
   print_text(ep->help); pariputc('\n');
   term_color(c_NONE); return 1;

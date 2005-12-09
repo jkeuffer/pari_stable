@@ -3437,7 +3437,7 @@ print_user_member(entree *ep)
 
   q++; /* skip initial NULL */
   print_var(*q++);
-  pariputsf(".%s = ", ep->name);
+  pariprintf(".%s = ", ep->name);
   pariputs((char*)q);
 }
 

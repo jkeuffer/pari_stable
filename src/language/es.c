@@ -495,7 +495,7 @@ vpariputs(const char* format, va_list args)
 }
 
 void
-pariputsf(const char *format, ...)
+pariprintf(const char *format, ...)
 {
   va_list args;
 
@@ -1095,7 +1095,7 @@ wr_vecsmall(pariout_t *T, GEN g)
   pariputs("Vecsmall(["); l = lg(g);
   for (i=1; i<l; i++)
   {
-    pariputsf("%ld", g[i]);
+    pariprintf("%ld", g[i]);
     if (i<l-1) comma_sp(T);
   }
   pariputs("])");
@@ -1121,7 +1121,7 @@ wr_dec(char *s, long point)
 static void
 wr_exp(pariout_t *T, char *s, long n)
 {
-  wr_dec(s, 1); sp(T); pariputsf("E%ld", n);
+  wr_dec(s, 1); sp(T); pariprintf("E%ld", n);
 }
 
 static void
@@ -1235,7 +1235,7 @@ wr_real(pariout_t *T, GEN x, int addsign)
       pariputs("0."); zeros(dec);
     }
     else
-      pariputsf("0.E%ld", ex10(ex) + 1);
+      pariprintf("0.E%ld", ex10(ex) + 1);
     return;
   }
   if (addsign && sx < 0) pariputc('-'); /* print sign if needed */
@@ -1305,9 +1305,9 @@ static void
 sorstring(char* b, long x)
 {
 #ifdef LONG_IS_64BIT
-  pariputsf(b,(ulong)x>>32,x & MAXHALFULONG);
+  pariprintf(b,(ulong)x>>32,x & MAXHALFULONG);
 #else
-  pariputsf(b,x);
+  pariprintf(b,x);
 #endif
 }
 
@@ -1338,16 +1338,16 @@ voir2(GEN x, long nb, long bl)
   sorstring(VOIR_STRING1,(ulong)x);
 
   lx = lg(x);
-  pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
+  pariprintf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   sorstring(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
       pariputs("chars:");
     else if (tx == t_INT)
-      pariputsf("(%c,lgefint=%ld):", vsigne(x), lgefint(x));
+      pariprintf("(%c,lgefint=%ld):", vsigne(x), lgefint(x));
     else if (tx == t_REAL)
-      pariputsf("(%c,expo=%ld):", vsigne(x), expo(x));
+      pariprintf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
     if (tx == t_VECSMALL) nb = lx;
     for (i=1; i < nb; i++) sorstring(VOIR_STRING2,x[i]);
@@ -1355,16 +1355,16 @@ voir2(GEN x, long nb, long bl)
   }
 
   if (tx == t_PADIC)
-    pariputsf("(precp=%ld,valp=%ld):", precp(x), valp(x));
+    pariprintf("(precp=%ld,valp=%ld):", precp(x), valp(x));
   else if (tx == t_POL)
-    pariputsf("(%c,varn=%ld):", vsigne(x), varn(x));
+    pariprintf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
-    pariputsf("(%c,varn=%ld,prec=%ld,valp=%ld):",
+    pariprintf("(%c,varn=%ld,prec=%ld,valp=%ld):",
                vsigne(x), varn(x),lg(x)-2, valp(x));
   else if (tx == t_LIST)
   {
     lx = lgeflist(x);
-    pariputsf("(lgeflist=%ld):", lx);
+    pariprintf("(lgeflist=%ld):", lx);
   }
   for (i=1; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
@@ -1405,7 +1405,7 @@ voir2(GEN x, long nb, long bl)
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
-	blancs(bl); pariputsf("coef of degree %ld = ",e);
+	blancs(bl); pariprintf("coef of degree %ld = ",e);
 	e++; voir2(gel(x,i),nb,bl);
       }
       break;
@@ -1414,7 +1414,7 @@ voir2(GEN x, long nb, long bl)
       i = (tx==t_LIST)? 2: 1;
       for (   ; i<lx; i++)
       {
-        blancs(bl); pariputsf("%ld%s component = ",i,eng_ord(i));
+        blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
 	voir2(gel(x,i),nb,bl);
       }
       break;
@@ -1427,7 +1427,7 @@ voir2(GEN x, long nb, long bl)
       {
         for (i = 1; i < lx; i++)
         {
-          blancs(bl); pariputsf("%ld%s column = ",i,eng_ord(i));
+          blancs(bl); pariprintf("%ld%s column = ",i,eng_ord(i));
           voir2(gel(x,i),nb,bl);
         }
       }
@@ -1437,7 +1437,7 @@ voir2(GEN x, long nb, long bl)
         for (i=1; i<dx; i++)
           for (j=1; j<lx; j++)
           {
-            blancs(bl); pariputsf("mat(%ld,%ld) = ",i,j);
+            blancs(bl); pariprintf("mat(%ld,%ld) = ",i,j);
             voir2(gcoeff(x,i,j),nb,bl);
           }
       }
@@ -1454,13 +1454,13 @@ voir(GEN x, long nb)
 static void
 print_entree(entree *ep, long hash)
 {
-  pariputsf(" %s ",ep->name); pariputsf(VOIR_STRING1,(ulong)ep);
-  pariputsf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
+  pariprintf(" %s ",ep->name); pariprintf(VOIR_STRING1,(ulong)ep);
+  pariprintf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
             hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
-    pariputsf("   next = %s ",(ep->next)->name);
-    pariputsf(VOIR_STRING1,(ulong)(ep->next));
+    pariprintf("   next = %s ",(ep->next)->name);
+    pariprintf(VOIR_STRING1,(ulong)(ep->next));
   }
   pariputs("\n");
 }
@@ -1498,7 +1498,7 @@ print_functions_hash(const char *s)
 
     for(; n<=m; n++)
     {
-      pariputsf("*** hashcode = %lu\n",n);
+      pariprintf("*** hashcode = %lu\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
 	print_entree(ep,n);
     }
@@ -1510,7 +1510,7 @@ print_functions_hash(const char *s)
     {
       m=0;
       for (ep=functions_hash[n]; ep; ep=ep->next) m++;
-      pariputsf("%3ld:%3ld ",n,m);
+      pariprintf("%3ld:%3ld ",n,m);
       if (n%9 == 8) pariputc('\n');
     }
     pariputc('\n'); return;
@@ -1608,23 +1608,23 @@ etatpile()
   nu = (top-avma)/BYTES_IN_LONG;
   l = (top-bot)/BYTES_IN_LONG;
   r = 100.0*nu/l;
-  pariputsf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
+  pariprintf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
             top, bot, avma);
 
-  pariputsf(" Used :                         %ld  long words  (%ld K)\n",
+  pariprintf(" Used :                         %ld  long words  (%ld K)\n",
             nu, nu/1024*BYTES_IN_LONG);
 
-  pariputsf(" Available :                    %ld  long words  (%ld K)\n",
+  pariprintf(" Available :                    %ld  long words  (%ld K)\n",
            (l-nu), (l-nu)/1024*BYTES_IN_LONG);
 
-  pariputsf(" Occupation of the PARI stack : %6.2f percent\n",r);
+  pariprintf(" Occupation of the PARI stack : %6.2f percent\n",r);
 
   adr = getheap();
-  pariputsf(" %ld objects on heap occupy %ld long words\n\n",
+  pariprintf(" %ld objects on heap occupy %ld long words\n\n",
             itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
 
-  pariputsf(" %ld variable names used out of %d\n\n",
+  pariprintf(" %ld variable names used out of %d\n\n",
             manage_var(manage_var_next,NULL), MAXVARN);
 }
 
@@ -1756,15 +1756,15 @@ texexpo(long e)
 {
   if (e !=1 ) {
     if (e >= 0 && e < 10)
-      pariputsf("^%ld",e);
+      pariprintf("^%ld",e);
     else
-      pariputsf("^{%ld}",e);
+      pariprintf("^{%ld}",e);
   }
 }
 static void
 wrexpo(long e)
 {
-  if (e!=1) pariputsf("^%ld",e);
+  if (e!=1) pariprintf("^%ld",e);
 }
 
 /* v^e */
@@ -1901,13 +1901,13 @@ static void
 prints(GEN g, pariout_t *T, int addsign)
 {
   (void)T; (void)addsign;
-  pariputsf("%ld", (long)g);
+  pariprintf("%ld", (long)g);
 }
 static void
 sors(GEN g, pariout_t *T)
 {
   (void)T;
-  pariputsf("%ld", (long)g);
+  pariprintf("%ld", (long)g);
 }
 
 static void
@@ -2076,7 +2076,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       l = lg(g[1]);
       if (l==1)
       {
-        pariputsf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
+        pariprintf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
         return;
       }
       print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
@@ -2410,7 +2410,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-        pariputsf("%ld", g[i]);
+        pariprintf("%ld", g[i]);
 	if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;

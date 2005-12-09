@@ -218,8 +218,8 @@ sd_toggle(const char *v, long flag, char *s, int *ptn)
   {
     case d_RETURN: return utoi(state);
     case d_ACKNOWLEDGE:
-      if (state) pariputsf("   %s = 1 (on)\n", s);
-      else       pariputsf("   %s = 0 (off)\n", s);
+      if (state) pariprintf("   %s = 1 (on)\n", s);
+      else       pariprintf("   %s = 0 (off)\n", s);
       break;
   }
   return gnil;
@@ -271,10 +271,10 @@ sd_ulong(const char *v, long flag, char *s, ulong *ptn, ulong Min, ulong Max,
         {
           if (!*msg) msg++; /* single msg, always printed */
           else       msg += *ptn; /* one per possible value */
-          pariputsf("   %s = %lu %s\n", s, *ptn, *msg);
+          pariprintf("   %s = %lu %s\n", s, *ptn, *msg);
         }
         else
-          pariputsf("   %s = %lu\n", s, *ptn);
+          pariprintf("   %s = %lu\n", s, *ptn);
       }
       break;
   }
@@ -298,9 +298,9 @@ sd_realprecision(const char *v, long flag)
   if (flag == d_ACKNOWLEDGE)
   {
     long n = (long)bit_accuracy_mul(precreal, L2SL10);
-    pariputsf("   realprecision = %ld significant digits", n);
+    pariprintf("   realprecision = %ld significant digits", n);
     if (n != fmt->sigd)
-      pariputsf(" (%ld digits displayed)", fmt->sigd);
+      pariprintf(" (%ld digits displayed)", fmt->sigd);
     pariputc('\n');
   }
   return gnil;
@@ -340,7 +340,7 @@ sd_format(const char *v, long flag)
     return strtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
+    pariprintf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
   return gnil;
 }
 
@@ -424,7 +424,7 @@ sd_colors(char *v, long flag)
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
     }
     if (flag==d_RETURN) return strtoGENstr(s);
-    pariputsf("   colors = \"%s\"\n",s);
+    pariprintf("   colors = \"%s\"\n",s);
   }
   return gnil;
 }
@@ -559,7 +559,7 @@ sd_log(const char *v, long flag)
     if (oldstyle)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
-        pariputsf("   [logfile was \"%s\"]\n", current_logfile);
+        pariprintf("   [logfile was \"%s\"]\n", current_logfile);
       fclose(logfile); logfile = NULL;
     }
     else
@@ -662,7 +662,7 @@ sd_filename(const char *v, long flag, char *s, char **f)
     *f = pari_strdup(s); free(s); free(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f);
-  if (flag == d_ACKNOWLEDGE) pariputsf("   %s = \"%s\"\n",s,*f);
+  if (flag == d_ACKNOWLEDGE) pariprintf("   %s = \"%s\"\n",s,*f);
   return gnil;
 }
 
@@ -711,7 +711,7 @@ sd_help(char *v, long flag)
   str = GP_DATA->help? GP_DATA->help: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   help = \"%s\"\n", str);
+    pariprintf("   help = \"%s\"\n", str);
   return gnil;
 }
 
@@ -727,7 +727,7 @@ sd_datadir(char *v, long flag)
   str = pari_datadir? pari_datadir: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   datadir = \"%s\"\n", str);
+    pariprintf("   datadir = \"%s\"\n", str);
   return gnil;
 }
 
@@ -744,7 +744,7 @@ sd_path(char *v, long flag)
   }
   if (flag == d_RETURN) return strtoGENstr(p->PATH);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   path = \"%s\"\n",p->PATH);
+    pariprintf("   path = \"%s\"\n",p->PATH);
   return gnil;
 }
 
@@ -782,7 +782,7 @@ sd_prettyprinter(char *v, long flag)
   if (flag == d_RETURN)
     return strtoGENstr(pp->cmd? pp->cmd: "");
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
+    pariprintf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
 }
 
@@ -798,7 +798,7 @@ sd_prompt_set(const char *v, long flag, char *how, char *p)
   }
   if (flag == d_RETURN) return strtoGENstr(p);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   prompt%s = \"%s\"\n", how, p);
+    pariprintf("   prompt%s = \"%s\"\n", how, p);
   return gnil;
 }
 
