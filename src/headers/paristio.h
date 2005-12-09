@@ -39,6 +39,11 @@ typedef struct entree {
   void *args;
 } entree;
 
+typedef struct module {
+  entree *func;
+  char **help;
+} module;
+
 typedef struct PariOUT {
   void (*putch)(char);
   void (*puts)(const char*);

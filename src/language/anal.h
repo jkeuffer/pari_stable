@@ -20,13 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*************************************************************************/
 BEGINEXTERN
 
-/* modules */
-typedef struct module {
-  entree *func;
-  char **help;
-} module;
-void  pari_addfunctions(module **modlist_p, entree *func, char **help);
-
 /* GP control structures */
 typedef struct {
   entree *ep;
@@ -94,7 +87,6 @@ extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
 
 /* Variables containing the list of PARI functions */
-extern module *pari_modules;       /* list of functions modules */
 extern entree **functions_hash;    /* functions hashtable */
 extern entree **members_hash;      /* members hashtable */
 extern char   *helpmessages_basic[];
@@ -111,7 +103,6 @@ extern long     gp_colors[];
 extern int     disable_color;
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
-extern module *pari_oldmodules;    /* list of functions modules */
 extern entree **funct_old_hash;    /* hashtable */
 extern char   *oldhelpmessage[], *helpmessages_oldgp[];
 extern entree  oldfonctions[], functions_oldgp[];
@@ -134,17 +125,6 @@ extern void *PARI_stack_limit;
 #define EpSETSTATIC(ep) ((ep)->valence |= 0x100)
 #define EpPREDEFINED(ep) (EpVALENCE(ep) < EpUSER)
 enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
-
-/* signals */
-extern ulong init_opts;
-#define INIT_JMPm 1
-#define INIT_SIGm 2
-#define INIT_JMP     (init_opts & INIT_JMPm)
-#define INIT_SIG     (init_opts & INIT_SIGm)
-#define INIT_JMP_on  (init_opts |= INIT_JMPm)
-#define INIT_SIG_on  (init_opts |= INIT_SIGm)
-#define INIT_JMP_off (init_opts &= ~INIT_JMPm)
-#define INIT_SIG_off (init_opts &= ~INIT_SIGm)
 
 /* defaults  */
 char* get_sep(const char *t);

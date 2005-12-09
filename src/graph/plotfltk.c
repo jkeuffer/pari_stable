@@ -182,9 +182,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
     Plotter *win;
     if (fork()) return;  // parent process returns
 
-    pari_sig_init(SIG_IGN); /* disable interrupt handler */
-
-    freeall();  // PARI stack isn't needed anymore, keep rectgraph
+    pari_close();
     PARI_get_plot(1);
 
     Fl::visual(FL_DOUBLE|FL_INDEX);

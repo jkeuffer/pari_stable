@@ -424,3 +424,12 @@ enum manage_var_t {
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
+ 
+/* For use with pari_init_opts */
+ 
+#define INIT_JMPm 1
+#define INIT_SIGm 2
+#define INIT_DFTm 4
+#define INIT_JMP     (init_opts & INIT_JMPm)
+#define INIT_SIG     (init_opts & INIT_SIGm)
+#define INIT_DFT     (init_opts & INIT_DFTm)

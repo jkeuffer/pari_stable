@@ -177,10 +177,9 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
   if (fork()) return;  /* parent process returns */
 
-  pari_sig_init(SIG_IGN); /* disable interrupt handler */
-
-  freeall();  /* PARI stack isn't needed anymore, keep rectgraph */
+  pari_close();
   PARI_get_plot(1);
+
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");
   if (!font_info) exiterr("cannot open 9x15 font");

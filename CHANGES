@@ -113,6 +113,7 @@ BA 18- define INLINE to 'inline static' for C++ compilers also
    22- rename wf -> weberf, wf1 -> weberf1, wf2 -> weberf2
    23- make incpos / incneg static
    24- export setseriesprecision, setrealprecision
+BA 25- make pari restartable
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

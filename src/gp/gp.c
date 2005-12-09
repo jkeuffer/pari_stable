@@ -810,9 +810,9 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 void
 gp_quit(void)
 {
-  free_graph(); freeall();
+  free_graph();
+  pari_close();
   kill_all_buffers(NULL);
-  if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
   if (GP_DATA->flags & TEXMACS) tm_end_output();
@@ -1823,9 +1823,12 @@ main(int argc, char **argv)
 {
 #endif
   growarray A;
+  module *newfun = NULL, *oldfun = NULL;
   long i;
 
-  init_defaults(1);
+  GP_DATA = default_gp_data();
+  initout(1);
+
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   bot = (pari_sp)0;
   top = (pari_sp)(1000000*sizeof(long));
@@ -1840,15 +1843,15 @@ main(int argc, char **argv)
 #endif
   grow_init(&A);
   read_opt(&A, argc,argv);
-  pari_addfunctions(&pari_modules, functions_gp,helpmessages_gp);
-  pari_addfunctions(&pari_modules, functions_highlevel,helpmessages_highlevel);
-  pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
+
+  pari_addfunctions(&newfun, functions_gp,helpmessages_gp);
+  pari_addfunctions(&newfun, functions_highlevel,helpmessages_highlevel);
+  pari_addfunctions(&oldfun, functions_oldgp,helpmessages_oldgp);
+
+  pari_init_opts(top-bot, GP_DATA->primelimit, 0, newfun, oldfun);
+  pari_sig_init(gp_sighandler);
 
   init_graph();
-  INIT_SIG_off;
-  pari_init(top-bot, GP_DATA->primelimit);
-  INIT_SIG_on;
-  pari_sig_init(gp_sighandler);
 #ifdef READLINE
   init_readline();
 #endif

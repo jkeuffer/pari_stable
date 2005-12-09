@@ -301,7 +301,6 @@ void  errcontext(char *msg, char *s, char *entry);
 GEN   geni(void);
 void* get_stack(double fraction, long min);
 GEN   gpreadseq(char *c, int strict);
-void  init_defaults(int force);
 void  initout(int initerr);
 void  init80col(long n);
 char* itostr(GEN x, int minus);
@@ -497,7 +496,7 @@ GEN     zx_copy_spec(GEN x, long nx);
 GEN     Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
 GEN     gauss_get_col(GEN a, GEN b, GEN p, long li);
 GEN     gauss_intern(GEN a, GEN b);
-void    vecselect_p(GEN A, GEN B, GEN p, long pari_init, long lB);
+void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* alglin2.c */
 

@@ -31,15 +31,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 const long functions_tblsz = 135; /* size of functions_hash          */
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
-ulong   logstyle = logstyle_none;
+ulong   logstyle;
 GEN     *pol_1, *pol_x;
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, polvar, gi;
-GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
+GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
-char    *current_logfile, *current_psfile, *pari_datadir = NULL;
+char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
-int     disable_color = 1;
+int     disable_color;
 
 entree  **varentries;
 
@@ -47,11 +47,10 @@ void    *global_err_data;
 long    *ordvar;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
 ulong   precreal, precdl;
-ulong   init_opts = INIT_JMPm | INIT_SIGm;
-pari_sp bot = 0, top = 0, avma;
+pari_sp bot, top, avma;
 size_t memused;
 
-gp_data *GP_DATA = NULL;
+gp_data *GP_DATA;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
@@ -68,7 +67,7 @@ typedef struct {
   long flag;
 } cell;
 
-static stack *err_catch_stack = NULL;
+static stack *err_catch_stack;
 static char **dft_handler;
 
 void
@@ -406,15 +405,10 @@ fill_hashtable(entree **table, entree *ep, char **helpmessage)
   }
 }
 
-void
-init_defaults(int force)
+static void
+init_defaults(void)
 {
-  static int done=0;
 
-  if (done && !force) return;
-  done = 1;
-
-  GP_DATA = default_gp_data();
 #ifdef LONG_IS_64BIT
   precreal = 4;
 #else
@@ -424,6 +418,8 @@ init_defaults(int force)
   precdl = 16;
   compatible = NONE;
   DEBUGFILES = DEBUGLEVEL = DEBUGMEM = 0;
+  disable_color = 1;
+  logstyle = logstyle_none;
 
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
@@ -498,12 +494,12 @@ gp_init_entrees(module *modlist, entree **hash, int force)
   return (hash == functions_hash);
 }
 
-module *pari_modules    = NULL;
-module *pari_oldmodules = NULL;
-module *pari_membermodules = NULL;
-entree **functions_hash = NULL;
-entree **funct_old_hash = NULL;
-entree **members_hash   = NULL;
+static module *pari_modules;
+static module *pari_oldmodules;
+static module *pari_membermodules;
+entree **functions_hash;
+entree **funct_old_hash;
+entree **members_hash;
 
 /* add to modlist the functions in func, with helpmsg help */
 void
@@ -635,21 +631,26 @@ gp_init_functions(int force)
                          functions_hash, force);
 }
 
-/* initialize PARI data. You can call pari_addfunctions() first to add other
- * routines to the default set */
+/* initialize PARI data. Initialize newfun, oldfun to NULL for the default set.
+ * Use pari_addfunctions() to add other routines to the default set */
 void
-pari_init(size_t parisize, ulong maxprime)
+pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
+               module *newfun, module *oldfun)
 {
   ulong u;
 
   STACK_CHECK_INIT(&u);
-  init_defaults(0);
+  if (INIT_DFT)
+    GP_DATA = default_gp_data();
+  init_defaults();
+  err_catch_stack=NULL;
   if (INIT_JMP && setjmp(GP_DATA->env))
   {
     fprintferr("  ***   Error in the PARI system. End of program.\n");
     exit(1);
   }
   if (INIT_SIG) pari_sig_init(pari_sighandler);
+  bot = top = 0;
   (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
   init_universal_constants();
@@ -661,19 +662,24 @@ pari_init(size_t parisize, ulong maxprime)
   pol_x  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   pol_1 = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
+  gpi=NULL; geuler=NULL; bernzone=NULL;
   for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
 
   (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
+  pari_modules    = newfun;
+  pari_oldmodules = oldfun;
 
   pari_addfunctions(&pari_modules, functions_basic,helpmessages_basic);
   pari_addfunctions(&pari_oldmodules, oldfonctions,oldhelpmessage);
+
+  pari_membermodules = NULL;
   pari_addfunctions(&pari_membermodules, gp_member_list, NULL);
 
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
-  members_hash = init_fun_hash();
+  members_hash   = init_fun_hash();
   (void)gp_init_entrees(pari_oldmodules, funct_old_hash, 1);
   (void)gp_init_entrees(pari_membermodules, members_hash, 1);
   gp_init_functions(1);
@@ -687,6 +693,13 @@ pari_init(size_t parisize, ulong maxprime)
   (void)manage_var(manage_var_init,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x");
   try_to_recover = 1;
+}
+
+void
+pari_init(size_t parisize, ulong maxprime)
+{
+  pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm,
+                 NULL, NULL);
 }
 
 static void
@@ -716,10 +729,12 @@ free_gp_data(gp_data *D)
 }
 
 void
-freeall(void)
+pari_close_opts(ulong init_opts)
 {
   long i;
   entree *ep,*ep1;
+
+  if (INIT_SIG) pari_sig_init(SIG_DFL);
 
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
@@ -747,7 +762,13 @@ freeall(void)
   free(current_logfile);
   free(current_psfile);
   if (pari_datadir) free(pari_datadir);
-  free_gp_data(GP_DATA);
+  if (INIT_DFT) free_gp_data(GP_DATA);
+}
+
+void
+pari_close(void)
+{
+  pari_close_opts(INIT_JMPm | INIT_SIGm | INIT_DFTm);
 }
 
 GEN
