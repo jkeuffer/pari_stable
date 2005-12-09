@@ -34,9 +34,9 @@ typedef struct entree {
   void *value;
   long menu;
   char *code;
-  struct entree *next;
   char *help;
   void *args;
+  struct entree *next;
 } entree;
 
 typedef struct module {

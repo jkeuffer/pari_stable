@@ -392,21 +392,20 @@ init_hashtable(entree **table, long tblsz)
 }
 
 static void
-fill_hashtable(entree **table, entree *ep, char **helpmessage)
+fill_hashtable(entree **table, entree *ep)
 {
   for ( ; ep->name; ep++)
   {
     char *s = ep->name;
     long n = hashvalue(&s);
     EpSETSTATIC(ep);
-    ep->help = helpmessage? *helpmessage++: NULL;
     ep->next = table[n]; table[n] = ep;
     ep->args = NULL;
   }
 }
 
-static void
-init_defaults(void)
+void
+pari_init_defaults(void)
 {
 
 #ifdef LONG_IS_64BIT
@@ -467,62 +466,44 @@ list_prepend(void ***listptr, void *elt)
   list[nbelt+1]=NULL; *listptr=list;
 }
 
-/* Load modlist in hashtable hash. If force == 0, do not load twice the
+/* Load elist in hashtable hash. If force == 0, do not load twice the
  * same list in the same hashtable, which would only destroy user variables.
  * As it stands keep a complete history (instead of most recent changes).
  */
 static int
-gp_init_entrees(module *modlist, entree **hash, int force)
+gp_init_entrees(entree **elist, entree **hash, int force)
 {
-  static void **oldmodlist=NULL, **oldhash=NULL;
+  static void **oldelist=NULL, **oldhash=NULL;
 
   if (!force)
   {
     const long indhash = list_isin(oldhash,(void *)hash,-1);
-    if (indhash != -1 && oldmodlist[indhash]==modlist) return 0;
+    if (indhash != -1 && oldelist[indhash]==(void*)elist) return 0;
   }
-  /* record the new pair (hash,modlist) */
-  list_prepend(&oldmodlist,(void *)modlist);
+  /* record the new pair (hash,elist) */
+  list_prepend(&oldelist,(void *)elist);
   list_prepend(&oldhash,(void *)hash);
 
   init_hashtable(hash,functions_tblsz);
-  while (modlist && modlist->func)
-  {
-    fill_hashtable(hash, modlist->func, modlist->help);
-    modlist++;
-  }
+  if (elist)
+    while (*elist) fill_hashtable(hash, *elist++);
   return (hash == functions_hash);
 }
 
-static module *pari_modules;
-static module *pari_oldmodules;
-static module *pari_membermodules;
+static entree **pari_entrees;
+static entree **pari_oldentrees;
+static entree **pari_memberentrees;
 entree **functions_hash;
 entree **funct_old_hash;
 entree **members_hash;
 
-/* add to modlist the functions in func, with helpmsg help */
+/* add to elist the functions in func */
 void
-pari_addfunctions(module **modlist_p, entree *func, char **help)
+pari_addfunctions(entree ***elist, entree *func)
 {
-  module *modlist = *modlist_p;
-  int nbmodules = 0;
-
-  while (modlist && modlist->func) { nbmodules++; modlist++; }
-  modlist = *modlist_p;
-  *modlist_p = (module*) gpmalloc(sizeof(module)*(nbmodules+2));
-  if (nbmodules)
-  {
-    memcpy(1+ *modlist_p, modlist, sizeof(module)*nbmodules);
-    free(modlist);
-  }
-  modlist = *modlist_p;
-  modlist->func = func;
-  modlist->help = help;
-
-  modlist += nbmodules+1;
-  modlist->func = NULL;
-  modlist->help = NULL;
+  void **v = (void**)*elist;
+  list_prepend(&v, func);
+  *elist = (entree**)v;
 }
 
 void
@@ -627,7 +608,7 @@ init_fun_hash() {
 int
 gp_init_functions(int force)
 {
-  return gp_init_entrees(new_fun_set? pari_modules: pari_oldmodules,
+  return gp_init_entrees(new_fun_set? pari_entrees: pari_oldentrees,
                          functions_hash, force);
 }
 
@@ -635,14 +616,12 @@ gp_init_functions(int force)
  * Use pari_addfunctions() to add other routines to the default set */
 void
 pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
-               module *newfun, module *oldfun)
+               entree **newfun, entree **oldfun)
 {
   ulong u;
 
   STACK_CHECK_INIT(&u);
-  if (INIT_DFT)
-    GP_DATA = default_gp_data();
-  init_defaults();
+  if (INIT_DFT) { GP_DATA = default_gp_data(); pari_init_defaults(); }
   err_catch_stack=NULL;
   if (INIT_JMP && setjmp(GP_DATA->env))
   {
@@ -668,20 +647,20 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
   (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
-  pari_modules    = newfun;
-  pari_oldmodules = oldfun;
+  pari_entrees    = newfun;
+  pari_oldentrees = oldfun;
 
-  pari_addfunctions(&pari_modules, functions_basic,helpmessages_basic);
-  pari_addfunctions(&pari_oldmodules, oldfonctions,oldhelpmessage);
+  pari_addfunctions(&pari_entrees, functions_basic);
+  pari_addfunctions(&pari_oldentrees, oldfonctions);
 
-  pari_membermodules = NULL;
-  pari_addfunctions(&pari_membermodules, gp_member_list, NULL);
+  pari_memberentrees = NULL;
+  pari_addfunctions(&pari_memberentrees, gp_member_list);
 
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
   members_hash   = init_fun_hash();
-  (void)gp_init_entrees(pari_oldmodules, funct_old_hash, 1);
-  (void)gp_init_entrees(pari_membermodules, members_hash, 1);
+  (void)gp_init_entrees(pari_oldentrees, funct_old_hash, 1);
+  (void)gp_init_entrees(pari_memberentrees, members_hash, 1);
   gp_init_functions(1);
 
   whatnow_fun = NULL;

@@ -254,7 +254,7 @@ FLTKDIR    = $FLTKDIR
 TOPLDDYN   = -L"$TOP/$objdir" \$(RLLIBS)
 # Description system
 DESC          = pari.desc
-DESC_HELP_GEN = $desc/gen_proto $desc/gen_help $desc/PARI/822.pm
+DESC_HELP_GEN = $desc/gen_proto $desc/PARI/822.pm
 TMPSUF        = -$osname-$arch-$$.tmp
 
 DOTEST=$dotest
@@ -552,15 +552,15 @@ $src/language/members.h: $desc/\$(DESC) $desc/gen_member
 	mv $desc/members\$(TMPSUF) \$@
 
 $src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF) && \$(PERL) gen_help basic \$(DESC) >> init\$(TMPSUF)
+	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF)
 	mv $desc/init\$(TMPSUF) \$@
 
 $src/gp/gp_init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto gp \$(DESC) > gp_init\$(TMPSUF) && \$(PERL) gen_help gp \$(DESC) >> gp_init\$(TMPSUF)
+	cd $desc && \$(PERL) gen_proto gp \$(DESC) > gp_init\$(TMPSUF)
 	mv $desc/gp_init\$(TMPSUF) \$@
 
 $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
-	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF) && \$(PERL) gen_help  highlevel \$(DESC) >> highlvl\$(TMPSUF)
+	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF)
 	mv $desc/highlvl\$(TMPSUF) \$@
 
 EOT

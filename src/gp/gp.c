@@ -1823,7 +1823,7 @@ main(int argc, char **argv)
 {
 #endif
   growarray A;
-  module *newfun = NULL, *oldfun = NULL;
+  entree **newfun = NULL, **oldfun = NULL;
   long i;
 
   GP_DATA = default_gp_data();
@@ -1842,11 +1842,12 @@ main(int argc, char **argv)
   argc = ccommand(&argv);
 #endif
   grow_init(&A);
+  pari_init_defaults();
   read_opt(&A, argc,argv);
 
-  pari_addfunctions(&newfun, functions_gp,helpmessages_gp);
-  pari_addfunctions(&newfun, functions_highlevel,helpmessages_highlevel);
-  pari_addfunctions(&oldfun, functions_oldgp,helpmessages_oldgp);
+  pari_addfunctions(&newfun, functions_gp);
+  pari_addfunctions(&newfun, functions_highlevel);
+  pari_addfunctions(&oldfun, functions_oldgp);
 
   pari_init_opts(top-bot, GP_DATA->primelimit, 0, newfun, oldfun);
   pari_sig_init(gp_sighandler);
