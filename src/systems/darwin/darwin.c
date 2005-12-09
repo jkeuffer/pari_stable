@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 /* Modified for PARI/GP by the PARI group */
+#include "pari.h"
 #ifndef HAS_DLOPEN
 
 #include <stdio.h>
