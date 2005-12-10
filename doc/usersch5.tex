@@ -35,15 +35,15 @@ The following functions enable you to start using the PARI functions
 in a program, and cleanup without exiting the whole program. Unless you
 need the full GP analyzer, you should be fine with
 
-\fun{void}{pari_init}{size_t parisize, ulong maxprime} initialize the
+\fun{void}{pari_init}{size\_t parisize, ulong maxprime} initialize the
 library, with a stack of \kbd{parisize} bytes and a prime table
 up to the maximum of \kbd{maxprime} and $2^{16}$.
 
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
 
-\fun{void}{pari_init_opts}{size_t parisize, ulong maxprime, ulong
-init_opts, entree **newfun, entree **oldfun} as \kbd{pari\_init}, with
+\fun{void}{pari_init_opts}{size\_t parisize, ulong maxprime, ulong
+init\_opts, entree **newfun, entree **oldfun} as \kbd{pari\_init}, with
 extra flexibility. \kbd{init\_opts} is a mask of flags among the
 following:
 
@@ -60,12 +60,12 @@ it is not mandatory to reinitialize it (and last values are restored).
 Finally, \kbd{newfun} and \kbd{oldfun} are list of modules containing
 extra routines which you want to make known to the GP analyzer. You
 probably want to set them to \kbd{NULL} (no extras). The calculator
-\dkb{gp} uses \kbd{pari\_addfunctions} to bundle a series of new routines
+\kbd{gp} uses \kbd{pari\_addfunctions} to bundle a series of new routines
 in a module list, to add high level gp-specific routines. If you want to
 do the same, \kbd{newfun} lists the routines, and \kbd{oldfun} the
 compatibility routines which are used when the compatible default is set.
 
-\fun{void}{pari_close_opts}{ulong init_opts} as \kbd{pari\_close},
+\fun{void}{pari_close_opts}{ulong init\_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. The same mask must be provided for initialization
 and closing.
