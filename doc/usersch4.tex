@@ -1675,21 +1675,20 @@ The general syntax is
 the remaining arguments and what message to print. The list of valid keywords
 is in \kbd{language/errmessages.c} together with the basic corresponding
 message. For instance, \kbd{pari\_err(typeer,"extgcd")} prints the message:
-
-\kbd{ ***   incorrect type in extgcd.}
-
-\noindent
+\bprog
+    ***   incorrect type in extgcd.
+@eprog\noindent
 Among the codewords are \emph{warning} keywords (all those which start with
 the prefix \kbd{warn}). In that case, \teb{pari_err} does \emph{not} abort the
 computation, just print the requested message and go on. The basic example is
 
-\kbd{pari\_err(warner, "Strategy 1 failed. Trying strategy 2")}
-
-\noindent which is the exact equivalent of \kbd{pari\_err(talker,...)} except
-that you certainly do not want to stop the program at this point, just inform
-the user that something important has occurred (in particular, this output
-would be suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf}
-would not).
+\bprog
+    pari_err(warner, "Strategy 1 failed. Trying strategy 2")
+@eprog\noindent
+which is the exact equivalent of \kbd{pari\_err(talker,...)} except that
+you certainly do not want to stop the program at this point, just inform the
+user that something important has occurred (in particular, this output would be
+suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not).
 
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
 

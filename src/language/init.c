@@ -28,34 +28,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
-const long functions_tblsz = 135; /* size of functions_hash          */
-/*      Variables statiques communes :         */
-FILE    *pari_outfile, *errfile, *logfile, *infile;
-ulong   logstyle;
-GEN     *pol_1, *pol_x;
-GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, polvar, gi;
+GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, gi;
 GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
+FILE    *pari_outfile, *errfile, *logfile, *infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
+ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
+ulong   compatible, precreal, precdl, logstyle;
+gp_data *GP_DATA;
 
 entree  **varentries;
-
-void    *global_err_data;
 long    *ordvar;
-ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
-ulong   precreal, precdl;
+GEN     polvar, *pol_1, *pol_x;
+
 pari_sp bot, top, avma;
 size_t memused;
+void    *global_err_data;
 
-gp_data *GP_DATA;
+static growarray MODULES, OLDMODULES;
+const long functions_tblsz = 135; /* size of functions_hash */
+entree **functions_hash, **funct_old_hash, **members_hash;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
 GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
-entree * (*foreignAutoload)(char*, long); /* Autoloader                      */
+entree * (*foreignAutoload)(char*, long); /* Autoloader                  */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
@@ -87,15 +87,6 @@ pop_stack(stack **pts)
   v = s->prev; *pts = v;
   a = s->value; free((void*)s);
   return a;
-}
-
-void
-debug_stack(void)
-{
-  GEN z;
-  fprintferr("bot=0x%lx\t top=0x%lx\n",bot,top);
-  for(z=(GEN)top;z>=(GEN)avma;z--)
-    fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
 /*********************************************************************/
@@ -431,79 +422,45 @@ pari_init_defaults(void)
   initout(1); next_bloc=0;
 }
 
-/* does elt belong to list, after position start (excluded) ? */
-static long
-list_isin(void **list, void *elt, long start)
-{
-  long indelt=0;
-
-  if (list)
-  {
-    while (*list)
-    {
-      if (indelt>start && *list==elt) return indelt;
-      list++; indelt++;
-    }
-  }
-  return -1;
-}
-
-static void
-list_prepend(void ***listptr, void *elt)
-{
-  void **list=*listptr;
-  long nbelt=0;
-
-  if (list)
-    while (list[nbelt]) nbelt++;
-  list = (void **) gpmalloc(sizeof(void *)*(nbelt+2));
-  list[0]=elt;
-  if (nbelt)
-  {
-    memcpy(list+1,*listptr,nbelt*sizeof(void *));
-    free(*listptr);
-  }
-  list[nbelt+1]=NULL; *listptr=list;
-}
-
-/* Load elist in hashtable hash. If force == 0, do not load twice the
- * same list in the same hashtable, which would only destroy user variables.
- * As it stands keep a complete history (instead of most recent changes).
- */
-static int
-gp_init_entrees(entree **elist, entree **hash, int force)
-{
-  static void **oldelist=NULL, **oldhash=NULL;
-
-  if (!force)
-  {
-    const long indhash = list_isin(oldhash,(void *)hash,-1);
-    if (indhash != -1 && oldelist[indhash]==(void*)elist) return 0;
-  }
-  /* record the new pair (hash,elist) */
-  list_prepend(&oldelist,(void *)elist);
-  list_prepend(&oldhash,(void *)hash);
-
-  init_hashtable(hash,functions_tblsz);
-  if (elist)
-    while (*elist) fill_hashtable(hash, *elist++);
-  return (hash == functions_hash);
-}
-
-static entree **pari_entrees;
-static entree **pari_oldentrees;
-static entree **pari_memberentrees;
-entree **functions_hash;
-entree **funct_old_hash;
-entree **members_hash;
-
-/* add to elist the functions in func */
+/* pari stack is a priori not available. Don't use it */
 void
-pari_addfunctions(entree ***elist, entree *func)
+grow_append(growarray A, void *e)
 {
-  void **v = (void**)*elist;
-  list_prepend(&v, func);
-  *elist = (entree**)v;
+  if (A->n == A->len-1)
+  {
+    A->len <<= 1;
+    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
+  }
+  A->v[A->n++] = e;
+}
+void
+grow_copy(growarray A, growarray B)
+{
+  long i;
+  if (!A) { grow_init(B); return; }
+  B->len = A->len;
+  B->n = A->n;
+  B->v = (void**)gpmalloc(B->len * sizeof(void*));
+  for (i = 0; i < A->n; i++) B->v[i] = A->v[i];
+}
+void
+grow_init(growarray A)
+{
+  A->len = 4;
+  A->n   = 0;
+  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
+}
+void
+grow_kill(growarray A) { free(A->v); }
+
+/* Load modules in A in hashtable hash. */
+static int
+gp_init_entrees(growarray A, entree **hash)
+{
+  long i;
+  init_hashtable(hash, functions_tblsz);
+  for (i = 0; i < A->n; i++) fill_hashtable(hash, A->v[i]);
+  return (hash == functions_hash);
 }
 
 void
@@ -606,17 +563,15 @@ init_fun_hash() {
 }
 
 int
-gp_init_functions(int force)
+gp_init_functions()
 {
-  return gp_init_entrees(new_fun_set? pari_entrees: pari_oldentrees,
-                         functions_hash, force);
+  return gp_init_entrees(new_fun_set? MODULES: OLDMODULES, functions_hash);
 }
 
-/* initialize PARI data. Initialize newfun, oldfun to NULL for the default set.
- * Use pari_addfunctions() to add other routines to the default set */
+/* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
 pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
-               entree **newfun, entree **oldfun)
+               growarray newfun, growarray oldfun)
 {
   ulong u;
 
@@ -638,30 +593,25 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
   polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  pol_x  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
+  pol_x = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   pol_1 = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
-  gpi=NULL; geuler=NULL; bernzone=NULL;
   for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
+  gpi = geuler = bernzone = NULL;
 
   (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
-  pari_entrees    = newfun;
-  pari_oldentrees = oldfun;
-
-  pari_addfunctions(&pari_entrees, functions_basic);
-  pari_addfunctions(&pari_oldentrees, oldfonctions);
-
-  pari_memberentrees = NULL;
-  pari_addfunctions(&pari_memberentrees, gp_member_list);
 
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
   members_hash   = init_fun_hash();
-  (void)gp_init_entrees(pari_oldentrees, funct_old_hash, 1);
-  (void)gp_init_entrees(pari_memberentrees, members_hash, 1);
-  gp_init_functions(1);
+  init_hashtable(members_hash,functions_tblsz);
+  fill_hashtable(members_hash, gp_member_list);
+  grow_copy(newfun, MODULES);    grow_append(MODULES, functions_basic);
+  grow_copy(oldfun, OLDMODULES); grow_append(OLDMODULES, oldfonctions);
+  (void)gp_init_entrees(OLDMODULES, funct_old_hash);
+  (void)gp_init_functions();
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
@@ -707,19 +657,26 @@ free_gp_data(gp_data *D)
   if (D->help) free((void*)D->help);
 }
 
+static void
+kill_hashlist(entree *ep)
+{
+  entree *EP;
+  for (; ep; ep = EP) { EP = ep->next; freeep(ep); }
+}
+
 void
 pari_close_opts(ulong init_opts)
 {
   long i;
-  entree *ep,*ep1;
 
   if (INIT_SIG) pari_sig_init(SIG_DFL);
 
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
   {
-    for (ep = functions_hash[i]; ep; ep = ep1) { ep1 = ep->next; freeep(ep); }
-    for (ep =   members_hash[i]; ep; ep = ep1) { ep1 = ep->next; freeep(ep); }
+    kill_hashlist(funct_old_hash[i]);
+    kill_hashlist(functions_hash[i]);
+    kill_hashlist(members_hash[i]);
   }
   free((void*)varentries);
   free((void*)ordvar);
@@ -732,14 +689,16 @@ pari_close_opts(ulong init_opts)
 
   while (cur_bloc) delete_from_bloclist(cur_bloc);
   killallfiles(1);
-  free((void *)functions_hash);
-  free((void *)funct_old_hash);
-  free((void *)members_hash);
-  free((void *)dft_handler);
-  free((void *)bot);
-  free((void *)diffptr);
+  free((void*)functions_hash);
+  free((void*)funct_old_hash);
+  free((void*)members_hash);
+  free((void*)dft_handler);
+  free((void*)bot);
+  free((void*)diffptr);
   free(current_logfile);
   free(current_psfile);
+  grow_kill(MODULES);
+  grow_kill(OLDMODULES);
   if (pari_datadir) free(pari_datadir);
   if (INIT_DFT) free_gp_data(GP_DATA);
 }
@@ -990,10 +949,7 @@ static void
 pop_catch_cell(stack **s)
 {
   cell *c = (cell*)pop_stack(s);
-  if (c)
-  {
-    free(c);
-  }
+  if (c) free(c);
 }
 
 /* reset traps younger than v (included).
@@ -1893,6 +1849,15 @@ fill_stack(void)
 {
   GEN x = ((GEN)bot);
   while (x < (GEN)avma) *x++ = 0xfefefefeUL;
+}
+
+void
+debug_stack(void)
+{
+  GEN z;
+  fprintferr("bot=0x%lx\ttop=0x%lx\n", bot, top);
+  for (z = (GEN)top; z >= (GEN)avma; z--)
+    fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
 /*******************************************************************/

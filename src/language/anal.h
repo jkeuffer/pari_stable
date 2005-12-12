@@ -86,26 +86,24 @@ extern entree * (*foreignAutoload)(char*, long);
 extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
 
+extern const long functions_tblsz;  /* hashcodes table size */
 /* Variables containing the list of PARI functions */
 extern entree **functions_hash;    /* functions hashtable */
 extern entree **members_hash;      /* members hashtable */
-extern char   *helpmessages_basic[];
 extern entree functions_basic[];
-extern const long functions_tblsz;  /* hashcodes table size */
 
 /* Variables containing the list of specific GP functions */
-extern char   *helpmessages_gp[];
 extern entree  functions_gp[];
 extern entree  gp_member_list[];
-extern char   *helpmessages_highlevel[];
 extern entree  functions_highlevel[];
-extern long     gp_colors[];
-extern int     disable_color;
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
 extern entree **funct_old_hash;    /* hashtable */
-extern char   *oldhelpmessage[], *helpmessages_oldgp[];
 extern entree  oldfonctions[], functions_oldgp[];
+
+/* colors */
+extern long    gp_colors[];
+extern int     disable_color;
 
 /* backward compatibility */
 extern ulong compatible;
@@ -130,7 +128,7 @@ enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);
 ulong get_uint(const char *s);
-int  gp_init_functions(int force);
+int  gp_init_functions();
 
 extern char *current_logfile;
 extern ulong readline_state;

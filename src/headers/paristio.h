@@ -39,10 +39,13 @@ typedef struct entree {
   struct entree *next;
 } entree;
 
-typedef struct module {
-  entree *func;
-  char **help;
-} module;
+/* naive grow-arrays */
+typedef struct {
+  void **v;
+  long len; /* len cells allocated */
+  long n; /* first n cells occupied */
+} __pari_growarray;
+typedef __pari_growarray growarray[1];
 
 typedef struct PariOUT {
   void (*putch)(char);

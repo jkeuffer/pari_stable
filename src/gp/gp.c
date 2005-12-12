@@ -44,33 +44,6 @@ ENDEXTERN
 #define skip_space(s) while (isspace((int)*s)) s++
 #define skip_alpha(s) while (isalpha((int)*s)) s++
 
-/* naive grow-arrays: pari stack is a priori not available yet. Don't use it */
-
-typedef struct {
-  void **v;
-  long len; /* len cells allocated */
-  long n; /* first n cells occupied */
-} growarray;
-
-static void
-grow_append(growarray *A, void *e)
-{
-  if (A->n == A->len-1)
-  {
-    A->len <<= 1;
-    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
-  }
-  A->v[A->n++] = e;
-}
-
-static void
-grow_init(growarray *A)
-{
-  A->len = 4;
-  A->n   = 0;
-  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
-}
-
 /*******************************************************************/
 /**                                                               **/
 /**                    TEXMACS-SPECIFIC STUFF                     **/
@@ -126,7 +99,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   s++; t = s;
   skip_alpha(s);
   c->cmd = pari_strndup(t, s - t);
-  grow_init(&A);
+  grow_init(A);
   for (c->n = 0; s <= send; c->n++)
   {
     char *u = gpmalloc(strlen(s) + 1);
@@ -138,9 +111,9 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
       while (isdigit((int)*s)) s++;
       strncpy(u, t, s - t); u[s-t] = 0;
     }
-    grow_append(&A, (void*)u);
+    grow_append(A, (void*)u);
   }
-  c->v = (char**)A.v;
+  c->v = (char**)A->v;
 }
 
 static void
@@ -1214,7 +1187,7 @@ next_expr(char *t)
 }
 
 static void
-gp_initrc(growarray *A, char *path)
+gp_initrc(growarray A, char *path)
 {
   char *nexts,*s,*t;
   FILE *file = gprc_get(path);
@@ -1740,7 +1713,7 @@ init_trivial_stack()
 }
 
 static void
-read_opt(growarray *A, long argc, char **argv)
+read_opt(growarray A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
   long i = 1, initrc = 1;
@@ -1822,8 +1795,7 @@ int
 main(int argc, char **argv)
 {
 #endif
-  growarray A;
-  entree **newfun = NULL, **oldfun = NULL;
+  growarray A, newfun, oldfun;
   long i;
 
   GP_DATA = default_gp_data();
@@ -1841,15 +1813,19 @@ main(int argc, char **argv)
 #ifdef __MWERKS__
   argc = ccommand(&argv);
 #endif
-  grow_init(&A);
+  grow_init(A);
   pari_init_defaults();
-  read_opt(&A, argc,argv);
+  read_opt(A, argc,argv);
 
-  pari_addfunctions(&newfun, functions_gp);
-  pari_addfunctions(&newfun, functions_highlevel);
-  pari_addfunctions(&oldfun, functions_oldgp);
+  grow_init(newfun);
+  grow_init(oldfun);
+  grow_append(newfun, functions_gp);
+  grow_append(newfun, functions_highlevel);
+  grow_append(oldfun, functions_oldgp);
 
   pari_init_opts(top-bot, GP_DATA->primelimit, 0, newfun, oldfun);
+  grow_kill(newfun);
+  grow_kill(oldfun);
   pari_sig_init(gp_sighandler);
 
   init_graph();
@@ -1862,23 +1838,23 @@ main(int argc, char **argv)
   gp_expand_path(GP_DATA->path);
 
   if (!(GP_DATA->flags & QUIET)) gp_head();
-  if (A.n)
+  if (A->n)
   {
     VOLATILE ulong f = GP_DATA->flags;
     FILE *l = logfile;
     VOLATILE long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
-    for (i = 0; i < A.n; i++) {
+    for (i = 0; i < A->n; i++) {
       if (setjmp(GP_DATA->env))
       {
-        fprintferr("... skipping file '%s'\n", A.v[i]);
-        i++; if (i == A.n) break;
+        fprintferr("... skipping file '%s'\n", A->v[i]);
+        i++; if (i == A->n) break;
       }
-      (void)read0((char*)A.v[i]); free(A.v[i]);
+      (void)read0((char*)A->v[i]); free(A->v[i]);
     }
     GP_DATA->flags = f; logfile = l;
   }
-  free(A.v);
+  grow_kill(A);
   (void)gp_main_loop(1);
   gp_quit(); return 0; /* not reached */
 }
