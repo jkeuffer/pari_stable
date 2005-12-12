@@ -183,6 +183,7 @@ advise you to update soon ]
            coefs_to_pol -> mkpoln, coefs_to_vec -> mkvecn
   - rename wf -> weberf, wf1 -> weberf1, wf2 -> weberf2
   - rename err -> pari_err, pariputsf -> pariprintf
+  - rename rnfhermitebasis -> rnfhnfbasis
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

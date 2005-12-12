@@ -3266,7 +3266,7 @@ rnfbasis(GEN bnf, GEN order)
  * if not
  */
 GEN
-rnfhermitebasis(GEN bnf, GEN order)
+rnfhnfbasis(GEN bnf, GEN order)
 {
   pari_sp av = avma;
   long j, n;

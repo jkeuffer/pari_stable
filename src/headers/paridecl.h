@@ -527,7 +527,7 @@ GEN     rnfdiscf(GEN nf, GEN pol);
 GEN     rnfequation(GEN nf, GEN pol2);
 GEN     rnfequation0(GEN nf, GEN pol2, long flall);
 GEN     rnfequation2(GEN nf, GEN pol);
-GEN     rnfhermitebasis(GEN bnf, GEN order);
+GEN     rnfhnfbasis(GEN bnf, GEN order);
 long    rnfisfree(GEN bnf, GEN order);
 GEN     rnflllgram(GEN nf, GEN pol, GEN order,long prec);
 GEN     rnfpolred(GEN nf, GEN pol, long prec);

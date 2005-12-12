@@ -118,6 +118,7 @@ BA 25- make pari restartable
        simplify pari_addfunctions, plug helpmessages in initializing
        entree arrays.
    27- rename err -> pari_err, pariputsf -> pariprintf
+   28- rename rnfhermitebasis -> rnfhnfbasis
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
