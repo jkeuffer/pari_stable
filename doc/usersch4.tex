@@ -71,7 +71,7 @@ $i$ (\tet{gi}). All of these are of type \kbd{GEN}.
 
 In addition, space is reserved for the polynomials $x_v$
 \sidx{variable}
-(\teb{pol_x}\kbd{[$v$]}), and the polynomials $1_v$ (\teb{pol_1}\kbd{[$v$]}).
+(\tet{pol_x}\kbd{[$v$]}), and the polynomials $1_v$ (\tet{pol_1}\kbd{[$v$]}).
 Here, $x_v$ is the name of variable number $v$, where $0\le v\le
 \tet{MAXVARN}$. Both \tet{pol_1} and \tet{pol_x} are arrays of \kbd{GEN}s, the
 index being the polynomial variable number.
@@ -1397,8 +1397,8 @@ similar situation.
 
 \subsec{Creating variables} A basic difficulty is to ``create'' a variable.
 As we have seen in \secref{se:intro4}, a number of objects is associated to
-variable number~$v$. Here is the complete list: \teb{pol_1}$[v]$ and
-\teb{pol_x}$[v]$, which you can use in library mode and which represent,
+variable number~$v$. Here is the complete list: \tet{pol_1}$[v]$ and
+\tet{pol_x}$[v]$, which you can use in library mode and which represent,
 respectively, the monic monomials of degrees 0 and 1 in~$v$;
 \teb{varentries}$[v]$, and \teb{polvar}$[v]$. The latter two are only
 meaningful to \kbd{gp}, but they have to be set nevertheless. All of them
@@ -1427,7 +1427,7 @@ GEN gy = pol_x[v];
 @eprog\noindent
 This function raises an error if $s$ is already registered as a function name.
 
-\misctitle{Caveat}: it is possible to use \teb{gp_read_str}
+\misctitle{Caveat}: it is possible to use \tet{gp_read_str}
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP variables
 on the fly as needed:
 
@@ -1650,7 +1650,7 @@ probably means you are rewriting \kbd{gp}. In that case, have a look at the code
 
 \noindent
 If you want your functions to issue error messages, you can use the general
-error handling routine \teb{pari_err}. The basic syntax is
+error handling routine \tet{pari_err}. The basic syntax is
 %
 \bprog
   pari_err(talker, "error message");
@@ -1727,7 +1727,7 @@ already in use!). For instance you could write:
 \bprog
 pari_err(talker, "x[%d] = %Z is not invertible!", i, x[i])
 @eprog
-\noindent since the \teb{pari_err} function accepts PARI formats. Here \kbd{i}
+\noindent since the \tet{pari_err} function accepts PARI formats. Here \kbd{i}
 is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf and this would
 insert in raw format the value of the \kbd{GEN} \kbd{x[i]}.
 
