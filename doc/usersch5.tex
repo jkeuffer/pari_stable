@@ -44,6 +44,29 @@ up to the maximum of \kbd{maxprime} and $2^{16}$.
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
 
+\subsec{The \kbd{entree} structure}
+
+An \kbd{entree} is the generic object associated to an identifier (a name)
+in GP's interpreter, be it a built-in or user function, or a variable. For
+a function, it has at least the following fields:
+
+  \kbd{char *name} : the name under which the interpreter knows us.
+
+  \kbd{ulong valence} : obsolete, set it to 1.
+
+  \kbd{void *value} :  a pointer to the C function to call.
+
+  \kbd{long menu} : an integer from 1 to 11 (to which group of function
+                    help do we belong).
+
+  \kbd{char *code} : the prototype code.
+
+  \kbd{char *help} : the help text for the function.
+
+\fun{void}{pari_add_function}{entree *ep} after \kbd{pari\_init} is
+called, this function adds a single routine to the table of symbols in the
+interpreter.
+
 \subsec{Technical functions}
 
 The rest have to do with the GP analyzer, in particular the declaration of

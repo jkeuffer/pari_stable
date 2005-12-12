@@ -76,6 +76,7 @@ BA 18- config/has_stat.c didn't work with g++
    19- charpoly/minpol(Mod(a,T)) was only monic if T was.
 BA 20- 'make install' did not work if 'prefix' contained spaces
    21- has_dlopen always compiled in on Mac OS X, even if present in libc
+   22- function pari_add_function
 
   Changed
     1- speed up prime() by using checkpoints.

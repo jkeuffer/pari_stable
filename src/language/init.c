@@ -383,16 +383,25 @@ init_hashtable(entree **table, long tblsz)
 }
 
 static void
+fill_hashtable_single(entree **table, entree *ep)
+{
+  char *s = ep->name;
+  long n = hashvalue(&s);
+  EpSETSTATIC(ep);
+  ep->next = table[n]; table[n] = ep;
+  ep->args = NULL;
+}
+
+static void
 fill_hashtable(entree **table, entree *ep)
 {
-  for ( ; ep->name; ep++)
-  {
-    char *s = ep->name;
-    long n = hashvalue(&s);
-    EpSETSTATIC(ep);
-    ep->next = table[n]; table[n] = ep;
-    ep->args = NULL;
-  }
+  for ( ; ep->name; ep++) fill_hashtable_single(table, ep);
+}
+
+void
+pari_add_function(entree *ep)
+{
+  fill_hashtable_single(functions_hash, ep);
 }
 
 void
