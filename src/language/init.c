@@ -459,7 +459,7 @@ gp_init_entrees(growarray A, entree **hash)
 {
   long i;
   init_hashtable(hash, functions_tblsz);
-  for (i = 0; i < A->n; i++) fill_hashtable(hash, A->v[i]);
+  for (i = 0; i < A->n; i++) fill_hashtable(hash, (entree*)A->v[i]);
   return (hash == functions_hash);
 }
 
