@@ -74,6 +74,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   }}
 /*=====================================================================*/
 
+#define LOG2   (0.6931471805599453) /* log(2) */
+#define L2SL10 (0.3010299956639812) /* log_10(2) */
+
+#ifndef  PI
+#  define PI (3.141592653589)
+#endif
+
 /*3.32~log_2(10)*/
 #define ndec2nlong(x) (1 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
 #define ndec2prec(x) (3 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
@@ -82,6 +89,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
 #define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
+#define prec2ndec(x) ((long)bit_accuracy_mul((x), L2SL10))
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
 
 #include "pariold.h"
@@ -107,13 +115,6 @@ enum manage_var_t {
   manage_var_max_avail,
   manage_var_pop
 };
-
-#define LOG2   (0.6931471805599453) /* log(2) */
-#define L2SL10 (0.3010299956639812) /* log_10(2) */
-
-#ifndef  PI
-#  define PI (3.141592653589)
-#endif
 
 #ifdef LONG_IS_64BIT
 #  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
