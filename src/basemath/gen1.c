@@ -2065,17 +2065,8 @@ gdiv(GEN x, GEN y)
       }
       return div_rfrac(x,y);
 
-    case t_QFI:
-      i = signe(y[2]); setsigne(y[2],-i);
-      z = compimag(x,y);
-      setsigne(y[2], i); return z;
-
-    case t_QFR: { long j;
-      i = signe(y[2]); setsigne(y[2], -i);
-      j = signe(y[4]); setsigne(y[4], -j);
-      z = compreal(x,y); setsigne(y[4], j);
-      setsigne(y[2], i); return z;
-    }
+    case t_QFI: av = avma; return gerepileupto(av, compimag(x, ginv(y)));
+    case t_QFR: av = avma; return gerepileupto(av, compreal(x, ginv(y)));
 
     case t_MAT:
       av = avma;

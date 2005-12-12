@@ -1097,14 +1097,15 @@ ginv(GEN x)
       gel(z,2) = gcopy(gel(x,1)); return z;
 
     case t_QFR:
-    {
-      long k,l;
-      l=signe(x[2]); setsigne(x[2],-l);
-      k=signe(x[4]); setsigne(x[4],-k); z=redreal(x);
-      setsigne(x[2],l); setsigne(x[4],k); return z;
-    }
+      av = avma; z = cgetg(5, t_QFR);
+      gel(z,1) = gel(x,1);
+      gel(z,2) = negi( gel(x,1) );
+      gel(z,3) = gel(x,3);
+      gel(z,4) = negr( gel(x,4) );
+      return gerepileupto(av, redreal(z));
+
     case t_QFI:
-      y=gcopy(x);
+      y = gcopy(x);
       if (!equalii(gel(x,1),gel(x,2)) && !equalii(gel(x,1),gel(x,3)))
 	setsigne(y[2],-signe(y[2]));
       return y;
