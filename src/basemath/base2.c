@@ -3171,7 +3171,8 @@ get_order(GEN nf, GEN O, char *s)
 {
   if (typ(O) == t_POL)
     return rnfpseudobasis(nf, O);
-  if (typ(O)!=t_VEC || lg(O) < 3)
+  if (typ(O)!=t_VEC || lg(O) < 3 || typ(O[1]) != t_MAT || typ(O[2]) != t_VEC
+      || lg(O[1]) != lg(O[2]))
     pari_err(talker,"not a pseudo-matrix in %s", s);
   return O;
 }
@@ -3192,8 +3193,6 @@ rnfsteinitz(GEN nf, GEN order)
   order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, gel(order,1));
   I = shallowcopy(gel(order,2)); n=lg(A)-1;
-  if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
-    pari_err(typeer,"rnfsteinitz");
   for (i=1; i<n; i++)
   {
     GEN c1,c2;
