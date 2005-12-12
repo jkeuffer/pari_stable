@@ -674,7 +674,6 @@ pari_close_opts(ulong init_opts)
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
   {
-    kill_hashlist(funct_old_hash[i]);
     kill_hashlist(functions_hash[i]);
     kill_hashlist(members_hash[i]);
   }
