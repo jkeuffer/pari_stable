@@ -644,6 +644,7 @@ pari_rand(void)
 #endif
 }
 
+#if 1
 /* assume N > 0 */
 GEN
 randomi(GEN N)
@@ -680,6 +681,24 @@ randomi(GEN N)
   if (!n) x = int_normalize(x, 1);
   return x;
 }
+#else
+/* assume N > 0 */
+GEN
+randomi(GEN N)
+{
+  long i, lx = lgefint(N), shift = bfffo(*int_MSW(N));
+  GEN x = cgeti(lx), xMSW, xd;
+
+  x[1] = evalsigne(1) | evallgefint(lx);
+  xMSW = int_MSW(x);
+  for (xd = xMSW;;) {
+    for (i=2; i<lx; i++) { *xd = pari_rand(); xd = int_precW(xd); }
+    *xMSW = ((ulong)*xMSW) >> shift;
+    x = int_normalize(x, 0);
+    if (absi_cmp(x, N) < 0) return x;
+  }
+}
+#endif
 
 /********************************************************************/
 /**                                                                **/
