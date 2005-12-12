@@ -365,7 +365,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
 PRECPB:
     prec = (prec<<1)-2;
     remake_GM(nf, &F, prec); G = F.G;
-    if (DEBUGLEVEL>1) pari_err(warnprec, "nf_factor_bound", prec);
+    if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
   }
 
   /* Take sup over 0 <= i <= d of
@@ -422,7 +422,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     if (prec > precnf)
     {
       nffp_t F; remake_GM(nf, &F, prec); G = F.G;
-      if (DEBUGLEVEL>1) pari_err(warnprec, "nf_factor_bound", prec);
+      if (DEBUGLEVEL>1) pari_warn(warnprec, "nf_factor_bound", prec);
     }
   }
   lt = leading_term(polbase);
@@ -1253,7 +1253,7 @@ AGAIN:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"nf_LLL_cmbf");
+      if(DEBUGMEM>1) pari_warn(warnmem,"nf_LLL_cmbf");
       gerepileall(av, Tpk? 9: 8,
                       &CM_L,&TT,&Tra,&famod,&pk,&GSmin,&PRK,&PRKinv,&Tpk);
     }

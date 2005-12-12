@@ -544,7 +544,7 @@ redimagsl2(GEN q, GEN *U)
     z = u1; u1 = u2; u2 = negi(z);
     REDBU(a,b,c, u1,u2);
     if (low_stack(lim, stack_lim(av, 1))) {
-      if (DEBUGMEM>1) pari_err(warnmem, "redimagsl2");
+      if (DEBUGMEM>1) pari_warn(warnmem, "redimagsl2");
       gerepileall(av, 5, &a,&b,&c, &u1,&u2);
     }
   }
@@ -591,7 +591,7 @@ redimag(GEN q)
     swap(a,c); b = negi(b); /* apply rho */
     REDB(a,b,c);
     if (low_stack(lim, stack_lim(av, 1))) {
-      if (DEBUGMEM>1) pari_err(warnmem, "redimag");
+      if (DEBUGMEM>1) pari_warn(warnmem, "redimag");
       gerepileall(av, 3, &a,&b,&c);
     }
   }
@@ -1253,7 +1253,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   {
     r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
-      if (DEBUGMEM>1) pari_err(warnmem,"cornacchia");
+      if (DEBUGMEM>1) pari_warn(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);
     }
   }
@@ -1304,7 +1304,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   {
     r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
-      if (DEBUGMEM>1) pari_err(warnmem,"cornacchia");
+      if (DEBUGMEM>1) pari_warn(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);
     }
   }

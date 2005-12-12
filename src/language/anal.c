@@ -453,7 +453,7 @@ unused_chars(char *c, int strict)
   }
   else
     s = pari_strdup(analyseur);
-  pari_err(warner, "unused characters: %s", s);
+  pari_warn(warner, "unused characters: %s", s);
   free(s);
 }
 
@@ -529,7 +529,7 @@ install(void *f, char *name, char *code)
   {
     if (ep->valence != EpINSTALL)
       pari_err(talker,"[install] identifier '%s' already in use", name);
-    pari_err(warner, "[install] updating '%s' prototype; module not reloaded", name);
+    pari_warn(warner, "[install] updating '%s' prototype; module not reloaded", name);
     if (ep->code) free(ep->code);
   }
   else
@@ -807,7 +807,7 @@ seq(void)
 
     if (top - avma > ((top - av)>>1))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"seq");
+      if(DEBUGMEM>1) pari_warn(warnmem,"seq");
       if (is_universal_constant(res)) avma = top - av;
       else
 	res = gerepilecopy(top - av, res);
@@ -886,7 +886,7 @@ L2:
   e3 = UNDEF;
   if (top - avma > ((top - bot)>>1))
   {
-    if(DEBUGMEM>1) pari_err(warnmem,"expr");
+    if(DEBUGMEM>1) pari_warn(warnmem,"expr");
     gerepileall(top - av, (e1==UNDEF)?1: 2, &e2, &e1);
   }
 
@@ -1426,7 +1426,7 @@ truc(void)
       while (*analyseur == ',') {
         analyseur++; _append(&table, &n, &N);
         if (low_stack(lim, stack_lim(av,2))) {
-          if(DEBUGMEM>1) pari_err(warnmem,"truc(): n = %ld", n);
+          if(DEBUGMEM>1) pari_warn(warnmem,"truc(): n = %ld", n);
           gerepilecoeffs(av0, (GEN)(table+1), n);
           av = avma; lim = stack_lim(av,2);
         }
@@ -3227,7 +3227,7 @@ skipentry(void)
     ep = findentry(old,len,funct_old_hash[hash]);
     if (ep)
     {
-      pari_err(warner,"using obsolete function %s",ep->name);
+      pari_warn(warner,"using obsolete function %s",ep->name);
       return ep;
     }
   }

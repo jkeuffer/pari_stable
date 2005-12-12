@@ -1990,7 +1990,7 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
 
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"FlxqX_safegcd");
+      if (DEBUGMEM>1) pari_warn(warnmem,"FlxqX_safegcd");
       gerepileall(btop, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;

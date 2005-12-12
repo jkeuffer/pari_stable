@@ -39,7 +39,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
     a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"forpari");
+      if (DEBUGMEM>1) pari_warn(warnmem,"forpari");
       a = gerepileupto(av,a);
     }
     changevalue_p(ep,a);
@@ -81,7 +81,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
 
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"forstep");
+      if (DEBUGMEM>1) pari_warn(warnmem,"forstep");
       a = gerepileupto(av,a);
     }
     changevalue_p(ep,a);
@@ -489,7 +489,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"sum");
+      if (DEBUGMEM>1) pari_warn(warnmem,"sum");
       x = gerepileupto(av,x);
     }
     ep->value = (void*) a;
@@ -517,7 +517,7 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"suminf");
+      if (DEBUGMEM>1) pari_warn(warnmem,"suminf");
       x = gerepileupto(av,x);
     }
   }
@@ -570,7 +570,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"prod");
+      if (DEBUGMEM>1) pari_warn(warnmem,"prod");
       x = gerepileupto(av,x);
     }
     ep->value = (void*) a;
@@ -596,7 +596,7 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (gcmp0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"prodinf");
+      if (DEBUGMEM>1) pari_warn(warnmem,"prodinf");
       x = gerepileupto(av,x);
     }
   }
@@ -619,7 +619,7 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (gcmp0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"prodinf1");
+      if (DEBUGMEM>1) pari_warn(warnmem,"prodinf1");
       x = gerepileupto(av,x);
     }
   }
@@ -657,7 +657,7 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
     x = gmul(x, eval(prime, E));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"prodeuler");
+      if (DEBUGMEM>1) pari_warn(warnmem,"prodeuler");
       x = gerepilecopy(av, x);
     }
     NEXT_PRIME_VIADIFF(prime[2], d);
@@ -749,7 +749,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"direuler");
+      if (DEBUGMEM>1) pari_warn(warnmem,"direuler");
       x = gerepilecopy(av, x);
     }
     NEXT_PRIME_VIADIFF(p, d);

@@ -902,7 +902,7 @@ escape0(char *tch)
         if (isclone(x)) /* many BIN_GEN */
         {
           long i, l = lg(x);
-          pari_err(warner,"setting %ld history entries", l-1);
+          pari_warn(warner,"setting %ld history entries", l-1);
           for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
         }
       }
@@ -1730,7 +1730,7 @@ read_opt(growarray A, long argc, char **argv)
     switch(*t++)
     {
       case 'b': b = read_arg(&i,t,argc,argv);
-        pari_err(warner, "buffersize is no longer used. -b ignored");
+        pari_warn(warner, "buffersize is no longer used. -b ignored");
         break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
@@ -1889,7 +1889,7 @@ prettyp_init(void)
     pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST);
   if (pp->file) return 1;
 
-  pari_err(warner,"broken prettyprinter: '%s'",pp->cmd);
+  pari_warn(warner,"broken prettyprinter: '%s'",pp->cmd);
   free(pp->cmd); pp->cmd = NULL; return 0;
 }
 

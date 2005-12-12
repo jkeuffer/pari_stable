@@ -286,7 +286,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[4]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&v; gptr[3]=&v1;
-      if(DEBUGMEM>1) pari_err(warnmem,"ratlift");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ratlift");
       gerepilemany(av1,gptr,4);
     }
   } /* end while */

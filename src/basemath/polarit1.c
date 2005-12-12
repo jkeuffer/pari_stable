@@ -821,7 +821,7 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"spec_FpXQ_pow");
+      if(DEBUGMEM>1) pari_warn(warnmem,"spec_FpXQ_pow");
       z = gerepileupto(av, z);
     }
   }
@@ -2284,7 +2284,7 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"spec_FqXQ_pow");
+      if(DEBUGMEM>1) pari_warn(warnmem,"spec_FqXQ_pow");
       z = gerepileupto(av, z);
     }
   }
@@ -2499,7 +2499,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       if (P) {
         for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
       } else {
-        if (DEBUGLEVEL) pari_err(warner, "FqX_split_Trager failed!");
+        if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
         nbfact += FqX_sqf_split(t+nbfact, q, T, p);
       }
 #endif
@@ -2668,7 +2668,7 @@ rootsold(GEN x, long prec)
           if (j > 10)
           {
             if (DEBUGLEVEL)
-              pari_err(warner,"too many iterations in rootsold(): using roots2()");
+              pari_warn(warner,"too many iterations in rootsold(): using roots2()");
             avma = av; return roots2(x,prec);
           }
         }
@@ -2701,7 +2701,7 @@ rootsold(GEN x, long prec)
       p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,prec)));
       if (gexpo(p6) >= expmin)
       {
-        if (DEBUGLEVEL) pari_err(warner,"error in rootsold(): using roots2()");
+        if (DEBUGLEVEL) pari_warn(warner,"error in rootsold(): using roots2()");
         avma = av; return roots2(x,prec);
       }
       avma = av2;

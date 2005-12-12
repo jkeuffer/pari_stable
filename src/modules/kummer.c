@@ -207,7 +207,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     z = get_arch_real(nf, be, &emb, prec);
     if (z) break;
     prec = (prec-1)<<1;
-    if (DEBUGLEVEL) pari_err(warnprec,"reducebeta",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
     nf = nfnewprec(nf,prec);
   }
   z = shallowconcat(matunit, z);

@@ -208,7 +208,7 @@ rowred(GEN a, GEN rmod)
     {
       long j1,k1;
       GEN p1 = a;
-      if(DEBUGMEM>1) pari_err(warnmem,"rowred j=%ld", j);
+      if(DEBUGMEM>1) pari_warn(warnmem,"rowred j=%ld", j);
       p1 = gerepilecopy(av,a);
       for (j1=1; j1<r; j1++)
         for (k1=1; k1<c; k1++) gcoeff(a,j1,k1) = gcoeff(p1,j1,k1);
@@ -413,7 +413,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     if (epsilon < 2) break;
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ordmax");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ordmax");
       gerepileall(av2, 2, &m, &delta);
     }
   }
@@ -609,7 +609,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       GEN x = (GEN)global_err_data;
       GEN p = gcdii(gel(x,1), gel(x,2));
       GEN N, u;
-      if (DEBUGLEVEL) pari_err(warner,"impossible inverse: %Z", x);
+      if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Z", x);
 
       u = get_coprimes(p, diviiexact(gel(x,1),p));
       l = lg(u);
@@ -1201,7 +1201,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem, "newtonsums");
+      if(DEBUGMEM>1) pari_warn(warnmem, "newtonsums");
       gerepileall(av, 4, &pa, &va, &pp, &dpa);
     }
   }
@@ -1703,7 +1703,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
 
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      if (DEBUGMEM > 1) pari_err(warnmem, "nilord");
+      if (DEBUGMEM > 1) pari_warn(warnmem, "nilord");
       gerepileall(av2, S->invnu? 3: 1, &beta, &(S->invnu), &(S->Dinvnu));
     }
   }
@@ -2931,7 +2931,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"rnfordmax");
+      if(DEBUGMEM>1) pari_warn(warnmem,"rnfordmax");
       gerepileall(av1,2, &W,&I);
     }
   }
@@ -3688,7 +3688,7 @@ PRECNF:
   if (count == MAX_COUNT)
   {
     prec = (prec<<1)-2; count = 0;
-    if (DEBUGLEVEL) pari_err(warnprec,"rnflllgram",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"rnflllgram",prec);
     nf = nfnewprec(nf,prec);
   }
   mth = rel_T2(nf, pol, lx, prec);
@@ -3744,7 +3744,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"rnflllgram");
+      if(DEBUGMEM>1) pari_warn(warnmem,"rnflllgram");
       gerepileall(av, H?10:9, &nf,&mth,&h,&MPOL,&B,&MC,&MCS,&mu,&I,&H);
     }
   }

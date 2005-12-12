@@ -640,7 +640,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   NQ=divis_rem(NN,N1,&R1);
   if (cmpiu(NQ,1000000000)>0)
   {
-    pari_err(warner,"Combinatorics too hard : would need %Z tests!\n"
+    pari_warn(warner,"Combinatorics too hard : would need %Z tests!\n"
 	"I will skip it, but it may induce an infinite loop",NN);
     avma = ltop; *psi = NULL; return 0;
   }
@@ -940,7 +940,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   if (cmpiu(NQ,100000000)>0)
   {
     avma=avm;
-    pari_err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
+    pari_warn(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
     return perm_identity(n);
   }
   N2=itos(NQ);
@@ -1539,7 +1539,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   if (plift == 0 || ((group&ga_non_wss) && order == Fp[np]))
   {
     deg = 0;
-    pari_err(warner, "Galois group almost certainly not weakly super solvable");
+    pari_warn(warner, "Galois group almost certainly not weakly super solvable");
   }
   /*linf=(n*(n-1))>>2;*/
   linf=n;
@@ -2465,7 +2465,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
 	}
 	Try++;
 	if ( (ga->group&ga_non_wss) && Try > n )
-	  pari_err(warner, "galoisconj _may_ hang up for this polynomial");
+	  pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
       }
     }
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
@@ -2957,7 +2957,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
 	{
 	  G = galoisconj2pol(nf, card, prec);
 	  if (lg(G) <= card)
-	    pari_err(warner, "conjugates list may be incomplete in nfgaloisconj");
+	    pari_warn(warner, "conjugates list may be incomplete in nfgaloisconj");
 	  return G;
 	}
 	else

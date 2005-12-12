@@ -442,7 +442,7 @@ sd_compatible(const char *v, long flag)
   GEN r = sd_ulong(v,flag,"compatible",&compatible, 0,3,msg);
 
   if (old != compatible && flag != d_INITRC && gp_init_functions())
-    pari_err(warner,"user functions re-initialized");
+    pari_warn(warner,"user functions re-initialized");
   return r;
 }
 
@@ -768,7 +768,7 @@ sd_prettyprinter(char *v, long flag)
         f = try_pipe(v, mf_OUT | mf_TEST);
         if (!f)
         {
-          pari_err(warner,"broken prettyprinter: '%s'",v);
+          pari_warn(warner,"broken prettyprinter: '%s'",v);
           return gnil;
         }
       }

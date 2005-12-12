@@ -883,7 +883,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 
     if (low_stack(st_lim, stack_lim(av2, 1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"FpXQX_gcd");
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpXQX_gcd");
       gerepileall(av2, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;
@@ -1316,7 +1316,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     w = FpXQ_mul(y,w,T,p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"FpXQ_sqrtl");
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpXQ_sqrtl");
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
@@ -1369,7 +1369,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
       }
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors */
-	if(DEBUGMEM>1) pari_err(warnmem,"FpXQ_sqrtn");
+	if(DEBUGMEM>1) pari_warn(warnmem,"FpXQ_sqrtn");
         gerepileall(av1,zetan? 2: 1, &a,&z);
       }
     }
@@ -2575,7 +2575,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (!gcmp1(lb)) res = muliimod(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"FpX_resultant (da = %ld)",da);
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpX_resultant (da = %ld)",da);
       gerepileall(av,3, &a,&b,&res);
     }
     da = db; /* = degpol(a) */
@@ -2688,7 +2688,7 @@ polint_triv(GEN xa, GEN ya)
     P = P? gadd(P, dP): dP;
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"polint_triv2 (i = %ld)",i);
+      if (DEBUGMEM>1) pari_warn(warnmem,"polint_triv2 (i = %ld)",i);
       P = gerepileupto(av, P);
     }
   }
@@ -2735,7 +2735,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
     P = P? FpX_add(P, dP, p): dP;
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"FpV_polint");
+      if (DEBUGMEM>1) pari_warn(warnmem,"FpV_polint");
       if (!P) avma = av; else P = gerepileupto(av, P);
     }
   }
@@ -2909,7 +2909,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
@@ -2985,7 +2985,7 @@ FlxX_subres(GEN u, GEN v, ulong p)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"subresall, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"subresall, dr = %ld",dr);
       gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
@@ -3227,7 +3227,7 @@ INIT:
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
-      if (DEBUGMEM>1) pari_err(warnmem,"ZY_ZXY_rnfequation");
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZY_ZXY_rnfequation");
       gerepilemany(av2,gptr,LERS? 4: 2); 
     }
   }
@@ -3367,7 +3367,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
-      if (DEBUGMEM>1) pari_err(warnmem,"ZX_resultant");
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZX_resultant");
       gerepilemany(av2,gptr, 2);
     }
   }
@@ -3510,7 +3510,7 @@ next:
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"modulargcd");
+      if (DEBUGMEM>1) pari_warn(warnmem,"modulargcd");
       gerepileall(av2, 2, &H, &q);
     }
   }
@@ -3566,7 +3566,7 @@ QXQ_inv(GEN A0, GEN B0)
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"QXQ_inv");
+      if (DEBUGMEM>1) pari_warn(warnmem,"QXQ_inv");
       gerepileall(av2, 3, &q,&U,&V);
     }
   }

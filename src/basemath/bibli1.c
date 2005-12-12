@@ -709,7 +709,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
           else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) pari_err(warnmem,"lllint[1], kmax = %ld", kmax);
+            if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
             gerepileall(av,h?4:3,&B,&L,&x,&h);
           }
         }
@@ -717,7 +717,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lllint[2], kmax = %ld", kmax);
+      if(DEBUGMEM>1) pari_warn(warnmem,"lllint[2], kmax = %ld", kmax);
       gerepileall(av,h?4:3,&B,&L,&x,&h);
     }
   }
@@ -947,7 +947,7 @@ lllgramallgen(GEN x, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lllgramallgen");
+      if(DEBUGMEM>1) pari_warn(warnmem,"lllgramallgen");
       gerepileall(av,3,&B,&L,&h);
     }
   }
@@ -1115,7 +1115,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lllfp[1]");
+      if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1]");
       gerepileall(av,5,&X,&Xs, &R,&h,&Q);
     }
   }
@@ -1222,7 +1222,7 @@ PRECPB:
           prec = (long)((prec-2) * 1.25 + 2);
         if (isexact)
         {
-          if (DEBUGLEVEL>2) pari_err(warnprec,"lllfp (exact)",prec);
+          if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
           if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
           gerepileall(av, in_place? 1: 2, &xinit, &H);
@@ -1234,7 +1234,7 @@ PRECPB:
         }
         else
         {
-          if (DEBUGLEVEL) pari_err(warnprec,"lllfp",prec);
+          if (DEBUGLEVEL) pari_warn(warnprec,"lllfp",prec);
           x = gprec_w(xinit,prec);
           x = gram? qf_base_change(x, h, 1): gmul(x, h);
           gerepileall(av, 2, &h, &x);
@@ -1243,7 +1243,7 @@ PRECPB:
       } /* fall through */
     case 0: /* give up */
       if (DEBUGLEVEL>3) fprintferr("\n");
-      if (DEBUGLEVEL) pari_err(warner,"lllfp giving up");
+      if (DEBUGLEVEL) pari_warn(warner,"lllfp giving up");
       if (flag) { avma=av; return NULL; }
       pari_err(lllger3);
   }
@@ -1318,7 +1318,7 @@ PRECPB:
           if (!j) goto PRECPB;
           if (low_stack(lim, stack_lim(av,1)))
           {
-            if(DEBUGMEM>1) pari_err(warnmem,"lllfp[1], kmax = %ld", kmax);
+            if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1], kmax = %ld", kmax);
             gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
           }
         }
@@ -1351,7 +1351,7 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lllfp[2], kmax = %ld", kmax);
+      if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[2], kmax = %ld", kmax);
       gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
     }
   }
@@ -1617,7 +1617,7 @@ lllintpartialall(GEN m, long flag)
         } /* for ijdif */
         if (low_stack(lim, stack_lim(av3,2)))
 	{
-          if(DEBUGMEM>1) pari_err(warnmem,"lllintpartialall");
+          if(DEBUGMEM>1) pari_warn(warnmem,"lllintpartialall");
 	  gerepileall(av3, 2, &dot,&tm2);
         }
       } /* for i */
@@ -2047,7 +2047,7 @@ lindep(GEN x, long prec)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lindep");
+      if(DEBUGMEM>1) pari_warn(warnmem,"lindep");
       b = (GEN*)gerepilecopy(av0, (GEN)b);
       av1 = avma;
     }
@@ -2412,7 +2412,7 @@ pslq(GEN x)
 
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"pslq");
+      if(DEBUGMEM>1) pari_warn(warnmem,"pslq");
       gerepileall(av,4,&M.y,&M.H,&M.A,&M.B);
     }
   }
@@ -2671,7 +2671,7 @@ RESTART:
   {
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"pslq");
+      if(DEBUGMEM>1) pari_warn(warnmem,"pslq");
       gerepileall(av,4,&M.y,&M.H,&M.A,&M.B);
     }
     if (flit)
@@ -3159,7 +3159,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if(DEBUGMEM>1) pari_err(warnmem,"minim0, rank>=%ld",s);
+          if(DEBUGMEM>1) pari_warn(warnmem,"minim0, rank>=%ld",s);
           invp = gerepilecopy(av1, invp);
         }
       }
@@ -3342,7 +3342,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) pari_err(warnmem,"smallvectors");
+	if(DEBUGMEM>1) pari_warn(warnmem,"smallvectors");
 	if (stockmax) S = clonefill(S, s, stockmax);
         if (check) {
           GEN dummy = cgetg(1, t_STR);

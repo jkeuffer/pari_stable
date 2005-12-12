@@ -1319,7 +1319,7 @@ gauss_intern(GEN a, GEN b)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"gauss. i=%ld",i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"gauss. i=%ld",i);
       gerepileall(av,2, &a,&b);
     }
   }
@@ -1488,7 +1488,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"FpM_gauss. i=%ld",i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpM_gauss. i=%ld",i);
       gerepileall(av,2, &a,&b);
     }
   }
@@ -1548,7 +1548,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"FpM_gauss. i=%ld",i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpM_gauss. i=%ld",i);
       gerepileall(av, 2, &a,&b);
     }
   }
@@ -1621,7 +1621,7 @@ ZM_inv(GEN M, GEN dM)
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
-      if (DEBUGMEM>1) pari_err(warnmem,"ZM_inv");
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZM_inv");
       gerepilemany(av2,gptr, 2);
     }
   }
@@ -1704,7 +1704,7 @@ detint(GEN x)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[5];
-      if(DEBUGMEM>1) pari_err(warnmem,"detint. k=%ld",k);
+      if(DEBUGMEM>1) pari_warn(warnmem,"detint. k=%ld",k);
       gptr[0]=&det1; gptr[1]=&piv; gptr[2]=&pivprec;
       gptr[3]=&pass; gptr[4]=&v; gerepilemany(av1,gptr,5);
     }
@@ -1740,7 +1740,7 @@ gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
   pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
 
-  if (DEBUGMEM > 1) pari_err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
+  if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++) gcopyifstack(gcoeff(x,u,i), gcoeff(x,u,i));
@@ -1753,7 +1753,7 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long k, long t, pari_sp av)
   pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
 
-  if (DEBUGMEM > 1) pari_err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
+  if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
     if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = modii(gcoeff(x,u,k),p);
   for (i=k+1; i<=n; i++)
@@ -1771,7 +1771,7 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
   size_t dec;
 
-  if (DEBUGMEM > 1) pari_err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
+  if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
     if (u==j || !c[u]) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
   for (u=1; u<=m; u++)
@@ -3053,7 +3053,7 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long k, long t, pari_sp av)
   pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
 
-  if (DEBUGMEM > 1) pari_err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
+  if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
     if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = Fq_red(gcoeff(x,u,k),T,p);
   for (i=k+1; i<=n; i++)
@@ -3068,7 +3068,7 @@ Flxq_gerepile_gauss_ker(GEN x, GEN T, ulong p, long k, long t, pari_sp av)
   pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
 
-  if (DEBUGMEM > 1) pari_err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
+  if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
     if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = Flx_rem(gcoeff(x,u,k),T,p);
   for (i=k+1; i<=n; i++)
@@ -3460,7 +3460,7 @@ det(GEN a)
       if (low_stack(lim,stack_lim(av,2)))
       {
         GEN *gptr[2]; gptr[0]=&a; gptr[1]=&pprec;
-        if(DEBUGMEM>1) pari_err(warnmem,"det. col = %ld",i);
+        if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
         gerepilemany(av,gptr,2); p = gcoeff(a,i,i); ci = (GEN*)a[i];
       }
     }

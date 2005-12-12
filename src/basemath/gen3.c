@@ -1017,7 +1017,7 @@ inv_ser(GEN b)
     for (j = l2+2; j < l1+2; j++) x[j] = y[j];
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"inv_ser");
+      if(DEBUGMEM>1) pari_warn(warnmem,"inv_ser");
       y = gerepilecopy(av2, x);
       for (j = 2; j < l1+2; j++) x[j] = y[j];
     }
@@ -1329,7 +1329,7 @@ gsubst(GEN x, long v, GEN y)
 	    }
             if (low_stack(lim, stack_lim(av,1)))
 	    {
-	      if(DEBUGMEM>1) pari_err(warnmem,"gsubst");
+	      if(DEBUGMEM>1) pari_warn(warnmem,"gsubst");
 	      gerepileall(av,2, &z,&t);
 	    }
 	  }
@@ -1446,7 +1446,7 @@ recip(GEN x)
       gel(y,i) = gdivgs(gel(u,i), i-1);
       if (low_stack(lim, stack_lim(av,2)))
       {
-	if(DEBUGMEM>1) pari_err(warnmem,"recip");
+	if(DEBUGMEM>1) pari_warn(warnmem,"recip");
 	for(k=i+1; k<lx; k++) gel(u,k) = gel(y,k) = gen_0; /* dummy */
 	gerepileall(av,2, &u,&y);
       }
@@ -3464,7 +3464,7 @@ poleval(GEN x, GEN y)
       p1 = gadd(gmul(p1,r), gel(x,j));
       if (low_stack(lim, stack_lim(av0,2)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"poleval: i = %ld",i);
+        if (DEBUGMEM>1) pari_warn(warnmem,"poleval: i = %ld",i);
         p1 = gerepileupto(av0, p1);
       }
     }
@@ -3479,7 +3479,7 @@ poleval(GEN x, GEN y)
     p2 = gadd(gel(x,i), gmul(s, p1)); p1 = p3;
     if (low_stack(lim, stack_lim(av0,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"poleval: i = %ld",i);
+      if (DEBUGMEM>1) pari_warn(warnmem,"poleval: i = %ld",i);
       gerepileall(av, 2, &p1, &p2);
     }
   }

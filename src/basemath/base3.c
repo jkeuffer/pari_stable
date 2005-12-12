@@ -1232,7 +1232,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"Fp_shanks, k = %ld", k);
+      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_shanks, k = %ld", k);
       p1 = gerepileuptoint(av1, p1);
     }
   }
@@ -1364,7 +1364,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ffshanks");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ffshanks");
       p1 = gerepileupto(av1, p1);
     }
   }
@@ -2346,7 +2346,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"Ideallist");
+      if(DEBUGMEM>1) pari_warn(warnmem,"Ideallist");
       z = gerepilecopy(av, z);
     }
   }

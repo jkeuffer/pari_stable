@@ -209,7 +209,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
     if (MatFU) break;
     prec_roots = (prec_roots << 1) - 2;
-    if (DEBUGLEVEL>1) pari_err(warnprec, "inithue", prec_roots); 
+    if (DEBUGLEVEL>1) pari_warn(warnprec, "inithue", prec_roots); 
   }
 
   dP = derivpol(P);
@@ -562,7 +562,7 @@ SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
       if (typ(gel(r,j)) == t_INT) add_sol(&S, gel(r,j), stoi(x)); 
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"SmallSols");
+      if(DEBUGMEM>1) pari_warn(warnmem,"SmallSols");
       S = gerepilecopy(av, S);
       P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 
     }
@@ -616,7 +616,7 @@ thueinit(GEN pol, long flag, long prec)
     {
       if (( tnf = inithue(pol, bnf, flag, PREC) )) break;
       PREC = (PREC<<1)-2;
-      if (DEBUGLEVEL>1) pari_err(warnprec,"thueinit",PREC);
+      if (DEBUGLEVEL>1) pari_warn(warnprec,"thueinit",PREC);
       bnf = NULL; avma = av;
     }
   }
@@ -781,7 +781,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     ne = bnfisintnorm(bnf, rhs);
     if (!gcmp1(gmael(tnf, 7, 7)) &&
         !gcmp1(gmael3(bnf, 8, 1, 1)) && !is_pm1(rhs))
-      pari_err(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation"); 
+      pari_warn(warner, "Non trivial conditional class group.\n  *** May miss solutions of the norm equation"); 
   }
   if (lg(ne)==1) return NULL;
 
@@ -853,7 +853,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     {
       if (( MatNE = Conj_LH(ne, &Hmu, ro, prec) )) break;
       prec = (prec<<1)-2;
-      if (DEBUGLEVEL>1) pari_err(warnprec,"thue",prec);
+      if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
       ro = tnf_get_roots(P, prec, s, t);
     }
     BS.ro    = ro;
@@ -941,7 +941,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
 PRECPB:
   ne = gerepilecopy(av, ne);
   prec += 5 * (DEFAULTPREC-2);
-  if (DEBUGLEVEL>1) pari_err(warnprec,"thue",prec);
+  if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
   tnf = inithue(P, bnf, 0, prec);
   return LargeSols(tnf, rhs, ne, pro, pS);
 }

@@ -53,7 +53,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
     s = gaddsg(1, gdiv(gdivgs(gmul(Z,s),k),gaddsg(k,n)));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"jbessel");
+      if (DEBUGMEM>1) pari_warn(warnmem,"jbessel");
       s = gerepilecopy(av, s);
     }
   }
@@ -373,7 +373,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     s = gadd(gadd(gel(H,k),gel(H,k+n)),gdiv(gmul(Z,s),mulss(k,k+n)));
     if (low_stack(limit,stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"kbessel");
+      if (DEBUGMEM>1) pari_warn(warnmem,"kbessel");
       s = gerepilecopy(av, s);
     }
   }
@@ -688,7 +688,7 @@ incgam2(GEN s, GEN x, long prec)
     S = gdiv(gaddsg(-i,s), gadd(gaddgs(x_s,i<<1),gmulsg(i,S)));
     if (low_stack(avlim,stack_lim(av2,3)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"incgam2");
+      if(DEBUGMEM>1) pari_warn(warnmem,"incgam2");
       S = gerepileupto(av2, S);
     }
   }
@@ -723,7 +723,7 @@ incgamc(GEN s, GEN x, long prec)
     t = gadd(S,t);
     if (low_stack(avlim,stack_lim(av2,3)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"incgamc");
+      if(DEBUGMEM>1) pari_warn(warnmem,"incgamc");
       gerepileall(av2, 2, &S, &t);
     }
   }
@@ -1183,7 +1183,7 @@ szeta_odd(long k, long prec)
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"szeta");
+        if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
         gerepileall(av2,2, &z, &qn);
       }
     }
@@ -1215,7 +1215,7 @@ szeta_odd(long k, long prec)
       qn=mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"szeta");
+        if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
         gerepileall(av2,2, &z, &qn);
       }
     }
@@ -1398,7 +1398,7 @@ czeta(GEN s0, long prec)
       tes = addrr(bernreal(i,prec), divrsns(u, i+1)); /* u / (i+1)(i+2) */
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"czeta");
+        if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
         tes = gerepileuptoleaf(av2, tes);
       }
     }
@@ -1421,7 +1421,7 @@ czeta(GEN s0, long prec)
       tes = gadd(bernreal(i,prec), divgsns(gmul(s5,tes), i+1));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"czeta");
+        if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
         gerepileall(av2,3, &tes,&s5,&s4);
       }
     }
@@ -1483,7 +1483,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
     if (gcmp0(Cx)) break; 
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem, "twistpartialzeta (1), j = %ld/%ld", j, N);
+      if(DEBUGMEM>1) pari_warn(warnmem, "twistpartialzeta (1), j = %ld/%ld", j, N);
       gerepileall(av, 2, &Cx, &Bx);
     }
   }
@@ -1507,7 +1507,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
     if (low_stack(lim, stack_lim(av2, 1)))
     {
       if(DEBUGMEM>1) 
-	pari_err(warnmem, "twistpartialzeta (2), j = %ld/%ld", lva-j, lva);
+	pari_warn(warnmem, "twistpartialzeta (2), j = %ld/%ld", lva-j, lva);
       Dx = gerepileupto(av2, FpXQX_red(Dx, cyc, q));
     }
   }
@@ -1522,7 +1522,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
     rep = modii(addii(rep, mulii(gel(cff, k), p2)), q);
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem, "twistpartialzeta (3), j = %ld/%ld", k, N);
+      if(DEBUGMEM>1) pari_warn(warnmem, "twistpartialzeta (3), j = %ld/%ld", k, N);
       rep = gerepileupto(av2, rep);
     }
   }
@@ -1590,7 +1590,7 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
     if (low_stack(lim, stack_lim(av, 2)))
     {
       if(DEBUGMEM>1) 
-	pari_err(warnmem, "coeff_of_phi_ms (1), k = %ld/%ld", N-k, N);
+	pari_warn(warnmem, "coeff_of_phi_ms (1), k = %ld/%ld", N-k, N);
       cff = gerepileupto(av, gcopy(cff));
     }
   }
@@ -1601,7 +1601,7 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
     if (low_stack(lim, stack_lim(av, 2)))
     {
       if(DEBUGMEM>1) 
-	pari_err(warnmem, "coeff_of_phi_ms (2), j = %ld/%ld", N-j, N);
+	pari_warn(warnmem, "coeff_of_phi_ms (2), j = %ld/%ld", N-j, N);
       cff = gerepileupto(av, gcopy(cff));
     }
   }
@@ -1613,7 +1613,7 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
       if (low_stack(lim, stack_lim(av, 2)))
       {
 	if(DEBUGMEM>1) 
-	  pari_err(warnmem, "coeff_of_phi_ms (3), (k,j) = (%ld,%ld)/%ld", 
+	  pari_warn(warnmem, "coeff_of_phi_ms (3), (k,j) = (%ld,%ld)/%ld", 
 	      k, N-j, N);
 	cff = gerepileupto(av, gcopy(cff));
       }
@@ -1867,7 +1867,7 @@ polylog(long m, GEN x, long prec)
 
     if (low_stack(limpile, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"polylog");
+      if(DEBUGMEM>1) pari_warn(warnmem,"polylog");
       gerepileall(av1,2, &y, &Xn);
     }
   }
@@ -2152,7 +2152,7 @@ inteta(GEN q)
         { if (gval(ps,v) >= l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"eta");
+        if(DEBUGMEM>1) pari_warn(warnmem,"eta");
         gerepileall(av, 3, &y, &qn, &ps);
       }
     }

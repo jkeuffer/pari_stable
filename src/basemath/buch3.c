@@ -649,7 +649,7 @@ zimmertbound(long N,long R2,GEN DK)
   n = itos_or_0( gceil(w) );
   if (!n) pari_err(talker,"Minkowski bound is too large");
   if (n > 500000)
-      pari_err(warner,"large Minkowski bound: certification will be VERY long");
+      pari_warn(warner,"large Minkowski bound: certification will be VERY long");
   avma = av; return n;
 }
 
@@ -2177,7 +2177,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"[1]: discrayabslistarch");
+      if(DEBUGMEM>1) pari_warn(warnmem,"[1]: discrayabslistarch");
       gerepileall(av, flbou? 2: 1, &Z, &Ray);
     }
     NEXT_PRIME_VIADIFF(p[2], dif);
@@ -2263,7 +2263,7 @@ STORE:  gel(discall,karch+1) = res;
       gel(sousdisc,j) = res;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"[2]: discrayabslistarch");
+        if(DEBUGMEM>1) pari_warn(warnmem,"[2]: discrayabslistarch");
         Disc = gerepilecopy(av1, Disc);
       }
     }

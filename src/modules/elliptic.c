@@ -1080,7 +1080,7 @@ trueE(GEN tau, long k, long prec)
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"elleisnum");
+      if(DEBUGMEM>1) pari_warn(warnmem,"elleisnum");
       gerepileall(av, 2, &y,&qn);
     }
   }
@@ -1220,7 +1220,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     if (low_stack(lim, stack_lim(av1,1)))
     {
       GEN *gptr[3]; gptr[0]=&y; gptr[1]=&qn; gptr[2]=&yp;
-      if(DEBUGMEM>1) pari_err(warnmem,"weipellnum");
+      if(DEBUGMEM>1) pari_warn(warnmem,"weipellnum");
       gerepilemany(av1,gptr,flall?3:2);
     }
   }
@@ -1273,7 +1273,7 @@ ellzeta(GEN om, GEN z, long prec)
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ellzeta");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ellzeta");
       gerepileall(av1,2, &y,&qn);
     }
   }
@@ -1328,7 +1328,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"ellsigma");
+        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
         gerepileall(av1,2, &y,&qn);
       }
     }
@@ -1352,7 +1352,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
       if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"ellsigma");
+        if(DEBUGMEM>1) pari_warn(warnmem,"ellsigma");
         gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
       }
     }
@@ -3189,7 +3189,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
     z = gadd(z, gmul(p1, an));
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"lseriesell");
+      if(DEBUGMEM>1) pari_warn(warnmem,"lseriesell");
       z = gerepilecopy(av1,z);
     }
   }

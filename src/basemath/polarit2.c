@@ -1296,7 +1296,7 @@ AGAIN:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"LLL_cmbf");
+      if(DEBUGMEM>1) pari_warn(warnmem,"LLL_cmbf");
       gerepileall(av, 5, &CM_L, &TT, &Tra, &famod, &pa);
     }
   }
@@ -1424,7 +1424,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
     gel(z,m++) = r;
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"DDF_roots, m = %ld", m);
+      if (DEBUGMEM>1) pari_warn(warnmem,"DDF_roots, m = %ld", m);
       gerepileall(av, lc? 4:2, &z, &pol, &lc, &lcpol);
     
     }
@@ -2279,7 +2279,7 @@ leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
         else y = sqr(data,y);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_err(warnmem,"leftright_pow");
+          if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
           y = gerepilecopy(av, y);
         }
       }
@@ -2876,7 +2876,7 @@ RgX_gcd_simple(GEN x, GEN y)
     }
     x = y; y = r;
     if (low_stack(lim,stack_lim(av,1))) {
-      if(DEBUGMEM>1) pari_err(warnmem,"RgX_gcd_simple");
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_gcd_simple");
       gerepileall(av,2, &x,&y);
     }
   }
@@ -3318,7 +3318,7 @@ gdivexact(GEN x, GEN y)
       for (i=1; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
       z[0] = x[0]; return z;
   }
-  if (DEBUGLEVEL) pari_err(warner,"missing case in gdivexact");
+  if (DEBUGLEVEL) pari_warn(warner,"missing case in gdivexact");
   return gdiv(x,y);
 }
 
@@ -3379,7 +3379,7 @@ pseudorem_i(GEN x, GEN y, GEN mod)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
@@ -3443,7 +3443,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"pseudodiv dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"pseudodiv dx = %ld >= %ld",dx,dy);
       gerepilecoeffs2(av2,x,dx+1, z,iz);
     }
   }
@@ -3515,7 +3515,7 @@ subresall(GEN u, GEN v, GEN *sol)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"subresall, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"subresall, dr = %ld",dr);
       gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
@@ -3607,14 +3607,14 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     }
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"subresext, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"subresext, dr = %ld",dr);
       gerepileall(av2,6, &u,&v,&g,&h,&uze,&um1);
     }
   }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
   p1 = gadd(z, gneg(gmul(uze,x)));
   vze = RgX_divrem(p1, y, &p1);
-  if (!gcmp0(p1)) pari_err(warner,"inexact computation in subresext");
+  if (!gcmp0(p1)) pari_warn(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
   p1 = gen_1;
   if (cu) p1 = gmul(p1, gpowgs(cu,dy));
@@ -3702,13 +3702,13 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"RgX_extgcd, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_extgcd, dr = %ld",dr);
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
   p1 = gadd(v, gneg(gmul(uze,x)));
   vze = RgX_divrem(p1, y, &p1);
-  if (!gcmp0(p1)) pari_err(warner,"inexact computation in RgX_extgcd");
+  if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);
   p1 = ginv(content(v));
@@ -3782,7 +3782,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
     if (j <= pr) A = gadd(A,gmul(gel(P,j+2),H));
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"nextSousResultant j = %ld/%ld",j,p);
+      if(DEBUGMEM>1) pari_warn(warnmem,"nextSousResultant j = %ld/%ld",j,p);
       gerepileall(av,2,&A,&H);
     }
   }
@@ -3824,7 +3824,7 @@ resultantducos(GEN P, GEN Q)
     {
       if (low_stack(lim,stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
+        if(DEBUGMEM>1) pari_warn(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
         gerepileall(av2,2,&P,&Q); s = leading_term(P);
       }
       delta = degpol(P) - degpol(Q);
@@ -4015,7 +4015,7 @@ srgcd(GEN x, GEN y)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"srgcd");
+        if(DEBUGMEM>1) pari_warn(warnmem,"srgcd");
         gerepileall(av1,4,&u,&v,&g,&h);
       }
     }
@@ -4181,7 +4181,7 @@ sturmpart(GEN x, GEN a, GEN b)
     v = gdivexact(r,p1);
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"polsturm, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"polsturm, dr = %ld",dr);
       gerepileall(av,4,&u,&v,&g,&h);
     }
   }
@@ -4448,7 +4448,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
-	if (DEBUGMEM>1) pari_err(warnmem,"nfgcd");
+	if (DEBUGMEM>1) pari_warn(warnmem,"nfgcd");
 	gerepileall(btop, 2, &M, &mod);
       }
 

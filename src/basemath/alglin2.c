@@ -314,7 +314,7 @@ hess(GEN x)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"hess, m = %ld", m);
+        if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
         x = gerepilecopy(av2, x);
       }
       break;
@@ -418,7 +418,7 @@ gnorml2(GEN x)
     y = gadd(y, gnorml2(gel(x,i)));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"gnorml2");
+      if (DEBUGMEM>1) pari_warn(warnmem,"gnorml2");
       y = gerepileupto(av, y);
     }
   }
@@ -763,7 +763,7 @@ sqred1intern(GEN a)
       gcoeff(b,k,j) = gmul(gcoeff(b,k,j), p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"sqred1");
+      if (DEBUGMEM>1) pari_warn(warnmem,"sqred1");
       b=gerepilecopy(av,b);
     }
   }
@@ -808,7 +808,7 @@ sqred3(GEN a)
     gcoeff(b,i,k) = gsub(gcoeff(a,i,i),p1);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"sqred3");
+      if (DEBUGMEM>1) pari_warn(warnmem,"sqred3");
       b=gerepilecopy(av,b);
     }
   }
@@ -883,7 +883,7 @@ sqred2(GEN a, long signature)
           gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
 	  if (low_stack(lim, stack_lim(av1,1)))
 	  {
-	    if(DEBUGMEM>1) pari_err(warnmem,"sqred2");
+	    if(DEBUGMEM>1) pari_warn(warnmem,"sqred2");
 	    a = gerepilecopy(av1, a);
 	  }
 	  break;
@@ -1071,7 +1071,7 @@ matrixqz(GEN x, GEN p)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if (DEBUGMEM>1) pari_err(warnmem,"matrixqz");
+	if (DEBUGMEM>1) pari_warn(warnmem,"matrixqz");
 	x = gerepilecopy(av1,x);
       }
     }
@@ -1159,7 +1159,7 @@ matrixqz_aux(GEN A)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"matrixqz_aux");
+      if(DEBUGMEM>1) pari_warn(warnmem,"matrixqz_aux");
       A = gerepilecopy(av,A);
     }
   }
@@ -1202,7 +1202,7 @@ matrixqz3(GEN x)
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"matrixqz3");
+      if(DEBUGMEM>1) pari_warn(warnmem,"matrixqz3");
       x = gerepilecopy(av1,x);
     }
   }
@@ -1512,7 +1512,7 @@ hnf_special(GEN x, long remove)
       if (low_stack(lim, stack_lim(av,1)))
       {
         GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
-        if (DEBUGMEM>1) pari_err(warnmem,"hnf_special[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_warn(warnmem,"hnf_special[1]. i=%ld",i);
         gerepilemany(av,gptr,2);
       }
     }
@@ -1537,7 +1537,7 @@ hnf_special(GEN x, long remove)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
-      if (DEBUGMEM>1) pari_err(warnmem,"hnf_special[2]. i=%ld",i);
+      if (DEBUGMEM>1) pari_warn(warnmem,"hnf_special[2]. i=%ld",i);
       gerepilemany(av,gptr,2);
     }
   }
@@ -1655,7 +1655,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"hnffinal, i = %ld",i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"hnffinal, i = %ld",i);
       gerepileall(av, 2, &Cnew, &B);
     }
   }
@@ -1882,7 +1882,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     lig--; col--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[1]");
+      if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[1]");
       if (T) T = gerepilecopy(av, T); else avma = av;
     }
   }
@@ -1924,7 +1924,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     lig--; col--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[2]");
+      if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[2]");
       if (T) T = gerepilecopy(av,T); else avma = av;
     }
   }
@@ -1966,7 +1966,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       if (T) elt_col(gel(T,j), gel(T,k), negi(v));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
+        if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
         for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
         gerepileall(av, T? 2: 1, &matb, &T);
         Bk = gel(matb,k);
@@ -2374,7 +2374,7 @@ hnf0(GEN A, int remove)
 
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"hnf[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. i=%ld",i);
         A = gerepilecopy(av, A);
       }
     }
@@ -2389,7 +2389,7 @@ hnf0(GEN A, int remove)
       if (ldef) ldef--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"hnf[2]. i=%ld",i);
+      if (DEBUGMEM>1) pari_warn(warnmem,"hnf[2]. i=%ld",i);
       A = gerepilecopy(av, A);
     }
   }
@@ -2485,7 +2485,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[1]. i=%ld",i);
+        if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[1]. i=%ld",i);
 	x = gerepilecopy(av, x);
       }
     }
@@ -2531,7 +2531,7 @@ allhnfmod(GEN x, GEN dm, int flag)
         FpV_red_part_ip(gel(x,j),  dm, j-1);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[2]. i=%ld", i);
+          if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
           x = gerepilecopy(av, x);
         }
       }
@@ -2572,7 +2572,7 @@ allhnfmod(GEN x, GEN dm, int flag)
         if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"allhnfmod[2]. i=%ld", i);
+        if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
         gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
       }
     }
@@ -2756,7 +2756,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
         if (low_stack(lim, stack_lim(av,3)))
         {
           GEN b = (GEN)(D-1);
-          if (DEBUGMEM) pari_err(warnmem,"hnflll (reducing), i = %ld",i);
+          if (DEBUGMEM) pari_warn(warnmem,"hnflll (reducing), i = %ld",i);
           gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
           D = (GEN*)(b+1);
         }
@@ -2766,7 +2766,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     if (low_stack(lim, stack_lim(av,3)))
     {
       GEN b = (GEN)(D-1);
-      if (DEBUGMEM) pari_err(warnmem,"hnflll, k = %ld / %ld",k,n-1);
+      if (DEBUGMEM) pari_warn(warnmem,"hnflll, k = %ld / %ld",k,n-1);
       gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
       D = (GEN*)(b+1);
     }
@@ -2951,7 +2951,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"hnfperm");
+      if (DEBUGMEM>1) pari_warn(warnmem,"hnfperm");
       gerepileall(av1, U? 2: 1, &A, &U);
     }
   }
@@ -3036,7 +3036,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
         ZM_reduce(A,B, i,k);
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if (DEBUGMEM>1) pari_err(warnmem,"hnfall[1], li = %ld", li);
+          if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[1], li = %ld", li);
           gerepileall(av1, B? 2: 1, &A, &B);
         }	
       }
@@ -3061,7 +3061,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     ZM_reduce(A,B, li,r);
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"hnfall[2], li = %ld", li);
+      if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[2], li = %ld", li);
       gerepileall(av1, B? 2: 1, &A, &B);
     }	
   }
@@ -3078,7 +3078,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       ZM_reduce(A,B, i,k);
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"hnfall[3], j = %ld", j);
+        if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[3], j = %ld", j);
         gerepileall(av1, B? 2: 1, &A, &B);
       }	
     }
@@ -3304,7 +3304,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         ZV_elem(b, a, x,V, j,i);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_err(warnmem,"[1]: smithall i = %ld", i);
+          if (DEBUGMEM>1) pari_warn(warnmem,"[1]: smithall i = %ld", i);
           snf_pile(av, &x,&U,&V);
         }
       }
@@ -3327,7 +3327,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if (DEBUGMEM>1) pari_err(warnmem,"[2]: smithall, i = %ld", i);
+          if (DEBUGMEM>1) pari_warn(warnmem,"[2]: smithall, i = %ld", i);
           snf_pile(av, &x,&U,&V);
         }
         c = 1;
@@ -3351,7 +3351,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_err(warnmem,"[3]: smithall");
+        if (DEBUGMEM>1) pari_warn(warnmem,"[3]: smithall");
         snf_pile(av, &x,&U,&V);
       }
     }
@@ -3543,7 +3543,7 @@ gsmithall(GEN x,long all)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_err(warnmem,"gsmithall");
+	if (DEBUGMEM>1) pari_warn(warnmem,"gsmithall");
         gerepileall(av, all? 3: 1, &x, &U, &V);
       }
     }

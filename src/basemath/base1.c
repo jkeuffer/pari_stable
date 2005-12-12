@@ -1292,7 +1292,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     }
     prec = (prec<<1)-2 + (gexpo(u0) >> TWOPOTBITS_IN_LONG);
     F.ro = NULL;
-    if (DEBUGLEVEL) pari_err(warnprec,"get_red_G", prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
   *pro = F.ro; 
   if (u0) u = gmul(u0,u);
@@ -1501,7 +1501,7 @@ initalg_i(GEN x, long flag, long prec)
 
   if (T.lead && !(flag & (nf_RED|nf_PARTRED)))
   {
-    pari_err(warner,"non-monic polynomial. Result of the form [nf,c]");
+    pari_warn(warner,"non-monic polynomial. Result of the form [nf,c]");
     flag |= nf_PARTRED | nf_ORIG;
   }
   if (flag & (nf_RED|nf_PARTRED))
@@ -2019,7 +2019,7 @@ _polredabs(nfbasic_t *T, GEN *u)
     }
     prec = (prec<<1)-2;
     get_nf_fp_compo(T, &F, NULL, prec);
-    if (DEBUGLEVEL) pari_err(warnprec,"polredabs0",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"polredabs0",prec);
   }
   *u = d.u; return v;
 }
@@ -2148,7 +2148,7 @@ rootsof1(GEN nf)
       if (y) break;
     }
     prec = (prec<<1)-2;
-    if (DEBUGLEVEL) pari_err(warnprec,"rootsof1",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
     nf = nfnewprec(nf,prec);
   }
   if (itos(ground(gel(y,2))) != N) pari_err(bugparier,"rootsof1 (bug1)");

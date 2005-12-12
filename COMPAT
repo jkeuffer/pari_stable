@@ -125,6 +125,8 @@ Incompatible changes:
     change the input of all list routines (bnrclassnolist, bnrdisclist)
     accordingly.
   - rename gtrans_i -> shallowtrans, concatsp -> shallowconcat.
+  - pari_err(warner | warnmem | warnfile | warnprec,) no longer accepted. Use
+    pari_warn.
 
 Partially compatible changes:
 -----------------------------

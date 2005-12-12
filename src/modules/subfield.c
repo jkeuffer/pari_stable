@@ -74,7 +74,7 @@ translate_pol(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gadd(R[k], R[k+1]);
       if (low_stack(lim, stack_lim(av,2)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
         Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }
@@ -86,7 +86,7 @@ translate_pol(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gsub(R[k], R[k+1]);
       if (low_stack(lim, stack_lim(av,2)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
         Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }
@@ -98,7 +98,7 @@ translate_pol(GEN P, GEN c)
       for (k=n-i; k<n; k++) R[k] = gadd(R[k], gmul(c, R[k+1]));
       if (low_stack(lim, stack_lim(av,2)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"TR_POL, i = %ld/%ld", i,n);
+        if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL, i = %ld/%ld", i,n);
         Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
       }
     }

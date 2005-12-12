@@ -308,7 +308,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     {
       GEN *gptr[6]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&u; gptr[3]=&u1;
       gptr[4]=&v; gptr[5]=&v1;
-      if(DEBUGMEM>1) pari_err(warnmem,"bezout");
+      if(DEBUGMEM>1) pari_warn(warnmem,"bezout");
       gerepilemany(av1,gptr,6);
     }
   } /* end while */

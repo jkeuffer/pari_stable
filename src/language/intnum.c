@@ -829,7 +829,7 @@ code_aux(GEN a2, int warn)
   if (s)
   {
     if(warn && !gcmp0(a2R))
-      pari_err(warner,"both nonzero real and imag. part in coding, real ignored");
+      pari_warn(warner,"both nonzero real and imag. part in coding, real ignored");
     return s > 0 ? f_YOSCC : f_YOSCS;
   }
   if (gcmp0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
@@ -1313,7 +1313,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   /* now a and b are infinite */
   if (codea * codeb > 0)
   {
-    pari_err(warner, "integral from infty to infty or from -infty to -infty");
+    pari_warn(warner, "integral from infty to infty or from -infty to -infty");
     return gen_0;
   }
   if (codea > 0) { lswap(codea, codeb); swap(a, b); sgns = -sgns; }

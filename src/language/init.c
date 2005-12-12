@@ -127,7 +127,7 @@ fprintferr("+ %ld\n", ++NUM);
 #endif
   if (DEBUGMEM)
   {
-    if (!n) pari_err(warner,"mallocing NULL object in newbloc");
+    if (!n) pari_warn(warner,"mallocing NULL object in newbloc");
     if (DEBUGMEM > 2)
       fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
   }
@@ -263,7 +263,7 @@ gpmalloc(size_t size)
     if (!tmp) pari_err(memer);
     return tmp;
   }
-  if (DEBUGMEM) pari_err(warner,"mallocing NULL object");
+  if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
   return NULL;
 }
 
@@ -490,7 +490,7 @@ static void
 reset_traps()
 {
   long i;
-  if (DEBUGLEVEL) pari_err(warner,"Resetting all traps");
+  if (DEBUGLEVEL) pari_warn(warner,"Resetting all traps");
   for (i=0; i <= noer; i++) dft_handler[i] = NULL;
 }
 
@@ -546,7 +546,7 @@ init_stack(size_t size)
     for (s = old;; s>>=1)
     {
       if (!s) pari_err(memer); /* no way out. Die */
-      pari_err(warner,"not enough memory, new stack %lu",s);
+      pari_warn(warner,"not enough memory, new stack %lu",s);
       bot = (pari_sp)__gpmalloc(s);
       if (bot) break;
     }
@@ -1014,17 +1014,56 @@ err_recover(long numerr)
 }
 
 void
-pari_err(long numerr, ...)
+pari_warn(long numerr, ...)
 {
-  char s[128], *ch1;
-  int ret = 0;
+  char *ch1;
   PariOUT *out = pariOut;
   va_list ap;
 
   va_start(ap,numerr);
 
+  if (!pari_last_was_newline())
+    pariputc('\n'); /* make sure pari_err msg starts at the beginning of line */
+  pariflush(); pariOut = pariErr;
+  pariflush(); term_color(c_ERR);
+
+  if (gp_function_name)
+    pariprintf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+  else
+    pariprintf("  ***   %s", errmessage[numerr]);
+  switch (numerr)
+  {
+    case warnmem: case warner:
+      pariputc(' '); ch1=va_arg(ap, char*);
+      vpariputs(ch1,ap); pariputs(".\n");
+      break;
+
+    case warnprec:
+      vpariputs(" in %s; new prec = %ld\n",ap);
+      break;
+
+    case warnfile:
+      ch1=va_arg(ap, char*);
+      pariprintf(" %s: %s\n", ch1, va_arg(ap, char*));
+      break;
+  }
+  term_color(c_NONE); va_end(ap);
+  pariOut = out;
+  flusherr();
+}
+
+void
+pari_err(long numerr, ...)
+{
+  char s[128], *ch1;
+  PariOUT *out = pariOut;
+  va_list ap;
+
+  va_start(ap,numerr);
+  if (is_warn(numerr)) err(talker,"use pari_warn for warnings");
+
   global_err_data = NULL;
-  if (err_catch_stack && !is_warn(numerr))
+  if (err_catch_stack)
   {
     cell *trapped = NULL;
     if ( (trapped = err_seek(numerr)) )
@@ -1121,21 +1160,6 @@ pari_err(long numerr, ...)
       case primer2:
         pariprintf("%lu.", va_arg(ap, ulong));
         break;
-
-      /* the following 4 are only warnings (they return) */
-      case warnmem: case warner:
-        pariputc(' '); ch1=va_arg(ap, char*);
-        vpariputs(ch1,ap); pariputs(".\n");
-        ret = 1; break;
-
-      case warnprec:
-        vpariputs(" in %s; new prec = %ld\n",ap);
-        ret = 1; break;
-
-      case warnfile:
-        ch1=va_arg(ap, char*);
-        pariprintf(" %s: %s\n", ch1, va_arg(ap, char*));
-        ret = 1; break;
     }
   }
   term_color(c_NONE); va_end(ap);
@@ -1146,7 +1170,6 @@ pari_err(long numerr, ...)
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
-  if (ret) { flusherr(); return; }
   gp_function_name=NULL;
   if (default_exception_handler)
   {
@@ -1715,7 +1738,7 @@ gerepileupto(pari_sp av, GEN q)
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by identifier() and they can be in the
    * stack: if we put a gerepileupto in readseq(), we get an error. Maybe add,
-   * if (DEBUGMEM) pari_err(warner,"av>q in gerepileupto") ???
+   * if (DEBUGMEM) pari_warn(warner,"av>q in gerepileupto") ???
    */
 
   /* Beware: (long)(q+i) --> ((long)q)+i*sizeof(long) */
@@ -1750,7 +1773,7 @@ _ok_gerepileupto(GEN av, GEN x)
   if (!isonstack(x)) return 1;
   if (x > av)
   {
-    pari_err(warner,"bad object %Z",x);
+    pari_warn(warner,"bad object %Z",x);
     return 0;
   }
   tx = typ(x);
@@ -1760,7 +1783,7 @@ _ok_gerepileupto(GEN av, GEN x)
   for (i=lontyp[tx]; i<lx; i++)
     if (!_ok_gerepileupto(av, gel(x,i)))
     {
-      pari_err(warner,"bad component %ld in object %Z",i,x);
+      pari_warn(warner,"bad component %ld in object %Z",i,x);
       return 0;
     }
   return 1;
@@ -1805,7 +1828,7 @@ allocatemoremem(size_t newsize)
   if (!newsize)
   {
     newsize = (top - bot) << 1;
-    pari_err(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
+    pari_warn(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
   return init_stack(newsize);

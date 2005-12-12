@@ -1375,7 +1375,7 @@ Fp_sqrt(GEN a, GEN p)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
-      if(DEBUGMEM>1) pari_err(warnmem,"Fp_sqrt");
+      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrt");
       gerepilemany(av,gptr,3);
     }
   }
@@ -1446,7 +1446,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
     w = modii(mulii(y,w),p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"Fp_sqrtl");
+      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrtl");
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
@@ -1502,7 +1502,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
       } while (--j);
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors*/
-	if(DEBUGMEM>1) pari_err(warnmem,"Fp_sqrtn");
+	if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrtn");
         gerepileall(av1, zetan? 2: 1, &a, &z);
 	lbot = av1;
       }
@@ -1871,7 +1871,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     if (lgefint(k) == 3) return utoi(Fl_pow(a, (ulong)k[2], n));
     /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */
-    pari_err(warner, "multiword exponent in Fl_pow");
+    pari_warn(warner, "multiword exponent in Fl_pow");
     return utoi( (ulong)leftright_pow((GEN)a, k, (void*)n, &_Flsqr, &_Flmul) );
   }
 
@@ -2576,7 +2576,7 @@ fundunit(GEN x)
     if (flp) break; update_f(f,a);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"fundunit");
+      if(DEBUGMEM>1) pari_warn(warnmem,"fundunit");
       gerepileall(av2,4, &a,&f,&u,&v);
     }
   }
@@ -2615,7 +2615,7 @@ regula(GEN x, long prec)
     if (rexp & ~EXPOBITS) pari_err(talker,"exponent overflow in regula");
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"regula");
+      if(DEBUGMEM>1) pari_warn(warnmem,"regula");
       gerepileall(av2,3, &reg,&u,&v);
     }
   }

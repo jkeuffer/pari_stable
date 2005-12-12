@@ -829,7 +829,7 @@ idealval(GEN nf, GEN ix, GEN P)
       gel(B,j) = y; y = x;
       if (low_stack(lim,stack_lim(av1,3)))
       {
-	if(DEBUGMEM>1) pari_err(warnmem,"idealval");
+	if(DEBUGMEM>1) pari_warn(warnmem,"idealval");
         gerepileall(av1,3, &y,&B,&pk);
       }
     }
@@ -2726,7 +2726,7 @@ nfhermite(GEN nf, GEN x)
     }
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"nfhermite, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"nfhermite, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }
@@ -2829,7 +2829,7 @@ nfsmith(GEN nf, GEN x)
         }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if(DEBUGMEM>1) pari_err(warnmem,"nfsmith");
+	if(DEBUGMEM>1) pari_warn(warnmem,"nfsmith");
         gerepileall(av,3, &A,&I,&J);
       }
     }
@@ -3006,7 +3006,7 @@ nfdetint(GEN nf, GEN x)
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"nfdetint");
+      if(DEBUGMEM>1) pari_warn(warnmem,"nfdetint");
       gerepileall(av1,6, &det1,&piv,&pivprec,&pass,&v,&idprod);
     }
   }
@@ -3067,7 +3067,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"[1]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"[1]: nfhermitemod, i = %ld", i);
       gerepileall(av,2, &A,&I);
     }
   }
@@ -3098,7 +3098,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"[2]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"[2]: nfhermitemod, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }

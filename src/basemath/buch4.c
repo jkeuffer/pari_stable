@@ -772,7 +772,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   S1   = gel(T,6);
   S2   = gel(T,7);
   if (flag && !gcmp0(gel(T,8)))
-    pari_err(warner,"useless flag in rnfisnorm: the extension is Galois");
+    pari_warn(warner,"useless flag in rnfisnorm: the extension is Galois");
   if (flag > 0)
   {
     byteptr d = diffptr;

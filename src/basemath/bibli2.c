@@ -94,7 +94,7 @@ legendre(long n, long v)
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2];
-      if(DEBUGMEM>1) pari_err(warnmem,"legendre");
+      if(DEBUGMEM>1) pari_warn(warnmem,"legendre");
       p0=gcopy(p0); gptr[0]=&p0; gptr[1]=&p1;
       gerepilemanysp(av,tetpil,gptr,2);
     }

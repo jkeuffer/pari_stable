@@ -883,7 +883,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
           nbrac++;
           if (nbrac >= M)
           {
-            pari_err(warner, "more than %ld rational integer roots\n", M);
+            pari_warn(warner, "more than %ld rational integer roots\n", M);
             avma = av1; goto NEXT;
           }
           for (j=1; j<=nbracint; j++)
@@ -2440,7 +2440,7 @@ polgaloisnamesbig(long n, long k)
   stream = fopen(s,"r");
   if (!stream) 
   {
-    pari_err(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
+    pari_warn(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
     free(s); 
     return strtoGENstr("");
   }

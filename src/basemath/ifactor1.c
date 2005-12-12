@@ -60,7 +60,7 @@ miller_ok(miller_t *S, GEN c)
     { /* too many sqrt(-1)s mod n */
       if (DEBUGLEVEL) {
         GEN z = gcdii(addii(c, S->sqrt1), S->n);
-        pari_err(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
+        pari_warn(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
       }
       return 1;
     }
@@ -89,7 +89,7 @@ bad_for_base(miller_t *S, GEN a)
     if (equalii(S->t, c)) return miller_ok(S, c2);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"miller(rabin)");
+      if(DEBUGMEM>1) pari_warn(warnmem,"miller(rabin)");
       c = gerepileuptoint(av, c);
     }
   }
@@ -220,7 +220,7 @@ LucasMod(GEN n, ulong P, GEN N)
       v1= modii(v1,N);
       if (low_stack(lim,stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"LucasMod");
+        if(DEBUGMEM>1) pari_warn(warnmem,"LucasMod");
         gerepileall(av, 2, &v,&v1);
       }
     }
@@ -3033,7 +3033,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 				/* check at most after_crack entries */
     if (scan > scan_end)	/* ooops... */
     {
-      pari_err(warner, "avoiding nonexistent factors in ifac_whoiswho");
+      pari_warn(warner, "avoiding nonexistent factors in ifac_whoiswho");
       scan = scan_end;
     }
   }
@@ -3280,9 +3280,9 @@ ifac_crack(GEN *partial, GEN *where)
       if (DEBUGLEVEL >= 2)
       {
         if (hint != 15)
-          pari_err(warner, "IFAC: unfactored composite declared prime");
+          pari_warn(warner, "IFAC: unfactored composite declared prime");
         else
-          pari_err(warner, "IFAC: untested integer declared prime");
+          pari_warn(warner, "IFAC: untested integer declared prime");
 
 	/* don't print it out at level 3 or above, where it would appear
 	 * several times before and after this message already */
@@ -3442,7 +3442,7 @@ ifac_main(GEN *partial)
 #if IFAC_DEBUG
     if (gel(here,2) == NULL)
     { /* unknown: something is wrong. Try to recover */
-      pari_err(warner, "IFAC: unknown factor seen in main loop");
+      pari_warn(warner, "IFAC: unknown factor seen in main loop");
       /* can only happen in Moebius mode */
       if (ifac_resort(partial, &here)) return gen_0;
 
@@ -3604,7 +3604,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"[2] ifac_decomp");
+      if(DEBUGMEM>1) pari_warn(warnmem,"[2] ifac_decomp");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto((pari_sp)workspc, part);
     }
@@ -3638,7 +3638,7 @@ ifac_moebius(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_moebius");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_moebius");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3660,7 +3660,7 @@ ifac_issquarefree(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_issquarefree");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_issquarefree");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3683,7 +3683,7 @@ ifac_omega(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_omega");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_omega");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3706,7 +3706,7 @@ ifac_bigomega(GEN n, long hint)
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_bigomega");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_bigomega");
       ifac_realloc(&part, &here, 0);
       part = gerepileupto(av, part);
     }
@@ -3738,7 +3738,7 @@ ifac_totient(GEN n, long hint)
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gsav[2];
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_totient");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_totient");
       tetpil = avma;
       ifac_realloc(&part, &here, 0);
       phi = icopy(phi);
@@ -3768,7 +3768,7 @@ ifac_numdiv(GEN n, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_numdiv");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_numdiv");
       tetpil = avma;
       ifac_realloc(&part, &here, 0);
       tau = icopy(tau);
@@ -3803,7 +3803,7 @@ ifac_sumdiv(GEN n, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_sumdiv");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_sumdiv");
       ifac_realloc(&part, &here, 0);
       sigma = icopy(sigma);
       gsav[0] = &sigma; gsav[1] = &part;
@@ -3839,7 +3839,7 @@ ifac_sumdivk(GEN n, long k, long hint)
     {
       pari_sp tetpil = avma;
       GEN *gsav[2];
-      if(DEBUGMEM>1) pari_err(warnmem,"ifac_sumdivk");
+      if(DEBUGMEM>1) pari_warn(warnmem,"ifac_sumdivk");
       ifac_realloc(&part, &here, 0);
       sigma = icopy(sigma);
       gsav[0] = &sigma; gsav[1] = &part;

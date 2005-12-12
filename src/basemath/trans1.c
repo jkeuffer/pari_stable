@@ -831,7 +831,7 @@ sqrt_2adic(GEN x, long pp)
 
     if (low_stack(lim,stack_lim(av,2)))
     {
-      if (DEBUGMEM > 1) pari_err(warnmem,"padic_sqrt");
+      if (DEBUGMEM > 1) pari_warn(warnmem,"padic_sqrt");
       z = gerepileuptoint(av,z);
     }
   }
@@ -864,7 +864,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
     if (low_stack(lim,stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0]=&z; gptr[1]=&mod;
-      if (DEBUGMEM>1) pari_err(warnmem,"padic_sqrt");
+      if (DEBUGMEM>1) pari_warn(warnmem,"padic_sqrt");
       gerepilemany(av,gptr,2);
     }
   }

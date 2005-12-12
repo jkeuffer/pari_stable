@@ -771,7 +771,7 @@ bernfracspec(long k)
     gel(N,2) = n; s = addii(s, powiu(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if (DEBUGMEM>1) pari_err(warnmem,"bernfrac");
+      if (DEBUGMEM>1) pari_warn(warnmem,"bernfrac");
       gerepileall(av,3, &c,&b,&s);
     }
   }
@@ -1047,7 +1047,7 @@ cxgamma(GEN s0, int dolog, long prec)
         y = mulri(y, addis(s0, i));
         if (low_stack(avlim,stack_lim(av2,3)))
         {
-          if(DEBUGMEM>1) pari_err(warnmem,"gamma");
+          if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
           y = gerepileuptoleaf(av2, y);
         }
       }
@@ -1058,7 +1058,7 @@ cxgamma(GEN s0, int dolog, long prec)
         y = mulru(y, ss + i);
         if (low_stack(avlim,stack_lim(av2,3)))
         {
-          if(DEBUGMEM>1) pari_err(warnmem,"gamma");
+          if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
           y = gerepileuptoleaf(av2, y);
         }
       }
@@ -1072,7 +1072,7 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gmul(y, gaddgs(s,i));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"gamma");
+        if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
         y = gerepileupto(av2, y);
       }
     }
@@ -1086,7 +1086,7 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gadd(y, glog(gaddgs(s,i), prec));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"gamma");
+        if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
         y = gerepileupto(av2, y);
       }
     }

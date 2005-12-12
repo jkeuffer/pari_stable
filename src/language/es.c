@@ -2619,18 +2619,18 @@ pari_kill_file(pariFILE *f)
 {
   if ((f->type & mf_PIPE) == 0)
   {
-    if (fclose(f->file)) pari_err(warnfile, "close", f->name);
+    if (fclose(f->file)) pari_warn(warnfile, "close", f->name);
   }
 #ifdef HAVE_PIPES
   else
   {
     if (f->type & mf_FALSE)
     {
-      if (fclose(f->file)) pari_err(warnfile, "close", f->name);
-      if (unlink(f->name)) pari_err(warnfile, "delete", f->name);
+      if (fclose(f->file)) pari_warn(warnfile, "close", f->name);
+      if (unlink(f->name)) pari_warn(warnfile, "delete", f->name);
     }
     else
-      if (pclose(f->file) < 0) pari_err(warnfile, "close pipe", f->name);
+      if (pclose(f->file) < 0) pari_warn(warnfile, "close pipe", f->name);
   }
 #endif
   if (DEBUGFILES)
@@ -2684,7 +2684,7 @@ pari_safefopen(char *s, char *mode)
 void
 pari_unlink(char *s)
 {
-  if (unlink(s)) pari_err(warner, "I/O: can\'t remove file %s", s);
+  if (unlink(s)) pari_warn(warner, "I/O: can\'t remove file %s", s);
   else if (DEBUGFILES)
     fprintferr("I/O: removed file %s\n", s);
 }
@@ -2694,12 +2694,12 @@ check_filtre(filtre_t *T)
 {
   if (T && T->in_string)
   {
-    pari_err(warner,"run-away string. Closing it");
+    pari_warn(warner,"run-away string. Closing it");
     T->in_string = 0;
   }
   if (T && T->in_comment)
   {
-    pari_err(warner,"run-away comment. Closing it");
+    pari_warn(warner,"run-away comment. Closing it");
     T->in_comment = 0;
   }
 }
@@ -2715,7 +2715,7 @@ popinfile()
   for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;
-    pari_err(warner, "I/O: leaked file descriptor (%d): %s",
+    pari_warn(warner, "I/O: leaked file descriptor (%d): %s",
 		f->type, f->name);
     pari_fclose(f);
   }
@@ -2932,7 +2932,7 @@ _expand_tilde(const char *s)
     if (!p)
     { /* host badly configured, don't kill session on startup
        * (when expanding path) */
-      pari_err(warner,"can't expand ~");
+      pari_warn(warner,"can't expand ~");
       return pari_strdup(s);
     }
   }
@@ -2985,7 +2985,7 @@ _expand_env(char *str)
     s0 = getenv(env);
     if (!s0)
     {
-      pari_err(warner,"undefined environment variable: %s",env);
+      pari_warn(warner,"undefined environment variable: %s",env);
       s0 = "";
     }
     l = strlen(s0);
@@ -3074,7 +3074,7 @@ accept_file(char *name, FILE *file)
 {
   if (pari_is_dir(name))
   {
-    pari_err(warner,"skipping directory %s",name);
+    pari_warn(warner,"skipping directory %s",name);
     return NULL;
   }
   if (! last_tmp_file)
@@ -3406,7 +3406,7 @@ readbin(const char *name, FILE *f)
   {
     if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
     if (DEBUGLEVEL)
-      pari_err(warner,"%ld unnamed objects read. Returning then in a vector",
+      pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
           lg(z)-1);
     x = gerepilecopy(av, z);
     setisclone(x); /* HACK */
@@ -3555,12 +3555,12 @@ env_ok(char *s)
   char *t = os_getenv(s);
   if (t && !pari_is_rwx(t))
   {
-    pari_err(warner,"%s is set (%s), but is not writeable", s,t);
+    pari_warn(warner,"%s is set (%s), but is not writeable", s,t);
     t = NULL;
   }
   if (t && !pari_is_dir(t))
   {
-    pari_err(warner,"%s is set (%s), but is not a directory", s,t);
+    pari_warn(warner,"%s is set (%s), but is not a directory", s,t);
     t = NULL;
   }
   return t;

@@ -454,7 +454,7 @@ CplxModulus(GEN data, long *newprec, long prec)
       cpl = QuickNormL2(pol, DEFAULTPREC);
       if (!gcmp0(cpl)) break;
     }
-    if (DEBUGLEVEL>1) pari_err(warnprec, "CplxModulus", dprec);
+    if (DEBUGLEVEL>1) pari_warn(warnprec, "CplxModulus", dprec);
   }
   ex = gexpo(cpl); avma = av;
   if (DEBUGLEVEL>1) fprintferr("cpl = 2^%ld\n", ex);
@@ -749,7 +749,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      if (DEBUGMEM > 1) pari_err(warnmem,"ArtinNumber");
+      if (DEBUGMEM > 1) pari_warn(warnmem,"ArtinNumber");
       gerepileall(av2, 2, &s, &vB);
     }
   }
@@ -1819,7 +1819,7 @@ LABrcf: ct++;
     if (ct > 3) return NULL;
 
     prec2 = (prec2 << 1) - 2;
-    if (DEBUGLEVEL>1) pari_err(warnprec,"RecCoeff", prec2);
+    if (DEBUGLEVEL>1) pari_warn(warnprec,"RecCoeff", prec2);
     nf2 = nfnewprec(nf2, prec2);
     beta2 = gprec_w(beta2, prec2);
     goto LABrcf;
@@ -2545,7 +2545,7 @@ LABDOUB:
       incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + max(ADD_PREC, cpt*incr_pr);
 
-    if (DEBUGLEVEL) pari_err(warnprec, "AllStark", newprec);
+    if (DEBUGLEVEL) pari_warn(warnprec, "AllStark", newprec);
 
     nf = nfnewprec(nf, newprec);
     dataCR = CharNewPrec(dataCR, nf, newprec);

@@ -671,7 +671,7 @@ ggval(GEN x, GEN p)
 	    if (!poldvd(x,p,&x)) break;
             if (low_stack(limit, stack_lim(av,1)))
 	    {
-	      if(DEBUGMEM>1) pari_err(warnmem,"ggval");
+	      if(DEBUGMEM>1) pari_warn(warnmem,"ggval");
 	      x = gerepilecopy(av, x);
 	    }
 	  }

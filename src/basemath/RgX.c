@@ -108,7 +108,7 @@ RgX_RgXQ_compo(GEN f, GEN x, GEN T)
     y = grem(gadd(gmul(y,x), gel(f,l)), T);
     if (low_stack(limit,stack_lim(av,1)))
     {
-      if (DEBUGMEM > 1) pari_err(warnmem, "RgX_RgXQ_compo");
+      if (DEBUGMEM > 1) pari_warn(warnmem, "RgX_RgXQ_compo");
       y = gerepileupto(av, y);
     }
   }
@@ -689,7 +689,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   y_lead = gel(y,dy+2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
-    pari_err(warner,"normalizing a polynomial with 0 leading term");
+    pari_warn(warner,"normalizing a polynomial with 0 leading term");
     for (dy--; dy>=0; dy--)
     {
       y_lead = gel(y,dy+2);

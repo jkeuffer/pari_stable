@@ -1678,17 +1678,28 @@ message. For instance, \kbd{pari\_err(typeer,"extgcd")} prints the message:
 \bprog
     ***   incorrect type in extgcd.
 @eprog\noindent
-Among the codewords are \emph{warning} keywords (all those which start with
-the prefix \kbd{warn}). In that case, \teb{pari_err} does \emph{not} abort the
-computation, just print the requested message and go on. The basic example is
+To issue a warning, use
 
+\fun{void}{pari_warn}{warnerr,...}
+In that case, of course, we do \emph{not} abort the computation, just print
+the requested message and go on. The basic example is
+%
 \bprog
-    pari_err(warner, "Strategy 1 failed. Trying strategy 2")
+    pari_warn(warner, "Strategy 1 failed. Trying strategy 2")
 @eprog\noindent
 which is the exact equivalent of \kbd{pari\_err(talker,...)} except that
 you certainly do not want to stop the program at this point, just inform the
 user that something important has occurred (in particular, this output would be
 suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not).
+
+The valid \emph{warning} keywords are \tet{warner} (general), \tet{warnprec}
+(increasing precision), \tet{warnmem} (garbage collecting) and \tet{warnfile}
+(error in file operation), used as follows:
+\bprog
+    pari_warn(warnprec, "bnfinit", newprec);
+    pari_warn(warnmem,  "bnfinit");
+    pari_warn(warnfile, "close", "log");  /* error when closing "log" */
+@eprog
 
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
 

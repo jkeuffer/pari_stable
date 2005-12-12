@@ -213,7 +213,7 @@ quadhilbertimag(GEN D, GEN pq)
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
-    if (DEBUGLEVEL) pari_err(warnprec,"quadhilbertimag",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
   }
   return gerepileupto(av,P);
 }
@@ -398,7 +398,7 @@ computeP2(GEN bnr, GEN la, long prec)
 PRECPB:
   if (!first)
   {
-    if (DEBUGLEVEL) pari_err(warnprec,"computeP2",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"computeP2",prec);
     nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
   }
   first = 0; lanum = to_approx(nf,la);
@@ -737,7 +737,7 @@ qrf5_rho_pow(GEN x, long n)
     x = qfr5_rho(x,Disc,sqrtD,isqrtD);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"qrf5_rho_pow");
+      if(DEBUGMEM>1) pari_warn(warnmem,"qrf5_rho_pow");
       x = gerepilecopy(av, x);
     }
   }
@@ -1311,7 +1311,7 @@ CYCLE:
     if (endcycle || rho > 5000) continue;
     if (low_stack(limstack, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"real_relations");
+      if(DEBUGMEM>1) pari_warn(warnmem,"real_relations");
       gerepileall(av1, form1? 2: 1, &form, &form1);
     }
     if (rho < 0) rho = 0; /* first time in */

@@ -995,7 +995,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
     RU = gmul(RU, prim);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"parameters");
+      if(DEBUGMEM>1) pari_warn(warnmem,"parameters");
       gerepileall(av2,2, &g,&RU);
     }
   }
@@ -1108,7 +1108,7 @@ refine_H(GEN F, GEN G, GEN HH, long bit, long Sbit)
   {
     if (low_stack(lim, stack_lim(ltop,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"refine_H");
+      if(DEBUGMEM>1) pari_warn(warnmem,"refine_H");
       gerepileall(ltop,2, &D,&H);
     }
     bit1 = -error + Sbit;
@@ -1145,7 +1145,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
     if (bit1 == bit2 && i >= 2) { Sbit += n; Sbit2 += n; bit2 += n; }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"refine_F");
+      if(DEBUGMEM>1) pari_warn(warnmem,"refine_F");
       gerepileall(av,4, &FF,&GG,&r,&HH);
     }
 
@@ -1265,7 +1265,7 @@ conformal_pol(GEN p, GEN a, long bit)
     z = addmulXn(gmul(z,ca), gneg(z), 1); /* z *= conj(a)X - 1 */
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_err(warnmem,"conformal_pol");
+      if(DEBUGMEM>1) pari_warn(warnmem,"conformal_pol");
       gerepileall(av,2, &r,&z);
     }
   }

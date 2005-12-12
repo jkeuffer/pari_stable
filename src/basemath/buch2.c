@@ -648,7 +648,7 @@ not_given(pari_sp av, long fl, long reason)
   if (fl & nf_FORCE)
   { if (reason != fupb_PRECI) pari_err(talker, "bnfinit: %s", s); }
   else
-    pari_err(warner,"%s, not given",s);
+    pari_warn(warner,"%s, not given",s);
   avma = av; return cgetg(1,t_MAT);
 }
 
@@ -1356,10 +1356,10 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
     if (flag & nf_FORCE)
     {
-      if (DEBUGLEVEL) pari_err(warner,"precision too low for generators, e = %ld",e);
+      if (DEBUGLEVEL) pari_warn(warner,"precision too low for generators, e = %ld",e);
       return NULL;
     }
-    pari_err(warner,"precision too low for generators, not given");
+    pari_warn(warner,"precision too low for generators, not given");
   }
   if (xc && col) col = gmul(xc, col);
   if (!col) col = cgetg(1, t_COL);
@@ -1403,7 +1403,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
     GEN y = _isprincipal(bnf,x,&pr,flag);
     if (y) return gerepilecopy(av, y);
 
-    if (DEBUGLEVEL) pari_err(warnprec,"isprincipal",pr);
+    if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",pr);
     avma = av1; bnf = bnfnewprec(bnf,pr); (void)setrand(c);
   }
 }
@@ -1471,10 +1471,10 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     if (flag & nf_GIVEPREC)
     {
       if (DEBUGLEVEL)
-        pari_err(warner,"insufficient precision for generators, not given");
+        pari_warn(warner,"insufficient precision for generators, not given");
       avma = av; return utoipos(prec);
     }
-    if (DEBUGLEVEL) pari_err(warnprec,"isprincipal",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",prec);
     avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
   }
 }
@@ -1582,7 +1582,7 @@ isunit(GEN bnf,GEN x)
       prec = (prec-1)<<1;
     }
     i++;
-    if (DEBUGLEVEL) pari_err(warnprec,"isunit",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"isunit",prec);
     nf = nfnewprec(nf, prec);
   }
 
@@ -2113,7 +2113,7 @@ be_honest(FB_t *F, GEN nf)
 	avma = av2; if (k < ru) break;
         if (++nbtest > 50)
         {
-          pari_err(warner,"be_honest() failure on prime %Z\n", P[j]);
+          pari_warn(warner,"be_honest() failure on prime %Z\n", P[j]);
           return 0;
         }
       }
@@ -2400,7 +2400,7 @@ makecycgen(GEN bnf)
   GEN cyc,gen,h,nf,y,GD,D;
   long e,i,l;
 
-  if (DEBUGLEVEL) pari_err(warner,"completing bnf (building cycgen)");
+  if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building cycgen)");
   nf = checknf(bnf);
   cyc = gmael3(bnf,8,1,2); D = diagonal_i(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
@@ -2427,7 +2427,7 @@ makematal(GEN bnf)
   GEN W,B,pFB,nf,ma, WB_C;
   long lW,lma,j,prec;
 
-  if (DEBUGLEVEL) pari_err(warner,"completing bnf (building matal)");
+  if (DEBUGLEVEL) pari_warn(warner,"completing bnf (building matal)");
   W   = gel(bnf,1);
   B   = gel(bnf,2);
   WB_C= gel(bnf,4);
@@ -2459,7 +2459,7 @@ makematal(GEN bnf)
     }
 
     prec = itos(y); j--;
-    if (DEBUGLEVEL) pari_err(warnprec,"makematal",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
     nf = nfnewprec(nf,prec);
     bnf = bnfinit0(nf,1,NULL,prec); (void)setrand(c);
   }
@@ -3014,7 +3014,7 @@ PRECPB:
     if (DEBUGLEVEL)
     {
       char str[64]; sprintf(str,"buchall (%s)",precpb);
-      pari_err(warnprec,str,PRECREG);
+      pari_warn(warnprec,str,PRECREG);
     }
     precdouble++; precpb = NULL;
     nf = nf_cloneprec(nf, PRECREG, pnf);
@@ -3140,7 +3140,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   {
     nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
     if (lg(nf)==3) {
-      pari_err(warner,"non-monic polynomial. Change of variables discarded");
+      pari_warn(warner,"non-monic polynomial. Change of variables discarded");
       nf = gel(nf,1); 
     }
   }

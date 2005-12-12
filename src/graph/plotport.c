@@ -145,7 +145,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     if (low_stack(limite, stack_lim(av2,1)))
     {
       pari_sp tetpil=avma;
-      if (DEBUGMEM>1) pari_err(warnmem,"plot");
+      if (DEBUGMEM>1) pari_warn(warnmem,"plot");
       x = gerepile(av2,tetpil,rcopy(x));
     }
   }
@@ -1354,7 +1354,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     xbig = gtodouble(b);
     ysml = ybig = gtodouble(p1);
     nc=1; nl=2; /* nc = nb of curves; nl = nb of coord. lists */
-    if (param) pari_err(warner,"flag PLOT_PARAMETRIC ignored");
+    if (param) pari_warn(warner,"flag PLOT_PARAMETRIC ignored");
     single_c=1; param=0;
   }
   else

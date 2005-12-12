@@ -638,7 +638,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
     i = 0;
   else if (h->digit_size_kN > MPQS_MAX_DIGIT_SIZE_KN)
   {
-    pari_err(warner,
+    pari_warn(warner,
         "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     return 0;
   }
@@ -652,7 +652,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
    * that the current sizing parameters for 90 or more digits are based
    * on 100% theory and 0% practice. */
   if (i >= 79)
-    pari_err(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
+    pari_warn(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
         i >= 86 ? "many": "several", h->N);
 
   if (DEBUGLEVEL >= 5)
@@ -684,7 +684,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   mb = (h->size_of_FB + 1)/(8.*1048576.) * h->target_no_rels;
   if (mb > 128.)
   {
-    pari_err(warner,
+    pari_warn(warner,
         "MPQS: Gauss elimination will require more than\n\t128MBy of memory");
     if (DEBUGLEVEL >= 1)
       fprintferr("\t(estimated memory needed: %4.1fMBy)\n", mb);
@@ -1212,7 +1212,7 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
    * up in the 150...170 range.) */
   if (h->sieve_threshold < 128) {
     h->sieve_threshold = 128;
-    pari_err(warner,
+    pari_warn(warner,
         "MPQS: sizing out of tune, FB size or tolerance\n\ttoo large");
   }
 
@@ -1270,7 +1270,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
   if (i > h->size_of_FB - 3)
   {
     /* ok now, now this isn't going to work at all. */
-    pari_err(warner,
+    pari_warn(warner,
         "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
   }
@@ -1709,7 +1709,7 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
       pari_err(talker, "error whilst appending to file %s", f->name);
     c++;
   }
-  if (fflush(fp)) pari_err(warner, "error whilst flushing file %s", f->name);
+  if (fflush(fp)) pari_warn(warner, "error whilst flushing file %s", f->name);
   pari_fclose(f); return c;
 }
 
@@ -3396,7 +3396,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
   if (!H_cols)
   { /* trivial kernel. Fail gracefully: main loop may look for more relations */
     if (DEBUGLEVEL >= 3)
-      pari_err(warner, "MPQS: no solutions found from linear system solver");
+      pari_warn(warner, "MPQS: no solutions found from linear system solver");
     pari_fclose(pFREL);
     F2_destroy_matrix(m, h->size_of_FB+1);
     F2_destroy_matrix(ker_m, rel);
@@ -3438,7 +3438,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
                                    mpqs_get_relation(fpos[j], FREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
-        if(DEBUGMEM>1) pari_err(warnmem,"[1]: mpqs_solve_linear_system");
+        if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
         Y_prod = gerepileuptoint(av3, Y_prod);
       }
     }
@@ -3454,7 +3454,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
                   N);
         if (low_stack(lim3, stack_lim(av3,1)))
         {
-          if(DEBUGMEM>1) pari_err(warnmem,"[2]: mpqs_solve_linear_system");
+          if(DEBUGMEM>1) pari_warn(warnmem,"[2]: mpqs_solve_linear_system");
           X = gerepileupto(av3, X);
         }
       }
@@ -3465,7 +3465,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
       { /* shouldn't happen */
         fprintferr("MPQS: X^2 - Y^2 != 0 mod N\n");
         fprintferr("\tindex i = %ld\n", i);
-        pari_err(warner, "MPQS: wrong relation found after Gauss");
+        pari_warn(warner, "MPQS: wrong relation found after Gauss");
       }
     }
     /* At this point, X^2 == Y^2 mod N.  Indeed, something stronger is true:
@@ -3581,7 +3581,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
     if (low_stack(lim, stack_lim(av2,1)))
     {
       long i1;
-      if(DEBUGMEM>1) pari_err(warnmem,"[3]: mpqs_solve_linear_system");
+      if(DEBUGMEM>1) pari_warn(warnmem,"[3]: mpqs_solve_linear_system");
       /* gcopy would have a problem with our NULL pointers... */
       new_res = cgetg(lg(res), t_VEC);
       for (i1=2*res_size; i1>=res_next; i1--) new_res[i1] = 0;
@@ -3696,7 +3696,7 @@ mpqs(GEN N)
   handle->digit_size_N = decimal_len(N);
   if (handle->digit_size_N > MPQS_MAX_DIGIT_SIZE_KN)
   {
-    pari_err(warner, "MPQS: number too big to be factored with MPQS,\n\tgiving up");
+    pari_warn(warner, "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     mpqs_handle_dtor(handle); return NULL;
   }
 

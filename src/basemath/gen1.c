@@ -1642,10 +1642,10 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     {
       if (!gequal(p2, Q))
       {
-        if (DEBUGMEM) pari_err(warner,"different modulus in ff_poltype");
+        if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
         return 0;
       }
-      if (DEBUGMEM > 2) pari_err(warner,"different pointers in ff_poltype");
+      if (DEBUGMEM > 2) pari_warn(warner,"different pointers in ff_poltype");
     }
   }
   if (Q) {
@@ -1671,10 +1671,10 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     {
       if (!equalii(p2, pr))
       {
-        if (DEBUGMEM) pari_err(warner,"different modulus in ff_poltype");
+        if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
         return 0;
       }
-      if (DEBUGMEM > 2) pari_err(warner,"different pointers in ff_poltype");
+      if (DEBUGMEM > 2) pari_warn(warner,"different pointers in ff_poltype");
     }
     y[i] = p1[2];
   }
@@ -1906,7 +1906,7 @@ div_ser(GEN x, GEN y, long vx)
   y_lead = gel(y,2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
-    pari_err(warner,"normalizing a series with 0 leading term");
+    pari_warn(warner,"normalizing a series with 0 leading term");
     for (i=3,y++; i<ly; i++,y++)
     {
       y_lead = gel(y,2); ly--; l--;
