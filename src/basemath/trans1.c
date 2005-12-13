@@ -240,6 +240,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
   GEN p1, y;
   long lx, i;
 
+  if (prec < 2) err(talker, "incorrect precision in transc");
   switch(typ(x))
   {
     case t_INT:
