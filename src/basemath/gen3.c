@@ -1099,7 +1099,7 @@ ginv(GEN x)
     case t_QFR:
       av = avma; z = cgetg(5, t_QFR);
       gel(z,1) = gel(x,1);
-      gel(z,2) = negi( gel(x,1) );
+      gel(z,2) = negi( gel(x,2) );
       gel(z,3) = gel(x,3);
       gel(z,4) = negr( gel(x,4) );
       return gerepileupto(av, redreal(z));

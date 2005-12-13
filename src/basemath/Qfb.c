@@ -796,6 +796,14 @@ qfr3_red(GEN x, GEN D, GEN isqrtD) {
   return x;
 }
 
+static void
+get_disc(GEN x, GEN *D)
+{
+  if (!*D) *D = qf_disc(x);
+  else if (typ(*D) != t_INT) pari_err(arither1);
+  if (!signe(*D)) err(talker,"reducible form in qfr_init");
+}
+
 static GEN
 qfr5_init(GEN x, GEN *D, GEN *isqrtD, GEN *sqrtD)
 {
@@ -805,9 +813,7 @@ qfr5_init(GEN x, GEN *D, GEN *isqrtD, GEN *sqrtD)
   if (prec < 3) prec = 3;
   x = qfr_to_qfr5(x,prec);
 
-  if (!*D) *D = qf_disc(x);
-  else if (typ(*D) != t_INT) pari_err(arither1);
-
+  get_disc(x, D);
   if (!*sqrtD) *sqrtD = sqrtr(itor(*D,prec));
   else if (typ(*sqrtD) != t_REAL) pari_err(arither1);
 
@@ -818,8 +824,7 @@ qfr5_init(GEN x, GEN *D, GEN *isqrtD, GEN *sqrtD)
 static GEN
 qfr3_init(GEN x, GEN *D, GEN *isqrtD)
 {
-  if (!*D) *D = qf_disc(x);
-  else if (typ(*D) != t_INT) pari_err(arither1);
+  get_disc(x, D);
 
   if (!*isqrtD) *isqrtD = sqrti(*D);
   else if (typ(*isqrtD) != t_INT) pari_err(arither1);
