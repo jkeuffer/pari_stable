@@ -978,7 +978,8 @@ idealaddmultoone(GEN nf, GEN list)
   for (i=1; i<l; i++)
   {
     GEN I = gel(list,i);
-    if (typ(I) != t_MAT || lg(I) != lg(I[1])) I = idealhermite_aux(nf,I);
+    if (typ(I) != t_MAT || lg(I) == 1 || lg(I) != lg(I[1]))
+      I = idealhermite_aux(nf,I);
     gel(L,i) = I; z = shallowconcat(z, I);
   }
   H = hnfperm_i(z, &U, &perm);
