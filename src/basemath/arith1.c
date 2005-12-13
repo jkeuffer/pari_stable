@@ -1871,7 +1871,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     if (lgefint(k) == 3) return utoi(Fl_pow(a, (ulong)k[2], n));
     /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */
-    pari_warn(warner, "multiword exponent in Fl_pow");
+    pari_warn(warner, "large exponent in Mod(a,N)^n: reduce n mod phi(N)");
     return utoi( (ulong)leftright_pow((GEN)a, k, (void*)n, &_Flsqr, &_Flmul) );
   }
 
