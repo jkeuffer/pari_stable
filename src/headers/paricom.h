@@ -431,6 +431,3 @@ enum manage_var_t {
 #define INIT_JMPm 1
 #define INIT_SIGm 2
 #define INIT_DFTm 4
-#define INIT_JMP     (init_opts & INIT_JMPm)
-#define INIT_SIG     (init_opts & INIT_SIGm)
-#define INIT_DFT     (init_opts & INIT_DFTm)

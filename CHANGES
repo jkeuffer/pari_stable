@@ -128,6 +128,7 @@ BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
     3- src/desc/Makefile
     4- log2old ( = 2atanh(1/3) )
     5- src/desc/gen_help
+BA  6- obsolete macros INIT_JMP/INIT_SIG
 
   Added
     1- new library function ellisoncurve()

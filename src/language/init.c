@@ -585,14 +585,15 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
   ulong u;
 
   STACK_CHECK_INIT(&u);
-  if (INIT_DFT) { GP_DATA = default_gp_data(); pari_init_defaults(); }
+  if ((init_opts&INIT_DFTm)) 
+    { GP_DATA = default_gp_data(); pari_init_defaults(); }
   err_catch_stack=NULL;
-  if (INIT_JMP && setjmp(GP_DATA->env))
+  if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env))
   {
     fprintferr("  ***   Error in the PARI system. End of program.\n");
     exit(1);
   }
-  if (INIT_SIG) pari_sig_init(pari_sighandler);
+  if ((init_opts&INIT_SIGm)) pari_sig_init(pari_sighandler);
   bot = top = 0;
   (void)init_stack(parisize);
   diffptr = initprimes(maxprime);
@@ -678,7 +679,7 @@ pari_close_opts(ulong init_opts)
 {
   long i;
 
-  if (INIT_SIG) pari_sig_init(SIG_DFL);
+  if ((init_opts&INIT_SIGm)) pari_sig_init(SIG_DFL);
 
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
@@ -708,7 +709,7 @@ pari_close_opts(ulong init_opts)
   grow_kill(MODULES);
   grow_kill(OLDMODULES);
   if (pari_datadir) free(pari_datadir);
-  if (INIT_DFT) free_gp_data(GP_DATA);
+  if ((init_opts&INIT_DFTm)) free_gp_data(GP_DATA);
 }
 
 void
