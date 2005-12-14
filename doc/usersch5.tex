@@ -42,8 +42,8 @@ need the full GP analyzer, you should be fine with the first ones.
 \fun{void}{pari_init}{size\_t size, ulong maxprime} initialize the
 library, with a stack of \kbd{size} bytes and a prime table
 up to the maximum of \kbd{maxprime} and $2^{16}$. Unless otherwise
-mentionned (functions handling \kbd{growarray} below), no PARI function
-will function properly before such an initialization.
+mentionned, no PARI function will function properly before such an
+initialization.
 
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
@@ -88,9 +88,14 @@ called.
 \kbd{mod} to the table of symbols in the interpreter. It assumes
 \kbd{pari\_init} has been called.
 
+For instance, gp implements a number of private routines, which it
+adds to the default set via the call
+\bprog
+  pari_add_module(functions_gp);
+  pari_add_module(functions_highlevel);
+@eprog
 
-\fun{void}{pari_init_opts}{size\_t size, ulong maxprime, ulong
-opts, growarray MOD, \hskip 0pt plus 5pt growarray OLD} as
+\fun{void}{pari_init_opts}{size\_t size, ulong maxprime, ulong opts} as
 \kbd{pari\_init}, with extra flexibility. \kbd{opts} is a mask of flags
 among the following:
 
@@ -104,14 +109,6 @@ This one \emph{must} be enabled once. If you close pari, then restart it,
 you need not reinitialize \kbd{GP\_DATA}; if you do not, then old values are
 restored.
 
-Finally, we need to explain \kbd{MOD} and \kbd{OLD}. Each is 
-\kbd{growarray} (see below) containing the modules of extra routines to
-made known to the GP analyzer besides the general ones. You may set 
-them to \kbd{NULL} (no extras). The calculator \kbd{gp} adds gp-specific
-routines. If you want to do the same, \kbd{MOD} lists the extra routines,
-and \kbd{OLD} obsolete routines which are used when the \kbd{compatible}
-default is set.
-
 \fun{void}{pari_close_opts}{ulong init\_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. The same mask must be provided for initialization
@@ -120,58 +117,6 @@ and closing.
 \fun{void}{pari_sig_init}{void (*f)(int)} install the signal handler \kbd{f}
 (see \kbd{signal(2)}): the signals \kbd{SIGBUS}, \kbd{SIGFPE}, \kbd{SIGINT},
 \kbd{SIGBREAK}, \kbd{SIGPIPE} and \kbd{SIGSEGV} are concerned.
-
-A \kbd{growarray} is a container type, wich enlarges itself as one appends
-elements to it. It has the following fields, accessed as \kbd{A->v},
-\kbd{A->len}, \kbd{A->n}:
-
-  \kbd{v}: an array of values, of type \kbd{void*}, possibly from $0$ to
-$\kbd{len}-1$, the ones from $0$ to $\kbd{n}-1$ being occupied. This array
-is allocated using \kbd{malloc}, not on the PARI stack.
-
-  \kbd{len}: the number of cells allocated in \kbd{v}.
-
-  \kbd{n}: the number of occupied cells.
-
-\noindent These containers are used when initializing the library, before the
-PARI stack is available, hence allocate memory using \kbd{malloc(3)}, not on
-the stack. They are manipulated with the following functions.
-
-\fun{void}{grow_init}{growarray A} initialize the \kbd{growarray} \kbd{A}.
-
-\fun{void}{grow_append}{growarray A, void *e} append \kbd{e} to \kbd{A},
-enlarging \kbd{A} if necessary.
-
-\fun{void}{grow_copy}{growarray A, growarray B} creates a copy \kbd{B} of
-\kbd{A}. Do not initialize \kbd{B} first (memory leak otherwise). If 
-\kbd{A} is \kbd{NULL}, this has the same effect as \kbd{grow\_init(B)}.
-
-\fun{void}{grow_kill}{growarray A} frees \kbd{A}
-
-Here is an example from the gp code. The following routine would initialize
-the pari library with an interpreter knowing the same routines as GP, 
-without support for obsolete names:
-\bprog
-void
-gp_init_opts(size_t size, ulong maxprime, ulong opts)
-{
-  growarray new;
-  grow_init(new);
-  grow_append(new, functions_gp);
-  grow_append(new, functions_highlevel);
-  pari_init_opts(size, maxprime, opts, new, NULL);
-}
-@eprog\noindent
-The simpler construction
-\bprog
-  pari_add_module(functions_gp);
-  pari_add_module(functions_highlevel);
-@eprog\noindent
-has almost the same effect, except that it does not organize
-functions in the interpreter as modules of up-to-date and obsolete
-functions. As a result, changing \kbd{compatible} setting back and forth
-will cause the analyzer to forget about the functions added by the latter
-construction.
 
 \section{Handling \kbd{GEN}s}
 \noindent Almost all these functions are either macros or inlined. Unless

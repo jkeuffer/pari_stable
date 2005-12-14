@@ -576,6 +576,9 @@ init_fun_hash() {
   return H;
 }
 
+growarray *pari_get_modules() { return &MODULES; }
+growarray *pari_get_oldmodules() { return &OLDMODULES; }
+
 int
 gp_init_functions()
 {
@@ -584,8 +587,7 @@ gp_init_functions()
 
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
 void
-pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
-               growarray newfun, growarray oldfun)
+pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 {
   ulong u;
 
@@ -618,15 +620,16 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
+  members_hash   = init_fun_hash();
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
-  members_hash   = init_fun_hash();
-  init_hashtable(members_hash,functions_tblsz);
+
   fill_hashtable(members_hash, gp_member_list);
-  grow_copy(newfun, MODULES);    grow_append(MODULES, functions_basic);
-  grow_copy(oldfun, OLDMODULES); grow_append(OLDMODULES, oldfonctions);
-  (void)gp_init_entrees(OLDMODULES, funct_old_hash);
-  (void)gp_init_functions();
+  fill_hashtable(funct_old_hash, oldfonctions);
+
+  grow_init(MODULES);    grow_append(MODULES, functions_basic);
+  grow_init(OLDMODULES); grow_append(OLDMODULES, oldfonctions);
+  fill_hashtable(functions_hash, new_fun_set? functions_basic:oldfonctions);
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
@@ -642,8 +645,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts,
 void
 pari_init(size_t parisize, ulong maxprime)
 {
-  pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm,
-                 NULL, NULL);
+  pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm);
 }
 
 static void

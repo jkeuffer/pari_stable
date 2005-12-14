@@ -296,6 +296,21 @@ void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double 
 int    pop_entree_bloc(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 
+/* naive grow-arrays */
+typedef struct {
+  void **v;
+  long len; /* len cells allocated */
+  long n; /* first n cells occupied */
+} __pari_growarray;
+typedef __pari_growarray growarray[1];
+
+growarray *pari_get_modules();
+growarray *pari_get_oldmodules();
+void    grow_append(growarray A, void *e);
+void    grow_copy(growarray A, growarray B);
+void    grow_init(growarray A);
+void    grow_kill(growarray A);
+
 /* Interfaces (GP, etc.) */
 void  errcontext(char *msg, char *s, char *entry);
 GEN   geni(void);

@@ -1795,7 +1795,7 @@ int
 main(int argc, char **argv)
 {
 #endif
-  growarray A, newfun, oldfun;
+  growarray A, *newfun, *oldfun;
   long i;
 
   GP_DATA = default_gp_data();
@@ -1817,15 +1817,20 @@ main(int argc, char **argv)
   pari_init_defaults();
   read_opt(A, argc,argv);
 
-  grow_init(newfun);
-  grow_init(oldfun);
-  grow_append(newfun, functions_gp);
-  grow_append(newfun, functions_highlevel);
-  grow_append(oldfun, functions_oldgp);
+  pari_init_opts(top-bot, GP_DATA->primelimit, 0);
+  newfun = pari_get_modules();
+  grow_append(*newfun, functions_gp);
+  grow_append(*newfun, functions_highlevel);
+  oldfun = pari_get_oldmodules();
+  grow_append(*oldfun, functions_oldgp);
+  if (new_fun_set)
+  {
+    pari_add_module(functions_gp);
+    pari_add_module(functions_highlevel);
+  }
+  else
+    pari_add_module(functions_oldgp);
 
-  pari_init_opts(top-bot, GP_DATA->primelimit, 0, newfun, oldfun);
-  grow_kill(newfun);
-  grow_kill(oldfun);
   pari_sig_init(gp_sighandler);
 
   init_graph();
