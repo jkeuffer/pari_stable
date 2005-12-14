@@ -10,7 +10,9 @@
 In this chapter, we describe all public low-level functions of the
 PARI library. These essentially include functions for handling all the PARI
 types. Higher level functions, such as arithmetic or transcendental
-functions, are described in Chapter~3 of the GP user's manual.
+functions, are described in Chapter~3 of the GP user's manual. A general
+introduction to the major concepts of PARI programming can be found in
+Chapter~4.
 
 Many other undocumented functions can be found throughout the source code.
 These private functions are more efficient than the library wrappers, but
@@ -46,7 +48,7 @@ will function properly before such an initialization.
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
 
-\subsec{The \kbd{entree} structure}
+\subsec{Functions specific to the GP interpreter}
 
 An \kbd{entree} is the generic object associated to an identifier (a name)
 in GP's interpreter, be it a built-in or user function, or a variable. For
@@ -65,10 +67,18 @@ a function, it has at least the following fields:
 
   \kbd{char *help} : the help text for the function.
 
-Built-in pari functions are defined in \emph{modules} \tet{functions_basic},
-\tet{functions_gp}, \tet{functions_highlevel}, which are arrays of
-\kbd{entree} structs, the last of which satisfying \kbd{name = NULL}
-(sentinel).
+A routine in GP is described to the analyzer by an \kbd{entree}
+structure. Built-in pari routines are grouped in \emph{modules}, which
+are arrays of \kbd{entree} structs, the last of which satisfy
+\kbd{name = NULL} (sentinel).
+
+There are currently six modules in GP: general functions
+(\tet{functions_basic}), gp-specific functions (\tet{functions_fp}),
+gp-specific highlevel functions (\tet{functions_highlevel}),
+member functions, and two modules of obsolete functions. The function 
+\kbd{pari\_init} initializes the interpreter and declares all symbols
+in \kbd{functions\_basic}. You may declare further functions on a cas by
+case basis or as a whole module using
 
 \fun{void}{pari_add_function}{entree *ep} adds a single routine to the
 table of symbols in the interpreter. It assumes \kbd{pari\_init} has been
@@ -78,20 +88,11 @@ called.
 \kbd{mod} to the table of symbols in the interpreter. It assumes
 \kbd{pari\_init} has been called.
 
-\subsec{Technical functions}
-
-The rest have to do with the GP analyzer, in particular the declaration of
-functions, and partial initializations. A routine in GP is described to the
-analyzer by an \kbd{entree} structure. Routines are grouped in modules,
-which are arrays of \kbd{entree} structs. There are currently six modules
-in GP: general functions, gp-specific functions, gp-specific highlevel
-functions, member functions, and two modules of obsolete functions. See
-e.g. \kbd{src/language/init.h} for the modules of general functions.
 
 \fun{void}{pari_init_opts}{size\_t size, ulong maxprime, ulong
-opts, growarray MOD, \hskip 0pt plus 5pt growarray OLD} as \kbd{pari\_init}, with
-extra flexibility. \kbd{opts} is a mask of flags among the
-following:
+opts, growarray MOD, \hskip 0pt plus 5pt growarray OLD} as
+\kbd{pari\_init}, with extra flexibility. \kbd{opts} is a mask of flags
+among the following:
 
   \kbd{INIT\_JMPm}: install pari error handler. When an exception is
 raised, the program is terminated with \kbd{exit(1)}.
@@ -105,10 +106,10 @@ restored.
 
 Finally, we need to explain \kbd{MOD} and \kbd{OLD}. Each is 
 \kbd{growarray} (see below) containing the modules of extra routines to
-made known to the GP analyzer besides the general ones. You probably want to
-set them to \kbd{NULL} (no extras). The calculator \kbd{gp} adds gp-specific
-routines. If you want to do the same, \kbd{MOD} lists the extra routines, and
-\kbd{OLD} obsolete routines which are used when the \kbd{compatible}
+made known to the GP analyzer besides the general ones. You may set 
+them to \kbd{NULL} (no extras). The calculator \kbd{gp} adds gp-specific
+routines. If you want to do the same, \kbd{MOD} lists the extra routines,
+and \kbd{OLD} obsolete routines which are used when the \kbd{compatible}
 default is set.
 
 \fun{void}{pari_close_opts}{ulong init\_opts} as \kbd{pari\_close},
@@ -147,10 +148,10 @@ enlarging \kbd{A} if necessary.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
 
-Here is an example from the gp code. the following routine would initialize
+Here is an example from the gp code. The following routine would initialize
 the pari library with an interpreter knowing the same routines as GP, 
 without support for obsolete names:
-\brog
+\bprog
 void
 gp_init_opts(size_t size, ulong maxprime, ulong opts)
 {
