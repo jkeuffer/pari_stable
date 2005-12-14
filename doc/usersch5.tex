@@ -981,10 +981,10 @@ except the inputs/outputs are now \kbd{ulong}s.
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
 in the factorization are actually strong pseudoprimes.
 
-\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but factors
-the \typ{INT} \kbd{n} until the unfactored part is smaller than
-\kbd{lim}. In particular, the last entry o nthe first factorization
-column is in general a composite number.
+%\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
+%factorization process as soon as the unfactored part is smaller than \kbd{lim}.
+%The resulting factorisation matrix only contains the factors found. No other
+%assumptions can be made on the remaining factors.
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
