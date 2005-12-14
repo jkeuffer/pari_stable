@@ -80,6 +80,6 @@ etags:
 	cd src; sh make_emacs_tags
 
 ctags:
-	src/make_vi_tags $TOP/src
+	src/make_vi_tags "$TOP/src"
 
 EOT

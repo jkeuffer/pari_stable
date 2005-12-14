@@ -2,7 +2,7 @@
 . ./version
 patchlevel_verbose=
 if test -d CVS -a $status = development; then
- status="$status CHANGES-"`$head 1 $TOP/CHANGES | awk '{print $4}'`
+ status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
  patchlevel_verbose="[ $status ]"
 fi
 
@@ -30,7 +30,7 @@ test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
 while test $# -gt 0; do
   case "$1" in
   -l|--load) shift; initfile=$1;
-     cd $TOP
+     cd "$TOP"
      PATH=.:$PATH; export PATH
      if test -z "$1";then
        tmp_host=`$config_dir/arch-osname`
