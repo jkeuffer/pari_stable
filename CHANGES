@@ -144,6 +144,7 @@ BA  6- support for GNU/kFreeBSD and other GNU userlands.
     7- document ZY_ZXY_rnfequation and ZY_ZXY_resultant
     8- function pari_warn() use instead of pari_err() for warnings
     9- function pari_add_function, pari_add_module
+   10- doc/develop.tex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):

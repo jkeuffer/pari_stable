@@ -8,9 +8,9 @@ MACROS= paricfg.tex parimacro.tex
 USERS_TEX=\$(MACROS) users.tex usersch1.tex usersch2.tex usersch3.tex
 PARI_TEX=\$(MACROS) libpari.tex appa.tex appb.tex appc.tex usersch4.tex usersch5.tex
 
-doc all: libpari.dvi users.dvi refcard.ps tutorial.dvi
-docps: libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
-docpdf: libpari.pdf users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
+doc all: develop.dvi libpari.dvi users.dvi refcard.ps tutorial.dvi
+docps: develop.ps libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
+docpdf: develop.pdf libpari.pdf users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
 
 .SUFFIXES: .tex .ipf .pod .inf .dumbpod .3 .html
 
@@ -36,6 +36,17 @@ libpari.dvi: \$(PARI_TEX) \$(MACROS)
 	tex libpari
 	tex libpari
 	make libpari.std; tex libpari; rm -f libpari.std
+
+develop.pdf: develop.tex \$(MACROS)
+	-rm -f develop.std
+	pdftex develop
+	pdftex develop
+	make develop.std; pdftex develop; rm -f develop.std
+develop.dvi: develop.tex \$(MACROS)
+	-rm -f develop.std
+	tex develop
+	tex develop
+	make develop.std; tex develop; rm -f develop.std
 
 tutorial.pdf: tutorial.tex \$(MACROS)
 	-rm -f tutorial.std
