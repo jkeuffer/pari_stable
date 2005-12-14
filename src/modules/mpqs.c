@@ -3292,7 +3292,6 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
   pari_sp av = avma;
   GEN Y, res;
   char *s;
-  long e;
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
@@ -3302,9 +3301,11 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
   s = strtok(s + 3, " \n");
   while (s != NULL)
   {
-    e = atol(s); if (!e) break;
+    long e = atol(s), i;
+    if (!e) break;
     s = strtok(NULL, " \n");
-    ei[ atol(s) ] += e;
+    i = atol(s); /* bug in g++-3.4.1: miscompiles ei[ atol(s) ] */
+    ei[i] += e;
     s = strtok(NULL, " \n");
   }
   return gerepileuptoint(av, res);
