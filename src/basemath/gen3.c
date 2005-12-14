@@ -42,6 +42,10 @@ gvar(GEN x)
       v = BIGINT;
       for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (w<v) v=w; }
       return v;
+    case t_VECSMALL:
+    case t_STR: 
+    case t_LIST: 
+      err(typeer, "gvar");
   }
   return BIGINT;
 }

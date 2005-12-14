@@ -123,6 +123,7 @@ BA 25- make pari restartable
        entree arrays.
    27- rename err -> pari_err, pariputsf -> pariprintf
    28- rename rnfhermitebasis -> rnfhnfbasis
+   29- forbid t_STR, t_VECSMALL and t_LIST in gvar.
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
