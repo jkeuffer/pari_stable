@@ -1244,6 +1244,7 @@ void    msgTIMER(pari_timer *T, char *format, ...);
 void    msgtimer(char *format, ...);
 GEN     newbloc(long n);
 void    pari_add_function(entree *ep);
+void    pari_add_module(entree *ep);
 void    pari_err(long numerr, ...);
 void    pari_warn(long numerr, ...);
 void    pari_close(void);

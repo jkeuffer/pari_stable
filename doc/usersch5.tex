@@ -39,7 +39,9 @@ need the full GP analyzer, you should be fine with the first ones.
 
 \fun{void}{pari_init}{size\_t size, ulong maxprime} initialize the
 library, with a stack of \kbd{size} bytes and a prime table
-up to the maximum of \kbd{maxprime} and $2^{16}$.
+up to the maximum of \kbd{maxprime} and $2^{16}$. Unless otherwise
+mentionned (functions handling \kbd{growarray} below), no PARI function
+will function properly before such an initialization.
 
 \fun{void}{pari_close}{void} stop using the library (assuming it was
 initialized with \kbd{pari\_init}) and frees all allocated objects.
@@ -63,19 +65,28 @@ a function, it has at least the following fields:
 
   \kbd{char *help} : the help text for the function.
 
-\fun{void}{pari_add_function}{entree *ep} after \kbd{pari\_init} is
-called, this function adds a single routine to the table of symbols in the
-interpreter.
+Built-in pari functions are defined in \emph{modules} \tet{functions_basic},
+\tet{functions_gp}, \tet{functions_highlevel}, which are arrays of
+\kbd{entree} structs, the last of which satisfying \kbd{name = NULL}
+(sentinel).
+
+\fun{void}{pari_add_function}{entree *ep} adds a single routine to the
+table of symbols in the interpreter. It assumes \kbd{pari\_init} has been
+called.
+
+\fun{void}{pari_add_module}{entree *mod} adds all the routines in module
+\kbd{mod} to the table of symbols in the interpreter. It assumes
+\kbd{pari\_init} has been called.
 
 \subsec{Technical functions}
 
 The rest have to do with the GP analyzer, in particular the declaration of
 functions, and partial initializations. A routine in GP is described to the
 analyzer by an \kbd{entree} structure. Routines are grouped in modules,
-which are arrays of \kbd{entree}. There are currently six modules in GP:
-general functions, gp-specific functions, gp-specific highlevel functions,
-member functions, and two modules of obsolete functions. See e.g.
-\kbd{src/language/init.h} for the modules of general functions.
+which are arrays of \kbd{entree} structs. There are currently six modules
+in GP: general functions, gp-specific functions, gp-specific highlevel
+functions, member functions, and two modules of obsolete functions. See
+e.g. \kbd{src/language/init.h} for the modules of general functions.
 
 \fun{void}{pari_init_opts}{size\_t size, ulong maxprime, ulong
 opts, growarray MOD, \hskip 0pt plus 5pt growarray OLD} as \kbd{pari\_init}, with
@@ -135,6 +146,31 @@ enlarging \kbd{A} if necessary.
 \kbd{A} is \kbd{NULL}, this has the same effect as \kbd{grow\_init(B)}.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
+
+Here is an example from the gp code. the following routine would initialize
+the pari library with an interpreter knowing the same routines as GP, 
+without support for obsolete names:
+\brog
+void
+gp_init_opts(size_t size, ulong maxprime, ulong opts)
+{
+  growarray new;
+  grow_init(new);
+  grow_append(new, functions_gp);
+  grow_append(new, functions_highlevel);
+  pari_init_opts(size, maxprime, opts, new, NULL);
+}
+@eprog\noindent
+The simpler construction
+\bprog
+  pari_add_module(functions_gp);
+  pari_add_module(functions_highlevel);
+@eprog\noindent
+has almost the same effect, except that it does not organize
+functions in the interpreter as modules of up-to-date and obsolete
+functions. As a result, changing \kbd{compatible} setting back and forth
+will cause the analyzer to forget about the functions added by the latter
+construction.
 
 \section{Handling \kbd{GEN}s}
 \noindent Almost all these functions are either macros or inlined. Unless
