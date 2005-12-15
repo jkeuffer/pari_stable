@@ -34,8 +34,7 @@ general background. \kbdsidx{BIL}
 \section{Initializing the library}
 
 The following functions enable you to start using the PARI functions
-in a program, and cleanup without exiting the whole program. Unless you
-need the full GP analyzer, you should be fine with the first ones.
+in a program, and cleanup without exiting the whole program.
 
 \subsec{General purpose}
 
@@ -66,8 +65,12 @@ restored.
 
 \fun{void}{pari_close_opts}{ulong init\_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
-\kbd{pari\_init\_opts}. The same mask must be provided for initialization
-and closing.
+\kbd{pari\_init\_opts}. \kbd{opts} is a mask of flags among
+
+  \kbd{INIT\_SIGm}: restore \kbd{SIG\_DFL} default action for signals
+tampered with by pari signal handler.
+
+  \kbd{INIT\_DFTm}: frees the \kbd{GP\_DATA} environment structure.
 
 \fun{void}{pari_sig_init}{void (*f)(int)} install the signal handler \kbd{f}
 (see \kbd{signal(2)}): the signals \kbd{SIGBUS}, \kbd{SIGFPE}, \kbd{SIGINT},
