@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static GEN glog2;
 void
-pari_init_floats()
+pari_init_floats(void)
 {
   geuler = gpi = bernzone = glog2 = NULL;
 }
