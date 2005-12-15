@@ -29,6 +29,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 # define CBRTVERYBIGINT  1291
 #endif
 
+static GEN glog2;
+void
+pari_init_floats()
+{
+  geuler = gpi = bernzone = glog2 = NULL;
+}
 
 /********************************************************************/
 /**                                                                **/
@@ -1576,7 +1582,6 @@ agm(GEN x, GEN y, long prec)
 GEN
 constlog2(long prec)
 {
-  static GEN glog2 = NULL;
   pari_sp av;
   long l, n;
   GEN y, tmplog2;

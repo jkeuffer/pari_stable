@@ -614,7 +614,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pol_1 = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
   for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
-  gpi = geuler = bernzone = NULL;
+  pari_init_floats();
 
   (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
