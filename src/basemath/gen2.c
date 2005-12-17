@@ -27,18 +27,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
-/* small t_INT prototype */
-static long court_p[] = { evaltyp(t_INT) | _evallg(3),0,0 };
-
 GEN
 gopsg2(GEN (*f)(GEN, GEN), long s, GEN y)
 {
+  long court_p[] = { evaltyp(t_INT) | _evallg(3),0,0 };
   affsi(s,court_p); return f(court_p,y);
 }
 
 void
 gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z) {
-  pari_sp av=avma; gaffect(gopsg2(f,s,y),z); avma=av;
+  pari_sp av=avma; gaffect(f(stoi(s),y), z); avma=av;
 }
 
 /*******************************************************************/
