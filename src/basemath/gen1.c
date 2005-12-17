@@ -461,8 +461,8 @@ addQp(GEN x, GEN y)
 static GEN
 add_polmod(GEN X, GEN Y, GEN x, GEN y)
 {
+  long T[3] = { evaltyp(t_POLMOD) | _evallg(3),0,0 };
   GEN z = cgetg(3,t_POLMOD);
-  static long T[3]={ evaltyp(t_POLMOD) | _evallg(3),0,0 };
   long vx = varn(X), vy = varn(Y);
   if (vx==vy) {
     pari_sp av;
@@ -1097,7 +1097,7 @@ mul_polmod_same(GEN X, GEN x, GEN y)
 static GEN
 mul_polmod(GEN X, GEN Y, GEN x, GEN y)
 {
-  static long T[3]={ evaltyp(t_POLMOD) | _evallg(3),0,0 };
+  long T[3] = { evaltyp(t_POLMOD) | _evallg(3),0,0 };
   long vx = varn(X), vy = varn(Y);
   GEN z = cgetg(3,t_POLMOD);
   pari_sp av;

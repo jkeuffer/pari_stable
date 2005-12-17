@@ -2331,12 +2331,11 @@ static GEN
 modprinit(GEN nf, GEN pr, int zk)
 {
   pari_sp av = avma;
-  GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c, gf;
+  GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c;
   long N, i, k, f;
 
   nf = checknf(nf); checkprimeid(pr);
-  gf = gel(pr,4);
-  f = itos(gf);
+  f = itos( gel(pr,4) );
   N = degpol(nf[1]);
   prh = prime_to_ideal(nf, pr);
   tau = zk? gen_0: anti_uniformizer2(nf, pr);
@@ -2378,7 +2377,7 @@ modprinit(GEN nf, GEN pr, int zk)
     gel(res,mpr_T) = T; return gerepilecopy(av, res);
   }
 
-  if (isprime(gf))
+  if (Fl_isprime(f))
   {
     mul = eltmulid_get_table(nf, c[2]);
     mul = vecpermute(mul, c);

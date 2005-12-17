@@ -29,12 +29,15 @@ int factor_add_primes = 0;
 /**                                                                 **/
 /*********************************************************************/
 typedef struct {
+  ulong n, sqrt1, sqrt2, t1, t;
+  long r1;
+} Fl_miller_t;
+
+typedef struct {
   GEN n, sqrt1, sqrt2, t1, t;
   long r1;
 } miller_t;
 
-/* The following two internal routines don't restore avma -- the caller
-   must do so at the end. */
 static void
 init_miller(miller_t *S, GEN n)
 {
@@ -45,6 +48,16 @@ init_miller(miller_t *S, GEN n)
   S->t1 = shifti(S->t, -S->r1);
   S->sqrt1 = cgeti(lg(n)); S->sqrt1[1] = evalsigne(0)|evallgefint(2);
   S->sqrt2 = cgeti(lg(n)); S->sqrt2[1] = evalsigne(0)|evallgefint(2);
+}
+static void
+Fl_init_miller(Fl_miller_t *S, ulong n)
+{
+  S->n = n;
+  S->t = n-1;
+  S->r1 = vals(S->t);
+  S->t1 = S->t >> S->r1;
+  S->sqrt1 = 0;
+  S->sqrt2 = 0;
 }
 
 /* c = sqrt(-1) seen in bad_for_base. End-matching: compare or remember
@@ -67,6 +80,18 @@ miller_ok(miller_t *S, GEN c)
   } else { /* remember */
     affii(c, S->sqrt1);
     affii(subii(S->n, c), S->sqrt2);
+  }
+  return 0;
+}
+static int
+Fl_miller_ok(Fl_miller_t *S, ulong c)
+{
+  if (S->sqrt1)
+  { /* saw one earlier: compare */
+    if (c != S->sqrt1 && c != S->sqrt2) return 1;
+  } else { /* remember */
+    S->sqrt1 = c;
+    S->sqrt2 = S->n - c;
   }
   return 0;
 }
@@ -95,9 +120,25 @@ bad_for_base(miller_t *S, GEN a)
   }
   return 1;
 }
+static int
+Fl_bad_for_base(Fl_miller_t *S, ulong a)
+{
+  long r;
+  ulong c2, c = Fl_pow(a, S->t1, S->n);
+
+  if (c == 1 || c == S->t) return 0;
+
+  /* go fishing for -1, not for 1 (saves one squaring) */
+  for (r = S->r1 - 1; r; r--) /* r1 - 1 squarings */
+  {
+    c2 = c; c = Fl_sqr(c, S->n);
+    if (c == S->t) return Fl_miller_ok(S, c2);
+  }
+  return 1;
+}
 
 /* Miller-Rabin test for k random bases */
-long
+int
 millerrabin(GEN n, long k)
 {
   pari_sp av2, av = avma;
@@ -151,35 +192,56 @@ millerrabin(GEN n, long k)
  * in the range  n < 2^36  (with less than 250 exceptions, indeed with fewer
  * than 1400 exceptions up to 2^42). --GN */
 int
+Fl_miller(ulong n, long k)
+{
+  static ulong pr[] =
+    { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
+  ulong *p;
+  ulong r;
+  long i;
+  Fl_miller_t S;
+
+  if (!(n & 1)) return 0;
+  if (k == 16)
+  { /* use smaller (faster) bases if possible */
+    p = (n < 3215031751UL)? pr: pr+13;
+    k = 4;
+  }
+  else if (k == 17)
+  {
+    p = (n < 1373653UL)? pr: pr+11;
+    k = 2;
+  }
+  else p = pr; /* 2,3,5,... */
+  Fl_init_miller(&S, n);
+  for (i=1; i<=k; i++)
+  {
+    r = p[i] % n; if (!r) break;
+    if (Fl_bad_for_base(&S, r)) return 0;
+  }
+  return 1;
+}
+
+int
 miller(GEN n, long k)
 {
   pari_sp av2, av = avma;
   static ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
   ulong *p;
-  ulong r;
   long i;
   miller_t S;
 
+  if (lgefint(n) == 3) return Fl_miller((ulong)n[2], k);
+
   if (!mod2(n)) return 0;
-  if (k == 16)
-  {				/* use smaller (faster) bases if possible */
-    if (lgefint(n)==3 && (ulong)(n[2]) < 3215031751UL) p = pr; /* 2,3,5,7 */
-    else p = pr+13;		/* 2,13,23,1662803 */
-    k = 4;
-  }
-  else if (k == 17)
-  {
-    if (lgefint(n)==3 && (ulong)(n[2]) < 1373653UL) p = pr; /* 2,3 */
-    else p = pr+11;		/* 31,73 */
-    k = 2;
-  }
-  else p = pr;			/* 2,3,5,... */
+  if      (k == 16) { p = pr+13; k = 4; } /* 2,13,23,1662803 */
+  else if (k == 17) { p = pr+11; k = 2; } /* 31,73 */
+  else p = pr; /* 2,3,5,... */
   init_miller(&S, n); av2 = avma;
   for (i=1; i<=k; i++)
   {
-    r = umodui(p[i],n); if (!r) break;
-    if (bad_for_base(&S, utoipos(r))) { avma = av; return 0; }
+    if (bad_for_base(&S, utoipos(p[i]))) { avma = av; return 0; }
     avma = av2;
   }
   avma = av; return 1;
@@ -257,14 +319,20 @@ u_LucasMod(ulong n, ulong P, ulong N)
 }
 
 static int
-u_IsLucasPsP(ulong n, ulong P)
+u_IsLucasPsP(ulong n)
 {
   long i, v;
-  ulong z, m2, m = n + 1;
+  ulong b, z, m2, m = n + 1;
 
+  for (b=3, i=0;; b+=2, i++)
+  {
+    ulong c = b*b - 4; /* = 1 mod 4 */
+    if (i == 64 && ucarrecomplet(n)) return 0; /* oo loop if N = m^2 */
+    if (krouu(n % c, c) < 0) break;
+  }
   if (!m) return 0; /* neither 2^32-1 nor 2^64-1 are Lucas-pp */
   v = vals(m); m >>= v;
-  z = u_LucasMod(m, P, n);
+  z = u_LucasMod(m, b, n);
   if (z == 2) return 1;
   m2 = n - 2;
   if (z == m2) return 1;
@@ -279,7 +347,7 @@ u_IsLucasPsP(ulong n, ulong P)
 /* check that N not a square first (taken care of here, but inefficient)
  * assume N > 3 */
 static int
-IsLucasPsP0(GEN N)
+IsLucasPsP(GEN N)
 {
   GEN N_2, m, z;
   long i, v;
@@ -291,8 +359,6 @@ IsLucasPsP0(GEN N)
     if (i == 64 && carreparfait(N)) return 0; /* avoid oo loop if N = m^2 */
     if (krouu(umodiu(N,c), c) < 0) break;
   }
-  if (lgefint(N) == 3) return u_IsLucasPsP(itou(N), b);
-
   m = addis(N,1); v = vali(m); m = shifti(m,-v);
   z = LucasMod(m, b, N);
   if (equaliu(z, 2)) return 1;
@@ -314,19 +380,19 @@ iu_coprime(GEN N, ulong u)
   const ulong n = umodiu(N, u);
   return (n == 1 || ugcd(n, u) == 1);
 }
-
-long
-BSW_psp(GEN N)
+/* assume u odd, u > 1 */
+static int
+uu_coprime(ulong n, ulong u)
 {
-  pari_sp av = avma;
-  miller_t S;
-  long n;
-  int k;
+  return (n == 1 || ugcd(n, u) == 1);
+}
 
-  if (typ(N) != t_INT) pari_err(arither1);
-  if (signe(N) <= 0) return 0;
-  n = itos_or_0(N);
-  if (n && n < 103)
+/* Fl_BSW_psp */
+int
+Fl_isprime(ulong n)
+{
+  Fl_miller_t S;
+  if (n < 103)
     switch(n)
     {
       case 2:
@@ -357,6 +423,67 @@ BSW_psp(GEN N)
       case 101: return 1;
       default: return 0;
     }
+  if (!(n & 1)) return 0;
+#ifdef LONG_IS_64BIT
+  /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53
+   *  7145393598349078859 = 59*61*67*71*73*79*83*89*97*101 */
+  if (!uu_coprime(n, 16294579238595022365UL) ||
+      !uu_coprime(n,  7145393598349078859UL)) return 0;
+#else
+  /* 4127218095 = 3*5*7*11*13*17*19*23*37
+   * 3948078067 = 29*31*41*43*47*53
+   * 4269855901 = 59*83*89*97*101
+   * 1673450759 = 61*67*71*73*79 */
+  if (!uu_coprime(n, 4127218095UL) ||
+      !uu_coprime(n, 3948078067UL) ||
+      !uu_coprime(n, 1673450759UL) ||
+      !uu_coprime(n, 4269855901UL)) return 0;
+#endif
+  if (n < 10427) return 1;
+  Fl_init_miller(&S, n);
+  if (Fl_bad_for_base(&S, 2)) return 0;
+  if (n < 1016801) switch(n) {
+    case 42799: /* strong 2-pseudoprimes without prime divisors < 103 */
+    case 49141:
+    case 88357:
+    case 90751:
+    case 104653:
+    case 130561:
+    case 196093:
+    case 220729:
+    case 253241:
+    case 256999:
+    case 271951:
+    case 280601:
+    case 357761:
+    case 390937:
+    case 458989:
+    case 486737:
+    case 489997:
+    case 514447:
+    case 580337:
+    case 741751:
+    case 838861:
+    case 873181:
+    case 877099:
+    case 916327:
+    case 976873:
+    case 983401: return 0;
+    default: return 1;
+  }
+  return u_IsLucasPsP(n);
+}
+
+int
+BSW_psp(GEN N)
+{
+  pari_sp av = avma;
+  miller_t S;
+  int k;
+
+  if (typ(N) != t_INT) pari_err(arither1);
+  if (signe(N) <= 0) return 0;
+  if (lgefint(N) == 3) return Fl_BSW_psp((ulong)N[2]);
   if (!mod2(N)) return 0;
 #ifdef LONG_IS_64BIT
   /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53
@@ -373,42 +500,10 @@ BSW_psp(GEN N)
       !iu_coprime(N, 1673450759UL) ||
       !iu_coprime(N, 4269855901UL)) return 0;
 #endif
-
   /* no prime divisor < 103 */
-  if (n && n < 10427) return 1;
-  init_miller(&S, N); k = bad_for_base(&S, gen_2);
-  avma = av; if (k) return 0;
-  if (n && n < 1016801)
-    switch(n) { /* strong 2-pseudoprimes without prime divisors < 103 */
-      case 42799:
-      case 49141:
-      case 88357:
-      case 90751:
-      case 104653:
-      case 130561:
-      case 196093:
-      case 220729:
-      case 253241:
-      case 256999:
-      case 271951:
-      case 280601:
-      case 357761:
-      case 390937:
-      case 458989:
-      case 486737:
-      case 489997:
-      case 514447:
-      case 580337:
-      case 741751:
-      case 838861:
-      case 873181:
-      case 877099:
-      case 916327:
-      case 976873:
-      case 983401: return 0;
-      default: return 1;
-    }
-  k = IsLucasPsP0(N);
+  av = avma;
+  init_miller(&S, N); 
+  k = (!bad_for_base(&S, gen_2) && IsLucasPsP(N));
   avma = av; return k;
 }
 
@@ -632,12 +727,7 @@ precprime(GEN n)
 ulong
 snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
 {
-  static ulong pp[] =
-    { evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0 };
-  static ulong *pp2 = pp + 2;
-  static GEN gp = (GEN)pp;
-  long rcn0;
-
+  ulong n;
   if (**d)
   {
     byteptr dd = *d;
@@ -646,7 +736,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     NEXT_PRIME_VIADIFF(d1,dd);
     if (*rcn != NPRC)
     {
-      rcn0 = *rcn;
+      long rcn0 = *rcn;
       while (d1 > 0)
       {
 	d1 -= prc210_d1[*rcn];
@@ -672,20 +762,19 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
     }
   }
   /* look for the next one */
-  *pp2 = p;
-  *pp2 += prc210_d1[*rcn];
+  n = p + prc210_d1[*rcn];
   if (++*rcn > 47) *rcn = 0;
-  while (!miller(gp, k))
+  while (!Fl_miller(n, k))
   {
-    *pp2 += prc210_d1[*rcn];
+    n += prc210_d1[*rcn];
     if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
-    if (*pp2 <= 11)		/* wraparound mod 2^BITS_IN_LONG */
+    if (n <= 11)		/* wraparound mod 2^BITS_IN_LONG */
     {
       fprintferr("snextpr: integer wraparound after prime %lu\n", p);
       pari_err(bugparier, "[caller of] snextpr");
     }
   }
-  return *pp2;
+  return n;
 }
 
 /***********************************************************************/
@@ -2325,7 +2414,7 @@ static ulong powersmod[106] = {
  * argument tells us which things to check -- bit 0: 3rd, bit 1: 5th,
  * bit 2: 7th pwr;  set a bit to have the corresponding power examined --
  * and is updated appropriately for a possible follow-up call */
-long
+int
 is_357_power(GEN x, GEN *pt, ulong *mask)
 {
   long lx = lgefint(x), exponent = 0, residue, resbyte;
@@ -2418,7 +2507,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
         if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-        while ( !BSW_psp( utoipos(q) ) ) { q += p; }
+        while (!Fl_BSW_psp(q)) { q += p; }
         break;
       }
     } while (q % p != 1);
@@ -2462,7 +2551,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
  * etc.) is computed from scratch on the fly; compared to the size of numbers
  * under consideration, these word-sized computations take negligible time.
  * Experimentally making the cutoff point caller-configurable... */
-long
+int
 is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
