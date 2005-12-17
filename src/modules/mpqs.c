@@ -76,533 +76,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/** DEBUG **/
 /* #define MPQS_DEBUG_VERBOSE 1 */
-
 /* histograms are pretty, but don't help performance after all (see below) */
 /* #define MPQS_USE_HISTOGRAMS */
 
-/*********************************************************************/
-/**                                                                 **/
-/**                    DATA STRUCTURES AND TABLES                   **/
-/**                                                                 **/
-/*********************************************************************/
-
-/* (following is an embedded "mpqs.h" really...) */
-
-/* - debug support */
-
-#ifdef MPQS_DEBUG_VERYVERBOSE
-#  ifndef MPQS_DEBUG_VERBOSE
-#  define MPQS_DEBUG_VERBOSE
-#  endif
-#endif
-
-#ifdef MPQS_DEBUG_VERBOSE
-#  ifndef MPQS_DEBUG
-#  define MPQS_DEBUG
-#  endif
-#  define PRINT_IF_VERBOSE(x) fprintferr(x)
-#else
-#  define PRINT_IF_VERBOSE(x)
-#endif
-
-#ifdef MPQS_DEBUG
-#  define MPQS_DEBUGLEVEL 1000  /* infinity */
-#else
-#  define MPQS_DEBUGLEVEL DEBUGLEVEL
-#endif
-
-/* - string and external file stuff for the relations "database" */
-
-#ifndef SEEK_SET
-#  define SEEK_SET 0
-#endif
-
-#ifdef __CYGWIN32__
-/* otherwise fseek() goes crazy due to silent \n <--> LF translations */
-#  define WRITE "wb"
-#  define READ "rb"
-#else
-#  define WRITE "w"
-#  define READ "r"
-#endif
-
-#define MPQS_STRING_LENGTH         (4 * 1024UL)
-
-/* - non-configurable sizing parameters */
-
-#define MPQS_POSSIBLE_MULTIPLIERS  5 /* how many values for k we'll try */
-/* following must be in range of the cand_multipliers table below */
-#define MPQS_MULTIPLIER_SEARCH_DEPTH 5 /* how many primes to inspect per k */
-
-/* XXX this comment is now totally off base...
- * `large primes' must be smaller than
- *   max(MPQS_LP_BOUND, largest_FB_p) * MPQS_LP_FACTOR
- * - increased this with the idea of capping it at about 2^30
- * (XX but see comment in mpqs() where we actually use this: we take the
- * min, not the max)
- */
-#define MPQS_LP_BOUND              12500000 /* works for 32 and 64bit */
-
-/* see mpqs_locate_A_range() for an explanation of the following.  I had
- * some good results with about -log2(0.85) but in the range I was testing,
- * this shifts the primes for A only by one position in the FB.  Don't go
- * over the top with this one... */
-#define MPQS_A_FUDGE               0.15 /* ~ -log2(0.9) */
-
-#define MPQS_CANDIDATE_ARRAY_SIZE  2000 /* max. this many cand's per poly */
-
-#ifdef MPQS_USE_HISTOGRAMS
-/* histogram evaluation/feedback available when size_of_FB exceeds this: */
-#  define MPQS_MIN_SIZE_FB_FOR_HISTO 600
-/* min number of candidates to look at before evaluating histograms */
-#  define MPQS_MIN_CANDS_FOR_HISTO   4000
-/* min number of full relations to have been created before etc. */
-#  define MPQS_MIN_FRELS_FOR_HISTO   110
-
-/* see mpqs_eval_histograms() for explanation of the following */
-#  define MPQS_HISTO_FREL_QUANTILE   2.4
-#  define MPQS_HISTO_DROP_LIMIT      3.6
-#  define MPQS_HISTO_LPREL_BASEFLOW  1.4
-#endif
-
-/* give up when nothing found after ~1.5 times the required number of
- * relations has been computed  (N might be a prime power or the
- * parameters might be exceptionally unfortunate for it) */
-#define MPQS_ADMIT_DEFEAT 1500
-
-
-/* - structures, types, and constants */
-
-/* -- reasonably-sized integers */
-#ifdef LONG_IS_64BIT
-typedef int  mpqs_int32_t;
-typedef unsigned int  mpqs_uint32_t;
-typedef unsigned long mpqs_uint64_t;
-#else
-typedef long mpqs_int32_t;
-typedef unsigned long mpqs_uint32_t;
-typedef struct {
-  ulong _w0;
-  ulong _w1;
-} mpqs_uint64_t;
-#endif
-
-/* -- we'll sometimes want to use the machine's native size here, and
- * sometimes  (for future double-large-primes)  force 64 bits - thus: */
-typedef union mpqs_invp {
-  ulong _ul;
-  mpqs_uint64_t _u64;
-} mpqs_invp_t;
-
-/* -- factor base entries should occupy 32 bytes  (and we'll keep them
- * aligned, for good L1 cache hit rates).  Some of the entries will be
- * abused for e.g. -1 and (factors of) k instead for real factor base
- * primes, and for a sentinel at the end.  This is why __p is a signed
- * field.-- The two start fields depend on the current polynomial and
- * keep changing during sieving, the flags will also change depending on
- * the current A. */
-/* Let (z1, z2) be the roots of Q(x) = A x^2 + Bx + C mod p_i; then
- * Q(z1 + p_i Z) == 0 mod p_i and Q(z2 + p_i Z) == 0 mod p_i;
- * start_1, start_2 are the positions where p_i divides Q(x) for the
- * first time, already adjusted for the fact that the sieving array,
- * nominally [-M, M], is represented by a 0-based C array of length
- * 2M + 1.  For the prime factors of A and those of k, the two roots
- * are equal mod p_i. */
-
-#define MPQS_FB_ENTRY_PAD 32
-
-typedef union mpqs_FB_entry {
-  char __pad[MPQS_FB_ENTRY_PAD];
-  struct {
-    mpqs_int32_t __p;           /* the prime p */
-    /* XX following two are not yet used: */
-    float __flogp;              /* its logarithm as a 4-byte float */
-    mpqs_invp_t __invp;         /* 1/p mod 2^64 or 2^BITS_IN_LONG */
-    mpqs_int32_t __start1;      /* representatives of the two APs mod p */
-    mpqs_int32_t __start2;
-    mpqs_uint32_t __sqrt_kN;    /* sqrt(kN) mod p */
-    unsigned char __val;        /* 8-bit approx. scaled log for sieving */
-    unsigned char __flags;
-  } __entry;
-} mpqs_FB_entry_t;
-
-/* --- convenience accessor macros for the preceding: */
-#define fbe_p           __entry.__p
-#define fbe_flogp       __entry.__flogp
-#define fbe_invp        __entry.__invp
-#define fbe_start1      __entry.__start1
-#define fbe_start2      __entry.__start2
-#define fbe_sqrt_kN     __entry.__sqrt_kN
-#define fbe_logval      __entry.__val
-#define fbe_flags       __entry.__flags
-
-/* --- flag bits for fbe_flags: */
-/* XXX TODO! */
-
-#define MPQS_FBE_CLEAR       0x0 /* no flags */
-
-/* following used for odd FB primes, and applies to the divisors of A but not
- * those of k.  Must occupy the rightmost bit because we also use it as a
- * shift count after extracting it from the byte. */
-#define MPQS_FBE_DIVIDES_A   0x1ul /* and Q(x) mod p only has degree 1 */
-
-/* XX tentative: one bit to mark normal FB primes,
- * XX one to mark the factors of k,
- * XX one to mark primes used in sieving,
- * XX later maybe one to mark primes of which we'll be tracking the square,
- * XX one to mark primes currently in use for A;
- * XX once we segment the FB, one bit marking the members of the first segment
- */
-
-/* -- multiplier k and associated quantities: More than two prime factors
-* for k will be pointless in practice, thus capping them at two. */
-#define MPQS_MAX_OMEGA_K 2
-typedef struct mpqs_multiplier {
-  mpqs_uint32_t k;              /* the multiplier (odd, squarefree) */
-  mpqs_uint32_t omega_k;        /* number (>=0) of primes dividing k */
-  mpqs_uint32_t kp[MPQS_MAX_OMEGA_K]; /* prime factors of k, if any */
-} mpqs_multiplier_t;
-
-static mpqs_multiplier_t cand_multipliers[] = {
-  {  1, 0, {  0,  0} },
-  {  3, 1, {  3,  0} },
-  {  5, 1, {  5,  0} },
-  {  7, 1, {  7,  0} },
-  { 11, 1, { 11,  0} },
-  { 13, 1, { 13,  0} },
-  { 15, 2, {  3,  5} },
-  { 17, 1, { 17,  0} },
-  { 19, 1, { 19,  0} },
-  { 21, 2, {  3,  7} },
-  { 23, 1, { 23,  0} },
-  { 29, 1, { 29,  0} },
-  { 31, 1, { 31,  0} },
-  { 33, 2, {  3, 11} },
-  { 35, 2, {  5,  7} },
-  { 37, 1, { 37,  0} },
-  { 39, 2, {  3, 13} },
-  { 41, 1, { 41,  0} },
-  { 43, 1, { 43,  0} },
-  { 47, 1, { 47,  0} },
-  { 51, 2, {  3, 17} },
-  { 53, 1, { 53,  0} },
-  { 55, 2, {  5, 11} },
-  { 57, 2, {  3, 19} },
-  { 59, 1, { 59,  0} },
-  { 61, 1, { 61,  0} },
-  { 65, 2, {  5, 13} },
-  { 67, 1, { 67,  0} },
-  { 69, 2, {  3, 23} },
-  { 71, 1, { 71,  0} },
-  { 73, 1, { 73,  0} },
-  { 77, 2, {  7, 11} },
-  { 79, 1, { 79,  0} },
-  { 83, 1, { 83,  0} },
-  { 85, 2, {  5, 17} },
-  { 87, 2, {  3, 29} },
-  { 89, 1, { 89,  0} },
-  { 91, 2, {  7, 13} },
-  { 93, 2, {  3, 31} },
-  { 95, 2, {  5, 19} },
-  { 97, 1, { 97,  0} }
-};
-
-/* -- the array of (Chinese remainder) idempotents which add/subtract up to
- * the middle coefficient B, and for convenience, the FB subscripts of the
- * primes in current use for A.  We keep these together since both arrays
- * are of the same size and are used at the same times. */
-typedef struct mqps_per_A_prime {
-  GEN _H;                       /* summand for B */
-  mpqs_int32_t _i;              /* subscript into FB */
-} mpqs_per_A_prime_t;
-
-/* following cooperate with names of local variables in the self_init fcns.
- * per_A_pr must exist and be an alias for the eponymous handle pointer for
- * all of these, and FB must exist and correspond to the handle FB pointer
- * for all but the first two of them. */
-#define MPQS_H(i) (per_A_pr[i]._H)
-#define MPQS_I(i) (per_A_pr[i]._i)
-#define MPQS_AP(i) (FB[per_A_pr[i]._i].fbe_p)
-#define MPQS_LP(i) (FB[per_A_pr[i]._i].fbe_flogp)
-#define MPQS_SQRT(i) (FB[per_A_pr[i]._i].fbe_sqrt_kN)
-#define MPQS_FLG(i) (FB[per_A_pr[i]._i].fbe_flags)
-
-
-/* -- the array of addends / subtrahends for changing polynomials during
- * self-initialization: (1/A) H[i] mod p_j, with i subscripting the inner
- * array in each entry, and j choosing the entry in an outer array.
- * Entries will occupy 64 bytes each no matter what  (which imposes one
- * sizing restriction: at most 17 prime factors for A;  thus i will range
- * from 0 to at most 15.)  This wastes a little memory for smaller N but
- * makes it easier for compilers to generate efficient code. */
-/* XX At present, memory locality vis-a-vis accesses to this array is good
- * XX in the slow (new A) branch of mpqs_self_init(), but poor in the fast
- * XX (same A, new B) branch, which now loops over the outer array index,
- * XX reading just one field of each inner array each time through the FB
- * XX loop.  This doesn't really harm, but will improve one day when we do
- * XX segmented sieve arrays with the associated segmented FB-range accesses.
- */
-#define MPQS_MAX_OMEGA_A 17
-typedef struct mpqs_inv_A_H {
-  mpqs_uint32_t _i[MPQS_MAX_OMEGA_A - 1];
-} mpqs_inv_A_H_t;
-
-#define MPQS_INV_A_H(i,j) (inv_A_H[j]._i[i])
-
-/* -- global handle for keeping track of everything used throughout any one
- * factorization attempt.  The order of the fields is roughly determined by
- * wanting to keep the most frequently used stuff near the beginning. */
-
-typedef struct mpqs_handle {
-  /* pointers into gpmalloc()d memory which must be freed at the end: */
-  unsigned char *sieve_array;   /* 0-based, representing [-M,M-1] */
-  unsigned char *sieve_array_end; /* points at sieve_array[M-1] */
-  mpqs_FB_entry_t *FB;          /* (aligned) FB array itself */
-  long *candidates;             /* collects promising sieve subscripts */
-  char *relations;              /* freshly found relations (strings) */
-  long *relaprimes;             /* prime/exponent pairs in a relation */
-  mpqs_inv_A_H_t *inv_A_H;      /* self-init: (aligned) stepping array, and */
-  mpqs_per_A_prime_t *per_A_pr; /* FB subscripts of primes in A etc. */
-
-  /* other stuff that's being used all the time */
-  mpqs_int32_t M;               /* sieving over |x| <= M */
-  mpqs_int32_t size_of_FB;      /* # primes in FB (or dividing k) */
-  /* the following three are in non-descending order, and the first two must
-   * be adjusted for omega_k at the beginning */
-  mpqs_int32_t index0_FB;       /* lowest subscript into FB of a "real" prime
-                                 * (i.e. other than -1, 2, factors of k) */
-  mpqs_int32_t index1_FB;       /* lowest subscript into FB for sieving */
-  mpqs_int32_t index2_FB;       /* primes for A are chosen relative to this */
-  unsigned char index2_moved;   /* true when we're starved for small A's */
-  unsigned char sieve_threshold; /* distinguishes candidates in sieve */
-#ifdef MPQS_USE_HISTOGRAMS
-  /* histogram feedback */
-  unsigned char do_histograms;  /* (boolean) enable histogram updating */
-  unsigned char done_histograms; /* histos have been eval'd for feedback */
-  /* more gpmalloc()d memory here: */
-  long *histo_full;             /* distribution of full rels from sieve */
-  long *histo_lprl;             /* - of LP rels from sieve */
-  long *histo_drop;             /* - of useless candidates */
-#endif
-  GEN N;                        /* given number to be factored */
-  GEN kN;                       /* N with multiplier (on PARI stack) */
-  /* quantities associated with the current polynomial; all these also
-   * live in preallocated slots on the PARI stack: */
-  GEN A;                        /* leading coefficient */
-  GEN B;                        /* middle coefficient */
-#ifdef MPQS_DEBUG
-  GEN C;                        /* and constant coefficient */
-#endif
-  mpqs_int32_t omega_A;         /* number of primes going into each A */
-  mpqs_int32_t no_B;            /* number of B's for each A: 2^(omega_A-1) */
-  double l2_target_A;           /* ~log2 of desired typical A */
-  /* counters and bit pattern determining and numbering the current
-   * polynomial: */
-  mpqs_uint32_t bin_index;      /* bit pattern for selecting primes for A */
-  mpqs_uint32_t index_i;        /* running count of A's */
-  mpqs_uint32_t index_j;        /* B's ordinal number in A's cohort */
-  /* XXX one more to follow here... */
-
-  /* further sizing parameters: */
-  mpqs_int32_t target_no_rels;  /* target number of full relations */
-  mpqs_int32_t largest_FB_p;    /* largest prime in the FB */
-  mpqs_int32_t pmin_index1;	/* lower bound for primes used for sieving */
-  mpqs_int32_t lp_scale;        /* factor by which LPs may exceed FB primes */
-
-  mpqs_int32_t first_sort_point; /* when to sort and combine */
-  mpqs_int32_t sort_pt_interval; /* (in units of 1/1000) */
-
-  /* XXX subscripts determining where to pick primes for A... */
-
-  /* XX lp_bound might have to be mpqs_int64_t ? or mpqs_invp_t ? */
-  long lp_bound;                /* cutoff for Large Primes */
-  long digit_size_N;
-  long digit_size_kN;
-  mpqs_multiplier_t _k;         /* multiplier k and associated quantities */
-  double tolerance;             /* controls the tightness of the sieve */
-  double dkN;                   /* - double prec. approximation of kN */
-  double l2sqrtkN;              /* ~log2(sqrt(kN)) */
-  double l2M;                   /* ~log2(M) (cf. below) */
-  /* XX need an index2_FB here to remember where to start picking primes */
-
-  /* XX put statistics here or keep them as local variables in mpqs() ? */
-
-  /* bookkeeping pointers to containers of aligned memory chunks: */
-  void *FB_chunk;               /* (unaligned) chunk containing the FB */
-  void *invAH_chunk;            /* (unaligned) chunk for self-init array */
-
-} mpqs_handle_t;
-
-/* -- for Gauss/Lanczos */
-typedef ulong *F2_row;
-typedef F2_row *F2_matrix;
-
-/* -- sizing table entries */
-
-/* The "tolerance" is explained below apropos of mpqs_set_sieve_threshold().
- * The LP scale, for very large kN, prevents us from accumulating vast amounts
- * of LP relations with little chance of hitting any particular large prime
- * a second time and being able to combine a full relation from two LP ones;
- * however, the sieve threshold (determined by the tolerance) already works
- * against very large LPs being produced.-- The present relations "database"
- * can detect duplicate full relations only during the sort/combine phases,
- * so we must do some sort points even for tiny kN where we do not admit
- * large primes at all.
- * Some constraints imposed by the present implementation:
- * + omega_A should be at least 3, and no more than MPQS_MAX_OMEGA_A
- * + The size of the FB must be large enough compared to omega_A
- *   (about 2*omega_A + 3, but this is always true below) */
-/* XXX Changes needed for segmented mode:
- * XXX When using it (kN large enough),
- * XXX - M must become a multiple of the (cache block) segment size
- * XXX   (or to keep things simple: a multiple of 32K)
- * XXX - we need index3_FB to seperate (smaller) primes used for normal
- * XXX   sieving from larger ones used with transaction buffers
- * XXX   (and the locate_A_range and associated logic must be changed to
- * XXX   cap index2_FB below index3_FB instead of below size_of_FB)
- */
-typedef struct mpqs_parameterset {
-  float tolerance;              /* "mesh width" of the sieve */
-  /* XX following subject to further change */
-  mpqs_int32_t lp_scale;        /* factor by which LPs may exceed FB primes */
-  mpqs_int32_t M;               /* size of half the sieving interval */
-  mpqs_int32_t size_of_FB;      /* #primes to use for FB (including 2) */
-  mpqs_int32_t omega_A;         /* #primes to go into each A */
-  /* following is auto-adjusted to account for prime factors of k inserted
-   * near the start of the FB.  NB never ever sieve on the prime 2  (which
-   * would just contribute a constant at each sieve point). */
-  mpqs_int32_t pmin_index1;     /* lower bound for primes used for sieving */
-  /* the remaining two are expressed in percent  (of the target number of full
-   * relations),  and determine when we stop sieving to review the contents
-   * of the relations DB and sort them and combine full relations from LP
-   * ones.  Note that the handle has these in parts per thousand instead. */
-  mpqs_int32_t first_sort_point;
-  mpqs_int32_t sort_pt_interval;
-} mpqs_parameterset_t;
-
-/* - the table of sizing parameters itself */
-
-/* indexed by size of kN in decimal digits, subscript 0 corresponding to
- * 9 (or fewer) digits */
-static mpqs_parameterset_t mpqs_parameters[] =
-{ /*       tol lp_scl     M   szFB  oA pmx1 1st  sti */
-  {  /*9*/ 0.8,   1,    900,    20,  3,   5, 70,  8},
-  { /*10*/ 0.8,   1,    900,    21,  3,   5, 70,  8},
-  { /*11*/ 0.8,   1,    920,    22,  3,   5, 70,  6},
-  { /*12*/ 0.8,   1,    960,    24,  3,   5, 70,  6},
-  { /*13*/ 0.8,   1,   1020,    26,  3,   5, 70,  6},
-  { /*14*/ 0.8,   1,   1100,    29,  3,   5, 70,  6},
-  { /*15*/ 0.8,   1,   1200,    32,  3,   5, 60,  8},
-  { /*16*/ 0.8,   1,   1500,    35,  3,   5, 60,  8},
-  { /*17*/ 0.8,   1,   1900,    40,  3,   5, 60,  8},
-  { /*18*/ 0.8,   1,   2500,    60,  3,   5, 50, 10},
-  { /*19*/ 0.8,   1,   3200,    80,  3,   5, 50, 10},
-  { /*20*/ 0.8,   1,   4000,   100,  3,   5, 40, 10},
-  { /*21*/ 0.8,   1,   4300,   100,  3,   5, 40, 10},
-  { /*22*/ 0.8,   1,   4500,   120,  3,   5, 40, 10},
-  { /*23*/ 0.8,   1,   4800,   140,  3,   5, 30, 10},
-  { /*24*/ 0.8,   1,   5100,   160,  4,   7, 30, 10},
-  { /*25*/ 0.8,   1,   5400,   180,  4,   7, 30, 10},
-  { /*26*/ 0.9,   1,   5700,   200,  4,   7, 30, 10},
-  { /*27*/ 1.12,  1,   6000,   220,  4,   7, 30, 10},
-  { /*28*/ 1.17,  1,   6300,   240,  4,  11, 30, 10},
-  { /*29*/ 1.22,  1,   6500,   260,  4,  11, 30, 10},
-  { /*30*/ 1.30,  1,   6800,   325,  4,  11, 20, 10},
-  { /*31*/ 1.33,  1,   7000,   355,  4,  13, 20, 10},
-  { /*32*/ 1.36,  1,   7200,   375,  5,  13, 20, 10},
-  { /*33*/ 1.40,  1,   7400,   400,  5,  13, 20, 10},
-  { /*34*/ 1.43,  1,   7600,   425,  5,  17, 20, 10},
-  /* around here, sieving takes long enough to make it worthwhile recording
-   * LP relations into their separate output files, although they tend not
-   * yet to contribute a lot to the full relations until we get up to around
-   * 47 digits or so. */
-  { /*35*/ 1.48, 30,   7800,   550,  5,  17, 20, 10},
-  { /*36*/ 1.53, 45,   8100,   650,  5,  17, 20, 10},
-  { /*37*/ 1.60, 60,   9000,   750,  6,  19, 20, 10},
-  { /*38*/ 1.66, 70,  10000,   850,  6,  19, 20, 10},
-  { /*39*/ 1.69, 80,  11000,   950,  6,  23, 20, 10},
-  /* around here, the largest prime in FB becomes comparable to M in size */
-  { /*40*/ 1.69, 80,  12500,  1000,  6,  23, 20, 10},
-  { /*41*/ 1.69, 80,  14000,  1150,  6,  23, 10, 10},
-  { /*42*/ 1.69, 80,  15000,  1300,  6,  29, 10, 10},
-  { /*43*/ 1.69, 80,  16000,  1500,  6,  29, 10, 10},
-  { /*44*/ 1.69, 80,  17000,  1700,  7,  31, 10, 10},
-  { /*45*/ 1.69, 80,  18000,  1900,  7,  31, 10, 10},
-  { /*46*/ 1.69, 80,  20000,  2100,  7,  37, 10, 10},
-  { /*47*/ 1.69, 80,  25000,  2300,  7,  37, 10, 10},
-  { /*48*/ 1.69, 80,  27500,  2500,  7,  37, 10, 10},
-  { /*49*/ 1.72, 80,  30000,  2700,  7,  41, 10, 10},
-  { /*50*/ 1.75, 80,  35000,  2900,  7,  41, 10, 10},
-  { /*51*/ 1.80, 80,  40000,  3000,  7,  43, 10, 10},
-  { /*52*/ 1.85, 80,  50000,  3200,  7,  43, 10, 10},
-  { /*53*/ 1.90, 80,  60000,  3500,  7,  47, 10, 10},
-  { /*54*/ 1.95, 80,  70000,  3800,  7,  47, 10, 10},
-  { /*55*/ 1.95, 80,  80000,  4100,  7,  53, 10, 10},
-  { /*56*/ 1.95, 80,  90000,  4400,  7,  53, 10,  8},
-  { /*57*/ 2.00, 80, 100000,  4700,  8,  53, 10,  8},
-  { /*58*/ 2.05, 80, 110000,  5000,  8,  59, 10,  8},
-  { /*59*/ 2.10, 80, 120000,  5400,  8,  59, 10,  8},
-  { /*60*/ 2.15, 80, 130000,  5800,  8,  61, 10,  8},
-  { /*61*/ 2.20, 80, 140000,  6100,  8,  61, 10,  8},
-  { /*62*/ 2.25, 80, 150000,  6400,  8,  67, 10,  6},
-  { /*63*/ 2.39, 80, 160000,  6700,  8,  67, 10,  6},
-  { /*64*/ 2.30, 80, 165000,  7000,  8,  67, 10,  6},
-  { /*65*/ 2.31, 80, 170000,  7300,  8,  71, 10,  6},
-  { /*66*/ 2.32, 80, 175000,  7600,  8,  71, 10,  6},
-  { /*67*/ 2.33, 80, 180000,  7900,  8,  73, 10,  6},
-  { /*68*/ 2.34, 80, 185000,  8200,  8,  73, 10,  6},
-  { /*69*/ 2.35, 80, 190000,  8600,  8,  79,  8,  6},
-  { /*70*/ 2.36, 80, 195000,  8800,  8,  79,  8,  6},
-  { /*71*/ 2.37, 80, 200000,  9000,  9,  79,  8,  6},
-  { /*72*/ 2.38, 80, 205000,  9250,  9,  83,  5,  5},
-  { /*73*/ 2.41, 80, 210000,  9500,  9,  83,  5,  5},
-  { /*74*/ 2.46, 80, 220000,  9750,  9,  83,  5,  5},
-  { /*75*/ 2.51, 80, 230000, 10000,  9,  89,  5,  5},
-  { /*76*/ 2.56, 80, 240000, 10500,  9,  89,  5,  5},
-  { /*77*/ 2.58, 80, 250000, 11200,  9,  89,  5,  5},
-  { /*78*/ 2.60, 80, 260000, 12500,  9,  89,  5,  5},
-  { /*79*/ 2.63, 80, 270000, 14000,  9,  97,  5,  4},
-  { /*80*/ 2.65, 80, 280000, 15500,  9,  97,  5,  4},
-  { /*81*/ 2.72, 80, 300000, 17000,  9,  97,  4,  4},
-  { /*82*/ 2.77, 80, 320000, 18500,  9, 101,  4,  4},
-  { /*83*/ 2.82, 80, 340000, 20000, 10, 101,  4,  4},
-  { /*84*/ 2.84, 80, 360000, 21500, 10, 103,  4,  4},
-  { /*85*/ 2.86, 80, 400000, 23000, 10, 103,  4,  3},
-  { /*86*/ 2.88, 80, 460000, 24500, 10, 107,  4,  3},
-  /* architectures with 1MBy L2 cache will become noticeably slower here
-   * as 2*M exceeds that mark - to be addressed in a future version by
-   * segmenting the sieve interval */
-  { /*87*/ 2.90, 80, 520000, 26000, 10, 107,  4,  3},
-  { /*88*/ 2.91, 80, 580000, 27500, 10, 109,  4,  3},
-  { /*89*/ 2.92, 80, 640000, 29000, 10, 109,  4,  3},
-  { /*90*/ 2.93, 80, 700000, 30500, 10, 113,  2,  2},
-  { /*91*/ 2.94, 80, 770000, 32200, 10, 113,  2,  2},
-  /* entries below due to Thomas Denny, never tested */
-  { /*92*/ 3.6, 90, 2000000, 35000,  9, 113,  2,  2},
-  { /*93*/ 3.7, 90, 2000000, 37000,  9, 113,  2,  2},
-  { /*94*/ 3.7, 90, 2000000, 39500,  9, 127,  2,  2},
-  { /*95*/ 3.7, 90, 2500000, 41500,  9, 127,  2,  2},
-  { /*96*/ 3.8, 90, 2500000, 45000, 10, 127,  2,  2},
-  { /*97*/ 3.8, 90, 2500000, 47500, 10, 131,  2,  2},
-  { /*98*/ 3.7, 90, 3000000, 51000, 10, 131,  2,  2},
-  { /*99*/ 3.8, 90, 3000000, 53000, 10, 133,  2,  2},
-  {/*100*/ 3.8, 90, 3500000, 51000, 10, 133,  2,  2},
-  {/*101*/ 3.8, 90, 3500000, 54000, 10, 139,  2,  2},
-  {/*102*/ 3.8, 90, 3500000, 57000, 10, 139,  2,  2},
-  {/*103*/ 3.9, 90, 4000000, 61000, 10, 139,  2,  2},
-  {/*104*/ 3.9, 90, 4000000, 66000, 10, 149,  2,  2},
-  {/*105*/ 3.9, 90, 4000000, 70000, 10, 149,  2,  2},
-  {/*106*/ 3.9, 90, 4000000, 75000, 10, 151,  2,  2},
-  {/*107*/ 3.9, 90, 4000000, 80000, 10, 151,  2,  2},
-};
-
-#define MPQS_MAX_DIGIT_SIZE_KN 107
-
-
-
-/* end of "mpqs.h" */
+#include "mpqs.h"
 
 /*********************************************************************/
 /**                                                                 **/
@@ -637,11 +115,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
   if (h->digit_size_kN <= 9)
     i = 0;
   else if (h->digit_size_kN > MPQS_MAX_DIGIT_SIZE_KN)
-  {
-    pari_warn(warner,
-        "MPQS: number too big to be factored with MPQS,\n\tgiving up");
     return 0;
-  }
   else
     i = h->digit_size_kN - 9;
 
@@ -852,59 +326,23 @@ mpqs_poly_ctor(mpqs_handle_t *h)
 static void
 mpqs_handle_dtor(mpqs_handle_t *h)
 {
-  if (h->per_A_pr != NULL)
-    free((void *)(h->per_A_pr));
-  if (h->relaprimes != NULL)
-    free((void *)(h->relaprimes));
-  if (h->relations != NULL)
-    free((void *)h->relations);
+#define myfree(x) if(x) free((void*)x)
+  myfree((h->per_A_pr));
+  myfree((h->relaprimes));
+  myfree(h->relations);
 
 #ifdef MPQS_USE_HISTOGRAMS
-  if (h->histo_drop != NULL)
-    free((void *)(h->histo_drop));
-  if (h->histo_lprl != NULL)
-    free((void *)(h->histo_lprl));
-  if (h->histo_full != NULL)
-    free((void *)(h->histo_full));
+  myfree((h->histo_drop));
+  myfree((h->histo_lprl));
+  myfree((h->histo_full));
 #endif
 
-  if (h->candidates != NULL)
-  {
-#ifdef MPQS_DEBUG_VERBOSE
-    fprintferr("MPQS DEBUG: freeing candidates table @0x%p\n",
-               (void *)(h->candidates));
-#endif
-    free((void *)(h->candidates));
-  }
-  if (h->sieve_array != NULL)
-  {
-#ifdef MPQS_DEBUG_VERBOSE
-    fprintferr("MPQS DEBUG: freeing sieve_array @0x%p\n",
-               (void *)(h->sieve_array));
-#endif
-    free((void *)(h->sieve_array));
-  }
-  if (h->invAH_chunk != NULL)
-  {
-#ifdef MPQS_DEBUG_VERBOSE
-    fprintferr("MPQS DEBUG: freeing inv_A_H chunk @0x%p\n",
-               (void *)(h->invAH_chunk));
-#endif
-    free((void *)(h->invAH_chunk));
-  }
-  if (h->FB_chunk != NULL)
-  {
-#ifdef MPQS_DEBUG_VERBOSE
-    fprintferr("MPQS DEBUG: freeing FB chunk @0x%p\n", (void *)(h->FB_chunk));
-#endif
-    free((void *)(h->FB_chunk));
-  }
-#ifdef MPQS_DEBUG_VERBOSE
-  fprintferr("MPQS DEBUG: destroying handle @0x%p\n", (void *)h);
-#endif
-  free((void *)h);
+  myfree((h->candidates));
+  myfree((h->sieve_array));
+  myfree((h->invAH_chunk));
+  myfree((h->FB_chunk));
+  myfree(h);
 }
-
 
 /* XX todo - relationsdb handle */
 
@@ -1268,8 +706,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
   /* check whether this hasn't walked off the top end... */
   /* The following should actually NEVER happen. */
   if (i > h->size_of_FB - 3)
-  {
-    /* ok now, now this isn't going to work at all. */
+  { /* this isn't going to work at all. */
     pari_warn(warner,
         "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
@@ -1486,21 +923,6 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 /**                                                                 **/
 /*********************************************************************/
 
-/* XXX this stuff should be consolidated into another handle "object" */
-
-/* BEGIN: global variables to disappear as soon as possible */
-/* names for temp. files, set in mpqs_get_filename */
-static char *FREL_str;
-static char *FNEW_str;
-static char *LPREL_str;
-static char *LPNEW_str;
-static char *TMP_str;
-static char *COMB_str;
-
-/* END: global variables to disappear as soon as possible */
-
-/******************************/
-
 /* determines a unique name for a file based on a short nickname
  * name is allocated on the stack */
 static char *
@@ -1529,7 +951,12 @@ mpqs_relations_cmp(const void *a, const void *b)
   else return strcmp(*sa, *sb);
 }
 
-#define bummer(fn) pari_err(talker, "error whilst writing to file %s", fn)
+static void
+pari_fputs(char *s, pariFILE *f)
+{
+  if (fputs(s, f->file) < 0)
+    pari_err(talker, "error whilst writing to file %s", f->name);
+}
 #define min_bufspace 120UL /* use new buffer when < min_bufspace left */
 #define buflist_size 1024  /* size of list-of-buffers blocks */
 
@@ -1662,16 +1089,15 @@ mpqs_sort_lp_file(char *filename)
   qsort(sort_table, i, sizeof(char*), mpqs_relations_cmp);
 
   /* copy results back to the original file, skipping exact duplicates */
-  pTMP = pari_fopen(filename, WRITE); /* NOT safefopen */
-  TMP = pTMP->file;
+  pTMP = pari_fopen(filename, WRITE);
   old_s = sort_table[0];
-  if (fputs(sort_table[0], TMP) < 0) bummer(filename);
+  pari_fputs(sort_table[0], pTMP);
   count = 1;
   for(j = 1; j < i; j++)
   {
     if (strcmp(old_s, sort_table[j]))
     {
-      if (fputs(sort_table[j], TMP) < 0) bummer(filename);
+      pari_fputs(sort_table[j], pTMP);
       count++;
     }
     old_s = sort_table[j];
@@ -1703,12 +1129,7 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
   FILE *fp = f->file;
   char line[MPQS_STRING_LENGTH];
   long c = 0;
-  while (fgets(line, MPQS_STRING_LENGTH, fp1) != NULL)
-  {
-    if (fputs(line, fp) < 0)
-      pari_err(talker, "error whilst appending to file %s", f->name);
-    c++;
-  }
+  while (fgets(line, MPQS_STRING_LENGTH, fp1)) { pari_fputs(line, f); c++; }
   if (fflush(fp)) pari_warn(warner, "error whilst flushing file %s", f->name);
   pari_fclose(f); return c;
 }
@@ -1716,31 +1137,26 @@ mpqs_append_file(pariFILE *f, FILE *fp1)
 /* Merge-sort on the files LPREL and LPNEW; assumes that LPREL and LPNEW are
  * already sorted. Creates/truncates the TMP file, writes result to it and
  * closes it (via mpqs_append_file()). Instead of LPREL, LPNEW we may also call
- * this with FREL, FNEW. In the latter case mode should be 1 (and we return the
- * count of all full relations), in the former 0 (and we return the count of
- * frels we expect to be able to combine out of the present lprels). Moreover,
- * if mode is 0, the combinable lprels are written out to a separate file (COMB)
- * which we also create and close (the caller will find it exists iff our
- * return value is nonzero), and we keep only one occurrence of each `large
- * prime' in TMP (i.e. in the future LPREL file). --GN */
+ * this with FREL, FNEW. In the latter case pCOMB should be NULL (and we
+ * return the count of all full relations), in the former non-NULL (and we
+ * return the count of frels we expect to be able to combine out of the
+ * present lprels). If pCOMB is non-NULL, the combinable lprels are written
+ * out to this separate file.
+ * We keep only one occurrence of each `large prime' in TMP (i.e. in the
+ * future LPREL file). --GN */
 
-#define swap_lines() { \
+#define swap_lines() { char *line_tmp;\
   line_tmp = line_new_old; \
   line_new_old = line_new; \
   line_new = line_tmp; }
 
 static long
-mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
+mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
+                        pariFILE *pTMP)
 {
-  /* TMP (renamed upon return) and COMB (deleted upon return) guaranteed not
-   * to exist yet  --> safefopen for both temp files */
-  pariFILE *pTMP = pari_safefopen(TMP_str, WRITE);
-  FILE *TMP = pTMP->file;
-  pariFILE *pCOMB = NULL;
-  FILE *COMB = NULL; /* gcc -Wall */
   char line1[MPQS_STRING_LENGTH], line2[MPQS_STRING_LENGTH];
   char line[MPQS_STRING_LENGTH];
-  char *line_new = line1, *line_new_old = line2, *line_tmp;
+  char *line_new = line1, *line_new_old = line2;
   long q_new, q_new_old = -1, q, i = 0, c = 0;
   long comb_in_progress;
 
@@ -1749,23 +1165,23 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
      * didn't want to count the lines (again)... however, this case will not
      * normally happen */
     i = mpqs_append_file(pTMP, LPREL);
-    return (mode ? i : 0);
+    return pCOMB ? 0 : i;
   }
   /* we now have a line_new from LPNEW */
 
   if (!fgets(line, MPQS_STRING_LENGTH, LPREL))
   { /* LPREL is empty: copy LPNEW to TMP... almost. */
-    if (fputs(line_new, TMP) < 0) bummer(TMP_str);
-    if (mode)
+    pari_fputs(line_new, pTMP);
+    if (!pCOMB)
     { /* full relations mode */
       i = mpqs_append_file(pTMP, LPNEW);
-      return i + 1; /* COMB cannot be open here */
+      return i + 1;
     }
 
     /* LP mode:  check for combinable relations */
     q_new_old = atol(line_new);
     /* we need to retain a copy of the old line just for a moment, because we
-     * may yet have to write it to COMB. Do this by swapping the two buffers */
+     * may yet have to write it to pCOMB. Do this by swapping the two buffers */
     swap_lines();
     comb_in_progress = 0;
     i = 0;
@@ -1777,18 +1193,13 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
       { /* found combinables, check whether we're already busy on this
            particular `large prime' */
         if (!comb_in_progress)
-        { /* if not, write first line to COMB, creating and opening the
+        { /* if not, write first line to pCOMB, creating and opening the
            * file first if it isn't open yet */
-          if (!pCOMB)
-          {
-            pCOMB = pari_safefopen(COMB_str, WRITE);
-            COMB = pCOMB->file;
-          }
-          if (fputs(line_new_old, COMB) < 0) bummer(COMB_str);
+          pari_fputs(line_new_old, pCOMB);
           comb_in_progress = 1;
         }
         /* in any case, write the current line, and count it */
-        if (fputs(line_new, COMB) < 0) bummer(COMB_str);
+        pari_fputs(line_new, pCOMB);
         i++;
       }
       else
@@ -1796,13 +1207,12 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
         q_new_old = q_new;
         comb_in_progress = 0;
         /* and dump it to the TMP file */
-        if (fputs(line_new, TMP) < 0) bummer(TMP_str);
+        pari_fputs(line_new, pTMP);
         /* and stash it away for a moment */
         swap_lines();
         comb_in_progress = 0;
       }
     } /* while */
-    if (pCOMB) pari_fclose(pCOMB);
     pari_fclose(pTMP); return i;
   }
 
@@ -1818,9 +1228,8 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
        overtake it, checking for combinables coming from LPNEW alone */
     while (q > q_new)
     {
-      if (mode || !comb_in_progress)
-        if (fputs(line_new, TMP) < 0) bummer(TMP_str);
-      if (mode) c++; /* in FREL mode, count lines written */
+      if (!pCOMB || !comb_in_progress) pari_fputs(line_new, pTMP);
+      if (!pCOMB) c++; /* in FREL mode, count lines written */
       else if (!comb_in_progress)
       {
         q_new_old = q_new;
@@ -1828,14 +1237,14 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
       }
       if (!fgets(line_new, MPQS_STRING_LENGTH, LPNEW))
       {
-        if (fputs(line, TMP) < 0) bummer(TMP_str);
-        if (mode) c++; else c += i;
+        pari_fputs(line, pTMP);
+        if (!pCOMB) c++; else c += i;
         i = mpqs_append_file(pTMP, LPREL);
-        if (pCOMB) pari_fclose(pCOMB);
-        return (mode ? c + i : c);
+        return pCOMB? c: c + i;
       }
       q_new = atol(line_new);
-      if (mode) continue;
+      if (!pCOMB) continue;
+
       /* LP mode only: */
       if (q_new_old != q_new) /* not combinable */
         comb_in_progress = 0; /* next loop will deal with it, or loop may end */
@@ -1844,37 +1253,31 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
            `large prime' */
         if (!comb_in_progress)
         {
-          if (!pCOMB)
-          {
-            pCOMB = pari_safefopen(COMB_str, WRITE);
-            COMB = pCOMB->file;
-          }
-          if (fputs(line_new_old, COMB) < 0) bummer(COMB_str);
+          pari_fputs(line_new_old, pCOMB);
           comb_in_progress = 1;
         }
         /* in any case, write the current line, and count it */
-        if (fputs(line_new, COMB) < 0) bummer(COMB_str);
+        pari_fputs(line_new, pCOMB);
         i++;
       }
     } /* while q > q_new */
 
     /* q <= q_new */
 
-    if (!mode) c += i;   /* accumulate count of combinables */
+    if (pCOMB) c += i;   /* accumulate count of combinables */
     i = 0;               /* and clear it */
     comb_in_progress = 0;/* redundant */
 
     /* now let LPREL catch up with LPNEW, and possibly overtake it */
     while (q < q_new)
     {
-      if (fputs(line, TMP) < 0) bummer(TMP_str);
-      if (mode) c++;
+      pari_fputs(line, pTMP);
+      if (!pCOMB) c++;
       if (!fgets(line, MPQS_STRING_LENGTH, LPREL))
       {
-        if (fputs(line_new, TMP) < 0) bummer(TMP_str);
+        pari_fputs(line_new, pTMP);
         i = mpqs_append_file(pTMP, LPNEW);
-        if (pCOMB) pari_fclose(pCOMB);
-        return (mode ? c + i + 1 : c);
+        return pCOMB? c: c + i + 1;
       }
       else
         q = atol(line);
@@ -1886,7 +1289,7 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
      * `large prime' is already in LPREL, and appears now once or more often in
      * LPNEW. Thus in this sub-loop we advance LPNEW. The `line' from LPREL is
      * left alone, and will be written to TMP the next time around the main for
-     * loop; we only write it to COMB here -- unless all we find is an exact
+     * loop; we only write it to pCOMB here -- unless all we find is an exact
      * duplicate of the line we already have, that is. (There can be at most
      * one such, and if so it is simply discarded.) */
     while (q == q_new)
@@ -1895,24 +1298,19 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
       { /* duplicate -- move right ahead to the next LPNEW line */
         ;/* do nothing here */
       }
-      else if (mode)
+      else if (!pCOMB)
       { /* full relations mode: write line_new out first, keep line */
-        if (fputs(line_new, TMP) < 0) bummer(TMP_str);
+        pari_fputs(line_new, pTMP);
         c++;
       }
       else
       { /* LP mode, and combinable relation */
         if (!comb_in_progress)
         {
-          if (!pCOMB)
-          {
-            pCOMB = pari_safefopen(COMB_str, WRITE);
-            COMB = pCOMB->file;
-          }
-          if (fputs(line, COMB) < 0) bummer(COMB_str);
+          pari_fputs(line, pCOMB);
           comb_in_progress = 1;
         }
-        if (fputs(line_new, COMB) < 0) bummer(COMB_str);
+        pari_fputs(line_new, pCOMB);
         i++;
       }
       /* NB comb_in_progress is cleared by q_new becoming bigger than q, thus
@@ -1922,34 +1320,36 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, long mode)
       /* common ending: get another line_new, if any */
       if (!fgets(line_new, MPQS_STRING_LENGTH, LPNEW))
       {
-        if (fputs(line, TMP) < 0) bummer(TMP_str);
-        if (mode) c++; else c += i;
+        pari_fputs(line, pTMP);
+        if (!pCOMB) c++; else c += i;
         i = mpqs_append_file(pTMP, LPREL);
-        if (pCOMB) pari_fclose(pCOMB);
-        return (mode ? c + i : c);
+        return pCOMB? c: c + i;
       }
       else
         q_new = atol(line_new);
     } /* while */
 
-    if (!mode) c += i; /* accumulate count of combinables */
+    if (pCOMB) c += i; /* accumulate count of combinables */
   }
 }
 
 static long
-mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, long mode)
+mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, pariFILE *pCOMB)
 {
   pariFILE *pREL = pari_fopen(REL_str, READ);
   pariFILE *pNEW = pari_fopen(NEW_str, READ);
-  long tp = mpqs_mergesort_lp_file0(pREL->file, pNEW->file, mode);
-
+  char *t  = mpqs_get_filename("LPTMP");
+  pariFILE *pTMP = pari_fopen(t, WRITE);
+  long tp;
+  
+  tp = mpqs_mergesort_lp_file0(pREL->file, pNEW->file, pCOMB, pTMP);
   pari_fclose(pREL);
   pari_fclose(pNEW);
   pari_unlink(REL_str);
-  if (rename(TMP_str,REL_str))
-    pari_err(talker, "cannot rename file %s to %s", TMP_str, REL_str);
+  if (rename(t,REL_str))
+    pari_err(talker, "cannot rename file %s to %s", t, REL_str);
   if (MPQS_DEBUGLEVEL >= 6)
-    fprintferr("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
+    fprintferr("MPQS: renamed file %s to %s\n", t, REL_str);
   return tp;
 }
 
@@ -2604,10 +2004,10 @@ mpqs_factorback(mpqs_handle_t *h, char *relations)
 }
 #endif
 
+/* NB FREL, LPREL are actually FNEW, LPNEW when we get called */
 static long
 mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
                FILE *FREL, FILE *LPREL)
-     /* NB FREL, LPREL are actually FNEW, LPNEW when we get called */
 {
   pari_sp av;
   long number_of_relations = 0;
@@ -2906,7 +2306,7 @@ set_lp_entry(mpqs_lp_entry *e, char *buf)
 
 static long
 mpqs_combine_large_primes(mpqs_handle_t *h,
-                          FILE *COMB, FILE *FNEW, GEN *f)
+                          FILE *COMB, pariFILE *pFNEW, GEN *f)
 {
   pari_sp av0 = avma, av, av2;
   char new_relation[MPQS_STRING_LENGTH], buf[MPQS_STRING_LENGTH];
@@ -3045,7 +2445,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
     }
 #endif
 
-    if (fputs(new_relation, FNEW) < 0) bummer(FNEW_str);
+    pari_fputs(new_relation, pFNEW);
     avma = av2;
   } /* while */
 
@@ -3354,10 +2754,9 @@ split(GEN N, GEN *e, GEN *res)
 }
 
 static GEN
-mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
+mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 {
-  pariFILE *pFREL;
-  FILE *FREL;
+  FILE *FREL = pFREL->file;
   GEN N = h->N, X, Y_prod, X_plus_Y, D1, res, new_res;
   mpqs_FB_entry_t *FB = h->FB;
   pari_sp av=avma, av2, av3, lim, lim3;
@@ -3367,8 +2766,6 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
   F2_matrix m, ker_m;
   long done, rank;
 
-  pFREL = pari_fopen(FREL_str, READ);
-  FREL = pFREL->file;
   fpos = (long *) gpmalloc(rel * sizeof(long));
 
   m = F2_read_matrix(FREL, h->size_of_FB+1, rel, fpos);
@@ -3398,7 +2795,6 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
   { /* trivial kernel. Fail gracefully: main loop may look for more relations */
     if (DEBUGLEVEL >= 3)
       pari_warn(warner, "MPQS: no solutions found from linear system solver");
-    pari_fclose(pFREL);
     F2_destroy_matrix(m, h->size_of_FB+1);
     F2_destroy_matrix(ker_m, rel);
     free(fpos); /* ei not yet allocated */
@@ -3597,7 +2993,6 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
     }
   } /* for (loop over kernel basis) */
 
-  pari_fclose(pFREL);
   F2_destroy_matrix(m, h->size_of_FB+1);
   F2_destroy_matrix(ker_m, rel);
   free(ei); free(fpos);
@@ -3647,11 +3042,10 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
 /* TODO: this function to be renamed mpqs_main() with several extra parameters,
  * with mpqs() as a wrapper for the standard case, so we can do partial runs
  * across several machines etc.  (from gp or a dedicated C program). --GN */
-GEN
-mpqs(GEN N)
+static GEN
+mpqs_i(mpqs_handle_t *handle)
 {
-  mpqs_handle_t *handle = mpqs_handle_ctor(N);
-  GEN fact; /* will in the end hold our factor(s) */
+  GEN N = handle->N, fact; /* will in the end hold our factor(s) */
 
   /* XXX fix type! */
   mpqs_int32_t size_of_FB; /* size of the factor base */
@@ -3683,8 +3077,13 @@ mpqs(GEN N)
   long histo_checkpoint = MPQS_MIN_CANDS_FOR_HISTO;
 #endif
 
-  pariFILE *pFREL, *pFNEW, *pLPREL, *pLPNEW, *pCOMB;
-  FILE *FNEW, *LPNEW;
+  pariFILE *pFNEW, *pLPNEW, *pCOMB, *pFREL;
+  char *COMB_str, *FREL_str, *FNEW_str, *LPREL_str, *LPNEW_str;
+
+/* END: global variables to disappear as soon as possible */
+
+/******************************/
+
 
   pari_sp av = avma;
 
@@ -3698,7 +3097,7 @@ mpqs(GEN N)
   if (handle->digit_size_N > MPQS_MAX_DIGIT_SIZE_KN)
   {
     pari_warn(warner, "MPQS: number too big to be factored with MPQS,\n\tgiving up");
-    mpqs_handle_dtor(handle); return NULL;
+    return NULL;
   }
 
   if (DEBUGLEVEL >= 4)
@@ -3712,7 +3111,9 @@ mpqs(GEN N)
 
   if (!mpqs_set_parameters(handle))
   {
-    mpqs_handle_dtor(handle); return NULL;
+    pari_warn(warner,
+        "MPQS: number too big to be factored with MPQS,\n\tgiving up");
+    return NULL;
   }
 
   size_of_FB = handle->size_of_FB;
@@ -3728,7 +3129,7 @@ mpqs(GEN N)
     /* free(FB); */
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: found factor = %ld whilst creating factor base\n", p);
-    mpqs_handle_dtor(handle); avma = av; return utoipos(p);
+    avma = av; return utoipos(p);
   }
   mpqs_sieve_array_ctor(handle);
   mpqs_poly_ctor(handle);
@@ -3750,10 +3151,7 @@ mpqs(GEN N)
   /* compute the threshold and fill in the byte-sized scaled logarithms */
   mpqs_set_sieve_threshold(handle);
 
-  if (!mpqs_locate_A_range(handle))
-  {
-    mpqs_handle_dtor(handle); return NULL;
-  }
+  if (!mpqs_locate_A_range(handle)) return NULL;
 
   if (DEBUGLEVEL >= 4)
   {
@@ -3805,13 +3203,15 @@ mpqs(GEN N)
   LPREL_str = mpqs_get_filename("LPREL");
   LPNEW_str = mpqs_get_filename("LPNEW");
   COMB_str  = mpqs_get_filename("COMB");
-  TMP_str   = mpqs_get_filename("LPTMP");
+#define unlink_all()\
+      pari_unlink(FREL_str);\
+      pari_unlink(FNEW_str);\
+      pari_unlink(LPREL_str);\
+      pari_unlink(LPNEW_str);\
+      pari_unlink(COMB_str);
 
-  /* just to create the temp files */
-  pFREL  = pari_safefopen(FREL_str,  WRITE); pari_fclose(pFREL);
-  pLPREL = pari_safefopen(LPREL_str, WRITE); pari_fclose(pLPREL);
-  pFNEW = pari_safefopen(FNEW_str,  WRITE);  FNEW = pFNEW->file;
-  pLPNEW= pari_safefopen(LPNEW_str, WRITE); LPNEW = pLPNEW->file;
+  pFNEW = pari_fopen(FNEW_str,  WRITE);
+  pLPNEW= pari_fopen(LPNEW_str, WRITE);
 
   for(;;)
   { /* FNEW and LPNEW are open for writing */
@@ -3838,15 +3238,10 @@ mpqs(GEN N)
       pari_fclose(pFNEW);
       pari_fclose(pLPNEW);
       /* FREL, LPREL are closed at this point */
-      pari_unlink(FREL_str);
-      pari_unlink(FNEW_str);
-      pari_unlink(LPREL_str);
-      pari_unlink(LPNEW_str);
-      mpqs_handle_dtor(handle); avma = av; return NULL;
+      unlink_all(); avma = av; return NULL;
     }
 
-    memset((void *)(handle->sieve_array), 0,
-           (M << 1) * sizeof (unsigned char));
+    memset((void*)(handle->sieve_array), 0, (M << 1) * sizeof(unsigned char));
     mpqs_sieve(handle);
 
     tc = mpqs_eval_sieve(handle);
@@ -3856,15 +3251,15 @@ mpqs(GEN N)
 
     if (tc)
     {
-      long t = mpqs_eval_cand(handle, tc, FNEW, LPNEW);
+      long t = mpqs_eval_cand(handle, tc, pFNEW->file, pLPNEW->file);
       total_full_relations += t;
       tff += t;
       good_iterations++;
     }
 
 #ifdef MPQS_USE_HISTOGRAMS
-    if (handle->do_histograms && (!handle->done_histograms) &&
-        (total_no_cand >= histo_checkpoint))
+    if (handle->do_histograms && !handle->done_histograms &&
+        total_no_cand >= histo_checkpoint)
     {
       int res = mpqs_eval_histograms(handle);
       if (res >= 0)
@@ -3908,9 +3303,10 @@ mpqs(GEN N)
     /* sort LPNEW and merge it into LPREL, diverting combinables into COMB */
     pari_fclose(pLPNEW);
     (void)mpqs_sort_lp_file(LPNEW_str);
-    tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, 0);
-    pLPNEW = pari_fopen(LPNEW_str, WRITE); /* NOT safefopen */
-    LPNEW = pLPNEW->file;
+    pCOMB = pari_fopen(COMB_str, WRITE);
+    tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, pCOMB);
+    pari_fclose(pCOMB);
+    pLPNEW = pari_fopen(LPNEW_str, WRITE);
 
     /* combine whatever there is to be combined */
     tfc = 0;
@@ -3918,25 +3314,20 @@ mpqs(GEN N)
     {
       /* build full relations out of large prime relations */
       pCOMB = pari_fopen(COMB_str, READ);
-      tfc = mpqs_combine_large_primes(handle, pCOMB->file, FNEW, &fact);
+      tfc = mpqs_combine_large_primes(handle, pCOMB->file, pFNEW, &fact);
       pari_fclose(pCOMB);
-      pari_unlink(COMB_str);
       /* now FREL, LPREL are closed and FNEW, LPNEW are still open */
       if (fact)
       { /* factor found during combining */
-        pari_fclose(pLPNEW);
-        pari_fclose(pFNEW);
-        pari_unlink(FREL_str);
-        pari_unlink(FNEW_str);
-        pari_unlink(LPREL_str);
-        pari_unlink(LPNEW_str);
         if (DEBUGLEVEL >= 4)
         {
           fprintferr("\nMPQS: split N whilst combining, time = %ld ms\n",
                      timer2());
           fprintferr("MPQS: found factor = %Z\n", fact);
         }
-        mpqs_handle_dtor(handle);
+        pari_fclose(pLPNEW);
+        pari_fclose(pFNEW);
+        unlink_all();
         return gerepileupto(av, fact);
       }
       total_partial_relations += tp;
@@ -3946,7 +3337,7 @@ mpqs(GEN N)
     pari_fclose(pFNEW);
     (void)mpqs_sort_lp_file(FNEW_str);
     /* definitive count (combinables combined, and duplicates removed) */
-    total_full_relations = mpqs_mergesort_lp_file(FREL_str, FNEW_str, 1);
+    total_full_relations = mpqs_mergesort_lp_file(FREL_str, FNEW_str, NULL);
     /* FNEW stays closed until we need to reopen it for another iteration */
 
     /* Due to the removal of duplicates, percentage may actually decrease at
@@ -4033,8 +3424,7 @@ mpqs(GEN N)
 
     if (percentage < 1000)
     {
-      pFNEW = pari_fopen(FNEW_str, WRITE); /* NOT safefopen */
-      FNEW = pFNEW->file;
+      pFNEW = pari_fopen(FNEW_str, WRITE);
       /* LPNEW and FNEW are again open for writing */
       continue; /* main loop */
     }
@@ -4048,15 +3438,12 @@ mpqs(GEN N)
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: starting Gauss over F_2 on %ld relations\n",
                  total_full_relations);
-    fact = mpqs_solve_linear_system(handle, total_full_relations);
+    pFREL = pari_fopen(FREL_str, READ);
+    fact = mpqs_solve_linear_system(handle, pFREL, total_full_relations);
+    pari_fclose(pFREL);
 
     if (fact)
     { /* solution found */
-      pari_fclose(pLPNEW);
-      pari_unlink(FREL_str);
-      pari_unlink(FNEW_str);
-      pari_unlink(LPREL_str);
-      pari_unlink(LPNEW_str);
       if (DEBUGLEVEL >= 4)
       {
         fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
@@ -4081,10 +3468,12 @@ mpqs(GEN N)
           }
         }
       }
-      /* fact may not be safe for a gcopy(), and thus gerepilecopy(av, fact)
-       * segfaults on one of the NULL markers. However, it is a nice connected
-       * object, and it resides already the top of the stack, so... --GN */
-      mpqs_handle_dtor(handle); return gerepileupto(av, fact);
+      pari_fclose(pLPNEW);
+      unlink_all();
+      /* fact not safe for a gerepilecopy(): segfaults on one of the NULL
+       * markers. However, it is a nice connected object, and it resides
+       * already the top of the stack, so... --GN */
+      return gerepileupto(av, fact);
     }
     else
     {
@@ -4100,14 +3489,16 @@ mpqs(GEN N)
       if (percentage > MPQS_ADMIT_DEFEAT)
       {
         pari_fclose(pLPNEW);
-        pari_unlink(FREL_str);
-        pari_unlink(FNEW_str);
-        pari_unlink(LPREL_str);
-        pari_unlink(LPNEW_str);
-        avma = av; mpqs_handle_dtor(handle); return NULL;
+        unlink_all(); avma = av; return NULL;
       }
-      pFNEW = pari_fopen(FNEW_str, WRITE); /* NOT safefopen */
-      FNEW = pFNEW->file;
+      pFNEW = pari_fopen(FNEW_str, WRITE);
     }
   } /* main loop */
+}
+GEN
+mpqs(GEN N)
+{
+  mpqs_handle_t *handle = mpqs_handle_ctor(N);
+  GEN fact = mpqs_i(handle);
+  mpqs_handle_dtor(handle); return fact;
 }

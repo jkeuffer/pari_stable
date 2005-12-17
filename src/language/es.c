@@ -2610,7 +2610,7 @@ newfile(FILE *f, char *name, int type)
   }
   if (file->prev) (file->prev)->next = file;
   if (DEBUGFILES)
-    fprintferr("I/O: opening file %s (code %d) \n",name,type);
+    fprintferr("I/O: new pariFILE %s (code %d) \n",name,type);
   return file;
 }
 
@@ -3540,10 +3540,11 @@ pari_is_rwx(char *s)
 }
 
 static int
-pari_file_exists(char *s)
+pari_file_exists(const char *s)
 {
 #if defined(UNIX) || defined (__EMX__)
-  return access(s, F_OK) == 0;
+  int id = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
+  return id < 0 || close(id);
 #else
   return 0;
 #endif
