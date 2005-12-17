@@ -136,7 +136,7 @@ BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
 BA  6- obsolete macros INIT_JMP/INIT_SIG
 
   Added
-    1- new library function ellisoncurve()
+    1- library function ellisoncurve()
 BA  2- library functions related to sorting: gen_sort_aux, gen_search_aux,
        vecsmall_indexsort
     3- functions strtoi, strtor
@@ -147,6 +147,7 @@ BA  6- support for GNU/kFreeBSD and other GNU userlands.
     8- function pari_warn() use instead of pari_err() for warnings
     9- function pari_add_function, pari_add_module
    10- doc/develop.tex
+   11- library function isprime_Fl
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):

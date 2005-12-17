@@ -328,7 +328,7 @@ e(ulong t, GEN *globfa)
       m /= E[j];
     }
     /* d runs through the divisors of t */
-    if (BSW_psp(utoipos(++d)))
+    if (isprime_Fl(++d))
     {
       if (d != 2) appendL(Primes, (GEN)d);
       s = muliu(s, upowuu(d, 1 + u_lval(t,d)));

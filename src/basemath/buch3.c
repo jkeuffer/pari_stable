@@ -1060,9 +1060,10 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
   lb = lg(beta)-1; mat = cgetg(1,t_MAT); q = 1UL;
   for(;;)
   {
-    q += 2*p; gq = utoipos(q);
-    if (!umodiu(bad,q) || !isprime(gq)) continue;
+    q += 2*p;
+    if (!umodiu(bad,q) || !isprime_Fl(q)) continue;
 
+    gq = utoipos(q);
     LQ = primedec(bnf,gq); nbqq = lg(LQ)-1;
     g = NULL;
     for (i=1; i<=nbqq; i++)
@@ -1492,7 +1493,7 @@ rnf_is_abelian(GEN nf, GEN pol)
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;
   /* small groups are abelian, as are groups of prime order */
-  if (l < 6 || isprime(utoipos(l))) return 1;
+  if (l < 6 || isprime_Fl(l)) return 1;
 
   pr = gel(z,2);
   modpr = nf_to_ff_init(nfL, &pr, &T, &pp);

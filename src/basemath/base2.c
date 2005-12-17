@@ -2377,7 +2377,7 @@ modprinit(GEN nf, GEN pr, int zk)
     gel(res,mpr_T) = T; return gerepilecopy(av, res);
   }
 
-  if (Fl_isprime(f))
+  if (isprime_Fl(f))
   {
     mul = eltmulid_get_table(nf, c[2]);
     mul = vecpermute(mul, c);

@@ -138,7 +138,7 @@ Fl_bad_for_base(Fl_miller_t *S, ulong a)
 }
 
 /* Miller-Rabin test for k random bases */
-int
+long
 millerrabin(GEN n, long k)
 {
   pari_sp av2, av = avma;
@@ -389,7 +389,7 @@ uu_coprime(ulong n, ulong u)
 
 /* Fl_BSW_psp */
 int
-Fl_isprime(ulong n)
+isprime_Fl(ulong n)
 {
   Fl_miller_t S;
   if (n < 103)
@@ -474,7 +474,7 @@ Fl_isprime(ulong n)
   return u_IsLucasPsP(n);
 }
 
-int
+long
 BSW_psp(GEN N)
 {
   pari_sp av = avma;
@@ -483,7 +483,7 @@ BSW_psp(GEN N)
 
   if (typ(N) != t_INT) pari_err(arither1);
   if (signe(N) <= 0) return 0;
-  if (lgefint(N) == 3) return Fl_BSW_psp((ulong)N[2]);
+  if (lgefint(N) == 3) return isprime_Fl((ulong)N[2]);
   if (!mod2(N)) return 0;
 #ifdef LONG_IS_64BIT
   /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53
@@ -2507,7 +2507,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
         if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-        while (!Fl_BSW_psp(q)) { q += p; }
+        while (!isprime_Fl(q)) { q += p; }
         break;
       }
     } while (q % p != 1);
