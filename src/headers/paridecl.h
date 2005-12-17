@@ -967,6 +967,7 @@ pariFILE*   pari_fopen(char *s, char *mode);
 pariFILE*   pari_safefopen(char *s, char *mode);
 char*   pari_strdup(const char *s);
 char*   pari_strndup(const char *s, long n);
+char*   pari_unique_dir(char *s);
 char*   pari_unique_filename(char *s);
 void    pari_unlink(char *s);
 void    pariflush(void);

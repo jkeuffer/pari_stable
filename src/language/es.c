@@ -2785,7 +2785,7 @@ try_pipe(char *cmd, int fl)
     s = gpmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
     file = system(s)? NULL: (FILE *) fopen(f,"r");
-    flag |= mf_FALSE; free(s);
+    flag |= mf_FALSE; free(s); free(f);
   }
   else
 #  endif
@@ -3539,16 +3539,24 @@ pari_is_rwx(char *s)
 #endif
 }
 
+#if defined(UNIX) || defined (__EMX__)
+#include <sys/types.h>
+#include <sys/stat.h>
+
 static int
 pari_file_exists(const char *s)
 {
-#if defined(UNIX) || defined (__EMX__)
   int id = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
   return id < 0 || close(id);
-#else
-  return 0;
-#endif
 }
+static int
+pari_dir_exists(const char *s) { return mkdir(s, 0777); }
+#else
+static int
+pari_file_exists(const char *s) { return 0; }
+static int
+pari_dir_exists(const char *s) { return 0; }
+#endif
 
 char *
 env_ok(char *s)
@@ -3590,7 +3598,7 @@ pari_tmp_dir(void)
 
 /* loop through 26^2 variants [suffix 'aa' to 'zz'] */
 static int
-get_file(char *buf)
+get_file(char *buf, int test(const char *))
 {
   char c, d, *end = buf + strlen(buf) - 1;
   for (d = 'a'; d <= 'z'; d++)
@@ -3599,54 +3607,75 @@ get_file(char *buf)
     for (c = 'a'; c <= 'z'; c++)
     {
       *end = c;
-      if (! pari_file_exists(buf)) return 1;
+      if (! test(buf)) return 1;
     }
   }
   return 0;
 }
 
-/* Return a "unique filename" built from the string s, possibly the user id
- * and the process pid (on Unix systems). A "temporary" directory name is
- * prepended. The name returned is stored in a static buffer (gpmalloc'ed
- * permanently). It is DOS-safe (s truncated to 8 chars)
- */
-char*
-pari_unique_filename(char *s)
+static void
+swap_slash(char *s)
 {
-  static char *buf, *pre, *post = NULL;
-
-  if (!post || !s) /* initialize */
-  {
-    char suf[64];
-    int lpre, lsuf;
-
-    if (post) free(post);
-    pre = pari_tmp_dir();
-#ifdef UNIX
-    sprintf(suf,".%ld.%ld", (long)getuid(), (long)getpid());
-#else
-    sprintf(suf,".gpa");
-#endif
-    lsuf = strlen(suf);
-    lpre = strlen(pre);
-    /* room for suffix + '\0 + prefix + '/' + s + suffix '\0' */
-    /*          ^- post        ^- buf         ^- pre          */
-    post = (char*) gpmalloc(lpre + 1 + 8 + 2*(lsuf + 1));
-    strcpy(post, suf);
-    buf = post + lsuf; *buf = 0; buf++;
-    strcpy(buf, pre);
-    if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
 #ifdef __EMX__
     if (!unix_shell())
 #endif
 #if defined(__EMX__) || defined(WINCE)
-      for (pre=buf; *pre; pre++)
-	if (*pre == '/') *pre = '\\';
+    {
+      char *t;
+      for (t=s; *t; t++)
+	if (*t == '/') *t = '\\';
+    }
 #endif
-    pre = buf + lpre; if (!s) return s;
-  }
-  sprintf(pre, "%.8s%s", s, post);
-  if (pari_file_exists(buf) && !get_file(buf))
+}
+
+static char *
+init_unique(char *s)
+{
+  char *buf, *pre, suf[64];
+  size_t lpre, lsuf;
+
+  pre = pari_tmp_dir();
+#ifdef UNIX
+  sprintf(suf,".%ld.%ld", (long)getuid(), (long)getpid());
+#else
+  sprintf(suf,".gpa");
+#endif
+  lsuf = strlen(suf);
+  lpre = strlen(pre);
+  /* room for prefix + '/' + s + suffix '\0' */
+  buf = (char*) gpmalloc(lpre + 1 + 8 + lsuf + 1);
+  strcpy(buf, pre);
+  if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
+  swap_slash(buf);
+  
+  sprintf(buf + lpre, "%.8s%s", s, suf);
+  return buf;
+}
+
+/* Return a "unique filename" built from the string s, possibly the user id
+ * and the process pid (on Unix systems). A "temporary" directory name is
+ * prepended. The name returned is gpmalloc'ed. It is DOS-safe
+ * (s truncated to 8 chars) */
+char*
+pari_unique_filename(char *s)
+{
+  char *buf = init_unique(s);
+
+  if (pari_file_exists(buf) && !get_file(buf, pari_file_exists))
     pari_err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
+  return buf;
+}
+
+/* Create a "unique directory" and return its name built from the string
+ * s, the user id and process pid (on Unix systems). A "temporary"
+ * directory name is prepended. The name returned is gpmalloc'ed.
+ * It is DOS-safe (truncated to 8 chars)
+ */
+char*
+pari_unique_dir(char *s)
+{
+  char *buf = init_unique(s);
+  if (pari_dir_exists(buf) && !get_file(buf, pari_dir_exists))
+    pari_err(talker,"couldn't find a suitable name for a tempdir (%s)",s);
   return buf;
 }

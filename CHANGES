@@ -126,6 +126,7 @@ BA 25- make pari restartable
    28- rename rnfhermitebasis -> rnfhnfbasis
    29- forbid t_STR, t_VECSMALL and t_LIST in gvar.
    30- cleanup mpqs use of temporary files
+   31- pari_unique_filename now MT-safe, returns a malloc'ed buffer.
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
@@ -148,6 +149,7 @@ BA  6- support for GNU/kFreeBSD and other GNU userlands.
     9- function pari_add_function, pari_add_module
    10- doc/develop.tex
    11- library function isprime_Fl
+   12- library function pari_unique_dir
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):

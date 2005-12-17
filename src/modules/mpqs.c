@@ -926,13 +926,15 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 /* determines a unique name for a file based on a short nickname
  * name is allocated on the stack */
 static char *
-mpqs_get_filename(char *s)
+mpqs_get_filename(char *dir, char *s)
 {
-  char *buf;
-
-  s = pari_unique_filename(s);
-  buf = (char*) new_chunk((strlen(s) / sizeof(long)) + 2);
-  return strcpy(buf, s);
+  char *buf = stackmalloc(strlen(dir) + strlen(s));
+#if defined(__EMX__) || defined(WINCE)
+  sprintf(buf, "%s\\%s", dir,s);
+#else
+  sprintf(buf, "%s/%s", dir,s);
+#endif
+  return buf;
 }
 
 /* compares two `large prime' relations according to their first element
@@ -1334,22 +1336,21 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
 }
 
 static long
-mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, pariFILE *pCOMB)
+mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, char *TMP_str, pariFILE *pCOMB)
 {
   pariFILE *pREL = pari_fopen(REL_str, READ);
   pariFILE *pNEW = pari_fopen(NEW_str, READ);
-  char *t  = mpqs_get_filename("LPTMP");
-  pariFILE *pTMP = pari_fopen(t, WRITE);
+  pariFILE *pTMP = pari_fopen(TMP_str, WRITE);
   long tp;
   
   tp = mpqs_mergesort_lp_file0(pREL->file, pNEW->file, pCOMB, pTMP);
   pari_fclose(pREL);
   pari_fclose(pNEW);
   pari_unlink(REL_str);
-  if (rename(t,REL_str))
-    pari_err(talker, "cannot rename file %s to %s", t, REL_str);
+  if (rename(TMP_str,REL_str))
+    pari_err(talker, "cannot rename file %s to %s", TMP_str, REL_str);
   if (MPQS_DEBUGLEVEL >= 6)
-    fprintferr("MPQS: renamed file %s to %s\n", t, REL_str);
+    fprintferr("MPQS: renamed file %s to %s\n", TMP_str, REL_str);
   return tp;
 }
 
@@ -3077,8 +3078,8 @@ mpqs_i(mpqs_handle_t *handle)
   long histo_checkpoint = MPQS_MIN_CANDS_FOR_HISTO;
 #endif
 
-  pariFILE *pFNEW, *pLPNEW, *pCOMB, *pFREL;
-  char *COMB_str, *FREL_str, *FNEW_str, *LPREL_str, *LPNEW_str;
+  pariFILE *pFNEW, *pLPNEW, *pCOMB, *pFREL, *pLPREL;
+  char *dir, *COMB_str, *FREL_str, *FNEW_str, *LPREL_str, *LPNEW_str, *TMP_str;
 
 /* END: global variables to disappear as soon as possible */
 
@@ -3198,18 +3199,22 @@ mpqs_i(mpqs_handle_t *handle)
 
   if (DEBUGLEVEL >= 5) fprintferr("MPQS: starting main loop\n");
   /* compute names for the temp files we'll need */
-  FREL_str  = mpqs_get_filename("FREL");
-  FNEW_str  = mpqs_get_filename("FNEW");
-  LPREL_str = mpqs_get_filename("LPREL");
-  LPNEW_str = mpqs_get_filename("LPNEW");
-  COMB_str  = mpqs_get_filename("COMB");
+  dir = pari_unique_dir("MPQS");
+  TMP_str   = mpqs_get_filename(dir, "LPTMP");
+  FREL_str  = mpqs_get_filename(dir, "FREL");
+  FNEW_str  = mpqs_get_filename(dir, "FNEW");
+  LPREL_str = mpqs_get_filename(dir, "LPREL");
+  LPNEW_str = mpqs_get_filename(dir, "LPNEW");
+  COMB_str  = mpqs_get_filename(dir, "COMB");
 #define unlink_all()\
       pari_unlink(FREL_str);\
       pari_unlink(FNEW_str);\
       pari_unlink(LPREL_str);\
       pari_unlink(LPNEW_str);\
-      pari_unlink(COMB_str);
+      pari_unlink(COMB_str); rmdir(dir); free(dir);
 
+  pFREL = pari_fopen(FREL_str,  WRITE); pari_fclose(pFREL);
+  pLPREL = pari_fopen(LPREL_str,  WRITE); pari_fclose(pLPREL);
   pFNEW = pari_fopen(FNEW_str,  WRITE);
   pLPNEW= pari_fopen(LPNEW_str, WRITE);
 
@@ -3304,7 +3309,7 @@ mpqs_i(mpqs_handle_t *handle)
     pari_fclose(pLPNEW);
     (void)mpqs_sort_lp_file(LPNEW_str);
     pCOMB = pari_fopen(COMB_str, WRITE);
-    tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, pCOMB);
+    tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, TMP_str, pCOMB);
     pari_fclose(pCOMB);
     pLPNEW = pari_fopen(LPNEW_str, WRITE);
 
@@ -3337,7 +3342,7 @@ mpqs_i(mpqs_handle_t *handle)
     pari_fclose(pFNEW);
     (void)mpqs_sort_lp_file(FNEW_str);
     /* definitive count (combinables combined, and duplicates removed) */
-    total_full_relations = mpqs_mergesort_lp_file(FREL_str, FNEW_str, NULL);
+    total_full_relations = mpqs_mergesort_lp_file(FREL_str, FNEW_str, TMP_str, NULL);
     /* FNEW stays closed until we need to reopen it for another iteration */
 
     /* Due to the removal of duplicates, percentage may actually decrease at
