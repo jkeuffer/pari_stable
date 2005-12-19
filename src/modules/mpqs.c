@@ -928,7 +928,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 static char *
 mpqs_get_filename(char *dir, char *s)
 {
-  char *buf = stackmalloc(strlen(dir) + strlen(s));
+  char *buf = stackmalloc(strlen(dir) + strlen(s) + 2);
 #if defined(__EMX__) || defined(WINCE)
   sprintf(buf, "%s\\%s", dir,s);
 #else
