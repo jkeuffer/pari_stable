@@ -2715,7 +2715,7 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 static char*
 mpqs_get_relation(long pos, FILE *FREL)
 {
-  static char buf[MPQS_STRING_LENGTH];
+  char buf[MPQS_STRING_LENGTH];
   if (fseek(FREL, pos, SEEK_SET)) pari_err(talker, "cannot seek FREL file");
   if (!fgets(buf, MPQS_STRING_LENGTH, FREL))
     pari_err(talker, "FREL file truncated?!");
