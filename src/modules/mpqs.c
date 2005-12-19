@@ -2691,13 +2691,13 @@ static GEN
 mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 {
   pari_sp av = avma;
-  GEN Y, res;
+  GEN res;
   char *s;
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
-  Y = strtoi(rel);
-  res = remii(mulii(Y_prod, Y), N);
+  
+  res = remii(mulii(Y_prod, strtoi(rel)), N);
 
   s = strtok(s + 3, " \n");
   while (s != NULL)
@@ -2713,9 +2713,8 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 }
 
 static char*
-mpqs_get_relation(long pos, FILE *FREL)
+mpqs_get_relation(char *buf, long pos, FILE *FREL)
 {
-  char buf[MPQS_STRING_LENGTH];
   if (fseek(FREL, pos, SEEK_SET)) pari_err(talker, "cannot seek FREL file");
   if (!fgets(buf, MPQS_STRING_LENGTH, FREL))
     pari_err(talker, "FREL file truncated?!");
@@ -2766,6 +2765,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   long res_last, res_next, res_size, res_max;
   F2_matrix m, ker_m;
   long done, rank;
+  char buf[MPQS_STRING_LENGTH];
 
   fpos = (long *) gpmalloc(rel * sizeof(long));
 
@@ -2833,7 +2833,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
     {
       if (F2_get_bit(ker_m, j, i))
         Y_prod = mpqs_add_relation(Y_prod, N, ei,
-                                   mpqs_get_relation(fpos[j], FREL));
+                                   mpqs_get_relation(buf, fpos[j], FREL));
       if (low_stack(lim3, stack_lim(av3,1)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"[1]: mpqs_solve_linear_system");
