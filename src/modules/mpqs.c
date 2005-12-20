@@ -972,22 +972,16 @@ mpqs_sort_lp_file(char *filename)
   pariFILE *pTMP;
   FILE *TMP;
   char *old_s, **sort_table = (char**)avma, *buf, *cur_line;
-  static char **buflist_head = NULL;
-  char **buflist, **next_buflist;
+  char **buflist, **next_buflist, **buflist_head;
   long i, j, count;
   size_t length, bufspace;
   pari_sp av=avma;
 
-  if (!buflist_head)
-  {
-    buflist_head = (char**) gpmalloc(buflist_size * sizeof(char*));
-    buflist = buflist_head;
-    *buflist++ = NULL; /* flag this as last and only buflist block */
-  }
-  else
-    buflist = buflist_head + 1;
-  /* buflist_head is never freed, and extra blocks may be allocated as needed
-   * and linked ahead of it.  NB: whilst extra buflist blocks might have been
+  buflist_head = (char**) stackmalloc(buflist_size * sizeof(char*));
+  buflist = buflist_head;
+  *buflist++ = NULL; /* flag this as last and only buflist block */
+  /* extra blocks may be allocated as needed and linked ahead of 
+   * buflist_head.  NB: whilst extra buflist blocks might have been
    * needed when we were still sorting entire FREL files (more than 1023
    * buffers, corresponding to about 20000 lines of ~200 characters), they
    * should never be touched now that we only sort LPNEW and FNEW files, which
