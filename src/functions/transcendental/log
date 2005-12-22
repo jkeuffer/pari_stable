@@ -4,5 +4,5 @@ C-Name: glog
 Prototype: Gp
 Help: log(x): natural logarithm of x.
 Description: 
- (gen, ?0):gen:prec	glog($1, prec)
+ (gen):gen:prec	glog($1, prec)
 
