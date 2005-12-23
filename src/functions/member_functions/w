@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_w
 Prototype: G
 Description: 
- (bell):gen:copy:long		$(1)[18]
+ (bell):gen:copy       gel($1, 18)
 

@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_group
 Prototype: G
 Description: 
- (gal):gen:copy:long		$(1)[6]
+ (gal):gen:copy        gel($1, 6)
 

@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_zk
 Prototype: G
 Description: 
- (nf):gen:copy:long		$(1)[7]
+ (nf):gen:copy         gel($1, 17)
 

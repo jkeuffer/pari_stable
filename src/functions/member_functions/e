@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_e
 Prototype: G
 Description: 
- (prid):int:copy:long		$(1)[3]
+ (prid):int:copy       gel($1, 3)
 

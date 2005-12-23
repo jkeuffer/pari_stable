@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_b8
 Prototype: G
 Description: 
- (ell):gen:copy:long		$(1)[9]
+ (ell):gen:copy        gel($1, 9)
 

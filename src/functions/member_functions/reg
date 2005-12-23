@@ -4,6 +4,6 @@ C-Name: member_reg
 Prototype: G
 Description: 
  (bnr):void		$"ray regulator not implemented"
- (bnf):real:copy:long	 	mael($1,8,2)
- (gen):real:copy:long	 	mael($1,8,2)
+ (bnf):real:copy        gmael($1, 8, 2)
+ (gen):real:copy        gmael($1, 8, 2)
 

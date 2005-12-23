@@ -3,6 +3,6 @@ Class: member_functions
 C-Name: member_index
 Prototype: G
 Description: 
- (nf):int:copy:long             $(1)[4]
+ (nf):int:copy                  gel($1, 4)
  (gen):int                      member_index($1)
 

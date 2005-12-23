@@ -4,6 +4,6 @@ C-Name: member_fu
 Prototype: G
 Description: 
  (bnr):void		$"ray units not implemented"
- (bnf):gen:copy:long	 	mael($1,8,5)
- (gen):gen:copy:long	 	mael($1,8,5)
+ (bnf):gen:copy         gmael($1, 8, 5)
+ (gen):gen:copy         gmael($1, 8, 5)
 

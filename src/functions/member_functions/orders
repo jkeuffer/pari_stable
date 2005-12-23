@@ -3,5 +3,5 @@ Class: member_functions
 C-Name: member_orders
 Prototype: G
 Description: 
- (gal):vecsmall:copy:long		$(1)[8]
+ (gal):vecsmall:copy   gel($1, 8)
 
