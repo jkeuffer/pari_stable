@@ -117,13 +117,13 @@ Description:
  
  (#str):typ  ${1 str_format}
   
- (bnf):nf:parens:long       $(1)[7]
+ (bnf):nf:parens       gel($1, 7)
  (gen):nf
- (bnr):bnf:parens:long      $(1)[1]
+ (bnr):bnf:parens      gel($1, 1)
  (gen):bnf
  (gen):bnr
- (bnf):clgp:parens:long     mael($1,8,1)
- (bnr):clgp:parens:long     $(1)[5]
+ (bnf):clgp:parens     gmael($1, 8, 1)
+ (bnr):clgp:parens     gel($1, 5)
  (gen):clgp
  (bell):ell
  (gen):ell
