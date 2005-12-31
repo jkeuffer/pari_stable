@@ -971,8 +971,8 @@ mpqs_sort_lp_file(char *filename)
 {
   pariFILE *pTMP;
   FILE *TMP;
-  char *old_s, **sort_table = (char**)avma, *buf, *cur_line;
-  char **buflist, **next_buflist, **buflist_head;
+  char *old_s, *buf, *cur_line;
+  char **sort_table, **buflist, **next_buflist, **buflist_head;
   long i, j, count;
   size_t length, bufspace;
   pari_sp av=avma;
@@ -1006,6 +1006,7 @@ mpqs_sort_lp_file(char *filename)
   length = strlen(cur_line) + 1; /* count the \0 byte as well */
   bufspace -= length;
 
+  sort_table = (char**)avma;
   /* at start of loop, one line from the file is sitting in cur_line inside buf,
    * the next will go into cur_line + length, and there's room for bufspace
    * further characters in buf. The loop reads another line if one exists, and
@@ -1101,7 +1102,7 @@ mpqs_sort_lp_file(char *filename)
   pari_fclose(pTMP);
   if (MPQS_DEBUGLEVEL >= 6) fprintferr("MPQS: done sorting one file.\n");
 
-  /* deallocate buffers and any extraneous buflist blocks except the first */
+  /* deallocate buffers and any extraneous buflist blocks except the first */  
   while (*--buflist)
   {
     if (buflist != buflist_head) /* not a linkage pointer */
