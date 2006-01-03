@@ -82,6 +82,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
        infinite loop on factor(41093858855767145965571)
    25- constlog2() was not restartable [ no way to set glog2 = NULL ]
    26- sloppy arg check in ellchangecurve [#388]
+   27- [internal] gprec_w reduced the accuracy of real 0s [#396]
 
   Changed
     1- speed up prime() by using checkpoints.
