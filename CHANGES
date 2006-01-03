@@ -81,6 +81,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    24- workaround a bug in g++ version 3.4.1 (Mandrakelinux 10.1 3.4.1-4mdk)
        infinite loop on factor(41093858855767145965571)
    25- constlog2() was not restartable [ no way to set glog2 = NULL ]
+   26- sloppy arg check in ellchangecurve [#388]
 
   Changed
     1- speed up prime() by using checkpoints.

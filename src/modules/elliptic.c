@@ -440,7 +440,7 @@ init_ch() {
 static GEN
 coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
 {
-  GEN y, p1, p2, v, v2, v3, v4, v6, r2, b2r, rx3 = gmulsg(3,r);
+  GEN R, y, p1, p2, v, v2, v3, v4, v6, r2, b2r, rx3 = gmulsg(3,r);
   long i, lx = lg(e);
 
   y = cgetg(lx,t_VEC);
@@ -459,6 +459,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
   gel(y,5) = gmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
   if (lx == 6) return y;
+  if (lx < 14) pari_err(elliper1);
 
   /* B2 = (b2 + 12r) / u^2 */
   gel(y,6) = gmul(v2,gadd(gel(e,6),gmul2n(rx3,2)));
@@ -477,30 +478,29 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   gel(y,11) = gmul(v6,gel(e,11));
   gel(y,12) = gmul(gsqr(v6),gel(e,12));
   gel(y,13) = gel(e,13);
-  if (lx > 14)
+  if (lx == 14) return y;
+  if (lx < 20) pari_err(elliper1);
+  R = gel(e,14);
+  if (typ(R) != t_COL) set_dummy(y);
+  else if (typ(e[1])==t_PADIC)
   {
-    GEN R = gel(e,14);
-    if (typ(R) != t_COL) set_dummy(y);
-    else if (typ(e[1])==t_PADIC)
-    {
-      gel(y,14) = mkvec( gmul(v2, gsub(gel(R,1),r)) );
-      gel(y,15) = gmul(gel(e,15), gsqr(u));
-      gel(y,16) = gmul(gel(e,16), u);
-      gel(y,17) = gel(e,17);
-      gel(y,18) = gmul(gel(e,18), v2);
-      gel(y,19) = gen_0;
-    }
-    else
-    {
-      p2 = cgetg(4,t_COL);
-      for (i=1; i<=3; i++) gel(p2,i) = gmul(v2, gsub(gel(R,i),r));
-      gel(y,14) = p2;
-      gel(y,15) = gmul(gel(e,15), u);
-      gel(y,16) = gmul(gel(e,16), u);
-      gel(y,17) = gdiv(gel(e,17), u);
-      gel(y,18) = gdiv(gel(e,18), u);
-      gel(y,19) = gmul(gel(e,19), gsqr(u));
-    }
+    gel(y,14) = mkvec( gmul(v2, gsub(gel(R,1),r)) );
+    gel(y,15) = gmul(gel(e,15), gsqr(u));
+    gel(y,16) = gmul(gel(e,16), u);
+    gel(y,17) = gel(e,17);
+    gel(y,18) = gmul(gel(e,18), v2);
+    gel(y,19) = gen_0;
+  }
+  else
+  {
+    p2 = cgetg(4,t_COL);
+    for (i=1; i<=3; i++) gel(p2,i) = gmul(v2, gsub(gel(R,i),r));
+    gel(y,14) = p2;
+    gel(y,15) = gmul(gel(e,15), u);
+    gel(y,16) = gmul(gel(e,16), u);
+    gel(y,17) = gdiv(gel(e,17), u);
+    gel(y,18) = gdiv(gel(e,18), u);
+    gel(y,19) = gmul(gel(e,19), gsqr(u));
   }
   return y;
 }
