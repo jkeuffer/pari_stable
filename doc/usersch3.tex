@@ -5966,15 +5966,12 @@ monomial.
 as $-1$. Also available is \funs{truecoeff}{x,v}.
 
 \subsecidx{poldegree}$(x,\{v\})$: degree of the polynomial $x$ in the main
-variable if $v$ is omitted, in the variable $v$ otherwise. This is to be
-understood as follows:
+variable if $v$ is omitted, in the variable $v$ otherwise.
 
-The degree of $0$ is $-\kbd{VERYBIGINT}$ by convention (\kbd{VERYBIGINT} is
-$2^{31}-1$ for 32-bit machines or $2^{63}-1$ for 64-bit machines).
-
-When $x$ is a non-zero scalar, its degree is $0$. When $x$ is non-zero
-polynomial or rational function, it is the ordinary degree of $x$. Return an
-error otherwise.
+The degree of $0$ is a fixed negative number, whose exact value should
+not be used. The degree of a non-zero scalar is $0$. Finally, when $x$ is
+a non-zero polynomial or rational function, returns the ordinary degree
+of $x$. Raise an error otherwise.
 
 \syn{poldegree}{x,v}, where $v$ and the result are \kbd{long}s (and an
 omitted $v$ is coded as $-1$). Also available is \funs{degree}{x}, which is
