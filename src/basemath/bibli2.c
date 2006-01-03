@@ -366,6 +366,8 @@ gprec_w(GEN x, long pr)
   {
     case t_REAL:
       if (signe(x)) return rtor(x,pr);
+      i = -bit_accuracy(pr);
+      if (i < expo(x)) return real_0_bit(i);
       y = cgetr(2); y[1] = x[1]; return y;
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
