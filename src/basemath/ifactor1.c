@@ -2053,7 +2053,7 @@ squfof(GEN n)
   long a1, b1, c1, dd1, L1, a2, b2, c2, dd2, L2, a, q, c, qc, qcb;
   GEN D1, D2;
   pari_sp av = avma;
-  static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
+  long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
   long blp1 = 0, blp2 = 0;
   int act1 = 1, act2 = 1;
 
