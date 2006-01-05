@@ -3708,7 +3708,7 @@ matfrobenius(GEN M, long flag)
   GEN D, A, N, B, R, M_x;
   if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius");
   if (gvar(M)==0)
-    pari_err(talker,"matrix coefficients must no use variable x");
+    pari_err(talker,"matrix coefficients must not use variable x");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");
   M_x = gaddmat(monomial(gen_m1, 1, 0), M);
