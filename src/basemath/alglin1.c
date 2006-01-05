@@ -1240,14 +1240,13 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
       case t_MAT:
         if (lg(*b) == 1) return 0;
         *b = shallowcopy(*b);
-        if (lg((*b)[1])-1 != *aco) pari_err(consister,"gauss");
         break;
       case t_COL: *iscol = 1;
-        if (lg(*b)-1 != *aco) pari_err(consister,"gauss");
         *b = mkmat( shallowcopy(*b) );
         break;
       default: pari_err(typeer,"gauss");
     }
+    if (lg((*b)[1])-1 != *li) pari_err(consister,"gauss");
   }
   else
     *b = matid(*li);
