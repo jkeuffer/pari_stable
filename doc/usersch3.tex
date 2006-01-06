@@ -8494,18 +8494,18 @@ not be correct anymore, e.g. loop indexes.
 is void. \kbd{gp} uses a variant which makes sure it was not called within a
 loop.
 
-\subsubsecidx{default}$(\{\var{key}\},\{\var{val}\},\{\fl\})$: sets the default
-corresponding to keyword \var{key} to value \var{val}. \var{val} is a string
-(which of course accepts numeric arguments without adverse effects, due to the
-expansion mechanism). See \secref{se:defaults} for a list of available
-defaults, and \secref{se:meta} for some shortcut alternatives. Typing
-\kbd{default()} (or \b{d}) yields the complete default list as well as
-their current values.\label{se:default}
+\subsubsecidx{default}$(\{\var{key}\},\{\var{val}\})$: returns
+the default corresponding to keyword \var{key}. If \var{val} is present,
+sets the default to \var{val} first (which is subject to string expansion
+first). Typing \kbd{default()} (or \b{d}) yields the complete default
+list as well as their current values.\label{se:default}
+See \secref{se:defaults} for a list of available defaults, and
+\secref{se:meta} for some shortcut alternatives. Note that the shortcut
+are meant for interactive use and usually display more information than
+\kbd{default}.
 
-If \var{val} is omitted, prints the current value of default \var{key}.
-If $\fl$ is set, returns the result instead of printing it.
-
-\syn{default0}{key, val, \fl}, where \var{key} and \var{val} are \kbd{char *}.
+\syn{default0}{key, val, \fl}, where \var{key} and \var{val} are
+\kbd{char *}. \fl is ignored and retained for backward compatibility only.
 
 \subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
 them interpreted as a string), then interrupts the running \kbd{gp} program,

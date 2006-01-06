@@ -131,6 +131,9 @@ BA 25- make pari restartable
    29- forbid t_STR, t_VECSMALL and t_LIST in gvar.
    30- cleanup mpqs use of temporary files
    31- pari_unique_filename now MT-safe, returns a malloc'ed buffer.
+   32- default() now always returns the value of the (possibly changed) default.
+       No need for a flag anymore. The construction default(def,,1) is still
+       valid but deprecated (the flag is ignored).
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

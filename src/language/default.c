@@ -888,7 +888,8 @@ setdefault(const char *s, const char *v, long flag)
 GEN
 default0(char *a, char *b, long flag)
 {
-  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
+  (void)flag; /* compatibility: to be deleted someday */
+  return setdefault(a,b, d_RETURN);
 }
 
 gp_data *
