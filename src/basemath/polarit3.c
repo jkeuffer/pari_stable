@@ -2409,7 +2409,7 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
 
 /* return z = a mod q, b mod p (p,q) = 1. qinv = 1/q mod p */
 static GEN
-u_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
+Fl_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
 {
   ulong d, amod = umodiu(a, p);
   pari_sp av = avma;
@@ -2455,7 +2455,7 @@ Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
   GEN h, lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
   int stable = 1;
-  h = u_chinese_coprime(*H,Hp,q,p,qinv,qp);
+  h = Fl_chinese_coprime(*H,Hp,q,p,qinv,qp);
   if (h)
   {
     if (cmpii(h,lim) > 0) h = subii(h,qp);
@@ -2488,7 +2488,7 @@ ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
   }
   for (i=2; i<lp; i++)
   {
-    h = u_chinese_coprime(gel(H,i),Hp[i],q,p,qinv,qp);
+    h = Fl_chinese_coprime(gel(H,i),Hp[i],q,p,qinv,qp);
     if (h)
     {
       if (cmpii(h,lim) > 0) h = subii(h,qp);
@@ -2508,7 +2508,7 @@ ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
   for (j=1; j<l; j++)
     for (i=1; i<m; i++)
     {
-      h = u_chinese_coprime(gcoeff(H,i,j), coeff(Hp,i,j),q,p,qinv,qp);
+      h = Fl_chinese_coprime(gcoeff(H,i,j), coeff(Hp,i,j),q,p,qinv,qp);
       if (h)
       {
         if (cmpii(h,lim) > 0) h = subii(h,qp);
