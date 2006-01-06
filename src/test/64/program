@@ -69,9 +69,9 @@ x + y
 ? m=5;while(m<20,print1(m," ");m=m+1);print()
 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 
 ? default(realprecision,28)
-   realprecision = 38 significant digits (28 digits displayed)
+28
 ? default(seriesprecision,12)
-   seriesprecision = 12 significant terms
+12
 ? print((x-12*y)/(y+13*x));
 (x - 12*y)/(13*x + y)
 ? print([1,2;3,4])
@@ -115,7 +115,7 @@ og(p)/log(q))));
 3
 ? kill(addii)
 ? getheap
-[22, 1578]
+[24, 1592]
 ? print("Total time spent: ",gettime);
-Total time spent: 12
+Total time spent: 13
 ? \q

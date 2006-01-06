@@ -1,4 +1,3 @@
-   echo = 1 (on)
 ? allocatemem(20*10^6);
 ? gettime;oo=[1];
 ? \p96
@@ -86,5 +85,5 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 41202
+Total time spent: 38902
 ? \q
