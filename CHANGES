@@ -84,6 +84,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    26- sloppy arg check in ellchangecurve [#388]
    27- [internal] gprec_w reduced the accuracy of real 0s [#396]
    28- wrong arg check in matsolve [#400]
+   29- minpoly([;]) --> SEGV
 
   Changed
     1- speed up prime() by using checkpoints.

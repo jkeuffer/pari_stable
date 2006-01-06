@@ -270,9 +270,9 @@ minpoly(GEN x, long v)
   if (P) return P;
   if (typ(x)==t_POLMOD)
     return RgXQ_minpoly_naive(gel(x,2),gel(x,1));
-  if (typ(x)==t_MAT)
-    return gerepilecopy(ltop,gel(matfrobenius(x,1),1));
-  pari_err(typeer,"minpoly"); return NULL; /* not reached */
+  if (typ(x)!=t_MAT) pari_err(typeer,"minpoly");
+  if (lg(x) == 1) return pol_1[v];
+  return gerepilecopy(ltop,gel(matfrobenius(x,1),1));
 }
 
 /*******************************************************************/
