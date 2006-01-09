@@ -87,6 +87,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    29- minpoly([;]) --> SEGV
    30- y*x^3/( 1+x+x^2 +O(y)) -> gerepile error [#403]
    31- poldivrem didn't handle properly multivariate polynomials [#402]
+   32- insufficient accuracy in ellheight --> singular curve, SEGV [#404]
 
   Changed
     1- speed up prime() by using checkpoints.

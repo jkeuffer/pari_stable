@@ -3302,8 +3302,12 @@ exphellagm(GEN e, GEN z, int flag, long prec)
     x = gadd(p1, gsqrt(gadd(gsqr(p1), gmul(x, p2)), prec));
     V = shallowconcat(V, gadd(x, p2));
   }
-  x = gel(V,n);
-  while (--n > 0) x = gdiv(gsqr(x), gel(V,n));
+  if (n) {
+    x = gel(V,n);
+    while (--n > 0) x = gdiv(gsqr(x), gel(V,n));
+  } else {
+    x = gadd(x, gsqr(a));
+  }
   /* height on E1 is log(x)/2. Go back to E0 */
   return flag? gsqr( gdiv(gsqr(x), x_a) )
              : gdiv(x, sqrtr( mpabs(x_a) ));
