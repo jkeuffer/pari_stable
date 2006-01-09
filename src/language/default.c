@@ -886,6 +886,9 @@ setdefault(const char *s, const char *v, long flag)
 }
 
 GEN
+gp_default(char *a, char *b) { return setdefault(a,b, d_RETURN); }
+
+GEN
 default0(char *a, char *b, long flag)
 {
   (void)flag; /* compatibility: to be deleted someday */

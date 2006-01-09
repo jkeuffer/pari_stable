@@ -157,6 +157,7 @@ BA  6- support for GNU/kFreeBSD and other GNU userlands.
    10- doc/develop.tex
    11- library function isprime_Fl
    12- library function pari_unique_dir
+   13- library function gp_default
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
