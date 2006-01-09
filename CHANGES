@@ -137,6 +137,8 @@ BA 25- make pari restartable
    32- default() now always returns the value of the (possibly changed) default.
        No need for a flag anymore. The construction default(def,,1) is still
        valid but deprecated (the flag is ignored).
+   33- increase default accuracy in ellinit() when curve has large coefficients
+       [ avoid large relative error on periods, #404 ]
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

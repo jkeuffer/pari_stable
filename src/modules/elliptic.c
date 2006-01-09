@@ -230,10 +230,11 @@ do_agm(GEN *ptx, GEN a1, GEN b1)
     b1 = sqrtr(mulrr(a,b)); setsigne(b1, s);
     a1 = gmul2n(addrr(addrr(a,b), gmul2n(b1,1)),-2);
     d = subrr(a1,b1);
+    if (!signe(d)) break;
     p1 = sqrtr( divrr(addrr(x,d),x) );
     x = mulrr(x, gsqr(addsr(1,p1)));
     setexpo(x, expo(x)-2);
-    if (!signe(d) || expo(d) <= G + expo(b1)) break;
+    if (expo(d) <= G + expo(b1)) break;
   }
   *ptx = x; return ginv(gmul2n(a1,2));
 }
@@ -344,7 +345,7 @@ initell0(GEN x, long prec)
 {
   GEN D, R, T, p, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
   GEN y = cgetg(20,t_VEC);
-  long i, e, stop = 0;
+  long PREC, i, e, stop = 0;
 
   smallinitell0(x,y);
 
@@ -371,19 +372,26 @@ initell0(GEN x, long prec)
   if (e < BIGINT) return padic_initell(y,p,e);
   if (!prec || stop) { set_dummy(y); return y; }
 
-  R = roots(RHSpol(y),prec);
   D = gel(y,12);
-  if (gsigne(D) < 0) gel(R,1) = real_i(gel(R,1));
-  else /* sort roots in decreasing order */
-    R = gen_sort(real_i(R), 0, invcmp);
+  switch(typ(D))
+  {
+    case t_INT: e = expi(D); break;
+    case t_FRAC:e = max(expi(gel(D,1)), expi(gel(D,2))); break;
+    default: e = -1; break;
+  }
+  PREC = prec;
+  if (e > 0) PREC += nbits2nlong(e >> 1);
+  R = cleanroots(RHSpol(y), PREC);
+  /* sort roots in decreasing order */
+  if (gsigne(D) > 0) R = gen_sort(R, 0, invcmp);
   gel(y,14) = R;
 
   (void)new_coords(y, NULL, &a1, &b1, 0, 0);
   u2 = do_agm(&x1,a1,b1); /* 1/4M */
 
-  w = gaddsg(1, ginv(gmul2n(gmul(u2,x1),1)));
-  q = gsqrt(gaddgs(gsqr(w),-1),prec);
-  if (gsigne(real_i(w)) > 0)
+  w = addsr(1, ginv(gmul2n(mulrr(u2,x1),1)));
+  q = sqrtr( addrs(gsqr(w),-1) );
+  if (signe(real_i(w)) > 0)
     q = ginv(gadd(w, q));
   else
     q = gsub(w, q);
@@ -391,15 +399,15 @@ initell0(GEN x, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi,1);
   tau = mulcxmI( gdiv(glog(q,prec),pi2) );
 
-  gel(y,19) = gmul(gmul(gsqr(pi2),gabs(u2,prec)), imag_i(tau));
-  w1 = gmul(pi2, gsqrt(gneg_i(u2),prec));
+  gel(y,19) = gmul(gmul(gsqr(pi2), mpabs(u2)), imag_i(tau));
+  w1 = gmul(pi2, sqrtr(mpneg(u2)));
   w2 = gmul(tau, w1);
   if (signe(b1) < 0)
     q = gsqrt(q,prec);
   else
   {
     w1= gmul2n(mpabs(gel(w2,1)), 1);
-    q = mpexp(mulrr(negr(mppi(prec)), divrr(gel(w2,2),w1)));
+    q = mpexp(mulrr(negr(pi), divrr(gel(w2,2),w1)));
     if (signe(w2[1]) < 0) setsigne(q, -1);
     q = pureimag(q);
   }
