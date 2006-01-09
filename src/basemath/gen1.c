@@ -1596,7 +1596,9 @@ gmul(GEN x, GEN y)
           long vn;
 	  if (gcmp0(x)) return zeropol(vx);
 	  if (gcmp0(y)) return zeroser(vx, valp(y) + polvaluation(x,NULL));
+          av = avma;
           vn = polvaluation(x, &x);
+          avma = av;
           /* take advantage of x = t^n ! */
           if (degpol(x)) {
             p1 = greffe(x,lg(y),0);

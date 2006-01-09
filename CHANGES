@@ -85,6 +85,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    27- [internal] gprec_w reduced the accuracy of real 0s [#396]
    28- wrong arg check in matsolve [#400]
    29- minpoly([;]) --> SEGV
+   30- y*x^3/( 1+x+x^2 +O(y)) -> gerepile error [#403]
 
   Changed
     1- speed up prime() by using checkpoints.
