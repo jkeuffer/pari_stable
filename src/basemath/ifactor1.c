@@ -191,7 +191,7 @@ millerrabin(GEN n, long k)
  * k == 17  (31,73)  detects most odd composites without prime factors > 100
  * in the range  n < 2^36  (with less than 250 exceptions, indeed with fewer
  * than 1400 exceptions up to 2^42). --GN */
-int
+static int
 Fl_miller(ulong n, long k)
 {
   static ulong pr[] =
