@@ -53,10 +53,10 @@ poldvd(GEN x, GEN y, GEN *z)
 GEN
 poldivrem(GEN x, GEN y, GEN *pr)
 {
-  long ty = typ(y), tx, vx, vy;
+  long ty = typ(y), tx, vx = gvar(x), vy = gvar(y);
   GEN p1;
 
-  if (is_scalar_t(ty))
+  if (is_scalar_t(ty) || varncmp(vx, vy) < 0)
   {
     if (pr == ONLY_REM) {
       if (gcmp0(y)) pari_err(gdiver);
@@ -66,8 +66,8 @@ poldivrem(GEN x, GEN y, GEN *pr)
     return gdiv(x,y);
   }
   if (ty != t_POL) pari_err(typeer,"euclidean division (poldivrem)");
-  tx = typ(x); vy = varn(y);
-  if (is_scalar_t(tx) || (vx = gvar(x)) > vy)
+  tx = typ(x);
+  if (is_scalar_t(tx) || varncmp(vx, vy) > 0)
   {
     if (!signe(y)) pari_err(gdiver);
     if (!degpol(y)) /* constant */
