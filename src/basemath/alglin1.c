@@ -491,6 +491,15 @@ row(GEN A, long x0)
   for (i=1; i<lB; i++) gel(B, i) = gcoeff(A, x0, i);
   return B;
 }
+/* A[x0,] */
+GEN
+rowcopy(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VEC);
+  for (i=1; i<lB; i++) gel(B, i) = gcopy(gcoeff(A, x0, i));
+  return B;
+}
 
 /* A[x0, x1..x2] */
 GEN

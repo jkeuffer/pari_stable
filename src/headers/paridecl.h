@@ -176,6 +176,7 @@ GEN     mattodiagonal_i(GEN m);
 long    rank(GEN x);
 GEN     row(GEN A, long x1);
 GEN     row_i(GEN A, long x0, long x1, long x2);
+GEN     rowcopy(GEN A, long x0);
 GEN     rowslice(GEN A, long x1, long x2);
 GEN     rowslicepermute(GEN A, GEN p, long x1, long x2);
 GEN     rowpermute(GEN A, GEN p);
