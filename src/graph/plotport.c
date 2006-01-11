@@ -1626,7 +1626,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   {
     int do_double = (flags & PLOT_NODOUBLETICK) ? TICKS_NODOUBLE : 0;
     PARI_plot *pl = WW;
-    if (!pl) pl = &pari_plot;
+    if (!pl) { PARI_get_plot(0); pl = &pari_plot; }
 
     rectlinetype(drawrect, -2); 		/* Frame. */
     current_color[drawrect]=BLACK;
