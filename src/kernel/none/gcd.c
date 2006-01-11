@@ -306,10 +306,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[6]; gptr[0]=&d; gptr[1]=&d1; gptr[2]=&u; gptr[3]=&u1;
-      gptr[4]=&v; gptr[5]=&v1;
       if(DEBUGMEM>1) pari_warn(warnmem,"bezout");
-      gerepilemany(av1,gptr,6);
+      gerepileall(av1,6, &d,&d1,&u,&u1,&v,&v1);
     }
   } /* end while */
 
