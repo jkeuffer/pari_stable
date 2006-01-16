@@ -47,6 +47,7 @@ esac
 
 PLOTCFLAGS=
 PLOTLIBS=
+postconfig="@: "
 case "$which_graphic_lib" in
 none)
   graph=plotnull;;
@@ -57,8 +58,7 @@ qt)
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
-  compilepost_sta='fltk-config --post gp-sta || echo "ignoring missing fltk-config"'
-  compilepost_dyn='fltk-config --post gp-dyn || echo "ignoring missing fltk-config"'
+  postconfig='-fltk-config --post '
   graph=plotfltk;;
 esac
 graph="plotport $graph"
@@ -312,7 +312,7 @@ tune-sta: tune.o \$(LIBPARI_STA)
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
-	$compilepost_sta
+	$postconfig gp-sta
 
 bench: $exec
 	@\$(DOTEST) $test_basic
@@ -365,6 +365,7 @@ install-bin-dyn: gp-dyn
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
+	$postconfig \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 
 install-bin-sta: gp-sta
@@ -374,6 +375,7 @@ install-bin-sta: gp-sta
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 # Can't strip it if we want install() to work on OSF.
 #	-\$(STRIP) \$(STRIPFLAGS)  \$(BINDIR)/gp-$version
+	$postconfig \$(BINDIR)/gp-$version$exe_suff
 
 install-man::
 	-mkdir -p \$(MANDIR)
@@ -500,7 +502,7 @@ EOT
 gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
-	$compilepost_dyn
+	$postconfig gp-dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
