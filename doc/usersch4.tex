@@ -1425,23 +1425,32 @@ and returns its variable number.
 long v = fetch_user_var("y");
 GEN gy = pol_x[v];
 @eprog\noindent
-This function raises an error if $s$ is already registered as a function name.
+This function raises an error if $s$ is already registered as a function
+name. 
 
-\misctitle{Caveat}: it is possible to use \tet{gp_read_str}
-(see~\secref{se:gp_read_str}) to execute a GP command and create GP variables
-on the fly as needed:
-
+\misctitle{Caveat}: you can use \tet{gp_read_str}
+(see~\secref{se:gp_read_str}) to execute a GP command and create GP
+variables on the fly as needed:
 \bprog
 GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x[$v$], for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}
-might work, but is dangerous, especially when programming functions that are
-used under \kbd{gp}. It would read the value of \kbd{y}, as currently known
-by the \kbd{gp} interpreter (possibly creating it in the process). But if
-\kbd{y} has been modified by previous \kbd{gp} commands (e.g \kbd {y = 1}),
-then the value of \kbd{gy} is not what you expected it to be and corresponds
-instead to the current value of the \kbd{gp} variable (e.g \kbd{gen\_1}).
+might work, but is dangerous, especially when programming functions to 
+be used under \kbd{gp}. The latter reads the value of \kbd{y}, as 
+\emph{currently} known by the \kbd{gp} interpreter, possibly creating it
+in the process. But if \kbd{y} has been modified by previous \kbd{gp}
+commands (e.g \kbd {y = 1}), then the value of \kbd{gy} is not what you
+expected it to be and corresponds instead to the current value of the
+\kbd{gp} variable (e.g \kbd{gen\_1}).
+
+\misctitle{Technical remark} If you are rewriting the gp interpreter, you
+may use the lower level
+
+\fun{entree *}{fetch_named_var}{char *$s$}
+
+\noindent which returns an \kbd{entree*} suitable for inclusion in the
+interpreter hashlists of symbols.
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}:
 \kbd{MAXVARN} is available, but is better left to pari internal functions
