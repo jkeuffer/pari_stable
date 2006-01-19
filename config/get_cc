@@ -116,7 +116,7 @@ if test -n "$__gnuc__"; then
       esac
     ;;
   esac
-  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
+  OPTFLAGS="$OPTFLAGS $warn"
   case "$__gnuc__" in
     2.95.[3-9]*|[3-9].*) OPTFLAGS="$OPTFLAGS -fno-strict-aliasing";;
   esac
