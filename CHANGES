@@ -90,6 +90,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    32- insufficient accuracy in ellheight --> singular curve, SEGV [#404]
    33- [MacOS X + fltk] installed gp binary couldn't use hi-res graphics
        (resource fork not copied)
+IZ 34- [2.2.9-A20] -fno-strict-aliasing not supported in older gcc
 
   Changed
     1- speed up prime() by using checkpoints.
