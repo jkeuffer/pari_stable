@@ -458,9 +458,7 @@ GEN
 perm_mul(GEN s, GEN t)
 {
   GEN u;
-  long i, l = lg(s);
-  if (l < lg(t))
-    pari_err(talker, "First permutation shorter than second in perm_mul");
+  long i, l = lg(t);
   u = cgetg(l, typ(s));
   for (i = 1; i < l; i++) u[i] = s[ t[i] ];
   return u;
