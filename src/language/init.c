@@ -120,7 +120,6 @@ newbloc(long n)
   bl_next(x) = 0; /* the NULL address */
   bl_prev(x) = (long)cur_bloc;
   bl_num(x)  = next_bloc++;
-  if (n) *x = 0; /* initialize first cell to 0. See killbloc */
   if (cur_bloc) bl_next(cur_bloc) = (long)x;
 #ifdef DEBUG
 fprintferr("+ %ld\n", ++NUM);
@@ -164,7 +163,7 @@ void
 killbloc(GEN x)
 {
   long i, lx;
-  switch(typ(x)) /* HACK: if x is not a GEN, we have typ(x)=0 */
+  switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
@@ -725,23 +724,27 @@ pari_close(void)
   pari_close_opts(INIT_JMPm | INIT_SIGm | INIT_DFTm);
 }
 
+struct getheap_t { long n, l; };
+static void
+f_getheap(GEN x, void *D)
+{
+  struct getheap_t *T = (struct getheap_t*)D;
+  T->n++;
+  T->l += taille(x);
+}
 GEN
 getheap(void)
 {
-  long m=0,l=0;
-  GEN x;
+  struct getheap_t T = { 0, 0 };
+  traverseheap(&f_getheap, &T);
+  return mkvec2s(T.n, T.l + BL_HEAD * T.n);
+}
 
-  for (x = cur_bloc; x; x = (GEN)bl_prev(x))
-  {
-    m++; l+=4;
-    if (! x[0]) /* user function */
-      l += (strlen((char *)(x+2))) / sizeof(long);
-    else if (x==bernzone)
-      l += x[0];
-    else /* GEN */
-      l += taille(x);
-  }
-  return mkvec2s(m, l);
+void
+traverseheap( void(*f)(GEN, void *), void *data )
+{
+  GEN x;
+  for (x = cur_bloc; x; x = (GEN)bl_prev(x)) f(x, data);
 }
 
 /********************************************************************/

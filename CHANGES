@@ -91,6 +91,7 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
    33- [MacOS X + fltk] installed gp binary couldn't use hi-res graphics
        (resource fork not copied)
 IZ 34- [2.2.9-A20] -fno-strict-aliasing not supported in older gcc
+   35- heapsize reported by getheap() were wrong (overestimate).
 
   Changed
     1- speed up prime() by using checkpoints.
@@ -167,6 +168,7 @@ BA  6- support for GNU/kFreeBSD and other GNU userlands.
    12- library function pari_unique_dir
    13- library function gp_default
    14- library function rowcopy (GP2C)
+   15- library function traverseheap
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):

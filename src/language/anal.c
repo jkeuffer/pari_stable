@@ -2363,8 +2363,9 @@ identifier(void)
       f->arg = defarg = (GEN*)(f + 1);
 
       narg += nloc; /* record default args and local variables */
-      newfun = ptr = (GEN) newbloc(1 + narg + nchar2nlong(len+1));
-      newfun++; /* this bloc is no GEN, leave the first cell alone ( = 0) */
+      i = 1 + narg + nchar2nlong(len+1);
+      newfun = ptr = (GEN) newbloc(i);
+      *newfun++ = evaltyp(t_STR) | evallg(i); /* dummy non-recursive type */
       for (i = 1; i <= narg; i++)
       {
         GEN cell = tmpargs-(i<<1);

@@ -1261,6 +1261,7 @@ long    taille(GEN x);
 long    taille2(GEN x);
 long    timer(void);
 long    timer2(void);
+void    traverseheap( void(*f)(GEN, void *), void *data );
 
 /* intnum.c */
 

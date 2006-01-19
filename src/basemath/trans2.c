@@ -691,7 +691,7 @@ mpbern(long nb, long prec)
   if (nb < 0) nb = 0;
   l = 3 + prec*(nb+1);
   B = newbloc(l);
-  B[0] = evallg(l);
+  B[0] = evaltyp(t_STR) | evallg(l); /* dummy non-recursive type */
   B[1] = nb;
   B[2] = prec;
   av = avma;
