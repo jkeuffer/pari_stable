@@ -563,6 +563,14 @@ are copied onto the stack.
 \fun{long}{taille}{GEN x} returns the total number of \B-bit words occupied
 by the tree representing~\kbd{x}.
 
+\fun{void}{traverseheap}{void(*f)(GEN, void *), void *data} this applies
+\kbd{f($x$, data)} to each object $x$ on the PARI heap, most recent
+first. Mostly for debugging purposes.
+
+\fun{GEN}{getheap}{} a simple wrapper around \kbd{traverseheap}. Returns  a
+two-component row vector giving the number of objects on the heap and the
+amount of memory they occupy in long words.
+
 \section{Level 0 kernel (operations on ulongs)}
 
 \subsec{Micro-kernel}.
