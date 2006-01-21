@@ -2978,7 +2978,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   GEN x,res,p1,u,r,L,gnorme,invp,V;
   long n = lg(a), i, j, k, s, maxrank;
   pari_sp av0 = avma, av1, av, lim;
-  double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
+  double p,maxnorm,BOUND,*v,*y,*z,**q;
+  const double eps = 0.0001;
 
   BORNE = gfloor(BORNE);
   if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
@@ -3001,7 +3002,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
       break;
-    default: pari_err(talker, "incorrect flag in minim0");
+    default: pari_err(flager, "minim0");
   }
   if (n == 1)
   {
@@ -3034,18 +3035,19 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   if (flag==min_PERF || gcmp0(BORNE))
   {
-    double c, b = rtodbl(gcoeff(a,1,1));
-
-    for (i=2; i<=n; i++) { c = rtodbl(gcoeff(a,i,i)); if (c < b) b = c; }
-    BOUND = b+eps;
-    BORNE = ground(dbltor(BOUND));
+    double c;
+    p = rtodbl(gcoeff(a,1,1));
+    for (i=2; i<=n; i++) { c = rtodbl(gcoeff(a,i,i)); if (c < p) p = c; }
+    BORNE = roundr(dbltor(p));
     maxnorm = -1.; /* don't update maxnorm */
   }
   else
   {
-    BOUND = gtodouble(BORNE)+eps;
+    p = gtodouble(BORNE);
     maxnorm = 0.;
   }
+  BOUND = p + eps;
+  if (BOUND == p) err(precer, "minim0");
 
   switch(flag)
   {

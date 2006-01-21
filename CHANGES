@@ -143,6 +143,8 @@ BA 25- make pari restartable
        valid but deprecated (the flag is ignored).
    33- increase default accuracy in ellinit() when curve has large coefficients
        [ avoid large relative error on periods, #404 ]
+   34- qfminim(,,,0) often gives wrong results for matrices with large
+       entries. Test whether rounding errors occur and abort if so [#407]
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

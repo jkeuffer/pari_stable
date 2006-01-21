@@ -6886,8 +6886,13 @@ pair $\pm v$ (at most $m$ such pairs).
 If $\fl=1$, ignores $m$ and returns the first vector whose norm is less than
 $b$.
 
-In both these cases, $x$ \emph{is assumed to have integral entries}, and the
-function searches for the minimal non-zero vectors whenever $b=0$.
+In both these cases, $x$ is assumed to have integral entries, and the
+function searches for the minimal non-zero vectors whenever $b=0$. The
+implmentation uses low precision floating point computations for maximal
+speed, but gives incorrect result when $x$ has large entries. (The
+condition is checked in the code and the routine will raise an error
+if large rounding errors occur.) A more robust, but much slower,
+implementation is chosen if the following flag is used:
 
 If $\fl=2$, $x$ can have non integral real entries, but $b=0$ is now
 meaningless (uses Fincke-Pohst algorithm).
