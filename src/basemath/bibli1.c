@@ -3002,7 +3002,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
       break;
-    default: pari_err(flager, "minim0");
+    default: pari_err(flagerr, "minim0");
   }
   if (n == 1)
   {
