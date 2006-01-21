@@ -145,6 +145,8 @@ BA 25- make pari restartable
        [ avoid large relative error on periods, #404 ]
    34- qfminim(,,,0) often gives wrong results for matrices with large
        entries. Test whether rounding errors occur and abort if so [#407]
+   35- qfminim(x,b,m,flag): b and m are now optional. Allow omitting b
+       (formerly b=0) if flag = 2 also.
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

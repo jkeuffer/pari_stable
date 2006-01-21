@@ -2981,8 +2981,11 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   double p,maxnorm,BOUND,*v,*y,*z,**q;
   const double eps = 0.0001;
 
+  if (!BORNE) BORNE = gen_0;
+  if (!STOCKMAX) pari_err(talker,"maximal number of vectors must be provided");
   BORNE = gfloor(BORNE);
-  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
+  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT)
+    pari_err(typeer, "minim0");
   if (typ(a) != t_MAT) pari_err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
@@ -3199,6 +3202,20 @@ qfrep0(GEN a, GEN borne, long flag)
   return g;
 }
 
+static GEN
+chk_ok(void *D, GEN x) { (void)D; (void)x; return gen_0; }
+static GEN
+chk_post(FP_chk_fun *f, GEN res, GEN u)
+{
+  GEN t = gel(res,2), z;
+  long i, l = lg(t);
+  (void)f;
+
+  z = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) gel(z,i) = gmul(u, gel(t,i));
+  return z;
+}
+
 GEN
 qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
 {
@@ -3208,9 +3225,26 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 1: return minim0(a,borne,gen_0   ,min_FIRST);
     case 2:
     {
-      GEN x = fincke_pohst(a,borne,itos(stockmax),prec,NULL);
-      if (!x) pari_err(precer,"fincke_pohst");
-      return x;
+      GEN x;
+      long maxnum = stockmax? itos(stockmax): -2;
+      if (!borne)
+      {
+        FP_chk_fun chk = { &chk_ok, NULL, &chk_post, NULL, 0 };
+        pari_sp av = avma;
+        long s;
+        GEN z;
+        x = fincke_pohst(a,NULL,maxnum,prec,&chk);
+        if (!x) pari_err(precer,"fincke_pohst");
+
+        s = lg(x)-1;
+        if (!s) return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
+        z = cgetg(4,t_VEC);
+        gel(z,1) = stoi(s << 1);
+        gel(z,2) = qfeval(a, gel(x,1));
+        gel(z,3) = x;
+        return gerepilecopy(av, z);
+      }
+      return fincke_pohst(a,borne,maxnum,prec,NULL);
     }
     default: pari_err(flagerr,"qfminim");
   }
@@ -3259,11 +3293,11 @@ step(GEN x, GEN y, GEN inc, long k)
 }
 /* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
- * One needs BORNE != 0; LLL reduction done in fincke_pohst().
- * If (check != NULL consider only vectors passing the check [ assumes
- *   stockmax > 0 and we only want the smallest possible vectors ] */
+ * Enumerate vectors whose norm is less than BORNE.
+ * If (check != NULL) consider only vectors passing the check, and assumes
+ *   we only want the smallest possible vectors */
 static GEN
-smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
+smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 {
   long N = lg(q), n = N-1, i, j, k, s, epsbit, prec, checkcnt = 1;
   pari_sp av, av1, lim;
@@ -3271,8 +3305,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
-  long skipfirst = CHECK? CHECK->skipfirst: 0;
-  int stockall = (stockmax < 0);
+  long stockmax, skipfirst = CHECK? CHECK->skipfirst: 0;
+  int stockall = (maxnum < 0);
 
   if (DEBUGLEVEL)
     fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
@@ -3288,7 +3322,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   inc = const_vecsmall(n, 1);
 
   av = avma; lim = stack_lim(av,2);
-  if (stockall) stockmax = 200;
+  stockmax = stockall? 200: maxnum;
   if (check) norms = cgetg(stockmax+1,t_VEC);
   S = cgetg(stockmax+1,t_VEC);
   x = cgetg(N,t_COL);
@@ -3355,7 +3389,6 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
     }
     while (k > 1);
     if (!signe(x[1]) && !signe(y[1])) continue; /* exclude 0 */
-    if (DEBUGLEVEL>4) output(x);
 
     av1 = avma; p1 = gsqr(mpadd(gel(x,1),gel(z,1)));
     norme1 = mpadd(gel(y,1), mpmul(p1, gel(v,1)));
@@ -3385,7 +3418,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         GEN per, Snew;
 
         if (!check) goto END;
-        stockmaxnew = (stockall && stockmax < 10000L)? stockmax<<1 : stockmax;
+        stockmaxnew = (stockall && (stockmax < 10000L || maxnum != -1))
+                      ? stockmax<<1 : stockmax;
         Snew = cgetg(stockmaxnew + 1, t_VEC);
         av2 = avma;
         per = sindexsort(norms);
@@ -3471,7 +3505,6 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   VOLATILE long i,j,l;
   VOLATILE GEN r,rinvtrans,u,v,res,z,vnorm,rperm,perm,uperm, bound = B0;
 
-  if (DEBUGLEVEL>2) fprintferr("entering fincke_pohst\n");
   if (typ(a) == t_VEC)
   {
     r = gel(a,1);
@@ -3505,7 +3538,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   /* now r~ * r = a in LLL basis */
   rinvtrans = shallowtrans( invmat(r) );
   if (DEBUGLEVEL>2)
-    fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
+    fprintferr("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lllintern(rinvtrans, 100, 1, 0);
   if (!v) return NULL;
 
@@ -3524,19 +3557,18 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   r = rperm; res = NULL;
   CATCH(precer) { }
   TRY {
-    if (CHECK && CHECK->f_init)
-    { /* f_init allowed to permute the columns of u and r */
-      bound = CHECK->f_init(CHECK, r, u);
-      if (!bound) pari_err(precer,"fincke_pohst");
-    }
+    if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     r = sqred1_from_QR(r, gprecision(r));
     if (!r) pari_err(precer,"fincke_pohst");
     if (!bound) bound = gsqr(gcoeff(r,1,1));
 
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
-  if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
-  if (CHECK) return res;
+  if (CHECK)
+  {
+    if (CHECK->f_post) res = CHECK->f_post(CHECK, res, u);
+    return res;
+  }
   if (!res) pari_err(precer,"fincke_pohst");
 
   z = cgetg(4,t_VEC);

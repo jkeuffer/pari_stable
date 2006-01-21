@@ -1765,7 +1765,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   GEN beta = d->beta, B = d->B;
   long N = d->N, v = d->v, e;
   long i, j, k, l, ct = 0, prec2;
-  FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, 0 };
+  FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, NULL, 0 };
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);

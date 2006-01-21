@@ -1392,7 +1392,7 @@ nfpolred(int part, nfbasic_t *T)
   GEN phi, xbest, dxbest, mat, d, rev;
   long i, n = lg(a)-1, v = varn(x);
   ok_pol_t O;
-  FP_chk_fun chk;
+  FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
   if (degpol(x) == 1) { T->x = gsub(pol_x[v],gen_1); return gen_1; }
 
@@ -1401,7 +1401,6 @@ nfpolred(int part, nfbasic_t *T)
   O.ind    = 0;
   O.indmax = part? min(n,3): n;
   O.xbest  = NULL;
-  chk.f    = &ok_pol;
   chk.data = (void*)&O;
   if (!_polred(x, a, NULL, &chk))
     pari_err(talker,"you found a counter-example to a conjecture, please report!");
@@ -1993,7 +1992,7 @@ _polredabs(nfbasic_t *T, GEN *u)
 {
   long prec, e, n = degpol(T->x);
   GEN v, ro = NULL;
-  FP_chk_fun chk = { &chk_gen, &chk_gen_init, NULL, 0 };
+  FP_chk_fun chk = { &chk_gen, &chk_gen_init, NULL, NULL, 0 };
   nffp_t F;
   CG_data d; chk.data = (void*)&d;
 

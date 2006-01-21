@@ -6872,34 +6872,38 @@ $\fl=5$: same as $4$ for generic $x$.
 \funs{lllgram}{x,\var{prec}} ($\fl=0$), \funs{lllgramint}{x} ($\fl=1$), and
 \funs{lllgramkerim}{x} ($\fl=4$).
 
-\subsecidx{qfminim}$(x,b,m,\{\fl=0\})$: $x$ being a square and symmetric
+\subsecidx{qfminim}$(x,\{b\},\{m\},\{\fl=0\})$: $x$ being a square and symmetric
 matrix representing a positive definite quadratic form, this function
-deals with the minimal vectors of $x$, depending on $\fl$.
+deals with the vectors of $x$ whose norm is less than or equal to $b$,
+enumerated using the Fincke-Pohst algorithm. The function searches for
+the minimal non-zero vectors if $b$ is omitted. The precise behaviour
+depends on $\fl$.
 
-If $\fl=0$ (default), seeks vectors of square norm less than or equal to $b$
-(for the norm defined by $x$), and at most $2m$ of these vectors. The result
-is a three-component vector, the first component being the number of vectors,
-the second being the maximum norm found, and the last vector is a matrix
-whose columns are the vectors found, only one being given for each
-pair $\pm v$ (at most $m$ such pairs).
+If $\fl=0$ (default), seeks at most $2m$ vectors. The result is a
+three-component vector, the first component being the number of vectors
+found, the second being the maximum norm found, and the last vector is a
+matrix whose columns are the vectors found, only one being given for each
+pair $\pm v$ (at most $m$ such pairs). The vectors are returned in no
+particular order. In this variant, an explicit $m$ must be provided.
 
-If $\fl=1$, ignores $m$ and returns the first vector whose norm is less than
-$b$.
+If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
+than $b$.
 
-In both these cases, $x$ is assumed to have integral entries, and the
-function searches for the minimal non-zero vectors whenever $b=0$. The
-implmentation uses low precision floating point computations for maximal
-speed, but gives incorrect result when $x$ has large entries. (The
-condition is checked in the code and the routine will raise an error
-if large rounding errors occur.) A more robust, but much slower,
+In both these cases, $x$ is assumed to have integral entries. The
+implementation uses low precision floating point computations for maximal
+speed, which gives incorrect result when $x$ has large entries. (The
+condition is checked in the code and the routine will raise an error if
+large rounding errors occur.) A more robust, but much slower,
 implementation is chosen if the following flag is used:
 
-If $\fl=2$, $x$ can have non integral real entries, but $b=0$ is now
-meaningless (uses Fincke-Pohst algorithm).
+If $\fl=2$, $x$ can have non integral real entries. In this case, if $b$
+is omitted, the ``minimal'' vectors only have approximately the same norm.
+If $m$ is omitted, all vectors found are stored and returned; note that
+this may be a huge vector!
 
 \syn{qfminim0}{x,b,m,\fl,\var{prec}}, also available are \funs{minim}{x,b,m}
-($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$), and finally
-\funs{fincke_pohst}{x,b,m,\var{prec}} ($\fl=2$).
+($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$). In all cases, an omitted $b$
+or $m$ is coded as \kbd{NULL}.
 
 \subsecidx{qfperfection}$(x)$: $x$ being a square and symmetric matrix with
 integer entries representing a positive definite quadratic form, outputs the

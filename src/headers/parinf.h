@@ -97,7 +97,9 @@ enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {
   GEN (*f)(void *,GEN);
+  /* f_init allowed to permute the columns of u and r */
   GEN (*f_init)(struct FP_chk_fun*,GEN,GEN);
+  GEN (*f_post)(struct FP_chk_fun*,GEN,GEN);
   void *data;
   long skipfirst;
 } FP_chk_fun;
