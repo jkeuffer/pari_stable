@@ -3207,13 +3207,13 @@ chk_ok(void *D, GEN x) { (void)D; (void)x; return gen_0; }
 static GEN
 chk_post(FP_chk_fun *f, GEN res, GEN u)
 {
-  GEN t = gel(res,2), z;
-  long i, l = lg(t);
+  GEN z = gel(res,2);
+  long i, l = lg(z);
   (void)f;
 
-  z = cgetg(l, t_MAT);
-  for (i = 1; i < l; i++) gel(z,i) = gmul(u, gel(t,i));
-  return z;
+  settyp(z, t_MAT);
+  for (i = 1; i < l; i++) gel(z,i) = gmul(u, gel(z,i));
+  return res;
 }
 
 GEN
@@ -3225,23 +3225,18 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 1: return minim0(a,borne,gen_0   ,min_FIRST);
     case 2:
     {
-      GEN x;
       long maxnum = stockmax? itos(stockmax): -2;
       if (!borne)
       {
         FP_chk_fun chk = { &chk_ok, NULL, &chk_post, NULL, 0 };
         pari_sp av = avma;
-        long s;
-        GEN z;
-        x = fincke_pohst(a,NULL,maxnum,prec,&chk);
+        GEN z, x = fincke_pohst(a,NULL,maxnum,prec,&chk);
         if (!x) pari_err(precer,"fincke_pohst");
 
-        s = lg(x)-1;
-        if (!s) return mkvec3(gen_0, gen_0, cgetg(1,t_MAT));
         z = cgetg(4,t_VEC);
-        gel(z,1) = stoi(s << 1);
-        gel(z,2) = qfeval(a, gel(x,1));
-        gel(z,3) = x;
+        gel(z,1) = shifti(gel(x,3), 1);
+        gel(z,2) = gel(x,4);
+        gel(z,3) = gel(x,2);
         return gerepilecopy(av, z);
       }
       return fincke_pohst(a,borne,maxnum,prec,NULL);
@@ -3462,24 +3457,24 @@ END:
   {
     GEN per, alph, pols, p;
     if (DEBUGLEVEL) fprintferr("final sort & check...\n");
-    s = stockmax;
-    setlg(norms,s+1); per = sindexsort(norms);
-    alph = cgetg(s+1,t_VEC);
-    pols = cgetg(s+1,t_VEC);
-    for (j=0,i=1; i<=s; i++)
+    setlg(norms,stockmax+1); per = sindexsort(norms);
+    alph = cgetg(stockmax+1,t_VEC);
+    pols = cgetg(stockmax+1,t_VEC);
+    for (j=0,i=1; i<=stockmax; i++)
     {
-      long k = per[i];
-      norme1 = gel(norms,k);
+      long t = per[i];
+      norme1 = gel(norms,t);
       if (j && mpcmp(norme1, borne1) > 0) break;
-      if ((p = check(data,gel(S,k))))
+      if ((p = check(data,gel(S,t))))
       {
-        if (!j) borne1 = gadd(norme1,eps);
-        j++; gel(pols,j) = p; alph[j]=S[k];
+        if (!j) borne1 = mpadd(norme1,eps);
+        j++; gel(pols,j) = p; alph[j]=S[t];
       }
     }
     setlg(pols,j+1);
-    setlg(alph,j+1); if (isclone(S)) { alph = forcecopy(alph); gunclone(S); }
-    return mkvec2(pols, alph);
+    setlg(alph,j+1);
+    if (stockmax && isclone(S)) { alph = forcecopy(alph); gunclone(S); }
+    return mkvec4(pols, alph, stoi(s), mpsub(borne1, eps));
   }
   u = cgetg(4,t_VEC);
   gel(u,1) = stoi(s<<1);
