@@ -93,6 +93,8 @@ BA 20- 'make install' did not work if 'prefix' contained spaces
 IZ 34- [2.2.9-A20] -fno-strict-aliasing not supported in older gcc
    35- heapsize reported by getheap() were wrong (overestimate).
    36- gerepile error in nfgaloisapply [#408]
+   37- wrong results in bessel functions at non-integer indices
+       (typo in isint(t_REAL) ) [#409] 
 
   Changed
     1- speed up prime() by using checkpoints.

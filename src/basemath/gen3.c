@@ -2007,7 +2007,7 @@ isint(GEN n, long *ptk)
     case t_INT: *ptk = itos(n); return 1;
     case t_REAL: {
       GEN z = floorr(n);
-      if (!signe(subri(n, z))) return 0;
+      if (signe(subri(n, z))) return 0;
       *ptk = itos(z); return 1;
     }
     case t_FRAC:    return 0;
