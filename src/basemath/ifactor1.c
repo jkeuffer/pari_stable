@@ -2192,7 +2192,7 @@ squfof(GEN n)
     }
     if (act1)
     {
-      if (uissquarerem((ulong)a1, &a))
+      if (uissquarerem((ulong)a1, (ulong*)&a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
@@ -2234,7 +2234,7 @@ squfof(GEN n)
     }
     if (act2)
     {
-      if (uissquarerem((ulong)a2, &a))
+      if (uissquarerem((ulong)a2, (ulong*)&a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
