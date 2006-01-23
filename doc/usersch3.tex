@@ -5913,9 +5913,17 @@ $\kbd{deriv}(x, -1)$.
 \subsecidx{eval}$(x)$: replaces in $x$ the formal variables by the values that
 have been assigned to them after the creation of $x$. This is mainly useful
 in GP, and not in library mode. Do not confuse this with substitution (see
-\kbd{subst}). Applying this function to a character string yields the
-output from the corresponding GP command, as if directly input from the
-keyboard (see \secref{se:strings}).\label{se:eval}
+\kbd{subst}).
+
+If $x$ is a character string, \kbd{eval($x$)} executes $x$ as a GP
+command, as if directly input from the keyboard, and returns its
+output.\label{se:eval} For convenience, $x$ is evaluated is if
+\kbd{strictmatch} was off. In particular, unused characters at the end of
+$x$ do not prevent its evaluation:
+\bprog
+    ? eval("1a")
+    % 1 = 1
+@eprog
 
 \syn{geval}{x}. The more basic functions \funs{poleval}{q,x},
 \funs{qfeval}{q,x}, and \funs{hqfeval}{q,x} evaluate $q$ at $x$, where $q$
@@ -6887,7 +6895,7 @@ pair $\pm v$ (at most $m$ such pairs). The vectors are returned in no
 particular order. In this variant, an explicit $m$ must be provided.
 
 If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
-than $b$.
+than $b$. In this variant, an explicit $b$ must be provided.
 
 In both these cases, $x$ is assumed to have integral entries. The
 implementation uses low precision floating point computations for maximal

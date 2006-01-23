@@ -804,6 +804,7 @@ seq(void)
       br_status = br_NONE;
       allocmem = 1;
     }
+    if (!separator(*analyseur)) break; else analyseur++;
 
     if (top - avma > ((top - av)>>1))
     {

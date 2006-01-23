@@ -148,6 +148,7 @@ BA 25- make pari restartable
        entries. Test whether rounding errors occur and abort if so [#407]
    35- qfminim(x,b,m,flag): b and m are now optional. Allow omitting b
        (formerly b=0) if flag = 2 also.
+   36- eval("1a") is now '1' again (was "a" since 2.2.10)
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
