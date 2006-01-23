@@ -1831,11 +1831,11 @@ would like to know about it, so that everyone can benefit from it. There is
 then a good chance that your improvements are incorporated into the next
 release.
 
-Roughly four types of modifications can be made. The first type includes all
+We classify changes to PARI into four rough classes. The first type includes all
 improvements to the documentation, in a broad sense. This includes correcting
 typos or inacurracies of course, but also items which are not really covered
 in this document, e.g.~if you happen to write a tutorial, or pieces of code
-exemplifying some fine points that you think were unduly omitted.
+exemplifying fine points unduly omitted in the present manual.
 
 The second type is to expand or modify the configuration routines and skeleton
 files (the \kbd{Configure} script and anything in the \kbd{config/}
@@ -1972,9 +1972,9 @@ can then compare with the C prototypes as they stand in the code.
 
 \misctitle{Remark}: If you need to implement complicated control statements
 (probably for some improved summation functions), you need to know about the
-\teb{entree} type, which is not documented. Check the comment before the
-function list at the end of \kbd{language/init.c} and the source code in
-\kbd{language/sumiter.c}. You should be able to make something of it.
+\teb{entree} type, which is not documented. Check the comment
+at the end of \kbd{language/init.c} and the source code in
+\kbd{language/sumiter.c}.
 \smallskip
 
 \subsec{Coding guidelines}.
@@ -2060,8 +2060,12 @@ Prototype: @com\var{code}
 Help:      @com\var{some help text}
 @eprog\noindent
 (If the help text does not fit on a single line, continuation lines must
-start by a whitespace character.) At this point you can recompile \kbd{gp},
-which will first rebuild the functions database.
+start by a whitespace character.) A GP2C-related \kbd{Description} field
+is also available to improve the code GP2C generates when compiling
+scripts involving your function. See the GP2C documentation for details.
+
+At this point you can recompile \kbd{gp}, which will first rebuild the
+functions database.
 
 \subsec{Example}.
 %
