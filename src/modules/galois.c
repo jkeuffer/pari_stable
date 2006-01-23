@@ -2471,7 +2471,7 @@ galoisbig(GEN pol, long prec)
     1920,1920,1920,3840,7200,14400,14400,28800,1814400,3628800};
   long tab11[]={0, 11,22,55,110,660,7920,19958400,39916800};
 
-  N = degpol(pol); dpol = ZX_disc(pol); EVEN = carreparfait(dpol);
+  N = degpol(pol); dpol = ZX_disc(pol); EVEN = Z_issquare(dpol);
   ID[0] = (IND)N;
   
   if (DEBUGLEVEL)

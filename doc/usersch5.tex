@@ -686,9 +686,6 @@ assuming \kbd{p} is prime.
 \fun{ulong}{gener_Fl_local}{ulong p, GEN L}, see \kbd{gener\_Fp\_local},
 \kbd{L} is an \kbd{Flv}.
 
-\fun{int}{isprime_Fl}{ulong p}, returns $1$ if \kbd{p} is a prime number and
-$0$ otherwise.
-
 \fun{long}{krouu}{ulong x, ulong y} returns the \idx{Kronecker symbol}
 $(x|y)$, i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is an
 odd prime, this is the \idx{Legendre symbol}.
@@ -941,6 +938,28 @@ except the inputs/outputs are now \kbd{ulong}s.
 
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
 in the factorization are actually strong pseudoprimes.
+
+\fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
+is square-free, and $0$ otherwise.
+
+\fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
+a square, and $0$ otherwise. This is tested first modulo small prime
+powers, then \kbd{sqrtremi} is called.
+
+\fun{long}{Z_issquarerem}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
+
+\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+(fully proven) prime number and $0$ otherwise.
+
+\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
+$0$ otherwise.
+
+\fun{long}{Z_issquarerem}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
+
+\fun{long}{uissquarerem}{ulong n, ulong *sqrtn} as \kbd{Z\_issquarerem},
+for an \kbd{ulong} operand \kbd{n}.
 
 %\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 %factorization process as soon as the unfactored part is smaller than \kbd{lim}.

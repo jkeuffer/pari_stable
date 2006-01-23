@@ -25,7 +25,7 @@ check_quaddisc(GEN x, long *s, long *r, char *f)
 {
   if (typ(x) != t_INT) pari_err(arither1);
   *s = signe(x); if (!*s) pari_err(talker,"zero discriminant in %s", f);
-  if (carreparfait(x)) pari_err(talker,"square discriminant in %s", f);
+  if (Z_issquare(x)) pari_err(talker,"square discriminant in %s", f);
   *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
   if (*r > 1) pari_err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
 }
@@ -1264,7 +1264,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   }
   a = subii(p, sqri(b));
   c = dvmdii(a, d, &r);
-  if (r != gen_0 || !carrecomplet(c, &c)) { avma = av; return 0; }
+  if (r != gen_0 || !Z_issquarerem(c, &c)) { avma = av; return 0; }
   avma = av;
   *px = icopy(b);
   *py = icopy(c); return 1;
@@ -1315,7 +1315,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   }
   a = subii(px4, sqri(b));
   c = dvmdii(a, d, &r);
-  if (r != gen_0 || !carrecomplet(c, &c)) { avma = av; return 0; }
+  if (r != gen_0 || !Z_issquarerem(c, &c)) { avma = av; return 0; }
   avma = av;
   *px = icopy(b);
   *py = icopy(c); return 1;

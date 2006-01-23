@@ -327,8 +327,8 @@ u_IsLucasPsP(ulong n)
   for (b=3, i=0;; b+=2, i++)
   {
     ulong c = b*b - 4; /* = 1 mod 4 */
-    if (i == 64 && ucarrecomplet(n)) return 0; /* oo loop if N = m^2 */
     if (krouu(n % c, c) < 0) break;
+    if (i == 64 && uissquarerem(n, &c)) return 0; /* oo loop if N = m^2 */
   }
   if (!m) return 0; /* neither 2^32-1 nor 2^64-1 are Lucas-pp */
   v = vals(m); m >>= v;
@@ -356,7 +356,7 @@ IsLucasPsP(GEN N)
   for (b=3, i=0;; b+=2, i++)
   {
     ulong c = b*b - 4; /* = 1 mod 4 */
-    if (i == 64 && carreparfait(N)) return 0; /* avoid oo loop if N = m^2 */
+    if (i == 64 && Z_issquare(N)) return 0; /* avoid oo loop if N = m^2 */
     if (krouu(umodiu(N,c), c) < 0) break;
   }
   m = addis(N,1); v = vali(m); m = shifti(m,-v);
@@ -389,7 +389,7 @@ uu_coprime(ulong n, ulong u)
 
 /* Fl_BSW_psp */
 int
-isprime_Fl(ulong n)
+uisprime(ulong n)
 {
   Fl_miller_t S;
   if (n < 103)
@@ -483,7 +483,7 @@ BSW_psp(GEN N)
 
   if (typ(N) != t_INT) pari_err(arither1);
   if (signe(N) <= 0) return 0;
-  if (lgefint(N) == 3) return isprime_Fl((ulong)N[2]);
+  if (lgefint(N) == 3) return uisprime((ulong)N[2]);
   if (!mod2(N)) return 0;
 #ifdef LONG_IS_64BIT
   /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53
@@ -2192,7 +2192,7 @@ squfof(GEN n)
     }
     if (act1)
     {
-      if ( (a = (long)ucarrecomplet((ulong)a1)) )
+      if (uissquarerem((ulong)a1, &a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
@@ -2234,7 +2234,7 @@ squfof(GEN n)
     }
     if (act2)
     {
-      if ( (a = (long)ucarrecomplet((ulong)a2)) )
+      if (uissquarerem((ulong)a2, &a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
@@ -2279,7 +2279,7 @@ squfof(GEN n)
 /**  Factoring engines like MPQS which ultimately rely on computing   **/
 /**  gcd(N, x^2-y^2) to find a nontrivial factor of N can't split     **/
 /**  N = p^k for an odd prime p, since (Z/p^k)^* is then cyclic.      **/
-/**  The square-detection function carrecomplet() also returns the    **/
+/**  The square-detection function Z_issquarerem() also returns the    **/
 /**  square root if appropriate.  Here's an analogue for cubes, fifth **/
 /**  and 7th powers.  11th powers are a non-issue so long as mpqs()   **/
 /**  gives up beyond 100 decimal digits  (ECM easily finds a 10-digit **/
@@ -2507,7 +2507,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
         if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-        while (!isprime_Fl(q)) { q += p; }
+        while (!uisprime(q)) { q += p; }
         break;
       }
     } while (q % p != 1);
@@ -3260,7 +3260,7 @@ ifac_crack(GEN *partial, GEN *where)
   /* crack squares.  Quite fast due to the initial square residue test */
   if (DEBUGLEVEL >= 4) fprintferr("IFAC: checking for pure square\n");
   av = avma;
-  while (carrecomplet(gel(*where,0), &factor))
+  while (Z_issquarerem(gel(*where,0), &factor))
   {
     if (DEBUGLEVEL >= 4)
       fprintferr("IFAC: found %Z =\n\t%Z ^2\n", **where, factor);
@@ -3274,7 +3274,7 @@ ifac_crack(GEN *partial, GEN *where)
     exponent = gel(*where,1);
     if (moebius_mode) return 0;	/* no need to carry on */
     exp1 = 2;
-  } /* while carrecomplet */
+  } /* while Z_issquarerem */
 
   /* check whether our composite hasn't become prime */
   if (exp1 > 1 && hint != 15 && BSW_psp(gel(*where,0)))
@@ -3418,7 +3418,7 @@ ifac_crack(GEN *partial, GEN *where)
     gel(*where,0) = gel(*where,3); /* move cofactor pointer to lowest slot */
     gel(*where,3) = factor;	/* save factor */
   }
-  else pari_err(bugparier,"ifac_crack [carrecomplet miss]");
+  else pari_err(bugparier,"ifac_crack [Z_issquarerem miss]");
   return 2;
 }
 

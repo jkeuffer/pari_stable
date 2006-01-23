@@ -922,7 +922,7 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   GEN D = subii(sqri(b), shifti(mulii(a,c), 2));
   long v, cnt = *ptcnt;
 
-  if (!carrecomplet(D, &d)) { gel(res,cnt++) = x; *ptcnt = cnt; return; }
+  if (!Z_issquarerem(D, &d)) { gel(res,cnt++) = x; *ptcnt = cnt; return; }
 
   t = shifti(negi(addii(b, d)), -1);
   z1 = gdiv(t, a); u = denom(z1);

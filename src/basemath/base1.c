@@ -428,7 +428,7 @@ polgalois(GEN x, long prec)
     if (n == 1) { avma = av; return _res(1, 1,1); }
     if (n == 2) { avma = av; return _res(2,-1,1); }
     /* n = 3 */
-    f = carreparfait(ZX_disc(x));
+    f = Z_issquare(ZX_disc(x));
     avma = av;
     return f? _res(3,1,1): 
               _res(6,-1, new_galois_format? 2: 1);
@@ -461,7 +461,7 @@ polgalois(GEN x, long prec)
 	p2 = (GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f = carreparfait(ZX_disc(x)); avma = av;
+	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
             return f? _res(12,1,4): _res(24,-1,5);
 
 	  case 2: avma = av; return _res(8,-1,3);
@@ -500,7 +500,7 @@ polgalois(GEN x, long prec)
 	  }
           if (!ZX_is_squarefree(p5)) goto tchi;
 	  p3=(GEN)factor(p5)[1];
-	  f=carreparfait(ZX_disc(x));
+	  f=Z_issquare(ZX_disc(x));
 	  if (lg(p3)-1==1)
 	  {
 	    avma = av;
@@ -525,7 +525,7 @@ polgalois(GEN x, long prec)
 	  if (e <= -10)
 	  {
 	    if (gcmp0(p4)) goto tchi;
-	    f = carreparfait(p4); avma = av;
+	    f = Z_issquare(p4); avma = av;
             return f? _res(5,1,1): _res(10,1,2);
 	  }
 	  prec=(prec<<1)-2;
@@ -576,7 +576,7 @@ polgalois(GEN x, long prec)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
 		p2 = (GEN)factor(p5)[1];
-		f = carreparfait(ZX_disc(x));
+		f = Z_issquare(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
                   return f? _res(360,1,15): _res(720,-1,16);
@@ -588,17 +588,17 @@ polgalois(GEN x, long prec)
 	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
-		case 1: f = carreparfait(ZX_disc(x));
+		case 1: f = Z_issquare(ZX_disc(x));
 		  avma = av;
                   return f? _res(60,1,12): _res(120,-1,14);
-		case 2: f = carreparfait(ZX_disc(x));
+		case 2: f = Z_issquare(ZX_disc(x));
 		  if (f) { avma = av; return _res(24,1,7); }
                   p3 = (degpol(p2[1])==2)? gel(p2,2): gel(p2,1);
-                  f = carreparfait(ZX_disc(p3));
+                  f = Z_issquare(ZX_disc(p3));
                   avma = av;
                   return f? _res(24,-1,6): _res(48,-1,11);
-		case 3: f = carreparfait(ZX_disc(gel(p2,1)))
-		         || carreparfait(ZX_disc(gel(p2,2)));
+		case 3: f = Z_issquare(ZX_disc(gel(p2,1)))
+		         || Z_issquare(ZX_disc(gel(p2,2)));
 		  avma = av;
                   return f? _res(18,-1,5): _res(36,-1,9);
 	      }
@@ -607,12 +607,12 @@ polgalois(GEN x, long prec)
 		if (degpol(p2[l2]) >= 3) p3 = gel(p2,l2);
 	      if (degpol(p3) == 3)
 	      {
-		f = carreparfait(ZX_disc(p3)); avma = av;
+		f = Z_issquare(ZX_disc(p3)); avma = av;
                 return f? _res(6,-1,1): _res(12,-1,3);
 	      }
 	      else
 	      {
-		f = carreparfait(ZX_disc(x)); avma = av;
+		f = Z_issquare(ZX_disc(x)); avma = av;
                 return f? _res(12,1,4): _res(24,-1,8);
 	      }
 	    case 4: avma = av; return _res(6,-1,2);
@@ -638,7 +638,7 @@ polgalois(GEN x, long prec)
 	p2=(GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f = carreparfait(ZX_disc(x)); avma = av;
+	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
             return f? _res(2520,1,6): _res(5040,-1,7);
 	  case 2: f = degpol(p2[1]); avma = av;
 	    return (f==7 || f==28)? _res(168,1,5): _res(42,-1,4);
@@ -777,7 +777,7 @@ nfiso0(GEN a, GEN b, long fliso)
     GEN db = nfb? gel(nfb,3): ZX_disc(b);
     if (fliso)
     {
-      if (gcarreparfait(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }
+      if (gissquare(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }
     }
     else
     {
@@ -1416,7 +1416,7 @@ nfpolred(int part, nfbasic_t *T)
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = matid(n);
 
-  (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
+  (void)Z_issquarerem(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);
   T->dx = dxbest;
   T->x  = xbest; return rev;

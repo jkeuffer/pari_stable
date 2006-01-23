@@ -319,9 +319,9 @@ GEN     Fp_pows(GEN A, long k, GEN N);
 GEN     Fp_powu(GEN x, ulong k, GEN p);
 GEN     Fp_sqrt(GEN a, GEN p);
 GEN     Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan);
+long    Z_issquarerem(GEN x, GEN *pt);
 GEN     bestappr0(GEN x, GEN a, GEN b);
 GEN     bestappr(GEN x, GEN k);
-long    carrecomplet(GEN x, GEN *pt);
 long    cgcd(long a,long b);
 GEN     chinese1(GEN x);
 GEN     chinese(GEN x, GEN y);
@@ -332,8 +332,6 @@ GEN     contfrac0(GEN x, GEN b, long flag);
 GEN     fibo(long n);
 GEN     fundunit(GEN x);
 GEN     gboundcf(GEN x, long k);
-GEN     gcarrecomplet(GEN x, GEN *pt);
-GEN     gcarreparfait(GEN x);
 GEN     gcf2(GEN b, GEN x);
 GEN     gcf(GEN x);
 GEN     gener(GEN m);
@@ -348,6 +346,8 @@ GEN     gisfundamental(GEN x);
 GEN     gisprime(GEN x, long flag);
 GEN     gispseudoprime(GEN x, long flag);
 GEN     gispsp(GEN x);
+GEN     gissquarerem(GEN x, GEN *pt);
+GEN     gissquare(GEN x);
 GEN     gkrogs(GEN x, long y);
 GEN     gkronecker(GEN x, GEN y);
 GEN     gmillerrabin(GEN n, long k);
@@ -379,11 +379,13 @@ GEN     quaddisc(GEN x);
 GEN     racine(GEN a);
 GEN     regula(GEN x, long prec);
 GEN     seq_umul(ulong a, ulong b);
+long    uissquarerem(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
 GEN     znstar(GEN x);
 
 /* arith2.c */
 
+long    Z_issquarefree(GEN x);
 GEN     addprimes(GEN primes);
 GEN     auxdecomp(GEN n, long all);
 long    bigomega(GEN n);
@@ -1202,7 +1204,7 @@ long    group_ident(GEN G, GEN S);
 /* ifactor1.c */
 
 long    BSW_psp(GEN N);
-int     isprime_Fl(ulong n);
+int     uisprime(ulong n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
 int     is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
 long    millerrabin(GEN n, long k);

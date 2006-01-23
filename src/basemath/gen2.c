@@ -1040,12 +1040,12 @@ gabs(GEN x, long prec)
       switch(typ(p1))
       {
         case t_INT:
-          if (!carrecomplet(p1, &y)) break;
+          if (!Z_issquarerem(p1, &y)) break;
           return gerepileupto(av, y);
         case t_FRAC: {
           GEN a,b;
-          if (!carrecomplet(gel(p1,1), &a)) break;
-          if (!carrecomplet(gel(p1,2), &b)) break;
+          if (!Z_issquarerem(gel(p1,1), &a)) break;
+          if (!Z_issquarerem(gel(p1,2), &b)) break;
           return gerepileupto(av, gdiv(a,b));
         }
       }

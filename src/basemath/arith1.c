@@ -431,20 +431,21 @@ carremod(ulong A)
     && carresmod11[A % 11UL]);
 }
 
-/* emulate carrecomplet on single-word positive integers */
-ulong
-ucarrecomplet(ulong A)
+/* emulate Z_issquarerem on single-word integers */
+long
+uissquarerem(ulong A, ulong *sqrtA)
 {
+  if (!A) { *sqrtA = 0; return 1; }
   if (carremod(A))
   {
     ulong a = usqrtsafe(A);
-    if (a * a == A) return a;
+    if (a * a == A) { *sqrtA = a; return 1; }
   }
   return 0;
 }
 
 long
-carrecomplet(GEN x, GEN *pt)
+Z_issquarerem(GEN x, GEN *pt)
 {
   pari_sp av;
   GEN y, r;
@@ -456,8 +457,8 @@ carrecomplet(GEN x, GEN *pt)
   }
   if (lgefint(x) == 3)
   {
-    ulong a = ucarrecomplet((ulong)x[2]);
-    if (!a) return 0;
+    ulong a; 
+    if (!uissquarerem((ulong)x[2], &a)) return 0;
     if (pt) *pt = utoipos(a);
     return 1;
   }
@@ -469,7 +470,7 @@ carrecomplet(GEN x, GEN *pt)
 }
 
 static long
-polcarrecomplet(GEN x, GEN *pt)
+polissquarerem(GEN x, GEN *pt)
 {
   pari_sp av;
   long v, l = degpol(x);
@@ -491,9 +492,9 @@ polcarrecomplet(GEN x, GEN *pt)
   a = gel(x,2);
   switch (typ(a))
   {
-    case t_INT: y =    carrecomplet(a,&b)? gen_1: gen_0; break;
-    case t_POL: y = polcarrecomplet(a,&b)? gen_1: gen_0; break;
-    default: y = gcarreparfait(a); b = NULL; break;
+    case t_INT: y =  Z_issquarerem(a,&b)? gen_1: gen_0; break;
+    case t_POL: y = polissquarerem(a,&b)? gen_1: gen_0; break;
+    default: y = gissquare(a); b = NULL; break;
   }
   if (y == gen_0) { avma = av; return 0; }
   if (!l) {
@@ -517,20 +518,20 @@ END:
 }
 
 GEN
-gcarrecomplet(GEN x, GEN *pt)
+gissquarerem(GEN x, GEN *pt)
 {
   long l, tx = typ(x);
   GEN *F;
   pari_sp av;
 
-  if (!pt) return gcarreparfait(x);
+  if (!pt) return gissquare(x);
   if (is_vec_t(tx))
   {
     long i, l = lg(x);
     GEN p, t, y = cgetg(l,tx), z = cgetg(l,tx);
     for (i=1; i<l; i++)
     {
-      t = gcarrecomplet(gel(x,i),&p);
+      t = gissquarerem(gel(x,i),&p);
       gel(y,i) = t;
       gel(z,i) = t == gen_0? gen_0: p;
     }
@@ -538,19 +539,19 @@ gcarrecomplet(GEN x, GEN *pt)
   }
   switch(tx)
   {
-    case t_INT: l = carrecomplet(x, pt); break;
+    case t_INT: l = Z_issquarerem(x, pt); break;
     case t_FRAC: av = avma;
       F = (GEN*)cgetg(3, t_FRAC);
-      l = carrecomplet(gel(x,1), &F[1]);
-      if (l) l = carrecomplet(gel(x,2), &F[2]);
+      l = Z_issquarerem(gel(x,1), &F[1]);
+      if (l) l = Z_issquarerem(gel(x,2), &F[2]);
       if (!l) { avma = av; break; }
       *pt = (GEN)F; break;
 
-    case t_POL: l = polcarrecomplet(x,pt); break;
+    case t_POL: l = polissquarerem(x,pt); break;
     case t_RFRAC: av = avma;
       F = (GEN*)cgetg(3, t_RFRAC);
-      l = (gcarrecomplet(gel(x,1), &F[1]) != gen_0);
-      if (l) l = polcarrecomplet(gel(x,2), &F[2]);
+      l = (gissquarerem(gel(x,1), &F[1]) != gen_0);
+      if (l) l = polissquarerem(gel(x,2), &F[2]);
       if (!l) { avma = av; break; }
       *pt = (GEN)F; break;
 
@@ -561,7 +562,7 @@ gcarrecomplet(GEN x, GEN *pt)
 }
 
 GEN
-gcarreparfait(GEN x)
+gissquare(GEN x)
 {
   pari_sp av;
   GEN p1,a,p;
@@ -570,7 +571,7 @@ gcarreparfait(GEN x)
   switch(tx)
   {
     case t_INT:
-      return carreparfait(x)? gen_1: gen_0;
+      return Z_issquare(x)? gen_1: gen_0;
 
     case t_REAL:
       return (signe(x)>=0)? gen_1: gen_0;
@@ -624,7 +625,7 @@ gcarreparfait(GEN x)
     }
 
     case t_FRAC:
-      av=avma; l=carreparfait(mulii(gel(x,1),gel(x,2)));
+      av=avma; l=Z_issquare(mulii(gel(x,1),gel(x,2)));
       avma=av; return l? gen_1: gen_0;
 
     case t_COMPLEX:
@@ -643,26 +644,26 @@ gcarreparfait(GEN x)
       return gen_1;
 
     case t_POL:
-      return stoi( polcarrecomplet(x,NULL) );
+      return stoi( polissquarerem(x,NULL) );
 
     case t_SER:
       if (!signe(x)) return gen_1;
       if (valp(x)&1) return gen_0;
-      return gcarreparfait(gel(x,2));
+      return gissquare(gel(x,2));
 
     case t_RFRAC:
-      av = avma; a = gcarreparfait(gmul(gel(x,1),gel(x,2)));
+      av = avma; a = gissquare(gmul(gel(x,1),gel(x,2)));
       avma = av; return a;
 
     case t_QFR: case t_QFI:
-      return gcarreparfait(gel(x,1));
+      return gissquare(gel(x,1));
 
     case t_VEC: case t_COL: case t_MAT:
       l=lg(x); p1=cgetg(l,tx);
-      for (i=1; i<l; i++) gel(p1,i) = gcarreparfait(gel(x,i));
+      for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
       return p1;
   }
-  pari_err(typeer,"issquare");
+  pari_err(typeer,"Z_issquare");
   return NULL; /* not reached */
 }
 
@@ -728,7 +729,7 @@ ispower(GEN x, GEN K, GEN *pty)
   switch(typ(x)) {
     case t_INT:
       k = itou(K);
-      if (k == 2) return carrecomplet(x, pty);
+      if (k == 2) return Z_issquarerem(x, pty);
       if (k == 3) { mask = 1; return !!is_357_power(x, pty, &mask); }
       if (k == 5) { mask = 2; return !!is_357_power(x, pty, &mask); }
       if (k == 7) { mask = 4; return !!is_357_power(x, pty, &mask); }
@@ -763,7 +764,7 @@ ispower(GEN x, GEN K, GEN *pty)
     case t_POL:
       return polispower(x, K, pty);
     case t_RFRAC:
-      if (polcarrecomplet(gmul(gel(x,1), powgi(gel(x,2), subis(K,1))), pty))
+      if (polissquarerem(gmul(gel(x,1), powgi(gel(x,2), subis(K,1))), pty))
       {
         if (pty) *pty = gdiv(*pty, gel(x,2));
         return 1;
@@ -823,7 +824,7 @@ isanypower(GEN x, GEN *pty)
 
   if (typ(x) != t_INT || cmpii(x, gen_2) < 0)
     pari_err(talker, "isanypower: argument must be > 1");
-  while (carrecomplet(x, &y)) { k <<= 1; x = y; }
+  while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
   /* cut off at 4 bits not 1 which seems to be about optimum;  for primes
    * >> 10^3 the modular checks are no longer competitively fast */

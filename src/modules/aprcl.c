@@ -328,7 +328,7 @@ e(ulong t, GEN *globfa)
       m /= E[j];
     }
     /* d runs through the divisors of t */
-    if (isprime_Fl(++d))
+    if (uisprime(++d))
     {
       if (d != 2) appendL(Primes, (GEN)d);
       s = muliu(s, upowuu(d, 1 + u_lval(t,d)));
@@ -937,7 +937,7 @@ aprcl(GEN N)
       case 2: case 3: case 5: case 7: case 11: return gen_1;
       default: return _res(0,0);
     }
-  if (carreparfait(N)) return _res(0,0);
+  if (Z_issquare(N)) return _res(0,0);
   t = compt(N);
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t, &globfa);

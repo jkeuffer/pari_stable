@@ -820,10 +820,10 @@ ordell(GEN e, GEN x, long prec)
   switch(td)
   {
     case t_INT:
-      if (!carrecomplet(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+      if (!Z_issquarerem(D,&d)) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_FRAC:
-      if (gcarrecomplet(D,&d) == gen_0) { avma = av; return cgetg(1,t_VEC); }
+      if (gissquarerem(D,&d) == gen_0) { avma = av; return cgetg(1,t_VEC); }
       break;
     case t_INTMOD:
       if (kronecker(gel(D,2),gel(D,1)) < 0) {
