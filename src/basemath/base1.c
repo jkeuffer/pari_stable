@@ -705,7 +705,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       N = degpol(pol);
       if (lg(x)!=N+1) pari_err(typeer,"galoisapply");
       p1 = gsubst(coltoliftalg(nf,x), varn(pol), aut);
-      return gerepileupto(av, algtobasis_i(nf,p1));
+      return gerepileupto(av, algtobasis(nf,p1));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
