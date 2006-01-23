@@ -186,6 +186,7 @@ advise you to update soon ]
   - rename wf -> weberf, wf1 -> weberf1, wf2 -> weberf2
   - rename err -> pari_err, pariputsf -> pariprintf
   - rename rnfhermitebasis -> rnfhnfbasis
+  - rename gcarreparfait -> gissquare, gcarrecomplet -> gissquarerem
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

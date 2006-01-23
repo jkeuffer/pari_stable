@@ -213,6 +213,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ldiv    (long)gdiv
 
 /*functions renamed*/
+#define gcarrecomplet gissquarerem
+#define gcarreparfait gissquare
 #define rnfhermitebasis rnfhnfbasis
 #define wf weberf
 #define wf1 weberf1
