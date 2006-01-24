@@ -1831,11 +1831,13 @@ would like to know about it, so that everyone can benefit from it. There is
 then a good chance that your improvements are incorporated into the next
 release.
 
-We classify changes to PARI into four rough classes. The first type includes all
-improvements to the documentation, in a broad sense. This includes correcting
-typos or inacurracies of course, but also items which are not really covered
-in this document, e.g.~if you happen to write a tutorial, or pieces of code
-exemplifying fine points unduly omitted in the present manual.
+We classify changes to PARI into four rough classes, where changes of the
+first three types are almost certain to be accepted. The first type includes
+all improvements to the documentation, in a broad sense. This includes
+correcting typos or inacurracies of course, but also items which are not
+really covered in this document, e.g.~if you happen to write a tutorial,
+or pieces of code exemplifying fine points unduly omitted in the present
+manual.
 
 The second type is to expand or modify the configuration routines and skeleton
 files (the \kbd{Configure} script and anything in the \kbd{config/}
@@ -1903,8 +1905,8 @@ concatenation rules in string context are implemented so that adjacent strings
 are read as different arguments, as if they had been comma-separated. For
 instance, if the remaining argument sequence is: \kbd{"xx" 1, "yy"}, the
 \kbd{s*} atom sends a \kbd{GEN *g = \obr \&a, \&b, \&c, NULL\cbr}, where
-$a$, $b$, $c$ are \kbd{GEN}s of type \typ{STR} (content \kbd{xx}), \typ{INT}
-and \typ{STR} (content \kbd{yy}).
+$a$, $b$, $c$ are \kbd{GEN}s of type \typ{STR} (content \kbd{"xx"}),
+\typ{INT} (equal to $1$) and \typ{STR} (content \kbd{"yy"}).
 
 The format to indicate a default value (atom starts with a \kbd{D}) is
 ``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
@@ -1913,8 +1915,8 @@ which is converted according to \var{type}, and the ending comma is
 mandatory. For instance \kbd{D0,L,} stands for ``this optional argument is
 converted to a \kbd{long}, and is \kbd{0} by default''. So if the
 user-given argument reads \kbd{1 + 3} at this point, \kbd{4L} is sent to
-the function (via \tet{itos}$()$); and \kbd{0L} if the argument is
-omitted. The following special syntaxes are available:
+the function; and \kbd{0L} if the argument is omitted. The following
+special syntaxes are available:
 
 \settabs\+\indent\indent&\kbd{Dxxx}\quad& optional \kbd{*GEN},&\cr
 \+&\kbd{DG}& optional \kbd{GEN}, & send \kbd{NULL} if argument omitted.\cr
@@ -1956,19 +1958,19 @@ argument. The ``automatic'' atoms fill in the argument list transparently,
 supplying the current value of the corresponding variable (or a dummy
 pointer).
 
-For instance, here is how you would code the following prototypes (which
-do not involve default values):
+For instance, here is how you would code the following prototypes, which
+do not involve default values:
 \bprog
 GEN name(GEN x, GEN y, long prec)   ----> "GGp"
 void name(GEN x, GEN y, long prec)  ----> "vGGp"
 void name(GEN x, long y, long prec) ----> "vGLp"
 long name(GEN x)                    ----> "lG"
 int name(long x)                    ----> "iL"
-@eprog
-
+@eprog\noindent
 If you want more examples, \kbd{gp} gives you easy access to the parser codes
 associated to all GP functions: just type \kbd{\b{h} \var{function}}. You
-can then compare with the C prototypes as they stand in the code.
+can then compare with the C prototypes as they stand in the
+\kbd{paridecl.h}.
 
 \misctitle{Remark}: If you need to implement complicated control statements
 (probably for some improved summation functions), you need to know about the
@@ -1981,18 +1983,17 @@ at the end of \kbd{language/init.c} and the source code in
 \noindent
 Code your function in a file of its own, using as a guide other functions
 in the PARI sources. One important thing to remember is to clean the stack
-before exiting your main function (usually using \kbd{gerepile}), since
-otherwise successive calls to the function clutters the stack with
-unnecessary garbage, and stack overflow occurs sooner. Also, if it
-returns a \kbd{GEN} and you want it to be accessible to \kbd{gp}, you have to
-make sure this \kbd{GEN} is suitable for \kbd{gerepileupto} (see
-\secref{se:garbage}).
+before exiting your main function, since otherwise successive calls to
+the function clutters the stack with unnecessary garbage, and stack
+overflow occurs sooner. Also, if it returns a \kbd{GEN} and you want it
+to be accessible to \kbd{gp}, you have to make sure this \kbd{GEN} is
+suitable for \kbd{gerepileupto} (see \secref{se:garbage}).
 
-If error messages are to be generated in your function, use the general
-error handling routine \kbd{pari\_err} (see \secref{se:err}). Recall that, apart
-from the \kbd{warn} variants, this function does not return but ends with
-a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
-\kbd{fprintf} statements, use the following encapsulated variants:
+If error messages or warnings are to be generated in your function, use
+\kbd{pari\_err} and \kbd{pari\_warn} respectively.
+Recall that \kbd{pari\_err} does not return but ends with a \kbd{longjmp}
+statement. As well, instead of explicit \kbd{printf}~/ \kbd{fprintf}
+statements, use the following encapsulated variants:
 
 \fun{void}{pariflush}{}: flush output stream.
 
@@ -2022,11 +2023,10 @@ consistency is nice. It has to be a valid GP identifier, i.e.~use only
 alphabetic characters, digits and the underscore character (\kbd{\_}), the
 first character being alphabetic.
 
-Then you have to figure out the correct \idx{parser code} corresponding to
-the function prototype. This has been explained above
-(\secref{se:gp.interface}).
+Then figure out the correct \idx{parser code} corresponding to the
+function prototype, as explained above (\secref{se:gp.interface}).
 
-Now, assuming your Operating System is supported by \tet{install}, simply
+Now, assuming your Operating System is supported by \tet{install},
 write a GP script like the following:
 
 \bprog
@@ -2038,16 +2038,16 @@ part is not mandatory, but very useful if you want others to use your
 module. \kbd{libname} is how the function is named in the library,
 usually the same name as one visible from C.
 
-Read that file from your \kbd{gp} session (from your \idx{preferences file} for
-instance, see \secref{se:gprc}), and that's it, you can use the new
-function \var{gpname} under \kbd{gp} (and we would very much like to hear about
-it!).
+Read that file from your \kbd{gp} session (from your \idx{preferences
+file} for instance, see \secref{se:gprc}), and that's it. You can now use
+the new function \var{gpname} under \kbd{gp}, and we would very much like
+to hear about it!
 
 \subsec{Integration the hard way}
 
-If \tet{install} is not available for your Operating System, things are more
-complicated: you have to hardcode your function in the \kbd{gp} binary (or
-install \idx{Linux}). Here is what needs to be done:
+If \tet{install} is not available, things are more complicated: you have
+to hardcode your function in the \kbd{gp} binary (or install
+\idx{Linux}). Here is what needs to be done:
 
 You need to choose a section and add a file
 \kbd{functions/\var{section}/\var{gpname}}
