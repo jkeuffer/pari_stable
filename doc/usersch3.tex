@@ -2054,19 +2054,19 @@ $-1$).
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
-\subsecidx{Z_issquare}$(x,\{\&n\})$: true (1) if $x$ is a square, false (0)
+\subsecidx{issquare}$(x,\{\&n\})$: true (1) if $x$ is a square, false (0)
 if not. What ``being a square'' means depends on the type of $x$: all
 \typ{COMPLEX} are squares, as well as all non-negative \typ{REAL}; for
 exact types such as \typ{INT}, \typ{FRAC} and \typ{INTMOD}, squares are
 numbers of the form $s^2$ with $s$ in $\Z$, $\Q$ and $\Z/N\Z$ respectively.
 \bprog
-    ? Z_issquare(3)          \\ as an integer
+    ? issquare(3)          \\ as an integer
     %1 = 0
-    ? Z_issquare(3.)         \\ as a real number
+    ? issquare(3.)         \\ as a real number
     %2 = 1
-    ? Z_issquare(Mod(7, 8))  \\ in Z/8Z
+    ? issquare(Mod(7, 8))  \\ in Z/8Z
     %3 = 0
-    ? Z_issquare( 5 + O(13^4) )  \\ in Q_13
+    ? issquare( 5 + O(13^4) )  \\ in Q_13
     %4 = 0
 @eprog
 If $n$ is given and an exact square root had to be computed in
@@ -2074,11 +2074,11 @@ the checking process, puts that square root in $n$. This is the case when
 $x$ is a \typ{INT}, \typ{FRAC}, \typ{POL} or \typ{RFRAC} (or a vector of
 such objects):
 \bprog
-    ? Z_issquare(4, &n)
+    ? issquare(4, &n)
     %1 = 1
     ? n
     %2 = 2
-    ? Z_issquare([4, x^2], &n)
+    ? issquare([4, x^2], &n)
     %3 = [1, 1]  \\ both are squares
     ? n
     %4 = [2, x]  \\ the square roots
