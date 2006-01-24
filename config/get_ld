@@ -36,6 +36,7 @@ if test "$GNULDused" = "yes"; then
 else
   case "$osname-$arch" in
     aix-*) ldflags='-brtl' ;; # in case we link against a shared library
+    hpux-*) ldflags='-Wl,-E' ;;
   esac
 fi
 case "$osname-$arch" in
