@@ -45,7 +45,7 @@ VL = Vincent Lefevre
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.12 (released ??/??/2005):
+Done for version 2.2.12 (released 24/01/2006):
   Fixed
     1- incorrect detection of EditLine library
     2- issquare(Mod(2,9)) --> 1  [ should be 0 ]. Implicitly assumed
