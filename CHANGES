@@ -45,6 +45,11 @@ VL = Vincent Lefevre
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.13 (released ??/??/2006):
+   Fixed
+BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
   Fixed
     1- incorrect detection of EditLine library
