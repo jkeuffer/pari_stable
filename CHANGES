@@ -48,6 +48,8 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.13 (released ??/??/2006):
    Fixed
 BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
+    2- made BITS_IN_LONG and related constants 'signed long' [ avoid
+       problems like : exp(10^10) --> 10^10 + 1 (silent overflow) ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
