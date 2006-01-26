@@ -38,7 +38,6 @@ long shiftl(ulong x, ulong y);
 long shiftlr(ulong x, ulong y);
 long mulll(ulong x, ulong y);
 long addmul(ulong x, ulong y);
-long divll(ulong x, ulong y);
 int  bfffo(ulong x);
 
 #else
