@@ -18,10 +18,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * level0.c, which includes this file and never needs to be changed
  * The following lines are necessary for level0.c and level1.c */
 #ifdef  LEVEL0
+#  undef INLINE_IS_STATIC
 #  undef  INLINE
 #  define INLINE
 #endif
 #ifdef  LEVEL1
+#  undef INLINE_IS_STATIC
 #  undef  INLINE
 #endif
 
