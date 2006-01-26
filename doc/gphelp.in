@@ -670,6 +670,8 @@ sub basic_subst {
     {$tr{startbold}FOOTNOTE$tr{endbold}$tr{lt}$tr{lt}$tr{lt} $1 $tr{gt}$tr{gt}$tr{gt}}g;
   s/(\{[\w\s]+)\{\}([\s\w]+\})/$1$2/g;	# {nf{}init}
   s(\\op(?![a-zA-Z])\s*)({\\it op\\/})g;	# {nf{}init}
+  s/\\emacs\b//;
+  s/\\unix\b//;
   s/\\(leavevmode|strut)(?![a-zA-Z])\s*//g;
   s/ \\funno \s*
      { \s* ((?:[^{}]|\{[^{}]*\})*) } \s*
