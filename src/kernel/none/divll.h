@@ -28,58 +28,125 @@ long divll(ulong x, ulong y);
 
 /* divide (hiremainder * 2^BITS_IN_LONG + n0) by d; assume hiremainder < d.
  * Return quotient, set hiremainder to remainder */
-INLINE long
-divll(ulong __n0, ulong __d)
-{
-  ulong d1, d0, q1, q0, r1, r0, m, k, n0 = __n0, n1 = hiremainder, d = __d;
 
-  if (n1 == 0)
+#ifdef __GNUC__
+
+#define divll(n0, d) 							\
+({ 									\
+  ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;	        \
+  ulong __k, __d;                                                       \
+                                                                        \
+  __n1 = hiremainder; __n0 = n0; __d = d;                               \
+  if (__n1 == 0)                                                        \
+  { /* Only one division needed */                                      \
+    __LDIV(__n0, __d, __q1, hiremainder);                               \
+  }                                                                     \
+  else if (__d < LOWMASK)                                               \
+  { /* Two half-word divisions  */                                      \
+    __n1 = __GLUE(__n1, HIGHWORD(__n0));                                \
+    __LDIV(__n1, __d, __q1, __r1);                                      \
+    __n1 = __GLUE(__r1,  LOWWORD(__n0));                                \
+    __LDIV(__n1, __d, __q0, hiremainder);                               \
+    __q1 = __GLUE(__q1, __q0);                                          \
+  }                                                                     \
+  else                                                                  \
+  { /* General case */                                                  \
+    if (__d & HIGHBIT)                                                  \
+    {                                                                   \
+      __k = 0; __SPLIT(__d, __d1, __d0);                                \
+    }                                                                   \
+    else                                                                \
+    {                                                                   \
+      __k = bfffo(__d);                                                 \
+      __n1 = (__n1 << __k) | (__n0 >> (BITS_IN_LONG - __k));            \
+      __n0 <<= __k;                                                     \
+      __d = __d << __k; __SPLIT(__d, __d1, __d0);                       \
+    }                                                                   \
+    __LDIV(__n1, __d1, __q1, __r1);                                     \
+    __m =  __q1 * __d0; 					        \
+    __r1 = __GLUE(__r1, HIGHWORD(__n0));  				\
+    if (__r1 < __m)							\
+    {									\
+      __q1--, __r1 += __d;						\
+      if (__r1 >= __d) /* we didn't get carry when adding to __r1 */    \
+        if (__r1 < __m)	__q1--, __r1 += __d;				\
+    }									\
+    __r1 -= __m;							\
+    __LDIV(__r1, __d1, __q0, __r0);                                     \
+    __m =  __q0 * __d0;  					        \
+    __r0 = __GLUE(__r0, LOWWORD(__n0));   				\
+    if (__r0 < __m)							\
+    {									\
+      __q0--, __r0 += __d;						\
+      if (__r0 >= __d)			        			\
+        if (__r0 < __m)	__q0--, __r0 += __d;				\
+    }									\
+    hiremainder = (__r0 - __m) >> __k;		                        \
+    __q1 = __GLUE(__q1, __q0);                 				\
+  }                                   				        \
+  __q1;					                                \
+})
+
+#else /* __GNUC__ */
+
+static long
+divll(ulong n0, ulong d) 							
+{
+  ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;
+  ulong __k, __d;
+
+  __n1 = hiremainder; __n0 = n0; __d = d;
+
+  if (__n1 == 0)
   { /* Only one division needed */
-    __LDIV(n0, d, q1, hiremainder);
+    __LDIV(__n0, __d, __q1, hiremainder);
   }
-  else if (d < LOWMASK)
+  else if (__d < LOWMASK)
   { /* Two half-word divisions  */
-    n1 = __GLUE(n1, HIGHWORD(n0));
-    __LDIV(n1, d, q1, r1);
-    n1 = __GLUE(r1,  LOWWORD(n0));
-    __LDIV(n1, d, q0, hiremainder);
-    q1 = __GLUE(q1, q0);
+    __n1 = __GLUE(__n1, HIGHWORD(__n0));
+    __LDIV(__n1, __d, __q1, __r1);
+    __n1 = __GLUE(__r1,  LOWWORD(__n0));
+    __LDIV(__n1, __d, __q0, hiremainder);
+    __q1 = __GLUE(__q1, __q0);
   }
   else
   { /* General case */
-    if (d & HIGHBIT)
+    if (__d & HIGHBIT)
     {
-      k = 0; __SPLIT(d, d1, d0);
+      __k = 0; __SPLIT(__d, __d1, __d0);
     }
     else
     {
-      k = bfffo(d);
-      n1 = (n1 << k) | (n0 >> (BITS_IN_LONG - k));
-      n0 = n0 << k;
-      d = d << k; __SPLIT(d, d1, d0);
+      __k = bfffo(__d);
+      __n1 = (__n1 << __k) | (__n0 >> (BITS_IN_LONG - __k));
+      __n0 = __n0 << __k;
+      __d = __d << __k; __SPLIT(__d, __d1, __d0);
     }
-    __LDIV(n1, d1, q1, r1);
-    m =  q1 * d0;
-    r1 = __GLUE(r1, HIGHWORD(n0));
-    if (r1 < m)
+    __LDIV(__n1, __d1, __q1, __r1);
+    __m =  __q1 * __d0;
+    __r1 = __GLUE(__r1, HIGHWORD(__n0));
+    if (__r1 < __m)
       {
-        q1--, r1 += d;
-        if (r1 >= d) /* we didn't get carry when adding to r1 */
-          if (r1 < m) q1--, r1 += d;
+        __q1--, __r1 += __d;
+        if (__r1 >= __d) /* we didn't get carry when adding to __r1 */
+          if (__r1 < __m) __q1--, __r1 += __d;
       }
-    r1 -= m;
-    __LDIV(r1, d1, q0, r0);
-    m =  q0 * d0;
-    r0 = __GLUE(r0, LOWWORD(n0));
-    if (r0 < m)
+    __r1 -= __m;
+    __LDIV(__r1, __d1, __q0, __r0);
+    __m =  __q0 * __d0;
+    __r0 = __GLUE(__r0, LOWWORD(__n0));
+    if (__r0 < __m)
       {
-        q0--, r0 += d;
-        if (r0 >= d)
-          if (r0 < m) q0--, r0 += d;
+        __q0--, __r0 += __d;
+        if (__r0 >= __d)
+          if (__r0 < __m) __q0--, __r0 += __d;
       }
-    hiremainder = (r0 - m) >> k;
-    q1 = __GLUE(q1, q0);
+    hiremainder = (__r0 - __m) >> __k;
+    __q1 = __GLUE(__q1, __q0);
   }
-  return q1;
+  return __q1;
 }
+
+#endif /* __GNUC__ */
+
 #endif
