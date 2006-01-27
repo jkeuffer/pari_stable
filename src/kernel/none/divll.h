@@ -29,7 +29,7 @@ long divll(ulong x, ulong y);
 /* divide (hiremainder * 2^BITS_IN_LONG + n0) by d; assume hiremainder < d.
  * Return quotient, set hiremainder to remainder */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(LEVEL0)
 
 #define divll(n0, d) 							\
 ({ 									\
@@ -89,7 +89,7 @@ long divll(ulong x, ulong y);
 
 #else /* __GNUC__ */
 
-static long
+INLINE long
 divll(ulong n0, ulong d) 							
 {
   ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;
