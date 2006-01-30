@@ -1781,6 +1781,17 @@ normalize(GEN x)
 }
 
 GEN
+normalizepol_approx(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (! gcmp0(gel(x,i))) break;
+  stackdummy(x + (i+1), lg(x) - (i+1));
+  setlg(x, i+1);
+  setsigne(x, i>1? 1: 0); return x;
+}
+
+GEN
 normalizepol_i(GEN x, long lx)
 {
   long i;

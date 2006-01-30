@@ -1072,6 +1072,7 @@ GEN     listsort(GEN list, long flag);
 GEN     matsize(GEN x);
 GEN     normalize(GEN x);
 GEN     normalizepol(GEN x);
+GEN     normalizepol_approx(GEN x, long lx);
 GEN     normalizepol_i(GEN x, long lx);
 long    polvaluation(GEN x, GEN *z);
 long    polvaluation_inexact(GEN x, GEN *Z);

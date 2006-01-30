@@ -2871,8 +2871,10 @@ RgX_gcd_simple(GEN x, GEN y)
     if (pol_approx0(r, x, exact))
     {
       avma = av1;
-      if (lg(y) == 3 && !exact) { avma = av; return gen_1; }
-      return (y==yorig)? gcopy(y): gerepileupto(av,y);
+      if (y == yorig) return gcopy(y);
+      y = normalizepol_approx(y, lg(y));
+      if (lg(y) == 3) { avma = av; return gen_1; }
+      return gerepileupto(av,y);
     }
     x = y; y = r;
     if (low_stack(lim,stack_lim(av,1))) {
