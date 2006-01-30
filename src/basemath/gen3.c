@@ -3109,7 +3109,9 @@ simplify_i(GEN x)
 
     case t_RFRAC: y=cgetg(3,t_RFRAC);
       gel(y,1) = simplify_i(gel(x,1));
-      gel(y,2) = simplify_i(gel(x,2)); return y;
+      gel(y,2) = simplify_i(gel(x,2));
+      if (typ(gel(y,2)) != t_POL) return gdiv(gel(y,1), gel(y,2));
+      return y;
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
