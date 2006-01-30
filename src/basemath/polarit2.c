@@ -2652,7 +2652,7 @@ ggcd(GEN x, GEN y)
       case t_PADIC:
         if (!equalii(gel(x,2),gel(y,2))) return gen_1;
         vx = valp(x);
-        vy = valp(y); return powiu(gel(y,2), min(vy,vx));
+        vy = valp(y); return gpowgs(gel(y,2), min(vy,vx));
 
       case t_QUAD:
         av=avma; p1=gdiv(x,y);
