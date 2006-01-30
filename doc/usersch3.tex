@@ -6316,15 +6316,15 @@ arguments. As usual, the generating vectors are taken to be the
 \label{se:algdep} $x$ being real/complex, or $p$-adic, finds a polynomial of
 degree at most $k$ with integer coefficients having $x$ as approximate root.
 Note that the polynomial which is obtained is not necessarily the ``correct''
-one (it's not even guaranteed to be irreducible!). One can check the
+one. In fact it is not even guaranteed to be irreducible. One can check the
 closeness either by a polynomial evaluation or substitution, or by computing
 the roots of the polynomial given by algdep.
 
 Internally, \tet{lindep}$([1,x,\ldots,x^{k-1}], \fl)$ is used. If
 \tet{lindep} is not able to find a relation and returns a lower bound for the
 sup norm of the smallest relation, \tet{algdep} returns that bound instead.
-It is in general advised
-
+In general, a suitable non-zero value of $\fl$ will improve on the
+default behaviour:
 \bprog
 ? \p200
 ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong result in 2.6s (PIII 1GHz)
