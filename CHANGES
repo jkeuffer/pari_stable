@@ -51,6 +51,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
     2- made BITS_IN_LONG and related constants 'signed long' [ avoid
        problems like : exp(10^10) --> 10^10 + 1 (silent overflow) ]
     3- --kernel=none : libpari ended up not containing the 'divll' symbol
+    4- polgalois(x^3-2) --> [,,,"A3"] when new_galois_format was unset.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):

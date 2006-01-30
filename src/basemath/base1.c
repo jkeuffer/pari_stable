@@ -392,18 +392,27 @@ polgaloisnames(long a, long b)
 static GEN
 galois_res(long d, long n, long s, long k)
 {
-  long kk=k;
+  long kk = k;
   GEN z = cgetg(5,t_VEC);
   if (!new_galois_format)
-    kk = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
+  {
+    switch (d) {
+      case 6:
+        kk = (k == 6 || k == 2)? 2: 1;
+        break;
+      case 3:
+        kk = (k == 2)? 1: 2;
+        break;
+      default:
+        kk = 1;
+    }
+  }
   gel(z,1) = stoi(n);
   gel(z,2) = stoi(s);
   gel(z,3) = stoi(kk);
   gel(z,4) = polgaloisnames(d,k);
   return z;
 }
-
-#define _res(a,b,c) galois_res(n,a,b,c)
 
 GEN
 polgalois(GEN x, long prec)
@@ -425,16 +434,13 @@ polgalois(GEN x, long prec)
 
   if (n<4)
   {
-    if (n == 1) { avma = av; return _res(1, 1,1); }
-    if (n == 2) { avma = av; return _res(2,-1,1); }
+    if (n == 1) { avma = av; return galois_res(n,1, 1,1); }
+    if (n == 2) { avma = av; return galois_res(n,2,-1,1); }
     /* n = 3 */
     f = Z_issquare(ZX_disc(x));
     avma = av;
-    return f? _res(3,1,1): 
-              _res(6,-1, new_galois_format? 2: 1);
-    /* using new_galois_format here is a hack: should be done in _res. But
-     * from [n,s,k] there is no way to distinguish S_3 as a subgroup of S_3
-     * or S_6 */
+    return f? galois_res(n,3,1,1): 
+              galois_res(n,6,-1,2);
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
   if (n > 7) return galoisbig(x, prec);
@@ -462,12 +468,12 @@ polgalois(GEN x, long prec)
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
-            return f? _res(12,1,4): _res(24,-1,5);
+            return f? galois_res(n,12,1,4): galois_res(n,24,-1,5);
 
-	  case 2: avma = av; return _res(8,-1,3);
+	  case 2: avma = av; return galois_res(n,8,-1,3);
 	
 	  case 3: avma = av;
-	    return (degpol(p2[1])==2)? _res(4,1,2): _res(4,-1,1);
+	    return (degpol(p2[1])==2)? galois_res(n,4,1,2): galois_res(n,4,-1,1);
 
 	  default: pari_err(bugparier,"galois (bug1)");
 	}
@@ -504,9 +510,9 @@ polgalois(GEN x, long prec)
 	  if (lg(p3)-1==1)
 	  {
 	    avma = av;
-            return f? _res(60,1,4): _res(120,-1,5);
+            return f? galois_res(n,60,1,4): galois_res(n,120,-1,5);
 	  }
-	  if (!f) { avma = av; return _res(20,-1,3); }
+	  if (!f) { avma = av; return galois_res(n,20,-1,3); }
 
           pr = - (bit_accuracy(prec) >> 1);
           for (l=1; l<=6; l++)
@@ -526,7 +532,7 @@ polgalois(GEN x, long prec)
 	  {
 	    if (gcmp0(p4)) goto tchi;
 	    f = Z_issquare(p4); avma = av;
-            return f? _res(5,1,1): _res(10,1,2);
+            return f? galois_res(n,5,1,1): galois_res(n,10,1,2);
 	  }
 	  prec=(prec<<1)-2;
 	}
@@ -579,9 +585,9 @@ polgalois(GEN x, long prec)
 		f = Z_issquare(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
-                  return f? _res(360,1,15): _res(720,-1,16);
+                  return f? galois_res(n,360,1,15): galois_res(n,720,-1,16);
 		else
-                  return f? _res(36,1,10): _res(72,-1,13);
+                  return f? galois_res(n,36,1,10): galois_res(n,72,-1,13);
 	      }
 	      prec=(prec<<1)-2; break;
 		
@@ -590,17 +596,17 @@ polgalois(GEN x, long prec)
 	      {
 		case 1: f = Z_issquare(ZX_disc(x));
 		  avma = av;
-                  return f? _res(60,1,12): _res(120,-1,14);
+                  return f? galois_res(n,60,1,12): galois_res(n,120,-1,14);
 		case 2: f = Z_issquare(ZX_disc(x));
-		  if (f) { avma = av; return _res(24,1,7); }
+		  if (f) { avma = av; return galois_res(n,24,1,7); }
                   p3 = (degpol(p2[1])==2)? gel(p2,2): gel(p2,1);
                   f = Z_issquare(ZX_disc(p3));
                   avma = av;
-                  return f? _res(24,-1,6): _res(48,-1,11);
+                  return f? galois_res(n,24,-1,6): galois_res(n,48,-1,11);
 		case 3: f = Z_issquare(ZX_disc(gel(p2,1)))
 		         || Z_issquare(ZX_disc(gel(p2,2)));
 		  avma = av;
-                  return f? _res(18,-1,5): _res(36,-1,9);
+                  return f? galois_res(n,18,-1,5): galois_res(n,36,-1,9);
 	      }
 	    case 3:
 	      for (l2=1; l2<=3; l2++)
@@ -608,14 +614,14 @@ polgalois(GEN x, long prec)
 	      if (degpol(p3) == 3)
 	      {
 		f = Z_issquare(ZX_disc(p3)); avma = av;
-                return f? _res(6,-1,1): _res(12,-1,3);
+                return f? galois_res(n,6,-1,1): galois_res(n,12,-1,3);
 	      }
 	      else
 	      {
 		f = Z_issquare(ZX_disc(x)); avma = av;
-                return f? _res(12,1,4): _res(24,-1,8);
+                return f? galois_res(n,12,1,4): galois_res(n,24,-1,8);
 	      }
-	    case 4: avma = av; return _res(6,-1,2);
+	    case 4: avma = av; return galois_res(n,6,-1,2);
             default: pari_err(bugparier,"galois (bug3)");
 	  }
 	}
@@ -639,12 +645,12 @@ polgalois(GEN x, long prec)
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
-            return f? _res(2520,1,6): _res(5040,-1,7);
+            return f? galois_res(n,2520,1,6): galois_res(n,5040,-1,7);
 	  case 2: f = degpol(p2[1]); avma = av;
-	    return (f==7 || f==28)? _res(168,1,5): _res(42,-1,4);
-	  case 3: avma = av; return _res(21,1,3);
-	  case 4: avma = av; return _res(14,-1,2);
-	  case 5: avma = av; return _res(7,1,1);
+	    return (f==7 || f==28)? galois_res(n,168,1,5): galois_res(n,42,-1,4);
+	  case 3: avma = av; return galois_res(n,21,1,3);
+	  case 4: avma = av; return galois_res(n,14,-1,2);
+	  case 5: avma = av; return galois_res(n,7,1,1);
           default: pari_err(bugparier,"galois (bug2)");
 	}
     }
