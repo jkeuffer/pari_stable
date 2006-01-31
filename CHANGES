@@ -54,6 +54,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
     4- polgalois(x^3-2) --> [,,,"A3"] when new_galois_format was unset.
     5- problem with negative valuations in ggcd(t_PADIC) [#411]
     6- Fp_pow for huge moduli could return a negative number [#417]
+    7- y;x/y/z/x --> error [#410]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
