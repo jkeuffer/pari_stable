@@ -563,14 +563,19 @@ remiimul(GEN x, GEN sy)
   if (k <= 0) return k? icopy(x): gen_0;
   invy = (GEN)sy[2];
   q = mulir(x,invy);
-  q = mptrunc(q); /* <= divii(x, y) (at most 1 less) */
+  q = truncr(q); /* differs from divii(x, y) at most by 1 */
   r = subii(x, mulii(y,q));
-  /* remii(x,y) + y >= r >= remii(x,y) */
-  k = cmpii(r, y);
-  if (k >= 0)
+  if (signe(r) < 0)
+    r = addiispec(r+2,y+2, lgefint(r)-2, lgefint(y)-2);
+  else
   {
-    if (k == 0) { avma = av; return gen_0; }
-    r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
+    /* remii(x,y) + y >= r >= remii(x,y) */
+    k = absi_cmp(r, y);
+    if (k >= 0)
+    {
+      if (k == 0) { avma = av; return gen_0; }
+      r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
+    }
   }
 #if 0
   q = subii(r,remii(x,y));
