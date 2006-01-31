@@ -3553,7 +3553,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   CATCH(precer) { }
   TRY {
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
-    r = sqred1_from_QR(r, gprecision(r));
+    r = sqred1_from_QR(r, gprecision(vnorm));
     if (!r) pari_err(precer,"fincke_pohst");
     if (!bound) bound = gsqr(gcoeff(r,1,1));
 
