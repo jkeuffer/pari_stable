@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 .text
         .align 2
 #endif
-        GLOBL C(addll),C(subll),C(addllx),C(subllx),C(shiftl),C(shiftlr),C(bfffo)
+        GLOBL C(addll),C(subll),C(addllx),C(subllx),C(shiftl),C(shiftlr)
         GLOBL C(mulll),C(overflow),C(hiremainder),C(addmul),C(divll)
 
 C(addll): sethi   %hi(C(overflow)),%o3
@@ -73,28 +73,6 @@ C(shiftlr): sethi %hi(C(hiremainder)),%o3
         st      %o2,[%o3+%lo(C(hiremainder))]
         retl
         srl     %o0,%o1,%o0
-C(bfffo): sethi   %hi(0xffff0000),%o1
-        andcc   %o1,%o0,%g0
-        bnz,a   1f
-        clr     %o2
-        sll     %o0,16,%o0
-        mov     16,%o2
-1:      sethi   %hi(0xff000000),%o1
-        andcc   %o1,%o0,%g0
-        bnz     2f
-        sethi   %hi(0xf0000000),%o1
-        sll     %o0,8,%o0
-        add     %o2,8,%o2
-2:      andcc   %o1,%o0,%g0
-        bnz,a   3f
-        srl     %o0,28,%o0
-        add     %o2,4,%o2
-        srl     %o0,24,%o0
-3:      set     C(tabshi),%o3
-	sll	%o0,2,%o0
-        ld      [%o3+%o0],%o1
-        retl
-        add     %o2,%o1,%o0
 C(mulll): sethi   %hi(C(hiremainder)),%o3
         or      %o0,%o1,%o4
         mov     %o0,%y
@@ -507,10 +485,6 @@ Lf32:	addx	%o3,%o3,%o3
 	xor	%o0,-1,%o0
 	retl
 	st	%o3,[%o4+%lo(C(hiremainder))]
-
-        .seg    "data"
-        .align  4
-C(tabshi): .word  4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0
 
 	.seg    "bss"
 	.align  4

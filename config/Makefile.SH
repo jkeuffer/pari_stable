@@ -276,14 +276,7 @@ lib-dyn: \$(LIBPARI_DYN)
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
-EOT
-if test -n "$ranlib"; then
-cat >> $file << EOT
-	$ranlib \$@
-
-EOT
-fi
-cat >> $file << EOT
+	-$ranlib \$@
 
 kerntest\$(_O): ../src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
@@ -314,25 +307,6 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 	$postconfig gp-sta
 
-bench: $exec
-	@\$(DOTEST) $test_basic
-dobench::
-	@\$(DOTEST) $test_basic
-test-all: $exec
-	@\$(DOTEST) $test_basic $test_extra
-dotest-all::
-	@\$(DOTEST) $test_basic $test_extra
-EOT
-for i in $test_extra $test_extra_out; do
-  cat >> $file << EOT
-test-$i: $exec
-	@\$(DOTEST) $i
-dotest-$i::
-	@\$(DOTEST) $i
-EOT
-done
-
-cat >> $file << EOT
 cleanemacs:
 	\$(RM) $emx/*.elc
 cleantest:
@@ -472,7 +446,26 @@ install-lib-dyn-link: install-lib-dyn-base
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
 
+pariinl.h: parilvl0.h parilvl1.h
+	cat parilvl0.h parilvl1.h > pariinl.h
+
+bench: $exec
+	@\$(DOTEST) $test_basic
+dobench::
+	@\$(DOTEST) $test_basic
+test-all: $exec
+	@\$(DOTEST) $test_basic $test_extra
+dotest-all::
+	@\$(DOTEST) $test_basic $test_extra
 EOT
+for i in $test_extra $test_extra_out; do
+  cat >> $file << EOT
+test-$i: $exec
+	@\$(DOTEST) $i
+dotest-$i::
+	@\$(DOTEST) $i
+EOT
+done
 
 if test -z "$DLLD"; then
   cat >> $file << EOT
@@ -531,11 +524,6 @@ $install_emacs_files: elc
 	done
 EOT
 fi
-
-cat >> $file << EOT
-pariinl.h: parilvl0.h parilvl1.h
-	cat parilvl0.h parilvl1.h > pariinl.h
-EOT
 
 if test -n "$add_funclist"; then
   cat >> $file << EOT

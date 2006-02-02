@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* addll addllx subll subllx shiftl shiftlr mulll addmul          */
 /*                                                                */
 /* These functions are always in level0.s                         */
-/* The following symbols are always defined in this file :        */
-/* divll bfffo (& tabshi)                                         */
 
 extern ulong hiremainder, overflow;
 extern int  bfffo(ulong x);

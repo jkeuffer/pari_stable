@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   Copyright (C) 2000 Free Software Foundation, Inc. */
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
-long divll(ulong x, ulong y);
+extern long divll(ulong x, ulong y);
 #else
 
 #define __GLUE(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))
@@ -29,7 +29,7 @@ long divll(ulong x, ulong y);
 /* divide (hiremainder * 2^BITS_IN_LONG + n0) by d; assume hiremainder < d.
  * Return quotient, set hiremainder to remainder */
 
-#if defined(__GNUC__) && !defined(LEVEL0)
+#if defined(__GNUC__) && !defined(DISABLE_INLINE)
 
 #define divll(n0, d) 							\
 ({ 									\

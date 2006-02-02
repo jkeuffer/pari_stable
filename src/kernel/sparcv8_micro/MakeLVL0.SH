@@ -12,6 +12,7 @@ then
 else
   level0="$kercom/level0_common.h $ker/level0.h"
 fi
+level0="$src/kernel/none/bfffo.h $level0"
 
 cat >> $file << EOT
 kernel0.s: $kercom/level0_common.S $ker/level0.S

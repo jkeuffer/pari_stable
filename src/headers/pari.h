@@ -73,20 +73,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 #include "paridecl.h"
 #include "paritune.h"
-ENDEXTERN
-
-#if defined(__MWERKS__)
-#  include <SIOUX.h>
-#  include <Memory.h>
-#  define malloc(x) NewPtr(x)
-#  define free(x) DisposePtr((Ptr)(x))
-#  define CodeWarrior_Bug
-#  pragma pointers_in_D0
-   void *macrealloc(void *p, size_t olds, size_t news);
-#  pragma pointers_in_A0
+#ifndef DISABLE_INLINE
+#  include "pariinl.h"
 #endif
-
-BEGINEXTERN
-#include "pariinl.h"
 ENDEXTERN
 #endif

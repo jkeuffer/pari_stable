@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file defines some "level 0" kernel functions for SPARC V8 */
 /* These are optimised for MicroSparc                             */
 /* The following symbols are defined in this file :               */
-/* divll bfffo (& tabshi)                                         */
+/* divll                                                          */
 /*   But divll has to use hiremainder, so it is different when    */
 /*   hiremainder is inline or not                                 */
 /*   If libpari.so is compiled with gcc, you should compile all   */
@@ -37,65 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define GLOBL .globl
 #endif
 
-#if   defined(sun) || defined(linux) || defined(__NetBSD__)
-	.seg	"data"
-	.align	4
-C(tabshi): .word	4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0
-
-#if   defined(sun)
-	.type C(tabshi),#object
-	.size C(tabshi),64
-#endif
-	
-	.seg "text"
-#elif defined(NeXT)
-.data
-	.align	3
-C(tabshi):
-	.long 4
-	.long 3
-	.long 2
-	.long 2
-	.long 1
-	.long 1
-	.long 1
-	.long 1
-	.long 0
-	.long 0
-	.long 0
-	.long 0
-	.long 0
-	.long 0
-	.long 0
-	.long 0
-
-.text
-	.align 2
-#endif
-	GLOBL	C(bfffo),C(divll)
-
-C(bfffo): sethi	%hi(0xffff0000),%o1
-	andcc	%o1,%o0,%g0
-	bnz,a	1f
-	clr	%o2
-	sll	%o0,16,%o0
-	mov	16,%o2
-1:	sethi	%hi(0xff000000),%o1
-	andcc	%o1,%o0,%g0
-	bnz	2f
-	sethi	%hi(0xf0000000),%o1
-	sll	%o0,8,%o0
-	add	%o2,8,%o2
-2:	andcc	%o1,%o0,%g0
-	bnz,a	3f
-	srl	%o0,28,%o0
-	add	%o2,4,%o2
-	srl	%o0,24,%o0
-3:	set	C(tabshi),%o3
-	sll	%o0,2,%o0
-	ld	[%o3+%o0],%o1
-	retl
-	add	%o2,%o1,%o0
+	GLOBL	C(divll)
 
 C(divll): sethi	%hi(C(hiremainder)),%o4
 	ld	[%o4+%lo(C(hiremainder))],%o2

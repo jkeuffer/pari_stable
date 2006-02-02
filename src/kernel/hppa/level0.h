@@ -32,7 +32,6 @@ extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 extern long divll(ulong x, ulong y);
-extern int  bfffo(ulong x);
 
 #else /* ASMINLINE */
 
@@ -98,19 +97,6 @@ extern int  bfffo(ulong x);
         : "r" (__vtab.x[1]),"r" (hiremainder), "r" (__vtab.x[0]) \
         : "cc"); \
     __value; \
-})
-
-/* From Peter Montgomery */
-
-#define bfffo(x) \
-({int __value; \
-  ulong __arg1=(x); \
-  static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
-  __value = BITS_IN_LONG - 4; \
-  if (__arg1 > 0xffffUL) {__value -= 16; __arg1 >>= 16;} \
-  if (__arg1 > 0x00ffUL) {__value -= 8; __arg1 >>= 8;} \
-  if (__arg1 > 0x000fUL) {__value -= 4; __arg1 >>= 4;} \
-  __value + __bfffo_tabshi[__arg1]; \
 })
 
 #endif

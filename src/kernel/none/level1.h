@@ -18,17 +18,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * These functions can be inline; if not they are defined externally in
  * level1.c, which includes this file and never needs to be changed
  * The following lines are necessary for level0.c and level1.c */
-#ifdef LEVEL1
-#  undef INLINE_IS_STATIC
-#  undef  INLINE
-#  define INLINE
-#endif
-#ifdef LEVEL0
-#  undef INLINE_IS_STATIC
-#  undef  INLINE
-#endif
 
-#if !defined(INLINE) || defined(INLINE_IS_STATIC)
+#if !defined(INLINE)
 GEN    mkcol(GEN x);
 GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);

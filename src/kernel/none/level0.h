@@ -17,35 +17,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * These functions can be inline; if not, they are defined externally in
  * level0.c, which includes this file and never needs to be changed
  * The following lines are necessary for level0.c and level1.c */
-#ifdef  LEVEL0
-#  undef INLINE_IS_STATIC
-#  undef  INLINE
-#  define INLINE
-#endif
-#ifdef  LEVEL1
-#  undef INLINE_IS_STATIC
-#  undef  INLINE
-#endif
 
 #define LOCAL_OVERFLOW
 #define LOCAL_HIREMAINDER
 
-#if !defined(INLINE) || defined(INLINE_IS_STATIC)
-ulong overflow, hiremainder;
-long addll(ulong x, ulong y);
-long addllx(ulong x, ulong y);
-long subll(ulong x, ulong y);
-long subllx(ulong x, ulong y);
-long shiftl(ulong x, ulong y);
-long shiftlr(ulong x, ulong y);
-long mulll(ulong x, ulong y);
-long addmul(ulong x, ulong y);
-int  bfffo(ulong x);
+#if !defined(INLINE)
+extern ulong overflow, hiremainder;
+extern long addll(ulong x, ulong y);
+extern long addllx(ulong x, ulong y);
+extern long subll(ulong x, ulong y);
+extern long subllx(ulong x, ulong y);
+extern long shiftl(ulong x, ulong y);
+extern long shiftlr(ulong x, ulong y);
+extern long mulll(ulong x, ulong y);
+extern long addmul(ulong x, ulong y);
 
 #else
 
-extern ulong overflow;
-extern ulong hiremainder;
+extern ulong overflow, hiremainder;
 
 INLINE long
 addll(ulong x, ulong y)
@@ -153,23 +142,5 @@ addmul(ulong x, ulong y)
      + ((((xhl + yhl) >> 1) - xymidhi) & HIGHMASK);
 
   return xylo;
-}
-
-/* version Peter Montgomery */
-
-INLINE int
-bfffo(ulong x)
-{
-  int sc;
-  static int tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};
-
-  sc = BITS_IN_LONG - 4;
-#ifdef LONG_IS_64BIT
-  if (x & 0xffffffff00000000) {sc -= 32; x >>= 32;}
-#endif
-  if (x > 0xffffUL) {sc -= 16; x >>= 16;}
-  if (x > 0x00ffUL) {sc -= 8; x >>= 8;}
-  if (x > 0x000fUL) {sc -= 4; x >>= 4;}
-  return sc + tabshi[x];
 }
 #endif

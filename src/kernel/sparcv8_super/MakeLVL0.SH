@@ -13,10 +13,11 @@ then
 else
   level0="$kercom/level0_common.h $kernon/divll.h"
 fi
+level0="$kernon/bfffo.h $level0"
 
 cat >> $file << EOT
-kernel0.s: $kercom/level0_common.S $ker/level0.S
-	cat $kercom/level0_common.S $ker/level0.S > level0.S
+kernel0.s: $kercom/level0_common.S
+	cat $kercom/level0_common.S > level0.S
 	\$(CPP) $KERNELCPPFLAGS level0.S |\
 	   sed -e '/^#/d' -e '/^ *#line/d' -e 's/%  */%/g' > \$@
 

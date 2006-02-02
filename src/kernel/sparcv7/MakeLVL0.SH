@@ -1,6 +1,6 @@
 # Level 0 kernel is "asm extern"
 # Level 1 kernel is the C generic one
-level0=$src/kernel/none/asm0.h
+level0="$src/kernel/none/asm0.h $src/kernel/none/bfffo.h"
 kernel1=$src/kernel/$kernlvl0/level0.S
 if test "$osname" = "nextstep" -o "$osname" = "linux" -o "$osname" = "netbsd" -o "$gnuas" = "yes";
 then
