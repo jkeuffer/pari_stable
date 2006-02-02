@@ -25,6 +25,7 @@ extern long divll(ulong x, ulong y);
 #define __GLUE(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))
 #define __SPLIT(a, b, c) b = HIGHWORD(a); c = LOWWORD(a)
 #define __LDIV(a, b, q, r) q = a / b; r = a - q*b
+extern ulong hiremainder;
 
 /* divide (hiremainder * 2^BITS_IN_LONG + n0) by d; assume hiremainder < d.
  * Return quotient, set hiremainder to remainder */

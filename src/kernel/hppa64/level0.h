@@ -29,8 +29,6 @@ extern long subll(ulong x, ulong y);
 extern long subllx(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
-extern long divll(ulong x, ulong y);
-extern int  bfffo(ulong x);
 
 #else /* ASMINLINE */
 
@@ -129,20 +127,6 @@ extern int  bfffo(ulong x);
   __xylo = __addllc(__xylo,__xymidlo,__xyhi); \
   hiremainder = __xyhi + __xymidhi; \
   __xylo; \
-})
-
-/* From Peter Montgomery */
-
-#define bfffo(x) \
-({int __value; \
-  ulong __arg1=(x); \
-  static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
-  __value = BITS_IN_LONG - 4; \
-  if (__arg1 & 0xffffffff00000000UL) {__value -= 32; __arg1 >>= 32;} \
-  if (__arg1 > 0xffffUL) {__value -= 16; __arg1 >>= 16;} \
-  if (__arg1 > 0x00ffUL) {__value -= 8; __arg1 >>= 8;} \
-  if (__arg1 > 0x000fUL) {__value -= 4; __arg1 >>= 4;} \
-  __value + __bfffo_tabshi[__arg1]; \
 })
 
 #endif

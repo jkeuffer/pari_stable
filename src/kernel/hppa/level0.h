@@ -31,7 +31,6 @@ extern long shiftl(ulong x, ulong y);
 extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
-extern long divll(ulong x, ulong y);
 
 #else /* ASMINLINE */
 
