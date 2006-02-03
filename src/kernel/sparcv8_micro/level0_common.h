@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* These functions are always in level0.s                         */
 
 extern ulong hiremainder, overflow;
-extern int  bfffo(ulong x);
 
 #ifndef ASMINLINE
 #define LOCAL_OVERFLOW
@@ -38,7 +37,6 @@ extern long shiftl(ulong x, ulong y);
 extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
-extern long divll(ulong x, ulong y);
 
 #else /* ASMINLINE */
 
