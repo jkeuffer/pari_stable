@@ -8,7 +8,7 @@ The list of object files is given by "$kernel" (default: "kernel mp mpinl")
   overflow hiremainder
   addll addllx subll subllx shiftl shiftlr mulll addmul
   divll
-  bfffo (+ tabshi)
+  bfffo
 If no assembler implementation is available the definitions are in
 none/ (level0.h, divll.h, bfffo.h). Otherwise, in $asmarch/ (level0.s, level0.h)
 
