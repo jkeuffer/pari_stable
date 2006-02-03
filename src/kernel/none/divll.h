@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
   Copyright (C) 2000 Free Software Foundation, Inc. */
 
-#if !defined(INLINE) || defined(INLINE_IS_STATIC)
+#if !defined(INLINE)
 extern long divll(ulong x, ulong y);
 #else
 
