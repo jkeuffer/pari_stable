@@ -19,19 +19,30 @@ extern int  bfffo(ulong x);
 
 #if defined(__GNUC__) && !defined(DISABLE_INLINE)
 
-#define bfffo(x) \
+#ifdef LONG_IS_64BIT
+#  define bfffo(x) \
 ({\
   static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
   int __value = BITS_IN_LONG - 4; \
   ulong __arg1=(x); \
-#ifdef LONG_IS_64BIT
   if (__arg1 & ~0xffffffffUL) {value -= 32; __arg1 >>= 32;}\
-#endif
   if (__arg1 & ~0xffffUL) {__value -= 16; __arg1 >>= 16;} \
   if (__arg1 & ~0x00ffUL) {__value -= 8; __arg1 >>= 8;} \
   if (__arg1 & ~0x000fUL) {__value -= 4; __arg1 >>= 4;} \
   __value + __bfffo_tabshi[__arg1]; \
 })
+#else
+#  define bfffo(x) \
+({\
+  static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
+  int __value = BITS_IN_LONG - 4; \
+  ulong __arg1=(x); \
+  if (__arg1 & ~0xffffUL) {__value -= 16; __arg1 >>= 16;} \
+  if (__arg1 & ~0x00ffUL) {__value -= 8; __arg1 >>= 8;} \
+  if (__arg1 & ~0x000fUL) {__value -= 4; __arg1 >>= 4;} \
+  __value + __bfffo_tabshi[__arg1]; \
+})
+#endif
 
 #else
 
