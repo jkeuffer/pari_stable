@@ -1,37 +1,20 @@
-There is a different directory for each value of "$asmarch". In each of them,
-lies a file Makefile.SH that will be included in the general Makefile. It
-contains rules for creating headers and object files in the build directory.
+There is a different directory for each value of "$asmarch". Each contain
+a file Makefile.SH, to be included in the general Makefile. It contains
+rules for creating headers and object files in the build directory.
 
 The list of object files is given by "$kernel" (default: "kernel mp mpinl")
 
-*******************************************************************
-The "level 0 kernel" symbols are :
+* Level 0 symbols, defined in object file kernel.o, are :
   overflow hiremainder
   addll addllx subll subllx shiftl shiftlr mulll addmul
-  divll bfffo (+ tabshi)
-For a generic architecture (no assembler kernel), they are defined in
-"none/level0.c" and, if inlining is possible (C++ or gcc), with
-"none/level0.h". Otherwise, in $asmarch/level0.s or $asmarch/level0.h
-respectively. The corresponding object file is "kernel.o".
+  divll
+  bfffo (+ tabshi)
+If no assembler implementation is available the definitions are in
+none/ (level0.h, divll.h, bfffo.h). Otherwise, in $asmarch/ (level0.s, level0.h)
 
-*******************************************************************
-The "level 1 kernel" symbols are many. Some of them can be inlined, the
-others not.
-The "inline level 1" symbols are :
-  addsii addssmod adduumod addssz affii affsi affui affsr cgetg cgeti cgetr
-  cmpir cmpsr divise divisii divisz divrrz divsiz divss divssmod divssz
-  dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz evallg 
-  evalvalp evalexpo expi gtodouble icopy icopy_av itor itos itou modis mpabs
-  mpadd mpaff mpcmp mpcopy mpdiv mpdivis mpdivisis mpmul mpneg mpsub mulsii
-  mulssmod mulssz new_chunk random_bits realun realzero realzero_bit resiiz
-  resis ressi rtor shiftr smodis stor stoi subii subir subri subrr subsi subsr
-  subssmod umodui umuluu utoi vali
+* Inline Level 1 symbols, defined in mpinl.o: the definitions are in
+none/level1.h (see there). Inlining may or may not be possible, but a symbol
+must be defined in mpinl.o in any case.
 
-The "not-inline level 1" symbols are :
-  absi_cmp absi_equal absr_cmp addii addir addrr addsi addsr addss affir
-  affrr bezout cbezout cgiv cmpii cmprr cmpsi dbltor diviiexact diviuexact
-  diviiz divir divis divis_rem diviu_rem divri divrr divrs divsi divsi_rem
-  divsr dvmdii egalii gcdii invmod ishiftr isqrti modii modiiz modiu modsi
-  modss modui mpdivz mpent mptrunc mulii mulir mulrr mulsi mulsr mulss mului
-  muluu pari_rand31 pari_rand randomi ratlift resmod2n resss rtodbl shifti
-  shift_r shifti3 smodsi sqri truedvmdii umodiu vals
+* Non-Inline Level 1 symbols, defined in mp.o: the definitions are in
+various *.c files in none/ and gmp/ concatenated into $objdir/mp.c.
