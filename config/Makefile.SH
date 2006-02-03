@@ -556,12 +556,12 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 EOT
 fi
 
-if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
-  . $src_dir/kernel/$kernlvl0/MakeLVL0.SH
-fi
-if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then
-  . $src_dir/kernel/$kernlvl1/MakeLVL1.SH
-fi
+for f in \
+  $src_dir/kernel/$kernlvl0/MakeLVL0.SH \
+  $src_dir/kernel/$kernlvl1/MakeLVL1.SH \
+; do
+  if test -s $f; then . $f; fi
+done
 
 HUGELINE=
 for dir in basemath modules language gp graph graphdyn systems; do
