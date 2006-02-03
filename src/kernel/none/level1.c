@@ -15,7 +15,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define DISABLE_INLINE
 #include "pari.h"
+BEGINEXTERN
 #include "parilvl0.h"
 #undef INLINE
 #define INLINE
 #include "parilvl1.h"
+ENDEXTERN
