@@ -51,6 +51,5 @@ C(divll): sethi	%hi(C(hiremainder)),%o4
 
 
 #if   defined(sun)
-	.type C(bfffo),#function
 	.type C(divll),#function
 #endif
