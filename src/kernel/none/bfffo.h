@@ -25,7 +25,7 @@ extern int  bfffo(ulong x);
   static int __bfffo_tabshi[16]={4,3,2,2,1,1,1,1,0,0,0,0,0,0,0,0};\
   int __value = BITS_IN_LONG - 4; \
   ulong __arg1=(x); \
-  if (__arg1 & ~0xffffffffUL) {value -= 32; __arg1 >>= 32;}\
+  if (__arg1 & ~0xffffffffUL) {__value -= 32; __arg1 >>= 32;}\
   if (__arg1 & ~0xffffUL) {__value -= 16; __arg1 >>= 16;} \
   if (__arg1 & ~0x00ffUL) {__value -= 8; __arg1 >>= 8;} \
   if (__arg1 & ~0x000fUL) {__value -= 4; __arg1 >>= 4;} \
