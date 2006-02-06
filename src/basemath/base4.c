@@ -1864,6 +1864,7 @@ isideal(GEN nf,GEN x)
   if (lg(x[1])-1 != N) return 0;
 
   av = avma; x = Q_primpart(x);
+  if (!ZM_ishnf(x)) return 0;
   for (i=1; i<=N; i++)
     for (j=2; j<=N; j++)
       if (! hnf_invimage(x, element_mulid(nf,gel(x,i),j)))

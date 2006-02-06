@@ -1273,6 +1273,7 @@ init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
   return Q_muli_to_int(x, *denx);
 }
 
+/* check whether x is upper trinagular with positive diagonal coeffs */
 int
 RgM_ishnf(GEN x)
 {
