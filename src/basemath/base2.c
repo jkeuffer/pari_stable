@@ -2531,6 +2531,7 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   pari_sp av = avma;
   GEN pr, p;
 
+  nf = checknf(nf);
   checkmodpr(modpr);
   pr = gel(modpr,mpr_PR);
   p = gel(pr,1);

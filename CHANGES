@@ -59,6 +59,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
        x^4 - 17524*x^2 + 69403802. Rounding error, due to setting the
        relative precision wrt the wrong reference object.
     9- nfisideal() could raise an error instead of returning 0
+   10- nfreducemodpr only accepted nf's (not bnf's or richer)
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
