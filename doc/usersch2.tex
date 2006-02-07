@@ -680,7 +680,7 @@ must use the function \kbd{eval} (see \secref{se:eval}). It is in general
 preferable to use \kbd{subst}, rather than assigning values to polynomial
 variables.
 
-\subsec{Variable priorities}.\sidx{variable (priority)}\label{se:priority}
+\subsec{Variable priorities, multivariate objects}.\sidx{variable (priority)}\label{se:priority}
 PARI has no ``sparse'' representation of polynomials. So a
 multivariate polynomial in PARI is just a polynomial (in one variable), whose
 coefficients are themselves polynomials, arbitrary but for the fact that they
@@ -774,6 +774,19 @@ instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
 \tet{denominator}, there is no way to set explicitly a main variable like in
 \tet{divrem} and remove the dependence on implicit orderings. This will
 hopefully be corrected in future versions.
+
+\subsec{Multivariate power series}
+The basic assumption is that if variable $x$ has higher priority than $y$,
+then $y$ does not depend on $x$: setting $y$ to a function of $x$ after some
+computations with bivariate power series does not make sense a priori. This
+is because implicit constants in expressions like $O(x^i)$ depend on $y$
+(whereas in $O(y^j)$ they can not depend on $x$). For instance
+\bprog
+  ? O(x) * y
+  %1 = O(x)
+  ? O(y) * x
+  %2 = O(y)*x
+@eprog\noindent
 
 \subsec{Variables and programming}. We will see in \secref{se:user_defined}
 that it is possible to restrict the use of a given variable by declaring it
