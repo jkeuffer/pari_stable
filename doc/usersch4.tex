@@ -701,7 +701,7 @@ and an error raised. Otherwise, it sets the type and length of the PARI object.
 In effect, it fills its first codeword (\kbd{z[0]} or \kbd{*z}). Many PARI
 objects also have a second codeword (types \typ{INT}, \typ{REAL},
 \typ{PADIC}, \typ{POL}, and \typ{SER}). In case you want to produce one of
-those from scratch (this should be exceedingly rare), \emph{it is your
+those from scratch, which should be exceedingly rare, \emph{it is your
 responsibility to fill this second codeword}, either explicitly (using the
 macros described in \secref{se:impl}), or implicitly using an assignment
 statement (using \kbd{gaffect}).
@@ -1276,7 +1276,10 @@ instance). By convention, the degree of $0$ is~$-1$.
 \misctitle{Important remark}. A zero polynomial can be characterized by the
 fact that its sign is~0. However, its length may be greater than 2, meaning
 that all the coefficients of the polynomial are equal to zero, but the
-leading term \kbd{z[lg(z)-1]} is not an exact zero.
+leading term \kbd{z[lg(z)-1]} is an inexact zero. More precisely,
+\kbd{gcmp0(x)} is true for all coefficients \kbd{x} of the polynomial,
+an \kbd{isexactzero(x)} is false for the leading coefficient. The same
+remark applies to \typ{SER}s.
 
 \subsec{Type \typ{SER} (power series)}:\kbdsidx{t_SER}\sidx{power series}
 This type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
@@ -1287,11 +1290,15 @@ as for polynomials, and \teb{valp}, \teb{setvalp} for the exponent as for
 $p$-adic numbers. Beware: do \emph{not} use \teb{expo} and \teb{setexpo} on
 power series.
 
-If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
-\kbd{z[lg(z)-1]} point to the coefficients of \kbd{z} in ascending order,
-\kbd{z[2]} being the first non-zero coefficient. Note that the exponent of a
-power series can be negative, i.e.~we are then dealing with a Laurent series
-(with a finite number of negative terms).
+The coefficients \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to
+the coefficients of \kbd{z} in ascending order. As for polynomials
+(see remark there), the sign of a \typ{SER} is $0$ if and only if the
+leading coefficient of the series is an inexact $0$. (It cannot be an
+exact $0$.)
+
+Note that the exponent of a power series can be negative, i.e.~we are
+then dealing with a Laurent series (with a finite number of negative
+terms).
 
 \subsec{Type \typ{RFRAC} (rational function)}:%
 \kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points to the numerator,
@@ -1391,9 +1398,9 @@ But in library mode, they are tricky objects if you intend to build
 polynomials yourself (and not just let PARI functions produce them, which is
 less efficient). For instance, it does not make sense to have a variable
 number occur in the components of a polynomial whose main variable has a
-lower priority, even though there is nothing PARI can do to prevent you from
-doing it; see \secref{se:priority} for a discussion of possible problems in a
-similar situation.
+lower priority, even though PARI cannot prevent you from doing it; see
+\secref{se:priority} for a discussion of possible problems in a similar
+situation.
 
 \subsec{Creating variables} A basic difficulty is to ``create'' a variable.
 As we have seen in \secref{se:intro4}, a number of objects is associated to

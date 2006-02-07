@@ -72,6 +72,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     pseudo-primality tests. 
   - default() now always returns the value of the (possibly changed) default.
     No need for a flag anymore.
+  - semantic of t_SER with inexact coefficients is now the same as for
+    t_POL: the sign is 0 iff all coefficients are zero. Either there are
+    no coefficients, or the leading coefficient is an inexact zero.
 
 * Specific to the PARI library:
 ===============================

@@ -1360,7 +1360,7 @@ voir2(GEN x, long nb, long bl)
     pariprintf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
     pariprintf("(%c,varn=%ld,prec=%ld,valp=%ld):",
-               vsigne(x), varn(x),lg(x)-2, valp(x));
+               vsigne(x), varn(x), lgpol(x), valp(x));
   else if (tx == t_LIST)
   {
     lx = lgeflist(x);
@@ -2000,9 +2000,9 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_SER: v = get_var(ordvar[varn(g)], buf);
       i = valp(g);
-      if (signe(g))
+      if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lg(g)-2; g += (2-i);
+        l = i + lgpol(g); g += (2-i);
         wr_lead_monome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {
@@ -2215,9 +2215,9 @@ sori(GEN g, pariout_t *T)
 	
     case t_SER: v = get_var(ordvar[varn(g)],buf);
       i = valp(g);
-      if (signe(g))
+      if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lg(g)-2; g += (2-i);
+        l = i + lgpol(g); g += (2-i);
         sor_lead_monome(T,gel(g,i),v,i);
         while (++i < l)
         {
@@ -2346,9 +2346,9 @@ texi(GEN g, pariout_t *T, int addsign)
 
     case t_SER: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
       i = valp(g);
-      if (signe(g))
+      if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lg(g)-2; g += (2-i);
+        l = i + lgpol(g); g += (2-i);
         wr_lead_texnome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {

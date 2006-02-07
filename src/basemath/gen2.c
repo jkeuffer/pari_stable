@@ -107,7 +107,7 @@ matsize(GEN x)
 /*                  Conversion t_POL --> t_SER                     */
 /*                                                                 */
 /*******************************************************************/
-
+/* enlarge/truncate t_POL x to a t_SER with lg l */
 GEN
 greffe(GEN x, long l, long use_stack)
 {
@@ -121,15 +121,8 @@ greffe(GEN x, long l, long use_stack)
     y = (GEN) gpmalloc(l*sizeof(long));
     y[0] = evaltyp(t_SER) | evallg(l);
   }
-  if (gcmp0(x))
-  {
-    y[1] = evalvalp(l-2) | evalvarn(varn(x));
-    for (i = 2; i < l; i++) gel(y,i) = gen_0;
-    return y;
-  }
-
   e = polvaluation(x, NULL);
-  y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
+  y[1] = evalsigne(signe(x)) | evalvalp(e) | evalvarn(varn(x));
   k = lg(x)-1 - e;
   for (i = l-1; i >  k; i--) gel(y,i) = gen_0;
   for (       ; i >= 2; i--) y[i] = x[i+e];
@@ -576,7 +569,7 @@ long
 polvaluation(GEN x, GEN *Z)
 {
   long vx;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (!isexactzero(gel(x,2+vx))) break;
   if (Z) *Z = shiftpol_i(x, vx);
@@ -1768,16 +1761,19 @@ normalize(GEN x)
 
   if (typ(x) != t_SER) pari_err(typeer,"normalize");
   if (lx==2) { setsigne(x,0); return x; }
-  if (! isexactzero(gel(x,2))) { setsigne(x,1); return x; }
-  for (i=3; i<lx; i++)
+  for (i=2; i<lx; i++)
     if (! isexactzero(gel(x,i)))
     {
-      i -= 2; y = x + i;
+      i -= 2; y = x + i; lx -= i;
+      /* don't swap the following two lines! [valp/varn corrupted] */
       y[1] = evalsigne(1) | evalvalp(valp(x)+i) | evalvarn(varn(x));
-      y[0] = evaltyp(t_SER) | evallg(lx-i); /* don't swap these lines ! */
-      stackdummy(x, i); return y;
+      y[0] = evaltyp(t_SER) | evallg(lx);
+      stackdummy(x, i);
+      for (i = 2; i < lx; i++)
+        if (!gcmp0(gel(y, i))) return y;
+      setsigne(y, 0); return y;
     }
-  return zeroser(varn(x),lx-2);
+  return zeroser(varn(x),lx-2+valp(x));
 }
 
 GEN

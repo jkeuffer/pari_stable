@@ -357,8 +357,6 @@ isexactzeroscalar(GEN g)
   {
     case t_INT:
       return !signe(g);
-    case t_REAL: case t_PADIC: case t_SER:
-      return 0;
     case t_INTMOD: case t_POLMOD:
       return isexactzeroscalar(gel(g,2));
     case t_FRAC: case t_RFRAC:
@@ -380,8 +378,6 @@ isexactzero(GEN g)
   {
     case t_INT:
       return !signe(g);
-    case t_REAL: case t_PADIC: case t_SER:
-      return 0;
     case t_INTMOD: case t_POLMOD:
       return isexactzero(gel(g,2));
     case t_FRAC: case t_RFRAC:

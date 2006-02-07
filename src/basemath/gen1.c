@@ -482,6 +482,17 @@ add_polmod_scal(GEN Y, GEN y, GEN x)
   GEN z = cgetg(3,t_POLMOD); copyifstack(Y, z[1]);
   gel(z,2) = gadd(x, y); return z;
 }
+
+/* check y[a..b-1] and set signe to 1 if one coeff is non-0, 0 otherwise
+ * For t_POL and t_SER */
+static GEN
+NORMALIZE_i(GEN y, long a, long b)
+{
+  long i;
+  for (i = a; i < b; i++)
+    if (!gcmp0(gel(y,i))) { setsigne(y, 1); return y; }
+  setsigne(y, 0); return y;
+}
 /* typ(y) == t_POL, varn(y) = vy, x "scalar" [e.g object in lower variable] */
 static GEN
 add_pol_scal(GEN y, GEN x, long vy)
@@ -501,19 +512,16 @@ add_pol_scal(GEN y, GEN x, long vy)
   z = cgetg(ly,t_POL); z[1] = y[1];
   gel(z,2) = gadd(x,gel(y,2));
   for (i = 3; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-  /* normalize_pol optimized for this case */
-  for (i = ly-1; i > 2; i--)
-    if (!gcmp0(gel(z,i))) { /* setsigne(z, 1); already true */ return z; }
-  if (!gcmp0(gel(z,2))) { setsigne(z, 1); return z; }
-  setsigne(z, 0); return z;
+  return NORMALIZE_i(z, 2, ly);
 }
-/* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable] */
+/* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable]
+ * l = valp(y) */
 static GEN
 add_ser_scal(GEN y, GEN x, long vy, long l)
 {
   long i, j, ly;
   pari_sp av;
-  GEN z, t;
+  GEN z;
 
   if (isexactzero(x)) return gcopy(y);
   ly = lg(y);
@@ -522,37 +530,39 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
   {
     z = cgetg(ly,t_SER); z[1] = y[1];
     for (i = 2; i <= 1-l; i++) gel(z,i) = gcopy(gel(y,i));
-    for (i = 3-l; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-    gel(z,2-l) = gadd(x,gel(y,2-l)); return z;
+    gel(z,i) = gadd(x,gel(y,i)); i++;
+    for (     ; i < ly; i++)   gel(z,i) = gcopy(gel(y,i));
+    return NORMALIZE_i(z, 2, ly);
   }
   if (l > 0)
   {
-    if (gcmp0(y)) ly = 2;
-
-    ly += l; z = cgetg(ly,t_SER);
+    ly += l; y -= l; z = cgetg(ly,t_SER);
     z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
+    gel(z,2) = gcopy(x);
     for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
-    for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i-l));
-    gel(z,2) = gcopy(x); return z;
+    for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
+    if (gcmp0(x)) return NORMALIZE_i(z, l+2, ly);
+    return z;
   }
-  /* l = 0 */
-  if (!signe(y)) return zeroser(vy, 0); /* 1 + O(1) --> O(1) */
+  /* l = 0, !isexactzero(x) */
+  if (ly==2) return zeroser(vy, 0); /* 1 + O(1) --> O(1) */
 
   av = avma; z = cgetg(ly,t_SER);
-  t = gadd(x, gel(y,2));
-  if (!isexactzero(t))
+  x = gadd(x, gel(y,2));
+  if (!isexactzero(x))
   {
-    z[1] = evalsigne(1)|evalvalp(0) | evalvarn(vy);
-    gel(z,2) = t;
+    z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
+    gel(z,2) = x;
     for (i=3; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
+    if (gcmp0(x)) return NORMALIZE_i(z, 3, ly);
     return z;
   }
   avma = av; /* first coeff is 0 */
   i = 3; while (i < ly && isexactzero(gel(y,i))) i++;
-  ly -= i; if (!ly) return zeroser(vy,i-2);
-  z = cgetg(ly+2,t_SER); z[1] = evalvalp(i-2)|evalvarn(vy)|evalsigne(1);
-  for (j = 2; j <= ly+1; j++) gel(z,j) = gcopy(gel(y,j+i-2));
-  return z;
+  i -= 2; ly -= i; y += i;
+  z = cgetg(ly,t_SER); z[1] = evalvalp(i) | evalvarn(vy);
+  for (j = 2; j < ly; j++) gel(z,j) = gcopy(gel(y,j));
+  return NORMALIZE_i(z, 2, ly);
 }
 /* typ(y) == RFRAC, x polynomial in same variable or "scalar" */
 static GEN
@@ -686,7 +696,7 @@ add_rfrac(GEN x, GEN y)
 GEN
 gadd(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), vx, vy, lx, ly, i, j, l;
+  long tx = typ(x), ty = typ(y), vx, vy, lx, ly, i, l;
   pari_sp av, tetpil;
   GEN z, p1;
 
@@ -761,34 +771,19 @@ gadd(GEN x, GEN y)
       l = valp(y) - valp(x);
       if (l < 0) { l = -l; swap(x,y); }
       /* valp(x) <= valp(y) */
-      if (!signe(x)) return gcopy(x);
       lx = lg(x);
-      ly = signe(y)? lg(y): 2;
-      ly += l; if (lx < ly) ly = lx;
-      av = avma;
-      z = cgetg(ly,t_SER);
+      ly = lg(y) + l; if (lx < ly) ly = lx;
       if (l)
       {
-        if (l > lx-2) { avma = av; return gcopy(x); }
+        if (l > lx-2) return gcopy(x);
+        z = cgetg(ly,t_SER);
         for (i=2; i<=l+1; i++) gel(z,i) = gcopy(gel(x,i));
         for (   ; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i-l));
-        z[1] = x[1]; return z;
+      } else {
+        z = cgetg(ly,t_SER);
+        for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
       }
-      for (i = 2; i < ly; i++)
-      {
-        p1 = gadd(gel(x,i),gel(y,i));
-        if (!isexactzero(p1))
-        {
-          l = i-2; stackdummy(z,l); z += l;
-          z[0] = evaltyp(t_SER) | evallg(ly-l);
-          z[1] = evalvalp(valp(x)+i-2) | evalsigne(1) | evalvarn(vx);
-          for (j=i+1; j<ly; j++) gel(z,j-l) = gadd(gel(x,j),gel(y,j));
-          gel(z,2) = p1; return z;
-        }
-        avma = (pari_sp)z;
-      }
-      avma = av;
-      return zeroser(vx, ly-2 + valp(y));
+      z[1] = x[1]; return normalize(z);
     case t_RFRAC:
       vx = gvar(x);
       vy = gvar(y);
@@ -916,8 +911,7 @@ gadd(GEN x, GEN y)
       {
 	case t_SER:
 	  if (isexactzero(x)) return gcopy(y);
-          ly = signe(y)? lg(y): 3;
-	  i = ly + valp(y) - polvaluation(x, NULL);
+	  i = lg(y) + valp(y) - polvaluation(x, NULL);
 	  if (i < 3) return gcopy(y);
 
 	  p1 = greffe(x,i,0); y = gadd(p1,y);
@@ -936,7 +930,7 @@ gadd(GEN x, GEN y)
         n = gel(y,1); vn = gval(n, vy);
         d = gel(y,2); vd = polvaluation(d, &d);
 
-	l = valp(x) - (vn - vd); l += gcmp0(x)? 3: lg(x);
+	l = lg(x) + valp(x) - (vn - vd);
 	if (l < 3) return gcopy(x);
 
 	av = avma; 
@@ -1118,7 +1112,6 @@ mul_ser_scal(GEN y, GEN x) {
   long ly, i;
   GEN z;
   if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
-  if (!signe(y)) return gcopy(y);
   ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return normalize(z);
@@ -1342,8 +1335,8 @@ gmul(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return mul_ser_scal(x, y);
         else                     return mul_ser_scal(y, x);
       }
-      if (gcmp0(x) || gcmp0(y)) return zeroser(vx, valp(x)+valp(y));
       lx = lg(x); if (lx > lg(y)) { lx = lg(y); swap(x, y); }
+      if (lx == 2) return zeroser(vx, valp(x)+valp(y));
       z = cgetg(lx,t_SER);
       z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
       if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
@@ -1357,6 +1350,7 @@ gmul(GEN x, GEN y)
           for (i = 2; i < ly; i++) z[i] = y[i];
           for (     ; i < lx; i++) gel(z,i) = gen_0;
         }
+        z = normalize(z);
         return gerepilecopy((pari_sp)(z + lx), z);
       }
       x += 2; y += 2; z += 2; lx -= 3;
@@ -1594,8 +1588,6 @@ gmul(GEN x, GEN y)
 	case t_SER:
         {
           long vn;
-	  if (gcmp0(x)) return zeropol(vx);
-	  if (gcmp0(y)) return zeroser(vx, valp(y) + polvaluation(x,NULL));
           av = avma;
           vn = polvaluation(x, &x);
           avma = av;
@@ -1617,9 +1609,8 @@ gmul(GEN x, GEN y)
       switch (ty)
       {
 	case t_RFRAC:
-	  if (gcmp0(y)) return zeropol(vx);
-	  if (gcmp0(x)) return zeroser(vx, valp(x) + gval(y,vx));
-	  av = avma; return gerepileupto(av, gdiv(gmul(gel(y,1),x), gel(y,2)));
+	  av = avma;
+          return gerepileupto(av, gdiv(gmul(gel(y,1),x), gel(y,2)));
       }
       break;
   }
@@ -1778,9 +1769,10 @@ gsqr(GEN x)
     case t_SER:
     {
       long mi;
-      if (gcmp0(x)) return zeroser(varn(x), 2*valp(x));
-      lx = lg(x); z = cgetg(lx, t_SER);
-      z[1] = evalsigne(1) | evalvalp(2*valp(x)) | evalvarn(varn(x));
+      lx = lg(x);
+      if (lx == 2) return zeroser(varn(x), 2*valp(x));
+      z = cgetg(lx, t_SER);
+      z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x));
       x += 2; z += 2; lx -= 3;
       p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
       mi = 0;
@@ -1903,8 +1895,7 @@ div_ser(GEN x, GEN y, long vx)
   GEN y_lead, p1, p2, z;
   pari_sp av;
 
-  if (gcmp0(x)) return zeroser(vx, l);
-  if (ly <= 2) pari_err(gdiver);
+  if (gcmp0(y)) pari_err(gdiver);
   y_lead = gel(y,2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
@@ -1914,7 +1905,7 @@ div_ser(GEN x, GEN y, long vx)
       y_lead = gel(y,2); ly--; l--;
       if (!gcmp0(y_lead)) break;
     }
-    if (i>=ly) pari_err(gdiver);
+    if (i>=ly) pari_err(gdiver); /* can't happen */
   }
   if (ly < lx) lx = ly;
   p2 = (GEN)gpmalloc(lx*sizeof(long));
@@ -1944,7 +1935,7 @@ div_ser(GEN x, GEN y, long vx)
   }
   for (i=3; i<lx; i++)
     if (p2[i]) gunclone(gel(p2,i));
-  free(p2); return z;
+  free(p2); return normalize(z);
 }
 /* x,y compatible PADIC */
 static GEN
@@ -2056,7 +2047,6 @@ gdiv(GEN x, GEN y)
         if (varncmp(vx, vy) < 0) return div_ser_scal(x, y);
                             else return div_scal_ser(x, y);
       }
-      if (!signe(y)) pari_err(gdiver);
       return div_ser(x, y, vx);
     case t_RFRAC:
       vx = gvar(x);
@@ -2284,8 +2274,8 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_SER:
-	  if (gcmp0(x)) return zeropol(vx);
-	  p1 = greffe(x,lg(y),0); p2 = div_ser(p1, y, vx);
+	  p1 = greffe(x,lg(y),0);
+          p2 = div_ser(p1, y, vx);
           free(p1); return p2;
 
         case t_RFRAC: return div_scal_rfrac(x,y);
@@ -2296,7 +2286,8 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
-	  p1 = greffe(y,lg(x),0); p2 = div_ser(x, p1, vx);
+	  p1 = greffe(y,lg(x),0);
+          p2 = div_ser(x, p1, vx);
           free(p1); return p2;
 	case t_RFRAC:
 	  av = avma;
@@ -2381,7 +2372,6 @@ gmulsg(long s, GEN y)
 
     case t_SER:
       if (!s) return zeropol(varn(y));
-      if (gcmp0(y)) return gcopy(y);
       ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
       for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalize(z);

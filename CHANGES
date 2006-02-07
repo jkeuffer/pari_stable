@@ -65,6 +65,10 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
     2- simplify(t_RFRAC): remove assumption that deg(denom) > 0 [#413]
     3- split bfffo.h from level0.h
+    4- semantic of t_SER with inexact coefficients is now the same as
+       for t_POL: the sign is 0 iff all coefficients are zero. Either
+       there are no coefficients, or the leading coefficient is an
+       inexact zero.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
