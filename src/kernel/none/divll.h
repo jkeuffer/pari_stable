@@ -1,3 +1,4 @@
+#line 2 "../src/kernel/none/divll.h"
 /* $Id$
 
 Copyright (C) 2003  The PARI group.

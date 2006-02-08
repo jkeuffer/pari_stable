@@ -1,3 +1,4 @@
+#line 2 "../src/kernel/none/level0.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
