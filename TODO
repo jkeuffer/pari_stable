@@ -93,8 +93,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 5  write more benches (specialized ones) 
 
-3  use stat() instead of opendir() to check if a file is a directory.
-
 2  switch to autoconf
 
 ***************************   ALGORITHMS      ****************************
