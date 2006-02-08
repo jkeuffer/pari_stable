@@ -628,15 +628,18 @@ time = 988 ms.
 \subsec{Variable names}. In GP you can use up to 16383 variable names (up to
 65535 on 64-bit machines). A valid identifier name starts with a letter and
 contain only valid keyword characters: \kbd{\_} or alphanumeric characters
-([\kbd{\_A-Za-z0-9}]). In addition to the function names which you must not
-use (see the list with \b{c}), there are exactly three special variable names
-which you are not allowed to use: \kbd{Pi} and \tet{Euler}, which represent
-well known constants, and $\kbd{I}=\sqrt{-1}$.
+([\kbd{\_A-Za-z0-9}]). You may not use built-in function names; see the
+list with \b{c}, including the constants \kbd{Pi}, \kbd{Euler} and
+$\kbd{I}=\sqrt{-1}$.
 
-Note that GP names are case sensitive since version 1.900. This means for
-instance that the symbol \kbd{i} is perfectly safe to use, and will not be
-mistaken for $\sqrt{-1}$, and that \kbd{o} is not synonymous anymore to
-\kbd{O}.
+Note that GP names are case sensitive. This means for instance that the
+symbol \kbd{i} is perfectly safe to use, and will not be mistaken for
+$\sqrt{-1}$, and that \kbd{o} is not synonymous to \kbd{O}.
+
+We will see in \secref{se:user_defined} that it is possible to restrict
+the use of a given variable by declaring it to be \tet{global} or
+\tet{local}. This can be useful to enforce clean programming style, but
+is in no way mandatory.
 
 \subsec{Vectors and matrices}. If the variable $x$ contains a vector or list,
 $x[m]$ refers to its $m$-th entry. You can assign a result to $x[m]$
@@ -646,7 +649,8 @@ referes to its $(m,n)$ entry; you can assign a result to $x[m,n]$, but
 column of a matrix $x$, use $x[,m]=\var{expr}$ instead. Similarly, use
 $x[m,]=\var{expr}$ to assign an expression to the $m$-th row of $x$. This
 process is recursive, so if $x$ is a matrix of matrices of \dots, an
-expression such as \kbd{x[1,1][,3][4] = 1} is perfectly valid, assuming
+expression such as \kbd{x[1,1][,3][4] = 1} is perfectly valid
+(and actually identical to \kbd{x[1,1][4,3] = 1}), assuming
 that all matrices along the way have compatible dimensions.
 
 \subsec{Variables and polynomials}
@@ -654,7 +658,7 @@ that all matrices along the way have compatible dimensions.
 manipulation package. One of the main consequences of this fact is that all
 expressions are evaluated as soon as they are written, they never stay in an
 abstract form%
-\footnote{**}{An obvious but important exception are character strings which
+\footnote{*}{An obvious but important exception are character strings which
 are evaluated essentially to themselves (type \typ{STR}). Not exactly
 so though, since we do some work to treat the quoted characters correctly
 (those preceded by a \b{)}.}.
@@ -696,7 +700,7 @@ x*y^0$, which is the same mathematical entity after all ?
 The answer is that variables are ordered implicitly by the \kbd{gp} interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
 variable is registered as having a strictly lower priority than any variable in
-use at this point\footnote{*}{This is not strictly true: if an
+use at this point\footnote{**}{This is not strictly true: if an
 identifier is interpreted as a user function, no variable is registered. Also,
 the variable $x$ is predefined and always has the highest possible priority.}
 %
@@ -776,22 +780,43 @@ instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
 hopefully be corrected in future versions.
 
 \subsec{Multivariate power series}
-The basic assumption is that if variable $x$ has higher priority than $y$,
-then $y$ does not depend on $x$: setting $y$ to a function of $x$ after some
-computations with bivariate power series does not make sense a priori. This
-is because implicit constants in expressions like $O(x^i)$ depend on $y$
-(whereas in $O(y^j)$ they can not depend on $x$). For instance
+Just like multivariate polynomials, power series are fundamentally
+single-variable objects. It is awkward to handle many variables at once,
+since PARI's implementation cannot handle multivariate error terms like
+$O(x^i y^j)$. (It can handle the polynomial $O(y^j) \times x^i$ which is
+a very different thing, see below.)
+
+The basic assumption in our model is that if variable $x$ has higher
+priority than $y$, then $y$ does not depend on $x$: setting $y$ to a
+function of $x$ after some computations with bivariate power series does
+not make sense a priori. This is because implicit constants in
+expressions like $O(x^i)$ depend on $y$ (whereas in $O(y^j)$ they can not
+depend on $x$). For instance
 \bprog
   ? O(x) * y
   %1 = O(x)
   ? O(y) * x
   %2 = O(y)*x
 @eprog\noindent
-
-\subsec{Variables and programming}. We will see in \secref{se:user_defined}
-that it is possible to restrict the use of a given variable by declaring it
-to be \tet{global} or \tet{local}. This can be useful to enforce clean
-programming style, but is in no way mandatory.
+Here is a more involved example:
+\bprog
+  ? A = 1/x^2 + 1 + O(x); B = 1/x + 1 + O(x^3);
+  ? subst(z*A, z, B)
+  %2 = x^-3 + x^-2 + x^-1 + 1 + O(x)
+  ? B * A
+  %3 = x^-3 + x^-2 + x^-1 + O(1)
+  ? z * A
+  %4 = z*x^-2 + z + O(x)
+@eprog\noindent
+The discrepancy between \kbd{\%2} and \kbd{\%3} is surprising. Why does
+\kbd{\%2} contain a spurious constant term, which cannot be
+deduced from the input ? Well, we ignored the rule that forbids to
+substitute an expression involving high-priority variables
+to a low-priority variable. The result \kbd{\%4} is correct according to
+our rules since the implicit constant in $O(x)$ may depend on $z$. It is
+obviously wrong if $z$ is allowed to have negative valuation in $x$. Of
+course, the correct error term should be $O(xz)$, but this is not
+possible in PARI.
 
 \section{User defined functions}\sidx{user defined functions}
 \label{se:user_defined}
