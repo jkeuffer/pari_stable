@@ -122,6 +122,9 @@ Kernel:
 
 Misc:
 =====
+5  add an optional argument to content, denominator, numerator to specify
+   the main variable
+
 4  decent (non-prime) finite field package [ esp. in small characteristic ]
 
 4  rnfkummer (non-prime degree)
