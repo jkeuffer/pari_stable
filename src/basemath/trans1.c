@@ -693,8 +693,11 @@ ser_pow(GEN x, GEN n, long prec)
   p1 = gdiv(x,lead);
   if (typ(p1) != t_SER) pari_err(typeer, "ser_pow");
   gel(p1,2) = gen_1; /* in case it's inexact */
-  p1 = gpow(p1,  n, prec);
-  p2 = gpow(lead,n, prec); return gmul(p1, p2);
+  if (typ(n) == t_FRAC && !isinexact(lead) && ispower(lead, gel(n,2), &p2))
+    p2 = powgi(p2, gel(n,1));
+  else
+    p2 = gpow(lead,n, prec);
+  return gmul(p2, gpow(p1,  n, prec));
 }
 
 static long
@@ -730,11 +733,11 @@ GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
 GEN
 gpow(GEN x, GEN n, long prec)
 {
-  long i, lx, tx;
+  long i, lx, tx, tn = typ(n);
   pari_sp av;
   GEN y;
 
-  if (typ(n) == t_INT) return powgi(x,n);
+  if (tn == t_INT) return powgi(x,n);
   tx = typ(x);
   if (is_matvec_t(tx))
   {
@@ -746,8 +749,6 @@ gpow(GEN x, GEN n, long prec)
   if (tx == t_POL || tx == t_RFRAC) { x = toser_i(x); tx = t_SER; }
   if (tx == t_SER)
   {
-    long tn = typ(n);
-
     if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
     if (valp(x))
       pari_err(talker,"gpow: need integer exponent if series valuation != 0");
@@ -756,7 +757,6 @@ gpow(GEN x, GEN n, long prec)
   }
   if (gcmp0(x))
   {
-    long tn = typ(n);
     if (!is_scalar_t(tn) || tn == t_PADIC || tn == t_INTMOD)
       pari_err(talker,"gpow: 0 to a forbidden power");
     n = real_i(n);
@@ -769,13 +769,13 @@ gpow(GEN x, GEN n, long prec)
       pari_err(talker,"gpow: underflow or overflow");
     avma = av; return real_0_bit(itos(x));
   }
-  if (typ(n) == t_FRAC)
+  if (tn == t_FRAC)
   {
     GEN z, d = gel(n,2), a = gel(n,1);
     if (tx == t_INTMOD)
     {
       if (!BSW_psp(gel(x,1))) pari_err(talker,"gpow: modulus %Z is not prime",x[1]);
-      y = cgetg(3,tx); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
       av = avma;
       z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
       if (!z) pari_err(talker,"gpow: nth-root does not exist");
