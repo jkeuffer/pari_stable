@@ -1906,7 +1906,8 @@ div_ser(GEN x, GEN y, long vx)
   GEN y_lead, p1, p2, z;
   pari_sp av;
 
-  if (gcmp0(y)) pari_err(gdiver);
+  if (!signe(y)) pari_err(gdiver);
+  if (lx == 2) return zeroser(vx, l);
   y_lead = gel(y,2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
