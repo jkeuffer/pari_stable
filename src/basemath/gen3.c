@@ -350,8 +350,8 @@ isinexactreal(GEN x)
   return 0;
 }
 
-/* returns 1 if there's an inexact component in the structure,
- * 0 otherwise. Non-computing types like t_LIST are considered exact */
+/* returns 1 if there's an inexact component in the structure, and
+ * 0 otherwise. */
 int
 isinexact(GEN x)
 {
@@ -367,6 +367,11 @@ isinexact(GEN x)
       return isinexact(gel(x,1)) || isinexact(gel(x,2));
     case t_POL: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++)
+        if (isinexact(gel(x,i))) return 1;
+      return 0;
+    case t_LIST:
+      lx = lgeflist(x);
       for (i=lontyp[tx]; i<lx; i++)
         if (isinexact(gel(x,i))) return 1;
       return 0;

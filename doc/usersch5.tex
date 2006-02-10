@@ -2747,10 +2747,14 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 \subsec{Comparison operators}
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
-to~0, 0~(false) otherwise. Note that many PARI functions will return a
+to~0, 0~(false) otherwise. Note that many PARI functions return a
 pointer to \kbd{gen\_0} when they are aware that the result they return is an
 exact zero, so it is almost always faster to test for pointer equality first,
 and call \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
+
+\fun{int}{isinexact}{GEN x} returns 0 (false) if \kbd{x} has an inexact
+component, and 1 (true) otherwise.
+\typ{LIST}
 
 \fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.

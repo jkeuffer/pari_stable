@@ -75,6 +75,9 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
        there are no coefficients, or the leading coefficient is an
        inexact zero.
 
+  Added
+    1- [library] new function isinexact
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
   Fixed
