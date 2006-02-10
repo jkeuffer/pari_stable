@@ -1156,6 +1156,7 @@ GEN     integ(GEN x, long v);
 int     iscomplex(GEN x);
 int     isexactzero(GEN g);
 int     isexactzeroscalar(GEN g);
+int     isinexact(GEN x);
 int     isinexactreal(GEN x);
 long    isint(GEN n, long *ptk);
 int     ismonome(GEN x);

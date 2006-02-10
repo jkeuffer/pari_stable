@@ -60,6 +60,11 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
        relative precision wrt the wrong reference object.
     9- nfisideal() could raise an error instead of returning 0
    10- nfreducemodpr only accepted nf's (not bnf's or richer)
+   11- 1/a/x --> 1/a/x; 1/(a*x) --> 1/(a*x). Now 1/(a*x) in both cases
+       (unify t_RFRAC normalization routines)
+   12- content(1.*a*x) --> 1 [ now returns a ]
+   13- content(1./a*x) --> 1.00000/a, but content(1./a*x + 1./a) --> 1/a
+       [ now returns 1/a ]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

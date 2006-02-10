@@ -2581,22 +2581,30 @@ c_is_rational(GEN x)
 
 /* y == 0 */
 static GEN
-zero_gcd(GEN x, GEN y, long tx, long ty)
+zero_gcd(GEN x, long tx)
 {
-  if (ty == t_PADIC)
-  {
-    GEN p = gel(y,2);
-    long v = ggval(x,p), w = valp(y);
-    if (w < v) return zeropadic(p, w);
-    if (gcmp0(x)) return zeropadic(p, v);
-    return powiu(p, v);
-  }
+  pari_sp av;
   switch(tx)
   {
     case t_INT: return absi(x);
     case t_FRAC: return gabs(x,0);
     case t_COMPLEX: return c_is_rational(x)? gauss_gcd(x, gen_0): gen_1;
     case t_REAL: return gen_1;
+    case t_PADIC: return gpowgs(gel(x,2), valp(x));
+    case t_SER: return monomial(gen_1, valp(x), varn(x));
+    case t_POL:
+      if (!isinexact(x)) return gcopy(x);
+      av = avma;
+      return gerepileupto(av, 
+        gmul(content(x), monomial(gen_1, polvaluation(x,NULL),varn(x)))
+      );
+
+    case t_RFRAC:
+      if (!isinexact(x)) return gcopy(x);
+      av = avma;
+      return gerepileupto(av,
+        gdiv(zero_gcd(gel(x,1), typ(gel(x,1))), gel(x,2))
+      );
     default: return gcopy(x);
   }
 }
@@ -2617,8 +2625,8 @@ ggcd(GEN x, GEN y)
     return z;
   }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
-  if (isexactzero(x)) return zero_gcd(y, x, ty, tx);
-  if (isexactzero(y)) return zero_gcd(x, y, tx, ty);
+  if (isexactzero(x)) return zero_gcd(y, ty);
+  if (isexactzero(y)) return zero_gcd(x, tx);
   if (is_const_t(tx))
   {
     if (ty == tx) switch(tx)
@@ -3005,7 +3013,7 @@ content(GEN x)
       GEN n = gel(x,1), d = gel(x,2);
       long vn = gvar9(n), vd = gvar9(d);
       if (varncmp(vn, vd) < 0) return ginv(d);
-      if (varncmp(vn, vd) > 0) return gcopy(n);
+      if (varncmp(vn, vd) > 0) return isinexact(n)? ggcd(gen_0, n): gcopy(n);
       return gerepileupto(av, gdiv(content(n), content(d)));
     }
 
@@ -3025,7 +3033,7 @@ content(GEN x)
       c = content(gel(x,1));
       for (j=2; j<lx; j++)
         for (i=1; i<hx; i++) c = ggcd(c,gcoeff(x,i,j));
-      if (typ(c) == t_INTMOD || isinexactreal(c)) { avma=av; return gen_1; }
+      if (typ(c) == t_INTMOD || isinexact(c)) { avma=av; return gen_1; }
       return gerepileupto(av,c);
     }
 
@@ -3051,11 +3059,12 @@ content(GEN x)
   }
   else
   {
+    if (isinexact(c)) c = ggcd(gen_0, c);
     while (lx>lontyp[tx])
     {
       lx--; c=ggcd(c,gel(x,lx));
     }
-    if (typ(c) == t_INTMOD || isinexactreal(c)) { avma=av; return gen_1; }
+    if (typ(c) == t_INTMOD || isinexact(c)) { avma=av; return gen_1; }
   }
   switch(typ(c))
   {

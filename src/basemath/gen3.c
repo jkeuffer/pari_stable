@@ -323,7 +323,7 @@ isinexactreal(GEN x)
 {
   long tx=typ(x),lx,i;
 
-  if (is_scalar_t(tx))
+  if (is_const_t(tx))
   {
     switch(tx)
     {
@@ -340,13 +340,37 @@ isinexactreal(GEN x)
     case t_QFR: case t_QFI:
       return 0;
 
-    case t_RFRAC:
+    case t_RFRAC: case t_POLMOD:
       return isinexactreal(gel(x,1)) || isinexactreal(gel(x,2));
   }
   if (is_noncalc_t(tx)) return 0;
   lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++)
     if (isinexactreal(gel(x,i))) return 1;
+  return 0;
+}
+
+/* returns 1 if there's an inexact component in the structure,
+ * 0 otherwise. Non-computing types like t_LIST are considered exact */
+int
+isinexact(GEN x)
+{
+  long tx = typ(x), lx, i;
+
+  switch(tx)
+  {
+    case t_REAL: case t_PADIC: case t_SER:
+      return 1;
+    case t_INT: case t_INTMOD: case t_FRAC: case t_QFR: case t_QFI:
+      return 0;
+    case t_COMPLEX: case t_QUAD: case t_RFRAC: case t_POLMOD:
+      return isinexact(gel(x,1)) || isinexact(gel(x,2));
+    case t_POL: case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x);
+      for (i=lontyp[tx]; i<lx; i++)
+        if (isinexact(gel(x,i))) return 1;
+      return 0;
+  }
   return 0;
 }
 

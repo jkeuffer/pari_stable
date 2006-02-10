@@ -209,80 +209,35 @@ gred_rfrac_copy(GEN n, GEN d)
   gel(y,2) = gcopy(d); return y;
 }
 
-/* n is scalar, non-zero */
+static GEN div_pol_scal(GEN x, GEN y);
+
+/* n is non-zero, d a t_POL, gcd(n,d) = 1 */
 static GEN
 gred_rfrac_simple(GEN n, GEN d)
 {
-  GEN y, c = content(d);
+  GEN c, cn, cd, z;
 
-  if (gcmp1(c)) return gred_rfrac_copy(n,d);
-  n = gdiv(n, c);
-  d = gdiv(d, c);
-
-  c = denom(n);
-  y = cgetg(3,t_RFRAC);
-  gel(y,1) = gmul(n,c);
-  gel(y,2) = gmul(d,c); return y;
-}
-
-static GEN
-gred_rfrac2_i(GEN n, GEN d)
-{
-  GEN y, p1, cn, cd, c;
-  long tx,ty;
-
-  if (isexactzero(n)) return gcopy(n);
-  n = simplify_i(n); tx = typ(n);
-  d = simplify_i(d); ty = typ(d);
-  if (ty!=t_POL)
-  {
-    if (tx!=t_POL) return gred_rfrac_copy(n,d);
-    if (varncmp(gvar2(d), varn(n)) > 0) return gdiv(n,d);
-    pari_err(talker,"incompatible variables in gred");
-  }
-  if (tx!=t_POL)
-  {
-    if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
-    pari_err(talker,"incompatible variables in gred");
-  }
-  if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
-  if (varncmp(varn(d), varn(n)) > 0) return gdiv(n,d);
-
-  /* now n and d are polynomials with the same variable */
-  cd = content(d); if (!gcmp1(cd)) d = gdiv(d,cd);
+  cd = content(d);
   cn = content(n);
-  if (gcmp0(cn))
-  {
-    long vn, vd = polvaluation(d, NULL);
-    if (vd)
+  if (!gcmp1(cd)) {
+    d = div_pol_scal(d,cd);
+    if (!gcmp1(cn))
     {
-      vn = polvaluation(n, NULL);
-      if (vn)
-      {
-        long v = min(vn, vd), dn = degpol(n);
-        if (dn >= 0)
-        {
-          if (v > dn) v = dn;
-          n = shiftpol_i(n, v);
-          d = shiftpol_i(d, v);
-          if (gcmp1(d)) d = NULL;
-        }
-      }
+      n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+      c = gdiv(cn,cd);
     }
-    n = gdiv(n,cd);
-    return d? gred_rfrac_copy(n, d): n;
+    else
+      c = ginv(cd);
+  } else {
+    if (!gcmp1(cn))
+    {
+      n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+      c = gdiv(cn,cd);
+    }
+    else
+      return gred_rfrac_copy(n, d);
   }
-  if (!gcmp1(cn))
-  {
-    n = gdiv(n,cn);
-    c = gdiv(cn,cd);
-  }
-  else
-    c = ginv(cd);
-  y = RgX_divrem(n, d, &p1);
-  if (!signe(p1)) return gmul(c,y);
-  p1 = ggcd(d,p1);
-  if (degpol(p1)) { n=gdeuc(n,p1); d=gdeuc(d,p1); }
+
   if (typ(c) == t_POL)
   {
     cd = denom(content(c));
@@ -293,9 +248,53 @@ gred_rfrac2_i(GEN n, GEN d)
     cn = numer(c);
     cd = denom(c);
   }
-  p1 = cgetg(3,t_RFRAC);
-  gel(p1,1) = gmul(n,cn);
-  gel(p1,2) = gmul(d,cd); return p1;
+  z = cgetg(3,t_RFRAC);
+  gel(z,1) = gmul(n, cn);
+  gel(z,2) = gmul(d, cd); return z;
+}
+
+/* assume d != 0 */
+static GEN
+gred_rfrac2_i(GEN n, GEN d)
+{
+  GEN y, z;
+  long tn, td, vn, vd;
+
+  n = simplify_i(n);
+  if (isexactzero(n)) return gcopy(n);
+  d = simplify_i(d);
+  tn = typ(n);
+  td = typ(d);
+  if (td!=t_POL)
+  {
+    if (tn!=t_POL) return gred_rfrac_copy(n,d);
+    if (varncmp(gvar2(d), varn(n)) > 0) return div_pol_scal(n,d);
+    pari_err(talker,"incompatible variables in gred");
+  }
+  if (tn!=t_POL)
+  {
+    if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
+    pari_err(talker,"incompatible variables in gred");
+  }
+  if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
+  if (varncmp(varn(d), varn(n)) > 0) return div_pol_scal(n,d);
+
+  /* now n and d are t_POLs in the same variable */
+  if ( (vd = polvaluation(d, NULL)) && (vn = polvaluation(n, NULL)) )
+  {
+    long v = min(vn, vd); /* > 0 */
+    n = shiftpol_i(n, v);
+    d = shiftpol_i(d, v);
+  }
+  if (!lgpol(d)) return div_pol_scal(n,d);
+
+  /* X does not divide gcd(n,d), deg(d) > 0 */
+  if (isinexact(n) || isinexact(d)) return gred_rfrac_simple(n, d);
+  y = RgX_divrem(n, d, &z);
+  if (!signe(z)) return y;
+  z = srgcd(d, z);
+  if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
+  return gred_rfrac_simple(n, d);
 }
 
 GEN
@@ -1588,6 +1587,7 @@ gmul(GEN x, GEN y)
 	case t_SER:
         {
           long vn;
+          if (lg(y) == 2) return zeroser(vx, valp(y)+polvaluation(x,NULL));
           av = avma;
           vn = polvaluation(x, &x);
           avma = av;
@@ -2036,7 +2036,7 @@ gdiv(GEN x, GEN y)
                             else return div_scal_pol(x, y);
       }
       if (!signe(y)) pari_err(gdiver);
-      if (lg(y) == 3) return gdiv(x,gel(y,2));
+      if (lg(y) == 3) return div_pol_scal(x,gel(y,2));
       if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
 
@@ -2274,6 +2274,8 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_SER:
+          if (lg(y) == 2)
+            return zeroser(vx, polvaluation(x,NULL) - valp(y));
 	  p1 = greffe(x,lg(y),0);
           p2 = div_ser(p1, y, vx);
           free(p1); return p2;
@@ -2286,6 +2288,8 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
+          if (lg(x) == 2)
+            return zeroser(vx, valp(x) - polvaluation(y,NULL));
 	  p1 = greffe(y,lg(x),0);
           p2 = div_ser(x, p1, vx);
           free(p1); return p2;

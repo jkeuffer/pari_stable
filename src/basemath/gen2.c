@@ -115,6 +115,7 @@ greffe(GEN x, long l, long use_stack)
   GEN y;
 
   if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
+  if (l == 2) pari_warn(warner, "l = 2 in greffe");
   if (use_stack) y = cgetg(l,t_SER);
   else
   {
