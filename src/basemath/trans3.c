@@ -655,8 +655,11 @@ incgam2(GEN s, GEN x, long prec)
   pari_sp av = avma, av2, avlim;
   double m,mx;
 
-  if (gcmp0(s)) return gerepileupto(av, incgam2_0(x));
   if (typ(x) != t_REAL) x = gtofp(x, prec);
+  if (gcmp0(s)) {
+    if (typ(x) == t_REAL && signe(x) > 0)
+      return gerepileupto(av, incgam2_0(x));
+  }
   if (typ(x) == t_COMPLEX)
   {
     double a = rtodbl(gel(x,1));
