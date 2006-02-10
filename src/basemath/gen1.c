@@ -1046,6 +1046,15 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
   if (p1) return gerepileupto(av, p1);
   gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
+static GEN
+gdiv_force(GEN x, GEN y)
+{
+  if (typ(x) == t_POL && typ(y) == t_POL && varn(x) == varn(y))
+    return gdeuc(x, y);
+  else
+    return gdiv(x, y);
+
+}
 /* (x1/x2) * (y1/y2) */
 static GEN
 mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
@@ -1053,8 +1062,10 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
   GEN z = cgetg(3,t_RFRAC), p1;
   pari_sp tetpil;
 
-  p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
-  p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdiv(x2,p1); y1 = gdiv(y1,p1); }
+  p1 = ggcd(x1, y2);
+  if (!gcmp1(p1)) { x1 = gdiv_force(x1,p1); y2 = gdiv_force(y2,p1); }
+  p1 = ggcd(x2, y1);
+  if (!gcmp1(p1)) { x2 = gdiv_force(x2,p1); y1 = gdiv_force(y1,p1); }
   tetpil = avma;
   gel(z,2) = gmul(x2,y2);
   gel(z,1) = gmul(x1,y1);
