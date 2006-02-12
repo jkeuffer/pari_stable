@@ -1599,6 +1599,7 @@ gmul(GEN x, GEN y)
         {
           long vn;
           if (lg(y) == 2) return zeroser(vx, valp(y)+polvaluation(x,NULL));
+          if (lg(x) == 2) return zeropol(vx);
           av = avma;
           vn = polvaluation(x, &x);
           avma = av;
