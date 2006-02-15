@@ -9,6 +9,6 @@ mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c
 	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
-mpinl\$(_O): .headers parilvl0.h parilvl1.h $kern/level1.c
-	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $kern/level1.c
+mpinl\$(_O): .headers parilvl0.h parilvl1.h $kern1/level1.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $kern1/level1.c
 EOT
