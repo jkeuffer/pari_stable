@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-// typedef unsigned long ulong;
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 #define LOCAL_OVERFLOW     register ulong overflow
 
@@ -78,5 +77,3 @@
            : "f" (__arg1), "f" (__arg2), "f" (hiremainder));            \
   __value;                                                              \
 })
-
-

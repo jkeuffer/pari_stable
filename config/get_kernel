@@ -2,7 +2,6 @@
 #
 case "$arch" in
   sparc)         asmarch=sparcv8_micro; pretty=Sparc ;;
-  sparcv7)       asmarch=$arch;         pretty=SparcV7 ;;
   sparcv8_micro) asmarch=$arch;         pretty=MicroSparc ;;
   sparcv8_super) asmarch=$arch;         pretty=SuperSparc ;;
   sparcv9) case "$sizeof_long" in   
@@ -52,8 +51,8 @@ An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
 ("-gmp" means we will use the GMP library (that needs to be installed))
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa ppc x86_64
-  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp x86_64-gmp'
+  rep='none sparcv8_super sparcv8_micro ix86 alpha hppa ppc x86_64
+  none-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp x86_64-gmp'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
@@ -69,7 +68,6 @@ kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
 
 case "$kernlvl0" in
   none)          prettyk="portable C";;
-  sparcv7)       prettyk=SparcV7;;
   sparcv8_super) prettyk=SuperSparc;;
   sparcv8_micro) prettyk=MicroSparc;;
   ix86)          prettyk=ix86;;

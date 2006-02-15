@@ -76,6 +76,11 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
        for t_POL: the sign is 0 iff all coefficients are zero. Either
        there are no coefficients, or the leading coefficient is an
        inexact zero.
+    5- removed all non-inline assembler kernels : they were complicated to
+       Configure, mostly untested, and inefficient ( function call overhead + 
+       must use global variable hiremainder/overlow when operating on limbs
+       instead of LOCAL_HIREMAINDER trick ). If this slows down your
+       application (it should not), install gcc or use the gmp kernel.
 
   Added
     1- [library] new function isinexact

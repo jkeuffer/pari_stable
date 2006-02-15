@@ -1,13 +1,10 @@
 # Functions that can be inlined are externally defined too
 # This is done with level0.c and level1.c
-
-kern=$src/kernel/$kernlvl1
-
 cat >> $file << EOT
-L1OBJS=$kern/tune.h $kern/int.h $kern/level1.h
+L1OBJS=$kern1/tune.h $kern1/int.h $kern1/level1.h
 parilvl1.h: \$(L1OBJS) $src/headers/paritune.h
 	cat \$(L1OBJS) > parilvl1.h
-MP_C=$kern/mp.c $kern/cmp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invmod.c $kern/mp_indep.c $kern/add.c
+MP_C=$kern1/mp.c $kern1/cmp.c $kern1/gcdll.c $kern1/ratlift.c $kern1/gcd.c $kern1/invmod.c $kern1/mp_indep.c $kern1/add.c
 mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c

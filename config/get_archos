@@ -11,9 +11,8 @@ if test "$fastread" != yes; then
 ==========================================================================
 Currently supported architectures:
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro sparcv9
-       ix86 i386 i486 i586 i686 alpha x86_64 arm fx2800 hppa ia64 mips m68k
-       ppc s390'
+  rep='none sparcv8_super sparcv8_micro sparcv9 ix86 i386 i486 i586 i686
+       alpha x86_64 arm fx2800 hppa ia64 mips m68k ppc s390'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$arch; . ./myread; arch=$ans

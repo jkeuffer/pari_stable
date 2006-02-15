@@ -57,7 +57,6 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_double_format # doubleformat, sizeof_long
 . ./get_kernel        # asmarch, pretty
 . ./get_dlcflags      # DLCFLAGS, update CFLAGS
-. ./get_as   # AS, ASFLAGS, KERNELCPPFLAGS, gnuas
 . ./get_ld   # $_ld_list
 . ./get_dlld # $_dlld_list, fix libpari_base
 . ./get_perl # $_perl_list
@@ -136,8 +135,7 @@ esac
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
-  kernlvl0 kernlvl1\
-  gnuas AS ASFLAGS KERNELCPPFLAGS LIBS\
+  kernlvl0 kernlvl1 LIBS\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\

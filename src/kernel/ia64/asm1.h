@@ -1,4 +1,6 @@
-/* Extracted from gmp-4.1.2 */
+/* Extracted from gmp-4.1.2
+ * FIXME: This file is unused until somebody implements
+ * invert_word(x) = return floor( 2^(2*BIL)/x ) */
 extern ulong invert_word(ulong);
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl) \

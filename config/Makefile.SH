@@ -152,9 +152,6 @@ cat > $file << EOT
 #
 SHELL      = $make_sh
 PERL       = $perl
-
-AS         = $AS
-ASFLAGS    = $ASFLAGS
 AR	   = ar
 
 SIZEOF_LONG= $sizeof_long
@@ -278,11 +275,14 @@ lib-dyn: \$(LIBPARI_DYN)
 	\$(AR) r \$@ \$(OBJS)
 	-$ranlib \$@
 
-kerntest\$(_O): ../src/test/kerntest.c
+kerntest\$(_O): $src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
 
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
+
+kernel\$(_O): .headers $src/kernel/none/level0.h
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $src/kernel/none/level0.c
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
@@ -556,6 +556,9 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 EOT
 fi
 
+knone=$src/kernel/none
+kern0=$src/kernel/$kernlvl0
+kern1=$src/kernel/$kernlvl1
 for f in \
   $src_dir/kernel/$kernlvl0/MakeLVL0.SH \
   $src_dir/kernel/$kernlvl1/MakeLVL1.SH \

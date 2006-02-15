@@ -16,15 +16,6 @@ fi
 level0="$kernon/bfffo.h $level0"
 
 cat >> $file << EOT
-kernel0.s: $kercom/level0_common.S
-	cat $kercom/level0_common.S > level0.S
-	\$(CPP) $KERNELCPPFLAGS level0.S |\
-	   sed -e '/^#/d' -e '/^ *#line/d' -e 's/%  */%/g' > \$@
-
 parilvl0.h: $level0
 	cat $level0 > parilvl0.h
-
-kernel\$(_O): kernel0.s
-	\$(AS) \$(ASFLAGS) -o \$@ kernel0.s
-
 EOT
