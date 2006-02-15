@@ -48,18 +48,6 @@ kro_quad(GEN x, GEN y)
   k = kronecker(x,y); avma=av; return k;
 }
 
-static GEN
-to_primitive(GEN x, GEN *cx)
-{
-  if (typ(x) != t_POL)
-    { *cx = x; x = gen_1; }
-  else if (lg(x) == 3)
-    { *cx = gel(x,2); x = gen_1; }
-  else
-    { *cx = content(x); if (!gcmp1(*cx)) x = gdiv(x,*cx); }
-  return x;
-}
-
 /* is -1 not a square in Zp, assume p prime */
 INLINE int
 Zp_nosquare_m1(GEN p) { return (mod4(p) & 2); /* 2 or 3 mod 4 */ }
@@ -986,91 +974,53 @@ fix_rfrac_if_pol(GEN x, GEN y)
   if (gcmp1(y)) { avma = av; return x; }
   if (typ(y) != t_POL)
   {
-    if (typ(x) != t_POL || varncmp(gvar2(y), varn(x)) > 0)
-      return gdiv(x,y);
+    if (typ(x) != t_POL) return gdiv(x,y);
+    if (varncmp(gvar2(y), varn(x)) > 0) return div_pol_scal(x,y);
   }
-  else if (varncmp(varn(y), varn(x)) > 0) return gdiv(x,y);
+  else if (varncmp(varn(y), varn(x)) > 0) return div_pol_scal(x,y);
   avma = av; return NULL;
 }
 /* (n/d) * x */
 static GEN
 mul_rfrac_scal(GEN n, GEN d, GEN x)
 {
-  GEN p1, z, cx, cn, cd;
-  long vx, vn, vd;
-  pari_sp av = avma, tetpil;
-
-  if (gcmp0(x)) {
-    if (isexactzero(x)) {
-      vn = gvar(n);
-      vd = gvar(d); return zeropol(varncmp(vn,vd) > 0? vd: vn);
-    }
-    return gerepileupto(av, gdiv(gmul(x,n), d));
-  }
-  if (gcmp0(n)) return gerepileupto(av, gdiv(gmul(x,n), d));
-  vx = gvar(x);
-  vn = gvar(n);
-  vd = gvar(d);
-  z = cgetg(3, t_RFRAC);
-  if (varncmp(vx, vd) > 0 || varncmp(vx, vn) > 0) { cx = x; x = gen_1; }
+  pari_sp av = avma;
+  GEN z = gred_rfrac2_i(x, d);
+  if (typ(z) == t_RFRAC) 
+    z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
   else
-  {
-    long td;
-    p1 = ggcd(x,d);
-    while (typ(p1) == t_POL && lg(p1) == 3) p1 = gel(p1,2);
-    if (typ(p1) == t_POL && lg(p1) > 3) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
-    while (typ(x) == t_POL && lg(x) == 3) x = gel(x,2);
-    while ((td = typ(d)) == t_POL && lg(d) == 3) d = gel(d,2);
-    if (is_scalar_t(td))
-      return gerepileupto(av, gdiv(gmul(x,n), d));
-    x = to_primitive(x, &cx);
-  }
-  n = to_primitive(n, &cn); if (x != gen_1) n = gmul(n,x);
-  d = to_primitive(d, &cd);
-  cx = gdiv(gmul(cx,cn), cd);
-  if (typ(cx) == t_POL)
-  {
-    cd = denom(content(cx));
-    cn = gmul(cx, cd);
-  }
-  else
-  {
-    cn = numer(cx);
-    cd = denom(cx);
-  }
-  tetpil = avma;
-  gel(z,2) = gmul(d, cd);
-  gel(z,1) = gmul(n, cn);
-  p1 = fix_rfrac_if_pol(gel(z,1),gel(z,2));
-  if (p1) return gerepileupto(av, p1);
-  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
-}
-static GEN
-gdiv_force(GEN x, GEN y)
-{
-  if (typ(x) == t_POL && typ(y) == t_POL && varn(x) == varn(y))
-    return gdeuc(x, y);
-  else
-    return gdiv(x, y);
-
+    z = gmul(z, n);
+  return gerepileupto(av, z);
 }
 /* (x1/x2) * (y1/y2) */
 static GEN
 mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
 {
-  GEN z = cgetg(3,t_RFRAC), p1;
-  pari_sp tetpil;
+  GEN z, X, Y;
+  pari_sp av = avma;
 
-  p1 = ggcd(x1, y2);
-  if (!gcmp1(p1)) { x1 = gdiv_force(x1,p1); y2 = gdiv_force(y2,p1); }
-  p1 = ggcd(x2, y1);
-  if (!gcmp1(p1)) { x2 = gdiv_force(x2,p1); y1 = gdiv_force(y1,p1); }
-  tetpil = avma;
-  gel(z,2) = gmul(x2,y2);
-  gel(z,1) = gmul(x1,y1);
-  p1 = fix_rfrac_if_pol(gel(z,1),gel(z,2));
-  if (p1) return gerepileupto((pari_sp)(z+3), p1);
-  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
+  X = gred_rfrac2_i(x1, y2);
+  Y = gred_rfrac2_i(y1, x2);
+  if (typ(X) == t_RFRAC)
+  {
+    x1 = gel(X,1);
+    x2 = gel(X,2);
+    if (typ(Y) == t_RFRAC) {
+      y1 = gel(Y,1);
+      y2 = gel(Y,2);
+      z = gred_rfrac_simple(gmul(x1,y1), gmul(x2,y2));
+    } else
+      z = gred_rfrac_simple(gmul(x1,Y), x2);
+  }
+  else if (typ(Y) == t_RFRAC)
+  {
+    y1 = gel(Y,1);
+    y2 = gel(Y,2);
+    z = gred_rfrac_simple(gmul(y1,X), y2);
+  }
+  else
+    z = gmul(X, Y);
+  return gerepileupto(av, z);
 }
 
 /* Mod(y, Y) * x,  assuming x scalar */
