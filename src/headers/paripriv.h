@@ -224,7 +224,6 @@ GEN  quad_polmod_norm(GEN x, GEN y);
 GEN  addmulXn(GEN x, GEN y, long d);
 GEN  addshiftpol(GEN x, GEN y, long d);
 GEN  fix_rfrac_if_pol(GEN x, GEN y);
-GEN  gmulXn(GEN x, long d);
 GEN  lift_if_rational(GEN x);
 GEN  monomial(GEN a, long degpol, long v);
 GEN  monomialcopy(GEN a, long degpol, long v);
@@ -233,7 +232,8 @@ long polegal_spec(GEN x, GEN y);
 GEN  polrecip_i(GEN x);
 GEN  pol_to_monic(GEN pol, GEN *lead);
 GEN  revpol(GEN x);
-GEN  ser_to_pol_i(GEN x, long lx);
+GEN  ser2pol_i(GEN x, long lx);
+GEN  ser2rfrac_i(GEN x);
 GEN  shiftpol_i(GEN x, long v);
 GEN  swap_vars(GEN b0, long v);
 GEN  translate_pol(GEN P, GEN c);
@@ -679,6 +679,7 @@ GEN     polgaloisnamesbig(long n, long k);
 int     ff_poltype(GEN *x, GEN *p, GEN *pol);
 GEN     gred_frac2(GEN x1, GEN x2);
 GEN     gred_rfrac2(GEN x1, GEN x2);
+GEN     gred_rfrac_simple(GEN n, GEN d);
 
 /* gen2.c */
 

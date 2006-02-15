@@ -831,25 +831,18 @@ maxord(GEN p,GEN f,long mf)
   return gerepileupto(av,res);
 }
 
-static GEN
-shiftpol(GEN x, long v)
-{
-  x = addmulXn(x, zeropol(v), 1);
-  setvarn(x,v); return x;
-}
-
 /* Sylvester's matrix, mod p^m (assumes f1 monic) */
 static GEN
 sylpm(GEN f1, GEN f2, GEN pm)
 {
-  long j, n = degpol(f1), v = varn(f1);
+  long j, n = degpol(f1);
   GEN h, a = cgetg(n+1,t_MAT);
   h = FpX_rem(f2,f1,pm);
   for (j=1;; j++)
   {
     gel(a,j) = RgX_to_RgV(h, n);
     if (j == n) break;
-    h = FpX_rem(shiftpol(h,v), f1, pm);
+    h = FpX_rem(RgX_shift(h, 1), f1, pm);
   }
   return hnfmodidpart(a, pm);
 }

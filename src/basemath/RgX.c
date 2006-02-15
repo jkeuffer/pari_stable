@@ -294,16 +294,26 @@ RgXY_swap(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
+/* return (x * X^n). Assume d >= 0. Shallow */
 GEN
 RgX_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (!signe(a)) return a;
-  b = cgetg(l+n, t_POL);
-  b[1] = a[1];
-  for (i=0; i<n; i++) gel(b,2+i) = gen_0;
-  for (i=2; i<l; i++) b[i+n] = a[i];
+  if (lg(a) == 2 || !n) return a;
+  l += n;
+  if (n < 0)
+  {
+    if (l <= 2) return zeropol(varn(a));
+    b = cgetg(l, t_POL); b[1] = a[1];
+    a -= n;
+    for (i=2; i<l; i++) gel(b,i) = gel(a,i);
+  } else {
+    b = cgetg(l, t_POL); b[1] = a[1];
+    a -= n; n += 2;
+    for (i=2; i<n; i++) gel(b,i) = gen_0;
+    for (   ; i<l; i++) gel(b,i) = gel(a,i);
+  }
   return b;
 }
 
@@ -452,21 +462,6 @@ addmulXn(GEN x, GEN y, long d)
   while (yd > y) *--zd = *--yd;
   *--zd = evalsigne(1);
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
-}
-/* return (x * X^d). Assume d >= 0 */
-GEN
-gmulXn(GEN x, long d)
-{
-  long i, l;
-  GEN z;
-  
-  if (!signe(x)) return x;
-  l = lg(x);
-  z = cgetg(l + d, t_POL);
-  z[1] = x[1];
-  for (i = 2; i < l; i++) z[d + i] = x[i];
-  for (i = 2; i < 2+d; i++) gel(z,i) = gen_0;
-  return z;
 }
 
 GEN

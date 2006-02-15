@@ -513,7 +513,7 @@ polissquarerem(GEN x, GEN *pt)
     y = gmul(b, y);
   }
 END:
-  *pt = v? gerepilecopy(av, gmulXn(y, v >> 1)): gerepileupto(av, y);
+  *pt = v? gerepilecopy(av, RgX_shift(y, v >> 1)): gerepileupto(av, y);
   return 1;
 }
 
@@ -711,7 +711,7 @@ polispower(GEN x, GEN K, GEN *pt)
       if (!b) b = gsqrtn(a, K, NULL, DEFAULTPREC);
       y = gmul(b,y);
     }
-    *pt = v? gerepilecopy(av, gmulXn(y, v/k)): gerepileupto(av, y);
+    *pt = v? gerepilecopy(av, RgX_shift(y, v/k)): gerepileupto(av, y);
   }
   else avma = av;
   return 1;
@@ -2217,10 +2217,27 @@ Qsfcont(GEN a, GEN b, GEN y, long k)
 }
 
 static GEN
+sersfcont(GEN a, GEN b, long k)
+{
+  long i, l = typ(a) == t_POL? lg(a): 3;
+  GEN y, c;
+  if (lg(b) > l) l = lg(b);
+  if (k > 0 && l > k+1) l = k+1;
+  y = cgetg(l,t_VEC);
+  for (i=1; i<l; i++)
+  {
+    gel(y,i) = poldivrem(a,b,&c);
+    if (gcmp0(c)) { i++; break; }
+    a = b; b = c;
+  }
+  setlg(y, i); return y;
+}
+
+static GEN
 sfcont(GEN x, long k)
 {
   pari_sp av;
-  long lx, tx = typ(x), e, i, l;
+  long lx, tx = typ(x), e;
   GEN y, a, b, c;
 
   if (is_scalar_t(tx))
@@ -2251,22 +2268,10 @@ sfcont(GEN x, long k)
     case t_POL: return mkveccopy(x);
     case t_SER:
       av = avma;
-      return gerepileupto(av, sfcont(gtrunc(x), k));
+      return gerepileupto(av, sfcont(ser2rfrac_i(x), k));
     case t_RFRAC:
       av = avma;
-      l = typ(x[1]) == t_POL? lg(x[1]): 3;
-      if (lg(x[2]) > l) l = lg(x[2]);
-      if (k > 0 && l > k+1) l = k+1;
-      y = cgetg(l,t_VEC);
-      a = gel(x,1);
-      b = gel(x,2);
-      for (i=1; i<l; i++)
-      {
-	gel(y,i) = poldivrem(a,b,&c);
-        if (gcmp0(c)) { i++; break; }
-	a = b; b = c;
-      }
-      setlg(y, i); return gerepilecopy(av, y);
+      return gerepilecopy(av, sersfcont(gel(x,1), gel(x,2), k));
   }
   pari_err(typeer,"sfcont");
   return NULL; /* not reached */
@@ -2276,25 +2281,25 @@ static GEN
 sfcont2(GEN b, GEN x, long k)
 {
   pari_sp av = avma;
-  long l1 = lg(b), tx = typ(x), i;
+  long lb = lg(b), tx = typ(x), i;
   GEN y,p1;
 
   if (k)
   {
-    if (k>=l1) pari_err(talker,"list of numerators too short in sfcontf2");
-    l1 = k+1;
+    if (k>=lb) pari_err(talker,"list of numerators too short in sfcontf2");
+    lb = k+1;
   }
-  y=cgetg(l1,t_VEC);
-  if (l1==1) return y;
+  y=cgetg(lb,t_VEC);
+  if (lb==1) return y;
   if (is_scalar_t(tx))
   {
     if (!is_intreal_t(tx) && tx != t_FRAC) pari_err(typeer,"sfcont2");
   }
-  else if (tx == t_SER) x = gtrunc(x);
+  else if (tx == t_SER) x = ser2rfrac_i(x);
 
   if (!gcmp1(gel(b,1))) x = gmul(gel(b,1),x);
   i = 2; gel(y,1) = gfloor(x); p1 = gsub(x,gel(y,1));
-  for (  ; i<l1 && !gcmp0(p1); i++)
+  for (  ; i<lb && !gcmp0(p1); i++)
   {
     x = gdiv(gel(b,i),p1);
     if (tx == t_REAL)

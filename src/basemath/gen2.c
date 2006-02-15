@@ -124,9 +124,9 @@ greffe(GEN x, long l, long use_stack)
   }
   e = polvaluation(x, NULL);
   y[1] = evalsigne(signe(x)) | evalvalp(e) | evalvarn(varn(x));
-  k = lg(x)-1 - e;
+  k = lg(x)-1 - e; x += e;
   for (i = l-1; i >  k; i--) gel(y,i) = gen_0;
-  for (       ; i >= 2; i--) y[i] = x[i+e];
+  for (       ; i >= 2; i--) gel(y,i) = gel(x,i);
   return y;
 }
 
@@ -552,20 +552,6 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
-/* assume vx >= 0, return floor( x / t^vx ) */
-GEN
-shiftpol_i(GEN x, long vx)
-{
-  long i, lz;
-  GEN z;
-  if (!vx) return x;
-  lz = lg(x)-vx;
-  z = cgetg(lz, t_POL); z[1] = x[1];
-  x += vx;
-  for (i=2; i<lz; i++) z[i] = x[i];
-  return z;
-}
-
 long
 polvaluation(GEN x, GEN *Z)
 {
@@ -573,7 +559,7 @@ polvaluation(GEN x, GEN *Z)
   if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (!isexactzero(gel(x,2+vx))) break;
-  if (Z) *Z = shiftpol_i(x, vx);
+  if (Z) *Z = RgX_shift(x, -vx);
   return vx;
 }
 long
@@ -583,7 +569,7 @@ ZX_valuation(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (signe(gel(x,2+vx))) break;
-  if (Z) *Z = shiftpol_i(x, vx);
+  if (Z) *Z = RgX_shift(x, -vx);
   return vx;
 }
 long
@@ -593,7 +579,7 @@ polvaluation_inexact(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (!gcmp0(gel(x,2+vx))) break;
-  if (Z) *Z = shiftpol_i(x, vx);
+  if (Z) *Z = RgX_shift(x, -vx);
   return vx;
 }
 static int
@@ -1055,7 +1041,7 @@ gabs(GEN x, long prec)
       return is_negative(gel(x,lx-1))? gneg(x): gcopy(x);
 
    case t_SER:
-     if (valp(x) || !signe(x) || lg(x)<3)
+     if (valp(x) || !signe(x))
        pari_err(talker, "abs is not meromorphic at 0");
      return is_negative(gel(x,2))? gneg(x): gcopy(x);
 
@@ -1681,15 +1667,13 @@ gcvtop(GEN x, GEN p, long r)
   GEN y;
 
   if (is_const_t(tx)) return cvtop(x,p,r);
-  lx = lg(x); y = cgetg_copy(lx, x);
   switch(tx)
   {
-    case t_POL: case t_SER: y[1] = x[1];
-      for (i=2; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
-      return y;
+    case t_POL: case t_SER:
     case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      for (i=1; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(y,i) = gcvtop(gel(x,i),p,r);
       return y;
   }
   pari_err(typeer,"gcvtop");

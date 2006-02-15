@@ -4102,7 +4102,7 @@ reduceddiscsmith(GEN pol)
   {
     p1=cgetg(n+1,t_COL); gel(m,j) = p1;
     for (i=1; i<=n; i++) gel(p1,i) = truecoeff(polp,i-1);
-    if (j<n) polp = grem(gmulXn(polp, 1), pol);
+    if (j<n) polp = grem(RgX_shift(polp, 1), pol);
   }
   return gerepileupto(av, smith(m));
 }

@@ -1531,7 +1531,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
     if (k > n/2) k = n/2;
     bit2 += k<<1;
     FF = monomial(myreal_1(bit2), k, 0);
-    GG = shiftpol_i(q, k);
+    GG = RgX_shift(q, -k);
   }
   else
   {
@@ -1577,7 +1577,7 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
   {
     if (k > n/2) k = n/2;
     *F = monomial(myreal_1(bit), k, 0);
-    *G = shiftpol_i(p, k);
+    *G = RgX_shift(p, -k);
   }
   else
   {

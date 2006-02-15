@@ -265,20 +265,17 @@ GEN
 laplace(GEN x)
 {
   pari_sp av = avma;
-  long i,l,ec;
-  GEN y,p1;
+  long i, l = lg(x), e = valp(x);
+  GEN y, t;
 
-  if (typ(x)!=t_SER) pari_err(talker,"not a series in laplace");
-  if (gcmp0(x)) return gcopy(x);
-
-  ec = valp(x);
-  if (ec<0) pari_err(talker,"negative valuation in laplace");
-  l=lg(x); y=cgetg(l,t_SER);
-  p1=mpfact(ec); y[1]=x[1];
+  if (typ(x) != t_SER) pari_err(talker,"not a series in laplace");
+  if (e < 0) pari_err(talker,"negative valuation in laplace");
+  y = cgetg(l,t_SER);
+  t = mpfact(e); y[1] = x[1];
   for (i=2; i<l; i++)
   {
-    gel(y,i) = gmul(p1,gel(x,i));
-    ec++; p1=mulsi(ec,p1);
+    gel(y,i) = gmul(t, gel(x,i));
+    e++; t = mulsi(e,t);
   }
   return gerepilecopy(av,y);
 }
@@ -305,7 +302,7 @@ convol(GEN x, GEN y)
   if (lx - ex < 3) return zeroser(vx, lx-2);
 
   z = cgetg(lx - ex, t_SER);
-  z[1] = evalsigne(1) | evalvalp(ex) | evalvarn(vx);
+  z[1] = evalvalp(ex) | evalvarn(vx);
   for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
   return normalize(z);
 }
@@ -337,7 +334,7 @@ gprec(GEN x, long l)
       break;
 
     case t_SER:
-      if (gcmp0(x)) return zeroser(varn(x), l);
+      if (lg(x) == 2) return zeroser(varn(x), l);
       y=cgetg(l+2,t_SER); y[1]=x[1]; l++; i=l;
       lx = lg(x);
       if (l>=lx)

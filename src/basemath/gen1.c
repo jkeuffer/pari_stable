@@ -212,7 +212,7 @@ gred_rfrac_copy(GEN n, GEN d)
 static GEN div_pol_scal(GEN x, GEN y);
 
 /* n is non-zero, d a t_POL, gcd(n,d) = 1 */
-static GEN
+GEN
 gred_rfrac_simple(GEN n, GEN d)
 {
   GEN c, cn, cd, z;
@@ -232,7 +232,7 @@ gred_rfrac_simple(GEN n, GEN d)
     if (!gcmp1(cn))
     {
       n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
-      c = gdiv(cn,cd);
+      c = cn;
     }
     else
       return gred_rfrac_copy(n, d);
@@ -283,8 +283,8 @@ gred_rfrac2_i(GEN n, GEN d)
   if ( (vd = polvaluation(d, NULL)) && (vn = polvaluation(n, NULL)) )
   {
     long v = min(vn, vd); /* > 0 */
-    n = shiftpol_i(n, v);
-    d = shiftpol_i(d, v);
+    n = RgX_shift(n, -v);
+    d = RgX_shift(d, -v);
   }
   if (!lgpol(d)) return div_pol_scal(n,d);
 
@@ -909,7 +909,7 @@ gadd(GEN x, GEN y)
       switch (ty)
       {
 	case t_SER:
-	  if (isexactzero(x)) return gcopy(y);
+	  if (lg(x) == 2) return gcopy(y);
 	  i = lg(y) + valp(y) - polvaluation(x, NULL);
 	  if (i < 3) return gcopy(y);
 
@@ -925,7 +925,6 @@ gadd(GEN x, GEN y)
       {
         GEN n, d;
         long vn, vd;
-	if (isexactzero(y)) return gcopy(x);
         n = gel(y,1); vn = gval(n, vy);
         d = gel(y,2); vd = polvaluation(d, &d);
 
@@ -1352,7 +1351,7 @@ gmul(GEN x, GEN y)
       if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
       {
         long ly;
-        y = RgX_mul(ser_to_pol_i(x, lx), ser_to_pol_i(y, lx));
+        y = RgX_mul(ser2pol_i(x, lx), ser2pol_i(y, lx));
         ly = lg(y);
         if (ly >= lx) {
           for (i = 2; i < lx; i++) z[i] = y[i];
