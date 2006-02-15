@@ -67,6 +67,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
        [ now returns 1/a ]
    14- t_SER ^ t_FRAC introduced floating point numbers even when
        rational expression available, e.g (8 + x)^(1/3)
+   15- round(t_POL/t_SER, &e) with leading coeff rounded to zero
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
