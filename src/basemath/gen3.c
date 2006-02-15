@@ -1963,7 +1963,7 @@ grndtoi(GEN x, long *e)
         gel(y,i) = grndtoi(gel(x,i),&e1);
         if (e1 > *e) *e = e1;
       }
-      return normalizeser(y);
+      return normalize(y);
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++)
