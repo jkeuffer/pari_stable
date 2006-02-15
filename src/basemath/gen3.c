@@ -1714,7 +1714,7 @@ integ(GEN x, long v)
       {
 	long j = i+e-1;
         if (!j)
-	{
+	{ /* should be isexactzero, but try to avoid error */
 	  if (gcmp0(gel(x,i))) { gel(y,i) = gen_0; continue; }
           pari_err(talker, "a log appears in intformal");
 	}
@@ -2353,6 +2353,7 @@ poltoser(GEN x, long v, long prec)
   if (is_scalar_t(tx) || varncmp(vx, v) > 0) return scalarser(x, v, prec);
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
 
+  /* cf normalize */
   lx = lg(x); i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
   i -= 2; x += i; lx -= i;
   l = lx; if (prec+2 > l) l = prec+2;
@@ -2405,20 +2406,18 @@ _gtoser(GEN x, long v, long prec)
   switch(tx)
   {
     case t_POL:
-      if (isexactzero(x)) return zeroser(v,prec);
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
         if (gel(y,i) != gen_0) gel(y,i) = gcopy(gel(y,i));
       break;
 
     case t_RFRAC:
-      if (isexactzero(x)) return zeroser(v,prec);
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       lx = lg(x); if (tx == t_QFR) lx--;
-      i=1; while (i<lx && isexactzero(gel(x,i))) i++;
+      i = 1; while (i<lx && isexactzero(gel(x,i))) i++;
       if (i == lx) return zeroser(v, lx-1);
       lx -= i-2; x += i-2;
       y = cgetg(lx,t_SER);
@@ -2535,10 +2534,9 @@ compo(GEN x, long n)
   ulong l, lx = (ulong)lg(x);
 
   if (!is_recursive_t(tx))
-    pari_err(talker, "this object doesn't have components (is a leaf)");
+    pari_err(talker, "this object is a leaf. It has no components");
   if (n < 1) pari_err(talker,"nonexistent component");
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
-  if (tx == t_SER && !signe(x)) return gen_0;
   if (tx == t_LIST) lx = (ulong)lgeflist(x);
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
   if (l >= lx) pari_err(talker,"nonexistent component");
@@ -2573,14 +2571,13 @@ _polcoeff(GEN x, long n, long v)
 static GEN
 _sercoeff(GEN x, long n, long v)
 {
-  long w, dx, ex = valp(x), N = n - ex;
+  long w, dx = degpol(x), ex = valp(x), N = n - ex;
   GEN z;
-  if (!signe(x))
+  if (dx < 0)
   {
     if (N >= 0) pari_err(talker,"non existent component in truecoeff");
     return gen_0;
   }
-  dx = lg(x)-3;
   if (v < 0 || v == (w=varn(x)))
   {
     if (N > dx) pari_err(talker,"non existent component in truecoeff");
@@ -2752,29 +2749,18 @@ lift0(GEN x, long v)
       gel(y,1) = lift0(gel(x,1),v);
       gel(y,2) = lift0(gel(x,2),v); return y;
 
-    case t_SER:
-      if (!signe(x)) return gcopy(x);
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i),v);
-      return y;
-
     case t_PADIC:
       return gtrunc(x);
 
     case t_FRAC: case t_COMPLEX: case t_RFRAC:
-    case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(y,i) = lift0(gel(x,i),v);
-      return y;
-
-    case t_POL:
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) gel(y,i) = lift0(gel(x,i),v);
+    case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(y,i) = lift0(gel(x,i), v);
       return y;
 
     case t_QUAD:
       y=cgetg(4,tx); copyifstack(x[1],y[1]);
-      for (i=2; i<4; i++) gel(y,i) = lift0(gel(x,i),v);
+      for (i=2; i<4; i++) gel(y,i) = lift0(gel(x,i), v);
       return y;
   }
   pari_err(typeer,"lift");
@@ -2808,7 +2794,7 @@ lift_intern0(GEN x, long v)
       gel(x,2) = lift_intern0(gel(x,2),v);
       return x;
 
-    case t_SER: if (!signe(x)) return x; /* fall through */
+    case t_SER:
     case t_FRAC: case t_COMPLEX: case t_QUAD: case t_POL:
     case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
@@ -2881,25 +2867,14 @@ op_ReIm(GEN f(GEN), GEN x)
   switch(tx)
   {
     case t_POL:
-      lx=lg(x); av=avma;
-      for (i=lx-1; i>=2; i--)
-        if (!gcmp0(f(gel(x,i)))) break;
-      avma=av; if (i==1) return zeropol(varn(x));
-
-      z = cgetg(i+1,t_POL); z[1] = x[1];
-      for (j=2; j<=i; j++) gel(z,j) = f(gel(x,j));
-      return z;
+      lx = lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
+      for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
+      return normalizepol_i(z, lx);
 
     case t_SER:
-      if (gcmp0(x)) { z=cgetg(2,t_SER); z[1]=x[1]; return z; }
-      lx=lg(x); av=avma;
-      for (i=2; i<lx; i++)
-        if (!gcmp0(f(gel(x,i)))) break;
-      avma=av; if (i==lx) return zeroser(varn(x),lx-2+valp(x));
-
-      z=cgetg(lx-i+2,t_SER); z[1]=x[1]; setvalp(z, valp(x)+i-2);
-      for (j=2; i<lx; j++,i++) gel(z,j) = f(gel(x,i));
-      return z;
+      lx = lg(x); z = cgetg(lx,t_SER); z[1] = x[1];
+      for (j=2; j<lx; j++) gel(z,j) = f(gel(x,j));
+      return normalize(z);
 
     case t_RFRAC: {
       GEN dxb, n, d;
@@ -3107,16 +3082,14 @@ simplify_i(GEN x)
       gel(y,2) = simplify_i(gel(x,2)); return y;
 
     case t_POL:
-      lx=lg(x); if (lx==2) return gen_0;
+      lx = lg(x); if (lx==2) return gen_0;
       if (lx==3) return simplify_i(gel(x,2));
-      y=cgetg(lx,t_POL); y[1]=x[1];
+      y = cgetg(lx,t_POL); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
       return y;
 
     case t_SER:
-      if (!signe(x)) return gcopy(x);
-      lx=lg(x);
-      y=cgetg(lx,t_SER); y[1]=x[1];
+      lx = lg(x); y = cgetg(lx,t_SER); y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = simplify_i(gel(x,i));
       return y;
 
