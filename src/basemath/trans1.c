@@ -656,7 +656,7 @@ powgi(GEN x, GEN n)
   }
 }
 
-/* we suppose n != 0, and valp(x) = 0. Not stack clean */
+/* we suppose n != 0, valp(x) = 0 and leading-term(x) != 0. Not stack clean */
 static GEN
 ser_pow(GEN x, GEN n, long prec)
 {
@@ -676,7 +676,7 @@ ser_pow(GEN x, GEN n, long prec)
     X = x+2;
     Y = y+2;
 
-    d = mi = lx-3; while (mi>=1 && gcmp0(gel(X,mi))) mi--;
+    d = mi = lx-3; while (mi>=1 && isexactzero(gel(X,mi))) mi--;
     gel(Y,0) = gen_1;
     for (i=1; i<=d; i++)
     {
@@ -1403,7 +1403,7 @@ serexp(GEN x, long prec)
   if (ex)
   {
     ly = lx+ex; y = cgetg(ly,t_SER);
-    mi = lx-1; while (mi>=3 && gcmp0(gel(x,mi))) mi--;
+    mi = lx-1; while (mi>=3 && isexactzero(gel(x,mi))) mi--;
     mi += ex-2;
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
@@ -2213,7 +2213,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
 
       ly = lx+2*ex;
-      mi = lx-1; while (mi>=3 && gcmp0(gel(y,mi))) mi--;
+      mi = lx-1; while (mi>=3 && isexactzero(gel(y,mi))) mi--;
       mi += ex-2;
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;

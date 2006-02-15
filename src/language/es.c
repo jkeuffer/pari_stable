@@ -2002,7 +2002,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g += (2-i);
+        l = i + lgpol(g); g -= i-2;
         wr_lead_monome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {
@@ -2217,7 +2217,7 @@ sori(GEN g, pariout_t *T)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g += (2-i);
+        l = i + lgpol(g); g -= i-2;
         sor_lead_monome(T,gel(g,i),v,i);
         while (++i < l)
         {
@@ -2348,7 +2348,7 @@ texi(GEN g, pariout_t *T, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g += (2-i);
+        l = i + lgpol(g); g -= i-2;
         wr_lead_texnome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {

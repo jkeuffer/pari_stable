@@ -1544,15 +1544,13 @@ gdeflate(GEN x, long v, long d)
       long V = valp(x);
       GEN y;
 
-      if (!signe(x)) return zeroser(v, V / d);
-      if (V % d != 0)
+      lx = lg(x);
+      if (lx == 2) return zeroser(v, V / d);
+      y = ser2pol_i(x, lx);
+      if (V % d != 0 || checkdeflate(y) % d != 0)
         pari_err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
-      y = shallowcopy(x); setvalp(y, 0); y = gtrunc(y);
-      if (checkdeflate(y) % d != 0)
-        pari_err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
-      y = poldeflate_i(y, d);
-      settyp(y, t_SER);
-      y[1] = evalsigne(1) | evalvalp(V / d) | evalvarn(v);
+      y = poldeflate_i(y, d); y[1] = x[1];
+      settyp(y, t_SER); setvalp(y, V/d);
       return gerepilecopy(av, y);
     }
     if (checkdeflate(x) % d != 0) pari_err(cant_deflate);
@@ -2952,25 +2950,6 @@ can_use_modular_gcd(GEN x)
   return 1;
 }
 
-static int
-isinexactfield(GEN x)
-{
-  long lx,i;
-  switch(typ(x))
-  {
-    case t_REAL: case t_PADIC: case t_SER:
-      return 1;
-    case t_POL:
-      lx=lg(x); if (lx == 2) return 0;/*true 0 polynomial*/
-      for (i=2; i<lx; i++)
-	if (isinexactfield(gel(x,i))) return 1;
-      return 0;
-    case t_COMPLEX: case t_POLMOD:
-      return isinexactfield(gel(x,1)) || isinexactfield(gel(x,2));
-  }
-  return 0;
-}
-
 static GEN
 gcdmonome(GEN x, GEN y)
 {
@@ -3490,7 +3469,7 @@ subresall(GEN u, GEN v, GEN *sol)
   if (sol) *sol=gen_0;
   if ((r = init_resultant(u,v))) return r;
 
-  if (isinexactfield(u) || isinexactfield(v)) return resultant2(u,v);
+  if (isinexact(u) || isinexact(v)) return resultant2(u,v);
   dx=degpol(u); dy=degpol(v); signh=1;
   if (dx < dy)
   {
@@ -4237,7 +4216,7 @@ RgXQ_inv(GEN x, GEN y)
     if (lg(x)!=3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
     x = gel(x,2); vx = gvar(x);
   }
-  if (isinexactfield(x) || isinexactfield(y)) return RgXQ_inv_inexact(x,y);
+  if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
 
   av = avma; d = subresext(x,y,&u,&v);
   if (gcmp0(d)) pari_err(talker,"non-invertible polynomial in RgXQ_inv");

@@ -111,22 +111,28 @@ matsize(GEN x)
 GEN
 greffe(GEN x, long l, long use_stack)
 {
-  long i, e, k;
+  long i, lx = lg(x);
   GEN y;
 
   if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
-  if (l == 2) pari_warn(warner, "l = 2 in greffe");
+  if (l == 2) err(talker, "l = 2 in greffe");
   if (use_stack) y = cgetg(l,t_SER);
   else
   {
     y = (GEN) gpmalloc(l*sizeof(long));
     y[0] = evaltyp(t_SER) | evallg(l);
   }
-  e = polvaluation(x, NULL);
-  y[1] = evalsigne(signe(x)) | evalvalp(e) | evalvarn(varn(x));
-  k = lg(x)-1 - e; x += e;
-  for (i = l-1; i >  k; i--) gel(y,i) = gen_0;
-  for (       ; i >= 2; i--) gel(y,i) = gel(x,i);
+  /* optimed version of polvaluation + normalize */
+  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
+  i -= 2; /* = polvaluation(x, NULL) */
+  y[1] = x[1]; setvalp(y, i);
+  x += i; lx -= i;
+  if (lx > l) {
+    for (i = 2; i < l; i++) gel(y,i) = gel(x,i);
+  } else {
+    for (i = 2; i <lx; i++) gel(y,i) = gel(x,i);
+    for (     ; i < l; i++) gel(y,i) = gen_0;
+  }
   return y;
 }
 
