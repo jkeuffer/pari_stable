@@ -2346,19 +2346,21 @@ coefstoser(GEN x, long v, long prec)
 GEN
 poltoser(GEN x, long v, long prec)
 {
-  long tx = typ(x), vx = varn(x), lx, i, j, l;
+  long tx = typ(x), vx = varn(x), lx, i, l;
   GEN y;
 
   if (isexactzero(x)) return zeroser(v, prec);
   if (is_scalar_t(tx) || varncmp(vx, v) > 0) return scalarser(x, v, prec);
   if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
 
-  l = lg(x); if (prec+2 > l) l = prec+2;
+  lx = lg(x); i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
+  i -= 2; x += i; lx -= i;
+  l = lx; if (prec+2 > l) l = prec+2;
   y = cgetg(l,t_SER);
-  y[1] = evalvalp(0) | evalvarn(v);
-  for (j=2; j<lx; j++) gel(y,j) = gel(x,j);
-  for (   ; j < l;j++) gel(y,j) = gen_0;
-  return normalize(y);
+  y[1] = evalsigne(1) | evalvalp(i) | evalvarn(v);
+  for (i=2; i <lx; i++) gel(y,i) = gel(x,i);
+  for (   ; i < l; i++) gel(y,i) = gen_0;
+  return y;
 }
 
 /* x a t_RFRAC[N]. Not stack-clean */
