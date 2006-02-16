@@ -681,7 +681,7 @@ gtrace(GEN x)
 {
   pari_sp av;
   long i, lx, tx = typ(x);
-  GEN y;
+  GEN y, z;
 
   switch(tx)
   {
@@ -706,8 +706,10 @@ gtrace(GEN x)
       return y;
 
     case t_POLMOD:
-      av = avma; y = gel(x,1);
-      return gerepileupto(av, quicktrace(gel(x,2), polsym(y, degpol(y)-1)));
+      y = gel(x,1); z = gel(x,2);
+      if (typ(z) != t_POL || varn(y) != varn(z)) return gmulsg(degpol(y), z);
+      av = avma;
+      return gerepileupto(av, quicktrace(z, polsym(y, degpol(y)-1)));
 
     case t_RFRAC:
       return gadd(x, gconj(x));
