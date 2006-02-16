@@ -4,16 +4,14 @@
 # For NextStep
 #   We don't accept "asm inline" since it does not work (Ptitboul)
 kercom=$src/kernel/sparcv8_micro
-kernon=$src/kernel/none
-ker=$src/kernel/$kernlvl0
 
 if test "$osname" = "nextstep" 
 then
   level0=$src/kernel/none/asm0.h
 else
-  level0="$kercom/level0_common.h $kernon/divll.h"
+  level0="$kercom/level0_common.h $knone/divll.h"
 fi
-level0="$kernon/bfffo.h $level0"
+level0="$knone/bfffo.h $level0"
 
 cat >> $file << EOT
 parilvl0.h: $level0
