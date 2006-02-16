@@ -255,7 +255,7 @@ gred_rfrac2_i(GEN n, GEN d)
   td = typ(d);
   if (td!=t_POL)
   {
-    if (tn!=t_POL) return gred_rfrac_copy(n,d);
+    if (tn!=t_POL) return gdiv(n,d);
     if (varncmp(gvar2(d), varn(n)) > 0) return div_pol_scal(n,d);
     pari_err(talker,"incompatible variables in gred");
   }
