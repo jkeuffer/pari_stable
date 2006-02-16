@@ -16,9 +16,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file is a slight adaptation of source code extracted from gmp-3.1.1
   (from T. Granlund), files longlong.h and gmp-impl.h
 
-  Copyright (C) 2000 Free Software Foundation, Inc. */
+  Copyright (C) 2000 Free Software Foundation, Inc.
 
-extern const unsigned char __clz_tab[];
+ * FIXME: This file is unused until somebody implements
+ * invert_word(x) = return floor( 2^(2*BIL)/x ) */
+
 extern ulong invert_word(ulong);
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl) \
@@ -30,17 +32,6 @@ extern ulong invert_word(ulong);
   } while (0)
 
 #ifdef __GNUC__
-
-#define bfffo(x)                         \
-({                                       \
-  ulong __xr = (x);                      \
-  ulong __a;                             \
-                                         \
-      for (__a = 56; __a > 0; __a -= 8)  \
-        if (((__xr >> __a) & 0xff) != 0) \
-          break;                         \
-  64 - (__clz_tab[__xr >> __a] + __a);   \
-})
 
 #define divll(x, y)                                      \
 ({                                                       \
@@ -73,18 +64,6 @@ extern ulong invert_word(ulong);
 })
 
 #else /* __GNUC__ */
-
-static int
-bfffo(ulong x)
-{
-  ulong __xr = (x);
-  ulong __a;
-
-      for (__a = 56; __a > 0; __a -= 8)
-        if (((__xr >> __a) & 0xff) != 0)
-          break;
-  return 64 - (__clz_tab[__xr >> __a] + __a);
-}
 
 static ulong
 divll(ulong x, ulong y)

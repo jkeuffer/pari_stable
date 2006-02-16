@@ -13,6 +13,10 @@ ex=../$examples_dir
 misc=../$misc_dir 
 src=../$src_dir 
 
+knone=$src/kernel/none
+kern0=$src/kernel/$kernlvl0
+kern1=$src/kernel/$kernlvl1
+
 #
 # File lists
 #
@@ -281,8 +285,11 @@ kerntest\$(_O): $src/test/kerntest.c
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 
-kernel\$(_O): .headers $src/kernel/none/level0.h
-	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $src/kernel/none/level0.c
+kernel\$(_O): .headers $knone/level0.h
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $knone/level0.c
+
+mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/level1.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $knone/level1.c
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
@@ -556,9 +563,6 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 EOT
 fi
 
-knone=$src/kernel/none
-kern0=$src/kernel/$kernlvl0
-kern1=$src/kernel/$kernlvl1
 for f in \
   $src_dir/kernel/$kernlvl0/MakeLVL0.SH \
   $src_dir/kernel/$kernlvl1/MakeLVL1.SH \
