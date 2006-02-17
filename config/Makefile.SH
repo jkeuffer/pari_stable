@@ -286,10 +286,10 @@ kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 
 kernel\$(_O): .headers $knone/level0.h
-	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o kernel\$(_O) $knone/level0.c
+	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o kernel\$(_O) $knone/level0.c
 
 mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/level1.c
-	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $knone/level1.c
+	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o mpinl\$(_O) $knone/level1.c
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
