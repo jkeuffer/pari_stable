@@ -2532,13 +2532,6 @@ triv_cont_gcd(GEN x, GEN y)
   tetpil=avma; return gerepile(av,tetpil,ggcd(p1,y));
 }
 
-static GEN
-cont_gcd(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  return gerepileupto(av, ggcd(content(x),y));
-}
-
 /* y is a PADIC, x a rational number or an INTMOD */
 static GEN
 padic_gcd(GEN x, GEN y)
@@ -2605,6 +2598,21 @@ zero_gcd(GEN x, long tx)
       );
     default: return gcopy(x);
   }
+}
+
+/* !is_const(tx), y considered as constant */
+static GEN
+cont_gcd(GEN x, long tx, GEN y)
+{
+  pari_sp av;
+  if (tx == t_RFRAC)
+  {
+    GEN z = cgetg(3, t_RFRAC);
+    gel(z,1) = ggcd(gel(x,1), y);
+    gel(z,2) = gcopy(gel(x,2)); return z;
+  }
+  av = avma;
+  return gerepileupto(av, ggcd(content(x),y));
 }
 
 GEN
@@ -2736,13 +2744,13 @@ ggcd(GEN x, GEN y)
 
       default: return gen_1; /* tx = t_REAL */
     }
-    return cont_gcd(y,x);
+    return cont_gcd(y,ty, x);
   }
 
   vx = gvar9(x);
   vy = gvar9(y);
-  if (varncmp(vy, vx) < 0) return cont_gcd(y,x);
-  if (varncmp(vy, vx) > 0) return cont_gcd(x,y);
+  if (varncmp(vy, vx) < 0) return cont_gcd(y,ty, x);
+  if (varncmp(vy, vx) > 0) return cont_gcd(x,tx, y);
   switch(tx)
   {
     case t_POLMOD:
@@ -2992,8 +3000,11 @@ content(GEN x)
       GEN n = gel(x,1), d = gel(x,2);
       long vn = gvar9(n), vd = gvar9(d);
       if (varncmp(vn, vd) < 0) return ginv(d);
-      if (varncmp(vn, vd) > 0) return isinexact(n)? ggcd(gen_0, n): gcopy(n);
-      return gerepileupto(av, gdiv(content(n), content(d)));
+      if (varncmp(vn, vd) > 0)
+        n = isinexact(n)? ggcd(gen_0, n): gcopy(n);
+      else 
+        n = content(n);
+      return gerepileupto(av, gdiv(n, content(d)));
     }
 
     case t_VEC: case t_COL:
