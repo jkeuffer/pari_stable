@@ -2,19 +2,21 @@ There is a different directory for each value of "$asmarch". Each contain
 a file Makefile.SH, to be included in the general Makefile. It contains
 rules for creating headers and object files in the build directory.
 
-The list of object files is given by "$kernel" (default: "kernel mp mpinl")
+The list of object files is given by "$kernel" (default: "mp mpinl")
 
-* Level 0 symbols, defined in object file kernel.o, are :
+* Level 0 symbols, in object file mpinl.o, are :
   overflow hiremainder
   addll addllx subll subllx shiftl shiftlr mulll addmul
   divll
   bfffo
 If no assembler implementation is available the definitions are in
-none/ (level0.h, divll.h, bfffo.h). Otherwise, in $asmarch/ (level0.s, level0.h)
+none/ (level0.h, divll.h, bfffo.h). Otherwise, in $asmarch/level0.h
 
-* Inline Level 1 symbols, defined in mpinl.o: the definitions are in
+* Inline Level 1 symbols, in mpinl.o: the definitions are in
 none/level1.h (see there). Inlining may or may not be possible, but a symbol
 must be defined in mpinl.o in any case.
+
+FIXME: asm0.h/asm1.h should be renamed according to the above.
 
 * Non-Inline Level 1 symbols, defined in mp.o: the definitions are in
 various *.c files in none/ and gmp/ concatenated into $objdir/mp.c.

@@ -1,5 +1,3 @@
-# Functions that can be inlined are externally defined too
-# This is done with level0.c and level1.c
 cat >> $file << EOT
 L1OBJS=$kern1/tune.h $kern1/int.h $knone/level1.h
 parilvl1.h: \$(L1OBJS) $src/headers/paritune.h

@@ -20,8 +20,7 @@ kern1=$src/kernel/$kernlvl1
 #
 # File lists
 #
-kernel="kernel mp"
-inline="mpinl"
+kernel="mp mpinl"
 gp=`ls $src_dir/gp/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -77,20 +76,14 @@ case "$which_graphic_lib" in
   ;;
 esac
 
-KERNOBJS=
-for f in $kernel; do
-  KERNOBJS="$KERNOBJS $f\$(_O)"
-done
-OBJS=$KERNOBJS
-for f in $basemath $language $modules $systems; do
+KERNOBJS="mp\$(_O)"
+OBJS=
+for f in $kernel $basemath $language $modules $systems; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=
 for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
-done
-for f in $inline; do
-  OBJS="$OBJS $f\$(_O)"
 done
 HEADERS=pariinl.h
 for f in $hlist; do
@@ -285,11 +278,8 @@ kerntest\$(_O): $src/test/kerntest.c
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 
-kernel\$(_O): .headers $knone/level0.h
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o kernel\$(_O) $knone/level0.c
-
-mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/level1.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o mpinl\$(_O) $knone/level1.c
+mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/mpinl.c
+	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o mpinl\$(_O) $knone/mpinl.c
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
