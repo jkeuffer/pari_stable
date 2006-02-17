@@ -22,6 +22,8 @@ void specinit()
 void gerepileall(pari_sp av, int n, ...){}
 void pari_err(long x, ...) { exit (0); }
 void pari_warn(long x, ...) { exit (0); }
+char*gprealloc(void *pointer, size_t size) { return realloc(pointer,size); }
+char*gpmalloc(size_t size) { return malloc(size); }
 GEN gmodulcp(GEN x, GEN y) { return NULL; }
 GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
 void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
