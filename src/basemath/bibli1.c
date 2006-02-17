@@ -3408,36 +3408,39 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       gel(S,s) = shallowcopy(x);
       if (s == stockmax)
       { /* overflow */
-        pari_sp av2;
-        long stockmaxnew;
-        GEN per, Snew;
-
-        if (!check) goto END;
-        stockmaxnew = (stockall && (stockmax < 10000L || maxnum != -1))
-                      ? stockmax<<1 : stockmax;
-        Snew = cgetg(stockmaxnew + 1, t_VEC);
-        av2 = avma;
-        per = sindexsort(norms);
-        if (DEBUGLEVEL) fprintferr("sorting...\n");
-        for (j=0,i=1; i<=s; i++)
-        { /* let N be the minimal norm so far for x satisfying 'check'. Keep
-           * all elements of norm N */
-          long k = per[i];
-          norme1 = gel(norms,k);
-          if (j  && mpcmp(norme1, borne1) > 0) break;
-          if (j  || check(data,gel(S,k)))
+        long stockmaxnew= (stockall && (stockmax < 10000L || maxnum != -1))
+                          ? stockmax<<1 : stockmax;
+        GEN Snew = cgetg(stockmaxnew + 1, t_VEC);
+        if (check)
+        {
+          pari_sp av2 = avma;
+          GEN per = sindexsort(norms);
+          if (DEBUGLEVEL) fprintferr("sorting...\n");
+          for (j = 0, i = 1; i <= s; i++)
+          { /* let N be the minimal norm so far for x satisfying 'check'. Keep
+             * all elements of norm N */
+            long k = per[i];
+            norme1 = gel(norms,k);
+            if (j  && mpcmp(norme1, borne1) > 0) break;
+            if (j  || check(data,gel(S,k)))
+            {
+              if (!j) borne1 = mpadd(norme1,eps);
+              Snew[++j] = S[k];
+            }
+          }
+          s = j; avma = av2;
+          if (s)
           {
-            if (!j) borne1 = mpadd(norme1,eps);
-            Snew[++j] = S[k];
+            norme1 = gel(norms, per[i-1]);
+            borne1 = mpadd(norme1, eps);
+            borne2 = mpmul(borne1, alpha);
+            checkcnt = 0;
           }
         }
-        s = j; avma = av2;
-        if (s)
+        else
         {
-          norme1 = (GEN)norms[ per[i-1] ];
-          borne1 = mpadd(norme1, eps);
-          borne2 = mpmul(borne1, alpha);
-          checkcnt = 0;
+          if (!stockall) goto END;
+          for (i = 1; i <= s; i++) Snew[i] = S[i];
         }
         if (stockmax != stockmaxnew)
         {
