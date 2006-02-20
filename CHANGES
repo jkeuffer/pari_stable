@@ -76,6 +76,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
    18- missing vectors in qfminim(x,b,,2) [ m omitted ]
    19- 'make test-kernel' [ wouldn't compile ]
    20- matsnf(matrix with t_POL entries, 1) ---> incorrect matrix V
+   21- O((-2)^3) --> invalid object
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

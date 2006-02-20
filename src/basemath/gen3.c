@@ -1617,7 +1617,7 @@ ggrando(GEN x, long n)
   switch(typ(x))
   {
   case t_INT:/* bug 3 + O(1). We suppose x is a truc() */
-    if (!signe(x)) pari_err(talker,"zero argument in O()");
+    if (signe(x) <= 0) pari_err(talker,"non-positive argument in O()");
     if (!is_pm1(x)) return zeropadic(x,n);
     /* +/-1 = x^0 */
     v = m = 0; break;
