@@ -199,7 +199,7 @@ gred_rfrac_copy(GEN n, GEN d)
 
 static GEN div_pol_scal(GEN x, GEN y);
 
-/* n is non-zero, d a t_POL, gcd(n,d) = 1 */
+/* d a t_POL, gcd(n,d) = 1. Not memory clean */
 GEN
 gred_rfrac_simple(GEN n, GEN d)
 {
@@ -211,16 +211,25 @@ gred_rfrac_simple(GEN n, GEN d)
     d = div_pol_scal(d,cd);
     if (!gcmp1(cn))
     {
-      n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
-      c = gdiv(cn,cd);
+      if (gcmp0(cn)) {
+        n = typ(n) == t_POL? div_pol_scal(n,cd): gdiv(n, cd);
+        c = gen_1;
+      } else {
+        n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+        c = gdiv(cn,cd);
+      }
     }
     else
       c = ginv(cd);
   } else {
     if (!gcmp1(cn))
     {
-      n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
-      c = cn;
+      if (gcmp0(cn)) {
+        c = gen_1;
+      } else {
+        n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+        c = cn;
+      }
     }
     else
       return gred_rfrac_copy(n, d);
@@ -274,7 +283,7 @@ gred_rfrac2_i(GEN n, GEN d)
     n = RgX_shift(n, -v);
     d = RgX_shift(d, -v);
   }
-  if (!lgpol(d)) return div_pol_scal(n,d);
+  if (!degpol(d)) return div_pol_scal(n,d);
 
   /* X does not divide gcd(n,d), deg(d) > 0 */
   if (isinexact(n) || isinexact(d)) return gred_rfrac_simple(n, d);
@@ -555,27 +564,9 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
 static GEN
 add_rfrac_scal(GEN y, GEN x)
 {
-  GEN p1,num, z = cgetg(3,t_RFRAC);
-  pari_sp tetpil, av;
-
-  p1 = gmul(x,gel(y,2)); tetpil = avma;
-  num = gadd(p1,gel(y,1));
-  av = avma;
-  p1 = content(gel(y,2));
-  if (!gcmp1(p1))
-  {
-    p1 = ggcd(p1, content(num));
-    if (!gcmp1(p1))
-    {
-      tetpil = avma;
-      gel(z,1) = gdiv(num, p1);
-      gel(z,2) = gdiv(gel(y,2), p1);
-      gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
-    }
-  }
-  avma = av;
-  gel(z,1) = gerepile((pari_sp)z,tetpil, num);
-  gel(z,2) = gcopy(gel(y,2)); return z;
+  pari_sp av = avma;
+  GEN n = gadd(gmul(x, gel(y,2)), gel(y,1));
+  return gerepileupto(av, gred_rfrac_simple(n, gel(y,2)));
 }
 
 /* x "scalar", ty != t_MAT and non-scalar */
@@ -1821,9 +1812,11 @@ div_T_scal(GEN x, GEN y, long tx) {
 static GEN
 div_scal_pol(GEN x, GEN y) {
   long ly = lg(y);
+  pari_sp av;
   if (ly == 3) return gdiv(x,gel(y,2));
   if (isexactzero(x)) return zeropol(varn(y));
-  return gred_rfrac2(x,y);
+  av = avma;
+  return gerepileupto(av, gred_rfrac_simple(x,y));
 }
 static GEN
 div_scal_ser(GEN x, GEN y) { /* TODO: improve */

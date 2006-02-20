@@ -2979,22 +2979,19 @@ GEN
 content(GEN x)
 {
   long lx, i, tx = typ(x);
-  pari_sp av;
+  pari_sp av = avma;
   GEN c;
 
-  if (is_scalar_t(tx))
-  {
-    switch (tx)
-    {
-      case t_INT: return absi(x);
-      case t_FRAC: return gabs(x,0);
-      case t_POLMOD: return content(gel(x,2));
-    }
-    return gcopy(x);
-  }
-  av = avma;
   switch(tx)
   {
+    case t_INT: return absi(x);
+    case t_FRAC: return gabs(x,0);
+    case t_POLMOD: return content(gel(x,2));
+    case t_REAL: return gen_1;
+    case t_COMPLEX: return isinexactreal(x)? gen_1: gcopy(x);
+    case t_PADIC: return ggcd(gen_0, x);
+    case t_QUAD: return gcopy(x);
+
     case t_RFRAC:
     {
       GEN n = gel(x,1), d = gel(x,2);
