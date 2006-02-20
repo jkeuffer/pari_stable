@@ -3113,14 +3113,19 @@ hnfall(GEN x) {return hnfall0(x,1);}
 static GEN
 col_mul(GEN x, GEN c)
 {
-  long s = signe(x);
-  GEN xc = NULL;
-  if (s)
+  if (typ(x) == t_INT)
   {
-    if (!is_pm1(x)) xc = gmul(x,c);
-    else xc = (s>0)? c: gneg_i(c);
+    long s = signe(x);
+    GEN xc = NULL;
+    if (s)
+    {
+      if (!is_pm1(x)) xc = gmul(x,c);
+      else xc = (s>0)? c: gneg_i(c);
+    }
+    return xc;
   }
-  return xc;
+  else
+    return gmul(x, c);
 }
 
 static void
