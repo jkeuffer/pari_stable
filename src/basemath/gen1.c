@@ -1538,8 +1538,8 @@ gmul(GEN x, GEN y)
 	case t_SER:
         {
           long vn;
-          if (lg(y) == 2) return zeroser(vx, valp(y)+polvaluation(x,NULL));
           if (lg(x) == 2) return zeropol(vx);
+          if (lg(y) == 2) return zeroser(vx, valp(y)+polvaluation(x,NULL));
           av = avma;
           vn = polvaluation(x, &x);
           avma = av;
