@@ -519,7 +519,7 @@ shiftpol_ip(GEN x, long v)
   if (lg(z) != v) x[lx + v] = z[0];
   for (i = lx-1; i >= 2; i--) y[i] = x[i];
   for (i = v+1;  i >= 2; i--) gel(x,i) = gen_0;
-  x[1] = evalsigne(1);
+  /* leave x[1] alone: it is correct */
   x[0] = evaltyp(t_POL) | evallg(lx+v); return x;
 }
 
