@@ -77,6 +77,8 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
    19- 'make test-kernel' [ wouldn't compile ]
    20- matsnf(matrix with t_POL entries, 1) ---> incorrect matrix V
    21- O((-2)^3) --> invalid object
+   22- (0.*x)*(0.*x) --> 0.E-57 [ instead of 0.E-57*x^2 ]
+
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

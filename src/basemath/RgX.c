@@ -510,8 +510,9 @@ shiftpol_ip(GEN x, long v)
 {
   long i, lx;
   GEN y, z;
-  if (!v || !signe(x)) return x;
+  if (!v) return x;
   lx = lg(x);
+  if (lx == 2) return x;
   y = x + v;
   z = x + lx;
   /* stackdummy from normalizepol: move it up */

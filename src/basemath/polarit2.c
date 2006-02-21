@@ -2569,6 +2569,16 @@ c_is_rational(GEN x)
 {
   return (is_rational(gel(x,1)) && is_rational(gel(x,2)));
 }
+static GEN
+c_zero_gcd(GEN c)
+{
+  GEN x = gel(c,1), y = gel(c,2);
+  long tx = typ(x), ty = typ(y);
+  if (tx == t_REAL || ty == t_REAL) return gen_1;
+  if (tx == t_PADIC || tx == t_INTMOD
+   || ty == t_PADIC || ty == t_INTMOD) return ggcd(x, y);
+  return gauss_gcd(c, gen_0);
+}
 
 /* y == 0 */
 static GEN
@@ -2579,25 +2589,25 @@ zero_gcd(GEN x, long tx)
   {
     case t_INT: return absi(x);
     case t_FRAC: return gabs(x,0);
-    case t_COMPLEX: return c_is_rational(x)? gauss_gcd(x, gen_0): gen_1;
+    case t_COMPLEX: return c_zero_gcd(x);
     case t_REAL: return gen_1;
     case t_PADIC: return gpowgs(gel(x,2), valp(x));
     case t_SER: return monomial(gen_1, valp(x), varn(x));
     case t_POL:
-      if (!isinexact(x)) return gcopy(x);
+      if (!isinexact(x)) break;
       av = avma;
       return gerepileupto(av, 
-        gmul(content(x), monomial(gen_1, polvaluation(x,NULL),varn(x)))
+        monomialcopy(content(x), polvaluation(x,NULL), varn(x))
       );
 
     case t_RFRAC:
-      if (!isinexact(x)) return gcopy(x);
+      if (!isinexact(x)) break;
       av = avma;
       return gerepileupto(av,
         gdiv(zero_gcd(gel(x,1), typ(gel(x,1))), gel(x,2))
       );
-    default: return gcopy(x);
   }
+  return gcopy(x);
 }
 
 /* !is_const(tx), y considered as constant */
@@ -2984,21 +2994,22 @@ content(GEN x)
 
   switch(tx)
   {
-    case t_INT: return absi(x);
-    case t_FRAC: return gabs(x,0);
-    case t_POLMOD: return content(gel(x,2));
-    case t_REAL: return gen_1;
-    case t_COMPLEX: return isinexactreal(x)? gen_1: gcopy(x);
-    case t_PADIC: return ggcd(gen_0, x);
-    case t_QUAD: return gcopy(x);
+    case t_INT:
+    case t_REAL:
+    case t_INTMOD:
+    case t_FRAC:
+    case t_COMPLEX:
+    case t_QUAD:
+    case t_PADIC: return zero_gcd(x, tx);
 
+    case t_POLMOD: return content(gel(x,2));
     case t_RFRAC:
     {
       GEN n = gel(x,1), d = gel(x,2);
       long vn = gvar9(n), vd = gvar9(d);
-      if (varncmp(vn, vd) < 0) return ginv(d);
+      /* varncmp(vn, vd) < 0 can't happen */
       if (varncmp(vn, vd) > 0)
-        n = isinexact(n)? ggcd(gen_0, n): gcopy(n);
+        n = isinexact(n)? zero_gcd(n, typ(n)): gcopy(n);
       else 
         n = content(n);
       return gerepileupto(av, gdiv(n, content(d)));
@@ -3046,7 +3057,7 @@ content(GEN x)
   }
   else
   {
-    if (isinexact(c)) c = ggcd(gen_0, c);
+    if (isinexact(c)) c = zero_gcd(c, typ(c));
     while (lx>lontyp[tx])
     {
       lx--; c=ggcd(c,gel(x,lx));
