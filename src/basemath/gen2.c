@@ -115,16 +115,23 @@ greffe(GEN x, long l, long use_stack)
   GEN y;
 
   if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
-  if (l == 2) err(talker, "l = 2 in greffe");
+  if (l <= 2) err(talker, "l <= 2 in greffe");
+
+  /* optimed version of polvaluation + normalize */
+  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
+  if (signe(x))
+  {
+    /* if leading terms are inexact zero, need more coefficients */
+    long j = i; while (gcmp0(gel(x,j))) { j++; l++; }
+  }
+  i -= 2; /* = polvaluation(x, NULL) */
+
   if (use_stack) y = cgetg(l,t_SER);
   else
   {
     y = (GEN) gpmalloc(l*sizeof(long));
     y[0] = evaltyp(t_SER) | evallg(l);
   }
-  /* optimed version of polvaluation + normalize */
-  i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
-  i -= 2; /* = polvaluation(x, NULL) */
   y[1] = x[1]; setvalp(y, i);
   x += i; lx -= i;
   if (lx > l) {

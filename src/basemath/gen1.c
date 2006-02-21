@@ -250,12 +250,42 @@ gred_rfrac_simple(GEN n, GEN d)
   gel(z,2) = gmul(d, cd); return z;
 }
 
+static GEN
+fix_pol(GEN x, long d)
+{
+  GEN z;
+  if (!d) return x;
+  if (d > 0) return RgX_shiftcopy(x, d);
+  z = cgetg(3, t_RFRAC);
+  gel(z,1) = gcopy(x);
+  gel(z,2) = monomial(gen_1, -d, varn(x));
+  return z;
+}
+static GEN
+fix_rfrac(GEN x, long d)
+{
+  GEN z, N, D;
+  if (!d) return x;
+  z = cgetg(3, t_RFRAC);
+  N = gel(x,1);
+  D = gel(x,2);
+  if (d > 0) {
+    gel(z, 1) = (typ(N)==t_POL && varn(N)==varn(D))? RgX_shiftcopy(N,d)
+                                                   : monomialcopy(N,d,varn(D));
+    gel(z, 2) = gcopy(D);
+  } else {
+    gel(z, 1) = gcopy(N);
+    gel(z, 2) = RgX_shiftcopy(D, -d);
+  }
+  return z;
+}
+
 /* assume d != 0 */
 static GEN
 gred_rfrac2_i(GEN n, GEN d)
 {
   GEN y, z;
-  long tn, td, vn, vd;
+  long tn, td, v;
 
   n = simplify_i(n);
   if (isexactzero(n)) return gcopy(n);
@@ -277,21 +307,18 @@ gred_rfrac2_i(GEN n, GEN d)
   if (varncmp(varn(d), varn(n)) > 0) return div_pol_scal(n,d);
 
   /* now n and d are t_POLs in the same variable */
-  if ( (vd = polvaluation(d, NULL)) && (vn = polvaluation(n, NULL)) )
-  {
-    long v = min(vn, vd); /* > 0 */
-    n = RgX_shift(n, -v);
-    d = RgX_shift(d, -v);
-  }
-  if (!degpol(d)) return div_pol_scal(n,d);
+  v = polvaluation(n, &n) - polvaluation(d, &d);
+  if (!degpol(d)) return fix_pol(div_pol_scal(n,d), v);
 
   /* X does not divide gcd(n,d), deg(d) > 0 */
-  if (isinexact(n) || isinexact(d)) return gred_rfrac_simple(n, d);
-  y = RgX_divrem(n, d, &z);
-  if (!signe(z)) return y;
-  z = srgcd(d, z);
-  if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
-  return gred_rfrac_simple(n, d);
+  if (!isinexact(n) && !isinexact(d))
+  {
+    y = RgX_divrem(n, d, &z);
+    if (!signe(z)) return fix_pol(y, v);
+    z = srgcd(d, z);
+    if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
+  }
+  return fix_rfrac(gred_rfrac_simple(n,d), v);
 }
 
 GEN

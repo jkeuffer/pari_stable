@@ -2802,7 +2802,7 @@ ggcd(GEN x, GEN y)
       {
 	case t_POL: return srgcd(x,y);
 	case t_SER: return monomial(gen_1, min(valp(y),gval(x,vx)), vx);
-	case t_RFRAC: z=cgetg(3,ty);
+	case t_RFRAC: z=cgetg(3,t_RFRAC);
           gel(z,1) = ggcd(x,gel(y,1));
           gel(z,2) = gcopy(gel(y,2)); return z;
       }
