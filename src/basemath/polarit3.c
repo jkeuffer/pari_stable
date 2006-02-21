@@ -3752,7 +3752,7 @@ init_Fq_i(GEN p, long n, long v)
   if (n == 1) return pol_x[v];
   /*If easy case, use cyclo*/
   if (fpinit_check(p, n + 1, n)) return cyclo(n + 1, v);
-  if (lgefint(p)-2 < BITS_IN_LONG-bfffo(n))
+  if (lgefint(p)-2 < BITS_IN_LONG-(long)bfffo(n))
     P = ffinit_fact(p,n);
   else
     P = ffinit_nofact(p,n);

@@ -1339,8 +1339,7 @@ gammap(GEN x)
     else 
       return gammap_neg_Morita(itos(m),p,e);
   }
-  else
-    return gammap_Dwork(x, itos(p));
+  return gammap_Dwork(x, itos(p));
 }
 
 GEN
