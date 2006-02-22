@@ -228,12 +228,26 @@ instance, the following program
 \kbd{a=bb=c} which assigns the value of \kbd{c} to both \kbd{bb} and
 \kbd{a}.
 
-\section{Input formats for the PARI types}
+\section{The PARI types}
 
 \noindent
 We see here how to input values of the different data types known to PARI.
 Recall that blanks are ignored in any expression which is not a string (see
 below).
+
+The following types are provided for convenience, not for speed:
+\typ{INTMOD}, \typ{FRAC}, \typ{PADIC}, \typ{QUAD}, \typ{POLMOD},
+\typ{RFRAC}. Indeed, they always perform a reduction of some kind after
+each basic operation, even though it is usually more efficient to perform
+a single reduction at the end of some complex computation. For instance,
+in a convolution product $\sum_{i+j = n} x_i y_j$ in $\Z/N\Z$ (common
+when multiplying polynomials!), it is wasteful to perform $n$ reductions
+modulo $N$.
+
+In short, basic individual operations on these types are fast, but
+recursive objects with such components could be handled more efficiently:
+programming with libpari will save large constant factors here, compared
+to GP.
 
 \subsec{Integers} \sidx{integer}
 (type \tet{t_INT}): type the integer (with an initial
@@ -256,13 +270,20 @@ $-\tet{realprecision}$), see \secref{se:whatzero}.
 
 \subsec{Intmods}\sidx{intmod}
 (type \tet{t_INTMOD}): to enter $n \mod m$, type
-\kbd{Mod(n,m)}, \emph{not} \kbd{n\%m} (see \secref{se:Mod}).
+\kbd{Mod(n,m)}, \emph{not} \kbd{n\%m}. Internally, all operations are done
+on integer representatives belonging to $[0,m-1]$.
+
+Note that this type is available for convenience, not for speed: each
+elementary operation involves a reduction modulo $m$.
 
 \subsec{Rational numbers}\sidx{rational number}
 (types \tet{t_FRAC}): all fractions are automatically reduced to lowest
 terms, so it is impossible to work with reducible fractions. To enter $n/m$
 just type it as written. As explained in \secref{se:gdiv}, division is
 \emph{not} performed, only reduction to lowest terms.\label{se:FRAC}
+
+Note that this type is available for convenience, not for speed: each
+elementary operation involves computing a gcd.
 
 \subsec{Complex numbers}\sidx{complex number} (type \tet{t_COMPLEX}): to
 enter $x+iy$, type \kbd{x + I*y} (\emph{not} \kbd{x+i*y}). The letter \tet{I}
@@ -271,16 +292,18 @@ stands for $\sqrt{-1}$. Recall from Chapter 1 that $x$ and $y$ can be of type
 
 \subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic} (type
 \tet{t_PADIC}): to enter a $p$-adic number, simply write a rational or
-integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$ and $k$ are
-integers. This last expression indicates three things to \kbd{gp}: first that
-it is dealing with a \typ{PADIC} type (the fact that $p$ is an integer, and
-not a polynomial, which would be used to enter a series, see
-\secref{se:series}), secondly the ``prime'' $p$ (note that it is not checked
-whether $p$ is indeed prime; you can work on 10-adics if you want, but beware
-of disasters as soon as you do something non-trivial like taking a square
-root), and finally the number of significant $p$-adic digits $k$. Note that
-\kbd{O(25)} is not the same as \kbd{O(5\pow 2)}; you probably want the
-latter!
+integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$ and $k$
+are integers. This last expression indicates three things to \kbd{gp}:
+first that it is dealing with a \typ{PADIC} type (the fact that $p$ is an
+integer, and not a polynomial, which would be used to enter a series, see
+\secref{se:series}), secondly the prime $p$, and finally the number of
+significant $p$-adic digits $k$.
+
+Note that it is not checked whether $p$ is indeed prime but results are
+undefined if this is not the case: you can work on 10-adics if you want,
+but disasters will happen as soon as you do something non-trivial like
+taking a square root. Note that \kbd{O(25)} is not the same as
+\kbd{O(5\pow 2)}; you want the latter!
 
 For example, you can type in the $7$-adic number
 
@@ -288,12 +311,26 @@ For example, you can type in the $7$-adic number
 
 \noindent exactly as shown, or equivalently as \kbd{905/7 + O(7\pow3)}.
 
+Note that this type is available for convenience, not for speed:
+internally, \typ{PADIC}s are stored as $p$-adic units modulo some $p^k$.
+Each elementary operation involves updating $p^k$ (multiplying or
+dividing by powers of $p$) and a reduction mod $p^k$. In particular
+additions are slow.
+\bprog
+    ? n = 1+O(2^20);   for (i=1,10^5, n++)
+    time = 86 ms.
+    ? n = Mod(1,2^20); for (i=1,10^5, n++)
+    time = 48 ms.
+    ? n = 1;           for (i=1,10^5, n++)
+    time = 38 ms.
+@eprog
+
 \subsec{Quadratic numbers}\sidx{quadratic number} (type \tet{t_QUAD}): first,
 you must define the default quadratic order or field in which you want to
 work. This is done using the \tet{quadgen} function, in the following way.
 Write something like
 \bprog
-w = quadgen(d)
+    w = quadgen(d)
 @eprog\noindent
 where \kbd{d} is the \emph{discriminant} of the quadratic order in
 which you want to work (hence $d$ is congruent to $0$ or $1$ modulo $4$). The
@@ -303,40 +340,57 @@ quadratic numbers are always printed with a \kbd{w}, regardless of the
 discriminant. So beware, two numbers can be printed in the same way and not
 be equal. However \kbd{gp} will refuse to add or multiply them for example.
 
-Now $(1,w)$ will be the ``canonical'' integral basis of the quadratic order
+Now $(1,w)$ is the ``canonical'' integral basis of the quadratic order
 (i.e.~$w=\sqrt{d}/2$ if $d\equiv 0 \mod 4$, and $w=(1+\sqrt{d})/2$ if
 $d\equiv 1 \mod 4$, where $d$ is the discriminant), and to enter $x+yw$ you
 just type \kbd{x + y*w}.
 
 \subsec{Polmods}\sidx{polmod} (type \tet{t_POLMOD}): exactly as
 for intmods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
-type \kbd{Mod(x,y)}, not \kbd{x\%y} (see \secref{se:Mod}). Note that when $y$
-is an irreducible polynomial in one variable, polmods whose modulus is $y$
-are simply algebraic numbers in the finite extension defined by the
-polynomial $y$. This allows us to work easily in \idx{number field}s, finite
-extensions of the $p$-adic field $\Q_p$, or \idx{finite field}s.
+type \kbd{Mod(x,y)}, not \kbd{x\%y}. Note that when $y$ is an irreducible
+polynomial in one variable, polmods whose modulus is $y$ are simply
+algebraic numbers in the finite extension defined by the polynomial $y$.
+This allows us to work easily in \idx{number field}s, finite extensions of
+the $p$-adic field $\Q_p$, or \idx{finite field}s.
+
+Note that this type is available for convenience, not for speed: each
+elementary operation involves a reduction modulo $y$.
 
 \label{se:rempolmod}
-\misctitle{Important remark.}\sidx{variable (priority)} Since the
-variables\sidx{variable} occurring in a polmod are not free variables, it is
-essential in order to avoid inconsistencies that polmods use the same
-variable in internal operations (i.e.~between polmods) and variables of lower
-priority for external operations, typically between a polynomial and a
-polmod. For example, PARI does not recognize that \kbd{Mod(y, y\pow2 + 1)}
-is the same as \kbd{Mod(x, x\pow2 + 1)}. See \secref{se:priority} for a
-definition of ``priority'' and a discussion of (PARI's idea of) multivariate
-polynomial arithmetic.
+\misctitle{Important remark.}\sidx{variable (priority)} 
+Mathematically, the variables\sidx{variable} occurring in a polmod are not
+free variables. But internally, a congruence class in $R[t]/(y)$ is
+represented by its representative (a \typ{POL} in $R[t]$) of lowest
+degree, and computations occur with polynomials in the variable $t$. PARI
+will not recognize that \kbd{Mod(y, y\pow2 + 1)} is ``the same'' as
+\kbd{Mod(x, x\pow2 + 1)}, since \kbd{x} and \kbd{y} are different
+variables.
 
-On the other hand, \kbd{Mod(x, x\pow2 + 1) + Mod(x, x\pow2 + 1)}
-(which gives \kbd{Mod(2*x, x\pow2 + 1)}) and \kbd{x + Mod(y, y\pow2 + 1)}
-(which gives a result mathematically equivalent to $\kbd{x} + i$ with
-$i^2=-1$) are completely correct, while \kbd{y + Mod(x, x\pow2 + 1)}
-gives \kbd{Mod(x + y, x\pow2 + 1)}, which may not be what you want (\kbd{y}
-is treated here as a numerical parameter, not as a polynomial variable).
+To avoid inconsistencies, polmods must use the same variable in internal
+operations (i.e.~between polmods) and variables of lower priority for
+external operations, typically between a polynomial and a polmod. See
+\secref{se:priority} for a definition of ``priority'' and a discussion of
+(PARI's idea of) multivariate polynomial arithmetic.
+For instance:
+\bprog
+    ? Mod(x, x^2+ 1) + Mod(x, x^2 + 1)
+    %1 = Mod(2*x, x^2 + 1)
+    ? x + Mod(y, y^2 + 1)
+    %2 = x + Mod(y, y^2 + 1)  \\@com in $\Q(i)[x]$, with $i^2=-1$
+    ? y + Mod(x, x^2 + 1)
+    %3 = Mod(x + y, x^2 + 1)  \\@com in $\Q(y)[i]$
+@eprog\noindent
+The first two are straightforward, but the last one may not be what you
+want: \kbd{y} is treated here as a numerical parameter, not as a polynomial
+variable.
 
-\misctitle{Note.} If the main variables are the same, it is allowed to
-mix \typ{POL} and \typ{POLMOD}s. The result is the expected \typ{POLMOD}. For
-instance \kbd{x + Mod(x, x\pow2 + 1)} is equal to \kbd{Mod(2*x, x\pow2 + 1)}.
+\misctitle{Note.} If the main variables are the same, it is allowed to mix
+\typ{POL} and \typ{POLMOD}s. The result is the expected \typ{POLMOD}. For
+instance 
+\bprog
+    ? x + Mod(x, x^2 + 1)
+    %1 = Mod(2*x, x^2 + 1)
+@eprog
 
 \subsec{Polynomials}\sidx{polynomial}\label{se:pol}
 (type \tet{t_POL}): type the polynomial in a natural way, not
