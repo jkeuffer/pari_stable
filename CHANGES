@@ -78,7 +78,10 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
    20- matsnf(matrix with t_POL entries, 1) ---> incorrect matrix V
    21- O((-2)^3) --> invalid object
    22- (0.*x)*(0.*x) --> 0.E-57 [ instead of 0.E-57*x^2 ]
-
+   23- qfminim(x,,m,2) [b omitted] -> [n,B,v]: output correct vectors (v),
+       but reported too many (n too large). 
+   24- qfminim(x,,,2) wrong when x has huge entries. Work out a sensible
+       default precision if x has exact entries.
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

@@ -3477,7 +3477,7 @@ END:
     setlg(pols,j+1);
     setlg(alph,j+1);
     if (stockmax && isclone(S)) { alph = forcecopy(alph); gunclone(S); }
-    return mkvec4(pols, alph, stoi(s), mpsub(borne1, eps));
+    return mkvec4(pols, alph, stoi(j), mpsub(borne1, eps));
   }
   u = cgetg(4,t_VEC);
   gel(u,1) = stoi(s<<1);
@@ -3524,6 +3524,10 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     u = lllgramintern(a, 4, 1, (prec<<1)-2);
     if (!u) return NULL;
     r = qf_base_change(a,u,1);
+    if (!i) {
+      prec = DEFAULTPREC + nbits2nlong(gexpo(r));
+      if (prec < PREC) prec = PREC;
+    }
     r = sqred1intern(r);
     if (!r) return NULL;
     for (i=1; i<l; i++)
