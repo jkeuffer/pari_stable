@@ -1887,7 +1887,6 @@ div_ser(GEN x, GEN y, long vx)
       y_lead = gel(y,2); ly--; l--;
       if (!gcmp0(y_lead)) break;
     }
-    if (i>=ly) pari_err(gdiver); /* can't happen */
   }
   if (ly < lx) lx = ly;
   p2 = (GEN)gpmalloc(lx*sizeof(long));

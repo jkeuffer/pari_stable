@@ -119,11 +119,6 @@ greffe(GEN x, long l, long use_stack)
 
   /* optimed version of polvaluation + normalize */
   i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
-  if (signe(x))
-  {
-    /* if leading terms are inexact zero, need more coefficients */
-    long j = i; while (gcmp0(gel(x,j))) { j++; l++; }
-  }
   i -= 2; /* = polvaluation(x, NULL) */
 
   if (use_stack) y = cgetg(l,t_SER);
