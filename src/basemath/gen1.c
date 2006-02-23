@@ -254,8 +254,7 @@ static GEN
 fix_pol(GEN x, long d)
 {
   GEN z;
-  if (!d) return x;
-  if (d > 0) return RgX_shiftcopy(x, d);
+  if (d >= 0) return RgX_shiftcopy(x, d);
   z = cgetg(3, t_RFRAC);
   gel(z,1) = gcopy(x);
   gel(z,2) = monomial(gen_1, -d, varn(x));
@@ -308,13 +307,17 @@ gred_rfrac2_i(GEN n, GEN d)
 
   /* now n and d are t_POLs in the same variable */
   v = polvaluation(n, &n) - polvaluation(d, &d);
-  if (!degpol(d)) return fix_pol(div_pol_scal(n,d), v);
+  if (!degpol(d))
+  {
+    n = div_pol_scal(n,d);
+    return v? fix_pol(n,v): n;
+  }
 
   /* X does not divide gcd(n,d), deg(d) > 0 */
   if (!isinexact(n) && !isinexact(d))
   {
     y = RgX_divrem(n, d, &z);
-    if (!signe(z)) return fix_pol(y, v);
+    if (!signe(z)) return v? fix_pol(y, v): y;
     z = srgcd(d, z);
     if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
   }
