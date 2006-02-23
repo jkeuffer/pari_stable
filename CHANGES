@@ -100,6 +100,7 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
 
   Added
     1- [library] new function isinexact
+BA  2- [elldata] function forell() to loop over elliptic curves.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):

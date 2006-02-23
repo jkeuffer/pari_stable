@@ -873,6 +873,7 @@ GEN     ellidentify(GEN E);
 long    ellnamecond(const char *s);
 GEN     ellsearch(GEN A);
 GEN     ellsearchcurve(GEN name);
+void    forell(entree *ep, long a, long b, char *ch);
 
 /* elliptic.c */
 

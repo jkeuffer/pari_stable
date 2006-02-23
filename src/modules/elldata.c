@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+#include "../language/anal.h"
 
 static long
 strtoclass(const char *s)
@@ -196,4 +197,37 @@ ellgenerators(GEN E)
   GEN gens=gmael(V,1,3);
   GEN W=pointchinv(gens,gel(V,2));
   return gerepileupto(ltop,W);
+}
+
+void
+forell(entree *ep, long a, long b, char *ch)
+{
+  long ca=a/1000, cb=b/1000;
+  long i, j, k;
+  for(i=ca; i<=cb; i++)
+  {
+    pari_sp ltop=avma;
+    GEN V=ellcondfile(i*1000);
+    for (j=1; j<lg(V); j++)
+    {
+      GEN ells=gel(V,j);
+      long cond=itos(gel(ells,1));
+      
+      if (i==ca && cond<a)
+        continue;
+      if (i==cb && cond>b)
+        break;
+      for(k=2; k<lg(ells); k++)
+      {
+        pari_sp btop=avma;
+        push_val(ep, gel(ells, k));
+        readseq_void(ch); 
+        avma=btop;
+       if (loop_break()) goto forell_end;
+      }
+    }
+    avma=ltop;
+  }
+  forell_end:
+  pop_val(ep);
 }
