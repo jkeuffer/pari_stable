@@ -1304,12 +1304,8 @@ gammap_Morita(long n, GEN p, long e)
 static GEN
 gammap_neg_Morita(long n, GEN p, long e)
 {
-  GEN g=ginv(gammap_Morita(n+1,p,e));
-  long s=(n&1);
-  if (is_bigint(p)) 
-    return s ? g:gneg(g);
-  else
-    return (s^((n/itos(p))&1)) ? g:gneg(g);
+  GEN g = ginv(gammap_Morita(n+1,p,e));
+  return ((n^sdivsi(n,p)) & 1)? g :gneg(g);
 }
 
 /* p-adic Gamma function for x a p-adic integer */

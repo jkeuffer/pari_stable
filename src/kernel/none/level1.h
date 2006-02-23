@@ -137,6 +137,7 @@ GEN    remis(GEN x, long y);
 GEN    remsi(long x, GEN y);
 GEN    remss(long x, long y);
 GEN    rtor(GEN x, long prec);
+long   sdivsi(long x, GEN y)
 long   sdivsi_rem(long x, GEN y, long *rem);
 long   sdivss_rem(long x, long y, long *rem);
 void shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
@@ -730,6 +731,19 @@ sdivsi_rem(long x, GEN y, long *rem)
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (s < 0) q = -q;
   *rem = hiremainder; return q;
+}
+
+INLINE long
+sdivsi(long x, GEN y)
+{
+  long q, s = signe(y);
+
+  if (!s) pari_err(gdiver);
+  if (!x || lgefint(y)>3 || ((long)y[2]) < 0) return 0;
+  q = labs(x) / y[2];
+  if (x < 0) q = -q;
+  if (s < 0) q = -q;
+  return q;
 }
 
 INLINE GEN
