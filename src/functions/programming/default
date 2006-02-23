@@ -5,4 +5,15 @@ Prototype: D"",r,D"",s,D0,L,
 Help: default({opt},{v}): returns the current value of the current
  default opt. If v is present, set opt to v first. If no argument is
  given, print a list of all defaults as well as their values.
+Description:
+ ("realprecision"):small:prec              prec2ndec(prec)
+ ("realprecision",small):void:parens:prec  prec = setrealprecision($2)
+ ("seriesprecision"):small                 precdl
+ ("seriesprecision",small):void:parens     precdl = $2
+ ("debug"):small                           DEBUGLEVEL
+ ("debug",small):void:parens               DEBUGLEVEL = $2
+ ("debugmem"):small                        DEBUGMEM
+ ("debugmem",small):void:parens            DEBUGMEM = $2
+ ("debugfiles"):small                      DEBUGFILES
+ ("debugfiles",small):void:parens          DEBUGFILES = $2
 
