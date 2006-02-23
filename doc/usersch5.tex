@@ -1629,9 +1629,9 @@ copy. If not, the inverse remains uncollected on the stack.
 
 
 \fun{GEN}{FpX_Fp_add}{GEN y, GEN x, GEN p} add the \kbd{Fp}~\kbd{x} to the
-\kbd{FpX}~\kbd{y}, modifying its argument \kbd{y} (thus the operation
-uses constant time instead of linear linear). This function is not
-suitable for \kbd{gerepileupto} nor for \kbd{gerepile}.
+\kbd{FpX}~\kbd{y}, possibly modifying the argument \kbd{y} (thus the
+operation uses constant time instead of linear linear). This function is
+not suitable for \kbd{gerepileupto} nor for \kbd{gerepile}.
 
 \fun{GEN}{FpX_Fp_mul}{GEN y, GEN x, GEN p} multiplies the \kbd{FpX}~\kbd{y}
 by the \kbd{Fp}~\kbd{x}.
