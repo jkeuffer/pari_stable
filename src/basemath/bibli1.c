@@ -3202,20 +3202,6 @@ qfrep0(GEN a, GEN borne, long flag)
   return g;
 }
 
-static GEN
-chk_ok(void *D, GEN x) { (void)D; (void)x; return gen_0; }
-static GEN
-chk_post(FP_chk_fun *f, GEN res, GEN u)
-{
-  GEN z = gel(res,2);
-  long i, l = lg(z);
-  (void)f;
-
-  settyp(z, t_MAT);
-  for (i = 1; i < l; i++) gel(z,i) = gmul(u, gel(z,i));
-  return res;
-}
-
 GEN
 qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
 {
@@ -3226,19 +3212,6 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 2:
     {
       long maxnum = stockmax? itos(stockmax): -2;
-      if (!borne)
-      {
-        FP_chk_fun chk = { &chk_ok, NULL, &chk_post, NULL, 0 };
-        pari_sp av = avma;
-        GEN z, x = fincke_pohst(a,NULL,maxnum,prec,&chk);
-        if (!x) pari_err(precer,"fincke_pohst");
-
-        z = cgetg(4,t_VEC);
-        gel(z,1) = shifti(gel(x,3), 1);
-        gel(z,2) = gel(x,4);
-        gel(z,3) = gel(x,2);
-        return gerepilecopy(av, z);
-      }
       return fincke_pohst(a,borne,maxnum,prec,NULL);
     }
     default: pari_err(flagerr,"qfminim");
@@ -3288,7 +3261,8 @@ step(GEN x, GEN y, GEN inc, long k)
 }
 /* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
- * Enumerate vectors whose norm is less than BORNE.
+ * Enumerate vectors whose norm is less than BORNE, minimal vectors
+ * if BORNE = NULL (implies check = NULL).
  * If (check != NULL) consider only vectors passing the check, and assumes
  *   we only want the smallest possible vectors */
 static GEN
@@ -3296,23 +3270,25 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 {
   long N = lg(q), n = N-1, i, j, k, s, epsbit, prec, checkcnt = 1;
   pari_sp av, av1, lim;
-  GEN inc, u, S, x, y, z, v,  eps, p1, alpha, norms;
+  GEN inc, S, x, y, z, v,  eps, p1, alpha, norms;
   GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
   long stockmax, skipfirst = CHECK? CHECK->skipfirst: 0;
   int stockall = (maxnum < 0);
 
-  if (DEBUGLEVEL)
-    fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
-
   prec = gprecision(q);
   epsbit = bit_accuracy(prec) >> 1;
   eps = real2n(-epsbit, 3);
   alpha = dbltor(0.95);
   normax1 = gen_0;
-  borne1 = gadd(BORNE,eps);
-  borne2 = mpmul(borne1,alpha);
+  norme1 = BORNE ? BORNE: gsqr(gcoeff(q,1,1));
+  borne1 = mpadd(norme1,eps);
+  if (!BORNE) borne2 = mpsub(norme1,eps);
+  else        borne2 = mpmul(norme1,alpha);
+  if (DEBUGLEVEL)
+    fprintferr("smallvectors looking for norm < %Z\n",gprec_w(borne1,3));
+
   v = cgetg(N,t_VEC);
   inc = const_vecsmall(n, 1);
 
@@ -3379,7 +3355,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
           GEN dummy = cgetg(1, t_STR);
           for (i=s+1; i<=stockmax; i++) gel(norms,i) = dummy;
         }
-	gerepileall(av,check?7:4,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
+	gerepileall(av,check?7:6,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
     }
     while (k > 1);
@@ -3401,7 +3377,21 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         s = 0; checkcnt = 0;
       }
     }
-    else if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
+    else
+    {
+      if (!BORNE) /* find minimal vectors */
+      {
+        if (mpcmp(norme1, borne2) < 0)
+        {
+          borne1 = mpadd(norme1, eps);
+          borne2 = mpsub(norme1, eps);
+          s = 0; 
+        }
+      }
+      else
+        if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
+    }
+
     if (++s <= stockmax)
     {
       if (check) gel(norms,s) = norme1;
@@ -3439,7 +3429,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         }
         else
         {
-          if (!stockall) goto END;
+          if (!stockall && BORNE) goto END;
           for (i = 1; i <= s; i++) Snew[i] = S[i];
         }
         if (stockmax != stockmaxnew)
@@ -3477,11 +3467,8 @@ END:
     setlg(pols,j+1);
     setlg(alph,j+1);
     if (stockmax && isclone(S)) { alph = forcecopy(alph); gunclone(S); }
-    return mkvec4(pols, alph, stoi(j), mpsub(borne1, eps));
+    return mkvec2(pols, alph);
   }
-  u = cgetg(4,t_VEC);
-  gel(u,1) = stoi(s<<1);
-  gel(u,2) = normax1;
   if (stockmax)
   {
     setlg(S,stockmax+1);
@@ -3490,7 +3477,8 @@ END:
   }
   else
     S = cgetg(1,t_MAT);
-  gel(u,3) = S; return u;
+  if (!BORNE) normax1 = mpsub(borne1, eps);
+  return mkvec3(utoi(s<<1), normax1, S);
 }
 
 /* solve q(x) = x~.a.x <= bound, a > 0.
@@ -3562,8 +3550,6 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
     r = sqred1_from_QR(r, gprecision(vnorm));
     if (!r) pari_err(precer,"fincke_pohst");
-    if (!bound) bound = gsqr(gcoeff(r,1,1));
-
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (CHECK)

@@ -6905,8 +6905,10 @@ implementation is chosen if the following flag is used:
 
 If $\fl=2$, $x$ can have non integral real entries. In this case, if $b$
 is omitted, the ``minimal'' vectors only have approximately the same norm.
-If $m$ is omitted, all vectors found are stored and returned; note that
-this may be a huge vector!
+If $b$ is omitted, $m$ is an upper bound for the number of vectors that
+will be stored and returned, but all minimal vectors are nevertheless
+enumerated. If $m$ is omitted, all vectors found are stored and returned;
+note that this may be a huge vector! 
 
 \syn{qfminim0}{x,b,m,\fl,\var{prec}}, also available are \funs{minim}{x,b,m}
 ($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$). In all cases, an omitted $b$
