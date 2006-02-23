@@ -199,23 +199,23 @@ gred_rfrac_copy(GEN n, GEN d)
 
 static GEN div_pol_scal(GEN x, GEN y);
 
-/* d a t_POL, gcd(n,d) = 1. Not memory clean */
+/* d a t_POL, n a coprime t_POL of same var or "scalar". Not memory clean */
 GEN
 gred_rfrac_simple(GEN n, GEN d)
 {
   GEN c, cn, cd, z;
 
   cd = content(d);
-  cn = content(n);
+  cn = (typ(n) == t_POL && varn(n) == varn(d))? content(n): n;
   if (!gcmp1(cd)) {
     d = div_pol_scal(d,cd);
     if (!gcmp1(cn))
     {
       if (gcmp0(cn)) {
-        n = typ(n) == t_POL? div_pol_scal(n,cd): gdiv(n, cd);
+        n = (cn != n)? div_pol_scal(n,cd): gdiv(n, cd);
         c = gen_1;
       } else {
-        n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+        n = (cn != n)? div_pol_scal(n,cn): gen_1;
         c = gdiv(cn,cd);
       }
     }
@@ -227,7 +227,7 @@ gred_rfrac_simple(GEN n, GEN d)
       if (gcmp0(cn)) {
         c = gen_1;
       } else {
-        n = typ(n) == t_POL? div_pol_scal(n,cn): gdiv(n, cn);
+        n = (cn != n)? div_pol_scal(n,cn): gen_1;
         c = cn;
       }
     }
