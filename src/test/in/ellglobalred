@@ -1,19 +1,9 @@
-check(L)=
-{ local(e);
-  N = L[1];
-  for(i=2,#L,
-    e = L[i][2];
-    M = ellglobalred( ellinit(e, 1) )[1];
+{
+  forell(E,1,9999,
+    N = ellconvertname(E[1])[1];
+    M = ellglobalred( ellinit(E[2], 1) )[1];
     if (N != M, print(e," bad for N = ",N))
   );
 }
-
-checkfile(n) =
-{ local(v);
-  v = read( Str(default(datadir,,1), "/elldata/ell", n) );
-  for (i = 1, #v, check(v[i]))
-}
-for (i = 0, 9, checkfile(i))
-
 print("Total time spent: ",gettime);
 \q
