@@ -97,6 +97,8 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
        must use global variable hiremainder/overlow when operating on limbs
        instead of LOCAL_HIREMAINDER trick ). If this slows down your
        application (it should not), install gcc or use the gmp kernel.
+    6- allow arbitrary n in divisors(n) and fordiv(n,), provided factor(n)
+       succeeds [ was restricted to t_INT or their factorization matrix ]
 
   Added
     1- [library] new function isinexact

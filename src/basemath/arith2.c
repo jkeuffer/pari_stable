@@ -1294,30 +1294,55 @@ sumdivk(GEN n, long k)
 GEN
 divisors(GEN n)
 {
-  pari_sp tetpil, av = avma;
-  long i, j, l, nbdiv;
+  pari_sp av = avma;
+  long i, j, l;
+  ulong nbdiv;
+  int isint = 1;
   GEN *d, *t, *t1, *t2, *t3, P, E, e;
 
-  if (typ(n) != t_MAT || lg(n) != 3) n = auxdecomp(n,1);
-
-  P = gel(n,1); l = lg(P);
+  if (typ(n) == t_MAT && lg(n) == 3)
+  {
+    P = gel(n,1); l = lg(P);
+    for (i = 1; i < l; i++)
+      if (typ(gel(P,i)) != t_INT) { isint = 0; break; }
+  }
+  else
+  {
+    if (typ(n) == t_INT)
+      n = auxdecomp(n,1);
+    else {
+      isint = 0;
+      n = factor(n);
+    }
+    P = gel(n,1); l = lg(P);
+  }
   E = gel(n,2);
-  if (l>1 && signe(P[1]) < 0) { E++; P++; l--; } /* skip -1 */
+  if (isint && l>1 && signe(P[1]) < 0) { E++; P++; l--; } /* skip -1 */
   e = cgetg(l, t_VECSMALL);
   nbdiv = 1;
   for (i=1; i<l; i++)
   {
     e[i] = itos(gel(E,i));
-    nbdiv = itos_or_0( mulss(nbdiv, 1+e[i]) );
+    if (e[i] < 0) err(talker, "denominators not allowed in divisors");
+    nbdiv = itou_or_0( muluu(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)
     pari_err(talker, "too many divisors (more than %ld)", LGBITS - 1);
   d = t = (GEN*) cgetg(nbdiv+1,t_VEC);
   *++d = gen_1;
-  for (i=1; i<l; i++)
-    for (t1=t,j=e[i]; j; j--,t1=t2)
-      for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
-  tetpil = avma; return gerepile(av,tetpil,sort((GEN)t));
+  if (isint)
+  {
+    for (i=1; i<l; i++)
+      for (t1=t,j=e[i]; j; j--,t1=t2)
+        for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
+    e = sort((GEN)t);
+  } else {
+    for (i=1; i<l; i++)
+      for (t1=t,j=e[i]; j; j--,t1=t2)
+        for (t2=d, t3=t1; t3<t2; ) *++d = gmul(*++t3, gel(P,i));
+    e = (GEN)t;
+  }
+  return gerepileupto(av, e);
 }
 
 GEN

@@ -1755,8 +1755,12 @@ $x$ by $y$, again as a vector.
 \syn{dirmul}{x,y}.
 
 \subsecidx{divisors}$(x)$: creates a row vector whose components are the
-positive divisors of the integer $x$ in increasing order. The factorization
-of $x$ (as output by \tet{factor}) can be used instead.
+divisors of $x$. The factorization of $x$ (as output by \tet{factor}) can
+be used instead.
+
+By definition, these divisors are the products of the irreducible
+factors of $n$, as produced by \kbd{factor(n)}. If $n$ is an integer,
+they are the positive divisors, in increasing order.
 
 \syn{divisors}{x}.
 
@@ -8331,13 +8335,35 @@ current function call (or the top level loop). $n$ must be bigger than 1.
 If $n$ is greater than the number of enclosing loops, all enclosing loops
 are exited.
 
-\subsubsecidx{for}$(X=a,b,\var{seq})$: the formal variable $X$ going from
-$a$ to $b$, the \var{seq} is evaluated. Nothing is done if $a>b$.
+\subsubsecidx{for}$(X=a,b,\var{seq})$: evaluate \var{seq}, where 
+the formal variable $X$ goes from $a$ to $b$. Nothing is done if $a>b$.
 $a$ and $b$ must be in $\R$.
 
-\subsubsecidx{fordiv}$(n,X,\var{seq})$: the formal variable $X$ ranging
-through the positive divisors of $n$, the sequence \var{seq} is evaluated.
-$n$ must be of type integer.
+\subsubsecidx{fordiv}$(n,X,\var{seq})$: evaluate \var{seq}, where
+the formal variable $X$ ranges through the divisors of $n$
+(see \tet{divisors}, which is used as a subroutine). It is assumed that
+\kbd{factor} can handle $n$, without negative exponents. Instead of $n$,
+it is possible to input a factorization matrix, i.e. the output of
+\kbd{factor(n)}.
+
+This routine uses \kbd{divisors} as a subroutine, then loops over the
+divisors. In particular, if $n$ is an integer, divisors are sorted by
+increasing size.
+
+To avoid storing all divisors, possibly using a lot of space, the
+following routine loops over the divisors using essentially constant
+space:
+\bprog
+    FORDIV(N)=
+    { local(P, E);
+   
+      P = factor(N); E = P[,2]; P = P[,1]; 
+      forvec( v = vector(#E, i, [0,E[i]]),
+        X = factorback(P, v)
+        ...
+      );
+    }
+@eprog
 
 \subsubsecidx{forell}$(E,a,b,\var{seq})$: the formal variable $E$ ranging
 through all elliptic curves of conductors from $a$ to $b$ the sequence
