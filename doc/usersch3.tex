@@ -2642,6 +2642,21 @@ $y'$ are the new coordinates, then $x=u^2x'+r$, $y=u^3y'+su^2x'+t$ (see also
 
 \syn{pointch}{x,v}.
 
+\subsecidx{ellconvertname}$(\var{name})$: 
+convert an elliptic curve name (as found in the elldata database) from a string
+to a triplet $[\var{conductor}, \var{isogeny class}, \var{index}]$. It will
+also convert a triplet back to a curve name.
+
+Examples:
+\bprog
+? ellconvertname("123b1")
+%1 = [123, 1, 1]
+? ellconvertname(%)
+%2 = "123b1"
+@eprog
+
+\syn{ellconvertname}{\var{name}}.
+
 \subsecidx{elleisnum}$(E,k,\{\fl=0\})$: $E$ being an elliptic curve as
 output by \kbd{ellinit} (or, alternatively, given by a 2-component vector
 $[\omega_1,\omega_2]$ representing its periods), and $k$ being an even

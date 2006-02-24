@@ -33,17 +33,6 @@ strtoclass(const char *s)
   return c;
 }
 
-/*This function is used externally to build elldata*/
-
-long
-ellnamecond(const char *s)
-{
-  long f=0;
-  while ('0'<=*s && *s<='9')
-    f=10*f+*(s++)-'0';
-  return f;
-}
-
 /*Take a curve name like "100a2" and set
  * f to the conductor, (100)
  * c to the isogeny class (in base 26), ("a" or 0)
@@ -71,6 +60,57 @@ ellparsename(const char *s, long *f, long *c, long *i)
     *i=10**i+*(s++)-'0';
   if (j==10) {*i=-1; return 0;}
   return !*s;
+}
+
+/* Take an integer and convert it to base 26 */
+static GEN
+ellrecode(long x)
+{
+  GEN str;
+  char *s;
+  long d = 0, n = x;
+  do
+  { 
+    d++;
+    n/=26;
+  } while(n);
+  str = cgetg(nchar2nlong(d+1)+1, t_STR);
+  s = GSTR(str);
+  s[d] = 0;
+  n = x;
+  do
+  { 
+    s[--d] = n%26 + 'a';
+    n/=26;
+  } while(n);
+  return str;
+}
+
+GEN 
+ellconvertname(GEN n)
+{
+  switch(typ(n))
+  {
+  case t_STR:
+    {
+      long f,i,c;
+      if (!ellparsename(GSTR(n),&f,&c,&i))
+        pari_err(talker,"Incorrect curve name in ellconvertname");
+      return mkvec3s(f,c,i);
+    }
+  case t_VEC:
+    if (lg(n)!=4)
+      pari_err(talker,"Incorrect vector in ellconvertname");
+    else
+    {
+      pari_sp ltop=avma;
+      GEN f=gel(n, 1), c=gel(n, 2), s=gel(n, 3);
+      if (typ(f)!=t_INT && typ(c)!=t_INT && typ(s)!=t_INT)
+        pari_err(typeer,"ellconvertname");
+      return gerepileupto(ltop, concat(concat(f,ellrecode(itos(c))),s));
+    }
+  }
+  return NULL; /*Not reached*/
 }
 
 GEN
