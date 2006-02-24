@@ -6329,17 +6329,34 @@ sup norm of the smallest relation, \tet{algdep} returns that bound instead.
 In general, a suitable non-zero value of $\fl$ will improve on the
 default behaviour:
 \bprog
+\\ LLL
 ? \p200
-? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong result in 2.6s (PIII 1GHz)
-? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right result in 8s (PIII 1GHz)
-? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong result in 8s
+? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 3.8s
+? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 1s
+? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right in 3.3s
+? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong in 2.9s
 ? \p250
-? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right result in 8.5s
+? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.8s
+? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 3.4s
+\\ PSLQ
 ? \p200
-? algdep(2^(1/6)+3^(1/5), 30); \\ wrong result in 34s
+? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 14s.
 ? \p250
-? algdep(2^(1/6)+3^(1/5), 30); \\ right result in 42s
-@eprog
+? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 18s
+@eprog\noindent
+Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
+flag produces its first correct result at 205 digits, and from then on a
+steady stream of correct results. Interestingly enough, our PSLQ also
+reliably succeeds from 205 digits on (and is 5 times slower at that
+accuracy).
+
+The above example is the testcase studied in a 2000 paper by Borwein and
+Lisonek, Applications of integer relation algorithms, \emph{Discrete Math.},
+{\bf 217}, p.~65--82. The paper conludes in the superiority of the PSLQ
+algorithm, which either shows that PARI's implementation of PSLQ is lacking,
+or that its LLL is extremely good. The version of PARI tested there was
+1.39, which succeeded reliably from precision 265 on, in about 60 as much
+time as the current version.
 
 \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
 Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
@@ -6419,13 +6436,16 @@ If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces a
 suitable (dual) lattice.
 
 Otherwise, the value of $\fl$ determines the algorithm used; in the current
-version of PARI, we suggest to use \emph{positive} values, since it is the
-fastest and most robust implementation. See the example in \secref{se:algdep}
-(\kbd{algdep}).
+version of PARI, we suggest to use \emph{non-negative} values, since it is by
+far the fastest and most robust implementation. See the detailed example in
+\secref{se:algdep} (\kbd{algdep}).
 
-If $\fl=0$, uses the PSLQ algorithm. This may return a real number $B$,
-indicating that the input accuracy was exhausted and that no relation exist
-whose sup norm is less than $B$.
+If $\fl\geq 0$, uses a floating point (variable precision) LLL algorithm.
+This is in general much faster than the other variants. 
+If $\fl = 0$ the accuracy is chosen internally using a crude heuristic.
+If $\fl > 0$ the computation is done with an accuracy of $\fl$ decimal digits.
+In that case, the parameter $\fl$ should be between 0.6 and 0.9 times the
+number of correct decimal digits in the input.
 
 If $\fl=-1$, uses a variant of the \idx{LLL} algorithm due to Hastad,
 Lagarias and Schnorr (STACS 1986). If the precision is too low, the routine
@@ -6436,9 +6456,12 @@ Returns a non trivial element of the kernel of $x$, or $0$ if $x$ has trivial
 kernel. The element is defined over the field of coefficients of $x$, and is
 in general not integral.
 
-If $\fl>0$, uses the LLL algorithm with an accuracy of $\fl$ decimal digits.
-The parameter $\fl$ should be between 0.6 and 0.9 times the number of correct
-decimal digits in the input. This is in general faster than the other variants. 
+If $\fl=-3$, uses the PSLQ algorithm. This may return a real number $B$,
+indicating that the input accuracy was exhausted and that no relation exist
+whose sup norm is less than $B$.
+
+If $\fl=-4$, uses an experimental 2-level PSLQ, which does not work at all.
+(Should be rewritten.)
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
 \funs{lindep}{x,\var{prec}} ($\fl=0$).
