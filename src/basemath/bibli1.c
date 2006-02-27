@@ -1913,7 +1913,16 @@ lindep2(GEN x, long bit)
   if (lx<=2) return cgetg(1,t_VEC);
   if (bit < 0) err(talker, "negative accuracy in lindep2");
   if (!bit)
-    bit = bit_accuracy_mul(gprecision(x), 0.8);
+  {
+    bit = gprecision(x);
+    if (!bit)
+    {
+      x = primpart(x);
+      bit = 32;
+    }
+    else
+      bit = bit_accuracy_mul(bit, 0.8);
+  }
   else
     bit = (long) (bit/L2SL10);
   re = real_i(x);
