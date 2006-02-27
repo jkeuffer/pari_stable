@@ -2496,7 +2496,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 {
   GEN resi,C,cst,cstlog,coeflog,cs,coef;
   GEN lambd,gammas,gammaunmoins,gammas2,gammaunmoins2,var1,var2;
-  GEN p1,unmoins,gexpro,gar,val,valm,valk,valkm;
+  GEN smoinun,unmoins,gexpro,gar,val,valm,valk,valkm;
   long ts = typ(s), r1,r2,ru,i0,i,j,k,N0,sl,prec,bigprec;
   pari_sp av = avma;
 
@@ -2538,7 +2538,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     if (sl < 0) /* r2 = 0 && odd(sl) */
     {
       gammaunmoins2 = ggamma(gmul2n(unmoins,-1),prec);
-      var1=var2=gen_1;
+      var1 = var2 = gen_1;
       for (i=2; i<=N0; i++)
 	if (coef[i])
 	{
@@ -2549,15 +2549,16 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       lambd=gadd(lambd,gmul(gmul(var1,cs),gar));
       lambd=gadd(lambd,gmul(gmul(var2,gdiv(cst,cs)),
 			    gpowgs(gammaunmoins2,r1)));
+      var1 = gen_0;
       for (i=1; i<=i0; i+=2)
       {
 	valk  = val;
         valkm = valm;
 	for (k=1; k<=ru; k++)	
 	{
-          p1 = gcoeff(C,i,k);
-	  lambd = gsub(lambd,gdiv(p1,valk )); valk  = mulii(val,valk);
-	  lambd = gsub(lambd,gdiv(p1,valkm)); valkm = mulii(valm,valkm);
+          GEN c = gcoeff(C,i,k);
+	  var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
+	  var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val, 2);
         valm = addis(valm,2);
@@ -2576,14 +2577,15 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
           if (sl <= i0)
           {
-            p1=gen_0;
+            GEN t=gen_0;
             for (j=1; j<=ru+1; j++)
-              p1 = gadd(p1, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
-            var2=gadd(var2,gdiv(p1,gmulsg(i,gexpro)));
+              t = gadd(t, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
+            var2=gadd(var2,gdiv(t,gmulsg(i,gexpro)));
           }
 	}
       lambd=gadd(lambd,gmul(gmul(var1,cs),gar));
       lambd=gadd(lambd,gmul(var2,gdiv(cst,cs)));
+      var1 = gen_0;
       for (i=1; i<=i0; i++)
       {
 	valk  = val;
@@ -2591,15 +2593,15 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
         if (i == sl)
           for (k=1; k<=ru; k++)
           {	
-            p1 = gcoeff(C,i,k);
-            lambd = gsub(lambd,gdiv(p1,valk)); valk = mulii(val,valk);
+            GEN c = gcoeff(C,i,k);
+            var1 = gsub(var1,gdiv(c,valk)); valk = mulii(val,valk);
           }
         else
 	for (k=1; k<=ru; k++)
 	{	
-            p1 = gcoeff(C,i,k);
-            lambd = gsub(lambd,gdiv(p1,valk )); valk  = mulii(val,valk);
-            lambd = gsub(lambd,gdiv(p1,valkm)); valkm = mulii(valm,valkm);
+            GEN c = gcoeff(C,i,k);
+            var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
+            var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val,1);
         valm = addis(valm,1);
@@ -2614,15 +2616,16 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     else
       s = gprec_w(s, bigprec);
 
-    unmoins = gsub(gen_1,s);
-    lambd = gdiv(resi,gmul(s,gsub(s,gen_1)));
+    smoinun = gsubgs(s,1);
+    unmoins = gneg(smoinun);
+    lambd = gdiv(resi,gmul(s,smoinun));
     gammas = ggamma(s,prec);
     gammas2= ggamma(gmul2n(s,-1),prec);
     gar = gmul(gpowgs(gammas,r2),gpowgs(gammas2,r1));
     cs = gexp(gmul(cstlog,s),prec);
     var1 = gmul(Pi,s);
     gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,gsub(s,gen_1),prec)),
+    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,smoinun,prec)),
                              gammas2),
                         gmul(gcos(gmul2n(var1,-1),prec),gammas));
     var1 = var2 = gen_1;
@@ -2639,28 +2642,30 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
                             gpowgs(gammaunmoins2,r1)));
     val  = s;
     valm = unmoins;
+    var1 = gen_0;
     for (i=1; i<=i0; i++)
     {
       valk  = val;
       valkm = valm;
       for (k=1; k<=ru; k++)
       {
-        p1 = gcoeff(C,i,k);
-	lambd = gsub(lambd,gdiv(p1,valk )); valk  = gmul(val, valk);
-	lambd = gsub(lambd,gdiv(p1,valkm)); valkm = gmul(valm,valkm);
+        GEN c = gcoeff(C,i,k);
+	var1 = gsub(var1,gdiv(c,valk )); valk  = gmul(val, valk);
+	var1 = gsub(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
       }
       if (r2)
       {
-	val  = gadd(val, gen_1);
-        valm = gadd(valm,gen_1);
+	val  = gaddgs(val, 1);
+        valm = gaddgs(valm,1);
       }
       else
       {
-	val  = gadd(val, gen_2);
-        valm = gadd(valm,gen_2); i++;
+	val  = gaddgs(val, 2);
+        valm = gaddgs(valm,2); i++;
       }
     }
   }
+  lambd = gadd(lambd, var1);
   if (!flag) lambd = gdiv(lambd,gmul(gar,cs)); /* zetak */
   if (gprecision(lambd) > prec2) lambd = gprec_w(lambd, prec2);
   return gerepileupto(av, lambd);
