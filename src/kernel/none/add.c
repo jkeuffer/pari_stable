@@ -310,8 +310,8 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   ez = ey - (j | (i<<TWOPOTBITS_IN_LONG));
   if (extend)
   { /* z was extended by d+1 words [should be e bits = d words + m bits] */
-    /* not worth keeping extra word if less than 16 significant bits in there */
-    if (m - j < 16 && lz > 3)
+    /* not worth keeping extra word if less than 5 significant bits in there */
+    if (m - j < 5 && lz > 3)
     { /* shorten z */
       ulong last = (ulong)z[--lz]; /* cancelled word */
 
