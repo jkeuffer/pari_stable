@@ -36,7 +36,7 @@ checkbnf_i(GEN bnf)
     switch (lg(bnf))
     {
       case 11: return bnf;
-      case 7:  return checkbnf(gel(bnf,1));
+      case 7:  return checkbnf_i(gel(bnf,1));
     }
   return NULL;
 }
@@ -48,9 +48,9 @@ checknf_i(GEN nf)
     switch(lg(nf))
     {
       case 10: return nf;
-      case 11: return checknf(gel(nf,7));
-      case 7:  return checknf(gel(nf,1));
-      case 3: if (typ(nf[2]) == t_POLMOD) return checknf(gel(nf,1));
+      case 11: return checknf_i(gel(nf,7));
+      case 7:  return checknf_i(gel(nf,1));
+      case 3: if (typ(nf[2]) == t_POLMOD) return checknf_i(gel(nf,1));
     }
   return NULL;
 }

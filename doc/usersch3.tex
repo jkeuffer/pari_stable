@@ -8372,11 +8372,11 @@ current function call (or the top level loop). $n$ must be bigger than 1.
 If $n$ is greater than the number of enclosing loops, all enclosing loops
 are exited.
 
-\subsubsecidx{for}$(X=a,b,\var{seq})$: evaluate \var{seq}, where 
+\subsubsecidx{for}$(X=a,b,\var{seq})$: evaluates \var{seq}, where 
 the formal variable $X$ goes from $a$ to $b$. Nothing is done if $a>b$.
 $a$ and $b$ must be in $\R$.
 
-\subsubsecidx{fordiv}$(n,X,\var{seq})$: evaluate \var{seq}, where
+\subsubsecidx{fordiv}$(n,X,\var{seq})$: evaluates \var{seq}, where
 the formal variable $X$ ranges through the divisors of $n$
 (see \tet{divisors}, which is used as a subroutine). It is assumed that
 \kbd{factor} can handle $n$, without negative exponents. Instead of $n$,
@@ -8387,8 +8387,8 @@ This routine uses \kbd{divisors} as a subroutine, then loops over the
 divisors. In particular, if $n$ is an integer, divisors are sorted by
 increasing size.
 
-To avoid storing all divisors, possibly using a lot of space, the
-following routine loops over the divisors using essentially constant
+To avoid storing all divisors, possibly using a lot of memory, the following
+(much slower) routine loops over the divisors using essentially constant
 space:
 \bprog
     FORDIV(N)=
@@ -8397,22 +8397,26 @@ space:
       P = factor(N); E = P[,2]; P = P[,1]; 
       forvec( v = vector(#E, i, [0,E[i]]),
         X = factorback(P, v)
-        ...
+        \\ ...
       );
     }
+    ? for(i=1,10^5, FORDIV(i))
+    time = 3,445 ms.
+    ? for(i=1,10^5, fordiv(i, d, ))
+    time = 490 ms.
 @eprog
 
-\subsubsecidx{forell}$(E,a,b,\var{seq})$: the formal variable $E$ ranging
-through all elliptic curves of conductors from $a$ to $b$ the sequence
-\var{seq} is evaluated. This requires the elldata database to be installed
-and to contain data for the specified conductors.
+\subsubsecidx{forell}$(E,a,b,\var{seq})$: evaluates \var{seq}, where 
+the formal variable $E$ ranges through all elliptic curves of conductors from
+$a$ to $b$. Th \tet{elldata} database must be installed and contain data for
+the specified conductors.
 
-\subsubsecidx{forprime}$(X=a,b,\var{seq})$: the formal variable $X$
-ranging over the prime numbers between $a$ to $b$ (including $a$ and $b$
-if they are prime), the \var{seq} is evaluated. More precisely, the value
-of $X$ is incremented to the smallest prime strictly larger than $X$ at the
-end of each iteration. Nothing is done if $a>b$. Note that $a$ and $b$ must
-be in $\R$.
+\subsubsecidx{forprime}$(X=a,b,\var{seq})$: evaluates \var{seq},
+where the formal variable $X$ ranges over the prime numbers between $a$ to
+$b$ (including $a$ and $b$ if they are prime). More precisely, the value of
+$X$ is incremented to the smallest prime strictly larger than $X$ at the end
+of each iteration. Nothing is done if $a>b$. Note that $a$ and $b$ must be in
+$\R$.
 
 \bprog
 ? { forprime(p = 2, 12,
@@ -8426,8 +8430,8 @@ be in $\R$.
 11
 @eprog
 
-\subsubsecidx{forstep}$(X=a,b,s,\var{seq})$: the formal variable $X$
-going from $a$ to $b$, in increments of $s$, the \var{seq} is evaluated.
+\subsubsecidx{forstep}$(X=a,b,s,\var{seq})$: evaluates \var{seq},
+where the formal variable $X$ goes from $a$ to $b$, in increments of $s$.
 Nothing is done if $s>0$ and $a>b$ or if $s<0$ and $a<b$. $s$ must be in
 $\R^*$ or a vector of steps $[s_1,\dots,s_n]$. In the latter case, the
 successive steps are used in the order they appear in $s$.
@@ -8442,7 +8446,7 @@ successive steps are used in the order they appear in $s$.
 19
 @eprog
 
-\subsubsecidx{forsubgroup}$(H=G,\{B\},\var{seq})$: executes \var{seq} for
+\subsubsecidx{forsubgroup}$(H=G,\{B\},\var{seq})$: evaluates \var{seq} for
 each subgroup $H$ of the \emph{abelian} group $G$ (given in
 SNF\sidx{Smith normal form} form or as a vector of elementary divisors),
 whose index is bounded by $B$. The subgroups are not ordered in any
@@ -8481,33 +8485,36 @@ determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
 one of its $p$-Sylow subgroups has a cyclic factor with more than $2^{31}$,
 resp.~$2^{63}$ elements on a $32$-bit, resp.~$64$-bit architecture.
 
-\subsubsecidx{forvec}$(X=v,\var{seq},\{\fl=0\})$: $v$ being an $n$-component
+\subsubsecidx{forvec}$(X=v,\var{seq},\{\fl=0\})$: Let $v$ be an $n$-component
 vector (where $n$ is arbitrary) of two-component vectors $[a_i,b_i]$
-for $1\le i\le n$, the \var{seq} is evaluated with the formal variable
-$X[1]$ going from $a_1$ to $b_1$,\dots,$X[n]$ going from $a_n$ to $b_n$.
-The formal variable with the highest index moves the fastest. If $\fl=1$,
-generate only nondecreasing vectors $X$, and if $\fl=2$, generate only
-strictly increasing vectors $X$.
+for $1\le i\le n$. This routine evaluates \var{seq}, where the formal
+variables $X[1],\dots, X[n]$ go from $a_1$ to $b_1$,\dots, from $a_n$ to
+$b_n$, i.e.~$X$ goes from $[a_1,\dots,a_n]$ to $[b_1,\dots,b_n]$ with respect
+to the lexicographic ordering. (The formal variable with the highest index
+moves the fastest.) If $\fl=1$, generate only nondecreasing vectors $X$, and
+if $\fl=2$, generate only strictly increasing vectors $X$.
 
-\subsubsecidx{if}$(a,\{\var{seq1}\},\{\var{seq2}\})$: if $a$ is non-zero,
-the expression sequence \var{seq1} is evaluated, otherwise the expression
-\var{seq2} is evaluated. Of course, \var{seq1} or \var{seq2} may be empty,
-so \kbd{if ($a$,\var{seq})} evaluates \var{seq} if $a$ is not equal to zero
+\subsubsecidx{if}$(a,\{\var{seq1}\},\{\var{seq2}\})$:
+evaluates the expression sequence \var{seq1} if $a$ is non-zero, otherwise
+the expression \var{seq2}. Of course, \var{seq1} or \var{seq2} may be empty:
+
+\kbd{if ($a$,\var{seq})} evaluates \var{seq} if $a$ is not equal to zero
 (you don't have to write the second comma), and does nothing otherwise,
-whereas \kbd{if ($a$,,\var{seq})} evaluates \var{seq} if $a$ is equal to
-zero, and does nothing otherwise. You could get the same result using
-the \kbd{!} (\kbd{not}) operator: \kbd{if (!$a$,\var{seq})}.
 
-  Note that the boolean operators \kbd{\&\&} and \kbd{||} are evaluated
+\kbd{if ($a$,,\var{seq})} evaluates \var{seq} if $a$ is equal to zero, and
+does nothing otherwise. You could get the same result using the \kbd{!}
+(\kbd{not}) operator: \kbd{if (!$a$,\var{seq})}.
+
+Note that the boolean operators \kbd{\&\&} and \kbd{||} are evaluated
 according to operator precedence as explained in \secref{se:operators}, but
-that, contrary to other operators, the evaluation of the arguments is
-stopped as soon as the final truth value has been determined. For instance
+that, contrary to other operators, the evaluation of the arguments is stopped
+as soon as the final truth value has been determined. For instance
 \bprog
-if (reallydoit && longcomplicatedfunction(), ...)%
+    if (reallydoit && longcomplicatedfunction(), ...)%
 @eprog
 \noindent is a perfectly safe statement.
 
-  Recall that functions such as \kbd{break} and \kbd{next} operate on
+Recall that functions such as \kbd{break} and \kbd{next} operate on
 \emph{loops} (such as \kbd{for$xxx$}, \kbd{while}, \kbd{until}). The \kbd{if}
 statement is \emph{not} a loop (obviously!).
 
@@ -8521,16 +8528,15 @@ loops, all enclosing loops are exited.
 result $x$. If $x$ is omitted, return the \kbd{(void)} value (return no
 result, like \kbd{print}).
 
-\subsubsecidx{until}$(a,\var{seq})$: evaluates expression sequence \var{seq}
-until $a$ is not equal to 0 (i.e.~until $a$ is true). If $a$ is initially
-not equal to 0, \var{seq} is evaluated once (more generally, the condition
-on $a$ is tested \emph{after} execution of the \var{seq}, not before as in
-\kbd{while}).
+\subsubsecidx{until}$(a,\var{seq})$: evaluates \var{seq} until $a$ is not
+equal to 0 (i.e.~until $a$ is true). If $a$ is initially not equal to 0,
+\var{seq} is evaluated once (more generally, the condition on $a$ is tested
+\emph{after} execution of the \var{seq}, not before as in \kbd{while}).
 
-\subsubsecidx{while}$(a,\var{seq})$: while $a$ is non-zero evaluate the
+\subsubsecidx{while}$(a,\var{seq})$: while $a$ is non-zero, evaluates the
 expression sequence \var{seq}. The test is made \emph{before} evaluating
 the $seq$, hence in particular if $a$ is initially equal to zero the
-\var{seq} will not be evaluated at all.\smallskip
+\var{seq} will not be evaluated at all.
 
 \subsec{Specific functions used in GP programming}.
 \label{se:gp_program}
@@ -8825,7 +8831,7 @@ standard output (this won't get into your logfile), and control returns
 to the PARI system. This simply calls the C \kbd{system} command.
 
 \subsubsecidx{trap}$(\{e\}, \{\var{rec}\}, \{\var{seq}\})$: tries to
-execute \var{seq}, trapping error $e$, that is effectively preventing it
+evaluate \var{seq}, trapping error $e$, that is effectively preventing it
 from aborting computations in the usual way; the recovery sequence
 \var{rec} is executed if the error occurs and the evaluation of \var{rec}
 becomes the result of the command. If $e$ is omitted, all exceptions are

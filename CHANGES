@@ -83,6 +83,8 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
    24- qfminim(x,,,2) wrong when x has huge entries. Work out a sensible
        default precision if x has exact entries.
 BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
+   26- factorback(x,y) --> error if x,y were valid t_VEC with exactly 6
+       components [ typo in checknf_i ]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
