@@ -104,6 +104,7 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
     7- made LLL the default algorithm in algdep / lindep again [ replaces PSLQ ]
        Our PSLQ implementation is slow and unstable, and LLL performs much
        better, see the example in ??algdep.
+    8- addrr: extend accuracy much less frequently
 
   Added
     1- [library] new function isinexact.

@@ -61,7 +61,7 @@
 ? ellheight(acurve,apoint)
 0.81778253183950144377417759611107234575
 ? ellheight(acurve,apoint,1)
-0.81778253183950144377417759611107234575
+0.81778253183950144377417759611107234576
 ? ellordinate(acurve,1)
 [8, 3]
 ? ellztopoint(acurve,ellpointtoz(acurve,apoint))
@@ -158,7 +158,7 @@ q^101)
 ? precision(cmcurve)
 38
 ? getheap
-[57, 4641]
+[57, 4639]
 ? print("Total time spent: ",gettime);
 Total time spent: 32
 ? \q
