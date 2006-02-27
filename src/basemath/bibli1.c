@@ -1921,7 +1921,7 @@ lindep2(GEN x, long bit)
       bit = 32;
     }
     else
-      bit = bit_accuracy_mul(bit, 0.8);
+      bit = (long)bit_accuracy_mul(bit, 0.8);
   }
   else
     bit = (long) (bit/L2SL10);
