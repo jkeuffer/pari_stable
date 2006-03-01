@@ -34,18 +34,6 @@
    __value;                                           \
 })
 
-#define shiftl(a, b)                                           \
-({ ulong __arg1 = (a), __shift = (b), __cshift = 64 - __shift; \
-   hiremainder = __arg1 >> __cshift;                           \
-   __arg1 << __shift;                                          \
-})
-
-#define shiftlr(a, b)                                          \
-({ ulong __arg1 = (a), __shift = (b), __cshift = 64 - __shift; \
-   hiremainder = __arg1 << __cshift;                           \
-   __arg1 >> __shift;                                          \
-})
-
 #define bfffo(a)                                                        \
 ({ ulong __arg1 = (a), __tmp, _a, _c;                                   \
     __asm__ ("mux1 %0 = %1, @rev" : "=r" (__tmp) : "r" (__arg1));       \

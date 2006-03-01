@@ -28,8 +28,6 @@ extern long addll(ulong x, ulong y);
 extern long addllx(ulong x, ulong y);
 extern long subll(ulong x, ulong y);
 extern long subllx(ulong x, ulong y);
-extern long shiftl(ulong x, ulong y);
-extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 
@@ -67,20 +65,6 @@ subllx(ulong x, ulong y)
   const ulong z = x-y-overflow;
   overflow = (z>x || (z==x && overflow));
   return (long) z;
-}
-
-INLINE long
-shiftl(ulong x, ulong y)
-{
-  hiremainder=x>>(BITS_IN_LONG-y);
-  return (x<<y);
-}
-
-INLINE long
-shiftlr(ulong x, ulong y)
-{
-  hiremainder=x<<(BITS_IN_LONG-y);
-  return (x>>y);
 }
 
 /* Version Peter Montgomery */

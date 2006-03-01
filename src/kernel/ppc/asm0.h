@@ -23,8 +23,6 @@ extern long addll(ulong a, ulong b);
 extern long addllx(ulong a, ulong b);
 extern long subll(ulong a, ulong b);
 extern long subllx(ulong a, ulong b);
-extern long shiftl(ulong x, ulong y);
-extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 extern long bfffo(ulong x); 
@@ -69,22 +67,6 @@ __value; \
 __asm__ ("subfc %0,%5,%2\n\tli %1,0\n\taddme %1,%5\n\tsubfc %0,%3,%4\n\taddme %1,%5\n\tneg %1,%5" \
    : "=r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong)0), "1" (overflow)); \
- __value; \
-})
-
-#define shiftl(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ ("subfic %2,%4,%5\n\tslw %0,%3,%4\n\tsrw %1,%3,%6\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
-   : "r" (__arg1), "r" (__arg2), "n" ((ulong) 32), "2" ((ulong)0)); \
- __value; \
-})
-
-#define shiftlr(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ ("subfic %2,%4,%5\n\tsrw %0,%3,%4\n\tslw %1,%3,%6\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
-   : "r" (__arg1), "r" (__arg2), "n" ((ulong) 32), "2" ((ulong)0)); \
  __value; \
 })
 

@@ -607,7 +607,6 @@ lgcdii(ulong* d, ulong* d1,
     }
     else
     {				/* dividend and divisor have the same length */
-      /* dd1 = shiftl(d1,sh) would have left hiremainder==0, and dd1 != 0. */
       dd1 = (*d1 << sh);
       if (!(HIGHMASK & dd1)) return 0;
       if (ld1 > 3)

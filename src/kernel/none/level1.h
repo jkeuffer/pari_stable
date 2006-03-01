@@ -140,8 +140,10 @@ GEN    rtor(GEN x, long prec);
 long   sdivsi(long x, GEN y)
 long   sdivsi_rem(long x, GEN y, long *rem);
 long   sdivss_rem(long x, long y, long *rem);
-void shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
-void shift_right2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
+void   shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
+void   shift_right2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
+ulong  shiftl(ulong x, ulong y);
+ulong  shiftlr(ulong x, ulong y);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
 long   smodss(long x, long y);
@@ -1112,5 +1114,20 @@ shift_right2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
     l     = *sb++;
     *tb++ = (l >> sh) | k;
   }
+}
+
+/* Backward compatibility. Inefficient && unused */
+extern ulong hiremainder;
+INLINE ulong
+shiftl(ulong x, ulong y)
+{
+  hiremainder=x>>(BITS_IN_LONG-y);
+  return (x<<y);
+}
+INLINE ulong
+shiftlr(ulong x, ulong y)
+{
+  hiremainder=x<<(BITS_IN_LONG-y);
+  return (x>>y);
 }
 #endif

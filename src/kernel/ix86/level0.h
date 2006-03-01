@@ -25,8 +25,6 @@ extern long addll(ulong x, ulong y);
 extern long addllx(ulong x, ulong y);
 extern long subll(ulong x, ulong y);
 extern long subllx(ulong x, ulong y);
-extern long shiftl(ulong x, ulong y);
-extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 extern long divll(ulong x, ulong y);
@@ -42,15 +40,6 @@ extern int  bfffo(ulong x);
 /* Use local variables whenever possible. */
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 #define LOCAL_OVERFLOW     register ulong overflow
-
-/* Different assemblers have different syntax for the "shldl" and "shrdl"
-   instructions. */
-#if defined(__EMX__) || defined(__DJGCC__) || defined(__GO32__) || (defined(linux) && !defined(__ELF__)) || defined(__386BSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(NeXT) || defined(__CYGWIN32__) || defined(__MINGW32__) || defined(COHERENT)
-#  define SHCL "%%cl,"
-#else
-#  define SHCL
-#endif
-
 
 #define addll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
@@ -88,42 +77,6 @@ extern int  bfffo(ulong x);
         : "cc"); \
   __value; \
 })
-
-
-#if 1
-#define shiftl(a,c) \
-({ ulong __valuelo = (a), __count = (c), __valuehi; \
-   __asm__ ("shldl "SHCL"%2,%0" /* shift %0 left by %cl bits, feeding in %2 from the right */ \
-        : "=q" (__valuehi) \
-        : "0" ((ulong)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
-   hiremainder = __valuehi; \
-   __valuelo << __count; \
-})
-#define shiftlr(a,c) \
-({ ulong __valuehi = (a), __count = (c), __valuelo; \
-   __asm__ ("shrdl "SHCL"%2,%0" /* shift %0 right by %cl bits, feeding in %2 from the left */ \
-        : "=q" (__valuelo) \
-        : "0" ((ulong)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
-   hiremainder = __valuelo; \
-   __valuehi >> __count; \
-})
-#else
-#define shiftl(a,c) \
-({ ulong __valuelo = (a), __count = (c), __valuehi; \
-   __asm__ ("shldl "SHCL"%2,%0" /* shift %0 left by %cl bits, feeding in %2 from the right */ \
-        : "=d" (hiremainder) \
-        : "0" ((ulong)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
-   __valuelo << __count; \
-})
-#define shiftlr(a,c) \
-({ ulong __valuehi = (a), __count = (c), __valuelo; \
-   __asm__ ("shrdl "SHCL"%2,%0" /* shift %0 right by %cl bits, feeding in %2 from the left */ \
-        : "=d" (hiremainder) \
-        : "0" ((ulong)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
-   __valuehi >> __count; \
-})
-#endif
-
 
 #define mulll(a,b) \
 ({ ulong __valuelo, __arg1 = (a), __arg2 = (b); \

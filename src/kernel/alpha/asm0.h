@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   extern long addllx(ulong a, ulong b);
   extern long subll(ulong a, ulong b);
   extern long subllx(ulong a, ulong b);
-  extern long shiftl(ulong x, ulong y);
-  extern long shiftlr(ulong x, ulong y);
   extern long mulll(ulong x, ulong y);
   extern long addmul(ulong x, ulong y);
 
@@ -62,22 +60,6 @@ __value; \
 __asm__ ("subq %4,%5,%2\n\tcmpult %4,%8,%3\n\tsubq %8,%7,%0\n\tcmpult %8,%6,%1\n\taddq %7,%9,%1\n\t" \
    : "=r" (__value), "=r" (overflow), "=&r" (__temp1), "=r" (__temp2)  \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong)0), "1" (overflow), "2" ((ulong)0), "3" ((ulong)0)); \
- __value; \
-})
-
-#define shiftl(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ ("subq %5,%4,%2\n\tsll %3,%4,%0\n\tsrl %3,%6,%1\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
-   : "r" (__arg1), "r" (__arg2), "n" ((ulong) 64), "2" ((ulong)0)); \
- __value; \
-})
-
-#define shiftlr(a, b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ ("subq %5,%4,%2\n\tsrl %3,%4,%0\n\tsll %3,%6,%1\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
-   : "r" (__arg1), "r" (__arg2), "n" ((ulong) 64), "2" ((ulong)0)); \
  __value; \
 })
 

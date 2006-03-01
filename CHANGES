@@ -111,6 +111,10 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
 BA  2- [elldata] function forell() to loop over elliptic curves.
 BA  3- [elldata] function ellconvertname() to parse curve name.
 
+  Removed
+    1- kernel functions shiftl / shiftlr (inefficient, unused, untested)
+       [ backward compatibility version in src/kernel/level1.h ]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
   Fixed

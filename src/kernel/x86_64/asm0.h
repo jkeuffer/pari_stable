@@ -27,8 +27,6 @@ extern long addll(ulong a, ulong b);
 extern long addllx(ulong a, ulong b);
 extern long subll(ulong a, ulong b);
 extern long subllx(ulong a, ulong b);
-extern long shiftl(ulong x, ulong y);
-extern long shiftlr(ulong x, ulong y);
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 extern long divll(ulong x, ulong y);
@@ -82,23 +80,6 @@ extern long bfffo(ulong x);
         : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
         : "cc"); \
   __value; \
-})
-
-#define shiftl(a,c) \
-({ ulong __valuelo = (a), __count = (c), __valuehi; \
-   __asm__ ("shldq "SHCL"%2,%0" /* shift %0 left by %cl bits, feeding in %2 from the right */ \
-        : "=q" (__valuehi) \
-        : "0" ((ulong)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
-   hiremainder = __valuehi; \
-   __valuelo << __count; \
-})
-#define shiftlr(a,c) \
-({ ulong __valuehi = (a), __count = (c), __valuelo; \
-   __asm__ ("shrdq "SHCL"%2,%0" /* shift %0 right by %cl bits, feeding in %2 from the left */ \
-        : "=q" (__valuelo) \
-        : "0" ((ulong)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
-   hiremainder = __valuelo; \
-   __valuehi >> __count; \
 })
 
 #define mulll(a,b) \
