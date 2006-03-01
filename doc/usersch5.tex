@@ -612,18 +612,6 @@ the lower \B\ bits and put the carry (borrow) bit into \kbd{overflow}.
 difference of \kbd{x} and \kbd{y}, returns the lower \B\ bits and puts the
 carry (borrow) bit into \kbd{overflow}.
 
-\fun{ulong}{shiftl}{ulong x, ulong y} shifts \kbd{x} left by \kbd{y} bits,
-returns the lower \B\ bits and stores the high-order \B\ bits into
-\kbd{hiremainder}. We must have $1\le\kbd{y}\le\B$; in particular,
-$\kbd{y}\neq 0$. If \kbd{y} does not satisfy this condition, the result is
-undefined.
-
-\fun{ulong}{shiftlr}{ulong x, ulong y} shifts \kbd{x << \B} right
-by \kbd{y} bits, returns the higher \B\ bits and stores the low-order
-\B\ bits into \kbd{hiremainder}. We must have $1\le\kbd{y}\le\B$; in
-particular, $\kbd{y}\neq 0$. If \kbd{y} does not satisfy this condition, the
-result is undefined.
-
 \fun{int}{bfffo}{ulong x} returns the number of leading zero bits in \kbd{x}.
 That is, the number of bit positions by which it would have to be shifted
 left until its leftmost bit first becomes equal to~1, which can be between 0
