@@ -2199,6 +2199,17 @@ remainder $\kbd{A}(\kbd{a})$.
 
 \fun{GEN}{RgX_rem}{GEN x, GEN y, GEN *r}
 
+\fun{GEN}{RgX_mulXn}{GEN x, long n} returns $\kbd{x} * t^n$. This may
+be a \typ{FRAC} if $n < 0$ and the valuation of \kbd{x} is not large
+enough.
+
+\fun{GEN}{RgX_shift}{GEN x, long n} returns $\kbd{x} * t^n$ if $n\geq 0$,
+and $\kbd{x} \\ t^{-n}$ otherwise.
+
+\fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
+shallow (coefficients are not copied). This is not suitable for
+\kbd{gerepile} or \kbd{gerepileupto}.
+
 \fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
 coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.

@@ -876,7 +876,7 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
     do /* set P := P % Q */
     {
       q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
-      P = FpXX_add(P, FqX_Fq_mul(RgX_shift(Q, dg), q, T, p), p);
+      P = FpXX_add(P, FqX_Fq_mul(RgX_shift_shallow(Q, dg), q, T, p), p);
       dg = lg(P)-lg(Q);
     } while (dg >= 0);
     if (!signe(P)) break;

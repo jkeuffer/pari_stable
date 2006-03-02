@@ -842,7 +842,7 @@ sylpm(GEN f1, GEN f2, GEN pm)
   {
     gel(a,j) = RgX_to_RgV(h, n);
     if (j == n) break;
-    h = FpX_rem(RgX_shift(h, 1), f1, pm);
+    h = FpX_rem(RgX_shift_shallow(h, 1), f1, pm);
   }
   return hnfmodidpart(a, pm);
 }

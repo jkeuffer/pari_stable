@@ -567,7 +567,7 @@ polvaluation(GEN x, GEN *Z)
   if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (!isexactzero(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift(x, -vx);
+  if (Z) *Z = RgX_shift_shallow(x, -vx);
   return vx;
 }
 long
@@ -577,7 +577,7 @@ ZX_valuation(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (signe(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift(x, -vx);
+  if (Z) *Z = RgX_shift_shallow(x, -vx);
   return vx;
 }
 long
@@ -587,7 +587,7 @@ polvaluation_inexact(GEN x, GEN *Z)
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (vx = 0;; vx++)
     if (!gcmp0(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift(x, -vx);
+  if (Z) *Z = RgX_shift_shallow(x, -vx);
   return vx;
 }
 static int

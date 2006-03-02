@@ -251,16 +251,6 @@ gred_rfrac_simple(GEN n, GEN d)
 }
 
 static GEN
-fix_pol(GEN x, long d)
-{
-  GEN z;
-  if (d >= 0) return RgX_shiftcopy(x, d);
-  z = cgetg(3, t_RFRAC);
-  gel(z,1) = gcopy(x);
-  gel(z,2) = monomial(gen_1, -d, varn(x));
-  return z;
-}
-static GEN
 fix_rfrac(GEN x, long d)
 {
   GEN z, N, D;
@@ -269,12 +259,12 @@ fix_rfrac(GEN x, long d)
   N = gel(x,1);
   D = gel(x,2);
   if (d > 0) {
-    gel(z, 1) = (typ(N)==t_POL && varn(N)==varn(D))? RgX_shiftcopy(N,d)
+    gel(z, 1) = (typ(N)==t_POL && varn(N)==varn(D))? RgX_shift(N,d)
                                                    : monomialcopy(N,d,varn(D));
     gel(z, 2) = gcopy(D);
   } else {
     gel(z, 1) = gcopy(N);
-    gel(z, 2) = RgX_shiftcopy(D, -d);
+    gel(z, 2) = RgX_shift(D, -d);
   }
   return z;
 }
@@ -310,14 +300,14 @@ gred_rfrac2_i(GEN n, GEN d)
   if (!degpol(d))
   {
     n = div_pol_scal(n,d);
-    return v? fix_pol(n,v): n;
+    return v? RgX_mulXn(n,v): n;
   }
 
   /* X does not divide gcd(n,d), deg(d) > 0 */
   if (!isinexact(n) && !isinexact(d))
   {
     y = RgX_divrem(n, d, &z);
-    if (!signe(z)) return v? fix_pol(y, v): y;
+    if (!signe(z)) return v? RgX_mulXn(y, v): y;
     z = srgcd(d, z);
     if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
   }

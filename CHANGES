@@ -111,6 +111,7 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
     1- [library] new function isinexact.
 BA  2- [elldata] function forell() to loop over elliptic curves.
 BA  3- [elldata] function ellconvertname() to parse curve name.
+    4- [library] new function RgX_shift, RgX_mulXn, RgX_shift_shallow
 
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)

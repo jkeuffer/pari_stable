@@ -513,7 +513,7 @@ polissquarerem(GEN x, GEN *pt)
     y = gmul(b, y);
   }
 END:
-  *pt = v? gerepilecopy(av, RgX_shift(y, v >> 1)): gerepileupto(av, y);
+  *pt = v? gerepilecopy(av, RgX_shift_shallow(y, v >> 1)): gerepileupto(av, y);
   return 1;
 }
 
@@ -711,7 +711,7 @@ polispower(GEN x, GEN K, GEN *pt)
       if (!b) b = gsqrtn(a, K, NULL, DEFAULTPREC);
       y = gmul(b,y);
     }
-    *pt = v? gerepilecopy(av, RgX_shift(y, v/k)): gerepileupto(av, y);
+    *pt = v? gerepilecopy(av, RgX_shift_shallow(y, v/k)): gerepileupto(av, y);
   }
   else avma = av;
   return 1;
