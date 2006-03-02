@@ -85,6 +85,7 @@ BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
 BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
    26- factorback(x,y) --> error if x,y were valid t_VEC with exactly 6
        components [ typo in checknf_i ]
+   27- [configure] shared libraries on 64bit sparc require -fPIC / -KPIC
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
