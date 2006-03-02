@@ -263,13 +263,14 @@ gacos(GEN x, long prec)
       if (valp(y) < 0) pari_err(negexper,"gacos");
       if (lg(y) > 2)
       {
-	p1 = integ(gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec)), varn(y));
+	p1 = integ(gdiv(gneg(derivser(y)),
+                        gsqrt(gsubsg(1,gsqr(y)),prec)), varn(y));
 	if (gcmp1(gel(y,2)) && !valp(y)) /*y = 1+O(y^k), k>=1*/
-	  return gerepileupto(av, gneg(p1));
+	  return gerepileupto(av, p1);
       }
       else p1 = y;
       a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
-      return gerepileupto(av, gsub(a,p1));
+      return gerepileupto(av, gadd(a,p1));
   }
   return transc(gacos,x,prec);
 }

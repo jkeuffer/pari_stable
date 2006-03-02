@@ -1720,7 +1720,7 @@ integ(GEN x, long v)
 	}
 	else gel(y,i) = gdivgs(gel(x,i),j);
       }
-      y[1] = evalvarn(vx) | evalvalp(e+1); return y;
+      y[1] = evalsigne(1) | evalvarn(vx) | evalvalp(e+1); return y;
 
     case t_RFRAC:
       vx = gvar(x);
