@@ -1907,7 +1907,7 @@ lindep2(GEN x, long bit)
 {
   long tx=typ(x), lx=lg(x), ly, i, j, e;
   pari_sp av = avma;
-  GEN re,im,p1,p2;
+  GEN re, im, M;
 
   if (! is_vec_t(tx)) pari_err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
@@ -1918,7 +1918,7 @@ lindep2(GEN x, long bit)
     if (!bit)
     {
       x = primpart(x);
-      bit = 32;
+      bit = 32 + gexpo(x);
     }
     else
       bit = (long)bit_accuracy_mul(bit, 0.8);
@@ -1933,17 +1933,18 @@ lindep2(GEN x, long bit)
 
   if (gcmp0(im)) im = NULL;
   ly = im? lx+2: lx+1;
-  p2=cgetg(lx,t_MAT);
+  M = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
-    p1 = cgetg(ly,t_COL); gel(p2,i) = p1;
-    for (j=1; j<lx; j++) gel(p1,j) = (i==j)? gen_1: gen_0;
-    gel(p1,lx)           = gcvtoi(gshift(gel(re,i),bit), &e);
-    if (im) gel(p1,lx+1) = gcvtoi(gshift(gel(im,i),bit), &e);
+    GEN c = cgetg(ly,t_COL); gel(M,i) = c;
+    for (j=1; j<lx; j++) gel(c,j) = (i==j)? gen_1: gen_0;
+    gel(c,lx)           = gcvtoi(gshift(gel(re,i),bit), &e);
+    if (im) gel(c,lx+1) = gcvtoi(gshift(gel(im,i),bit), &e);
   }
-  p1 = (GEN)lllint_fp_ip(p2,100)[1];
-  p1[0] = evaltyp(t_COL) | evallg(lx);
-  return gerepilecopy(av, p1);
+  M = lllint_fp_ip(M,100);
+  M = gel(M,1);
+  M[0] = evaltyp(t_COL) | evallg(lx);
+  return gerepilecopy(av, M);
 }
 
 #define quazero(x) (gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP))
