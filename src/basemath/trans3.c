@@ -670,7 +670,7 @@ incgam2(GEN s, GEN x, long prec)
   else
   {
     l = lg(x);
-    mx = rtodbl(x);
+    mx = fabs(rtodbl(x));
   }
   m = (bit_accuracy_mul(l,LOG2) + mx)/4;
   n = (long)(1+m*m/mx);
