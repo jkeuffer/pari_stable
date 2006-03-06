@@ -28,7 +28,6 @@ extern long addmul(ulong x, ulong y);
 extern long bfffo(ulong x); 
 
 #else /* ASMINLINE */
-/* From the PARI source, using gcc __asm__ format. */
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 #define LOCAL_OVERFLOW     register ulong overflow
 

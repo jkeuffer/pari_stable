@@ -1,38 +1,6 @@
 #include <stdio.h>
 
 #define LOCAL_HIREMAINDER  register ulong hiremainder
-#define LOCAL_OVERFLOW     register ulong overflow
-
-#define addll(a, b)                           \
-({ ulong __arg1 = (a), __arg2 = (b), __value; \
- __value = __arg1 + __arg2;                   \
- overflow = (__value < __arg1);               \
- __value;                                     \
-})
-
-#define addllx(a, b)                                          \
-({ ulong __arg1 = (a), __arg2 = (b), __value, __tmp;          \
- __tmp = __arg1 + overflow;                                   \
- overflow = (__tmp < __arg1);                                 \
- __value = __tmp + __arg2;                                    \
- overflow |= (__value < __tmp);                               \
- __value;                                                     \
-})
-
-#define subll(a, b)                                           \
-({ ulong __arg1 = (a), __arg2 = (b);                          \
-   overflow = (__arg2 > __arg1);                              \
-   __arg1 - __arg2;                                           \
-})
-
-#define subllx(a, b)                                  \
-({ ulong __arg1 = (a), __arg2 = (b), __tmp, __value;  \
-   __tmp = __arg1 - overflow;                         \
-   overflow = (__arg1 < overflow);                    \
-   __value = __tmp - __arg2;                          \
-   overflow |= (__arg2 > __tmp);                      \
-   __value;                                           \
-})
 
 #define bfffo(a)                                                        \
 ({ ulong __arg1 = (a), __tmp, _a, _c;                                   \

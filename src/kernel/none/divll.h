@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
   Copyright (C) 2000 Free Software Foundation, Inc. */
 
+#undef  LOCAL_HIREMAINDER
+#define LOCAL_HIREMAINDER
+extern ulong hiremainder;
+
 #if !defined(INLINE)
 extern long divll(ulong x, ulong y);
 #else
@@ -32,6 +36,8 @@ extern ulong hiremainder;
  * Return quotient, set hiremainder to remainder */
 
 #if defined(__GNUC__) && !defined(DISABLE_INLINE)
+#undef LOCAL_HIREMAINDER
+#define LOCAL_HIREMAINDER register ulong hiremainder
 
 #define divll(n0, d) 							\
 ({ 									\

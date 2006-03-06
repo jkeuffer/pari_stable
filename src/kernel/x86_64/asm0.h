@@ -37,15 +37,6 @@ extern long bfffo(ulong x);
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 #define LOCAL_OVERFLOW     register ulong overflow
 
-/* Different assemblers have different syntax for the "shldl" and "shrdl"
-   instructions. */
-#if defined(__EMX__) || defined(__DJGCC__) || defined(__GO32__) || (defined(linux) && !defined(__ELF__)) || defined(__386BSD__) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(NeXT) || defined(__CYGWIN32__) || defined(__MINGW32__) || defined(COHERENT)
-#  define SHCL "%%cl,"
-#else
-#  define SHCL
-#endif
-
-
 #define addll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("addq %3,%0 ; adcq %1,%1" \

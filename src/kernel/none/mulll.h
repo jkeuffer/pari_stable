@@ -1,4 +1,4 @@
-#line 2 "../src/kernel/none/level0.h"
+#line 2 "../src/kernel/none/mulll.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
@@ -19,53 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * level0.c, which includes this file and never needs to be changed
  * The following lines are necessary for level0.c and level1.c */
 
-#define LOCAL_OVERFLOW
+#undef  LOCAL_HIREMAINDER
 #define LOCAL_HIREMAINDER
-
-#if !defined(INLINE)
-extern ulong overflow, hiremainder;
-extern long addll(ulong x, ulong y);
-extern long addllx(ulong x, ulong y);
-extern long subll(ulong x, ulong y);
-extern long subllx(ulong x, ulong y);
-extern long mulll(ulong x, ulong y);
-extern long addmul(ulong x, ulong y);
-
-#else
-
-extern ulong overflow, hiremainder;
-
-INLINE long
-addll(ulong x, ulong y)
-{
-  const ulong z = x+y;
-  overflow=(z<x);
-  return (long) z;
-}
-
-INLINE long
-addllx(ulong x, ulong y)
-{
-  const ulong z = x+y+overflow;
-  overflow = (z<x || (z==x && overflow));
-  return (long) z;
-}
-
-INLINE long
-subll(ulong x, ulong y)
-{
-  const ulong z = x-y;
-  overflow = (z>x);
-  return (long) z;
-}
-
-INLINE long
-subllx(ulong x, ulong y)
-{
-  const ulong z = x-y-overflow;
-  overflow = (z>x || (z==x && overflow));
-  return (long) z;
-}
+extern ulong hiremainder;
 
 /* Version Peter Montgomery */
 /*
@@ -83,6 +39,64 @@ subllx(ulong x, ulong y)
  *       This inequality was derived using exact (rational) arithmetic;
  *       it remains valid when we truncate the two middle terms.
  */
+
+#if !defined(INLINE)
+extern long mulll(ulong x, ulong y);
+extern long addmul(ulong x, ulong y);
+#else
+
+#if defined(__GNUC__) && !defined(DISABLE_INLINE)
+#undef LOCAL_HIREMAINDER
+#define LOCAL_HIREMAINDER register ulong hiremainder
+
+#define mulll(x, y) \
+({ \
+  const ulong __x = (x), __y = (y);\
+  const ulong __xlo = LOWWORD(__x), __xhi = HIGHWORD(__x); \
+  const ulong __ylo = LOWWORD(__y), __yhi = HIGHWORD(__y); \
+  ulong __xylo,__xymid,__xyhi,__xymidhi,__xymidlo; \
+  ulong __xhl,__yhl; \
+ \
+  __xylo = __xlo*__ylo; __xyhi = __xhi*__yhi; \
+  __xhl = __xhi+__xlo; __yhl = __yhi+__ylo; \
+  __xymid = __xhl*__yhl - (__xyhi+__xylo); \
+ \
+  __xymidhi = HIGHWORD(__xymid); \
+  __xymidlo = __xymid << BITS_IN_HALFULONG; \
+ \
+  __xylo += __xymidlo; \
+  hiremainder = __xyhi + __xymidhi + (__xylo < __xymidlo) \
+     + ((((__xhl + __yhl) >> 1) - __xymidhi) & HIGHMASK); \
+ \
+  __xylo; \
+})
+
+#define addmul(x, y) \
+({ \
+  const ulong __x = (x), __y = (y);\
+  const ulong __xlo = LOWWORD(__x), __xhi = HIGHWORD(__x); \
+  const ulong __ylo = LOWWORD(__y), __yhi = HIGHWORD(__y); \
+  ulong __xylo,__xymid,__xyhi,__xymidhi,__xymidlo; \
+  ulong __xhl,__yhl; \
+ \
+  __xylo = __xlo*__ylo; __xyhi = __xhi*__yhi; \
+  __xhl = __xhi+__xlo; __yhl = __yhi+__ylo; \
+  __xymid = __xhl*__yhl - (__xyhi+__xylo); \
+ \
+  __xylo += hiremainder; __xyhi += (__xylo < hiremainder); \
+ \
+  __xymidhi = HIGHWORD(__xymid); \
+  __xymidlo = __xymid << BITS_IN_HALFULONG; \
+ \
+  __xylo += __xymidlo; \
+  hiremainder = __xyhi + __xymidhi + (__xylo < __xymidlo) \
+     + ((((__xhl + __yhl) >> 1) - __xymidhi) & HIGHMASK); \
+ \
+  __xylo; \
+})
+
+#else
+
 INLINE long
 mulll(ulong x, ulong y)
 {
@@ -128,4 +142,6 @@ addmul(ulong x, ulong y)
 
   return xylo;
 }
+#endif
+
 #endif
