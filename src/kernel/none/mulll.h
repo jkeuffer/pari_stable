@@ -14,11 +14,6 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines "level 0" kernel functions.
- * These functions can be inline; if not, they are defined externally in
- * level0.c, which includes this file and never needs to be changed
- * The following lines are necessary for level0.c and level1.c */
-
 #undef  LOCAL_HIREMAINDER
 #define LOCAL_HIREMAINDER
 extern ulong hiremainder;
