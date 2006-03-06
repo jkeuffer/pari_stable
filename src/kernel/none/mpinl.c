@@ -20,4 +20,24 @@ ulong hiremainder, overflow;
 BEGINEXTERN
 #include "parilvl0.h"
 #include "parilvl1.h"
+#ifdef addll
+#  undef addll
+#  undef addllx
+#  undef subll
+#  undef subllx
+#  include "../src/kernel/none/addll.h"
+#endif
+#ifdef mulll
+#  undef mulll
+#  undef addmul
+#  include "../src/kernel/none/mulll.h"
+#endif
+#ifdef divll
+#  undef divll
+#  include "../src/kernel/none/divll.h"
+#endif
+#ifdef bfffo
+#  undef bfffo
+#  include "../src/kernel/none/bfffo.h"
+#endif
 ENDEXTERN

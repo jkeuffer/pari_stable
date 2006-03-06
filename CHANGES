@@ -107,6 +107,8 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
        Our PSLQ implementation is slow and unstable, and LLL performs much
        better, see the example in ??algdep.
     8- addrr: extend accuracy much less frequently
+    9- make sure all kernel symbols are present in all versions of libpari
+       (addll & friends could be inline)
 
   Added
     1- [library] new function isinexact.
