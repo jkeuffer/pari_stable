@@ -791,6 +791,8 @@ sub basic_subst {
   s/\\mapsto(?![a-zA-Z])\s*/$tr{startcode}|---$tr{gt}$tr{endcode}/g;
   s/ *\\geq?(?![a-zA-Z]) *([^ ])/ $tr{startcode}$tr{gt}=$tr{endcode} $1/g;
   s/ *\\leq?(?![a-zA-Z]) *([^ ])/ $tr{startcode}$tr{lt}=$tr{endcode} $1/g;
+  s/ *\\gg?(?![a-zA-Z]) *([^ ])/ $tr{startcode}$tr{gt}$tr{gt}$tr{endcode} $1/g;
+  s/ *\\ll?(?![a-zA-Z]) *([^ ])/ $tr{startcode}$tr{lt}$tr{ll}$tr{endcode} $1/g;
 
   s/\\(vers|PARIversion)(?![a-zA-Z])/$tr{startbold}$version$tr{endbold}/;
   s/\\([QRCFZNapdf])(?![a-zA-Z])/$tr{startbi}$1$tr{endbi}$2/g;
