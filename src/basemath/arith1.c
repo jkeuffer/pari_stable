@@ -764,7 +764,7 @@ ispower(GEN x, GEN K, GEN *pty)
     case t_POL:
       return polispower(x, K, pty);
     case t_RFRAC:
-      if (polissquarerem(gmul(gel(x,1), powgi(gel(x,2), subis(K,1))), pty))
+      if (polispower(gmul(gel(x,1), powgi(gel(x,2), subis(K,1))), K, pty))
       {
         if (pty) *pty = gdiv(*pty, gel(x,2));
         return 1;
