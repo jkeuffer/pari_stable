@@ -6335,15 +6335,16 @@ arguments. As usual, the generating vectors are taken to be the
 degree at most $k$ with integer coefficients having $x$ as approximate root.
 Note that the polynomial which is obtained is not necessarily the ``correct''
 one. In fact it is not even guaranteed to be irreducible. One can check the
-closeness either by a polynomial evaluation or substitution, or by computing
-the roots of the polynomial given by algdep.
+closeness either by a polynomial evaluation (use \tet{subst}), or by
+computing the roots of the polynomial given by \kbd{algdep} (use 
+\tet{polroots}).
 
-Internally, \tet{lindep}$([1,x,\ldots,x^{k-1}], \fl)$ is used. If
+Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
 \tet{lindep} is not able to find a relation and returns a lower bound for the
 sup norm of the smallest relation, \tet{algdep} returns that bound instead.
 A suitable non-zero value of $\fl$ may improve on the default behaviour:
 \bprog
-\\ LLL
+\\\\\\\\\ LLL
 ? \p200
 ? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 3.8s
 ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 1s
@@ -6352,7 +6353,7 @@ A suitable non-zero value of $\fl$ may improve on the default behaviour:
 ? \p250
 ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.8s
 ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 3.4s
-\\ PSLQ
+\\\\\\\\\ PSLQ
 ? \p200
 ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 14s.
 ? \p250
