@@ -548,15 +548,15 @@ char *keyword_list[]={
 };
 
 static int
-ok_external_help(char *s)
+ok_external_help(char **s)
 {
   long n;
-  if (!*s) return 1;
-  if (!isalpha((int)*s)) return 3; /* operator or section number */
-  if (!strncmp(s,"t_",2)) return 2; /* type name */
+  if (!**s) return 1;
+  if (!isalpha((int)**s)) return 3; /* operator or section number */
+  if (!strncmp(*s,"t_",2)) { *s += 2; return 2; } /* type name */
 
   for (n=0; keyword_list[n]; n++)
-    if (!strcmp(s,keyword_list[n])) return 3;
+    if (!strcmp(*s,keyword_list[n])) return 3;
   return 0;
 }
 
@@ -585,7 +585,7 @@ aide0(char *s, int flag)
   if (*s == '\\') { s1 = s+1; skip_alpha(s1); *s1 = '\0';}
 
   if (flag & h_APROPOS) { external_help(s,-1); return; }
-  if (long_help && (n = ok_external_help(s))) { external_help(s,n); return; }
+  if (long_help && (n = ok_external_help(&s))) { external_help(s,n); return; }
   switch (*s)
   {
     case '*' : commands(-1); return;
