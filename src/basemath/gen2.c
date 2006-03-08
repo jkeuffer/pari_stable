@@ -184,7 +184,7 @@ gcmp0(GEN x)
       return gcmp0(gel(x,2));
 
     case t_FRAC:
-      return !signe(x[1]);
+      return 0;
 
     case t_COMPLEX:
      /* is 0 iff norm(x) would be 0 (can happen with Re(x) and Im(x) != 0
@@ -255,7 +255,7 @@ gcmp1(GEN x)
       return gcmp1(gel(x,2));
 
     case t_FRAC:
-      return gcmp1(gel(x,1)) && gcmp1(gel(x,2));
+      return 0;
 
     case t_COMPLEX:
       return gcmp1(gel(x,1)) && gcmp0(gel(x,2));
@@ -292,8 +292,7 @@ gcmp_1(GEN x)
       av=avma; y=equalii(addsi(1,gel(x,2)), gel(x,1)); avma=av; return y;
 
     case t_FRAC:
-      l = signe(x[1]);
-      return l && l == -signe(x[2]) && !absi_cmp(gel(x,1),gel(x,2));
+      return 0;
 
     case t_COMPLEX:
       return gcmp_1(gel(x,1)) && gcmp0(gel(x,2));

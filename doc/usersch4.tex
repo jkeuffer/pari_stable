@@ -1164,8 +1164,9 @@ functions implement this practice almost by default.
 
 \subsec{Type \typ{FRAC} (rational number)}:%
 \kbdsidx{t_FRAC}\sidx{rational number}
-\kbd{z[1]} points to the numerator, and \kbd{z[2]} to the denominator. Both
-must be of \typ{INT}s and $\kbd{z[2]} > 0$.
+\kbd{z[1]} points to the numerator $n$, and \kbd{z[2]} to the denominator
+$d$. Both must be of type \typ{INT} such that $d\neq 0$, $n > 0$ and
+$(n,d) = 1$ (see \tet{gred_frac2}).
 
 \subsec{Type \typ{COMPLEX} (complex number)}:%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
@@ -1301,9 +1302,11 @@ then dealing with a Laurent series (with a finite number of negative
 terms).
 
 \subsec{Type \typ{RFRAC} (rational function)}:%
-\kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points to the numerator,
-and \kbd{z[2]} on the denominator. The denominator must be of type \typ{POL},
-with variable of higher priority than the numerator.
+\kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points to the
+numerator $n$,
+and \kbd{z[2]} on the denominator $d$. The denominator must be of type \typ{POL},
+with variable of higher priority than the numerator. The numerator
+$n$ is not an exact $0$ and $(n,d) = 1$ (see \tet{gred_rfac2}).
 
 \subsec{Type \typ{QFR} (indefinite binary quadratic form)}:%
 \kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
