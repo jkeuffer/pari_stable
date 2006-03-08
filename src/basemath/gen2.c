@@ -277,7 +277,7 @@ int
 gcmp_1(GEN x)
 {
   pari_sp av;
-  long l,y;
+  long y;
   GEN p1;
 
   switch(typ(x))
