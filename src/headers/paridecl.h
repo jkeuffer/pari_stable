@@ -1150,7 +1150,6 @@ GEN     gtovecsmall(GEN x);
 GEN     gtrunc(GEN x);
 long    gvar(GEN x);
 long    gvar2(GEN x);
-long    gvar9(GEN x);
 GEN     hqfeval(GEN q, GEN x);
 GEN     imag_i(GEN x);
 GEN     integ(GEN x, long v);

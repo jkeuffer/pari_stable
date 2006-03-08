@@ -2593,6 +2593,11 @@ zero_gcd(GEN x, long tx)
     case t_REAL: return gen_1;
     case t_PADIC: return gpowgs(gel(x,2), valp(x));
     case t_SER: return monomial(gen_1, valp(x), varn(x));
+    case t_POLMOD: {
+      GEN d = gel(x,2);
+      if (typ(d) == t_POL && varn(d) == varn(gel(x,1))) return content(d);
+      return isinexact(d)? zero_gcd(d, typ(d)): gcopy(d);
+    }
     case t_POL:
       if (!isinexact(x)) break;
       av = avma;
@@ -2633,14 +2638,14 @@ ggcd(GEN x, GEN y)
   GEN p1,z;
 
   if (tx>ty) { swap(x,y); lswap(tx,ty); }
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
+  /* tx <= ty */
   if (is_matvec_t(ty))
   {
-    if (is_noncalc_t(tx)) pari_err(operf,"g",x,y); /* necessary if l = 1 */
     l = lg(y); z = cgetg(l,ty);
     for (i=1; i<l; i++) gel(z,i) = ggcd(x,gel(y,i));
     return z;
   }
-  if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
   if (isexactzero(x)) return zero_gcd(y, ty);
   if (isexactzero(y)) return zero_gcd(x, tx);
   if (is_const_t(tx))
@@ -2757,51 +2762,64 @@ ggcd(GEN x, GEN y)
     return cont_gcd(y,ty, x);
   }
 
-  vx = gvar9(x);
-  vy = gvar9(y);
+  if (tx == t_POLMOD)
+  {
+    if (ty == t_POLMOD)
+    {
+      z = cgetg(3,t_POLMOD);
+      if (gequal(gel(x,1),gel(y,1)))
+        copyifstack(x[1],z[1]);
+      else
+        gel(z,1) = ggcd(gel(x,1),gel(y,1));
+      if (degpol(z[1])<=0) gel(z,2) = gen_0;
+      else
+      {
+        GEN X, Y, d;
+        av = avma; X = gel(x,2); Y = gel(y,2);
+        d = ggcd(content(X), content(Y));
+        if (!gcmp1(d)) { X = gdiv(X,d); Y = gdiv(Y,d); }
+        p1 = ggcd(gel(z,1), X);
+        gel(z,2) = gerepileupto(av, gmul(d, ggcd(p1, Y)));
+      }
+      return z;
+    }
+    vx = varn(x[1]);
+    switch(ty)
+    {
+      case t_POL:
+        vy = varn(y);
+        if (varncmp(vy,vx) < 0) return cont_gcd(y,ty, x);
+        z = cgetg(3,t_POLMOD);
+        copyifstack(x[1],z[1]);
+        av = avma; p1 = ggcd(gel(x,1),gel(x,2));
+        gel(z,2) = gerepileupto(av, ggcd(p1,y));
+        return z;
+
+      case t_RFRAC:
+        vy = varn(y[2]);
+        if (varncmp(vy,vx) < 0) return cont_gcd(y,ty, x);
+        av = avma; 
+        p1 = ggcd(gel(x,1),gel(y,2));
+        if (degpol(p1)) pari_err(operi,"g",x,y);
+        avma = av; return gdiv(ggcd(gel(y,1),x), content(gel(y,2)));
+    }
+  }
+
+  vx = gvar(x);
+  vy = gvar(y);
   if (varncmp(vy, vx) < 0) return cont_gcd(y,ty, x);
   if (varncmp(vy, vx) > 0) return cont_gcd(x,tx, y);
+
+  /* same main variable */
   switch(tx)
   {
-    case t_POLMOD:
-      switch(ty)
-      {
-	case t_POLMOD: z=cgetg(3,t_POLMOD);
-          if (gequal(gel(x,1),gel(y,1)))
-	    copyifstack(x[1],z[1]);
-          else
-            gel(z,1) = ggcd(gel(x,1),gel(y,1));
-	  if (lg(z[1])<=3) gel(z,2) = gen_0;
-	  else
-	  {
-	    av=avma; p1=ggcd(gel(z,1),gel(x,2));
-	    if (lg(p1)>3)
-	    {
-	      tetpil=avma;
-              p1=gerepile(av,tetpil,ggcd(p1,gel(y,2)));
-	    }
-	    gel(z,2) = p1;
-	  }
-	  return z;
-
-	case t_POL: z=cgetg(3,t_POLMOD);
-          copyifstack(x[1],z[1]); av=avma;
-          p1=ggcd(gel(x,1),gel(x,2));
-	  if (lg(p1)>3) { tetpil=avma; p1=gerepile(av,tetpil,ggcd(y,p1)); }
-	  gel(z,2) = p1; return z;
-
-	case t_RFRAC:
-	  av = avma; p1=ggcd(gel(x,1),gel(y,2)); avma = av;
-          if (!gcmp1(p1)) pari_err(operi,"g",x,y);
-	  return ggcd(gel(y,1),x);
-      }
-      break;
-
     case t_POL:
       switch(ty)
       {
 	case t_POL: return srgcd(x,y);
-	case t_SER: return monomial(gen_1, min(valp(y),gval(x,vx)), vx);
+	case t_SER: 
+          z = ggcd(content(x), content(y));
+          return monomialcopy(z, min(valp(y),gval(x,vx)), vx);
 	case t_RFRAC: z=cgetg(3,t_RFRAC);
           gel(z,1) = ggcd(x,gel(y,1));
           gel(z,2) = gcopy(gel(y,2)); return z;
@@ -2809,10 +2827,11 @@ ggcd(GEN x, GEN y)
       break;
 
     case t_SER:
+      z = ggcd(content(x), content(y));
       switch(ty)
       {
-	case t_SER:   return monomial(gen_1, min(valp(x),valp(y)), vx);
-	case t_RFRAC: return monomial(gen_1, min(valp(x),gval(y,vx)), vx);
+	case t_SER:   return monomialcopy(z, min(valp(x),valp(y)), vx);
+	case t_RFRAC: return monomialcopy(z, min(valp(x),gval(y,vx)), vx);
       }
       break;
 
@@ -2992,23 +3011,16 @@ content(GEN x)
   pari_sp av = avma;
   GEN c;
 
+  if (is_scalar_t(tx)) return zero_gcd(x, tx);
   switch(tx)
   {
-    case t_INT:
-    case t_REAL:
-    case t_INTMOD:
-    case t_FRAC:
-    case t_COMPLEX:
-    case t_QUAD:
-    case t_PADIC: return zero_gcd(x, tx);
-
-    case t_POLMOD: return content(gel(x,2));
     case t_RFRAC:
     {
       GEN n = gel(x,1), d = gel(x,2);
-      long vn = gvar9(n), vd = gvar9(d);
-      /* varncmp(vn, vd) < 0 can't happen */
-      if (varncmp(vn, vd) > 0)
+      /* -- varncmp(vn, vd) < 0 can't happen
+       * -- if n is POLMOD, its main variable (in the sense of gvar2)
+       *    has lower priority than denominator */
+      if (typ(n) == t_POLMOD || varncmp(gvar(n), varn(d)) > 0)
         n = isinexact(n)? zero_gcd(n, typ(n)): gcopy(n);
       else 
         n = content(n);

@@ -1327,7 +1327,7 @@ facteur(void)
         NO_BREAK("after ^", old);
         x = gpow(x,p1,precreal); break;
       case '\'':
-	analyseur++; x = deriv(x,gvar9(x)); break;
+	analyseur++; x = deriv(x, -1); break;
       case '~':
 	analyseur++; x = gtrans(x); break;
       case '[':

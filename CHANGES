@@ -88,6 +88,9 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
    27- [configure] shared libraries on 64bit sparc require -fPIC / -KPIC
    28- (x^3/y^3)^(1/3) -> x + O(x^17)  [ leading coeff sometimes lost #433 ]
    29- ??INT worked, but not ??t_INT
+   30- inconsistencies wrt variables in t_POLMOD, e.g
+       Mod(x*a,x^2)' ---> Mod(x, x^2)
+       deriv(Mod(x*a,x^2)) ---> 0
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

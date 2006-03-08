@@ -49,55 +49,60 @@ gvar(GEN x)
   }
   return BIGINT;
 }
-
-/* assume x POLMOD or RFRAC */
+/* T main polynomial in R[X], A auxiliary in R[X] (possibly degree 0).
+ * Guess and return the main variable of R */
 static long
-_var2(GEN x)
+var2_aux(GEN T, GEN A)
 {
-  long v = gvar2(gel(x,1));
-  long w = gvar2(gel(x,2)); if (w<v) v=w;
-  return v;
+  long a = gvar2(T);
+  long b = (typ(A) == t_POL && varn(A) == varn(T))? gvar2(A): gvar(A);
+  if (a < b) a = b;
+  return a;
+}
+static long
+var2_rfrac(GEN x)  { return var2_aux(gel(x,2), gel(x,1)); }
+static long
+var2_polmod(GEN x) { return var2_aux(gel(x,1), gel(x,2)); }
+
+/* main variable of x, with the convention that the "natural" main
+ * variable of a POLMOD is mute, so we want the next one. */
+static long
+gvar9(GEN x)
+{
+  return (typ(x) == t_POLMOD)? var2_polmod(x): gvar(x);
 }
 
+/* main variable of the ring over wich x is defined */
 long
 gvar2(GEN x)
 {
   long i, v, w;
   switch(typ(x))
   {
-    case t_POLMOD: case t_RFRAC:
-      return _var2(x);
-
+    case t_POLMOD:
+      return var2_polmod(x);
     case t_POL: case t_SER:
       v = BIGINT;
-      for (i=2; i < lg(x); i++) { w=gvar(gel(x,i)); if (w<v) v=w; }
+      for (i=2; i < lg(x); i++) { w = gvar9(gel(x,i)); if (w<v) v=w; }
       return v;
-
+    case t_RFRAC:
+      return var2_rfrac(x);
     case t_VEC: case t_COL: case t_MAT:
       v = BIGINT;
-      for (i=1; i < lg(x); i++) { w=gvar2(gel(x,i)); if (w<v) v=w; }
+      for (i=1; i < lg(x); i++) { w = gvar2(gel(x,i)); if (w<v) v=w; }
       return v;
   }
   return BIGINT;
 }
 
-long
-gvar9(GEN x)
-{
-  return (typ(x) == t_POLMOD)? _var2(x): gvar(x);
-}
-
 GEN
 gpolvar(GEN x)
 {
-  if (typ(x)==t_PADIC) x = gel(x,2);
-  else
-  {
-    long v=gvar(x);
-    if (v==BIGINT) pari_err(typeer,"gpolvar");
-    x = pol_x[v];
-  }
-  return gcopy(x);
+  long v;
+  if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
+  v = gvar(x);
+  if (v==BIGINT) pari_err(typeer,"gpolvar");
+  return pol_x[v];
 }
 
 /*******************************************************************/
@@ -1524,25 +1529,23 @@ deriv(GEN x, long v)
   pari_sp av;
   GEN y;
 
-  tx=typ(x); if (is_const_t(tx)) return gen_0;
-  if (v < 0) v = gvar(x);
+  tx = typ(x); if (is_const_t(tx)) return gen_0;
+  if (v < 0) v = gvar9(x);
   switch(tx)
   {
     case t_POLMOD:
       if (v<=varn(x[1])) return gen_0;
-      y=cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
       gel(y,2) = deriv(gel(x,2),v); return y;
 
     case t_POL:
-      vx=varn(x); if (varncmp(vx, v) > 0) return gen_0;
-      if (varncmp(vx, v) < 0)
-      {
-        lx = lg(x); y = cgetg(lx,t_POL);
-        for (i=2; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);
-        y[1] = evalvarn(vx);
-        return normalizepol_i(y,i);
-      }
-      return derivpol(x);
+      vx = varn(x);
+      if (varncmp(vx, v) > 0) return gen_0;
+      if (varncmp(vx, v) == 0) return derivpol(x);
+      lx = lg(x); y = cgetg(lx,t_POL);
+      y[1] = x[1];
+      for (i=2; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);
+      return normalizepol_i(y,i);
 
     case t_SER:
       vx = varn(x);
