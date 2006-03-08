@@ -3602,7 +3602,7 @@ ifac_main(GEN *partial)
   if (factor_add_primes && !(hint & 8))
   {
     GEN p = gel(here,0);
-    if (lgefint(p)>3 || (ulong)p[2] > 0x1000000UL) addprimes(p);
+    if (lgefint(p)>3 || (ulong)p[2] > 0x1000000UL) (void)addprimes(p);
   }
   return here;
 }

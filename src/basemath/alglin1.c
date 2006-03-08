@@ -2380,7 +2380,7 @@ Flm_indexrank(GEN x, ulong p)
   GEN res,d,p1,p2;
   pari_sp av = avma;
   long n = lg(x)-1; 
-  new_chunk(3+n+1+n+1);
+  (void)new_chunk(3+n+1+n+1);
   /* yield r = dim ker(x) */
   d = Flm_gauss_pivot(x,p,&r);
   avma = av;

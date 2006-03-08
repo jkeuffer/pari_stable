@@ -1071,7 +1071,7 @@ group_subgroups(GEN G)
         {
           if (perm_commute(gel(c,2),gel(c,3))) { lswap(c[1], c[2]); }
           else
-            perm_mul_inplace(gel(c,2), gel(c,1));
+            (void)perm_mul_inplace(gel(c,2), gel(c,1));
         }
       }
   }

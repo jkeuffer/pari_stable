@@ -413,7 +413,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   pari_timer Ti;
-  if (DEBUGLEVEL>=4) TIMER(&Ti);
+  if (DEBUGLEVEL>=4) TIMERstart(&Ti);
   Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
   w = v = FpXQYQ_pow(pol_x[varn(u)], q, u, T, p);
   if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQYQ_pow");
@@ -441,7 +441,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   pari_timer T;
-  TIMER(&T);
+  TIMERstart(&T);
   Q = cgetg(N+1,t_VEC); gel(Q,1) = const_vecsmall(N,0);
   w = v = Flxq_pow(polx_Flx(u[1]), utoipos(p), u, p);
   for (j=2; j<=N; j++)

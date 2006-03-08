@@ -2096,7 +2096,7 @@ typedef struct {
 void
 init_dalloc()
 { /* correct alignment for dalloc */
-  new_chunk((avma % sizeof(double)) / sizeof(long));
+  (void)new_chunk((avma % sizeof(double)) / sizeof(long));
 }
 
 double *

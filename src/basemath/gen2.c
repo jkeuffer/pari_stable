@@ -1359,7 +1359,7 @@ gaffect(GEN x, GEN y)
 	case t_FRAC:
 	  switch(ty)
 	  {
-	    case t_REAL: rdiviiz(gel(x,1),gel(x,2), y); break;
+	    case t_REAL: (void)rdiviiz(gel(x,1),gel(x,2), y); break;
 	    case t_INTMOD: av = avma;
               p1 = Fp_inv(gel(x,2),gel(y,1));
 	      affii(modii(mulii(gel(x,1),p1),gel(y,1)), gel(y,2));

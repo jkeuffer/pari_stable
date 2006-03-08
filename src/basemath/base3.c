@@ -1616,7 +1616,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 
   for (r=1;; r++)
   { /* reset */
-    vec_setconst(lambda, (GEN)0);
+    (void)vec_setconst(lambda, (GEN)0);
     if (!x) lambda[1] = r;
     while (increment(lambda, N, r))
     {
@@ -2275,7 +2275,7 @@ zlog_unitsarch(GEN sgnU, GEN bid)
   long i;
   U = gmul(gmael(liste, lg(liste)-1, 3),
            rowpermute(sgnU, arch_to_perm(arch)));
-  for (i = 1; i < lg(U); i++) F2V_red_ip(gel(U,i));
+  for (i = 1; i < lg(U); i++) (void)F2V_red_ip(gel(U,i));
   return U;
 }
 

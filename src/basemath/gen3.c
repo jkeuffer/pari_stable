@@ -1409,12 +1409,9 @@ gsubstvec(GEN e, GEN v, GEN r)
     w[i]=varn(T);
     z[i]=fetch_var();
   }
-  for(i=1;i<l;i++)
-    e=gsubst(e,w[i],pol_x[z[i]]);
-  for(i=1;i<l;i++)
-    e=gsubst(e,z[i],(GEN)r[i]);
-  for(i=1;i<l;i++)
-    delete_var();
+  for(i=1;i<l;i++) e = gsubst(e,w[i],pol_x[z[i]]);
+  for(i=1;i<l;i++) e = gsubst(e,z[i],(GEN)r[i]);
+  for(i=1;i<l;i++) (void)delete_var();
   return gerepileupto(ltop,e);
 }
 

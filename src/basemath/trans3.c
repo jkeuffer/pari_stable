@@ -1276,7 +1276,7 @@ szeta(long k, long prec)
   }
   /* k > 1 odd */
   if (k * log(k) > bit_accuracy_mul(prec, LOG2)) /* heuristic */
-    gerepileuptoleaf(av, ginv( inv_szeta_euler(k, 0, prec) ));
+    return gerepileuptoleaf(av, ginv( inv_szeta_euler(k, 0, prec) ));
   return szeta_odd(k, prec);
 }
 
