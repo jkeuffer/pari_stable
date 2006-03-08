@@ -2159,11 +2159,11 @@ static GEN
 Qsfcont(GEN a, GEN b, GEN y, long k)
 {
   GEN  z, c;
-  long i, l, ly = lgefint(b);
+  long i, l, K = k+1, ly = lgefint(b);
 
   /* / log2( (1+sqrt(5)) / 2 )  */
   l = (long)(3 + bit_accuracy_mul(ly, 1.44042009041256));
-  if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
+  if (k > 0 && K > 0 && l > K) l = K; /* beware overflow */
   if ((ulong)l > LGBITS) l = LGBITS;
 
   z = cgetg(l,t_VEC);

@@ -91,6 +91,7 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
    30- inconsistencies wrt variables in t_POLMOD, e.g
        Mod(x*a,x^2)' ---> Mod(x, x^2)
        deriv(Mod(x*a,x^2)) ---> 0
+   31- contfrac(sqrt(19),2^31-1) --> overflow [ gcc bug ]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
