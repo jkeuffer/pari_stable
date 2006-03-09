@@ -91,7 +91,8 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
    30- inconsistencies wrt variables in t_POLMOD, e.g
        Mod(x*a,x^2)' ---> Mod(x, x^2)
        deriv(Mod(x*a,x^2)) ---> 0
-   31- contfrac(sqrt(19),2^31-1) --> overflow [ gcc bug ]
+   31- contfrac(sqrt(19),2^31-1) --> overflow [ signed overflow can't
+       be reliably tested, use unsigned computations ]
 BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
 
   Changed

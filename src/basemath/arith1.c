@@ -2156,21 +2156,21 @@ icopy_lg(GEN x, long l)
 /* continued fraction of a/b. If y != NULL, stop when partial quotients
  * differ from y */
 static GEN
-Qsfcont(GEN a, GEN b, GEN y, long k)
+Qsfcont(GEN a, GEN b, GEN y, ulong k)
 {
   GEN  z, c;
-  long i, l, K = k+1, ly = lgefint(b);
+  ulong i, l, ly = lgefint(b);
 
   /* / log2( (1+sqrt(5)) / 2 )  */
-  l = (long)(3 + bit_accuracy_mul(ly, 1.44042009041256));
-  if (k > 0 && K > 0 && l > K) l = K; /* beware overflow */
-  if ((ulong)l > LGBITS) l = LGBITS;
+  l = (ulong)(3 + bit_accuracy_mul(ly, 1.44042009041256));
+  if (k > 0 && k+1 > 0 && l > k+1) l = k+1; /* beware overflow */
+  if (l > LGBITS) l = LGBITS;
 
   z = cgetg(l,t_VEC);
   l--;
   if (y) {
     pari_sp av = avma;
-    if (l >= lg(y)) l = lg(y)-1;
+    if (l >= (ulong)lg(y)) l = lg(y)-1;
     for (i = 1; i <= l; i++)
     {
       GEN q = gel(y,i);
@@ -2240,6 +2240,7 @@ sfcont(GEN x, long k)
   long lx, tx = typ(x), e;
   GEN y, a, b, c;
 
+  if (k < 0) err(talker, "negative nmax in sfcont");
   if (is_scalar_t(tx))
   {
     if (gcmp0(x)) return mkvec(gen_0);
