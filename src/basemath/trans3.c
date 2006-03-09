@@ -968,7 +968,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     l2 = (p + s/2. - .25);
     n = 1 + dabs(l2, t/2) * la / PI;
   }
-  else if (t)
+  else if (t != 0)
   {
     double sn = dabs(s, t), L = log(sn/s);
     alpha = B - 0.39 + L + s*(log2PI - log(sn));
