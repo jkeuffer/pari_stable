@@ -713,7 +713,7 @@ pol_from_Newton(GEN S)
 
 /* - mu_b = sum_{0 <= i < m} floor(r_b r_{d-1-i} / ell) tau^i */
 static GEN
-get_m_mu(long b, GEN r, long ell)
+get_mmu(long b, GEN r, long ell)
 {
   long i, m = lg(r)-1;
   GEN M = cgetg(m+1, t_VEC);
@@ -789,10 +789,10 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   for (i = 0; i < m; i++)
   { /* compute (1/be) ^ (-mu) instead of be^mu [mu << 0].
      * 1/be = C_invbe * prim_invbe */
-    GEN m_mu = get_m_mu(i, r, ell);
+    GEN mmu = get_mmu(i, r, ell);
     /* p1 = prim_invbe ^ -mu */
-    p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, m_mu, nfz));
-    if (C_invbe) p1 = gmul(p1, powgi(C_invbe, sum(m_mu,1,m)));
+    p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, mmu, nfz));
+    if (C_invbe) p1 = gmul(p1, powgi(C_invbe, sum(mmu,1,m)));
     /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
     gel(root, 2 + r[i+1]) = monomial(p1, r[i+1], vT);
   }

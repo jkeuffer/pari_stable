@@ -172,7 +172,6 @@ GEN merge_factor_i(GEN f, GEN g);
 GEN to_famat_all(GEN x, GEN y);
 GEN to_famat(GEN g, GEN e);
 GEN trivfact(void);
-GEN vconcat(GEN Q1, GEN Q2);
 
 /* integer factorization / discrete log */
 int   BSW_isprime(GEN x);
