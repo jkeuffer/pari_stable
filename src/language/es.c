@@ -2791,8 +2791,10 @@ try_pipe(char *cmd, int fl)
 #  endif
   {
     file = (FILE *) popen(cmd, (flag & mf_OUT)? "w": "r");
-    if (flag & mf_OUT) flag |= mf_PERM;
-    if ((flag & (mf_TEST | mf_OUT)) && !ok_pipe(file)) return NULL;
+    if (flag & mf_OUT) {
+      if (!ok_pipe(file)) return NULL;
+      flag |= mf_PERM;
+    }
     f = cmd;
   }
   if (!file) pari_err(talker,"[pipe:] '%s' failed",cmd);

@@ -768,7 +768,7 @@ sd_prettyprinter(char *v, long flag)
       if (cancel) f = NULL;
       else
       {
-        f = try_pipe(v, mf_OUT | mf_TEST);
+        f = try_pipe(v, mf_OUT);
         if (!f)
         {
           pari_warn(warner,"broken prettyprinter: '%s'",v);
