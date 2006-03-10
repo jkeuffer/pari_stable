@@ -1877,7 +1877,7 @@ static void
 prettyp_wait(void)
 {
   char *s = "                                                     \n";
-  long i = 400;
+  long i = 2000;
 
   pariputs("\n\n"); pariflush(); /* start translation */
   while (--i) pariputs(s);
@@ -1890,9 +1890,7 @@ prettyp_init(void)
 {
   gp_pp *pp = GP_DATA->pp;
   if (!pp->cmd) return 0;
-  if (!pp->file)
-    pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST);
-  if (pp->file) return 1;
+  if (pp->file || (pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST))) return 1;
 
   pari_warn(warner,"broken prettyprinter: '%s'",pp->cmd);
   free(pp->cmd); pp->cmd = NULL; return 0;
