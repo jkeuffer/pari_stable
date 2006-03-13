@@ -2643,10 +2643,9 @@ $y'$ are the new coordinates, then $x=u^2x'+r$, $y=u^3y'+su^2x'+t$ (see also
 \syn{pointch}{x,v}.
 
 \subsecidx{ellconvertname}$(\var{name})$: 
-convert an elliptic curve name (as found in the elldata database) from a string
-to a triplet $[\var{conductor}, \var{isogeny class}, \var{index}]$. It will
-also convert a triplet back to a curve name.
-
+converts an elliptic curve name, as found in the \tet{elldata} database,
+from a string to a triplet $[\var{conductor}, \var{isogeny class},
+\var{index}]$. It will also convert a triplet back to a curve name.
 Examples:
 \bprog
 ? ellconvertname("123b1")
@@ -2683,8 +2682,8 @@ $[\eta_1,\eta_2]$ of quasi-periods associated to $\kbd{om} = [\omega_1,
 
 \subsecidx{ellgenerators}$(E)$: returns a $\Z$-basis of the free part of the
 \idx{Mordell-Weil group} associated to $E$.  This function depends on the
-elldata database being installed and referencing the curve, and so is only
-available for curves over $\Z$ of small conductors.
+\tet{elldata} database being installed and referencing the curve, and so
+is only available for curves over $\Z$ of small conductors.
 
 \syn{ellgenerators}{E}.
 
@@ -2725,11 +2724,11 @@ given by a minimal model.
 
 \syn{mathell}{E,x,\var{prec}}.
 
-\subsecidx{ellidentify}$(E)$: look up the elliptic curve $E$ (over $\Z$) in the
-elldata database and return \kbd{[[N, M, G], C]}  where $N$ is the name of the
-curve in J.  E.  Cremona database, $M$ the minimal model, $G$ a $\Z$-basis of
-the free part of the \idx{Mordell-Weil group} of $E$ and $C$ the coordinates
-change (see \kbd{ellchangecurve}).
+\subsecidx{ellidentify}$(E)$: look up the elliptic curve $E$ (over $\Z$)
+in the \tet{elldata} database and return \kbd{[[N, M, G], C]}  where $N$
+is the name of the curve in J.  E.  Cremona database, $M$ the minimal
+model, $G$ a $\Z$-basis of the free part of the \idx{Mordell-Weil group}
+of $E$ and $C$ the coordinates change (see \kbd{ellchangecurve}).
 
 \syn{ellidentify}{E}.
 
@@ -2739,10 +2738,11 @@ vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
 equation
 $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
 or a string, in this case the coefficients of the curve with matching name
-are looked in the elldata database if available. For the time being, only
-curves over a prime field $\F_p$ and over the $p$-adic or real numbers
-(including rational numbers) are fully supported. Other domains are only
-supported for very basic operations such as point addition.
+are looked in the \tet{elldata} database if available. For the time
+being, only curves over a prime field $\F_p$ and over the $p$-adic or
+real numbers (including rational numbers) are fully supported. Other
+domains are only supported for very basic operations such as point
+addition.
 
 The result of \tet{ellinit} is a an \tev{ell} structure by default, and
 a shorted \tev{sell} if $\fl=1$. Both contain the following information in
@@ -2908,8 +2908,8 @@ If $\fl=2,3$, same using the product expansion instead of theta series.
 
 \subsecidx{ellsearch}$(N)$: if $N$ is an integer, it is taken as a conductor
 else if $N$ is a string, it can be a curve name ("11a1"), a isogeny class
-("11a") or a conductor "11". This function finds all curves in the elldata
-database with the given property. 
+("11a") or a conductor "11". This function finds all curves in the
+\tet{elldata} database with the given property. 
 
 If $N$ is a full curve name, the output format is $[N, [a_1,a_2,a_3,a_4,a_6],
 G]$ where $[a_1,a_2,a_3,a_4,a_6]$ are the coefficients of the Weierstrass
