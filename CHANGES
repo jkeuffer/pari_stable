@@ -96,6 +96,7 @@ BA 25- HPPA 32bit level0 inline assembly addmul constraint was too weak.
 BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    33- [output=3] give more time to external prettyprinter [#209]
    34- rare SEGV in factor(t_INT) with low stack space [ #345 ]
+   35- ispower(1) --> error, ispower(-8) --> error [ allow negative numbers ]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

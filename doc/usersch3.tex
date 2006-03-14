@@ -1998,11 +1998,17 @@ which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
 \subsecidx{ispower}$(x,\{k\}, \{\&n\})$:
- true (1) if $x$ is a $k$-th power, false (0) if not. If $n$ is
-given and a $k$-th root was computed in the process, put that in $n$. If $k$
-is omitted, return the maximal $k \geq 2$ such that $x = n^k$ is a perfect
-power, or 0 if no such $k$ exist. Intmod a prime and $p$-adics are allowed,
-provided $k$ is not omitted.
+if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
+(0) if not. In this case, $x$ may be an integer or polynomial,
+a rational number or function, or an intmod a prime or $p$-adic.
+
+If $k$ is omitted, only integers and fractions are allowed and the
+function returns the maximal $k \geq 2$ such that $x = n^k$ is a perfect
+power, or 0 if no such $k$ exist; in particular \kbd{ispower(-1)},
+\kbd{ispower(0)}, and \kbd{ispower(1)} all return $0$.
+
+If a third argument $\&n$ is given and a $k$-th root was computed in the
+process, then $n$ is set to that root.
 
 \syn{ispower}{x, k, \&n}, the result is a \kbd{long}. Omitted $k$ or $n$
 are coded as \kbd{NULL}.

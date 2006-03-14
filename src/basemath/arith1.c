@@ -721,6 +721,7 @@ long
 ispower(GEN x, GEN K, GEN *pty)
 {
   ulong k, mask;
+  long s;
   GEN z;
 
   if (!K) return gisanypower(x, pty);
@@ -728,12 +729,24 @@ ispower(GEN x, GEN K, GEN *pty)
   if (is_pm1(K)) { if (pty) *pty = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
+      s = signe(x);
+      if (!s) return 1;
       k = itou(K);
-      if (k == 2) return Z_issquarerem(x, pty);
-      if (k == 3) { mask = 1; return !!is_357_power(x, pty, &mask); }
-      if (k == 5) { mask = 2; return !!is_357_power(x, pty, &mask); }
-      if (k == 7) { mask = 4; return !!is_357_power(x, pty, &mask); }
-      return is_kth_power(x, k, pty, NULL);
+      if (s > 0) {
+        if (k == 2) return Z_issquarerem(x, pty);
+        if (k == 3) { mask = 1; return !!is_357_power(x, pty, &mask); }
+        if (k == 5) { mask = 2; return !!is_357_power(x, pty, &mask); }
+        if (k == 7) { mask = 4; return !!is_357_power(x, pty, &mask); }
+        return is_kth_power(x, k, pty, NULL);
+      } else {
+        if (!odd(k)) return 0;
+        if (ispower(absi(x), K, pty))
+        {
+          if (pty) *pty = negi(*pty);
+          return 1;
+        };
+        return 0;
+      }
     case t_FRAC:
     {
       GEN a = gel(x,1), b = gel(x,2);
@@ -817,14 +830,17 @@ long
 isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long ex, k = 1;
+  long ex, k = 1, s = signe(x);
   GEN logx, y;
   byteptr d = diffptr;
   ulong mask = 7, p = 0, ex0 = 11, e2;
 
-  if (typ(x) != t_INT || cmpii(x, gen_2) < 0)
-    pari_err(talker, "isanypower: argument must be > 1");
-  while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
+  if (typ(x) != t_INT) pari_err(typeer, "isanypower");
+  if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
+  if (s < 0)
+    x = absi(x);
+  else
+    while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
   /* cut off at 4 bits not 1 which seems to be about optimum;  for primes
    * >> 10^3 the modular checks are no longer competitively fast */
@@ -847,7 +863,12 @@ isanypower(GEN x, GEN *pty)
     if (*d) NEXT_PRIME_VIADIFF(p, d);
     else p = itou( nextprime(utoipos(p + 1)) );
   }
-  if (pty) *pty = gerepilecopy(av, x); else avma = av;
+  if (!pty) avma = av;
+  else
+  {
+    if (s < 0) x = negi(x);
+    *pty = gerepilecopy(av, x);
+  }
   return k == 1? 0: k;
 }
 
