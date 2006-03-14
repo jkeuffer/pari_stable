@@ -92,18 +92,14 @@ done
 
 # runpath
 tmp=$runpath
-if test -n "$plotrunpath"; then
-  tmp="$tmp$dir_sep$plotrunpath"
-fi
-if test -n "$gmp"; then
-  tmp="$tmp$dir_sep$gmp"
-fi
-case "$tmp" in
-  /usr/lib);;
-  *$dir_sep/usr/lib);;
-  *$dir_sep/usr/lib$dir_sep);;
-  *) tmp="$tmp$dir_sep/usr/lib";;
-esac
+for d in "$plotrunpath" "$gmp" "$readline" "/usr/lib"; do
+  if test -n "$d"; then
+    case "$tmp" in
+      $d|*$dir_sep$d|*$dir_sep$d$dir_sep*);;
+      *) tmp="$tmp$dir_sep$d";;
+    esac
+  fi
+done
 RUNPTH_FINAL=
 RUNPTH=
 if test -n "$runpathprefix"; then
@@ -237,13 +233,13 @@ RLLIBS    = $RLLIBS
 # GMP
 GMPINCLUDE = $GMPINCLUDE
 # Graphic library.
-QTDIR      = $QTDIR
+QTDIR      = "$QTDIR"
 MOC        = \$(QTDIR)/bin/moc
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
 CPLUSPLUS  = g++
 
-FLTKDIR    = $FLTKDIR
+FLTKDIR    = "$FLTKDIR"
 
 TOPLDDYN   = -L"$TOP/$objdir" \$(RLLIBS)
 # Description system
