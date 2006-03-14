@@ -7138,6 +7138,21 @@ return a \typ{VECSMALL} $v$, where $v[1]\dots v[n]$ contain the indices.
 \var{expr} evaluated at the integer points between 1 and $n$. If one of the
 last two arguments is omitted, fill the vector with zeroes.
 
+Avoid modifying $X$ within \var{expr}; if you do, the formal variable
+still runs from $1$ to $n$. In particular, \kbd{vector(n,i,expr)} is not
+equivalent to
+\bprog
+    v = vector(n)
+    for (i = 1, n, v[i] = expr)
+@eprog\noindent
+as the following example shows:
+\bprog
+    n = 3
+    v = vector(n); vector(n, i, i++)            ----> [2, 3, 4]
+    v = vector(n); for (i = 1, n, v[i] = i++)   ----> [2, 0, 4]
+@eprog\noindent
+
+
 \synt{vecteur}{GEN nmax, entree *ep, char *expr}.
 
 \subsecidx{vectorsmall}$(n,\{X\},\{\var{expr}=0\})$: creates a row vector of small integers (type
@@ -8378,6 +8393,29 @@ powerful enough to write any kind of program. Some of them are specific to
 GP, since they are made for number theorists. As usual, $X$ will denote any
 simple variable name, and \var{seq} will always denote a sequence of
 expressions, including the empty sequence.
+
+\misctitle{Caveat:} in constructs like
+\bprog
+    for (X = a,b, seq)
+@eprog\noindent
+the variable \kbd{X} is considered local to the loop, leading to possibly
+unexpected behaviour:
+\bprog
+    n = 5;
+    for (n = 1, 10,
+      if (something_nice(), break);
+    );
+    \\ @com at this point \kbd{n} is 5 !
+@eprog\noindent
+If the sequence \kbd{seq} modifies the loop index, then the loop
+is modified accordingly:
+\bprog
+    ? for (n = 1, 10, n += 2; print(n))
+    3
+    6
+    9
+    12
+@eprog
 
 \subsubsecidx{break}$(\{n=1\})$: interrupts execution of current \var{seq}, and
 immediately exits from the $n$ innermost enclosing loops, within the

@@ -783,6 +783,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
   {
     c[2] = i; p1 = readseq_nobreak(ch);
     gel(y,i) = isonstack(p1)? p1 : forcecopy(p1);
+    changevalue_p(ep,c);
   }
   pop_val(ep); return y;
 }
@@ -799,7 +800,12 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
   if (m < 0)  pari_err(talker,"negative number of components in vector");
   if (!ep || !ch) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
-  for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(readseq_nobreak(ch)); }
+  for (i=1; i<=m; i++)
+  {
+    c[2] = i;
+    y[i] = itos(readseq_nobreak(ch));
+    changevalue_p(ep,c);
+  }
   pop_val(ep); return y;
 }
 
@@ -836,6 +842,8 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
     {
       c1[2] = j; p1 = readseq_nobreak(ch);
       gel(z,j) = isonstack(p1)? p1 : forcecopy(p1);
+      changevalue_p(ep1,c1);
+      changevalue_p(ep2,c2);
     }
   }
   pop_val(ep2);

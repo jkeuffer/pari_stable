@@ -181,6 +181,7 @@ IZ 34- [2.2.9-A20] -fno-strict-aliasing not supported in older gcc
    36- gerepile error in nfgaloisapply [#408]
    37- wrong results in bessel functions at non-integer indices
        (typo in isint(t_REAL) ) [#409] 
+   38- vector(3,n,n*=10) -> [10, 100, 1000] ( now [10, 20, 30] )
 
   Changed
     1- speed up prime() by using checkpoints.
