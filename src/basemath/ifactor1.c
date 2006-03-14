@@ -1119,6 +1119,26 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2, GEN *XAUX)
   return elladd(nbc, XAUX, X2, X2);
 }
 
+/* Auxiliary routines need < (3*nbc+240)*tf words on the PARI stack, in
+ * addition to the spc*(tf+1) words occupied by our main table.
+ * If stack space is already tight, use the heap & newbloc(). */
+static GEN*
+alloc_scratch(long nbc, long spc, long tf)
+{
+  long i, tw = evallg(tf) | evaltyp(t_INT), len = spc + 385 + spc*tf;
+  GEN *X, w;
+  if ((long)((GEN)avma - (GEN)bot) < len + (3*nbc + 240)*tf)
+  {
+    if (DEBUGLEVEL>4) fprintferr("ECM: stack tight, using heap space\n");
+    X = (GEN*)newbloc(len);
+  } else
+    X = (GEN*)new_chunk(len);
+  /* hack for X[i] = cgeti(tf). X = current point in B1 phase */
+  w = (GEN)(X + spc + 385);
+  for (i = spc-1; i >= 0; i--) { X[i] = w; *w = tw; w += tf; }
+  return X;
+}
+
 /* PRAC implementation notes - main changes against the paper version:
  * (1) The general function  [m+n]P = f([m]P,[n]P,[m-n]P)  collapses  (for
  * m!=n)  to an elladd() which does not depend on the third argument;  and
@@ -1258,8 +1278,7 @@ ellfacteur(GEN n, int insist)
   GEN *X,*XAUX,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb;
   GEN res = cgeti(tf);
   pari_sp av1, avtmp, av = avma;
-  int rflag, use_clones = 0;
-  byteptr d, d0;
+  int rflag;
 
   N = n; /* make n known to auxiliary functions */
   /* determine where we'll start, how long we'll persist, and how many
@@ -1278,7 +1297,7 @@ ellfacteur(GEN n, int insist)
     else if (dsn > 47) dsn = 47;
     /* pick up the torch where non-insistent stage would have given up */
     nbc = dsn + (dsn >> 2) + 9;	/* 8 or more curves in parallel */
-    nbc &= ~3; /* nbc is always a multiple of 4 */
+    nbc &= ~3; /* 4 | nbc */
     if (nbc > nbcmax) nbc = nbcmax;
     a = 1 + (nbcmax<<7)*(size&0xffff); /* seed for choice of curves */
     rep = 0; /* gcc -Wall */
@@ -1334,27 +1353,9 @@ ellfacteur(GEN n, int insist)
     fprintferr("...\n");
   }
 
-  /* The auxiliary routines above need < (3*nbc+240)*tf words on the PARI
-   * stack, in addition to the spc*(tf+1) words occupied by our main table.
-   * If stack space is already tight, try the heap, using newbloc(). */
   nbc2 = nbc << 1;
   spc = (13 + 48) * nbc2 + bstpmax * 4;
-{
-  const long tw = evallg(tf) | evaltyp(t_INT);
-  GEN w;
-  if ((long)((GEN)avma - (GEN)bot) < spc + 385 + (spc + 3*nbc + 240)*tf)
-  {
-    if (DEBUGLEVEL >= 5) fprintferr("ECM: stack tight, using heap space\n");
-    use_clones = 1;
-    X = (GEN*)newbloc(spc + 385);
-    w = newbloc(spc*tf);
-  } else {
-    X = (GEN*)new_chunk(spc + 385);
-    w = new_chunk(spc*tf);
-  }
-  /* hack for X[i] = cgeti(tf). X = current point in B1 phase */
-  for (i = spc; i--; ) { X[i] = w; *w = tw; w += tf; }
-}
+  X = alloc_scratch(nbc, spc, tf);
   XAUX = X    + nbc2;	 /* scratchpad for ellmult() */
   XT   = XAUX + nbc2;	 /* ditto, will later hold [3*210]Q */
   XD   = XT   + nbc2;	 /* room for various multiples */
@@ -1374,11 +1375,11 @@ ellfacteur(GEN n, int insist)
   /* ECM MAIN LOOP */
   for(;;)
   {
-    d = diffptr; rcn = NPRC; /* multipliers begin at the beginning */
-
-    /* pick curves */
-    for (i = nbc2; i--; ) affsi(a++, X[i]);
-    /* pick bounds */
+    byteptr d0, d = diffptr;
+    
+    rcn = NPRC; /* multipliers begin at the beginning */
+    /* pick curves & bounds */
+    for (i = nbc2; i--; ) affui(a++, X[i]);
     B1 = insist ? TB1[dsn] : TB1_for_stage[dsn];
     B2 = 110*B1;
     B2_rt = (ulong)(sqrt((double)B2));
@@ -1689,7 +1690,7 @@ fin:
     flusherr();
   }
 ret:
-  if (use_clones) { gunclone(X[spc]); gunclone((GEN)X); }
+  if (!isonstack(X)) gunclone((GEN)X);
   avma = av; return res;
 }
 
