@@ -3007,7 +3007,7 @@ gcdmonome(GEN x, GEN y)
 GEN
 content(GEN x)
 {
-  long lx, i, tx = typ(x);
+  long lx, i, t, tx = typ(x);
   pari_sp av = avma;
   GEN c;
 
@@ -3058,21 +3058,24 @@ content(GEN x)
   }
   for (i=lontyp[tx]; i<lx; i++)
     if (typ(x[i]) != t_INT) break;
-  lx--; c=gel(x,lx);
+  lx--; c = gel(x,lx);
+  t = typ(c); if (is_matvec_t(t)) c = content(c);
   if (i > lx)
   { /* integer coeffs */
-    while (lx>lontyp[tx])
+    while (lx-- > lontyp[tx])
     {
-      lx--; c=gcdii(c,gel(x,lx));
+      c = gcdii(c, gel(x,lx));
       if (is_pm1(c)) { avma=av; return gen_1; }
     }
   }
   else
   {
     if (isinexact(c)) c = zero_gcd(c, typ(c));
-    while (lx>lontyp[tx])
+    while (lx-- > lontyp[tx])
     {
-      lx--; c=ggcd(c,gel(x,lx));
+      GEN d = gel(x,lx);
+      t = typ(d); if (is_matvec_t(t)) d = content(d);
+      c = ggcd(c, d);
     }
     if (typ(c) == t_INTMOD || isinexact(c)) { avma=av; return gen_1; }
   }
