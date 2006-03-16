@@ -119,6 +119,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
     8- addrr: extend accuracy much less frequently
     9- make sure all kernel symbols are present in all versions of libpari
        (addll & friends could be inline)
+   10- disallow gcd(x) [ use content(x) ], see 2.2.1-C8
 
   Added
     1- [library] new function isinexact.

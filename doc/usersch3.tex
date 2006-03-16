@@ -1993,15 +1993,20 @@ algorithm.
 
 \syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
-\subsecidx{gcd}$(x,\{y\},\{\fl=0\})$: creates the greatest common divisor of $x$
+\subsecidx{gcd}$(x,y,\{\fl=0\})$: creates the greatest common divisor of $x$
 and $y$. $x$ and $y$ can be of quite general types, for instance both
-rational numbers. Vector/matrix types are also accepted, in which case
-the GCD is taken recursively on each component. Note that for these
-types, \kbd{gcd} is not commutative. \fl\ is obsolete and should not be used.
+rational numbers. \fl\ is obsolete and should not be used.
 
-If $y$ is omitted and $x$ is a vector, return the $\gcd$ of all
-components of $x$. The algorithm used is a naive \idx{Euclid} except for the
-following inputs:
+Vector/matrix types are also accepted, in which case the GCD is taken
+recursively on each component, with the following meaning: if $y$
+is a vector, resp.~matrix, then the result has the same type as $y$, and
+components equal to \kbd{gcd(x, y[i])}, resp.~\kbd{gcd(x, y[,i])}. Else
+if $x$ is a vector/matrix the result has the same type as $x$ and an
+analogous definition. Note that for these types, \kbd{gcd} is not
+commutative. To obtain the gcd of all entries in a vector, use
+\kbd{content}.
+
+The algorithm used is a naive \idx{Euclid} except for the following inputs:
 
 \item integers: use modified right-shift binary (``plus-minus''
 variant).

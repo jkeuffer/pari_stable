@@ -2490,33 +2490,14 @@ gisirreducible(GEN x)
 /*                         GENERIC GCD                             */
 /*                                                                 */
 /*******************************************************************/
-static GEN
-mapgcd(GEN f(GEN,GEN), GEN x, GEN y)
-{
-  if (!y)
-  {
-    pari_sp av = avma;
-    long i, tx = typ(x), lx = lg(x);
-    GEN t;
-    if (!is_vec_t(tx)) pari_err(typeer,"association");
-    if (lx == 1) return gen_0;
-    t = gel(x,1);
-    if (lx == 2) return gcopy(t);
-    /* more efficient than divide & conquer ! */
-    for (i = 2; i < lx; i++) t = f(t, gel(x,i));
-    return gerepileupto(av, t);
-  }
-  return f(x,y);
-}
-
 GEN
 gcd0(GEN x, GEN y, long flag)
 {
   switch(flag)
   {
-    case 0: return mapgcd(ggcd,x,y);
-    case 1: return mapgcd(modulargcd,x,y);
-    case 2: return mapgcd(srgcd,x,y);
+    case 0: return ggcd(x,y);
+    case 1: return modulargcd(x,y);
+    case 2: return srgcd(x,y);
     default: pari_err(flagerr,"gcd");
   }
   return NULL; /* not reached */
@@ -2637,15 +2618,21 @@ ggcd(GEN x, GEN y)
   pari_sp av, tetpil;
   GEN p1,z;
 
-  if (tx>ty) { swap(x,y); lswap(tx,ty); }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) pari_err(operf,"g",x,y);
-  /* tx <= ty */
   if (is_matvec_t(ty))
   {
     l = lg(y); z = cgetg(l,ty);
     for (i=1; i<l; i++) gel(z,i) = ggcd(x,gel(y,i));
     return z;
   }
+  if (is_matvec_t(tx))
+  {
+    l = lg(x); z = cgetg(l,tx);
+    for (i=1; i<l; i++) gel(z,i) = ggcd(gel(x,i),y);
+    return z;
+  }
+  if (tx>ty) { swap(x,y); lswap(tx,ty); }
+  /* tx <= ty */
   if (isexactzero(x)) return zero_gcd(y, ty);
   if (isexactzero(y)) return zero_gcd(x, tx);
   if (is_const_t(tx))
