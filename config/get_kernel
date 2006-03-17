@@ -56,6 +56,7 @@ EOM
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
+  kernel=$ans # explicit kernel, needed when checking for gmp in Configure
   tmp_kern=$ans
   cat << EOM
 ==========================================================================
