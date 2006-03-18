@@ -52,9 +52,16 @@ else
   else
     cat << EOM
 ==========================================================================
+GNU MP library can be used as an alternate multiprecision kernel, which
+is faster than PARI's native one as soon as integers larger than 10^100
+are considered. Unfortunately, with GNU MP, libpari is binary incompatible
+with the native one. Despite this, you should only answer 'no' to the
+following question if you plan to use libpari (not only the gp shell)
+and have stringent backward compatibility requirements.
 EOM
     echo $n "Do you want to use GNU MP library instead of the native kernel? $c"
-    rep='y n'; dflt=y; . ./myread
+    if test "$with_gmp" = yes; then dflt=y; else dflt=n; fi
+    rep='y n'; . ./myread
     case $ans in
       n) gmp=;;
     esac

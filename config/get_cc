@@ -65,8 +65,8 @@ Only ANSI C and C++ compilers are supported.  Choosing the GNU compiler
 gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
 use g++, it is a good idea to include the -fpermissive flag).  If you choose
 not to use gcc, the C++ version of Pari will be a little faster because of
-general inlining, but can be used in library mode only with C++ programs (we
-_really_ recommand using gcc all the way through).
+general inlining, but can be used in library mode only with C++ programs.
+We strongly recommand using gcc all the way through.
 EOT
   echo $n ..."Which C compiler shall I use ? $c"
   dflt=$CC; rep=; . ./myread

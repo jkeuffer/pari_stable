@@ -72,7 +72,7 @@ if test -n "$kernel"; then # kernel explicitly provided
     gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
   esac
 fi
-if test -n "$with_gmp"; then
+if test -n "$with_gmp" -o "$fastread" != yes; then
   . ./get_gmp  # $_gmp_list
 fi
 if test "$optimization" != profiling; then
