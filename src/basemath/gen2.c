@@ -1078,7 +1078,7 @@ vecmax(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) return utoineg(VERYBIGINT);
+  lx=lg(x); if (lx==1) err(talker, "empty vector in vecmax");
   if (tx!=t_MAT)
   {
     s=gel(x,1);
@@ -1088,7 +1088,7 @@ vecmax(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) return utoineg(VERYBIGINT);
+    if (lx2==1) err(talker, "empty vector in vecmax");
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {
@@ -1108,7 +1108,7 @@ vecmin(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) return utoipos(VERYBIGINT);
+  lx=lg(x); if (lx==1) err(talker, "empty vector in vecmin");
   if (tx!=t_MAT)
   {
     s=gel(x,1);
@@ -1118,7 +1118,7 @@ vecmin(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) return utoipos(VERYBIGINT);
+    if (lx2==1) err(talker, "empty vector in vecmin");
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {

@@ -395,15 +395,14 @@ maximum and minimum of $x$ and $y$ when they can be compared.
 \syn{gmax}{x,y} and \funs{gmin}{x,y}.
 
 \subsecidx{vecmax}$(x)$: if $x$ is a vector or a matrix, returns the maximum
-of the elements of $x$, otherwise returns a copy of $x$. Returns $-\infty$
-in the form of $-(2^{31}-1)$ (or $-(2^{63}-1)$ for 64-bit machines) if $x$ is
+of the elements of $x$, otherwise returns a copy of $x$. Error if $x$ is
 empty.
 
 \syn{vecmax}{x}.
 
 \subsecidx{vecmin}$(x)$: if $x$ is a vector or a matrix, returns the minimum
-of the elements of $x$, otherwise returns a copy of $x$. Returns $+\infty$
-in the form of $2^{31}-1$ (or $2^{63}-1$ for 64-bit machines) if $x$ is empty.
+of the elements of $x$, otherwise returns a copy of $x$. Error if $x$ is
+empty.
 
 \syn{vecmin}{x}.
 
