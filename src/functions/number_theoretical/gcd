@@ -1,11 +1,8 @@
 Function: gcd
 Section: number_theoretical
 C-Name: gcd0
-Prototype: GGD0,L,
-Help: gcd(x,y,{flag=0}): greatest common divisor of x and y. flag is
- optional, and can be 0: default, 1: use the modular gcd algorithm (x and y
- must be polynomials), 2 use the subresultant algorithm (x and y must be
- polynomials)
+Prototype: GDGD0,L,
+Help: gcd(x,{y}): greatest common divisor of x and y.
 Description: 
  (small, small, ?0):small	cgcd($1, $2)
  (int, int, ?0):int	        gcdii($1, $2)

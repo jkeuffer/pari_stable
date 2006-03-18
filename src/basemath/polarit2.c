@@ -2493,6 +2493,7 @@ gisirreducible(GEN x)
 GEN
 gcd0(GEN x, GEN y, long flag)
 {
+  if (!y) return content(x);
   switch(flag)
   {
     case 0: return ggcd(x,y);
@@ -2833,8 +2834,59 @@ ggcd(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
+/* x a t_VEC,t_COL or t_MAT */
+static GEN
+vec_lcm(GEN x)
+{
+  if (typ(x) == t_MAT)
+  {
+    long i, l = lg(x);
+    GEN z = cgetg(l, t_VEC);
+    for (i = 1; i < l; i++) gel(z,i) = glcm0(gel(x,i), NULL);
+    x = z;
+  }
+  return glcm0(x, NULL);
+}
+static GEN
+scal_lcm(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  long tx = typ(x), ty = typ(y);
+  if (is_matvec_t(tx)) x = vec_lcm(x);
+  if (is_matvec_t(ty)) y = vec_lcm(y);
+  return gerepileupto(av, glcm(x, y));
+}
+
+static GEN
+fix_lcm(GEN x)
+{
+  GEN t;
+  switch(typ(x))
+  {
+    case t_INT: if (signe(x)<0) x = negi(x);
+      break;
+    case t_POL:
+      if (lg(x) <= 2) break;
+      t = leading_term(x);
+      if (typ(t) == t_INT && signe(t) < 0) x = gneg(x);
+  }
+  return x;
+}
+
 GEN
-glcm0(GEN x, GEN y) { return gassoc_proto(glcm,x,y); }
+glcm0(GEN x, GEN y) {
+  if (!y && lg(x) == 2)
+  {
+    long tx = typ(x);
+    if (is_vec_t(tx))
+    {
+      x = gel(x,1);
+      tx = typ(x);
+      return is_matvec_t(tx)? vec_lcm(x): fix_lcm(x);
+    }
+  }
+  return gassoc_proto(scal_lcm,x,y);
+}
 
 GEN
 glcm(GEN x, GEN y)
@@ -2863,16 +2915,7 @@ glcm(GEN x, GEN y)
   av = avma;
   p1 = ggcd(x,y); if (!gcmp1(p1)) y = gdiv(y,p1);
   p2 = gmul(x,y);
-  switch(typ(p2))
-  {
-    case t_INT: if (signe(p2)<0) setsigne(p2,1);
-      break;
-    case t_POL:
-      if (lg(p2) <= 2) break;
-      p1=leading_term(p2);
-      if (typ(p1)==t_INT && signe(p1)<0) p2=gneg(p2);
-  }
-  return gerepileupto(av,p2);
+  return gerepileupto(av,fix_lcm(p2));
 }
 
 /* x + r ~ x ? Assume x,r are t_POL, deg(r) <= deg(x) */
