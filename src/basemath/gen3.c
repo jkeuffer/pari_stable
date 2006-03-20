@@ -1118,12 +1118,22 @@ ginv(GEN x)
       return gdiv(gen_1,x);
 
     case t_RFRAC:
-      if (gcmp0(gel(x,1))) pari_err(gdiver);
-      p1 = fix_rfrac_if_pol(gel(x,2),gel(x,1));
-      if (p1) return p1;
-      z=cgetg(3,t_RFRAC);
-      gel(z,1) = gcopy(gel(x,2));
-      gel(z,2) = gcopy(gel(x,1)); return z;
+    {
+      GEN n = gel(x,1), d = gel(x,2);
+      pari_sp av = avma;
+      if (gcmp0(n)) pari_err(gdiver);
+
+      n = simplify_i(n);
+      if (typ(n) != t_POL || varn(n) != varn(d))
+      {
+        if (gcmp1(n)) { avma = av; return gcopy(d); }
+        return RgX_Rg_div(d,n);
+      }
+      avma = av;
+      z = cgetg(3,t_RFRAC);
+      gel(z,1) = gcopy(d);
+      gel(z,2) = gcopy(n); return z;
+    }
 
     case t_QFR:
       av = avma; z = cgetg(5, t_QFR);

@@ -686,6 +686,13 @@ RgX_sqr(GEN x)
 /*                                                                 */
 /*******************************************************************/
 GEN
+RgX_Rg_div(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg_copy(lx, x); z[1] = x[1];
+  for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
+  return normalizepol_i(z, lx);
+}
+GEN
 RgX_div_by_X_x(GEN a, GEN x, GEN *r)
 {
   long l = lg(a), i;

@@ -222,7 +222,6 @@ GEN  quad_polmod_norm(GEN x, GEN y);
 /* a) Arithmetic/conversions */
 GEN  addmulXn(GEN x, GEN y, long d);
 GEN  addshiftpol(GEN x, GEN y, long d);
-GEN  fix_rfrac_if_pol(GEN x, GEN y);
 GEN  lift_if_rational(GEN x);
 GEN  monomial(GEN a, long degpol, long v);
 GEN  monomialcopy(GEN a, long degpol, long v);

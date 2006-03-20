@@ -189,8 +189,6 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
 /*                                                                 */
 /* (static routines are not memory clean, but OK for gerepileupto) */
 /*******************************************************************/
-static GEN div_pol_scal(GEN x, GEN y);
-
 /* d a t_POL, n a coprime t_POL of same var or "scalar". Not memory clean */
 GEN
 gred_rfrac_simple(GEN n, GEN d)
@@ -200,14 +198,14 @@ gred_rfrac_simple(GEN n, GEN d)
   cd = content(d);
   cn = (typ(n) == t_POL && varn(n) == varn(d))? content(n): n;
   if (!gcmp1(cd)) {
-    d = div_pol_scal(d,cd);
+    d = RgX_Rg_div(d,cd);
     if (!gcmp1(cn))
     {
       if (gcmp0(cn)) {
-        n = (cn != n)? div_pol_scal(n,cd): gdiv(n, cd);
+        n = (cn != n)? RgX_Rg_div(n,cd): gdiv(n, cd);
         c = gen_1;
       } else {
-        n = (cn != n)? div_pol_scal(n,cn): gen_1;
+        n = (cn != n)? RgX_Rg_div(n,cn): gen_1;
         c = gdiv(cn,cd);
       }
     }
@@ -219,7 +217,7 @@ gred_rfrac_simple(GEN n, GEN d)
       if (gcmp0(cn)) {
         c = gen_1;
       } else {
-        n = (cn != n)? div_pol_scal(n,cn): gen_1;
+        n = (cn != n)? RgX_Rg_div(n,cn): gen_1;
         c = cn;
       }
     } else {
@@ -280,7 +278,7 @@ gred_rfrac2_i(GEN n, GEN d)
   if (td!=t_POL)
   {
     if (tn!=t_POL) return gdiv(n,d);
-    if (varncmp(gvar2(d), varn(n)) > 0) return div_pol_scal(n,d);
+    if (varncmp(gvar2(d), varn(n)) > 0) return RgX_Rg_div(n,d);
     pari_err(talker,"incompatible variables in gred");
   }
   if (tn!=t_POL)
@@ -289,13 +287,13 @@ gred_rfrac2_i(GEN n, GEN d)
     pari_err(talker,"incompatible variables in gred");
   }
   if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
-  if (varncmp(varn(d), varn(n)) > 0) return div_pol_scal(n,d);
+  if (varncmp(varn(d), varn(n)) > 0) return RgX_Rg_div(n,d);
 
   /* now n and d are t_POLs in the same variable */
   v = polvaluation(n, &n) - polvaluation(d, &d);
   if (!degpol(d))
   {
-    n = div_pol_scal(n,d);
+    n = RgX_Rg_div(n,d);
     return v? RgX_mulXn(n,v): n;
   }
 
@@ -1008,21 +1006,6 @@ mul_scal(GEN y, GEN x, long ty)
   }
   pari_err(operf,"*",x,y);
   return NULL; /* not reached */
-}
-
-GEN
-fix_rfrac_if_pol(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  y = simplify(y);
-  if (gcmp1(y)) { avma = av; return x; }
-  if (typ(y) != t_POL)
-  {
-    if (typ(x) != t_POL) return gdiv(x,y);
-    if (varncmp(gvar2(y), varn(x)) > 0) return div_pol_scal(x,y);
-  }
-  else if (varncmp(varn(y), varn(x)) > 0) return div_pol_scal(x,y);
-  avma = av; return NULL;
 }
 
 static GEN
@@ -1815,13 +1798,6 @@ div_rfrac(GEN x, GEN y)
 { return mul_rfrac(gel(x,1),gel(x,2), gel(y,2),gel(y,1)); }
 
 static GEN
-div_pol_scal(GEN x, GEN y) {
-  long i, lx = lg(x);
-  GEN z = cgetg_copy(lx, x); z[1] = x[1];
-  for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
-  return normalizepol_i(z, lx);
-}
-static GEN
 div_ser_scal(GEN x, GEN y) {
   long i, lx = lg(x);
   GEN z = cgetg_copy(lx, x); z[1] = x[1];
@@ -1832,7 +1808,7 @@ static GEN
 div_T_scal(GEN x, GEN y, long tx) {
   switch(tx)
   {
-    case t_POL: return div_pol_scal(x, y);
+    case t_POL: return RgX_Rg_div(x, y);
     case t_SER: return div_ser_scal(x, y);
     case t_RFRAC: return div_rfrac_scal(x,y);
   }
@@ -2017,11 +1993,11 @@ gdiv(GEN x, GEN y)
       vx = varn(x);
       vy = varn(y);
       if (vx != vy) {
-        if (varncmp(vx, vy) < 0) return div_pol_scal(x, y);
+        if (varncmp(vx, vy) < 0) return RgX_Rg_div(x, y);
                             else return div_scal_pol(x, y);
       }
       if (!signe(y)) pari_err(gdiver);
-      if (lg(y) == 3) return div_pol_scal(x,gel(y,2));
+      if (lg(y) == 3) return RgX_Rg_div(x,gel(y,2));
       if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
 
@@ -2271,7 +2247,7 @@ gdiv(GEN x, GEN y)
           if (typ(y1) == t_POL && varn(y1) == vx)
             return mul_rfrac_scal(y2, y1, x);
           av = avma;
-          return gerepileupto(av, div_pol_scal(RgX_mul(y2, x), y1));
+          return gerepileupto(av, RgX_Rg_div(RgX_mul(y2, x), y1));
         }
       }
       break;

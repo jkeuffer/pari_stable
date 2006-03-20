@@ -130,7 +130,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
     1- [library] new function isinexact.
 BA  2- [elldata] function forell() to loop over elliptic curves.
 BA  3- [elldata] function ellconvertname() to parse curve name.
-    4- [library] new function RgX_shift, RgX_mulXn, RgX_shift_shallow
+    4- [library] new function RgX_shift, RgX_mulXn, RgX_shift_shallow, RgX_Rg_div
 
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)
