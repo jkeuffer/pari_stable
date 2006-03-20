@@ -34,10 +34,8 @@ gvar(GEN x)
   switch(typ(x))
   {
     case t_POL: case t_SER: return varn(x);
-    case t_POLMOD: return varn(x[1]);
-    case t_RFRAC:
-      v = gvar(gel(x,1));
-      w = gvar(gel(x,2)); return min(v,w);
+    case t_POLMOD: return varn(gel(x,1));
+    case t_RFRAC:  return varn(gel(x,2));
     case t_VEC: case t_COL: case t_MAT:
       v = BIGINT;
       for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (w<v) v=w; }

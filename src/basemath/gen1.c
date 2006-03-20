@@ -189,14 +189,6 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
 /*                                                                 */
 /* (static routines are not memory clean, but OK for gerepileupto) */
 /*******************************************************************/
-static GEN
-gred_rfrac_copy(GEN n, GEN d)
-{
-  GEN y = cgetg(3,t_RFRAC);
-  gel(y,1) = gcopy(n);
-  gel(y,2) = gcopy(d); return y;
-}
-
 static GEN div_pol_scal(GEN x, GEN y);
 
 /* d a t_POL, n a coprime t_POL of same var or "scalar". Not memory clean */
@@ -230,14 +222,18 @@ gred_rfrac_simple(GEN n, GEN d)
         n = (cn != n)? div_pol_scal(n,cn): gen_1;
         c = cn;
       }
+    } else {
+      GEN y = cgetg(3,t_RFRAC);
+      gel(y,1) = gcopy(n);
+      gel(y,2) = gcopy(d); return y;
     }
-    else
-      return gred_rfrac_copy(n, d);
   }
 
   if (typ(c) == t_POL)
   {
-    cd = denom(content(c));
+    z = c;
+    do { z = content(z); } while (typ(z) == t_POL);
+    cd = denom(z);
     cn = gmul(c, cd);
   }
   else
@@ -977,6 +973,42 @@ gaddsg(long x, GEN y)
 /**                        MULTIPLICATION                          **/
 /**                                                                **/
 /********************************************************************/
+static GEN
+mul_ser_scal(GEN y, GEN x) {
+  long ly, i;
+  GEN z;
+  if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
+  ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
+  for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
+  return normalize(z);
+}
+/* (n/d) * x */
+static GEN
+mul_rfrac_scal(GEN n, GEN d, GEN x)
+{
+  pari_sp av = avma;
+  GEN z = gred_rfrac2_i(x, d);
+  if (typ(z) == t_RFRAC) 
+    z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
+  else
+    z = gmul(z, n);
+  return gerepileupto(av, z);
+}
+static GEN
+mul_scal(GEN y, GEN x, long ty)
+{
+  switch(ty)
+  {
+    case t_POL: return RgX_Rg_mul(y, x);
+    case t_SER: return mul_ser_scal(y, x);
+    case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
+    case t_QFI: case t_QFR:
+      if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
+  }
+  pari_err(operf,"*",x,y);
+  return NULL; /* not reached */
+}
+
 GEN
 fix_rfrac_if_pol(GEN x, GEN y)
 {
@@ -991,17 +1023,14 @@ fix_rfrac_if_pol(GEN x, GEN y)
   else if (varncmp(varn(y), varn(x)) > 0) return div_pol_scal(x,y);
   avma = av; return NULL;
 }
-/* (n/d) * x */
+
 static GEN
-mul_rfrac_scal(GEN n, GEN d, GEN x)
+mul_gen_rfrac(GEN X, GEN Y)
 {
-  pari_sp av = avma;
-  GEN z = gred_rfrac2_i(x, d);
-  if (typ(z) == t_RFRAC) 
-    z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
-  else
-    z = gmul(z, n);
-  return gerepileupto(av, z);
+  GEN y1 = gel(Y,1), y2 = gel(Y,2);
+  long vx = gvar(X), vy = varn(y2);
+  return (varncmp(vx, vy) <= 0)? mul_scal(Y, X, typ(X)):
+                                 gred_rfrac_simple(gmul(y1,X), y2);
 }
 /* (x1/x2) * (y1/y2) */
 static GEN
@@ -1021,14 +1050,10 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
       y2 = gel(Y,2);
       z = gred_rfrac_simple(gmul(x1,y1), gmul(x2,y2));
     } else
-      z = gred_rfrac_simple(gmul(x1,Y), x2);
+      z = mul_gen_rfrac(Y, X);
   }
   else if (typ(Y) == t_RFRAC)
-  {
-    y1 = gel(Y,1);
-    y2 = gel(Y,2);
-    z = gred_rfrac_simple(gmul(y1,X), y2);
-  }
+    z = mul_gen_rfrac(X, Y);
   else
     z = gmul(X, Y);
   return gerepileupto(av, z);
@@ -1075,30 +1100,6 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   else
   { copyifstack(Y, z[1]); gel(T,1) = X; gel(T,2) = x; x = T; }
   gel(z,2) = gmul(x, y); return z;
-}
-
-static GEN
-mul_ser_scal(GEN y, GEN x) {
-  long ly, i;
-  GEN z;
-  if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
-  ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
-  for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
-  return normalize(z);
-}
-static GEN
-mul_scal(GEN y, GEN x, long ty)
-{
-  switch(ty)
-  {
-    case t_POL: return RgX_Rg_mul(y, x);
-    case t_SER: return mul_ser_scal(y, x);
-    case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
-    case t_QFI: case t_QFR:
-      if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
-  }
-  pari_err(operf,"*",x,y);
-  return NULL; /* not reached */
 }
 
 /* compatible t_VEC * t_COL, l = lg(x) = lg(y) */
@@ -1795,10 +1796,19 @@ gsqr(GEN x)
 /********************************************************************/
 static GEN
 div_rfrac_scal(GEN x, GEN y)
-{ return mul_rfrac(gel(x,1),gel(x,2), gen_1,y); }
+{ 
+  pari_sp av = avma;
+  return gerepileupto(av, gred_rfrac_simple(gel(x,1),gmul(y, gel(x,2))));
+}
 static GEN
 div_scal_rfrac(GEN x, GEN y)
-{ return mul_rfrac_scal(gel(y,2), gel(y,1), x); }
+{ 
+  GEN y1 = gel(y,1), y2 = gel(y,2);
+  pari_sp av = avma;
+  if (typ(y1) == t_POL && varn(y2) == varn(y1))
+    return gerepileupto(av, gred_rfrac_simple(gmul(x, y2), y1));
+  return RgX_Rg_mul(y2, gdiv(x,y1));
+}
 static GEN
 div_rfrac(GEN x, GEN y)
 { return mul_rfrac(gel(x,1),gel(x,2), gel(y,2),gel(y,1)); }
@@ -2254,7 +2264,7 @@ gdiv(GEN x, GEN y)
           p2 = div_ser(p1, y, vx);
           free(p1); return p2;
 
-        case t_RFRAC: return div_scal_rfrac(x,y);
+        case t_RFRAC: return mul_rfrac_scal(gel(y,2), gel(y,1), x);
       }
       break;
 
