@@ -982,7 +982,8 @@ mul_ser_scal(GEN y, GEN x) {
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return normalize(z);
 }
-/* (n/d) * x */
+/* (n/d) * x, x "scalar" or polynomial in the same variable as d
+ * [n/d a valid RFRAC]  */
 static GEN
 mul_rfrac_scal(GEN n, GEN d, GEN x)
 {
@@ -2264,7 +2265,14 @@ gdiv(GEN x, GEN y)
           p2 = div_ser(p1, y, vx);
           free(p1); return p2;
 
-        case t_RFRAC: return mul_rfrac_scal(gel(y,2), gel(y,1), x);
+        case t_RFRAC:
+        {
+          GEN y1 = gel(y,1), y2 = gel(y,2);
+          if (typ(y1) == t_POL && varn(y1) == vx)
+            return mul_rfrac_scal(y2, y1, x);
+          av = avma;
+          return gerepileupto(av, div_pol_scal(RgX_mul(y2, x), y1));
+        }
       }
       break;
 
