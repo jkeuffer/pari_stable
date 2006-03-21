@@ -1114,8 +1114,8 @@ ginv(GEN x)
       else gel(z,2) = ginvmod(gel(x,2), X);
       return z;
 
-    case t_POL: case t_SER:
-      return gdiv(gen_1,x);
+    case t_POL: return gred_rfrac_simple(gen_1,x);
+    case t_SER: return gdiv(gen_1,x);
 
     case t_RFRAC:
     {

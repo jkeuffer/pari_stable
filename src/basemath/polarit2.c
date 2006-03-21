@@ -2597,19 +2597,25 @@ zero_gcd(GEN x, long tx)
   return gcopy(x);
 }
 
+/* tx = t_RFRAC, y considered as constant */
+static GEN
+cont_gcd_rfrac(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, gred_rfrac_simple(ggcd(gel(x,1), y), gel(x,2)));
+}
+/* !is_const(tx), tx != t_RFRAC, y considered as constant */
+static GEN
+cont_gcd_gen(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, ggcd(content(x),y));
+}
 /* !is_const(tx), y considered as constant */
 static GEN
 cont_gcd(GEN x, long tx, GEN y)
 {
-  pari_sp av;
-  if (tx == t_RFRAC)
-  {
-    GEN z = cgetg(3, t_RFRAC);
-    gel(z,1) = ggcd(gel(x,1), y);
-    gel(z,2) = gcopy(gel(x,2)); return z;
-  }
-  av = avma;
-  return gerepileupto(av, ggcd(content(x),y));
+  return (tx == t_RFRAC)? cont_gcd_rfrac(x, y): cont_gcd_gen(x, y);
 }
 
 GEN
@@ -2776,7 +2782,7 @@ ggcd(GEN x, GEN y)
     {
       case t_POL:
         vy = varn(y);
-        if (varncmp(vy,vx) < 0) return cont_gcd(y,ty, x);
+        if (varncmp(vy,vx) < 0) return cont_gcd_gen(y, x);
         z = cgetg(3,t_POLMOD);
         copyifstack(x[1],z[1]);
         av = avma; p1 = ggcd(gel(x,1),gel(x,2));
@@ -2785,7 +2791,7 @@ ggcd(GEN x, GEN y)
 
       case t_RFRAC:
         vy = varn(y[2]);
-        if (varncmp(vy,vx) < 0) return cont_gcd(y,ty, x);
+        if (varncmp(vy,vx) < 0) return cont_gcd_rfrac(y, x);
         av = avma; 
         p1 = ggcd(gel(x,1),gel(y,2));
         if (degpol(p1)) pari_err(operi,"g",x,y);
@@ -2808,9 +2814,7 @@ ggcd(GEN x, GEN y)
 	case t_SER: 
           z = ggcd(content(x), content(y));
           return monomialcopy(z, min(valp(y),gval(x,vx)), vx);
-	case t_RFRAC: z=cgetg(3,t_RFRAC);
-          gel(z,1) = ggcd(x,gel(y,1));
-          gel(z,2) = gcopy(gel(y,2)); return z;
+	case t_RFRAC: return cont_gcd_rfrac(y, x);
       }
       break;
 
@@ -4273,9 +4277,7 @@ RgXQ_inv(GEN x, GEN y)
     if (varncmp(vx,vy) > 0)
     {
       if (vx == BIGINT) return ginv(x);
-      d = cgetg(3,t_RFRAC);
-      gel(d,1) = pol_1[vx];
-      gel(d,2) = gcopy(x); return d;
+      return gred_rfrac_simple(gen_1, x);
     }
     if (lg(x)!=3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
     x = gel(x,2); vx = gvar(x);
