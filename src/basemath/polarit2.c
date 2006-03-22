@@ -2602,7 +2602,8 @@ static GEN
 cont_gcd_rfrac(GEN x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gred_rfrac_simple(ggcd(gel(x,1), y), gel(x,2)));
+  GEN cx; x = primitive_part(x, &cx);
+  return gerepileupto(av, gred_rfrac_simple(ggcd(cx? cx: gen_1, y), gel(x,2)));
 }
 /* !is_const(tx), tx != t_RFRAC, y considered as constant */
 static GEN

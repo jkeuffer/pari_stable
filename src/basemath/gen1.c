@@ -987,6 +987,7 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
 {
   pari_sp av = avma;
   GEN z = gred_rfrac2_i(x, d);
+  n = simplify_i(n);
   if (typ(z) == t_RFRAC) 
     z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));
   else
