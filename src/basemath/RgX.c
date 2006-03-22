@@ -341,16 +341,17 @@ RgX_shift(GEN a, long n)
 GEN
 RgX_mulXn(GEN x, long d)
 {
+  pari_sp av;
   GEN z;
   long v;
   if (d >= 0) return RgX_shift(x, d);
   d = -d;
   v = polvaluation(x, NULL);
   if (v >= d) return RgX_shift(x, -d);
-  z = cgetg(3, t_RFRAC);
-  gel(z,1) = RgX_shift(x, -v);
-  gel(z,2) = monomial(gen_1, d - v, varn(x));
-  return z;
+  av = avma;
+  z = gred_rfrac_simple( RgX_shift(x, -v),
+                         monomial(gen_1, d - v, varn(x)));
+  return gerepileupto(av, z);
 }
 
 GEN
