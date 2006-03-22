@@ -110,6 +110,7 @@ ellconvertname(GEN n)
       return gerepileupto(ltop, concat(concat(f,ellrecode(itos(c))),s));
     }
   }
+  pari_err(typeer,"ellconvertname");
   return NULL; /*Not reached*/
 }
 
