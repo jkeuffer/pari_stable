@@ -1295,12 +1295,12 @@ GEN
 divisors(GEN n)
 {
   pari_sp av = avma;
-  long i, j, l;
+  long i, j, l, tn = typ(n);
   ulong nbdiv;
   int isint = 1;
   GEN *d, *t, *t1, *t2, *t3, P, E, e;
 
-  if (typ(n) == t_MAT && lg(n) == 3)
+  if (tn == t_MAT && lg(n) == 3)
   {
     P = gel(n,1); l = lg(P);
     for (i = 1; i < l; i++)
@@ -1308,9 +1308,10 @@ divisors(GEN n)
   }
   else
   {
-    if (typ(n) == t_INT)
+    if (tn == t_INT)
       n = auxdecomp(n,1);
     else {
+      if (is_matvec_t(tn)) err(typeer,"divisors");
       isint = 0;
       n = factor(n);
     }

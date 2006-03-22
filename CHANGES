@@ -98,6 +98,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    34- rare SEGV in factor(t_INT) with low stack space [ #345 ]
    35- ispower(1) --> error, ispower(-8) --> error [ allow negative numbers ]
    36- Configure -a + kernel = $arch-gmp didn't work [missing -lgmp #438]
+   37- divisors([]) --> SEGV [#441]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
