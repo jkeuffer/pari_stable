@@ -1134,7 +1134,7 @@ bernfrac_using_zeta(long n)
   for (i = 2; i < l; i++) /* skip 1 */
   { /* Clausen - von Staudt */
     ulong p = 2*itou(gel(D,i)) + 1;
-    if (isprime(utoipos(p))) d = muliu(d, p);
+    if (uisprime(p)) d = muliu(d, p);
   }
   /* 1.712086 = ??? */
   t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*(1+log2PI) + 1.712086;

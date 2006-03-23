@@ -903,13 +903,13 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnr      = gel(p1,2); 
   subgroup = gel(p1,3);
   gell = get_gell(bnr,subgroup,all);
-  if (gcmp1(gell)) return pol_x[vnf];
-  if (!isprime(gell)) pari_err(impl,"kummer for composite relative degree");
-  if (dvdii(wk,gell)) return rnfkummersimple(bnr, subgroup, gell, all);
+  ell = itos(gell);
+  if (ell == 1) return pol_x[vnf];
+  if (!uisprime(ell)) pari_err(impl,"kummer for composite relative degree");
+  if (!umodiu(wk,ell)) return rnfkummersimple(bnr, subgroup, gell, all);
 
   bid = gel(bnr,2);
   ideal = gmael(bid,1,1);
-  ell = itos(gell);
   /* step 1 of alg 5.3.5. */
   if (DEBUGLEVEL>2) fprintferr("Step 1\n");
   compositum_red(&COMPO, polnf, cyclo(ell,vnf));

@@ -2815,7 +2815,7 @@ apell0(GEN e, ulong p)
     for (i=1; ; i++)
     {
       if (ftest.isnull) {
-        if (!isprime(utoi(p))) pari_err(talker,"%lu is not prime, use ellak", p);
+        if (!uisprime(p)) pari_err(talker,"%lu is not prime, use ellak", p);
         pari_err(bugparier,"apell (f^(i*s) = 1)");
       }
       l=0; r=s;

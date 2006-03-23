@@ -518,7 +518,7 @@ group_ident_trans(GEN G, GEN S)
   if ( n > 30 ) 
     pari_err(talker,
         "Classification of transitive groups of order > 30 is not known");
-  if (isprime(stoi(n))) return 1;
+  if (uisprime(n)) return 1;
   s=group_ident(G,S);
   for(t=tab;*t>=0;t++)
   {
