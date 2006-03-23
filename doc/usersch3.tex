@@ -258,17 +258,17 @@ Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
 \subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
 If the exponent is an integer, then exact operations are performed using
 binary (left-shift) powering techniques. In particular, in this case $x$
-cannot be a vector or matrix unless it is a square matrix (and moreover
-invertible if the exponent is negative). If $x$ is a $p$-adic number, its
+cannot be a vector or matrix unless it is a square matrix (invertible
+if the exponent is negative). If $x$ is a $p$-adic number, its
 precision will increase if $v_p(n) > 0$. Powering a binary quadratic form
 (types \typ{QFI} and \typ{QFR}) returns a reduced representative of the
 class, provided the input is reduced. In particular, $x\hbox{\kbd{\pow}}1$ is
 identical to $x$.
 
 PARI is able to rewrite the multiplication $x * x$ of two \emph{identical}
-objects as $x^2$, or $\kbd{sqr}(x)$ (here, identical means the operands are
+objects as $x^2$, or $\kbd{sqr}(x)$. Here, identical means the operands are
 two different labels referencing the same chunk of memory; no equality test
-is performed). This is no longer true when more than two arguments are
+is performed. This is no longer true when more than two arguments are
 involved.
 
 If the exponent is not of type integer, this is treated as a transcendental
@@ -276,21 +276,61 @@ function (see \secref{se:trans}), and in particular has the effect of
 componentwise powering on vector or matrices.
 
 As an exception, if the exponent is a rational number $p/q$ and $x$ an
-integer modulo a prime, return a solution $y$ of $y^q=x^p$ if it
-exists. Currently, $q$ must not have large prime factors.
-
+integer modulo a prime or a $p$-adic number, return a solution $y$ of
+$y^q=x^p$ if it exists. Currently, $q$ must not have large prime factors.
 Beware that
-
 \bprog
-? Mod(7,19)^(1/2)
-%1 = Mod(11, 19) /* is any square root */
-? sqrt(Mod(7,19))
-%2 = Mod(8, 19)  /* is the smallest square root */
-? Mod(7,19)^(3/5)
-%3 = Mod(1, 19)
-? %3^(5/3)
-%4 = Mod(1, 19)  /* Mod(7,19) is just another cubic root */
+    ? Mod(7,19)^(1/2)
+    %1 = Mod(11, 19) /* is any square root */
+    ? sqrt(Mod(7,19))
+    %2 = Mod(8, 19)  /* is the smallest square root */
+    ? Mod(7,19)^(3/5)
+    %3 = Mod(1, 19)
+    ? %3^(5/3)
+    %4 = Mod(1, 19)  /* Mod(7,19) is just another cubic root */
+@eprog
+
+If the exponent is a negative integer, an \idx{inverse} must be computed.
+For non-invertible \typ{INTMOD}, this will fail and implicitly exhibit a
+non trivial factor of the modulus:
+\bprog
+    ? Mod(4,6)^(-1)
+      ***   impossible inverse modulo: Mod(2, 6).
 @eprog\noindent
+(Here, a factor 2 is obtained directly. In general, take the gcd of the
+representative and the modulus.) This is most useful when performing
+complicated operations modulo an integer $N$ whose factorization is
+unknown. Either the computation succeeds and all is well, or a factor $d$
+is discovered and the computation may be restarted modulo $d$ or $N/d$.
+
+For non-invertible \typ{POLMOD}, this will fail without exhibiting a
+factor.
+\bprog
+    ? Mod(x^2, x^3-x)^(-1)
+      ***   non-invertible polynomial in RgXQ_inv.
+
+    ? a = Mod(3,4)*y^3 + Mod(1,4); b = y^6+y^5+y^4+y^3+y^2+y+1;
+    ? Mod(a, b)^(-1);
+      ***   non-invertible polynomial in RgXQ_inv.
+@eprog\noindent
+In fact the latter polynomial is invertible, but the algorithm used
+(subresultant) assumes the base ring is a domain. If it is not the case,
+as here for $\Z/4\Z$, a result will be correct but chances are an error
+will occur first. In this specific case, one should work with $2$-adics.
+In general, one can try the following approach
+\bprog
+    ? inversemod(a, b) =
+    { local(m);
+      m = polsylvestermatrix(polrecip(a), polrecip(b));
+      m = matinverseimage(m, matid(#m)[,1]);
+      Polrev( vecextract(m, Str("..", poldegree(b))), variable(b) )
+    }
+    ? inversemod(a,b)
+    %2 = Mod(2,4)*y^5 + Mod(3,4)*y^3 + Mod(1,4)*y^2 + Mod(3,4)*y + Mod(2,4)
+
+@eprog\noindent
+This is not guaranteed to work either since it must invert pivots. See
+\secref{se:linear_algebra}.
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
@@ -1643,8 +1683,8 @@ which gives as result the address of the created gcd, and puts
 the addresses of the corresponding created objects into $u$ and $v$.
 
 \subsecidx{bezoutres}$(x,y)$: as \kbd{bezout}, with the resultant of $x$ and
-$y$ replacing the gcd.
-\sidx{extended gcd}
+$y$ replacing the gcd. \sidx{extended gcd} The algorithm uses
+(subresultant) assumes the base ring is a domain.
 
 \syn{vecbezoutres}{x,y} to get the vector, or \funs{subresext}{x,y, \&u, \&v}
 which gives as result the address of the created gcd, and puts the
@@ -6147,7 +6187,9 @@ i.e.~the coefficients are in reverse order. \var{pol} must be a polynomial.
 \subsecidx{polresultant}$(x,y,\{v\},\{\fl=0\})$: resultant of the two
 polynomials $x$ and $y$ with exact entries, with respect to the main
 variables of $x$ and $y$ if $v$ is omitted, with respect to the variable $v$
-otherwise. The algorithm used is the \idx{subresultant algorithm} by default.
+otherwise. The algorithm assumes the base ring is a domain.
+
+If $\fl=0$, uses the \idx{subresultant algorithm}.
 
 If $\fl=1$, uses the determinant of Sylvester's matrix instead (here $x$ and
 $y$ may have non-exact coefficients).
@@ -6405,6 +6447,15 @@ Note that most linear algebra functions operating on subspaces defined by
 generating sets (such as \tet{mathnf}, \tet{qflll}, etc.) take matrices as
 arguments. As usual, the generating vectors are taken to be the
 \emph{columns} of the given matrix.
+
+Since PARI does not have a strong typing system, scalars live in
+unspecified commutative base rings. It is very difficult to write
+robust linear algebra routines in such a general setting. The
+developpers's choice has been to assume the base ring is a domain
+and work over its field of fractions. If the base ring is \emph{not}
+a domaine, one gets an error as soon as a non-zero pivot turns out to be
+non-invertible. Some functions, e.g.~\kbd{mathnf} or \kbd{mathnfmod},
+specifically assume the base ring is $\Z$.
 
 \subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic dependence}
 \label{se:algdep} $x$ being real/complex, or $p$-adic, finds a polynomial of
