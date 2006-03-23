@@ -187,9 +187,13 @@ static GEN
 init_get_chic(GEN c)
 {
   long i, l = lg(c); /* > 1 */
-  GEN D = cgetg(l, t_VEC), C = gel(c,1);
-  gel(D,1) = gen_1;
-  for (i = 2; i < l; i++) gel(D,i) = diviiexact(C, gel(c,i));
+  GEN C, D = cgetg(l, t_VEC);
+  if (l == 1) C = gen_1;
+  else
+  {
+    C = gel(c,1); gel(D,1) = gen_1;
+    for (i = 2; i < l; i++) gel(D,i) = diviiexact(C, gel(c,i));
+  }
   return mkvec2(C, D);
 }
 

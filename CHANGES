@@ -100,6 +100,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    36- Configure -a + kernel = $arch-gmp didn't work [missing -lgmp #438]
    37- divisors([]) --> SEGV [#441]
    38- missing GC in bernfrac
+   39- bnrrootnumber(bnrinit(bnfinit(x),1),[]) --> SEGV [#443]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
