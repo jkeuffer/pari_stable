@@ -793,11 +793,15 @@ B4(void) { GEN z = cgetg(3, t_FRAC);
 GEN
 bernfrac(long k)
 {
-  if (!k) return gen_1;
-  if (k == 1) return gneg(ghalf);
-  if (k < 0 || k & 1) return gen_0;
-  if (k == 2) return B2();
-  if (k == 4) return B4();
+  if (k < 6) switch(k)
+  {
+    case 0: return gen_1;
+    case 1: return gneg(ghalf);
+    case 2: return B2();
+    case 4: return B4();
+    default: return gen_0;
+  }
+  if (k & 1) return gen_0;
   return bernfrac_using_zeta(k);
 }
 

@@ -1081,15 +1081,15 @@ GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
   GEN z, res = cgetr(prec);
-  pari_sp av0 = avma;
+  pari_sp av = avma, avlim = stack_lim(av, 1);
   byteptr d =  diffptr + 2;
   double A = n / (LOG2*BITS_IN_LONG), D;
-  long p, lim;
+  ulong p, lim;
 
   if (!lba) lba = bit_accuracy_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
-  lim = 1 + (long)ceil(D);
-  maxprime_check((ulong)lim);
+  lim = 1 + (ulong)ceil(D);
+  maxprime_check(lim);
 
   prec++;
   z = gsub(gen_1, real2n(-n, prec));
@@ -1100,11 +1100,16 @@ inv_szeta_euler(long n, double lba, long prec)
 
     if (l < 3)         l = 3;
     else if (l > prec) l = prec;
-    h = divrr(z, rpowuu((ulong)p, (ulong)n, l));
+    h = divrr(z, rpowuu(p, (ulong)n, l));
     z = subrr(z, h);
+    if (low_stack(avlim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"inv_szeta_euler, p = %lu/%lu", p,lim);
+      affrr(z, res); avma = av;
+    }
     NEXT_PRIME_VIADIFF(p,d);
   }
-  affrr(z, res); avma = av0; return res;
+  affrr(z, res); avma = av; return res;
 }
 
 /* assume n even > 0, if iz != NULL, assume iz = 1/zeta(n) */
