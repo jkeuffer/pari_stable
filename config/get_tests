@@ -10,6 +10,7 @@ test_extra="\
   galois\
   intnum\
   qfbsolve\
+  rfrac\
   round4\
   stark\
 "
