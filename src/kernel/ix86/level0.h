@@ -1,3 +1,4 @@
+#line 2 "../src/kernel/ix86/level0.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
@@ -13,7 +14,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines some "level 0" kernel functions for Intel x386  */
+/* This file defines some "level 0" kernel functions for Intel ix86  */
 /* It is intended for use with an external "asm" definition          */
 
 #ifndef ASMINLINE
