@@ -94,14 +94,6 @@ extern int  bfffo(ulong x);
    __valuelo; \
 })
 
-#define addmullow(a,b) \
-({ ulong __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
-   __asm__ ("mull %3 ; addl %4,%0" \
-        : "=a" /* %eax */ (__valuelo), "=&d" /* %edx */ (__temp) \
-        : "0" (__arg1), "rm" (__arg2), "g" (hiremainder)); \
-   __valuelo; \
-})
-
 #define divll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("divl %4" \
