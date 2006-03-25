@@ -525,15 +525,16 @@ gissquarerem(GEN x, GEN *pt)
   pari_sp av;
 
   if (!pt) return gissquare(x);
-  if (is_vec_t(tx))
+  if (is_matvec_t(tx))
   {
     long i, l = lg(x);
-    GEN p, t, y = cgetg(l,tx), z = cgetg(l,tx);
+    GEN t, y = cgetg(l,tx), z = cgetg(l,tx);
     for (i=1; i<l; i++)
     {
+      GEN p = gen_0;
       t = gissquarerem(gel(x,i),&p);
       gel(y,i) = t;
-      gel(z,i) = t == gen_0? gen_0: p;
+      gel(z,i) = p;
     }
     *pt = z; return y;
   }
