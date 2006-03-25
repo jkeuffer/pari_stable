@@ -293,7 +293,7 @@ gred_rfrac2_i(GEN n, GEN d)
   v = polvaluation(n, &n) - polvaluation(d, &d);
   if (!degpol(d))
   {
-    n = RgX_Rg_div(n,d);
+    n = RgX_Rg_div(n,gel(d,2));
     return v? RgX_mulXn(n,v): n;
   }
 
@@ -1014,7 +1014,7 @@ mul_gen_rfrac(GEN X, GEN Y)
 {
   GEN y1 = gel(Y,1), y2 = gel(Y,2);
   long vx = gvar(X), vy = varn(y2);
-  return (varncmp(vx, vy) <= 0)? mul_scal(Y, X, typ(X)):
+  return (varncmp(vx, vy) <= 0)? mul_scal(Y, X, typ(Y)):
                                  gred_rfrac_simple(gmul(y1,X), y2);
 }
 /* (x1/x2) * (y1/y2) */
@@ -1028,9 +1028,9 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
   Y = gred_rfrac2_i(y1, x2);
   if (typ(X) == t_RFRAC)
   {
-    x1 = gel(X,1);
-    x2 = gel(X,2);
     if (typ(Y) == t_RFRAC) {
+      x1 = gel(X,1);
+      x2 = gel(X,2);
       y1 = gel(Y,1);
       y2 = gel(Y,2);
       z = gred_rfrac_simple(gmul(x1,y1), gmul(x2,y2));

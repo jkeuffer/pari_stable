@@ -2830,7 +2830,7 @@ ggcd(GEN x, GEN y)
 
     case t_RFRAC: z=cgetg(3,t_RFRAC);
       if (ty != t_RFRAC) pari_err(operf,"g",x,y);
-      p1 = gdiv(gel(y,2), ggcd(gel(x,2), gel(y,2)));
+      p1 = gdeuc(gel(y,2), ggcd(gel(x,2), gel(y,2)));
       tetpil = avma;
       gel(z,2) = gerepile((pari_sp)z,tetpil,gmul(p1, gel(x,2)));
       gel(z,1) = ggcd(gel(x,1), gel(y,1)); return z;
