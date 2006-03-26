@@ -112,17 +112,6 @@ extern long bfffo(ulong x);
            : "cc");                                                     \
   __value;                                                              \
 })
-#if 0
-#define divll(a, b)                                                     \
-({                                                                      \
-  ulong __arg1 = (a), __arg2 = (b), __value;                            \
-  __asm__ ("divu.l %2, %0:%1"                                           \
-           : "+d" (hiremainder), "=d" (__value)                         \
-           : "1" (__arg1), "md" (__arg2)                                \
-           : "cc");                                                     \
-  __value;                                                              \
-})
-#endif
 
 #endif
 
