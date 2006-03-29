@@ -831,8 +831,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
   if (m < 0) pari_err(talker,"negative number of columns in matrix");
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
-  if (!n) return zeromat(0, m);
-  if (!ep1 || !ep2 || !ch) return zeromat(n, m);
+  if (!ep1 || !ep2 || !ch || !n) return zeromatcopy(n, m);
   push_val(ep1, c1);
   push_val(ep2, c2); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
