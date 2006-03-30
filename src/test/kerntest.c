@@ -40,10 +40,18 @@ void sorstring(long x)
 #endif
 }
 
-void _voir(GEN x)
+void _voiri(GEN x)
 {
-  long i, tx = typ(x), lx = (tx == t_INT)? lgefint(x): lg(x);
-  sorstring(x[0]);
+  long i, lx = lgefint(x);
+  GEN y = int_MSW(x);
+  /* sorstring(x[0]); depends on the kernel and contains no useful info */
+  sorstring(x[1]);
+  for (i=2; i < lx; i++, y = int_precW(y)) sorstring(*y);
+  printf("\n");
+}
+void _voirr(GEN x)
+{
+  long i, lx = lg(x);
   for (i=1; i < lx; i++) sorstring(x[i]);
   printf("\n");
 }
@@ -55,28 +63,28 @@ int main()
   x = utoipos(187654321UL);
   y = utoineg(12345678UL);
   printf("INT: %ld\n", itos(x));
-  printf("conv:"); _voir(x);
-  printf("+:"); _voir(addii(x,y));
-  printf("-:"); _voir(subii(x,y));
-  printf("*:"); _voir(mulii(x,y));
-  printf("/:"); _voir(dvmdii(x,y, &z));
-  printf("rem:"); _voir(z);
+  printf("conv:"); _voiri(x);
+  printf("+:"); _voiri(addii(x,y));
+  printf("-:"); _voiri(subii(x,y));
+  printf("*:"); _voiri(mulii(x,y));
+  printf("/:"); _voiri(dvmdii(x,y, &z));
+  printf("rem:"); _voiri(z);
   printf("pow:\n");
-  z = mulii(x,x); _voir(z);
-  z = mulii(z,z); _voir(z);
-  z = mulii(z,z); _voir(z);
-  z = mulii(z,z); _voir(z);
-  z = mulii(z,z); _voir(z);
-  printf("invmod:"); invmod(y,z,&r); _voir(r);
+  z = mulii(x,x); _voiri(z);
+  z = mulii(z,z); _voiri(z);
+  z = mulii(z,z); _voiri(z);
+  z = mulii(z,z); _voiri(z);
+  z = mulii(z,z); _voiri(z);
+  printf("invmod:"); invmod(y,z,&r); _voiri(r);
   xr = itor(x, DEFAULTPREC);
   yr = itor(y, DEFAULTPREC);
   printf("\nREAL: %f\n", rtodbl(xr));
-  printf("conv1:"); _voir(xr);
-  printf("conv2:"); _voir(dbltor(rtodbl(xr)));
-  printf("+:"); _voir(addrr(xr,yr));
-  printf("-:"); _voir(subrr(xr,yr));
-  printf("*:"); _voir(mulrr(xr,yr));
-  printf("/:"); _voir(divrr(xr,yr));
-  printf("gcc bug?:"); _voir(divrs(dbltor(3.),2));
+  printf("conv1:"); _voirr(xr);
+  printf("conv2:"); _voirr(dbltor(rtodbl(xr)));
+  printf("+:"); _voirr(addrr(xr,yr));
+  printf("-:"); _voirr(subrr(xr,yr));
+  printf("*:"); _voirr(mulrr(xr,yr));
+  printf("/:"); _voirr(divrr(xr,yr));
+  printf("gcc bug?:"); _voirr(divrs(dbltor(3.),2));
   return 0;
 }

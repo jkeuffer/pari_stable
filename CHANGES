@@ -102,6 +102,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    38- missing GC in bernfrac
    39- bnrrootnumber(bnrinit(bnfinit(x),1),[]) --> SEGV [#443]
    40- f()= local(m = matrix(2,2)); m[1,1] = 1  f() --> m[1,2] also set to 1
+   41- make test-kernel would always fail with gmp kernel.
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
