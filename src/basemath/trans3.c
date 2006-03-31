@@ -92,7 +92,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
       if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
-      if (isint(n,&ki))
+      if (issmall(n,&ki))
       {
 	k = labs(ki);
         n = stoi(k);
@@ -123,7 +123,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     case t_PADIC: pari_err(impl,"p-adic jbessel function");
     default:
       if (!(y = toser_i(z))) break;
-      if (isint(n,&ki)) n = stoi(labs(ki));
+      if (issmall(n,&ki)) n = stoi(labs(ki));
       return gerepilecopy(av, _jbessel(n,y,flag,lg(y)-2));
   }
   pari_err(typeer,"jbessel");
@@ -421,7 +421,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
          precnew += 1 + rab;
       }
       z = gtofp(z, precnew);
-      if (isint(n,&ki))
+      if (issmall(n,&ki))
       {
         GEN z2 = gmul2n(z, -1);
 	k = labs(ki);
@@ -484,12 +484,12 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
     case t_PADIC: pari_err(impl,"p-adic kbessel function");
     default:
       if (!(y = toser_i(z))) break;
-      if (isint(n,&ki))
+      if (issmall(n,&ki))
       {
 	k = labs(ki);
 	return gerepilecopy(av, _kbessel(k,y,flag+2,lg(y)-2,prec));
       }
-      if (!isint(gmul2n(n,1),&ki))
+      if (!issmall(gmul2n(n,1),&ki))
         pari_err(talker,"cannot give a power series result in k/n bessel function");
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;

@@ -3157,7 +3157,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
       pari_err(talker,"cut-off point must be positive in lseriesell");
     if (gcmpgs(A,1) < 0) A = ginv(A);
   }
-  if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
+  if (isint(s, &s) && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gcmp1(A) && gcmp1(s);
   checkell(e);
   e = ell_to_small(e); gr = ellglobalred(e);

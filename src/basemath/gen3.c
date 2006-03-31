@@ -2035,22 +2035,37 @@ gcvtoi(GEN x, long *e)
   return gtrunc(x);
 }
 
-long
-isint(GEN n, long *ptk)
+int
+isint(GEN n, GEN *ptk)
 {
   switch(typ(n))
   {
-    case t_INT: *ptk = itos(n); return 1;
+    case t_INT: *ptk = n; return 1;
     case t_REAL: {
+      pari_sp av0 = avma;
       GEN z = floorr(n);
-      if (signe(subri(n, z))) return 0;
-      *ptk = itos(z); return 1;
+      pari_sp av = avma;
+      long s = signe(subri(n, z));
+      if (s) { avma = av0; return 0; }
+      *ptk = z; avma = av; return 1;
     }
     case t_FRAC:    return 0;
     case t_COMPLEX: return gcmp0(gel(n,2)) && isint(gel(n,1),ptk);
     case t_QUAD:    return gcmp0(gel(n,3)) && isint(gel(n,2),ptk);
     default: pari_err(typeer,"isint"); return 0; /* not reached */
   }
+}
+
+int
+issmall(GEN n, long *ptk)
+{
+  pari_sp av = avma;
+  GEN z;
+  long k;
+  if (!isint(n, &z)) return 0;
+  k = itos_or_0(z); avma = av;
+  if (k || lgefint(z) == 2) { *ptk = k; return k; }
+  return 0;
 }
 
 /* smallest integer greater than any incarnations of the real x
