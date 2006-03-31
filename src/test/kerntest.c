@@ -34,7 +34,8 @@ void stackdummy(GEN z, long l) { z[0] = evaltyp(t_VECSMALL) | evallg(l); }
 void sorstring(ulong x)
 {
 #ifdef LONG_IS_64BIT
-  printf("%08x%08x  ", x>>32, x & MAXHALFULONG);
+  printf("%08x%08x  ", (unsigned int)(x>>32),
+                       (unsigned int)(x & MAXHALFULONG));
 #else
   printf("%08lx  ", x);
 #endif
