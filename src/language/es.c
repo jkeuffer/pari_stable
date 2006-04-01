@@ -1301,16 +1301,6 @@ type_name(long t)
   return s;
 }
 
-static void
-sorstring(char* b, long x)
-{
-#ifdef LONG_IS_64BIT
-  pariprintf(b,(ulong)x>>32,x & MAXHALFULONG);
-#else
-  pariprintf(b,x);
-#endif
-}
-
 static char
 vsigne(GEN x)
 {
@@ -1323,8 +1313,8 @@ vsigne(GEN x)
 #  define VOIR_STRING1 "[&=%08lx] "
 #  define VOIR_STRING2 "%08lx  "
 #else
-#  define VOIR_STRING1 "[&=%08x%08x] "
-#  define VOIR_STRING2 "%08x%08x  "
+#  define VOIR_STRING1 "[&=%016lx] "
+#  define VOIR_STRING2 "%016lx  "
 #endif
 
 static void
@@ -1335,11 +1325,11 @@ voir2(GEN x, long nb, long bl)
   if (!x) { pariputs("NULL\n"); return; }
   tx = typ(x);
   if (tx == t_INT && x == gen_0) { pariputs("gen_0\n"); return; }
-  sorstring(VOIR_STRING1,(ulong)x);
+  pariprintf(VOIR_STRING1,(ulong)x);
 
   lx = lg(x);
   pariprintf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
-  sorstring(VOIR_STRING2,x[0]);
+  pariprintf(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
@@ -1350,7 +1340,7 @@ voir2(GEN x, long nb, long bl)
       pariprintf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
     if (tx == t_VECSMALL) nb = lx;
-    for (i=1; i < nb; i++) sorstring(VOIR_STRING2,x[i]);
+    for (i=1; i < nb; i++) pariprintf(VOIR_STRING2,x[i]);
     pariputc('\n'); return;
   }
 
@@ -1366,7 +1356,7 @@ voir2(GEN x, long nb, long bl)
     lx = lgeflist(x);
     pariprintf("(lgeflist=%ld):", lx);
   }
-  for (i=1; i<lx; i++) sorstring(VOIR_STRING2,x[i]);
+  for (i=1; i<lx; i++) pariprintf(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
   switch(tx)
   {
@@ -2099,7 +2089,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       break;
     }
 
-    default: sorstring(VOIR_STRING2,*g);
+    default: pariprintf(VOIR_STRING2,*g);
   }
 }
 
@@ -2276,7 +2266,7 @@ sori(GEN g, pariout_t *T)
       }
       break;
     }
-    default: sorstring(VOIR_STRING2,*g);
+    default: pariprintf(VOIR_STRING2,*g);
   }
   if (close_paren) pariputc(')');
 }
