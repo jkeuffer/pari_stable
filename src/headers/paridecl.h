@@ -905,7 +905,7 @@ GEN     ellzeta(GEN om, GEN z, long prec);
 GEN     ghell(GEN e, GEN a, long prec);
 GEN     ghell2(GEN e, GEN a, long prec);
 GEN     initell(GEN x, long prec);
-GEN     lseriesell(GEN e, GEN s, GEN A, long prec);
+GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     mathell(GEN e, GEN x, long prec);
 int     oncurve(GEN e, GEN z);
 GEN     ordell(GEN e, GEN x, long prec);

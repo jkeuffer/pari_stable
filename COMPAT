@@ -190,6 +190,7 @@ advise you to update soon ]
   - rename err -> pari_err, pariputsf -> pariprintf
   - rename rnfhermitebasis -> rnfhnfbasis
   - rename gcarreparfait -> gissquare, gcarrecomplet -> gissquarerem
+  - rename lseriesell -> elllseries
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
