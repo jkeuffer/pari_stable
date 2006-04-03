@@ -63,6 +63,7 @@ while test $# -gt 0; do
   --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --mandir=*) dfltmandir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --sysdatadir=*) dfltsysdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --time=*) timing_fun=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --builddir) dfltobjdir=auto;;
@@ -139,6 +140,7 @@ Build Options:
   --host=<arch-osname>  target achitecture
   --kernel=<kern>       kernel used
   --graphic=<gr>        graphic library used (default X11) (none X11 Qt fltk)
+  --time=<fun>          timing function to use (getrusage times ftime)
   --builddir=<dir>      directory where the object files will be created
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)

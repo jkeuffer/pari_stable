@@ -104,6 +104,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    40- f()= local(m = matrix(2,2)); m[1,1] = 1  f() --> m[1,2] also set to 1
    41- make test-kernel would always fail with gmp kernel.
    42- elllseries(e, 0.) --> error [ only elllseries(e,0) worked ] [#445]
+   43- 'ftime' was never detected by Configure
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
@@ -141,6 +142,7 @@ BA  3- [elldata] function ellconvertname() to parse curve name.
        RgX_Rg_div
 BA  5- m68k level0 inline assembly kernel
     6- [library] new function isint, issmall, mkrfrac
+    7- Configure --time=timing_fun
 
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)

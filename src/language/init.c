@@ -1937,7 +1937,7 @@ TIMER(pari_timer *T)
 #endif
   );
 }
-#elif USE_GETRUSAGE
+#elif defined(USE_GETRUSAGE)
 
 # include <sys/time.h>
 # include <sys/resource.h>
@@ -1953,7 +1953,7 @@ TIMER(pari_timer *T)
   T->us = t.tv_usec;
   T->s  = t.tv_sec; return delay;
 }
-#elif USE_FTIME
+#elif defined(USE_FTIME)
 
 # include <sys/timeb.h>
 long
@@ -1967,7 +1967,7 @@ TIMER(pari_timer *T)
   T->us = t.millitm * 1000;
   T->s  = t.time; return delay;
 }
-#elif WINCE
+#elif defined(WINCE)
 long
 TIMER(pari_timer *T)
 {

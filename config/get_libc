@@ -9,10 +9,14 @@ list=exp2; . ./look
 list=log2; . ./look
 extra_flags=
 list=strftime; . ./look
-case "$osname" in
-  *cygwin*) list='times ftime';; # getrusage based timer always returns 0
-  *) list='getrusage times ftime';;
-esac; . ./look
+if test -n "$timing_fun"; then
+  list=$timing_fun
+else
+  case "$osname" in
+    *cygwin*) list='times ftime';; # getrusage based timer always returns 0
+    *) list='getrusage times ftime';;
+  esac;
+fi; . ./look
 list=sigaction; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
