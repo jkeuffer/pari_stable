@@ -140,7 +140,7 @@ BA  3- [elldata] function ellconvertname() to parse curve name.
     4- [library] new function RgX_shift, RgX_mulXn, RgX_shift_shallow, 
        RgX_Rg_div
 BA  5- m68k level0 inline assembly kernel
-    6- [library] new function isint, issmall
+    6- [library] new function isint, issmall, mkrfrac
 
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)

@@ -2646,6 +2646,10 @@ then the above warning does not apply.
 \fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
 $y > 1$ and $(x,y) = 1$.
 
+\fun{GEN}{mkrfrac}{GEN x, GEN y} creates the \typ{RFRAC} $x/y$. Assumes
+that $y$ is a \typ{POL}, $x$ a compatible type whose variable has lower
+or same priority, with $(x,y) = 1$.
+
 \fun{GEN}{mkcol}{GEN x} creates a 1-dimensional \typ{COL} containing \kbd{x}.
 
 \fun{GEN}{mkintmod}{GEN x, GEN y} creates the \typ{INTMOD} \kbd{Mod(x, y)}.
