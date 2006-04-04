@@ -148,6 +148,7 @@ ulong  shiftlr(ulong x, ulong y);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
 long   smodss(long x, long y);
+void   stackdummy(pari_sp av, pari_sp ltop);
 GEN    stoi(long x);
 GEN    stor(long x, long prec);
 GEN    subii(GEN x, GEN y);
@@ -199,7 +200,27 @@ evalexpo(long x)
 INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
 INLINE GEN
-leading_term(GEN x) { return lg(x) == 2? gen_0: (GEN)x[lg(x)-1]; }
+leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
+
+/* Inhibit some area gerepile-wise: declare it to be a non recursive
+ * type, of length l. Thus gerepile won't inspect the zone, just copy it.
+ * For the following situation:
+ *   z = cgetg(t,a); av = avma; garbage(); ltop = avma;
+ *   for (i=1; i<HUGE; i++) gel(z,i) = blah();
+ *   stackdummy(av,ltop);
+ * loses (av-ltop) words but save a costly gerepile.
+ */
+INLINE void
+stackdummy(pari_sp av, pari_sp ltop) {
+  long l = ((GEN)av) - ((GEN)ltop);
+  GEN z = (GEN)ltop;
+  if (l > 0) {
+    z[0] = evaltyp(t_VECSMALL) | evallg(l);
+#ifdef DEBUG
+    { long i; for (i = 1; i < l; i++) z[i] = 0; }
+#endif
+  }
+}
 
 INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */

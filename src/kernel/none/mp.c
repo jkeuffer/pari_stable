@@ -28,8 +28,7 @@ int pari_kernel_init(void) { return 0; } /*nothing to do*/
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis
  * BITS_IN_LONG) : a[0], ..., a[na-1]. [ In ordre to facilitate splitting: no
- * need to reintroduce codewords ]
- * Use speci(a,na) to visualize the coresponding GEN. */
+ * need to reintroduce codewords ] */
 
 /* Normalize a non-negative integer */
 GEN
@@ -44,7 +43,8 @@ int_normalize(GEN x, long known_zero_words)
       {
         GEN x0 = x;
         i -= 2; x += i;
-        if (x0 == (GEN)avma) avma = (pari_sp)x; else stackdummy(x0, i);
+        if (x0 == (GEN)avma) avma = (pari_sp)x;
+        else stackdummy((pari_sp)(x0+i), (pari_sp)x0);
         lx -= i;
         x[0] = evaltyp(t_INT) | evallg(lx);
         x[1] = evalsigne(1) | evallgefint(lx);

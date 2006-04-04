@@ -30,7 +30,7 @@ ZX_renormalize(GEN x, long lx)
   long i;
   for (i = lx-1; i>1; i--)
     if (signe(gel(x,i))) break;
-  stackdummy(x + (i+1), lg(x) - (i+1));
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + (i+1)));
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 

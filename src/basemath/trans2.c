@@ -946,7 +946,7 @@ affr_fixlg(GEN y, GEN z) {
   if (ly < lz)
   {
     setlg(z, ly);
-    stackdummy(z + ly, lz - ly);
+    stackdummy((pari_sp)(z + lz), (pari_sp)(z + ly));
   }
   /* lz <= ly */
   affrr(y, z);

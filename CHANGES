@@ -133,6 +133,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    11- disallow vecmin([]), vecmax([]) [ returning stoi(+/- BIGINT) is not
        helpful ]
    12- [libpari] renamed lellseries -> elllseries [ as in GP ]
+   13- semantics of stackdummy() [ make it consistent with gerepile ]
 
   Added
     1- [library] new function isinexact.

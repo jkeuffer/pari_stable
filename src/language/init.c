@@ -1629,23 +1629,6 @@ bin_copy(GENbin *p)
 /*                         STACK MANAGEMENT                        */
 /*                                                                 */
 /*******************************************************************/
-/* Inhibit some area gerepile-wise: declare it to be a non recursive
- * type, of length l. Thus gerepile won't inspect the zone, just copy it.
- * For the following situation:
- *   z = cgetg(t,a); garbage of length l;
- *   for (i=1; i<HUGE; i++) z[i] = ...
- *   stackdummy(z,l); z += l; We lose l words but save a costly gerepile.
- */
-void
-stackdummy(GEN z, long l) {
-  if (l > 0) {
-    z[0] = evaltyp(t_VECSMALL) | evallg(l);
-#ifdef DEBUG
-    { long i; for (i = 1; i < l; i++) z[i] = 0; }
-#endif
-  }
-}
-
 /* gerepileupto(av, forcecopy(x)) */
 GEN
 gerepilecopy(pari_sp av, GEN x)

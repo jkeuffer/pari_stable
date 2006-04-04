@@ -228,8 +228,6 @@ ZM_to_Flm(GEN x, ulong p)
 /**          Basic operation on Flx                                   **/
 /**                                                                   **/
 /***********************************************************************/
-
-
 /*Similar to normalizepol, in place*/
 /*FIXME: should be zx_renormalize*/
 GEN
@@ -238,9 +236,8 @@ Flx_renormalize(GEN /*in place*/ x, long lx)
   long i;
   for (i = lx-1; i>1; i--)
     if (x[i]) break;
-  stackdummy(x + (i+1), lg(x) - (i+1));
-  setlg(x, i+1);
-  return x;
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
+  setlg(x, i+1); return x;
 }
 
 /*Do not renormalize. Must not use z[0],z[1]*/
@@ -1485,7 +1482,6 @@ FlxV_to_Flm(GEN v, long n)
  **                 FlxX                                    **
  **                                                          **
  **************************************************************/
-
 /*Similar to normalizepol, in place*/
 /*FlxX_renormalize=zxX_renormalize */
 GEN
@@ -1494,7 +1490,7 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
   long i;
   for (i = lx-1; i>1; i--)
     if (lgpol(x[i])) break;
-  stackdummy(x + (i+1), lg(x) - (i+1));
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
