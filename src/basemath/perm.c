@@ -267,7 +267,7 @@ vecsmall_uniq(GEN V)
   W[1] = V[1];
   for(i=j=2; i<l; i++)
     if (V[i] != W[j-1]) W[j++] = V[i];
-  stackdummy((pari_sp)(W + l), (pari_sp)W+j);
+  stackdummy((pari_sp)(W + l), (pari_sp)(W + j));
   setlg(W, j); return W;
 }
 
