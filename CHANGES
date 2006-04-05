@@ -151,6 +151,7 @@ BA  5- m68k level0 inline assembly kernel
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)
        [ backward compatibility version in src/kernel/level1.h ]
+    2- obsolete functions forcecopy and gmodulo
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.12 (released 24/01/2006):
