@@ -2,9 +2,7 @@ Function: Mod
 Section: conversions
 C-Name: Mod0
 Prototype: GGD0,L,
-Help: Mod(x,y,{flag=0}): creates the object x modulo y. flag is optional,
- and can be 0: default, creates on the Pari stack, or 1: creates a permanent
- object on the heap
+Help: Mod(x,y): creates 'x modulo y'.
 Description: 
  (small, small, ?0):gen	gmodulss($1, $2)
  (small, gen, ?0):gen	gmodulsg($1, $2)

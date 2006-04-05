@@ -1363,7 +1363,7 @@ voir2(GEN x, long nb, long bl)
     case t_INTMOD: case t_POLMOD:
     {
       const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
-      if (isonstack(x[1])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
+      blancs(bl);
       pariputs("mod = "); voir2(gel(x,1),nb,bl);
       blancs(bl); pariputs(s);        voir2(gel(x,2),nb,bl);
       break;
@@ -1379,7 +1379,7 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_PADIC:
-      if (isonstack(x[2])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
+      blancs(bl);
                   pariputs("  p : "); voir2(gel(x,2),nb,bl);
       blancs(bl); pariputs("p^l : "); voir2(gel(x,3),nb,bl);
       blancs(bl); pariputs("  I : "); voir2(gel(x,4),nb,bl);

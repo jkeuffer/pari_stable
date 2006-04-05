@@ -2652,7 +2652,7 @@ ggcd(GEN x, GEN y)
 
       case t_INTMOD: z=cgetg(3,t_INTMOD);
         if (equalii(gel(x,1),gel(y,1)))
-          copyifstack(x[1],z[1]);
+          gel(z,1) = gcopy(gel(x,1));
         else
           gel(z,1) = gcdii(gel(x,1),gel(y,1));
         if (gcmp1(gel(z,1))) gel(z,2) = gen_0;
@@ -2699,7 +2699,7 @@ ggcd(GEN x, GEN y)
         switch(ty)
         {
           case t_INTMOD: z = cgetg(3,t_INTMOD);
-            copyifstack(y[1],z[1]); av=avma;
+            gel(z,1) = gcopy(gel(y,1)); av = avma;
             p1 = gcdii(gel(y,1),gel(y,2));
             if (!is_pm1(p1)) p1 = gerepileuptoint(av, gcdii(x,p1));
             gel(z,2) = p1; return z;
@@ -2763,7 +2763,7 @@ ggcd(GEN x, GEN y)
     {
       z = cgetg(3,t_POLMOD);
       if (gequal(gel(x,1),gel(y,1)))
-        copyifstack(x[1],z[1]);
+        gel(z,1) = gcopy(gel(x,1));
       else
         gel(z,1) = ggcd(gel(x,1),gel(y,1));
       if (degpol(z[1])<=0) gel(z,2) = gen_0;
@@ -2785,7 +2785,7 @@ ggcd(GEN x, GEN y)
         vy = varn(y);
         if (varncmp(vy,vx) < 0) return cont_gcd_gen(y, x);
         z = cgetg(3,t_POLMOD);
-        copyifstack(x[1],z[1]);
+        gel(z,1) = gcopy(gel(x,1));
         av = avma; p1 = ggcd(gel(x,1),gel(x,2));
         gel(z,2) = gerepileupto(av, ggcd(p1,y));
         return z;
@@ -3273,7 +3273,7 @@ Q_muli_to_int(GEN x, GEN d)
 
     case t_POLMOD:
       y = cgetg(3, t_POLMOD);
-      copyifstack(x[1],y[1]);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = Q_muli_to_int(gel(x,2), d);
       return y;
   }
@@ -3314,7 +3314,7 @@ Q_divmuli_to_int(GEN x, GEN d, GEN n)
 
     case t_POLMOD:
       y = cgetg(3, t_POLMOD);
-      copyifstack(x[1],y[1]);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = Q_divmuli_to_int(gel(x,2), d,n);
       return y;
   }
@@ -3588,7 +3588,7 @@ subresall(GEN u, GEN v, GEN *sol)
 
   if (sol) u = gclone(u);
   z = gerepileupto(av, z);
-  if (sol) { *sol = forcecopy(u); gunclone(u); }
+  if (sol) { *sol = gcopy(u); gunclone(u); }
   return z;
 }
 

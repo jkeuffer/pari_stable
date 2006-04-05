@@ -75,6 +75,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - semantic of t_SER with inexact coefficients is now the same as for
     t_POL: the sign is 0 iff all coefficients are zero. Either there are
     no coefficients, or the leading coefficient is an inexact zero.
+  - No longer assume that part of an object is "permanent" when it is out
+    of the stack (was used by INTMOD/POLMOD/PADIC). Always copy it.
+    As a result, 'gmodulo' and 'forcecopy' become obsolete.
 
 * Specific to the PARI library:
 ===============================
@@ -191,6 +194,7 @@ advise you to update soon ]
   - rename rnfhermitebasis -> rnfhnfbasis
   - rename gcarreparfait -> gissquare, gcarrecomplet -> gissquarerem
   - rename lseriesell -> elllseries
+  - gmodulo and forcecopy are obsolete. Use gmodulcp and gcopy.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

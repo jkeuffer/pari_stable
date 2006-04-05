@@ -134,6 +134,9 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
        helpful ]
    12- [libpari] renamed lellseries -> elllseries [ as in GP ]
    13- semantics of stackdummy() [ make it consistent with gerepile ]
+   14- never assume that part of an object is "permanent" when it is out
+       of the stack (was used by INTMOD/POLMOD/PADIC). Always copy it.
+       As a result, 'gmodulo' and 'forcecopy' become obsolete.
 
   Added
     1- [library] new function isinexact.

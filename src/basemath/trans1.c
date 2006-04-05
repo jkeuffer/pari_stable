@@ -299,11 +299,11 @@ puiss0(GEN x)
       return gen_1;
 
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); copyifstack(x[1], y[1]);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = gen_1; return y;
 
     case t_POLMOD:
-      y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_POLMOD); gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = pol_1[varn(x[1])]; return y;
 
     case t_POL: case t_SER: case t_RFRAC:
@@ -508,7 +508,7 @@ powps(GEN x, long n)
     mod = gerepileuptoint((pari_sp)y, mod);
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(e);
-  icopyifstack(p, y[2]);
+  gel(y,2) = icopy(p);
   gel(y,3) = mod;
 
   av = avma; t = gel(x,4);
@@ -541,7 +541,7 @@ powp(GEN x, GEN n)
     mod = gerepileuptoint((pari_sp)y, mod);
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(0);
-  icopyifstack(p, y[2]);
+  gel(y,2) = icopy(p);
   gel(y,3) = mod;
   gel(y,4) = Fp_pow(gel(x,4), n, mod);
   return y;
@@ -578,7 +578,7 @@ gpowgs(GEN x, long n)
       return y;
     }
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = Fp_pows(gel(x,2), n, gel(x,1));
       return y;
     case t_FRAC:
@@ -631,7 +631,7 @@ powgi(GEN x, GEN n)
   switch(typ(x))
   {
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = Fp_pow(gel(x,2), n, gel(x,1));
       return y;
     case t_PADIC: return powp(x, n);
@@ -775,7 +775,7 @@ gpow(GEN x, GEN n, long prec)
     if (tx == t_INTMOD)
     {
       if (!BSW_psp(gel(x,1))) pari_err(talker,"gpow: modulus %Z is not prime",x[1]);
-      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       av = avma;
       z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
       if (!z) pari_err(talker,"gpow: nth-root does not exist");
@@ -922,7 +922,7 @@ padic_sqrt(GEN x)
     mod = icopy(mod);
   }
   y[1] = evalprecp(pp) | evalvalp(e);
-  copyifstack(p,y[2]);
+  gel(y,2) = icopy(p);
   gel(y,3) = mod;
   gel(y,4) = z; return y;
 }
@@ -938,7 +938,7 @@ gsqrt(GEN x, long prec)
     case t_REAL: return sqrtr(x);
 
     case t_INTMOD:
-      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       p1 = Fp_sqrt(gel(x,2),gel(y,1));
       if (!p1) pari_err(sqrter5);
       gel(y,2) = p1; return y;
@@ -1129,8 +1129,8 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   {
   case t_INTMOD:
     z = gen_0;
-    if (zetan) { z = cgetg(3,t_INTMOD); copyifstack(x[1],z[1]); }
-    y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+    y = cgetg(3,t_INTMOD);  gel(y,1) = icopy(gel(x,1));
+    if (zetan) { z = cgetg(3,t_INTMOD); gel(z,1) = gel(y,1); }
     gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
     if (!y[2]) {
       if (zetan) return gen_0;

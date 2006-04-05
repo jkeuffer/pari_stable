@@ -317,7 +317,9 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
 
       /* if we need to shift anyway, shorten from left
        * If not, shorten from right, neutralizing last word of z */
-      if (j == 0) stackdummy((pari_sp)(z + lz+1), (pari_sp)(z + lz));
+      if (j == 0)
+        /* stackdummy((pari_sp)(z + lz+1), (pari_sp)(z + lz)); */
+        z[lz] = evaltyp(t_VECSMALL) | _evallg(1);
       else
       {
         GEN t = z;

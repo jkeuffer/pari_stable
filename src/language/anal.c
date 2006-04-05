@@ -388,7 +388,7 @@ readseq0(char *t, GEN (*f)(void))
     if (!z) { avma = av; return gnil; }
   }
   /* ep->value, beware: it may be killed anytime.  */
-  if (isclone(z)) { avma = av; return forcecopy(z); }
+  if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
 }
 static GEN
@@ -405,7 +405,7 @@ readseq0_nobreak(char *t, GEN (*f)(void))
   if (br_status) pari_err(talker,"break not allowed");
   av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   /* ep->value, beware: it may be killed anytime.  */
-  if (isclone(z)) { avma = av; return forcecopy(z); }
+  if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
 }
 
@@ -605,7 +605,7 @@ new_val_cell(entree *ep, GEN x, char flag)
   /* beware: f(p) = Nv = 0
    *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
   ep->value = (flag == COPY_VAL)? gclone(x):
-                                  (x && isclone(x))? forcecopy(x): x;
+                                  (x && isclone(x))? gcopy(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
   ep->args  = (void*)v;
 }
@@ -1334,7 +1334,7 @@ facteur(void)
       {
         matcomp c;
         x = matcell(x, &c);
-        if (isonstack(x)) x = forcecopy(x);
+        if (isonstack(x)) x = gcopy(x);
         break;
       }
       case '!':
@@ -1615,11 +1615,11 @@ matrix_block(GEN p)
     }
   }
 #if 0
-  return isonstack(cpt)? forcecopy(cpt): cpt; /* no assignment */
+  return isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
 #else
   /* too dangerous otherwise: e.g we return x[1] and have x = 0 immediately
    * after, destroying x[1] in changevalue */
-  return forcecopy(cpt); /* no assignment */
+  return gcopy(cpt); /* no assignment */
 #endif
 }
 
@@ -3267,8 +3267,7 @@ read_member(GEN x)
     else
     {
       GEN y = ((F1GEN)ep->value)(x);
-      if (isonstack(y)) y = forcecopy(y);
-      return y;
+      return isonstack(y)? gcopy(y): y;
     }
   }
   if (*analyseur != '=' || analyseur[1] == '=')

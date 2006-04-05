@@ -782,7 +782,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
   for (i=1; i<=m; i++)
   {
     c[2] = i; p1 = readseq_nobreak(ch);
-    gel(y,i) = isonstack(p1)? p1 : forcecopy(p1);
+    gel(y,i) = isonstack(p1)? p1 : gcopy(p1);
     changevalue_p(ep,c);
   }
   pop_val(ep); return y;
@@ -840,7 +840,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
     for (j=1; j<=n; j++)
     {
       c1[2] = j; p1 = readseq_nobreak(ch);
-      gel(z,j) = isonstack(p1)? p1 : forcecopy(p1);
+      gel(z,j) = isonstack(p1)? p1 : gcopy(p1);
       changevalue_p(ep1,c1);
       changevalue_p(ep2,c2);
     }

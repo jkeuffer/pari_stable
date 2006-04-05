@@ -516,7 +516,7 @@ gmod(GEN x, GEN y)
 	  tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
 
 	case t_QUAD: z=cgetg(4,tx);
-          copyifstack(x[1],z[1]);
+          gel(z,1) = gcopy(gel(x,1));
 	  gel(z,2) = gmod(gel(x,2),y);
           gel(z,3) = gmod(gel(x,3),y); return z;
 
@@ -605,7 +605,7 @@ gmodgs(GEN x, long y)
                           umodiu(gel(x,2), u), u) );
 
     case t_QUAD: z=cgetg(4,tx);
-      copyifstack(x[1],z[1]);
+      gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gmodgs(gel(x,2),y);
       gel(z,3) = gmodgs(gel(x,3),y); return z;
 
@@ -653,36 +653,6 @@ specialmod(GEN x, GEN y)
 }
 
 GEN
-gmodulo(GEN x,GEN y)
-{
-  long tx=typ(x),l,i;
-  GEN z;
-
-  if (is_matvec_t(tx))
-  {
-    l=lg(x); z=cgetg(l,tx);
-    for (i=1; i<l; i++) gel(z,i) = gmodulo(gel(x,i),y);
-    return z;
-  }
-  switch(typ(y))
-  {
-    case t_INT:
-      z=cgetg(3,t_INTMOD);
-      if (!signe(y)) pari_err(talker,"zero modulus in gmodulo");
-      y = gclone(y); setsigne(y,1);
-      gel(z,1) = y;
-      gel(z,2) = Rg_to_Fp(x,y); return z;
-
-    case t_POL: z=cgetg(3,t_POLMOD);
-      gel(z,1) = gclone(y);
-      if (is_scalar_t(tx)) { gel(z,2) = gcopy(x); return z; }
-      if (tx!=t_POL && tx!=t_RFRAC && tx!=t_SER) break;
-      gel(z,2) = specialmod(x,y); return z;
-  }
-  pari_err(operf,"%",x,y); return NULL; /* not reached */
-}
-
-GEN
 gmodulcp(GEN x,GEN y)
 {
   long tx=typ(x),l,i;
@@ -718,8 +688,8 @@ Mod0(GEN x,GEN y,long flag)
 {
   switch(flag)
   {
-    case 0: return gmodulcp(x,y);
-    case 1: return gmodulo(x,y);
+    case 0:
+    case 1: return gmodulcp(x,y);
     default: pari_err(flagerr,"Mod");
   }
   return NULL; /* not reached */
@@ -1075,7 +1045,7 @@ ginv(GEN x)
       return divsr(1,x);
 
     case t_INTMOD: z=cgetg(3,t_INTMOD);
-      icopyifstack(x[1],z[1]);
+      gel(z,1) = icopy(gel(x,1));
       gel(z,2) = Fp_inv(gel(x,2),gel(x,1)); return z;
 
     case t_FRAC:
@@ -1099,13 +1069,12 @@ ginv(GEN x)
     case t_PADIC: z = cgetg(5,t_PADIC);
       if (!signe(x[4])) pari_err(gdiver);
       z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
-      icopyifstack(x[2], z[2]);
+      gel(z,2) = icopy(gel(x,2));
       gel(z,3) = icopy(gel(x,3));
       gel(z,4) = Fp_inv(gel(x,4),gel(z,3)); return z;
 
     case t_POLMOD: z = cgetg(3,t_POLMOD);
-      X = gel(x,1);
-      copyifstack(X, z[1]);
+      X = gel(x,1); gel(z,1) = gcopy(X);
       if (degpol(X) == 2) { /* optimized for speed */
         av = avma;
         gel(z,2) = gerepileupto(av, gdiv(quad_polmod_conj(gel(x,2), X),
@@ -1540,7 +1509,8 @@ deriv(GEN x, long v)
   {
     case t_POLMOD:
       if (v<=varn(x[1])) return gen_0;
-      y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_POLMOD);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = deriv(gel(x,2),v); return y;
 
     case t_POL:
@@ -1673,7 +1643,8 @@ integ(GEN x, long v)
   {
     if (tx == t_POLMOD && v>varn(x[1]))
     {
-      y=cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
+      y=cgetg(3,t_POLMOD);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = integ(gel(x,2),v); return y;
     }
     if (gcmp0(x)) return gen_0;
@@ -1882,7 +1853,7 @@ ground(GEN x)
     case t_REAL: return roundr(x);
     case t_FRAC: return diviiround(gel(x,1), gel(x,2));
     case t_POLMOD: y=cgetg(3,t_POLMOD);
-      copyifstack(x[1],y[1]);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = ground(gel(x,2)); return y;
 
     case t_COMPLEX:
@@ -1941,7 +1912,7 @@ grndtoi(GEN x, long *e)
       *e = e1; return y;
 
     case t_POLMOD: y = cgetg(3,t_POLMOD);
-      copyifstack(x[1], y[1]);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = grndtoi(gel(x,2), e); return y;
 
     case t_COMPLEX:
@@ -2774,7 +2745,7 @@ lift0(GEN x, long v)
       return y;
 
     case t_QUAD:
-      y=cgetg(4,tx); copyifstack(x[1],y[1]);
+      y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
       for (i=2; i<4; i++) gel(y,i) = lift0(gel(x,i), v);
       return y;
   }
@@ -2852,7 +2823,7 @@ centerlift0(GEN x, long v)
       return y;
 
     case t_QUAD:
-      y=cgetg(4, t_QUAD); copyifstack(x[1],y[1]);
+      y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = centerlift0(gel(x,2),v);
       gel(y,3) = centerlift0(gel(x,3),v); return y;
   }

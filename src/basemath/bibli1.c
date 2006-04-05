@@ -2809,7 +2809,7 @@ algdep0(GEN x, long n, long bit, long prec)
   GEN y;
 
   if (! is_scalar_t(tx)) pari_err(typeer,"algdep0");
-  if (tx==t_POLMOD) { y = forcecopy(gel(x,1)); setvarn(y,0); return y; }
+  if (tx==t_POLMOD) { y = gcopy(gel(x,1)); setvarn(y,0); return y; }
   if (gcmp0(x)) return pol_x[0];
   if (n <= 0)
   {
@@ -3479,14 +3479,14 @@ END:
     }
     setlg(pols,j+1);
     setlg(alph,j+1);
-    if (stockmax && isclone(S)) { alph = forcecopy(alph); gunclone(S); }
+    if (stockmax && isclone(S)) { alph = gcopy(alph); gunclone(S); }
     return mkvec2(pols, alph);
   }
   if (stockmax)
   {
     setlg(S,stockmax+1);
     settyp(S,t_MAT);
-    if (isclone(S)) { p1 = S; S = forcecopy(S); gunclone(p1); }
+    if (isclone(S)) { p1 = S; S = gcopy(S); gunclone(p1); }
   }
   else
     S = cgetg(1,t_MAT);

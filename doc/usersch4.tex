@@ -899,11 +899,6 @@ does this is called \teb{gcopy}. Its syntax is:
 \fun{GEN}{gcopy}{GEN x}
 
 \noindent and the effect is to create a new copy of x on the PARI stack.
-Beware that universal objects which occur in specific components of certain
-types (mainly moduli for types \typ{INTMOD} and \typ{PADIC}) are not
-copied, as they are assumed to be permanent. In this case, \kbd{gcopy} only
-copies the pointer. Use \fun{GEN}{forcecopy}{GEN x} if you want a complete
-copy. 
 
 Sometimes, on the contrary, a quick copy of the skeleton of \kbd{x} is
 enough, leaving pointers to the original data in \kbd{x} for the sake of
@@ -927,9 +922,7 @@ A clone can be removed from the heap (thus destroyed) using
 \fun{void}{gunclone}{GEN x}
 
 \noindent No PARI object should keep references to a clone which has been
-destroyed. If you want to copy a clone back to the stack then delete it, use
-\tet{forcecopy} and not \tet{gcopy}, otherwise some components might not be
-copied (moduli of \typ{INTMOD}s and \typ{POLMOD}s for instance).
+destroyed!
 
 \subsec{Conversions}.\sidx{conversions}
 The following functions convert C objects to PARI objects (creating them on

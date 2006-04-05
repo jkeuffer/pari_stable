@@ -213,8 +213,8 @@ leading_term(GEN x) { return lg(x) == 2? gen_0: gel(x,lg(x)-1); }
 INLINE void
 stackdummy(pari_sp av, pari_sp ltop) {
   long l = ((GEN)av) - ((GEN)ltop);
-  GEN z = (GEN)ltop;
   if (l > 0) {
+    GEN z = (GEN)ltop;
     z[0] = evaltyp(t_VECSMALL) | evallg(l);
 #ifdef DEBUG
     { long i; for (i = 1; i < l; i++) z[i] = 0; }

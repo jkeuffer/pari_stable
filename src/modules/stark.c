@@ -2597,7 +2597,7 @@ makescind(GEN nf, GEN P, long cl)
   GEN Pp, p, perm, pol, G, L, a, roo, nfpol = gel(nf,1);
   long i, k, l, is_P;
 
-  P = lift(P);
+  P = lift_intern(P);
   pol = RgX_mul(P, pol_quad_conj(P, nfpol)); /* Norm_{k/Q}(P), irreducible/Q */
   for (i = 2; i < lg(pol); i++)
   {

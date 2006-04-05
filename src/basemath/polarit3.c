@@ -1879,8 +1879,7 @@ GEN
 FpX_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l,t_POL);
-  if (isonstack(p)) p = icopy(p);
+  GEN x = cgetg(l,t_POL); p = icopy(p);
   for (i=2; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   x[1] = z[1]; return normalizepol_i(x,l);
 }
@@ -1890,8 +1889,7 @@ GEN
 FpV_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l, t_VEC);
-  if (isonstack(p)) p = icopy(p);
+  GEN x = cgetg(l, t_VEC); p = icopy(p);
   for (i=1; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   return x;
 }
@@ -1900,8 +1898,7 @@ GEN
 FpC_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l, t_COL);
-  if (isonstack(p)) p = icopy(p);
+  GEN x = cgetg(l, t_COL); p = icopy(p);
   for (i=1; i<l; i++) gel(x,i) = to_intmod(gel(z,i), p);
   return x;
 }
@@ -1910,14 +1907,12 @@ GEN
 FpM_to_mod(GEN z, GEN p)
 {
   long i,j,l = lg(z), m = lg(gel(z,1));
-  GEN x,y,zi;
-  if (isonstack(p)) p = icopy(p);
-  x = cgetg(l,t_MAT);
+  GEN  x = cgetg(l,t_MAT), y, zi;
+  p = icopy(p);
   for (i=1; i<l; i++)
   {
     gel(x,i) = cgetg(m,t_COL);
-    y = gel(x,i);
-    zi= gel(z,i);
+    y = gel(x,i); zi= gel(z,i);
     for (j=1; j<m; j++) gel(y,j) = to_intmod(gel(zi,j), p);
   }
   return x;
@@ -1999,7 +1994,7 @@ from_Kronecker(GEN z, GEN T)
   GEN a,x, t = cgetg(N,t_POL);
   t[1] = T[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  if (isonstack(T)) T = gcopy(T);
+  T = gcopy(T);
   for (i=2; i<lx+2; i++)
   {
     a = cgetg(3,t_POLMOD); gel(x,i) = a;

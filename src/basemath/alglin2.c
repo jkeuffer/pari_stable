@@ -217,16 +217,16 @@ caradj(GEN x, long v, GEN *py)
     y = gclone(y);
     /* beware: since y is a clone and t computed from it some components
      * may be out of stack (eg. INTMOD/POLMOD) */
-    gel(p,l-k+1) = gerepileupto(av, forcecopy(t)); av = avma;
+    gel(p,l-k+1) = gerepileupto(av, gcopy(t)); av = avma;
     if (k > 2) gunclone(y0);
   }
   t = gen_0;
   for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
-  gel(p,2) = gerepileupto(av, forcecopy(gneg(t)));
+  gel(p,2) = gerepileupto(av, gneg(t));
   i = gvar2(p);
   if (i == v) pari_err(talker,"incorrect variable in caradj");
   if (i < v) p = gerepileupto(av0, poleval(p, pol_x[v]));
-  if (py) *py = (l & 1)? stackify(gneg(y)): forcecopy(y);
+  if (py) *py = (l & 1)? gneg(y): gcopy(y);
   gunclone(y); return p;
 }
 
@@ -552,7 +552,8 @@ gconj(GEN x)
       break;
 
     case t_QUAD:
-      z = cgetg(4,t_QUAD); copyifstack(x[1],z[1]);
+      z = cgetg(4,t_QUAD);
+      gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
                                     : gadd(gel(x,2), gel(x,3));
       gel(z,3) = gneg(gel(x,3));
@@ -569,7 +570,8 @@ gconj(GEN x)
       long d = degpol(X);
       if (d < 2) return gcopy(x);
       if (d == 2) {
-        z = cgetg(3, t_POLMOD); copyifstack(X, z[1]);
+        z = cgetg(3, t_POLMOD); 
+        gel(z,1) = gcopy(X);
         gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
       }
     }

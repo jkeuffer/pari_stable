@@ -1253,7 +1253,6 @@ void    pari_sig_init(void (*f)(int));
 void    pari_warn(long numerr, ...);
 GEN     reorder(GEN x);
 GEN     shallowcopy(GEN x);
-GEN     stackify(GEN x);
 stackzone* switch_stack(stackzone *z, long n);
 long    taille(GEN x);
 long    taille2(GEN x);

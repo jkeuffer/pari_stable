@@ -1270,12 +1270,8 @@ trap0(char *e, char *r, char *f)
 /*                  Replicate an existing GEN                      */
 /*                                                                 */
 /*******************************************************************/
-/* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx
- * if nocp[tx], then x[lontyp[tx]] is not copied if not in stack
- */
+/* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx */
 const  long lontyp[] = { 0,0,0,1,1,1,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
-static int    nocp[] = { 0,0,0,1,0,0,0,1,1,1, 0,0,0,0,0,0,0,0,0,0, 0,0,0 };
-
 #define LG(x, tx) tx == t_LIST? lgeflist(x): lg(x)
 
 /* x is a t_INT equal to 0 ? tx == t_INT && lx == 2 */
@@ -1306,7 +1302,6 @@ gcopy(GEN x)
   lx = lg(x); y = cgetg_copy(lx, x);
   if (tx == t_LIST) lx = lgeflist(x);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-  if (nocp[tx]) { copyifstack(x[i],y[i]); i++; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
   return y;
 }
@@ -1323,49 +1318,8 @@ gcopy_i(GEN x, long lx)
   if (! is_recursive_t(tx)) return copy_leaf(x);
   y = cgetg(lx, tx); /* cgetg_copy would be incorrect if lx < lg(x) */
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-  if (nocp[tx]) { copyifstack(x[i],y[i]); i++; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
   return y;
-}
-
-GEN
-forcecopy(GEN x)
-{
-  long tx = typ(x), lx, i;
-  GEN y;
-
-  if (! is_recursive_t(tx)) return copy_leaf(x);
-  lx = lg(x); y = cgetg_copy(lx, x);
-  if (tx == t_LIST) lx = lgeflist(x);
-  if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-  for (; i<lx; i++) gel(y,i) = forcecopy(gel(x,i));
-  return y;
-}
-
-/* Replace heap components in INTMOD / POLMOD by stack copies, in place.
- * Useful after x = gneg(y), y a clone. stackify(x) less wasteful than
- * x = gerepileupto(av, forcecopy(x))   [ 1 partial copy instead of 2 full
- * ones ] */
-GEN
-stackify(GEN x)
-{
-  long tx=typ(x),lx,i;
-
-  if (isclone(x)) return forcecopy(x);
-  if (is_recursive_t(tx))
-  {
-    if (tx == t_POLMOD || tx == t_INTMOD)
-    {
-      if (!isonstack(x[1])) gel(x,1) = forcecopy(gel(x,1));
-      gel(x,2) = stackify(gel(x,2));
-    }
-    else
-    {
-      lx = LG(x, tx);
-      for (i=lontyp[tx]; i<lx; i++) gel(x,i) = stackify(gel(x,i));
-    }
-  }
-  return x;
 }
 
 GEN
@@ -1629,7 +1583,7 @@ bin_copy(GENbin *p)
 /*                         STACK MANAGEMENT                        */
 /*                                                                 */
 /*******************************************************************/
-/* gerepileupto(av, forcecopy(x)) */
+/* gerepileupto(av, gcopy(x)) */
 GEN
 gerepilecopy(pari_sp av, GEN x)
 {

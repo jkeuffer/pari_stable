@@ -51,7 +51,7 @@ cgetp2(GEN x, long vx)
 {
   GEN y = cgetg(5,t_PADIC);
   y[1] = evalprecp(precp(x)) | evalvalp(vx);
-  icopyifstack(x[2], y[2]);
+  gel(y,2) = icopy(gel(x,2));
   gel(y,3) = icopy(gel(x,3)); return y;
 }
 
@@ -891,12 +891,12 @@ gneg(GEN x)
       return mpneg(x);
 
     case t_INTMOD: y=cgetg(3,t_INTMOD);
-      icopyifstack(x[1],y[1]);
+      gel(y,1) = icopy(gel(x,1));
       gel(y,2) = subii(gel(y,1),gel(x,2));
       break;
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
-      copyifstack(x[1],y[1]);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = gneg(gel(x,2)); break;
 
     case t_FRAC: case t_RFRAC:
@@ -910,7 +910,8 @@ gneg(GEN x)
       break;
 
     case t_QUAD:
-      y=cgetg(4,t_QUAD); copyifstack(x[1],y[1]);
+      y=cgetg(4,t_QUAD);
+      gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = gneg(gel(x,2));
       gel(y,3) = gneg(gel(x,3)); break;
 
@@ -1638,7 +1639,7 @@ cvtop(GEN x, GEN p, long d)
       if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
-      icopyifstack(p, z[2]);
+      gel(z,2) = icopy(p);
       gel(z,3) = gpowgs(p, d);
       gel(z,4) = modii(x, gel(z,3)); return z; /* not memory-clean */
 
@@ -1654,7 +1655,7 @@ cvtop(GEN x, GEN p, long d)
       if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
-      icopyifstack(p, z[2]);
+      gel(z,2) = icopy(p);
       gel(z,3) = gpowgs(p, d);
       if (!is_pm1(den)) num = mulii(num, Fp_inv(den, gel(z,3)));
       gel(z,4) = modii(num, gel(z,3)); return z; /* not memory-clean */

@@ -557,12 +557,7 @@ on the heap. The \emph{clone bit} of the result is set.
 \fun{void}{gunclone}{GEN x} delete the clone~\kbd{x} (created by \kbd{gclone}).
 Fatal error if~\kbd{x} not a clone.
 
-\fun{GEN}{gcopy}{GEN x} creates a new copy of the object~\kbd{x} on the
-stack. Subobjects not belonging to the stack may not be copied (only the
-pointer would be): this occurs for \kbd{x[1]} if \kbd{x} is a \typ{INTMOD},
-\typ{POLMOD} or \typ{QUAD}, for \kbd{x[2]} if \kbd{x} is a \typ{PADIC}. This
-happens for instance when one initializes a sequence of operation from a
-clone.
+\fun{GEN}{gcopy}{GEN x} creates a new copy of the object~\kbd{x} on the stack.
 
 \fun{int}{isonstack}{GEN x} \kbd{true} iff \kbd{x} belongs to the stack. This
 is a macro whose argument is evaluated several times.
@@ -576,9 +571,6 @@ its arguments once, contrary to
 
 \fun{void}{icopyifstack}{GEN x, GEN y} as \kbd{copyifstack} assuming \kbd{x}
 is a \typ{INT}.
-
-\fun{GEN}{forcecopy}{GEN x} same as \key{gcopy} except that all subobjects
-are copied onto the stack.
 
 \fun{long}{taille}{GEN x} returns the total number of \B-bit words occupied
 by the tree representing~\kbd{x}.
@@ -2492,9 +2484,6 @@ result is a \typ{INTMOD}, or \kbd{x} is a scalar or a \typ{POL} and \kbd{y} a
 
 \fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulcp} except both
 \kbd{x} and \kbd{y} are \kbd{long}s.
-
-\fun{GEN}{gmodulo}{GEN x, GEN y} same as \key{gmodulcp} except that the
-modulus \kbd{y} is cloned onto the heap, not copied onto the PARI stack.
 
 \subsubsec{Between polynomials and coefficient arrays}
 

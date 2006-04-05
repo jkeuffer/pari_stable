@@ -1742,6 +1742,10 @@ gerepile_mat(pari_sp av, pari_sp tetpil, GEN x, long k, long m, long n, long t)
     }
 }
 
+#define COPY(x) {\
+  GEN _t = (x); if (!is_universal_constant(_t)) x = gcopy(_t); \
+}
+
 static void
 gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
 {
@@ -1749,9 +1753,9 @@ gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
 
   if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
-  for (u=t+1; u<=m; u++) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
+  for (u=t+1; u<=m; u++) COPY(gcoeff(x,u,k));
   for (i=k+1; i<=n; i++)
-    for (u=1; u<=m; u++) gcopyifstack(gcoeff(x,u,i), gcoeff(x,u,i));
+    for (u=1; u<=m; u++) COPY(gcoeff(x,u,i));
   gerepile_mat(av,tetpil,x,k,m,n,t);
 }
 
@@ -1781,10 +1785,10 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
 
   if (DEBUGMEM > 1) pari_warn(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (u==j || !c[u]) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
+    if (u==j || !c[u]) COPY(gcoeff(x,u,k));
   for (u=1; u<=m; u++)
     if (u==j || !c[u])
-      for (i=k+1; i<=n; i++) gcopyifstack(gcoeff(x,u,i), gcoeff(x,u,i));
+      for (i=k+1; i<=n; i++) COPY(gcoeff(x,u,i));
 
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
@@ -1931,7 +1935,7 @@ keri(GEN x)
       if (l[i])
       {
 	c=gcoeff(x,l[i],k);
-	gel(p,i) = forcecopy(c); gunclone(c);
+	gel(p,i) = gcopy(c); gunclone(c);
       }
       else
 	gel(p,i) = gen_0;
@@ -2132,7 +2136,7 @@ ker0(GEN x, GEN a)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	gel(p,i) = forcecopy(p1); gunclone(p1);
+	gel(p,i) = gcopy(p1); gunclone(p1);
       }
       else
 	gel(p,i) = gen_0;
