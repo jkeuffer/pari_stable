@@ -16,6 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* For compatibility with 1.x.x */
 /*functions renamed*/
 #define gmodulo gmodulcp
+#define forcecopy gcopy
 #define lseriesell elllseries
 #define gcarrecomplet gissquarerem
 #define gcarreparfait gissquare

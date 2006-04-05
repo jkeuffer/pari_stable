@@ -1219,7 +1219,6 @@ GEN     changevar(GEN x, GEN y);
 void    disable_dbg(long val);
 void*   err_catch(long errnum, jmp_buf *penv);
 void    err_leave(void **v);
-GEN     forcecopy(GEN x);
 GEN     gclone(GEN x);
 GEN     gcopy(GEN x);
 GEN     gcopy_i(GEN x, long lx);
