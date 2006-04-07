@@ -1089,19 +1089,23 @@ ginv(GEN x)
     case t_RFRAC:
     {
       GEN n = gel(x,1), d = gel(x,2);
-      pari_sp av = avma;
+      pari_sp av = avma, ltop;
       if (gcmp0(n)) pari_err(gdiver);
 
       n = simplify_i(n);
       if (typ(n) != t_POL || varn(n) != varn(d))
       {
         if (gcmp1(n)) { avma = av; return gcopy(d); }
-        return RgX_Rg_div(d,n);
+        ltop = avma;
+        z = RgX_Rg_div(d,n);
+      } else {
+        ltop = avma;
+        z = cgetg(3,t_RFRAC);
+        gel(z,1) = gcopy(d);
+        gel(z,2) = gcopy(n);
       }
-      avma = av;
-      z = cgetg(3,t_RFRAC);
-      gel(z,1) = gcopy(d);
-      gel(z,2) = gcopy(n); return z;
+      stackdummy(av, ltop);
+      return z;
     }
 
     case t_QFR:
