@@ -3143,7 +3143,7 @@ akell(GEN e, GEN n)
 }
 
 GEN
-lseriesell(GEN e, GEN s, GEN A, long prec)
+elllseries(GEN e, GEN s, GEN A, long prec)
 {
   pari_sp av = avma, av1, lim;
   ulong l, n;
