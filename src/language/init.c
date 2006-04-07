@@ -1079,7 +1079,7 @@ pari_err(long numerr, ...)
   va_list ap;
 
   va_start(ap,numerr);
-  if (is_warn(numerr)) err(talker,"use pari_warn for warnings");
+  if (is_warn(numerr)) pari_err(talker,"use pari_warn for warnings");
 
   global_err_data = NULL;
   if (err_catch_stack)

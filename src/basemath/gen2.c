@@ -115,7 +115,7 @@ greffe(GEN x, long l, long use_stack)
   GEN y;
 
   if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
-  if (l <= 2) err(talker, "l <= 2 in greffe");
+  if (l <= 2) pari_err(talker, "l <= 2 in greffe");
 
   /* optimed version of polvaluation + normalize */
   i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
@@ -1079,7 +1079,7 @@ vecmax(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) err(talker, "empty vector in vecmax");
+  lx=lg(x); if (lx==1) pari_err(talker, "empty vector in vecmax");
   if (tx!=t_MAT)
   {
     s=gel(x,1);
@@ -1089,7 +1089,7 @@ vecmax(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) err(talker, "empty vector in vecmax");
+    if (lx2==1) pari_err(talker, "empty vector in vecmax");
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {
@@ -1109,7 +1109,7 @@ vecmin(GEN x)
   GEN *p1,s;
 
   if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) err(talker, "empty vector in vecmin");
+  lx=lg(x); if (lx==1) pari_err(talker, "empty vector in vecmin");
   if (tx!=t_MAT)
   {
     s=gel(x,1);
@@ -1119,7 +1119,7 @@ vecmin(GEN x)
   else
   {
     lx2 = lg(x[1]);
-    if (lx2==1) err(talker, "empty vector in vecmin");
+    if (lx2==1) pari_err(talker, "empty vector in vecmin");
     s=gmael(x,1,1); i=2;
     for (j=1; j<lx; j++)
     {

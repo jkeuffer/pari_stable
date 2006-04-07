@@ -1911,7 +1911,7 @@ lindep2(GEN x, long bit)
 
   if (! is_vec_t(tx)) pari_err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
-  if (bit < 0) err(talker, "negative accuracy in lindep2");
+  if (bit < 0) pari_err(talker, "negative accuracy in lindep2");
   if (!bit)
   {
     bit = gprecision(x);
@@ -3063,7 +3063,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     maxnorm = 0.;
   }
   BOUND = p + eps;
-  if (BOUND == p) err(precer, "minim0");
+  if (BOUND == p) pari_err(precer, "minim0");
 
   switch(flag)
   {

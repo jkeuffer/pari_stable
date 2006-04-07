@@ -1311,7 +1311,7 @@ divisors(GEN n)
     if (tn == t_INT)
       n = auxdecomp(n,1);
     else {
-      if (is_matvec_t(tn)) err(typeer,"divisors");
+      if (is_matvec_t(tn)) pari_err(typeer,"divisors");
       isint = 0;
       n = factor(n);
     }
@@ -1324,7 +1324,7 @@ divisors(GEN n)
   for (i=1; i<l; i++)
   {
     e[i] = itos(gel(E,i));
-    if (e[i] < 0) err(talker, "denominators not allowed in divisors");
+    if (e[i] < 0) pari_err(talker, "denominators not allowed in divisors");
     nbdiv = itou_or_0( muluu(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)

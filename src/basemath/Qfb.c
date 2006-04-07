@@ -801,7 +801,7 @@ get_disc(GEN x, GEN *D)
 {
   if (!*D) *D = qf_disc(x);
   else if (typ(*D) != t_INT) pari_err(arither1);
-  if (!signe(*D)) err(talker,"reducible form in qfr_init");
+  if (!signe(*D)) pari_err(talker,"reducible form in qfr_init");
 }
 
 static GEN

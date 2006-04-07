@@ -43,7 +43,7 @@ gvar(GEN x)
     case t_VECSMALL:
     case t_STR: 
     case t_LIST: 
-      err(typeer, "gvar");
+      pari_err(typeer, "gvar");
   }
   return BIGINT;
 }

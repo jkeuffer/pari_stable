@@ -2262,7 +2262,7 @@ sfcont(GEN x, long k)
   long lx, tx = typ(x), e;
   GEN y, a, b, c;
 
-  if (k < 0) err(talker, "negative nmax in sfcont");
+  if (k < 0) pari_err(talker, "negative nmax in sfcont");
   if (is_scalar_t(tx))
   {
     if (gcmp0(x)) return mkvec(gen_0);
