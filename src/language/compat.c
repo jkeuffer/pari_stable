@@ -30,7 +30,7 @@ sigmak0(long k, GEN x) {return gsumdivk(x,k);}
 
 static GEN
 lseriesell0(GEN a, GEN b, GEN c, GEN d, long prec)
-  {(void)c; return lseriesell(a,b,d,prec);}
+  {(void)c; return elllseries(a,b,d,prec);}
 
 static GEN
 subres0(GEN x, GEN y) { return subres(x,y); }
@@ -386,7 +386,7 @@ entree oldfonctions[]={
 {"minim",33,(void*)minim,8,"GGG","minim(x,bound,maxnum)=number of vectors of square norm <= bound, maximum norm and list of vectors for the integral and definite quadratic form x; minimal non-zero vectors if bound=0"},
 {"minim2",23,(void*)minim2,8,"GG","minim2(x,bound)=looks for vectors of square norm <= bound, return the first one and its norm"},
 {"mod",25,(void*)gmodulcp,2,"GG","mod(x,y)=creates the integer x modulo y on the PARI stack"},
-{"modp",25,(void*)gmodulo,2,"GG","modp(x,y)=creates the integer x modulo y as a permanent object (on the heap)"},
+{"modp",25,(void*)gmodulcp,2,"GG","modp(x,y)=creates the integer x modulo y as a permanent object (on the heap)"},
 {"modreverse",1,(void*)polymodrecip,6,"G","modreverse(x)=reverse polymod of the polymod x, if it exists"},
 {"modulargcd",2,(void*)modulargcd,2,"GG","modulargcd(x,y)=gcd of the polynomials x and y using the modular method"},
 {"mu",1,(void*)gmu,4,"G","mu(x)=Moebius function of x"},
