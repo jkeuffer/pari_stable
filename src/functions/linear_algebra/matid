@@ -1,8 +1,8 @@
 Function: matid
 Section: linear_algebra
-C-Name: idmat
+C-Name: matid
 Prototype: L
 Help: matid(n): identity matrix of order n (n C-integer)
 Description:
- (small):vec    idmat($1)
+ (small):vec    matid($1)
 
