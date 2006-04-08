@@ -1186,7 +1186,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
   }
 
   if (v <= gvar(from)) pari_err(talker, "subst: unexpected variable precedence");
-  tmp = gmul(pol, gmodulcp(gen_1, tmp));
+  tmp = gmul(pol, mkpolmod(gen_1, tmp));
   if (typ(tmp) == t_POLMOD)
     tmp = gel(tmp,2);			/* optimize lift */
   else					/* Vector? */
