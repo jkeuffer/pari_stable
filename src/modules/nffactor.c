@@ -68,7 +68,7 @@ unifpol0(GEN nf,GEN x,long flag)
       if (typ(x) != t_POL) return gcopy(x); /* scalar */
     case t_POL:
       if (!degpol(x)) return gcopy(constant_term(x));
-      return (flag == t_COL)? algtobasis(nf, x): gmodulcp(x, gel(nf,1));
+      return (flag == t_COL)? algtobasis(nf, x): gmodulo(x, gel(nf,1));
 
     default: /* t_COL */
       return (flag == t_COL)? gcopy(x): basistoalg(nf, x);

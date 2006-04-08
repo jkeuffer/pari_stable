@@ -464,7 +464,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     msgtimer("padicsqrtnlift.");
   *ptr_val=val;
   *ptr_l=itos(l);
-  return gmodulcp(z,le);
+  return gmodulo(z,le);
 }
 
 /*Fill in the powz table:
@@ -596,7 +596,7 @@ bnr_to_znstar(GEN bnr, long *complex)
       x = gcoeff(x, 1, 1);
     else if (typ(x) == t_COL)
       x = gel(x,1);
-    gel(v,i) = gmodulcp(absi(x), cond);
+    gel(v,i) = gmodulo(absi(x), cond);
   }
   return mkvec3(gel(zk,1), gel(zk,2), v);
 }

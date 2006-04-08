@@ -78,6 +78,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - No longer assume that part of an object is "permanent" when it is out
     of the stack (was used by INTMOD/POLMOD/PADIC). Always copy it.
     As a result, 'gmodulo' and 'forcecopy' become obsolete.
+    Rename gmodulcp -> gmodulo.
 
 * Specific to the PARI library:
 ===============================

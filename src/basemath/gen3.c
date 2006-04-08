@@ -653,7 +653,7 @@ specialmod(GEN x, GEN y)
 }
 
 GEN
-gmodulcp(GEN x,GEN y)
+gmodulo(GEN x,GEN y)
 {
   long tx=typ(x),l,i;
   GEN z;
@@ -661,7 +661,7 @@ gmodulcp(GEN x,GEN y)
   if (is_matvec_t(tx))
   {
     l=lg(x); z=cgetg(l,tx);
-    for (i=1; i<l; i++) gel(z,i) = gmodulcp(gel(x,i),y);
+    for (i=1; i<l; i++) gel(z,i) = gmodulo(gel(x,i),y);
     return z;
   }
   switch(typ(y))
@@ -689,7 +689,7 @@ Mod0(GEN x,GEN y,long flag)
   switch(flag)
   {
     case 0:
-    case 1: return gmodulcp(x,y);
+    case 1: return gmodulo(x,y);
     default: pari_err(flagerr,"Mod");
   }
   return NULL; /* not reached */
@@ -1245,10 +1245,10 @@ gsubst(GEN x, long v, GEN y)
     p2=gsubst(gel(x,2),v,y); vy=gvar(p2);
     if (typ(p1)!=t_POL)
       pari_err(talker,"forbidden substitution in a scalar type");
-    if (varncmp(vy, vx) >= 0) return gerepileupto(av, gmodulcp(p2,p1));
+    if (varncmp(vy, vx) >= 0) return gerepileupto(av, gmodulo(p2,p1));
     lx = lg(p2);
     z = cgetg(lx,t_POL); z[1] = p2[1];
-    for (i=2; i<lx; i++) gel(z,i) = gmodulcp(gel(p2,i),p1);
+    for (i=2; i<lx; i++) gel(z,i) = gmodulo(gel(p2,i),p1);
     return gerepileupto(av, normalizepol_i(z,lx));
   }
 
@@ -2703,7 +2703,7 @@ numer(GEN x)
 
     case t_POLMOD:
       av=avma; s=numer(gel(x,2)); tetpil=avma;
-      return gerepile(av,tetpil,gmodulcp(s,gel(x,1)));
+      return gerepile(av,tetpil,gmodulo(s,gel(x,1)));
 
     case t_RFRAC:
       return gcopy(gel(x,1));

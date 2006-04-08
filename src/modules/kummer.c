@@ -326,7 +326,7 @@ downtoK(toK_s *T, GEN x)
 {
   long degKz = lg(T->invexpoteta1) - 1;
   GEN y = gmul(T->invexpoteta1, RgX_to_RgV(lift_intern(x), degKz));
-  return gmodulcp(gtopolyrev(y,varn(T->polnf)), T->polnf);
+  return gmodulo(gtopolyrev(y,varn(T->polnf)), T->polnf);
 }
 
 static GEN

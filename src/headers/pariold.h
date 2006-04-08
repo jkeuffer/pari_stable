@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
-#define gmodulo gmodulcp
+#define gmodulcp gmodulo
 #define forcecopy gcopy
 #define lseriesell elllseries
 #define gcarrecomplet gissquarerem
@@ -212,7 +212,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lmod    (long)gmod
 #define lmodsg    (long)gmodsg
 #define lmodsi  (long)modsi
-#define lmodulcp  (long)gmodulcp
+#define lmodulcp  (long)gmodulo
 #define lmodulo   (long)gmodulo
 #define lmpabs  (long)mpabs
 #define lmpadd  (long)mpadd

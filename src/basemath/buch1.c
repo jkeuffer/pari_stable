@@ -177,7 +177,7 @@ quadhilbertimag(GEN D, GEN pq)
   if (p == q)
   {
     u = (GEN)compimagraw(qfp, qfp)[2];
-    u = gmodulcp(u, shifti(sqru(p),1));
+    u = gmodulo(u, shifti(sqru(p),1));
   }
   else
   {
@@ -460,7 +460,7 @@ findquad(GEN a, GEN x, GEN p)
     pari_err(talker, "incorrect data in findquad");
   x = v;
   if (!gcmp0(u)) x = gadd(gmul(u, pol_x[varn(a)]), x);
-  if (typ(x) == t_POL) x = gmodulcp(x,p);
+  if (typ(x) == t_POL) x = gmodulo(x,p);
   return gerepileupto(av, x);
 }
 

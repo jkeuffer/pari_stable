@@ -364,7 +364,7 @@ znstar(GEN n)
     GEN q = gel(mod,i), a = gel(gen,i);
     z = Fp_inv(q, diviiexact(n,q));
     a = addii(a, mulii(mulii(subsi(1,a),z),q));
-    gel(gen,i) = gmodulcp(a, n);
+    gel(gen,i) = gmodulo(a, n);
   }
 
   for (i=sizeh; i>=2; i--)

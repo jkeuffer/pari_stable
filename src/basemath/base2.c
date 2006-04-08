@@ -2958,7 +2958,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
       case t_INT: case t_FRAC: break;
       case t_POL:
         check_pol(gel(x,i), vnf);
-        gel(x,i) = gmodulcp(gel(x,i), xnf); break;
+        gel(x,i) = gmodulo(gel(x,i), xnf); break;
       case t_POLMOD:
         if (!gequal(gmael(x,i,1), xnf)) pari_err(consister,"rnf function");
         break;
@@ -3884,7 +3884,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     POL = gel(eq,1);
     a   = gel(eq,3);
     rel = poleval(relpol, gsub(pol_x[v],
-                               gmul(a, gmodulcp(pol_x[varn(T)],T))));
+                               gmul(a, gmodulo(pol_x[varn(T)],T))));
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {

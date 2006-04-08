@@ -769,7 +769,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     case t_INTMOD:
     case t_POLMOD: y_lead = ginv(y_lead);
-      f = gmul; mod = gmodulcp(gen_1, gel(y_lead,1));
+      f = gmul; mod = gmodulo(gen_1, gel(y_lead,1));
       break;
     default: if (gcmp1(y_lead)) y_lead = NULL;
       f = gdiv; mod = NULL;

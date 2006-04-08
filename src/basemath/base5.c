@@ -421,7 +421,7 @@ rnfprincipaltohermite(GEN rnf,GEN x)
   GEN bas = gel(rnf,7), nf = gel(rnf,10);
 
   x = rnfbasistoalg(rnf,x);
-  x = rnfalgtobasis(rnf, gmul(x, gmodulcp(gel(bas,1), gel(rnf,1))));
+  x = rnfalgtobasis(rnf, gmul(x, gmodulo(gel(bas,1), gel(rnf,1))));
   settyp(x, t_MAT);
   return gerepileupto(av, nfhermite(nf, mkvec2(x, gel(bas,2))));
 }
@@ -584,7 +584,7 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   z = rnfidealtwoelement(rnf,y);
   nf = gel(rnf,10);
   x = rnfidealhermite(rnf,x);
-  x1 = gmodulcp(gmul(gmael(rnf,7,1), matbasistoalg(nf,gel(x,1))),gel(rnf,1));
+  x1 = gmodulo(gmul(gmael(rnf,7,1), matbasistoalg(nf,gel(x,1))),gel(rnf,1));
   x2 = gel(x,2);
   p1 = gmul(gel(z,1), gel(x,1));
   p2 = rnfalgtobasis(rnf, gmul(gel(z,2), x1)); settyp(p2, t_MAT);

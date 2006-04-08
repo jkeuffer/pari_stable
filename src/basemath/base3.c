@@ -147,7 +147,7 @@ element_inv(GEN nf, GEN x)
   if (is_extscalar_t(tx))
   {
     if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_inv");
-    else if (tx==t_POL) x=gmodulcp(x,gel(nf,1));
+    else if (tx==t_POL) x=gmodulo(x,gel(nf,1));
     return gerepileupto(av, algtobasis(nf, ginv(x)));
   }
   if (tx != t_COL) pari_err(typeer,"element_inv");
@@ -171,10 +171,10 @@ element_div(GEN nf, GEN x, GEN y)
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_div");
-  else if (tx==t_POL) x=gmodulcp(x,gel(nf,1));
+  else if (tx==t_POL) x=gmodulo(x,gel(nf,1));
 
   if (ty==t_POLMOD) (void)checknfelt_mod(nf,y,"element_div");
-  else if (ty==t_POL) y=gmodulcp(y,gel(nf,1));
+  else if (ty==t_POL) y=gmodulo(y,gel(nf,1));
 
   if (is_extscalar_t(tx))
   {
@@ -734,7 +734,7 @@ rnfbasistoalg(GEN rnf,GEN x)
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
       for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
       p1 = gmul(gmael(rnf,7,1), p1);
-      return gerepileupto(av, gmodulcp(p1,gel(rnf,1)));
+      return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
 
     case t_MAT:
       z = cgetg(lx,tx);
@@ -1281,7 +1281,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
       b = Fp_shanks(b, g_q, p, q);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
     }
-    gel(v,i) = gmodulcp(n_q, gel(qj,e));
+    gel(v,i) = gmodulo(n_q, gel(qj,e));
   }
   return gerepileuptoint(av, lift(chinese1(v)));
 }
@@ -1407,7 +1407,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
       b = ffshanks(b, g_q, q, T,p);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
     }
-    gel(v,i) = gmodulcp(n_q, gel(qj,e));
+    gel(v,i) = gmodulo(n_q, gel(qj,e));
   }
   return gerepileuptoint(av, lift(chinese1(v)));
 }

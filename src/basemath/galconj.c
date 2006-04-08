@@ -3152,7 +3152,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     lbot = avma;
     res = cgetg(3, t_VEC);
     gel(res,1) = gcopy(P);
-    gel(res,2) = gmodulcp(S, gel(gal,1));
+    gel(res,2) = gmodulo(S, gel(gal,1));
     return gerepile(ltop, lbot, res);
   }
   else
@@ -3181,7 +3181,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
       pari_err(talker,"priority of optional variable too high in galoisfixedfield");
     res = cgetg(4, t_VEC);
     gel(res,1) = gcopy(P);
-    gel(res,2) = gmodulcp(S, gel(gal,1));
+    gel(res,2) = gmodulo(S, gel(gal,1));
     gel(res,3) = fixedfieldfactor(L,O,gel(gal,6),
         PM,Pden,mod,x,y);
     return gerepile(ltop, lbot, res);

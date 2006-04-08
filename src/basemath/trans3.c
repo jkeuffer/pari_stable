@@ -1474,7 +1474,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
   psm = polsym(cyc, degpol(cyc) - 1);
-  eta = gmodulcp(y, cyc);
+  eta = gmodulo(y, cyc);
   av = avma;
   Ax  = gsubgs(gpowgs(gaddgs(x, 1), f), 1);
   Ax  = gdiv(gmul(Ax, gpowgs(eta, f)), gsubsg(1, gpowgs(eta, f)));

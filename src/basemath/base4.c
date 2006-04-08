@@ -1758,7 +1758,7 @@ idealpow(GEN nf, GEN x, GEN n)
           switch(tx)
           {
             case t_COL: x = coltoalg(nf,x); break;
-            case t_POL: x = gmodulcp(x,gel(nf,1));
+            case t_POL: x = gmodulo(x,gel(nf,1));
           }
         x = powgi(x,n);
         x = idealhermite_aux(nf,x); break;

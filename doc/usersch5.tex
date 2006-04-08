@@ -2474,15 +2474,15 @@ copied; in particular, this funciton is not suitable for \kbd{gerepileupto}.
 
 \subsubsec{Modular objects}
 
-\fun{GEN}{gmodulcp}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)} on
+\fun{GEN}{gmodulo}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)} on
 the PARI stack, where \kbd{x} and \kbd{y} are either both \typ{INT}s, and the
 result is a \typ{INTMOD}, or \kbd{x} is a scalar or a \typ{POL} and \kbd{y} a
 \typ{POL}, and the result is a \typ{POLMOD}.
 
-\fun{GEN}{gmodulgs}{GEN x, long y} same as \key{gmodulcp} except \kbd{y} is a
+\fun{GEN}{gmodulgs}{GEN x, long y} same as \key{gmodulo} except \kbd{y} is a
 \kbd{long}.
 
-\fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulcp} except both
+\fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulo} except both
 \kbd{x} and \kbd{y} are \kbd{long}s.
 
 \subsubsec{Between polynomials and coefficient arrays}

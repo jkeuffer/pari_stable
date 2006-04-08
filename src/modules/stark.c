@@ -1143,7 +1143,7 @@ InitReduction(GEN CHI, long deg)
   for (j = 0; j < deg; j++)
   {
     A[j] = (int*)gpmalloc(deg*sizeof(int));
-    polmod = gmodulcp(monomial(gen_1, deg+j, 0), pol);
+    polmod = gmodulo(monomial(gen_1, deg+j, 0), pol);
     Polmod2Coeff(A[j], polmod, deg);
   }
 

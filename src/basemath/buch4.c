@@ -281,7 +281,7 @@ repres(GEN nf,GEN pr)
     for (j=1; j<pp; j++)
       for (k=1; k<=ppi; k++)
 	gel(rep, j*ppi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
-  return gmodulcp(rep,gel(nf,1));
+  return gmodulo(rep,gel(nf,1));
 }
 
 /* =1 si l'equation y^2 = z^deg(pol) * pol(x/z) a une solution rationnelle
@@ -824,7 +824,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback(sunitrel, gfloor(Y));
-  x = gdiv(x, gnorm(gmodulcp(lift_intern(aux), relpol)));
+  x = gdiv(x, gnorm(gmodulo(lift_intern(aux), relpol)));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
   {
     x = gel(x,2); /* rational number */

@@ -771,7 +771,7 @@ changevar(GEN x, GEN y)
     av = avma;
     p1 = changevar(gel(x,1),y);
     p2 = changevar(gel(x,2),y);
-    return gerepileupto(av, gmodulcp(p2,p1));
+    return gerepileupto(av, gmodulo(p2,p1));
   }
   if (tx == t_RFRAC)
   {
