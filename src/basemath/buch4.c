@@ -127,25 +127,38 @@ qpsoluble(GEN pol,GEN p)
   return zpsol(polrecip(pol),p,1,p,gen_0);
 }
 
+/* is t a square in (O_K/pr), assume v_pr(t) >= 0 ? */
+static long
+quad_char(GEN nf, GEN t, GEN pr)
+{
+  GEN ord, ordp, T, p, modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  t = nf_to_ff(nf,t,modpr);
+  if (T)
+  {
+    ord = subis( pr_norm(pr), 1 ); /* |(O_K / pr)^*| */
+    ordp= subis( p, 1);            /* |F_p^*|        */
+    t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
+    if (typ(t) == t_POL)
+    {
+      if (degpol(t)) pari_err(bugparier,"nfhilbertp");
+      t = constant_term(t);
+    }
+  }
+  return kronecker(t, p);
+}
+
 /* (pr,2) = 1. return 1 if a square in (ZK / pr), 0 otherwise */
 static long
 psquarenf(GEN nf,GEN a,GEN pr)
 {
   pari_sp av = avma;
   long v;
-  GEN norm;
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
   if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
 
-  norm = gshift(pr_norm(pr), -1);
-  a = gmul(a, gmodulsg(1,gel(pr,1)));
-  a = gaddgs(powgi(a,norm), -1);
-  if (gcmp0(a)) { avma = av; return 1; }
-  a = lift(lift(a));
-  v = idealval(nf,a,pr);
-  avma = av; return (v>0);
+  v = quad_char(nf, a, pr); avma = av; return v;
 }
 
 static long
@@ -167,13 +180,13 @@ static long
 psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 {
   long v;
-  pari_sp ltop = avma;
+  pari_sp av = avma;
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
   if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
   /* now (a,pr) = 1 */
-  v = check2(nf,a,zinit); avma = ltop; return v;
+  v = check2(nf,a,zinit); avma = av; return v;
 }
 
 static long
@@ -184,12 +197,12 @@ lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
 
   gx = poleval(pol, x);
   if (psquarenf(nf,gx,pr)) return 1;
-  lambda = idealval(nf,gx,pr);
+  lambda = element_val(nf,gx,pr);
 
   gpx = poleval(derivpol(pol), x);
   mu = gcmp0(gpx)? BIGINT: idealval(nf,gpx,pr);
-
   if (lambda > mu<<1) return 1;
+
   if (lambda >= nu<<1  && mu >= nu) return 0;
   return -1;
 }
@@ -331,7 +344,7 @@ zpsolublenf(GEN nf,GEN pol,GEN pr)
     if (psquarenf(nf,constant_term(pol),pr)) return 1;
     zinit = NULL;
   }
-  repr=repres(nf,pr);
+  repr = repres(nf,pr);
   if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
@@ -357,7 +370,7 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 long
 nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 {
-  GEN ord, ordp, T,p, modpr,t;
+  GEN p, t;
   long va, vb, rep;
   pari_sp av = avma;
 
@@ -376,17 +389,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
-  ord = subis( pr_norm(pr), 1 ); /* |(O_K / pr)^*| */
-  ordp= subis( p, 1);                 /* |F_p^*|        */
-  modpr = nf_to_ff_init(nf, &pr,&T,&p);
-  t = nf_to_ff(nf,t,modpr);
-  t = Fq_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
-  if (typ(t) == t_POL)
-  {
-    if (degpol(t)) pari_err(bugparier,"nfhilbertp");
-    t = constant_term(t);
-  }
-  rep = kronecker(t, p);
+  rep = quad_char(nf, t, pr);
   avma = av; return rep;
 }
 

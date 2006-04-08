@@ -2651,7 +2651,7 @@ FOUND: /* found a point of exponent h on E_u */
     if (B == gen_1) B = h;
     else
     {
-      p1 = chinese(gmodulcp(A,B), gmodulsg(0,h));
+      p1 = chinese(gmodulcp(A,B), mkintmod(gen_0, h));
       A = gel(p1,2);
       B = gel(p1,1);
     }

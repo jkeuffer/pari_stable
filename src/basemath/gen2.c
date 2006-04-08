@@ -1207,10 +1207,10 @@ padic_to_Fp(GEN x, GEN Y) {
   long vy, vx = valp(x);
   if (!signe(Y)) pari_err(gdiver);
   vy = Z_pvalrem(Y,gel(x,2), &z);
-  if (vx < 0 || !gcmp1(z)) pari_err(operi,"",x, gmodulsg(1,Y));
+  if (vx < 0 || !gcmp1(z)) pari_err(operi,"",x, mkintmod(gen_1,Y));
   if (vx >= vy) return gen_0;
   z = gel(x,4);
-  if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, gmodulsg(1,Y));
+  if (!signe(z) || vy > vx + precp(x)) pari_err(operi,"",x, mkintmod(gen_1,Y));
   if (vx) z = mulii(z, powiu(gel(x,2),vx));
   return remii(z, Y);
 }
