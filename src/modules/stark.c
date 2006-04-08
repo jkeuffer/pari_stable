@@ -100,8 +100,15 @@ init_CHI(CHI_t *c, GEN CHI, GEN z)
 /* as t_POLMOD */
 static void
 init_CHI_alg(CHI_t *c, GEN CHI) {
-  GEN z = mkpolmod(pol_x[0], cyclo(itos(gel(CHI,3)), 0));
-  init_CHI(c,CHI,z);
+  long d = itos(gel(CHI,3));
+  GEN z;
+  switch(d)
+  {
+    case 1: z = gen_1; break;
+    case 2: z = gen_m1; break;
+    default: z = mkpolmod(pol_x[0], cyclo(d,0));
+  }
+  init_CHI(c,CHI, z);
 }
 /* as t_COMPLEX */
 static void
