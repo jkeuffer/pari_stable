@@ -2305,8 +2305,7 @@ functional equation. However, it is in $O(|D|^{1/2})$.
 results when the class group has a low exponent (has many cyclic factors),
 because implementing \idx{Shanks}'s method in full generality slows it down
 immensely. It is therefore strongly recommended to double-check results using
-either the version with $\fl = 1$, the function $\kbd{qfbhclassno}(-D)$ or
-the function \kbd{quadclassunit}.
+either the version with $\fl = 1$ or the function \kbd{quadclassunit}.
 
 \misctitle{Warning.} contrary to what its name implies, this routine does not
 compute the number of classes of binary primitive forms of discriminant $D$,
@@ -2349,8 +2348,10 @@ compute a generating element of an ideal.
 
 \syn{compraw}{x,y}.
 
-\subsecidx{qfbhclassno}$(x)$: \idx{Hurwitz class number} of $x$, where $x$ is
-non-negative and congruent to 0 or 3 modulo 4. See also \kbd{qfbclassno}.
+\subsecidx{qfbhclassno}$(x)$: \idx{Hurwitz class number} of $x$, where
+$x$ is non-negative and congruent to 0 or 3 modulo 4. For $x > 5\cdot
+10^5$, we assume the GRH, and use \kbd{quadclassunit} with default
+parameters.
 
 \syn{hclassno}{x}.
 

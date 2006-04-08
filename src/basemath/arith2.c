@@ -1351,13 +1351,13 @@ corepartial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
-  GEN fa,p1,p2,c = gen_1;
+  GEN fa, P, E, c = gen_1;
 
   fa = auxdecomp(n,all);
-  p1 = gel(fa,1);
-  p2 = gel(fa,2);
-  for (i=1; i<lg(p1); i++)
-    if (mod2(gel(p2,i))) c = mulii(c,gel(p1,i));
+  P = gel(fa,1);
+  E = gel(fa,2);
+  for (i=1; i<lg(P); i++)
+    if (mod2(gel(E,i))) c = mulii(c,gel(P,i));
   return gerepileuptoint(av, c);
 }
 
@@ -1366,16 +1366,16 @@ core2partial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
-  GEN fa,p1,p2,e,c=gen_1,f=gen_1;
+  GEN fa, P, E, c = gen_1, f = gen_1;
 
   fa = auxdecomp(n,all);
-  p1 = gel(fa,1);
-  p2 = gel(fa,2);
-  for (i=1; i<lg(p1); i++)
+  P = gel(fa,1);
+  E = gel(fa,2);
+  for (i=1; i<lg(P); i++)
   {
-    e = gel(p2,i);
-    if (mod2(e))   c = mulii(c, gel(p1,i));
-    if (!gcmp1(e)) f = mulii(f, powgi(gel(p1,i), shifti(e,-1)));
+    long e = itos(gel(E,i));
+    if (e & 1)  c = mulii(c, gel(P,i));
+    if (e != 1) f = mulii(f, gpowgs(gel(P,i), e >> 1));
   }
   return gerepilecopy(av, mkvec2(c,f));
 }
@@ -1394,8 +1394,7 @@ coredisc(GEN n)
 {
   pari_sp av = avma;
   GEN c = core(n);
-  long r = _mod4(c);
-  if (r==1 || r==4) return c;
+  if (_mod4(c)==1) return c;
   return gerepileuptoint(av, shifti(c,2));
 }
 
@@ -1405,8 +1404,7 @@ coredisc2(GEN n)
   pari_sp av = avma;
   GEN y = core2(n);
   GEN c = gel(y,1), f = gel(y,2);
-  long r = _mod4(c);
-  if (r==1 || r==4) return y;
+  if (_mod4(c)==1) return y;
   y = cgetg(3,t_VEC);
   gel(y,1) = shifti(c,2);
   gel(y,2) = gmul2n(f,-1); return gerepileupto(av, y);

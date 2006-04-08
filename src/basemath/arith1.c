@@ -2743,31 +2743,44 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
   return mulii(q,h);
 }
 
-/* r = x mod 4 */
-static GEN
-conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
+/* Write x = Df^2, where D = fundamental discriminant,
+ * P^E = factorisation of conductor f, with E[i] >= 0 */
+static void
+corediscfact(GEN x, long xmod4, GEN *ptD, GEN *ptP, GEN *ptE)
 {
-  long n,i,k,s=signe(x),fl2;
-  GEN e,p,H,d,D,fa,reg;
+  long s = signe(x), l, i; 
+  GEN fa = auxdecomp(s < 0? absi(x): x,1);
+  GEN d, P = gel(fa,1), E = gtovecsmall(gel(fa,2));
 
-  fa = auxdecomp(absi(x),1);
-  e = gtovecsmall(gel(fa,2));
-  fa = gel(fa,1);
-  n = lg(fa); d = gen_1;
-  for (i=1; i<n; i++)
-    if (e[i] & 1) d = mulii(d,gel(fa,i));
-  if (r) fl2 = 0; else { fl2 = 1; d = shifti(d,2); }
-  H = gen_1; D = (s<0)? negi(d): d; /* d = abs(D) */
-  /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] */
-  for (i=1; i<n; i++)
+  l = lg(P); d = gen_1;
+  for (i=1; i<l; i++)
   {
-    p = gel(fa,i);
-    k = e[i];
-    if (fl2 && i==1) k -= 2; /* p = 2 */
-    if (k >= 2)
+    if (E[i] & 1) d = mulii(d, gel(P,i));
+    E[i] >>= 1;
+  }
+  if (!xmod4 && mod4(d) != ((s < 0)? 3: 1)) { d = shifti(d,2); E[1]--; }
+  *ptD = (s < 0)? negi(d): d;
+  *ptP = P;
+  *ptE = E;
+}
+
+static GEN
+conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
+{
+  long l, i, s = signe(x);
+  GEN E, H, D, P, reg;
+
+  corediscfact(x, xmod4, &D, &P, &E);
+  H = gen_1; l = lg(P);
+  /* f \prod_{p|f}  [ 1 - (D/p) p^-1 ] = \prod_{p^e||f} p^(e-1) [ p - (D/p) ] */
+  for (i=1; i<l; i++)
+  {
+    long e = E[i];
+    if (e)
     {
+      GEN p = gel(P,i);
       H = mulii(H, subis(p, kronecker(D,p)));
-      if (k>=4) H = mulii(H, powiu(p,(k>>1)-1));
+      if (e >= 2) H = mulii(H, powiu(p,e-1));
     }
   }
 
@@ -2775,18 +2788,16 @@ conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
   if (s < 0)
   {
     reg = NULL;
-    switch(itos_or_0(d))
+    switch(itou_or_0(D))
     {
       case 4: H = divis(H,2); break;
       case 3: H = divis(H,3); break;
     }
   } else {
     reg = regula(D,DEFAULTPREC);
-    if (!equalii(x,D))
-      H = divii(H, ground(gdiv(regula(x,DEFAULTPREC), reg)));
+    if (!equalii(x,D)) H = divii(H, ground(gdiv(regula(x,DEFAULTPREC), reg)));
   }
   if (ptreg) *ptreg = reg;
-  if (ptfa)  *ptfa = fa;
   *ptD = D; return H;
 }
 
@@ -2830,7 +2841,7 @@ classno(GEN x)
   check_quaddisc(x, &s, &k, "classno");
   if (cmpiu(x,12) <= 0) return gen_1;
 
-  Hf = conductor_part(x, k, &D, NULL, NULL);
+  Hf = conductor_part(x, k, &D, NULL);
   if (cmpiu(D,12) <= 0) return gerepilecopy(av, Hf);
 
   p2 = gsqrt(absi(D),DEFAULTPREC);
@@ -2929,7 +2940,7 @@ classno2(GEN x)
   check_quaddisc(x, &s, &r, "classno2");
   if (s < 0 && cmpiu(x,12) <= 0) return gen_1;
 
-  Hf = conductor_part(x, r, &D, &reg, NULL);
+  Hf = conductor_part(x, r, &D, &reg);
   if (s < 0 && cmpiu(D,12) <= 0) return gerepilecopy(av, Hf); /* |D| < 12*/
 
   Pi = mppi(prec);
@@ -2976,33 +2987,70 @@ classno2(GEN x)
   return gerepileuptoint(av, mulii(Hf, roundr(S)));
 }
 
+static GEN
+hclassno2(GEN x)
+{
+  long i, l, s, xmod4;
+  GEN Q, H, D, P, E;
+
+  x = negi(x);
+  check_quaddisc(x, &s, &xmod4, "hclassno");
+  corediscfact(x, xmod4, &D, &P, &E);
+
+  Q = quadclassunit0(D, 0, NULL, 0);
+  H = gel(Q,1); l = lg(P);
+
+  /* H \prod_{p^e||f}  (1 + (p^e-1)/(p-1))[ p - (D/p) ] */
+  for (i=1; i<l; i++)
+  {
+    long e = E[i];
+    if (e)
+    {
+      GEN p = gel(P,i), t = subis(p, kronecker(D,p));
+      if (e > 1) t = mulii(t, diviiexact(subis(gpowgs(p,e), 1), subis(p,1)));
+      H = mulii(H, addsi(1, t));
+    }
+  }
+  switch( itou_or_0(D) )
+  {
+    case 3: H = gdivgs(H, 3); break;
+    case 4: H = gdivgs(H, 2); break;
+  }
+  return H;
+}
+
 GEN
 hclassno(GEN x)
 {
-  long d, a, b, h, b2, f;
+  ulong a, b, b2, d, h;
+  int f;
 
   if (typ(x) != t_INT) pari_err(typeer,"hclassno");
+  a = signe(x);
+  if (a < 0) return gen_0;
+  if (!a) return gdivgs(gen_1, -12);
 
-  d = -itos(x); if (d>0 || (d & 3) > 1) return gen_0;
-  if (!d) return gdivgs(gen_1,-12);
-  if (-d > (VERYBIGINT>>1))
-    pari_err(talker,"discriminant too big in hclassno. Use quadclassunit");
-  h = 0; b = d&1; b2 = (1-d)>>2; f=0;
+  a = mod4(x); if (a == 1 || a == 2) return gen_0;
+
+  d = itou_or_0(x);
+  if (!d || d > 500000) return hclassno2(x);
+
+  h = 0; b = d&1; b2 = (1+d)>>2; f=0;
   if (!b)
   {
     for (a=1; a*a<b2; a++)
       if (b2%a == 0) h++;
-    f = (a*a==b2); b=2; b2=(4-d)>>2;
+    f = (a*a==b2); b=2; b2=(4+d)>>2;
   }
-  while (b2*3+d<0)
+  while (b2*3 < d)
   {
     if (b2%b == 0) h++;
     for (a=b+1; a*a < b2; a++)
       if (b2%a == 0) h += 2;
     if (a*a == b2) h++;
-    b += 2; b2 = (b*b-d)>>2;
+    b += 2; b2 = (b*b+d)>>2;
   }
-  if (b2*3+d==0)
+  if (b2*3 == d)
   {
     GEN y = cgetg(3,t_FRAC);
     gel(y,1) = utoipos(3*h+1);
