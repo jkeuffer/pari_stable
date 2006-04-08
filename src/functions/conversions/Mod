@@ -4,9 +4,7 @@ C-Name: Mod0
 Prototype: GGD0,L,
 Help: Mod(x,y): creates 'x modulo y'.
 Description: 
- (small, small, ?0):gen	gmodulss($1, $2)
- (small, gen, ?0):gen	gmodulsg($1, $2)
- (gen, gen, ?0):gen	gmodulcp($1, $2)
- (gen, gen, 1):gen	gmodulo($1, $2)
- (gen, gen, small):gen	Mod0($1, $2, $3)
+ (small, small, small):gen	gmodulss($1, $2)
+ (small, gen, small):gen	gmodulsg($1, $2)
+ (gen, gen, small):gen	gmodulo($1, $2)
 
