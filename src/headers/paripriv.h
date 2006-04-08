@@ -507,6 +507,7 @@ GEN     zx_copy_spec(GEN x, long nx);
 GEN     Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
 GEN     gauss_get_col(GEN a, GEN b, GEN p, long li);
 GEN     gauss_intern(GEN a, GEN b);
+GEN     matid_intern(long n,GEN myun,GEN myzero);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
 /* alglin2.c */

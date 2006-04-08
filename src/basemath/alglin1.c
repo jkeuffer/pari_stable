@@ -694,12 +694,12 @@ gscalsmat(long x, long n) {
   fill_scalmat(y, stoi(x), gen_0, n); return y;
 }
 GEN
-idmat_intern(long n, GEN _1, GEN _0) {
+matid_intern(long n, GEN _1, GEN _0) {
   GEN y = cgetg(n+1, t_MAT);
   fill_scalmat(y, _1, _0, n); return y;
 }
 GEN
-matid(long n) { return idmat_intern(n, gen_1, gen_0); }
+matid(long n) { return matid_intern(n, gen_1, gen_0); }
 
 static void
 fill_scalcol(GEN y, GEN t, GEN _0, long n)

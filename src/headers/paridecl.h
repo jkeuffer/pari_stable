@@ -154,7 +154,6 @@ GEN     shallowtrans(GEN x);
 int     hnfdivide(GEN A, GEN B);
 GEN     matid(long n);
 GEN     matid_Flm(long n);
-GEN     idmat_intern(long n,GEN myun,GEN myzero);
 GEN     image(GEN x);
 GEN     image2(GEN x);
 GEN     imagecompl(GEN x);
