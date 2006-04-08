@@ -24,12 +24,9 @@ void pari_err(long x, ...) { exit (0); }
 void pari_warn(long x, ...) { exit (0); }
 char*gprealloc(void *pointer, size_t size) { return realloc(pointer,size); }
 char*gpmalloc(size_t size) { return malloc(size); }
-GEN gmodulcp(GEN x, GEN y) { return NULL; }
 GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
 void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
 void gerepilemany(pari_sp av, GEN* gptr[], int n){}
-/* used in addrr */
-void stackdummy(GEN z, long l) { z[0] = evaltyp(t_VECSMALL) | evallg(l); }
 
 void sorstring(ulong x)
 {

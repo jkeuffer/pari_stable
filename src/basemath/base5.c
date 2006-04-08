@@ -307,8 +307,8 @@ rnfelementreltoabs(GEN rnf,GEN x)
 GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
-  return gmodulcp(gadd(pol_x[varn(pol)],
-                       gmul(k, gmodulcp(pol_x[varn(T)],T))), pol);
+  return mkpolmod(gadd(pol_x[varn(pol)],
+                       gmul(k, mkpolmod(pol_x[varn(T)],T))), pol);
 }
 GEN
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)

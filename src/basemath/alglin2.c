@@ -382,7 +382,7 @@ gnorm(GEN x)
 {
   pari_sp av;
   long lx, i, tx=typ(x);
-  GEN p1, y;
+  GEN y;
 
   switch(tx)
   {
