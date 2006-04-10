@@ -185,11 +185,17 @@ values computed by \kbd{Configure}:
 
 \kbd{LDFLAGS}: Flags for \kbd{LD}.
 
-\kbd{C\_INCLUDE\_PATH} is \emph{prepended} to the list of directories
+\noindent The contents of the following variables are \emph{prepended} to
+the values computed by \kbd{Configure}:
+
+\kbd{C\_INCLUDE\_PATH} is prepended to the list of directories
 searched for include files. Note that adding \kbd{-I} flags to
-\kbd{CFLAGS} will \emph{not} be enough since \kbd{Configure} sometimes
+\kbd{CFLAGS} is not enough since \kbd{Configure} sometimes
 relies on finding the include files and parsing them, and it does not 
 parse \kbd{CFLAGS} at this time.
+
+\kbd{LIBRARY\_PATH} is prepended to the list of directories
+searched for libraries.
 
 You may disable inlining by adding \kbd{-DDISABLE\_INLINE} to \kbd{CFLAGS},
 and prevent the use of the \kbd{volatile} keyword with
