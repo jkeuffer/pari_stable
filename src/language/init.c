@@ -889,6 +889,7 @@ recover(int flag)
         case EpMEMBER:
           if (bl_num(ep->value) >= listloc)
           {
+            if (ep->args) free_ep_args(ep);
             gunclone((GEN)ep->value);
             kill_from_hashlist(ep, n);
           }

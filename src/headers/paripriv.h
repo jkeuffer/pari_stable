@@ -292,6 +292,7 @@ void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double 
 int    pop_entree_bloc(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
+void   free_ep_args(entree *ep);
 
 /* naive grow-arrays */
 typedef struct {

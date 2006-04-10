@@ -544,35 +544,6 @@ install(void *f, char *name, char *code)
   return ep;
 }
 
-static void
-free_args(gp_args *f)
-{
-  long i;
-  GEN *y = f->arg;
-  for (i = f->narg + f->nloc - 1; i>=0; i--)
-    if (isclone(y[i])) gunclone(y[i]);
-}
-
-void
-freeep(entree *ep)
-{
-  if (foreignFuncFree && ep->code && (*ep->code == 'x'))
-    (*foreignFuncFree)(ep); /* function created by foreign interpreter */
-
-  if (EpSTATIC(ep)) return; /* gp function loaded at init time */
-  if (ep->help) free(ep->help);
-  if (ep->code) free(ep->code);
-  if (ep->args)
-  {
-    switch(EpVALENCE(ep))
-    {
-      case EpVAR: case EpGVAR: free((void*)ep->args); break;
-      default: free_args((gp_args*)ep->args);
-    }
-  }
-  free(ep);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                            VARIABLES                            */
@@ -607,6 +578,35 @@ new_val_cell(entree *ep, GEN x, char flag)
                                   (x && isclone(x))? gcopy(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
   ep->args  = (void*)v;
+}
+
+void
+free_ep_args(entree *ep)
+{
+  long i;
+  gp_args *f = (gp_args*)ep->args;
+  GEN *y = f->arg;
+  for (i = f->narg + f->nloc - 1; i>=0; i--)
+    if (isclone(y[i])) gunclone(y[i]);
+  ep->args = INITIAL;
+}
+
+void
+freeep(entree *ep)
+{
+  if (foreignFuncFree && ep->code && (*ep->code == 'x'))
+    (*foreignFuncFree)(ep); /* function created by foreign interpreter */
+
+  if (EpSTATIC(ep)) return; /* gp function loaded at init time */
+  if (ep->help) free(ep->help);
+  if (ep->code) free(ep->code);
+  if (ep->args)
+    switch(EpVALENCE(ep))
+    {
+      case EpVAR:
+      case EpGVAR: free((void*)ep->args); break;
+    }
+  free(ep);
 }
 
 static entree*
@@ -753,7 +753,8 @@ kill0(entree *ep)
       if (!v) return; /* never kill x */
       gel(polvar,v+1) = pol_x[v] = pol_1[v] = gnil;
       varentries[v] = NULL; break;
-    case EpUSER: kill_alias(ep); /* fall through */
+    case EpUSER: kill_alias(ep);
+      free_ep_args(ep); /* fall through */
     case EpALIAS:
       gunclone((GEN)ep->value); break;
   }
@@ -1911,7 +1912,7 @@ identifier(void)
       case ')': case ',': return (GEN)ep->value;
       case '.':
       {
-        long len, v;
+        long n, len, v;
         char *name;
 
         analyseur++; name = analyseur;
@@ -1933,8 +1934,9 @@ identifier(void)
                        members_hash + hashvalue(&ch1));
         ch1 = analyseur; skipseq(); len = analyseur-ch1;
 
-        newfun=ptr= (GEN) newbloc(2 + nchar2nlong(len+1));
-        newfun++; /* this bloc is no GEN, leave the first cell alone ( = 0) */
+        n = 2 + nchar2nlong(len+1);
+        newfun=ptr= (GEN) newbloc(n);
+        *newfun++ = evaltyp(t_STR) | evallg(n); /* non-recursive dummy */
         *newfun++ = v;
 
         /* record text */
@@ -2367,8 +2369,7 @@ identifier(void)
       {
         ep->valence = EpNEW;
         tokill = (GEN)ep->value; /* can't kill now */
-        free_args((gp_args*)ep->args);
-        ep->args = INITIAL;
+        free_ep_args(ep);
       }
       check_new_fun = ep;
 
