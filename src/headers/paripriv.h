@@ -291,6 +291,7 @@ void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 int    pop_entree_bloc(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
+void   gclone_refc(GEN x);
 
 /* naive grow-arrays */
 typedef struct {

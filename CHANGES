@@ -107,6 +107,10 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    43- 'ftime' was never detected by Configure
    44- setrand(74);quadclassunit(-83138791008,,[0.2,6]) --> oo loop
        [ large prime relation hashtable corrupted when changing subfactorbase ]
+   45- a(k)=if(k==0,0,a(k)=a(k-1))
+       a(1) --> SEGV [#447] (add refcounts to 'user function' structs)
+   46- getheap() did not report properly the "size" of user functions
+       (value too small)
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

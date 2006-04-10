@@ -120,7 +120,7 @@ O(x^12)
 ? length(divisors(1000))
 16
 ? getheap
-[59, 746]
+[59, 805]
 ? print("Total time spent: ",gettime);
 Total time spent: 2
 ? \q

@@ -95,8 +95,9 @@ pop_stack(stack **pts)
 /*                                                                   */
 /*********************************************************************/
 /*#define DEBUG*/
-#define BL_HEAD 3
+#define BL_HEAD 4
 #define bl_base(x) ((x) - BL_HEAD)
+#define bl_refc(x) (((GEN)x)[-4])
 #define bl_next(x) (((GEN)x)[-3])
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
@@ -108,6 +109,7 @@ static long NUM = 0;
 #endif
 
 /* Return x, where:
+ * x[-4]: reference count
  * x[-3]: adress of next bloc
  * x[-2]: adress of preceding bloc.
  * x[-1]: number of allocated blocs.
@@ -117,12 +119,13 @@ newbloc(long n)
 {
   long *x = (long *) gpmalloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
 
+  bl_refc(x) = 1;
   bl_next(x) = 0; /* the NULL address */
   bl_prev(x) = (long)cur_bloc;
   bl_num(x)  = next_bloc++;
   if (cur_bloc) bl_next(cur_bloc) = (long)x;
 #ifdef DEBUG
-fprintferr("+ %ld\n", ++NUM);
+  fprintferr("+ %ld\n", ++NUM);
 #endif
   if (DEBUGMEM)
   {
@@ -133,20 +136,13 @@ fprintferr("+ %ld\n", ++NUM);
   return cur_bloc = x;
 }
 
-static void
-free_bloc(GEN x)
-{
-#ifdef DEBUG
-fprintferr("- %ld\n", NUM--);
-#endif
-  if (DEBUGMEM > 2)
-    fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  free((void*)bl_base(x));
-}
+void
+gclone_refc(GEN x) { ++bl_refc(x); }
 
-static void
-delete_from_bloclist(GEN x)
+void
+gunclone(GEN x)
 {
+  if (--bl_refc(x) > 0) return;
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
   else
   {
@@ -154,7 +150,12 @@ delete_from_bloclist(GEN x)
     next_bloc = bl_num(x);
   }
   if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
-  free_bloc(x);
+#ifdef DEBUG
+  fprintferr("- %ld\n", NUM--);
+#endif
+  if (DEBUGMEM > 2)
+    fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
+  free((void*)bl_base(x));
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
@@ -174,10 +175,8 @@ killbloc(GEN x)
       for (i=2;i<lx;i++) killbloc(gel(x,i));
       break;
   }
-  if (isclone(x)) delete_from_bloclist(x);
+  if (isclone(x)) gunclone(x);
 }
-void
-gunclone(GEN x) { delete_from_bloclist(x); }
 
 int
 pop_entree_bloc(entree *ep, long loc)
@@ -702,7 +701,7 @@ pari_close_opts(ulong init_opts)
   free((void*)primetab);
   free((void*)universal_constants);
 
-  while (cur_bloc) delete_from_bloclist(cur_bloc);
+  while (cur_bloc) gunclone(cur_bloc);
   killallfiles(1);
   free((void*)functions_hash);
   free((void*)funct_old_hash);

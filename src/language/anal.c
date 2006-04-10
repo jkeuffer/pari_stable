@@ -551,7 +551,6 @@ free_args(gp_args *f)
   GEN *y = f->arg;
   for (i = f->narg + f->nloc - 1; i>=0; i--)
     if (isclone(y[i])) gunclone(y[i]);
-  free((void*)f);
 }
 
 void
@@ -1654,9 +1653,10 @@ static GEN
 call_fun(entree *ep, GEN *arg)
 {
   gp_args *f = (gp_args*)ep->args;
-  GEN res, p = (GEN)ep->value, *loc = f->arg + f->narg;
+  GEN res, p = (GEN)ep->value, bloc = p, *loc = f->arg + f->narg;
   long i;
 
+  gclone_refc(bloc); /* protect bloc while we use it */
   p++; /* skip NULL */
   /* push new values for formal parameters */
   for (i=0; i<f->narg; i++) copyvalue(*p++, *arg++);
@@ -1665,7 +1665,7 @@ call_fun(entree *ep, GEN *arg)
   res = fun_seq((char *)p);
   /* pop out values of formal parameters */
   for (i=0; i < f->nloc + f->narg; i++) killvalue(*--p);
-  return res;
+  gunclone(bloc); return res;
 }
 /* p = NULL + array of variable numbers (longs) + function text */
 static GEN
@@ -1783,6 +1783,50 @@ check_args()
   }
   analyseur++; /* match(')') */
   return nparam;
+}
+
+/* function is ok. record it */
+static void
+record_fun(entree *ep, char *start, long len, long narg, long nloc, GEN tmpargs)
+{
+  long i, NARG = narg + nloc;
+  long L1 = NARG + nchar2nlong(len+1) + 1; /* args + fun code + codeword */
+  long L2 = NARG + nchar2nlong(sizeof(gp_args)); /* dflt args */
+  GEN newfun, *defarg, ptr = (GEN) newbloc(L1 + L2);
+  gp_args *f = (gp_args*)(ptr + L1);
+
+  newfun = ptr;
+  *newfun++ = evaltyp(t_STR) | evallg(L1 + L2); /* non-recursive dummy */
+
+  ep->args = (void*) f;
+  f->nloc = nloc;
+  f->narg = narg;
+  f->arg = defarg = (GEN*)(f + 1);
+
+  /* record default args and local variables */
+  for (i = 1; i <= NARG; i++)
+  {
+    GEN cell = tmpargs-(i<<1);
+    *newfun++ = cell[0];
+    *defarg++ = gel(cell,1);
+  }
+  /* record text */
+  strncpy((char *)newfun, start, len);
+  ((char *) newfun)[len] = 0;
+
+  if (NARG > 1)
+  { /* check for duplicates */
+    GEN x = new_chunk(NARG), v = ptr+1;
+    long k;
+    for (i=0; i<NARG; i++) x[i] = v[i];
+    qsort(x,NARG,sizeof(long),(QSCOMP)pari_compare_long);
+    for (k=x[0],i=1; i<NARG; k=x[i],i++)
+      if (x[i] == k)
+        pari_err(talker,"user function %s: variable %Z declared twice",
+            ep->name, pol_x[k]);
+  }
+  ep->value = ptr;
+  ep->valence = EpUSER;
 }
 
 static GEN
@@ -2257,12 +2301,10 @@ identifier(void)
 
   switch (EpVALENCE(ep))
   {
-    GEN *defarg; /* = default args, and values for local variables */
-    GEN *arglist;
-    gp_args *f;
-
     case EpUSER: /* user-defined functions */
-      f = (gp_args*)ep->args;
+    {
+      GEN *arglist;
+      gp_args *f = (gp_args*)ep->args;
       deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
       arglist = (GEN*) new_chunk(f->narg);
       if (*analyseur != '(') /* no args */
@@ -2313,13 +2355,13 @@ identifier(void)
             mark.identifier,mark.start);
 
       analyseur = ch1-1; /* points to '(' */
-    /* Fall through, REDEFINE function */
+    } /* Fall through, REDEFINE function */
 
     case EpNEW: /* new function */
     {
       GEN tokill = NULL, tmpargs = (GEN)avma;
       char *start;
-      long len, narg, nloc;
+      long narg, nloc;
 
       if (ep->valence == EpUSER)
       {
@@ -2330,7 +2372,7 @@ identifier(void)
       }
       check_new_fun = ep;
 
-      /* checking arguments */
+      /* check arguments */
       narg = check_args(); nloc = 0;
       /* Dirty, but don't want to define a local() function */
       if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
@@ -2352,48 +2394,12 @@ identifier(void)
         nloc += check_args();
         while(separator(*analyseur)) analyseur++;
       }
-      start = analyseur; skipseq(); len = analyseur-start;
-      skipping_fun_def--;
-
-      /* function is ok. record it */
-      /* record default args */
-      f = (gp_args*) gpmalloc((narg+nloc)*sizeof(GEN) + sizeof(gp_args));
-      ep->args = (void*) f;
-      f->nloc = nloc;
-      f->narg = narg;
-      f->arg = defarg = (GEN*)(f + 1);
-
-      narg += nloc; /* record default args and local variables */
-      i = 1 + narg + nchar2nlong(len+1);
-      newfun = ptr = (GEN) newbloc(i);
-      *newfun++ = evaltyp(t_STR) | evallg(i); /* dummy non-recursive type */
-      for (i = 1; i <= narg; i++)
-      {
-        GEN cell = tmpargs-(i<<1);
-	*newfun++ =      cell[0];
-        *defarg++ = gel(cell,1);
-      }
-      if (narg > 1)
-      { /* check for duplicates */
-        GEN x = new_chunk(narg), v = ptr+1;
-        long k;
-        for (i=0; i<narg; i++) x[i] = v[i];
-        qsort(x,narg,sizeof(long),(QSCOMP)pari_compare_long);
-        for (k=x[0],i=1; i<narg; k=x[i],i++)
-          if (x[i] == k)
-            pari_err(talker,"user function %s: variable %Z declared twice",
-                ep->name, pol_x[k]);
-      }
-
-      /* record text */
-      strncpy((char *)newfun, start, len);
-      ((char *) newfun)[len] = 0;
-     /* wait till here for gunclone because of strncopy above. In pathological
-      * cases, e.g. (f()=f()=x), new text is given by value of old one! */
+      start = analyseur; skipseq(); skipping_fun_def--;
+      record_fun(ep, start, analyseur-start, narg, nloc, tmpargs);
+     /* wait till here for gunclone. In pathological cases, e.g. (f()=f()=x),
+      * new text is given by value of old one! */
       if (tokill) gunclone(tokill);
-      ep->value = (void *)ptr;
-      ep->valence = EpUSER;
-      check_new_fun=NULL;
+      check_new_fun = NULL;
       avma = (pari_sp)tmpargs; return gnil;
     }
   }
