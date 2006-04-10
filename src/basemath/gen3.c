@@ -2271,8 +2271,8 @@ _gtopoly(GEN x, long v, int reverse)
   if (v<0) v = 0;
   if (isexactzero(x)) return zeropol(v);
   if (is_scalar_t(tx)) return scalarpol(x,v);
-  if (varncmp(gvar(x), v) < 0)
-    pari_err(talker,"main variable has highest priority in gtopoly");
+  if (varncmp(gvar(x), v) <= 0)
+    pari_err(talker,"variable must have highest priority in gtopoly");
   switch(tx)
   {
     case t_POL:
