@@ -1651,9 +1651,10 @@ fun_seq(char *t) /* readseq0, simplified */
 
 /* p = NULL + array of variable numbers (longs) + function text */
 static GEN
-call_fun(GEN p, GEN *arg, gp_args *f)
+call_fun(entree *ep, GEN *arg)
 {
-  GEN res, *loc = f->arg + f->narg;
+  gp_args *f = (gp_args*)ep->args;
+  GEN res, p = (GEN)ep->value, *loc = f->arg + f->narg;
   long i;
 
   p++; /* skip NULL */
@@ -1822,7 +1823,7 @@ num_deriv(void *call, GEN argvec[])
 
 /* as above, for user functions */
 static GEN
-num_derivU(GEN p, GEN *arg, gp_args *f)
+num_derivU(entree *ep, GEN *arg)
 {
   GEN eps,a,b, x = *arg;
   long fpr, pr, l, e, ex;
@@ -1838,8 +1839,8 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
-  *arg = gtofp(gsub(x, eps), l); a = call_fun(p,arg,f);
-  *arg = gtofp(gadd(x, eps), l); b = call_fun(p,arg,f);
+  *arg = gtofp(gsub(x, eps), l); a = call_fun(ep,arg);
+  *arg = gtofp(gadd(x, eps), l); b = call_fun(ep,arg);
   setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
@@ -2268,9 +2269,8 @@ identifier(void)
       {
 	if (*analyseur != '='  ||  analyseur[1] == '=')
         {
-          for (i=0; i<f->narg; i++)
-            arglist[i] = make_arg(f->arg[i]);
-	  return call_fun((GEN)ep->value, arglist, f);
+          for (i=0; i<f->narg; i++) arglist[i] = make_arg(f->arg[i]);
+	  return call_fun(ep, arglist);
         }
 	match('('); /* ==> error */
       }
@@ -2301,9 +2301,9 @@ identifier(void)
         {
           if (!f->narg)
             pari_err(talker2, "can't derive this", mark.identifier, mark.start);
-          return num_derivU((GEN)ep->value, arglist, f);
+          return num_derivU(ep, arglist);
         }
-        return call_fun((GEN)ep->value, arglist, f);
+        return call_fun(ep, arglist);
       }
       if (*analyseur != ',' && *analyseur != ')') skipexpr();
       while (*analyseur == ',') { analyseur++; skipexpr(); }
