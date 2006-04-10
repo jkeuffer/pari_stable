@@ -2450,17 +2450,17 @@ If $\fl$ is non-zero \emph{and} $D>0$, computes the narrow class group and
 regulator, instead of the ordinary (or wide) ones. In the current version
 \vers, this does not work at all: use the general function \tet{bnfnarrow}.
 
-Optional parameter \var{tech} is a row vector of the form
-$[c_1,c_2]$, where $c_1 \leq c_2$ are positive real numbers which
-control the execution time and the stack size. To get maximum speed,
-set $c_2 = c_1$. To get a rigorous result (under \idx{GRH}) you must take
-$c_2=6$. Reasonable values for $c_1$ are between $0.1$ and $2$. More
-precisely, the algorithm will \emph{assume} that prime ideals of norm
-less than $c_2 (\log |D|)^2$ generate the class group, but the bulk of the
-work will be done with prime ideals of norm less than $c_1 (\log |D|)^2$.
-A larger $c_1$ means that relations are easier to find, but more relations
-are needed and the linear algebra will be harder. The default is $c_1 =
-c_2 = 0.2$, so the result is \emph{not} rigorously proven.
+Optional parameter \var{tech} is a row vector of the form $[c_1, c_2]$, where
+$c_1 \leq c_2$ are positive real numbers which control the execution time and
+the stack size. For a given $c_1$, set $c_2 = c_1$ to get maximum speed. To
+get a rigorous result under \idx{GRH}, you must take $c_2\geq 6$. Reasonable
+values for $c_1$ are between $0.1$ and $2$. More precisely, the algorithm will
+\emph{assume} that prime ideals of norm less than $c_2 (\log |D|)^2$ generate
+the class group, but the bulk of the work is done with prime ideals of norm
+less than $c_1 (\log |D|)^2$. A larger $c_1$ means that relations are easier
+to find, but more relations are needed and the linear algebra will be harder.
+The default is $c_1 = c_2 = 0.2$, so the result is \emph{not} rigorously
+proven.
 
 The result is a vector $v$ with 3 components if $D<0$, and
 $4$ otherwise. The correspond respectively to
@@ -2571,9 +2571,11 @@ non-negative integer. The result is non-negative and rounded towards zero.
 $s$ such that $s^2 = x+r$, with $0 \leq r \leq 2s$.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
-$|x0| \leq X$ such that
+$|x_0| \leq X$ such that
 $$\gcd(N, P(x_0)) \geq B.$$
-$X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$.
+If $N$ is prime or a prime power, \tet{polrootsmod} or \tet{polrootspadic}
+will be much faster. $X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log
+N))$.
 
 \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
 
@@ -3257,15 +3259,14 @@ If is a finite abelian group as described above, supplemented by
 technical data needed to solve discrete log problems.
 
 Finally we explain how to input ray number fields (or \var{bnr}), using class
-field theory. These are defined by a triple
-
-$a1$, $a2$, $a3$, where the defining set $[a1,a2,a3]$ can have any of the
-following forms: $[\var{bnr}]$, $[\var{bnr},\var{subgroup}]$,
-$[\var{bnf},\var{module}]$, $[\var{bnf},\var{module},\var{subgroup}]$, where:
+field theory. These are defined by a triple $a1$, $a2$, $a3$, where the
+defining set $[a1,a2,a3]$ can have any of the following forms: $[\var{bnr}]$,
+$[\var{bnr},\var{subgroup}]$, $[\var{bnf},\var{module}]$,
+$[\var{bnf},\var{module},\var{subgroup}]$.
 
 \item $\var{bnf}$ is as output by \kbd{bnfinit}, where units are mandatory
-unless the modulus is trivial; \var{bnr} by \kbd{bnrinit}. This is the ground
-field $K$.
+unless the modulus is trivial; \var{bnr} is as output by \kbd{bnrinit}. This
+is the ground field $K$.
 
 \item \emph{module} is a modulus $\goth{f}$, as described above.
 
@@ -3281,17 +3282,19 @@ modulo $\goth{f}$, fixed by the given subgroup.
 
 All the functions which are specific to relative extensions, number fields,
 Buchmann's number fields, Buchmann's number rays, share the prefix \kbd{rnf},
-\kbd{nf}, \kbd{bnf}, \kbd{bnr} respectively. They are meant to take as first
-argument a number field of that precise type, respectively output by
-\kbd{rnfinit}, \kbd{nfinit}, \kbd{bnfinit}, and \kbd{bnrinit}.
+\kbd{nf}, \kbd{bnf}, \kbd{bnr} respectively. They take as first argument a
+number field of that precise type, respectively output by \kbd{rnfinit},
+\kbd{nfinit}, \kbd{bnfinit}, and \kbd{bnrinit}.
 
 However, and even though it may not be specified in the descriptions of the
 functions below, it is permissible, if the function expects a $\var{nf}$, to
-use a $\var{bnf}$ instead (which contains much more information). The program
-will make the effort of converting to what it needs. On the other hand, if
-the program requires a \kbd{bnf}, the program will \emph{not} launch
+use a $\var{bnf}$ instead, which contains much more information. On the other
+hand, if the function requires a \kbd{bnf}, it will \emph{not} launch
 \kbd{bnfinit} for you, which is a costly operation. Instead, it will give you
-a specific error message.
+a specific error message. In short, the types
+$$ \kbd{nf} \leq \kbd{bnf} \leq \kbd{bnr}$$
+are ordered, each function requires a minimal type to work properly, but you
+may always substitute a larger type.
 
 The data types corresponding to the structures described above are rather
 complicated. Thus, as we already have seen it with elliptic curves, GP
@@ -3376,22 +3379,22 @@ where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
 $\Z[X]$, irreducible and monic. In fact, if you supply a non-monic polynomial
-at this point, \kbd{gp} will issue a warning, then \emph{transform your
+at this point, \kbd{gp} issues a warning, then \emph{transforms your
 polynomial} so that it becomes monic. The \kbd{nfinit} routine
 will return a different result in this case: instead of \kbd{res}, you get a
 vector \kbd{[res,Mod(a,Q)]}, where \kbd{Mod(a,Q) = Mod(X,P)} gives the change
 of variables. In all other routines, the variable change is simply lost.
 
-The numbers $c$ and $c2$ are positive real numbers which control the
-execution time and the stack size. To get maximum speed, set $c2=c$. To get a
-rigorous result (under \idx{GRH}) you must take $c2=12$ (or $c2=6$ in the
-quadratic case). Reasonable values for $c$ are between $0.1$ and
-$2$. (The defaults are $c=c2 = 0.3$.)
+The numbers $c \leq c_2$ are positive real numbers which control the
+execution time and the stack size. For a given $c$, set
+$c_2 = c$ to get maximum speed. To get a rigorous result under \idx{GRH} you
+must take $c2\geq 12$ (or $c2\geq 6$ in $P$ is quadratic). Reasonable values
+for $c$ are between $0.1$ and $2$. The default is $c = c_2 = 0.3$.
 
 $\var{nrpid}$ is the maximal number of small norm relations associated to each
 ideal in the factor base. Set it to $0$ to disable the search for small norm
-relations. Otherwise, reasonable values are between 4 and 20. (The default is
-4).
+relations. Otherwise, reasonable values are between 4 and 20. The default is
+4.
 
 \misctitle{Warning.} Make sure you understand the above! By default, most of
 the \kbd{bnf} routines depend on the correctness of a heuristic assumption
@@ -3403,8 +3406,8 @@ subgroup of finite index in the full unit group. In practice, very few
 counter-examples are known, requiring unlucky random seeds. No
 counter-example has been reported for $c_2 = 0.5$ (which should be almost as
 fast as $c_2 = 0.3$, and shall very probably become the default). If you use
-$c_2 = 12$, then everything is correct assuming the GRH holds. You may use
-\kbd{bnfcertify} to certify the computations unconditionally.
+$c_2 = 12$, then everything is correct assuming the GRH holds. You can
+use \kbd{bnfcertify} to certify the computations unconditionally.
 
 \misctitle{Remarks.}
 
@@ -3412,8 +3415,9 @@ Apart from the polynomial $P$, you do not need to supply the technical
 parameters (under the library you still need to send at least an empty
 vector, coded as \kbd{NULL}). However, should you choose to set some of them,
 they \emph{must} be given in the requested order. For example, if you want to
-specify a given value of $nrpid$, you must give some values as well for $c$
-and $c2$, and provide a vector $[c,c2,nrpid]$.
+specify a given value of 
+\var{nrpid}, you must give some values as well for $c$
+and $c_2$, and provide a vector $[c,c_2,\var{nrpid}]$.
 
 Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
@@ -3422,10 +3426,9 @@ recomputing the integral basis and analogous quantities.
 \subsecidx{bnfcertify}$(\var{bnf})$: $\var{bnf}$ being as output by
 \kbd{bnfinit}, checks whether the result is correct, i.e.~whether it is
 possible to remove the assumption of the Generalized Riemann
-Hypothesis\sidx{GRH}. If it is correct, the answer is 1. If not, the program
-may output some error message, but more probably will loop indefinitely. In
-\emph{no} occasion can the program give a wrong answer (barring bugs of
-course): if the program answers 1, the answer is certified.
+Hypothesis\sidx{GRH}. It is correct if and only if the answer is 1. If it is
+incorrect, the program may output some error message, or loop indefinitely.
+You can check its progress by increasing the debug level.
 
 \syn{certifybuchall}{\var{bnf}}, and the result is a C long.
 
@@ -3805,9 +3808,7 @@ with Euler factors at prime ideals dividing the modulus of \var{bnr} removed
 if set to 1 (this is the so-called $L_S(s, \chi)$ function where $S$ is the
 set of infinite places of the number field together with the finite prime
 ideals dividing the modulus of \var{bnr}, see the example below), 3: returns
-also the character.
-
-Example:
+also the character. Example:
 \bprog
 bnf = bnfinit(x^2 - 229);
 bnr = bnrinit(bnf,1,1);
@@ -3826,7 +3827,7 @@ characters of the class group of $\Q(\sqrt{229})$ and $S$ is the set
 of infinite places of $\Q(\sqrt{229})$ together with the finite prime
 $2$. Note that the ray class group modulo $2$ is in fact the class
 group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
-\kbd{bnrL1(bnr,0)}!
+\kbd{bnrL1(bnr,0)}.
 
 \syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}, where an omitted
 \var{subgroup} is coded as \kbd{NULL}.
@@ -3866,7 +3867,7 @@ class number, \tet{bnrclassno} is more efficient.
 %5 = [[98, 88; 0, 1], [14, 0; 0, 7], [98, 10; 0, 1]]
 @eprog
 The weird \kbd{l[i].mod[1]}, is the first component of \kbd{l[i].mod}, i.e.
-the finite part of the conductor. (This is cosmetic, since by construction
+the finite part of the conductor. (This is cosmetic: since by construction
 the archimedean part is trivial, I do not want to see it). This tells us that
 the ray class groups modulo the ideals of norm 98 (printed as \kbd{\%5}) have
 respectively order $1$, $3$ and $1$. Indeed, we may check directly :
@@ -4105,22 +4106,19 @@ example
 \subsecidx{galoisexport}$(\var{gal},\{\fl=0\})$:
 \var{gal} being be a Galois field as output by \tet{galoisinit},
 export the underlying permutation group as a string suitable
-for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma.
-
-This command also accepts subgroups returned by \kbd{galoissubgroups}.
-
-The following example compute the index of the underlying abstract
-group in the GAP library:
-
+for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma. The following example
+compute the index of the underlying abstract group in the GAP library:
 \bprog
-? G=galoisinit(x^6+108);
-? s=galoisexport(G)
+? G = galoisinit(x^6+108);
+? s = galoisexport(G)
 %2 = "Group((1, 2, 3)(4, 5, 6), (1, 4)(2, 6)(3, 5))"
-? extern("echo \"IdGroup("s");\"| gap -q")
+? extern("echo \"IdGroup("s");\" | gap -q")
 %3 = [6, 1]
 ? galoisidentify(G)
 %4 = [6, 1]
 @eprog
+
+This command also accepts subgroups returned by \kbd{galoissubgroups}.
 
 \syn{galoisexport}{\var{gal},\fl}.
 
@@ -4144,9 +4142,9 @@ must be less than the priority of the variable of $\var{gal}.pol$ (see
 \secref{se:priority}). Example:
 
 \bprog
-G = galoisinit(x^4+1);
-galoisfixedfield(G,G.group[2],2)
-  [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
+? G = galoisinit(x^4+1);
+? galoisfixedfield(G,G.group[2],2)
+%2 = [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
 @eprog\noindent
 computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 
@@ -4317,7 +4315,7 @@ subcyclo(n, d = -1)=
   vector(#L,i, galoissubcyclo(bnr,L[i]));
 }
 @eprog\noindent
-Setting \kbd{L = subgrouplist(bnr, [d])} would produce subfields of exact
+Setting \kbd{L = subgrouplist(bnr, IndexBound)} would produce subfields of exact
 conductor $n\infty$.
 
 \syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and
@@ -4607,8 +4605,7 @@ The library syntax corresponding to $\fl=0$ is
 \subsecidx{idealprimedec}$(\var{nf},p)$: computes the prime ideal
 decomposition of the prime number $p$ in the number field $\var{nf}$. $p$
 must be a (positive) prime number. Note that the fact that $p$ is prime is
-not checked, so if a non-prime number $p$ is given it may lead to
-unpredictable results.
+not checked, so if a non-prime $p$ is given the result is undefined.
 
 The result is a vector of \tev{pr} structures, each representing one of the
 prime ideals above $p$ in the number field $\var{nf}$. The representation
@@ -4763,7 +4760,7 @@ entries are expressed as a column vector on the integral basis
 
 \syn{algtobasis}{\var{nf},x}.
 
-\subsecidx{nfbasis}$(x,\{\fl=0\},\{fa\})$: \idx{integral basis} of the number
+\subsecidx{nfbasis}$(x,\{\fl=0\},\{\var{fa}\})$: \idx{integral basis} of the number
 field defined by the irreducible, preferably monic, polynomial $x$, using a
 modified version of the \idx{round 4} algorithm by default, due to David
 \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary digits
@@ -4780,18 +4777,18 @@ program written by David \idx{Ford} in Algeb.)
 Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
 an order which will be maximal at all the small primes.
 
-If $fa$ is present, we assume (without checking!) that it is the two-column
+If \var{fa} is present, we assume (without checking!) that it is the two-column
 matrix of the factorization of the discriminant of the polynomial $x$. Note
 that it does \emph{not} have to be a complete factorization. This is
 especially useful if only a local integral basis for some small set of places
 is desired: only factors with exponents greater or equal to 2 will be
 considered.
 
-\syn{nfbasis0}{x,\fl,fa}. An extended version is
-\funs{nfbasis}{x,\&d,\fl,fa}, where $d$ receives the discriminant of the
-number field (\emph{not} of the polynomial $x$), and an omitted $fa$ is input
+\syn{nfbasis0}{x,\fl,\var{fa}}. An extended version is
+\funs{nfbasis}{x,\&d,\fl,\var{fa}}, where $d$ receives the discriminant of the
+number field (\emph{not} of the polynomial $x$), and an omitted \var{fa} is input
 as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
-\funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,fa,\&d}.
+\funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,\var{fa},\&d}.
 
 \subsecidx{nfbasistoalg}$(\var{nf},x)$: this is the inverse function of
 \kbd{nfalgtobasis}. Given an object $x$ whose entries are expressed on the
@@ -5332,7 +5329,8 @@ group according to the GAP 4 transitive groups library by Alexander Hulpke.
 $k$ is more arbitrary and the choice made up to version~2.2.3 of PARI is rather
 unfortunate: for $n > 7$, $k$ is the numbering of the group among all
 transitive subgroups of $S_n$, as given in ``The transitive groups of degree up
-to eleven'', G.~Butler and J.~McKay, Communications in Algebra, vol.~11, 1983,
+to eleven'', G.~Butler and J.~McKay, \emph{Communications in Algebra}, vol.~11,
+1983,
 pp.~863--911 (group $k$ is denoted $T_k$ there). And for $n \leq 7$, it was ad
 hoc, so as to ensure that a given triple would design a unique group.
 Specifically, for polynomials of degree $\leq 7$, the groups are coded as
@@ -6454,7 +6452,7 @@ unspecified commutative base rings. It is very difficult to write
 robust linear algebra routines in such a general setting. The
 developpers's choice has been to assume the base ring is a domain
 and work over its field of fractions. If the base ring is \emph{not}
-a domaine, one gets an error as soon as a non-zero pivot turns out to be
+a domain, one gets an error as soon as a non-zero pivot turns out to be
 non-invertible. Some functions, e.g.~\kbd{mathnf} or \kbd{mathnfmod},
 specifically assume the base ring is $\Z$.
 
@@ -6507,8 +6505,8 @@ Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
 \subsecidx{charpoly}$(A,\{v=x\},\{\fl=0\})$: \idx{characteristic polynomial}
 of $A$ with respect to the variable $v$, i.e.~determinant of $v*I-A$ if $A$
 is a square matrix. If $A$ is not a square matrix, it returns the characteristic polynomial of the map ``multiplication by $A$'' if $A$
-is a scalar, in particular a polmod (e.g.~\kbd{charpoly(I) = x\pow2+1}).
-@eprog\noindent
+is a scalar, in particular a polmod. E.g.~\kbd{charpoly(I) = x\pow2+1}.
+
 The value of $\fl$ is only significant for matrices.
 
 If $\fl=0$, the method used is essentially the same as for computing the
@@ -8142,52 +8140,49 @@ available is \tet{sumpos2} with the same arguments ($\fl = 1$).
 \section{Plotting functions}
 
   Although plotting is not even a side purpose of PARI, a number of plotting
-functions are provided. Moreover, a lot of people felt like suggesting
-ideas or submitting huge patches for this section of the code. Among these,
-special thanks go to Klaus-Peter Nischke who suggested the recursive plotting
-and the forking/resizing stuff under X11, and Ilya Zakharevich who
-undertook a complete rewrite of the graphic code, so that most of it is now
-platform-independent and should be relatively easy to port or expand.
+functions are provided. Moreover, a lot of people suggested ideas or submitted
+patches for this section of the code. Among these, special thanks go to
+Klaus-Peter Nischke who suggested the recursive plotting and the
+forking/resizing stuff under X11, and Ilya Zakharevich who undertook a
+complete rewrite of the graphic code, so that most of it is now
+platform-independent and should be easy to port or expand. There are three
+types of graphic functions.
 
-These graphic functions are either
+\subsec{High-level plotting functions} (all the functions starting with \kbd{ploth}) in which the user has little to
+do but explain what type of plot he wants, and whose syntax is similar to the
+one used in the preceding section.
 
-\item high-level plotting functions (all the functions starting with
-\kbd{ploth}) in which the user has little to do but explain what type of plot
-he wants, and whose syntax is similar to the one used in the preceding
-section (with somewhat more complicated flags).
-
-\item low-level plotting functions, where every drawing primitive (point,
-line, box, etc.) must be specified by the user. These low-level functions
-(called \var{rectplot} functions, sharing the prefix \kbd{plot}) work as
+\subsec{Low-level plotting functions} (called \var{rectplot} functions,
+sharing the prefix \kbd{plot}), where every drawing primitive (point, line,
+box, etc.) is specified by the user. These low-level functions work as
 follows. You have at your disposal 16 virtual windows which are filled
 independently, and can then be physically ORed on a single window at
 user-defined positions. These windows are numbered from 0 to 15, and must be
 initialized before being used by the function \kbd{plotinit}, which specifies
 the height and width of the virtual window (called a \var{rectwindow} in the
-sequel). At all times, a virtual cursor (initialized at $[0,0]$) is
-associated to the window, and its current value can be obtained using the
-function \kbd{plotcursor}.
+sequel). At all times, a virtual cursor (initialized at $[0,0]$) is associated
+to the window, and its current value can be obtained using the function
+\kbd{plotcursor}.
 
-  A number of primitive graphic objects (called \var{rect} objects) can then
+A number of primitive graphic objects (called \var{rect} objects) can then
 be drawn in these windows, using a default color associated to that window
 (which can be changed under X11, using the \kbd{plotcolor} function, black
 otherwise) and only the part of the object which is inside the window will be
-drawn, with the exception of polygons and strings which are drawn entirely
-(but the virtual cursor can move outside of the window). The ones sharing the
-prefix \kbd{plotr} draw relatively to the current position of the virtual
-cursor, the others use absolute coordinates. Those having the prefix
-\kbd{plotrecth} put in the rectwindow a large batch of rect objects
-corresponding to the output of the related \kbd{ploth} function.
+drawn, with the exception of polygons and strings which are drawn entirely.
+The ones sharing the prefix \kbd{plotr} draw relatively to the current
+position of the virtual cursor, the others use absolute coordinates. Those
+having the prefix \kbd{plotrecth} put in the rectwindow a large batch of rect
+objects corresponding to the output of the related \kbd{ploth} function.
 
    Finally, the actual physical drawing is done using the function
-\kbd{plotdraw}. Note that the windows are preserved so that further drawings
+\kbd{plotdraw}. The rectwindows are preserved so that further drawings
 using the same windows at different positions or different windows can be
-done without extra work. If you want to erase a window (and free the
-corresponding memory), use the function \kbd{plotkill}. It is not possible to
-partially erase a window. Erase it completely, initialize it again and then
-fill it with the graphic objects that you want to keep.
+done without extra work. To erase a window (and free the corresponding
+memory), use the function \kbd{plotkill}. It is not possible to partially
+erase a window. Erase it completely, initialize it again and then fill it with
+the graphic objects that you want to keep.
 
-   In addition to initializing the window, you may want to have a scaled
+   In addition to initializing the window, you may use a scaled
 window to avoid unnecessary conversions. For this, use the function
 \kbd{plotscale} below. As long as this function is not called, the scaling is
 simply the number of pixels, the origin being at the upper left and the
@@ -8209,29 +8204,28 @@ session, without having to kill the window first. Under X11, this window can
 be closed, enlarged or reduced using the standard window manager functions.
 No zooming procedure is implemented though (yet).
 
-\item Finally, note that in the same way that \kbd{printtex} allows you
-to have a \TeX\ output corresponding to printed results, the functions
-starting with \kbd{ps} allow you to have \tet{PostScript} output of the
-plots. This will not be absolutely identical with the screen output, but will
-be sufficiently close. Note that you can use PostScript output even if you do
-not have the plotting routines enabled. The PostScript output is written in a
-file whose name is derived from the \tet{psfile} default (\kbd{./pari.ps} if
-you did not tamper with it). Each time a new PostScript output is asked for,
-the PostScript output is appended to that file. Hence the user must remove
-this file, or change the value of \kbd{psfile}, first if he does not want
-unnecessary drawings from preceding sessions to appear. On the other hand, in
-this manner as many plots as desired can be kept in a single file. \smallskip
+\subsec{Functions for PostScript output:} in the same way that \kbd{printtex} allows you to have a \TeX\ output
+corresponding to printed results, the functions starting with \kbd{ps} allow
+you to have \tet{PostScript} output of the plots. This will not be absolutely
+identical with the screen output, but will be sufficiently close. Note that
+you can use PostScript output even if you do not have the plotting routines
+enabled. The PostScript output is written in a file whose name is derived from
+the \tet{psfile} default (\kbd{./pari.ps} if you did not tamper with it). Each
+time a new PostScript output is asked for, the PostScript output is appended
+to that file. Hence you probably want to remove this file, or change the value
+of \kbd{psfile}, in between plots. On the other hand, in this manner, as many
+plots as desired can be kept in a single file. \smallskip
 
-\emph{None of the graphic functions are available within the PARI library, you
-must be under \kbd{gp} to use them}. The reason for that is that you really should
-not use PARI for heavy-duty graphical work, there are much better specialized
-alternatives around. This whole set of routines was only meant as a
-convenient, but simple-minded, visual aid. If you really insist on using
-these in your program (we warned you), the source (\kbd{plot*.c}) should be
-readable enough for you to achieve something.
+\subsec{And library mode ?} \emph{None of the graphic functions are available
+within the PARI library, you must be under \kbd{gp} to use them}. The reason
+for that is that you really should not use PARI for heavy-duty graphical work,
+there are better specialized alternatives around. This whole set of routines
+was only meant as a convenient, but simple-minded, visual aid. If you really
+insist on using these in your program (we warned you), the source
+(\kbd{plot*.c}) should be readable enough for you to achieve something.
 
 \subsecidx{plot}$(X=a,b,\var{expr},\{\var{Ymin}\},\{\var{Ymax}\})$: crude
-(ASCII) plot of the function represented by expression \var{expr} from
+ASCII plot of the function represented by expression \var{expr} from
 $a$ to $b$, with \var{Y} ranging from \var{Ymin} to \var{Ymax}. If
 \var{Ymin} (resp. \var{Ymax}) is not given, the minima (resp. the
 maxima) of the computed values of the expression is used instead.
@@ -8252,7 +8246,7 @@ picture.
 In present version \vers, this is only implemented for the X11 window system,
 and you only have the following palette to choose from:
 
-1=black, 2=blue, 3=sienna, 4=red, 5=cornsilk, 6=grey, 7=gainsborough.
+1=black, 2=blue, 3=sienna, 4=red, 5=green, 6=grey, 7=gainsborough.
 
 Note that it should be fairly easy for you to hardwire some more colors by
 tweaking the files \kbd{rect.h} and \kbd{plotX.c}. User-defined
@@ -8721,10 +8715,10 @@ message for the symbol $S$. The string \var{str} is expanded on the spot
 and stored as the online help for $S$. If $S$ is a function \emph{you} have
 defined, its definition will still be printed before the message \var{str}.
 It is recommended that you document global variables and user functions in
-this way. Of course \kbd{gp} won't protest if you don't do it.
+this way. Of course \kbd{gp} will not protest if you skip this.
 
-There's nothing to prevent you from modifying the help of built-in PARI
-functions (but if you do, we'd like to hear why you needed to do it!).
+Nothing prevents you from modifying the help of built-in PARI
+functions. (But if you do, we would like to hear why you needed to do it!)
 
 \subsubsecidx{alias}$(\var{newkey},\var{key})$: defines the keyword
 \var{newkey} as an alias for keyword \var{key}. \var{key} must correspond
@@ -8738,7 +8732,7 @@ should be useless in interactive usage.
 
 \subsubsecidx{allocatemem}$(\{x=0\})$: this is a very special operation which
 allows the user to change the stack size \emph{after} initialization. $x$
-must be a non-negative integer. If $x!=0$, a new stack of size
+must be a non-negative integer. If $x \neq 0$, a new stack of size
 $16*\ceil{x/16}$ bytes is allocated, all the PARI data on the old stack is
 moved to the new one, and the old stack is discarded. If $x=0$, the size of
 the new stack is twice the size of the old one.
@@ -8768,12 +8762,10 @@ are meant for interactive use and usually display more information than
 
 \subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
 them interpreted as a string), then interrupts the running \kbd{gp} program,
-returning to the input prompt.
-
-Example: \kbd{error("n = ", n, " is not squarefree !")}.
-
-Note that, due to the automatic concatenation of strings, you could in fact
-use only one argument, just by suppressing the commas.
+returning to the input prompt. For instance
+\bprog
+error("n = ", n, " is not squarefree !")
+@eprog\noindent
 
 \subsubsecidxunix{extern}$(\var{str})$: the string \var{str} is the name
 of an external command (i.e.~one you would type from your UNIX shell prompt).
@@ -8937,9 +8929,7 @@ You could for instance do:\sidx{logfile}
 default(logfile, "new.tex");
 default(log, 1);
 printtex(result);
-@eprog\noindent
-(You can use the automatic string expansion/concatenation process to have
-dynamic file names if you wish).
+@eprog
 
 \subsubsecidx{quit}$()$: exits \kbd{gp}.\label{se:quit}
 
