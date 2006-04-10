@@ -2275,23 +2275,23 @@ _gtopoly(GEN x, long v, int reverse)
   {
     case t_POL:
       if (varncmp(varn(x), v) < 0)
-        pari_err(talker,"variable must have highest priority in gtopoly");
+        pari_err(talker,"variable must have higher priority in gtopoly");
       y=gcopy(x); break;
     case t_SER:
       if (varncmp(varn(x), v) < 0)
-        pari_err(talker,"variable must have highest priority in gtopoly");
+        pari_err(talker,"variable must have higher priority in gtopoly");
       y = ser2rfrac(x);
       if (typ(y) != t_POL)
         pari_err(talker,"t_SER with negative valuation in gtopoly");
       break;
     case t_RFRAC:
       if (varncmp(varn(gel(x,2)), v) < 0)
-        pari_err(talker,"variable must have highest priority in gtopoly");
+        pari_err(talker,"variable must have higher priority in gtopoly");
       y=gdeuc(gel(x,1),gel(x,2)); break;
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); if (tx == t_QFR) lx--;
       if (varncmp(gvar(x), v) <= 0)
-        pari_err(talker,"variable must have highest priority in gtopoly");
+        pari_err(talker,"variable must have higher priority in gtopoly");
       if (reverse)
       {
 	while (lx-- && isexactzero(gel(x,lx)));
@@ -2397,21 +2397,25 @@ _gtoser(GEN x, long v, long prec)
     return y;
   }
   if (is_scalar_t(tx)) return scalarser(x,v,prec);
-  if (varncmp(gvar(x), v) < 0)
-    pari_err(talker,"main variable has highest priority in gtoser");
   switch(tx)
   {
     case t_POL:
+      if (varncmp(varn(x), v) <= 0)
+        pari_err(talker,"main variable must have higher priority in gtoser");
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
         if (gel(y,i) != gen_0) gel(y,i) = gcopy(gel(y,i));
       break;
 
     case t_RFRAC:
+      if (varncmp(varn(gel(x,2)), v) <= 0)
+        pari_err(talker,"main variable must have higher priority in gtoser");
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));
 
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      if (varncmp(gvar(x), v) < 0)
+        pari_err(talker,"main variable must have higher priority in gtoser");
       lx = lg(x); if (tx == t_QFR) lx--;
       i = 1; while (i<lx && isexactzero(gel(x,i))) i++;
       if (i == lx) return zeroser(v, lx-1);
