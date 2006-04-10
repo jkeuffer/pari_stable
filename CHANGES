@@ -105,6 +105,8 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
    41- make test-kernel would always fail with gmp kernel.
    42- elllseries(e, 0.) --> error [ only elllseries(e,0) worked ] [#445]
    43- 'ftime' was never detected by Configure
+   44- setrand(74);quadclassunit(-83138791008,,[0.2,6]) --> oo loop
+       [ large prime relation hashtable corrupted when changing subfactorbase ]
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]

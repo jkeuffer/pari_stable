@@ -933,7 +933,7 @@ largeprime(long q, long *ex, long np, long nrho)
 }
 
 static void
-freehash(long **hash)
+clearhash(long **hash)
 {
   long *pt;
   long i;
@@ -1223,8 +1223,7 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
         if (DEBUGLEVEL>1) fprintferr(".");
         continue;
       }
-      form2 = qfi_factorback(fpd);
-      if (fpd[-2]) form2 = compimag(form2, qfi_pf(Disc, FB[fpd[-2]]));
+      form2 = compimag(qfi_factorback(fpd), qfi_pf(Disc, FB[fpd[-2]]));
       p = fpc << 1;
       b1 = umodiu(gel(form2,2), p);
       b2 = umodiu(gel(form,2),  p);
@@ -1271,7 +1270,7 @@ imag_be_honest()
     fpc = factorquad(F,s,p-1);
     if (fpc == 1) { nbtest=0; s++; }
     else
-      if (++nbtest > 20) return 0;
+      if (++nbtest > 40) return 0;
     avma = av;
   }
   return 1;
@@ -1441,7 +1440,7 @@ real_be_honest()
     {
       fpc = factorquad(F,s,p-1);
       if (fpc == 1) { nbtest=0; s++; break; }
-      if (++nbtest > 20) return 0;
+      if (++nbtest > 40) return 0;
       F = qfr3_canon(qfr3_rho(F, Disc, isqrtD));
       if (equalii(gel(F,1),gel(F0,1))
        && equalii(gel(F,2),gel(F0,2))) break;
@@ -1572,7 +1571,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 START: avma = av; cbach = check_bach(cbach,6.);
   if (subFB) gunclone(subFB);
   if (powsubFB) gunclone(powsubFB);
-  freehash(hashtab);
+  clearhash(hashtab);
   nreldep = nrelsup = 0;
   LIMC = (ulong)(cbach*LOGD2);
   if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
@@ -1605,6 +1604,7 @@ MORE:
     gunclone(powsubFB);
     subFB = gclone(vecslice(vperm, 1, nsubFB));
     powsubFB = powsubFBquad(CBUCH+1);
+    clearhash(hashtab);
   }
   need += 2;
   mat    = cgetg(need+1, t_MAT);
@@ -1663,7 +1663,7 @@ MORE:
   }
   /* DONE */
   if (!quad_be_honest()) goto START;
-  freehash(hashtab);
+  clearhash(hashtab);
 
   gen = get_clgp(Disc,W,&cyc,PRECREG);
   gunclone(subFB);
