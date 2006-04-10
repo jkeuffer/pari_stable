@@ -2504,9 +2504,9 @@ apell1(GEN e, GEN p)
     /* look for h s.t f^h = 0 */
     if (!tx)
     { /* first time: initialize */
-      tx = newbloc(s+1);
-      ty = newbloc(s+1);
-      ti = newbloc(s+1);
+      tx = newbloc(3*(s+1));
+      ty = tx + (s+1);
+      ti = ty + (s+1);
     }
     F = powsell(cp4,f,B,p);
     *tx = CODE;
@@ -2665,12 +2665,7 @@ FOUND: /* found a point of exponent h on E_u */
     h = closest_lift(A, B, p1p);
     if (!i) break;
   }
-  if (tx)
-  {
-    gunclone(tx);
-    gunclone(ty);
-    gunclone(ti);
-  }
+  if (tx) gunclone(tx);
   return gerepileuptoint(av, KRO==1? subii(p1p,h): subii(h,p1p));
 }
 
