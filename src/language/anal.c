@@ -746,8 +746,8 @@ kill0(entree *ep)
   {
     case EpVAR:
     case EpGVAR:
-      v = varn(initial_value(ep)); while (ep->args) pop_val(ep);
-      if (!v) return; /* never kill x */
+      while (ep->args) pop_val(ep);
+      v = varn(ep->value); if (!v) return; /* never kill x */
 
       gel(polvar,v+1) = pol_x[v] = pol_1[v] = gnil;
       varentries[v] = NULL; break;
