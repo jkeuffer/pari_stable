@@ -17,10 +17,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* Written by Guillaume Hanrot */
 
 #ifndef ASMINLINE
-#define LOCAL_OVERFLOW
 #define LOCAL_HIREMAINDER
 
-extern  ulong hiremainder, overflow;
+extern  ulong hiremainder;
 extern long mulll(ulong x, ulong y);
 extern long addmul(ulong x, ulong y);
 extern int  bfffo(ulong x);
