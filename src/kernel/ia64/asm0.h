@@ -16,6 +16,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Written by Guillaume Hanrot */
 
+#ifndef ASMINLINE
+#define LOCAL_OVERFLOW
+#define LOCAL_HIREMAINDER
+
+extern  ulong hiremainder, overflow;
+extern long mulll(ulong x, ulong y);
+extern long addmul(ulong x, ulong y);
+extern int  bfffo(ulong x);
+
+#else
+
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 
 #define bfffo(a)                                                        \
@@ -49,3 +60,4 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
            : "f" (__arg1), "f" (__arg2), "f" (hiremainder));            \
   __value;                                                              \
 })
+#endif
