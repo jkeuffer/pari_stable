@@ -358,24 +358,26 @@ dowin32ctrlc()
 static void
 init_hashtable(entree **table, long tblsz)
 {
-  entree *ep, *ep1, *last;
-  long i, v;
+  entree *ep, *EP, *last;
+  long i;
 
   for (i = 0; i < tblsz; i++)
   {
     last = NULL; ep = table[i]; table[i] = NULL;
-    for ( ; ep; ep = ep1)
+    for ( ; ep; ep = EP)
     {
-      ep1 = ep->next; v = EpVALENCE(ep);
-      if (v == EpVAR || v == EpINSTALL) /* keep this one */
+      EP = ep->next;
+      switch(EpVALENCE(ep))
       {
-        if (last)
-          last->next = ep;
-        else
-          table[i] = ep;
-        last = ep; last->next = NULL;
+        case EpGVAR: case EpVAR: case EpINSTALL: /* keep this one */
+          if (last)
+            last->next = ep;
+          else
+            table[i] = ep;
+          last = ep; last->next = NULL;
+          break;
+        default: freeep(ep);
       }
-      else freeep(ep);
     }
   }
 }
@@ -878,21 +880,13 @@ recover(int flag)
       epnext = ep->next;
       switch(EpVALENCE(ep))
       {
+        case EpGVAR:
         case EpVAR:
           while (pop_val_if_newer(ep,listloc)) /* empty */;
           break;
         case EpNEW:
           kill_from_hashlist(ep, n);
-          break;
-        case EpUSER:
-        case EpALIAS:
-        case EpMEMBER:
-          if (bl_num(ep->value) >= listloc)
-          {
-            if (ep->args) free_ep_args(ep);
-            gunclone((GEN)ep->value);
-            kill_from_hashlist(ep, n);
-          }
+          freeep(ep); break;
       }
     }
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");

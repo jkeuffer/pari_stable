@@ -600,12 +600,17 @@ freeep(entree *ep)
   if (EpSTATIC(ep)) return; /* gp function loaded at init time */
   if (ep->help) free(ep->help);
   if (ep->code) free(ep->code);
-  if (ep->args)
-    switch(EpVALENCE(ep))
-    {
-      case EpVAR:
-      case EpGVAR: free((void*)ep->args); break;
-    }
+  switch(EpVALENCE(ep))
+  {
+    case EpVAR:
+    case EpGVAR:
+      while (ep->args) pop_val(ep);
+      break;
+    case EpUSER:
+      free_ep_args(ep); /* fall through */
+    case EpALIAS:
+      gunclone((GEN)ep->value); break;
+  }
   free(ep);
 }
 
@@ -706,17 +711,9 @@ void
 kill_from_hashlist(entree *ep, long n)
 {
   entree *e = functions_hash[n];
-  if (e == ep)
-  {
-    functions_hash[n] = ep->next;
-    freeep(ep); return;
-  }
+  if (e == ep) { functions_hash[n] = ep->next; return; }
   for (; e; e = e->next)
-    if (e->next == ep)
-    {
-      e->next = ep->next;
-      freeep(ep); return;
-    }
+    if (e->next == ep) { e->next = ep->next; return; }
 }
 
 /* kill aliases pointing to EP */
@@ -749,22 +746,22 @@ kill0(entree *ep)
   {
     case EpVAR:
     case EpGVAR:
-      v = varn(initial_value(ep)); killvalue(v);
+      v = varn(initial_value(ep)); while (ep->args) pop_val(ep);
       if (!v) return; /* never kill x */
+
       gel(polvar,v+1) = pol_x[v] = pol_1[v] = gnil;
       varentries[v] = NULL; break;
     case EpUSER: kill_alias(ep);
-      free_ep_args(ep); /* fall through */
-    case EpALIAS:
-      gunclone((GEN)ep->value); break;
+      break;
   }
   kill_from_hashlist(ep, hashvalue(&s));
+  freeep(ep);
 }
 
 void
 addhelp(entree *ep, char *s)
 {
-  if (ep->help && ! EpSTATIC(ep)) free(ep->help);
+  if (ep->help && !EpSTATIC(ep)) free(ep->help);
   ep->help = pari_strdup(s);
 }
 
@@ -2598,8 +2595,8 @@ installep(void *f, char *name, long len, long valence, long add, entree **table)
 
   ep->name    = u; strncpy(u, name,len); u[len]=0;
   ep->args    = INITIAL; /* necessary, see var_cell definition */
-  ep->help = NULL;
-  ep->code = NULL;
+  ep->help    = NULL;
+  ep->code    = NULL;
   ep->value   = f? f: (void *) ep1;
   ep->next    = *table;
   ep->valence = valence;
