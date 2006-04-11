@@ -104,14 +104,14 @@ filtre0(filtre_t *F)
 
       case '\\':
         if (!*s) {
-          if (t[-2] == '?') break; /* '?\' */
+          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
           t--;
           if (!F->more_input) F->more_input = 1;
           goto END;
         }
         if (*s == '\r') s++; /* DOS */
         if (*s == '\n') {
-          if (t[-2] == '?') break; /* '?\' */
+          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
           t--; s++;
           if (!*s)
           {
