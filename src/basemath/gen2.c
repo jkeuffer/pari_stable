@@ -837,12 +837,11 @@ long
 Z_pvalrem(GEN x, GEN p, GEN *py)
 {
   long vx;
-  pari_sp av, av2;
+  pari_sp av;
 
   if (lgefint(p) == 3) return Z_lvalrem(x, (ulong)p[2], py);
   if (lgefint(x) == 3) { *py = icopy(x); return 0; }
   av = avma; vx = 0; (void)new_chunk(lgefint(x));
-  av2= avma;
   for(;;)
   {
     GEN r, q = dvmdii(x,p,&r);

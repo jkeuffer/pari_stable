@@ -967,14 +967,14 @@ static GEN
 FBquad(GEN Disc, long n2, long n)
 {
   GEN Res = real_1(DEFAULTPREC);
-  long i, p, bad, s, LIM;
+  long i, p, s, LIM;
   pari_sp av;
   byteptr d = diffptr;
 
   numFB = cgetg(n2+1, t_VECSMALL);
   FB    = cgetg(n2+1, t_VECSMALL);
   av = avma;
-  KC = 0; bad = 0; i = 0;
+  KC = 0; i = 0;
   maxprime_check((ulong)n2);
   badprim = gen_1;
   for (p = 0;;) /* p <= n2 */

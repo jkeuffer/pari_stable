@@ -875,9 +875,9 @@ static GEN
 ComputeAChi(GEN dtcr, long *r, long flag, long prec)
 {
   long l, i;
-  GEN p1, A, diff, chi, bnrc, nf;
+  GEN p1, A, diff, chi, bnrc;
 
-  bnrc = ch_bnr(dtcr); nf = checknf(bnrc);
+  bnrc = ch_bnr(dtcr);
   diff = ch_diff(dtcr); l = lg(diff);
   chi  = ch_CHI0(dtcr);
 
@@ -1004,14 +1004,13 @@ static GEN
 get_listCR(GEN bnr, GEN dtQ)
 {
   GEN MrD, listCR, vecchi, lchi, Surj, cond, Mr, d, allCR;
-  long hD, h, nc, i, j, lD, tnc;
+  long hD, h, nc, i, j, tnc;
 
   Surj = gel(dtQ,3);
   MrD  = gel(dtQ,2);
   Mr   = gmael(bnr, 5, 2);
   hD   = itos(gel(dtQ,1));
   h    = hD >> 1;
-  lD   = lg(MrD)-1;
 
   disable_dbg(0);
 
@@ -2579,12 +2578,10 @@ static GEN
 quad_conj(GEN x, GEN y)
 {
   GEN z, u, v, b;
-  pari_sp av;
-  long d;
-  if (typ(x) != t_POL || (d = degpol(x)) <= 0) return x;
+  if (typ(x) != t_POL || degpol(x) <= 0) return x;
   u = gel(x,3); /*Mod(ux + v, x^2 + bx + c)*/
   v = gel(x,2); b = gel(y,3);
-  z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
+  z = cgetg(4, t_POL); z[1] = x[1];
   gel(z,2) = gadd(v, gmul(u,negi(b)));
   gel(z,3) = gneg(u); return z;
 }
@@ -2798,7 +2795,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
   GEN bnf, nf, cyc, Mcyc, L1, lchi, clchi, allCR, listCR, dataCR;
   GEN W, S, T, indCR, invCR, Qt, vChar;
-  long N, cl, i, j, nc, a, ncc;
+  long N, cl, i, j, nc, a;
   pari_sp av = avma;
 
   checkbnrgen(bnr);
@@ -2812,7 +2809,6 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2)) bnr = (GEN)conductor(bnr, NULL, 2)[2];
   cyc  = gmael(bnr, 5, 2);
-  ncc  = lg(cyc) - 1;
   Mcyc = diagonal_i(cyc);
 
   /* check the subgroup */

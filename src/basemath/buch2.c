@@ -2073,7 +2073,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
 static int
 be_honest(FB_t *F, GEN nf)
 {
-  GEN P, ideal, m, vdir;
+  GEN P, ideal, m;
   long ex, i, j, J, k, iz, nbtest, ru;
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   pari_sp av;
@@ -2082,7 +2082,7 @@ be_honest(FB_t *F, GEN nf)
     fprintferr("Be honest for %ld primes from %ld to %ld\n", F->KCZ2 - F->KCZ,
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
   }
-  ru = lg(nf[6]); vdir = cgetg(ru, t_VECSMALL);
+  ru = lg(nf[6]);
   av = avma;
   for (iz=F->KCZ+1; iz<=F->KCZ2; iz++, avma = av)
   {

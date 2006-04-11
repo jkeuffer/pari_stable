@@ -2828,7 +2828,6 @@ Flm_deplin(GEN x, ulong p) { return Flm_ker_sp(gcopy(x), p, 1); }
 static GEN
 Flm_gauss_pivot(GEN x, ulong p, long *rr)
 {
-  pari_sp av;
   GEN c,d;
   ulong piv;
   long i,j,k,r,t,n,m;
@@ -2839,7 +2838,6 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
   d=cgetg(n+1,t_VECSMALL);
   x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
-  av=avma; 
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)

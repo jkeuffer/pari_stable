@@ -446,13 +446,11 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   long rt;
   GEN     Q=gl->T, p=gl->p;
   long    e=gl->e, level=1;
-  long    x;
   GEN     q, qold, qm1, qm1old;
   GEN     W, Pr, Qr, Sr, Wr = gen_0, Qrold, Spow;
   long    i,nb,mask;
   GEN    *gptr[2];
   if (DEBUGLEVEL == 1) (void)timer2();
-  x = varn(P);
   rt = brent_kung_optpow(degpol(Q),1);
   q = p; qm1 = gen_1; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);

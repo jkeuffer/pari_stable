@@ -129,12 +129,11 @@ set_karasquare_limit(long bit)
 static GEN
 CX_square_spec(GEN P, long lP)
 {
-  GEN s, t, S;
+  GEN s, t;
   long i, j, l, nn, n = lP - 1;
   pari_sp av;
 
   nn = n<<1; s = cgetg(nn+3,t_POL); s[1] = evalsigne(1)|evalvarn(0);
-  S = s+2;
   gel(s,2) = sqrCC(gel(P,0)); /* i = 0 */
   for (i=1; i<=n; i++)
   {

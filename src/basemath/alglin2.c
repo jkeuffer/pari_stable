@@ -513,8 +513,7 @@ quad_polmod_conj(GEN x, GEN y)
 {
   GEN z, u, v, a, b;
   pari_sp av;
-  long d;
-  if (typ(x) != t_POL || varn(x) != varn(y) || (d = degpol(x)) <= 0)
+  if (typ(x) != t_POL || varn(x) != varn(y) || degpol(x) <= 0)
     return gcopy(x);
   a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
   b = gel(y,3); v = gel(x,2);
@@ -527,8 +526,7 @@ quad_polmod_norm(GEN x, GEN y)
 {
   GEN z, u, v, a, b, c;
   pari_sp av;
-  long d;
-  if (typ(x) != t_POL || varn(x) != varn(y) || (d = degpol(x)) <= 0)
+  if (typ(x) != t_POL || varn(x) != varn(y) || degpol(x) <= 0)
     return gsqr(x);
   a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
   b = gel(y,3); v = gel(x,2);

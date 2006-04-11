@@ -166,10 +166,10 @@ GEN
 element_div(GEN nf, GEN x, GEN y)
 {
   pari_sp av=avma;
-  long N,tx=typ(x),ty=typ(y);
+  long tx = typ(x), ty = typ(y);
   GEN p1;
 
-  nf=checknf(nf); N=degpol(nf[1]);
+  nf=checknf(nf);
   if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_div");
   else if (tx==t_POL) x=gmodulo(x,gel(nf,1));
 
@@ -551,11 +551,11 @@ long
 element_val(GEN nf, GEN x, GEN vp)
 {
   pari_sp av = avma;
-  long N,w,vcx,e;
+  long w, vcx, e;
   GEN cx,p;
 
   if (gcmp0(x)) return VERYBIGINT;
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf);
   checkprimeid(vp);
   p = gel(vp,1);
   e = itos(gel(vp,3));
@@ -1648,7 +1648,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 GEN
 zarchstar(GEN nf, GEN x, GEN archp)
 {
-  long N, i, nba;
+  long i, nba;
   pari_sp av;
   GEN p1, y, bas, gen, mat, gZ, v;
 
@@ -1670,7 +1670,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
     gel(y,2) = mkvec(gZ);
     gel(y,3) = gscalmat(gen_1,1); return y;
   }
-  bas = gmael(nf,5,1); N = lg(bas)-1;
+  bas = gmael(nf,5,1);
   if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
   gen = cgetg(nba+1,t_VEC);
   v = mkmat( const_vecsmall(nba, 1) );

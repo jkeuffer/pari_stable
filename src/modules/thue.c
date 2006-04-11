@@ -359,13 +359,11 @@ CF_1stPass(GEN *B0, GEN kappa, baker_s *BS)
 static int
 LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
 {
-  GEN B0 = *pB0, Bx = *pBx, lllmat, C, l0, l1, delta, lambda, errdelta, triv; 
-  long e, r;
+  GEN B0 = *pB0, Bx = *pBx, lllmat, C, l0, l1, delta, lambda, triv; 
+  long e;
 
   delta = BS -> delta; 
   lambda = BS -> lambda; 
-  errdelta = BS -> errdelta; 
-  r = BS -> r; 
   
   C = grndtoi(mulir(mulii(BS->Ind, kappa), 
 		    gpow(B0, dbltor(2.2), DEFAULTPREC)), &e);
@@ -527,17 +525,12 @@ SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   const long prec = DEFAULTPREC;
-  GEN X, Y, sqrtnRHS, P, r;
+  GEN X, Y, P, r;
   long x, j, n = degpol(poly);
-  double bndyx;
 
   if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
-
-  sqrtnRHS = absisqrtn(rhs, n, prec);
-  bndyx = gtodouble(gadd(sqrtnRHS, Vecmax(gabs(ro,prec))));
-
   /* x = 0 first */
-  Y = ground(sqrtnRHS);
+  Y = ground( absisqrtn(rhs, n, prec) );
   if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
   Y = negi(Y);
   if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);

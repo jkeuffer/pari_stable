@@ -149,7 +149,7 @@ root_mod_4(GEN f)
   int z0 = !signe(constant_term(f));
   int z2 = ((i_mod4(constant_term(f)) + 2*i_mod4(f[3])) & 3) == 0;
   int z1, z3;
-  GEN y,p;
+  GEN y;
 
   for (ne=0,i=2; i<lg(f); i+=2)
     if (signe(f[i])) ne += mael(f,i,2);
@@ -158,7 +158,7 @@ root_mod_4(GEN f)
   no &= 3; ne &= 3;
   z3 = (no == ne);
   z1 = (no == ((4-ne)&3));
-  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1; p = utoipos(4);
+  y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1;
   if (z0) gel(y,i++) = gen_0;
   if (z1) gel(y,i++) = gen_1;
   if (z2) gel(y,i++) = gen_2;
@@ -1218,7 +1218,7 @@ FpX_factor_i(GEN f, GEN pp)
 {
   long e, N, nbfact, val, d = degpol(f);
   ulong p, k, j;
-  GEN pps2, E, f2, g1, u, *t;
+  GEN E, f2, g1, u, *t;
 
   if (d <= 2) return FpX_factor_2(f, pp, d);
   p = init_p(pp);
@@ -1228,7 +1228,6 @@ FpX_factor_i(GEN f, GEN pp)
   val = ZX_valuation(f, &f);
   e = nbfact = 1;
   if (val) { t[1] = pol_x[varn(f)]; E[1] = val; nbfact++; }
-  pps2 = shifti(pp,-1);
 
   for(;;)
   {
@@ -1967,7 +1966,7 @@ GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
   pari_sp av = avma;
-  GEN y, P, E, ppow, lead, lt;
+  GEN y, P, ppow, lead, lt;
   long i, l, pr, n = degpol(f);
   int reverse = 0;
 
@@ -1980,8 +1979,7 @@ factorpadic4(GEN f,GEN p,long prec)
   f = QpX_to_ZX(f); (void)Z_pvalrem(leading_term(f), p, &lt);
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
   y = ZX_monic_factorpadic(f, p, pr);
-  P = gel(y,1);
-  E = gel(y,2); l = lg(P);
+  P = gel(y,1); l = lg(P);
   if (lead)
     for (i=1; i<l; i++) gel(P,i) = primpart( RgX_unscale(gel(P,i), lead) );
   ppow = powiu(p,prec);

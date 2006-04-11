@@ -1688,7 +1688,7 @@ logagmr_abs(GEN q)
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
   y = divrr(Pi2n(-1, prec), agm1r_abs( divsr(4, Q) ));
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affr_fixlg(y, z); return z;
+  affr_fixlg(y, z); avma = av; return z;
 }
 
 /* assume Im(q) != 0 */

@@ -504,7 +504,7 @@ static void
 calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
   GEN J, tabf, tabg, faq, tabfaq, tabj, P, E, PE;
-  long lfaq, p, e, j;
+  long lfaq, j;
   ulong i, q, l;
   pari_sp av;
 
@@ -526,8 +526,6 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
       long pe = PE[j];
-      p = P[j];
-      e = E[j];
       gel(J,j) = get_jac(pC[pe], q, pe, tabf, tabg);
     }
     gel(tabj,i) = gerepilecopy(av, J);
