@@ -271,7 +271,7 @@ lib-dyn: \$(LIBPARI_DYN)
 kerntest\$(_O): $src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
 
-kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
+kerntest: $KERNOBJS kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
 
 mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/mpinl.c

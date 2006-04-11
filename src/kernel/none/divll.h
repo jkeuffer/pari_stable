@@ -1,4 +1,6 @@
 #line 2 "../src/kernel/none/divll.h"
+#ifndef __DIVLL_H__
+#define __DIVLL_H__
 /* $Id$
 
 Copyright (C) 2003  The PARI group.
@@ -157,4 +159,5 @@ divll(ulong n0, ulong d)
 
 #endif /* __GNUC__ */
 
+#endif
 #endif
