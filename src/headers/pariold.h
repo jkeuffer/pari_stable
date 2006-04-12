@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define decomp Z_factor
 #define gmodulcp gmodulo
 #define forcecopy gcopy
 #define lseriesell elllseries

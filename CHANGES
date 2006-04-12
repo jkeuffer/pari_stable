@@ -111,6 +111,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
        a(1) --> SEGV [#447] (add refcounts to 'user function' structs)
    46- getheap() did not report properly the "size" of user functions
        (value too small)
+   47- add compatibility macro decomp -> Z_factor
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
