@@ -6691,12 +6691,13 @@ matrix.
 
 \syn{eigen}{x}.
 
-\subsecidx{matfrobenius}$(M,\{\fl=0\})$: returns the Frobenius form of the
-square matrix \kbd{M}. If $\fl=1$, returns only the elementary divisors. If
-$\fl=2$, returns a two-components vector [F,B] where \kbd{F} is the Frobenius
-form and \kbd{B} is the basis change so that $M=B^{-1}FB$.
+\subsecidx{matfrobenius}$(M,\{\fl=0\},\{v=x\})$: returns the Frobenius form of
+the square matrix \kbd{M}. If $\fl=1$, returns only the elementary divisors as
+a vectr of polynomials in the variable \kbd{v}.  If $\fl=2$, returns a
+two-components vector [F,B] where \kbd{F} is the Frobenius form and \kbd{B} is
+the basis change so that $M=B^{-1}FB$.
 
-\syn{matfrobenius}{M,\fl}.
+\syn{matfrobenius}{M,\fl,v}, where $v$ is the variable number.
 
 \subsecidx{mathess}$(x)$: Hessenberg form of the square matrix $x$.
 

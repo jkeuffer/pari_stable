@@ -272,7 +272,7 @@ minpoly(GEN x, long v)
     return RgXQ_minpoly_naive(gel(x,2),gel(x,1));
   if (typ(x)!=t_MAT) pari_err(typeer,"minpoly");
   if (lg(x) == 1) return pol_1[v];
-  return gerepilecopy(ltop,gel(matfrobenius(x,1),1));
+  return gerepilecopy(ltop,gel(matfrobenius(x,1,v),1));
 }
 
 /*******************************************************************/
@@ -3713,17 +3713,18 @@ build_basischange(GEN N, GEN U)
 }
 
 GEN
-matfrobenius(GEN M, long flag)
+matfrobenius(GEN M, long flag, long v)
 {
   pari_sp ltop=avma;
   long n;
   GEN D, A, N, B, R, M_x;
   if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius");
-  if (gvar(M)==0)
-    pari_err(talker,"matrix coefficients must not use variable x");
+  if (v<0) v=0;
+  if (gvar(M)<=v)
+    pari_err(talker,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");
-  M_x = gaddmat(monomial(gen_m1, 1, 0), M);
+  M_x = gaddmat(monomial(gen_m1, 1, v), M);
   if (flag<2)
   {
     D = matsnf0(M_x,6);
