@@ -145,6 +145,7 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
        of the stack (was used by INTMOD/POLMOD/PADIC). Always copy it.
        As a result, 'gmodulo' and 'forcecopy' become obsolete.
    15- use quadclassunit in qfbhclassno for large D, thereby ASSUMING GRH.
+   16- ellan was bypassing the check for CM
 
   Added
     1- [library] new function isinexact.

@@ -3022,6 +3022,7 @@ GEN
 anell(GEN e, long n0)
 {
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
+  long P[3] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong p, m, n = (ulong)n0;
   GEN *an, D, c6;
 #ifndef LONG_IS_64BIT
@@ -3059,7 +3060,8 @@ anell(GEN e, long n0)
       }
     else /* good reduction */
     {
-      GEN ap = apell0(e, p);
+      GEN ap;
+      P[2] = p; ap = apell(e, P);
 
       if (p < TEMPC) {
         ulong pk, oldpk = 1;
@@ -3079,7 +3081,7 @@ anell(GEN e, long n0)
       } else {
         an[p] = ap;
         for (m = n/p; m > 1; m--)
-          if (an[m] && m%p) an[m*p] = mulii(an[m], an[p]);
+          if (an[m]) an[m*p] = mulii(an[m], an[p]);
       }
     }
   }
