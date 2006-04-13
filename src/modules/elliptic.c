@@ -3023,17 +3023,13 @@ anell(GEN e, long n0)
 {
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
   long P[3] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong p, m, n = (ulong)n0;
+  ulong p, m, SQRTn, n = (ulong)n0;
   GEN *an, D, c6;
-#ifndef LONG_IS_64BIT
-  const ulong TEMPC = 46337UL; /* largest prime p, such that p^2 < HIGHBIT */
-#else
-  const ulong TEMPC = 3037000493UL;
-#endif
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
   if (n >= LGBITS) pari_err(impl,"anell for n >= %lu", LGBITS);
+  SQRTn = (ulong)sqrt(n);
   c6= gel(e,11);
   D = gel(e,12);
 
@@ -3063,7 +3059,7 @@ anell(GEN e, long n0)
       GEN ap;
       P[2] = p; ap = apell(e, P);
 
-      if (p < TEMPC) {
+      if (p <= SQRTn) {
         ulong pk, oldpk = 1;
         for (pk=p; pk <= n; oldpk=pk, pk *= p)
         {
@@ -3081,7 +3077,7 @@ anell(GEN e, long n0)
       } else {
         an[p] = ap;
         for (m = n/p; m > 1; m--)
-          if (an[m]) an[m*p] = mulii(an[m], an[p]);
+          if (an[m]) an[m*p] = mulii(an[m], ap);
       }
     }
   }
