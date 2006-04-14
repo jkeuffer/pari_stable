@@ -556,6 +556,7 @@ else
   cat >> $file <<EOT
 parilvl0.h: $kernlvl0/asm0.h
 	$cfg/genkernel $kernlvl0/asm0.h > parilvl0.h
+EOT
 fi
 if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then . $f; fi
 
