@@ -1,6 +1,6 @@
-There is a different directory for each value of "$asmarch". Each contain
-a file Makefile.SH, to be included in the general Makefile. It contains
-rules for creating headers and object files in the build directory.
+There is a different directory for each value of "$asmarch". If it contain
+files MakeLVL[01].SH, these are included in the general Makefile. It
+contains rules for creating headers and object files in the build directory.
 
 The list of object files is given by "$kernel" (default: "mp mpinl")
 
@@ -10,13 +10,21 @@ The list of object files is given by "$kernel" (default: "mp mpinl")
   divll
   bfffo
 If no assembler implementation is available the definitions are in
-none/ (asm0.h, divll.h, bfffo.h). Otherwise, in $asmarch/asm0.h
+none/ (addll.h, mulll.h, bfffo.h, divll.h). Otherwise, in $asmarch/asm0.h
+
+If MakeLVL0.SH is not present, the file asm0.h is treated by
+config/genkernel. The script expands the following tokens [ to be
+placed in a C comment ] as follows:
+
+  ^NOASM mod1 mod2 ... includes mod1.h, mod2.h #ifndef ASMINLINE
+  ^ALWAYS mod1 mod2 ...includes mod1, mod2.
+
+where portable implementations of mod1, mod2, etc. (among addll, mulll,
+bfffo, divll)
 
 * Inline Level 1 symbols, in mpinl.o: the definitions are in
-none/level1.h (see there). Inlining may or may not be possible, but a symbol
+none/level1.h. Inlining may or may not be possible, but a symbol
 must be defined in mpinl.o in any case.
-
-FIXME: asm0.h/asm1.h should be renamed according to the above.
 
 * Non-Inline Level 1 symbols, defined in mp.o: the definitions are in
 various *.c files in none/ and gmp/ concatenated into $objdir/mp.c.
