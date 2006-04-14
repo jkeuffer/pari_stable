@@ -549,6 +549,7 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 EOT
 fi
 
+# Level 0
 f=$src_dir/kernel/$kernlvl0/MakeLVL0.SH
 if test -s $f; then
   . $f
@@ -558,7 +559,10 @@ parilvl0.h: $kernlvl0/asm0.h
 	$cfg/genkernel $kernlvl0/asm0.h > parilvl0.h
 EOT
 fi
-if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then . $f; fi
+
+# Level 1
+f=$src_dir/kernel/$kernlvl1/MakeLVL1.SH
+if test -s $f; then . $f; fi
 
 HUGELINE=
 for dir in basemath modules language gp graph graphdyn systems; do
