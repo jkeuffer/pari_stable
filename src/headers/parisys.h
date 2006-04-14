@@ -41,7 +41,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define ENDEXTERN
 #endif
 
-#ifndef DISABLE_INLINE
+#ifdef DISABLE_INLINE
+#  undef ASMINLINE
+#else
 #  ifdef __cplusplus
 #    define INLINE inline static
 #  elif defined(__GNUC__)

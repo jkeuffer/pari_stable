@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* It is intended for use with an external "asm" definition          */
 
 /*
-NOASM addll mulll divll bfffo
+NOASM addll mulll bfffo divll
 */
 #ifdef ASMINLINE
 /* Written by Bruno Haible, 1996-1998. */
