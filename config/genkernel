@@ -17,3 +17,4 @@ for i in `grep '^ALWAYS' $file`; do
     *) cat $knone/$i.h;;
   esac;
 done
+exit 0
