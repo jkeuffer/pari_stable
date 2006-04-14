@@ -1,6 +1,4 @@
 #line 2 "../src/kernel/none/bfffo.h"
-#ifndef __BFFO_H__
-#define __BFFO_H__
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
@@ -65,5 +63,4 @@ bfffo(ulong x)
 }
 #endif
 
-#endif
 #endif

@@ -12,22 +12,11 @@ ANY WARRANTY WHATSOEVER.
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
-
-#ifndef ASMINLINE
-
-#define LOCAL_OVERFLOW
-#define LOCAL_HIREMAINDER
-
-extern ulong overflow, hiremainder;
-extern long addll(ulong a, ulong b);
-extern long addllx(ulong a, ulong b);
-extern long subll(ulong a, ulong b);
-extern long subllx(ulong a, ulong b);
-extern long mulll(ulong x, ulong y);
-extern long addmul(ulong x, ulong y);
-extern long bfffo(ulong x); 
-
-#else /* ASMINLINE */
+/*
+NOASM addll mulll bfffo
+ALWAYS divll.h
+*/
+#ifdef ASMINLINE
 #define LOCAL_HIREMAINDER  register ulong hiremainder
 #define LOCAL_OVERFLOW     register ulong overflow
 

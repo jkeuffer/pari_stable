@@ -1,6 +1,4 @@
 #line 2 "../src/kernel/none/addll.h"
-#ifndef __ADDLL_H__
-#define __ADDLL_H__
 /* $Id$
 
 Copyright (C) 2003  The PARI group.
@@ -100,5 +98,4 @@ subllx(ulong x, ulong y)
 
 #endif /* __GNUC__ */
 
-#endif
 #endif

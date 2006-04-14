@@ -17,22 +17,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file defines some "level 0" kernel functions for Intel ix86  */
 /* It is intended for use with an external "asm" definition          */
 
-#ifndef ASMINLINE
-#define LOCAL_OVERFLOW
-#define LOCAL_HIREMAINDER
-
-extern  ulong hiremainder, overflow;
-extern long addll(ulong x, ulong y);
-extern long addllx(ulong x, ulong y);
-extern long subll(ulong x, ulong y);
-extern long subllx(ulong x, ulong y);
-extern long mulll(ulong x, ulong y);
-extern long addmul(ulong x, ulong y);
-extern long divll(ulong x, ulong y);
-extern int  bfffo(ulong x);
-
-#else /* ASMINLINE */
-
+/*
+NOASM addll mulll divll bfffo
+*/
+#ifdef ASMINLINE
 /* Written by Bruno Haible, 1996-1998. */
 
 /* This file can assume the GNU C extensions.
@@ -110,4 +98,4 @@ extern int  bfffo(ulong x);
   31 - leading_one_position; \
 })
 
-#endif /* ASMINLINE */
+#endif

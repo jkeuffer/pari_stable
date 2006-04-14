@@ -25,19 +25,19 @@ BEGINEXTERN
 #  undef addllx
 #  undef subll
 #  undef subllx
+#  include "../src/kernel/none/addll.h"
 #endif
-#include "../src/kernel/none/addll.h"
 #ifdef mulll
 #  undef mulll
 #  undef addmul
+#  include "../src/kernel/none/mulll.h"
 #endif
-#include "../src/kernel/none/mulll.h"
 #ifdef divll
 #  undef divll
+#  include "../src/kernel/none/divll.h"
 #endif
-#include "../src/kernel/none/divll.h"
 #ifdef bfffo
 #  undef bfffo
+#  include "../src/kernel/none/bfffo.h"
 #endif
-#include "../src/kernel/none/bfffo.h"
 ENDEXTERN

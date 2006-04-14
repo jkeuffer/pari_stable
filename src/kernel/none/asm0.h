@@ -13,19 +13,6 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines the prototypes of "level 0" kernel functions 
- * It is intended for use with an external "asm" definition 
- * bfffo is omitted since 1) no "asm" provides it, 2) if has its own
- * independent header in bfffo.h, possibly conflicting with this one */
-
-#define LOCAL_OVERFLOW
-#define LOCAL_HIREMAINDER
-
-extern ulong hiremainder, overflow;
-extern long addll(ulong x, ulong y);
-extern long addllx(ulong x, ulong y);
-extern long subll(ulong x, ulong y);
-extern long subllx(ulong x, ulong y);
-extern long mulll(ulong x, ulong y);
-extern long addmul(ulong x, ulong y);
-extern long divll(ulong x, ulong y);
+/*
+ALWAYS addll mulll bfffo divll
+*/

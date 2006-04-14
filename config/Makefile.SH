@@ -318,8 +318,8 @@ install: install-lib-$dft install-include install-bin install-man install-misc i
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)/pari
-	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)/pari
-	\$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)/pari
+	-for i in paricfg.h pariinl.h; do \\
+	  \$(INSTALL_DATA) \$\$i \$(INCLUDEDIR)/pari; done
 	-for i in $headerlist; do \\
 	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR)/pari; done
 	-\$(RM) \$(INCLUDEDIR)/pari/genpari.h
@@ -549,12 +549,15 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 EOT
 fi
 
-for f in \
-  $src_dir/kernel/$kernlvl0/MakeLVL0.SH \
-  $src_dir/kernel/$kernlvl1/MakeLVL1.SH \
-; do
-  if test -s $f; then . $f; fi
-done
+f=$src_dir/kernel/$kernlvl0/MakeLVL0.SH
+if test -s $f; then
+  . $f
+else
+  cat >> $file <<EOT
+parilvl0.h: $kernlvl0/asm0.h
+	$cfg/genkernel $kernlvl0/asm0.h > parilvl0.h
+fi
+if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then . $f; fi
 
 HUGELINE=
 for dir in basemath modules language gp graph graphdyn systems; do

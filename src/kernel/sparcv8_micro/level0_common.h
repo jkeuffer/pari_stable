@@ -14,20 +14,11 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file is common to SuperSparc and MicroSparc */
-
-extern ulong hiremainder, overflow;
-
-#ifndef ASMINLINE
-#define LOCAL_OVERFLOW
-#define LOCAL_HIREMAINDER
-extern long addll(ulong a, ulong b);
-extern long addllx(ulong a, ulong b);
-extern long subll(ulong a, ulong b);
-extern long subllx(ulong a, ulong b);
-extern long mulll(ulong x, ulong y);
-extern long addmul(ulong x, ulong y);
-
-#else /* ASMINLINE */
+/*
+NOASM addll mulll
+ALWAYS bfffo
+*/
+#ifdef ASMINLINE
 
 #define LOCAL_HIREMAINDER  ulong hiremainder
 #define LOCAL_OVERFLOW     ulong overflow
@@ -88,4 +79,4 @@ __value;})
 	 : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
          : "cc");	\
 __value;})								
-#endif /* ASMINLINE */
+#endif

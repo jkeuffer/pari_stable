@@ -10,7 +10,7 @@ The list of object files is given by "$kernel" (default: "mp mpinl")
   divll
   bfffo
 If no assembler implementation is available the definitions are in
-none/ (level0.h, divll.h, bfffo.h). Otherwise, in $asmarch/level0.h
+none/ (asm0.h, divll.h, bfffo.h). Otherwise, in $asmarch/asm0.h
 
 * Inline Level 1 symbols, in mpinl.o: the definitions are in
 none/level1.h (see there). Inlining may or may not be possible, but a symbol

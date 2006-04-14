@@ -147,6 +147,7 @@ BA 48- minpoly(,,v) might return polynomials in x instead of v.
        As a result, 'gmodulo' and 'forcecopy' become obsolete.
    15- use quadclassunit in qfbhclassno for large D, thereby ASSUMING GRH.
    16- ellan was bypassing the check for CM
+   17- uniformize the generation of parilvl0.h [ genkernel ]
 
   Added
     1- [library] new function isinexact.
@@ -157,6 +158,7 @@ BA  3- [elldata] function ellconvertname() to parse curve name.
 BA  5- m68k level0 inline assembly kernel
     6- [library] new function isint, issmall, mkrfrac
     7- Configure --time=timing_fun
+    8- [Configure] genkernel script
 
   Removed
     1- kernel functions shiftl / shiftlr (inefficient, unused, untested)

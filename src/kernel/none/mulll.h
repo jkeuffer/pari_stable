@@ -1,6 +1,4 @@
 #line 2 "../src/kernel/none/mulll.h"
-#ifndef __MULLL_H__
-#define __MULLL_H__
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
@@ -141,5 +139,4 @@ addmul(ulong x, ulong y)
 }
 #endif
 
-#endif
 #endif

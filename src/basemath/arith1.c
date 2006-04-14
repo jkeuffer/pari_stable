@@ -2783,7 +2783,7 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
     }
   }
 
-  /* divide by [ O^* : O_K^* ] */
+  /* divide by [ O_K^* : O^* ] */
   if (s < 0)
   {
     reg = NULL;
