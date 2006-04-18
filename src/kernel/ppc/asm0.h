@@ -14,7 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*
 NOASM addll mulll bfffo
-ALWAYS divll.h
+ALWAYS divll
 */
 #ifdef ASMINLINE
 #define LOCAL_HIREMAINDER  register ulong hiremainder
