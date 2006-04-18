@@ -15,7 +15,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*
-NOASM addll mulll bfffo divll
+ASM addll mulll bfffo divll
 */
 /* Written by Bill Allombert from the ix86 version by Bruno Haible. Basically
  * change insl to insq*/

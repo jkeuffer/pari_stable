@@ -19,8 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * longlong.h from the GNU MP package.*/
 
 /*
-NOASM addll mulll
-ALWAYS bfffo divll
+ASM addll mulll
+NOASM bfffo divll
 */
 #ifdef ASMINLINE
 

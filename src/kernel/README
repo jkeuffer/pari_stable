@@ -13,14 +13,15 @@ If no assembler implementation is available the definitions are in
 none/ (addll.h, mulll.h, bfffo.h, divll.h). Otherwise, in $asmarch/asm0.h
 
 If MakeLVL0.SH is not present, the file asm0.h is treated by
-config/genkernel. The script expands the following tokens [ to be
-placed in a C comment ] as follows:
+config/genkernel, creating parilvl0.h. The script expands the
+following tokens [ to be placed in a C comment ] as follows:
 
-  ^NOASM mod1 mod2 ... includes mod1.h, mod2.h #ifndef ASMINLINE
-  ^ALWAYS mod1 mod2 ...includes mod1, mod2.
+  ^ASM  mod1 mod2    // asm0.h implements modules mod1, mod2
+  ^NOASM mod1 mod2   // asm0.h does not implement modules mod1, mod2
 
-where portable implementations of mod1, mod2, etc. (among addll, mulll,
-bfffo, divll)
+where mod1, mod2 etc. are modules among addll, mulll, bfffo, divll.
+In effect, this includes portable code from kernel/none/<module>.h
+to supplement whatever is provided by asm0.h.
 
 * Inline Level 1 symbols, in mpinl.o: the definitions are in
 none/level1.h. Inlining may or may not be possible, but a symbol
