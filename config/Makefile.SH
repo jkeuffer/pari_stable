@@ -269,7 +269,7 @@ lib-dyn: \$(LIBPARI_DYN)
 	-$ranlib \$@
 
 kerntest\$(_O): $src/test/kerntest.c
-	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
+	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ $src/test/kerntest.c
 
 kerntest: $KERNOBJS kerntest\$(_O)
 	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
