@@ -42,6 +42,22 @@ gsettype(GEN x,long t)
   x=gcopy(x); settyp(x,t); return x;
 }
 
+static long
+setserieslength(long n)
+{
+  long m=precdl;
+  if(n>0) precdl=n;
+  return m;
+}
+
+static long
+setprecr(long n)
+{
+  long m = GP_DATA->fmt->sigd;
+  if (n > 0) { GP_DATA->fmt->sigd = n; precreal = ndec2prec(n); }
+  return m;
+}
+
 entree functions_oldgp[] = {
 {"allocatemem",11,(void *)allocatemoremem,2,"vLp","allocatemem(s)=allocates a new stack of s bytes, or doubles the stack if size is 0"},
 {"box",35,(void *)rectbox,10,"vLGG","box(w,x2,y2)=if the cursor is at position (x1,y1), draw a box with diagonal (x1,y1) and (x2,y2) in rectwindow w (cursor does not move)"},
@@ -78,8 +94,8 @@ entree functions_oldgp[] = {
 {"rpoint",35,(void *)rectrpoint,10,"vLGG","rpoint(w,dx,dy)=draw a point (and move cursor) at position dx,dy relative to present position of the cursor in rectwindow w"},
 {"rpoints",35,(void *)rectpoints,10,"vLGG","rpoints(w,xs,ys)=draw in rectwindow w the points given by vector of first coordinates xs and vector of second coordinates ys"},
 {"scale",59,(void *)rectscale,10,"vLGGGG","scale(w,x1,x2,y1,y2)=scale the coordinates in rectwindow w so that x goes from x1 to x2 and y from y1 to y2 (y2<y1 is allowed)"},
-{"setprecision",15,(void *)setrealprecision,2,"lL","setprecision(n)=set the current precision to n decimal digits if n>0, or return the current precision if n<=0"},
-{"setserieslength",15,(void *)setseriesprecision,2,"lL","setserieslength(n)=set the default length of power series to n if n>0, or return the current default length if n<=0"},
+{"setprecision",15,(void *)setprecr,2,"lL","setprecision(n)=set the current precision to n decimal digits if n>0, or return the current precision if n<=0"},
+{"setserieslength",15,(void *)setserieslength,2,"lL","setserieslength(n)=set the default length of power series to n if n>0, or return the current default length if n<=0"},
 {"settype",21,(void *)gsettype,2,"GL","settype(x,t)=make a copy of x with type t (to use with extreme care)"},
 {"string",57,(void*)rectstring,10,"vLs","string(w,x)=draw in rectwindow w the string corresponding to x, where x is either a string, or a number in R, written in format 9.3"},
 {"system",70,(void*) system0,11,"vs","system(a): a being a string, execute the system command a (not valid on every machine)"},

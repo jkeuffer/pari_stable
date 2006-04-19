@@ -183,19 +183,17 @@ do_strftime(const char *s, char *buf, long max)
 /**************************************************************************/
 
 long
-setseriesprecision(long n)
+getrealprecision(void)
 {
-  long m = precdl;
-  if(n > 0) precdl = n;
-  return m;
+  return GP_DATA->fmt->sigd;
 }
 
 long
-setrealprecision(long n)
+setrealprecision(long n, long *prec)
 {
-  long m = GP_DATA->fmt->sigd;
-  if (n > 0) { GP_DATA->fmt->sigd = n; precreal = ndec2prec(n); }
-  return m;
+  GP_DATA->fmt->sigd = n; 
+  *prec = precreal = ndec2prec(n);
+  return n;
 }
 
 static GEN
