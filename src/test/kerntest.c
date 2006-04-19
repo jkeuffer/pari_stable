@@ -33,7 +33,7 @@ GEN gtofp(GEN x, long prec){return x;}
 void gaffect(GEN x, GEN y){}
 GEN ceilr(GEN x){return x;}
 GEN roundr(GEN x){return x;}
-const long lontyp[] = {};
+const long lontyp[] = {0};
 
 void sorstring(ulong x)
 {
