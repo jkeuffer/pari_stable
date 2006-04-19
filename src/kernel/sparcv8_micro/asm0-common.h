@@ -15,8 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file is common to SuperSparc and MicroSparc */
 /*
-NOASM addll mulll
-ALWAYS bfffo
+ASM addll mulll
+NOASM bfffo
 */
 #ifdef ASMINLINE
 
