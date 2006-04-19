@@ -82,7 +82,7 @@ typedef long *GEN;
 
 #define evaltyp(x)    (((ulong)(x)) << TYPSHIFT)
 #define evalvarn(x)   (((ulong)(x)) << VARNSHIFT)
-#define evalsigne(x)   (((long)(x)) << SIGNSHIFT)
+#define evalsigne(x)  ((ulong)(((long)(x)) << SIGNSHIFT))
 #define evalprecp(x)   (((long)(x)) << PRECPSHIFT)
 #define _evalexpo(x)  (HIGHEXPOBIT + (x))
 #define _evalvalp(x)  (HIGHVALPBIT + (x))

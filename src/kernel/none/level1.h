@@ -619,7 +619,7 @@ real_1(long prec) {
   GEN x = cgetr(prec);
   long i;
   x[1] = evalsigne(1) | _evalexpo(0);
-  x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
+  x[2] = (long)HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
   return x;
 }
 INLINE GEN
@@ -627,7 +627,7 @@ real_m1(long prec) {
   GEN x = cgetr(prec);
   long i;
   x[1] = evalsigne(-1) | _evalexpo(0);
-  x[2] = HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
+  x[2] = (long)HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
   return x;
 }
 /* 2.^n */
