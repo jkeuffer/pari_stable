@@ -319,13 +319,11 @@ printer. The output should bear some similarity to the screen images.
 \subsubsec{Heavy-duty testing} [{\sl Optional\/}]
 There are a few extra tests which should be useful only for developpers.
 
-\kbd{make test-kernel} may be applied to an \emph{optimized} gp build (not a
-debugging one): it checks whether the inline assembler kernel seems to work,
-and provides simple diagnostics if it does not.
+\kbd{make test-kernel} checks whether the low-level kernel seems to work,
+and provides simple diagnostics if it does not. Only useful if \kbd{make
+bench} fails horribly, e.g.~things like \kbd{1+1} do not work.
 
 \kbd{make test-all} runs all available test suites. Slow.
-
-
 
 \section{Installation} When everything looks fine, type
 
