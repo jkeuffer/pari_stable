@@ -546,6 +546,7 @@ $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF)
 	mv $desc/highlvl\$(TMPSUF) \$@
 
+L0MODS=$kern0/asm0.h $knone/addll.h $knone/mulll.h $knone/bfffo.h $knone/divll.h
 EOT
 fi
 
@@ -555,7 +556,7 @@ if test -s $f; then
   . $f
 else
   cat >> $file <<EOT
-parilvl0.h: $kern0/asm0.h $knone/addll.h $knone/mulll.h $knone/bfffo.h $knone/divll.h
+parilvl0.h: \$(L0MODS)
 	$cfg/genkernel $kern0/asm0.h > parilvl0.h
 EOT
 fi
