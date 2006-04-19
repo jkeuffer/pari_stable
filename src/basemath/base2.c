@@ -589,7 +589,7 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
 GEN
 allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  VOLATILE GEN w1, w2, a, da, p1, ordmax;
+  VOLATILE GEN w1, w2, a, da, ordmax;
   VOLATILE long n, lw, i, j, k, l;
   GEN w;
 
@@ -633,58 +633,48 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   da = NULL;
   for (i=1; i<lw; i++)
   {
-    GEN db, b = gel(ordmax,i);
+    GEN M, db, b = gel(ordmax,i);
     if (b == gen_1) continue;
     db = gen_1;
     for (j=1; j<=n; j++)
     {
-      p1 = denom(gcoeff(b,j,j));
-      if (cmpii(p1,db) > 0) db = p1;
+      GEN t = denom(gcoeff(b,j,j));
+      if (absi_cmp(t,db) > 0) db = t;
     }
     if (db == gen_1) continue;
 
-    /* db = denom(diag(b)), (da,db) = 1 */
+    /* db = denom(b), (da,db) = 1. Compute da Im(b) + db Im(a) */
     b = Q_muli_to_int(b,db);
     if (!da) { da = db; a = b; }
     else
-    {
-      j=1; while (j<=n && fnz(gel(a,j),j) && fnz(gel(b,j),j)) j++;
-      b = gmul(da,b);
-      a = gmul(db,a); da = mulii(da,db);
-      k = j-1; p1 = cgetg(2*n-k+1,t_MAT);
+    { /* optimization: easy as long as both matrix are diagonal */
+      j=2; while (j<=n && fnz(gel(a,j),j) && fnz(gel(b,j),j)) j++;
+      k = j-1; M = cgetg(2*n-k+1,t_MAT);
       for (j=1; j<=k; j++)
       {
-        p1[j] = a[j];
-        gcoeff(p1,j,j) = gcdii(gcoeff(a,j,j),gcoeff(b,j,j));
+        gel(M,j) = gel(a,j);
+        gcoeff(M,j,j) = mulii(gcoeff(a,j,j),gcoeff(b,j,j));
       }
-      for (  ; j<=n;     j++) p1[j] = a[j];
-      for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];
-      a = hnfmodid(p1, da);
+      /* could reduce mod M(j,j) but not worth it: usually close to da*db */
+      for (  ; j<=n;     j++) gel(M,j) = gmul(db, gel(a,j));
+      for (  ; j<=2*n-k; j++) gel(M,j) = gmul(da, gel(b,j+k-n));
+      da = mulii(da,db);
+      a = hnfmodid(M, da);
     }
     if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
   }
-  *dK = *dx;
   if (da)
   {
     *index = diviiexact(da, gcoeff(a,1,1));
     for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
-    *dK = diviiexact(*dK, sqri(*index));
-    for (j=n-1; j; j--)
-      if (cmpiu(gcoeff(a,j,j),2) > 0)
-      {
-        p1 = shifti(gcoeff(a,j,j),-1);
-        for (k=j+1; k<=n; k++)
-          if (cmpii(gcoeff(a,j,k),p1) > 0)
-            for (l=1; l<=j; l++)
-              gcoeff(a,l,k) = subii(gcoeff(a,l,k),gcoeff(a,l,j));
-      }
-    a = gdiv(a, da);
+    a = gdiv(hnfcenter_ip(a), da);
   }
   else
   {
     *index = gen_1;
     a = matid(n);
   }
+  *dK = diviiexact(*dx, sqri(*index));
 
   if (ptw)
   {
@@ -695,7 +685,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     for (j=1; j<lw; j++)
     {
       k = safe_Z_pvalrem(D, gel(w1,j), &D);
-      if (k) { W1[lfa] = w1[j]; gel(W2,lfa) = utoipos(k); lfa++; }
+      if (k) { gel(W1,lfa) = gel(w1,j); gel(W2,lfa) = utoipos(k); lfa++; }
     }
     setlg(W1, lfa);
     setlg(W2, lfa); *ptw = mkmat2(W1,W2);
