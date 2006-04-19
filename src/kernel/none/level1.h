@@ -876,7 +876,7 @@ INLINE void
 divsiz(long x, GEN y, GEN z)
 {
   long junk;
-  gaffsg(sdivsi_rem(x,y,&junk), z);
+  affsi(sdivsi_rem(x,y,&junk), z);
 }
 
 INLINE void

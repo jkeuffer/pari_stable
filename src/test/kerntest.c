@@ -27,6 +27,13 @@ char*gpmalloc(size_t size) { return malloc(size); }
 GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
 void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
 void gerepilemany(pari_sp av, GEN* gptr[], int n){}
+void fprintferr(const char *x, ...){}
+GEN gcopy(GEN x){return x;}
+GEN gtofp(GEN x, long prec){return x;}
+void gaffect(GEN x, GEN y){}
+GEN ceilr(GEN x){return x;}
+GEN roundr(GEN x){return x;}
+const long lontyp[] = {};
 
 void sorstring(ulong x)
 {

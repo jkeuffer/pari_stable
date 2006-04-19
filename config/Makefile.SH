@@ -76,9 +76,12 @@ case "$which_graphic_lib" in
   ;;
 esac
 
-KERNOBJS="mp\$(_O)"
-OBJS=
-for f in $kernel $basemath $language $modules $systems; do
+KERNOBJS=
+for f in $kernel; do
+  KERNOBJS="$KERNOBJS $f\$(_O)"
+done
+OBJS=$KERNOBJS
+for f in $basemath $language $modules $systems; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=
