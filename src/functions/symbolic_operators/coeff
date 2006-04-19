@@ -15,6 +15,6 @@ Function: _[_,]
 Class: symbolic_operators
 Description:
  (mp,small):gen                 $"Scalar has no rows"
- (vec,small):gen                row($1, $2)
- (gen,small):gen                row($1, $2)
+ (vec,small):vec                rowcopy($1, $2)
+ (gen,small):vec                rowcopy($1, $2)
 
