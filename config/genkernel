@@ -1,8 +1,7 @@
 #! /bin/sh
 K=../src/kernel
 knone=$K/none
-for i in "$@"; do
-  file="$K/$1"
+for file in "$@"; do
   echo "#ifndef ASMINLINE"
   for i in `grep '^ASM' $file`; do
     case $i in
