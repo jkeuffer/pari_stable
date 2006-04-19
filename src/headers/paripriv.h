@@ -135,6 +135,9 @@ GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
 GEN lllint_marked(long *M, GEN x, long D, int g, GEN *h, GEN *f, GEN *B);
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
+GEN sqred1intern(GEN a);
+GEN lllgramintern(GEN x, long alpha, long flag, long prec);
+GEN lllintern(GEN x, long D, long flag, long prec);
 
 /* miscellaneous linear algebra */
 GEN  diagonal_i(GEN x);
@@ -258,7 +261,8 @@ GEN  RgXQ_u_pow(GEN x, ulong n, GEN T);
 GEN  RgX_gcd_simple(GEN x, GEN y);
 GEN  RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
 GEN  RgXQ_minpoly_naive(GEN y, GEN P);
-
+GEN lift_intern0(GEN x,long v);
+#define lift_intern(x) (lift_intern0((x),-1))
 
 /* b') Chinese Remainder Theorem */
 GEN ZM_init_CRT(GEN Hp, ulong p);

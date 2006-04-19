@@ -399,7 +399,6 @@ enum manage_var_t {
 #define subres(x,y) (subresall((x),(y),NULL))
 /* #define subres(x,y) (resultantducos((x),(y))) */
 
-#define lift_intern(x) (lift_intern0((x),-1))
 #define invmat(a) (gauss((a),NULL))
 
 /* output of get_nf and get_bnf */
