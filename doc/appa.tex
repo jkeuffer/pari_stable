@@ -61,7 +61,7 @@ Then, type
 
 \kbd{./Configure}
 
-\noindent in the toplevel directory. This attempts to configure GP/PARI
+\noindent in the toplevel directory. This attempts to configure PARI/GP
 without outside help. Note that if you want to install the end product in
 some nonstandard place, you can use the \kbd{--prefix} option, as in
 
@@ -115,14 +115,20 @@ run a series of comparative tests on those two. To test only the default
 binary, use \kbd{make dobench} which starts the bench immediately.
 
 The static binary should be slightly faster. In any case, this should not
-take more than a few seconds (user time) on modern machines. See the file
+take more than a few seconds on modern machines. See the file
 \kbd{MACHINES} to get an idea of how much time comparable systems need.
 We would appreciate a short note in the same format in case your system is
 not listed and you nevertheless have a working GP executable.
 
-If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
-installation procedure, but it may be a bug in the Pari system, in which
-case we would appreciate a report (see the last section)
+If a \kbd{[BUG]} message shows up, something went wrong. The testing utility
+directs you to files containing the differences between the test output and
+the expected results. Have a look and decide for yourself if something is
+amiss. If it looks like a bug in the Pari system, we would appreciate a
+report (see the last section).
+
+\misctitle{Known problem:} some implementations of the \kbd{diff} utility
+(on HPUX for instance) output \kbd{No differences encountered} or some
+similar message instead of the expected empty input.
 
 \section{Troubleshooting and fine tuning:} 
 In case the default \kbd{Configure} run fails miserably, try
@@ -230,7 +236,8 @@ multi-precision integer and real).
 
 L0: \kbd{auto}, \kbd{none} and
 \bprog
-  alpha hppa hppa64 ia64 ix86 x86_64 ppc sparcv7 sparcv8_micro sparcv8_super
+  alpha hppa hppa64 ia64 ix86 x86_64 m68k ppc sparcv7
+  sparcv8_micro sparcv8_super
 @eprog
 
 L1: \kbd{auto}, \kbd{none} and \kbd{gmp}
