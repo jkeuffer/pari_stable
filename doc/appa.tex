@@ -17,9 +17,10 @@ to fetch \kbd{gcc} at the address
 
 \kbd{http://www.gnu.org/order/ftp.html}
 
-\noindent You can certainly compile PARI with a different compiler, but the
-PARI kernel takes advantage of optimizations provided by \kbd{gcc}. This
-results in at least 20\% speedup on most architectures.
+\noindent (On Mac OS X, this is also provided in the \kbd{Xcode} tool
+suite.) You can certainly compile PARI with a different compiler, but
+the PARI kernel takes advantage of optimizations provided by \kbd{gcc}.
+This results in at least 20\% speedup on most architectures.
 
 \misctitle{Optional packages.} The following programs and libraries are useful
 in conjunction with \kbd{gp}, but not mandatory. In any case, get them before
@@ -34,8 +35,7 @@ you will use libpari unless you have backwards compatibility requirements.
   $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
 an automatic context-dependent completion, and an editable history of
 commands. Note that it is incompatible with SUN commandtools (yet another
-reason to dump Suntools for X Windows). Antique versions (version number less
-than 2.2) will lack some features but are still usable.
+reason to dump Suntools for X Windows).
 
   $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables GP to read compressed
 data.
@@ -126,11 +126,7 @@ the expected results. Have a look and decide for yourself if something is
 amiss. If it looks like a bug in the Pari system, we would appreciate a
 report (see the last section).
 
-\misctitle{Known problem:} some implementations of the \kbd{diff} utility
-(on HPUX for instance) output \kbd{No differences encountered} or some
-similar message instead of the expected empty input.
-
-\section{Troubleshooting and fine tuning:} 
+\section{Troubleshooting and fine tuning} 
 In case the default \kbd{Configure} run fails miserably, try
 
 \kbd{./Configure -a}
@@ -203,8 +199,8 @@ parse \kbd{CFLAGS} at this time.
 \kbd{LIBRARY\_PATH} is prepended to the list of directories
 searched for libraries.
 
-You may disable inlining by adding \kbd{-DDISABLE\_INLINE} to \kbd{CFLAGS},
-and prevent the use of the \kbd{volatile} keyword with
+\noindent You may disable inlining by adding \kbd{-DDISABLE\_INLINE} to
+\kbd{CFLAGS}, and prevent the use of the \kbd{volatile} keyword with
 \kbd{-DDISABLE\_VOLATILE}.
 
 \subsec{Debugging/profiling}: If you also want to debug the PARI library,
@@ -275,20 +271,31 @@ You can also invoke \kbd{Configure} with one of the following arguments:
 
    \kbd{--with-readline-include=\emph{path to \kbd{readline.h}}}
 
-\misctitle{Linux:} Linux distributions have separate \kbd{readline} and
-\kbd{readline-devel} packages. You need both of them installed to compile gp
-with readline support. If only \kbd{readline} is installed, \kbd{Configure}
-will complain. \kbd{Configure} may also complain about a missing
-libncurses.so, in which case, you have to install the
-\kbd{ncurses-devel} package (some distributions let you install
-\kbd{readline-devel} without \kbd{ncurses-devel}, which is a bug in their
-package dependency handling).
-
 \misctitle{Technical note:} Configure can build GP on different architectures
 simultaneously from the same toplevel sources. Instead of the \kbd{readline}
 link alluded above, you can create \kbd{readline-{\sl osname}-{\sl arch}},
 using the same naming conventions as for the \kbd{O$xxx$} directory,
 e.g \kbd{readline-linux-i686}.
+
+\misctitle{Known problems:}
+
+$\bullet$ on Linux: Linux distributions have separate \kbd{readline} and
+\kbd{readline-devel} packages. You need both of them installed to
+compile gp with readline support. If only \kbd{readline} is installed,
+\kbd{Configure} will complain. \kbd{Configure} may also complain about a
+missing libncurses.so, in which case, you have to install the
+\kbd{ncurses-devel} package (some distributions let you install
+\kbd{readline-devel} without \kbd{ncurses-devel}, which is a bug in
+their package dependency handling).
+
+$\bullet$ on OS X.4: Tiger comes equipped with a fake \kbd{readline},
+which is not sufficient for our purpose. As a result, gp is built
+without readline support. Since \kbd{readline} is not trivial to install
+in this environment, a step by step solution can be found in the PARI
+FAQ, see
+\bprog
+  http://pari.math.u-bordeaux.fr/
+@eprog
 
 \subsec{Testing}
 
@@ -309,6 +316,11 @@ old library or unset the \kbd{LD\_LIBRARY\_PATH} environment variable. Try to
 disable this variable in any case if anything \emph{very} wrong occurs with
 the \kbd{gp-dyn} binary, like an Illegal Instruction on startup. It does not
 affect \kbd{gp-sta}.
+
+$\bullet$ Some implementations of the \kbd{diff} utility (on HPUX for
+instance) output \kbd{No differences encountered} or some similar
+message instead of the expected empty input. Thus producing a spurious
+\kbd{[BUG]} message.
 
 \subsubsec{Some more testing} [{\sl Optional\/}]
 
