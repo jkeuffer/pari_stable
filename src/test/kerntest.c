@@ -11,7 +11,7 @@ void specinit()
   long size = 100000L;
   bot = (pari_sp)malloc(size);
   top = avma = bot + size;
-  gen_0 = malloc(2);
+  gen_0 = (GEN)malloc(2);
   gen_0[0] = evaltyp(t_INT)|evallg(2);
   gen_0[1] = evallgefint(2);
   gen_1 = utoipos(1);
@@ -22,8 +22,8 @@ void specinit()
 void gerepileall(pari_sp av, int n, ...){}
 void pari_err(long x, ...) { exit (0); }
 void pari_warn(long x, ...) { exit (0); }
-char*gprealloc(void *pointer, size_t size) { return realloc(pointer,size); }
-char*gpmalloc(size_t size) { return malloc(size); }
+char*gprealloc(void *pointer, size_t size) { return (char*)realloc(pointer,size); }
+char*gpmalloc(size_t size) { return (char*)malloc(size); }
 GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
 void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
 void gerepilemany(pari_sp av, GEN* gptr[], int n){}
