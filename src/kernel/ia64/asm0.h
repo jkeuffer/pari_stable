@@ -15,13 +15,27 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*
-ASM mulll
-NOASM addll bfffo divll
+ASM mulll bfffo
+NOASM addll divll
 */
 
 #ifdef ASMINLINE
 /* Written by Guillaume Hanrot */
 #define LOCAL_HIREMAINDER  register ulong hiremainder
+
+#define bfffo(a)                                                        \
+({ ulong __arg1 = (a), __tmp, _a, _c;                                   \
+    __asm__ ("mux1 %0 = %1, @rev" : "=r" (__tmp) : "r" (__arg1));       \
+    __asm__ ("czx1.l %0 = %1" : "=r" (_a) : "r" (-__tmp | __tmp));      \
+    _c = (_a - 1) << 3;                                                 \
+    __arg1 >>= _c;                                                      \
+    if (__arg1 >= 1 << 4)                                               \
+      __arg1 >>= 4, _c += 4;                                            \
+    if (__arg1 >= 1 << 2)                                               \
+      __arg1 >>= 2, _c += 2;                                            \
+    _c += __arg1 >> 1;                                                  \
+    63 - _c;                                                            \
+})
 
 #define mulll(a, b)                                                     \
 ({                                                                      \

@@ -13,7 +13,10 @@ case "$arch" in
            4) asmarch=ix86;;
            8) asmarch=x86_64;;
            esac;                        pretty='amd64';;
-  ia64)          asmarch=ia64 ;         pretty=Itanium ;;
+  ia64)    case "$sizeof_long" in
+           4) asmarch=none;;
+           8) asmarch=ia64;;
+           esac;                        pretty=Itanium;;
   hppa) case "$sizeof_long" in   
            4) asmarch=hppa;             pretty='PA-RISC1.1';;
            8) asmarch=hppa64;           pretty='PA-RISC2.0';;
