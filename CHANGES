@@ -115,6 +115,8 @@ BA 32- on x86_64 + gcc-4.0, CFLAGS was missing a -fno-gcse-after-reload
 BA 48- minpoly(,,v) might return polynomials in x instead of v.
    49- make test-kernel required inlining compiler
    50- make test-kernel didn't work with C++ compilers
+   51- ia64 kernel assumed 64bit longs, whereas compilers can be
+       configured for 32bit
 
   Changed
     1- RgX_simple_gcd: make sure result has non-zero leading term [#412]
