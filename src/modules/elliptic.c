@@ -3327,6 +3327,24 @@ exp4hellagm(GEN e, GEN z, long prec)
   return exphellagm(e, z, 1, prec);
 }
 
+GEN
+ellheightoo(GEN e, GEN z, long prec)
+{
+  GEN e1, h, x = gel(z,1);
+  pari_sp av = avma;
+  checkell(e);
+  e1 = gmael(e,14,1);
+  if (gcmp(x, e1) < 0) /* z not on neutral component */
+  {
+    GEN eh = exphellagm(e, addell(e, z,z), 0, prec);
+    /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
+    h = gmul(eh, gabs(d_ellLHS(e, z), prec));
+  }
+  else
+    h = exphellagm(e, z, 1, prec);
+  return gerepileuptoleaf(av, gmul2n(mplog(h), -2));
+}
+
 /* Assume e integral, given by a minimal model */
 GEN
 ellheight0(GEN e, GEN a, long flag, long prec)
@@ -3354,10 +3372,10 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   {
     case 0:  z = hell2(e,a,prec); break; /* Tate 4^n */
     case 1:  z = hell(e,a,prec);  break; /* Silverman's log(sigma) */
-    default: z = exp4hellagm(e,a,prec); /* = exp(4h_oo(a)), Mestre's AGM */
+    default:
     {
       GEN d = denom(gel(a,1));
-      if (!z) return gen_0;
+      z = exp4hellagm(e,a,prec); /* = exp(4h_oo(a)), Mestre's AGM */
       if (!is_pm1(d)) z = gmul(z, sqri(d));
       z = gmul2n(mplog(z), -2); break;
     }
