@@ -45,7 +45,7 @@ VL = Vincent Lefevre
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.13 (released ??/??/2006):
+Done for version 2.2.13 (released 26/04/2006):
   Fixed
 BA  1-[HPUX] 'program' bench failed for gp-sta [install did not work]
     2- made BITS_IN_LONG and related constants 'signed long' [ avoid
