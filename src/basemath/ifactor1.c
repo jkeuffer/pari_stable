@@ -2536,7 +2536,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
   /* go to the horse's mouth... */
-  y = mpround(sqrtnr(itor(x, nbits2prec((long)(((double)expi(x))/p) + 16)), p));
+  y = mpround( sqrtnr(itor(x, nbits2prec((expi(x)+16*p)/p)), p) );
   if (!equalii(powiu(y, p), x)) {
     if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
     avma = av; return 0;
