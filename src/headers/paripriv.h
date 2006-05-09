@@ -30,6 +30,7 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define both_odd(x,y) ((x)&(y)&1)
 
 /* unused */
+GEN ellheightoo(GEN e, GEN z, long prec);
 void ellprint(GEN e);
 GEN mpinv(GEN b);
 

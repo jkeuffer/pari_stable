@@ -191,6 +191,7 @@ GEN     vecpermute(GEN A, GEN p);
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
+GEN     RgXQ_norm(GEN x, GEN T);
 GEN     ZM_to_zm(GEN z);
 int     ZM_ishnf(GEN x);
 GEN     ZV_add(GEN x, GEN y);
