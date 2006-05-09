@@ -2485,13 +2485,16 @@ ulong
 is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
 {
   int init = 0;
-  long j, k, lx = lgefint(x);
+  long j, k;
   ulong q, prkmodq, residue, elt;
   GEN y;
   byteptr d0;
   pari_sp av = avma;
 
-  if (d) d0 = d;
+  if (d)
+  {
+    q = p; d0 = d;
+  }
   else
   {
     q = 0; d0 = diffptr;
@@ -2499,7 +2502,6 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
     while (q < p) NEXT_PRIME_VIADIFF(q,d0);
   }
   /* for modular checks, use small primes q congruent 1 mod curexp */
-  q = p;
   /* #checks is tunable, for small p we can afford to do more than 5 */
   for (j = (p<40 ? 7 : p<80 ? 5 : p<250 ? 4 : 3); j > 0; j--)
   {
@@ -2516,8 +2518,6 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
     /* XXX give up if q is too large, huh? */
     residue = umodiu(x, q);
     if (residue == 0) continue;
-    /* this is intended to be used after trial division, so we won't check
-     * whether residue is zero here - that cannot normally happen */
     /* find a generator of the subgroup of index curexp in (Z/qZ)^* */
     prkmodq = elt = Fl_pow(gener_Fl(q), p, q);
     /* see whether our residue is in the subgroup */
@@ -2536,7 +2536,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
   /* go to the horse's mouth... */
-  y = mpround( sqrtnr(itor(x, 3 + (lx-2) / p), p) );
+  y = mpround(sqrtnr(itor(x, nbits2prec((long)(((double)expi(x))/p) + 16)), p));
   if (!equalii(powiu(y, p), x)) {
     if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
     avma = av; return 0;
