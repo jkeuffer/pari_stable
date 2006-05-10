@@ -22,6 +22,8 @@ following tokens [ to be placed in a C comment ] as follows:
 where mod1, mod2 etc. are modules among addll, mulll, bfffo, divll.
 In effect, this includes portable code from kernel/none/<module>.h
 to supplement whatever is provided by asm0.h.
+CAVEAT: if bfffo and divll are both mentioned, they must appear in this
+order (divll depends on bfffo).
 
 * Inline Level 1 symbols, in mpinl.o: the definitions are in
 none/level1.h. Inlining may or may not be possible, but a symbol
