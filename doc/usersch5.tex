@@ -501,7 +501,7 @@ non-recursive type (\kbd{is\_recursive\_t(typ(q))} is non-zero). Contrary to
 length of a \typ{INT} unchanged.
 
 \fun{void}{stackdummy}{pari\_sp av, pari\_sp ltop} inhibits the memory area
-between \kbd{av} (included) and \kbd{ltop} (excluded) with respect to
+between \kbd{av} \emph{included} and \kbd{ltop} \emph{excluded} with respect to
 \kbd{gerepile}, in order to avoid a call to \kbd{gerepile(av, ltop,...)}.
 The stack space is not reclaimed though.
 
