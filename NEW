@@ -3,6 +3,95 @@ This file highlights some of the novelties in PARI/GP 2.x compared to 1.39.15
 Incompatible changes are described in COMPAT. See TODO for possible future
 improvements.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   * The GP2C compiler is available at
+
+         http://pari.math.u-bordeaux.fr/download.html#gp2c
+
+    GP2C compiles GP scripts to the C language, easing the task of writing
+    PARI programs. It can transparently compile them to object code and
+    load the resulting functions in gp. Low-level gp2c-compiled scripts
+    typically run 3 or 4 times faster. Minor hand editing (specifying types)
+    typically gains a further factor 2.
+
+   * Cremona's database of elliptic curves is available through the 'elldata'
+     package [ to be downloaded separately ]
+     ? E = ellinit([1,1,0,10,10]);
+     ? id = ellidentify(E)[1]   \\ [1] = discard change of variables
+     %2 = ["69950b1", [1, 1, 0, 10, 10], [[-1, 1], [-1/4, 23/8]]]
+     \\ gives name and generators
+
+     ? E = ellinit("11a1"); E.disc
+     %3 = -161051
+
+     ? ellsearch(11); \\ all curves of conductor 11
+
+     ? forell(E, 10,20, print(E))   \\ iterate over curves of conductor 10-20
+     ["11a1", [0, -1, 1, -10, -20], []]
+     ...
+
+Kernel:
+
+   * Use 'Configure --with-gmp' to replace the native multiprecision kernel by
+     the GNU MP library (featuring asymptotically fast arithmetic).
+
+   * cleanup of all assembler kernels (all macroized); added support for
+     x86_64, ppc64, hppa and hppa64, ia64, sparc64.
+
+   * faster algorithms for "transcendental" functions (divide/conquer square
+     root, AGM for log and Pi, Newton for exp and most trigonometric functions,
+     AGM for inverse trigonometric functions, rewrite for gamma and zeta =>
+     faster Bernoulli, Mestre's AGM for ellheight)
+
+   * faster and cleaner kernel for modular arithmetic. Try e.g.
+     factormod/factorff or polcompositum.
+
+   * major internal cleanups: separate lgef for t_POLs is gone, zero t_SER
+     and t_POL now handled in a uniform way, heuristic soft copies in
+     t_INTMOD, t_POLMOD, t_PADIC are gone [ led to fatal errors in complex
+     scripts, no performance penalty ]
+
+Algebraic number Theory:
+   * faster maximal order (round4 rewrite) and polredabs (esp. with flag
+     16: don't factor the discriminant; yields a canonical equation for a
+     field), faster ideal arithmetic (prime decomposition, approximation,
+     multiplication).
+
+   * faster and more reliable class-field theoretic functions quadclassunit,
+     bnfinit, bnfisprincipal, bnrinit (and related functions, e.g. bnrconductor
+     or bnrdisc), rnfkummer, thue (fast enumeration of small solutions, don't
+     assume the full unit group is known).
+  
+   * A set of fast routines for Galois theory (galoisininit, nfgaloisconj,
+     galoisisabelian, galoisfixedfield, galoissubfields, galoissubcyclo for
+     abelian fields, galoisidentify to identify large Galois fields up to
+     degree 127).
+    
+     'galdata' package [ to be downloaded separately ]: polgalois is safer
+     and orders of magnitudes faster in tough cases, output is now
+     human readable
+     ? polgalois(x^11-2)
+     time = 1,759 ms.   \\ used to be ~ 1 hour
+     %1 = [110, -1, 4, "F_110(11)=11:10"]
+
+Miscellaneous:
+
+   * a new set of fast numerical summation and integration routine,
+     variations on the Ooura-Mori "double exponential" method. See ??intnum
+     Library interface to all these functions and standard iterators (e.g.
+     forvec)
+   
+   * error messages now mention the GP function where the error occured.
+
+   * input/output and convenience functions: Str(a,1,c) --> "a1c", 
+     Strexpand("~") --> "/home/a2x/belabas", substvec (parallel substitutions),
+     substpol(expr, x^2, y), writebin (write objets in binary format for
+     fast retrieval), readvec (load a file's content into a vector)
+
+   * support for new graphic libraries (Qt, FLTK) [ ==> hi-res plots now
+     also available under Mac OS X and Windows ]
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    * PARI/GP is now released under the GNU General Public License.

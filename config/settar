@@ -26,8 +26,5 @@ mkdir $dir && mv $tarfile $dir
 cd $dir && tar xf $tarfile && rm -f $tarfile && cd ..
 tar cf $tarfile $dir
 rm -rf $dir
-
-cp $tarfile $tarfile.old
-rm -f $tarfile.gz;  gzip  $tarfile
-mv $tarfile.old $tarfile
-rm -f $tarfile.bz2; bzip2 $tarfile
+rm -f $tarfile.gz
+gzip  $tarfile

@@ -1,7 +1,7 @@
-This is PARI/GP, version 2.2.x (*).
+This is PARI/GP, version 2.3.x (*).
 
 PARI/GP Number Theory-oriented Computer Algebra System
-        Copyright (C) 2000 The PARI Group, Bordeaux.
+        Copyright (C) 2000-2006 The PARI Group, Bordeaux.
 
 ==========================================================================
 
@@ -10,11 +10,11 @@ To get started, run TeX on the file INSTALL.tex and have a look at the dvi
 hurry, look at INSTALL.txt (ascii file). But a lot of information is missing
 there.
 
-Typing 'make doc' should typeset the PARI/GP user's manual, a tutorial and
-reference card in directory doc.
+Typing 'make doc' typesets separate user's manual for GP and libpari,
+a tutorial and reference card in directory doc.
 
 See the files NEW and COMPAT for new features and incompatible changes
-respectively between 2.0 and older versions. See Changelog for (a terse
+respectively between 2.3 and older versions. See CHANGES for (a terse
 description of) subsequent patches.
 
 The file README.DOS is specific to DOS, OS/2 and Windows 3.1 users.
@@ -27,20 +27,20 @@ versions of PARI/GP or do development work yourself, see the file CVS.txt.
 * Directory Odos/ contains information to compile binaries on DOS-based
 systems (DOS, OS/2, Win3.1, Win95/98/NT/CE).
 
-Afterwards, you're on your own...
+Afterwards, you're on your own.
 
 ==========================================================================
 
-There are three mailing lists devoted to the PARI/GP package (run courtesy of
-Dan Bernstein), and most feedback should be directed to those. They are:
+There are three mailing lists devoted to the PARI/GP package, run courtesy
+of Dan Bernstein, and most feedback should be directed to those. They are:
 
-- pari-announce: to announce major version changes. You can't write to this
+-- pari-announce: to announce major version changes. You can't write to this
 one, but you should probably subscribe.
 
-- pari-dev: for everything related to the development of PARI, including
+-- pari-dev: for everything related to the development of PARI, including
 suggestions, technical questions, bug reports or patch submissions.
 
-- pari-users: for everything else.
+-- pari-users: for everything else.
 
 To subscribe, send empty messages respectively to
 
