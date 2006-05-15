@@ -10,18 +10,15 @@ soname=.$soname_num
 do_dll=yes
 case "$osname" in
   gnu*|aix|osf1|solaris|linux|freebsd)
-    case $libpari_base in
-      pari) sodest=.$version.$patch;; # released version
-      *)    sodest=.$patch.0.0;;      # unstable version
+    case $pari_release_verbose in
+      *STABLE*)      sodest=.$version.$patch;; # released version
+      *DEVELOPMENT*) sodest=.$patch.0.0;;      # unstable version
     esac ;;
   sunos) sodest=.$VersionMajor$VersionMinor.$patch
          soname=$sodest;;
   hpux) soname= ; sodest= ; DLSUFFIX=sl;;
   irix) soname= ; sodest= ;;
-  os2)  soname= ; sodest= ; DLSUFFIX=dll
-        libpari_base=`echo "$libpari_base" | sed 's/\./_/g'` # 8.3 DLL name
-       ;;
-  cygwin)soname= ; sodest= ; DLSUFFIX=dll ;;
+  os2|cygwin)soname= ; sodest= ; DLSUFFIX=dll ;;
   darwin)soname= ; sodest= ; DLSUFFIX=dylib;;
   *) do_dll=no ;;
 esac

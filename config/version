@@ -2,13 +2,13 @@
 VersionMajor='2'
 
 # minor version number
-VersionMinor='2'
+VersionMinor='3'
 
 # Patch level
-patch='14'
+patch='0'
 
 # Status: alpha, beta, released, development
-status=development
+status=released
 
 # soname of stable libpari.so is libpari.so.$soname_num
 soname_num=$patch
