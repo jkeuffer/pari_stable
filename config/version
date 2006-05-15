@@ -11,4 +11,4 @@ patch='0'
 status=released
 
 # soname of stable libpari.so is libpari.so.$soname_num
-soname_num=$patch
+soname_num=2
