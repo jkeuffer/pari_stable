@@ -36,29 +36,38 @@ Kernel:
    * Use 'Configure --with-gmp' to replace the native multiprecision kernel by
      the GNU MP library (featuring asymptotically fast arithmetic).
 
-   * cleanup of all assembler kernels (all macroized); added support for
-     x86_64, ppc64, hppa and hppa64, ia64, sparc64.
+   * Cleanup of all architecture specific kernels (all macroized); added
+     support for x86_64, ppc64, hppa and hppa64, ia64, sparc64, m68k.
 
-   * faster algorithms for "transcendental" functions (divide/conquer square
+   * Faster algorithms for "transcendental" functions (divide/conquer square
      root, AGM for log and Pi, Newton for exp and most trigonometric functions,
      AGM for inverse trigonometric functions, rewrite for gamma and zeta =>
      faster Bernoulli, Mestre's AGM for ellheight)
 
-   * faster and cleaner kernel for modular arithmetic. Try e.g.
+   * Faster and cleaner kernel for modular arithmetic. Try e.g.
      factormod/factorff or polcompositum.
 
-   * major internal cleanups: separate lgef for t_POLs is gone, zero t_SER
+   * Major internal cleanups: separate lgef for t_POLs is gone, zero t_SER
      and t_POL now handled in a uniform way, heuristic soft copies in
      t_INTMOD, t_POLMOD, t_PADIC are gone [ led to fatal errors in complex
      scripts, no performance penalty ]
 
+   * The "syntax" of GP routines and operators are no longer hard-coded in
+     the sources, but maintained in a separate database (pari.desc). This
+     way, external tools like GP2C need not be modified when the GP language
+     is changed.
+
 Algebraic number Theory:
-   * faster maximal order (round4 rewrite) and polredabs (esp. with flag
+   * Faster integral LLL (still not super fast, but getting better), and
+     polynomial factorization routines (over finite fields [ new modular
+     kernel ], Q or general number fields [ van Hoeij's algorithm ])
+
+   * Faster maximal order (round4 rewrite) and polredabs (esp. with flag
      16: don't factor the discriminant; yields a canonical equation for a
      field), faster ideal arithmetic (prime decomposition, approximation,
      multiplication).
 
-   * faster and more reliable class-field theoretic functions quadclassunit,
+   * Faster and more reliable class-field theoretic functions quadclassunit,
      bnfinit, bnfisprincipal, bnrinit (and related functions, e.g. bnrconductor
      or bnrdisc), rnfkummer, thue (fast enumeration of small solutions, don't
      assume the full unit group is known).
@@ -76,20 +85,27 @@ Algebraic number Theory:
      %1 = [110, -1, 4, "F_110(11)=11:10"]
 
 Miscellaneous:
+   * For convenience, the manual was split in two parts: the GP user's manual
+     and the libpari user's manual, the latter being substantially expanded.
+     (Many semi-private functions have been renamed, specified and documented)
+     If you only use GP, there is no need to print the library manual.
 
-   * a new set of fast numerical summation and integration routine,
+   * Initial implementation of the APR-CL primality prover, faster
+     compositeness tests (BPSW)
+
+   * A new set of fast numerical summation and integration routine,
      variations on the Ooura-Mori "double exponential" method. See ??intnum
      Library interface to all these functions and standard iterators (e.g.
      forvec)
    
-   * error messages now mention the GP function where the error occured.
+   * Error messages now mention the GP function where the error occured.
 
-   * input/output and convenience functions: Str(a,1,c) --> "a1c", 
+   * Input/output and convenience functions: Str(a,1,c) --> "a1c", 
      Strexpand("~") --> "/home/a2x/belabas", substvec (parallel substitutions),
      substpol(expr, x^2, y), writebin (write objets in binary format for
      fast retrieval), readvec (load a file's content into a vector)
 
-   * support for new graphic libraries (Qt, FLTK) [ ==> hi-res plots now
+   * Support for new graphic libraries (Qt, FLTK) [ ==> hi-res plots now
      also available under Mac OS X and Windows ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
