@@ -87,8 +87,8 @@ Algebraic number Theory:
 Miscellaneous:
    * For convenience, the manual was split in two parts: the GP user's manual
      and the libpari user's manual, the latter being substantially expanded.
-     (Many semi-private functions have been renamed, specified and documented)
-     If you only use GP, there is no need to print the library manual.
+     Many formerly private functions have been renamed, specified,
+     cleaned up and documented.
 
    * Initial implementation of the APR-CL primality prover, faster
      compositeness tests (BPSW)
