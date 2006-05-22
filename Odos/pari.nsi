@@ -1,6 +1,6 @@
 !include "MUI.nsh"
 !define MUI_PRODUCT "PARI"
-!define MUI_VERSION "2.2.11"
+!define MUI_VERSION "2.3.0"
 
 ;--------------------------------
 AutoCloseWindow false
@@ -28,13 +28,14 @@ Section "pari (required)" SecCopy
   File /oname=gp.exe "..\Ocygwin-i686\gp-dyn.exe"
   File "makegprc"
   File "..\misc\tex2mail"
-  File "..\Ocygwin-i686\libpari-2.2.dll"
+  File "..\Ocygwin-i686\libpari.dll"
   File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\cygncurses-8.dll"
   File "\cygwin\bin\cygreadline6.dll"
-  File "\cygwin\bin\cygperl5_8_5.dll"
+  File "\cygwin\bin\cygperl5_8.dll"
   File "\cygwin\bin\cygcrypt-0.dll"
   File "\cygwin\bin\perl.exe"
+  File "\cygwin\bin\sh.exe"
 
   WriteRegStr HKCU "Software\PARI" "" $INSTDIR
   WriteRegStr HKLM ${uninst} "DisplayName" "PARI (remove only)"
@@ -63,14 +64,14 @@ Section "documentation" SecDOC
 SectionEnd
 
 Section "examples" SecEX
-  SetOutPath "$INSTDIR"
-  File "..\doc\gphelp"
   SetOutPath $INSTDIR\examples
   File "..\examples\EXPLAIN"
   File "..\examples\Inputrc"
   File "..\examples\*.gp"
   File "..\examples\*.c"
   File "..\examples\Makefile.cygwin-i686"
+  SetOutPath "$INSTDIR"
+  File "..\doc\gphelp"
 SectionEnd
 
 Function .onInstSuccess
