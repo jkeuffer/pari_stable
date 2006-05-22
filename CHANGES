@@ -45,7 +45,10 @@ VL = Vincent Lefevre
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.3 0  (released 19/05/2006):
+Done for version 2.4.0 (released ??/??/2006):
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Done for version 2.3.0  (released 19/05/2006):
   Fixed
     1- ispower(HUGE t_INT, n) could give wrong results (rounding errors)
     2- ellheightoo (internal) and RgXQ_norm (public) not declared
