@@ -60,6 +60,7 @@ GEN    cgetg_copy(long lx, GEN x);
 GEN    cgetg(long x, long y);
 GEN    cgeti(long x);
 GEN    cgetr(long x);
+void   cgiv(GEN x);
 int    cmpir(GEN x, GEN y);
 int    cmpsr(long x, GEN y);
 GEN    constant_term(GEN x);
@@ -266,6 +267,13 @@ cgetg(long x, long y)
   z[0] = evaltyp(y) | evallg(x);
   return z;
 }
+
+INLINE void
+cgiv(GEN x)
+{
+  if (x == (GEN)avma) avma = (pari_sp)(x+lg(x));
+}
+
 
 INLINE GEN
 cgeti(long x)

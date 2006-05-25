@@ -1357,7 +1357,6 @@ void    affir(GEN x, GEN y);
 void    affrr(GEN x, GEN y);
 GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
 long    cbezout(long a,long b,long *uu,long *vv);
-void    cgiv(GEN x);
 int     cmpii(GEN x, GEN y);
 int     cmprr(GEN x, GEN y);
 int     cmpsi(long x, GEN y);

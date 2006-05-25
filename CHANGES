@@ -8,6 +8,7 @@ Done for version 2.4.0 (released ??/??/2006):
        Also affects the gmp kernel, for p >> 10^5800.
 
   Changed
+    1- moved cgiv to inline kernel
 
   Added
 
