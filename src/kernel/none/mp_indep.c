@@ -566,7 +566,7 @@ remiimul(GEN x, GEN sy)
   q = truncr(q); /* differs from divii(x, y) at most by 1 */
   r = subii(x, mulii(y,q));
   if (signe(r) < 0)
-    r = addiispec(r+2,y+2, lgefint(r)-2, lgefint(y)-2);
+    r = subiispec(y+2,r+2, lgefint(y)-2, lgefint(r)-2); /* y - |r| */
   else
   {
     /* remii(x,y) + y >= r >= remii(x,y) */
