@@ -246,21 +246,25 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
   const GEN taba = C->aall;
   const GEN tabt = C->tall;
   const long efin = lg(taba)-1, lv = R->lv;
-  GEN vz, res = jac, pol2 = _sqr(res, R);
+  GEN L, res = jac, pol2 = _sqr(res, R);
   long f;
-  pari_sp av;
+  pari_sp av, lim;
 
-  vz = cgetg(lv+1, t_VEC); gel(vz,1) = res;
-  for (f=2; f<=lv; f++) gel(vz,f) = _mul(gel(vz,f-1), pol2, R);
-  av = avma;
+  L = cgetg(lv+1, t_VEC); gel(L,1) = res;
+  for (f=2; f<=lv; f++) gel(L,f) = _mul(gel(L,f-1), pol2, R);
+  av = avma; lim = stack_lim(av, 1);
   for (f = efin; f >= 1; f--)
   {
-    GEN t = (GEN)vz[taba[f]];
+    GEN t = gel(L, taba[f]);
     long tf = tabt[f];
-    res = f==efin ? t
-                  : _mul(t, res, R);
-    while (tf--) res = _sqr(res, R);
-    if ((f&7) == 0) res = gerepilecopy(av, res);
+    res = (f==efin)? t: _mul(t, res, R);
+    while (tf--) {
+      res = _sqr(res, R);
+      if (low_stack(lim, stack_lim(av,1))) { 
+        res = gerepilecopy(av, res);
+        if(DEBUGMEM>1) pari_warn(warnmem,"powpolmod: f = %ld",f);
+      }
+    }
   }
   return res;
 }
@@ -418,47 +422,50 @@ compt(GEN N)
   avma = av0; return t;
 }
 
-/* tabdl[i] = discrete log of i+1 in (Z/q)^*, q odd prime */
+/* T[i] = discrete log of i in (Z/q)^*, q odd prime
+ * To save on memory, compute half the table: T[q-x] = T[x] + (q-1)/2 */
 static GEN
 computetabdl(ulong q)
 {
-  GEN v = cgetg(q-1,t_VECSMALL), w = v-1; /* w[i] = dl(i) */
-  ulong g,qm3s2,qm1s2,a,i;
+  ulong g, a, i, qs2 = q>>1; /* (q-1)/2 */
+  GEN T = cgetg(qs2+2,t_VECSMALL);
 
-  g = gener_Fl(q);
-  qm3s2 = (q-3)>>1;
-  qm1s2 = qm3s2+1;
-  w[q-1] = qm1s2; a = 1;
-  for (i=1; i<=qm3s2; i++)
+  g = gener_Fl(q); a = 1;
+  for (i=1; i < qs2; i++) /* g^((q-1)/2) = -1 */
   {
     a = Fl_mul(g,a,q);
-    w[a]   = i;
-    w[q-a] = i+qm1s2;
+    if (a > qs2) T[q-a] = i+qs2; else T[a] = i;
   }
-  return v;
+  T[qs2+1] = T[qs2] + qs2;
+  T[1] = 0; return T;
 }
 
-static void
-compute_fg(ulong q, long half, GEN *tabf, GEN *tabg)
+/* Return T: T[x] = dl of x(1-x) */
+static GEN
+compute_g(ulong q)
 {
-  const ulong qm3s2 = (q-3)>>1;
-  const ulong l = half? qm3s2: q-2;
-  ulong x;
-  *tabf = computetabdl(q);
-  *tabg = cgetg(l+1,t_VECSMALL);
-  for (x=1; x<=l; x++) (*tabg)[x] = (*tabf)[x] + (*tabf)[q-x-1];
+  const ulong qs2 = q>>1; /* (q-1)/2 */
+  ulong x, a;
+  GEN T = computetabdl(q); /* updated in place to save on memory */
+  a = 0; /* dl[1] */
+  for (x=2; x<=qs2+1; x++)
+  { /* a = dl(x) */
+    ulong b = T[x]; /* = dl(x) */
+    T[x] = b + a + qs2; /* dl(x) + dl(x-1) + dl(-1) */
+    a = b;
+  }
+  return T;
 }
 
 /* p odd prime */
 static GEN
-get_jac(Cache *C, ulong q, long pk, GEN tabf, GEN tabg)
+get_jac(Cache *C, ulong q, long pk, GEN tabg)
 {
-  ulong x, qm3s2;
+  ulong x, qs2 = q>>1; /* (q-1)/2 */
   GEN vpk = const_vecsmall(pk, 0);
 
-  qm3s2 = (q-3)>>1;
-  for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
-  vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
+  for (x=2; x<=qs2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
+  vpk[ tabg[x]%pk + 1 ]++; /* x = (q+1)/2 */
   return u_red(vpk, C->cyc);
 }
 
@@ -466,19 +473,21 @@ get_jac(Cache *C, ulong q, long pk, GEN tabf, GEN tabg)
 static GEN
 get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
 {
-  GEN jpq, vpk, tabf, tabg;
-  ulong x, pk, i, qm3s2;
+  GEN jpq, vpk, T;
+  ulong x, pk, i, qs2;
 
   if (k == 1) return NULL;
 
-  compute_fg(q,0, &tabf,&tabg);
-
+  T = computetabdl(q);
+  /* could store T[x+1] + T[x] + qs2 (cf compute_g).
+   * Recompute instead, saving half the memory. */
   pk = 1 << k;;
   vpk = const_vecsmall(pk, 0);
 
-  qm3s2 = (q-3)>>1;
-  for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
-  vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
+  qs2 = q>>1; /* (q-1)/2 */
+
+  for (x=2; x<=qs2; x++) vpk[ (T[x]+T[x-1]+qs2)%pk + 1 ] += 2;
+  vpk[ (T[x]+T[x-1]+qs2)%pk + 1 ]++;
   jpq = u_red_cyclo2n_ip(vpk, k);
 
   if (k == 2) return jpq;
@@ -487,14 +496,16 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
   {
     GEN v8 = cgetg(9,t_VECSMALL);
     for (x=1; x<=8; x++) v8[x] = 0;
-    for (x=1; x<=q-2; x++) v8[ ((2*tabf[x]+tabg[x])&7) + 1 ]++;
+    for (x=2; x<=qs2; x++) v8[ ((3*T[x]+T[x-1]+qs2)&7) + 1 ]++;
+    for (   ; x<=q-1; x++) v8[ ((3*T[q-x]+T[q-x+1]-3*qs2)&7) + 1 ]++;
     *j2q = polinflate(gsqr(u_red_cyclo2n_ip(v8,3)), pk>>3);
     *j2q = red_cyclo2n_ip(*j2q, k);
   }
   else *j2q = NULL;
 
   for (i=1; i<=pk; i++) vpk[i] = 0;
-  for (x=1; x<=q-2; x++) vpk[ (tabf[x]+tabg[x])%pk + 1 ]++;
+  for (x=2; x<=qs2; x++) vpk[ (2*T[x]+T[x-1]+qs2)%pk + 1 ]++;
+  for (   ; x<=q-1; x++) vpk[ (2*T[q-x]+T[q-x+1]-2*qs2)%pk + 1 ]++;
   *j3q = gmul(jpq, u_red_cyclo2n_ip(vpk,k));
   *j3q = red_cyclo2n_ip(*j3q, k);
   return jpq;
@@ -503,7 +514,7 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
 static void
 calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
-  GEN J, tabf, tabg, faq, tabfaq, tabj, P, E, PE;
+  GEN J, tabg, faq, tabfaq, tabj, P, E, PE;
   long lfaq, j;
   ulong i, q, l;
   pari_sp av;
@@ -519,14 +530,14 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     E = gel(faq,2);
     PE= gel(faq,3);
     av = avma;
-    compute_fg(q, 1, &tabf, &tabg);
+    tabg = compute_g(q);
 
     J = cgetg(lfaq,t_VEC);
     gel(J,1) = cgetg(1,t_STR); /* dummy */
     for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
       long pe = PE[j];
-      gel(J,j) = get_jac(pC[pe], q, pe, tabf, tabg);
+      gel(J,j) = get_jac(pC[pe], q, pe, tabg);
     }
     gel(tabj,i) = gerepilecopy(av, J);
   }
@@ -782,12 +793,7 @@ step4a(Cache *C, Red *R, ulong q, long p, long k, GEN jpq)
   long ind;
   GEN s1, s2, s3;
   
-  if (!jpq)
-  {
-    GEN tabf, tabg;
-    compute_fg(q,1, &tabf,&tabg);
-    jpq = get_jac(C, q, pk, tabf, tabg);
-  }
+  if (!jpq) jpq = get_jac(C, q, pk, compute_g(q));
   s1 = autvec_TH(pk, jpq, C->E, C->cyc);
   s2 = powpolmod(C,R, p,k, s1);
   s3 = autvec_AL(pk, jpq, C->E, R);
@@ -925,7 +931,7 @@ aprcl(GEN N)
   GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
   long i, j, l, ltab, lfat, fl, ctglob = 0;
   ulong p, q, t;
-  pari_sp av, av2;
+  pari_sp av;
   Red R;
   Cache **pC;
 
@@ -960,16 +966,14 @@ aprcl(GEN N)
   if (DEBUGLEVEL>2)
   {
     fprintferr("Jacobi sums and tables computed\n");
-    fprintferr("Step4: q-values (# = %ld, largest = %ld): ", l-1, globfa[l-1]);
+    fprintferr("Step4: q-values (# = %ld): ", l-1);
   }
-  for (i=1; i<l; i++)
+  for (i=l-1; i>0; i--)
   {
     GEN faq = gel(tabfaq,i), P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
     long lfaq = lg(P);
-    avma = av;
     q = globfa[i]; if (DEBUGLEVEL>2) fprintferr("%ld ",q);
-    av2 = avma;
-    for (j=1; j<lfaq; j++, avma = av2)
+    for (j=1; j<lfaq; j++, avma = av)
     {
       Cache *C;
       long pe, e;

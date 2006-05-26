@@ -12,6 +12,7 @@ Done for version 2.4.0 (released ??/??/2006):
 
   Changed
     1- moved cgiv to inline kernel
+    2- reduce amount of memory needed by APRCL
 
   Added
 
