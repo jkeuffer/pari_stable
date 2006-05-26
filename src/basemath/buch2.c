@@ -2137,10 +2137,10 @@ trunc_error(GEN x)
 
 /* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
-compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
+compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
 {
-  GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda;
-  long i, zc = lg(A)-1, R1 = 2*RU - N;
+  GEN T,v,mdet,mdet2,Im_mdet,kR,xreal,L;
+  long i, R1 = 2*RU - N;
   pari_sp av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
@@ -2151,8 +2151,8 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   mdet = shallowconcat(xreal,T); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
-  mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = (GEN)sindexrank(mdet_t)[2]; /* list of independent column indices */
+  mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
+  v = (GEN)sindexrank(mdet2)[2]; /* list of independent column indices */
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
@@ -2164,10 +2164,12 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   if (gcmp0(kR) || gexpo(kR) < -3) { avma=av; return NULL; }
 
   kR = mpabs(kR);
-  lambda = gauss(Im_mdet,xreal); /* approximate rational entries */
-  for (i=1; i<=zc; i++) setlg(lambda[i], RU);
-  gerepileall(av,2, &lambda, &kR);
-  *ptlambda = lambda; return kR;
+  L = gauss_intern(Im_mdet,NULL); /* Im_mdet^(-1) */
+  if (!L) { *ptL = NULL; return kR; }
+
+  L = gmul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */
+  gerepileall(av,2, &L, &kR);
+  *ptL = L; return kR;
 }
 
 static GEN

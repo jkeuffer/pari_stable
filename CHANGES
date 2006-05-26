@@ -6,6 +6,9 @@ Done for version 2.4.0 (released ??/??/2006):
     1- typo in remiimul: wrong result in a "failsafe" branch (hardly ever
        taken). May affect modular powering /Fp if p >> 10^1300 [#457]
        Also affects the gmp kernel, for p >> 10^5800.
+    2- rare accuracy problem in bnfinit
+       P=x^8-787856*x^6+232721637848*x^4-30546112988506688*x^2+1503204734505922286224;
+       setrand(1974190693); bnfinit(P) --> non invertible matrix in gauss
 
   Changed
     1- moved cgiv to inline kernel
