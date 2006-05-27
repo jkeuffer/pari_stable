@@ -674,7 +674,7 @@ possibly negative.)
 \syn{gbitand}{x,y}.
 
 \subsecidx{bitneg}$(x,\{n=-1\})$: \idx{bitwise negation} of an integer $x$,
-truncated to $n$ bits, that is the integer $$\sum_{i=0}^n \kbd{not}(x_i)
+truncated to $n$ bits, that is the integer $$\sum_{i=0}^{n-1} \kbd{not}(x_i)
 2^i$$ The special case $n=-1$ means no truncation: an infinite sequence of
 leading $1$ is then represented as a negative number.
 
