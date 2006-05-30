@@ -1264,7 +1264,7 @@ FpX_factor_i(GEN f, GEN pp)
     e *= p; f = poldeflate_i(f2, p);
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(mkmat2((GEN)t,E), cmpii);
+  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t,E), cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
@@ -2520,7 +2520,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       }
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(mkmat2((GEN)t, E), cmp_pol);
+  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t, E), cmp_pol);
 }
 GEN
 factorff(GEN f, GEN p, GEN T)

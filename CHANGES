@@ -9,6 +9,7 @@ Done for version 2.4.0 (released ??/??/2006):
     2- rare accuracy problem in bnfinit
        P=x^8-787856*x^6+232721637848*x^4-30546112988506688*x^2+1503204734505922286224;
        setrand(1974190693); bnfinit(P) --> non invertible matrix in gauss
+    3- inconsistent return type in nffactormod [#460]
 
   Changed
     1- moved cgiv to inline kernel

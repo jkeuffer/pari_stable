@@ -3203,6 +3203,31 @@ matrix, whose column express generators of $H$ on the given generators $g_i$.
 Note that the absolute value of the determinant of that matrix is equal to
 the index $(G:H)$.
 
+\subsec{Quotient by maximal ideals}
+
+For a given maximal ideal \var{pr}, elements in \var{nf} which have
+non-negative valuation at \var{pr} can be mapped to the residue field.
+A \tev{modpr} structure describes this map, and is obtained via
+\teb{nfmodprinit} from \var{nf} and \var{pr}. This is used
+in all functions whose name is of the form \kbd{nf...modpr} and
+\kbd{nffactormod} (which should have been called \kbd{nffactormodpr}).
+
+An element in the residue field is represented by a canonical
+representative in the maximal order, given by a \typ{COL}.
+
+\misctitle{Interface design bug.} There is currently no satisfactory way
+to work over finite fields in GP (the \kbd{libpari} situation is much
+better due to a wealth of specialized functions). Hence the above
+interface is awkward and inefficient: the internal data type used (an
+element in $\F_p[X]/(T)$ for some suitable $T$) is different from the
+public type available under GP, leading to many unnecessary format
+conversions (transparent but slow). This must be improved. In particular,
+all \kbd{modpr} functions should disappear, and be replaced by just two
+functions: a projection to the residue field and a lift to the maximal
+order. All other computations should be done by generic finite fields
+functions having no relation to \var{nf} structures. Most of these
+functions are implemented internally but are not available under GP.
+
 \subsec{Relative extensions}
 
 When defining a relative extension, the base field $\var{nf}$ must be defined
@@ -4917,17 +4942,17 @@ coefficients of $x$ (as modulus of a \typ{POLMOD}), its main variable must be
 
 \syn{nffactor}{\var{nf},x}.
 
-\subsecidx{nffactormod}$(\var{nf},x,\var{pr})$: factorization of the
-univariate polynomial $x$ modulo the prime ideal \var{pr} in the number
-field $\var{nf}$. $x$ can have coefficients in the number field (scalar,
-polmod, polynomial, column vector) or modulo the prime ideal (intmod
-modulo the rational prime under \var{pr}, polmod or polynomial with
-intmod coefficients, column vector of intmod). The prime ideal
-\var{pr} \emph{must} be in the format output by \kbd{idealprimedec}. The
-main variable of $\var{nf}$ must be of lower priority than that of $x$
-(see \secref{se:priority}). However if the coefficients of the number
-field occur explicitly (as polmods) as coefficients of $x$, the variable of
-these polmods \emph{must} be the same as the main variable of $t$ (see
+\subsecidx{nffactormod}$(\var{nf},x,\var{pr})$: factors of the univariate
+polynomial $x$ modulo the prime ideal \var{pr} in the number field
+\var{nf}. The coefficients of $x$ are algebraic numbers in \var{nf}
+(which are \var{pr}-integers). The prime ideal \var{pr} is as output by
+\kbd{idealprimedec} or \kbd{nfmodprinit}. The latter is preferable if
+more than one operation modulo the same prime ideal are needed.
+
+The main variable of $\var{nf}$ must be of lower priority than that of
+$x$ (see \secref{se:priority}). However if the coefficients of the number
+field occur explicitly (as polmods) as coefficients of $x$, the variable
+of these polmods \emph{must} be the same as the main variable of $t$ (see
 \kbd{nffactor}).
 
 \syn{nffactormod}{\var{nf},x,\var{pr}}.

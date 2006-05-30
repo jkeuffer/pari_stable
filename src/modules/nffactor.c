@@ -109,6 +109,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
   xrd = modprX(x, nf, modpr);
   rep = FqX_factor(xrd,T,p);
+  settyp(rep, t_MAT);
   F = gel(rep,1); l = lg(F);
   E = gel(rep,2); settyp(E, t_COL);
   for (j = 1; j < l; j++) {
