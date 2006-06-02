@@ -52,11 +52,11 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
--  v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
+5  v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
    any variable is "deleted", while it (or part of it) is still in use 
    Reference count could be helpful here.
 
--  saving an object containing high variable numbers in binary form, then
+5  saving an object containing high variable numbers in binary form, then
    reading it back in a virgin session will create an invalid object,
    accessing undefined variables (SEGV).
    Should replace direct access to polx[] and polun[] arrays by a wrapper
@@ -64,6 +64,18 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    startup.
 
 4  changing primelimit from within forprime loop yields unpredictable results
+
+2  external prettyprinter tex2mail: on a fast machine with a slow 'perl',
+   the external prettyprinter does not return quickly enough and a new prompt
+   has already been printed.
+   ? default(output,3)
+     output = 3 (external prettyprint)
+   ? 1
+   ?  \\ THEN, %1 = 1 is printed.
+ 
+   gphelp is not affected by the problem since it prints an 'ugly_kludge'
+   string to tell the caller (gp) that it is finished [it should use 'wait'
+   instead, but less portable]. tex2mail just uses a delay loop [prettyp_wait()].
 
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
