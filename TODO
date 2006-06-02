@@ -76,6 +76,8 @@ Unless specified otherwise, examples assume 32bit machine and default precision
    gphelp is not affected by the problem since it prints an 'ugly_kludge'
    string to tell the caller (gp) that it is finished [it should use 'wait'
    instead, but less portable]. tex2mail just uses a delay loop [prettyp_wait()].
+   Note that tex2mail is always running in the background whereas gphelp is
+   restarted everytime.
 
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
