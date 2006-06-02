@@ -15,18 +15,17 @@ if test -n "$perl"; then
   esac
 fi
 
+has_stack_check=
+if test "$osname" = "os2" -o "$has_getrlimit" = "yes"; then
+  has_stack_check=yes;
+fi
+
 cat > $file << EOT
 /*  This file was created by Configure. Any change made to it will be lost
  *  next time Configure is run. */
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 EOT
-
-# case "$osname" in
-#   cygwin*) echo '#ifdef __CYGWIN32__' >> $file ;
-# 	     echo '#include "libpari_dll.h"' >> $file ;
-# 	     echo '#endif' >> $file ;;
-# esac
 
 cat >> $file << EOT
 #define UNIX
@@ -171,7 +170,7 @@ EOT
 ;;
 esac
 
-case $has_getrlimit in
+case $has_stack_check in
 yes) echo '#define STACK_CHECK' >> $file;;
 esac
 
