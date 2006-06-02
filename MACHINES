@@ -91,6 +91,7 @@ Intel/x86_64 in 64bit mode
 AMD Opteron 2400MHz  Linux-2.6.12-1  gcc-4.0.1       198     204  2.2.11    PZ
 AMD Opteron 2200MHz  Linux-2.6.11-6  gcc-3.4.3       206     221  2.3.0     
 AMD Opteron 2000MHz  Linux-2.4.22    gcc-3.3.2       290     290  2.2.8     
+AMD Athlon 64 3000+  Linux-2.6.15    gcc-4.1.0       300     287  2.3.0     JB
 AMD Opteron 1333MHz  Linux-2.6.5     gcc-3.3         413     419  2.2.8     BA
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Intel/x86
@@ -386,6 +387,7 @@ Contributors:
   HV = Hugo van der Sanden
   ID = Ingo Dittmer
   IS = Igor Schein
+  JB = Jonathan Baker
   JC = John Cremona
   JD = Jeroen Demeyer
   KK = Kimitoshi Kono
