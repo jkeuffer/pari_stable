@@ -2999,6 +2999,20 @@ FpM_rank(GEN x, GEN p)
   return lg(x)-1 - r;
 }
 
+long
+Flm_rank(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  long r;
+  GEN d;
+
+  d = Flm_gauss_pivot(x,p,&r);
+  /* yield r = dim ker(x) */
+
+  avma=av; 
+  return lg(x)-1 - r;
+}
+
 static GEN
 sFpM_invimage(GEN mat, GEN y, GEN p)
 {
