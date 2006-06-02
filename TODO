@@ -15,19 +15,6 @@ Priority classification (first column): [subjective and debatable]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
-5  bnfinit sometimes gives wrong answers because we cheat on the value of
-Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
-(under GRH), or some suitably optimized bound following Bach's article. If
-the prime ideals of norm <= B do not generate the classgroup, we may not detect it, and compute junk. Ex:
- * setrand(3); bnfinit(y^4 + 1190*y^2 + 1416100).cyc --> [8,2,2,2].
-   Wrong. The correct structure is [8,4,2].
-
- * setrand(1414185642); bnfinit(y^4 + 635*y^2 + 403225).reg is twice
-the correct value.
-
- * setrand(867341586); bnfinit(y^4 - y^3 + 6122*y^2 + 6121*y + 37466641).gen
-is wrong [second one is principal]. Group structure and regulator are correct!
-
 4  factorback should not accept [;] since matrix(0,2) is the only valid
    form of an empty matrix input, corresponding e.g to factor(1). But the
    empty matrix is used in many places as a marker for a void factorization.

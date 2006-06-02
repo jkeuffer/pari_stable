@@ -964,26 +964,27 @@ is_bad(GEN D, ulong p)
 
 /* create FB, numFB; set badprim. Return L(kro_D, 1) */
 static GEN
-FBquad(GEN Disc, long n2, long n)
+FBquad(GEN Disc, long C2, long C1, GRHcheck_t *S)
 {
   GEN Res = real_1(DEFAULTPREC);
+  double L = log((double)C2), SA = 0, SB = 0;
   long i, p, s, LIM;
   pari_sp av;
   byteptr d = diffptr;
 
-  numFB = cgetg(n2+1, t_VECSMALL);
-  FB    = cgetg(n2+1, t_VECSMALL);
+  numFB = cgetg(C2+1, t_VECSMALL);
+  FB    = cgetg(C2+1, t_VECSMALL);
   av = avma;
   KC = 0; i = 0;
-  maxprime_check((ulong)n2);
+  maxprime_check((ulong)C2);
   badprim = gen_1;
-  for (p = 0;;) /* p <= n2 */
+  for (p = 0;;) /* p <= C2 */
   {
     NEXT_PRIME_VIADIFF(p, d);
-    if (!KC && p > n) KC = i;
-    if (p > n2) break;
+    if (!KC && p > C1) KC = i;
+    if (p > C2) break;
     s = krois(Disc,p);
-    Res = mulur(p, divrs(Res, p - s));
+    if (s) Res = mulur(p, divrs(Res, p - s));
     switch (s)
     {
       case -1: break; /* inert */
@@ -993,8 +994,24 @@ FBquad(GEN Disc, long n2, long n)
       default:  /* split */
         i++; numFB[p] = i; FB[i] = p; break;
     }
+    if (S)
+    {
+      double logp = log((double)p);
+      double logNP = s < 0? 2*logp: logp;
+      double q = s < 0? 1/(double)p: 1/sqrt((double)p);
+      double A = logNP * q, B = logNP * A;
+      long M = (long)(L/logNP);
+      if (M > 1)
+      {
+        double inv1_q = 1 / (1-q);
+        A *= (1 - pow(q, M)) * inv1_q;
+        B *= (1 - pow(q, M)*(M+1 - M*q)) * inv1_q * inv1_q;
+      }
+      if (s > 0) { SA += 2 * A; SB += 2 * B; } else { SA += A; SB += B; }
+    }
   }
   if (!KC) return NULL;
+  if (!GRHok(S, L, SA, SB)) return NULL;
   KC2 = i;
   setlg(FB, KC2+1);
   if (DEBUGLEVEL)
@@ -1527,6 +1544,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
+  GRHcheck_t G, *GRHcheck = &G;
 
   check_quaddisc(D, &s, /*junk*/&i, "buchquad");
   Disc = D;
@@ -1566,6 +1584,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buchquad");
   av = avma; cbach /= 2;
   powsubFB = subFB = NULL;
+  init_GRHcheck(GRHcheck, 2, PRECREG? 2: 0, LOGD);
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START: avma = av; cbach = check_bach(cbach,6.);
@@ -1583,8 +1602,9 @@ START: avma = av; cbach = check_bach(cbach,6.);
     isqrtD = truncr(sqrtD);
   }
 
-  Res = FBquad(Disc, LIMC2, LIMC);
+  Res = FBquad(Disc, LIMC2, LIMC, GRHcheck);
   if (!Res) goto START;
+  GRHcheck = NULL;
   subFB = subFBquad(Disc, lim + 0.5, KC);
   if (!subFB) goto START;
   nsubFB = lg(subFB) - 1;

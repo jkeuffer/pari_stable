@@ -10,6 +10,19 @@ Done for version 2.4.0 (released ??/??/2006):
        P=x^8-787856*x^6+232721637848*x^4-30546112988506688*x^2+1503204734505922286224;
        setrand(1974190693); bnfinit(P) --> non invertible matrix in gauss
     3- inconsistent return type in nffactormod [#460]
+    4- the following TODO item
+        bnfinit may give wrong answers because we cheat on the value of
+        Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should
+        really be 12 (under GRH). If the prime ideals of norm <= B do not
+        generate the classgroup, we may not detect it, and compute junk. Ex:
+        * setrand(3); bnfinit(y^4 + 1190*y^2 + 1416100).cyc
+          --> [8,2,2,2]. The correct structure is [8,4,2].
+
+        * setrand(1414185642); bnfinit(y^4 + 635*y^2 + 403225).reg
+          [twice the correct value]
+
+        * setrand(867341586); bnfinit(y^4-y^3+6122*y^2+6121*y+37466641).gen[2]
+          [is principal]. Group structure and regulator are correct!
 
   Changed
     1- moved cgiv to inline kernel
