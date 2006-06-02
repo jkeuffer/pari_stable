@@ -188,19 +188,8 @@ jump_to_given_buffer(Buffer *buf)
 static int
 has_ext_help(void)
 {
-  if (GP_DATA->help)
-  {
-    char *buf = pari_strdup(GP_DATA->help), *s, *t;
-    FILE *file;
-
-    for (t = s = buf; *s; *t++ = *s++)
-    {
-      if (*s == '\\') s++; else if (*s == ' ') break;
-    }
-    *t = 0; file = fopen(buf,"r");
-    free(buf);
-    if (file) { fclose(file); return 1; }
-  }
+  if (GP_DATA->help && *(GP_DATA->help))
+      return 1;
   return 0;
 }
 
@@ -376,7 +365,7 @@ Also:\n\
   ?\\             (keyboard shortcuts)\n\
   ?.             (member functions)\n");
   if (has_ext_help()) pariputs("\
-Extended help looks available:\n\
+Extended help (if available):\n\
   ??             (opens the full user's manual in a dvi previewer)\n\
   ??  tutorial / refcard / libpari (tutorial/reference card/libpari manual)\n\
   ??  keyword    (long help text about \"keyword\" from the user's manual)\n\
@@ -507,7 +496,8 @@ external_help(char *s, int num)
   pariFILE *z;
   FILE *f;
 
-  if (!GP_DATA->help) pari_err(talker,"no external help program");
+  if (!GP_DATA->help || !*(GP_DATA->help))
+    pari_err(talker,"no external help program");
   s = filter_quotes(s);
   str = gpmalloc(strlen(GP_DATA->help) + strlen(s) + 64);
   *ar = 0;
@@ -750,7 +740,7 @@ print_version(void)
   center(buf);
   ver = what_readline();
   buf = stackmalloc(strlen(ver) + 64);
-  (void)sprintf(buf, "(readline %s, extended help%s available)", ver,
+  (void)sprintf(buf, "(readline %s, extended help%s enabled)", ver,
                 has_ext_help()? "": " not");
   center(buf); avma = av;
 }
