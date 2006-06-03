@@ -1201,11 +1201,11 @@ ggamd(GEN x, long prec)
       if (labs(k) > 962353) pari_err(talker, "argument too large in ggamd");
       return gammahs(k<<1, prec);
     }
-    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD: case t_PADIC:
       av=avma; x = gadd(x,ghalf); tetpil=avma;
       return gerepile(av,tetpil,ggamma(x,prec));
 
-    case t_INTMOD: case t_PADIC: pari_err(typeer,"ggamd");
+    case t_INTMOD: pari_err(typeer,"ggamd");
     case t_SER: pari_err(impl,"gamd of a power series");
   }
   return transc(ggamd,x,prec);
