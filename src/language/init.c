@@ -1275,13 +1275,22 @@ const  long lontyp[] = { 0,0,0,1,1,1,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
 /* assume x is non-recursive. For efficiency return gen_0 instead of a copy
  * for a 0 t_INT */
 INLINE GEN
-copy_leaf(GEN x)
+copy_leaf(GEN x, long tx)
 {
   long i, lx;
   GEN y;
 
   if (is_0INT(x)) return gen_0; /* very common */
-  lx = lg(x); y = cgetg_copy(lx, x);
+  if (tx == t_INT)
+  {
+    lx = lgefint(x);
+    y = cgeti(lx);
+  }
+  else
+  {
+    lx = lg(x);
+    y = cgetg_copy(lx, x);
+  }
   for (i=1; i<lx; i++) y[i] = x[i]; /* no memcpy: avma and x may overlap */
   return y;
 }
@@ -1292,7 +1301,7 @@ gcopy(GEN x)
   long tx = typ(x), lx, i;
   GEN y;
 
-  if (! is_recursive_t(tx)) return copy_leaf(x);
+  if (! is_recursive_t(tx)) return copy_leaf(x, tx);
   lx = lg(x); y = cgetg_copy(lx, x);
   if (tx == t_LIST) lx = lgeflist(x);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
@@ -1309,7 +1318,7 @@ gcopy_i(GEN x, long lx)
   long tx = typ(x), i;
   GEN y;
 
-  if (! is_recursive_t(tx)) return copy_leaf(x);
+  if (! is_recursive_t(tx)) return copy_leaf(x, tx);
   y = cgetg(lx, tx); /* cgetg_copy would be incorrect if lx < lg(x) */
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
