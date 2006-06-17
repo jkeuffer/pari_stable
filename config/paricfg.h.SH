@@ -194,4 +194,8 @@ case $has_stat in
 yes) echo '#define HAS_STAT' >> $file;;
 esac
 
+case $enable_tls in
+yes) echo '#define ENABLE_TLS' >> $file;;
+esac
+
 echo '#endif' >> $file

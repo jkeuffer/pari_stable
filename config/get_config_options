@@ -106,6 +106,9 @@ while test $# -gt 0; do
   --with-fltk) with_fltk=yes ;;
   --with-fltk=*)
       with_fltk=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --enable-tls) enable_tls=yes;;
+  --enable-tls=*) enable_tls=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --disable-tls) enable_tls=no;;
   *) echo "*** Unrecognized option $1." >&2; error=true;;
   esac
   shift
@@ -145,6 +148,7 @@ Build Options:
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)
+  --enable-tls	  (*experimental*) enable thread-local stack
 
 Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)

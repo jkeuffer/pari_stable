@@ -76,6 +76,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#ifdef ENABLE_TLS
+static THREAD char *saveptr;
+#define strtok(x,y) strtok_r(x,y,&saveptr)
+#endif
+
+/** DEBUG **/
 /* #define MPQS_DEBUG_VERBOSE 1 */
 /* histograms are pretty, but don't help performance after all (see below) */
 /* #define MPQS_USE_HISTOGRAMS */
@@ -355,9 +361,9 @@ mpqs_handle_dtor(mpqs_handle_t *h)
 /* our own pointer to PARI's or to our own prime diffs table.
  * NB the latter is never freed, unless we need to replace it with
  * an even larger one. */
-static byteptr mpqs_diffptr = NULL;
-static long mpqs_prime_count = 0;
-static int mpqs_use_our_diffptr = 0;
+static THREAD byteptr mpqs_diffptr = NULL;
+static THREAD long mpqs_prime_count = 0;
+static THREAD int mpqs_use_our_diffptr = 0;
 
 /* return next prime larger than p, using *primes_ptr on the diffptr table
  * first and pari's other wits after that */

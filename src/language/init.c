@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, gi;
-GEN     gpi, geuler, bernzone;
+THREAD GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
 FILE    *pari_outfile, *errfile, *logfile, *infile;
@@ -44,7 +44,7 @@ entree  **varentries;
 long    *ordvar;
 GEN     polvar, *pol_1, *pol_x;
 
-pari_sp bot, top, avma;
+THREAD pari_sp bot, top, avma;
 size_t memused;
 void    *global_err_data;
 
@@ -583,6 +583,20 @@ int
 gp_init_functions()
 {
   return gp_init_entrees(new_fun_set? MODULES: OLDMODULES, functions_hash);
+}
+
+void
+pari_thread_init(size_t parisize)
+{
+  init_stack(parisize);
+  pari_init_floats();
+}
+
+void
+pari_thread_close(void)
+{
+  free((void *)bot);
+  pari_close_floats();
 }
 
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
@@ -1936,9 +1950,9 @@ void
 TIMERstart(pari_timer *T) { (void)TIMER(T); }
 
 long
-timer(void)   { static pari_timer T; return TIMER(&T);}
+timer(void)   { static THREAD pari_timer T; return TIMER(&T);}
 long
-timer2(void)  { static pari_timer T; return TIMER(&T);}
+timer2(void)  { static THREAD pari_timer T; return TIMER(&T);}
 
 void
 msgTIMER(pari_timer *T, char *format, ...)

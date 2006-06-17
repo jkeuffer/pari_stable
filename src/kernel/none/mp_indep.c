@@ -605,7 +605,7 @@ usqrtsafe(ulong a)
 /**                         RANDOM INTEGERS                        **/
 /**                                                                **/
 /********************************************************************/
-static long pari_randseed = 1;
+static THREAD long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */
 /*Return 31 ``random'' bits.*/

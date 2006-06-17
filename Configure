@@ -141,6 +141,7 @@ for variable in\
   sizeof_long doubleformat\
   X11 X11_INC X11_LIBS which_graphic_lib\
   FLTKDIR FLTK_LIBS QTDIR QTLIB\
+  enable_tls\
   $_test_list\
   $_install_list\
   $_perl_list\

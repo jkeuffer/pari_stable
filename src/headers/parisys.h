@@ -63,6 +63,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifndef INLINE
 #  define INLINE static
 #endif
+#ifdef ENABLE_TLS
+#  define THREAD __thread
+#else
+#  define THREAD
+#endif
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
 /* ANSI C does not allow to longjmp() out of a signal handler, in particular,

@@ -1247,6 +1247,8 @@ void    pari_err(long numerr, ...);
 void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
 void    pari_sig_init(void (*f)(int));
+void    pari_thread_init(size_t parisize);
+void    pari_thread_close(void);
 void    pari_warn(long numerr, ...);
 GEN     reorder(GEN x);
 GEN     shallowcopy(GEN x);

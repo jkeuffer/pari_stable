@@ -36,5 +36,7 @@ BA 10- ellheight short help was accidentally truncated.
 
   Added
 BA  1- function Flm_rank
+BA  2- Add experimental --enable-tls Configure option and thread-local stack 
+       support. Warning: using this option break the ABI.
 
   Removed
