@@ -180,6 +180,7 @@ Motorola
 *MC68030      25MHz  SunOS-4.0.3     gcc         1034136!1038368  2.0.9
 ------------------------------------------------------------------------------
 IBM/POWER,PowerPC
+CoreDuo     2160MHz  MacOS X 10.4    gcc-4.0.1       376       -  2.3.0     LG
 PPC G5      2000MHz  MacOS X 10.4    gcc-4.0.1       461       -  2.3.0     LG
 PPC G4      1667MHz  MacOS X 10.4    gcc-3.3         543       -  2.3.0     LG
 *PPC G4      400MHz  MacOS X 10.2    gcc-3.1        5174!      -  2.1.4     MB
