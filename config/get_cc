@@ -1,5 +1,5 @@
 # Exported variables
-_cc_list="__gnuc__ CC CFLAGS optimization DBGFLAGS OPTFLAGS CPP exe_suff suffix ASMINLINE"
+_cc_list="__gnuc__ CC CFLAGS optimization DBGFLAGS OPTFLAGS exe_suff suffix ASMINLINE"
 
 # Which optimization ?
 if test "$fastread" != yes; then
@@ -176,19 +176,3 @@ if test "$fastread" != yes; then
   dflt=$CFLAGS; rep=; . ./myread
   CFLAGS=$ans
 fi
-
-# Which C PreProcessor ?
-case "$osname" in
-  nextstep) cppfl="-traditional-cpp" ;;
-  darwin) cppfl="-no-cpp-precomp";;
-  freebsd)
-    if test "$PORTOBJFORMAT" = "elf"; then
-      cppfl="-DUSE_ELF"    
-      FREEBSD_ELF=1
-    else
-      FREEBSD_ELF=0
-    fi ;;
-esac
-CPP="$CC $cppfl -E -I."
-
-echo "C PreProcessor is      $CPP"

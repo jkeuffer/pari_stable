@@ -34,6 +34,7 @@ BA 10- ellheight short help was accidentally truncated.
   Changed
     1- moved cgiv to inline kernel
     2- reduce amount of memory needed by APRCL
+    3- remove CPP from Configure tests (not needed)
 
   Added
 BA  1- function Flm_rank
@@ -41,3 +42,4 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
        support. Warning: using this option break the ABI.
 
   Removed
+    1- Odos/Makefile (no longer functional, obsolete)
