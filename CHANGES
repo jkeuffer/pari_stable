@@ -29,6 +29,7 @@ IZ  7- [OS/2]: bogus [BUG] in 'program' bench (install pb not detected)
     8- gammah(1+O(3^5)) --> incorrect type in ggamd.
     9- invalid read in copy_leaf [ SEGV in some libc ]
 BA 10- ellheight short help was accidentally truncated.
+   11- substpol(1+O(x^(2*n)),x^2,x) --> 1+O(x) instead of 1+O(x^n) [#470]
 
   Changed
     1- moved cgiv to inline kernel
