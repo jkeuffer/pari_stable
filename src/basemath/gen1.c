@@ -1046,6 +1046,20 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
     z = gmul(X, Y);
   return gerepileupto(av, z);
 }
+/* (x1/x2) /y2 */
+static GEN
+div_rfrac_pol(GEN x1, GEN x2, GEN y2)
+{
+  GEN z, X;
+  pari_sp av = avma;
+
+  X = gred_rfrac2_i(x1, y2);
+  if (typ(X) == t_RFRAC)
+     z = gred_rfrac_simple(gel(X,1), gmul(gel(X,2),x2));
+  else
+    z = mul_gen_rfrac(X, mkrfrac(gen_1, x2));
+  return gerepileupto(av, z);
+}
 
 /* Mod(y, Y) * x,  assuming x scalar */
 static GEN
@@ -2277,7 +2291,7 @@ gdiv(GEN x, GEN y)
     case t_RFRAC:
       switch(ty)
       {
-	case t_POL: return div_rfrac_scal(x,y);
+	case t_POL: return div_rfrac_pol(gel(x,1),gel(x,2), y);
 	case t_SER:
 	  av = avma;
 	  return gerepileupto(av, gdiv(gel(x,1), gmul(gel(x,2),y)));
