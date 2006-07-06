@@ -1,0 +1,32 @@
+% $Id$
+% Copyright (c) 2000  The PARI Group
+%
+% This file is part of the PARI/GP documentation
+%
+% Permission is granted to copy, distribute and/or modify this document
+% under the terms of the GNU General Public License
+\appendix{PARI and threads}
+
+To use PARI in multi-threaded programs, you must configure it using
+\kbd{Configure --enable-tls}. Your system must implement the \kbd{\_\_thread}
+storage class. As a major side effect, this breaks the \kbd{libpari} ABI: the
+resulting library will not be compatible with the old one. On the other hand,
+it now provides the following two public functions
+
+\fun{void}{pari_thread_init}{size\_t parisize} must be called when starting a
+thread: it allocates a local stack of size \kbd{parisize} and local cached
+universal constants (e.g. \kbd{Pi}, \kbd{Euler}). Here, \emph{local} means
+\emph{local to the present thread}.
+
+\fun{void}{pari_thread_close}{void} must be called when closing a thread,
+and deallocates the above resources.
+
+\noindent The following sample program can be compiled using
+\bprog
+    cc thread.c -o thread.o -lpari -lpthread
+@eprog\noindent
+(Add \kbd{-I/-L} paths as necessary.)
+
+\noindent\bprogfile{../examples/thread.c}
+
+\vfill\eject

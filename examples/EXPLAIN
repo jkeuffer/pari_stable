@@ -4,6 +4,9 @@ This directory contains:
 the users' manual. A generic Makefile for PARI programs, adapted to your
 system by Configure, is included.
 
+* the C program thread.c using the Pari library in a multi-threaded context,
+as described in Appendix D of the users' manual.
+
 * Inputrc: an example of .inputrc file for the readline library.
 
 * Several examples of complete GP programs. The rest of this file gives a
