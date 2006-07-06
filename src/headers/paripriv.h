@@ -18,6 +18,11 @@ BEGINEXTERN
 /* for qsort */
 typedef int (*QSCOMP)(const void *, const void *);
 
+/* for (ulong*) GENs */
+typedef ulong *uGEN;
+#define ucoeff(a,i,j)  (((uGEN*)(a))[j][i])
+#define ugel(a,i) ((uGEN*)(a))[i]
+
 /* swap */
 #define lswap(x,y) {long _z=x; x=y; y=_z;}
 #define pswap(x,y) {GEN *_z=x; x=y; y=_z;}

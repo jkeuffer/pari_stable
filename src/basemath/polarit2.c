@@ -729,8 +729,6 @@ all_factor_bound(GEN x)
 }
 #endif
 
-typedef ulong *uGEN;
-
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim and divisible by hint
  *

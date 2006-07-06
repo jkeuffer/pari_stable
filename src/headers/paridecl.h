@@ -1125,7 +1125,6 @@ GEN     glt(GEN x, GEN y);
 GEN     gmod(GEN x, GEN y);
 GEN     gmodgs(GEN x, long y);
 GEN     gmodulo(GEN x,GEN y);
-GEN     gmodulo(GEN x,GEN y);
 GEN     gmodulsg(long x, GEN y);
 GEN     gmodulss(long x, long y);
 GEN     gne(GEN x, GEN y);

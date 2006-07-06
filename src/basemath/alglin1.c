@@ -1138,10 +1138,6 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
   return u;
 }
 
-typedef ulong* uGEN;
-#define ucoeff(a,i,j)  (((uGEN*)(a))[j][i])
-#define ugel(a,i) ((uGEN*)(a))[i]
-
 /* assume 0 <= a[i,j], b[i], invpiv < p */
 static uGEN
 Fl_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)

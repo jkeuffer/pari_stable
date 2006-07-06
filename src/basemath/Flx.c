@@ -2052,41 +2052,41 @@ typedef struct {
   GEN T, S;
   GEN mg;
   ulong p;
-} kronecker_muldata;
+} FlxqX_kronecker_muldata;
 
 static GEN
 FlxqXQ_red(void *data, GEN x)
 {
-  kronecker_muldata *D = (kronecker_muldata*)data;
+  FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
   GEN t = FlxqX_from_Kronecker(x, D->T,D->p);
   t = FlxqX_divrem(t, D->S,D->T,D->p, ONLY_REM);
   return FlxX_to_Kronecker(t,D->T);
 }
 static GEN
 FlxqXQ_mul(void *data, GEN x, GEN y) {
-  return FlxqXQ_red(data, Flx_mul(x,y,((kronecker_muldata*) data)->p));
+  return FlxqXQ_red(data, Flx_mul(x,y,((FlxqX_kronecker_muldata*) data)->p));
 }
 static GEN
 FlxqXQ_sqr(void *data, GEN x) {
-  return FlxqXQ_red(data, Flx_sqr(x,((kronecker_muldata*) data)->p));
+  return FlxqXQ_red(data, Flx_sqr(x,((FlxqX_kronecker_muldata*) data)->p));
 }
 
 #if 0
 static GEN
 FlxqXQ_red_montgomery(void *data, GEN x)
 {
-  kronecker_muldata *D = (kronecker_muldata*)data;
+  FlxqX_kronecker_muldata *D = (FlxqX_kronecker_muldata*)data;
   GEN t = FlxqX_from_Kronecker(x, D->T,D->p);
   t = FlxqX_rem_montgomery(t, D->S,D->mg,D->T,D->p);
   return FlxX_to_Kronecker(t,D->T);
 }
 static GEN
 FlxqXQ_mul_montgomery(void *data, GEN x, GEN y) {
-  return FlxqXQ_red_montgomery(data, Flx_mul(x,y,((kronecker_muldata*) data)->p));
+  return FlxqXQ_red_montgomery(data, Flx_mul(x,y,((FlxqX_kronecker_muldata*) data)->p));
 }
 static GEN
 FlxqXQ_sqr_montgomery(void *data, GEN x) {
-  return FlxqXQ_red_montgomery(data, Flx_sqr(x,((kronecker_muldata*) data)->p));
+  return FlxqXQ_red_montgomery(data, Flx_sqr(x,((FlxqX_kronecker_muldata*) data)->p));
 }
 #endif
 
@@ -2098,7 +2098,7 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
 {
   pari_sp av0 = avma;
   GEN y;
-  kronecker_muldata D;
+  FlxqX_kronecker_muldata D;
   D.S = S;
   D.T = T;
   D.p = p;
