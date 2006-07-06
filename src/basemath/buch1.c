@@ -807,7 +807,11 @@ check_bach(double cbach, double B)
 {
   if (cbach >= B)
    pari_err(talker,"sorry, couldn't deal with this field. PLEASE REPORT");
-  cbach *= 2; if (cbach > B) cbach = B;
+  if (cbach <= 0.3)
+    cbach *= 2;
+  else
+    cbach += 0.2;
+  if (cbach > B) cbach = B;
   if (DEBUGLEVEL) fprintferr("\n*** Bach constant: %f\n", cbach);
   return cbach;
 }

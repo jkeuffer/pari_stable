@@ -23,6 +23,7 @@ Done for version 2.4.0 (released ??/??/2006):
 
         * setrand(867341586); bnfinit(y^4-y^3+6122*y^2+6121*y+37466641).gen[2]
           [is principal]. Group structure and regulator are correct!
+       Retune check_bach()
 IZ  5- remove bogus test for "external help" (= ??)
 IZ  6- [OS/2]: stack check [prevent oo recursion] present but not enabled
 IZ  7- [OS/2]: bogus [BUG] in 'program' bench (install pb not detected)
