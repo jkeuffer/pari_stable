@@ -835,20 +835,18 @@ GEN
 divrem(GEN x, GEN y, long v)
 {
   pari_sp av = avma;
-  long vx,vy;
-  GEN z,q,r;
+  long vx, vy;
+  GEN q, r;
   if (v < 0 || typ(y) != t_POL || typ(x) != t_POL) return gdiventres(x,y);
   vx = varn(x); if (vx != v) x = swap_vars(x,v);
   vy = varn(y); if (vy != v) y = swap_vars(y,v);
   q = poldivrem(x,y, &r);
   if (v && (vx != v || vy != v))
   {
-    q = poleval(q, pol_x[v]);
-    r = poleval(r, pol_x[v]);
+    q = gsubst(q, v, pol_x[v]); /* poleval broken for t_RFRAC, subst is safe */
+    r = gsubst(r, v, pol_x[v]);
   }
-  z = cgetg(3,t_COL);
-  gel(z,1) = q;
-  gel(z,2) = r; return gerepilecopy(av, z);
+  return gerepilecopy(av, mkcol2(q, r));
 }
 
 static int

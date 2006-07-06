@@ -31,6 +31,7 @@ IZ  7- [OS/2]: bogus [BUG] in 'program' bench (install pb not detected)
 BA 10- ellheight short help was accidentally truncated.
    11- substpol(1+O(x^(2*n)),x^2,x) --> 1+O(x) instead of 1+O(x^n) [#470]
    12- [OS X] only use -no-cpp-precomp with Apple cc
+   13- divrem(x,x,y) --> [1/y*x, 0]
 
   Changed
     1- moved cgiv to inline kernel
