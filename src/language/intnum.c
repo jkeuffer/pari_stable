@@ -1215,7 +1215,7 @@ intfuncinitintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag)
   long L = weight(E, eval, tabxp, tabwp), L0 = lg(tabxp);
 
   TABw0(tab) = gmul(TABw0(tab), eval(TABx0(tab), E));
-  if (lg(tabxm) > 1) weight(E, eval, tabxm, tabwm);
+  if (lg(tabxm) > 1) (void)weight(E, eval, tabxm, tabwm);
   else
   {
     tabxm = gneg(tabxp);

@@ -114,10 +114,10 @@ enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
 	*failure = reason; *failure_arg = s; return 0;		\
     } else pari_err(talker,reason,s); } STMT_END
 
-unsigned long
+ulong
 parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg)
 {
-    unsigned long retval = 0;
+    ulong retval = 0;
     char *etmplate = NULL;
 
     if (flag & PARSEMNU_TEMPL_TERM_NL)
@@ -132,8 +132,9 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	char *e, *id;
 	char *negated;			/* action found with 'no'-ID */
 	int negate;			/* Arg has 'no' prefix removed */
-	unsigned long l, action = 0, first = 1, singleton = 0;
-	char b[80], *buf, *inibuf;
+	ulong l, action = 0, first = 1, singleton = 0;
+        char *buf, *inibuf;
+	static char b[80];
 
 	if (flag & PARSEMNU_ARG_WHITESP)
 	    while (isspace((int)*arg)) arg++;

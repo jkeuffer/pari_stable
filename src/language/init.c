@@ -588,7 +588,7 @@ gp_init_functions()
 void
 pari_thread_init(size_t parisize)
 {
-  init_stack(parisize);
+  (void)init_stack(parisize);
   pari_init_floats();
 }
 

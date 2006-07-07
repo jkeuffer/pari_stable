@@ -613,7 +613,7 @@ sd_parisize(const char *v, long flag)
     if (!bot) top = (pari_sp)n; /* no stack allocated yet */
     if (flag != d_INITRC) {
       ulong R = (ulong)r[2];
-      allocatemoremem(n);
+      (void)allocatemoremem(n);
       r = utoi(R);
     }
   }
