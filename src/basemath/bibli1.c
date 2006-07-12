@@ -1326,7 +1326,7 @@ PRECPB:
       {
         if (isexact)
         {
-          if (exact_can_leave) { if (H) h = gmul(H, h); break; }
+          if (exact_can_leave) { if (!in_place && H) h = gmul(H, h); break; }
 
           if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
           if (!in_place) H = H? gmul(H, h): h;
