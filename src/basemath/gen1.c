@@ -1808,7 +1808,7 @@ div_scal_rfrac(GEN x, GEN y)
 { 
   GEN y1 = gel(y,1), y2 = gel(y,2);
   pari_sp av = avma;
-  if (typ(y1) == t_POL && varn(y2) == varn(y1))
+  if (typ(y1) == t_POL && varn(y2) == varn(y1) && degpol(y1) > 0)
     return gerepileupto(av, gred_rfrac_simple(gmul(x, y2), y1));
   return RgX_Rg_mul(y2, gdiv(x,y1));
 }

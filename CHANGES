@@ -37,6 +37,7 @@ BA 10- ellheight short help was accidentally truncated.
    15- typo in qflll: in rare cases (exact input+floating point computation+
        precision increase in last-but-1 step), the returned base change is not
        properly updated in last iteration --> basis not LLL-reduced
+   16- simplification missed in div_scal_rfrac() [ #473 ]
 
   Changed
     1- moved cgiv to inline kernel
