@@ -164,7 +164,6 @@ DLLD_FLAVOR  = \$(LD_FLAVOR)
 DLLD       = $DLLD \$(DLLD_FLAVOR)
 DLLDFLAGS  = $DLLDFLAGS
 EXTRADLLDFLAGS = $EXTRADLLDFLAGS
-CPP        = $CPP
 
 # HIGHLY EXPERIMENTAL (only tested with gmp-4.0 on ix86 and Ultra).
 # If you've configured and compiled GMP and would like to tune PARI using
