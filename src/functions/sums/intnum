@@ -1,7 +1,7 @@
 Function: intnum
 Section: sums
 C-Name: intnum0
-Prototype: V=GGEDGp
+Prototype: V=GGIDGp
 Help: intnum(X=a,b,s,{tab}): numerical integration of s from a to b with 
  respect to X. a (and similarly b) is coded as follows. It can be a scalar: f
  is assumed to be C^infty at a. It can be a two component vector [a[1],a[2]],

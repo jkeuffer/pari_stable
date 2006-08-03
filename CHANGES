@@ -38,12 +38,14 @@ BA 10- ellheight short help was accidentally truncated.
        precision increase in last-but-1 step), the returned base change is not
        properly updated in last iteration --> basis not LLL-reduced
    16- simplification missed in div_scal_rfrac() [ #473 ]
-   17- ispower(x^k, k) would answer no for some x and k in {3,5,7} [#476]
+   17- ispower(x^k, k) would answer 0 for some x and k in {3,5,7} [#476]
 
   Changed
     1- moved cgiv to inline kernel
     2- reduce amount of memory needed by APRCL
     3- remove CPP from Configure tests (not needed)
+    4- allow arbitrary sequences (not only expressions) in sum, prod, etc.
+       sum(i = 1, 2, 1;2) --> 4  [ was: error ]
 
   Added
 BA  1- function Flm_rank

@@ -484,7 +484,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = readexpr_nobreak(ch);
+    p1 = readseq_nobreak(ch);
     x=gadd(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -565,7 +565,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = readexpr_nobreak(ch);
+    p1 = readseq_nobreak(ch);
     x = gmul(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))

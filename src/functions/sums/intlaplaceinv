@@ -1,7 +1,7 @@
 Function: intlaplaceinv
 Section: sums
 C-Name: intlaplaceinv0
-Prototype: V=GGEDGp
+Prototype: V=GGIDGp
 Help: intlaplaceinv(X=sig,x,s,{tab}): numerical integration on the line
  real(z) = sig of s(z)exp(xz)dz/(2*I*Pi), i.e. inverse Laplace transform of s
  at x. tab is as in intnum.

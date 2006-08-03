@@ -1,7 +1,7 @@
 Function: sumnum
 Section: sums
 C-Name: sumnum0
-Prototype: V=GGEDGD0,L,p
+Prototype: V=GGIDGD0,L,p
 Help: sumnum(X=a,sig,expr,{tab},{flag=0}): numerical summation of expr from 
  X = ceiling(a) to +infinity. sig is either a scalar or a two-component vector
  coding the function's decrease rate at infinity. It is assumed that the
