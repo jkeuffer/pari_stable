@@ -3070,7 +3070,7 @@ content(GEN x)
       if (lx == 1) return gen_1;
       hx = lg(x[1]);
       if (hx == 1) return gen_1;
-      if (lx == 2) { x = gel(x,1); break; }
+      if (lx == 2) { x = gel(x,1); lx = lg(x); break; }
       if (hx == 2) { x = row_i(x, 1, 1, lx-1); break; }
       c = content(gel(x,1));
       for (j=2; j<lx; j++)
