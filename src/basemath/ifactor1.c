@@ -2275,137 +2275,151 @@ squfof(GEN n)
 }
 
 /***********************************************************************/
-/**                                                                   **/
-/**                   DETECTING ODD POWERS  --GN1998Jun28             **/
-/**  Factoring engines like MPQS which ultimately rely on computing   **/
-/**  gcd(N, x^2-y^2) to find a nontrivial factor of N can't split     **/
-/**  N = p^k for an odd prime p, since (Z/p^k)^* is then cyclic.      **/
-/**  The square-detection function Z_issquarerem() also returns the    **/
-/**  square root if appropriate.  Here's an analogue for cubes, fifth **/
-/**  and 7th powers.  11th powers are a non-issue so long as mpqs()   **/
-/**  gives up beyond 100 decimal digits  (ECM easily finds a 10-digit **/
-/**  factor of a 100-digit number).                                   **/
-/**                                                                   **/
+/*                                                                     */
+/*                    DETECTING ODD POWERS  --GN1998Jun28              */
+/*   Factoring engines like MPQS which ultimately rely on computing    */
+/*   gcd(N, x^2-y^2) to find a nontrivial factor of N can't split      */
+/*   N = p^k for an odd prime p, since (Z/p^k)^* is then cyclic. Here  */
+/*   is an analogue of Z_issquarerem() for 3rd, 5th and 7th powers.    */
+/*   The general case is handled by is_kth_power                       */
+/*                                                                     */
 /***********************************************************************/
 
-/* Multistage sieve. First stages work mod 211, 209, 61, 203 in this order;
- * if the argument is larger than a word, we first reduce mod the product of
- * these and then take the remainder apart.  Second stages use 117, 31, 43, 71.
- * Moduli which are no longer interesting are skipped.  Everything is encoded
- * in a single table of 106 24-bit masks. We only need the first half of the
- * residues.  Three bits per modulus indicate which residues are 7th (bit 2),
- * 5th (bit 1) powers or cubes (bit 0); the eight moduli above are assigned
- * right-to-left. The table errs on the side of safety if one of the moduli
- * divides the number to be tested, but as this leads to inefficiency it should
- * still be avoided. */
+/* Multistage sieve. First stages work mod 211, 209, 61, 203 in this order
+ * (first reduce mod the product of these and then take the remainder apart).
+ * Second stages use 117, 31, 43, 71. Moduli which are no longer interesting
+ * are skipped. Everything is encoded in a table of 106 24-bit masks. We only
+ * need the first half of the residues.  Three bits per modulus indicate which
+ * residues are 7th (bit 2), 5th (bit 1) or 3rd (bit 0) powers; the eight
+ * moduli above are assigned right-to-left. The table was generated using: */
 
+#if 0
+L = [71, 43, 31, [O(3^2),O(13)], [O(7),O(29)], 61, [O(11),O(19)], 211];
+ispow(x, N, k)=
+{
+  if (type(N) == "t_INT", return (ispower(Mod(x,N), k)));
+  for (i = 1, #N, if (!ispower(x + N[i], k), return (0))); 1
+}
+check(r) =
+{
+  print1("  0");
+  for (i=1,#L,
+    N = 0;
+    if (ispow(r, L[i], 3), N += 1);
+    if (ispow(r, L[i], 5), N += 2);
+    if (ispow(r, L[i], 7), N += 4);
+    print1(N);
+  ); print("ul,  /* ", r, " */")
+}
+for (r = 0, 105, check(r))
+#endif
 static ulong powersmod[106] = {
-  077777777ul,	/* 0 */
-  077777777ul,	/* 1 */
-  013562440ul,	/* 2 */
-  012462540ul,	/* 3 */
-  013562440ul,	/* 4 */
-  052662441ul,	/* 5 */
-  016663440ul,	/* 6 */
-  016463450ul,	/* 7 */
-  013573551ul,	/* 8 */
-  012462540ul,	/* 9 */
-  012462464ul,	/* 10 */
-  013462771ul,	/* 11 */
-  012466473ul,	/* 12 */
-  012463641ul,	/* 13 */
-  052463646ul,	/* 14 */
-  012563446ul,	/* 15 */
-  013762440ul,	/* 16 */
-  052766440ul,	/* 17 */
-  012772451ul,	/* 18 */
-  012762454ul,	/* 19 */
-  032763550ul,	/* 20 */
-  013763664ul,	/* 21 */
-  017763460ul,	/* 22 */
-  037762565ul,	/* 23 */
-  017762540ul,	/* 24 */
-  057762441ul,	/* 25 */
-  037772452ul,	/* 26 */
-  017773551ul,	/* 27 */
-  017767541ul,	/* 28 */
-  017767640ul,	/* 29 */
-  037766450ul,	/* 30 */
-  017762752ul,	/* 31 */
-  037762762ul,	/* 32 */
-  017762742ul,	/* 33 */
-  037763762ul,	/* 34 */
-  017763740ul,	/* 35 */
-  077763740ul,	/* 36 */
-  077762750ul,	/* 37 */
-  077762752ul,	/* 38 */
-  077762750ul,	/* 39 */
-  077762743ul,	/* 40 */
-  077767740ul,	/* 41 */
-  077763741ul,	/* 42 */
-  077763762ul,	/* 43 */
-  077772760ul,	/* 44 */
-  077762770ul,	/* 45 */
-  077766750ul,	/* 46 */
-  077762740ul,	/* 47 */
-  077763740ul,	/* 48 */
-  077763750ul,	/* 49 */
-  077763752ul,	/* 50 */
-  077762740ul,	/* 51 */
-  077762740ul,	/* 52 */
-  077772740ul,	/* 53 */
-  077762762ul,	/* 54 */
-  077763765ul,	/* 55 */
-  077763770ul,	/* 56 */
-  077767750ul,	/* 57 */
-  077766753ul,	/* 58 */
-  077776740ul,	/* 59 */
-  077772741ul,	/* 60 */
-  077772744ul,	/* 61 */
-  077773740ul,	/* 62 */
-  077773743ul,	/* 63 */
-  077773751ul,	/* 64 */
-  077772771ul,	/* 65 */
-  077772760ul,	/* 66 */
-  077772763ul,	/* 67 */
-  077772751ul,	/* 68 */
-  077773750ul,	/* 69 */
-  077777740ul,	/* 70 */
-  077773745ul,	/* 71 */
-  077772740ul,	/* 72 */
-  077772742ul,	/* 73 */
-  077772744ul,	/* 74 */
-  077776750ul,	/* 75 */
-  077773771ul,	/* 76 */
-  077773774ul,	/* 77 */
-  077773760ul,	/* 78 */
-  077772741ul,	/* 79 */
-  077772740ul,	/* 80 */
-  077772740ul,	/* 81 */
-  077772741ul,	/* 82 */
-  077773754ul,	/* 83 */
-  077773750ul,	/* 84 */
-  077773740ul,	/* 85 */
-  077776741ul,	/* 86 */
-  077776771ul,	/* 87 */
-  077776773ul,	/* 88 */
-  077772761ul,	/* 89 */
-  077773741ul,	/* 90 */
-  077773740ul,	/* 91 */
-  077773740ul,	/* 92 */
-  077772740ul,	/* 93 */
-  077772752ul,	/* 94 */
-  077772750ul,	/* 95 */
-  077772751ul,	/* 96 */
-  077773741ul,	/* 97 */
-  077773761ul,	/* 98 */
-  077777760ul,	/* 99 */
-  077772765ul,	/* 100 */
-  077772742ul,	/* 101 */
-  077777751ul,	/* 102 */
-  077777750ul,	/* 103 */
-  077777745ul,	/* 104 */
-  077777770ul	/* 105 */
+  077777777ul,  /* 0 */
+  077777777ul,  /* 1 */
+  013562440ul,  /* 2 */
+  012402540ul,  /* 3 */
+  013562440ul,  /* 4 */
+  052662441ul,  /* 5 */
+  016603440ul,  /* 6 */
+  016463450ul,  /* 7 */
+  013573551ul,  /* 8 */
+  012462540ul,  /* 9 */
+  012462464ul,  /* 10 */
+  013462771ul,  /* 11 */
+  012406473ul,  /* 12 */
+  012463641ul,  /* 13 */
+  052463646ul,  /* 14 */
+  012503446ul,  /* 15 */
+  013562440ul,  /* 16 */
+  052466440ul,  /* 17 */
+  012472451ul,  /* 18 */
+  012462454ul,  /* 19 */
+  032463550ul,  /* 20 */
+  013403664ul,  /* 21 */
+  013463460ul,  /* 22 */
+  032562565ul,  /* 23 */
+  012402540ul,  /* 24 */
+  052662441ul,  /* 25 */
+  032672452ul,  /* 26 */
+  013573551ul,  /* 27 */
+  012467541ul,  /* 28 */
+  012567640ul,  /* 29 */
+  032706450ul,  /* 30 */
+  012762452ul,  /* 31 */
+  033762662ul,  /* 32 */
+  012502562ul,  /* 33 */
+  032463562ul,  /* 34 */
+  013563440ul,  /* 35 */
+  016663440ul,  /* 36 */
+  036662550ul,  /* 37 */
+  012462552ul,  /* 38 */
+  033502450ul,  /* 39 */
+  012462643ul,  /* 40 */
+  033467540ul,  /* 41 */
+  017403441ul,  /* 42 */
+  017463462ul,  /* 43 */
+  017472460ul,  /* 44 */
+  033462470ul,  /* 45 */
+  052566450ul,  /* 46 */
+  013562640ul,  /* 47 */
+  032403640ul,  /* 48 */
+  016463450ul,  /* 49 */
+  016463752ul,  /* 50 */
+  033402440ul,  /* 51 */
+  012462540ul,  /* 52 */
+  012472540ul,  /* 53 */
+  053562462ul,  /* 54 */
+  012463465ul,  /* 55 */
+  012663470ul,  /* 56 */
+  052607450ul,  /* 57 */
+  012566553ul,  /* 58 */
+  013466440ul,  /* 59 */
+  012502741ul,  /* 60 */
+  012762744ul,  /* 61 */
+  012763740ul,  /* 62 */
+  012763443ul,  /* 63 */
+  013573551ul,  /* 64 */
+  013462471ul,  /* 65 */
+  052502460ul,  /* 66 */
+  012662463ul,  /* 67 */
+  012662451ul,  /* 68 */
+  012403550ul,  /* 69 */
+  073567540ul,  /* 70 */
+  072463445ul,  /* 71 */
+  072462740ul,  /* 72 */
+  012472442ul,  /* 73 */
+  012462644ul,  /* 74 */
+  013406650ul,  /* 75 */
+  052463471ul,  /* 76 */
+  012563474ul,  /* 77 */
+  013503460ul,  /* 78 */
+  016462441ul,  /* 79 */
+  016462440ul,  /* 80 */
+  012462540ul,  /* 81 */
+  013462641ul,  /* 82 */
+  012463454ul,  /* 83 */
+  013403550ul,  /* 84 */
+  057563540ul,  /* 85 */
+  017466441ul,  /* 86 */
+  017606471ul,  /* 87 */
+  053666573ul,  /* 88 */
+  012562561ul,  /* 89 */
+  013473641ul,  /* 90 */
+  032573440ul,  /* 91 */
+  016763440ul,  /* 92 */
+  016702640ul,  /* 93 */
+  033762552ul,  /* 94 */
+  012562550ul,  /* 95 */
+  052402451ul,  /* 96 */
+  033563441ul,  /* 97 */
+  012663561ul,  /* 98 */
+  012677560ul,  /* 99 */
+  012462464ul,  /* 100 */
+  032562642ul,  /* 101 */
+  013402551ul,  /* 102 */
+  032462450ul,  /* 103 */
+  012467445ul,  /* 104 */
+  032403440ul,  /* 105 */
 };
 
 /* Returns 3, 5, or 7 if x is a cube (but not a 5th or 7th power),  a 5th
@@ -2418,8 +2432,9 @@ static ulong powersmod[106] = {
 int
 is_357_power(GEN x, GEN *pt, ulong *mask)
 {
-  long lx = lgefint(x), exponent = 0, residue, resbyte;
-  pari_sp av = avma;
+  long lx = lgefint(x), exponent, resbyte;
+  ulong residue;
+  pari_sp av;
   GEN y;
 
   *mask &= 7;		/* paranoia */
@@ -2433,7 +2448,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     if (*mask&4) fprintferr(" 7th");
     fprintferr(" power?\n\tmodulo: resid. (remaining possibilities)\n");
   }
-  residue = (lx == 3)? x[2]: smodis(x, 211*209*61*203);
+  residue = (lx == 3)? x[2]: umodiu(x, 211*209*61*203);
 
 #define check_res(N, shift) {\
   resbyte = residue%N; if (resbyte > (N>>1)) resbyte = N - resbyte;\
@@ -2444,14 +2459,14 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   if (!*mask) return 0;\
 }
   check_res(211, 0);
-  if (*mask & 3) check_res(209, 3);
-  if (*mask & 3) check_res( 61, 6);
-  if (*mask & 5) check_res(203, 9);
-  residue = (lx == 3)? x[2]: smodis(x, 117*31*43*71);
-  if (*mask & 1) check_res(117,12);
-  if (*mask & 3) check_res( 31,15);
-  if (*mask & 5) check_res( 43,18);
-  if (*mask & 6) check_res( 71,21);
+  if (*mask & 3) check_res(209UL, 3);
+  if (*mask & 3) check_res( 61UL, 6);
+  if (*mask & 5) check_res(203UL, 9);
+  residue = (lx == 3)? x[2]: umodiu(x, 117*31*43*71);
+  if (*mask & 1) check_res(117UL,12);
+  if (*mask & 3) check_res( 31UL,15);
+  if (*mask & 5) check_res( 43UL,18);
+  if (*mask & 6) check_res( 71UL,21);
 
   /* priority to higher powers: if we have a 21st, it is easier to rediscover
    * that its 7th root is a cube than that its cube root is a 7th power */
@@ -2462,6 +2477,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   else
     { resbyte = 1; exponent = 3; }
 
+  av = avma;
   y = mpround( sqrtnr(itor(x, 3 + (lx-2) / exponent), exponent) );
   if (!equalii(powiu(y, exponent), x))
   {
