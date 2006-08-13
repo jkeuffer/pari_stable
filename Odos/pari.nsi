@@ -1,6 +1,6 @@
 !include "MUI.nsh"
-!define MUI_PRODUCT "PARI"
-!define MUI_VERSION "2.3.0"
+Name "PARI 2.4.0-rc1 (unstable, release candidate)"
+!define dll "libpari-2.4.dll"
 
 ;--------------------------------
 AutoCloseWindow false
@@ -8,15 +8,21 @@ AutoCloseWindow false
 OutFile "Pari.exe"
 InstallDir "$PROGRAMFILES\PARI"
 InstallDirRegKey HKLM "Software\PARI" ""
-LicenseData "..\COPYING"
 
-!define MUI_WELCOMEPAGE
-!define MUI_LICENSEPAGE
-!define MUI_COMPONENTSPAGE
-!define MUI_DIRECTORYPAGE
 !define MUI_ABORTWARNING
-!define MUI_UNINSTALLER
-!define MUI_UNCONFIRMPAGE
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "..\COPYING"
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
+
 !insertmacro MUI_LANGUAGE "English"
 ;--------------------------------
 ;Installer Sections
@@ -28,12 +34,14 @@ Section "pari (required)" SecCopy
   File /oname=gp.exe "..\Ocygwin-i686\gp-dyn.exe"
   File "makegprc"
   File "..\misc\tex2mail"
-  File "..\Ocygwin-i686\libpari.dll"
-  File "\cygwin\bin\cygwin1.dll"
+  File "..\Ocygwin-i686\${dll}"
+  File "\cygwin\bin\cygcrypt-0.dll"
+  File "\cygwin\bin\cygiconv-2.dll"
+  File "\cygwin\bin\cygintl-3.dll"
   File "\cygwin\bin\cygncurses-8.dll"
   File "\cygwin\bin\cygreadline6.dll"
   File "\cygwin\bin\cygperl5_8.dll"
-  File "\cygwin\bin\cygcrypt-0.dll"
+  File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\perl.exe"
   File "\cygwin\bin\sh.exe"
 
@@ -64,18 +72,18 @@ Section "documentation" SecDOC
 SectionEnd
 
 Section "examples" SecEX
+  SetOutPath "$INSTDIR"
+  File "..\doc\gphelp"
   SetOutPath $INSTDIR\examples
   File "..\examples\EXPLAIN"
   File "..\examples\Inputrc"
   File "..\examples\*.gp"
   File "..\examples\*.c"
   File "..\examples\Makefile.cygwin-i686"
-  SetOutPath "$INSTDIR"
-  File "..\doc\gphelp"
 SectionEnd
 
 Function .onInstSuccess
-  MessageBox MB_OK "Thank you for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
+  MessageBox MB_OK "Thank you for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP: colors, script search path, etc."
   ExecShell "open" "$INSTDIR"
 FunctionEnd
 
@@ -93,8 +101,6 @@ Section "shortcuts" SecSM
   CreateShortCut "$DESKTOP\PARI.lnk" "$INSTDIR\gp.exe"
 SectionEnd
 
-!insertmacro MUI_SECTIONS_FINISHHEADER
-
 ;--------------------------------
 ;Descriptions
 
@@ -104,13 +110,13 @@ LangString DESC_EX ${LANG_ENGLISH} "Install sample GP scripts."
 LangString DESC_GAL ${LANG_ENGLISH} "Install Galois data files (degree > 7)."
 LangString DESC_SM ${LANG_ENGLISH} "Add PARI shortcuts to Start Menu and desktop."
 
-!insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCopy} $(DESC_SecCopy)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGAL} $(DESC_GAL)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSM} $(DESC_SM)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDOC} $(DESC_DOC)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecEX} $(DESC_EX)
-!insertmacro MUI_FUNCTIONS_DESCRIPTION_END
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
  
 ;--------------------------------
 Section "Uninstall"
@@ -118,17 +124,21 @@ Section "Uninstall"
   Delete "$INSTDIR\.gprc"
   Delete "$INSTDIR\gphelp"
   Delete "$INSTDIR\tex2mail"
-  Delete "$INSTDIR\libpari-2.2.dll"
-
-  Delete "$INSTDIR\perl.exe"
-  Delete "$INSTDIR\cygwin1.dll"
+  Delete "$INSTDIR\${dll}"
+  Delete "$INSTDIR\cygcrypt-0.dll"
+  Delete "$INSTDIR\cyginconv-2.dll"
+  Delete "$INSTDIR\cygintl-3.dll"
   Delete "$INSTDIR\cygncurses-8.dll"
   Delete "$INSTDIR\cygreadline6.dll"
+  Delete "$INSTDIR\cygperl5_8.dll"
+  Delete "$INSTDIR\cygwin1.dll"
+  Delete "$INSTDIR\perl.exe"
+  Delete "$INSTDIR\sh.exe"
+
   Delete "$INSTDIR\Uninstall.exe"
-  Delete "$INSTDIR\cygperl5_8_5.dll"
-  Delete "$INSTDIR\cygcrypt-0.dll"
   RMDir /r "$INSTDIR\doc"
-  RMDir /r "$INSTDIR\data"
+  RMDir /r "$INSTDIR\examples"
+  RMDir /r "$INSTDIR\galdata"
 
   DeleteRegKey HKLM ${uninst}
   DeleteRegKey /ifempty HKLM "Software\PARI"
@@ -136,6 +146,4 @@ Section "Uninstall"
   RMDir /r "$SMPROGRAMS\PARI"
   Delete "$DESKTOP\PARI.lnk"
   RMDir "$INSTDIR"
-  
-  !insertmacro MUI_UNFINISHHEADER
 SectionEnd
