@@ -2451,7 +2451,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   residue = (lx == 3)? x[2]: umodiu(x, 211*209*61*203);
 
 #define check_res(N, shift) {\
-  resbyte = residue%N; if (resbyte > (N>>1)) resbyte = N - resbyte;\
+  resbyte = residue%N; if ((ulong)resbyte > (N>>1)) resbyte = N - resbyte;\
   *mask &= (powersmod[resbyte] >> shift); \
   if (DEBUGLEVEL >= 5)\
     fprintferr("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",\
