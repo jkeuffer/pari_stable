@@ -72,7 +72,7 @@ rand_INT(long n)
 {
   pari_sp av = avma;
   GEN x, N = int2n(n*BITS_IN_LONG);
-  do x = genrand(N); while (lgefint(x) != n+2);
+  do x = randomi(N); while (lgefint(x) != n+2);
   return gerepileuptoint(av, x);
 }
 /* real, n words */
