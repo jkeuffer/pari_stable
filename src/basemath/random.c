@@ -113,7 +113,13 @@ pari_rand()
 }
 
 long
-pari_rand31() { return pari_rand() >> 1; }
+pari_rand31() {
+#ifdef LONG_IS_64BIT
+  return pari_rand() >> 33;
+#else
+  return pari_rand() >> 1;
+#endif
+}
 
 void
 setrand(GEN seed) {
