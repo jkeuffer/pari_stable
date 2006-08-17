@@ -47,6 +47,8 @@ BA 10- ellheight short help was accidentally truncated.
     3- remove CPP from Configure tests (not needed)
     4- allow arbitrary sequences (not only expressions) in sum, prod, etc.
        sum(i = 1, 2, 1;2) --> 4  [ was: error ]
+    5- checked that no 2-strong pseudoprime passes BSPW primality test up to 
+       10^15 (use Galway's list, extending Pinch's 10^13)
 
   Added
 BA  1- function Flm_rank
