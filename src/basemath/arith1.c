@@ -1971,8 +1971,9 @@ gisprime(GEN x, long flag)
 long
 isprimeSelfridge(GEN x) { return (plisprime(x,0)==gen_1); }
 
-/* assume x BSW pseudoprime. Check whether it's small enough to be certified
- * prime */
+/* Assume x BSW pseudoprime. Check whether it's small enough to be certified
+ * prime (< 10^15). Reference for strong 2-pseudoprimes: William Galway's list
+ * at http://oldweb.cecm.sfu.ca/pseudoprime/, extending Richard Pinch (<10^13)*/
 int
 BSW_isprime_small(GEN x)
 {
@@ -1981,7 +1982,7 @@ BSW_isprime_small(GEN x)
   if (l == 4)
   {
     pari_sp av = avma;
-    long t = cmpii(x, u2toi(0x918UL, 0x4e72a000UL)); /* 10^13 */
+    long t = cmpii(x, u2toi(0x38d7eUL, 0xa4c68000UL)); /* 10^15 */
     avma = av;
     if (t < 0) return 1;
   }

@@ -1854,7 +1854,7 @@ $0$ is factored as $0^1$.
 
    If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
 (see \kbd{ispseudoprime}), and in general not rigorously proven primes. In
-fact, any factor which is $\leq 10^{13}$ is a genuine prime number. Use
+fact, any factor which is $\leq 10^{15}$ is a genuine prime number. Use
 \kbd{isprime} to prove primality of other factors, as in
 \bprog
 fa = factor(2^2^7 +1)
@@ -2106,7 +2106,7 @@ Adleman-Pomerance-Rumely-Cohen-Lenstra (APRCL) for general $x$.
 If $\fl=1$, use Selfridge-Pocklington-Lehmer ``$p-1$'' test and output a
 primality certificate as follows: return 0 if $x$ is composite, 1 if $x$ is
 small enough that passing Baillie-PSW test guarantees its primality
-(currently $x < 10^{13}$), $2$ if $x$ is a large prime whose primality could
+(currently $x < 10^{15}$), $2$ if $x$ is a large prime whose primality could
 only sensibly be proven (given the algorithms implemented in PARI) using the
 APRCL test. Otherwise ($x$ is large and $x-1$ is smooth) output a three
 column matrix as a primality certificate. The first column contains the prime
@@ -2133,9 +2133,11 @@ pseudo prime (strong Rabin-Miller pseudo prime for base $2$, followed by
 strong Lucas test for the sequence $(P,-1)$, $P$ smallest positive integer
 such that $P^2 - 4$ is not a square mod $x$).
 
-There are no known composite numbers passing this test (in particular, all
-composites $\leq 10^{13}$ are correctly detected), although it is expected
-that infinitely many such numbers exist.
+There are no known composite numbers passing this test, although it is
+expected that infinitely many such numbers exist. In particular, all
+composites $\leq 10^{15}$ are correctly detected (checked using
+Galway's list of strong 2-pseudoprimes at
+\kbd{http://oldweb.cecm.sfu.ca/pseudoprime/}).
 
 If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime  for
 $\fl$ randomly chosen bases (with end-matching to catch square roots of
