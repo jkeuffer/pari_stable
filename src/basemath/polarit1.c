@@ -1061,7 +1061,7 @@ FpX_rand(long d1, long v, GEN p)
 {
   long i, d = d1+2;
   GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
-  for (i=2; i<d; i++) gel(y,i) = genrand(p);
+  for (i=2; i<d; i++) gel(y,i) = randomi(p);
   (void)normalizepol_i(y,d); return y;
 }
 
@@ -1114,7 +1114,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     }
     else
     {
-      GEN pol = scalarpol(genrand(p), vu);
+      GEN pol = scalarpol(randomi(p), vu);
       for (i=2; i<=d; i++)
         pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
       polt = FpX_red(pol,p);
