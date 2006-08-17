@@ -1866,7 +1866,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       fprintferr("chk_gen_init: difficult field, trying random elements\n");
     for (i = 0; i < 10; i++)
     {
-      for (j = 1; j <= N; j++) gel(x,j) = stoi( (pari_rand31() % 7) - 3 );
+      for (j = 1; j <= N; j++) gel(x,j) = stoi( (long)Fl_rand(7) - 3 );
       e = gmul(d->ZKembed, x);
       P = get_pol(d, e);
       if (!ZX_is_squarefree(P)) continue;

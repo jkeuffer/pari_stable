@@ -1856,6 +1856,9 @@ debug_stack(void)
     fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
+long
+getstack(void) { return top-avma; }
+
 /*******************************************************************/
 /*                                                                 */
 /*                               TIMER                             */
@@ -1977,6 +1980,9 @@ msgtimer(char *format, ...)
   pariprintf(": %ld\n", timer2()); pariflush();
   pariOut = out;
 }
+
+long
+gettime(void) { return timer(); }
 
 /*******************************************************************/
 /*                                                                 */

@@ -1440,8 +1440,8 @@ triv_gen(GEN nf, GEN x, long c, long flag)
 GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
-  GEN nf, arch;
-  long c, pr, tx = idealtyp(&x, &arch);
+  GEN nf, arch, c;
+  long pr, tx = idealtyp(&x, &arch);
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
@@ -1464,7 +1464,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
     if (y) return gerepilecopy(av, y);
 
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",pr);
-    avma = av1; bnf = bnfnewprec(bnf,pr); (void)setrand(c);
+    avma = av1; bnf = bnfnewprec(bnf,pr); setrand(c);
   }
 }
 
@@ -1481,9 +1481,9 @@ add_principal_part(GEN nf, GEN u, GEN v, long flag)
 GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
-  long l = lg(e), i, prec, c;
+  long l = lg(e), i, prec;
   pari_sp av = avma;
-  GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
+  GEN c, id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
   int gen = flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL);
 
   prec = prec_arch(bnf);
@@ -1535,7 +1535,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       avma = av; return utoipos(prec);
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",prec);
-    avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
+    avma = av1; bnf = bnfnewprec(bnf,prec); setrand(c);
   }
 }
 
@@ -2501,7 +2501,8 @@ makematal(GEN bnf)
   prec = prec_arch(bnf);
   for (j=1; j<lma; j++)
   {
-    long c = getrand(), e;
+    long e;
+    GEN c = getrand();
     GEN ex = (j<=lW)? gel(W,j): gel(B,j-lW);
     GEN C = (j<=lW)? NULL: gel(pFB,j);
     GEN dx, Nx = get_norm_fact_primes(pFB, ex, C, &dx);
@@ -2523,7 +2524,7 @@ makematal(GEN bnf)
     prec = itos(y); j--;
     if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
     nf = nfnewprec(nf,prec);
-    bnf = bnfinit0(nf,1,NULL,prec); (void)setrand(c);
+    bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
   return ma;

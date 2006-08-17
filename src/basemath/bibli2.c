@@ -835,26 +835,6 @@ dirdiv(GEN x, GEN y)
   return gerepilecopy(av,z);
 }
 
-/*************************************************************************/
-/**									**/
-/**			         RANDOM					**/
-/**									**/
-/*************************************************************************/
-
-GEN
-genrand(GEN N)
-{
-  if (!N) return stoi( pari_rand31() );
-  if (typ(N)!=t_INT || signe(N)<=0) pari_err(talker,"invalid bound in random");
-  return randomi(N);
-}
-
-long
-getstack(void) { return top-avma; }
-
-long
-gettime(void) { return timer(); }
-
 /***********************************************************************/
 /**							              **/
 /**       		     PERMUTATIONS                             **/

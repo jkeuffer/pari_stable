@@ -734,8 +734,6 @@ long    gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN
 GEN     gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN));
 GEN     gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN));
 GEN     gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void *,GEN,GEN));
-GEN     genrand(GEN N);
-long    getrand(void);
 long    getstack(void);
 long    gettime(void);
 GEN     gprec(GEN x, long l);
@@ -761,7 +759,6 @@ GEN     roots_to_pol(GEN a, long v);
 GEN     setintersect(GEN x, GEN y);
 long    setisset(GEN x);
 GEN     setminus(GEN x, GEN y);
-long    setrand(long seed);
 long    setsearch(GEN x, GEN y, long flag);
 GEN     setunion(GEN x, GEN y);
 GEN     sindexlexsort(GEN x);
@@ -1400,8 +1397,6 @@ GEN     mulss(long x, long y);
 GEN     mului(ulong x, GEN y);
 GEN     mulur(ulong x, GEN y);
 GEN     muluu(ulong x, ulong y);
-long    pari_rand31(void);
-GEN     randomi(GEN x);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);
 GEN     resmod2n(GEN x, long n);
 double  rtodbl(GEN x);
@@ -1719,6 +1714,16 @@ GEN     modulargcd(GEN a,GEN b);
 GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 GEN     to_Kronecker(GEN P, GEN Q);
+
+/* random.c */
+
+ulong   Fl_rand(ulong n);
+GEN     genrand(GEN N);
+GEN     getrand(void);
+ulong   pari_rand(void);
+long    pari_rand31(void);
+GEN     randomi(GEN x);
+void    setrand(GEN seed);
 
 /* RgX.c */
 

@@ -1,6 +1,6 @@
 Function: getrand
 Section: programming
 C-Name: getrand
-Prototype: l
+Prototype:
 Help: getrand(): current value of random number seed
 

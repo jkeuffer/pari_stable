@@ -982,16 +982,16 @@ $n$ is a \kbd{long}.
 \subsecidx{random}$(\{N=2^{31}\})$: returns a random integer between $0$ and
 $N-1$. $N$ is an integer, which can be arbitrary large. This is an internal
 PARI function and does not depend on the system's random number generator.
+The random seed may be obtained via \tet{getrand}, and reset using
+\tet{setrand}.
 
-The resulting integer is obtained by means of linear congruences and will not
-be well distributed in arithmetic progressions. The random seed may be
-obtained via \tet{getrand}, and reset using \tet{setrand}.
+Up to version 2.4 included, these pseudo-random numbers were obtained by
+means of linear congruences and were not well distributed in arithmetic
+progressions. We now use Brent's XORGEN algorithm, based on Feedback Shift
+Registers, see \kbd{http://wwwmaths.anu.edu.au/~brent/random.html}.
 
-Note that \kbd{random(2\pow31)} is \emph{not} equivalent to \kbd{random()},
-although both return an integer between $0$ and $2^{31}-1$. In fact, calling
-\kbd{random} with an argument generates a number of random words (32bit or
-64bit depending on the architecture), rescaled to the desired interval.
-The default uses directly a 31-bit generator.
+Note that \kbd{random(2\pow31)} \emph{is} equivalent to \kbd{random()}. This
+was not the case, up to version 2.4.
 
 \syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a
 random \kbd{unsigned long} (32bit or 64bit depending on the architecture), and
@@ -8818,9 +8818,11 @@ words. Useful mainly for debugging purposes.
 \syn{getheap}{}.
 
 \subsubsecidx{getrand}$()$: returns the current value of the random number
-seed. Useful mainly for debugging purposes.
+seed. Useful mainly for debugging purposes, to reproduce a specific chain of
+computations. The returned value is technical (reproduces an internal state
+array), and can only be used as an argument to \tet{setrand}.
 
-\syn{getrand}{}, returns a C long.
+\syn{getrand}{}.
 
 \subsubsecidx{getstack}$()$: returns the current value of
 $\kbd{top}-\kbd{avma}$, i.e.~the number of bytes used up to now on the stack.
@@ -9014,10 +9016,14 @@ example, if the existing order is \kbd{[x,y,z]}, then after
 to output, will be \kbd{[z,y,x]}. The internal representation is unaffected.
 \label{se:reorder}
 
-\subsubsecidx{setrand}$(n)$: reseeds the random number generator to the value
-$n$. The initial seed is $n=1$.
+\subsubsecidx{setrand}$(n)$: reseeds the random number generator using the
+seed $n$. No value is returned. The seed is either a technical array output
+by \kbd{getrand}, or a small positive integer, used to generate
+deterministically a suitable state array. In particular, running a randomized
+computation starting by \kbd{setrand(1)} twice will generate the exact same
+output.
 
-\syn{setrand}{n}, where $n$ is a \kbd{long}. Returns $n$.
+\syn{setrand}{n}.
 
 \subsubsecidxunix{system}$(\var{str})$: \var{str} is a string representing
 a system command. This command is executed, its output written to the

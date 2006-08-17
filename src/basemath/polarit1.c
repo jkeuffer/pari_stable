@@ -1050,12 +1050,6 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
     for (i=2; i<ly;  i++) x[i] = Fl_add(x[i], Fl_mul(c,y[i],p),p);
 }
 
-static long
-small_rand(ulong p)
-{
-  return (p==2)? ((pari_rand31() & 0x1000) == 0): pari_rand31() % p;
-}
-
 GEN
 FpX_rand(long d1, long v, GEN p)
 {
@@ -1105,9 +1099,9 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     {
       GEN pol = const_vecsmall(l-2,0);
       pol[1] = u[1];
-      pol[2] = small_rand(ps); /*Assume vker[1]=1*/
+      pol[2] = Fl_rand(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
-        Flx_addmul_inplace(pol, gel(vker,i), (ulong)small_rand(ps), ps);
+        Flx_addmul_inplace(pol, gel(vker,i), Fl_rand(ps), ps);
       (void)Flx_renormalize((GEN)pol,l-1);
 
       polt = Flx_to_ZX(pol);
