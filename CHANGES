@@ -42,6 +42,8 @@ BA 10- ellheight short help was accidentally truncated.
    18- content(t_MAT with exactly 1 col) gave a wrong result
    19- random(N) was not uniformly distributed in [0,N-1] (use a reject
        strategy instead of moding out) [#210]
+   20- rare bug in red_montgomery (returning 0 with + sign, an incorrect object)
+       [ polrootspadic(x^11+x,11,10) --> corrupts gen_0 ]
 
   Changed
     1- moved cgiv to inline kernel

@@ -1010,9 +1010,10 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
   /* copy result */
   Td = (GEN)av;
-  while (! *scratch) scratch++; /* strip leading zeroes */
+  while (! *scratch && Te > scratch) scratch++; /* strip further leading 0s */
   while (Te > scratch) *--Td = *--Te;
-  k = ((GEN)av - Td) + 2;
+  k = (GEN)av - Td; if (!k) return gen_0;
+  k += 2;
   *--Td = evalsigne(1) | evallgefint(k);
   *--Td = evaltyp(t_INT) | evallg(k);
 #ifdef DEBUG
