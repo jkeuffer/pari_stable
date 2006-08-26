@@ -962,6 +962,7 @@ GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
   err(impl, "Montgomery reduction in gmp kernel");
+  return NULL; /* not reached */
 }
 
 /* EXACT INTEGER DIVISION */
