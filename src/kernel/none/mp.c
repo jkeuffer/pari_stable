@@ -1010,7 +1010,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
   /* copy result */
   Td = (GEN)av;
-  while (! *scratch && Te > scratch) scratch++; /* strip further leading 0s */
+  while (! *scratch && Te > scratch) scratch++; /* strip leading 0s */
   while (Te > scratch) *--Td = *--Te;
   k = (GEN)av - Td; if (!k) return gen_0;
   k += 2;
