@@ -66,8 +66,7 @@ check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
-#define SFB_MAX 3
-
+static const long SFB_MAX = 3;
 static const long RANDOM_BITS = 4;
 static const long MAXRELSUP = 50;
 
