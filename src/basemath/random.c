@@ -206,7 +206,7 @@ randomi(GEN N)
 GEN
 genrand(GEN N)
 {
-  if (!N) return utoi( pari_rand31() );
+  if (!N) return utoi( random_bits(31) );
   if (typ(N)!=t_INT || signe(N)<=0) pari_err(talker,"invalid bound in random");
   return randomi(N);
 }

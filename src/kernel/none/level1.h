@@ -1010,9 +1010,9 @@ dvdiiz(GEN x, GEN y, GEN z)
   affii(p1,z); avma=av; return 1;
 }
 
-/* assume 0 <= k < 32. Return random 0 <= x < (1<<k) */
+/* assume 0 <= k <= BITS_IN_LONG. Return uniform random 0 <= x < (1<<k) */
 INLINE long
-random_bits(long k) { return pari_rand31() >> (31 - k); }
+random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }
 
 INLINE ulong
 itou(GEN x)

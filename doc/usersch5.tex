@@ -1262,9 +1262,7 @@ to \kbd{sqrtremi(N, NULL)}.
 \subsec{Pseudo-random integers}
 
 \fun{long}{random_bits}{long k} returns a random $0 \leq x < 2^k$. Assumes
-that $0 \leq k < 31$.
-
-\fun{long}{pari_rand31}{long k} as \kbd{random\_bits} with $k = 31$.
+that $0 \leq k \leq \B$.
 
 \fun{GEN}{randomi}{GEN n} returns a random \typ{INT} between $0$ and $\kbd{n}
 - 1$. The result is pasted from successive calls to \kbd{pari\_rand31}.

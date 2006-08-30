@@ -154,7 +154,7 @@ millerrabin(GEN n, long k)
   init_miller(&S, n); av2 = avma;
   for (i=1; i<=k; i++)
   {
-    do r = umodui((ulong)pari_rand31(), n); while (!r);
+    do r = umodui(pari_rand(), n); while (!r);
     if (DEBUGLEVEL > 4) fprintferr("Miller-Rabin: testing base %ld\n", r);
     if (bad_for_base(&S, utoipos(r))) { avma = av; return 0; }
     avma = av2;
