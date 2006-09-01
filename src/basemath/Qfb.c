@@ -1120,6 +1120,7 @@ qfbimagsolvep(GEN Q, GEN p)
     if (!signe(gel(a,2)))
     {
       a = qfbsolve_cornacchia(gel(a,3), p, 0);
+      if (a == gen_0) { avma = av; return gen_0; }
       return gerepileupto(av, gmul(a, shallowtrans(N)));
     }
     /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
@@ -1128,7 +1129,7 @@ qfbimagsolvep(GEN Q, GEN p)
     return gerepileupto(av, gmul(mkvec2(x,y), shallowtrans(N)));
   }
   b = redimagsl2(primeform(d, p, 0), &M);
-  if (!GL2_qfb_equal(a,b)) return gen_0;
+  if (!GL2_qfb_equal(a,b)) { avma = av; return gen_0; }
   if (signe(gel(a,2))==signe(gel(b,2)))
     x = SL2_div_mul_e1(N,M);
   else
