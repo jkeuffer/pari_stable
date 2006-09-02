@@ -731,7 +731,7 @@ ispower(GEN x, GEN K, GEN *pty)
   switch(typ(x)) {
     case t_INT:
       s = signe(x);
-      if (!s) return 1;
+      if (!s) { if (pty) *pty = gen_0; return 1; }
       k = itou(K);
       if (s > 0) {
         if (k == 2) return Z_issquarerem(x, pty);

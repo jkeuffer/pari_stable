@@ -45,6 +45,7 @@ BA 10- ellheight short help was accidentally truncated.
    20- rare bug in red_montgomery (returning 0 with + sign, an incorrect object)
        [ polrootspadic(x^11+x,11,10) --> corrupts gen_0 ]
    21- qfbsolve(Qfb(1,2,10),5) --> [0,0; 0,0] instead of 0 [#479]
+   22- ispower(0, n, &z) would not set z
 
   Changed
     1- moved cgiv to inline kernel
