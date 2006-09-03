@@ -979,23 +979,28 @@ power series. For that, see \kbd{truncate}.
 \funs{ggprecision}{x} (result is a \kbd{GEN}) and \funs{gprec}{x,n}, where
 $n$ is a \kbd{long}.
 
-\subsecidx{random}$(\{N=2^{31}\})$: returns a random integer between $0$ and
-$N-1$. $N$ is an integer, which can be arbitrary large. This is an internal
-PARI function and does not depend on the system's random number generator.
-The random seed may be obtained via \tet{getrand}, and reset using
-\tet{setrand}.
-
-Up to version 2.4 included, these pseudo-random numbers were obtained by
-means of linear congruences and were not well distributed in arithmetic
-progressions. We now use Brent's XORGEN algorithm, based on Feedback Shift
-Registers, see \kbd{http://wwwmaths.anu.edu.au/~brent/random.html}.
+\subsecidx{random}$(\{N=2^{31}\})$: returns a (pseudo-)random integer
+uniformly distributed between $0$ and $N-1$. $N$ is an integer, which can be
+arbitrary large. The random seed may be obtained via \tet{getrand}, and reset
+using \tet{setrand}: from a given seed, the exact same values will be
+generated. The same seed is used at each startup, reseed the generator
+yourself if this is a problem.
 
 Note that \kbd{random(2\pow31)} \emph{is} equivalent to \kbd{random()}. This
 was not the case, up to version 2.4.
 
+This function does not depend on the system's random number generator. Up to
+version 2.4 included, pseudo-random numbers were obtained by means of linear
+congruences and were not well distributed in arithmetic progressions. We now
+use Brent's XORGEN algorithm, based on Feedback Shift Registers, see
+\kbd{http://wwwmaths.anu.edu.au/~brent/random.html}. The generator has period
+$2^{4096}-1$, passes the Crush battery of statistical tests of L'Ecuyer and
+Simard, but is not suitable for cryptographic purposes: one can reconstruct
+the state vector from a small sample of consecutive values, thus predicting
+the entire sequence.
+
 \syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a
-random \kbd{unsigned long} (32bit or 64bit depending on the architecture), and
-\tet{pari_rand31}$()$ which returns a 31bit \kbd{long} integer.
+random \kbd{unsigned long} (32bit or 64bit depending on the architecture).
 
 \subsecidx{real}$(x)$: real part of $x$. In the case where $x$ is a quadratic
 number, this is the coefficient of $1$ in the ``canonical'' integral basis
@@ -8817,10 +8822,11 @@ words. Useful mainly for debugging purposes.
 
 \syn{getheap}{}.
 
-\subsubsecidx{getrand}$()$: returns the current value of the random number
-seed. Useful mainly for debugging purposes, to reproduce a specific chain of
-computations. The returned value is technical (reproduces an internal state
-array), and can only be used as an argument to \tet{setrand}.
+\subsubsecidx{getrand}$()$: returns the current value of the seed used by the
+pseudo-random number generator \tet{random}. Useful mainly for debugging
+purposes, to reproduce a specific chain of computations. The returned value
+is technical (reproduces an internal state array), and can only be used as an
+argument to \tet{setrand}.
 
 \syn{getrand}{}.
 
@@ -9019,7 +9025,7 @@ to output, will be \kbd{[z,y,x]}. The internal representation is unaffected.
 \subsubsecidx{setrand}$(n)$: reseeds the random number generator using the
 seed $n$. No value is returned. The seed is either a technical array output
 by \kbd{getrand}, or a small positive integer, used to generate
-deterministically a suitable state array. In particular, running a randomized
+deterministically a suitable state array. For instance, running a randomized
 computation starting by \kbd{setrand(1)} twice will generate the exact same
 output.
 
