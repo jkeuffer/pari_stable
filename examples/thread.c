@@ -5,28 +5,26 @@
 void *
 mydet(void *arg)
 {
-  GEN M = (GEN)arg;
-  GEN F;
+  GEN F, M = (GEN)arg;
 
   pari_thread_init(8000000); /* This thread uses a local PARI stack of 8MB */
-  /* Compute det(M) using the local stack, clone the result so we can free
-   * the stack */
+  /* Compute det(M) using local stack, then clone before freeing the stack */
   F = gclone( det(M) );
-  pari_thread_close();     /* Free the PARI stack */
+  pari_thread_close();     /* Free the local PARI stack */
   pthread_exit((void*)F);  /* End the thread and return F */
-  return F;                /* Not reached */
+  return NULL;             /* Not reached */
 }
 
 void *
 myfactor(void *arg)  /* same principles */
 {
-  GEN N = (GEN)arg;
-  GEN F;
+  GEN F, N = (GEN)arg;
+
   pari_thread_init(4000000);
   F = gclone( factor(N) );
   pari_thread_close();
   pthread_exit((void*)F);
-  return F;
+  return NULL;
 }
 
 int
@@ -38,8 +36,8 @@ main(void)
   /* Initialise the main PARI stack and global objects (gen_0, etc.) */
   pari_init(4000000,500000);
   /* Compute in the main PARI stack */
-  N1 = addis(gpowgs(gen_2,256),1);
-  N2 = subis(gpowgs(gen_2,193),1);
+  N1 = addis(int2n(256), 1); /* 2^256 + 1 */
+  N2 = subis(int2n(193), 1); /* 2^193 - 1 */
   M = mathilbert(80);
   /* pthread_create and pthread_join are standard POSIX-thread functions
    * to start and get the result of threads. */
@@ -49,6 +47,6 @@ main(void)
   pthread_join(th1,(void*)&F1); /* Wait for termination, get the results */
   pthread_join(th2,(void*)&F2);
   pthread_join(th3,(void*)&D);
-  pariputsf("F1=%Z\nF2=%Z\nlog(D)=%Z\n", F1, F2, glog(D,3));
+  pariprintf("F1=%Z\nF2=%Z\nlog(D)=%Z\n", F1, F2, glog(D,3));
   return 0;
 }
