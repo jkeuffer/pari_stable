@@ -11,7 +11,7 @@ To use PARI in multi-threaded programs, you must configure it using
 \kbd{Configure --enable-tls}. Your system must implement the \kbd{\_\_thread}
 storage class. As a major side effect, this breaks the \kbd{libpari} ABI: the
 resulting library will not be compatible with the old one. On the other hand,
-it now provides the following two public functions
+it now provides the following two public functions\sidx{threads}
 
 \fun{void}{pari_thread_init}{size\_t parisize} must be called when starting a
 thread: it allocates a local stack of size \kbd{parisize} and local cached
