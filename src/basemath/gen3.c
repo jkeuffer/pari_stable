@@ -1010,7 +1010,7 @@ inv_ser(GEN b)
     setlg(a, l1 + 2);
     setlg(x, l1 + 2);
     /* TODO: gmul(a,x) should be a half product (the higher half is known) */
-    y = gmul(x, gsubsg(1, gmul(a,x))) - l2;
+    y = gadd(x, gmul(x, gsubsg(1, gmul(a,x))));
     for (j = l2+2; j < l1+2; j++) x[j] = y[j];
     if (low_stack(lim, stack_lim(av2,2)))
     {
