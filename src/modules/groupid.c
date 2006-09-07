@@ -191,7 +191,7 @@ group_ident_i(GEN G, GEN S)
       else if (p[1]==3 && e[1]==2) /*9p, p>3*/
       {
         long q=p[2], q2=q*q;
-        long p3 = q%3 == 1, p9= q%9 ==1;
+        long p3 = q%3 == 1, p9 = q%9 == 1;
         if (s==7+47*q+7*q2)
           return 1;       /* 3p.3 */
         if (s==61-61*q+61*q2)
