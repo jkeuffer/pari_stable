@@ -1263,12 +1263,20 @@ the non-negative \typ{INT}~\kbd{N} (rounded towards 0). This is identical
 to \kbd{sqrtremi(N, NULL)}.
 
 \subsec{Pseudo-random integers}
+These routine return pseudo-random integers uniformly distributed in some
+interval. The all use the same underlying generator which can be seeded and
+restarted using \tet{getrand} and \tet{setrand}.
+
+\fun{ulong}{pari_rand}{void} returns a random $0 \leq x < 2^\B$.
 
 \fun{long}{random_bits}{long k} returns a random $0 \leq x < 2^k$. Assumes
 that $0 \leq k \leq \B$.
 
+\fun{ulong}{random_Fl}{ulong p} returns a pseudo-random integer
+in $0, 1, \dots p-1$.
+
 \fun{GEN}{randomi}{GEN n} returns a random \typ{INT} between $0$ and $\kbd{n}
-- 1$. The result is pasted from successive calls to \kbd{pari\_rand31}.
+- 1$.
 
 \subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
 
