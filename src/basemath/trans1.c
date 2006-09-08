@@ -736,9 +736,6 @@ ser_powfrac(GEN x, GEN q, long prec)
   return y;
 }
 
-static GEN padic_sqrt(GEN x);
-GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
-
 GEN
 gpow(GEN x, GEN n, long prec)
 {
@@ -886,7 +883,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
   }
 }
 
-static GEN
+GEN
 padic_sqrt(GEN x)
 {
   long pp, e = valp(x);
