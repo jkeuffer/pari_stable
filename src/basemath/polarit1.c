@@ -1099,9 +1099,9 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     {
       GEN pol = const_vecsmall(l-2,0);
       pol[1] = u[1];
-      pol[2] = Fl_rand(ps); /*Assume vker[1]=1*/
+      pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
-        Flx_addmul_inplace(pol, gel(vker,i), Fl_rand(ps), ps);
+        Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
       (void)Flx_renormalize((GEN)pol,l-1);
 
       polt = Flx_to_ZX(pol);

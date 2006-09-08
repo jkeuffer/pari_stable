@@ -160,7 +160,7 @@ getrand(void) {
 
 /* assume n > 0 */
 ulong 
-Fl_rand(ulong n)
+random_Fl(ulong n)
 {
   ulong d;
   int shift;
@@ -177,7 +177,7 @@ Fl_rand(ulong n)
   }
 }
 
-/* assume N > 0, see Fl_rand() for algorithm */
+/* assume N > 0, see random_Fl() for algorithm */
 GEN
 randomi(GEN N)
 {
@@ -185,7 +185,7 @@ randomi(GEN N)
   GEN d, x, xMSW, NMSW;
   int shift;
 
-  if (lx == 3) return utoi( Fl_rand(N[2]) );
+  if (lx == 3) return utoi( random_Fl(N[2]) );
 
   NMSW = int_MSW(N); shift = bfffo(*NMSW);
   if (((ulong)*NMSW << shift) == HIGHBIT)
