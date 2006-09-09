@@ -317,7 +317,7 @@ enum manage_var_t {
 #define gsubgs(y,s)     gaddgs((y), -(s))
 #define gsubsg(s,y)     (gopsg2(gsub,(s),(y)))
 
-#define gaddgsz(y,s,z)    gopgsz(gaddgs,(x),(s),(z))
+#define gaddgsz(y,s,z)    gopgsz(gaddgs,(y),(s),(z))
 #define gaddsgz(s,y,z)    gaddgsz((y),(s),(z))
 #define gdiventgsz(y,s,z) gopgsz(gdiventgs,(y),(s),(z))
 #define gdiventsgz(s,y,z) gopsg2z(gdivent,(s),y),(z)

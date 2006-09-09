@@ -47,6 +47,7 @@ BA 10- ellheight short help was accidentally truncated.
    21- qfbsolve(Qfb(1,2,10),5) --> [0,0; 0,0] instead of 0 [#479]
    22- ispower(0, n, &z) would not set z
    23- wrong result in conversion t_QUAD -> t_PADIC whenever disc  = 1 (4)
+JJ 24- gaddgsz macro was wrong [#481]
 
   Changed
     1- moved cgiv to inline kernel
