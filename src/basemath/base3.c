@@ -1202,7 +1202,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   p1 = addsi(-1, p); if (!q) q = p1;
   if (equalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
-  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in Fp_shanks");
+  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"order too large in Fp_shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fp_inv(g0, p); p1 = x;
 
