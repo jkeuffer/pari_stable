@@ -64,12 +64,12 @@ static THREAD ulong xorgen_w;
 static THREAD int xorgen_i = -1; /* not initialized */
 
 #ifdef LONG_IS_64BIT /* weyl = odd approximation to 2^BIL*(sqrt(5)-1)/2. */
-  const ulong weyl = 0x61c8864680b583ebUL;
-  const int ws = 27, r = 64,  s = 53, a = 33, b = 26, c = 27, d = 29;
+  static const ulong weyl = 0x61c8864680b583ebUL;
+  static const int ws = 27, r = 64,  s = 53, a = 33, b = 26, c = 27, d = 29;
   static THREAD ulong state[64]; /* size r */
 #else
-  const ulong weyl = 0x61c88647UL;
-  const int ws = 16, r = 128, s = 95, a = 17, b = 12, c = 13, d = 15;
+  static const ulong weyl = 0x61c88647UL;
+  static const int ws = 16, r = 128, s = 95, a = 17, b = 12, c = 13, d = 15;
   static THREAD ulong state[128]; /* size r */
 #endif
 
