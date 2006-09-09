@@ -338,6 +338,8 @@ ulong   gener_Fl_local(ulong p, GEN L);
 ulong   gener_Fl(ulong p);
 GEN     gener_Fp_local(GEN p, GEN L);
 GEN     gener_Fp(GEN p);
+ulong   gener_Zl(ulong p);
+GEN     gener_Zp(GEN p);
 GEN     gfundunit(GEN x);
 GEN     ggener(GEN m);
 long    gisanypower(GEN x, GEN *pty);

@@ -760,18 +760,18 @@ subcyclo(long n, long d, long v)
   al= mael(fa,2,1);
   if (lg(gel(fa,1)) > 2 || (p==2 && al>2))
     pari_err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
+  if (p==2) {
+    GEN z = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
+    setvarn(z,v); return z;
+  }
   avma=ltop;
-  r = cgcd(d,n); /* = p^(v_p(d))*/
+  r = cgcd(d,n); /* = p^(v_p(d)) < n */
   n = r*p;
   o = n-r; /* = phi(n) */
   if (o == d) return cyclo(n,v);
   if (o % d) pari_err(talker,"degree does not divide phi(n) in subcyclo");
   o /= d;
-  if (p==2) {
-    GEN z = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
-    setvarn(z,v); return z;
-  }
-  g = gener_Fl(n);
+  g = r == 1? gener_Fl(p): gener_Zl(p);
   gd = Fl_pow(g, d, n);
   avma=ltop;
   powz=subcyclo_complex_roots(n,(o&1)==0,3);

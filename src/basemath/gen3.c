@@ -2094,7 +2094,7 @@ gtrunc(GEN x)
     case t_PADIC:
       if (!signe(x[4])) return gen_0;
       v = valp(x);
-      if (!v) return gcopy(gel(x,4));
+      if (!v) return icopy(gel(x,4));
       if (v>0)
       { /* here p^v is an integer */
         av = avma; y = powiu(gel(x,2),v);
@@ -2804,22 +2804,27 @@ lift_intern0(GEN x, long v)
   return NULL; /* not reached */
 }
 
+static GEN
+centerliftii(GEN x, GEN y)
+{
+  pari_sp av = avma; 
+  long i = cmpii(shifti(x,1), y);
+  avma = av; return (i > 0)? subii(x,y): icopy(x);
+}
+
 /* memes conventions pour v que lift */
 GEN
 centerlift0(GEN x, long v)
 {
   long i, lx, tx = typ(x);
-  pari_sp av;
   GEN y;
 
   switch(tx)
   {
     case t_INT:
       return icopy(x);
-
     case t_INTMOD:
-      av = avma; i = cmpii(shifti(gel(x,2),1), gel(x,1)); avma = av;
-      return (i > 0)? subii(gel(x,2),gel(x,1)): icopy(gel(x,2));
+      return centerliftii(gel(x,2), gel(x,1));
 
     case t_POLMOD:
       if (v < 0 || v == varn(gel(x,1))) return gcopy(gel(x,2));
@@ -2838,6 +2843,23 @@ centerlift0(GEN x, long v)
       y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = centerlift0(gel(x,2),v);
       gel(y,3) = centerlift0(gel(x,3),v); return y;
+      return gtrunc(x);
+
+    case t_PADIC:
+      if (!signe(x[4])) return gen_0;
+      v = valp(x);
+      if (v>=0)
+      { /* here p^v is an integer */
+        GEN z =  centerliftii(gel(x,4), gel(x,3));
+        pari_sp av;
+        if (!v) return z;
+        av = avma; y = powiu(gel(x,2),v);
+        return gerepileuptoint(av, mulii(y,z));
+      }
+      y=cgetg(3,t_FRAC);
+      gel(y,1) = centerliftii(gel(x,4), gel(x,3));
+      gel(y,2) = gpowgs(gel(x,2),-v);
+      return y;
   }
   pari_err(typeer,"centerlift");
   return NULL; /* not reached */

@@ -723,9 +723,14 @@ the denominator.
 \subsecidx{centerlift}$(x,\{v\})$: lifts an element $x=a \bmod n$ of $\Z/n\Z$
 to $a$ in $\Z$, and similarly lifts a polmod to a polynomial. This is the
 same as \tet{lift} except that in the particular case of elements of
-$\Z/n\Z$, the lift $y$ is such that $-n/2<y\le n/2$. If $x$ is of type
-fraction, complex, quadratic, polynomial, power series, rational function,
-vector or matrix, the lift is done for each coefficient. Reals are forbidden.
+$\Z/n\Z$, the lift $y$ is such that $-n/2<y\le n/2$.  A \typ{PADIC} is lifted
+as above if its valuation $v$ is non-negative; if not, returns the fraction 
+$p^v$ \kbd{centerlift}$(x^{-v})$; in particular, note that rational
+reconstruction is not attempted.
+
+If $x$ is of type fraction, complex, quadratic, polynomial, power series,
+rational function, vector or matrix, the lift is done for each coefficient.
+Reals are forbidden.
 
 \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
 as $-1$. Also available is \funs{centerlift}{x} = \kbd{centerlift0($x$,-1)}.
