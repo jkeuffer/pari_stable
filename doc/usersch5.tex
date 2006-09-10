@@ -1183,6 +1183,12 @@ $\kbd{x}$ and $\kbd{y}$ is non-zero.
 \fun{int}{dvdii}{GEN x, GEN y} if the \typ{INT}~\kbd{y} divides the
 \typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
 
+\fun{int}{dvdis}{GEN x, long y} if the \typ{long}~\kbd{y} divides the
+\typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
+
+\fun{int}{dvdiu}{GEN x, ulong y, GEN z} if the \typ{ulong}~\kbd{y} divides
+the \typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
+
 \fun{int}{dvdiiz}{GEN x, GEN y, GEN z} if the \typ{INT}~\kbd{y} divides the
 \typ{INT}~\kbd{x}, assigns the quotient to the \typ{INT}~\kbd{z} and returns 1
 (true), otherwise returns 0 (false).

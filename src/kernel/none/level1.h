@@ -80,7 +80,9 @@ ulong  Fl_sqr(ulong a, ulong p);
 ulong  Fl_sub(ulong a, ulong b, ulong p);
 int    dvdii(GEN x, GEN y);
 int    dvdiiz(GEN x, GEN y, GEN z);
+int    dvdis(GEN x, long y);
 int    dvdisz(GEN x, long y, GEN z);
+int    dvdiu(GEN x, ulong y);
 int    dvdiuz(GEN x, ulong y, GEN z);
 void   dvmdiiz(GEN x, GEN y, GEN z, GEN t);
 GEN    dvmdis(GEN x, long y, GEN *z);
@@ -1029,6 +1031,24 @@ affui(ulong u, GEN x)
 {
   if (!u) x[1] = evalsigne(0) | evallgefint(2);
   else  { x[1] = evalsigne(1) | evallgefint(3); x[2] = u; }
+}
+
+INLINE int
+dvdis(GEN x, long y)
+{
+  const pari_sp av = avma;
+  long rem;
+  (void)divis_rem(x,y, &rem);
+  avma = av; return rem == 0;
+}
+
+INLINE int
+dvdiu(GEN x, ulong y)
+{
+  const pari_sp av = avma;
+  ulong rem;
+  (void)diviu_rem(x,y, &rem);
+  avma = av; return rem == 0;
 }
 
 INLINE int

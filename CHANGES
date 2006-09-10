@@ -68,6 +68,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
        support. Warning: using this option break the ABI.
     3- centerlift(t_PADIC)
     4- gener_Zp, gener_Zl
+    5- dvdiu, dvdis
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)
