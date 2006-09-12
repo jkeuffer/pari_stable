@@ -49,8 +49,8 @@ BA 10- ellheight short help was accidentally truncated.
    23- wrong result in conversion t_QUAD -> t_PADIC whenever disc  = 1 (4)
 JJ 24- gaddgsz macro was wrong [#481]
    25- gener_Fl(p^k) can't handle k > 1, use gener_Zl instead [#480]
-SC 26- in gmp-enabled libpari, SEGV when calling mp_setmemory_functions
-       (improper prototype) [#484]
+SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc 
+       function. [#484] 
 
   Changed
     1- moved cgiv to inline kernel
