@@ -741,12 +741,11 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   return gerepileupto(ltop,gscycloconductor(T,n,flag));
 }
 
-GEN
-subcyclo(long n, long d, long v)
+static GEN
+subcyclo_g(long n, long d, GEN Z, long v)
 {
   pari_sp ltop=avma;
-  long o,p,al,r,g,gd;
-  GEN fa;
+  long o,p,r,g,gd;
   GEN zl,L,T,le;
   long l,val;
   GEN B,powz;
@@ -754,26 +753,25 @@ subcyclo(long n, long d, long v)
   if (d==1) return deg1pol(gen_1,gen_m1,v);
   if (d<=0 || n<=0) pari_err(typeer,"subcyclo");
   if ((n & 3) == 2) n >>= 1;
-  if (n == 1 || d >= n) pari_err(talker,"degree does not divide phi(n) in subcyclo");
-  fa = factoru(n);
-  p = mael(fa,1,1);
-  al= mael(fa,2,1);
-  if (lg(gel(fa,1)) > 2 || (p==2 && al>2))
-    pari_err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
-  if (p==2) {
-    GEN z = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
-    setvarn(z,v); return z;
-  }
+  if (n == 1 || d >= n)
+    pari_err(talker,"degree does not divide phi(n) in subcyclo");
+  if (!Z) Z = znstar(stoi(n));
+  if (lg(Z[2]) != 2)
+    pari_err(talker,
+        "non-cyclic case in polsubcyclo: use galoissubcyclo instead");
+  o = itos(gel(Z,1));
+  g = itos(gmael3(Z,3,1,2));
   avma=ltop;
+  p = n/cgcd(n,o); /* p^a/gcd(p^a,phi(p^a))=p*/
   r = cgcd(d,n); /* = p^(v_p(d)) < n */
-  n = r*p;
+  n = r*p; /* n is now the conductor */
   o = n-r; /* = phi(n) */
   if (o == d) return cyclo(n,v);
   if (o % d) pari_err(talker,"degree does not divide phi(n) in subcyclo");
   o /= d;
-  g = r == 1? gener_Fl(p): gener_Zl(p);
-  gd = Fl_pow(g, d, n);
+  gd = Fl_pow(g%n, d, n);
   avma=ltop;
+  /*FIXME: If degree is small, the computation of B is a waste of time*/
   powz=subcyclo_complex_roots(n,(o&1)==0,3);
   L=subcyclo_cyclic(n,d,o,g,gd,powz,NULL);
   B=subcyclo_complex_bound(ltop,L,3);
@@ -789,15 +787,21 @@ subcyclo(long n, long d, long v)
   return gerepileupto(ltop,T);
 }
 
+GEN
+subcyclo(long n, long d, long v)
+{
+  return subcyclo_g(n, d, NULL, v);
+}
+
 GEN polsubcyclo(long n, long d, long v)
 {
   pari_sp ltop=avma;
   GEN L, Z=znstar(stoi(n));
   /*subcyclo is twice faster but Z must be cyclic*/
-  if (lg(Z[2]) == 2 && dvdii(gel(Z,1),stoi(d)))
+  if (lg(Z[2]) == 2 && dvdis(gel(Z,1), d))
   {
     avma=ltop; 
-    return subcyclo(n, d, v);
+    return subcyclo_g(n, d, Z, v);
   }
   L=subgrouplist(gel(Z,2), mkvec(stoi(d)));
   if (lg(L) == 2)
