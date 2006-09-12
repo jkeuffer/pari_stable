@@ -485,9 +485,8 @@ check_proto(char *code)
   {
     case '&':
     case '=':
-    case 'E':
     case 'G':
-    case 'I':
+    case 'I': case 'E':
     case 'L':
     case 'M':
     case 'P':
@@ -2048,8 +2047,7 @@ identifier(void)
 	  argvec[i++] = (GEN)&(g->x); break;
         }
         /* Input position */
-        case 'E': /* expr */
-	case 'I': /* seq */
+	case 'I': case 'E':
 	  match_comma();
 	  argvec[i++] = (GEN) analyseur;
 	  skipseq(); break;
@@ -3036,9 +3034,7 @@ skipidentifier(void)
         match_comma();
         if (*analyseur == ',' || *analyseur == ')') break;
         skipexpr(); break;
-      case 'E':
-        match_comma(); skipexpr(); break;
-      case 'I':
+      case 'I': case 'E':
         match_comma(); skipseq(); break;
       case 'r':
         match_comma();

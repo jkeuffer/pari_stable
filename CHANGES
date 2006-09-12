@@ -63,6 +63,7 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
     6- random() now uses Brent's XORGEN (replaces congruential linear generator)
        getrand() returns the FSR internal state array, used by setrand(). The
        latter no longer returns the input seed. (Initial patch by RR)
+    7- for install(): parser code 'E' is now obsolete, use 'I'
 
   Added
 BA  1- function Flm_rank

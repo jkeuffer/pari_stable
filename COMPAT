@@ -10,6 +10,8 @@ This file lists the incompatible changes between Version 2.x and older versions
       GEN seed = getrand(); ...; setrand(seed);
     The sequence of generated pseudo-random numbers are completely different.
 
+  - install(): parser code 'E' is now obsolete, use 'I'
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 * General:  [ use GP function names in description ]
