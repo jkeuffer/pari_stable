@@ -238,26 +238,12 @@ static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
 static GEN universal_constants;
 
-#if __MWERKS__
-static void *
-macalloc(size_t size)
-{
-  OSErr resultCode;
-  Handle newH = TempNewHandle((size),&resultCode);
-  if (!newH) return NULL;
-  HLock(newH); return (void*) *newH;
-}
-#  define __gpmalloc(size)  ((size) > 1000000)? macalloc(size): malloc((size))
-#else
-#  define __gpmalloc(size)  (malloc(size))
-#endif
-
 char*
 gpmalloc(size_t size)
 {
   if (size)
   {
-    char *tmp = (char*)__gpmalloc(size);
+    char *tmp = (char*)malloc(size);
     if (!tmp) pari_err(memer);
     return tmp;
   }
@@ -555,13 +541,13 @@ init_stack(size_t size)
     free((void*)bot);
   }
   /* NOT gpmalloc, memer would be deadly */
-  bot = (pari_sp)__gpmalloc(s);
+  bot = (pari_sp)malloc(s);
   if (!bot)
     for (s = old;; s>>=1)
     {
       if (!s) pari_err(memer); /* no way out. Die */
       pari_warn(warner,"not enough memory, new stack %lu",s);
-      bot = (pari_sp)__gpmalloc(s);
+      bot = (pari_sp)malloc(s);
       if (bot) break;
     }
   avma = top = bot+s;

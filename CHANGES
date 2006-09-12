@@ -72,3 +72,4 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)
+    2- old CodeWarrior-specific hack (malloc)
