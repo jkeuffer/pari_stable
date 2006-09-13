@@ -575,7 +575,7 @@ gissquarerem(GEN x, GEN *pt)
     case t_REAL: case t_COMPLEX: case t_PADIC: case t_SER:
       F = gissquare(x);
       if (F == gen_1) *pt = gsqrt(x, DEFAULTPREC);
-      break;
+      return F;
 
     case t_INTMOD:
     {
