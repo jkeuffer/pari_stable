@@ -537,7 +537,7 @@ GEN
 gissquarerem(GEN x, GEN *pt)
 {
   long l, tx = typ(x);
-  GEN *F;
+  GEN F;
   pari_sp av;
 
   if (!pt) return gissquare(x);
@@ -558,19 +558,50 @@ gissquarerem(GEN x, GEN *pt)
   {
     case t_INT: l = Z_issquarerem(x, pt); break;
     case t_FRAC: av = avma;
-      F = (GEN*)cgetg(3, t_FRAC);
-      l = Z_issquarerem(gel(x,1), &F[1]);
-      if (l) l = Z_issquarerem(gel(x,2), &F[2]);
+      F = cgetg(3, t_FRAC);
+      l = Z_issquarerem(gel(x,1), &gel(F,1));
+      if (l) l = Z_issquarerem(gel(x,2), &gel(F,2));
       if (!l) { avma = av; break; }
-      *pt = (GEN)F; break;
+      *pt = F; break;
 
     case t_POL: l = polissquarerem(x,pt); break;
     case t_RFRAC: av = avma;
-      F = (GEN*)cgetg(3, t_RFRAC);
-      l = (gissquarerem(gel(x,1), &F[1]) != gen_0);
-      if (l) l = polissquarerem(gel(x,2), &F[2]);
+      F = cgetg(3, t_RFRAC);
+      l = (gissquarerem(gel(x,1), &gel(F,1)) != gen_0);
+      if (l) l = polissquarerem(gel(x,2), &gel(F,2));
       if (!l) { avma = av; break; }
-      *pt = (GEN)F; break;
+      *pt = F; break;
+
+    case t_REAL: case t_COMPLEX: case t_PADIC: case t_SER:
+      F = gissquare(x);
+      if (F == gen_1) *pt = gsqrt(x, DEFAULTPREC);
+      break;
+
+    case t_INTMOD:
+    {
+      GEN L, P, E, q = gel(x,1), a = gel(x,2);
+      long i;
+      if (!signe(a)) { *pt = gcopy(x); return gen_1; }
+      av = avma;
+      L = Z_factor(q);
+      P = gel(L,1); l = lg(P);
+      E = gel(L,2);
+      L = cgetg(l, t_VEC);
+      for (i = 1; i < l; i++)
+      {
+        GEN p = gel(P,i), t, b;
+        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+        if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+        if (odd(v)) { avma = av; return gen_0; }
+        t = cvtop(b, gel(P,i), e - v);
+        if (gissquare(t) != gen_1) { avma = av; return gen_0; }
+        t = gtrunc(padic_sqrt(t));
+        if (v) t = mulii(t, gpowgs(p, v>>1));
+        gel(L,i) = mkintmod(t, gpowgs(p, e));
+      }
+      *pt = gerepileupto(av, chinese1(L));
+      return gen_1;
+    }
 
     default: pari_err(arither1);
       return NULL; /* not reached */
@@ -661,7 +692,7 @@ gissquare(GEN x)
       return gen_1;
 
     case t_POL:
-      return stoi( polissquarerem(x,NULL) );
+      return polissquarerem(x,NULL)? gen_1: gen_0;
 
     case t_SER:
       if (!signe(x)) return gen_1;
@@ -672,15 +703,12 @@ gissquare(GEN x)
       av = avma; a = gissquare(gmul(gel(x,1),gel(x,2)));
       avma = av; return a;
 
-    case t_QFR: case t_QFI:
-      return gissquare(gel(x,1));
-
     case t_VEC: case t_COL: case t_MAT:
       l=lg(x); p1=cgetg(l,tx);
       for (i=1; i<l; i++) gel(p1,i) = gissquare(gel(x,i));
       return p1;
   }
-  pari_err(typeer,"Z_issquare");
+  pari_err(typeer,"gissquare");
   return NULL; /* not reached */
 }
 

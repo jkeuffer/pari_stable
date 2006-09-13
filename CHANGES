@@ -64,6 +64,9 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
        getrand() returns the FSR internal state array, used by setrand(). The
        latter no longer returns the input seed. (Initial patch by RR)
     7- for install(): parser code 'E' is now obsolete, use 'I'
+    8- if issquare(x, &n) == 1, always set n to a square root of x
+    9- issquare(t_QFI or t_QFR) now is an error. Use explicitly
+       issquare(component(x,1)) if you relied(?) on the old behaviour
 
   Added
 BA  1- function Flm_rank

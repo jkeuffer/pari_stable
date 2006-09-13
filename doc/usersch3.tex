@@ -2172,10 +2172,8 @@ numbers of the form $s^2$ with $s$ in $\Z$, $\Q$ and $\Z/N\Z$ respectively.
     ? issquare( 5 + O(13^4) )  \\ in Q_13
     %4 = 0
 @eprog
-If $n$ is given and an exact square root had to be computed in
-the checking process, puts that square root in $n$. This is the case when
-$x$ is a \typ{INT}, \typ{FRAC}, \typ{POL} or \typ{RFRAC} (or a vector of
-such objects):
+If $n$ is given, a square root of $x$ is put into $n$. (This feature is not
+implemented is $x$ is a \typ{QFI} or \typ{QFR}.)
 \bprog
     ? issquare(4, &n)
     %1 = 1
@@ -2186,8 +2184,6 @@ such objects):
     ? n
     %4 = [2, x]  \\ the square roots
 @eprog
-This will \emph{not} work for \typ{INTMOD} (use quadratic reciprocity) or
-\typ{SER} (only check the leading coefficient).
 
 \syn{gissquarerem}{x,\&n}. Also available is \funs{gissquare}{x}.
 
