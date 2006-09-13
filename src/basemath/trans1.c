@@ -723,7 +723,7 @@ ser_powfrac(GEN x, GEN q, long prec)
   long e = valp(x);
   GEN y, E = gmulsg(e, q);
 
-  if (gcmp0(x)) return zeroser(varn(x), val_from_i(gceil(E)));
+  if (!signe(x)) return zeroser(varn(x), val_from_i(gceil(E)));
   if (typ(E) != t_INT)
     pari_err(talker,"%Z should divide valuation (= %ld) in sqrtn",q[2], e);
   e = val_from_i(E);

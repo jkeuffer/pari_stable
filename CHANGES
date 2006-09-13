@@ -65,7 +65,8 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
        latter no longer returns the input seed. (Initial patch by RR)
     7- for install(): parser code 'E' is now obsolete, use 'I'
     8- if issquare(x, &n) == 1, always set n to a square root of x
-    9- issquare(t_QFI or t_QFR) now is an error. Use explicitly
+    9- if ispower(x, k, &n) == 1, always set n to a k-root of x
+   10- issquare(t_QFI or t_QFR) now is an error. Use explicitly
        issquare(component(x,1)) if you relied(?) on the old behaviour
 
   Added
@@ -74,7 +75,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
        support. Warning: using this option break the ABI.
     3- centerlift(t_PADIC)
     4- gener_Zp, gener_Zl
-    5- dvdiu, dvdis
+    5- dvdiu, dvdis, dvdiu, dvdsi
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

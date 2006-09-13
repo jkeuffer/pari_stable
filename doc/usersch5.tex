@@ -1180,26 +1180,22 @@ implemented).
 $|\kbd{x}| / \kbd{y}$ (note the absolue value!), assuming $\kbd{y}$ divides
 $\kbd{x}$ and $\kbd{y}$ is non-zero.
 
-\fun{int}{dvdii}{GEN x, GEN y} if the \typ{INT}~\kbd{y} divides the
-\typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
+The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
+0 otherwise. All \kbd{GEN} are assumed to be \typ{INT}s.
+\fun{int}{dvdii}{GEN x, GEN y} 
+\fun{int}{dvdis}{GEN x, long y}
+\fun{int}{dvdiu}{GEN x, ulong y}
+\fun{int}{dvdsi}{long x, GEN y}
+\fun{int}{dvdui}{ulong x, GEN y}
 
-\fun{int}{dvdis}{GEN x, long y} if the \typ{long}~\kbd{y} divides the
-\typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
-
-\fun{int}{dvdiu}{GEN x, ulong y, GEN z} if the \typ{ulong}~\kbd{y} divides
-the \typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
-
-\fun{int}{dvdiiz}{GEN x, GEN y, GEN z} if the \typ{INT}~\kbd{y} divides the
-\typ{INT}~\kbd{x}, assigns the quotient to the \typ{INT}~\kbd{z} and returns 1
-(true), otherwise returns 0 (false).
-
-\fun{int}{dvdisz}{GEN x, long y, GEN z} if the \typ{long}~\kbd{y} divides the
-\typ{INT}~\kbd{x}, assigns the quotient to the \typ{INT}~\kbd{z} and returns 1
-(true), otherwise returns 0 (false).
-
-\fun{int}{dvdiuz}{GEN x, ulong y, GEN z} if the \typ{ulong}~\kbd{y} divides
-the \typ{INT}~\kbd{x}, assigns the quotient $|\kbd{x}|/\kbd{y}$ to the
-\typ{INT}~\kbd{z} and returns 1 (true), otherwise returns 0 (false).
+The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and in
+that case assign the quotient to \kbd{z}; otherwise they return 0. All
+\kbd{GEN} are assumed to be \typ{INT}s.
+\fun{int}{dvdiiz}{GEN x, GEN y, GEN z}
+\fun{int}{dvdisz}{GEN x, long y, GEN z}
+\fun{int}{dvdiuz}{GEN x, ulong y, GEN z} if \kbd{y} divides \kbd{x}, assigns
+the quotient $|\kbd{x}|/\kbd{y}$ to \kbd{z} and returns 1 (true), otherwise
+returns 0 (false).
 
 \subsec{Division with remainder}. The following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.

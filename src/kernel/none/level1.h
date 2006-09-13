@@ -84,6 +84,8 @@ int    dvdis(GEN x, long y);
 int    dvdisz(GEN x, long y, GEN z);
 int    dvdiu(GEN x, ulong y);
 int    dvdiuz(GEN x, ulong y, GEN z);
+int    dvdsi(long x, GEN y);
+int    dvdui(ulong x, GEN y);
 void   dvmdiiz(GEN x, GEN y, GEN z, GEN t);
 GEN    dvmdis(GEN x, long y, GEN *z);
 void   dvmdisz(GEN x, long y, GEN z, GEN t);
@@ -757,6 +759,19 @@ dvmdss(long x, long y, GEN *z)
 }
 
 INLINE long
+udivui_rem(ulong x, GEN y, ulong *rem)
+{
+  long q, s = signe(y);
+  LOCAL_HIREMAINDER;
+
+  if (!s) pari_err(gdiver);
+  if (!x || lgefint(y)>3) { *rem = x; return 0; }
+  hiremainder=0; q = (long)divll(x, (ulong)y[2]);
+  if (s < 0) q = -q;
+  *rem = hiremainder; return q;
+}
+
+INLINE long
 sdivsi_rem(long x, GEN y, long *rem)
 {
   long q, s = signe(y);
@@ -1034,21 +1049,31 @@ affui(ulong u, GEN x)
 }
 
 INLINE int
+dvdsi(long x, GEN y)
+{
+  if (!signe(y)) return x == 0;
+  if (lgefint(y) != 3) return 0;
+  return x % y[2] == 0;
+}
+
+INLINE int
+dvdui(ulong x, GEN y)
+{
+  if (!signe(y)) return x == 0;
+  if (lgefint(y) != 3) return 0;
+  return x % y[2] == 0;
+}
+
+INLINE int
 dvdis(GEN x, long y)
 {
-  const pari_sp av = avma;
-  long rem;
-  (void)divis_rem(x,y, &rem);
-  avma = av; return rem == 0;
+  return y? smodis(x, y) == 0: signe(x) == 0;
 }
 
 INLINE int
 dvdiu(GEN x, ulong y)
 {
-  const pari_sp av = avma;
-  ulong rem;
-  (void)diviu_rem(x,y, &rem);
-  avma = av; return rem == 0;
+  return y? umodiu(x, y) == 0: signe(x) == 0;
 }
 
 INLINE int

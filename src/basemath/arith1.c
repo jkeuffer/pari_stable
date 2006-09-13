@@ -603,7 +603,7 @@ gissquarerem(GEN x, GEN *pt)
       return gen_1;
     }
 
-    default: pari_err(arither1);
+    default: pari_err(typeer, "gissquarerem");
       return NULL; /* not reached */
   }
   return l? gen_1: gen_0;
@@ -763,73 +763,110 @@ polispower(GEN x, GEN K, GEN *pt)
 }
 
 long
-ispower(GEN x, GEN K, GEN *pty)
+ispower(GEN x, GEN K, GEN *pt)
 {
   ulong k, mask;
   long s;
   GEN z;
 
-  if (!K) return gisanypower(x, pty);
+  if (!K) return gisanypower(x, pt);
   if (typ(K) != t_INT || signe(K) <= 0) pari_err(typeer, "ispower");
-  if (is_pm1(K)) { if (pty) *pty = gcopy(x); return 1; }
+  if (is_pm1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
       s = signe(x);
-      if (!s) { if (pty) *pty = gen_0; return 1; }
+      if (!s) { if (pt) *pt = gen_0; return 1; }
       k = itou(K);
       if (s > 0) {
-        if (k == 2) return Z_issquarerem(x, pty);
-        if (k == 3) { mask = 1; return !!is_357_power(x, pty, &mask); }
-        if (k == 5) { mask = 2; return !!is_357_power(x, pty, &mask); }
-        if (k == 7) { mask = 4; return !!is_357_power(x, pty, &mask); }
-        return is_kth_power(x, k, pty, NULL);
+        if (k == 2) return Z_issquarerem(x, pt);
+        if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
+        if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
+        if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
+        return is_kth_power(x, k, pt, NULL);
       } else {
         if (!odd(k)) return 0;
-        if (ispower(absi(x), K, pty))
+        if (ispower(absi(x), K, pt))
         {
-          if (pty) *pty = negi(*pty);
+          if (pt) *pt = negi(*pt);
           return 1;
         };
         return 0;
       }
-    case t_FRAC:
-    {
+    case t_FRAC: {
       GEN a = gel(x,1), b = gel(x,2);
-      z = cgetg(3, t_FRAC);
-      if (ispower(a, K, pty? &a: NULL)
-       && ispower(b, K, pty? &b: NULL))
-      {
-        if (pty) { *pty = z; gel(z,1) = a; gel(z,2) = b; }
-        return 1;
+      if (pt) {
+        z = cgetg(3, t_FRAC);
+        if (ispower(a, K, &a) && ispower(b, K, &b)) {
+          *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
+        }
+        avma = (pari_sp)(z + 3); return 0;
       }
-      avma = (pari_sp)(z + 3); return 0;
+      return (ispower(a, K, NULL) && ispower(b, K, NULL));
     }
     case t_INTMOD:
     {
-      pari_sp av = avma;
-      GEN d, p = gel(x,1);
-      z = gel(x,2); if (!signe(z)) return 1;
-      d = subis(p, 1); ;
-      z = Fp_pow(z, diviiexact(d, gcdii(K, d)), p);
-      avma = av; return is_pm1(z);
+      GEN L, P, E, q = gel(x,1), a = gel(x,2);
+      pari_sp av;
+      long i, l;
+      if (!signe(a)) {
+        if (pt) *pt = gcopy(x);
+        return 1;
+      }
+      av = avma;
+      L = Z_factor(q);
+      P = gel(L,1); l = lg(P);
+      E = gel(L,2);
+      L = cgetg(l, t_VEC);
+      for (i = 1; i < l; i++)
+      {
+        GEN p = gel(P,i), t, b;
+        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+        if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+        if (!dvdui(v, K)) { avma = av; return 0; }
+        t = cvtop(b, gel(P,i), e - v);
+        if (!ispower(t, K, pt)) { avma = av; return 0; }
+        if (pt)
+        {
+          t = gtrunc(*pt);
+          if (v) t = mulii(t, gpowgs(p, v>>1));
+          gel(L,i) = mkintmod(t, gpowgs(p, e));
+        }
+      }
+      if (pt) *pt = gerepileupto(av, chinese1(L));
+      return 1;
     }
     case t_PADIC:
       z = padic_sqrtn(x, K, NULL);
       if (!z) return 0;
-      if (pty) *pty = z;
+      if (pt) *pt = z;
       return 1;
 
     case t_POL:
-      return polispower(x, K, pty);
-    case t_RFRAC:
-      if (polispower(gmul(gel(x,1), powgi(gel(x,2), subis(K,1))), K, pty))
-      {
-        if (pty) *pty = gdiv(*pty, gel(x,2));
-        return 1;
-      }
-      return 0;
+      return polispower(x, K, pt);
+    case t_RFRAC: {
+      GEN a = gel(x,1), b = gel(x,2);
+      if (pt) {
+        z = cgetg(3, t_RFRAC);
+        if (polispower(a, K, &a) && polispower(b, K, &b)) {
+          *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
+        }
+        avma = (pari_sp)(z + 3); return 0;
+      } 
+      return (polispower(a, K, NULL) && polispower(b, K, NULL));
+    }
+    case t_REAL: 
+      if (signe(x) < 0 && !mpodd(K)) return 0;
+    case t_COMPLEX:
+      if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
+      return 1;
 
-    default: pari_err(impl, "ispower for non-rational arguments");
+    case t_SER:
+      if (signe(x) && (!dvdsi(valp(x), K) || !ispower(gel(x,2), K, NULL)))
+        return 0;
+      if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
+      return 1;
+
+    default: pari_err(typeer, "ispower");
     return 0; /* not reached */
   }
 }
