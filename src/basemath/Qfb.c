@@ -949,7 +949,7 @@ qfr_pow(GEN x, GEN n)
   pari_sp av = avma;
   GEN D, sqrtD, isqrtD, d0;
 
-  if (is_pm1(n)) return signe(n) > 0? gcopy(x): ginv(x);
+  if (is_pm1(n)) return signe(n) > 0? redreal(x): ginv(x);
   if (signe(n) < 0) x = qfr_inv(x);
   d0 = gel(x,4);
   D = sqrtD = isqrtD = NULL;
