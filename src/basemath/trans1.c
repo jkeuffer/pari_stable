@@ -564,7 +564,7 @@ gpowgs(GEN x, long n)
   GEN y;
 
   if (n == 0) return puiss0(x);
-  if (n == 1) return gcopy(x);
+  if (n == 1) return typ(x) == t_QFI? redimag(x): gcopy(x);
   if (n ==-1) return ginv(x);
   switch(typ(x))
   {

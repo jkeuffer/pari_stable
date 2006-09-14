@@ -51,6 +51,8 @@ JJ 24- gaddgsz macro was wrong [#481]
    25- gener_Fl(p^k) can't handle k > 1, use gener_Zl instead [#480]
 SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc 
        function. [#484] 
+   27- t_QFI^n would return a reduced form (OK) except when n = 1. Make it
+       systematic.
 
   Changed
     1- moved cgiv to inline kernel
