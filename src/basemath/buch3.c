@@ -1073,7 +1073,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       if (!g)
       {
         ord = Z_factor( utoipos(q-1) );
-        g = gener_Fp_local(gq, gel(ord,1)); /* primitive root */
+        g = pgener_Fp_local(gq, gel(ord,1)); /* primitive root */
       }
       modpr = zkmodprinit(nf, Q);
       newcol = cgetg(lb+1,t_COL);

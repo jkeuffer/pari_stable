@@ -1532,7 +1532,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
   if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Z\n",e,pr);
   if (f == 1)
-    g = gscalcol_i(gener_Fp(p), degpol(nf[1]));
+    g = gscalcol_i(pgener_Fp(p), degpol(nf[1]));
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);

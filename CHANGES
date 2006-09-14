@@ -70,13 +70,15 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
     9- if ispower(x, k, &n) == 1, always set n to a k-root of x
    10- issquare(t_QFI or t_QFR) now is an error. Use explicitly
        issquare(component(x,1)) if you relied(?) on the old behaviour
+   11- rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp [ contrary to
+         'gener', these assume that their argument is prime ]
 
   Added
 BA  1- function Flm_rank
 BA  2- Add experimental --enable-tls Configure option and thread-local stack 
        support. Warning: using this option break the ABI.
     3- centerlift(t_PADIC)
-    4- gener_Zp, gener_Zl
+    4- pgener_Zp, pgener_Zl
     5- dvdiu, dvdis, dvdiu, dvdsi
 
   Removed

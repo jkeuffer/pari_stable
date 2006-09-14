@@ -920,7 +920,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   degKz = degpol(COMPO.R);
   m = degKz / degK;
   d = (ell-1) / m;
-  g = (long)Fl_pow(gener_Fl(ell), d, ell);
+  g = (long)Fl_pow(pgener_Fl(ell), d, ell);
   if (Fl_pow((ulong)g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */

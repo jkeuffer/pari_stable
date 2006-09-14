@@ -175,7 +175,7 @@ ggener(GEN m)
 
 /* assume p prime */
 ulong
-gener_Fl_local(ulong p, GEN L0)
+pgener_Fl_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
   const ulong q = p - 1;
@@ -202,11 +202,11 @@ gener_Fl_local(ulong p, GEN L0)
   avma = av; return x;
 }
 ulong
-gener_Fl(ulong p) { return gener_Fl_local(p, NULL); }
+pgener_Fl(ulong p) { return pgener_Fl_local(p, NULL); }
 
 /* assume p prime, return a generator of all L[i]-Sylows in F_p^*. */
 GEN
-gener_Fp_local(GEN p, GEN L0)
+pgener_Fp_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
   long k, i;
@@ -216,7 +216,7 @@ gener_Fp_local(GEN p, GEN L0)
     ulong z;
     if (p[2] == 2) return gen_1;
     if (L0) L0 = ZV_to_nv(L0);
-    z = gener_Fl_local((ulong)p[2], L0);
+    z = pgener_Fl_local((ulong)p[2], L0);
     avma = av0; return utoipos(z);
   }
 
@@ -244,17 +244,17 @@ gener_Fp_local(GEN p, GEN L0)
 }
 
 GEN
-gener_Fp(GEN p) { return gener_Fp_local(p, NULL); }
+pgener_Fp(GEN p) { return pgener_Fp_local(p, NULL); }
 
 /* Can fail if 2p > 2^BIL */
 ulong
-gener_Zl(ulong p)
+pgener_Zl(ulong p)
 {
   ulong x;
   if (p == 2) pari_err(talker,"primitive root mod 2^3 does not exist");
   /* only p < 2^32 such that znprimroot(p) != znprimroot(p^2) */
   if (p == 40487) return 40492;
-  x = gener_Fl(p);
+  x = pgener_Fl(p);
 #ifdef LONG_IS_64BIT
 {
   pari_sp av = avma;
@@ -262,7 +262,7 @@ gener_Zl(ulong p)
   GEN y = Fp_powu(utoipos(x), p-1, q);
   if (is_pm1(y)) {
     x += p;
-    if (x < p) err(talker, "p too large in gener_Zl");
+    if (x < p) err(talker, "p too large in pgener_Zl");
   }
   avma = av;
 }
@@ -272,12 +272,12 @@ gener_Zl(ulong p)
 
 /* p prime. Return a primitive root modulo p^e, e > 1 */
 GEN
-gener_Zp(GEN p)
+pgener_Zp(GEN p)
 {
   GEN x, y;
 
-  if (lgefint(p) == 3 && !(p[2] & HIGHBIT)) return utoipos( gener_Zl(p[2]) );
-  x = gener_Fp(p);
+  if (lgefint(p) == 3 && !(p[2] & HIGHBIT)) return utoipos( pgener_Zl(p[2]) );
+  x = pgener_Fp(p);
   y = Fp_pow(x, subis(p,1), sqri(p));
   if (is_pm1(y)) x = addii(x,p); else avma = (pari_sp)x;
   return x;
@@ -314,7 +314,7 @@ gener(GEN m)
   if (lg(t[1]) != 2) pari_err(talker,"primitive root mod %Z does not exist", m);
   p = gcoeff(t,1,1);
   e = itos(gcoeff(t,1,2));
-  gel(z,2) = gerepileuptoint(av, e > 1? gener_Zp(p): gener_Fp(p)); return z;
+  gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(p)); return z;
 }
 
 GEN
@@ -372,7 +372,7 @@ znstar(GEN n)
     long e = itos(gel(E,j));
     GEN p = gel(P,j), q = powiu(p, e-1), Q = mulii(p, q);
     gel(cyc,i) = subii(Q, q); /* phi(p^e) */
-    gel(gen,i) = e > 1? gener_Zp(p): gener_Fp(p);
+    gel(gen,i) = e > 1? pgener_Zp(p): pgener_Fp(p);
     gel(mod,i) = Q;
   }
   for (i=1; i<=sizeh; i++)

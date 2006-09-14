@@ -430,7 +430,7 @@ computetabdl(ulong q)
   ulong g, a, i, qs2 = q>>1; /* (q-1)/2 */
   GEN T = cgetg(qs2+2,t_VECSMALL);
 
-  g = gener_Fl(q); a = 1;
+  g = pgener_Fl(q); a = 1;
   for (i=1; i < qs2; i++) /* g^((q-1)/2) = -1 */
   {
     a = Fl_mul(g,a,q);

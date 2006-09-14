@@ -78,6 +78,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define rayclassno bnrclassno
 #define rayclassnolist bnrclassnolist
 #define idealhermite2 idealhnf0
+#define gener_Fp pgener_Fp
+#define gener_Fl pgener_Fl
 
 #define apprgen padicappr
 #define apprgen9 padicappr
