@@ -60,7 +60,7 @@ quadpoly0(GEN x, long v)
   y = cgetg(5,t_POL);
   y[1] = evalsigne(1) | evalvarn(v);
 
-  p1 = shifti(x,-2); setsigne(p1,-signe(p1));
+  p1 = shifti(x,-2); togglesign(p1);
   /* p1 = - floor(x/4) [ = -x/4 or (1-x)/4 ] */
   if (!res) gel(y,3) = gen_0;
   else
@@ -144,7 +144,7 @@ qfb_sqr(GEN z, GEN x)
     v2 = mulii(v1, gcdii(d1,c)); /* = v1 iff x primitive */
     c = mulii(c, d1);
   }
-  setsigne(m, -signe(m));
+  togglesign(m);
   r = modii(m,v2);
   p1 = mulii(r, v1);
   c3 = addii(c, mulii(r,addii(gel(x,2),p1)));
@@ -179,7 +179,7 @@ qfb_comp(GEN z, GEN x, GEN y)
     }
     m = addii(mulii(mulii(y1,y2),n), mulii(gel(y,3),x2));
   }
-  setsigne(m, -signe(m));
+  togglesign(m);
   r = modii(m, v1);
   p1 = mulii(r, v2);
   c3 = addii(c, mulii(r,addii(gel(y,2),p1)));
@@ -309,9 +309,8 @@ static GEN
 invraw(GEN x)
 {
   GEN y = gcopy(x);
-  setsigne(y[2], -signe(y[2]));
-  if (typ(y) == t_QFR) setsigne(y[4], -signe(y[4]));
-  return y;
+  if (typ(y) == t_QFR) togglesign(y[4]);
+  togglesign(y[2]); return y;
 }
 GEN
 powrealraw(GEN x, long n)
@@ -505,7 +504,7 @@ nupow(GEN x, GEN n)
   y = leftright_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
   if (signe(n) < 0
   && !absi_equal(gel(y,1),gel(y,2))
-  && !absi_equal(gel(y,1),gel(y,3))) setsigne(y[2],-signe(y[2]));
+  && !absi_equal(gel(y,1),gel(y,3))) togglesign(y[2]);
   return gerepileupto(av, y);
 }
 

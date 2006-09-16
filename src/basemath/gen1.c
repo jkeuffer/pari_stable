@@ -22,11 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-#define fix_frac(z) if (signe(z[2])<0)\
-{\
-  setsigne(z[1],-signe(z[1]));\
-  setsigne(z[2],1);\
-}
+#define fix_frac(z) if (signe(z[2])<0) { togglesign(z[1]); setsigne(z[2],1); }
 
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\

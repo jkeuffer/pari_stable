@@ -2424,7 +2424,7 @@ initzeta(GEN pol, long prec)
     if (coef[i])
     {
       GEN t = cgetg(r+2,t_COL);
-      p1 = logr_abs(gel(tabcstn,i)); setsigne(p1, -signe(p1));
+      p1 = logr_abs(gel(tabcstn,i)); togglesign(p1);
       gel(t,1) = utoi(coef[i]);
       gel(t,2) = mulur(coef[i], p1);
       for (j=2; j<=r; j++)

@@ -964,7 +964,7 @@ gsqrt(GEN x, long prec)
       if (gsigne(gel(x,1)) < 0)
       {
         p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
-        if (gsigne(gel(x,2)) < 0) setsigne(p1, -signe(p1));
+        if (gsigne(gel(x,2)) < 0) togglesign(p1);
         gel(y,2) = gerepileuptoleaf(av, p1); av = avma;
         gel(y,1) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
       } else {
@@ -1995,7 +1995,7 @@ mpcos(GEN x)
   switch(mod8)
   {
     case 0: case 4: y = addsr(1,p1); break;
-    case 1: case 7: y = mpaut(p1); setsigne(y,-signe(y)); break;
+    case 1: case 7: y = mpaut(p1); togglesign(y); break;
     case 2: case 6: y = subsr(-1,p1); break;
     default:        y = mpaut(p1); break; /* case 3: case 5: */
   }
@@ -2063,7 +2063,7 @@ mpsin(GEN x)
   {
     case 0: case 6: y=mpaut(p1); break;
     case 1: case 5: y=addsr(1,p1); break;
-    case 2: case 4: y=mpaut(p1); setsigne(y,-signe(y)); break;
+    case 2: case 4: y=mpaut(p1); togglesign(y); break;
     default:        y=subsr(-1,p1); break; /* case 3: case 7: */
   }
   return gerepileuptoleaf(av, y);
@@ -2135,13 +2135,13 @@ mpsincos(GEN x, GEN *s, GEN *c)
   switch(mod8)
   {
     case 0: *c=addsr( 1,p1); *s=mpaut(p1); break;
-    case 1: *s=addsr( 1,p1); *c=mpaut(p1); setsigne(*c,-signe(*c)); break;
-    case 2: *c=subsr(-1,p1); *s=mpaut(p1); setsigne(*s,-signe(*s)); break;
+    case 1: *s=addsr( 1,p1); *c=mpaut(p1); togglesign(*c); break;
+    case 2: *c=subsr(-1,p1); *s=mpaut(p1); togglesign(*s); break;
     case 3: *s=subsr(-1,p1); *c=mpaut(p1); break;
-    case 4: *c=addsr( 1,p1); *s=mpaut(p1); setsigne(*s,-signe(*s)); break;
+    case 4: *c=addsr( 1,p1); *s=mpaut(p1); togglesign(*s); break;
     case 5: *s=addsr( 1,p1); *c=mpaut(p1); break;
     case 6: *c=subsr(-1,p1); *s=mpaut(p1); break;
-    case 7: *s=subsr(-1,p1); *c=mpaut(p1); setsigne(*c,-signe(*c)); break;
+    case 7: *s=subsr(-1,p1); *c=mpaut(p1); togglesign(*c); break;
   }
   gptr[0]=s; gptr[1]=c;
   gerepilemanysp(av,tetpil,gptr,2);

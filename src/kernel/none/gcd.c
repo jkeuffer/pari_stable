@@ -208,13 +208,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
     if      (g == 1) return gen_1;
     else if (g == 2) return gen_2;
-    else
-    {
-      r = cgeti(3);
-      r[1] = evalsigne(1)|evallgefint(3);
-      r[2] = g;
-      return r;
-    }
+    else return utoipos(g);
   }
 
   /* general case */
@@ -277,18 +271,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
 	a  = subii(muliu(v,xu),  muliu(v1,xv));
 	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1)
-	{
-          setsigne(d,-signe(d));
-          setsigne(u,-signe(u));
-          setsigne(v,-signe(v));
-        }
-        else
-	{
-          if (signe(d1)) { setsigne(d1,-signe(d1)); }
-          setsigne(u1,-signe(u1));
-          setsigne(v1,-signe(v1));
-        }
+        if (lhmres&1) { togglesign(d);  togglesign(u);  togglesign(v); }
+        else          { togglesign(d1); togglesign(u1); togglesign(v1); }
       }
     }
     if (lhmres <= 0 && signe(d1))
@@ -326,13 +310,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pv) *pv = sb < 0 ? negi(v) : icopy(v);
     if (g == 1) return gen_1;
     else if (g == 2) return gen_2;
-    else
-    {
-      r = cgeti(3);
-      r[1] = evalsigne(1)|evallgefint(3);
-      r[2] = g;
-      return r;
-    }
+    else return utoipos(g);
   }
   /* get here when the final sprint was skipped (d1 was zero already).
    * Now the matrix is final, and d contains the gcd.

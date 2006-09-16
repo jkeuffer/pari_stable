@@ -1176,7 +1176,7 @@ szeta_odd(long k, long prec)
       if (n) { binom = next_bin(binom,kk,n); setlg(binom,prec+1); }
       p1 = mulrr(binom,p1);
       if (n == kk>>1) setexpo(p1, expo(p1)-1);
-      if ((n>>1)&1) setsigne(p1,-signe(p1));
+      if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
     y = mulrr(divrr(gpowgs(pi2,k),mpfactr(kk,prec)),y);
@@ -1196,7 +1196,7 @@ szeta_odd(long k, long prec)
       }
     }
     setexpo(z, expo(z)+1);
-    y = addrr(y,z); setsigne(y,-signe(y));
+    y = addrr(y,z); togglesign(y);
   }
   else
   {
@@ -1207,7 +1207,7 @@ szeta_odd(long k, long prec)
       if (n) binom = next_bin(binom,kk,n);
       p1 = mulrr(binom,p1);
       p1 = mulsr(kk-(n<<1),p1);
-      if ((n>>1)&1) setsigne(p1,-signe(p1));
+      if ((n>>1)&1) togglesign(p1);
       y = n? addrr(y,p1): p1;
     }
     y = mulrr(divrr(gpowgs(pi2,k),mpfactr(kk,prec)),y);
@@ -2203,8 +2203,8 @@ e12(ulong k, long prec)
             gel(z,2) = mpcopy(gel(z,1)); break;
   }
   if (sPiov2) lswap(z[1], z[2]);
-  if (sPi) setsigne(z[1], -signe(z[1]));
-  if (s)   setsigne(z[2], -signe(z[2]));
+  if (sPi) togglesign(z[1]);
+  if (s)   togglesign(z[2]);
   return z;
 }
 

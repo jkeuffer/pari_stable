@@ -194,13 +194,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
     if (g == 1) return gen_1;
     else if (g == 2) return gen_2;
-    else
-    {
-      r = cgeti(3);
-      r[1] = evalsigne(1)|evallgefint(3);
-      r[2] = g;
-      return r;
-    }
+    else return utoipos(g);
   }
   else
   { /* general case */

@@ -51,7 +51,7 @@ poltchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
     {
       av = avma;
       a = diviuexact(muliu(a, l*(l-1)), 4*k*(n-k));
-      setsigne(a, -signe(a));
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -61,7 +61,7 @@ poltchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
       av = avma;
       a = muliu(muliu(a, l), l-1);
       a = diviuexact(diviuexact(a, 4*k), n-k);
-      setsigne(a, -signe(a));
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -91,7 +91,7 @@ poltchebi2(long n, long v)
     {
       av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m*(n-m+1));
-      setsigne(a, -signe(a));
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -101,7 +101,7 @@ poltchebi2(long n, long v)
       av = avma;
       a = muliu(muliu(a, n-2*m+2), n-2*m+1);
       a = diviuexact(diviuexact(a, 4*m), n-m+1);
-      setsigne(a, -signe(a));
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -129,20 +129,20 @@ polhermite(long n, long v)
   if (n < SQRTVERYBIGINT)
     for (m=1; 2*m<= n; m++)
     {
-        av = avma;
-        a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
-        setsigne(a, -signe(a));
-        gel(r--,0) = gerepileuptoint(av, a);
-        gel(r--,0) = gen_0;
+      av = avma;
+      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
+      togglesign(a);
+      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = gen_0;
     }
   else
     for (m=1; 2*m<= n; m++)
     {
-        av = avma;
-        a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
-        setsigne(a, -signe(a));
-        gel(r--,0) = gerepileuptoint(av, a);
-        gel(r--,0) = gen_0;
+      av = avma;
+      a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
+      togglesign(a);
+      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;

@@ -105,6 +105,7 @@ typedef long *GEN;
 #define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
 #define setsigne(x,s) (((ulong*)(x))[1]=\
                         (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
+#define togglesign(x) (void)((((GEN)(x))[1] & SIGNBITS) && (((GEN)(x))[1] ^= HIGHBIT))
 
 #define lgeflist(x)      (((long*)(x))[1])
 #define setlgeflist(x,l) (((ulong*)(x))[1]=(ulong)(l))

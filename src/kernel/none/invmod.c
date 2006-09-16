@@ -105,16 +105,8 @@ invmod(GEN a, GEN b, GEN *res)
 	a  = subii(muliu(v,xu),  muliu(v1,xv));
 	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
 	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1)
-	{
-          setsigne(d,-signe(d));
-          setsigne(v,-signe(v));
-        }
-        else
-	{
-          if (signe(d1)) { setsigne(d1,-signe(d1)); }
-          setsigne(v1,-signe(v1));
-        }
+        if (lhmres&1) { togglesign(d);  togglesign(v); }
+        else          { togglesign(d1); togglesign(v1); }
       }
     }
 #ifdef DEBUG_LEHMER

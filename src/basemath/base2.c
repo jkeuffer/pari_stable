@@ -237,7 +237,7 @@ matinv(GEN x, GEN d)
         GEN p1 = mulii(gcoeff(y,i,k),gcoeff(x,k,j));
         if (p1 != gen_0) h=addii(h,p1);
       }
-      setsigne(h,-signe(h)); av1=avma;
+      togglesign(h); av1=avma;
       gcoeff(y,i,j) = gerepile(av,av1,diviiexact(h,gcoeff(x,j,j)));
       av = avma;
     }

@@ -557,10 +557,7 @@ galoiscyclo(long n, long v)
   elts = group_elts(G, card); /*not stack clean*/
   grp = cgetg(9, t_VEC);
   gel(grp,1) = polcyclo(n,v);
-  gel(grp,2) = cgetg(4,t_VEC); 
-  gmael(grp,2,1) = stoi(l);
-  gmael(grp,2,2) = stoi(val);
-  gmael(grp,2,3) = icopy(le);
+  gel(grp,2) = mkvec3(stoi(l), stoi(val), icopy(le));
   gel(grp,3) = gcopy(L);
   gel(grp,4) = vandermondeinversemod(L, gel(grp,1), gen_1, le);
   gel(grp,5) = gen_1;

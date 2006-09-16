@@ -510,11 +510,10 @@ muluu(ulong x, ulong y)
   p1 = mulll(x,y);
   if (hiremainder)
   {
-    z=cgeti(4); z[1] = evalsigne(1) | evallgefint(4);
+    z=cgetpos(4);
     z[3]=hiremainder; z[2]=p1; return z;
   }
-  z=cgeti(3); z[1] = evalsigne(1) | evallgefint(3);
-  z[2]=p1; return z;
+  return utoipos(p1);
 }
 
 /* assume ny > 0 */
@@ -1088,7 +1087,7 @@ sqrtremi(GEN a, GEN *r)
     return gen_0;
   }
   l = (na + 5) >> 1; /* 2 + ceil(na/2) */
-  S = cgeti(l); S[1] = evalsigne(1) | evallgefint(l);
+  S = cgetpos(l);
   if (r) {
     GEN R = cgeti(2 + na);
     nr = mpn_sqrtrem(LIMBS(S), LIMBS(R), LIMBS(a), na);

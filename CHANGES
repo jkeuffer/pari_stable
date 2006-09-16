@@ -84,7 +84,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
     3- centerlift(t_PADIC)
     4- pgener_Zp, pgener_Zl
     5- dvdiu, dvdis, dvdiu, dvdsi
-    6- cgetipos, cgetineg
+    6- cgetipos, cgetineg, togglesign
 RM  7- polhermite, poltchebi2
 
   Removed

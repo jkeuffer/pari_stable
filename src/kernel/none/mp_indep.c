@@ -65,7 +65,7 @@ icopy_spec(GEN x, long nx)
   GEN z;
   long i;
   if (!nx) return gen_0;
-  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
+  z = cgetipos(nx+2);
   for (i=0; i<nx; i++) z[i+2] = x[i];
   return z;
 }
@@ -517,8 +517,7 @@ int2n(long n) {
 
   d = n>>TWOPOTBITS_IN_LONG;
   m = n & (BITS_IN_LONG-1);
-  l = d + 3; z = cgeti(l);
-  z[1] = evalsigne(1) | evallgefint(l);
+  l = d + 3; z = cgetipos(l);
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
 }
@@ -532,8 +531,7 @@ int2u(ulong n) {
 
   d = n>>TWOPOTBITS_IN_LONG;
   m = n & (BITS_IN_LONG-1);
-  l = d + 3; z = cgeti(l);
-  z[1] = evalsigne(1) | evallgefint(l);
+  l = d + 3; z = cgetipos(l);
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
 }

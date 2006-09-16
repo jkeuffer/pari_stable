@@ -2315,7 +2315,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   for (i=2; i<=(long)bound; i++) gel(z,i) = empty;
   ID.nf = nf;
 
-  p = cgeti(3); p[1] = evalsigne(1) | evallgefint(3);
+  p = cgetipos(3);
   av = avma; lim = stack_lim(av,1);
   maxprime_check(bound);
   for (p[2] = 0; (ulong)p[2] <= bound; )

@@ -113,7 +113,7 @@ mpatan(GEN x)
 
   p4 = mulrr(p2,p4); setexpo(p4, expo(p4)+m);
   if (inv) p4 = subrr(Pi2n(-1, lp), p4);
-  if (sx < 0) setsigne(p4,-signe(p4));
+  if (sx < 0) togglesign(p4);
   affr_fixlg(p4,y); avma = av0; return y;
 }
 
@@ -181,11 +181,7 @@ gasin(GEN x, long prec)
       y = cgetg(3,t_COMPLEX);
       gel(y,1) = Pi2n(-1, lg(x));
       gel(y,2) = mpach(x);
-      if (sx < 0)
-      {
-        setsigne(y[1],-signe(y[1]));
-        setsigne(y[2],-signe(y[2]));
-      }
+      if (sx < 0) { togglesign(y[1]); togglesign(y[2]); }
       return y;
 
     case t_COMPLEX:
@@ -248,10 +244,7 @@ gacos(GEN x, long prec)
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
       if (sx < 0) gel(y,1) = mppi(lg(x));
-      else {
-	gel(y,1) = gen_0;
-        setsigne(p1,-signe(p1));
-      }
+      else { gel(y,1) = gen_0; togglesign(p1); }
       gel(y,2) = p1; return y;
 
     case t_COMPLEX: av = avma;
@@ -459,7 +452,7 @@ mpth(GEN x)
     GEN t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
     y = gerepileuptoleaf(av, divrr(t, addsr(2,t)));
   }
-  if (s < 0) setsigne(y, -signe(y)); /* tanh is odd */
+  if (s < 0) togglesign(y); /* tanh is odd */
   return y;
 }
 
@@ -499,7 +492,7 @@ mpash(GEN x)
 {
   pari_sp av = avma;
   GEN z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
-  if (signe(x) < 0) setsigne(z, -signe(z));
+  if (signe(x) < 0) togglesign(z);
   return gerepileuptoleaf(av, z);
 }
 
@@ -576,8 +569,7 @@ gach(GEN x, long prec)
       /* x <= -1 */
       if (absrnz_egal1(x)) { y = cgetimag(); gel(y,2) = mppi(lg(x)); return y; }
       y = cgetg(3,t_COMPLEX);
-      av = avma; p1 = mpach(x);
-      setsigne(p1, -signe(p1));
+      av = avma; p1 = mpach(x); togglesign(p1);
       gel(y,1) = p1;
       gel(y,2) = mppi(lg(x)); return y;
 
@@ -1123,7 +1115,7 @@ cxgamma(GEN s0, int dolog, long prec)
        *     = y - log( sin(Pi s) / (sqrt(2Pi)/2) ) */
       y = gsub(y, glog(gdiv(gsin(gmul(pi,s0),prec), shiftr(sqrtpi2,-1)), prec));
       if (signe(z)) {
-        if (gsigne(imag_i(s)) < 0) setsigne(z, -signe(z));
+        if (gsigne(imag_i(s)) < 0) togglesign(z);
         if (typ(y) == t_COMPLEX)
           gel(y,2) = gadd(gel(y,2), z);
         else

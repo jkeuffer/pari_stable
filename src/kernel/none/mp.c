@@ -457,11 +457,10 @@ muluu(ulong x, ulong y)
   p1 = mulll(x,y);
   if (hiremainder)
   {
-    z=cgeti(4); z[1] = evalsigne(1) | evallgefint(4);
+    z=cgetipos(4);
     z[2]=hiremainder; z[3]=p1; return z;
   }
-  z=cgeti(3); z[1] = evalsigne(1) | evallgefint(3);
-  z[2]=p1; return z;
+  return utoipos(p1);
 }
 
 /* assume ny > 0 */
@@ -554,7 +553,7 @@ diviu_rem(GEN y, ulong x, ulong *rem)
     if (ly==3) { *rem = (ulong)y[2]; return gen_0; }
     hiremainder=y[2]; ly--; y++;
   }
-  z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(1);
+  z = cgetipos(ly);
   for (i=2; i<ly; i++) z[i]=divll(y[i],x);
   *rem = hiremainder; return z;
 }
@@ -1397,8 +1396,7 @@ resmod2n(GEN x, long n)
   else
     ly = k+3;
 
-  zd = z = cgeti(ly);
-  *++zd = evalsigne(1) | evallgefint(ly);
+  z = utoipos(ly); zd = z+1;
   if (hi) *++zd = hi;
   for ( ;k; k--) *++zd = *++xd;
   return z;
@@ -1547,8 +1545,7 @@ xmpn_copy(GEN z, GEN x, long n)
 static GEN
 cat1u(ulong d)
 {
-  GEN R = cgeti(4);
-  R[1] = evalsigne(1)|evallgefint(4);
+  GEN R = cgetipos(4);
   R[2] = 1;
   R[3] = d; return R;
 }
@@ -1557,8 +1554,7 @@ static GEN
 catii(GEN a, long la, GEN b, long lb)
 {
   long l = la + lb + 2;
-  GEN z = cgeti(l);
-  z[1] = evalsigne(1) | evallgefint(l);
+  GEN z = cgetipos(l);
   xmpn_copy(z + 2, a, la);
   xmpn_copy(z + 2 + la, b, lb);
   return int_normalize(z, 0);

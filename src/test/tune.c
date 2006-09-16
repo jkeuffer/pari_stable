@@ -200,8 +200,7 @@ static double speed_Flx_karamul(speed_param *s)
 
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
-  op = cgeti(2*lx - 2);                                 \
-  op[1] = evallgefint(2*lx - 2) | evalsigne(1);         \
+  op = cgetpos(2*lx - 2);                                 \
   for (i=2; i<lx; i++) op[i]      = s->x[i];            \
   for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
   modBIL(s->y) |= 1; /* make sure modulus is odd */

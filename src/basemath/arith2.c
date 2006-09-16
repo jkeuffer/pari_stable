@@ -1578,7 +1578,7 @@ gbitneg(GEN x, long bits)
   len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
   if (len_out > xl) { /* Need to grow */
     GEN out, outp, xp = int_MSW(x);
-    out = cgeti(len_out); out[1] = evalsigne(1) | evallgefint(len_out);
+    out = cgetipos(len_out);
     outp = int_MSW(out);
     if (!(bits & (BITS_IN_LONG - 1)))
       *outp = ~uzero;
@@ -1615,7 +1615,7 @@ ibitand(GEN x, GEN y)
   lout = min(lx,ly); /* > 2 */
   xp = int_LSW(x);
   yp = int_LSW(y);
-  out = cgeti(lout); out[1] = evalsigne(1) | evallgefint(lout);
+  out = cgetipos(lout);
   outp = int_LSW(out);
   for (i=2; i<lout; i++)
   {
@@ -1643,7 +1643,7 @@ ibitor(GEN x, GEN y)
   ly = lgefint(y); yp = int_LSW(y);
   if (lx < ly) swapspec(xp,yp,lx,ly);
   /* lx > 2 */
-  out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
+  out = cgetipos(lx);
   outp = int_LSW(out);
   for (i=2;i<ly;i++)
   {
@@ -1678,7 +1678,7 @@ ibitxor(GEN x, GEN y)
   ly = lgefint(y); yp = int_LSW(y);
   if (lx < ly) swapspec(xp,yp,lx,ly);
   /* lx > 2 */
-  out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
+  out = cgetipos(lx);
   outp = int_LSW(out);
   for (i=2;i<ly;i++)
   {
@@ -1713,7 +1713,7 @@ ibitnegimply(GEN x, GEN y)
   ly = lgefint(y); yp = int_LSW(y);
   if (lx < ly) { lin = lx; lout = ly; } else { lin = ly; lout = lx; }
   /* lout > 2 */
-  out = cgeti(lout); out[1] = evalsigne(1) | evallgefint(lout);
+  out = cgetipos(lout);
   outp = int_LSW(out);
   for (i=2; i<lin; i++)
   {

@@ -1053,11 +1053,7 @@ ginv(GEN x)
       z = cgetg(3,t_FRAC);
       gel(z,1) = icopy(gel(x,2));
       gel(z,2) = icopy(gel(x,1));
-      if (s < 0)
-      {
-	setsigne(z[1],-signe(z[1]));
-	setsigne(z[2],1);
-      }
+      if (s < 0) { togglesign(z[1]); setsigne(z[2],1); }
       return z;
 
     case t_COMPLEX: case t_QUAD:
@@ -1117,7 +1113,7 @@ ginv(GEN x)
     case t_QFI:
       y = gcopy(x);
       if (!equalii(gel(x,1),gel(x,2)) && !equalii(gel(x,1),gel(x,3)))
-	setsigne(y[2],-signe(y[2]));
+	togglesign(y[2]);
       return y;
     case t_MAT:
       return (lg(x)==1)? cgetg(1,t_MAT): invmat(x);
@@ -2147,8 +2143,7 @@ mkintn(long n, ...)
   n = (n+1) >> 1;
 #endif
   va_start(ap,n);
-  x = cgeti(n+2); 
-  x[1] = evallgefint(n+2) | evalsigne(1);
+  x = cgetipos(n+2); 
   y = int_MSW(x);
   for (i=0; i <n; i++)
   {
@@ -2172,18 +2167,15 @@ u2toi(ulong a, ulong b)
   GEN x;
   if (!a && !b) return gen_0;
 #ifdef LONG_IS_64BIT
-  x = cgeti(3);
-  x[1] = evallgefint(3)|evalsigne(1);
+  x = cgetipos(3);
   x[2] = ((a << 32) | b);
 #else
   if (a) {
-    x = cgeti(4);
-    x[1] = evallgefint(4)|evalsigne(1);
+    x = cgetipos(4);
     *(int_MSW(x)) = (long)a;
     *(int_LSW(x)) = (long)b;
   } else {
-    x = cgeti(3);
-    x[1] = evallgefint(3)|evalsigne(1);
+    x = cgetipos(3);
     x[2] = (long)b;
   }
 #endif

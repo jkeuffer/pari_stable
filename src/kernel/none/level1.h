@@ -291,16 +291,14 @@ cgeti(long x)
 INLINE GEN
 cgetipos(long x)
 {
-  const GEN z = new_chunk((size_t)x);
-  z[0] = evaltyp(t_INT) | evallg(x);
+  const GEN z = cgeti(x);
   z[1] = evalsigne(1) | evallgefint(x);
   return z;
 }
 INLINE GEN
 cgetineg(long x)
 {
-  const GEN z = new_chunk((size_t)x);
-  z[0] = evaltyp(t_INT) | evallg(x);
+  const GEN z = cgeti(x);
   z[1] = evalsigne(-1) | evallgefint(x);
   return z;
 }
@@ -500,18 +498,10 @@ smodss(long x, long y)
 
 /* assume x != 0, return -x as a t_INT */
 INLINE GEN
-utoineg(ulong x)
-{
-  GEN y = cgeti(3);
-  y[1] = evalsigne(-1)| evallgefint(3); y[2] = x; return y;
-}
+utoineg(ulong x) { GEN y = cgetineg(3); y[2] = x; return y; }
 /* assume x != 0, return utoi(x) */
 INLINE GEN
-utoipos(ulong x)
-{
-  GEN y = cgeti(3);
-  y[1] = evalsigne(1)| evallgefint(3); y[2] = x; return y;
-}
+utoipos(ulong x) { GEN y = cgetipos(3); y[2] = x; return y; }
 INLINE GEN
 utoi(ulong x) { return x? utoipos(x): gen_0; }
 INLINE GEN
