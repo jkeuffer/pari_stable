@@ -728,6 +728,14 @@ inefficient: don't use them.
 of length~\kbd{n}, and initializes its first codeword. Identical to
 \kbd{cgetg(n,\typ{INT})}.
 
+\fun{GEN}{cgetipos}{long n} allocates memory on the PARI stack for a
+\typ{INT} of length~\kbd{n}, and initializes its two codewords. The sign
+of \kbd{n} is set to $1$.
+
+\fun{GEN}{cgetineg}{long n} allocates memory on the PARI stack for a negative
+\typ{INT} of length~\kbd{n}, and initializes its two codewords. The sign
+of \kbd{n} is set to $-1$.
+
 \fun{GEN}{cgetr}{long n} allocates memory on the PARI stack for a \typ{REAL}
 of length~\kbd{n}, and initializes its first codeword. Identical to
 \kbd{cgetg(n,\typ{REAL})}.
