@@ -181,7 +181,7 @@ random_Fl(ulong n)
 GEN
 randomi(GEN N)
 {
-  long lx = lgefint(N), code1;
+  long lx = lgefint(N);
   GEN d, NMSW;
   pari_sp av;
   int shift;
