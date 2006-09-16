@@ -53,6 +53,8 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
        function. [#484] 
    27- raising a t_QFI or t_QFR to the power n would return a reduced form (OK)
        except when n = 1. Make it systematic.
+   28- in rare cases (return 0, native kernel) int_normalize was not suitable
+       for gerepileupto
 
   Changed
     1- moved cgiv to inline kernel

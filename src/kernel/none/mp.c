@@ -34,24 +34,21 @@ int pari_kernel_init(void) { return 0; } /*nothing to do*/
 GEN
 int_normalize(GEN x, long known_zero_words)
 {
-  long lx = lgefint(x);
-  long i = 2 + known_zero_words;
+  long lx, i;
+  GEN x0;
+  if (x[2]) return x;
+  lx = lgefint(x);
+  i = 2 + known_zero_words;
   for ( ; i < lx; i++)
-    if (x[i])
-    {
-      if (i != 2)
-      {
-        GEN x0 = x;
-        i -= 2; x += i;
-        if (x0 == (GEN)avma) avma = (pari_sp)x;
-        else stackdummy((pari_sp)(x0+i), (pari_sp)x0);
-        lx -= i;
-        x[0] = evaltyp(t_INT) | evallg(lx);
-        x[1] = evalsigne(1) | evallgefint(lx);
-      }
-      return x;
-    }
-  x[1] = evalsigne(0) | evallgefint(2); return x;
+    if (x[i]) break;
+  x0 = x; i -= 2; x += i;
+  if (x0 == (GEN)avma) avma = (pari_sp)x;
+  else stackdummy((pari_sp)(x0+i), (pari_sp)x0);
+  lx -= i;
+  x[0] = evaltyp(t_INT) | evallg(lx);
+  if (lx == 2) x[1] = evalsigne(0) | evallgefint(lx);
+  else         x[1] = evalsigne(1) | evallgefint(lx);
+  return x;
 }
 
 /***********************************************************************/
