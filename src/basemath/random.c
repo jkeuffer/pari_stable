@@ -200,7 +200,7 @@ randomi(GEN N)
     for (d = int_LSW(x); d != xMSW; d = int_nextW(d)) *d = pari_rand();
     *d = pari_rand() >> shift;
     d = int_normalize(x, 0); /* may update lgefint */
-    if (absi_cmp(d, N) < 0) return x;
+    if (absi_cmp(d, N) < 0) return d;
     x[1] = code1;
   }
 }
