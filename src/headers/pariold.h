@@ -83,6 +83,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define cyclo polcyclo
 #define tchebi poltchebi
 #define legendre pollegendre
+#define subcyclo polsubcyclo
 
 #define apprgen padicappr
 #define apprgen9 padicappr

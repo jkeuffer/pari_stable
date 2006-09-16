@@ -741,10 +741,11 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   return gerepileupto(ltop,gscycloconductor(T,n,flag));
 }
 
+/* Z = znstar(n). n = p^a primary and d | phi(n) = (p-1)p^(a-1) */
 static GEN
 polsubcyclo_g(long n, long d, GEN Z, long v)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop = avma;
   long o,p,r,g,gd;
   GEN zl,L,T,le;
   long l,val;
@@ -755,22 +756,15 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n)
     pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
-  if (!Z) Z = znstar(stoi(n));
-  if (lg(Z[2]) != 2)
-    pari_err(talker,
-        "non-cyclic case in polsubcyclo: use galoissubcyclo instead");
   o = itos(gel(Z,1));
   g = itos(gmael3(Z,3,1,2));
-  avma=ltop;
   p = n/cgcd(n,o); /* p^a/gcd(p^a,phi(p^a))=p*/
   r = cgcd(d,n); /* = p^(v_p(d)) < n */
   n = r*p; /* n is now the conductor */
   o = n-r; /* = phi(n) */
   if (o == d) return polcyclo(n,v);
-  if (o % d) pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
   o /= d;
   gd = Fl_pow(g%n, d, n);
-  avma=ltop;
   /*FIXME: If degree is small, the computation of B is a waste of time*/
   powz=polsubcyclo_complex_roots(n,(o&1)==0,3);
   L=polsubcyclo_cyclic(n,d,o,g,gd,powz,NULL);
@@ -783,25 +777,18 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_cyclic"); 
   T=FpV_roots_to_pol(L,le,v);
   if (DEBUGLEVEL >= 6) msgtimer("roots_to_pol"); 
-  T=FpX_center(T,le);
-  return gerepileupto(ltop,T);
-}
-
-GEN
-subcyclo(long n, long d, long v)
-{
-  return polsubcyclo_g(n, d, NULL, v);
+  return gerepileupto(ltop, FpX_center(T,le));
 }
 
 GEN
 polsubcyclo(long n, long d, long v)
 {
-  pari_sp ltop=avma;
-  GEN L, Z=znstar(stoi(n));
+  pari_sp ltop = avma;
+  GEN L, Z = znstar(stoi(n));
   /*polsubcyclo is twice faster but Z must be cyclic*/
   if (lg(Z[2]) == 2 && dvdis(gel(Z,1), d))
   {
-    avma=ltop; 
+    avma = ltop; 
     return polsubcyclo_g(n, d, Z, v);
   }
   L=subgrouplist(gel(Z,2), mkvec(stoi(d)));
@@ -809,7 +796,7 @@ polsubcyclo(long n, long d, long v)
     return gerepileupto(ltop, galoissubcyclo(Z, gel(L,1), 0, v));
   else
   {
-    GEN V=cgetg(lg(L),t_VEC);
+    GEN V = cgetg(lg(L),t_VEC);
     long i;
     for (i=1; i< lg(V); i++)
       gel(V,i) = galoissubcyclo(Z, gel(L,i), 0, v);
