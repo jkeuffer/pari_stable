@@ -59,6 +59,8 @@ GEN    cgetc(long x);
 GEN    cgetg_copy(long lx, GEN x);
 GEN    cgetg(long x, long y);
 GEN    cgeti(long x);
+GEN    cgetineg(long x);
+GEN    cgetipos(long x);
 GEN    cgetr(long x);
 void   cgiv(GEN x);
 int    cmpir(GEN x, GEN y);
@@ -284,6 +286,22 @@ cgeti(long x)
 {
   const GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_INT) | evallg(x);
+  return z;
+}
+INLINE GEN
+cgetipos(long x)
+{
+  const GEN z = new_chunk((size_t)x);
+  z[0] = evaltyp(t_INT) | evallg(x);
+  z[1] = evalsigne(1) | evallgefint(x);
+  return z;
+}
+INLINE GEN
+cgetineg(long x)
+{
+  const GEN z = new_chunk((size_t)x);
+  z[0] = evaltyp(t_INT) | evallg(x);
+  z[1] = evalsigne(-1) | evallgefint(x);
   return z;
 }
 

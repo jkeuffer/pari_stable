@@ -182,7 +182,8 @@ GEN
 randomi(GEN N)
 {
   long lx = lgefint(N), code1;
-  GEN d, x, xMSW, NMSW;
+  GEN d, NMSW;
+  pari_sp av;
   int shift;
 
   if (lx == 3) return utoi( random_Fl(N[2]) );
@@ -193,15 +194,12 @@ randomi(GEN N)
     for (d = int_LSW(N); !*d; d = int_nextW(d)) /* empty */;
     if (d == NMSW && ++shift == BITS_IN_LONG) { shift = 0; lx--; }
   }
-  x = cgeti(lx);
-  code1 = evalsigne(1) | evallgefint(lx);
-  x[1] = code1; xMSW = int_MSW(x); /* need lgefint */
-  for (;;) {
+  for (av = avma;; avma = av) {
+    GEN x = cgetipos(lx), xMSW = int_MSW(x);
     for (d = int_LSW(x); d != xMSW; d = int_nextW(d)) *d = pari_rand();
     *d = pari_rand() >> shift;
-    d = int_normalize(x, 0); /* may update lgefint */
-    if (absi_cmp(d, N) < 0) return d;
-    x[1] = code1;
+    x = int_normalize(x, 0);
+    if (absi_cmp(x, N) < 0) return x;
   }
 }
 
