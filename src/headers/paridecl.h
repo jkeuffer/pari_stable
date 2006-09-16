@@ -728,7 +728,7 @@ int     cmp_prime_ideal(GEN x, GEN y);
 int     cmp_prime_over_p(GEN x, GEN y);
 int     cmp_vecint(GEN x, GEN y);
 GEN     convol(GEN x, GEN y);
-GEN     cyclo(long n, long v);
+GEN     polcyclo(long n, long v);
 GEN     dirdiv(GEN x, GEN y);
 GEN     dirmul(GEN x, GEN y);
 long    gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN));
@@ -745,7 +745,6 @@ GEN     gtoset(GEN x);
 GEN     indexlexsort(GEN x);
 GEN     indexsort(GEN x);
 GEN     laplace(GEN x);
-GEN     legendre(long n, long v);
 GEN     lexsort(GEN x);
 GEN     mathilbert(long n);
 GEN     matqpascal(long n, GEN q);
@@ -754,7 +753,11 @@ GEN     numtoperm(long n, GEN x);
 int     pari_compare_lg(GEN a,GEN b);
 int     pari_compare_long(long *a,long *b);
 GEN     permtonum(GEN x);
+GEN     polhermite(long n, long v);
+GEN     pollegendre(long n, long v);
 GEN     polint(GEN xa, GEN ya, GEN x, GEN *dy);
+GEN     poltchebi(long n, long v);
+GEN     poltchebi2(long n, long v);
 GEN     polrecip(GEN x);
 GEN     polymodrecip(GEN x);
 GEN     roots_to_pol(GEN a, long v);
@@ -767,7 +770,6 @@ GEN     sindexlexsort(GEN x);
 GEN     sindexsort(GEN x);
 GEN     sort(GEN x);
 long    tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN));
-GEN     tchebi(long n, long v);
 GEN     vecbinome(long n);
 GEN     vecsort(GEN x, GEN k);
 GEN     vecsort0(GEN x, GEN k, long flag);
@@ -1777,11 +1779,11 @@ int     isrealappr(GEN x, long l);
 GEN     roots(GEN x,long l);
 GEN     roots0(GEN x,long flag,long l);
 
-/* subcyclo.c */
+/* polsubcyclo.c */
 
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     polsubcyclo(long n, long d, long v);
-GEN     subcyclo(long n, long d, long v);
+GEN     polsubcyclo(long n, long d, long v);
 GEN     znstar_small(GEN zn);
 
 /* subfield.c */

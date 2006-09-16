@@ -72,8 +72,9 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
     9- if ispower(x, k, &n) == 1, always set n to a k-root of x
    10- issquare(t_QFI or t_QFR) now is an error. Use explicitly
        issquare(component(x,1)) if you relied(?) on the old behaviour
-   11- rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp [ contrary to
-         'gener', these assume that their argument is prime ]
+   11- [library] rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp
+       [ contrary to 'gener', these assume that their argument is prime ]
+   12- [library] rename cyclo -> polcyclo, tchebi -> poltchebi
 
   Added
 BA  1- function Flm_rank
@@ -83,6 +84,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
     4- pgener_Zp, pgener_Zl
     5- dvdiu, dvdis, dvdiu, dvdsi
     6- cgetipos, cgetineg
+RM  7- polhermite, poltchebi2
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

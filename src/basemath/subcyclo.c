@@ -303,7 +303,7 @@ znstar_hnf_elts(GEN Z, GEN H)
 
 /*************************************************************************/
 /**                                                                     **/
-/**                     subcyclo                                        **/
+/**                     polsubcyclo                                        **/
 /**                                                                     **/
 /*************************************************************************/
 
@@ -345,7 +345,7 @@ lift_check_modulus(GEN H, long n)
  * In the modular case, the result is not reduced.
  */
 
-static GEN subcyclo_powz(GEN powz, long ex)
+static GEN polsubcyclo_powz(GEN powz, long ex)
 {
   long m=lg(powz[1])-1;
   long q=ex/m, r=ex%m; /*ex=m*q+r*/
@@ -354,7 +354,7 @@ static GEN subcyclo_powz(GEN powz, long ex)
   return z;
 }
 
-GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
+GEN polsubcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
 {
   GEN pol = roots_to_pol(V,0);
   GEN vec = gtovec(real_i(pol));
@@ -364,7 +364,7 @@ GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
 
 /* Newton sums mod le. if le==NULL, works with complex instead */
 GEN
-subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
+polsubcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
 {
   GEN V=cgetg(d+1,t_VEC);
   ulong base=1;
@@ -376,7 +376,7 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
     GEN s = gen_0;
     for (k=0; k<m; k++, ex = Fl_mul(ex,g,n)) 
     {
-      s = gadd(s,subcyclo_powz(powz,ex));
+      s = gadd(s,polsubcyclo_powz(powz,ex));
       if ((k&0xff)==0) s=gerepileupto(av,s);
     }
     if (le) s = modii(s, le);
@@ -400,7 +400,7 @@ _subcyclo_orbits(struct _subcyclo_orbits_s *data, long k)
   GEN *s = data->s;
   
   if (!data->count) data->ltop= avma;
-  *s = gadd(*s,subcyclo_powz(powz,k));
+  *s = gadd(*s,polsubcyclo_powz(powz,k));
   data->count++;
   if ((data->count & 0xffUL) == 0)
     *s = gerepileupto(data->ltop, *s);
@@ -408,7 +408,7 @@ _subcyclo_orbits(struct _subcyclo_orbits_s *data, long k)
 
 /* Newton sums mod le. if le==NULL, works with complex instead */
 GEN
-subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
+polsubcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
 {
   long i, d=lg(O);
   GEN V=cgetg(d,t_VEC);
@@ -431,7 +431,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
 }
 
 GEN 
-subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
+polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
 {
   pari_sp av;
   GEN l,le,z;
@@ -473,7 +473,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
  *  powz[3] exists only if the field is real (value is ignored).
  */
 GEN
-subcyclo_complex_roots(long n, long real, long prec)
+polsubcyclo_complex_roots(long n, long real, long prec)
 {
   long i;
   long m = (long)(1+sqrt((double) n));
@@ -504,7 +504,7 @@ static GEN muliimod_sz(GEN x, GEN y, GEN l, long siz)
 }
 
 GEN
-subcyclo_roots(long n, GEN zl)
+polsubcyclo_roots(long n, GEN zl)
 {
   GEN le=gel(zl,1);
   GEN z=gel(zl,2);
@@ -542,7 +542,7 @@ galoiscyclo(long n, long v)
   GEN gen=lift(gel(zn,3));
   GEN ord=gtovecsmall(gel(zn,2));
   GEN elts;
-  z=subcyclo_start(n,card/2,2,NULL,&val,&l);
+  z=polsubcyclo_start(n,card/2,2,NULL,&val,&l);
   le=gel(z,1);
   z=gel(z,2);
   L = cgetg(1+card,t_VEC);
@@ -556,7 +556,7 @@ galoiscyclo(long n, long v)
   G=abelian_group(ord);
   elts = group_elts(G, card); /*not stack clean*/
   grp = cgetg(9, t_VEC);
-  gel(grp,1) = cyclo(n,v);
+  gel(grp,1) = polcyclo(n,v);
   gel(grp,2) = cgetg(4,t_VEC); 
   gmael(grp,2,1) = stoi(l);
   gmael(grp,2,2) = stoi(val);
@@ -719,7 +719,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   {
     avma=ltop;
     if (flag==3) return galoiscyclo(n,v);
-    return gscycloconductor(cyclo(n,v),n,flag); 
+    return gscycloconductor(polcyclo(n,v),n,flag); 
   }
   O = znstar_cosets(n, phi_n, H);
   if (DEBUGLEVEL >= 1)
@@ -729,20 +729,20 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
   av=avma;
-  powz=subcyclo_complex_roots(n,!complex,3);
-  L=subcyclo_orbits(n,H,O,powz,NULL);
-  B=subcyclo_complex_bound(av,L,3);
-  zl=subcyclo_start(n,phi_n/card,card,B,&val,&l);
-  powz=subcyclo_roots(n,zl);
+  powz=polsubcyclo_complex_roots(n,!complex,3);
+  L=polsubcyclo_orbits(n,H,O,powz,NULL);
+  B=polsubcyclo_complex_bound(av,L,3);
+  zl=polsubcyclo_start(n,phi_n/card,card,B,&val,&l);
+  powz=polsubcyclo_roots(n,zl);
   le=gel(zl,1);
-  L=subcyclo_orbits(n,H,O,powz,le);
+  L=polsubcyclo_orbits(n,H,O,powz,le);
   T=FpV_roots_to_pol(L,le,v);
   T=FpX_center(T,le);
   return gerepileupto(ltop,gscycloconductor(T,n,flag));
 }
 
 static GEN
-subcyclo_g(long n, long d, GEN Z, long v)
+polsubcyclo_g(long n, long d, GEN Z, long v)
 {
   pari_sp ltop=avma;
   long o,p,r,g,gd;
@@ -751,10 +751,10 @@ subcyclo_g(long n, long d, GEN Z, long v)
   GEN B,powz;
   if (v<0) v = 0;
   if (d==1) return deg1pol(gen_1,gen_m1,v);
-  if (d<=0 || n<=0) pari_err(typeer,"subcyclo");
+  if (d<=0 || n<=0) pari_err(typeer,"polsubcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n)
-    pari_err(talker,"degree does not divide phi(n) in subcyclo");
+    pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
   if (!Z) Z = znstar(stoi(n));
   if (lg(Z[2]) != 2)
     pari_err(talker,
@@ -766,21 +766,21 @@ subcyclo_g(long n, long d, GEN Z, long v)
   r = cgcd(d,n); /* = p^(v_p(d)) < n */
   n = r*p; /* n is now the conductor */
   o = n-r; /* = phi(n) */
-  if (o == d) return cyclo(n,v);
-  if (o % d) pari_err(talker,"degree does not divide phi(n) in subcyclo");
+  if (o == d) return polcyclo(n,v);
+  if (o % d) pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
   o /= d;
   gd = Fl_pow(g%n, d, n);
   avma=ltop;
   /*FIXME: If degree is small, the computation of B is a waste of time*/
-  powz=subcyclo_complex_roots(n,(o&1)==0,3);
-  L=subcyclo_cyclic(n,d,o,g,gd,powz,NULL);
-  B=subcyclo_complex_bound(ltop,L,3);
-  zl=subcyclo_start(n,d,o,B,&val,&l);
+  powz=polsubcyclo_complex_roots(n,(o&1)==0,3);
+  L=polsubcyclo_cyclic(n,d,o,g,gd,powz,NULL);
+  B=polsubcyclo_complex_bound(ltop,L,3);
+  zl=polsubcyclo_start(n,d,o,B,&val,&l);
   le=gel(zl,1);
-  powz=subcyclo_roots(n,zl);
-  if (DEBUGLEVEL >= 6) msgtimer("subcyclo_roots"); 
-  L=subcyclo_cyclic(n,d,o,g,gd,powz,le);
-  if (DEBUGLEVEL >= 6) msgtimer("subcyclo_cyclic"); 
+  powz=polsubcyclo_roots(n,zl);
+  if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_roots"); 
+  L=polsubcyclo_cyclic(n,d,o,g,gd,powz,le);
+  if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_cyclic"); 
   T=FpV_roots_to_pol(L,le,v);
   if (DEBUGLEVEL >= 6) msgtimer("roots_to_pol"); 
   T=FpX_center(T,le);
@@ -790,18 +790,19 @@ subcyclo_g(long n, long d, GEN Z, long v)
 GEN
 subcyclo(long n, long d, long v)
 {
-  return subcyclo_g(n, d, NULL, v);
+  return polsubcyclo_g(n, d, NULL, v);
 }
 
-GEN polsubcyclo(long n, long d, long v)
+GEN
+polsubcyclo(long n, long d, long v)
 {
   pari_sp ltop=avma;
   GEN L, Z=znstar(stoi(n));
-  /*subcyclo is twice faster but Z must be cyclic*/
+  /*polsubcyclo is twice faster but Z must be cyclic*/
   if (lg(Z[2]) == 2 && dvdis(gel(Z,1), d))
   {
     avma=ltop; 
-    return subcyclo_g(n, d, Z, v);
+    return polsubcyclo_g(n, d, Z, v);
   }
   L=subgrouplist(gel(Z,2), mkvec(stoi(d)));
   if (lg(L) == 2)

@@ -1,6 +1,6 @@
 Function: polcyclo
 Section: polynomials
-C-Name: cyclo
+C-Name: polcyclo
 Prototype: LDn
 Help: polcyclo(n,{v=x}): n-th cyclotomic polynomial (in variable v)
 

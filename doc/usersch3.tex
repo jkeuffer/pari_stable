@@ -4311,7 +4311,7 @@ $fl=0$ and $N$ the conductor as output when $fl=1$.
 The following function can be used to compute all subfields of
 $\Q(\zeta_n)$ (of exact degree \kbd{d}, if \kbd{d} is set):
 \bprog
-subcyclo(n, d = -1)=
+polsubcyclo(n, d = -1)=
 {
   local(bnr,L,IndexBound);
   IndexBound = if (d < 0, n, [d]);
@@ -6145,7 +6145,7 @@ equivalent to \kbd{poldegree($x$,-1)}.
 \subsecidx{polcyclo}$(n,\{v=x\})$: $n$-th cyclotomic polynomial, in variable
 $v$ ($x$ by default). The integer $n$ must be positive.
 
-\syn{cyclo}{n,v}, where $n$ and $v$ are \kbd{long}
+\syn{polcyclo}{n,v}, where $n$ and $v$ are \kbd{long}
 integers ($v$ is a variable number, usually obtained through \kbd{varn}).
 
 \subsecidx{poldisc}$(\var{pol},\{v\})$: discriminant of the polynomial
@@ -6170,6 +6170,12 @@ product is congruent to $x$ modulo $p$, lift the elements of $y$ to
 polynomials whose product is congruent to $x$ modulo $p^e$.
 
 \syn{polhensellift}{x,y,p,e} where $e$ must be a \kbd{long}.
+
+\subsecidx{polhermite}$(n,\{v=x\})$: creates the $n^{\text{th}}$
+\idx{Hermite} polynomial $H_n$ in variable $v$.
+
+\syn{polhermite}{n,v}, where $n$ and $v$ are \kbd{long}
+integers ($v$ is a variable number).
 
 \subsecidx{polinterpolate}$(xa,\{ya\},\{v=x\},\{\&e\})$: given the data vectors
 $xa$ and $ya$ of the same length $n$ ($xa$ containing the $x$-coordinates,
@@ -6199,7 +6205,8 @@ $-1$. Also available is \funs{leading_term}{x}.
 \subsecidx{pollegendre}$(n,\{v=x\})$: creates the $n^{\text{th}}$
 \idx{Legendre polynomial}, in variable $v$.
 
-\syn{legendre}{n}, where $x$ is a \kbd{long}.
+\syn{pollegendre}{n, v}, where $n$ and $v$ are \kbd{long}s and an omitted $v$
+is coded as $-1$.
 
 \subsecidx{polrecip}$(\var{pol})$: reciprocal polynomial of \var{pol},
 i.e.~the coefficients are in reverse order. \var{pol} must be a polynomial.
@@ -6287,9 +6294,9 @@ To be sure to get a vector, you can use \kbd{concat([],polsubcyclo(n,d))}
 
 The function \tet{galoissubcyclo} allows to specify more closely which sub-Abelian extension should be computed.
 
-\syn{polsubcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
+\syn{polsubcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long}s and $v$ is a
 variable number. When $(\Z/n\Z)^*$ is cyclic, you can use
-\funs{subcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
+\funs{polsubcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
 variable number.
 
 \subsecidx{polsylvestermatrix}$(x,y)$: forms the Sylvester matrix
@@ -6310,7 +6317,13 @@ formula.
 \subsecidx{poltchebi}$(n,\{v=x\})$: creates the $n^{\text{th}}$
 \idx{Chebyshev} polynomial~$T_n$ of the first kind in variable $v$.
 
-\syn{tchebi}{n,v}, where $n$ and $v$ are \kbd{long}
+\syn{poltchebi}{n,v}, where $n$ and $v$ are \kbd{long}
+integers ($v$ is a variable number).
+
+\subsecidx{poltchebi2}$(n,\{v=x\})$: creates the $n^{\text{th}}$
+\idx{Chebyshev} polynomial~$U_n$ of the second kind in variable $v$.
+
+\syn{poltchebi2}{n,v}, where $n$ and $v$ are \kbd{long}
 integers ($v$ is a variable number).
 
 \subsecidx{polzagier}$(n,m)$: creates Zagier's polynomial $P_n^{(m)}$ used in

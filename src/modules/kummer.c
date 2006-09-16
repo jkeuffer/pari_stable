@@ -912,7 +912,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   ideal = gmael(bid,1,1);
   /* step 1 of alg 5.3.5. */
   if (DEBUGLEVEL>2) fprintferr("Step 1\n");
-  compositum_red(&COMPO, polnf, cyclo(ell,vnf));
+  compositum_red(&COMPO, polnf, polcyclo(ell,vnf));
   /* step 2 */
   if (DEBUGLEVEL>2) fprintferr("Step 2\n");
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] compositum");

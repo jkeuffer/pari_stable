@@ -106,7 +106,7 @@ init_CHI_alg(CHI_t *c, GEN CHI) {
   {
     case 1: z = gen_1; break;
     case 2: z = gen_m1; break;
-    default: z = mkpolmod(pol_x[0], cyclo(d,0));
+    default: z = mkpolmod(pol_x[0], polcyclo(d,0));
   }
   init_CHI(c,CHI, z);
 }
@@ -1078,7 +1078,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
 /*             4th part: compute the coefficients an(chi)           */
 /*                                                                  */
 /* matan entries are arrays of ints containing the coefficients of  */
-/* an(chi) as a polmod modulo cyclo(order(chi))                     */
+/* an(chi) as a polmod modulo polcyclo(order(chi))                     */
 /********************************************************************/
 
 static void
@@ -1145,7 +1145,7 @@ InitReduction(GEN CHI, long deg)
 
   A   = (int**)gpmalloc(deg*sizeof(int*));
   d   = gel(CHI,3);
-  pol = cyclo(itos(d), 0);
+  pol = polcyclo(itos(d), 0);
   for (j = 0; j < deg; j++)
   {
     A[j] = (int*)gpmalloc(deg*sizeof(int));

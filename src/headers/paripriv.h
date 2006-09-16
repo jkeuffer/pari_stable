@@ -803,16 +803,16 @@ GEN     polint_triv(GEN xa, GEN ya);
 GEN     FFT(GEN x, GEN Omega);
 GEN     FFTinit(long k, long prec);
 
-/* subcyclo.c */
+/* polsubcyclo.c */
 
 GEN     bnr_to_znstar(GEN bnr, long *complex);
 GEN     galoiscyclo(long n, long v);
-GEN     subcyclo_complex_bound(pari_sp ltop, GEN V, long prec);
-GEN     subcyclo_complex_roots(long n, long real, long prec);
-GEN     subcyclo_cyclic(long n, long d, long m, long z, long g, GEN powz, GEN le);
-GEN     subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le);
-GEN     subcyclo_roots(long n, GEN zl);
-GEN     subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val, long *ptr_l);
+GEN     polsubcyclo_complex_bound(pari_sp ltop, GEN V, long prec);
+GEN     polsubcyclo_complex_roots(long n, long real, long prec);
+GEN     polsubcyclo_cyclic(long n, long d, long m, long z, long g, GEN powz, GEN le);
+GEN     polsubcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le);
+GEN     polsubcyclo_roots(long n, GEN zl);
+GEN     polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val, long *ptr_l);
 GEN     znstar_bits(long n, GEN H);
 long    znstar_conductor(long n, GEN H);
 GEN     znstar_coset_bits(long n, GEN H, long c);

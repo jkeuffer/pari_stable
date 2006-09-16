@@ -31,14 +31,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   where a_k = (-1)^k 2^(n-2k) (n-k-1)! / k!(n-2k)! is an integer
  *   and a_0 = 2^(n-1), a_k / a_{k-1} = - (n-2k+2)(n-2k+1) / 4k(n-k) */
 GEN
-tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
+poltchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 {
   long k, l;
   pari_sp av;
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) n = -n;
+  if (n < 0) pari_err(talker,"negative degree in poltchebi2");
   if (n==0) return pol_1[v];
   if (n==1) return pol_x[v];
 
@@ -50,37 +50,115 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
     for (k=1,l=n; l>1; k++,l-=2)
     {
       av = avma;
-      a = divis(mulis(a, l*(l-1)), 4*k*(n-k));
-      a = gerepileuptoint(av, negi(a));
-      gel(r--,0) = a;
+      a = diviuexact(muliu(a, l*(l-1)), 4*k*(n-k));
+      setsigne(a, -signe(a));
+      gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
   else
     for (k=1,l=n; l>1; k++,l-=2)
     {
       av = avma;
-      a = mulis(mulis(a, l), l-1);
-      a = divis(divis(a, 4*k), n-k);
-      a = gerepileuptoint(av, negi(a));
-      gel(r--,0) = a;
+      a = muliu(muliu(a, l), l-1);
+      a = diviuexact(diviuexact(a, 4*k), n-k);
+      setsigne(a, -signe(a));
+      gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
 
-GEN addmulXn(GEN x, GEN y, long d);
+/* Chebychev  polynomial of the second kind U(n,x): the coefficient in front of
+ * x^(n-2*m) is (-1)^m * 2^(n-2m)*(n-m)!/m!/(n-2m)!  for m=0,1,...,n/2 */
+GEN
+poltchebi2(long n, long v)
+{
+  long m;
+  pari_sp av;
+  GEN q,a,r;
+
+  if (v<0) v = 0;
+  if (n < 0) pari_err(talker,"negative degree in poltchebi2");
+  if (n==0) return pol_1[v];
+
+  q = cgetg(n+3, t_POL); r = q + n+2;
+  a = int2n(n);
+  gel(r--,0) = a;
+  gel(r--,0) = gen_0;
+  if (n < SQRTVERYBIGINT)
+    for (m=1; 2*m<= n; m++)
+    {
+      av = avma;
+      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m*(n-m+1));
+      setsigne(a, -signe(a));
+      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = gen_0;
+    }
+  else
+    for (m=1; 2*m<= n; m++)
+    {
+      av = avma;
+      a = muliu(muliu(a, n-2*m+2), n-2*m+1);
+      a = diviuexact(diviuexact(a, 4*m), n-m+1);
+      setsigne(a, -signe(a));
+      gel(r--,0) = gerepileuptoint(av, a);
+      gel(r--,0) = gen_0;
+    }
+  q[1] = evalsigne(1) | evalvarn(v);
+  return q;
+}
+
+/* Hermite polynomial H(n,x):  The coefficient in front of x^(n-2*m)
+ * is (-1)^m * n! * 2^(n-2m)/m!/(n-2m)!  for m=0,1,...,n/2.. */
+GEN
+polhermite(long n, long v)
+{
+  long m;
+  pari_sp av;
+  GEN q,a,r;
+
+  if (v<0) v = 0;
+  if (n < 0) pari_err(talker,"negative degree in hermite");
+  if (n==0) return pol_1[v];
+
+  q = cgetg(n+3, t_POL); r = q + n+2;
+  a = int2n(n);
+  gel(r--,0) = a;
+  gel(r--,0) = gen_0;
+  if (n < SQRTVERYBIGINT)
+    for (m=1; 2*m<= n; m++)
+    {
+        av = avma;
+        a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
+        setsigne(a, -signe(a));
+        gel(r--,0) = gerepileuptoint(av, a);
+        gel(r--,0) = gen_0;
+    }
+  else
+    for (m=1; 2*m<= n; m++)
+    {
+        av = avma;
+        a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
+        setsigne(a, -signe(a));
+        gel(r--,0) = gerepileuptoint(av, a);
+        gel(r--,0) = gen_0;
+    }
+  q[1] = evalsigne(1) | evalvarn(v);
+  return q;
+}
+
 /* Legendre polynomial */
 /* L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1) */
 GEN
-legendre(long n, long v)
+pollegendre(long n, long v)
 {
   long m;
-  pari_sp av, tetpil, lim;
-  GEN p0,p1,p2;
+  pari_sp av, lim;
+  GEN p0, p1, p2;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in legendre");
+  if (n < 0) pari_err(talker,"negative degree in pollegendre");
   if (n==0) return pol_1[v];
   if (n==1) return pol_x[v];
 
@@ -90,21 +168,19 @@ legendre(long n, long v)
   {
     p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
     setvarn(p2,v);
-    p0 = p1; tetpil=avma; p1 = gdivgs(p2,m+1);
+    p0 = p1; p1 = gdivgs(p2,m+1);
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[2];
-      if(DEBUGMEM>1) pari_warn(warnmem,"legendre");
-      p0=gcopy(p0); gptr[0]=&p0; gptr[1]=&p1;
-      gerepilemanysp(av,tetpil,gptr,2);
+      if(DEBUGMEM>1) pari_warn(warnmem,"pollegendre");
+      gerepileall(av, 2, &p0, &p1);
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gmul2n(p1,-n));
+  return gerepileupto(av, gmul2n(p1,-n));
 }
 
 /* cyclotomic polynomial */
 GEN
-cyclo(long n, long v)
+polcyclo(long n, long v)
 {
   long d, q, m;
   pari_sp av=avma, tetpil;

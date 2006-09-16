@@ -480,7 +480,7 @@ compocyclo(GEN nf, long m, long d)
   long ell,vx;
 
   p1 = quadhilbertimag(D, gen_0);
-  p2 = cyclo(m,0);
+  p2 = polcyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
   ell = m&1 ? m : (m>>2);
@@ -528,16 +528,16 @@ treatspecialsigma(GEN nf, GEN gf)
 
   if (equaliu(D,3))
   {
-    if (i == 4 || i == 5 || i == 7) return cyclo(i,0);
+    if (i == 4 || i == 5 || i == 7) return polcyclo(i,0);
     if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
-    p1 = (GEN)nfroots(nf,cyclo(3,0))[1]; /* f = P_3^3 */
+    p1 = (GEN)nfroots(nf,polcyclo(3,0))[1]; /* f = P_3^3 */
     return gadd(monomial(gen_1,3,0), p1); /* x^3+j */
   }
   if (equaliu(D,4))
   {
-    if (i == 3 || i == 5) return cyclo(i,0);
+    if (i == 3 || i == 5) return polcyclo(i,0);
     if (i != 4) return NULL;
-    p1 = (GEN)nfroots(nf,cyclo(4,0))[1];
+    p1 = (GEN)nfroots(nf,polcyclo(4,0))[1];
     return gadd(monomial(gen_1,2,0), p1); /* x^2+i */
   }
   Ds = smodis(D,48);

@@ -239,7 +239,7 @@ sqrmod5(GEN pol, Red *R)
 static GEN
 _mul(GEN x, GEN y, Red *R) { return R->red(gmul(x,y), R); }
 
-/* jac^floor(N/pk) mod (N, cyclo(pk)), flexible window */
+/* jac^floor(N/pk) mod (N, polcyclo(pk)), flexible window */
 static GEN
 _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
 {
@@ -594,7 +594,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   long e;
   GEN tabt, taba, m;
 
-  C->cyc = cyclo(pk,0);
+  C->cyc = polcyclo(pk,0);
 
   if (p > 2)
   {
@@ -760,7 +760,7 @@ autvec_AL(long pk, GEN z, GEN v, Red *R)
   return s;
 }
 
-/* 0 <= i < pk, such that x^i = z mod cyclo(pk),  -1 if no such i exist */
+/* 0 <= i < pk, such that x^i = z mod polcyclo(pk),  -1 if no such i exist */
 static long
 look_eta(GEN eta, long pk, GEN z)
 {

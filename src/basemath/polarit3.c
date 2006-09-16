@@ -1576,7 +1576,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
     if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
     A=FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
   }
-  if (DEBUGLEVEL>=4) msgtimer("matrix cyclo");
+  if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
   if (lg(A)!=r+1)
     pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
         ,l,pol_x[vp],P);
@@ -1666,7 +1666,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     else
     {
       GEN L, An, Bn, z, U;
-      U = gmael(FpX_factor(cyclo(pg,MAXVARN),l),1,1);
+      U = gmael(FpX_factor(polcyclo(pg,MAXVARN),l),1,1);
       A = intersect_ker(P, MA, U, l); 
       B = intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
@@ -3621,7 +3621,7 @@ f2init(long l)
   long i;
   GEN q, T, S;
 
-  if (l == 1) return cyclo(3, MAXVARN);
+  if (l == 1) return polcyclo(3, MAXVARN);
 
   S = mkpoln(4, gen_1,gen_1,gen_0,gen_0); /* #(#^2 + #) */
   setvarn(S, MAXVARN);
@@ -3666,7 +3666,7 @@ ffinit_Artin_Shreier(GEN ip, long l)
 }
 
 
-/*Check if subcyclo(n,l,0) is irreducible modulo p*/
+/*Check if polsubcyclo(n,l,0) is irreducible modulo p*/
 static long
 fpinit_check(GEN p, long n, long l)
 {
@@ -3693,8 +3693,8 @@ fpinit(GEN p, long l)
   ulong n = 1+l, k = 1;
   while (!fpinit_check(p,n,l)) { n += l; k++; }
   if (DEBUGLEVEL>=4)
-    fprintferr("FFInit: using subcyclo(%ld, %ld)\n",n,l);
-  return FpX_red(subcyclo(n,l,0),p);
+    fprintferr("FFInit: using polsubcyclo(%ld, %ld)\n",n,l);
+  return FpX_red(polsubcyclo(n,l,0),p);
 }
 
 static GEN
@@ -3745,8 +3745,8 @@ init_Fq_i(GEN p, long n, long v)
   if (typ(p) != t_INT) pari_err(typeer, "ffinit");
   if (v < 0) v = 0;
   if (n == 1) return pol_x[v];
-  /*If easy case, use cyclo*/
-  if (fpinit_check(p, n + 1, n)) return cyclo(n + 1, v);
+  /*If easy case, use polcyclo*/
+  if (fpinit_check(p, n + 1, n)) return polcyclo(n + 1, v);
   if (lgefint(p)-2 < BITS_IN_LONG-(long)bfffo(n))
     P = ffinit_fact(p,n);
   else

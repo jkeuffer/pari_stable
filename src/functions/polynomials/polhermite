@@ -1,0 +1,6 @@
+Function: polhermite
+Section: polynomials
+C-Name: polhermite
+Prototype: LDn
+Help: polhermite(n,{v=x}): Hermite polynomial H(n,v) of degree n, in variable v
+
