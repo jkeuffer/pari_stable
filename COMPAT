@@ -11,8 +11,13 @@ This file lists the incompatible changes between Version 2.x and older versions
     The sequence of generated pseudo-random numbers are completely different.
 
   - install(): parser code 'E' is now obsolete, use 'I'
+
+* Specific to the PARI library:
+===============================
   - rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp [ contrary to
     'gener', these assume that their argument is prime ]
+  - rename cyclo -> polcyclo (GP name), tchebi -> poltchebi (GP name),
+    legendre -> pollegendre (GP name)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
