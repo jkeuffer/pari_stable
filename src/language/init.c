@@ -333,7 +333,7 @@ pari_sighandler(int sig)
 int win32ctrlc = 0;
 
 void
-dowin32ctrlc()
+dowin32ctrlc(void)
 {
   win32ctrlc = 0;
   sigint_fun();
@@ -487,7 +487,7 @@ pari_sig_init(void (*f)(int))
 }
 
 static void
-reset_traps()
+reset_traps(void)
 {
   long i;
   if (DEBUGLEVEL) pari_warn(warner,"Resetting all traps");
@@ -555,18 +555,18 @@ init_stack(size_t size)
 }
 
 static entree **
-init_fun_hash() {
+init_fun_hash(void) {
   entree **H = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
   long i;
   for (i = 0; i < functions_tblsz; i++) H[i] = NULL;
   return H;
 }
 
-growarray *pari_get_modules() { return &MODULES; }
-growarray *pari_get_oldmodules() { return &OLDMODULES; }
+growarray *pari_get_modules(void) { return &MODULES; }
+growarray *pari_get_oldmodules(void) { return &OLDMODULES; }
 
 int
-gp_init_functions()
+gp_init_functions(void)
 {
   return gp_init_entrees(new_fun_set? MODULES: OLDMODULES, functions_hash);
 }

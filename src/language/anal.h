@@ -128,7 +128,7 @@ enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);
 ulong get_uint(const char *s);
-int  gp_init_functions();
+int  gp_init_functions(void);
 
 extern char *current_logfile;
 extern ulong readline_state;

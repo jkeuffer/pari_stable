@@ -295,7 +295,7 @@ GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 /* Allocation / gerepile */
 void   debug_stack(void);
 void   fill_stack(void);
-void   init_dalloc();
+void   init_dalloc(void);
 double *dalloc(size_t n);
 void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
@@ -312,8 +312,8 @@ typedef struct {
 } __pari_growarray;
 typedef __pari_growarray growarray[1];
 
-growarray *pari_get_modules();
-growarray *pari_get_oldmodules();
+growarray *pari_get_modules(void);
+growarray *pari_get_oldmodules(void);
 void    grow_append(growarray A, void *e);
 void    grow_copy(growarray A, growarray B);
 void    grow_init(growarray A);
@@ -342,7 +342,7 @@ void  push_val(entree *ep, GEN a);
 void  recover(int flag);
 int   term_height(void);
 int   term_width(void);
-void  var_make_safe();
+void  var_make_safe(void);
 void  whatnow_new_syntax(char *f, long n);
 
 /* defaults */
@@ -459,7 +459,7 @@ GEN  set_hist_entry(gp_hist *H, GEN x);
 
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);
-const char *pari_default_path();
+const char *pari_default_path(void);
 char *expand_prompt(char *prompt, filtre_t *F);
 
 typedef struct input_method {

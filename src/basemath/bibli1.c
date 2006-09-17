@@ -2094,7 +2094,7 @@ typedef struct {
 } pslq_M;
 
 void
-init_dalloc()
+init_dalloc(void)
 { /* correct alignment for dalloc */
   (void)new_chunk((avma % sizeof(double)) / sizeof(long));
 }

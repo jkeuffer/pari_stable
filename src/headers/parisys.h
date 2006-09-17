@@ -76,6 +76,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * Instead, we check whether win32ctrlc is set in new_chunk(). */
 BEGINEXTERN
   extern int win32ctrlc;
-  void dowin32ctrlc();
+  void dowin32ctrlc(void);
 ENDEXTERN
 #endif
