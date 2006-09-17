@@ -19,12 +19,12 @@ gcdii(GEN a, GEN b)
 {
   long v, w;
   pari_sp av;
-  GEN t, p1;
+  GEN t;
 
   switch (absi_cmp(a,b))
   {
     case 0: return absi(a);
-    case -1: t=b; b=a; a=t;
+    case -1: swap(a,b);
   }
   if (!signe(b)) return absi(a);
   /* here |a|>|b|>0. Try single precision first */
@@ -48,7 +48,7 @@ gcdii(GEN a, GEN b)
   switch(absi_cmp(a,b))
   {
     case  0: avma=av; a=shifti(a,v); return a;
-    case -1: p1=b; b=a; a=p1;
+    case -1: swap(a,b);
   }
   if (is_pm1(b)) { avma=av; return int2n(v); }
  {
@@ -128,19 +128,13 @@ invmod(GEN a, GEN b, GEN *res)
 GEN
 bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 {
-  GEN t,r;
-  GEN *pt;
   long s, sa, sb;
   ulong g;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
 
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   s = absi_cmp(a,b);
-  if (s < 0)
-  {
-    t=b; b=a; a=t;
-    pt=pu; pu=pv; pv=pt;
-  }
+  if (s < 0) { swap(a,b); pswap(pu,pv); }
   /* now |a| >= |b| */
 
   sa = signe(a); sb = signe(b);
