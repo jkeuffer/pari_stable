@@ -510,7 +510,7 @@ muluu(ulong x, ulong y)
   p1 = mulll(x,y);
   if (hiremainder)
   {
-    z=cgetpos(4);
+    z=cgetipos(4);
     z[3]=hiremainder; z[2]=p1; return z;
   }
   return utoipos(p1);
@@ -1087,7 +1087,7 @@ sqrtremi(GEN a, GEN *r)
     return gen_0;
   }
   l = (na + 5) >> 1; /* 2 + ceil(na/2) */
-  S = cgetpos(l);
+  S = cgetipos(l);
   if (r) {
     GEN R = cgeti(2 + na);
     nr = mpn_sqrtrem(LIMBS(S), LIMBS(R), LIMBS(a), na);
