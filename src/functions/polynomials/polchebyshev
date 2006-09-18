@@ -4,4 +4,8 @@ C-Name: polchebyshev
 Prototype: LD1,L,Dn
 Help: polchebishev(n,{flag=1},{v=x}): Chebychev polynomial of the first (flag
  = 1) or second (flag = 2) kind, of degree n, in variable v
+Description:
+ (small,?1,?var):gen polchebishev1($1,$3)
+ (small,2,?var):gen  polchebishev2($1,$3)
+ (small,small,?var):gen polchebishev($1,$2,$3)
 
