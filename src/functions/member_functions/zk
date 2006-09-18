@@ -3,5 +3,6 @@ Class: member_functions
 C-Name: member_zk
 Prototype: G
 Description: 
- (nf):gen:copy         gel($1, 17)
+ (nf):vec:copy         gel($1, 17)
+ (gen):vec             member_zk($1)
 
