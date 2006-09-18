@@ -788,7 +788,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
 /**                                                                   **/
 /***********************************************************************/
 
-static GEN N, gl;
+static THREAD GEN N, gl;
 #define nbcmax 64		/* max number of simultaneous curves */
 #define bstpmax 1024		/* max number of baby step table entries */
 
