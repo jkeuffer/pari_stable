@@ -1563,7 +1563,7 @@ idealnorm(GEN nf, GEN x)
     case id_PRIME:
       return pr_norm(x);
     case id_PRINCIPAL:
-      x = gnorm(basistoalg_i(nf,x)); break;
+      x = gnorm(basistoalg(nf,x)); break;
     default:
       if (lg(x) != lg(nf[1])-2) x = idealhermite_aux(nf,x);
       x = dethnf(x);

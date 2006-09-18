@@ -507,7 +507,7 @@ rnfidealreltoabs(GEN rnf,GEN x)
 
   x = rnfidealhermite(rnf,x);
   w = gel(x,1); l = lg(w); settyp(w, t_VEC);
-  for (i=1; i<l; i++) gel(w,i) = lift( rnfbasistoalg(rnf, gel(w,i)) );
+  for (i=1; i<l; i++) gel(w,i) = lift_intern( rnfbasistoalg(rnf, gel(w,i)) );
   return gerepilecopy(av, modulereltoabs(rnf, x));
 }
 

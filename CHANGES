@@ -55,6 +55,7 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
        except when n = 1. Make it systematic.
    28- in rare cases (return 0, native kernel) int_normalize was not suitable
        for gerepileupto
+   29- idealnorm(nf, t_POL) didn't work
 
   Changed
     1- moved cgiv to inline kernel
@@ -75,7 +76,7 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
    11- [library] rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp
        [ contrary to 'gener', these assume that their argument is prime ]
    12- [library] rename cyclo -> polcyclo, subcyclo -> polsubcyclo,
-       tchebi -> poltchebi, legendre -> pollegendre
+       tchebi -> polchebyshev1, legendre -> pollegendre
 
   Added
 BA  1- function Flm_rank
@@ -85,7 +86,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
     4- pgener_Zp, pgener_Zl
     5- dvdiu, dvdis, dvdiu, dvdsi
     6- cgetipos, cgetineg, togglesign
-RM  7- polhermite, poltchebi2
+RM  7- polhermite, polchebyshev2
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

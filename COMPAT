@@ -17,7 +17,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename gener_Fp -> pgener_Fp, gener_Fl -> pgener_Fp [ contrary to
     'gener', these assume that their argument is prime ]
   - rename cyclo -> polcyclo (GP name), subcyclo -> polsubcyclo (GP name), 
-    tchebi -> poltchebi (GP name), legendre -> pollegendre (GP name)
+    tchebi -> polchebyshev (GP name), legendre -> pollegendre (GP name)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -81,7 +81,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define gener_Fp pgener_Fp
 #define gener_Fl pgener_Fl
 #define cyclo polcyclo
-#define tchebi poltchebi
+#define tchebi polchebyshev1
 #define legendre pollegendre
 #define subcyclo polsubcyclo
 
@@ -305,7 +305,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lsubsi  (long)subsi
 #define lsubsr  (long)subsr
 #define ltan    (long)gtan
-#define ltchebi (long)poltchebi
+#define ltchebi (long)polchebyshev
 #define lth     (long)gth
 #define ltrace  (long)gtrace
 #define ltrans  (long)gtrans

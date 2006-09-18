@@ -1,7 +1,0 @@
-Function: poltchebi2
-Section: polynomials
-C-Name: poltchebi2
-Prototype: LDn
-Help: poltchebi2(n,{v=x}): Chebychev polynomial of the 2nd kind U(n,v) of
- degree n, in variable v
-

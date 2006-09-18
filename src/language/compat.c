@@ -552,7 +552,7 @@ entree oldfonctions[]={
 {"tanh",1,(void*)gth,3,"Gp","tanh(x)=hyperbolic tangent of x"},
 {"taniyama",1,(void*)elltaniyama,5,"GP","taniyama(e)=modular parametrization of elliptic curve e"},
 {"taylor",12,(void*)tayl,7,"GnP","taylor(x,y)=taylor expansion of x with respect to the main variable of y"},
-{"tchebi",11,(void*)poltchebi,7,"LDn","tchebi(n)=Tchebitcheff polynomial of degree n (n C-integer)"},
+{"tchebi",11,(void*)polchebyshev,7,"LDn","tchebi(n)=Tchebitcheff polynomial of degree n (n C-integer)"},
 {"teich",1,(void*)teich,3,"Gp","teich(x)=teichmuller character of p-adic number x"},
 {"theta",2,(void*)theta,3,"GGp","theta(q,z)=Jacobi sine theta-function"},
 {"thetanullk",21,(void*)thetanullk,3,"GLp","thetanullk(q,k)=k'th derivative at z=0 of theta(q,z)"},

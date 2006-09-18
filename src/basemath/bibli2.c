@@ -31,14 +31,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   where a_k = (-1)^k 2^(n-2k) (n-k-1)! / k!(n-2k)! is an integer
  *   and a_0 = 2^(n-1), a_k / a_{k-1} = - (n-2k+2)(n-2k+1) / 4k(n-k) */
 GEN
-poltchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
+polchebyshev1(long n, long v) /* Assume 4*n < VERYBIGINT */
 {
   long k, l;
   pari_sp av;
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in poltchebi2");
+  if (n < 0) pari_err(talker,"negative degree in polchebyshev2");
   if (n==0) return pol_1[v];
   if (n==1) return pol_x[v];
 
@@ -72,14 +72,14 @@ poltchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 /* Chebychev  polynomial of the second kind U(n,x): the coefficient in front of
  * x^(n-2*m) is (-1)^m * 2^(n-2m)*(n-m)!/m!/(n-2m)!  for m=0,1,...,n/2 */
 GEN
-poltchebi2(long n, long v)
+polchebyshev2(long n, long v)
 {
   long m;
   pari_sp av;
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in poltchebi2");
+  if (n < 0) pari_err(talker,"negative degree in polchebyshev2");
   if (n==0) return pol_1[v];
 
   q = cgetg(n+3, t_POL); r = q + n+2;
@@ -107,6 +107,18 @@ poltchebi2(long n, long v)
     }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
+}
+
+GEN
+polchebyshev(long n, long kind, long v)
+{
+  switch (kind)
+  {
+    case 1: return polchebyshev1(n, v);
+    case 2: return polchebyshev2(n, v);
+    default: pari_err(flagerr, "polchebyshev");
+  }
+  return NULL; /* not reached */
 }
 
 /* Hermite polynomial H(n,x):  The coefficient in front of x^(n-2*m)

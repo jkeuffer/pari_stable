@@ -6121,6 +6121,14 @@ is the vector of roots belonging to the same extension of $\Q_p$ as $a$.
 
 \syn{padicappr}{\var{pol},a}.
 
+\subsecidx{polchebyshev}$(n,\{\fl=1}, \{v=x\})$: creates the $n^{\text{th}}$
+\idx{Chebyshev} polynomial of the first kind $T_n$ ($\fl=1$) or the second 
+kind $U_n$ ($\fl=2$), in variable $v$.
+
+\syn{polchebyshev}{n,\fl,v}, where $n$, $\fl$ and $v$ are \kbd{long}
+integers ($v$ is a variable number). Also available are \tet{polchebyshev1}
+and polchebyshev2 for $T_n$ and $U_n$ respectively.
+
 \subsecidx{polcoeff}$(x,s,\{v\})$: coefficient of degree $s$ of the
 polynomial $x$, with respect to the main variable if $v$ is omitted, with
 respect to $v$ otherwise. Also applies to power series, scalars (polynomial
@@ -6316,15 +6324,8 @@ formula.
 
 \subsecidx{poltchebi}$(n,\{v=x\})$: creates the $n^{\text{th}}$
 \idx{Chebyshev} polynomial~$T_n$ of the first kind in variable $v$.
-
-\syn{poltchebi}{n,v}, where $n$ and $v$ are \kbd{long}
-integers ($v$ is a variable number).
-
-\subsecidx{poltchebi2}$(n,\{v=x\})$: creates the $n^{\text{th}}$
-\idx{Chebyshev} polynomial~$U_n$ of the second kind in variable $v$.
-
-\syn{poltchebi2}{n,v}, where $n$ and $v$ are \kbd{long}
-integers ($v$ is a variable number).
+This function is retained for backward compatibility only. Use
+\tet{polchebyshev}.
 
 \subsecidx{polzagier}$(n,m)$: creates Zagier's polynomial $P_n^{(m)}$ used in
 the functions \kbd{sumalt} and \kbd{sumpos} (with $\fl=1$). One must have $m\le

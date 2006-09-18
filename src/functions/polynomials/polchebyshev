@@ -1,0 +1,7 @@
+Function: polchebyshev
+Section: polynomials
+C-Name: polchebyshev
+Prototype: LD1,L,Dn
+Help: polchebishev(n,{flag=1},{v=x}): Chebychev polynomial of the first (flag
+ = 1) or second (flag = 2) kind, of degree n, in variable v
+
