@@ -114,7 +114,7 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
 #ifdef STACK_CHECK
-extern void *PARI_stack_limit;
+extern THREAD void *PARI_stack_limit;
 #endif
 
 /* entrees */

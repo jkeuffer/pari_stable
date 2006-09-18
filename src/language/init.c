@@ -195,7 +195,7 @@ pop_entree_bloc(entree *ep, long loc)
 /*********************************************************************/
 #ifdef STACK_CHECK
 /* adapted from Perl code written by Dominic Dunlop */
-void *PARI_stack_limit = NULL;
+THREAD void *PARI_stack_limit = NULL;
 
 #  ifdef __EMX__				/* Emulate */
 #    define STACK_CHECK_INIT(b)		\
