@@ -73,9 +73,12 @@ member_bnf(GEN x)
 GEN
 member_nf(GEN x)
 {
-  long t; x = get_nf(x,&t);
-  if (!x) member_err("nf");
-  return x;
+  long t; GEN y = get_nf(x,&t);
+  if (!y) {
+    if (typ(x)==t_VEC && lg(x) == 13) return gel(x,10);
+    member_err("nf");
+  }
+  return y;
 }
 
 /* integral basis */
@@ -90,6 +93,7 @@ member_zk(GEN x)
       case typ_CLA: return gmael(x,1,4);
       case typ_Q: return mkvec2(gen_1, pol_x[varn(x[1])]);
     }
+    if (typ(x)==t_VEC && lg(x) == 13) return gel(x,7);
     member_err("zk");
   }
   return gel(y,7);
