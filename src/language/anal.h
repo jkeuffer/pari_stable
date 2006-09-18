@@ -76,7 +76,7 @@ void term_color(long c);
 char *term_get_color(long c);
 void hit_return(void);
 
-extern char *gp_function_name;
+extern THREAD char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);
 extern void (*sigint_fun)(void);
 extern void *foreignHandler;

@@ -33,7 +33,7 @@ typedef struct gp_args {
 } gp_args;
 
 
-char *gp_function_name=NULL;
+THREAD char *gp_function_name=NULL;
 
 static GEN    constante();
 static GEN    expr();
@@ -61,27 +61,27 @@ static entree *installep(void *f,char *name,long l,long v,long add,entree **tabl
 static struct
 {
   char *identifier, *symbol, *raw, *member, *start;
-} mark;
+} THREAD mark;
 
 /* points to the part of the string that remains to be parsed */
-static char *analyseur = NULL;
+static THREAD char *analyseur = NULL;
 
 /* when non-0, we are checking the syntax of a new function body */
-static long skipping_fun_def;
+static THREAD long skipping_fun_def;
 
 /* when non-NULL, points to the entree of a new user function (currently
  * being checked). Used by the compatibility engine in the following way:
  *   when user types in a function whose name has changed, it is understood
  *   as EpNEW; first syntax error (missing = after function definition
  *   usually) triggers err_new_fun() if check_new_fun is set. */
-static entree *check_new_fun;
+static THREAD entree *check_new_fun;
 #define NOT_CREATED_YET ((entree *)0x1L)
 #define initial_value(ep) ((ep)+1)
 
 /* for control statements */
 enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM };
-static long br_status, br_count;
-static GEN br_res = NULL;
+static THREAD long br_status, br_count;
+static THREAD GEN br_res = NULL;
 
 /* Mnemonic codes parser:
  *
