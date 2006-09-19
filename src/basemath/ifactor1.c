@@ -194,9 +194,9 @@ millerrabin(GEN n, long k)
 static int
 Fl_miller(ulong n, long k)
 {
-  static ulong pr[] =
+  const ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
-  ulong *p;
+  const ulong *p;
   ulong r;
   long i;
   Fl_miller_t S;
@@ -226,9 +226,9 @@ int
 miller(GEN n, long k)
 {
   pari_sp av2, av = avma;
-  static ulong pr[] =
+  const ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
-  ulong *p;
+  const ulong *p;
   long i;
   miller_t S;
 
@@ -1235,7 +1235,7 @@ alloc_scratch(long nbc, long spc, long tf)
 GEN
 ellfacteur(GEN n, int insist)
 {
-  static ulong TB1[] = { /* table revised, cf. below 1998Aug15 --GN */
+  const ulong TB1[] = { /* table revised, cf. below 1998Aug15 --GN */
     142,172,208,252,305,370,450,545,661,801,972,1180,1430,
     1735,2100,2550,3090,3745,4540,5505,6675,8090,9810,11900,
     14420,17490,21200,25700,31160,37780UL,45810UL,55550UL,67350UL,
@@ -1257,7 +1257,7 @@ ellfacteur(GEN n, int insist)
      * has gotten 100 times faster than now --GN */
 #endif
     };
-  static ulong TB1_for_stage[] = { /* table revised 1998Aug11 --GN.
+  const ulong TB1_for_stage[] = { /* table revised 1998Aug11 --GN.
     * Start a little below the optimal B1 for finding factors which would just
     * have been missed by pollardbrent(), and escalate gradually, changing
     * curves sufficiently frequently to give good coverage of the small factor
