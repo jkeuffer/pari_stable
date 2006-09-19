@@ -29,7 +29,7 @@ static const double pariINFINITY = 100000.;
 /**                   FAST ARITHMETIC over Z[i]                    **/
 /**                                                                **/
 /********************************************************************/
-static long KARASQUARE_LIMIT, COOKSQUARE_LIMIT;
+static THREAD long KARASQUARE_LIMIT, COOKSQUARE_LIMIT;
 
 /* fast sum of x,y: t_INT or t_COMPLEX(t_INT) */
 static GEN
