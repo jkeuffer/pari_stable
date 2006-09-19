@@ -1964,7 +1964,7 @@ texmacs_output(GEN z, long n)
   sz = GENtostr0(z, &T, &gen_output);
   printf("%clatex:", DATA_BEGIN);
   if (n) printf("\\magenta\\%%%ld = ", n);
-  printf("$\\blue%s$%c", sz,DATA_END);
+  printf("$\\blue %s$%c", sz,DATA_END);
   free(sz); fflush(stdout);
 }
 

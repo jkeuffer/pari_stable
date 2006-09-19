@@ -56,6 +56,7 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
    28- in rare cases (return 0, native kernel) int_normalize was not suitable
        for gerepileupto
    29- idealnorm(nf, t_POL) didn't work
+AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
 
   Changed
     1- moved cgiv to inline kernel
