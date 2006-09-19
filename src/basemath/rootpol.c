@@ -1945,14 +1945,11 @@ roots_com(GEN q, long bit)
 static GEN
 tocomplex(GEN x, long l)
 {
-  GEN y = cgetg(3,t_COMPLEX);
-
-  gel(y,1) = cgetr(l);
-  if (typ(x) == t_COMPLEX)
-    { gel(y,2) = cgetr(l); gaffect(x,y); }
-  else
-    { gaffect(x,gel(y,1)); gel(y,2) = real_0(l); }
- return y;
+  GEN y;
+  if (typ(x) == t_COMPLEX) return ctofp(x, l);
+  y = cgetg(3,t_COMPLEX);
+  gel(y,1) = gtofp(x, l);
+  gel(y,2) = real_0(l); return y;
 }
 
 /* Check if x is approximately real with precision e */

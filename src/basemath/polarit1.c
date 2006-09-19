@@ -2700,17 +2700,17 @@ rootsold(GEN x, long prec)
       if (expo(p1[2]) < expmin && real)
       {
         gaffect(gen_0, gel(p1,2));
-        for (j=1; j<m; j++) gaffect(p1, (GEN)y[k+(i-1)*m+j]);
+        for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
         gel(p11,2) = gneg(gel(p1,1));
         xc = gerepileupto(av0, RgX_div(xc,p11));
       }
       else
       {
-        for (j=1; j<m; j++) gaffect(p1, (GEN)y[k+(i-1)*m+j]);
+        for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
         if (real)
         {
           p1 = gconj(p1);
-          for (j=1; j<=m; j++) gaffect(p1, (GEN)y[k+i*m+j]);
+          for (j=1; j<=m; j++) gaffect(p1, gel(y, k+i*m+j));
           i++;
           gel(p12,2) = gnorm(p1);
           gel(p12,3) = gmulsg(-2,gel(p1,1));

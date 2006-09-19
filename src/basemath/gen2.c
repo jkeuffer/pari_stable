@@ -1208,7 +1208,7 @@ padic_to_Fl(GEN x, ulong Y) {
 void
 gaffect(GEN x, GEN y)
 {
-  long vx, ly, tx = typ(x), ty = typ(y);
+  long vx, i, lx, ly, tx = typ(x), ty = typ(y);
   pari_sp av;
   GEN p1, num, den;
 
@@ -1239,6 +1239,10 @@ gaffect(GEN x, GEN y)
       if (! gequal(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); if (lx != lg(y)) pari_err(operi,"",x,y);
+      for (i=1; i<lx; i++) gaffect(gel(x,i),gel(y,i));
+      return;
   }
 
   /* Various conversions. Avoid them, use specialized routines ! */

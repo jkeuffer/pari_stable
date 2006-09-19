@@ -2005,7 +2005,7 @@ lindep(GEN x, long prec)
         gdivz(gscal(b[i],be[j]),bn[j], m[i][j]);
         p2 = gsub(p2, gmul(m[i][j],be[j]));
       }
-    gaffect(p2,          be[i]);
+    for (j=1; j<=n; j++) affrr(gel(p2,j), gel(be[i],j));
     affrr(sqscal(be[i]), bn[i]);
     qzer[i] = quazero(bn[i]); avma = av1;
   }
