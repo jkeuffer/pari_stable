@@ -102,8 +102,8 @@ pop_stack(stack **pts)
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
-static long next_bloc;
-static GEN cur_bloc=NULL; /* current bloc in bloc list */
+static THREAD long next_bloc;
+static THREAD GEN cur_bloc=NULL; /* current bloc in bloc list */
 #ifdef DEBUG
 static long NUM = 0;
 #endif
