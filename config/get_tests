@@ -5,6 +5,7 @@ _test_list='test_extra_out test_extra test_basic top_test_extra top_dotest_extra
 
 # included in 'make test-all' in addition to regular components of 'make bench'
 test_extra="\
+  bnfisintnorm\
   compat\
   ellglobalred\
   galois\

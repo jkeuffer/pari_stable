@@ -92,6 +92,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
     6- cgetipos, cgetineg, togglesign
 RM  7- polhermite, polchebyshev2
     8- allow rnf.zk and rnf.nf
+    9- [toplevel benchmark] bnfisintnorm bench
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

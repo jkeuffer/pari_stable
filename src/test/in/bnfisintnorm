@@ -1,0 +1,10 @@
+\p 38
+\e
+setrand(1); bnf=bnfinit(x^2+105);
+vector(1000, i, bnfisintnorm(bnf,i))
+setrand(1); bnf=bnfinit(x^2-65);
+vector(1000, i, bnfisintnorm(bnf,i - 500))
+setrand(1); bnf=bnfinit(x^5-37);
+vector(1000, i, bnfisintnorm(bnf,i - 500))
+print("Total time spent: ",gettime);
+\q
