@@ -848,18 +848,20 @@ the following syntax:
 
 \noindent
 Its effect is to assign the PARI object \kbd{x} into the \emph{preexisting}
-object \kbd{y}. This copies the whole structure of \kbd{x} into \kbd{y} so
-many conditions must be met for the assignment to be possible. For instance
-it is allowed to assign a \typ{INT} into a \typ{REAL}, but the converse is
-forbidden. For that, you must use the truncation or rounding function of
-your choice (see section 3.2). It can also happen that \kbd{y} is not large
-enough or does not have the proper tree structure to receive the object
-\kbd{x}. For instance, let \kbd{y} the zero integer with length equal to 2;
-then \kbd{y} is too small to accommodate any non-zero \typ{INT}. In general
-common sense tells you what is possible, keeping in mind the PARI
-philosophy which says that if it makes sense it is valid. For instance, the
-assignment of an imprecise object into a precise one does \emph{not} make
-sense. However, a change in precision of imprecise objects is allowed.
+object \kbd{y}. Both \kbd{x} and \kbd{y} must be \emph{scalar} types.
+
+This copies the whole structure of \kbd{x} into \kbd{y} so many conditions
+must be met for the assignment to be possible. For instance it is allowed to
+assign a \typ{INT} into a \typ{REAL}, but the converse is forbidden. For
+that, you must use the truncation or rounding function of your choice (see
+section 3.2). It can also happen that \kbd{y} is not large enough or does not
+have the proper tree structure to receive the object \kbd{x}. For instance,
+let \kbd{y} the zero integer with length equal to 2; then \kbd{y} is too
+small to accommodate any non-zero \typ{INT}. In general common sense tells
+you what is possible, keeping in mind the PARI philosophy which says that if
+it makes sense it is valid. For instance, the assignment of an imprecise
+object into a precise one does \emph{not} make sense. However, a change in
+precision of imprecise objects is allowed.
 
 All functions ending in ``\kbd{z}'' such as \teb{gaddz}
 (see~\secref{se:low_level}) implicitly use this function. In fact what they

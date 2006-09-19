@@ -1151,8 +1151,6 @@ padicaff0(GEN x)
 void
 gaffsg(long s, GEN x)
 {
-  long l,i,vx;
-
   switch(typ(x))
   {
     case t_INT: affsi(s,x); break;
@@ -1161,6 +1159,7 @@ gaffsg(long s, GEN x)
     case t_FRAC: affsi(s,gel(x,1)); affsi(1,gel(x,2)); break;
     case t_COMPLEX: gaffsg(s,gel(x,1)); gaffsg(0,gel(x,2)); break;
     case t_PADIC: {
+      long vx;
       GEN y;
       if (!s) { padicaff0(x); break; }
       vx = Z_pvalrem(stoi(s), gel(x,2), &y);
@@ -1168,27 +1167,6 @@ gaffsg(long s, GEN x)
       break;
     }
     case t_QUAD: gaffsg(s,gel(x,2)); gaffsg(0,gel(x,3)); break;
-    case t_POLMOD: gaffsg(s,gel(x,2)); break;
-    case t_POL:
-      vx = varn(x); l = lg(x); if (l < 2) pari_err(operi,"",stoi(s),x);
-      gaffsg(s, gel(x,2));
-      if (!s) x[1] = evalvarn(vx);
-      else    x[1] = evalsigne(1) | evalvarn(vx);
-      for (i=3; i<l; i++) gaffsg(0,gel(x,i));
-      break;
-
-    case t_SER:
-      vx = varn(x); l = lg(x); if (l < 2) pari_err(operi,"",stoi(s),x);
-      gaffsg(s,gel(x,2));
-      if (!s) x[1] = evalvalp(l-2) | evalvarn(vx);
-      else    x[1] = evalsigne(1) | evalvalp(0) | evalvarn(vx);
-      for (i=3; i<l; i++) gaffsg(0,gel(x,i));
-      break;
-
-    case t_RFRAC:
-      gaffsg(s,gel(x,1));
-      gaffsg(1,gel(x,2)); break;
-
     default: pari_err(operf,"",stoi(s),x);
   }
 }
@@ -1230,15 +1208,15 @@ padic_to_Fl(GEN x, ulong Y) {
 void
 gaffect(GEN x, GEN y)
 {
-  long i, j, k, vx, vy, lx, ly, tx = typ(x), ty = typ(y);
+  long vx, ly, tx = typ(x), ty = typ(y);
   pari_sp av;
-  GEN p1,num,den;
+  GEN p1, num, den;
 
   if (tx == ty) switch(tx) {
     case t_INT:
       if (!is_universal_constant(y)) { affii(x,y); return; }
       /* y = gen_0, gnil, gen_1 or gen_2 */
-      if (y==gen_0) pari_err(overwriter,"gaffect (gen_0)");
+      if (y==gen_0)  pari_err(overwriter,"gaffect (gen_0)");
       if (y==gen_1)  pari_err(overwriter,"gaffect (gen_1)");
       if (y==gen_m1) pari_err(overwriter,"gaffect (gen_m1)");
       if (y==gen_2)  pari_err(overwriter,"gaffect (gen_2)");
@@ -1261,269 +1239,112 @@ gaffect(GEN x, GEN y)
       if (! gequal(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
-    case t_POLMOD:
-      if (! gdvd(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
-      gmodz(gel(x,2),gel(y,1),gel(y,2)); return;
-    case t_POL:
-      vx = varn(x);
-      vy = varn(y); ly = lg(y);
-      if (vx != vy) {
-        if (varncmp(vy, vx) > 0) pari_err(operf,"",x,y);
-        gaffect(x,gel(y,2)); for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
-        y[1] = signe(x)? evalsigne(1)|evalvarn(vy): evalvarn(vy);
-        return;
-      }
-      lx = lg(x); if (lx > ly) pari_err(operi,"",x,y);
-      y[1] = x[1]; for (i=2; i<lx; i++) gaffect(gel(x,i),gel(y,i));
-      return;
-    case t_SER:
-      vx = varn(x);
-      vy = varn(y);  ly = lg(y);
-      if (vx != vy) {
-        if (varncmp(vy, vx) > 0) pari_err(operf,"",x,y);
-	gaffect(x,gel(y,2));
-	if (!signe(x)) y[1] = evalvalp(ly-2) | evalvarn(vy);
-	else           y[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
-        for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
-        return;
-      }
-      lx = lg(x); if (lx > ly) lx = ly;
-      y[1] = x[1];
-      for (i=2; i<lx; i++) gaffect(gel(x,i),gel(y,i));
-      for (   ; i<ly; i++) gaffsg(0,gel(y,i));
-      return;
-    case t_RFRAC:
-      gaffect(gel(x,1),gel(y,1));
-      gaffect(gel(x,2),gel(y,2)); return;
-    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); if (lx != lg(y)) pari_err(operi,"",x,y);
-      for (i=1; i<lx; i++) gaffect(gel(x,i),gel(y,i));
-      return;
   }
 
-  if (is_scalar_t(tx))
-  {
-    if (is_scalar_t(ty))
-    {
-      switch(tx)
-      {
-	case t_INT:
-	  switch(ty)
-	  {
-	    case t_REAL:
-              if (y ==  gpi) pari_err(overwriter,"gaffect (gpi)");
-              if (y==geuler) pari_err(overwriter,"gaffect (geuler)");
-	      affir(x,y); break;
+  /* Various conversions. Avoid them, use specialized routines ! */
 
-	    case t_INTMOD:
-	      modiiz(x,gel(y,1),gel(y,2)); break;
-
-	    case t_FRAC:
-	      if (y == ghalf) pari_err(overwriter,"gaffect (ghalf)");
-	      affii(x,gel(y,1)); affsi(1,gel(y,2)); break;
-
-	    case t_COMPLEX:
-	      if (y == gi) pari_err(overwriter,"gaffect (gi)");
-	      gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-
-	    case t_PADIC:
-              if (!signe(x)) { padicaff0(y); break; }
-	      av = avma;
-	      setvalp(y, Z_pvalrem(x,gel(y,2),&p1));
-	      affii(modii(p1,gel(y,3)), gel(y,4));
-	      avma = av; break;
-
-	    case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-	
-	case t_REAL:
-	  switch(ty)
-	  {
-	    case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-	
-	case t_INTMOD:
-	  switch(ty)
-	  {
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-
-	case t_FRAC:
-	  switch(ty)
-	  {
-	    case t_REAL: (void)rdiviiz(gel(x,1),gel(x,2), y); break;
-	    case t_INTMOD: av = avma;
-              p1 = Fp_inv(gel(x,2),gel(y,1));
-	      affii(modii(mulii(gel(x,1),p1),gel(y,1)), gel(y,2));
-	      avma = av; break;
-	    case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
-	    case t_PADIC:
-	      if (!signe(x[1])) { padicaff0(y); break; }
-              num = gel(x,1);
-              den = gel(x,2);
-	      av = avma; vx = Z_pvalrem(num, gel(y,2), &num);
-	      if (!vx) vx = -Z_pvalrem(den,gel(y,2),&den);
-	      setvalp(y,vx);
-	      p1 = mulii(num,Fp_inv(den,gel(y,3)));
-	      affii(modii(p1,gel(y,3)), gel(y,4)); avma = av; break;
-	    case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-	
-	case t_COMPLEX:
-	  switch(ty)
-	  {
-	    case t_INT: case t_REAL: case t_INTMOD:
-	    case t_FRAC: case t_PADIC: case t_QUAD:
-	      if (!gcmp0(gel(x,2))) pari_err(operi,"",x,y);
-	      gaffect(gel(x,1),y); break;
-	    case t_POLMOD:
-	      gaffect(x,gel(y,2)); break;
-
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-	
-	case t_PADIC:
-	  switch(ty)
-	  {
-	    case t_INTMOD:
-              av = avma; affii(padic_to_Fp(x, gel(y,1)), gel(y,2));
-	      avma = av; break;
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-	
-	case t_QUAD:
-	  switch(ty)
-	  {
-	    case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-	      if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
-	      gaffect(gel(x,2),y); break;
-
-	    case t_REAL:
-	      av = avma; gaffect(quadtoc(x,lg(y)), y); avma = av; break;
-	    case t_COMPLEX:
-	      ly = precision(y);
-	      if (ly) { av = avma; gaffect(quadtoc(x,ly), y); avma = av; }
-	      else
-	      {
-                if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
-		gaffect(gel(x,2),y);
-	      }
-	      break;
-	    case t_POLMOD: gaffect(x,gel(y,2)); break;
-	    default: pari_err(operf,"",x,y);
-	  }
-	  break;
-
-        default: pari_err(operf,"",x,y);
-      }
-      return;
-    }
-
-    /* here y is not scalar */
-    switch(ty)
-    {
-      case t_POL:
-	vx = varn(y); ly = lg(y);
-	if (y==pol_1[vx] || y==pol_x[vx]) pari_err(overwriter,"gaffect (pol_1/pol_x)");
-	gaffect(x,gel(y,2)); for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
-        y[1] = gcmp0(x)? evalvarn(vx): evalsigne(1) | evalvarn(vx);
-	break;
-
-      case t_SER:
-	vx = varn(y); ly = lg(y);
-	if (gcmp0(x)) y[1] = evalvalp(ly-2) | evalvarn(vx);
-	else          y[1] = evalsigne(1) | evalvalp(0) | evalvarn(vx);
-        gaffect(x,gel(y,2)); for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
-	break;
-
-      case t_RFRAC:
-	gaffect(x,gel(y,1)); gaffsg(1,gel(y,2)); break;
-
-      default: pari_err(operf,"",x,y);
-    }
-    return;
-  }
-
-  if (is_const_t(ty)) {
-    entree *varnum, *varden;
-    long vnum, vden;
-    GEN num, den;
-    if (tx == t_POL) {
-      vnum = varn(x); varnum = varentries[ordvar[vnum]];
-      if (varnum) {
-        x = geval(x); tx = typ(x);
-        if (tx != t_POL || varn(x) != vnum) { gaffect(x, y); return; }
-      }	
-    } else if (tx == t_RFRAC) {
-      num = gel(x,1); vnum = gvar(num); varnum = varentries[ordvar[vnum]];
-      den = gel(x,2); vden = gvar(den); varden = varentries[ordvar[vden]];
-      if (varnum && varden) {
-        vnum = min(vnum, vden);
-        x = geval(x); tx = typ(x);
-        if (tx != t_RFRAC || gvar(x) != vnum) { gaffect(x, y); return; }
-      }
-    }
-    pari_err(operf,"",x,y);
-  }
-
-  lx = lg(x);
-  ly = lg(y);
+  if (!is_const_t(ty)) pari_err(operf,"",x,y);
   switch(tx)
   {
-    case t_POL:
-      vx = varn(x);
+    case t_INT:
       switch(ty)
       {
-	case t_POLMOD: gmodz(x,gel(y,1),gel(y,2)); break;
-	case t_SER:
-	  vy=varn(y); if (varncmp(vy, vx) > 0) pari_err(operf,"",x,y);
-	  if (!signe(x)) { gaffsg(0,y); return; }
-	  if (vy==vx)
-	  {
-	    i = gval(x,vx); y[1] = evalvarn(vx) | evalvalp(i) | evalsigne(1);
-	    k = lx-i; if (k > ly) k = ly;
-	    for (j=2; j<k; j++) gaffect(gel(x,i+j),gel(y,j));
-	    for (   ; j<ly; j++) gaffsg(0,gel(y,j));
-	  }
-	  else
-	  {
-	    gaffect(x,gel(y,2));
-	    if (!signe(x)) y[1] = evalvalp(ly-2) | evalvarn(vy);
-	    else           y[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
-            for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
-	  }
-	  break;
-	case t_RFRAC: gaffect(x,gel(y,1)); gaffsg(1,gel(y,2)); break;
+        case t_REAL:
+          if (y ==  gpi) pari_err(overwriter,"gaffect (gpi)");
+          if (y==geuler) pari_err(overwriter,"gaffect (geuler)");
+          affir(x,y); break;
 
+        case t_INTMOD:
+          modiiz(x,gel(y,1),gel(y,2)); break;
+
+        case t_COMPLEX:
+          if (y == gi) pari_err(overwriter,"gaffect (gi)");
+          gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
+
+        case t_PADIC:
+          if (!signe(x)) { padicaff0(y); break; }
+          av = avma;
+          setvalp(y, Z_pvalrem(x,gel(y,2),&p1));
+          affii(modii(p1,gel(y,3)), gel(y,4));
+          avma = av; break;
+
+        case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
         default: pari_err(operf,"",x,y);
       }
       break;
-
-    case t_RFRAC:
+    
+    case t_REAL:
       switch(ty)
       {
-	case t_POLMOD:
-	  av=avma; p1=ginvmod(gel(x,2),gel(y,1));
-	  gmodz(gmul(gel(x,1),p1),gel(y,1),gel(y,2));
-	  avma=av; break;
-	case t_SER: gdivz(gel(x,1),gel(x,2),y); break;
+        case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
         default: pari_err(operf,"",x,y);
       }
       break;
+    
+    case t_FRAC:
+      switch(ty)
+      {
+        case t_REAL: (void)rdiviiz(gel(x,1),gel(x,2), y); break;
+        case t_INTMOD: av = avma;
+          p1 = Fp_inv(gel(x,2),gel(y,1));
+          affii(modii(mulii(gel(x,1),p1),gel(y,1)), gel(y,2));
+          avma = av; break;
+        case t_COMPLEX: gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
+        case t_PADIC:
+          if (!signe(x[1])) { padicaff0(y); break; }
+          num = gel(x,1);
+          den = gel(x,2);
+          av = avma; vx = Z_pvalrem(num, gel(y,2), &num);
+          if (!vx) vx = -Z_pvalrem(den,gel(y,2),&den);
+          setvalp(y,vx);
+          p1 = mulii(num,Fp_inv(den,gel(y,3)));
+          affii(modii(p1,gel(y,3)), gel(y,4)); avma = av; break;
+        case t_QUAD: gaffect(x,gel(y,2)); gaffsg(0,gel(y,3)); break;
+        default: pari_err(operf,"",x,y);
+      }
+      break;
+    
+    case t_COMPLEX:
+      switch(ty)
+      {
+        case t_INT: case t_REAL: case t_INTMOD:
+        case t_FRAC: case t_PADIC: case t_QUAD:
+          if (!gcmp0(gel(x,2))) pari_err(operi,"",x,y);
+          gaffect(gel(x,1),y); break;
+        default: pari_err(operf,"",x,y);
+      }
+      break;
+    
+    case t_PADIC:
+      switch(ty)
+      {
+        case t_INTMOD:
+          av = avma; affii(padic_to_Fp(x, gel(y,1)), gel(y,2));
+          avma = av; break;
+        default: pari_err(operf,"",x,y);
+      }
+      break;
+    
+    case t_QUAD:
+      switch(ty)
+      {
+        case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
+          if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
+          gaffect(gel(x,2),y); break;
+
+        case t_REAL:
+          av = avma; gaffect(quadtoc(x,lg(y)), y); avma = av; break;
+        case t_COMPLEX:
+          ly = precision(y);
+          if (ly) { av = avma; gaffect(quadtoc(x,ly), y); avma = av; }
+          else
+          {
+            if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
+            gaffect(gel(x,2),y);
+          }
+          break;
+        default: pari_err(operf,"",x,y);
+      }
     default: pari_err(operf,"",x,y);
   }
 }

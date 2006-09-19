@@ -78,6 +78,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
        [ contrary to 'gener', these assume that their argument is prime ]
    12- [library] rename cyclo -> polcyclo, subcyclo -> polsubcyclo,
        tchebi -> polchebyshev1, legendre -> pollegendre
+   13- restrict the types allowed in gaffect and gaffsf to scalar types only
 
   Added
 BA  1- function Flm_rank
