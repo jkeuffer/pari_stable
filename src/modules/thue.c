@@ -972,64 +972,68 @@ thue(GEN tnf, GEN rhs, GEN ne)
   return gerepilecopy(av, SmallSols(S, itos(gfloor(x3)), P, rhs, ro));
 }
 
-static GEN *Relations; /* primes above a, expressed on generators of Cl(K) */
-static GEN *Partial;   /* list of vvectors, Partial[i] = Relations[1..i] * u[1..i] */
-static GEN *gen_ord;   /* orders of generators of Cl(K) given in bnf */
-
-static long *f;        /* f[i] = f(Primes[i]/p), inertial degree */
-static long *n;        /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
-static long *inext;    /* index of first P above next p, 0 if p is last */
-static long *S;        /* S[i] = n[i] - sum_{ 1<=k<=i } f[k].u[k] */
-static long *u;        /* We want principal ideals I = prod Primes[i]^u[i] */
-static GEN  *normsol; /* lists of copies of the u[] which are solutions */
-
-static long Nprimes; /* length(Relations) = #{max ideal above divisors of a} */
-static long sindex, smax; /* current index in normsol; max. index */
+struct sol_abs
+{
+  GEN *Relations; /* primes above a, expressed on generators of Cl(K) */
+  GEN *Partial;   /* list of vectors, 
+                     T->Partial[i] = T->Relations[1..i] * u[1..i] */
+  GEN *gen_ord;   /* orders of generators of Cl(K) given in bnf */
+ 
+  long *f;        /* f[i] = f(Primes[i]/p), inertial degree */
+  long *n;        /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
+  long *inext;    /* index of first P above next p, 0 if p is last */
+  long *S;        /* S[i] = n[i] - sum_{ 1<=k<=i } f[k].u[k] */
+  long *u;        /* We want principal ideals I = prod Primes[i]^u[i] */
+  GEN  *normsol; /* lists of copies of the u[] which are solutions */
+ 
+  long Nprimes; /* length(T->Relations) = #{max ideal above divisors of a} */
+  long sindex, smax; /* current index in T->normsol; max. index */
+};
 
 /* u[1..i] has been filled. Norm(u) is correct.
  * Check relations in class group then save it.
  */
 static void
-test_sol(long i)
+test_sol(struct sol_abs *T, long i)
 {
   long k,*sol;
 
-  if (Partial)
+  if (T->Partial)
   {
     pari_sp av=avma;
-    for (k=1; k<lg(Partial[1]); k++)
-      if ( signe(modii( gmael(Partial,i,k), gen_ord[k] )) )
+    for (k=1; k<lg(T->Partial[1]); k++)
+      if ( signe(modii( gmael(T->Partial,i,k), T->gen_ord[k] )) )
         { avma=av; return; }
     avma=av;
   }
-  if (sindex == smax)
+  if (T->sindex == T->smax)
   {
-    long new_smax = smax << 1;
+    long new_smax = T->smax << 1;
     GEN *new_normsol = (GEN*)new_chunk(new_smax+1);
 
-    for (k=1; k<=smax; k++) new_normsol[k] = normsol[k];
-    normsol = new_normsol; smax = new_smax;
+    for (k=1; k<=T->smax; k++) new_normsol[k] = T->normsol[k];
+    T->normsol = new_normsol; T->smax = new_smax;
   }
-  sol = cgetg(Nprimes+1,t_VECSMALL);
-  normsol[++sindex] = sol;
+  sol = cgetg(T->Nprimes+1,t_VECSMALL);
+  T->normsol[++T->sindex] = sol;
 
-  for (k=1; k<=i; k++)       sol[k] = u[k];
-  for (   ; k<=Nprimes; k++) sol[k] = 0;
+  for (k=1; k<=i; k++)       sol[k] = T->u[k];
+  for (   ; k<=T->Nprimes; k++) sol[k] = 0;
   if (DEBUGLEVEL>2)
   {
     fprintferr("sol = %Z\n",sol);
-    if (Partial) fprintferr("Partial = %Z\n",Partial);
+    if (T->Partial) fprintferr("T->Partial = %Z\n",T->Partial);
     flusherr();
   }
 }
 static void
-fix_Partial(long i)
+fix_Partial(struct sol_abs *T, long i)
 {
   long k;
   pari_sp av = avma;
-  for (k=1; k<lg(Partial[1]); k++)
-    affii(addii(gmael(Partial,i-1,k), mulis(gmael(Relations,i,k), u[i])),
-          gmael(Partial,i,k));
+  for (k=1; k<lg(T->Partial[1]); k++)
+    affii(addii(gmael(T->Partial,i-1,k), mulis(gmael(T->Relations,i,k), T->u[i])),
+          gmael(T->Partial,i,k));
   avma = av;
 }
 
@@ -1040,71 +1044,64 @@ fix_Partial(long i)
  *  2) the factorization of a.
  */
 static void
-isintnorm_loop(long i)
+isintnorm_loop(struct sol_abs *T, long i)
 {
-  if (S[i] == 0) /* sum u[i].f[i] = n[i], do another prime */
+  if (T->S[i] == 0) /* sum u[i].f[i] = n[i], do another prime */
   {
     long k;
-    if (inext[i] == 0) { test_sol(i); return; }
+    if (T->inext[i] == 0) { test_sol(T, i); return; }
 
     /* there are some primes left */
-    if (Partial) gaffect(Partial[i], Partial[inext[i]-1]);
-    for (k=i+1; k < inext[i]; k++) u[k]=0;
-    i=inext[i]-1;
+    if (T->Partial) gaffect(T->Partial[i], T->Partial[T->inext[i]-1]);
+    for (k=i+1; k < T->inext[i]; k++) T->u[k]=0;
+    i=T->inext[i]-1;
   }
-  else if (i == inext[i]-2 || i == Nprimes-1)
+  else if (i == T->inext[i]-2 || i == T->Nprimes-1)
   {
     /* only one Prime left above prime; change prime, fix u[i+1] */
-    if (S[i] % f[i+1]) return;
-    i++; u[i] = S[i-1] / f[i];
-    if (Partial) fix_Partial(i);
-    if (inext[i]==0) { test_sol(i); return; }
+    if (T->S[i] % T->f[i+1]) return;
+    i++; T->u[i] = T->S[i-1] / T->f[i];
+    if (T->Partial) fix_Partial(T,i);
+    if (T->inext[i]==0) { test_sol(T,i); return; }
   }
 
-  i++; u[i]=0;
-  if (Partial) gaffect(Partial[i-1], Partial[i]);
-  if (i == inext[i-1])
+  i++; T->u[i]=0;
+  if (T->Partial) gaffect(T->Partial[i-1], T->Partial[i]);
+  if (i == T->inext[i-1])
   { /* change prime */
-    if (inext[i] == i+1 || i == Nprimes) /* only one Prime above p */
+    if (T->inext[i] == i+1 || i == T->Nprimes) /* only one Prime above p */
     {
-      S[i]=0; u[i] = n[i] / f[i]; /* we already know this is exact */
-      if (Partial) fix_Partial(i);
+      T->S[i]=0; T->u[i] = T->n[i] / T->f[i]; /* we already know this is exact */
+      if (T->Partial) fix_Partial(T, i);
     }
-    else S[i] = n[i];
+    else T->S[i] = T->n[i];
   }
-  else S[i] = S[i-1]; /* same prime, different Prime */
+  else T->S[i] = T->S[i-1]; /* same prime, different Prime */
   for(;;)
   {
-    isintnorm_loop(i); S[i]-=f[i]; if (S[i]<0) break;
-    if (Partial)
-      gaddz(Partial[i], Relations[i], Partial[i]);
-    u[i]++;
+    isintnorm_loop(T, i); T->S[i]-=T->f[i]; if (T->S[i]<0) break;
+    if (T->Partial)
+      gaddz(T->Partial[i], T->Relations[i], T->Partial[i]);
+    T->u[i]++;
   }
 }
 
 static void
-get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
+get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 {
   GEN dec, fact, primes, Primes, *Fact;
   long *gcdlist, gcd,nprimes,Ngen,i,j;
 
   *ptPrimes = NULL;
-  if (gcmp1(a))
-  {
-    GEN sol = cgetg(Nprimes+1, t_VECSMALL);
-    sindex = 1; normsol = (GEN*) new_chunk(2);
-    normsol[1] = sol; for (i=1; i<=Nprimes; i++) sol[i] = 0;
-    return;
-  }
 
   fact=factor(a); primes=gel(fact,1);
-  nprimes=lg(primes)-1; sindex = 0;
-  gen_ord = (GEN *) mael3(bnf,8,1,2); Ngen = lg(gen_ord)-1;
+  nprimes=lg(primes)-1; T->sindex = 0;
+  T->gen_ord = (GEN *) mael3(bnf,8,1,2); Ngen = lg(T->gen_ord)-1;
 
   Fact = (GEN*) new_chunk(1+nprimes);
   gcdlist = new_chunk(1+nprimes);
 
-  Nprimes=0;
+  T->Nprimes=0;
   for (i=1; i<=nprimes; i++)
   {
     long ldec;
@@ -1124,22 +1121,22 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
         { fprintferr("gcd f_P  does not divide n_p\n"); flusherr(); }
       return;
     }
-    Fact[i] = dec; Nprimes += ldec;
+    Fact[i] = dec; T->Nprimes += ldec;
   }
 
-  f = new_chunk(1+Nprimes); u = new_chunk(1+Nprimes);
-  n = new_chunk(1+Nprimes); S = new_chunk(1+Nprimes);
-  inext = new_chunk(1+Nprimes);
-  Primes = cgetg(1+Nprimes, t_VEC);
+  T->f = new_chunk(1+T->Nprimes); T->u = new_chunk(1+T->Nprimes);
+  T->n = new_chunk(1+T->Nprimes); T->S = new_chunk(1+T->Nprimes);
+  T->inext = new_chunk(1+T->Nprimes);
+  Primes = cgetg(1+T->Nprimes, t_VEC);
   *ptPrimes = Primes;
 
   if (Ngen)
   {
-    Partial   = (GEN*) new_chunk(1+Nprimes);
-    Relations = (GEN*) new_chunk(1+Nprimes);
+    T->Partial   = (GEN*) new_chunk(1+T->Nprimes);
+    T->Relations = (GEN*) new_chunk(1+T->Nprimes);
   }
   else /* trivial class group, no relations to check */
-    Relations = Partial = NULL;
+    T->Relations = T->Partial = NULL;
 
   j=0;
   for (i=1; i<=nprimes; i++)
@@ -1152,30 +1149,30 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
     for (k=1; k < lim; k++)
     {
       j++; Primes[j] = dec[k];
-      f[j] = itos(gmael(dec,k,4)) / gcd;
-      n[j] = vn / gcd; inext[j] = v;
-      if (Partial)
-	Relations[j] = isprincipal(bnf, gel(Primes,j));
+      T->f[j] = itos(gmael(dec,k,4)) / gcd;
+      T->n[j] = vn / gcd; T->inext[j] = v;
+      if (T->Partial)
+	T->Relations[j] = isprincipal(bnf, gel(Primes,j));
     }
   }
-  if (Partial)
+  if (T->Partial)
   {
-    for (i=1; i <= Nprimes; i++)
-      if (!gcmp0(Relations[i])) break;
-    if (i > Nprimes) Partial = NULL; /* all ideals dividing a are principal */
+    for (i=1; i <= T->Nprimes; i++)
+      if (!gcmp0(T->Relations[i])) break;
+    if (i > T->Nprimes) T->Partial = NULL; /* all ideals dividing a are principal */
   }
-  if (Partial)
-    for (i=0; i<=Nprimes; i++) /* Partial[0] needs to be initialized */
+  if (T->Partial)
+    for (i=0; i<=T->Nprimes; i++) /* T->Partial[0] needs to be initialized */
     {
-      Partial[i]=cgetg(Ngen+1,t_COL);
+      T->Partial[i]=cgetg(Ngen+1,t_COL);
       for (j=1; j<=Ngen; j++)
       {
         GEN z = cgeti(4); z[1] = evalsigne(0)|evallgefint(4);
-	Partial[i][j]=(long)z;
+	T->Partial[i][j]=(long)z;
       }
     }
-  smax=511; normsol = (GEN*) new_chunk(smax+1);
-  S[0]=n[1]; inext[0]=1; isintnorm_loop(0);
+  T->smax=511; T->normsol = (GEN*) new_chunk(T->smax+1);
+  T->S[0]=T->n[1]; T->inext[0]=1; isintnorm_loop(T, 0);
 }
 
 /* Look for unit of norm -1. Return 1 if it exists and set *unit, 0 otherwise */
@@ -1202,6 +1199,7 @@ get_unit_1(GEN bnf, GEN *unit)
 GEN
 bnfisintnormabs(GEN bnf, GEN a)
 {
+  struct sol_abs T;
   GEN nf, res, x, Primes;
   long i;
 
@@ -1209,15 +1207,15 @@ bnfisintnormabs(GEN bnf, GEN a)
   if (typ(a)!=t_INT)
     pari_err(talker,"expected an integer in bnfisintnorm");
   if (!signe(a))  return mkvec(gen_0);
-  if (gcmp1(a)) return mkvec(gen_1);
+  if (is_pm1(a)) return mkvec(gen_1);
 
-  get_sol_abs(bnf, absi(a), &Primes);
+  get_sol_abs(&T, bnf, absi(a), &Primes);
 
-  res = cget1(sindex+1, t_VEC);
-  for (i=1; i<=sindex; i++)
+  res = cget1(T.sindex+1, t_VEC);
+  for (i=1; i<=T.sindex; i++)
   {
-    x = normsol[i];
-    if (!Nprimes) x = gen_1;
+    x = T.normsol[i];
+    if (!T.Nprimes) x = gen_1;
     else
     {
       x = isprincipalfact(bnf, Primes, vecsmall_to_col(x), NULL,
