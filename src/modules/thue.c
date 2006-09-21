@@ -974,19 +974,19 @@ thue(GEN tnf, GEN rhs, GEN ne)
 
 struct sol_abs
 {
-  GEN *Relations; /* primes above a, expressed on generators of Cl(K) */
-  GEN *Partial;   /* list of vectors, 
+  GEN Relations;  /* primes above a, expressed on generators of Cl(K) */
+  GEN Partial;    /* list of vectors, 
                      T->Partial[i] = T->Relations[1..i] * u[1..i] */
-  GEN *gen_ord;   /* orders of generators of Cl(K) given in bnf */
+  GEN gen_ord;    /* orders of generators of Cl(K) given in bnf */
  
   long *f;        /* f[i] = f(Primes[i]/p), inertial degree */
   long *n;        /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
   long *inext;    /* index of first P above next p, 0 if p is last */
   long *S;        /* S[i] = n[i] - sum_{ 1<=k<=i } f[k].u[k] */
   long *u;        /* We want principal ideals I = prod Primes[i]^u[i] */
-  GEN  *normsol; /* lists of copies of the u[] which are solutions */
+  GEN  normsol;   /* lists of copies of the u[] which are solutions */
  
-  long Nprimes; /* length(T->Relations) = #{max ideal above divisors of a} */
+  long Nprimes;   /* length(T->Relations) = #{max ideal above divisors of a} */
   long sindex, smax; /* current index in T->normsol; max. index */
 };
 
@@ -1002,20 +1002,20 @@ test_sol(struct sol_abs *T, long i)
   {
     pari_sp av=avma;
     for (k=1; k<lg(T->Partial[1]); k++)
-      if ( signe(modii( gmael(T->Partial,i,k), T->gen_ord[k] )) )
+      if ( signe(modii( gmael(T->Partial,i,k), gel(T->gen_ord,k) )) )
         { avma=av; return; }
     avma=av;
   }
   if (T->sindex == T->smax)
   {
     long new_smax = T->smax << 1;
-    GEN *new_normsol = (GEN*)new_chunk(new_smax+1);
+    GEN  new_normsol = new_chunk(new_smax+1);
 
-    for (k=1; k<=T->smax; k++) new_normsol[k] = T->normsol[k];
+    for (k=1; k<=T->smax; k++) gel(new_normsol,k) = gel(T->normsol,k);
     T->normsol = new_normsol; T->smax = new_smax;
   }
   sol = cgetg(T->Nprimes+1,t_VECSMALL);
-  T->normsol[++T->sindex] = sol;
+  gel(T->normsol,++T->sindex) = sol;
 
   for (k=1; k<=i; k++)       sol[k] = T->u[k];
   for (   ; k<=T->Nprimes; k++) sol[k] = 0;
@@ -1052,7 +1052,7 @@ isintnorm_loop(struct sol_abs *T, long i)
     if (T->inext[i] == 0) { test_sol(T, i); return; }
 
     /* there are some primes left */
-    if (T->Partial) gaffect(T->Partial[i], T->Partial[T->inext[i]-1]);
+    if (T->Partial) gaffect(gel(T->Partial,i), gel(T->Partial,T->inext[i]-1));
     for (k=i+1; k < T->inext[i]; k++) T->u[k]=0;
     i=T->inext[i]-1;
   }
@@ -1066,7 +1066,7 @@ isintnorm_loop(struct sol_abs *T, long i)
   }
 
   i++; T->u[i]=0;
-  if (T->Partial) gaffect(T->Partial[i-1], T->Partial[i]);
+  if (T->Partial) gaffect(gel(T->Partial,i-1), gel(T->Partial,i));
   if (i == T->inext[i-1])
   { /* change prime */
     if (T->inext[i] == i+1 || i == T->Nprimes) /* only one Prime above p */
@@ -1081,7 +1081,7 @@ isintnorm_loop(struct sol_abs *T, long i)
   {
     isintnorm_loop(T, i); T->S[i]-=T->f[i]; if (T->S[i]<0) break;
     if (T->Partial)
-      gaddz(T->Partial[i], T->Relations[i], T->Partial[i]);
+      gaddz(gel(T->Partial,i), gel(T->Relations,i), gel(T->Partial,i));
     T->u[i]++;
   }
 }
@@ -1089,16 +1089,16 @@ isintnorm_loop(struct sol_abs *T, long i)
 static void
 get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 {
-  GEN dec, fact, primes, Primes, *Fact;
+  GEN dec, fact, primes, Primes, Fact;
   long *gcdlist, gcd,nprimes,Ngen,i,j;
 
   *ptPrimes = NULL;
 
   fact=factor(a); primes=gel(fact,1);
   nprimes=lg(primes)-1; T->sindex = 0;
-  T->gen_ord = (GEN *) mael3(bnf,8,1,2); Ngen = lg(T->gen_ord)-1;
+  T->gen_ord = gmael3(bnf,8,1,2); Ngen = lg(T->gen_ord)-1;
 
-  Fact = (GEN*) new_chunk(1+nprimes);
+  Fact = new_chunk(1+nprimes);
   gcdlist = new_chunk(1+nprimes);
 
   T->Nprimes=0;
@@ -1121,7 +1121,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
         { fprintferr("gcd f_P  does not divide n_p\n"); flusherr(); }
       return;
     }
-    Fact[i] = dec; T->Nprimes += ldec;
+    gel(Fact,i) = dec; T->Nprimes += ldec;
   }
 
   T->f = new_chunk(1+T->Nprimes); T->u = new_chunk(1+T->Nprimes);
@@ -1132,8 +1132,8 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 
   if (Ngen)
   {
-    T->Partial   = (GEN*) new_chunk(1+T->Nprimes);
-    T->Relations = (GEN*) new_chunk(1+T->Nprimes);
+    T->Partial   = new_chunk(1+T->Nprimes);
+    T->Relations = new_chunk(1+T->Nprimes);
   }
   else /* trivial class group, no relations to check */
     T->Relations = T->Partial = NULL;
@@ -1144,7 +1144,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
     long k,lim,v, vn=itos(gmael(fact,2,i));
 
     gcd = gcdlist[i];
-    dec = Fact[i]; lim = lg(dec);
+    dec = gel(Fact,i); lim = lg(dec);
     v = (i==nprimes)? 0: j + lim;
     for (k=1; k < lim; k++)
     {
@@ -1152,26 +1152,26 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
       T->f[j] = itos(gmael(dec,k,4)) / gcd;
       T->n[j] = vn / gcd; T->inext[j] = v;
       if (T->Partial)
-	T->Relations[j] = isprincipal(bnf, gel(Primes,j));
+	gel(T->Relations,j) = isprincipal(bnf, gel(Primes,j));
     }
   }
   if (T->Partial)
   {
     for (i=1; i <= T->Nprimes; i++)
-      if (!gcmp0(T->Relations[i])) break;
+      if (!gcmp0(gel(T->Relations,i))) break;
     if (i > T->Nprimes) T->Partial = NULL; /* all ideals dividing a are principal */
   }
   if (T->Partial)
     for (i=0; i<=T->Nprimes; i++) /* T->Partial[0] needs to be initialized */
     {
-      T->Partial[i]=cgetg(Ngen+1,t_COL);
+      gel(T->Partial,i)=cgetg(Ngen+1,t_COL);
       for (j=1; j<=Ngen; j++)
       {
         GEN z = cgeti(4); z[1] = evalsigne(0)|evallgefint(4);
-	T->Partial[i][j]=(long)z;
+	gmael(T->Partial,i,j)=z;
       }
     }
-  T->smax=511; T->normsol = (GEN*) new_chunk(T->smax+1);
+  T->smax=511; T->normsol = new_chunk(T->smax+1);
   T->S[0]=T->n[1]; T->inext[0]=1; isintnorm_loop(T, 0);
 }
 
@@ -1214,7 +1214,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   res = cget1(T.sindex+1, t_VEC);
   for (i=1; i<=T.sindex; i++)
   {
-    x = T.normsol[i];
+    x = gel(T.normsol,i);
     if (!T.Nprimes) x = gen_1;
     else
     {
