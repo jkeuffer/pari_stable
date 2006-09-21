@@ -461,14 +461,14 @@ static GEN
 _quot(GEN x, GEN y)
 {
   GEN q = gdiv(x,y), f = gfloor(q);
-  if (gsigne(y) < 0 && !gequal(f,q)) f = gadd(f,gen_1);
+  if (gsigne(y) < 0 && !gequal(f,q)) f = gaddgs(f, 1);
   return f;
 }
 static GEN
 _quotgs(GEN x, long y)
 {
   GEN q = gdivgs(x,y), f = gfloor(q);
-  if (y < 0 && !gequal(f,q)) f = gadd(f,gen_1);
+  if (y < 0 && !gequal(f,q)) f = gaddgs(f, 1);
   return f;
 }
 static GEN
@@ -484,6 +484,22 @@ quotgs(GEN x, long y)
   return gerepileupto(av, _quotgs(x, y));
 }
 
+/* assume y a t_REAL, x a t_INT, t_FRAC or t_REAL. 
+ * Return x mod y or NULL if accuracy error */
+GEN
+modr_safe(GEN x, GEN y)
+{
+  GEN q, f;
+  long d;
+  if (typ(x) == t_INT && !signe(x)) return gen_0;
+  q = gdiv(x,y); /* t_REAL */
+
+  d = (expo(q)>>TWOPOTBITS_IN_LONG) + 3;
+  if (d>lg(x)) return NULL;
+  f = floorr(q);
+  if (gsigne(y) < 0 && signe(subri(q,f))) f = addrs(f, 1);
+  return signe(f)? gadd(x, negr(mulir(f,y))): x;
+}
 GEN
 gmod(GEN x, GEN y)
 {
@@ -515,7 +531,7 @@ gmod(GEN x, GEN y)
 	  p1=mulii(gel(x,1),Fp_inv(gel(x,2),y));
 	  tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
 
-	case t_QUAD: z=cgetg(4,tx);
+	case t_QUAD: z=cgetg(4,t_QUAD);
           gel(z,1) = gcopy(gel(x,1));
 	  gel(z,2) = gmod(gel(x,2),y);
           gel(z,3) = gmod(gel(x,3),y); return z;
@@ -534,7 +550,7 @@ gmod(GEN x, GEN y)
       {
 	case t_INT: case t_REAL: case t_FRAC:
 	  av = avma;
-          return gerepileupto(av, gsub(x, gmul(_quot(x,y),y)));
+          return gerepileupto(av, gadd(x, gneg(gmul(_quot(x,y),y))));
 
 	case t_POLMOD: case t_POL:
 	  return gen_0;
@@ -604,7 +620,7 @@ gmodgs(GEN x, long y)
       return utoi( Fl_div(umodiu(gel(x,1), u),
                           umodiu(gel(x,2), u), u) );
 
-    case t_QUAD: z=cgetg(4,tx);
+    case t_QUAD: z=cgetg(4,t_QUAD);
       gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gmodgs(gel(x,2),y);
       gel(z,3) = gmodgs(gel(x,3),y); return z;
@@ -1753,7 +1769,7 @@ gfloor(GEN x)
 
   switch(tx)
   {
-    case t_INT:
+    case t_INT: return icopy(x);
     case t_POL: return gcopy(x);
     case t_REAL: return floorr(x);
     case t_FRAC: return truedivii(gel(x,1),gel(x,2));
@@ -1793,7 +1809,8 @@ gceil(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_POL: return gcopy(x);
+    case t_INT: return icopy(x);
+    case t_POL: return gcopy(x);
     case t_REAL: return ceilr(x);
     case t_FRAC:
       av = avma; y = dvmdii(gel(x,1),gel(x,2),&p1);
@@ -1847,7 +1864,8 @@ ground(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
+    case t_INT: return icopy(x);
+    case t_INTMOD: case t_QUAD: return gcopy(x);
     case t_REAL: return roundr(x);
     case t_FRAC: return diviiround(gel(x,1), gel(x,2));
     case t_POLMOD: y=cgetg(3,t_POLMOD);

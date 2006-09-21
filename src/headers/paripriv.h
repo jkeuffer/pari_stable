@@ -83,6 +83,7 @@ GEN   sqrispec(GEN x, long nx);
 GEN   subrex01(GEN x);
 GEN   mulcxI(GEN x);
 GEN   mulcxmI(GEN x);
+GEN   modr_safe(GEN x, GEN y);
 
 int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);

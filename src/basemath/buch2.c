@@ -657,8 +657,9 @@ addRe_modIm(GEN x, GEN a, GEN m)
   GEN re, im, z;
   if (typ(x) == t_COMPLEX)
   {
+    im = modr_safe(gel(x,2), m);
+    if (!im) return NULL;
     re = gadd(gel(x,1), a);
-    im = gmod(gel(x,2), m);
     z = gcmp0(im)? re: mkcomplex(re, im);
   }
   else
@@ -676,8 +677,10 @@ cleanarch(GEN x, long N, long prec)
   if (tx == t_MAT)
   {
     y = cgetg(lg(x), tx);
-    for (i=1; i < lg(x); i++)
+    for (i=1; i < lg(x); i++) {
       gel(y,i) = cleanarch(gel(x,i), N, prec);
+      if (!gel(y,i)) return NULL;
+    }
     return y;
   }
   if (!is_vec_t(tx)) pari_err(talker,"not a vector/matrix in cleanarch");
@@ -685,11 +688,17 @@ cleanarch(GEN x, long N, long prec)
   s = gdivgs(sum(real_i(x), 1, RU), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
   pi2 = Pi2n(1, prec);
-  for (i=1; i<=R1; i++) gel(y,i) = addRe_modIm(gel(x,i), s, pi2);
+  for (i=1; i<=R1; i++) {
+    gel(y,i) = addRe_modIm(gel(x,i), s, pi2);
+    if (!gel(y,i)) return NULL;
+  }
   if (i <= RU)
   {
     GEN pi4 = Pi2n(2, prec), s2 = gmul2n(s, 1);
-    for (   ; i<=RU; i++) gel(y,i) = addRe_modIm(gel(x,i), s2, pi4);
+    for (   ; i<=RU; i++) {
+      gel(y,i) = addRe_modIm(gel(x,i), s2, pi4);
+      if (!gel(y,i)) return NULL;
+    }
   }
   return y;
 }
@@ -1298,6 +1307,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   R1 = nf_get_r1(nf);
   RU = (N + R1)>>1;
   col = cleanarch(col,N,prec); settyp(col, t_COL);
+  if (!col) pari_err(precer, "isprincipalarch");
   if (RU > 1)
   { /* reduce mod units */
     GEN u, z = init_red_mod_units(bnf,prec);
@@ -2596,7 +2606,10 @@ get_archclean(GEN nf, GEN x, long prec, int units)
   for (k=1; k<la; k++)
   {
     GEN c = get_arch(nf, gel(x,k), prec);
-    if (!units) c = cleanarch(c, N, prec);
+    if (!units) {
+      c = cleanarch(c, N, prec);
+      if (!c) return NULL;
+    }
     gel(M,k) = c;
   }
   return M;
@@ -2627,12 +2640,14 @@ bnfnewprec(GEN bnf, long prec)
     prec += 1 + (gexpo(funits) >> TWOPOTBITS_IN_LONG);
   nf = nfnewprec(nf0,prec);
   mun = get_archclean(nf,funits,prec,1);
+  if (!mun) pari_err(precer,"bnfnewprec");
   if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   matal = check_and_build_matal(bnf);
 
   y = shallowcopy(bnf);
   gel(y,3) = mun;
   gel(y,4) = get_archclean(nf,matal,prec,0);
+  if (!gel(y,4)) pari_err(precer,"bnfnewprec");
   gel(y,7) = nf;
   my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
   res = shallowcopy(gel(bnf,8));
@@ -2727,10 +2742,12 @@ bnfmake(GEN sbnf, long prec)
   p1 = gel(sbnf,11); l = lg(p1); fu = cgetg(l, t_VEC);
   for (k=1; k < l; k++) gel(fu,k) = gmul(bas, gel(p1,k));
   A = get_archclean(nf,fu,prec,1);
+  if (!A) pari_err(precer, "bnfmake");
 
   prec = gprecision(ro);
   matal = check_and_build_matal(sbnf);
   C = get_archclean(nf,matal,prec,0);
+  if (!C) pari_err(precer, "bnfmake");
 
   pfc = gel(sbnf,9);
   l = lg(pfc);
@@ -2993,7 +3010,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
-  GEN res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
+  GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const long minsFB = 3;
   RELCACHE_t cache;
@@ -3159,7 +3176,7 @@ PRECPB:
   /* fundamental units */
   if (flun & (nf_UNITS|nf_INIT))
   {
-    GEN U, H, v = extract_full_lattice(L); /* L may be very large */
+    GEN B, U, H, v = extract_full_lattice(L); /* L may be very large */
     if (v)
     {
       A = vecpermute(A, v);
@@ -3168,8 +3185,15 @@ PRECPB:
     /* arch. components of fund. units */
     H = hnflll_i(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
     U = gmul(U, lll(H, DEFAULTPREC));
-    A = cleanarch(gmul(A, U), N, PRECREG);
+    B = gmul(A, U);
+    A = cleanarch(B, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
+    if (!A) {
+      precadd = (DEFAULTPREC-2) + (gexpo(B) >> TWOPOTBITS_IN_LONG)
+                                - gprecision(B);
+      if (precadd <= 0) precadd = 1;
+      precpb = "cleanarch"; goto PRECPB;
+    }
   }
   fu = NULL;
   if (flun & nf_UNITS)
@@ -3182,11 +3206,17 @@ PRECPB:
       precpb = "getfu"; goto PRECPB;
     }
   }
-  delete_cache(&cache); delete_FB(&F);
-
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
-  C = cleanarch(C, N, PRECREG);
+  C0 = C; C = cleanarch(C, N, PRECREG);
+  if (!C) {
+    precadd = (DEFAULTPREC-2) + (gexpo(C0) >> TWOPOTBITS_IN_LONG)
+                              - gprecision(C0);
+    if (precadd <= 0) precadd = 1;
+    precpb = "cleanarch"; goto PRECPB;
+  }
+
+  delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu, flun);
