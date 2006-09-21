@@ -11,6 +11,7 @@ test_extra="\
   galois\
   intnum\
   qfbsolve\
+  quadclassunit\
   rfrac\
   round4\
   stark\

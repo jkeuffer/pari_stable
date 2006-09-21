@@ -1,0 +1,13 @@
+\p 38
+\e
+gettime
+test(D) =
+{
+  for (d = D, D+10^3,
+    if (!isfundamental(d),next);
+    print(d, " ", quadclassunit(d).cyc)
+  )
+}
+setrand(1); test(10^15); test(-10^15)
+print("Total time spent: ",gettime);
+\q
