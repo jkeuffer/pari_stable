@@ -1,7 +1,6 @@
    realprecision = 38 significant digits
    echo = 1 (on)
-? gettime
-0
+? gettime;
 ? test(D)=for(d=D,D+10^3,if(!isfundamental(d),next);print(d," ",quadclassuni
 t(d).cyc))
 ? setrand(1);test(10^15);test(-10^15)

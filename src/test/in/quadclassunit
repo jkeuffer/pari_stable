@@ -1,6 +1,6 @@
 \p 38
 \e
-gettime
+gettime;
 test(D) =
 {
   for (d = D, D+10^3,
