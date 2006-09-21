@@ -30,7 +30,7 @@ void gerepilemany(pari_sp av, GEN* gptr[], int n){}
 void fprintferr(const char *x, ...){}
 GEN gcopy(GEN x){return x;}
 GEN gtofp(GEN x, long prec){return x;}
-void gaffect(GEN x, GEN y){}
+ulong pari_rand() {return 0;}
 GEN ceilr(GEN x){return x;}
 GEN roundr(GEN x){return x;}
 const long lontyp[] = {0};
