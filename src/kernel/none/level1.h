@@ -1107,10 +1107,12 @@ dvdiuz(GEN x, ulong y, GEN z)
 INLINE double
 gtodouble(GEN x)
 {
-  static long reel4[4]={ evaltyp(t_REAL) | _evallg(4),0,0,0 };
-
-  if (typ(x)==t_REAL) return rtodbl(x);
-  gaffect(x,(GEN)reel4); return rtodbl((GEN)reel4);
+  if (typ(x)!=t_REAL) {
+    pari_sp av = avma;
+    x = gtofp(x, DEFAULTPREC);
+    avma = av;
+  }
+  return rtodbl(x);
 }
 
 /* same as Fl_add, assume p <= 2^(BIL - 1), so that overflow can't occur */
