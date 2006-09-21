@@ -2415,7 +2415,7 @@ number(int *n, char **s)
 ulong
 u_pow10(int n)
 {
-  static ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
+  const ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
                         1000000UL, 10000000UL, 100000000UL, 1000000000UL };
   return pw10[n];
 }
@@ -3218,8 +3218,8 @@ skipconstante(void)
 static entree *
 skipentry(void)
 {
-  static entree fakeEpNEW = { "",EpNEW };
-  static entree fakeEpVAR = { "",EpVAR };
+  static const entree fakeEpNEW = { "",EpNEW };
+  static const entree fakeEpVAR = { "",EpVAR };
   char *old = analyseur;
   const long hash = hashvalue(&analyseur), len = analyseur - old;
   entree *ep = findentry(old,len,functions_hash[hash]);
@@ -3234,7 +3234,7 @@ skipentry(void)
       return ep;
     }
   }
-  return (*analyseur == '(') ? &fakeEpNEW : &fakeEpVAR;
+  return (entree *) ((*analyseur == '(') ? &fakeEpNEW : &fakeEpVAR);
 }
 
 #include "members.h"
