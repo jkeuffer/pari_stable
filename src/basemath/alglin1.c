@@ -789,13 +789,13 @@ isscalarmat(GEN x, GEN s)
 
   for (j=1; j<=nco; j++)
   {
-    GEN *col = (GEN*) x[j];
+    GEN col = gel(x,j);
     for (i=1; i<=nco; i++)
       if (i == j)
       {
-        if (!gequal(col[i],s)) return 0;
+        if (!gequal(gel(col,i),s)) return 0;
       }
-      else if (!gcmp0(col[i])) return 0;
+      else if (!gcmp0(gel(col,i))) return 0;
   }
   return 1;
 }
@@ -811,9 +811,9 @@ isdiagonal(GEN x)
 
   for (j=1; j<=nco; j++)
   {
-    GEN *col = (GEN*) x[j];
+    GEN col = gel(x,j);
     for (i=1; i<=nco; i++)
-      if (i!=j && !gcmp0(col[i])) return 0;
+      if (i!=j && !gcmp0(gel(col,i))) return 0;
   }
   return 1;
 }
@@ -1624,9 +1624,8 @@ ZM_inv(GEN M, GEN dM)
 
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
       if (DEBUGMEM>1) pari_warn(warnmem,"ZM_inv");
-      gerepilemany(av2,gptr, 2);
+      gerepileall(av2, 2, &H, &q);
     }
   }
   if (DEBUGLEVEL>5) msgtimer("ZM_inv done");
@@ -1707,10 +1706,8 @@ detint(GEN x)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[5];
       if(DEBUGMEM>1) pari_warn(warnmem,"detint. k=%ld",k);
-      gptr[0]=&det1; gptr[1]=&piv; gptr[2]=&pivprec;
-      gptr[3]=&pass; gptr[4]=&v; gerepilemany(av1,gptr,5);
+      gerepileall(av1,5,&det1,&piv,&pivprec,*pass,&v);
     }
   }
   return gerepileupto(av, absi(det1));
@@ -1946,7 +1943,7 @@ deplin(GEN x0)
 {
   pari_sp av = avma;
   long i,j,k,t,nc,nl;
-  GEN x,y,piv,q,c,l,*d,*ck,*cj;
+  GEN x,y,piv,q,c,l,d,ck,cj;
 
   t = typ(x0);
   if (t == t_MAT) x = shallowcopy(x0);
@@ -1957,22 +1954,22 @@ deplin(GEN x0)
   }
   nc = lg(x)-1; if (!nc) pari_err(talker,"empty matrix in deplin");
   nl = lg(x[1])-1;
-  d = (GEN*)cgetg(nl+1,t_VEC); /* pivot list */
+  d = cgetg(nl+1,t_VEC); /* pivot list */
   c = cgetg(nl+1, t_VECSMALL);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
-  for (i=1; i<=nl; i++) { d[i] = gen_1; c[i] = 0; }
+  for (i=1; i<=nl; i++) { gel(d,i) = gen_1; c[i] = 0; }
   ck = NULL; /* gcc -Wall */
   for (k=1; k<=nc; k++)
   {
-    ck = (GEN*)x[k];
+    ck = gel(x,k);
     for (j=1; j<k; j++)
     {
-      cj = (GEN*)x[j]; piv = d[j]; q = gneg(ck[l[j]]);
+      cj = gel(x,j); piv = gel(d,j); q = gneg(gel(ck,l[j]));
       for (i=1; i<=nl; i++)
-        if (i != l[j]) ck[i] = gadd(gmul(piv, ck[i]), gmul(q, cj[i]));
+        if (i!=l[j]) gel(ck,i) = gadd(gmul(piv, gel(ck,i)), gmul(q, gel(cj,i)));
     }
 
-    i = gauss_get_pivot_NZ((GEN)ck, NULL, c, 1);
+    i = gauss_get_pivot_NZ(ck, NULL, c, 1);
     if (i > nl) break;
 
     d[k] = ck[i];
@@ -1981,11 +1978,11 @@ deplin(GEN x0)
   if (k > nc) { avma = av; return zerocol(nc); }
   if (k == 1) { avma = av; return gscalcol_i(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
-  gel(y,1) = ck[ l[1] ];
-  for (q=d[1],j=2; j<k; j++)
+  y[1] = ck[ l[1] ];
+  for (q=gel(d,1),j=2; j<k; j++)
   {
-    gel(y,j) = gmul(ck[ l[j] ], q);
-    q = gmul(q, d[j]);
+    gel(y,j) = gmul(gel(ck, l[j]), q);
+    q = gmul(q, gel(d,j));
   }
   gel(y,j) = gneg(q);
   for (j++; j<=nc; j++) gel(y,j) = gen_0;
@@ -3437,7 +3434,7 @@ det(GEN a)
   a = shallowcopy(a); s = 1;
   for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
   {
-    GEN *ci, *ck, m, p1;
+    GEN ci, ck, m, p1;
     int diveuc = (gcmp1(pprec)==0);
 
     p = gcoeff(a,i,i);
@@ -3448,10 +3445,10 @@ det(GEN a)
       lswap(a[k], a[i]); s = -s;
       p = gcoeff(a,i,i);
     }
-    ci = (GEN*)a[i];
+    ci = gel(a,i);
     for (k=i+1; k<=nbco; k++)
     {
-      ck = (GEN*)a[k]; m = gel(ck,i);
+      ck = gel(a,k); m = gel(ck,i);
       if (gcmp0(m))
       {
         if (gcmp1(p))
@@ -3462,9 +3459,9 @@ det(GEN a)
         else
           for (j=i+1; j<=nbco; j++)
           {
-            p1 = gmul(p,ck[j]);
+            p1 = gmul(p, gel(ck,j));
             if (diveuc) p1 = mydiv(p1,pprec);
-            ck[j] = p1;
+            gel(ck,j) = p1;
           }
       }
       else
@@ -3472,16 +3469,15 @@ det(GEN a)
         m = gneg_i(m);
         for (j=i+1; j<=nbco; j++)
         {
-          p1 = gadd(gmul(p,ck[j]), gmul(m,ci[j]));
+          p1 = gadd(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
           if (diveuc) p1 = mydiv(p1,pprec);
-          ck[j] = p1;
+          gel(ck,j) = p1;
         }
       }
       if (low_stack(lim,stack_lim(av,2)))
       {
-        GEN *gptr[2]; gptr[0]=&a; gptr[1]=&pprec;
         if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-        gerepilemany(av,gptr,2); p = gcoeff(a,i,i); ci = (GEN*)a[i];
+        gerepileall(av,2, &a,&pprec); p = gcoeff(a,i,i); ci = gel(a,i);
       }
     }
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);

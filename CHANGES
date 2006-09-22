@@ -60,6 +60,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
    31- accuracy errors in bnfinit: setrand(3); bnfinit(x^2+999999999999971)
        [ use a failsafe version of gmod (modr_safe), and increase accuracy 
          if necessary ]
+   32- possible corruption of gen_2 in mynegi() [ hnflll ]
 
 
   Changed
