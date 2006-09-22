@@ -2830,7 +2830,7 @@ static void
 corediscfact(GEN x, long xmod4, GEN *ptD, GEN *ptP, GEN *ptE)
 {
   long s = signe(x), l, i; 
-  GEN fa = auxdecomp(s < 0? absi(x): x,1);
+  GEN fa = Z_factor(s < 0? absi(x): x);
   GEN d, P = gel(fa,1), E = gtovecsmall(gel(fa,2));
 
   l = lg(P); d = gen_1;

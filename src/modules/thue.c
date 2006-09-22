@@ -1094,7 +1094,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 
   *ptPrimes = NULL;
 
-  fact=factor(a); primes=gel(fact,1);
+  fact=Z_factor(a); primes=gel(fact,1);
   nprimes=lg(primes)-1; T->sindex = 0;
   T->gen_ord = gmael3(bnf,8,1,2); Ngen = lg(T->gen_ord)-1;
 

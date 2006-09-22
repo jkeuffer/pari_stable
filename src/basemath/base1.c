@@ -464,7 +464,7 @@ polgalois(GEN x, long prec)
 	  prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
-	p2 = (GEN)factor(p5)[1];
+	p2 = (GEN)ZX_factor(p5)[1];
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
@@ -505,7 +505,7 @@ polgalois(GEN x, long prec)
 	    prec = (prec<<1)-2;
 	  }
           if (!ZX_is_squarefree(p5)) goto tchi;
-	  p3=(GEN)factor(p5)[1];
+	  p3=(GEN)ZX_factor(p5)[1];
 	  f=Z_issquare(ZX_disc(x));
 	  if (lg(p3)-1==1)
 	  {
@@ -561,7 +561,7 @@ polgalois(GEN x, long prec)
 	    prec=(prec<<1)-2;
 	  }
 	  if (!ZX_is_squarefree(p5)) goto tchi;
-	  p2=(GEN)factor(p5)[1];
+	  p2=(GEN)ZX_factor(p5)[1];
 	  switch(lg(p2)-1)
 	  {
 	    case 1:
@@ -581,7 +581,7 @@ polgalois(GEN x, long prec)
 	      if (e <= -10)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
-		p2 = (GEN)factor(p5)[1];
+		p2 = (GEN)ZX_factor(p5)[1];
 		f = Z_issquare(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
@@ -641,7 +641,7 @@ polgalois(GEN x, long prec)
           prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
-	p2=(GEN)factor(p5)[1];
+	p2=(GEN)ZX_factor(p5)[1];
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;

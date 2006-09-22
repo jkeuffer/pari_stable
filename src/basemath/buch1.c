@@ -328,7 +328,7 @@ form_to_ideal(GEN x)
        && tx != t_QFR && tx != t_QFI) pari_err(typeer,"form_to_ideal");
   b = negi(gel(x,2)); if (mpodd(b)) b = addis(b,1);
   return mkmat2( mkcol2(gel(x,1), gen_0),
-                 mkcol2((GEN)shifti(b,-1), gen_1) );
+                 mkcol2(shifti(b,-1), gen_1) );
 }
 
 /* P approximation computed at initial precision prec. Compute needed prec
@@ -940,7 +940,7 @@ largeprime(struct buch_quad *B, long q, long *ex, long np, long nrho)
   }
   for(i=1; i<l; i++)
     if (pt[i] != ex[i]) return pt;
-  return (pt[-2]==np)? (GEN)NULL: pt;
+  return (pt[-2]==np)? NULL: pt;
 }
 
 static void

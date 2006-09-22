@@ -1054,13 +1054,14 @@ matrixqz(GEN x, GEN p)
 
   if (gcmp0(p))
   {
-    p1 = gtrans(x); setlg(p1,n+1);
-    p2 = det(p1); p1[n] = p1[n+1]; p2 = ggcd(p2,det(p1));
+    av1 = avma;
+    p1 = shallowtrans(x); setlg(p1,n+1);
+    p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
     if (!signe(p2))
       pari_err(impl,"matrixqz when the first 2 dets are zero");
-    if (gcmp1(p2)) return gerepilecopy(av,x);
+    if (gcmp1(p2)) { avma = av1; return x; }
 
-    p1 = (GEN)factor(p2)[1];
+    p1 = (GEN)Z_factor(p2)[1];
   }
   else p1 = mkvec(p);
   nfact = lg(p1)-1;

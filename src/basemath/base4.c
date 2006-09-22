@@ -612,7 +612,7 @@ val_norm(GEN x, GEN p, long *vz)
   return v;
 }
 
-/* return factorization of Nx */
+/* return factorization of Nx, x in HNF */
 GEN
 factor_norm(GEN x)
 {

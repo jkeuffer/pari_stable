@@ -2123,7 +2123,7 @@ factor(GEN x)
       switch(tx)
       {
         case 0: pari_err(impl,"factor for general polynomials");
-	case t_INT: return factpol(x,1);
+	case t_INT: return ZX_factor(x);
 	case t_INTMOD: return factmod(x,p);
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
@@ -2208,10 +2208,12 @@ factor(GEN x)
           return gerepilecopy(av, p1);
         }
       }
-    case t_RFRAC:
-      p1 = factor(gel(x,1));
-      p2 = factor(gel(x,2)); gel(p2,2) = gneg_i(gel(p2,2));
-      return gerepilecopy(av, concat_factor(p1,p2));
+    case t_RFRAC: {
+      GEN a = gel(x,1), b = gel(x,2);
+      y = factor(b); gel(y,2) = gneg_i(gel(y,2));
+      if (typ(a)==t_POL && varn(a)==varn(b)) y = concat_factor(factor(a), y);
+      return gerepilecopy(av, y);
+    }
 
     case t_COMPLEX:
       y = gauss_factor(x);

@@ -173,7 +173,7 @@ idealmodidele(GEN bnr, GEN x)
 {
   GEN bid = gel(bnr,2), fa2 = gel(bid,4);
   GEN idele = gel(bid,1);
-  GEN sarch = (GEN)fa2[lg(fa2)-1];
+  GEN sarch = gel(fa2,lg(fa2)-1);
   return _idealmodidele(checknf(bnr), x, idele, sarch);
 }
 
@@ -685,8 +685,8 @@ isprimitive(GEN nf)
   long p, i, l, ep, N = degpol(nf[1]);
   GEN d,fa;
 
-  fa = (GEN)factor(utoipos(N))[1]; /* primes | N */
-  p = itos(gel(fa,1)); if (p == N) return 1; /* prime degree */
+  p = ucoeff(factoru(N), 1,1); /* smallest prime | N */
+  if (p == N) return 1; /* prime degree */
 
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
    * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
@@ -1020,7 +1020,7 @@ lowerboundforregulator_i(GEN bnf)
     {
       pol = gaddgs(gsub(monomial(gen_1,N,0),monomial(bound,1,0)),N-1);
       p1 = roots(pol,DEFAULTPREC);
-      y= real_i((GEN)p1[ N&1? 3: 2]);
+      y= real_i(gel(p1, 2 + (N&1)));
       M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
       fprintferr("pol = %Z\n",pol);
       fprintferr("old method: y = %Z, M0 = %Z\n",y,gprec_w(M0,3));
@@ -1178,7 +1178,7 @@ certifybuchall(GEN bnf)
 
   if (nbgen)
   {
-    GEN f = factor(gel(cyc,1)), f1 = gel(f,1);
+    GEN f = Z_factor(gel(cyc,1)), f1 = gel(f,1);
     long nbf1 = lg(f1);
     if (DEBUGLEVEL>1) { fprintferr("  Testing primes | h(K)\n\n"); flusherr(); }
     for (i=1; i<nbf1; i++)
@@ -1827,7 +1827,7 @@ get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
   if (nz < 0) return NULL;
   n  = clhray * degk;
   R1 = clhray * nz;
-  dlk = factordivexact(factorpow(factor(utoipos(Nf)),clhray), idealrel);
+  dlk = factordivexact(factorpow(Z_factor(utoipos(Nf)),clhray), idealrel);
   /* r2 odd, set dlk = -dlk */
   if (((n-R1)&3)==2) dlk = factormul(to_famat_all(gen_m1,gen_1), dlk);
   return mkvec3(utoipos(n),
@@ -1896,7 +1896,7 @@ discrayabslist(GEN bnf, GEN L)
   nf = gel(bnf,7);
   h = gmael3(bnf,8,1,1);
   ID.degk = degpol(nf[1]);
-  ID.fadk = factor(absi(gel(nf,3)));
+  ID.fadk = Z_factor(absi(gel(nf,3)));
   ID.idealrelinit = trivfact();
   V = cgetg(l, t_VEC);
   D = cgetg(l, t_VEC);
@@ -2087,7 +2087,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   bnf = checkbnf(bnf);
   nf = gel(bnf,7); r1 = nf_get_r1(nf);
   degk = degpol(nf[1]);
-  fadkabs = factor(absi(gel(nf,3)));
+  fadkabs = Z_factor(absi(gel(nf,3)));
   h = gmael3(bnf,8,1,1);
   U = init_units(bnf);
   sgnU = zsignunits(bnf, NULL, 1);
@@ -2100,7 +2100,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     if (r1>15) pari_err(talker,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {
-    matarchunit = (GEN)NULL;
+    matarchunit = NULL;
     for (nba=0,i=1; i<=r1; i++) if (signe(arch[i])) nba++;
   }
 

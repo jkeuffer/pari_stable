@@ -1548,6 +1548,11 @@ integral over \kbd{Z}.
 \fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
 \kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
 
+\fun{GEN}{ZX_factor}{GEN T} returns the factorization of the primitive part
+of \kbd{T} over $\Q[X]$ (the content is lost). 
+
+\fun{GEN}{QX_factor}{GEN T} as \kbd{ZX_factor}.
+
 \fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{ZX}~\kbd{A} and \kbd{B}.
 

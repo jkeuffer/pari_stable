@@ -61,7 +61,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
        [ use a failsafe version of gmod (modr_safe), and increase accuracy 
          if necessary ]
    32- possible corruption of gen_2 in mynegi() [ hnflll ]
-
+   33- factor(4/x) --> [2, 2; x -1]  (content not removed)
 
   Changed
     1- moved cgiv to inline kernel
@@ -98,6 +98,7 @@ BA  2- Add experimental --enable-tls Configure option and thread-local stack
 RM  7- polhermite, polchebyshev2
     8- allow rnf.zk and rnf.nf
     9- [toplevel benchmarks] bnfisintnorm, quadclassunit
+   10- ZX_factor, QX_factor
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

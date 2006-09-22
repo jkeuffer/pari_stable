@@ -453,7 +453,7 @@ subgroup_engine(subgp_iter *T)
   }
   if (!signe(cyc[1])) pari_err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) (void)timer2();
-  fa = factor(gel(cyc,1)); primlist = gel(fa,1);
+  fa = Z_factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;
   for (i=1; i<nbprim; i++)

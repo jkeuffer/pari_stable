@@ -923,7 +923,6 @@ factoru(ulong n)
   GEN f = cgetg(3,t_VEC);
   GEN p = cgetg(l,t_VECSMALL);
   GEN e = cgetg(l,t_VECSMALL);
-  pari_sp lbot = avma;
   gel(f,1) = p;
   gel(f,2) = e;
   for (i = 1; i < l; i++)
@@ -931,7 +930,7 @@ factoru(ulong n)
     p[i] = itou(gel(P,i));
     e[i] = itou(gel(E,i));
   }
-  avma = lbot; return gerepileupto(ltop,f);
+  return gerepileupto(ltop,f);
 }
 /* Factor n and output [p,e,c] where
  * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
@@ -1287,7 +1286,7 @@ sumdivk(GEN n, long k)
 /***********************************************************************/
 /**                                                                   **/
 /**                MISCELLANEOUS ARITHMETIC FUNCTIONS                 **/
-/**         (all of these ultimately depend on auxdecomp())           **/
+/**                (ultimately depend on Z_factor())                  **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -1309,7 +1308,7 @@ divisors(GEN n)
   else
   {
     if (tn == t_INT)
-      n = auxdecomp(n,1);
+      n = Z_factor(n);
     else {
       if (is_matvec_t(tn)) pari_err(typeer,"divisors");
       isint = 0;

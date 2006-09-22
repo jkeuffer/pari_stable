@@ -645,7 +645,7 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 {
   if (!is_pm1(N))
   {
-    GEN v = (GEN)factor(N)[1];
+    GEN v = (GEN)Z_factor(N)[1];
     long i, l = lg(v);
     for (i=1; i<l; i++) pr_append(nf,rel,gel(v,i),prod,S1,S2);
   }

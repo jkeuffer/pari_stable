@@ -1382,7 +1382,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
     return gerepileuptoint(av, ff_PHlog_Fp(a,g,T,p));
   /* f > 1 ==> T != NULL */
   ord = subis(powiu(p, degpol(T)), 1);
-  fa = factor(ord);
+  fa = Z_factor(ord);
   ex = gel(fa,2);
   fa = gel(fa,1);
   l = lg(fa);
