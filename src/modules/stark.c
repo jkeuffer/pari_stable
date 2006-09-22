@@ -1392,7 +1392,7 @@ static void
 deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
   GEN z = isprincipalray(bnr, gel(Lpr,1));
   appendL(R->L11, (GEN)p);
-  appendL((GEN)R->L11ray, z);
+  appendL(R->L11ray, z);
 }
 static void
 deg0(LISTray *R, long p) {
