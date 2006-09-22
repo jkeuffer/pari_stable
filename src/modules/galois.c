@@ -401,7 +401,7 @@ Monomial(GEN r, PERM bb, long nbv)
 
   for (i = 1; i <= nbv; i++)
   {
-    t = (GEN)r[(int)bb[i]];
+    t = gel(r,(int)bb[i]);
     if (typ(t) == t_COMPLEX && signe(t[1]) < 0) { s = -s; t = gneg(t); }
     gel(R,i) = t;
   }
@@ -714,7 +714,7 @@ tschirn(buildroot *BR)
   if (DEBUGLEVEL)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
-  a = (GEN)BR->coef[l]; /* fill with random polynomial of degree <= l-1 */
+  a = gel(BR->coef,l); /* fill with random polynomial of degree <= l-1 */
   do
   {
     a[1]=0;
@@ -726,7 +726,7 @@ tschirn(buildroot *BR)
   a[1] += k;
 
   preci(BR, BR->prmax);
-  appendL(BR->r, new_pol((GEN)BR->r[1], a));
+  appendL(BR->r, new_pol(gel(BR->r,1), a));
   preci(BR, BR->pr);
 }
 
@@ -774,10 +774,10 @@ moreprec(buildroot *BR)
     
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
     BR->prmax += d;
-    ro = sortroots(cleanroots(BR->p,BR->prmax), (GEN)BR->r[1]);
+    ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
     appendL(BR->r, gclone(ro));
-    for (d = 2; d < l; d++) appendL(BR->r, new_pol(ro, (GEN)BR->coef[d]));
+    for (d = 2; d < l; d++) appendL(BR->r, new_pol(ro, gel(BR->coef,d)));
     avma = av;
   }
   preci(BR, BR->pr);
@@ -830,7 +830,7 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
   long i, sp;
   for (;;)
   {
-    GEN rr = (GEN)BR->r[d];
+    GEN rr = gel(BR->r,d);
     for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
     ro = R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
     sp = suffprec(ro);
@@ -2276,7 +2276,7 @@ closure11(buildroot *BR)
   {
   /* ODD_11_1: */
     GEN h = BR->p, r = compositum(h, h);
-    r = (GEN)r[lg(r)-1];
+    r = gel(r,lg(r)-1);
     if (degpol(r) == 22) return 2; /* D11 */
     h = shallowcopy(h); setvarn(h, MAXVARN);
     setvarn(r, 0);
@@ -2314,27 +2314,27 @@ galoismodulo11(GEN pol, GEN dpol)
 {
   long res, gr[6] = {0, 1, 1, 1, 1, 1};
   pari_sp av = avma;
-  GEN *TYP = (GEN*)cgetg(EVEN? 9: 6, t_VEC);
+  GEN TYP = cgetg(EVEN? 9: 6, t_VEC);
 
-  TYP[1] = _typ(1, 11);
+  gel(TYP,1) = _typ(1, 11);
   if (EVEN)
   {
-    TYP[2] = _typ(3, 8,2,1);
-    TYP[3] = _typ(3, 6,3,2);
-    TYP[4] = _typ(3, 5,5,1);
-    TYP[5] = _typ(5, 4,4,1,1,1);
-    TYP[6] = _typ(5, 3,3,3,1,1);
-    TYP[7] = _typ(7, 2,2,2,2,1,1,1);
-    TYP[8] = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
+    gel(TYP,2) = _typ(3, 8,2,1);
+    gel(TYP,3) = _typ(3, 6,3,2);
+    gel(TYP,4) = _typ(3, 5,5,1);
+    gel(TYP,5) = _typ(5, 4,4,1,1,1);
+    gel(TYP,6) = _typ(5, 3,3,3,1,1);
+    gel(TYP,7) = _typ(7, 2,2,2,2,1,1,1);
+    gel(TYP,8) = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
   }
   else
   {
-    TYP[2] = _typ(2, 10,1);
-    TYP[3] = _typ(3, 5,5,1);
-    TYP[4] = _typ(6, 2,2,2,2,2,1);
-    TYP[5] = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
+    gel(TYP,2) = _typ(2, 10,1);
+    gel(TYP,3) = _typ(3, 5,5,1);
+    gel(TYP,4) = _typ(6, 2,2,2,2,2,1);
+    gel(TYP,5) = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
   }
-  res = galmodp(pol,dpol,(GEN)TYP,gr,NULL);
+  res = galmodp(pol,dpol,TYP,gr,NULL);
   avma=av; if (!res) return 0;
   return EVEN? 7: 8;
 }
@@ -2414,7 +2414,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
     }
     for (i = 1; i < l; i++)
     {
-      GEN p1 = (GEN)BR->r[i];
+      GEN p1 = gel(BR->r,i);
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
       for (j=1; j<=N; j++) p1[j] = z[j];
     }
@@ -2513,7 +2513,7 @@ galoisbig(GEN pol, long prec)
       case 10: t = closure10(&BR); break;
       case 11: t = closure11(&BR); break;
     }
-    for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
+    for (i = 1; i < lg(BR.r); i++) gunclone(gel(BR.r,i));
   }
   avma = av; 
   res    = cgetg(5,t_VEC);

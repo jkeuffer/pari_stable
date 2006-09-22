@@ -1756,7 +1756,7 @@ gsqr(GEN x)
           if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
         p1 = gshift(p1,1);
         if ((i&1) == 0 && p2[i>>1])
-          p1 = gadd(p1, gsqr((GEN)x[i>>1]));
+          p1 = gadd(p1, gsqr(gel(x,i>>1)));
         gel(z,i) = gerepileupto(av,p1);
       }
       z -= 2; free(p2); return normalize(z);

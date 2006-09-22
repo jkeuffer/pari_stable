@@ -792,7 +792,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
     if (DEBUGLEVEL>5) fprintferr("initial parameters p=%Z,\n  f=%Z\n",p,f);
   }
   if (2*dk >= mf-1) return FpX_div(f,k,p);
-  return dk? (GEN)NULL: f;
+  return dk? NULL: f;
 }
 
 /* p-maximal order of Af; mf = v_p(Disc(f)) */

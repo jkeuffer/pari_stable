@@ -141,7 +141,7 @@ CX_square_spec(GEN P, long lP)
     t = mulCC(gel(P,0), gel(P,i)); /* j = 0 */
     for (j=1; j<l; j++) t = addCC(t, mulCC(gel(P,j), gel(P,i-j)));
     t = gmul2n(t,1);
-    if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
+    if ((i & 1) == 0) t = addCC(t, sqrCC(gel(P,i>>1)));
     gel(s,i+2) = gerepileupto(av, t);
   }
   gel(s,nn+2) = sqrCC(gel(P,n)); /* i = nn */
@@ -151,7 +151,7 @@ CX_square_spec(GEN P, long lP)
     t = mulCC(gel(P,i-n),gel(P,n)); /* j = i-n */
     for (j=i-n+1; j<l; j++) t = addCC(t, mulCC(gel(P,j),gel(P,i-j)));
     t = gmul2n(t,1);
-    if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
+    if ((i & 1) == 0) t = addCC(t, sqrCC(gel(P,i>>1)));
     gel(s,i+2) = gerepileupto(av, t);
   }
   return normalizepol_i(s, nn+3);
@@ -801,10 +801,10 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   }
   if (l == 4)
   {
-    f1 = gadd(gel(p,0),   (GEN)p[step<<1]);
-    f2 = gadd(gel(p,0),   gneg((GEN)p[step<<1]));
-    f3 = gadd(gel(p,step),(GEN)p[3*step]);
-    f02= gadd(gel(p,step),gneg((GEN)p[3*step]));
+    f1 = gadd(gel(p,0),   gel(p,step<<1));
+    f2 = gadd(gel(p,0),   gneg(gel(p,step<<1)));
+    f3 = gadd(gel(p,step),gel(p,3*step));
+    f02= gadd(gel(p,step),gneg(gel(p,3*step)));
     f02 = mulcxI(f02);
     gel(f,0) = gadd(f1, f3);
     gel(f,1) = gadd(f2, f02);
@@ -824,8 +824,8 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   {
     rapi = step*i;
     f1 = gmul(gel(Omega,rapi),    gel(f,i+l1));
-    f2 = gmul((GEN)Omega[rapi<<1], gel(f,i+l2));
-    f3 = gmul((GEN)Omega[3*rapi],  gel(f,i+l3));
+    f2 = gmul(gel(Omega,rapi<<1), gel(f,i+l2));
+    f3 = gmul(gel(Omega,3*rapi),  gel(f,i+l3));
 
     f02 = gadd(gel(f,i),f2);
     g02 = gadd(gel(f,i),gneg(f2));

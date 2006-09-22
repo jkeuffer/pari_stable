@@ -125,7 +125,7 @@ list_fun(subgp_iter *T, GEN x)
   { /* test conductor */
     long i, l = lg(S->gen);
     for (i = 1; i < l; i++)
-      if ( hnf_gauss(H, (GEN)S->gen[i]) ) return;
+      if ( hnf_gauss(H, gel(S->gen,i)) ) return;
   }
   addcell(S, H); T->countsub++;
 }
@@ -142,7 +142,7 @@ treatsub(subgp_iter *T, GEN H)
     GEN Hp = gmul(T->expoI, H); /* lift H to G */
     long l = lg(T->subqpart);
     for (i=1; i<l; i++)
-      T->fun(T, shallowconcat(Hp, (GEN)T->subqpart[i]));
+      T->fun(T, shallowconcat(Hp, gel(T->subqpart,i)));
   }
 }
 

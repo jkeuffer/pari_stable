@@ -1818,9 +1818,9 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
   if (!sgn) sgn = zsigne(nf, a, S->archp);
   for (k = kmin; k <= kmax; k++)
   {
-    list= (GEN)S->lists[k];
-    pr  = (GEN)S->P[k];
-    prk = idealpow(nf, pr, (GEN)S->e[k]);
+    list= gel(S->lists,k);
+    pr  = gel(S->P,k);
+    prk = idealpow(nf, pr, gel(S->e,k));
     y = zlog_pk(nf, a, y, pr, prk, list, &sgn);
   }
   zlog_add_sign(y0, sgn, S->lists);
@@ -1840,7 +1840,7 @@ GEN
 log_gen_pr(zlog_S *S, long index, GEN nf, long e)
 {
   long i, l, yind = S->ind[index];
-  GEN y, A, L, L2 = (GEN)S->lists[index];
+  GEN y, A, L, L2 = gel(S->lists,index);
 
   if (e == 1)
   {
@@ -1851,7 +1851,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
   }
   else
   {
-    GEN pr = (GEN)S->P[index], prk, g;
+    GEN pr = gel(S->P,index), prk, g;
 
     if (e == 2)
       L = gel(L2,2);
@@ -1860,7 +1860,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     g = gel(L,2);
     l = lg(g);
     A = cgetg(l, t_MAT);
-    prk = idealpow(nf, pr, (GEN)S->e[index]);
+    prk = idealpow(nf, pr, gel(S->e,index));
     for (i = 1; i < l; i++)
     {
       GEN G = gel(g,i), sgn = NULL; /* positive at f_oo */
@@ -1935,7 +1935,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   lists = cgetg(nbp+2,t_VEC);
 
   gen = cgetg(1,t_VEC);
-  t = (nbp==1)? (GEN)NULL: x;
+  t = (nbp==1)? NULL: x;
   for (i=1; i<=nbp; i++)
   {
     GEN L = zprimestar(nf, gel(P,i), gel(E,i), t, archp);

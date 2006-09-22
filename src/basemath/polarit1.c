@@ -1102,7 +1102,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
         Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
-      (void)Flx_renormalize((GEN)pol,l-1);
+      (void)Flx_renormalize(pol,l-1);
 
       polt = Flx_to_ZX(pol);
     }

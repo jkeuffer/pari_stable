@@ -716,6 +716,8 @@ kill_from_hashlist(entree *ep, long n)
     if (e->next == ep) { e->next = ep->next; return; }
 }
 
+#define ALIAS(ep) (entree *) ((GEN)ep->value)[1]
+
 /* kill aliases pointing to EP */
 static void 
 kill_alias(entree *EP)
@@ -726,8 +728,7 @@ kill_alias(entree *EP)
     for (ep = functions_hash[n]; ep; ep = epnext)
     {
       epnext = ep->next;
-      if (EpVALENCE(ep) == EpALIAS &&
-          EP == (entree *) ((GEN)ep->value)[1]) kill0(ep);
+      if (EpVALENCE(ep) == EpALIAS && EP == ALIAS(ep)) kill0(ep);
     }
 }
 
@@ -1683,7 +1684,7 @@ call_member(GEN p, GEN x)
 entree *
 do_alias(entree *ep)
 {
-  while (ep->valence == EpALIAS) ep = (entree *) ((GEN)ep->value)[1];
+  while (ep->valence == EpALIAS) ep = ALIAS(ep);
   return ep;
 }
 
@@ -1790,7 +1791,7 @@ record_fun(entree *ep, char *start, long len, long narg, long nloc, GEN tmpargs)
   long i, NARG = narg + nloc;
   long L1 = NARG + nchar2nlong(len+1) + 1; /* args + fun code + codeword */
   long L2 = NARG + nchar2nlong(sizeof(gp_args)); /* dflt args */
-  GEN newfun, *defarg, ptr = (GEN) newbloc(L1 + L2);
+  GEN newfun, *defarg, ptr = newbloc(L1 + L2);
   gp_args *f = (gp_args*)(ptr + L1);
 
   newfun = ptr;
@@ -1888,7 +1889,7 @@ num_derivU(entree *ep, GEN *arg)
 }
 
 #define DFT_VAR (GEN)-1L
-#define DFT_GEN (GEN)NULL
+#define DFT_GEN NULL
 #define _ARGS_ argvec[0], argvec[1], argvec[2], argvec[3],\
                argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]
 
@@ -1932,7 +1933,7 @@ identifier(void)
         ch1 = analyseur; skipseq(); len = analyseur-ch1;
 
         n = 2 + nchar2nlong(len+1);
-        newfun=ptr= (GEN) newbloc(n);
+        newfun=ptr= newbloc(n);
         *newfun++ = evaltyp(t_STR) | evallg(n); /* non-recursive dummy */
         *newfun++ = v;
 

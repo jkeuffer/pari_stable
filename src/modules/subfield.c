@@ -413,7 +413,7 @@ chinese_retrieve_pol(GEN DATA, primedata *S, GEN listdelta)
   for (i=1; i<l; i++)
   { /* h(firstroot[i]) = listdelta[i] */
     GEN t = FqX_Fq_mul(gel(interp,i), gel(listdelta,i), S->T,S->p);
-    t = poltrace(t, (GEN)S->Trk[i], S->p);
+    t = poltrace(t, gel(S->Trk,i), S->p);
     t = gmul(t, gel(bezoutC,i));
     h = h? gadd(h,t): t;
   }
@@ -560,7 +560,7 @@ init_primedata(primedata *S)
 
   if (S->lcm == degpol(S->ff[lff-1]))
   {
-    T = shallowcopy((GEN)S->ff[lff-1]);
+    T = shallowcopy(gel(S->ff,lff-1));
     setvarn(T, v);
   }
   else
@@ -710,7 +710,7 @@ compute_data(blockdata *B)
     }
     ff = cgetg(lff, t_VEC); /* copy, don't overwrite! */
     for (i=1; i<lff; i++)
-      gel(ff,i) = FpX_red(translate_pol((GEN)S->ff[i], mTR), p);
+      gel(ff,i) = FpX_red(translate_pol(gel(S->ff,i), mTR), p);
   }
   else
   {
@@ -772,19 +772,19 @@ subfield(GEN A, blockdata *B)
   GEN M, pe, pol, fhk, g, e, d_1_term, delta, listdelta, whichdelta;
   GEN T = B->S->T, p = B->S->p, firstroot = B->S->firstroot;
 
-  pol= (GEN)B->DATA[1]; N = degpol(pol); d = N/m; /* m | N */
-  pe = (GEN)B->DATA[2];
-  fhk= (GEN)B->DATA[3];
-  M  = (GEN)B->DATA[8];
+  pol= gel(B->DATA,1); N = degpol(pol); d = N/m; /* m | N */
+  pe = gel(B->DATA,2);
+  fhk= gel(B->DATA,3);
+  M  = gel(B->DATA,8);
 
   delta = cgetg(m+1,t_VEC);
   whichdelta = cgetg(N+1, t_VECSMALL);
   d_1_term = gen_0;
   for (i=1; i<=m; i++)
   {
-    GEN Ai = gel(A,i), p1 = (GEN)fhk[Ai[1]];
+    GEN Ai = gel(A,i), p1 = gel(fhk,Ai[1]);
     for (j=2; j<=d; j++)
-      p1 = Fq_mul(p1, (GEN)fhk[Ai[j]], T, pe);
+      p1 = Fq_mul(p1, gel(fhk,Ai[j]), T, pe);
     gel(delta,i) = p1;
     if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
     /* g = prod (X - delta[i])

@@ -987,7 +987,7 @@ idealaddmultoone(GEN nf, GEN list)
     pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
-  U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
+  U = gel(U,(l-2)*N + i); /* z U = 1 */
   for (i=1; i<l; i++)
     gel(L,i) = gmul(gel(L,i), vecslice(U, (i-1)*N + 1, i*N));
   return gerepilecopy(av, L);
@@ -1362,7 +1362,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
   long lc;
   if (lg(g) == 1) return gscalcol_i(gen_1, degpol(nf[1])); /* 1 */
   module = gel(bid,1);
-  fa2 = gel(bid,4); sarch = (GEN)fa2[lg(fa2)-1];
+  fa2 = gel(bid,4); sarch = gel(fa2,lg(fa2)-1);
   cyc = gmael(bid,2,2); lc = lg(cyc);
   t = NULL;
   if (lc != 1)
@@ -2982,8 +2982,8 @@ nfdetint(GEN nf, GEN x)
           cm=1; idprod = id;
           for (i=1; i<=m; i++)
             if (i!=t)
-              idprod = (idprod==id)? (GEN)I[c[i]]
-                                   : idealmul(nf,idprod,(GEN)I[c[i]]);
+              idprod = (idprod==id)? gel(I,c[i])
+                                   : idealmul(nf,idprod,gel(I,c[i]));
         }
         p1 = idealmul(nf,gel(v,t),gel(I,k)); c[t]=0;
         det1 = (typ(det1)==t_INT)? p1: idealadd(nf,p1,det1);

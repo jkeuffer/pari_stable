@@ -1394,14 +1394,14 @@ gsubstvec(GEN e, GEN v, GEN r)
   z=cgetg(l,t_VECSMALL);
   for(i=1;i<l;i++)
   { 
-    GEN T=(GEN)v[i];
+    GEN T = gel(v,i);
     if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
       pari_err(talker,"not a variable in substvec");
     w[i]=varn(T);
     z[i]=fetch_var();
   }
   for(i=1;i<l;i++) e = gsubst(e,w[i],pol_x[z[i]]);
-  for(i=1;i<l;i++) e = gsubst(e,z[i],(GEN)r[i]);
+  for(i=1;i<l;i++) e = gsubst(e,z[i],gel(r,i));
   for(i=1;i<l;i++) (void)delete_var();
   return gerepileupto(ltop,e);
 }
@@ -1618,7 +1618,7 @@ ggrando(GEN x, long n)
     v = varn(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");
     m = n * polvaluation(x, NULL); break;
   case t_RFRAC:
-    if (!gcmp0((GEN)x[1])) pari_err(talker,"zero argument in O()");
+    if (!gcmp0(gel(x,1))) pari_err(talker,"zero argument in O()");
     v = gvar(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");
     m = n * gval(x,v); break;
     default: pari_err(talker,"incorrect argument in O()");

@@ -133,7 +133,7 @@ static GEN
 Conj_LH(GEN v, GEN *H, GEN r, long prec)
 {
   long j, l = lg(v);
-  GEN e, M = (GEN)cgetg(l,t_MAT);
+  GEN e, M = cgetg(l,t_MAT);
 
   (*H) = cgetg(l,t_COL);
   for (j = 1; j < l; j++)
@@ -275,7 +275,7 @@ static GEN
 Baker(baker_s *BS)
 {
   const long prec = DEFAULTPREC;
-  GEN tmp, B0, hb0, c9 = gen_1, ro = BS->ro, ro0 = (GEN)ro[BS->iroot];
+  GEN tmp, B0, hb0, c9 = gen_1, ro = BS->ro, ro0 = gel(ro,BS->iroot);
   long k, i1, i2, r = BS->r;
 
   switch (BS->iroot) {
@@ -289,13 +289,13 @@ Baker(baker_s *BS)
   {
     tmp = gdiv(gcoeff(BS->MatFU,i1,k), gcoeff(BS->MatFU,i2,k));
     tmp = gmax(gen_1, abslog(tmp,prec));
-    c9 = gmul(c9, gmax((GEN)BS->ALH[k], gdiv(tmp, BS->bak)));
+    c9 = gmul(c9, gmax(gel(BS->ALH,k), gdiv(tmp, BS->bak)));
   }
 
   /* Compute a bound for the h_0 */
   hb0 = gadd(gmul2n(BS->hal,2), gmul2n(gadd(BS->Hmu,mplog2(prec)), 1));
-  tmp = gdiv(gmul(gsub(ro0, gel(ro,i2)), (GEN)BS->NE[i1]),
-             gmul(gsub(ro0, gel(ro,i1)), (GEN)BS->NE[i2]));
+  tmp = gdiv(gmul(gsub(ro0, gel(ro,i2)), gel(BS->NE,i1)),
+             gmul(gsub(ro0, gel(ro,i1)), gel(BS->NE,i2)));
   tmp = gmax(gen_1, abslog(tmp, prec));
   hb0 = gmax(hb0, gdiv(tmp, BS->bak));
   c9 = gmul(c9,hb0);
@@ -641,14 +641,14 @@ init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
   else
   { /* r == 1, single fundamental unit (i1 = s = t = 1) */
     GEN p1, Pi2 = Pi2n(1, prec);
-    GEN fu = (GEN)BS->MatFU[1], ro = BS->ro;
+    GEN fu = gel(BS->MatFU,1), ro = BS->ro;
 
     p1 = gdiv(gel(fu,2), gel(fu,3));
     delta = divrr(garg(p1,prec), Pi2);
 
     p1 = gmul(gdiv(gsub(gel(ro,1), gel(ro,2)),
                    gsub(gel(ro,1), gel(ro,3))),
-              gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
+              gdiv(gel(BS->NE,3), gel(BS->NE,2)));
     lambda = divrr(garg(p1,prec), Pi2);
 
     errdelta = ginv(gmul2n(gabs(gel(fu,2),prec), bit_accuracy(prec)-1));
