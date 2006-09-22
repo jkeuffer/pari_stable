@@ -2371,16 +2371,16 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   }
   for (i=1; i<n; i++)
     if (is_zero(gcoeff(H,i,i), M->EXP, prec)) {
-      m = vecabsminind(M->y); return (GEN)M->B[m];
+      m = vecabsminind(M->y); return gel(M->B,m);
     }
   for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
 
   if (DEBUGLEVEL>3) M->T->reda += timer();
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
-  if (is_zero((GEN)M->y[m], M->EXP, prec)
-   && gexpo(M->y) - gexpo((GEN)M->y[m]) > 20)
-    return (GEN)M->B[m];
+  if (is_zero(gel(M->y,m), M->EXP, prec)
+   && gexpo(M->y) - gexpo(gel(M->y,m)) > 20)
+    return gel(M->B,m);
 
   if (DEBUGLEVEL>2)
   {
@@ -2625,12 +2625,12 @@ checkend(pslq_M *M, long prec)
     if (is_zero(gcoeff(M->H,i,i), M->EXP, prec))
     {
       m = vecabsminind(M->y);
-      return (GEN)M->B[m];
+      return gel(M->B,m);
     }
   if (gexpo(M->A) >= -M->EXP)
     return ginv( maxnorml2(M) );
   m = vecabsminind(M->y);
-  if (is_zero((GEN)M->y[m], M->EXP, prec)) return (GEN)M->B[m];
+  if (is_zero(gel(M->y,m), M->EXP, prec)) return gel(M->B,m);
   return NULL;
 }
 

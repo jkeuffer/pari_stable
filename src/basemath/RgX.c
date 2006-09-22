@@ -628,7 +628,7 @@ sqrpol(GEN x, long nx)
         p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
     p1 = gshift(p1,1);
     if ((i&1) == 0 && p2[i>>1])
-      p1 = gadd(p1, gsqr((GEN)x[i>>1]));
+      p1 = gadd(p1, gsqr(gel(x,i>>1)));
     gel(z,i) = gerepileupto(av,p1);
   }
   for (  ; i<nz; i++)
@@ -639,7 +639,7 @@ sqrpol(GEN x, long nx)
         p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
     p1 = gshift(p1,1);
     if ((i&1) == 0 && p2[i>>1])
-      p1 = gadd(p1, gsqr((GEN)x[i>>1]));
+      p1 = gadd(p1, gsqr(gel(x,i>>1)));
     gel(z,i) = gerepileupto(av,p1);
   }
   free(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
