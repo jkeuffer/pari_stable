@@ -530,14 +530,14 @@ treatspecialsigma(GEN nf, GEN gf)
   {
     if (i == 4 || i == 5 || i == 7) return polcyclo(i,0);
     if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
-    p1 = (GEN)nfroots(nf,polcyclo(3,0))[1]; /* f = P_3^3 */
+    p1 = (GEN)nfroots(nf, mkpoln(3,gen_1,gen_1,gen_1))[1]; /* f = P_3^3 */
     return gadd(monomial(gen_1,3,0), p1); /* x^3+j */
   }
   if (equaliu(D,4))
   {
     if (i == 3 || i == 5) return polcyclo(i,0);
     if (i != 4) return NULL;
-    p1 = (GEN)nfroots(nf,polcyclo(4,0))[1];
+    p1 = (GEN)nfroots(nf, mkpoln(3,gen_1,gen_0,gen_1))[1];
     return gadd(monomial(gen_1,2,0), p1); /* x^2+i */
   }
   Ds = smodis(D,48);
