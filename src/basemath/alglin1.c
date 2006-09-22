@@ -547,31 +547,34 @@ rowselect_p(GEN A, GEN B, GEN p, long init)
 }
 
 GEN
-extract(GEN x, GEN l)
+extract(GEN x, GEN L)
 {
-  pari_sp av;
-  long i,j, tl = typ(l), tx = typ(x), lx = lg(x);
+  long i,j, tl = typ(L), tx = typ(x), lx = lg(x);
   GEN y;
 
   if (! is_matvec_t(tx)) pari_err(typeer,"extract");
   if (tl==t_INT)
-  {
-    /* extract components of x as per the bits of mask l */
-    if (!signe(l)) return cgetg(1,tx);
-    av=avma; y = (GEN) gpmalloc(lx*sizeof(long));
-    i = j = 1; while (!mpodd(l)) { l=shifti(l,-1); i++; }
-    while (signe(l) && i<lx)
+  { /* extract components of x as per the bits of mask L */
+    long k, l, ix, iy;
+    GEN Ld;
+    if (!signe(L)) return cgetg(1,tx);
+    y = (GEN) gpmalloc(lx*sizeof(long));
+    l = lgefint(L); ix = iy = 1;
+    for (k = 2, Ld = int_LSW(L); k < l; k++, Ld = int_nextW(Ld))
     {
-      if (mod2(l)) y[j++] = x[i];
-      i++; l=shifti(l,-1);
+      ulong B = *Ld;
+      for (j = 0; B && (j < BITS_IN_LONG); j++, B >>= 1)
+      {
+        if (B & 1) y[iy++] = x[ix];
+        if (ix++ == lx) pari_err(talker,"mask too large in vecextract");
+      }
     }
-    if (signe(l)) pari_err(talker,"mask too large in vecextract");
-    y[0] = evaltyp(tx) | evallg(j);
-    avma=av; x = gcopy(y); free(y); return x;
+    y[0] = evaltyp(tx) | evallg(iy);
+    x = gcopy(y); free(y); return x;
   }
   if (tl==t_STR)
   {
-    char *s = GSTR(l);
+    char *s = GSTR(L);
     long first, last, cmpl;
     if (! get_range(s, &first, &last, &cmpl, lx))
       pari_err(talker, "incorrect range in extract");
@@ -609,10 +612,10 @@ extract(GEN x, GEN l)
 
   if (is_vec_t(tl))
   {
-    long ll=lg(l); y=cgetg(ll,tx);
+    long ll=lg(L); y=cgetg(ll,tx);
     for (i=1; i<ll; i++)
     {
-      j = itos(gel(l,i));
+      j = itos(gel(L,i));
       if (j>=lx || j<=0) pari_err(talker,"no such component in vecextract");
       gel(y,i) = gcopy(gel(x,j));
     }
@@ -620,10 +623,10 @@ extract(GEN x, GEN l)
   }
   if (tl == t_VECSMALL)
   {
-    long ll=lg(l); y=cgetg(ll,tx);
+    long ll=lg(L); y=cgetg(ll,tx);
     for (i=1; i<ll; i++)
     {
-      j = l[i];
+      j = L[i];
       if (j>=lx || j<=0) pari_err(talker,"no such component in vecextract");
       gel(y,i) = gcopy(gel(x,j));
     }
