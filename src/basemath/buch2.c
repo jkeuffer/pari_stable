@@ -1721,8 +1721,8 @@ signunits(GEN bnf)
   y = zsignunits(bnf, NULL, 0);
   for (j = 1; j < lg(y); j++)
   {
-    GEN *c = (GEN*)y[j];
-    for (i = 1; i < lg(c); i++) c[i] = (c[i] == gen_0)? gen_1: gen_m1;
+    GEN c = gel(y,j);
+    for (i = 1; i < lg(c); i++) gel(c,i) = (gel(c,i) == gen_0)? gen_1: gen_m1;
   }
   return gerepilecopy(av, y);
 }

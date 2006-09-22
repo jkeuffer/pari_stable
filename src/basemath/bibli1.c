@@ -333,21 +333,25 @@ lll_finish(GEN h,GEN fl,long flag)
 static void
 Zupdate_col(long k, long l, GEN q, long K, GEN h)
 {
-  GEN *hl, *hk;
+  GEN hl, hk;
   long i, qq = itos_or_0(q);
 
   if (!h) return;
-  hl = (GEN*)h[l]; hk = (GEN*)h[k];
+  hl = gel(h,l); hk = gel(h,k);
   if (!qq) {
-    for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulii(q,hl[i]));
+    for (i=1;i<=K;i++)
+      if (signe(hl[i])) gel(hk,i) = addii(gel(hk,i),mulii(q,gel(hl,i)));
     return;
   }
   if (qq == 1) {
-    for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = addii(hk[i],hl[i]); }
+    for (i=1;i<=K;i++)
+      if (signe(hl[i])) gel(hk,i) = addii(gel(hk,i),gel(hl,i));
   } else if (qq == -1) {
-    for (i=1;i<=K;i++) { if (signe(hl[i])) hk[i] = subii(hk[i],hl[i]); }
+    for (i=1;i<=K;i++)
+      if (signe(hl[i])) gel(hk,i) = subii(gel(hk,i),gel(hl,i));
   } else {
-    for (i=1;i<=K;i++) if (signe(hl[i])) hk[i] = addii(hk[i],mulsi(qq,hl[i]));
+    for (i=1;i<=K;i++)
+      if (signe(hl[i])) gel(hk,i) = addii(gel(hk,i),mulsi(qq,gel(hl,i)));
   }
 }
 

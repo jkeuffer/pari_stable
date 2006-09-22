@@ -580,16 +580,15 @@ GEN
 vecbinome(long n)
 {
   long d = (n + 1)/2, k;
-  GEN bin = cgetg(n+2, t_VEC), *C;
-  C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
-  C[0] = gen_1;
+  GEN C = cgetg(n+2, t_VEC) + 1; /* C[k] = binomial(n, k) */
+  gel(C,0) = gen_1;
   for (k=1; k <= d; k++)
   {
     pari_sp av = avma;
-    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), utoipos(k)));
+    gel(C,k) = gerepileuptoint(av, diviuexact(mului(n-k+1, gel(C,k-1)), k));
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
-  return bin;
+  return C - 1;
 }
 
 /********************************************************************/

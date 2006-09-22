@@ -2299,7 +2299,7 @@ GEN
 initzeta(GEN pol, long prec)
 {
   GEN nfz, nf, gr1, gr2, gru, p1, p2, cst, coef, bnf = checkbnf_i(pol);
-  GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
+  GEN limx, resi,zet,C,coeflog,racpi,aij,tabj,colzero, tabcstn, tabcstni;
   GEN c_even, ck_even, c_odd, ck_odd, serie_even, serie_odd, serie_exp, Pi;
   long N0, i0, r1, r2, r, R, N, i, j, k, n, bit = bit_accuracy(prec) + 6;
   pari_sp av, av2;
@@ -2336,10 +2336,10 @@ initzeta(GEN pol, long prec)
   zone1 = switch_stack(NULL,2*i);
   zone0 = switch_stack(NULL,2*i);
   (void)switch_stack(zone,1);
-  tabcstn  = (GEN*) cgetg(N0+1,t_VEC);
-  tabcstni = (GEN*) cgetg(N0+1,t_VEC);
+  tabcstn  = cgetg(N0+1,t_VEC);
+  tabcstni = cgetg(N0+1,t_VEC);
   p1 = ginv(cst);
-  for (i=1; i<=N0; i++) tabcstni[i] = tabcstn[i] = mulsr(i,p1);
+  for (i=1; i<=N0; i++) gel(tabcstni,i) = gel(tabcstn,i) = mulsr(i,p1);
   (void)switch_stack(zone,0);
 
   /********** compute a(i,j) **********/
@@ -2469,7 +2469,7 @@ initzeta(GEN pol, long prec)
           GEN tabjn = gel(tabj,n), p2 = mpmul(gel(aiji,1+k), gel(tabjn,1));
           for (j=2; j<=r-k+1; j++)
             p2 = mpadd(p2, mpmul(gel(aiji,j+k), gel(tabjn,j)));
-          if (i > 1) p2 = mpmul(p2, tabcstni[n]);
+          if (i > 1) p2 = mpmul(p2, gel(tabcstni,n));
           p1 = p1? mpadd(p1,p2): p2;
         }
       gcoeff(C,i,k) = gerepileuptoleaf(av2,p1);
@@ -2480,7 +2480,7 @@ initzeta(GEN pol, long prec)
       z = i&1? zone1: zone0;
       (void)switch_stack(z, 1);
       for (n=1; n<=N0; n++)
-        if (coef[n]) tabcstni[n] = mpmul(tabcstni[n],tabcstn[n]);
+        if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
       /* come back */
       (void)switch_stack(z, 0);
     }

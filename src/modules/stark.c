@@ -27,8 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* ComputeCoeff */
 typedef struct {
   GEN L0, L1, L11, L2; /* VECSMALL of p */
-  GEN *L1ray, *L11ray; /* precomputed isprincipalray(pr), pr | p */
-  GEN *rayZ; /* precomputed isprincipalray(i), i < condZ */
+  GEN L1ray, L11ray; /* precomputed isprincipalray(pr), pr | p */
+  GEN rayZ; /* precomputed isprincipalray(i), i < condZ */
   long condZ; /* generates cond(bnr) \cap Z, assumed small */
 } LISTray;
 
@@ -1369,7 +1369,7 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
   for (i=1; i<l; i++, avma = av2)
   {
     np = L[i]; 
-    chi  = EvalChar(&C, R->L1ray[i]);
+    chi  = EvalChar(&C, gel(R->L1ray,i));
     an_AddMul(an,an2,np,n,deg,chi,reduc);
   }
   FreeMat(an2, n);
@@ -1386,7 +1386,7 @@ static void
 deg11(LISTray *R, long p, GEN bnr, GEN pr) {
   GEN z = isprincipalray(bnr, pr);
   appendL(R->L1, (GEN)p);
-  appendL((GEN)R->L1ray, z);
+  appendL(R->L1ray, z);
 }
 static void
 deg12(LISTray *R, long p, GEN bnr, GEN Lpr) {
@@ -1424,8 +1424,8 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   l = 1 + PiBound(N0);
   R->L0 = cget1(l, t_VECSMALL);
   R->L2 = cget1(l, t_VECSMALL); R->condZ = condZ;
-  R->L1 = cget1(l, t_VECSMALL); R->L1ray = (GEN*)cget1(l, t_VEC);
-  R->L11= cget1(l, t_VECSMALL); R->L11ray= (GEN*)cget1(l, t_VEC);
+  R->L1 = cget1(l, t_VECSMALL); R->L1ray = cget1(l, t_VEC);
+  R->L11= cget1(l, t_VECSMALL); R->L11ray= cget1(l, t_VEC);
   prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p) {
     switch (krois(dk, p))
@@ -1455,14 +1455,14 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
     NEXT_PRIME_VIADIFF(p,d);
   }
   /* precompute isprincipalray(x), x in Z */
-  R->rayZ = (GEN*)cgetg(condZ, t_VEC);
+  R->rayZ = cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
-    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
+    gel(R->rayZ,i) = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
 
   gptr[0] = &(R->L0);
-  gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
-  gptr[3] = &(R->L1);  gptr[5] = (GEN*)&(R->L1ray);
-  gptr[4] = &(R->L11); gptr[6] = (GEN*)&(R->L11ray);
+  gptr[1] = &(R->L2);  gptr[2] = &(R->rayZ);
+  gptr[3] = &(R->L1);  gptr[5] = &(R->L1ray);
+  gptr[4] = &(R->L11); gptr[6] = &(R->L11ray);
   gerepilemany(av,gptr,7);
 }
 
@@ -1471,13 +1471,13 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
 {
   GEN bnf = gel(bnr,1), cond = gmael3(bnr,2,1,1);
   long np,p,j,k,l, condZ = itos(gcoeff(cond,1,1)), N = lg(cond)-1;
-  GEN *tmpray, tabpr, prime, pr, nf = checknf(bnf);
+  GEN tmpray, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
 
   R->condZ = condZ; l = PiBound(N0) * N;
-  tmpray = (GEN*)cgetg(N+1, t_VEC);
+  tmpray = cgetg(N+1, t_VEC);
   R->L1 = cget1(l, t_VECSMALL);
-  R->L1ray = (GEN*)cget1(l, t_VEC);
+  R->L1ray = cget1(l, t_VEC);
   prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p)
   {
@@ -1491,18 +1491,18 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
       if (!np || np > N0) break;
       if (condZ % p == 0 && idealval(nf, cond, pr))
       {
-        tmpray[j] = NULL; continue;
+        gel(tmpray,j) = NULL; continue;
       }
 
       appendL(R->L1, (GEN)np);
-      tmpray[j] = gclone( isprincipalray(bnr, pr) );
+      gel(tmpray,j) = gclone( isprincipalray(bnr, pr) );
     }
     avma = av;
     for (k = 1; k < j; k++)
     {
       if (!tmpray[k]) continue;
-      appendL((GEN)R->L1ray, gcopy(tmpray[k]));
-      gunclone(tmpray[k]);
+      appendL(R->L1ray, gcopy(gel(tmpray,k)));
+      gunclone(gel(tmpray,k));
     }
     NEXT_PRIME_VIADIFF(p,d);
   }
@@ -1970,7 +1970,7 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   {
     p = L[i];
     if (condZ == 1) chi = C.val[0]; /* 1 */
-    else            chi = EvalChar(&C, R->rayZ[p % condZ]);
+    else            chi = EvalChar(&C, gel(R->rayZ, p%condZ));
     chi1 = chi;
     for (q=p;;)
     {
@@ -1988,7 +1988,7 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   for (i=1; i<l; i++, avma = av2)
   {
     p = L[i];
-    chi = EvalChar(&C, R->L1ray[i]);
+    chi = EvalChar(&C, gel(R->L1ray,i));
     chi1 = chi;
     for(q=p;;)
     {
@@ -2004,11 +2004,11 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
   {
     GEN ray1, ray2, chi11, chi12, chi2;
 
-    p = L[i]; ray1 = R->L11ray[i]; /* use pr1 pr2 = (p) */
+    p = L[i]; ray1 = gel(R->L11ray,i); /* use pr1 pr2 = (p) */
     if (condZ == 1)
       ray2 = gneg(ray1);
     else
-      ray2 = gsub(R->rayZ[p % condZ],  ray1);
+      ray2 = gsub(gel(R->rayZ, p%condZ),  ray1);
     chi11 = EvalChar(&C, ray1);
     chi12 = EvalChar(&C, ray2);
 

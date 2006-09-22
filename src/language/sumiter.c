@@ -222,15 +222,14 @@ forvec_next_i(GEN gd, GEN ignored)
 }
 /* increment and return d->a [generic]*/
 static GEN
-forvec_next(GEN gd, GEN v0)
+forvec_next(GEN gd, GEN v)
 {
   forvec_data *d=(forvec_data *) gd;
   long i = d->n;
-  GEN *v = (GEN*)v0;
   for (;;) {
-    v[i] = gaddgs(v[i], 1);
-    if (gcmp(v[i], d->M[i]) <= 0) return (GEN)v;
-    v[i] = d->m[i];
+    gel(v,i) = gaddgs(gel(v,i), 1);
+    if (gcmp(gel(v,i), d->M[i]) <= 0) return v;
+    gel(v,i) = d->m[i];
     if (--i <= 0) return NULL;
   }
 }
@@ -264,34 +263,33 @@ forvec_next_le_i(GEN gd, GEN ignored)
 }
 /* non-decreasing order [generic] */
 static GEN
-forvec_next_le(GEN gd, GEN v0)
+forvec_next_le(GEN gd, GEN v)
 {
   forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
-  GEN *v = (GEN*)v0;
   for (;;) {
-    v[i] = gaddgs(v[i], 1);
-    if (gcmp(v[i], d->M[i]) <= 0)
+    gel(v,i) = gaddgs(gel(v,i), 1);
+    if (gcmp(gel(v,i), d->M[i]) <= 0)
     {
       while (i < d->n)
       {
         i++;
-        if (gcmp(v[i-1], v[i]) <= 0) continue;
-        while (gcmp(v[i-1], d->M[i]) > 0)
+        if (gcmp(gel(v,i-1), gel(v,i)) <= 0) continue;
+        while (gcmp(gel(v,i-1), d->M[i]) > 0)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
-          v[i] = gaddgs(v[i], 1);
-          if (gcmp(v[i], d->M[i]) <= 0) break;
+          gel(v,i) = gaddgs(gel(v,i), 1);
+          if (gcmp(gel(v,i), d->M[i]) <= 0) break;
         } 
         if (i > 1) { /* a >= a[i-1] - a[i] */
-          GEN a = gceil(gsub(v[i-1], v[i]));
-          v[i] = gadd(v[i], a);
+          GEN a = gceil(gsub(gel(v,i-1), gel(v,i)));
+          gel(v,i) = gadd(gel(v,i), a);
         }
       }
-      return (GEN)v;
+      return v;
     }
-    v[i] = d->m[i];
+    gel(v,i) = d->m[i];
     if (--i <= 0) return NULL;
     if (i < imin) imin = i;
   }
@@ -325,37 +323,36 @@ forvec_next_lt_i(GEN gd, GEN ignored)
 }
 /* strictly increasing order [generic] */
 static GEN
-forvec_next_lt(GEN gd, GEN v0)
+forvec_next_lt(GEN gd, GEN v)
 {
   forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
-  GEN *v = (GEN*)v0;
   for (;;) {
-    v[i] = gaddgs(v[i], 1);
-    if (gcmp(v[i], d->M[i]) <= 0)
+    gel(v,i) = gaddgs(gel(v,i), 1);
+    if (gcmp(gel(v,i), d->M[i]) <= 0)
     {
       while (i < d->n)
       {
         i++;
-        if (gcmp(v[i-1], v[i]) < 0) continue;
+        if (gcmp(gel(v,i-1), gel(v,i)) < 0) continue;
         for(;;)
         {
           GEN a, b;
-          a = addis(gfloor(gsub(v[i-1], v[i])), 1); /* a > v[i-1] - v[i] */
-          b = gadd(v[i], a);
+          a = addis(gfloor(gsub(gel(v,i-1), gel(v,i))), 1); /* a> v[i-1]-v[i] */
+          b = gadd(gel(v,i), a);
           /* v[i-1] < b <= v[i-1] + 1 */
-          if (gcmp(b, d->M[i]) <= 0) { v[i] = b; break; }
+          if (gcmp(b, d->M[i]) <= 0) { gel(v,i) = b; break; }
 
-          for (; i >= imin; i--) v[i] = d->m[i];
+          for (; i >= imin; i--) gel(v,i) = d->m[i];
           if (!i) return NULL;
           imin = i;
-          v[i] = gaddgs(v[i], 1);
-          if (gcmp(v[i], d->M[i]) <= 0) break;
+          gel(v,i) = gaddgs(gel(v,i), 1);
+          if (gcmp(gel(v,i), d->M[i]) <= 0) break;
         } 
       }
-      return (GEN)v;
+      return v;
     }
-    v[i] = d->m[i];
+    gel(v,i) = d->m[i];
     if (--i <= 0) return NULL;
     if (i < imin) imin = i;
   }

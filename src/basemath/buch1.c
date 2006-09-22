@@ -248,7 +248,7 @@ get_om(GEN nf, GEN a) {
 static GEN
 getallelts(GEN bnr)
 {
-  GEN nf,G,C,c,g, *list, **pows, *gk;
+  GEN nf,G,C,c,g, list, pows, gk;
   long lc,i,j,k,no;
 
   nf = checknf(bnr);
@@ -257,21 +257,21 @@ getallelts(GEN bnr)
   no = itos(gel(G,1));
   c = gel(G,2);
   g = gel(G,3); lc = lg(c)-1;
-  list = (GEN*) cgetg(no+1,t_VEC);
+  list = cgetg(no+1,t_VEC);
   if (!lc)
   {
-    list[1] = idealhermite(nf,gen_1);
-    return (GEN)list;
+    gel(list,1) = idealhermite(nf,gen_1);
+    return list;
   }
-  pows = (GEN**)cgetg(lc+1,t_VEC);
+  pows = cgetg(lc+1,t_VEC);
   c = shallowcopy(c); settyp(c, t_VECSMALL);
   for (i=1; i<=lc; i++)
   {
     c[i] = k = itos(gel(c,i));
-    gk = (GEN*)cgetg(k, t_VEC); gk[1] = gel(g,i);
+    gk = cgetg(k, t_VEC); gel(gk,1) = gel(g,i);
     for (j=2; j<k; j++)
-      gk[j] = idealmodidele(bnr, idealmul(nf, gk[j-1], gk[1]));
-    pows[i] = gk; /* powers of g[i] */
+      gel(gk,j) = idealmodidele(bnr, idealmul(nf, gel(gk,j-1), gel(gk,1)));
+    gel(pows,i) = gk; /* powers of g[i] */
   }
 
   C = cgetg(lc+1, t_VECSMALL); C[1] = c[lc];
@@ -280,18 +280,18 @@ getallelts(GEN bnr)
   /* j < C[i+1] <==> j only involves g(k-i)...gk */
   i = 1; list[1] = 0; /* dummy */
   for (j=1; j < C[1]; j++)
-    list[j + 1] = pows[lc][j];
+    gel(list, j+1) = gmael(pows,lc,j);
   for (   ; j<no; j++)
   {
     GEN p1,p2;
     if (j == C[i+1]) i++;
-    p2 = pows[lc-i][j/C[i]];
-    p1 = list[j%C[i] + 1];
+    p2 = gmael(pows,lc-i,j/C[i]);
+    p1 = gel(list ,j%C[i]+1);
     if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
-    list[j + 1] = p2;
+    gel(list, j+1) = p2;
   }
-  list[1] = idealhermite(nf,gen_1);
-  return (GEN)list;
+  gel(list,1) = idealhermite(nf,gen_1);
+  return list;
 }
 
 /* x quadratic integer (approximate), recognize it. If error return NULL */
@@ -1142,12 +1142,12 @@ add_fact(struct buch_quad *B, GEN col, GEN F)
 static GEN
 get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
 {
-  GEN res, *init, u1, D = smithrel(W,NULL,&u1), Z = prec? real_0(prec): NULL;
+  GEN res, init, u1, D = smithrel(W,NULL,&u1), Z = prec? real_0(prec): NULL;
   long i, j, l = lg(W), c = lg(D);
 
   if (DEBUGLEVEL) msgtimer("smith/class group");
-  res=cgetg(c,t_VEC); init = (GEN*)cgetg(l,t_VEC);
-  for (i=1; i<l; i++) init[i] = primeform_u(B->Disc, B->FB[B->vperm[i]]);
+  res=cgetg(c,t_VEC); init = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) gel(init,i) = primeform_u(B->Disc, B->FB[B->vperm[i]]);
   for (j=1; j<c; j++)
   {
     GEN g = NULL;
@@ -1157,7 +1157,7 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
       {
         GEN t, u = gcoeff(u1,i,j);
         if (!signe(u)) continue;
-        t = qfr3_pow(init[i], u, B->Disc, B->isqrtD);
+        t = qfr3_pow(gel(init,i), u, B->Disc, B->isqrtD);
         g = g? qfr3_comp(g, t, B->Disc, B->isqrtD): t;
       }
       g = qfr3_to_qfr(qfr3_canon(B,qfr3_red(g, B->Disc, B->isqrtD)), Z);
@@ -1168,7 +1168,7 @@ get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
       {
         GEN t, u = gcoeff(u1,i,j);
         if (!signe(u)) continue;
-        t = powgi(init[i], u);
+        t = powgi(gel(init,i), u);
         g = g? compimag(g, t): t;
       }
     }

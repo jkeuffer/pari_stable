@@ -223,7 +223,7 @@ static GEN
 compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 {
   GEN f, fZ, basecl, module, fa, fa2, pr, t, EX, sarch, cyc, F;
-  GEN *listpr, *vecpi, *vecpinvpi, *vectau;
+  GEN listpr, vecpi, vecpinvpi, vectau;
   long i,j,l,lp;
 
   if (lg(u1) == 1) return cgetg(1, t_VEC);
@@ -235,19 +235,19 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   cyc = gmael(bid,2,2); EX = gel(cyc,1); /* exponent of (O/f)^* */
   f   = gel(module,1); fZ = gcoeff(f,1,1);
   fa  = gel(bid,3);
-  fa2 = gel(bid,4); sarch = (GEN)fa2[lg(fa2)-1];
-  listpr = (GEN*)fa[1]; F = init_unif_mod_fZ((GEN)listpr);
+  fa2 = gel(bid,4); sarch = gel(fa2, lg(fa2)-1);
+  listpr = gel(fa,1); F = init_unif_mod_fZ(listpr);
 
   lp = lg(listpr);
-  vecpinvpi = (GEN*)cgetg(lp, t_VEC);
-  vecpi  = (GEN*)cgetg(lp, t_VEC);
-  vectau = (GEN*)cgetg(lp, t_VEC);
+  vecpinvpi = cgetg(lp, t_VEC);
+  vecpi  = cgetg(lp, t_VEC);
+  vectau = cgetg(lp, t_VEC);
   for (i=1; i<lp; i++) 
   {
-    pr = listpr[i];
-    vecpi[i]    = NULL; /* to be computed if needed */
-    vecpinvpi[i] = NULL; /* to be computed if needed */
-    vectau[i] = eltmul_get_table(nf, gel(pr,5));
+    pr = gel(listpr,i);
+    gel(vecpi,i)    = NULL; /* to be computed if needed */
+    gel(vecpinvpi,i) = NULL; /* to be computed if needed */
+    gel(vectau,i) = eltmul_get_table(nf, gel(pr,5));
   }
 
   l = lg(basecl);
@@ -280,12 +280,12 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     dmulI = mulI = NULL;
     for (j=1; j<lp; j++)
     {
-      pr = listpr[j]; 
+      pr = gel(listpr,j); 
       v  = idealval(nf, I, pr);
       if (!v) continue;
       p  = gel(pr,1);
-      pi = get_pi(F, pr, &vecpi[j]);
-      pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
+      pi = get_pi(F, pr, &gel(vecpi,j));
+      pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
       t = element_pow(nf, pinvpi, stoi(v));
       mulI = mulI? element_mul(nf, mulI, t): t;
       t = powiu(gel(pr,1), v);
@@ -301,14 +301,14 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
       for (j=1; j<lp; j++)
       {
-        pr = listpr[j];
-        v  = fast_val(nf, L0,cx, pr,vectau[j]); /* = val_pr(LL) */
+        pr = gel(listpr,j);
+        v  = fast_val(nf, L0,cx, pr,gel(vectau,j)); /* = val_pr(LL) */
         if (!v) continue;
         p  = gel(pr,1);
-        pi = get_pi(F, pr, &vecpi[j]);
+        pi = get_pi(F, pr, &gel(vecpi,j));
         if (v > 0)
         {
-          pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
+          pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
           t = element_pow(nf,pinvpi,stoi(v));
           LL = element_mul(nf, LL, t);
           LL = gdiv(LL, powiu(p, v));

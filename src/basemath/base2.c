@@ -245,7 +245,7 @@ matinv(GEN x, GEN d)
 }
 
 static GEN
-ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
+ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
 {
   long sp,i,n=lg(cf)-1;
   pari_sp av=avma, av2,limit;
@@ -294,7 +294,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
           p1 = j==k? gcoeff(m,i,1): gen_0;
           for (h=2; h<=n; h++)
           {
-	    GEN p2 = mulii(gcoeff(m,i,h),gcoeff(cf[h],j,k));
+	    GEN p2 = mulii(gcoeff(m,i,h),gcoeff(gel(cf,h),j,k));
             if (p2!=gen_0) p1 = addii(p1,p2);
           }
           gcoeff(T,j,k) = centermodii(p1, ppdd, ppddo2);
@@ -437,7 +437,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 static GEN
 allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
 {
-  GEN w,w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
+  GEN w,w1,w2,a,pro,at,bt,b,da,db,q, cf,*gptr[2];
   pari_sp av=avma,tetpil;
   long n,h,j,i,k,r,s,t,mf;
 
@@ -446,9 +446,9 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
   w1 = gel(w,1);
   w2 = gel(w,2);
   n = degpol(f); h = lg(w1)-1;
-  cf = (GEN*)cgetg(n+1,t_VEC);
-  cf[2]=companion(f);
-  for (i=3; i<=n; i++) cf[i]=mulmati(cf[2],cf[i-1]);
+  cf = cgetg(n+1,t_VEC);
+  gel(cf,2) = companion(f);
+  for (i=3; i<=n; i++) gel(cf,i) = mulmati(gel(cf,2), gel(cf,i-1));
 
   a=matid(n); da=gen_1;
   for (i=1; i<=h; i++)
@@ -501,7 +501,6 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
       }
     tetpil=avma; a=gtrans(at);
     {
-      GEN *gptr[2];
       da = icopy(da); gptr[0]=&a; gptr[1]=&da;
       gerepilemanysp(av1,tetpil,gptr,2);
     }

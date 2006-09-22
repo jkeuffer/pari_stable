@@ -1203,15 +1203,15 @@ famat_pow(GEN f, GEN n)
 GEN
 famat_to_nf(GEN nf, GEN f)
 {
-  GEN t, *x, *e;
+  GEN t, x, e;
   long i;
   if (lg(f) == 1) return gen_1;
 
-  x = (GEN*)f[1];
-  e = (GEN*)f[2];
-  t = element_pow(nf, x[1], e[1]);
+  x = gel(f,1);
+  e = gel(f,2);
+  t = element_pow(nf, gel(x,1), gel(e,1));
   for (i=lg(x)-1; i>1; i--)
-    t = element_mul(nf, t, element_pow(nf, x[i], e[i]));
+    t = element_mul(nf, t, element_pow(nf, gel(x,i), gel(e,i)));
   return t;
 }
 
@@ -2157,13 +2157,13 @@ coprime_part(GEN x, GEN f)
 
 /* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
 static GEN
-nf_coprime_part(GEN nf, GEN x, GEN *listpr)
+nf_coprime_part(GEN nf, GEN x, GEN listpr)
 {
   long v, j, lp = lg(listpr), N = degpol(nf[1]);
   GEN x1, x2, ex, p, pr;
 
 #if 0 /*1) via many gcds. Expensive ! */
-  GEN f = idealprodprime(nf, (GEN)listpr);
+  GEN f = idealprodprime(nf, listpr);
   f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
   x = gscalmat(x, N);
   for (;;)
@@ -2177,7 +2177,7 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
   x1 = NULL;
   for (j=1; j<lp; j++)
   {
-    pr = listpr[j]; p = gel(pr,1);
+    pr = gel(listpr,j); p = gel(pr,1);
     v = Z_pval(x, p); if (!v) continue;
 
     ex = mulsi(v, gel(pr,3)); /* = v_pr(x) > 0 */
@@ -2192,7 +2192,7 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
 
 /* L0 in K^*, assume (L0,f) = 1. Return L integral, L0 = L mod f  */
 GEN
-make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
+make_integral(GEN nf, GEN L0, GEN f, GEN listpr)
 {
   GEN fZ, t, L, D2, d1, d2, d;
 
