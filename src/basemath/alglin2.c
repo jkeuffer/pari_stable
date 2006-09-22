@@ -1580,13 +1580,13 @@ hnf_special(GEN x, long remove)
 /*                                                                 */
 /*******************************************************************/
 static int
-count(long **mat, long row, long len, long *firstnonzero)
+count(GEN mat, long row, long len, long *firstnonzero)
 {
   long j, n = 0;
 
   for (j=1; j<=len; j++)
   {
-    long p = mat[j][row];
+    long p = mael(mat,j,row);
     if (p)
     {
       if (labs(p)!=1) return -1;
@@ -1597,11 +1597,11 @@ count(long **mat, long row, long len, long *firstnonzero)
 }
 
 static int
-count2(long **mat, long row, long len)
+count2(GEN mat, long row, long len)
 {
   long j;
   for (j=len; j; j--)
-    if (labs(mat[j][row]) == 1) return j;
+    if (labs(mael(mat,j,row)) == 1) return j;
   return 0;
 }
 
@@ -1735,13 +1735,13 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 
 /* for debugging */
 static void
-p_mat(long **mat, GEN perm, long k)
+p_mat(GEN mat, GEN perm, long k)
 {
   pari_sp av = avma;
   perm = vecslice(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Z\n", zm_to_ZM( rowpermute((GEN)mat, perm) ));
+    fprintferr("matgen = %Z\n", zm_to_ZM( rowpermute(mat, perm) ));
   avma = av;
 }
 
@@ -1789,10 +1789,11 @@ col_dup(long l, GEN col)
 ** column operations applied to C. IN PLACE
 **/
 GEN
-hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av, lim;
-  long co, n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj, **mat;
+  long co, n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p;
+  GEN matj, mat;
   GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, C, H, dep, permpro;
   const long li = lg(perm); /* = lg(mat0[1]) */
   const long CO = lg(mat0);
@@ -1812,11 +1813,11 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     p_mat(mat0,perm,0);
   }
   matt = cgetg(co, t_MAT); /* dense part of mat (top) */
-  mat = (long**)cgetg(co, t_MAT);
+  mat = cgetg(co, t_MAT);
   for (j = 1; j < co; j++)
   {
-    mat[j] = col_dup(li, gel(mat0,j));
-    p1 = cgetg(k0+1,t_COL); gel(matt,j) = p1; matj = mat[j];
+    matj = col_dup(li, gel(mat0,j));
+    p1 = cgetg(k0+1,t_COL); gel(matt,j) = p1; gel(mat,j) = matj;
     for (i=1; i<=k0; i++) gel(p1,i) = stoi(matj[perm[i]]);
   }
   vmax = cgetg(co,t_VECSMALL);
@@ -1835,7 +1836,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       case 1: /* move trivial generator between lig+1 and li */
 	lswap(perm[i], perm[lig]);
         if (T) lswap(T[n], T[col]);
-	swap(mat[n], mat[col]); p = mat[col];
+	lswap(mat[n], mat[col]); p = gel(mat,col);
 	if (p[perm[lig]] < 0) /* = -1 */
 	{ /* convert relation -g = 0 to g = 0 */
 	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1869,7 +1870,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
     /* only 0, +/- 1 entries, at least 2 of them non-zero */
     lswap(perm[i], perm[lig]);
-    swap(mat[n], mat[col]); p = mat[col];
+    lswap(mat[n], mat[col]); p = gel(mat,col);
     if (T) lswap(T[n], T[col]);
     if (p[perm[lig]] < 0)
     {
@@ -1879,7 +1880,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     for (j=1; j<col; j++)
     {
       long t;
-      matj = mat[j];
+      matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (t == 1) {
         for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= p[perm[i]]);
@@ -1900,7 +1901,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
    * Stop when single precision becomes dangerous */
   for (j=1; j<=col; j++)
   {
-    matj = mat[j];
+    matj = gel(mat,j);
     for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[i]);
     vmax[j] = s;
   }
@@ -1912,7 +1913,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
     lswap(vmax[n], vmax[col]);
     lswap(perm[i], perm[lig]);
-    swap(mat[n], mat[col]); p = mat[col];
+    lswap(mat[n], mat[col]); p = gel(mat,col);
     if (T) lswap(T[n], T[col]);
     if (p[perm[lig]] < 0)
     {
@@ -1922,7 +1923,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     for (j=1; j<col; j++)
     {
       long t;
-      matj = mat[j];
+      matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
         goto END2;
@@ -1945,7 +1946,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   for (j=1; j<co; j++)
   {
     p1 = cgetg(li-k0,t_COL); gel(matb,j) = p1;
-    p1 -= k0; matj = mat[j];
+    p1 -= k0; matj = gel(mat,j);
     for (i=k0+1; i<li; i++) gel(p1,i) = stoi(matj[perm[i]]);
   }
   if (DEBUGLEVEL>5)
@@ -2064,19 +2065,19 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   { /* treat the rest, N cols at a time (hnflll slow otherwise) */
     const long N = 300;
     long a, L = CO - co, l = min(L, N); /* L columns to add */
-    GEN CC = *ptC, m0 = (GEN)mat0;
+    GEN CC = *ptC, m0 = mat0;
     setlg(CC, CO); /* restore */
     CC += co-1;
     m0 += co-1;
     for (a = l;;)
     {
-      GEN mat = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
+      GEN MAT = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
-        mat[j] = m0[j];
+        MAT[j] = m0[j];
         emb[j] = CC[j];
       }
-      H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
+      H = hnfadd_i(H, perm, ptdep, ptB, &C, MAT, emb);
       if (a == L) break;
       CC += l;
       m0 += l;
@@ -2088,7 +2089,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
 }
 
 GEN
-hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec(GEN mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
   pari_sp av = avma;
   GEN H = hnfspec_i(mat, perm, ptdep, ptB, ptC, k0);
@@ -2121,7 +2122,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
    *  [  H  |     ]
    *  [-----|-----]
    *  [  0  | Id  ] */
-  return hnfspec((long**)z,perm, ptdep, ptB, ptC, 0);
+  return hnfspec(z,perm, ptdep, ptB, ptC, 0);
 
 TOOLARGE:
   if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
@@ -3148,12 +3149,12 @@ update(GEN u, GEN v, GEN a, GEN b, GEN *c1, GEN *c2)
   u = col_mul(u,*c1);
   v = col_mul(v,*c2);
   if (u) p1 = v? gadd(u,v): u;
-  else   p1 = v? v: (GEN)NULL;
+  else   p1 = v? v: NULL;
 
   a = col_mul(a,*c2);
   b = col_mul(gneg_i(b),*c1);
   if (a) p2 = b? gadd(a,b): a;
-  else   p2 = b? b: (GEN)NULL;
+  else   p2 = b? b: NULL;
 
   if (!p1) do_zero(*c1); else *c1 = p1;
   if (!p2) do_zero(*c2); else *c2 = p2;

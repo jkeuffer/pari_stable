@@ -1663,7 +1663,7 @@ MORE:
   }
 
   if (!W)
-    W = hnfspec_i((long**)mat,BQ.vperm,&dep,&B,&C,nsubFB);
+    W = hnfspec_i(mat,BQ.vperm,&dep,&B,&C,nsubFB);
   else
     W = hnfadd_i(W,BQ.vperm,&dep,&B,&C, mat,extraC);
   gerepileall(av2, 4, &W,&C,&B,&dep);

@@ -132,8 +132,8 @@ GEN hnf_gauss(GEN A, GEN B);
 GEN hnf_invimage(GEN A, GEN b);
 GEN hnfmerge_get_1(GEN A, GEN B);
 GEN hnfperm_i(GEN A, GEN *ptU, GEN *ptperm);
-GEN hnfspec_i(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
-GEN hnfspec(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN hnfspec_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN hnfspec(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
 /* LLL */

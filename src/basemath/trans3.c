@@ -2000,7 +2000,7 @@ polylogp(long m, GEN x, long prec)
       {
 	if (k!=1)
 	{
-	  p5=(GEN)bern(k>>1);
+	  p5=bern(k>>1);
 	  if (bernzone[2]>prec) { affrr(p5,p51); p5=p51; }
 	  p4=gmul(p2,p5);
 	}

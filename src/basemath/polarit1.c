@@ -2624,7 +2624,7 @@ rootsold(GEN x, long prec)
     {
       if (i == deg)
       {
-        p1 = (GEN)y[k+m*i];
+        p1 = gel(y,k+m*i);
         gdivz(gneg_i(gel(xc,2)),gel(xc,3), p1);
         p1r = gel(p1,1);
         p1i = gel(p1,2);
@@ -2664,7 +2664,7 @@ rootsold(GEN x, long prec)
             avma = av; return roots2(x,prec);
           }
         }
-        p1 = (GEN)y[k+m*i];
+        p1 = gel(y,k+m*i);
         p1r = gel(p1,1); setlg(p1r, 3);
         p1i = gel(p1,2); setlg(p1i, 3); gaffect(p3, p1); avma = av2;
         for (ln = 4; ln <= prec; ln = (ln<<1)-2)

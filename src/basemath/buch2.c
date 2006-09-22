@@ -3119,7 +3119,7 @@ PRECPB:
     }
     if (first) {
       C = emb;
-      W = hnfspec_i((long**)mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
+      W = hnfspec_i(mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
     }
     else
       W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);

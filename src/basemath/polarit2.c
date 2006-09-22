@@ -2379,7 +2379,7 @@ eltpow(void *nf, GEN x, GEN n) { return element_pow((GEN) nf, x, n); }
 static GEN
 ellmul(void *ell, GEN x, GEN y) { return addell((GEN) ell, x, y); }
 static GEN
-ellpow(void *GEN x, GEN n) { return powell((GEN) ell, x, n); }
+ellpow(void *ell, GEN x, GEN n) { return powell((GEN) ell, x, n); }
 #endif
 
 GEN
