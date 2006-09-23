@@ -713,7 +713,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     classe = isprincipalray(bnr, gel(gen,i));
     for (ic = 1; ic <= nChar; ic++) {
       GEN n = gel(nchi,ic);
-      n[i] = (long)EvalChar_n(lC[ic], classe);
+      n[i] = EvalChar_n(lC[ic], classe);
     }
   }
 
@@ -744,7 +744,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     for (ic = 1; ic <= nChar; ic++)
     {
       GEN v = gel(vN,ic), n = gel(nchi,ic);
-      v[i] = (long)Fl_add(v[i], n[i], lC[ic]->ord);
+      v[i] = Fl_add(v[i], n[i], lC[ic]->ord);
       for (j=1; j<i; j++) v[j] = v[i];
     }
 

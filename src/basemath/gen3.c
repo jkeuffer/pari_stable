@@ -2190,11 +2190,11 @@ u2toi(ulong a, ulong b)
 #else
   if (a) {
     x = cgetipos(4);
-    *(int_MSW(x)) = (long)a;
-    *(int_LSW(x)) = (long)b;
+    *(int_MSW(x)) = a;
+    *(int_LSW(x)) = b;
   } else {
     x = cgetipos(3);
-    x[2] = (long)b;
+    x[2] = b;
   }
 #endif
   return x;

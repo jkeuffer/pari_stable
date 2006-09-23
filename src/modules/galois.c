@@ -54,7 +54,7 @@ do_par(GEN T, long k, long n, long m)
   {
     GEN t = cgetg(k, t_VECSMALL);
     for (i=1; i<k; i++) t[i] = par_vec[i];
-    T[ ++T[0] ] = (long)t; return;
+    gel(T, ++T[0]) = t; return;
   }
   if (n < m) m = n;
   for (i=1; i<=m; i++) { par_vec[k] = i; do_par(T, k+1, n-i, i); }

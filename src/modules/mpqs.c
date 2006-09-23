@@ -2810,7 +2810,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
    * down at the end to what we actually found, or up if we are very lucky and
    * find more factors.  In the upper half of our vector, we store information
    * about which factors we know to be composite (zero) or believe to be
-   * composite ((long)NULL) or suspect to be prime (one), or an exponent (two
+   * composite (NULL) or suspect to be prime (one), or an exponent (two
    * or some t_INT) if it is a proper power */
   av2 = avma; lim = stack_lim(av2,1);
   if (rank > (long)BITS_IN_LONG - 2)
@@ -2926,25 +2926,25 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 	/* first make sure there's room for another factor */
 	if (res_next > res_size)
 	{ /* need to reallocate (_very_ rare case) */
-	  long i1, new_size = 2*res_size;
-	  GEN new_res;
-	  if (new_size > res_max) new_size = res_max;
-	  new_res = cgetg(2*new_size+1, t_VEC);
-	  for (i1=2*new_size; i1>=res_next; i1--) new_res[i1] = 0;
+	  long i1, size = 2*res_size;
+	  GEN RES;
+	  if (size > res_max) size = res_max;
+	  RES = cgetg(2*size+1, t_VEC);
+	  for (i1=2*size; i1>=res_next; i1--) gel(RES,i1) = NULL;
 	  for (i1=1; i1<res_next; i1++)
 	  {
 	    /* GN20050707:
-	     * on-stack contents of new_res must be rejuvenated */
-	    icopyifstack(res[i1], new_res[i1]); /* factors */
+	     * on-stack contents of RES must be rejuvenated */
+	    icopyifstack(res[i1], RES[i1]); /* factors */
 	    if (res[res_size+i1])
-	      icopyifstack(res[res_size+i1], new_res[new_size+i1]);
+	      icopyifstack(res[res_size+i1], RES[size+i1]);
 	    /* primality tags */
 	  }
-	  res = new_res; res_size = new_size;   /* res_next unchanged */
+	  res = RES; res_size = size;   /* res_next unchanged */
 	}
 	/* now there is room; divide into existing factor and store the
 	   new gcd */
-	(void)dvdiiz(gel(res,j), D1, gel(res,j));
+	diviiz(gel(res,j), D1, gel(res,j));
 	gel(res,res_next) = D1;
 
 	/* following overwrites the old known-composite indication at j */
