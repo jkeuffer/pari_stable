@@ -2051,7 +2051,7 @@ issmall(GEN n, long *ptk)
   long k;
   if (!isint(n, &z)) return 0;
   k = itos_or_0(z); avma = av;
-  if (k || lgefint(z) == 2) { *ptk = k; return k; }
+  if (k || lgefint(z) == 2) { *ptk = k; return 1; }
   return 0;
 }
 

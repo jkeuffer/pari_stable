@@ -43,18 +43,18 @@ _jbessel(GEN n, GEN z, long flag, long m)
     k = lg(Z)-2 - v;
     if (v < 0) pari_err(negexper,"jbessel");
     if (v == 0) pari_err(impl,"jbessel around a!=0");
-    if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
-    Z = gprec(Z, k);
+    if (k <= 0) return scalarser(gen_1, varn(z), 2*v);
+    setlg(Z, k+2);
   }
   s = gen_1;
   av = avma; lim = stack_lim(av,1);
   for (k=m; k>=1; k--)
   {
-    s = gaddsg(1, gdiv(gdivgs(gmul(Z,s),k),gaddsg(k,n)));
+    s = gaddsg(1, gdiv(gmul(Z,s),gmulgs(gaddgs(n,k), k)));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"jbessel");
-      s = gerepilecopy(av, s);
+      s = gerepileupto(av, s);
     }
   }
   return s;
@@ -89,13 +89,13 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
       if (gcmp0(z)) return gerepilecopy(av, p2);
 
-      L = 1.3591409 * gtodouble(gabs(z,prec));
+      L = 1.3591409 * gtodouble(gabs(gtofp(z,3),prec));
       precnew = prec;
       if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
       if (issmall(n,&ki))
       {
 	k = labs(ki);
-        n = stoi(k);
+        n = utoi(k);
       } else {
         i = precision(n);
         if (i && i < precnew) n = gtofp(n,precnew);
@@ -553,30 +553,28 @@ kbessel0(GEN nu, GEN gx, long flag, long prec)
 GEN
 hyperu(GEN a, GEN b, GEN gx, long prec)
 {
-  GEN S, P, T, x, mb, p1, zf, zz, s, t, q, u, v, e, f, c, a1;
+  GEN S, P, T, x, p1, zf, u, a1, mb = gneg(b);
   const int ex = iscomplex(a) || iscomplex(b);
   long k, n, l = (typ(gx)==t_REAL)? lg(gx): prec, l1 = l+1;
   GEN y = ex? cgetc(l): cgetr(l);
-  pari_sp av = avma, av1, av2;
+  pari_sp av = avma;
 
   if(gsigne(gx) <= 0)
     pari_err(talker,"hyperu's third argument must be positive");
-  x = gtofp(gx, l); mb = gneg(b);
+  x = gtofp(gx, l);
   a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
   p1 = gabs(gtofp(P,3), 3);
   n = (long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(p1)));
-
-  if (ex)
-  { u=cgetc(l1); v=cgetc(l1); e=cgetc(l1); f=cgetc(l1); }
-  else
-  { u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1); }
-  c = cgetr(l1);
   S = gadd(a1, a);
-  av1 = avma;
   if (cmprs(x,n) < 0)
   {
+    GEN q = stor(n, l1), s = gen_1, t = gen_0, v, c, e, f;
+    pari_sp av1, av2;
+   
+    if (ex) { u=cgetc(l1); v=cgetc(l1); e=cgetc(l1); f=cgetc(l1); }
+    else    { u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1); }
+    av1 = avma;
     zf = gpow(stoi(n),gneg_i(a),l1);
-    s = gen_1; t = gen_0;
     T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
     for (k=n-1; k>=0; k--)
     {
@@ -589,19 +587,18 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
     gmulz(zf, s, u);
     gmulz(zf, gdivgs(t,-n), v);
-    avma = av1; q = stor(n, l1); av1 = avma;
+    avma = av1;
     for(;; avma = av1)
     {
-      GEN d, p2, p3 = gadd(q,mb);
-      p1=divsr(5,q); if (expo(p1)>= -1) p1 = real2n(-1, l1);
-      p2=subsr(1,divrr(x,q)); if (cmprr(p1,p2)>0) p1 = p2;
-      affrr(p1, c); togglesign(c);
-      d = real_1(l1);
+      GEN d = real_1(l1), p3 = gadd(q,mb);
+      c = divsr(5,q); if (expo(c)>= -1) c = real2n(-1, l1);
+      p1 = subsr(1,divrr(x,q)); if (cmprr(c,p1)>0) c = p1;
+      togglesign(c);
       gaffect(u,e);
       gaffect(v,f); av2 = avma;
       for(k=1;;k++, avma = av2)
       {
-	GEN w = gadd(gmul(gaddgs(a,k-1),u),gmul(gaddgs(p3,1-k),v));
+	GEN w = gadd(gmul(gaddgs(a,k-1),u), gmul(gaddgs(p3,1-k),v));
 	gmulz(divrs(q,k),v, u);
 	gdivgsz(w,k,v);
 	mulrrz(d,c,d);
@@ -616,13 +613,16 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
   }
   else
-  {
+  { 
+    GEN zz = divsr(-1,x), s = gen_1;
     zf = gpow(x,gneg_i(a),l1);
-    zz = divsr(-1,x); s=gen_1;
+    T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
     for (k=n-1; k>=0; k--)
     {
-      p1 = gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
+      p1 = gmul(T,divrs(zz,k+1));
       s = gaddsg(1, gmul(p1,s));
+      if (!k) break;
+      T = gsubgs(gsub(T, S), 2*k-1);
     }
     u = gmul(s,zf);
   }
