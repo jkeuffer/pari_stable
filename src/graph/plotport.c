@@ -127,7 +127,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   x = gtofp(a, prec); push_val(ep, x);
   for (i=1; i<=ISCR; i++) y[i]=cgetr(3);
   dx = gtofp(gdivgs(gsub(b,a), ISCR-1), prec);
-  ysml=gen_0; ybig=gen_0;
+  ysml = ybig = real_0(3);
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
   {
@@ -139,31 +139,29 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   for (i=1; i<=ISCR; i++)
   {
     gaffect(READ_EXPR(ch,ep,x), y[i]);
-    if (gcmp(y[i],ysml)<0) ysml=y[i];
-    if (gcmp(y[i],ybig)>0) ybig=y[i];
+    if (cmprr(y[i],ysml)<0) ysml=y[i];
+    if (cmprr(y[i],ybig)>0) ybig=y[i];
     x = addrr(x,dx);
     if (low_stack(limite, stack_lim(av2,1)))
     {
-      pari_sp tetpil=avma;
       if (DEBUGMEM>1) pari_warn(warnmem,"plot");
-      x = gerepile(av2,tetpil,rcopy(x));
+      x = gerepileuptoleaf(av2, x);
     }
   }
-  if (ysmlu) ysml=ysmlu;
-  if (ybigu) ybig=ybigu;
-  avma=av2; diff=gsub(ybig,ysml);
-  if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gen_1; }
-  dyj = gdivsg((JSCR-1)*3+2,diff);
-  jz = 3-gtolong(gmul(ysml,dyj));
-  av2=avma; z = PICTZERO(jz); jz = jz/3;
-  for (i=1; i<=ISCR; i++)
+  if (ysmlu) ysml = gtofp(ysmlu,3);
+  if (ybigu) ybig = gtofp(ybigu,3);
+  avma = av2; diff = subrr(ybig,ysml);
+  if (!signe(diff)) { ybig=addsr(1,ybig); diff=real_1(3); }
+  dyj = divsr((JSCR-1)*3+2, diff);
+  jz = 3 - gtolong(mulrr(ysml,dyj));
+  av2 = avma; z = PICTZERO(jz); jz = jz/3;
+  for (i=1; i<=ISCR; i++, avma = av2)
   {
     if (0<=jz && jz<=JSCR) scr[i][jz]=z;
-    j = 3+gtolong(gmul(gsub(y[i],ysml),dyj));
+    j = 3 + gtolong(mulrr(subrr(y[i],ysml),dyj));
     jnew = j/3;
     if (i > 1) fill_gap(scr, i, jnew, jpre);
     if (0<=jnew && jnew<=JSCR) scr[i][jnew] = PICT(j);
-    avma = av2;
     jpre = jnew;
   }
   pariputc('\n');
