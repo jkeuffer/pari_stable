@@ -276,10 +276,7 @@ kbessel(GEN nu, GEN gx, long prec)
     s=gen_1; t=gen_0;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
-      if (k2 & ~(MAXHALFULONG>>1))
-        p1 = gadd(mulss(k2,k2),nu2);
-      else
-        p1 = gaddsg(k2*k2,nu2);
+      p1 = gadd(nu2, mulss(k2,k2));
       ak = gdivgs(gmul(p1,zz),-k);
       s = gaddsg(1, gmul(ak,s));
       t = gaddsg(k2,gmul(ak,t));
@@ -290,13 +287,13 @@ kbessel(GEN nu, GEN gx, long prec)
     r=gmul2n(x,1); av1=avma;
     for(;;)
     {
-      p1=divsr(5,q); if (expo(p1) >= -1) p1=ghalf;
+      p1=divsr(5,q); if (expo(p1) >= -1) p1=real2n(-1,l1);
       p2=subsr(1,divrr(r,q));
       if (gcmp(p1,p2)>0) p1=p2;
       gnegz(p1,c); gaffsg(1,d); affrr(u,e); affrr(v,f);
       for (k=1; ; k++)
       {
-	w=gadd(gmul(gsubsg(k,ghalf),u), gmul(subrs(q,k),v));
+	w=gadd(gmul2n(gmulsg(2*k-1,u), -1), gmul(subrs(q,k),v));
 	w=gadd(w, gmul(nu,gsub(u,gmul2n(v,1))));
 	gdivgsz(gmul(q,v),k,u);
 	gdivgsz(w,k,v);
@@ -556,74 +553,76 @@ kbessel0(GEN nu, GEN gx, long flag, long prec)
 GEN
 hyperu(GEN a, GEN b, GEN gx, long prec)
 {
-  GEN x,y,p1,p2,p3,zf,zz,s,t,q,r,u,v,e,f,c,d,w,a1,gn;
-  long l, k, l1, n, ex;
-  pari_sp av, av1, av2;
+  GEN S, P, T, x, mb, p1, zf, zz, s, t, q, u, v, e, f, c, a1;
+  const int ex = iscomplex(a) || iscomplex(b);
+  long k, n, l = (typ(gx)==t_REAL)? lg(gx): prec, l1 = l+1;
+  GEN y = ex? cgetc(l): cgetr(l);
+  pari_sp av = avma, av1, av2;
 
-  if(gsigne(gx) <= 0) pari_err(talker,"hyperu's third argument must be positive");
-  ex = (iscomplex(a) || iscomplex(b));
+  if(gsigne(gx) <= 0)
+    pari_err(talker,"hyperu's third argument must be positive");
+  x = gtofp(gx, l); mb = gneg(b);
+  a1 = gaddsg(1, gadd(a,mb)); P = gmul(a1, a);
+  p1 = gabs(gtofp(P,3), 3);
+  n = (long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(p1)));
 
-  l = (typ(gx)==t_REAL)? lg(gx): prec;
-  if (ex) y=cgetc(l); else y=cgetr(l);
-  l1=l+1; av=avma; x = gtofp(gx, l);
-  a1=gaddsg(1,gsub(a,b));
   if (ex)
-  {
-    u=cgetc(l1); v=cgetc(l1); c=cgetc(l1);
-    d=cgetc(l1); e=cgetc(l1); f=cgetc(l1);
-  }
+  { u=cgetc(l1); v=cgetc(l1); e=cgetc(l1); f=cgetc(l1); }
   else
+  { u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1); }
+  c = cgetr(l1);
+  S = gadd(a1, a);
+  av1 = avma;
+  if (cmprs(x,n) < 0)
   {
-    u=cgetr(l1); v=cgetr(l1); c=cgetr(l1);
-    d=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
-  }
-  n=(long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(gabs(gmul(a,a1),l1))));
-  av1=avma;
-  if (cmprs(x,n)<0)
-  {
-    gn=stoi(n); zf=gpow(gn,gneg_i(a),l1);
-    zz=gdivsg(-1,gn); s=gen_1; t=gen_0;
+    zf = gpow(stoi(n),gneg_i(a),l1);
+    s = gen_1; t = gen_0;
+    T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
     for (k=n-1; k>=0; k--)
     {
-      p1=gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
-      s=gaddsg(1,gmul(p1,s));
-      t=gadd(gaddsg(k,a),gmul(p1,t));
+      /* T = (a+k)*(a1+k) = a*a1 + k(a+a1) + k^2 = previous(T) - S - 2k + 1 */
+      p1 = gdiv(T, mulss(-n, k+1));
+      s = gaddgs(gmul(p1,s), 1);
+      t = gadd(  gmul(p1,t), gaddgs(a,k));
+      if (!k) break;
+      T = gsubgs(gsub(T, S), 2*k-1);
     }
-    gmulz(s,zf,u); t=gmul(t,zz); gmulz(t,zf,v); avma=av1;
-    q = stor(n, l1); r=x; av1=avma;
-    for(;;)
+    gmulz(zf, s, u);
+    gmulz(zf, gdivgs(t,-n), v);
+    avma = av1; q = stor(n, l1); av1 = avma;
+    for(;; avma = av1)
     {
-      p1=divsr(5,q); if (expo(p1)>= -1) p1=ghalf;
-      p2=subsr(1,divrr(r,q)); if (gcmp(p1,p2)>0) p1=p2;
-      gnegz(p1,c); avma=av1;
-      gaffsg(1,d); gaffect(u,e); gaffect(v,f);
-      p3=gsub(q,b); av2 = avma;
-      for(k=1;;k++)
+      GEN d, p2, p3 = gadd(q,mb);
+      p1=divsr(5,q); if (expo(p1)>= -1) p1 = real2n(-1, l1);
+      p2=subsr(1,divrr(x,q)); if (cmprr(p1,p2)>0) p1 = p2;
+      affrr(p1, c); togglesign(c);
+      d = real_1(l1);
+      gaffect(u,e);
+      gaffect(v,f); av2 = avma;
+      for(k=1;;k++, avma = av2)
       {
-	w=gadd(gmul(gaddsg(k-1,a),u),gmul(gaddsg(1-k,p3),v));
-	gdivgsz(gmul(q,v),k,u);
+	GEN w = gadd(gmul(gaddgs(a,k-1),u),gmul(gaddgs(p3,1-k),v));
+	gmulz(divrs(q,k),v, u);
 	gdivgsz(w,k,v);
-	gmulz(d,c,d);
+	mulrrz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);
 	if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
-	avma=av2;
       }
-      p1=u; u=e; e=p1;
-      p1=v; v=f; f=p1;
-      gmulz(q,gadd(gen_1,c),q);
-      if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(l)) break;
-      avma=av1;
+      swap(e, u);
+      swap(f, v);
+      affrr(mulrr(q, addrs(c,1)), q);
+      if (expo(subrr(q,x)) - expo(x) <= 1-bit_accuracy(l)) break;
     }
   }
   else
   {
-    zf=gpow(x,gneg_i(a),l1);
-    zz=divsr(-1,x); s=gen_1;
+    zf = gpow(x,gneg_i(a),l1);
+    zz = divsr(-1,x); s=gen_1;
     for (k=n-1; k>=0; k--)
     {
-      p1=gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
-      s=gadd(gen_1,gmul(p1,s));
+      p1 = gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
+      s = gaddsg(1, gmul(p1,s));
     }
     u = gmul(s,zf);
   }

@@ -86,7 +86,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
    13- restrict the types allowed in gaffect and gaffsg to scalar types and
        vectors of such.
    14- vecextract(x, bitmask) much faster [ read bits, don't use shifts ]
-       
+   15- improve hyperu
    
 
   Added
