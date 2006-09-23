@@ -147,15 +147,17 @@ greffe(GEN x, long l, long use_stack)
 long
 gtolong(GEN x)
 {
-  long y, tx=typ(x);
-  pari_sp av=avma;
-
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       return itos(x);
-    case t_REAL: case t_FRAC:
-      y=itos(ground(x)); avma=av; return y;
+    case t_REAL:
+      return (long)(rtodbl(x) + 0.5);
+    case t_FRAC: {
+      pari_sp av = avma;
+      long y = itos(ground(x));
+      avma = av; return y;
+    }
     case t_COMPLEX:
       if (gcmp0(gel(x,2))) return gtolong(gel(x,1)); break;
     case t_QUAD:
@@ -889,6 +891,12 @@ gneg(GEN x)
     case t_INT: case t_REAL:
       return mpneg(x);
 
+    case t_COMPLEX:
+      y=cgetg(3, t_COMPLEX);
+      gel(y,1) = gneg(gel(x,1));
+      gel(y,2) = gneg(gel(x,2));
+      break;
+
     case t_INTMOD: y=cgetg(3,t_INTMOD);
       gel(y,1) = icopy(gel(x,1));
       gel(y,2) = subii(gel(y,1),gel(x,2));
@@ -914,14 +922,10 @@ gneg(GEN x)
       gel(y,2) = gneg(gel(x,2));
       gel(y,3) = gneg(gel(x,3)); break;
 
-    case t_COMPLEX: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(y,i) = gneg(gel(x,i));
-      break;
-
     case t_POL: case t_SER:
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
-      for (i=2; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+    case t_VEC: case t_COL: case t_MAT:
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(y,i) = gneg(gel(x,i));
       break;
 
     case t_VECSMALL:
@@ -1308,17 +1312,6 @@ gaffect(GEN x, GEN y)
       }
       break;
     
-    case t_COMPLEX:
-      switch(ty)
-      {
-        case t_INT: case t_REAL: case t_INTMOD:
-        case t_FRAC: case t_PADIC: case t_QUAD:
-          if (!gcmp0(gel(x,2))) pari_err(operi,"",x,y);
-          gaffect(gel(x,1),y); break;
-        default: pari_err(operf,"",x,y);
-      }
-      break;
-    
     case t_PADIC:
       switch(ty)
       {
@@ -1333,20 +1326,13 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-          if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
-          gaffect(gel(x,2),y); break;
+          pari_err(operf,"",x,y);
 
         case t_REAL:
           av = avma; gaffect(quadtoc(x,lg(y)), y); avma = av; break;
         case t_COMPLEX:
-          ly = precision(y);
-          if (ly) { av = avma; gaffect(quadtoc(x,ly), y); avma = av; }
-          else
-          {
-            if (!gcmp0(gel(x,3))) pari_err(operi,"",x,y);
-            gaffect(gel(x,2),y);
-          }
-          break;
+          ly = precision(y); if (!ly) pari_err(operf,"",x,y);
+          av = avma; gaffect(quadtoc(x,ly), y); avma = av; break;
         default: pari_err(operf,"",x,y);
       }
     default: pari_err(operf,"",x,y);
@@ -1362,15 +1348,13 @@ gaffect(GEN x, GEN y)
 GEN
 quadtoc(GEN x, long prec)
 {
+  GEN z, Q, u = gel(x,2), v = gel(x,3);
   pari_sp av;
-  GEN z, Q;
-  if (gcmp0(x)) return gen_0;
-  if (prec < 3) return real_0_bit( gexpo(x) );
-
+  if (gcmp0(v)) return gtofp(u, prec);
   av = avma; Q = gel(x,1);
   /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */
   z = itor(subsi(signe(gel(Q,3))? 1: 0, shifti(gel(Q,2),2)), prec);
-  z = gsub(gsqrt(z,prec), gel(Q,3));
+  z = gsub(sqrtr(z), gel(Q,3));
   if (signe(gel(Q,2)) < 0) /* Q[2] = -D/4 or (1-D)/4 */
     setexpo(z, expo(z)-1);
   else
@@ -1378,7 +1362,7 @@ quadtoc(GEN x, long prec)
     gel(z,1) = gmul2n(gel(z,1),-1);
     setexpo(z[2], expo(z[2])-1);
   }/* z = (-b + sqrt(D)) / 2 */
-  return gerepileupto(av, gadd(gel(x,2), gmul(gel(x,3),z)));
+  return gerepileupto(av, gadd(u, gmul(v,z)));
 }
 
 static GEN
