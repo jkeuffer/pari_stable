@@ -2669,8 +2669,8 @@ rootsold(GEN x, long prec)
         p1i = gel(p1,2); setlg(p1i, 3); gaffect(p3, p1); avma = av2;
         for (ln = 4; ln <= prec; ln = (ln<<1)-2)
         {
-          setlg(p1r,ln); if (gcmp0(p1r)) gel(p1,1) = gen_0;
-          setlg(p1i,ln); if (gcmp0(p1i)) gel(p1,2) = gen_0;
+          setlg(p1r,ln); if (!signe(p1r)) gel(p1,1) = gen_0;
+          setlg(p1i,ln); if (!signe(p1i)) gel(p1,2) = gen_0;
           p6 = gadd(p1, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
           gel(p1,1) = p1r;
           gel(p1,2) = p1i; gaffect(p6, p1); avma = av2;
@@ -2684,8 +2684,8 @@ rootsold(GEN x, long prec)
       {
         if (typ(p7) == t_COMPLEX)
         {
-          if (gcmp0(gel(p7,1))) gel(p7,1) = gen_0;
-          if (gcmp0(gel(p7,2))) gel(p7,2) = gen_0;
+          if (!signe(gel(p7,1))) gel(p7,1) = gen_0;
+          if (!signe(gel(p7,2))) gel(p7,2) = gen_0;
         }
         p7 = gadd(p7, gneg_i(gdiv(poleval(ps,p7), poleval(xd0,p7))));
       }
@@ -2699,7 +2699,7 @@ rootsold(GEN x, long prec)
       avma = av2;
       if (expo(p1[2]) < expmin && real)
       {
-        gaffect(gen_0, gel(p1,2));
+        gaffsg(0, gel(p1,2));
         for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
         gel(p11,2) = gneg(gel(p1,1));
         xc = gerepileupto(av0, RgX_div(xc,p11));
@@ -2892,12 +2892,10 @@ roots2(GEN pol,long PREC)
   return zrhqr(pol,PREC);
 }
 
-#define MR 8
-#define MT 10
-
 static GEN
 laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
 {
+  const long MR = 8, MT = 10;
   long MAXIT, iter, j;
   pari_sp av = avma, av1;
   GEN rac,erre,I,x,abx,abp,abm,dx,x1,b,d,f,g,h,sq,gp,gm,g2,*ffrac;
@@ -2952,8 +2950,6 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
   }
   avma = av; return NULL;
 }
-#undef MR
-#undef MT
 /***********************************************************************/
 /**                                                                   **/
 /**             ROOTS of a polynomial with REAL coeffs                **/

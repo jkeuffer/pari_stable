@@ -32,9 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static GEN
 _jbessel(GEN n, GEN z, long flag, long m)
 {
-  long k;
   pari_sp av, lim;
   GEN Z,s;
+  long k;
 
   Z = gmul2n(gsqr(z),-2); if (flag & 1) Z = gneg(Z);
   if (typ(z) == t_SER)
@@ -50,7 +50,7 @@ _jbessel(GEN n, GEN z, long flag, long m)
   av = avma; lim = stack_lim(av,1);
   for (k=m; k>=1; k--)
   {
-    s = gaddsg(1, gdiv(gmul(Z,s),gmulgs(gaddgs(n,k), k)));
+    s = gaddsg(1, gdiv(gmul(Z,s), gmulgs(gaddgs(n,k),k)));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"jbessel");
@@ -123,8 +123,8 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     case t_PADIC: pari_err(impl,"p-adic jbessel function");
     default:
       if (!(y = toser_i(z))) break;
-      if (issmall(n,&ki)) n = stoi(labs(ki));
-      return gerepilecopy(av, _jbessel(n,y,flag,lg(y)-2));
+      if (issmall(n,&ki)) n = utoi(labs(ki));
+      return gerepileupto(av, _jbessel(n,y,flag,lg(y)-2));
   }
   pari_err(typeer,"jbessel");
   return NULL; /* not reached */
@@ -238,97 +238,93 @@ kbessel2(GEN nu, GEN x, long prec)
 
   if (typ(x)==t_REAL) prec = lg(x);
   x2 = gshift(x,1);
-  a = gcmp0(imag_i(nu))? cgetr(prec): cgetc(prec);
-  gaddz(gen_1,gshift(nu,1), a);
+  a = gtofp(gaddgs(gshift(nu,1), 1), prec);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
   p1 = gmul(gmul(p1,gpow(x2,nu,prec)), sqrtr(mppi(prec)));
-  return gerepileupto(av, gdiv(p1,gexp(x,prec)));
+  return gerepileupto(av, gmul(p1,gexp(gneg(x),prec)));
 }
 
 GEN
 kbessel(GEN nu, GEN gx, long prec)
 {
-  GEN x,y,yfin,p1,p2,zf,zz,s,t,q,r,u,v,e,f,c,d,ak,pitemp,nu2,w;
-  long l, lnew, k, k2, l1, n2, n, ex, rab=0;
-  pari_sp av, av1;
+  GEN x, y, p1, zf, zz, r, s, t, u, ak, pitemp, nu2;
+  long l, lnew, k, k2, l1, n2, n, ex;
+  pari_sp av;
 
   if (typ(nu)==t_COMPLEX) return kbessel2(nu,gx,prec);
   l = (typ(gx)==t_REAL)? lg(gx): prec;
   ex = gexpo(gx);
   if (ex < 0)
   {
-    rab = 1 + ((-ex)>>TWOPOTBITS_IN_LONG);
+    long rab = 1 + ((-ex)>>TWOPOTBITS_IN_LONG);
     lnew = l + rab; prec += rab;
   }
   else lnew = l;
-  yfin=cgetr(l); l1=lnew+1;
-  av=avma; x = gtofp(gx, lnew); y=cgetr(lnew);
-  u=cgetr(l1); v=cgetr(l1); c=cgetr(l1); d=cgetr(l1);
-  e=cgetr(l1); f=cgetr(l1);
-  nu2=gmulgs(gsqr(nu),-4);
+  y = cgetr(l); l1=lnew+1;
+  av = avma; x = gtofp(gx, lnew); nu = gtofp(nu, lnew);
+  nu2 = gmul2n(mulrr(nu,nu), 2); togglesign(nu2);
   n = (long) (bit_accuracy_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
-  n2=(n<<1); pitemp=mppi(l1);
-  av1=avma;
+  n2 = n<<1; pitemp=mppi(l1);
+  r = gmul2n(x,1);
   if (cmprs(x, n) < 0)
   {
-    zf = gsqrt(gdivgs(pitemp,n2),prec);
+    GEN q = stor(n2, l1), v, c, e, f;
+    pari_sp av1, av2;
+    u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
+    av1 = avma;
+    zf = sqrtr(divrs(pitemp,n2));
     zz = ginv(stor(n2<<2, prec));
     s=gen_1; t=gen_0;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
-      p1 = gadd(nu2, mulss(k2,k2));
-      ak = gdivgs(gmul(p1,zz),-k);
-      s = gaddsg(1, gmul(ak,s));
-      t = gaddsg(k2,gmul(ak,t));
+      p1 = addri(nu2, mulss(k2,k2));
+      ak = divrs(gmul(p1,zz),-k);
+      s = addsr(1, gmul(ak,s));
+      t = addsr(k2,gmul(ak,t));
     }
-    gmulz(s,zf,u); t=gmul2n(t,-1);
-    gdivgsz(gadd(gmul(t,zf),gmul(u,nu)),-n2,v); avma=av1;
-    q = stor(n2, l1);
-    r=gmul2n(x,1); av1=avma;
-    for(;;)
+    mulrrz(zf, s, u); setexpo(t, expo(t)-1);
+    divrsz(addrr(mulrr(t,zf),mulrr(u,nu)),-n2,v);
+    for(;; avma = av1)
     {
-      p1=divsr(5,q); if (expo(p1) >= -1) p1=real2n(-1,l1);
-      p2=subsr(1,divrr(r,q));
-      if (gcmp(p1,p2)>0) p1=p2;
-      gnegz(p1,c); gaffsg(1,d); affrr(u,e); affrr(v,f);
-      for (k=1; ; k++)
+      GEN d = real_1(l1);
+      c = divsr(5,q); if (expo(c) >= -1) c = real2n(-1,l1);
+      p1 = subsr(1,divrr(r,q)); if (cmprr(c,p1)>0) c = p1;
+      togglesign(c);
+      affrr(u,e);
+      affrr(v,f); av2 = avma;
+      for (k=1;; k++, avma=av2)
       {
-	w=gadd(gmul2n(gmulsg(2*k-1,u), -1), gmul(subrs(q,k),v));
-	w=gadd(w, gmul(nu,gsub(u,gmul2n(v,1))));
-	gdivgsz(gmul(q,v),k,u);
-	gdivgsz(w,k,v);
-	gmulz(d,c,d);
-	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
-	gaddz(f,p1,f);
+	GEN w = addrr(gmul2n(mulsr(2*k-1,u), -1), mulrr(subrs(q,k),v));
+	w = addrr(w, mulrr(nu, subrr(u,gmul2n(v,1))));
+	divrsz(mulrr(q,v),k,u);
+	divrsz(w,k,v);
+	mulrrz(d,c,d);
+	addrrz(e,mulrr(d,u),e); p1=mulrr(d,v);
+	addrrz(f,p1,f);
 	if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
-	avma=av1;
+
       }
-      p1=u; u=e; e=p1;
-      p1=v; v=f; f=p1;
-      gmulz(q,gaddsg(1,c),q);
+      swap(e, u);
+      swap(f, v);
+      affrr(mulrr(q,addrs(c,1)), q);
       if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(lnew)) break;
-      avma=av1;
     }
-    gmulz(u,gpow(divrs(x,n),nu,prec),y);
+    u = mulrr(u, gpow(divrs(x,n),nu,prec));
   }
   else
   {
-    p2=gmul2n(x,1);
-    zf=gsqrt(gdiv(pitemp,p2),prec);
-    zz=ginv(gmul2n(p2,2)); s=gen_1;
+    zf = sqrtr(divrr(pitemp,r));
+    zz = ginv(gmul2n(r,2)); s=gen_1;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
-      if (k2 & ~(MAXHALFULONG>>1))
-        p1=gadd(mulss(k2,k2),nu2);
-      else
-        p1=gaddsg(k2*k2,nu2);
-      ak = gdivgs(gmul(p1,zz),k);
-      s = gsub(gen_1,gmul(ak,s));
+      p1 = addir(mulss(k2,k2),nu2);
+      ak = divrs(mulrr(p1,zz), k);
+      s = subsr(1, mulrr(ak,s));
     }
-    gmulz(s,zf,y);
+    u = mulrr(s, zf);
   }
-  gdivz(y,mpexp(x),yfin);
-  avma=av; return yfin;
+  affrr(mulrr(u, mpexp(mpneg(x))), y);
+  avma = av; return y;
 }
 
 /*   sum_{k=0}^m Z^k (H(k)+H(k+n)) / (k! (k+n)!)
@@ -338,9 +334,9 @@ kbessel(GEN nu, GEN gx, long prec)
 static GEN
 _kbessel(long n, GEN z, long flag, long m, long prec)
 {
-  long k, limit;
-  pari_sp av;
   GEN Z, p1, p2, s, H;
+  pari_sp av, lim;
+  long k;
 
   Z = gmul2n(gsqr(z),-2); if (flag & 1) Z = gneg(Z);
   if (typ(z) == t_SER)
@@ -350,7 +346,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     if (v < 0) pari_err(negexper,"kbessel");
     if (v == 0) pari_err(impl,"kbessel around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
-    Z = gprec(Z, k);
+    setlg(Z, k+2);
   }
   H = cgetg(m+n+2,t_VEC); gel(H,1) = gen_0;
   if (flag <= 1)
@@ -364,14 +360,14 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     for (k=2; k<=m+n; k++) gel(H,k+1) = s = gdivgs(gaddsg(1,gmulsg(k,s)),k);
   }
   s = gadd(gel(H,m+1), gel(H,m+n+1));
-  av = avma; limit = stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
   for (k=m; k>0; k--)
   {
     s = gadd(gadd(gel(H,k),gel(H,k+n)),gdiv(gmul(Z,s),mulss(k,k+n)));
-    if (low_stack(limit,stack_lim(av,1)))
+    if (low_stack(lim,stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"kbessel");
-      s = gerepilecopy(av, s);
+      s = gerepileupto(av, s);
     }
   }
   p1 = (flag <= 1) ? mpfactr(n,prec) : mpfact(n);
@@ -587,7 +583,6 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
     gmulz(zf, s, u);
     gmulz(zf, gdivgs(t,-n), v);
-    avma = av1;
     for(;; avma = av1)
     {
       GEN d = real_1(l1), p3 = gadd(q,mb);
@@ -626,7 +621,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
     u = gmul(s,zf);
   }
-  gaffect(u,y); avma=av; return y;
+  gaffect(u,y); avma = av; return y;
 }
 
 /* = incgam2(0, x, prec). typ(x) = t_REAL. Optimized for eint1 */
@@ -1020,60 +1015,6 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n", *pp, *pn);
 }
 
-#if 0
-static GEN
-czeta(GEN s0, long prec)
-{
-  int funeq = 0;
-  long n, p, n1, i, i2;
-  pari_sp av;
-  GEN s, y, z, res, sig, ms, p1, p2, p3, p31, pitemp;
-
-  s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-
-  if (signe(sig) <= 0 || expo(sig) <= -2)
-  {
-    if (typ(s0) == t_INT)
-    {
-      gaffect(szeta(itos(s0), prec), res);
-      avma = av; return res;
-    }
-    funeq = 1; s = gsub(gen_1,s);
-  }
-  optim_zeta(s, prec, &p, &n);
-
-  n1 = (n < 46340)? n*n: 0;
-  y=gen_1; ms=gneg_i(s); p1=cgetr(prec+1); p2=gen_1;
-  for (i=2; i<=n; i++)
-  {
-    affsr(i,p1); p2 = gexp(gmul(ms,mplog(p1)), prec+1);
-    y = gadd(y,p2);
-  }
-  mpbern(p,prec); p31=cgetr(prec+1); z=gen_0;
-  for (i=p; i>=1; i--)
-  {
-    i2 = i<<1;
-    p1 = gmul(gaddsg(i2-1,s),gaddsg(i2,s));
-    p1 = divgsns(p1, i2);
-    p1 = n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
-    p3 = bern(i);
-    if (bernzone[2]>prec+1) { affrr(p3,p31); p3=p31; }
-    z = gadd(divrs(p3,i),gmul(p1,z));
-  }
-  p1 = gsub(gdivsg(n,gsubgs(s,1)),ghalf);
-  z = gmul(gadd(p1,gmul(s,gdivgs(z,n<<1))),p2);
-  y = gadd(y,z);
-  if (funeq)
-  {
-    pitemp=mppi(prec+1); setexpo(pitemp,2);
-    y = gmul(gmul(y,ggamma(s,prec+1)), gpow(pitemp,ms,prec+1));
-    setexpo(pitemp, 0);
-    y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec+1)),1);
-  }
-  gaffect(y,res); avma = av; return res;
-}
-#endif
-
 /* 1/zeta(n) using Euler product. Assume n > 0.
  * if (lba != 0) it is log(bit_accuracy) we _really_ require */
 GEN
@@ -1236,17 +1177,12 @@ szeta_odd(long k, long prec)
 static GEN
 single_bern(long k, long prec)
 {
-  pari_sp av;
   GEN B;
   if (OK_bern(k >> 1, prec)) B = bernreal(k, prec);
   else if (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2))
     B = bernreal_using_zeta(k, NULL, prec);
   else
-  {
-    B = cgetr(prec);
-    av = avma; gaffect(bernfrac(k), B);
-    avma = av;
-  }
+    B = fractor(bernfrac(k), prec);
   return B;
 }
 
