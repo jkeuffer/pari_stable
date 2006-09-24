@@ -794,7 +794,7 @@ bernfrac(long k)
   if (k < 6) switch(k)
   {
     case 0: return gen_1;
-    case 1: return gneg(ghalf);
+    case 1: return mkfrac(gen_m1, gen_2);
     case 2: return B2();
     case 4: return B4();
     default: return gen_0;

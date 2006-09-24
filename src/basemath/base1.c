@@ -2521,7 +2521,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     {
       avma = av;
       if (flag) pari_err(talker,"s = 0 is a pole (gzetakall)");
-      if (ru == 1) return gneg(r1? ghalf: resi);
+      if (ru == 1) return r1? mkfrac(gen_m1, gen_2): gneg(resi);
       return gen_0;
     }
     if (sl<0 && (r2 || !odd(sl)))

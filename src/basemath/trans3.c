@@ -1266,7 +1266,7 @@ czeta(GEN s0, long prec)
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-  if (gcmp0(s)) { y = gneg(ghalf); goto END; }
+  if (gcmp0(s)) { y = mkfrac(gen_m1,gen_2); goto END; }
   if (gexpo(gsub(s, gen_1)) < -5 ||
       (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
@@ -1789,7 +1789,7 @@ polylog(long m, GEN x, long prec)
   GEN X, Xn, z, p1, p2, y;
 
   if (m<0) pari_err(talker,"negative index in polylog");
-  if (!m) return gneg(ghalf);
+  if (!m) return mkfrac(gen_m1,gen_2);
   if (gcmp0(x)) return gcopy(x);
   av = avma;
   if (m==1)
@@ -1839,7 +1839,8 @@ polylog(long m, GEN x, long prec)
   }
   else
   {
-    GEN logx = glog(x,l), logx2 = gsqr(logx); p1 = gneg_i(ghalf);
+    GEN logx = glog(x,l), logx2 = gsqr(logx);
+    p1 = mkfrac(gen_m1,gen_2);
     for (i=m-2; i>=0; i-=2)
       p1 = gadd(szeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
     if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
@@ -1981,7 +1982,7 @@ gpolylog(long m, GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err(impl, "padic polylogarithm");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (!m) { avma = av; return gneg(ghalf); }
+      if (!m) { avma = av; return mkfrac(gen_m1,gen_2); }
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gcmp0(y)) return gcopy(y);
       v = valp(y);
