@@ -974,19 +974,18 @@ thue(GEN tnf, GEN rhs, GEN ne)
 
 struct sol_abs
 {
-  GEN Relations;  /* primes above a, expressed on generators of Cl(K) */
-  GEN Partial;    /* list of vectors, 
-                     T->Partial[i] = T->Relations[1..i] * u[1..i] */
-  GEN gen_ord;    /* orders of generators of Cl(K) given in bnf */
+  GEN Relations; /* primes above a, expressed on generators of Cl(K) */
+  GEN Partial;   /* list of vectors, Partial[i] = Relations[1..i] * u[1..i] */
+  GEN gen_ord;   /* orders of generators of Cl(K) given in bnf */
  
-  long *f;        /* f[i] = f(Primes[i]/p), inertial degree */
-  long *n;        /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
-  long *inext;    /* index of first P above next p, 0 if p is last */
-  long *S;        /* S[i] = n[i] - sum_{ 1<=k<=i } f[k].u[k] */
-  long *u;        /* We want principal ideals I = prod Primes[i]^u[i] */
-  GEN  normsol;   /* lists of copies of the u[] which are solutions */
+  long *f;       /* f[i] = f(Primes[i]/p), inertial degree */
+  long *n;       /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
+  long *inext;   /* index of first P above next p, 0 if p is last */
+  long *S;       /* S[i] = n[i] - sum_{ 1<=k<=i } f[k]*u[k] */
+  long *u;       /* We want principal ideals I = prod Primes[i]^u[i] */
+  GEN  normsol;  /* lists of copies of the u[] which are solutions */
  
-  long Nprimes;   /* length(T->Relations) = #{max ideal above divisors of a} */
+  long Nprimes;  /* length(T->Relations) = #{max ideal above divisors of a} */
   long sindex, smax; /* current index in T->normsol; max. index */
 };
 
