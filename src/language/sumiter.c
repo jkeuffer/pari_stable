@@ -932,23 +932,23 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     else
     {
       pari_sp av2 = avma;
-      x = gen_0; r = stoi(2*k+2);
+      x = gen_0; r = utoipos(2*k+2);
       for(kk=0;;kk++)
       {
         
         long ex;
-        gaffect(eval(addii(r,a), E), reel);
+        affgr(eval(addii(r,a), E), reel);
         ex = expo(reel) + kk; setexpo(reel,ex);
-	x = gadd(x,reel); if (kk && ex < G) break;
+	x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k < N) stock[2*k+1] = x;
-      gaffect(eval(addsi(k+1,a), E), reel);
-      x = gadd(reel, gmul2n(x,1));
+      affgr(eval(addsi(k+1,a), E), reel);
+      x = addrr(reel, gmul2n(x,1));
     }
-    c = gadd(az,c);
-    s = gadd(s, gmul(x, k&1? gneg_i(c): c));
+    c = addir(az,c);
+    s = mpadd(s, mulrr(x, k&1? negr(c): c));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
   }
   return gerepileupto(av, gdiv(s,d));
@@ -972,19 +972,19 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (odd(k) || !stock[k])
     {
       pari_sp av2 = avma;
-      x = gen_0; r = stoi(2*k);
+      x = gen_0; r = utoipos(2*k);
       for(kk=0;;kk++)
       {
         long ex;
-        gaffect(eval(addii(r,a), E), reel);
+        affgr(eval(addii(r,a), E), reel);
         ex = expo(reel) + kk; setexpo(reel,ex);
-	x = gadd(x,reel); if (kk && ex < G) break;
+	x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k-1 < N) stock[2*k] = x;
-      gaffect(eval(addsi(k,a), E), reel);
-      stock[k] = gadd(reel, gmul2n(x,1));
+      affgr(eval(addsi(k,a), E), reel);
+      stock[k] = addrr(reel, gmul2n(x,1));
     }
   s = gen_0;
   pol = polzagreel(N,N>>1,prec+1);
