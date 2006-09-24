@@ -672,7 +672,7 @@ logmodulus(GEN p, long k, double tau)
   pari_sp av, ltop=avma;
   double r, tau2 = tau/6;
 
-  bit = (long)(n * (2. + log2(3.*n) + log2(1./tau2)));
+  bit = (long)(n * (2. + log2(3.*n/tau2)));
   gunr = myreal_1(bit);
   av = avma;
   q = gprec_w(p, nbits2prec(bit));
@@ -695,7 +695,7 @@ logmodulus(GEN p, long k, double tau)
     homothetie2n(q,e);
 
     tau2 *= 1.5; if (tau2 > 1.) tau2 = 1.;
-    bit = 1 + (long)(nn*(2. + log2(3.*nn) + log2(1./tau2)));
+    bit = 1 + (long)(nn*(2. + log2(3.*nn/tau2)));
   }
   avma = ltop; return -r * LOG2;
 }
@@ -719,7 +719,7 @@ logpre_modulus(GEN p, long k, double tau, double lrmin, double lrmax)
   av = avma;
   bit = (long)(n*(2. + aux / LOG2 - log2(tau2)));
   q = homothetie(p, lrho, bit);
-  imax2 = (long)(log2(3./tau) + log2(log(4.*n))) + 1;
+  imax2 = (long)(log2(3./tau * log(4.*n))) + 1;
   if (imax > imax2) imax = imax2;
 
   for (i=0; i<imax; i++)
@@ -760,7 +760,7 @@ dual_modulus(GEN p, double lrho, double tau, long l)
   pari_sp av = avma;
   GEN q;
 
-  bit = 6*n - 5*l + (long)(n*(log2(1/tau2) + tau2 * 8./7.));
+  bit = 6*n - 5*l + (long)(n*(-log2(tau2) + tau2 * 8./7.));
   q = homothetie(p, lrho, bit);
   imax = (long)(log(log(2.*n)/tau2)/log(7./4.)+1);
 
@@ -776,7 +776,7 @@ dual_modulus(GEN p, double lrho, double tau, long l)
     set_karasquare_limit(bit);
     q = gerepileupto(av, graeffe(q));
     tau2 *= 7./4.;
-    bit = 6*nn - 5*ll + (long)(nn*(log2(1/tau2) + tau2 * 8./7.));
+    bit = 6*nn - 5*ll + (long)(nn*(-log2(tau2) + tau2 * 8./7.));
   }
   avma = av; return delta_k + (long)ind_maxlog2(q);
 }
