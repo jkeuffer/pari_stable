@@ -118,16 +118,16 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   long jz, j, i, sig;
   pari_sp av = avma, av2, limite;
   int jnew, jpre = 0; /* for lint */
-  GEN ysml, ybig, x, diff, dyj, dx, y[ISCR+1];
+  GEN x, dx;
+  double diff, dyj, ysml, ybig, y[ISCR+1]; 
   screen scr;
   char buf[80], z;
 
   sig=gcmp(b,a); if (!sig) return;
   if (sig<0) { x=a; a=b; b=x; }
   x = gtofp(a, prec); push_val(ep, x);
-  for (i=1; i<=ISCR; i++) y[i]=cgetr(3);
-  dx = gtofp(gdivgs(gsub(b,a), ISCR-1), prec);
-  ysml = ybig = real_0(3);
+  dx = divrs(gtofp(gsub(b,a),prec), ISCR-1);
+  ysml = ybig = 0.;
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
   {
@@ -135,12 +135,12 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     scr[i][JSCR]= XX_UPPER;
     for (j=2; j<JSCR; j++) scr[i][j] = BLANK;
   }
-  av2=avma; limite=stack_lim(av2,1);
+  av2 = avma; limite=stack_lim(av2,1);
   for (i=1; i<=ISCR; i++)
   {
-    gaffect(READ_EXPR(ch,ep,x), y[i]);
-    if (cmprr(y[i],ysml)<0) ysml=y[i];
-    if (cmprr(y[i],ybig)>0) ybig=y[i];
+    y[i] = gtodouble( READ_EXPR(ch,ep,x) );
+    if (y[i] < ysml) ysml = y[i];
+    if (y[i] > ybig) ybig = y[i];
     x = addrr(x,dx);
     if (low_stack(limite, stack_lim(av2,1)))
     {
@@ -148,24 +148,25 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
       x = gerepileuptoleaf(av2, x);
     }
   }
-  if (ysmlu) ysml = gtofp(ysmlu,3);
-  if (ybigu) ybig = gtofp(ybigu,3);
-  avma = av2; diff = subrr(ybig,ysml);
-  if (!signe(diff)) { ybig=addsr(1,ybig); diff=real_1(3); }
-  dyj = divsr((JSCR-1)*3+2, diff);
-  jz = 3 - gtolong(mulrr(ysml,dyj));
-  av2 = avma; z = PICTZERO(jz); jz = jz/3;
+  avma = av;
+  if (ysmlu) ysml = gtodouble(ysmlu);
+  if (ybigu) ybig = gtodouble(ybigu);
+  diff = ybig - ysml;
+  if (!diff) { ybig += 1; diff= 1.; }
+  dyj = ((JSCR-1)*3+2) / diff;
+  jz = 3 - DTOL(ysml*dyj);
+  z = PICTZERO(jz); jz = jz/3;
   for (i=1; i<=ISCR; i++, avma = av2)
   {
     if (0<=jz && jz<=JSCR) scr[i][jz]=z;
-    j = 3 + gtolong(mulrr(subrr(y[i],ysml),dyj));
+    j = 3 + DTOL((y[i]-ysml)*dyj);
     jnew = j/3;
     if (i > 1) fill_gap(scr, i, jnew, jpre);
     if (0<=jnew && jnew<=JSCR) scr[i][jnew] = PICT(j);
     jpre = jnew;
   }
   pariputc('\n');
-  pariprintf("%s ", dsprintf9(todbl(ybig), buf));
+  pariprintf("%s ", dsprintf9(ybig, buf));
   for (i=1; i<=ISCR; i++) pariputc(scr[i][JSCR]);
   pariputc('\n');
   for (j=(JSCR-1); j>=2; j--)
@@ -174,11 +175,11 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     for (i=1; i<=ISCR; i++) pariputc(scr[i][j]);
     pariputc('\n');
   }
-  pariprintf("%s ", dsprintf9(todbl(ysml), buf));
+  pariprintf("%s ", dsprintf9(ysml, buf));
   for (i=1; i<=ISCR; i++)  pariputc(scr[i][1]);
   pariputc('\n');
   pariprintf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
-  pop_val(ep); avma=av;
+  pop_val(ep);
 }
 
 /********************************************************************/
@@ -1007,22 +1008,14 @@ rectclip(long rect)
 	  }
 	  goto do_next;
       case ROt_BX:
-	  if (RoLNx1(R) < xmin)
-	      RoLNx1(R) = xmin, did_clip = 1;
-	  if (RoLNx2(R) < xmin)
-	      RoLNx2(R) = xmin, did_clip = 1;
-	  if (RoLNy1(R) < ymin)
-	      RoLNy1(R) = ymin, did_clip = 1;
-	  if (RoLNy2(R) < ymin)
-	      RoLNy2(R) = ymin, did_clip = 1;
-	  if (RoLNx1(R) > xmax)
-	      RoLNx1(R) = xmax, did_clip = 1;
-	  if (RoLNx2(R) > xmax)
-	      RoLNx2(R) = xmax, did_clip = 1;
-	  if (RoLNy1(R) > ymax)
-	      RoLNy1(R) = ymax, did_clip = 1;
-	  if (RoLNy2(R) > ymax)
-	      RoLNy2(R) = ymax, did_clip = 1;
+	  if (RoLNx1(R) < xmin) RoLNx1(R) = xmin, did_clip = 1;
+	  if (RoLNx2(R) < xmin) RoLNx2(R) = xmin, did_clip = 1;
+	  if (RoLNy1(R) < ymin) RoLNy1(R) = ymin, did_clip = 1;
+	  if (RoLNy2(R) < ymin) RoLNy2(R) = ymin, did_clip = 1;
+	  if (RoLNx1(R) > xmax) RoLNx1(R) = xmax, did_clip = 1;
+	  if (RoLNx2(R) > xmax) RoLNx2(R) = xmax, did_clip = 1;
+	  if (RoLNy1(R) > ymax) RoLNy1(R) = ymax, did_clip = 1;
+	  if (RoLNy2(R) > ymax) RoLNy2(R) = ymax, did_clip = 1;
 	  /* Remove zero-size clipped boxes */
 	  if ( did_clip
 	       && RoLNx1(R) == RoLNx2(R) && RoLNy1(R) == RoLNy2(R) )
@@ -1050,8 +1043,7 @@ rectclip(long rect)
 	      }
 	      f++;
 	  }
-	  if (t == 0)
-	      goto remove;
+	  if (t == 0) goto remove;
 	  RoMPcnt(R) = t;
 	  goto do_next;
       }
@@ -1129,8 +1121,7 @@ rectclip(long rect)
 	      }
 	      goto do_next;
 	  }
-	  if (t == 0)
-	      goto remove;
+	  if (t == 0) goto remove;
 	  goto do_next;
       }
       default: {
@@ -1252,63 +1243,54 @@ gtodblList(GEN data, long flags)
 }
 
 static void
-single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,GEN yleft,
-  GEN xright,GEN yright,long depth)
+single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,double yleft,
+  GEN xright,double yright,long depth)
 {
-  GEN xx,yy;
-  pari_sp av=avma;
-  double dy=pl[0].ybig - pl[0].ysml;
+  GEN xx;
+  pari_sp av = avma;
+  double yy, dy=pl[0].ybig - pl[0].ysml;
 
   if (depth==RECUR_MAXDEPTH) return;
 
   xx = gmul2n(gadd(xleft,xright),-1);
-  yy = gtofp(READ_EXPR(ch,ep,xx), 3);
+  yy = gtodouble(READ_EXPR(ch,ep,xx));
 
-  if (dy)
-  {
-    if (fabs(rtodbl(yleft)+rtodbl(yright)-2*rtodbl(yy))/dy < RECUR_PREC)
-      return;
-  }
+  if (dy && fabs(yleft+yright-2*yy)< dy*RECUR_PREC) return;
   single_recursion(pl,ch,ep, xleft,yleft, xx,yy, depth+1);
 
   Appendx(&pl[0],&pl[0],rtodbl(xx));
-  Appendy(&pl[0],&pl[1],rtodbl(yy));
+  Appendy(&pl[0],&pl[1],yy);
 
   single_recursion(pl,ch,ep, xx,yy, xright,yright, depth+1);
-
-  avma=av;
+  avma = av;
 }
 
 static void
-param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,GEN xleft,
-  GEN yleft, GEN tright,GEN xright,GEN yright, long depth)
+param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,double xleft,
+  double yleft, GEN tright,double xright,double yright, long depth)
 {
-  GEN tt,xx,yy, p1;
+  GEN tt, p1;
   pari_sp av=avma;
-  double dy=pl[0].ybig - pl[0].ysml;
-  double dx=pl[0].xbig - pl[0].xsml;
+  double xx, dy=pl[0].ybig - pl[0].ysml;
+  double yy, dx=pl[0].xbig - pl[0].xsml;
 
   if (depth==PARAMR_MAXDEPTH) return;
 
-  tt=gmul2n(gadd(tleft,tright),-1);
+  tt = addrr(tleft,tright); setexpo(tt, expo(tt)-1);
   p1 = READ_EXPR(ch,ep,tt);
-  xx = gtofp(gel(p1,1), 3);
-  yy = gtofp(gel(p1,2), 3);
+  xx = gtodouble(gel(p1,1));
+  yy = gtodouble(gel(p1,2));
 
-  if (dx && dy)
-  {
-    if (fabs(rtodbl(xleft)+rtodbl(xright)-2*rtodbl(xx))/dx < RECUR_PREC &&
-       fabs(rtodbl(yleft)+rtodbl(yright)-2*rtodbl(yy))/dy < RECUR_PREC)
-        return;
-  }
+  if (dx && dy && fabs(xleft+xright-2*xx) < dx*RECUR_PREC
+               && fabs(yleft+yright-2*yy) < dy*RECUR_PREC) return;
   param_recursion(pl,ch,ep, tleft,xleft,yleft, tt,xx,yy, depth+1);
 
-  Appendx(&pl[0],&pl[0],rtodbl(xx));
-  Appendy(&pl[0],&pl[1],rtodbl(yy));
+  Appendx(&pl[0],&pl[0],xx);
+  Appendy(&pl[0],&pl[1],yy);
 
   param_recursion(pl,ch,ep, tt,xx,yy, tright,xright,yright, depth+1);
 
-  avma=av;
+  avma = av;
 }
 
 /*
@@ -1322,7 +1304,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   long single_c;
   long param=flags & PLOT_PARAMETRIC;
   long recur=flags & PLOT_RECURSIVE;
-  GEN p1,dx,x,xleft,xright,yleft,yright,tleft,tright;
+  GEN t,dx,x;
   dblPointList *pl;
   long tx, i, j, sig, nc, nl, nbpoints;
   pari_sp av = avma, av2;
@@ -1342,15 +1324,15 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
   sig=gcmp(b,a); if (!sig) return 0;
   if (sig<0) swap(a, b);
-  dx=gdivgs(gsub(b,a),testpoints-1);
+  dx = divrs(gtofp(gsub(b,a),prec), testpoints-1);
 
   x = gtofp(a, prec); push_val(ep, x);
-  av2=avma; p1=READ_EXPR(ch,ep,x); tx=typ(p1);
+  av2=avma; t=READ_EXPR(ch,ep,x); tx=typ(t);
   if (!is_matvec_t(tx))
   {
     xsml = gtodouble(a);
     xbig = gtodouble(b);
-    ysml = ybig = gtodouble(p1);
+    ysml = ybig = gtodouble(t);
     nc=1; nl=2; /* nc = nb of curves; nl = nb of coord. lists */
     if (param) pari_warn(warner,"flag PLOT_PARAMETRIC ignored");
     single_c=1; param=0;
@@ -1358,27 +1340,27 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   else
   {
     if (tx != t_VEC) pari_err(talker,"not a row vector in ploth");
-    nl=lg(p1)-1; if (!nl) { avma=av; return 0; }
+    nl=lg(t)-1; if (!nl) { avma=av; return 0; }
     single_c=0;
     if (param) nc=nl/2; else { nc=nl; nl++; }
     if (recur && nc > 1) pari_err(talker,"multi-curves cannot be plot recursively");
 
     if (param)
     {
-      xbig=xsml=gtodouble(gel(p1,1));
-      ybig=ysml=gtodouble(gel(p1,2));
+      xbig = xsml = gtodouble(gel(t,1));
+      ybig = ysml = gtodouble(gel(t,2));
       for (i=3; i<=nl; i++)
       {
-	fx=gtodouble(gel(p1,i)); i++;
-        fy=gtodouble(gel(p1,i));
+	fx = gtodouble(gel(t,i)); i++;
+        fy = gtodouble(gel(t,i));
 	if (xsml>fx) xsml=fx; else if (xbig<fx) xbig=fx;
 	if (ysml>fy) ysml=fy; else if (ybig<fy) ybig=fy;
       }
     }
     else
     {
-      xsml=gtodouble(a); xbig=gtodouble(b);
-      ysml=gtodouble(vecmin(p1)); ybig=gtodouble(vecmax(p1));
+      xsml = gtodouble(a); ysml = gtodouble(vecmin(t));
+      xbig = gtodouble(b); ybig = gtodouble(vecmax(t));
     }
   }
 
@@ -1392,52 +1374,53 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
   if (recur) /* recursive plot */
   {
-    xleft=cgetr(3); xright=cgetr(3); yleft=cgetr(3); yright=cgetr(3);
+    double yleft, yright = 0;
     if (param)
     {
-      tleft=cgetr(prec); tright=cgetr(prec);
-      av2=avma;
-      gaffect(a,tleft); p1=READ_EXPR(ch,ep,tleft);
-      gaffect(gel(p1,1),xleft);
-      gaffect(gel(p1,2),yleft);
+      GEN tleft = cgetr(prec), tright = cgetr(prec);
+      double xleft, xright = 0;
+      av2 = avma;
+      affgr(a,tleft); t=READ_EXPR(ch,ep,tleft);
+      xleft = gtodouble(gel(t,1));
+      yleft = gtodouble(gel(t,2));
       for (i=0; i<testpoints-1; i++)
       {
-	if (i) {
-	  gaffect(tright,tleft); gaffect(xright,xleft); gaffect(yright,yleft);
-	 }
-	gaddz(tleft,dx,tright);
-        p1 = READ_EXPR(ch,ep,tright);
-        if (lg(p1) != 3) pari_err(talker,"inconsistent data in rectplothin");
-        gaffect(gel(p1,1),xright); gaffect(gel(p1,2),yright);
+	if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
+	addrrz(tleft,dx,tright);
+        t = READ_EXPR(ch,ep,tright);
+        if (lg(t) != 3) pari_err(talker,"inconsistent data in rectplothin");
+        xright = gtodouble(gel(t,1));
+        yright = gtodouble(gel(t,2));
 
-	Appendx(&pl[0],&pl[0],rtodbl(xleft));
-	Appendy(&pl[0],&pl[1],rtodbl(yleft));
+	Appendx(&pl[0],&pl[0],xleft);
+	Appendy(&pl[0],&pl[1],yleft);
 
 	param_recursion(pl,ch,ep, tleft,xleft,yleft, tright,xright,yright, 0);
-	avma=av2;
+	avma = av2;
       }
-      Appendx(&pl[0],&pl[0],rtodbl(xright));
-      Appendy(&pl[0],&pl[1],rtodbl(yright));
+      Appendx(&pl[0],&pl[0],xright);
+      Appendy(&pl[0],&pl[1],yright);
     }
     else /* single_c */
     {
-      av2=avma;
-      gaffect(a,xleft);
-      gaffect(READ_EXPR(ch,ep,xleft), yleft);
+      GEN xleft = cgetr(prec), xright = cgetr(prec);
+      av2 = avma;
+      affgr(a,xleft);
+      yleft = gtodouble(READ_EXPR(ch,ep,xleft));
       for (i=0; i<testpoints-1; i++)
       {
-        gaddz(xleft,dx,xright);
-	gaffect(READ_EXPR(ch,ep,xright),yright);
+        addrrz(xleft,dx,xright);
+	yright = gtodouble(READ_EXPR(ch,ep,xright));
 
 	Appendx(&pl[0],&pl[0],rtodbl(xleft));
-	Appendy(&pl[0],&pl[1],rtodbl(yleft));
+	Appendy(&pl[0],&pl[1],yleft);
 
         single_recursion(pl,ch,ep,xleft,yleft,xright,yright,0);
-        avma=av2;
-        gaffect(xright,xleft); gaffect(yright,yleft);
+        avma = av2;
+        affrr(xright,xleft); yleft = yright;
       }
       Appendx(&pl[0],&pl[0],rtodbl(xright));
-      Appendy(&pl[0],&pl[1],rtodbl(yright));
+      Appendy(&pl[0],&pl[1],yright);
     }
   }
   else /* non-recursive plot */
@@ -1445,10 +1428,10 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     if (single_c)
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch,ep,x);
+	t = READ_EXPR(ch,ep,x);
 	pl[0].d[i]=gtodouble(x);
-	Appendy(&pl[0],&pl[1],gtodouble(p1));
-	gaddz(x,dx,x); avma=av2;
+	Appendy(&pl[0],&pl[1],gtodouble(t));
+	addrrz(x,dx,x); avma=av2;
       }
     else if (param)
     {
@@ -1457,27 +1440,27 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch,ep,x);
-        if (lg(p1) != nl+1) pari_err(talker,"inconsistent data in rectplothin");
+	t = READ_EXPR(ch,ep,x);
+        if (lg(t) != nl+1) pari_err(talker,"inconsistent data in rectplothin");
 	for (j=0; j<nl; j=k)
 	{
-	  k=j+1; z=gtodouble(gel(p1,k));
+	  k=j+1; z=gtodouble(gel(t,k));
 	  Appendx(&pl[0], &pl[j],z);
 
-	  j=k; k++; z=gtodouble(gel(p1,k));
+	  j=k; k++; z=gtodouble(gel(t,k));
 	  Appendy(&pl[0], &pl[j],z);
 	 }
-	gaddz(x,dx,x); avma=av2;
+	addrrz(x,dx,x); avma=av2;
       }
     }
     else /* plothmult */
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch,ep,x);
-        if (lg(p1) != nl) pari_err(talker,"inconsistent data in rectplothin");
+	t = READ_EXPR(ch,ep,x);
+        if (lg(t) != nl) pari_err(talker,"inconsistent data in rectplothin");
 	pl[0].d[i]=gtodouble(x);
-	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(p1,j))); }
-	gaddz(x,dx,x); avma=av2;
+	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(t,j))); }
+	addrrz(x,dx,x); avma=av2;
       }
   }
   pl[0].nb=nc; pop_val(ep); avma = av;
