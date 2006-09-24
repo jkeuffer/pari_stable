@@ -22,25 +22,20 @@ t_POL: pol_1[..], pol_x[..]
 defined initially. Use \kbd{fetch\_var()} (see \secref{se:fetch_var}) to
 create new ones.
 
+The use of \kbd{gi} is deprecated: using \tet{mkcomplex} or \tet{mulcxI}
+is likely to be much more efficient. Besides, the name is far too short,
+polluting the namespace.
+
 \noindent The other objects are not initialized by default:
 
 \tet{bern}(i). This is the $2i$-th Bernoulli number ($B_0=1$, $B_2=1/6$,
-$B_4=-1/30$, etc\dots). To initialize them, use the function:
-
-\fun{void}{mpbern}{long n, long prec}
-
-This creates the even numbered Bernoulli numbers up to $B_{2n-2}$ 
-\emph{as real numbers} of precision \kbd{prec}. They can then be used with
-the macro \kbd{bern(i)}. Note that this is not a function but simply an
-abbreviation, hence care must be taken that \kbd{i} is inside the right
-bounds (i.e. $0\le \kbd{i}\le n-1$) before using it, since no checking is
-done by PARI itself.
+$B_4=-1/30$, etc\dots). To initialize them, use \tet{mpbern}.
 
 \tet{geuler}. This is Euler's constant. It is initialized by the first call
-to \tet{mpeuler} (see \secref{se:euler}).
+to \tet{mpeuler}.
 
 \tet{gpi}. This is the number $\pi$.  It is initialized by the first call to
-\tet{mppi} (see \secref{se:pi}).
+\tet{mppi}.
 
 The use of both \tet{geuler} and \tet{gpi} is deprecated since it is always
 possible that some library function increases the precision of the constant

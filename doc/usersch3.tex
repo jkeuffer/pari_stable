@@ -1605,8 +1605,8 @@ j=(f_2^{24}+16)^3/f_2^{24}.$$
 Note the identities $f^8=f_1^8+f_2^8$ and $ff_1f_2=\sqrt2$.
 
 \syn{weber0}{x,\fl,prec}. Associated to the various values of \fl, the
-following functions are also available: \funs{werberf}{x,prec},
-\funs{werberf1}{x,prec} or \funs{werberf2}{x,prec}.
+following functions are also available: \funs{weberf}{x,prec},
+\funs{weberf1}{x,prec} or \funs{weberf2}{x,prec}.
 
 \subsecidx{zeta}$(s)$: For $s$ a complex number, Riemann's zeta
 function \sidx{Riemann zeta-function} $\zeta(s)=\sum_{n\ge1}n^{-s}$,
@@ -6082,8 +6082,9 @@ $R[X]/(T(X))$, the variable $X$ is a mute variable and the derivative is
 taken with respect to the main variable used in the base ring $R$.
 
 \syn{deriv}{x,v}, where $v$ is a \kbd{long}, and an omitted $v$ is coded as
-$-1$. When $x$ is a \typ{POL}, $\tet{derivpol}(x)$ is a shortcut for
-$\kbd{deriv}(x, -1)$.
+$-1$. When $x$ is a \typ{POL}, \funs{derivpol}{x} is a shortcut for
+$\kbd{deriv}(x, -1)$. When $x$ is a \typ{SER}, \funs{derivser}{x} is a
+shortcut for $\kbd{deriv}(x, -1)$.
 
 \subsecidx{eval}$(x)$: replaces in $x$ the formal variables by the values that
 have been assigned to them after the creation of $x$. This is mainly useful
@@ -6144,8 +6145,8 @@ is the vector of roots belonging to the same extension of $\Q_p$ as $a$.
 kind $U_n$ ($\fl=2$), in variable $v$.
 
 \syn{polchebyshev}{n,\fl,v}, where $n$, $\fl$ and $v$ are \kbd{long}
-integers ($v$ is a variable number). Also available are \tet{polchebyshev1}
-and polchebyshev2 for $T_n$ and $U_n$ respectively.
+integers ($v$ is a variable number). Also available are
+\funs{polchebyshev1}{} and \funs{polchebyshev2}{} for $T_n$ and $U_n$ respectively.
 
 \subsecidx{polcoeff}$(x,s,\{v\})$: coefficient of degree $s$ of the
 polynomial $x$, with respect to the main variable if $v$ is omitted, with

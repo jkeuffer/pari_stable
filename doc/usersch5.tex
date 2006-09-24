@@ -1283,6 +1283,44 @@ due to Paul Zimmermann (``Karatsuba Square Root'', INRIA Research Report 3805
 the non-negative \typ{INT}~\kbd{N} (rounded towards 0). This is identical
 to \kbd{sqrtremi(N, NULL)}.
 
+\subsec{Cached constants}
+
+\fun{void}{consteuler}{long prec} precomputes Euler-Mascheroni's constant
+at precision \kbd{prec}.
+
+\fun{void}{constpi}{long prec} precomputes $\pi$ at precision \kbd{prec}.
+
+\fun{void}{constlog2}{long prec} precomputes $\log(2)$ at precision
+\kbd{prec}.
+
+\fun{void}{mpbern}{long n, long prec} precomputes even \idx{Bernoulli} numbers
+$B_0,\dots,B_{2n-2}$ as \typ{REAL} of precision \kbd{prec}.
+
+\fun{GEN}{bern}{long i} is a macro returning the \idx{Bernoulli} number
+$B_{2i}$ at precision \kbd{prec}, assuming that \kbd{mpbern(n, prec)} was
+called previously with $n > i$. The macro does not check whether
+$0 \leq i < n$. If cached Bernoullis were initialized to a larger accuracy
+than desired, use e.g.~\kbd{rtor(bern(i), prec)}.
+
+The following functions use cached data if \kbd{prec} is not too large; 
+otherwise the newly computed data replaces the old cache.
+
+\fun{GEN}{mppi}{long prec} returns $\pi$ at precision \kbd{prec}.
+
+\fun{GEN}{Pi2n}{long n, long prec} returns $2^n\pi$ at precision \kbd{prec}.
+
+\fun{GEN}{PiI2}{long n, long prec} returns the complex number $2\pi i$ at
+precision \kbd{prec}.
+
+\fun{GEN}{PiI2n}{long n, long prec} returns the complex number $2^n\pi i$ at
+precision \kbd{prec}.
+
+\fun{GEN}{mpeuler}{long prec} returns Euler-Mascheroni's constant at
+precision \kbd{prec}.
+
+\fun{GEN}{mplog2}{long prec} returns $\log 2$ at precision \kbd{prec}.
+
+
 \subsec{Pseudo-random integers}
 These routine return pseudo-random integers uniformly distributed in some
 interval. The all use the same underlying generator which can be seeded and
@@ -1545,6 +1583,8 @@ is a \kbd{ZX}. More generally, \kbd{A} is allowed to be a
 the result is a \kbd{ZX}, i.e.~the algebraic number \kbd{Mod(A,T)} is
 integral over \kbd{Z}.
 
+\fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}. 
+
 \fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
 \kbd{T}.
 
@@ -1653,6 +1693,9 @@ remainder $\kbd{A}(\kbd{a})$.
 
 \fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.
+
+\fun{GEN}{FpX_deriv}{GEN x, GEN p} returns the derivative of \kbd{x}.
+(This function is suitable for \kbd{gerepilupto} but not memory-clean.)
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
@@ -1873,6 +1916,9 @@ by its leading term.
 \fun{GEN}{FqX_div}{GEN x, GEN y, GEN T, GEN p}
 
 \fun{GEN}{FqX_rem}{GEN x, GEN y, GEN T, GEN p}
+
+\fun{GEN}{FqX_deriv}{GEN x, GEN T, GEN p} returns the derivative of \kbd{x}.
+(This function is suitable for \kbd{gerepilupto} but not memory-clean.)
 
 \fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p}
 
@@ -2693,6 +2739,15 @@ restrict their arguments to universal objects (e.g \kbd{gen\_0}),
 then the above warning does not apply.
 
 \fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
+
+\fun{GEN}{mulcxI}{GEN x} creates the \typ{COMPLEX} $ix$, assuming 
+$x$ is a \typ{INT}, \typ{REAL}, \typ{FRAC} or \typ{COMPLEX}. The result in
+general contains data pointing back to the original $x$. Use \kbd{gcopy}
+if this is a problem. But in most cases, the result is to be used
+immediately, before $x$ is subject to garbage collection.
+
+\fun{GEN}{mulcxmI}{GEN x}, as \tet{mulcxI}, but creates the \typ{COMPLEX}
+$-ix$.
 
 \fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
 $y > 1$ and $(x,y) = 1$.
