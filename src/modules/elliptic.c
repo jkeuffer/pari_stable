@@ -2463,7 +2463,7 @@ apell1(GEN e, GEN p)
   long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
   ulong x;
   pari_sp av = avma, av2;
-  GEN p1, h, mfh, F, f, fh, fg, pordmin, u, v, p1p, p2p, A, B, c4, c6, cp4, pts;
+  GEN p1, P, h, mfh, F,f, fh,fg, pordmin, u, v, p1p, p2p, A, B, c4,c6, cp4, pts;
   tx = NULL;
   ty = ti = NULL; /* gcc -Wall */
 
@@ -2512,14 +2512,14 @@ apell1(GEN e, GEN p)
     *tx = CODE;
 
     /* F = B.f */
-    p1 = gcopy(fh);
+    P = gcopy(fh);
     if (s < 3)
     { /* we're nearly done: naive search */
-      GEN q1 = p1, mF = negsell(F, p); /* -F */
+      GEN q1 = P, mF = negsell(F, p); /* -F */
       for (i=1;; i++)
       {
-        p1 = addsell(cp4,p1, F,p); /* h.f + i.F */
-        if (!p1) { h = addii(h, mulsi( i,B)); goto FOUND; }
+        P = addsell(cp4,P, F,p); /* h.f + i.F */
+        if (!P) { h = addii(h, mulsi( i,B)); goto FOUND; }
         q1 = addsell(cp4,q1,mF,p); /* h.f - i.F */
         if (!q1) { h = addii(h, mulsi(-i,B)); goto FOUND; }
       }
@@ -2530,14 +2530,14 @@ apell1(GEN e, GEN p)
     j = lgefint(p);
     for (i=1; i<=nb; i++)
     { /* baby steps */
-      gel(pts,i) = p1; /* h.f + (i-1).F */
-      _fix(p1+1, j); tx[i] = modBIL(gel(p1,1));
-      _fix(p1+2, j); ty[i] = modBIL(gel(p1,2));
-      p1 = addsell(cp4,p1,F,p); /* h.f + i.F */
-      if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
+      gel(pts,i) = P; /* h.f + (i-1).F */
+      _fix(P+1, j); tx[i] = modBIL(gel(P,1));
+      _fix(P+2, j); ty[i] = modBIL(gel(P,2));
+      P = addsell(cp4,P,F,p); /* h.f + i.F */
+      if (!P) { h = addii(h, mulsi(i,B)); goto FOUND; }
     }
     mfh = negsell(fh, p);
-    fg = addsell(cp4,p1,mfh,p); /* h.f + nb.F - h.f = nb.F */
+    fg = addsell(cp4,P,mfh,p); /* h.f + nb.F - h.f = nb.F */
     if (!fg) { h = mulsi(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
@@ -2546,12 +2546,12 @@ apell1(GEN e, GEN p)
       long maxj;
       for (j=1; j<=nb; j++) /* adding nb.F (part 1) */
       {
-        p1 = gel(pts,j); /* h.f + (i-nb-1+j-1).F */
-        gel(u,j) = subii(gel(fg,1), gel(p1,1));
-        if (u[j] == (long)gen_0) /* sum = 0 or doubling */
+        P = gel(pts,j); /* h.f + (i-nb-1+j-1).F */
+        gel(u,j) = subii(gel(fg,1), gel(P,1));
+        if (gel(u,j) == gen_0) /* sum = 0 or doubling */
         {
           long k = i+j-2;
-          if (equalii(gel(p1,2),gel(fg,2))) k -= 2*nb; /* fg == p1 */
+          if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
           h = addii(h, mulsi(k,B)); goto FOUND;
         }
       }
@@ -2559,39 +2559,43 @@ apell1(GEN e, GEN p)
       maxj = (i-1 + nb <= s)? nb: s % nb;
       for (j=1; j<=maxj; j++,i++) /* adding nb.F (part 2) */
       {
-        p1 = gel(pts,j);
-        addsell_part2(cp4,p1,fg,p, gel(v,j));
-        tx[i] = modBIL(gel(p1,1));
-        ty[i] = modBIL(gel(p1,2));
+        P = gel(pts,j);
+        addsell_part2(cp4,P,fg,p, gel(v,j));
+        tx[i] = modBIL(gel(P,1));
+        ty[i] = modBIL(gel(P,2));
       }
       avma = av2;
     }
-    p1 = addsell(cp4,gel(pts,j-1),mfh,p); /* = (s-1).F */
-    if (!p1) { h = mulsi(s-1,B); goto FOUND; }
+    P = addsell(cp4,gel(pts,j-1),mfh,p); /* = (s-1).F */
+    if (!P) { h = mulsi(s-1,B); goto FOUND; }
     if (DEBUGLEVEL) msgtimer("[apell1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
-    fg = addsell(cp4,p1,F,p);
+    fg = addsell(cp4,P,F,p);
     if (!fg) { h = mulsi(s,B); goto FOUND; }
     pfinal = modBIL(p); av2 = avma;
-
-    p1 = vecsmall_indexsort(tx);
+    /* Goal of the following: sort points by increasing x-coordinate hash.
+     * Done in a complicated way to avoid allocating a large temp vector */
+    p1 = vecsmall_indexsort(tx); /* = permutation sorting tx */
     for (i=1; i<=s; i++) ti[i] = tx[p1[i]];
+    /* ti = tx sorted */
     for (i=1; i<=s; i++) { tx[i] = ti[i]; ti[i] = ty[p1[i]]; }
+    /* tx is sorted. ti = ty sorted */
     for (i=1; i<=s; i++) { ty[i] = ti[i]; ti[i] = p1[i]; }
+    /* ty is sorted. ti = permutation sorting tx */
     if (DEBUGLEVEL) msgtimer("[apell1] sorting");
     avma = av2;
 
     gaffect(fg, gel(pts,1));
     for (j=2; j<=nb; j++) /* pts[j] = j.fg = (s*j).F */
     {
-      p1 = addsell(cp4,gel(pts,j-1),fg,p);
-      if (!p1) { h = mulii(mulss(s,j), B); goto FOUND; }
-      gaffect(p1, gel(pts,j));
+      P = addsell(cp4,gel(pts,j-1),fg,p);
+      if (!P) { h = mulii(mulss(s,j), B); goto FOUND; }
+      gaffect(P, gel(pts,j));
     }
     /* replace fg by nb.fg since we do nb points at a time */
     avma = av2;
-    fg = gcopy(gel(pts,nb));
+    fg = gcopy(gel(pts,nb)); /* copy: we modify (temporarily) pts[nb] below */
     av2 = avma;
 
     for (i=1,j=1; ; i++)
@@ -2616,10 +2620,10 @@ apell1(GEN e, GEN p)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
             if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
-            p1 = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
-            if (equalii(gel(p1,1), gel(ftest,1)))
+            P = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
+            if (equalii(gel(P,1), gel(ftest,1)))
             {
-              if (equalii(gel(p1,2), gel(ftest,2))) i = -i;
+              if (equalii(gel(P,2), gel(ftest,2))) i = -i;
               h = addii(h, mulii(addis(mulss(s,i), j2), B));
               goto FOUND;
             }
@@ -2630,12 +2634,12 @@ apell1(GEN e, GEN p)
         long save = 0; /* gcc -Wall */;
         for (j=1; j<=nb; j++)
         {
-          p1 = gel(pts,j);
-          gel(u,j) = subii(gel(fg,1), gel(p1,1));
-          if (u[j] == (long)gen_0) /* occurs once: i = j = nb, p1 == fg */
+          P = gel(pts,j);
+          gel(u,j) = subii(gel(fg,1), gel(P,1));
+          if (gel(u,j) == gen_0) /* occurs once: i = j = nb, P == fg */
           {
-            gel(u,j) = shifti(gel(p1,2),1);
-            save = fg[1]; fg[1] = p1[1];
+            gel(u,j) = shifti(gel(P,2),1);
+            save = fg[1]; fg[1] = P[1];
           }
         }
         v = multi_invmod(u, p);
@@ -2651,9 +2655,9 @@ FOUND: /* found a point of exponent h on E_u */
     if (B == gen_1) B = h;
     else
     {
-      p1 = chinese(mkintmod(A,B), mkintmod(gen_0, h));
-      A = gel(p1,2);
-      B = gel(p1,1);
+      GEN C = chinese(mkintmod(A,B), mkintmod(gen_0, h));
+      A = gel(C,2);
+      B = gel(C,1);
     }
 
     i = (cmpii(B, pordmin) < 0);
@@ -2831,10 +2835,10 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN p1 = chinese(mkintmodu(smodss(A,B),B), mkintmodu(0,h));
-      A = itos(gel(p1,2));
-      if (is_bigint(p1[1])) { h = A; break; }
-      B = itos(gel(p1,1));
+      GEN C = chinese(mkintmodu(smodss(A,B),B), mkintmodu(0,h));
+      A = itos(gel(C,2));
+      if (is_bigint(C[1])) { h = A; break; }
+      B = itos(gel(C,1));
     }
 
     i = (B < pordmin);
@@ -3024,7 +3028,7 @@ anell(GEN e, long n0)
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
   long P[3] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong p, m, SQRTn, n = (ulong)n0;
-  GEN *an, D, c6;
+  GEN an, D, c6;
 
   checkell_int(e);
   if (n0 <= 0) return cgetg(1,t_VEC);
@@ -3033,8 +3037,8 @@ anell(GEN e, long n0)
   c6= gel(e,11);
   D = gel(e,12);
 
-  an = (GEN*)cgetg(n+1,t_VEC); an[1] = gen_1;
-  for (p=2; p <= n; p++) an[p] = NULL;
+  an = cgetg(n+1,t_VEC); gel(an,1) = gen_1;
+  for (p=2; p <= n; p++) gel(an,p) = NULL;
   for (p=2; p<=n; p++)
   {
     if (an[p]) continue; /* p not prime */
@@ -3044,14 +3048,14 @@ anell(GEN e, long n0)
       {
         case -1:  /* non deployee */
           for (m=p; m<=n; m+=p)
-            if (an[m/p]) an[m] = negi(an[m/p]);
+            if (an[m/p]) gel(an,m) = negi(gel(an,m/p));
           continue;
         case 0:   /* additive */
-          for (m=p; m<=n; m+=p) an[m] = gen_0;
+          for (m=p; m<=n; m+=p) gel(an,m) = gen_0;
           continue;
         case 1:   /* deployee */
           for (m=p; m<=n; m+=p)
-            if (an[m/p]) an[m] = an[m/p];
+            if (an[m/p]) gel(an,m) = gel(an,m/p);
           continue;
       }
     else /* good reduction */
@@ -3063,25 +3067,25 @@ anell(GEN e, long n0)
         ulong pk, oldpk = 1;
         for (pk=p; pk <= n; oldpk=pk, pk *= p)
         {
-          if (pk == p) an[pk] = ap;
+          if (pk == p) gel(an,pk) = ap;
           else
           {
             pari_sp av = avma;
-            GEN u = mulii(ap, an[oldpk]);
-            GEN v = mului(p, an[oldpk/p]);
-            an[pk] = gerepileuptoint(av, subii(u,v));
+            GEN u = mulii(ap, gel(an,oldpk));
+            GEN v = mului(p, gel(an,oldpk/p));
+            gel(an,pk) = gerepileuptoint(av, subii(u,v));
           }
           for (m = n/pk; m > 1; m--)
-            if (an[m] && m%p) an[m*pk] = mulii(an[m], an[pk]);
+            if (an[m] && m%p) gel(an,m*pk) = mulii(gel(an,m), gel(an,pk));
         }
       } else {
-        an[p] = ap;
+        gel(an,p) = ap;
         for (m = n/p; m > 1; m--)
-          if (an[m]) an[m*p] = mulii(an[m], ap);
+          if (an[m]) gel(an,m*p) = mulii(gel(an,m), ap);
       }
     }
   }
-  return (GEN)an;
+  return an;
 }
 
 GEN
