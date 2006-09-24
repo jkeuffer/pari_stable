@@ -1589,7 +1589,7 @@ intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
     case 3: z = qrom2  (E, eval, a, b, prec); break;
     default: pari_err(flagerr); return NULL; /* not reached */
   }
-  if (!z) pari_err(intger2);
+  if (!z) pari_err(talker, "too many iterations in intnumromb");
   return gerepileupto(av, z);
 }
 

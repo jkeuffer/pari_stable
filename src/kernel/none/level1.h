@@ -573,7 +573,8 @@ affii(GEN x, GEN y)
   long lx;
 
   if (x==y) return;
-  lx=lgefint(x); if (lg(y)<lx) pari_err(affer3);
+  lx=lgefint(x); if (lg(y)<lx) pari_err(talker,"impossible assignment I-->I");
+  
   while (--lx) y[lx]=x[lx];
 }
 
@@ -677,7 +678,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) pari_err(talker,"overflow in real shift");
+  if (e & ~EXPOBITS) pari_err(errexpo);
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 

@@ -1209,6 +1209,11 @@ padic_to_Fl(GEN x, ulong Y) {
   return umodiu(z, Y);
 }
 
+static void
+croak(char *s) {
+  pari_err(talker,"trying to overwrite a universal object in gaffect (%s)", s);
+}
+
 void
 gaffect(GEN x, GEN y)
 {
@@ -1220,11 +1225,11 @@ gaffect(GEN x, GEN y)
     case t_INT:
       if (!is_universal_constant(y)) { affii(x,y); return; }
       /* y = gen_0, gnil, gen_1 or gen_2 */
-      if (y==gen_0)  pari_err(overwriter,"gaffect (gen_0)");
-      if (y==gen_1)  pari_err(overwriter,"gaffect (gen_1)");
-      if (y==gen_m1) pari_err(overwriter,"gaffect (gen_m1)");
-      if (y==gen_2)  pari_err(overwriter,"gaffect (gen_2)");
-      pari_err(overwriter,"gaffect (gnil)");
+      if (y==gen_0)  croak("gen_0");
+      if (y==gen_1)  croak("gen_1)");
+      if (y==gen_m1) croak("gen_m1)");
+      if (y==gen_2)  croak("gen_2)");
+      croak("gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:
       if (!dvdii(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
@@ -1258,15 +1263,15 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
         case t_REAL:
-          if (y ==  gpi) pari_err(overwriter,"gaffect (gpi)");
-          if (y==geuler) pari_err(overwriter,"gaffect (geuler)");
+          if (y ==  gpi) croak("gpi");
+          if (y==geuler) croak("geuler");
           affir(x,y); break;
 
         case t_INTMOD:
           modiiz(x,gel(y,1),gel(y,2)); break;
 
         case t_COMPLEX:
-          if (y == gi) pari_err(overwriter,"gaffect (gi)");
+          if (y == gi) croak("gi");
           gaffect(x,gel(y,1)); gaffsg(0,gel(y,2)); break;
 
         case t_PADIC:

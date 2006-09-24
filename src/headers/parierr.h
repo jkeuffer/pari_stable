@@ -30,7 +30,7 @@ enum {
 
 /* mp.s ou mp.c */
 
-  affer2, affer3,
+  affer2,
   
   errpile, errlg, errexpo, errvalp, rtodber,
 
@@ -51,14 +51,14 @@ enum {
 
 /* bibli.c  */
 
-  intger2, lllger3,
+  lllger3,
 
 /* elliptic.c */
 
   elliper1,
 
 /* gen.c */
-  operi, operf, gdiver, overwriter,
+  operi, operf, gdiver,
 
 /* init.c */
 

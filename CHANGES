@@ -106,3 +106,4 @@ RM  7- polhermite, polchebyshev2
   Removed
     1- Odos/Makefile (no longer functional, obsolete)
     2- old CodeWarrior-specific hack (malloc)
+    3- error code: intger2, affer3, overwriter

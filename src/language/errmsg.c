@@ -72,8 +72,6 @@ char *errmessage[]=
 
 /* affer2 */
   "impossible assignment I-->S",
-/* affer3 */
-  "impossible assignment I-->I",
 /* errpile */
   "the PARI stack overflows !",
 /* errlg */
@@ -121,8 +119,6 @@ char *errmessage[]=
 
   /*  BIBLI.C  */
 
-/* intger2 */
-  "too many iterations for desired precision in integration routine",
 /* lllger3 */
   "not a definite matrix in lllgram",
 
@@ -139,8 +135,6 @@ char *errmessage[]=
   "forbidden",
 /* gdiver */
   "division by zero",
-/* overwriter */
-  "trying to overwrite a universal object",
 
   /*  INIT.C  */
 
