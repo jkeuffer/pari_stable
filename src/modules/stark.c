@@ -1519,11 +1519,11 @@ static void
 affect_coeff(GEN q, long n, GEN y)
 {
   GEN x = _sercoeff(q,-n);
-  if (x == gen_0) gel(y,n) = gen_0; else gaffect(x, gel(y,n));
+  if (x == gen_0) gel(y,n) = gen_0; else affgr(x, gel(y,n));
 }
 
 typedef struct {
-  GEN c1, *aij, *bij, *powracpi, *cS, *cT;
+  GEN c1, aij, bij, cS, cT, powracpi;
   long i0, a,b,c, r, rc1, rc2;
 } ST_t;
 
@@ -1534,19 +1534,19 @@ static void
 ppgamma(ST_t *T, long prec)
 {
   GEN eul, gam,gamun,gamdm, an,bn,cn_evn,cn_odd, x,x2,X,Y, cf, sqpi;
-  GEN p1, p2, *aij, *bij;
+  GEN p1, p2, aij, bij;
   long a = T->a;
   long b = T->b;
   long c = T->c, r = T->r, i0 = T->i0;
   long i,j, s,t;
   pari_sp av;
 
-  aij = (GEN*)cgetg(i0+1, t_VEC);
-  bij = (GEN*)cgetg(i0+1, t_VEC);
+  aij = cgetg(i0+1, t_VEC);
+  bij = cgetg(i0+1, t_VEC);
   for (i = 1; i <= i0; i++)
   {
-    aij[i] = p1 = cgetg(r+1, t_VEC);
-    bij[i] = p2 = cgetg(r+1, t_VEC);
+    gel(aij,i) = p1 = cgetg(r+1, t_VEC);
+    gel(bij,i) = p2 = cgetg(r+1, t_VEC);
     for (j=1; j<=r; j++) { gel(p1,j) = cgetr(prec); gel(p2,j) = cgetr(prec); }
   }
   av = avma;
@@ -1597,8 +1597,8 @@ ppgamma(ST_t *T, long prec)
   cn_odd = gpowgs(p2, s-t); /* Gamma(Y)^{s-t} */
   for (i = 0; i < i0/2; i++)
   {
-    GEN C1,q1, A1 = aij[2*i+1], B1 = bij[2*i+1];
-    GEN C2,q2, A2 = aij[2*i+2], B2 = bij[2*i+2];
+    GEN C1,q1, A1 = gel(aij,2*i+1), B1 = gel(bij,2*i+1);
+    GEN C2,q2, A2 = gel(aij,2*i+2), B2 = gel(bij,2*i+2);
 
     C1 = gmul(cf, gmul(bn, gmul(an, cn_evn)));
     p1 = gdiv(C1, gsubgs(x, 2*i));
@@ -2122,9 +2122,8 @@ static void
 get_cS_cT(ST_t *T, long n)
 {
   pari_sp av;
-  GEN csurn, nsurc, lncsurn;
-  GEN A,B,s,t,Z,*aij,*bij;
-  long i,j,r,i0;
+  GEN csurn, nsurc, lncsurn, A, B, s, t, Z, aij, bij;
+  long i, j, r, i0;
 
   if (T->cS[n]) return;
 
@@ -2144,8 +2143,8 @@ get_cS_cT(ST_t *T, long n)
   /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
 
   /* i = i0 */
-    A = aij[i0]; t = gel(A,1);
-    B = bij[i0]; s = gel(B,1);
+    A = gel(aij,i0); t = gel(A,1);
+    B = gel(bij,i0); s = gel(B,1);
     for (j = 2; j <= r; j++)
     {
       if (signe(B[j])) s = mpadd(s, mulrr(gel(Z,j), gel(B,j)));
@@ -2153,8 +2152,8 @@ get_cS_cT(ST_t *T, long n)
     }
   for (i = i0 - 1; i > 1; i--)
   {
-    A = aij[i]; if (signe(t)) t = mulrr(t, nsurc);
-    B = bij[i]; if (signe(s)) s = mulrr(s, nsurc);
+    A = gel(aij,i); if (signe(t)) t = mulrr(t, nsurc);
+    B = gel(bij,i); if (signe(s)) s = mulrr(s, nsurc);
     for (j = odd(i)? T->rc2: T->rc1; j > 1; j--)
     {
       if (signe(B[j])) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
@@ -2164,8 +2163,8 @@ get_cS_cT(ST_t *T, long n)
     if (signe(A[1])) t = addrr(t, gel(A,1));
   }
   /* i = 1 */
-    A = aij[1]; if (signe(t)) t = mulrr(t, nsurc);
-    B = bij[1]; if (signe(s)) s = mulrr(s, nsurc);
+    A = gel(aij,1); if (signe(t)) t = mulrr(t, nsurc);
+    B = gel(bij,1); if (signe(s)) s = mulrr(s, nsurc);
     if (signe(B[1])) s = addrr(s, gel(B,1));
     if (signe(A[1])) t = addrr(t, gel(A,1));
     for (j = 2; j <= r; j++)
@@ -2173,18 +2172,21 @@ get_cS_cT(ST_t *T, long n)
       if (signe(B[j])) s = addrr(s, mulrr(gel(Z,j), gel(B,j)));
       if (signe(A[j])) t = addrr(t, mulrr(gel(Z,j), gel(A,j)));
     }
-  s = mpadd(s, mpmul(csurn, T->powracpi[T->b]));
-  T->cS[n] = gclone(s);
-  T->cT[n] = gclone(t); avma = av;
+  s = mpadd(s, T->b? mpmul(csurn, gel(T->powracpi,T->b)): csurn);
+  gel(T->cS,n) = gclone(s);
+  gel(T->cT,n) = gclone(t); avma = av;
 }
 
 static void
 clear_cScT(ST_t *T, long N)
 {
-  GEN *cS = T->cS, *cT = T->cT;
+  GEN cS = T->cS, cT = T->cT;
   long i;
   for (i=1; i<=N; i++)
-    if (cS[i]) { gunclone(cS[i]); gunclone(cT[i]); cS[i] = cT[i] = NULL; }
+    if (cS[i]) {
+      gunclone(gel(cS,i));
+      gunclone(gel(cT,i)); gel(cS,i) = gel(cT,i) = NULL;
+    }
 }
 
 static void
@@ -2207,7 +2209,7 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   const long cl = lg(dataCR) - 1;
   pari_sp av, av1, av2;
   long ncond, n, j, k, jc, n0, prec2, i0, r1, r2;
-  GEN nf, racpi, *powracpi;
+  GEN nf, racpi, powracpi;
   GEN N0, C, T, S, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
@@ -2248,14 +2250,14 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   racpi = sqrtr(mppi(prec2));
-  powracpi = (GEN*)cgetg(r1+2,t_VEC);
-  powracpi++; powracpi[0] = gen_1; powracpi[1] = racpi;
-  for (j=2; j<=r1; j++) powracpi[j] = mulrr(powracpi[j-1], racpi);
+  powracpi = cgetg(r1+2,t_VEC);
+  gel(powracpi,1) = racpi;
+  for (j=2; j<=r1; j++) gel(powracpi,j) = mulrr(gel(powracpi,j-1), racpi);
   cScT.powracpi = powracpi;
 
-  cScT.cS = (GEN*)cgetg(n0+1, t_VEC);
-  cScT.cT = (GEN*)cgetg(n0+1, t_VEC);
-  for (j=1; j<=n0; j++) cScT.cS[j] = cScT.cT[j] = NULL;
+  cScT.cS = cgetg(n0+1, t_VEC);
+  cScT.cT = cgetg(n0+1, t_VEC);
+  for (j=1; j<=n0; j++) gel(cScT.cS,j) = gel(cScT.cT,j) = NULL;
 
   cScT.i0 = i0;
 
@@ -2286,8 +2288,8 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
         if ((an = EvalCoeff(z, matan[n], d)))
         {
           get_cS_cT(&cScT, n);
-          p1 = gadd(p1, gmul(an, cScT.cS[n]));
-          p2 = gadd(p2, gmul(an, cScT.cT[n]));
+          p1 = gadd(p1, gmul(an, gel(cScT.cS,n)));
+          p2 = gadd(p2, gmul(an, gel(cScT.cT,n)));
           if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
         }
       gaffect(p1,        gel(S,t));
@@ -2307,73 +2309,6 @@ GetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 /*     Class fields of real quadratic fields using Stark units     */
 /*                                                                 */
 /*******************************************************************/
-
-#if 0
-typedef struct {
-  long cl;
-  GEN dkpow;
-} DH_t;
-
-/* return 1 if the absolute polynomial pol (over Q) defines the
-   Hilbert class field of the real quadratic field bnf */
-static GEN
-define_hilbert(void *S, GEN pol)
-{
-  DH_t *T = (DH_t*)S;
-  GEN d = modulargcd(derivpol(pol), pol);
-
-  if (degpol(pol) != T->cl + degpol(d)) return NULL;
-  pol = gdivexact(pol, d);
-  return (T->cl & 1 || !equalii(smalldiscf(pol), T->dkpow))? pol: NULL;
-}
-
-/* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
-   disjoint */
-static GEN
-makescindold(GEN nf, GEN polrel, long cl)
-{
-  long i, l;
-  pari_sp av = avma;
-  GEN pol, L, BAS, nf2, dk;
-  DH_t T;
-  FP_chk_fun CHECK;
-
-  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK|nf_PARTIALFACT);
-
-  /* attempt to find the subfields using polred */
-  T.cl = cl; dk  = gel(nf,3);
-  T.dkpow = (cl & 1) ? NULL: powiu(dk, cl>>1);
-  CHECK.f = &define_hilbert;
-  CHECK.data = (void*)&T;
-  pol = polredfirstpol(BAS, 0, &CHECK);
-  if (DEBUGLEVEL) msgtimer("polred");
-
-  if (!pol)
-  {
-    nf2 = nfinit0(BAS, 0, DEFAULTPREC);
-    L  = subfields(nf2, utoipos(cl));
-    l = lg(L);
-    if (DEBUGLEVEL) msgtimer("subfields");
-
-    for (i = 1; i < l; i++)
-    {
-      pol = gmael(L, i, 1);
-      if (cl & 1 || !equalii(smalldiscf(pol), T.dkpow)) break;
-    }
-    if (i == l)
-      for (i = 1; i < l; i++)
-      {
-        pol = gmael(L, i, 1);
-        if (degpol(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
-      }
-    if (i == l)
-      pari_err(bugparier, "makescindold (no polynomial found)");
-  }
-  pol = polredabs0(pol, nf_PARTIALFACT);
-  return gerepileupto(av, pol);
-}
-#endif
-
 /* compute the Hilbert class field using genus class field theory when
    the exponent of the class group is 2 */
 static GEN
