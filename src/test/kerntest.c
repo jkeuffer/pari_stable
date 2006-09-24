@@ -24,7 +24,7 @@ GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
 void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n){}
 void gerepilemany(pari_sp av, GEN* gptr[], int n){}
 GEN gcopy(GEN x){return x;}
-GEN gtofp(GEN x, long prec){return x;}
+GEN quadtoc(GEN x, long prec){return x;}
 ulong pari_rand() {return 0;}
 GEN ceilr(GEN x){return x;}
 GEN roundr(GEN x){return x;}

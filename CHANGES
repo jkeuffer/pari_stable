@@ -101,6 +101,7 @@ RM  7- polhermite, polchebyshev2
     8- allow rnf.zk and rnf.nf
     9- [toplevel benchmarks] bnfisintnorm, quadclassunit
    10- ZX_factor, QX_factor
+   11- affgr
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

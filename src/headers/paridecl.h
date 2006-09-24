@@ -1055,7 +1055,6 @@ GEN     gneg(GEN x);
 GEN     gneg_i(GEN x);
 GEN     greffe(GEN x, long l, long use_stack);
 int     gsigne(GEN x);
-GEN     gtofp(GEN z, long prec);
 GEN     gtolist(GEN x);
 long    gtolong(GEN x);
 int     lexcmp(GEN x, GEN y);

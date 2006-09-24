@@ -44,6 +44,7 @@ GEN    mkvecs(long x);
 GEN    mkvecsmall(long x);
 GEN    mkvecsmall2(long x,long y);
 GEN    mkvecsmall3(long x,long y, long z);
+void   affgr(GEN x, GEN y);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
@@ -101,6 +102,7 @@ long   evalvalp(long x);
 long   expi(GEN x);
 GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
+GEN    gtofp(GEN z, long prec);
 GEN    icopy_av(GEN x, GEN y);
 GEN    icopy(GEN x);
 GEN    init_gen_op(GEN x, long tx, long *lx, long *i);
@@ -131,7 +133,7 @@ GEN    mptrunc(GEN x);
 GEN    new_chunk(size_t x);
 long   random_bits(long k);
 GEN    rdivii(GEN x, GEN y, long prec);
-GEN    rdiviiz(GEN x, GEN y, GEN z);
+void   rdiviiz(GEN x, GEN y, GEN z);
 GEN    rdivis(GEN x, long y, long prec);
 GEN    rdivsi(long x, GEN y, long prec);
 GEN    rdivss(long x, long y, long prec);
@@ -650,6 +652,7 @@ real_m1(long prec) {
   x[2] = (long)HIGHBIT; for (i=3; i<prec; i++) x[i] = 0;
   return x;
 }
+
 /* 2.^n */
 INLINE GEN
 real2n(long n, long prec) { GEN z = real_1(prec); setexpo(z, n); return z; }
@@ -661,6 +664,7 @@ INLINE GEN
 itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
 INLINE GEN
 rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
+INLINE GEN gtofp(GEN z, long prec);
 INLINE GEN
 ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
   gel(z,1) = gtofp(gel(x,1),prec);
@@ -933,7 +937,7 @@ rdivss(long x, long y, long prec)
   avma = av; return z;
 }
 
-INLINE GEN
+INLINE void
 rdiviiz(GEN x, GEN y, GEN z)
 {
   const pari_sp av = avma;
@@ -941,15 +945,27 @@ rdiviiz(GEN x, GEN y, GEN z)
   affir(x, z);
   if (!is_bigint(y)) {
     affrr(divrs(z, y[2]), z);
-    if (signe(y) < 0) setsigne(z, -signe(z));
+    if (signe(y) < 0) togglesign(z);
+  }
+  else
+    affrr(divrr(z, itor(y,prec)), z);
+  avma = av;
+}
+
+INLINE GEN 
+rdivii(GEN x, GEN y, long prec)
+{
+  GEN z = cgetr(prec);
+  const pari_sp av = avma;
+  affir(x, z);
+  if (!is_bigint(y)) {
+    affrr(divrs(z, y[2]), z);
+    if (signe(y) < 0) togglesign(z);
   }
   else
     affrr(divrr(z, itor(y,prec)), z);
   avma = av; return z;
 }
-
-INLINE GEN 
-rdivii(GEN x, GEN y, long prec) { return rdiviiz(x, y, cgetr(prec)); }
 INLINE GEN
 fractor(GEN x, long prec) { return rdivii(gel(x,1), gel(x,2), prec); }
 
@@ -973,6 +989,34 @@ dvdii(GEN x, GEN y)
   const pari_sp av=avma;
   const GEN p1=remii(x,y);
   avma=av; return p1 == gen_0;
+}
+
+/* Force z to be of type real/complex with floating point components */
+INLINE GEN
+gtofp(GEN z, long prec)
+{
+  switch(typ(z))
+  {
+    case t_INT:  return itor(z, prec);
+    case t_FRAC: return fractor(z, prec);
+    case t_REAL: return rtor(z, prec);
+    case t_COMPLEX: return ctofp(z, prec);
+    case t_QUAD: return quadtoc(z, prec);
+    default: pari_err(typeer,"gtofp"); return gen_0; /* not reached */
+  }
+}
+/* y a t_REAL */
+INLINE void
+affgr(GEN x, GEN y)
+{
+  pari_sp av;
+  switch(typ(x)) {
+    case t_INT:  affir(x,y); break;
+    case t_REAL: affrr(x,y); break;
+    case t_FRAC: rdiviiz(gel(x,1),gel(x,2), y); break;
+    case t_QUAD: av = avma; affgr(quadtoc(x,lg(y)), y); avma = av; break;
+    default: pari_err(operf,"",x,y);
+  }
 }
 
 INLINE int
