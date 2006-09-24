@@ -239,8 +239,9 @@ pgener_Fp_local(GEN p, GEN L0)
       GEN e = Fp_pow(x, gel(L,i), p);
       if (is_pm1(e)) break;
     }
-    if (!i) { avma = av0; return utoipos((ulong)x[2]); }
+    if (!i) break;
   }
+  avma = av0; return utoipos((ulong)x[2]);
 }
 
 GEN
@@ -543,8 +544,11 @@ gissquarerem(GEN x, GEN *pt)
   if (!pt) return gissquare(x);
   if (is_matvec_t(tx))
   {
-    long i, l = lg(x);
-    GEN t, y = cgetg(l,tx), z = cgetg(l,tx);
+    GEN t, y, z;
+    long i;
+    l = lg(x);
+    y = cgetg(l,tx);
+    z = cgetg(l,tx);
     for (i=1; i<l; i++)
     {
       GEN p = gen_0;
@@ -1510,9 +1514,10 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
     if (is_pm1(m)) { avma = av1; continue; }
     for (i=1; i<e; i++)
       if (gcmp1(m = Fp_pow(m,l,p))) break;
-    if (i==e) { *zeta = m; return m1; }
+    if (i==e) break;
     avma = av1;
   }
+  *zeta = m; return m1;
 }
 
 /* solve x^l = a mod (p), l prime
