@@ -1329,7 +1329,7 @@ gaffect(GEN x, GEN y)
           pari_err(operf,"",x,y);
 
         case t_REAL:
-          av = avma; gaffect(quadtoc(x,lg(y)), y); avma = av; break;
+          av = avma; affgr(quadtoc(x,lg(y)), y); avma = av; break;
         case t_COMPLEX:
           ly = precision(y); if (!ly) pari_err(operf,"",x,y);
           av = avma; gaffect(quadtoc(x,ly), y); avma = av; break;
