@@ -88,7 +88,6 @@ GEN   modr_safe(GEN x, GEN y);
 int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);
 int OK_bern(long nb, long prec);
-GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
 
 /* FIXME: adapt/use mpn_[lr]shift instead */
 #define shift_left(z2,z1,imin,imax,f, sh) {\
