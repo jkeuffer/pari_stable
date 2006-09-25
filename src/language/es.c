@@ -2769,13 +2769,14 @@ try_pipe(char *cmd, int fl)
 #  ifdef __EMX__
   if (_osmode == DOS_MODE) /* no pipes under DOS */
   {
+    pari_sp av = avma;
     char *s;
     if (flag & mf_OUT) pari_err(archer);
     f = pari_unique_filename("pipe");
-    s = gpmalloc(strlen(cmd)+strlen(f)+4);
+    s = stackmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
-    file = system(s)? NULL: (FILE *) fopen(f,"r");
-    flag |= mf_FALSE; gpfree(s); gpfree(f);
+    file = system(s)? NULL: fopen(f,"r");
+    flag |= mf_FALSE; gpfree(f); avma = av;
   }
   else
 #  endif
@@ -2930,12 +2931,13 @@ _expand_tilde(const char *s)
   }
   else
   {
+    pari_sp av = avma;
     char *tmp;
     while (*u && *u != '/') u++;
-    len = u-s;
-    tmp = strncpy(gpmalloc(len+1),s,len);
+    len = u-s; tmp = stackmalloc(len+1);
+    (void)strncpy(tmp,s,len);
     tmp[len] = 0;
-    p = getpwnam(tmp); gpfree(tmp);
+    p = getpwnam(tmp); avma = av;
   }
   if (!p) pari_err(talker2,"unknown user ",s,s-1);
   ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
@@ -3062,14 +3064,14 @@ gp_expand_path(gp_path *p)
 /* name is a malloc'ed (existing) filename. Accept it as new infile
  * (unzip if needed). */
 static FILE *
-accept_file(char *name, FILE *file)
+accept_file(char *name, FILE *file, int record)
 {
   if (pari_is_dir(name))
   {
     pari_warn(warner,"skipping directory %s",name);
     return NULL;
   }
-  if (! last_tmp_file)
+  if (record && ! last_tmp_file)
   {  /* empty file stack, record this name */
     if (last_filename) gpfree(last_filename);
     last_filename = pari_strdup(name);
@@ -3085,10 +3087,11 @@ accept_file(char *name, FILE *file)
 #endif
     ))
     { /* compressed file (compress or gzip) */
-      char *cmd = gpmalloc(strlen(ZCAT) + l + 2);
+      pari_sp av = avma;
+      char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
       sprintf(cmd,"%s %s",ZCAT,name);
       fclose(file); infile = try_pipe(cmd, mf_IN)->file;
-      gpfree(cmd); return infile;
+      avma = av; return infile;
     }
   }
 #endif
@@ -3103,14 +3106,15 @@ static FILE *
 try_name(char *name)
 {
   FILE *file = fopen(name, "r");
-  if (file) file = accept_file(name,file);
+  if (file) file = accept_file(name,file, 1);
   if (!file)
   { /* try appending ".gp" to name */
-    char *s = gpmalloc(strlen(name)+4);
+    pari_sp av = avma;
+    char *s = stackmalloc(strlen(name)+4);
     sprintf(s, "%s.gp", name);
     file = fopen(s, "r");
-    if (file) file = accept_file(s,file);
-    gpfree(s);
+    if (file) file = accept_file(s,file, 1);
+    avma = av;
   }
   gpfree(name); return file;
 }
@@ -3303,10 +3307,11 @@ static const long BINARY_VERSION = 1; /* since 2.2.9 */
 static int
 is_magic_ok(FILE *f)
 {
+  pari_sp av = avma;
   size_t L = strlen(MAGIC);
-  char *s = gpmalloc(L);
+  char *s = stackmalloc(L);
   int r = (fread(s,1,L, f) == L && strncmp(s,MAGIC,L) == 0);
-  gpfree(s); return r;
+  avma = av; return r;
 }
 
 static int
