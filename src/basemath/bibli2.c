@@ -1020,29 +1020,20 @@ polymodrecip(GEN x)
 
 /********************************************************************/
 /**                                                                **/
-/**                           HEAPSORT                             **/
+/**                          MERGESORT                             **/
 /**                                                                **/
 /********************************************************************/
 
 #define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
 
 int
-pari_compare_lg(GEN x, GEN y)
-{
-  return icmp(lg(x),lg(y));
-}
+pari_compare_lg(GEN x, GEN y) { return icmp(lg(x),lg(y)); }
 
 int
-pari_compare_long(long *a,long *b)
-{
-  return icmp(*a,*b);
-}
+pari_compare_long(long *a,long *b) { return icmp(*a,*b); }
 
 static int
-pari_compare_small(GEN x, GEN y)
-{
-  return icmp((long)x,(long)y);
-}
+pari_compare_small(GEN x, GEN y) { return icmp((long)x,(long)y); }
 
 #undef icmp
 
@@ -1070,10 +1061,10 @@ veccmp(void *data, GEN x, GEN y)
 static GEN
 gen_sortspec(GEN v, long n, void *data, int (*cmp)(void*,GEN,GEN))
 {
-  long nx=n>>1, ny=n-nx;
+  long nx = n>>1, ny = n-nx;
   long m, ix, iy;
   GEN x, y;
-  GEN w=cgetg(n+1,t_VECSMALL);
+  GEN w = cgetg(n+1,t_VECSMALL);
   if (n<=2)
   {
     if (n==1) 
@@ -1085,17 +1076,17 @@ gen_sortspec(GEN v, long n, void *data, int (*cmp)(void*,GEN,GEN))
     }
     return w;
   }
-  x=gen_sortspec(v,nx,data,cmp);
-  y=gen_sortspec(v+nx,ny,data,cmp);
-  for (m=1, ix=1, iy=1; ix<=nx && iy<=ny; )
+  x = gen_sortspec(v,nx,data,cmp);
+  y = gen_sortspec(v+nx,ny,data,cmp);
+  m = ix = iy = 1;
+  while (ix<=nx && iy<=ny)
     if (cmp(data, gel(v,x[ix]), gel(v,y[iy]+nx))<=0)
-      w[m++]=x[ix++];
+      w[m++] = x[ix++];
     else
-      w[m++]=y[iy++]+nx;
-  for(;ix<=nx;) w[m++]=x[ix++];
-  for(;iy<=ny;) w[m++]=y[iy++]+nx;
-  avma = (pari_sp) w;
-  return w;
+      w[m++] = y[iy++]+nx;
+  while (ix<=nx) w[m++] = x[ix++];
+  while (iy<=ny) w[m++] = y[iy++]+nx;
+  avma = (pari_sp)w; return w;
 }
 
 /* Sort x = vector of elts, using cmp to compare them.
@@ -1129,15 +1120,8 @@ gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 
   y = gen_sortspec(x,lx-1,data,cmp);
 
-  if (flag & cmp_REV)
-  { /* reverse order */
-    for (j=1; j<=((lx-1)>>1); j++) 
-    {
-      long z=y[j];
-      y[j]=y[lx-j];
-      y[lx-j]=z;
-    }
-  }
+  if (flag & cmp_REV) /* reverse order */
+    for (j=1; j<=((lx-1)>>1); j++) lswap(y[j], y[lx-j]);
   if (flag & cmp_C) return y;
   settyp(y,tx);
   if (flag & cmp_IND)
