@@ -62,6 +62,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
          if necessary ]
    32- possible corruption of gen_2 in mynegi() [ hnflll ]
    33- factor(4/x) --> [2, 2; x -1]  (content not removed)
+BA 34- bnrstark prototype code was non-standard.
 
   Changed
     1- moved cgiv, gtofp to inline kernel

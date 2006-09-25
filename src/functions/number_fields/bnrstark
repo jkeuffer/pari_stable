@@ -1,7 +1,7 @@
 Function: bnrstark
 Section: number_fields
 C-Name: bnrstark
-Prototype: GDG,p
+Prototype: GDGp
 Help: bnrstark(bnr,{subgroup}): bnr being as output by
  bnrinit(,,1), finds a relative equation for the class field corresponding to
  the module in bnr and the given congruence subgroup (the trivial subgroup if
