@@ -300,18 +300,19 @@ allocgroup(long n, long card)
 #  define O_RDONLY 0
 #endif
 
-static long
+static FILE *
 galopen(char *pre, long n, long n1, long n2, long no)
 {
-  char *s = gpmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1);
-  long fd;
+  pari_sp av = avma;
+  char *s = stackmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1);
+  FILE *f;
 
-  sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
-  if (no) sprintf(s + strlen(s), "_%ld", no);
-  fd = os_open(s, O_RDONLY);
-  if (fd == -1) pari_err(talker,"galois files not available\n[missing %s]",s);
+  (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
+  if (no) (void)sprintf(s + strlen(s), "_%ld", no);
+  f = fopen(s, "r");
+  if (!f) pari_err(talker,"galois files not available\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
-  gpfree(s); return fd;
+  avma = av; return f;
 }
 
 static char
@@ -327,7 +328,7 @@ bin(char c)
 #define BUFFS 512
 /* fill in g[i][j] (i<=n, j<=m) with (buffered) data from fd */
 static void
-read_obj(PERM *g, long fd, long n, long m)
+read_obj(PERM *g, FILE *f, long n, long m)
 {
   char ch[BUFFS];
   long i,j, k = BUFFS;
@@ -335,11 +336,11 @@ read_obj(PERM *g, long fd, long n, long m)
   i = j = 1;
   for(;;)
   {
-    if (k==BUFFS) { os_read(fd,ch,BUFFS); k=0; }
+    if (k==BUFFS) { fread(ch,sizeof(char),BUFFS, f); k=0; }
     g[i][j] = bin(ch[k++]);
     if (++j>m) { j=1; if (++i>n) break; }
   }
-  os_close(fd); if (DEBUGLEVEL > 3) msgtimer("read_object");
+  fclose(f); if (DEBUGLEVEL > 3) msgtimer("read_object");
 }
 #undef BUFFS
 
@@ -349,22 +350,23 @@ lirecoset(long n1, long n2, long n)
 {
   GROUP gr, grptr;
   char c, ch[8];
-  long no,m,cardgr,fd;
+  long no, m, cardgr;
+  FILE *f;
 
   if (n<11 || n2<8)
   {
-    fd = galopen("COS", n, n1, n2, 0);
-    os_read(fd,&c,1); m=bin(c);
-    os_read(fd,&c,1);
-    os_read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
-    read_obj(gr, fd,cardgr,m); return gr;
+    f = galopen("COS", n, n1, n2, 0);
+    fread(&c,sizeof(char), 1, f); m=bin(c);
+    fread(&c,sizeof(char), 1, f);
+    fread(ch,sizeof(char), 6, f); cardgr=atol(ch); gr=allocgroup(m,cardgr);
+    read_obj(gr, f,cardgr,m); return gr;
   }
   m = 11; cardgr = 45360;
   gr = grptr = allocgroup(n, 8 * cardgr);
   for (no=1; no<=8; no++)
   {
-    fd = galopen("COS", n, n1, n2, no); os_read(fd,ch,8);
-    read_obj(grptr, fd,cardgr,m); grptr += cardgr;
+    f = galopen("COS", n, n1, n2, no); fread(ch, sizeof(char), 8, f);
+    read_obj(grptr, f,cardgr,m); grptr += cardgr;
   }
   return gr;
 }
@@ -373,13 +375,14 @@ static void
 lireresolv(long n1, long n2, long n, resolv *R)
 {
   char ch[5];
-  long fd, nm, nv;
+  long nm, nv;
+  FILE *f;
 
-  fd = galopen("RES", n, n1, n2, 0);
-  os_read(fd,ch,5); nm = atol(ch);
-  os_read(fd,ch,3); nv = atol(ch);
+  f = galopen("RES", n, n1, n2, 0);
+  fread(ch,sizeof(char),5,f); nm = atol(ch);
+  fread(ch,sizeof(char),3,f); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
-  read_obj(R->a, fd,nm,nv); 
+  read_obj(R->a, f,nm,nv); 
   R->nm = nm;
   R->nv = nv;
 }
@@ -2431,25 +2434,23 @@ isin_G_H(buildroot *BR, long n1, long n2)
 GEN
 polgaloisnamesbig(long n, long k)
 {
-  pari_sp ltop=avma;
-  char *s = gpmalloc(strlen(pari_datadir) + 13 + 20);
+  pari_sp av = avma;
+  char *s = stackmalloc(strlen(pari_datadir) + 13 + 20);
   FILE *stream;
   GEN V;
 
-  sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
+  (void)sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
   stream = fopen(s,"r");
   if (!stream) 
   {
     pari_warn(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
-    gpfree(s); 
-    return strtoGENstr("");
+    avma = av; return strtoGENstr("");
   }
   V = gp_read_stream(stream);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
     pari_err(talker,"galois files %s not compatible\n",s);
   fclose(stream);
-  gpfree(s); 
-  return gerepilecopy(ltop,gel(V,k));
+  return gerepilecopy(av, gel(V,k));
 }
 
 GEN
