@@ -64,7 +64,7 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex>
    33- factor(4/x) --> [2, 2; x -1]  (content not removed)
 
   Changed
-    1- moved cgiv to inline kernel
+    1- moved cgiv, gtofp to inline kernel
     2- reduce amount of memory needed by APRCL
     3- remove CPP from Configure tests (not needed)
     4- allow arbitrary sequences (not only expressions) in sum, prod, etc.
