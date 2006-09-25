@@ -1081,14 +1081,19 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     y[i] = 1; /* y = [0,...,0,1,0,...,0], 1 at dK'th position */
     do
     { /* cf. algo 5.3.18 */
-      GEN be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
+      GEN H, be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup))
       {
         be = compute_beta(X, vecWB, gell, bnfz);
         P = compute_polrel(nfz, &T, be, g, ell);
         P = lift_if_rational(P);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
-        if (!all && gequal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
+        H = rnfnormgroup(bnr, P);
+        if (!all) {
+          if (gequal(subgroup, H)) return P; /* DONE */
+        } else {
+          if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
+        }
         res = shallowconcat(res, P);
       }
     } while (increment(y, dK, ell));

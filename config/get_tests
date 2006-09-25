@@ -13,6 +13,7 @@ test_extra="\
   qfbsolve\
   quadclassunit\
   rfrac\
+  rnfkummer\
   round4\
   stark\
 "
