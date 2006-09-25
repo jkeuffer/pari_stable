@@ -332,7 +332,7 @@ mpqs_poly_ctor(mpqs_handle_t *h)
 static void
 mpqs_handle_dtor(mpqs_handle_t *h)
 {
-#define myfree(x) if(x) free((void*)x)
+#define myfree(x) if(x) gpfree((void*)x)
   myfree((h->per_A_pr));
   myfree((h->relaprimes));
   myfree(h->relations);
@@ -498,7 +498,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   {
     /* not large enough - must use our own then */
     long newsize = 3 * mpqs_find_maxprime(size);
-    if (mpqs_use_our_diffptr) free((void *) mpqs_diffptr);
+    if (mpqs_use_our_diffptr) gpfree((void *) mpqs_diffptr);
     if (DEBUGLEVEL >= 2)
       fprintferr("MPQS: precomputing auxiliary primes up to %ld\n", newsize);
     /* the following three assignments must happen in this order, to
@@ -1004,7 +1004,7 @@ mpqs_sort_lp_file(char *filename)
 
   if (fgets(cur_line, bufspace, TMP) == NULL)
   { /* file empty */
-    free(buf); pari_fclose(pTMP);
+    gpfree(buf); pari_fclose(pTMP);
     avma = av; return 0;
   }
   /* enter first buffer into buflist */
@@ -1035,7 +1035,7 @@ mpqs_sort_lp_file(char *filename)
       buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
       cur_line = buf;
       bufspace = MPQS_STRING_LENGTH;
-      if (fgets(cur_line, bufspace, TMP) == NULL) { free(buf); break; }
+      if (fgets(cur_line, bufspace, TMP) == NULL) { gpfree(buf); break; }
 
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
@@ -1112,11 +1112,11 @@ mpqs_sort_lp_file(char *filename)
   while (*--buflist)
   {
     if (buflist != buflist_head) /* not a linkage pointer */
-      free((void*) *buflist);   /* free a buffer */
+      gpfree((void*) *buflist);   /* free a buffer */
     else
     { /* linkage pointer */
       next_buflist = (char**)(*buflist);
-      free((void*)buflist_head); /* free a buflist block */
+      gpfree((void*)buflist_head); /* free a buflist block */
       buflist_head = next_buflist;
       buflist = buflist_head + buflist_size;
     }
@@ -2002,7 +2002,7 @@ mpqs_factorback(mpqs_handle_t *h, char *relations)
     prod = remii(mulii(prod, p_e), N);
     s = strtok(NULL, " \n");
   }
-  free(t); return prod;
+  gpfree(t); return prod;
 }
 #endif
 
@@ -2537,8 +2537,8 @@ static void
 F2_destroy_matrix(F2_matrix m, long rows)
 {
   long i;
-  for (i = 0; i < rows; i++) free(m[i]);
-  free(m);
+  for (i = 0; i < rows; i++) gpfree(m[i]);
+  gpfree(m);
 }
 
 static ulong
@@ -2799,7 +2799,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
       pari_warn(warner, "MPQS: no solutions found from linear system solver");
     F2_destroy_matrix(m, h->size_of_FB+1);
     F2_destroy_matrix(ker_m, rel);
-    free(fpos); /* ei not yet allocated */
+    gpfree(fpos); /* ei not yet allocated */
     avma = av; return NULL; /* no factors found */
   }
 
@@ -2997,7 +2997,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 
   F2_destroy_matrix(m, h->size_of_FB+1);
   F2_destroy_matrix(ker_m, rel);
-  free(ei); free(fpos);
+  gpfree(ei); gpfree(fpos);
   if (res_next < 3) { avma = av; return NULL; } /* no factors found */
 
   /* normal case:  convert internal format to ifac format as described in
@@ -3128,7 +3128,7 @@ mpqs_i(mpqs_handle_t *handle)
   FB = mpqs_create_FB(handle, &p);
   if (p)
   {
-    /* free(FB); */
+    /* gpfree(FB); */
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: found factor = %ld whilst creating factor base\n", p);
     avma = av; return utoipos(p);
@@ -3212,7 +3212,7 @@ mpqs_i(mpqs_handle_t *handle)
       pari_unlink(FNEW_str);\
       pari_unlink(LPREL_str);\
       pari_unlink(LPNEW_str);\
-      pari_unlink(COMB_str); rmdir(dir); free(dir);
+      pari_unlink(COMB_str); rmdir(dir); gpfree(dir);
 
   pFREL = pari_fopen(FREL_str,  WRITE); pari_fclose(pFREL);
   pLPREL = pari_fopen(LPREL_str,  WRITE); pari_fclose(pLPREL);

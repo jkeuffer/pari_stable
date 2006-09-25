@@ -216,9 +216,9 @@ free_graph(void)
     PariRect *e=rectgraph[i];
 
     if (RHead(e)) killrect(i);
-    free((void *)e);
+    gpfree((void *)e);
   }
-  free((void *)rectgraph);
+  gpfree((void *)rectgraph);
   rectgraph = 0;
 }
 
@@ -604,10 +604,10 @@ killrect(long ne)
   {
     if (RoType(p1)==ROt_MP || RoType(p1)==ROt_ML)
     {
-      free(RoMPxs(p1)); free(RoMPys(p1));
+      gpfree(RoMPxs(p1)); gpfree(RoMPys(p1));
     }
-    if (RoType(p1)==ROt_ST) free(RoSTs(p1));
-    p2=RoNext(p1); free(p1); p1=p2;
+    if (RoType(p1)==ROt_ST) gpfree(RoSTs(p1));
+    p2=RoNext(p1); gpfree(p1); p1=p2;
   }
 }
 
@@ -657,7 +657,7 @@ rectpoints(long ne, GEN listx, GEN listy)
     px[i]=gtodouble(gel(listx,i+1)); py[i]=gtodouble(gel(listy,i+1));
   }
   rectpoints0(ne,px,py,lx);
-  free(px); free(py);
+  gpfree(px); gpfree(py);
 }
 
 void
@@ -709,7 +709,7 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
     y[i] = gtodouble(gel(listy,i+1));
   }
   rectlines0(ne,x,y,lx,flag);
-  free(x); free(y);
+  gpfree(x); gpfree(y);
 }
 
 static void
@@ -1003,7 +1003,7 @@ rectclip(long rect)
 	       || DTOL(RoPTy(R)) < ymin || DTOL(RoPTy(R)) > ymax) {
 		 remove:
 	      *prevp = next;
-	      free(R);
+	      gpfree(R);
 	      break;
 	  }
 	  goto do_next;
@@ -1089,7 +1089,7 @@ rectclip(long rect)
 		      had_hole = 1, RoMLcnt(R) = t + 1;
 		  continue;
 	      }
-	      /* Is not continuous, automatically R is not free()ed.  */
+	      /* Is not continuous, automatically R is not gpfree()ed.  */
 	      RoMLcnt(R) = t + 1;
 	      if ( rc & CLIPLINE_CLIP_2) { /* Needs separate entry */
 		  RectObj *n = (RectObj*) gpmalloc(sizeof(RectObj2P));
@@ -1200,7 +1200,7 @@ gtodblList(GEN data, long flags)
     l[0].nb = nl/2;
     for (i=0; i < l[0].nb; i+=2)
       if (l[i+1].nb) break;
-    if (i >= l[0].nb) { free(l); return NULL; }
+    if (i >= l[0].nb) { gpfree(l); return NULL; }
     xsml = xbig = l[i  ].d[0];
     ysml = ybig = l[i+1].d[0];
 
@@ -1219,7 +1219,7 @@ gtodblList(GEN data, long flags)
   }
   else
   {
-    if (!l[0].nb) { free(l); return NULL; }
+    if (!l[0].nb) { gpfree(l); return NULL; }
     l[0].nb = nl-1;
 
     xsml = xbig = l[0].d[0];
@@ -1669,8 +1669,8 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 	}
     }
   }
-  for (i--; i>=0; i--) free(data[i].d);
-  free(data);
+  for (i--; i>=0; i--) gpfree(data[i].d);
+  gpfree(data);
 
   if (WW)
   {
@@ -1896,7 +1896,7 @@ gendraw(GEN list, long ps, long flag)
     w[i] = ne;
   }
   if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n);
-  free(x); free(y); free(w);
+  gpfree(x); gpfree(y); gpfree(w);
 }
 
 void
@@ -2066,7 +2066,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
           }
           eng->sc(data,RoCol(R));
           eng->mp(data, nb, points);
-          free(points);
+          gpfree(points);
           break;
         }
       case ROt_ML:
@@ -2083,7 +2083,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
           }
           eng->sc(data,RoCol(R));
           eng->ml(data, nb, points);
-          free(points);
+          gpfree(points);
           break;
         }
       case ROt_ST:

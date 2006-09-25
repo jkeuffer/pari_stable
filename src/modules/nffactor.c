@@ -302,7 +302,7 @@ nffactor(GEN nf,GEN pol)
     }
     avma = av1; y = gerepileupto(av, y);
     p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) gel(p1,j) = utoipos(ex[j]);
-    free(ex);
+    gpfree(ex);
   }
   else
   {

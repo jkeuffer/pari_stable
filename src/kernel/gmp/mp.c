@@ -45,14 +45,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*We need PARI invmod renamed to invmod_pari*/
 #define INVMOD_PARI
 
-static void *wrap_gprealloc(void *ptr, size_t old_size, size_t new_size) {
+static void *gmp_realloc(void *ptr, size_t old_size, size_t new_size) {
   (void)old_size; return (void *) gprealloc(ptr,new_size);
+}
+
+static void gmp_free(void *ptr, size_t old_size){
+  (void)old_size; gpfree(ptr);
 }
 
 int pari_kernel_init(void)
 {
   /* Use gpmalloc instead of malloc */
-  mp_set_memory_functions((void *(*)(size_t)) gpmalloc, wrap_gprealloc, NULL);
+  mp_set_memory_functions((void *(*)(size_t)) gpmalloc, gmp_realloc, gmp_free);
   return 0;
 }
 

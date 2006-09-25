@@ -85,7 +85,7 @@ pop_stack(stack **pts)
   void *a;
   if (!s) return NULL; /* initial value */
   v = s->prev; *pts = v;
-  a = s->value; free((void*)s);
+  a = s->value; gpfree((void*)s);
   return a;
 }
 
@@ -155,7 +155,7 @@ gunclone(GEN x)
 #endif
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  free((void*)bl_base(x));
+  gpfree((void*)bl_base(x));
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
@@ -237,6 +237,12 @@ pari_init_stackcheck(void *stack_base)
 static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
 static GEN universal_constants;
+
+void
+gpfree(void *pointer)
+{
+  free(pointer);
+}
 
 char*
 gpmalloc(size_t size)
@@ -451,7 +457,7 @@ grow_init(growarray A)
   A->v   = (void**)gpmalloc(A->len * sizeof(void*));
 }
 void
-grow_kill(growarray A) { free(A->v); }
+grow_kill(growarray A) { gpfree(A->v); }
 
 /* Load modules in A in hashtable hash. */
 static int
@@ -538,7 +544,7 @@ init_stack(size_t size)
   if (bot)
   {
     old = top - bot;
-    free((void*)bot);
+    gpfree((void*)bot);
   }
   /* NOT gpmalloc, memer would be deadly */
   bot = (pari_sp)malloc(s);
@@ -581,7 +587,7 @@ pari_thread_init(size_t parisize)
 void
 pari_thread_close(void)
 {
-  free((void *)bot);
+  gpfree((void *)bot);
   pari_close_floats();
 }
 
@@ -651,18 +657,18 @@ pari_init(size_t parisize, ulong maxprime)
 static void
 delete_hist(gp_hist *h)
 {
-  if (h->res) free((void*)h->res);
+  if (h->res) gpfree((void*)h->res);
 }
 static void
 delete_pp(gp_pp *p)
 {
-  if (p->cmd) free((void*)p->cmd);
+  if (p->cmd) gpfree((void*)p->cmd);
 }
 static void
 delete_path(gp_path *p)
 {
   delete_dirs(p);
-  free((void*)p->PATH);
+  gpfree((void*)p->PATH);
 }
 
 static void
@@ -671,7 +677,7 @@ free_gp_data(gp_data *D)
   delete_hist(D->hist);
   delete_path(D->path);
   delete_pp(D->pp);
-  if (D->help) free((void*)D->help);
+  if (D->help) gpfree((void*)D->help);
 }
 
 static void
@@ -694,28 +700,28 @@ pari_close_opts(ulong init_opts)
     kill_hashlist(functions_hash[i]);
     kill_hashlist(members_hash[i]);
   }
-  free((void*)varentries);
-  free((void*)ordvar);
-  free((void*)polvar);
-  free((void*)pol_x[MAXVARN]);
-  free((void*)pol_x);
-  free((void*)pol_1);
-  free((void*)primetab);
-  free((void*)universal_constants);
+  gpfree((void*)varentries);
+  gpfree((void*)ordvar);
+  gpfree((void*)polvar);
+  gpfree((void*)pol_x[MAXVARN]);
+  gpfree((void*)pol_x);
+  gpfree((void*)pol_1);
+  gpfree((void*)primetab);
+  gpfree((void*)universal_constants);
 
   while (cur_bloc) gunclone(cur_bloc);
   killallfiles(1);
-  free((void*)functions_hash);
-  free((void*)funct_old_hash);
-  free((void*)members_hash);
-  free((void*)dft_handler);
-  free((void*)bot);
-  free((void*)diffptr);
-  free(current_logfile);
-  free(current_psfile);
+  gpfree((void*)functions_hash);
+  gpfree((void*)funct_old_hash);
+  gpfree((void*)members_hash);
+  gpfree((void*)dft_handler);
+  gpfree((void*)bot);
+  gpfree((void*)diffptr);
+  gpfree(current_logfile);
+  gpfree(current_psfile);
   grow_kill(MODULES);
   grow_kill(OLDMODULES);
-  if (pari_datadir) free(pari_datadir);
+  if (pari_datadir) gpfree(pari_datadir);
   if ((init_opts&INIT_DFTm)) free_gp_data(GP_DATA);
 }
 
@@ -940,7 +946,7 @@ errcontext(char *msg, char *s, char *entry)
   strcpy(pre, term_get_color(c_ERR));
   strcat(pre, "  ***   ");
   print_prefixed_text(buf, pre, str);
-  free(buf); free(pre);
+  gpfree(buf); gpfree(pre);
 }
 
 void *
@@ -962,7 +968,7 @@ static void
 pop_catch_cell(stack **s)
 {
   cell *c = (cell*)pop_stack(s);
-  if (c) free(c);
+  if (c) gpfree(c);
 }
 
 /* reset traps younger than v (included).
@@ -1210,7 +1216,7 @@ static void
 kill_dft_handler(int numerr)
 {
   char *s = dft_handler[numerr];
-  if (s && s != BREAK_LOOP) free(s);
+  if (s && s != BREAK_LOOP) gpfree(s);
   dft_handler[numerr] = NULL;
 }
 
@@ -1569,7 +1575,7 @@ bin_copy(GENbin *p)
   GEN x, y, base;
   long dx, len;
 
-  x   = p->x; if (!x) { free(p); return gen_0; }
+  x   = p->x; if (!x) { gpfree(p); return gen_0; }
   len = p->len;
   base= p->base; dx = x - base;
   y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
@@ -1578,7 +1584,7 @@ bin_copy(GENbin *p)
     shiftaddress_canon(y, (y-x)*sizeof(long));
   else
     shiftaddress(y, (y-x)*sizeof(long));
-  free(p); return y;
+  gpfree(p); return y;
 }
 
 /*******************************************************************/
@@ -1605,7 +1611,7 @@ gerepilemany(pari_sp av, GEN* gptr[], int n)
   for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
   avma = av;
   for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
-  free(l);
+  gpfree(l);
 }
 
 void
@@ -1619,7 +1625,7 @@ gerepileall(pari_sp av, int n, ...)
   for (i=0; i<n; i++) { gptr[i] = va_arg(a,GEN*); l[i] = copy_bin(*(gptr[i])); }
   avma = av;
   for (--i; i>=0; i--) *(gptr[i]) = bin_copy(l[i]);
-  free(l); free(gptr);
+  gpfree(l); gpfree(gptr);
 }
 
 void

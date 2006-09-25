@@ -196,7 +196,7 @@ void
 delete_buffer(Buffer *b)
 {
   if (!b) return;
-  free((void*)b->buf); free((void*)b);
+  gpfree((void*)b->buf); gpfree((void*)b);
 }
 /* resize */
 void
@@ -334,7 +334,7 @@ input_loop(filtre_t *F, input_method *IM)
     F->s = to_read;
     F->t = s;
     (void)filtre0(F);
-    if (IM->free) free(to_read);
+    if (IM->free) gpfree(to_read);
     if (! F->more_input) break;
 
     /* read continuation line */
@@ -467,7 +467,7 @@ vpariputs(const char* format, va_list args)
     buf = gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
     if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
-    free(buf); bufsize = l + 1;
+    gpfree(buf); bufsize = l + 1;
   }
   buf[bufsize-1] = 0; /* just in case */
 #else
@@ -491,7 +491,7 @@ vpariputs(const char* format, va_list args)
       else t++;
     }
   }
-  pariputs(s); free(buf); free(str);
+  pariputs(s); gpfree(buf); gpfree(str);
 }
 
 void
@@ -914,14 +914,14 @@ pGENtostr(GEN g, long flag) {
   {
     strcpy(t2, (char*)Ls[i]);
     t2 += Ll[i];
-    free((void*)Ls[i]);
+    gpfree((void*)Ls[i]);
   }
   avma = av; return t;
 }
 GEN Str0(GEN g, long flag) {
   char *t = pGENtostr(g, flag);
   GEN z = strtoGENstr(t);
-  free(t); return z;
+  gpfree(t); return z;
 }
 GEN Str(GEN g)    { return Str0(g, f_RAW); }
 GEN Strtex(GEN g) { return Str0(g, f_TEX); }
@@ -929,7 +929,7 @@ GEN
 Strexpand(GEN g) {
   char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
   GEN z = strtoGENstr(t);
-  free(t); free(s); return z;
+  gpfree(t); gpfree(s); return z;
 }
 
 GEN
@@ -940,7 +940,7 @@ GENtoGENstr(GEN x)
   GEN z;
   T.prettyp = f_RAW;
   s = GENtostr0(x, &T, &gen_output);
-  z = strtoGENstr(s); free(s); return z;
+  z = strtoGENstr(s); gpfree(s); return z;
 }
 
 GEN
@@ -952,7 +952,7 @@ GENtocanonicalstr(GEN x)
   T.prettyp = f_RAW;
   T.sp = 0;
   s = GENtostr0(x, &T, &gen_output);
-  z = strtoGENstr(s); free(s); return z;
+  z = strtoGENstr(s); gpfree(s); return z;
 }
 
 static char
@@ -2025,7 +2025,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
         if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       pariputs("O("); VpowE(ev,i); pariputc(')');
-      free(ev); break;
+      gpfree(ev); break;
     }
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
@@ -2189,7 +2189,7 @@ sori(GEN g, pariout_t *T)
       }
       pariputs("O(");
       if (!i) pariputs(" 1)"); else VpowE(ev,i);
-      pariputc(')'); free(ev); break;
+      pariputc(')'); gpfree(ev); break;
     }
 
     case t_POL:
@@ -2369,7 +2369,7 @@ texi(GEN g, pariout_t *T, int addsign)
 	}
       }
       pariputs("O("); texVpowE(ev,i); pariputc(')');
-      free(ev); break;
+      gpfree(ev); break;
     }
 
     case t_VEC:
@@ -2625,7 +2625,7 @@ pari_kill_file(pariFILE *f)
 #endif
   if (DEBUGFILES)
     fprintferr("I/O: closing file %s (code %d) \n",f->name,f->type);
-  free(f);
+  gpfree(f);
 }
 
 void
@@ -2775,7 +2775,7 @@ try_pipe(char *cmd, int fl)
     s = gpmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
     file = system(s)? NULL: (FILE *) fopen(f,"r");
-    flag |= mf_FALSE; free(s); free(f);
+    flag |= mf_FALSE; gpfree(s); gpfree(f);
   }
   else
 #  endif
@@ -2935,7 +2935,7 @@ _expand_tilde(const char *s)
     len = u-s;
     tmp = strncpy(gpmalloc(len+1),s,len);
     tmp[len] = 0;
-    p = getpwnam(tmp); free(tmp);
+    p = getpwnam(tmp); gpfree(tmp);
   }
   if (!p) pari_err(talker2,"unknown user ",s,s-1);
   ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
@@ -2986,7 +2986,7 @@ _expand_env(char *str)
       s0 = strncpy(gpmalloc(l+1), s0, l); s0[l] = 0;
       x[xnum++] = s0; len += l;
     }
-    free(env); s0 = s;
+    gpfree(env); s0 = s;
   }
   l = s - s0;
   if (l)
@@ -2996,8 +2996,8 @@ _expand_env(char *str)
   }
 
   s = gpmalloc(len+1); *s = 0;
-  for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); free(x[i]); }
-  free(str); free(x); return s;
+  for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); gpfree(x[i]); }
+  gpfree(str); gpfree(x); return s;
 #endif
 }
 
@@ -3014,8 +3014,8 @@ delete_dirs(gp_path *p)
   if (v)
   {
     p->dirs = NULL; /* in case of error */
-    for (dirs = v; *dirs; dirs++) free(*dirs);
-    free(v);
+    for (dirs = v; *dirs; dirs++) gpfree(*dirs);
+    gpfree(v);
   }
 }
 
@@ -3055,7 +3055,7 @@ gp_expand_path(gp_path *p)
     dirs[i] = expand_tilde(s);
     s = end + 1; /* next path component */
   }
-  free((void*)v);
+  gpfree((void*)v);
   dirs[i] = NULL; p->dirs = dirs;
 }
 
@@ -3071,7 +3071,7 @@ accept_file(char *name, FILE *file)
   }
   if (! last_tmp_file)
   {  /* empty file stack, record this name */
-    if (last_filename) free(last_filename);
+    if (last_filename) gpfree(last_filename);
     last_filename = pari_strdup(name);
   }
 #ifdef ZCAT
@@ -3088,7 +3088,7 @@ accept_file(char *name, FILE *file)
       char *cmd = gpmalloc(strlen(ZCAT) + l + 2);
       sprintf(cmd,"%s %s",ZCAT,name);
       fclose(file); infile = try_pipe(cmd, mf_IN)->file;
-      free(cmd); return infile;
+      gpfree(cmd); return infile;
     }
   }
 #endif
@@ -3110,9 +3110,9 @@ try_name(char *name)
     sprintf(s, "%s.gp", name);
     file = fopen(s, "r");
     if (file) file = accept_file(s,file);
-    free(s);
+    gpfree(s);
   }
-  free(name); return file;
+  gpfree(name); return file;
 }
 
 /* If name = "", re-read last file */
@@ -3214,7 +3214,7 @@ wrGEN(GEN x, FILE *f)
     wr_long((long)p->base,f);
     _lfwrite(GENbase(p), L,f);
   }
-  free((void*)p);
+  gpfree((void*)p);
 }
 
 static void
@@ -3306,7 +3306,7 @@ is_magic_ok(FILE *f)
   size_t L = strlen(MAGIC);
   char *s = gpmalloc(L);
   int r = (fread(s,1,L, f) == L && strncmp(s,MAGIC,L) == 0);
-  free(s); return r;
+  gpfree(s); return r;
 }
 
 static int
@@ -3446,8 +3446,8 @@ wr_check(const char *s) {
   return t;
 }
 
-static void wr_init(const char *s) { char *t=wr_check(s); switchout(t); free(t);}
-void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); free(t);}
+static void wr_init(const char *s) { char *t=wr_check(s); switchout(t); gpfree(t);}
+void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
 
 #define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
 #define WR_NO() {pariflush(); switchout(NULL); }

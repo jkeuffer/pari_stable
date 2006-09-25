@@ -115,8 +115,8 @@ strconcat(GEN x, GEN y)
   x = cgetg(l + 1, t_STR); str = GSTR(x);
   strcpy(str,sx);
   strcat(str,sy);
-  if (flx) free(sx);
-  if (fly) free(sy);
+  if (flx) gpfree(sx);
+  if (fly) gpfree(sy);
   return x;
 }
 
@@ -570,7 +570,7 @@ extract(GEN x, GEN L)
       }
     }
     y[0] = evaltyp(tx) | evallg(iy);
-    x = gcopy(y); free(y); return x;
+    x = gcopy(y); gpfree(y); return x;
   }
   if (tl==t_STR)
   {
@@ -2163,14 +2163,14 @@ image(GEN x)
   gauss_pivot(x,&d,&r);
 
   /* r = dim ker(x) */
-  if (!r) { avma=av; if (d) free(d); return gcopy(x); }
+  if (!r) { avma=av; if (d) gpfree(d); return gcopy(x); }
 
   /* r = dim Im(x) */
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
     if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  free(d); return y;
+  gpfree(d); return y;
 }
 
 GEN
@@ -2184,7 +2184,7 @@ imagecompl(GEN x)
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
     if (!d[i]) gel(y,j++) = utoipos(i);
-  if (d) free(d); return y;
+  if (d) gpfree(d); return y;
 }
 
 /* for hnfspec: imagecompl(trans(x)) + image(trans(x)) */
@@ -2201,7 +2201,7 @@ imagecomplspec(GEN x, long *nlze)
   for (i=j=1, k=r+1; i<l; i++)
     if (d[i]) y[k++]=i; else y[j++]=i;
   *nlze = r;
-  if (d) free(d); return y;
+  if (d) gpfree(d); return y;
 }
 
 static GEN
@@ -2264,7 +2264,7 @@ get_suppl(GEN x, GEN d, long r)
   rx = lg(x)-1;
   if (!rx) pari_err(talker,"empty matrix in suppl");
   n = lg(x[1])-1;
-  if (rx == n && r == 0) { free(d); return gcopy(x); }
+  if (rx == n && r == 0) { gpfree(d); return gcopy(x); }
   y = cgetg(n+1, t_MAT);
   av = avma;
   c = const_vecsmall(n,0);
@@ -2286,7 +2286,7 @@ get_suppl(GEN x, GEN d, long r)
     gel(y,j) = gcopy(gel(y,j));
   for (   ; j<=n; j++)
     gel(y,j) = col_ei(n, y[j]);
-  free(d); return y;
+  gpfree(d); return y;
 }
 
 /* x is an n x k matrix, rank(x) = k <= n. Return an invertible n x n matrix
@@ -2369,7 +2369,7 @@ rank(GEN x)
   gauss_pivot(x,&d,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; if (d) free(d);
+  avma=av; if (d) gpfree(d);
   return lg(x)-1 - r;
 }
 
@@ -2420,7 +2420,7 @@ indexrank0(GEN x, GEN p, int vecsmall)
   {
     for (i=0,j=1; j<=n; j++)
       if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    free(d);
+    gpfree(d);
     qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
   }
   if (!vecsmall)
@@ -2971,14 +2971,14 @@ FpM_image(GEN x, GEN p)
   FpM_gauss_pivot(x,p,&d,&r);
 
   /* r = dim ker(x) */
-  if (!r) { avma=av; if (d) free(d); return gcopy(x); }
+  if (!r) { avma=av; if (d) gpfree(d); return gcopy(x); }
 
   /* r = dim Im(x) */
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
     if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  free(d); return y;
+  gpfree(d); return y;
 }
 
 long
@@ -2991,7 +2991,7 @@ FpM_rank(GEN x, GEN p)
   FpM_gauss_pivot(x,p,&d,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; if (d) free(d);
+  avma=av; if (d) gpfree(d);
   return lg(x)-1 - r;
 }
 

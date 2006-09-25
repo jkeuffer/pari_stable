@@ -393,7 +393,7 @@ sd_colors(char *v, long flag)
     v0 = v = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
-    free(v0);
+    gpfree(v0);
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
@@ -525,7 +525,7 @@ sd_histsize(const char *v, long flag)
       gunclone(resG[g]);
       if (!g) g = sG;
     }
-    free((void*)resG);
+    gpfree((void*)resG);
   }
   return r;
 }
@@ -630,7 +630,7 @@ sd_primelimit(const char *v, long flag)
     if (flag != d_INITRC)
     {
       byteptr ptr = initprimes(n);
-      free(diffptr); diffptr = ptr;
+      gpfree(diffptr); diffptr = ptr;
     }
     GP_DATA->primelimit = n;
   }
@@ -659,8 +659,8 @@ sd_filename(const char *v, long flag, char *s, char **f)
     char *ev = expand_tilde(v);
     l = strlen(ev) + 256;
     s = (char *) malloc(l);
-    do_strftime(ev,s, l-1); free(ev);
-    *f = pari_strdup(s); free(s); free(old);
+    do_strftime(ev,s, l-1); gpfree(ev);
+    *f = pari_strdup(s); gpfree(s); gpfree(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f);
   if (flag == d_ACKNOWLEDGE) pariprintf("   %s = \"%s\"\n",s,*f);
@@ -706,7 +706,7 @@ sd_help(char *v, long flag)
   if (*v)
   {
     if (GP_DATA->flags & SECURE) err_secure("help",v);
-    if (GP_DATA->help) free(GP_DATA->help);
+    if (GP_DATA->help) gpfree(GP_DATA->help);
     GP_DATA->help = expand_tilde(v);
   }
   str = GP_DATA->help? GP_DATA->help: "none";
@@ -722,7 +722,7 @@ sd_datadir(char *v, long flag)
   const char *str;
   if (*v)
   {
-    if (pari_datadir) free(pari_datadir);
+    if (pari_datadir) gpfree(pari_datadir);
     pari_datadir = expand_tilde(v);
   }
   str = pari_datadir? pari_datadir: "none";
@@ -738,7 +738,7 @@ sd_path(char *v, long flag)
   gp_path *p = GP_DATA->path;
   if (*v)
   {
-    free((void*)p->PATH);
+    gpfree((void*)p->PATH);
     p->PATH = pari_strdup(v);
     if (flag == d_INITRC) return gnil;
     gp_expand_path(p);
@@ -777,7 +777,7 @@ sd_prettyprinter(char *v, long flag)
       pp->file = f;
     }
     pp->cmd = cancel? NULL: pari_strdup(v);
-    if (old) free(old);
+    if (old) gpfree(old);
     if (flag == d_INITRC) return gnil;
   }
   if (flag == d_RETURN)

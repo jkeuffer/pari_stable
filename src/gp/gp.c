@@ -119,8 +119,8 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
 static void
 free_cmd(tm_cmd *c)
 {
-  while (c->n--) free((void*)c->v[c->n]);
-  free((void*)c->v);
+  while (c->n--) gpfree((void*)c->v[c->n]);
+  gpfree((void*)c->v);
 }
 
 static void
@@ -256,7 +256,7 @@ commands(long n)
       }
   list[s] = NULL;
   print_fun_list(list, term_height()-4);
-  free(list);
+  gpfree(list);
 }
 
 static void
@@ -270,7 +270,7 @@ center(char *s)
   for (i=0; i<pad; i++) *u++ = ' ';
   while (*s) *u++ = *s++;
   *u++ = '\n'; *u = 0;
-  pariputs(buf); free(buf);
+  pariputs(buf); gpfree(buf);
 }
 
 static void
@@ -507,8 +507,8 @@ external_help(char *s, int num)
     sprintf(ar,"@%d",num);
   sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,s,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
-  free(str);
-  free(s);
+  gpfree(str);
+  gpfree(s);
   while (fgets(buf, nbof(buf), f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;
@@ -1062,7 +1062,7 @@ gprc_get(char *path)
     int free_it = 0;
     s = get_home(&free_it); l = strlen(s); c = s[l-1];
     str = strcpy(gpmalloc(l+7), s);
-    if (free_it) free(s);
+    if (free_it) gpfree(s);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
 #ifdef UNIX
@@ -1085,10 +1085,10 @@ gprc_get(char *path)
         t = gpmalloc(l + 6);
         strncpy(t, path, l);
         strcpy(t+l, s); f = gprc_chk(t);
-        free(t);
+        gpfree(t);
       }
     }
-    free(str);
+    gpfree(str);
   }
   return f;
 }
@@ -1739,7 +1739,7 @@ read_opt(growarray A, long argc, char **argv)
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
         if (strcmp(t, "version") == 0) {
           init_trivial_stack(); print_version();
-          free((void*)bot); exit(0);
+          gpfree((void*)bot); exit(0);
         }
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
         if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
@@ -1845,7 +1845,7 @@ main(int argc, char **argv)
         fprintferr("... skipping file '%s'\n", A->v[i]);
         i++; if (i == A->n) break;
       }
-      (void)read0((char*)A->v[i]); free(A->v[i]);
+      (void)read0((char*)A->v[i]); gpfree(A->v[i]);
     }
     GP_DATA->flags = f; logfile = l;
   }
@@ -1883,7 +1883,7 @@ prettyp_init(void)
   if (pp->file || (pp->file = try_pipe(pp->cmd, mf_OUT))) return 1;
 
   pari_warn(warner,"broken prettyprinter: '%s'",pp->cmd);
-  free(pp->cmd); pp->cmd = NULL; return 0;
+  gpfree(pp->cmd); pp->cmd = NULL; return 0;
 }
 
 /* n = history number. if n = 0 no history */
@@ -1965,7 +1965,7 @@ texmacs_output(GEN z, long n)
   printf("%clatex:", DATA_BEGIN);
   if (n) printf("\\magenta\\%%%ld = ", n);
   printf("$\\blue %s$%c", sz,DATA_END);
-  free(sz); fflush(stdout);
+  gpfree(sz); fflush(stdout);
 }
 
     /* REGULAR */

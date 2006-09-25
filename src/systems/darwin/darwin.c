@@ -200,7 +200,7 @@ void *dlsym(void *handle, const char *symbol)
     {
       sprintf(malloc_sym, "_%s", symbol);
       value = dlsymIntern(handle, malloc_sym);
-      free(malloc_sym);
+      gpfree(malloc_sym);
     }
     else
       error(0, "Unable to allocate memory");

@@ -81,7 +81,7 @@ static void DrawPoints(void *data, long nb, struct plot_points *p)
     xp[i].y=p[i].y;
   }
   XDrawPoints(dx->display,dx->win,dx->gc, xp, nb, 0);
-  free(xp);
+  gpfree(xp);
 }
 
 static void DrawLines(void *data, long nb, struct plot_points *p)
@@ -95,7 +95,7 @@ static void DrawLines(void *data, long nb, struct plot_points *p)
     xp[i].y=p[i].y;
   }
   XDrawLines(dx->display,dx->win,dx->gc, xp, nb, 0);
-  free(xp);
+  gpfree(xp);
 }
 
 static void DrawString(void *data, long x, long y, char *text, long numtext)

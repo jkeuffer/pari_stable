@@ -906,7 +906,7 @@ gadd(GEN x, GEN y)
 	  if (i < 3) return gcopy(y);
 
 	  p1 = greffe(x,i,0); y = gadd(p1,y);
-          free(p1); return y;
+          gpfree(p1); return y;
 	
         case t_RFRAC: return add_rfrac_scal(y, x);
       }
@@ -1336,7 +1336,7 @@ gmul(GEN x, GEN y)
         gel(z,i) = gerepileupto(av,p1);
       }
       z -= 2; /* back to normalcy */
-      free(p2); return normalize(z);
+      gpfree(p2); return normalize(z);
     }
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);
@@ -1566,7 +1566,7 @@ gmul(GEN x, GEN y)
           /* take advantage of x = t^n ! */
           if (degpol(x)) {
             p1 = greffe(x,lg(y),0);
-            p2 = gmul(p1,y); free(p1);
+            p2 = gmul(p1,y); gpfree(p1);
           } else
             p2 = mul_ser_scal(y, gel(x,2));
           setvalp(p2, valp(p2) + vn);
@@ -1759,7 +1759,7 @@ gsqr(GEN x)
           p1 = gadd(p1, gsqr(gel(x,i>>1)));
         gel(z,i) = gerepileupto(av,p1);
       }
-      z -= 2; free(p2); return normalize(z);
+      z -= 2; gpfree(p2); return normalize(z);
     }
     case t_RFRAC: z = cgetg(3,t_RFRAC);
       gel(z,1) = gsqr(gel(x,1));
@@ -1849,7 +1849,7 @@ div_scal_ser(GEN x, GEN y) { /* TODO: improve */
   z[0] = evaltyp(t_SER) | evallg(ly);
   z[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
   gel(z,2) = x; for (i=3; i<ly; i++) gel(z,i) = gen_0;
-  y = gdiv(z,y); free(z); return y;
+  y = gdiv(z,y); gpfree(z); return y;
 }
 static GEN
 div_scal_T(GEN x, GEN y, long ty) {
@@ -1910,7 +1910,7 @@ div_ser(GEN x, GEN y, long vx)
   }
   for (i=3; i<lx; i++)
     if (p2[i]) gunclone(gel(p2,i));
-  free(p2); return normalize(z);
+  gpfree(p2); return normalize(z);
 }
 /* x,y compatible PADIC */
 static GEN
@@ -2256,7 +2256,7 @@ gdiv(GEN x, GEN y)
             return zeroser(vx, polvaluation(x,NULL) - valp(y));
 	  p1 = greffe(x,lg(y),0);
           p2 = div_ser(p1, y, vx);
-          free(p1); return p2;
+          gpfree(p1); return p2;
 
         case t_RFRAC:
         {
@@ -2277,7 +2277,7 @@ gdiv(GEN x, GEN y)
             return zeroser(vx, valp(x) - polvaluation(y,NULL));
 	  p1 = greffe(y,lg(x),0);
           p2 = div_ser(x, p1, vx);
-          free(p1); return p2;
+          gpfree(p1); return p2;
 	case t_RFRAC:
 	  av = avma;
 	  return gerepileupto(av, gdiv(gmul(x,gel(y,2)), gel(y,1)));

@@ -1130,8 +1130,8 @@ FreeMat(int **A, long n)
 {
   long i;
   for (i = 0; i <= n; i++)
-    if (A[i]) free((void*)A[i]);
-  free((void*)A);
+    if (A[i]) gpfree((void*)A[i]);
+  gpfree((void*)A);
 }
 
 /* initialize Coeff reduction */

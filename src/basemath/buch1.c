@@ -951,7 +951,7 @@ clearhash(long **hash)
   for (i=0; i<HASHT; i++) {
     for (pt = hash[i]; pt; ) {
       void *z = (void*)(pt - 3);
-      pt = (long*) pt[0]; free(z);
+      pt = (long*) pt[0]; gpfree(z);
     }
     hash[i] = NULL;
   }

@@ -608,7 +608,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   z = cgetg(nbsub+1,t_VEC);
   for (ii=1; ii<=nbsub; ii++)
   {
-    list = sublist; sublist = list->next; free(list);
+    list = sublist; sublist = list->next; gpfree(list);
     H = cgetg(N+1,t_MAT); gel(z,ii) = H; k=0;
     for (j=1; j<=n; j++)
     {
@@ -618,7 +618,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     }
     for (   ; j<=N; j++) gel(H,j) = col_ei(N, j);
   }
-  free(sublist); return z;
+  gpfree(sublist); return z;
 }
 
 GEN

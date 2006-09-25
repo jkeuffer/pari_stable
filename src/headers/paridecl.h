@@ -1232,6 +1232,7 @@ GEN     gerepileupto(pari_sp av, GEN q);
 GEN     gerepileuptoint(pari_sp av, GEN q);
 GEN     gerepileuptoleaf(pari_sp av, GEN q);
 GEN     getheap(void);
+void    gpfree(void *pointer);
 char*   gpmalloc(size_t bytes);
 char*   gprealloc(void *pointer,size_t size);
 void    gunclone(GEN x);

@@ -1192,7 +1192,7 @@ gen_vecsort(GEN x, GEN k, long flag)
     if (lg(gel(x,j)) <= l) pari_err(talker,"index too large in vecsort");
   }
   x = gen_sort_aux(x, flag, (void *) &v, veccmp);
-  free(v.k); return x;
+  gpfree(v.k); return x;
 }
 
 GEN

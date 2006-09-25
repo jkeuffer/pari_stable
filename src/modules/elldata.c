@@ -130,7 +130,7 @@ ellcondfile(long f)
   if (!V || typ(V)!=t_VEC )
     pari_err(talker,"Elliptic files %s not compatible\n",s);
   fclose(stream);
-  free(s); 
+  gpfree(s); 
   return V;
 }
 

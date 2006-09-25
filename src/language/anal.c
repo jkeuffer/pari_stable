@@ -436,7 +436,7 @@ gp_read_str(char *s)
 {
   char *t = filtre(s, (compatible == OLDALL));
   GEN x = readseq0(t, seq);
-  free(t); return x;
+  gpfree(t); return x;
 }
 
 static void
@@ -455,7 +455,7 @@ unused_chars(char *c, int strict)
   else
     s = pari_strdup(analyseur);
   pari_warn(warner, "unused characters: %s", s);
-  free(s);
+  gpfree(s);
 }
 
 /* check syntax, then execute */
@@ -530,7 +530,7 @@ install(void *f, char *name, char *code)
     if (ep->valence != EpINSTALL)
       pari_err(talker,"[install] identifier '%s' already in use", name);
     pari_warn(warner, "[install] updating '%s' prototype; module not reloaded", name);
-    if (ep->code) free(ep->code);
+    if (ep->code) gpfree(ep->code);
   }
   else
   {
@@ -598,8 +598,8 @@ freeep(entree *ep)
     (*foreignFuncFree)(ep); /* function created by foreign interpreter */
 
   if (EpSTATIC(ep)) return; /* gp function loaded at init time */
-  if (ep->help) free(ep->help);
-  if (ep->code) free(ep->code);
+  if (ep->help) gpfree(ep->help);
+  if (ep->code) gpfree(ep->code);
   switch(EpVALENCE(ep))
   {
     case EpVAR:
@@ -611,7 +611,7 @@ freeep(entree *ep)
     case EpALIAS:
       gunclone((GEN)ep->value); break;
   }
-  free(ep);
+  gpfree(ep);
 }
 
 static entree*
@@ -643,7 +643,7 @@ pop_val(entree *ep)
   if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
   ep->value = v->value;
   ep->args  = (void*) v->prev;
-  free((void*)v);
+  gpfree((void*)v);
 }
 
 /* as above IF ep->value was PUSHed, or was created after block number 'loc'
@@ -657,7 +657,7 @@ pop_val_if_newer(entree *ep, long loc)
   if (v->flag == COPY_VAL && !pop_entree_bloc(ep, loc)) return 0;
   ep->value = v->value;
   ep->args  = (void*) v->prev;
-  free((void*)v); return 1;
+  gpfree((void*)v); return 1;
 }
 
 /* set new value of ep directly to val (COPY), do not save last value unless
@@ -762,7 +762,7 @@ kill0(entree *ep)
 void
 addhelp(entree *ep, char *s)
 {
-  if (ep->help && !EpSTATIC(ep)) free(ep->help);
+  if (ep->help && !EpSTATIC(ep)) gpfree(ep->help);
   ep->help = pari_strdup(s);
 }
 
@@ -1103,7 +1103,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
   if (ptlimit && bp + len > *ptlimit)
     bp = realloc_buf(bp, len, ptbuf,ptlimit);
   memcpy(bp,tmp,len); /* ignore trailing \0 */
-  if (alloc) free(tmp);
+  if (alloc) gpfree(tmp);
   return bp + len;
 }
 
@@ -1462,7 +1462,7 @@ truc(void)
           pari_err(talker,"incorrect vector or matrix");
           return NULL; /* not reached */
       }
-      free(table); return z;
+      gpfree(table); return z;
 
     case '%': {
       gp_hist *H = GP_DATA->hist;
@@ -2626,7 +2626,7 @@ manage_var(long n, entree *ep)
       case manage_var_delete:
 	/* user wants to delete one of his/her/its variables */
 	if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
-	free(pol_x[++max_avail]); /* frees both pol_1 and pol_x */
+	gpfree(pol_x[++max_avail]); /* frees both pol_1 and pol_x */
 	return max_avail+1;
       case manage_var_create: break;
       default: pari_err(talker, "panic");
@@ -2724,7 +2724,7 @@ name_var(long n, char *s)
   ep->valence = EpVAR;
   ep->name = u; strcpy(u,s);
   ep->value = gen_0; /* in case geval is called */
-  if (varentries[n]) free(varentries[n]);
+  if (varentries[n]) gpfree(varentries[n]);
   varentries[n] = ep;
 }
 

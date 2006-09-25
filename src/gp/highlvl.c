@@ -52,7 +52,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(talker,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  if (lib) free(lib);
+  if (lib) gpfree(lib);
   install(f, gpname, code);
 }
 #else
@@ -90,7 +90,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) pari_err(talker,"can't find symbol '%s' in library '%s'",name,lib);
     pari_err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
-  if (lib) free(lib);
+  if (lib) gpfree(lib);
   install((void*)f,gpname,code);
 }
 #  else

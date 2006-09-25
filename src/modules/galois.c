@@ -311,7 +311,7 @@ galopen(char *pre, long n, long n1, long n2, long no)
   fd = os_open(s, O_RDONLY);
   if (fd == -1) pari_err(talker,"galois files not available\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
-  free(s); return fd;
+  gpfree(s); return fd;
 }
 
 static char
@@ -2401,11 +2401,11 @@ isin_G_H(buildroot *BR, long n1, long n2)
 
   init_isin(n1,n2, &tau, &ss, &s0, &R);
   ww = check_isin(BR, &R, tau, ss);
-  free(ss); free(tau); if (R.a) free(R.a);
+  gpfree(ss); gpfree(tau); if (R.a) gpfree(R.a);
   if (ww)
   {
     long z[NMAX+1], i , j, l = lg(BR->r);
-    s0 = permmul(ww, s0); free(ww);
+    s0 = permmul(ww, s0); gpfree(ww);
     if (DEBUGLEVEL)
     {
       fprintferr("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
@@ -2418,7 +2418,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
       for (j=1; j<=N; j++) p1[j] = z[j];
     }
-    free(s0); return n2;
+    gpfree(s0); return n2;
   }
   if (DEBUGLEVEL)
   {
@@ -2441,14 +2441,14 @@ polgaloisnamesbig(long n, long k)
   if (!stream) 
   {
     pari_warn(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
-    free(s); 
+    gpfree(s); 
     return strtoGENstr("");
   }
   V = gp_read_stream(stream);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
     pari_err(talker,"galois files %s not compatible\n",s);
   fclose(stream);
-  free(s); 
+  gpfree(s); 
   return gerepilecopy(ltop,gel(V,k));
 }
 

@@ -493,7 +493,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   rootnum |= 1;
   {
     byteptr p2 = initprimes0(rootnum, &psize, &last); /* recursive call */
-    memcpy(p1, p2, psize); free(p2);
+    memcpy(p1, p2, psize); gpfree(p2);
   }
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
@@ -555,7 +555,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   *curdiff++ = 0;               /* sentinel */
   *lenp = curdiff - p1;
   *lastp = last;
-  if (alloced) free(p);
+  if (alloced) gpfree(p);
   return (byteptr) gprealloc(p1, *lenp);
 }
 #if 0 /* not yet... GN */

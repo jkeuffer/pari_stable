@@ -464,7 +464,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
   }
   for (  ; i<nx; i++) gel(z,i) = mulpol_limb(x+i,y,p1,0,ny);
   for (  ; i<nz; i++) gel(z,i) = mulpol_limb(x+i,y,p1,i-nx+1,ny);
-  free(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
+  gpfree(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
 }
 
 /* return (x * X^d) + y. Assume d > 0, y != 0 */
@@ -642,7 +642,7 @@ sqrpol(GEN x, long nx)
       p1 = gadd(p1, gsqr(gel(x,i>>1)));
     gel(z,i) = gerepileupto(av,p1);
   }
-  free(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
+  gpfree(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
 }
 
 GEN

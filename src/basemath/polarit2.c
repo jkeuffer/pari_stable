@@ -4379,7 +4379,7 @@ newtonpoly(GEN x, GEN p)
     }
     while (ind<=b) { affsi(u1,num); gel(y,ind++) = gdivgs(num,u2); }
   }
-  free(vval); return y;
+  gpfree(vval); return y;
 }
 
 static GEN

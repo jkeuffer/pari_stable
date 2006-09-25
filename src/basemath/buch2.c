@@ -141,13 +141,13 @@ delete_cache(RELCACHE_t *M)
   REL_t *rel;
   for (rel = M->base+1; rel <= M->last; rel++)
   {
-    free((void*)rel->R);
+    gpfree((void*)rel->R);
     if (!rel->m) continue;
     gunclone(rel->m); 
     if (!rel->ex) continue;
     gunclone(rel->ex); 
   }
-  free((void*)M->base); M->base = NULL;
+  gpfree((void*)M->base); M->base = NULL;
 }
 
 static void
@@ -161,7 +161,7 @@ delete_FB(FB_t *F)
     gunclone(S->alg);
     gunclone(S->ord);
     if (S->arc) gunclone(S->arc);
-    S = S->prev; free((void*)T);
+    S = S->prev; gpfree((void*)T);
   }
   gunclone(F->subFB);
 }
@@ -1974,7 +1974,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
                                 && ! addcolumn_mod(rel->R,invp,L, mod_p))
       { /* Q-dependent from previous ones: forget it */
-        free((void*)rel->R); rel--;
+        gpfree((void*)rel->R); rel--;
         if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
         continue;
@@ -2118,7 +2118,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
       if (already_known(cache, rel))
       { /* forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
-        free((void*)rel->R); rel--;
+        gpfree((void*)rel->R); rel--;
         if (++cptzer > MAXRELSUP)
         {
           if (L_jid) { cptzer = 0; L_jid = NULL; break; } /* second chance */

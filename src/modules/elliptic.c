@@ -2851,7 +2851,7 @@ FOUND:
     h = A + B * (((ulong)(p2p + B - (A << 1))) / (B << 1));
     avma = av; if (!i) break;
   }
-  if (table) free(table);
+  if (table) gpfree(table);
   return stoi(KRO==1? p1p-h: h-p1p);
 }
 

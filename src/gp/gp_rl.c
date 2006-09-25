@@ -345,8 +345,8 @@ matches_for_emacs(const char *text, char **matches)
    /* we don't want readline to do anything, but insert some junk
     * which will be erased by emacs.
     */
-    for (i=0; matches[i]; i++) free(matches[i]);
-    free(matches);
+    for (i=0; matches[i]; i++) gpfree(matches[i]);
+    gpfree(matches);
   }
   matches = (char **) gpmalloc(2*sizeof(char *));
   matches[0] = gpmalloc(2); sprintf(matches[0],"_");
@@ -800,7 +800,7 @@ print_escape_string(char *s)
       case '"': *t++ = '\\'; continue;
     }
   *t++ = '"';
-  *t++ = 0; printf(t0); free(t0);
+  *t++ = 0; printf(t0); gpfree(t0);
 }
 
 static char *
@@ -840,7 +840,7 @@ texmacs_completion(char *s, long pos)
 {
   char **matches, *text;
 
-  if (rl_line_buffer) free(rl_line_buffer);
+  if (rl_line_buffer) gpfree(rl_line_buffer);
   rl_line_buffer = pari_strdup(s);
   text = completion_word(pos);
   /* text = start of expression we complete */
@@ -854,14 +854,14 @@ texmacs_completion(char *s, long pos)
     char *t = gpmalloc(prelen+1);
     strncpy(t, text, prelen); t[prelen] = 0; /* prefix */
     printf(" ");
-    print_escape_string(t); free(t);
+    print_escape_string(t); gpfree(t);
     for (i = matches[1]? 1: 0; matches[i]; i++)
     {
       printf(" ");
       print_escape_string(matches[i] + prelen);
-      free(matches[i]);
+      gpfree(matches[i]);
     }
-    free(matches);
+    gpfree(matches);
   }
   printf(")%c", DATA_END);
   fflush(stdout);
@@ -939,7 +939,7 @@ get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
       int i = history_length;
       while (i > index) {
         HIST_ENTRY *e = remove_history(--i);
-        free(e->line); free(e);
+        gpfree(e->line); gpfree(e);
       }
       gp_add_history(s);
     }
