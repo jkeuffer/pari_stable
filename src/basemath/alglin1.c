@@ -1710,7 +1710,7 @@ detint(GEN x)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"detint. k=%ld",k);
-      gerepileall(av1,5,&det1,&piv,&pivprec,*pass,&v);
+      gerepileall(av1,5,&det1,&piv,&pivprec,&pass,&v);
     }
   }
   return gerepileupto(av, absi(det1));
