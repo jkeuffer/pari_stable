@@ -702,7 +702,7 @@ odd prime, this is the \idx{Legendre symbol}.
 
 \section{Level 1 kernel (operations on longs, integers and reals)}
 
-\misctitle{Note:} Many functions consist of an elementary operation,
+\misctitle{Note:} Some functions consist of an elementary operation,
 immediately followed by an assignment statement. They will be introduced as
 in the following example:
 
@@ -890,7 +890,7 @@ to the \typ{REAL}~\kbd{x} (i.e.~the \kbd{ceil} function).
 \fun{GEN}{truncr}{GEN x} truncates the \typ{REAL}~\kbd{x} (not the same as
 \kbd{floorr} if \kbd{x} is and negative).
 
-\fun{GEN}{mpceil[z]}{GEN x[, GEN z]}
+\fun{GEN}{mpceil}{GEN x}
 as \kbd{ceilr} except that \kbd{x} may be a \typ{INT}.
 
 \fun{GEN}{ceil_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
@@ -898,13 +898,13 @@ as \kbd{ceilr} except that \kbd{x} may be a \typ{INT}.
 of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
 values.)
 
-\fun{GEN}{mpfloor[z]}{GEN x[, GEN z]}
+\fun{GEN}{mpfloor}{GEN x}
 as \kbd{floorr} except that \kbd{x} may be a \typ{INT}.
 
-\fun{GEN}{mpround[z]}{GEN x[, GEN z]}
+\fun{GEN}{mpround}{GEN x}
 as \kbd{roundr} except that \kbd{x} may be a \typ{INT}.
 
-\fun{GEN}{mptrunc[z]}{GEN x[, GEN z]}
+\fun{GEN}{mptrunc}{GEN x}
 as \kbd{truncr} except that \kbd{x} may be a \typ{INT}.
 
 \fun{GEN}{diviiround}{GEN x, GEN y} if \kbd{x} and \kbd{y} are \typ{INT}s,
@@ -921,7 +921,7 @@ $-1$ if \kbd{s} is equal to 0.
 \fun{long}{vali}{GEN x} 2-adic valuation of the \typ{INT}~\kbd{x}. Returns $-1$
 if \kbd{x} is equal to 0.
 
-\fun{GEN}{mpshift[z]}{GEN x, long n[, GEN z]} shifts the~\typ{INT} or
+\fun{GEN}{mpshift}{GEN x, long n} shifts the~\typ{INT} or
 \typ{REAL} \kbd{x} by~\kbd{n}. If \kbd{n} is positive, this is a left shift,
 i.e.~multiplication by $2^{\kbd{n}}$. If \kbd{n} is negative, it is a right
 shift by~$-\kbd{n}$, which amounts to the truncation of the quotient of \kbd{x}
@@ -1071,24 +1071,24 @@ The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
 \subsec{Generic binary operators}. Let ``\op'' be a binary operation among
 
 \op=\key{add}: addition (\kbd{x + y}). The result is a \typ{REAL} unless both
-\kbd{x} and \kbd{y} are \typ{INT}s (or longs).
+\kbd{x} and \kbd{y} are integer types (\typ{INT}, \kbd{long} or \kbd{ulong}).
 
 \op=\key{sub}: subtraction (\kbd{x - y}). The result is a \typ{REAL} unless both
-\kbd{x} and \kbd{y} are \typ{INT} (or longs).
+\kbd{x} and \kbd{y} are integer types.
 
 \op=\key{mul}: multiplication (\kbd{x * y}). The result is a \typ{REAL}
-unless both \kbd{x} and \kbd{y} are \typ{INT}s (or longs), \emph{or} if
+unless both \kbd{x} and \kbd{y} are integer types, \emph{or} if
 \kbd{x} or \kbd{y} is an exact $0$.
 
 \op=\key{div}: division (\kbd{x / y}). In the case where \kbd{x} and \kbd{y}
-are both \typ{INT}s or longs, the result is the Euclidean quotient, where the
+are both integer types, the result is the Euclidean quotient, where the
 remainder has the same sign as the dividend~\kbd{x}. It is the ordinary
 division otherwise. If one of \kbd{x} or \kbd{y} is a \typ{REAL}, the result
 is a \typ{REAL} unless \kbd{x} is an exact $0$. A division-by-$0$ error
 occurs if \kbd{y} is equal to $0$.
 
 \op=\key{rem}: remainder (``\kbd{x \% y}''). This operation is defined only
-when \kbd{x} and \kbd{y} are longs or \typ{INT}. The result is the Euclidean
+when \kbd{x} and \kbd{y} are integer types. The result is the Euclidean
 remainder corresponding to \kbd{div},~i.e. its sign is that of the
 dividend~\kbd{x}. The result is always a \typ{INT}.
 
@@ -1099,9 +1099,9 @@ of~\kbd{y}.
 
 \noindent The names and prototypes of the low-level functions corresponding
 to \op\ are as follows. In this section, the \kbd{z} argument in the
-\kbd{z}-functions must be of type \typ{INT} or~\typ{REAL}. \typ{INT} is only
-allowed when no `r' appears in the argument code (no \typ{REAL} operand is
-involved).
+\kbd{z}-functions must be of type \typ{INT} when no \kbd{r} or \kbd{mp}
+appears in the argument code (no \typ{REAL} operand is involved, only integer
+types), and of type \typ{REAL} otherwise.
 
 \funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
 the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}.
@@ -1133,14 +1133,13 @@ the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}.
 \funno{GEN}{\op rs[z]}{GEN x, long s[, GEN z]} applies \op\ to the
 \typ{REAL}~\kbd{x} and the \kbd{long}~\kbd{s}.
 
-\noindent Some miscellaneous routines whose meaning should be clear from
-their names:
+\noindent Some miscellaneous routines:
 
-\fun{GEN}{muluu}{ulong x, ulong y}
+\fun{GEN}{muluu}{ulong x, ulong y} multiplies \kbd{x} by \kbd{y}.
 
-\fun{GEN}{mului}{ulong x, GEN y}
+\fun{GEN}{mului}{ulong x, GEN y} multiplies \kbd{x} by \kbd{y}.
 
-\fun{GEN}{muliu}{GEN x, ulong y}
+\fun{GEN}{muliu}{GEN x, ulong y} multiplies \kbd{x} by \kbd{y}.
 
 \fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
 
