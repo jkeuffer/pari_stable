@@ -3063,39 +3063,35 @@ gp_expand_path(gp_path *p)
 
 /* name is a malloc'ed (existing) filename. Accept it as new infile
  * (unzip if needed). */
-static FILE *
-accept_file(char *name, FILE *file, int record)
+pariFILE *
+pari_get_infile(char *name, FILE *file)
 {
-  if (pari_is_dir(name))
-  {
-    pari_warn(warner,"skipping directory %s",name);
-    return NULL;
-  }
-  if (record && ! last_tmp_file)
-  {  /* empty file stack, record this name */
-    if (last_filename) gpfree(last_filename);
-    last_filename = pari_strdup(name);
-  }
 #ifdef ZCAT
-  {
-    long l = strlen(name);
-    char *end = name + l-1;
+  long l = strlen(name);
+  char *end = name + l-1;
 
-    if (l > 2 && (!strncmp(end-1,".Z",2)
+  if (l > 2 && (!strncmp(end-1,".Z",2)
 #ifdef GNUZCAT
-               || !strncmp(end-2,".gz",3)
+             || !strncmp(end-2,".gz",3)
 #endif
-    ))
-    { /* compressed file (compress or gzip) */
-      pari_sp av = avma;
-      char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
-      sprintf(cmd,"%s %s",ZCAT,name);
-      fclose(file); infile = try_pipe(cmd, mf_IN)->file;
-      avma = av; return infile;
-    }
+  ))
+  { /* compressed file (compress or gzip) */
+    char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
+    sprintf(cmd,"%s %s",ZCAT,name);
+    fclose(file); 
+    return try_pipe(cmd, mf_IN);
   }
 #endif
-  return infile = newfile(file, name, mf_IN)->file;
+  return newfile(file, name, mf_IN);
+}
+
+/* input s must have 'alloc size' >= strlen(s) + 3 (to append .gz) */
+pariFILE *
+pari_fopengz(char *s)
+{
+  FILE *f = fopen(s, "r");
+  if (!f) { (void)sprintf(s + strlen(s), ".gz"); f = fopen(s, "r"); }
+  return f ? pari_get_infile(s, f): NULL;
 }
 
 /* If a file called "name" exists (possibly after appending ".gp")
@@ -3105,18 +3101,33 @@ accept_file(char *name, FILE *file, int record)
 static FILE *
 try_name(char *name)
 {
-  FILE *file = fopen(name, "r");
-  if (file) file = accept_file(name,file, 1);
+  pari_sp av = avma;
+  char *s = name;
+  FILE *file;
+
+  if (pari_is_dir(s))
+  {
+    pari_warn(warner,"skipping directory %s",s);
+    return NULL;
+  }
+  file = fopen(s, "r");
   if (!file)
   { /* try appending ".gp" to name */
-    pari_sp av = avma;
-    char *s = stackmalloc(strlen(name)+4);
+    s = stackmalloc(strlen(name)+4);
     sprintf(s, "%s.gp", name);
     file = fopen(s, "r");
-    if (file) file = accept_file(s,file, 1);
-    avma = av;
   }
-  gpfree(name); return file;
+  if (file)
+  {
+    if (! last_tmp_file)
+    {  /* empty file stack, record this name */
+      if (last_filename) gpfree(last_filename);
+      last_filename = pari_strdup(s);
+    }
+    file = infile = pari_get_infile(s,file)->file;
+  }
+  gpfree(name); avma = av;
+  return file;
 }
 
 /* If name = "", re-read last file */

@@ -118,20 +118,18 @@ GEN
 ellcondfile(long f)
 {
   long n=f/1000;
-  char *s = gpmalloc(strlen(pari_datadir) + 13 + 20);
-  FILE *stream;
+  char *s = gpmalloc(strlen(pari_datadir) + 13 + 20 + 3);
+  pariFILE *F;
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
-  stream = fopen(s,"r");
-  if (!stream) 
+  F = pari_fopengz(s);
+  if (!F) 
     pari_err(talker,"Elliptic curves files not available for conductor %ld\n"
                "[missing %s]",f,s);
-  V = gp_read_stream(stream);
+  V = gp_read_stream(F->file);
   if (!V || typ(V)!=t_VEC )
     pari_err(talker,"Elliptic files %s not compatible\n",s);
-  fclose(stream);
-  gpfree(s); 
-  return V;
+  pari_fclose(F); gpfree(s); return V;
 }
 
 GEN

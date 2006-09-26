@@ -656,6 +656,7 @@ void    bruti(GEN g, pariout_t *T, int addsign);
 const char * eng_ord(long i);
 char *  env_ok(char *s);
 void    matbruti(GEN g, pariout_t *T);
+pariFILE * pari_fopengz(char *s);
 int     pari_is_dir(char *name);
 GEN     readobj(FILE *f, int *ptc);
 void    sori(GEN g, pariout_t *T);
