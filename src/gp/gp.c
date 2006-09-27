@@ -1760,7 +1760,7 @@ read_opt(growarray A, long argc, char **argv)
     gp_initrc(A, argv[0]);
     if (setjmp(GP_DATA->env))
     {
-      pariputs("### Errors on startup, exiting...\n\n");
+      puts("### Errors on startup, exiting...\n\n");
       exit(1);
     }
   }
@@ -1789,7 +1789,6 @@ main(int argc, char **argv)
   long i;
 
   GP_DATA = default_gp_data();
-  initout(1);
 
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   bot = (pari_sp)0;
@@ -1797,14 +1796,14 @@ main(int argc, char **argv)
 
   if (setjmp(GP_DATA->env))
   {
-    pariputs("### Errors on startup, exiting...\n\n");
+    puts("### Errors on startup, exiting...\n\n");
     exit(1);
   }
 #ifdef __MWERKS__
   argc = ccommand(&argv);
 #endif
-  grow_init(A);
   pari_init_defaults();
+  grow_init(A);
   read_opt(A, argc,argv);
 
   pari_init_opts(top-bot, GP_DATA->primelimit, 0);
