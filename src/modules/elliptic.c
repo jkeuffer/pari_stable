@@ -246,17 +246,19 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
   long mi;
 
   if (!x) x = gmul2n(gsub(a1,b1),-2);
+  if (gcmp0(x)) pari_err(precer,"initell");
   mi = min(precp(a1),precp(b1));
   for(;;)
   {
     GEN d;
     a = a1; b = b1;
-    b1 = gprec(gsqrt(gmul(a,b),0),mi); bmod1 = modii(gel(b1,4),p);
+    b1 = gprec(padic_sqrt(gmul(a,b)),mi);
+    bmod1 = modii(gel(b1,4),p);
     if (!equalii(bmod1,bmod)) b1 = gneg_i(b1);
     a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
     d = gsub(a1,b1);
     if (gcmp0(d)) break;
-    p1 = gsqrt(gdiv(gadd(x,d),x),0);
+    p1 = padic_sqrt(gdiv(gadd(x,d),x));
     if (! gcmp1(modii(gel(p1,4),p))) p1 = gneg_i(p1);
     x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
@@ -269,7 +271,8 @@ padic_initell(GEN y, GEN p, long prec)
   GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  for (i=1; i<=13; i++) gel(y,i) = gcvtop(gel(y,i), p, prec);
+  for (i=1; i<=13; i++)
+    if (typ(gel(y,i)) != t_PADIC) gel(y,i) = gcvtop(gel(y,i), p, prec);
   if (gcmp0(gel(y,13)) || valp(gel(y,13)) >= 0) /* p | j */
     pari_err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
@@ -299,7 +302,7 @@ padic_initell(GEN y, GEN p, long prec)
   setvalp(e1, valp(e1)+alpha);
 
   e1 = gsub(e1, gdivgs(b2,12));
-  w = gsqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1), 0);
+  w = padic_sqrt(gmul2n(gadd(b4,gmul(e1,gadd(b2,gmulsg(6,e1)))),1));
 
   p1 = gaddgs(gdiv(gmulsg(3,e0),w),1);
   if (valp(p1) <= 0) w = gneg_i(w);
@@ -309,15 +312,16 @@ padic_initell(GEN y, GEN p, long prec)
   b1 = gmul2n(w,-1); x1 = NULL;
   u2 = do_padic_agm(&x1,a1,b1,pv);
 
-  w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
-  w = gadd(w,gsqrt(gaddgs(gsqr(w),-1),0));
-  if (gcmp0(w)) pari_err(precer,"initell");
-  q = ginv(w);
+  p1 = ginv(gmul2n(gmul(u2,x1),1));
+  w = gaddsg(1,p1);
+  q = padic_sqrt(gmul(p1, gaddgs(p1,2))); /* sqrt(w^2 - 1) */
+  p1 = gadd(w,q);
+  q = gcmp0(p1)? gsub(w,q): p1;
   if (valp(q) < 0) q = ginv(q);
 
   gel(y,14) = mkvec(e1);
   gel(y,15) = u2;
-  gel(y,16) = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? gen_0: gsqrt(u2,0);
+  gel(y,16) = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? gen_0: padic_sqrt(u2);
   gel(y,17) = q;
   gel(y,19) = gen_0; return y;
 }
@@ -938,7 +942,7 @@ zell(GEN e, GEN z, long prec)
     u2 = do_padic_agm(&x1,a,b,gel(D,2));
     if (!gcmp0(gel(e,16)))
     {
-      t = gsqrt(gaddsg(1,gdiv(x1,a)),prec);
+      t = padic_sqrt(gaddsg(1, gdiv(x1,a)));
       t = gdiv(gaddsg(-1,t), gaddsg(1,t));
     }
     else t = gaddsg(2, ginv(gmul(u2,x1)));

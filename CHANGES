@@ -62,6 +62,9 @@ AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex> [#491]
    33- factor(4/x) --> [2, 2; x -1]  (content not removed)
 BA 34- bnrstark prototype code was non-standard.
    35- rnfkummer(,,degree) often found too many fields [#482]
+   36- loss of accuracy in p-adic ellinit: wrong digits and spurious errors:
+       E.g i = 5; ellinit([1, -1, 1, -1, -14]*(1+O(17^i)))
+
 
   Changed
     1- moved cgiv, gtofp to inline kernel
