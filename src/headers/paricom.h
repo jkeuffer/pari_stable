@@ -195,34 +195,21 @@ enum manage_var_t {
 /*                                                                 */
 /*******************************************************************/
 #define TRgopgz(f, x, y, fstr)  STMT_START {\
-  GEN __x = (x), __y = (y);\
+  GEN __y = (y);\
   long prec = precision(__y);\
   pari_sp __av = avma;\
   if (!prec) pari_err(infprecer, fstr);\
-  gaffect(f(__x), __y); avma=__av; } STMT_END
+  gaffect(f(x), __y); avma=__av; } STMT_END
 #define gopgz(f, x, y)  STMT_START {\
-  GEN __x = (x), __y = (y);\
-  pari_sp __av = avma;\
-  gaffect(f(__x), __y); avma=__av; } STMT_END
+  pari_sp __av = avma; gaffect(f(x), (y)); avma=__av; } STMT_END
 #define gopggz(f, x, y, z)  STMT_START {\
-  GEN __x = (x), __y = (y), __z = (z);\
-  pari_sp __av = avma;\
-  gaffect(f(__x,__y), __z); avma=__av; } STMT_END
+  pari_sp __av = avma; gaffect(f((x),(y)), (z)); avma=__av; } STMT_END
 #define gopgsz(f, x, s, z)  STMT_START {\
-  GEN __x = (x), __z = (z);\
-  long __s = (s);\
-  pari_sp __av = avma;\
-  gaffect(f(__x,__s), __z); avma=__av; } STMT_END
+  pari_sp __av = avma; gaffect(f((x),(s)), (z)); avma=__av; } STMT_END
 #define gopsgz(f, s, y, z)  STMT_START {\
-  GEN __y = (y), __z = (z);\
-  long __s = (s);\
-  pari_sp __av = avma;\
-  gaffect(f(__s,__y), __z); avma=__av; } STMT_END
+  pari_sp __av = avma; gaffect(f((s),(y)), (z)); avma=__av; } STMT_END
 #define gopssz(f, x, y, z)  STMT_START {\
-  GEN __z = (z);\
-  long __x = (x), __y = (y);\
-  pari_sp __av = avma;\
-  gaffect(f(__x,__y), __z); avma=__av; } STMT_END
+  pari_sp __av = avma; affii(f((x),(y)), (z)); avma=__av; } STMT_END
 
 #define mptruncz(x,y)  gopgz(mptrunc,(x),(y))
 #define mpfloorz(x,y)  gopgz(mpfloor,(x),(y))
