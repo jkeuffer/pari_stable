@@ -404,6 +404,7 @@ pari_add_module(entree *ep)
 void
 pari_init_defaults(void)
 {
+  initout(1);
 
 #ifdef LONG_IS_64BIT
   precreal = 4;
@@ -425,7 +426,7 @@ pari_init_defaults(void)
   if (!pari_datadir) pari_datadir = GPDATADIR;
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
-  initout(1); next_bloc=0;
+  next_bloc=0;
 }
 
 /* pari stack is a priori not available. Don't use it */
