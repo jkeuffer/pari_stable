@@ -1187,11 +1187,8 @@ redrealsl2(GEN V)
     r = u2; u2 = v2; v2 = subii(mulii(q, v2), r);
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      GEN *bptr[7];
-      bptr[0]=&a; bptr[1]=&b; bptr[2]=&c;
-      bptr[3]=&u1; bptr[4]=&u2;
-      bptr[5]=&v1; bptr[6]=&v2;
-      gerepilemany(ltop, bptr, 7);
+      if (DEBUGMEM>1) pari_warn(warnmem,"redrealsl2");
+      gerepileall(ltop, 7, &a,&b,&c,&u1,&u2,&v1,&v2);
     }
   }
   M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
