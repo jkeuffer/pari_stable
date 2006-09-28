@@ -67,8 +67,8 @@ typedef struct {
   long flag;
 } cell;
 
-static stack *err_catch_stack;
-static char **dft_handler;
+static THREAD stack *err_catch_stack;
+static THREAD char **dft_handler;
 
 void
 push_stack(stack **pts, void *a)
@@ -105,7 +105,7 @@ pop_stack(stack **pts)
 static THREAD long next_bloc;
 static THREAD GEN cur_bloc=NULL; /* current bloc in bloc list */
 #ifdef DEBUG
-static long NUM = 0;
+static THREAD long NUM = 0;
 #endif
 
 /* Return x, where:
