@@ -73,7 +73,7 @@ static const long MAXRELSUP = 50;
 /* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
  * HACK: MAX_FACTOR_LEN never checked, we assume default value is enough
  * (since elts have small norm) */
-static long primfact[500], exprimfact[500];
+static THREAD long primfact[500], exprimfact[500];
 
 /* a factor base contains only non-inert primes
  * KC = # of P in factor base (p <= n, NP <= n2)
