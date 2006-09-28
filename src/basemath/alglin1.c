@@ -106,15 +106,16 @@ static GEN
 strconcat(GEN x, GEN y)
 {
   int flx = 0, fly = 0;
-  size_t l;
+  size_t l, lx;
   char *sx,*sy,*str;
 
   if (typ(x)==t_STR) sx = GSTR(x); else { flx=1; sx = GENtostr(x); }
   if (typ(y)==t_STR) sy = GSTR(y); else { fly=1; sy = GENtostr(y); }
-  l = nchar2nlong(strlen(sx) + strlen(sy) + 1);
+  lx = strlen(sx);
+  l = nchar2nlong(lx + strlen(sy) + 1);
   x = cgetg(l + 1, t_STR); str = GSTR(x);
-  strcpy(str,sx);
-  strcat(str,sy);
+  strcpy(str,   sx);
+  strcpy(str+lx,sy);
   if (flx) gpfree(sx);
   if (fly) gpfree(sy);
   return x;
