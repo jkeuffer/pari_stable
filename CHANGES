@@ -105,6 +105,7 @@ RM  7- polhermite, polchebyshev2
     9- [toplevel benchmarks] bnfisintnorm, quadclassunit, rnfkummer
    10- ZX_factor, QX_factor
    11- allow gzip'ped elldata & galdata files
+   12- allow t_VECSMALL in vecmin / vecmax
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

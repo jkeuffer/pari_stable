@@ -1066,73 +1066,85 @@ gabs(GEN x, long prec)
 }
 
 GEN
-gmax(GEN x, GEN y) { if (gcmp(x,y)>0) y=x; return gcopy(y); }
+gmax(GEN x, GEN y) { return gcopy(gcmp(x,y)<0? y: x); }
 GEN
 gmaxgs(GEN x, long s) { return (gcmpsg(s,x)>=0)? stoi(s): gcopy(x); }
 
 GEN
-gmin(GEN x, GEN y) { if (gcmp(x,y)<0) y=x; return gcopy(y); }
+gmin(GEN x, GEN y) { return gcopy(gcmp(x,y)<0? x: y); }
 GEN
 gmings(GEN x, long s) { return (gcmpsg(s,x)>0)? gcopy(x): stoi(s); }
 
 GEN
 vecmax(GEN x)
 {
-  long tx=typ(x),lx,lx2,i,j;
-  GEN *p1,s;
+  long lx = lg(x), i, j;
+  GEN s;
 
-  if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) pari_err(talker, "empty vector in vecmax");
-  if (tx!=t_MAT)
+  if (lx==1) pari_err(talker, "empty vector in vecmax");
+  switch(typ(x))
   {
-    s=gel(x,1);
-    for (i=2; i<lx; i++)
-      if (gcmp(gel(x,i),s) > 0) s=gel(x,i);
-  }
-  else
-  {
-    lx2 = lg(x[1]);
-    if (lx2==1) pari_err(talker, "empty vector in vecmax");
-    s=gmael(x,1,1); i=2;
-    for (j=1; j<lx; j++)
-    {
-      p1 = (GEN *) x[j];
-      for (; i<lx2; i++)
-	if (gcmp(p1[i],s) > 0) s=p1[i];
-      i=1;
+    case t_VEC: case t_COL:
+      s = gel(x,1);
+      for (i=2; i<lx; i++)
+        if (gcmp(gel(x,i),s) > 0) s = gel(x,i);
+      return gcopy(s);
+    case t_MAT: {
+      long lx2 = lg(x[1]);
+      if (lx2==1) pari_err(talker, "empty vector in vecmax");
+      s = gcoeff(x,1,1); i = 2;
+      for (j=1; j<lx; j++,i=1)
+      {
+        GEN c = gel(x,j);
+        for (; i<lx2; i++)
+          if (gcmp(gel(c,i),s) > 0) s = gel(c,i);
+      }
+      return gcopy(s);
     }
+    case t_VECSMALL: {
+      long t = x[1];
+      for (i=2; i<lx; i++)
+        if (x[i] > t) t = x[i];
+      return stoi(t);
+    }
+    default: return gcopy(x);
   }
-  return gcopy(s);
 }
 
 GEN
 vecmin(GEN x)
 {
-  long tx=typ(x),lx,lx2,i,j;
-  GEN *p1,s;
+  long lx = lg(x), i, j;
+  GEN s;
 
-  if (!is_matvec_t(tx)) return gcopy(x);
-  lx=lg(x); if (lx==1) pari_err(talker, "empty vector in vecmin");
-  if (tx!=t_MAT)
+  if (lx==1) pari_err(talker, "empty vector in vecmin");
+  switch(typ(x))
   {
-    s=gel(x,1);
-    for (i=2; i<lx; i++)
-      if (gcmp(gel(x,i),s) < 0) s=gel(x,i);
-  }
-  else
-  {
-    lx2 = lg(x[1]);
-    if (lx2==1) pari_err(talker, "empty vector in vecmin");
-    s=gmael(x,1,1); i=2;
-    for (j=1; j<lx; j++)
-    {
-      p1 = (GEN *) x[j];
-      for (; i<lx2; i++)
-	if (gcmp(p1[i],s) < 0) s=p1[i];
-      i=1;
+    case t_VEC: case t_COL:
+      s = gel(x,1);
+      for (i=2; i<lx; i++)
+        if (gcmp(gel(x,i),s) < 0) s = gel(x,i);
+      return gcopy(s);
+    case t_MAT: {
+      long lx2 = lg(x[1]);
+      if (lx2==1) pari_err(talker, "empty vector in vecmin");
+      s = gcoeff(x,1,1); i = 2;
+      for (j=1; j<lx; j++,i=1)
+      {
+        GEN c = gel(x,j);
+        for (; i<lx2; i++)
+          if (gcmp(gel(c,i),s) < 0) s = gel(c,i);
+      }
+      return gcopy(s);
     }
+    case t_VECSMALL: {
+      long t = x[1];
+      for (i=2; i<lx; i++)
+        if (x[i] < t) t = x[i];
+      return stoi(t);
+    }
+    default: return gcopy(x);
   }
-  return gcopy(s);
 }
 
 /*******************************************************************/
