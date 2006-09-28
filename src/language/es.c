@@ -3063,7 +3063,7 @@ gp_expand_path(gp_path *p)
 
 /* name is a malloc'ed (existing) filename. Accept it as new infile
  * (unzip if needed). */
-pariFILE *
+static pariFILE *
 pari_get_infile(char *name, FILE *file)
 {
 #ifdef ZCAT
