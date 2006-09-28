@@ -701,7 +701,7 @@ default_bound(GEN n, ulong all)
 {
   ulong l;
   if (all > 1) return all; /* use supplied limit */
-  if (!all) return (ulong)VERYBIGINT; /* smallfact() case */
+  if (!all) return ~0UL; /* smallfact() case */
   l = (ulong)expi(n) + 1;
   if (l <= 32)  return 1UL<<14;
   if (l <= 512) return (l-16) << 10;
@@ -717,21 +717,20 @@ tridiv_bound(GEN n, ulong all)
 static GEN
 aux_end(GEN n, long nb)
 {
-  GEN p1,p2, z = (GEN)avma;
+  GEN P,E, z = (GEN)avma;
   long i;
 
   if (n) gunclone(n);
-  p1 = cgetg(nb+1,t_COL);
-  p2 = cgetg(nb+1,t_COL);
+  P = cgetg(nb+1,t_COL);
+  E = cgetg(nb+1,t_COL);
   for (i=nb; i; i--)
   {
-    gel(p2,i) = z; z += lg(z);
-    gel(p1,i) = z; z += lg(z);
+    gel(E,i) = z; z += lg(z);
+    gel(P,i) = z; z += lg(z);
   }
-  gel(z,1) = p1;
-  gel(z,2) = p2;
-  if (nb) (void)sort_factor_gen(z, absi_cmp);
-  return z;
+  gel(z,1) = P;
+  gel(z,2) = E;
+  return sort_factor_gen(z, absi_cmp);
 }
 
 static GEN
@@ -838,16 +837,10 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
   avma = ltop; return res;
 }
 
-static GEN
-auxdecomp0(GEN n, ulong all, long hint)
-{
-  return auxdecomp1(n, NULL, gen_0, all, hint);
-}
-
 GEN
 auxdecomp(GEN n, long all)
 {
-  return auxdecomp0(n,all,decomp_default_hint);
+  return auxdecomp1(n,NULL,NULL, all,decomp_default_hint);
 }
 
 /* see before ifac_crack() in ifactor1.c for current semantics of `hint'
@@ -855,13 +848,13 @@ auxdecomp(GEN n, long all)
 GEN
 factorint(GEN n, long flag)
 {
-  return auxdecomp0(n,1,flag);
+  return auxdecomp1(n,NULL,NULL, 1,flag);
 }
 
 GEN
 Z_factor(GEN n)
 {
-  return auxdecomp0(n,1,decomp_default_hint);
+  return auxdecomp1(n,NULL,NULL, 1,decomp_default_hint);
 }
 
 /* Factor until the unfactored part is smaller than limit. */
