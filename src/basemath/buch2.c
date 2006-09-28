@@ -2431,8 +2431,7 @@ decode_pr_lists(GEN nf, GEN pfc)
     t = gel(pfc,i); p = itos(t) / n;
     if (p > pmax) pmax = p;
   }
-  L = cgetg(pmax+1, t_VEC);
-  for (p=1; p<=pmax; p++) L[p] = 0;
+  L = const_vec(pmax, NULL);
   for (i=1; i<l; i++)
   {
     t = gel(pfc,i); p = itos(t) / n;

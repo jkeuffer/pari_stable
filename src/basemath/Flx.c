@@ -158,14 +158,7 @@ zero_Flx(long sv)
 /* polx_Flx=polx_zx*/
 
 GEN
-polx_Flx(long sv)
-{
-  GEN z = cgetg(4, t_VECSMALL);
-  z[1] = sv;
-  z[2] = 0;
-  z[3] = 1;
-  return z;
-}
+polx_Flx(long sv) { return mkvecsmall3(sv, 0, 1); }
 
 /* Take an integer and return a scalar polynomial mod p,
  * with evalvarn=vs */
@@ -173,23 +166,14 @@ polx_Flx(long sv)
 GEN
 Fl_to_Flx(ulong x, long sv)
 {
-  GEN z;
-  if (!x) return zero_Flx(sv);
-  z = cgetg(3, t_VECSMALL);
-  z[1] = sv;
-  z[2] = x; return z;
+  return x? mkvecsmall2(sv, x): zero_Flx(sv);
 }
 
 GEN
 Z_to_Flx(GEN x, ulong p, long v)
 {
-  GEN z;
-  long sv=evalvarn(v);
-  z = cgetg(3, t_VECSMALL);
-  z[1] = sv;
-  z[2] = umodiu(x,p); 
-  if (!z[2]) {avma = (pari_sp)(z + lg(z)); z = zero_Flx(sv);}
-  return z;
+  long sv = evalvarn(v), u = umodiu(x,p);
+  return u? mkvecsmall2(sv, u): zero_Flx(sv);
 }
 
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/

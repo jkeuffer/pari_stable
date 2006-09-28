@@ -2086,7 +2086,7 @@ gauss_factor(GEN x)
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {
     gel(fa,1) = shallowconcat(mkcol(y), gel(fa,1));
-    gel(fa,2) = shallowconcat(gen_1,     gel(fa,2));
+    gel(fa,2) = shallowconcat(gen_1,    gel(fa,2));
   }
   return gerepilecopy(av, fa);
 }
