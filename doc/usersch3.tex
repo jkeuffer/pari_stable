@@ -7935,7 +7935,8 @@ If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 
 \subsecidx{solve}$(X=a,b,\var{expr})$: find a real root of expression
 \var{expr} between $a$ and $b$, under the condition
-$\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
+$\var{expr}(X=a) * \var{expr}(X=b) \le 0$. (You will get an error message
+\kbd{roots must be bracketed in solve} if this does not hold.)
 This routine uses Brent's method and can fail miserably if \var{expr} is
 not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
 
