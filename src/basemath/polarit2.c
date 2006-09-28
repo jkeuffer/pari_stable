@@ -1717,7 +1717,6 @@ nfrootsQ(GEN x)
 /**                          FACTORIZATION                            **/
 /**                                                                   **/
 /***********************************************************************/
-#define LT 17
 #define assign_or_fail(x,y) {\
   if (y==NULL) y=x; else if (!gequal(x,y)) return 0;\
 }
@@ -1729,7 +1728,7 @@ nfrootsQ(GEN x)
 static long
 poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
-  long t[LT]; /* code for 0,1,2,3,61,62,63,67,7,81,82,83,86,87,91,93,97 */
+  long t[15];
   long tx = typ(x),lx,i,j,s,pa=BIGINT;
   GEN pcx=NULL, p=NULL,pol=NULL,p1,p2;
 
@@ -1738,7 +1737,21 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
     if (tx == t_POLMOD) return 0;
     x = scalarpol(x,0);
   }
-  for (i=2; i<LT; i++) t[i]=0; /* t[0..1] unused */
+  for (i=2; i<15; i++) t[i]=0;
+  /* t[0..1] unused. Other values, if set, indicate a coefficient of type
+   * t[2] : t_REAL
+   * t[3] : t_INTMOD
+   * t[4] : t_COMPLEX of rationals (t_INT/t_FRAC)
+   * t[5] : t_COMPLEX of t_REAL
+   * t[6] : t_COMPLEX of t_INTMOD
+   * t[7] : t_COMPLEX of t_PADIC
+   * t[8] : t_PADIC
+   * t[9] : t_QUAD of rationals (t_INT/t_FRAC)
+   * t[10]: t_QUAD of t_INTMOD
+   * t[11]: t_QUAD of t_PADIC
+   * t[12]: t_POLMOD of rationals (t_INT/t_FRAC)
+   * t[13]: t_POLMOD of t_INTMOD
+   * t[14]: t_POLMOD of t_PADIC */
   lx = lg(x);
   for (i=2; i<lx; i++)
   {
@@ -1792,19 +1805,15 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	    case t_INT: case t_FRAC:
 	      assign_or_fail(gel(p1,1),pol);
 	      t[9]=1; break;
-	    case t_REAL:
-	      s = precision(p2); if (s < pa) pa = s;
-	      if (gsigne(discsr(gel(p1,1)))>0) t[10]=1; else t[12]=1;
-	      break;
 	    case t_INTMOD:
 	      assign_or_fail(gel(p2,1),p);
 	      assign_or_fail(gel(p1,1),pol);
-	      t[11]=1; break;
+	      t[10]=1; break;
 	    case t_PADIC:
 	      s = precp(p2) + valp(p2); if (s < pa) pa = s;
 	      assign_or_fail(gel(p2,2),p);
 	      assign_or_fail(gel(p1,1),pol);
-	      t[13]=1; break;
+	      t[11]=1; break;
 	    default: return 0;
 	  }
 	}
@@ -1817,9 +1826,9 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	  long pabis;
 	  switch(poltype(gel(p1,j),&pbis,&polbis,&pabis))
 	  {
-	    case t_INT: t[14]=1; break;
-	    case t_INTMOD: t[15]=1; break;
-	    case t_PADIC: t[16]=1; if (pabis<pa) pa=pabis; break;
+	    case t_INT: t[12]=1; break;
+	    case t_INTMOD: t[13]=1; break;
+	    case t_PADIC: t[14]=1; if (pabis<pa) pa=pabis; break;
 	    default: return 0;
 	  }
 	  if (pbis) assign_or_fail(pbis,p);
@@ -1829,50 +1838,43 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
       default: return 0;
     }
   }
-  if (t[5]||t[12])
+  if (t[5])
   {
-    if (t[3]||t[6]||t[7]||t[8]||t[11]||t[13]||t[14]||t[15]||t[16]) return 0;
+    if (t[3]||t[6]||t[7]||t[8]||t[10]||t[11]||t[12]||t[13]||t[14]) return 0;
     *ptpa=pa; return t_COMPLEX;
   }
-  if (t[2]||t[10])
+  if (t[2])
   {
-    if (t[3]||t[6]||t[7]||t[8]||t[11]||t[13]||t[14]||t[15]||t[16]) return 0;
+    if (t[3]||t[6]||t[7]||t[8]||t[10]||t[11]||t[12]||t[13]||t[14]) return 0;
     *ptpa=pa; return t[4]?t_COMPLEX:t_REAL;
   }
-  if (t[6]||t[11]||t[15])
+  if (t[6]||t[10]||t[13])
   {
     *ptpol=pol; *ptp=p;
-    i = t[15]? t_POLMOD: (t[11]? t_QUAD: t_COMPLEX);
+    i = t[13]? t_POLMOD: (t[10]? t_QUAD: t_COMPLEX);
     return typs(i, t_INTMOD);
   }
-  if (t[7]||t[13]||t[16])
+  if (t[7]||t[11]||t[14])
   {
     *ptpol=pol; *ptp=p; *ptpa=pa;
-    i = t[16]? t_POLMOD: (t[13]? t_QUAD: t_COMPLEX);
+    i = t[14]? t_POLMOD: (t[11]? t_QUAD: t_COMPLEX);
     return typs(i, t_PADIC);
   }
-  if (t[4]||t[9]||t[14])
+  if (t[4]||t[9]||t[12])
   {
     *ptpol=pol;
-    i = t[14]? t_POLMOD: (t[9]? t_QUAD: t_COMPLEX);
+    i = t[12]? t_POLMOD: (t[9]? t_QUAD: t_COMPLEX);
     return typs(i, t_INT);
   }
   if (t[3]) { *ptp=p; return t_INTMOD; }
   if (t[8]) { *ptp=p; *ptpa=pa; return t_PADIC; }
   return t_INT;
 }
-#undef LT
 
 GEN
 factor0(GEN x,long flag)
 {
-  long tx=typ(x);
-
-  if (flag<0) return factor(x);
-  if (is_matvec_t(tx)) return gboundfact(x,flag);
-  if (tx==t_INT || tx==t_FRAC) return boundfact(x,flag);
-  pari_err(talker,"partial factorization is not meaningful here");
-  return NULL; /* not reached */
+  return (flag<0)? factor(x): gboundfact(x,flag);
 }
 
 GEN
@@ -2094,7 +2096,7 @@ factor(GEN x)
 {
   long tx=typ(x), lx, i, j, pa, v, r1;
   pari_sp av, tetpil;
-  GEN  y,p,p1,p2,p3,p4,p5,pol;
+  GEN  y,p,p1,p2,p5,pol;
 
   if (is_matvec_t(tx))
   {
@@ -2128,10 +2130,9 @@ factor(GEN x)
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
 	  av = avma; p1 = roots(x,pa); tetpil = avma;
-          p2 = deg1_from_roots(p1, v);
-	  gel(y,1) = gerepile(av,tetpil,p2);
-	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) gel(p3,i) = gen_1;
-          gel(y,2) = p3; return y;
+          p1 = deg1_from_roots(p1, v);
+	  gel(y,1) = gerepile(av,tetpil,p1);
+          gel(y,2) = const_col(lx-1, gen_1); return y;
 
 	case t_REAL: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
 	  av=avma; p1=cleanroots(x,pa); tetpil=avma;
@@ -2150,8 +2151,7 @@ factor(GEN x)
 	    gel(p,4) = gen_1;
 	  }
 	  gel(y,1) = gerepile(av,tetpil,p2);
-	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) gel(p3,i) = gen_1;
-          gel(y,2) = p3; return y;
+          gel(y,2) = const_col(lx-1, gen_1); return y;
 
 	case t_PADIC: return factorpadic4(x,p,pa);
 
@@ -2163,14 +2163,12 @@ factor(GEN x)
           v = manage_var(manage_var_max_avail,NULL);
           for(i=2; i<lx; i++)
           {
-            p1=gel(x,i);
+            p1 = gel(x,i);
             switch(typ(p1))
             {
               case t_QUAD: p1++;
               case t_COMPLEX:
-                p2 = cgetg(3, t_POLMOD); gel(x,i) = p2;
-                gel(p2,1) = pol;
-                gel(p2,2) = deg1pol_i(gel(p1,2), gel(p1,1), v);
+                gel(x,i) = mkpolmod(deg1pol_i(gel(p1,2), gel(p1,1), v), pol);
             }
           }
           killv = (avma != (pari_sp)pol);
@@ -2197,10 +2195,10 @@ factor(GEN x)
           p2=gel(p1,1);
           for(i=1; i<lg(p2); i++)
           {
-            p3=gel(p2,i);
+            GEN p3 = gel(p2,i);
             for(j=2; j<lg(p3); j++)
             {
-              p4=gel(p3,j);
+              GEN p4 = gel(p3,j);
               if(typ(p4)==t_POLMOD) gel(p3,j) = gsubst(gel(p4,2),v,p5);
             }
           }
@@ -2897,7 +2895,7 @@ glcm(GEN x, GEN y)
 {
   long tx, ty, i, l;
   pari_sp av;
-  GEN p1,p2,z;
+  GEN p1, z;
 
   ty = typ(y);
   if (is_matvec_t(ty))
@@ -2918,8 +2916,7 @@ glcm(GEN x, GEN y)
 
   av = avma;
   p1 = ggcd(x,y); if (!gcmp1(p1)) y = gdiv(y,p1);
-  p2 = gmul(x,y);
-  return gerepileupto(av,fix_lcm(p2));
+  return gerepileupto(av, fix_lcm(gmul(x,y)));
 }
 
 /* x + r ~ x ? Assume x,r are t_POL, deg(r) <= deg(x) */
