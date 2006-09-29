@@ -1258,14 +1258,8 @@ GEN
 fixedfieldorbits(GEN O, GEN L)
 {
   GEN S = cgetg(lg(O), t_MAT);
-  long i, j;
-  for (i = 1; i < lg(O); i++)
-  {
-    GEN z = cgetg(lg(O[i]),t_COL);
-    gel(S,i) = z;
-    for (j = 1; j < lg(O[i]); j++)
-      z[j] = L[mael(O,i,j)];
-  }
+  long i;
+  for (i = 1; i < lg(O); i++) gel(S,i) = vecpermute(L, gel(O,i));
   return S;
 }
 
@@ -2312,12 +2306,8 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
     return res;
   }
   inittestlift(aut,gf->Tmod, &gl, &gt);
-  gt.C=cgetg(gf->fp+1,t_VEC);
-  for (i = 1; i <= gf->fp; i++)
-  {
-    gel(gt.C,i) = cgetg(gt.g+1,t_VECSMALL);
-    for(j = 1; j <= gt.g; j++) mael(gt.C,i,j) = 0;
-  }
+  gt.C = cgetg(gf->fp+1,t_VEC);
+  for (i = 1; i <= gf->fp; i++) gel(gt.C,i) = const_vecsmall(gt.g, 0);
   gt.Cd=gcopy(gt.C);
 
   F =factoru(gf->fp);

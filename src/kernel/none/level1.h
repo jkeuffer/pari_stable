@@ -20,6 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * The following lines are necessary for level0.c and level1.c */
 
 #if !defined(INLINE)
+GEN    const_col(long n, GEN x)
+GEN    const_vec(long n, GEN x)
+GEN    const_vecsmall(long n, long c)
 GEN    mkcol(GEN x);
 GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
@@ -371,6 +374,32 @@ INLINE GEN
 mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
+
+INLINE GEN
+const_vec(long n, GEN x)
+{
+  GEN v = cgetg(n+1, t_VEC);
+  long i;
+  for (i = 1; i <= n; i++) gel(v,i) = x;
+  return v;
+}
+INLINE GEN
+const_col(long n, GEN x)
+{
+  GEN v = cgetg(n+1, t_COL);
+  long i;
+  for (i = 1; i <= n; i++) gel(v,i) = x;
+  return v;
+}
+INLINE GEN
+const_vecsmall(long n, long c)
+{
+  long i;
+  GEN V = cgetg(n+1,t_VECSMALL);
+  for(i=1;i<=n;i++) V[i] = c;
+  return V;
+}
+
 
 /***   ZERO   ***/
 /* O(p^e) */

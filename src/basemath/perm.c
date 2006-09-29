@@ -32,15 +32,6 @@ vec_setconst(GEN v, GEN x)
   return v;
 }
 
-GEN
-const_vec(long n, GEN x)
-{
-  GEN v = cgetg(n+1, t_VEC);
-  long i;
-  for (i = 1; i <= n; i++) gel(v,i) = x;
-  return v;
-}
-
 int
 vec_isconst(GEN v)
 {
@@ -67,15 +58,6 @@ vec_is1to1(GEN v)
       if (gequal(gel(v,i), gel(v,j)))
 	return 0;
   return 1;
-}
-
-GEN
-const_col(long n, GEN x)
-{
-  GEN v = cgetg(n+1, t_COL);
-  long i;
-  for (i = 1; i <= n; i++) gel(v,i) = x;
-  return v;
 }
 
 GEN
@@ -138,15 +120,6 @@ vecsmall_copy(GEN x)
   if (typ(x)!=t_VECSMALL) pari_err(typeer,"vecsmall_copy");
   for (i=1; i<l; i++) z[i] = x[i];
   return z;
-}
-
-GEN
-const_vecsmall(long n, long c)
-{
-  long i;
-  GEN V = cgetg(n+1,t_VECSMALL);
-  for(i=1;i<=n;i++) V[i] = c;
-  return V;
 }
 
 GEN

@@ -1441,12 +1441,7 @@ binaire(GEN x)
     }
     case t_REAL:
       ex=expo(x);
-      if (!signe(x))
-      {
-        lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
-        for (i=1; i<lx; i++) gel(y,i) = gen_0;
-        return y;
-      }
+      if (!signe(x)) return const_vec(max(-ex,0), gen_0);
 
       lx=lg(x); y=cgetg(3,t_VEC);
       if (ex > bit_accuracy(lx)) pari_err(precer,"binary");

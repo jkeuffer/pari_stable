@@ -926,8 +926,7 @@ get_pr_lists(GEN FB, long N, int list_pr)
     pr = gel(FB,i); p = itos(gel(pr,1));
     if (p > pmax) pmax = p;
   }
-  L = cgetg(pmax+1, t_VEC);
-  for (p=1; p<=pmax; p++) L[p] = 0;
+  L = const_vec(pmax, NULL);
   if (list_pr)
   {
     for (i=1; i<l; i++)

@@ -2337,7 +2337,7 @@ vecthetanullk(GEN q, long k, long prec)
   qn = gen_1;
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
-  y = cgetg(k+1, t_VEC); for (i = 1; i <= k; i++) gel(y,i) = gen_1;
+  y = const_vec(k, gen_1);
   for (n = 1;; n++)
   {
     ulong N = 2*n + 1;

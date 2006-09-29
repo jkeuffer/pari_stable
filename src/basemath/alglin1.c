@@ -677,13 +677,12 @@ sum(GEN v, long a, long b)
 static void
 fill_scalmat(GEN y, GEN t, GEN _0, long n)
 {
-  long i, j;
+  long i;
   if (n < 0) pari_err(talker,"negative size in fill_scalmat");
   for (i = 1; i <= n; i++)
   {
-    GEN c = cgetg(n+1,t_COL); gel(y,i) = c;
-    for (j=1; j<=n; j++) gel(c,j) = _0;
-    gel(c,i) = t;
+    gel(y,i) = const_col(n, _0);
+    gcoeff(y,i,i) = t;
   }
 }
 
@@ -1661,13 +1660,8 @@ detint(GEN x)
   m1=lg(x[1]); m=m1-1;
   if (n < m) return gen_0;
   lim=stack_lim(av,1);
-  c=new_chunk(m1); for (k=1; k<=m; k++) c[k]=0;
-  av1=avma; pass=cgetg(m1,t_MAT);
-  for (j=1; j<=m; j++)
-  {
-    p1=cgetg(m1,t_COL); gel(pass,j) = p1;
-    for (i=1; i<=m; i++) gel(p1,i) = gen_0;
-  }
+  c = const_vecsmall(m, 0);
+  av1=avma; pass = zeromatcopy(m,m);
   for (k=1; k<=n; k++)
     for (j=1; j<=m; j++)
       if (typ(gcoeff(x,j,k)) != t_INT)
@@ -1880,7 +1874,7 @@ keri(GEN x)
   av0=avma; m=lg(x[1])-1; r=0;
   pp=cgetg(n+1,t_COL);
   x=shallowcopy(x); p=gen_1;
-  c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
+  c=const_vecsmall(m, 0);
   l=cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -1958,10 +1952,9 @@ deplin(GEN x0)
   }
   nc = lg(x)-1; if (!nc) pari_err(talker,"empty matrix in deplin");
   nl = lg(x[1])-1;
-  d = cgetg(nl+1,t_VEC); /* pivot list */
-  c = cgetg(nl+1, t_VECSMALL);
+  d = const_vec(nl, gen_1); /* pivot list */
+  c = const_vecsmall(nl, 0);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
-  for (i=1; i<=nl; i++) { gel(d,i) = gen_1; c[i] = 0; }
   ck = NULL; /* gcc -Wall */
   for (k=1; k<=nc; k++)
   {
@@ -2022,7 +2015,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
     for (k=1; k<=n; k++) gcoeff(x,k,k) = gsub(gcoeff(x,k,k), a);
   }
   get_pivot = use_maximal_pivot(x)? &gauss_get_pivot_max: &gauss_get_pivot_NZ;
-  c=cgetg(m+1,t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2086,7 +2079,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
   }
   x = shallowcopy(x0);
   m=lg(x[1])-1; r=0;
-  c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
@@ -2645,7 +2638,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
   n = lg(x)-1;
   m=lg(x[1])-1; r=0;
 
-  c = new_chunk(m+1); for (k=1; k<=m; k++) c[k] = 0;
+  c = const_vecsmall(m, 0);
   d = new_chunk(n+1);
   a = 0; /* for gcc -Wall */
   for (k=1; k<=n; k++)
@@ -2734,7 +2727,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
 
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2834,7 +2827,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
   m=lg(x[1])-1; r=0;
   d=cgetg(n+1,t_VECSMALL);
   x=shallowcopy(x);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -2881,7 +2874,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
@@ -2927,7 +2920,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
 
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
@@ -3121,7 +3114,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   }
   m=lg(x[1])-1; r=0; av0 = avma;
   x=shallowcopy(x);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -3207,7 +3200,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
 
   m=lg(x[1])-1; r=0; av0 = avma;
   x=shallowcopy(x); mun=Fl_to_Flx(p-1,vs);
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
+  c = const_vecsmall(m, 0);
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -3497,7 +3490,7 @@ static GEN
 gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 {
   pari_sp av = avma;
-  long n, m, i, j, lM = lg(M);
+  long n, m, j, lM = lg(M);
   GEN p1, delta, H, U, u1, u2, x;
 
   if (typ(M)!=t_MAT) pari_err(typeer,"gaussmodulo");
@@ -3519,10 +3512,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   }
   switch(typ(Y))
   {
-    case t_INT:
-      p1 = cgetg(n+1,t_COL);
-      for (i=1; i<=n; i++) gel(p1,i) = Y;
-      Y = p1; break;
+    case t_INT: Y = const_col(n, Y); break;
     case t_COL: break;
     default: pari_err(typeer,"gaussmodulo");
   }

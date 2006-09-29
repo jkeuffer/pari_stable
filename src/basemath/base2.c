@@ -2760,11 +2760,9 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 static GEN
 triv_order(long n, long m)
 {
-  GEN I, z = cgetg(3, t_VEC), id = matid(m);
-  long i;
-  I = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) gel(I,i) = id;
+  GEN z = cgetg(3, t_VEC), id = matid(m);
   gel(z,1) = matid(n);
-  gel(z,2) = I; return z;
+  gel(z,2) = const_vec(n, id); return z;
 }
 
 /* FIXME: is it really necessary to export this routine ? */

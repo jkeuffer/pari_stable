@@ -1064,8 +1064,7 @@ make_M(nffp_t *F, int trunc)
   GEN m, d, M;
   long i, j, l = lg(ro), n = lg(bas);
   M = cgetg(n,t_MAT);
-    m = cgetg(l, t_COL); gel(M,1) = m;
-    for (i=1; i<l; i++) gel(m,i) = gen_1; /* bas[1] = 1 */
+  gel(M,1) = const_col(l-1, gen_1); /* bas[1] = 1 */
   for (j=2; j<n; j++)
   {
     m = cgetg(l,t_COL); gel(M,j) = m;

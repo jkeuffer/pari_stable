@@ -945,7 +945,7 @@ jacobi(GEN a, long prec)
   for (j=1; j<l; j++)
   {
     gel(r,j) = cgetg(l,t_COL);
-    for (i=1; i<l; i++) gcoeff(r,i,j) = stor(i==j, prec);
+    for (i=1; i<l; i++) gcoeff(r,i,j) = utor(i==j? 1: 0, prec);
   }
   av1 = avma;
 
@@ -1196,8 +1196,7 @@ matrixqz3(GEN x)
   if (typ(x)!=t_MAT) pari_err(typeer,"matrixqz3");
   n = lg(x); if (n==1) return gcopy(x);
   m = lg(x[1]); x = shallowcopy(x);
-  c = cgetg(n,t_VECSMALL);
-  for (j=1; j<n; j++) c[j] = 0;
+  c = const_vecsmall(n-1, 0);
   av1 = avma; lim = stack_lim(av1,1);
   for (k=1; k<m; k++)
   {

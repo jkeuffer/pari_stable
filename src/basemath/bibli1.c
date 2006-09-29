@@ -195,8 +195,7 @@ sqred1_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
   GEN L, B = zerovec(k);
-  L = cgetg(k+1, t_MAT);
-  for (j=1; j<=k; j++) gel(L,j) = zerocol(k);
+  L = zeromatcopy(k,k);
   if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
   for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
   return shallowtrans(L);
@@ -207,8 +206,7 @@ R_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
   GEN L, B = zerovec(k), Q = cgetg(k+1, t_VEC);
-  L = cgetg(k+1, t_MAT);
-  for (j=1; j<=k; j++) gel(L,j) = zerocol(k);
+  L = zeromatcopy(k,k);
   for (j=1; j<=k; j++)
     if (!incrementalQ(x, L, B, Q, j, prec)) return NULL;
   return shallowtrans(L);
