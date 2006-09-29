@@ -2094,9 +2094,9 @@ gauss_factor(GEN x)
 GEN
 factor(GEN x)
 {
-  long tx=typ(x), lx, i, j, pa, v, r1;
+  long tx=typ(x), lx, i, pa, v, r1;
   pari_sp av, tetpil;
-  GEN  y,p,p1,p2,p5,pol;
+  GEN  y, p, p1, p2, pol;
 
   if (is_matvec_t(tx))
   {
@@ -2128,9 +2128,9 @@ factor(GEN x)
 	case t_INT: return ZX_factor(x);
 	case t_INTMOD: return factmod(x,p);
 
-	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
+	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lg(x)-2;
 	  av = avma; p1 = roots(x,pa); tetpil = avma;
-          p1 = deg1_from_roots(p1, v);
+          p1 = deg1_from_roots(p1, varn(x));
 	  gel(y,1) = gerepile(av,tetpil,p1);
           gel(y,2) = const_col(lx-1, gen_1); return y;
 
@@ -2157,6 +2157,7 @@ factor(GEN x)
 
         default:
         {
+          GEN p5;
           long killv;
 	  x = shallowcopy(x); lx=lg(x);
           pol = shallowcopy(pol);
@@ -2196,6 +2197,7 @@ factor(GEN x)
           for(i=1; i<lg(p2); i++)
           {
             GEN p3 = gel(p2,i);
+            long j;
             for(j=2; j<lg(p3); j++)
             {
               GEN p4 = gel(p3,j);
