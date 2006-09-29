@@ -230,13 +230,13 @@ typedef struct _intdata {
   GEN tabwm; /* table of weights phi'(kh) for k < 0 */
 } intdata;
 
-#define TABm(v)  ((GEN*)v)[1]
-#define TABx0(v) ((GEN*)v)[2]
-#define TABw0(v) ((GEN*)v)[3]
-#define TABxp(v) ((GEN*)v)[4]
-#define TABwp(v) ((GEN*)v)[5]
-#define TABxm(v) ((GEN*)v)[6]
-#define TABwm(v) ((GEN*)v)[7]
+#define TABm(v)  gel(v,1)
+#define TABx0(v) gel(v,2)
+#define TABw0(v) gel(v,3)
+#define TABxp(v) gel(v,4)
+#define TABwp(v) gel(v,5)
+#define TABxm(v) gel(v,6)
+#define TABwm(v) gel(v,7)
 
 static int
 isinR(GEN z)
