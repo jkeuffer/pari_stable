@@ -106,6 +106,7 @@ RM  7- polhermite, polchebyshev2
    10- ZX_factor, QX_factor
    11- allow gzip'ped elldata & galdata files
    12- allow t_VECSMALL in vecmin / vecmax
+BA 13- add pari_stackcheck_init() function to control deep recursion detection
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

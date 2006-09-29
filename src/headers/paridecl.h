@@ -1247,6 +1247,7 @@ void    pari_close_opts(ulong init_opts);
 void    pari_err(long numerr, ...);
 void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
+void    pari_stackcheck_init(void *stack_base);
 void    pari_sig_init(void (*f)(int));
 void    pari_thread_init(size_t parisize);
 void    pari_thread_close(void);

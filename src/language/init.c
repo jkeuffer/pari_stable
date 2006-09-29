@@ -193,13 +193,19 @@ pop_entree_bloc(entree *ep, long loc)
 /*                       C STACK SIZE CONTROL                        */
 /*                (avoid core dump on deep recursion)                */
 /*********************************************************************/
-#ifdef STACK_CHECK
-/* adapted from Perl code written by Dominic Dunlop */
 THREAD void *PARI_stack_limit = NULL;
 
+#ifdef STACK_CHECK
+/* adapted from Perl code written by Dominic Dunlop */
+
 #  ifdef __EMX__				/* Emulate */
-#    define STACK_CHECK_INIT(b)		\
-	((void)b, PARI_stack_limit = get_stack(1./16, 32*1024))
+void
+pari_stackcheck_init(void *stack_base)
+{
+  (void) stack_base;
+  if (!stack_base) { PARI_stack_limit = NULL; return; }
+  PARI_stack_limit = get_stack(1./16, 32*1024);
+}
 #  else /* !__EMX__ */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -209,12 +215,12 @@ THREAD void *PARI_stack_limit = NULL;
  * be used on the stack. Leave PARI_stack_limit at its initial value (NULL)
  * to show no check should be made [init failed]. Assume stack grows downward.
  */
-static void
-pari_init_stackcheck(void *stack_base)
+void
+pari_stackcheck_init(void *stack_base)
 {
   struct rlimit rip;
   ulong size;
-
+  if (!stack_base) { PARI_stack_limit = NULL; return; }
   if (getrlimit(RLIMIT_STACK, &rip)) return;
   size = rip.rlim_cur;
   if (size == (ulong)RLIM_INFINITY || size > (ulong)stack_base)
@@ -222,11 +228,14 @@ pari_init_stackcheck(void *stack_base)
   else
     PARI_stack_limit = (void*)((ulong)stack_base - (size/16)*15);
 }
-#    define STACK_CHECK_INIT(b) pari_init_stackcheck(b)
 #  endif /* !__EMX__ */
 
 #else
-#    define STACK_CHECK_INIT(b)		((void)b)
+void
+pari_stackcheck_init(void *stack_base)
+{
+  PARI_stack_limit = NULL;
+}
 #endif /* STACK_CHECK */
 
 /*********************************************************************/
@@ -598,7 +607,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 {
   ulong u;
 
-  STACK_CHECK_INIT(&u);
+  pari_stackcheck_init(&u);
   if ((init_opts&INIT_DFTm)) 
     { GP_DATA = default_gp_data(); pari_init_defaults(); }
   err_catch_stack=NULL;

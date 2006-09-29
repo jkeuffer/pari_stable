@@ -76,6 +76,20 @@ tampered with by pari signal handler.
 (see \kbd{signal(2)}): the signals \kbd{SIGBUS}, \kbd{SIGFPE}, \kbd{SIGINT},
 \kbd{SIGBREAK}, \kbd{SIGPIPE} and \kbd{SIGSEGV} are concerned.
 
+\fun{void}{pari_stackcheck_init}{void *stackbase} controls the system stack
+exhaustion checking code in the GP interpreter. This should be used when the
+system stack base address change or when the address seen by \kbd{pari\_init}
+is to far from the base address. If stackbase is NULL, disable the check, else
+set the base address to stackbase. It is normally used this way
+\bprog
+int thread_start (...)
+{
+  long first_item_on_the_stack;
+  ...
+  pari_stackcheck_init(&first_item_on_the_stack);
+}
+@eprog
+
 \subsec{Notions specific to the GP interpreter}
 
 An \kbd{entree} is the generic object associated to an identifier (a name)
