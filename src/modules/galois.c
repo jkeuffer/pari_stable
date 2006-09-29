@@ -336,7 +336,7 @@ read_obj(PERM *g, pariFILE *f, long n, long m)
   i = j = 1;
   for(;;)
   {
-    if (k==BUFFS) { fread(ch,sizeof(char),BUFFS, f->file); k=0; }
+    if (k==BUFFS) { (void)fread(ch,sizeof(char),BUFFS, f->file); k=0; }
     g[i][j] = bin(ch[k++]);
     if (++j>m) { j=1; if (++i>n) break; }
   }
@@ -356,9 +356,9 @@ lirecoset(long n1, long n2, long n)
   if (n<11 || n2<8)
   {
     f = galopen("COS", n, n1, n2, 0);
-    fread(&c,sizeof(char), 1, f->file); m=bin(c);
-    fread(&c,sizeof(char), 1, f->file);
-    fread(ch,sizeof(char), 6, f->file); cardgr=atol(ch);
+    (void)fread(&c,sizeof(char), 1, f->file); m=bin(c);
+    (void)fread(&c,sizeof(char), 1, f->file);
+    (void)fread(ch,sizeof(char), 6, f->file); cardgr=atol(ch);
     gr=allocgroup(m,cardgr);
     read_obj(gr, f,cardgr,m); return gr;
   }
@@ -366,7 +366,8 @@ lirecoset(long n1, long n2, long n)
   gr = grptr = allocgroup(n, 8 * cardgr);
   for (no=1; no<=8; no++)
   {
-    f = galopen("COS", n, n1, n2, no); fread(ch, sizeof(char), 8, f->file);
+    f = galopen("COS", n, n1, n2, no);
+    (void)fread(ch, sizeof(char), 8, f->file);
     read_obj(grptr, f,cardgr,m); grptr += cardgr;
   }
   return gr;
@@ -380,8 +381,8 @@ lireresolv(long n1, long n2, long n, resolv *R)
   pariFILE *f;
 
   f = galopen("RES", n, n1, n2, 0);
-  fread(ch,sizeof(char),5,f->file); nm = atol(ch);
-  fread(ch,sizeof(char),3,f->file); nv = atol(ch);
+  (void)fread(ch,sizeof(char),5,f->file); nm = atol(ch);
+  (void)fread(ch,sizeof(char),3,f->file); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
   read_obj(R->a, f,nm,nv); 
   R->nm = nm;
