@@ -650,8 +650,7 @@ ggval(GEN x, GEN p)
         vx = varn(x);
 	if (vp == vx)
 	{
-	  if ((p>=(GEN)pol_x && p <= (GEN)(pol_x+MAXVARN)) || ismonome(p))
-            return polvaluation(x, NULL) / degpol(p);
+	  if (ismonome(p)) return polvaluation(x, NULL) / degpol(p);
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {

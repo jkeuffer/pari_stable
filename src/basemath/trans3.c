@@ -1404,7 +1404,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, N = lg(cff)-1;
   pari_sp av, av2, lim;
-  GEN Ax, Cx, Bx, Dx, x = pol_x[0], y = pol_x[fetch_user_var("y")], eta;
+  GEN Ax, Cx, Bx, Dx, x = pol_x(0), y = pol_x(fetch_user_var("y")), eta;
   GEN cyc, psm, rep;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
@@ -1433,7 +1433,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   Bx  = lift(gmul(ginv(gsubsg(1, gpowgs(eta, f))), Bx));
   Bx  = gerepileupto(av, RgX_to_FqX(Bx, cyc, q));
   Cx = lift(gmul(eta, gaddsg(1, x)));
-  Dx = pol_1[varn(x)];
+  Dx = pol_1(varn(x));
   av2 = avma; lim = stack_lim(av2, 1);
   for (j = lva; j > 1; j--)
   {  
@@ -1959,10 +1959,10 @@ gpolylog(long m, GEN x, long prec)
 
   if (m <= 0)
   {
-    GEN t = mkpoln(2, gen_m1, gen_1); /* 1 - X */
-    p1 = pol_x[0];
+    GEN X = pol_x(0), t = mkpoln(2, gen_m1, gen_1); /* 1 - X */
+    p1 = X;
     for (i=2; i <= -m; i++)
-      p1 = gmul(pol_x[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
+      p1 = gmul(X, gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
     p1 = gdiv(p1, gpowgs(t,1-m));
     return gerepileupto(av, poleval(p1,x));
   }

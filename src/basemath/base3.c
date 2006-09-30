@@ -631,7 +631,7 @@ basistoalg(GEN nf, GEN x)
       return gcopy(x);
     default: z=cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(nf,1));
-      gel(z,2) = gmul(x,pol_1[varn(nf[1])]); return z;
+      gel(z,2) = gmul(x,pol_1(varn(nf[1]))); return z;
   }
 }
 
@@ -746,7 +746,7 @@ rnfbasistoalg(GEN rnf,GEN x)
 
     default: z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(rnf,1));
-      gel(z,2) = gmul(x,pol_1[varn(rnf[1])]); return z;
+      gel(z,2) = gmul(x,pol_1(varn(rnf[1]))); return z;
   }
 }
 

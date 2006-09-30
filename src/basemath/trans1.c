@@ -312,11 +312,12 @@ puiss0(GEN x)
       gel(y,2) = gen_1; return y;
 
     case t_POLMOD:
-      y = cgetg(3,t_POLMOD); gel(y,1) = gcopy(gel(x,1));
-      gel(y,2) = pol_1[varn(x[1])]; return y;
+      y = cgetg(3,t_POLMOD);
+      gel(y,1) = gcopy(gel(x,1));
+      gel(y,2) = pol_1(varn(x[1])); return y;
 
     case t_POL: case t_SER: case t_RFRAC:
-      return pol_1[gvar(x)];
+      return pol_1(gvar(x));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);

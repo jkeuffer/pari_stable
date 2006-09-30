@@ -11,7 +11,7 @@ getheap
 getrand
 getstack
 if(3<2,print("bof"),print("ok"));
-kill(y);print(x+y);reorder([x,y]);print(x+y);
+kill(y);print(x+y);
 f(u)=u+1;
 print(f(5));kill(f);
 f=12

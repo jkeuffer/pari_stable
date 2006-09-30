@@ -96,9 +96,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Common global variables: */
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
-extern long  *ordvar;
 extern THREAD GEN  bernzone,gpi,geuler;
-extern GEN   polvar,*pol_1,*pol_x,primetab;
+extern GEN   primetab;
 extern GEN   gen_m1,gen_1,gen_2,ghalf,gi,gen_0,gnil;
 extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
@@ -156,7 +155,7 @@ enum manage_var_t {
 #define min(a,b) ((a)>(b)?(b):(a))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-#define gval(x,v) (ggval((x),pol_x[v]))
+#define gval(x,v) (ggval((x),pol_x(v)))
 
 #define absr  mpabs
 #define absi  mpabs

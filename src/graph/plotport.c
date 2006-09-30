@@ -1434,8 +1434,8 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 {
   long i, j;
   pari_sp oldavma = avma;
-  GEN tas, xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
-  entree *var0 = varentries[ordvar[0]];
+  GEN tas, X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
+  entree *var0 = varentries[0];
 
   if (lx < 4) pari_err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
@@ -1453,10 +1453,10 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 
     xa++; ya++;
     if (flag & PLOT_PARAMETRIC) {
-      gel(quark_gen,1) = polint_i(tas, xa, pol_x[0], 4, NULL);
-      gel(quark_gen,2) = polint_i(tas, ya, pol_x[0], 4, NULL);
+      gel(quark_gen,1) = polint_i(tas, xa, X, 4, NULL);
+      gel(quark_gen,2) = polint_i(tas, ya, X, 4, NULL);
     } else {
-      quark_gen = polint_i(xa, ya, pol_x[0], 4, NULL);
+      quark_gen = polint_i(xa, ya, X, 4, NULL);
       tas = xa;
     }
     rectploth(ne, var0,

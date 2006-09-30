@@ -11,6 +11,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     The sequence of generated pseudo-random numbers are completely different.
 
   - install(): parser code 'E' is now obsolete, use 'I'
+  - changevar() and reorder() have been removed
 
 * Specific to the PARI library:
 ===============================
@@ -22,6 +23,9 @@ This file lists the incompatible changes between Version 2.x and older versions
 
   - only scalar types (and vectors/matrices of such) are allowed in gaffect
     and gaffsg.
+
+  - pol_x and pol_1 are now functions, not global arrays. Use pol_x(v)
+    instead of pol_x[v]. polvar[] and ordvar[] have disappeared
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

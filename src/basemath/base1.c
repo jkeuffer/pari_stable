@@ -799,7 +799,7 @@ nfiso0(GEN a, GEN b, long fliso)
   b = shallowcopy(b); vb=varn(b);
   if (nfb)
   {
-    if (vb == 0) nfb = gsubst(nfb, 0, pol_x[MAXVARN]);
+    if (vb == 0) nfb = gsubst(nfb, 0, pol_x(MAXVARN));
     y = lift_intern(nfroots(nfb,a));
   }
   else
@@ -1399,7 +1399,7 @@ nfpolred(int part, nfbasic_t *T)
   ok_pol_t O;
   FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
-  if (degpol(x) == 1) { T->x = gsub(pol_x[v],gen_1); return gen_1; }
+  if (degpol(x) == 1) { T->x = gsub(pol_x(v),gen_1); return gen_1; }
 
   if (!dx) dx = mulii(T->dK, sqri(T->index));
 
@@ -1515,7 +1515,7 @@ initalg_i(GEN x, long flag, long prec)
     if (rev) { ro = NULL; set_LLL_basis(&T, &ro); } /* changed T.x */
     if (flag & nf_ORIG)
     {
-      if (!rev) rev = pol_x[varn(T.x)]; /* no improvement */
+      if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
       if (T.lead) rev = gdiv(rev, T.lead);
       rev = mkpolmod(rev, T.x);
     }
@@ -2042,7 +2042,7 @@ polredabs0(GEN x, long flag)
   if (degpol(x) == 1)
   {
     u = NULL;
-    y = mkvec(pol_x[vx]);
+    y = mkvec(pol_x(vx));
     a = mkvec(gsub(gel(y,1), gel(x,2)));
   }
   else
@@ -2059,7 +2059,7 @@ polredabs0(GEN x, long flag)
   if (l == 1)
   {
     y = mkvec(x);
-    a = mkvec(pol_x[vx]);
+    a = mkvec(pol_x(vx));
   }
   if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL)

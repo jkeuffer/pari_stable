@@ -91,7 +91,10 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: return mkvec2(gen_1, pol_x[varn(x[1])]);
+      case typ_Q: 
+        y = cgetg(3,t_VEC);
+        gel(y,1) = gen_1;
+        gel(y,2) = pol_x(varn(x[1])); return y;
     }
     if (typ(x)==t_VEC && lg(x) == 13) return gel(x,7);
     member_err("zk");

@@ -41,8 +41,6 @@ ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
 entree  **varentries;
-long    *ordvar;
-GEN     polvar, *pol_1, *pol_x;
 
 THREAD pari_sp bot, top, avma;
 size_t memused;
@@ -243,7 +241,6 @@ pari_stackcheck_init(void *stack_base)
 /*                       SYSTEM INITIALIZATION                       */
 /*                                                                   */
 /*********************************************************************/
-static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
 VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
 static GEN universal_constants;
@@ -658,15 +655,10 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
-  ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  pol_x = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
-  pol_1 = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
-  polvar[0] = evaltyp(t_VEC) | evallg(1);
-  for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
+  for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
 
-  (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
+  (void)fetch_var(); /* create MAXVARN */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
@@ -688,7 +680,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   default_exception_handler = NULL;
 
   (void)manage_var(manage_var_init,NULL); /* init nvar */
-  var_not_changed = 1; (void)fetch_named_var("x");
+  (void)fetch_named_var("x");
   try_to_recover = 1;
 }
 
@@ -745,11 +737,6 @@ pari_close_opts(ulong init_opts)
     kill_hashlist(members_hash[i]);
   }
   gpfree((void*)varentries);
-  gpfree((void*)ordvar);
-  gpfree((void*)polvar);
-  gpfree((void*)pol_x[MAXVARN]);
-  gpfree((void*)pol_x);
-  gpfree((void*)pol_1);
   gpfree((void*)primetab);
   gpfree((void*)universal_constants);
 
@@ -796,108 +783,6 @@ traverseheap( void(*f)(GEN, void *), void *data )
 {
   GEN x;
   for (x = cur_bloc; x; x = (GEN)bl_prev(x)) f(x, data);
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                       VARIABLE ORDERING                        **/
-/**                                                                **/
-/********************************************************************/
-
-/* substitute globally components of y for variables of x */
-GEN
-changevar(GEN x, GEN y)
-{
-  long tx, ty, lx, vx, vy, i;
-  GEN  p1, p2, z;
-  pari_sp av;
-
-  if (var_not_changed && y==polvar) return x;
-  tx = typ(x); if (!is_recursive_t(tx)) return gcopy(x);
-  ty = typ(y); if (!is_vec_t(ty)) pari_err(typeer, "changevar");
-  if (is_const_t(tx)) return gcopy(x);
-
-  if (tx == t_POLMOD)
-  {
-    av = avma;
-    p1 = changevar(gel(x,1),y);
-    p2 = changevar(gel(x,2),y);
-    return gerepileupto(av, gmodulo(p2,p1));
-  }
-  if (tx == t_RFRAC)
-  {
-    av = avma;
-    p1 = changevar(gel(x,1),y);
-    p2 = changevar(gel(x,2),y);
-    return gerepileupto(av, gdiv(p1,p2));
-  }
-
-  lx = lg(x);
-  if (tx == t_POL || tx == t_SER)
-  {
-    vx = varn(x)+1; if (vx >= lg(y)) return gcopy(x);
-    p1 = gel(y,vx);
-    if (!signe(x))
-    {
-      vy = gvar(p1); if (vy == BIGINT) pari_err(typeer, "changevar");
-      z = gcopy(x); setvarn(z,vy); return z;
-    }
-    av = avma; p2 = changevar(gel(x,lx-1),y);
-    for (i=lx-2; i>=2; i--)
-      p2 = gadd(gmul(p2,p1), changevar(gel(x,i),y));
-    if (tx == t_SER)
-    {
-      p2 = gadd(p2, ggrando(p1,lx-2));
-      if (valp(x)) p2 = gmul(gpowgs(p1,valp(x)), p2);
-    }
-    return gerepileupto(av,p2);
-  }
-  z = cgetg(lx,tx);
-  for (i=1; i<lx; i++) gel(z,i) = changevar(gel(x,i),y);
-  return z;
-}
-
-GEN
-reorder(GEN x)
-{
-  long tx, lx, i, n, nvar;
-  long *var,*varsort,*t1;
-  pari_sp av;
-
-  if (!x) return polvar;
-  tx=typ(x); lx=lg(x)-1;
-  if (!is_vec_t(tx)) pari_err(typeer,"reorder");
-  if (!lx) return polvar;
-
-  av = avma;
-  nvar = manage_var(manage_var_next,NULL);
-  varsort = (long *)new_chunk(lx);
-  var = (long *)new_chunk(lx);
-  t1 = (long *)new_chunk(nvar);
-
-  for (n=0; n<nvar; n++) t1[n] = 0;
-  for (n=0; n<lx; n++)
-  {
-    var[n] = i = gvar(gel(x,n+1));
-    if (i >= nvar) pari_err(talker,"variable out of range in reorder");
-    varsort[n] = ordvar[i]; /* position in polvar */
-    /* check if x is a permutation */
-    if (t1[i]) pari_err(talker,"duplicate indeterminates in reorder");
-    t1[i] = 1;
-  }
-  qsort(varsort,lx,sizeof(long),(QSCOMP)pari_compare_long);
-
-  for (n=0; n<lx; n++)
-  { /* variables are numbered 0,1 etc... while polvar starts at 1. */
-    i = var[n];
-    gel(polvar, varsort[n]+1) = pol_x[i];
-    ordvar[i] = varsort[n];
-  }
-
-  var_not_changed=1;
-  for (i=0; i<nvar; i++)
-    if (ordvar[i]!=i) { var_not_changed=0; break; }
-  avma = av; return polvar;
 }
 
 /*******************************************************************/

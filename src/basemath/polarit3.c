@@ -430,7 +430,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
   GEN V=cgetg(l+2,t_VEC);
   long i;
-  gel(V,1) = pol_1[varn(T)]; if (l==0) return V;
+  gel(V,1) = pol_1(varn(T)); if (l==0) return V;
   gel(V,2) = gcopy(x);       if (l==1) return V;
   if (lgefint(p) == 3) {
     long pp = p[2];
@@ -648,7 +648,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   pari_sp av;
   GEN y;
 
-  if (!signe(n)) return pol_1[ varn(x) ];
+  if (!signe(n)) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
     return (signe(n) < 0)? FpXQ_inv(x,pol,p): gcopy(x);
   av = avma;
@@ -1259,7 +1259,7 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
 
   for (k=0; ; k++)
   {
-    z = (degpol(T)==1)? pol_1[x]: pol_x[x];
+    z = (degpol(T)==1)? pol_1(x): pol_x(x);
     u = k/pp; v=2; /* FpX_Fp_add modify y */
     z = gaddgs(z, k%pp);
     while(u)
@@ -1348,7 +1348,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
   q = addsi(-1, powiu(p,degpol(T)));
   m = bezout(n,q,&u1,&u2);
   if (!equalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
-  if (zetan) z = pol_1[varn(T)];
+  if (zetan) z = pol_1(varn(T));
   lim = stack_lim(ltop,1);
   if (!gcmp1(m))
   {
@@ -1416,7 +1416,7 @@ FpM_Frobenius(GEN M, long r, GEN p, long v)
 {
   GEN W, V = cgetg(r+2,t_VEC);
   long i;
-  gel(V,1) = pol_x[v]; if (!r) return V;
+  gel(V,1) = pol_x(v); if (!r) return V;
   gel(V,2) = RgV_to_RgX(gel(M,2),v);
   W = gel(M,2);
   for (i = 3; i <= r+1; ++i)
@@ -1548,7 +1548,7 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
 }
 
 /* Essentially we want to compute
- * FqM_ker(MA-pol_x[MAXVARN],U,l)
+ * FqM_ker(MA-pol_x(MAXVARN),U,l)
  * To avoid use of matrix in Fq we procede as follows:
  * We compute FpM_ker(U(MA),l) and then we recover
  * the eigen value by Galois action, see formula.
@@ -1579,7 +1579,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
   if (lg(A)!=r+1)
     pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
-        ,l,pol_x[vp],P);
+        ,l,pol_x(vp),P);
   A=gerepileupto(ltop,A);
   /*The formula is 
    * a_{r-1}=-\phi(a_0)/b_0
@@ -1623,8 +1623,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
     pari_err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
   e = u_pvalrem(n, l, &pg);
-  if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x[vp],l,P,l),np,np,P,l);
-  if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x[vq],l,Q,l),nq,nq,Q,l);
+  if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
+  if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
   A = Ap = zeropol(vp);
   B = Bp = zeropol(vq);
   if (pg > 1)
@@ -1642,13 +1642,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       A = FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
 	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
-	    ,l,pol_x[vp],P);
+	    ,l,pol_x(vp),P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
 	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
-	    ,l,pol_x[vq],Q);
+	    ,l,pol_x(vq),Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
@@ -1689,8 +1689,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     long i, j;
     MA = gaddmat(gen_m1,MA);
     MB = gaddmat(gen_m1,MB);
-    Ay = pol_1[vp];
-    By = pol_1[vq];
+    Ay = pol_1(vp);
+    By = pol_1(vq);
     VP = col_ei(np, 1);
     VQ = np == nq? VP: col_ei(nq, 1); /* save memory */
     for(j=0;j<e;j++)
@@ -1755,7 +1755,7 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
 
   Tl = gcopy(P); setvarn(Tl,w);
   V = cgetg(m+1,t_VEC);
-  gel(V,1) = pol_x[w];
+  gel(V,1) = pol_x(w);
   z = gel(M,2);
   gel(V,2) = RgV_to_RgX(z,w);
   for(k=3;k<=m;k++)
@@ -1841,9 +1841,9 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   }
   else
   {
-    FQ = FpXQ_matrix_pow(FpXQ_pow(pol_x[vq],l,Q,l),nq,nq,Q,l);
+    FQ = FpXQ_matrix_pow(FpXQ_pow(pol_x(vq),l,Q,l),nq,nq,Q,l);
     av = avma;
-    FP = FpXQ_matrix_pow(FpXQ_pow(pol_x[vp],l,P,l),np,np,P,l);
+    FP = FpXQ_matrix_pow(FpXQ_pow(pol_x(vp),l,P,l),np,np,P,l);
     if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
     FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
 
@@ -3098,10 +3098,10 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   if (vY == MAXVARN)
   {
     vY = fetch_var(); delvar = 1;
-    B0 = gsubst(B0, MAXVARN, pol_x[vY]);
+    B0 = gsubst(B0, MAXVARN, pol_x(vY));
     A = shallowcopy(A); setvarn(A, vY);
   }
-  L = pol_x[MAXVARN];
+  L = pol_x(MAXVARN);
   B0 = Q_remove_denom(B0, &dB);
   lim = stack_lim(av,2);
 
@@ -3109,7 +3109,7 @@ INIT:
   if (av2) { avma = av2; *lambda = next_lambda(*lambda); } 
   if (lambda)
   {
-    L = gadd(pol_x[MAXVARN], gmulsg(*lambda, pol_x[vY]));
+    L = gadd(pol_x(MAXVARN), gmulsg(*lambda, pol_x(vY)));
     if (DEBUGLEVEL>4) fprintferr("Trying lambda = %ld\n",*lambda);
   }
   B = poleval(B0, L); av2 = avma;
@@ -3261,7 +3261,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
       B = dB? gel(B,2): gen_0; /* fall through */
     default:
       if (lambda) { B = scalarpol(B,varn(A)); dB = 0; break;}
-      return gerepileupto(av, gpowgs(gsub(pol_x[v], B), degpol(A)));
+      return gerepileupto(av, gpowgs(gsub(pol_x(v), B), degpol(A)));
   }
   delvar = 0;
   if (varn(A) == 0)
@@ -3464,7 +3464,7 @@ modulargcd(GEN A0, GEN B0)
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
-    if (m == 0) { H = pol_1[varn(A0)]; break; } /* coprime. DONE */
+    if (m == 0) { H = pol_1(varn(A0)); break; } /* coprime. DONE */
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
     if (!g) /* make sure lead(H) = g mod p */
@@ -3590,7 +3590,7 @@ FpX_direct_compositum(GEN A, GEN B, GEN p)
   GEN C,a,b,x;
   a = shallowcopy(A); setvarn(a, MAXVARN);
   b = shallowcopy(B); setvarn(b, MAXVARN);
-  x = gadd(pol_x[0], pol_x[MAXVARN]);
+  x = gadd(pol_x(0), pol_x(MAXVARN));
   C = FpY_FpXY_resultant(a, poleval(b,x),p);
   return C;
 }
@@ -3605,7 +3605,7 @@ FpX_compositum(GEN A, GEN B, GEN p)
   b = shallowcopy(B); setvarn(b, MAXVARN);
   for (k = 1;; k = next_lambda(k))
   {
-    GEN x = gadd(pol_x[0], gmulsg(k, pol_x[MAXVARN]));
+    GEN x = gadd(pol_x(0), gmulsg(k, pol_x(MAXVARN)));
     C = FpY_FpXY_resultant(a, poleval(b,x),p);
     if (FpX_is_squarefree(C, p)) break;
   }
@@ -3656,7 +3656,7 @@ ffinit_Artin_Shreier(GEN ip, long l)
   
   yp=monomial(gen_1,p,MAXVARN);
   y2pm1=monomial(gen_1,2*p-1,MAXVARN);
-  Q = gsub(ZX_sub(xp, pol_x[0]), ZX_sub(y2pm1, yp));
+  Q = gsub(ZX_sub(xp, pol_x(0)), ZX_sub(y2pm1, yp));
   for (i = 2; i <= l; ++i)
   {
     setvarn(P,MAXVARN);
@@ -3744,7 +3744,7 @@ init_Fq_i(GEN p, long n, long v)
   if (n <= 0) pari_err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) pari_err(typeer, "ffinit");
   if (v < 0) v = 0;
-  if (n == 1) return pol_x[v];
+  if (n == 1) return pol_x(v);
   /*If easy case, use polcyclo*/
   if (fpinit_check(p, n + 1, n)) return polcyclo(n + 1, v);
   if (lgefint(p)-2 < BITS_IN_LONG-(long)bfffo(n))

@@ -47,6 +47,8 @@ GEN    mkvecs(long x);
 GEN    mkvecsmall(long x);
 GEN    mkvecsmall2(long x,long y);
 GEN    mkvecsmall3(long x,long y, long z);
+GEN    pol_1(long v);
+GEN    pol_x(long v);
 void   affgr(GEN x, GEN y);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
@@ -374,6 +376,19 @@ INLINE GEN
 mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
+INLINE GEN
+pol_x(long v) {
+  GEN p = cgetg(4, t_POL);
+  p[1] = evalsigne(1)|evalvarn(v);
+  gel(p,2) = gen_0;
+  gel(p,3) = gen_1; return p;
+}
+INLINE GEN
+pol_1(long v) {
+  GEN p = cgetg(3, t_POL);
+  p[1] = evalsigne(1)|evalvarn(v);
+  gel(p,2) = gen_1; return p;
+}
 
 INLINE GEN
 const_vec(long n, GEN x)
@@ -413,14 +428,14 @@ zeropadic(GEN p, long e)
   y[1] = evalvalp(e) | evalprecp(0);
   return y;
 }
-/* O(pol_x[v]^e) */
+/* O(pol_x(v)^e) */
 INLINE GEN
 zeroser(long v, long e)
 {
   GEN x = cgetg(2, t_SER);
   x[1] = evalvalp(e) | evalvarn(v); return x;
 }
-/* 0 * pol_x[v] */
+/* 0 * pol_x(v) */
 INLINE GEN
 zeropol(long v)
 {

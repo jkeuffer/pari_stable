@@ -292,7 +292,7 @@ FpX_roots_i(GEN f, GEN p)
   }
 
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
-  b = FpXQ_pow(pol_x[varn(f)],q, f,p);
+  b = FpXQ_pow(pol_x(varn(f)),q, f,p);
   if (lg(b) < 3) pari_err(talker,"not a prime in rootmod");
   b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
@@ -302,7 +302,7 @@ FpX_roots_i(GEN f, GEN p)
   db = degpol(b); n += da + db; setlg(y, n+1);
   if (db) gel(y,j)    = FpX_normalize(b,p);
   if (da) gel(y,j+db) = FpX_normalize(a,p);
-  pol = gadd(pol_x[varn(f)], gen_1); pol0 = constant_term(pol);
+  pol = gadd(pol_x(varn(f)), gen_1); pol0 = constant_term(pol);
   while (j <= n)
   { /* cf FpX_split_Berlekamp */
     a = gel(y,j); da = degpol(a);
@@ -391,7 +391,7 @@ FpX_Berlekamp_ker(GEN u, GEN p)
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
-  w = v = FpXQ_pow(pol_x[varn(u)],p,u,p);
+  w = v = FpXQ_pow(pol_x(varn(u)),p,u,p);
   for (j=2; j<=N; j++)
   {
     p1 = RgX_to_RgV(w, N);
@@ -415,7 +415,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   pari_timer Ti;
   if (DEBUGLEVEL>=4) TIMERstart(&Ti);
   Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
-  w = v = FpXQYQ_pow(pol_x[varn(u)], q, u, T, p);
+  w = v = FpXQYQ_pow(pol_x(varn(u)), q, u, T, p);
   if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQYQ_pow");
   for (j=2; j<=N; j++)
   {
@@ -496,7 +496,7 @@ static GEN
 FpX_split_part(GEN f, GEN p)
 {
   long n = degpol(f);
-  GEN z, X = pol_x[varn(f)];
+  GEN z, X = pol_x(varn(f));
   if (n <= 1) return f;
   f = FpX_red(f, p);
   z = FpXQ_pow(X, p, f, p);
@@ -508,7 +508,7 @@ static GEN
 FqX_split_part(GEN f, GEN T, GEN p)
 {
   long n = degpol(f);
-  GEN z, X = pol_x[varn(f)];
+  GEN z, X = pol_x(varn(f));
   if (n <= 1) return f;
   f = FpXQX_red(f, T, p);
   z = FpXQYQ_pow(X, powiu(p, degpol(T)), f, T, p);
@@ -543,7 +543,7 @@ FpX_is_totally_split(GEN f, GEN p)
   if (n <= 1) return 1;
   if (cmpui(n, p) > 0) return 0;
   f = FpX_red(f, p);
-  z = FpXQ_pow(pol_x[varn(f)], p, f, p);
+  z = FpXQ_pow(pol_x(varn(f)), p, f, p);
   avma = av;
   return degpol(z) == 1 && gcmp1(gel(z,3)) && !signe(z[2]); /* x^p = x ? */
 }
@@ -736,7 +736,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
   {
     if (ps==2)
     {
-      w0 = w = FpXQ_pow(pol_x[v], utoi(m-1), *t, gen_2); m += 2;
+      w0 = w = FpXQ_pow(pol_x(v), utoi(m-1), *t, gen_2); m += 2;
       for (l=1; l<d; l++)
         w = gadd(w0, spec_FpXQ_pow(w, p, S));
     }
@@ -792,7 +792,7 @@ init_spec_FpXQ_pow(GEN p, GEN T)
   long i, n = degpol(T), v = varn(T);
   GEN S = cgetg(n, t_VEC), x;
   if (n == 1) return S;
-  x = FpXQ_pow(pol_x[v], p, T, p);
+  x = FpXQ_pow(pol_x(v), p, T, p);
   gel(S,1) = x;
   if ((degpol(x)<<1) < degpol(T)) {
     for (i=2; i < n; i++)
@@ -915,12 +915,12 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
       S = init_spec_FpXQ_pow(pp, u);
-      pd=gen_1; v=pol_x[vf];
+      pd=gen_1; v=pol_x(vf);
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = mulii(pd,pp);
         v = spec_FpXQ_pow(v, pp, S);
-        g = FpX_gcd(gadd(v, gneg(pol_x[vf])), u, pp);
+        g = FpX_gcd(gadd(v, gneg(pol_x(vf))), u, pp);
         dg = degpol(g);
         if (dg <= 0) continue;
 
@@ -1221,7 +1221,7 @@ FpX_factor_i(GEN f, GEN pp)
   t = (GEN*)cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
   val = ZX_valuation(f, &f);
   e = nbfact = 1;
-  if (val) { t[1] = pol_x[varn(f)]; E[1] = val; nbfact++; }
+  if (val) { t[1] = pol_x(varn(f)); E[1] = val; nbfact++; }
 
   for(;;)
   {
@@ -1232,7 +1232,7 @@ FpX_factor_i(GEN f, GEN pp)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
       u = g1; 
-      if (!degpol(f2)) g1 = pol_1[0]; /* only its degree (= 0) matters */
+      if (!degpol(f2)) g1 = pol_1(0); /* only its degree (= 0) matters */
       else
       {
         g1 = FpX_gcd(f2,g1, pp);
@@ -1438,7 +1438,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
     return mkcol(a0);
   }
 
-  f = poleval(f, gadd(a, gmul(p,pol_x[varn(f)])));
+  f = poleval(f, gadd(a, gmul(p,pol_x(varn(f)))));
   f = gdivexact(f, powiu(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
@@ -1722,7 +1722,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
     return mkcol(a);
   }
   /* TODO: need RgX_RgYQX_compo ? */
-  f = lift_intern(poleval(f, gadd(mkpolmod(a,T), gmul(p, pol_x[varn(f)]))));
+  f = lift_intern(poleval(f, gadd(mkpolmod(a,T), gmul(p, pol_x(varn(f))))));
   f = gdiv(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
 
@@ -2156,7 +2156,7 @@ polfnf(GEN a, GEN T)
   if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
   if (!sqfree)
   {
-    G = poleval(G, gadd(pol_x[varn(A)], gmulsg(k, pol_x[varn(T)])));
+    G = poleval(G, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
     G = ZY_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
@@ -2169,7 +2169,7 @@ polfnf(GEN a, GEN T)
     gel(E,1) = utoipos(degpol(A) / degpol(u));
     return gerepilecopy(av, mkmat2(P,E));
   }
-  x0 = gadd(pol_x[varn(A)], gmulsg(-k, mkpolmod(pol_x[varn(T)], T)));
+  x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
   for (i=lx-1; i>0; i--)
   {
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
@@ -2208,7 +2208,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   n = NULL;
   for (k = 0; cmpui(k, p) < 0; k++)
   {
-    GEN U = poleval(u, gadd(pol_x[varn(A)], gmulsg(k, pol_x[varn(T)])));
+    GEN U = poleval(u, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
     n = FpY_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
     n = NULL;
@@ -2223,7 +2223,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     gel(P,1) = u;
     return P;
   }
-  x0 = gadd(pol_x[varn(A)], gmulsg(-k, mkpolmod(pol_x[varn(T)], T)));
+  x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
   for (i=lx-1; i>1; i--)
   {
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
@@ -2313,7 +2313,7 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 
   *pz = z;
   if (N == 1) return 1;
-  v = X = pol_x[varn(u)];
+  v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   appendL(z, S);
   v = spec_FqXQ_pow(v, S, T, p);
@@ -2332,7 +2332,7 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 
   *pz = z;
   if (N == 1) return 1;
-  v = X = pol_x[varn(u)];
+  v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   appendL(z, S);
   for (d=1; d <= N>>1; d++)
@@ -2386,7 +2386,7 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
   long d, dg, N = degpol(u);
 
   if (N == 1) return 1;
-  v = X = pol_x[varn(u)];
+  v = X = pol_x(varn(u));
   S = init_spec_FqXQ_pow(X, q, u, T, p);
   for (d=1; d <= N>>1; d++)
   {

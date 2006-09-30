@@ -69,18 +69,6 @@ which do not belong to the stack): the integers $0$, $1$, $-1$ and $2$
 \tet{gen_2}), the fraction $\dfrac{1}{2}$ (\tet{ghalf}), the complex number
 $i$ (\tet{gi}). All of these are of type \kbd{GEN}.
 
-In addition, space is reserved for the polynomials $x_v$
-\sidx{variable}
-(\tet{pol_x}\kbd{[$v$]}), and the polynomials $1_v$ (\tet{pol_1}\kbd{[$v$]}).
-Here, $x_v$ is the name of variable number $v$, where $0\le v\le
-\tet{MAXVARN}$. Both \tet{pol_1} and \tet{pol_x} are arrays of \kbd{GEN}s, the
-index being the polynomial variable number.
-
-However, except for the ones corresponding to variables $0$ and \kbd{MAXVARN},
-these polynomials are \emph{not} created upon initialization. It
-is the programmer's responsibility to fill them before use. We will see how
-this is done in \secref{se:vars} (\emph{never} through direct assignment).
-
 $\bullet$ a \tev{heap} which is just a linked list of permanent
 universal objects. For now, it contains exactly the ones listed above. You
 will probably very rarely use the heap yourself; and if so, only as a
@@ -1426,14 +1414,8 @@ lower priority, even though PARI cannot prevent you from doing it; see
 situation.
 
 \subsec{Creating variables} A basic difficulty is to ``create'' a variable.
-As we have seen in \secref{se:intro4}, a number of objects is associated to
-variable number~$v$. Here is the complete list: \tet{pol_1}$[v]$ and
-\tet{pol_x}$[v]$, which you can use in library mode and which represent,
-respectively, the monic monomials of degrees 0 and 1 in~$v$;
-\teb{varentries}$[v]$, and \teb{polvar}$[v]$. The latter two are only
-meaningful to \kbd{gp}, but they have to be set nevertheless. All of them
-must be properly defined before you can use a given integer as a variable
-number.
+Some initializations are needed before you can use a given integer $v$ as a
+variable number.
 
 Initially, this is done for $0$ (the variable \kbd{x} under \kbd{gp}), and
 \tet{MAXVARN}, which is there to address the need for a ``temporary'' new
@@ -1453,7 +1435,7 @@ variables\sidx{variable (user)}''.
 and returns its variable number.
 \bprog
 long v = fetch_user_var("y");
-GEN gy = pol_x[v];
+GEN gy = pol_x(v);
 @eprog\noindent
 This function raises an error if $s$ is already registered as a function
 name. 
@@ -1462,7 +1444,7 @@ name.
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP
 variables on the fly as needed:
 \bprog
-GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x[$v$], for some $v$ */
+GEN gy = gp_read_str("'y"); /*@Ccom returns pol_x($v$), for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}

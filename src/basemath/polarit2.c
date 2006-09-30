@@ -926,8 +926,8 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   z1 = gdiv(t, a); u = denom(z1);
   z2 = gdiv(addii(t, d), a);
   v = varn(x);
-  gel(res,cnt++) = gmul(u, gsub(pol_x[v], z1)); u = diviiexact(a, u);
-  gel(res,cnt++) = gmul(u, gsub(pol_x[v], z2)); *ptcnt = cnt;
+  gel(res,cnt++) = gmul(u, gsub(pol_x(v), z1)); u = diviiexact(a, u);
+  gel(res,cnt++) = gmul(u, gsub(pol_x(v), z2)); *ptcnt = cnt;
 }
 
 /* y > 1 and B integers. Let n such that y^(n-1) <= B < y^n.
@@ -1647,7 +1647,7 @@ ZX_squff(GEN f, GEN *ex)
     if (dW <= 0) break;
     V = W;
   }
-  if (val) { gel(P,i) = pol_x[varn(f)]; e[i] = val; i++;}
+  if (val) { gel(P,i) = pol_x(varn(f)); e[i] = val; i++;}
   setlg(P,i);
   setlg(e,i); *ex = e; return P;
 }
@@ -3691,7 +3691,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 static GEN
 scalar_bezout(GEN x, GEN y, GEN *U, GEN *V)
 {
-  *U=gen_0; *V=ginv(y); return pol_1[varn(x)];
+  *U=gen_0; *V=ginv(y); return pol_1(varn(x));
 }
 
 static GEN
@@ -3716,7 +3716,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   }
   if (gcmp0(y)) return zero_bezout(x,V,U);
   if (tx != t_POL) {
-    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return pol_1[0]; }
+    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return pol_1(0); }
     return scalar_bezout(y,x,V,U);
   }
   if (ty != t_POL) return scalar_bezout(x,y,U,V);
@@ -3970,7 +3970,7 @@ fix_pol(GEN x, long v, long *mx)
     vx = varn(x);
     if (vx)
     {
-      if (v>=vx) return gsubst(x,v,pol_x[0]);
+      if (v>=vx) return gsubst(x,v,pol_x(0));
       p1 = cgetg(3,t_POL);
       p1[1] = evalvarn(0)|evalsigne(signe(x));
       gel(p1,2) = x; return p1;
@@ -3978,7 +3978,7 @@ fix_pol(GEN x, long v, long *mx)
     if (v)
     {
       *mx = 1;
-      return gsubst(gsubst(x,0,pol_x[MAXVARN]),v,pol_x[0]);
+      return gsubst(gsubst(x,0,pol_x(MAXVARN)),v,pol_x(0));
     }
   }
   return x;
@@ -4004,7 +4004,7 @@ polresultant0(GEN x, GEN y, long v, long flag)
     case 2: x=resultantducos(x,y); break;
     default: pari_err(flagerr,"polresultant");
   }
-  if (m) x = gsubst(x,MAXVARN,pol_x[0]);
+  if (m) x = gsubst(x,MAXVARN,pol_x(0));
   return gerepileupto(av,x);
 }
 
@@ -4105,7 +4105,7 @@ poldisc0(GEN x, long v)
       p1 = subres(x, derivpol(x));
       p2 = leading_term(x); if (!gcmp1(p2)) p1 = gdiv(p1,p2);
       if (degpol(x) & 2) p1 = gneg(p1);
-      if (i) p1 = gsubst(p1, MAXVARN, pol_x[0]);
+      if (i) p1 = gsubst(p1, MAXVARN, pol_x(0));
       return gerepileupto(av,p1);
 
     case t_COMPLEX:

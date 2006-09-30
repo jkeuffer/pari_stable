@@ -1977,7 +1977,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       if (!isnull(b)) wr_monome(T,b,v,1);
       break;
 
-    case t_POL: v = get_var(ordvar[varn(g)], buf);
+    case t_POL: v = get_var(varn(g), buf);
       /* hack: we want g[i] = coeff of degree i. */
       i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
       wr_lead_monome(T,gel(g,i),v,i,addsign);
@@ -1988,7 +1988,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       }
       break;
 
-    case t_SER: v = get_var(ordvar[varn(g)], buf);
+    case t_SER: v = get_var(varn(g), buf);
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
@@ -2194,7 +2194,7 @@ sori(GEN g, pariout_t *T)
 
     case t_POL:
       if (!signe(g)) { pariputc('0'); break; }
-      v = get_var(ordvar[varn(g)],buf);
+      v = get_var(varn(g),buf);
       i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
       sor_lead_monome(T,gel(g,i),v,i);
       while (i--)
@@ -2203,7 +2203,7 @@ sori(GEN g, pariout_t *T)
       }
       break;
 	
-    case t_SER: v = get_var(ordvar[varn(g)],buf);
+    case t_SER: v = get_var(varn(g),buf);
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
@@ -2323,7 +2323,7 @@ texi(GEN g, pariout_t *T, int addsign)
       if (!isnull(b)) wr_texnome(T,b,v,1);
       break;
 
-    case t_POL: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
+    case t_POL: v = get_texvar(varn(g), buf, sizeof(buf));
       /* hack: we want g[i] = coeff of degree i. */
       i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
       wr_lead_texnome(T,gel(g,i),v,i,addsign);
@@ -2334,7 +2334,7 @@ texi(GEN g, pariout_t *T, int addsign)
       }
       break;
 
-    case t_SER: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
+    case t_SER: v = get_texvar(varn(g), buf, sizeof(buf));
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
@@ -2454,15 +2454,14 @@ void
 gen_output(GEN x, pariout_t *T)
 {
   pari_sp av = avma;
-  GEN y = changevar(x, polvar);
   if (!T) T = GP_DATA->fmt;
   switch(T->prettyp)
   {
-    case f_PRETTYMAT: matbruti(y, T); break;
+    case f_PRETTYMAT: matbruti(x, T); break;
     case f_PRETTY:
-    case f_PRETTYOLD: sori(y, T); break;
-    case f_RAW      : bruti(y, T, 1); break;
-    case f_TEX      : texi(y, T, 1); break;
+    case f_PRETTYOLD: sori(x, T); break;
+    case f_RAW      : bruti(x, T, 1); break;
+    case f_TEX      : texi(x, T, 1); break;
   }
   avma = av;
 }

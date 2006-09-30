@@ -2803,6 +2803,10 @@ as above on $64$-bit machines).
 @eprog
 \noindent returns $a_2 2^{64} + a_1 2^{32} + a_0$.
 
+\fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
+
+\fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
+
 \fun{GEN}{mkpoln}{long n, ...} Returns the \typ{POL} whose $n$
 coefficients (\kbd{GEN}) follow, in order of decreasing degree.
 \bprog

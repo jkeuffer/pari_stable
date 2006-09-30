@@ -752,7 +752,7 @@ polispower(GEN x, GEN K, GEN *pt)
     y = gtrunc(gsqrtn(greffe(x,lg(x),1), K, NULL, 0)); av2 = avma;
     if (!gequal(powgi(y, K), x)) { avma = av; return 0; }
   }
-  else y = pol_1[varn(x)];
+  else y = pol_1(varn(x));
   if (pt)
   {
     if (!gcmp1(a))

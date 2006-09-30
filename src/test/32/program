@@ -70,8 +70,7 @@ Vecsmall([-1972095278, 1417909247, -213878183, 815482895, -989924416, -28085
 0
 ? if(3<2,print("bof"),print("ok"));
 ok
-? kill(y);print(x+y);reorder([x,y]);print(x+y);
-x + y
+? kill(y);print(x+y);
 x + y
 ? f(u)=u+1;
 ? print(f(5));kill(f);
@@ -137,5 +136,5 @@ og(p)/log(q))));
 ? getheap
 [23, 3144]
 ? print("Total time spent: ",gettime);
-Total time spent: 48
+Total time spent: 40
 ? \q

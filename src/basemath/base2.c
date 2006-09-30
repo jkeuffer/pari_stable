@@ -811,7 +811,7 @@ maxord(GEN p,GEN f,long mf)
   }
   res = dedek(f, mf, p, g);
   if (res)
-    res = dbasis(p, f, mf, pol_x[varn(f)], res);
+    res = dbasis(p, f, mf, pol_x(varn(f)), res);
   else
   {
     if (!w) w = (GEN)FpX_factor(fp,p)[1];
@@ -1164,7 +1164,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
   pari_sp av, lim;
 
   a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
-  pa = pol_1[varn(a)]; dpa = gen_1;
+  pa = pol_1(varn(a)); dpa = gen_1;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
   { /* pa/dpa = (a/d)^(j-1) mod (chi, pp) */
@@ -1420,7 +1420,7 @@ composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
 static int 
 update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
 {
-  GEN PHI = NULL, pdr, pmr = S->pmr, X = pol_x[ varn(S->f) ];
+  GEN PHI = NULL, pdr, pmr = S->pmr, X = pol_x( varn(S->f) );
   long k;
 
   if (!S->chi) 
@@ -1494,7 +1494,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
 
   c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
   c = gdiv(RgX_rem(c, S->chi), powiu(S->p, t));
-  S->phi = gadd( pol_x[ varn(S->chi) ], redelt(c, S->pmr, S->p) );
+  S->phi = gadd( pol_x( varn(S->chi) ), redelt(c, S->pmr, S->p) );
   if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
 }
@@ -1726,7 +1726,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     Fa   = degpol(S->nu);
     for(;;)
     {
-      pia  = getprime(S, pol_x[v], S->chi, S->nu, &La, &Ea, oE,0);
+      pia  = getprime(S, pol_x(v), S->chi, S->nu, &La, &Ea, oE,0);
       if (pia) break;
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
@@ -1785,7 +1785,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
   S.p = p;
   S.nu = h;
   S.df = Z_pval(D, p);
-  S.phi = pol_x[varn(f)];
+  S.phi = pol_x(varn(f));
   if (l == 1) return nilord(&S, D, mf, flag);
   if (flag && flag <= mf) flag = mf + 1;
   S.chi = f; return Decomp(&S, flag);
@@ -2739,7 +2739,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     gel(A,j) = col_ei(m, j);
     gel(I,j) = matid;
   }
-  X = pol_x[varn(P)];
+  X = pol_x(varn(P));
   pal = FqX_div(Prd,k, T,p);
   pal = modprX_lift(pal, modpr);
   for (   ; j<=m+d; j++)
@@ -3341,7 +3341,7 @@ polcompositum0(GEN A, GEN B, long flall)
     { /* invmod possibly very costly */
       a = gmul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), gel(C,i)));
       a = gneg_i(RgX_rem(a, gel(C,i)));
-      b = gadd(pol_x[v], gmulsg(k,a));
+      b = gadd(pol_x(v), gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = C[i];
       gel(w,2) = mkpolmod(a, gel(w,1));
@@ -3413,7 +3413,6 @@ rnfequation0(GEN A, GEN B, long flall)
   { /* a,b,c root of A,B,C = compositum, c = b + k a */
     GEN a = gmul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), C));/* inv is costly !*/
     a = gneg_i(RgX_rem(a, C));
-    /* b = gadd(pol_x[varn(A)], gmulsg(k,a)); */
     C = mkvec3(C, mkpolmod(a, C), stoi(k));
   }
   return gerepilecopy(av, C);
@@ -3746,7 +3745,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
-  if (degpol(pol) <= 1) return mkvec(pol_x[v]);
+  if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(v,1) = pol_x(v); return w; }
   nfpol = gel(nf,1);
 
   id = rnfpseudobasis(nf,pol);
@@ -3777,7 +3776,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     p1 = gel(I,j); al = gmul(gcoeff(p1,1,1),gel(O,j));
     p1 = coltoalg(nf,gel(al,n));
     for (i=n-1; i; i--)
-      p1 = gadd(coltoalg(nf,gel(al,i)), gmul(pol_x[v],p1));
+      p1 = gadd(coltoalg(nf,gel(al,i)), gmul(pol_x(v),p1));
     newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
     newpol = Q_primpart(newpol);
 
@@ -3870,8 +3869,8 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     GEN rel, eq = rnfequation2(nf,relpol);
     POL = gel(eq,1);
     a   = gel(eq,3);
-    rel = poleval(relpol, gsub(pol_x[v],
-                               gmul(a, gmodulo(pol_x[varn(T)],T))));
+    rel = poleval(relpol, gsub(pol_x(v),
+                               gmul(a, gmodulo(pol_x(varn(T)),T))));
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {

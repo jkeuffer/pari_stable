@@ -970,7 +970,7 @@ RgXQ_u_pow(GEN x, ulong n, GEN T)
   pari_sp av;
   GEN y;
 
-  if (!n) return pol_1[varn(x)];
+  if (!n) return pol_1(varn(x));
   if (n == 1) return gcopy(x);
   av = avma;
   y = leftright_pow_u(x, n, (void*)T, &_sqr, &_mul);
@@ -983,7 +983,7 @@ RgXQ_powers(GEN x, long l, GEN T)
 {
   GEN V=cgetg(l+2,t_VEC);
   long i;
-  gel(V,1) = pol_1[varn(T)]; if (l==0) return V;
+  gel(V,1) = pol_1(varn(T)); if (l==0) return V;
   gel(V,2) = gcopy(x);       if (l==1) return V;
   gel(V,3) = RgXQ_sqr(x,T);
   if ((degpol(x)<<1) < degpol(T)) {

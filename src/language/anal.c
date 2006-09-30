@@ -54,8 +54,7 @@ static entree *entry();
 static entree *skipentry(void);
 
 static entree *installep(void *f,char *name,long l,long v,long add,entree **table);
-#define VAR_POLS_LONGS	7 /* 4 words for pol_x, 3 for pol_1 */
-#define SIZEOF_VAR_POLS	(VAR_POLS_LONGS*sizeof(long))
+static const long SIZEOF_VAR_POLS = 4*sizeof(long);
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -733,8 +732,8 @@ kill_alias(entree *EP)
 }
 
 /* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
- * If it's a variable set a "black hole" in pol_x[v], etc. x = 0-th variable
- * can NOT be killed (only the value): we often use explicitly pol_x[0] */
+ * If it's a variable set a "black hole" in varentries[v]. x = 0-th variable
+ * can NOT be killed (only the value) */
 void
 kill0(entree *ep)
 {
@@ -749,8 +748,6 @@ kill0(entree *ep)
     case EpGVAR:
       while (ep->args) pop_val(ep);
       v = varn(ep->value); if (!v) return; /* never kill x */
-
-      gel(polvar,v+1) = pol_x[v] = pol_1[v] = gnil;
       varentries[v] = NULL; break;
     case EpUSER: kill_alias(ep);
       break;
@@ -1700,7 +1697,7 @@ global0()
     if (ep && EpVALENCE(ep) == EpGVAR)
     {
       res = new_chunk(1);
-      gel(res,0) = pol_x[n]; i++;
+      gel(res,0) = pol_x(n); i++;
     }
   }
   if (i) { res = new_chunk(1); res[0] = evaltyp(t_VEC) | evallg(i+1); }
@@ -1822,7 +1819,7 @@ record_fun(entree *ep, char *start, long len, long narg, long nloc, GEN tmpargs)
     for (k=x[0],i=1; i<NARG; k=x[i],i++)
       if (x[i] == k)
         pari_err(talker,"user function %s: variable %Z declared twice",
-            ep->name, pol_x[k]);
+            ep->name, pol_x(k));
   }
   ep->value = ptr;
   ep->valence = EpUSER;
@@ -2610,7 +2607,6 @@ manage_var(long n, entree *ep)
   static long max_avail = MAXVARN; /* max variable not yet used */
   static long nvar; /* first GP free variable */
   long var;
-  GEN p;
 
   switch(n) {
       case manage_var_init: return nvar=0;
@@ -2620,13 +2616,12 @@ manage_var(long n, entree *ep)
       {
         long v = (long)ep;
         if (v != nvar-1) pari_err(talker,"can't pop gp variable");
-        setlg(polvar, nvar);
         return --nvar;
       }
       case manage_var_delete:
 	/* user wants to delete one of his/her/its variables */
 	if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
-	gpfree(pol_x[++max_avail]); /* frees both pol_1 and pol_x */
+	max_avail++;
 	return max_avail+1;
       case manage_var_create: break;
       default: pari_err(talker, "panic");
@@ -2636,32 +2631,17 @@ manage_var(long n, entree *ep)
                              mark.identifier, mark.start);
   if (ep)
   {
-    p = (GEN)ep->value;
-    var=nvar++;
+    GEN p = (GEN)ep->value;
+    var = nvar++;
+    /* create pol_x[var] */
+    p[0] = evaltyp(t_POL) | evallg(4);
+    p[1] = evalsigne(1) | evalvarn(var);
+    gel(p,2) = gen_0;
+    gel(p,3) = gen_1;
   }
   else
-  {
-    p = (GEN) gpmalloc(SIZEOF_VAR_POLS);
-    var=max_avail--;
-  }
-
-  /* create pol_x[var] */
-  p[0] = evaltyp(t_POL) | evallg(4);
-  p[1] = evalsigne(1) | evalvarn(var);
-  gel(p,2) = gen_0;
-  gel(p,3) = gen_1;
-  pol_x[var] = p;
-
-  /* create pol_1[nvar] */
-  p += 4;
-  p[0] = evaltyp(t_POL) | evallg(3);
-  p[1] = evalsigne(1) | evalvarn(var);
-  gel(p,2) = gen_1;
-  pol_1[var] = p;
-
-  varentries[var] = ep;
-  if (ep) { gel(polvar,nvar) = (GEN)ep->value; setlg(polvar, nvar+1); }
-  return var;
+    var = max_avail--;
+  varentries[var] = ep; return var;
 }
 
 long

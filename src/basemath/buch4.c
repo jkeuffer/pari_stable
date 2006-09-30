@@ -712,7 +712,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfisgalois(gsubst(nfabs, varn(nfabs[1]), pol_x[vbas]), P);
+    galois = nfisgalois(gsubst(nfabs, varn(nfabs[1]), pol_x(vbas)), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
@@ -839,6 +839,6 @@ GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   pari_sp av = avma;
-  GEN T = rnfisnorminit(pol_x[MAXVARN], bnf, flag == 0? 1: 2);
+  GEN T = rnfisnorminit(pol_x(MAXVARN), bnf, flag == 0? 1: 2);
   return gerepileupto(av, rnfisnorm(T, x, flag == 1? 0: flag));
 }

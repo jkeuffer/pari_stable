@@ -45,7 +45,7 @@ static GEN
 caract_const(GEN x, long v, long d)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gpowgs(gadd(pol_x[v], gneg_i(x)), d));
+  return gerepileupto(av, gpowgs(gadd(pol_x(v), gneg_i(x)), d));
 }
 
 static GEN
@@ -61,14 +61,14 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
 
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
-  gel(x,2) = gadd(gel(x,2), pol_x[MAXVARN]);
+  gel(x,2) = gadd(gel(x,2), pol_x(MAXVARN));
   ch = subres_f(p, x, NULL);
   if (v != MAXVARN)
   {
     if (typ(ch) == t_POL && varn(ch) == MAXVARN)
       setvarn(ch, v);
     else
-      ch = gsubst(ch, MAXVARN, pol_x[v]);
+      ch = gsubst(ch, MAXVARN, pol_x(v));
   }
   L = leading_term(ch);
   if (!gcmp1(L)) ch = gdiv(ch, L);
@@ -122,7 +122,7 @@ easychar(GEN x, long v, GEN *py)
       if (lx==1)
       {
 	if (py) *py = cgetg(1,t_MAT);
-	return pol_1[v];
+	return pol_1(v);
       }
       if (lg(x[1]) != lx) break;
       return NULL;
@@ -225,7 +225,7 @@ caradj(GEN x, long v, GEN *py)
   gel(p,2) = gerepileupto(av, gneg(t));
   i = gvar2(p);
   if (i == v) pari_err(talker,"incorrect variable in caradj");
-  if (i < v) p = gerepileupto(av0, poleval(p, pol_x[v]));
+  if (i < v) p = gerepileupto(av0, poleval(p, pol_x(v)));
   if (py) *py = (l & 1)? gneg(y): gcopy(y);
   gunclone(y); return p;
 }
@@ -275,7 +275,7 @@ minpoly(GEN x, long v)
     return gerepileupto(ltop,P);
   }
   if (typ(x)!=t_MAT) pari_err(typeer,"minpoly");
-  if (lg(x) == 1) return pol_1[v];
+  if (lg(x) == 1) return pol_1(v);
   return gerepilecopy(ltop,gel(matfrobenius(x,1,v),1));
 }
 
@@ -336,7 +336,7 @@ carhess(GEN x, long v)
   if ((H = easychar(x,v,NULL))) return H;
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
-  gel(y,1) = pol_1[v]; H = hess(x);
+  gel(y,1) = pol_1(v); H = hess(x);
   X_h = monomial(gen_1, 1, v);
   for (r = 1; r < lx; r++)
   {

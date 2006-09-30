@@ -1,7 +1,6 @@
 \p 38
 \e
 gettime; apol=x^3+5*x+1
-changevar(x+y,[z,t])
 deriv((x+y)^5,y)
 ((x+y)^5)'
 dz=vector(30,k,1);dd=vector(30,k,k==1);dm=dirdiv(dd,dz)

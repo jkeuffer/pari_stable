@@ -106,7 +106,7 @@ init_CHI_alg(CHI_t *c, GEN CHI) {
   {
     case 1: z = gen_1; break;
     case 2: z = gen_m1; break;
-    default: z = mkpolmod(pol_x[0], polcyclo(d,0));
+    default: z = mkpolmod(pol_x(0), polcyclo(d,0));
   }
   init_CHI(c,CHI, z);
 }
@@ -1551,7 +1551,7 @@ ppgamma(ST_t *T, long prec)
   }
   av = avma;
 
-  x   = pol_x[0];
+  x   = pol_x(0);
   x2  = gmul2n(x, -1); /* x/2 */
   eul = mpeuler(prec);
   sqpi= sqrtr_abs(mppi(prec)); /* Gamma(1/2) */
@@ -2590,7 +2590,7 @@ quadhilbertreal(GEN D, long prec)
 
   /* quick computation of the class number */
   cl = itos((GEN)quadclassunit0(D, 0, NULL, prec)[1]);
-  if (cl == 1) { disable_dbg(-1); avma = av; return pol_x[0]; }
+  if (cl == 1) { disable_dbg(-1); avma = av; return pol_x(0); }
 
 START:
   pol = quadpoly0(D, fetch_user_var("y"));
@@ -2676,7 +2676,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   p1     = conductor(bnr, subgrp, 2);
   bnr    = gel(p1,2); Mcyc = diagonal_i(gmael(bnr, 5, 2));
   subgrp = gel(p1,3);
-  if (gcmp1( dethnf_i(subgrp) )) { avma = av; return pol_x[0]; }
+  if (gcmp1( dethnf_i(subgrp) )) { avma = av; return pol_x(0); }
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))

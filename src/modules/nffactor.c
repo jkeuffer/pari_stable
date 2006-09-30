@@ -1578,13 +1578,13 @@ rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
   if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
   lT = lg(T);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
-    return gerepileupto(av, gpowgs(gsub(pol_x[v], alpha), lT - 3));
+    return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), lT - 3));
   vT = varn(T);
   if (varn(alpha) != vT || varncmp(v, vnf)>=0)
     pari_err(talker,"incorrect variables in rnfcharpoly");
   if (lg(alpha) >= lT) alpha = RgX_rem(alpha, T);
   if (lT <= 4)
-    return gerepileupto(av, gsub(pol_x[v], alpha));
+    return gerepileupto(av, gsub(pol_x(v), alpha));
   p1 = caract2(T, unifpol(nf,alpha, t_POLMOD), v);
   return gerepileupto(av, unifpol(nf, p1, t_POLMOD));
 }

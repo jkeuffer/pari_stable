@@ -31,7 +31,7 @@ galoisconj(GEN nf)
   x = gel(nf,1);
   v = varn(x);
   if (v == 0)
-    nf = gsubst(nf, 0, pol_x[MAXVARN]);
+    nf = gsubst(nf, 0, pol_x(MAXVARN));
   else
   {
     x = shallowcopy(x);
@@ -71,7 +71,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
     gel(w,i) = gmul(p1, gel(w,i - 1));
   v = varn(x);
   y = cgetg(nbmax + 1, t_COL);
-  gel(y,1) = pol_x[v];
+  gel(y,1) = pol_x(v);
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
     w[n + 1] = polr[i];
@@ -126,7 +126,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
   for (i = 1; i <= n; i++)
     w[i] = coeff(p2, 1, i);
   y = cgetg(nbmax + 1, t_COL);
-  gel(y,1) = pol_x[varn(x)];
+  gel(y,1) = pol_x(varn(x));
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
     w[n + 1] = polr[i];
@@ -538,7 +538,7 @@ galoisdolift(struct galois_lift *gl, GEN frob)
   pari_sp ltop=avma;
   long v = varn(gl->T);
   GEN Tp = FpX_red(gl->T, gl->p);
-  GEN S = FpXQ_pow(pol_x[v],gl->p, Tp,gl->p);
+  GEN S = FpXQ_pow(pol_x(v),gl->p, Tp,gl->p);
   GEN plift = automorphismlift(S, gl, frob);
   return gerepileupto(ltop,plift);
 }
@@ -553,7 +553,7 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   gt->f = gt->n / gt->g;
   gt->bezoutcoeff = bezout_lift_fact(gl->T, Tmod, gl->p, gl->e);
   gt->pauto = cgetg(gt->f + 1, t_VEC);
-  gel(gt->pauto,1) = pol_x[v];
+  gel(gt->pauto,1) = pol_x(v);
   gel(gt->pauto,2) = gcopy(plift);
   if (gt->f > 2)
   {
@@ -1138,7 +1138,7 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
   GEN  s, f, pows;
   GEN v=gel(sym,1), w=gel(sym,2);
   sigma = RgX_to_FpX(sigma, p);
-  f=pol_x[varn(sigma)];
+  f=pol_x(varn(sigma));
   s=zeropol(varn(sigma));
   for(j=1; j<lg(v); j++)
     s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(w[j]),Tp,p),stoi(v[j]),p),p);
@@ -2786,7 +2786,7 @@ galoisconj4(GEN T, GEN den, long flag)
   n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
-    if (!flag) return mkcol( pol_x[varn(T)] );
+    if (!flag) { G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); }
     ga.l = 3;
     ga.deg = 1;
     den = gen_1;
@@ -2964,7 +2964,8 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   default:
     pari_err(flagerr, "nfgaloisconj");
   }
-  return mkcol( pol_x[varn(T)] );	/* Failure */
+  G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T));
+  return G; /* Failure */
 }
 
 

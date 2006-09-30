@@ -67,7 +67,6 @@ BA 34- bnrstark prototype code was non-standard.
    37- missing GC in forvec(,,2)
 BA 38- Interrupting GP could lead to a freeze. [#488]
 
-
   Changed
     1- moved cgiv, gtofp to inline kernel
     2- reduce amount of memory needed by APRCL
@@ -93,7 +92,7 @@ BA 38- Interrupting GP could lead to a freeze. [#488]
    14- vecextract(x, bitmask) much faster [ read bits, don't use shifts ]
    15- improve hyperu
    16- remove gp-specific signal handler. Use the one in libpari
-   
+   17- [library] pol_1 and pol_x are no longer global arrays but functions
 
   Added
 BA  1- function Flm_rank
@@ -116,4 +115,6 @@ BA 13- add pari_stackcheck_init() function to control deep recursion detection
     2- old CodeWarrior-specific hack (malloc)
     3- error code: intger2, affer3, overwriter
     4- useless static function gp_handle_SIGINT
+    5- functions changevar() and reorder(), global arrays pol_1[], pol_x[]
+       ordvar[] and polvar[]
 
