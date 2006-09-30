@@ -1477,52 +1477,6 @@ gp_sigint_fun(void) {
   pari_err(siginter, gp_format_time(ti_INTERRUPT));
 }
 
-static void
-gp_sighandler(int sig)
-{
-  char *msg;
-#ifndef HAS_SIGACTION
-  /*SYSV reset the signal handler in the handler*/
-  (void)os_signal(sig,gp_sighandler);
-#endif
-  switch(sig)
-  {
-#ifdef SIGBREAK
-    case SIGBREAK: pari_handle_SIGINT(); return;
-#endif
-#ifdef SIGINT
-    case SIGINT:   pari_handle_SIGINT(); return;
-#endif
-
-#ifdef SIGSEGV
-    case SIGSEGV: msg = "GP (Segmentation Fault)"; break;
-#endif
-#ifdef SIGBUS
-    case SIGBUS:  msg = "GP (Bus Error)"; break;
-#endif
-#ifdef SIGFPE
-    case SIGFPE:  msg = "GP (Floating Point Exception)"; break;
-#endif
-
-#ifdef SIGPIPE
-    case SIGPIPE:
-    {
-      pariFILE *f = GP_DATA->pp->file;
-      if (f && pari_outfile == f->file)
-      {
-        pari_err(talker, "Broken Pipe, resetting file stack...");
-        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
-        pari_outfile = stdout; pari_fclose(f);
-      }
-      /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
-      return; /* not reached */
-    }
-#endif
-    default: msg = "signal handling"; break;
-  }
-  pari_err(bugparier, msg);
-}
-
 int
 break_loop(long numerr)
 {
@@ -1798,7 +1752,7 @@ main(int argc, char **argv)
   grow_init(A);
   read_opt(A, argc,argv);
 
-  pari_init_opts(top-bot, GP_DATA->primelimit, 0);
+  pari_init_opts(top-bot, GP_DATA->primelimit, INIT_SIGm);
   newfun = pari_get_modules();
   grow_append(*newfun, functions_gp);
   grow_append(*newfun, functions_highlevel);
@@ -1811,8 +1765,6 @@ main(int argc, char **argv)
   }
   else
     pari_add_module(functions_oldgp);
-
-  pari_sig_init(gp_sighandler);
 
   init_graph();
 #ifdef READLINE

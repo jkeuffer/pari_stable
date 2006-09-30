@@ -91,6 +91,7 @@ BA 34- bnrstark prototype code was non-standard.
        vectors of such.
    14- vecextract(x, bitmask) much faster [ read bits, don't use shifts ]
    15- improve hyperu
+   16- remove gp-specific signal handler. Use the one in libpari
    
 
   Added

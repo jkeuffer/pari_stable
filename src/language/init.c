@@ -316,32 +316,35 @@ pari_sighandler(int sig)
 
 #ifdef SIGSEGV
     case SIGSEGV:
-      msg="segmentation fault: bug in PARI or calling program";
-      break;
+      msg="PARI/GP (Segmentation Fault)"; break;
 #endif
-
 #ifdef SIGBUS
     case SIGBUS:
-      msg="bus error: bug in PARI or calling program";
-      break;
+      msg="PARI/GP (Bus Error)"; break;
 #endif
-
 #ifdef SIGFPE
     case SIGFPE:
-      msg="floating point exception: bug in PARI or calling program";
-      break;
+      msg="PARI/GP (Floating Point Exception)"; break;
 #endif
 
 #ifdef SIGPIPE
     case SIGPIPE:
-      msg="broken pipe";
-      break;
+    {
+      pariFILE *f = GP_DATA->pp->file;
+      if (f && pari_outfile == f->file)
+      {
+        pari_err(talker, "Broken Pipe, resetting file stack...");
+        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
+        pari_outfile = stdout; pari_fclose(f);
+      }
+      /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
+      return; /* not reached */
+    }
 #endif
 
-    default:
-      msg="unknown signal";
+    default: msg="signal handling"; break;
   }
-  pari_err(talker,msg);
+  pari_err(bugparier,msg);
 }
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
