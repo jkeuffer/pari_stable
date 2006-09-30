@@ -113,3 +113,5 @@ BA 13- add pari_stackcheck_init() function to control deep recursion detection
     1- Odos/Makefile (no longer functional, obsolete)
     2- old CodeWarrior-specific hack (malloc)
     3- error code: intger2, affer3, overwriter
+    4- useless static function gp_handle_SIGINT
+

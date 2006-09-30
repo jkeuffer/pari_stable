@@ -287,7 +287,7 @@ cgetalloc(long t, size_t l)
 static void
 dflt_sigint_fun(void) { pari_err(talker, "user interrupt"); }
 
-static void
+void
 pari_handle_SIGINT(void)
 {
 #ifdef _WIN32

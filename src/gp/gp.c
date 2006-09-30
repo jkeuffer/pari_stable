@@ -1472,17 +1472,9 @@ gp_main_loop(int ismain)
 /*                                                                  */
 /********************************************************************/
 void
-gp_sigint_fun(void) { pari_err(siginter, gp_format_time(ti_INTERRUPT)); }
-
-static void
-gp_handle_SIGINT(void)
-{
-#if defined(_WIN32) || defined(__CYGWIN32__)
-  win32ctrlc++;
-#else
+gp_sigint_fun(void) {
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  gp_sigint_fun();
-#endif
+  pari_err(siginter, gp_format_time(ti_INTERRUPT));
 }
 
 static void
@@ -1496,10 +1488,10 @@ gp_sighandler(int sig)
   switch(sig)
   {
 #ifdef SIGBREAK
-    case SIGBREAK: gp_handle_SIGINT(); return;
+    case SIGBREAK: pari_handle_SIGINT(); return;
 #endif
 #ifdef SIGINT
-    case SIGINT:   gp_handle_SIGINT(); return;
+    case SIGINT:   pari_handle_SIGINT(); return;
 #endif
 
 #ifdef SIGSEGV
