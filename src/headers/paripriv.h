@@ -734,7 +734,6 @@ void    err_recover(long numerr);
 GEN     gcopy_av(GEN x, GEN *AVMA);
 int     ok_gerepileupto(GEN x);
 void    pari_init_defaults(void);
-void    pari_handle_SIGINT(void);
 
 /* nffactor.c */
 
