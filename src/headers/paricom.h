@@ -100,6 +100,7 @@ extern long  *ordvar;
 extern THREAD GEN  bernzone,gpi,geuler;
 extern GEN   polvar,*pol_1,*pol_x,primetab;
 extern GEN   gen_m1,gen_1,gen_2,ghalf,gi,gen_0,gnil;
+extern VOLATILE int PARI_SIGINT_block, PARI_SIGINT_pending;
 
 extern const long lontyp[];
 extern void* global_err_data;

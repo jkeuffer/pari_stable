@@ -245,12 +245,28 @@ pari_stackcheck_init(void *stack_base)
 /*********************************************************************/
 static int var_not_changed; /* altered in reorder() */
 static int try_to_recover = 0;
+VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
 static GEN universal_constants;
+static void pari_sighandler(int sig);
+
+#define BLOCK_SIGINT(code) \
+{                          \
+  PARI_SIGINT_block = 1;   \
+  code                     \
+  PARI_SIGINT_block = 0;   \
+  if (PARI_SIGINT_pending) \
+  {                        \
+    PARI_SIGINT_pending=0; \
+    raise(SIGINT);         \
+  }                        \
+}
 
 void
 gpfree(void *pointer)
 {
+  BLOCK_SIGINT(
   free(pointer);
+  )
 }
 
 char*
@@ -258,7 +274,10 @@ gpmalloc(size_t size)
 {
   if (size)
   {
-    char *tmp = (char*)malloc(size);
+    char *tmp;
+    BLOCK_SIGINT(
+    tmp = (char*)malloc(size);
+    )
     if (!tmp) pari_err(memer);
     return tmp;
   }
@@ -271,8 +290,10 @@ gprealloc(void *pointer, size_t size)
 {
   char *tmp;
 
+  BLOCK_SIGINT(
   if (!pointer) tmp = (char *) malloc(size);
   else tmp = (char *) realloc(pointer,size);
+  )
   if (!tmp) pari_err(memer);
   return tmp;
 }
@@ -308,10 +329,17 @@ pari_sighandler(int sig)
   switch(sig)
   {
 #ifdef SIGBREAK
-    case SIGBREAK: pari_handle_SIGINT(); return;
+    case SIGBREAK: 
+      if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
+      else pari_handle_SIGINT(); 
+      return;
 #endif
+
 #ifdef SIGINT
-    case SIGINT:   pari_handle_SIGINT(); return;
+    case SIGINT:
+      if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
+      else pari_handle_SIGINT(); 
+      return;
 #endif
 
 #ifdef SIGSEGV
@@ -560,7 +588,10 @@ init_stack(size_t size)
     gpfree((void*)bot);
   }
   /* NOT gpmalloc, memer would be deadly */
+  
+  BLOCK_SIGINT(
   bot = (pari_sp)malloc(s);
+  )
   if (!bot)
     for (s = old;; s>>=1)
     {
