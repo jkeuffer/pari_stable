@@ -56,7 +56,7 @@ ceil
 centerlift
 cf(x)=contfrac(x);
 cf2(b,x)=contfrac(x,b);
-changevar
+changevar=;
 char(x,y)=charpoly(x,y);
 char1(x,y)=charpoly(x,y,1);
 char2(x,y)=charpoly(x,y,2);
@@ -172,7 +172,7 @@ hell(e,x)=ellheight(e,x);
 hell2(e,x)=ellheight(e,x,1);
 hermite(x)=mathnf(x);
 hermite2(x)=mathnf(x,1);
-hermitehavas(x)=mathnf(x,2);
+hermitehavas(x)=;
 hermitemod(x,d)=mathnfmod(x,d);
 hermitemodid(x,d)=mathnfmodid(x,d);
 hermiteperm(x)=mathnf(x,3);
@@ -200,10 +200,10 @@ idealinv
 idealinv2(nf,x)=idealinv(nf,x,1);
 ideallist
 ideallistarch
-ideallistarchgen(nf,list,arch)=ideallistarch(nf,list,arch,1);
+ideallistarchgen(nf,list,arch)=ideallistarch(nf,list,arch);
 ideallistunit(nf,list)=ideallist(nf,list,2);
-ideallistunitarch=ideallistarch(nf,list,arch,2);
-ideallistunitarchgen=ideallistarch(nf,list,arch,3);
+ideallistunitarch=ideallistarch(nf,list,arch);
+ideallistunitarchgen=ideallistarch(nf,list,arch);
 ideallistunitgen=ideallist(nf,list,3);
 ideallistzstar(nf,bound)=ideallist(nf,bound);
 ideallistzstargen(nf,bound)=ideallist(nf,bound,1);
@@ -274,7 +274,7 @@ ker(x)=matker(x);
 keri(x)=matker(x,1);
 kerint(x)=matkerint(x);
 kerint1(x)=matkerint(x,1);
-kerint2(x)=matkerint(x,2);
+kerint2(x)=;
 kill
 killrect(w)=plotkill(w);
 kro(x,y)=kronecker(x,y);
@@ -292,10 +292,10 @@ lindep2(x)=lindep(x,1);
 line(w,x2,y2)=plotlines(w,x2,y2);
 lines(w,x2,y2)=plotlines(w,x2,y2);
 lll(x)=qflll(x);
-lll1(x)=qflll(x,7);
+lll1(x)=;
 lllgen(x)=qflll(x,8);
 lllgram(x)=qflllgram(x);
-lllgram1(x)=qflllgram(x,7);
+lllgram1(x)=;
 lllgramgen(x)=qflllgram(x,8);
 lllgramint(x)=qflllgram(x,1);
 lllgramkerim(x)=qflllgram(x,4);
@@ -304,7 +304,7 @@ lllint(x)=qflll(x,1);
 lllintpartial(x)=qflll(x,2);
 lllkerim(x)=qflll(x,4);
 lllkerimgen(x)=qflll(x,5);
-lllrat(x)=qflll(x,3);
+lllrat(x)=;
 ln(x)=log(x);
 lngamma
 localred(e)=elllocalred(e);
@@ -432,7 +432,7 @@ redreal(x)=qfbred(x);
 redrealnod(x,d)=qfbred(x,2,,d);
 reduceddisc(f)=poldiscreduced(f);
 regula(x)=quadregulator(x);
-reorder
+reorder=;
 resultant(x,y)=polresultant(x,y);
 resultant2(x,y)=polresultant(x,y,1);
 reverse(x)=serreverse(x);
@@ -476,7 +476,7 @@ setunion
 shift
 shiftmul
 sigma
-sigmak(x,k)=sigma(x,k);
+sigmak(k,x)=sigma(x,k);
 sign
 signat(x)=qfsign(x);
 signunit(bnf)=bnfsignunit(bnf);
@@ -521,7 +521,7 @@ tan
 tanh
 taniyama(e)=elltaniyama(e);
 taylor
-tchebi(n)=poltchebi(n);
+tchebi(n)=polchebyshev(n);
 teich(x)=teichmuller(x);
 texprint(x)=printtex(x);
 theta
