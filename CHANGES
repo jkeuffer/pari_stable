@@ -64,6 +64,7 @@ BA 34- bnrstark prototype code was non-standard.
    35- rnfkummer(,,degree) often found too many fields [#482]
    36- loss of accuracy in p-adic ellinit: wrong digits and spurious errors:
        E.g i = 5; ellinit([1, -1, 1, -1, -14]*(1+O(17^i)))
+   37- missing GC in forvec(,,2)
 
 
   Changed

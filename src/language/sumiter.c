@@ -308,12 +308,15 @@ forvec_next_lt_i(GEN gd, GEN ignored)
       /* m[i] < a[i] <= M[i] < M[i+1] */
       while (i < d->n)
       {
+        pari_sp av;
         GEN t;
         i++;
         if (cmpii(d->a[i-1], d->a[i]) < 0) continue;
+        av = avma;
         /* a[i-1] <= M[i-1] < M[i] */
         t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
         d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1]+1,m[i]) <= M[i]*/
+        avma = av;
       }
       return (GEN)d->a;
     }
