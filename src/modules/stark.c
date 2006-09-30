@@ -2320,7 +2320,7 @@ GenusField(GEN bnf)
 
   hk   = itos(gmael3(bnf, 8, 1, 1));
   disc = gmael(bnf, 7, 3);
-  x2   = gsqr(pol_x[0]);
+  x2   = monomial(gen_1, 2, 0); /* x^2 */
 
   if (mod4(disc) == 0) disc = divis(disc, 4);
   div = divisors(disc);

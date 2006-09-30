@@ -1694,7 +1694,7 @@ global0()
   GEN res = gnil;
   long i,n;
 
-  for (i=0,n=lg(polvar)-1; n>=0; n--)
+  for (i=0,n=manage_var(manage_var_next,NULL)-1; n>=0; n--)
   {
     entree *ep = varentries[n];
     if (ep && EpVALENCE(ep) == EpGVAR)
@@ -1703,7 +1703,7 @@ global0()
       gel(res,0) = pol_x[n]; i++;
     }
   }
-  if (i) { res = cgetg(1,t_VEC); setlg(res, i+1); }
+  if (i) { res = new_chunk(1); res[0] = evaltyp(t_VEC) | evallg(i+1); }
   return res;
 }
 
