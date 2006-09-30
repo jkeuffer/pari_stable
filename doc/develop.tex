@@ -68,5 +68,16 @@ enlarging \kbd{A} if necessary.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
 
+\section{Otherwise undocumented global variables}
+
+\tet{PARI_SIGINT_block}: set this to a non-zero value if you want to block
+the \kbd{SIGINT} signal in a critical part of your code. We use it
+before calling \kbd{malloc}, \kbd{free} and such. (Because \kbd{SIGINT} 
+is non-fatal for us, and we don't want to leave the system stack in an
+inconsistent state.)
+
+\tet{PARI_SIGINT_pending}: if this is non-zero, then a \kbd{SIGINT} was
+blocked. Take action as appropriate.
+
 \vfill\eject
 \input index\end
