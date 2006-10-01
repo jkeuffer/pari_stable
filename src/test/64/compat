@@ -510,7 +510,7 @@ t([[6, 1]~, 1])]]], [[[25, 14; 0, 1], [1, 1]], [80, [20, 2, 2], [[2, 0]~, [-
 ? cf2([1,3,5,7,9],(exp(1)-1)/(exp(1)+1))
 [0, 6, 10, 42, 30]
 ? changevar(x+y,[z,t])
-y + z
+  *** changevar: this function no longer exists.
 ? char([1,2;3,4],z)
 z^2 - 5*z - 2
 ? char(mod(x^2+x+1,x^3+5*x+1),z)
@@ -834,7 +834,7 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
 ? factpol2(x^15-1,0)
-  *** factpol2: this function has been suppressed.
+  *** factpol2: this function no longer exists.
 ? fibo(100)
 354224848179261915075
 ? floor(-1/2)
@@ -903,7 +903,7 @@ mod(x^5, x^6 + 108)
 ? gcd(12345678,87654321)
 9
 ? getheap()
-[210, 44544]
+[209, 44524]
 ? getrand()
 Vecsmall([8565307317838020184, -685821326004592251, -6124143154290517352, 16
 93223585009395122, -9075479400493086827, -4651827925415397176, 3827079313216
@@ -960,7 +960,7 @@ Vecsmall([8565307317838020184, -685821326004592251, -6124143154290517352, 16
  168, 420, 360, 1785, 658, 2542; 84, 140, 360, 315, 1582, 588, 2266; 70, 120
 , 315, 280, 1421, 532, 2046; 60, 105, 280, 252, 1290, 486, 1866]]
 ? hermitehavas(amat)
-  *** hermitehavas: this function has been suppressed.
+  *** hermitehavas: this function no longer exists.
 ? hermitemod(amat,detint(amat))
 
 [420 0 0 0 210 168 175]
@@ -1341,7 +1341,7 @@ ok
 ? incgam(2,1)
 0.73575888234288464319104754032292173491
 ? incgam1(2,1)
-  *** incgam1: this function has been suppressed.
+  *** incgam1: this function no longer exists.
 ? incgam2(2,1)
 0.73575888234288464319104754032292173489
 ? incgam3(2,1)
@@ -1517,7 +1517,7 @@ x
 [0 1 -1]
 
 ? kerint2(matrix(4,6,x,y,2520/(x+y)))
-  *** kerint2: this function has been suppressed.
+  *** kerint2: this function no longer exists.
 ? f(u)=u+1;
 ? print(f(5));kill(f);
 6
@@ -1603,7 +1603,7 @@ x
 [-60 -105 280 252 -486 191 1290]
 
 ? lll1(m)
-  *** lll1: this function has been suppressed.
+  *** lll1: this function no longer exists.
 ? lllgram(m)
 
 [1 1 27 -27 69 0 141]
@@ -1621,7 +1621,7 @@ x
 [0 1 3 -18 3 -7 3]
 
 ? lllgram1(m)
-  *** lllgram1: this function has been suppressed.
+  *** lllgram1: this function no longer exists.
 ? lllgramint(m)
 
 [1 1 27 -27 69 0 141]
@@ -1693,7 +1693,7 @@ x
 ; 1, 0, 0, 0, 0, 0, 0; 0, 1, 0, 0, 0, 0, 0; 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 1,
  0, 0, 0; 0, 0, 0, 0, 1, 0, 0; 0, 0, 0, 0, 0, 1, 0; 0, 0, 0, 0, 0, 0, 1]]
 ? lllrat(m)
-  *** lllrat: this function has been suppressed.
+  *** lllrat: this function no longer exists.
 ? \precision=96
    realprecision = 96 significant digits
 ? ln(2)
@@ -2326,7 +2326,7 @@ qfr(3, 16, -7, 1.5000000000000000000000000000000000000)
 2.0947125472611012942448228460655286535
 ? kill(y);print(x+y);reorder([x,y]);print(x+y);
 x + y
-x + y
+  *** reorder: this function no longer exists.
 ? resultant(x^3-1,x^3+1)
 8
 ? resultant2(x^3-1.,x^3+1.)
@@ -2712,7 +2712,7 @@ d(391, 3120), mod(2081, 3120)]]
 ? getstack()
 0
 ? getheap()
-[608, 105750]
+[607, 105730]
 ? print("Total time spent: ",gettime());
-Total time spent: 283
+Total time spent: 281
 ? \q
