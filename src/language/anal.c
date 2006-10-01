@@ -2613,11 +2613,9 @@ manage_var(long n, entree *ep)
       case manage_var_next: return nvar;
       case manage_var_max_avail: return max_avail;
       case manage_var_pop:
-      {
-        long v = (long)ep;
-        if (v != nvar-1) pari_err(talker,"can't pop gp variable");
+        var = (long)ep;
+        if (var != nvar-1) pari_err(talker,"can't pop gp variable");
         return --nvar;
-      }
       case manage_var_delete:
 	/* user wants to delete one of his/her/its variables */
 	if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
@@ -2638,10 +2636,11 @@ manage_var(long n, entree *ep)
     p[1] = evalsigne(1) | evalvarn(var);
     gel(p,2) = gen_0;
     gel(p,3) = gen_1;
+    varentries[var] = ep;
   }
   else
     var = max_avail--;
-  varentries[var] = ep; return var;
+  return var;
 }
 
 long
