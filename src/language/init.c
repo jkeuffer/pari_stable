@@ -161,13 +161,13 @@ gunclone(GEN x)
     next_bloc = bl_num(x);
   }
   if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
-#ifdef DEBUG
-  fprintferr("- %ld\n", NUM--);
-#endif
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
   free((void*)bl_base(x)); /* gpfree not needed: we already block */
   )
+#ifdef DEBUG
+  fprintferr("- %ld\n", NUM--);
+#endif
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
