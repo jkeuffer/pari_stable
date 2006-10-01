@@ -68,6 +68,18 @@ typedef struct {
 static THREAD stack *err_catch_stack;
 static THREAD char **dft_handler;
 
+#define BLOCK_SIGINT(code) \
+{                          \
+  PARI_SIGINT_block = 1;   \
+  code                     \
+  PARI_SIGINT_block = 0;   \
+  if (PARI_SIGINT_pending) \
+  {                        \
+    PARI_SIGINT_pending=0; \
+    raise(SIGINT);         \
+  }                        \
+}
+
 void
 push_stack(stack **pts, void *a)
 {
@@ -141,6 +153,7 @@ void
 gunclone(GEN x)
 {
   if (--bl_refc(x) > 0) return;
+  BLOCK_SIGINT(
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
   else
   {
@@ -154,26 +167,34 @@ gunclone(GEN x)
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
   gpfree((void*)bl_base(x));
+  )
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
- * container if clone. FIXME: SIGINT should be blocked until it returns */
-void
-killbloc(GEN x)
+ * container if clone. SIGINT should be blocked until it returns */
+static void
+killbloc0(GEN x)
 {
   long i, lx;
   switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
-      for (i=1;i<lx;i++) killbloc(gel(x,i));
+      for (i=1;i<lx;i++) killbloc0(gel(x,i));
       break;
     case t_LIST:
       lx = lgeflist(x);
-      for (i=2;i<lx;i++) killbloc(gel(x,i));
+      for (i=2;i<lx;i++) killbloc0(gel(x,i));
       break;
   }
   if (isclone(x)) gunclone(x);
+}
+
+void
+killbloc(GEN x) {
+  BLOCK_SIGINT(
+    killbloc0(x);
+  )
 }
 
 int
@@ -245,18 +266,6 @@ static int try_to_recover = 0;
 VOLATILE int PARI_SIGINT_block  = 0, PARI_SIGINT_pending = 0;
 static GEN universal_constants;
 static void pari_sighandler(int sig);
-
-#define BLOCK_SIGINT(code) \
-{                          \
-  PARI_SIGINT_block = 1;   \
-  code                     \
-  PARI_SIGINT_block = 0;   \
-  if (PARI_SIGINT_pending) \
-  {                        \
-    PARI_SIGINT_pending=0; \
-    raise(SIGINT);         \
-  }                        \
-}
 
 void
 gpfree(void *pointer)
