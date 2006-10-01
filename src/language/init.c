@@ -166,35 +166,28 @@ gunclone(GEN x)
 #endif
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  gpfree((void*)bl_base(x));
+  free((void*)bl_base(x)); /* gpfree not needed: we already block */
   )
 }
 
 /* Recursively look for clones in the container and kill them. Then kill
- * container if clone. SIGINT should be blocked until it returns */
-static void
-killbloc0(GEN x)
+ * container if clone. SIGINT could be blocked until it returns */
+void
+killbloc(GEN x)
 {
   long i, lx;
   switch(typ(x))
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
-      for (i=1;i<lx;i++) killbloc0(gel(x,i));
+      for (i=1;i<lx;i++) killbloc(gel(x,i));
       break;
     case t_LIST:
       lx = lgeflist(x);
-      for (i=2;i<lx;i++) killbloc0(gel(x,i));
+      for (i=2;i<lx;i++) killbloc(gel(x,i));
       break;
   }
   if (isclone(x)) gunclone(x);
-}
-
-void
-killbloc(GEN x) {
-  BLOCK_SIGINT(
-    killbloc0(x);
-  )
 }
 
 int
