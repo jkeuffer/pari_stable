@@ -1582,36 +1582,41 @@ deriv(GEN x, long v)
 /**                         TAYLOR SERIES                          **/
 /**                                                                **/
 /********************************************************************/
-static void
-init_tayl(long v, long vx, GEN *ab, GEN *ba)
+/* swap vars (vx,v) in x (assume vx < v, vx main variable in x), then call
+ * act(data, v, x). FIXME: use in other places */
+static GEN
+swapvar_act(GEN x, long vx, long v, GEN (*act)(void*, long, GEN), void *data)
 {
-  GEN a = pol_x(v), b = pol_x(vx); 
-  *ab = mkvec2(a,b);
-  *ba = mkvec2(b,a);
+  GEN y;
+  if (v != MAXVARN) { /* (vx,v) -> (MAXVARN, v) */
+    y = act(data, v, gsubst(x,vx,pol_x(MAXVARN)));
+    y = gsubst(y,MAXVARN,pol_x(vx));
+  } else if (vx != 0) { /* (vx,v) -> (vx, 0) */
+    y = act(data, 0, gsubst(x,v,pol_x(0)));
+    y = gsubst(y,0,pol_x(v));
+  } else { /* (0,MAXVARN) -> (w, 0) */
+    long w = fetch_var();
+    y = act(data, 0, gsubst(gsubst(x,0,pol_x(w)), MAXVARN,pol_x(0)));
+    y = gsubst(gsubst(y,0,pol_x(MAXVARN)), w,pol_x(0));
+    delete_var();
+  }
+  return y;
 }
+/* x + O(v^data) */
+static GEN
+tayl_act(void *data, long v, GEN x) { return gadd(zeroser(v, (long)data), x); }
+static  GEN
+integ_act(void *data, long v, GEN x) { (void)data; return integ(x,v); }
 
 GEN
 tayl(GEN x, long v, long precS)
 {
   long vx = gvar9(x);
   pari_sp av;
-  GEN t;
 
   if (varncmp(v, vx) <= 0) return gadd(zeroser(v,precS), x);
   av = avma;
-  if (v != MAXVARN) { /* (vx,v) -> (MAXVARN, v) */
-    t = gadd(zeroser(v,precS), gsubst(x,vx,pol_x(MAXVARN)));
-    t = gsubst(t,MAXVARN,pol_x(vx));
-  } else if (vx != 0) { /* (vx,v) -> (vx, 0) */
-    t = gadd(zeroser(0,precS), gsubst(x,v,pol_x(0)));
-    t = gsubst(t,0,pol_x(v));
-  } else { /* (0,MAXVARN) -> (w, 0) */
-    long w = fetch_var();
-    t = gadd(zeroser(0,precS), gsubst(gsubst(x,0,pol_x(w)), MAXVARN,pol_x(0)));
-    t = gsubst(gsubst(t,0,pol_x(MAXVARN)), w,pol_x(0));
-    delete_var();
-  }
-  return gerepileupto(av, t);
+  return gerepileupto(av, swapvar_act(x, vx, v, tayl_act, (void*)precS));
 }
 
 GEN
@@ -1739,11 +1744,7 @@ integ(GEN x, long v)
         gel(y,3) = gcopy(x); return y;
       }
       if (varncmp(vx, v) < 0)
-      {
-        GEN ab, ba; init_tayl(v, vx, &ab, &ba);
-	y = integ(gsubstvec(x,ab,ba),vx);
-	return gerepileupto(av, gsubstvec(y,ab,ba));
-      }
+        return gerepileupto(av, swapvar_act(x, vx, v, integ_act, NULL));
 
       tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(x[1]);
       tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(x[2]);
