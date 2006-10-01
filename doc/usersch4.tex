@@ -250,13 +250,13 @@ You should make use of the PARI stack as much as possible, and avoid
 allocating objects using the customary functions. If you do, you should
 use, or at least have a very close look at, the following wrappers:
 
-\fun{char*}{gpmalloc}{size_t size} calls \kbd{malloc} to allocate
+\fun{char*}{gpmalloc}{size\_t size} calls \kbd{malloc} to allocate
 \kbd{size} bytes and returns a pointer to the allocated memory. If the
 request fails, an error is raised. The \kbd{SIGINT} signal is blocked until
 \kbd{malloc} returns, to avoid leaving the system stack in an inconsistent
 state.
 
-\fun{char*}{gprealloc}{void* ptr, size_t size} as \kbd{gpmalloc} but calls
+\fun{char*}{gprealloc}{void* ptr, size\_t size} as \kbd{gpmalloc} but calls
 \kbd{realloc} instead of \kbd{malloc}.
 
 \fun{char*}{gpfree}{void* ptr} calls \kbd{free} to liberate the memory space
@@ -1444,7 +1444,7 @@ name.
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP
 variables on the fly as needed:
 \bprog
-GEN gy = gp_read_str("'y"); /*@Ccom returns pol_x($v$), for some $v$ */
+GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x($v$), for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}

@@ -735,19 +735,6 @@ Reals are forbidden.
 \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
 as $-1$. Also available is \funs{centerlift}{x} = \kbd{centerlift0($x$,-1)}.
 
-\subsecidx{changevar}$(x,y)$: creates a copy of the object $x$ where its
-variables are modified according to the permutation specified by the vector
-$y$. For example, assume that the variables have been introduced in the
-order \kbd{x}, \kbd{a}, \kbd{b}, \kbd{c}. Then, if $y$ is the vector
-\kbd{[x,c,a,b]}, the variable \kbd{a} will be replaced by \kbd{c}, \kbd{b} by
-\kbd{a}, and \kbd{c} by \kbd{b}, \kbd{x} being unchanged. Note that the
-permutation must be completely specified, e.g.~\kbd{[c,a,b]} would not work,
-since this would replace \kbd{x} by \kbd{c}, and leave \kbd{a} and \kbd{b}
-unchanged (as well as \kbd{c} which is the fourth variable of the initial
-list). In particular, the new variable names must be distinct.
-
-\syn{changevar}{x,y}.
-
 \subsec{components of a PARI object}:
 
 There are essentially three ways to extract the \idx{components} from a PARI
@@ -768,9 +755,8 @@ types, which can be recalled by typing \b{t} under \kbd{gp}.
 
 The two other methods are more natural but more restricted. The function
 \funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the polynomial
-or power series $x$, with respect to the main variable of $x$ (to check
-variable ordering, or to change it, use the function \tet{reorder}, see
-\secref{se:reorder}). In particular if $n$ is less than the valuation of
+or power series $x$, with respect to the main variable of $x$. In particular
+if $n$ is less than the valuation of
 $x$ or in the case of a polynomial, greater than the degree, the result is
 zero (contrary to \kbd{compo} which would send an error message). If $x$ is
 a power series and $n$ is greater than the largest significant degree, then
@@ -9044,17 +9030,6 @@ then we will get:
 In general a sequence is just a single line, but as usual braces and
 \kbd{\bs\bs} may be used to enter multiline sequences.
 
-\subsubsecidx{reorder}$(\{x=[\,]\})$: $x$ must be a vector. If $x$ is the
-empty vector, this gives the vector whose components are the existing
-variables in increasing order (i.e.~in decreasing importance). Killed
-variables (see \kbd{kill}) will be shown as \kbd{0}. If $x$ is
-non-empty, it must be a permutation of variable names, and this permutation
-gives a new order of importance of the variables, \emph{for output only}. For
-example, if the existing order is \kbd{[x,y,z]}, then after
-\kbd{reorder([z,x])} the order of importance of the variables, with respect
-to output, will be \kbd{[z,y,x]}. The internal representation is unaffected.
-\label{se:reorder}
-
 \subsubsecidx{setrand}$(n)$: reseeds the random number generator using the
 seed $n$. No value is returned. The seed is either a technical array output
 by \kbd{getrand}, or a small positive integer, used to generate
@@ -9093,12 +9068,10 @@ The error message is printed, as well as the result of the evaluation of
 \var{rec}, and control is given back to the \kbd{gp} prompt. In particular, current
 computation is then lost.
 
-The following error handler prints the list of all user variables, then
-stores in a file their name and their values:\kbdsidx{writebin}
+The following error handler stores in the file \kbd{crash} the names and
+values of all user variables:\kbdsidx{writebin}
 \bprog
-? { trap( ,
-      print(reorder);
-      writebin("crash")) }
+? trap(, writebin("crash"))
 @eprog
 
 If no recovery code is given (\var{rec} is omitted) a \tev{break loop} will

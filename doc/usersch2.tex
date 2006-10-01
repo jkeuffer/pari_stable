@@ -411,8 +411,7 @@ which has non-zero valuation (it can be a polynomial, power series, or a
 rational function; the most common case being simply a variable name). This
 indicates to \kbd{gp} that it is dealing with a power series, and the desired
 precision is $k$ times the valuation of \var{expr} with respect to the main
-variable of \var{expr}. (To check the ordering of the variables, or to modify
-it, use the function \kbd{reorder}; see~\secref{se:reorder}.)
+variable of \var{expr}.
 
 \misctitle{Caveat.} Power series with inexact coefficients sometimes have a
 non-intuitive behaviour: if $k$ significant terms are requested, an inexact
@@ -790,8 +789,7 @@ use at this point\footnote{**}{This is not strictly true: if an
 identifier is interpreted as a user function, no variable is registered. Also,
 the variable $x$ is predefined and always has the highest possible priority.}
 %
-. To see the ordering used by \kbd{gp} at any given time, type
-\kbd{reorder()}\kbdsidx{reorder}.
+.
 
 Given such an ordering, multivariate polynomials are stored so that the
 variable with the highest priority is the main variable. And so on,
@@ -809,12 +807,6 @@ ordering of common variable names in all your \kbd{gp} sessions, e.g read in a f
 \bprog
 x;y;z;t;a;b;c;d;
 @eprog
-
-If you already have started working and want to change the names of the
-variables in an object, use the function \tet{changevar}. If you only want to
-have them ordered when the result is printed, you can also use the function
-\tet{reorder}, but this won't change anything to the internal representation,
-and is not recommended.
 
 \misctitle{Important note:} PARI allows Euclidean division of multivariate
 polynomials, but assumes that the computation takes place in the fraction
@@ -1548,9 +1540,7 @@ break loop. This is the purpose of the \emph{second} argument of \kbd{trap}:
 to specify an error handler. (We will discuss the first argument at the very
 end.) For instance:
 \bprog
-? { trap( ,                \\@ note the comma: arg1 is omitted
-      print(reorder);
-      writebin("crash")) }
+  ? trap(, writebin("crash"))  \\@ note the comma: arg1 is omitted
 @eprog
 \noindent After that, whenever an error occurs, the list of all user
 variables is printed, and they are all saved in binary format in file
