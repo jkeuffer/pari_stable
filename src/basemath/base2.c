@@ -3745,7 +3745,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   if (typ(pol)!=t_POL) pari_err(typeer,"rnfpolred");
   bnf = nf; nf = checknf(bnf);
   bnf = (nf == bnf)? NULL: checkbnf(bnf);
-  if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(v,1) = pol_x(v); return w; }
+  if (degpol(pol) <= 1) { w = cgetg(2, t_VEC); gel(w,1) = pol_x(v); return w; }
   nfpol = gel(nf,1);
 
   id = rnfpseudobasis(nf,pol);
