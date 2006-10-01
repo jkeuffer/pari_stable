@@ -98,7 +98,7 @@ Description:
  (pol):var      varn($1)
  (gen):var      gvar($1)
  
- (var):pol      pol_x[$1]
+ (var):pol      pol_x($1)
  (gen):pol
  
  (int):gen
