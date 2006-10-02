@@ -444,13 +444,11 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     * [w1,h1] satisfying the same conditions mod p^2, [w1,h1] = [w0,h0] (mod p)
     * (cf. Dixon: J. Austral. Math. Soc., Series A, vol.49, 1990, p.445) */
     if (DEBUGLEVEL>1)
-      fprintferr("lifting embedding mod p^k = %Z^%ld\n",p, Z_pval(q,p));
+      fprintferr("lifting embedding mod p^k = %Z^%ld\n",S->p, Z_pval(q,S->p));
 
     /* w1 := w0 - h0 g(w0) mod (T,q) */
-    if (wpow)
-      a = FpX_FpXQV_compo(g,wpow, T,q);
-    else
-      a = FpX_FpXQ_compo(g,w0, T,q); /* first time */
+    if (wpow) a = FpX_FpXQV_compo(g,wpow, T,q);
+    else      a = FpX_FpXQ_compo(g,w0, T,q); /* first time */
     /* now, a = 0 (p) */
     a = gmul(gneg(h0), gdivexact(a, p));
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
@@ -678,11 +676,13 @@ compute_data(blockdata *B)
   if (DEBUGLEVEL>1) fprintferr("Entering compute_data()\n\n");
   pol = B->PD->pol; N = degpol(pol);
   roo = B->PD->roo;
-  if (DATA) /* update (translate) an existing DATA */
+  if (DATA)
   {
     GEN Xm1 = gsub(pol_x(varn(pol)), gen_1);
     GEN TR = addis(gel(DATA,5), 1);
     GEN mTR = negi(TR), interp, bezoutC;
+
+    if (DEBUGLEVEL>1) fprintferr("... update (translate) an existing DATA\n\n");
 
     gel(DATA,5) = TR;
     pol = translate_pol(gel(DATA,1), gen_m1);
@@ -708,7 +708,7 @@ compute_data(blockdata *B)
         gel(bezoutC,i) = FpXX_red(p1, p);
       }
     }
-    ff = cgetg(lff, t_VEC); /* copy, don't overwrite! */
+    ff = cgetg(lff, t_VEC); /* copy, do not overwrite! */
     for (i=1; i<lff; i++)
       gel(ff,i) = FpX_red(translate_pol(gel(S->ff,i), mTR), p);
   }
@@ -786,7 +786,7 @@ subfield(GEN A, blockdata *B)
     for (j=2; j<=d; j++)
       p1 = Fq_mul(p1, gel(fhk,Ai[j]), T, pe);
     gel(delta,i) = p1;
-    if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
+    if (DEBUGLEVEL>5) fprintferr("delta[%ld] = %Z\n",i,p1);
     /* g = prod (X - delta[i])
      * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
     /* fk[k] belongs to block number whichdelta[k] */
@@ -801,12 +801,13 @@ subfield(GEN A, blockdata *B)
   }
   g = FqV_roots_to_pol(delta, T, pe, 0);
   g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
-  if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
   if (!ok_coeffs(g,M)) {
+    if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
     if (DEBUGLEVEL>1) fprintferr("coeff too big for pol g(x)\n");
     return NULL;
   }
   if (!FpX_is_squarefree(g, p)) {
+    if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
     if (DEBUGLEVEL>1) fprintferr("changing f(x): p divides disc(g)\n");
     compute_data(B);
     return subfield(A, B);
@@ -817,7 +818,7 @@ subfield(GEN A, blockdata *B)
   if (DEBUGLEVEL) fprintferr("candidate = %Z\n", g);
   e = embedding(g, B->DATA, B->S, B->PD->den, listdelta);
   if (!e) return NULL;
-  if (DEBUGLEVEL) fprintferr("embedding = %Z\n", e);
+  if (DEBUGLEVEL) fprintferr("... OK!\n");
   return _subfield(g, e);
 }
 
@@ -846,7 +847,7 @@ subfields_of_given_degree(blockdata *B)
   if (DEBUGLEVEL) fprintferr("\n* Look for subfields of degree %ld\n\n", B->d);
   B->DATA = NULL; compute_data(B);
   L = calc_block(B, B->S->Z, cgetg(1,t_VEC), NULL);
-  if (DEBUGLEVEL) fprintferr("\nSubfields of degree %ld: %Z\n", B->d, L);
+  if (DEBUGLEVEL>9) fprintferr("\nSubfields of degree %ld: %Z\n", B->d, L);
   if (isclone(B->DATA)) gunclone(B->DATA);
   avma = av; return L;
 }
