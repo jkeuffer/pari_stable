@@ -972,6 +972,66 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
+#if 0 /* use undocumented GMP interface */
+static void
+GEN2mpz(mpz_t X, GEN x)
+{
+  long l = lgefint(x)-2;
+  X->_mp_alloc = l;
+  X->_mp_size = signe(x) > 0? l: -l;
+  X->_mp_d = LIMBS(x);
+}
+static void
+mpz2GEN(GEN z, mpz_t Z)
+{
+  long l = Z->_mp_size;
+  z[1] = evalsigne(l > 0? 1: -1) | evallgefint(labs(l)+2);
+}
+
+/* assume y != 0 and the division is exact */
+GEN
+diviuexact(GEN x, ulong y)
+{
+  if (!signe(x)) return gen_0;
+  {
+    long l = lgefint(x);
+    mpz_t X, Z;
+    GEN z = cgeti(l);
+    GEN2mpz(X, x);
+    Z->_mp_alloc = l-2;
+    Z->_mp_size  = l-2;
+    Z->_mp_d = LIMBS(z);
+    mpz_divexact_ui(Z, X, y);
+    mpz2GEN(z, Z); return z;
+  }
+}
+
+/* Find z such that x=y*z, knowing that y | x (unchecked) */
+GEN
+diviiexact(GEN x, GEN y)
+{
+  if (!signe(y)) pari_err(gdiver);
+  if (lgefint(y) == 3)
+  {
+    GEN z = diviuexact(x, y[2]);
+    if (signe(y) < 0) togglesign(z);
+    return z;
+  }
+  if (!signe(x)) return gen_0;
+  {
+    long l = lgefint(x);
+    mpz_t X, Y, Z;
+    GEN z = cgeti(l);
+    GEN2mpz(X, x);
+    GEN2mpz(Y, y);
+    Z->_mp_alloc = l-2;
+    Z->_mp_size  = l-2;
+    Z->_mp_d = LIMBS(z);
+    mpz_divexact(Z, X, Y);
+    mpz2GEN(z, Z); return z;
+  }
+}
+#else
 /* assume y != 0 and the division is exact */
 GEN
 diviuexact(GEN x, ulong y)
@@ -989,6 +1049,8 @@ diviiexact(GEN x, GEN y)
   /*TODO: use mpn_bdivmod instead*/
   return divii(x,y);
 }
+#endif
+
 
 /********************************************************************/
 /**                                                                **/
