@@ -2707,6 +2707,30 @@ name_var(long n, char *s)
   varentries[n] = ep;
 }
 
+GEN
+gpolvar(GEN x)
+{
+  long v;
+  if (!x) {
+    long k = 1, n = manage_var(manage_var_next,NULL);
+    GEN z = cgetg(n+1, t_VEC);
+    for (v = 0; v < n; v++)
+    {
+      entree *ep = varentries[v];
+      if (ep) gel(z,k++) = (GEN)initial_value(ep);
+    }
+    if (k <= n) {
+      setlg(z,k);
+      stackdummy((pari_sp)(z+n), (pari_sp)(z+k));
+    }
+    return z;
+  }
+  if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
+  v = gvar(x);
+  if (v==BIGINT) pari_err(typeer,"gpolvar");
+  return pol_x(v);
+}
+
 /* Find entry or create it */
 static entree *
 entry(void)

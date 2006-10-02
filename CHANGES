@@ -115,6 +115,7 @@ BA 13- add pari_stackcheck_init() function to control deep recursion detection
     2- old CodeWarrior-specific hack (malloc)
     3- error code: intger2, affer3, overwriter
     4- useless static function gp_handle_SIGINT
-    5- functions changevar() and reorder(), global arrays pol_1[], pol_x[]
+    5- functions changevar() [ use substvec ] and reorder() [ use variable()
+       to get the list of user variables ], global arrays pol_1[], pol_x[]
        ordvar[] and polvar[]
 

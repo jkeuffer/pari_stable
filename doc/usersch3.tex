@@ -755,7 +755,8 @@ types, which can be recalled by typing \b{t} under \kbd{gp}.
 
 The two other methods are more natural but more restricted. The function
 \funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the polynomial
-or power series $x$, with respect to the main variable of $x$. In particular
+or power series $x$, with respect to the main variable of $x$. (To check
+variable ordering, type \kbd{variable()}.) In particular
 if $n$ is less than the valuation of
 $x$ or in the case of a polynomial, greater than the degree, the result is
 zero (contrary to \kbd{compo} which would send an error message). If $x$ is
@@ -1095,15 +1096,18 @@ Any other type combinations gives an error.
 
 \syn{ggval}{x,p}, and the result is a \kbd{long}.
 
-\subsecidx{variable}$(x)$: gives the main variable of the object $x$, and
+\subsecidx{variable}$(\{x\})$: gives the main variable of the object $x$, and
 $p$ if $x$ is a $p$-adic number. Gives an error if $x$ has no variable
-associated to it. Note that this function is useful only in GP, since in
-library mode the function \kbd{gvar} is more appropriate.
+associated to it. If $x$ is omitted, returns the list of user variables known
+to the interpreter, by order of decreasing priority. (Highest priority is $x$,
+which always come first.)
 
-\syn{gpolvar}{x}. However, in library mode, this function should not be used.
-Instead, test whether $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$
-is in $x[2]$, or call the function \funs{gvar}{x} which returns the variable
-\emph{number} of $x$ if it exists, \kbd{BIGINT} otherwise.
+\syn{gpolvar}{x}, where an omitted $x$ is coded as \kbd{NULL}.
+However, in library mode, this function should not be used for $x$
+non-\kbd{NULL}, since \tet{gvar} is more appropriate. Instead, test whether
+$x$ is a $p$-adic (type \typ{PADIC}), in which case $p$ is $gel(x,2)$, or call
+the function \funs{gvar}{x} which returns the variable \emph{number} of $x$ if
+it exists, \kbd{BIGINT} otherwise.
 
 \section{Transcendental functions}\label{se:trans}
 
@@ -9068,10 +9072,10 @@ The error message is printed, as well as the result of the evaluation of
 \var{rec}, and control is given back to the \kbd{gp} prompt. In particular, current
 computation is then lost.
 
-The following error handler stores in the file \kbd{crash} the names and
-values of all user variables:\kbdsidx{writebin}
+The following error handler prints the list of all user variables, then
+stores in the file \kbd{crash} their names and values:\kbdsidx{writebin}
 \bprog
-? trap(, writebin("crash"))
+? trap(, print(variable()); writebin("crash"))
 @eprog
 
 If no recovery code is given (\var{rec} is omitted) a \tev{break loop} will

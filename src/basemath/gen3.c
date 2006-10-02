@@ -93,16 +93,6 @@ gvar2(GEN x)
   return BIGINT;
 }
 
-GEN
-gpolvar(GEN x)
-{
-  long v;
-  if (typ(x)==t_PADIC) return gcopy( gel(x,2) );
-  v = gvar(x);
-  if (v==BIGINT) pari_err(typeer,"gpolvar");
-  return pol_x(v);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                    PRECISION OF SCALAR OBJECTS                  */

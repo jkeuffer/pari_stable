@@ -411,7 +411,8 @@ which has non-zero valuation (it can be a polynomial, power series, or a
 rational function; the most common case being simply a variable name). This
 indicates to \kbd{gp} that it is dealing with a power series, and the desired
 precision is $k$ times the valuation of \var{expr} with respect to the main
-variable of \var{expr}.
+variable of \var{expr}. (To check the ordering of the variables, type
+\kbd{variable()}.)\kbdsidx{variable}\kbdsidx{variable}
 
 \misctitle{Caveat.} Power series with inexact coefficients sometimes have a
 non-intuitive behaviour: if $k$ significant terms are requested, an inexact
@@ -789,7 +790,8 @@ use at this point\footnote{**}{This is not strictly true: if an
 identifier is interpreted as a user function, no variable is registered. Also,
 the variable $x$ is predefined and always has the highest possible priority.}
 %
-.
+. To see the ordering used by \kbd{gp} at any given time, type
+\kbd{variable()}.\kbdsidx{variable}
 
 Given such an ordering, multivariate polynomials are stored so that the
 variable with the highest priority is the main variable. And so on,
