@@ -66,6 +66,7 @@ BA 34- bnrstark prototype code was non-standard.
        E.g i = 5; ellinit([1, -1, 1, -1, -14]*(1+O(17^i)))
    37- missing GC in forvec(,,2)
 BA 38- Interrupting GP could lead to a freeze. [#488]
+   39- possible stack corruption in charpoly(,1)
 
   Changed
     1- moved cgiv, gtofp to inline kernel

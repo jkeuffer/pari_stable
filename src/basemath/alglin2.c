@@ -144,7 +144,7 @@ caract(GEN x, long v)
   x_k = monomial(gen_1, 1, v);
   for (k=0; k<=n; k++)
   {
-    GEN mk = utoineg(k);
+    GEN mk = stoi(-k);
     gel(x_k,2) = mk;
     p3 = det(gaddmat_i(mk, x));
     p1 = gadd(gmul(p1, x_k), gmul(gmul(p2, p3), Q));
