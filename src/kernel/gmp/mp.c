@@ -193,8 +193,7 @@ adduispec(ulong s, GEN x, long nx)
     ulong t = (ulong)x[0]+s;
     if (t < (ulong)x[0])
     {
-      GEN y = cgeti(4);
-      y[1] = evalsigne(1)| evallgefint(4); y[2] = t; y[3]=1;
+      GEN y = cgetipos(4); y[2] = t; y[3]=1;
       return y;
     }
     return utoipos(t);
