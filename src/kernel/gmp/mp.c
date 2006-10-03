@@ -183,11 +183,22 @@ incloop(GEN a)
 }
 
 INLINE GEN
-addsispec(long s, GEN x, long nx)
+adduispec(ulong s, GEN x, long nx)
 {
   GEN  zd;
   long lz;
 
+  if (nx == 1)
+  {
+    ulong t = (ulong)x[0]+s;
+    if (t < (ulong)x[0])
+    {
+      GEN y = cgeti(4);
+      y[1] = evalsigne(1)| evallgefint(4); y[2] = t; y[3]=1;
+      return y;
+    }
+    return utoipos(t);
+  }
   lz = nx+3; zd = cgeti(lz);
   if (mpn_add_1(LIMBS(zd),(mp_limb_t *)x,nx,s))
     zd[lz-1]=1;
@@ -204,7 +215,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
   long lz;
 
   if (nx < ny) swapspec(x,y, nx,ny);
-  if (ny == 1) return addsispec(*y,x,nx);
+  if (ny == 1) return adduispec(*y,x,nx);
   lz = nx+3; zd = cgeti(lz);
 
   if (mpn_add(LIMBS(zd),(mp_limb_t *)x,nx,(mp_limb_t *)y,ny))
@@ -524,12 +535,17 @@ muluu(ulong x, ulong y)
 INLINE GEN
 muluispec(ulong x, GEN y, long ny)
 {
-  long lz = ny+3;
-  GEN z=cgeti(lz);
-  ulong hi = mpn_mul_1 (LIMBS(z), (mp_limb_t *)y, ny, x);
-  if (hi) { z[lz - 1] = hi; } else lz--;
-  z[1] = evalsigne(1) | evallgefint(lz);
-  return z;
+  if (ny == 1)
+    return muluu(x, *y);
+  else
+  {
+    long lz = ny+3;
+    GEN z = cgeti(lz);
+    ulong hi = mpn_mul_1 (LIMBS(z), (mp_limb_t *)y, ny, x);
+    if (hi) { z[lz - 1] = hi; } else lz--;
+    z[1] = evalsigne(1) | evallgefint(lz);
+    return z;
+  }
 }
 
 /* a + b*|y| */

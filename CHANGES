@@ -94,6 +94,7 @@ BA 38- Interrupting GP could lead to a freeze. [#488]
    15- improve hyperu
    16- remove gp-specific signal handler. Use the one in libpari
    17- [library] pol_1 and pol_x are no longer global arrays but functions
+   18- [GMP] was inefficient for small sizes (e.g. 1-word operands)
 
   Added
 BA  1- function Flm_rank

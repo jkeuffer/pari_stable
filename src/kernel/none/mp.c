@@ -125,15 +125,15 @@ incloop(GEN a)
 }
 
 INLINE GEN
-addsispec(long s, GEN x, long nx)
+adduispec(ulong s, GEN x, long nx)
 {
   GEN xd, zd = (GEN)avma;
   long lz;
 
   lz = nx+3; (void)new_chunk(lz);
   xd = x + nx;
-  *--zd = *--xd + s;
-  if ((ulong)*zd < (ulong)s)
+  *--zd = (ulong)*--xd + s;
+  if ((ulong)*zd < s)
     for(;;)
     {
       if (xd == x) { *--zd = 1; break; } /* enlarge z */
@@ -155,7 +155,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
   LOCAL_OVERFLOW;
 
   if (nx < ny) swapspec(x,y, nx,ny);
-  if (ny == 1) return addsispec(*y,x,nx);
+  if (ny == 1) return adduispec(*y,x,nx);
   zd = (GEN)avma;
   lz = nx+3; (void)new_chunk(lz);
   xd = x + nx;

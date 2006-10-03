@@ -49,7 +49,7 @@ addsi_sign(long x, GEN y, long sy)
   if (x<0) { sx=-1; x=-x; } else sx=1;
   if (sx==sy)
   {
-    z = addsispec(x,y+2, lgefint(y)-2);
+    z = adduispec(x,y+2, lgefint(y)-2);
     setsigne(z,sy); return z;
   }
   ly=lgefint(y);
