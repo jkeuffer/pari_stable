@@ -1047,7 +1047,7 @@ gtofp(GEN z, long prec)
     case t_REAL: return rtor(z, prec);
     case t_COMPLEX: return ctofp(z, prec);
     case t_QUAD: return quadtoc(z, prec);
-    default: pari_err(typeer,"gtofp"); return gen_0; /* not reached */
+    default: pari_err(typeer,"gtofp"); return NULL; /* not reached */
   }
 }
 /* y a t_REAL */
