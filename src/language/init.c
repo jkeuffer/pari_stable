@@ -68,16 +68,17 @@ typedef struct {
 static THREAD stack *err_catch_stack;
 static THREAD char **dft_handler;
 
-#define BLOCK_SIGINT(code) \
-{                          \
-  PARI_SIGINT_block = 1;   \
-  code                     \
-  PARI_SIGINT_block = 0;   \
-  if (PARI_SIGINT_pending) \
-  {                        \
-    PARI_SIGINT_pending=0; \
-    raise(SIGINT);         \
-  }                        \
+#define BLOCK_SIGINT(code)           \
+{                                    \
+  int block=PARI_SIGINT_block;       \
+  PARI_SIGINT_block = 1;             \
+  code                               \
+  if (!block && PARI_SIGINT_pending) \
+  {                                  \
+    PARI_SIGINT_block   = 0;         \
+    PARI_SIGINT_pending = 0;         \
+    raise(SIGINT);                   \
+  }                                  \
 }
 
 void
