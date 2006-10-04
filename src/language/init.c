@@ -73,9 +73,9 @@ static THREAD char **dft_handler;
   int block=PARI_SIGINT_block;       \
   PARI_SIGINT_block = 1;             \
   code                               \
+  PARI_SIGINT_block = block;         \
   if (!block && PARI_SIGINT_pending) \
   {                                  \
-    PARI_SIGINT_block   = 0;         \
     PARI_SIGINT_pending = 0;         \
     raise(SIGINT);                   \
   }                                  \
