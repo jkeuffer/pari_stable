@@ -982,6 +982,7 @@ void    printp1(GEN g);
 void    printtex(GEN g);
 GEN     readbin(const char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);
+char*   stack_strdup(const char *s);
 void    switchin(const char *name);
 void    switchout(char *name);
 void    texe(GEN g, char format, long dec);

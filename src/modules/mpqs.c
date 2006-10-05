@@ -1982,13 +1982,12 @@ mpqs_add_0(char **last) {
 }
 
 #ifdef MPQS_DEBUG
-/* XXX use this in *all* places which factor something back...? */
 static GEN
 mpqs_factorback(mpqs_handle_t *h, char *relations)
 {
-  char *s, *t = pari_strdup(relations);
+  char *s, *t = stack_strdup(relations);
   GEN p_e, N = h->N, prod = gen_1;
-  long e;
+  long i;
   mpqs_FB_entry_t *FB = h->FB;
 
   s = strtok(t, " \n");
@@ -1996,13 +1995,14 @@ mpqs_factorback(mpqs_handle_t *h, char *relations)
   {
     e = atol(s); if (!e) break;
     s = strtok(NULL, " \n");
-    if (atol(s) == 1)           /* special case -1... */
-    { prod = subii(N, prod); s = strtok(NULL, " \n"); continue; }
-    p_e = Fp_powu(utoipos(FB[atol(s)].fbe_p), (ulong)e, N);
+    i = atol(s);
+    /* special case -1 */
+    if (i == 1) { prod = subii(N, prod); s = strtok(NULL, " \n"); continue; }
+    p_e = Fp_powu(utoipos(FB[i].fbe_p), (ulong)e, N);
     prod = remii(mulii(prod, p_e), N);
     s = strtok(NULL, " \n");
   }
-  gpfree(t); return prod;
+  return prod;
 }
 #endif
 
@@ -2317,9 +2317,6 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
   long old_q;
   GEN inv_q, Y1, Y2, new_Y, new_Y1;
   long i, l, c = 0;
-#ifdef MPQS_DEBUG
-  mpqs_FB_entry_t *FB = h->FB;  /* for factoring back */
-#endif
 
   *f = NULL;
   if (!fgets(buf, MPQS_STRING_LENGTH, COMB)) return 0; /* should not happen */
@@ -2412,38 +2409,15 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
 
 #ifdef MPQS_DEBUG
     {
-      char ejk [MPQS_STRING_LENGTH];
-      GEN Qx_2, prod_pi_ei, pi_ei;
-      char *s;
-      long pi, exi;
+      GEN Qx_2, prod;
+      char *s = strchr(new_relation, ':') + 2;
       pari_sp av1 = avma;
+
       Qx_2 = modii(sqri(new_Y), h->N);
-
-      strcpy(ejk, new_relation);
-      s = strchr(ejk, ':') + 2;
-      s = strtok(s, " \n");
-
-      /* XXX Why isn't this re-using mpqs_factorback()? */
-      /* XXX And de-mess the messy ad-hoc identifiers... */
-      prod_pi_ei = gen_1;
-      while (s != NULL)
-      {
-        exi = atol(s); if (!exi) break;
-        s = strtok(NULL, " \n");
-        pi = atol(s);
-        if (pi == 1)            /* special case -1... */
-        {
-          prod_pi_ei = subii(h->N, prod_pi_ei); s = strtok(NULL, " \n");
-          continue;
-        }
-        pi_ei = Fp_pow(utoipos(FB[pi].fbe_p), utoipos(exi), h->N);
-        prod_pi_ei = modii(mulii(prod_pi_ei, pi_ei), h->N);
-        s = strtok(NULL, " \n");
-      }
-      avma = av1;
-
-      if (!equalii(Qx_2, prod_pi_ei))
+      prod = mpqs_factorback(h, s);
+      if (!equalii(Qx_2, prod))
         pari_err(talker, "MPQS: combined large prime relation is false");
+      avma = av1;
     }
 #endif
 

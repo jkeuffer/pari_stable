@@ -839,6 +839,14 @@ PariOUT pariErr2Str = {errstr_putc, errstr_puts, outstr_flush, NULL};
 #undef STEPSIZE
 
 char *
+stack_strdup(const char *s)
+{
+  long n = strlen(s)+1;
+  char *t = stackmalloc(n);
+  memcpy(t,s,n); return t;
+}
+
+char *
 pari_strdup(const char *s)
 {
   long n = strlen(s)+1;
