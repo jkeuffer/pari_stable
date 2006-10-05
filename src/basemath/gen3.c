@@ -1588,7 +1588,7 @@ swapvar_act(GEN x, long vx, long v, GEN (*act)(void*, long, GEN), void *data)
     long w = fetch_var();
     y = act(data, 0, gsubst(gsubst(x,0,pol_x(w)), MAXVARN,pol_x(0)));
     y = gsubst(gsubst(y,0,pol_x(MAXVARN)), w,pol_x(0));
-    delete_var();
+    (void)delete_var();
   }
   return y;
 }

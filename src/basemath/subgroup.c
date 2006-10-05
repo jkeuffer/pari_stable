@@ -15,14 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
-
-void push_val(entree *ep, GEN a);
-void pop_val(entree *ep);
-
-typedef struct {
-  entree *ep;
-  char *s;
-} expr_t;
+#include "../language/anal.h"
 
 typedef struct slist {
   struct slist *next;
@@ -98,9 +91,9 @@ conjugate(long *typ)
 static void
 std_fun(subgp_iter *T, GEN x)
 {
-  expr_t *E = (expr_t *)T->fundata;
+  exprdat *E = (exprdat *)T->fundata;
   E->ep->value = (void*)x;
-  (void)readseq(E->s); T->countsub++;
+  (void)readseq(E->ch); T->countsub++;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
 static void
@@ -559,7 +552,7 @@ void
 forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 {
   subgp_iter T;
-  expr_t E;
+  exprdat E;
   long N;
 
   T.fun = &std_fun;
@@ -567,7 +560,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
   if (!cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
   T.cyc = cyc;
-  E.s = ch;
+  E.ch = ch;
   E.ep= ep; T.fundata = (void*)&E;
   push_val(ep, gen_0);
 
