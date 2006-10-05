@@ -2412,7 +2412,7 @@ _gtoser(GEN x, long v, long prec)
   switch(tx)
   {
     case t_POL:
-      if (varncmp(varn(x), v) <= 0)
+      if (varncmp(varn(x), v) < 0)
         pari_err(talker,"main variable must have higher priority in gtoser");
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
@@ -2420,7 +2420,7 @@ _gtoser(GEN x, long v, long prec)
       break;
 
     case t_RFRAC:
-      if (varncmp(varn(gel(x,2)), v) <= 0)
+      if (varncmp(varn(gel(x,2)), v) < 0)
         pari_err(talker,"main variable must have higher priority in gtoser");
       av = avma;
       return gerepileupto(av, rfractoser(x, v, prec));

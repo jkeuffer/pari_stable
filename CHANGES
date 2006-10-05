@@ -67,6 +67,7 @@ BA 34- bnrstark prototype code was non-standard.
    37- missing GC in forvec(,,2)
 BA 38- Interrupting GP could lead to a freeze. [#488]
    39- possible stack corruption in charpoly(,1)
+   40- Ser(x) raised an error [#499]
 
   Changed
     1- moved cgiv, gtofp to inline kernel
