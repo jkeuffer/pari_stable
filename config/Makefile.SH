@@ -287,7 +287,7 @@ test-kernel:: kerntest
 tune.o: $src/test/tune.c
 	\$(CC) \$(CFLAGS) \$(GMPFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
 
-tune: tune-sta
+tune: pariinl.h tune-sta
 	-\$(RM) tune ../tune
 	-\$(LN) tune-sta tune
 	-\$(LN) $ln_objdir/tune ../tune
