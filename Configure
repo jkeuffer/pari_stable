@@ -163,8 +163,14 @@ cat << EOT
 ==========================================================================
 EOT
 
-echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
-dflt=n; rep='y n'; . $config_dir/myread
+if test -n "$tune"; then
+  echo "Building and tuning PARI (this may take a while)"
+  echo
+  (cd $objdir; make tune; tune -t > tune.h; touch pariinl.h)
+else
+  echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
+  dflt=n; rep='y n'; . $config_dir/myread
+fi
 
 mkobjdir=`$config_dir/objdir`
 cdobjdir=

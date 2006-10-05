@@ -111,6 +111,7 @@ RM  7- polhermite, polchebyshev2
    11- allow gzip'ped elldata & galdata files
    12- allow t_VECSMALL in vecmin / vecmax
 BA 13- add pari_stackcheck_init() function to control deep recursion detection
+   14- Configure --tune flag
 
   Removed
     1- Odos/Makefile (no longer functional, obsolete)

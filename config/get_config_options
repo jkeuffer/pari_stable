@@ -66,6 +66,7 @@ while test $# -gt 0; do
   --time=*) timing_fun=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*) target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --kernel=*) kernel=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --tune) tune=yes;;
   --builddir) dfltobjdir=auto;;
   --builddir=*) dfltobjdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   -a|-ask|--ask)     fastread=no;;
@@ -145,6 +146,7 @@ Build Options:
   --graphic=<gr>        graphic library used (default X11) (none X11 Qt fltk)
   --time=<fun>          timing function to use (getrusage times ftime)
   --builddir=<dir>      directory where the object files will be created
+  --tune                tune the binary for compiling host (slow)
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)

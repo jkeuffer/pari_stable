@@ -323,6 +323,17 @@ add_dat(long size, double d)
   dat[ndat].d    = d; ndat++;
 }
 
+void 
+diag(const char *format, ...)
+{
+  va_list ap;
+  va_start(ap, format);
+  vfprintf(stderr, format, ap);
+}
+void
+print_define(const char *name, long value)
+{ printf("#define __%-25s  %5ld\n\n", name, value); }
+
 long
 analyze_dat(int final)
 {
@@ -336,10 +347,10 @@ analyze_dat(int final)
 
   if (final && option_trace >= 3)
   {
-    printf("\n");
-    printf("x is the sum of the badness from setting thresh at given size\n");
-    printf("  (minimum x is sought)\n");
-    printf("size=%ld  first x=%.4f\n", dat[j].size, x);
+    diag("\n");
+    diag("x is the sum of the badness from setting thresh at given size\n");
+    diag("  (minimum x is sought)\n");
+    diag("size=%ld  first x=%.4f\n", dat[j].size, x);
   }
 
   min_x = x;
@@ -351,17 +362,13 @@ analyze_dat(int final)
   for (j = 0; j < ndat; j++)
   {
     if (final && option_trace >= 3)
-      printf ("size=%ld  x=%.4f\n", dat[j].size, x);
+      diag ("size=%ld  x=%.4f\n", dat[j].size, x);
 
     if (x < min_x) { min_x = x; min_j = j; }
     x -= dat[j].d;
   }
   return min_j;
 }
-
-void
-print_define(const char *name, long value)
-{ printf("#define __%-25s  %5ld\n\n", name, value); }
 
 void
 Test(tune_param *param)
@@ -382,11 +389,11 @@ Test(tune_param *param)
   s.var  = param->var;
   ndat = since_positive = since_change = thresh = 0;
   if (option_trace >= 1)
-    printf("Setting %s... (default %ld)\n", param->name, *(param->var));
+    diag("Setting %s... (default %ld)\n", param->name, *(param->var));
   if (option_trace >= 2)
   {
-    printf("              algorithm-A  algorithm-B   ratio  possible\n");
-    printf("               (seconds)    (seconds)    diff    thresh\n");
+    diag("              algorithm-A  algorithm-B   ratio  possible\n");
+    diag("               (seconds)    (seconds)    diff    thresh\n");
   }
 
   for(;;)
@@ -401,8 +408,8 @@ Test(tune_param *param)
     new_thresh = analyze_dat(0);
 
     if (option_trace >= 2)
-      printf ("size =%4ld     %.8f   %.8f  % .4f %c  %ld\n",
-               s.size, t1,t2, d, d < 0? '#': ' ', dat[new_thresh].size);
+      diag ("size =%4ld     %.8f   %.8f  % .4f %c  %ld\n",
+            s.size, t1,t2, d, d < 0? '#': ' ', dat[new_thresh].size);
 
 #define SINCE_POSITIVE 20
 #define SINCE_CHANGE 50
@@ -413,14 +420,14 @@ Test(tune_param *param)
       if (++since_positive > SINCE_POSITIVE)
       {
         if (option_trace >= 1)
-          printf ("Stop: since_positive (%d)\n", SINCE_POSITIVE);
+          diag("Stop: since_positive (%d)\n", SINCE_POSITIVE);
         break;
       }
     /* Stop if method A has become slower by a certain factor */
     if (t1 >= t2 * param->stop_factor)
     {
       if (option_trace >= 1)
-        printf ("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
+        diag("Stop: t1 >= t2 * factor (%.1f)\n", param->stop_factor);
       break;
     }
     /* Stop if threshold implied hasn't changed for a while */
@@ -430,14 +437,14 @@ Test(tune_param *param)
       if (++since_change > SINCE_CHANGE)
       {
         if (option_trace >= 1)
-          printf ("Stop: since_change (%d)\n", SINCE_CHANGE);
+          diag("Stop: since_change (%d)\n", SINCE_CHANGE);
         break;
       }
     s.size += max((long)floor(s.size * param->step_factor), 1);
     if (s.size >= param->max_size)
     {
       if (option_trace >= 1)
-        printf ("Stop: max_size (%ld). Disable Algorithm B?\n",param->max_size);
+        diag("Stop: max_size (%ld). Disable Algorithm B?\n",param->max_size);
       break;
     }
   }
@@ -448,10 +455,10 @@ Test(tune_param *param)
 
 void error(char **argv) {
   long i;
-  printf("usage: tune [-t] [-s step_factor] [-p mod] [-u unittime] var1 var2 ...\n");
-  printf("Tunable variables: (omitting variable indices tunes everybody)\n");
+  diag("usage: tune [-t] [-s step_factor] [-p mod] [-u unittime] var1 var2 ...\n");
+  diag("Tunable variables: (omitting variable indices tunes everybody)\n");
   for (i = 0; i < (long)numberof(param); i++)
-    printf("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
+    diag("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
   exit(1);
 }
 

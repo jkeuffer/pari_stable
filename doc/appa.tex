@@ -78,6 +78,15 @@ architecture and operating system, thus you can build GP for several
 different machines from the same source tree (the builds are
 independent and can be done simultaneously).
 
+\kbd{./Configure --tune} 
+
+\noindent fine tunes the library for the host used for compilation. This
+adjusts thresholds by running a large number of comparative tests. (It will
+take a while: about 30 minutes on a 2GHz machine.) Expect a small performance
+boost, perhaps a 10\%
+speed increase compared to default settings. If you are using GMP, tune it
+first, then PARI. Do not use a heavily loaded machine for tunings.
+
 \misctitle{Technical note:} \kbd{Configure} accepts many other flags
 besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
 particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
