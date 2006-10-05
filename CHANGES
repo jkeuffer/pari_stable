@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.4.0 (released ??/??/2006):
+Done for version 2.4.0 (released 06/10/2006):
   Fixed
     1- typo in remiimul: wrong result in a "failsafe" branch (hardly ever
        taken). May affect modular powering /Fp if p >> 10^1300 [#457]
