@@ -1,5 +1,5 @@
 !include "MUI.nsh"
-Name "PARI 2.4.0-rc1 (release candidate)"
+Name "PARI 2.4.0 (ALPHA)"
 !define dll "libpari-2.4.dll"
 
 ;--------------------------------
