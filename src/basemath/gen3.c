@@ -3067,7 +3067,7 @@ geval(GEN x)
         entree *ep = varentries[vx];
         if (!ep) return gcopy(x);
         z = (GEN)ep->value;
-        if (degpol(x) == 1 && gequal(gel(x,2),gen_1) && gequal(gel(x,3),gen_0))
+        if (degpol(x) == 1 && gequal(gel(x,2),gen_0) && gequal(gel(x,3),gen_1))
           return gcopy(z);
       }
       y=gen_0; av=avma;
