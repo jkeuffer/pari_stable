@@ -79,13 +79,19 @@ rand_INT(long n)
 static GEN
 rand_REAL(long n) { return gmul2n(itor(rand_INT(n), n+2),-BITS_IN_LONG*n); }
 
+static GEN
+rand_FpX(long n)
+{
+  GEN x;
+  do x = FpX_rand(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
+  return x;
+}
 /* Flx, degree n */
 static GEN
 rand_Flx(long n)
 {
   pari_sp av = avma;
-  GEN x;
-  do x = FpX_rand(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
+  GEN x = rand_FpX(n);
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
@@ -100,6 +106,7 @@ rand_NFlx(long n)
 
 #define t_Flx  100
 #define t_NFlx 101
+#define t_FpX  102
 
 static GEN
 rand_g(long n, long type)
@@ -109,6 +116,7 @@ rand_g(long n, long type)
     case t_REAL: return rand_REAL(n);
     case t_Flx:  return rand_Flx(n);
     case t_NFlx: return rand_NFlx(n);
+    case t_FpX : return rand_FpX(n);
   }
   return NULL;
 }
@@ -225,6 +233,16 @@ static double speed_Flxq_pow_mod(speed_param *s) {
   disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoipos(p), s->y, p) );
 }
 
+/* small coeffs: earlier thresholds for more complicated rings */
+static double speed_RgX_sqr(speed_param *s)
+{ disable(s); TIME_FUN(RgX_sqr(s->x)); }
+static double speed_RgX_karasqr(speed_param *s)
+{ enable(s); TIME_FUN(RgX_sqr(s->x)); }
+static double speed_RgX_mul(speed_param *s)
+{ disable(s); TIME_FUN(RgX_mul(s->x, s->y)); }
+static double speed_RgX_karamul(speed_param *s)
+{ enable(s); TIME_FUN(RgX_mul(s->x, s->y)); }
+
 enum { PARI = 1, GMP = 2 };
 #ifdef PARI_KERNEL_GMP
 #  define AVOID PARI
@@ -252,7 +270,9 @@ static tune_param param[] = {
 {0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,30000,
                                    speed_Flx_inv,speed_Flx_invnewton,0.3},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
-                                   speed_Flxq_pow_redc,speed_Flxq_pow_mod}
+                                   speed_Flxq_pow_redc,speed_Flxq_pow_mod},
+{0,  var(RgX_MUL_LIMIT),          t_FpX, 4,0, speed_RgX_mul,speed_RgX_karamul},
+{0,  var(RgX_SQR_LIMIT),          t_FpX, 4,0, speed_RgX_sqr,speed_RgX_karasqr},
 };
 
 /* ========================================================== */
