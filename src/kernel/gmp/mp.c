@@ -228,7 +228,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
 
 /* assume x >= y */
 INLINE GEN
-subisspec(GEN x, long s, long nx)
+subiuspec(GEN x, ulong s, long nx)
 {
   GEN zd;
   long lz;
@@ -247,7 +247,7 @@ subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN zd;
   long lz;
-  if (ny==1) return subisspec(x,*y,nx);
+  if (ny==1) return subiuspec(x,*y,nx);
   lz = nx+2; zd = cgeti(lz);
   
   mpn_sub (LIMBS(zd), (mp_limb_t *)x, nx, (mp_limb_t *)y, ny);
@@ -588,8 +588,6 @@ muliispec_mirror(GEN x, GEN y, long nx, long ny)
   xmpn_mirror(LIMBS(z), NLIMBS(z));
   return z;
 }
-
-/*#define KARAMULR_VARIANT*/
 
 /***********************************************************************/
 /**								      **/

@@ -178,7 +178,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
 
 /* assume x >= y */
 INLINE GEN
-subisspec(GEN x, long s, long nx)
+subiuspec(GEN x, ulong s, long nx)
 {
   GEN xd, zd = (GEN)avma;
   long lz;
@@ -210,7 +210,7 @@ subiispec(GEN x, GEN y, long nx, long ny)
   long lz;
   LOCAL_OVERFLOW;
 
-  if (ny==1) return subisspec(x,*y,nx);
+  if (ny==1) return subiuspec(x,*y,nx);
   zd = (GEN)avma;
   lz = nx+2; (void)new_chunk(lz);
   xd = x + nx;

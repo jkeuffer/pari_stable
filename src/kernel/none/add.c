@@ -68,7 +68,7 @@ addsi_sign(long x, GEN y, long sy)
     }
     return z;
   }
-  z = subisspec(y+2,x, ly-2);
+  z = subiuspec(y+2,x, ly-2);
   setsigne(z,sy); return z;
 }
 
