@@ -197,6 +197,16 @@ shallowconcat(GEN x, GEN y)
     err_cat(x,y);
   }
 
+  if (tx == ty)
+  {
+    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
+    if (!is_matvec_t(tx) && tx != t_VECSMALL) return mkvec2(x, y);
+    z=cgetg(lx+ly-1,tx);
+    for (i=1; i<lx; i++) z[i]     = x[i];
+    for (i=1; i<ly; i++) z[lx+i-1]= y[i];
+    return z;
+  }
+
   if (! is_matvec_t(tx))
   {
     if (! is_matvec_t(ty)) return mkvec2(x, y);
@@ -221,15 +231,6 @@ shallowconcat(GEN x, GEN y)
     }
     for (i=1; i<lx; i++) z[i]=x[i];
     gel(z, lx) = p1; return z;
-  }
-
-  if (tx == ty)
-  {
-    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
-    z=cgetg(lx+ly-1,tx);
-    for (i=1; i<lx; i++) z[i]=x[i];
-    for (i=1; i<ly; i++) z[lx+i-1]=y[i];
-    return z;
   }
 
   switch(tx)
@@ -321,6 +322,23 @@ concat(GEN x, GEN y)
     err_cat(x,y);
   }
 
+  if (tx == ty)
+  {
+    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
+    if (!is_matvec_t(tx))
+    {
+      if (tx != t_VECSMALL) return mkvec2copy(x, y);
+      z = cgetg(lx+ly-1,t_VECSMALL);
+      for (i=1; i<lx; i++) z[i]     = x[i];
+      for (i=1; i<ly; i++) z[lx+i-1]= y[i];
+      return z;
+    }
+    z=cgetg(lx+ly-1,tx);
+    for (i=1; i<lx; i++) gel(z,i)     = gcopy(gel(x,i));
+    for (i=1; i<ly; i++) gel(z,lx+i-1)= gcopy(gel(y,i));
+    return z;
+  }
+
   if (! is_matvec_t(tx))
   {
     if (! is_matvec_t(ty)) return mkvec2copy(x, y);
@@ -345,15 +363,6 @@ concat(GEN x, GEN y)
     }
     for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
     gel(z,lx) = p1; return z;
-  }
-
-  if (tx == ty)
-  {
-    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
-    z=cgetg(lx+ly-1,tx);
-    for (i=1; i<lx; i++) gel(z,i)     = gcopy(gel(x,i));
-    for (i=1; i<ly; i++) gel(z,lx+i-1)= gcopy(gel(y,i));
-    return z;
   }
 
   switch(tx)
