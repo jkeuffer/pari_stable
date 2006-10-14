@@ -689,7 +689,7 @@ changevalue_p(entree *ep, GEN x)
 
 /* make GP variables safe for avma = top */
 void
-var_make_safe()
+var_make_safe(void)
 {
   long n;
   entree *ep;
@@ -951,7 +951,7 @@ L1:
  * guess offending function was last identifier */
 #define LEN 127
 static void
-err_new_fun()
+err_new_fun(void)
 {
   char s[LEN+1], *t;
   long n;
@@ -985,7 +985,7 @@ err_match(char *s, char c)
   if (br_status) pari_err(talker2, "break not allowed "/**/s, (old), mark.start)
 
 static long
-readlong()
+readlong(void)
 {
   const pari_sp av = avma;
   const char *old = analyseur;
@@ -1017,7 +1017,7 @@ check_array_index(long max)
 }
 
 static long
-readvar()
+readvar(void)
 {
   const char *old = analyseur;
   const GEN x = expr();
@@ -1141,7 +1141,7 @@ readstring_i(char *s, char **ptbuf, char **ptlim)
 }
 
 static GEN
-any_string()
+any_string(void)
 {
   long n = 1, len = 16;
   GEN res = cget1(len + 1, t_VEC);
@@ -1483,7 +1483,7 @@ truc(void)
 
 /* valid x opop, e.g x++ */
 static GEN
-double_op()
+double_op(void)
 {
   char c = *analyseur;
   if (c && c == analyseur[1])
@@ -1497,7 +1497,7 @@ double_op()
 
 /* return op if op= detected */
 static F2GEN
-get_op_fun()
+get_op_fun(void)
 {
   char c = *analyseur, c1;
   if (c && (c1 = analyseur[1]))
@@ -1531,7 +1531,7 @@ get_op_fun()
 }
 
 static GEN
-expr_ass()
+expr_ass(void)
 {
   char *old = analyseur;
   GEN res = expr();
@@ -1686,7 +1686,7 @@ do_alias(entree *ep)
 }
 
 static GEN
-global0()
+global0(void)
 {
   GEN res = gnil;
   long i,n;
@@ -1740,7 +1740,7 @@ skip_arg_block(gp_args *f)
 }
 
 static long
-check_args()
+check_args(void)
 {
   long nparam = 0, matchcomma = 0;
   entree *ep;
@@ -2518,7 +2518,7 @@ strtor(char *s, long PREC)
 }
 
 static GEN
-constante()
+constante(void)
 {
   pari_sp av = avma;
   GEN y = int_read(&analyseur);
@@ -2765,7 +2765,7 @@ entry(void)
 /* analyseur points on the character following the starting " */
 /* skip any number of concatenated strings */
 static void
-skipstring()
+skipstring(void)
 {
   while (*analyseur)
     switch (*analyseur++)
@@ -2778,7 +2778,7 @@ skipstring()
 }
 
 static void
-skip_matrix_block()
+skip_matrix_block(void)
 {
   while (*analyseur == '[')
   {
@@ -2797,7 +2797,7 @@ skip_matrix_block()
 /* return 1 if we would be assigning some value after expansion. 0 otherwise.
  * Skip all chars corresponding to the assignment (and assigned value) */
 static int
-skip_affect_block()
+skip_affect_block(void)
 {
   if (*analyseur == '=')
   {
@@ -2981,7 +2981,7 @@ skiptruc(void)
 }
 
 static void
-check_var()
+check_var(void)
 {
   char *old = analyseur;
   check_var_name();
@@ -2995,7 +2995,7 @@ check_var()
 }
 
 static void
-check_matcell()
+check_matcell(void)
 {
   char *old = analyseur;
   check_var_name();
@@ -3244,7 +3244,7 @@ skipentry(void)
 #include "members.h"
 
 static entree*
-find_member()
+find_member(void)
 {
   char *old = analyseur;
   const long hash = hashvalue(&analyseur), len = analyseur - old;
@@ -3294,7 +3294,7 @@ member_err(char *s)
 /**                                                                **/
 /********************************************************************/
 long
-loop_break()
+loop_break(void)
 {
   switch(br_status)
   {
@@ -3310,7 +3310,7 @@ loop_break()
 }
 
 long
-did_break() { return br_status; }
+did_break(void) { return br_status; }
 
 GEN
 return0(GEN x)

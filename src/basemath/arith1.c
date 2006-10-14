@@ -1173,7 +1173,7 @@ hilii(GEN x, GEN y, GEN p)
 }
 
 static void
-err_at2() { pari_err(talker, "insufficient precision for p = 2 in hilbert"); }
+err_at2(void) { pari_err(talker, "insufficient precision for p = 2 in hilbert"); }
 
 long
 hil(GEN x, GEN y, GEN p)

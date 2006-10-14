@@ -1596,7 +1596,7 @@ get_texvar(long v, char *buf, unsigned int len)
 }
 
 void
-etatpile()
+etatpile(void)
 {
   long nu, l;
   pari_sp av = avma;
@@ -2706,7 +2706,7 @@ check_filtre(filtre_t *T)
  * Check for leaked file handlers (temporary files)
  */
 int
-popinfile()
+popinfile(void)
 {
   pariFILE *f;
   for (f = last_tmp_file; f; f = f->prev)
@@ -3035,7 +3035,7 @@ delete_dirs(gp_path *p)
 #endif
 
 const char *
-pari_default_path() {
+pari_default_path(void) {
 #if PATH_SEPARATOR == ';'
   return ".;C:;C:/gp";
 #elif defined(UNIX)
@@ -3529,7 +3529,7 @@ set_hist_entry(gp_hist *H, GEN x)
 #ifdef __EMX__
 #include <io.h>
 static int
-unix_shell()
+unix_shell(void)
 {
   char *base, *sh = getenv("EMXSHELL");
   if (sh == NULL) sh = getenv("COMSPEC");

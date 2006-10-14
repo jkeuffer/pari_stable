@@ -709,7 +709,7 @@ isprimitive(GEN nf)
 }
 
 static GEN
-dft_bound()
+dft_bound(void)
 {
   if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
   return dbltor(0.2);

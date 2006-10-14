@@ -442,7 +442,7 @@ initell(GEN x, long prec)
 /********************************************************************/
 /* [1,0,0,0] */
 static GEN
-init_ch() { 
+init_ch(void) { 
   GEN v = cgetg(5, t_VEC);
   gel(v,1) = gen_1;
   gel(v,2) = gel(v,3) = gel(v,4) = gen_0;

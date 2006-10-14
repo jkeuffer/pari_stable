@@ -667,7 +667,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
 }
 
 static Cache *
-alloc_cache()
+alloc_cache(void)
 {
   Cache *C = (Cache*)new_chunk(sizeof(Cache) / sizeof(long));
   C->matvite = NULL;

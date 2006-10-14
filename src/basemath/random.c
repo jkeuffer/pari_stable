@@ -98,7 +98,7 @@ init_xor4096i(ulong seed)
 /* One random number uniformly distributed in [0..2**BIL) is returned, where
  * BIL = 8*sizeof(ulong) = 32 or 64. */
 ulong
-pari_rand()
+pari_rand(void)
 {
   ulong t, v;
   if (xorgen_i < 0) init_xor4096i(1);
@@ -113,7 +113,7 @@ pari_rand()
 }
 
 long
-pari_rand31() {
+pari_rand31(void) {
 #ifdef LONG_IS_64BIT
   return pari_rand() >> 33;
 #else

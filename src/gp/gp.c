@@ -659,7 +659,7 @@ aide(char *s, long flag)
 /**                                                                **/
 /********************************************************************/
 static char *
-what_readline()
+what_readline(void)
 {
   char *s;
 #ifdef READLINE
@@ -703,7 +703,7 @@ print_shortversion(void)
 }
 
 static char *
-what_cc()
+what_cc(void)
 {
   char *s;
 #ifdef GCC_VERSION
@@ -1641,7 +1641,7 @@ read_arg_equal(long *nread, char *t, long argc, char **argv)
 }
 
 static void
-init_trivial_stack()
+init_trivial_stack(void)
 {
   const size_t s = 2048;
   bot = (pari_sp)gpmalloc(s);
