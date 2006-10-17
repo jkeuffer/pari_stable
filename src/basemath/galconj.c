@@ -2786,7 +2786,7 @@ galoisconj4(GEN T, GEN den, long flag)
   n = degpol(T);
   if (n == 1)			/* Too easy! */
   {
-    if (!flag) { G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); }
+    if (!flag) { G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); return G;}
     ga.l = 3;
     ga.deg = 1;
     den = gen_1;
