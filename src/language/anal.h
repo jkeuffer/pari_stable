@@ -26,7 +26,7 @@ typedef struct {
   char *ch;
 } exprdat;
 GEN gp_eval(GEN x, void *dat);
-#define EXPR_START(ep, ch) exprdat __E; __E.ch=ch; __E.ep=ep; push_val(ep,NULL);
+#define EXPR_START(EP, CH) exprdat __E; __E.ch=CH; __E.ep=EP; push_val(EP,NULL);
 #define EXPR_END(ep) pop_val(ep);
 #define EXPR_WRAP(ep, ch, call) \
 { GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
