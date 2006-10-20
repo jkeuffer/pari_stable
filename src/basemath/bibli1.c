@@ -1132,6 +1132,25 @@ good_prec(GEN x, long kmax)
   return prec;
 }
 
+static void
+prec_col(GEN c, long M, long *pl, GEN *D)
+{
+  long i, l;
+  for (i=1; i<=M; i++)
+  {
+    GEN x = gel(c,i);
+    switch(typ(x)) {
+      case t_REAL: 
+        *D = NULL;
+        l = lg(x); if (l > *pl) *pl = l;
+        break;
+      case t_FRAC:
+        if (*D) *D = lcmii(*D, gel(x,2));
+        break;
+    }
+  }
+}
+
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
  * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
  *
@@ -1148,7 +1167,7 @@ GEN
 lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
 {
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
-  long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX, MARKED;
+  long retry = 2, lx = lg(x), hx, l, j, k, k1, n, kmax, KMAX, MARKED;
   long count, count_max = 8;
   pari_sp av0 = avma, av, lim;
   int isexact, exact_can_leave;
@@ -1167,23 +1186,12 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
     if (lx > hx) pari_err(talker,"dependent vectors in lllfp");
   }
   delta = divrs(stor(D-1, DEFAULTPREC), D);
+  B = gen_1;
+  if (gram) { for (k=2,j=1; j<lx; j++) prec_col(gel(x,j), j, &k, &B); }
+  else      { for (k=2,j=1; j<lx; j++) prec_col(gel(x,j), hx-1, &k, &B); }
+  if (B && B != gen_1) x = Q_muli_to_int(x, B);
   xinit = x;
   av = avma; lim = stack_lim(av,1);
-  if (gram) {
-    for (k=2,j=1; j<lx; j++)
-    {
-      GEN p1=gel(x,j);
-      for (i=1; i<=j; i++)
-        if (typ(p1[i]) == t_REAL) { l = lg(p1[i]); if (l>k) k=l; }
-    }
-  } else {
-    for (k=2,j=1; j<lx; j++)
-    {
-      GEN p1=gel(x,j);
-      for (i=1; i<hx; i++)
-        if (typ(p1[i]) == t_REAL) { l = lg(p1[i]); if (l>k) k=l; }
-    }
-  }
   if (k == 2)
   {
     if (!prec) return lllint_marked(pMARKED, x, D, gram, &h, NULL, NULL);
