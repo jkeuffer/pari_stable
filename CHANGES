@@ -5,6 +5,7 @@ Done for version 2.4.1 (released ??/??/2006):
   Fixed
     1- qflll / qflllgram (t_MAT with t_FRAC entries) would not reduce to the
        integer case (--> insufficient precision, SEGV) [#505]
+    2- [Cygwin] missing -L... -lgmp when compiling with gmp.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
