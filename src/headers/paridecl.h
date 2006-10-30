@@ -1801,6 +1801,8 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 
 /* sumiter.c */
 
+GEN     derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
+GEN     derivnum0(entree *ep, GEN a, char *ch, long prec);
 GEN     direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c);
 GEN     direuler0(entree *ep, GEN a, GEN b, char *ch, GEN c);
 GEN     divsum(GEN num,entree *ep, char *ch);

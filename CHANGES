@@ -12,6 +12,7 @@ Done for version 2.4.1 (released ??/??/2006):
        [was: a vector with two t_VECSMALL entries]
 
   Added
+BA  1- derivnum(x=a,expr) for numerical derivations.
 
   Removed
 

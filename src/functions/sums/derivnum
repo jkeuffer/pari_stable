@@ -1,0 +1,6 @@
+Function: derivnum
+Section: sums
+C-Name: derivnum0
+Prototype: V=GIp
+Help: derivnum(X=a,s): numerical derivation of s with respect to X at X = a
+

@@ -1163,3 +1163,45 @@ zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec)
  *   x = solve_next(&D, y);
  * }
  * return D.res; */
+
+/********************************************************************/
+/**                                                                **/
+/**            Numerical derivation                                **/
+/**                                                                **/
+/********************************************************************/
+
+/* Rationale: (f(2^-e) - f(-2^-e) + O(2^-pr)) / (2 * 2^-e) = f'(0) + O(2^-2e)
+ * since 2nd derivatives cancel.
+ *   prec(LHS) = pr - e
+ *   prec(RHS) = 2e, equal when  pr = 3e = 3/2 fpr (fpr = required final prec)
+ *
+ * For f'(x), x far from 0: prec(LHS) = pr - e - expo(x)
+ * --> pr = 3/2 fpr + expo(x) */
+GEN
+derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
+{
+  GEN eps,a,b, y;
+  long fpr, pr, l, e, ex;
+  pari_sp av = avma;
+  if (!is_const_t(typ(x))) pari_err(impl, "formal derivation");
+  fpr = precision(x)-2; /* required final prec (in sig. words) */
+  if (fpr == -2) fpr = prec-2;
+  ex = gexpo(x);
+  if (ex < 0) ex = 0; /* at 0 */
+  pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
+  l = 2+pr;
+  e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
+
+  eps = real2n(-e, l);
+  y = gtofp(gsub(x, eps), l); a = eval(y, E);
+  y = gtofp(gadd(x, eps), l); b = eval(y, E);
+  setexpo(eps, e-1);
+  return gerepileupto(av, gmul(gsub(b,a), eps));
+}
+
+GEN
+derivnum0(entree *ep, GEN a, char *ch, long prec)
+{
+  EXPR_WRAP(ep,ch, derivnum (EXPR_ARG,a,prec));  
+}
+

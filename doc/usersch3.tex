@@ -7396,6 +7396,16 @@ the point $0$ is a singularity of $\text{abs}(x)$.
 
 See also the discrete summation methods below (sharing the prefix \kbd{sum}).
 
+\subsecidx{derivnum}$(X=a,\var{expr})$: numerical derivation of \var{expr} with
+respect to $X$ at $X=a$.
+
+\bprog
+? derivnum(x=0,sin(exp(x)))-cos(1)
+%1 = -1.262177448 E-29
+@eprog
+
+\synt{derivnum}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
+
 \subsecidx{intcirc}$(X=a,R,\var{expr}, \{\var{tab}\})$: numerical
 integration of \var{expr} with respect to $X$ on the circle $|X-a|=R$,
 divided by $2i\pi$. In other words, when \var{expr} is a meromorphic
