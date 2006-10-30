@@ -264,6 +264,7 @@ void    kill0(entree *ep);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *t);
+GEN     strntoGENstr(const char *s, long n0);
 GEN     strtoGENstr(const char *s);
 GEN     strtoi(char *s);
 GEN     strtor(char *s, long prec);

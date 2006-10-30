@@ -1178,8 +1178,8 @@ readstring(char *src, char *s)
 }
 
 /* return the first n0 chars of s as a GEN [s may not be 0-terminated] */
-static GEN
-_strtoGENstr(const char *s, long n0)
+GEN
+strntoGENstr(const char *s, long n0)
 {
   long n = nchar2nlong(n0+1);
   GEN x = cgetg(n+1, t_STR);
@@ -1188,7 +1188,7 @@ _strtoGENstr(const char *s, long n0)
 }
 
 GEN
-strtoGENstr(const char *s) { return _strtoGENstr(s, strlen(s)); }
+strtoGENstr(const char *s) { return strntoGENstr(s, strlen(s)); }
 /********************************************************************/
 /**                                                                **/
 /**                          READ FUNCTIONS                        **/
@@ -1772,7 +1772,7 @@ check_args(void)
       char *old = ++analyseur;
       pari_sp av = avma;
       skipexpr();
-      gel(cell,1) = gclone(_strtoGENstr(old, analyseur-old));
+      gel(cell,1) = gclone(strntoGENstr(old, analyseur-old));
       avma = av;
     }
     else gel(cell,1) = gen_0;
