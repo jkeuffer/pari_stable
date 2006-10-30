@@ -1777,7 +1777,7 @@ debug_stack(void)
   GEN z;
   fprintferr("bot=0x%lx\ttop=0x%lx\n", bot, top);
   for (z = (GEN)top; z >= (GEN)avma; z--)
-    fprintferr("0x%p:\t0x%lx\t%lu\n",z,*z,*z);
+    fprintferr("%p:\t0x%lx\t%lu\n",z,*z,*z);
 }
 
 long
