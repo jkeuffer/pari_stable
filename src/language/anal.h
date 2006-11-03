@@ -67,7 +67,6 @@ long   loop_break(void);
 long   did_break(void);
 void   readseq_void(char *t);
 GEN    readseq_nobreak(char *t);
-GEN    readexpr_nobreak(char *t);
 
 char*  get_analyseur(void);
 void   set_analyseur(char *s);

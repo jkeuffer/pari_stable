@@ -536,7 +536,6 @@ GEN     hnfall0(GEN A, long remove);
 /* anal.c */
 
 ulong parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg);
-GEN     readexpr(char *t);
 
 /* aprcl.c */
 

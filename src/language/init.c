@@ -1949,10 +1949,8 @@ geni(void) { return gi; }
  * code: describe function prototype. NULL = use valence instead.
  * -----
  * Arguments:
- *  I  input position (to be processed with readseq) - a string with a
- *     sequence of PARI expressions.
- *  E  input position (to be processed with readexpr) - a string with a
- *     PARI expression.
+ *  I, E  input position (to be processed with readseq) - a string with a
+ *     sequence of PARI expressions. Use I: E is now obsolete.
  *  G  GEN
  *  L  long
  *  S  symbol (i.e GP function name)

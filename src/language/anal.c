@@ -370,8 +370,8 @@ seq_init(char *t)
     return (*foreignExprHandler)(t);
 
 /* Do not modify (analyseur,mark.start) */
-static GEN
-readseq0(char *t, GEN (*f)(void))
+GEN
+readseq(char *t)
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
@@ -379,9 +379,9 @@ readseq0(char *t, GEN (*f)(void))
 
   HANDLE_FOREIGN(t);
 
-  seq_init(t); z = f();
+  seq_init(t); z = seq();
   analyseur = olds; mark.start = olde;
-  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
+  av = top - av; /* safer than recording av=avma: seq() may call allocatemem */
   if (br_status)
   {
     if (br_res) return gerepilecopy(av, br_res);
@@ -391,8 +391,8 @@ readseq0(char *t, GEN (*f)(void))
   if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
 }
-static GEN
-readseq0_nobreak(char *t, GEN (*f)(void))
+GEN
+readseq_nobreak(char *t)
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
@@ -400,10 +400,10 @@ readseq0_nobreak(char *t, GEN (*f)(void))
 
   HANDLE_FOREIGN(t);
 
-  seq_init(t); z = f();
+  seq_init(t); z = seq();
   analyseur = olds; mark.start = olde;
   if (br_status) pari_err(talker,"break not allowed");
-  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
+  av = top - av; /* safer than recording av=avma: seq() may call allocatemem */
   /* ep->value, beware: it may be killed anytime.  */
   if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
@@ -425,16 +425,12 @@ readseq_void(char *t)
   avma = top - av;
 }
 
-GEN readseq_nobreak(char *t)  { return readseq0_nobreak(t, seq);  }
-GEN readexpr_nobreak(char *t) { return readseq0_nobreak(t, expr); }
-GEN readseq(char *t)  { return readseq0(t, seq);  }
-GEN readexpr(char *t) { return readseq0(t, expr); }
 /* filtered readseq = remove blanks and comments */
 GEN
 gp_read_str(char *s)
 {
   char *t = filtre(s, (compatible == OLDALL));
-  GEN x = readseq0(t, seq);
+  GEN x = readseq(t);
   gpfree(t); return x;
 }
 
@@ -1624,7 +1620,7 @@ static GEN
 make_arg(GEN x) { return (x==gen_0)? x: readseq(GSTR(x)); }
 
 static GEN
-fun_seq(char *t) /* readseq0, simplified */
+fun_seq(char *t) /* readseq, simplified */
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
