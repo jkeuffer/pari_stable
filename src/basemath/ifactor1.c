@@ -2432,7 +2432,7 @@ static ulong powersmod[106] = {
 int
 is_357_power(GEN x, GEN *pt, ulong *mask)
 {
-  long lx = lgefint(x), exponent, resbyte;
+  long lx = lgefint(x), resbyte;
   ulong residue;
   pari_sp av;
   GEN y;
@@ -2468,32 +2468,28 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   if (*mask & 5) check_res( 43UL,18);
   if (*mask & 6) check_res( 71UL,21);
 
-  /* priority to higher powers: if we have a 21st, it is easier to rediscover
-   * that its 7th root is a cube than that its cube root is a 7th power */
-  if ( (resbyte = *mask & 4) )
-    exponent = 7;
-  else if ( (resbyte = *mask & 2) )
-    exponent = 5;
-  else
-    { resbyte = 1; exponent = 3; }
-
   av = avma;
-  y = mpround( sqrtnr(itor(x, 3 + (lx-2) / exponent), exponent) );
-  if (!equalii(powiu(y, exponent), x))
+  while (*mask)
   {
-    if (DEBUGLEVEL >= 5)
+    long e, b;
+    /* priority to higher powers: if we have a 21st, it is easier to rediscover
+     * that its 7th root is a cube than that its cube root is a 7th power */
+         if (*mask & 4) { b = 4; e = 7; }
+    else if (*mask & 2) { b = 2; e = 5; }
+    else                { b = 1; e = 3; }
+    y = mpround( sqrtnr(itor(x, 3 + (lx-2)/e), e) );
+    if (equalii(powiu(y,e), x))
     {
-      if (exponent == 3)
-	fprintferr("\tBut it nevertheless wasn't a cube.\n");
-      else
-	fprintferr("\tBut it nevertheless wasn't a %ldth power.\n", exponent);
+      if (!pt) { avma = av; return e; }
+      avma = (pari_sp)y; *pt = gerepileuptoint(av, y);
+      return e;
     }
-    *mask &= ~resbyte; /* turn the bit off */
-    avma = av; return 0;
+    if (DEBUGLEVEL >= 5)
+      fprintferr("\tBut it nevertheless wasn't a %ld%s power.\n", e,eng_ord(e));
+    *mask &= ~b; /* turn the bit off */
+    avma = av;
   }
-  if (!pt) { avma = av; return exponent; }
-  avma = (pari_sp)y; *pt = gerepileuptoint(av, y);
-  return exponent;
+  return 0;
 }
 
 /* p not necessarily prime */
@@ -3252,7 +3248,7 @@ ifac_divide(GEN *partial, GEN *where)
 static long
 ifac_crack(GEN *partial, GEN *where)
 {
-  long hint, cmp_res, exp1 = 1, exp2 = 1;
+  long hint, cmp_res, exp1 = 1;
   pari_sp av;
   GEN factor = NULL, exponent;
 
@@ -3306,6 +3302,7 @@ ifac_crack(GEN *partial, GEN *where)
    * it is useful in bounded factorization */
   {
     ulong exp0 = 0, mask = 7;
+    long exp2 = 1;
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
     /* At debug levels > 4, is_357_power() prints something more informative */
     av = avma;
