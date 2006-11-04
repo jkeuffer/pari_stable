@@ -41,7 +41,7 @@ in a program, and cleanup without exiting the whole program.
 \fun{void}{pari_init}{size\_t size, ulong maxprime} initialize the
 library, with a stack of \kbd{size} bytes and a prime table
 up to the maximum of \kbd{maxprime} and $2^{16}$. Unless otherwise
-mentionned, no PARI function will function properly before such an
+mentioned, no PARI function will function properly before such an
 initialization.
 
 \fun{void}{pari_close}{void} stop using the library (assuming it was
@@ -243,7 +243,7 @@ estimate for the maximal number of decimal digits of the components
 of~\kbd{x}.
 
 \subsec{Eval type-dependent information}.
-These routines convert type-dependant information to bitmask to fill the
+These routines convert type-dependent information to bitmask to fill the
 codewords of \kbd{GEN} objects (see \secref{se:impl}). E.g for a
 \typ{REAL}~\kbd{z}:
 \bprog
@@ -437,7 +437,7 @@ chars (\emph{not} $n$ \kbd{GEN}s). This is faster than using \kbd{malloc},
 and easier to use in most situations when temporary storage is needed. In
 particular there is no need to \kbd{free} individually all variables thus
 allocated: a simple \kbd{avma = oldavma} might be enough. On the other hand,
-beware that this is not permanent independant storage, but part of the stack.
+beware that this is not permanent independent storage, but part of the stack.
 
 \noindent Objects allocated through these last two functions cannot be
 \kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI type.
@@ -467,7 +467,7 @@ otherwise.
 \fun{GEN}{gerepilecopy}{pari\_sp av, GEN x} cleans up the stack  from
 \kbd{av} on, preserving the object \kbd{x}. Special case of \kbd{gerepileall}
 (case $\kbd{n} = 1$), except that the routine returns the preserved \kbd{GEN}
-instead of updating its adress through a pointer.
+instead of updating its address through a pointer.
 
 \fun{void}{gerepilemany}{pari\_sp av, GEN* g[], int n} alternative interface
 to \kbd{gerepileall}
@@ -1201,7 +1201,7 @@ algorithm (Jebelean-Krandick bidirectional exact division is not
 implemented).
 
 \fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
-$|\kbd{x}| / \kbd{y}$ (note the absolue value!), assuming $\kbd{y}$ divides
+$|\kbd{x}| / \kbd{y}$ (note the absolute value!), assuming $\kbd{y}$ divides
 $\kbd{x}$ and $\kbd{y}$ is non-zero.
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
@@ -1507,10 +1507,10 @@ $\deg(z) < \deg \kbd{T}$.
   \kbd{Y}: polynomial in $Y\neq X$. E.g. \kbd{FpXY} means $((\Z/p\Z)[Y])[X]$
 
   \kbd{V}: vector (\typ{VEC} or \typ{COL}), treated as a line vector
-  (independantly of the actual type). E.g. \kbd{ZV} means $\Z^k$ for some $k$.
+  (independently of the actual type). E.g. \kbd{ZV} means $\Z^k$ for some $k$.
 
   \kbd{C}: vector (\typ{VEC} or \typ{COL}), treated as a column vector
-  (independantly of the actual type). The difference with \kbd{V} is purely
+  (independently of the actual type). The difference with \kbd{V} is purely
   semantic.
 
   \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
@@ -1641,7 +1641,7 @@ still assume that $M'$ has integer coefficients.
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
 be wary. An \kbd{Fp} object is a \typ{INT} belonging to $[0,
 \kbd{p}-1]$, an \kbd{FpX} is a \typ{POL} in a fixed variable whose
-coefficients are \kbd{Fp} objects. Unless mentionned otherwise, all outputs
+coefficients are \kbd{Fp} objects. Unless mentioned otherwise, all outputs
 in this section are \kbd{FpX}s. All operations are understood to take place
 in $(\Z/\kbd{p}\Z)[X]$.
 
@@ -2564,14 +2564,14 @@ for \typ{REAL}, \typ{SER}, \typ{PADIC} components, respectively.
 \fun{GEN}{gprec_w}{GEN x, long l} returns a shallow copy of $x$ whose
 \typ{REAL} components have their precision changed to $l$ \emph{words}. This
 is often more useful than \kbd{gprec}. Shallow copy means that unaffected
-components are not copied; in particular, this funciton is not suitable for
+components are not copied; in particular, this function is not suitable for
 \kbd{gerepileupto}.
 
 \fun{GEN}{gprec_wtrunc}{GEN x, long l} returns a shallow copy of $x$ whose
 \typ{REAL} components have their precision \emph{truncated} to $l$
 \emph{words}. Contrary to \kbd{gprec\_w}, this function may never increase
 the precision of~$x$. Shallow copy means that unaffected components are not
-copied; in particular, this funciton is not suitable for \kbd{gerepileupto}.
+copied; in particular, this function is not suitable for \kbd{gerepileupto}.
 
 \subsubsec{Modular objects}
 
@@ -3123,7 +3123,7 @@ copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
 
 \fun{GEN}{shallowconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
 copying compoents, i.~e.,~it returns a \kbd{GEN} whose components are 
-(physically) the comonents of $x$ and $y$.
+(physically) the components of $x$ and $y$.
 
 \fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
 and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
@@ -3194,7 +3194,7 @@ pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
 components.
 
 \fun{GEN}{vec_lengthen}{GEN v, long n} lengthens the vector \kbd{v}
-to \kbd{n} components. The extra components are not initialised.
+to \kbd{n} components. The extra components are not initialized.
 
 \subsec{Function to handle \typ{VECSMALL}}
 
@@ -3216,7 +3216,7 @@ of \kbd{n} components equal to \kbd{c}.
 to \kbd{n} components.
 
 \fun{GEN}{vecsmall_lengthen}{GEN v, long n} lengthens the \typ{VECSMALL}
-\kbd{v} to \kbd{n} components. The extra components are not initialised.
+\kbd{v} to \kbd{n} components. The extra components are not initialized.
 
 \fun{GEN}{vecsmall_indexsort}{GEN x} performs an indirect sort of the
 components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
@@ -3225,7 +3225,7 @@ components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
 \fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
 
 \fun{GEN}{vecsmall_uniq}{GEN v} given a sorted \typ{VECSMALL} \kbd{v}, return
-the vector of unique occurences.
+the vector of unique occurrences.
 
 \fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically
 

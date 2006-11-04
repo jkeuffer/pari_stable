@@ -57,7 +57,7 @@ $\{\var{x}\}*$, means that any number of such arguments (possibly none) can
 be given. This is in particular used by the various \kbd{print} routines.
 
 \misctitle{Flags}. A \tev{flag} is an argument which, rather than conveying
-actual information to the routine, intructs it to change its default
+actual information to the routine, instructs it to change its default
 behaviour, e.g.~return more or less information. All such
 flags are optional, and will be called \fl\ in the function descriptions to
 follow. There are two different kind of flags
@@ -74,7 +74,7 @@ are set to $0$). This is announced as ``The binary digits of $\fl$ mean 1:
 $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the available consecutive
 powers of~$2$.
 
-\misctitle{Mnemonics for flags}. Numeric flags as mentionned above are
+\misctitle{Mnemonics for flags}. Numeric flags as mentioned above are
 obscure, error-prone, and quite rigid: should the authors
 want to adopt a new flag numbering scheme (for instance when noticing
 flags with the same meaning but different numeric values across a set of
@@ -1716,7 +1716,7 @@ vector arguments to contain other data, so long as they are identical in both
 vectors.
 
 \syn{chinese}{x,y}. Also available is \tet{chinese1}$(x)$, corresponding to an
-ommitted \kbd{y}.
+omitted \kbd{y}.
 
 \subsecidx{content}$(x)$: computes the gcd of all the coefficients of $x$,
 when this gcd makes sense. This is the natural definition
@@ -2248,7 +2248,7 @@ integer.
 \syn{numbdiv}{x}.
 
 \subsecidx{numbpart}$(n)$: gives the number of unrestricted partitions of
-$n$, usually called $p(n)$ in the litterature; in other words the number of
+$n$, usually called $p(n)$ in the literature; in other words the number of
 nonnegative integer solutions to $a+2b+3c+\cdots=n$. $n$ must be of type
 integer and $1\le n<10^{15}$. The algorithm uses the
 Hardy-Ramanujan-Rademacher formula.
@@ -2358,7 +2358,7 @@ the common discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
 discriminant, the result is undefined.
 
 The current implementation is straightforward and in general \emph{slower}
-than the generic routine (since the latter take advantadge of asymptotically
+than the generic routine (since the latter takes advantage of asymptotically
 fast operations and careful optimizations).
 
 \syn{nucomp}{x,y,l}. The auxiliary function \funs{nudupl}{x,l} can be
@@ -2623,7 +2623,7 @@ point at infinity, i.e.~the identity element of the group law, represented by
 the one-component vector \kbd{[0]}.
 
   It is useful to have at one's disposal more information. This is given by
-the function \tet{ellinit} (see there), which initalizes and returns an
+the function \tet{ellinit} (see there), which initializes and returns an
 \tev{ell} structure by default. If a specific flag is added, a
 shortened \tev{sell}, for small \tev{ell}, is returned, which is much
 faster to compute but contains less information. The following \idx{member
@@ -3219,7 +3219,7 @@ Most functions can in fact handle them.) Hence it is a matrix of vectors.
 
 \item An \tev{ideal list} is a row vector of fractional ideals of the number
 field $\var{nf}$, in HNF form. (This is an interface bug: ideals in arbitrary
-formshould be allowed.)
+form should be allowed.)
 
 \item A \tev{pseudo-matrix} is a pair $(A,I)$ where $A$ is a relative matrix
 and $I$ an ideal list whose length is the same as the number of columns of
@@ -3235,7 +3235,7 @@ pseudo-matrix.
 
 \item The pair $(A,I)$ is a \tev{pseudo-basis} of the module it
 generates if the ${\Bbb a_j}$ are non-zero, and the $A_j$ are $K$-linearly
-independant. We call $n$ the \emph{size} of the pseudo-basis. If $A$ is a
+independent. We call $n$ the \emph{size} of the pseudo-basis. If $A$ is a
 relative matrix, the latter condition means it is square with non-zero
 determinant; we say that it is in Hermite Normal Form\sidx{Hermite normal
 form} (HNF) if it is upper triangular and all the elements of the diagonal
@@ -3243,7 +3243,7 @@ are equal to 1.
 
 \item For instance, the relative integer basis \kbd{rnf.zk} is a pseudo-basis
 $(A,I)$ of $\Z_L$, where $A = \kbd{rnf.zk[1]}$ is a vector of elements of $L$,
-which are $K$-linearly independant. Most \var{rnf} routines return and handle
+which are $K$-linearly independent. Most \var{rnf} routines return and handle
 $\Z_K$-modules contained in $L$ (e.g.~$\Z_L$-ideals) via a pseudo-basis
 $(A',I')$, where $A'$ is a relative matrix representing a vector of elements of
 $L$ in terms of the fixed basis \kbd{rnf.zk[1]}
@@ -3794,7 +3794,7 @@ $v[6]$ is a copy of $S$.
 \kbd{bnfinit}, outputs the vector of fundamental units of the number field.
 
 This function is mostly useless, since it will only succeed if
-\var{bnf} contains the units, in which case \kbd{bnf.fu} is recommanded
+\var{bnf} contains the units, in which case \kbd{bnf.fu} is recommended
 instead, or \var{bnf} was produced with \kbd{bnfinit(,,2)}, which is itself
 deprecated.
 
@@ -3946,7 +3946,7 @@ supported, where \var{list} is as output by \kbd{ideallist} or
 \kbd{ideallistarch} (with units), in which case \var{arch} is disregarded.
 
 The output $v$ is a vector of vectors, where $v[i][j]$ is understood to be in
-fact $V[2^{15}(i-1)+j]$ of a unique big vector $V$. (This akward scheme
+fact $V[2^{15}(i-1)+j]$ of a unique big vector $V$. (This awkward scheme
 allows for larger vectors than could be otherwise represented.)
 
 $V[k]$ is itself a vector $W$, whose length is the number of ideals of norm
@@ -5144,7 +5144,7 @@ In case \var{pol} has a huge discriminant which is difficult to factor,
 the special input format $[\var{pol},B]$ is also accepted where \var{pol} is a
 polynomial as above and $B$ is the integer basis, as would be computed by
 \tet{nfbasis}. This is useful if the integer basis is known in advance,
-or was computed conditionnally.
+or was computed conditionally.
 \bprog
   ? pol = polcompositum(x^5 - 101, polcyclo(7))[1];
   ? B = nfbasis(pol, 1);   \\ faster than nfbasis(pol), but conditional
@@ -6420,7 +6420,7 @@ For instance
 
 \subsecidx{substvec}$(x,v,w)$: $v$ being a vector of monomials (variables),
 $w$ a vector of expressions of the same length, replace in the expression
-$x$ all occurences of $v_i$ by $w_i$. The substitutions are done
+$x$ all occurrences of $v_i$ by $w_i$. The substitutions are done
 simultaneously; more precisely, the $v_i$ are first replaced by new
 variables in $x$, then these are replaced by the $w_i$:
 
@@ -6447,7 +6447,7 @@ $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
 $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
 $\Norm(x)=a$ modulo units of positive norm in the number field
 defined by $P$ (as computed by \kbd{bnfisintnorm}). If the
-result is conditional (on the GRH or some heuristic strenghtening),
+result is conditional (on the GRH or some heuristic strengthening),
 a Warning is printed. Otherwise, the result is unconditional, barring bugs.
 For instance, here's how to solve the Thue equation $x^{13} - 5y^{13} = - 4$:
 
@@ -6475,7 +6475,7 @@ as \kbd{NULL}.
 \subsecidx{thueinit}$(P,\{\fl=0\})$: initializes the \var{tnf}
 corresponding to $P$. It is meant to be used in conjunction with \tet{thue}
 to solve Thue equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is
-non-zero, certify the result unconditionnally. Otherwise, assume \idx{GRH},
+non-zero, certify the result unconditionally. Otherwise, assume \idx{GRH},
 this being much faster of course.
 
 \emph{If} the conditional computed class group is trivial \emph{or} you are
@@ -6496,7 +6496,7 @@ arguments. As usual, the generating vectors are taken to be the
 Since PARI does not have a strong typing system, scalars live in
 unspecified commutative base rings. It is very difficult to write
 robust linear algebra routines in such a general setting. The
-developpers's choice has been to assume the base ring is a domain
+developers's choice has been to assume the base ring is a domain
 and work over its field of fractions. If the base ring is \emph{not}
 a domain, one gets an error as soon as a non-zero pivot turns out to be
 non-invertible. Some functions, e.g.~\kbd{mathnf} or \kbd{mathnfmod},
@@ -6762,7 +6762,7 @@ of rows, the result is a square matrix. In general, the columns of the result
 form a basis of the lattice spanned by the columns of $x$.
 
 If $\fl=0$, uses the naive algorithm. This should never be used if the
-dimension is at all large (larger than 10, say). It is recommanded to use
+dimension is at all large (larger than 10, say). It is recommended to use
 either \kbd{mathnfmod(x, matdetint(x))} (when $x$ has maximal rank) or
 \kbd{mathnf(x, 1)}. Note that the latter is in general faster than
 \kbd{mathnfmod}, and also provides a base change matrix.
@@ -7450,7 +7450,7 @@ forbidden.
 \synt{intfouriersin}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, GEN tab, long prec}.
 
 \subsecidx{intfuncinit}$(X=a,b,\var{expr},\{\fl=0\},\{m=0\})$:
-initalize tables for use with integral transforms such as \kbd{intmellininv},
+initialize tables for use with integral transforms such as \kbd{intmellininv},
 etc., where $a$ and $b$ are coded as in \kbd{intnum}, $\var{expr}$ is the
 function $s(X)$ to which the integral transform is to be applied (which will
 multiply the weights of integration) and $m$ is as in \kbd{intnuminit}. If
