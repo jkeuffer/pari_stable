@@ -715,7 +715,7 @@ See \secref{se:bitand} for the behaviour for negative arguments.
 
 \subsecidx{ceil}$(x)$: ceiling of $x$. When $x$ is in $\R$, the result is the
 smallest integer greater than or equal to $x$. Applied to a rational
-function, $\kbd{ceil}(x)$ returns the euclidian quotient of the numerator by
+function, $\kbd{ceil}(x)$ returns the Euclidean quotient of the numerator by
 the denominator.
 
 \syn{gceil}{x}.
@@ -826,7 +826,7 @@ $y/x$ is a rational function). See \secref{se:priority}.
 
 \subsecidx{floor}$(x)$: floor of $x$. When $x$ is in $\R$, the result is the
 largest integer smaller than or equal to $x$. Applied to a rational function,
-$\kbd{floor}(x)$ returns the euclidian quotient of the numerator by the
+$\kbd{floor}(x)$ returns the Euclidean quotient of the numerator by the
 denominator.
 
 \syn{gfloor}{x}.
@@ -4060,7 +4060,7 @@ class field corresponding to the modulus in \var{bnr} and the given
 congruence subgroup (as usual, omit $\var{subgroup}$ if you want the whole
 ray class group).
 
-The routine uses \idx{Stark units} and needs to find a suitable auxilliary
+The routine uses \idx{Stark units} and needs to find a suitable auxiliary
 conductor, which may not exist when the class field is not cyclic over the
 base. In this case \kbd{bnrstark} is allowed to return a vector of
 polynomials defining \emph{independent} relative extensions, whose compositum
@@ -6539,7 +6539,7 @@ accuracy).
 
 The above example is the testcase studied in a 2000 paper by Borwein and
 Lisonek, Applications of integer relation algorithms, \emph{Discrete Math.},
-{\bf 217}, p.~65--82. The paper conludes in the superiority of the PSLQ
+{\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
 algorithm, which either shows that PARI's implementation of PSLQ is lacking,
 or that its LLL is extremely good. The version of PARI tested there was
 1.39, which succeeded reliably from precision 265 on, in about 60 as much
@@ -7360,7 +7360,7 @@ summed, etc.) with two parameters named
   GEN (*eval)(GEN,void*)
   void *E;
 @eprog\noindent
-The second is meant to contain all auxilliary data needed by your function.
+The second is meant to contain all auxiliary data needed by your function.
 The first is such that \kbd{eval(x, E)} returns your function evaluated at
 \kbd{x}. For instance, one may code the family of functions
 $f_t: x \to (x+t)^2$ via
@@ -7469,7 +7469,7 @@ $\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Laplace transform
 of the function corresponding to \var{expr} at the value $z$.
 
 $sig$ is coded as follows. Either it is a real number $\sigma$, equal to the
-abcissa of integration, and then the function to be integrated is assumed to
+abscissa of integration, and then the function to be integrated is assumed to
 be slowly decreasing when the imaginary part of the variable tends to
 $\pm\infty$. Or it is a two component vector $[\sigma,\alpha]$, where
 $\sigma$ is as before, and either $\alpha=0$ for slowly decreasing functions,
@@ -7479,7 +7479,7 @@ is not necessary to choose the exact value of $\alpha$. \var{tab} is as in
 
 It is often a good idea to use this function with a value of $m$ one or two
 higher than the one chosen by default (which can be viewed thanks to the
-function \kbd{intnumstep}), or to increase the abcissa of integration
+function \kbd{intnumstep}), or to increase the abscissa of integration
 $\sigma$. For example:
 
 \bprog
@@ -7517,7 +7517,7 @@ $\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Mellin transform of
 the function corresponding to \var{expr} at the value $z$.
 
 $sig$ is coded as follows. Either it is a real number $\sigma$, equal to the
-abcissa of integration, and then the function to be integrated is assumed to
+abscissa of integration, and then the function to be integrated is assumed to
 decrease exponentially fast, of the order of $\exp(-t)$ when the imaginary
 part of the variable tends to $\pm\infty$. Or it is a two component vector
 $[\sigma,\alpha]$, where $\sigma$ is as before, and either $\alpha=0$ for
@@ -7824,11 +7824,11 @@ The result is technical, but in some cases it is useful to know the output.
 Let $x=\phi(t)$ be the change of variable which is used. \var{tab}[1] contains
 the integer $m$ as above, either given by the user or computed from the default
 precision, and can be recomputed directly using the function \kbd{intnumstep}.
-\var{tab}[2] and \var{tab}[3] contain respectively the abcissa and weight
+\var{tab}[2] and \var{tab}[3] contain respectively the abscissa and weight
 corresponding to $t=0$ ($\phi(0)$ and $\phi'(0)$). \var{tab}[4] and
-\var{tab}[5] contain the abcissas and weights corresponding to positive
+\var{tab}[5] contain the abscissas and weights corresponding to positive
 $t=nh$ for $1\le n\le N$ and $h=1/2^m$ ($\phi(nh)$ and $\phi'(nh)$). Finally
-\var{tab}[6] and \var{tab}[7] contain either the abcissas and weights
+\var{tab}[6] and \var{tab}[7] contain either the abscissas and weights
 corresponding to negative $t=nh$ for $-N\le n\le -1$, or may be empty (but
 not always) if $\phi(t)$ is an odd function (implicitly we would have
 $\var{tab}[6]=-\var{tab}[4]$ and $\var{tab}[7]=\var{tab}[5]$).
@@ -8179,7 +8179,7 @@ then twice faster when \var{tab} is precomputed.
 
 \bprog
 ? \p 308
-? tab = sumnuminit(2, /*omitted*/, -1); \\@com abcissa $\sigma=2$, alternating sums.
+? tab = sumnuminit(2, /*omitted*/, -1); \\@com abscissa $\sigma=2$, alternating sums.
 time = 1,620 ms. \\@com slow, but done once and for all.
 ? a = sumnumalt(n=1, 2, 1/(n^3+n+1), tab, 1);
 time = 230 ms. \\@com similar speed to \kbd{sumnum}
@@ -8194,7 +8194,7 @@ time = 0 ms.
 
 \subsecidx{sumnuminit}$(sig,{m=0},{sgn=1})$: initialize tables for numerical
 summation using \kbd{sumnum} (with $\var{sgn}=1$) or \kbd{sumnumalt} (with
-$\var{sgn}=-1$), $sig$ is the abcissa of integration coded as in \kbd{sumnum},
+$\var{sgn}=-1$), $sig$ is the abscissa of integration coded as in \kbd{sumnum},
 and $m$ is as in \kbd{intnuminit}.
 
 \synt{sumnuminit}{GEN sig, long m, long sgn, long prec}.
@@ -8314,7 +8314,7 @@ the part of the rectangle which is in $w$ is drawn. The virtual cursor does
 \subsecidx{plotclip}$(w)$: `clips' the content of rectwindow $w$, i.e
 remove all parts of the drawing that would not be visible on the screen.
 Together with \tet{plotcopy} this function enables you to draw on a
-scratchpad before commiting the part you're interested in to the final
+scratchpad before committing the part you're interested in to the final
 picture.
 
 \subsecidx{plotcolor}$(w,c)$: set default color to $c$ in rectwindow $w$.

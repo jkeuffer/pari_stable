@@ -730,7 +730,7 @@ is in no way mandatory.
 \subsec{Vectors and matrices}. If the variable $x$ contains a vector or list,
 $x[m]$ refers to its $m$-th entry. You can assign a result to $x[m]$
 (i.e.~write something like $x[k]=\var{expr}$). If $x$ is a matrix, $x[m,n]$
-referes to its $(m,n)$ entry; you can assign a result to $x[m,n]$, but
+refers to its $(m,n)$ entry; you can assign a result to $x[m,n]$, but
 \emph{not} to $x[m]$. If you want to assign an expression to the $m$-th
 column of a matrix $x$, use $x[,m]=\var{expr}$ instead. Similarly, use
 $x[m,]=\var{expr}$ to assign an expression to the $m$-th row of $x$. This
@@ -1090,7 +1090,7 @@ and \kbd{my} in Perl.)
 In an iterative constructs which use a variable name (\kbd{for$xxx$},
 \kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix}, \kbd{plot},
 etc.) the given variable is also local to the construct. A value is pushed on
-entry and poped on exit. So, it is not necessary for a function using such an
+entry and popped on exit. So, it is not necessary for a function using such an
 iterator to declare the variable as \kbd{local}. On the other hand, if you
 exit the loop prematurely, e.g.~using the \kbd{break} statement, you must
 save the loop index in another variable since its value prior the loop will
@@ -1125,7 +1125,7 @@ general \emph{not} what you want to do. So, be warned.
 
 Coming back to our previous example \kbd{zet}, since loop variables are not
 visible outside their loops, the variable \kbd{n} need not be declared in the
-function protoype.
+function prototype.
 \bprog
 zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 @eprog
@@ -1559,7 +1559,7 @@ $\bullet$  \kbd{trap(, )} (omitted argument, default handler): to trap errors
 by a break loop.
 
 \subsec{Protecting code}. Finally \kbd{trap} can define a temporary handler
-used within the scope of a code frament, protecting it from errors, by
+used within the scope of a code fragment, protecting it from errors, by
 providing replacement code should the trap be activated. The expression
 
   \kbd{trap}( , \var{recovery}, \var{statements})
@@ -1644,7 +1644,7 @@ written by Ilya Zakharevich. The second is \tet{PariPython}%
 \footnote{*}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
 %
 by St\'efane Fermigier, which is no more maintained. Starting from
-Fermigier's work, Wiliam Stein has embedded PARI into his Python-based
+Fermigier's work, William Stein has embedded PARI into his Python-based
 SAGE\footnote{**}{see \kbd{http://modular.fas.harvard.edu/sage/}}
 system. Finally, Michael Stoll has integrated PARI into \tet{CLISP}
 \footnote{***}{see \kbd{http://clisp.cons.org}}, which is a Common Lisp
@@ -1965,7 +1965,7 @@ increase \kbd{parisize}, once the session is started.
 \subsecidx{path} (default \kbd{".:\til:\til/gp"} on UNIX systems,
 \kbd{".;C:\bs;C:\bs GP} on DOS, OS/2 and Windows, and \kbd{"."} otherwise):
 This is a list of directories, separated by colons ':' (semicolons ';' in the
-DOS world, since colons are pre-empted for drive names). When asked to read a
+DOS world, since colons are preempted for drive names). When asked to read a
 file whose name does not contain \kbd{/} (i.e.~no explicit path was given),
 \kbd{gp} will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
@@ -2341,7 +2341,7 @@ performed:
 \kbd{VERSION} \var{op} \var{number}: where \var{op} is in the set
 $\{ \kbd{>}, \kbd{<}, \kbd{<=}, \kbd{>=} \}$, and \var{number} is a PARI
 version number of the form \var{Major}.\var{Minor}.\var{patch}, where the
-last two components can be omitted (i.e.~$1$ is understood as versio $1.0.0$).
+last two components can be omitted (i.e.~$1$ is understood as version $1.0.0$).
 This is \kbd{true} if \kbd{gp}'s version number satisfies the required
 inequality.
 

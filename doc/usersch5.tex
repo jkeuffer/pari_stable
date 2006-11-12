@@ -2494,13 +2494,13 @@ array) to (normalized) polynomial in variable $v$.
 \fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
 identity matrix.
 
-\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the colums of
+\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the columns of
 \kbd{Flm}~\kbd{x} to an array of \kbd{Flx} (repeated calls to
 \kbd{Flv\_to\_Flx}).
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
-\fun{GEN}{Flm_to_FlxX}{GEN x, long sv,long w} converts the colums of
+\fun{GEN}{Flm_to_FlxX}{GEN x, long sv,long w} converts the columns of
 \kbd{Flm}~\kbd{x} to the coefficient of an \kbd{FlxX}, and normalize the
 result.
 
@@ -3122,7 +3122,7 @@ copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
 \tet{gtrans}.
 
 \fun{GEN}{shallowconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
-copying compoents, i.~e.,~it returns a \kbd{GEN} whose components are 
+copying components, i.~e.,~it returns a \kbd{GEN} whose components are 
 (physically) the components of $x$ and $y$.
 
 \fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
@@ -3173,7 +3173,7 @@ Theses functions handle \typ{VEC} as an abstract container type
 of \kbd{GEN}s. No specific meaning is attached to the content.
 
 They accept both \typ{VEC} and \typ{COL} as input, but \kbd{col} functions
-always return \typ{COL} and \kbd{vec} functions alway return \typ{VEC}.
+always return \typ{COL} and \kbd{vec} functions always return \typ{VEC}.
 
 \misctitle{Note.} All the functions below are shallow.
 
