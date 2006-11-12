@@ -1,5 +1,5 @@
-\p 38
-\e
+default(realprecision,38);
+default(echo,1);
 gettime;
 test(D) =
 {
