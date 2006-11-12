@@ -413,17 +413,16 @@ sub posttex {
   print TEX "\\vfill\\eject\\bye";
   close(TEX) || die "Error closing '$texfile.tex': $!";
 
-  chdir($tmpdir);
-  $out = `tex $texfile.tex 2>&1 < /dev/null`;
+  $out = `cd $tmpdir; tex $texfile.tex 2>&1 < /dev/null`;
   $? == 0 && -f "$texfile.dvi"
     || die "could not create '$texfile.dvi': status=$?, $out";
   safe_setsid();
-  system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log;rmdir $tmpdir)&");
+  system("(cd $tmpdir; $xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f
+  $texfile.tex $texfile.dvi $texfile.log; cd /; rmdir $tmpdir)&");
 }
 
 sub clean {
-  unlink("$texfile.tex","$texfile.dvi","$texfile.log");
-  rmdir("$tmpdir");
+  unlink("$texfile.tex"); rmdir("$tmpdir");
 }
 
 #
