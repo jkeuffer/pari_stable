@@ -203,7 +203,8 @@ RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
 LIBS         = $LIBS
-GMPLIBS     = $GMPLIBS
+GMPLIBS      = $GMPLIBS
+DL_LIBS      = $DL_LIBS
 STA_LIBS     = \$(GMPLIBS) \$(LIBS)
 
 RM = rm -f
