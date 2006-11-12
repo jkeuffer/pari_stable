@@ -23,4 +23,4 @@ elc:
 	   -f batch-byte-compile *.el
 
 clean:
-	rm -f *.elc
+	rm -f *.elc pari-conf.el
