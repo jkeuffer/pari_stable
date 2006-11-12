@@ -203,6 +203,8 @@ RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
 LIBS         = $LIBS
+GMPLIBS     = $GMPLIBS
+STA_LIBS     = \$(GMPLIBS) \$(LIBS)
 
 RM = rm -f
 MV = mv -f
@@ -274,7 +276,7 @@ kerntest\$(_O): $src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ $src/test/kerntest.c
 
 kerntest: $KERNOBJS kerntest\$(_O)
-	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(LIBS)
+	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ $KERNOBJS kerntest\$(_O) \$(STA_LIBS)
 
 mpinl\$(_O): .headers parilvl0.h parilvl1.h $knone/mpinl.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) -o mpinl\$(_O) $knone/mpinl.c
@@ -293,13 +295,13 @@ tune: pariinl.h tune-sta
 	-\$(LN) $ln_objdir/tune ../tune
 
 tune-dyn: tune.o \$(LIBPARI_DYN)
-	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
+	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(STA_LIBS)
 tune-sta: tune.o \$(LIBPARI_STA)
-	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
+	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(STA_LIBS)
 
 gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(DL_LIBS) \$(STA_LIBS)
 	$postconfig gp-sta
 
 cleanemacs:
@@ -332,7 +334,7 @@ install-bin: install-bin-$dft
 install-bin-dyn: gp-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
+	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
 	$postconfig \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
@@ -490,7 +492,7 @@ EOT
 
 gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	$postconfig gp-dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)

@@ -9,6 +9,9 @@ Done for version 2.4.1 (released ??/??/2006):
     3- ispower(522^3) -> 0 [ looked like a 7th power to is_357_power(), which
        then forgot to test for cubes ] [#506]
 LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
+    5- Cleanup library linking: do not link libpari with -ld [only gp], do
+    not link gp with -lgmp [only libpari]. Side effect: libgmp.so no longer
+    needed for modules compiled by gp2c-run
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

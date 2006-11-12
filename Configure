@@ -61,7 +61,7 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_dlld # $_dlld_list
 . ./get_perl # $_perl_list
 ####################### CONFIGURE - LIBC ####################################
-. ./get_libc # $_has_list, update LIBS
+. ./get_libc # $_has_list, DL_LIBS
 ####################### CONFIGURE - LIBRARIES ###############################
 # Looking for libraries: gmp, X11, fltk, Qt, readline
 echo Checking for optional libraries and headers...
@@ -135,7 +135,7 @@ esac
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
-  kernlvl0 kernlvl1 LIBS\
+  kernlvl0 kernlvl1 DL_LIBS LIBS\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\

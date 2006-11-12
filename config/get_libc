@@ -26,12 +26,13 @@ list=vsnprintf; . ./look
 # For install(). Do we need libdl.so?
 # on irix and osf1 -ldl not needed
 extra_flags=
+DL_LIBS=
 list=dlopen; . ./look
 if test "$has_dlopen" = no; then
   echo "Try again, with -ldl this time..."
   extra_flags=-ldl; . ./look
   if test "$has_dlopen" = yes; then
-    LIBS="-ldl $LIBS"
+    DL_LIBS=-ldl
   fi
 fi
 if test "$has_dlopen" = no; then

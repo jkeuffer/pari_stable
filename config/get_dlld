@@ -91,7 +91,8 @@ if test -n "$DLLD"; then
     DLLDFLAGS="-shared $extra \$(CFLAGS) \$(DLCFLAGS) $DLLDFLAGS"
   fi
   case "$osname" in
-    cygwin|osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
+# Beware: will run through 'eval' [ hence ${...} instead of \$(...) ]
+    cygwin|osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${GMPLIBS} ${LIBS}';;
   esac
 
   if test "$fastread" != yes; then

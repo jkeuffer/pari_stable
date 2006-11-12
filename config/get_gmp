@@ -31,7 +31,6 @@ fi
 if test -n "$gmp"; then
   GMPINCLUDE="-I$gmp_include"
   GMPLIBS="-L$gmp -lgmp"
-  LIBS="$LIBS $GMPLIBS"
 
   exe=$osname-$arch-rlv$$
   $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
