@@ -58,7 +58,6 @@ while test $# -gt 0; do
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --bindir=*) dfltbindir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --datadir=*) dfltdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
-  --emacsdir=*) dfltemacsdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --includedir=*) dfltincludedir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --mandir=*) dfltmandir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
@@ -156,7 +155,6 @@ Installation directories:
   --prefix=<dir>        install files in <dir> (default $prefix)
   --share-prefix=<dir>  as 'prefix', for architecture independent files
   --bindir=<dir>        for binaries
-  --emacsdir=<dir>      for emacs macros
   --includedir=<dir>    for C header files
   --libdir=<dir>        for libraries
   --mandir=<dir>        for manual pages

@@ -20,12 +20,10 @@ TOP=`pwd`
 config_dir=config
 data_dir=data
 doc_dir=doc
-emacs_dir=emacs
 examples_dir=examples
 misc_dir=misc
 src_dir=src
 desc_dir=src/desc
-extract_dir_list="$doc_dir $emacs_dir $misc_dir" # for extract_files
 
 cd $config_dir
 # Process options, initialize
@@ -36,7 +34,7 @@ cd $config_dir
 . ./get_PATH
 #  We might need the following :
 echo Looking for some tools first ...
-list='ld zcat gzip ranlib perl emacs'
+list='ld zcat gzip ranlib perl'
 pathspace=`echo $PATH | sed -e "s/$dir_sep/ /g" | sed -e 's,\\\\,/,g'`
 
 for file in $list; do
@@ -137,7 +135,7 @@ for variable in\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1 DL_LIBS LIBS\
   dir_sep runpath runpathprefix LDDYN\
-  ranlib gzip zcat emacs perl ln_s make_sh\
+  ranlib gzip zcat perl ln_s make_sh\
   sizeof_long doubleformat\
   X11 X11_INC X11_LIBS which_graphic_lib\
   FLTKDIR FLTK_LIBS QTDIR QTLIB\

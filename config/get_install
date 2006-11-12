@@ -1,5 +1,5 @@
 # Exported variables
-_install_list="prefix share_prefix bindir datadir emacsdir includedir libdir mandir sysdatadir "
+_install_list="prefix share_prefix bindir datadir includedir libdir mandir sysdatadir "
 
 dflt=$prefix; rep=
 test "$fastread" = yes || cat <<EOT
@@ -24,7 +24,6 @@ echo $n "...for architecture-independent files (share-prefix) ? $c"
 dflt=$share_prefix; . ./myread; share_prefix=$ans
 
 dfltman=$share_prefix/man/man1
-dfltemacs=$share_prefix/emacs/site-lisp/pari
 dfltdata=$share_prefix/pari
 
 echo "Installation directories for:"
@@ -40,16 +39,13 @@ dflt=${dlftincludedir:-$prefix/include}; . ./myread; includedir=$ans
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
 
-echo $n ..."emacs macros ? $c"
-dflt=${dfltemacsdir:-$dfltemacs}; . ./myread; emacsdir=$ans
-
 echo $n ..."other system-dependant data ? $c"
 dflt=${dfltsysdatadir:-$prefix/lib/pari}; . ./myread; sysdatadir=$ans
 
 echo $n ..."other system-independant data ? $c"
 dflt=${dfltdatadir:-$dfltdata}; . ./myread; datadir=$ans
 
-for i in prefix share_prefix bindir libdir includedir mandir emacsdir sysdatadir datadir ; do
+for i in prefix share_prefix bindir libdir includedir mandir sysdatadir datadir ; do
   eval "dflt=\"\$$i\""
   case $dflt in 
       /*) ;;

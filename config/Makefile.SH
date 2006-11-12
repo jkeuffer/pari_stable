@@ -8,7 +8,6 @@ cfg=../$config_dir
 data=../$data_dir 
 doc=../$doc_dir 
 desc=../$desc_dir 
-emx=../$emacs_dir 
 ex=../$examples_dir 
 misc=../$misc_dir 
 src=../$src_dir 
@@ -120,11 +119,6 @@ case "$sizeof_long" in
   8) numbits=64;;
 esac
 dotest="env \"LD_LIBRARY_PATH=.$dir_sep\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $numbits"
-if test -z "$emacs"; then
-  install_emacs_files=
-else
-  install_emacs_files=install_emacs_files
-fi
 case "$static" in
   n) dft=dyn; libdft=lib-dyn;;
   y) dft=sta; libdft= ;;
@@ -220,7 +214,6 @@ INCLUDEDIR= "\$(DESTDIR)$includedir"
 LIBDIR    = "\$(DESTDIR)$libdir"
 BINDIR    = "\$(DESTDIR)$bindir"
 MANDIR    = "\$(DESTDIR)$mandir"
-EMACSDIR  = "\$(DESTDIR)$emacsdir"
 DATADIR   = "\$(DESTDIR)$datadir"
 SYSDATADIR= "\$(DESTDIR)$sysdatadir"
 
@@ -305,8 +298,6 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(DL_LIBS) \$(STA_LIBS)
 	$postconfig gp-sta
 
-cleanemacs:
-	\$(RM) $emx/*.elc
 cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
@@ -314,7 +305,7 @@ cleanobj:
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 
-clean: cleanobj cleantest cleanemacs cleandesc
+clean: cleanobj cleantest cleandesc
 
 .headers: $HEADERS
 	@touch \$@
@@ -357,7 +348,7 @@ install-man::
 	-\$(LN) gp.1 \$(MANDIR)/pari.1
 	-\$(LN) gp-$version.1 \$(MANDIR)/gp.1
 
-install-misc: $install_emacs_files
+install-misc:
 	-mkdir -p \$(MISCDIR) \$(BINDIR)
 	\$(INSTALL_PROGRAM) $misc/tex2mail \$(BINDIR)
 	\$(INSTALL_DATA) $doc/tex2mail.1 \$(MANDIR)
@@ -505,22 +496,6 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SONAME)"; then \
 	  \$(RM) \$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME); fi
-EOT
-fi
-
-if test -n "$emacs"; then
-  cat >> $file << EOT
-elc:
-	@echo "Byte-Compiling elisp files..."
-	-cd $emx; $emacs -batch \
-	   --eval '(setq load-path (append (list ".") load-path))' \
-	   -f batch-byte-compile *.el
-
-$install_emacs_files: elc
-	-mkdir -p \$(EMACSDIR)
-	-cd $emx; for f in *.elc *.el pariemacs.txt; do \
-	  \$(INSTALL_DATA) \$\$f \$(EMACSDIR); \
-	done
 EOT
 fi
 

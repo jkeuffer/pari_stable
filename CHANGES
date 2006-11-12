@@ -23,6 +23,7 @@ BA  2- library function strntoGENstr
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
+    2- pariemacs support from Configure
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.0 (released 06/10/2006):
