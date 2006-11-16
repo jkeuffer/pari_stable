@@ -213,9 +213,10 @@ member_diff(GEN x) /* different */
 GEN
 member_codiff(GEN x) /* codifferent */
 {
-  long t; GEN nf = get_nf(x,&t), y = nfmats(nf);
+  long t; GEN H, nf = get_nf(x,&t), y = nfmats(nf);
   if (!y) member_err("codiff");
-  return gdiv(gel(y,6), absi(gel(nf,3)));
+  H = hnf(gel(y,6));
+  return gdiv(H, gcoeff(H,1,1));
 }
 
 GEN

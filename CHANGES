@@ -13,6 +13,8 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
     not link gp with -lgmp [only libpari]. Side effect: libgmp.so no longer
     needed for modules compiled by gp2c-run
     6- when nf.disc < 0, nf.diff was an incorrect PARI ideal [#510]
+    7- nf.codiff was only correct up to multiplication by some rational number
+       (a divisor of nf.disc) [#510]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

@@ -1192,7 +1192,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   absdK = T->dK; if (signe(absdK) < 0) absdK = negi(absdK);
   TI = ZM_inv(Tr, absdK); /* dK T^-1 */
   A = Q_primitive_part(TI, &dA);
-  gel(mat,6) = A; /* primitive part of codifferent, dA its denominator */
+  gel(mat,6) = A; /* primitive part of codifferent, dA its content */
   dA = dA? diviiexact(absdK, dA): absdK;
   A = hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
