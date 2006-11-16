@@ -1168,7 +1168,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 {
   GEN nf = cgetg(10,t_VEC);
   GEN x = T->x;
-  GEN invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
+  GEN absdK, invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
   nffp_t F;
   get_nf_fp_compo(T, &F, ro, prec);
 
@@ -1189,10 +1189,11 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   if (DEBUGLEVEL) msgtimer("mult. table");
 
   Tr = get_Tr(gel(nf,9), x, F.basden);
-  TI = ZM_inv(Tr, T->dK); /* dK T^-1 */
+  absdK = T->dK; if (signe(absdK) < 0) absdK = negi(absdK);
+  TI = ZM_inv(Tr, absdK); /* dK T^-1 */
   A = Q_primitive_part(TI, &dA);
   gel(mat,6) = A; /* primitive part of codifferent, dA its denominator */
-  dA = dA? diviiexact(T->dK, dA): T->dK;
+  dA = dA? diviiexact(absdK, dA): absdK;
   A = hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
   gel(MDI,2) = eltmul_get_table(nf, gel(MDI,2));
