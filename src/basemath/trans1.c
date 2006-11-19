@@ -1603,8 +1603,8 @@ constlog2(long prec)
   tmplog2 = newbloc(prec);
   *tmplog2 = evaltyp(t_REAL) | evallg(prec);
   av = avma;
-  n = bit_accuracy(prec) >> 1;
   l = prec+1;
+  n = bit_accuracy(l) >> 1;
   y = divrr(Pi2n(-1, l), agm1r_abs( real2n(2 - n, l) ));
   affrr(divrs(y,n), tmplog2);
   if (glog2) gunclone(glog2);
