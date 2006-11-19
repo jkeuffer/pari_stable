@@ -2494,7 +2494,7 @@ gtovec(GEN x)
 GEN
 gtovecrev(GEN x)
 {
-  long lx, ly, i;
+  long ly, i;
   GEN y;
   if (!x) return cgetg(1,t_VEC);
   switch (typ(x))
