@@ -1185,6 +1185,14 @@ strntoGENstr(const char *s, long n0)
 
 GEN
 strtoGENstr(const char *s) { return strntoGENstr(s, strlen(s)); }
+
+GEN
+chartoGENstr(char c)
+{ 
+  GEN x = cgetg(2, t_STR);
+  char *t = GSTR(x);
+  t[0] = c; t[1] = 0; return x;
+}
 /********************************************************************/
 /**                                                                **/
 /**                          READ FUNCTIONS                        **/

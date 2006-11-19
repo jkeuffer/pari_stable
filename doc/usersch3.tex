@@ -457,15 +457,24 @@ is a vector or a matrix, the operation is done componentwise. This will not
 be restated for every function.
 
 \subsecidx{Col}$({x=[\,]})$: transforms the object $x$ into a column vector.
-The vector will be with one component only, except when $x$ is a
-vector or a quadratic form (in which case the resulting vector is simply the
-initial object considered as a column vector), a matrix (the column of row
-vectors comprising the matrix is returned), a character string (a column of
-individual characters is returned), but more importantly when $x$ is a
-polynomial or a power series. In the case of a polynomial, the coefficients
-of the vector start with the leading coefficient of the polynomial, while for
-power series only the significant coefficients are taken into account, but
-this time by increasing order of degree.
+The vector has a single component , except when $x$ is
+
+$\bullet$ a vector or a quadratic form (in which case the resulting vector is
+simply the initial object considered as a column vector),
+
+$\bullet$ a matrix (the column of row vectors comprising the matrix is
+returned),
+
+$\bullet$ a character string (a column of individual characters is returned),
+
+$\bullet$ a polynomial or a power series. In the case of a polynomial, the
+coefficients of the vector start with the leading coefficient of the
+polynomial, while for power series only the significant coefficients are
+taken into account, but this time by increasing order of degree. In this last
+case, \kbd{Col} is the reciprocal function of \kbd{Pol} and \kbd{Ser}
+respectively.
+
+Note that the function \kbd{Colrev} does not exist, use \kbd{Vecrev}.
 
 \syn{gtocol}{x}.
 
@@ -523,10 +532,30 @@ $\fl$ is obsolete and should not be used.
 
 \subsecidx{Pol}$(x,\{v=x\})$: transforms the object $x$ into a polynomial with
 main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
-$x$ is a power series, the effect is identical to \kbd{truncate} (see there),
-i.e.~it chops off the $O(X^k)$. If $x$ is a vector, this function creates
-the polynomial whose coefficients are given in $x$, with $x[1]$ being the
-leading coefficient (which can be zero).
+$x$ is a power series, the effect is identical to \kbd{truncate},
+i.e.~it chops off the $O(X^k)$. 
+
+The main use of this function is when $x$ is a vector: it creates the
+polynomial whose coefficients are given by $x$, with $x[1]$ being the leading
+coefficient (which can be zero). It is much faster to evaluate
+\kbd{Pol} on a vector of coefficients in this way, than the corresponding
+formal expression $a_n X^n + \dots + a_0$, which is evaluated naively exactly
+as written (linear versus quadratic time in $n$). \tet{Polrev} can be used if
+one wants $x[1]$ to be the constant coefficient:
+\bprog
+? Pol([1,2,3])
+%1 = x^2 + 2*x + 3
+? Polrev([1,2,3])
+%2 = 3*x^2 + 2*x + 1
+@eprog\noindent
+The reciprocal function of \kbd{Pol} (resp.~\kbd{Polrev}) is \kbd{Vec} (resp.~
+\kbd{Vecrev}).
+\bprog
+? Vec(Pol([1,2,3]))
+%1 = [1, 2, 3]
+? Vecrev( Polrev([1,2,3]) )
+%2 = [1, 2, 3]
+@eprog\noindent
 
 \misctitle{Warning:} this is \emph{not} a substitution function. It will not
 transform an object containing variables of higher priority than~$v$.
@@ -539,11 +568,21 @@ transform an object containing variables of higher priority than~$v$.
 
 \subsecidx{Polrev}$(x,\{v=x\})$: transform the object $x$ into a polynomial
 with main variable $v$. If $x$ is a scalar, this gives a constant polynomial.
-If $x$ is a power series, the effect is identical to \kbd{truncate} (see
-there), i.e.~it chops off the $O(X^k)$. If $x$ is a vector, this function
-creates the polynomial whose coefficients are given in $x$, with $x[1]$ being
-the constant term. Note that this is the reverse of \kbd{Pol} if $x$ is a
-vector, otherwise it is identical to \kbd{Pol}.
+If $x$ is a power series, the effect is identical to \kbd{truncate}, i.e.~it
+chops off the $O(X^k)$.
+
+The main use of this function is when $x$ is a vector: it creates the
+polynomial whose coefficients are given by $x$, with $x[1]$ being the
+constant term. \tet{Pol} can be used if one wants $x[1]$ to be the leading
+coefficient:
+\bprog
+? Polrev([1,2,3])
+%1 = 3*x^2 + 2*x + 1
+? Pol([1,2,3])
+%2 = x^2 + 2*x + 3
+@eprog
+The reciprocal function of \kbd{Pol} (resp.~\kbd{Polrev}) is \kbd{Vec} (resp.~
+\kbd{Vecrev}).
 
 \syn{gtopolyrev}{x,v}, where $v$ is a variable number.
 
@@ -625,17 +664,31 @@ format, and concatenates the results into a single character string (type
 The individual arguments are read in string context, see \secref{se:strings}.
 
 \subsecidx{Vec}$({x=[\,]})$: transforms the object $x$ into a row vector.
-The vector will be with one component only, except when $x$ is a
-vector or a quadratic form (in which case the resulting vector is
-simply the initial object considered as a row vector), a matrix
-(the vector of columns comprising the matrix is return), a character string
-(a vector of individual characters is returned), but more importantly when
-$x$ is a polynomial or a power series. In the case of a polynomial, the
+That vector has a single component, except when $x$ is 
+
+$\bullet$ a vector or a quadratic form (in which case the resulting vector
+is simply the initial object considered as a row vector),
+
+$\bullet$ a matrix (the vector of columns comprising the matrix is return),
+
+$\bullet$ a character string (a vector of individual
+characters is returned),
+
+$\bullet$ a polynomial or a power series. In the case of a polynomial, the
 coefficients of the vector start with the leading coefficient of the
 polynomial, while for power series only the significant coefficients are
-taken into account, but this time by increasing order of degree.
+taken into account, but this time by increasing order of degree. 
+In this last case, \kbd{Vec} is the reciprocal function of \kbd{Pol} and
+\kbd{Ser} respectively.
 
 \syn{gtovec}{x}.
+
+\subsecidx{Vecrev}$({x=[\,]})$: as \kbd{Vec}, except when $x$ is a polynomial.
+In this case, \kbd{Vecrev} is the reciprocal function of \kbd{Polrev}: the
+coefficients of the vector start with the constant coefficient of the
+polynomial and the others follow by increasing degree.
+
+\syn{gtovecrev}{x}.
 
 \subsecidx{Vecsmall}$({x=[\,]})$: transforms the object $x$ into a row
 vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a

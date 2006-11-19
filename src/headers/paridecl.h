@@ -249,6 +249,7 @@ GEN     zx_to_ZX(GEN z);
 /* anal.c */
 
 void    addhelp(entree *ep, char *s);
+GEN     chartoGENstr(char c);
 void    delete_named_var(entree *ep);
 long    delete_var(void);
 entree* fetch_named_var(char *s);
@@ -1147,6 +1148,7 @@ GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);
 GEN     gtoser(GEN x, long v);
 GEN     gtovec(GEN x);
+GEN     gtovecrev(GEN x);
 GEN     gtovecsmall(GEN x);
 GEN     gtrunc(GEN x);
 long    gvar(GEN x);

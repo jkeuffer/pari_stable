@@ -23,6 +23,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations
 BA  2- library function strntoGENstr
+    3- function Vecrev
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 

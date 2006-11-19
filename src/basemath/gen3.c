@@ -2446,62 +2446,66 @@ _gtoser(GEN x, long v, long prec)
 GEN
 gtoser(GEN x, long v) { return _gtoser(x,v,precdl); }
 
-/* assume typ(x) = t_STR */
-static GEN
-str_to_vecsmall(GEN x)
-{
-  char *s = GSTR(x);
-  long i, l = strlen(s);
-  GEN y = cgetg(l+1, t_VECSMALL);
-  s--;
-  for (i=1; i<=l; i++) y[i] = (long)s[i];
-  return y;
-}
-
 GEN
 gtovec(GEN x)
 {
-  long tx,lx,i;
+  long tx, lx, i;
   GEN y;
 
   if (!x) return cgetg(1,t_VEC);
   tx = typ(x);
-  if (is_scalar_t(tx) || tx == t_RFRAC) return mkveccopy(x);
-  if (tx == t_STR)
-  {
-    char t[2] = {0,0};
-    y = str_to_vecsmall(x);
-    lx = lg(y);
-    for (i=1; i<lx; i++)
-    {
-      t[0] = y[i];
-      gel(y,i) = strtoGENstr(t);
-    }
-    settyp(y,t_VEC); return y;
-  }
+  if (is_scalar_t(tx)) return mkveccopy(x);
   if (is_graphicvec_t(tx))
   {
     lx=lg(x); y=cgetg(lx,t_VEC);
     for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
     return y;
   }
-  if (tx==t_POL)
+  switch(tx)
   {
-    lx=lg(x); y=cgetg(lx-1,t_VEC);
-    for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,lx-i));
-    return y;
+    case t_POL:
+      lx=lg(x); y=cgetg(lx-1,t_VEC);
+      for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,lx-i));
+      return y;
+    case t_SER:
+      lx=lg(x); y=cgetg(lx-1,t_VEC); x++;
+      for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+    case t_RFRAC: return mkveccopy(x);
+    case t_LIST:
+      lx=lgeflist(x); y=cgetg(lx-1,t_VEC); x++;
+      for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
+    case t_STR:
+    {
+      char *s = GSTR(x);
+      lx = strlen(s)+1; y = cgetg(lx, t_VEC);
+      s--;
+      for (i=1; i<lx; i++) gel(y,i) = chartoGENstr(s[i]);
+      return y;
+    }
+    case t_VECSMALL:
+      return vecsmall_to_vec(x);
+    default: err(typeer,"gtovec");
+      return NULL; /*notreached*/
   }
-  if (tx==t_LIST)
+}
+
+GEN
+gtovecrev(GEN x)
+{
+  long lx, ly, i;
+  GEN y;
+  if (!x) return cgetg(1,t_VEC);
+  switch (typ(x))
   {
-    lx=lgeflist(x); y=cgetg(lx-1,t_VEC); x++;
-    for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
-    return y;
+    case t_POL:
+      ly=lg(x)-1; y=cgetg(ly,t_VEC);
+      for (i=1; i<ly; i++) gel(y,i) = gcopy(gel(x,i+1));
+      return y;
+    default:
+      return gtovec(x);
   }
-  if (tx == t_VECSMALL) return vecsmall_to_vec(x);
-  if (!signe(x)) return mkvec(gen_0);
-  lx=lg(x); y=cgetg(lx-1,t_VEC); x++;
-  for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
-  return y;
 }
 
 GEN
@@ -2531,7 +2535,15 @@ gtovecsmall(GEN x)
   tx = typ(x);
   if (tx == t_VECSMALL) return gcopy(x);
   if (tx == t_INT) return mkvecsmall(itos(x));
-  if (tx == t_STR) return str_to_vecsmall(x);
+  if (tx == t_STR)
+  {
+    char *s = GSTR(x);
+    l = strlen(s);
+    V = cgetg(l+1, t_VECSMALL);
+    s--;
+    for (i=1; i<=l; i++) V[i] = (long)s[i];
+    return V;
+  }
   if (!is_vec_t(tx)) pari_err(typeer,"vectosmall");
   l = lg(x);
   V = cgetg(l,t_VECSMALL);
