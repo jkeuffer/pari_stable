@@ -367,7 +367,7 @@ mpch(GEN x)
   pari_sp av;
   GEN z;
 
-  if (gcmp0(x)) { /* 1 + x */
+  if (!signe(x)) { /* 1 + x */
     long e = expo(x);
     if (e > 0) return real_0_bit(e);
     return real_1(3 + ((-e)>>TWOPOTBITS_IN_LONG));
@@ -408,12 +408,14 @@ static GEN
 mpsh(GEN x)
 {
   pari_sp av;
-  GEN z;
+  long ex = expo(x), lx;
+  GEN z, res;
 
-  if (!signe(x)) return real_0_bit(expo(x));
-  av = avma;
+  if (!signe(x)) return real_0_bit(ex);
+  lx = lg(x); res = cgetr(lx); av = avma;
+  if (ex < 0) x = rtor(x, lx + nbits2nlong(-ex));
   z = mpexp(x); z = addrr(z, divsr(-1,z)); setexpo(z, expo(z)-1);
-  return gerepileuptoleaf(av, z);
+  affrr(z, res); avma = av; return res;
 }
 
 GEN
@@ -496,10 +498,15 @@ gth(GEN x, long prec)
 static GEN
 mpash(GEN x)
 {
-  pari_sp av = avma;
-  GEN z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
+  GEN z, res;
+  pari_sp av;
+  long lx = lg(x), ex = expo(x);
+  
+  res = cgetr(lx); av = avma;
+  if (ex < 0) x = rtor(x, lx + nbits2nlong(-ex));
+  z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
   if (signe(x) < 0) togglesign(z);
-  return gerepileuptoleaf(av, z);
+  affrr(z, res); avma = av; return res;
 }
 
 GEN
