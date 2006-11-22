@@ -413,7 +413,7 @@ mpsh(GEN x)
 
   if (!signe(x)) return real_0_bit(ex);
   lx = lg(x); res = cgetr(lx); av = avma;
-  if (ex < 0) x = rtor(x, lx + nbits2nlong(-ex));
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
   z = mpexp(x); z = addrr(z, divsr(-1,z)); setexpo(z, expo(z)-1);
   affrr(z, res); avma = av; return res;
 }
@@ -448,16 +448,19 @@ gsh(GEN x, long prec)
 static GEN
 mpth(GEN x)
 {
-  long l, s = signe(x);
+  long lx, s = signe(x);
   GEN y;
 
   if (!s) return real_0_bit(expo(x));
-  l = lg(x);
-  if (absr_cmp(x, stor(bit_accuracy(l), 3)) >= 0) {
-    y = real_1(l);
+  lx = lg(x);
+  if (absr_cmp(x, stor(bit_accuracy(lx), 3)) >= 0) {
+    y = real_1(lx);
   } else {
     pari_sp av = avma;
-    GEN t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
+    long ex = expo(x);
+    GEN t;
+    if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
+    t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
     y = gerepileuptoleaf(av, divrr(t, addsr(2,t)));
   }
   if (s < 0) togglesign(y); /* tanh is odd */
@@ -503,7 +506,7 @@ mpash(GEN x)
   long lx = lg(x), ex = expo(x);
   
   res = cgetr(lx); av = avma;
-  if (ex < 0) x = rtor(x, lx + nbits2nlong(-ex));
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
   z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
   if (signe(x) < 0) togglesign(z);
   affrr(z, res); avma = av; return res;
@@ -628,7 +631,10 @@ static GEN
 mpath(GEN x)
 {
   pari_sp av = avma;
-  GEN z = logr_abs( addrs(divsr(2,subsr(1,x)), -1) );
+  long ex = expo(x);
+  GEN z;
+  if (ex < 1 - BITS_IN_LONG) x = rtor(x, lg(x) + nbits2nlong(-ex)-1);
+  z = logr_abs( addrs(divsr(2,subsr(1,x)), -1) );
   setexpo(z, expo(z)-1); return gerepileuptoleaf(av, z);
 }
 
