@@ -130,7 +130,10 @@ setloop(GEN a)
 
 /* we had a = setloop(?), then some incloops. Reset a to b */
 GEN
-resetloop(GEN a, GEN b) { affii(b, a); return a; }
+resetloop(GEN a, GEN b) {
+  a[0] = evaltyp(t_INT) | evallg(lgefint(b));
+  affii(b, a); return a;
+}
 
 /* assume a > 0, initialized by setloop. Do a++ */
 static GEN
