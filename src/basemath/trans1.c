@@ -1216,7 +1216,7 @@ exp1r_abs(GEN x)
     l2 += m>>TWOPOTBITS_IN_LONG;
   } else { /* rare ! */
     b = -1 - log((double)(ulong)x[2]) + (BITS_IN_LONG-1-ex)*LOG2; /*-1-log(x)*/
-    n = (long)(1 + beta/b);
+    n = (long)(1.1 + beta/b);
     m = 0;
   }
   unr=real_1(l2);
@@ -1226,15 +1226,14 @@ exp1r_abs(GEN x)
 
   s = 0; l1 = 3; av2 = avma;
   for (i=n; i>=2; i--)
-  {
+  { /* compute X^(n-1)/n! + ... + X/2 + 1 */
     setlg(X,l1); p3 = divrs(X,i);
     s -= expo(p3); p1 = mulrr(p3,p2); setlg(p1,l1);
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);
     setlg(unr,l1); p1 = addrr_sign(unr,1, p1,1);
-    setlg(p2,l1); affrr(p1,p2); avma = av2;
+    setlg(p2,l1); affrr(p1,p2); avma = av2; /* p2 <- 1 + (X/i)*p2 */
   }
-  setlg(p2,l2);
   setlg(X,l2); p2 = mulrr(X,p2);
 
   for (i=1; i<=m; i++)

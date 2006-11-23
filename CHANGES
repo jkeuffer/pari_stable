@@ -16,7 +16,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
     7- nf.codiff was only correct up to multiplication by some rational number
        (a divisor of nf.disc) [#510]
     8- inaccuracy (>= 2ulp) in [cached] log(2) [#498]
-    9- sinh, asinh, tanh, atanh were inaccurate near 0
+    9- exp, sinh, asinh, tanh, atanh were inaccurate near 0
    10- [GMP kernel] forvec(x=[[-1,0]],print(x)) --> error [#509]
        [ 'resetloop' failed when passing through '0' ]
 
