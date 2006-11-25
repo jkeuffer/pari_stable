@@ -22,7 +22,7 @@
 ? F=truncate(f(t+O(t^7)));
 ? g(x)=if(x>1e-18,f(x),subst(F,t,x))
 ? intnum(x=0,[oo,1],f(x))-Euler
-1.84582610376039027654450959964542429285 E-76
+1.01780270266616498382717300808289765224 E-76
 ? intnum(x=0,[oo,1],g(x))-Euler
 0.E-96
 ? intnum(x=0,1,1/sqrt(x))-2
@@ -85,5 +85,5 @@
 ? a-b
 -1.3906711615670008645 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 12681
+Total time spent: 12656
 ? \q
