@@ -209,15 +209,6 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
       if (i == 1) { z[2] = HIGHBIT; ez++; }
     }
     z[1] = evalsigne(sz)|evalexpo(ez);
-#if 0
-{
-GEN U;
-KARATSUBA_MULR_LIMIT = 100000;
-U = mulrr(x, y);
-KARATSUBA_MULR_LIMIT = 4;
-if (!gequal(U, z)) pari_err(talker,"toto");
-}
-#endif
     avma = av; return;
   }
   if (lz == 3)
