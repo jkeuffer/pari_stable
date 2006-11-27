@@ -19,6 +19,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
     9- exp, sinh, asinh, tanh, atanh were inaccurate near 0
    10- [GMP kernel] forvec(x=[[-1,0]],print(x)) --> error [#509]
        [ 'resetloop' failed when passing through '0' ]
+   11- nfbasistoalg(nfinit(y),x) created an invalid t_POLMOD
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

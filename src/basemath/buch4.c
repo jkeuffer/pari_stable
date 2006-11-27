@@ -618,13 +618,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
   bnf = checkbnf(bnf);
   nf = checknf(bnf);
   if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
-  switch (typ(x))
-  {
-    case t_INT: case t_FRAC: case t_POL: case t_COL:
-      x = basistoalg(nf,x); break;
-    case t_POLMOD: break;
-    default: pari_err(typeer,"bnfissunit");
-  }
+  x = basistoalg(nf,x);
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = isunit(bnf, x);
   if (!v || lg(v) == 1) { avma = av; return cgetg(1,t_COL); }

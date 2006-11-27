@@ -629,9 +629,9 @@ basistoalg(GEN nf, GEN x)
       if (!polegal_spec(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
-    default: z=cgetg(3,t_POLMOD);
+    default: z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(nf,1));
-      gel(z,2) = gmul(x,pol_1(varn(nf[1]))); return z;
+      gel(z,2) = gtopoly(x, varn(nf[1])); return z;
   }
 }
 
