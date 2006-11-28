@@ -3320,13 +3320,13 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     bound = ZY_ZXY_ResBound(A, B, dB);
     if (bound > 50000)
     {
-      long prec = MEDDEFAULTPREC;
+      long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(max(eA,eB));
       for(;; prec = (prec-1)<<1)
       {
         GEN run = real_1(prec);
         GEN R = subres(gmul(A, run), gmul(B, run));
         bound = gexpo(R) + 1;
-        if (!gcmp0(R) || bound <= 0) break;
+        if (!gcmp0(R)) break;
       }
       if (dB) bound -= (long)(dbllog2(dB)*degA);
     }
