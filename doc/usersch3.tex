@@ -7637,7 +7637,7 @@ of \var{expr} on $]a,b[$ with respect to $X$. The integrand may have values
 belonging to a vector space over the real numbers; in particular, it can be
 complex-valued or vector-valued. But it is assumed that the function is regular
 on $]a,b[$. If the endpoints $a$ and $b$ are finite and the function is regular
-there, no problems arise:
+there, the situation is simple:
 \bprog
   ? intnum(x = 0,1, x^2)
   %1 = 0.3333333333333333333333333333
@@ -7654,7 +7654,7 @@ behaviour.
   %2 = 1.000000000000000000000000000
 @eprog\noindent
 In basic usage, it is assumed that the function does not decrease
-exponentially fast:
+exponentially fast at infinity:
 \bprog
   ? intnum(x=0,+oo, exp(-x))
     *** exp: exponent (expo) overflow
@@ -7667,15 +7667,16 @@ integrated, evaluated at many sampling points. If \var{tab} is
 \item a positive integer $m$, we use $2^m$ sampling points, hopefully
 increasing accuracy. But note that the running time is roughly proportionnal
 to $2^m$. One may try consecutive values of $m$ until they give the same
-value up to an accepted error. If \var{tab} is omitted the algorithm guesses
+value up to an accepted error. If \var{tab} is omitted, the algorithm guesses
 a reasonable value for $m$ depending on the current precision only, which
 should be sufficient for regular functions. That value may be obtained from
 \tet{intnumstep}, and increased in case of difficulties.
 
 \item a set of integration tables as output by \tet{intnuminit},
-they are used directyly. This is useful if several integrations of the same
+they are used directly. This is useful if several integrations of the same
 type are performed (on the same kind of interval and functions, for a given
-accuracy), in particular for multivariate integrals.
+accuracy), in particular for multivariate integrals, since we then skip
+expensive precomputations.
 
 \misctitle{Specifying the behaviour at endpoints.}
 This is done as follows. An endpoint $a$ is either given as such (a scalar,
@@ -7687,8 +7688,15 @@ If $a$ is finite, the code $[a,\alpha]$ means the function has a
 singularity of the form $(x-a)^{\alpha}$, up to logarithms. (If $\alpha \ge
 0$, we only assume the function is regular, which is the default assumption.)
 If a wrong singularity exponent is used, the result will lose a catastrophic
-number of decimals, for instance half the number of digits will be wrong if
-$\alpha=-1/2$ is omitted.
+number of decimals:
+\bprog
+  ? intnum(x=0, 1, x^(-1/2))         \\@com assume $x^{-1/2}$ is regular at 0
+  %1 = 1.999999999999999999990291881
+  ? intnum(x=[0,-1/2], 1, x^(-1/2))  \\@com no, it's not
+  %2 = 2.000000000000000000000000000
+  ? intnum(x=[0,-1/10], 1, x^(-1/2)) 
+  %3 = 1.999999999999999999999946438 \\@com using a wrong exponent is bad
+@eprog
 
 If $a$ is $\pm\infty$, which is coded as $[\pm 1]$, the situation is more
 complicated, and $[[\pm1],\alpha]$ means:
@@ -7698,10 +7706,19 @@ integrand tends to zero, but not exponentially fast, and not
 oscillating such as $\sin(x)/x$.
 
 \item $\alpha>0$ assumes that the function tends to zero exponentially fast
-approximately as $\exp(-\alpha x)$. This includ oscillating but quickly
-decreasing functions such as $\exp(-x)\sin(x)$. The precise choice of
-$\alpha$, while useful in extreme cases, is not critical, and may be off by a
-factor of $10$ or more from the correct value.
+approximately as $\exp(-\alpha x)$. This includes oscillating but quickly
+decreasing functions such as $\exp(-x)\sin(x)$.
+\bprog
+  ? oo = [1];
+  ? intnum(x=0, +oo, exp(-2*x))
+    *** exp: exponent (expo) overflow
+  ? intnum(x=0, [+oo, 2], exp(-2*x))
+  %1 = 0.5000000000000000000000000000 \\@com OK!
+  ? intnum(x=0, [+oo, 4], exp(-2*x))
+  %2 = 0.4999999999999999999961990984 \\@com wrong exponent $\Rightarrow$ imprecise result
+  ? intnum(x=0, [+oo, 20], exp(-2*x))
+  %2 = 0.4999524997739071283804510227 \\@com disaster
+@eprog
 
 \item $\alpha<-1$ assumes that the function tends to $0$ slowly, like
 $x^{\alpha}$. Here it is essential to give the correct $\alpha$, if possible,
@@ -7712,22 +7729,22 @@ words to no $\alpha$ at all.
 Let $k > 0$ real, and $g(x)$ a nonoscillating function tending slowly to $0$
 (e.g. like a negative power of $x$), then
 
-\item $\alpha=k I$ assumes that the function behaves like $\cos(kx)g(x)$.
+\item $\alpha=k * I$ assumes that the function behaves like $\cos(kx)g(x)$.
 
-\item $\alpha=-kI$ assumes that the function behaves like $\sin(kx)g(x)$.
+\item $\alpha=-k* I$ assumes that the function behaves like $\sin(kx)g(x)$.
 
 \noindent Here it is critical to give the exact value of $k$. If the
 oscillating part is not a pure sine or cosine, one must expand it into a
 Fourier series, use the above codings, and sum the resulting contributions.
-Otherwise you will get nonsense. Note that $\cos(kx)$ (and similarly
-$\sin(kx)$) means that very function, and not a translated version such as
+Otherwise you will get nonsense. Note that $\cos(kx)$, and similarly
+$\sin(kx)$, means that very function, and not a translated version such as
 $\cos(kx+a)$.
 
 \misctitle{Note.} If $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero
 exponentially fast as $\exp(-\alpha x)$, it is up to the user to choose
-between $[[\pm1],\alpha]$ and $[[\pm1],kI]$, but a good rule of thumb is that
+between $[[\pm1],\alpha]$ and $[[\pm1],k* I]$, but a good rule of thumb is that
 if the oscillations are much weaker than the exponential decrease, choose
-$[[\pm1],\alpha]$, otherwise choose $[[\pm1],kI]$, although the latter can
+$[[\pm1],\alpha]$, otherwise choose $[[\pm1],k* I]$, although the latter can
 reasonably be used in all cases, while the former cannot. To take a specific
 example, in the inverse Mellin transform, the integrand is almost always a
 product of an exponentially decreasing and an oscillating factor. If we
