@@ -23,8 +23,8 @@ case "$arch" in
            esac;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
   ppc)  case "$sizeof_long" in   
-        4) asmarch=$arch;;
-        8) asmarch=none;;
+        4) asmarch=ppc;;
+        8) asmarch=ppc64;;
         esac;                           pretty='PowerPC' ;; 
   arm*)          asmarch=none;          pretty=$arch ;;
   mips)          asmarch=none;          pretty=MIPS ;;
@@ -54,8 +54,8 @@ An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
 ("-gmp" means we will use the GMP library (that needs to be installed))
 EOM
-  rep='none sparcv8_super sparcv8_micro ix86 alpha hppa m68k ppc x86_64
-  none-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp m68k-gmp ppc-gmp x86_64-gmp'
+  rep='none sparcv8_super sparcv8_micro ix86 alpha hppa m68k ppc ppc64 x86_64
+  none-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp m68k-gmp ppc-gmp ppc64-gmp x86_64-gmp'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
@@ -81,6 +81,7 @@ case "$kernlvl0" in
   hppa64)        prettyk=HPPA64;;
   alpha)         prettyk=Alpha;;
   ppc)           prettyk=PPC;;
+  ppc64)         prettyk=PPC64;;
   x86_64)        prettyk="x86-64";;
   *)             prettyk="$kernlvl0";;
 esac

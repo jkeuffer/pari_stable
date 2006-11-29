@@ -30,6 +30,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
 BA  1- derivnum(x=a,expr) for numerical derivations
 BA  2- library function strntoGENstr
     3- function Vecrev
+BA  4- ppc64 level0 inline assembly kernel
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
