@@ -73,6 +73,7 @@ if test -n "$DLLD"; then
       solaris) DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
       sunos)   DLLDFLAGS='-assert nodefinitions' ;;
       os2)     ;; # see below
+      linux)   ;; # for e.g. the Portland Group cc (pgcc)
       *)         DLLD=;;
     esac
   fi
