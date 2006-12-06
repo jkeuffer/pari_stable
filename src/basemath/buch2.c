@@ -1853,18 +1853,19 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
   return invp;
 }
 
+static const long BMULT = 8;
+
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
+small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
            long nbrelpid, double LIMC2)
 {
   const ulong mod_p = 27449UL;
-  const long BMULT = 8, maxtry_DEP  = 20, maxtry_FACT = 500;
-  const double eps = 0.000001;
+  const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
-  long nbsmallnorm, nbfact, j, k, noideal, precbound;
+  long nbsmallnorm, nbfact, j, k, noideal;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
-  GEN x, gx, Mlow, M, G, r;
+  GEN x, gx, r, G = gmael(nf,5,2);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
@@ -1873,16 +1874,6 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
                cache->end - cache->base);
   gx = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
-  M = gmael(nf,5,1);
-  G = gmael(nf,5,2);
- /* LLL reduction produces v0 in I such that
-  *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
-  * We consider v with T2(v) <= BMULT * T2(v0)
-  * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
-  precbound = 3 + (long)ceil(
-    (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
-      / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
-  Mlow = (precbound < prec)? gprec_w(M, precbound): M;
 
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   for (av = avma, noideal = F->KC; noideal; noideal--, avma = av)
@@ -1925,7 +1916,6 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
       if (DEBUGLEVEL>3) fprintferr("\n");
       fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
-    BOUND *= 1 + eps;
     k = N; y[N] = z[N] = 0; x[N] = (long)sqrt(BOUND/v[N]);
     for (av2 = avma;; x[1]--, avma = av2)
     {
@@ -1951,13 +1941,13 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
         if (k != 1) continue;
 
 	/* element complete */
-        if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
+        if (y[1]<=1e-6) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
         if (ccontent(x)==1) /* primitive */
         {
           gx = ZM_zc_mul(IDEAL,x);
           if (!RgV_isscalar(gx))
           {
-            GEN Nx, xembed = gmul(Mlow, gx); 
+            GEN Nx, xembed = gmul(M, gx); 
             nbsmallnorm++;
             if (++try_factor > maxtry_FACT) goto ENDIDEAL;
             Nx = ground( norm_by_embed(R1,xembed) );
@@ -3061,7 +3051,21 @@ START:
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
   if (nbrelpid > 0) {
-    small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;
+    GEN M = gmael(nf,5,1);
+   /* LLL reduction produces v0 in I such that
+    *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
+    * We consider v with T2(v) <= BMULT * T2(v0)
+    * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
+    long precbound = 3 + (long)ceil(
+      (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
+        / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
+    if (precbound < PRECREG) M = gprec_w(M, precbound);
+    else if (precbound > PRECREG) 
+    {
+      PRECREG = precbound;
+      nf = nf_cloneprec(nf, PRECREG, pnf);
+    }
+    small_norm(&cache,&F,nf,M,nbrelpid,LIMC2); avma = av2;
   }
 
   /* Random relations */
@@ -3225,13 +3229,16 @@ GEN
 buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av = avma;
-  long PRECREG = max(prec, MEDDEFAULTPREC);
+  long PRECREG;
   GEN z, nf;
 
   if (DEBUGLEVEL) (void)timer2();
   P = get_nfpol(P, &nf);
-  if (!nf)
+  if (nf)
+    PRECREG = nfgetprec(nf);
+  else
   {
+    PRECREG = max(prec, MEDDEFAULTPREC);
     nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
     if (lg(nf)==3) {
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
