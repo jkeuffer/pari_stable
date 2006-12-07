@@ -4095,14 +4095,16 @@ The generators of the ray class group are needed, and you can set $\fl=1$ if
 the character is known to be primitive. Example:
 
 \bprog
-bnf = bnfinit(x^2 - 145);
-bnr = bnrinit(bnf,7,1);
-bnrrootnumber(bnr, [5])
+bnf = bnfinit(x^2 - x - 57);
+bnr = bnrinit(bnf, [7,[1,1]], 1);
+bnrrootnumber(bnr, [2,1])
 @eprog\noindent
-returns the root number of the character $\chi$ of $\Cl_7(\Q(\sqrt{145}))$
-such that $\chi(g) = \zeta^5$, where $g$ is the generator of the ray-class
-field and $\zeta = e^{2i\pi/N}$ where $N$ is the order of $g$ ($N=12$ as
-\kbd{bnr.cyc} readily tells us).
+returns the root number of the character $\chi$ of
+$\Cl_{7\infty_1\infty_2}(\Q(\sqrt{229}))$ defined by $\chi(g_1^ag_2^b)
+= \zeta_1^a\zeta_2^b$, where $g_1, g_2$ are the generators of the
+ray-class group given by \kbd{bnr.gen} and $\zeta_1 = e^{2i\pi/N_1},
+\zeta_2 = e^{2i\pi/N_2}$ where $N_1, N_2$ are the orders of $g_1$ and
+$g_2$ respectively ($N_1=6$ and $N_2=3$ as \kbd{bnr.cyc} readily tells us).
 
 \syn{bnrrootnumber}{\var{bnf},\var{chi},\fl}
 
