@@ -1,8 +1,9 @@
 !include "MUI.nsh"
-Name "PARI 2.4.0 (ALPHA)"
-!define dll "libpari-2.4.dll"
+Name "PARI 2.4.1 (ALPHA)"
+!define dll "libpari-gmp-2.4.dll"
+!define objdir "..\Ocygwin-i686-gmp"
 
-;--------------------------------
+;--No need to modify things below --
 AutoCloseWindow false
 
 OutFile "Pari.exe"
@@ -31,10 +32,10 @@ InstallDirRegKey HKLM "Software\PARI" ""
 
 Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
-  File /oname=gp.exe "..\Ocygwin-i686\gp-dyn.exe"
+  File /oname=gp.exe "${objdir}\gp-dyn.exe"
   File "makegprc"
   File "..\misc\tex2mail"
-  File "..\Ocygwin-i686\${dll}"
+  File "${objdir}\${dll}"
   File "\cygwin\bin\cygcrypt-0.dll"
   File "\cygwin\bin\cygfltknox-0.dll"
   File "\cygwin\bin\cygiconv-2.dll"
