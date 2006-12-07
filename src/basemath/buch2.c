@@ -1948,11 +1948,15 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
           if (!RgV_isscalar(gx))
           {
             GEN Nx, xembed = gmul(M, gx); 
+            long e;
             nbsmallnorm++;
             if (++try_factor > maxtry_FACT) goto ENDIDEAL;
-            Nx = ground( norm_by_embed(R1,xembed) );
-            setsigne(Nx, 1);
-            if (can_factor(F, nf, NULL, gx, Nx)) break;
+            Nx = grndtoi(norm_by_embed(R1,xembed), &e);
+            if (e < 0)
+            {
+              setsigne(Nx, 1);
+              if (can_factor(F, nf, NULL, gx, Nx)) break;
+            }
             if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
           }
         }
@@ -3060,11 +3064,13 @@ START:
       (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
         / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
     if (precbound < PRECREG) M = gprec_w(M, precbound);
+#if 0
     else if (precbound > PRECREG) 
     {
       PRECREG = precbound;
       nf = nf_cloneprec(nf, PRECREG, pnf);
     }
+#endif
     small_norm(&cache,&F,nf,M,nbrelpid,LIMC2); avma = av2;
   }
 
