@@ -22,6 +22,8 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    11- nfbasistoalg(nfinit(y),x) created an invalid t_POLMOD
    12- incorrect result in ZX_resultant (accuracy loss in bound computation)
    13- bnfinit(): avoid further precision problems for large degree fields
+   14- [Configure] gcc-specific flags were used on linux/freebsd/cygwin, even
+       when __gnuc__ was unsed
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

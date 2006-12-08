@@ -154,8 +154,6 @@ else
                   OPTFLAGS=-O; cflags=-Ae;;
     aix-*)        OPTFLAGS='-O2 -qtune=auto -qmaxmem=8192'
                   cflags='-qlanglvl=ansi';;
-    cygwin*|linux-i?86|freebsd-i?86)
-                  OPTFLAGS=-O2; cflags=-m486;;
     osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
     sunos-*)      OPTFLAGS=-fast; PRFFLAGS='-pg -Bstatic';;
     solaris-*)    OPTFLAGS='-fast -fsimple=1'; PRFFLAGS=-xpg;
