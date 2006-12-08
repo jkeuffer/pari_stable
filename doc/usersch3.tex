@@ -4080,8 +4080,8 @@ ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
 \syn{bnrisprincipal}{\var{bnr},x,\fl}.
 
 \subsecidx{bnrrootnumber}$(\var{bnr},\var{chi},\{\fl=0\})$:
-if $\chi=\var{chi}$ is a (not necessarily primitive)
-\idx{character} over \var{bnr}, let
+if $\chi=\var{chi}$ is a
+\idx{character} over \var{bnr}, not necessarily primitive, let
 $L(s,\chi) = \sum_{id} \chi(id) N(id)^{-s}$ be the associated
 \idx{Artin L-function}. Returns the so-called \idx{Artin root number}, i.e.~the
 complex number $W(\chi)$ of modulus 1 such that
@@ -4101,7 +4101,7 @@ bnrrootnumber(bnr, [2,1])
 @eprog\noindent
 returns the root number of the character $\chi$ of
 $\Cl_{7\infty_1\infty_2}(\Q(\sqrt{229}))$ defined by $\chi(g_1^ag_2^b)
-= \zeta_1^{2a}\zeta_2^b$, where $g_1, g_2$ are the generators of the
+= \zeta_1^{2a}\zeta_2^b$. Here $g_1, g_2$ are the generators of the
 ray-class group given by \kbd{bnr.gen} and $\zeta_1 = e^{2i\pi/N_1},
 \zeta_2 = e^{2i\pi/N_2}$ where $N_1, N_2$ are the orders of $g_1$ and
 $g_2$ respectively ($N_1=6$ and $N_2=3$ as \kbd{bnr.cyc} readily tells us).
