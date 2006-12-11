@@ -2217,12 +2217,9 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   if (DEBUGLEVEL>4) fprintferr("FqX_split_Trager: choosing k = %ld\n",k);
   /* n guaranteed to be squarefree */
   fa = FpX_factor(n, p); fa = gel(fa,1); lx = lg(fa);
+  if (lx == 2) return mkcol(A); /* P^k, P irreducible */
+  
   P = cgetg(lx,t_COL);
-  if (lx == 2)
-  { /* P^k, k irreducible */
-    gel(P,1) = u;
-    return P;
-  }
   x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
   for (i=lx-1; i>1; i--)
   {
@@ -2458,7 +2455,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   for(;;)
   {
     long nb0;
-    while (gcmp0(df1))
+    while (!signe(df1))
     { /* needs d >= p: pg = 0 can't happen  */
       pk *= pg; e = pk;
       f = FqX_frob_deflate(f, T, p);
@@ -2479,24 +2476,27 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
-    nb0 = nbfact; N = degpol(u);
-    t[nbfact] = FqX_normalize(u, T,p);
-    if (N == 1) nbfact++;
-    else
-    {
+    N = degpol(u);
+    if (N) {
+      nb0 = nbfact;
+      t[nbfact] = FqX_normalize(u, T,p);
+      if (N == 1) nbfact++;
+      else
+      {
 #if 0
-      nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
+        nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
 #else
-      GEN P = FqX_split_Trager(t[nbfact], T, p);
-      if (P) {
-        for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
-      } else {
-        if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
-        nbfact += FqX_sqf_split(t+nbfact, q, T, p);
-      }
+        GEN P = FqX_split_Trager(t[nbfact], T, p);
+        if (P) {
+          for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
+        } else {
+          if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
+          nbfact += FqX_sqf_split(t+nbfact, q, T, p);
+        }
 #endif
+      }
+      for (j = nb0; j < nbfact; j++) E[j] = e;
     }
-    for (j = nb0; j < nbfact; j++) E[j] = e;
 
     if (!degpol(f2)) break;
     f = f2; df1 = df2; e += pk;
