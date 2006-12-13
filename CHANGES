@@ -25,6 +25,10 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    14- [Configure] gcc-specific flags were used on linux/freebsd/cygwin, even
        when __gnuc__ was unsed
    15- factor( pure power FqX ) --> SEGV
+   16- [GMP kernel] polrootsmod(f, 4) --> wrong result [ low level t_INT
+       manipulation not using the int_* macros ]
+   17- polrootspadic(f, 2, r) --> some roots would be found twice [ due to
+       FpX_roots(f, 4) called ]  [#521]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

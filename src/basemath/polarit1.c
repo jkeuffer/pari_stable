@@ -146,15 +146,23 @@ static GEN
 root_mod_4(GEN f)
 {
   long i, no, ne;
-  int z0 = !signe(constant_term(f));
-  int z2 = ((i_mod4(constant_term(f)) + 2*i_mod4(f[3])) & 3) == 0;
-  int z1, z3;
-  GEN y;
+  GEN y, t;
+  int z0, z1, z2, z3;
+
+  t = constant_term(f);
+  z0 = !signe(t);
+  z2 = ((i_mod4(t) + 2*i_mod4(f[3])) & 3) == 0;
 
   for (ne=0,i=2; i<lg(f); i+=2)
-    if (signe(f[i])) ne += mael(f,i,2);
+  {
+    t = gel(f,i);
+    if (signe(t)) ne += *int_LSW(t);
+  }
   for (no=0,i=3; i<lg(f); i+=2)
-    if (signe(f[i])) no += mael(f,i,2);
+  {
+    t = gel(f,i);
+    if (signe(t)) ne += *int_LSW(t);
+  }
   no &= 3; ne &= 3;
   z3 = (no == ne);
   z1 = (no == ((4-ne)&3));
@@ -1474,13 +1482,12 @@ Zp_appr(GEN f, GEN a)
 static GEN
 ZX_Zp_roots(GEN f, GEN p, long prec)
 {
-  GEN y, z, q, rac;
+  GEN y, z, rac;
   long lx, i, j, k;
 
   z = modulargcd(f, ZX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
-  q = equaliu(p,2)? utoipos(4): p;
-  rac = FpX_roots(f, q);
+  rac = FpX_roots(f, p);
   lx = lg(rac); if (lx == 1) return rac;
   y = cgetg(degpol(f)+1,t_COL);
   for (j=i=1; i<lx; i++)
