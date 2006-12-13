@@ -705,5 +705,5 @@ Notes
   Modified: Karim Belabas 13-January-1998 version 2.19.
   Modified from the original file pari.txt written by David Carlisle
 
-  23-February-2002 version 2.53 (This file refers to pari.el version 2.53)
+  10-March-2002 version 2.55 (This file refers to pari.el version 2.55)
 
