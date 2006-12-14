@@ -29,6 +29,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
        manipulation not using the int_* macros ]
    17- polrootspadic(f, 2, r) --> some roots would be found twice [ due to
        FpX_roots(f, 4) called ]  [#521]
+   18- ??sumalt doesn't compile: in GPHELP, treat \ref in verbatim mode [#518]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
