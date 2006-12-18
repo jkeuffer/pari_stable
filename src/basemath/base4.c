@@ -1325,7 +1325,8 @@ GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
-  GEN prkZ,cx,x,u, zpow = gen_0, p = gel(pr,1), b = gel(pr,5);
+  GEN prkZ,cx,x,u, p = gel(pr,1), b = gel(pr,5);
+  GEN vden = gen_0, vnum = gen_0;
   GEN mul = eltmul_get_table(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
@@ -1340,17 +1341,20 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
         x = gmul(x, Fp_inv(u, prkZ));
       if (k)
-        zpow = addii(zpow, mulsi(k, gel(e,i)));
+        vden = addii(vden, mulsi(k, gel(e,i)));
     }
-    (void)int_elt_val(nf, x, p, mul, &x);
+    vnum = addii(vnum, mulsi(int_elt_val(nf, x, p, mul, &x), gel(e,i)));
     gel(newg,i) = colreducemodHNF(x, prk, NULL);
   }
-  if (zpow == gen_0) setlg(newg, l);
+  if (vden == gen_0) setlg(newg, l);
   else
   {
     gel(newg,i) = FpC_red(special_anti_uniformizer(nf, pr), prkZ);
-    e = shallowconcat(e, negi(zpow));
+    e = shallowconcat(e, negi(vden));
+    vden = mulii(vden, gel(pr,3));
   }
+  if (!equalii(vden, vnum))
+    err(talker,"x not coprime to pr in famat_makecoprime");
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
 
