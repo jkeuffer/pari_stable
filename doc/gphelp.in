@@ -414,7 +414,7 @@ sub posttex {
   close(TEX) || die "Error closing '$texfile.tex': $!";
 
   $out = `cd $tmpdir; tex $texfile.tex 2>&1 < /dev/null`;
-  $? == 0 && -f "$tmpdir/$texfile.dvi"
+  $? == 0 && -f "$texfile.dvi"
     || die "could not create '$texfile.dvi': status=$?, $out";
   safe_setsid();
   system("(cd $tmpdir; $xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log; cd /; rmdir $tmpdir)&");
