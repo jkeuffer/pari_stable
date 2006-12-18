@@ -1354,7 +1354,8 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     vden = mulii(vden, gel(pr,3));
   }
   if (!equalii(vden, vnum))
-    err(talker,"x not coprime to pr in famat_makecoprime");
+    err(talker,"x not coprime to pr in famat_makecoprime:\n\tx = %Z\n\tpr= %Z",
+        x, pr);
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
 
