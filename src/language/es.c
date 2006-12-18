@@ -436,6 +436,15 @@ _initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
   T->prettyp = prettyp;
 }
 
+static void
+printGEN(GEN x, pariout_t *T)
+{
+  if (typ(x)==t_STR)
+    pariputs(GSTR(x)); /* text surrounded by "" otherwise */
+  else
+    gen_output(x, T);
+}
+
 /* format is standard printf format, except %Z is a GEN */
 void
 vpariputs(const char* format, va_list args)
@@ -484,7 +493,7 @@ vpariputs(const char* format, va_list args)
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariputs(s); gen_output((GEN)atol(t+1), &T);
+        pariputs(s); printGEN((GEN)atol(t+1), &T);
         t += 22; s = t;
         if (!--nb) break;
       }
@@ -3441,11 +3450,7 @@ print0(GEN g, long flag)
   pariout_t T = *(GP_DATA->fmt); /* copy */
   long i, l = lg(g);
   T.prettyp = flag;
-  for (i = 1; i < l; i++)
-    if (flag != f_TEX && typ(g[i])==t_STR)
-      pariputs(GSTR(g[i])); /* text surrounded by "" otherwise */
-    else
-      gen_output(gel(g,i), &T);
+  for (i = 1; i < l; i++) printGEN(gel(g,i), &T);
 }
 
 #define PR_NL() {pariputc('\n'); pariflush(); }

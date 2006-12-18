@@ -35,6 +35,7 @@ LG  4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
        [was: a vector with two t_VECSMALL entries]
+    2- pariprintf() so that it handles t_STR as print() [ don't include quotes ]
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations
