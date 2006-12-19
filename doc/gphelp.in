@@ -417,7 +417,7 @@ sub posttex {
   $? == 0 && -f "$texfile.dvi"
     || die "could not create '$texfile.dvi': status=$?, $out";
   safe_setsid();
-  system("(cd $tmpdir; $xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log; cd /; rmdir $tmpdir)&");
+  system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log; rmdir $tmpdir)&");
 }
 
 sub clean {
