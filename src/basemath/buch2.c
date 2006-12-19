@@ -1853,19 +1853,18 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
   return invp;
 }
 
-static const long BMULT = 8;
-
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
-           long nbrelpid, double LIMC2)
+small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
+           double LOGD, double LIMC2)
 {
+  const long BMULT = 8;
   const ulong mod_p = 27449UL;
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
-  long nbsmallnorm, nbfact, j, k, noideal;
+  long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
-  GEN x, gx, r, G = gmael(nf,5,2);
+  GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2); 
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
@@ -1874,6 +1873,15 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, GEN M,
                cache->end - cache->base);
   gx = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
+
+ /* LLL reduction produces v0 in I such that
+  *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
+  * We consider v with T2(v) <= BMULT * T2(v0)
+  * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
+  precbound = 3 + (long)ceil(
+    (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
+      / (BITS_IN_LONG * LOG2)); /* enough to compute norms */
+  if (precbound < prec) M = gprec_w(M, precbound);
 
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   for (av = avma, noideal = F->KC; noideal; noideal--, avma = av)
@@ -3054,25 +3062,7 @@ START:
   PERM = shallowcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
-  if (nbrelpid > 0) {
-    GEN M = gmael(nf,5,1);
-   /* LLL reduction produces v0 in I such that
-    *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
-    * We consider v with T2(v) <= BMULT * T2(v0)
-    * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
-    long precbound = 3 + (long)ceil(
-      (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
-        / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
-    if (precbound < PRECREG) M = gprec_w(M, precbound);
-#if 0
-    else if (precbound > PRECREG) 
-    {
-      PRECREG = precbound;
-      nf = nf_cloneprec(nf, PRECREG, pnf);
-    }
-#endif
-    small_norm(&cache,&F,nf,M,nbrelpid,LIMC2); avma = av2;
-  }
+  if (nbrelpid > 0) { small_norm(&cache,&F,nf,nbrelpid,LOGD,LIMC2); avma=av2; }
 
   /* Random relations */
   W = L_jid = NULL;
