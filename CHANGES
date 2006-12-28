@@ -31,6 +31,8 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
        FpX_roots(f, 4) called ]  [#521]
    18- ??sumalt doesn't compile: in GPHELP, treat \ref in verbatim mode [#518]
    19- bnrisprincipal accepted inputs not coprime with the modulus [#514]
+   20- matinverseimage returned [;] when no pre-image exists. Conform th
+       the docs: "an empty vector or matrix", depending on the input types.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

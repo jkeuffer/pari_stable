@@ -2242,7 +2242,7 @@ inverseimage(GEN m,GEN v)
   {
     p1 = sinverseimage(m,v);
     if (p1) return p1;
-    avma = av; return cgetg(1,t_MAT);
+    avma = av; return cgetg(1,t_COL);
   }
   if (tv!=t_MAT) pari_err(typeer,"inverseimage");
 
