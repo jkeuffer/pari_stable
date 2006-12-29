@@ -2310,12 +2310,12 @@ thetanullk(GEN q, long k, long prec)
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
   y = gen_1;
-  for (n = 1;; n++)
+  for (n = 3;; n += 2)
   {
     GEN t;
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
-    t = gmul(qn, powuu(2*n+1, k)); y = gadd(y, t);
+    t = gmul(qn, powuu(n, k)); y = gadd(y, t);
     if (gexpo(t) < -bit_accuracy(prec)) break;
   }
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
@@ -2338,10 +2338,9 @@ vecthetanullk(GEN q, long k, long prec)
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
   y = const_vec(k, gen_1);
-  for (n = 1;; n++)
+  for (n = 3;; n += 2)
   {
-    ulong N = 2*n + 1;
-    GEN t = NULL/*-Wall*/, P = utoipos(N), N2 = sqru(N);
+    GEN t = NULL/*-Wall*/, P = utoipos(n), N2 = sqru(n);
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
     for (i = 1; i <= k; i++)
