@@ -2277,12 +2277,12 @@ theta(GEN q, GEN z, long prec)
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
   y = gsin(z,prec);
-  for (n = 1;; n++)
+  for (n = 3;; n += 2)
   {
     GEN t;
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
-    t = gmul(qn, gsin(gmulsg(2*n+1,z),prec)); y = gadd(y, t);
+    t = gmul(qn, gsin(gmulsg(n,z),prec)); y = gadd(y, t);
     if (gexpo(t) < -bit_accuracy(prec)) break;
   }
   if (signe(k))
