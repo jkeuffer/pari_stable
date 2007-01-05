@@ -329,7 +329,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       { /* round up */
         i = lz-1;
         while (++z[i] == 0 && i > 1) i--;
-        if (i == 1) { ez++; z[2] = HIGHBIT; }
+        if (i == 1) { ez++; z[2] = (long)HIGHBIT; }
       }
     }
     else if (j) shift_left(z,z,2,lz-1, 0,j);

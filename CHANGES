@@ -23,7 +23,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    12- incorrect result in ZX_resultant (accuracy loss in bound computation)
    13- bnfinit(): avoid further precision problems for large degree fields
    14- [Configure] gcc-specific flags were used on linux/freebsd/cygwin, even
-       when __gnuc__ was unsed
+       when __gnuc__ was unset
    15- factor( pure power FqX ) --> SEGV
    16- [GMP kernel] polrootsmod(f, 4) --> wrong result [ low level t_INT
        manipulation not using the int_* macros ]
