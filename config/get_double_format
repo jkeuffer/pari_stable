@@ -4,6 +4,7 @@ if ($CC $CFLAGS $extraflag endian.c -o $exe 2>/dev/null); then
 else
   echo "***************************************************************"
   echo "Cannot compile endian.c. Aborting. PLEASE REPORT!"
+  exit 1
 fi
 rm -f $exe $exe$exe_suff
 case "$doubleformat" in
