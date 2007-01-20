@@ -1924,6 +1924,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       if (DEBUGLEVEL>3) fprintferr("\n");
       fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
+    BOUND *= 1 + 1e-6;
     k = N; y[N] = z[N] = 0; x[N] = (long)sqrt(BOUND/v[N]);
     for (av2 = avma;; x[1]--, avma = av2)
     {
