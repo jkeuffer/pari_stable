@@ -650,16 +650,17 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 \kbd{/}: exact division (\kbd{3/2}=$3/2$, not $1.5$).
 
 \kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
-qy + r$, with $0\le r < y$ (if $x$ and $y$ are polynomials, assume instead
-that $\deg r< \deg y$ and that the leading terms of $r$ and $x$ have the
-same sign), then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$.
+qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$ 
+are scalars, $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$ and $y$
+are polynomials, $q$ and $r$ are polynomials such that $\deg r< \deg y$ and
+the leading terms of $r$ and $x$ have the same sign.
 
 \kbd{\bs/}: rounded Euclidean quotient for integers (rounded towards
 $+\infty$ when the exact quotient would be a half-integer).
 
-\kbd{<<}, \kbd{>>}: left and right binary shift: \kbd{x<<n}$~=~x * 2^n$
-if $n>0$, and $x \b{/} 2^{-n}$ otherwise. Right shift is defined by
-\kbd{x>>n}$~=~$\kbd{x<<(-n)}.
+\kbd{<<}, \kbd{>>}: left and right binary shift. By definition,
+\kbd{x<<n}$~=~x * 2^n$ if $n>0$, and $x \b{/} 2^{-n}$ otherwise. Right shift
+is defined by \kbd{x>>n}$~=~$\kbd{x<<(-n)}.
 
 \point{Priority 2}
 %

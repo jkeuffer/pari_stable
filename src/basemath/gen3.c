@@ -529,8 +529,9 @@ gmod(GEN x, GEN y)
 	case t_PADIC: return padic_to_Fp(x, y);
 	case t_POLMOD: case t_POL:
 	  return gen_0;
-      /* case t_REAL could be defined as below, but conlicting semantic
-       * with lift(x * Mod(1,y)). */
+	case t_REAL: /* NB: conflicting semantic with lift(x * Mod(1,y)). */
+	  av = avma;
+          return gerepileupto(av, gadd(x, gneg(gmul(_quot(x,y),y))));
 
 	default: pari_err(operf,"%",x,y);
       }
