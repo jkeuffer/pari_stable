@@ -1399,12 +1399,12 @@ rnfnormgroup(GEN bnr, GEN polrel)
   long i, j, reldeg, nfac, k;
   pari_sp av = avma;
   GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
-  GEN famo, fac, col;
+  GEN famo, fac, col, cnd;
   byteptr d = diffptr;
   ulong p;
 
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
-  nf=gel(bnf,7);
+  nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
   polrel = fix_relative_pol(nf,polrel,1);
   if (typ(polrel)!=t_POL) pari_err(typeer,"rnfnormgroup");
   reldeg = degpol(polrel);
@@ -1443,6 +1443,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       modpr = nf_to_ff_init(nf, &pr, &T, &pp);
       polr = modprX(polrel, nf, modpr);
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
+      if (idealval(nf,cnd,pr)) { oldf = 0; continue; }
       if (!FqX_is_squarefree(polr, T,pp)) { oldf = 0; continue; }
 
       famo = FqX_factor(polr, T, pp);
