@@ -2002,6 +2002,15 @@ mpcos(GEN x)
   return gerepileuptoleaf(av, y);
 }
 
+/* convert INT or FRAC to REAL, which is later reduced mod 2Pi : avoid
+ * cancellation */
+static GEN
+tofp_safe(GEN x, long prec)
+{
+  return (typ(x) == t_INT || gexpo(x) > 0)? gadd(x, real_0(prec)) 
+                                          : fractor(x, prec);
+}
+
 GEN
 gcos(GEN x, long prec)
 {
@@ -2026,9 +2035,7 @@ gcos(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, real_0(prec));
-      affr_fixlg(mpcos(x), y); avma = av; return y;
+      affr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_INTMOD: pari_err(typeer,"gcos");
     
@@ -2093,9 +2100,7 @@ gsin(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, real_0(prec));
-      affr_fixlg(mpsin(x), y); avma = av; return y;
+      affr_fixlg(mpsin(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_INTMOD: pari_err(typeer,"gsin");
 
@@ -2284,9 +2289,7 @@ gtan(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, real_0(prec));
-      affr_fixlg(mptan(x), y); avma = av; return y;
+      affr_fixlg(mptan(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_PADIC:
       av = avma;
@@ -2331,9 +2334,7 @@ gcotan(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, real_0(prec));
-      affr_fixlg(mpcotan(x), y); avma = av; return y;
+      affr_fixlg(mpcotan(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_PADIC: 
       av = avma;

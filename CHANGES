@@ -35,6 +35,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
        the docs: "an empty vector or matrix", depending on the input types.
    21- [Configure] abort when $CFLAGS is not supported by $CC
    22- 3.5 % 2 --> error [ should be 0.5 ]
+   23- sin(1/10^100) --> 0e-28 [ also affected cos,tan,cotan ]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
