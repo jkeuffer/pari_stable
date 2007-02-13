@@ -1625,7 +1625,8 @@ modulo $p$.
 
 \syn{teich}{x}.
 
-\subsecidx{theta}$(q,z)$: Jacobi sine theta-function.
+\subsecidx{theta}$(q,z)$: Jacobi sine theta-function
+$$ \theta_1(z, q) = 2q^{1/4} \sum_{n\geq 0} (-1)^n q^{n(n-1)} \sin((2n+1)z).$$
 
 \syn{theta}{q,z,\var{prec}}.
 
@@ -2162,15 +2163,15 @@ Adleman-Pomerance-Rumely-Cohen-Lenstra (APRCL) for general $x$.
 If $\fl=1$, use Selfridge-Pocklington-Lehmer ``$p-1$'' test and output a
 primality certificate as follows: return 
 
-$\bullet$ 0 if $x$ is composite,
+\item 0 if $x$ is composite,
 
-$\bullet$ 1 if $x$ is small enough that passing Baillie-PSW test guarantees
+\item 1 if $x$ is small enough that passing Baillie-PSW test guarantees
 its primality (currently $x < 10^{15}$),
 
-$\bullet$ $2$ if $x$ is a large prime whose primality could only sensibly be
+\item $2$ if $x$ is a large prime whose primality could only sensibly be
 proven (given the algorithms implemented in PARI) using the APRCL test.
 
-$\bullet$ Otherwise ($x$ is large and $x-1$ is smooth) output a three column
+\item Otherwise ($x$ is large and $x-1$ is smooth) output a three column
 matrix as a primality certificate. The first column contains the prime
 factors $p$ of $x-1$, the second the corresponding elements $a_p$ as in
 Proposition~8.3.1 in GTM~138 , and the third the output of isprime(p,1).
@@ -2686,7 +2687,7 @@ point at infinity, i.e.~the identity element of the group law, represented by
 the one-component vector \kbd{[0]}.
 
   It is useful to have at one's disposal more information. This is given by
-the function \tet{ellinit} (see there), which initializes and returns an
+the function \tet{ellinit}, which initializes and returns an
 \tev{ell} structure by default. If a specific flag is added, a
 shortened \tev{sell}, for small \tev{ell}, is returned, which is much
 faster to compute but contains less information. The following \idx{member
@@ -2706,11 +2707,11 @@ coefficients of the elliptic curve.\cr
 \+ \tet{omega}&: & $[\omega_1,\omega_2]$, periods forming a basis of
 the complex lattice defining $E$ ($\omega_1$ is the\cr
 
-\+            &   & real period, and $\omega_2/\omega_1$ belongs to
+\+            &   & real period, and $\omega_1/\omega_2$ belongs to
 Poincar\'e's half-plane).\cr
 
 \+ \tet{eta}  &: & quasi-periods $[\eta_1, \eta_2]$, such that
-$\eta_1\omega_2-\eta_2\omega_1=i\pi$.\cr
+$\eta_1\omega_2-\eta_2\omega_1=2i\pi$.\cr
 
 \+ \tet{roots}&: & roots of the associated Weierstrass equation.\cr
 
@@ -2836,7 +2837,8 @@ $$
 (2i \pi/\omega_2)^k
   \Big(1 + 2/\zeta(1-k) \sum_{n\geq 0} n^{k-1}q^n / (1-q^n)\Big),
 $$
-where $q = e(\omega_1/\omega_2)$.
+where $q = \exp(2i\pi \tau)$ and $\tau:=\omega_1/\omega_2$ belongs to the
+complex upper half-plane.
 
 When \fl\ is non-zero and $k=4$ or 6, returns the elliptic invariants $g_2$
 or $g_3$, such that
@@ -2845,9 +2847,16 @@ is a Weierstrass equation for $E$.
 
 \syn{elleisnum}{E,k,\fl}.
 
-\subsecidx{elleta}$(om)$: returns the two-component row vector
-$[\eta_1,\eta_2]$ of quasi-periods associated to $\kbd{om} = [\omega_1,
-\omega_2]$
+\subsecidx{elleta}$(\var{om})$: returns the quasi-periods $[\eta_1,\eta_2]$
+associated to the lattice basis $\var{om} = [\omega_1, \omega_2]$.
+Alternatively, \var{om} can be an elliptic curve $E$ as output by
+\kbd{ellinit}, in which case, the quasi periods associated to the period
+lattice basis \kbd{$E$.omega} (namely, \kbd{$E$.eta}) are returned.
+
+\bprog
+  ? elleta([1, I])
+  %1 = [3.141592653589793238462643383, 9.424777960769379715387930149*I]
+@eprog
 
 \syn{elleta}{om, \var{prec}}
 
@@ -2904,7 +2913,7 @@ of $E$ and $C$ the coordinates change (see \kbd{ellchangecurve}).
 \syn{ellidentify}{E}.
 
 \subsecidx{ellinit}$(E,\{\fl=0\})$: initialize an \tet{ell} structure,
-associated to the elliptic curve $E$. $E$ is a $5$-component
+associated to the elliptic curve $E$. $E$ is either a $5$-component
 vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
 equation
 $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
@@ -2915,7 +2924,7 @@ real numbers (including rational numbers) are fully supported. Other
 domains are only supported for very basic operations such as point
 addition.
 
-The result of \tet{ellinit} is a an \tev{ell} structure by default, and
+The result of \tet{ellinit} is an \tev{ell} structure by default, and
 a shorter \tev{sell} if $\fl=1$. Both contain the following information in
 their components:
 %
@@ -2924,25 +2933,30 @@ $$ a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,\Delta,j.$$
 All are accessible via member functions. In particular, the discriminant is
 \kbd{$E$.disc}, and the $j$-invariant is \kbd{$E$.j}.
 
-The other six components are only present if $\fl$ is $0$ or omitted.
-Their content depends on whether the curve is defined over $\R$ or not:
+The other six components are only present if $\fl$ is $0$ or omitted, in
+which case the computation will be 10 ($p$-adic) to 200 (complex) times
+slower. Their content depends on whether the curve is defined over $\R$ or
+not:
 \smallskip
 \item When $E$ is defined over $\R$, \kbd{$E$.roots} is a vector whose
 three components contain the roots of the right hand side of the associated
 Weierstrass equation.
 $$ (y + a_1x/2 + a_3/2)^2 = g(x) $$
-If the roots are all real, then they are ordered by decreasing value. If only
+If the roots are all real, they are ordered by decreasing value. If only
 one is real, it is the first component.
 
 Then $\omega_1 = $\kbd{$E$.omega[1]} is the real period of $E$ (integral of
 $dx/(2y+a_1x+a_3)$ over the connected component of the identity element of
 the real points of the curve), and $\omega_2 = $\kbd{$E$.omega[2]} is a
-complex period. In other words, \kbd{$E$.omega} forms a basis of the
-complex lattice defining $E$, with
-$\tau=\dfrac{\omega_2}{\omega_1}$ having positive imaginary part.
+complex period. \kbd{$E$.omega} forms a basis of the
+complex lattice defining $E$, such that
+$\tau=\dfrac{\omega_1}{\omega_2}$ has positive imaginary part.
 
-\kbd{$E$.eta} is a row vector containing the corresponding values $\eta_1$
-and $\eta_2$ such that $\eta_1\omega_2-\eta_2\omega_1=i\pi$.
+\kbd{$E$.eta} is a row vector containing the quasi-periods $\eta_1$ and
+$\eta_2$ such that $\eta_i = 2\zeta(\omega_i/2)$, where $\zeta$ is the
+Weierstrass zeta function associated to the period lattice (see
+\tet{ellzeta}). In particular, the Legendre relation holds:
+$\eta_2\omega_1 - \eta_1\omega_2 = 2i\pi$.
 
 Finally, \kbd{$E$.area} is the volume of the complex lattice defining
 $E$.\smallskip
@@ -2959,7 +2973,7 @@ to zero.
 \kbd{$E$.w} is Mestre's $w$ (this is technical).
 
 \smallskip For all other base fields or rings, the last six components are
-arbitrarily set equal to zero. See also the description of member functions
+arbitrarily set to zero. See also the description of member functions
 related to elliptic curves at the beginning of this section.
 
 \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
@@ -3068,9 +3082,13 @@ have coefficients in $\Q$ but need \emph{not} be minimal.
 
 \syn{ellrootno}{E,p} and the result (equal to $\pm1$) is a \kbd{long}.
 
-\subsecidx{ellsigma}$(E,z,\{\fl=0\})$: value of the Weierstrass $\sigma$
-function of the lattice associated to $E$ as given by \kbd{ellinit}
-(alternatively, $E$ can be given as a lattice $[\omega_1,\omega_2]$).
+\subsecidx{ellsigma}$(E,z,\{\fl=0\})$: $E$ being given by \kbd{ellinit},
+returns the value at $z$ of the Weierstrass $\sigma$ function of the period
+lattice $L$ of $E$:
+$$ \sigma(z, L) = z \prod_{\omega\in L^*} \left(1 -
+\dfrac{z}{\omega}\right)e^{\dfrac{z}{\omega} + \dfrac{z^2}{2\omega^2}}$$
+Alternatively, one can input a lattice basis $[\omega_1,\omega_2]$ directly
+instead of $E$.
 
 If $\fl=1$, computes an (arbitrary) determination of $\log(\sigma(z))$.
 
@@ -3155,9 +3173,24 @@ means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
 \syn{ellwp0}{E,z,\fl,\var{prec},\var{precdl}}. Also available is
 \funs{weipell}{E,\var{precdl}} for the power series.
 
-\subsecidx{ellzeta}$(E,z)$: value of the Weierstrass $\zeta$ function of the
-lattice associated to $E$ as given by \kbd{ellinit} (alternatively, $E$ can
-be given as a lattice $[\omega_1,\omega_2]$).
+\subsecidx{ellzeta}$(E,z)$: $E$ being given by \kbd{ellinit}, returns the
+value at $z$ of the Weierstrass $\zeta$ function of the period lattice $L$
+of $E$:
+$$ \zeta(z, L) = \dfrac{1}{z} + z^2\sum_{\omega\in L^*}
+\dfrac{1}{\omega^2(z-\omega)}.$$
+Alternatively, one can input a lattice basis $[\omega_1,\omega_2]$ directly
+instead of $E$.
+\bprog
+  ? e = ellinit([0,0,0,1,0]);
+  ? ellzeta(e, e.omega[1]/2)
+  %2 = 0.8472130847939790866064991234 + 4.417621070 E-29*I
+  ? 2*ellzeta([1,I], 1/2)
+  %3 = 3.141592653589793238462643384 + 0.E-37*I
+@eprog\noindent
+The quasi-periods of $\zeta$, such that 
+$$\zeta(z + a\omega_1 + b\omega_2) = \zeta(z) + a\eta_1 + b\eta_2 $$
+for integers $a$ and $b$ are obtained directly as $\eta_i =
+2\zeta(\omega_i/2)$ or using \tet{elleta}.
 
 \syn{ellzeta}{E,z}.
 

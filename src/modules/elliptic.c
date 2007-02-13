@@ -403,26 +403,14 @@ initell0(GEN x, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi,1);
   tau = mulcxmI( gdiv(glog(q,prec),pi2) );
 
-  gel(y,19) = gmul(gmul(gsqr(pi2), mpabs(u2)), imag_i(tau));
-  w1 = gmul(pi2, sqrtr(mpneg(u2)));
-  w2 = gmul(tau, w1);
-  if (signe(b1) < 0)
-    q = gsqrt(q,prec);
-  else
-  {
-    w1= gmul2n(mpabs(gel(w2,1)), 1);
-    q = mpexp(mulrr(negr(pi), divrr(gel(w2,2),w1)));
-    if (signe(w2[1]) < 0) setsigne(q, -1);
-    q = pureimag(q);
-  }
+  w1 = gmul(pi2, sqrtr(mpabs(u2)));
+  w2 = gneg(gmul(w1,tau));
   gel(y,15) = w1;
   gel(y,16) = w2;
-  T = vecthetanullk(q, 2, prec);
-  if (gcmp0(gel(T,1))) pari_err(precer,"initell");
-  T = check_real(gdiv(gel(T,2), gel(T,1)));
-  /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
-  gel(y,17) = gdiv(gmul(gsqr(pi),T), gmulsg(6,w1));
-  gel(y,18) = gdiv(gadd(gmul(gel(y,17),w2), mulcxmI(pi)), w1);
+  T = elleta(mkvec2(w1,w2), prec);
+  gel(y,17) = gel(T,1);
+  gel(y,18) = gel(T,2);
+  gel(y,19) = mpabs(gmul(w1, imag_i(w2)));
   return y;
 }
 
@@ -1148,9 +1136,14 @@ GEN
 elleta(GEN om, long prec)
 {
   pari_sp av = avma;
-  GEN y1, y2, E2, pi = mppi(prec);
+  GEN y1, y2, E2, pi;
   SL2_red T;
+
+  if (typ(om) == t_VEC && lg(om) == 20)
+    return mkvec2copy(gel(om,17), gel(om,18));
+
   if (!get_periods(om, &T)) pari_err(typeer,"elleta");
+  pi = mppi(prec);
   E2 = trueE(T.Tau, 2, prec); /* E_2(Tau) */
   if (signe(T.c))
   {
@@ -3217,23 +3210,24 @@ hell(GEN e, GEN a, long prec)
 {
   long n;
   pari_sp av = avma;
-  GEN p1, p2, y, z, q, pi2surw, qn, ps;
+  GEN pi2 = Pi2n(1, prec), w1 = gel(e,15), w2 = gel(e,16);
+  GEN p1, y, z, q, pi2surw, qn, ps;
 
   checkbell(e);
-  pi2surw = gdiv(Pi2n(1, prec), gel(e,15));
+  pi2surw = gdiv(pi2, w1);
   z = gmul(real_i(zell(e,a,prec)), pi2surw);
-  q = real_i( expIxy(pi2surw, gel(e,16), prec) );
-  y = gsin(z,prec); qn = gen_1; ps = gneg_i(q);
+  q = real_i( expIxy(mpneg(pi2surw), w2, prec) );
+  y = mpsin(z); qn = gen_1; ps = gneg_i(q);
   for (n = 3; ; n += 2)
   {
     qn = gmul(qn, ps);
     ps = gmul(ps, q);
     y = gadd(y, gmul(qn, gsin(gmulsg(n,z),prec)));
-    if (gexpo(qn) < - bit_accuracy(prec)) break;
+    if (gexpo(qn) < -bit_accuracy(prec)) break;
   }
   p1 = gmul(gsqr(gdiv(gmul2n(y,1), d_ellLHS(e,a))), pi2surw);
-  p2 = gsqr(gsqr(gdiv(p1, gsqr(gsqr(denom(gel(a,1)))))));
-  p1 = gdiv(gmul(p2,q), gel(e,12));
+  p1 = gsqr(gsqr(gdiv(p1, gsqr(gsqr(denom(gel(a,1)))))));
+  p1 = gdiv(gmul(p1,q), gel(e,12));
   p1 = gmul2n(glog(gabs(p1,prec),prec), -5);
   return gerepileupto(av, gneg(p1));
 }

@@ -31,11 +31,20 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
        FpX_roots(f, 4) called ]  [#521]
    18- ??sumalt doesn't compile: in GPHELP, treat \ref in verbatim mode [#518]
    19- bnrisprincipal accepted inputs not coprime with the modulus [#514]
-   20- matinverseimage returned [;] when no pre-image exists. Conform th
+   20- matinverseimage returned [;] when no pre-image exists. Conform to
        the docs: "an empty vector or matrix", depending on the input types.
    21- [Configure] abort when $CFLAGS is not supported by $CC
    22- 3.5 % 2 --> error [ should be 0.5 ]
    23- sin(1/10^100) --> 0e-28 [ also affected cos,tan,cotan ]
+   24- fix e.eta and elleta such that e.eta = 2 ellzeta(e,e.omega/2)
+       [ was ellzeta(e,e.omega/2) ]. COMPAT.
+   25- elleta(e) was different from elleta(e.omega). Analogous problems
+       in all quasi-elliptic functions. COMPAT: change e.omega so that
+       e.omega[1] / e.omega[2] belongs to the Poincare half plane [ used
+       to be the inverse ]. Together with 24: the Legendre relation now reads 
+       w1 e2 - w2 e1 = 2 I Pi
+       Rationale: 1) the action of Sl_2(R) becomes the standard one, not a
+       twisted one 2) fixes quite a few normalization problems in our code.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

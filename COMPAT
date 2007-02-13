@@ -13,6 +13,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - install(): parser code 'E' is now obsolete, use 'I'
   - changevar()  [ use substvec ] and reorder() [ use variable() for the list
     of user variables ] have been removed
+  - The quasi-periods e.eta (and elleta(e)) are now twice the old value,
+    so that e.eta = 2 ellzeta(e,e.omega/2)
+  - Change e.omega so that e.omega[1] / e.omega[2] belongs to the Poincare
+    half plane [ used to be the inverse ]. 
 
 * Specific to the PARI library:
 ===============================
