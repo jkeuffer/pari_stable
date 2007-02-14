@@ -45,6 +45,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
        w1 e2 - w2 e1 = 2 I Pi
        Rationale: 1) the action of Sl_2(R) becomes the standard one, not a
        twisted one 2) fixes quite a few normalization problems in our code.
+   26- check that k >= 0 in thetanullk [#531]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector

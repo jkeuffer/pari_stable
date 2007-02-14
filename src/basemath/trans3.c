@@ -2301,6 +2301,7 @@ thetanullk(GEN q, long k, long prec)
   pari_sp av = avma;
   GEN p1, ps, qn, y, ps2;
 
+  if (k < 0) pari_err(talker,"k < 0 in thetanullk");
   l = precision(q);
   if (l) prec = l;
   q = gtofp(q, prec); if (gexpo(q) >= 0) pari_err(talker,"q >= 1 in theta");
