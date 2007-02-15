@@ -857,7 +857,8 @@ Z_factor(GEN n)
   return auxdecomp1(n,NULL,NULL, 1,decomp_default_hint);
 }
 
-/* Factor until the unfactored part is smaller than limit. */
+/* Factor until the unfactored part is smaller than limit. Return the
+ * factored part. Hence factorback(output) may be smaller than n */
 GEN
 Z_factor_limit(GEN n, GEN limit)
 {

@@ -549,23 +549,32 @@ plisprime(GEN N, long flag)
   GEN C, F = NULL;
 
   if (t == t_VEC)
-  { /* [ N, [p1,...,pk] ], pi list of pseudoprime divisors of N */
+  { /* [ N, [p1,...,pk] ], (p_i) list of pseudoprime divisors of N-1 */
     F = gel(N,2);
     N = gel(N,1); t = typ(N);
   }
   if (t != t_INT) pari_err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
 
-  eps = cmpiu(N,2);
+  eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
   N = absi(N);
   if (!F)
   {
-    F = (GEN)Z_factor_limit(addis(N,-1), sqrti(N))[1];
+    GEN cbrtN = gsqrtn(N, utoi(3), NULL, nbits2prec((expi(N)+2)/3));
+    GEN N_1 = addis(N,-1), f, q, r, c1, c2;
+    F = Z_factor_limit(N_1, sqri(floorr(cbrtN)));
+    f = factorback(F, NULL); F = gel(F,1);
+    if (!equalii(f, N_1) && cmpii(sqri(f), N) < 0)
+    { /* N^(1/3) <= f < N^(1/2) */
+      q = dvmdii(N, f, &r);
+      if (!is_pm1(r)) { avma = ltop; return gen_0; }
+      c2 = dvmdii(q, f, &c1);
+      if (Z_issquare(subii(c2, shifti(c1,2)))) { avma=ltop; return gen_0; }
+    }
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
-
   C = cgetg(4,t_MAT); l = lg(F);
   gel(C,1) = cgetg(l,t_COL);
   gel(C,2) = cgetg(l,t_COL);
