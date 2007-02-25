@@ -1022,7 +1022,7 @@ static ulong *
 convi(GEN x, long *l)
 {
   pari_sp av, lim;
-  long lz = 3 + (long)((lgefint(x)-2) * (BITS_IN_LONG / (9*L2SL10)));
+  long lz = 3 + (long)((lgefint(x)-2) * (BITS_IN_LONG * L2SL10 / 9));
   ulong *z, *zd;
 
   zd = z = (ulong*)new_chunk(lz);
