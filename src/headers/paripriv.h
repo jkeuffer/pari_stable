@@ -511,8 +511,6 @@ GEN     sqcomprealraw(GEN x);
 /* RgX.c */
 
 GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
-GEN     RgX_copy_spec(GEN x, long nx);
-GEN     zx_copy_spec(GEN x, long nx);
 
 /* alglin1.c */
 

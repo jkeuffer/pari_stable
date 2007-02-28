@@ -385,8 +385,10 @@ RgXQX_red(GEN P, GEN T)
 /*                  KARATSUBA (for polynomials)                    */
 /*                                                                 */
 /*******************************************************************/
+#if 0
+/* to debug Karatsuba-like routines */
 GEN
-zx_copy_spec(GEN x, long nx)
+zx_debug_spec(GEN x, long nx)
 {
   GEN z = cgetg(nx+2,t_POL);
   long i;
@@ -395,13 +397,14 @@ zx_copy_spec(GEN x, long nx)
 }
 
 GEN
-RgX_copy_spec(GEN x, long nx)
+RgX_debug_spec(GEN x, long nx)
 {
   GEN z = cgetg(nx+2,t_POL);
   long i;
   for (i=0; i<nx; i++) z[i+2] = x[i];
   z[1] = evalsigne(1); return z;
 }
+#endif
 
 /* generic multiplication */
 
