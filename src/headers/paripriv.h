@@ -326,7 +326,6 @@ void* get_stack(double fraction, long min);
 GEN   gpreadseq(char *c, int strict);
 void  initout(int initerr);
 void  init80col(long n);
-char* itostr(GEN x, int minus);
 void  kill_from_hashlist(entree *ep, long n);
 void  member_err(char *s);
 int   pari_kernel_init(void);

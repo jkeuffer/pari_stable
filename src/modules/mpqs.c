@@ -93,16 +93,13 @@ static THREAD char *saveptr;
 /**                         INITIAL SIZING                          **/
 /**                                                                 **/
 /*********************************************************************/
-
-static char *i2str(GEN x) { return itostr(x, signe(x) < 0); }
-
 /* number of decimal digits of argument - for parameter choosing and for
  * diagnostics */
 static long
 decimal_len(GEN N)
 {
   pari_sp av = avma;
-  long d = strlen(i2str(N));
+  long d = strlen(itostr(N));
   avma = av; return d;
 }
 
@@ -2187,7 +2184,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
     if (is_pm1(Qx))
     {
       mpqs_add_0(&relations_end);
-      fprintf(FREL, "%s :%s\n", i2str(Y), relations);
+      fprintf(FREL, "%s :%s\n", itostr(Y), relations);
       number_of_relations++;
 #ifdef MPQS_USE_HISTOGRAMS
       /* bump full relations counter at candidate's value */
@@ -2224,7 +2221,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
     else
     { /* if (mpqs_isprime(itos(Qx))) */
       mpqs_add_0(&relations_end);
-      fprintf(LPREL, "%s @ %s :%s\n", i2str(Qx), i2str(Y), relations);
+      fprintf(LPREL, "%s @ %s :%s\n", itostr(Qx), itostr(Y), relations);
 #ifdef MPQS_USE_HISTOGRAMS
       /* bump LP relations counter at candidate's value */
       if (h->do_histograms) h->histo_lprl[sa[x]-128]++;
@@ -2388,7 +2385,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
     new_Y = modii(mulii(mulii(Y1, Y2), inv_q), h->N);
     new_Y1 = subii(h->N, new_Y);
     if (absi_cmp(new_Y1, new_Y) < 0) new_Y = new_Y1;
-    strcpy(new_relation, i2str(new_Y));
+    strcpy(new_relation, itostr(new_Y));
     strcat(new_relation, " :");
     if (ei[1] & 1) strcat(new_relation, " 1 1");
     for (l = 2; l < ei_size; l++)

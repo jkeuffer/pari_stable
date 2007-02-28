@@ -884,13 +884,17 @@ padd with zeroes. Assumes that $\kbd{prec} > 2$.
 \noindent The following function is also available as a special case of
 \tet{mkintn}:
 
-\fun{GEN}{u2toi}{ulong a, ulong b}
-
-Returns the \kbd{GEN} equal to $2^{32} a + b$, \emph{assuming} that
-$a,b < 2^{32}$. This does not depend on \kbd{sizeof(long)}: the behaviour is
-as above on both $32$ and $64$-bit machines.
+\fun{GEN}{u2toi}{ulong a, ulong b} returns the \kbd{GEN} equal to $2^{32} a +
+b$, \emph{assuming} that $a,b < 2^{32}$. This does not depend on
+\kbd{sizeof(long)}: the behaviour is as above on both $32$ and $64$-bit
+machines.
 
 \subsec{Integer parts}
+The following four functions implement the conversion from \typ{REAL} to
+\typ{INT} using standard rounding modes. Contrary to usual semantics
+(complement the mantissa with an infinite number of 0), they will raise an
+error \emph{precision loss in truncation} if the \typ{REAL} represents a
+range containing more than one integer.
 
 \fun{GEN}{ceilr}{GEN x} smallest integer larger or equal
 to the \typ{REAL}~\kbd{x} (i.e.~the \kbd{ceil} function).
@@ -904,13 +908,11 @@ to the \typ{REAL}~\kbd{x} (i.e.~the \kbd{ceil} function).
 \fun{GEN}{truncr}{GEN x} truncates the \typ{REAL}~\kbd{x} (not the same as
 \kbd{floorr} if \kbd{x} is and negative).
 
+The following four function are analogous, but can also treat the trivial
+case when the argument is a \typ{INT}:
+
 \fun{GEN}{mpceil}{GEN x}
 as \kbd{ceilr} except that \kbd{x} may be a \typ{INT}.
-
-\fun{GEN}{ceil_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
-\typ{REAL}) returns an integer which is larger than any possible incarnation
-of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
-values.)
 
 \fun{GEN}{mpfloor}{GEN x}
 as \kbd{floorr} except that \kbd{x} may be a \typ{INT}.
@@ -926,6 +928,16 @@ returns the quotient $\kbd{x}/\kbd{y}$ of \kbd{x} and~\kbd{y}, rounded to
 the nearest integer. If $\kbd{x}/\kbd{y}$ falls exactly halfway between
 two consecutive integers, then it is rounded towards~$+\infty$ (as for
 \tet{roundr}).
+
+\fun{GEN}{ceil_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
+\typ{REAL}) returns an integer which is larger than any possible incarnation
+of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
+values.)
+
+\fun{GEN}{floor_safe}{GEN x}, \kbd{x} being a real number (not necessarily a
+\typ{REAL}) returns an integer which is smaller than any possible incarnation
+of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
+values.)
 
 \subsec{Valuation and shift}
 

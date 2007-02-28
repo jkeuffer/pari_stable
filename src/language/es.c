@@ -1070,7 +1070,7 @@ copart(char *s, ulong x, long start)
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
 char *
-itostr(GEN x, int minus)
+itostr_minus(GEN x, int minus)
 {
   long l, d;
   ulong *res = convi(x, &l);
@@ -1082,13 +1082,24 @@ itostr(GEN x, int minus)
   while (--l > 0) { copart(t, *--res, 9); t += 9; }
   *t = 0; return s;
 }
+char *
+itostr(GEN x) { 
+  long sx = signe(x);
+  if (!sx)
+  {
+    char *s = (char*)new_chunk(1);
+    s[0] = '0';
+    s[1] = 0; return s;
+  }
+  return itostr_minus(x, sx < 0);
+}
 
 /* x != 0 integer, write abs(x). Prepend '-' if (minus) */
 static void
 wr_intsgn(GEN x, int minus)
 {
   pari_sp av = avma;
-  pariputs( itostr(x, minus) ); avma = av;
+  pariputs( itostr_minus(x, minus) ); avma = av;
 }
 
 /* write integer. T->fieldw: field width (pad with ' ') */
@@ -1100,7 +1111,7 @@ wr_int(pariout_t *T, GEN x, int addsign)
   char *s;
 
   if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  s = itostr(x, sx < 0 && addsign);
+  s = itostr_minus(x, sx < 0 && addsign);
   blancs( T->fieldw - strlen(s) );
   pariputs(s); avma = av;
 }

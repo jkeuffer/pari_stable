@@ -1819,7 +1819,7 @@ gceil(GEN x)
     case t_REAL: return ceilr(x);
     case t_FRAC:
       av = avma; y = dvmdii(gel(x,1),gel(x,2),&p1);
-      if (p1 != gen_0 && gsigne(x) > 0)
+      if (p1 != gen_0 && signe(gel(x,1)) > 0)
       {
         cgiv(p1);
         return gerepileuptoint(av, addsi(1,y));
@@ -2061,15 +2061,39 @@ issmall(GEN n, long *ptk)
 }
 
 /* smallest integer greater than any incarnations of the real x
- * [avoid mpfloor() and "precision loss in truncation"] */
+ * Avoid "precision loss in truncation" */
 GEN
 ceil_safe(GEN x)
 {
   pari_sp av = avma;
-  long e;
-  GEN y = gcvtoi(x,&e);
-  if (e < 0) e = 0;
-  y = addii(y, int2n(e));
+  long e, tx = typ(x);
+  GEN y;
+
+  if (is_rational_t(tx)) return gceil(x);
+  y = gcvtoi(x,&e);
+  if (gsigne(x) >= 0)
+  {
+    if (e < 0) e = 0;
+    y = addii(y, int2n(e));
+  }
+  return gerepileuptoint(av, y);
+}
+/* largest integer smaller than any incarnations of the real x
+ * Avoid "precision loss in truncation" */
+GEN
+floor_safe(GEN x)
+{
+  pari_sp av = avma;
+  long e, tx = typ(x);
+  GEN y;
+
+  if (is_rational_t(tx)) return gfloor(x);
+  y = gcvtoi(x,&e);
+  if (gsigne(x) <= 0)
+  {
+    if (e < 0) e = 0;
+    y = subii(y, int2n(e));
+  }
   return gerepileuptoint(av, y);
 }
 
