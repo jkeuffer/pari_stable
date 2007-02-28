@@ -1799,3 +1799,36 @@ sqrtr_abs(GEN x)
 }
 
 #endif
+
+/*******************************************************************
+ *                                                                 *
+ *                           Base Conversion                       *
+ *                                                                 *
+ *******************************************************************/
+
+static void
+convi_dac(GEN x, ulong l, ulong *res)
+{
+  pari_sp ltop=avma;
+  ulong m;
+  GEN x1,x2;
+  if (l==1) { *res=itou(x); return; } 
+  m=l>>1;
+  x1=dvmdii(x,powuu(1000000000UL,m),&x2);
+  convi_dac(x1,l-m,res+m);
+  convi_dac(x2,m,res);
+  avma=ltop;
+}
+
+/* convert integer --> base 10^9 [not memory clean] */
+ulong *
+convi(GEN x, long *l)
+{
+  long lz = 3 + (long)((lgefint(x)-2) * BITS_IN_LONG * L2SL10 / 9);
+  ulong *z = (ulong*)new_chunk(lz);
+  convi_dac(x,(ulong)lz,z);
+  while (z[lz-1]==0) lz--;
+  *l=lz;
+  return z+lz;
+}
+ 

@@ -1017,24 +1017,6 @@ Strchr(GEN g)
 #define comma_sp(T)     ((T)->sp? pariputs(", "): pariputc(','))
 #define sp(T) STMT_START { if ((T)->sp) pariputc(' '); } STMT_END
 
-/* convert integer --> base 10^9 [not memory clean] */
-static ulong *
-convi(GEN x, long *l)
-{
-  pari_sp av, lim;
-  long lz = 3 + (long)((lgefint(x)-2) * (BITS_IN_LONG * L2SL10 / 9));
-  ulong *z, *zd;
-
-  zd = z = (ulong*)new_chunk(lz);
-  av = avma; lim = stack_lim(av,1);
-  for(;;)
-  {
-    x = diviu_rem(x, 1000000000UL, zd); zd++;
-    if (!signe(x)) { if (l) *l = zd - z; return zd; }
-    if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint(av, x);
-  }
-}
-
 /* # of decimal digits, assume l > 0 */
 static long
 numdig(ulong l)

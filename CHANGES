@@ -54,6 +54,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
     2- pariprintf() so that it handles t_STR as print() [ don't include quotes ]
 LGr 3- [Makefile] make generated src/funclist independent of locale
     4- Extend Pocklington-Lehmer to the case N-1 = FU, F > N^(1/3)
+BA  5- Much faster base-2 to base-10 conversion.
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations

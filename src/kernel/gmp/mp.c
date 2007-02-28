@@ -1228,3 +1228,44 @@ int_normalize(GEN x, long known_zero_words)
     if (x[i]) { setlgefint(x, i+1); return x; }
   x[1] = evalsigne(0) | evallgefint(2); return x;
 }
+
+/********************************************************************
+ **                                                                **
+ **                           Base Conversion                      **
+ **                                                                **
+ ********************************************************************/
+
+ulong *convi(GEN x, long *l)
+{
+  long n = nchar2nlong(2 + (long)(NLIMBS(x) * (BITS_IN_LONG / L2SL10)));
+  GEN str = cgetg(n+1, t_VECSMALL);
+  unsigned char *res = (unsigned char*) GSTR(str);
+  long llz = mpn_get_str(res, 10, LIMBS(icopy(x)), NLIMBS(x));
+  long lz;
+  ulong *z;
+  long i, j;
+  unsigned char *t;
+  while (!*res) {res++; llz--;} /*Strip leading zeros*/
+  lz  = (8+llz)/9; 
+  z = (ulong*)new_chunk(1+lz);
+  t=res+llz+9;
+  for(i=0;i<llz-8;i+=9)
+  {
+    ulong s;
+    t-=18;
+    s=*t++;
+    for (j=1; j<9;j++)
+      s=10*s+*t++;
+    *z++=s;
+  }
+  if (i<llz)
+  {
+    unsigned char *t = res;
+    ulong s=*t++;
+    for (j=i+1; j<llz;j++)
+      s=10*s+*t++;
+    *z++=s;
+  }
+  *l = lz;
+  return z;
+}
