@@ -1652,8 +1652,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       B = RgV_to_RgX(gel(B,1),vq);
 
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
-      An = (GEN) FpXQ_pow(A,ipg,P,l)[2];
-      Bn = (GEN) FpXQ_pow(B,ipg,Q,l)[2];
+      An = gel(FpXQ_pow(A,ipg,P,l),2);
+      Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
       if (!invmod(Bn,l,&z))
         pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
       z = modii(mulii(An,z),l);
@@ -1670,8 +1670,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       A = intersect_ker(P, MA, U, l); 
       B = intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
-      An = (GEN) FpXYQQ_pow(A,ipg,U,P,l)[2];
-      Bn = (GEN) FpXYQQ_pow(B,ipg,U,Q,l)[2];
+      An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
+      Bn = gel(FpXYQQ_pow(B,ipg,U,Q,l),2);
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z = FpXQ_inv(Bn,U,l);
       z = FpXQ_mul(An,z,U,l);
@@ -1822,7 +1822,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     E = Flx_factorgalois(Px,p,d,vq, FP);
     E = FlxX_to_Flm(E,np);
     MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,Px,p);
-    IR= (GEN)Flm_indexrank(MP,p)[1];
+    IR= gel(Flm_indexrank(MP,p),1);
     E = rowpermute(E, IR);
     M = rowpermute(MP,IR);
     M = Flm_inv(M,p);
@@ -1850,7 +1850,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     E = FpX_factorgalois(P,l,d,vq,FP);
     E = RgXX_to_RgM(E,np);
     MP= FpXQ_matrix_pow(SP,np,d,P,l);
-    IR= (GEN)FpM_indexrank(MP,l)[1];
+    IR= gel(FpM_indexrank(MP,l),1);
     E = rowpermute(E, IR);
     M = rowpermute(MP,IR);
     M = FpM_inv(M,l);
@@ -3700,7 +3700,7 @@ fpinit(GEN p, long l)
 static GEN
 ffinit_fact(GEN p, long n)
 {
-  GEN F = (GEN)factoru_pow(n)[3];
+  GEN F = gel(factoru_pow(n),3);
   GEN P; /* pol */
   long i;
   /* If n is even, then F[1] is 2^bfffo(n)*/

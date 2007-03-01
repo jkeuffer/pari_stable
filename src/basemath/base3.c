@@ -1500,7 +1500,7 @@ FpXQ_gener(GEN T, GEN p)
   GEN g, L, pf_1 = subis(powiu(p, f), 1);
   pari_sp av0 = avma, av;
 
-  L = (GEN)Z_factor(pf_1)[1];
+  L = gel(Z_factor(pf_1),1);
   k = lg(L)-1;
 
   for (i=1; i<=k; i++) gel(L,i) = diviiexact(pf_1, gel(L,i));
