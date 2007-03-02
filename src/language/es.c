@@ -1051,7 +1051,7 @@ copart(char *s, ulong x, long start)
 }
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
-char *
+static char *
 itostr_minus(GEN x, int minus)
 {
   long l, d;
@@ -1064,6 +1064,7 @@ itostr_minus(GEN x, int minus)
   while (--l > 0) { copart(t, *--res, 9); t += 9; }
   *t = 0; return s;
 }
+
 char *
 itostr(GEN x) { 
   long sx = signe(x);
