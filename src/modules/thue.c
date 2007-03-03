@@ -476,15 +476,17 @@ GuessQi(GEN b, GEN c, GEN *eps)
 static GEN
 MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1) 
 {
-  long j, k, d = degpol(poly); 
+  long j, k, nmax, d = degpol(poly); 
   GEN bndcf = sqrtnr(shiftr(c1,1), d - 2); 
 
   if (cmprr(bound, bndcf) == -1) return bound; 
+  /* divide by log((1+sqrt(5))/2) */
+  nmax = (long)(gtodouble(mplog(bound)) / 0.4812118250596);
+  if (nmax < 2) nmax = 2;
 
   for (k = 1; k <= s; k++) 
   {
-    GEN rr = greal(gel(roo,k)); 
-    GEN t = contfrac0(rr, 0, 100); 
+    GEN t = contfrac0(real_i(gel(roo,k)), 0, nmax); 
     GEN p, q, pm1, qm1, p0, q0, z; 
 
     pm1 = gen_0; p0 = gen_1; 
@@ -514,7 +516,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
           if (d % 2 == 1) add_sol(pS, negi(p), negi(q)); 
       }
     }
-    if (j == lg(t)) pari_err(talker, "Not enough precision in thue"); 
+    if (j == lg(t)) pari_err(bugparier, "Short continued fraction in thue"); 
   }
   return bndcf;
 }
