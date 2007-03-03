@@ -1052,13 +1052,13 @@ copart(char *s, ulong x, long start)
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
 static char *
-itostr_minus(GEN x, int minus)
+itostr_sign(GEN x, int sx)
 {
   long l, d;
   ulong *res = convi(x, &l);
-  char *s = (char*)new_chunk(nchar2nlong(l*9 + minus + 1)), *t = s;
+  char *s = (char*)new_chunk(nchar2nlong(l*9 + (sx<0) + 1)), *t = s;
 
-  if (minus) *t++ = '-';
+  if (sx<0) *t++ = '-';
   d = numdig(*--res);
   copart(t, *res, d); t += d;
   while (--l > 0) { copart(t, *--res, 9); t += 9; }
@@ -1074,15 +1074,15 @@ itostr(GEN x) {
     s[0] = '0';
     s[1] = 0; return s;
   }
-  return itostr_minus(x, sx < 0);
+  return itostr_sign(x, sx);
 }
 
 /* x != 0 integer, write abs(x). Prepend '-' if (minus) */
 static void
-wr_intsgn(GEN x, int minus)
+wr_int_sign(GEN x, int sx)
 {
   pari_sp av = avma;
-  pariputs( itostr_minus(x, minus) ); avma = av;
+  pariputs( itostr_sign(x, sx) ); avma = av;
 }
 
 /* write integer. T->fieldw: field width (pad with ' ') */
@@ -1094,7 +1094,7 @@ wr_int(pariout_t *T, GEN x, int addsign)
   char *s;
 
   if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  s = itostr_minus(x, sx < 0 && addsign);
+  s = itostr_sign(x, addsign?sx:1);
   blancs( T->fieldw - strlen(s) );
   pariputs(s); avma = av;
 }
@@ -1959,7 +1959,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
   switch(tg)
   {
-    case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
+    case t_INT: wr_int_sign(g, addsign?signe(g):1); break;
     case t_REAL: wr_real(T,g,addsign); break;
 
     case t_INTMOD: case t_POLMOD:
@@ -2028,7 +2028,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 	{
 	  if (!i || !is_pm1(a))
 	  {
-	    wr_intsgn(a, 0); if (i) pariputc('*');
+	    wr_int_sign(a, 1); if (i) pariputc('*');
 	  }
 	  if (i) VpowE(ev,i);
           sp_sign_sp(T,1);
@@ -2373,7 +2373,7 @@ texi(GEN g, pariout_t *T, int addsign)
 	{
 	  if (!i || !is_pm1(a))
 	  {
-	    wr_intsgn(a, 0); if (i) pariputs("\\cdot");
+	    wr_int_sign(a, 1); if (i) pariputs("\\cdot");
 	  }
 	  if (i) texVpowE(ev,i);
 	  pariputc('+');
