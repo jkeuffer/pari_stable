@@ -1374,7 +1374,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   if (xar)
   {
     A = gsub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
-    Bex = gneg(Bex);
+    Bex = zv_neg(Bex);
   }
   else
     A = gsub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));

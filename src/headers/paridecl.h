@@ -186,6 +186,7 @@ GEN     vconcat(GEN A, GEN B);
 GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
+GEN     zv_neg(GEN x);
 
 /* alglin2.c */
 
