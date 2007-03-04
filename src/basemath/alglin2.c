@@ -369,6 +369,16 @@ quadnorm(GEN x)
 }
 
 GEN
+FpXQ_norm(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma; 
+  GEN y = FpX_resultant(T, x, p);
+  GEN L = leading_term(T);
+  if (gcmp1(L) || signe(x)==0) return y;
+  return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
+}
+
+GEN
 RgXQ_norm(GEN x, GEN T)
 {
   pari_sp av;

@@ -190,6 +190,7 @@ GEN     zv_neg(GEN x);
 
 /* alglin2.c */
 
+GEN     FpXQ_norm(GEN x, GEN T, GEN p);
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
