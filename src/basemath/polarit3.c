@@ -97,7 +97,7 @@ ZX_Z_add(GEN y, GEN x)
   gel(z,2) = addii(gel(y,2),x);
   for(i=3;i<lz;i++)
     gel(z,i) = icopy(gel(y,i));
-  if (lz==2) z = ZX_renormalize(z,lz);
+  if (lz==3) z = ZX_renormalize(z,lz);
   return z;
 }
 
