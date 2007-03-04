@@ -1376,6 +1376,10 @@ modulo \kbd{p} (smallest non-negative residue).
 \fun{GEN}{Fp_invsafe}{GEN a, GEN m} as \kbd{Fp\_inv}, but return
 \kbd{NULL} if \kbd{a} is not invertible.
 
+\fun{GEN}{Fp_div}{GEN a, GEN b, GEN m} returns the quotient of \kbd{a} by
+\kbd{b} modulo \kbd{m} (smallest non-negative residue). Raise an error if
+\kbd{b} is not invertible.
+
 \fun{int}{invmod}{GEN a, GEN m, GEN *g},  return $1$ if \kbd{a}
 modulo \kbd{m} is invertible, else return $0$ and set
 $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
@@ -1738,9 +1742,7 @@ copy. If not, the inverse remains uncollected on the stack.
 
 
 \fun{GEN}{FpX_Fp_add}{GEN y, GEN x, GEN p} add the \kbd{Fp}~\kbd{x} to the
-\kbd{FpX}~\kbd{y}, possibly modifying the argument \kbd{y} (thus the
-operation uses constant time instead of linear linear). This function is
-not suitable for \kbd{gerepileupto} nor for \kbd{gerepile}.
+\kbd{FpX}~\kbd{y}.
 
 \fun{GEN}{FpX_Fp_mul}{GEN y, GEN x, GEN p} multiplies the \kbd{FpX}~\kbd{y}
 by the \kbd{Fp}~\kbd{x}.

@@ -358,20 +358,26 @@ FpXQ_sqr(GEN y,GEN pol,GEN p)
   GEN z = RgX_sqrspec(y+2,lgpol(y)); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_rem(z,pol, p);
 }
-/*Modify y[2].
- *No reduction if p is NULL
+/*No reduction if p is NULL
  */
 GEN
 FpX_Fp_add(GEN y,GEN x,GEN p)
 {
-  if (!signe(x)) return y;
+  GEN z;
+  long lz, i;
   if (!signe(y))
     return scalarpol(x,varn(y));
-  gel(y,2) = addii(gel(y,2),x);
-  if (p) gel(y,2) = modii(gel(y,2),p);
-  if (!signe(y[2]) && degpol(y) == 0) return zeropol(varn(y));
-  return y;
+  lz=lg(y);
+  z=cgetg(lz,t_POL);
+  z[1]=y[1];
+  gel(z,2) = addii(gel(y,2),x);
+  if (p) gel(z,2) = modii(gel(z,2),p);
+  for(i=3;i<lz;i++)
+    gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
 }
+
 /* as above over Fp[X] */
 GEN
 FpX_rescale(GEN P, GEN h, GEN p)
@@ -1260,8 +1266,8 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
   for (k=0; ; k++)
   {
     z = (degpol(T)==1)? pol_1(x): pol_x(x);
-    u = k/pp; v=2; /* FpX_Fp_add modify y */
-    z = gaddgs(z, k%pp);
+    u = k/pp; v=2;
+    z = FpX_Fp_add(z, stoi(k%pp));
     while(u)
     {
       z = ZX_add(z, monomial(utoipos(u%pp),v,x));

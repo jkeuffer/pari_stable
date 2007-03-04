@@ -1769,6 +1769,17 @@ Fp_invsafe(GEN a, GEN m)
   return res;
 }
 
+GEN
+Fp_div(GEN a, GEN b, GEN m)
+{
+  pari_sp av=avma;
+  GEN p;
+  new_chunk(2*lg(m)); /*HACK: assume remii use <2*lg(m) space*/
+  p=mulii(a,Fp_inv(b,m));
+  avma=av;
+  return remii(p,m);
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                    MODULAR EXPONENTIATION                       **/

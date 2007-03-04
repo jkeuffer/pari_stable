@@ -57,6 +57,7 @@ BA 29- [OS X] Fix kernel detection on x86_64-darwin
 LGr 3- [Makefile] make generated src/funclist independent of locale
     4- Extend Pocklington-Lehmer to the case N-1 = FU, F > N^(1/3)
 BA  5- Much faster base-2 to base-10 conversion.
+BA  6- FpX_Fp_add() is now clean.
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations
@@ -65,6 +66,7 @@ BA  2- library function strntoGENstr
 BA  4- ppc64 level0 inline assembly kernel
     5- library function floor_safe()
     6- library function itostr()
+BA  7- library function Fp_div()
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
