@@ -48,6 +48,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    26- check that k >= 0 in thetanullk [#531]
    27- isprime(-2,1) returned 1
    28- Fix 'Not enough precision in thue' error
+BA 29- [OS X] Fix kernel detection on x86_64-darwin
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
