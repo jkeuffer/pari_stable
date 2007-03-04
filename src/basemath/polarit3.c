@@ -1267,7 +1267,7 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
   {
     z = (degpol(T)==1)? pol_1(x): pol_x(x);
     u = k/pp; v=2;
-    z = FpX_Fp_add(z, stoi(k%pp));
+    z = FpX_Fp_add(z, stoi(k%pp), p);
     while(u)
     {
       z = ZX_add(z, monomial(utoipos(u%pp),v,x));
