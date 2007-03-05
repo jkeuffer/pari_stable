@@ -2866,6 +2866,7 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 }
 
 /* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
+/* Return a Flx */
 static GEN
 Fly_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
 {
@@ -2948,8 +2949,9 @@ FlxX_Flx_div(GEN x, GEN y, ulong p)
   return z;
 }
 
+/* return a Flx */
 static GEN
-FlxX_subres(GEN u, GEN v, ulong p)
+FlxY_resultant(GEN u, GEN v, ulong p, long sx)
 {
   pari_sp av = avma, av2, lim;
   long degq,dx,dy,du,dv,dr,signh;
@@ -2961,14 +2963,14 @@ FlxX_subres(GEN u, GEN v, ulong p)
     swap(u,v); lswap(dx,dy);
     if (both_odd(dx, dy)) signh = -signh;
   }
-  if (dy < 0) return gen_0;
+  if (dy < 0) return zero_Flx(sx);
   if (dy==0) return gerepileupto(av, Flx_pow(gel(v,2),dx,p));
 
-  g = h = Fl_to_Flx(1,0); av2 = avma; lim = stack_lim(av2,1);
+  g = h = Fl_to_Flx(1,sx); av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
     r = FlxX_pseudorem(u,v,p); dr = lg(r);
-    if (dr == 2) { avma = av; return gen_0; }
+    if (dr == 2) { avma = av; return zero_Flx(sx); }
     du = degpol(u); dv = degpol(v); degq = du-dv;
     u = v; p1 = g; g = leading_term(u);
     switch(degq)
@@ -3014,6 +3016,8 @@ swap_vars(GEN b0, long v)
 }
 
 /* assume varn(b) << varn(a) */
+/* return a FpX*/
+/* Should be named FpX_FpXY_resultant (w.r.t. X) */
 GEN
 FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
@@ -3028,7 +3032,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
     if ((ulong)dres >= pp)
     {
       a = ZXX_to_FlxX(a, pp, vX);
-      x = FlxX_subres(a, b, pp);
+      x = FlxY_resultant(a, b, pp, evalvarn(vX));
     }
     else
     {
