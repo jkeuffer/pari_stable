@@ -410,7 +410,7 @@ initell0(GEN x, long prec)
   T = elleta(mkvec2(w1,w2), prec);
   gel(y,17) = gel(T,1);
   gel(y,18) = gel(T,2);
-  gel(y,19) = mpabs(gmul(w1, imag_i(w2)));
+  gel(y,19) = mpabs(gmul(w1, gel(w2,2)));
   return y;
 }
 
