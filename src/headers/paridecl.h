@@ -28,6 +28,7 @@ GEN     Flv_to_Flx(GEN x, long vs);
 GEN     Flv_to_ZV(GEN z);
 GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
 GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
+GEN     Fly_to_FlxY(GEN B, long v);
 GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
 GEN     Flx_to_Flv(GEN x, long N);
 GEN     Flx_to_ZX(GEN z);

@@ -1466,6 +1466,9 @@ FlxV_to_Flm(GEN v, long n)
  **                 FlxX                                    **
  **                                                          **
  **************************************************************/
+/* FlxX are t_POL with Flx coefficients.
+ * Normally the variable ordering should be respected.*/
+
 /*Similar to normalizepol, in place*/
 /*FlxX_renormalize=zxX_renormalize */
 GEN
@@ -1478,8 +1481,19 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
-/* FlxX are t_POL with Flx coefficients.
- * Normally the variable ordering should be respected.*/
+/*Lift coefficient of B to constant Flx, to give a FlxY*/
+GEN 
+Fly_to_FlxY(GEN B, long sv)
+{
+  long lb=lg(B);
+  long i;
+  GEN b=cgetg(lb,t_POL);
+  b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
+  for (i=2; i<lb; i++) 
+    gel(b,i) = Fl_to_Flx(B[i], sv);
+  return FlxX_renormalize(b, lb);
+}
+
 GEN 
 FlxX_to_ZXX(GEN B)
 {
