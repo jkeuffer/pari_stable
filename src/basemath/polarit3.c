@@ -2781,7 +2781,7 @@ FlV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
 /* b a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
  * Return 0 in case of degree drop. */
 static GEN
-FlxV_eval(GEN b, ulong x, ulong p)
+FlxY_evalx_drop(GEN b, ulong x, ulong p)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2796,7 +2796,7 @@ FlxV_eval(GEN b, ulong x, ulong p)
 
 /* as above, but don't care about degree drop */
 static GEN
-FlxV_eval_gen(GEN b, ulong x, ulong p, long *drop)
+FlxY_evalx(GEN b, ulong x, ulong p)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2804,7 +2804,6 @@ FlxV_eval_gen(GEN b, ulong x, ulong p, long *drop)
 
   for (i=2; i<lb; i++) z[i] = Flx_eval(gel(b,i), x, p);
   z = Flx_renormalize(z, lb);
-  *drop = lb - lg(z);
   return z;
 }
 
@@ -2850,8 +2849,8 @@ ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
 static ulong
 FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 {
-  long drop;
-  GEN ev = FlxV_eval_gen(b, n, p, &drop);
+  GEN ev = FlxY_evalx(b, n, p);
+  long drop = lg(b) - lg(ev);
   ulong r = Flx_resultant(a, ev, p);
   if (drop && la != 1) r = Fl_mul(r, Fl_pow(la, drop,p),p);
   return r;
@@ -3164,7 +3163,7 @@ INIT:
         setlg(dglist, 1);
         for (n=0; n <= dres; n++)
         {
-          ev = FlxV_eval(b, n, p);
+          ev = FlxY_evalx_drop(b, n, p);
           (void)Flx_resultant_all(a, ev, NULL, NULL, dglist, p);
           if (lg(dglist)-1 == goal) break;
         }
@@ -3182,7 +3181,7 @@ INIT:
 
       for (i=0,n = 0; i <= dres; n++)
       {
-        ev = FlxV_eval(b, n, p);
+        ev = FlxY_evalx_drop(b, n, p);
         x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
         if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
       }
