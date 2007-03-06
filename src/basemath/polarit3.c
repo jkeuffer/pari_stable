@@ -2928,27 +2928,6 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   return gerepilecopy(av, x);
 }
 
-static GEN
-FlxX_Flx_div(GEN x, GEN y, ulong p)
-{
-  long i, l;
-  GEN z;
-  if (degpol(y) == 0)
-  {
-    ulong t = (ulong)y[2];
-    if (t == 1) return x;
-    t = Fl_inv(t, p);
-    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
-    for (i=2; i<l; i++) gel(z,i) = Flx_Fl_mul(gel(x,i),t,p);
-  }
-  else
-  {
-    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
-    for (i=2; i<l; i++) gel(z,i) = Flx_div(gel(x,i),y,p);
-  }
-  return z;
-}
-
 /* return a Flx */
 GEN
 FlxX_resultant(GEN u, GEN v, ulong p, long sx)
@@ -2983,7 +2962,7 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
         h = Flx_div(Flx_pow(g,degq,p), Flx_pow(h,degq-1,p), p);
     }
     if (both_odd(du,dv)) signh = -signh;
-    v = FlxX_Flx_div(r, p1, p);
+    v = FlxY_Flx_div(r, p1, p);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {

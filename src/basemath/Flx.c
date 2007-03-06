@@ -1689,6 +1689,27 @@ FlxX_sub(GEN x, GEN y, ulong p)
 }
 
 GEN
+FlxY_Flx_div(GEN x, GEN y, ulong p)
+{
+  long i, l;
+  GEN z;
+  if (degpol(y) == 0)
+  {
+    ulong t = (ulong)y[2];
+    if (t == 1) return x;
+    t = Fl_inv(t, p);
+    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
+    for (i=2; i<l; i++) gel(z,i) = Flx_Fl_mul(gel(x,i),t,p);
+  }
+  else
+  {
+    l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
+    for (i=2; i<l; i++) gel(z,i) = Flx_div(gel(x,i),y,p);
+  }
+  return z;
+}
+
+GEN
 FlxX_shift(GEN a, long n)
 {
   long i, l = lg(a);
