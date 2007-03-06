@@ -482,11 +482,11 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   if (cmprr(bound, bndcf) < 0) return bound; 
   /* divide by log((1+sqrt(5))/2) */
   nmax = 1 + (long)(gtodouble(mplog(bound)) / 0.4812118250596);
-  if (nmax < 2) nmax = 2;
+  if (nmax < 3) nmax = 3;
 
   for (k = 1; k <= s; k++) 
   {
-    GEN t = contfrac0(real_i(gel(roo,k)), 0, nmax); 
+    GEN t = contfrac0(real_i(gel(roo,k)), NULL, nmax); 
     GEN p, q, pm1, qm1, p0, q0, z; 
 
     pm1 = gen_0; p0 = gen_1; 
