@@ -3671,7 +3671,7 @@ fpinit_check(GEN p, long n, long l)
 {
   pari_sp ltop=avma;
   long q,o;
-  if (!uisprime(n)) {avma=ltop; return 0;}
+  if (!uisprime(n)) return 0;
   q = smodis(p,n);
   if (!q) {avma=ltop; return 0;}
   o = itos(order(mkintmodu(q,n)));
