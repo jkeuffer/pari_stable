@@ -1724,7 +1724,7 @@ remainder $\kbd{A}(\kbd{a})$.
 greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FpX_deriv}{GEN x, GEN p} returns the derivative of \kbd{x}.
-(This function is suitable for \kbd{gerepilupto} but not memory-clean.)
+This function is suitable for \kbd{gerepileupto} but not memory-clean.
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
@@ -2235,16 +2235,18 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{FlxX_add}{GEN P, GEN Q, ulong p}
 
-\fun{GEN}{FlxY_Flx_div(GEN x, GEN y, ulong p)}
+\fun{GEN}{FlxY_Flx_div}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{FlxX_resultant}{GEN u, GEN v, ulong p, long sx} Returns $\text{Res}_X(u, v)$, which is an \kbd{Flx}. The parameter \kbd{vx} must be the shifted
-variable number of \kbd{x}.
+\fun{GEN}{FlxX_resultant}{GEN u, GEN v, ulong p, long evx} Returns
+$\text{Res}_X(u, v)$, which is an \kbd{Flx}. Assume that
+\kbd{evx = evalvarn(vx)} for some variable number \kbd{vx}.
 
-\fun{GEN}{Fly_FlxY_resultant}{GEN a, GEN b, ulong p, long sx} Returns $\text{Res}_Y(a, b)$, which is an \kbd{Flx}. The parameter \kbd{vx} must be the shifted
-variable number of \kbd{x}.
+\fun{GEN}{Fly_FlxY_resultant}{GEN a, GEN b, ulong p, long evx}
+Returns $\text{Res}_Y(a, b)$, which is an \kbd{Flx}. Assume that \kbd{evx =
+evalvarn(vx)} for some variable number \kbd{vx}.
 
 \fun{GEN}{FlxX_shift}{GEN a, long n}
 
@@ -2499,7 +2501,9 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{polx_zx}{long sv} as \kbd{polx\_Flx}
 
-\fun{GEN}{Fl_to_Flx}{ulong x, long sv} converts a \kbd{unsigned long} to a scalar \kbd{Flx} in shifted variable $sv$.
+\fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
+scalar \kbd{Flx}. Assume that \kbd{evx = evalvarn(vx)} for some variable
+number \kbd{vx}.
 
 \fun{GEN}{Z_to_Flx}{GEN x, ulong p, long v} converts a \typ{INT} to a scalar
 polynomial in variable $v$.
