@@ -480,8 +480,10 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   GEN bndcf = sqrtnr(shiftr(c1,1), d - 2); 
 
   if (cmprr(bound, bndcf) < 0) return bound; 
-  /* divide by log((1+sqrt(5))/2) */
-  nmax = 1 + (long)(gtodouble(mplog(bound)) / 0.4812118250596);
+  /* divide by log((1+sqrt(5))/2) 
+   * 1 + ==> ceil
+   * 2 + ==> continued fraction is normalized if last entry is 1 */
+  nmax = 2 + (long)(gtodouble(mplog(bound)) / 0.4812118250596);
   if (nmax < 3) nmax = 3;
 
   for (k = 1; k <= s; k++) 
