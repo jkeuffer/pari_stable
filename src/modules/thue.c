@@ -479,9 +479,9 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
   long j, k, nmax, d = degpol(poly); 
   GEN bndcf = sqrtnr(shiftr(c1,1), d - 2); 
 
-  if (cmprr(bound, bndcf) == -1) return bound; 
+  if (cmprr(bound, bndcf) < 0) return bound; 
   /* divide by log((1+sqrt(5))/2) */
-  nmax = (long)(gtodouble(mplog(bound)) / 0.4812118250596);
+  nmax = 1 + (long)(gtodouble(mplog(bound)) / 0.4812118250596);
   if (nmax < 2) nmax = 2;
 
   for (k = 1; k <= s; k++) 

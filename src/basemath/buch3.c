@@ -648,8 +648,6 @@ zimmertbound(long N,long R2,GEN DK)
   }
   n = itos_or_0( gceil(w) );
   if (!n) pari_err(talker,"Minkowski bound is too large");
-  if (n > 500000)
-      pari_warn(warner,"large Minkowski bound: certification will be VERY long");
   avma = av; return n;
 }
 

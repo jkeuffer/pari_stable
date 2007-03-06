@@ -49,6 +49,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    27- isprime(-2,1) returned 1
    28- Fix 'Not enough precision in thue' error
 BA 29- [OS X] Fix kernel detection on x86_64-darwin
+   30- Remove "VERY long time" Warning in bnfcertify (few minutes nowadays)
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
