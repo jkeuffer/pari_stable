@@ -2868,7 +2868,7 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 /* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
 /* Return a Flx */
 static GEN
-Fly_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
+Fly_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong dres, long sx)
 {
   ulong i, n, la = (ulong)leading_term(a);
   GEN  x = cgetg(dres+2, t_VECSMALL);
@@ -2884,7 +2884,7 @@ Fly_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
   {
     x[++i] = 0;   y[i] = FlX_eval_resultant(a,b, x[i], p,la);
   }
-  return Flv_polint(x,y, p, evalvarn(varn(b)));
+  return Flv_polint(x,y, p, sx);
 }
 
 static GEN
@@ -3015,6 +3015,16 @@ swap_vars(GEN b0, long v)
   return b;
 }
 
+static GEN
+Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx)
+{
+  long dres = degpol(a)*degpol(b);
+  if ((ulong)dres >= pp)
+    return FlxY_resultant(a, b, pp, sx);
+  else
+    return Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, sx);
+}
+
 /* assume varn(b) << varn(a) */
 /* return a FpX*/
 /* Should be named FpX_FpXY_resultant (w.r.t. X) */
@@ -3029,18 +3039,8 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   {
     ulong pp = (ulong)p[2];
     b = ZXX_to_FlxX(b, pp, vX);
-    if ((ulong)dres >= pp)
-    {
-      a = ZXX_to_FlxX(a, pp, vX);
-      x = FlxY_resultant(a, b, pp, evalvarn(vX));
-    }
-    else
-    {
-      a = ZX_to_Flx(a, pp);
-      x = Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres);
-      setvarn(x, vX);
-    }
-    return Flx_to_ZX(x);
+    a = ZX_to_Flx(a, pp);
+    return Flx_to_ZX(Fly_FlxY_resultant(a, b, pp, evalvarn(vX)));
   }
  
   la = leading_term(a);
@@ -3091,6 +3091,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   pari_sp av = avma, av2 = 0, lim;
   long i,n, lb, degA = degpol(A), dres = degA*degpol(B0);
   long vX = varn(B0), vY = varn(A); /* assume vX << vY */
+  long sX = evalvarn(vX);
   GEN x, y, dglist, dB, B, q, a, b, ev, H, H0, H1, Hp, H0p, H1p, C0, C1, L;
   byteptr d = init_modular(&p);
 
@@ -3195,7 +3196,7 @@ INIT:
       H1p= gel(C1,1);
     }
     else
-      Hp = Fly_FlxY_resultant_polint(a, b, p, (ulong)dres);
+      Hp = Fly_FlxY_resultant_polint(a, b, p, (ulong)dres, sX);
     if (!H && degpol(Hp) != dres) continue;
     if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
