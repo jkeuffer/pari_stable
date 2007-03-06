@@ -3019,8 +3019,17 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   {
     ulong pp = (ulong)p[2];
     b = ZXX_to_FlxX(b, pp, vX);
-    a = ZX_to_Flx(a, pp);
-    return Flx_to_ZX(Fly_FlxY_resultant(a, b, pp, evalvarn(vX)));
+    if ((ulong)dres >= pp)
+    {
+      a = ZXX_to_FlxX(a, pp, vX);
+      x = FlxX_resultant(a, b, pp, evalvarn(vX));
+    }
+    else
+    {
+      a = ZX_to_Flx(a, pp);
+      x = Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, evalvarn(vX));
+    }
+    return Flx_to_ZX(x);
   }
  
   la = leading_term(a);
