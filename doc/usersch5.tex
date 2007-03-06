@@ -2238,6 +2238,12 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
+\fun{GEN}{FlxX_resultant}{GEN u, GEN v, ulong p, long sx} Returns $\text{Res}_X(u, v)$, which is an \kbd{Flx}. The parameter \kbd{vx} must be the shifted
+variable number of \kbd{x}.
+
+\fun{GEN}{Fly_FlxY_resultant}{GEN a, GEN b, ulong p, long sx} Returns $\text{Res}_Y(a, b)$, which is an \kbd{Flx}. The parameter \kbd{vx} must be the shifted
+variable number of \kbd{x}.
+
 \fun{GEN}{FlxX_shift}{GEN a, long n}
 
 \subsec{\kbd{FlxqX}}. See \kbd{FpXQX} operations.

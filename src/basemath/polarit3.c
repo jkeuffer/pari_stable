@@ -2950,8 +2950,8 @@ FlxX_Flx_div(GEN x, GEN y, ulong p)
 }
 
 /* return a Flx */
-static GEN
-FlxY_resultant(GEN u, GEN v, ulong p, long sx)
+GEN
+FlxX_resultant(GEN u, GEN v, ulong p, long sx)
 {
   pari_sp av = avma, av2, lim;
   long degq,dx,dy,du,dv,dr,signh;
@@ -2997,6 +2997,17 @@ FlxY_resultant(GEN u, GEN v, ulong p, long sx)
   return gerepileupto(av, z);
 }
 
+/* Return a Flx*/
+GEN
+Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx)
+{
+  long dres = degpol(a)*degpol(b);
+  if ((ulong)dres >= pp)
+    return FlxX_resultant(a, b, pp, sx);
+  else
+    return Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, sx);
+}
+
 /* return a t_POL (in variable v) whose coeffs are the coeffs of b,
  * in variable v. This is an incorrect PARI object if initially varn(b) << v.
  * We could return a vector of coeffs, but it is convenient to have degpol()
@@ -3013,16 +3024,6 @@ swap_vars(GEN b0, long v)
   b[1] = evalsigne(1) | evalvarn(v);
   for (i=0; i<=n; i++) gel(x,i) = polcoeff_i(b0, i, v);
   return b;
-}
-
-static GEN
-Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx)
-{
-  long dres = degpol(a)*degpol(b);
-  if ((ulong)dres >= pp)
-    return FlxY_resultant(a, b, pp, sx);
-  else
-    return Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, sx);
 }
 
 /* assume varn(b) << varn(a) */

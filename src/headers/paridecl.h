@@ -1619,6 +1619,8 @@ GEN     vecbezoutres(GEN x, GEN y);
 
 /* polarit3.c */
 
+GEN     FlxX_resultant(GEN u, GEN v, ulong p, long sx);
+GEN     Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx);
 GEN     FpC_red(GEN z, GEN p);
 GEN     FpC_to_mod(GEN z, GEN p);
 GEN     FpM_red(GEN z, GEN p);
