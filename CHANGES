@@ -70,6 +70,7 @@ BA  4- ppc64 level0 inline assembly kernel
 BA  7- library function Fp_div()
 BA  8- library function FpXQ_norm()
 BA  9- library function FlxX_resultant() and Fly_FlxY_resultant()
+BA 10- library function FlxY_Flx_div()
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
