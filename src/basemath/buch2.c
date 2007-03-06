@@ -1075,7 +1075,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
         ex = cgetg(lgsub, t_VECSMALL);
       }
       else nbtest_lim = VERYBIGINT; /* don't increase further */
-      if (DEBUGLEVEL) fprintferr("SPLIT: increasing factor base [%ld]\n",lgsub);
+      if (DEBUGLEVEL>2) fprintferr("SPLIT: increasing factor base [%ld]\n",lgsub);
     }
   }
 }
