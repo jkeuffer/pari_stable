@@ -53,6 +53,7 @@ BA 31- missing prototype for documented function ZY_ZXY_rnfequation
    32- sqrt(x^2/y^2) --> SEGV [#536]
    33- \r foo no longer worked if foo was a directory and foo.gp a valid
        input file [#540]
+BA 34- [Configure] spectacular failure to recognize gcc under some locales.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
