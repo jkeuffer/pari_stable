@@ -3104,6 +3104,14 @@ pari_fopengz(char *s)
   return f ? pari_get_infile(s, f): NULL;
 }
 
+static FILE*
+try_open(char *s)
+{
+  if (!pari_is_dir(s)) return fopen(s, "r");
+  pari_warn(warner,"skipping directory %s",s);
+  return NULL;
+}
+
 /* If a file called "name" exists (possibly after appending ".gp")
  * record it in the file_stack (as a pipe if compressed).
  * name is malloc'ed, we free it before returning
@@ -3113,19 +3121,13 @@ try_name(char *name)
 {
   pari_sp av = avma;
   char *s = name;
-  FILE *file;
+  FILE *file = try_open(name);
 
-  if (pari_is_dir(s))
-  {
-    pari_warn(warner,"skipping directory %s",s);
-    return NULL;
-  }
-  file = fopen(s, "r");
   if (!file)
   { /* try appending ".gp" to name */
     s = stackmalloc(strlen(name)+4);
     sprintf(s, "%s.gp", name);
-    file = fopen(s, "r");
+    file = try_open(s);
   }
   if (file)
   {
