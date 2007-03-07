@@ -379,6 +379,7 @@ enum manage_var_t {
 #define zero_zx(x)     (zero_Flx((x)))
 #define polx_zx(x)     (polx_Flx((x)))
 #define zx_shift(x,y)  (Flx_shift((x),(y)))
+#define zm_transpose(x) (Flm_transpose((x)))
 
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))

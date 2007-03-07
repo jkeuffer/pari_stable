@@ -96,6 +96,24 @@ gtrans(GEN x)
   return y;
 }
 
+/* Flm_transpose == zm_transpose */
+
+GEN
+Flm_transpose(GEN x)
+{
+  long i,j;
+  GEN y;
+  long dx, lx=lg(x); 
+  if (lx==1) return cgetg(1,t_MAT);
+  dx=lg(x[1]); y=cgetg(dx,t_MAT);
+  for (i=1; i<dx; i++)
+  {
+    GEN c = cgetg(lx,t_VECSMALL); gel(y, i) = c;
+    for (j=1; j<lx; j++) c[j] = coeff(x,i,j);
+  }
+  return y;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                    CONCATENATION & EXTRACTION                   */
