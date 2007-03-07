@@ -1632,11 +1632,11 @@ of \kbd{T} over $\Q[X]$ (the content is lost).
 \kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result 
 is an integer.
 
-\fun{GEN}{ZY_ZXY_resultant}{GEN A, GEN B}
+\fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
 under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
 $R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
 
-\fun{GEN}{ZY_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
+\fun{GEN}{ZX_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
 assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
 \text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
 as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to

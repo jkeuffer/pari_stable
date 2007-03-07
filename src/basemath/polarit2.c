@@ -3446,7 +3446,7 @@ pseudorem_i(GEN x, GEN y, GEN mod)
   x[1] = evalsigne(1) | evalvarn(vx);
   x = revpol(x) - 2;
   if (p)
-  { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */
+  { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = gel(y,0);
     if (mod)
     { /* assume p fairly small */

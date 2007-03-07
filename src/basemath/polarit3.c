@@ -2393,7 +2393,7 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   GEN R;
   T = gcopy(T); setvarn(T, MAXVARN);
   x = gcopy(x); setvarn(x, MAXVARN);
-  R = FpY_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
+  R = FpX_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
 
@@ -2826,7 +2826,7 @@ vec_FpX_eval_gen(GEN b, GEN x, GEN p, long *drop)
  *     N_2(A) = sqrt(sum (N_1(Ai))^2)
  * Return e such that Res(A, B) < 2^e */
 ulong
-ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
+ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
 {
   pari_sp av = avma;
   GEN a = gen_0, b = gen_0;
@@ -2920,7 +2920,7 @@ FlxX_pseudorem(GEN x, GEN y, ulong p)
   x[1]=evalsigne(1) | evalvarn(vx);
   x = revpol(x) - 2;
   if (dp)
-  { /* multiply by y[0]^dp   [beware dummy vars from FpY_FpXY_resultant] */
+  { /* multiply by y[0]^dp   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = Flx_pow(gel(y,0), dp, p);
     for (i=2; i<lx; i++)
       gel(x,i) = Flx_mul(gel(x,i), t, p);
@@ -3009,7 +3009,7 @@ swap_vars(GEN b0, long v)
 /* return a FpX*/
 /* Should be named FpX_FpXY_resultant (w.r.t. X) */
 GEN
-FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
+FpX_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
   long i,n,dres, vX = varn(b0), vY = varn(a);
   GEN la,x,y,b = swap_vars(b0, vY);
@@ -3064,16 +3064,16 @@ init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
 /* 0, 1, -1, 2, -2, ... */
 #define next_lambda(a) (a>0 ? -a : 1-a)
 
-/* Assume A in Z[Y], B in Q[Y][X], and Res_Y(A, B) in Z[X].
+/* Assume A in Z[X], B in Q[X][Y], and Res_X(A, B) in Z[Y].
  * If lambda = NULL, return Res_Y(A,B).
  * Otherwise, find a small lambda (start from *lambda, use the sequence above)
- * such that R(X) = Res_Y(A, B(X + lambda Y)) is squarefree, reset *lambda to
+ * such that R(Y) = Res_X(A, B(Y + lambda X)) is squarefree, reset *lambda to
  * the chosen value and return R
  *
  * If LERS is non-NULL, set it to the Last non-constant polynomial in the
  * Euclidean Remainder Sequence */
 GEN
-ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
+ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
 {
   int checksqfree = lambda? 1: 0, delvar = 0, stable;
   ulong bound, p, dp;
@@ -3087,7 +3087,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
   if (LERS)
   {
-    if (!lambda) pari_err(talker,"ZY_ZXY_resultant_all: LERS needs lambda");
+    if (!lambda) pari_err(talker,"ZX_ZXY_resultant_all: LERS needs lambda");
     C0 = cgetg(dres+2, t_VECSMALL);
     C1 = cgetg(dres+2, t_VECSMALL);
     dglist = cgetg(dres+1, t_VECSMALL);
@@ -3135,7 +3135,7 @@ INIT:
 
   H = H0 = H1 = NULL;
   lb = lg(B); 
-  bound = ZY_ZXY_ResBound(A, B, dB);
+  bound = ZX_ZXY_ResBound(A, B, dB);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
   check_theta(bound);
 
@@ -3221,7 +3221,7 @@ INIT:
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
-      if (DEBUGMEM>1) pari_warn(warnmem,"ZY_ZXY_rnfequation");
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZX_ZXY_rnfequation");
       gerepilemany(av2,gptr,LERS? 4: 2); 
     }
   }
@@ -3237,9 +3237,9 @@ END:
 }
 
 GEN
-ZY_ZXY_rnfequation(GEN A, GEN B, long *lambda)
+ZX_ZXY_rnfequation(GEN A, GEN B, long *lambda)
 {
-  return ZY_ZXY_resultant_all(A, B, lambda, NULL);
+  return ZX_ZXY_resultant_all(A, B, lambda, NULL);
 }
 
 /* If lambda = NULL, return caract(Mod(B, A)), A,B in Z[X].
@@ -3273,7 +3273,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   B0[1] = evalsigne(1);
   gel(B0,2) = gneg_i(B);
   gel(B0,3) = gen_1;
-  R = ZY_ZXY_rnfequation(A, B0, lambda);
+  R = ZX_ZXY_rnfequation(A, B0, lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
   if (!gcmp1(a)) R = gdiv(R, powiu(a, dB));
@@ -3316,7 +3316,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   degA = degpol(A);
   if (!bound)
   {
-    bound = ZY_ZXY_ResBound(A, B, dB);
+    bound = ZX_ZXY_ResBound(A, B, dB);
     if (bound > 50000)
     {
       long eA = gexpo(A), eB = gexpo(B), prec = nbits2prec(max(eA,eB));
@@ -3590,7 +3590,7 @@ FpX_direct_compositum(GEN A, GEN B, GEN p)
   a = shallowcopy(A); setvarn(a, MAXVARN);
   b = shallowcopy(B); setvarn(b, MAXVARN);
   x = gadd(pol_x(0), pol_x(MAXVARN));
-  C = FpY_FpXY_resultant(a, poleval(b,x),p);
+  C = FpX_FpXY_resultant(a, poleval(b,x),p);
   return C;
 }
 
@@ -3605,7 +3605,7 @@ FpX_compositum(GEN A, GEN B, GEN p)
   for (k = 1;; k = next_lambda(k))
   {
     GEN x = gadd(pol_x(0), gmulsg(k, pol_x(MAXVARN)));
-    C = FpY_FpXY_resultant(a, poleval(b,x),p);
+    C = FpX_FpXY_resultant(a, poleval(b,x),p);
     if (FpX_is_squarefree(C, p)) break;
   }
   return C;
@@ -3633,7 +3633,7 @@ f2init(long l)
      * ==> X^2 + X + a(#) b irred. over K for any root b of q
      * ==> X^2 + X + (b^2+b)b */
     setvarn(T, MAXVARN);
-    T = FpY_FpXY_resultant(T, q, gen_2);
+    T = FpX_FpXY_resultant(T, q, gen_2);
     /* T = minimal polynomial of b over F2 */
   }
   return T;
@@ -3659,7 +3659,7 @@ ffinit_Artin_Shreier(GEN ip, long l)
   for (i = 2; i <= l; ++i)
   {
     setvarn(P,MAXVARN);
-    P = FpY_FpXY_resultant(P, Q, ip);
+    P = FpX_FpXY_resultant(P, Q, ip);
   }
   return P;
 }

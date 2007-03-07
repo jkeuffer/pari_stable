@@ -361,7 +361,7 @@ enum manage_var_t {
 #define FpXX_renormalize  ZX_renormalize
 #define FpXQX_renormalize ZX_renormalize
 
-#define ZY_ZXY_resultant(a,b) ZY_ZXY_rnfequation((a),(b),NULL)
+#define ZX_ZXY_resultant(a,b) ZX_ZXY_rnfequation((a),(b),NULL)
 
 #define RgX_add gadd
 #define RgX_sub gsub

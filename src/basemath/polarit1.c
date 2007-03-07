@@ -2159,12 +2159,12 @@ polfnf(GEN a, GEN T)
   G = nfgcd(A,derivpol(A), T, dent);
   sqfree = gcmp1(G);
   u = sqfree? A: RgXQX_div(A, G, T);
-  k = 0; n = ZY_ZXY_rnfequation(T, u, &k);
+  k = 0; n = ZX_ZXY_rnfequation(T, u, &k);
   if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
   if (!sqfree)
   {
     G = poleval(G, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
-    G = ZY_ZXY_resultant(T, G);
+    G = ZX_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
   fa = ZX_DDF(n,0); lx = lg(fa);
@@ -2216,7 +2216,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   for (k = 0; cmpui(k, p) < 0; k++)
   {
     GEN U = poleval(u, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
-    n = FpY_FpXY_resultant(T, U, p);
+    n = FpX_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
     n = NULL;
   }

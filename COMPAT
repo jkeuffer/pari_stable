@@ -32,6 +32,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - pol_x and pol_1 are now functions, not global arrays. Use pol_x(v)
     instead of pol_x[v]. polvar[] and ordvar[] have disappeared
 
+  - rename ZY_ZXY_resultant   -> ZX_ZXY_resultant, 
+           ZY_ZXY_rnfequation -> ZX_ZXY_rnfequation and
+           FpY_FpXY_resultant -> FpX_FpXY_resultant
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 * General:  [ use GP function names in description ]

@@ -3323,7 +3323,7 @@ polcompositum0(GEN A, GEN B, long flall)
 
   D = NULL; /* -Wall */
   k = same? -1: 1;
-  C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  C = ZX_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (same)
   {
     D = RgX_rescale(A, stoi(1 - k));
@@ -3395,7 +3395,7 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
   if (!nfissquarefree(A,B))
     pari_err(talker,"inseparable relative equation in rnfequation");
 
-  *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
+  *pk = 0; C = ZX_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leading_term(C)) < 0) C = gneg_i(C);
   *pk = -*pk; return primpart(C);
 }
