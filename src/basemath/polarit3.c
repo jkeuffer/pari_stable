@@ -2976,15 +2976,33 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
   return gerepileupto(av, z);
 }
 
-/* Return a Flx*/
-GEN
-Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx)
+/* Warning:
+ * This function switches between valid and invalid variable ordering*/
+
+static GEN
+FlxY_to_FlyX(GEN b, long sv)
 {
+  long i, n=-1;
+  long sw = b[1]&VARNBITS;
+  for(i=2;i<lg(b);i++)
+    n=max(n,lgpol(gel(b,i)));
+  return Flm_to_FlxX(Flm_transpose(FlxX_to_Flm(b,n)),sv,sw);
+}
+
+/* Return a Fly*/
+GEN
+Flx_FlxY_resultant(GEN a, GEN b, ulong pp)
+{
+  pari_sp ltop=avma;
   long dres = degpol(a)*degpol(b);
+  long sx=a[1], sy=b[1]&VARNBITS;
+  GEN z;
+  b = FlxY_to_FlyX(b,sx);
   if ((ulong)dres >= pp)
-    return FlxX_resultant(a, b, pp, sx);
+    z = FlxX_resultant(Fly_to_FlxY(a, sy), b, pp, sx);
   else
-    return Flx_FlyX_resultant_polint(a, b, pp, (ulong)dres, sx);
+    z = Flx_FlyX_resultant_polint(a, b, pp, (ulong)dres, sy);
+  return gerepileupto(ltop,z);
 }
 
 /* return a t_POL (in variable v) whose coeffs are the coeffs of b,
@@ -3008,29 +3026,21 @@ swap_vars(GEN b0, long v)
 /* assume varn(b) << varn(a) */
 /* return a FpY*/
 GEN
-FpX_FpXY_resultant(GEN a, GEN b0, GEN p)
+FpX_FpXY_resultant(GEN a, GEN b, GEN p)
 {
-  long i,n,dres, vX = varn(b0), vY = varn(a);
-  GEN la,x,y,b = swap_vars(b0, vY);
+  long i,n,dres, vX = varn(b), vY = varn(a);
+  GEN la,x,y;
  
-  dres = degpol(a)*degpol(b0);
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    b = ZXX_to_FlxX(b, pp, vX);
-    if ((ulong)dres >= pp)
-    {
-      a = ZXX_to_FlxX(a, pp, vX);
-      x = FlxX_resultant(a, b, pp, evalvarn(vX));
-    }
-    else
-    {
-      a = ZX_to_Flx(a, pp);
-      x = Flx_FlyX_resultant_polint(a, b, pp, (ulong)dres, evalvarn(vX));
-    }
+    b = ZXX_to_FlxX(b, pp, vY);
+    a = ZX_to_Flx(a, pp);
+    x = Flx_FlxY_resultant(a, b, pp);
     return Flx_to_ZX(x);
   }
- 
+  dres = degpol(a)*degpol(b);
+  b = swap_vars(b, vY); 
   la = leading_term(a);
   x = cgetg(dres+2, t_VEC);
   y = cgetg(dres+2, t_VEC);
