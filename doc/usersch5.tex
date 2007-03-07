@@ -2525,14 +2525,14 @@ array) to (normalized) polynomial in variable $v$.
 identity matrix.
 
 \fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the columns of
-\kbd{Flm}~\kbd{x} to an array of \kbd{Flx} (repeated calls to
-\kbd{Flv\_to\_Flx}).
+\kbd{Flm}~\kbd{x} to an array of \kbd{Flx} in the variable $v$
+(repeated calls to \kbd{Flv\_to\_Flx}).
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
-\fun{GEN}{Flm_to_FlxX}{GEN x, long sv,long w} converts the columns of
-\kbd{Flm}~\kbd{x} to the coefficient of an \kbd{FlxX}, and normalize the
-result.
+\fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as 
+\kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial
+in variable $w$.
 
 \fun{GEN}{FlxV_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxV}, to obtain
 an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
