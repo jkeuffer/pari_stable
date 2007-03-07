@@ -3277,8 +3277,9 @@ these assumptions is not correct the behaviour of the routine is undefined.
 \medskip
 
 \item an \tev{idele} is a 2-component vector, the first being an ideal as
-above, the second being a $R_1+R_2$-component row vector giving Archimedean
-information, as complex numbers.
+above, the second being a $(r_1+r_2)$-component row vector giving Archimedean
+information, as complex numbers (ususally representing logarithms of complex
+embeddings).
 \smallskip
 
 \subsec{Finite abelian groups}
@@ -3367,11 +3368,11 @@ corresponds to the real embedding associated to the $i$-th real root of
 \kbd{K.roots}. (That ordering is not canonical, but well defined once a
 defining polynomial for $K$ is chosen.) For instance, \kbd{[1, [1,1]]} is a
 modulus for a real quadratic field, allowing ramification at any of the two
-places at infinity.
+places at infinity, and nowhere else.
 
 A \tev{bid} or ``big ideal'' is a structure output by \kbd{idealstar}
 needed to compute in $(\Z_K/I)^*$, where $I$ is a modulus in the above sense.
-If is a finite abelian group as described above, supplemented by
+It is a finite abelian group as described above, supplemented by
 technical data needed to solve discrete log problems.
 
 Finally we explain how to input ray number fields (or \var{bnr}), using class
@@ -3490,7 +3491,7 @@ due to Hafner-McCurley, \idx{Buchmann} and Cohen-Diaz-Olivier. The general
 call to the functions concerning class groups of general number fields
 (i.e.~excluding \kbd{quadclassunit}) involves a polynomial $P$ and a
 technical vector
-$$\var{tech} = [c, c2, \var{nrpid} ],$$
+$$\var{tech} = [c1, c2, \var{nrpid} ],$$
 where the parameters are to be understood as follows:
 
 $P$ is the defining polynomial for the number field, which must be in
@@ -3501,11 +3502,33 @@ will return a different result in this case: instead of \kbd{res}, you get a
 vector \kbd{[res,Mod(a,Q)]}, where \kbd{Mod(a,Q) = Mod(X,P)} gives the change
 of variables. In all other routines, the variable change is simply lost.
 
-The numbers $c \leq c_2$ are positive real numbers which control the
-execution time and the stack size. For a given $c$, set
-$c_2 = c$ to get maximum speed. To get a rigorous result under \idx{GRH} you
-must take $c2\geq 12$ (or $c2\geq 6$ in $P$ is quadratic). Reasonable values
-for $c$ are between $0.1$ and $2$. The default is $c = c_2 = 0.3$.
+The \var{tech} interface is obsolete and you should not tamper with
+these parameters. Indeed, from version 2.4.0 on, 
+
+\item the results are always rigorous under \idx{GRH} (before that version,
+they relied on a heuristic strengthening, hence the need for overrides).
+
+\item the influence of these parameters of execution time and stack size is
+marginal. They \emph{can} be useful to fine-tune and experiment with the
+\kbd{bnfinit} code, but you will be better off modifying all tuning
+parameters in the C code (there are many more than just those three).
+We nevertheless describe it for completeness.
+
+The numbers $c_1 \leq c_2$ are positive real numbers. For $i = 1,2$, let $B_i
+= c_i(\log |d_K|)^2$, and denote by $S(B)$ the set of maximal ideals of $K$
+whose norm is less than $B$. We want $S(B_1)$ to generate $\Cl(K)$ and hope
+that $S(B_2)$ can be \emph{proven} to generate $\Cl(K)$.
+
+More precisely, $S(B_1)$ is a factorbase used it to compute a tentative
+$\Cl(K)$ by generators and relations. We then check explicitly, using
+essentially \kbd{bnfisprincipal}, that the elements of $S(B_2)$ belong to the
+span of $S(B_1)$. Under the assumption that $S(B_2)$ generates $\Cl(K)$, we
+are done. User-supplied $c_i$ are only used to compute initial guesses for
+the bounds $B_i$, and the algorithm increases them until one can \emph{prove}
+under GRH that $S(B_2)$ generates $\Cl(K)$. A uniform result of Bach says
+that $c_2 = 12$ is always suitable, but this bound is very pessimistic and a
+direct algorithm due to Belabas-Diaz-Friedman is used to check the condition,
+assuming GRH. The default values are $c_1 = c_2 = 0.3$.
 
 $\var{nrpid}$ is the maximal number of small norm relations associated to each
 ideal in the factor base. Set it to $0$ to disable the search for small norm
@@ -3513,27 +3536,22 @@ relations. Otherwise, reasonable values are between 4 and 20. The default is
 4.
 
 \misctitle{Warning.} Make sure you understand the above! By default, most of
-the \kbd{bnf} routines depend on the correctness of a heuristic assumption
-which is stronger than the GRH. In particular, any of the class number, class
-group structure, class group generators, regulator and fundamental units may
-be wrong, independently of each other. Any result computed from such a
-\kbd{bnf} may be wrong. The only guarantee is that the units given generate a
-subgroup of finite index in the full unit group. In practice, very few
-counter-examples are known, requiring unlucky random seeds. No
-counter-example has been reported for $c_2 = 0.5$ (which should be almost as
-fast as $c_2 = 0.3$, and shall very probably become the default). If you use
-$c_2 = 12$, then everything is correct assuming the GRH holds. You can
-use \kbd{bnfcertify} to certify the computations unconditionally.
+the \kbd{bnf} routines depend on the correctness of the GRH. In particular,
+any of the class number, class group structure, class group generators,
+regulator and fundamental units may be wrong, independently of each other.
+Any result computed from such a \kbd{bnf} may be wrong. The only guarantee is
+that the units given generate a subgroup of finite index in the full unit
+group. You must use \kbd{bnfcertify} to certify the computations
+unconditionally.
 
 \misctitle{Remarks.}
 
-Apart from the polynomial $P$, you do not need to supply the technical
-parameters (under the library you still need to send at least an empty
-vector, coded as \kbd{NULL}). However, should you choose to set some of them,
-they \emph{must} be given in the requested order. For example, if you want to
-specify a given value of 
-\var{nrpid}, you must give some values as well for $c$
-and $c_2$, and provide a vector $[c,c_2,\var{nrpid}]$.
+You do not need to supply the technical parameters (under the library you
+still need to send at least an empty vector, coded as \kbd{NULL}). However,
+should you choose to set some of them, they \emph{must} be given in the
+requested order. For example, if you want to specify a given value of
+\var{nrpid}, you must give some values as well for $c$ and $c_2$, and provide
+a vector $[c,c_2,\var{nrpid}]$.
 
 Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
@@ -4021,13 +4039,13 @@ class group, gives the conductor of this character as a modulus.
 \subsecidx{bnrdisc}$(a1,\{a2\},\{a3\},\{\fl=0\})$: $a1$, $a2$, $a3$
 defining a big ray number field $L$ over a ground field $K$ (see \kbd{bnr}
 at the beginning of this section for the
-meaning of $a1$, $a2$, $a3$), outputs a 3-component row vector $[N,R_1,D]$,
-where $N$ is the (absolute) degree of $L$, $R_1$ the number of real places of
+meaning of $a1$, $a2$, $a3$), outputs a 3-component row vector $[N,r_1,D]$,
+where $N$ is the (absolute) degree of $L$, $r_1$ the number of real places of
 $L$, and $D$ the discriminant of $L/\Q$, including sign (if $\fl=0$).
 
    If $\fl=1$, as above but outputs relative data. $N$ is now the degree of
-$L/K$, $R_1$ is the number of real places of $K$ unramified in $L$ (so that
-the number of real places of $L$ is equal to $R_1$ times the relative degree
+$L/K$, $r_1$ is the number of real places of $K$ unramified in $L$ (so that
+the number of real places of $L$ is equal to $r_1$ times the relative degree
 $N$), and $D$ is the relative discriminant ideal of $L/K$.
 
    If $\fl=2$, as the default case, except that if the modulus is not the
@@ -4127,6 +4145,7 @@ that $x=\alpha\prod_ig_i^{x_i}$.
 
 If $\fl=0$, outputs only $v_1$. In that case, \var{bnr} need not contain the
 ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
+If $x$ is not coprime to the modulus of \var{bnr} the result is undefined.
 
 \syn{bnrisprincipal}{\var{bnr},x,\fl}.
 
@@ -4668,15 +4687,15 @@ is more typical:
 \syn{ideallistarch}{\var{nf},\var{list},\var{arch}}.
 
 \subsecidx{ideallog}$(\var{nf},x,\var{bid})$: $\var{nf}$ is a number field,
-\var{bid} a ``big ideal'' as output by \kbd{idealstar} and $x$ a
+\var{bid} is as output by \kbd{idealstar(nf, D, \dots)} and $x$ a
 non-necessarily integral element of \var{nf} which must have valuation
-equal to 0 at all prime ideals dividing $I=\var{bid}[1]$. This function
-computes the ``discrete logarithm'' of $x$ on the generators given in
-$\var{bid}[2]$. In other words, if $g_i$ are these generators, of orders
+equal to 0 at all prime ideals in the support of $\kbd{D}$. This function
+computes the discrete logarithm of $x$ on the generators given in
+\kbd{\var{bid}.gen}. In other words, if $g_i$ are these generators, of orders
 $d_i$ respectively, the result is a column vector of integers $(x_i)$ such
 that $0\le x_i<d_i$ and
-$$x\equiv\prod_ig_i^{x_i}\pmod{\ ^*I}\enspace.$$
-Note that when $I$ is a module, this implies also sign conditions on the
+$$x \equiv \prod_i g_i^{x_i} \pmod{\ ^*D}\enspace.$$
+Note that when \kbd{D} is an idele, this implies also sign conditions on the
 embeddings.
 
 \syn{zideallog}{\var{nf},x,\var{bid}}.
