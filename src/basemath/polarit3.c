@@ -2865,10 +2865,10 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
   return r;
 }
 
-/* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
-/* Return a Flx */
+/* assume dres := deg(Res_X(a,b), Y) <= deg(a,X) * deg(b,Y) < p */
+/* Return a Fly */
 static GEN
-Fly_FlxY_resultant_polint(GEN a, GEN b, ulong p, ulong dres, long sx)
+Flx_FlyX_resultant_polint(GEN a, GEN b, ulong p, ulong dres, long sx)
 {
   ulong i, n, la = (ulong)leading_term(a);
   GEN  x = cgetg(dres+2, t_VECSMALL);
@@ -2984,7 +2984,7 @@ Fly_FlxY_resultant(GEN a, GEN b, ulong pp, long sx)
   if ((ulong)dres >= pp)
     return FlxX_resultant(a, b, pp, sx);
   else
-    return Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, sx);
+    return Flx_FlyX_resultant_polint(a, b, pp, (ulong)dres, sx);
 }
 
 /* return a t_POL (in variable v) whose coeffs are the coeffs of b,
@@ -3006,8 +3006,7 @@ swap_vars(GEN b0, long v)
 }
 
 /* assume varn(b) << varn(a) */
-/* return a FpX*/
-/* Should be named FpX_FpXY_resultant (w.r.t. X) */
+/* return a FpY*/
 GEN
 FpX_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
@@ -3027,7 +3026,7 @@ FpX_FpXY_resultant(GEN a, GEN b0, GEN p)
     else
     {
       a = ZX_to_Flx(a, pp);
-      x = Fly_FlxY_resultant_polint(a, b, pp, (ulong)dres, evalvarn(vX));
+      x = Flx_FlyX_resultant_polint(a, b, pp, (ulong)dres, evalvarn(vX));
     }
     return Flx_to_ZX(x);
   }
@@ -3185,7 +3184,7 @@ INIT:
       H1p= gel(C1,1);
     }
     else
-      Hp = Fly_FlxY_resultant_polint(a, b, p, (ulong)dres, sX);
+      Hp = Flx_FlyX_resultant_polint(a, b, p, (ulong)dres, sX);
     if (!H && degpol(Hp) != dres) continue;
     if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
