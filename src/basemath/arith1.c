@@ -851,12 +851,12 @@ ispower(GEN x, GEN K, GEN *pt)
       GEN a = gel(x,1), b = gel(x,2);
       if (pt) {
         z = cgetg(3, t_RFRAC);
-        if (polispower(a, K, &a) && polispower(b, K, &b)) {
+        if (ispower(a, K, &a) && polispower(b, K, &b)) {
           *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
         }
         avma = (pari_sp)(z + 3); return 0;
       } 
-      return (polispower(a, K, NULL) && polispower(b, K, NULL));
+      return (ispower(a, K, NULL) && polispower(b, K, NULL));
     }
     case t_REAL: 
       if (signe(x) < 0 && !mpodd(K)) return 0;

@@ -50,6 +50,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
 BA 29- [OS X] Fix kernel detection on x86_64-darwin
    30- Remove "VERY long time" Warning in bnfcertify (few minutes nowadays)
 BA 31- missing prototype for documented function ZY_ZXY_rnfequation
+   32- sqrt(x^2/y^2) --> SEGV [#536]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
