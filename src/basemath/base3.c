@@ -1188,10 +1188,9 @@ zidealij(GEN x, GEN y, GEN *U)
   return mkvec2(cyc, G);
 }
 
-/* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q
- * (p-1 if q = NULL) */
-GEN
-Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
+/* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q */
+static GEN
+Fp_Shanks(GEN x,GEN g0,GEN q, GEN p)
 {
   pari_sp av=avma,av1,lim;
   long lbaby,i,k;
@@ -1199,7 +1198,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
   x = modii(x,p);
   if (is_pm1(x) || equaliu(p,2)) { avma = av; return gen_0; }
-  p1 = addsi(-1, p); if (!q) q = p1;
+  p1 = addsi(-1, p);
   if (equalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
   if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"order too large in Fp_shanks");
@@ -1232,7 +1231,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_shanks, k = %ld", k);
+      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_Shanks, k = %ld", k);
       p1 = gerepileuptoint(av1, p1);
     }
   }
@@ -1240,7 +1239,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 
 /* Pohlig-Hellman */
 GEN
-Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
+Fp_log(GEN a, GEN g, GEN ord, GEN p)
 {
   pari_sp av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
@@ -1248,7 +1247,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   long e,i,j,l;
 
   if (equalii(g, a)) return gen_1; /* frequent special case */
-  if (!ord) ord = subis(p,1);
+  
   if (typ(ord) == t_MAT)
   {
     fa = ord;
@@ -1278,7 +1277,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
     {
       b = modii(mulii(a0, Fp_pow(ginv0, n_q, p)), p);
       b = Fp_pow(b, gel(qj,e-1-j), p);
-      b = Fp_shanks(b, g_q, p, q);
+      b = Fp_Shanks(b, g_q, q, p);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
     }
     gel(v,i) = gmodulo(n_q, gel(qj,e));
@@ -1310,7 +1309,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
     g = FpXQ_pow(g,q,T,p);
     if (typ(g) == t_POL) g = constant_term(g);
   }
-  n_q = Fp_PHlog(a,g,p,NULL);
+  n_q = Fp_log(a,g,subis(p,1),p);
   if (q) n_q = mulii(q, n_q);
   return gerepileuptoint(av, n_q);
 }
@@ -1330,7 +1329,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
     if (!gcmp1(modii(p,N))) return gen_0;
     /* g0 in Fp^*, order N | (p-1) */
     if (typ(g0) == t_POL) g0 = constant_term(g0);
-    return Fp_PHlog(x,g0,p,N);
+    return Fp_log(x,g0,N,p);
   }
 
   p1 = sqrti(N);
@@ -1429,7 +1428,7 @@ znlog(GEN x, GEN g0)
   pari_sp av = avma;
   GEN p = gel(g0,1);
   if (typ(g0) != t_INTMOD) pari_err(talker,"not an element of (Z/pZ)* in znlog");
-  return gerepileuptoint(av, Fp_PHlog(Rg_to_Fp(x,p),gel(g0,2),p,NULL));
+  return gerepileuptoint(av, Fp_log(Rg_to_Fp(x,p),gel(g0,2),subis(p,1),p));
 }
 
 GEN

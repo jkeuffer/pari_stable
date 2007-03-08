@@ -1546,7 +1546,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
       k++;
     } while(!is_pm1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = Fp_shanks(Fp_inv(z,p),m,p,l);
+    dl = Fp_log(Fp_inv(z,p),m,l,p);
     p1 = Fp_pow(y, modii(mulii(dl,powiu(l,e-k-1)),q), p);
     m = Fp_pow(m,dl,p);
     e = k;

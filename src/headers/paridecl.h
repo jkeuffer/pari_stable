@@ -556,6 +556,7 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
+GEN     Fp_log(GEN a, GEN g, GEN p, GEN ord);
 int     RgV_isscalar(GEN x);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     arch_to_perm(GEN arch);

@@ -1078,7 +1078,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       for (j=1; j<=lb; j++)
       {
         GEN t = to_Fp_simple(nf, gel(beta,j), modpr);
-        gel(newcol,j) = Fp_PHlog(t,g,gq,ord);
+        gel(newcol,j) = Fp_log(t,g,ord,gq);
       }
       if (DEBUGLEVEL>3)
       {
