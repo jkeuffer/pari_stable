@@ -93,7 +93,7 @@ if test -z "$__gnuc__"; then
   $CC $extraflag -o $exe gnu.c
   if $exe; then
     # avoid internationalization trouble by setting LANG=C
-    __gnuc__=`env LANG=C $CC -v 2>&1 | sed -n 's/.*version //p'`
+    __gnuc__=`env LANG=C LC_ALL=C LC_MESSAGES=C $CC -v 2>&1 | sed -n 's/.*version //p'`
     echo GNU compiler version $__gnuc__
   fi
   rm -f $exe $exe$exe_suff
