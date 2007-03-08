@@ -1287,18 +1287,17 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
 
 /* discrete log in Fq for a in Fp^*, g primitive root in Fq^* */
 static GEN
-ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
+Fp_Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN q,n_q,ord,ordp;
+  GEN q,n_q,ordp;
 
   if (gcmp1(a)) { avma = av; return gen_0; }
   if (equaliu(p,2)) {
-    if (!signe(a)) pari_err(talker,"a not invertible in ff_PHlog_Fp");
+    if (!signe(a)) pari_err(talker,"a not invertible in Fp_Fq_log");
     avma = av; return gen_0;
   }
-  ordp = subis(p, 1);
-  ord = T? subis(powiu(p,degpol(T)), 1): p;
+  ordp = gcdii(subis(p, 1),ord);
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
 
@@ -1309,7 +1308,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
     g = FpXQ_pow(g,q,T,p);
     if (typ(g) == t_POL) g = constant_term(g);
   }
-  n_q = Fp_log(a,g,subis(p,1),p);
+  n_q = Fp_log(a,g,ordp,p);
   if (q) n_q = mulii(q, n_q);
   return gerepileuptoint(av, n_q);
 }
@@ -1369,19 +1368,23 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
   }
 }
 
-/* same in Fp[X]/T */
 GEN
-ff_PHlog(GEN a, GEN g, GEN T, GEN p)
+Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,ord,fa,ex;
+  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,fa,ex;
   long e,i,j,l;
 
   if (typ(a) == t_INT)
-    return gerepileuptoint(av, ff_PHlog_Fp(a,g,T,p));
+    return gerepileuptoint(av, Fp_Fq_log(a,g,ord,T,p));
   /* f > 1 ==> T != NULL */
-  ord = subis(powiu(p, degpol(T)), 1);
-  fa = Z_factor(ord);
+  if (typ(ord) == t_MAT)
+  {
+    fa = ord;
+    ord= factorback(fa,NULL);
+  }
+  else
+    fa = Z_factor(ord);
   ex = gel(fa,2);
   fa = gel(fa,1);
   l = lg(fa);
@@ -1412,14 +1415,15 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
 }
 
 /* same in nf.zk / pr */
-GEN
-nf_PHlog(GEN nf, GEN a, GEN g, GEN pr)
+static GEN
+nf_log(GEN nf, GEN a, GEN g, GEN pr)
 {
   pari_sp av = avma;
   GEN T,p, modpr = nf_to_ff_init(nf, &pr, &T, &p);
   GEN A = nf_to_ff(nf,a,modpr);
   GEN G = nf_to_ff(nf,g,modpr);
-  return gerepileuptoint(av, ff_PHlog(A,G,T,p));
+  GEN ord = addis(T?powiu(p,degpol(T)):p,-1);
+  return gerepileuptoint(av, Fq_log(A,G,ord,T,p));
 }
 
 GEN
@@ -1696,7 +1700,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     s   = gel(L,4);
     U   = gel(L,5);
     if (j == 1)
-      e = mkcol( nf_PHlog(nf, a, gel(gen,1), pr) );
+      e = mkcol( nf_log(nf, a, gel(gen,1), pr) );
     else if (typ(a) == t_INT)
       e = gmul(subis(a, 1), gel(U,1));
     else

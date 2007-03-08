@@ -575,8 +575,6 @@ GEN     rnfdet0(GEN nf, GEN x, GEN y);
 
 GEN     FpXQ_gener(GEN T, GEN p);
 void    check_nfelt(GEN x, GEN *den);
-GEN     ff_PHlog(GEN a, GEN g, GEN T, GEN p);
-GEN     nf_PHlog(GEN nf, GEN a, GEN g, GEN pr);
 
 /* base4.c */
 
