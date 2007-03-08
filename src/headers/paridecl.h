@@ -1360,6 +1360,7 @@ GEN     member_zkst(GEN bid);
 
 /* mp.c */
 
+ulong   Fl_inv(ulong x, ulong p);
 int     absi_cmp(GEN x, GEN y);
 int     absi_equal(GEN x, GEN y);
 int     absr_cmp(GEN x, GEN y);
@@ -1400,7 +1401,6 @@ GEN     int2n(long n);
 GEN     int2u(ulong n);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invrev(ulong b);
-ulong   Fl_inv(ulong x, ulong p);
 GEN     ishiftr(GEN x, long n);
 GEN     modii(GEN x, GEN y);
 void    modiiz(GEN x, GEN y, GEN z);
