@@ -403,8 +403,10 @@ initell0(GEN x, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi,1);
   tau = mulcxmI( gdiv(glog(q,prec),pi2) );
 
-  w1 = gmul(pi2, sqrtr(mpabs(u2)));
+  w1 = gmul(pi2, sqrtr(mpneg(u2)));
   w2 = gneg(gmul(w1,tau));
+  if (signe(b1) >= 0) w1= gmul2n(mpabs(gel(w2,1)), 1);
+
   gel(y,15) = w1;
   gel(y,16) = w2;
   T = elleta(mkvec2(w1,w2), prec);
