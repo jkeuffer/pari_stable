@@ -136,22 +136,22 @@ caract(GEN x, long v)
 {
   long k, n;
   pari_sp av=avma;
-  GEN  p1, p2, p3, x_k, Q;
+  GEN  p1, C, x_k, Q;
 
   if ((p1 = easychar(x,v,NULL))) return p1;
 
-  p1 = gen_0; Q = p2 = gen_1; n = lg(x)-1;
-  x_k = monomial(gen_1, 1, v);
+  p1 = gen_0; Q = C = gen_1; n = lg(x)-1;
+  x_k = pol_x(v);
   for (k=0; k<=n; k++)
   {
-    GEN mk = stoi(-k);
+    GEN mk = stoi(-k), d;
     gel(x_k,2) = mk;
-    p3 = det(gaddmat_i(mk, x));
-    p1 = gadd(gmul(p1, x_k), gmul(gmul(p2, p3), Q));
+    d = det(gaddmat_i(mk, x));
+    p1 = gadd(gmul(p1, x_k), gmul(gmul(C, d), Q));
     if (k == n) break;
 
     Q = gmul(Q, x_k);
-    p2 = divis(mulsi(k-n,p2), k+1); /* (-1)^{k} binomial(n,k) */
+    C = divis(mulsi(k-n,C), k+1); /* (-1)^{k} binomial(n,k) */
   }
   return gerepileupto(av, gdiv(p1, mpfact(n)));
 }
@@ -166,13 +166,12 @@ caradj0(GEN x, long v)
 static GEN
 mattrace(GEN x)
 {
-  pari_sp av;
   long i, lx = lg(x);
   GEN t;
   if (lx < 3) return lx == 1? gen_0: gcopy(gcoeff(x,1,1));
-  av = avma; t = gcoeff(x,1,1);
+  t = gcoeff(x,1,1);
   for (i = 2; i < lx; i++) t = gadd(t, gcoeff(x,i,i));
-  return gerepileupto(av, t);
+  return t;
 }
 
 /* Using traces: return the characteristic polynomial of x (in variable v).
@@ -206,6 +205,7 @@ caradj(GEN x, long v, GEN *py)
     gel(p,2) = gerepileupto(av, gadd(gmul(a,d), gneg(gmul(b,c))));
     return p;
   }
+  /* l > 3 */
   av = avma; y = shallowcopy(x);
   for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
   for (k = 2; k < l-1; k++)
@@ -215,13 +215,11 @@ caradj(GEN x, long v, GEN *py)
     t = gdivgs(mattrace(y), -k);
     for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
     y = gclone(y);
-    /* beware: since y is a clone and t computed from it some components
-     * may be out of stack (eg. INTMOD/POLMOD) */
-    gel(p,l-k+1) = gerepileupto(av, gcopy(t)); av = avma;
+    gel(p,l-k+1) = gerepilecopy(av, t); av = avma;
     if (k > 2) gunclone(y0);
   }
-  t = gen_0;
-  for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
+  t = gmul(gcoeff(x,1,1),gcoeff(y,1,1));
+  for (i=2; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
   gel(p,2) = gerepileupto(av, gneg(t));
   i = gvar2(p);
   if (i == v) pari_err(talker,"incorrect variable in caradj");
@@ -337,7 +335,7 @@ carhess(GEN x, long v)
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
   gel(y,1) = pol_1(v); H = hess(x);
-  X_h = monomial(gen_1, 1, v);
+  X_h = pol_x(v);
   for (r = 1; r < lx; r++)
   {
     GEN p3 = gen_1, p4 = gen_0;
@@ -741,7 +739,7 @@ gtrace(GEN x)
       lx = lg(x); if (lx == 1) return gen_0;
       /*now lx >= 2*/
       if (lx != lg(x[1])) pari_err(mattype1,"gtrace");
-      return mattrace(x);
+      av = avma; return gerepileupto(av, mattrace(x));
   }
   pari_err(typeer,"gtrace");
   return NULL; /* not reached */

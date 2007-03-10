@@ -6674,19 +6674,24 @@ Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
 
 \subsecidx{charpoly}$(A,\{v=x\},\{\fl=0\})$: \idx{characteristic polynomial}
 of $A$ with respect to the variable $v$, i.e.~determinant of $v*I-A$ if $A$
-is a square matrix. If $A$ is not a square matrix, it returns the characteristic polynomial of the map ``multiplication by $A$'' if $A$
-is a scalar, in particular a polmod. E.g.~\kbd{charpoly(I) = x\pow2+1}.
+is a square matrix. If $A$ is not a square matrix, it returns the
+characteristic polynomial of the map ``multiplication by $A$'' if $A$ is a
+scalar, in particular a polmod. E.g.~\kbd{charpoly(I) = x\pow2+1}.
 
-The value of $\fl$ is only significant for matrices.
+The value of $\fl$ is only significant for matrices. Let $n$ be the dimension
+of $A$.
 
 If $\fl=0$, the method used is essentially the same as for computing the
-adjoint matrix, i.e.~computing the traces of the powers of $A$.
+adjoint matrix, i.e.~computing the traces of the powers of $A$. Assumes that
+$n!$ is invertible.
 
-If $\fl=1$, uses Lagrange interpolation which is almost always slower.
+If $\fl=1$, uses Lagrange interpolation which is usually the slowest method.
+Assumes that $n!$ is invertible.
 
-If $\fl=2$, uses the Hessenberg form. This is faster than the default when
-the coefficients are intmod a prime or real numbers, but is usually
-slower in other base rings.
+If $\fl=2$, uses the Hessenberg form. Assumes that the base ring is a field.
+This last variant is the fastest whenever coefficient explosion does not
+occur, e.g.~over a finite field or the reals. It is usually slower in other
+base rings.
 
 \syn{charpoly0}{A,v,\fl}, where $v$ is the variable number. Also available
 are the functions \funs{caract}{A,v} ($\fl=1$), \funs{carhess}{A,v}
