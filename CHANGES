@@ -54,6 +54,8 @@ BA 31- missing prototype for documented function ZY_ZXY_rnfequation
    33- \r foo no longer worked if foo was a directory and foo.gp a valid
        input file [#540]
 BA 34- [Configure] spectacular failure to recognize gcc under some locales.
+   35- polredabs(x^8+2*x^6-5*x^4+78*x^2+9) was incorrect [ missed
+       x^8+6*x^6-x^4+54*x^2+25 due to incorrect "skipfirst" ]   [#542]
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
