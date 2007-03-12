@@ -2132,6 +2132,8 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
 \fun{GEN}{Flx_add}{GEN x, GEN y, ulong p}
 
+\fun{GEN}{Flx_Fl_add}{GEN y, ulong x, ulong p}
+
 \fun{GEN}{Flx_neg}{GEN x, ulong p}
 
 \fun{GEN}{Flx_neg_inplace}{GEN x, ulong p}, same as \kbd{Flx\_neg}, in place
@@ -2140,6 +2142,8 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 \fun{GEN}{Flx_sub}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flx_mul}{GEN x, GEN y, ulong p}
+
+\fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
 \fun{GEN}{Flx_sqr}{GEN x, ulong p}
 
@@ -2164,8 +2168,6 @@ collecting garbage.
 \subsubsec{Miscellaneous operations}
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
-
-\fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
 \fun{GEN}{Flx_recip}{GEN x}, returns the reciprocal polynomial
 
