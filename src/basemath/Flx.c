@@ -272,6 +272,23 @@ Flx_add(GEN x, GEN y, ulong p)
 }
 
 GEN
+Flx_Fl_add(GEN y, ulong x, ulong p)
+{
+  GEN z;
+  long lz, i;
+  if (!lgpol(y))
+    return Fl_to_Flx(x,y[1]);
+  lz=lg(y);
+  z=cgetg(lz,t_VECSMALL);
+  z[1]=y[1];
+  z[2] = Fl_add(y[2],x,p);
+  for(i=3;i<lz;i++)
+    z[i] = y[i];
+  if (lz==3) z = Flx_renormalize(z,lz);
+  return z;
+}
+
+GEN
 Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;

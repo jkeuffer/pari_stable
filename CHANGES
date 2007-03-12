@@ -80,6 +80,7 @@ BA  8- library function FpXQ_norm()
 BA  9- library function FlxX_resultant() and Flx_FlxY_resultant()
 BA 10- library function FlxY_Flx_div()
 BA 11- library function Flm_transpose()
+BA 12- library function Flx_Fl_add()
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
