@@ -2847,7 +2847,7 @@ ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
 
 /* return Res(a(Y), b(n,Y)) over Fp. la = leading_term(a) [for efficiency] */
 static ulong
-FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
+Flx_FlxY_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 {
   GEN ev = FlxY_evalx(b, n, p);
   long drop = lg(b) - lg(ev);
@@ -2877,12 +2877,12 @@ Flx_FlyX_resultant_polint(GEN a, GEN b, ulong p, ulong dres, long sx)
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
   {
-    x[++i] = n;   y[i] = FlX_eval_resultant(a,b, x[i], p,la);
-    x[++i] = p-n; y[i] = FlX_eval_resultant(a,b, x[i], p,la);
+    x[++i] = n;   y[i] = Flx_FlxY_eval_resultant(a,b, x[i], p,la);
+    x[++i] = p-n; y[i] = Flx_FlxY_eval_resultant(a,b, x[i], p,la);
   }
   if (i == dres)
   {
-    x[++i] = 0;   y[i] = FlX_eval_resultant(a,b, x[i], p,la);
+    x[++i] = 0;   y[i] = Flx_FlxY_eval_resultant(a,b, x[i], p,la);
   }
   return Flv_polint(x,y, p, sx);
 }
