@@ -2808,7 +2808,7 @@ FlxY_evalx(GEN b, ulong x, ulong p)
 }
 
 static GEN
-vec_FpX_eval_gen(GEN b, GEN x, GEN p, long *drop)
+FpXY_evalx(GEN b, GEN x, GEN p)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2816,9 +2816,7 @@ vec_FpX_eval_gen(GEN b, GEN x, GEN p, long *drop)
   z[1] = b[1];
   for (i=2; i<lb; i++)
     gel(z,i) = FpX_eval(gel(b,i), x, p);
-  z = FpX_renormalize(z, lb);
-  *drop = lb - lg(z);
-  return z;
+  return FpX_renormalize(z, lb);
 }
 
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
@@ -2858,8 +2856,8 @@ Flx_FlxY_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 static GEN
 FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 {
-  long drop;
-  GEN ev = vec_FpX_eval_gen(b, n, p, &drop);
+  GEN ev = FpXY_evalx(b, n, p);
+  long drop=lg(b)-lg(ev);
   GEN r = FpX_resultant(a, ev, p);
   if (drop && !gcmp1(la)) r = muliimod(r, Fp_powu(la, drop,p),p);
   return r;
