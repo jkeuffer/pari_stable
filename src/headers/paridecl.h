@@ -195,7 +195,6 @@ GEN     zv_neg(GEN x);
 
 /* alglin2.c */
 
-GEN     FpXQ_norm(GEN x, GEN T, GEN p);
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
@@ -1664,6 +1663,7 @@ GEN     FpXQ_invsafe(GEN x, GEN T, GEN p);
 GEN     FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l);
 GEN     FpXQ_minpoly(GEN x, GEN T, GEN p);
 GEN     FpXQ_mul(GEN y,GEN x,GEN T,GEN p);
+GEN     FpXQ_norm(GEN x, GEN T, GEN p);
 GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);

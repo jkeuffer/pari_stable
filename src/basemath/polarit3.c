@@ -430,6 +430,16 @@ FpXV_FpC_mul(GEN V, GEN W, GEN p)
   return gerepileupto(ltop,FpX_red(z,p));
 }
 
+GEN
+FpXQ_norm(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma; 
+  GEN y = FpX_resultant(T, x, p);
+  GEN L = leading_term(T);
+  if (gcmp1(L) || signe(x)==0) return y;
+  return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
+}
+
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN
 FpXQ_powers(GEN x, long l, GEN T, GEN p)
