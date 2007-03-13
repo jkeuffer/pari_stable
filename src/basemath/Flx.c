@@ -1228,16 +1228,14 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
     p2 = cgetg(5,t_VECSMALL); gel(p1,k++) = p2;
     p2[1] = vs;
     p2[2] = Fl_mul(a[i], a[i+1], p);
-    p2[3] = a[i] + a[i+1];
-    if ((ulong)p2[3] >= p) p2[3] -= p;
-    if (p2[3]) p2[3] = p - p2[3]; /* - (a[i] + a[i+1]) mod p */
+    p2[3] = Fl_neg(Fl_add(a[i],a[i+1],p),p);
     p2[4] = 1; 
   }
   if (i < lx)
   {
     p2 = cgetg(4,t_VECSMALL); gel(p1,k++) = p2;
     p2[1] = vs;
-    p2[2] = a[i]?p - a[i]:0;
+    p2[2] = Fl_neg(a[i],p);
     p2[3] = 1;
   }
   setlg(p1, k); return divide_conquer_assoc(p1, _Flx_mul,(void *)&p);
@@ -1284,8 +1282,8 @@ Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p)
   {
     ulong t = P[i];
     y[i] = (t == 0)? 0:
-                     (i&1)? Fl_mul(t, u + (p - v), p)
-                          : Fl_mul(t, u + v, p);
+                     (i&1)? Fl_mul(t, Fl_sub(u, v, p), p)
+                          : Fl_mul(t, Fl_add(u, v, p), p);
   }
   return Flx_renormalize(y,l);
 }
