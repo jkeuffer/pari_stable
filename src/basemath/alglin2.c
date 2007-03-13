@@ -377,19 +377,6 @@ FpXQ_norm(GEN x, GEN T, GEN p)
 }
 
 GEN
-RgXQ_norm(GEN x, GEN T)
-{
-  pari_sp av;
-  GEN L, y;
-  if (typ(x) != t_POL) return gpowgs(x, degpol(T));
-
-  av = avma; y = subres(T, x);
-  L = leading_term(T);
-  if (gcmp1(L) || gcmp0(x)) return y;
-  return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
-}
-
-GEN
 gnorm(GEN x)
 {
   pari_sp av;
@@ -407,7 +394,9 @@ gnorm(GEN x)
     case t_POL: case t_SER: case t_RFRAC: av = avma;
       return gerepileupto(av, greal(gmul(gconj(x),x)));
 
-    case t_POLMOD: return RgXQ_norm(gel(x,2), gel(x,1));
+    case t_POLMOD: 
+      if (typ(gel(x,2)) != t_POL) return gpowgs(gel(x,2), degpol(gel(x,1)));
+      return RgXQ_norm(gel(x,2), gel(x,1));
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);

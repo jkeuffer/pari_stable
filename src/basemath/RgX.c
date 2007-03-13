@@ -1016,3 +1016,15 @@ RgXQ_minpoly_naive(GEN y, GEN P)
   return gerepileupto(ltop,M);
 }
 
+GEN
+RgXQ_norm(GEN x, GEN T)
+{
+  pari_sp av;
+  GEN L, y;
+
+  av = avma; y = subres(T, x);
+  L = leading_term(T);
+  if (gcmp1(L) || gcmp0(x)) return y;
+  return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
+}
+
