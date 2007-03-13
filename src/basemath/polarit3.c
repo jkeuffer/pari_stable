@@ -2856,7 +2856,7 @@ FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
   return r;
 }
 static GEN
-FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
+FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 {
   long drop;
   GEN ev = vec_FpX_eval_gen(b, n, p, &drop);
@@ -3048,12 +3048,15 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
   {
-    gel(x,++i) = utoipos(n); gel(y,i) = FpX_eval_resultant(a,b,gel(x,i),p,la);
-    gel(x,++i) = subis(p,n); gel(y,i) = FpX_eval_resultant(a,b,gel(x,i),p,la);
+    gel(x,++i) = utoipos(n); 
+    gel(y,i) = FpX_FpXY_eval_resultant(a,b,gel(x,i),p,la);
+    gel(x,++i) = subis(p,n); 
+    gel(y,i) = FpX_FpXY_eval_resultant(a,b,gel(x,i),p,la);
   }
   if (i == dres)
   {
-    gel(x,++i) = gen_0;        gel(y,i) = FpX_eval_resultant(a,b, gel(x,i), p,la);
+    gel(x,++i) = gen_0;
+    gel(y,i) = FpX_FpXY_eval_resultant(a,b, gel(x,i), p,la);
   }
   x = FpV_polint(x,y, p);
   setvarn(x, vX); return x;
