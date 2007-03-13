@@ -2744,7 +2744,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
 }
 
 static void
-FlV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
+Flv_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
 {
   GEN T,Q = Flv_roots_to_pol(xa, p, 0);
   GEN dP  = NULL,  P = NULL;
@@ -3189,7 +3189,7 @@ INIT:
         x[++i] = n; y[i] = Flx_resultant_all(a, ev, C0+i, C1+i, dglist, p);
         if (!C1[i]) i--; /* C1(i) = 0. No way to recover C0(i) */
       }
-      FlV_polint_all(x,y,C0,C1, p);
+      Flv_polint_all(x,y,C0,C1, p);
       Hp = gel(y,1);
       H0p= gel(C0,1);
       H1p= gel(C1,1);
