@@ -1629,7 +1629,7 @@ GEN     FpC_red(GEN z, GEN p);
 GEN     FpC_to_mod(GEN z, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);
-GEN     FpV_polint(GEN xa, GEN ya, GEN p);
+GEN     FpV_polint(GEN xa, GEN ya, GEN p, long v);
 GEN     FpV_red(GEN z, GEN p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 GEN     FpV_to_mod(GEN z, GEN p);

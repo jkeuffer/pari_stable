@@ -67,6 +67,7 @@ BA  5- Much faster base-2 to base-10 conversion.
 BA  6- FpX_Fp_add() is now clean.
 BA  7- rename ZY_ZXY_resultant -> ZX_ZXY_resultant, ZY_ZXY_rnfequation ->
        ZX_ZXY_rnfequation and FpY_FpXY_resultant -> FpX_FpXY_resultant.
+BA  8- FpV_polint() now take a variable number as last parameter.
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations

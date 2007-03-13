@@ -2724,9 +2724,9 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
 }
 
 GEN
-FpV_polint(GEN xa, GEN ya, GEN p)
+FpV_polint(GEN xa, GEN ya, GEN p, long v)
 {
-  GEN inv,T,dP, P = NULL, Q = FpV_roots_to_pol(xa, p, 0);
+  GEN inv,T,dP, P = NULL, Q = FpV_roots_to_pol(xa, p, v);
   long i, n = lg(xa);
   pari_sp av, lim;
   av = avma; lim = stack_lim(av,2);
@@ -2750,7 +2750,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
       if (!P) avma = av; else P = gerepileupto(av, P);
     }
   }
-  return P? P: zeropol(0);
+  return P? P: zeropol(v);
 }
 
 static void
@@ -3066,8 +3066,7 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
     gel(x,++i) = gen_0;
     gel(y,i) = FpX_FpXY_eval_resultant(a,b, gel(x,i), p,la);
   }
-  x = FpV_polint(x,y, p);
-  setvarn(x, vX); return x;
+  return FpV_polint(x,y, p, vX);
 }
 
 /* check that theta(maxprime) - theta(27448) >= 2^bound */
