@@ -1303,8 +1303,8 @@ GEN
 FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 {
   pari_sp av = avma, lim;
-  long i,k;
-  GEN p1,p2,u1,u2,v,w,z;
+  long k;
+  GEN p1,u1,u2,v,w,z,dl;
 
   if (gcmp1(a)) return gcopy(a);
 
@@ -1322,10 +1322,9 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
       k++;
     } while (!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
-    p2 = FpXQ_mul(z,m,T,p);
-    for (i=1; !gcmp1(p2); i++) p2 = FpXQ_mul(p2,m,T,p);/*TODO: BS/GS instead*/
-    p1= FpXQ_pow(y, modii(mulsi(i,powiu(l,e-k-1)), q), T,p);
-    m = FpXQ_pow(m,utoipos(i),T,p);
+    dl= Fq_log(FpXQ_inv(z,T,p),m,l,T,p);
+    p1= FpXQ_pow(y, modii(mulii(dl,powiu(l,e-k-1)), q), T,p);
+    m = FpXQ_pow(m,dl,T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
     y = FpXQ_pow(p1,l,T,p);
