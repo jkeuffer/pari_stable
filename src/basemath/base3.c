@@ -1287,14 +1287,14 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
 
 /* discrete log in Fq for a in Fp^*, g primitive root in Fq^* */
 static GEN
-Fp_Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
+Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN q,n_q,ordp;
 
   if (gcmp1(a)) { avma = av; return gen_0; }
   if (equaliu(p,2)) {
-    if (!signe(a)) pari_err(talker,"a not invertible in Fp_Fq_log");
+    if (!signe(a)) pari_err(talker,"a not invertible in Fp_FpXQ_log");
     avma = av; return gen_0;
   }
   ordp = gcdii(subis(p, 1),ord);
@@ -1306,7 +1306,7 @@ Fp_Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   { /* we want < g > = Fp^* */
     q = diviiexact(ord,ordp);
     g = FpXQ_pow(g,q,T,p);
-    if (typ(g) == t_POL) g = constant_term(g);
+    g = constant_term(g);
   }
   n_q = Fp_log(a,g,ordp,p);
   if (q) n_q = mulii(q, n_q);
@@ -1376,7 +1376,7 @@ Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   long e,i,j,l;
 
   if (typ(a) == t_INT)
-    return gerepileuptoint(av, Fp_Fq_log(a,g,ord,T,p));
+    return gerepileuptoint(av, Fp_FpXQ_log(a,g,ord,T,p));
   /* f > 1 ==> T != NULL */
   if (typ(ord) == t_MAT)
   {
