@@ -1316,7 +1316,7 @@ Fp_Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 /* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
  * N = order of g0 is prime (and != p) */
 static GEN
-ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
+FpXQ_Shanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 {
   pari_sp av = avma, av1, lim;
   long lbaby,i,k;
@@ -1332,7 +1332,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
   }
 
   p1 = sqrti(N);
-  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in ffshanks");
+  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in FpXQ_Shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fq_inv(g0,T,p);
   p1 = x;
@@ -1362,7 +1362,7 @@ ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ffshanks");
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpXQ_Shanks");
       p1 = gerepileupto(av1, p1);
     }
   }
@@ -1406,7 +1406,7 @@ Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
     {
       b = FpXQ_mul(a0, FpXQ_pow(ginv0, n_q, T,p), T,p);
       b = FpXQ_pow(b, gel(qj,e-1-j), T,p);
-      b = ffshanks(b, g_q, q, T,p);
+      b = FpXQ_Shanks(b, g_q, q, T,p);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
     }
     gel(v,i) = gmodulo(n_q, gel(qj,e));
