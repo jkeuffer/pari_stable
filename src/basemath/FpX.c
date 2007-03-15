@@ -318,6 +318,21 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 }
 
 GEN
+FpX_rescale(GEN P, GEN h, GEN p)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l,t_POL), hi = h;
+  Q[l-1] = P[l-1];
+  for (i=l-2; i>=2; i--)
+  {
+    gel(Q,i) = Fp_mul(gel(P,i), hi, p);
+    if (i == 2) break;
+    hi = Fp_mul(hi,h, p);
+  }
+  Q[1] = P[1]; return Q;
+}
+
+GEN
 FpX_deriv(GEN x, GEN p) 
 { 
    GEN z = ZX_deriv(x);

@@ -280,25 +280,6 @@ FpXQ_sqr(GEN y,GEN pol,GEN p)
   z = FpX_red(z, p); return FpX_rem(z,pol, p);
 }
 
-/* as above over Fp[X] */
-GEN
-FpX_rescale(GEN P, GEN h, GEN p)
-{
-  long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = h;
-  Q[l-1] = P[l-1];
-  for (i=l-2; i>=2; i--)
-  {
-    gel(Q,i) = Fp_mul(gel(P,i), hi, p);
-    if (i == 2) break;
-    hi = Fp_mul(hi,h, p);
-  }
-  Q[1] = P[1]; return Q;
-}
-/*****************************************************************
- *                 End of unclean functions.                     *
- *****************************************************************/
-
 /*****************************************************************
  Clean and with no reduced hypothesis.  Beware that some operations
  will be much slower with big unreduced coefficient
