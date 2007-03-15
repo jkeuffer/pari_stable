@@ -322,6 +322,7 @@ ulong   Fl_sqrt(ulong a, ulong p);
 GEN     Fp_div(GEN a, GEN b, GEN m);
 GEN     Fp_inv(GEN a, GEN m);
 GEN     Fp_invsafe(GEN a, GEN m);
+GEN     Fp_mul(GEN a, GEN b, GEN m);
 GEN     Fp_pow(GEN a, GEN n, GEN m);
 GEN     Fp_pows(GEN A, long k, GEN N);
 GEN     Fp_powu(GEN x, ulong k, GEN p);
