@@ -1398,7 +1398,7 @@ sqrt_Cipolla(GEN a, GEN p)
    *
    * Thus a square root is v*a */
 
-  v = modii(mulii(v,a), p);
+  v = Fp_mul(v,a, p);
 
   u = subii(p,v); if (cmpii(v,u) > 0) v = u;
   return gerepileuptoint(av,v);
@@ -1465,8 +1465,8 @@ Fp_sqrt(GEN a, GEN p)
 
   p1 = Fp_pow(a, shifti(q,-1), p); /* a ^ [(q-1)/2] */
   if (!signe(p1)) { avma=av; return gen_0; }
-  v = modii(mulii(a, p1), p);
-  w = modii(mulii(v, p1), p);
+  v = Fp_mul(a, p1, p);
+  w = Fp_mul(v, p1, p);
   lim = stack_lim(av,1);
   while (!is_pm1(w))
   { /* a*w = v^2, y primitive 2^e-th root of 1
@@ -1478,8 +1478,8 @@ Fp_sqrt(GEN a, GEN p)
     p1 = y;
     for (i=1; i < e-k; i++) p1 = sqrmod(p1,p);
     y = sqrmod(p1, p); e = k;
-    w = modii(mulii(y, w), p);
-    v = modii(mulii(v, p1), p);
+    w = Fp_mul(y, w, p);
+    v = Fp_mul(v, p1, p);
     if (low_stack(lim, stack_lim(av,1)))
     {
       GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
@@ -1534,7 +1534,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 
   (void)bezout(r,l,&u1,&u2);
   v = Fp_pow(a,u2,p);
-  w = Fp_pow(a,modii(mulii(negi(u1),r),q),p);
+  w = Fp_pow(a,Fp_mul(negi(u1),r,q),p);
   lim = stack_lim(av,1);
   while (!is_pm1(w))
   {
@@ -1547,12 +1547,12 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
     } while(!is_pm1(p1));
     if (k==e) { avma = av; return NULL; }
     dl = Fp_log(Fp_inv(z,p),m,l,p);
-    p1 = Fp_pow(y, modii(mulii(dl,powiu(l,e-k-1)),q), p);
+    p1 = Fp_pow(y, Fp_mul(dl,powiu(l,e-k-1),q), p);
     m = Fp_pow(m,dl,p);
     e = k;
-    v = modii(mulii(p1,v),p);
+    v = Fp_mul(p1,v,p);
     y = Fp_pow(p1,l,p);
-    w = modii(mulii(y,w),p);
+    w = Fp_mul(y,w,p);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrtl");
@@ -1597,7 +1597,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
       j = itos(gcoeff(F,i,2));
       e = Z_pvalrem(q,l,&r);
       y = mplgenmod(l,e,r,p,&zeta);
-      if (zetan) z = modii(mulii(z, Fp_pow(y,powiu(l,e-j),p)), p);
+      if (zetan) z = Fp_mul(z, Fp_pow(y,powiu(l,e-j),p), p);
       do
       {
 	lbot = avma;
@@ -1756,11 +1756,11 @@ GEN
 Fp_mul(GEN a, GEN b, GEN m)
 {
   pari_sp av=avma;
-  GEN p;
-  new_chunk(lg(a)+lg(b)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
+  GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
+  new_chunk(lg(a)+lg(b)+(lg(m)<<1));
   p=mulii(a,b);
   avma=av;
-  return remii(p,m);
+  return modii(p,m);
 }
 
 GEN
