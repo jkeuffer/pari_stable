@@ -298,9 +298,11 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   }
   else
   {
+    long vx = varn(x);
     a = FpX_red(x, p);
     b = FpX_red(y, p);
-    d = a; d1 = b; v = gen_0; v1 = gen_1;
+    d = a; d1 = b;
+    v = zeropol(vx); v1 = scalarpol(gen_1,vx);
     while (signe(d1))
     {
       q = FpX_divrem(d,d1,p, &r);
