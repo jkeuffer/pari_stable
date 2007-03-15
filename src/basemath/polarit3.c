@@ -1142,7 +1142,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 
   (void)bezout(r,l,&u1,&u2); /* result is 1 */
   v = FpXQ_pow(a,u2,T,p);
-  w = FpXQ_pow(a, Fp_mul(negi(u1),r),q, T,p);
+  w = FpXQ_pow(a, Fp_mul(negi(u1),r,q), T,p);
   lim = stack_lim(av,1);
   while (!gcmp1(w))
   {
@@ -1155,7 +1155,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     } while (!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
     dl= Fq_log(FpXQ_inv(z,T,p),m,l,T,p);
-    p1= FpXQ_pow(y, Fp_mul(dl,powiu(l,e-k-1)), q, T,p);
+    p1= FpXQ_pow(y, Fp_mul(dl,powiu(l,e-k-1), q), T,p);
     m = FpXQ_pow(m,dl,T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
