@@ -289,9 +289,9 @@ FpX_rescale(GEN P, GEN h, GEN p)
   Q[l-1] = P[l-1];
   for (i=l-2; i>=2; i--)
   {
-    gel(Q,i) = modii(mulii(gel(P,i), hi), p);
+    gel(Q,i) = Fp_mul(gel(P,i), hi, p);
     if (i == 2) break;
-    hi = modii(mulii(hi,h), p);
+    hi = Fp_mul(hi,h, p);
   }
   Q[1] = P[1]; return Q;
 }
@@ -911,7 +911,7 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
 {
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
-    case 0: return modii(mulii(x,y),p);
+    case 0: return Fp_mul(x,y,p);
     case 1: return FpX_Fp_mul(x,y,p);
     case 2: return FpX_Fp_mul(y,x,p);
     case 3: if (T) return FpXQ_mul(x,y,T,p);
@@ -1142,7 +1142,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 
   (void)bezout(r,l,&u1,&u2); /* result is 1 */
   v = FpXQ_pow(a,u2,T,p);
-  w = FpXQ_pow(a, modii(mulii(negi(u1),r),q), T,p);
+  w = FpXQ_pow(a, Fp_mul(negi(u1),r),q, T,p);
   lim = stack_lim(av,1);
   while (!gcmp1(w))
   {
@@ -1155,7 +1155,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     } while (!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
     dl= Fq_log(FpXQ_inv(z,T,p),m,l,T,p);
-    p1= FpXQ_pow(y, modii(mulii(dl,powiu(l,e-k-1)), q), T,p);
+    p1= FpXQ_pow(y, Fp_mul(dl,powiu(l,e-k-1)), q, T,p);
     m = FpXQ_pow(m,dl,T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
@@ -1503,7 +1503,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       Bn = gel(FpXQ_pow(B,ipg,Q,l),2);
       if (!invmod(Bn,l,&z))
         pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
-      z = modii(mulii(An,z),l);
+      z = Fp_mul(An,z,l);
       L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
         pari_err(talker,"Polynomials not irreducible in FpX_ffintersect");
