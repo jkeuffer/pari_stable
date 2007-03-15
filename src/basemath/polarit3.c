@@ -2550,12 +2550,6 @@ stopoly_gen(GEN m, GEN p, long v)
   y[0] = evaltyp(t_POL) | evallg(l); return y;
 }
 
-static GEN
-muliimod(GEN x, GEN y, GEN p)
-{
-  return modii(mulii(x,y), p);
-}
-
 /* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
 GEN
 FpX_resultant(GEN a, GEN b, GEN p)
@@ -2582,7 +2576,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = subii(p, res);
-    if (!gcmp1(lb)) res = muliimod(res, Fp_powu(lb, da - dc, p), p);
+    if (!gcmp1(lb)) res = Fp_mul(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"FpX_resultant (da = %ld)",da);
@@ -2591,7 +2585,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
-  res = muliimod(res, Fp_powu(gel(b,2), da, p), p);
+  res = Fp_mul(res, Fp_powu(gel(b,2), da, p), p);
   return gerepileuptoint(av, res);
 }
 
@@ -2715,10 +2709,10 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
   z0 = z + l-2; *z0 = *a0--;
   for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
   {
-    GEN t = addii(gel(a0--,0), muliimod(x, gel(z0--,0), p));
+    GEN t = addii(gel(a0--,0), Fp_mul(x, gel(z0--,0), p));
     *z0 = (long)t;
   }
-  if (r) *r = addii(gel(a0,0), muliimod(x, gel(z0,0), p));
+  if (r) *r = addii(gel(a0,0), Fp_mul(x, gel(z0,0), p));
   return z;
 }
 
@@ -2736,12 +2730,12 @@ FpV_polint(GEN xa, GEN ya, GEN p, long v)
     inv = Fp_inv(FpX_eval(T,gel(xa,i), p), p);
     if (i < n-1 && equalii(addii(gel(xa,i), gel(xa,i+1)), p))
     {
-      dP = pol_comp(T, muliimod(gel(ya,i),  inv,p),
-                       muliimod(gel(ya,i+1),inv,p));
+      dP = pol_comp(T, Fp_mul(gel(ya,i),  inv,p),
+                       Fp_mul(gel(ya,i+1),inv,p));
       i++; /* x_i = -x_{i+1} */
     }
     else
-      dP = FpX_Fp_mul(T, muliimod(gel(ya,i),inv,p), p);
+      dP = FpX_Fp_mul(T, Fp_mul(gel(ya,i),inv,p), p);
     P = P? FpX_add(P, dP, p): dP;
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2868,7 +2862,7 @@ FpX_FpXY_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
   GEN ev = FpXY_evalx(b, n, p);
   long drop=lg(b)-lg(ev);
   GEN r = FpX_resultant(a, ev, p);
-  if (drop && !gcmp1(la)) r = muliimod(r, Fp_powu(la, drop,p),p);
+  if (drop && !gcmp1(la)) r = Fp_mul(r, Fp_powu(la, drop,p),p);
   return r;
 }
 
