@@ -2474,7 +2474,7 @@ FpC_Fp_mul(GEN x, GEN y, GEN p)
   long i, l=lg(x);
   GEN z=cgetg(l, t_COL);
   for (i=1;i<l;i++)
-    gel(z,i)=modii(mulii(gel(x,i),y),p);
+    gel(z,i)=Fp_mul(gel(x,i),y,p);
   return z;
 }
 
@@ -2782,7 +2782,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
       c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
       gcoeff(x,j,k) = gen_m1;
       for (i=k+1; i<=n; i++)
-	gcoeff(x,j,i) = modii(mulii(piv,gcoeff(x,j,i)), p);
+	gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
 	if (t==j) continue;
@@ -2916,7 +2916,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
     {
       c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
       for (i=k+1; i<=n; i++)
-	gcoeff(x,j,i) = modii(mulii(piv,gcoeff(x,j,i)), p);
+	gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
