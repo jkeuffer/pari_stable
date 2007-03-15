@@ -76,7 +76,7 @@ BA  2- library function strntoGENstr
 BA  4- ppc64 level0 inline assembly kernel
     5- library function floor_safe()
     6- library function itostr()
-BA  7- library function Fp_div()
+BA  7- library function Fp_div(), Fp_mul()
 BA  8- library function FpXQ_norm()
 BA  9- library function FlxX_resultant() and Flx_FlxY_resultant()
 BA 10- library function FlxY_Flx_div()

@@ -1748,9 +1748,20 @@ Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)
 }
 /*********************************************************************/
 /**                                                                 **/
-/**                      INVERSE MODULO b                           **/
+/**                      OPERATIONS MODULO m                        **/
 /**                                                                 **/
 /*********************************************************************/
+
+GEN
+Fp_mul(GEN a, GEN b, GEN m)
+{
+  pari_sp av=avma;
+  GEN p;
+  new_chunk(lg(a)+lg(b)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
+  p=mulii(a,b);
+  avma=av;
+  return remii(p,m);
+}
 
 GEN
 Fp_inv(GEN a, GEN m)
@@ -1774,7 +1785,7 @@ Fp_div(GEN a, GEN b, GEN m)
 {
   pari_sp av=avma;
   GEN p;
-  new_chunk(2*lg(m)); /*HACK: assume remii use <2*lg(m) space*/
+  new_chunk(lg(a)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
   p=mulii(a,Fp_inv(b,m));
   avma=av;
   return remii(p,m);

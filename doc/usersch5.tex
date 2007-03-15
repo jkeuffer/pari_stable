@@ -1364,6 +1364,9 @@ in $0, 1, \dots p-1$.
 
 \subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
 
+\fun{GEN}{Fp_mul}{GEN a, GEN b, GEN m} returns the product of \kbd{a} by
+\kbd{b} modulo \kbd{m} (smallest non-negative residue). 
+
 \fun{ulong}{Fp_powu}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
 power modulo \kbd{p} (smallest non-negative residue).
 
