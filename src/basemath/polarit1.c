@@ -482,8 +482,6 @@ ZX_deriv(GEN x)
 }
 
 GEN
-FpX_deriv(GEN f, GEN p) { return FpX_red(ZX_deriv(f), p); }
-GEN
 FqX_deriv(GEN f, /*unused*/GEN T, GEN p) {
   (void)T; return FpXX_red(derivpol(f), p);
 }
@@ -493,8 +491,7 @@ long
 FpX_is_squarefree(GEN f, GEN p)
 {
   pari_sp av = avma;
-  GEN z;
-  z = FpX_gcd(f,ZX_deriv(f),p);
+  GEN z = FpX_gcd(f,ZX_deriv(f),p);
   avma = av;
   return lg(z)==3;
 }
@@ -1056,15 +1053,6 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
     for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else
     for (i=2; i<ly;  i++) x[i] = Fl_add(x[i], Fl_mul(c,y[i],p),p);
-}
-
-GEN
-FpX_rand(long d1, long v, GEN p)
-{
-  long i, d = d1+2;
-  GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
-  for (i=2; i<d; i++) gel(y,i) = randomi(p);
-  (void)normalizepol_i(y,d); return y;
 }
 
 /* return a random polynomial in F_q[v], degree < d1 */
