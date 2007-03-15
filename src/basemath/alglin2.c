@@ -2433,7 +2433,7 @@ FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
   }
   else {
     for (i = 1; i <= k; i++)
-      if (signe(z[i])) gel(z,i) = modii(mulii(u,gel(z,i)), p);
+      if (signe(z[i])) gel(z,i) = Fp_mul(u,gel(z,i), p);
   }
 }
 static void

@@ -376,7 +376,7 @@ trace(GEN x, GEN Trq, GEN p)
 {
   long i, l;
   GEN s;
-  if (typ(x) == t_INT) return modii(mulii(x, gel(Trq,1)), p);
+  if (typ(x) == t_INT) return Fp_mul(x, gel(Trq,1), p);
   l = lg(x)-1; if (l == 1) return gen_0;
   x++; s = mulii(gel(x,1), gel(Trq,1));
   for (i=2; i<l; i++)

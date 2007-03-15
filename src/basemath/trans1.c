@@ -1774,7 +1774,7 @@ teich(GEN x)
     z = remii(z, p);
     aux = diviiexact(addsi(-1,q),p1); n = precp(x);
     for (k=1; k<n; k<<=1)
-      z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q))))), q);
+      z = Fp_mul(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q)))), q);
   }
   affii(z, gel(y,4)); avma = av; return y;
 }
