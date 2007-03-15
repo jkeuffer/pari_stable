@@ -82,6 +82,7 @@ BA  9- library function FlxX_resultant() and Flx_FlxY_resultant()
 BA 10- library function FlxY_Flx_div()
 BA 11- library function Flm_transpose()
 BA 12- library function Flx_Fl_add()
+BA 13- library function Flxq_div()
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 

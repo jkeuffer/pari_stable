@@ -1328,9 +1328,9 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
 
 /* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL. */
 GEN
-Flxq_mul(GEN y,GEN x,GEN pol,ulong p)
+Flxq_mul(GEN x,GEN y,GEN pol,ulong p)
 {
-  GEN z = Flx_mul(y,x,p);
+  GEN z = Flx_mul(x,y,p);
   return Flx_rem(z,pol,p);
 }
 
@@ -1424,6 +1424,13 @@ Flxq_inv(GEN x,GEN T,ulong p)
   GEN U = Flxq_invsafe(x, T, p);
   if (!U) pari_err(talker,"non invertible polynomial in Flxq_inv");
   return gerepileuptoleaf(av, U);
+}
+
+GEN
+Flxq_div(GEN x,GEN y,GEN T,ulong p)
+{
+  pari_sp av = avma;
+  return gerepileuptoleaf(av, Flxq_mul(x,Flxq_inv(y,T,p),T,p));
 }
 
 /* generates the list of powers of x of degree 0,1,2,...,l*/
