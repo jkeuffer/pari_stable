@@ -185,7 +185,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  gel(z,dz) = lead? gerepileupto(av, modii(mulii(p1,lead), p)): icopy(p1);
+  gel(z,dz) = lead? gerepileupto(av, Fp_mul(p1,lead, p)): icopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);

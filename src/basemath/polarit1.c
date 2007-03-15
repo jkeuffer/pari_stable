@@ -262,7 +262,7 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   s = Fp_sqrt(D,p);
   if (!s) pari_err(talker,"not a prime in FpX_quad_root");
   u = addis(shifti(p,-1), 1); /* = 1/2 */
-  return modii(mulii(u, subii(s,b)), p);
+  return Fp_mul(u, subii(s,b), p);
 }
 static GEN
 otherroot(GEN x, GEN r, GEN p)
@@ -1575,8 +1575,8 @@ ZpX_liftroot(GEN f, GEN a, GEN p, long e)
     ar = a;
     if (i)
     {
-      W = modii(mulii(Wr,FpX_eval(ZX_deriv(fr),ar,qold)), qold);
-      W = modii(mulii(Wr, subsi(2,W)), qold);
+      W = Fp_mul(Wr, FpX_eval(ZX_deriv(fr),ar,qold), qold);
+      W = Fp_mul(Wr, subsi(2,W), qold);
     }
     Wr = W;
     a = subii(ar, mulii(Wr, FpX_eval(fr, ar,q)));
@@ -1665,7 +1665,7 @@ padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
   long    i, nb, mask;
   qold = q = p; qm1 = gen_1;
   nb = hensel_lift_accel(e, &mask);
-  W = modii(mulii(n,Fp_pow(a,subis(n,1),q)),q);
+  W = Fp_mul(n,Fp_pow(a,subis(n,1),q),q);
   W = Fp_inv(W,q);
   for(i=0;i<nb;i++)
   {
@@ -1674,8 +1674,8 @@ padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
     ar = a;
     if (i)
     {
-      W = modii(mulii(Wr,mulii(n,Fp_pow(ar,subis(n,1),qold))),qold);
-      W = modii(mulii(Wr, subsi(2,W)),qold);
+      W = Fp_mul(Wr, mulii(n,Fp_pow(ar,subis(n,1),qold)),qold);
+      W = Fp_mul(Wr, subsi(2,W),qold);
     }
     Wr = W;
     a = subii(ar, mulii(Wr, subii(Fp_pow(ar,n,q),T)));

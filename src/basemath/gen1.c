@@ -835,7 +835,7 @@ gadd(GEN x, GEN y)
       {
         case t_FRAC: { GEN X = gel(x,1);
           z = cgetg(3, t_INTMOD);
-          p1 = modii(mulii(gel(y,1), Fp_inv(gel(y,2),X)), X);
+          p1 = Fp_div(gel(y,1), gel(y,2), X);
           return add_intmod_same(z, X, p1, gel(x,2));
         }
         case t_COMPLEX: return addRc(x, y);
@@ -1415,7 +1415,7 @@ gmul(GEN x, GEN y)
       switch(ty)
       {
         case t_FRAC: { GEN X = gel(x,1);
-          z = cgetg(3, t_INTMOD); p1 = modii(mulii(gel(y,1), gel(x,2)), X);
+          z = cgetg(3, t_INTMOD); p1 = Fp_mul(gel(y,1), gel(x,2), X);
           return div_intmod_same(z, X, p1, remii(gel(y,2), X)); 
         }
         case t_COMPLEX: return mulRc(x, y);

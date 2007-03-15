@@ -775,8 +775,8 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
       T2 = modii(T2, pa); /* = S_2 Newton sum */
       if (lc)
       {
-        T1 = modii(mulii(lc, T1), pa);
-        T2 = modii(mulii(lc2,T2), pa);
+        T1 = Fp_mul(lc, T1, pa);
+        T2 = Fp_mul(lc2,T2, pa);
       }
       trace1[i] = itou(diviiround(T1, pb));
       trace2[i] = itou(diviiround(T2, pb));
