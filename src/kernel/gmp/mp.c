@@ -1137,14 +1137,14 @@ resmod2n(GEN x, long n)
   { /* strip leading zeroes from result */
     xd--; while (k && !*xd) { k--; xd--; }
     if (!k) return gen_0;
-    ly = k+2; xd++;
+    ly = k+2;
   }
   else
     ly = k+3;
 
   zd = z = cgeti(ly);
   *++zd = evalsigne(1) | evallgefint(ly);
-  for ( ;k; k--) *++zd = *++xd;
+  xd = x+1; for ( ;k; k--) *++zd = *++xd;
   if (hi) *++zd = hi;
   return z;
 }
