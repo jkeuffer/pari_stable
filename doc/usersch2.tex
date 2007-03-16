@@ -659,8 +659,8 @@ the leading terms of $r$ and $x$ have the same sign.
 $+\infty$ when the exact quotient would be a half-integer).
 
 \kbd{<<}, \kbd{>>}: left and right binary shift. By definition,
-\kbd{x<<n}$~=~x * 2^n$ if $n>0$, and $x \b{/} 2^{-n}$ otherwise. Right shift
-is defined by \kbd{x>>n}$~=~$\kbd{x<<(-n)}.
+\kbd{x<<n}$~=~x * 2^n$ if $n>0$, and $\kbd{truncate}(x 2^{-n})$ otherwise.
+Right shift is defined by \kbd{x>>n}$~=~$\kbd{x<<(-n)}.
 
 \point{Priority 2}
 %
