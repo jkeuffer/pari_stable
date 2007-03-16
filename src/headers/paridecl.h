@@ -760,6 +760,7 @@ GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 /* bibli2.c */
 
 GEN     binomial(GEN x, long k);
+GEN     binomialuu(ulong n, ulong k);
 int     cmp_prime_ideal(GEN x, GEN y);
 int     cmp_prime_over_p(GEN x, GEN y);
 int     cmp_vecint(GEN x, GEN y);
@@ -806,6 +807,11 @@ GEN     setunion(GEN x, GEN y);
 GEN     sindexlexsort(GEN x);
 GEN     sindexsort(GEN x);
 GEN     sort(GEN x);
+GEN     stirling(long n, long m, long flag);
+GEN     stirling1(long n, long m);
+GEN     stirling1uu(ulong n, ulong m);
+GEN     stirling2(long n, long m);
+GEN     stirling2uu(ulong n, ulong m);
 long    tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN));
 GEN     vecbinome(long n);
 GEN     vecsort(GEN x, GEN k);

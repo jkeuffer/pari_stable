@@ -521,6 +521,17 @@ polrecip_i(GEN x)
 /*******************************************************************/
 
 GEN
+binomialuu(ulong n, ulong k)
+{
+  pari_sp ltop=avma;
+  GEN z;
+  k = min(k,n-k);
+  if (!k) return gen_1;
+  z=diviiexact(seq_umul(n-k+1, n), seq_umul(1UL, k));
+  return gerepileuptoint(ltop,z);
+}
+
+GEN
 binomial(GEN n, long k)
 {
   long i;
@@ -554,8 +565,8 @@ binomial(GEN n, long k)
     /* k > 1 */
     if (lgefint(n) == 3 && signe(n) > 0)
     {
-      ulong N = itou(n);
-      y = seq_umul(N-(ulong)k+1, N);
+      y = binomialuu(itou(n),(ulong)k);
+      return gerepileupto(av, y);
     }
     else
     {
@@ -589,6 +600,92 @@ vecbinome(long n)
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
   return C - 1;
+}
+/********************************************************************/
+/**                                                                **/
+/**                  STIRLING NUMBERS                              **/
+/**                                                                **/
+/********************************************************************/
+
+/** 
+Stirling number of the 2nd kind. The number of ways of partitioning
+a set of n elements into m non-empty subsets.
+*/
+
+GEN
+stirling2uu(ulong n, ulong m)
+{
+  pari_sp av = avma, lim = stack_lim(av, 2);
+  GEN p1 = gen_0;
+  GEN p2, bmk;
+  ulong k;
+  if (n<m) return gen_0;
+  else if (n==m) return gen_1;
+  for (k = 0; k <= m; ++k)
+  {
+    bmk = k ? diviuexact(mului(m-k+1, bmk), k) : gen_1;
+    p2  = mulii(bmk, powuu(k, n));
+    p1  = ((m-k)&1) ? subii(p1,p2) : addii(p1,p2);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"stirling2uu");
+      gerepileall(av, 2, &p2, &bmk);
+    }
+  }
+  return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
+}
+
+GEN
+stirling2(long n, long m)
+{
+  if ((n < 0) || (m < 0))
+    pari_err(talker, "Negative arguments in stirling2(%ld,%ld)",n,m);
+  return stirling2uu((ulong)n,(ulong)m);
+}
+
+/** 
+Stirling number of the first kind. Up to the sign, the number of
+permutations of n symbols which have exactly m cycles.
+*/
+GEN
+stirling1uu(ulong n, ulong m)
+{
+  pari_sp ltop=avma;
+  ulong k;
+  GEN p1 = gen_0;
+  if (n<m) return gen_0;
+  else if (n==m) return gen_1;
+  for (k = 0; k <= n-m; ++k)
+  {
+    GEN p2 = mulii(mulii(binomialuu(n-1+k, n-m+k), binomialuu(2*n-m, n-m-k)),
+                  stirling2uu(n-m+k, k));
+    if(k&1)
+      p1 = subii(p1,p2);
+    else
+      p1 = addii(p1,p2);
+    p1 = gerepileuptoint(ltop, p1);
+  }
+  return p1;
+}
+
+GEN
+stirling1(long n, long m)
+{
+  if (n<0 || m<0)
+    pari_err(talker, "Negative arguments in stirling");
+  return stirling1uu((ulong)n,(ulong)m);
+}
+
+GEN
+stirling(long n, long m, long flag)
+{
+  switch (flag)
+  {
+    case 1: return stirling1(n,m);
+    case 2: return stirling2(n,m);
+    default: pari_err(flagerr,"stirling");
+  }
+  return NULL; /*NOT REACHED*/
 }
 
 /********************************************************************/

@@ -2624,6 +2624,15 @@ positive divisors of $|x|$. $x$ and $k$ must be of type integer.
 \syn{sumdiv}{x} (= \funs{sigma}{x}) or \funs{gsumdivk}{x,k} (=
 \funs{sigma}{x,k}), where $k$ is a C long integer.
 
+\subsecidx{stirling}$(n,k,\{\fl=1\})$: \idx{stirling number}
+of first kind $s(n,k)$ ($\fl=1$, default) or of the second kind 
+$S(n,k)$ (\fl=2).
+
+\syn{stirling}{n,k,\fl}, where $n$ and $k$ must be a \kbd{long}.
+Also available are
+\tet{stirling1}$(n,k)$ (for $\fl=1$) and
+\tet{stirling2}$(n,k)$ (for $\fl=2$).
+
 \subsecidx{sqrtint}$(x)$: integer square root of $x$, which must be a
 non-negative integer. The result is non-negative and rounded towards zero.
 
