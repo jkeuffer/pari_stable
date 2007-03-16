@@ -1396,7 +1396,8 @@ resmod2n(GEN x, long n)
   else
     ly = k+3;
 
-  z = utoipos(ly); zd = z+1;
+  zd = z = cgeti(ly);
+  *++zd = evalsigne(1) | evallgefint(ly);
   if (hi) *++zd = hi;
   for ( ;k; k--) *++zd = *++xd;
   return z;
