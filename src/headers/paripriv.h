@@ -777,7 +777,6 @@ GEN     FpXQ_sqrtl(GEN a, GEN l, GEN T, GEN p, GEN q, long e, GEN r, GEN y, GEN 
 GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
-GEN     FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r);
 GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
 GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
 GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);

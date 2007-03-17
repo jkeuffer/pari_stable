@@ -231,6 +231,23 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   *pr = rem; return z-2;
 }
 
+GEN
+FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
+{
+  long l = lg(a), i;
+  GEN z = cgetg(l-1, t_POL), a0, z0;
+  z[1] = evalsigne(1) | evalvarn(0);
+  a0 = a + l-1;
+  z0 = z + l-2; *z0 = *a0--;
+  for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
+  {
+    GEN t = addii(gel(a0--,0), Fp_mul(x, gel(z0--,0), p));
+    *z0 = (long)t;
+  }
+  if (r) *r = addii(gel(a0,0), Fp_mul(x, gel(z0,0), p));
+  return z;
+}
+
 long
 FpX_valrem(GEN x, GEN t, GEN p, GEN *py)
 {

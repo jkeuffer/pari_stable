@@ -58,6 +58,7 @@ BA 34- [Configure] spectacular failure to recognize gcc under some locales.
        x^8+6*x^6-x^4+54*x^2+25 due to incorrect "skipfirst" ]   [#542]
    36- typo in resmod2n (both kernels) [#546]
    37- At \p28, 0.1 - 0.1 would return 0.E-30 instead of 0.E-29
+BA 38- missing prototype for documented function FpX_div_by_X_x
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
