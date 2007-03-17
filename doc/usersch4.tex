@@ -1165,11 +1165,6 @@ represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
 the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be
 \typ{INT}s, satisfying the inequality $0 \le \kbd{z[2]} < \kbd{z[1]}$.
 
-It is good practice to keep the modulus object on the heap, so that new
-\typ{INTMOD}s resulting from operations can point at this common object,
-instead of carrying along their own copies of it on the stack. The library
-functions implement this practice almost by default.
-
 \subsec{Type \typ{FRAC} (rational number)}:%
 \kbdsidx{t_FRAC}\sidx{rational number}
 \kbd{z[1]} points to the numerator $n$, and \kbd{z[2]} to the denominator
@@ -1178,9 +1173,12 @@ $(n,d) = 1$ (see \tet{gred_frac2}).
 
 \subsec{Type \typ{COMPLEX} (complex number)}:%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
-\kbd{z[1]} points to the real part, and \kbd{z[2]} to the imaginary part. A
-priori \kbd{z[1]} and \kbd{z[2]} can be of any type, but only certain types
-are useful and make sense (mostly \typ{INT}, \typ{REAL} and \typ{FRAC}).
+\kbd{z[1]} points to the real part, and \kbd{z[2]} to the imaginary part.
+The components \kbd{z[1]} and \kbd{z[2]} must be of type
+\typ{INT}, \typ{REAL} or \typ{FRAC}. For historical reasons \typ{INTMOD}
+and \typ{PADIC} are also allowed (the latter for $p = 2$ or
+congruent to 3 mod 4 only), but one should rather use the more general 
+\typ{POLMOD} construction.
 
 \subsec{Type \typ{PADIC} ($p$-adic numbers)}:%
 \sidx{p-adic number}\kbdsidx{t_PADIC} this type has a second codeword
