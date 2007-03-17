@@ -629,7 +629,7 @@ stirling2uu(ulong n, ulong m)
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"stirling2uu");
-      gerepileall(av, 2, &p2, &bmk);
+      gerepileall(av, 2, &p1, &bmk);
     }
   }
   return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
