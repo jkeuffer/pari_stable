@@ -17,7 +17,7 @@
 ? A=intmellininv(s=2,4,gamma(s)^3);
 ? tab=intfuncinit(t=[-oo,4.5],[oo,4.5],gamma(2+I*t)^3,1);
 ? intmellininvshort(2,4,tab)-A
--3.072350107766755152 E-97 + 9.907178318246741303 E-100*I
+-3.072350107766755152 E-97 + 9.889529779727499027 E-100*I
 ? f(x)=1/(exp(x)-1)-exp(-x)/x
 ? F=truncate(f(t+O(t^7)));
 ? g(x)=if(x>1e-18,f(x),subst(F,t,x))
@@ -28,7 +28,7 @@
 ? intnum(x=0,1,1/sqrt(x))-2
 -1.9262844386075338042 E-59
 ? intnum(x=[0,-1/2],1,1/sqrt(x))-2
-0.E-96
+0.E-95
 ? intnum(x=0,oo,sin(x)/x)-Pi/2
 20.778594771898826028
 ? intnum(x=0,[oo,1],sin(x)/x)-Pi/2
@@ -49,7 +49,7 @@
 ? intnum(x=0,oo,sin(x)^3*exp(-x),tab)-0.3
 0.E-96
 ? intnum(x=0,[oo,-I],x^2*sin(x))+2
-0.E-96
+0.E-95
 ? tab=intnuminit(-1,1);
 ? intnum(x=-1,1,intnum(y=-sqrt(1-x^2),sqrt(1-x^2),x^2+y^2,tab),tab)-Pi/2
 -1.7790370147830353644 E-94
@@ -85,5 +85,5 @@
 ? a-b
 -1.3906711615670008645 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 12656
+Total time spent: 14358
 ? \q
