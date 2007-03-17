@@ -281,7 +281,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   else
   {
     i = 2; while (i < lx && x[i] == y[i]) i++;
-    if (i==lx) return real_0_bit(ey - bit_accuracy(lx));
+    if (i==lx) return real_0_bit(ey+1 - bit_accuracy(lx));
     f2 = ((ulong)y[i] > (ulong)x[i]);
   }
   /* result is non-zero. f2 = (y > x) */

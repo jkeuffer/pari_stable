@@ -7,9 +7,9 @@
 ? intnum(x=1,[1],1/(1+x^2))-Pi/4
 0.E-19
 ? intnum(x=-0.5,0.5,1/sqrt(1-x^2))-Pi/3
-0.E-19
+0.E-18
 ? intnum(x=0,[[1],-I],sin(x)/x)-Pi/2
-0.E-19
+0.E-18
 ? \p38
    realprecision = 38 significant digits
 ? prod(k=1,10,1+1/k!)
@@ -41,5 +41,5 @@
 ? getheap
 [19, 183]
 ? print("Total time spent: ",gettime);
-Total time spent: 28
+Total time spent: 20
 ? \q
