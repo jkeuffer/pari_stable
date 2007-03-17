@@ -377,7 +377,7 @@ long
 FpX_is_squarefree(GEN f, GEN p)
 {
   pari_sp av = avma;
-  GEN z = FpX_gcd(f,FpX_deriv(f),p);
+  GEN z = FpX_gcd(f,FpX_deriv(f,p),p);
   avma = av;
   return degpol(z)==0;
 }
