@@ -1722,7 +1722,14 @@ quotient of the \kbd{FpX}~\kbd{A} by $(X - \kbd{a})$, and sets \kbd{r} to the
 remainder $\kbd{A}(\kbd{a})$.
 
 \fun{GEN}{FpX_rem}{GEN x, GEN y, GEN p} returns the remainder \kbd{x} mod
-\kbd{y}
+\kbd{y}.
+
+\fun{long}{FpX_valrem}{GEN x, GEN t, GEN p, GEN *r} The arguments \kbd{x} and
+\kbd{e} being non-zero \kbd{FpX} returns the highest exponent $e$ such that
+$\kbd{t}^{e}$ divides~\kbd{x}. The quotient $\kbd{x}/\kbd{t}^{e}$ is returned
+in~\kbd{*r}. In particular, if \kbd{t} is irreducible, this returns the
+valuation at \kbd{t} of~\kbd{x}, and \kbd{*r} is the prime-to-\kbd{t} part
+of~\kbd{x}.
 
 \fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
 greatest common divisor of $x$  and $y$.

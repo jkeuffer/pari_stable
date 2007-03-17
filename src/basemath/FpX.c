@@ -231,6 +231,23 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   *pr = rem; return z-2;
 }
 
+long
+FpX_valrem(GEN x, GEN t, GEN p, GEN *py)
+{
+  pari_sp av=avma;
+  long k;
+  GEN r, y;
+
+  for (k=0; ; k++)
+  {
+    y = FpX_divrem(x, t, p, &r);
+    if (signe(r)) break;
+    x = y;
+  }
+  *py = gerepilecopy(av,x); 
+  return k;
+}
+
 /* x and y in Z[X], return lift(gcd(x mod p, y mod p)) */
 GEN
 FpX_gcd(GEN x, GEN y, GEN p)

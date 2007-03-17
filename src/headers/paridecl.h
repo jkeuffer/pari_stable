@@ -121,6 +121,7 @@ GEN     FpX_rescale(GEN P, GEN h, GEN p);
 GEN     FpX_resultant(GEN a, GEN b, GEN p);
 GEN     FpX_sqr(GEN x, GEN p);
 GEN     FpX_sub(GEN x, GEN y, GEN p);
+long    FpX_valrem(GEN x0, GEN t, GEN p, GEN *py);
 GEN     FpXV_prod(GEN V, GEN p);
 
 /* alglin1.c */

@@ -85,6 +85,7 @@ BA 11- library function Flm_transpose()
 BA 12- library function Flx_Fl_add()
 BA 13- library function Flxq_div()
 BA 14- function stirling (Stirling numbers of 1st and 2nd kind)
+BA 15- library function FpX_valrem()
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 

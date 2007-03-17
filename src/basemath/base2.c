@@ -936,21 +936,6 @@ get_partial_order_as_pols(GEN p, GEN f, GEN *d)
   return z;
 }
 
-long
-FpX_val(GEN x0, GEN t, GEN p, GEN *py)
-{
-  long k;
-  GEN r, y, x = x0;
-
-  for (k=0; ; k++)
-  {
-    y = FpX_divrem(x, t, p, &r);
-    if (signe(r)) break;
-    x = y;
-  }
-  *py = x; return k;
-}
-
 #if 0
 /* e in Qp, f i Zp. Return r = e mod (f, pk) */
 static GEN
@@ -995,7 +980,7 @@ Decomp(decomp_t *S, long flag)
     if (DEBUGLEVEL>5) fprintferr(", parameters: %Z^%ld\n  f = %Z",p, r, S->f);
     fprintferr("\n");
   }
-  if (!FpX_val(S->chi, S->nu, p, &b1))
+  if (!FpX_valrem(S->chi, S->nu, p, &b1))
     pari_err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
   b2 = FpX_div(S->chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);

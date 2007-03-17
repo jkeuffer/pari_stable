@@ -562,7 +562,6 @@ GEN     primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
 /* base2.c */
 
-long    FpX_val(GEN x0, GEN t, GEN p, GEN *py);
 GEN     fast_respm(GEN f, GEN g, GEN p, long M);
 GEN     gen_if_principal(GEN bnf, GEN x);
 int     nfissquarefree(GEN nf, GEN x);
