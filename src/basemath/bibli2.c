@@ -617,20 +617,28 @@ stirling2uu(ulong n, ulong m)
 {
   pari_sp av = avma, lim = stack_lim(av, 2);
   GEN p1 = gen_0;
-  GEN p2, bmk;
+  GEN p2, bmk, kn, mkn;
   ulong k;
-  if (n<m) return gen_0;
-  else if (n==m) return gen_1;
-  for (k = 0; k <= m; ++k)
+  if (m==0 || m>n) return gen_0;
+  else if (m==0 || m==n) return gen_1;
+  for (k = 0; k <= ((m-1)>>1); ++k)
   {
     bmk = k ? diviuexact(mului(m-k+1, bmk), k) : gen_1;
-    p2  = mulii(bmk, powuu(k, n));
-    p1  = ((m-k)&1) ? subii(p1,p2) : addii(p1,p2);
+    kn  = powuu(k, n); mkn = powuu(m-k, n);
+    p2  = (m&1) ? subii(mkn,kn) : addii(mkn,kn);
+    p2  = mulii(bmk, p2);
+    p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"stirling2uu");
       gerepileall(av, 2, &p1, &bmk);
     }
+  }
+  if ((m&1)==0)
+  { /*k=m/2*/
+    bmk = diviuexact(mului(k+1, bmk), k);
+    p2  = mulii(bmk, powuu(k,n)); 
+    p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
   }
   return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
 }
