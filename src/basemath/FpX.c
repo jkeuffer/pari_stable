@@ -373,6 +373,15 @@ FpX_deriv(GEN x, GEN p)
    return FpX_red(z, p);
 }
 
+long
+FpX_is_squarefree(GEN f, GEN p)
+{
+  pari_sp av = avma;
+  GEN z = FpX_gcd(f,FpX_deriv(f),p);
+  avma = av;
+  return degpol(z)==0;
+}
+
 GEN
 FpX_rand(long d1, long v, GEN p)
 {

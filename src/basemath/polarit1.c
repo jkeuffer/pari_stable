@@ -486,16 +486,6 @@ FqX_deriv(GEN f, /*unused*/GEN T, GEN p) {
   (void)T; return FpXX_red(derivpol(f), p);
 }
 
-/* f in ZZ[X] and p a prime number. */
-long
-FpX_is_squarefree(GEN f, GEN p)
-{
-  pari_sp av = avma;
-  GEN z = FpX_gcd(f,ZX_deriv(f),p);
-  avma = av;
-  return lg(z)==3;
-}
-
 /* product of terms of degree 1 in factorization of f */
 static GEN
 FpX_split_part(GEN f, GEN p)
