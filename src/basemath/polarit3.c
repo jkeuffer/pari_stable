@@ -2009,8 +2009,14 @@ GEN
 FpXQ_minpoly(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
-  GEN R=FpXQ_charpoly(x, T, p);
-  GEN G=FpX_gcd(R,derivpol(R),p);
+  GEN G,R=FpXQ_charpoly(x, T, p);
+  GEN dR=FpX_deriv(R,p);
+  while (signe(dR)==0)
+  {
+    R  = poldeflate_i(R,itos(p));
+    dR = FpX_deriv(R,p);
+  } 
+  G=FpX_gcd(R,dR,p);
   G=FpX_normalize(G,p);
   G=FpX_div(R,G,p);
   return gerepileupto(ltop,G);
