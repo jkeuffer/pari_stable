@@ -51,6 +51,7 @@ GEN     Flx_neg(GEN x, ulong p);
 GEN     Flx_neg_inplace(GEN x, ulong p);
 GEN     Flx_normalize(GEN z, ulong p);
 GEN     Flx_pow(GEN x, long n, ulong p);
+GEN     Flx_rand(long d1, long v, ulong p);
 GEN     Flx_recip(GEN x);
 GEN     Flx_red(GEN z, ulong p);
 GEN     Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p);

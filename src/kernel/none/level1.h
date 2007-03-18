@@ -170,6 +170,7 @@ GEN    subir(GEN x, GEN y);
 GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
+ulong  udivui_rem(ulong x, GEN y, ulong *rem);
 ulong  umodui(ulong x, GEN y);
 GEN    utoi(ulong x);
 GEN    utoineg(ulong x);
@@ -815,7 +816,7 @@ dvmdss(long x, long y, GEN *z)
   *z = stoi(rem); return q;
 }
 
-INLINE long
+INLINE ulong
 udivui_rem(ulong x, GEN y, ulong *rem)
 {
   long q, s = signe(y);
@@ -923,18 +924,15 @@ modis(GEN x, long y)
 INLINE ulong
 umodui(ulong x, GEN y)
 {
-  LOCAL_HIREMAINDER;
   if (!signe(y)) pari_err(gdiver);
   if (!x || lgefint(y) > 3) return x;
-  hiremainder = 0; (void)divll(x, y[2]); return hiremainder;
+  return x % (ulong)y[2];
 }
 
 INLINE GEN
 remsi(long x, GEN y)
 {
-  long rem;
-  const pari_sp av=avma; (void)divsi_rem(x,y, &rem); avma=av;
-  return stoi(rem);
+  long rem; (void)sdivsi_rem(x,y, &rem); return stoi(rem);
 }
 
 INLINE GEN

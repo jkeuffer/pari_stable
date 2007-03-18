@@ -72,7 +72,7 @@ BA  6- FpX_Fp_add() is now clean.
 BA  7- rename ZY_ZXY_resultant -> ZX_ZXY_resultant, ZY_ZXY_rnfequation ->
        ZX_ZXY_rnfequation and FpY_FpXY_resultant -> FpX_FpXY_resultant.
 BA  8- FpV_polint() now take a variable number as last parameter.
-    9- use Miller-Rabin-like improvement in znprimroot
+    9- use Miller-Rabin-like improvement in znprimroot and FpXQ_gener
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations
@@ -90,6 +90,7 @@ BA 12- library function Flx_Fl_add()
 BA 13- library function Flxq_div()
 BA 14- function stirling (Stirling numbers of 1st and 2nd kind)
 BA 15- library function FpX_valrem()
+   16- library function Flxq_gener
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 

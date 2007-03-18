@@ -1070,7 +1070,10 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       /* Q has degree 1 */
       if (!g)
       {
+        GEN Podd;
         ord = Z_factor( utoipos(q-1) );
+        Podd = gel(ord,1);
+        Podd = vecslice(Podd, 2, lg(Podd)-1); /* remove 2 */
         g = pgener_Fp_local(gq, gel(ord,1)); /* primitive root */
       }
       modpr = zkmodprinit(nf, Q);

@@ -245,6 +245,15 @@ Flx_red(GEN z, ulong p)
 }
 
 GEN
+Flx_rand(long d1, long v, ulong p)
+{
+  long i, d = d1+2;
+  GEN y = cgetg(d,t_VECSMALL); y[1] = evalsigne(1) | evalvarn(v);
+  for (i=2; i<d; i++) y[i] = random_Fl(p);
+  return Flx_renormalize(y,d);
+}
+
+GEN
 Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;

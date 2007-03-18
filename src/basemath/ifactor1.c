@@ -515,7 +515,7 @@ BSW_psp(GEN N)
 /***********************************************************************/
 /* Brillhart, Lehmer, Selfridge test (Crandall & Pomerance, Th 4.1.5)
  * N^(1/3) <= f fully factored, f | N-1 */
-int
+static int
 BLS_test(GEN N, GEN f)
 {
   GEN c1, c2, r, q;

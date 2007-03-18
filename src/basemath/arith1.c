@@ -173,6 +173,17 @@ ggener(GEN m)
   return garith_proto(gener,m,1);
 }
 
+int
+is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
+{
+  long i;
+  if (kross(x, p) >= 0) return 0;
+  for (i=lg(L)-1; i; i--)
+  {
+    if (Fl_pow(x, (ulong)L[i], p) == p_1) return 0;
+  }
+  return 1;
+}
 /* assume p prime */
 ulong
 pgener_Fl_local(ulong p, GEN L0)
@@ -185,7 +196,9 @@ pgener_Fl_local(ulong p, GEN L0)
   if (p == 2) return 1;
 
   if (!L0) {
-    L0 = L = gel(factoru(q), 1);
+    ulong t;
+    (void)u_lvalrem(q, 2, &t);
+    L0 = L = gel(factoru(t), 1);
     k = lg(L)-1;
   } else {
     k = lg(L0)-1;
@@ -193,20 +206,24 @@ pgener_Fl_local(ulong p, GEN L0)
   }
 
   for (i=1; i<=k; i++) L[i] = q / (ulong)L0[i];
-  for (x=2;;x++)
-  {
-    if (kross(x, p) >= 0) continue;
-    for (i=k; i; i--)
-    {
-      ulong l = (ulong)L[i];
-      if (l > 2 && Fl_pow(x, l, p) == p_1) break; 
-    }
-    if (!i) break;
-  }
+  for (x=2;;x++) { if (is_gener_Fl(x,p,p_1,L)) break; }
   avma = av; return x;
 }
 ulong
 pgener_Fl(ulong p) { return pgener_Fl_local(p, NULL); }
+
+/* L[i] = set of (p-1)/2l, l ODD prime divisor of l-1 (p=2 can be included,
+ * but wasteful) */
+int
+is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
+{
+  long i, t = lgefint(x)==3? krosi(x[2], p): kronecker(x, p);
+  if (t >= 0) return 1;
+  for (i = lg(L)-1; i; i--) {
+    if (equalii(Fp_pow(x, gel(L,i), p), p_1)) return 0;
+  }
+  return 1;
+}
 
 /* assume p prime, return a generator of all L[i]-Sylows in F_p^*. */
 GEN
@@ -226,7 +243,9 @@ pgener_Fp_local(GEN p, GEN L0)
   p_1 = subis(p,1);
   q = shifti(p_1, -1);
   if (!L0) {
-    L0 = L = gel(Z_factor(q), 1);
+    GEN t;
+    (void)Z_lvalrem(q, 2, &t);
+    L0 = L = gel(Z_factor(t), 1);
     k = lg(L)-1;
   } else {
     k = lg(L0)-1;
@@ -235,15 +254,7 @@ pgener_Fp_local(GEN p, GEN L0)
 
   for (i=1; i<=k; i++) gel(L,i) = diviiexact(q, gel(L0,i));
   x = utoipos(2);
-  for (;; x[2]++)
-  {
-    if (krosi(x[2], p) >= 0) continue;
-    for (i = k; i; i--) {
-      GEN l = gel(L,i);
-      if (!equaliu(l,2) && equalii(Fp_pow(x, l, p), p_1)) break;
-    }
-    if (!i) break;
-  }
+  for (;; x[2]++) { if (is_gener_Fp(x, p, p_1, L)) break; }
   avma = av0; return utoipos((ulong)x[2]);
 }
 

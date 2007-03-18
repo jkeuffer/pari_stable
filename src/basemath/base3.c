@@ -1497,24 +1497,98 @@ makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN v, GEN gen)
 }
 
 GEN
-FpXQ_gener(GEN T, GEN p)
+Flxq_gener(GEN T, ulong p)
 {
-  long i,j, k, vT = varn(T), f = degpol(T);
-  GEN g, L, pf_1 = subis(powiu(p, f), 1);
+  long i, j, vT = varn(T), f = degpol(T);
+  ulong p_1 = p - 1;
+  GEN g, L, L2, q = diviuexact(subis(powuu(p, f), 1), p_1);
   pari_sp av0 = avma, av;
 
-  L = gel(Z_factor(pf_1),1);
-  k = lg(L)-1;
-
-  for (i=1; i<=k; i++) gel(L,i) = diviiexact(pf_1, gel(L,i));
+  L = cgetg(1, t_VECSMALL);
+  if (p > 3)
+  {
+    ulong t;
+    (void)u_lvalrem(p_1, 2, &t);
+    L = gel(factoru(t),1);
+    for (i=lg(L)-1; i; i--) L[i] = p_1 / L[i];
+  }
+  L2 = gel(Z_factor(q),1);
+  for (i = j = 1; i < lg(L2); i++) 
+  {
+    if (umodui(p_1, gel(L2,i)) == 0) continue;
+    gel(L2,j++) = diviiexact(q, gel(L2,i));
+  }
+  setlg(L2, j);
   for (av = avma;; avma = av)
   {
+    ulong RES;
+    GEN tt;
+    g = Flx_rand(f, vT, p);
+    if (degpol(g) < 1) continue;
+    if (p > 2)
+    {
+      ulong t;
+      tt = Flxq_pow(g, q, T, p); t = tt[2];
+      if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
+      tt = Flxq_pow(g, utoi(p_1>>1), T, p);
+      RES = p_1;
+    } else {
+      tt = Flxq_pow(g, utoi(p_1), T, p);
+      RES = 1;
+    }
+    for (i = 1; i < j; i++)
+    {
+      GEN a = Flxq_pow(tt, gel(L2,i), T, p);
+      if (!degpol(a) && a[2] == RES) break;
+    }
+    if (i == j) break;
+  }
+  return gerepilecopy(av0, g);
+}
+
+GEN
+FpXQ_gener(GEN T, GEN p)
+{
+  long i, j, vT = varn(T), f = degpol(T);
+  GEN g, L, L2, p_1, q;
+  pari_sp av0 = avma, av;
+
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (ulong)p[2];
+    g = Flxq_gener(ZX_to_Flx(T, pp), pp);
+    return gerepileupto(av0, Flx_to_ZX(g));
+  }
+  p_1 = subis(p,1);
+  q = diviiexact(subis(powiu(p, f), 1), p_1);
+
+  L = NULL;
+  (void)Z_lvalrem(p_1, 2, &L);
+  L = gel(Z_factor(L),1);
+  for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
+  L2 = gel(Z_factor(q),1);
+  for (i = j = 1; i < lg(L2); i++) 
+  {
+    if (remii(p_1, gel(L2,i)) == gen_0) continue;
+    gel(L2,j++) = diviiexact(q, gel(L2,i));
+  }
+  setlg(L2, j);
+  for (av = avma;; avma = av)
+  {
+    GEN t;
     g = FpX_rand(f, vT, p);
     if (degpol(g) < 1) continue;
-    for (j=1; j<=k; j++)
-      if (gcmp1(FpXQ_pow(g, gel(L,j), T, p))) break;
-    if (j > k) return gerepilecopy(av0, g);
+    t = constant_term(FpXQ_pow(g, q, T, p));
+    if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
+    t = FpXQ_pow(g, shifti(p_1,-1), T, p);
+    for (i = 1; i < j; i++)
+    {
+      GEN a = FpXQ_pow(t, gel(L2,i), T, p);
+      if (!degpol(a) && equalii(gel(a,2), p_1)) break;
+    }
+    if (i == j) break;
   }
+  return gerepilecopy(av0, g);
 }
 
 /* Given an ideal pr^ep, and an integral ideal x (in HNF form) compute a list

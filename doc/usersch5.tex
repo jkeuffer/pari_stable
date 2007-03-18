@@ -1422,6 +1422,9 @@ primes dividing $p - 1$, returns an integer $x$ which is a generator of the
 $\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,
 $x^{(p-1)/\ell} \neq 1$ for all such $\ell$. In particular, returns
 \kbd{pgener\_Fp(p)} if \kbd{L} contains all primes dividing $p - 1$.
+It is not necessary, and in fact slightly inefficient, to include $\ell=2$,
+since 2 is treated separately in any case, i.e. the generator
+obtained is never a square.
 
 \subsec{Miscellaneous functions}
 
@@ -1908,6 +1911,10 @@ of \kbd{x}
 
 \fun{GEN}{FpXQ_norm}{GEN x, GEN T, GEN p} returns the norm of \kbd{x}
 
+\fun{GEN}{FpXQ_gener}{GEN T, GEN p) returns a primitive root modulo
+$(T,p)$. $T$ is an \kbd{FpX} assumed to be irreducible modulo the prime
+$p$.
+
 \fun{GEN}{FpXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{FpXQ}s.
 
@@ -2179,6 +2186,9 @@ collecting garbage.
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
 
+\fun{GEN}{Flx_rand}{long d, long v, ulong p} returns a random \kbd{Flx}
+in variable \kbd{v}, of degree less than~\kbd{d}.
+
 \fun{GEN}{Flx_recip}{GEN x}, returns the reciprocal polynomial
 
 \fun{ulong}{Flx_resultant}{GEN a, GEN b, ulong p}, returns the resultant
@@ -2245,6 +2255,10 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
+
+\fun{GEN}{Flxq_gener}{GEN T, ulong p) returns a primitive root modulo
+$(T,p)$. $T$ is an \kbd{Flx} assumed to be irreducible modulo the prime
+$p$.
 
 \subsec{\kbd{FlxX}}. See \kbd{FpXX} operations.
 

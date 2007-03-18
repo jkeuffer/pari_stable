@@ -542,6 +542,8 @@ GEN     Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C);
 GEN     bestappr_mod(GEN x, GEN A, GEN B);
 long    hilii(GEN x, GEN y, GEN p);
 long    krouu_s(ulong x, ulong y, long s);
+int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
+int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 
 /* arith2.c */
 
