@@ -178,7 +178,8 @@ ulong
 pgener_Fl_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
-  const ulong q = p - 1;
+  const ulong p_1 = p - 1;
+  const ulong q = p_1 >>1;
   long i, x, k ;
   GEN L;
   if (p == 2) return 1;
@@ -193,12 +194,15 @@ pgener_Fl_local(ulong p, GEN L0)
 
   for (i=1; i<=k; i++) L[i] = q / (ulong)L0[i];
   for (x=2;;x++)
-    if (x % p)
+  {
+    if (kross(x, p) >= 0) continue;
+    for (i=k; i; i--)
     {
-      for (i=k; i; i--)
-	if (Fl_pow(x, (ulong)L[i], p) == 1) break;
-      if (!i) break;
+      ulong l = (ulong)L[i];
+      if (l > 2 && Fl_pow(x, l, p) == p_1) break; 
     }
+    if (!i) break;
+  }
   avma = av; return x;
 }
 ulong
@@ -210,7 +214,7 @@ pgener_Fp_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
   long k, i;
-  GEN x, q, L;
+  GEN x, q, p_1, L;
   if (lgefint(p) == 3)
   {
     ulong z;
@@ -219,8 +223,8 @@ pgener_Fp_local(GEN p, GEN L0)
     z = pgener_Fl_local((ulong)p[2], L0);
     avma = av0; return utoipos(z);
   }
-
-  q = subis(p, 1);
+  p_1 = subis(p,1);
+  q = shifti(p_1, -1);
   if (!L0) {
     L0 = L = gel(Z_factor(q), 1);
     k = lg(L)-1;
@@ -233,11 +237,10 @@ pgener_Fp_local(GEN p, GEN L0)
   x = utoipos(2);
   for (;; x[2]++)
   {
-    GEN d = gcdii(p,x);
-    if (!is_pm1(d)) continue;
+    if (krosi(x[2], p) >= 0) continue;
     for (i = k; i; i--) {
-      GEN e = Fp_pow(x, gel(L,i), p);
-      if (is_pm1(e)) break;
+      GEN l = gel(L,i);
+      if (!equaliu(l,2) && equalii(Fp_pow(x, l, p), p_1)) break;
     }
     if (!i) break;
   }
