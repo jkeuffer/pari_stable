@@ -513,6 +513,19 @@ BSW_psp(GEN N)
 /**                        P-1 primality test                         **/
 /** Crude implementation  BA 2000Apr21                                **/
 /***********************************************************************/
+/* Brillhart, Lehmer, Selfridge test (Crandall & Pomerance, Th 4.1.5)
+ * N^(1/3) <= f fully factored, f | N-1 */
+int
+BLS_test(GEN N, GEN f)
+{
+  GEN c1, c2, r, q;
+  if (cmpii(sqri(f), N) < 0) return 1; /* Pocklington case */
+  q = dvmdii(N, f, &r);
+  if (!is_pm1(r)) return 0;
+  c2 = dvmdii(q, f, &c1);
+  if (Z_issquare(subii(c2, shifti(c1,2)))) return 0;
+  return 1;
+}
 
 /*assume n>=2*/
 static ulong
@@ -554,25 +567,18 @@ plisprime(GEN N, long flag)
     N = gel(N,1); t = typ(N);
   }
   if (t != t_INT) pari_err(arither1);
-  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
-
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
+  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
   N = absi(N);
   if (!F)
   {
     GEN cbrtN = gsqrtn(N, utoi(3), NULL, nbits2prec((expi(N)+2)/3));
-    GEN N_1 = addis(N,-1), f, q, r, c1, c2;
+    GEN N_1 = addis(N,-1), f;
     F = Z_factor_limit(N_1, sqri(floorr(cbrtN)));
     f = factorback(F, NULL); F = gel(F,1);
-    if (!equalii(f, N_1) && cmpii(sqri(f), N) < 0)
-    { /* N^(1/3) <= f < N^(1/2) */
-      q = dvmdii(N, f, &r);
-      if (!is_pm1(r)) { avma = ltop; return gen_0; }
-      c2 = dvmdii(q, f, &c1);
-      if (Z_issquare(subii(c2, shifti(c1,2)))) { avma=ltop; return gen_0; }
-    }
+    if (!equalii(f, N_1) && !BLS_test(N,f)) { avma = ltop; return gen_0; }
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
   C = cgetg(4,t_MAT); l = lg(F);
@@ -600,6 +606,31 @@ plisprime(GEN N, long flag)
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
 }
+
+/* assume x a BSW pseudoprime */
+int
+BSW_isprime(GEN N)
+{
+  pari_sp av = avma;
+  long l, res;
+  GEN fa, P, F, p, N_1;
+
+  if (BSW_isprime_small(N)) return 1;
+  N_1 = subis(N,1); fa = auxdecomp(N_1, 1<<19);
+  l = lg(gel(fa,1))-1; p = gcoeff(fa,l,1);
+  F = diviiexact(N_1,  powgi(p, gcoeff(fa,l,2)));
+  P = gel(fa,1);
+  /* N-1 = F U, F factored, U possibly composite */
+  if (cmpii(gpowgs(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
+    res = BLS_test(N, F)
+          && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
+  else if (BSW_psp(p)) /* smooth */
+    res = isprimeSelfridge(mkvec2(N,P));
+  else
+    res = isprimeAPRCL(N);
+  avma = av; return res;
+}
+
 
 /***********************************************************************/
 /**                                                                   **/
