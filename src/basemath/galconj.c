@@ -182,7 +182,7 @@ vandermondeinverseprep(GEN L)
   return V;
 }
 
-/* Calcule l'inverse de la matrice de van der Monde de T multiplie par den */
+/* Compute the inverse of the van der Monde matrix of T multiplied by den */
 GEN
 vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 {
@@ -200,7 +200,6 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   return gerepileupto(ltop, gmul(den, M));
 }
 
-/* Calcule les bornes sur les coefficients a chercher */
 struct galois_borne
 {
   GEN     l;
@@ -212,6 +211,7 @@ struct galois_borne
   GEN     lbornesol;
 };
 
+/* Compute bound for the coefficients of automorphisms */
 
 GEN
 initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
@@ -370,8 +370,10 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
 }
 
 /*
- * Verifie que f est une solution presque surement et calcule sa permutation
+ * Check whether f is (with very high probability) a solution and compute its
+ * permutation
  */
+
 static int
 poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 {
@@ -412,11 +414,6 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
   return 1;
 }
 
-/*
- * Soit P one polynome de \ZZ[X] , p one nombre premier , S\in\FF_p[X]/(Q) tel
- * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
- * Unclean stack.
- */
 static long
 monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
 {
@@ -511,6 +508,12 @@ automorphismlift(GEN S, struct galois_lift *gl, GEN frob)
 {
   return  monomorphismratlift(gl->T, S, gl, frob);
 }
+
+/*
+ * Let P be a polynomial in \ZZ[X] , p a prime number, S\in\FF_p[X]/(Q) so
+ * that T(S)=0 [p,T] Lift S in S_0 so that T(S_0)=0 [Q,p^e]
+ * Unclean stack.
+ */
 
 GEN
 monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
@@ -760,7 +763,7 @@ struct galois_test
   GEN     PV, TM;
   GEN     L, M;
 };
-/* Calcule la matrice de tests correspondant a la n-ieme ligne de V */
+/* Compute the test matrix for the n-th line  of V */
 static GEN
 Vmatrix(long n, struct galois_test *td)
 {
@@ -774,7 +777,7 @@ Vmatrix(long n, struct galois_test *td)
 }
 
 /*
- * Initialise la structure galois_test
+ * Initialise galois_test
  */
 static void
 inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
@@ -782,7 +785,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   pari_sp ltop;
   long i, n = lg(L) - 1;
   if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:Entree Init Test\n");
+    fprintferr("GaloisConj:Start Init Test\n");
   td->order = cgetg(n + 1, t_VECSMALL);
   for (i = 1; i <= n - 2; i++)
     td->order[i] = i + 2;
@@ -804,10 +807,10 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   for (i = 1; i < lg(td->TM); i++)
     settyp(td->TM[i], t_VEC);
   if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:Sortie Init Test\n");
+    fprintferr("GaloisConj:End Init Test\n");
 }
 
-/* liberer les clones de la structure galois_test */
+/* Free clones stored inside galois_test */
 static void
 freetest(struct galois_test *td)
 {
@@ -1301,7 +1304,8 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   gunclone(Tp); /*unclone*/
   return M;
 }
-/* Calcule le polynome associe a one vecteur conjugue v*/
+
+/* Compute the polynomial associated to a vector of conjugates*/
 static GEN
 vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
 {
@@ -1324,7 +1328,8 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
   gunclone(mod2);/*unclone*/
   return normalizepol_i(z,n+1);
 }
-/* Calcule le polynome associe a une permutation des racines*/
+
+/* Compute the polynomial associate to a permuatation of the roots*/
 static GEN
 permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
 {
@@ -2861,7 +2866,7 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
   if (DEBUGLEVEL >= 1)
-    msgtimer("Calcul polynomes");
+    msgtimer("Computation of polynomials");
   return gerepileupto(ltop, gen_sort(aut, 0, cmp_pol));
 }
 
