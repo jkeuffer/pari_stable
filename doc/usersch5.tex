@@ -1911,7 +1911,7 @@ of \kbd{x}
 
 \fun{GEN}{FpXQ_norm}{GEN x, GEN T, GEN p} returns the norm of \kbd{x}
 
-\fun{GEN}{gener_FpXQ}{GEN T, GEN p) returns a primitive root modulo
+\fun{GEN}{gener_FpXQ}{GEN T, GEN p} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{FpX} assumed to be irreducible modulo the prime
 $p$.
 
@@ -2199,7 +2199,7 @@ returns the resultant and sets Bezout coefficients (if the resultant is 0,
 the latter are not set).
 
 \fun{GEN}{Flx_invmontgomery}{GEN T, ulong p}, returns the Montgomery inverse
-of \kbd{T}, i.e.~\kbd{truncate(x / polrecip(T)+O(x\pow n)}. Assumes
+of \kbd{T}, i.e.~\kbd{truncate(x / polrecip(T)+O(x\pow n))}. Assumes
 $\kbd{T}(0) \neq 0$.
 
 \fun{GEN}{Flx_rem_montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
@@ -2256,7 +2256,7 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
 
-\fun{GEN}{gener_Flxq}{GEN T, ulong p) returns a primitive root modulo
+\fun{GEN}{gener_Flxq}{GEN T, ulong p} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{Flx} assumed to be irreducible modulo the prime
 $p$.
 

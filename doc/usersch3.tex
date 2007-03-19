@@ -89,10 +89,10 @@ corresponding to the numeric identifier is given after it as in
 \bprog
 fun(x, {flag = 0} ):
 
-  If flag is equal to 1 = AGM, use an agm formula\dots
+  If flag is equal to 1 = AGM, use an agm formula ...
 @eprog\noindent
-which means that one can use indifferently \kbd{fun($x$, 1)} or \kbd{fun($x$,
-AGM)}.
+which means that one can use indifferently \kbd{fun($x$, 1)} or
+\kbd{fun($x$, AGM)}.
 
 For a binary flag, mnemonics corresponding to the various toggles are given
 after each of them. They can be negated by prepending \kbd{no\_} to the
@@ -1800,7 +1800,7 @@ not with $x$, but with its content:
 \subsecidx{contfrac}$(x,\{b\},\{nmax\})$: creates the row vector whose
 components are the partial quotients of the \idx{continued fraction}
 expansion of $x$. That is a result $[a_0,\dots,a_n]$ means that $x \approx
-a_0+1/(a_1+\dots+1/a_n)\dots)$. The output is normalized so that $a_n \neq 1$
+a_0+1/(a_1+\dots+1/a_n\dots)$. The output is normalized so that $a_n \neq 1$
 (unless we also have $n = 0$).
 
 The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
@@ -1825,7 +1825,7 @@ is a C integer.
 is considered as the list of partial quotients $[a_0,a_1,\dots,a_n]$ of a
 rational number, and the result is the 2 by 2 matrix
 $[p_n,p_{n-1};q_n,q_{n-1}]$ in the standard notation of continued fractions,
-so $p_n/q_n=a_0+1/(a_1+\dots+1/a_n)\dots)$. If $x$ is a matrix with two rows
+so $p_n/q_n=a_0+1/(a_1+\dots+1/a_n\dots)$. If $x$ is a matrix with two rows
 $[b_0,b_1,\dots,b_n]$ and $[a_0,a_1,\dots,a_n]$, this is then considered as a
 generalized continued fraction and we have similarly
 $p_n/q_n=1/b_0(a_0+b_1/(a_1+\dots+b_n/a_n)\dots)$. Note that in this case one
@@ -4268,7 +4268,7 @@ This command also accepts subgroups returned by \kbd{galoissubgroups}.
 
 \syn{galoisexport}{\var{gal},\fl}.
 
-\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{\fl=0\},\{v=y\}))$:
+\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{\fl=0\},\{v=y\})$:
 \var{gal} being be a Galois field as output by \tet{galoisinit} and
 \var{perm} an element of $\var{gal}.group$ or a vector of such elements,
 computes the fixed field of \var{gal} by the automorphism defined by the
@@ -6482,6 +6482,7 @@ alternating series'', Cohen et al., Experiment.~Math., vol.~9, 2000, pp.~3--12.
 %      YEAR = {2000},
 %    NUMBER = {1},
 %     PAGES = {3--12},
+%}
 
 \syn{polzagreel}{n,m,\var{prec}} if the result is only wanted as a polynomial
 with real coefficients to the precision $\var{prec}$, or \funs{polzag}{n,m}
@@ -8139,7 +8140,7 @@ If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 $\var{expr}(X=a) * \var{expr}(X=b) \le 0$. (You will get an error message
 \kbd{roots must be bracketed in solve} if this does not hold.)
 This routine uses Brent's method and can fail miserably if \var{expr} is
-not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
+not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x))}).
 
 \synt{zbrent}{void *E,GEN (*eval)(GEN,void*),GEN a,GEN b,long prec}.
 
