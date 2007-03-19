@@ -1497,7 +1497,7 @@ makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN v, GEN gen)
 }
 
 GEN
-Flxq_gener(GEN T, ulong p)
+gener_Flxq(GEN T, ulong p)
 {
   long i, j, vT = varn(T), f = degpol(T);
   ulong p_1 = p - 1;
@@ -1547,7 +1547,7 @@ Flxq_gener(GEN T, ulong p)
 }
 
 GEN
-FpXQ_gener(GEN T, GEN p)
+gener_FpXQ(GEN T, GEN p)
 {
   long i, j, vT = varn(T), f = degpol(T);
   GEN g, L, L2, p_1, q;
@@ -1556,7 +1556,7 @@ FpXQ_gener(GEN T, GEN p)
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    g = Flxq_gener(ZX_to_Flx(T, pp), pp);
+    g = gener_Flxq(ZX_to_Flx(T, pp), pp);
     return gerepileupto(av0, Flx_to_ZX(g));
   }
   p_1 = subis(p,1);
@@ -1613,7 +1613,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
-    g = ff_to_nf(FpXQ_gener(T,p), modpr);
+    g = ff_to_nf(gener_FpXQ(T,p), modpr);
     g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */

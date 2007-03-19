@@ -574,7 +574,7 @@ GEN     rnfdet0(GEN nf, GEN x, GEN y);
 
 /* base3.c */
 
-GEN     FpXQ_gener(GEN T, GEN p);
+GEN     gener_FpXQ(GEN T, GEN p);
 void    check_nfelt(GEN x, GEN *den);
 
 /* base4.c */
