@@ -180,7 +180,8 @@ is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
   if (kross(x, p) >= 0) return 0;
   for (i=lg(L)-1; i; i--)
   {
-    if (Fl_pow(x, (ulong)L[i], p) == p_1) return 0;
+    ulong t = Fl_pow(x, (ulong)L[i], p);
+    if (t == p_1 || t == 1) return 0;
   }
   return 1;
 }
@@ -220,7 +221,8 @@ is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
   long i, t = lgefint(x)==3? krosi(x[2], p): kronecker(x, p);
   if (t >= 0) return 1;
   for (i = lg(L)-1; i; i--) {
-    if (equalii(Fp_pow(x, gel(L,i), p), p_1)) return 0;
+    GEN t = Fp_pow(x, gel(L,i), p);
+    if (equalii(t, p_1) || is_pm1(t)) return 0;
   }
   return 1;
 }
