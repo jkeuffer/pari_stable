@@ -1778,6 +1778,7 @@ GEN     RgX_powers(GEN a, GEN T, long l);
 GEN     RgX_renormalize(GEN x);
 GEN     RgX_rescale(GEN P, GEN h);
 GEN     RgX_unscale(GEN P, GEN h);
+GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);
 GEN     RgXQ_norm(GEN x, GEN T);
 GEN     RgXQ_powers(GEN x, long l, GEN T);

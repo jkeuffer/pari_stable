@@ -505,10 +505,6 @@ GEN     redrealsl2step(GEN A);
 GEN     sqcompimagraw(GEN x);
 GEN     sqcomprealraw(GEN x);
 
-/* RgX.c */
-
-GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
-
 /* alglin1.c */
 
 GEN     Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
