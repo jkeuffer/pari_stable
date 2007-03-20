@@ -750,7 +750,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
       j = itos(gcoeff(m,i,2));
       e = Z_pvalrem(q,l,&r);
       if(DEBUGLEVEL>=6) (void)timer2();
-      y = FpXQ_lgener(l,e,r,T,p,&zeta);
+      y = lgener_FpXQ(l,e,r,T,p,&zeta);
       if(DEBUGLEVEL>=6) msgtimer("FpXQ_lgener");
       if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,powiu(l,e-j),T,p), T,p);
       for (; j; j--)
