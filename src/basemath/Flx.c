@@ -1469,6 +1469,56 @@ Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
 }
 
+GEN
+gener_Flxq(GEN T, ulong p)
+{
+  long i, j, vT = varn(T), f = degpol(T);
+  ulong p_1 = p - 1;
+  GEN g, L, L2, q = diviuexact(subis(powuu(p, f), 1), p_1);
+  pari_sp av0 = avma, av;
+
+  L = cgetg(1, t_VECSMALL);
+  if (p > 3)
+  {
+    ulong t;
+    (void)u_lvalrem(p_1, 2, &t);
+    L = gel(factoru(t),1);
+    for (i=lg(L)-1; i; i--) L[i] = p_1 / L[i];
+  }
+  L2 = gel(Z_factor(q),1);
+  for (i = j = 1; i < lg(L2); i++) 
+  {
+    if (umodui(p_1, gel(L2,i)) == 0) continue;
+    gel(L2,j++) = diviiexact(q, gel(L2,i));
+  }
+  setlg(L2, j);
+  for (av = avma;; avma = av)
+  {
+    ulong RES;
+    GEN tt;
+    g = Flx_rand(f, vT, p);
+    if (degpol(g) < 1) continue;
+    if (p > 2)
+    {
+      ulong t;
+      tt = Flxq_pow(g, q, T, p); t = tt[2];
+      if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
+      tt = Flxq_pow(g, utoi(p_1>>1), T, p);
+      RES = p_1;
+    } else {
+      tt = Flxq_pow(g, utoi(p_1), T, p);
+      RES = 1;
+    }
+    for (i = 1; i < j; i++)
+    {
+      GEN a = Flxq_pow(tt, gel(L2,i), T, p);
+      if (!degpol(a) && a[2] == RES) break;
+    }
+    if (i == j) break;
+  }
+  return gerepilecopy(av0, g);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                               FlxV                                **/

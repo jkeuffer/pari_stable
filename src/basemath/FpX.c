@@ -631,6 +631,51 @@ FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
 }
 
 GEN
+gener_FpXQ(GEN T, GEN p)
+{
+  long i, j, vT = varn(T), f = degpol(T);
+  GEN g, L, L2, p_1, q;
+  pari_sp av0 = avma, av;
+
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (ulong)p[2];
+    g = gener_Flxq(ZX_to_Flx(T, pp), pp);
+    return gerepileupto(av0, Flx_to_ZX(g));
+  }
+  p_1 = subis(p,1);
+  q = diviiexact(subis(powiu(p, f), 1), p_1);
+
+  L = NULL;
+  (void)Z_lvalrem(p_1, 2, &L);
+  L = gel(Z_factor(L),1);
+  for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
+  L2 = gel(Z_factor(q),1);
+  for (i = j = 1; i < lg(L2); i++) 
+  {
+    if (remii(p_1, gel(L2,i)) == gen_0) continue;
+    gel(L2,j++) = diviiexact(q, gel(L2,i));
+  }
+  setlg(L2, j);
+  for (av = avma;; avma = av)
+  {
+    GEN t;
+    g = FpX_rand(f, vT, p);
+    if (degpol(g) < 1) continue;
+    t = constant_term(FpXQ_pow(g, q, T, p));
+    if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
+    t = FpXQ_pow(g, shifti(p_1,-1), T, p);
+    for (i = 1; i < j; i++)
+    {
+      GEN a = FpXQ_pow(t, gel(L2,i), T, p);
+      if (!degpol(a) && equalii(gel(a,2), p_1)) break;
+    }
+    if (i == j) break;
+  }
+  return gerepilecopy(av0, g);
+}
+
+GEN
 FpXQ_norm(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma; 

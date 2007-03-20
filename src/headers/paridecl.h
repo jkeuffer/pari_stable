@@ -98,6 +98,7 @@ GEN     ZX_to_Flx(GEN x, ulong p);
 GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
+GEN     gener_Flxq(GEN T, ulong p);
 GEN     polx_Flx(long sv);
 GEN     zero_Flx(long sv);
 
@@ -137,6 +138,7 @@ GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
 GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     FpXV_prod(GEN V, GEN p);
+GEN     gener_FpXQ(GEN T, GEN p);
 
 /* alglin1.c */
 
