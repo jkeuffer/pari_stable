@@ -1285,7 +1285,7 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
   return gerepileuptoint(av, lift(chinese1(v)));
 }
 
-/* discrete log in Fq for a in Fp^*, g primitive root in Fq^* */
+/* discrete log in FpXQ for a in Fp^*, g primitive root in FpXQ^* */
 static GEN
 Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
@@ -1322,19 +1322,12 @@ FpXQ_Shanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
   long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
-  if (!degpol(x)) x = constant_term(x);
-  if (typ(x) == t_INT)
-  {
-    if (!gcmp1(modii(p,N))) return gen_0;
-    /* g0 in Fp^*, order N | (p-1) */
-    if (typ(g0) == t_POL) g0 = constant_term(g0);
-    return Fp_log(x,g0,N,p);
-  }
-
+  if (!degpol(x))
+    return Fp_FpXQ_log(constant_term(x),g0,N,T,p);
   p1 = sqrti(N);
   if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in FpXQ_Shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
-  g0inv = Fq_inv(g0,T,p);
+  g0inv = FpXQ_inv(g0,T,p);
   p1 = x;
 
   for (i=1;;i++)
@@ -1369,15 +1362,14 @@ FpXQ_Shanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 }
 
 GEN
-Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
+FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
   pari_sp av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,fa,ex;
   long e,i,j,l;
 
-  if (typ(a) == t_INT)
-    return gerepileuptoint(av, Fp_FpXQ_log(a,g,ord,T,p));
-  /* f > 1 ==> T != NULL */
+  if (!degpol(a))
+    return Fp_FpXQ_log(constant_term(a),g,ord,T,p);
   if (typ(ord) == t_MAT)
   {
     fa = ord;
@@ -1388,7 +1380,7 @@ Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   ex = gel(fa,2);
   fa = gel(fa,1);
   l = lg(fa);
-  ginv = Fq_inv(g,T,p);
+  ginv = FpXQ_inv(g,T,p);
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
@@ -1414,6 +1406,16 @@ Fq_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   return gerepileuptoint(av, lift(chinese1(v)));
 }
 
+static GEN
+Fq_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
+{
+  if (!T) 
+    return Fp_log(a,g,ord,p);
+  if (typ(a)==t_INT)
+    return Fp_FpXQ_log(a,g,ord,T,p);
+  return FpXQ_log(a,g,ord,T,p);
+}
+
 /* same in nf.zk / pr */
 static GEN
 nf_log(GEN nf, GEN a, GEN g, GEN pr)
@@ -1423,7 +1425,7 @@ nf_log(GEN nf, GEN a, GEN g, GEN pr)
   GEN A = nf_to_ff(nf,a,modpr);
   GEN G = nf_to_ff(nf,g,modpr);
   GEN ord = addis(T?powiu(p,degpol(T)):p,-1);
-  return gerepileuptoint(av, Fq_log(A,G,ord,T,p));
+  return gerepileuptoint(av, Fq_FpXQ_log(A,G,ord,T,p));
 }
 
 GEN

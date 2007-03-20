@@ -743,7 +743,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
       k++;
     } while (!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
-    dl= Fq_log(FpXQ_inv(z,T,p),m,l,T,p);
+    dl= FpXQ_log(FpXQ_inv(z,T,p),m,l,T,p);
     p1= FpXQ_pow(y, Fp_mul(dl,powiu(l,e-k-1), q), T,p);
     m = FpXQ_pow(m,dl,T,p);
     e = k;
