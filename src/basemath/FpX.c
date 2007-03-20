@@ -502,3 +502,276 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
+/***********************************************************************/
+/**                                                                   **/
+/**                              FpXQ                                 **/
+/**                                                                   **/
+/***********************************************************************/
+
+/* FpXQ are elements of Fp[X]/(T), represented by FpX*/
+
+GEN
+FpXQ_mul(GEN x,GEN y,GEN T,GEN p)
+{
+  GEN z = FpX_mul(x,y,p);
+  return FpX_rem(z, T, p);
+}
+
+GEN
+FpXQ_sqr(GEN x, GEN T, GEN p)
+{
+  GEN z = FpX_sqr(x,p);
+  return FpX_rem(z, T, p);
+}
+
+/* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
+ * return lift(1 / (x mod (p,pol))) */
+GEN
+FpXQ_invsafe(GEN x, GEN T, GEN p)
+{
+  GEN z, U, V;
+
+  z = FpX_extgcd(x, T, p, &U, &V);
+  if (degpol(z)) return NULL;
+  z = Fp_invsafe(gel(z,2), p);
+  if (!z) return NULL;
+  return FpX_Fp_mul(U, z, p);
+}
+
+GEN
+FpXQ_inv(GEN x,GEN T,GEN p)
+{
+  pari_sp av = avma;
+  GEN U = FpXQ_invsafe(x, T, p);
+  if (!U) pari_err(talker,"non invertible polynomial in FpXQ_inv");
+  return gerepileupto(av, U);
+}
+
+GEN
+FpXQ_div(GEN x,GEN y,GEN T,GEN p)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FpXQ_mul(x,FpXQ_inv(y,T,p),T,p));
+}
+
+typedef struct {
+  GEN pol, p;
+} FpX_muldata;
+
+static GEN
+_sqr(void *data, GEN x)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return FpXQ_sqr(x, D->pol, D->p);
+}
+static GEN
+_mul(void *data, GEN x, GEN y)
+{
+  FpX_muldata *D = (FpX_muldata*)data;
+  return FpXQ_mul(x,y, D->pol, D->p);
+}
+
+/* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
+GEN
+FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
+{
+  FpX_muldata D;
+  pari_sp av;
+  GEN y;
+
+  if (!signe(n)) return pol_1(varn(x));
+  if (is_pm1(n)) /* +/- 1 */
+    return (signe(n) < 0)? FpXQ_inv(x,pol,p): gcopy(x);
+  av = avma;
+  if (!is_bigint(p))
+  {
+    ulong pp = p[2];
+    pol = ZX_to_Flx(pol, pp);
+    x   = ZX_to_Flx(x,   pp);
+    y = Flx_to_ZX( Flxq_pow(x, n, pol, pp) );
+  }
+  else
+  {
+    D.pol = pol;
+    D.p   = p;
+    if (signe(n) < 0) x = FpXQ_inv(x,pol,p);
+    y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
+  }
+  return gerepileupto(av, y);
+}
+
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+FpXQ_powers(GEN x, long l, GEN T, GEN p)
+{
+  GEN V=cgetg(l+2,t_VEC);
+  long i;
+  gel(V,1) = pol_1(varn(T)); if (l==0) return V;
+  gel(V,2) = gcopy(x);       if (l==1) return V;
+  if (lgefint(p) == 3) {
+    long pp = p[2];
+    return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+  }
+  gel(V,3) = FpXQ_sqr(x,T,p);
+  if ((degpol(x)<<1) < degpol(T)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = FpXQ_mul(gel(V,i-1),x,T,p);
+  } else { /* use squarings if degree(x) is large */
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = (i&1)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
+                      : FpXQ_mul(gel(V, i-1),x,T,p);
+  }
+  return V;
+}
+
+GEN
+FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
+{
+  return RgXV_to_RgM(FpXQ_powers(y,m-1,P,l),n);
+}
+
+GEN
+FpXQ_norm(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma; 
+  GEN y = FpX_resultant(T, x, p);
+  GEN L = leading_term(T);
+  if (gcmp1(L) || signe(x)==0) return y;
+  return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
+}
+
+/*Not stack-clean*/
+
+static GEN lgener_FpXQ(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
+{
+  pari_sp av1 = avma;
+  GEN z, m, m1;
+  const long pp = is_bigint(p)? VERYBIGINT: itos(p);
+  long x=varn(T),k,u,v,i;
+
+  for (k=0; ; k++)
+  {
+    z = (degpol(T)==1)? pol_1(x): pol_x(x);
+    u = k/pp; v=2;
+    z = FpX_Fp_add(z, stoi(k%pp), p);
+    while(u)
+    {
+      z = ZX_add(z, monomial(utoipos(u%pp),v,x));
+      u /= pp; v++;
+    }
+    if ( DEBUGLEVEL>=6 ) fprintferr("FF l-Gen:next %Z\n",z);
+    m1 = m = FpXQ_pow(z,r,T,p);
+    if (gcmp1(m)) { avma = av1; continue; }
+
+    for (i=1; i<e; i++)
+      if (gcmp1(m = FpXQ_pow(m,l,T,p))) break;
+    if (i==e) break;
+    avma = av1;
+  }
+  *zeta = m; return m1;
+}
+/* Solve x^l = a mod (p,T)
+ * l must be prime
+ * q = p^degpol(T)-1 = (l^e)*r, with e>=1 and pgcd(r,l)=1
+ * m = y^(q/l)
+ * y not an l-th power [ m != 1 ] */
+GEN
+FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
+{
+  pari_sp av = avma, lim;
+  long k;
+  GEN p1,u1,u2,v,w,z,dl;
+
+  if (gcmp1(a)) return gcopy(a);
+
+  (void)bezout(r,l,&u1,&u2); /* result is 1 */
+  v = FpXQ_pow(a,u2,T,p);
+  w = FpXQ_pow(a, Fp_mul(negi(u1),r,q), T,p);
+  lim = stack_lim(av,1);
+  while (!gcmp1(w))
+  {
+    k = 0;
+    p1 = w;
+    do { /* if p is not prime, loop will not end */
+      z = p1;
+      p1 = FpXQ_pow(p1,l,T,p);
+      k++;
+    } while (!gcmp1(p1));
+    if (k==e) { avma=av; return NULL; }
+    dl= Fq_log(FpXQ_inv(z,T,p),m,l,T,p);
+    p1= FpXQ_pow(y, Fp_mul(dl,powiu(l,e-k-1), q), T,p);
+    m = FpXQ_pow(m,dl,T,p);
+    e = k;
+    v = FpXQ_mul(p1,v,T,p);
+    y = FpXQ_pow(p1,l,T,p);
+    w = FpXQ_mul(y,w,T,p);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"FpXQ_sqrtl");
+      gerepileall(av,4, &y,&v,&w,&m);
+    }
+  }
+  return gerepilecopy(av, v);
+}
+/* Solve x^n = a mod p: n integer, a in Fp[X]/(T) [ p prime, T irred. mod p ]
+ *
+ * 1) if no solution, return NULL and (if zetan != NULL) set zetan to gen_0.
+ *
+ * 2) If there is a solution, there are exactly  m=gcd(p-1,n) of them.
+ * If zetan != NULL, it is set to a primitive mth root of unity so that the set
+ * of solutions is {x*zetan^k;k=0 to m-1}
+ *
+ * If a = 0, return 0 and (if zetan != NULL) set zetan = gen_1 */
+GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
+{
+  pari_sp ltop=avma, av1, lim;
+  long i,j,e;
+  GEN m,u1,u2;
+  GEN q,r,zeta,y,l,z;
+
+  if (typ(a) != t_POL || typ(n) != t_INT || typ(T) != t_POL || typ(p)!=t_INT)
+    pari_err(typeer,"FpXQ_sqrtn");
+  if (!degpol(T)) pari_err(constpoler,"FpXQ_sqrtn");
+  if (!signe(n)) pari_err(talker,"1/0 exponent in FpXQ_sqrtn");
+  if (gcmp1(n)) {if (zetan) *zetan=gen_1;return gcopy(a);}
+  if (gcmp0(a)) {if (zetan) *zetan=gen_1;return gen_0;}
+
+  q = addsi(-1, powiu(p,degpol(T)));
+  m = bezout(n,q,&u1,&u2);
+  if (!equalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
+  if (zetan) z = pol_1(varn(T));
+  lim = stack_lim(ltop,1);
+  if (!gcmp1(m))
+  {
+    m = Z_factor(m); av1 = avma;
+    for (i = lg(m[1])-1; i; i--)
+    {
+      l = gcoeff(m,i,1);
+      j = itos(gcoeff(m,i,2));
+      e = Z_pvalrem(q,l,&r);
+      if(DEBUGLEVEL>=6) (void)timer2();
+      y = FpXQ_lgener(l,e,r,T,p,&zeta);
+      if(DEBUGLEVEL>=6) msgtimer("FpXQ_lgener");
+      if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,powiu(l,e-j),T,p), T,p);
+      for (; j; j--)
+      {
+	a = FpXQ_sqrtl(a,l,T,p,q,e,r,y,zeta);
+	if (!a) {avma=ltop; return NULL;}
+      }
+      if (low_stack(lim, stack_lim(ltop,1)))
+      { /* n can have lots of prime factors */
+	if(DEBUGMEM>1) pari_warn(warnmem,"FpXQ_sqrtn");
+        gerepileall(av1,zetan? 2: 1, &a,&z);
+      }
+    }
+  }
+  if (zetan)
+  {
+    *zetan = z;
+    gerepileall(ltop,2,&a,zetan);
+  }
+  else
+    a = gerepileupto(ltop, a);
+  return a;
+}
+

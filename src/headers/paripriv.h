@@ -770,16 +770,19 @@ long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sort_vecpol_gen(GEN a, int (*cmp) (GEN, GEN));
 GEN     sylvestermatrix_i(GEN x, GEN y);
 
+/* FpX.c */
+
+GEN     FpXQ_sqrtl(GEN a, GEN l, GEN T, GEN p, GEN q, long e, GEN r, GEN y, GEN m);
+GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
+
 /* polarit3.c */
 
 GEN     Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p);
 GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);
 GEN     FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p);
-GEN     FpXQ_sqrtl(GEN a, GEN l, GEN T, GEN p, GEN q, long e, GEN r, GEN y, GEN m);
 GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
-GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
 GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
 GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);
 int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p);
