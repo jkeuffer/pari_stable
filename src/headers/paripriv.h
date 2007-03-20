@@ -778,7 +778,6 @@ GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
 /* polarit3.c */
 
 GEN     Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p);
-GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);
 GEN     FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p);
 GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpX_compositum(GEN A, GEN B, GEN p);

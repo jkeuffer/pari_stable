@@ -1463,6 +1463,12 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   return V;
 }
 
+GEN
+Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
+{
+  return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                               FlxV                                **/

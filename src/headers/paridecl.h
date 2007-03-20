@@ -76,6 +76,7 @@ GEN     FlxYqQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p);
 GEN     Flxq_div(GEN x, GEN y, GEN T, ulong p);
 GEN     Flxq_inv(GEN x,GEN T,ulong p);
 GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
+GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);
 GEN     Flxq_mul(GEN x, GEN y, GEN T, ulong p);
 GEN     Flxq_pow(GEN x, GEN n, GEN T, ulong p);
 GEN     Flxq_powers(GEN x, long l, GEN T, ulong p);

@@ -936,11 +936,7 @@ FqM_to_FlxM(GEN x, GEN T, GEN pp)
 /*******************************************************************/
 /*  Isomorphisms between finite fields                             */
 /*******************************************************************/
-GEN
-Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
-{
-  return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
-}
+
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
    V(S)=X  mod T,p*/
 GEN
