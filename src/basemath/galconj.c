@@ -2023,7 +2023,7 @@ s4galoisgen(struct galois_lift *gl)
     sg[i] = i;
   Tp = FpX_red(gl->T,p);
   TQ = gl->TQ;
-  Tmod = lift(gel(factmod(gl->T, p),1));
+  Tmod = gel(FpX_factor(gl->T, p),1);
   isom = cgetg(lg(Tmod), t_VEC);
   isominv = cgetg(lg(Tmod), t_VEC);
   misom = cgetg(lg(Tmod), t_MAT);
@@ -2419,10 +2419,10 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     long    i;
     GEN     ip,Tmod;
     ip = utoipos(gf->p);
-    Tmod = lift_intern(factmod(T, ip));
+    Tmod = FpX_factor(T,ip);
     isram = 0;
     for (i = 1; i < lg(Tmod[2]) && !isram; i++)
-      if (!gcmp1(gmael(Tmod,2,i)))
+      if (mael(Tmod,2,i)!=1)
 	isram = 1;
     if (isram == 0)
     {
