@@ -1047,6 +1047,21 @@ Flx_deriv(GEN z, ulong p)
   return Flx_renormalize(x,l);
 }
 
+GEN
+Flx_deflate(GEN x0, long d)
+{
+  GEN z, y, x;
+  long i,id, dy, dx = degpol(x0);
+  if (d <= 1) return vecsmall_copy(x0);
+  if (dx < 0) return zero_Flx(x0[1]);
+  dy = dx/d;
+  y = cgetg(dy+3, t_VECSMALL); y[1] = x0[1];
+  z = y + 2;
+  x = x0+ 2;
+  for (i=id=0; i<=dy; i++,id+=d) z[i] = x[id];
+  return y;
+}
+
 /*Do not garbage collect*/
 GEN
 Flx_gcd_i(GEN a, GEN b, ulong p)
@@ -1467,6 +1482,42 @@ GEN
 Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 {
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
+}
+
+ulong
+Flxq_norm(GEN x, GEN T, ulong p)
+{
+  ulong y = Flx_resultant(T, x, p);
+  ulong L = T[lg(T)-1];
+  if ( L==1 || lgpol(x)==0) return y;
+  return Fl_div(y, Fl_pow(L, (ulong)degpol(x), p), p);
+}
+
+/*x must be reduced*/
+GEN
+Flxq_charpoly(GEN x, GEN T, ulong p)
+{
+  pari_sp ltop=avma;
+  long v=varn(T);
+  GEN R = Flx_FlxY_resultant(T, deg1pol_i(Fl_to_Flx(1,x[1]),Flx_neg(x,p),v) ,p);
+  return gerepileupto(ltop,R);
+}
+
+GEN 
+Flxq_minpoly(GEN x, GEN T, ulong p)
+{
+  pari_sp ltop=avma;
+  GEN G, R=Flxq_charpoly(x, T, p);
+  GEN dR=Flx_deriv(R,p);
+  while (!lgpol(dR))
+  {
+    R  = Flx_deflate(R,p);
+    dR = Flx_deriv(R,p);
+  }
+  G=Flx_gcd(R,dR,p);
+  G=Flx_normalize(G,p);
+  G=Flx_div(R,G,p);
+  return gerepileupto(ltop,G);
 }
 
 GEN

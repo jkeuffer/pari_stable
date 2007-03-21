@@ -2256,6 +2256,14 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
 
+\fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
+polynomial of \kbd{x}
+
+\fun{GEN}{Flxq_minpoly}{GEN x, GEN T, ulong p} returns the minimal polynomial
+of \kbd{x}
+
+\fun{GEN}{Flxq_norm}{GEN x, GEN T, ulong p} returns the norm of \kbd{x}
+
 \fun{GEN}{gener_Flxq}{GEN T, ulong p} returns a primitive root modulo
 $(T,p)$. $T$ is an \kbd{Flx} assumed to be irreducible modulo the prime
 $p$.
