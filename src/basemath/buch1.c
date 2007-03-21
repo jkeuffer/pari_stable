@@ -73,7 +73,7 @@ check_pq(GEN gp, GEN z, long d, GEN D)
 {
   ulong p = itou(gp);
   if (!umodiu(z,p) || kross(d,(long)p) <= 0 || 
-    gcmp1((GEN)redimag(primeform_u(D,p))[1]));
+    gcmp1(gel(redimag(primeform_u(D,p)),1)));
       pari_err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
   return p;
 }
@@ -176,7 +176,7 @@ quadhilbertimag(GEN D, GEN pq)
   qfp = primeform_u(D, p);
   if (p == q)
   {
-    u = (GEN)compimagraw(qfp, qfp)[2];
+    u = gel(compimagraw(qfp, qfp),2);
     u = gmodulo(u, shifti(sqru(p),1));
   }
   else
@@ -234,7 +234,7 @@ quadhilbert(GEN D, GEN flag, long prec)
                      : quadhilbertimag(D,flag);
 }
 
-#define to_approx(nf,a) ((GEN)gmul(gmael((nf),5,1), (a))[1])
+#define to_approx(nf,a) (gel(gmul(gmael((nf),5,1), (a)),1))
 /* Z-basis for a (over C) */
 static GEN
 get_om(GEN nf, GEN a) {
@@ -530,14 +530,14 @@ treatspecialsigma(GEN nf, GEN gf)
   {
     if (i == 4 || i == 5 || i == 7) return polcyclo(i,0);
     if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
-    p1 = (GEN)nfroots(nf, mkpoln(3,gen_1,gen_1,gen_1))[1]; /* f = P_3^3 */
+    p1 = gel(nfroots(nf, mkpoln(3,gen_1,gen_1,gen_1)),1); /* f = P_3^3 */
     return gadd(monomial(gen_1,3,0), p1); /* x^3+j */
   }
   if (equaliu(D,4))
   {
     if (i == 3 || i == 5) return polcyclo(i,0);
     if (i != 4) return NULL;
-    p1 = (GEN)nfroots(nf, mkpoln(3,gen_1,gen_0,gen_1))[1];
+    p1 = gel(nfroots(nf, mkpoln(3,gen_1,gen_0,gen_1)),1);
     return gadd(monomial(gen_1,2,0), p1); /* x^2+i */
   }
   Ds = smodis(D,48);

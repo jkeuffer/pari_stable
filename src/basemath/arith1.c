@@ -673,7 +673,7 @@ gissquare(GEN x)
       if (i==0)
       {
         GEN d = gcdii(a,q);
-        p = (GEN)Z_factor(d)[1]; l = lg(p);
+        p = gel(Z_factor(d),1); l = lg(p);
         for (i=1; i<l; i++)
         {
           v = Z_pvalrem(a,gel(p,i),&p1);
@@ -686,7 +686,7 @@ gissquare(GEN x)
       }
       /* kro(a,q) = 1, q odd: need to factor q and check all p|q 
        * (can't use product formula in case v_p(q) is even for some p) */
-      p = (GEN)Z_factor(q)[1]; l = lg(p);
+      p = gel(Z_factor(q),1); l = lg(p);
       for (i=1; i<l; i++)
         if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
       return gen_1;
@@ -2908,7 +2908,7 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
 static long
 two_rank(GEN x)
 {
-  GEN p = (GEN)Z_factor(absi(x))[1];
+  GEN p = gel(Z_factor(absi(x)),1);
   long l = lg(p)-1;
 #if 0 /* positive disc not needed */
   if (signe(x) > 0)

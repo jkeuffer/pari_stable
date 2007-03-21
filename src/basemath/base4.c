@@ -916,7 +916,7 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
   archp = arch_to_perm(arch);
   if (lg(archp) == 1) return u;
 
-  if (gcmp0(u)) u = (GEN)idealhermite_aux(nf,x)[1];
+  if (gcmp0(u)) u = gel(idealhermite_aux(nf,x),1);
   p2 = zarchstar(nf, idealmul(nf,x,y), archp);
   p2 = gel(p2,2); nba = 0;
   p1 = gmul(gel(p2,3), zsigne(nf,u,archp));
@@ -2134,7 +2134,7 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
   y = gmul(computeGtwist(nf,vdir), x);
-  y = gmul(x, (GEN)lll(y,prec)[1]);
+  y = gmul(x, gel(lll(y,prec),1));
   return gerepileupto(av, principalidele(nf,y,prec));
 }
 

@@ -689,7 +689,7 @@ isprimitive(GEN nf)
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
    * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
   d = absi(gel(nf,3));
-  fa = (GEN)auxdecomp(d,0)[2]; /* list of v_q(d_L). Don't check large primes */
+  fa = gel(auxdecomp(d,0),2); /* list of v_q(d_L). Don't check large primes */
   if (mod2(d)) i = 1;
   else
   { /* q = 2 */
@@ -1536,7 +1536,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
 
   pol2 = fix_relative_pol(nf, pol2, 1);
-  module = mkvec2((GEN)rnfdiscf(nf,pol2)[1],
+  module = mkvec2(gel(rnfdiscf(nf, pol2),1),
                   const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);

@@ -806,7 +806,7 @@ maxord(GEN p,GEN f,long mf)
     g = FpX_div(fp, FpX_gcd(fp,derivpol(fp), p), p);
   else
   {
-    w = (GEN)FpX_factor(fp,p)[1];
+    w = gel(FpX_factor(fp,p),1);
     g = FpXV_prod(w, p);
   }
   res = dedek(f, mf, p, g);
@@ -814,7 +814,7 @@ maxord(GEN p,GEN f,long mf)
     res = dbasis(p, f, mf, pol_x(varn(f)), res);
   else
   {
-    if (!w) w = (GEN)FpX_factor(fp,p)[1];
+    if (!w) w = gel(FpX_factor(fp,p),1);
     res = maxord_i(p, f, mf, w, 0);
   }
   return gerepileupto(av,res);
@@ -1270,7 +1270,7 @@ mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
 static GEN
 get_nu(GEN chi, GEN p, long *ptl)
 {
-  GEN P = (GEN)FpX_factor(chi, p)[1];
+  GEN P = gel(FpX_factor(chi, p),1);
   *ptl = lg(P) - 1;
   return gel(P,*ptl);
 }
@@ -2698,7 +2698,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   m = degpol(P);
 
   Prd = modprX(P, nf, modpr);
-  A = (GEN)FqX_factor(Prd,T,p)[1];
+  A = gel(FqX_factor(Prd,T,p),1);
   r = lg(A); if (r < 2) pari_err(constpoler,"rnfdedekind");
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
@@ -3749,7 +3749,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     id = mkvec2(newO, newI);
   }
 
-  id = (GEN)rnflllgram(nf,pol,id,prec)[1];
+  id = gel(rnflllgram(nf,pol,id,prec),1);
   O = gel(id,1);
   I = gel(id,2); n = lg(I)-1;
   w = cgetg(n+1,t_VEC);

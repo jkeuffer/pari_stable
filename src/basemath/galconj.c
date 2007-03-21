@@ -1469,7 +1469,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       continue;
     nbtest++;
     av=avma;
-    FS=(GEN)FpX_degfact(T,ip)[1];
+    FS=gel(FpX_degfact(T,ip),1);
     d = FS[1];
     for(i=2;i<lg(FS);i++)
       if (d != FS[i]) break;
@@ -2023,7 +2023,7 @@ s4galoisgen(struct galois_lift *gl)
     sg[i] = i;
   Tp = FpX_red(gl->T,p);
   TQ = gl->TQ;
-  Tmod = lift((GEN) factmod(gl->T, p)[1]);
+  Tmod = lift(gel(factmod(gl->T, p),1));
   isom = cgetg(lg(Tmod), t_VEC);
   isominv = cgetg(lg(Tmod), t_VEC);
   misom = cgetg(lg(Tmod), t_MAT);

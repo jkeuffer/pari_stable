@@ -1048,7 +1048,7 @@ matrixqz(GEN x, GEN p)
       pari_err(impl,"matrixqz when the first 2 dets are zero");
     if (gcmp1(p2)) { avma = av1; return x; }
 
-    p1 = (GEN)Z_factor(p2)[1];
+    p1 = gel(Z_factor(p2),1);
   }
   else p1 = mkvec(p);
   nfact = lg(p1)-1;
@@ -3702,7 +3702,7 @@ build_basischange(GEN N, GEN U)
     pari_sp btop=avma;
     GEN p3 = gen_0;
     for (i = 1; i < n; ++i)
-      p3 = gadd(p3, (GEN) gsubst(gcoeff(U, i, j), 0, N)[i]);
+      p3 = gadd(p3, gel(gsubst(gcoeff(U, i, j), 0, N),i));
     gel(p2,j) = gerepileupto(btop, p3);
   }
   return p2;

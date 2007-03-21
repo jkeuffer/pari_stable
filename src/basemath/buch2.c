@@ -2223,7 +2223,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = (GEN)sindexrank(mdet2)[2]; /* list of independent column indices */
+  v = gel(sindexrank(mdet2),2); /* list of independent column indices */
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
@@ -2835,7 +2835,7 @@ classgrouponly(GEN P, GEN data, long prec)
     z=quadclassunit0(P,0,data,prec); setlg(z,4);
     return gerepilecopy(av,z);
   }
-  z=(GEN)classgroupall(P,data,6,prec)[1];
+  z=gel(classgroupall(P,data,6,prec),1);
   return gerepilecopy(av,gel(z,5));
 }
 
@@ -2851,7 +2851,7 @@ regulator(GEN P, GEN data, long prec)
     z=quadclassunit0(P,0,data,prec);
     return gerepilecopy(av,gel(z,4));
   }
-  z=(GEN)classgroupall(P,data,6,prec)[1];
+  z=gel(classgroupall(P,data,6,prec),1);
   return gerepilecopy(av,gel(z,6));
 }
 

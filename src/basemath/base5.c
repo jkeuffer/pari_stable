@@ -481,7 +481,7 @@ rnfidealnormrel(GEN rnf, GEN id)
   checkrnf(rnf);
   if (degpol(rnf[1]) == 1) return matid(degpol(nf[1]));
 
-  z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
+  z = prodid(nf, gel(rnfidealhermite(rnf,id),2));
   return gerepileupto(av, idealmul(nf,z, gel(rnf,4)));
 }
 
@@ -494,7 +494,7 @@ rnfidealnormabs(GEN rnf, GEN id)
   checkrnf(rnf);
   if (degpol(rnf[1]) == 1) return gen_1;
 
-  z = prodidnorm( (GEN)rnfidealhermite(rnf,id)[2] );
+  z = prodidnorm( gel(rnfidealhermite(rnf,id),2) );
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));
 }
 

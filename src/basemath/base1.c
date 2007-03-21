@@ -464,7 +464,7 @@ polgalois(GEN x, long prec)
 	  prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
-	p2 = (GEN)ZX_factor(p5)[1];
+	p2 = gel(ZX_factor(p5),1);
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
@@ -505,7 +505,7 @@ polgalois(GEN x, long prec)
 	    prec = (prec<<1)-2;
 	  }
           if (!ZX_is_squarefree(p5)) goto tchi;
-	  p3=(GEN)ZX_factor(p5)[1];
+	  p3=gel(ZX_factor(p5),1);
 	  f=Z_issquare(ZX_disc(x));
 	  if (lg(p3)-1==1)
 	  {
@@ -561,7 +561,7 @@ polgalois(GEN x, long prec)
 	    prec=(prec<<1)-2;
 	  }
 	  if (!ZX_is_squarefree(p5)) goto tchi;
-	  p2=(GEN)ZX_factor(p5)[1];
+	  p2=gel(ZX_factor(p5),1);
 	  switch(lg(p2)-1)
 	  {
 	    case 1:
@@ -581,7 +581,7 @@ polgalois(GEN x, long prec)
 	      if (e <= -10)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
-		p2 = (GEN)ZX_factor(p5)[1];
+		p2 = gel(ZX_factor(p5),1);
 		f = Z_issquare(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
@@ -641,7 +641,7 @@ polgalois(GEN x, long prec)
           prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
-	p2=(GEN)ZX_factor(p5)[1];
+	p2=gel(ZX_factor(p5),1);
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
@@ -805,7 +805,7 @@ nfiso0(GEN a, GEN b, long fliso)
   else
   {
     if (vb == 0) setvarn(b, fetch_var());
-    y = (GEN)polfnf(a,b)[1]; lx = lg(y);
+    y = gel(polfnf(a,b),1); lx = lg(y);
     for (i=1; i<lx; i++)
     {
       if (lg(y[i]) != 4) { setlg(y,i); break; }
@@ -2205,7 +2205,7 @@ dirzetak0(GEN nf, long N0)
   {
     NEXT_PRIME_VIADIFF(court[2], d);
     if (umodiu(index, court[2])) /* court does not divide index */
-      { vect = (GEN) FpX_degfact(pol,court)[1]; lx = lg(vect); }
+      { vect = gel(FpX_degfact(pol,court),1); lx = lg(vect); }
     else
     {
       GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_VECSMALL);

@@ -2276,13 +2276,13 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     x = real_i(x); settyp(x, t_VEC);
     if (!gcmp0(im))
     {
-      U = (GEN)extendedgcd(im)[2];
+      U = gel(extendedgcd(im),2);
       setlg(U, lg(U)-1); /* remove last column */
       x = gmul(x, U);
       if (n == 2) /* x has a single component */
         return gcmp0(gel(x,1))? gel(U,1): cgetg(1, t_COL);
     }
-    x = (GEN)extendedgcd(x)[2];
+    x = gel(extendedgcd(x),2);
     x = gel(x,1);
     if (U) x = gmul(U, x);
     return gerepilecopy(av, x);
