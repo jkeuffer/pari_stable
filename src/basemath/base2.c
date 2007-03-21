@@ -2335,6 +2335,7 @@ modprinit(GEN nf, GEN pr, int zk)
       T = Q_primpart(gmul(basis, gel(pr,2)));
       basis = vecpermute(basis, c);
     }
+    T = FpX_red(T, p);
     ffproj = FpM_mul(get_proj_modT(basis, T, p), ffproj, p);
 
     res = cgetg(SMALLMODPR+1, t_COL);
