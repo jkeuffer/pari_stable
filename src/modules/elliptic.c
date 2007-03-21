@@ -1844,7 +1844,7 @@ ellintegralmodel(GEN e)
     {
       case t_INT: break;
       case t_FRAC: /* partial factorization */
-        L = shallowconcat(L, (GEN)auxdecomp(gel(u,2), 0)[1]);
+        L = shallowconcat(L, gel(auxdecomp(gel(u,2), 0),1));
         break;
       default: pari_err(talker, "not a rational curve in ellintegralmodel");
     }
@@ -1897,7 +1897,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   v = init_ch();
   c4 = gel(e,10);
   c6 = gel(e,11);
-  P = (GEN)Z_factor(gcdii(c4,c6))[1];
+  P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
   for (k = 1; k < l; k++)
   {
@@ -1935,10 +1935,10 @@ ellglobalred(GEN E)
   c4 = gel(e,10);
   c6 = gel(e,11);
   D  = gel(e,12);
-  P = (GEN)Z_factor(gcdii(c4,c6))[1];
+  P = gel(Z_factor(gcdii(c4,c6)),1);
   l = lg(P);
   for (k = 1; k < l; k++) (long)Z_pvalrem(D, gel(P,k), &D);
-  if (!is_pm1(D)) P = shallowconcat(P, (GEN)Z_factor(absi(D))[1]);
+  if (!is_pm1(D)) P = shallowconcat(P, gel(Z_factor(absi(D)),1));
   l = lg(P); c = N = gen_1;
   for (k = 1; k < l; k++)
   {
@@ -3395,7 +3395,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
     gsub(gadd(gel(e,4),gmul(x,gadd(shifti(gel(e,2),1),gmulsg(3,x)))),
          gmul(gel(e,1),y)) );
-  Lp = (GEN)Z_factor(gcdii(psi2,phi2))[1];
+  Lp = gel(Z_factor(gcdii(psi2,phi2)),1);
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {

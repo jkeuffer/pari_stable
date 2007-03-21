@@ -231,7 +231,7 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!umodiu(dpol,p)) continue; /* p divides dpol */
 
-    p1 = (GEN)FpX_degfact(pol,utoipos(p))[1];
+    p1 = gel(FpX_degfact(pol,utoipos(p)),1);
     l = lg(p1);
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
     for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */

@@ -657,7 +657,7 @@ Stelt(GEN nf, GEN J, GEN polrel)
   x = cgetg(3,t_VEC);
   gel(x,1) = RgXV_to_RgM(A, degpol(polrel));
   gel(x,2) = I;
-  return prodid(nf, (GEN)nfhermite(nf,x)[2]);
+  return prodid(nf, gel(nfhermite(nf,x),2));
 }
 
 static GEN
@@ -857,7 +857,7 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 static void
 compositum_red(compo_s *C, GEN P, GEN Q)
 {
-  GEN p, q, a, z = (GEN)compositum2(P, Q)[1];
+  GEN p, q, a, z = gel(compositum2(P, Q),1);
   long v;
   a = gel(z,1); v = varn(a);
   p = lift_intern(gel(z,2));

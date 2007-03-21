@@ -1378,7 +1378,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
       ap = utoipos(pp);
-      list = (GEN)FpX_factor(nfpol, ap)[1];
+      list = gel(FpX_factor(nfpol, ap),1);
       if (maxf == 1)
       { /* deg.1 factors are best */
         r = gel(list,1);
@@ -1466,7 +1466,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     GEN z, t;
     long i;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = (GEN)polfnf(polmod, nfpol)[1];
+    z = gel(polfnf(polmod, nfpol),1);
     if (fl) {
       long l = lg(z);
       for (i = 1; i < l; i++)

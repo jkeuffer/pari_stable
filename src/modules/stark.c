@@ -802,7 +802,7 @@ ComputeAllArtinNumbers(GEN dataCR, GEN vChar, int check, long prec)
 }
 static GEN
 SingleArtinNumber(GEN bnr, GEN chi, long prec)
-{ return (GEN)ArtinNumber(bnr, mkvec(chi), 1, prec)[1]; }
+{ return gel(ArtinNumber(bnr, mkvec(chi), 1, prec), 1); }
 
 /* compute the constant W of the functional equation of
    Lambda(chi). If flag = 1 then chi is assumed to be primitive */
@@ -1447,7 +1447,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
       if (condZ % p == 0) deg0(R,p);
       else
       {
-        pr = (GEN)primedec(nf, prime)[1];
+        pr = gel(primedec(nf, prime),1);
         deg11(R, p, bnr, pr);
       }
       break;
@@ -2336,7 +2336,7 @@ GenusField(GEN bnf)
       if (!pol)
 	pol = t;
       else
-	pol = (GEN)compositum(pol, t)[1];
+	pol = gel(compositum(pol, t),1);
 
       l = degpol(pol);
     }
@@ -2589,7 +2589,7 @@ quadhilbertreal(GEN D, long prec)
   disable_dbg(0);
 
   /* quick computation of the class number */
-  cl = itos((GEN)quadclassunit0(D, 0, NULL, prec)[1]);
+  cl = itos(gel(quadclassunit0(D, 0, NULL, prec),1));
   if (cl == 1) { disable_dbg(-1); avma = av; return pol_x(0); }
 
 START:
@@ -2742,7 +2742,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (flag < 0 || flag > 8) pari_err(flagerr,"bnrL1");
 
   /* compute bnr(conductor) */
-  if (!(flag & 2)) bnr = (GEN)conductor(bnr, NULL, 2)[2];
+  if (!(flag & 2)) bnr = gel(conductor(bnr, NULL, 2),2);
   cyc  = gmael(bnr, 5, 2);
   Mcyc = diagonal_i(cyc);
 

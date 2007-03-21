@@ -465,7 +465,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
   gmael(Lat,2,3) = ground(gmul(C,b));
   gmael(Lat,3,3) = ground(gmul(C,c));
 
-  Q = (GEN)lllint(Lat)[1];
+  Q = gel(lllint(Lat),1);
   if (gcmp0(gel(Q,3))) return NULL; /* FAIL */
 
   *eps = gadd(gadd(gel(Q,1), gmul(gel(Q,2),b)), gmul(gel(Q,3),c));
