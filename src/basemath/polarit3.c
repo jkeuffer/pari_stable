@@ -1705,36 +1705,6 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   *ptu = u; *ptv = v; return d;
 }
 
-/*x must be reduced*/
-GEN
-FpXQ_charpoly(GEN x, GEN T, GEN p)
-{
-  pari_sp ltop=avma;
-  long v=varn(T);
-  GEN R;
-  T = gcopy(T); setvarn(T, MAXVARN);
-  x = gcopy(x); setvarn(x, MAXVARN);
-  R = FpX_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
-  return gerepileupto(ltop,R);
-}
-
-GEN 
-FpXQ_minpoly(GEN x, GEN T, GEN p)
-{
-  pari_sp ltop=avma;
-  GEN G,R=FpXQ_charpoly(x, T, p);
-  GEN dR=FpX_deriv(R,p);
-  while (signe(dR)==0)
-  {
-    R  = poldeflate_i(R,itos(p));
-    dR = FpX_deriv(R,p);
-  } 
-  G=FpX_gcd(R,dR,p);
-  G=FpX_normalize(G,p);
-  G=FpX_div(R,G,p);
-  return gerepileupto(ltop,G);
-}
-
 /* return z = a mod q, b mod p (p,q) = 1. qinv = 1/q mod p */
 static GEN
 Fl_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)

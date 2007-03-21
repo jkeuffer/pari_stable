@@ -631,6 +631,45 @@ FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
 }
 
 GEN
+FpXQ_norm(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma; 
+  GEN y = FpX_resultant(T, x, p);
+  GEN L = leading_term(T);
+  if (gcmp1(L) || signe(x)==0) return y;
+  return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
+}
+
+GEN
+FpXQ_charpoly(GEN x, GEN T, GEN p)
+{
+  pari_sp ltop=avma;
+  long v=varn(T);
+  GEN R;
+  T = gcopy(T); setvarn(T, MAXVARN);
+  x = gcopy(x); setvarn(x, MAXVARN);
+  R = FpX_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
+  return gerepileupto(ltop,R);
+}
+
+GEN 
+FpXQ_minpoly(GEN x, GEN T, GEN p)
+{
+  pari_sp ltop=avma;
+  GEN G,R=FpXQ_charpoly(x, T, p);
+  GEN dR=FpX_deriv(R,p);
+  while (signe(dR)==0)
+  {
+    R  = poldeflate_i(R,itos(p));
+    dR = FpX_deriv(R,p);
+  } 
+  G=FpX_gcd(R,dR,p);
+  G=FpX_normalize(G,p);
+  G=FpX_div(R,G,p);
+  return gerepileupto(ltop,G);
+}
+
+GEN
 gener_FpXQ(GEN T, GEN p)
 {
   long i, j, vT = varn(T), f = degpol(T);
@@ -673,16 +712,6 @@ gener_FpXQ(GEN T, GEN p)
     if (i == j) break;
   }
   return gerepilecopy(av0, g);
-}
-
-GEN
-FpXQ_norm(GEN x, GEN T, GEN p)
-{
-  pari_sp av = avma; 
-  GEN y = FpX_resultant(T, x, p);
-  GEN L = leading_term(T);
-  if (gcmp1(L) || signe(x)==0) return y;
-  return gerepileupto(av, Fp_div(y, Fp_pows(L, degpol(x), p), p));
 }
 
 /*Not stack-clean*/
