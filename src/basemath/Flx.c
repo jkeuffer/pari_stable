@@ -245,10 +245,10 @@ Flx_red(GEN z, ulong p)
 }
 
 GEN
-Flx_rand(long d1, long v, ulong p)
+Flx_rand(long d1, long vs, ulong p)
 {
   long i, d = d1+2;
-  GEN y = cgetg(d,t_VECSMALL); y[1] = evalsigne(1) | evalvarn(v);
+  GEN y = cgetg(d,t_VECSMALL); y[1] = vs;
   for (i=2; i<d; i++) y[i] = random_Fl(p);
   return Flx_renormalize(y,d);
 }
@@ -1523,7 +1523,7 @@ Flxq_minpoly(GEN x, GEN T, ulong p)
 GEN
 gener_Flxq(GEN T, ulong p)
 {
-  long i, j, vT = varn(T), f = degpol(T);
+  long i, j, vT = T[1], f = degpol(T);
   ulong p_1 = p - 1;
   GEN g, L, L2, q = diviuexact(subis(powuu(p, f), 1), p_1);
   pari_sp av0 = avma, av;
