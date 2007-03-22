@@ -1406,7 +1406,7 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
-  if (!signe(n)) return Fl_to_Flx(1,varn(pol));
+  if (!signe(n)) return Fl_to_Flx(1,pol[1]);
   if (signe(n) < 0)
     x=Flxq_inv(x,pol,p);
   else
