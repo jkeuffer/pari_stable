@@ -61,6 +61,7 @@ BA 34- [Configure] spectacular failure to recognize gcc under some locales.
 BA 38- missing prototype for documented function FpX_div_by_X_x
    39- isprime(,0) very slow when primelimit is large [#546]
    40- nfmodprinit could create FpX's which were not reduced mod p
+   41- O(x^3)^(1/2) was O(x^2) instead of O(x)
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
