@@ -94,6 +94,7 @@ BA 14- function stirling (Stirling numbers of 1st and 2nd kind)
 BA 15- library function FpX_valrem()
    16- library function Flxq_gener
 BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
+BA 18- [toplevel benchmark] ffisom
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
