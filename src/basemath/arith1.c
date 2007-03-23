@@ -1932,9 +1932,9 @@ znorder(GEN x, GEN o)
     pari_err(talker,"not an element of (Z/nZ)* in order");
   if (!o)
     return gerepileuptoint(av, Fp_order(a, phi(b), b));
-  else if(typ(o) != t_INT) 
+  else if (typ(o) != t_INT)
     pari_err(arither1);
-  return Fp_order(a, phi(b), b);
+  return Fp_order(a, o, b);
 }
 GEN
 order(GEN x) { return znorder(x, NULL); }
