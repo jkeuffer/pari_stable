@@ -637,19 +637,19 @@ Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   pari_sp av = avma;
   GEN q,n_q,ordp;
 
-  if (gcmp1(a)) return gen_0; 
-  if (equaliu(p,2)) return gen_0;
-
-  ordp = subis(p, 1);
-  if (equalii(a, ordp) && mod2(ordp)) /* -1 */
-    return gerepileuptoint(av, shifti(ord,-1));
+  if (is_pm1(a)) return gen_0; 
+  /* p > 2 */
+  ordp = subis(p, 1); /* even */
+  if (equalii(a, ordp)) { avma = av; return shifti(ord,-1); } /* -1 */
   ordp = gcdii(ordp,ord);
 
-  if (!T) q = NULL;
-  else
+  q = NULL;
+  if (T)
   { /* we want < g > = Fp^* */
-    q = diviiexact(ord,ordp);
-    g = FpXQ_pow(g,q,T,p);
+    if (!equalii(ord,ordp)) { 
+      q = diviiexact(ord,ordp);
+      g = FpXQ_pow(g,q,T,p);
+    }
     g = constant_term(g);
   }
   n_q = Fp_log(a,g,ordp,p);

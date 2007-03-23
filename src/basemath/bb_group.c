@@ -42,7 +42,8 @@ gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
   }
   if (grp->cmp1(x)) {avma=av; return gen_0;}
   p1 = sqrti(q);
-  if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"order too large in Fp_shanks");
+  if (cmpiu(p1,LGBITS) >= 0)
+    pari_err(talker,"order too large in gen_Shanks_log");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = grp->pow(E,g0,gen_m1); p1 = x;
 
@@ -114,21 +115,26 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     e = itos(gel(ex,i));
     if (DEBUGLEVEL>5)
       fprintferr("Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
-    qj = new_chunk(e+1); gel(qj,0) = gen_1;
-    for (j=1; j<=e; j++) gel(qj,j) = mulii(gel(qj,j-1), q);
+    qj = new_chunk(e+1);
+    gel(qj,0) = gen_1;
+    gel(qj,1) = q;
+    for (j=2; j<=e; j++) gel(qj,j) = mulii(gel(qj,j-1), q);
     t0 = diviiexact(ord, gel(qj,e));
     a0 = grp->pow(E, a, t0);
     ginv0 = grp->pow(E, ginv, t0); /* order q^e */
-    g_q = grp->pow(E,g, diviiexact(ord,q)); /* order q */
+    g_q = grp->pow(E,g, mulii(t0, gel(qj,e-1))); /* order q */
     n_q = gen_0;
-    for (j=0; j<e; j++)
-    {
-      b = grp->mul(E,a0, grp->pow(E,ginv0, n_q));
-      b = grp->pow(E,b, gel(qj,e-1-j));
+    for (j=0;; j++)
+    { /* n_q = sum_{i<j} b_i q^i */
+      b = grp->pow(E,a0, gel(qj,e-1-j));
       b = gen_Shanks_log(b, g_q, q, E, grp, easy);
       n_q = addii(n_q, mulii(b, gel(qj,j)));
+      if (j == e-1) break;
+
+      a0 = grp->mul(E,a0, grp->pow(E,ginv0, b));
+      ginv0 = grp->pow(E,ginv0, q);
     }
-    gel(v,i) = gmodulo(n_q, gel(qj,e));
+    gel(v,i) = mkintmod(n_q, gel(qj,e));
   }
   return gerepileuptoint(av, lift(chinese1(v)));
 }
@@ -144,26 +150,32 @@ GEN
 gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
 {
   pari_sp av = avma;
-  long i, e;
-  GEN m, p;
+  long i;
+  GEN m;
 
   if (typ(o) == t_MAT)
   {
     m = o;
-    o= factorback(m,NULL);
+    o = factorback(m,NULL);
   }
   else
     m = Z_factor(o);
   for (i = lg(m[1])-1; i; i--)
   {
-    p = gcoeff(m,i,1); e = itos(gcoeff(m,i,2));
-    do
-    {
-      GEN o1 = diviiexact(o,p), y = grp->pow(E, a, o1);
-      if (!grp->cmp1(y)) break;
-      e--; o = o1;
+    GEN t, y, p = gcoeff(m,i,1);
+    long j, e = itos(gcoeff(m,i,2));
+    t = diviiexact(o, powiu(p,e));
+    y = grp->pow(E, a, t);
+    if (grp->cmp1(y)) o = t;
+    else {
+      for (j = 1; j < e; j++)
+      {
+        y = grp->pow(E, y, p);
+        if (grp->cmp1(y)) break;
+      }
+      if (j > 1) p = powiu(p, j);
+      o = mulii(t, p);
     }
-    while (e);
   }
   return gerepilecopy(av, o);
 }
@@ -184,17 +196,16 @@ gen_lgener(GEN l, long e, GEN r,GEN *zeta, void *E, const struct bb_group *grp)
   const pari_sp av1 = avma;
   GEN m, m1;
   long i;
-  while(1)
+  for (;; avma = av1)
   {
     m1 = m = grp->pow(E, grp->rand(E), r);
-    if (grp->cmp1(m)) { avma = av1; continue; }
+    if (grp->cmp1(m)) continue;
     for (i=1; i<e; i++)
     {
       m = grp->pow(E,m,l);
       if (grp->cmp1(m)) break;
     }
     if (i==e) break;
-    avma = av1;
   }
   *zeta = m; return m1;
 }
@@ -225,7 +236,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
       k++;
     } while(!grp->cmp1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = negi(gen_PH_log(z,m,l,E,grp,NULL));
+    dl = negi(gen_Shanks_log(z,m,l,E,grp,NULL));
     p1 = grp->pow(E,y, Fp_mul(dl,powiu(l,e-k-1),q));
     m = grp->pow(E,m,dl);
     e = k;
@@ -238,7 +249,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
       gerepileall(av,4, &y,&v,&w,&m);
     }
   }
-  return gerepilecopy(av,gcopy(v));
+  return gerepilecopy(av, v);
 }
 /* Return one solution of x^n = a in a cyclic group of order q
  *
