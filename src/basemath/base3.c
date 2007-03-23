@@ -1325,7 +1325,12 @@ FpXQ_Shanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
   GEN p1,smalltable,giant,perm,v,g0inv;
 
   if (!degpol(x))
-    return Fp_FpXQ_log(constant_term(x),g0,N,T,p);
+  {
+    x = constant_term(x);
+    if (is_pm1(x)) return gen_0;
+    /* since <x> = <g0>, g0 has degree 0 also ! */
+    return Fp_Shanks(x,constant_term(g0),N,p);
+  }
   p1 = sqrti(N);
   if (cmpiu(p1,LGBITS) >= 0) pari_err(talker,"module too large in FpXQ_Shanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
