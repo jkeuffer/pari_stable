@@ -1297,9 +1297,11 @@ Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
     if (!signe(a)) pari_err(talker,"a not invertible in Fp_FpXQ_log");
     avma = av; return gen_0;
   }
-  ordp = gcdii(subis(p, 1),ord);
+  ordp = subis(p, 1);
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
+
+  ordp = gcdii(ordp,ord);
 
   if (!T) q = NULL;
   else
