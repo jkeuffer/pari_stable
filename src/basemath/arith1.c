@@ -125,42 +125,6 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
   return f(x,y);
 }
 
-/*********************************************************************/
-/**                                                                 **/
-/**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/
-/**                                                                 **/
-/*********************************************************************/
-
-GEN
-znorder(GEN x, GEN o)
-{
-  pari_sp av = avma;
-  long i, e;
-  GEN m, p, b = gel(x,1), a = gel(x,2);
-
-  if (typ(x) != t_INTMOD || !gcmp1(gcdii(a,b)))
-    pari_err(talker,"not an element of (Z/nZ)* in order");
-  if (!o)
-    o = phi(b); 
-  else if(typ(o) != t_INT) pari_err(arither1);
-
-  m = Z_factor(o);
-  for (i = lg(m[1])-1; i; i--)
-  {
-    p = gcoeff(m,i,1); e = itos(gcoeff(m,i,2));
-    do
-    {
-      GEN o1 = diviiexact(o,p), y = Fp_pow(a, o1, b);
-      if (!is_pm1(y)) break;
-      e--; o = o1;
-    }
-    while (e);
-  }
-  return gerepilecopy(av, o);
-}
-GEN
-order(GEN x) { return znorder(x, NULL); }
-
 /******************************************************************/
 /*                                                                */
 /*                 GENERATOR of (Z/mZ)*                           */
@@ -1508,148 +1472,6 @@ Fp_sqrt(GEN a, GEN p)
   return gerepileuptoint(av, v);
 }
 
-/*******************************************************************/
-/*                                                                 */
-/*                       n-th ROOT MODULO p                        */
-/*                                                                 */
-/*******************************************************************/
-/* Assume l is prime. Return a non l-th power residue and set *zeta to a
- * primitive l-th root of 1.
- *
- * q = p-1 = l^e*r, e>=1, (r,l)=1
- * UNCLEAN */
-static GEN
-mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
-{
-  const pari_sp av1 = avma;
-  GEN m, m1;
-  long k, i;
-  for (k=2; ; k++)
-  {
-    m1 = m = Fp_pow(utoipos(k), r, p);
-    if (is_pm1(m)) { avma = av1; continue; }
-    for (i=1; i<e; i++)
-      if (gcmp1(m = Fp_pow(m,l,p))) break;
-    if (i==e) break;
-    avma = av1;
-  }
-  *zeta = m; return m1;
-}
-
-/* solve x^l = a mod (p), l prime
- *
- * q = p-1 = (l^e)*r, e >= 1, (r,l) = 1
- * y is not an l-th power, hence generates the l-Sylow of (Z/p)^*
- * m = y^(q/l) != 1 */
-static GEN
-Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
-{
-  pari_sp av = avma, tetpil,lim;
-  long k;
-  GEN p1, u1, u2, v, w, z, dl;
-
-  (void)bezout(r,l,&u1,&u2);
-  v = Fp_pow(a,u2,p);
-  w = Fp_pow(a,Fp_mul(negi(u1),r,q),p);
-  lim = stack_lim(av,1);
-  while (!is_pm1(w))
-  {
-    k = 0;
-    p1 = w;
-    do
-    { /* if p is not prime, this loop will not end */
-      z = p1; p1 = Fp_pow(p1,l,p);
-      k++;
-    } while(!is_pm1(p1));
-    if (k==e) { avma = av; return NULL; }
-    dl = Fp_log(Fp_inv(z,p),m,l,p);
-    p1 = Fp_pow(y, Fp_mul(dl,powiu(l,e-k-1),q), p);
-    m = Fp_pow(m,dl,p);
-    e = k;
-    v = Fp_mul(p1,v,p);
-    y = Fp_pow(p1,l,p);
-    w = Fp_mul(y,w,p);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrtl");
-      gerepileall(av,4, &y,&v,&w,&m);
-    }
-  }
-  tetpil=avma; return gerepile(av,tetpil,icopy(v));
-}
-/* a, n t_INT, p is prime. Return one solution of x^n = a mod p
-*
-* 1) If there is no solution, return NULL and if zetan!=NULL set *zetan=gen_0.
-*
-* 2) If there is a solution, there are exactly m of them [m = gcd(p-1,n) if
-* a != 0, and m = 1 otherwise].
-* If zetan!=NULL, *zetan is set to a primitive mth root of unity so that
-* the set of solutions is { x*zetan^k; k=0..m-1 } */
-GEN
-Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
-{
-  pari_sp ltop = avma, lbot = 0, lim;
-  GEN m, u1, u2, q, z;
-
-  if (typ(a) != t_INT || typ(n) != t_INT || typ(p)!=t_INT)
-    pari_err(typeer,"Fp_sqrtn");
-  if (!signe(n)) pari_err(talker,"1/0 exponent in Fp_sqrtn");
-  if (gcmp1(n)) { if (zetan) *zetan = gen_1; return icopy(a);}
-  a = modii(a,p);
-  if (gcmp0(a)) { if (zetan) *zetan = gen_1; avma = ltop; return gen_0;}
-  q = addsi(-1,p);
-  m = bezout(n,q,&u1,&u2);
-  z = gen_1;
-  lim = stack_lim(ltop,1);
-  if (!is_pm1(m))
-  {
-    GEN F = Z_factor(m);
-    long i, j, e;
-    GEN r, zeta, y, l;
-    pari_sp av1 = avma;
-    for (i = lg(F[1])-1; i; i--)
-    {
-      l = gcoeff(F,i,1);
-      j = itos(gcoeff(F,i,2));
-      e = Z_pvalrem(q,l,&r);
-      y = mplgenmod(l,e,r,p,&zeta);
-      if (zetan) z = Fp_mul(z, Fp_pow(y,powiu(l,e-j),p), p);
-      do
-      {
-	lbot = avma;
-	if (!is_pm1(a) || signe(a)<0)
-        {
-	  a = Fp_sqrtl(a,l,p,q,e,r,y,zeta);
-          if (!a) { avma = ltop; if (zetan) *zetan = gen_0; return NULL;}
-        }
-	else
-	  a = icopy(a);
-      } while (--j);
-      if (low_stack(lim, stack_lim(ltop,1)))
-      { /* n can have lots of prime factors*/
-	if(DEBUGMEM>1) pari_warn(warnmem,"Fp_sqrtn");
-        gerepileall(av1, zetan? 2: 1, &a, &z);
-	lbot = av1;
-      }
-    }
-  }
-  if (!equalii(m, n))
-  {
-    GEN b = modii(u1,q);
-    lbot = avma; a = Fp_pow(a,b,p);
-  }
-  if (zetan)
-  {
-    GEN *gptr[2];
-    *zetan = icopy(z);
-    gptr[0] = &a;
-    gptr[1] = zetan; gerepilemanysp(ltop,lbot,gptr,2);
-  }
-  else
-    a = gerepileuptoint(ltop, a);
-  return a;
-}
-
 /*********************************************************************/
 /**                                                                 **/
 /**                        GCD & BEZOUT                             **/
@@ -2066,6 +1888,101 @@ Fp_pow(GEN A, GEN k, GEN N)
     if (cmpii(y,N) >= 0) y = subii(y,N);
   }
   return gerepileuptoint(av,y);
+}
+
+static GEN
+_Fp_mul(void *E, GEN x, GEN y)
+{
+  return Fp_mul(x,y,(GEN)E);
+}
+
+static GEN
+_Fp_pow(void *E, GEN x, GEN n)
+{
+  return Fp_pow(x,n,(GEN)E);
+}
+
+static GEN
+_Fp_rand(void *E)
+{
+  return randomi((GEN)E);
+}
+
+const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,cmpii,gcmp1};
+
+/*********************************************************************/
+/**                                                                 **/
+/**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/
+/**                                                                 **/
+/*********************************************************************/
+
+GEN 
+Fp_order(GEN a, GEN o, GEN p)
+{
+  return gen_eltorder(a, o, (void*)p, &Fp_star);
+}
+
+GEN
+znorder(GEN x, GEN o)
+{
+  pari_sp av = avma;
+  GEN b = gel(x,1), a = gel(x,2);
+
+  if (typ(x) != t_INTMOD || !gcmp1(gcdii(a,b)))
+    pari_err(talker,"not an element of (Z/nZ)* in order");
+  if (!o)
+    return gerepileuptoint(av, Fp_order(a, phi(b), b));
+  else if(typ(o) != t_INT) 
+    pari_err(arither1);
+  return Fp_order(a, phi(b), b);
+}
+GEN
+order(GEN x) { return znorder(x, NULL); }
+
+/*********************************************************************/
+/**                                                                 **/
+/**               DISCRETE LOGARITHM  in  (Z/nZ)*  i                **/
+/**                                                                 **/
+/*********************************************************************/
+
+
+static GEN
+_Fp_easylog(void *E, GEN x, GEN g, GEN ord)
+{
+  GEN p1,p=(GEN)E;
+  if (is_pm1(x) || equaliu(p,2)) return gen_0;
+  p1 = addsi(-1, p); cgiv(p1);
+  if (equalii(p1,x) && mod2(ord)==0) 
+    return shifti(ord,-1);
+  return NULL;
+}
+
+GEN
+Fp_log(GEN a, GEN g, GEN ord, GEN p)
+{
+  return gen_PH_log(modii(a,p),modii(g,p),ord,(void*)p,&Fp_star,_Fp_easylog);
+}
+
+GEN
+znlog(GEN x, GEN g0)
+{
+  pari_sp av = avma;
+  GEN p = gel(g0,1);
+  if (typ(g0) != t_INTMOD) pari_err(talker,"not an element of (Z/pZ)* in znlog");
+  return gerepileuptoint(av, Fp_log(Rg_to_Fp(x,p),gel(g0,2),subis(p,1),p));
+}
+
+GEN
+Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
+{
+  a = modii(a,p);
+  if (!signe(a))
+  {
+    if (zeta)
+      *zeta=gen_1;
+    return gen_0;
+  }
+  return gen_Shanks_sqrtn(a,n,addis(p,-1),zeta,(void*)p,&Fp_star);
 }
 
 /*********************************************************************/

@@ -1387,6 +1387,10 @@ modulo \kbd{p} (smallest non-negative residue).
 modulo \kbd{m} is invertible, else return $0$ and set
 $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 
+\fun{GEN}{Fp_log}{GEN a, GEN g, GEN ord, GEN p} Let $g$ such that $g^ord=1
+\pmod{p}$. Return an integer $e$ such that $a^e=g \pmod{p}$. If $e$ does not
+exists, the result is currently undefined.
+
 \fun{GEN}{Fp_sqrt}{GEN x, GEN p} returns a square root of \kbd{x} modulo
 \kbd{p} (the smallest non-negative residue), where \kbd{x}, \kbd{p} are
 \typ{INT}s, and \kbd{p} is assumed to be prime. Return \kbd{NULL}
@@ -1885,6 +1889,15 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
+\fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let $g$ such that
+$g^ord=1$ in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$ does
+not exists, the result is currently undefined.
+
+\fun{GEN}{FpXQ_sqrtn}{GEN x, GEN n, GEN T, GEN p, GEN *zn} returns an
+\kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
+\kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
+primitive \kbd{n}-th root of the unity.
+
 \fun{GEN}{Fq_add}{GEN x, GEN y, GEN T/*unused*/, GEN p}
 
 \fun{GEN}{Fq_sub}{GEN x, GEN y, GEN T/*unused*/, GEN p}
@@ -2255,6 +2268,15 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
+
+\fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ such that
+$g^ord=1$ in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$ does
+not exists, the result is currently undefined.
+
+\fun{GEN}{Flxq_sqrtn}{GEN x, GEN n, GEN T, ulong p, GEN *zn} returns an
+\kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
+\kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
+primitive \kbd{n}-th root of $1$.  
 
 \fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
 polynomial of \kbd{x}

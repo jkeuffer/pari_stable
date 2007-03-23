@@ -78,13 +78,16 @@ GEN     Flxq_charpoly(GEN x, GEN T, ulong p);
 GEN     Flxq_div(GEN x, GEN y, GEN T, ulong p);
 GEN     Flxq_inv(GEN x,GEN T,ulong p);
 GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
+GEN     Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p);
 GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);
 GEN     Flxq_minpoly(GEN x, GEN T, ulong p);
 GEN     Flxq_mul(GEN x, GEN y, GEN T, ulong p);
 ulong   Flxq_norm(GEN x, GEN T, ulong p);
+GEN     Flxq_order(GEN a, GEN ord, GEN T, ulong p);
 GEN     Flxq_pow(GEN x, GEN n, GEN T, ulong p);
 GEN     Flxq_powers(GEN x, long l, GEN T, ulong p);
 GEN     Flxq_sqr(GEN y,GEN T,ulong p);
+GEN     Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zetan);
 GEN     FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v);
 GEN     FlxqX_normalize(GEN z, GEN T, ulong p);
 GEN     FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p);
@@ -108,6 +111,7 @@ GEN     zero_Flx(long sv);
 
 /* FpX.c */
 
+GEN     Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 GEN     FpX_Fp_add(GEN x, GEN y, GEN p);
 GEN     FpX_Fp_mul(GEN x, GEN y, GEN p);
@@ -135,10 +139,12 @@ GEN     FpXQ_charpoly(GEN x, GEN T, GEN p);
 GEN     FpXQ_div(GEN x,GEN y,GEN T,GEN p);
 GEN     FpXQ_inv(GEN x,GEN T,GEN p);
 GEN     FpXQ_invsafe(GEN x, GEN T, GEN p);
+GEN     FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
 GEN     FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l);
 GEN     FpXQ_minpoly(GEN x, GEN T, GEN p);
 GEN     FpXQ_mul(GEN y,GEN x,GEN T,GEN p);
 GEN     FpXQ_norm(GEN x, GEN T, GEN p);
+GEN     FpXQ_order(GEN a, GEN ord, GEN T, GEN p);
 GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
@@ -369,7 +375,9 @@ ulong   Fl_sqrt(ulong a, ulong p);
 GEN     Fp_div(GEN a, GEN b, GEN m);
 GEN     Fp_inv(GEN a, GEN m);
 GEN     Fp_invsafe(GEN a, GEN m);
+GEN     Fp_log(GEN a, GEN g, GEN ord, GEN p);
 GEN     Fp_mul(GEN a, GEN b, GEN m);
+GEN     Fp_order(GEN a, GEN o, GEN p);
 GEN     Fp_pow(GEN a, GEN n, GEN m);
 GEN     Fp_pows(GEN A, long k, GEN N);
 GEN     Fp_powu(GEN x, ulong k, GEN p);
@@ -439,6 +447,7 @@ GEN     regula(GEN x, long prec);
 GEN     seq_umul(ulong a, ulong b);
 long    uissquarerem(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
+GEN     znlog(GEN x, GEN g);
 GEN     znstar(GEN x);
 
 /* arith2.c */
@@ -604,8 +613,6 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
-GEN     FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
-GEN     Fp_log(GEN a, GEN g, GEN ord, GEN p);
 int     RgV_isscalar(GEN x);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     arch_to_perm(GEN arch);
@@ -656,7 +663,6 @@ GEN     zidealstar(GEN nf, GEN x);
 GEN     zidealstarinit(GEN nf, GEN x);
 GEN     Idealstar(GEN nf, GEN x,long flun);
 GEN     zidealstarinitgen(GEN nf, GEN x);
-GEN     znlog(GEN x, GEN g);
 GEN     zsigne(GEN nf,GEN alpha,GEN arch);
 GEN     zsigns(GEN nf,GEN alpha);
 

@@ -1145,7 +1145,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (zetan) { z = cgetg(3,t_INTMOD); gel(z,1) = gel(y,1); }
     gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
     if (!y[2]) {
-      if (zetan) return gen_0;
+      if (zetan) {avma=av; return gen_0;}
       pari_err(talker,"nth-root does not exist in gsqrtn");
     }
     if (zetan) { gel(z,2) = *zetan; *zetan = z; }

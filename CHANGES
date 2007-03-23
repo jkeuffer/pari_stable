@@ -95,6 +95,8 @@ BA 15- library function FpX_valrem()
    16- library function Flxq_gener
 BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
 BA 18- [toplevel benchmark] ffisom
+BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn, 
+       Flxq_order, Flxq_log, Flxq_sqrtn 
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 

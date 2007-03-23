@@ -253,6 +253,12 @@ Flx_rand(long d1, long vs, ulong p)
   return Flx_renormalize(y,d);
 }
 
+static int
+Flx_cmp1(GEN x)
+{
+  return degpol(x)==0 && x[2]==1;
+}
+
 GEN
 Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
@@ -1482,6 +1488,52 @@ GEN
 Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 {
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
+}
+
+static GEN
+_Flxq_pow(void *data, GEN x, GEN n)
+{
+  Flxq_muldata *D = (Flxq_muldata*)data;
+  return Flxq_pow(x,n, D->pol, D->p);
+}
+
+static GEN
+_Flxq_rand(void *data)
+{
+  Flxq_muldata *D = (Flxq_muldata*)data;
+  return Flx_rand(degpol(D->pol),D->pol[1],D->p);
+}
+
+const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,vecsmall_lexcmp,Flx_cmp1};
+
+GEN
+Flxq_order(GEN a, GEN ord, GEN T, ulong p)
+{ 
+  Flxq_muldata E;
+  E.pol=T; E.p=p;
+  return gen_eltorder(a,ord,(void*)&E,&Flxq_star);
+}
+
+GEN
+Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
+{ 
+  Flxq_muldata E;
+  E.pol=T; E.p=p;
+  return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,NULL);
+}
+
+GEN
+Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
+{ 
+  Flxq_muldata E;
+  if (!lgpol(a))
+  {
+    if (zeta)
+      *zeta=Fl_to_Flx(1,T[1]);
+    return zero_Flx(T[1]);
+  }
+  E.pol=T; E.p=p;
+  return gen_Shanks_sqrtn(a,n,addis(powuu(p,degpol(T)),-1),zeta,(void*)&E,&Flxq_star);
 }
 
 ulong
