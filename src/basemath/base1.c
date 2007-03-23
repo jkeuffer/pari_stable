@@ -1876,7 +1876,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     }
   }
 
-  if (firstprim > 1)
+  if (firstprim != 1)
   {
     inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
     V = gel(inv,1);
