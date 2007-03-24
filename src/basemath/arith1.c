@@ -1949,11 +1949,17 @@ order(GEN x) { return znorder(x, NULL); }
 static GEN
 _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
 {
+  pari_sp av = avma;
   GEN p1,p=(GEN)E;
-  if (is_pm1(x) || equaliu(p,2)) return gen_0;
-  p1 = addsi(-1, p); cgiv(p1);
-  if (equalii(p1,x) && mod2(ord)==0) 
-    return shifti(ord,-1);
+  if (is_pm1(x)) return gen_0;
+  /* p > 2 */
+  p1 = addsi(-1, p); 
+  if (equalii(p1,x))  /* -1 */
+  { 
+    ord = (typ(ord)==t_MAT) ? factorback(ord,NULL) : ord; 
+    return gerepileupto(av, shifti(ord,-1)); 
+  }
+  avma = av;
   return NULL;
 }
 

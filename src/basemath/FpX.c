@@ -630,18 +630,45 @@ FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
   return RgXV_to_RgM(FpXQ_powers(y,m-1,P,l),n);
 }
 
+static GEN
+famat_Z_gcd(GEN M, GEN n)
+{
+  pari_sp av=avma;
+  long i, j, l=lg(M[1]);
+  GEN F=cgetg(3,t_MAT);
+  gel(F,1)=cgetg(l,t_COL);
+  gel(F,2)=cgetg(l,t_COL);
+  for (i=1, j=1; i<l; i++)
+  {
+    GEN p = gcoeff(M,i,1);
+    GEN e = gminsg(Z_pval(n,p),gcoeff(M,i,2));
+    if (signe(e))
+    {
+      gcoeff(F,j,1)=p;
+      gcoeff(F,j,2)=e;
+      j++;
+    }
+  }
+  setlg(gel(F,1),j); setlg(gel(F,2),j);
+  return gerepilecopy(av,F);
+}
+
 /* discrete log in FpXQ for a in Fp^*, g in FpXQ^* of order ord */
 GEN
-Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
+Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN q,n_q,ordp;
+  GEN q,n_q,ord,ordp, op;
 
   if (is_pm1(a)) return gen_0; 
   /* p > 2 */
+
+  ord  = typ(o)==t_MAT ? factorback(o, NULL) : o;
   ordp = subis(p, 1); /* even */
-  if (equalii(a, ordp)) { avma = av; return shifti(ord,-1); } /* -1 */
+  if (equalii(a, ordp)) /* -1 */
+    return gerepileupto(av, shifti(ord,-1)); 
   ordp = gcdii(ordp,ord);
+  op = typ(o)==t_MAT ? famat_Z_gcd(o,ordp) : ordp;
 
   q = NULL;
   if (T)
@@ -652,7 +679,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
     }
     g = constant_term(g);
   }
-  n_q = Fp_log(a,g,ordp,p);
+  n_q = Fp_log(a,g,op,p);
   if (q) n_q = mulii(q, n_q);
   return gerepileuptoint(av, n_q);
 }
