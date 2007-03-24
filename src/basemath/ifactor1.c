@@ -3498,7 +3498,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
 
   /* create sort permutation from the values of the factors */
   for (j=nf; j; j--) auxvec[j] = facvec[3*j-2]; /* just the pointers */
-  sorted = sindexsort(auxvec);
+  sorted = indexsort(auxvec);
   /* and readjust the result for the triple spacing */
   for (j=nf; j; j--) sorted[j] = 3*sorted[j]-2;
 

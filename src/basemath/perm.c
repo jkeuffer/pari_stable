@@ -385,7 +385,7 @@ vecvecsmall_sort(GEN x)
 GEN
 vecvecsmall_indexsort(GEN x)
 {
-  return gen_sort(x, cmp_IND | cmp_C, vecsmall_lexcmp);
+  return gen_sort(x, cmp_IND, vecsmall_lexcmp);
 }
 
 long

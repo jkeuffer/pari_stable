@@ -1241,7 +1241,7 @@ famat_reduce(GEN fa)
   if (lg(fa) == 1) return fa;
   g = gel(fa,1); l = lg(g);
   e = gel(fa,2);
-  L = gen_sort(g, cmp_IND|cmp_C, &elt_cmp);
+  L = gen_sort(g, cmp_IND, &elt_cmp);
   G = cgetg(l, t_COL);
   E = cgetg(l, t_COL);
   /* merge */
@@ -2408,7 +2408,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   w = Q_remove_denom(w, &den);
   if (den)
   {
-    GEN p = gen_sort(x, cmp_IND|cmp_C, &cmp_prime_ideal);
+    GEN p = gen_sort(x, cmp_IND, &cmp_prime_ideal);
     GEN fa = idealfactor(nf, den); /* sorted */
     L = vecpermute(L, p);
     e = vecpermute(e, p);

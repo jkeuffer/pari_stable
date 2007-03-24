@@ -113,7 +113,7 @@ sort_factor_gen_aux(GEN y, void *data, int (*cmp)(void *,GEN,GEN))
   GEN a,b,A,B,w;
   a = gel(y,1); n = lg(a); A = new_chunk(n);
   b = gel(y,2);            B = new_chunk(n);
-  w = gen_sort_aux(a, cmp_IND | cmp_C, data, cmp);
+  w = gen_sort_aux(a, cmp_IND, data, cmp);
   for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
   for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
   avma = av; return y;
@@ -128,7 +128,7 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
   GEN a,b,A,B,w;
   a = gel(y,1); n = lg(a); A = new_chunk(n);
   b = gel(y,2);            B = new_chunk(n);
-  w = gen_sort(a, cmp_IND | cmp_C, cmp);
+  w = gen_sort(a, cmp_IND, cmp);
   for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
   for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
   avma = av; return y;
@@ -148,7 +148,7 @@ sort_vecpol_gen(GEN a, int (*cmp)(GEN,GEN))
   pari_sp av = avma;
   GEN A,w;
   n = lg(a); A = new_chunk(n);
-  w = gen_sort_aux(a, cmp_IND | cmp_C,(void*)cmp, polcmp);
+  w = gen_sort_aux(a, cmp_IND,(void*)cmp, polcmp);
   for (i=1; i<n; i++) A[i] = a[w[i]];
   for (i=1; i<n; i++) a[i] = A[i];
   avma = av; return a;

@@ -97,10 +97,12 @@ BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
 BA 18- [toplevel benchmark] ffisom
 BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn, 
        Flxq_order, Flxq_log, Flxq_sqrtn 
+   20- indexrank, indexsort and indexlexsort now return t_VECSMALLs
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
     2- pariemacs support from Configure
+    3- obsolete functions sindexsort, sindexlexsort, sindexrank
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.0 (released 06/10/2006):

@@ -3286,7 +3286,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (U) U = matid(n);
 
   /* square, maximal rank n */
-  p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &negcmpii);
+  p1 = gen_sort(mattodiagonal_i(x), cmp_IND, &negcmpii);
   ys = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(ys,j) = vecpermute(gel(x, p1[j]), p1);
   x = ys;

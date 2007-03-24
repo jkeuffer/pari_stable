@@ -6973,7 +6973,7 @@ vectors $y$ and $z$ of length $r$ giving a list of rows and columns
 respectively (starting from 1) such that the extracted matrix obtained from
 these two vectors using $\tet{vecextract}(x,y,z)$ is invertible.
 
-\syn{indexrank}{x}.
+\syn{indexrank}{x}. The two components $y$ and $z$ are \typ{VECSMALL}s.
 
 \subsecidx{matintersect}$(x,y)$: $x$ and $y$ being two matrices with the same
 number of rows each of whose columns are independent, finds a basis of the
@@ -7451,12 +7451,10 @@ use the simpler functions
 
 \funs{sort}{x} (= \funs{vecsort0}{x,\kbd{NULL},0}).
 
-\funs{indexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},1}).
+\funs{indexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},1}). This function
+returns a \typ{VECSMALL} $v$, where $v[1]\dots v[n]$ contain the indices.
 
 \funs{lexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},2}).
-
-Also available are \funs{sindexsort}{x} and \funs{sindexlexsort}{x} which
-return a \typ{VECSMALL} $v$, where $v[1]\dots v[n]$ contain the indices.
 
 \subsecidx{vector}$(n,\{X\},\{\var{expr}=0\})$: creates a row vector (type
 \typ{VEC}) with $n$ components whose components are the expression

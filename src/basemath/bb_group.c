@@ -56,7 +56,7 @@ gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
   }
   giant = grp->mul(E,x,grp->pow(E, p1, gen_m1));
   p1=cgetg(lbaby+1,t_VEC);
-  perm = gen_sort(smalltable, cmp_IND | cmp_C, grp->cmp);
+  perm = gen_sort(smalltable, cmp_IND, grp->cmp);
   for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
   smalltable=p1; p1=giant;
 

@@ -2422,7 +2422,7 @@ Flm_indexrank(GEN x, ulong p)
 
 /* if p != NULL, assume x integral and compute rank over Fp */
 static GEN
-indexrank0(GEN x, GEN p, int vecsmall)
+indexrank0(GEN x, GEN p)
 {
   pari_sp av = avma;
   long i,j,n,r;
@@ -2435,8 +2435,8 @@ indexrank0(GEN x, GEN p, int vecsmall)
   n = lg(x)-1; r = n - r;
 
   avma=av; res=cgetg(3,t_VEC);
-  p1 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); gel(res,1) = p1;
-  p2 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); gel(res,2) = p2;
+  p1 = cgetg(r+1,t_VECSMALL); gel(res,1) = p1;
+  p2 = cgetg(r+1,t_VECSMALL); gel(res,2) = p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
@@ -2444,22 +2444,14 @@ indexrank0(GEN x, GEN p, int vecsmall)
     gpfree(d);
     qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
   }
-  if (!vecsmall)
-    for (i=1;i<=r;i++) {
-      gel(p1,i) = utoipos(p1[i]);
-      gel(p2,i) = utoipos(p2[i]);
-    }
   return res;
 }
 
 GEN
-indexrank(GEN x) { return indexrank0(x,NULL,0); }
+indexrank(GEN x) { return indexrank0(x,NULL); }
 
 GEN
-sindexrank(GEN x) { return indexrank0(x,NULL,1); }
-
-GEN
-FpM_indexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
+FpM_indexrank(GEN x, GEN p) { return indexrank0(x,p); }
 
 /*******************************************************************/
 /*                                                                 */

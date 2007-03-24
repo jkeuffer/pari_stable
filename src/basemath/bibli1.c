@@ -3427,7 +3427,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         if (check)
         {
           pari_sp av2 = avma;
-          GEN per = sindexsort(norms);
+          GEN per = indexsort(norms);
           if (DEBUGLEVEL) fprintferr("sorting...\n");
           for (j = 0, i = 1; i <= s; i++)
           { /* let N be the minimal norm so far for x satisfying 'check'. Keep
@@ -3473,7 +3473,7 @@ END:
   {
     GEN per, alph, pols, p;
     if (DEBUGLEVEL) fprintferr("final sort & check...\n");
-    setlg(norms,stockmax+1); per = sindexsort(norms);
+    setlg(norms,stockmax+1); per = indexsort(norms);
     alph = cgetg(stockmax+1,t_VEC);
     pols = cgetg(stockmax+1,t_VEC);
     for (j=0,i=1; i<=stockmax; i++)
@@ -3564,7 +3564,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   vnorm = cgetg(l,t_VEC);
   for (j=1; j<l; j++) gel(vnorm,j) = gnorml2(gel(rinvtrans,j));
   rperm = cgetg(l,t_MAT);
-  uperm = cgetg(l,t_MAT); perm = sindexsort(vnorm);
+  uperm = cgetg(l,t_MAT); perm = indexsort(vnorm);
   for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
   u = uperm;
   r = rperm; res = NULL;

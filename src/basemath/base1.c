@@ -1951,7 +1951,7 @@ findmindisc(GEN *py, GEN *pa)
 
   discs = cgetg(l,t_VEC);
   for (i=1; i<l; i++) gel(discs,i) = absi(ZX_disc(gel(y,i)));
-  v = sindexsort(discs);
+  v = indexsort(discs);
   k = v[1];
   dmin = gel(discs,k);
   z    = gel(y,k);

@@ -1728,7 +1728,7 @@ listsort(GEN L, long flag)
 
   if (typ(L) != t_LIST) pari_err(typeer,"listsort");
   if (lx < 2) return L;
-  perm = sindexlexsort(L);
+  perm = indexlexsort(L);
   l = cgetg(lx,t_VEC); vec = L+1;
   for (i=1; i<lx; i++) l[i] = vec[perm[i]];
   if (flag)

@@ -17,6 +17,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     so that e.eta = 2 ellzeta(e,e.omega/2)
   - Change e.omega so that e.omega[1] / e.omega[2] belongs to the Poincare
     half plane [ used to be the inverse ]. 
+  - indexrank, indexsort andindexlexsort now return t_VECSMALLs
 
 * Specific to the PARI library:
 ===============================

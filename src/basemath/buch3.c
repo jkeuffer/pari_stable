@@ -1782,7 +1782,7 @@ factormul(GEN fa1,GEN fa2)
   GEN p, pnew, e, enew, v, P, y = concat_factor(fa1,fa2);
   long i, c, lx;
 
-  p = gel(y,1); v = sindexsort(p); lx = lg(p);
+  p = gel(y,1); v = indexsort(p); lx = lg(p);
   e = gel(y,2);
   pnew = vecpermute(p, v);
   enew = vecpermute(e, v);
@@ -2301,7 +2301,7 @@ subgroupcond(GEN bnr, GEN indexbound)
   /* sort by increasing index */
   lidet = cgetg(l,t_VEC);
   for (i=1; i<l; i++) gel(lidet,i) = dethnf_i(gel(li,i));
-  perm = sindexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
+  perm = indexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
   for (i=1; i<l; i++) li[i] = p1[perm[l-i]];
   return gerepilecopy(av,li);
 }

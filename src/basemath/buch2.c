@@ -228,7 +228,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
     }
   }
   /* perm sorts LP by increasing norm */
-  perm = sindexsort(y);
+  perm = indexsort(y);
   no  = cgetg(lv, t_VECSMALL); ino  = 1;
   yes = cgetg(lv, t_VECSMALL); iyes = 1;
   prod = 1.0;
@@ -2223,7 +2223,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet2 = (i <= 4)? mdet: gprec_w(mdet,i-1);
-  v = gel(sindexrank(mdet2),2); /* list of independent column indices */
+  v = gel(indexrank(mdet2),2); /* list of independent column indices */
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
