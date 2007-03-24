@@ -772,9 +772,8 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   {
     FpX_muldata s;  
     s.pol=T; s.p=p;
-    GEN z = gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
+    return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
         (void*)&s,&FpXQ_star);
-    return z;
   }
 }
 
