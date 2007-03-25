@@ -75,6 +75,7 @@ BA  7- rename ZY_ZXY_resultant -> ZX_ZXY_resultant, ZY_ZXY_rnfequation ->
        ZX_ZXY_rnfequation and FpY_FpXY_resultant -> FpX_FpXY_resultant.
 BA  8- FpV_polint() now take a variable number as last parameter.
     9- use Miller-Rabin-like improvement in znprimroot and FpXQ_gener
+   10- indexrank, indexsort and indexlexsort now return t_VECSMALLs
 
   Added
 BA  1- derivnum(x=a,expr) for numerical derivations
@@ -97,7 +98,6 @@ BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
 BA 18- [toplevel benchmark] ffisom
 BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn, 
        Flxq_order, Flxq_log, Flxq_sqrtn 
-   20- indexrank, indexsort and indexlexsort now return t_VECSMALLs
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
