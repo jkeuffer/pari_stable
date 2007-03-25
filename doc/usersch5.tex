@@ -3038,6 +3038,7 @@ monomial in its main variable, 0~otherwise.
 \subsec{Sorting}
 
 \subsubsec{Basic sort}
+
 \fun{GEN}{sort}{GEN x} sorts the vector \kbd{x} in ascending order using a
 mergesort algorithm, and \kbd{gcmp} as the undelying comparison routine
 (returns the sorted vector). This routine copies all components of $x$, use
@@ -3065,27 +3066,26 @@ instead of \kbd{gcmp} as the underlying comparison routine.
 \fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
 returns the permutation that would sort the vector \kbd{x}.
 
-\subsubsec{Generic routines}
+\subsubsec{Generic routines}. The following routines allow to use an
+arbitrary comparison function \kbd{int (*cmp)(void* data, GEN x, GEN y)},
+such that \kbd{cmp(data,x,y)} returns a negative result if $x
+< y$, a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is
+there in case your \kbd{cmp} requires additional context.
 
-The following routines allows to use an arbitrary comparison function
-\kbd{int (*cmp)(void* data, GEN x, GEN y)}
-it is assumed that \kbd{cmp(data,x,y)} returns a negative result if $x < y$,
-a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is there
-in case your \kbd{cmp} requires additional context.
+\fun{GEN}{gen_sort}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as \kbd{sort}.
 
-\fun{GEN}{gen_sort}{GEN x, void *E, int (*cmp)(void *,GEN,GEN)}, as \kbd{sort}.
-
-\fun{GEN}{gen_indexsort}{GEN x, void *E, int (*cmp)(void*,GEN,GEN)},
+\fun{GEN}{gen_indexsort}{GEN x, void *data, int (*cmp)(void*,GEN,GEN)},
 as \kbd{indexsort}.
 
-\fun{void}{gen_sort_inplace}{GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN
-*perm}: sorts \kbd{x} in place, without copying its components. If
+\fun{void}{gen_sort_inplace}{GEN x, void *data, int (*cmp)(void*,GEN,GEN), GEN
+*perm} sorts \kbd{x} in place, without copying its components. If
 \kbd{perm} is non-\kbd{NULL}, it is set to the permutation that would sort
 the original \kbd{x}.
 
 \fun{GEN}{sort_factor}{GEN y, void *data, int (*cmp)(void *,GEN,GEN)}:
-assuming \kbd{y} is a factorization matrix, sorts its rows according to the
-comparison function \kbd{cmp} applied to its first column.
+assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
+is made) according to the comparison function \kbd{cmp} applied to its first
+column. 
 
 \fun{int}{cmp_nodata}{void *data, GEN x, GEN y}. This function is a hack
 used to pass an existing basic comparison function lacking the \kbd{data}
