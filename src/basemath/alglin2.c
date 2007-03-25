@@ -3197,7 +3197,7 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 }
 
 static int
-negcmpii(GEN x, GEN y) { return -cmpii(x,y); }
+negcmpii(void *E, GEN x, GEN y) { (void)E; return -cmpii(x,y); }
 
 /* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
  * to that D = UXV */
@@ -3286,7 +3286,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (U) U = matid(n);
 
   /* square, maximal rank n */
-  p1 = gen_sort(mattodiagonal_i(x), cmp_IND, &negcmpii);
+  p1 = gen_indexsort(mattodiagonal_i(x), NULL, &negcmpii);
   ys = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(ys,j) = vecpermute(gel(x, p1[j]), p1);
   x = ys;

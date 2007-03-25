@@ -730,7 +730,7 @@ aux_end(GEN n, long nb)
   }
   gel(z,1) = P;
   gel(z,2) = E;
-  return sort_factor_gen(z, absi_cmp);
+  return sort_factor(z, (void*)&absi_cmp, cmp_nodata);
 }
 
 static GEN

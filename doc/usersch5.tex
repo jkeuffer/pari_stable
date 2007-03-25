@@ -3035,6 +3035,65 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
 \fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
 monomial in its main variable, 0~otherwise.
 
+\subsec{Sorting}
+
+\subsubsec{Basic sort}
+\fun{GEN}{sort}{GEN x} sorts the vector \kbd{x} in ascending order using a
+mergesort algorithm, and \kbd{gcmp} as the undelying comparison routine
+(returns the sorted vector). This routine copies all components of $x$, use
+\kbd{gen\_sort\_inplace} for a more memory-efficient function.
+
+\fun{GEN}{lexsort}{GEN x}, as \kbd{sort}, using \kbd{lexcmp} instead of
+\kbd{gcmp} as the underlying comparison routine.
+
+\fun{GEN}{vecsort}{GEN x, GEN k}, as \kbd{sort}, but sorts the
+vector \kbd{x} in ascending \emph{lexicographic} order, according to the
+entries of the \typ{VECSMALL} \kbd{k}. For example,  if $\kbd{k} = [2,1,3]$,
+sorting will be done with respect to the second component,  and when these
+are  equal, with respect to the first,  and when these are equal,  with
+respect to the third.                                                           
+
+\subsubsec{Indirect sorting}
+
+\fun{GEN}{indexsort}{GEN x} as \kbd{sort}, but only returns the permutation
+which, applied to \kbd{x}, would sort the vector. The result is a
+\typ{VECSMALL}.
+
+\fun{GEN}{indexlexsort}{GEN x}, as \kbd{indexsort}, using \kbd{lexcmp}
+instead of \kbd{gcmp} as the underlying comparison routine.
+
+\fun{GEN}{indexvecsort}{GEN x, GEN k}, as \kbd{vecsort}, but only
+returns the permutation that would sort the vector \kbd{x}.
+
+\subsubsec{Generic routines}
+
+The following routines allows to use an arbitrary comparison function
+\kbd{int (*cmp)(void* data, GEN x, GEN y)}
+it is assumed that \kbd{cmp(data,x,y)} returns a negative result if $x < y$,
+a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is there
+in case your \kbd{cmp} requires additional context.
+
+\fun{GEN}{gen_sort}{GEN x, void *E, int (*cmp)(void *,GEN,GEN)}, as \kbd{sort}.
+
+\fun{GEN}{gen_indexsort}{GEN x, void *E, int (*cmp)(void*,GEN,GEN)},
+as \kbd{indexsort}.
+
+\fun{void}{gen_sort_inplace}{GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN
+*perm}: sorts \kbd{x} in place, without copying its components. If
+\kbd{perm} is non-\kbd{NULL}, it is set to the permutation that would sort
+the original \kbd{x}.
+
+\fun{GEN}{sort_factor}{GEN y, void *data, int (*cmp)(void *,GEN,GEN)}:
+assuming \kbd{y} is a factorization matrix, sorts its rows according to the
+comparison function \kbd{cmp} applied to its first column.
+
+\fun{int}{cmp_nodata}{void *data, GEN x, GEN y}. This function is a hack
+used to pass an existing basic comparison function lacking the \kbd{data}
+argument, i.e. with prototype \kbd{int (*cmp)(GEN x, GEN y)}. Instead of
+\kbd{gen\_sort(x, NULL, cmp)} which may or may not work depending on how your
+compiler handles typecasts between incompatible function pointers, one should
+use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
+
 \subsec{Generic unary operators}
 
 \funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
@@ -3261,11 +3320,10 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 
 \subsec{Low-level vectors and columns functions}
 
-Theses functions handle \typ{VEC} as an abstract container type
-of \kbd{GEN}s. No specific meaning is attached to the content.
-
-They accept both \typ{VEC} and \typ{COL} as input, but \kbd{col} functions
-always return \typ{COL} and \kbd{vec} functions always return \typ{VEC}.
+Theses functions handle \typ{VEC} as an abstract container type of
+\kbd{GEN}s. No specific meaning is attached to the content. They accept both
+\typ{VEC} and \typ{COL} as input, but \kbd{col} functions always return
+\typ{COL} and \kbd{vec} functions always return \typ{VEC}.
 
 \misctitle{Note.} All the functions below are shallow.
 

@@ -45,20 +45,17 @@ gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
   if (cmpiu(p1,LGBITS) >= 0)
     pari_err(talker,"order too large in gen_Shanks_log");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
-  g0inv = grp->pow(E,g0,gen_m1); p1 = x;
+  g0inv = grp->pow(E,g0,gen_m1);
 
-  for (i=1;;i++)
+  for (p1=x, i=1;;i++)
   {
     av1 = avma;
     if (grp->cmp1(p1)) { avma = av; return stoi(i-1); }
     gel(smalltable,i) = p1; if (i==lbaby) break;
     p1 = gerepileupto(av1, grp->mul(E,p1,g0inv));
   }
-  giant = grp->mul(E,x,grp->pow(E, p1, gen_m1));
-  p1=cgetg(lbaby+1,t_VEC);
-  perm = gen_sort(smalltable, cmp_IND, grp->cmp);
-  for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
-  smalltable=p1; p1=giant;
+  p1 = giant = grp->mul(E,x,grp->pow(E, p1, gen_m1));
+  gen_sort_inplace(smalltable, (void*)grp->cmp, &cmp_nodata, &perm);
 
   av1 = avma; lim=stack_lim(av1,2);
   for (k=1;;k++)

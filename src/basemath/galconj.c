@@ -89,7 +89,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
     }
   }
   setlg(y, 1 + nbauto);
-  return gerepileupto(av, gen_sort(y, 0, cmp_pol));
+  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &cmp_pol_aux));
 }
 
 GEN
@@ -145,7 +145,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
     }
   }
   setlg(y, 1 + nbauto);
-  return gerepileupto(av, gen_sort(y, 0, cmp_pol));
+  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &cmp_pol_aux));
 }
 /*************************************************************************/
 /**									**/
@@ -1084,7 +1084,7 @@ listznstarelts(long m, long p)
       gel(res,k++) = znstar_hnf_elts(zns,gel(lss,i));
   }
   setlg(res,k);
-  return gerepileupto(ltop, gen_sort(res,0,&pari_compare_lg));
+  return gerepileupto(ltop,gen_sort(res, (void*)&pari_compare_lg, &cmp_nodata));
 }
 /* A sympol is a symmetric polynomial
  *
@@ -2867,7 +2867,7 @@ galoisconj4(GEN T, GEN den, long flag)
   aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
   if (DEBUGLEVEL >= 1)
     msgtimer("Computation of polynomials");
-  return gerepileupto(ltop, gen_sort(aut, 0, cmp_pol));
+  return gerepileupto(ltop, gen_sort(aut, (void*)&gcmp, &cmp_pol_aux));
 }
 
 /* Heuristic computation of #Aut(T), pdepart first prime to be tested */

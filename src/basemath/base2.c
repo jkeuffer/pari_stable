@@ -2193,7 +2193,7 @@ primedec(GEN nf, GEN p)
   pari_sp av = avma;
   if (typ(p) != t_INT) pari_err(typeer, "primedec");
   return gerepileupto(av, gen_sort(_primedec(checknf(nf),p),
-                                   0, cmp_prime_over_p));
+                                   (void*)&cmp_prime_over_p, &cmp_nodata));
 }
 
 /* return [Fp[x]: Fp] */
@@ -3318,7 +3318,7 @@ polcompositum0(GEN A, GEN B, long flall)
   }
   else
     C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
-  C = sort_vecpol(C, &cmpii);
+  gen_sort_inplace(C, (void*)&cmpii, &cmp_pol_aux, NULL);
   if (flall)
   {
     long i,l = lg(C);

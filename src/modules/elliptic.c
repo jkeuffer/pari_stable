@@ -327,7 +327,7 @@ padic_initell(GEN y, GEN p, long prec)
 }
 
 static int
-invcmp(GEN x, GEN y) { return -gcmp(x,y); }
+invcmp(void *E, GEN x, GEN y) { (void)E; return -gcmp(x,y); }
 
 static void
 set_dummy(GEN y) {
@@ -387,7 +387,7 @@ initell0(GEN x, long prec)
   if (e > 0) PREC += nbits2nlong(e >> 1);
   R = cleanroots(RHSpol(y), PREC);
   /* sort roots in decreasing order */
-  if (gsigne(D) > 0) R = gen_sort(R, 0, invcmp);
+  if (gsigne(D) > 0) gen_sort_inplace(R, NULL, &invcmp, NULL);
   gel(y,14) = R;
 
   (void)new_coords(y, NULL, &a1, &b1, 0, 0);

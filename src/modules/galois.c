@@ -411,11 +411,9 @@ Monomial(GEN r, PERM bb, long nbv)
     gel(R,i) = t;
   }
   if (nbv > 2)
-    R = gen_sort(R, 0, &cmp_re);
-  else if (nbv == 2)
-  {
-    if (typ(R[2]) != t_COMPLEX) lswap(R[1], R[2]);
-  }
+    gen_sort_inplace(R, (void*)&cmp_re, cmp_nodata, NULL);
+  else if (nbv == 2 && typ(R[2]) != t_COMPLEX)
+    lswap(R[1], R[2]);
   t = NULL;
   for (i=1; i<=nbv; i++)
   {

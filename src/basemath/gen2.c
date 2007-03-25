@@ -341,7 +341,7 @@ gcmp(GEN x, GEN y)
   }
   if (ty == t_STR) return -1;
   if (!is_intreal_t(ty) && ty != t_FRAC) pari_err(typeer,"comparison");
-  av=avma; y=gneg_i(y); f=gsigne(gadd(x,y)); avma=av; return f;
+  av=avma; f = gsigne( gadd(x,gneg_i(y)) ); avma=av; return f;
 }
 
 int

@@ -161,7 +161,7 @@ vecsmall_sortspec(GEN v, long n, GEN w)
     {
       long v0=v[0], v1=v[1];
       if (v0<=v1) { w[0]=v0; w[1]=v1; }
-      else { w[0]=v1; w[1]=v0; }
+      else        { w[0]=v1; w[1]=v0; }
     }
     return;
   }
@@ -173,10 +173,8 @@ vecsmall_sortspec(GEN v, long n, GEN w)
       w[m++]=x[ix++];
     else
       w[m++]=y[iy++];
-  for(;ix<nx;)
-    w[m++]=x[ix++];
-  for(;iy<ny;)
-    w[m++]=y[iy++];
+  for(;ix<nx;) w[m++]=x[ix++];
+  for(;iy<ny;) w[m++]=y[iy++];
   avma=ltop;
 }
 
@@ -189,35 +187,39 @@ vecsmall_sort(GEN V)
   vecsmall_sortspec(V+1,l,V+1);
 }
 
+/* cf gen_sortspec */
 static GEN
 vecsmall_indexsortspec(GEN v, long n)
 {
-  long nx=n>>1, ny=n-nx;
-  long m, ix, iy;
-  GEN x, y;
-  GEN w=cgetg(n+1,t_VECSMALL);
-  if (n<=2)
+  long nx, ny, m, ix, iy;
+  GEN x, y, w;
+  switch(n)
   {
-    if (n==1)
-      w[1]=1;
-    else if (n==2)
-    {
-      if (v[1]<=v[2]) { w[1]=1; w[2]=2; }
-      else { w[1]=2; w[2]=1; }
-    }
-    return w;
+    case 1: return mkvecsmall(1);
+    case 2: return (v[1] <= v[2])? mkvecsmall2(1,2): mkvecsmall2(2,1);
+    case 3:
+      if (v[1] <= v[2]) {
+        if (v[2] <= v[3]) return mkvecsmall3(1,2,3);
+        return (v[1] <= v[3])? mkvecsmall3(1,3,2)
+                             : mkvecsmall3(3,1,2);
+      } else {
+        if (v[1] <= v[3]) return mkvecsmall3(2,1,3);
+        return (v[2] <= v[3])? mkvecsmall3(2,3,1)
+                             : mkvecsmall3(3,2,1);
+      }
   }
-  x=vecsmall_indexsortspec(v,nx);
-  y=vecsmall_indexsortspec(v+nx,ny);
+  nx = n>>1; ny = n-nx;
+  w = cgetg(n+1,t_VECSMALL);
+  x = vecsmall_indexsortspec(v,nx);
+  y = vecsmall_indexsortspec(v+nx,ny);
   for (m=1, ix=1, iy=1; ix<=nx && iy<=ny; )
     if (v[x[ix]] <= v[y[iy]+nx])
       w[m++] = x[ix++];
     else
       w[m++] = y[iy++]+nx;
-  for(;ix<=nx;) w[m++]=x[ix++];
-  for(;iy<=ny;) w[m++]=y[iy++]+nx;
-  avma = (pari_sp) w;
-  return w;
+  for(;ix<=nx;) w[m++] = x[ix++];
+  for(;iy<=ny;) w[m++] = y[iy++]+nx;
+  avma = (pari_sp)w; return w;
 }
 
 /*indirect sort.*/
@@ -379,13 +381,13 @@ bitvec_clear(GEN bitvec, long b)
 GEN
 vecvecsmall_sort(GEN x)
 {
-  return gen_sort(x, 0, vecsmall_lexcmp);
+  return gen_sort(x, (void*)&vecsmall_lexcmp, cmp_nodata);
 }
 
 GEN
 vecvecsmall_indexsort(GEN x)
 {
-  return gen_sort(x, cmp_IND, vecsmall_lexcmp);
+  return gen_indexsort(x, (void*)&vecsmall_lexcmp, cmp_nodata);
 }
 
 long

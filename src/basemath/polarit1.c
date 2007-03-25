@@ -958,8 +958,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2((GEN)t, E);
-  return flag ? sort_factor_gen(y, cmpGsGs)
-              : sort_factor(y, cmpii);
+  return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
+              : sort_factor_pol(y, cmpii);
 }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
@@ -1244,7 +1244,7 @@ FpX_factor_i(GEN f, GEN pp)
     e *= p; f = poldeflate_i(f2, p);
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t,E), cmpii);
+  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t,E), cmpii);
 }
 GEN
 FpX_factor(GEN f, GEN p)
@@ -1766,6 +1766,7 @@ padicappr(GEN f, GEN a)
 /*                      FACTORIZATION in Zp[X]                     */
 /*                                                                 */
 /*******************************************************************/
+
 int
 cmp_padic(GEN x, GEN y)
 {
@@ -1774,8 +1775,8 @@ cmp_padic(GEN x, GEN y)
   if (y == gen_0) return  1;
   vx = valp(x);
   vy = valp(y);
-  if (varncmp(vx, vy) < 0) return  1;
-  if (varncmp(vx, vy) > 0) return -1;
+  if (vx < vy) return  1;
+  if (vx > vy) return -1;
   return cmpii(gel(x,4), gel(y,4));
 }
 
@@ -1873,7 +1874,7 @@ factorpadic2(GEN f, GEN p, long prec)
   }
 
   y = fact_from_DDF(fa,ex,n);
-  return gerepileupto(av, sort_factor(y, cmp_padic));
+  return gerepileupto(av, sort_factor_pol(y, cmp_padic));
 }
 
 /***********************/
@@ -1969,7 +1970,7 @@ factorpadic4(GEN f,GEN p,long prec)
     gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,prec);
   }
   if (!gcmp1(lt)) gel(P,1) = gmul(gel(P,1), lt);
-  return gerepilecopy(av, sort_factor(y, cmp_padic));
+  return gerepilecopy(av, sort_factor_pol(y, cmp_padic));
 }
 
 GEN
@@ -2085,32 +2086,6 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   FqX_split(t  ,d,q,S,T,p);
 }
 
-/* to "compare" (real) scalars and t_INTMODs */
-static int
-cmp_coeff(GEN x, GEN y)
-{
-  if (typ(x) == t_INTMOD) x = gel(x,2);
-  if (typ(y) == t_INTMOD) y = gel(y,2);
-  return gcmp(x,y);
-}
-
-int
-cmp_pol(GEN x, GEN y)
-{
-  long fx[3], fy[3];
-  long i,lx,ly;
-  int fl;
-  if (typ(x) == t_POLMOD) x = gel(x,2);
-  if (typ(y) == t_POLMOD) y = gel(y,2);
-  if (typ(x) == t_POL) lx = lg(x); else { lx = 3; gel(fx,2) = x; x = fx; }
-  if (typ(y) == t_POL) ly = lg(y); else { ly = 3; gel(fy,2) = y; y = fy; }
-  if (lx > ly) return  1;
-  if (lx < ly) return -1;
-  for (i=lx-1; i>1; i--)
-    if ((fl = cmp_coeff(gel(x,i), gel(y,i)))) return fl;
-  return 0;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                  FACTOR USING TRAGER'S TRICK                    */
@@ -2171,7 +2146,7 @@ polfnf(GEN a, GEN T)
     gel(P,i) = gdiv(gmul(unt,F), leading_term(F));
     gel(E,i) = utoipos(e);
   }
-  return gerepilecopy(av, sort_factor(mkmat2(P,E), cmp_pol));
+  return gerepilecopy(av, sort_factor_pol(mkmat2(P,E), cmp_pol));
 }
 
 static GEN
@@ -2412,7 +2387,7 @@ FpX_factorff(GEN P,GEN l, GEN Q)
     }
   }
   setlg(V,lfact);
-  setlg(E,lfact); return sort_factor(mkvec2(V,E), cmp_pol);
+  setlg(E,lfact); return sort_factor_pol(mkvec2(V,E), cmp_pol);
 }
 
 static GEN
@@ -2499,7 +2474,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       }
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor(mkvec2((GEN)t, E), cmp_pol);
+  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t, E), cmp_pol);
 }
 GEN
 factorff(GEN f, GEN p, GEN T)

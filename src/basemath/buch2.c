@@ -936,7 +936,8 @@ get_pr_lists(GEN FB, long N, int list_pr)
       appendL(gel(L,p), pr);
     }
     for (p=1; p<=pmax; p++)
-      if (L[p]) gel(L,p) = gen_sort(gel(L,p),0,cmp_prime_over_p);
+      if (L[p]) gen_sort_inplace(gel(L,p), (void*)&cmp_prime_over_p,
+                                 &cmp_nodata, NULL);
   }
   else
   {
@@ -1144,7 +1145,7 @@ testprimes(GEN bnf, ulong bound)
     if (DEBUGLEVEL>1) fprintferr("     is %Z\n", p1);
   }
   /* sort factorbase for tablesearch */
-  fb = gen_sort(gel(bnf,5), 0, &cmp_prime_ideal);
+  fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
   pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));

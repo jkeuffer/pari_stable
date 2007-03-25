@@ -840,7 +840,8 @@ gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
   return (fl<0)? j+1: j;
 }
 
-static int cmp_nodata(void *data, GEN x, GEN y)
+int
+cmp_nodata(void *data, GEN x, GEN y)
 {
   int (*cmp)(GEN,GEN)=(int (*)(GEN,GEN)) data;
   return cmp(x,y);
@@ -873,7 +874,7 @@ ZV_sort_uniq(GEN L)
   GEN perm;
 
   if (l < 2) return cgetg(1, typ(L));
-  perm = gen_sort(L, cmp_IND, &cmpii);
+  perm = gen_indexsort(L, (void*)&cmpii, &cmp_nodata);
   L = vecpermute(L, perm);
   c = 1;
   for (i = 2; i < l; i++)
@@ -1138,13 +1139,12 @@ int
 pari_compare_long(long *a,long *b) { return icmp(*a,*b); }
 
 static int
-pari_compare_small(GEN x, GEN y) { return icmp((long)x,(long)y); }
+cmp_small(GEN x, GEN y) { return icmp((long)x,(long)y); }
 
 #undef icmp
 
 struct veccmp_s
 {
-  long lk;
   GEN k;
   int (*cmp)(GEN,GEN);
 };
@@ -1153,9 +1153,9 @@ static int
 veccmp(void *data, GEN x, GEN y)
 {
   struct veccmp_s *v=(struct veccmp_s *) data;
-  long i,s;
+  long i, s, lk = lg(v->k);
 
-  for (i=1; i<v->lk; i++)
+  for (i=1; i<lk; i++)
   {
     s = v->cmp(gel(x,v->k[i]), gel(y,v->k[i]));
     if (s) return s;
@@ -1163,20 +1163,32 @@ veccmp(void *data, GEN x, GEN y)
   return 0;
 }
 
-/* return permutation sorting v[1..n] */
+/* return permutation sorting v[1..n]. Assume n > 0 */
 static GEN
 gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
 {
   long nx, ny, m, ix, iy;
   GEN x, y, w;
-  if (n<=2)
+  switch(n)
   {
-    if (n==1) return mkvecsmall(1);
-    return cmp(E, gel(v,1), gel(v,2)) <= 0? mkvecsmall2(1,2): mkvecsmall2(2,1);
+    case 1: return mkvecsmall(1);
+    case 2:
+      return cmp(E,gel(v,1),gel(v,2)) <= 0? mkvecsmall2(1,2)
+                                          : mkvecsmall2(2,1);
+    case 3:
+      if (cmp(E,gel(v,1),gel(v,2)) <= 0) {
+        if (cmp(E,gel(v,2),gel(v,3)) <= 0) return mkvecsmall3(1,2,3);
+        return (cmp(E,gel(v,1),gel(v,3)) <= 0)? mkvecsmall3(1,3,2)
+                                              : mkvecsmall3(3,1,2);
+      } else {
+        if (cmp(E,gel(v,1),gel(v,3)) <= 0) return mkvecsmall3(2,1,3);
+        return (cmp(E,gel(v,2),gel(v,3)) <= 0)? mkvecsmall3(2,3,1)
+                                              : mkvecsmall3(3,2,1);
+      }
   }
   nx = n>>1; ny = n-nx;
   w = cgetg(n+1,t_VECSMALL);
-  x = gen_sortspec(v,nx,E,cmp);
+  x = gen_sortspec(v,   nx,E,cmp);
   y = gen_sortspec(v+nx,ny,E,cmp);
   m = ix = iy = 1;
   while (ix<=nx && iy<=ny)
@@ -1189,33 +1201,28 @@ gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
   avma = (pari_sp)w; return w;
 }
 
-/* Sort the vector x, using cmp to compare entries.
- * flag & cmp_IND: indirect sort: return permutation that would sort x */
-GEN
-gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
+static void
+init_sort(GEN *x, long *tx, long *lx)
 {
-  long i, j;
-  long tx = typ(x), lx = lg(x);
+  *tx = typ(*x);
+  if (*tx != t_LIST) *lx = lg(*x);
+  else {
+    *lx = lgeflist(*x)-1; *tx = t_VEC; (*x)++;
+  }
+  if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
+}
+
+
+/* Sort the vector x, using cmp to compare entries. */
+GEN
+gen_sort(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
+{
+  long tx, lx, i;
   GEN y;
 
-  if (tx == t_LIST) { lx = lgeflist(x)-1; tx = t_VEC; x++; }
-  if (!is_matvec_t(tx) && tx != t_VECSMALL) pari_err(typeer,"gen_sort");
-  if (flag & cmp_IND) tx = t_VECSMALL;
-  if (lx<=2)
-  {
-    if (lx==1) return cgetg(1, tx);
-    y = cgetg(2, tx);
-    if      (flag & cmp_IND)   y[1] = 1;
-    else if (tx == t_VECSMALL) y[1] = x[1];
-    else gel(y,1) = gcopy(gel(x,1)); 
-    return y;
-  }
-
-  y = gen_sortspec(x,lx-1,data,cmp);
-
-  if (flag & cmp_REV) /* reverse order */
-    for (j=1; j<=(lx-1)>>1; j++) lswap(y[j], y[lx-j]);
-  if (flag & cmp_IND) return y;
+  init_sort(&x, &tx, &lx);
+  if (lx==1) return cgetg(1, tx);
+  y = gen_sortspec(x,lx-1,E,cmp);
   if (tx == t_VECSMALL)
     for (i=1; i<lx; i++) y[i] = x[y[i]];
   else {
@@ -1224,91 +1231,119 @@ gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
   }
   return y;
 }
-
+/* indirect sort: return the permutation that would sort x */
 GEN
-gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
+gen_indexsort(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
 {
-  return gen_sort_aux(x, flag, (void *)cmp, cmp_nodata);
+  long tx, lx;
+  init_sort(&x, &tx, &lx);
+  if (lx==1) return cgetg(1, t_VECSMALL);
+  return gen_sortspec(x,lx-1,E,cmp);
 }
 
-#define sort_fun(flag) ((flag & cmp_LEX)? &lexcmp: &gcmp)
-
-GEN
-gen_vecsort(GEN x, GEN k, long flag)
+/* Sort the vector x in place, using cmp to compare entries */
+void
+gen_sort_inplace(GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN *perm)
 {
-  long i,j,l,t, lx = lg(x), tmp[2];
-  struct veccmp_s v;
+  long tx, lx, i;
+  pari_sp av = avma;
+  GEN y;
 
-  if (lx<=2) return gen_sort(x,flag,sort_fun(flag));
-  t = typ(k); v.cmp = sort_fun(flag);
-  if (t==t_INT)
+  init_sort(&x, &tx, &lx);
+  if (lx<=2)
   {
-    gel(tmp,1) = k; k = tmp;
-    v.lk = 2;
+    if (perm) *perm = lx == 1? cgetg(1, t_VECSMALL): mkvecsmall(1);
+    return;
   }
-  else
+  y = gen_sortspec(x,lx-1, E, cmp);
+  if (perm)
   {
-    if (! is_vec_t(t)) pari_err(talker,"incorrect lextype in vecsort");
-    v.lk = lg(k);
+    GEN z = new_chunk(lx);
+    for (i=1; i<lx; i++) gel(z,i) = gel(x,y[i]);
+    for (i=1; i<lx; i++) gel(x,i) = gel(z,i);
+    *perm = y;
+    avma = (pari_sp)y;
+  } else {
+    for (i=1; i<lx; i++) gel(y,i) = gel(x,y[i]);
+    for (i=1; i<lx; i++) gel(x,i) = gel(y,i);
+    avma = av;
   }
-  l = 0;
-  v.k = (GEN)gpmalloc(v.lk * sizeof(long));
-  for (i=1; i<v.lk; i++)
-  {
-    j = itos(gel(k,i));
-    if (j<=0) pari_err(talker,"negative index in vecsort");
-    v.k[i]=j; if (j>l) l=j;
-  }
-  t = typ(x);
-  if (! is_matvec_t(t)) pari_err(typeer,"vecsort");
-  for (j=1; j<lx; j++)
-  {
-    t = typ(x[j]);
-    if (! is_vec_t(t)) pari_err(typeer,"vecsort");
-    if (lg(gel(x,j)) <= l) pari_err(talker,"index too large in vecsort");
-  }
-  x = gen_sort_aux(x, flag, (void *) &v, veccmp);
-  gpfree(v.k); return x;
 }
 
 GEN
 vecsort0(GEN x, GEN k, long flag)
 {
+  int (*CMP)(void*,GEN,GEN);
+  int (*cmp)(GEN,GEN) = (flag & cmp_LEX)? &lexcmp: &gcmp;
+  void *E;
+
   if (flag < 0 || flag >= cmp_C) pari_err(flagerr,"vecsort");
-  if (k) return gen_vecsort(x, k, flag);
-  return gen_sort(x, flag, (typ(x) == t_VECSMALL)?
-                       pari_compare_small:sort_fun(flag));
+  if (k) {
+    long i, j, l, lk, tx = typ(x), lx = lg(x);
+    struct veccmp_s v;
+
+    if (! is_matvec_t(tx)) pari_err(typeer,"vecsort");
+    switch(typ(k))
+    {
+      case t_INT: k = mkvecsmall(itos(k)); break;
+      case t_VEC: case t_COL: k = ZV_to_zv(k); break;
+      case t_VECSMALL: break;
+      default: pari_err(typeer,"vecsort");
+    }
+    lk = lg(k); l = 0;
+    for (l=0,i=1; i<lk; i++)
+    {
+      j = k[i]; if (j<=0) pari_err(talker,"negative index in vecsort");
+      if (j>l) l = j;
+    }
+    for (j=1; j<lx; j++)
+    {
+      long t = typ(x[j]);
+      if (! is_vec_t(t)) pari_err(typeer,"vecsort");
+      if (lg(gel(x,j)) <= l) pari_err(talker,"index too large in vecsort");
+    }
+    v.cmp = cmp;
+    v.k = k;
+    E = (void*)&v;
+    CMP = &veccmp;
+  } else {
+    E = (void*)((typ(x) == t_VECSMALL)? cmp_small: cmp);
+    CMP = &cmp_nodata;
+  }
+  x = flag & cmp_IND? gen_indexsort(x, E, CMP): gen_sort(x, E, CMP);
+  if (flag & cmp_REV) { /* reverse order */
+    long j, lx = lg(x);
+    for (j=1; j<=(lx-1)>>1; j++) lswap(x[j], x[lx-j]);
+  }
+  return x;
 }
+
+GEN
+indexsort(GEN x) { return gen_indexsort(x, (void*)&gcmp, cmp_nodata); }
+
+GEN
+indexlexsort(GEN x) { return gen_indexsort(x, (void*)&lexcmp, cmp_nodata); }
 
 GEN
 vecsort(GEN x, GEN k)
 {
-  return gen_vecsort(x,k, 0);
+  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
+  if (typ(k) != t_VECSMALL) err(typeer,"vecsort");
+  return gen_sort(x, (void*)&v, &veccmp);
+}
+GEN
+indexvecsort(GEN x, GEN k)
+{
+  struct veccmp_s v; v.cmp = &gcmp; v.k = k;
+  if (typ(k) != t_VECSMALL) err(typeer,"vecsort");
+  return gen_indexsort(x, (void*)&v, &veccmp);
 }
 
 GEN
-indexsort(GEN x)
-{
-  return gen_sort(x, cmp_IND, gcmp);
-}
+sort(GEN x) { return gen_sort(x, (void*)gcmp, cmp_nodata); }
 
 GEN
-indexlexsort(GEN x)
-{
-  return gen_sort(x, cmp_IND, lexcmp);
-}
-
-GEN
-sort(GEN x)
-{
-  return gen_sort(x, 0, gcmp);
-}
-
-GEN
-lexsort(GEN x)
-{
-  return gen_sort(x, 0, lexcmp);
-}
+lexsort(GEN x) { return gen_sort(x, (void*)lexcmp, cmp_nodata); }
 
 /* index of x in table T, 0 otherwise */
 long
@@ -1349,4 +1384,77 @@ cmp_prime_ideal(GEN x, GEN y)
 {
   int k = cmpii(gel(x,1), gel(y,1));
   return k? k: cmp_prime_over_p(x,y);
+}
+
+/* assume x and y are t_POL in the same variable whose coeffs can be
+ * compared (used to sort polynomial factorizations) */
+int
+cmp_pol_aux(void *data, GEN x, GEN y)
+{
+  int (*coeff_cmp)(GEN,GEN)=(int(*)(GEN,GEN))data;
+  long i, lx = lg(x), ly = lg(y);
+  int fl;
+  if (lx > ly) return  1;
+  if (lx < ly) return -1;
+  for (i=lx-1; i>1; i--)
+    if ((fl = coeff_cmp(gel(x,i), gel(y,i)))) return fl;
+  return 0;
+}
+
+/* to "compare" (real) scalars and t_INTMODs */
+static int
+cmp_coeff(GEN x, GEN y)
+{
+  if (typ(x) == t_INTMOD) x = gel(x,2);
+  if (typ(y) == t_INTMOD) y = gel(y,2);
+  return gcmp(x,y);
+}
+
+int
+cmp_pol(GEN x, GEN y)
+{
+  long F[3] = {evallg(3)|evaltyp(t_POL)};
+  if (typ(x) == t_POLMOD) x = gel(x,2);
+  if (typ(y) == t_POLMOD) y = gel(y,2);
+  if (typ(x) == t_POL) {
+    if (typ(y) != t_POL) { gel(F,2) = y; y = F; }
+  } else {
+    if (typ(x) != t_POL) return cmp_coeff(x,y);
+    gel(F,2) = x; x = F;
+  }
+  return cmp_pol_aux((void*)&cmp_coeff,x,y);
+}
+
+/* sort generic factorization, in place */
+GEN
+sort_factor(GEN y, void *data, int (*cmp)(void *,GEN,GEN))
+{
+  GEN a, b, A, B, w;
+  pari_sp av;
+  long n, i;
+
+  a = gel(y,1); n = lg(a); if (n == 1) return y;
+  b = gel(y,2); av = avma;
+  A = new_chunk(n);
+  B = new_chunk(n);
+  w = gen_sortspec(a, n-1, data, cmp);
+  for (i=1; i<n; i++) { long k = w[i]; A[i] = a[k]; B[i] = b[k]; }
+  for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
+  avma = av; return y;
+}
+/* sort polynomial factorization, in place */
+GEN
+sort_factor_pol(GEN y,int (*cmp)(GEN,GEN))
+{
+  (void)sort_factor(y,(void*)cmp, &cmp_pol_aux);
+  return y;
+}
+
+/* assume f and g coprime integer factorizations */
+GEN
+merge_factor_i(GEN f, GEN g)
+{
+  if (lg(f) == 1) return g;
+  if (lg(g) == 1) return f;
+  return sort_factor(concat_factor(f,g), (void*)&cmpii, &cmp_nodata);
 }

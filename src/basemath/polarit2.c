@@ -87,81 +87,6 @@ polsym(GEN x, long n)
   return polsym_gen(x, NULL, n, NULL,NULL);
 }
 
-/* assume x and y are polynomials in the same variable whose coeffs can be
- * compared (used to sort polynomial factorizations)
- */
-
-static int
-polcmp(void *data, GEN x, GEN y)
-{
-  int (*coeff_cmp)(GEN,GEN)=(int(*)(GEN,GEN))data;
-  long i, lx = lg(x), ly = lg(y);
-  int fl;
-  if (lx > ly) return  1;
-  if (lx < ly) return -1;
-  for (i=lx-1; i>1; i--)
-    if ((fl = coeff_cmp(gel(x,i), gel(y,i)))) return fl;
-  return 0;
-}
-
-/* sort generic factorisation */
-GEN
-sort_factor_gen_aux(GEN y, void *data, int (*cmp)(void *,GEN,GEN))
-{
-  long n, i;
-  pari_sp av = avma;
-  GEN a,b,A,B,w;
-  a = gel(y,1); n = lg(a); A = new_chunk(n);
-  b = gel(y,2);            B = new_chunk(n);
-  w = gen_sort_aux(a, cmp_IND, data, cmp);
-  for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
-  for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
-  avma = av; return y;
-}
-
-/* sort generic factorisation */
-GEN
-sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
-{
-  long n, i;
-  pari_sp av = avma;
-  GEN a,b,A,B,w;
-  a = gel(y,1); n = lg(a); A = new_chunk(n);
-  b = gel(y,2);            B = new_chunk(n);
-  w = gen_sort(a, cmp_IND, cmp);
-  for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
-  for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
-  avma = av; return y;
-}
-
-GEN
-sort_factor(GEN y,int (*cmp)(GEN,GEN))
-{
-  (void)sort_factor_gen_aux(y,(void*)cmp,polcmp);
-  return y;
-}
-
-GEN
-sort_vecpol_gen(GEN a, int (*cmp)(GEN,GEN))
-{
-  long n, i;
-  pari_sp av = avma;
-  GEN A,w;
-  n = lg(a); A = new_chunk(n);
-  w = gen_sort_aux(a, cmp_IND,(void*)cmp, polcmp);
-  for (i=1; i<n; i++) A[i] = a[w[i]];
-  for (i=1; i<n; i++) a[i] = A[i];
-  avma = av; return a;
-}
-
-/*In place sort*/
-GEN
-sort_vecpol(GEN y, int (*cmp)(GEN,GEN))
-{
-  (void)sort_vecpol_gen(y,cmp);
-  return y;
-}
-
 /* centered residue x mod p. po2 = shifti(p, -1) or NULL (euclidean residue) */
 GEN
 centermodii(GEN x, GEN p, GEN po2)
@@ -1692,7 +1617,7 @@ factpol(GEN x, long hint)
     n += lg(fa[i])-1;
   }
   y = fact_from_DDF(fa,ex,n);
-  return gerepileupto(av, sort_factor(y, cmpii));
+  return gerepileupto(av, sort_factor_pol(y, cmpii));
 }
 
 GEN
@@ -1886,15 +1811,6 @@ concat_factor(GEN f, GEN g)
                 shallowconcat(gel(f,2), gel(g,2)));
 }
 
-/* assume f and g coprime integer factorizations */
-GEN
-merge_factor_i(GEN f, GEN g)
-{
-  if (lg(f) == 1) return g;
-  if (lg(g) == 1) return f;
-  return sort_factor_gen(concat_factor(f,g), cmpii);
-}
-
 GEN
 deg1_from_roots(GEN L, long v)
 {
@@ -1948,9 +1864,10 @@ gauss_primpart_try(GEN x, GEN c)
 }
 
 static int
-gauss_cmp(GEN x, GEN y)
+gauss_cmp(void *E, GEN x, GEN y)
 {
   int v;
+  (void)E;
   if (typ(x) != t_COMPLEX)
     return (typ(y) == t_COMPLEX)? -1: gcmp(x, y);
   if (typ(y) != t_COMPLEX) return 1;
@@ -2081,7 +1998,7 @@ gauss_factor(GEN x)
     gel(Fa,2) = E;
     fa = concat_factor(fa, Fa);
   }
-  fa = sort_factor_gen(fa, &gauss_cmp);
+  fa = sort_factor(fa, (void*)&gauss_cmp, &cmp_nodata);
 
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {

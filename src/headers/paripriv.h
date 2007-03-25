@@ -48,10 +48,7 @@ GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
-GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
-GEN sort_factor_gen(GEN y, int (*cmp)(GEN,GEN));
-GEN sort_factor_gen_aux(GEN y, void *data, int (*cmp)(void *,GEN,GEN));
-GEN sort_vecpol(GEN a, int (*cmp)(GEN,GEN));
+GEN sort_factor_pol(GEN y, int (*cmp)(GEN,GEN));
 
 /* loops */
 GEN incloop(GEN a);
@@ -620,9 +617,10 @@ GEN     sqscal(GEN x);
 
 /* bibli2.c */
 
+int     cmp_pol_aux(void *data, GEN x, GEN y);
+GEN     gen_vecsort(GEN x, GEN k, long flag);
 long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort_uniq(GEN L);
-GEN     gen_vecsort(GEN x, GEN k, long flag);
 
 /* buch1.c */
 
@@ -781,7 +779,6 @@ GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow
 GEN     matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN     pseudodiv(GEN x, GEN y, GEN *ptr);
 long    s_centermod(long x, ulong pp, ulong pps2);
-GEN     sort_vecpol_gen(GEN a, int (*cmp) (GEN, GEN));
 GEN     sylvestermatrix_i(GEN x, GEN y);
 
 /* FpX.c */

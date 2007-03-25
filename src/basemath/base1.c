@@ -811,7 +811,7 @@ nfiso0(GEN a, GEN b, long fliso)
       if (lg(y[i]) != 4) { setlg(y,i); break; }
       gel(y,i) = gneg_i(lift_intern(gmael(y,i,2)));
     }
-    y = gen_sort(y, 0, cmp_pol);
+    y = gen_sort(y, (void*)&gcmp, &cmp_pol_aux);
     settyp(y, t_VEC);
     if (vb == 0) (void)delete_var();
   }
@@ -1616,7 +1616,7 @@ remove_duplicates(GEN y, GEN a)
   if (l < 2) return;
   z = new_chunk(3);
   gel(z,1) = y;
-  gel(z,2) = a; (void)sort_factor(z, gcmp);
+  gel(z,2) = a; (void)sort_factor_pol(z, gcmp);
   for  (k=1, i=2; i<l; i++)
     if (!gequal(gel(y,i), gel(y,k)))
     {
@@ -1950,8 +1950,8 @@ findmindisc(GEN *py, GEN *pa)
   if (l == 2) { *py = gel(y,1); *pa = gel(a,1); return; }
 
   discs = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(discs,i) = absi(ZX_disc(gel(y,i)));
-  v = indexsort(discs);
+  for (i=1; i<l; i++) gel(discs,i) = ZX_disc(gel(y,i));
+  v = gen_indexsort(discs, (void*)&absi_cmp, &cmp_nodata);
   k = v[1];
   dmin = gel(discs,k);
   z    = gel(y,k);
@@ -1959,7 +1959,7 @@ findmindisc(GEN *py, GEN *pa)
   for (i=2; i<l; i++)
   {
     k = v[i];
-    if (!equalii(gel(discs,k), dmin)) break;
+    if (!absi_equal(gel(discs,k), dmin)) break;
     if (gpolcomp(gel(y,k),z) < 0) { z = gel(y,k); b = gel(a,k); }
   }
   *py = z; *pa = b;

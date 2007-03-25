@@ -729,7 +729,7 @@ idealfactor(GEN nf, GEN x)
   setlg(y2, k); y = gerepilecopy(av, mkmat2(y1,y2));
   y2 = gel(y,2); for (i=1; i<k; i++) gel(y2,i) = stoi(y2[i]);
   settyp(y2, t_COL);
-  return sort_factor_gen(y, cmp_prime_ideal);
+  return sort_factor(y, (void*)&cmp_prime_ideal, &cmp_nodata);
 }
 
 /* P prime ideal in primedec format. Return valuation(ix) at P */
@@ -1241,7 +1241,7 @@ famat_reduce(GEN fa)
   if (lg(fa) == 1) return fa;
   g = gel(fa,1); l = lg(g);
   e = gel(fa,2);
-  L = gen_sort(g, cmp_IND, &elt_cmp);
+  L = gen_indexsort(g, (void*)&elt_cmp, &cmp_nodata);
   G = cgetg(l, t_COL);
   E = cgetg(l, t_COL);
   /* merge */
@@ -2408,7 +2408,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   w = Q_remove_denom(w, &den);
   if (den)
   {
-    GEN p = gen_sort(x, cmp_IND, &cmp_prime_ideal);
+    GEN p = gen_indexsort(x, (void*)&cmp_prime_ideal, cmp_nodata);
     GEN fa = idealfactor(nf, den); /* sorted */
     L = vecpermute(L, p);
     e = vecpermute(e, p);
