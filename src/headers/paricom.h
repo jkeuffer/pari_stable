@@ -403,11 +403,6 @@ enum manage_var_t {
 #define typ_QUA  8 /* quadclassunit  */
 #define typ_GAL  9 /* galoisinit     */
 #define typ_BID 10
-/* for gen_sort */
-#define cmp_IND 1
-#define cmp_LEX 2
-#define cmp_REV 4
-#define cmp_C   8
 
 #define DIFFPTR_SKIP	255		/* Skip these entries */
 #define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \

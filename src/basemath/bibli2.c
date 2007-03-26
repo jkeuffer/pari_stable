@@ -1270,6 +1270,9 @@ gen_sort_inplace(GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN *perm)
   }
 }
 
+#define cmp_IND 1
+#define cmp_LEX 2
+#define cmp_REV 4
 GEN
 vecsort0(GEN x, GEN k, long flag)
 {
@@ -1277,7 +1280,7 @@ vecsort0(GEN x, GEN k, long flag)
   int (*cmp)(GEN,GEN) = (flag & cmp_LEX)? &lexcmp: &gcmp;
   void *E;
 
-  if (flag < 0 || flag >= cmp_C) pari_err(flagerr,"vecsort");
+  if (flag < 0 || flag >= cmp_REV) pari_err(flagerr,"vecsort");
   if (k) {
     long i, j, l, lk, tx = typ(x), lx = lg(x);
     struct veccmp_s v;
