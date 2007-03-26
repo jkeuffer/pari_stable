@@ -1404,15 +1404,6 @@ cmp_pol_aux(void *data, GEN x, GEN y)
   return 0;
 }
 
-/* to "compare" (real) scalars and t_INTMODs */
-static int
-cmp_coeff(GEN x, GEN y)
-{
-  if (typ(x) == t_INTMOD) x = gel(x,2);
-  if (typ(y) == t_INTMOD) y = gel(y,2);
-  return gcmp(x,y);
-}
-
 int
 cmp_pol(GEN x, GEN y)
 {
@@ -1422,10 +1413,10 @@ cmp_pol(GEN x, GEN y)
   if (typ(x) == t_POL) {
     if (typ(y) != t_POL) { gel(F,2) = y; y = F; }
   } else {
-    if (typ(x) != t_POL) return cmp_coeff(x,y);
+    if (typ(y) != t_POL) return gcmp(x,y);
     gel(F,2) = x; x = F;
   }
-  return cmp_pol_aux((void*)&cmp_coeff,x,y);
+  return cmp_pol_aux((void*)&gcmp,x,y);
 }
 
 /* sort generic factorization, in place */

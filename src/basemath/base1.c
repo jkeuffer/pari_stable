@@ -726,9 +726,6 @@ galoisapply(GEN nf, GEN aut, GEN x)
   return NULL; /* not reached */
 }
 
-GEN pol_to_monic(GEN pol, GEN *lead);
-int cmp_pol(GEN x, GEN y);
-
 /* x = relative polynomial nf = absolute nf, bnf = absolute bnf */
 GEN
 get_bnfpol(GEN x, GEN *bnf, GEN *nf)
