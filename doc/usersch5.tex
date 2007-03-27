@@ -1213,8 +1213,8 @@ algorithm (Jebelean-Krandick bidirectional exact division is not
 implemented).
 
 \fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
-$|\kbd{x}| / \kbd{y}$ (note the absolute value!), assuming $\kbd{y}$ divides
-$\kbd{x}$ and $\kbd{y}$ is non-zero.
+$|\kbd{x}| / \kbd{y}$, assuming $\kbd{y}$ divides
+$\kbd{x}$ and $\kbd{y}$ is non-zero. (Note the absolute value!)
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
 0 otherwise. All \kbd{GEN} are assumed to be \typ{INT}s.
@@ -1318,8 +1318,8 @@ at precision \kbd{prec}.
 \fun{void}{constlog2}{long prec} precomputes $\log(2)$ at precision
 \kbd{prec}.
 
-\fun{void}{mpbern}{long n, long prec} precomputes even \idx{Bernoulli} numbers
-$B_0,\dots,B_{2n-2}$ as \typ{REAL} of precision \kbd{prec}.
+\fun{void}{mpbern}{long n, long prec} precomputes the even \idx{Bernoulli}
+numbers $B_0,\dots,B_{2n-2}$ as \typ{REAL}s of precision \kbd{prec}.
 
 \fun{GEN}{bern}{long i} is a macro returning the \idx{Bernoulli} number
 $B_{2i}$ at precision \kbd{prec}, assuming that \kbd{mpbern(n, prec)} was
@@ -1530,7 +1530,7 @@ $\deg(z) < \deg \kbd{T}$.
   \kbd{X}: polynomial in $X$ (\typ{POL} in a fixed variable), e.g. \kbd{FpX}
            means $\Z/p\Z[X]$
 
-  \kbd{Y}: polynomial in $Y\neq X$. This is only used to resolve ambiguity. 
+  \kbd{Y}: polynomial in $Y\neq X$. This is used to resolve ambiguities. 
            E.g. \kbd{FpXY} means $((\Z/p\Z)[X])[Y]$.
 
   \kbd{V}: vector (\typ{VEC} or \typ{COL}), treated as a line vector
@@ -1742,7 +1742,8 @@ of~\kbd{x}.
 greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FpX_deriv}{GEN x, GEN p} returns the derivative of \kbd{x}.
-This function is suitable for \kbd{gerepileupto} but not memory-clean.
+This function is not memory-clean, but nevertheless suitable for
+\kbd{gerepileupto}.
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
@@ -2846,7 +2847,7 @@ then the above warning does not apply.
 \fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
 
 \fun{GEN}{mulcxI}{GEN x} creates the \typ{COMPLEX} $ix$, assuming 
-$x$ is a \typ{INT}, \typ{REAL}, \typ{FRAC} or \typ{COMPLEX}. The result in
+$x$ is a \typ{INT}, \typ{REAL}, \typ{COMPLEX} or \typ{FRAC}. The result in
 general contains data pointing back to the original $x$. Use \kbd{gcopy}
 if this is a problem. But in most cases, the result is to be used
 immediately, before $x$ is subject to garbage collection.
