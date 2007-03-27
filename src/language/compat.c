@@ -572,7 +572,7 @@ entree oldfonctions[]={
 {"veclexsort",2,(void*)lexsort,8,"G","veclexsort(x): sort the elements of the vector x in ascending lexicographic order"},
 {"vecmax",1,(void*)vecmax,2,"G","vecmax(x)=maximum of the elements of the vector/matrix x"},
 {"vecmin",1,(void*)vecmin,2,"G","vecmin(x)=minimum of the elements of the vector/matrix x"},
-{"vecsort",2,(void*)vecsort,8,"GG","vecsort(x,k)=sorts the vector of vector (or matrix) x according to the value of its k-th component"},
+{"vecsort",2,(void*)vecsort0,8,"GGD0,L,","vecsort(x,k)=sorts the vector of vector (or matrix) x according to the value of its k-th component"},
 {"vector",22,(void*)vecteur,9,"GVI","vector(n,X,expr)=row vector with n components of expression expr (X ranges from 1 to n)"},
 {"vvector",22,(void*)vvecteur,9,"GVI","vvector(n,X,expr)=column vector with n components of expression expr (X ranges from 1 to n)"},
 {"weipell",1,(void*)weipell,5,"GP","weipell(e)=formal expansion in x=z of Weierstrass P function"},
