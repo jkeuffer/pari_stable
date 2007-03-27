@@ -52,13 +52,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
-5  saving an object containing high variable numbers in binary form, then
-   reading it back in a virgin session will create an invalid object,
-   accessing undefined variables (SEGV).
-   Should replace direct access to polx[] and polun[] arrays by a wrapper
-   which would check variable number first. Or fill them completely on 
-   startup.
-
 4  changing primelimit from within forprime loop yields unpredictable results
 
 2  external prettyprinter tex2mail: on a fast machine with a slow 'perl',
