@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.4.1 (released ??/??/2006):
+Done for version 2.4.1 (released 28/03/2006):
   Fixed
     1- qflll / qflllgram (t_MAT with t_FRAC entries) would not reduce to the
        integer case (--> insufficient precision, SEGV) [#505]
@@ -66,6 +66,7 @@ RB 42- the following TODO item:
        v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
        any variable is "deleted", while it (or part of it) is still in use
        Reference count could be helpful here.
+   43- substpol(x^-2+O(x^-1),x^2,x) --> error [#555]
 
 
   Changed
