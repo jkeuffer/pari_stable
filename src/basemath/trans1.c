@@ -311,6 +311,8 @@ puiss0(GEN x)
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = gen_1; return y;
 
+    case t_FFELT: return FF_1(x);
+
     case t_POLMOD:
       y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
@@ -649,6 +651,7 @@ powgi(GEN x, GEN n)
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       gel(y,2) = Fp_pow(gel(x,2), n, gel(x,1));
       return y;
+    case t_FFELT: return FF_pow(x,n);
     case t_PADIC: return powp(x, n);
 
     case t_INT:
@@ -784,8 +787,9 @@ gpow(GEN x, GEN n, long prec)
   if (tn == t_FRAC)
   {
     GEN z, d = gel(n,2), a = gel(n,1);
-    if (tx == t_INTMOD)
+    switch (tx)
     {
+    case t_INTMOD:
       if (!BSW_psp(gel(x,1))) pari_err(talker,"gpow: modulus %Z is not prime",x[1]);
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       av = avma;
@@ -793,12 +797,14 @@ gpow(GEN x, GEN n, long prec)
       if (!z) pari_err(talker,"gpow: nth-root does not exist");
       gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, gel(x,1)));
       return y;
-    }
-    else if (tx == t_PADIC)
-    {
+
+    case t_PADIC:
       z = equaliu(d, 2)? padic_sqrt(x): padic_sqrtn(x, d, NULL);
       if (!z) pari_err(talker, "gpow: nth-root does not exist");
       return gerepileupto(av, powgi(z, a));
+
+    case t_FFELT:
+      return gerepileupto(av,FF_pow(FF_sqrtn(x,d,NULL),a));
     }
   }
   i = (long) precision(n); if (i) prec=i;
@@ -978,6 +984,8 @@ gsqrt(GEN x, long prec)
     case t_PADIC:
       return padic_sqrt(x);
 
+    case t_FFELT: return FF_sqrt(x);
+      
     default:
       av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, ser_powfrac(y, ghalf, prec));
@@ -1159,6 +1167,8 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     }
     return y;
 
+  case t_FFELT: return FF_sqrtn(x,n,zetan);
+ 
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = precision(x); if (i) prec = i;
     if (tx==t_INT && is_pm1(x) && signe(x) > 0)

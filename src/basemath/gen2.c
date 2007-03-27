@@ -185,6 +185,9 @@ gcmp0(GEN x)
     case t_INTMOD: case t_POLMOD:
       return gcmp0(gel(x,2));
 
+    case t_FFELT:
+      return FF_cmp0(x);
+
     case t_FRAC:
       return 0;
 
@@ -253,8 +256,11 @@ gcmp1(GEN x)
     case t_REAL:
       return signe(x) > 0 ? absrnz_egal1(x): 0;
 
-    case t_INTMOD: case t_POLMOD:
+    case t_INTMOD: case t_POLMOD: 
       return gcmp1(gel(x,2));
+  
+    case t_FFELT:
+      return FF_cmp1(x);
 
     case t_FRAC:
       return 0;
@@ -295,6 +301,9 @@ gcmp_1(GEN x)
 
     case t_FRAC:
       return 0;
+      
+    case t_FFELT:
+      return FF_cmp_1(x);
 
     case t_COMPLEX:
       return gcmp_1(gel(x,1)) && gcmp0(gel(x,2));
@@ -494,6 +503,9 @@ gequal(GEN x, GEN y)
       case t_INTMOD: case t_POLMOD:
 	return gequal(gel(x,2),gel(y,2))
             && (x[1]==y[1] || gequal(gel(x,1),gel(y,1)));
+
+      case t_FFELT:
+        return FF_equal(x,y);
 
       case t_QFR:
 	    if (!gequal(gel(x,4),gel(y,4))) return 0; /* fall through */
@@ -921,6 +933,8 @@ gneg(GEN x)
       gel(y,2) = gneg(gel(x,2));
       gel(y,3) = gneg(gel(x,3)); break;
 
+    case t_FFELT: return FF_neg(x);
+
     case t_POL: case t_SER:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
@@ -960,6 +974,8 @@ gneg_i(GEN x)
 
     case t_POLMOD: y=cgetg(3,t_POLMOD); y[1]=x[1];
       gel(y,2) = gneg_i(gel(x,2)); break;
+
+    case t_FFELT: return FF_neg_i(x);
 
     case t_QUAD: y=cgetg(4,t_QUAD); y[1]=x[1];
       gel(y,2) = gneg_i(gel(x,2));

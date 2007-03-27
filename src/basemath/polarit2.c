@@ -1653,16 +1653,16 @@ nfrootsQ(GEN x)
 static long
 poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
-  long t[15];
+  long t[16];
   long tx = typ(x),lx,i,j,s,pa=BIGINT;
-  GEN pcx=NULL, p=NULL,pol=NULL,p1,p2;
+  GEN pcx=NULL, p=NULL,pol=NULL,ff=NULL,p1,p2;
 
   if (is_scalar_t(tx))
   {
     if (tx == t_POLMOD) return 0;
     x = scalarpol(x,0);
   }
-  for (i=2; i<15; i++) t[i]=0;
+  for (i=2; i<16; i++) t[i]=0;
   /* t[0..1] unused. Other values, if set, indicate a coefficient of type
    * t[2] : t_REAL
    * t[3] : t_INTMOD
@@ -1676,7 +1676,8 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
    * t[11]: t_QUAD of t_PADIC
    * t[12]: t_POLMOD of rationals (t_INT/t_FRAC)
    * t[13]: t_POLMOD of t_INTMOD
-   * t[14]: t_POLMOD of t_PADIC */
+   * t[14]: t_POLMOD of t_PADIC 
+   * t[15]: t_FFELT */
   lx = lg(x);
   for (i=2; i<lx; i++)
   {
@@ -1691,6 +1692,12 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
       case t_INTMOD:
 	assign_or_fail(gel(p1,1),p);
         t[3]=1; break;
+      case t_FFELT:
+        if (ff==NULL) ff=p1; 
+        else if (!FF_samefield(p1,ff)) return 0;
+        p2=FF_p(p1);
+        assign_or_fail(p2,p);
+        t[15]=1; break;
       case t_COMPLEX:
         if (!pcx) pcx = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
 	for (j=1; j<=2; j++)
@@ -1790,6 +1797,12 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
     *ptpol=pol;
     i = t[12]? t_POLMOD: (t[9]? t_QUAD: t_COMPLEX);
     return typs(i, t_INT);
+  }
+  if (t[15]) 
+  {
+    if (t[8]) return 0;
+    *ptp=p; *ptpol=ff; 
+    return t_FFELT; 
   }
   if (t[3]) { *ptp=p; return t_INTMOD; }
   if (t[8]) { *ptp=p; *ptpa=pa; return t_PADIC; }
@@ -2071,6 +2084,8 @@ factor(GEN x)
           gel(y,2) = const_col(lx-1, gen_1); return y;
 
 	case t_PADIC: return factorpadic4(x,p,pa);
+                      
+	case t_FFELT: return FFX_factor(x,pol);
 
         default:
         {
@@ -4439,3 +4454,56 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   }
   return gerepilecopy(ltop, sol);
 }
+
+GEN ffgen(GEN T, long v)
+{
+  GEN ff=cgetg(5,t_FFELT);
+  GEN p,junk;
+  long ljunk;
+  if (typ(T)!=t_POL || degpol(T)<1)
+    pari_err(typeer,"ffgen");
+  if (poltype(T,&p,&junk,&ljunk)!=t_INTMOD)
+    pari_err(typeer,"ffgen");
+  if (v<0) v=varn(T);
+  if (lgefint(p)==3)
+  {
+    ulong pp=p[2];
+    long sv=evalvarn(v);
+    ff[1]=t_FF_Flxq;
+    gel(ff,2)=polx_Flx(sv);
+    gel(ff,3)=ZX_to_Flx(lift(T),pp);
+    mael(ff,3,1)=sv;
+    gel(ff,4)=icopy(p);
+  }
+  else
+  {
+    ff[1]=t_FF_FpXQ;
+    gel(ff,2)=pol_x(v);
+    gel(ff,3)=lift(T);
+    setvarn(gel(ff,3),v);
+    gel(ff,4)=icopy(p);
+  }
+  return ff;
+}
+
+GEN fforder(GEN x, GEN o)
+{
+  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT))
+    pari_err(typeer,"fforder");
+  return FF_order(x,o);
+}
+
+GEN ffprimroot(GEN x)
+{
+  if (typ(x)!=t_FFELT)
+    pari_err(typeer,"ffprimroot");
+  return FF_primroot(x);
+}
+
+GEN fflog(GEN x, GEN g)
+{
+  if (typ(x)!=t_FFELT || typ(g)!=t_FFELT)
+    pari_err(typeer,"fflog");
+  return FF_log(x,g);
+}
+

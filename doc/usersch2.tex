@@ -284,6 +284,19 @@ just type it as written. As explained in \secref{se:gdiv}, division is
 Note that this type is available for convenience, not for speed: each
 elementary operation involves computing a gcd.
 
+\subsec{Finite field elements}\sidx{finite field element} (type \tet{t_FFELT}):
+first, you must create a irreducible polynomial defining your finite field. You
+can use \tet{ffinit} to compute it. Then you must create a generator of the
+finite field. This is done using the \tet{ffgen} function, in the following way.
+To create the field $\F_{2^8}$, write something like
+\bprog
+    P = ffinit(2,8);
+    g = ffgen(P,g);
+@eprog\noindent
+The element $g$ is the class of $X$ in the quotient field $\F_p[X]/(P(X))$.
+The second parameter to \tet{ffgen} is the name used to display $g$, so it is
+customary to use the name of a variable we will assign the generator to.
+
 \subsec{Complex numbers}\sidx{complex number} (type \tet{t_COMPLEX}): to
 enter $x+iy$, type \kbd{x + I*y} (\emph{not} \kbd{x+i*y}). The letter \tet{I}
 stands for $\sqrt{-1}$. Recall from Chapter 1 that $x$ and $y$ can be of type

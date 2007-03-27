@@ -111,6 +111,10 @@ $n$)\varsidx{intmod}\cr
 \+&type \tet{t_FRAC}& $\Q$& Rational numbers (in irreducible
 form)\sidx{rational number}\cr
 %
+\+&type \tet{t_FFELT}& $\F_q$& Finite field element\sidx{finite field
+element}\cr
+%
+%
 \+&type \tet{t_COMPLEX}& $T[i]$& Complex numbers\sidx{complex number}\cr
 %
 \+&type \tet{t_PADIC}& $\Q_p$& $p$-adic\sidx{p-adic number} numbers\cr
@@ -199,6 +203,14 @@ quotients), and $\Q_p$ as its field of fractions. Like real numbers, the
 codewords contain an exponent, giving the $p$-adic valuation of the number,
 and also the information on the precision of the number, which is
 redundant with $p^k$, but is included for the sake of efficiency.
+
+\subsec{Finite field elements}: \sidx{finite field element} 
+
+Finite field elements are built with the function \kbd{ffgen}.
+The exact internal format depend of the finite field size, but it includes
+the field characteristic $p$, an irreducible polynomial $T$ over $\F_p$
+defining the finite field $\F_p[X]/(T(X))$ and the element expressed as
+a polynomial in $X$.
 
 \subsec{Complex numbers and quadratic numbers}: \sidx{complex
 number}\sidx{quadratic number} quadratic numbers are numbers of the form

@@ -1069,6 +1069,40 @@ void    write1(const char *s, GEN g);
 void    writebin(char *name, GEN x);
 void    writetex(const char *s, GEN g);
 
+/* ffelt.c */
+GEN     FF_1(GEN a);
+GEN     FF_Z_Z_muldiv(GEN x, GEN y, GEN z);
+GEN     FF_Z_add(GEN a, GEN b);
+GEN     FF_Z_mul(GEN a, GEN b);
+GEN     FF_add(GEN a, GEN b);
+GEN     FF_charpoly(GEN x);
+int     FF_cmp0(GEN x);
+int     FF_cmp1(GEN x);
+int     FF_cmp_1(GEN x);
+GEN     FF_div(GEN a, GEN b);
+int     FF_equal(GEN a, GEN b);
+GEN     FF_inv(GEN a);
+GEN     FF_log(GEN a, GEN b);
+GEN     FF_minpoly(GEN x); 
+GEN     FF_mul(GEN a, GEN b);
+GEN     FF_mul2n(GEN a, long n);
+GEN     FF_neg(GEN a);
+GEN     FF_neg_i(GEN a);
+GEN     FF_norm(GEN x);
+GEN     FF_order(GEN x, GEN o);
+GEN     FF_p(GEN x);
+GEN     FF_pow(GEN x, GEN n);
+GEN     FF_primroot(GEN x);
+int     FF_samefield(GEN x, GEN y);
+GEN     FF_sqr(GEN a);
+GEN     FF_sqrt(GEN a);
+GEN     FF_sqrtn(GEN x, GEN n, GEN *zetan);
+GEN     FF_to_FpXQ(GEN x);
+GEN     FF_trace(GEN x);
+GEN     FF_zero(GEN a);
+GEN     FFX_factor(GEN f, GEN ff);
+GEN     Z_FF_div(GEN a, GEN b);
+
 /* galconj.c */
 
 GEN     checkgal(GEN gal);
@@ -1639,6 +1673,10 @@ GEN     factorback(GEN fa,GEN nf);
 GEN     factorback0(GEN fa,GEN e, GEN nf);
 GEN     factorbackelt(GEN fa, GEN e, GEN nf);
 GEN     factpol(GEN x, long hint);
+GEN     ffgen(GEN T, long v);
+GEN     fflog(GEN x, GEN g);
+GEN     fforder(GEN x, GEN o);
+GEN     ffprimroot(GEN x);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gcd0(GEN x, GEN y,long flag);
 GEN     gdeflate(GEN x, long v, long d);

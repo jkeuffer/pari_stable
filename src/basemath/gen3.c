@@ -1077,6 +1077,7 @@ ginv(GEN x)
       else gel(z,2) = ginvmod(gel(x,2), X);
       return z;
 
+    case t_FFELT: return FF_inv(x);
     case t_POL: return gred_rfrac_simple(gen_1,x);
     case t_SER: return gdiv(gen_1,x);
 
@@ -2700,7 +2701,8 @@ denom(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD: case t_PADIC: case t_SER:
+    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT: 
+    case t_PADIC: case t_SER:
       return gen_1;
 
     case t_FRAC:
@@ -2745,7 +2747,7 @@ numer(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD:
+    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT:
     case t_PADIC: case t_POL: case t_SER:
       return gcopy(x);
 
@@ -2789,6 +2791,9 @@ lift0(GEN x, long v)
       y = cgetg(3,tx);
       gel(y,1) = lift0(gel(x,1),v);
       gel(y,2) = lift0(gel(x,2),v); return y;
+
+    case t_FFELT:
+      return gcopy(x);
 
     case t_PADIC:
       return gtrunc(x);
@@ -3144,6 +3149,8 @@ simplify_i(GEN x)
       gel(y,1) = simplify_i(gel(x,1));
       if (typ(y[1]) != t_POL) y[1] = x[1]; /* invalid object otherwise */
       gel(y,2) = simplify_i(gel(x,2)); return y;
+
+    case t_FFELT: return gcopy(x);
 
     case t_POL:
       lx = lg(x); if (lx==2) return gen_0;

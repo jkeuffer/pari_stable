@@ -1196,7 +1196,7 @@ trap0(char *e, char *r, char *f)
 /*                                                                 */
 /*******************************************************************/
 /* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx */
-const  long lontyp[] = { 0,0,0,1,1,1,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
+const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
 #define LG(x, tx) tx == t_LIST? lgeflist(x): lg(x)
 
 /* x is a t_INT equal to 0 ? tx == t_INT && lx == 2 */

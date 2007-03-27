@@ -1171,6 +1171,25 @@ the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be
 $d$. Both must be of type \typ{INT} such that $d\neq 0$, $n > 0$ and
 $(n,d) = 1$ (see \tet{gred_frac2}).
 
+\subsec{Type \typ{FFELT} (finite field element)}:%
+\kbdsidx{t_FFELT}\sidx{finite field element} (Experimental)
+
+Components of this type should normaly not be accessed directly.
+Instead, finite field elements should be created using \kbd{ffgen}.
+
+This type has a second codeword \kbd{z[1]} which determines the storage format
+of the element. 
+
+The format \tet{t_FF_FpXQ}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{FpX},
+\kbd{p=z[4]} is a \typ{INT}, where $p$ is a prime number, $T$ is irreducible
+modulo $p$, and the degree of $A$ is strictly less than the degree of $T$.
+This represents the element $A\pmod{T}$ in $\F_p[X]/T$.  
+
+The format \tet{t_FF_Flxq}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{Flx},
+\kbd{l=z[4]} is a \typ{INT}, where $l$ prime number, $T$ is irreducible
+modulo $p$, and the degree of $A$ is strictly less than the degree of $T$.
+This represents the element $A\pmod{T}$ in $\F_l[X]/T$.
+
 \subsec{Type \typ{COMPLEX} (complex number)}:%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
 \kbd{z[1]} points to the real part, and \kbd{z[2]} to the imaginary part.

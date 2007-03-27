@@ -112,6 +112,13 @@ easychar(GEN x, long v, GEN *py)
       gel(p1,2) = gnorm(x); av = avma;
       gel(p1,3) = gerepileupto(av, gneg(gtrace(x)));
       gel(p1,4) = gen_1; return p1;
+      
+    case t_FFELT: {
+      pari_sp ltop=avma;
+      if (py) pari_err(typeer,"easychar");
+      p1 = FpX_to_mod(FF_charpoly(x), FF_p(x));
+      setvarn(p1,v); return gerepileupto(ltop,p1);
+    }
 
     case t_POLMOD:
       if (py) pari_err(typeer,"easychar");
@@ -264,6 +271,12 @@ minpoly(GEN x, long v)
   pari_sp ltop=avma;
   GEN P;
   if (v<0) v = 0;
+  if (typ(x)==t_FFELT)
+  {
+      GEN p1 = FpX_to_mod(FF_minpoly(x), FF_p(x));
+      setvarn(p1,v); return gerepileupto(ltop,p1);
+  }
+
   P=easymin(x,v);
   if (P) return P;
   if (typ(x)==t_POLMOD)
@@ -384,6 +397,11 @@ gnorm(GEN x)
     case t_POL: case t_SER: case t_RFRAC: av = avma;
       return gerepileupto(av, greal(gmul(gconj(x),x)));
 
+    case t_FFELT:
+      y=cgetg(3, t_INTMOD);
+      gel(y,1) = icopy(FF_p(x));
+      gel(y,2) = FF_norm(x);
+      return y;
     case t_POLMOD: 
       if (typ(gel(x,2)) != t_POL) return gpowgs(gel(x,2), degpol(gel(x,1)));
       return RgXQ_norm(gel(x,2), gel(x,1));
@@ -705,6 +723,13 @@ gtrace(GEN x)
       if (typ(z) != t_POL || varn(y) != varn(z)) return gmulsg(degpol(y), z);
       av = avma;
       return gerepileupto(av, quicktrace(z, polsym(y, degpol(y)-1)));
+      
+    case t_FFELT: 
+      y=cgetg(3, t_INTMOD);
+      gel(y,1) = icopy(FF_p(x));
+      gel(y,2) = FF_trace(x);
+      return y;
+
 
     case t_RFRAC:
       return gadd(x, gconj(x));

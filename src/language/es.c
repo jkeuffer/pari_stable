@@ -1291,6 +1291,7 @@ type_name(long t)
     case t_REAL   : s="t_REAL";    break;
     case t_INTMOD : s="t_INTMOD";  break;
     case t_FRAC   : s="t_FRAC";    break;
+    case t_FFELT  : s="t_FFELT";   break;
     case t_COMPLEX: s="t_COMPLEX"; break;
     case t_PADIC  : s="t_PADIC";   break;
     case t_QUAD   : s="t_QUAD";    break;
@@ -1382,6 +1383,12 @@ voir2(GEN x, long nb, long bl)
     case t_FRAC: case t_RFRAC:
       blancs(bl); pariputs("num = "); voir2(gel(x,1),nb,bl);
       blancs(bl); pariputs("den = "); voir2(gel(x,2),nb,bl);
+      break;
+
+    case t_FFELT:
+      blancs(bl); pariputs("pol = "); voir2(gel(x,2),nb,bl);
+      blancs(bl); pariputs("mod = "); voir2(gel(x,3),nb,bl);
+      blancs(bl); pariputs("p   = "); voir2(gel(x,4),nb,bl);
       break;
 
     case t_COMPLEX:
@@ -1642,6 +1649,8 @@ isnull(GEN g)
       return !signe(g);
     case t_COMPLEX:
       return isnull(gel(g,1)) && isnull(gel(g,2));
+    case t_FFELT:
+      return FF_cmp0(g);
     case t_QUAD:
       return isnull(gel(g,2)) && isnull(gel(g,3));
     case t_FRAC: case t_RFRAC:
@@ -1691,6 +1700,8 @@ isfactor(GEN g)
       return (signe(g)<0)? -1: 1;
     case t_FRAC: case t_RFRAC:
       return isfactor(gel(g,1));
+    case t_FFELT:
+      return isfactor(FF_to_FpXQ(g));
     case t_COMPLEX:
       if (isnull(gel(g,1))) return isfactor(gel(g,2));
       if (isnull(gel(g,2))) return isfactor(gel(g,1));
@@ -1966,6 +1977,10 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       pariputs(new_fun_set? "Mod(": "mod(");
       bruti(gel(g,2),T,1); comma_sp(T);
       bruti(gel(g,1),T,1); pariputc(')'); break;
+
+    case t_FFELT:
+      bruti(FF_to_FpXQ(g),T,addsign); 
+      break;
 
     case t_FRAC: case t_RFRAC:
       r = isfactor(gel(g,1)); if (!r) pariputc('(');

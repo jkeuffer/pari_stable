@@ -20,6 +20,7 @@ enum {
   t_REAL   =  2,
   t_INTMOD =  3,
   t_FRAC   =  4,
+  t_FFELT  =  5,
   t_COMPLEX=  6,
   t_PADIC  =  7,
   t_QUAD   =  8,

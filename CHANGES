@@ -105,9 +105,11 @@ BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
 BA 18- [toplevel benchmark] ffisom
 BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn, 
        Flxq_order, Flxq_log, Flxq_sqrtn 
-   20- indexrank, indexsort and indexlexsort now return t_VECSMALLs
-   21- library functions gen_sort_inplace, gen_indexsort, sort_factor,
+   20- library functions gen_sort_inplace, gen_indexsort, sort_factor,
        indexvecsort
+BA 21- New PARI type t_FFELT and support functions (FF_*) for finite field
+       elements.
+BA 22- functions ffgen, fforder, fflog, ffprimroot for finite field elements.
 
   Removed
     1- obsolete functions readexpr(), readexpr_nobreak() 
