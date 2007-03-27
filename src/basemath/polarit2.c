@@ -1472,7 +1472,7 @@ gdeflate(GEN x, long v, long d)
       y = ser2pol_i(x, lx);
       if (V % d != 0 || checkdeflate(y) % d != 0)
         pari_err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
-      y = poltoser(poldeflate_i(y, d), v, max(1, (lx-2)/d));
+      y = poltoser(poldeflate_i(y, d), v, 1 + (lx-3)/d);
       setvalp(y, V/d); return gerepilecopy(av, y);
     }
     if (checkdeflate(x) % d != 0) pari_err(cant_deflate);
