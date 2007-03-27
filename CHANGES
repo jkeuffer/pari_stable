@@ -67,7 +67,7 @@ RB 42- the following TODO item:
        any variable is "deleted", while it (or part of it) is still in use
        Reference count could be helpful here.
    43- substpol(x^-2+O(x^-1),x^2,x) --> error [#555]
-
+BA 44- [TLS] addss, addsr and subsr were not reentrant.
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
