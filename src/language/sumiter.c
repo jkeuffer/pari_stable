@@ -922,7 +922,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   if (typ(a) != t_INT) pari_err(talker,"non integral index in sumpos");
 
   a = subis(a,1); reel = cgetr(prec);
-  e1 = addsr(3, sqrtr(stor(8,prec));
+  e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N);
   d = shiftr(addrr(d, ginv(d)),-1);
