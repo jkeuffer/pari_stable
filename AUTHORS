@@ -9,7 +9,7 @@ bugs or suggesting improvements, Igor Schein foremost among them.
 
 We would like to thank them all here.
 
-Major code contributors:
+Major code contributors (large modules written from scratch):
 
   Bill Allombert
   Christian Batut
@@ -31,8 +31,8 @@ Major code contributors:
   Emmanuel Tollis
   Ilya Zakharevitch
 
-Other contributors: (please, kindly remind us if you have been forgotten!)
-[ The 2 or 3 letter code refer to the CHANGES file ]
+Other contributors: the 2 or 3 letter code refer to the CHANGES file. Please,
+kindly remind us if you have been forgotten!
 
    = Karim Belabas (maintainer)
 AM = Alex V. Myltsev
@@ -79,6 +79,7 @@ OV = Oliver Voigt
 PC = Phil Carmody
 PM = Peter Montgomery
 PW = Paul van Wamelen
+RB = Remi Butel
 RM = Richard Mathar
 RS = Ralf Stephan
 RR = Randall Rathbun

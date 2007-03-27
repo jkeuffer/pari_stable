@@ -52,10 +52,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
-5  v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
-   any variable is "deleted", while it (or part of it) is still in use 
-   Reference count could be helpful here.
-
 5  saving an object containing high variable numbers in binary form, then
    reading it back in a virgin session will create an invalid object,
    accessing undefined variables (SEGV).

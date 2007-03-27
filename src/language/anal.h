@@ -32,6 +32,14 @@ GEN gp_eval(GEN x, void *dat);
 { GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
 #define EXPR_ARG &__E, &gp_eval
 
+/* to manipulate 'blocs' */
+#define BL_HEAD 4
+#define bl_base(x) ((x) - BL_HEAD)
+#define bl_refc(x) (((GEN)x)[-4])
+#define bl_next(x) (((GEN)x)[-3])
+#define bl_prev(x) (((GEN)x)[-2])
+#define bl_num(x)  (((GEN)x)[-1])
+
 /* binary I/O */
 typedef struct GENbin {
   size_t len; /* taille(x) */

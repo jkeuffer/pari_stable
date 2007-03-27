@@ -1295,6 +1295,7 @@ matcell(GEN p, matcomp *C)
     }
   } while (*analyseur == '[');
   C->parent = p;
+  if (isclone(p)) bl_refc(p) += 1;
   C->ptcell = pt; return *pt;
 }
 
@@ -1618,6 +1619,7 @@ matrix_block(GEN p)
 #else
   /* too dangerous otherwise: e.g we return x[1] and have x = 0 immediately
    * after, destroying x[1] in changevalue */
+  if (isclone(c.parent)) bl_refc(c.parent) -= 1;
   return gcopy(cpt); /* no assignment */
 #endif
 }

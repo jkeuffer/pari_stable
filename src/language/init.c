@@ -106,13 +106,6 @@ pop_stack(stack **pts)
 /*                                                                   */
 /*********************************************************************/
 /*#define DEBUG*/
-#define BL_HEAD 4
-#define bl_base(x) ((x) - BL_HEAD)
-#define bl_refc(x) (((GEN)x)[-4])
-#define bl_next(x) (((GEN)x)[-3])
-#define bl_prev(x) (((GEN)x)[-2])
-#define bl_num(x)  (((GEN)x)[-1])
-
 static THREAD long next_bloc;
 static THREAD GEN cur_bloc=NULL; /* current bloc in bloc list */
 #ifdef DEBUG

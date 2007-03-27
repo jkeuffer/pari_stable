@@ -62,6 +62,11 @@ BA 38- missing prototype for documented function FpX_div_by_X_x
    39- isprime(,0) very slow when primelimit is large [#546]
    40- nfmodprinit could create FpX's which were not reduced mod p
    41- O(x^3)^(1/2) was O(x^2) instead of O(x)
+RB 42- the following TODO item:
+       v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
+       any variable is "deleted", while it (or part of it) is still in use
+       Reference count could be helpful here.
+
 
   Changed
     1- concat(t_VECSMALL, t_VECSMALL) to return the concatenated vector
