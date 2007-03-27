@@ -1162,7 +1162,6 @@ long    Z_pvalrem(GEN x, GEN p, GEN *py);
 
 /* gen3.c */
 
-GEN     Mod0(GEN x, GEN y,long flag);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);

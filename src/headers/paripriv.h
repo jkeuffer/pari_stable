@@ -34,6 +34,9 @@ typedef ulong *uGEN;
 /* */
 #define both_odd(x,y) ((x)&(y)&1)
 
+/* FIXME: obsolete */
+GEN Mod0(GEN x, GEN y,long flag);
+
 /* unused */
 GEN ellheightoo(GEN e, GEN z, long prec);
 void ellprint(GEN e);

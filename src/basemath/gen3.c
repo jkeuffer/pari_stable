@@ -690,17 +690,9 @@ gmodulo(GEN x,GEN y)
   pari_err(operf,"%",x,y); return NULL; /* not reached */
 }
 
+/* FIXME: obsolete, kept for backward compatibility */
 GEN
-Mod0(GEN x,GEN y,long flag)
-{
-  switch(flag)
-  {
-    case 0:
-    case 1: return gmodulo(x,y);
-    default: pari_err(flagerr,"Mod");
-  }
-  return NULL; /* not reached */
-}
+Mod0(GEN x,GEN y,long flag) { (void)flag; return gmodulo(x,y); }
 
 /*******************************************************************/
 /*                                                                 */
