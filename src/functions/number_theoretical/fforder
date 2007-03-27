@@ -1,0 +1,7 @@
+Function: fforder
+Section: number_theoretical
+C-Name: fforder
+Prototype: GDG
+Help: fforder(x,{o}): multiplicative order of the finite field element x.
+ Optional o is assumed to be a multiple of the order of the element
+
