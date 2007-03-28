@@ -114,7 +114,7 @@ mulur_2(ulong x, GEN y, long s)
 GEN
 mulsr(long x, GEN y)
 {
-  long s, e;
+  long s;
 
   if (!x) return gen_0;
   s = signe(y);
@@ -134,7 +134,7 @@ mulsr(long x, GEN y)
 GEN
 mulur(ulong x, GEN y)
 {
-  long s, e;
+  long s;
 
   if (!x) return gen_0;
   s = signe(y);
