@@ -1615,7 +1615,7 @@ gener_Flxq(GEN T, ulong p)
     for (i = 1; i < j; i++)
     {
       GEN a = Flxq_pow(tt, gel(L2,i), T, p);
-      if (!degpol(a) && a[2] == RES) break;
+      if (!degpol(a) && (ulong)a[2] == RES) break;
     }
     if (i == j) break;
   }

@@ -119,7 +119,7 @@ FF_cmp_1(GEN x)
       break;
     }
   default:
-    b=(degpol(gel(x,2))==0 && mael(x,2,2)==pp-1);
+    b=(degpol(gel(x,2))==0 && (ulong)mael(x,2,2)==pp-1);
   }
   return b;
 }
