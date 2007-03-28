@@ -1782,7 +1782,7 @@ pollardbrent(GEN n)
   if (tf >= 4)
     size = expi(n) + 1;
   else if (tf == 3)		/* try to keep purify happy...  */
-    size = BITS_IN_LONG - bfffo((ulong)n[2]);
+    size = 1 + expu((ulong)n[2]);
 
   if (size <= 28)
     c0 = 32;/* amounts very nearly to `insist'. Now that we have squfof(), we

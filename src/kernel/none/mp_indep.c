@@ -121,8 +121,7 @@ mulsr(long x, GEN y)
   if (!s)
   {
     if (x < 0) x = -x;
-    e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
-    return real_0_bit(e);
+    return real_0_bit( expo(y) + expu(x) );
   }
   if (x==1)  return rcopy(y);
   if (x==-1) return negr(y);
@@ -139,11 +138,7 @@ mulur(ulong x, GEN y)
 
   if (!x) return gen_0;
   s = signe(y);
-  if (!s)
-  {
-    e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
-    return real_0_bit(e);
-  }
+  if (!s) return real_0_bit( expo(y) + expu(x) );
   if (x==1) return rcopy(y);
   return mulur_2(x, y, s);
 }
@@ -435,8 +430,8 @@ divrs(GEN x, long y)
   LOCAL_HIREMAINDER;
 
   if (!y) pari_err(gdiver);
-  if (!s) return real_0_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
   if (y<0) { s = -s; y = -y; }
+  if (!s) return real_0_bit(expo(x) - expu(y));
   if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
 
   z=cgetr(lx=lg(x)); hiremainder=0;

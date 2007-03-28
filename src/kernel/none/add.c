@@ -26,8 +26,11 @@ GEN
 addss(long x, long y)
 {
   if (!x) return stoi(y);
-  if (x>0) { pos_s[2] = x; return addsi(y,pos_s); }
-  neg_s[2] = -x; return addsi(y,neg_s);
+  if (!y) return stoi(x);
+  if (x > 0) return y > 0? adduu(x,y): subuu(x, -y);
+
+  if (y > 0) return subuu(y, -x);
+  else { GEN z = adduu(-x,-y); togglesign(z); return z; }
 }
 
 INLINE GEN

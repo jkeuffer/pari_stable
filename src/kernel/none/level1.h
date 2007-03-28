@@ -105,6 +105,7 @@ long   evalexpo(long x);
 long   evallg(long x);
 long   evalvalp(long x);
 long   expi(GEN x);
+long   expu(ulong x);
 GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
 GEN    gtofp(GEN z, long prec);
@@ -170,6 +171,7 @@ GEN    subir(GEN x, GEN y);
 GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
+GEN    subuu(ulong x, ulong y);
 ulong  udivui_rem(ulong x, GEN y, ulong *rem);
 ulong  umodui(ulong x, GEN y);
 GEN    utoi(ulong x);
@@ -756,6 +758,14 @@ INLINE long
 minss(long x, long y) { return x<y?x:y; }
 
 INLINE GEN
+subuu(ulong x, ulong y)
+{
+  LOCAL_OVERFLOW;
+  ulong z = subll(x, y);
+  return overflow? utoineg(-z): utoi(z);
+}
+
+INLINE GEN
 subii(GEN x, GEN y)
 {
   if (x==y) return gen_0; /* frequent with x = y = gen_0 */
@@ -1254,6 +1264,10 @@ Fl_div(ulong a, ulong b, ulong p)
 {
   return Fl_mul(a, Fl_inv(b, p), p);
 }
+
+/* assume x > 0 */
+INLINE long
+expu(ulong x) { return (BITS_IN_LONG-1) - (long)bfffo(x); }
 
 INLINE long
 expi(GEN x)

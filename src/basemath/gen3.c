@@ -2204,22 +2204,17 @@ mkintn(long n, ...)
 GEN
 u2toi(ulong a, ulong b)
 {
-  GEN x;
-  if (!a && !b) return gen_0;
 #ifdef LONG_IS_64BIT
-  x = cgetipos(3);
-  x[2] = ((a << 32) | b);
+  return utoi((a<<32) | b)
 #else
-  if (a) {
-    x = cgetipos(4);
-    *(int_MSW(x)) = a;
-    *(int_LSW(x)) = b;
-  } else {
-    x = cgetipos(3);
-    x[2] = b;
-  }
-#endif
+  if (!a) return utoi(b);
+{
+  GEN x = cgetipos(4);
+  *(int_MSW(x)) = a;
+  *(int_LSW(x)) = b;
   return x;
+}
+#endif
 }
 
 /* return a_(n-1) x^(n-1) + ... + a_0 */

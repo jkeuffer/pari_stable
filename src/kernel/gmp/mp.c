@@ -186,21 +186,24 @@ incloop(GEN a)
 }
 
 INLINE GEN
+adduu(ulong x, ulong y)
+{
+  ulong t = x+y;
+  if (t < x)
+  {
+    GEN y = cgetipos(4); y[2] = t; y[3] = 1;
+    return y;
+  }
+  return utoi(t);
+}
+
+INLINE GEN
 adduispec(ulong s, GEN x, long nx)
 {
   GEN  zd;
   long lz;
 
-  if (nx == 1)
-  {
-    ulong t = (ulong)x[0]+s;
-    if (t < (ulong)x[0])
-    {
-      GEN y = cgetipos(4); y[2] = t; y[3]=1;
-      return y;
-    }
-    return utoipos(t);
-  }
+  if (nx == 1) return adduu((ulong)x[0], s);
   lz = nx+3; zd = cgeti(lz);
   if (mpn_add_1(LIMBS(zd),(mp_limb_t *)x,nx,s))
     zd[lz-1]=1;

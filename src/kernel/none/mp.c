@@ -125,11 +125,24 @@ incloop(GEN a)
 }
 
 INLINE GEN
+adduu(ulong x, ulong y)
+{
+  ulong t = x+y;
+  if (t < x)
+  {
+    GEN y = cgetipos(4); y[2] = 1; y[3] = t;
+    return y;
+  }
+  return utoi(t);
+}
+
+INLINE GEN
 adduispec(ulong s, GEN x, long nx)
 {
   GEN xd, zd = (GEN)avma;
   long lz;
 
+  if (nx == 1) return adduu(s, (ulong)x[0]);
   lz = nx+3; (void)new_chunk(lz);
   xd = x + nx;
   *--zd = (ulong)*--xd + s;

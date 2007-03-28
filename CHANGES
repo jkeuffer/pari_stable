@@ -1,6 +1,18 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
+Done for version 2.4.2 (released ??/??/2006):
+
+  Fixed
+    1- divrs(0., negative integer) had the wrong exponent
+  Changed
+
+  Added
+    1- library functions expu, adduu, subuu
+
+  Removed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2006):
   Fixed
     1- qflll / qflllgram (t_MAT with t_FRAC entries) would not reduce to the
