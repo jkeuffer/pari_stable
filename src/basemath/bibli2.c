@@ -1280,7 +1280,7 @@ vecsort0(GEN x, GEN k, long flag)
   int (*cmp)(GEN,GEN) = (flag & cmp_LEX)? &lexcmp: &gcmp;
   void *E;
 
-  if (flag < 0 || flag >= cmp_REV) pari_err(flagerr,"vecsort");
+  if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND)) pari_err(flagerr,"vecsort");
   if (k) {
     long i, j, l, lk, tx = typ(x), lx = lg(x);
     struct veccmp_s v;

@@ -5,6 +5,7 @@ Done for version 2.4.2 (released ??/??/2006):
 
   Fixed
     1- divrs(0., negative integer) had the wrong exponent
+    2- vecsort(,,4) was broken in 2.4.1
   Changed
 
   Added
