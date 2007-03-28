@@ -107,8 +107,8 @@ FF_cmp_1(GEN x)
 {
   ulong pp;
   GEN T, p;
-  _getFF(x,&T,&p,&pp);
   int b;
+  _getFF(x,&T,&p,&pp);
   switch(x[1])
   {
   case t_FF_FpXQ:
