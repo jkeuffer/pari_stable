@@ -1,0 +1,4 @@
+Function: local
+Section: programming
+Help: local(x,...,z): declare x,...,z as local variables
+
