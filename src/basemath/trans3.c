@@ -230,7 +230,7 @@ jbesselh(GEN n, GEN z, long prec)
   return NULL; /* not reached */
 }
 
-GEN
+static GEN
 kbessel2(GEN nu, GEN x, long prec)
 {
   pari_sp av = avma;
@@ -244,8 +244,8 @@ kbessel2(GEN nu, GEN x, long prec)
   return gerepileupto(av, gmul(p1,gexp(gneg(x),prec)));
 }
 
-GEN
-kbessel(GEN nu, GEN gx, long prec)
+static GEN
+kbessel1(GEN nu, GEN gx, long prec)
 {
   GEN x, y, p1, zf, zz, r, s, t, u, ak, pitemp, nu2;
   long l, lnew, k, k2, l1, n2, n, ex;
@@ -332,7 +332,7 @@ kbessel(GEN nu, GEN gx, long prec)
  * Warning: contrary to _jbessel, no n! in front.
  * When flag > 1, compute exactly the H(k) and factorials (slow) */
 static GEN
-_kbessel(long n, GEN z, long flag, long m, long prec)
+_kbessel1(long n, GEN z, long flag, long m, long prec)
 {
   GEN Z, p1, p2, s, H;
   pari_sp av, lim;
@@ -343,8 +343,8 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
   {
     long v = valp(z);
     k = lg(Z)-2 - v;
-    if (v < 0) pari_err(negexper,"kbessel");
-    if (v == 0) pari_err(impl,"kbessel around a!=0");
+    if (v < 0) pari_err(negexper,"_kbessel1");
+    if (v == 0) pari_err(impl,"Bessel K around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
     setlg(Z, k+2);
   }
@@ -366,7 +366,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     s = gadd(gadd(gel(H,k),gel(H,k+n)),gdiv(gmul(Z,s),mulss(k,k+n)));
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"kbessel");
+      if (DEBUGMEM>1) pari_warn(warnmem,"_kbessel1");
       s = gerepileupto(av, s);
     }
   }
@@ -404,8 +404,8 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
       /* experimental */
-      if (!flag && ex > bit_accuracy(prec)/16 + gexpo(n))
-        return kbessel(n,z,prec);
+      if (!flag && !gcmp0(n) && ex > bit_accuracy(prec)/16 + gexpo(n))
+        return kbessel1(n,z,prec);
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
       if (L >= 1.3591409) {
@@ -421,7 +421,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	B = bit_accuracy_mul(prec,LOG2/2) / L;
 	if (fl) B += 0.367879;
         lim = bessel_get_lim(B, L);
-	p1 = gmul(gpowgs(z2,k), _kbessel(k,z,flag,lim,precnew));
+	p1 = gmul(gpowgs(z2,k), _kbessel1(k,z,flag,lim,precnew));
 	p2 = gadd(mpeuler(precnew), glog(z2,precnew));
 	p3 = jbesselintern(stoi(k),z,flag,precnew);
 	p2 = gsub(gmul2n(p1,-1),gmul(p2,p3));
@@ -474,13 +474,13 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       }
       return gerepilecopy(av, y);
 
-    case t_PADIC: pari_err(impl,"p-adic kbessel function");
+    case t_PADIC: pari_err(impl,"p-adic Bessel K function");
     default:
       if (!(y = toser_i(z))) break;
       if (issmall(n,&ki))
       {
 	k = labs(ki);
-	return gerepilecopy(av, _kbessel(k,y,flag+2,lg(y)-2,prec));
+	return gerepilecopy(av, _kbessel1(k,y,flag+2,lg(y)-2,prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
         pari_err(talker,"cannot give a power series result in k/n bessel function");
@@ -499,12 +499,12 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       else p1 = pm;
       return gerepileupto(av, fl2? gneg(p1): gcopy(p1));
   }
-  pari_err(typeer,"kbessel");
+  pari_err(typeer,"kbesselintern");
   return NULL; /* not reached */
 }
 
 GEN
-kbesselnew(GEN n, GEN z, long prec) { return kbesselintern(n,z,0,prec); }
+kbessel(GEN n, GEN z, long prec) { return kbesselintern(n,z,0,prec); }
 GEN
 nbessel(GEN n, GEN z, long prec) { return kbesselintern(n,z,1,prec); }
 /* J + iN */
@@ -520,19 +520,6 @@ hbessel2(GEN n, GEN z, long prec)
 {
   pari_sp av = avma;
   return gerepileupto(av, gadd(jbessel(n,z,prec), mulcxmI(nbessel(n,z,prec))));
-}
-
-GEN
-kbessel0(GEN nu, GEN gx, long flag, long prec)
-{
-  switch(flag)
-  {
-    case 0: return kbesselnew(nu,gx,prec);
-    case 1: return kbessel(nu,gx,prec);
-    case 2: return kbessel2(nu,gx,prec);
-    default: pari_err(flagerr,"besselk");
-  }
-  return NULL; /* not reached */
 }
 
 /***********************************************************************/

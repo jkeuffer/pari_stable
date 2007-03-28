@@ -2009,8 +2009,6 @@ GEN     jbesselh(GEN n, GEN z, long prec);
 GEN     nbessel(GEN n, GEN z, long prec);
 GEN     jell(GEN x, long prec);
 GEN     kbessel(GEN nu, GEN gx, long prec);
-GEN     kbessel0(GEN nu, GEN gx, long flag,long prec);
-GEN     kbessel2(GEN nu, GEN x, long prec);
 GEN     polylog(long m, GEN x, long prec);
 GEN     polylog0(long m, GEN x, long flag, long prec);
 GEN     polylogd(long m, GEN x, long prec);

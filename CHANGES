@@ -11,6 +11,7 @@ Done for version 2.4.2 (released ??/??/2006):
     1- library functions expu, adduu, subuu
 
   Removed
+    1- obsolete function kbessel2 (now static). Removed optional flag in besselk
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2006):

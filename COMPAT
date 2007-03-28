@@ -18,6 +18,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - Change e.omega so that e.omega[1] / e.omega[2] belongs to the Poincare
     half plane [ used to be the inverse ]. 
   - indexrank, indexsort and indexlexsort now return t_VECSMALLs
+  - besselk no longer admits a flag, the default implementation caters for
+    all cases
 
 * Specific to the PARI library:
 ===============================
