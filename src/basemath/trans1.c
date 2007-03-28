@@ -1020,6 +1020,40 @@ rootsof1padic(GEN n, GEN y)
   affii(z, gel(r,4)); avma = av; return r;
 }
 
+/* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
+ * log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k.
+ * palogaux(x) returns the last sum (not multiplied by 2) */
+static GEN
+palogaux(GEN x)
+{
+  long k,e,pp;
+  GEN y,s,y2, p = gel(x,2);
+
+  if (equalii(gen_1, gel(x,4)))
+  {
+    long v = valp(x)+precp(x);
+    if (equaliu(p,2)) v--;
+    return zeropadic(p, v);
+  }
+  y = gdiv(gaddgs(x,-1), gaddgs(x,1));
+  e = valp(y); /* > 0 */
+  pp = e+precp(y);
+  if (equaliu(p,2)) pp--;
+  else
+  {
+    GEN p1;
+    for (p1=utoipos(e); cmpui(pp,p1) > 0; pp++) p1 = mulii(p1, p);
+    pp -= 2;
+  }
+  k = pp/e; if (!odd(k)) k--;
+  y2 = gsqr(y); s = gdivgs(gen_1,k);
+  while (k > 2)
+  {
+    k -= 2; s = gadd(gmul(y2,s), gdivgs(gen_1,k));
+  }
+  return gmul(s,y);
+}
+
 static GEN
 palog(GEN x)
 {
@@ -1810,40 +1844,6 @@ teich(GEN x)
       z = Fp_mul(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q)))), q);
   }
   affii(z, gel(y,4)); avma = av; return y;
-}
-
-/* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
- * log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k.
- * palogaux(x) returns the last sum (not multiplied by 2) */
-static GEN
-palogaux(GEN x)
-{
-  long k,e,pp;
-  GEN y,s,y2, p = gel(x,2);
-
-  if (equalii(gen_1, gel(x,4)))
-  {
-    long v = valp(x)+precp(x);
-    if (equaliu(p,2)) v--;
-    return zeropadic(p, v);
-  }
-  y = gdiv(gaddgs(x,-1), gaddgs(x,1));
-  e = valp(y); /* > 0 */
-  pp = e+precp(y);
-  if (equaliu(p,2)) pp--;
-  else
-  {
-    GEN p1;
-    for (p1=utoipos(e); cmpui(pp,p1) > 0; pp++) p1 = mulii(p1, p);
-    pp -= 2;
-  }
-  k = pp/e; if (!odd(k)) k--;
-  y2 = gsqr(y); s = gdivgs(gen_1,k);
-  while (k > 2)
-  {
-    k -= 2; s = gadd(gmul(y2,s), gdivgs(gen_1,k));
-  }
-  return gmul(s,y);
 }
 
 GEN
