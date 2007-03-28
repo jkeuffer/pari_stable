@@ -57,7 +57,6 @@ zeta(3)
 \\ A faible precision
 \p 38
 besselk(1+I,1)
-besselk(1+I,1,1)
 erfc(2)
 gamma(10.5)
 hyperu(1,1,1)
