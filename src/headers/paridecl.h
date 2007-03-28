@@ -1960,7 +1960,6 @@ GEN     powiu(GEN p, ulong k);
 GEN     powuu(ulong p, ulong k);
 GEN     sqrtr(GEN x);
 GEN     sqrtnr(GEN x, long n);
-GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);
 GEN     teich(GEN x);
 ulong   upowuu(ulong p, ulong k);

@@ -660,9 +660,6 @@ polgalois(GEN x, long prec)
 
 #undef _res
 
-/*Deprecated*/
-GEN galois(GEN x, long prec) {return polgalois(x,prec);}
-
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {

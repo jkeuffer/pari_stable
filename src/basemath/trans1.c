@@ -1020,6 +1020,29 @@ rootsof1padic(GEN n, GEN y)
   affii(z, gel(r,4)); avma = av; return r;
 }
 
+static GEN
+palog(GEN x)
+{
+  pari_sp av = avma;
+  GEN y, p = gel(x,2);
+
+  if (!signe(x[4])) pari_err(talker,"zero argument in palog");
+  if (equaliu(p,2))
+  {
+    y = gsqr(x); setvalp(y,0);
+    y = palogaux(y);
+  }
+  else
+  { /* compute log(x^(p-1)) / (p-1) */
+    GEN mod = gel(x,3), p1 = subis(p,1);
+    y = cgetp(x);
+    gel(y,4) = Fp_pow(gel(x,4), p1, mod);
+    p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
+    y = gmul(palogaux(y), mulis(p1, -2));
+  }
+  return gerepileupto(av,y);
+}
+
 static GEN exp_p(GEN x);
 /*compute the p^e th root of x p-adic, assume x != 0 */
 GEN
@@ -1821,29 +1844,6 @@ palogaux(GEN x)
     k -= 2; s = gadd(gmul(y2,s), gdivgs(gen_1,k));
   }
   return gmul(s,y);
-}
-
-GEN
-palog(GEN x)
-{
-  pari_sp av = avma;
-  GEN y, p = gel(x,2);
-
-  if (!signe(x[4])) pari_err(talker,"zero argument in palog");
-  if (equaliu(p,2))
-  {
-    y = gsqr(x); setvalp(y,0);
-    y = palogaux(y);
-  }
-  else
-  { /* compute log(x^(p-1)) / (p-1) */
-    GEN mod = gel(x,3), p1 = subis(p,1);
-    y = cgetp(x);
-    gel(y,4) = Fp_pow(gel(x,4), p1, mod);
-    p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
-    y = gmul(palogaux(y), mulis(p1, -2));
-  }
-  return gerepileupto(av,y);
 }
 
 GEN
