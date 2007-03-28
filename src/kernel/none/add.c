@@ -14,14 +14,6 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* prototype of positive small ints */
-static THREAD long pos_s[] = {
-  evaltyp(t_INT) | _evallg(3), evalsigne(1) | evallgefint(3), 0 };
-
-/* prototype of negative small ints */
-static THREAD long neg_s[] = {
-  evaltyp(t_INT) | _evallg(3), evalsigne(-1) | evallgefint(3), 0 };
-
 GEN
 addss(long x, long y)
 {
@@ -107,7 +99,7 @@ rcopy_sign(GEN x, long sx) { GEN y = rcopy(x); setsigne(y,sx); return y; }
 GEN
 addir_sign(GEN x, long sx, GEN y, long sy)
 {
-  long e,l,ly;
+  long e, l, ly;
   GEN z;
 
   if (!sx) return rcopy_sign(y, sy);
@@ -132,21 +124,40 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   avma = (pari_sp)z; return z;
 }
 
-GEN
-addsr(long x, GEN y)
+static GEN
+addsr_sign(long x, GEN y, long sy)
 {
-  if (!x) return rcopy(y);
-  if (x>0) { pos_s[2]=x; return addir_sign(pos_s, 1, y, signe(y)); }
-  neg_s[2] = -x; return addir_sign(neg_s, -1, y, signe(y));
+  long e, l, ly, sx;
+  GEN z;
+
+  if (!x) return rcopy_sign(y, sy);
+  if (x < 0) { sx = -1; x = -x; } else sx = 1;
+  e = expo(y) - expu(x);
+  if (!sy)
+  {
+    if (e > 0) return rcopy_sign(y, sy);
+    if (sx == -1) x = -x;
+    return stor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
+  }
+
+  ly = lg(y);
+  if (e > 0)
+  {
+    l = ly - (e>>TWOPOTBITS_IN_LONG);
+    if (l < 3) return rcopy_sign(y, sy);
+  }
+  else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
+  z = (GEN)avma;
+  y = addrr_sign(stor(x,l), sx, y, sy);
+  ly = lg(y); while (ly--) *--z = y[ly];
+  avma = (pari_sp)z; return z;
 }
 
 GEN
-subsr(long x, GEN y)
-{
-  if (!x) return rcopy_sign(y, -signe(y));
-  if (x>0) { pos_s[2]=x; return addir_sign(pos_s, 1, y, -signe(y)); }
-  neg_s[2] = -x; return addir_sign(neg_s, -1, y, -signe(y));
-}
+addsr(long x, GEN y) { return addsr_sign(x, y, signe(y)); }
+
+GEN
+subsr(long x, GEN y) { return addsr_sign(x, y, -signe(y)); }
 
 /* return x + 1, assuming x > 0 is a normalized t_REAL of exponent 0 */
 GEN
