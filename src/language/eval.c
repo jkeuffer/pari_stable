@@ -90,8 +90,14 @@ break0(long n)
 }
 
 void
-allocatemem0(size_t newsize)
+allocatemem0(GEN z)
 {
+  ulong newsize;
+  if (!z) newsize = 0;
+  else {
+    newsize = itou(z);
+    if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
+  }
   (void)allocatemoremem(newsize);
   br_status = br_ALLOCMEM;
 }
