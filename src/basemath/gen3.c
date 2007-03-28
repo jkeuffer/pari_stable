@@ -2205,7 +2205,7 @@ GEN
 u2toi(ulong a, ulong b)
 {
 #ifdef LONG_IS_64BIT
-  return utoi((a<<32) | b)
+  return utoi((a<<32) | b);
 #else
   if (!a) return utoi(b);
 {
