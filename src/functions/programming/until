@@ -1,4 +1,6 @@
 Function: until
+C-Name: untilpari
+Prototype: vEI
 Section: programming
 Help: until(a,seq): evaluate the expression sequence seq until a is nonzero
 

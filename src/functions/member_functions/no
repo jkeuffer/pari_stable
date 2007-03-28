@@ -1,5 +1,6 @@
 Function: _.no
-Class: member_functions
+Help: _.no
+Section: member_functions
 C-Name: member_no
 Prototype: G
 Description: 

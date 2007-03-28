@@ -1,5 +1,6 @@
 Function: _.zkst
-Class: member_functions
+Help: _.zkst
+Section: member_functions
 C-Name: member_zkst
 Prototype: G
 Description: 

@@ -6,7 +6,12 @@ Done for version 2.4.2 (released ??/??/2006):
   Fixed
     1- divrs(0., negative integer) had the wrong exponent
     2- vecsort(,,4) was broken in 2.4.1
+
   Changed
+BA  1- The combined GP parser/evaluator has been replaced by a bytecode compiler       and a bytecode evaluator
+BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
+       'I': closure whose value is ignored, like in for() loop
+       'E': closure whose value is used, like in sum() loop
 
   Added
     1- library functions expu, adduu, subuu

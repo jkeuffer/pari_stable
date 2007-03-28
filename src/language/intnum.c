@@ -22,12 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 typedef struct {
-  entree *epx;
-  entree *epy;
-  char *ch;
-} exprdoub;
-
-typedef struct {
   GEN (*f)(GEN,void *);
   void *E;
 } invfun;
@@ -38,17 +32,23 @@ gp_eval(GEN x, void *dat)
 {
   exprdat *E = (exprdat*)dat;
   E->ep->value = x;
-  return readseq_nobreak(E->ch);
+  return closure_evalnobrk(E->code);
 }
 
 #if 0
+typedef struct {
+  entree *epx;
+  entree *epy;
+  GEN code;
+} exprdoub;
+
 static GEN
 gp_eval2(GEN x, GEN y, void *dat)
 {
   exprdoub *E = (exprdoub*)dat;
   E->epx->value = x;
   E->epy->value = y;
-  return readseq_nobreak(E->ch);
+  return closure_evalnobrk(E->code);
 }
 #endif
 
@@ -1594,44 +1594,44 @@ intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
 }
 
 GEN
-intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec)
-{ EXPR_WRAP(ep,ch, intnumromb(EXPR_ARG, a, b, flag, prec)); }
+intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec)
+{ EXPR_WRAP(ep,code, intnumromb(EXPR_ARG, a, b, flag, prec)); }
 GEN
-intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intnum(EXPR_ARG, a, b, tab, prec)); }
+intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intnum(EXPR_ARG, a, b, tab, prec)); }
 GEN
-intcirc0(entree *ep, GEN a, GEN R, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intcirc(EXPR_ARG, a, R, tab, prec)); }
+intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intcirc(EXPR_ARG, a, R, tab, prec)); }
 GEN
-intmellininv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intmellininv(EXPR_ARG, sig, x, tab, prec)); }
+intmellininv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intmellininv(EXPR_ARG, sig, x, tab, prec)); }
 GEN
-intlaplaceinv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intlaplaceinv(EXPR_ARG, sig, x, tab, prec)); }
+intlaplaceinv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intlaplaceinv(EXPR_ARG, sig, x, tab, prec)); }
 GEN
-intfourcos0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intfouriercos(EXPR_ARG, a, b, x, tab, prec)); }
+intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intfouriercos(EXPR_ARG, a, b, x, tab, prec)); }
 GEN
-intfoursin0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intfouriersin(EXPR_ARG, a, b, x, tab, prec)); }
+intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(ep,code, intfouriersin(EXPR_ARG, a, b, x, tab, prec)); }
 GEN
-intfourexp0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec)
+intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
 {
   pari_sp ltop = avma;
-  GEN z, R, I; EXPR_START(ep, ch);
+  GEN z, R, I; EXPR_START(ep, code);
   R = intfouriercos(EXPR_ARG, a, b, x, tab, prec);
   I = intfouriersin(EXPR_ARG, a, b, x, tab, prec);
   z = gerepileupto(ltop, gadd(R, mulcxmI(I)));
   EXPR_END(ep); return z;
 }
 GEN
-intnuminitgen0(entree *ep, GEN a, GEN b, char *ch, long m, long flag, long prec)
-{ EXPR_WRAP(ep,ch, intnuminitgen(EXPR_ARG, a, b, m, flag, prec)); }
+intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec)
+{ EXPR_WRAP(ep,code, intnuminitgen(EXPR_ARG, a, b, m, flag, prec)); }
 
 /* m and flag reversed on purpose */
 GEN
-intfuncinit0(entree *ep, GEN a, GEN b, char *ch, long flag, long m, long prec)
-{ EXPR_WRAP(ep,ch, intfuncinit(EXPR_ARG, a, b, m, flag? 1: 0, prec)); }
+intfuncinit0(entree *ep, GEN a, GEN b, GEN code, long flag, long m, long prec)
+{ EXPR_WRAP(ep,code, intfuncinit(EXPR_ARG, a, b, m, flag? 1: 0, prec)); }
 
 #if 0
 /* Two variable integration */
@@ -1696,7 +1696,7 @@ intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, 
 }
 
 GEN
-intnumdoub0(entree *epx, GEN a, GEN b, entree *epy, char *chc, char *chd, char *chf, GEN tabext, GEN tabint, long prec)
+intnumdoub0(entree *epx, GEN a, GEN b, entree *epy, int nc, int nd, int nf, GEN tabext, GEN tabint, long prec)
 {
   exprdat Ec, Ed;
   exprdoub Ef;
@@ -1811,8 +1811,8 @@ sumnumalt(void *E, GEN (*f)(GEN,void*),GEN a,GEN s,GEN tab,long flag,long prec)
 { return sumnumall(E,f,a,s,tab,flag,-1,prec); }
 
 GEN
-sumnum0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec)
-{ EXPR_WRAP(ep,ch, sumnum(EXPR_ARG, a, sig, tab, flag, prec)); }
+sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
+{ EXPR_WRAP(ep,code, sumnum(EXPR_ARG, a, sig, tab, flag, prec)); }
 GEN
-sumnumalt0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec)
-{ EXPR_WRAP(ep,ch, sumnumalt(EXPR_ARG, a, sig, tab, flag, prec)); }
+sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
+{ EXPR_WRAP(ep,code, sumnumalt(EXPR_ARG, a, sig, tab, flag, prec)); }

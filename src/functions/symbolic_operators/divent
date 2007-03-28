@@ -1,5 +1,6 @@
 Function: _\_
-Class: symbolic_operators
+Help: x\\y: Euclidean quotient of x and y
+Section: symbolic_operators
 C-Name: gdivent
 Prototype: GG
 Description: 

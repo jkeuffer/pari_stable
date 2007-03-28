@@ -1,6 +1,14 @@
 Function: if
+C-Name: ifpari
+Prototype: GDEDE
 Section: programming
 Help: if(a,seq1,seq2): if a is nonzero, seq1 is evaluated, otherwise seq2.
  seq1 and seq2 are optional, and if seq2 is omitted, the preceding comma can
  be omitted also
+
+Function: _void_if
+C-Name: ifpari_void
+Prototype: vGDIDI
+Section: programming
+Help: internal variant of if() that does not return a value.
 

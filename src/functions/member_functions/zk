@@ -1,5 +1,6 @@
 Function: _.zk
-Class: member_functions
+Help: _.zk
+Section: member_functions
 C-Name: member_zk
 Prototype: G
 Description: 

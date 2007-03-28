@@ -1,5 +1,6 @@
 Function: _.disc
-Class: member_functions
+Help: _.disc
+Section: member_functions
 C-Name: member_disc
 Prototype: G
 Description: 

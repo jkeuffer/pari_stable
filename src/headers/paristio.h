@@ -35,7 +35,9 @@ typedef struct entree {
   long menu;
   char *code;
   char *help;
-  void *args;
+  void *pvalue;
+  long arity;
+  GEN  lvars;
   struct entree *next;
 } entree;
 

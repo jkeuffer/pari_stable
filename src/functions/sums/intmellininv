@@ -1,7 +1,7 @@
 Function: intmellininv
 Section: sums
 C-Name: intmellininv0
-Prototype: V=GGIDGp
+Prototype: V=GGEDGp
 Help: intmellininv(X=sig,x,s,{tab}): numerical integration on the 
  line real(z) = sig (or sig[1]) of s(z)x^(-z)dz/(2*I*Pi), i.e. inverse Mellin 
  transform of s at x. sig is coded as follows: either it is real, and then

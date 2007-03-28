@@ -1,5 +1,6 @@
 Function: _.orders
-Class: member_functions
+Help: _.orders
+Section: member_functions
 C-Name: member_orders
 Prototype: G
 Description: 

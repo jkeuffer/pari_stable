@@ -41,9 +41,53 @@ BEGINEXTERN
 ENDEXTERN
 #endif
 
+/********************************************************************/
+/**                                                                **/
+/**                            STRINGS                             **/
+/**                                                                **/
+/********************************************************************/
+
 #define skip_space(s) while (isspace((int)*s)) s++
 #define skip_alpha(s) while (isalpha((int)*s)) s++
 
+static char *
+translate(char **src, char *s)
+{
+  char *t = *src;
+  while (*t)
+  {
+    while (*t == '\\')
+    {
+      switch(*++t)
+      {
+	case 'e':  *s='\033'; break; /* escape */
+	case 'n':  *s='\n'; break;
+	case 't':  *s='\t'; break;
+	default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
+      }
+      t++; s++;
+    }
+    if (*t == '"')
+    {
+      if (t[1] != '"') break;
+      t += 2; continue;
+    }
+    *s++ = *t++;
+  }
+  *s=0; *src=t; return s;
+}
+
+#define match2(s,c) if (*s != c) \
+                      pari_err(talker,"expected character: '%c' instead of",c);
+
+/*  Read a "string" from src. Format then copy it, starting at s. Return
+ *  pointer to char following the end of the input string */
+static char *
+readstring(char *src, char *s)
+{
+  match2(src, '"'); src++; s = translate(&src, s);
+  match2(src, '"'); return src+1;
+}
 /*******************************************************************/
 /**                                                               **/
 /**                    TEXMACS-SPECIFIC STUFF                     **/
@@ -245,7 +289,7 @@ commands(long n)
 
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
-      if ((n < 0 && ep->menu) || ep->menu == n)
+      if (ep->valence!=EpNEW &&  ((n < 0 && ep->menu) || ep->menu == n))
       {
         list[s] = ep->name;
         if (++s >= size)
@@ -397,7 +441,6 @@ slash_commands(void)
 \\s {n}  : print stack information\n\
 \\t      : print the list of PARI types\n\
 \\u      : print the list of user-defined functions\n\
-\\um     : print the list of user-defined member functions\n\
 \\v      : print current version of GP\n\
 \\w {nf} : write to a file\n\
 \\x {n}  : print complete inner structure of result\n\
@@ -566,7 +609,7 @@ aide0(char *s, int flag)
   {
     n = atoi(s);
     if (n == 12) { community(); return; }
-    if (n < 0 || n > 12)
+    if (n < 0 || n > 14)
       pari_err(talker2,"no such section in help: ?",s,s);
     if (long_help) external_help(s,3); else commands(n);
     return;
@@ -619,7 +662,7 @@ aide0(char *s, int flag)
   switch(EpVALENCE(ep))
   {
     case EpUSER:
-      if (!ep->help || long_help) print_user_fun(ep);
+      if (!ep->help || long_help) pariputs(ep->code);
       if (!ep->help) return;
       if (long_help) { pariputs("\n\n"); long_help=0; }
       break;
@@ -900,11 +943,7 @@ escape0(char *tch)
     case 's': etatpile(); break;
     case 't': gentypes(); break;
     case 'u':
-      switch (*s)
-      {
-        case 'm': print_all_user_member(); break;
-        default: print_all_user_fun();
-      }
+        print_all_user_fun();
       break;
     case 'v': print_version(); break;
     case 'y':
@@ -918,10 +957,7 @@ escape0(char *tch)
 static void
 escape(char *tch)
 {
-  char *old = get_analyseur();
-  set_analyseur(tch); /* for error messages */
   escape0(tch);
-  set_analyseur(old);
 }
 
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
@@ -1481,32 +1517,27 @@ int
 break_loop(long numerr)
 {
   static FILE *oldinfile = NULL;
-  static char *old = NULL;
   static Buffer *b = NULL;
   VOLATILE int go_on = 0;
-  char *s, *t;
+  char *t;
   filtre_t F;
 
   if (b) jump_to_given_buffer(b);
   b = new_buffer();
   push_stack(&bufstack, (void*)b);
 
-  (void)&s; /* emulate volatile */
-  old = s = get_analyseur();
   t = NULL;
   if (bufstack->prev)
   {
     Buffer *oldb = (Buffer*)bufstack->prev->value;
     t = oldb->buf;
     /* something fishy, probably a ^C, or we overran analyseur */
-    if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
   }
   oldinfile = infile;
   init_filtre(&F, b);
 
   term_color(c_ERR); pariputc('\n');
-  errcontext("Break loop (type 'break' or Control-d to go back to GP)", s, t);
-  if (s) pariputc('\n');
+  errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (numerr == siginter)
     pariputs("[type <Return> in empty line to continue]\n");
@@ -1535,17 +1566,19 @@ break_loop(long numerr)
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pariputc('\n');
   }
-  if (old && !s) set_analyseur(old);
   b = NULL; infile = oldinfile;
   pop_buffer(); return go_on;
 }
 
+#define BREAK_LOOP (GEN) 0x1L
+
 int
 gp_exception_handler(long numerr)
 {
-  char *s = (char*)global_err_data;
+  GEN s = (GEN)global_err_data;
   if (!s) return 0;
-  if (*s) {
+  if (s!=BREAK_LOOP)
+  {
     /* prevent infinite recursion in case s raises an exception */
     static int recovering = 0;
     if (recovering)
@@ -1553,7 +1586,7 @@ gp_exception_handler(long numerr)
     else
     {
       recovering = 1;
-      fprintferr("\n"); outerr(readseq(s));
+      fprintferr("\n"); outerr(closure_evalgen(s));
       recovering = 0; return 0;
     }
   }

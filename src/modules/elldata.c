@@ -239,7 +239,7 @@ ellgenerators(GEN E)
 }
 
 void
-forell(entree *ep, long a, long b, char *ch)
+forell(entree *ep, long a, long b, GEN code)
 {
   long ca=a/1000, cb=b/1000;
   long i, j, k;
@@ -258,8 +258,10 @@ forell(entree *ep, long a, long b, char *ch)
       if (i==cb && cond>b) break;
       for(k=2; k<lg(ells); k++)
       {
+        pari_sp av=avma;
         ep->value = (void*)gel(ells, k);
-        readseq_void(ch); 
+        closure_eval(code);
+        avma=av;
         if (loop_break()) goto forell_end;
       }
     }

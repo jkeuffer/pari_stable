@@ -23,10 +23,10 @@ BEGINEXTERN
 /* GP control structures */
 typedef struct {
   entree *ep;
-  char *ch;
+  GEN code;
 } exprdat;
 GEN gp_eval(GEN x, void *dat);
-#define EXPR_START(EP, CH) exprdat __E; __E.ch=CH; __E.ep=EP; push_val(EP,NULL);
+#define EXPR_START(EP, CH) exprdat __E; __E.code=CH; __E.ep=EP; push_val(EP,NULL);
 #define EXPR_END(ep) pop_val(ep);
 #define EXPR_WRAP(ep, ch, call) \
 { GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
@@ -67,17 +67,13 @@ void *pop_stack(stack **pts);
 void   changevalue_p(entree *ep, GEN x);
 void   changevalue(entree *ep, GEN val);
 entree *do_alias(entree *ep);
-int    is_identifier(char *s);
-entree *is_entry_intern(char *s, entree **table, long *hash);
+entree *is_entry_intern(const char *s, entree **table, long *hash);
 long   is_keyword_char(char c);
-char   *readstring(char *src, char *s);
 long   loop_break(void);
+void   reset_break(void);
 long   did_break(void);
-void   readseq_void(char *t);
-GEN    readseq_nobreak(char *t);
 
-char*  get_analyseur(void);
-void   set_analyseur(char *s);
+const char*  get_origin(void);
 
 void term_color(long c);
 char *term_get_color(long c);
@@ -89,19 +85,17 @@ extern void (*sigint_fun)(void);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;
-extern entree * (*foreignAutoload)(char*, long);
+extern entree * (*foreignAutoload)(const char*, long len);
 extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
 
 extern const long functions_tblsz;  /* hashcodes table size */
 /* Variables containing the list of PARI functions */
 extern entree **functions_hash;    /* functions hashtable */
-extern entree **members_hash;      /* members hashtable */
 extern entree functions_basic[];
 
 /* Variables containing the list of specific GP functions */
 extern entree  functions_gp[];
-extern entree  gp_member_list[];
 extern entree  functions_highlevel[];
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
@@ -195,7 +189,51 @@ GEN  next0(long n);
 GEN  read0(char *s);
 GEN  return0(GEN x);
 void system0(char *cmd);
-GEN  trap0(char *e, char *f, char *r);
+GEN  trap0(char *e, GEN f, GEN r);
 int  whatnow(char *s, int silent);
+
+struct node_loc
+{
+  const char *start,*end;  
+}; 
+
+union token_value {
+  int val;
+  GEN gen;
+};
+
+int pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex);
+int pari_parse(char **lex);
+extern const THREAD char *pari_lasterror, *pari_unusedchar;
+entree* fetch_entry(const char *s, long len);
+entree* fetch_member(const char *s, long len);
+void pari_init_parser(void);
+void pari_init_compiler(void);
+void pari_init_evaluator(void);
+void compiler_reset(void);
+GEN  gp_closure(long n);
+GEN  evalnode(void);
+
+INLINE GEN 
+closure_evalnobrk(GEN code)
+{
+  GEN r=closure_evalgen(code);
+  if(!r)
+    pari_err(talker, "break not allowed here");
+  return r;
+}
+
+typedef struct
+{
+  long offset;
+  long n;
+  long alloc;
+  size_t size;
+} gp2c_stack;
+
+void **stack_base(gp2c_stack *s);
+void stack_alloc(gp2c_stack *s, long nb);
+void stack_init(gp2c_stack *s, size_t size, void **data);
+long stack_new(gp2c_stack *s);
 
 ENDEXTERN

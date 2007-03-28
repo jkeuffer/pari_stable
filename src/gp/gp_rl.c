@@ -473,12 +473,47 @@ hashtable_generator(const char *text, int state, entree **hash)
   current_ep = ep; ep = ep->next;
   return add_prefix(current_ep->name,text,junk);
 }
+/* Generator function for member completion.  STATE lets us know whether
+ * to start from scratch; without any state (i.e. STATE == 0), then we
+ * start at the top of the list. */
+static char *
+member_generator(const char *text, int state)
+{
+  static int hashpos, len, junk;
+  static entree* ep;
+  static char *TEXT;
+  entree **hash=functions_hash;
+
+ /* If this is a new word to complete, initialize now:
+  *  + indexes hashpos (GP hash list) and n (keywords specific to long help).
+  *  + file completion and keyword completion use different word boundaries,
+  *    have TEXT point to the keyword start.
+  *  + save the length of TEXT for efficiency.
+  */
+  if (!state)
+  {
+    hashpos = 0; ep = hash[hashpos];
+    init_prefix(text, &len, &junk, &TEXT);
+  }
+
+  /* Return the next name which partially matches from the command list. */
+  for(;;)
+    if (!ep)
+    {
+      if (++hashpos >= functions_tblsz) return NULL; /* no names matched */
+      ep = hash[hashpos];
+    }
+    else if (ep->name[0]=='_' && ep->name[1]=='.' 
+             && !strncmp(ep->name+2,TEXT,len))
+        break;
+    else
+        ep = ep->next;
+  current_ep = ep; ep = ep->next;
+  return add_prefix(current_ep->name+2,text,junk);
+}
 static char *
 command_generator(const char *text, int state)
 { return hashtable_generator(text,state, functions_hash); }
-static char *
-member_generator(const char *text, int state)
-{ return hashtable_generator(text,state, members_hash); }
 
 static char *
 ext_help_generator(const char *text, int state)

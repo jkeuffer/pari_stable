@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000-2003  The PARI group.
+Copyright (C) 2000-2004  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                DECLARATIONS of PUBLIC FUNCTIONS                 */
 /*                                                                 */
 /*******************************************************************/
+
 /* Flx.c */
 
 GEN     Fl_to_Flx(ulong x, long sv);
@@ -307,26 +308,40 @@ GEN     zx_to_ZX(GEN z);
 /* anal.c */
 
 void    addhelp(entree *ep, char *s);
+GEN     andpari(GEN a, GEN b);
 GEN     chartoGENstr(char c);
 void    delete_named_var(entree *ep);
 long    delete_var(void);
 entree* fetch_named_var(char *s);
 long    fetch_user_var(char *s);
 long    fetch_var(void);
-void    freeep(entree *ep);
+GEN     gadde(GEN *x, GEN y);
+GEN     gadd1e(GEN *x);
+GEN     gdive(GEN *x, GEN y);
+GEN     gdivente(GEN *x, GEN y);
+GEN     gdivrounde(GEN *x, GEN y);
+GEN     gmode(GEN *x, GEN y);
+GEN     gmule(GEN *x, GEN y);
 GEN     gp_read_str(char *t);
-entree* gp_variable(char *s);
-long    hashvalue(char **s);
+GEN     gshift_right(GEN x, long n);
+GEN     gshiftle(GEN *x, long n);
+GEN     gshiftre(GEN *x, long n);
+GEN     gstore(GEN *x, GEN y);
+GEN     gsube(GEN *x, GEN y);
+GEN     gsub1e(GEN *x);
+GEN     ifpari(GEN g, GEN a, GEN b);
+void    ifpari_void(GEN g, GEN a, GEN b);
 entree* install(void *f, char *name, char *code);
-entree* is_entry(char *s);
+entree* is_entry(const char *s);
 void    kill0(entree *ep);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
+GEN     orpari(GEN a, GEN b);
 GEN     readseq(char *t);
 GEN     strntoGENstr(const char *s, long n0);
 GEN     strtoGENstr(const char *s);
-GEN     strtoi(char *s);
-GEN     strtor(char *s, long prec);
+GEN     strtoi(const char *s);
+GEN     strtor(const char *s, long prec);
 GEN     type0(GEN x);
 
 /* aprcl.c */
@@ -947,7 +962,7 @@ GEN     ellgenerators(GEN E);
 GEN     ellidentify(GEN E);
 GEN     ellsearch(GEN A);
 GEN     ellsearchcurve(GEN name);
-void    forell(entree *ep, long a, long b, char *ch);
+void    forell(entree *ep, long a, long b, GEN code);
 
 /* elliptic.c */
 
@@ -1069,7 +1084,17 @@ void    write1(const char *s, GEN g);
 void    writebin(char *name, GEN x);
 void    writetex(const char *s, GEN g);
 
+/* eval.c */
+
+void    closure_check(void);
+void    closure_disassemble(GEN n);
+void    closure_eval(GEN code);
+GEN     closure_evalgen(GEN code);
+void    closure_reset(void);
+void    freeep(entree *ep);
+
 /* ffelt.c */
+
 GEN     FF_1(GEN a);
 GEN     FF_Z_Z_muldiv(GEN x, GEN y, GEN z);
 GEN     FF_Z_add(GEN a, GEN b);
@@ -1122,6 +1147,7 @@ GEN     galoissubgroups(GEN G);
 GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
+
 /* gen1.c */
 
 GEN     gadd(GEN x, GEN y);
@@ -1135,6 +1161,7 @@ GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 
 /* gen2.c */
+
 GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
 
 long    ZX_valuation(GEN x, GEN *Z);
@@ -1354,6 +1381,7 @@ void    pari_add_module(entree *ep);
 void    pari_close(void);
 void    pari_close_opts(ulong init_opts);
 void    pari_err(long numerr, ...);
+void    pari_fill_hashtable(entree **table, entree *ep);
 void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
 void    pari_stackcheck_init(void *stack_base);
@@ -1372,32 +1400,32 @@ void    traverseheap( void(*f)(GEN, void *), void *data );
 /* intnum.c */
 
 GEN     intcirc(void *E, GEN (*eval) (GEN, void *), GEN a, GEN R, GEN tab, long prec);
-GEN     intcirc0(entree *ep, GEN a, GEN R, char *ch, GEN tab, long prec);
-GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
-GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
+GEN     intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
+GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
+GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfouriercos(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
 GEN     intfouriersin(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
-GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
+GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfuncinit(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flag, long prec);
-GEN     intfuncinit0(entree *ep, GEN a, GEN b, char *ch, long flag, long m, long prec);
+GEN     intfuncinit0(entree *ep, GEN a, GEN b, GEN code, long flag, long m, long prec);
 GEN     intlaplaceinv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
-GEN     intlaplaceinv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
+GEN     intlaplaceinv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
 GEN     intmellininv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
-GEN     intmellininv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
+GEN     intmellininv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
 GEN     intmellininvshort(GEN sig, GEN x, GEN tab, long prec);
 GEN     intnum(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN tab, long prec);
-GEN     intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec);
+GEN     intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec);
 GEN     intnuminit(GEN a, GEN b, long m, long prec);
 GEN     intnuminit0(GEN a, GEN b, GEN tab, long prec);
 GEN     intnuminitgen(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flext, long prec);
-GEN     intnuminitgen0(entree *ep, GEN a, GEN b, char *ch, long m, long flag, long prec);
+GEN     intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec);
 GEN     intnumromb(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long flag, long prec);
-GEN     intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec);
+GEN     intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec);
 long    intnumstep(long prec);
 GEN     sumnum(void *E, GEN (*f) (GEN, void *), GEN a, GEN sig, GEN tab, long flag, long prec);
-GEN     sumnum0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
+GEN     sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN     sumnumalt(void *E, GEN (*f) (GEN, void *), GEN a, GEN s, GEN tab, long flag, long prec);
-GEN     sumnumalt0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
+GEN     sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 GEN     sumnuminit0(GEN a, GEN tab, long sgn, long prec);
 
@@ -1874,7 +1902,7 @@ GEN     subfields0(GEN nf,GEN d);
 
 /* subgroup.c */
 
-void    forsubgroup(entree *oep, GEN cyc, GEN bound, char *och);
+void    forsubgroup(entree *oep, GEN cyc, GEN bound, GEN code);
 GEN     subgrouplist(GEN cyc, GEN bound);
 
 /* stark.c */
@@ -1886,38 +1914,42 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 /* sumiter.c */
 
 GEN     derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
-GEN     derivnum0(entree *ep, GEN a, char *ch, long prec);
+GEN     derivnum0(entree *ep, GEN a, GEN code, long prec);
 GEN     direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c);
-GEN     direuler0(entree *ep, GEN a, GEN b, char *ch, GEN c);
-GEN     divsum(GEN num,entree *ep, char *ch);
-void    fordiv(GEN a, entree *ep, char *ch);
-void    forpari(entree *ep, GEN a, GEN b, char *ch);
-void    forprime(entree *ep, GEN a, GEN b, char *ch);
-void    forstep(entree *ep, GEN a, GEN b, GEN s, char *ch);
-void    forvec(entree *ep, GEN x, char *ch, long flag);
+GEN     direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c);
+GEN     divsum(GEN num,entree *ep, GEN code);
+void    fordiv(GEN a, entree *ep, GEN code);
+void    forpari(entree *ep, GEN a, GEN b, GEN node);
+void    forprime(entree *ep, GEN a, GEN b, GEN code);
+void    forstep(entree *ep, GEN a, GEN b, GEN s, GEN code);
+void    forvec(entree *ep, GEN x, GEN code, long flag);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
-GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch);
+GEN     intnum(void *E, GEN (*e)(GEN, void*), GEN a,GEN b, GEN tab, long prec);
+long    intnumstep(long prec);
+GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code);
 GEN     polzag(long n, long m);
 GEN     polzagreel(long n, long m, long prec);
 GEN     prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec);
-GEN     prodeuler0(entree *ep, GEN a, GEN b, char *ch, long prec);
+GEN     prodeuler0(entree *ep, GEN a, GEN b, GEN code, long prec);
 GEN     prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     prodinf0(entree *ep, GEN a, char *ch, long flag, long prec);
+GEN     prodinf0(entree *ep, GEN a, GEN code, long flag, long prec);
 GEN     prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     produit(entree *ep, GEN a, GEN b, char *ch, GEN x);
-GEN     somme(entree *ep, GEN a, GEN b, char *ch, GEN x);
+GEN     produit(entree *ep, GEN a, GEN b, GEN code, GEN x);
+GEN     somme(entree *ep, GEN a, GEN b, GEN code, GEN x);
 GEN     sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumalt0(entree *ep, GEN a, char *ch,long flag, long prec);
+GEN     sumalt0(entree *ep, GEN a, GEN code,long flag, long prec);
 GEN     sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumpos0(entree *ep, GEN a, char *ch, long flag,long prec);
+GEN     sumpos0(entree *ep, GEN a, GEN code, long flag,long prec);
 GEN     suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     suminf0(entree *ep, GEN a, char *ch, long prec);
-GEN     vecteur(GEN nmax, entree *ep, char *ch);
-GEN     vecteursmall(GEN nmax, entree *ep, char *ch);
-GEN     vvecteur(GEN nmax, entree *ep, char *ch);
-GEN     zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec);
+GEN     suminf0(entree *ep, GEN a, GEN code, long prec);
+void    untilpari(GEN a, GEN b);
+GEN     vecteur(GEN nmax, entree *ep, GEN n);
+GEN     vecteursmall(GEN nmax, entree *ep, GEN code);
+GEN     vvecteur(GEN nmax, entree *ep, GEN n);
+void    whilepari(GEN a, GEN b);
+GEN     zbrent0(entree *ep, GEN a, GEN b, GEN code, long prec);
 GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 
 /* thue.c */

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 
 void
-forpari(entree *ep, GEN a, GEN b, char *ch)
+forpari(entree *ep, GEN a, GEN b, GEN code)
 {
   pari_sp av, av0 = avma, lim;
 
@@ -34,7 +34,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    pari_sp av1=avma; readseq_void(ch); avma=av1;
+    pari_sp av1=avma; closure_eval(code); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
@@ -47,10 +47,41 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   pop_val(ep); avma = av0;
 }
 
+void
+whilepari(GEN a, GEN b)
+{
+  pari_sp av = avma; 
+  for(;;)
+  {
+    GEN res = closure_evalgen(a);
+    if (gcmp0(res)) break;
+    avma = av; 
+    closure_eval(b); if (loop_break()) break;
+    avma = av;
+  }
+  avma = av;
+}
+
+void
+untilpari(GEN a, GEN b)
+{
+  pari_sp av = avma; 
+  for(;;)
+  {
+    GEN res;
+    closure_eval(b); if (loop_break()) break;
+    avma = av; 
+    res = closure_evalgen(a);
+    if (!gcmp0(res)) break;
+    avma = av; 
+  }
+  avma = av;
+}
+
 static int negcmp(GEN x, GEN y) { return gcmp(y,x); }
 
 void
-forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
+forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
 {
   long ss, i;
   pari_sp av, av0 = avma, lim;
@@ -70,7 +101,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    pari_sp av1=avma; readseq_void(ch); avma=av1;
+    pari_sp av1=avma; closure_eval(code); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -145,7 +176,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
 }
 
 void
-forprime(entree *ep, GEN ga, GEN gb, char *ch)
+forprime(entree *ep, GEN ga, GEN gb, GEN code)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong *prime = (ulong*)p;
@@ -159,7 +190,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   avma = av; push_val(ep, (GEN)prime);
   while (prime[2] < b)
   {
-    readseq_void(ch); if (loop_break()) break;
+    closure_eval(code); if (loop_break()) break;
     if (ep->value == prime)
       NEXT_PRIME_VIADIFF(prime[2], d);
     else
@@ -168,12 +199,12 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
-  if (prime[2] == b) { readseq_void(ch); (void)loop_break(); avma = av; }
+  if (prime[2] == b) { closure_eval(code); (void)loop_break(); avma = av; }
   pop_val(ep);
 }
 
 void
-fordiv(GEN a, entree *ep, char *ch)
+fordiv(GEN a, entree *ep, GEN code)
 {
   long i, l;
   pari_sp av2, av = avma;
@@ -183,7 +214,7 @@ fordiv(GEN a, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*) t[i];
-    readseq_void(ch); if (loop_break()) break;
+    closure_eval(code); if (loop_break()) break;
     avma = av2;
   }
   pop_val(ep); avma=av;
@@ -384,7 +415,6 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     if (! is_vec_t(tx) || lg(e)!=3)
       pari_err(talker,"not a vector of two-component vectors in forvec");
     if (typ(m) != t_INT) t = t_REAL;
-    /* in case x is an ep->value and readseq_void() kills it, have to copy */
     if (i > 1) switch(flag)
     {
       case 1: /* a >= m[i-1] - m */
@@ -447,7 +477,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
 }
 
 void
-forvec(entree *ep, GEN x, char *c, long flag)
+forvec(entree *ep, GEN x, GEN code, long flag)
 {
   pari_sp av = avma;
   GEN D;
@@ -455,7 +485,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   GEN v = forvec_start(x, flag, &D, &next);
   push_val(ep, v);
   while (v) {
-    pari_sp av2 = avma; readseq_void(c); avma = av2;
+    pari_sp av2 = avma; closure_eval(code); avma = av2;
     if (loop_break()) break;
     v = next(D, v);
   }
@@ -469,7 +499,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
 /********************************************************************/
 
 GEN
-somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
+somme(entree *ep, GEN a, GEN b, GEN code, GEN x)
 {
   pari_sp av, av0 = avma, lim;
   GEN p1;
@@ -484,7 +514,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = readseq_nobreak(ch);
+    p1 = closure_evalnobrk(code);
     x=gadd(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -524,11 +554,11 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   return gerepileupto(av0, gaddgs(x,-1));
 }
 GEN
-suminf0(entree *ep, GEN a, char *ch, long prec)
-{ EXPR_WRAP(ep,ch, suminf(EXPR_ARG, a, prec)); }
+suminf0(entree *ep, GEN a, GEN code, long prec)
+{ EXPR_WRAP(ep,code, suminf(EXPR_ARG, a, prec)); }
 
 GEN
-divsum(GEN num, entree *ep, char *ch)
+divsum(GEN num, entree *ep, GEN code)
 {
   pari_sp av = avma;
   GEN y = gen_0, t = divisors(num);
@@ -538,7 +568,7 @@ divsum(GEN num, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*)t[i];
-    y = gadd(y, readseq_nobreak(ch));
+    y = gadd(y, closure_evalnobrk(code));
   }
   pop_val(ep); return gerepileupto(av,y);
 }
@@ -550,7 +580,7 @@ divsum(GEN num, entree *ep, char *ch)
 /********************************************************************/
 
 GEN
-produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
+produit(entree *ep, GEN a, GEN b, GEN code, GEN x)
 {
   pari_sp av, av0 = avma, lim;
   GEN p1;
@@ -565,7 +595,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = readseq_nobreak(ch);
+    p1 = closure_evalnobrk(code);
     x = gmul(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -626,12 +656,12 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   return gerepilecopy(av0,x);
 }
 GEN
-prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
+prodinf0(entree *ep, GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,ch, prodinf (EXPR_ARG, a, prec));
-    case 1: EXPR_WRAP(ep,ch, prodinf1(EXPR_ARG, a, prec));
+    case 0: EXPR_WRAP(ep,code, prodinf (EXPR_ARG, a, prec));
+    case 1: EXPR_WRAP(ep,code, prodinf1(EXPR_ARG, a, prec));
   }
   pari_err(flagerr);
   return NULL; /* not reached */
@@ -666,8 +696,8 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
   return gerepilecopy(av0,x);
 }
 GEN
-prodeuler0(entree *ep, GEN a, GEN b, char *ch, long prec)
-{ EXPR_WRAP(ep,ch, prodeuler(EXPR_ARG, a, b, prec)); }
+prodeuler0(entree *ep, GEN a, GEN b, GEN code, long prec)
+{ EXPR_WRAP(ep,code, prodeuler(EXPR_ARG, a, b, prec)); }
 
 GEN
 direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
@@ -758,8 +788,8 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
   return gerepilecopy(av0,x);
 }
 GEN
-direuler0(entree *ep, GEN a, GEN b, char *ch, GEN c)
-{ EXPR_WRAP(ep,ch, direuler(EXPR_ARG, a, b, c)); }
+direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c)
+{ EXPR_WRAP(ep,code, direuler(EXPR_ARG, a, b, c)); }
 
 /********************************************************************/
 /**                                                                **/
@@ -768,7 +798,7 @@ direuler0(entree *ep, GEN a, GEN b, char *ch, GEN c)
 /********************************************************************/
 
 GEN
-vecteur(GEN nmax, entree *ep, char *ch)
+vecteur(GEN nmax, entree *ep, GEN code)
 {
   GEN y,p1;
   long i,m;
@@ -777,11 +807,11 @@ vecteur(GEN nmax, entree *ep, char *ch)
   if (typ(nmax) != t_INT) pari_err(typeer,"vector");
   m = itos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
-  if (!ep || !ch) return zerovec(m);
+  if (!ep || !code) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_val(ep, c);
   for (i=1; i<=m; i++)
   {
-    c[2] = i; p1 = readseq_nobreak(ch);
+    c[2] = i; p1 = closure_evalnobrk(code);
     gel(y,i) = isonstack(p1)? p1 : gcopy(p1);
     changevalue_p(ep,c);
   }
@@ -789,7 +819,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
 }
 
 GEN
-vecteursmall(GEN nmax, entree *ep, char *ch)
+vecteursmall(GEN nmax, entree *ep, GEN code)
 {
   GEN y;
   long i,m;
@@ -798,26 +828,26 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
   if (typ(nmax) != t_INT) pari_err(typeer,"vector");
   m = itos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
-  if (!ep || !ch) return const_vecsmall(m, 0);
+  if (!ep || !code) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
   for (i=1; i<=m; i++)
   {
     c[2] = i;
-    y[i] = itos(readseq_nobreak(ch));
+    y[i] = itos(closure_evalnobrk(code));
     changevalue_p(ep,c);
   }
   pop_val(ep); return y;
 }
 
 GEN
-vvecteur(GEN nmax, entree *ep, char *ch)
+vvecteur(GEN nmax, entree *ep, GEN n)
 {
-  GEN y = vecteur(nmax,ep,ch);
+  GEN y = vecteur(nmax,ep,n);
   settyp(y,t_COL); return y;
 }
 
 GEN
-matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
+matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN ch)
 {
   GEN y, z, p1;
   long i, j, m, n;
@@ -831,7 +861,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
   if (m < 0) pari_err(talker,"negative number of columns in matrix");
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
-  if (!ep1 || !ep2 || !ch || !n) return zeromatcopy(n, m);
+  if (!ep1 || !ep2 || ch<0 || !n) return zeromatcopy(n, m);
   push_val(ep1, c1);
   push_val(ep2, c2); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
@@ -839,7 +869,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
     c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;
     for (j=1; j<=n; j++)
     {
-      c1[2] = j; p1 = readseq_nobreak(ch);
+      c1[2] = j; p1 = closure_evalnobrk(ch);
       gel(z,j) = isonstack(p1)? p1 : gcopy(p1);
       changevalue_p(ep1,c1);
       changevalue_p(ep2,c2);
@@ -901,12 +931,12 @@ sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumalt0(entree *ep, GEN a, char *ch, long flag, long prec)
+sumalt0(entree *ep, GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,ch, sumalt (EXPR_ARG,a,prec));
-    case 1: EXPR_WRAP(ep,ch, sumalt2(EXPR_ARG,a,prec));
+    case 0: EXPR_WRAP(ep,code, sumalt (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(ep,code, sumalt2(EXPR_ARG,a,prec));
     default: pari_err(flagerr);
   }
   return NULL; /* not reached */
@@ -1004,12 +1034,12 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumpos0(entree *ep, GEN a, char *ch, long flag, long prec)
+sumpos0(entree *ep, GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,ch, sumpos (EXPR_ARG,a,prec));
-    case 1: EXPR_WRAP(ep,ch, sumpos2(EXPR_ARG,a,prec));
+    case 0: EXPR_WRAP(ep,code, sumpos (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(ep,code, sumpos2(EXPR_ARG,a,prec));
     default: pari_err(flagerr);
   }
   return NULL; /* not reached */
@@ -1156,8 +1186,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
 }
 
 GEN
-zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec)
-{ EXPR_WRAP(ep,ch, zbrent(EXPR_ARG, a,b, prec)); }
+zbrent0(entree *ep, GEN a, GEN b, GEN code, long prec)
+{ EXPR_WRAP(ep,code, zbrent(EXPR_ARG, a,b, prec)); }
 
 /* x = solve_start(&D, a, b, prec)
  * while (x) {
@@ -1202,8 +1232,8 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
 }
 
 GEN
-derivnum0(entree *ep, GEN a, char *ch, long prec)
+derivnum0(entree *ep, GEN a, GEN code, long prec)
 {
-  EXPR_WRAP(ep,ch, derivnum (EXPR_ARG,a,prec));  
+  EXPR_WRAP(ep,code, derivnum (EXPR_ARG,a,prec));  
 }
 

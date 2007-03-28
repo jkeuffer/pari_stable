@@ -1,5 +1,6 @@
 Function: _.nf
-Class: member_functions
+Help: _.nf
+Section: member_functions
 C-Name: member_nf
 Prototype: G
 Description: 

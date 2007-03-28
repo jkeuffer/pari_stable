@@ -1,0 +1,7 @@
+Function: %
+C-Name: parihist
+Prototype: D0,L,
+Class: gp
+Section: operators
+Help: last history item
+

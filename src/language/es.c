@@ -121,12 +121,6 @@ filtre0(filtre_t *F)
         } /* skip \<CR> */
         break;
 
-      case ':':
-        if (!compatible && isalpha((int)*s)) {
-          t--; s++; while (is_keyword_char(*s)) { s++; }
-        }
-        break;
-
       case '"': F->in_string = 1;
         break;
 
@@ -150,6 +144,7 @@ filtre0(filtre_t *F)
     c = t[-1]; /* = last input char */
     if (c == '=')                 F->more_input = 2;
     else if (! F->wait_for_brace) F->more_input = 0;
+    else if (c == RBRACE)       { F->more_input = 0; t--; F->wait_for_brace--;}
   }
 
 END:
@@ -1484,9 +1479,7 @@ print_functions_hash(const char *s)
 
   if (isalpha((int)*s))
   {
-    /*FIXME: the cast below is a C++ kludge because
-     * it is difficult to change is_entry_intern to take a const*/
-    ep = is_entry_intern((char *)s,functions_hash,&n);
+    ep = is_entry_intern(s,functions_hash,&n);
     if (!ep) pari_err(talker,"no such function");
     print_entree(ep,n); return;
   }

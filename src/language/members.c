@@ -23,6 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
 #define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
+
+static void
+member_err(char *s)
+{
+  pari_err(typeer,"%s",s);
+}
+
 GEN
 member_e(GEN x)
 {

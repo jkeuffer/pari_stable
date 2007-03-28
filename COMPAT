@@ -10,7 +10,9 @@ This file lists the incompatible changes between Version 2.x and older versions
       GEN seed = getrand(); ...; setrand(seed);
     The sequence of generated pseudo-random numbers are completely different.
 
-  - install(): parser code 'E' is now obsolete, use 'I'
+  - install(): parser code 'E' and 'I' now refer to closure, not strings:
+    'I': closure whose value is ignored, like in for() loop
+    'E': closure whose value is used, like in sum() loop
   - changevar()  [ use substvec ] and reorder() [ use variable() for the list
     of user variables ] have been removed
   - The quasi-periods e.eta (and elleta(e)) are now twice the old value,

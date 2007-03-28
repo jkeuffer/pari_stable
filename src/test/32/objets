@@ -63,7 +63,7 @@
 ? Mod(-12,7)
 Mod(2, 7)
 ? Mod(10873,49649)^-1
-  ***   impossible inverse modulo: Mod(131, 49649).
+  *** _^_: impossible inverse modulo: Mod(131, 49649).
 ? norm(1+I)
 2
 ? norm(Mod(x+5,x^3+x+1))
@@ -122,5 +122,5 @@ O(x^12)
 ? getheap
 [59, 805]
 ? print("Total time spent: ",gettime);
-Total time spent: 2
+Total time spent: 408
 ? \q

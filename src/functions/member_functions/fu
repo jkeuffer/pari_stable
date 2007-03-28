@@ -1,5 +1,6 @@
 Function: _.fu
-Class: member_functions
+Help: _.fu
+Section: member_functions
 C-Name: member_fu
 Prototype: G
 Description: 

@@ -1,5 +1,6 @@
 Function: _.a4
-Class: member_functions
+Help: _.a4
+Section: member_functions
 C-Name: member_a4
 Prototype: G
 Description: 

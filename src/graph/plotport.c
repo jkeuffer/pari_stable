@@ -103,17 +103,17 @@ fill_gap(screen scr, long i, int jnew, int jpre)
 static double
 todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
 
-#define QUARK  ((char*)NULL) /* Used as a special-case */
+#define QUARK  NULL /* Used as a special-case */
 static GEN quark_gen;
 
 static GEN
-READ_EXPR(char *s, entree *ep, GEN x) {
-  if (s == QUARK) return gsubst(quark_gen,0,x);
-  ep->value = x; return readseq(s);
+READ_EXPR(GEN code, entree *ep, GEN x) {
+  if (code == QUARK) return gsubst(quark_gen,0,x);
+  ep->value = x; return closure_evalgen(code);
 }
 
 void
-plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
+plot(entree *ep, GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
 {
   long jz, j, i, sig;
   pari_sp av = avma, av2, limite;
@@ -138,7 +138,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   av2 = avma; limite=stack_lim(av2,1);
   for (i=1; i<=ISCR; i++)
   {
-    y[i] = gtodouble( READ_EXPR(ch,ep,x) );
+    y[i] = gtodouble( READ_EXPR(code,ep,x) );
     if (y[i] < ysml) ysml = y[i];
     if (y[i] > ybig) ybig = y[i];
     x = addrr(x,dx);
@@ -190,7 +190,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
 void
 init_graph(void)
 {
-  int n;
+  long n;
 
   rectgraph = (PariRect**) gpmalloc(sizeof(PariRect*)*NUMRECT);
   for (n=0; n<NUMRECT; n++)
@@ -1206,7 +1206,7 @@ gtodblList(GEN data, long flags)
 }
 
 static void
-single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,double yleft,
+single_recursion(dblPointList *pl,GEN code,entree *ep,GEN xleft,double yleft,
   GEN xright,double yright,long depth)
 {
   GEN xx;
@@ -1216,20 +1216,20 @@ single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,double yleft,
   if (depth==RECUR_MAXDEPTH) return;
 
   xx = addrr(xleft,xright); setexpo(xx, expo(xx)-1);
-  yy = gtodouble(READ_EXPR(ch,ep,xx));
+  yy = gtodouble(READ_EXPR(code,ep,xx));
 
   if (dy && fabs(yleft+yright-2*yy)< dy*RECUR_PREC) return;
-  single_recursion(pl,ch,ep, xleft,yleft, xx,yy, depth+1);
+  single_recursion(pl,code,ep, xleft,yleft, xx,yy, depth+1);
 
   Appendx(&pl[0],&pl[0],rtodbl(xx));
   Appendy(&pl[0],&pl[1],yy);
 
-  single_recursion(pl,ch,ep, xx,yy, xright,yright, depth+1);
+  single_recursion(pl,code,ep, xx,yy, xright,yright, depth+1);
   avma = av;
 }
 
 static void
-param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,double xleft,
+param_recursion(dblPointList *pl,GEN code,entree *ep, GEN tleft,double xleft,
   double yleft, GEN tright,double xright,double yright, long depth)
 {
   GEN tt, p1;
@@ -1240,25 +1240,25 @@ param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,double xleft,
   if (depth==PARAMR_MAXDEPTH) return;
 
   tt = addrr(tleft,tright); setexpo(tt, expo(tt)-1);
-  p1 = READ_EXPR(ch,ep,tt);
+  p1 = READ_EXPR(code,ep,tt);
   xx = gtodouble(gel(p1,1));
   yy = gtodouble(gel(p1,2));
 
   if (dx && dy && fabs(xleft+xright-2*xx) < dx*RECUR_PREC
                && fabs(yleft+yright-2*yy) < dy*RECUR_PREC) return;
-  param_recursion(pl,ch,ep, tleft,xleft,yleft, tt,xx,yy, depth+1);
+  param_recursion(pl,code,ep, tleft,xleft,yleft, tt,xx,yy, depth+1);
 
   Appendx(&pl[0],&pl[0],xx);
   Appendy(&pl[0],&pl[1],yy);
 
-  param_recursion(pl,ch,ep, tt,xx,yy, tright,xright,yright, depth+1);
+  param_recursion(pl,code,ep, tt,xx,yy, tright,xright,yright, depth+1);
   avma = av;
 }
 
 /*  Pure graphing. If testpoints is 0, it is set to the default.
  *  Returns a dblPointList of (absolute) coordinates. */
 static dblPointList *
-rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
+rectplothin(entree *ep, GEN a, GEN b, GEN code, long prec, ulong flags,
             long testpoints)
 {
   long single_c;
@@ -1285,7 +1285,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   dx = divrs(gtofp(gsub(b,a),prec), testpoints-1);
 
   x = gtofp(a, prec); push_val(ep, x);
-  av2=avma; t=READ_EXPR(ch,ep,x); tx=typ(t);
+  av2=avma; t=READ_EXPR(code,ep,x); tx=typ(t);
   if (!is_matvec_t(tx))
   {
     xsml = gtodouble(a);
@@ -1338,14 +1338,14 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
       GEN tleft = cgetr(prec), tright = cgetr(prec);
       double xleft, xright = 0;
       av2 = avma;
-      affgr(a,tleft); t=READ_EXPR(ch,ep,tleft);
+      affgr(a,tleft); t=READ_EXPR(code,ep,tleft);
       xleft = gtodouble(gel(t,1));
       yleft = gtodouble(gel(t,2));
       for (i=0; i<testpoints-1; i++)
       {
 	if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
 	addrrz(tleft,dx,tright);
-        t = READ_EXPR(ch,ep,tright);
+        t = READ_EXPR(code,ep,tright);
         if (lg(t) != 3) pari_err(talker,"inconsistent data in rectplothin");
         xright = gtodouble(gel(t,1));
         yright = gtodouble(gel(t,2));
@@ -1353,7 +1353,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 	Appendx(&pl[0],&pl[0],xleft);
 	Appendy(&pl[0],&pl[1],yleft);
 
-	param_recursion(pl,ch,ep, tleft,xleft,yleft, tright,xright,yright, 0);
+	param_recursion(pl,code,ep, tleft,xleft,yleft, tright,xright,yright, 0);
 	avma = av2;
       }
       Appendx(&pl[0],&pl[0],xright);
@@ -1364,16 +1364,16 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
       GEN xleft = cgetr(prec), xright = cgetr(prec);
       av2 = avma;
       affgr(a,xleft);
-      yleft = gtodouble(READ_EXPR(ch,ep,xleft));
+      yleft = gtodouble(READ_EXPR(code,ep,xleft));
       for (i=0; i<testpoints-1; i++)
       {
         addrrz(xleft,dx,xright);
-	yright = gtodouble(READ_EXPR(ch,ep,xright));
+	yright = gtodouble(READ_EXPR(code,ep,xright));
 
 	Appendx(&pl[0],&pl[0],rtodbl(xleft));
 	Appendy(&pl[0],&pl[1],yleft);
 
-        single_recursion(pl,ch,ep,xleft,yleft,xright,yright,0);
+        single_recursion(pl,code,ep,xleft,yleft,xright,yright,0);
         avma = av2;
         affrr(xright,xleft); yleft = yright;
       }
@@ -1386,7 +1386,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     if (single_c)
       for (i=0; i<testpoints; i++)
       {
-	t = READ_EXPR(ch,ep,x);
+	t = READ_EXPR(code,ep,x);
 	pl[0].d[i]=gtodouble(x);
 	Appendy(&pl[0],&pl[1],gtodouble(t));
 	addrrz(x,dx,x); avma=av2;
@@ -1398,7 +1398,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
       for (i=0; i<testpoints; i++)
       {
-	t = READ_EXPR(ch,ep,x);
+	t = READ_EXPR(code,ep,x);
         if (lg(t) != nl+1) pari_err(talker,"inconsistent data in rectplothin");
 	for (j=0; j<nl; j=k)
 	{
@@ -1414,7 +1414,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     else /* plothmult */
       for (i=0; i<testpoints; i++)
       {
-	t = READ_EXPR(ch,ep,x);
+	t = READ_EXPR(code,ep,x);
         if (lg(t) != nl) pari_err(talker,"inconsistent data in rectplothin");
 	pl[0].d[i]=gtodouble(x);
 	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(t,j))); }
@@ -1649,10 +1649,10 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 /*************************************************************************/
 
 GEN
-rectploth(long drawrect,entree *ep,GEN a,GEN b,char *ch,
+rectploth(long drawrect,entree *ep,GEN a,GEN b,GEN code,
           long prec,ulong flags,long testpoints)
 {
-  dblPointList *pl=rectplothin(ep, a,b, ch, prec, flags,testpoints);
+  dblPointList *pl=rectplothin(ep, a,b, code, prec, flags,testpoints);
   return rectplothrawin(0,drawrect, pl, flags,NULL);
 }
 
@@ -1673,11 +1673,11 @@ init_output(long flags)
 }
 
 static GEN
-ploth0(long stringrect,long drawrect,entree *ep,GEN a,GEN b,char *ch,
+ploth0(long stringrect,long drawrect,entree *ep,GEN a,GEN b,GEN code,
              long prec,ulong flags,long testpoints)
 {
   PARI_plot *output = init_output(flags);
-  dblPointList *pl=rectplothin(ep, a,b, ch, prec, flags,testpoints);
+  dblPointList *pl=rectplothin(ep, a,b, code, prec, flags,testpoints);
   return rectplothrawin(stringrect,drawrect, pl, flags, output);
 }
 
@@ -1703,21 +1703,21 @@ plothraw(GEN listx, GEN listy, long flags)
 }
 
 GEN
-ploth(entree *ep, GEN a, GEN b, char *ch, long prec,long flags,long numpoints)
+ploth(entree *ep, GEN a, GEN b, GEN code, long prec,long flags,long numpoints)
 {
-  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,ch,prec,flags,numpoints);
+  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,code,prec,flags,numpoints);
 }
 
 GEN
-ploth2(entree *ep, GEN a, GEN b, char *ch, long prec)
+ploth2(entree *ep, GEN a, GEN b, GEN code, long prec)
 {
-  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,ch,prec,PLOT_PARAMETRIC,0);
+  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,code,prec,PLOT_PARAMETRIC,0);
 }
 
 GEN
-plothmult(entree *ep, GEN a, GEN b, char *ch, long prec)
+plothmult(entree *ep, GEN a, GEN b, GEN code, long prec)
 {
-  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,ch,prec,0,0);
+  return ploth0(STRINGRECT, DRAWRECT, ep,a,b,code,prec,0,0);
 }
 
 GEN
@@ -1728,18 +1728,18 @@ postplothraw(GEN listx, GEN listy, long flags)
 }
 
 GEN
-postploth(entree *ep, GEN a, GEN b, char *ch, long prec,long flags,
+postploth(entree *ep, GEN a, GEN b, GEN code, long prec,long flags,
            long numpoints)
 {
-  return ploth0(STRINGRECT,DRAWRECT,ep,a,b,ch,prec,flags|PLOT_POSTSCRIPT,
+  return ploth0(STRINGRECT,DRAWRECT,ep,a,b,code,prec,flags|PLOT_POSTSCRIPT,
                 numpoints);
 }
 
 GEN
-postploth2(entree *ep, GEN a, GEN b, char *ch, long prec,
+postploth2(entree *ep, GEN a, GEN b, GEN code, long prec,
            long numpoints)
 {
-  return ploth0(STRINGRECT,DRAWRECT,ep,a,b,ch,prec,
+  return ploth0(STRINGRECT,DRAWRECT,ep,a,b,code,prec,
 		PLOT_PARAMETRIC|PLOT_POSTSCRIPT,numpoints);
 }
 

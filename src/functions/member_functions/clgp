@@ -1,5 +1,6 @@
 Function: _.clgp
-Class: member_functions
+Help: _.clgp
+Section: member_functions
 C-Name: member_clgp
 Prototype: G
 Description: 

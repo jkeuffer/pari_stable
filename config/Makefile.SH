@@ -34,6 +34,9 @@ hlist=`ls $src_dir/headers/*.h | grep -v paridecl | grep -v paripriv |\
 # for installation put paridecl back. Remove \n otherwise make will choke.
 headerlist="paridecl paripriv `echo $hlist| tr '\n' ' '`"
 
+#Add src/language/parse.c if it is not yet generated
+case $language in *parse*);; *) language="$language parse";; esac
+
 # special systems (OS/2 for now)
 shortlib_prefix=lib
 lib_prefix=lib
@@ -142,6 +145,7 @@ cat > $file << EOT
 #
 SHELL      = $make_sh
 PERL       = $perl
+BISON      = bison
 AR	   = ar
 
 SIZEOF_LONG= $sizeof_long
@@ -496,12 +500,14 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SONAME)"; then \
 	  \$(RM) \$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME); fi
+$src/language/parse.c $src/language/parse.h: $src/language/parse.y 
+	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
 EOT
 fi
 
 if test -n "$add_funclist"; then
   cat >> $file << EOT
-desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h $src/language/members.h
+desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h
 
 $src/funclist::
 	@-cksum \`env LANG= LC_COLLATE= LC_ALL= ls -d $src/functions/*/* | grep -v CVS\` > funclist\$(TMPSUF)
@@ -510,10 +516,6 @@ $src/funclist::
 $desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
 	cd $desc && \$(PERL) merge_822 ../functions/*/* > def\$(TMPSUF)
 	mv $desc/def\$(TMPSUF) \$@
-
-$src/language/members.h: $desc/\$(DESC) $desc/gen_member
-	cd $desc && \$(PERL) gen_member \$(DESC) > members\$(TMPSUF)
-	mv $desc/members\$(TMPSUF) \$@
 
 $src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF)
@@ -605,7 +607,19 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   anal)
-    depend="$src/language/anal.h $src/language/members.h"
+    depend="$src/language/anal.h $src/language/parse.h"
+    cflags="$cflags \$(DLCFLAGS)"
+    ;;
+  parse)
+    depend="$src/language/anal.h $src/language/parse.h $src/language/tree.h"
+    cflags="$cflags \$(DLCFLAGS)"
+    ;;
+  compile)
+    depend="$src/language/anal.h $src/language/tree.h $src/language/opcode.h"
+    cflags="$cflags \$(DLCFLAGS)"
+    ;;
+  eval)
+    depend="$src/language/anal.h $src/language/opcode.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   *)

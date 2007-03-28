@@ -1,5 +1,6 @@
 Function: !_
-Class: symbolic_operators
+Help: !_
+Section: symbolic_operators
 C-Name: gnot
 Prototype: G
 Description: 

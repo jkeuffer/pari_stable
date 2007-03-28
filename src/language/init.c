@@ -48,12 +48,12 @@ void    *global_err_data;
 
 static growarray MODULES, OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
-entree **functions_hash, **funct_old_hash, **members_hash;
+entree **functions_hash, **funct_old_hash;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
 GEN  (*foreignExprHandler)(char*);    /* Handler for foreign expressions.*/
-entree * (*foreignAutoload)(char*, long); /* Autoloader                  */
+entree* (*foreignAutoload)(const char*, long len); /* Autoloader         */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
@@ -66,7 +66,7 @@ typedef struct {
 } cell;
 
 static THREAD stack *err_catch_stack;
-static THREAD char **dft_handler;
+static THREAD GEN *dft_handler;
 
 #define BLOCK_SIGINT(code)           \
 {                                    \
@@ -407,33 +407,6 @@ init_hashtable(entree **table, long tblsz)
   }
 }
 
-static void
-fill_hashtable_single(entree **table, entree *ep)
-{
-  char *s = ep->name;
-  long n = hashvalue(&s);
-  EpSETSTATIC(ep);
-  ep->next = table[n]; table[n] = ep;
-  ep->args = NULL;
-}
-
-static void
-fill_hashtable(entree **table, entree *ep)
-{
-  for ( ; ep->name; ep++) fill_hashtable_single(table, ep);
-}
-
-void
-pari_add_function(entree *ep)
-{
-  fill_hashtable_single(functions_hash, ep);
-}
-void
-pari_add_module(entree *ep)
-{
-  fill_hashtable(functions_hash, ep);
-}
-
 void
 pari_init_defaults(void)
 {
@@ -499,7 +472,7 @@ gp_init_entrees(growarray A, entree **hash)
 {
   long i;
   init_hashtable(hash, functions_tblsz);
-  for (i = 0; i < A->n; i++) fill_hashtable(hash, (entree*)A->v[i]);
+  for (i = 0; i < A->n; i++) pari_fill_hashtable(hash, (entree*)A->v[i]);
   return (hash == functions_hash);
 }
 
@@ -649,7 +622,9 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   diffptr = initprimes(maxprime);
   init_universal_constants();
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
-
+  pari_init_parser();
+  pari_init_compiler();
+  
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
@@ -658,20 +633,19 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
-  members_hash   = init_fun_hash();
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
 
-  fill_hashtable(members_hash, gp_member_list);
-  fill_hashtable(funct_old_hash, oldfonctions);
+  pari_fill_hashtable(funct_old_hash, oldfonctions);
 
   grow_init(MODULES);    grow_append(MODULES, functions_basic);
   grow_init(OLDMODULES); grow_append(OLDMODULES, oldfonctions);
-  fill_hashtable(functions_hash, new_fun_set? functions_basic:oldfonctions);
+  pari_fill_hashtable(functions_hash, 
+                      new_fun_set? functions_basic:oldfonctions);
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
-  dft_handler = (char **) gpmalloc((noer + 1) *sizeof(char *));
+  dft_handler = (GEN*) gpmalloc((noer + 1) *sizeof(GEN));
   reset_traps();
   default_exception_handler = NULL;
 
@@ -730,7 +704,6 @@ pari_close_opts(ulong init_opts)
   for (i = 0; i < functions_tblsz; i++)
   {
     kill_hashlist(functions_hash[i]);
-    kill_hashlist(members_hash[i]);
   }
   gpfree((void*)varentries);
   gpfree((void*)primetab);
@@ -740,7 +713,6 @@ pari_close_opts(ulong init_opts)
   killallfiles(1);
   gpfree((void*)functions_hash);
   gpfree((void*)funct_old_hash);
-  gpfree((void*)members_hash);
   gpfree((void*)dft_handler);
   gpfree((void*)bot);
   gpfree((void*)diffptr);
@@ -815,11 +787,11 @@ recover(int flag)
         case EpVAR:
           while (pop_val_if_newer(ep,listloc)) /* empty */;
           break;
-        case EpNEW:
-          kill_from_hashlist(ep, n);
-          freeep(ep); break;
+        case EpNEW: break;
       }
     }
+  compiler_reset();
+  closure_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");
   try_to_recover=1;
   (void)os_signal(SIGINT, sigfun);
@@ -1038,8 +1010,7 @@ pari_err(long numerr, ...)
     switch (numerr)
     {
       case obsoler:
-        ch1 = va_arg(ap,char *);
-        errcontext(s,ch1,va_arg(ap,char *));
+        errcontext(s,NULL,NULL);
         ch1 = va_arg(ap,char *);
         whatnow_new_syntax(ch1, va_arg(ap,int));
         break;
@@ -1118,9 +1089,9 @@ pari_err(long numerr, ...)
   if (default_exception_handler)
   {
     if (dft_handler[numerr])
-      global_err_data = dft_handler[numerr];
+      global_err_data = (void *) dft_handler[numerr];
     else
-      global_err_data = dft_handler[noer];
+      global_err_data = (void *) dft_handler[noer];
     if (default_exception_handler(numerr)) { flusherr(); return; }
   }
   err_recover(numerr);
@@ -1135,22 +1106,23 @@ whatnow_new_syntax(char *f, long n)
   (void)whatnow_fun(f, -n);
 }
 
-static char *BREAK_LOOP = "";
+#define BREAK_LOOP (GEN) 0x1L
 
 static void
 kill_dft_handler(int numerr)
 {
-  char *s = dft_handler[numerr];
-  if (s && s != BREAK_LOOP) gpfree(s);
+  GEN s = dft_handler[numerr];
+  if (s && s != BREAK_LOOP) gunclone(s);
   dft_handler[numerr] = NULL;
 }
 
+
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
-trap0(char *e, char *r, char *f)
+trap0(char *e, GEN r, GEN f)
 {
   long numerr = CATCH_ALL;
-  char *F;
+  GEN F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
@@ -1165,14 +1137,13 @@ trap0(char *e, char *r, char *f)
 
   if (f && r)
   { /* explicit recovery text */
-    char *a = get_analyseur();
     pari_sp av = avma;
     VOLATILE GEN x;
 
     CATCH(numerr) { x = NULL; }
-    TRY { x = readseq(f); } ENDCATCH;
-    if (!x) { avma = av; gp_function_name = NULL; x = readseq(r); }
-    set_analyseur(a); return x;
+    TRY { x = closure_evalgen(f); } ENDCATCH;
+    if (!x) { avma = av; gp_function_name = NULL; x = closure_evalgen(r); }
+    return x;
   }
 
   F = f? f: r; /* define a default handler */
@@ -1181,11 +1152,8 @@ trap0(char *e, char *r, char *f)
   kill_dft_handler(numerr);
   if (!F)
     dft_handler[numerr] = BREAK_LOOP;
-  else if (*F && (*F != '"' || F[1] != '"'))
-  {
-    F = pari_strdup(F);
-    dft_handler[numerr] = F;
-  }
+  else 
+    dft_handler[numerr] = gclone(F);
   return gnil;
 }
 
@@ -1626,7 +1594,7 @@ gerepileupto(pari_sp av, GEN q)
   if (av <= (pari_sp)q) return q;
   /* The garbage is only empty when av==q. It's probably a mistake if
    * av < q. But "temporary variables" from sumiter are a problem since
-   * ep->values are returned as-is by identifier() and they can be in the
+   * ep->values are returned as-is by pushentryval and they can be in the
    * stack: if we put a gerepileupto in readseq(), we get an error. Maybe add,
    * if (DEBUGMEM) pari_warn(warner,"av>q in gerepileupto") ???
    */
@@ -1942,8 +1910,8 @@ geni(void) { return gi; }
  * code: describe function prototype. NULL = use valence instead.
  * -----
  * Arguments:
- *  I, E  input position (to be processed with readseq) - a string with a
- *     sequence of PARI expressions. Use I: E is now obsolete.
+ *  I  closure whose value is ignored, like in for() loop
+ *  E  closure whose value is used, like in sum() loop
  *  G  GEN
  *  L  long
  *  S  symbol (i.e GP function name)
@@ -1956,7 +1924,7 @@ geni(void) { return gi; }
  *  r  raw input (treated as a string without quotes).
  *     Quoted args are copied as strings. Stops at first unquoted ')' or ','.
  *     Special chars can be quoted using '\'.  Ex : aa"b\n)"c => "aab\n)c".
- *  s  expanded string. Example: pi"x"2 yields "3.142x2".
+ *  s  expanded string. Example: Pi"x"2 yields "3.142x2".
  *     The unquoted components can be of any pari type (converted according to
  *     the current output format)
  *  s* any number of strings (see s)

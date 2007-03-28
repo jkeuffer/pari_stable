@@ -1,5 +1,8 @@
 Function: _++
-Class: symbolic_operators
+C-Name: gadd1e
+Prototype: &
+Section: symbolic_operators
+Help: x++
 Description: 
  (*bptr):bptr				++$1
  (*small):small				++$1

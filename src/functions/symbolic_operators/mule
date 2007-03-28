@@ -1,5 +1,8 @@
 Function: _*=_
-Class: symbolic_operators
+Section: symbolic_operators
+C-Name: gmule
+Prototype: &G
+Help: x*=y: shortcut for x=x*y
 Description: 
  (*small, small):small:parens		$1 *= $(2)
  (*int, small):int:parens		 $1 = mulis($1, $2)

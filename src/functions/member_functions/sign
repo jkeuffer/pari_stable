@@ -1,5 +1,6 @@
 Function: _.sign
-Class: member_functions
+Help: _.sign
+Section: member_functions
 C-Name: member_sign
 Prototype: G
 Description: 

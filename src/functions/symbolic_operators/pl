@@ -1,5 +1,6 @@
 Function: +_
-Class: symbolic_operators
+Help: +_
+Section: symbolic_operators
 Description: 
  (small):small:parens			$1
  (int):int:parens:copy			$1

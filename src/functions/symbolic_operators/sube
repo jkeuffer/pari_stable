@@ -1,5 +1,8 @@
 Function: _-=_
-Class: symbolic_operators
+C-Name: gsube
+Prototype: &G
+Help: x-=y
+Section: symbolic_operators
 Description: 
  (*small, small):small:parens		 $1 -= $(2)
  (*lg, small):lg:parens			 $1 -= $(2)

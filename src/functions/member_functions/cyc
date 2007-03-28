@@ -1,5 +1,6 @@
 Function: _.cyc
-Class: member_functions
+Help: _.cyc
+Section: member_functions
 C-Name: member_cyc
 Prototype: G
 Description: 

@@ -1,5 +1,6 @@
 Function: _.gen
-Class: member_functions
+Help: _.gen
+Section: member_functions
 C-Name: member_gen
 Prototype: G
 Description: 

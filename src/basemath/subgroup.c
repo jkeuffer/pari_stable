@@ -91,9 +91,11 @@ conjugate(long *typ)
 static void
 std_fun(subgp_iter *T, GEN x)
 {
+  pari_sp ltop=avma;
   exprdat *E = (exprdat *)T->fundata;
   E->ep->value = (void*)x;
-  (void)readseq(E->ch); T->countsub++;
+  closure_eval(E->code); T->countsub++;
+  avma=ltop;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
 static void
@@ -549,7 +551,7 @@ get_snf(GEN x, long *N)
 }
 
 void
-forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
+forsubgroup(entree *ep, GEN cyc, GEN bound, GEN code)
 {
   subgp_iter T;
   exprdat E;
@@ -560,7 +562,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
   if (!cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
   T.cyc = cyc;
-  E.ch = ch;
+  E.code = code;
   E.ep= ep; T.fundata = (void*)&E;
   push_val(ep, gen_0);
 

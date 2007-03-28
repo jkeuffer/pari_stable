@@ -1,7 +1,7 @@
 Function: intnum
 Section: sums
 C-Name: intnum0
-Prototype: V=GGIDGp
+Prototype: V=GGEDGp
 Help: intnum(X=a,b,s,{tab}): numerical integration of s from a to b with 
  respect to X. Plus/minus infinity is coded as [+1]/ [-1]. Finally tab is
  either omitted (let the program choose the integration step), a positive

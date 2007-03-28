@@ -1,5 +1,8 @@
 Function: _||_
-Class: symbolic_operators
+C-Name: orpari
+Prototype: GE
+Help: x||y: 
+Section: symbolic_operators
 Description: 
  (bool, bool):bool:parens               $(1) || $(2)
 

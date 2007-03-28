@@ -1,5 +1,6 @@
 Function: _<=_
-Class: symbolic_operators
+Help: _<=_
+Section: symbolic_operators
 C-Name: gle
 Prototype: GG
 Description: 

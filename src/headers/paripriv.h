@@ -323,7 +323,6 @@ void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double 
 int    pop_entree_bloc(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 void   gclone_refc(GEN x);
-void   free_ep_args(entree *ep);
 
 /* naive grow-arrays */
 typedef struct {
@@ -347,16 +346,11 @@ void* get_stack(double fraction, long min);
 GEN   gpreadseq(char *c, int strict);
 void  initout(int initerr);
 void  init80col(long n);
-void  kill_from_hashlist(entree *ep, long n);
-void  member_err(char *s);
 int   pari_kernel_init(void);
 int   pari_last_was_newline(void);
 void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
-void  print_user_fun(entree *ep);
-void  print_user_member(entree *ep);
 void  print_all_user_fun(void);
-void  print_all_user_member(void);
 void  pop_val(entree *ep);
 void  push_val(entree *ep, GEN a);
 void  recover(int flag);

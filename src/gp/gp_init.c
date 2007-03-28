@@ -26,6 +26,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static void whatnow0(char *s) { whatnow(s,0); }
 
+GEN 
+parihist(long p)
+{
+  return gp_history(GP_DATA->hist, p, NULL,NULL);
+}
+
 #include "gp_init.h"
 
 /* Backward Compatibility */
@@ -59,6 +65,7 @@ setprecr(long n)
 }
 
 entree functions_oldgp[] = {
+{"%",0,(void*)parihist,1,"D0,L,","last history item"},
 {"allocatemem",11,(void *)allocatemoremem,2,"vLp","allocatemem(s)=allocates a new stack of s bytes, or doubles the stack if size is 0"},
 {"box",35,(void *)rectbox,10,"vLGG","box(w,x2,y2)=if the cursor is at position (x1,y1), draw a box with diagonal (x1,y1) and (x2,y2) in rectwindow w (cursor does not move)"},
 {"color",2,(void *)rectcolor,2,"vLL","color(w,c)=set default color to c in rectwindow. Possible values for c are 1=sienna, 2=cornsilk, 3=red, 4=black, 5=grey, 6=blue, 7=gainsborough"},
@@ -71,16 +78,16 @@ entree functions_oldgp[] = {
 {"line",35,(void *)rectline,10,"vLGG","line(w,x2,y2)=if cursor is at position (x1,y1), draw a line from (x1,y1) to (x2,y2) (and move the cursor) in the rectwindow w"},
 {"lines",35,(void *)rectlines,10,"vLGG","lines(w,listx,listy)=draws an open polygon in rectwindow w where listx and listy contain the x (resp. y) coordinates of the vertices"},
 {"move",35,(void*)rectmove,10,"vLGG","move(w,x,y)=move cursor to position x,y in rectwindow w"},
-{"plot",99,(void *)plot,10,"vV=GGIDGDGp","plot(X=a,b,expr)=crude plot of expression expr, X goes from a to b"},
-{"ploth",37,(void *)ploth,10,"V=GGIp","ploth(X=a,b,expr)=plot of expression expr, X goes from a to b in high resolution"},
-{"ploth2",37,(void *)ploth2,10,"V=GGIp","ploth2(X=a,b,[expr1,expr2])=plot of points [expr1,expr2], X goes from a to b in high resolution"},
-{"plothmult",37,(void *)plothmult,10,"V=GGIp","plothmult(X=a,b,[expr1,...])=plot of expressions expr1,..., X goes from a to b in high resolution"},
+{"plot",99,(void *)plot,10,"vV=GGEDGDGp","plot(X=a,b,expr)=crude plot of expression expr, X goes from a to b"},
+{"ploth",37,(void *)ploth,10,"V=GGEp","ploth(X=a,b,expr)=plot of expression expr, X goes from a to b in high resolution"},
+{"ploth2",37,(void *)ploth2,10,"V=GGEp","ploth2(X=a,b,[expr1,expr2])=plot of points [expr1,expr2], X goes from a to b in high resolution"},
+{"plothmult",37,(void *)plothmult,10,"V=GGEp","plothmult(X=a,b,[expr1,...])=plot of expressions expr1,..., X goes from a to b in high resolution"},
 {"plothraw",2,(void *)plothraw,10,"GGp","plothraw(listx,listy)=plot in high resolution points whose x (resp. y) coordinates are in listx (resp. listy)"},
 {"point",35,(void *)rectpoint,10,"vLGG","point(w,x,y)=draw a point (and move cursor) at position x,y in rectwindow w"},
 {"points",35,(void *)rectpoints,10,"vLGG","points(w,listx,listy)=draws in rectwindow w the points whose x (resp y) coordinates are in listx (resp listy)"},
 {"postdraw",1,(void *)postdraw,10,"vG","postdraw(list)=same as plotdraw, except that the output is a PostScript program in file \"pari.ps\""},
-{"postploth",37,(void *)postploth,10,"V=GGIpD0,L,D0,L,","postploth(X=a,b,expr)=same as ploth, except that the output is a PostScript program in the file \"pari.ps\""},
-{"postploth2",37,(void *)postploth2,10,"V=GGIpD0,L,","postploth2(X=a,b,[expr1,expr2])=same as ploth2, except that the output is a PostScript program in the file \"pari.ps\""},
+{"postploth",37,(void *)postploth,10,"V=GGEpD0,L,D0,L,","postploth(X=a,b,expr)=same as ploth, except that the output is a PostScript program in the file \"pari.ps\""},
+{"postploth2",37,(void *)postploth2,10,"V=GGEpD0,L,","postploth2(X=a,b,[expr1,expr2])=same as ploth2, except that the output is a PostScript program in the file \"pari.ps\""},
 {"postplothraw",2,(void *)postplothraw,10,"GGD0,L,","postplothraw(listx,listy)=same as plothraw, except that the output is a PostScript program in the file \"pari.ps\""},
 {"pprint",0,(void*)printp,11,"vs*","pprint(a)=outputs a in beautified format ending with newline"},
 {"pprint1",0,(void*)printp1,11,"vs*","pprint1(a)=outputs a in beautified format without ending with newline"},

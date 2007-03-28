@@ -10,7 +10,8 @@ for d in `find . -name Entries`; do
 done
 echo Odos/paricfg.h
 echo src/language/init.h
-echo src/language/members.h
+echo src/language/parse.c
+echo src/language/parse.h
 echo src/gp/gp_init.h
 echo src/gp/highlvl.h
 echo src/funclist
