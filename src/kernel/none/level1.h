@@ -760,8 +760,9 @@ minss(long x, long y) { return x<y?x:y; }
 INLINE GEN
 subuu(ulong x, ulong y)
 {
+  ulong z;
   LOCAL_OVERFLOW;
-  ulong z = subll(x, y);
+  z = subll(x, y);
   return overflow? utoineg(-z): utoi(z);
 }
 
