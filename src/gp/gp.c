@@ -367,6 +367,7 @@ gentypes(void)
   t_REAL   : long real numbers [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_INTMOD : integermods       [ code ] [ mod  ] [ integer ]\n\
   t_FRAC   : irred. rationals  [ code ] [ num. ] [ den. ]\n\
+  t_FFELT  : finite field elt. [ code ] [ cod2 ] [ elt ] [ mod ] [ p ]\n\
   t_COMPLEX: complex numbers   [ code ] [ real ] [ imag ]\n\
   t_PADIC  : p-adic numbers    [ cod1 ] [ cod2 ] [ p ] [ p^r ] [ int ]\n\
   t_QUAD   : quadratic numbers [ cod1 ] [ mod  ] [ real ] [ imag ]\n\
