@@ -353,6 +353,7 @@ void  print_functions_hash(const char *s);
 void  print_all_user_fun(void);
 void  pop_val(entree *ep);
 void  push_val(entree *ep, GEN a);
+GEN   readbin(const char *name, FILE *f, int *vector);
 void  recover(int flag);
 int   term_height(void);
 int   term_width(void);

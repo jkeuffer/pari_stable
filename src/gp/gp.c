@@ -826,9 +826,9 @@ gp_quit(void)
 }
 
 static GEN
-gpreadbin(const char *s)
+gpreadbin(const char *s, int *vector)
 {
-  GEN x = readbin(s,infile);
+  GEN x = readbin(s,infile, vector);
   popinfile(); return x;
 }
 
@@ -931,8 +931,9 @@ escape0(char *tch)
       switchin(s);
       if (file_is_binary(infile))
       {
-        GEN x = gpreadbin(s);
-        if (isclone(x)) /* many BIN_GEN */
+        int vector;
+        GEN x = gpreadbin(s, &vector);
+        if (vector) /* many BIN_GEN */
         {
           long i, l = lg(x);
           pari_warn(warner,"setting %ld history entries", l-1);
@@ -1609,8 +1610,9 @@ check_secure(char *s)
 GEN
 read0(char *s)
 {
+  int junk;
   switchin(s);
-  if (file_is_binary(infile)) return gpreadbin(s);
+  if (file_is_binary(infile)) return gpreadbin(s, &junk);
   return gp_main_loop(0);
 }
 

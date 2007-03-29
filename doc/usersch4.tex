@@ -1561,7 +1561,8 @@ It has the following syntax:\label{se:gp_read_str}
 In fact this function starts by \emph{filtering} out all spaces and comments
 in the input string. They it calls the underlying basic function, the GP
 parser proper: \fun{GEN}{gp_read_str}{char *s}, which is slightly faster but
-which you probably do not need.
+which you probably do not need. Note that \kbd{gp}'s metacommands are not
+recognized.
 
 To read a \kbd{GEN} from a file, you can use the simpler interface
 
@@ -1578,7 +1579,10 @@ Finally, you can read in a whole file, as in GP's \tet{read} statement
 \fun{GEN}{gp_read_file}{char *name}
 
 \noindent As usual, the return value is that of the last non-empty expression
-evaluated. Note that \kbd{gp}'s metacommands are not recognized.
+evaluated. There is one technical exception: if \kbd{name} is a \emph{binary}
+file (from \tet{writebin}) containing more than one object, a \typ{VEC}
+containing them all is returned. This is because binary objects bypass the
+parser, hence reading them has no useful side effect.
 
 Once in a while, it may be necessary to evaluate a GP expression sequence
 involving a call to a function you have defined in~C. This is easy using

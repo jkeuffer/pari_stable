@@ -228,9 +228,10 @@ GEN
 gp_read_file(char *s)
 {
   GEN x = gnil;
+  int junk;
   switchin(s);
   if (file_is_binary(infile))
-    x = readbin(s,infile);
+    x = readbin(s,infile, &junk);
   else {
     Buffer *b = new_buffer();
     x = gnil;
@@ -271,9 +272,10 @@ GEN
 gp_readvec_file(char *s)
 {
   GEN x = NULL;
+  int junk;
   switchin(s);
   if (file_is_binary(infile))
-    x = readbin(s,infile);
+    x = readbin(s,infile,&junk);
   else 
     x = gp_readvec_stream(infile);
   popinfile(); return x;
@@ -3416,9 +3418,9 @@ writebin(char *name, GEN x)
 
 /* read all objects in f. If f contains BIN_GEN that would be silently ignored
  * [i.e f contains more than one objet, not all of them 'named GENs'], return
- * them all in a vector with clone bit set (special marker). */
+ * them all in a vector and set 'vector'. */
 GEN
-readbin(const char *name, FILE *f)
+readbin(const char *name, FILE *f, int *vector)
 {
   pari_sp av = avma;
   GEN x,y,z;
@@ -3437,8 +3439,10 @@ readbin(const char *name, FILE *f)
       pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
           lg(z)-1);
     x = gerepilecopy(av, z);
-    setisclone(x); /* HACK */
+    *vector = 1;
   }
+  else
+    *vector = 0;
   return x;
 }
 
