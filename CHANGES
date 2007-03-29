@@ -10,6 +10,7 @@ Done for version 2.4.2 (released ??/??/2006):
     4- remove hack in internal function 'readbin' that used the clone bit as
     a special marker hence returned an invalid object, which could be
     propagated to higher level public functions.
+    5- sqrtn(Mod(a,p),..) was broken in 2.4.1
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode compiler       and a bytecode evaluator

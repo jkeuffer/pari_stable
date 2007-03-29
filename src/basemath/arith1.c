@@ -1905,7 +1905,7 @@ _Fp_pow(void *E, GEN x, GEN n)
 static GEN
 _Fp_rand(void *E)
 {
-  return randomi((GEN)E);
+  return addis(randomi(subis((GEN)E,1)),1);
 }
 
 const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,cmpii,gcmp1};
