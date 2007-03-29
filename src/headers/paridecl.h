@@ -384,7 +384,7 @@ GEN     sqcompreal(GEN x);
 
 /* arith1.c */
 
-ulong   Fl_pow(ulong x, ulong n, ulong p);
+ulong   Fl_powu(ulong x, ulong n, ulong p);
 ulong   Fl_sqrt(ulong a, ulong p);
 GEN     Fp_div(GEN a, GEN b, GEN m);
 GEN     Fp_inv(GEN a, GEN m);

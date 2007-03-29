@@ -98,7 +98,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define subuumod Fl_sub
 #define muluumod Fl_mul
 #define divuumod Fl_div
-#define powuumod Fl_pow
+#define powuumod Fl_powu
 #define invumod Fl_inv
 #define invsmod Fl_inv_signed
 #define mpinvmod Fp_inv

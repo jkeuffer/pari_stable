@@ -1875,7 +1875,7 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
       if (both_odd(da,db)) res = p-res;
       if (lb != 1)
       {
-        ulong t = Fl_pow(lb, da - dc, p);
+        ulong t = Fl_powu(lb, da - dc, p);
         res = Fl_mul(res, t, p);
         if (dc) cx = Fl_mul(cx, t, p);
       }
@@ -1899,7 +1899,7 @@ Flx_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
     *C0 = Fl_mul(cx, a[2], p);
     *C1 = Fl_mul(cx, a[3], p);
     lb = b[2];
-  } else lb = Fl_pow(b[2], da, p);
+  } else lb = Fl_powu(b[2], da, p);
   avma = av; return Fl_mul(res, lb, p);
 }
 
@@ -2085,7 +2085,7 @@ Flx_FlxY_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
   GEN ev = FlxY_evalx(b, n, p);
   long drop = lg(b) - lg(ev);
   ulong r = Flx_resultant(a, ev, p);
-  if (drop && la != 1) r = Fl_mul(r, Fl_pow(la, drop,p),p);
+  if (drop && la != 1) r = Fl_mul(r, Fl_powu(la, drop,p),p);
   return r;
 }
 static GEN
@@ -2431,7 +2431,7 @@ INIT:
     else
       Hp = Flx_FlyX_resultant_polint(a, b, p, (ulong)dres, sX);
     if (!H && degpol(Hp) != dres) continue;
-    if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
+    if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
       if (!Flx_is_squarefree(Hp, p)) goto INIT;
       if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
@@ -2587,7 +2587,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p);
     Hp= Flx_resultant(a, b, p);
-    if (dp != 1) Hp = Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
+    if (dp != 1) Hp = Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     if (!H)
     {
       stable = 0; q = utoipos(p);

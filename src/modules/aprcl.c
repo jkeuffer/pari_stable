@@ -958,7 +958,7 @@ aprcl(GEN N)
   for (i=2; i<lfat; i++)
   {
     p = fat[i]; q = p*p;
-    flaglp[p] = (Fl_pow(umodiu(N,q),p-1,q) != 1);
+    flaglp[p] = (Fl_powu(umodiu(N,q),p-1,q) != 1);
   }
   calcjac(pC, globfa, &tabfaq, &tabj);
   

@@ -2576,7 +2576,7 @@ wpow(long s, long m, long e, long n)
     w[i] = w[i-1]*e;
   for(i=n; i>=1; i--)
   {
-    si = Fl_pow(si,e,m);
+    si = Fl_powu(si,e,m);
     w[i] = Fl_mul(s-1, stpow(si, w[i], m), m);
   }
   return w;
@@ -2714,7 +2714,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       gel(Be,e) = cyc_pow(B, op);
       for(i=e-1; i>=1; i--)
         gel(Be,i) = cyc_pow(gel(Be,i+1), p);
-      w = wpow(Fl_pow(s,op,deg),deg,p,e);
+      w = wpow(Fl_powu(s,op,deg),deg,p,e);
       wg = cgetg(e+2,t_VECSMALL);
       wg[e+1] = deg;
       for (i=e; i>=1; i--)
@@ -2726,7 +2726,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
         GEN Bel = gel(Be,f);
         long t;
         dg *= p; el /= p;
-        sel = Fl_pow(s,el,deg); 
+        sel = Fl_powu(s,el,deg); 
         if (DEBUGLEVEL >= 6)
           fprintferr("GaloisConj: B=%Z\n", Bel);
         sr  = cgcd(stpow(sel,p,deg),deg);

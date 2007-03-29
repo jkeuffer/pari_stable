@@ -144,7 +144,7 @@ is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L)
   if (kross(x, p) >= 0) return 0;
   for (i=lg(L)-1; i; i--)
   {
-    ulong t = Fl_pow(x, (ulong)L[i], p);
+    ulong t = Fl_powu(x, (ulong)L[i], p);
     if (t == p_1 || t == 1) return 0;
   }
   return 1;
@@ -1265,13 +1265,13 @@ Fl_sqrt(ulong a, ulong p)
         if (i) continue;
         pari_err(talker,"composite modulus in Fl_sqrt: %lu",p);
       }
-      y = m = Fl_pow(k, q, p);
+      y = m = Fl_powu(k, q, p);
       for (i=1; i<e; i++)
 	if ((m = Fl_sqr(m,p)) == 1) break;
       if (i == e) break; /* success */
     }
 
-  p1 = Fl_pow(a, q >> 1, p); /* a ^ [(q-1)/2] */
+  p1 = Fl_powu(a, q >> 1, p); /* a ^ [(q-1)/2] */
   if (!p1) return 0;
   v = Fl_mul(a, p1, p);
   w = Fl_mul(v, p1, p);
@@ -1713,7 +1713,7 @@ _sqr(void *data, GEN x)
   return D->res(sqri(x), D->N);
 }
 ulong
-Fl_pow(ulong x, ulong n0, ulong p)
+Fl_powu(ulong x, ulong n0, ulong p)
 {
   ulong y, z, n;
   if (n0 <= 2)
@@ -1742,7 +1742,7 @@ Fp_powu(GEN A, ulong k, GEN N)
 
   if (lN == 3) {
     ulong n = (ulong)N[2];
-    return utoi( Fl_pow(umodiu(A, n), k, n) );
+    return utoi( Fl_powu(umodiu(A, n), k, n) );
   }
   if (k <= 2)
   { /* frequent special cases */
@@ -1800,7 +1800,7 @@ Fp_pows(GEN A, long k, GEN N)
       a = Fl_inv(a, n);
       k = -k;
     }
-    return utoi( Fl_pow(a, (ulong)k, n) );
+    return utoi( Fl_powu(a, (ulong)k, n) );
   }
   if (k < 0) { A = Fp_inv(A, N); k = -k; };
   return Fp_powu(A, (ulong)k, N);
@@ -1836,7 +1836,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     ulong n = N[2];
     ulong a = umodiu(A, n);
     if (s < 0) a = Fl_inv(a, n);
-    if (lgefint(k) == 3) return utoi(Fl_pow(a, (ulong)k[2], n));
+    if (lgefint(k) == 3) return utoi(Fl_powu(a, (ulong)k[2], n));
     /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */
     pari_warn(warner, "large exponent in Mod(a,N)^n: reduce n mod phi(N)");

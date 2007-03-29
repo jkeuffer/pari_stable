@@ -281,7 +281,7 @@ znstar_hnf_generators(GEN Z, GEN M)
     gen[j] = 1;
     for (h = 1; h < l; h++)
       gen[j] = Fl_mul((ulong)gen[j], 
-                      Fl_pow(itou(gel(zgen,h)), itou(gmael(M,j,h)), n), n);
+                      Fl_powu(itou(gel(zgen,h)), itou(gmael(M,j,h)), n), n);
   }
   avma = ltop; return gen;
 }
@@ -761,7 +761,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   o = n-r; /* = phi(n) */
   if (o == d) return polcyclo(n,v);
   o /= d;
-  gd = Fl_pow(g%n, d, n);
+  gd = Fl_powu(g%n, d, n);
   /*FIXME: If degree is small, the computation of B is a waste of time*/
   powz=polsubcyclo_complex_roots(n,(o&1)==0,3);
   L=polsubcyclo_cyclic(n,d,o,g,gd,powz,NULL);

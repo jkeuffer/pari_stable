@@ -1144,12 +1144,12 @@ Flx_resultant(GEN a, GEN b, ulong p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = p - res;
-    if (lb != 1) res = Fl_mul(res, Fl_pow(lb, da - dc, p), p);
+    if (lb != 1) res = Fl_mul(res, Fl_powu(lb, da - dc, p), p);
     if (++cnt == 4) { cnt = 0; avma = av; }
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
-  avma = av; return Fl_mul(res, Fl_pow(b[2], da, p), p);
+  avma = av; return Fl_mul(res, Fl_powu(b[2], da, p), p);
 }
 
 /* If resultant is 0, *ptU and *ptU are not set */
@@ -1185,11 +1185,11 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
     u = v; v = z; /* (u,v) = (v, u - q v) */
 
     if (both_odd(dx,dy)) res = p - res;
-    if (lb != 1) res = Fl_mul(res, Fl_pow(lb, dx-dz, p), p);
+    if (lb != 1) res = Fl_mul(res, Fl_powu(lb, dx-dz, p), p);
     dx = dy; /* = degpol(x) */
     dy = dz; /* = degpol(y) */
   }
-  res = Fl_mul(res, Fl_pow(y[2], dx, p), p);
+  res = Fl_mul(res, Fl_powu(y[2], dx, p), p);
   lb = Fl_mul(res, Fl_inv(y[2],p), p);
   v = gerepileuptoleaf(av, Flx_Fl_mul(v, lb, p));
   av = avma;
@@ -1215,10 +1215,10 @@ Flx_eval(GEN x, ulong y, ulong p)
       for (j=i; !x[j]; j--)
         if (j==2)
         {
-          if (i != j) y = Fl_pow(y, i-j+1, p);
+          if (i != j) y = Fl_powu(y, i-j+1, p);
           return (p1 * y) % p;
         }
-      r = (i==j)? y: Fl_pow(y, i-j+1, p);
+      r = (i==j)? y: Fl_powu(y, i-j+1, p);
       p1 = ((p1*r) + x[j]) % p;
     }
   }
@@ -1229,10 +1229,10 @@ Flx_eval(GEN x, ulong y, ulong p)
       for (j=i; !x[j]; j--)
         if (j==2)
         {
-          if (i != j) y = Fl_pow(y, i-j+1, p);
+          if (i != j) y = Fl_powu(y, i-j+1, p);
           return Fl_mul(p1, y, p);
         }
-      r = (i==j)? y: Fl_pow(y, i-j+1, p);
+      r = (i==j)? y: Fl_powu(y, i-j+1, p);
       p1 = Fl_add((ulong)x[j], Fl_mul(p1,r,p), p);
     }
   }
@@ -1542,7 +1542,7 @@ Flxq_norm(GEN x, GEN T, ulong p)
   ulong y = Flx_resultant(T, x, p);
   ulong L = T[lg(T)-1];
   if ( L==1 || lgpol(x)==0) return y;
-  return Fl_div(y, Fl_pow(L, (ulong)degpol(x), p), p);
+  return Fl_div(y, Fl_powu(L, (ulong)degpol(x), p), p);
 }
 
 /*x must be reduced*/

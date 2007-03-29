@@ -920,8 +920,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   degKz = degpol(COMPO.R);
   m = degKz / degK;
   d = (ell-1) / m;
-  g = (long)Fl_pow(pgener_Fl(ell), d, ell);
-  if (Fl_pow((ulong)g, m, ell*ell) == 1) g += ell;
+  g = (long)Fl_powu(pgener_Fl(ell), d, ell);
+  if (Fl_powu((ulong)g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
@@ -1032,7 +1032,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     ap = cgetg(1, t_MAT);
     for (i=0; i<m; i++)
     {
-      ap = famat_mul(ap, famat_pow(p2, utoi(Fl_pow(g,m-1-i,ell))));
+      ap = famat_mul(ap, famat_pow(p2, utoi(Fl_powu(g,m-1-i,ell))));
       if (i < m-1) p2 = tauofelt(p2, tau);
     }
     gel(vecAp,j) = ap;

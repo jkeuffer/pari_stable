@@ -124,7 +124,7 @@ static int
 Fl_bad_for_base(Fl_miller_t *S, ulong a)
 {
   long r;
-  ulong c2, c = Fl_pow(a, S->t1, S->n);
+  ulong c2, c = Fl_powu(a, S->t1, S->n);
 
   if (c == 1 || c == S->t) return 0;
 
@@ -2571,7 +2571,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
     residue = umodiu(x, q);
     if (residue == 0) continue;
     /* find a generator of the subgroup of index curexp in (Z/qZ)^* */
-    prkmodq = elt = Fl_pow(pgener_Fl(q), p, q);
+    prkmodq = elt = Fl_powu(pgener_Fl(q), p, q);
     /* see whether our residue is in the subgroup */
     for (k = (q - 1)/p; k > 0; k--)
     {
