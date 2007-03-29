@@ -772,6 +772,18 @@ closure_eval(GEN C)
           gel(st,sp++)=res;
           break;
         }
+    case OCcallgen2:
+        {
+          entree *ep=(entree*)operand;
+          GEN res;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
+          if (br_status) return;
+          gp_function_name=NULL;
+          gel(st,sp++)=res;
+          break;
+        }
     case OCcalllong:
         {
           entree *ep=(entree*)operand;
@@ -1068,6 +1080,10 @@ closure_disassemble(GEN C)
     case OCcallgen:
       ep=(entree*)operand;
       pariprintf("callgen\t\t%s\n",ep->name);
+      break;
+    case OCcallgen2:
+      ep=(entree*)operand;
+      pariprintf("callgen2\t%s\n",ep->name);
       break;
     case OCcalllong:
       ep=(entree*)operand;

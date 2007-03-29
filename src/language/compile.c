@@ -526,7 +526,7 @@ compilefunc(long n, int mode)
       compilenode(tree[y].x,Ggen);
       compilenode(tree[y].y,Gsmall);
     }
-    op_push(OCcallgen,(long)ep);
+    op_push(OCcallgen2,(long)ep);
     compilecast(n,Ggen,mode);
     avma=ltop;
     return;
@@ -764,6 +764,8 @@ compilefunc(long n, int mode)
   case RET_GEN: 
     if (tree[n].f==Fderfunc)
       op_push(OCderivgen, (long) ep);
+    else if (ep->arity==2)
+      op_push(OCcallgen2, (long) ep);
     else
       op_push(OCcallgen, (long) ep);
     compilecast(n,Ggen,mode);
