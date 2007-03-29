@@ -228,11 +228,11 @@ GEN
 gp_read_file(char *s)
 {
   GEN x = gnil;
-  int junk;
   switchin(s);
-  if (file_is_binary(infile))
+  if (file_is_binary(infile)) {
+    int junk;
     x = readbin(s,infile, &junk);
-  else {
+  } else {
     Buffer *b = new_buffer();
     x = gnil;
     for (;;) {
@@ -272,11 +272,11 @@ GEN
 gp_readvec_file(char *s)
 {
   GEN x = NULL;
-  int junk;
   switchin(s);
-  if (file_is_binary(infile))
+  if (file_is_binary(infile)) {
+    int junk;
     x = readbin(s,infile,&junk);
-  else 
+  } else 
     x = gp_readvec_stream(infile);
   popinfile(); return x;
 }

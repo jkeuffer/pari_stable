@@ -1610,9 +1610,11 @@ check_secure(char *s)
 GEN
 read0(char *s)
 {
-  int junk;
   switchin(s);
-  if (file_is_binary(infile)) return gpreadbin(s, &junk);
+  if (file_is_binary(infile)) {
+    int junk;
+    return gpreadbin(s, &junk);
+  }
   return gp_main_loop(0);
 }
 
