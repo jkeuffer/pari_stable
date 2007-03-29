@@ -840,7 +840,7 @@ calluser:
         {
           long n=st[--sp];
           long savsp=sp;
-          ep = (entree*) operand;
+          entree *ep = (entree*) operand;
           GEN z, lvars=ep->lvars;
           if (ep->valence!=EpUSER)
           {
