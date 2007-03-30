@@ -8,4 +8,22 @@ Help: polresultant(x,y,{v},{flag=0}): resultant of the polynomials x and y,
  assumes that the polynomials have exact entries (uses the subresultant
  algorithm), 1 for arbitrary polynomials, using Sylvester's matrix, or 2:
  using a Ducos's modified subresultant algorithm
+Doc: resultant of the two
+ polynomials $x$ and $y$ with exact entries, with respect to the main
+ variables of $x$ and $y$ if $v$ is omitted, with respect to the variable $v$
+ otherwise. The algorithm assumes the base ring is a domain.
+ 
+ If $\fl=0$, uses the \idx{subresultant algorithm}.
+ 
+ If $\fl=1$, uses the determinant of Sylvester's matrix instead (here $x$ and
+ $y$ may have non-exact coefficients).
+ 
+ If $\fl=2$, uses Ducos's modified subresultant algorithm. It should be much
+ faster than the default if the coefficient ring is complicated (e.g
+ multivariate polynomials or huge coefficients), and slightly slower
+ otherwise.
+ 
+ \syn{polresultant0}{x,y,v,\fl}, where $v$ is a \kbd{long} and an omitted $v$
+ is coded as $-1$. Also available are \funs{subres}{x,y} ($\fl=0$) and
+ \funs{resultant2}{x,y} ($\fl=1$).
 

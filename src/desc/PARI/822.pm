@@ -52,6 +52,17 @@ sub read
 	my ($key, $value);
 	my $line;
         my $entry;
+        my ($store) = sub {
+                $value =~ s/\s*$//;
+                if (!defined($ret->{$entry}->{$key}))
+                {
+                        $ret->{$entry}->{$key}=$value;
+                }
+                elsif (($check&1) and $ret->{$entry}->{$key} ne $value)
+                {
+                        die ("Unmatched data: $entry: $key: $ret->{$entry}->{$key} ne $value");
+                }
+        };
 
         open FILE,"<$file";
 	while ($line = <FILE>) 
@@ -68,15 +79,7 @@ sub read
 			else
                         {
 				$invars=0;
-                                $value =~ s/\s*$//;
-                                if (!defined($ret->{$entry}->{$key}))
-                                {
-                                        $ret->{$entry}->{$key}=$value;
-                                }
-                                elsif (($check&1) and $ret->{$entry}->{$key} ne $value)
-                                {
-                                        die ("Unmatched data: $entry: $key: $ret->{$entry}->{$key} ne $value");
-                                }
+                                $store->();
 			}
 		}
                 next if ($line eq '');
@@ -85,11 +88,11 @@ sub read
 		if ($key eq 'Function') 
                 {
                         $entry=$value;
+                        die("New function $value") if (($check&2) and !defined($ret->{$entry}));
 		}
-                die("New function $value") if (($check&2) and !defined($ret->{$entry}));
                 $invars=1;
 	}
-        die("$file is not terminated") if ($invars);
+        $store->() if ($invars);
         return 0;
 }
 

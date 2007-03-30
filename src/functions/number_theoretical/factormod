@@ -5,4 +5,16 @@ Prototype: GGD0,L,
 Help: factormod(x,p,{flag=0}): factorization mod p of the polynomial x using
  Berlekamp. flag is optional, and can be 0: default or 1: simple factormod,
  same except that only the degrees of the irreducible factors are given
+Doc: factors the polynomial $x$ modulo
+ the prime integer $p$, using \idx{Berlekamp}. The coefficients of $x$ must be
+ operation-compatible with $\Z/p\Z$. The result is a two-column matrix, the
+ first column being the irreducible polynomials dividing $x$, and the second
+ the exponents. If $\fl$ is non-zero, outputs only the \emph{degrees} of the
+ irreducible polynomials (for example, for computing an $L$-function). A
+ different algorithm for computing the mod $p$ factorization is
+ \kbd{factorcantor} which is sometimes faster.
+ 
+ \syn{factormod}{x,p,\fl}. Also available are
+ \funs{factmod}{x,p} (which is equivalent to \funs{factormod}{x,p,0}) and
+ \funs{simplefactmod}{x,p} (= \funs{factormod}{x,p,1}).
 

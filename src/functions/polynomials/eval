@@ -3,4 +3,23 @@ Section: polynomials
 C-Name: geval
 Prototype: G
 Help: eval(x): evaluation of x, replacing variables by their value
+Doc: replaces in $x$ the formal variables by the values that
+ have been assigned to them after the creation of $x$. This is mainly useful
+ in GP, and not in library mode. Do not confuse this with substitution (see
+ \kbd{subst}).
+ 
+ If $x$ is a character string, \kbd{eval($x$)} executes $x$ as a GP
+ command, as if directly input from the keyboard, and returns its
+ output. For convenience, $x$ is evaluated as if
+ \kbd{strictmatch} was off. In particular, unused characters at the end of
+ $x$ do not prevent its evaluation:
+ \bprog
+ ? eval("1a")
+ % 1 = 1
+ @eprog
+ 
+ \syn{geval}{x}. The more basic functions \funs{poleval}{q,x},
+ \funs{qfeval}{q,x}, and \funs{hqfeval}{q,x} evaluate $q$ at $x$, where $q$
+ is respectively assumed to be a polynomial, a quadratic form (a symmetric
+ matrix), or an Hermitian form (an Hermitian complex matrix).
 

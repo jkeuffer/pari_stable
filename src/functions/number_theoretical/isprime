@@ -11,4 +11,43 @@ Description:
  (int, 1):bool	plisprime($1, 0)
  (int, 2):gen	plisprime($1, 1)
  (gen, ?small):gen	gisprime($1, $2)
+Doc: true (1) if $x$ is a prime
+ number, false (0) otherwise. A prime number is a positive integer having
+ exactly two distinct divisors among the natural numbers, namely 1 and
+ itself. 
+ 
+ This routine proves or disproves rigorously that a number is prime, which can
+ be very slow when $x$ is indeed prime and has more than $1000$ digits, say.
+ Use \tet{ispseudoprime} to quickly check for compositeness. See also
+ \kbd{factor}.
+ 
+ If $\fl=0$, use a combination of Baillie-PSW pseudo primality test (see
+ \tet{ispseudoprime}), Selfridge ``$p-1$'' test if $x-1$ is smooth enough, and
+ Adleman-Pomerance-Rumely-Cohen-Lenstra (APRCL) for general $x$.
+ 
+ If $\fl=1$, use Selfridge-Pocklington-Lehmer ``$p-1$'' test and output a
+ primality certificate as follows: return 
+ 
+ \item 0 if $x$ is composite,
+ 
+ \item 1 if $x$ is small enough that passing Baillie-PSW test guarantees
+ its primality (currently $x < 10^{15}$),
+ 
+ \item $2$ if $x$ is a large prime whose primality could only sensibly be
+ proven (given the algorithms implemented in PARI) using the APRCL test.
+ 
+ \item Otherwise ($x$ is large and $x-1$ is smooth) output a three column
+ matrix as a primality certificate. The first column contains prime
+ divisors $p$ of $x-1$ (such that $\prod p^{v_p(x-1)} > x^{1/3}$), the second
+ the corresponding elements $a_p$ as in Proposition~8.3.1 in GTM~138 , and the
+ third the output of isprime(p,1).
+ 
+ The algorithm fails if one of the pseudo-prime factors is not prime, which is
+ exceedingly unlikely and well worth a bug report.
+ 
+ If $\fl=2$, use APRCL.
+ 
+ \syn{gisprime}{x,\fl}, but the simpler function \funs{isprime}{x}
+ which returns a \kbd{long} should be used if $x$ is known to be of
+ type integer.
 

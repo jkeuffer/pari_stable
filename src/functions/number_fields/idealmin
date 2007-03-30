@@ -4,4 +4,9 @@ C-Name: minideal
 Prototype: GGDGp
 Help: idealmin(nf,ix,{vdir}): minimum of the ideal ix in the direction vdir
  in the number field nf
+Doc: computes a minimum of
+ the ideal $x$ in the direction \var{vdir} in the number field \var{nf}.
+ 
+ \syn{minideal}{\var{nf},x,\var{vdir},\var{prec}}, where an omitted
+ \var{vdir} is coded as \kbd{NULL}.
 

@@ -5,4 +5,16 @@ Prototype: GGDG
 Help: idealhnf(nf,a,{b}): hermite normal form of the ideal a in the number
  field nf, whatever form a may have. If called as idealhnf(nf,a,b), the ideal
  is given as aZ_K+bZ_K in the number field K defined by nf
+Doc: gives the \idx{Hermite normal form}
+ matrix of the ideal $a$. The ideal can be given in any form whatsoever
+ (typically by an algebraic number if it is principal, by a $\Z_K$-system of
+ generators, as a prime ideal as given by \kbd{idealprimedec}, or by a
+ $\Z$-basis).
+ 
+ If $b$ is not omitted, assume the ideal given was $a\Z_K+b\Z_K$, where $a$
+ and $b$ are elements of $K$ given either as vectors on the integral basis
+ $\var{nf}[7]$ or as algebraic numbers.
+ 
+ \syn{idealhnf0}{\var{nf},a,b} where an omitted $b$ is coded as \kbd{NULL}.
+ Also available is \funs{idealhermite}{\var{nf},a} ($b$ omitted).
 

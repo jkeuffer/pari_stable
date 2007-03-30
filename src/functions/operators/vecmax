@@ -3,4 +3,6 @@ Section: operators
 C-Name: vecmax
 Prototype: G
 Help: vecmax(x): maximum of the elements of the vector/matrix x
-
+Doc: if $x$ is a vector or a matrix, returns the maximum
+ of the elements of $x$, otherwise returns a copy of $x$. Error if $x$ is
+ empty.

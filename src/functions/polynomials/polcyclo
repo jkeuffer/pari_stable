@@ -3,4 +3,9 @@ Section: polynomials
 C-Name: polcyclo
 Prototype: LDn
 Help: polcyclo(n,{v=x}): n-th cyclotomic polynomial (in variable v)
+Doc: $n$-th cyclotomic polynomial, in variable
+ $v$ ($x$ by default). The integer $n$ must be positive.
+ 
+ \syn{polcyclo}{n,v}, where $n$ and $v$ are \kbd{long}
+ integers ($v$ is a variable number, usually obtained through \kbd{varn}).
 

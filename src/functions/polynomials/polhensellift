@@ -5,4 +5,11 @@ Prototype: GGGL
 Help: polhensellift(x, y, p, e): lift the factorization y of x modulo p to a
  factorization modulo p^e using Hensel lift. The factors in y must be
  pairwise relatively prime modulo p
+Doc: given a prime $p$, an integral
+ polynomial $x$ whose leading coefficient is a $p$-unit, a vector $y$ of
+ integral polynomials that are pairwise relatively prime modulo $p$, and whose
+ product is congruent to $x$ modulo $p$, lift the elements of $y$ to
+ polynomials whose product is congruent to $x$ modulo $p^e$.
+ 
+ \syn{polhensellift}{x,y,p,e} where $e$ must be a \kbd{long}.
 

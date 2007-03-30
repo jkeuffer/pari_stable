@@ -2,5 +2,9 @@ Function: primes
 Section: number_theoretical
 C-Name: primes
 Prototype: L
-Help: primes(n): returns the vector of the first n primes (n C-integer)
+Help: primes(x): returns the vector of the first x primes
+Doc: creates a row vector whose components
+ are the first $x$ prime numbers, which must be among the precalculated primes.
+ 
+ \syn{primes}{x}. $x$ must be a \kbd{long}.
 

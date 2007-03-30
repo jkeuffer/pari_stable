@@ -9,4 +9,17 @@ Help: ispower(x,{k},{&n}): true (1) if x is a k-th power, false (0) if not.
 Description: 
  (int):small       isanypower($1, NULL)
  (int, &int):small isanypower($1, &$2)
+Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
+ (0) if not.
+ 
+ If $k$ is omitted, only integers and fractions are allowed for $x$ and the
+ function returns the maximal $k \geq 2$ such that $x = n^k$ is a perfect
+ power, or 0 if no such $k$ exist; in particular \kbd{ispower(-1)},
+ \kbd{ispower(0)}, and \kbd{ispower(1)} all return $0$.
+ 
+ If a third argument $\&n$ is given and $x$ is indeed a $k$-th power, sets
+ $n$ to a $k$-th root of $x$.
+ 
+ \syn{ispower}{x, k, \&n}, the result is a \kbd{long}. Omitted $k$ or $n$
+ are coded as \kbd{NULL}.
 

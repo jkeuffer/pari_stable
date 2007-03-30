@@ -1,9 +1,3 @@
-Function: O
-C-Name: ggrando
-Prototype: GD1,L,
-Section: polynomials
-Help: O(a^b): p-adic or power series zero with precision given by b
-
 Function: O(_^_)
 Class: gp2c_internal
 Description:
@@ -12,4 +6,18 @@ Description:
  (int,small):gen    zeropadic($1, $2)
  (gen,small):gen    ggrando($1, $2)
  (var,small):gen    zeroser($1, $2)
+
+Function: O
+Section: polynomials
+C-Name: ggrando
+Prototype: GD1,L,
+Help: O(p^e): p-adic or power series zero with precision given by e
+Doc: if $p$ is an integer
+ greater than $2$, returns a $p$-adic $0$ of precision $e$. In all other
+ cases, returns a power series zero with precision given by $e v$, where $v$
+ is the $X$-adic valuation of $p$ with respect to its main variable.
+ 
+ \syn{zeropadic}{p,e} for a $p$-adic and \funs{zeroser}{v,e} for a
+ power series zero in variable $v$, which is a \kbd{long}. The precision $e$
+ is a \kbd{long}.
 

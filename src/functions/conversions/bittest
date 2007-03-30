@@ -8,4 +8,13 @@ Description:
  (small, small):bool:parens     ($(1)>>$(2))&1
  (int, small):bool              bittest($1, $2)
  (gen, gen):gen                 gbittest($1, $2)
+Doc: 
+ outputs the $n^{\text{th}}$ bit of $x$ starting
+ from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
+ The result is 0 or 1. To extract several bits at once as a vector, pass a
+ vector for $n$.
+ 
+ See \secref{se:bitand} for the behaviour at negative arguments.
+ 
+ \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 

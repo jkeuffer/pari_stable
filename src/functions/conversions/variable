@@ -7,4 +7,17 @@ Help: variable({x}): main variable of object x. Gives p for p-adic x, error
 Description: 
  (pol):var:parens:copy	$var:1
  (gen):gen	gpolvar($1)
+Doc: 
+ gives the main variable of the object $x$, and
+ $p$ if $x$ is a $p$-adic number. Gives an error if $x$ has no variable
+ associated to it. If $x$ is omitted, returns the list of user variables known
+ to the interpreter, by order of decreasing priority. (Highest priority is $x$,
+ which always come first.)
+ 
+ \syn{gpolvar}{x}, where an omitted $x$ is coded as \kbd{NULL}.
+ However, in library mode, this function should not be used for $x$
+ non-\kbd{NULL}, since \tet{gvar} is more appropriate. Instead, test whether
+ $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$ is $gel(x,2)$, or call
+ the function \funs{gvar}{x} which returns the variable \emph{number} of $x$ if
+ it exists, \kbd{BIGINT} otherwise.
 

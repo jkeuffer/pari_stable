@@ -5,4 +5,12 @@ Prototype: p
 Help: Euler=Euler(): Euler's constant with current precision
 Description: 
  ():real:prec	mpeuler(prec)
+Doc: Euler's constant $\gamma=0.57721\cdots$. Note that
+ \kbd{Euler} is one of the few special reserved names which cannot be used for
+ variables (the others are \kbd{I} and \kbd{Pi}, as well as all function
+ names).
+ 
+ \syn{mpeuler}{\var{prec}} where $\var{prec}$ \emph{must} be given. Note that
+ this creates $\gamma$ on the PARI stack, but a copy is also created on the
+ heap for quicker computations next time the function is called.
 

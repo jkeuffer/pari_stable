@@ -3,4 +3,8 @@ Section: transcendental
 C-Name: gpsi
 Prototype: Gp
 Help: psi(x): psi-function at x
+Doc: the $\psi$-function of $x$, i.e.~the
+ logarithmic derivative $\Gamma'(x)/\Gamma(x)$.
+ 
+ \syn{gpsi}{x,\var{prec}}.
 

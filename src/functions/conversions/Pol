@@ -4,4 +4,40 @@ C-Name: gtopoly
 Prototype: GDn
 Help: Pol(x,{v=x}): convert x (usually a vector or a power series) into a
  polynomial with variable v, starting with the leading coefficient
+Doc: 
+ transforms the object $x$ into a polynomial with
+ main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
+ $x$ is a power series, the effect is identical to \kbd{truncate},
+ i.e.~it chops off the $O(X^k)$. 
+ 
+ The main use of this function is when $x$ is a vector: it creates the
+ polynomial whose coefficients are given by $x$, with $x[1]$ being the leading
+ coefficient (which can be zero). It is much faster to evaluate
+ \kbd{Pol} on a vector of coefficients in this way, than the corresponding
+ formal expression $a_n X^n + \dots + a_0$, which is evaluated naively exactly
+ as written (linear versus quadratic time in $n$). \tet{Polrev} can be used if
+ one wants $x[1]$ to be the constant coefficient:
+ \bprog
+ ? Pol([1,2,3])
+ %1 = x^2 + 2*x + 3
+ ? Polrev([1,2,3])
+ %2 = 3*x^2 + 2*x + 1
+ @eprog\noindent
+ The reciprocal function of \kbd{Pol} (resp.~\kbd{Polrev}) is \kbd{Vec} (resp.~
+ \kbd{Vecrev}).
+ \bprog
+ ? Vec(Pol([1,2,3]))
+ %1 = [1, 2, 3]
+ ? Vecrev( Polrev([1,2,3]) )
+ %2 = [1, 2, 3]
+ @eprog\noindent
+ 
+ \misctitle{Warning:} this is \emph{not} a substitution function. It will not
+ transform an object containing variables of higher priority than~$v$.
+ \bprog
+ ? Pol(x + y, y)
+ *** Pol: variable must have higher priority in gtopoly.
+ @eprog
+ 
+ \syn{gtopoly}{x,v}, where $v$ is a variable number.
 

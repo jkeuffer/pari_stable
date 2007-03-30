@@ -8,4 +8,12 @@ Help: bitnegimply(x,y): bitwise "negated imply" of two integers x and y,
 Description: 
  (small, small):small:parens	$(1)&~$(2)
  (gen, gen):int	gbitnegimply($1, $2)
+Doc: 
+ bitwise negated imply of two integers $x$ and
+ $y$ (or \kbd{not} $(x \Rightarrow y)$), that is the integer $$\sum
+ (x_i~\kbd{and not}(y_i)) 2^i$$
+ 
+ See \secref{se:bitand} for the behaviour for negative arguments.
+ 
+ \syn{gbitnegimply}{x,y}.
 

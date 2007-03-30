@@ -4,4 +4,19 @@ C-Name: gtoser
 Prototype: GDn
 Help: Ser(x,{v=x}): convert x (usually a vector) into a power series with
  variable v, starting with the constant coefficient
+Doc: 
+ transforms the object $x$ into a power series
+ with main variable $v$ ($x$ by default). If $x$ is a scalar, this gives a
+ constant power series with precision given by the default \kbd{serieslength}
+ (corresponding to the C global variable \kbd{precdl}). If $x$ is a
+ polynomial, the precision is the greatest of \kbd{precdl} and the degree of
+ the polynomial. If $x$ is a vector, the precision is similarly given, and the
+ coefficients of the vector are understood to be the coefficients of the power
+ series starting from the constant term (i.e.~the reverse of the function
+ \kbd{Pol}).
+ 
+ The warning given for \kbd{Pol} also applies here: this is not a substitution
+ function.
+ 
+ \syn{gtoser}{x,v}, where $v$ is a variable number (i.e.~a C integer).
 

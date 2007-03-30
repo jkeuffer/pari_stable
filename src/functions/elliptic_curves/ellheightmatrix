@@ -2,6 +2,18 @@ Function: ellheightmatrix
 Section: elliptic_curves
 C-Name: mathell
 Prototype: GGp
-Help: ellheightmatrix(e,x): gives the height matrix for vector of points x
- on elliptic curve e using theta functions
+Help: ellheightmatrix(E,x): gives the height matrix for vector of points x
+ on elliptic curve E using theta functions
+Doc: 
+ $x$ being a vector of points, this
+ function outputs the Gram matrix of $x$ with respect to the N\'eron-Tate
+ height, in other words, the $(i,j)$ component of the matrix is equal to
+ \kbd{ellbil($E$,x[$i$],x[$j$])}. The rank of this matrix, at least in some
+ approximate sense, gives the rank of the set of points, and if $x$ is a
+ basis of the \idx{Mordell-Weil group} of $E$, its determinant is equal to
+ the regulator of $E$. Note that this matrix should be divided by 2 to be in
+ accordance with certain normalizations. $E$ is assumed to be integral,
+ given by a minimal model.
+ 
+ \syn{mathell}{E,x,\var{prec}}.
 

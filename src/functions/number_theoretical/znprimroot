@@ -6,4 +6,6 @@ Help: znprimroot(n): returns a primitive root of n when it exists
 Description: 
  (int):gen	gener($1)
  (gen):gen	ggener($1)
-
+Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
+  latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
+  odd prime and $k \geq 0$).

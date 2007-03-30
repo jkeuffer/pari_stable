@@ -1,11 +1,11 @@
 Function: default
-Section: programming
+Section: programming/specific
 C-Name: default0
 Prototype: D"",r,D"",s,D0,L,
-Help: default({opt},{v}): returns the current value of the current
- default opt. If v is present, set opt to v first. If no argument is
+Help: default({key},{val}): returns the current value of the
+ default key. If val is present, set opt to val first. If no argument is
  given, print a list of all defaults as well as their values.
-Description:
+Description: 
  ("realprecision"):small:prec              getrealprecision()
  ("realprecision",small):small:prec        setrealprecision($2, &prec)
  ("seriesprecision"):small                 precdl
@@ -16,4 +16,16 @@ Description:
  ("debugmem",small):small:parens           DEBUGMEM = $2
  ("debugfiles"):small                      DEBUGFILES
  ("debugfiles",small):small:parens         DEBUGFILES = $2
+Doc: returns
+ the default corresponding to keyword \var{key}. If \var{val} is present,
+ sets the default to \var{val} first (which is subject to string expansion
+ first). Typing \kbd{default()} (or \b{d}) yields the complete default
+ list as well as their current values.
+ See \secref{se:defaults} for a list of available defaults, and
+ \secref{se:meta} for some shortcut alternatives. Note that the shortcut
+ are meant for interactive use and usually display more information than
+ \kbd{default}.
+ 
+ \syn{gp_default}{key, val}, where \var{key} and \var{val} are
+ \kbd{char *}.
 

@@ -18,6 +18,7 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
        'I': closure whose value is ignored, like in for() loop
        'E': closure whose value is used, like in sum() loop
     3- Fl_pow renamed to Fl_powu [ exponent may not be negative ]
+    4- split usersch3.tex moving function documentation to src/functions/*
 
   Added
     1- library functions expu, adduu, subuu

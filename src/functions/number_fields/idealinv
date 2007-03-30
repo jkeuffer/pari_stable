@@ -2,9 +2,10 @@ Function: idealinv
 Section: number_fields
 C-Name: idealinv
 Prototype: GG
-Help: idealinv(nf,x,{flag=0}): inverse of the ideal x in the number field
- nf. If flag is omitted or set to 0, use the different. If flag is 1 do not
- use it
+Help: idealinv(nf,x): inverse of the ideal x in the number field nf.
 Description: 
  (gen, gen):gen	idealinv($1, $2)
-
+Doc: inverse of the ideal $x$ in the
+ number field $\var{nf}$. The result is the Hermite normal form of the
+ inverse of the ideal, together with the opposite of the Archimedean
+ information if it is given.

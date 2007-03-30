@@ -10,4 +10,32 @@ Description:
  (gen):gen	gissquare($1)
  (int, &int):bool	Z_issquarerem($1, &$2)
  (gen, &gen):gen	gissquarerem($1, &$2)
+Doc: true (1) if $x$ is a square, false (0)
+ if not. What ``being a square'' means depends on the type of $x$: all
+ \typ{COMPLEX} are squares, as well as all non-negative \typ{REAL}; for
+ exact types such as \typ{INT}, \typ{FRAC} and \typ{INTMOD}, squares are
+ numbers of the form $s^2$ with $s$ in $\Z$, $\Q$ and $\Z/N\Z$ respectively.
+ \bprog
+ ? issquare(3)          \\ as an integer
+ %1 = 0
+ ? issquare(3.)         \\ as a real number
+ %2 = 1
+ ? issquare(Mod(7, 8))  \\ in Z/8Z
+ %3 = 0
+ ? issquare( 5 + O(13^4) )  \\ in Q_13
+ %4 = 0
+ @eprog
+ If $n$ is given, a square root of $x$ is put into $n$.
+ \bprog
+ ? issquare(4, &n)
+ %1 = 1
+ ? n
+ %2 = 2
+ ? issquare([4, x^2], &n)
+ %3 = [1, 1]  \\ both are squares
+ ? n
+ %4 = [2, x]  \\ the square roots
+ @eprog
+ 
+ \syn{gissquarerem}{x,\&n}. Also available is \funs{gissquare}{x}.
 

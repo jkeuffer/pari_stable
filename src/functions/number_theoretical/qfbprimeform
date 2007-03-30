@@ -4,4 +4,14 @@ C-Name: primeform
 Prototype: GGp
 Help: qfbprimeform(x,p): returns the prime form of discriminant x, whose
  first coefficient is p
+Doc: prime binary quadratic form of discriminant
+ $x$ whose first coefficient is the prime number $p$. By abuse of notation,
+ $p = \pm 1$ is a valid special case which returns the unit form. Returns an
+ error if $x$ is not a quadratic residue mod $p$. In the case where $x>0$,
+ $p < 0$ is allowed, and the ``distance'' component of the form is set equal
+ to zero according to the current precision. (Note that negative definite
+ \typ{QFI} are not implemented.)
+ 
+ \syn{primeform}{x,p,\var{prec}}, where the third variable $\var{prec}$ is a
+ \kbd{long}, but is only taken into account when $x>0$.
 

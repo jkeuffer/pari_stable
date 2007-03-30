@@ -2,5 +2,8 @@ Function: polsym
 Section: polynomials
 C-Name: polsym
 Prototype: GL
-Help: polsym(x,n): vector of symmetric powers of the roots of x up to n
-
+Help: vector of symmetric powers of the roots of x up to n
+Doc: 
+ \subsecidx{polsym}$(x,n)$: creates the vector of the \idx{symmetric powers}
+ of the roots of the polynomial $x$ up to power $n$, using Newton's
+ formula.

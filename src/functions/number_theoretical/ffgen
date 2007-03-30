@@ -4,5 +4,11 @@ C-Name: ffgen
 Prototype: GDn
 Help: ffgen(P,{v}): return the generator g=X mod P(X) of the finite field
  defined by the polynomial P(X). If v is given, the variable name is used to
- display g, else the variable of the polynomial P is used. 
+ display g, else the variable of the polynomial P is used.
+Doc: return the generator $g=X \pmod{P(X)}$ of the
+ finite field defined by the polynomial $P$ (which must have \typ{INTMOD}
+ coefficients). If \kbd{v} is given, the variable name is used to display $g$,
+ else the variable of the polynomial $P$ is used.  
+ 
+ \syn{ffgen}{P,v}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
 

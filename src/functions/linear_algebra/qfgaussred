@@ -2,7 +2,13 @@ Function: qfgaussred
 Section: linear_algebra
 C-Name: sqred
 Prototype: G
-Help: qfgaussred(x): square reduction of the (symmetric) matrix x (returns a
+Help: qfgaussred(q): square reduction of the (symmetric) matrix q (returns a
  square matrix whose i-th diagonal term is the coefficient of the i-th square
  in which the coefficient of the i-th variable is 1)
-
+Doc: 
+ \idx{decomposition into squares} of the
+ quadratic form represented by the symmetric matrix $q$. The result is a
+ matrix whose diagonal entries are the coefficients of the squares, and the
+ non-diagonal entries represent the bilinear forms. More precisely, if
+ $(a_{ij})$ denotes the output, one has
+ $$ q(x) = \sum_i a_{ii} (x_i + \sum_{j>i} a_{ij} x_j)^2 $$

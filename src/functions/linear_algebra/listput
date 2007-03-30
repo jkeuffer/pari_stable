@@ -6,4 +6,17 @@ Help: listput(list,x,{n}): sets n-th element of list equal to x. If n is
  omitted or greater than the current list length, just append x
 Description: 
  (list, gen, small):gen	listput($1, $2, $3)
+Doc: 
+ sets the $n$-th element of the list
+ \var{list} (which must be of type \typ{LIST}) equal to $x$. If $n$ is omitted,
+ or greater than the list current effective length, just appends $x$. This and
+ \kbd{listinsert} are the only commands which enable you to increase a list's
+ effective length (as long as it remains under the maximal length specified at
+ the time of the \kbd{listcreate}).
+ 
+ If you want to put an element into an occupied cell, i.e.~if you don't want to
+ change the effective length, you can consider the list as a vector and use
+ the usual \kbd{list[n] = x} construct.
+ 
+ This function is useless in library mode.
 

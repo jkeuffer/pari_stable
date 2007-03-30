@@ -4,4 +4,8 @@ C-Name: algtobasis
 Prototype: GG
 Help: nfalgtobasis(nf,x): transforms the algebraic number x into a column
  vector on the integral basis nf.zk
-
+Doc: this is the inverse function of
+ \kbd{nfbasistoalg}. Given an object $x$ whose entries are expressed as
+ algebraic numbers in the number field $\var{nf}$, transforms it so that the
+ entries are expressed as a column vector on the integral basis
+ \kbd{\var{nf}.zk}.

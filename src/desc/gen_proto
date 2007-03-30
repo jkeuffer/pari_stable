@@ -14,7 +14,8 @@ $class=$ARGV[0];
   'linear_algebra'     =>  8 ,
   'sums'               =>  9 ,
   'graphic'            => 10 ,
-  'programming'        => 11 ,
+  'programming/control'        => 11 ,
+  'programming/specific'        => 11 ,
   'symbolic_operators' => 13 , 
   'member_functions'   => 14
 );

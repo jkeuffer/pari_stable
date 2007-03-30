@@ -4,4 +4,7 @@ C-Name: suppl
 Prototype: G
 Help: matsupplement(x): supplement the columns of the matrix x to an
  invertible matrix
-
+Doc: assuming that the columns of the matrix $x$
+ are linearly independent (if they are not, an error message is issued), finds
+ a square invertible matrix whose first columns are the columns of $x$,
+ i.e.~supplement the columns of $x$ to a basis of the whole space.

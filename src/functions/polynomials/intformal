@@ -2,6 +2,16 @@ Function: intformal
 Section: polynomials
 C-Name: integ
 Prototype: GDn
-Help: intformal(x,{y}): formal integration of x with respect to the main
- variable of y, or to the main variable of x if y is omitted
+Help: intformal(x,{v}): formal integration of x with respect to the main
+ variable of v, or to the main variable of x if v is omitted
+Doc: \idx{formal integration} of $x$ with
+ respect to the main variable if $v$ is omitted, with respect to the variable
+ $v$ otherwise. Since PARI does not know about ``abstract'' logarithms (they
+ are immediately evaluated, if only to a power series), logarithmic terms in
+ the result will yield an error. $x$ can be of any type. When $x$ is a
+ rational function, it is assumed that the base ring is an integral domain of
+ characteristic zero.
+ 
+ \syn{integ}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
+ as $-1$.
 

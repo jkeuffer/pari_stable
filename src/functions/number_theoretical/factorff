@@ -4,4 +4,10 @@ C-Name: factorff
 Prototype: GGG
 Help: factorff(x,p,a): factorization of the polynomial x in the finite field
  F_p[X]/a(X)F_p[X]
-
+Doc: factors the polynomial $x$ in the field
+ $\F_q$ defined by the irreducible polynomial $a$ over $\F_p$. The
+ coefficients of $x$ must be operation-compatible with $\Z/p\Z$. The result
+ is a two-column matrix: the first column contains the irreducible factors of
+ $x$, and the second their exponents. If all the coefficients of $x$ are in
+ $\F_p$, a much faster algorithm is applied, using the computation of
+ isomorphisms between finite fields.

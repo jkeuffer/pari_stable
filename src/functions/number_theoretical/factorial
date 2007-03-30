@@ -4,4 +4,11 @@ C-Name: mpfactr
 Prototype: Lp
 Help: factorial(x): factorial of x (x C-integer), the result being given as
  a real number
+Doc: factorial of $x$. The expression $x!$
+ gives a result which is an integer, while $\kbd{factorial}(x)$ gives a real
+ number.
+ 
+ \syn{mpfact}{x} for $x!$ and
+ \funs{mpfactr}{x,prec} for $\kbd{factorial}(x)$. $x$ must be a \kbd{long}
+ integer and not a PARI integer.
 

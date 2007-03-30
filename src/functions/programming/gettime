@@ -1,6 +1,11 @@
 Function: gettime
-Section: programming
+Section: programming/specific
 C-Name: gettime
 Prototype: l
 Help: gettime(): time (in milliseconds) since last call to gettime
+Doc: returns the time (in milliseconds) elapsed since
+ either the last call to \kbd{gettime}, or to the beginning of the containing
+ GP instruction (if inside \kbd{gp}), whichever came last.
+ 
+ \syn{gettime}{}, returns a C long.
 

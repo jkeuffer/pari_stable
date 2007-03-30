@@ -20,4 +20,137 @@ Description:
  (gen, 6):nf:prec	nfinit0($1, 6, prec)
  (gen, #small):void	$"incorrect flag in nfinit"
  (gen, small):gen:prec	nfinit0($1, $2, prec)
+Doc: \var{pol} being a non-constant,
+ preferably monic, irreducible polynomial in $\Z[X]$, initializes a
+ \emph{number field} structure (\kbd{nf}) associated to the field $K$ defined
+ by \var{pol}. As such, it's a technical object passed as the first argument
+ to most \kbd{nf}\var{xxx} functions, but it contains some information which
+ may be directly useful. Access to this information via \emph{member
+ functions} is preferred since the specific data organization specified below
+ may change in the future. Currently, \kbd{nf} is a row vector with 9
+ components:
+ 
+ $\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
+ 
+ $\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}, \kbd{\var{nf}.r1},
+ \kbd{\var{nf}.r2}), the number of real and complex places of $K$.
+ 
+ $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of $K$.
+ 
+ $\var{nf}[4]$ contains the index of $\var{nf}[1]$ (\kbd{\var{nf}.index}),
+ i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
+ 
+ $\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, $T2$, $T$,
+ $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
+ 
+ \quad\item $M$ is the $(r1+r2)\times n$ matrix whose columns represent
+ the numerical values of the conjugates of the elements of the integral
+ basis.
+ 
+ \quad\item $G$ is such that $T2 = {}^t G G$, where $T2$ is the quadratic
+ form $T_2(x) = \sum |\sigma(x)|^2$, $\sigma$ running over the embeddings of
+ $K$ into $\C$.
+ 
+ \quad\item The $T2$ component is deprecated and currently unused.
+ 
+ \quad\item $T$ is the $n\times n$ matrix whose coefficients are
+ $\text{Tr}(\omega_i\omega_j)$ where the $\omega_i$ are the elements of the
+ integral basis. Note also that $\det(T)$ is equal to the discriminant of the
+ field $K$.
+ 
+ \quad\item The columns of $MD$ (\kbd{\var{nf}.diff}) express a $\Z$-basis
+ of the different of $K$ on the integral basis.
+ 
+ \quad\item $TI$ is equal to $d(K)T^{-1}$, which has integral
+ coefficients. Note that, understood as as ideal, the matrix $T^{-1}$
+ generates the codifferent ideal.
+ 
+ \quad\item Finally, $MDI$ is a two-element representation (for faster
+ ideal product) of $d(K)$ times the codifferent ideal
+ (\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal). $MDI$
+ is only used in \tet{idealinv}.
+ 
+ $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
+ (\kbd{\var{nf}.roots}) of $\var{nf}[1]$ corresponding to the $r1+r2$
+ embeddings of the number field into $\C$ (the first $r1$ components are real,
+ the next $r2$ have positive imaginary part).
+ 
+ $\var{nf}[7]$ is an integral basis for $\Z_K$ (\kbd{\var{nf}.zk}) expressed
+ on the powers of~$\theta$. Its first element is guaranteed to be $1$. This
+ basis is LLL-reduced with respect to $T_2$ (strictly speaking, it is a
+ permutation of such a basis, due to the condition that the first element be
+ $1$).
+ 
+ $\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
+ basis in terms of the integral basis, and finally
+ 
+ $\var{nf}[9]$ is the $n\times n^2$ matrix giving the multiplication table
+ of the integral basis.
+ 
+ If a non monic polynomial is input, \kbd{nfinit} will transform it into a
+ monic one, then reduce it (see $\fl=3$). It is allowed, though not very
+ useful given the existence of \tet{nfnewprec}, to input a \kbd{nf} or a
+ \kbd{bnf} instead of a polynomial.
+ 
+ \bprog
+ ? nf = nfinit(x^3 - 12); \\ initialize number field Q[X] / (X^3 - 12)
+ ? nf.pol   \\ defining polynomial
+ %2 = x^3 - 12
+ ? nf.disc  \\ field discriminant
+ %3 = -972
+ ? nf.index \\ index of power basis order in maximal order
+ %4 = 2
+ ? nf.zk    \\ integer basis, lifted to Q[X]
+ %5 = [1, x, 1/2*x^2]
+ ? nf.sign  \\ signature
+ %6 = [1, 1]
+ ? factor(abs(nf.disc ))  \\ determines ramified primes
+ %7 =
+ [2 2]
+ 
+ [3 5]
+ ? idealfactor(nf, 2)
+ %8 =
+ [[2, [0, 0, -1]~, 3, 1, [0, 1, 0]~] 3]  \\ @com $\goth{P}_2^3$
+ @eprog
+ 
+ In case \var{pol} has a huge discriminant which is difficult to factor,
+ the special input format $[\var{pol},B]$ is also accepted where \var{pol} is a
+ polynomial as above and $B$ is the integer basis, as would be computed by
+ \tet{nfbasis}. This is useful if the integer basis is known in advance,
+ or was computed conditionally.
+ \bprog
+ ? pol = polcompositum(x^5 - 101, polcyclo(7))[1];
+ ? B = nfbasis(pol, 1);   \\ faster than nfbasis(pol), but conditional
+ ? nf = nfinit( [pol, B] );
+ ? factor( abs(nf.disc) )
+ [5 18]
+ 
+ [7 25]
+ 
+ [101 24]
+ @eprog
+ \kbd{B} is conditional when its discriminant, which is \kbd{nf.disc}, can't be
+ factored. In this example, the above factorization proves the correctness of
+ the computation.
+ \medskip
+ 
+ If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
+ number field, which is as simple as can easily be found using the \kbd{polred}
+ algorithm, and all the subsequent computations are done using this new
+ polynomial. In particular, the first component of the result is the modified
+ polynomial.
+ 
+ If $\fl=3$, does a \kbd{polred} as in case 2, but outputs
+ $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as before and
+ $\kbd{Mod}(a,P)=\kbd{Mod}(x,\var{pol})$ gives the change of
+ variables. This is implicit when \var{pol} is not monic: first a linear change
+ of variables is performed, to get a monic polynomial, then a \kbd{polred}
+ reduction.
+ 
+ If $\fl=4$, as $2$ but uses a partial \kbd{polred}.
+ 
+ If $\fl=5$, as $3$ using a partial \kbd{polred}.
+ 
+ \syn{nfinit0}{x,\fl,\var{prec}}.
 

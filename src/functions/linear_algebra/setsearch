@@ -6,4 +6,13 @@ Help: setsearch(x,y,{flag=0}): looks if y belongs to the set x. If flag is 0
  or omitted, returns 0 if it is not, otherwise returns the index j such that
  y==x[j]. If flag is non-zero, return 0 if y belongs to x, otherwise the
  index j where it should be inserted
+Doc: searches if $y$ belongs to the set
+ $x$. If it does and $\fl$ is zero or omitted, returns the index $j$ such that
+ $x[j]=y$, otherwise returns 0. If $\fl$ is non-zero returns the index $j$
+ where $y$ should be inserted, and $0$ if it already belongs to $x$ (this is
+ meant to be used in conjunction with \kbd{listinsert}).
+ 
+ This function works also if $x$ is a \emph{sorted} list (see \kbd{listsort}).
+ 
+ \syn{setsearch}{x,y,\fl} which returns a \kbd{long} integer.
 

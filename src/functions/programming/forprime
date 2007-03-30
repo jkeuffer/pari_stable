@@ -1,10 +1,3 @@
-Function: forprime
-Section: programming
-C-Name: forprime
-Prototype: vV=GGI
-Help: forprime(X=a,b,seq): the sequence is evaluated, X running over the
- primes between a and b
-
 Function: _diffptr
 Class: gp2c_internal
 Help: Table of difference of primes.
@@ -16,4 +9,30 @@ Class: gp2c_internal
 Help: Compute the next prime from the diffptr table.
 Description:
  (*small,*bptr):void  NEXT_PRIME_VIADIFF($1, $2)
+
+
+Function: forprime
+Section: programming/control
+C-Name: forprime
+Prototype: vV=GGI
+Help: forprime(X=a,b,seq): the sequence is evaluated, X running over the
+ primes between a and b
+Doc: evaluates \var{seq},
+ where the formal variable $X$ ranges over the prime numbers between $a$ to
+ $b$ (including $a$ and $b$ if they are prime). More precisely, the value of
+ $X$ is incremented to the smallest prime strictly larger than $X$ at the end
+ of each iteration. Nothing is done if $a>b$. Note that $a$ and $b$ must be in
+ $\R$.
+ 
+ \bprog
+ ? { forprime(p = 2, 12,
+ print(p);
+ if (p == 3, p = 6);
+ )
+ }
+ 2
+ 3
+ 7
+ 11
+ @eprog
 

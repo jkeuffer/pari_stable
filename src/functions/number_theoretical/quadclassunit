@@ -6,4 +6,45 @@ Help: quadclassunit(D,{flag=0},{tech=[]}): compute the structure of the
  class group and the regulator of the quadratic field of discriminant D. If
  flag is non-null (and D>0), compute the narrow class group. See manual for
  the optional technical parameters
-
+Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
+ class group of a quadratic order of discriminant $D$.
+ 
+ This function should be used instead of \tet{qfbclassno} or \tet{quadregula}
+ when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted. It
+ is a special case of \tet{bnfinit}, which is slower, but more robust.
+  
+ If $\fl$ is non-zero \emph{and} $D>0$, computes the narrow class group and
+ regulator, instead of the ordinary (or wide) ones. In the current version
+ \vers, this does not work at all: use the general function \tet{bnfnarrow}.
+  
+ Optional parameter \var{tech} is a row vector of the form $[c_1, c_2]$,
+ where $c_1 \leq c_2$ are positive real numbers which control the execution
+ time and the stack size. For a given $c_1$, set $c_2 = c_1$ to get maximum
+ speed. To get a rigorous result under \idx{GRH}, you must take $c_2\geq 6$.
+ Reasonable values for $c_1$ are between $0.1$ and $2$. More precisely, the
+ algorithm will \emph{assume} that prime ideals of norm less than $c_2 (\log
+ |D|)^2$ generate the class group, but the bulk of the work is done with
+ prime ideals of norm less than $c_1 (\log |D|)^2$. A larger $c_1$ means that
+ relations are easier to find, but more relations are needed and the linear
+ algebra will be harder. The default is $c_1 = c_2 = 0.2$, so the result is
+ \emph{not} rigorously proven.
+  
+ The result is a vector $v$ with 3 components if $D<0$, and $4$ otherwise.
+ The correspond respectively to
+  
+ \item $v[1]$: the class number
+  
+ \item $v[2]$: a vector giving the structure of the class group as a product
+ of cyclic groups;
+  
+ \item $v[3]$: a vector giving generators of those cyclic groups (as binary
+ quadratic forms).
+  
+ \item $v[4]$: (omitted if $D < 0$) the regulator, computed to an accuracy
+ which is the maximum of an internal accuracy determined by the program and
+ the current default (note that once the regulator is known to a small
+ accuracy it is trivial to compute it to very high accuracy, see the
+ tutorial).
+  
+ \syn{quadclassunit0}{D,\fl,tech}. Also available are
+ \funs{buchimag}{D,c_1,c_2} and \funs{buchreal}{D,\fl,c_1,c_2}.

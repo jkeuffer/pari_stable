@@ -6,4 +6,21 @@ Help: idealprimedec(nf,p): prime ideal decomposition of the prime number p
  in the number field nf as a vector of 5 component vectors [p,a,e,f,b]
  representing the prime ideals pZ_K+a. Z_K, e,f as usual, a as vector of
  components on the integral basis, b Lenstra's constant
-
+Doc: computes the prime ideal
+ decomposition of the prime number $p$ in the number field $\var{nf}$. $p$
+ must be a (positive) prime number. Note that the fact that $p$ is prime is
+ not checked, so if a non-prime $p$ is given the result is undefined.
+ 
+ The result is a vector of \tev{pr} structures, each representing one of the
+ prime ideals above $p$ in the number field $\var{nf}$. The representation
+ $P=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
+ equal to $p\Z_K+\alpha\Z_K$ where $\Z_K$ is the ring of integers of the field
+ and $\alpha=\sum_i a_i\omega_i$ where the $\omega_i$ form the integral basis
+ \kbd{\var{nf}.zk}, $e$ is the ramification index, $f$ is the residual index,
+ and $b$ represents a $\beta\in\Z_K$ such that $P^{-1}=\Z_K+\beta/p\Z_K$ which
+ will be useful for computing valuations, but which the user can ignore. The
+ number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
+ ideal (this is automatic if $e>1$).
+ 
+ The components of \kbd{P} should be accessed by member functions: \kbd{P.p},
+ \kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector $[p,a]$).

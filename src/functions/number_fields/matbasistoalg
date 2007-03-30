@@ -4,4 +4,9 @@ C-Name: matbasistoalg
 Prototype: GG
 Help: matbasistoalg(nf,x): nfbasistoalg applied to every element of the
  matrix x
-
+Doc: $\var{nf}$ being a number field in
+ \kbd{nfinit} format, and $x$ a matrix whose coefficients are expressed as
+ column vectors on the integral basis of $\var{nf}$, transforms this matrix
+ into a matrix whose coefficients are algebraic numbers expressed as
+ polmods. This is the same as applying \kbd{nfbasistoalg} to each entry, but
+ it would be dangerous to use the same name.

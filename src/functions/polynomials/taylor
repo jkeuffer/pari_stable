@@ -4,4 +4,11 @@ C-Name: tayl
 Prototype: GnP
 Help: taylor(x,y): taylor expansion of x with respect to the main variable
  of y
+Doc: Taylor expansion around $0$ of $x$ with respect to
+ the simple variable $y$. $x$ can be of any reasonable type, for example a
+ rational function. The number of terms of the expansion is transparent to the
+ user in GP, but must be given as a second argument in library mode.
+ 
+ \syn{tayl}{x,y,n}, where the \kbd{long} integer $n$ is the desired number of
+ terms in the expansion.
 

@@ -2,8 +2,31 @@ Function: contfrac
 Section: number_theoretical
 C-Name: contfrac0
 Prototype: GDGD0,L,
-Help: contfrac(x,{b},{lmax}): continued fraction expansion of x (x
- rational,real or rational function). b and lmax are both optional, where b
- is the vector of numerators of the continued fraction, and lmax is a bound
+Help: contfrac(x,{b},{nmax}): continued fraction expansion of x (x
+ rational,real or rational function). b and nmax are both optional, where b
+ is the vector of numerators of the continued fraction, and nmax is a bound
  for the number of terms in the continued fraction expansion
+Doc: creates the row vector whose
+ components are the partial quotients of the \idx{continued fraction}
+ expansion of $x$. That is a result $[a_0,\dots,a_n]$ means that $x \approx
+ a_0+1/(a_1+\dots+1/a_n\dots)$. The output is normalized so that $a_n \neq 1$
+ (unless we also have $n = 0$).
+ 
+ The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
+ number, the expansion stops at the last significant partial quotient if
+ $nmax$ is omitted. $x$ can also be a rational function or a power series.
+ 
+ If a vector $b$ is supplied, the numerators will be equal to the coefficients
+ of $b$ (instead of all equal to $1$ as above). The length of the result is
+ then equal to the length of $b$, unless a partial remainder is encountered
+ which is equal to zero, in which case the expansion stops. In the case of
+ real numbers, the stopping criterion is thus different from the one mentioned
+ above since, if $b$ is too long, some partial quotients may not be
+ significant.
+ 
+ If $b$ is an integer, the command is understood as \kbd{contfrac($x,nmax$)}.
+ 
+ \syn{contfrac0}{x,b,nmax}. Also available are
+ \funs{gboundcf}{x,nmax}, \funs{gcf}{x}, or \funs{gcf2}{b,x}, where $nmax$
+ is a C integer.
 

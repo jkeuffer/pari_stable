@@ -9,4 +9,32 @@ Help: qfbred(x,{flag=0},{D},{isqrtD},{sqrtD}): reduction of the binary
  distance hereafter are meaningless. flag can be any of 0: default, uses
  Shanks's distance function d; 1: use d, do a single reduction step; 2: do
  not use d; 3: do not use d, single reduction step.
+Doc: reduces the binary quadratic form $x$ (updating Shanks's distance function
+ if $x$ is indefinite). The binary digits of $\fl$ are toggles meaning
+ 
+ \quad 1: perform a single \idx{reduction} step
+ 
+ \quad 2: don't update \idx{Shanks}'s distance
+ 
+ $D$, \var{isqrtD}, \var{sqrtD}, if present, supply the values of the
+ discriminant, $\floor{\sqrt{D}}$, and $\sqrt{D}$ respectively
+ (no checking is done of these facts). If $D<0$ these values are useless,
+ and all references to Shanks's distance are irrelevant.
+ 
+ \syn{qfbred0}{x,\fl,D,\var{isqrtD},\var{sqrtD}}. Use \kbd{NULL}
+ to omit any of $D$, \var{isqrtD}, \var{sqrtD}.
+ 
+ \noindent Also available are
+ 
+ \funs{redimag}{x} (= \funs{qfbred}{x} where $x$ is definite),
+ 
+ \noindent and for indefinite forms:
+ 
+ \funs{redreal}{x} (= \funs{qfbred}{x}),
+ 
+ \funs{rhoreal}{x} (= \funs{qfbred}{x,1}),
+ 
+ \funs{redrealnod}{x,sq} (= \funs{qfbred}{x,2,,isqrtD}),
+ 
+ \funs{rhorealnod}{x,sq} (= \funs{qfbred}{x,3,,isqrtD}).
 

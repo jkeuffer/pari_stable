@@ -15,4 +15,41 @@ Description:
  (vec, , 2):vec	lexsort($1)
  (vec, , small):vec	vecsort0($1, NULL, $3)
  (vec, gen, small):vec	vecsort0($1, $2, $3)
+Doc: sorts the vector $x$ in ascending
+ order, using a mergesort method. $x$ must be a vector, and its components
+ integers, reals, or fractions.
+ 
+ If $k$ is present and is an integer, sorts according to the value of the
+ $k$-th subcomponents of the components of~$x$. Note that mergesort is
+ stable, hence is the initial ordering of "equal" entries (with respect to
+ the sorting criterion) is not changed.
+ 
+ $k$ can also be a vector, in which case the sorting is done lexicographically
+ according to the components listed in the vector $k$. For example, if
+ $k=[2,1,3]$, sorting will be done with respect to the second component, and
+ when these are equal, with respect to the first, and when these are equal,
+ with respect to the third.
+ 
+ \noindent The binary digits of \fl\ mean:
+ 
+ \item 1: indirect sorting of the vector $x$, i.e.~if $x$ is an
+ $n$-component vector, returns a permutation of $[1,2,\dots,n]$ which
+ applied to the components of $x$ sorts $x$ in increasing order.
+ For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
+ \kbd{vecsort(x)}.
+ 
+ \item 2: sorts $x$ by ascending lexicographic order (as per the
+ \kbd{lex} comparison function).
+ 
+ \item 4: use descending instead of ascending order.
+ 
+ \syn{vecsort0}{x,k,flag}. To omit $k$, use \kbd{NULL} instead. You can also
+ use the simpler functions
+ 
+ \funs{sort}{x} (= \funs{vecsort0}{x,\kbd{NULL},0}).
+ 
+ \funs{indexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},1}). This function
+ returns a \typ{VECSMALL} $v$, where $v[1]\dots v[n]$ contain the indices.
+ 
+ \funs{lexsort}{x} (= \funs{vecsort0}{x,\kbd{NULL},2}).
 

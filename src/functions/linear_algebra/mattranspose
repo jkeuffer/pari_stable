@@ -3,4 +3,5 @@ Section: linear_algebra
 C-Name: gtrans
 Prototype: G
 Help: mattranspose(x): x~=transpose of x
-
+Doc: transpose of $x$ (also $x\til$).
+ This has an effect only on vectors and matrices.

@@ -4,4 +4,14 @@ C-Name: rnfidealreltoabs
 Prototype: GG
 Help: rnfidealreltoabs(rnf,x): transforms the ideal x from relative to
  absolute representation
-
+Doc: $\var{rnf}$ being a relative
+ number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
+ relative ideal, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in
+ the form of a $\Z$-basis, given by a vector of polynomials (modulo
+ \kbd{rnf.pol}).
+ The following routine might be useful:
+ \bprog
+ \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form
+ \\ associated to nf = nfinit( rnf.pol );
+ idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
+ @eprog

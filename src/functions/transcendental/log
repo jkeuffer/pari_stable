@@ -5,4 +5,18 @@ Prototype: Gp
 Help: log(x): natural logarithm of x.
 Description: 
  (gen):gen:prec	glog($1, prec)
+Doc: principal branch of the natural logarithm of
+ $x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
+ (with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,
+ the algorithm uses the formula
+ $$\log(x) \approx {\pi\over 2\text{agm}(1, 4/s)} - m \log 2, $$
+ if $s = x 2^m$ is large enough. (The result is exact to $B$ bits provided
+ $s > 2^{B/2}$.) At low accuracies, the series expansion near $1$ is used.
+ 
+ $p$-adic arguments are also accepted for $x$, with the convention that
+ $\log(p)=0$. Hence in particular $\exp(\log(x))/x$ is not in general equal to
+ 1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$) times a power of
+ $p$.
+ 
+ \syn{glog}{x,\var{prec}}.
 

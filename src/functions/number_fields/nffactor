@@ -3,4 +3,17 @@ Section: number_fields
 C-Name: nffactor
 Prototype: GG
 Help: nffactor(nf,x): factor polynomial x in number field nf
-
+Doc: factorization of the univariate
+ polynomial $x$ over the number field $\var{nf}$ given by \kbd{nfinit}. $x$
+ has coefficients in $\var{nf}$ (i.e.~either scalar, polmod, polynomial or
+ column vector). The main variable of $\var{nf}$ must be of \emph{lower}
+ priority than that of $x$ (see \secref{se:priority}). However if
+ the polynomial defining the number field occurs explicitly  in the
+ coefficients of $x$ (as modulus of a \typ{POLMOD}), its main variable must be
+ \emph{the same} as the main variable of $x$. For example,
+ \bprog
+ ? nf = nfinit(y^2 + 1);
+ ? nffactor(nf, x^2 + y); \\@com OK
+ ? nffactor(nf, x^2 + Mod(y, y^2+1)); \\ @com OK
+ ? nffactor(nf, x^2 + Mod(z, z^2+1)); \\ @com WRONG
+ @eprog

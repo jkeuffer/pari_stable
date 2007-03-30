@@ -4,4 +4,8 @@ C-Name: intersect
 Prototype: GG
 Help: matintersect(x,y): intersection of the vector spaces whose bases are
  the columns of x and y
-
+Doc: $x$ and $y$ being two matrices with the same
+ number of rows each of whose columns are independent, finds a basis of the
+ $\Q$-vector space equal to the intersection of the spaces spanned by the
+ columns of $x$ and $y$ respectively. See also the function
+ \tet{idealintersect}, which does the same for free $\Z$-modules.

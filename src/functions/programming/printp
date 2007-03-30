@@ -1,6 +1,8 @@
 Function: printp
-Section: programming
+Section: programming/specific
 C-Name: printp
 Prototype: vs*
-Help: printp(a): outputs a (in beautified format) ending with newline
-
+Help: printp({str}*): outputs its string arguments  (in beautified format)
+  ending with newline
+Doc: outputs its (string) arguments in
+ prettyprint (beautified) format, ending with a newline.

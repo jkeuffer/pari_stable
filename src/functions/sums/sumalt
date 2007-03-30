@@ -5,4 +5,38 @@ Prototype: V=GED0,L,p
 Help: sumalt(X=a,expr,{flag=0}): Cohen-Villegas-Zagier's acceleration of
  alternating series expr, X starting at a. flag is optional, and can be 0:
  default, or 1: uses a slightly different method using Zagier's polynomials
+Doc: numerical summation of the
+ series \var{expr}, which should be an \idx{alternating series}, the formal
+ variable $X$ starting at $a$. Use an algorithm of F.~Villegas as modified by
+ D.~Zagier (improves on \idx{Euler}-\idx{Van Wijngaarden} method).
+ 
+ If $\fl=1$, use a variant with slightly different polynomials. Sometimes
+ faster.
+ 
+ Divergent alternating series can sometimes be summed by this method, as well
+ as series which are not exactly alternating (see for example
+ \secref{se:user_defined}). If the series already converges geometrically,
+ \tet{suminf} is often a better choice:
+ \bprog
+ ? \p28
+ ? sumalt(i = 1, -(-1)^i / i)  - log(2)
+ time = 0 ms.
+ %1 = -2.524354897 E-29
+ ? suminf(i = 1, -(-1)^i / i)
+ *** suminf: user interrupt after 10min, 20,100 ms.
+ ? \p1000
+ ? sumalt(i = 1, -(-1)^i / i)  - log(2)
+ time = 90 ms.
+ %2 = 4.459597722 E-1002
+ 
+ ? sumalt(i = 0, (-1)^i / i!) - exp(-1)
+ time = 670 ms.
+ %3 = -4.03698781490633483156497361352190615794353338591897830587 E-944
+ ? suminf(i = 0, (-1)^i / i!) - exp(-1)
+ time = 110 ms.
+ %4 = -8.39147638 E-1000   \\ @com faster and more accurate
+ @eprog
+ 
+ \synt{sumalt}{void *E, GEN (*eval)(GEN,void*),GEN a,long prec}. Also
+ available is \tet{sumalt2} with the same arguments ($\fl = 1$).
 

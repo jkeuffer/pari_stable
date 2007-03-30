@@ -14,4 +14,4 @@ Description:
  (small, gen):gen	gminsg($1, $2)
  (gen, small):gen	gmings($1, $2)
  (gen, gen):gen	gmin($1, $2)
-
+Doc: creates the minimum of $x$ and $y$ when they can be compared.

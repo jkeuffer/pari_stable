@@ -2,7 +2,19 @@ Function: factorpadic
 Section: polynomials
 C-Name: factorpadic0
 Prototype: GGLD0,L,
-Help: factorpadic(x,p,r,{flag=0}): p-adic factorization of the polynomial x
+Help: factorpadic(pol,p,r,{flag=0}): p-adic factorization of the polynomial pol
  to precision r. flag is optional and may be set to 0 (use round 4) or 1 (use
  Buchmann-Lenstra)
+Doc: $p$-adic factorization
+ of the polynomial \var{pol} to precision $r$, the result being a
+ two-column matrix as in \kbd{factor}. The factors are normalized so that
+ their leading coefficient is a power of $p$. $r$ must be strictly larger than
+ the $p$-adic valuation of the discriminant of \var{pol} for the result to
+ make any sense. The method used is a modified version of the \idx{round 4}
+ algorithm of \idx{Zassenhaus}.
+ 
+ If $\fl=1$, use an algorithm due to \idx{Buchmann} and \idx{Lenstra}, which is
+ usually less efficient.
+ 
+ \syn{factorpadic4}{\var{pol},p,r}, where $r$ is a \kbd{long} integer.
 

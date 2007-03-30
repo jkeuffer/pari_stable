@@ -2,11 +2,40 @@ Function: nfbasis
 Section: number_fields
 C-Name: nfbasis0
 Prototype: GD0,L,DG
-Help: nfbasis(x,{flag=0},{p}): integral basis of the field Q[a], where a is
+Help: nfbasis(x,{flag=0},{fa}): integral basis of the field Q[a], where a is
  a root of the polynomial x, using the round 4 algorithm. Second and third
  args are optional. Binary digits of flag mean 1: assume that no square of a
  prime>primelimit divides the discriminant of x, 2: use round 2 algorithm
- instead. If present, p provides the matrix of a partial factorization of the
+ instead. If present, fa provides the matrix of a partial factorization of the
  discriminant of x, useful if one wants only an order maximal at certain
  primes only
+Doc: \idx{integral basis} of the number
+ field defined by the irreducible, preferably monic, polynomial $x$, using a
+ modified version of the \idx{round 4} algorithm by default, due to David
+ \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary digits
+ of $\fl$ have the following meaning:
+ 
+ 1: assume that no square of a prime greater than the default \kbd{primelimit}
+ divides the discriminant of $x$, i.e.~that the index of $x$ has only small
+ prime divisors.
+ 
+ 2: use \idx{round 2} algorithm. For small degrees and coefficient size, this
+ is sometimes a little faster. (This program is the translation into C of a
+ program written by David \idx{Ford} in Algeb.)
+ 
+ Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
+ an order which will be maximal at all the small primes.
+ 
+ If \var{fa} is present, we assume (without checking!) that it is the two-column
+ matrix of the factorization of the discriminant of the polynomial $x$. Note
+ that it does \emph{not} have to be a complete factorization. This is
+ especially useful if only a local integral basis for some small set of places
+ is desired: only factors with exponents greater or equal to 2 will be
+ considered.
+ 
+ \syn{nfbasis0}{x,\fl,\var{fa}}. An extended version is
+ \funs{nfbasis}{x,\&d,\fl,\var{fa}}, where $d$ receives the discriminant of the
+ number field (\emph{not} of the polynomial $x$), and an omitted \var{fa} is input
+ as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
+ \funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,\var{fa},\&d}.
 

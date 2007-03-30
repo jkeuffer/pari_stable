@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+use PARI::822;
+
+PARI::822::read(\%funcs, "pari.desc");
+
+open (FILE, "../../doc/usersFUN.tex") || die;
+while (<FILE>)
+{
+  if (/^% *SECTION *: *(.*) */)
+  {
+    my ($sec) = $1;
+    my @funs = grep { $funcs{$_}->{Section} eq $sec && $funcs{$_}->{Doc}}
+                    keys %funcs;
+    for (sort @funs) {
+      my ($fun) = $funcs{$_};
+      my ($vars)  = $fun->{Help};
+      my ($doc)   = $fun->{Doc};
+      my ($Cname) = $fun->{'C-Name'};
+      $vars =~ s/^[^(]*\((.*)\) *:.*/$1/s;
+      my ($v) = $vars;
+      $v =~ s/([{}&])/\\$1/g;
+      $v =~ s/\^(\d+)/^{$1}/g;
+      $v =~ s/\[\]/[\\,]/g;
+      $v =~ s/(\w\w+)/\\var{$1}/g;
+      $v =~ s/\^([a-z])/\\hbox{\\kbd{\\pow}}$1/g;
+      $v =~ s/\\var{flag}/\\fl/g;
+
+      $vars =~ s/\bflag\b/\\fl/g;
+      $vars =~ s/[{}]//g;
+      $vars =~ s/=[^,}]//g;
+      if ($doc !~ /\\syn\w*{/ && $sec !~ /programming/) {
+        $doc .= "\n\n\\syn{$Cname}{$vars}.\n"
+      }
+      print "\n" . "\\subsecidx{$_}\$($v)\$:"
+                 . "\\label{se:$_} $doc\n";
+    }
+    next;
+  }
+  print;
+}

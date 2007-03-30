@@ -6,4 +6,14 @@ Help: coredisc(n,{flag=0}): discriminant of the quadratic field Q(sqrt(n)).
  If (optional) flag is non-null, output a two-component row vector [d,f],
  where d is the discriminant of the quadratic field Q(sqrt(n)) and n=df^2. f
  may be a half integer
+Doc: if $n$ is a non-zero integer written as
+ $n=df^2$ with $d$ fundamental discriminant (including 1), returns $d$. If
+ $\fl$ is non-zero, returns the two-element row vector $[d,f]$. Note that if
+ $n$ is not congruent to 0 or 1 modulo 4, $f$ will be a half integer and not
+ an integer.
+ 
+ \syn{coredisc0}{n,\fl}.
+ Also available are
+ \funs{coredisc}{n} (= \funs{coredisc}{n,0}) and
+ \funs{coredisc2}{n} (= \funs{coredisc}{n,1}).
 

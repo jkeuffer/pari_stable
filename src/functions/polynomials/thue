@@ -6,4 +6,33 @@ Help: thue(tnf,a,{sol}): solve the equation P(x,y)=a, where tnf was created
  with thueinit(P), and sol, if present, contains the solutions of Norm(x)=a
  modulo units in the number field defined by P. If tnf was computed without
  assuming GRH (flag 1 in thueinit), the result is unconditional
+Doc: solves the equation
+ $P(x,y)=a$ in integers $x$ and $y$, where \var{tnf} was created with
+ $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
+ $\Norm(x)=a$ modulo units of positive norm in the number field
+ defined by $P$ (as computed by \kbd{bnfisintnorm}). If the
+ result is conditional (on the GRH or some heuristic strengthening),
+ a Warning is printed. Otherwise, the result is unconditional, barring bugs.
+ For instance, here's how to solve the Thue equation $x^{13} - 5y^{13} = - 4$:
+ 
+ \bprog
+ ? tnf = thueinit(x^13 - 5);
+ ? thue(tnf, -4)
+ %1 = [[1, 1]]
+ @eprog
+ Hence, the only solution is $x = 1$, $y = 1$ and the result is
+ unconditional. On the other hand:
+ 
+ \bprog
+ ? tnf = thueinit(x^3-2*x^2+3*x-17);
+ ? thue(tnf, -15)
+ *** thue: Warning: Non trivial conditional class group.
+ *** May miss solutions of the norm equation.
+ %2 = [[1, 1]]
+ @eprog
+ This time the result is conditional. All results computed using this tnf
+ are likewise conditional, \emph{except} for a right-hand side of $\pm 1$.
+ 
+ \syn{thue}{\var{tnf},a,\var{sol}}, where an omitted \var{sol} is coded
+ as \kbd{NULL}.
 

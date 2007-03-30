@@ -1,11 +1,3 @@
-Function: error
-Section: programming
-C-Name: error0
-Prototype: vs*
-Help: error("msg"): abort script with error message msg
-Description:
- (?gen,...):void  pari_err(talker, "${2 format_string}"${2 format_args})
-
 Function: _err_primes
 Class: gp2c_internal
 Description:
@@ -15,4 +7,18 @@ Function: _err_type
 Class: gp2c_internal
 Description:
  (str):void  pari_err(typeer, $1)
+
+Function: error
+Section: programming/specific
+C-Name: error0
+Prototype: vs*
+Help: error({str}*): abort script with error message str
+Description: 
+ (?gen,...):void  pari_err(talker, "${2 format_string}"${2 format_args})
+Doc: outputs its argument list (each of
+ them interpreted as a string), then interrupts the running \kbd{gp} program,
+ returning to the input prompt. For instance
+ \bprog
+ error("n = ", n, " is not squarefree !")
+ @eprog\noindent
 

@@ -6,4 +6,20 @@ Help: bnrconductor(a1,{a2},{a3},{flag=0}): conductor f of the subfield of
  the ray class field given by a1,a2,a3 (see bnrdisc). flag is optional and
  can be 0: default, 1: returns [f, Cl_f, H], H subgroup of the ray class
  group modulo f defining the extension, 2: returns [f, bnr(f), H]
+Doc: conductor $f$ of
+ the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
+ \kbd{bnr} at the beginning of this section).
+ 
+ If $\fl = 0$, returns $f$.
+ 
+ If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group
+ modulo $f$, as a finite abelian group; finally $H$ is the subgroup of $Cl_f$
+ defining the extension.
+ 
+ If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
+ replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.
+ 
+ \syn{conductor}{\var{bnr}, \var{subgroup}, \fl}, where an omitted subgroup
+ (trivial subgroup, i.e.~ray class field) is input as \kbd{NULL}, and $\fl$ is
+ a C long.
 

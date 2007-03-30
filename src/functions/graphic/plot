@@ -3,7 +3,13 @@ Class: highlevel
 Section: graphic
 C-Name: plot
 Prototype: vV=GGEDGDGp
-Help: plot(X=a,b,expr,{ymin},{ymax}): crude plot of expression expr, X goes
- from a to b, with Y ranging from ymin to ymax. If ymin (resp. ymax) is not
+Help: plot(X=a,b,expr,{Ymin},{Ymax}): crude plot of expression expr, X goes
+ from a to b, with Y ranging from Ymin to Ymax. If Ymin (resp. Ymax) is not
  given, the minima (resp. the maxima) of the expression is used instead
+Doc: 
+ crude
+ ASCII plot of the function represented by expression \var{expr} from
+ $a$ to $b$, with \var{Y} ranging from \var{Ymin} to \var{Ymax}. If
+ \var{Ymin} (resp. \var{Ymax}) is not given, the minima (resp. the
+ maxima) of the computed values of the expression is used instead.
 

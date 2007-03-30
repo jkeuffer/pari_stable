@@ -5,4 +5,14 @@ Prototype: GGG
 Help: nfgaloisapply(nf,aut,x): Apply the Galois automorphism sigma
  (polynomial or polymod) to the object x (element or ideal) in the number
  field nf
-
+Doc: $\var{nf}$ being a
+ number field as output by \kbd{nfinit}, and \var{aut} being a \idx{Galois}
+ automorphism of $\var{nf}$ expressed either as a polynomial or a polmod
+ (such automorphisms being found using for example one of the variants of
+ \kbd{nfgaloisconj}), computes the action of the automorphism \var{aut} on
+ the object $x$ in the number field. $x$ can be an element (scalar, polmod,
+ polynomial or column vector) of the number field, an ideal (either given by
+ $\Z_K$-generators or by a $\Z$-basis), a prime ideal (given as a 5-element
+ row vector) or an idele (given as a 2-element row vector). Because of
+ possible confusion with elements and ideals, other vector or matrix
+ arguments are forbidden.

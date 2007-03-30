@@ -7,4 +7,12 @@ Help: bitxor(x,y): bitwise "exclusive or" of two integers x and y.
 Description: 
  (small, small):small:parens	$(1)^$(2)
  (gen, gen):int	gbitxor($1, $2)
+Doc: 
+ bitwise (exclusive) \tet{or}
+ \sidx{bitwise exclusive or}of two integers $x$ and $y$, that is the integer
+ $$\sum (x_i~\kbd{xor}~y_i) 2^i$$
+ 
+ See \secref{se:bitand} for the behaviour for negative arguments.
+ 
+ \syn{gbitxor}{x,y}.
 

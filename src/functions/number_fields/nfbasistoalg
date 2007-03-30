@@ -4,4 +4,7 @@ C-Name: basistoalg
 Prototype: GG
 Help: nfbasistoalg(nf,x): transforms the column vector x on the integral
  basis into an algebraic number
-
+Doc: this is the inverse function of
+ \kbd{nfalgtobasis}. Given an object $x$ whose entries are expressed on the
+ integral basis \kbd{\var{nf}.zk}, transforms it into an object whose entries
+ are algebraic numbers (i.e.~polmods).

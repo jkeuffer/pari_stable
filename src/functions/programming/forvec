@@ -1,12 +1,3 @@
-Function: forvec
-Section: programming
-C-Name: forvec
-Prototype: vV=GID0,L,
-Help: forvec(x=v,seq,{flag=0}): v being a vector of two-component vectors of
- length n, the sequence is evaluated with x[i] going from v[i][1] to v[i][2]
- for i=n,..,1 if flag is zero or omitted. If flag = 1 (resp. flag = 2),
- restrict to increasing (resp. strictly increasing) sequences
-
 Function: _forvec_start
 Class: gp2c_internal
 Help: Initializes parameters for forvec_start.
@@ -18,4 +9,21 @@ Class: gp2c_internal
 Help: Call a function with proto GG on two GENs
 Description:
  (func_GG, gen, gen):gen         $(1)($2, $3)
+
+Function: forvec
+Section: programming/control
+C-Name: forvec
+Prototype: vV=GID0,L,
+Help: forvec(X=v,seq,{flag=0}): v being a vector of two-component vectors of
+ length n, the sequence is evaluated with X[i] going from v[i][1] to v[i][2]
+ for i=n,..,1 if flag is zero or omitted. If flag = 1 (resp. flag = 2),
+ restrict to increasing (resp. strictly increasing) sequences
+Doc: Let $v$ be an $n$-component
+ vector (where $n$ is arbitrary) of two-component vectors $[a_i,b_i]$
+ for $1\le i\le n$. This routine evaluates \var{seq}, where the formal
+ variables $X[1],\dots, X[n]$ go from $a_1$ to $b_1$,\dots, from $a_n$ to
+ $b_n$, i.e.~$X$ goes from $[a_1,\dots,a_n]$ to $[b_1,\dots,b_n]$ with respect
+ to the lexicographic ordering. (The formal variable with the highest index
+ moves the fastest.) If $\fl=1$, generate only nondecreasing vectors $X$, and
+ if $\fl=2$, generate only strictly increasing vectors $X$.
 

@@ -4,4 +4,9 @@ C-Name: hil0
 Prototype: lGGDG
 Help: hilbert(x,y,{p}): Hilbert symbol at p of x,y. If x,y are integermods
  or p-adic, p can be omitted
-
+Doc: \idx{Hilbert symbol} of $x$ and $y$ modulo
+ $p$. If $x$ and $y$ are of type integer or fraction, an explicit third
+ parameter $p$ must be supplied, $p=0$ meaning the place at infinity.
+ Otherwise, $p$ needs not be given, and $x$ and $y$ can be of compatible types
+ integer, fraction, real, intmod a prime (result is undefined if the
+ modulus is not prime), or $p$-adic.

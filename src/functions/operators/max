@@ -14,4 +14,4 @@ Description:
  (small, gen):gen	gmaxsg($1, $2)
  (gen, small):gen	gmaxgs($1, $2)
  (gen, gen):gen	gmax($1, $2)
-
+Doc: creates the maximum of $x$ and $y$ when they can be compared.

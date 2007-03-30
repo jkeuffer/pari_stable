@@ -2,8 +2,20 @@ Function: qfrep
 Section: linear_algebra
 C-Name: qfrep0
 Prototype: GGD0,L,
-Help: qfrep(x,B,{flag=0}): vector of (half) the number of vectors of norms
- from 1 to B for the integral and definite quadratic form x. Binary digits of
+Help: qfrep(q,B,{flag=0}): vector of (half) the number of vectors of norms
+ from 1 to B for the integral and definite quadratic form q. Binary digits of
  flag mean 1: count vectors of even norm from 1 to 2B, 2: return a t_VECSMALL
  instead of a t_VEC
-
+Doc: 
+ $q$ being a square and symmetric
+ matrix with integer entries representing a positive definite quadratic form,
+ outputs the vector whose $i$-th entry, $1 \leq i \leq B$ is half the number
+ of vectors $v$ such that $q(v) = i$. This routine uses a naive algorithm
+ based on \tet{qfminim}, and will fail if any entry becomes larger than
+ $2^{31}$.
+ 
+ \noindent The binary digits of \fl\ mean:
+ 
+ \item 1: count vectors of even norm from $1$ to $2B$.
+ 
+ \item 2: return a \typ{VECSMALL} instead of a \typ{GEN}

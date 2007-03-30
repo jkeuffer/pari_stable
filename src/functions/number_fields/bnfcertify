@@ -4,4 +4,12 @@ C-Name: certifybuchall
 Prototype: lG
 Help: bnfcertify(bnf): certify the correctness (i.e. remove the GRH) of the
  bnf data output by bnfclassunit or bnfinit
+Doc: $\var{bnf}$ being as output by
+ \kbd{bnfinit}, checks whether the result is correct, i.e.~whether it is
+ possible to remove the assumption of the Generalized Riemann
+ Hypothesis\sidx{GRH}. It is correct if and only if the answer is 1. If it is
+ incorrect, the program may output some error message, or loop indefinitely.
+ You can check its progress by increasing the debug level.
+ 
+ \syn{certifybuchall}{\var{bnf}}, and the result is a C long.
 

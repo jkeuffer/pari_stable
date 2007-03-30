@@ -1,8 +1,16 @@
 Function: type
-Section: programming
+Section: programming/specific
 C-Name: type0
 Prototype: G
 Help: type(x): return the type of the GEN x.
-Description:
+Description: 
  (gen):typ              typ($1)
+Doc: this is useful only under \kbd{gp}. Returns the
+ internal type name of the PARI object $x$ as a  string. Check out
+ existing type names with the metacommand \b{t}.
+ For example \kbd{type(1)} will return "\typ{INT}".
+ 
+ \syn{type0}{\var{x}}, though the macro \kbd{typ} is usually simpler to use
+ since it return an integer that can easily be matched with the symbols \typ{*}.
+ The name \kbd{type} was avoided due to the fact that \kbd{type} is a reserved identifier for some C(++) compilers.
 

@@ -5,4 +5,12 @@ Prototype: GG
 Help: bnfisunit(bnf,x): bnf being output by bnfinit (with flag<=2), gives
  the column vector of exponents of x on the fundamental units and the roots
  of unity if x is a unit, the empty vector otherwise
-
+Doc: $\var{bnf}$ being the number field data
+ output by \kbd{bnfinit} and $x$ being an algebraic number (type integer,
+ rational or polmod), this outputs the decomposition of $x$ on the fundamental
+ units and the roots of unity if $x$ is a unit, the empty vector otherwise.
+ More precisely, if $u_1$,\dots,$u_r$ are the fundamental units, and $\zeta$
+ is the generator of the group of roots of unity (\kbd{bnf.tu}), the output is
+ a vector $[x_1,\dots,x_r,x_{r+1}]$ such that $x=u_1^{x_1}\cdots
+ u_r^{x_r}\cdot\zeta^{x_{r+1}}$. The $x_i$ are integers for $i\le r$ and is an
+ integer modulo the order of $\zeta$ for $i=r+1$.

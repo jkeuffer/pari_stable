@@ -2,10 +2,48 @@ Function: qfminim
 Section: linear_algebra
 C-Name: qfminim0
 Prototype: GDGDGD0,L,p
-Help: qfminim(x,{bound},{maxnum},{flag=0}): number of vectors of square norm <=
- bound, maximum norm and list of vectors for the integral and definite
- quadratic form x; minimal non-zero vectors if bound=0. flag is optional, and
- can be 0: default; 1: returns the first minimal vector found (ignore
- maxnum); 2: as 0 but uses a more robust, slower implementation, valid for
- non integral quadratic forms
+Help: qfminim(x,{b},{m},{flag=0}): x being a square and symmetric
+ matrix representing a positive definite quadratic form, this function
+ deals with the vectors of x whose norm is less than or equal to b,
+ enumerated using the Fincke-Pohst algorithm. The function searches for
+ the minimal non-zero vectors if b is omitted. The precise behaviour
+ depends on flag. 0: seeks at most 2m vectors, result [N,M,mat] where
+ N is the number of vectors found, M the maximum norm among these, and mat
+ lists the vectors. 1: ignores m and returns the first vector whose norm is
+ less than b. 2: as 0 but uses a more robust, slower implementation, valid for
+  non integral quadratic forms
+Doc: $x$ being a square and symmetric
+ matrix representing a positive definite quadratic form, this function
+ deals with the vectors of $x$ whose norm is less than or equal to $b$,
+ enumerated using the Fincke-Pohst algorithm. The function searches for
+ the minimal non-zero vectors if $b$ is omitted. The precise behaviour
+ depends on $\fl$.
+ 
+ If $\fl=0$ (default), seeks at most $2m$ vectors. The result is a
+ three-component vector, the first component being the number of vectors
+ found, the second being the maximum norm found, and the last vector is a
+ matrix whose columns are the vectors found, only one being given for each
+ pair $\pm v$ (at most $m$ such pairs). The vectors are returned in no
+ particular order. In this variant, an explicit $m$ must be provided.
+ 
+ If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
+ than $b$. In this variant, an explicit $b$ must be provided.
+ 
+ In both these cases, $x$ is assumed to have integral entries. The
+ implementation uses low precision floating point computations for maximal
+ speed, which gives incorrect result when $x$ has large entries. (The
+ condition is checked in the code and the routine will raise an error if
+ large rounding errors occur.) A more robust, but much slower,
+ implementation is chosen if the following flag is used:
+ 
+ If $\fl=2$, $x$ can have non integral real entries. In this case, if $b$
+ is omitted, the ``minimal'' vectors only have approximately the same norm.
+ If $b$ is omitted, $m$ is an upper bound for the number of vectors that
+ will be stored and returned, but all minimal vectors are nevertheless
+ enumerated. If $m$ is omitted, all vectors found are stored and returned;
+ note that this may be a huge vector! 
+ 
+ \syn{qfminim0}{x,b,m,\fl,\var{prec}}, also available are \funs{minim}{x,b,m}
+ ($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$). In all cases, an omitted $b$
+ or $m$ is coded as \kbd{NULL}.
 

@@ -4,4 +4,12 @@ C-Name: divsum
 Prototype: GVE
 Help: sumdiv(n,X,expr): sum of expression expr, X running over the divisors
  of n
+Doc: sum of expression \var{expr} over the positive divisors of $n$.
+ 
+ Arithmetic functions like \tet{sigma} use the multiplicativity of the
+ underlying expression to speed up the computation. In the present version
+ \vers, there is no way to indicate that \var{expr} is multiplicative in
+ $n$, hence specialized functions should be preferred whenever possible.
+ 
+ \synt{divsum}{entree *ep, GEN num, char *expr}.
 

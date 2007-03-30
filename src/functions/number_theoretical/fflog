@@ -3,4 +3,4 @@ Section: number_theoretical
 C-Name: fflog
 Prototype: GG
 Help: fflog(x,g): return the discrete logarithm of the finite field element x in base g
-
+Doc: discrete logarithm of the finite field element $x$ in base $g$.

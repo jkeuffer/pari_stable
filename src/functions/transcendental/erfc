@@ -3,4 +3,8 @@ Section: transcendental
 C-Name: gerfc
 Prototype: Gp
 Help: erfc(x): complementary error function
+Doc: complementary error function
+ $(2/\sqrt\pi)\int_x^\infty e^{-t^2}\,dt$ ($x\in\R$).
+ 
+ \syn{erfc}{x,\var{prec}}.
 

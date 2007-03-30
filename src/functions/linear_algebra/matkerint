@@ -5,4 +5,14 @@ Prototype: GD0,L,
 Help: matkerint(x,{flag=0}): LLL-reduced Z-basis of the kernel of the matrix
  x with integral entries. flag is optional, and may be set to 0: default,
  uses a modified LLL, 1: uses matrixqz
+Doc: gives an \idx{LLL}-reduced $\Z$-basis
+ for the lattice equal to the kernel of the matrix $x$ as columns of the
+ matrix $x$ with integer entries (rational entries are not permitted).
+ 
+ If $\fl=0$, uses a modified integer LLL algorithm.
+ 
+ If $\fl=1$, uses $\kbd{matrixqz}(x,-2)$. If LLL reduction of the final result
+ is not desired, you can save time using \kbd{matrixqz(matker(x),-2)} instead.
+ 
+ \syn{matkerint0}{x,\fl}. Also available is \funs{kerint}{x} ($\fl=0$).
 

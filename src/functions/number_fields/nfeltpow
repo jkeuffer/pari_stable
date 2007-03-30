@@ -2,5 +2,6 @@ Function: nfeltpow
 Section: number_fields
 C-Name: element_pow
 Prototype: GGG
-Help: nfeltpow(nf,a,k): element a^k in nf
-
+Help: nfeltpow(nf,x,k): element x^k in nf
+Doc: given an element $x$ in \var{nf}, and a positive or negative integer $k$,
+ computes $x^k$ in the number field $\var{nf}$.

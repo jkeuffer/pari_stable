@@ -10,4 +10,57 @@ Description:
  (gen, ?-1):gen        factor($1)
  (int, 0):gen          smallfact($1)
  (gen, small):gen      factor0($1, $2)
+Doc: general factorization function.
+ If $x$ is of type integer, rational, polynomial or rational function, the
+ result is a two-column matrix, the first column being the irreducibles
+ dividing $x$ (prime numbers or polynomials), and the second the exponents.
+ If $x$ is a vector or a matrix, the factoring is done componentwise (hence
+ the result is a vector or matrix of two-column matrices). By definition,
+ $0$ is factored as $0^1$.
+ 
+ If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
+ (see \kbd{ispseudoprime}), and in general not rigorously proven primes. In
+ fact, any factor which is $\leq 10^{15}$ is a genuine prime number. Use
+ \kbd{isprime} to prove primality of other factors, as in
+ \bprog
+ fa = factor(2^2^7 +1)
+ isprime( fa[,1] )
+ @eprog\noindent
+ An argument \var{lim} can be added, meaning that we look only for prime
+ factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
+ (except when $\var{lim}=0$ where the effect is identical to setting
+ $\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
+ be a proven composite! See \tet{factorint} for more information about the
+ algorithms used.
+ 
+ The polynomials or rational functions to be factored must have scalar
+ coefficients. In particular PARI does \emph{not} know how to factor
+ multivariate polynomials. See \tet{factormod} and \tet{factorff} for the
+ algorithms used over finite fields, \tet{factornf} for the algorithms over
+ number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is able to
+ cope with hundreds of modular factors.
+ 
+ Note that PARI tries to guess in a sensible way over which ring you want
+ to factor. Note also that factorization of polynomials is done up to
+ multiplication by a constant. In particular, the factors of rational
+ polynomials will have integer coefficients, and the content of a polynomial
+ or rational function is discarded and not included in the factorization. If
+ needed, you can always ask for the content explicitly:
+ 
+ \bprog
+ ? factor(t^2 + 5/2*t + 1)
+ %1 =
+ [2*t + 1 1]
+ 
+ [t + 2 1]
+ 
+ ? content(t^2 + 5/2*t + 1)
+ %2 = 1/2
+ @eprog\noindent
+ See also \tet{factornf} and \tet{nffactor}.
+ 
+ \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
+ Also available are
+ \funs{factor}{x} (= \funs{factor0}{x,-1}),
+ \funs{smallfact}{x} (= \funs{factor0}{x,0}).
 

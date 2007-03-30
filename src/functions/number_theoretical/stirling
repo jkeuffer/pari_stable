@@ -5,4 +5,12 @@ Prototype: LLD1,L,
 Help: stirling(n,k,{flag=1}): If flag=1 (default) return the Stirling number
  of the first kind s(n,k), if flag=2, return the Stirling number of the second
  kind S(n,k)
+Doc: \idx{Stirling number}
+ of the first kind $s(n,k)$ ($\fl=1$, default) or of the second kind 
+ $S(n,k)$ (\fl=2).
+ 
+ \syn{stirling}{n,k,\fl}, where $n$ and $k$ must be a \kbd{long}.
+ Also available are
+ \tet{stirling1}$(n,k)$ (for $\fl=1$) and
+ \tet{stirling2}$(n,k)$ (for $\fl=2$).
 

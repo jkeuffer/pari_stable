@@ -4,4 +4,15 @@ C-Name: nffactormod
 Prototype: GGG
 Help: nffactormod(nf,pol,pr): factorize polynomial pol modulo prime ideal pr
  in number field nf
-
+Doc: factorization of the
+ univariate polynomial $x$ modulo the prime ideal \var{pr} in the number
+ field $\var{nf}$. $x$ can have coefficients in the number field (scalar,
+ polmod, polynomial, column vector) or modulo the prime ideal (intmod
+ modulo the rational prime under \var{pr}, polmod or polynomial with
+ intmod coefficients, column vector of intmod). The prime ideal
+ \var{pr} \emph{must} be in the format output by \kbd{idealprimedec}. The
+ main variable of $\var{nf}$ must be of lower priority than that of $x$
+ (see \secref{se:priority}). However if the coefficients of the number
+ field occur explicitly (as polmods) as coefficients of $x$, the variable of
+ these polmods \emph{must} be the same as the main variable of $t$ (see
+ \kbd{nffactor}).

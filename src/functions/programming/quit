@@ -1,7 +1,8 @@
 Function: quit
 Class: gp
-Section: programming
+Section: programming/specific
 C-Name: gp_quit
 Prototype: v
 Help: quit(): quits GP and return to the system
+Doc: exits \kbd{gp}.
 

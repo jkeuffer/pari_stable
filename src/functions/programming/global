@@ -1,4 +1,25 @@
 Function: global
-Section: programming
-Help: global(x,...,z): declare x,...,z as global variables
+Section: programming/specific
+Help: global(list of variables): declare the corresponding variables to be
+ global
+Doc: declares the corresponding variables to be global. From now on, you are
+ forbidden to use them as formal parameters for function definitions or as
+ loop indexes. This is especially useful when patching together various
+ scripts, possibly written with different naming conventions. For instance the
+ following situation is dangerous:
+ %
+ \bprog
+ p = 3   \\@com fix characteristic
+ ...
+ forprime(p = 2, N, ...)
+ f(p) = ...
+ @eprog\noindent
+ since within the loop or within the function's body (even worse: in the
+ subroutines called in that scope), the true global value of \kbd{p} will be
+ hidden. If the statement \kbd{global(p = 3)} appears at the beginning of
+ the script, then both expressions will trigger syntax errors.
+ 
+ Calling \kbd{global} without arguments prints the list of global variables in
+ use. In particular, \kbd{eval(global)} will output the values of all global
+ variables.
 

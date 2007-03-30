@@ -2,13 +2,33 @@ Function: bnrinit
 Section: number_fields
 C-Name: bnrinit0
 Prototype: GGD0,L,
-Help: bnrinit(bnf,ideal,{flag=0}): given a big number field as output by
- bnfinit (only) and an ideal or a 2-component row vector formed by an ideal
- and a list of R1 zeros or ones representing a module, initializes data
+Help: bnrinit(bnf,f,{flag=0}): given a bnf as output by
+ bnfinit and a modulus f, initializes data
  linked to the ray class group structure corresponding to this module. flag
  is optional, and can be 0: default (same as bnrclass with flag = 1), 1:
- compute also the generators (same as bnrclass with flag = 2). The fifth
- component is the ray class group structure
-Description:
+ compute also the generators (same as bnrclass with flag = 2).
+Description: 
  (gen,gen,?small):bnr       bnrinit0($1, $2, $3)
-
+Doc: $\var{bnf}$ is as
+ output by \kbd{bnfinit}, $f$ is a modulus, initializes data linked to
+ the ray class group structure corresponding to this module, a so-called
+ \var{bnr} structure. The following member functions are available
+ on the result: \kbd{.bnf} is the underlying \var{bnf},
+ \kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
+ modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{clgp} refer to the
+ ray class group (as a finite abelian group), its cardinality, its elementary
+ divisors, its generators. 
+ 
+ The last group of functions are different from the members of the underlying
+ \var{bnf}, which refer to the class group; use \kbd{\var{bnr}.bnf.\var{xxx}}
+ to access these, e.g.~\kbd{\var{bnr}.bnf.cyc} to get the cyclic decomposition
+ of the class group.
+ 
+ They are also different from the members of the underlying \var{bid}, which
+ refer to $(\Z_K/f)^*$; use \kbd{\var{bnr}.bid.\var{xxx}} to access these,
+ e.g.~\kbd{\var{bnr}.bid.no} to get $\phi(f)$.
+ 
+ If $\fl=0$ (default), the generators of the ray class group are not computed,
+ which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
+ 
+ If $\fl=1$, as the default, except that generators are computed.

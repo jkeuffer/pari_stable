@@ -6,4 +6,57 @@ Help: factorback(f,{e},{nf}): given a factorisation f, gives the factored
  object back. If this is a prime ideal factorisation you must supply the
  corresponding number field as last argument. If e is present, f has to be a
  vector of the same length, and we return the product of the f[i]^e[i]
+Doc: gives back the factored object
+ corresponding to a factorization. The integer $1$ corresponds to the empty
+ factorization. If the last argument is of number field type (e.g.~created by
+ \kbd{nfinit}), assume we are dealing with an ideal factorization in the
+ number field. The resulting ideal product is given in HNF form.
+ 
+ If $e$ is present, $e$ and $f$ must be vectors of the same length ($e$ being
+ integral), and the corresponding factorization is the product of the
+ $f[i]^{e[i]}$.
+ 
+ If not, and $f$ is vector, it is understood as in the preceding case with $e$
+ a vector of 1 (the product of the $f[i]$ is returned). Finally, $f$ can be a
+ regular factorization, as produced with any \kbd{factor} command. A few
+ examples:
+ \bprog
+ ? factorback([2,2; 3,1])
+ %1 = 12
+ ? factorback([2,2], [3,1])
+ %2 = 12
+ ? factorback([5,2,3])
+ %3 = 30
+ ? factorback([2,2], [3,1], nfinit(x^3+2))
+ %4 =
+ [16 0 0]
+ 
+ [0 16 0]
+ 
+ [0 0 16]
+ ? nf = nfinit(x^2+1); fa = idealfactor(nf, 10)
+ %5 =
+ [[2, [1, 1]~, 2, 1, [1, 1]~] 2]
+ 
+ [[5, [-2, 1]~, 1, 1, [2, 1]~] 1]
+ 
+ [[5, [2, 1]~, 1, 1, [-2, 1]~] 1]
+ ? factorback(fa)
+ ***   forbidden multiplication t_VEC * t_VEC.
+ ? factorback(fa, nf)
+ %6 =
+ [10 0]
+ 
+ [0 10]
+ 
+ @eprog
+ In the fourth example, $2$ and $3$ are interpreted as principal ideals in a
+ cubic field. In the fifth one, \kbd{factorback(fa)} is meaningless since we
+ forgot to indicate the number field, and the entries in the first column of
+ \kbd{fa} can't be multiplied.
+ 
+ \syn{factorback0}{f,e,\var{nf}}, where an omitted
+ $\var{nf}$ or $e$ is entered as \kbd{NULL}. Also available is
+ \tet{factorback}$(f,\var{nf})$ (case $e = \kbd{NULL}$) where an omitted
+ $\var{nf}$ is entered as \kbd{NULL}.
 

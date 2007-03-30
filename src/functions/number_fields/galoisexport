@@ -5,4 +5,18 @@ Prototype: GD0,L,
 Help: galoisexport(gal,{flag}): gal being a galois field as output by
  galoisinit, output a string representing the underlying permutation group in
  GAP notation (default) or Magma notation (flag = 1)
-
+Doc: \var{gal} being be a Galois field as output by \tet{galoisinit},
+ export the underlying permutation group as a string suitable
+ for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma. The following example
+ compute the index of the underlying abstract group in the GAP library:
+ \bprog
+ ? G = galoisinit(x^6+108);
+ ? s = galoisexport(G)
+ %2 = "Group((1, 2, 3)(4, 5, 6), (1, 4)(2, 6)(3, 5))"
+ ? extern("echo \"IdGroup("s");\" | gap -q")
+ %3 = [6, 1]
+ ? galoisidentify(G)
+ %4 = [6, 1]
+ @eprog
+ 
+ This command also accepts subgroups returned by \kbd{galoissubgroups}.

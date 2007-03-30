@@ -2,5 +2,12 @@ Function: modreverse
 Section: number_fields
 C-Name: polymodrecip
 Prototype: G
-Help: modreverse(x): reverse polymod of the polymod x, if it exists
-
+Help: modreverse(a): reverse polymod of the polmod a, if it exists
+Doc: $a$ being a polmod $A(X)$ modulo $T(X)$, finds
+ the ``reverse polmod'' $B(X)$ modulo $Q(X)$, where $Q$ is the minimal
+ polynomial of $a$, which must be equal to the degree of $T$, and such that if
+ $\theta$ is a root of $T$ then $\theta=B(\alpha)$ for a certain root $\alpha$
+ of $Q$.
+ 
+ This is very useful when one changes the generating element in algebraic
+ extensions.

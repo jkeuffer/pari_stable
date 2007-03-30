@@ -1,7 +1,8 @@
 Function: writetex
-Section: programming
+Section: programming/specific
 C-Name: writetex
 Prototype: vss*
-Help: writetex(filename,a): write the string expression a (same format as
+Help: writetex(filename,{str}*): appends the remaining arguments (same format as
  print) to filename, in TeX format
+Doc: as \kbd{write}, in \TeX\ format.
 

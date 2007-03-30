@@ -2,6 +2,23 @@ Function: deriv
 Section: polynomials
 C-Name: deriv
 Prototype: GDn
-Help: deriv(x,{y}): derivative of x with respect to the main variable of y,
- or to the main variable of x if y is omitted
+Help: deriv(x,{v}): derivative of x with respect to the main variable of v,
+ or to the main variable of x if v is omitted
+Doc: 
+ derivative of $x$ with respect to the main
+ variable if $v$ is omitted, and with respect to $v$ otherwise. The derivative
+ of a scalar type is zero, and the derivative of a vector or matrix is done
+ componentwise. One can use $x'$ as a shortcut if the derivative is with
+ respect to the main variable of $x$.
+ 
+ By definition, the main variable of a \typ{POLMOD} is the main variable among
+ the coefficients from its two polynomial components (representative and
+ modulus); in other words, assuming a polmod represents an element of
+ $R[X]/(T(X))$, the variable $X$ is a mute variable and the derivative is
+ taken with respect to the main variable used in the base ring $R$.
+ 
+ \syn{deriv}{x,v}, where $v$ is a \kbd{long}, and an omitted $v$ is coded as
+ $-1$. When $x$ is a \typ{POL}, \funs{derivpol}{x} is a shortcut for
+ $\kbd{deriv}(x, -1)$. When $x$ is a \typ{SER}, \funs{derivser}{x} is a
+ shortcut for $\kbd{deriv}(x, -1)$.
 

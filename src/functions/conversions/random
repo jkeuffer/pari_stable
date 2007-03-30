@@ -6,4 +6,27 @@ Help: random({N=2^31}): random integer between 0 and N-1
 Description: 
  (?int):int	genrand($1)
  (real):void	$"incorrect type `real' in random"
+Doc: 
+ returns a (pseudo-)random integer
+ uniformly distributed between $0$ and $N-1$. $N$ is an integer, which can be
+ arbitrary large. The random seed may be obtained via \tet{getrand}, and reset
+ using \tet{setrand}: from a given seed, the exact same values will be
+ generated. The same seed is used at each startup, reseed the generator
+ yourself if this is a problem.
+ 
+ Note that \kbd{random(2\pow31)} \emph{is} equivalent to \kbd{random()}. This
+ was not the case, up to version 2.4.
+ 
+ This function does not depend on the system's random number generator. Up to
+ version 2.4 included, pseudo-random numbers were obtained by means of linear
+ congruences and were not well distributed in arithmetic progressions. We now
+ use Brent's XORGEN algorithm, based on Feedback Shift Registers, see
+ \kbd{http://wwwmaths.anu.edu.au/~brent/random.html}. The generator has period
+ $2^{4096}-1$, passes the Crush battery of statistical tests of L'Ecuyer and
+ Simard, but is not suitable for cryptographic purposes: one can reconstruct
+ the state vector from a small sample of consecutive values, thus predicting
+ the entire sequence.
+ 
+ \syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a
+ random \kbd{unsigned long} (32bit or 64bit depending on the architecture).
 

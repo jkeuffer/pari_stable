@@ -5,4 +5,4 @@ Prototype: GDGp
 Help: bnfreg(P,{tech=[]}): compute the regulator of the number field defined
  by the polynomial P. If P is a non-zero integer, it is interpreted as a
  quadratic discriminant. See manual for details about tech
-
+Doc: $\var{bnf}$ being as output by \kbd{bnfinit}, computes its regulator.

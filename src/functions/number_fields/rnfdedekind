@@ -2,9 +2,18 @@ Function: rnfdedekind
 Section: number_fields
 C-Name: rnfdedekind
 Prototype: GGG
-Help: rnfdedekind(nf,T,pr): relative Dedekind criterion over nf, applied to
- the order defined by a root of irreducible polynomial T, modulo the prime
+Help: rnfdedekind(nf,pol,pr): relative Dedekind criterion over nf, applied to
+ the order defined by a root of irreducible polynomial pol, modulo the prime
  ideal pr. Returns [flag,basis,val], where basis is a pseudo-basis of the
  enlarged order, flag is 1 iff this order is pr-maximal, and val is the
  valuation in pr of the order discriminant
-
+Doc: given a number field
+ $\var{nf}$ as output by \kbd{nfinit} and a polynomial \var{pol} with
+ coefficients in $\var{nf}$ defining a relative extension $L$ of $\var{nf}$,
+ evaluates the relative \idx{Dedekind} criterion over the order defined by a
+ root of \var{pol} for the prime ideal \var{pr} and outputs a 3-component
+ vector as the result. The first component is a flag equal to 1 if the
+ enlarged order could be proven to be \var{pr}-maximal and to 0 otherwise (it
+ may be maximal in the latter case if \var{pr} is ramified in $L$), the second
+ component is a pseudo-basis of the enlarged order and the third component is
+ the valuation at \var{pr} of the order discriminant.

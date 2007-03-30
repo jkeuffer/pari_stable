@@ -1,6 +1,13 @@
 Function: alias
-Section: programming
+Section: programming/specific
 C-Name: alias0
 Prototype: vrr
-Help: alias("new","old"): new is now an alias for old
-
+Help: alias(newkey,key): newkey is now an alias for key
+Doc: defines the keyword \var{newkey} as an alias for keyword \var{key}.
+ \var{key} must correspond to an existing \emph{function} name. This is
+ different from the general user macros in that alias expansion takes place
+ immediately upon execution, without having to look up any function code, and
+ is thus much faster. A sample alias file \kbd{misc/gpalias} is provided with
+ the standard distribution. Alias commands are meant to be read upon startup
+ from the \kbd{.gprc} file, to cope with function names you are dissatisfied
+ with, and should be useless in interactive usage.

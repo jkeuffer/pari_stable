@@ -2,6 +2,10 @@ Function: ellsub
 Section: elliptic_curves
 C-Name: subell
 Prototype: GGG
-Help: ellsub(e,z1,z2): difference of the points z1 and z2 on elliptic curve
- e
+Help: ellsub(E,z1,z2): difference of the points z1 and z2 on elliptic curve E
+Doc: 
+ difference of the points $z1$ and $z2$ on the
+ elliptic curve corresponding to $E$.
+ 
+ \syn{subell}{E,z1,z2}.
 

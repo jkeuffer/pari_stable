@@ -2,6 +2,19 @@ Function: bestappr
 Section: number_theoretical
 C-Name: bestappr0
 Prototype: GGDG
-Help: bestappr(x,k): gives the best approximation to the real x with
- denominator less or equal to k
+Help: bestappr(A,{B}): gives the best approximation to the real A with
+ denominator less or equal to B
+Doc: if $B$ is omitted, finds the best rational
+ approximation to $x\in\R$ (or $\R[X]$, or $\R^n$, \dots) with denominator at
+ most equal to $A$ using continued fractions.
+ 
+ If $B$ is present, $x$ is assumed to be of type \typ{INTMOD} modulo $M$ (or a
+ recursive combination of those), and the routine returns the unique fraction
+ $a/b$ in coprime integers $a\leq A$ and $b\leq B$ which is congruent to $x$
+ modulo $M$. If $M \leq 2AB$, uniqueness is not guaranteed and the function
+ fails with an error message. If rational reconstruction is not possible
+ (no such $a/b$ exists for at least one component of $x$), returns $-1$.
+ 
+ \syn{bestappr0}{x,A,B}. Also available is \funs{bestappr}{x,A} corresponding
+ to an omitted $B$.
 

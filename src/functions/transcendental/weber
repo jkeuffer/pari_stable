@@ -7,4 +7,20 @@ Help: weber(x,{flag=0}): One of Weber's f function of x. flag is optional,
  that (j=(f^24-16)^3/f^24), 1: function f1(x)=eta(x/2)/eta(x) such that
  (j=(f1^24+16)^3/f2^24), 2: function f2(x)=sqrt(2)*eta(2*x)/eta(x) such that
  (j=(f2^24+16)^3/f2^24)
+Doc: one of Weber's three $f$ functions.
+ If $\fl=0$, returns
+ $$f(x)=\exp(-i\pi/24)\cdot\eta((x+1)/2)\,/\,\eta(x) \quad\hbox{such that}\quad
+ j=(f^{24}-16)^3/f^{24}\,,$$
+ where $j$ is the elliptic $j$-invariant  (see the function \kbd{ellj}).
+ If $\fl=1$, returns
+ $$f_1(x)=\eta(x/2)\,/\,\eta(x)\quad\hbox{such that}\quad
+ j=(f_1^{24}+16)^3/f_1^{24}\,.$$
+ Finally, if $\fl=2$, returns
+ $$f_2(x)=\sqrt{2}\eta(2x)\,/\,\eta(x)\quad\hbox{such that}\quad
+ j=(f_2^{24}+16)^3/f_2^{24}.$$
+ Note the identities $f^8=f_1^8+f_2^8$ and $ff_1f_2=\sqrt2$.
+ 
+ \syn{weber0}{x,\fl,prec}. Associated to the various values of \fl, the
+ following functions are also available: \funs{weberf}{x,prec},
+ \funs{weberf1}{x,prec} or \funs{weberf2}{x,prec}.
 

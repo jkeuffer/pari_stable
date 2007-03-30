@@ -4,8 +4,15 @@ C-Name: znorder
 Prototype: GDG
 Help: znorder(x,{o}): order of the integermod x in (Z/nZ)*. Optional o is
  assumed to be a multiple of the order.
-Description:
+Description: 
  (gen):int             order($1)
  (gen,):int            order($1)
  (gen,int):int         znorder($1, $2)
+Doc: $x$ must be an integer mod $n$, and the
+ result is the order of $x$ in the multiplicative group $(\Z/n\Z)^*$. Returns
+ an error if $x$ is not invertible. If optional parameter $o$ is given it is
+ assumed to be a multiple of the order (used to limit the search space).
+ 
+ \syn{znorder}{x,o}, where an omitted $o$ is coded as \kbd{NULL}. Also
+ available is \funs{order}{x}.
 

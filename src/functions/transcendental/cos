@@ -3,4 +3,7 @@ Section: transcendental
 C-Name: gcos
 Prototype: Gp
 Help: cos(x): cosine of x
+Doc: cosine of $x$.
+ 
+ \syn{gcos}{x,\var{prec}}.
 

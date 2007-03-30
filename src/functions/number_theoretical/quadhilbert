@@ -7,4 +7,21 @@ Help: quadhilbert(D,{pq}): relative equation for the Hilbert class field
  If D<0, pq (if supplied) is a 2-component vector [p,q], where p,q are the
  prime numbers needed for Schertz's method. In that case, return 0 if [p,q]
  not suitable.
+Doc: relative equation defining the
+ \idx{Hilbert class field} of the quadratic field of discriminant $D$.
+ 
+ If $D < 0$, uses complex multiplication (\idx{Schertz}'s variant). The
+ technical component $pq$, if supplied, is a vector $[p,q]$ where $p$, $q$ are
+ the prime numbers needed for the Schertz's method. More precisely, prime
+ ideals above $p$ and $q$ should be non-principal and coprime to all reduced
+ representatives of the class group. In addition, if one of these ideals has
+ order $2$ in the class group, they should have the same class. Finally, for
+ efficiency, $\gcd(24,(p-1)(q-1))$ should be as large as possible.
+ The routine returns $0$ if $[p,q]$ is not suitable.
+ 
+ If $D > 0$ \idx{Stark units} are used and (in rare cases) a
+ vector of extensions may be returned whose compositum is the requested class
+ field. See \kbd{bnrstark} for details.
+ 
+ \syn{quadhilbert}{D,pq,\var{prec}}.
 

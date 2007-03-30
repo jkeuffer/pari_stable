@@ -4,4 +4,10 @@ C-Name: znlog
 Prototype: GG
 Help: znlog(x,g): g as output by znprimroot (modulo a prime). Return
  smallest non-negative n such that g^n = x
-
+Doc: $g$ must be a primitive root mod a prime $p$, and
+ the result is the discrete log of $x$ in the multiplicative group
+ $(\Z/p\Z)^*$. This function uses a simple-minded combination of
+ Pohlig-Hellman algorithm and Shanks baby-step/giant-step which requires
+ $O(\sqrt{q})$ storage, where $q$ is the largest prime factor of $p-1$. Hence
+ it cannot be used when the largest prime divisor of $p-1$ is greater than
+ about $10^{13}$.

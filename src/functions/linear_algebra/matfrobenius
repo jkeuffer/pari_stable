@@ -7,4 +7,11 @@ Help: matfrobenius(M,{flag},{v=x}): Return the Frobenius form of the square
  polynomials in the variable v. If flag is 2, return a two-components vector
  [F,B] where F is the Frobenius form and B is the basis change so that
  M=B^-1*F*B.
+Doc: returns the Frobenius form of
+ the square matrix \kbd{M}. If $\fl=1$, returns only the elementary divisors as
+ a vectr of polynomials in the variable \kbd{v}.  If $\fl=2$, returns a
+ two-components vector [F,B] where \kbd{F} is the Frobenius form and \kbd{B} is
+ the basis change so that $M=B^{-1}FB$.
+ 
+ \syn{matfrobenius}{M,\fl,v}, where $v$ is the variable number.
 

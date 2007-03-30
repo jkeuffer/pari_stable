@@ -3,4 +3,9 @@ Section: number_fields
 C-Name: rnfidealnormabs
 Prototype: GG
 Help: rnfidealnormabs(rnf,x): absolute norm of the ideal x
-
+Doc: $\var{rnf}$ being a relative
+ number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
+ relative ideal (which can be, as in the absolute case, of many different
+ types, including of course elements), computes the norm of the ideal $x$
+ considered as an ideal of the absolute extension $L/\Q$. This is identical to
+ \kbd{idealnorm(rnfidealnormrel(\var{rnf},x))}, but faster.

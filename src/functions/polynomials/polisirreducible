@@ -2,6 +2,10 @@ Function: polisirreducible
 Section: polynomials
 C-Name: gisirreducible
 Prototype: G
-Help: polisirreducible(x): true(1) if x is an irreducible non-constant
- polynomial, false(0) if x is reducible or constant
-
+Help: polisirreducible(pol): true(1) if pol is an irreducible non-constant
+ polynomial, false(0) if pol is reducible or constant
+Doc: 
+ \subsecidx{polisirreducible}$(\var{pol})$: \var{pol} being a polynomial
+ (univariate in the present version \vers), returns 1 if \var{pol} is
+ non-constant and irreducible, 0 otherwise. Irreducibility is checked over
+ the smallest base field over which \var{pol} seems to be defined.

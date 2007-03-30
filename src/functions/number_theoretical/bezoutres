@@ -4,4 +4,11 @@ C-Name: vecbezoutres
 Prototype: GG
 Help: bezoutres(x,y): gives a 3-dimensional row vector [u,v,d] such that
  d=resultant(x,y) and u*x+v*y=d, where x and y are polynomials
+Doc: as \kbd{bezout}, with the resultant of $x$ and
+ $y$ replacing the gcd. \sidx{extended gcd} The algorithm uses
+ (subresultant) assumes the base ring is a domain.
+ 
+ \syn{vecbezoutres}{x,y} to get the vector, or \funs{subresext}{x,y, \&u, \&v}
+ which gives as result the address of the created gcd, and puts the
+ addresses of the corresponding created objects into $u$ and $v$.
 

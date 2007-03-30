@@ -1,6 +1,14 @@
 Function: addhelp
-Section: programming
+Section: programming/specific
 C-Name: addhelp
 Prototype: vSs
-Help: addhelp(symbol,"message"): add/change help message for a symbol
-
+Help: addhelp(S,str): add/change help message for the symbol S
+Doc: changes the help
+ message for the symbol $S$. The string \var{str} is expanded on the spot
+ and stored as the online help for $S$. If $S$ is a function \emph{you} have
+ defined, its definition will still be printed before the message \var{str}.
+ It is recommended that you document global variables and user functions in
+ this way. Of course \kbd{gp} will not protest if you skip this.
+ 
+ Nothing prevents you from modifying the help of built-in PARI
+ functions. (But if you do, we would like to hear why you needed to do it!)

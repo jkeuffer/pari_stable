@@ -2,6 +2,20 @@ Function: idealpow
 Section: number_fields
 C-Name: idealpow0
 Prototype: GGGD0,L,p
-Help: idealpow(nf,x,n,{flag=0}): n-th power of the ideal x in HNF in the
- number field nf If (optional) flag is non-null, reduce the result
+Help: idealpow(nf,x,k,{flag=0}): k-th power of the ideal x in HNF in the
+ number field nf. If (optional) flag is non-null, reduce the result
+Doc: computes the $k$-th power of
+ the ideal $x$ in the number field $\var{nf}$. $k$ can be positive, negative
+ or zero. The result is NOT reduced, it is really the $k$-th ideal power, and
+ is given in HNF.
+ 
+ If $\fl$ is non-zero, reduce the result using \kbd{idealred}. Note however
+ that this is NOT the same as as $\kbd{idealpow}(\var{nf},x,k)$ followed by
+ reduction, since the reduction is performed throughout the powering process.
+ 
+ The library syntax corresponding to $\fl=0$ is
+ \funs{idealpow}{\var{nf},x,k}. If $k$ is a \kbd{long}, you can use
+ \funs{idealpows}{\var{nf},x,k}. Corresponding to $\fl=1$ is
+ \funs{idealpowred}{\var{nf},vp,k,\var{prec}}, where $\var{prec}$ is a
+ \kbd{long}.
 

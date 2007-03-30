@@ -5,4 +5,14 @@ Prototype: GD0,L,p
 Help: eta(x,{flag=0}): if flag=0, eta function without the q^(1/24),
  otherwise eta of the complex number x in the upper half plane intelligently
  computed using SL(2,Z) transformations
+Doc: \idx{Dedekind}'s $\eta$ function, without the
+ $q^{1/24}$. This means the following: if $x$ is a complex number with positive
+ imaginary part, the result is $\prod_{n=1}^\infty(1-q^n)$, where
+ $q=e^{2i\pi x}$. If $x$ is a power series (or can be converted to a power
+ series) with positive valuation, the result is $\prod_{n=1}^\infty(1-x^n)$.
+ 
+ If $\fl=1$ and $x$ can be converted to a complex number (i.e.~is not a power
+ series), computes the true $\eta$ function, including the leading $q^{1/24}$.
+ 
+ \syn{eta}{x,\var{prec}}.
 

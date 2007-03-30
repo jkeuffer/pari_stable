@@ -2,6 +2,52 @@ Function: algdep
 Section: linear_algebra
 C-Name: algdep0
 Prototype: GLD0,L,p
-Help: algdep(x,n,{flag=0}): algebraic relations up to degree n of x, using
- lindep([1,x,...,x^(n-1)], flag).
+Help: algdep(x,k,{flag=0}): algebraic relations up to degree n of x, using
+ lindep([1,x,...,x^(k-1)], flag).
+Doc: 
+ \sidx{algebraic dependence}
+ $x$ being real/complex, or $p$-adic, finds a polynomial of
+ degree at most $k$ with integer coefficients having $x$ as approximate root.
+ Note that the polynomial which is obtained is not necessarily the ``correct''
+ one. In fact it is not even guaranteed to be irreducible. One can check the
+ closeness either by a polynomial evaluation (use \tet{subst}), or by
+ computing the roots of the polynomial given by \kbd{algdep} (use 
+ \tet{polroots}).
+ 
+ Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
+ \tet{lindep} is not able to find a relation and returns a lower bound for the
+ sup norm of the smallest relation, \tet{algdep} returns that bound instead.
+ A suitable non-zero value of $\fl$ may improve on the default behaviour:
+ \bprog
+ \\\\\\\\\ LLL
+ ? \p200
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 3.8s
+ ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 1s
+ ? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right in 3.3s
+ ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong in 2.9s
+ ? \p250
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.8s
+ ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 3.4s
+ \\\\\\\\\ PSLQ
+ ? \p200
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 14s.
+ ? \p250
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 18s
+ @eprog\noindent
+ Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
+ flag produces its first correct result at 205 digits, and from then on a
+ steady stream of correct results. Interestingly enough, our PSLQ also
+ reliably succeeds from 205 digits on (and is 5 times slower at that
+ accuracy).
+ 
+ The above example is the testcase studied in a 2000 paper by Borwein and
+ Lisonek, Applications of integer relation algorithms, \emph{Discrete Math.},
+ {\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
+ algorithm, which either shows that PARI's implementation of PSLQ is lacking,
+ or that its LLL is extremely good. The version of PARI tested there was
+ 1.39, which succeeded reliably from precision 265 on, in about 60 as much
+ time as the current version.
+ 
+ \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
+ Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
 

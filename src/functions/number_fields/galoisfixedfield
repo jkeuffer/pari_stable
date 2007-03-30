@@ -11,4 +11,30 @@ Help: galoisfixedfield(gal,perm,{flag},{v=y}): gal being a galois field as
  defined by P, where the variable v stands for a root of P
 Description: 
  (gen, gen, ?small, ?var):vec	galoisfixedfield($1, $2, $3, $4)
+Doc: \var{gal} being be a Galois field as output by \tet{galoisinit} and
+ \var{perm} an element of $\var{gal}.group$ or a vector of such elements,
+ computes the fixed field of \var{gal} by the automorphism defined by the
+ permutations \var{perm} of the roots $\var{gal}.roots$. $P$ is guaranteed to
+ be squarefree modulo $\var{gal}.p$.
+ 
+ If no flags or $\fl=0$, output format is the same as for \tet{nfsubfield},
+ returning $[P,x]$ such that $P$ is a polynomial defining the fixed field, and
+ $x$ is a root of $P$ expressed as a polmod in $\var{gal}.pol$.
+ 
+ If $\fl=1$ return only the polynomial $P$.
+ 
+ If $\fl=2$ return $[P,x,F]$ where $P$ and $x$ are as above and $F$ is the
+ factorization of $\var{gal}.pol$ over the field defined by $P$, where
+ variable $v$ ($y$ by default) stands for a root of $P$. The priority of $v$
+ must be less than the priority of the variable of $\var{gal}.pol$ (see
+ \secref{se:priority}). Example:
+ 
+ \bprog
+ ? G = galoisinit(x^4+1);
+ ? galoisfixedfield(G,G.group[2],2)
+ %2 = [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
+ @eprog\noindent
+ computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
+ 
+ \syn{galoisfixedfield}{\var{gal},\var{perm},\fl,$v$}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
 

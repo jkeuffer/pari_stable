@@ -5,4 +5,16 @@ Prototype: V=GED0,L,p
 Help: sumpos(X=a,expr,{flag=0}): sum of positive series expr, the formal
  variable X starting at a. flag is optional, and can be 0: default, or 1:
  uses a slightly different method using Zagier's polynomials
+Doc: numerical summation of the
+ series \var{expr}, which must be a series of terms having the same sign,
+ the formal
+ variable $X$ starting at $a$. The algorithm used is Van Wijngaarden's trick
+ for converting such a series into an alternating one, and is quite slow. For
+ regular functions, the function \kbd{sumnum} is in general much faster once the
+ initializations have been made using \kbd{sumnuminit}.
+ 
+ If $\fl=1$, use slightly different polynomials. Sometimes faster.
+ 
+ \synt{sumpos}{void *E, GEN (*eval)(GEN,void*),GEN a,long prec}. Also
+ available is \tet{sumpos2} with the same arguments ($\fl = 1$).
 

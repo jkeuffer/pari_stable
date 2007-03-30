@@ -4,4 +4,28 @@ C-Name: precision0
 Prototype: GD0,L,
 Help: precision(x,{n}): change the precision of x to be n (n C-integer). If
  n is omitted, output real precision of object x
+Doc: 
+ gives the precision in decimal digits of the
+ PARI object $x$. If $x$ is an exact object, the largest single precision
+ integer is returned. If $n$ is not omitted, creates a new object equal to $x$
+ with a new precision $n$. This is to be understood as follows:
+ 
+ For exact types, no change. For $x$ a vector or a matrix, the operation
+ is done componentwise.
+ 
+ For real $x$, $n$ is the number of desired significant \emph{decimal} digits.
+ If $n$ is smaller than the precision of $x$, $x$ is truncated, otherwise $x$
+ is extended with zeros.
+ 
+ For $x$ a $p$-adic or a power series, $n$ is the desired number of
+ significant $p$-adic or $X$-adic digits, where $X$ is the main variable of
+ $x$.
+ 
+ Note that the function \kbd{precision} never changes the type of the result.
+ In particular it is not possible to use it to obtain a polynomial from a
+ power series. For that, see \kbd{truncate}.
+ 
+ \syn{precision0}{x,n}, where $n$ is a \kbd{long}. Also available are
+ \funs{ggprecision}{x} (result is a \kbd{GEN}) and \funs{gprec}{x,n}, where
+ $n$ is a \kbd{long}.
 

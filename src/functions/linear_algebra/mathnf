@@ -2,11 +2,44 @@ Function: mathnf
 Section: linear_algebra
 C-Name: mathnf0
 Prototype: GD0,L,
-Help: mathnf(A,{flag=0}): (upper triangular) Hermite normal form of A, basis
- for the lattice formed by the columns of A. flag is optional whose value
+Help: mathnf(x,{flag=0}): (upper triangular) Hermite normal form of x, basis
+ for the lattice formed by the columns of x. flag is optional whose value
  range from 0 to 4 (0 if omitted), meaning : 0: naive algorithm. 1: Use
  Batut's algorithm. Output 2-component vector [H,U] such that H is the HNF of
- A, and U is a unimodular matrix such that AU=H. 3: Use Batut's algorithm.
- Output [H,U,P] where P is a permutation matrix such that P A U = H. 4:
+ x, and U is a unimodular matrix such that XU=H. 3: Use Batut's algorithm.
+ Output [H,U,P] where P is a permutation matrix such that P x U = H. 4:
  as 1, using a heuristic variant of LLL reduction along the way
+Doc: if $x$ is a (not necessarily square)
+ matrix with integer entries, finds the \emph{upper triangular}
+ \idx{Hermite normal form} of $x$. If the rank of $x$ is equal to its number
+ of rows, the result is a square matrix. In general, the columns of the result
+ form a basis of the lattice spanned by the columns of $x$.
+ 
+ If $\fl=0$, uses the naive algorithm. This should never be used if the
+ dimension is at all large (larger than 10, say). It is recommended to use
+ either \kbd{mathnfmod(x, matdetint(x))} (when $x$ has maximal rank) or
+ \kbd{mathnf(x, 1)}. Note that the latter is in general faster than
+ \kbd{mathnfmod}, and also provides a base change matrix.
+ 
+ If $\fl=1$, uses Batut's algorithm, which is much faster than the default.
+ Outputs a two-component row vector $[H,U]$, where $H$ is the \emph{upper
+ triangular} Hermite normal form of $x$ defined as above,  and $U$ is the
+ unimodular transformation matrix such that $xU=[0|H]$. $U$ has in general
+ huge coefficients, in particular when the kernel is large.
+ 
+ If $\fl=3$, uses Batut's algorithm, but outputs $[H,U,P]$, such that $H$ and
+ $U$ are as before and $P$ is a permutation of the rows such that $P$ applied
+ to $xU$ gives $H$. The matrix $U$ is smaller than with $\fl=1$, but may still
+ be large.
+ 
+ If $\fl=4$, as in case 1 above, but uses a heuristic variant of \idx{LLL}
+ reduction along the way. The matrix $U$ is in general close to optimal (in
+ terms of smallest $L_2$ norm), but the reduction is slower than in case $1$.
+ 
+ \syn{mathnf0}{x,\fl}. Also available are \funs{hnf}{x} ($\fl=0$) and
+ \funs{hnfall}{x} ($\fl=1$). To reduce \emph{huge} (say $400 \times 400$ and
+ more) relation matrices (sparse with small entries), you can use the pair
+ \kbd{hnfspec} / \kbd{hnfadd}. Since this is rather technical and the
+ calling interface may change, they are not documented yet. Look at the code
+ in \kbd{basemath/alglin1.c}.
 

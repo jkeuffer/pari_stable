@@ -2,6 +2,16 @@ Function: ellztopoint
 Section: elliptic_curves
 C-Name: pointell
 Prototype: GGp
-Help: ellztopoint(e,z): coordinates of point P on the curve e corresponding
+Help: ellztopoint(E,z): coordinates of point P on the curve E corresponding
  to the complex number z
+Doc: 
+ $E$ being an \var{ell} as output by
+ \kbd{ellinit}, computes the coordinates $[x,y]$ on the curve $E$
+ corresponding to the complex number $z$. Hence this is the inverse function
+ of \kbd{ellpointtoz}. In other words, if the curve is put in Weierstrass
+ form, $[x,y]$ represents the \idx{Weierstrass $\wp$-function} and its
+ derivative. If $z$ is in the lattice defining $E$ over $\C$, the result is
+ the point at infinity $[0]$.
+ 
+ \syn{pointell}{E,z,\var{prec}}.
 

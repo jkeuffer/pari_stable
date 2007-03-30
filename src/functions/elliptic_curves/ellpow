@@ -2,5 +2,12 @@ Function: ellpow
 Section: elliptic_curves
 C-Name: powell
 Prototype: GGG
-Help: ellpow(e,x,n): n times the point x on elliptic curve e (n in Z)
+Help: ellpow(E,x,n): n times the point x on elliptic curve E (n in Z)
+Doc: 
+ computes $n$ times the point $z$ for the
+ group law on the elliptic curve $E$. Here, $n$ can be in $\Z$, or $n$
+ can be a complex quadratic integer if the curve $E$ has complex multiplication
+ by $n$ (if not, an error message is issued).
+ 
+ \syn{powell}{E,z,n}.
 

@@ -1,7 +1,22 @@
 Function: allocatemem
-Section: programming
+Section: programming/specific
 C-Name: allocatemem0
 Prototype: vDG
 Help: allocatemem({s=0}): allocates a new stack of s bytes. doubles the
  stack if s is omitted
-
+Doc: this very special operation
+ allows the user to change the stack size \emph{after} initialization. $x$
+ must be a non-negative integer. If $x \neq 0$, a new stack of size
+ $16*\ceil{x/16}$ bytes is allocated, all the PARI data on the old stack is
+ moved to the new one, and the old stack is discarded. If $x=0$, the size of
+ the new stack is twice the size of the old one.
+ 
+ Although it is a function, \kbd{allocatemem} cannot be used in loop-like
+ constructs, or as part of a larger expression, e.g \kbd{2 + allocatemem()}.
+ Such an attempt will raise an error. The technical reason is that this
+ routine usually moves the stack, so objects from the current expression may
+ not be correct anymore, e.g. loop indexes.
+ 
+ \syn{allocatemoremem}{x}, where $x$ is an unsigned long, and the return type
+ is void. \kbd{gp} uses a variant which makes sure it was not called within a
+ loop.

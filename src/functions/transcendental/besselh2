@@ -3,4 +3,7 @@ Section: transcendental
 C-Name: hbessel2
 Prototype: GGp
 Help: besselh2(nu,x): H^2-bessel function of index nu and argument x
+Doc: $H^2$-Bessel function of index \var{nu} and argument $x$.
+ 
+ \syn{hbessel2}{\var{nu},x,\var{prec}}.
 

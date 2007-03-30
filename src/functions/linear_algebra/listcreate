@@ -5,4 +5,7 @@ Prototype: L
 Help: listcreate(n): creates an empty list of maximum length n
 Description: 
  (small):list	listcreate($1)
+Doc: creates an empty list of maximal length $n$.
+ 
+ This function is useless in library mode.
 

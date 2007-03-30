@@ -11,4 +11,27 @@ Help: idealstar(nf,I,{flag=1}): gives the structure of (Z_K/I)^*. flag is
  ideal factorisation of I and f2, U and V are technical but essential to work
  in (Z_K/I)^*. Finally if flag=2, same as with flag=1 except that the
  generators are also given
-
+Doc: outputs a \var{bid} structure,
+ necessary for computing in the finite abelian group $G = (\Z_K/I)^*$. Here,
+ \var{nf} is a number field and $I$ is a \var{modulus}: either an ideal in any
+ form, or a row vector whose first component is an ideal and whose second
+ component is a row vector of $r_1$ 0 or 1.
+ 
+ This \var{bid} is used in \tet{ideallog} to compute discrete logarithms. It
+ also contains useful information which can be conveniently retrieved as
+ \kbd{\var{bid}.mod} (the modulus),
+ \kbd{\var{bid}.clgp} ($G$ as a finite abelian group),
+ \kbd{\var{bid}.no} (the cardinality of $G$),
+ \kbd{\var{bid}.cyc} (elementary divisors) and
+ \kbd{\var{bid}.gen} (generators).
+ 
+ If $\fl=1$ (default), the result is a \var{bid} structure without
+ generators.
+ 
+ If $\fl=2$, as $\fl=1$, but including generators, which wastes some time.
+ 
+ If $\fl=0$, \emph{deprecated}. Only outputs $(\Z_K/I)^*$ as an abelian group,
+ i.e as a 3-component vector $[h,d,g]$: $h$ is the order, $d$ is the vector of
+ SNF\sidx{Smith normal form} cyclic components and $g$ the corresponding
+ generators. This flag is deprecated: it is in fact slightly faster
+ to compute a true \var{bid} structure, which contains much more information.

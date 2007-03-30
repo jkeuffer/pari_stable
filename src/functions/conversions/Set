@@ -7,4 +7,12 @@ Help: Set({x=[]}): convert x into a set, i.e. a row vector with strictly
 Description: 
  ():vec	cgetg(1,t_VEC)
  (gen):vec	gtoset($1)
+Doc: 
+ converts $x$ into a set, i.e.~into a row
+ vector of character strings, with strictly increasing entries with respect to
+ lexicographic ordering. The components of $x$ are put in canonical form (type
+ \typ{STR}) so as to be easily sorted. To recover an ordinary \kbd{GEN} from
+ such an element, you can apply \tet{eval} to it.
+ 
+ \syn{gtoset}{x}.
 

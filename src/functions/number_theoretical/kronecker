@@ -10,4 +10,18 @@ Description:
  (int, int):small	kronecker($1, $2)
  (gen, small):gen	gkrogs($1, $2)
  (gen, gen):gen	gkronecker($1, $2)
+Doc: 
+ \idx{Kronecker symbol} $(x|y)$, where $x$ and $y$ must be of type integer. By
+ definition, this is the extension of \idx{Legendre symbol} to $\Z \times \Z$
+ by total multiplicativity in both arguments with the following special rules
+ for $y = 0, -1$ or $2$:
+ 
+ \item $(x|0) = 1$ if $|x| = 1$ and $0$ otherwise.
+ 
+ \item $(x|-1) = 1$ if $x \geq 0$ and $-1$ otherwise.
+ 
+ \item $(x|2) = 0$ if $x$ is even and $1$ if $x = 1,-1 \mod 8$ and $-1$
+ if $x=3,-3 \mod 8$.
+ 
+ \syn{kronecker}{x,y}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 

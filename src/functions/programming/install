@@ -1,6 +1,6 @@
 Function: install
 Class: highlevel
-Section: programming
+Section: programming/specific
 C-Name: gpinstall
 Prototype: vrrD"",r,D"",s,
 Help: install(name,code,{gpname},{lib}): load from dynamic library 'lib' the
@@ -8,3 +8,40 @@ Help: install(name,code,{gpname},{lib}): load from dynamic library 'lib' the
  argument code 'code'. If 'lib' is omitted use 'libpari.so'. If 'gpname' is
  omitted, use 'name'
 
+Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
+ the name \var{gpname} in this \kbd{gp} session, with argument code \var{code}
+ (see the Libpari Manual for an explanation of those). If \var{lib} is
+ omitted, uses \kbd{libpari.so}. If \var{gpname} is omitted, uses
+ \var{name}.
+ 
+ This function is useful for adding custom functions to the \kbd{gp} interpreter,
+ or picking useful functions from unrelated libraries. For instance, it
+ makes the function \tet{system} obsolete:
+ 
+ \bprog
+ ? install(system, vs, sys, "libc.so")
+ ? sys("ls gp*")
+ gp.c            gp.h            gp_rl.c
+ @eprog
+ 
+ But it also gives you access to all (non static) functions defined in the
+ PARI library. For instance, the function \kbd{GEN addii(GEN x, GEN y)} adds
+ two PARI integers, and is not directly accessible under \kbd{gp} (it is
+ eventually called by the \kbd{+} operator of course):
+ 
+ \bprog
+ ? install("addii", "GG")
+ ? addii(1, 2)
+ %1 = 3
+ @eprog\noindent
+ Re-installing a function will print a Warning, and update the prototype code
+ if needed, but will reload a symbol from the library, even it the latter has
+ been recompiled.
+ 
+ \misctitle{Caution:} This function may not work on all systems, especially
+ when \kbd{gp} has been compiled statically. In that case, the first use of an
+ installed function will provoke a Segmentation Fault, i.e.~a major internal
+ blunder (this should never happen with a dynamically linked executable).
+ Hence, if you intend to use this function, please check first on some
+ harmless example such as the ones above that it works properly on your
+ machine.

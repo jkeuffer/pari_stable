@@ -7,4 +7,35 @@ Help: bnrstark(bnr,{subgroup}): bnr being as output by
  the module in bnr and the given congruence subgroup (the trivial subgroup if
  omitted) using Stark's units. The ground field and the class field must be
  totally real.
+Doc: \var{bnr}
+ being as output by \kbd{bnrinit(,,1)}, finds a relative equation for the
+ class field corresponding to the modulus in \var{bnr} and the given
+ congruence subgroup (as usual, omit $\var{subgroup}$ if you want the whole
+ ray class group).
+ 
+ The routine uses \idx{Stark units} and needs to find a suitable auxiliary
+ conductor, which may not exist when the class field is not cyclic over the
+ base. In this case \kbd{bnrstark} is allowed to return a vector of
+ polynomials defining \emph{independent} relative extensions, whose compositum
+ is the requested class field. It was decided that it was more useful
+ to keep the extra information thus made available, hence the user has to take
+ the compositum herself.
+ 
+ The main variable of \var{bnr} must not be $x$, and the ground field and the
+ class field must be totally real. When the base field is $\Q$, the vastly
+ simpler \tet{galoissubcyclo} is used instead. Here is an example:
+ \bprog
+ bnf = bnfinit(y^2 - 3);
+ bnr = bnrinit(bnf, 5, 1);
+ pol = bnrstark(bnr)
+ @eprog\noindent
+ returns the ray class field of $\Q(\sqrt{3})$ modulo $5$. Usually, one wants
+ to apply to the result one of
+ \bprog
+ rnfpolredabs(bnf, pol, 16)     \\@com compute a reduced relative polynomial
+ rnfpolredabs(bnf, pol, 16 + 2) \\@com compute a reduced absolute polynomial
+ @eprog
+ 
+ \syn{bnrstark}{\var{bnr},\var{subgroup}}, where an omitted \var{subgroup}
+ is coded by \kbd{NULL}.
 

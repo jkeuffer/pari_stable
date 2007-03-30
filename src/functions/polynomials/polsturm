@@ -2,6 +2,14 @@ Function: polsturm
 Section: polynomials
 C-Name: sturmpart
 Prototype: lGDGDG
-Help: polsturm(x,{a},{b}): number of real roots of the polynomial x in the
+Help: polsturm(pol,{a},{b}): number of real roots of the polynomial pol in the
  interval]a,b] (which are respectively taken to be -oo or +oo when omitted)
+Doc: number of real roots of the real
+ polynomial \var{pol} in the interval $]a,b]$, using Sturm's algorithm. $a$
+ (resp.~$b$) is taken to be $-\infty$ (resp.~$+\infty$) if omitted.
+ 
+ \syn{sturmpart}{\var{pol},a,b}. Use \kbd{NULL} to omit an argument.
+ \funs{sturm}{\var{pol}} is equivalent to
+ \funs{sturmpart}{\var{pol},\kbd{NULL},\kbd{NULL}}. The result is a
+ \kbd{long}.
 

@@ -4,6 +4,15 @@ C-Name: gtovecsmall
 Prototype: DG
 Help: Vecsmall({x=[]}): transforms the object x into a VECSMALL. Empty
  vector if x is omitted
-Description:
+Description: 
  (gen):vecsmall                gtovecsmall($1)
+Doc: 
+ transforms the object $x$ into a row
+ vector of type \typ{VECSMALL}. This acts as \kbd{Vec}, but only on a
+ limited set of objects (the result must be representable as a vector of small
+ integers). In particular, polynomials and power series are forbidden.
+ If $x$ is a character string, a vector of individual characters in ASCII
+ encoding is returned (\tet{Strchr} yields back the character string).
+ 
+ \syn{gtovecsmall}{x}.
 

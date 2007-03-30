@@ -3,7 +3,7 @@ Class: highlevel
 Section: graphic
 C-Name: rectploth
 Prototype: LV=GGIpD0,L,D0,L,
-Help: plotrecth(w,X=xmin,xmax,expr,{flags=0},{n=0}): plot graph(s) for expr
+Help: plotrecth(w,X=a,b,expr,{flags=0},{n=0}): plot graph(s) for expr
  in rectwindow w, where expr is scalar for a single non-parametric plot, and
  a vector otherwise. If plotting is parametric, its length should be even and
  pairs of entries give points coordinates. If not, all entries but the first
@@ -12,4 +12,6 @@ Help: plotrecth(w,X=xmin,xmax,expr,{flags=0},{n=0}): plot graph(s) for expr
  x-axis, 16 omit y-axis, 32 omit frame, 64 do not join points, 128 plot both
  lines and points. n specifies the number of reference points on the graph
  (0=use default value). Returns a vector for the bounding box
+Doc: writes to
+ rectwindow $w$ the curve output of \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.
 
