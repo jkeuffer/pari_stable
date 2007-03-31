@@ -22,6 +22,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - indexrank, indexsort and indexlexsort now return t_VECSMALLs
   - besselk no longer admits a flag, the default implementation caters for
     all cases
+  - removed (obsolete) optional flag in ellap() and Mod()
 
 * Specific to the PARI library:
 ===============================

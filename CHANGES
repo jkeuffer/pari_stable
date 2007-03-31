@@ -30,6 +30,7 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
+    2- Removed optional flag in ellap() and Mod()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2006):

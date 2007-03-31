@@ -1,15 +1,12 @@
 Function: Mod
 Section: conversions
-C-Name: Mod0
-Prototype: GGD0,L,
+C-Name: gmodulo
+Prototype: GG
 Help: Mod(x,y): creates 'x modulo y'.
 Description: 
  (small, small):gen         gmodulss($1, $2)
- (small, small, #small):gen gmodulss($1, $2)
  (small, gen):gen           gmodulsg($1, $2)
- (small, gen, #small):gen   gmodulsg($1, $2)
  (gen, gen):gen             gmodulo($1, $2)
- (gen, gen, #small):gen     gmodulo($1, $2)
 Doc: 
  creates the PARI object
  $(x \mod y)$, i.e.~an intmod or a polmod. $y$ must be an integer or a
@@ -20,5 +17,3 @@ Doc:
  
  This function is not the same as $x$ \kbd{\%} $y$, the result of which is an
  integer or a polynomial.
- 
- \syn{gmodulo}{x,y}.
