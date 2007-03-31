@@ -188,7 +188,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | lvalue KDE expr {$$=newopcall(OPde,$1,$3,&@$);}
     | lvalue KDRE expr {$$=newopcall(OPdre,$1,$3,&@$);}
     | lvalue KEUCE expr {$$=newopcall(OPeuce,$1,$3,&@$);}
-    | lvalue KMODE expr {$$=newopcall(OPmode,$1,$3,&@$);}
+    | lvalue '%' '=' expr %prec KMODE {$$=newopcall(OPmode,$1,$4,&@$);}
     | lvalue KSLE expr {$$=newopcall(OPsle,$1,$3,&@$);}
     | lvalue KSRE expr {$$=newopcall(OPsre,$1,$3,&@$);}
     | lvalue KPE expr {$$=newopcall(OPpe,$1,$3,&@$);}
@@ -200,7 +200,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr KAND expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr '&'  expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr KEQ  expr  {$$=newopcall(OPeq,$1,$3,&@$);}
-    | expr KNE  expr  {$$=newopcall(OPne,$1,$3,&@$);}
+    | expr '!' '=' %prec KNE  expr  {$$=newopcall(OPne,$1,$4,&@$);}
     | expr '<' '>' %prec KNE  expr  {$$=newopcall(OPne,$1,$4,&@$);}
     | expr KGE  expr  {$$=newopcall(OPge,$1,$3,&@$);}
     | expr '>'  expr  {$$=newopcall(OPg,$1,$3,&@$);}

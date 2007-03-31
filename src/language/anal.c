@@ -680,8 +680,6 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     {
     case '=':
       *lex+=2; yylloc->end = *lex; return KEQ;
-    case '!':
-      *lex+=2; yylloc->end = *lex; return KNE;
     case '>':
       *lex+=2; yylloc->end = *lex; return KGE;
     case '<':
@@ -692,8 +690,6 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
       *lex+=2; yylloc->end = *lex; return KDE;
     case '\\':
       *lex+=2; yylloc->end = *lex; return KEUCE;
-    case '%':
-      *lex+=2; yylloc->end = *lex; return KMODE;
     case '+':
       *lex+=2; yylloc->end = *lex; return KPE;
     case '-':
