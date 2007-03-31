@@ -11,9 +11,11 @@ Done for version 2.4.2 (released ??/??/2006):
     a special marker hence returned an invalid object, which could be
     propagated to higher level public functions.
     5- sqrtn(Mod(a,p),..) was broken in 2.4.1
+BA  6- bitnegimply(1,2^65) returned a wrong result [#560]
 
   Changed
-BA  1- The combined GP parser/evaluator has been replaced by a bytecode compiler       and a bytecode evaluator
+BA  1- The combined GP parser/evaluator has been replaced by a bytecode
+       compiler and a bytecode evaluator
 BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
        'I': closure whose value is ignored, like in for() loop
        'E': closure whose value is used, like in sum() loop

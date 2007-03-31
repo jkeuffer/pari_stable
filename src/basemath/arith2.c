@@ -1690,7 +1690,7 @@ ibitxor(GEN x, GEN y)
 GEN
 ibitnegimply(GEN x, GEN y)
 {
-  long lx, ly, lout, lin;
+  long lx, ly, lin;
   long *xp, *yp, *outp;
   GEN out;
   long i;
@@ -1699,9 +1699,8 @@ ibitnegimply(GEN x, GEN y)
 
   lx = lgefint(x); xp = int_LSW(x);
   ly = lgefint(y); yp = int_LSW(y);
-  if (lx < ly) { lin = lx; lout = ly; } else { lin = ly; lout = lx; }
-  /* lout > 2 */
-  out = cgetipos(lout);
+  lin = min(lx,ly);
+  out = cgetipos(lx);
   outp = int_LSW(out);
   for (i=2; i<lin; i++)
   {
@@ -1715,12 +1714,6 @@ ibitnegimply(GEN x, GEN y)
     *outp = *xp;
     outp  = int_nextW(outp);
     xp    = int_nextW(xp);
-  }
-  for (   ;i<ly;i++)
-  {
-    *outp = ~(*yp);
-    outp  = int_nextW(outp);
-    yp    = int_nextW(yp);
   }
   if ( !*int_MSW(out) ) out = int_normalize(out, 1);
   return out;
