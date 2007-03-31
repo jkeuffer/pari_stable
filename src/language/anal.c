@@ -365,7 +365,7 @@ install(void *f, char *name, char *code)
   entree *ep = is_entry_intern(name, functions_hash, &hash);
 
   arity=check_proto(code);
-  if (ep)
+  if (ep && ep->valence != EpNEW)
   {
     if (ep->valence != EpINSTALL)
       pari_err(talker,"[install] identifier '%s' already in use", name);
