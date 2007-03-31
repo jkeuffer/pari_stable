@@ -1419,6 +1419,36 @@ cmp_pol(GEN x, GEN y)
   return cmp_pol_aux((void*)&gcmp,x,y);
 }
 
+/* merge fx, fy two factorizations, whose 1st column is sorted in strictly
+ * increasing order wrt cmp. Keep 0 exponents. */
+GEN
+merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN))
+{
+  GEN x = gel(fx,1), e = gel(fx,2), M, E; 
+  GEN y = gel(fy,1), f = gel(fy,2);
+  long ix, iy, m, lx = lg(x), ly = lg(y), l = lx+ly-1;
+
+  M = cgetg(l, t_COL);
+  E = cgetg(l, t_COL);
+
+  m = ix = iy = 1;
+  while (ix<lx && iy<ly)
+  {
+    int s = cmp(data, gel(x,ix), gel(y,iy));
+    if (s < 0)
+    { M[m] = x[ix]; E[m] = e[ix]; ix++; }
+    else if (s == 0)
+    { M[m] = x[iy]; gel(E,m) = addii(gel(e,ix), gel(f,iy)); iy++; ix++; }
+    else
+    { M[m] = y[iy]; E[m] = f[iy]; iy++; }
+    m++;
+  }
+  while (ix<lx) { M[m] = x[ix]; E[m] = e[ix]; ix++; m++; }
+  while (iy<ly) { M[m] = y[iy]; E[m] = f[iy]; iy++; m++; }
+  setlg(M, m);
+  setlg(E, m); return mkmat2(M, E);
+}
+
 /* sort generic factorization, in place */
 GEN
 sort_factor(GEN y, void *data, int (*cmp)(void *,GEN,GEN))

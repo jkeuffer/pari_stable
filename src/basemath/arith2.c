@@ -951,6 +951,21 @@ factoru_pow(ulong n)
   avma = lbot; return gerepileupto(ltop,f);
 }
 
+/* factor p^n - 1 */
+GEN
+factor_pn_1(GEN p, GEN n)
+{
+  pari_sp av = avma;
+  GEN A = Z_factor(subis(p,1)), d = divisorsu( itou(n) );
+  long i;
+  for(i=2; i<lg(d); i++)
+  {
+    GEN B = Z_factor(poleval(polcyclo(d[i],0), p));
+    A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
+  }
+  return gerepilecopy(av, A);
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                    BASIC ARITHMETIC FUNCTIONS                     **/
@@ -1337,6 +1352,27 @@ divisors(GEN n)
     e = (GEN)t;
   }
   return gerepileupto(av, e);
+}
+
+GEN
+divisorsu(ulong n)
+{
+  pari_sp av = avma;
+  long i, j, l;
+  ulong nbdiv;
+  GEN d, t, t1, t2, t3, P, e, fa = factoru(n);
+
+  P = gel(fa,1); l = lg(P);
+  e = gel(fa,2);
+  nbdiv = 1;
+  for (i=1; i<l; i++) nbdiv *= 1+e[i];
+  d = t = cgetg(nbdiv+1,t_VECSMALL);
+  *++d = 1;
+  for (i=1; i<l; i++)
+    for (t1=t,j=e[i]; j; j--,t1=t2)
+      for (t2=d, t3=t1; t3<t2; ) *(++d) = *(++t3) * P[i];
+  vecsmall_sort(t);
+  return gerepileupto(av, t);
 }
 
 GEN

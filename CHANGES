@@ -27,6 +27,7 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
 
   Added
     1- library functions expu, adduu, subuu
+    2- library functions divisorsu, factor_pn_1, merge_factor
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

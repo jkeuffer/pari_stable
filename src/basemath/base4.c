@@ -2357,7 +2357,7 @@ idealappr0(GEN nf, GEN x, long fl) {
 
 /* merge a^e b^f. Assume a and b sorted. Keep 0 exponents */
 static void
-merge_factor(GEN *pa, GEN *pe, GEN b, GEN f)
+merge_fact(GEN *pa, GEN *pe, GEN b, GEN f)
 {
   GEN A, E, a = *pa, e = *pe;
   long k, i, la = lg(a), lb = lg(b), l = la+lb-1;
@@ -2413,7 +2413,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     L = vecpermute(L, p);
     e = vecpermute(e, p);
     w = vecpermute(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
-    merge_factor(&L, &e, gel(fa,1), gel(fa,2));
+    merge_fact(&L, &e, gel(fa,1), gel(fa,2));
     i = lg(L);
     w = shallowconcat(w, zerovec(i - r));
     r = i;

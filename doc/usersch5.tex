@@ -1455,10 +1455,16 @@ coefficients such that $\kbd{au} + \kbd{bv} = d$.
 is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
 containing the prime divisors of $n$, and the $v_p(n)$.
 
+\fun{GEN}{divisorsu}{ulong n}, returns the divisors of $n$ in a
+\typ{VECSMALL}, sorted by increasing order.
+
 \fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
 is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
 \typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
 and the $p^{v_p(n)}$.
+
+\fun{GEN}{factor_pn_1}{GEN p, GEN n} returns the factorization of $p^n-1$,
+where $p$ and $n$ are positive integers.
 
 \fun{GEN}{gcdii}{GEN x, GEN y}, returns the GCD of the \typ{INT}s \kbd{x} and
 \kbd{y}.
@@ -3101,6 +3107,14 @@ the original \kbd{x}.
 assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
 is made) according to the comparison function \kbd{cmp} applied to its first
 column. 
+
+\fun{GEN}{merge_factor}{GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN)}:
+assuming \kbd{fx} and \kbd{fy} are factorization matrices for $X$ and $Y$
+sorted with respect to the comparison function \kbd{cmp} (see
+\tet{sort\_factor}), returns the factorization of $X * Y$.
+
+Zero exponents in the latter factorization are preserved, e.g. when merging
+the factorization of $2$ and $1/2$, the result is $2^0$.
 
 \fun{int}{cmp_nodata}{void *data, GEN x, GEN y}. This function is a hack
 used to pass an existing basic comparison function lacking the \kbd{data}

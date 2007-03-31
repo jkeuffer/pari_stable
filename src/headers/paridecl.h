@@ -482,6 +482,8 @@ GEN     coredisc(GEN n);
 GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
 GEN     divisors(GEN n);
+GEN     divisorsu(ulong n);
+GEN     factor_pn_1(GEN p, GEN n)
 GEN     factorint(GEN n, long flag);
 GEN     factoru(ulong n);
 GEN     factoru_pow(ulong n);
@@ -832,6 +834,7 @@ GEN     laplace(GEN x);
 GEN     lexsort(GEN x);
 GEN     mathilbert(long n);
 GEN     matqpascal(long n, GEN q);
+GEN     merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN));
 GEN     modreverse_i(GEN a, GEN T);
 GEN     numtoperm(long n, GEN x);
 int     pari_compare_lg(GEN a,GEN b);
