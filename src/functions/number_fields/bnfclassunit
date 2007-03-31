@@ -59,5 +59,3 @@ Doc: \emph{this function is DEPRECATED, use \kbd{bnfinit}}.
  
  If $\fl=2$, the fundamental units and roots of unity are not computed.
  Hence the result has only 7 components, the first seven ones.
- 
- \syn{bnfclassunit0}{P,\fl,\var{tech},\var{prec}}.

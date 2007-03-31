@@ -10,7 +10,3 @@ Doc: if \var{pr} is omitted,
  if $x^2 - a y^2 - b z^2$ has a non trivial solution $(x,y,z)$ in $\var{nf}$,
  and $-1$ otherwise. Otherwise compute the local symbol modulo the prime ideal
  \var{pr} (as output by \kbd{idealprimedec}).
- 
- \syn{nfhilbert}{\var{nf},a,b,\var{pr}}, where an omitted \var{pr} is coded
- as \kbd{NULL}.
-

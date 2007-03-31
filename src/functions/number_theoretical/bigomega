@@ -8,6 +8,3 @@ Description:
  (gen):gen	gbigomega($1)
 Doc: number of prime divisors of $|x|$ counted with
  multiplicity. $x$ must be an integer.
- 
- \syn{bigomega}{x}, the result is a \kbd{long}.
-

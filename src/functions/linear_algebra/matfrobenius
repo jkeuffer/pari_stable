@@ -12,6 +12,3 @@ Doc: returns the Frobenius form of
  a vectr of polynomials in the variable \kbd{v}.  If $\fl=2$, returns a
  two-components vector [F,B] where \kbd{F} is the Frobenius form and \kbd{B} is
  the basis change so that $M=B^{-1}FB$.
- 
- \syn{matfrobenius}{M,\fl,v}, where $v$ is the variable number.
-

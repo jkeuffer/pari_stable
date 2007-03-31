@@ -45,7 +45,3 @@ Doc: \var{bnr} being as output by \kbd{bnrinit} or a list of cyclic components
  @eprog\noindent
  will produce their equations. (For a general base field, you would
  have to rely on \tet{bnrstark}, or \tet{rnfkummer}.)
- 
- \syn{subgrouplist0}{\var{bnr},\var{bound},\fl}, where $\fl$
- is a long integer, and an omitted \var{bound} is coded by \kbd{NULL}.
-

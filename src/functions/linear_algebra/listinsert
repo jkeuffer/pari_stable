@@ -12,6 +12,3 @@ Doc: inserts the object $x$ at
  to the right. This and \kbd{listput} are the only commands which enable
  you to increase a list's effective length (as long as it remains under
  the maximal length specified at the time of the \kbd{listcreate}).
- 
- This function is useless in library mode.
-

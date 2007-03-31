@@ -22,6 +22,3 @@ Doc: replace the simple variable $y$ by the argument $z$ in the ``polynomial''
  @eprog\noindent
  If $x$ is a power series, $z$ must be either a polynomial, a power
  series, or a rational function.
- 
- \syn{gsubst}{x,y,z}, where $y$ is the variable number.
-

@@ -11,6 +11,3 @@ Doc: given a polynomial
  \kbd{rnfpseudobasis}$(\var{nf},\var{pol})$ or similar, gives
  $[[\var{neworder}],U]$, where \var{neworder} is a reduced order and $U$ is
  the unimodular transformation matrix.
- 
- \syn{rnflllgram}{\var{nf},\var{pol},\var{order},\var{prec}}.
-

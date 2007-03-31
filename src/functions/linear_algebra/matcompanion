@@ -5,6 +5,3 @@ Prototype: G
 Help: matcompanion(x): companion matrix to polynomial x
 Doc: 
  the left companion matrix to the polynomial $x$.
- 
- \syn{assmat}{x}.
-

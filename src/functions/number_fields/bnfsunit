@@ -27,5 +27,3 @@ Doc: computes the fundamental $S$-units of the
  the cyclic components and the generators).
  
  $v[6]$ is a copy of $S$.
- 
- \syn{bnfsunit}{\var{bnf},S,\var{prec}}.

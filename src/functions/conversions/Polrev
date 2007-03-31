@@ -22,6 +22,3 @@ Doc:
  @eprog
  The reciprocal function of \kbd{Pol} (resp.~\kbd{Polrev}) is \kbd{Vec} (resp.~
  \kbd{Vecrev}).
- 
- \syn{gtopolyrev}{x,v}, where $v$ is a variable number.
-

@@ -55,6 +55,3 @@ Doc: concatenation of $x$ and $y$. If $x$ or $y$ is
  
  [1 2 3 4]
  @eprog
- 
- \syn{concat}{x,y}.
-

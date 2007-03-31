@@ -18,7 +18,3 @@ Doc: relative equation for the ray
  
  For $D>0$, uses Stark's conjecture, and a vector of relative equations may be
  returned. See \tet{bnrstark} for more details.
- 
- \syn{quadray}{D,f,lambda,prec}, where an omitted \kbd{lambda} is coded as
- \kbd{NULL}.
-

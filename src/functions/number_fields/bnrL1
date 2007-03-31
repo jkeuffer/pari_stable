@@ -54,7 +54,3 @@ Doc: \var{bnr} being
  $2$. Note that the ray class group modulo $2$ is in fact the class
  group, so \kbd{bnrL1(bnr2,0)} returns exactly the same answer as
  \kbd{bnrL1(bnr,0)}.
- 
- \syn{bnrL1}{\var{bnr},\var{subgroup},\fl,\var{prec}}, where an omitted
- \var{subgroup} is coded as \kbd{NULL}.
-

@@ -54,7 +54,3 @@ Doc: computes the subextension
  @eprog\noindent
  Setting \kbd{L = subgrouplist(bnr, IndexBound)} would produce subfields of exact
  conductor $n\infty$.
- 
- \syn{galoissubcyclo}{N,H,fl,v} where \var{fl} is a C long integer, and
- \var{v} a variable number.
-

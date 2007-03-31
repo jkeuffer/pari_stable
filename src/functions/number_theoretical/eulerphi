@@ -6,9 +6,5 @@ Help: eulerphi(x): Euler's totient function of x
 Description: 
  (int):int	phi($1)
  (gen):gen	gphi($1)
-Doc: Euler's $\phi$
- (totient)\sidx{Euler totient function} function of $|x|$, in other words
- $|(\Z/x\Z)^*|$. $x$ must be of type integer.
- 
- \syn{phi}{x}.
-
+Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of $|x|$,
+ in other words $|(\Z/x\Z)^*|$. $x$ must be of type integer.

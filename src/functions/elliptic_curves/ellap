@@ -5,8 +5,7 @@ Prototype: GGD0,L,
 Help: ellap(E,p,{flag=0}): computes a_p for the elliptic curve E using
  Shanks-Mestre's method. flag is optional and can be set to 0 (default) or 1
  (use Jacobi symbols)
-Doc: 
- computes the $a_p$ corresponding to the
+Doc: computes the $a_p$ corresponding to the
  elliptic curve $E$ and the prime number $p$. These are defined by the
  equation $\#E(\F_p) = p+1 - a_p$, where $\#E(\F_p)$ stands for the number
  of points of the curve $E$ over the finite field $\F_p$. When $\fl$ is $0$,

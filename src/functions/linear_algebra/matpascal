@@ -11,4 +11,3 @@ Doc: creates as a matrix the lower triangular
  
  \syn{matqpascal}{x,q}, where $x$ is a \kbd{long} and $q=\kbd{NULL}$ is used
  to omit $q$. Also available is \funs{matpascal}{x}.
-

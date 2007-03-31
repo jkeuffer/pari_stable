@@ -17,6 +17,3 @@ Doc:
  If you want to put an element into an occupied cell, i.e.~if you don't want to
  change the effective length, you can consider the list as a vector and use
  the usual \kbd{list[n] = x} construct.
- 
- This function is useless in library mode.
-

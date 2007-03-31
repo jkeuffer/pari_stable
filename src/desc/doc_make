@@ -35,25 +35,48 @@ while (<FILE>)
 
       if ($doc !~ /\\syn\w*{/ && $sec !~ /programming/) {
         my ($Cname) = $fun->{'C-Name'};
-        my ($proto) = $fun->{Prototype};
-        my ($w) = $args;
-        $w =~ s/[{}]//g;
-        $w =~ s/=[^,)]*//g; # default values
+        my (@proto) = split(//, $fun->{Prototype});
+        $args =~ s/[{}&]//g;
+        $args =~ s/=[^,\)]*//g; # delete default values
+        my (@ARGS) = split(/, */, $args);
+#        print "ZZZ" . join ("|", @ARGS). "\n";
 
         $type = "GEN";
-        $type = "long" if ($proto =~ /^l/);
-        $type = "void" if ($proto =~ /^v/);
-
-        $args = '';
-        for ( split(/, */, $w) ) 
+        $args = $post = '';
+        for ($i = 0; $i <= $#proto; )
         {
-          $args .= "GEN $_,"
+          my ($c) = $proto[$i++];
+          if ($c eq 'l') { $type = "long"; next; }
+          if ($c eq 'v') { $type = "void"; next; }
 
+          if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS); next;}
+          if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
+          if ($c eq 'p') {$args .= ", long prec"; next;}
+          if ($c eq 'P') {$args .= ", long precdl"; next;}
+          if ($c eq 'n') {$args .= ", long " . shift(@ARGS); next;}
+          if ($c eq '') { next; }
+          if ($c eq 'D') {
+            $c = $proto[$i++];
+            if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS) ." = NULL"; next;}
+            if ($c eq '&') {$args .= ", GEN *". shift(@ARGS) ." = NULL"; next;}
+            if ($c eq 'n') {
+              my ($v) = shift(@ARGS);
+              $args .= ", long $v = -1";
+              $post = ", where \\kbd{$v} is a variable number";
+              next;
+            }
+            if ($c eq 'V') {
+              $args .= ", entree *". shift(@ARGS) ." = NULL"; next;
+            }
+            if ($c eq 'E' || $c eq 'I') {
+              $args .= ", char *". shift(@ARGS) ." = NULL"; next;
+            }
+            while (($c = $proto[$i++]) ne ',') {}
+          }
         }
-        $args .= " long prec" if ($proto =~ /p$/);
-        $args =~ s/,$//;
+        $args =~ s/^, //;
 
-        $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}."
+        $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}$post."
       }
       print "\n\\subsecidx{$_}$v:\\label{se:$_} $doc\n";
     }

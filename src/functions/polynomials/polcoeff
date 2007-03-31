@@ -9,12 +9,7 @@ Help: polcoeff(x,s,{v}): coefficient of degree s of x, or the s-th component
 Description: 
  (pol, 0):gen:copy      constant_term($1)
  (gen, small, ?var):gen polcoeff0($1, $2, $3)
-Doc: coefficient of degree $s$ of the
- polynomial $x$, with respect to the main variable if $v$ is omitted, with
- respect to $v$ otherwise. Also applies to power series, scalars (polynomial
- of degree $0$), and to rational functions provided the denominator is a
- monomial.
- 
- \syn{polcoeff0}{x,s,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
- as $-1$. Also available is \funs{truecoeff}{x,v}.
-
+Doc: coefficient of degree $s$ of the polynomial $x$, with respect to the
+ main variable if $v$ is omitted, with respect to $v$ otherwise. Also applies
+ to power series, scalars (polynomial of degree $0$), and to rational
+ functions provided the denominator is a monomial.

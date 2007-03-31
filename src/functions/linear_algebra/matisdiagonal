@@ -5,6 +5,3 @@ Prototype: lG
 Help: matisdiagonal(x): true(1) if x is a diagonal matrix, false(0)
  otherwise
 Doc: returns true (1) if $x$ is a diagonal matrix, false (0) if not.
- 
- \syn{isdiagonal}{x}, and this returns a \kbd{long} integer.
-

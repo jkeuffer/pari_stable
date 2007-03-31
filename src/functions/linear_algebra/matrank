@@ -4,6 +4,3 @@ C-Name: rank
 Prototype: lG
 Help: matrank(x): rank of the matrix x
 Doc: rank of the matrix $x$.
- 
- \syn{rank}{x}, and the result is a \kbd{long}.
-

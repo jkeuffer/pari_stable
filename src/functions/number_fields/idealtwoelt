@@ -15,7 +15,3 @@ Doc: computes a two-element
  
  Note that when an explicit $a$ is given, we use an asymptotically faster
  method, however in practice it is usually slower.
- 
- \syn{ideal_two_elt0}{\var{nf},x,a}, where an omitted $a$ is entered as
- \kbd{NULL}.
-

@@ -19,7 +19,3 @@ Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
  
  If a third argument $\&n$ is given and $x$ is indeed a $k$-th power, sets
  $n$ to a $k$-th root of $x$.
- 
- \syn{ispower}{x, k, \&n}, the result is a \kbd{long}. Omitted $k$ or $n$
- are coded as \kbd{NULL}.
-

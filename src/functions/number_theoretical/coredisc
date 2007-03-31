@@ -12,8 +12,7 @@ Doc: if $n$ is a non-zero integer written as
  $n$ is not congruent to 0 or 1 modulo 4, $f$ will be a half integer and not
  an integer.
  
- \syn{coredisc0}{n,\fl}.
- Also available are
+ \syn{coredisc0}{n,\fl}. Also available are
  \funs{coredisc}{n} (= \funs{coredisc}{n,0}) and
  \funs{coredisc2}{n} (= \funs{coredisc}{n,1}).
 

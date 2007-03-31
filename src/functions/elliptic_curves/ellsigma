@@ -19,5 +19,3 @@ Doc:
  If $\fl=1$, computes an (arbitrary) determination of $\log(\sigma(z))$.
  
  If $\fl=2,3$, same using the product expansion instead of theta series.
-
- \syn{ellsigma}{E,z,\fl}

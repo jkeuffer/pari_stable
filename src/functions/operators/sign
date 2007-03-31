@@ -8,6 +8,3 @@ Description:
  (gen):small        gsigne($1)
 Doc: \idx{sign} ($0$, $1$ or $-1$) of $x$, which must be of
  type integer, real or fraction.
- 
- \syn{gsigne}{x}. The result is a \kbd{long}.
-

@@ -10,6 +10,3 @@ Doc: $a1$, $a2$, $a3$ represent
  an extension of the base field, given by class field theory for some modulus
  encoded in the parameters. Outputs 1 if this modulus is the conductor, and 0
  otherwise. This is slightly faster than \kbd{bnrconductor}.
- 
- \syn{bnrisconductor}{a1,a2,a3} and the result is a \kbd{long}.
-

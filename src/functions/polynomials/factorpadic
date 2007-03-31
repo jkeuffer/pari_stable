@@ -15,6 +15,3 @@ Doc: $p$-adic factorization
  
  If $\fl=1$, use an algorithm due to \idx{Buchmann} and \idx{Lenstra}, which is
  usually less efficient.
- 
- \syn{factorpadic4}{\var{pol},p,r}, where $r$ is a \kbd{long} integer.
-

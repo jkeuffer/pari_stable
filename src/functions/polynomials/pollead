@@ -9,10 +9,6 @@ Description:
  (pol):gen:copy         leading_term($1)
  (gen):gen              pollead($1, -1)
  (gen, var):gen         pollead($1, $2)
-Doc: leading coefficient of the polynomial or
- power series $x$. This is computed with respect to the main variable of $x$
- if $v$ is omitted, with respect to the variable $v$ otherwise.
- 
- \syn{pollead}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
- $-1$. Also available is \funs{leading_term}{x}.
-
+Doc: leading coefficient of the polynomial or power series $x$. This is
+  computed with respect to the main variable of $x$ if $v$ is omitted, with
+  respect to the variable $v$ otherwise.

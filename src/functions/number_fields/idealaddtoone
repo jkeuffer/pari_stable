@@ -15,7 +15,3 @@ Doc: $x$ and $y$ being two co-prime
  $v$ is a $k$-component vector of ideals (given in any form) which sum to
  $\Z_K$. This outputs a $k$-component vector $e$ such that $e[i]\in x[i]$ for
  $1\le i\le k$ and $\sum_{1\le i\le k}e[i]=1$.
- 
- \syn{idealaddtoone0}{\var{nf},x,y}, where an omitted $y$ is coded as
- \kbd{NULL}.
-

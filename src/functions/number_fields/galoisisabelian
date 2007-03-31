@@ -10,6 +10,3 @@ Doc: \var{gal} being as output by \kbd{galoisinit}, return $0$ if
  \kbd{gal.gen} if $fl=0$, $1$ if $fl=1$.
  
  This command also accepts subgroups returned by \kbd{galoissubgroups}.
- 
- \syn{galoisisabelian}{\var{gal},\var{fl}} where \var{fl} is a C long integer.
-

@@ -9,6 +9,3 @@ Doc: relative version of \kbd{polred}.
  list of relative polynomials defining some subfields, hopefully simpler and
  containing the original field. In the present version \vers, this is slower
  and less efficient than \kbd{rnfpolredabs}.
- 
- \syn{rnfpolred}{\var{nf},\var{pol},\var{prec}}.
-

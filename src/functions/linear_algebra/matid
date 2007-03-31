@@ -6,10 +6,3 @@ Help: matid(n): identity matrix of order n (n C-integer)
 Description: 
  (small):vec    matid($1)
 Doc: creates the $n\times n$ identity matrix.
- 
- \syn{matid}{n} where $n$ is a \kbd{long}.
- 
- Related functions are \funs{gscalmat}{x,n}, which creates $x$ times the
- identity matrix ($x$ being a \kbd{GEN} and $n$ a \kbd{long}), and
- \funs{gscalsmat}{x,n} which is the same when $x$ is a \kbd{long}.
-

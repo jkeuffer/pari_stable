@@ -22,4 +22,3 @@ Doc: complex roots of the polynomial
  be the default root-finding function in PARI until version 1.39.06.
  
  \syn{roots}{\var{pol},\var{prec}} or \funs{rootsold}{\var{pol},\var{prec}}.
-

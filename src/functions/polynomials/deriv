@@ -16,9 +16,3 @@ Doc:
  modulus); in other words, assuming a polmod represents an element of
  $R[X]/(T(X))$, the variable $X$ is a mute variable and the derivative is
  taken with respect to the main variable used in the base ring $R$.
- 
- \syn{deriv}{x,v}, where $v$ is a \kbd{long}, and an omitted $v$ is coded as
- $-1$. When $x$ is a \typ{POL}, \funs{derivpol}{x} is a shortcut for
- $\kbd{deriv}(x, -1)$. When $x$ is a \typ{SER}, \funs{derivser}{x} is a
- shortcut for $\kbd{deriv}(x, -1)$.
-

@@ -27,6 +27,3 @@ Doc:
  
  If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be an
  \var{sell}.
- 
- \syn{elltors0}{E,flag}.
-

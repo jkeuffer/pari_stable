@@ -7,6 +7,3 @@ Doc:
  \idx{adjoint matrix} of $x$, i.e.~the matrix $y$
  of cofactors of $x$, satisfying $x*y=\det(x)*\Id$. $x$ must be a
  (non-necessarily invertible) square matrix.
- 
- \syn{adj}{x}.
-

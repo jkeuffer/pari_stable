@@ -59,8 +59,7 @@ Doc: general factorization function.
  @eprog\noindent
  See also \tet{factornf} and \tet{nffactor}.
  
- \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
- Also available are
+ \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer. Also available are
  \funs{factor}{x} (= \funs{factor0}{x,-1}),
  \funs{smallfact}{x} (= \funs{factor0}{x,0}).
 

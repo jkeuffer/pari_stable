@@ -15,6 +15,3 @@ Doc:
  vector for $n$.
  
  See \secref{se:bitand} for the behaviour at negative arguments.
- 
- \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
-

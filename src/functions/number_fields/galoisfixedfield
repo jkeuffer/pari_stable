@@ -35,6 +35,3 @@ Doc: \var{gal} being be a Galois field as output by \tet{galoisinit} and
  %2 = [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
  @eprog\noindent
  computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
- 
- \syn{galoisfixedfield}{\var{gal},\var{perm},\fl,$v$}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
-

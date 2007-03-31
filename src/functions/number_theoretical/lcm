@@ -34,6 +34,3 @@ Doc: least common multiple of $x$ and $y$, i.e.~such
  ? l = v[1]; for (i = 1, #v, l = lcm(l, v[i]))
  time = 833 ms.
  @eprog
- 
- \syn{glcm}{x,y}.
-

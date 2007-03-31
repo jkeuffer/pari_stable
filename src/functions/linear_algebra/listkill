@@ -6,6 +6,3 @@ Help: listkill(list): kills list
 Doc: kill \var{list}. This deletes all
  elements from \var{list} and sets its effective length to $0$. The maximal
  length is not affected.
- 
- This function is useless in library mode.
-

@@ -22,5 +22,3 @@ Doc: creates a row vector (type
  v = vector(n); vector(n, i, i++)            ----> [2, 3, 4]
  v = vector(n); for (i = 1, n, v[i] = i++)   ----> [2, 0, 4]
  @eprog\noindent
- 
- \synt{vecteur}{GEN nmax, entree *ep, char *expr}.

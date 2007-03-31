@@ -8,6 +8,3 @@ Doc: sorts \var{list} (which must
  be of type \typ{LIST}) in place. If $\fl$ is non-zero, suppresses all repeated
  coefficients. This is much faster than the \kbd{vecsort} command since no
  copy has to be made.
- 
- This function is useless in library mode.
-

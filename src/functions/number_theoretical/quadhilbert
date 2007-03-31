@@ -22,6 +22,3 @@ Doc: relative equation defining the
  If $D > 0$ \idx{Stark units} are used and (in rare cases) a
  vector of extensions may be returned whose compositum is the requested class
  field. See \kbd{bnrstark} for details.
- 
- \syn{quadhilbert}{D,pq,\var{prec}}.
-

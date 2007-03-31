@@ -60,4 +60,3 @@ Doc: extraction of components of the
  @eprog
  
  \syn{extract}{x,y} or \funs{matextract}{x,y,z}.
-

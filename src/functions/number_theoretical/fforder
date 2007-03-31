@@ -4,9 +4,5 @@ C-Name: fforder
 Prototype: GDG
 Help: fforder(x,{o}): multiplicative order of the finite field element x.
  Optional o is assumed to be a multiple of the order of the element
-Doc: multiplicative order of the finite field
- element $x$.  If $o$ is present, it is assumed to be a multiple of the order of
- the element.
- 
- \syn{fforder}{x,o} where an omitted $o$ is coded as \kbd{NULL}.
-
+Doc: multiplicative order of the finite field element $x$.  If $o$ is
+ present, it is assumed to be a multiple of the order of the element.

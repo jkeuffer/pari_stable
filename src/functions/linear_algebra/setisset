@@ -9,6 +9,3 @@ Doc:
  not. In PARI, a set is simply a row vector whose entries are strictly
  increasing. To convert any vector (and other objects) into a set, use the
  function \kbd{Set}.
- 
- \syn{setisset}{x}, and this returns a \kbd{long}.
-

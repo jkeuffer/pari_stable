@@ -11,7 +11,3 @@ Description:
 Doc: discriminant of the polynomial
  \var{pol} in the main variable is $v$ is omitted, in $v$ otherwise. The
  algorithm used is the \idx{subresultant algorithm}.
- 
- \syn{poldisc0}{x,v}. Also available is \funs{discsr}{x}, equivalent
- to \kbd{poldisc0(x,-1)}.
-

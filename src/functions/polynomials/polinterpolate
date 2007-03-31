@@ -13,7 +13,3 @@ Doc: given the data vectors
  at~$x$. If $ya$ is omitted, return the polynomial interpolating the
  $(i,xa[i])$. If present, $e$ will contain an error estimate on the returned
  value.
- 
- \syn{polint}{xa,ya,v,\&e}, where $e$ will contain an error estimate on the
- returned value.
-

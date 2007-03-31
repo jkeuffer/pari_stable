@@ -21,8 +21,3 @@ Doc: \var{bnr}
  of ramification in Kummer extensions of prime degree. If your extension does
  not have prime degree, for the time being, you have to split it by hand as a
  tower / compositum of such extensions.
- 
- \syn{rnfkummer}{\var{bnr},\var{subgroup},\var{deg},\var{prec}}, where
- \var{deg} is a \kbd{long} and an omitted \var{subgroup} is coded as
- \kbd{NULL}
-

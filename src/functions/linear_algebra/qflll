@@ -59,4 +59,3 @@ Doc: \idx{LLL} algorithm applied to the
  \syn{qflll0}{x,\fl,\var{prec}}. Also available are
  \funs{lll}{x,\var{prec}} ($\fl=0$), \funs{lllint}{x} ($\fl=1$), and
  \funs{lllkerim}{x} ($\fl=4$).
-

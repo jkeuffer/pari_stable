@@ -8,8 +8,5 @@ Help: zncoppersmith(P, N, X, {B=N}): finds all integers x0
 Doc: finds all integers $x_0$ with $|x_0| \leq X$ such that
  $$\gcd(N, P(x_0)) \geq B.$$
  If $N$ is prime or a prime power, \tet{polrootsmod} or \tet{polrootspadic}
- will be much faster. $X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log
- N))$.
- 
- \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
-
+ will be much faster. $X$ must be smaller than
+ $\exp(\log^2 B / (\deg(P) \log N))$.

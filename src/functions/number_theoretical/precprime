@@ -11,6 +11,3 @@ Doc: finds the largest pseudoprime (see
  Returns 0 if $x\le1$. Note that if $x$ is a prime, this function returns $x$
  and not the largest prime strictly smaller than $x$. To rigorously prove that
  the result is prime, use \kbd{isprime}.
- 
- \syn{precprime}{x}.
-

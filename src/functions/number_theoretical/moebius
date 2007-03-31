@@ -7,6 +7,3 @@ Description:
  (int):small	mu($1)
  (gen):gen	gmu($1)
 Doc: \idx{Moebius} $\mu$-function of $|x|$. $x$ must be of type integer.
- 
- \syn{mu}{x}, the result ($0$ or $\pm 1$) is a \kbd{long}.
-

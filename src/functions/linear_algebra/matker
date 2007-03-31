@@ -18,4 +18,3 @@ Doc: gives a basis for the kernel of the
  
  \syn{matker0}{x,\fl}. Also available are \funs{ker}{x} ($\fl=0$),
  \funs{keri}{x} ($\fl=1$).
-

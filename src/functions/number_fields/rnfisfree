@@ -10,6 +10,3 @@ Doc: given $\var{bnf}$ as output by
  defining a relative extension $L$ of $\var{bnf}$, or a pseudo-basis $x$ of
  such an extension, returns true (1) if $L/\var{bnf}$ is free, false (0) if
  not.
- 
- \syn{rnfisfree}{\var{bnf},x}, and the result is a \kbd{long}.
-

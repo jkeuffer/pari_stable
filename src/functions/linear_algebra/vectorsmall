@@ -9,5 +9,3 @@ Doc: creates a row vector of small integers (type
  \typ{VECSMALL}) with $n$ components whose components are the expression
  \var{expr} evaluated at the integer points between 1 and $n$. If one of the
  last two arguments is omitted, fill the vector with zeroes.
- 
- \synt{vecteursmall}{GEN nmax, entree *ep, char *expr}.

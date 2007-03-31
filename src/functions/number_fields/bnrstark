@@ -35,7 +35,3 @@ Doc: \var{bnr}
  rnfpolredabs(bnf, pol, 16)     \\@com compute a reduced relative polynomial
  rnfpolredabs(bnf, pol, 16 + 2) \\@com compute a reduced absolute polynomial
  @eprog
- 
- \syn{bnrstark}{\var{bnr},\var{subgroup}}, where an omitted \var{subgroup}
- is coded by \kbd{NULL}.
-

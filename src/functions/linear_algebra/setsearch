@@ -13,6 +13,3 @@ Doc: searches if $y$ belongs to the set
  meant to be used in conjunction with \kbd{listinsert}).
  
  This function works also if $x$ is a \emph{sorted} list (see \kbd{listsort}).
- 
- \syn{setsearch}{x,y,\fl} which returns a \kbd{long} integer.
-

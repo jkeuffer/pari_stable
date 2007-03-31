@@ -10,5 +10,3 @@ Doc: given an element $x$ in
  element $x$. The same result could be obtained using
  \kbd{idealval(\var{nf},x,\var{pr})} (since $x$ would then be converted to a
  principal ideal), but it would be less efficient.
- 
- \syn{element_val}{\var{nf},x,\var{pr}}, and the result is a \kbd{long}.

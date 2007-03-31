@@ -22,8 +22,3 @@ Doc: resultant of the two
  faster than the default if the coefficient ring is complicated (e.g
  multivariate polynomials or huge coefficients), and slightly slower
  otherwise.
- 
- \syn{polresultant0}{x,y,v,\fl}, where $v$ is a \kbd{long} and an omitted $v$
- is coded as $-1$. Also available are \funs{subres}{x,y} ($\fl=0$) and
- \funs{resultant2}{x,y} ($\fl=1$).
-

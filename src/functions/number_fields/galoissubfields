@@ -7,7 +7,3 @@ Help: galoissubfields(G,{flags=0},{v}):Output all the subfields of G. flags
 Doc: outputs all the subfields of the Galois group \var{G}, as a vector.
  This works by applying \kbd{galoisfixedfield} to all subgroups. The meaning of
  the flag \var{fl} is the same as for \kbd{galoisfixedfield}.
- 
- \syn{galoissubfields}{\var{G},fl,v}, where \var{fl} is a long and \var{v} a
- variable number.
-

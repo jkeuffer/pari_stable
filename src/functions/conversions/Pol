@@ -38,6 +38,3 @@ Doc:
  ? Pol(x + y, y)
  *** Pol: variable must have higher priority in gtopoly.
  @eprog
- 
- \syn{gtopoly}{x,v}, where $v$ is a variable number.
-

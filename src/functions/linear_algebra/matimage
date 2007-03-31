@@ -10,4 +10,3 @@ Doc: gives a basis for the image of the
  \kbd{matsupplement}.
  
  \syn{matimage0}{x,\fl}. Also available is \funs{image}{x} ($\fl=0$).
-

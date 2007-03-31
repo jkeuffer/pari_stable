@@ -14,5 +14,3 @@ Doc: row vector of $p$-adic roots of
  well-defined; in this case, the equation is first made integral, then lifted
  to $\Z$. Hence the roots given are approximations of the roots of a
  polynomial which is $p$-adically close to the input.
- 
- \syn{rootpadic}{\var{pol},p,r}, where $r$ is a \kbd{long}.

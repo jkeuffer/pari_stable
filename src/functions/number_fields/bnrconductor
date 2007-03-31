@@ -18,8 +18,3 @@ Doc: conductor $f$ of
  
  If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
  replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.
- 
- \syn{conductor}{\var{bnr}, \var{subgroup}, \fl}, where an omitted subgroup
- (trivial subgroup, i.e.~ray class field) is input as \kbd{NULL}, and $\fl$ is
- a C long.
-

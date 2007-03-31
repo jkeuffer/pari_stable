@@ -126,6 +126,3 @@ Doc: initializes a
  Note that all the components are exact (integral or rational), except for
  the roots in $v[5]$. Note also that member functions will \emph{not} work on
  \var{sbnf}, you have to use \kbd{bnfmake} explicitly first.
- 
- \syn{bnfinit0}{P,\fl,\var{tech},\var{prec}}.
-

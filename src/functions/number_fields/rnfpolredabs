@@ -30,6 +30,3 @@ Doc: relative version of
  \kbd{rnfpolred} is based on (a partial implementation of) an incomplete
  reduction theory of lattices over number fields, the function
  \kbd{rnflllgram}, which deserves to be improved.
- 
- \syn{rnfpolredabs}{\var{nf},\var{pol},\fl,\var{prec}}.
-

@@ -8,5 +8,3 @@ Doc:
  computes the vector of the first $n$ $a_k$
  corresponding to the elliptic curve $E$. All comments in \kbd{ellak}
  description remain valid.
- 
- \syn{anell}{E,n}, where $n$ is a C integer.

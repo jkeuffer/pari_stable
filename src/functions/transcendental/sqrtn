@@ -42,6 +42,3 @@ Doc: principal branch of the $n$th root of $x$,
  }
  addhelp(sqrtnall,"sqrtnall(x,n):compute the vector of nth-roots of x");
  @eprog\noindent
- 
- \syn{gsqrtn}{x,n,\&z,\var{prec}}.
-

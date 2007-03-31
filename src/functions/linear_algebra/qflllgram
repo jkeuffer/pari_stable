@@ -33,4 +33,3 @@ Doc: same as \kbd{qflll}, except that the
  \syn{qflllgram0}{G,\fl,\var{prec}}. Also available are
  \funs{lllgram}{G,\var{prec}} ($\fl=0$), \funs{lllgramint}{G} ($\fl=1$), and
  \funs{lllgramkerim}{G} ($\fl=4$).
-

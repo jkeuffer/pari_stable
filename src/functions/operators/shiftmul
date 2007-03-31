@@ -8,6 +8,3 @@ Doc: multiplies $x$ by $2^n$. The difference with
  example if $x$ is an integer the result may be a fraction, while for shifts
  Euclidean division takes place when $n<0$ hence if $x$ is an integer the result
  is still an integer.
- 
- \syn{gmul2n}{x,n} where $n$ is a \kbd{long}.
-

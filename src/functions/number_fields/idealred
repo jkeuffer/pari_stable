@@ -24,7 +24,3 @@ Doc: \idx{LLL} reduction of
  
  Note that this is \emph{not} the same as the LLL reduction of the lattice
  $I$ since ideal operations are involved.
- 
- \syn{ideallllred}{\var{nf},x,\var{vdir},\var{prec}}, where an omitted
- \var{vdir} is coded as \kbd{NULL}.
-

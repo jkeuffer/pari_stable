@@ -25,7 +25,3 @@ Doc: tries to tell whether the
  $\var{Bnf}$ is the Galois closure of $\var{bnf}$.
  
  See also \tet{bnfisintnorm}.
- 
- \syn{bnfisnorm}{\var{bnf},x,\fl,\var{prec}}, where $\fl$ and
- $\var{prec}$ are \kbd{long}s.
-

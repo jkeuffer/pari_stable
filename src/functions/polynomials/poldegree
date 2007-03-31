@@ -9,15 +9,10 @@ Description:
  (pol):small:parens	lg($1)-3
  (gen):small	degree($1)
  (gen, var):small	poldegree($1, $2)
-Doc: degree of the polynomial $x$ in the main
- variable if $v$ is omitted, in the variable $v$ otherwise.
+Doc: degree of the polynomial $x$ in the main variable if $v$ is omitted, in
+ the variable $v$ otherwise.
  
- The degree of $0$ is a fixed negative number, whose exact value should
- not be used. The degree of a non-zero scalar is $0$. Finally, when $x$ is
- a non-zero polynomial or rational function, returns the ordinary degree
- of $x$. Raise an error otherwise.
- 
- \syn{poldegree}{x,v}, where $v$ and the result are \kbd{long}s (and an
- omitted $v$ is coded as $-1$). Also available is \funs{degree}{x}, which is
- equivalent to \kbd{poldegree($x$,-1)}.
-
+ The degree of $0$ is a fixed negative number, whose exact value should not
+ be used. The degree of a non-zero scalar is $0$. Finally, when $x$ is a
+ non-zero polynomial or rational function, returns the ordinary degree of
+ $x$. Raise an error otherwise.

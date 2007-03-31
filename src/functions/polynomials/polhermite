@@ -4,7 +4,3 @@ C-Name: polhermite
 Prototype: LDn
 Help: polhermite(n,{v=x}): Hermite polynomial H(n,v) of degree n, in variable v
 Doc: creates the $n^{\text{th}}$ \idx{Hermite} polynomial $H_n$ in variable $v$.
- 
- \syn{polhermite}{n,v}, where $n$ and $v$ are \kbd{long}
- integers ($v$ is a variable number).
-

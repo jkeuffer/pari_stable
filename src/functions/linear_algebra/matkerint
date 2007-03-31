@@ -15,4 +15,3 @@ Doc: gives an \idx{LLL}-reduced $\Z$-basis
  is not desired, you can save time using \kbd{matrixqz(matker(x),-2)} instead.
  
  \syn{matkerint0}{x,\fl}. Also available is \funs{kerint}{x} ($\fl=0$).
-

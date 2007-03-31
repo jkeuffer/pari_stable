@@ -32,7 +32,3 @@ Doc: solves the equation
  @eprog
  This time the result is conditional. All results computed using this tnf
  are likewise conditional, \emph{except} for a right-hand side of $\pm 1$.
- 
- \syn{thue}{\var{tnf},a,\var{sol}}, where an omitted \var{sol} is coded
- as \kbd{NULL}.
-

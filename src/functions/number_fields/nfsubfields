@@ -15,5 +15,3 @@ Doc: finds all subfields of degree
  polynomial defining $\var{nf}$. This routine uses J.~Kl\"uners's algorithm
  in the general case, and B.~Allombert's \tet{galoissubfields} when \var{nf}
  is Galois (with weakly supersolvable Galois group).\sidx{Galois}\sidx{subfield}
- 
- \syn{subfields}{\var{nf},d}.

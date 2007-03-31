@@ -13,4 +13,3 @@ Doc: \idx{Stirling number}
  Also available are
  \tet{stirling1}$(n,k)$ (for $\fl=1$) and
  \tet{stirling2}$(n,k)$ (for $\fl=2$).
-

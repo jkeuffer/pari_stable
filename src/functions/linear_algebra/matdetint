@@ -17,6 +17,3 @@ Doc:
  Note that as soon as one of the dimensions gets large ($m$ or $n$ is larger
  than 20, say), it will often be much faster to use \kbd{mathnf(x, 1)} or
  \kbd{mathnf(x, 4)} directly.
- 
- \syn{detint}{x}.
-

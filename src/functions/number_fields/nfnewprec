@@ -9,6 +9,3 @@ Doc: transforms the number field $\var{nf}$
  function works as expected if $\var{nf}$ is in fact a $\var{bnf}$ (update
  $\var{bnf}$ to current precision) but may be quite slow (many generators of
  principal ideals have to be computed).
- 
- \syn{nfnewprec}{\var{nf},\var{prec}}.
-

@@ -5,7 +5,3 @@ Prototype: LDn
 Help: pollegendre(n,{v=x}): legendre polynomial of degree n (n C-integer),
  in variable v
 Doc: creates the $n^{\text{th}}$ \idx{Legendre polynomial}, in variable $v$.
- 
- \syn{pollegendre}{n, v}, where $n$ and $v$ are \kbd{long}s and an omitted $v$
- is coded as $-1$.
-
