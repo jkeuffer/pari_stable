@@ -240,7 +240,7 @@
 
 \def\title#1#2{%
   \ifodd\pageno\else\newpage\fi
-  \tocwrite{#1 #2\string\dotfill\the\pageno}
+  \tocwrite{{\bf #1 #2\string\dotfill\the\pageno}}
   \ifGPHELP\else
      \putchapdest
      \centerline{\chaptertitlefont #1}\medskip
@@ -250,8 +250,7 @@
   \vskip 0pt plus 54pt\penalty-600% good break
   \vskip 24pt plus -45pt minus 9pt%
   \putchapdest%
-  \tocwrite{{%\sevenrm
-\hskip0.5cm#1\string\dotfill\the\pageno}}%
+  \tocwrite{{\hskip0.5cm#1\string\dotfill\the\pageno}}%
   \leftline{\sectionhook{\sectiontitlebf #1}.}
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
@@ -259,8 +258,7 @@
 \def\subsectitle#1{%
   \vskip 0pt plus 45pt\penalty-300
   \vskip 6pt plus -42pt minus 3pt
-  \tocwrite{{\sevenrm
-\hskip1cm#1\string\dotfill\the\pageno}}%
+  \tocwrite{{\sevenrm \hskip1cm#1\string\dotfill\the\pageno}}%
   \sectionhook\noindent{\bf#1}}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
