@@ -2557,8 +2557,7 @@ GEN
 element_reduce(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
-  long tx = typ(x);
-  if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
+  x = algtobasis_i(checknf(nf), x);
   return gerepileupto(av, reducemodinvertible(x, ideal));
 }
 /* Given an element x and an ideal in matrix form (not necessarily HNF),
