@@ -3,6 +3,7 @@ cat > doc/Makefile << EOT
 #  next time configure is run.
 #
 SHELL = $make_sh
+PERL  = $perl
 
 MACROS= paricfg.tex parimacro.tex
 USERS_TEX=\$(MACROS) users.tex usersch1.tex usersch2.tex usersch3.tex
