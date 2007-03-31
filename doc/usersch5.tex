@@ -1831,7 +1831,7 @@ roots in \kbd{\Z/p\Z} of the \kbd{FpX}~\kbd{f}. Assumes that \kbd{p} is prime.
 the \kbd{FpX}~\kbd{f} (without multiplicity, as a vector of \kbd{Fp}s).
 Assumes that \kbd{p} is prime.
 
-\fun{GEN}{FpX_rand}{long d, long v, GEN p} returns a random \kbd{FpX}
+\fun{GEN}{random_FpX}{long d, long v, GEN p} returns a random \kbd{FpX}
 in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{FpX_resultant}{GEN x, GEN y, GEN p} returns the resultant
@@ -2206,7 +2206,7 @@ collecting garbage.
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
 
-\fun{GEN}{Flx_rand}{long d, long sv, ulong p} returns a random \kbd{Flx}
+\fun{GEN}{random_Flx}{long d, long sv, ulong p} returns a random \kbd{Flx}
 in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{Flx_recip}{GEN x}, returns the reciprocal polynomial

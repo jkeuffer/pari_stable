@@ -1455,7 +1455,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
   if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
   for (;;)
   {
-    S->phi = gadd(theta, FpX_rand(dlim, v, S->p));
+    S->phi = gadd(theta, random_FpX(dlim, v, S->p));
     /* phi non-primary ? */
     if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;

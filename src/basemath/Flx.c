@@ -245,7 +245,7 @@ Flx_red(GEN z, ulong p)
 }
 
 GEN
-Flx_rand(long d1, long vs, ulong p)
+random_Flx(long d1, long vs, ulong p)
 {
   long i, d = d1+2;
   GEN y = cgetg(d,t_VECSMALL); y[1] = vs;
@@ -1501,7 +1501,7 @@ static GEN
 _Flxq_rand(void *data)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flx_rand(degpol(D->pol),D->pol[1],D->p);
+  return random_Flx(degpol(D->pol),D->pol[1],D->p);
 }
 
 const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,vecsmall_lexcmp,Flx_cmp1};
@@ -1599,7 +1599,7 @@ gener_Flxq(GEN T, ulong p)
   {
     ulong RES;
     GEN tt;
-    g = Flx_rand(f, vT, p);
+    g = random_Flx(f, vT, p);
     if (degpol(g) < 1) continue;
     if (p > 2)
     {

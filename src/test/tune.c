@@ -83,7 +83,7 @@ static GEN
 rand_FpX(long n)
 {
   GEN x;
-  do x = FpX_rand(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
+  do x = random_FpX(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
   return x;
 }
 /* Flx, degree n */
@@ -100,7 +100,7 @@ static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(monomial(gen_1,n,0), FpX_rand(n, 0, utoipos(DFLT_mod)));
+  GEN x = gadd(monomial(gen_1,n,0), random_FpX(n, 0, utoipos(DFLT_mod)));
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 

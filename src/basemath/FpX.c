@@ -383,7 +383,7 @@ FpX_is_squarefree(GEN f, GEN p)
 }
 
 GEN
-FpX_rand(long d1, long v, GEN p)
+random_FpX(long d1, long v, GEN p)
 {
   long i, d = d1+2;
   GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
@@ -695,7 +695,7 @@ static GEN
 _FpXQ_rand(void *data)
 {
   FpX_muldata *D = (FpX_muldata*)data;
-  return FpX_rand(degpol(D->pol),varn(D->pol),D->p);
+  return random_FpX(degpol(D->pol),varn(D->pol),D->p);
 }
 
 static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,cmp_pol,gcmp1};
@@ -846,7 +846,7 @@ gener_FpXQ(GEN T, GEN p)
   for (av = avma;; avma = av)
   {
     GEN t;
-    g = FpX_rand(f, vT, p);
+    g = random_FpX(f, vT, p);
     if (degpol(g) < 1) continue;
     t = constant_term(FpXQ_pow(g, q, T, p));
     if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;

@@ -2821,7 +2821,7 @@ ffinit_rand(GEN p,long n)
 
   for(;; avma = av)
   {
-    pol = gadd(monomial(gen_1, n, 0), FpX_rand(n-1,0, p));
+    pol = gadd(monomial(gen_1, n, 0), random_FpX(n-1,0, p));
     if (FpX_is_irred(pol, p)) break;
   }
   return pol;

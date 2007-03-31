@@ -1051,7 +1051,7 @@ FqX_rand(long d1, long v, GEN T, GEN p)
 {
   long i, d = d1+2, k = degpol(T), w = varn(T);
   GEN y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
-  for (i=2; i<d; i++) gel(y,i) = FpX_rand(k, w, p);
+  for (i=2; i<d; i++) gel(y,i) = random_FpX(k, w, p);
   (void)normalizepol_i(y,d); return y;
 }
 
@@ -1161,11 +1161,11 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   for (L=1; L<d; )
   {
     GEN polt;
-    gel(pol,2) = FpX_rand(dT,vT,p);
+    gel(pol,2) = random_FpX(dT,vT,p);
     setlg(pol, signe(pol[2])? 3: 2);
     pol[1] = u[1];
     for (i=2; i<=d; i++)
-      pol = gadd(pol, gmul(gel(vker,i), FpX_rand(dT,vT,p)));
+      pol = gadd(pol, gmul(gel(vker,i), random_FpX(dT,vT,p)));
     polt = FpXQX_red(pol,T,p);
     for (i=ir; i<L && L<d; i++)
     {
