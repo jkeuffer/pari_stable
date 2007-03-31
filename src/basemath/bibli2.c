@@ -1438,7 +1438,7 @@ merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN))
     if (s < 0)
     { M[m] = x[ix]; E[m] = e[ix]; ix++; }
     else if (s == 0)
-    { M[m] = x[iy]; gel(E,m) = addii(gel(e,ix), gel(f,iy)); iy++; ix++; }
+    { M[m] = x[ix]; gel(E,m) = addii(gel(e,ix), gel(f,iy)); iy++; ix++; }
     else
     { M[m] = y[iy]; E[m] = f[iy]; iy++; }
     m++;
