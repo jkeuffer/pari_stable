@@ -3,7 +3,7 @@ use PARI::822;
 
 PARI::822::read(\%funcs, "pari.desc");
 
-open (FILE, "../../doc/usersFUN.tex") || die;
+open (FILE, "../../doc/usersFUNCS.tex") || die;
 while (<FILE>)
 {
   if (/^% *SECTION *: *(.*) */)

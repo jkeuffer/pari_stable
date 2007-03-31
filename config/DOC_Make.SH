@@ -26,6 +26,9 @@ paricfg.tex: paricfg.tex.in
 %.dvi: %.tex \$(MACROS)
 	tex \$<
 
+usersch3.tex: ../src/desc/pari.desc usersFUNCS.tex
+	cd ../src/desc && \$(PERL) doc_make > ../../doc/usersch3.tex
+
 libpari.pdf: \$(PARI_TEX) \$(MACROS)
 	-rm -f libpari.std
 	pdftex libpari

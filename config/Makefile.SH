@@ -518,7 +518,6 @@ $src/funclist::
 $desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
 	cd $desc && \$(PERL) merge_822 ../functions/*/* > def\$(TMPSUF)
 	mv $desc/def\$(TMPSUF) \$@
-	cd $desc && \$(PERL) doc_make > ../../doc/usersch3.tex
 
 $src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF)
