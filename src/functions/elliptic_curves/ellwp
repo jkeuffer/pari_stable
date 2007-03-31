@@ -25,4 +25,3 @@ Doc:
  
  \syn{ellwp0}{E,z,\fl,\var{prec},\var{precdl}}. Also available is
  \funs{weipell}{E,\var{precdl}} for the power series.
-

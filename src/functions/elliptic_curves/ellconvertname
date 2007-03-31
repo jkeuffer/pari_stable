@@ -16,6 +16,3 @@ Doc:
  ? ellconvertname(%)
  %2 = "123b1"
  @eprog
- 
- \syn{ellconvertname}{\var{name}}.
-

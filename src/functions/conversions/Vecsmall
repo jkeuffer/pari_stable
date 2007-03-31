@@ -13,6 +13,3 @@ Doc:
  integers). In particular, polynomials and power series are forbidden.
  If $x$ is a character string, a vector of individual characters in ASCII
  encoding is returned (\tet{Strchr} yields back the character string).
- 
- \syn{gtovecsmall}{x}.
-

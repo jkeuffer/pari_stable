@@ -4,6 +4,3 @@ C-Name: gcotan
 Prototype: Gp
 Help: cotan(x): cotangent of x
 Doc: cotangent of $x$.
- 
- \syn{gcotan}{x,\var{prec}}.
-

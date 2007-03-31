@@ -22,4 +22,3 @@ Doc:
  
  \syn{ellsearch}{N}. Also available is \funs{ellsearchcurve}{N} that only
  accept complete curve names.
-

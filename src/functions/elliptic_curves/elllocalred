@@ -21,6 +21,3 @@ Doc:
  giving the coordinate changes done during the local reduction. Normally, this
  has no use if $u$ is 1, that is, if the given equation was already minimal.
  Finally, the last component $c$ is the local \idx{Tamagawa number} $c_p$.
- 
- \syn{elllocalred}{E,p}.
-

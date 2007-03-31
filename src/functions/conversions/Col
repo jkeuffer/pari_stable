@@ -27,6 +27,3 @@ Doc:
  respectively.
  
  Note that the function \kbd{Colrev} does not exist, use \kbd{Vecrev}.
- 
- \syn{gtocol}{x}.
-

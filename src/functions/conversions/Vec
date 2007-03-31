@@ -25,6 +25,3 @@ Doc:
  taken into account, but this time by increasing order of degree. 
  In this last case, \kbd{Vec} is the reciprocal function of \kbd{Pol} and
  \kbd{Ser} respectively.
- 
- \syn{gtovec}{x}.
-

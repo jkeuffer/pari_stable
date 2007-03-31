@@ -24,6 +24,3 @@ Doc: absolute value of $x$ (modulus if $x$ is complex).
  If $x$ is a polynomial, returns $-x$ if the leading coefficient is
  real and negative else returns $x$. For a power series, the constant
  coefficient is considered instead.
- 
- \syn{gabs}{x,\var{prec}}.
-

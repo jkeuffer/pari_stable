@@ -15,6 +15,3 @@ Doc:
  ? Strchr(%)
  %3 = "hello world"
  @eprog
- 
- \syn{Strchr}{x}.
-

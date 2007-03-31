@@ -14,6 +14,3 @@ Doc:
  (i.e.~the effective length minus 2 for integers and polynomials). In
  particular, the degree of a polynomial is equal to its length minus 1. If $x$
  has type \typ{STR}, output number of letters.
- 
- \syn{glength}{x} and the result is a C long.
-

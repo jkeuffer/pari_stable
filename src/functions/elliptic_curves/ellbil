@@ -11,6 +11,3 @@ Doc:
  $$ ( h(E,z1\kbd{+}z2) - h(E,z1) - h(E,z2) ) / 2 $$
  where \kbd{+} denotes of course addition on $E$. In addition, $z1$ or $z2$
  (but not both) can be vectors or matrices.
- 
- \syn{bilhell}{E,z1,z2,\var{prec}}.
-

@@ -8,6 +8,3 @@ Doc:
  gives a 0, 1 or 2-component vector containing
  the $y$-coordinates of the points of the curve $E$ having $x$ as
  $x$-coordinate.
- 
- \syn{ordell}{E,x}.
-

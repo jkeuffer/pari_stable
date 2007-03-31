@@ -18,5 +18,4 @@ Doc:
  The warning given for \kbd{Pol} also applies here: this is not a substitution
  function.
  
- \syn{gtoser}{x,v}, where $v$ is a variable number (i.e.~a C integer).
-
+ \syn{gtoser}{x,v}, where $v$ is a variable number.

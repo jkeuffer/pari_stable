@@ -7,6 +7,3 @@ Doc:
  elliptic $j$-invariant. $x$ must be a complex number
  with positive imaginary part, or convertible into a power series or a
  $p$-adic number with positive valuation.
- 
- \syn{jell}{x,\var{prec}}.
-

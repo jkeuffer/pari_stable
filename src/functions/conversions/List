@@ -10,6 +10,3 @@ Doc:
  transforms a (row or column) vector $x$
  into a list. The only other way to create a \typ{LIST} is to use the
  function \kbd{listcreate}.
- 
- This is useless in library mode.
-

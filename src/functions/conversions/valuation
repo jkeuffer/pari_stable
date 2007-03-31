@@ -19,6 +19,3 @@ Doc:
  $2^{63}-1$ for 64-bit machines) if $x$ is an exact object. If $x$ is a
  $p$-adic numbers or power series, the result is the exponent of the zero.
  Any other type combinations gives an error.
- 
- \syn{ggval}{x,p}, and the result is a \kbd{long}.
-

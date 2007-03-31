@@ -10,4 +10,3 @@ Doc:
  modulo $n!\,$, i.e.~inverse function of \tet{permtonum}.
  
  \syn{numtoperm}{n,k}, where $n$ is a \kbd{long}.
-

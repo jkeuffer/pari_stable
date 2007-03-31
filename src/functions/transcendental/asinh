@@ -5,6 +5,3 @@ Prototype: Gp
 Help: asinh(x): inverse hyperbolic sine of x
 Doc: principal branch of $\text{sinh}^{-1}(x)$, i.e.~such
  that $\text{Im(asinh}(x))\in [-\pi/2,\pi/2]$.
- 
- \syn{gash}{x,\var{prec}}.
-

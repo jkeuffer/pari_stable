@@ -34,4 +34,3 @@ Doc:
  
  \syn{gcvtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
  \funs{gtrunc}{x}.
-

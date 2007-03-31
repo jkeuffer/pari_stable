@@ -29,6 +29,3 @@ Doc:
  ? type(%1)
  %4 = "t_INT"
  @eprog
- 
- \syn{simplify}{x}.
-

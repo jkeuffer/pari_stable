@@ -12,6 +12,3 @@ Doc:
  leading $1$ is then represented as a negative number.
  
  See \secref{se:bitand} for the behaviour for negative arguments.
- 
- \syn{gbitneg}{x}.
-

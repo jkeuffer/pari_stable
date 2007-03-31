@@ -4,6 +4,3 @@ C-Name: gsin
 Prototype: Gp
 Help: sin(x): sine of x
 Doc: sine of $x$.
- 
- \syn{gsin}{x,\var{prec}}.
-

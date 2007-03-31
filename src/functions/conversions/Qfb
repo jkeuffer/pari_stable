@@ -13,4 +13,3 @@ Doc:
  \syn{Qfb0}{a,b,c,D,\var{prec}}. Also available are
  \funs{qfi}{a,b,c} (when $b^2-4ac<0$), and
  \funs{qfr}{a,b,c,d} (when $b^2-4ac>0$).\sidx{binary quadratic form}
-

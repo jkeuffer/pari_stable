@@ -37,4 +37,3 @@ Doc:
  
  \syn{lift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
  $-1$. Also available is \funs{lift}{x} = \kbd{lift0($x$,-1)}.
-

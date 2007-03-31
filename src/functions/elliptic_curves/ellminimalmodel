@@ -18,4 +18,3 @@ Doc:
  \sidx{minimal model}
  
  \syn{ellminimalmodel}{E,\&v}, where an omitted $v$ is coded as \kbd{NULL}.
-

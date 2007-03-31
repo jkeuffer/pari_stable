@@ -7,6 +7,3 @@ Doc: principal branch of the logarithm of the gamma
  function of $x$. This function is analytic on the complex plane with
  non-positive integers removed. Can have much larger arguments than \kbd{gamma}
  itself. The $p$-adic \kbd{lngamma} function is not implemented.
- 
- \syn{glngamma}{x,\var{prec}}.
-

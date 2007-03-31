@@ -8,6 +8,3 @@ Doc:
  gives the order of the point $z$ on the elliptic
  curve $E$ if it is a torsion point, zero otherwise. In the present version
  \vers, this is implemented only for elliptic curves defined over $\Q$.
- 
- \syn{orderell}{E,z}.
-

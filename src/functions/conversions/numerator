@@ -23,6 +23,3 @@ Doc:
  \misctitle{Warning:} multivariate objects are created according to variable
  priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
  $y/x$ is a rational function). See \secref{se:priority}.
- 
- \syn{numer}{x}.
-

@@ -26,4 +26,3 @@ Doc:
  
  \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
  as $-1$. Also available is \funs{centerlift}{x} = \kbd{centerlift0($x$,-1)}.
-

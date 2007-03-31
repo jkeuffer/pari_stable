@@ -20,4 +20,3 @@ Doc:
  $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$ is $gel(x,2)$, or call
  the function \funs{gvar}{x} which returns the variable \emph{number} of $x$ if
  it exists, \kbd{BIGINT} otherwise.
-

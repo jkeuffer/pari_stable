@@ -9,30 +9,53 @@ while (<FILE>)
   if (/^% *SECTION *: *(.*) */)
   {
     my ($sec) = $1;
-    my @funs = grep { $funcs{$_}->{Section} eq $sec && $funcs{$_}->{Doc}}
-                    keys %funcs;
-    for (sort @funs) {
+    for ( sort grep { $funcs{$_}->{Section} eq $sec } keys %funcs ) {
       my ($fun) = $funcs{$_};
-      my ($vars)  = $fun->{Help};
-      my ($doc)   = $fun->{Doc};
-      my ($Cname) = $fun->{'C-Name'};
-      $vars =~ s/^[^(]*\((.*)\) *:.*/$1/s;
-      my ($v) = $vars;
-      $v =~ s/([{}&])/\\$1/g;
-      $v =~ s/\^(\d+)/^{$1}/g;
-      $v =~ s/\[\]/[\\,]/g;
-      $v =~ s/(\w\w+)/\\var{$1}/g;
-      $v =~ s/\^([a-z])/\\hbox{\\kbd{\\pow}}$1/g;
-      $v =~ s/\\var{flag}/\\fl/g;
+      my ($doc) = $fun->{Doc};
+      next if (!defined($doc));
 
-      $vars =~ s/\bflag\b/\\fl/g;
-      $vars =~ s/[{}]//g;
-      $vars =~ s/=[^,}]//g;
-      if ($doc !~ /\\syn\w*{/ && $sec !~ /programming/) {
-        $doc .= "\n\n\\syn{$Cname}{$vars}.\n"
+      my ($args)  = $fun->{Help};
+      $args =~ s/ *:.*//s;
+
+      my ($v);
+      if ($args =~ /^\w+=\w+\(\)/) { $args = $v = ''; }
+      else
+      {
+        $args =~ s/^[^(]*\((.*)\)/$1/; # args proper
+        $v = $args;
+        $v =~ s/([{}&])/\\$1/g;
+        $v =~ s/\^(\d+)/^{$1}/g;
+        $v =~ s/\[\]/[\\,]/g;
+        $v =~ s/(\w\w+)/\\var{$1}/g;
+        $v =~ s/\^([a-z])/\\hbox{\\kbd{\\pow}}$1/g;
+        $v =~ s/\\var{flag}/\\fl/g;
+
+        $v = "\$($v)\$";
       }
-      print "\n" . "\\subsecidx{$_}\$($v)\$:"
-                 . "\\label{se:$_} $doc\n";
+
+      if ($doc !~ /\\syn\w*{/ && $sec !~ /programming/) {
+        my ($Cname) = $fun->{'C-Name'};
+        my ($proto) = $fun->{Prototype};
+        my ($w) = $args;
+        $w =~ s/[{}]//g;
+        $w =~ s/=[^,)]*//g; # default values
+
+        $type = "GEN";
+        $type = "long" if ($proto =~ /^l/);
+        $type = "void" if ($proto =~ /^v/);
+
+        $args = '';
+        for ( split(/, */, $w) ) 
+        {
+          $args .= "GEN $_,"
+
+        }
+        $args .= " long prec" if ($proto =~ /p$/);
+        $args =~ s/,$//;
+
+        $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}."
+      }
+      print "\n\\subsecidx{$_}$v:\\label{se:$_} $doc\n";
     }
     next;
   }

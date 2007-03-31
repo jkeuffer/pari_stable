@@ -12,6 +12,3 @@ Doc:
  root number is the sign of the functional equation and conjecturally is the
  parity of the rank of the \idx{Mordell-Weil group}. The equation for $E$ must
  have coefficients in $\Q$ but need \emph{not} be minimal.
- 
- \syn{ellrootno}{E,p} and the result (equal to $\pm1$) is a \kbd{long}.
-

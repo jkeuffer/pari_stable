@@ -11,4 +11,3 @@ Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt$ ($x\in\R$)
  repeatedly calling \kbd{eint1($i$ * x)}.
  
  \syn{veceint1}{x,n,prec}. Also available is \funs{eint1}{x,prec}.
-

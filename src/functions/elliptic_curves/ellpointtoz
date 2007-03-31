@@ -17,6 +17,3 @@ Doc:
  which case the output is a $p$-adic number $t$ corresponding to the point $z$
  under the Tate parametrization, or only its square is, in which case the
  output is $t+1/t$. $E$ must be an \var{ell} as output by \kbd{ellinit}.
- 
- \syn{zell}{E,z,\var{prec}}.
-

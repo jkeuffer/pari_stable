@@ -13,6 +13,3 @@ Doc:
  lexicographic ordering. The components of $x$ are put in canonical form (type
  \typ{STR}) so as to be easily sorted. To recover an ordinary \kbd{GEN} from
  such an element, you can apply \tet{eval} to it.
- 
- \syn{gtoset}{x}.
-

@@ -8,6 +8,3 @@ Doc: complementary incomplete gamma function.
  $\Gamma$ and $|x|/(|s|+1)$ is not much larger than 1 (otherwise the
  convergence is very slow). The result returned is $\int_0^x
  e^{-t}t^{s-1}\,dt$.
- 
- \syn{incgamc}{s,x,\var{prec}}.
-

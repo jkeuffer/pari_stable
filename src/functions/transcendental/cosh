@@ -4,6 +4,3 @@ C-Name: gch
 Prototype: Gp
 Help: cosh(x): hyperbolic cosine of x
 Doc: hyperbolic cosine of $x$.
- 
- \syn{gch}{x,\var{prec}}.
-

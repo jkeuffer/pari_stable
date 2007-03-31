@@ -14,6 +14,3 @@ Doc:
  the regulator of $E$. Note that this matrix should be divided by 2 to be in
  accordance with certain normalizations. $E$ is assumed to be integral,
  given by a minimal model.
- 
- \syn{mathell}{E,x,\var{prec}}.
-

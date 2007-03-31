@@ -15,6 +15,3 @@ Doc: For $s$ a complex number, Riemann's zeta
  that interpolates the values of $(1 - p^{-k}) \zeta(k)$ at negative
  integers $k$ such that $k \equiv 1 \pmod{p-1}$ (resp. $k$ is odd) if
  $p$ is odd (resp. $p = 2$).
- 
- \syn{gzeta}{s,\var{prec}}.
-

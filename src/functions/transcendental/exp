@@ -9,6 +9,3 @@ Description:
  (gen):gen:prec	gexp($1, prec)
 Doc: exponential of $x$.
  $p$-adic arguments with positive valuation are accepted.
- 
- \syn{gexp}{x,\var{prec}}.
-

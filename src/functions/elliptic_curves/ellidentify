@@ -12,6 +12,3 @@ Doc:
  is the name of the curve in J.  E.  Cremona database, $M$ the minimal
  model, $G$ a $\Z$-basis of the free part of the \idx{Mordell-Weil group}
  of $E$ and $C$ the coordinates change (see \kbd{ellchangecurve}).
- 
- \syn{ellidentify}{E}.
-

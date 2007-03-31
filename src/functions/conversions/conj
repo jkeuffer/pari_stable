@@ -9,6 +9,3 @@ Doc:
  real quadratic field. This function has no effect on integers, reals,
  intmods, fractions or $p$-adics. The only forbidden type is polmod
  (see \kbd{conjvec} for this).
- 
- \syn{gconj}{x}.
-

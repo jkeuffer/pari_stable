@@ -10,4 +10,3 @@ Doc:
  
  \syn{taille2}{x} which returns a \kbd{long}; \funs{taille}{x} returns the
  number of \emph{words} instead.
-

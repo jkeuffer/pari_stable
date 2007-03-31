@@ -20,4 +20,3 @@ Doc:
  This function is mostly useless in library mode. Use the pair
  \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{GEN} and \kbd{char*}.
  The latter returns a malloced string, which should be freed after usage.
-

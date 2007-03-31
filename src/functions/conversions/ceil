@@ -14,6 +14,3 @@ Doc:
  smallest integer greater than or equal to $x$. Applied to a rational
  function, $\kbd{ceil}(x)$ returns the Euclidean quotient of the numerator by
  the denominator.
- 
- \syn{gceil}{x}.
-

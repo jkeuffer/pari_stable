@@ -28,4 +28,3 @@ Doc:
  \syn{precision0}{x,n}, where $n$ is a \kbd{long}. Also available are
  \funs{ggprecision}{x} (result is a \kbd{GEN}) and \funs{gprec}{x,n}, where
  $n$ is a \kbd{long}.
-

@@ -12,6 +12,3 @@ Doc:
  In this case, \kbd{Vecrev} is the reciprocal function of \kbd{Polrev}: the
  coefficients of the vector start with the constant coefficient of the
  polynomial and the others follow by increasing degree.
- 
- \syn{gtovecrev}{x}.
-

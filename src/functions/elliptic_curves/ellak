@@ -14,6 +14,3 @@ Doc:
  to work for every $n$ and not just those prime to the conductor, $E$ must
  be a minimal Weierstrass equation. If this is not the case, use the
  function \kbd{ellminimalmodel} before using \kbd{ellak}.
- 
- \syn{akell}{E,n}.
-

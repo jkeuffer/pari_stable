@@ -17,6 +17,3 @@ Doc: principal branch of the square root of $x$,
  first $p$-adic digit (or its unique $p$-adic digit in the case of
  intmods) is in the interval $[0,p/2]$. When the argument is an
  intmod a non-prime (or a non-prime-adic), the result is undefined.
- 
- \syn{gsqrt}{x,\var{prec}}.
-

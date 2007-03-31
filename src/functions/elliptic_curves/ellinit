@@ -81,4 +81,3 @@ Doc:
  \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
  \funs{initell}{E,\var{prec}} ($\fl=0$) and
  \funs{smallinitell}{E,\var{prec}} ($\fl=1$).
-

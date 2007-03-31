@@ -14,6 +14,3 @@ Doc:
  (x_i~\kbd{and not}(y_i)) 2^i$$
  
  See \secref{se:bitand} for the behaviour for negative arguments.
- 
- \syn{gbitnegimply}{x,y}.
-

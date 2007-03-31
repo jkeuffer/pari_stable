@@ -13,4 +13,3 @@ Doc:
  
  \syn{ellisoncurve}{E,z}. Also available is \funs{oncurve}{E,z}
  which returns a \kbd{long} but does not accept vector of points.
-

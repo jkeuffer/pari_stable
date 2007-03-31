@@ -10,4 +10,3 @@ Doc: the constant $\pi$ ($3.14159\cdots$).
  \syn{mppi}{\var{prec}} where $\var{prec}$ \emph{must} be given. Note that
  this creates $\pi$ on the PARI stack, but a copy is also created on the heap
  for quicker computations next time the function is called.
-

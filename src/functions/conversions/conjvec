@@ -12,6 +12,3 @@ Doc:
  \kbd{polroots} functions. If $x$ is an integer or a rational number, the
  result is~$x$. If $x$ is a (row or column) vector, the result is a matrix
  whose columns are the conjugate vectors of the individual elements of $x$.
- 
- \syn{conjvec}{x,\var{prec}}.
-

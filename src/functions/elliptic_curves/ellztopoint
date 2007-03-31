@@ -12,6 +12,3 @@ Doc:
  form, $[x,y]$ represents the \idx{Weierstrass $\wp$-function} and its
  derivative. If $z$ is in the lattice defining $E$ over $\C$, the result is
  the point at infinity $[0]$.
- 
- \syn{pointell}{E,z,\var{prec}}.
-

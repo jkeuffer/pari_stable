@@ -14,6 +14,3 @@ Doc:
  largest integer smaller than or equal to $x$. Applied to a rational function,
  $\kbd{floor}(x)$ returns the Euclidean quotient of the numerator by the
  denominator.
- 
- \syn{gfloor}{x}.
-

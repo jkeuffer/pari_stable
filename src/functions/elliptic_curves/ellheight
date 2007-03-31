@@ -19,4 +19,3 @@ Doc:
  \syn{ellheight0}{E,z,\fl,\var{prec}}. Also available are
  \funs{ghell}{E,z,\var{prec}} ($\fl=0$) and \funs{ghell2}{E,z,\var{prec}}
  ($\fl=1$).
-

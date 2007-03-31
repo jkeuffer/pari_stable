@@ -10,6 +10,3 @@ Doc:
  \idx{Mordell-Weil group} associated to $E$.  This function depends on the
  \tet{elldata} database being installed and referencing the curve, and so
  is only available for curves over $\Z$ of small conductors.
- 
- \syn{ellgenerators}{E}.
-

@@ -8,7 +8,3 @@ Doc:
  This is the minimum precision of the components of $x$. The result is
  \kbd{VERYBIGINT} ($2^{31}-1$ for 32-bit machines or $2^{63}-1$ for 64-bit
  machines) if $x$ is an exact object.
- 
- \syn{padicprec}{x,p} and the result is a \kbd{long}
- integer.
-

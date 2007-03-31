@@ -25,6 +25,3 @@ Doc:
  ? bitand(-5, -3)
  %3 = -7
  @eprog
- 
- \syn{gbitand}{x,y}.
-

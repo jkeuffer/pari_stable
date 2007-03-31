@@ -3206,6 +3206,20 @@ and returns the primitive part \kbd{x} / \kbd{c}.
 \fun{GEN}{primpart}{GEN x} as \kbd{primitive\_part} but the content is lost.
 (For efficiency, the content remains on the stack.)
 
+\subsec{Complex numbers}
+
+\fun{GEN}{imag}{GEN x} returns a copy of the imaginary part of \kbd{x}.
+
+\fun{GEN}{real}{GEN x} returns a copy of the real part of \kbd{x}. If \kbd{x}
+is a \typ{QUAD}, returns the coefficient of $1$ in the ``canonical'' integral
+basis $(1,\omega)$.
+
+The last two functions are not suitable for \tet{gerepileupto}:
+
+\fun{GEN}{imag_i}{GEN x} as \kbd{gimag}, returns a pointer to the imaginary
+part.
+\fun{GEN}{real_i}{GEN x} as \kbd{greal}, returns a pointer to the real part.
+
 \subsec{Generic binary operators}. Let ``\op'' be a binary operation among
 
 \op=\key{add}: addition (\kbd{x + y}).

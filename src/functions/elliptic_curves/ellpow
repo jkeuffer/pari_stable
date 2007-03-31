@@ -8,6 +8,3 @@ Doc:
  group law on the elliptic curve $E$. Here, $n$ can be in $\Z$, or $n$
  can be a complex quadratic integer if the curve $E$ has complex multiplication
  by $n$ (if not, an error message is issued).
- 
- \syn{powell}{E,z,n}.
-

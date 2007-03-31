@@ -16,7 +16,3 @@ Doc:
  assumed that the curve is a \emph{strong} \idx{Weil curve}, and that the
  Manin constant is equal to 1. The equation of the curve $E$ must be minimal
  (use \kbd{ellminimalmodel} to get a minimal equation).
- 
- \syn{elltaniyama}{E, prec}, and the precision of the result is determined by
- \kbd{prec}.
-

@@ -4,6 +4,3 @@ C-Name: gsh
 Prototype: Gp
 Help: sinh(x): hyperbolic sine of x
 Doc: hyperbolic sine of $x$.
- 
- \syn{gsh}{x,\var{prec}}.
-

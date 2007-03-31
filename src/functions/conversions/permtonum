@@ -7,6 +7,3 @@ Doc:
  given a permutation $x$ on $n$ elements,
  gives the number $k$ such that $x=\kbd{numtoperm(n,k)}$, i.e.~inverse
  function of \tet{numtoperm}.
- 
- \syn{permtonum}{x}.
-

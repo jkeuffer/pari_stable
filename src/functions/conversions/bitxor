@@ -13,6 +13,3 @@ Doc:
  $$\sum (x_i~\kbd{xor}~y_i) 2^i$$
  
  See \secref{se:bitand} for the behaviour for negative arguments.
- 
- \syn{gbitxor}{x,y}.
-

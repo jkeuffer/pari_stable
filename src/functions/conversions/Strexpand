@@ -16,4 +16,3 @@ Doc:
  @eprog
  
  The individual arguments are read in string context, see \secref{se:strings}.
-

@@ -7,8 +7,3 @@ Doc:
  imaginary part of $x$. When
  $x$ is a quadratic number, this is the coefficient of $\omega$ in
  the ``canonical'' integral basis $(1,\omega)$.
- 
- \syn{gimag}{x}. This returns a copy of the imaginary part. The internal
- routine \tet{imag_i} is faster, since it returns the pointer and skips the
- copy.
-

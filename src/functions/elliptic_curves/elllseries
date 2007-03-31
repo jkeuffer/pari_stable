@@ -18,4 +18,3 @@ Doc:
  
  \syn{elllseries}{E,s,A,\var{prec}} where $\var{prec}$ is a \kbd{long} and an
  omitted $A$ is coded as \kbd{NULL}.
-

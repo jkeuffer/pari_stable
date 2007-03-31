@@ -23,4 +23,3 @@ Doc:
  
  \syn{ellap0}{E,p,\fl}. Also available are \funs{apell}{E,p}, corresponding
  to $\fl=0$, and \funs{apell2}{E,p} ($\fl=1$).
-
