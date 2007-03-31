@@ -15,4 +15,3 @@ Doc: reads in the file
  If a GP \tet{binary file} is read using this command (see
  \secref{se:writebin}), the file is loaded and the last object in the file
  is returned.
-

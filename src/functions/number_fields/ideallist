@@ -54,8 +54,3 @@ Doc: computes the list
  three ideals of norm $25$. In fact, for all moduli with finite part of norm
  $25$ and trivial archimedean part, as the last 3 commands show. See
  \tet{ideallistarch} to treat general moduli.
- 
- \syn{ideallist0}{\var{nf},\var{bound},\fl}, where \var{bound} must
- be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
- corresponding to the case $\fl=4$.
-

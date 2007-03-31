@@ -7,4 +7,4 @@ Help: print({str}*): outputs its string arguments (in raw format) ending with
 Description: 
  (?gen,...):void  pariprintf("${2 format_string}\n"${2 format_args})
 Doc: outputs its (string) arguments in raw format, ending with a newline.
-
+ %\syn{NO}

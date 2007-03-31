@@ -5,4 +5,3 @@ C-Name: gp_quit
 Prototype: v
 Help: quit(): quits GP and return to the system
 Doc: exits \kbd{gp}.
-

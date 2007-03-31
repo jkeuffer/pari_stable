@@ -9,3 +9,4 @@ Description:
 Doc: outputs its (string) arguments in raw
  format, without ending with a newline. Note that you can still embed newlines
  within your strings, using the \b{n} notation~!
+ %\syn{NO}

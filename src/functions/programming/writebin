@@ -36,4 +36,3 @@ Doc: writes (appends) to
  and compatibility with future versions of \kbd{gp} is not guaranteed. Hence
  binary files should not be used for long term storage (also, they are
  larger and harder to compress than text files).
-

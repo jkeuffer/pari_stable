@@ -8,5 +8,3 @@ Doc: returns the current value of the seed used by the
  purposes, to reproduce a specific chain of computations. The returned value
  is technical (reproduces an internal state array), and can only be used as an
  argument to \tet{setrand}.
- 
- \syn{getrand}{}.

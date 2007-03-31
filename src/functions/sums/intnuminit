@@ -29,6 +29,3 @@ Doc: initialize tables for integration from
  corresponding to negative $t=nh$ for $-N\le n\le -1$, or may be empty (but
  not always) if $\phi(t)$ is an odd function (implicitly we would have
  $\var{tab}[6]=-\var{tab}[4]$ and $\var{tab}[7]=\var{tab}[5]$).
- 
- \synt{intnuminit}{GEN a, GEN b, long m, long prec}.
-

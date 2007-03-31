@@ -21,4 +21,4 @@ Doc: outputs its argument list (each of
  \bprog
  error("n = ", n, " is not squarefree !")
  @eprog\noindent
-
+  % \syn{NO}

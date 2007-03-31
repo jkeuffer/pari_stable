@@ -20,7 +20,7 @@ something like:
 
 \key{foo}$(x,\{\fl=0\})$: short description.
 
-\syn{foo}{x,\fl}.
+The library syntax is \kbd{GEN foo(GEN x, long fl = 0)}.
 
 \noindent
 This means that the GP function \kbd{foo} has one mandatory argument $x$, and
@@ -120,16 +120,14 @@ argument is optional for all documented functions, hence the \& will always
 appear between brackets as in \kbd{Z\_issquare}$(x,\{\&e\})$.
 
 \misctitle{About library programming}.
-the \var{library} function \kbd{foo}, as defined
-at the beginning of this section, is seen to have two mandatory arguments,
-$x$ and \fl: no PARI mathematical function has been implemented so as to
-accept a variable number of arguments, so all arguments are mandatory when
-programming with the library (often, variants are provided corresponding to
-the various flag values). When not mentioned otherwise, the result and
-arguments of a function are assumed implicitly to be of type \kbd{GEN}. Most
-other functions return an object of type \kbd{long} integer in C (see
-Chapter~4). The variable or parameter names \var{prec} and \fl\ always denote
-\kbd{long} integers.
+The \var{library} function \kbd{foo}, as defined at the beginning of this
+section, is seen to have two mandatory arguments, $x$ and \fl: no function
+seen in the present chapter has been implemented so as to accept a variable
+number of arguments, so all arguments are mandatory when programming with the
+library (often, variants are provided corresponding to the various flag
+values). We include an \kbd{= default value} token in the prototype to signal
+how a missing argument should be encoded. Most of the time, it will be a
+\kbd{NULL} pointer, or -1 for a variable number.
 
 The \tet{entree} type is used by the library to implement iterators (loops,
 sums, integrals, etc.) when a formal variable has to successively assume a

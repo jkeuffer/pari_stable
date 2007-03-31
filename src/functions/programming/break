@@ -9,4 +9,3 @@ Doc: interrupts execution of current \var{seq}, and
  current function call (or the top level loop). $n$ must be bigger than 1.
  If $n$ is greater than the number of enclosing loops, all enclosing loops
  are exited.
-

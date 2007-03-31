@@ -37,4 +37,3 @@ Doc: kills the present value of the variable, alias or user-defined
  If you simply want to restore a variable to its ``undefined'' value
  (monomial of degree one), use the \idx{quote} operator: \kbd{a = 'a}.
  Predefined symbols (\kbd{x} and GP function names) cannot be killed.
-

@@ -26,4 +26,3 @@ Doc: Let $v$ be an $n$-component
  to the lexicographic ordering. (The formal variable with the highest index
  moves the fastest.) If $\fl=1$, generate only nondecreasing vectors $X$, and
  if $\fl=2$, generate only strictly increasing vectors $X$.
-

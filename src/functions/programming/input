@@ -13,4 +13,3 @@ Doc: reads a string, interpreted as a GP expression,
  \secref{se:emacs}) one \emph{must} prompt for the string, with a string
  which ends with the same prompt as any of the previous ones (a \kbd{"? "}
  will do for instance).
-

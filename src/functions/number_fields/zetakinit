@@ -19,6 +19,3 @@ Doc: computes a number of initialization data
  the precision is big. Unless the discriminant is small it will not be able
  to handle more than 9 digits of relative precision. For instance,
  \kbd{zetakinit(x\pow 8 - 2)} needs 440MB of memory at default precision.
- 
- \syn{initzeta}{x,prec}.
-

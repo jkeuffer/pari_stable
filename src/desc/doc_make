@@ -33,7 +33,8 @@ while (<FILE>)
         $v = "\$($v)\$";
       }
 
-      if ($doc !~ /\\syn\w*{/ && $sec !~ /programming/) {
+      if ($doc !~ /\\syn\w*{/ && $fun->{Class} !~ /^(highlevel|gp)$/
+                              && $sec !~ /programming\/control/) {
         my ($Cname) = $fun->{'C-Name'};
         my (@proto) = split(//, $fun->{Prototype});
         $args =~ s/[{}&]//g;
@@ -51,9 +52,12 @@ while (<FILE>)
 
           if ($c eq 'G') {$args .= ", GEN " . shift(@ARGS); next;}
           if ($c eq 'L') {$args .= ", long " . shift(@ARGS); next;}
+          if ($c eq 'n') {$args .= ", long " . shift(@ARGS); next;}
+          if ($c =~ /^[rs]$/) {$args .= ", char *" . shift(@ARGS); next;}
+          if ($c eq 'S') {$args .= ", entree *" . shift(@ARGS); next;}
+
           if ($c eq 'p') {$args .= ", long prec"; next;}
           if ($c eq 'P') {$args .= ", long precdl"; next;}
-          if ($c eq 'n') {$args .= ", long " . shift(@ARGS); next;}
           if ($c eq '') { next; }
           if ($c eq 'D') {
             $c = $proto[$i++];
@@ -68,7 +72,7 @@ while (<FILE>)
             if ($c eq 'V') {
               $args .= ", entree *". shift(@ARGS) ." = NULL"; next;
             }
-            if ($c eq 'E' || $c eq 'I') {
+            if ($c =~ /^[EI]$/) {
               $args .= ", char *". shift(@ARGS) ." = NULL"; next;
             }
             while (($c = $proto[$i++]) ne ',') {}

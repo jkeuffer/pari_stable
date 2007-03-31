@@ -16,7 +16,3 @@ Doc: this very special operation
  Such an attempt will raise an error. The technical reason is that this
  routine usually moves the stack, so objects from the current expression may
  not be correct anymore, e.g. loop indexes.
- 
- \syn{allocatemoremem}{x}, where $x$ is an unsigned long, and the return type
- is void. \kbd{gp} uses a variant which makes sure it was not called within a
- loop.

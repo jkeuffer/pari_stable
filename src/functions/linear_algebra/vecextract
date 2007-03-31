@@ -58,5 +58,3 @@ Doc: extraction of components of the
  
  [0 0 1]
  @eprog
- 
- \syn{extract}{x,y} or \funs{matextract}{x,y,z}.

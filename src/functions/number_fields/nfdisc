@@ -20,4 +20,3 @@ Doc:
  
  \syn{nfdiscf0}{x,\fl,fa} where an omitted $fa$ is input as \kbd{NULL}. You
  can also use \funs{discf}{x} ($\fl=0$).
-

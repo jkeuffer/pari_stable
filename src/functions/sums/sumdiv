@@ -10,6 +10,3 @@ Doc: sum of expression \var{expr} over the positive divisors of $n$.
  underlying expression to speed up the computation. In the present version
  \vers, there is no way to indicate that \var{expr} is multiplicative in
  $n$, hence specialized functions should be preferred whenever possible.
- 
- \synt{divsum}{entree *ep, GEN num, char *expr}.
-

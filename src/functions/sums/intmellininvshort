@@ -41,6 +41,3 @@ Doc: numerical integration
  \emph{exact} exponential decrease of $\Gamma(2+it)^3$. But as the last
  example shows, a rough indication \emph{must} be given, otherwise slow
  decrease is assumed, resulting in catastrophic loss of accuracy.
- 
- \synt{intmellininvshort}{GEN sig, GEN z, GEN tab, long prec}.
-

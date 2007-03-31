@@ -7,5 +7,3 @@ Help: getheap(): 2-component vector giving the current number of objects in
 Doc: returns a two-component row vector giving the
  number of objects on the heap and the amount of memory they occupy in long
  words. Useful mainly for debugging purposes.
- 
- \syn{getheap}{}.

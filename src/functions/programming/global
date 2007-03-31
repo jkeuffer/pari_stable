@@ -22,4 +22,4 @@ Doc: declares the corresponding variables to be global. From now on, you are
  Calling \kbd{global} without arguments prints the list of global variables in
  use. In particular, \kbd{eval(global)} will output the values of all global
  variables.
-
+ % \syn{NO}

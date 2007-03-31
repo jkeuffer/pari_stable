@@ -29,4 +29,3 @@ Doc: reads in the file
  @eprog
  In general a sequence is just a single line, but as usual braces and
  \kbd{\bs\bs} may be used to enter multiline sequences.
-
