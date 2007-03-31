@@ -1093,9 +1093,10 @@ orpari(GEN a, GEN b/*closure*/)
   return gcmp0(g)?gen_0:gen_1;
 }
 
-GEN gstore(GEN *x, GEN y)
+GEN
+gstore(GEN *x, GEN y)
 {
-  *x=gcopy(y);
+  *x=y;
   return *x;
 }
 
