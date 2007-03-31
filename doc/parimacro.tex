@@ -308,15 +308,7 @@
   \subsubsectitle{\maketitle#1}}
 
 \def\annotepar#1{\noindent\llap{#1:\ \ }}
-\def\unix{\annotepar{UNIX}}
 \def\emacs{\annotepar{EMACS}}
-
-\def\@secunix#1{\begingroup\def\sectionhook{\unix{}}\do{#1}\endgroup}
-\def\sectionunix#1{{\let\do=\section\@secunix{#1}}}
-\def\subsecunix#1{{\let\do=\subsec\@secunix{#1}}}
-\def\subsubsecunix#1{{\let\do=\subsubsec\@secunix{#1}}}
-\def\@subsecidxunix#1{{\let\do=\@subsecidx\@secunix{#1}}}
-\def\@subsubsecidxunix#1{{\let\do=\@subsubsecidx\@secunix{#1}}}
 
 \def\subseckbd#1{\subsec{\kbd{#1}}}
 \def\@subsecidx#1{\subsec{#1}\toindex{#1}}
