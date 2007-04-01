@@ -519,13 +519,12 @@ FF_log(GEN x, GEN g)
   GEN r,ord,T,p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
+  ord = factor_pn_1(p,degpol(T));
   switch(x[1])
   {
   case t_FF_FpXQ:
-    ord = addis(powiu(p,degpol(T)),-1);
     r = FpXQ_log(gel(x,2), gel(g,2), ord, T, p);
   default:
-    ord = addis(powuu(pp,degpol(T)),-1);
     r = Flxq_log(gel(x,2), gel(g,2), ord, T, pp);
   }
   return gerepileuptoint(av, r);
@@ -538,14 +537,13 @@ FF_order(GEN x, GEN o)
   ulong pp;
   GEN r, T,p;
   _getFF(x,&T,&p,&pp);
+  if (!o) o = factor_pn_1(p,degpol(T));
   switch(x[1])
   {
   case t_FF_FpXQ:
-    if (!o) o = addis(powiu(p,degpol(T)),-1);
     r = FpXQ_order(gel(x,2), o, T, p);
     break;
   default:
-    if (!o) o = addis(powuu(pp,degpol(T)),-1);
     r = Flxq_order(gel(x,2), o, T, pp);
   }
   if (!o) r = gerepileuptoint(av,r);

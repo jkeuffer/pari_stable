@@ -25,10 +25,12 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
     4- split usersch3.tex moving function documentation to src/functions/*
     5- simplify table of contents for users.dvi
     6- rename Flx_rand -> random_Flx, FpX_rand -> random_FpX
+BA  7- use factor_pn_1 to compute various orders in FF.c
 
   Added
     1- library functions expu, adduu, subuu
-    2- library functions divisorsu, factor_pn_1, merge_factor
+    2- library functions divisorsu, factor_pn_1 (using cyclotomic factors and
+       Aurifeuille), merge_factor
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

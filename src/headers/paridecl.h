@@ -483,7 +483,7 @@ GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
 GEN     divisors(GEN n);
 GEN     divisorsu(ulong n);
-GEN     factor_pn_1(GEN p, GEN n);
+GEN     factor_pn_1(GEN p, long n);
 GEN     factorint(GEN n, long flag);
 GEN     factoru(ulong n);
 GEN     factoru_pow(ulong n);
