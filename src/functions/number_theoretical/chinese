@@ -22,7 +22,4 @@ Doc: if $x$ and $y$ are both intmods or both
  Finally $\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows
  vector arguments to contain other data, so long as they are identical in both
  vectors.
- 
- \syn{chinese}{x,y}. Also available is \tet{chinese1}$(x)$, corresponding to an
- omitted \kbd{y}.
-
+Variant: Also available is \fun{GEN}{chinese1}{GEN x}.

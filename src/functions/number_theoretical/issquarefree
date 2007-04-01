@@ -6,12 +6,5 @@ Help: issquarefree(x): true(1) if x is squarefree, false(0) if not
 Description: 
  (int):bool	issquarefree($1)
  (gen):gen	gissquarefree($1)
-Doc: true (1) if $x$ is squarefree, false (0) if not.
- Here $x$ can be an integer or a polynomial.
- 
- \syn{gissquarefree}{x}, but the simpler function \funs{issquarefree}{x}
- which returns a \kbd{long} should be used if $x$ is known to be of type
- integer. This \teb{issquarefree} is just the square of the \idx{Moebius}
- function, and is computed as a multiplicative arithmetic function much like
- the latter.
-
+Doc: true (1) if $x$ is squarefree, false (0) if not. Here $x$ can be an
+ integer or a polynomial.

@@ -9,7 +9,6 @@ Doc: \idx{Stirling number}
  of the first kind $s(n,k)$ ($\fl=1$, default) or of the second kind 
  $S(n,k)$ (\fl=2).
  
- \syn{stirling}{n,k,\fl}, where $n$ and $k$ must be a \kbd{long}.
- Also available are
- \tet{stirling1}$(n,k)$ (for $\fl=1$) and
- \tet{stirling2}$(n,k)$ (for $\fl=2$).
+Variant: Also available are
+ \fun{GEN}{stirling1}{long n, long k} ($\fl=1$) and
+ \fun{GEN}{stirling2}{long n, long k} ($\fl=2$).

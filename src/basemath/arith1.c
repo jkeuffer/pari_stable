@@ -2282,14 +2282,14 @@ sersfcont(GEN a, GEN b, long k)
   setlg(y, i); return y;
 }
 
-static GEN
-sfcont(GEN x, long k)
+GEN
+gboundcf(GEN x, long k)
 {
   pari_sp av;
   long lx, tx = typ(x), e;
   GEN y, a, b, c;
 
-  if (k < 0) pari_err(talker, "negative nmax in sfcont");
+  if (k < 0) pari_err(talker, "negative nmax in gboundcf");
   if (is_scalar_t(tx))
   {
     if (gcmp0(x)) return mkvec(gen_0);
@@ -2299,7 +2299,7 @@ sfcont(GEN x, long k)
       case t_REAL:
         av = avma; lx = lg(x);
         e = bit_accuracy(lx)-1-expo(x);
-        if (e < 0) pari_err(talker,"integral part not significant in sfcont");
+        if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
         c = ishiftr_lg(x,lx,0);
         y = int2n(e);
 	a = Qsfcont(c,y, NULL, k);
@@ -2310,7 +2310,7 @@ sfcont(GEN x, long k)
         av = avma;
         return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
     }
-    pari_err(typeer,"sfcont");
+    pari_err(typeer,"gboundcf");
   }
 
   switch(tx)
@@ -2318,12 +2318,12 @@ sfcont(GEN x, long k)
     case t_POL: return mkveccopy(x);
     case t_SER:
       av = avma;
-      return gerepileupto(av, sfcont(ser2rfrac_i(x), k));
+      return gerepileupto(av, gboundcf(ser2rfrac_i(x), k));
     case t_RFRAC:
       av = avma;
       return gerepilecopy(av, sersfcont(gel(x,1), gel(x,2), k));
   }
-  pari_err(typeer,"sfcont");
+  pari_err(typeer,"gboundcf");
   return NULL; /* not reached */
 }
 
@@ -2368,7 +2368,7 @@ sfcont2(GEN b, GEN x, long k)
 GEN
 gcf(GEN x)
 {
-  return sfcont(x,0);
+  return gboundcf(x,0);
 }
 
 GEN
@@ -2378,25 +2378,19 @@ gcf2(GEN b, GEN x)
 }
 
 GEN
-gboundcf(GEN x, long k)
-{
-  return sfcont(x,k);
-}
-
-GEN
 contfrac0(GEN x, GEN b, long flag)
 {
   long lb, tb, i;
   GEN y;
 
-  if (!b || gcmp0(b)) return sfcont(x,flag);
+  if (!b) return gboundcf(x,flag);
   tb = typ(b);
-  if (tb == t_INT) return sfcont(x,itos(b));
+  if (tb == t_INT) return gboundcf(x,itos(b));
   if (! is_matvec_t(tb)) pari_err(typeer,"contfrac0");
 
   lb = lg(b); if (lb==1) return cgetg(1,t_VEC);
   if (tb != t_MAT) return sfcont2(b,x,flag);
-  if (lg(b[1])==1) return sfcont(x,flag);
+  if (lg(b[1])==1) return gboundcf(x,flag);
   y = cgetg(lb, t_VEC); for (i=1; i<lb; i++) gel(y,i) = gmael(b,i,1);
   x = sfcont2(y,x,flag); return x;
 }

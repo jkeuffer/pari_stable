@@ -151,6 +151,3 @@ Doc: \var{pol} being a non-constant,
  If $\fl=4$, as $2$ but uses a partial \kbd{polred}.
  
  If $\fl=5$, as $3$ using a partial \kbd{polred}.
- 
- \syn{nfinit0}{x,\fl,\var{prec}}.
-

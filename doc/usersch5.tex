@@ -990,6 +990,9 @@ in the factorization are actually strong pseudoprimes.
 \fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.
 
+\fun{long}{isfundamental}{GEN x} returns $1$ if the \typ{INT} \kbd{x}
+is a fundamental discriminant, and $0$ otherwise.
+
 \fun{long}{Z_issquare}{GEN n} returns $1$ if \typ{INT} \kbd{n} is
 a square, and $0$ otherwise. This is tested first modulo small prime
 powers, then \kbd{sqrtremi} is called.
@@ -999,6 +1002,9 @@ powers, then \kbd{sqrtremi} is called.
 
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
+
+\fun{long}{BSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
 
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
 $0$ otherwise.

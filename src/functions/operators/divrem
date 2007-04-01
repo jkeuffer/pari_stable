@@ -13,7 +13,7 @@ Doc: creates a column vector with two components, the first being the Euclidean
  polynomials, divide with respect to the variable $v$.
  
  Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
- \kbd{$x$ \% $y$}; there is no operator to obtain it in GP:
+ \kbd{$x$ \% $y$}; no GP operator corresponds to it:
  \bprog
  ? divrem(1/2, 3)[2]
  %1 = 1/2
@@ -24,7 +24,5 @@ Doc: creates a column vector with two components, the first being the Euclidean
  ? Mod(2,9) % 6
  %3 = Mod(2,3)
  @eprog
- 
- \syn{divrem}{x,y,v}, where $v$ is a \kbd{long}. Also available as
- \funs{gdiventres}{x,y} when $v$ is not needed.
-
+Variant: Also available is \fun{GEN}{gdiventres}{GEN x, GEN y} when $v$ is
+ not needed.

@@ -1708,7 +1708,6 @@ GEN     fflog(GEN x, GEN g);
 GEN     fforder(GEN x, GEN o);
 GEN     ffprimroot(GEN x);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
-GEN     gcd0(GEN x, GEN y,long flag);
 GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);
 GEN     ggcd(GEN x, GEN y);

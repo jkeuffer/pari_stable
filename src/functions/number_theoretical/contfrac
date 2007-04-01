@@ -6,11 +6,10 @@ Help: contfrac(x,{b},{nmax}): continued fraction expansion of x (x
  rational,real or rational function). b and nmax are both optional, where b
  is the vector of numerators of the continued fraction, and nmax is a bound
  for the number of terms in the continued fraction expansion
-Doc: creates the row vector whose
- components are the partial quotients of the \idx{continued fraction}
- expansion of $x$. That is a result $[a_0,\dots,a_n]$ means that $x \approx
- a_0+1/(a_1+\dots+1/a_n\dots)$. The output is normalized so that $a_n \neq 1$
- (unless we also have $n = 0$).
+Doc: returns the row vector whose components are the partial quotients of the
+ \idx{continued fraction} expansion of $x$. That is a result
+ $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n\dots)$. The
+ output is normalized so that $a_n \neq 1$ (unless we also have $n = 0$).
  
  The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
  number, the expansion stops at the last significant partial quotient if
@@ -24,9 +23,7 @@ Doc: creates the row vector whose
  above since, if $b$ is too long, some partial quotients may not be
  significant.
  
- If $b$ is an integer, the command is understood as \kbd{contfrac($x,nmax$)}.
- 
- \syn{contfrac0}{x,b,nmax}. Also available are
- \funs{gboundcf}{x,nmax}, \funs{gcf}{x}, or \funs{gcf2}{b,x}, where $nmax$
- is a C integer.
-
+ If $b$ is an integer, \var{nmax} is ignored and the command is understood as
+ \kbd{contfrac($x, , b$)}.
+Variant: Also available are \fun{GEN}{gboundcf}{GEN x, long nmax} and
+ \fun{GEN}{gcf}{GEN x}.

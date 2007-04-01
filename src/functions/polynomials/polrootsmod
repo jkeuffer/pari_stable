@@ -13,9 +13,4 @@ Doc: row vector of roots modulo $p$ of the polynomial \var{pol}. The
  particular non-prime value $p=4$ is accepted, mainly for $2$-adic
  computations. Multiple roots are \emph{not} repeated.
  
- If $p$ is very small, you may try setting $\fl=1$, which uses a naive
- search.
- 
- \syn{rootmod}{\var{pol},p} ($\fl=0$) or \funs{rootmod2}{\var{pol},p}
- ($\fl=1$).
-
+ If $p$ is very small, you may set $\fl=1$, which uses a naive search.

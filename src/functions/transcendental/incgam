@@ -10,6 +10,5 @@ Doc: incomplete gamma function. The argument $x$
  assume (of course without checking!) that $y=\Gamma(s)$. For small $x$, this
  will speed up the computation.
  
- \syn{incgam}{s,x,\var{prec}} and \funs{incgam0}{s,x,y,prec},
- respectively (an omitted $y$ is coded as \kbd{NULL}).
+Variant: Also available is \fun{GEN}{incgam}{GEN s, GEN x, long prec}.
 

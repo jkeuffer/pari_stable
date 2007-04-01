@@ -46,8 +46,3 @@ Doc: true (1) if $x$ is a prime
  exceedingly unlikely and well worth a bug report.
  
  If $\fl=2$, use APRCL.
- 
- \syn{gisprime}{x,\fl}, but the simpler function \funs{isprime}{x}
- which returns a \kbd{long} should be used if $x$ is known to be of
- type integer.
-

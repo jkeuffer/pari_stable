@@ -1,21 +1,16 @@
 Function: gcd
 Section: number_theoretical
-C-Name: gcd0
-Prototype: GDGD0,L,
+C-Name: ggcd
+Prototype: GDG
 Help: gcd(x,{y}): greatest common divisor of x and y.
 Description: 
- (small, small, ?0):small	cgcd($1, $2)
- (int, int, ?0):int	        gcdii($1, $2)
- (gen, gen, ?0):gen	        ggcd($1, $2)
- (gen, gen, 1):gen	        modulargcd($1, $2)
- (gen, gen, 2):gen	        srgcd($1, $2)
- (gen, ?gen, ?small):gen	gcd0($1, $2, $3)
-Doc: creates the greatest common divisor of $x$
- and $y$. $x$ and $y$ can be of quite general types, for instance both
- rational numbers. If $y$ is omitted and $x$ is a vector, returns the
- $\text{gcd}$ of all components of $x$, i.e.~this is equivalent to
- \kbd{content(x)}.
- 
+ (small, small):small	cgcd($1, $2)
+ (int, int):int	        gcdii($1, $2)
+ (gen, gen):gen	        ggcd($1, $2)
+Doc: creates the greatest common divisor of $x$ and $y$. $x$ and $y$ can be
+ of quite general types, for instance both rational numbers. If $y$ is
+ omitted and $x$ is a vector, returns the $\text{gcd}$ of all components of
+ $x$, i.e.~this is equivalent to \kbd{content(x)}.
  
  When $x$ and $y$ are both given and one of them is a vector/matrix type,
  the GCD is again taken recursively on each component, but in a different way.
@@ -35,8 +30,3 @@ Doc: creates the greatest common divisor of $x$
  
  \item general polynomials: use the \idx{subresultant algorithm} if
  coefficient explosion is likely (exact, non modular, coefficients).
- 
- \syn{ggcd}{x,y}. For general polynomial inputs, \funs{srgcd}{x,y} is also
- available. For univariate \emph{rational} polynomials, one also has
- \funs{modulargcd}{x,y}.
-

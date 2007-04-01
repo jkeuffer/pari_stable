@@ -9,5 +9,4 @@ Doc: exponential integral $\int_x^\infty \dfrac{e^{-t}}{t}\,dt$ ($x\in\R$)
  If $n$ is present, outputs the $n$-dimensional vector
  $[\kbd{eint1}(x),\dots,\kbd{eint1}(nx)]$ ($x \geq 0$). This is faster than
  repeatedly calling \kbd{eint1($i$ * x)}.
- 
- \syn{veceint1}{x,n,prec}. Also available is \funs{eint1}{x,prec}.
+Variant: Also available is \fun{GEN}{eint1}{GEN x, long prec}.

@@ -57,9 +57,6 @@ Doc: general factorization function.
  ? content(t^2 + 5/2*t + 1)
  %2 = 1/2
  @eprog\noindent
- See also \tet{factornf} and \tet{nffactor}.
- 
- \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer. Also available are
- \funs{factor}{x} (= \funs{factor0}{x,-1}),
- \funs{smallfact}{x} (= \funs{factor0}{x,0}).
-
+ See also \tet{nffactor}.
+Variant: Also available are \fun{GEN}{factor}{GEN x} and
+ \fun{GEN}{boundfact}{GEN x, long lim}

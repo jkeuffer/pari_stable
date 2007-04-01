@@ -2421,20 +2421,6 @@ gisirreducible(GEN x)
 /*                         GENERIC GCD                             */
 /*                                                                 */
 /*******************************************************************/
-GEN
-gcd0(GEN x, GEN y, long flag)
-{
-  if (!y) return content(x);
-  switch(flag)
-  {
-    case 0: return ggcd(x,y);
-    case 1: return modulargcd(x,y);
-    case 2: return srgcd(x,y);
-    default: pari_err(flagerr,"gcd");
-  }
-  return NULL; /* not reached */
-}
-
 /* x is a COMPLEX or a QUAD */
 static GEN
 triv_cont_gcd(GEN x, GEN y)

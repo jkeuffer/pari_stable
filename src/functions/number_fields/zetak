@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: gzetakall
 Prototype: GGD0,L,p
 Help: zetak(nfz,x,{flag=0}): Dedekind zeta function of the number field nfz
- at x, where nfz is the vector computed by zetakinit (NOT by nfinit) flag is
+ at x, where nfz is the vector computed by zetakinit (NOT by nfinit); flag is
  optional, and can be 0: default, compute zetak, or non-zero: compute the
  lambdak function, i.e. with the gamma factors
 Doc: \var{znf} being a number
@@ -21,8 +21,7 @@ Doc: \var{znf} being a number
  Be wary in particular that $x$ of large imaginary part or, on the
  contrary, very close to an ordinary integer will suffer from precision
  loss, yielding fewer significant digits than expected. Computing with 28
- eight digits of relative accuracy, we have
- 
+ digits of relative accuracy, we have
  \bprog
  ? zeta(3)
  %1 = 1.202056903159594285399738161
@@ -51,5 +50,5 @@ Doc: \var{znf} being a number
  %4 = 1.6 E43             \\ junk
  @eprog
  
- \syn{glambdak}{\var{znf},x,\var{prec}} or
- \funs{gzetak}{\var{znf},x,\var{prec}}.
+Variant: \fun{GEN}{glambdak}{GEN znf, GEN x, long prec} or
+ \fun{GEN}{gzetak}{GEN znf, GEN x, long prec}.

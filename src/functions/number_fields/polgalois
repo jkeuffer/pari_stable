@@ -83,7 +83,5 @@ Doc: \idx{Galois} group of the non-constant
  sensitive to the current precision. The precision is updated internally but,
  in very rare cases, a wrong result may be returned if the initial precision
  was not sufficient.
- 
- \syn{polgalois}{x,\var{prec}}. To enable the new format in library mode,
+Variant: To enable the new format in library mode,
  set the global variable \tet{new_galois_format} to $1$.
-

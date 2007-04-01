@@ -9,16 +9,14 @@ Description:
  (gen, gen, gen, 1):gen:prec	idealmulred($1, $2, $3, prec)
  (gen, gen, gen, #small):gen	$"invalid flag in idealmul"
  (gen, gen, gen, small):gen:prec	idealmul0($1, $2, $3, $4, prec)
-Doc: ideal multiplication of the
- ideals $x$ and $y$ in the number field \var{nf}. The result is a generating
- set for the ideal product with at most $n$ elements, and is in Hermite normal
- form if either $x$ or $y$ is in HNF or is a prime ideal as output by
- \kbd{idealprimedec}, and this is given together with the sum of the
- Archimedean information in $x$ and $y$ if both are given.
- 
- If $\fl$ is non-zero, reduce the result using \kbd{idealred}.
- 
- \syn{idealmul}{\var{nf},x,y} ($\fl=0$) or
- \funs{idealmulred}{\var{nf},x,y,\var{prec}} ($\fl\neq0$), where as usual,
- $\var{prec}$ is a C long integer representing the precision.
+Doc: ideal multiplication of the ideals $x$ and $y$ in the number field
+ \var{nf}. The result is a generating set for the ideal product with at most
+ $n$ elements, and is in Hermite normal form if either $x$ or $y$ is in HNF
+ or is a prime ideal as output by \kbd{idealprimedec}, and this is given
+ together with the sum of the Archimedean information in $x$ and $y$ if both
+ are given.
 
+ If $\fl$ is non-zero, reduce the result using \kbd{idealred}.
+Variant: Also available are \fun{GEN}{idealmul}{GEN nf, GEN x, GEN y}
+ ($\fl=0$) or \fun{GEN}{idealmulred}{GEN nf, GEN x, GEN y, long prec}
+ ($\fl\neq0$).

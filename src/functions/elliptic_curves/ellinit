@@ -77,7 +77,5 @@ Doc:
  \smallskip For all other base fields or rings, the last six components are
  arbitrarily set to zero. See also the description of member functions
  related to elliptic curves at the beginning of this section.
- 
- \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
- \funs{initell}{E,\var{prec}} ($\fl=0$) and
- \funs{smallinitell}{E,\var{prec}} ($\fl=1$).
+Variant: Also available are \fun{GEN}{initell}{GEN E, long prec} ($\fl=0$) and
+ \fun{GEN}{smallinitell}{GEN E, long prec} ($\fl=1$).

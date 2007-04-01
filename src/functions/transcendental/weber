@@ -19,8 +19,5 @@ Doc: one of Weber's three $f$ functions.
  $$f_2(x)=\sqrt{2}\eta(2x)\,/\,\eta(x)\quad\hbox{such that}\quad
  j=(f_2^{24}+16)^3/f_2^{24}.$$
  Note the identities $f^8=f_1^8+f_2^8$ and $ff_1f_2=\sqrt2$.
- 
- \syn{weber0}{x,\fl,prec}. Associated to the various values of \fl, the
- following functions are also available: \funs{weberf}{x,prec},
- \funs{weberf1}{x,prec} or \funs{weberf2}{x,prec}.
-
+Variant: Also available are \fun{GEN}{weberf}{GEN x, long prec},
+ \fun{GEN}{weberf1}{GEN x, long prec} and \fun{GEN}{weberf2}{GEN x, long prec}.

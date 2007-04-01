@@ -12,12 +12,11 @@ Help: nfgaloisconj(nf,{flag=0},{d}): list of conjugates of a root of the
  complete (but a warning is issued when the list is not proven complete); 2 &
  4: same meaning and restrictions. Note that only flag 4 can be applied to
  fields of large degrees (approx. >= 20)
-Doc: $\var{nf}$ being a
- number field as output by \kbd{nfinit}, computes the conjugates of a root
- $r$ of the non-constant polynomial $x=\var{nf}[1]$ expressed as
- polynomials in $r$. This can be used even if the number field $\var{nf}$ is
- not \idx{Galois} since some conjugates may lie in the field.
- 
+Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
+ conjugates of a root $r$ of the non-constant polynomial $x=\var{nf}[1]$
+ expressed as polynomials in $r$. This also makes sense when the number field
+ is not \idx{Galois} since some conjugates may lie in the field.
+
  $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
  
  If no flags or $\fl=0$, if $\var{nf}$ is a number field use a
@@ -35,45 +34,40 @@ Doc: $\var{nf}$ being a
  the default precision may help.
  
  If $\fl=4$, use Allombert's algorithm and permutation testing. If the
- field is Galois with ``weakly'' super solvable Galois group, return
+ field is Galois with weakly super-solvable Galois group, return
  the complete list of automorphisms, else only the identity element. If
  present, $d$ is assumed to be a multiple of the least common
  denominator of the conjugates expressed as polynomial in a root of
  \var{pol}.
  
- A group G is ``weakly'' super solvable (WKSS) if it contains a super solvable
- normal subgroup $H$ such that $G=H$ , or $G/H \simeq A_4$ , or $G/H \simeq
- S_4$. Abelian and nilpotent groups are WKSS. In practice, almost all groups
- of small order are WKSS, the exceptions having order 36(1 exception), 48(2),
+ A group G is weakly super-solvable (WKSS) if it contains a super-solvable
+ normal subgroup $H$ such that $G/H$ is trivial or isomorphic to $A_4$
+ or $S_4$. Abelian and nilpotent groups are WKSS. In practice, almost all
+ small groups are WKSS, the exceptions having order 36(1 exception), 48(2),
  56(1), 60(1), 72(5), 75(1), 80(1), 96(10) and $\geq 108$.
  
  Hence $\fl = 4$ permits to quickly check whether a polynomial of order
- strictly less than $36$ is Galois or not. This method is much faster than
- \kbd{nfroots} and can be applied to polynomials of degree larger than $50$.
+ strictly less than $36$ is Galois or not. (Note that the result is rigorous,
+ whereas factorisations modulo small primes are not enough when the
+ polynomial is indeed Galois.) This method is much faster than \kbd{nfroots}
+ and can be applied to polynomials of huge degree.
  
  This routine can only compute $\Q$-automorphisms, but it may be used to get
  $K$-automorphism for any base field $K$ as follows:
  \bprog
  rnfgaloisconj(nfK, R) = \\ K-automorphisms of L = K[X] / (R)
  { local(polabs, N, H);
- R *= Mod(1, nfK.pol);             \\ convert coeffs to polmod elts of K
- polabs = rnfequation(nfK, R);
- N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L
- H = [];
- for(i=1, #N,                      \\ select the ones that fix K
- if (subst(R, variable(R), Mod(N[i],R)) == 0,
- H = concat(H,N[i])
- )
- ); H
+   R *= Mod(1, nfK.pol);             \\ convert coeffs to polmod elts of K
+   polabs = rnfequation(nfK, R);
+   N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L
+   H = [];
+   for(i=1, #N,                      \\ select the ones that fix K
+     if (subst(R, variable(R), Mod(N[i],R)) == 0,
+       H = concat(H, N[i])
+     )
+   ); H
  }
  K  = nfinit(y^2 + 7);
  polL = x^4 - y*x^3 - 3*x^2 + y*x + 1;
  rnfgaloisconj(K, polL)             \\ K-automorphisms of L
  @eprog
- 
- \syn{galoisconj0}{\var{nf},\fl,d,\var{prec}}. Also available are
- \funs{galoisconj}{\var{nf}} for $\fl=0$,
- \funs{galoisconj2}{\var{nf},n,\var{prec}} for $\fl=2$ where $n$ is a bound
- on the number of conjugates, and  \funs{galoisconj4}{\var{nf},d}
- corresponding to $\fl=4$.
-

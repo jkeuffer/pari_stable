@@ -14,7 +14,4 @@ Doc: gives the \idx{Hermite normal form}
  If $b$ is not omitted, assume the ideal given was $a\Z_K+b\Z_K$, where $a$
  and $b$ are elements of $K$ given either as vectors on the integral basis
  $\var{nf}[7]$ or as algebraic numbers.
- 
- \syn{idealhnf0}{\var{nf},a,b} where an omitted $b$ is coded as \kbd{NULL}.
- Also available is \funs{idealhermite}{\var{nf},a} ($b$ omitted).
-
+Variant: Also available is \fun{GEN}{idealhermite}{GEN nf, GEN a}.

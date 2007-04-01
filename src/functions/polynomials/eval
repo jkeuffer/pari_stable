@@ -18,8 +18,8 @@ Doc: replaces in $x$ the formal variables by the values that
  % 1 = 1
  @eprog
  
- \syn{geval}{x}. The more basic functions \funs{poleval}{q,x},
- \funs{qfeval}{q,x}, and \funs{hqfeval}{q,x} evaluate $q$ at $x$, where $q$
- is respectively assumed to be a polynomial, a quadratic form (a symmetric
- matrix), or an Hermitian form (an Hermitian complex matrix).
-
+Variant: Also available are \fun{GEN}{poleval}{GEN q, GEN x},
+ \fun{GEN}{qfeval}{GEN q, GEN x}, and \fun{GEN}{hqfeval}{GEN q, GEN x} to
+ evaluate $q$ at $x$, where $q$ is respectively assumed to be a polynomial, a
+ quadratic form (a symmetric matrix), or an Hermitian form (a Hermitian
+ complex matrix).

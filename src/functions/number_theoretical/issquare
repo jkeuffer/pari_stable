@@ -36,6 +36,4 @@ Doc: true (1) if $x$ is a square, false (0)
  ? n
  %4 = [2, x]  \\ the square roots
  @eprog
- 
- \syn{gissquarerem}{x,\&n}. Also available is \funs{gissquare}{x}.
-
+Variant: Also available is \fun{GEN}{gissquare}{GEN x}.

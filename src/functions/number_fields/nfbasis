@@ -33,9 +33,6 @@ Doc: \idx{integral basis} of the number
  is desired: only factors with exponents greater or equal to 2 will be
  considered.
  
- \syn{nfbasis0}{x,\fl,\var{fa}}. An extended version is
- \funs{nfbasis}{x,\&d,\fl,\var{fa}}, where $d$ receives the discriminant of the
- number field (\emph{not} of the polynomial $x$), and an omitted \var{fa} is input
- as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
- \funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,\var{fa},\&d}.
-
+Variant: An extended version is \fun{GEN}{nfbasis}{GEN x, GEN *d, long flag,
+ GEN fa = NULL}, where \kbd{*d} receives the discriminant of the number field
+ (\emph{not} of the polynomial $x$).

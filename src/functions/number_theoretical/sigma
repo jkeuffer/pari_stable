@@ -11,9 +11,5 @@ Description:
  (gen, 0):gen	gnumbdiv($1)
  (int, small):int	sumdivk($1, $2)
  (gen, small):gen	gsumdivk($1, $2)
-Doc: sum of the $k^{\text{th}}$ powers of the
- positive divisors of $|x|$. $x$ and $k$ must be of type integer.
- 
- \syn{sumdiv}{x} (= \funs{sigma}{x}) or \funs{gsumdivk}{x,k} (=
- \funs{sigma}{x,k}), where $k$ is a C long integer.
-
+Doc: sum of the $k^{\text{th}}$ powers of the positive divisors of $|x|$. $x$
+ and $k$ must be of type integer.

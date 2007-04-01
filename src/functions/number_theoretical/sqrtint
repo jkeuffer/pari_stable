@@ -5,9 +5,5 @@ Prototype: G
 Help: sqrtint(x): integer square root of x (x integer)
 Description: 
  (gen):int racine($1)
-Doc: integer square root of $x$, which must be a
- non-negative integer. The result is non-negative and rounded towards zero.
- 
- \syn{sqrti}{x}. Also available is \tet{sqrtremi}$(x,\&r)$ which returns
- $s$ such that $s^2 = x+r$, with $0 \leq r \leq 2s$.
-
+Doc: integer square root of $x$, which must be a non-negative integer. The
+ result is non-negative and rounded towards zero.
