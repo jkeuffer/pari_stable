@@ -16,9 +16,9 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  conjugates of a root $r$ of the non-constant polynomial $x=\var{nf}[1]$
  expressed as polynomials in $r$. This also makes sense when the number field
  is not \idx{Galois} since some conjugates may lie in the field.
-
- $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
  
+ $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
+  
  If no flags or $\fl=0$, if $\var{nf}$ is a number field use a
  combination of flag $4$ and $1$ and the result is always complete,
  else use a combination of flag $4$ and $2$ and the result is subject

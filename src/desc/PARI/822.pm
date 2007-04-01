@@ -84,7 +84,7 @@ sub read
 		}
                 next if ($line eq '');
 		($key, $value)=split(/:\s*/, $line, 2);
-                die("Bad entry $key") if (!defined($value));
+                die("Bad entry in $file: $key") if (!defined($value));
 		if ($key eq 'Function') 
                 {
                         $entry=$value;
