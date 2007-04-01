@@ -1406,6 +1406,7 @@ GEN     intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
 GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfouriercos(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, long prec);
 GEN     intfouriersin(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
 GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfuncinit(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flag, long prec);

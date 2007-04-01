@@ -1577,6 +1577,16 @@ intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
 }
 
 GEN
+intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab,
+              long prec)
+{
+  pari_sp ltop = avma;
+  GEN R = intfouriercos(E, eval, a, b, x, tab, prec);
+  GEN I = intfouriersin(E, eval, a, b, x, tab, prec);
+  return gerepileupto(ltop, gadd(R, mulcxmI(I)));
+}
+
+GEN
 intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
 {
   pari_sp av = avma;
@@ -1616,14 +1626,8 @@ intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
 { EXPR_WRAP(ep,code, intfouriersin(EXPR_ARG, a, b, x, tab, prec)); }
 GEN
 intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
-{
-  pari_sp ltop = avma;
-  GEN z, R, I; EXPR_START(ep, code);
-  R = intfouriercos(EXPR_ARG, a, b, x, tab, prec);
-  I = intfouriersin(EXPR_ARG, a, b, x, tab, prec);
-  z = gerepileupto(ltop, gadd(R, mulcxmI(I)));
-  EXPR_END(ep); return z;
-}
+{ EXPR_WRAP(ep,code, intfourierexp(EXPR_ARG, a, b, x, tab, prec)); }
+
 GEN
 intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec)
 { EXPR_WRAP(ep,code, intnuminitgen(EXPR_ARG, a, b, m, flag, prec)); }
