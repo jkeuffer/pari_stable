@@ -41,7 +41,7 @@ clareg(pol, plim=19, lima=50, extra=5)=
 { local(e,t,r,coreg,lireg,r1,ind,fa,li,co,res,a,b,m,mh,ms,mhs,mreg,mregh);
 
   nf=nfinit(pol); pol=nf.pol;
-  t=Mod(x,pol,1);
+  t=Mod(x,pol);
   r=nf.roots; r1=nf.sign[1];
   if (nf[4] > 1, /* index: power basis <==> nf[4] = 1 */
     error("sorry, the case f>1 is not implemented")
