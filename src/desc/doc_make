@@ -36,6 +36,7 @@ while (<FILE>)
       if ($doc !~ /\\syn\w*{/ && $fun->{Class} !~ /^(highlevel|gp)$/
                               && $sec !~ /programming\/control/) {
         my ($Cname) = $fun->{'C-Name'};
+        my ($Variant) = $fun->{Variant};
         my (@proto) = split(//, $fun->{Prototype});
         $args =~ s/[{}&]//g;
         $args =~ s/=[^,\)]*//g; # delete default values
@@ -80,7 +81,8 @@ while (<FILE>)
         }
         $args =~ s/^, //;
 
-        $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}$post."
+        $doc .= "\n\nThe library syntax is \\fun{$type}{$Cname}{$args}$post.";
+        $doc .= "\n$Variant" if ($Variant);
       }
       print "\n\\subsecidx{$_}$v:\\label{se:$_} $doc\n";
     }

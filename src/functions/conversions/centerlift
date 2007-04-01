@@ -24,5 +24,5 @@ Doc:
  rational function, vector or matrix, the lift is done for each coefficient.
  Reals are forbidden.
  
- \syn{centerlift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
- as $-1$. Also available is \funs{centerlift}{x} = \kbd{centerlift0($x$,-1)}.
+Variant: Also available is \fun{GEN}{centerlift}{GEN x} corresponding to
+ \kbd{centerlift0(x,-1)}.

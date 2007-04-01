@@ -56,6 +56,5 @@ Doc: \idx{LLL} algorithm applied to the
  
  If $\fl=8$, same as case $0$, but $x$ may have polynomial coefficients.
  
- \syn{qflll0}{x,\fl,\var{prec}}. Also available are
- \funs{lll}{x,\var{prec}} ($\fl=0$), \funs{lllint}{x} ($\fl=1$), and
- \funs{lllkerim}{x} ($\fl=4$).
+Variant: Also available are \fun{GEN}{lll}{GEN x, long prec} ($\fl=0$),
+ \fun{GEN}{lllint}{GEN x} ($\fl=1$), and \fun{GEN}{lllkerim}{GEN x} ($\fl=4$).

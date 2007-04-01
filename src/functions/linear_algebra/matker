@@ -16,5 +16,5 @@ Doc: gives a basis for the kernel of the
  orders of magnitude faster than, \kbd{matker(x*Mod(1,p))} and needs much
  less stack space. To use it under \kbd{gp}, type \kbd{install(FpM\_ker, GG)} first.
  
- \syn{matker0}{x,\fl}. Also available are \funs{ker}{x} ($\fl=0$),
- \funs{keri}{x} ($\fl=1$).
+Variant: Also available are \fun{GEN}{ker}{GEN x} ($\fl=0$),
+ \fun{GEN}{keri}{GEN x} ($\fl=1$).

@@ -30,6 +30,6 @@ Doc: same as \kbd{qflll}, except that the
  
  $\fl=5$: same as case $4$, but $G$ may have polynomial coefficients.
  
- \syn{qflllgram0}{G,\fl,\var{prec}}. Also available are
- \funs{lllgram}{G,\var{prec}} ($\fl=0$), \funs{lllgramint}{G} ($\fl=1$), and
- \funs{lllgramkerim}{G} ($\fl=4$).
+Variant: Also available are \fun{GEN}{lllgram}{GEN G, long prec} ($\fl=0$),
+ \fun{GEN}{lllgramint}{GEN G} ($\fl=1$), and \fun{GEN}{lllgramkerim}{GEN G}
+ ($\fl=4$).

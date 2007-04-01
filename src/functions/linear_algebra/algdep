@@ -4,15 +4,13 @@ C-Name: algdep0
 Prototype: GLD0,L,p
 Help: algdep(x,k,{flag=0}): algebraic relations up to degree n of x, using
  lindep([1,x,...,x^(k-1)], flag).
-Doc: 
- \sidx{algebraic dependence}
- $x$ being real/complex, or $p$-adic, finds a polynomial of
- degree at most $k$ with integer coefficients having $x$ as approximate root.
- Note that the polynomial which is obtained is not necessarily the ``correct''
- one. In fact it is not even guaranteed to be irreducible. One can check the
- closeness either by a polynomial evaluation (use \tet{subst}), or by
- computing the roots of the polynomial given by \kbd{algdep} (use 
- \tet{polroots}).
+Doc: \sidx{algebraic dependence}
+ $x$ being real/complex, or $p$-adic, finds a polynomial of degree at most
+ $k$ with integer coefficients having $x$ as approximate root. Note that the
+ polynomial which is obtained is not necessarily the ``correct'' one. In fact
+ it is not even guaranteed to be irreducible. One can check the closeness
+ either by a polynomial evaluation (use \tet{subst}), or by computing the
+ roots of the polynomial given by \kbd{algdep} (use \tet{polroots}).
  
  Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
  \tet{lindep} is not able to find a relation and returns a lower bound for the
@@ -41,13 +39,12 @@ Doc:
  accuracy).
  
  The above example is the testcase studied in a 2000 paper by Borwein and
- Lisonek, Applications of integer relation algorithms, \emph{Discrete Math.},
+ Lisonek: Applications of integer relation algorithms, \emph{Discrete Math.},
  {\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
  algorithm, which either shows that PARI's implementation of PSLQ is lacking,
  or that its LLL is extremely good. The version of PARI tested there was
  1.39, which succeeded reliably from precision 265 on, in about 60 as much
  time as the current version.
  
- \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
- Also available is \funs{algdep}{x,k,\var{prec}} ($\fl=0$).
-
+Variant: Also available is \fun{GEN}{algdep}{GEN x, long k, long prec}
+ ($\fl=0$).

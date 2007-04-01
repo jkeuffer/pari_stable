@@ -26,6 +26,5 @@ Doc: $M$ being any integral matrix,
  system (so that all solutions can be obtained by adding $x$ to any linear
  combination of columns of $u$). If no solution exists, returns zero.
  
- \syn{matsolvemod0}{M,D,B,\fl}. Also available
- are \funs{gaussmodulo}{M,D,B} ($\fl=0$)
- and \funs{gaussmodulo2}{M,D,B} ($\fl=1$).
+Variant Also available are \fun{GEN}{gaussmodulo}{GEN M, GEN D, GEN B}
+ ($\fl=0$) and \fun{GEN}{gaussmodulo2}{GEN M, GEN D, GEN B} ($\fl=1$).

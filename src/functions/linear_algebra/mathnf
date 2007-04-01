@@ -36,10 +36,9 @@ Doc: if $x$ is a (not necessarily square)
  reduction along the way. The matrix $U$ is in general close to optimal (in
  terms of smallest $L_2$ norm), but the reduction is slower than in case $1$.
  
- \syn{mathnf0}{x,\fl}. Also available are \funs{hnf}{x} ($\fl=0$) and
- \funs{hnfall}{x} ($\fl=1$). To reduce \emph{huge} (say $400 \times 400$ and
- more) relation matrices (sparse with small entries), you can use the pair
- \kbd{hnfspec} / \kbd{hnfadd}. Since this is rather technical and the
- calling interface may change, they are not documented yet. Look at the code
- in \kbd{basemath/alglin1.c}.
-
+Variant: Also available are \fun{GEN}{hnf}{GEN x} ($\fl=0$) and
+ \fun{GEN}{hnfall}{GEN x} ($\fl=1$). To reduce \emph{huge} (say $400 \times
+ 400$ and more) relation matrices (sparse with small entries), you can use
+ the pair \kbd{hnfspec} / \kbd{hnfadd}. Since this is quite technical and
+ the calling interface may change, they are not documented yet. Look at the
+ code in \kbd{basemath/alglin1.c}.

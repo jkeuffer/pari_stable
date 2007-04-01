@@ -27,10 +27,8 @@ Doc:
  occur, e.g.~over a finite field or the reals. It is usually slower in other
  base rings.
  
- \syn{charpoly0}{A,v,\fl}, where $v$ is the variable number. Also available
- are the functions \funs{caract}{A,v} ($\fl=1$), \funs{carhess}{A,v}
- ($\fl=2$), and \funs{caradj}{A,v,\var{pt}} where, in this last case,
- \var{pt} is a \kbd{GEN*} which, if not equal to \kbd{NULL}, will receive
- the address of the adjoint matrix of $A$ (see \kbd{matadjoint}), so both
- can be obtained at once.
-
+Variant: Also available are \fun{GEN}{caract}{GEN A, long v} ($\fl=1$),
+ \fun{GEN}{carhess}{GEN A, long v} ($\fl=2$), and \fun{GEN}{caradj}{GEN A,
+ long v, GEN *pt}. In this last case, if \var{pt} is not \kbd{NULL},
+ \kbd{*pt} receives the address of the adjoint matrix of $A$ (see
+ \tet{matadjoint}), so both can be obtained at once.

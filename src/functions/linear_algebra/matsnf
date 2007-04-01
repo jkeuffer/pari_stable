@@ -28,5 +28,4 @@ Doc: if $X$ is a (singular or non-singular)
  form $D$ or $[U,V,D]$ as would normally be output with the cleanup flag
  unset.
  
- \syn{matsnf0}{X,\fl}. Also available is \funs{smith}{X} ($\fl=0$).
-
+Variant: Also available is \fun{GEN}{smith}{GEN X} ($\fl=0$).

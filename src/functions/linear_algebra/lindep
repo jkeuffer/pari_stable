@@ -42,6 +42,4 @@ Doc: \sidx{linear dependence}$x$ being a
  If $\fl=-4$, uses an experimental 2-level PSLQ, which does not work at all.
  (Should be rewritten.)
  
- \syn{lindep0}{x,\fl,\var{prec}}. Also available is
- \funs{lindep}{x,\var{prec}} ($\fl=0$).
-
+Variant: Also available is \fun{GEN}{lindep}{GEN x, long prec} ($\fl=0$).

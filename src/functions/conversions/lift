@@ -35,5 +35,5 @@ Doc:
  %6 = Mod(y, y^2+1) * x + Mod(2, y^2+1)
  @eprog
  
- \syn{lift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
- $-1$. Also available is \funs{lift}{x} = \kbd{lift0($x$,-1)}.
+Variant: Also available is \fun{GEN}{lift}{GEN x} corresponding to
+ \kbd{lift0(x,-1)}.

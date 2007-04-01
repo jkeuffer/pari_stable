@@ -14,9 +14,8 @@ Doc:
  to the interpreter, by order of decreasing priority. (Highest priority is $x$,
  which always come first.)
  
- \syn{gpolvar}{x}, where an omitted $x$ is coded as \kbd{NULL}.
- However, in library mode, this function should not be used for $x$
- non-\kbd{NULL}, since \tet{gvar} is more appropriate. Instead, test whether
- $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$ is $gel(x,2)$, or call
- the function \funs{gvar}{x} which returns the variable \emph{number} of $x$ if
+Variant: However, in library mode, this function should not be used for $x$
+ non-\kbd{NULL}, since \tet{gvar} is more appropriate. Instead, for
+ $x$ a $p$-adic (type \typ{PADIC}), $p$ is $gel(x,2)$; otherwise, call
+ \funs{gvar}{x} which returns the variable \emph{number} of $x$ if
  it exists, \kbd{BIGINT} otherwise.

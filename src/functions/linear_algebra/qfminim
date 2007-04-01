@@ -43,6 +43,6 @@ Doc: $x$ being a square and symmetric
  enumerated. If $m$ is omitted, all vectors found are stored and returned;
  note that this may be a huge vector! 
  
- \syn{qfminim0}{x,b,m,\fl,\var{prec}}, also available are \funs{minim}{x,b,m}
- ($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$). In all cases, an omitted $b$
- or $m$ is coded as \kbd{NULL}.
+Variant: Also available are \fun{GEN}{minim}{GEN x, GEN b = NULL, GEN m =
+ NULL} ($\fl=0$), \fun{GEN}{minim2}{GEN x, GEN b = NULL, GEN m = NULL}
+ ($\fl=1$).

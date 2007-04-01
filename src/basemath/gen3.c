@@ -195,7 +195,7 @@ ggprecision(GEN x)
 GEN
 precision0(GEN x, long n) { return n? gprec(x,n): ggprecision(x); }
 
-/* attention: precision p-adique absolue */
+/* ABSOLUTE padic precision */
 long
 padicprec(GEN x, GEN p)
 {

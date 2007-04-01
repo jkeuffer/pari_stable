@@ -227,14 +227,14 @@ impossible, but an inexact $0$ is allowed). By convention the degree of an
 exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
 the result is undefined.
 
-\fun{int}{precision}{GEN x} If \kbd{x} is of type \typ{REAL}, returns the
-precision of~\kbd{x} (the length of \kbd{x} in \B-bit words if \kbd{x} is not
-zero, and a reasonable quantity obtained from the exponent of \kbd{x} if
-\kbd{x} is numerically equal to zero). If \kbd{x} is of type \typ{COMPLEX},
-returns the minimum of the precisions of the real and imaginary part.
-Otherwise, returns~0 (which stands in fact for infinite precision).
+\fun{long}{precision}{GEN x} If \kbd{x} is of type \typ{REAL}, returns the
+precision of~\kbd{x}, namely the length of \kbd{x} in \B-bit words if \kbd{x}
+is not zero, and a reasonable quantity obtained from the exponent of \kbd{x}
+if \kbd{x} is numerically equal to zero. If \kbd{x} is of type
+\typ{COMPLEX}, returns the minimum of the precisions of the real and
+imaginary part. Otherwise, returns~0 (which stands for infinite precision).
 
-\fun{int}{gprecision}{GEN x} as \kbd{precision} for scalars; returns the
+\fun{long}{gprecision}{GEN x} as \kbd{precision} for scalars; returns the
 lowest precision encountered among the components otherwise.
 
 \fun{long}{sizedigit}{GEN x} returns 0 if \kbd{x} is exactly~0. Otherwise,

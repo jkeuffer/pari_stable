@@ -15,8 +15,7 @@ Description:
  (gen):gen              gtrunc($1)
  (gen, &small):gen      gcvtoi($1, &$2)
  (gen, &int):gen        trunc0($1, &$2)
-Doc: 
- truncates $x$ and sets $e$ to the number of
+Doc: truncates $x$ and sets $e$ to the number of
  error bits. When $x$ is in $\R$, this means that the part after the decimal
  point is chopped away, $e$ is the binary exponent of the difference between
  the original and the truncated value (the ``fractional part''). If the
@@ -32,5 +31,5 @@ Doc:
  a $p$-adic number, it transforms it into an integer or a rational number
  by chopping away the $O(p^k)$.
  
- \syn{gcvtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
- \funs{gtrunc}{x}.
+Variant: Also available are \fun{GEN}{gcvtoi}{GEN x, long *e} and
+ \fun{GEN}{gtrunc}{GEN x}.

@@ -9,5 +9,4 @@ Doc: creates as a matrix the lower triangular
  up to $x$). If $q$ is given, compute the $q$-Pascal triangle (i.e.~using
  $q$-binomial coefficients).
  
- \syn{matqpascal}{x,q}, where $x$ is a \kbd{long} and $q=\kbd{NULL}$ is used
- to omit $q$. Also available is \funs{matpascal}{x}.
+Variant: Also available is \fun{GEN}{matpascal}{GEN x}.
