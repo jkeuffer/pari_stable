@@ -188,7 +188,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | lvalue KDE expr {$$=newopcall(OPde,$1,$3,&@$);}
     | lvalue KDRE expr {$$=newopcall(OPdre,$1,$3,&@$);}
     | lvalue KEUCE expr {$$=newopcall(OPeuce,$1,$3,&@$);}
-    | lvalue '%' '=' expr %prec KMODE {$$=newopcall(OPmode,$1,$4,&@$);}
+    | lvalue KMODE expr {$$=newopcall(OPmode,$1,$3,&@$);}
     | lvalue KSLE expr {$$=newopcall(OPsle,$1,$3,&@$);}
     | lvalue KSRE expr {$$=newopcall(OPsre,$1,$3,&@$);}
     | lvalue KPE expr {$$=newopcall(OPpe,$1,$3,&@$);}
