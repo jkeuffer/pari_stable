@@ -26,10 +26,9 @@ typedef struct {
   GEN code;
 } exprdat;
 GEN gp_eval(GEN x, void *dat);
-#define EXPR_START(EP, CH) exprdat __E; __E.code=CH; __E.ep=EP; push_val(EP,NULL);
-#define EXPR_END(ep) pop_val(ep);
 #define EXPR_WRAP(ep, ch, call) \
-{ GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
+{ GEN z; exprdat __E; __E.code = ch; __E.ep = ep;\
+  push_val(ep,NULL); z = call; pop_val(ep); return z; }
 #define EXPR_ARG &__E, &gp_eval
 
 /* to manipulate 'blocs' */
