@@ -399,7 +399,7 @@ closure_castgen(GEN z, long mode)
   switch (mode)
   {
   case Ggen:
-    gel(st,sp++)=gcopy(z);
+    gel(st,sp++)=z;
     break;
   case Gsmall:
     st[sp++]=itos(z);
@@ -548,6 +548,9 @@ closure_eval(GEN C)
     case OCvarn:
         st[sp-1] = closure_varn(gel(st,sp-1));
         break;
+    case OCcopy:
+        gel(st,sp-1) = gcopy(gel(st,sp-1));
+        break;
     case OCcompo1:
         {
           GEN  p=gel(st,sp-2);
@@ -650,7 +653,7 @@ closure_eval(GEN C)
             pari_err(talker,"_[,_]: not a matrix");
           check_array_index(c, lg(p));
           sp--;
-          gel(st,sp-1) = gcopy(gel(p,c));
+          gel(st,sp-1) = gel(p,c);
           break;
         }
     case OCcompoCptr:
@@ -685,7 +688,7 @@ closure_eval(GEN C)
             pari_err(talker,"_[_,]: not a matrix");
           if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
           check_array_index(r,lg(p[1]));
-          gel(st,sp-1) = rowcopy(p,r);
+          gel(st,sp-1) = row(p,r);
           break;
         }
     case OCcompoLptr:
@@ -1035,6 +1038,9 @@ closure_disassemble(GEN C)
       break;
     case OCvarn:
       pariprintf("varn\n");
+      break;
+    case OCcopy:
+      pariprintf("copy\n");
       break;
     case OCcompo1:
       pariprintf("compo1\t\t%s\n",disassemble_cast(operand));

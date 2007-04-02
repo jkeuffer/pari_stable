@@ -19,7 +19,7 @@ typedef enum {Gvoid, Gsmall, Gvec, Gvar, Ggen} Gtype;
 typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,
               OCpushvalue,OCpushvar,
               OCpop,
-              OCstoi,OCitos,OCtostr,OCvarn,
+              OCstoi,OCitos,OCtostr,OCvarn,OCcopy,
               OCprecreal,OCprecdl,
               OCvec,OCmat,OCcol,
               OCstackgen,

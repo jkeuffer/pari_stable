@@ -122,7 +122,9 @@ var_push(long x)
   localvars[n] = x;
 } 
 
-static void compilenode(long n, int mode);
+enum Fflag {Fnocopy=1};
+
+static void compilenode(long n, int mode, long flag);
 
 typedef enum {PPend,PPstd,PPdefault,PPdefaultmulti,PPstar,PPauto} PPproto;
 
@@ -196,7 +198,7 @@ parseproto(char const **q, char *c)
 }
 /*supported types:
  * type: Gsmall, Ggen, Gvoid, Gvec
- * mode: Gsmall, Ggen, Gvar, Gvoid
+ * mode: Gsmall, Ggen, Ggen_nocopy, Gvar, Gvoid
  */
 static void
 compilecast(long n, int type, int mode)
@@ -288,13 +290,13 @@ compilelvalue(long n)
         tree[tree[x].y].f==FmatrixL)
     {
       compilelvalue(tree[x].x);
-      compilenode(tree[tree[x].y].x,Gsmall);
-      compilenode(yx,Gsmall);
+      compilenode(tree[tree[x].y].x,Gsmall,0);
+      compilenode(yx,Gsmall,0);
       op_push(OCcompo2ptr,0);
       return;
     }
     compilelvalue(x);
-    compilenode(yx,Gsmall);
+    compilenode(yx,Gsmall,0);
     if (f==Fmatrix && yy==-1)
       op_push(OCcompo1ptr,0);
     else
@@ -302,7 +304,7 @@ compilelvalue(long n)
       switch(f)
       {
       case Fmatrix:
-        compilenode(yy,Gsmall);
+        compilenode(yy,Gsmall,0);
         op_push(OCcompo2ptr,0);
         break;
       case FmatrixR:
@@ -324,8 +326,8 @@ compilefacteurmat(long n, int mode)
   long yx=tree[y].x;
   long yy=tree[y].y;
   long f=tree[y].f;
-  compilenode(x,Ggen);
-  compilenode(yx,Gsmall);
+  compilenode(x,Ggen,Fnocopy);
+  compilenode(yx,Gsmall,0);
   if (f==Fmatrix && yy==-1)
   {
     op_push(OCcompo1,mode);
@@ -334,9 +336,9 @@ compilefacteurmat(long n, int mode)
   switch(f)
   {
   case Fmatrix:
-    compilenode(yy,Gsmall);
+    compilenode(yy,Gsmall,0);
     op_push(OCcompo2,mode);
-    break;
+    return;
   case FmatrixR:
     op_push(OCcompoC,0);
     compilecast(n,Gvec,mode);
@@ -357,11 +359,12 @@ compilevec(long n, long mode, op_code op)
   long x=tree[n].x;
   long i;
   GEN arg=listtogen(x,Fmatrixelts);
-  long l=lg(arg);
+  long l=lg(arg),lnc;
   op_push(op,l);
-  for(i=1;i<l;i++)
+  for (lnc=l-1; lnc>0 && tree[arg[lnc]].f==Fconst; lnc--);
+  for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen);
+    compilenode(arg[i],Ggen,i>=lnc?Fnocopy:0);
     op_push(OCstackgen,i);
   }
   avma=ltop;
@@ -395,7 +398,7 @@ compilemat(long n, long mode)
     for(j=1;j<lgcol;j++)
     {
       k-=lglin;
-      compilenode(col[j], Ggen);
+      compilenode(col[j], Ggen,0);
       op_push(OCstackgen,k);
     }
   }
@@ -443,7 +446,7 @@ compilefunc(long n, int mode)
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
   long nbpointers=0;
-  long nb=lg(arg)-1;
+  long nb=lg(arg)-1, lnc;
   entree *ep = getfunc(n);
   if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
     pari_err(talker2,"not a function in function call",
@@ -452,7 +455,7 @@ compilefunc(long n, int mode)
   {
     for (j=1;j<=nb;j++)
       if (tree[arg[j]].f!=Fnoarg)
-        compilenode(arg[j], Ggen);
+        compilenode(arg[j], Ggen,0);
       else
         op_push(OCpushlong,0);
     op_push(OCpushlong, nb);
@@ -468,6 +471,8 @@ compilefunc(long n, int mode)
     ep=is_entry("_void_if");
   if (is_func_named(x,"local"))
   {
+    if (mode!=Gvoid)
+      pari_err(talker,"local() is not allowed here");
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     for (i=1;i<=nb;i++)
@@ -475,7 +480,7 @@ compilefunc(long n, int mode)
       long en, a=arg[i];
       if (tree[a].f==Faffect)
       {
-        compilenode(tree[a].y,Ggen);
+        compilenode(tree[a].y,Ggen,0);
         a=tree[a].x;
       }
       else
@@ -500,7 +505,7 @@ compilefunc(long n, int mode)
       long en;
       if (tree[a].f==Faffect)
       {
-        compilenode(tree[a].y,Ggen);
+        compilenode(tree[a].y,Ggen,0);
         a=tree[a].x;
       }
       else
@@ -521,14 +526,14 @@ compilefunc(long n, int mode)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     if (tree[a].f!=Ffunction || tree[a].x!=OPpow)
     {
-      compilenode(a,Ggen);
+      compilenode(a,Ggen,Fnocopy);
       op_push(OCpushlong,1);
     }
     else
     {
       long y=tree[a].y;
-      compilenode(tree[y].x,Ggen);
-      compilenode(tree[y].y,Gsmall);
+      compilenode(tree[y].x,Ggen,0);
+      compilenode(tree[y].y,Gsmall,0);
     }
     op_push(OCcallgen2,(long)ep);
     compilecast(n,Ggen,mode);
@@ -553,6 +558,8 @@ compilefunc(long n, int mode)
   else ret = RET_GEN;
   if (tree[n].f==Fderfunc && (ret!=RET_GEN || *p!='G'))
     pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+  /*lnc: last non-constant */
+  for (lnc=nb; lnc>0 && tree[arg[lnc]].f==Fconst; lnc--);
   i=0; j=1;
   if (*p)
   {
@@ -574,14 +581,15 @@ compilefunc(long n, int mode)
         switch(c)
         {
         case 'G':
-          compilenode(arg[j++],Ggen);
+          compilenode(arg[j],Ggen,j>=lnc?Fnocopy:0);
+          j++;
           break;
         case 'M':
         case 'L':
-          compilenode(arg[j++],Gsmall);
+          compilenode(arg[j++],Gsmall,0);
           break;
         case 'n':
-          compilenode(arg[j++],Gvar);
+          compilenode(arg[j++],Gvar,0);
           break;
         case '&': case '*': 
           {
@@ -611,7 +619,7 @@ compilefunc(long n, int mode)
             if (tree[a].f==Fnoarg)
               compilecast(a,Gvoid,type);
             else
-              compilenode(a,type);
+              compilenode(a,type,0);
             op_push(OCpushgen, data_push(getclosure(&pos)));
             break;
           }
@@ -632,7 +640,7 @@ compilefunc(long n, int mode)
                   tree[n].str+tree[n].len, get_origin());
             ep = getentry(x);
             op_push(OCpushlong, (long)ep);
-            compilenode(y,Ggen);
+            compilenode(y,Ggen,0);
             i++; j++;
           }
           break;
@@ -646,7 +654,7 @@ compilefunc(long n, int mode)
             }
             else
             {
-              compilenode(a,Ggen);
+              compilenode(a,Ggen,Fnocopy);
               op_push(OCtostr, 1);
             }
             break;
@@ -656,7 +664,7 @@ compilefunc(long n, int mode)
             GEN g = cattovec(arg[j++], OPcat);
             long l, nb = lg(g)-1;
             for(l=1; l<=nb; l++)
-              compilenode(g[l], Ggen);
+              compilenode(g[l], Ggen,0);
             op_push(OCtostr, nb);
             break;
           }
@@ -743,7 +751,7 @@ compilefunc(long n, int mode)
             for(m=1,k=1;k<=n;k++)
               for(l=1;l<lg(g[k]);l++,m++)
               {
-                compilenode(mael(g,k,l),Ggen);
+                compilenode(mael(g,k,l),Ggen,0);
                 op_push(OCstackgen,m); 
               }
             j=nb+1;
@@ -822,7 +830,7 @@ strntoGENexp(const char *str, long len)
 }
 
 static void
-compilenode(long n, int mode)
+compilenode(long n, int mode, long flag)
 {
   long x,y;
   if (n<0)
@@ -834,11 +842,13 @@ compilenode(long n, int mode)
   {
   case Fseq:
     if (tree[x].f!=Fnoarg)
-      compilenode(x,Gvoid);
-    compilenode(y,mode);
+      compilenode(x,Gvoid,0);
+    compilenode(y,mode,0);
     return;
   case Ffacteurmat:
     compilefacteurmat(n,mode);
+    if (mode==Ggen && !(flag&Fnocopy))
+      op_push(OCcopy,0);
     break;
   case Faffect:
     {
@@ -954,7 +964,7 @@ compilenode(long n, int mode)
           { 
             struct codepos lpos;
             getcodepos(&lpos);
-            compilenode(tree[a].y,Ggen);
+            compilenode(tree[a].y,Ggen,0);
             a=tree[a].x;
             if (tree[a].f==Ftag)
               a=tree[a].x;
@@ -969,7 +979,7 @@ compilenode(long n, int mode)
               tree[a].str,get_origin());
         }
       }
-      if (y>=0 && tree[y].f!=Fnoarg) compilenode(y,Ggen);
+      if (y>=0 && tree[y].f!=Fnoarg) compilenode(y,Ggen,0);
       else compilecast(n,Gvoid,Ggen);
       nbvar=s_lvar.n-pos.localvars;
       s_lvar.n=pos.localvars;
@@ -997,7 +1007,7 @@ compilenode(long n, int mode)
       break;
     }
   case Ftag:
-    compilenode(x, mode);
+    compilenode(x, mode,0);
     return;
   case Fnoarg:
     return;
@@ -1010,7 +1020,7 @@ GEN
 gp_closure(long n)
 {
   struct codepos pos={0,0,0,-1};
-  compilenode(n,Ggen);
+  compilenode(n,Ggen,0);
   return getclosure(&pos); 
 }
 
