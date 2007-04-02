@@ -170,13 +170,17 @@ parseproto(char const **q, char *c)
     *q=p+1;
     return PPstd;
   case 'V':
-    if (p[1]=='=')
-    {
-      *c=*p;
+    if (p[1]=='=') 
+    { 
+      if (p[2]!='G')
+        pari_err(impl,"prototype not supported");
+      *c='=';
       p+=2;
-      *q=p+1;
-      return PPstar;
     }
+    else
+      *c=*p;
+    *q=p+1;
+    return PPstd;
   case 's': /*fall through*/
     if (p[1]=='*')
     {
@@ -618,6 +622,20 @@ compilefunc(long n, int mode)
             op_push(OCpushlong, (long)ep);
             break;
           }
+        case '=':
+          {
+            long x=tree[arg[j]].x;
+            long y=tree[arg[j]].y;
+            entree *ep;
+            if (tree[arg[j]].f!=Faffect)
+              pari_err(talker2,"expected character: '=' instead of",
+                  tree[n].str+tree[n].len, get_origin());
+            ep = getentry(x);
+            op_push(OCpushlong, (long)ep);
+            compilenode(y,Ggen);
+            i++; j++;
+          }
+          break;
         case 'r':
           {
             long a=arg[j++];
@@ -711,20 +729,6 @@ compilefunc(long n, int mode)
       case PPstar:
         switch(c)
         {
-        case 'V':
-          {
-            long x=tree[arg[j]].x;
-            long y=tree[arg[j]].y;
-            entree *ep;
-            if (tree[arg[j]].f!=Faffect)
-              pari_err(talker2,"expected character: '=' instead of",
-                  tree[n].str+tree[n].len, get_origin());
-            ep = getentry(x);
-            op_push(OCpushlong, (long)ep);
-            compilenode(y,Ggen);
-            i++; j++;
-          }
-          break;
         case 's':
           {
             long n=nb+1-j;
