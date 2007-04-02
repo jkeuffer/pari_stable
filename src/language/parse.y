@@ -17,7 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define YYSTYPE union token_value
 #define YYLTYPE struct node_loc
 #define YYLLOC_DEFAULT(Current, Rhs, N)     \
-        ((Current).start  = (Rhs)[1].start,  \
+        ((Current).start  = ((N)?(Rhs)[1].start:(Rhs)[0].end),  \
          (Current).end    = (Rhs)[N].end)
 #include "pari.h"
 #include "parse.h"
@@ -150,7 +150,8 @@ newintnode(struct node_loc *loc)
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unusedchar=@1.end;YYABORT;}
 
-seq: /**/ %prec SEQ  {$$=newnode(Fnoarg,-1,-1,&@$);}
+seq: /**/ %prec SEQ  {@$.start=@$.end=get_origin();
+                      $$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
