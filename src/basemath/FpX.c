@@ -694,8 +694,15 @@ _FpXQ_pow(void *data, GEN x, GEN y)
 static GEN
 _FpXQ_rand(void *data)
 {
+  pari_sp av=avma;
   FpX_muldata *D = (FpX_muldata*)data;
-  return random_FpX(degpol(D->pol),varn(D->pol),D->p);
+  GEN z;
+  do 
+  {
+    avma=av;
+    z=random_FpX(degpol(D->pol),varn(D->pol),D->p);
+  } while (!signe(z));
+  return z;
 }
 
 static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,cmp_pol,gcmp1};

@@ -1500,8 +1500,15 @@ _Flxq_pow(void *data, GEN x, GEN n)
 static GEN
 _Flxq_rand(void *data)
 {
+  pari_sp av=avma;
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return random_Flx(degpol(D->pol),D->pol[1],D->p);
+  GEN z;
+  do
+  {
+    avma = av;
+    z = random_Flx(degpol(D->pol),D->pol[1],D->p);
+  } while (lgpol(z)==0);
+  return z;
 }
 
 const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,vecsmall_lexcmp,Flx_cmp1};
