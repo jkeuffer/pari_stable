@@ -952,41 +952,51 @@ factoru_pow(ulong n)
 }
 
 /* Factor Phi_p(p) = (C_p(p))^2 - (p D_p(p))^2, p = 1 (mod 4)
+ * or Phi_2p(p) = Phi_p(-p) = (C_p(p))^2 - (p D_p(p))^2, p = 3 (mod 4)
  * Algorithm L in R.P Brent "On computing factors of cyclotomic polynomials",
  * Math. Comp. 61 (1993), 131-14 */
+static GEN neg(long s, GEN x) { return s == 1? x: negi(x); }
 static GEN
 aurifeuille(long p)
 {
-  long j, k, u, d;
+  long j, k, u, v, d;
   GEN q, C, D, P;
-  if ((p & 3) != 1) return NULL;
 
-  d = p >> 1;
-  u = d >> 1; /* p = 1 + 2d = 1 + 4u */
+  d = p >> 1; /* p = 1 + 2d */
+  u = d >> 1;
+  v = (d-1) >> 1;
 
   q = cgetg(d+1, t_VECSMALL);
-  for (k = 1; k <= d; k++) { q[k] = kross(p,k); q[++k] = -1; }
+  if ((p & 3) == 1) { /* 1 mod 4 */
+    for (k = 1; k <= d; k++) { q[k] = kross(p,k); q[++k] = -1; }
+  } else { /* 3 mod 4 */
+    for (k = 1; k <= d; k++) {
+      q[k] = kross(p,k); k++;
+      q[k] = (k & 3) == 2 ? 1: -1;
+    }
+  }
   C = cgetg(d+2, t_VEC) + 1;
   D = cgetg(d+1, t_VEC) + 1;
-  gel(C, d) = gel(C,0) = gel(D,0) = gen_1;
+  gel(C,0) = gel(D,0) = gen_1;
   for (k = 1; k <= u; k++)
   {
     GEN SC = gen_0, SD = gen_0;
     for (j = 0; j < k; j++)
     {
       long a = 2*(k-j);
-      SC = addii(SC, addii(mulsi(p * q[a-1], gel(D,j)), gel(C,j)));
-      SD = addii(SD, addii(mulsi(q[a+1], gel(C,j)), gel(D,j)));
+      SC = addii(SC, addii(mulsi(p * q[a-1], gel(D,j)), neg(-q[a],gel(C,j))));
     }
     gel(C,k) = diviuexact(SC, 2*k);
+    if (k > v) break;
+    for (j = 0; j < k; j++)
+    {
+      long a = 2*(k-j);
+      SD = addii(SD, addii(neg(q[a+1], gel(C,j)), neg(-q[a],gel(D,j))));
+    }
     gel(D,k) = diviuexact(addii(gel(C,k),SD), 2*k+1);
   }
-  for (k = u+1; k < d; k++) 
-  {
-    gel(C,k) = gel(C, d-k);
-    gel(D,k) = gel(D, d-k-1);
-  }
-  gel(D,u) = gel(D, u-1);
+  for (k = u+1; k <=d; k++) gel(C,k) = gel(C, d-k);
+  for (k = v+1; k < d; k++) gel(D,k) = gel(D, d-k-1);
   P = utoipos(p);
   C = poleval(C-1, P);
   D = poleval(D-1, P); D = mulis(D, p);
@@ -999,12 +1009,16 @@ factor_pn_1(GEN p, long n)
 {
   pari_sp av = avma;
   GEN A = Z_factor(subis(p,1)), d = divisorsu(n);
-  long i, pp = itos_or_0(p);
-  if (pp && (n % pp || (pp & 3) != 1)) pp = 0; /* can't apply Aurifeuille */
+  long i, dpp = 0, pp = itos_or_0(p);
+  if (pp && n % pp == 0)
+  {
+    dpp = ((pp & 3) == 3) ? (odd(n)? 0: 2*pp) : pp;
+  }
+  /* dpp = 0: can't apply Aurifeuille. Otherwise, may apply it for d = dpp */
   for(i=2; i<lg(d); i++)
   {
     GEN B;
-    if (d[i] == pp)
+    if (d[i] == dpp)
     {
       GEN t = aurifeuille(pp);
       B = Z_factor(gel(t,1));
