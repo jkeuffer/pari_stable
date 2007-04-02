@@ -33,13 +33,15 @@ foreach my $name (sort keys %funcs)
       next if ($func{'Class'} ne $class);
       my $gpname=$func{'Function'};
       $gpname =~ s/\\/\\\\/g;
-      defined($func{'Section'}) or die("No section for $name");
+      defined($func{'Section'})
+        or die("$name: mandatory field Section is missing");
       my $sec=$secnumber{$func{'Section'}};
-      defined($sec) or die("Unknown section $func{'Section'}");
+      defined($sec)
+        or die("$name: Section field has unknown value $func{'Section'}");
       my $proto=$func{'Prototype'};
       my $cname=$func{'C-Name'};
       my $help=$func{'Help'};
-      defined($help) or die("No help for function $name");
+      defined($help) or die("$name: mandatory field Help is missing");
       $help =~ s/\n/ /g;
       $help =~ s/\\/\\\\/g;
       $help =~ s/"/\\"/g;
