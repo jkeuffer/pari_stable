@@ -40,7 +40,7 @@ while (<FILE>)
         my (@proto) = split(//, $fun->{Prototype});
         $args =~ s/[{}&]//g;
         $args =~ s/=[^,\)]*//g; # delete default values
-        my (@ARGS) = split(/, */, $args);
+        my (@ARGS) = split(/[,^] */, $args); # ^ for O(p^e)
 #        print "ZZZ" . join ("|", @ARGS). "\n";
 
         $type = "GEN";

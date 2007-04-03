@@ -26,6 +26,7 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
     5- simplify table of contents for users.dvi
     6- rename Flx_rand -> random_Flx, FpX_rand -> random_FpX
 BA  7- use factor_pn_1 to compute various orders in FF.c
+    8- file usersch3.tex is now generated from functions/*
 
   Added
     1- library functions expu, adduu, subuu

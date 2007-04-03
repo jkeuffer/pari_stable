@@ -25,4 +25,4 @@ Doc: finds polynomials with reasonably
  
  If $fa$ is given, it is assumed that it is the two-column matrix of the
  factorization of the discriminant of the polynomial $x$.
-Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0).
+Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0$).

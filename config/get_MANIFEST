@@ -9,6 +9,7 @@ for d in `find . -name Entries`; do
   done
 done
 echo Odos/paricfg.h
+echo doc/usersch3.tex
 echo src/language/init.h
 echo src/language/parse.c
 echo src/language/parse.h

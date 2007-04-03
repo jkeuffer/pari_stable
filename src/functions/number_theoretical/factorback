@@ -54,5 +54,5 @@ Doc: gives back the factored object
  cubic field. In the fifth one, \kbd{factorback(fa)} is meaningless since we
  forgot to indicate the number field, and the entries in the first column of
  \kbd{fa} can't be multiplied.
-Variant: Also available is \fun{GEN}{factorback}{GEN f, GEN nf = NULL)$
+Variant: Also available is \fun{GEN}{factorback}{GEN f, GEN nf = NULL}
  (case $e = \kbd{NULL}$).
