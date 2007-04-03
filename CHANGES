@@ -14,6 +14,7 @@ BA  5- sqrtn(Mod(a,p),..) and factorff() were broken in 2.4.1
 BA  6- bitnegimply(1,2^65) returned a wrong result [#560]
     7- nfeltreduce(nf,t_POLMOD,id) didn't work [#558]
     8- [library] missing function intfourierexp()
+    9- segv in polrootspadic / repeated roots in FpX_root (only in deg 2) [#562]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

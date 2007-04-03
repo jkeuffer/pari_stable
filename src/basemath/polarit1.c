@@ -291,10 +291,11 @@ FpX_roots_i(GEN f, GEN p)
   da = degpol(f);
   if (da == 1) { gel(y,j++) = subii(p, gel(f,2)); setlg(y,j); return y; }
   if (da == 2) {
-    GEN r = FpX_quad_root(f, p, 1);
+    GEN s, r = FpX_quad_root(f, p, 1);
     if (r) {
       gel(y, j++) = r;
-      gel(y, j++) = otherroot(f,r, p);
+      s = otherroot(f,r, p);
+      if (!equalii(r, s)) gel(y, j++) = s;
     }
     setlg(y, j); return sort(y);
   }
