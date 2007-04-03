@@ -790,6 +790,7 @@ recover(int flag)
         case EpNEW: break;
       }
     }
+  parser_reset();
   compiler_reset();
   closure_reset();
   if (DEBUGMEM>2) fprintferr("leaving recover()\n");

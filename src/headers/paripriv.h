@@ -343,7 +343,6 @@ void    grow_kill(growarray A);
 void  errcontext(char *msg, char *s, char *entry);
 GEN   geni(void);
 void* get_stack(double fraction, long min);
-GEN   gpreadseq(char *c, int strict);
 void  initout(int initerr);
 void  init80col(long n);
 int   pari_kernel_init(void);

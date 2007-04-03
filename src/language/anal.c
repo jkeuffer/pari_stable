@@ -23,9 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "parse.h"
 
-/* points to the start of the string that remains to be parsed */
-static THREAD const char *pari_lex_start = NULL;
-THREAD const char *pari_lasterror, *pari_unusedchar;
 
 #define initial_value(ep) ((ep)+1)
 
@@ -211,43 +208,6 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
     return retval;
 }
 
-const char*
-get_origin(void) { return pari_lex_start; }
-
-static void
-unused_chars(const char *lex, const char *c, int strict)
-{
-  long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
-  char *s;
-  if (strict) pari_err(talker2,"unused characters", lex, c);
-  if ((long)strlen(lex) > n)
-  {
-    s = gpmalloc(n + 1);
-    n -= 5;
-    (void)strncpy(s,lex, n);
-    strcpy(s + n, "[+++]");
-  }
-  else
-    s = pari_strdup(lex);
-  pari_warn(warner, "unused characters: %s", s);
-  gpfree(s);
-}
-
-INLINE void
-seq_init(char *lex, int strict)
-{
-  pari_lex_start = lex;
-  reset_break();
-  pari_unusedchar=NULL;
-  if (pari_parse(&lex))
-  {
-    if (pari_unusedchar)
-      unused_chars(pari_unusedchar,pari_lex_start,strict);
-    else  
-      pari_err(talker2,pari_lasterror,lex-1,pari_lex_start);
-  }
-}
-
 #define HANDLE_FOREIGN(t)\
   if (foreignExprHandler && *t == foreignExprSwitch)\
     return (*foreignExprHandler)(t);
@@ -260,7 +220,7 @@ readseq(char *t)
 
   HANDLE_FOREIGN(t);
 
-  seq_init(t,0); z = evalnode();
+  z=pari_eval_str(t,0);
   av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
@@ -273,14 +233,6 @@ gp_read_str(char *s)
   char *t = filtre(s, (compatible == OLDALL));
   GEN x = readseq(t);
   gpfree(t); return x;
-}
-
-/* check syntax, then execute */
-GEN
-gpreadseq(char *t, int strict)
-{
-  seq_init(t, strict); 
-  return evalnode();
 }
 
 static long
@@ -652,7 +604,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     ++*lex;
     skipstring(lex);
     if (!**lex)
-      pari_err(talker2,"run-away string",*lex-1,pari_lex_start);
+      pari_err(talker2,"run-away string",*lex-1,get_origin());
     ++*lex;
     yylloc->end=*lex;   
     return KSTRING;

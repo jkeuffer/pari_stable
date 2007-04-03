@@ -203,15 +203,15 @@ union token_value {
 
 int pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex);
 int pari_parse(char **lex);
-extern const THREAD char *pari_lasterror, *pari_unusedchar;
 entree* fetch_entry(const char *s, long len);
 entree* fetch_member(const char *s, long len);
 void pari_init_parser(void);
 void pari_init_compiler(void);
 void pari_init_evaluator(void);
+GEN  pari_eval_str(char *lex, int strict);
+void parser_reset(void);
 void compiler_reset(void);
 GEN  gp_closure(long n);
-GEN  evalnode(void);
 
 INLINE GEN 
 closure_evalnobrk(GEN code)

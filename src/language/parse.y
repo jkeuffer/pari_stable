@@ -20,11 +20,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
         ((Current).start  = ((N)?(Rhs)[1].start:(Rhs)[0].end),  \
          (Current).end    = (Rhs)[N].end)
 #include "pari.h"
+#include "paripriv.h"
 #include "parse.h"
 #include "anal.h"
 #include "tree.h"
 
 static THREAD int once=0;
+static THREAD const char *pari_lex_start, *pari_lasterror, *pari_unusedchar;
 
 static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
 { 
@@ -58,17 +60,52 @@ pari_init_parser(void)
 }
 
 static void
-freenode(void)
+unused_chars(const char *lex, const char *c, int strict)
 {
-  s_node.n=OPnboperator;
+  long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
+  char *s;
+  if (strict) pari_err(talker2,"unused characters", lex, c);
+  if ((long)strlen(lex) > n)
+  {
+    s = gpmalloc(n + 1);
+    n -= 5;
+    (void)strncpy(s,lex, n);
+    strcpy(s + n, "[+++]");
+  }
+  else
+    s = pari_strdup(lex);
+  pari_warn(warner, "unused characters: %s", s);
+  gpfree(s);
 }
 
+const char*
+get_origin(void) { return pari_lex_start; }
+
+void
+parser_reset(void)
+{
+  s_node.n = OPnboperator;
+}
+
+/* check syntax, then execute */
+
 GEN
-evalnode(void)
+pari_eval_str(char *lex, int strict)
 {
   GEN code, res;
+  pari_lex_start = lex;
+  pari_unusedchar=NULL;
+  if (pari_parse(&lex))
+  {
+    if (pari_unusedchar)
+      unused_chars(pari_unusedchar,pari_lex_start,strict);
+    else  
+      pari_err(talker2,pari_lasterror,lex-1,pari_lex_start);
+  }
   code=gp_closure(s_node.n-1);
-  freenode();
+  parser_reset();
+  compiler_reset();
+  reset_break();
   res=closure_evalgen(code);
   if (!res) return gnil;
   return res;
@@ -150,7 +187,7 @@ newintnode(struct node_loc *loc)
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unusedchar=@1.end;YYABORT;}
 
-seq: /**/ %prec SEQ  {@$.start=@$.end=get_origin();
+seq: /**/ %prec SEQ  {if (s_node.n==OPnboperator) @$.start=@$.end=get_origin();
                       $$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1;}
