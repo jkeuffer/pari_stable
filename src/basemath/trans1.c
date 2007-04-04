@@ -1037,6 +1037,10 @@ palogaux(GEN x)
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
+  if (e <= 0) {
+    if (!BSW_psp(p)) err(talker, "error in p-adic log, %Z is not a prime", p);
+    err(bugparier, "log_p");
+  }
   pp = e+precp(y);
   if (equaliu(p,2)) pp--;
   else
