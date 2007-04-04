@@ -410,7 +410,7 @@ compilemat(long n, long mode)
 static GEN
 cattovec(long n, long fnum)
 {
-  long x=n, i=0, nb;
+  long x=n, y, i=0, nb;
   GEN stack;
   if (tree[n].f==Fnoarg) return cgetg(1,t_VECSMALL);
   while(1)
@@ -419,8 +419,15 @@ cattovec(long n, long fnum)
     long xy=tree[x].y;
     if (tree[x].f!=Ffunction || xx!=fnum) break;
     x=tree[xy].x;
+    y=tree[xy].y;
+    if (tree[y].f==Fnoarg)
+      pari_err(talker2,"unexpected character: ",
+               tree[y].str, get_origin());
     i++;
   }
+  if (tree[x].f==Fnoarg)
+    pari_err(talker2,"unexpected character: ",
+             tree[x].str, get_origin());
   nb=i+1;
   stack=cgetg(nb+1,t_VECSMALL);
   for(x=n;i>0;i--)
