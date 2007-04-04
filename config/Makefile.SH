@@ -500,12 +500,15 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SONAME)"; then \
 	  \$(RM) \$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME); fi
+EOT
+fi
+
+cat >> $file << EOT
 $src/language/parse.h: $src/language/parse.y 
 	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
 $src/language/parse.c: $src/language/parse.y 
 	\$(BISON) -d $src/language/parse.y -o $src/language/parse.c
 EOT
-fi
 
 if test -n "$add_funclist"; then
   cat >> $file << EOT
