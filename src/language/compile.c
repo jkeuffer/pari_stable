@@ -858,6 +858,18 @@ compilenode(long n, int mode, long flag)
       op_push(OCcopy,0);
     break;
   case Faffect:
+    if (tree[x].f==Fentry)
+    {
+      entree *ep=getentry(x);
+      compilenode(y,Ggen,Fnocopy);
+      op_push(OCstore,(long)ep);
+      if (mode!=Gvoid)
+      {
+        op_push(OCpushvalue,(long)ep);
+        compilecast(n,Ggen,mode);
+      }
+    }
+    else
     {
       struct node_loc l;
       l.start=tree[n].str;

@@ -517,6 +517,21 @@ closure_eval(GEN C)
           else (void)change_compo(&(g->c), g->x);
         }
         break;
+    case OCstore:
+        ep=(entree *)operand;
+        switch (ep->valence)
+        {
+        case EpNEW:
+          ep->valence=EpVAR;
+          manage_var(manage_var_create,ep);
+          ep->value=initial_value(ep);
+        case EpVAR: case EpGVAR:/*FALL THROUGH*/
+          changevalue(ep, gel(st,--sp));
+          break;
+        default:
+          pari_err(varer1,"variable name expected",NULL,NULL);
+        }
+        break;
     case OCstackgen:
         gmael(st,sp-2,operand)=copyupto(gel(st,sp-1),gel(st,sp-2));
         sp--;
@@ -1020,6 +1035,10 @@ closure_disassemble(GEN C)
       break;
     case OCendptr:
       pariprintf("endptr\t\t%ld\n",operand);
+      break;
+    case OCstore:
+      ep=(entree *)operand;
+      pariprintf("store\t\t%s\n",ep->name);
       break;
     case OCprecreal:
       pariprintf("precreal\n");
