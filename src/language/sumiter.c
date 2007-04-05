@@ -53,7 +53,7 @@ whilepari(GEN a, GEN b)
   pari_sp av = avma; 
   for(;;)
   {
-    GEN res = closure_evalgen(a);
+    GEN res = closure_evalnobrk(a);
     if (gcmp0(res)) break;
     avma = av; 
     closure_eval(b); if (loop_break()) break;
@@ -71,7 +71,7 @@ untilpari(GEN a, GEN b)
     GEN res;
     closure_eval(b); if (loop_break()) break;
     avma = av; 
-    res = closure_evalgen(a);
+    res = closure_evalnobrk(a);
     if (!gcmp0(res)) break;
     avma = av; 
   }
