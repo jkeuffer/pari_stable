@@ -943,7 +943,11 @@ closure_evalgen(GEN C)
   pari_sp ltop=avma;
   closure_eval(C);
   sp--;
-  if (br_status) {avma=ltop; return NULL;}
+  if (br_status)
+  {
+    if (br_status!=br_ALLOCMEM) avma=ltop; 
+    return NULL;
+  }
   return gerepileupto(ltop,gel(st,sp));
 }
 
