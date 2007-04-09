@@ -928,7 +928,6 @@ calluser:
         ep->code  = pari_strdup(GSTR(gel(st,sp-2)));
         ep->arity = st[sp-1];
         sp-=4;
-        gel(st, sp-1) = gnil;
         break;
     case OCpop:
         sp-=operand;
