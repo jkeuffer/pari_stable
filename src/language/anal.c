@@ -1168,8 +1168,6 @@ void stack_alloc(gp2c_stack *s, long nb)
   while (s->n+nb > s->alloc)
     s->alloc=s->alloc?s->alloc<<1:1;
   *sdat=gprealloc(*sdat,s->alloc*s->size);
-  if (*sdat==NULL)
-    fprintf(stderr,"Cannot alloc memory (%ld bytes)\n",(long)s->alloc*s->size);
 }
 
 long stack_new(gp2c_stack *s)
