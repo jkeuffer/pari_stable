@@ -1692,65 +1692,89 @@ mplog2(long prec)
 GEN
 logr_abs(GEN X)
 {
-  pari_sp ltop, av;
-  long EX, l1, l2, m, n, k, e, s, l = lg(X);
-  double a, b;
-  GEN z, x, y, y2, S, unr;
-  ulong u, v;
+  pari_sp ltop;
+  long EX, L, m, k, a, b, e, l = lg(X);
+  GEN z, x, y;
+  ulong u;
+  int neg;
 
   if (l > LOGAGM_LIMIT) return logagmr_abs(X);
+
+ /* Assuming 1 < x < 2, we want delta = x-1, 1-x/2, 1-1/x, or 2/x-1 small.
+  * We have 2/x-1 > 1-x/2, 1-1/x < x-1. So one should be choosing between
+  * 1-1/x and 1-x/2 ( crossover sqrt(2), worse ~ 0.29 ). To avoid an inverse,
+  * we choose between x-1 and 1-x/2 ( crossover 4/3, worse ~ 0.33 ) */
   EX = expo(X);
-  if (absrnz_egal2n(X)) return EX? mulsr(EX, mplog2(l)): real_0(l);
-
-  av = avma; z = cgetr(l); ltop = avma;
-  l2 = l+1; x = cgetr(l2); affrr(X,x);
-  x[1] = evalsigne(1) | evalexpo(0);
-  /* X = x 2^EX, 1 < x < 2 */
-  av = avma; l -= 2;
+  u = (ulong)X[2];
   k = 2;
-  u = ((ulong)x[k]) & (~HIGHBIT); /* x[2] - HIGHBIT, assuming HIGHBIT set */
-  v = BITS_IN_LONG-1;
-  while (!u) { v += BITS_IN_LONG; u = (ulong)x[++k]; } /* terminates: x>1 */
-  a = (double)v - log2((double)u); /* ~ -log2(x - 1) */
-  b = sqrt((BITS_IN_HALFULONG/3.0) * l);
-  if (a <= b)
-  {
-    n = 1 + (long)(3*b);
-    m = 1 + (long)(b-a);
-    if ((ulong)m >= BITS_IN_LONG) { GEN t;
-      l2 += m>>TWOPOTBITS_IN_LONG;
-      t = cgetr(l2); affrr(x,t); x = t;
-    }
-    for (k=1; k<=m; k++) x = sqrtr_abs(x);
+  if (u > (~0UL / 3) * 2) { /* choose 1-x/2 */
+    EX++; u = ~u;
+    while (!u && k < l) { u = (ulong)X[++k]; u = ~u; }
+    neg = 1;
+  } else { /* choose x - 1 */
+    u &= ~HIGHBIT; /* u - HIGHBIT, assuming HIGHBIT set */
+    while (!u && k < l) u = (ulong)X[++k];
+    neg = 0;
   }
-  else
-  {
-    n = 1 + (long)(BITS_IN_HALFULONG*l / a);
-    m = 0;
-  }
-  y = divrr(subrex01(x), addrex01(x)); /* = (x-1) / (x+1) ~ 0 */
-  y2 = gsqr(y);
-  /* log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k */
-  k = 2*n + 1;
-  unr = real_1(l2); S = x; av = avma;
-  setlg(S,  3);
-  setlg(unr,3); affrr(divrs(unr,k), S); /* destroy x, not needed anymore */
+  if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
+  z = cgetr(l); ltop = avma;
 
-  s = 0; e = expo(y2); l1 = 3;
-  for (k -= 2; k > 0; k -= 2) /* k = 2n+1, ..., 1 */
+  a = bit_accuracy(k) + bfffo(u); /* ~ -log2 |1-x| */
+ /* Multiplication is quadratic in this range (l is small, otherwise we
+  * use AGM). Set Y = x^(1/2^m), y = (Y - 1) / (Y + 1) and compute truncated
+  * series sum y^(2k+1)/(2k+1): this costs roughly floor(b/e) b^2 / 6  + m b^2
+  * bit operations with |x-1| <  2^-a, Y = 2^-e , m ~ e-a and b bits of
+  * accuracy needed, so we want b ~ 6 m (m+a) or m~b-a hence 
+  *     m = min( -a/2 + sqrt(a^2/4 + b/6),  b - a ) */
+  L = l+1;
+  b = bit_accuracy(L - (k-2)); /* take loss of accuracy into account */
+  m = (long)(-a/2. + sqrt(a*a/4. + b/6.));
+  if (m > b-a) m = b-a;
+  if (m <= 0) m = 0; else L += m>>TWOPOTBITS_IN_LONG;
+  x = rtor(X,L);
+  if (neg) x[1] = evalsigne(1) | _evalexpo(-1);
+  else     x[1] = evalsigne(1) | _evalexpo(0);
+  /* 2/3 < x < 4/3 */
+  for (k=1; k<=m; k++) x = sqrtr_abs(x);
+
+  y = divrr(subrs(x,1), addrs(x,1)); /* = (x-1) / (x+1), close to 0 */
+  L = lg(y); /* should be ~ l+1 - (k-2) */
+  e = -expo(y);
+  /* log(x) = log(1+y) - log(1-y) = 2 sum_{k odd} y^k / k
+   * Truncate the sum at k = 2n+1, the remainder is
+   *   2 sum_{k >= 2n+3} y^k / k < 2y^(2n+3) / (2n+3)(1-y) < y^(2n+3)
+   * We want y^(2n+3) < y 2^(-bit_accuracy(L)), hence
+   *   2n+1 > -1 + bit_accuracy(L) /-expo(y) */
+  k = bit_accuracy(L) / e;
+  if (k >= 2)
   {
-    GEN T; /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
-    setlg(y2, l1); T = mulrr(S,y2);
-    setlg(unr,l1);
-    s -= e; /* >= 0 */
-    l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
-    s &= (BITS_IN_LONG-1);
-    setlg(S, l1);
-    affrr(addrr(divrs(unr, k), T), S); avma = av;
+    GEN S, T, y2 = gsqr(y), unr = real_1(L);
+    pari_sp av = avma;
+    long s, l1;
+    k |= 1; /* make it odd */
+    e *= 2 /* - expo y^2 */;
+    l1 = L - ((e*(k-2))>>TWOPOTBITS_IN_LONG);
+    if (l1 < 3) l1 = 3;
+    S = x;
+    setlg(S,  l1);
+    setlg(unr,l1); affrr(divrs(unr,k), S); /* destroy x, not needed anymore */
+    for (s = 0, k -= 2;; k -= 2) /* k = 2n+1, ..., 1 */
+    { /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
+      setlg(y2, l1); T = mulrr(S,y2);
+      if (k == 1) break;
+
+      s += e;
+      l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
+      s &= (BITS_IN_LONG-1);
+      setlg(S, l1);
+      setlg(unr,l1);
+      affrr(addrr(divrs(unr, k), T), S); avma = av;
+    }
+    /* k = 1 special-cased for eficiency */
+    y = mulrr(y, addsr(1,T)); /* = log(X)/2 */
   }
-  setlg(S, l2); y = mulrr(y,S); /* = log(X)/2 */
   setexpo(y, expo(y)+m+1);
-  if (EX) y = addrr(y, mulsr(EX, mplog2(l2)));
+  if (EX) y = addrr(y, mulsr(EX, mplog2(l+1)));
   affr_fixlg(y, z); avma = ltop; return z;
 }
 

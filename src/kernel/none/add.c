@@ -170,23 +170,26 @@ addrex01(GEN x)
   shift_right(y, x, 3,l, x[2], 1); 
   return y;
 }
-/* return x - 1 to same accuracy as x, assuming x > 1 is a normalized t_REAL
- * of exponent 0 */
+/* return subrs(x,1) to the min of (prec(x), prec(x-1) + 1),
+ * assuming x > 1 is a normalized t_REAL of exponent 0 
+ * [ goal: avoid the loss of significant bits form subrs ]*/
 GEN
 subrex01(GEN x)
 {
-  long i, sh, k, l = lg(x);
+  long i, sh, k, ly, lx = lg(x);
   ulong u;
-  GEN y = cgetr(l);
+  GEN y;
   k = 2;
   u = (ulong)x[2] & (~HIGHBIT);
   while (!u) u = x[++k]; /* terminates: x not a power of 2 */
+  ly = (k == 2)? lx: lx - k+3; /* NB: +3, not +2: 1 extra word */
+  y = cgetr(ly);
   sh = bfffo(u);
   if (sh)
-  { shift_left(y+2, x+k, 0, l-k-1, 0, sh); }
+  { shift_left(y+2, x+k, 0, lx-k-1, 0, sh); }
   else
-  { for (i = 2; i < l-k+2; i++) y[i] = x[k-2 + i]; }
-  for (i = l-k+2; i < l; i++) y[i] = 0;
+  { for (i = 2; i < lx-k+2; i++) y[i] = x[k-2 + i]; }
+  for (i = lx-k+2; i < ly; i++) y[i] = 0;
   y[1] = evalsigne(1) | evalexpo(- ((k-2)*BITS_IN_LONG + sh));
   return y;
 }

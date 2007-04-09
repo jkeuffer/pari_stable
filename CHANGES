@@ -29,6 +29,7 @@ BA  2- install(): parser code 'E' and 'I' now refer to closures, not strings:
     6- rename Flx_rand -> random_Flx, FpX_rand -> random_FpX
 BA  7- use factor_pn_1 to compute various orders in FF.c
     8- file usersch3.tex is now generated from functions/*
+    9- rewrote logr_abs [ inaccurate + slow for x = 2^k * (1 - epsilon) ]
 
   Added
     1- library functions expu, adduu, subuu
