@@ -1844,11 +1844,11 @@ PB_RETRY:
   for (;;)			/* terminated under the control of c */
   {
     /* use the polynomial  x^2 + delta */
-#define one_iter() {\
+#define one_iter() STMT_START {\
     avma = GGG; x = remii(sqri(x), n); /* to garbage zone */\
     avma = avx; x = addsi(delta,x);    /* erase garbage */\
     avma = GGG; P = mulii(P, subii(x1, x));\
-    avma = avP; P = modii(P,n); }
+    avma = avP; P = modii(P,n); } STMT_END
 
     one_iter();
 
