@@ -1790,7 +1790,7 @@ sqrtr_abs(GEN x)
   GEN a, t, y = cgetr(l);
   pari_sp av, av0 = avma;
 
-  a = cgetr(l+1); affrr(x,a);
+  a = rtor(x, l+1);
   t = cgetr(l+1);
   if (ex & 1) { /* odd exponent */
     a[1] = evalsigne(1) | evalexpo(1);

@@ -52,7 +52,7 @@ mpatan(GEN x)
   if (e > 0) lp += (e>>TWOPOTBITS_IN_LONG);
 
   y = cgetr(lp); av0 = avma;
-  p1 = cgetr(l+1); affrr(x,p1); setsigne(p1, 1); /* p1 = |x| */
+  p1 = rtor(x, l+1); setsigne(p1, 1); /* p1 = |x| */
   if (inv) p1 = divsr(1, p1);
   e = expo(p1);
   if (e < -100)
@@ -87,7 +87,7 @@ mpatan(GEN x)
     }
   }
   l2 = l+1+(m>>TWOPOTBITS_IN_LONG);
-  p2 = cgetr(l2); affrr(p1,p2); av = avma;
+  p2 = rtor(p1, l2); av = avma;
   for (i=1; i<=m; i++)
   {
     p5 = addsr(1, mulrr(p2,p2)); setlg(p5,l2);

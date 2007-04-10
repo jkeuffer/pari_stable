@@ -1292,7 +1292,7 @@ exp1r_abs(GEN x)
   }
   unr=real_1(l2);
   p2 =real_1(l2); setlg(p2,3);
-  X = cgetr(l2); affrr(x, X); setsigne(X, 1);
+  X = rtor(x,l2); setsigne(X, 1);
   if (m) setexpo(X, ex-m);
 
   s = 0; l1 = 3; av2 = avma;
@@ -1788,7 +1788,7 @@ logagmr_abs(GEN q)
   if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
   z = cgetr(prec); av = avma; prec++;
   lim = bit_accuracy(prec) >> 1;
-  Q = cgetr(prec); affrr(q, Q);
+  Q = rtor(q,prec);
   Q[1] = evalsigne(1) | evalexpo(lim);
 
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
