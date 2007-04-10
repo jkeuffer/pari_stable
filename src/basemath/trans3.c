@@ -272,7 +272,7 @@ kbessel1(GEN nu, GEN gx, long prec)
     pari_sp av1, av2;
     u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
     av1 = avma;
-    zf = sqrtr(divrs(pitemp,n2));
+    zf = sqrtr(divru(pitemp,n2));
     zz = ginv(stor(n2<<2, prec));
     s=gen_1; t=gen_0;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
@@ -309,7 +309,7 @@ kbessel1(GEN nu, GEN gx, long prec)
       affrr(mulrr(q,addrs(c,1)), q);
       if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(lnew)) break;
     }
-    u = mulrr(u, gpow(divrs(x,n),nu,prec));
+    u = mulrr(u, gpow(divru(x,n),nu,prec));
   }
   else
   {
@@ -318,7 +318,7 @@ kbessel1(GEN nu, GEN gx, long prec)
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
       p1 = addir(mulss(k2,k2),nu2);
-      ak = divrs(mulrr(p1,zz), k);
+      ak = divru(mulrr(p1,zz), k);
       s = subsr(1, mulrr(ak,s));
     }
     u = mulrr(s, zf);
@@ -352,7 +352,7 @@ _kbessel1(long n, GEN z, long flag, long m, long prec)
   if (flag <= 1)
   {
     gel(H,2) = s = real_1(prec);
-    for (k=2; k<=m+n; k++) gel(H,k+1) = s = divrs(addsr(1,mulsr(k,s)),k);
+    for (k=2; k<=m+n; k++) gel(H,k+1) = s = divru(addsr(1,mulsr(k,s)),k);
   }
   else
   {
@@ -581,7 +581,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
       for(k=1;;k++, avma = av2)
       {
 	GEN w = gadd(gmul(gaddgs(a,k-1),u), gmul(gaddgs(p3,1-k),v));
-	gmulz(divrs(q,k),v, u);
+	gmulz(divru(q,k),v, u);
 	gdivgsz(w,k,v);
 	mulrrz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
@@ -601,7 +601,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
     for (k=n-1; k>=0; k--)
     {
-      p1 = gmul(T,divrs(zz,k+1));
+      p1 = gmul(T,divru(zz,k+1));
       s = gaddsg(1, gmul(p1,s));
       if (!k) break;
       T = gsubgs(gsub(T, S), 2*k-1);
@@ -765,8 +765,8 @@ eint1(GEN x, long prec)
     S = p3 = t = p1 = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
     {
-      p1 = addrr(p1, divrs(run,i)); /* p1 = sum_{i=1} 1/i */
-      p3 = divrs(mulrr(x,p3), i);   /* p3 = sum_{i=1} x^(i-1)/i */
+      p1 = addrr(p1, divru(run,i)); /* p1 = sum_{i=1} 1/i */
+      p3 = divru(mulrr(x,p3), i);   /* p3 = sum_{i=1} x^(i-1)/i */
       t = mulrr(p3, p1); S = addrr(S, t);
     }
     S = mulrr(x,mulrr(mpexp(negr(x)),S));
@@ -780,8 +780,8 @@ eint1(GEN x, long prec)
   if (cmprs(y, (3*n)/4) < 0) {
     p1 = t = S = y;
     for (i = 2; expo(t) - expo(S) >= -n; i++) {
-      p1 = mulrr(y, divrs(p1, i));
-      t = divrs(p1, i); S = addrr(S, t);
+      p1 = mulrr(y, divru(p1, i));
+      t = divru(p1, i); S = addrr(S, t);
     }
     y  = addrr(S, addrr(mplog(y), mpeuler(l)));
   } else {
@@ -1081,8 +1081,8 @@ bernfrac_using_zeta(long n)
 static GEN
 next_bin(GEN y, long n, long k)
 {
-  y = divrs(mulrs(y, n-k+2), k-1);
-  return divrs(mulrs(y, n-k+1), k);
+  y = divru(mulrs(y, n-k+2), k-1);
+  return divru(mulrs(y, n-k+1), k);
 }
 
 /* assume k > 1 odd */
@@ -1127,7 +1127,7 @@ szeta_odd(long k, long prec)
   }
   else
   {
-    GEN p2 = divrs(pi2, k-1);
+    GEN p2 = divru(pi2, k-1);
     for (n=0; n <= k>>1; n+=2)
     {
       p1 = mulrr(bernreal(kk-n,prec),bernreal(n,prec));
@@ -1138,7 +1138,7 @@ szeta_odd(long k, long prec)
       y = n? addrr(y,p1): p1;
     }
     y = mulrr(divrr(gpowgs(pi2,k),mpfactr(kk,prec)),y);
-    y = divrs(y,k-1);
+    y = divru(y,k-1);
     av2 = avma; limit = stack_lim(av2,1);
     qn = q; z=gen_0;
     for (n=1; ; n++)
@@ -1185,7 +1185,8 @@ szeta(long k, long prec)
   if (k < 0)
   {
     if ((k&1) == 0) return gen_0;
-    return gerepileuptoleaf(av, divrs(single_bern(1 - k, prec), k - 1));
+    y = single_bern(1-k, prec); togglesign(y);
+    return gerepileuptoleaf(av, divru(y, 1-k));
   }
   if (k > bit_accuracy(prec)+1) return real_1(prec);
   if ((k&1) == 0)
@@ -1325,7 +1326,7 @@ czeta(GEN s0, long prec)
     for (i=lim2-2; i>=2; i-=2)
     { /* using single prec (when (s0 + i) < 2^31) not faster (even at \p28) */
       u = mulri(mulrr(tes,invn2), mulii(addsi(i,s0), addsi(i-1,s0)));
-      tes = addrr(bernreal(i,prec), divrsns(u, i+1)); /* u / (i+1)(i+2) */
+      tes = addrr(bernreal(i,prec), divrunu(u, i+1)); /* u / (i+1)(i+2) */
       if (low_stack(avlim,stack_lim(av2,3)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
@@ -1348,7 +1349,7 @@ czeta(GEN s0, long prec)
     {
       s5 = gsub(s5, s4);
       s4 = gsub(s4, s3);
-      tes = gadd(bernreal(i,prec), divgsns(gmul(s5,tes), i+1));
+      tes = gadd(bernreal(i,prec), divgunu(gmul(s5,tes), i+1));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
@@ -1821,7 +1822,7 @@ polylog(long m, GEN x, long prec)
       p1 = gsub(glog(x,l), z);
     p1 = gmul2n(gsqr(p1), -1); /* = (log(-x))^2 / 2 */
     
-    p1 = gadd(p1, divrs(gsqr(mppi(l)), 6));
+    p1 = gadd(p1, divru(gsqr(mppi(l)), 6));
     p1 = gneg_i(p1);
   }
   else

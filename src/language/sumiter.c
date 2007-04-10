@@ -1058,7 +1058,7 @@ polzag(long n, long m)
   g = gmul(poleval(derivpol(polchebyshev1(d,0)), A), gpowgs(Bx, (m+1)>>1));
   for (k = m; k >= 0; k--)
     g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
-  s = mulsi(d, mulsi(d, mpfact(m+1)));
+  s = mulii(sqru(d), mpfact(m+1));
   return gerepileupto(av, gdiv(g,s));
 }
 
@@ -1106,7 +1106,7 @@ polzagreel(long n, long m, long prec)
     }
   }
   g = gmul2n(g, r-1);
-  s = mulsi(d, mpfact(m+1));
+  s = mului(d, mpfact(m+1));
   return gerepileupto(av, gdiv(g,s));
 }
 #ifdef _MSC_VER

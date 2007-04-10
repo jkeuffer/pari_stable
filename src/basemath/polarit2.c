@@ -560,7 +560,7 @@ two_factor_bound(GEN x)
   for (i=0,j=n; j >= i; i++,j--)
   {
     invbin[i] = invbin[j] = z;
-    z = divrs(mulrs(z, i+1), n-i);
+    z = divru(mulrs(z, i+1), n-i);
   }
   z = invbin[0]; /* = 1 */
   for (i=0; i<=n; i++)
@@ -1266,7 +1266,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   A = factor_bound(target);
 
   la = absi(leading_term(target));
-  B = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
+  B = mului(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
@@ -4425,9 +4425,9 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 	gerepileall(btop, 2, &M, &mod);
       }
 
-      ax = mulis(Fp_inv(utoipos(p), mod), p);
+      ax = muliu(Fp_inv(utoipos(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
-      mod = mulis(mod, p);
+      mod = muliu(mod, p);
       M = FpM_red(M, mod);
       /* I suspect it must be better to take amax > bmax*/
       bo = sqrti(shifti(mod, -1));

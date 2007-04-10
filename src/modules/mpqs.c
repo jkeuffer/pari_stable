@@ -400,7 +400,7 @@ mpqs_find_k(mpqs_handle_t *h)
     if ((k & 3) == N_mod_4) /* kN = 1 (mod 4) */
     {
       value = -0.7 * log2 ((double) k);
-      kN = mulis(h->N, k);
+      kN = muliu(h->N, k);
       if (mod8(kN) == 1) value += 1.38629;
 
       j = 0; p = 0;
@@ -1367,7 +1367,7 @@ static void
 check_root(mpqs_handle_t *h, long p, long start)
 {
   long z = start - ((long)(h->M) % p);
-  if (smodis(addii(h->C, mulsi(z, addii(h->B, mulsi(z, h->A)))), p))
+  if (smodis(addii(h->C, mului(z, addii(h->B, mului(z, h->A)))), p))
   {
     fprintferr("MPQS: p = %ld\n", p);
     fprintferr("MPQS: A = %Z\n", h->A);
@@ -1717,7 +1717,7 @@ mpqs_self_init(mpqs_handle_t *h)
 
     /* ensure B = 1 mod 4 */
     if (mod2(B) == 0)
-      affii(addii(B, mulsi(mod4(A), A)), B); /* B += (A % 4) * A; */
+      affii(addii(B, mului(mod4(A), A)), B); /* B += (A % 4) * A; */
 
     p1 = shifti(A, 1);
     /* compute the roots z1, z2, of the polynomial Q(x) mod p_j and
@@ -2109,7 +2109,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
       { /* p divides Q(x)/A (and possibly A), 1st or 3rd case */
         relaprimes[relaprpos++] = pi;
         relaprimes[relaprpos++] = 1 + ei;
-        Qx_part = mulis(Qx_part, p);
+        Qx_part = muliu(Qx_part, p);
       }
       else if (ei)
       { /* p divides A but does not divide Q(x)/A, 2nd case */
@@ -3080,7 +3080,7 @@ mpqs_i(mpqs_handle_t *handle)
   mpqs_find_k(handle);
   if (DEBUGLEVEL >= 5) fprintferr("MPQS: found multiplier %ld for N\n",
                                   handle->_k.k);
-  handle->kN = mulis(N, handle->_k.k);
+  handle->kN = muliu(N, handle->_k.k);
 
   if (!mpqs_set_parameters(handle))
   {

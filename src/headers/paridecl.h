@@ -1516,6 +1516,7 @@ GEN     diviu_rem(GEN y, ulong x, ulong *rem);
 GEN     divri(GEN x, GEN y);
 GEN     divrr(GEN x, GEN y);
 GEN     divrs(GEN x, long y);
+GEN     divru(GEN x, ulong y);
 GEN     divsi(long x, GEN y);
 GEN     divsr(long x, GEN y);
 GEN     dvmdii(GEN x, GEN y, GEN *z);

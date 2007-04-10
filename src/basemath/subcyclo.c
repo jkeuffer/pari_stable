@@ -481,7 +481,7 @@ polsubcyclo_complex_roots(long n, long real, long prec)
   powz      = cgetg(real?4:3,t_VEC);
   powbab    = cgetg(m+1,t_VEC);
   gel(powbab,1) = gen_1;
-  gel(powbab,2) = exp_Ir(divrs(Pi2n(1, prec), n)); /* = e_n(1) */
+  gel(powbab,2) = exp_Ir(divru(Pi2n(1, prec), n)); /* = e_n(1) */
   for (i=3; i<=m; i++) gel(powbab,i) = gmul(gel(powbab,2),gel(powbab,i-1));
   powgig    = cgetg(m+1,t_VEC);
   gel(powgig,1) = gen_1;

@@ -496,7 +496,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
         SB += nb * B;
       }
     }
-    a = a? divri(mulir(a,Res),b): divrs(mulsr(p-1,Res),p);
+    a = a? divri(mulir(a,Res),b): divru(mulsr(p-1,Res),p);
     affrr(a, Res);
     avma = av1;
     if (l == N+1) continue; /* p inert */
@@ -1661,7 +1661,7 @@ isunit(GEN bnf,GEN x)
   p1 = gadd(garg(gel(emb,1),prec), p1);
   /* p1 = arg(the missing root of 1) */
 
-  pi2_sur_w = divrs(mppi(prec), n>>1); /* 2pi / n */
+  pi2_sur_w = divru(mppi(prec), n>>1); /* 2pi / n */
   e = umodiu(ground(gdiv(p1, pi2_sur_w)), n);
   if (n > 2)
   {

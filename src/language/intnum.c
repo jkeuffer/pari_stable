@@ -99,7 +99,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   {
     pari_sp av, av2;
     gel(h,j) = shiftr(gel(h,j-1),-2);
-    av = avma; del = divrs(qlint,it);
+    av = avma; del = divru(qlint,it);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
     for (sum = gen_0, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
@@ -139,8 +139,8 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   for (it=1, j=1; j<JMAX; j++, it*=3)
   {
     pari_sp av, av2;
-    gel(h,j) = divrs(gel(h,j-1), 9);
-    av = avma; del = divrs(qlint,3*it); ddel = shiftr(del,1);
+    gel(h,j) = divru(gel(h,j-1), 9);
+    av = avma; del = divru(qlint,3*it); ddel = shiftr(del,1);
     x = addrr(a, shiftr(del,-1));
     av2 = avma;
     for (sum = gen_0, j1 = 1; j1 <= it; j1++)

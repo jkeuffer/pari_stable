@@ -425,14 +425,38 @@ modiiz(GEN x, GEN y, GEN z)
 GEN
 divrs(GEN x, long y)
 {
-  long i,lx,garde,sh,s=signe(x);
+  long i, lx, garde, sh, s = signe(x);
   GEN z;
   LOCAL_HIREMAINDER;
 
   if (!y) pari_err(gdiver);
   if (y<0) { s = -s; y = -y; }
   if (!s) return real_0_bit(expo(x) - expu(y));
-  if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
+  if (y==1) { z = rcopy(x); setsigne(z,s); return z; }
+  if (y==2) { z = shiftr(x, -1); setsigne(z,s); return z; }
+
+  z=cgetr(lx=lg(x)); hiremainder=0;
+  for (i=2; i<lx; i++) z[i] = divll(x[i],y);
+
+  /* we may have hiremainder != 0 ==> garde */
+  garde=divll(0,y); sh=bfffo(z[2]);
+  if (sh) shift_left(z,z, 2,lx-1, garde,sh);
+  z[1] = evalsigne(s) | evalexpo(expo(x)-sh);
+  if ((garde << sh) & HIGHBIT) roundr_up_ip(z, lx);
+  return z;
+}
+
+GEN
+divru(GEN x, ulong y)
+{
+  long i, lx, garde, sh, s = signe(x);
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!y) pari_err(gdiver);
+  if (!s) return real_0_bit(expo(x) - expu(y));
+  if (y==1) return rcopy(x);
+  if (y==2) return shiftr(x, -1);
 
   z=cgetr(lx=lg(x)); hiremainder=0;
   for (i=2; i<lx; i++) z[i] = divll(x[i],y);

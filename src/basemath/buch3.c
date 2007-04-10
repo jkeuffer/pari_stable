@@ -728,7 +728,7 @@ regulatorbound(GEN bnf)
   if (cmpii(dK,c1) <= 0) return dft_bound();
 
   p1 = gsqr(glog(gdiv(dK,c1),DEFAULTPREC));
-  p1 = divrs(gmul2n(gpowgs(divrs(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
+  p1 = divru(gmul2n(gpowgs(divru(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
   return gmax(p1, dbltor(0.2));
@@ -870,7 +870,7 @@ compute_M0(GEN M_star,long N)
       pari_sp av = avma; n3=N-n1-n2;
       if (n1==n2 && n1==n3) /* n1 = n2 = n3 = m1 = N/3 */
       {
-	p1 = divrs(M_star, m1);
+	p1 = divru(M_star, m1);
 	p4 = sqrtr_abs( mulrr(addsr(1,p1),subrs(p1,3)) );
         p5 = subrs(p1,1);
 	u = gen_1;

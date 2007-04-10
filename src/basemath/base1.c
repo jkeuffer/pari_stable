@@ -2431,7 +2431,7 @@ initzeta(GEN pol, long prec)
       for (j=2; j<=r; j++)
       {
         pari_sp av2 = avma;
-        gel(t,j+1) = gerepileuptoleaf(av2, divrs(mulrr(gel(t,j), p1), j));
+        gel(t,j+1) = gerepileuptoleaf(av2, divru(mulrr(gel(t,j), p1), j));
       }
       gel(tabj,i) = t; /* tabj[n,j] = coef(n)*ln(c/n)^(j-1)/(j-1)! */
     }

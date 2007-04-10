@@ -995,7 +995,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
     if (!B->KC && p > C1) B->KC = i;
     if (p > C2) break;
     s = krois(B->Disc,p);
-    if (s) Res = mulur(p, divrs(Res, p - s));
+    if (s) Res = mulur(p, divru(Res, p - s));
     switch (s)
     {
       case -1: break; /* inert */
@@ -1034,7 +1034,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
   while (p < LIM)
   {
     s = krois(B->Disc,p);
-    Res = mulur(p, divrs(Res, p - s));
+    Res = mulur(p, divru(Res, p - s));
     NEXT_PRIME_VIADIFF(p, d);
   }
   if (B->badprim != gen_1)

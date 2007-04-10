@@ -158,7 +158,7 @@ caract(GEN x, long v)
     if (k == n) break;
 
     Q = gmul(Q, x_k);
-    C = divis(mulsi(k-n,C), k+1); /* (-1)^{k} binomial(n,k) */
+    C = diviuexact(mulsi(k-n,C), k+1); /* (-1)^{k} binomial(n,k) */
   }
   return gerepileupto(av, gdiv(p1, mpfact(n)));
 }
@@ -2766,7 +2766,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     { /* row0 == row1 == 0 */
       pari_sp av1 = avma;
       z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
-      do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(gel(D,k-1)))) < 0);
+      do_swap = (cmpii(mului(n1,z), mului(m1,sqri(gel(D,k-1)))) < 0);
       avma = av1;
     }
     else
@@ -2874,7 +2874,7 @@ extendedgcd(GEN A)
     {
       pari_sp av1 = avma;
       z = addii(mulii(gel(D,k-2),gel(D,k)), sqri(gcoeff(lambda,k-1,k)));
-      do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(gel(D,k-1)))) < 0);
+      do_swap = (cmpii(mului(n1,z), mului(m1,sqri(gel(D,k-1)))) < 0);
       avma = av1;
     }
     else do_swap = 0;

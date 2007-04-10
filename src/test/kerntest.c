@@ -84,6 +84,6 @@ int main()
   printf("-:"); _voirr(subrr(xr,yr));
   printf("*:"); _voirr(mulrr(xr,yr));
   printf("/:"); _voirr(divrr(xr,yr));
-  printf("gcc bug?:"); _voirr(divrs(dbltor(3.),2));
+  printf("gcc bug?:"); _voirr(divru(dbltor(3.),2));
   return 0;
 }

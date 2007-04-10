@@ -707,7 +707,7 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
   GEN u, y;
   long e;
   setlg(*logx, DEFAULTPREC + (lg(*x)-2) / p);
-  u = divrs(*logx, p); y = grndtoi(mpexp(u), &e);
+  u = divru(*logx, p); y = grndtoi(mpexp(u), &e);
   if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
   *k *= p; *x = y; *logx = u; return 1;
 }
@@ -2888,11 +2888,11 @@ classno(GEN x)
     else
       d = c + 1;
     av2 = avma;
-    divrsz(mulsr(c,p1),d, p1);
+    affrr(divru(mulur(c,p1),d), p1);
     avma = av2;
   }
   r2 = two_rank(D);
-  h = hin = ground(gmul2n(p1, -r2));
+  h = hin = roundr(shiftr(p1, -r2));
   s = 2*itos(gceil(sqrtnr(p1, 4)));
   if (s > 10000) s = 10000;
 
@@ -2988,7 +2988,7 @@ classno2(GEN x)
       k = krois(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
-      p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,prec));
+      p5 = addrr(divru(mulrr(p1,p5),i), eint1(p2,prec));
       S = (k>0)? addrr(S,p5): subrr(S,p5);
     }
     S = shiftr(divrr(S,reg),-1);
@@ -3001,7 +3001,7 @@ classno2(GEN x)
       k = krois(D,i); if (!k) continue;
       p2 = mulir(sqru(i), p4);
       p5 = subsr(1, mulrr(p7,incgamc(half,p2,prec)));
-      p5 = addrr(p5, divrr(divrs(p1,i), mpexp(p2)));
+      p5 = addrr(p5, divrr(divru(p1,i), mpexp(p2)));
       S = (k>0)? addrr(S,p5): subrr(S,p5);
     }
   }

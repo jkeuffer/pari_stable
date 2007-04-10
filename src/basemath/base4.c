@@ -1341,7 +1341,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
         x = gmul(x, Fp_inv(u, prkZ));
       if (k)
-        vden = addii(vden, mulsi(k, gel(e,i)));
+        vden = addii(vden, mului(k, gel(e,i)));
     }
     (void)int_elt_val(nf, x, p, mul, &x);
     gel(newg,i) = colreducemodHNF(x, prk, NULL);
@@ -2181,7 +2181,7 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
     pr = gel(listpr,j); p = gel(pr,1);
     v = Z_pval(x, p); if (!v) continue;
 
-    ex = mulsi(v, gel(pr,3)); /* = v_pr(x) > 0 */
+    ex = mului(v, gel(pr,3)); /* = v_pr(x) > 0 */
     x1 = x1? idealmulpowprime(nf, x1, pr, ex)
            : idealpow(nf, pr, ex);
   }

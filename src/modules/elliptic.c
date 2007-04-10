@@ -1113,7 +1113,7 @@ elleisnum(GEN om, long k, long flag, long prec)
   y = _elleisnum(&T, k, prec);
   if (k==2 && signe(T.c))
   {
-    p1 = gmul(Pi2n(1,prec), mulsi(12, T.c));
+    p1 = gmul(Pi2n(1,prec), mului(12, T.c));
     y = gsub(y, mulcxI(gdiv(p1, gmul(T.w2, T.W2))));
   }
   else if (k==4 && flag) y = gdivgs(y,  12);
@@ -1151,7 +1151,7 @@ elleta(GEN om, long prec)
   {
     GEN u = gdiv(T.w2, T.W2);
     /* E2 := u^2 E2 + 6iuc/pi = E_2(tau) */
-    E2 = gadd(gmul(gsqr(u), E2), mulcxI(gdiv(gmul(mulsi(6,T.c), u), pi)));
+    E2 = gadd(gmul(gsqr(u), E2), mulcxI(gdiv(gmul(mului(6,T.c), u), pi)));
   }
   y2 = gdiv(gmul(E2, gsqr(pi)), gmulsg(3, T.w2));
   if (T.swap)
@@ -1602,18 +1602,18 @@ localred_p(GEN e, GEN p, int minim)
     case  2: f = 2; kod = 2; c = 1; break; /* II   */
     case  3: f = 2; kod = 3; c = 2; break; /* III  */
     case  4: f = 2; kod = 4; /* IV   */
-      c = 2 + kronecker(mulis(diviiexact(c6,sqri(p)), -6), p);
+      c = 2 + krosi(-6,p) * kronecker(diviiexact(c6,sqri(p)), p);
       break;
     case  6: f = 2; kod = -1; /* I0*  */
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
       tri = mkpoln(4, gen_1, gen_0,
-                            negi(mulsi(3, diviiexact(c4, p2))),
+                            negi(mului(3, diviiexact(c4, p2))),
                             negi(shifti(diviiexact(c6, mulii(p2,p)), 1)));
       c = 1 + FpX_nbroots(tri, p);
       break;
     case  8: f = 2; kod = -4; /* IV*  */
-      c = 2 + kronecker(mulsi(-6, diviiexact(c6, sqri(sqri(p)))), p);
+      c = 2 + krosi(-6,p) * kronecker(diviiexact(c6, sqri(sqri(p))), p);
       break;
     case  9: f = 2; kod = -3; c = 2; break; /* III* */
     case 10: f = 2; kod = -2; c = 1; break; /* II*  */
@@ -1766,7 +1766,7 @@ localred_23(GEN e, long p)
           ga = aux2(gel(e,5), p, p2k);
           if (numroots2(al, be, ga, p, &theroot) == 2) break;
           if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
-          p2k = mulsi(p, p2k); nu++;
+          p2k = mului(p, p2k); nu++;
         }
         if (p == 2)
           c = 4 - 2 * (ga & 1);
@@ -2344,7 +2344,7 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
   {
     if (!signe(y1) || !equalii(y1,y2)) return NULL;
     p2 = shifti(y1,1);
-    p1 = addii(e, mulii(x1,mulsi(3,x1)));
+    p1 = addii(e, mulii(x1,mului(3,x1)));
     p1 = remii(p1, p);
   }
   else { p1 = subii(y2,y1); p2 = subii(x2, x1); }
@@ -2368,7 +2368,7 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
   x2 = gel(z2,1); y2 = gel(z2,2);
   if (x1 == x2)
   {
-    p1 = addii(e, mulii(x1,mulsi(3,x1)));
+    p1 = addii(e, mulii(x1,mului(3,x1)));
     p1 = remii(p1, p);
   }
   else p1 = subii(y2,y1);
@@ -2518,9 +2518,9 @@ apell1(GEN e, GEN p)
       for (i=1;; i++)
       {
         P = addsell(cp4,P, F,p); /* h.f + i.F */
-        if (!P) { h = addii(h, mulsi( i,B)); goto FOUND; }
+        if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
         q1 = addsell(cp4,q1,mF,p); /* h.f - i.F */
-        if (!q1) { h = addii(h, mulsi(-i,B)); goto FOUND; }
+        if (!q1) { h = subii(h, mului(i,B)); goto FOUND; }
       }
     }
     /* Baby Step/Giant Step */
@@ -2533,11 +2533,11 @@ apell1(GEN e, GEN p)
       _fix(P+1, j); tx[i] = modBIL(gel(P,1));
       _fix(P+2, j); ty[i] = modBIL(gel(P,2));
       P = addsell(cp4,P,F,p); /* h.f + i.F */
-      if (!P) { h = addii(h, mulsi(i,B)); goto FOUND; }
+      if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
     }
     mfh = negsell(fh, p);
     fg = addsell(cp4,P,mfh,p); /* h.f + nb.F - h.f = nb.F */
-    if (!fg) { h = mulsi(nb,B); goto FOUND; }
+    if (!fg) { h = mului(nb,B); goto FOUND; }
     u = cgetg(nb+1, t_VEC);
     av2 = avma; /* more baby steps, nb points at a time */
     while (i <= s)
@@ -2551,7 +2551,7 @@ apell1(GEN e, GEN p)
         {
           long k = i+j-2;
           if (equalii(gel(P,2),gel(fg,2))) k -= 2*nb; /* fg == P */
-          h = addii(h, mulsi(k,B)); goto FOUND;
+          h = addii(h, mului(k,B)); goto FOUND;
         }
       }
       v = multi_invmod(u, p);
@@ -2566,12 +2566,12 @@ apell1(GEN e, GEN p)
       avma = av2;
     }
     P = addsell(cp4,gel(pts,j-1),mfh,p); /* = (s-1).F */
-    if (!P) { h = mulsi(s-1,B); goto FOUND; }
+    if (!P) { h = mului(s-1,B); goto FOUND; }
     if (DEBUGLEVEL) msgtimer("[apell1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
     fg = addsell(cp4,P,F,p);
-    if (!fg) { h = mulsi(s,B); goto FOUND; }
+    if (!fg) { h = mului(s,B); goto FOUND; }
     pfinal = modBIL(p); av2 = avma;
     /* Goal of the following: sort points by increasing x-coordinate hash.
      * Done in a complicated way to avoid allocating a large temp vector */

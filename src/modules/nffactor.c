@@ -373,7 +373,7 @@ PRECPB:
    * sum_sigma | binom(d-1, i-1) ||sigma(S)||_2 + binom(d-1,i) lc(S) |^2 */
 
   /* i = 0: n lc(S)^2 */
-  C = mulsi(n, sqri(lS));
+  C = mului(n, sqri(lS));
   /* i = d: sum_sigma ||sigma(S)||_2^2 */
   p1 = gnorml2(N2); if (gcmp(C, p1) < 0) C = p1;
   for (i = 1; i < d; i++)
@@ -427,7 +427,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     }
   }
   lt = leading_term(polbase);
-  s = gmul(s, mulis(sqri(lt), n));
+  s = gmul(s, muliu(sqri(lt), n));
   C = powrshalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
   return gdiv(gmul(C, s), gmulsg(d, mppi(DEFAULTPREC)));
 }
@@ -987,7 +987,7 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
   double t;
   if (typ(C) != t_REAL) C = gmul(C, real_1(DEFAULTPREC));
   setlg(C, DEFAULTPREC);
-  t = rtodbl(mplog(gmul2n(divrs(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
+  t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr)));
 }
 

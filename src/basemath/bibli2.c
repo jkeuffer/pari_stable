@@ -363,7 +363,7 @@ laplace(GEN x)
   for (i=2; i<l; i++)
   {
     gel(y,i) = gmul(t, gel(x,i));
-    e++; t = mulsi(e,t);
+    e++; t = mului(e,t);
   }
   return gerepilecopy(av,y);
 }

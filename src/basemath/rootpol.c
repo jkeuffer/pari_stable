@@ -847,7 +847,7 @@ RUgen(long N, long bit)
 {
   if (N == 2) return mpneg(real_1(nbits2prec(bit)));
   if (N == 4) return gi;
-  return exp_Ir(divrs(Pi2n(1, nbits2prec(bit)), N));
+  return exp_Ir(divru(Pi2n(1, nbits2prec(bit)), N));
 }
 
 /* N=2^k. returns a vector RU which contains exp(2*i*k*Pi/N), k=0..N-1 */
@@ -998,7 +998,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
       gerepileall(av2,2, &g,&RU);
     }
   }
-  *gamma = dblogr(divrs(g,NN)) / LOG2;
+  *gamma = dblogr(divru(g,NN)) / LOG2;
   *LMAX = Lmax; avma = av;
 }
 

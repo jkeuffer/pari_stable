@@ -97,7 +97,7 @@ mpatan(GEN x)
   p3 = mulrr(p2,p2); l1 = 4;
   unr = real_1(l2); setlg(unr,4);
   p4 = cgetr(l2); setlg(p4,4);
-  affrr(divrs(unr,2*n+1), p4);
+  affrr(divru(unr,2*n+1), p4);
   s = 0; e = expo(p3); av = avma;
   for (i = n; i > 1; i--) /* n >= 1. i = 1 done outside for efficiency */
   {
@@ -105,7 +105,7 @@ mpatan(GEN x)
     s -= e; l1 += (s>>TWOPOTBITS_IN_LONG);
     s %= BITS_IN_LONG;
     if (l1 > l2) l1 = l2;
-    setlg(unr,l1); p5 = subrr(divrs(unr,2*i-1), p5);
+    setlg(unr,l1); p5 = subrr(divru(unr,2*i-1), p5);
     setlg(p4,l1); affrr(p5,p4); avma = av;
   }
   setlg(p3, l2); p5 = mulrr(p4,p3); /* i = 1 */
@@ -723,7 +723,7 @@ mpbern(long nb, long prec)
 
   if (i == 1 && nb > 0)
   {
-    set_bern(c0, 1, divrs(real_1(prec), 6)); /* B2 = 1/6 */
+    set_bern(c0, 1, divru(real_1(prec), 6)); /* B2 = 1/6 */
     i = 2;
   }
   for (   ; i <= nb; i++, avma = av)
@@ -733,13 +733,13 @@ mpbern(long nb, long prec)
 
     for (;;)
     {
-      S = divrs(mulrs(S, n*m), d1*d2);
+      S = divru(mulrs(S, n*m), d1*d2);
       if (d1 == 1) break;
       n += 4; m += 2; d1--; d2 -= 2;
       S = addrr(BERN(d1), S);
       if ((d1 & 127) == 0) { set_bern(c0, i, S); S = BERN(i); avma = av; }
     }
-    S = divrs(subsr(2*i, S), 2*i+1);
+    S = divru(subsr(2*i, S), 2*i+1);
     setexpo(S, expo(S) - 2*i);
     set_bern(c0, i, S); /* S = B_2i */
   }
@@ -864,20 +864,16 @@ bernvec(long nb)
 
 /* x / (i*(i+1)) */
 GEN
-divrsns(GEN x, long i)
+divrunu(GEN x, ulong i)
 {
-#ifdef LONG_IS_64BIT
-  if (i < 3037000500) /* i(i+1) < 2^63 */
-#else
-  if (i < 46341) /* i(i+1) < 2^31 */
-#endif
-    return divrs(x, i*(i+1));
+  if (i <= MAXHALFULONG) /* i(i+1) < 2^BITS_IN_LONG*/
+    return divru(x, i*(i+1));
   else
-    return divrs(divrs(x, i), i+1);
+    return divru(divru(x, i), i+1);
 }
 /* x / (i*(i+1)) */
 GEN
-divgsns(GEN x, long i)
+divgunu(GEN x, ulong i)
 {
 #ifdef LONG_IS_64BIT
   if (i < 3037000500) /* i(i+1) < 2^63 */
@@ -1111,11 +1107,11 @@ cxgamma(GEN s0, int dolog, long prec)
 
   nnx = gaddgs(s, nn);
   a = ginv(nnx); invn2 = gsqr(a);
-  tes = divrsns(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
+  tes = divrunu(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL>5) msgtimer("Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
   {
-    u = divrsns(bernreal(i,prec), i-1); /* Bi / i(i-1) */
+    u = divrunu(bernreal(i,prec), i-1); /* Bi / i(i-1) */
     tes = gadd(u, gmul(invn2,tes));
   }
   if (DEBUGLEVEL>5) msgtimer("Bernoulli sum");
@@ -1493,10 +1489,10 @@ cxpsi(GEN s0, long prec)
   if (DEBUGLEVEL>2) msgtimer("sum from 0 to N-1");
 
   in2 = gsqr(a);
-  av2 = avma; tes = divrs(bernreal(2*lim, prec), 2*lim);
+  av2 = avma; tes = divru(bernreal(2*lim, prec), 2*lim);
   for (k=2*lim-2; k>=2; k-=2)
   {
-    tes = gadd(gmul(in2,tes), divrs(bernreal(k, prec), k));
+    tes = gadd(gmul(in2,tes), divru(bernreal(k, prec), k));
     if ((k & 255) == 0) tes = gerepileupto(av2, tes);
   }
   if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");

@@ -301,11 +301,11 @@ Baker(baker_s *BS)
   c9 = gmul(c9,hb0);
   /* Multiply c9 by the "constant" factor */
   c9 = gmul(c9, gmul(mulri(mulsr(18,mppi(prec)), int2n(5*(4+r))),
-                     gmul(gmul(mpfact(r+3), powiu(mulis(BS->bak,r+2), r+3)),
-                          glog(mulis(BS->bak,2*(r+2)),prec))));
+                     gmul(gmul(mpfact(r+3), powiu(muliu(BS->bak,r+2), r+3)),
+                          glog(muliu(BS->bak,2*(r+2)),prec))));
   c9 = gprec_w(myround(c9, 1), DEFAULTPREC);
   /* Compute B0 according to Lemma 2.3.3 */
-  B0 = mulir(mulsi(2, BS->Ind), 
+  B0 = mulir(shifti(BS->Ind,1), 
 	     divrr(addrr(mulrr(c9,mplog(divrr(mulir(BS->Ind, c9),BS->c10))), 
 			 mplog(mulir(BS->Ind, BS->c11))),
 		   BS->c10));
@@ -387,7 +387,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   l0 = subrr(divir(l0, dbltor(1.8262)), triv); /* delta = 0.99 */
   if (signe(l0) <= 0) return 0; 
 
-  l1 = divrs(addri(mulsr(2, B0), BS->Ind), 2);
+  l1 = shiftr(addri(mulsr(2, B0), BS->Ind), -1);
   l0 = divri(subrr(sqrtr(l0), l1), C);
  
   if (signe(l0) <= 0) return 0;
@@ -678,7 +678,7 @@ get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       GEN oldB0 = B0, kappa = utoipos(10);
       long cf;
 
-      for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
+      for (cf = 0; cf < 10; cf++, kappa = muliu(kappa,10))
       {
         int res = CF_1stPass(&B0, kappa, BS);
         if (res < 0) return NULL; /* prec problem */
@@ -724,7 +724,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
       GEN oldBx = Bx, kappa = utoipos(10);
       long cf;
 
-      for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
+      for (cf = 0; cf < 10; cf++, kappa = muliu(kappa,10))
       {
         int res = LLL_1stPass(&B0, kappa, BS, &Bx);
         if (res) break;

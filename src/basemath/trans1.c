@@ -83,15 +83,15 @@ piold(long prec)
   while (n)
   {
     if (n < CBRTVERYBIGINT) /* p3 = n1(n1-2)(n1-4) / n^3 */
-      p3 = divrs(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n*n);
+      p3 = divru(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n*n);
     else
     {
       if (n1 < SQRTVERYBIGINT)
-	p3 = divrs(divrs(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n),n);
+	p3 = divru(divru(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n),n);
       else
-	p3 = divrs(divrs(divrs(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n),n),n);
+	p3 = divru(divru(divru(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n),n),n);
     }
-    p3 = divrs(divrs(p3,100100025), 327843840);
+    p3 = divru(divru(p3,100100025), 327843840);
     subisz(p2,k1,p2);
     subirz(p2,p3,p1);
     alpha += alpha2; l = (long)(1+alpha); /* new mantissa length */
@@ -187,47 +187,47 @@ consteuler(long prec)
   prec++;
 
   l = prec+1; x = (long) (1 + bit_accuracy_mul(l, LOG2/4));
-  a = stor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
+  a = utor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
   b = real_1(l);
   v = real_1(l);
   n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
   n1 = min(n, SQRTVERYBIGINT);
   if (x < SQRTVERYBIGINT)
   {
-    long xx = x*x;
+    ulong xx = x*x;
     av2 = avma;
     for (k=1; k<n1; k++)
     {
-      divrsz(mulsr(xx,b),k*k, b);
-      divrsz(addrr(divrs(mulsr(xx,a),k),b),k, a);
-      addrrz(u,a,u);
-      addrrz(v,b,v); avma = av2;
+      affrr(divru(mulur(xx,b),k*k), b);
+      affrr(divru(addrr(divru(mulur(xx,a),k),b),k), a);
+      affrr(addrr(u,a), u);
+      affrr(addrr(v,b), v); avma = av2;
     }
     for (   ; k<=n; k++)
     {
-      divrsz(divrs(mulsr(xx,b),k), k, b);
-      divrsz(addrr(divrs(mulsr(xx,a),k),b),k, a);
-      addrrz(u,a,u);
-      addrrz(v,b,v); avma = av2;
+      affrr(divru(divru(mulur(xx,b),k),k), b);
+      affrr(divru(addrr(divru(mulur(xx,a),k),b),k), a);
+      affrr(addrr(u,a), u);
+      affrr(addrr(v,b), v); avma = av2;
     }
   }
   else
   {
-    GEN xx = mulss(x,x);
+    GEN xx = muluu(x,x);
     av2 = avma;
     for (k=1; k<n1; k++)
     {
-      divrsz(mulir(xx,b),k*k, b);
-      divrsz(addrr(divrs(mulir(xx,a),k),b),k, a);
-      addrrz(u,a,u);
-      addrrz(v,b,v); avma = av2;
+      affrr(divru(mulir(xx,b),k*k), b);
+      affrr(divru(addrr(divru(mulir(xx,a),k),b),k), a);
+      affrr(addrr(u,a), u);
+      affrr(addrr(v,b), v); avma = av2;
     }
     for (   ; k<=n; k++)
     {
-      divrsz(divrs(mulir(xx,b),k), k, b);
-      divrsz(addrr(divrs(mulir(xx,a),k),b),k, a);
-      addrrz(u,a,u);
-      addrrz(v,b,v); avma = av2;
+      affrr(divru(divru(mulir(xx,b),k),k), b);
+      affrr(divru(addrr(divru(mulir(xx,a),k),b),k), a);
+      affrr(addrr(u,a), u);
+      affrr(addrr(v,b), v); avma = av2;
     }
   }
   divrrz(u,v,tmpeuler);
@@ -1075,8 +1075,8 @@ palog(GEN x)
     GEN mod = gel(x,3), p1 = subis(p,1);
     y = cgetp(x);
     gel(y,4) = Fp_pow(gel(x,4), p1, mod);
-    p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
-    y = gmul(palogaux(y), mulis(p1, -2));
+    p1 = diviiexact(subsi(1,mod), p1); /* 1/(p-1) */
+    y = gmul(palogaux(y), shifti(p1,1));
   }
   return gerepileupto(av,y);
 }
@@ -1298,7 +1298,7 @@ exp1r_abs(GEN x)
   s = 0; l1 = 3; av2 = avma;
   for (i=n; i>=2; i--)
   { /* compute X^(n-1)/n! + ... + X/2 + 1 */
-    setlg(X,l1); p3 = divrs(X,i);
+    setlg(X,l1); p3 = divru(X,i);
     s -= expo(p3); p1 = mulrr(p3,p2); setlg(p1,l1);
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);
@@ -1395,9 +1395,9 @@ exp_p_prec(GEN x)
     if (n%e == 0) k--;
   }
   else
-  {
+  { /* e > 0, n > 0 */
     GEN r, t = subis(p, 1);
-    k = itos(dvmdii(subis(mulis(t,n), 1), subis(mulis(t,e), 1), &r));
+    k = itos(dvmdii(subis(muliu(t,n), 1), subis(muliu(t,e), 1), &r));
     if (!signe(r)) k--;
   }
   return k;
@@ -1676,7 +1676,7 @@ constlog2(long prec)
   l = prec+1;
   n = bit_accuracy(l) >> 1;
   y = divrr(Pi2n(-1, l), agm1r_abs( real2n(2 - n, l) ));
-  affrr(divrs(y,n), tmplog2);
+  affrr(divru(y,n), tmplog2);
   if (glog2) gunclone(glog2);
   glog2 = tmplog2; avma = av; return glog2;
 }
@@ -1757,7 +1757,7 @@ logr_abs(GEN X)
     if (l1 < 3) l1 = 3;
     S = x;
     setlg(S,  l1);
-    setlg(unr,l1); affrr(divrs(unr,k), S); /* destroy x, not needed anymore */
+    setlg(unr,l1); affrr(divru(unr,k), S); /* destroy x, not needed anymore */
     for (s = 0, k -= 2;; k -= 2) /* k = 2n+1, ..., 1 */
     { /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
       setlg(y2, l1); T = mulrr(S,y2);
@@ -1768,7 +1768,7 @@ logr_abs(GEN X)
       s &= (BITS_IN_LONG-1);
       setlg(S, l1);
       setlg(unr,l1);
-      affrr(addrr(divrs(unr, k), T), S); avma = av;
+      affrr(addrr(divru(unr, k), T), S); avma = av;
     }
     /* k = 1 special-cased for eficiency */
     y = mulrr(y, addsr(1,T)); /* = log(X)/2 */
@@ -1979,14 +1979,14 @@ mpsc1(GEN x, long *ptmod8)
   affrr(gsqr(x), x2);
   if (m) setexpo(x2, expo(x2) - (m<<1));
 
-  setlg(x2, 3); p1 = divrs(x2, 2*n+1);
+  setlg(x2, 3); p1 = divru(x2, 2*n+1);
   s = -expo(p1);
   l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
   setlg(p2,l1);
   s = 0;
   for (i=n; i>=2; i--)
   {
-    setlg(x2,l1); p1 = divrsns(x2, 2*i-1);
+    setlg(x2,l1); p1 = divrunu(x2, 2*i-1);
     s -= expo(p1); p1 = mulrr(p1,p2);
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);

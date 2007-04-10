@@ -1049,7 +1049,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 
     if (i) gl = modii(mulii(gl, Y1[i]), N);
     av2 = avma;
-    L = modii(mulii(addsi(1, mulsi(3, sqri(X1[i]))),
+    L = modii(mulii(addsi(1, mului(3, sqri(X1[i]))),
                     i? mulii(GL,W[i]): GL), N);
     if (signe(L)) /* half of zero is still zero */
       L = shifti(mod2(L)? addii(L, N): L, -1);
@@ -2110,12 +2110,12 @@ squfof(GEN n)
   if (nm4 == 1)
   { /* n = 1 (mod4):  run one iteration on D1 = n, another on D2 = 5n */
     D1 = n;
-    D2 = mulsi(5,n); d2 = itou(sqrti(D2)); dd2 = (long)((d2>>1) + (d2&1));
+    D2 = mului(5,n); d2 = itou(sqrti(D2)); dd2 = (long)((d2>>1) + (d2&1));
     b2 = (long)((d2-1) | 1);	/* b1, b2 will always stay odd */
   }
   else
   { /* n = 3 (mod4):  run one iteration on D1 = 3n, another on D2 = 4n */
-    D1 = mulsi(3,n);
+    D1 = mului(3,n);
     D2 = shifti(n,2); dd2 = itou(sqrti(n)); d2 =  dd2 << 1;
     b2 = (long)(d2 & (~1UL)); /* largest even below d2, will stay even */
   }
@@ -3509,7 +3509,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
     if (exponent == 1)
       gel(*where,1) = isonstack(newexp) ? icopy(newexp) : newexp;
     else
-      gel(*where,1) = mulsi(exponent, newexp);
+      gel(*where,1) = mului(exponent, newexp);
   } /* if new exponent is 1, the old exponent already in place will do */
   (*where)[2] = facvec[sorted[nf]+2]; /* copy class */
   if (DEBUGLEVEL >= 6) fprintferr("\tstored (largest) factor no. %ld...\n", nf);
@@ -3538,7 +3538,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
       if (exponent == 1 && newexp == gen_2)
 	gel(*where,-2) = gen_2;
       else /* exponent*newexp > 2 */
-	gel(*where,-2) = mulsi(exponent, newexp);
+	gel(*where,-2) = mului(exponent, newexp);
     }
     else
     {
@@ -3904,7 +3904,7 @@ ifac_numdiv(GEN n, long hint)
 
   while (here != gen_1)
   {
-    tau = mulis(tau, 1 + itos(gel(here,1)));
+    tau = muliu(tau, 1 + itou(gel(here,1)));
     INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))

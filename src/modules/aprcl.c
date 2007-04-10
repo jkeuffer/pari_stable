@@ -557,7 +557,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
     GEN ph, b, q;
     ulong u = 2;
     long v = Z_lvalrem(addis(N,-1), p, &q);
-    ph = powuu(p, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
+    ph = powuu(p, v-1); pv = muliu(ph, p); /* N - 1 = p^v q */ 
     if (p > 2)
     {
       for (;;u++)
@@ -946,7 +946,7 @@ aprcl(GEN N)
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t, &globfa);
   if (cmpii(sqri(et),N) < 0) pari_err(bugparier,"aprcl: e(t) too small");
-  if (!gcmp1(gcdii(N,mulsi(t,et)))) return _res(1,0);
+  if (!gcmp1(gcdii(N,mului(t,et)))) return _res(1,0);
 
   R.N = N;
   R.N2= shifti(N, -1);

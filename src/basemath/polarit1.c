@@ -478,7 +478,7 @@ ZX_deriv(GEN x)
 
   if (lx<3) return zeropol(varn(x));
   y = cgetg(lx,t_POL);
-  for (i=2; i<lx ; i++) gel(y,i) = mulsi(i-1,gel(x,i+1));
+  for (i=2; i<lx ; i++) gel(y,i) = mului(i-1,gel(x,i+1));
   y[1] = x[1]; return y;
 }
 
@@ -1929,7 +1929,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       for (k=1; k<lg(p1); k++,j++)
       {
         P[j] = p1[k];
-        gel(E,j) = mulis(gel(p2,k),ex[i]);
+        gel(E,j) = muliu(gel(p2,k),ex[i]);
       }
     }
     else
@@ -2546,7 +2546,7 @@ rootsold(GEN x, long prec)
   if (k == deg0) return y;
 
   pi = mppi(DEFAULTPREC);
-  p2 = mkcomplex(pi, divrs(pi,10)); /* Pi * (1+I/10) */
+  p2 = mkcomplex(pi, divru(pi,10)); /* Pi * (1+I/10) */
   p11 = cgetg(4,t_POL); p11[1] = x[1];
   gel(p11,3) = gen_1;
 

@@ -54,7 +54,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static GEN
 psi(GEN c, GEN d, ulong q, long prec)
 {
-  GEN a = divrs(c, q), ea = mpexp(a), invea = ginv(ea);
+  GEN a = divru(c, q), ea = mpexp(a), invea = ginv(ea);
   GEN cha = mpshift(mpadd(ea, invea), -1);  /* ch(a) */
   GEN sha = mpshift(mpsub(ea, invea), -1);  /* sh(a) */
   return mulrr(mulrr(d, sqrtr(stor(q,prec))), mpsub(mulrr(a,cha), sha));
@@ -74,9 +74,9 @@ g(ulong q, ulong h)
 
   k = q % h;
   if (k == 1)
-    return gdivgs(mulsi((q-1)/h, subsi(q-1, mulss(h,h))), 12);
+    return gdivgs(mului((q-1)/h, subsi(q-1, mulss(h,h))), 12);
   if (k == 2)
-    return gdivgs(mulsi((q-2)/h, subsi(q<<1, addsi(1, mulss(h,h)))), 24);
+    return gdivgs(mului((q-2)/h, subsi(q<<1, addsi(1, mulss(h,h)))), 24);
   /* TODO: expr for h-1 mod h  +  gcd-style computation */
   
   kh = h;
@@ -137,7 +137,7 @@ estim(GEN n)
   pari_sp av = avma;
   GEN p1, pi = mppi (DEFAULTPREC);
 
-  p1 = divrs( itor(shifti(n,1), DEFAULTPREC), 3 );
+  p1 = divru( itor(shifti(n,1), DEFAULTPREC), 3 );
   p1 = mpexp( mulrr(pi, sqrtr(p1)) ); /* exp(Pi * sqrt(2N/3)) */
   p1 = divri (shiftr(p1,-2), n);
   p1 = divrr(p1, sqrtr( stor(3,DEFAULTPREC) ));
@@ -147,11 +147,11 @@ estim(GEN n)
 static void
 pinit(GEN n, GEN *c, GEN *d, GEN *Pi, ulong prec)
 {
-  GEN b = divrs( itor( subis(mulis(n,24), 1), prec ), 24 ); /* n - 1/24 */
+  GEN b = divru( itor( subis(muliu(n,24), 1), prec ), 24 ); /* n - 1/24 */
   GEN sqrtb = sqrtr(b), pi2sqrt2, pisqrt2d3;
  
   *Pi = mppi (prec);
-  pisqrt2d3 = mulrr(*Pi, sqrtr( divrs(stor(2, prec), 3) ));
+  pisqrt2d3 = mulrr(*Pi, sqrtr( divru(stor(2, prec), 3) ));
   pi2sqrt2  = mulrr(*Pi, sqrtr( stor(8, prec) ));
   *c = mulrr(pisqrt2d3, sqrtb);
   *d = ginv( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
@@ -177,13 +177,13 @@ numbpart(GEN n)
   sum = cgetr (prec);
   max = (ulong)(sqrt( gtodouble(n) ) * 0.24 + 5);
 
-  av = avma;
+  av = avma; togglesign(est);
   affrr(psi(C,D, 1, prec), sum);
   for (q = 2; q <= max; q++, avma=av)
   {
     GEN t;
     t = L(n, q, Pi, prec);
-    if (absr_cmp(t, mpexp(divrs(est,-q))) <= 0) continue;
+    if (absr_cmp(t, mpexp(divru(est,q))) <= 0) continue;
     addrrz(mulrr(psi(C,D, q, prec), t), sum, sum);
   }
   return gerepileupto (ltop, ground(sum));

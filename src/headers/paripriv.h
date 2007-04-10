@@ -69,8 +69,8 @@ ulong rgcduu(ulong d, ulong d1, ulong vmax, ulong* u, ulong* u1, ulong* v, ulong
 ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 GEN   quadnorm(GEN x);
 ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
-GEN   divgsns(GEN x, long i);
-GEN   divrsns(GEN x, long i);
+GEN   divgunu(GEN x, ulong i);
+GEN   divrunu(GEN x, ulong i);
 GEN   init_remiimul(GEN M);
 GEN   ishiftr_lg(GEN x, long lx, long n);
 GEN   logagmcx(GEN q, long prec);

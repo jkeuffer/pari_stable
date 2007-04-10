@@ -352,7 +352,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         msgtimer("for this type");
         if (T->fun != list_fun || !((sublist_t*)(T->fundata))->gen)
         {
-          if (T->subq) p1 = mulis(p1,lg(T->subqpart)-1);
+          if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
           if (!equaliu(p1,T->countsub))
           {
             fprintferr("  alpha = %Z\n",p1);

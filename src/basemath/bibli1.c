@@ -1858,9 +1858,9 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     {
       fprintferr("Candidate: %Z\n", short_pol);
       fprintferr("bitsize Norm: %ld\n", expi(nsp));
-      fprintferr("bitsize bound: %ld\n", expi(mulsi(bnd, Z)));
+      fprintferr("bitsize bound: %ld\n", expi(mului(bnd, Z)));
     }
-    if (cmpii(nsp, mulsi(bnd, Z)) < 0) break; /* SUCCESS */
+    if (cmpii(nsp, mului(bnd, Z)) < 0) break; /* SUCCESS */
 
     /* Failed with the precomputed or supplied value */
     t++; if (t == d) { delta++; t = 1; }
@@ -1874,7 +1874,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   R = cgetg(dim + 2, t_POL); R[1] = P[1];
   for (j = 1; j <= dim; j++)
     gel(R,j+1) = diviiexact(gel(short_pol,j), Xpowers[j-1]);
-  gel(R,2) = subii(gel(R,2), mulsi(bnd - 1, N0));
+  gel(R,2) = subii(gel(R,2), mului(bnd - 1, N0));
 
   sol = cgetg(1, t_VEC);
   for (i = -bnd + 1; i < bnd; i++)
@@ -2407,7 +2407,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
 static GEN
 get_tabga(int flreal, long n, long prec)
 {
-  GEN ga = sqrtr( flreal? divrs(stor(4, prec), 3): stor(2, prec) );
+  GEN ga = sqrtr( flreal? divru(stor(4, prec), 3): stor(2, prec) );
   GEN tabga = cgetg(n,t_VEC);
   long i;
   gel(tabga,1) = ga;

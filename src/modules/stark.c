@@ -1820,7 +1820,7 @@ LABrcf: ct++;
       gcoeff(A, i, j) = gcoeff(A, j, i) = p1;
     }
 
-  nB = mulsi(N+1, B2);
+  nB = mului(N+1, B2);
   d->nB = nB;
   cand = fincke_pohst(A, nB, -1, prec2, &chk);
 
@@ -2086,7 +2086,7 @@ QuadGetST(GEN bnr, GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
     for (n=2; n<=NN; n++) gel(vcn,n) = mulrr(gel(vcn,n-1), cexp);
     av2 = avma;
     for (n=2; n<=NN; n++, avma = av2)
-      affrr(divrs(gel(vcn,n),n), gel(vcn,n));
+      affrr(divru(gel(vcn,n),n), gel(vcn,n));
 
     for (k = 1; k <= nChar; k++)
     {
@@ -2133,13 +2133,13 @@ get_cS_cT(ST_t *T, long n)
   Z = cgetg(r+1, t_VEC);
   Z[1] = 0; /* unused */
 
-  csurn = divrs(T->c1, n);
+  csurn = divru(T->c1, n);
   nsurc = ginv(csurn);
   lncsurn = logr_abs(csurn);
 
   gel(Z,2) = lncsurn; /* r >= 2 */
   for (i = 3; i <= r; i++)
-    gel(Z,i) = divrs(mulrr(gel(Z,i-1), lncsurn), i-1);
+    gel(Z,i) = divru(mulrr(gel(Z,i-1), lncsurn), i-1);
   /* Z[i] = ln^(i-1)(c1/n) / (i-1)! */
 
   /* i = i0 */

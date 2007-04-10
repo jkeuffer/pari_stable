@@ -998,7 +998,7 @@ Decomp(decomp_t *S, long flag)
   { /* E <-- E^2(3-2E) mod p^2k, with E = e/de */
     GEN D;
     pk = sqri(pk); k <<= 1;
-    e = gmul(gsqr(e), gsub(mulsi(3,de), gmul2n(e,1)));
+    e = gmul(gsqr(e), gsub(mului(3,de), gmul2n(e,1)));
     de= mulii(de, sqri(de));
     D = mulii(pk, de);
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
@@ -1108,7 +1108,7 @@ polsymmodp(GEN g, GEN p)
   for (k = 1; k < d; k++)
   {
     av1 = avma;
-    s = centermod(mulsi(k, polcoeff0(g,d-k,-1)), p);
+    s = centermod(mului(k, polcoeff0(g,d-k,-1)), p);
     for (i = 1; i < k; i++)
       s = addii(s, mulii(gel(y,k-i+1), polcoeff0(g,d-i,-1)));
     av2 = avma;
@@ -1425,7 +1425,7 @@ update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
     pmr = sqri(pmr); /* try a larger precision */
 
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, pmr): S->phi;
-    PHI = gadd(PHI, gmul(mulsi(k, S->p), X));
+    PHI = gadd(PHI, gmul(mului(k, S->p), X));
     S->chi = mycaract(S->f, PHI, S->p, pmr, S->df, ns);
   }
   pmr = mulii(sqri(pdr), S->p);
@@ -1940,7 +1940,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
   {
     GEN M = gmael(nf,5,1);
-    long ex = gexpo(M) + gexpo(mulsi(8 * N, p));
+    long ex = gexpo(M) + gexpo(mului(8 * N, p));
     if (N * ex <= bit_accuracy(gprecision(M)))
     { /* enough prec to use norm_by_embed */
       S->M = M;

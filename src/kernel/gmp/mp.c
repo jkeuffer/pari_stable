@@ -757,7 +757,11 @@ divri(GEN x, GEN y)
 
   if (!s) pari_err(gdiver);
   if (!signe(x)) return real_0_bit(expo(x) - expi(y));
-  if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
+  if (!is_bigint(y)) {
+    GEN z = divru(x, y[2]);
+    if (s < 0) togglesign(z);
+    return z;
+  }
   return divri_with_gmp(x,y);
 }
 
