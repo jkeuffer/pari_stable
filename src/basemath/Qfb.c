@@ -1178,11 +1178,11 @@ redrealsl2(GEN V)
   {
     GEN ac = mpabs(c);
     GEN r = addii(b, gmax(rd,ac));
-    GEN q = truedvmdii(r, mulsi(2, ac), NULL);
-    r = subii(mulii(mulis(q, 2), ac), b);
+    GEN q = truedvmdii(r, shifti(ac, 1), NULL);
+    r = subii(mulii(shifti(q, 1), ac), b);
     a = c; b = r;
-    c = truedvmdii(subii(sqri(r), d), mulsi(4, c), NULL);
-    q = mulis(q, signe(a));
+    c = truedvmdii(subii(sqri(r), d), shifti(c, 2), NULL);
+    if (signe(a) < 0) q = negi(q);
     r = u1; u1 = v1; v1 = subii(mulii(q, v1), r);
     r = u2; u2 = v2; v2 = subii(mulii(q, v2), r);
     if (low_stack(st_lim, stack_lim(btop, 1)))
