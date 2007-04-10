@@ -458,15 +458,11 @@ Flx_shiftip(pari_sp av, GEN x, long v)
 }
 
 INLINE long
-maxlenghtcoeffpol (ulong p, long n)
+maxlenghtcoeffpol(ulong p, long n)
 {
-  pari_sp ltop=avma;
-  long l;
-  GEN z=muluu(p-1,p-1);
-  z=mulis(z,n);
-  l=lgefint(z)-2;
-  avma=ltop;
-  return l;
+  pari_sp ltop = avma;
+  GEN z = muliu(sqru(p-1), n);
+  avma = ltop; return lgefint(z)-2;
 }
 
 INLINE ulong
