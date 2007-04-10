@@ -2322,7 +2322,7 @@ GenusField(GEN bnf)
   disc = gmael(bnf, 7, 3);
   x2   = monomial(gen_1, 2, 0); /* x^2 */
 
-  if (mod4(disc) == 0) disc = divis(disc, 4);
+  if (mod4(disc) == 0) disc = shifti(disc, -2);
   div = divisors(disc);
   l = 0;
   pol = NULL;

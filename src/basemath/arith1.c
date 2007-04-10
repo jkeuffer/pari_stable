@@ -2811,7 +2811,7 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
     reg = NULL;
     switch(itou_or_0(D))
     {
-      case 4: H = divis(H,2); break;
+      case 4: H = shifti(H,-1); break;
       case 3: H = divis(H,3); break;
     }
   } else {
