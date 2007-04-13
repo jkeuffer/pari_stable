@@ -1456,7 +1456,7 @@ easier to grasp than a parser's logic. For instance:
 It is quite annoying to wait for some program to finish and find out the hard
 way that there was a mistake in it (like the division by 0 above), sending
 you back to the prompt. First you may lose some valuable intermediate data.
-Also, correcting the error may not be ovious; you might have to change your
+Also, correcting the error may not be obvious; you might have to change your
 program, adding a number of extra statements and tests to try and narrow down
 the problem.
 
@@ -1487,12 +1487,13 @@ of the loop. Any error: syntax error, library error, user error (from
 \tet{error}), even user interrupts like \kbd{C-c} (Control-C). When a break
 loop starts, a prompt is issued (\kbd{break>}). You can type in a \kbd{gp} command,
 which is evaluated when you hit the \kbd{<Return>} key, and the result is
-printed as during the main \kbd{gp} loop, except that no history of results is kept
+printed as during the main \kbd{gp} loop, except that no history of results
+is kept.
 Then the break loop prompt reappears and you can type further commands as
 long as you do not exit the loop. If you are using readline, the history of
 commands is kept, and line editing is available as usual. If you type in a
 command that results in an error, you are sent back to the break loop prompt
-(errors does \var{not} terminate the loop).
+(errors do \var{not} terminate the loop).
 
 To get out of a break loop, you can use \tet{next}, \tet{break},
 \tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
@@ -1632,9 +1633,9 @@ and \kbd{BROKEN} if the installed function did not behave as expected.
 \section{Interfacing GP with other languages}
 \noindent
 The PARI library was meant to be interfaced with C programs. This specific
-use will be dealt with extensively in Chapter~4. \kbd{gp} itself provides a
-convenient, if simple-minded, interpreter, which enables you to execute
-rather intricate scripts (see \secref{se:programming}).
+use will be dealt with extensively in Chapter~4. Of course, \kbd{gp} itself
+provides a convenient  interpreter to execute rather intricate scripts (see
+\secref{se:programming}).
 
 Scripts, when properly written, tend to be shorter and clearer than C
 programs, and are certainly easier to write, maintain or debug. You don't
@@ -1647,7 +1648,7 @@ The GP2C compiler often eases this part.
 
 Note also that the \kbd{install} command enables you to concentrate on
 critical parts of your programs only (which can of course be written with the
-help of other mathematical libraries than PARI!), and to efficiently import
+help of other libraries than PARI), and to efficiently import
 foreign functions for use under \kbd{gp} (see~\secref{se:install}).
 
 We are aware of four PARI-related public domain packages to embed PARI in
@@ -1657,7 +1658,7 @@ on. The first is the \tet{Math::Pari} Perl module (see any CPAN mirror),
 written by Ilya Zakharevich. The second is \tet{PariPython}%
 \footnote{*}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
 %
-by St\'efane Fermigier, which is no more maintained. Starting from
+by St\'efane Fermigier, which is no longer maintained. Starting from
 Fermigier's work, William Stein has embedded PARI into his Python-based
 SAGE\footnote{**}{see \kbd{http://modular.fas.harvard.edu/sage/}}
 system. Finally, Michael Stoll has integrated PARI into \tet{CLISP}
@@ -1691,8 +1692,8 @@ use, most of these can be abbreviated using historic \kbd{gp} metacommands
 Here we will only describe the available defaults and how they are used. Just
 be aware that typing \kbd{default} by itself will list all of them, as well
 as their current values (see \b{d}). Just after the default name, we give
-between parentheses the initial value when \kbd{gp} starts (assuming you did
-not tamper with it using command-line switches or a~\tet{gprc}).
+between parentheses the initial value when \kbd{gp} starts, assuming you did
+not tamper with factory settings using command-line switches or a~\tet{gprc}.
 
 \misctitle{Note:} the suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
 a \var{value} which is a numeric argument, with the effect of multiplying it
@@ -1707,12 +1708,13 @@ expansion, which means you can use run-time values. In other words, something
 like
 \bprog
   a = 3;
-  default(logfile, "\var{some filename}" a ".log")
+  default(logfile, "file" a ".log")
 @eprog
-logs the output in \kbd{\var{some filename}3.log}.
+logs the output in \kbd{file3.log}.
 
-Some defaults will be expanded further when the values are used, after the
-above expansion has been performed:
+Some special defaults, corresponding to filenames and prompts, expand further
+the resulting value at the time they are set. Two kinds of expansions may be
+performed:
 
 $\bullet$ \teb{time expansion}: the string is sent through the library
 function \tet{strftime}. This means that \kbd{\%}\var{char} combinations have
@@ -1735,6 +1737,9 @@ corresponding value. Also the \kbd{\til} symbol has the same meaning as in
 many shells~--- \kbd{\til} by itself stands for your home directory, and
 \kbd{\til{}user} is expanded to \kbd{user}'s home directory. This is applied
 to all filenames\sidx{filename}. \label{se:envir}
+
+We shall now describe all the available defaults, specifying each time
+whether time and/or environment expansion is performed.
 
 \subsecidx{colors} (default \kbd{""}): this default is only usable if
 \kbd{gp}\label{se:colors}
