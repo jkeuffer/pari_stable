@@ -34,7 +34,7 @@ forpari(entree *ep, GEN a, GEN b, GEN code)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    pari_sp av1=avma; closure_eval(code); avma=av1;
+    pari_sp av1=avma; closure_evalvoid(code); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
@@ -56,7 +56,7 @@ whilepari(GEN a, GEN b)
     GEN res = closure_evalnobrk(a);
     if (gcmp0(res)) break;
     avma = av; 
-    closure_eval(b); if (loop_break()) break;
+    closure_evalvoid(b); if (loop_break()) break;
     avma = av;
   }
   avma = av;
@@ -69,7 +69,7 @@ untilpari(GEN a, GEN b)
   for(;;)
   {
     GEN res;
-    closure_eval(b); if (loop_break()) break;
+    closure_evalvoid(b); if (loop_break()) break;
     avma = av; 
     res = closure_evalnobrk(a);
     if (!gcmp0(res)) break;
@@ -101,7 +101,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    pari_sp av1=avma; closure_eval(code); avma=av1;
+    pari_sp av1=avma; closure_evalvoid(code); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -190,7 +190,7 @@ forprime(entree *ep, GEN ga, GEN gb, GEN code)
   avma = av; push_val(ep, (GEN)prime);
   while (prime[2] < b)
   {
-    closure_eval(code); if (loop_break()) break;
+    closure_evalvoid(code); if (loop_break()) break;
     if (ep->value == prime)
       NEXT_PRIME_VIADIFF(prime[2], d);
     else
@@ -199,7 +199,7 @@ forprime(entree *ep, GEN ga, GEN gb, GEN code)
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
-  if (prime[2] == b) { closure_eval(code); (void)loop_break(); avma = av; }
+  if (prime[2] == b) { closure_evalvoid(code); (void)loop_break(); avma = av; }
   pop_val(ep);
 }
 
@@ -214,7 +214,7 @@ fordiv(GEN a, entree *ep, GEN code)
   for (i=1; i<l; i++)
   {
     ep->value = (void*) t[i];
-    closure_eval(code); if (loop_break()) break;
+    closure_evalvoid(code); if (loop_break()) break;
     avma = av2;
   }
   pop_val(ep); avma=av;
@@ -485,7 +485,7 @@ forvec(entree *ep, GEN x, GEN code, long flag)
   GEN v = forvec_start(x, flag, &D, &next);
   push_val(ep, v);
   while (v) {
-    pari_sp av2 = avma; closure_eval(code); avma = av2;
+    pari_sp av2 = avma; closure_evalvoid(code); avma = av2;
     if (loop_break()) break;
     v = next(D, v);
   }

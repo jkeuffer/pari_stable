@@ -1014,11 +1014,11 @@ ifpari_void(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 {
   if (gcmp0(g)) /* false */
   {
-    if(b) closure_eval(b);
+    if(b) closure_evalvoid(b);
   }
   else /* true */
   {
-    if(a) closure_eval(a);
+    if(a) closure_evalvoid(a);
   }
 }
 

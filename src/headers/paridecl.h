@@ -1090,8 +1090,8 @@ void    writetex(const char *s, GEN g);
 
 void    closure_check(void);
 void    closure_disassemble(GEN n);
-void    closure_eval(GEN code);
 GEN     closure_evalgen(GEN code);
+void    closure_evalvoid(GEN code);
 void    closure_reset(void);
 void    freeep(entree *ep);
 

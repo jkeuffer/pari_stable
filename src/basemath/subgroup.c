@@ -94,7 +94,7 @@ std_fun(subgp_iter *T, GEN x)
   pari_sp ltop=avma;
   exprdat *E = (exprdat *)T->fundata;
   E->ep->value = (void*)x;
-  closure_eval(E->code); T->countsub++;
+  closure_evalvoid(E->code); T->countsub++;
   avma=ltop;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */

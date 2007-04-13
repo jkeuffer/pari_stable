@@ -260,7 +260,7 @@ forell(entree *ep, long a, long b, GEN code)
       {
         pari_sp av=avma;
         ep->value = (void*)gel(ells, k);
-        closure_eval(code);
+        closure_evalvoid(code);
         avma=av;
         if (loop_break()) goto forell_end;
       }

@@ -350,6 +350,8 @@ change_compo(matcomp *c, GEN res)
 static long st[1024];
 static long sp=0;
 
+static void closure_eval(GEN C);
+
 INLINE GEN
 copyupto(GEN z, GEN t)
 {
@@ -362,23 +364,31 @@ copyupto(GEN z, GEN t)
 static GEN
 derivuserwrap(GEN x, void* E)
 {
+  pari_sp ltop;
   entree *ep=(entree*)E;
   GEN z;
-  long savsp=sp;
+  long saved_sp=sp;
   long j;
   gel(st,sp)=x;
   for (j=1;j<ep->arity;j++)
     gel(st,sp+j)=gel(st,sp+j-ep->arity);
   sp+=ep->arity;
-  z = closure_evalgen((GEN) ep->value);
+  ltop=avma;
+  closure_eval((GEN) ep->value);
   if (br_status)
   {
-    sp = savsp;
-    br_status = br_NONE;
-    if (br_res) z=gcopy(br_res);
-    if (!z) pari_err(talker, "break when derivating");
+    if (br_status!=br_RETURN)
+      pari_err(talker, "break/next/allocatemem not allowed here");
+    avma=ltop;
+    sp = saved_sp;
+    z = br_res ? gcopy(br_res) : gnil;
+    reset_break();
   }
-  if (isclone(z)) z = gcopy(z);
+  else
+  {
+    z = gerepileupto(ltop, gel(st,--sp));
+    if (isclone(z)) z = gcopy(z);
+  }
   for(j=1;j<lg(ep->lvars);j++)
     pop_val((entree*)ep->lvars[j]);
   return z;
@@ -432,7 +442,7 @@ closure_castlong(long z, long mode)
   }
 }
 
-void
+static void
 closure_eval(GEN C)
 {
   gp_pointer ptrs[16];
@@ -446,6 +456,7 @@ closure_eval(GEN C)
     op_code opcode=(op_code) code[pc];
     long operand=oper[pc];
     entree *ep;
+    if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
     if (sp>1000) pari_err(talker,"evaluator stack exhausted");
     switch(opcode)
     {
@@ -856,8 +867,9 @@ closure_eval(GEN C)
     case OCcalluser: 
 calluser:
         {
+          pari_sp ltop;
           long n=st[--sp];
-          long savsp=sp;
+          long saved_sp=sp;
           entree *ep = (entree*) operand;
           GEN z, lvars=ep->lvars;
           if (ep->valence!=EpUSER)
@@ -876,15 +888,22 @@ calluser:
           if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
             pari_err(talker, "deep recursion");
 #endif
-          z = closure_evalgen((GEN) ep->value);
+          ltop=avma;
+          closure_eval((GEN) ep->value);
           if (br_status)
           {
-            sp = savsp-n;
-            br_status = br_NONE;
-            if (br_res) z=gcopy(br_res);
-            if (!z) z=gnil;
+            if (br_status!=br_RETURN)
+              pari_err(talker, "break/next/allocatemem not allowed here");
+            avma=ltop;
+            sp = saved_sp - n;
+            z = br_res ? gcopy(br_res) : gnil;
+            reset_break();
           }
-          if (isclone(z)) z = gcopy(z);
+          else
+          {
+            z = gerepileupto(ltop, gel(st,--sp));
+            if (isclone(z)) z = gcopy(z);
+          }
           for(j=1;j<lg(lvars);j++)
             pop_val((entree*)lvars[j]);
           gel(st, sp++) = z;
@@ -940,14 +959,30 @@ GEN
 closure_evalgen(GEN C)
 {
   pari_sp ltop=avma;
+  long saved_sp=sp;
   closure_eval(C);
-  sp--;
   if (br_status)
   {
+    sp=saved_sp;
     if (br_status!=br_ALLOCMEM) avma=ltop; 
     return NULL;
   }
-  return gerepileupto(ltop,gel(st,sp));
+  return gerepileupto(ltop,gel(st,--sp));
+}
+
+void
+closure_evalvoid(GEN C)
+{
+  pari_sp ltop=avma;
+  long saved_sp=sp;
+  closure_eval(C);
+  if (br_status)
+  {
+    sp=saved_sp;
+    if (br_status!=br_ALLOCMEM) avma=ltop; 
+  }
+  else
+    avma=ltop;
 }
 
 void
