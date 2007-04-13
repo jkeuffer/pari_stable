@@ -107,7 +107,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   if (!sy)
   {
     if (e > 0) return rcopy_sign(y, sy);
-    z = itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    z = itor(x, nbits2prec(-e));
     setsigne(z, sx); return z;
   }
 
@@ -137,7 +137,7 @@ addsr_sign(long x, GEN y, long sy)
   {
     if (e > 0) return rcopy_sign(y, sy);
     if (sx == -1) x = -x;
-    return stor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    return stor(x, nbits2prec(-e));
   }
 
   ly = lg(y);
@@ -212,7 +212,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       return real_0_bit(ex);
     }
     if (e > 0) return real_0_bit(ey);
-    lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
+    lz = nbits2prec(-e);
     lx = lg(x); if (lz > lx) lz = lx;
     z = cgetr(lz); while(--lz) z[lz] = x[lz];
     setsigne(z,sx); return z;
@@ -220,7 +220,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   if (!sx)
   {
     if (e < 0) return real_0_bit(ex);
-    lz = 3 + (e>>TWOPOTBITS_IN_LONG);
+    lz = nbits2prec(e);
     ly = lg(y); if (lz > ly) lz = ly;
     z = cgetr(lz); while (--lz) z[lz] = y[lz];
     setsigne(z,sy); return z;

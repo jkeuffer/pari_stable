@@ -39,7 +39,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     1- library functions expu, adduu, subuu
     2- library functions divisorsu, factor_pn_1 (using cyclotomic factors and
        Aurifeuille), merge_factor
-    3- library function divru
+    3- library function divru, dbllog2r
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

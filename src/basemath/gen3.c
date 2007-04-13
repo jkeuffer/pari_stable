@@ -134,13 +134,13 @@ precision(GEN z)
     if (!signe(x)) {
       if (!signe(y)) return prec0( min(ex,ey) );
       if (e < 0) return prec0(ex);
-      lz = 3 + (e >> TWOPOTBITS_IN_LONG);
+      lz = nbits2prec(e);
       ly = lg(y); if (lz > ly) lz = ly;
       return lz;
     }
     if (!signe(y)) {
       if (e > 0) return prec0(ey);
-      lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
+      lz = nbits2prec(-e);
       lx = lg(x); if (lz > lx) lz = lx;
       return lz;
     }
@@ -484,7 +484,7 @@ modr_safe(GEN x, GEN y)
   if (typ(x) == t_INT && !signe(x)) return gen_0;
   q = gdiv(x,y); /* t_REAL */
 
-  d = (expo(q)>>TWOPOTBITS_IN_LONG) + 3;
+  d = nbits2prec(expo(q));
   if (d>lg(x)) return NULL;
   f = floorr(q);
   if (gsigne(y) < 0 && signe(subri(q,f))) f = addrs(f, 1);

@@ -1799,7 +1799,7 @@ logr_abs(GEN X)
    *   2 sum_{k >= 2n+3} y^k / k < 2y^(2n+3) / (2n+3)(1-y) < y^(2n+3)
    * We want y^(2n+3) < y 2^(-bit_accuracy(L)), hence
    *   n+1 > bit_accuracy(L) /-log_2(y^2) */
-  d = 2*(-expo(y) + BITS_IN_LONG-1 - log2((double)(ulong)y[2])); /* ~ -log_2(y^2) */
+  d = -2*dbllog2r(y); /* ~ -log_2(y^2) */
   k = (long)(2*(bit_accuracy(L) / d));
   k |= 1;
   if (k >= 3)

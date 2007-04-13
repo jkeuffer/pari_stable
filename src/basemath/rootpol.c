@@ -347,8 +347,7 @@ log2ir(GEN x)
     return log2(l) + (double)(BITS_IN_LONG*(lgefint(x)-3));
   }
   /* else t_REAL */
-  l = (double)(ulong)x[2];
-  return log2(l) + (double)(expo(x) - (long)(BITS_IN_LONG-1));
+  return dbllog2r(x);
 }
 /* return log(|x|) */
 static double
@@ -356,7 +355,7 @@ dblogr(GEN x) {
   double l;
   if (!signe(x)) return -pariINFINITY;
   l = (double)(ulong)x[2];
-  return log(l) + LOG2 * (expo(x) - (long)(BITS_IN_LONG-1));
+  return log(l) + LOG2 * (expo(x) - (BITS_IN_LONG-1));
 }
 static GEN /* beware overflow */
 dblexp(double x) { return fabs(x) < 100.? dbltor(exp(x)): mpexp(dbltor(x)); }

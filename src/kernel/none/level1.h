@@ -110,6 +110,7 @@ long   expu(ulong x);
 void   fixlg(GEN z, long ly);
 GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
+double dbllog2r(GEN x);
 GEN    gtofp(GEN z, long prec);
 GEN    icopy_av(GEN x, GEN y);
 GEN    icopy(GEN x);
@@ -733,6 +734,13 @@ ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
   gel(z,2) = gtofp(gel(x,2),prec); return z;
 }
 
+/* assume x != 0 and x t_REAL, return an approximation to log2(|x|) */
+INLINE double
+dbllog2r(GEN x)
+{
+  return log2((double)(ulong)x[2]) + (double)(expo(x) - (BITS_IN_LONG-1));
+}
+
 INLINE GEN
 shiftr(GEN x, long n)
 {
@@ -1087,6 +1095,17 @@ affgr(GEN x, GEN y)
   }
 }
 
+INLINE double
+gtodouble(GEN x)
+{
+  if (typ(x)!=t_REAL) {
+    pari_sp av = avma;
+    x = gtofp(x, DEFAULTPREC);
+    avma = av;
+  }
+  return rtodbl(x);
+}
+
 INLINE int
 mpcmp(GEN x, GEN y)
 {
@@ -1214,17 +1233,6 @@ dvdiuz(GEN x, ulong y, GEN z)
   GEN p1 = diviu_rem(x,y, &rem);
   avma = av; if (rem) return 0;
   affii(p1,z); return 1;
-}
-
-INLINE double
-gtodouble(GEN x)
-{
-  if (typ(x)!=t_REAL) {
-    pari_sp av = avma;
-    x = gtofp(x, DEFAULTPREC);
-    avma = av;
-  }
-  return rtodbl(x);
 }
 
 /* same as Fl_add, assume p <= 2^(BIL - 1), so that overflow can't occur */
