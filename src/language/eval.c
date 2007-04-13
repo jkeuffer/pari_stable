@@ -347,8 +347,18 @@ change_compo(matcomp *c, GEN res)
  **                                                                       **
  ***************************************************************************/
 
-static long st[1024];
-static long sp=0;
+static THREAD long *st;
+static THREAD long sp;
+static THREAD gp2c_stack s_st;
+
+void
+pari_init_evaluator(void)
+{
+  sp=0;
+  stack_init(&s_st,sizeof(*st),(void**)&st);
+  stack_alloc(&s_st,32);
+  s_st.n=s_st.alloc;
+}
 
 static void closure_eval(GEN C);
 
@@ -457,7 +467,12 @@ closure_eval(GEN C)
     long operand=oper[pc];
     entree *ep;
     if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
-    if (sp>1000) pari_err(talker,"evaluator stack exhausted");
+    if (sp+16>s_st.n)
+    { 
+      stack_alloc(&s_st,32);
+      s_st.n=s_st.alloc;
+      if (DEBUGMEM>=2) pari_warn(warner,"doubling evaluator stack");
+    }
     switch(opcode)
     {
     case OCpushlong:

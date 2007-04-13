@@ -624,6 +624,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   if (pari_kernel_init()) pari_err(talker,"Cannot initialize kernel");
   pari_init_parser();
   pari_init_compiler();
+  pari_init_evaluator();
   
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
