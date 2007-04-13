@@ -1139,11 +1139,12 @@ trap0(char *e, GEN r, GEN f)
   if (f && r)
   { /* explicit recovery text */
     pari_sp av = avma;
+    VOLATILE int status=0;
     VOLATILE GEN x;
 
-    CATCH(numerr) { x = NULL; }
+    CATCH(numerr) { status=1; }
     TRY { x = closure_evalgen(f); } ENDCATCH;
-    if (!x) { avma = av; gp_function_name = NULL; x = closure_evalgen(r); }
+    if (status) { avma = av; gp_function_name = NULL; x = closure_evalgen(r); }
     return x;
   }
 
