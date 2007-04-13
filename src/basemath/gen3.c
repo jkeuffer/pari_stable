@@ -133,13 +133,13 @@ precision(GEN z)
     e = ey - ex;
     if (!signe(x)) {
       if (!signe(y)) return prec0( min(ex,ey) );
-      if (e < 0) return prec0(ex);
+      if (e <= 0) return prec0(ex);
       lz = nbits2prec(e);
       ly = lg(y); if (lz > ly) lz = ly;
       return lz;
     }
     if (!signe(y)) {
-      if (e > 0) return prec0(ey);
+      if (e >= 0) return prec0(ey);
       lz = nbits2prec(-e);
       lx = lg(x); if (lz > lx) lz = lx;
       return lz;

@@ -106,7 +106,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   e = expo(y) - expi(x);
   if (!sy)
   {
-    if (e > 0) return rcopy_sign(y, sy);
+    if (e >= 0) return rcopy_sign(y, sy);
     z = itor(x, nbits2prec(-e));
     setsigne(z, sx); return z;
   }
@@ -135,7 +135,7 @@ addsr_sign(long x, GEN y, long sy)
   e = expo(y) - expu(x);
   if (!sy)
   {
-    if (e > 0) return rcopy_sign(y, sy);
+    if (e >= 0) return rcopy_sign(y, sy);
     if (sx == -1) x = -x;
     return stor(x, nbits2prec(-e));
   }
@@ -211,7 +211,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
       if (e > 0) ex = ey;
       return real_0_bit(ex);
     }
-    if (e > 0) return real_0_bit(ey);
+    if (e >= 0) return real_0_bit(ey);
     lz = nbits2prec(-e);
     lx = lg(x); if (lz > lx) lz = lx;
     z = cgetr(lz); while(--lz) z[lz] = x[lz];
@@ -219,7 +219,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   }
   if (!sx)
   {
-    if (e < 0) return real_0_bit(ex);
+    if (e <= 0) return real_0_bit(ex);
     lz = nbits2prec(e);
     ly = lg(y); if (lz > ly) lz = ly;
     z = cgetr(lz); while (--lz) z[lz] = y[lz];
