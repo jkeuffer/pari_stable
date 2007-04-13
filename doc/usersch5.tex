@@ -3505,4 +3505,104 @@ the vector \kbd{x}.
 \fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
 vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
 
+\subsec{Functions to handle \typ{FFELT}}
+Theses functions define the public interface of the \typ{FFELT} type to use in
+generic functions.  However, in specific functions, it is better to use the
+functions class \kbd{FpXQ} and/or \kbd{Flxq} as appropriate.
+
+\fun{GEN}{FF_p}{GEN a} returns the characteristic of the definition field of the
+\typ{FFELT} element \kbd{a}.
+
+\fun{GEN}{FF_to_FpXQ}{GEN a} converts the \typ{FFELT} \kbd{a} to a polynomial
+$P$ with \typ{INT} coefficients such that $a=P(g)$ where $g$ is the generator
+of the finite field returned by \kbd{ffgen}, in the variable used to display
+$g$.
+
+\fun{GEN}{FF_1}{GEN a} returns the unity in the definition field of the
+\typ{FFELT} element \kbd{a}.
+
+\fun{GEN}{FF_zero}{GEN a} returns the zero element of the definition field of
+the \typ{FFELT} element \kbd{a}.
+
+\fun{int}{FF_cmp0}{GEN a}, \fun{int}{FF_cmp1}{GEN a}, \fun{int}{FF_cmp_1}{GEN
+a} returns $1$ if the \typ{FFELT} \kbd{a} is equal to $0$ (resp. $1$, resp.
+$-1$) else $0$.
+
+\fun{int}{FF_equal}{GEN a, GEN b} return $1$ if the \typ{FFELT} \kbd{a} and
+\kbd{b} have the same definition field and are equal, else $0$.
+
+\fun{int}{FF_samefield}{GEN a, GEN b} return $1$ if the \typ{FFELT} \kbd{a} and
+\kbd{b} have the same definition field, else $0$.
+
+\fun{GEN}{FF_add}{GEN a, GEN b} returns $a+b$ where \kbd{a} and \kbd{b} are
+\typ{FFELT} having the same definition field.
+
+\fun{GEN}{FF_mul}{GEN a, GEN b} returns $a\*b$ where \kbd{a} and \kbd{b} are
+\typ{FFELT} having the same definition field.
+
+\fun{GEN}{FF_div}{GEN a, GEN b} returns $a/b$ where \kbd{a} and \kbd{b} are
+\typ{FFELT} having the same definition field.
+
+\fun{GEN}{FF_neg}{GEN a} returns $-a$ where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_inv}{GEN a} returns $a^{-1}$ where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_sqr}{GEN a} returns $a^2$ where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_mul2n}{GEN a, long n} returns $a\*2^n$ where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_pow}{GEN x, GEN n} returns $a^n$ where \kbd{a} is a \typ{FFELT}
+and\kbd{n} is a \typ{INT}.
+
+\fun{GEN}{FF_Z_Z_muldiv}{GEN a, GEN x, GEN y} returns $a\*y/z$, where \kbd{a}
+is a \typ{FFELT}, and \kbd{x} and \kbd{y} are \typ{INT}, the computation being
+performed in the definition field of \kbd{a}.
+
+\fun{GEN}{FF_Z_add}{GEN a, GEN x} returns $a+x$, where \kbd{a} is a
+\typ{FFELT}, and \kbd{x} is a \typ{INT}, the computation being
+performed in the definition field of \kbd{a}.
+
+\fun{GEN}{FF_Z_mul}{GEN a, GEN b} returns $a\*x$, where \kbd{a} is a
+\typ{FFELT}, and \kbd{x} is a \typ{INT}, the computation being
+performed in the definition field of \kbd{a}.
+
+\fun{GEN}{Z_FF_div}{GEN x, GEN a} return $x/a$ where \kbd{a} is a
+\typ{FFELT}, and \kbd{x} is a \typ{INT}, the computation being
+performed in the definition field of \kbd{a}.
+
+\fun{GEN}{FF_norm}{GEN a} returns the norm of the \typ{FFELT} \kbd{a} with
+respect to its definition field.
+
+\fun{GEN}{FF_trace}{GEN a} returns the trace of the \typ{FFELT} \kbd{a} with
+respect to its definition field.
+
+\fun{GEN}{FF_charpoly}{GEN a} returns the characteristic polynomial) of the
+\typ{FFELT} \kbd{a} with respect to its definition field.
+
+\fun{GEN}{FF_minpoly}{GEN a} returns the minimal polynomial of
+the \typ{FFELT} \kbd{a}.
+
+\fun{GEN}{FF_sqrt}{GEN a} returns an \typ{FFELT} $b$ such that $a=b^2$ if
+it exist, where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_sqrtn}{GEN a, GEN n, GEN *zetan} returns an \kbd{n}-th root of
+$\kbd{a}$ if it exist. If \kbd{zn} is non-\kbd{NULL} set it to a primitive
+\kbd{n}-th root of the unity.
+
+\fun{GEN}{FF_log}{GEN a, GEN g} the \typ{FFELT} \kbd{g} being a generator fo
+the definition field of the \typ{FFELT} \kbd{a}, returns a \typ{INT} $e$ such
+that $a^e=g$.  If $e$ does not exists, the result is currently undefined.
+
+\fun{GEN}{FF_order}{GEN a, GEN o} returns the order of the \typ{FFELT} \kbd{a}.
+If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o} is a multiple of the
+order of \kbd{a}.
+
+\fun{GEN}{FF_primroot}{GEN a} returns a generator of the multiplicative group
+of the definition field of the \typ{FFELT} \kbd{a}.
+
+\fun{GEN}{FFX_factor}{GEN f, GEN a} returns the factorisation of the univariate
+polynomial \kbd{f} over the definition field of the \typ{FFELT} \kbd{a}. The
+coefficients of \kbd{f} must be of type \typ{INT}, \typ{INTMOD} or \typ{FFELT}
+and compatible with \kbd{a}.
+
 \vfill\eject
