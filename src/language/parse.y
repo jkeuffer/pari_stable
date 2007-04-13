@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "tree.h"
 
-static THREAD int once=0;
+static THREAD int pari_once;
 static THREAD const char *pari_lex_start, *pari_lasterror, *pari_unusedchar;
 
 static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
@@ -95,6 +95,7 @@ pari_eval_str(char *lex, int strict)
   GEN code, res;
   pari_lex_start = lex;
   pari_unusedchar=NULL;
+  pari_once=1;
   if (pari_parse(&lex))
   {
     if (pari_unusedchar)
@@ -172,8 +173,9 @@ newintnode(struct node_loc *loc)
 %left '%' KDR '\\' '/' '*'
 %left SIGN
 %right '^'
+%left '!' '[' '\''
 %left '#'
-%left '!' '~' '[' '\''
+%left '~'
 %left '.' MAT
 %token KPP KSS 
 %left ':'
@@ -187,8 +189,9 @@ newintnode(struct node_loc *loc)
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unusedchar=@1.end;YYABORT;}
 
-seq: /**/ %prec SEQ  {if (s_node.n==OPnboperator) @$.start=@$.end=get_origin();
-                      $$=newnode(Fnoarg,-1,-1,&@$);}
+seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2) 
+                         @$.start=@$.end=pari_lex_start;
+                       $$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
@@ -287,7 +290,8 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
 
 arg: seq        {$$=$1;}
    | '&' lvalue {$$=newnode(Frefarg,$2,-1,&@$);}
-   | arg error  {if (!once) { yyerrok; } once=1;}  expr {once=0; $$=newopcall(OPcat,$1,$4,&@$);}
+   | arg error  {if (!pari_once) { yyerrok; } pari_once=1;}  expr 
+                     {pari_once=0; $$=newopcall(OPcat,$1,$4,&@$);}
 ;
 
 listarg: arg {$$=$1;}
