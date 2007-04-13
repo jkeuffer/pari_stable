@@ -34,8 +34,8 @@ static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
   pari_lasterror=pari_strdup(s); 
 }
 
-static gp2c_stack s_node;
-node *pari_tree;
+static THREAD gp2c_stack s_node;
+THREAD node *pari_tree;
 
 void
 pari_init_parser(void)

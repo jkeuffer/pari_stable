@@ -43,7 +43,7 @@ typedef enum {CSTstr, CSTquote, CSTint, CSTreal, CSTmember, CSTentry} CSTtype;
 
 typedef enum {OPor, OPand, OPeq, OPne, OPge, OPg, OPle, OPl, OPs, OPp, OPsl, OPsr, OPmod, OPdr, OPeuc, OPd, OPm, OPpow, OPcat, OPstore, OPss, OPpp, OPse ,OPpe ,OPsle ,OPsre ,OPmode ,OPdre ,OPeuce ,OPde ,OPme, OPpl, OPn, OPnb, OPfact, OPderiv, OPtrans, OPhist, OPlength, OPnboperator} OPerator;
 
-extern node *pari_tree;
+extern THREAD node *pari_tree;
 
 /*FIXME: newopcall should be static, but used by compile.c for Faffect*/
 long newopcall(OPerator op, long x, long y, struct node_loc *loc);
