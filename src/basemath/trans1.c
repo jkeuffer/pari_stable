@@ -1410,7 +1410,7 @@ mpexp(GEN x)
   GEN a, z;
 
   if (!sx) {
-    l = 3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG);
+    l = nbits2prec(-expo(x));
     if (l < 3) l = 3;
     return real_1(l);
   }
@@ -1995,7 +1995,7 @@ mpsc1(GEN x, long *ptmod8)
   n = 0;
   if (e >= 0)
   {
-    GEN q, z, pitemp = mppi(DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG));
+    GEN q, z, pitemp = mppi(nbits2prec(e + 32));
     setexpo(pitemp,-1);
     z = addrr(x,pitemp); /* = x + Pi/4 */
     if (expo(z) >= bit_accuracy(min(l, lg(z))) + 3) pari_err(precer,"mpsc1");
@@ -2079,7 +2079,11 @@ mpcos(GEN x)
   pari_sp av;
   GEN y,p1;
 
-  if (!signe(x)) return real_1(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
+  if (!signe(x)) {
+    long l = nbits2prec(-expo(x));
+    if (l < 3) l = 3;
+    return real_1(l);
+  }
 
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
