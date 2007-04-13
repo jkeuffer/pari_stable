@@ -946,19 +946,6 @@ red_mod_2z(GEN x, GEN z)
 }
 #endif
 
-/* update lg(z) before affrr(y, z)  [ to cater for precision loss ]*/
-void
-affr_fixlg(GEN y, GEN z) {
-  long ly = lg(y), lz = lg(z);
-  if (ly < lz)
-  {
-    setlg(z, ly);
-    stackdummy((pari_sp)(z + lz), (pari_sp)(z + ly));
-  }
-  /* lz <= ly */
-  affrr(y, z);
-}
-
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
 {

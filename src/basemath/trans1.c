@@ -567,7 +567,7 @@ gpowgs(GEN x, long n)
   GEN y;
 
   if (n == 0) return puiss0(x);
-  if (n == 1) 
+  if (n == 1)
     switch (typ(x)) {
       case t_QFI: return redimag(x);
       case t_QFR: return redreal(x);
@@ -985,7 +985,7 @@ gsqrt(GEN x, long prec)
       return padic_sqrt(x);
 
     case t_FFELT: return FF_sqrt(x);
-      
+
     default:
       av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, ser_powfrac(y, ghalf, prec));
@@ -1229,7 +1229,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     return y;
 
   case t_FFELT: return FF_sqrtn(x,n,zetan);
- 
+
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = precision(x); if (i) prec = i;
     if (tx==t_INT && is_pm1(x) && signe(x) > 0)
@@ -1267,49 +1267,75 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 /**                             EXP(X) - 1                         **/
 /**                                                                **/
 /********************************************************************/
-/* exp(|x|) - 1, assume x != 0 */
+/* exp(|x|) - 1, assume x != 0.
+ * For efficiency, x should be reduced mod log(2): if so, we have a < 0 */
 GEN
 exp1r_abs(GEN x)
 {
-  long l = lg(x), l2 = l+1, ex = expo(x), l1, i, n, m, s;
-  GEN y = cgetr(l), p1, p2, p3, X, unr;
-  pari_sp av2, av = avma;
-  double a, b, beta, gama = 2.0 /* optimized for SUN3 */;
-                                /* KB: 3.0 is better for UltraSparc */
-  beta = 5. + bit_accuracy_mul(l, LOG2);
-  a = sqrt(beta/(gama*LOG2));
-  b = (BITS_IN_LONG-1-ex)
-      + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
-  if (a >= b)
-  {
-    n = (long)(1+a*gama);
-    m = (long)(1+a-b);
-    l2 += m>>TWOPOTBITS_IN_LONG;
-  } else { /* rare ! */
-    b = -1 - log((double)(ulong)x[2]) + (BITS_IN_LONG-1-ex)*LOG2; /*-1-log(x)*/
-    n = (long)(1.1 + beta/b);
-    m = 0;
-  }
-  unr=real_1(l2);
-  p2 =real_1(l2); setlg(p2,3);
-  X = rtor(x,l2); setsigne(X, 1);
-  if (m) setexpo(X, ex-m);
+  long l = lg(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e;
+  GEN y, p2, X;
+  pari_sp av;
+  double d;
 
-  s = 0; l1 = 3; av2 = avma;
-  for (i=n; i>=2; i--)
-  { /* compute X^(n-1)/n! + ... + X/2 + 1 */
-    setlg(X,l1); p3 = divru(X,i);
-    s -= expo(p3); p1 = mulrr(p3,p2); setlg(p1,l1);
-    l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
-    s &= (BITS_IN_LONG-1);
-    setlg(unr,l1); p1 = addrr_sign(unr,1, p1,1);
-    setlg(p2,l1); affrr(p1,p2); avma = av2; /* p2 <- 1 + (X/i)*p2 */
+  if (b + a <= 0) return mpabs(x);
+
+  y = cgetr(l); av = avma;
+  d = a/2.; m = (long)(d + sqrt(d*d + b/2)); /* >= 0 ,*/
+  if (m < (-a) * 0.1) m = 0; /* not worth it */
+  L = l+1 + (m>>TWOPOTBITS_IN_LONG);
+ /* Multiplication is quadratic in this range (l is small, otherwise we
+  * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
+  * sum x^k/k!: this costs roughly floor(b/e) b^2 / 3  + m b^2
+  * bit operations with |x| <  2^(1+a), |Y| < 2^(1-e) , m = e+a and b bits of
+  * accuracy needed, so we want b ~ 3 m (m-a) or m~b+a hence
+  *     m = min( a/2 + sqrt(a^2/4 + b/3),  b + a )
+  * NB1: e ~ (b/3)^(1/2) or b.
+  * NB2: We use b/2 instead of b/3 in the formula above: hand-optimized...
+  *
+  * Truncate the sum at k = n (>= 1), the remainder is
+  *   sum_{k >= n+1} Y^k / k! < Y^(n+1) / (n+1)! (1-Y) < Y^(n+1) / n!
+  * We want Y^(n+1) / n! <= Y 2^-b, hence -n log_2 |Y| + log_2 n! >= b
+  *   log n! ~ (n + 1/2) log(n+1) - (n+1) + log(2Pi)/2,
+  * error bounded by 1/6(n+1) <= 1/12. Finally, we want
+  * n (-1/log(2) -log_2 |Y| + log_2(n+1)) >= b  */
+  b += m;
+  e = m - a; /* >= 1 */
+  /* ~ -1/log(2) - log_2 Y */
+  d = e+BITS_IN_LONG-1-1/LOG2 - log2((double)(ulong)x[2]);
+  n = (long)(b / d);
+  if (n > 1)
+    n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
+  while (n*(d+log2((double)n+1)) < b) n++; /* expect few corrections */
+
+  X = rtor(x,L); X[1] = evalsigne(1) | evalexpo(-e);
+  if (n == 1) p2 = X;
+  else
+  {
+    long s = 0, l1 = L - (((long)((n-1)*d))>>TWOPOTBITS_IN_LONG);
+    long l2 = nbits2prec((long)d);
+    GEN unr = real_1(L);
+    pari_sp av2;
+
+    if (l1 < l2) l1 = l2;
+    p2 =real_1(L); setlg(p2,l1);
+    av2 = avma;
+    for (i=n; i>=2; i--, avma = av2)
+    { /* compute X^(n-1)/n! + ... + X/2 + 1 */
+      GEN p1, p3;
+      setlg(X,l1); p3 = divru(X,i);
+      s -= expo(p3);
+      l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
+      s &= (BITS_IN_LONG-1);
+      setlg(unr,l1); p1 = addrr_sign(unr,1, mulrr(p3,p2),1);
+      setlg(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
+    }
+    setlg(p2,L);
+    setlg(X,L); p2 = mulrr(X,p2);
   }
-  setlg(X,l2); p2 = mulrr(X,p2);
 
   for (i=1; i<=m; i++)
   {
-    setlg(p2,l2);
+    setlg(p2,L);
     p2 = mulrr(p2, addsr(2,p2));
   }
   affr_fixlg(p2,y); avma = av; return y;
@@ -1335,20 +1361,52 @@ mpexp1(GEN x)
 /**                                                                **/
 /********************************************************************/
 
+/* centermod(x, log(2)), set *sh to the quotient */
+static GEN
+modlog2(GEN x, long *sh)
+{
+  double d = rtodbl(x);
+  long q = (long) ((fabs(d) + (LOG2/2))/LOG2);
+  if (d > LOG2 * VERYBIGINT) pari_err(errexpo); /* avoid overflow in  q */
+  if (d < 0) q = -q;
+  *sh = q;
+  if (q) {
+    long l = lg(x) + 1;
+    x = subrr(rtor(x,l), mulsr(q, mplog2(l)));
+    if (!signe(x)) return NULL;
+  }
+  return x;
+}
+
 static GEN
 mpexp_basecase(GEN x)
 {
   pari_sp av = avma;
-  GEN y = addsr(1, exp1r_abs(x));
-  if (signe(x) < 0) y = ginv(y);
-  return gerepileupto(av,y);
+  long sh, l = lg(x);
+  GEN y, z;
+
+  y = modlog2(x, &sh);
+  if (!y) { avma = av; return real2n(sh, l); }
+  z = addsr(1, exp1r_abs(y));
+  if (signe(y) < 0) z = ginv(z);
+  if (sh) {
+    setexpo(z, expo(z)+sh);
+    if (lg(z) > l+1) z = rtor(z, l); /* spurious precision increase */
+  }
+#if DEBUG
+{
+  GEN t = mplog(z), u = divrr(subrr(x, t),x);
+  if (signe(u) && expo(u) > 3-bit_accuracy(min(l,lg(t)))) err(talker,"");
+}
+#endif
+  return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
 }
 
 GEN
 mpexp(GEN x)
 {
   const long s = 6; /*Initial steps using basecase*/
-  long i, n, mask, p, l, sx = signe(x), sh=0;
+  long i, n, mask, p, l, sx = signe(x), sh;
   GEN a, z;
 
   if (!sx) {
@@ -1360,12 +1418,8 @@ mpexp(GEN x)
   l = lg(x);
   if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
   z = cgetr(l); /* room for result */
-  if (expo(x) >= 0)
-  { /* x>=1 : we do x %= log(2) to keep x small*/
-    sh = (long) (rtodbl(x)/LOG2);
-    x = subrr(rtor(x,l+1), mulsr(sh, mplog2(l+1)));
-    if (!signe(x)) { avma = (pari_sp)(z+l); return real2n(sh, l); }
-  }
+  x = modlog2(x, &sh);
+  if (!x) { avma = (pari_sp)(z+l); return real2n(sh, l); }
   n = hensel_lift_accel(l-1,&mask);
   for(i=0, p=1; i<s; i++) { p <<= 1; if (mask&(1<<i)) p--; }
   a = mpexp_basecase(rtor(x, p+2));
@@ -1377,7 +1431,7 @@ mpexp(GEN x)
     setlg(x, p+2); a = rtor(a, p+2);
     a = mulrr(a, subrr(x, logr_abs(a))); /* a := a (x - log(a)) */
   }
-  affrr(a,z); 
+  affrr(a,z);
   if (sh) setexpo(z, expo(z) + sh);
   avma = (pari_sp)z; return z;
 }
@@ -1429,7 +1483,7 @@ cos_p(GEN x)
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
   if (k & 1) k--;
-  for (y=gen_1; k; k-=2) 
+  for (y=gen_1; k; k-=2)
   {
     GEN t = gdiv(gmul(y,x2), mulss(k, k-1));
     y = gsubsg(1, t);
@@ -1448,7 +1502,7 @@ sin_p(GEN x)
   if (k < 0) return NULL;
   av = avma; x2 = gsqr(x);
   if (k & 1) k--;
-  for (y=gen_1; k; k-=2) 
+  for (y=gen_1; k; k-=2)
   {
     GEN t = gdiv(gmul(y,x2), mulss(k, k+1));
     y = gsubsg(1, t);
@@ -1693,10 +1747,11 @@ GEN
 logr_abs(GEN X)
 {
   pari_sp ltop;
-  long EX, L, m, k, a, b, e, l = lg(X);
+  long EX, L, m, k, a, b, l = lg(X);
   GEN z, x, y;
   ulong u;
   int neg;
+  double d;
 
   if (l > LOGAGM_LIMIT) return logagmr_abs(X);
 
@@ -1717,14 +1772,14 @@ logr_abs(GEN X)
     neg = 0;
   }
   if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
-  z = cgetr(l); ltop = avma;
+  z = cgetr(l - (k-2)); ltop = avma;
 
   a = bit_accuracy(k) + bfffo(u); /* ~ -log2 |1-x| */
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use AGM). Set Y = x^(1/2^m), y = (Y - 1) / (Y + 1) and compute truncated
   * series sum y^(2k+1)/(2k+1): this costs roughly floor(b/e) b^2 / 6  + m b^2
-  * bit operations with |x-1| <  2^-a, Y = 2^-e , m ~ e-a and b bits of
-  * accuracy needed, so we want b ~ 6 m (m+a) or m~b-a hence 
+  * bit operations with |x-1| <  2^-a, |Y| < 2^-e , m ~ e-a and b bits of
+  * accuracy needed, so we want b ~ 6 m (m+a) or m~b-a hence
   *     m = min( -a/2 + sqrt(a^2/4 + b/6),  b - a ) */
   L = l+1;
   b = bit_accuracy(L - (k-2)); /* take loss of accuracy into account */
@@ -1739,31 +1794,28 @@ logr_abs(GEN X)
 
   y = divrr(subrs(x,1), addrs(x,1)); /* = (x-1) / (x+1), close to 0 */
   L = lg(y); /* should be ~ l+1 - (k-2) */
-  e = -expo(y);
   /* log(x) = log(1+y) - log(1-y) = 2 sum_{k odd} y^k / k
    * Truncate the sum at k = 2n+1, the remainder is
    *   2 sum_{k >= 2n+3} y^k / k < 2y^(2n+3) / (2n+3)(1-y) < y^(2n+3)
    * We want y^(2n+3) < y 2^(-bit_accuracy(L)), hence
-   *   2n+1 > -1 + bit_accuracy(L) /-expo(y) */
-  k = bit_accuracy(L) / e;
-  if (k >= 2)
+   *   n+1 > bit_accuracy(L) /-log_2(y^2) */
+  d = 2*(-expo(y) + BITS_IN_LONG-1 - log2((double)(ulong)y[2])); /* ~ -log_2(y^2) */
+  k = (long)(2*(bit_accuracy(L) / d));
+  k |= 1;
+  if (k >= 3)
   {
     GEN S, T, y2 = gsqr(y), unr = real_1(L);
     pari_sp av = avma;
-    long s, l1;
-    k |= 1; /* make it odd */
-    e *= 2 /* - expo y^2 */;
-    l1 = L - ((e*(k-2))>>TWOPOTBITS_IN_LONG);
-    if (l1 < 3) l1 = 3;
+    long s = 0, l1 = nbits2prec((long)d);
     S = x;
     setlg(S,  l1);
     setlg(unr,l1); affrr(divru(unr,k), S); /* destroy x, not needed anymore */
-    for (s = 0, k -= 2;; k -= 2) /* k = 2n+1, ..., 1 */
+    for (k -= 2;; k -= 2) /* k = 2n+1, ..., 1 */
     { /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
       setlg(y2, l1); T = mulrr(S,y2);
       if (k == 1) break;
 
-      s += e;
+      s += d;
       l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
       s &= (BITS_IN_LONG-1);
       setlg(S, l1);
@@ -1805,7 +1857,7 @@ logagmcx(GEN q, long prec)
   long lim, e, ea, eb;
   pari_sp av;
   int neg = 0;
-  
+
   z = cgetc(prec); av = avma; prec++;
   if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
   lim = bit_accuracy(prec) >> 1;
@@ -2045,7 +2097,7 @@ mpcos(GEN x)
 static GEN
 tofp_safe(GEN x, long prec)
 {
-  return (typ(x) == t_INT || gexpo(x) > 0)? gadd(x, real_0(prec)) 
+  return (typ(x) == t_INT || gexpo(x) > 0)? gadd(x, real_0(prec))
                                           : fractor(x, prec);
 }
 
@@ -2076,7 +2128,7 @@ gcos(GEN x, long prec)
       affr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_INTMOD: pari_err(typeer,"gcos");
-    
+
     case t_PADIC: x = cos_p(x);
       if (!x) pari_err(talker,"p-adic argument out of range in gcos");
       return x;
@@ -2374,7 +2426,7 @@ gcotan(GEN x, long prec)
       y = cgetr(prec); av = avma;
       affr_fixlg(mpcotan(tofp_safe(x,prec)), y); avma = av; return y;
 
-    case t_PADIC: 
+    case t_PADIC:
       av = avma;
       return gerepileupto(av, gdiv(gcos(x,prec), gsin(x,prec)));
 

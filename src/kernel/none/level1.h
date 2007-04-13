@@ -51,6 +51,7 @@ GEN    pol_1(long v);
 GEN    pol_x(long v);
 void   affgr(GEN x, GEN y);
 void   affiz(GEN x, GEN y);
+void   affr_fixlg(GEN y, GEN z);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
 GEN    addir(GEN x, GEN y);
@@ -106,6 +107,7 @@ long   evallg(long x);
 long   evalvalp(long x);
 long   expi(GEN x);
 long   expu(ulong x);
+void   fixlg(GEN z, long ly);
 GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
 GEN    gtofp(GEN z, long prec);
@@ -238,6 +240,18 @@ stackdummy(pari_sp av, pari_sp ltop) {
 #endif
   }
 }
+INLINE void
+fixlg(GEN z, long ly) {
+  long lz = lg(z);
+  if (ly < lz)
+  {
+    setlg(z, ly);
+    stackdummy((pari_sp)(z + lz), (pari_sp)(z + ly));
+  }
+}
+/* update lg(z) before affrr(y, z)  [ to cater for precision loss ]*/
+INLINE void
+affr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
 
 INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */
