@@ -34,6 +34,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     9- rewrote logr_abs [ inaccurate + slow for x = 2^k * (1 - epsilon) ]
    10- rewrote exp1r_abs [ inaccurate + slow ]  and mpexp_basecase [ reduce
        input mod log(2) ]
+   11- [library] rename pointch ->  ellchangepoint, coordch -> ellchangecurve
 
   Added
     1- library functions expu, adduu, subuu

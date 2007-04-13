@@ -510,7 +510,7 @@ static GEN
 _coordch(GEN e, GEN w)
 { return coordch4(e, gel(w,1), gel(w,2), gel(w,3), gel(w,4)); }
 GEN
-coordch(GEN e, GEN w)
+ellchangecurve(GEN e, GEN w)
 {
   pari_sp av = avma;
   checkch(w); checksell(e);
@@ -573,7 +573,7 @@ cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t)
 /* X = (x-r)/u^2
  * Y = (y - s(x-r) - t) / u^3 */
 static GEN
-pointch0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
+ellchangepoint0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 {
   GEN p1,z;
 
@@ -586,7 +586,7 @@ pointch0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 }
 
 GEN
-pointch(GEN x, GEN ch)
+ellchangepoint(GEN x, GEN ch)
 {
   GEN y, v, v2, v3, mor, r, s, t, u;
   long tx, i, lx = lg(x);
@@ -605,17 +605,17 @@ pointch(GEN x, GEN ch)
   {
     y = cgetg(lx,tx);
     for (i=1; i<lx; i++)
-      gel(y,i) = pointch0(gel(x,i),v2,v3,mor,s,t);
+      gel(y,i) = ellchangepoint0(gel(x,i),v2,v3,mor,s,t);
   }
   else
-    y = pointch0(x,v2,v3,mor,s,t);
+    y = ellchangepoint0(x,v2,v3,mor,s,t);
   return gerepilecopy(av,y);
 }
 
 /* x =  u^2*X +r
  * y =  u^3*Y +s*u^2*X+t */
 static GEN
-pointchinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
+ellchangepointinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
 {
   GEN u2X, z;
   GEN X=gel(x,1), Y=gel(x,2);
@@ -629,7 +629,7 @@ pointchinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
 }
 
 GEN
-pointchinv(GEN x, GEN ch)
+ellchangepointinv(GEN x, GEN ch)
 {
   GEN y, u, r, s, t, u2, u3;
   long tx, i, lx = lg(x);
@@ -647,10 +647,10 @@ pointchinv(GEN x, GEN ch)
   {
     y = cgetg(lx,tx);
     for (i=1; i<lx; i++)
-      gel(y,i) = pointchinv0(gel(x,i),u2,u3,r,s,t);
+      gel(y,i) = ellchangepointinv0(gel(x,i),u2,u3,r,s,t);
   }
   else
-    y = pointchinv0(x,u2,u3,r,s,t);
+    y = ellchangepointinv0(x,u2,u3,r,s,t);
   return gerepilecopy(av,y);
 }
 
@@ -3270,7 +3270,7 @@ hell2(GEN e, GEN x, long prec)
   ro= gel(e,14);
   e3 = (gsigne(D) < 0)? gel(ro,1): gel(ro,3);
   v = init_ch(); gel(v,2) = addis(gfloor(e3),-1);
-  return gerepileupto(av, hells(_coordch(e,v), pointch(x,v), prec));
+  return gerepileupto(av, hells(_coordch(e,v), ellchangepoint(x,v), prec));
 }
 
 /* exp( h_oo(z) ), assume z on neutral component.
@@ -3609,8 +3609,8 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     p = best_in_cycle(e,p,k);
     if (v)
     {
-      p = pointch(p,v);
-      q = pointch(q,v);
+      p = ellchangepoint(p,v);
+      q = ellchangepoint(q,v);
     }
     r = cgetg(4,t_VEC);
     gel(r,1) = utoipos(2*k);
@@ -3622,7 +3622,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     if (p)
     {
       p = best_in_cycle(e,p,k);
-      if (v) p = pointch(p,v);
+      if (v) p = ellchangepoint(p,v);
       r = cgetg(4,t_VEC);
       gel(r,1) = utoipos(k);
       gel(r,2) = mkvec( gel(r,1) );
@@ -3771,7 +3771,7 @@ nagelllutz(GEN e)
   if (v)
   {
     gel(v,1) = ginv(gel(v,1));
-    w3 = pointch(w3,v);
+    w3 = ellchangepoint(w3,v);
   }
   return gerepilecopy(av, mkvec3(utoipos(t), w2,w3));
 }

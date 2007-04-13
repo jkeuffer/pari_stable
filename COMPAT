@@ -47,6 +47,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - FpX_ functions no longer accept p==NULL.
 
   - Fl_pow renamed to Fl_powu [ exponent may not be negative ]
+  - rename pointch ->  ellchangepoint, coordch -> ellchangecurve
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -220,7 +220,7 @@ ellidentify(GEN E)
   GEN V, M, G = ellglobalred(E);
   long j;
   V = ellcondlist(itos(gel(G,1)));
-  M = coordch(vecslice(E,1,5),gel(G,2));
+  M = ellchangecurve(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
     if (gequal(gmael(V,j,2), M))
       return gerepilecopy(ltop, mkvec2(gel(V,j),gel(G,2)));
@@ -234,7 +234,7 @@ ellgenerators(GEN E)
   pari_sp ltop=avma;
   GEN V=ellidentify(E);
   GEN gens=gmael(V,1,3);
-  GEN W=pointchinv(gens,gel(V,2));
+  GEN W=ellchangepointinv(gens,gel(V,2));
   return gerepileupto(ltop,W);
 }
 

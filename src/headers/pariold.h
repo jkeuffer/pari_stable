@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define pointch ellchangepoint
+#define coordch ellchangecurve
 #define Flx_rand random_Flx
 #define FpX_rand random_FpX
 #define galois polgalois
