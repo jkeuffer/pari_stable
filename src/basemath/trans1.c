@@ -1311,14 +1311,11 @@ exp1r_abs(GEN x)
   if (n == 1) p2 = X;
   else
   {
-    long s = 0, l1 = L - (((long)((n-1)*d))>>TWOPOTBITS_IN_LONG);
-    long l2 = nbits2prec((long)d);
+    long s = 0, l1 = nbits2prec((long)(d + n + 16));
     GEN unr = real_1(L);
     pari_sp av2;
 
-    if (l1 < l2) l1 = l2;
-    p2 =real_1(L); setlg(p2,l1);
-    av2 = avma;
+    p2 = cgetr(L); av2 = avma;
     for (i=n; i>=2; i--, avma = av2)
     { /* compute X^(n-1)/n! + ... + X/2 + 1 */
       GEN p1, p3;
@@ -1326,7 +1323,7 @@ exp1r_abs(GEN x)
       s -= expo(p3);
       l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
       s &= (BITS_IN_LONG-1);
-      setlg(unr,l1); p1 = addrr_sign(unr,1, mulrr(p3,p2),1);
+      setlg(unr,l1); p1 = addrr_sign(unr,1, i == n? p3: mulrr(p3,p2),1);
       setlg(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
     }
     setlg(p2,L);
@@ -1393,10 +1390,10 @@ mpexp_basecase(GEN x)
     setexpo(z, expo(z)+sh);
     if (lg(z) > l+1) z = rtor(z, l); /* spurious precision increase */
   }
-#if DEBUG
+#ifdef DEBUG
 {
   GEN t = mplog(z), u = divrr(subrr(x, t),x);
-  if (signe(u) && expo(u) > 3-bit_accuracy(min(l,lg(t)))) err(talker,"");
+  if (signe(u) && expo(u) > 5-bit_accuracy(min(l,lg(t)))) err(talker,"");
 }
 #endif
   return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
