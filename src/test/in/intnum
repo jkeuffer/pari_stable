@@ -18,7 +18,6 @@ intnum(x = 0, [oo,1],  f(x)) - Euler
 intnum(x = 0, [oo,1],  g(x)) - Euler
 intnum(x = 0, 1,  1/sqrt(x)) - 2
 intnum(x = [0,-1/2], 1,  1/sqrt(x)) - 2
-intnum(x = 0, oo, sin(x) / x) - Pi/2
 intnum(x = 0, [oo,1], sin(x)/x) - Pi/2
 intnum(x = 0, [oo,-I], sin(x)/x) - Pi/2
 intnum(x = 0, [oo,-2*I], sin(2*x)/x) - Pi/2
