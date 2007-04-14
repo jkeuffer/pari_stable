@@ -31,6 +31,14 @@ long}. The word \emph{stack} always refer to the PARI stack, allocated
 through an initial \kbd{pari\_init} call. Refer to Chapters 1--2 and~4 for
 general background. \kbdsidx{BIL}
 
+We shall often refer to the notion of \tev{shallow} function, which means that
+some components of the result may point to components of the input (which is
+more efficient than a deep copy). In particular, such outputs are not
+suitable for \kbd{gerepileupto} and particular care must be taken when
+garbage collecting objects which have been input to shallow functions: in
+general corresponding outputs also become invalid and should no longer be
+accessed.
+
 \section{Initializing the library}
 
 The following functions enable you to start using the PARI functions
@@ -3140,6 +3148,9 @@ use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
 
 \funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
 
+\fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$. The result
+is not suitable for gerepileupto.
+
 \funno{GEN}{gabs[\key{z}]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
 
 \fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
@@ -3509,7 +3520,7 @@ the vector \kbd{x}.
 vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
 
 \subsec{Functions to handle \typ{FFELT}}
-Theses functions define the public interface of the \typ{FFELT} type to use in
+These functions define the public interface of the \typ{FFELT} type to use in
 generic functions.  However, in specific functions, it is better to use the
 functions class \kbd{FpXQ} and/or \kbd{Flxq} as appropriate.
 
@@ -3547,6 +3558,9 @@ $-1$) else $0$.
 \typ{FFELT} having the same definition field.
 
 \fun{GEN}{FF_neg}{GEN a} returns $-a$ where \kbd{a} is a \typ{FFELT}.
+
+\fun{GEN}{FF_neg_i}{GEN a} shallow function returning $-a$ where \kbd{a} is a
+\typ{FFELT}. The result is not suitable for gerepileupto.
 
 \fun{GEN}{FF_inv}{GEN a} returns $a^{-1}$ where \kbd{a} is a \typ{FFELT}.
 
