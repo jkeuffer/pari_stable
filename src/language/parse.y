@@ -173,9 +173,8 @@ newintnode(struct node_loc *loc)
 %left '%' KDR '\\' '/' '*'
 %left SIGN
 %right '^'
-%left '!' '[' '\''
 %left '#'
-%left '~'
+%left '!' '~' '[' '\''
 %left '.' MAT
 %token KPP KSS 
 %left ':'
@@ -241,8 +240,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | expr KAND expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr '&'  expr  {$$=newopcall(OPand,$1,$3,&@$);}
     | expr KEQ  expr  {$$=newopcall(OPeq,$1,$3,&@$);}
-    | expr '!' '=' %prec KNE  expr  {$$=newopcall(OPne,$1,$4,&@$);}
-    | expr '<' '>' %prec KNE  expr  {$$=newopcall(OPne,$1,$4,&@$);}
+    | expr KNE  expr  {$$=newopcall(OPne,$1,$3,&@$);}
     | expr KGE  expr  {$$=newopcall(OPge,$1,$3,&@$);}
     | expr '>'  expr  {$$=newopcall(OPg,$1,$3,&@$);}
     | expr KLE  expr  {$$=newopcall(OPle,$1,$3,&@$);}
