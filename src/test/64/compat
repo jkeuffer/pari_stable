@@ -2424,7 +2424,7 @@ mod(38, 41), mod(40, 41)]~
 ? round(prod(1,k=1,17,x-exp(2*i*pi*k/17)))
 x^17 - 1
 ? rounderror(prod(1,k=1,17,x-exp(2*i*pi*k/17)))
--34
+-35
 ? rpoint(0,20,20)
 ? initrect(3,600,600);scale(3,-7,7,-2,2);cursor(3)
 ? q*series(anell(acurve,100),q)
@@ -2715,5 +2715,5 @@ d(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [607, 105783]
 ? print("Total time spent: ",gettime());
-Total time spent: 305
+Total time spent: 302
 ? \q
