@@ -38,26 +38,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /****************************************************************/
 
-/* 
-   Psi(N, q) = local(a, b, d);
-   b = N-1/24;
-   c = sqrt(2/3)*Pi*sqrt(b)
-   d = 1 / ((2*b)^(3/2) * Pi);
-
-   a = c/q;
-   d * sqrt(q) * (a*cosh(a) - sinh(a))
+/* Given:  b = N-1/24;
+ *   c = sqrt(2/3)*Pi*sqrt(b)
+ *   d = 1 / ((2*b)^(3/2) * Pi);
+ *
+ * Psi(N, q) = local(a = c/q); sqrt(q) * (a*cosh(a) - sinh(a))
  *
  * Because N < 10^16 and q < sqrt(N), q fits always into long.
- * This part of the algorithm needs full precision.
- *
- * c and d precomputed in terms of N for efficiency */
+ * This part of the algorithm needs full precision. */
 static GEN
-psi(GEN c, GEN d, ulong q, long prec)
+psi(GEN c, ulong q, long prec)
 {
   GEN a = divru(c, q), ea = mpexp(a), invea = ginv(ea);
-  GEN cha = mpshift(mpadd(ea, invea), -1);  /* ch(a) */
-  GEN sha = mpshift(mpsub(ea, invea), -1);  /* sh(a) */
-  return mulrr(mulrr(d, sqrtr(stor(q,prec))), mpsub(mulrr(a,cha), sha));
+  GEN cha = shiftr(mpadd(ea, invea), -1);  /* ch(a) */
+  GEN sha = shiftr(mpsub(ea, invea), -1);  /* sh(a) */
+  return mulrr(sqrtr(stor(q,prec)), subrr(mulrr(a,cha), sha));
 }
 
 /* g(h, q) = if (q<3, 0, sum(k=1,q-1,k*(frac(h*k/q)-1/2))) */
@@ -69,14 +64,17 @@ g(ulong q, ulong h)
   GEN i2;
 
   if (q < 3)  return gen_0;
-  if (h == 1) return gdivgs(mulss(q-1,q-2), 12);
-  if (h == 2) return gdivgs(mulss(q-1,q-5), 24); /* q odd since (h,q)=1 */
-
+  if (h == 1) return gdivgs(muluu(q-1,q-2), 12);
+  if (h == 2) return q == 3? mkfrac(gen_m1, utoipos(6))
+                           : gdivgs(muluu((q-1)>>1,(q-5)>>1), 6);
   k = q % h;
-  if (k == 1)
-    return gdivgs(mului((q-1)/h, subsi(q-1, mulss(h,h))), 12);
-  if (k == 2)
-    return gdivgs(mului((q-2)/h, subsi(q<<1, addsi(1, mulss(h,h)))), 24);
+  if (k <= 2)
+  {
+    GEN h2 = sqru(h);
+    return k == 1? gdivgs(mului((q-1)/h, subsi(q-1, h2)), 12)
+                 : gdivgs(mului((q-2)/h, subsi((q<<1)-1, h2)), 24); /* k=2 */
+  
+  }
   /* TODO: expr for h-1 mod h  +  gcd-style computation */
   
   kh = h;
@@ -104,33 +102,32 @@ g(ulong q, ulong h)
   return gdivgs(i2, q<<1);
 }
 
-/* L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q))) */
+/* L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q)))
+ * Never called with q < 3, so ignore this case */
 static GEN
-L(GEN n, ulong q, GEN Pi, long prec)
+L(GEN n, ulong q, long prec)
 {
   GEN r, pi, res;
-  ulong h, pr, nmodq = umodiu(n, q);
+  ulong h, pr, nmodq = umodiu(n, q), hn;
   pari_sp av;
   
-  if (q == 1) return stor(1, prec);
-  if (q == 2) return stor(nmodq? -1: 1, prec);
   pr = (2*(ulong)prec) / q + 1; 
   if (pr < (ulong)DEFAULTPREC) pr = (ulong)DEFAULTPREC;
-  pi = gprec_w(Pi, pr);
+  pi = mppi(pr);
   res = stor(0, pr); av = avma;
-  for (h = 1; h < q; h++, avma = av)
+  for (h = 1, hn = 0; h < q; h++, avma = av)
   {
+    GEN t;
+    hn += nmodq; if (hn >= q) hn -= q;
     if (cgcd((long)q, (long)h) > 1) continue;
-    r = gdivgs(gsubgs(g(q, h), Fl_mul(h, nmodq, q) << 1), q);
-    if (gcmp0(r))
-      addsrz(1, res, res);
-    else
-      addrrz(mpcos(gmul(pi,r)), res, res);
+    r = gsubgs(g(q, h), hn << 1);
+    t = gcmp0(r)? addrs(res, 1): addrr(mpcos(gmul(divru(pi,q),r)), res);
+    affrr(t, res);
   }
   return res;
 }
 
-/* Return a low precision raw estimate of log p(n). */
+/* Return a low precision estimate of log p(n). */
 static GEN
 estim(GEN n)
 {
@@ -145,14 +142,14 @@ estim(GEN n)
 }
 
 static void
-pinit(GEN n, GEN *c, GEN *d, GEN *Pi, ulong prec)
+pinit(GEN n, GEN *c, GEN *d, ulong prec)
 {
   GEN b = divru( itor( subis(muliu(n,24), 1), prec ), 24 ); /* n - 1/24 */
-  GEN sqrtb = sqrtr(b), pi2sqrt2, pisqrt2d3;
+  GEN sqrtb = sqrtr(b), Pi = mppi(prec), pi2sqrt2, pisqrt2d3;
  
-  *Pi = mppi (prec);
-  pisqrt2d3 = mulrr(*Pi, sqrtr( divru(stor(2, prec), 3) ));
-  pi2sqrt2  = mulrr(*Pi, sqrtr( stor(8, prec) ));
+  
+  pisqrt2d3 = mulrr(Pi, sqrtr( divru(stor(2, prec), 3) ));
+  pi2sqrt2  = mulrr(Pi, sqrtr( stor(8, prec) ));
   *c = mulrr(pisqrt2d3, sqrtb);
   *d = ginv( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
 }
@@ -162,7 +159,7 @@ GEN
 numbpart(GEN n)
 {
   pari_sp ltop = avma, av;
-  GEN sum, est, C, D, Pi;
+  GEN sum, est, C, D, p1, p2;
   ulong q, max, prec;
 
   if (typ(n) != t_INT) pari_err(typeer, "partition function");
@@ -172,19 +169,20 @@ numbpart(GEN n)
     pari_err(talker, "arg to partition function must be < 10^15");
   est = estim(n);
   prec = (ulong)(DEFAULTPREC + ((gtodouble(est)/LOG2) + 25) / BITS_IN_LONG);
-  pinit(n, &C,&D,&Pi, prec);
+  pinit(n, &C, &D, prec);
   
   sum = cgetr (prec);
   max = (ulong)(sqrt( gtodouble(n) ) * 0.24 + 5);
 
   av = avma; togglesign(est);
-  affrr(psi(C,D, 1, prec), sum);
-  for (q = 2; q <= max; q++, avma=av)
+  p1 = psi(C, 1, prec);
+  p2 = psi(C, 2, prec);
+  affrr(mod2(n)? subrr(p1,p2): addrr(p1,p2), sum);
+  for (q = 3; q <= max; q++, avma=av)
   {
-    GEN t;
-    t = L(n, q, Pi, prec);
+    GEN t = L(n, q, prec);
     if (absr_cmp(t, mpexp(divru(est,q))) <= 0) continue;
-    addrrz(mulrr(psi(C,D, q, prec), t), sum, sum);
+    affrr(addrr(mulrr(psi(C, q, prec), t), sum), sum);
   }
-  return gerepileupto (ltop, ground(sum));
+  return gerepileuptoint (ltop, roundr(mulrr(D,sum)));
 }
