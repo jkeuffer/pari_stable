@@ -102,17 +102,12 @@ g(ulong q, ulong h)
 /* L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q)))
  * Never called with q < 3, so ignore this case */
 static GEN
-L(GEN n, ulong q, long prec)
+L(GEN n, ulong q, long bitprec)
 {
-  GEN r, pi_q, res;
+  long pr = nbits2prec(bitprec / q + q);
   ulong h, nmodq = umodiu(n, q), hn;
-  pari_sp av;
-  long pr;
-  
-  pr = (2*prec) / q + 1; 
-  if (pr < DEFAULTPREC) pr = DEFAULTPREC;
-  pi_q = divru(mppi(pr), q);
-  res = stor(0, pr); av = avma;
+  GEN r, res = stor(0, pr), pi_q = divru(mppi(pr), q);
+  pari_sp av = avma;
   for (h = 1, hn = 0; h < q; h++, avma = av)
   {
     GEN t;
@@ -175,7 +170,7 @@ numbpart(GEN n)
   av = avma; togglesign(est);
   for (q = (ulong)(sqrt(gtodouble(n))*0.24 + 5); q >= 3; q--, avma=av)
   {
-    GEN t = L(n, q, prec);
+    GEN t = L(n, q, bitprec);
     if (absr_cmp(t, mpexp(divru(est,q))) < 0) continue;
 
     t = mulrr(t, psi(gprec_w(C, nbits2prec(bitprec / q + 32)), q, prec));
