@@ -42,10 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   c = sqrt(2/3)*Pi*sqrt(b)
  *   d = 1 / ((2*b)^(3/2) * Pi);
  *
- * Psi(N, q) = local(a = c/q); sqrt(q) * (a*cosh(a) - sinh(a))
- *
- * Because N < 10^16 and q < sqrt(N), q fits always into long.
- * This part of the algorithm needs full precision. */
+ * Psi(N, q) = local(a = c/q); sqrt(q) * (a*cosh(a) - sinh(a)) */
 static GEN
 psi(GEN c, ulong q, long prec)
 {
@@ -94,7 +91,7 @@ g(ulong q, ulong h)
     i2 = gen_0;
     for (k = 1; k < q; k++)
     {
-      i2 = addii(mulss(k, (kh << 1) - q), i2);
+      i2 = addii(i2, mulss(k, (kh << 1) - q));
       if ((k & 31) == 0) i2 = gerepileuptoint(av, i2);
       kh += h; if (kh >= q) kh -= q;
     }
@@ -107,21 +104,22 @@ g(ulong q, ulong h)
 static GEN
 L(GEN n, ulong q, long prec)
 {
-  GEN r, pi, res;
-  ulong h, pr, nmodq = umodiu(n, q), hn;
+  GEN r, pi_q, res;
+  ulong h, nmodq = umodiu(n, q), hn;
   pari_sp av;
+  long pr;
   
-  pr = (2*(ulong)prec) / q + 1; 
-  if (pr < (ulong)DEFAULTPREC) pr = (ulong)DEFAULTPREC;
-  pi = mppi(pr);
+  pr = (2*prec) / q + 1; 
+  if (pr < DEFAULTPREC) pr = DEFAULTPREC;
+  pi_q = divru(mppi(pr), q);
   res = stor(0, pr); av = avma;
   for (h = 1, hn = 0; h < q; h++, avma = av)
   {
     GEN t;
     hn += nmodq; if (hn >= q) hn -= q;
     if (cgcd((long)q, (long)h) > 1) continue;
-    r = gsubgs(g(q, h), hn << 1);
-    t = gcmp0(r)? addrs(res, 1): addrr(mpcos(gmul(divru(pi,q),r)), res);
+    r = gsubgs(g(q,h), hn << 1);
+    t = gcmp0(r)? addrs(res, 1): addrr(res, mpcos(gmul(pi_q,r)));
     affrr(t, res);
   }
   return res;
@@ -160,7 +158,8 @@ numbpart(GEN n)
 {
   pari_sp ltop = avma, av;
   GEN sum, est, C, D, p1, p2;
-  ulong q, max, prec;
+  long prec, bitprec;
+  ulong q;
 
   if (typ(n) != t_INT) pari_err(typeer, "partition function");
   if (signe(n) < 0) return gen_0;
@@ -168,21 +167,22 @@ numbpart(GEN n)
   if (cmpii(n, u2toi(0x38d7e, 0xa4c68000)) >= 0)
     pari_err(talker, "arg to partition function must be < 10^15");
   est = estim(n);
-  prec = (ulong)(DEFAULTPREC + ((gtodouble(est)/LOG2) + 25) / BITS_IN_LONG);
+  bitprec = (long)(rtodbl(est)/LOG2) + 32;
+  prec = nbits2prec(bitprec);
   pinit(n, &C, &D, prec);
-  
   sum = cgetr (prec);
-  max = (ulong)(sqrt( gtodouble(n) ) * 0.24 + 5);
-
+  /* Because N < 10^16 and q < sqrt(N), q fits into a long */
   av = avma; togglesign(est);
-  p1 = psi(C, 1, prec);
-  p2 = psi(C, 2, prec);
-  affrr(mod2(n)? subrr(p1,p2): addrr(p1,p2), sum);
-  for (q = 3; q <= max; q++, avma=av)
+  for (q = (ulong)(sqrt(gtodouble(n))*0.24 + 5); q >= 3; q--, avma=av)
   {
     GEN t = L(n, q, prec);
-    if (absr_cmp(t, mpexp(divru(est,q))) <= 0) continue;
-    affrr(addrr(mulrr(psi(C, q, prec), t), sum), sum);
+    if (absr_cmp(t, mpexp(divru(est,q))) < 0) continue;
+
+    t = mulrr(t, psi(gprec_w(C, nbits2prec(bitprec / q + 32)), q, prec));
+    affrr(addrr(sum, t), sum);
   }
+  p1 = addrr(sum, psi(C, 1, prec));
+  p2 = psi(C, 2, prec);
+  affrr(mod2(n)? subrr(p1,p2): addrr(p1,p2), sum);
   return gerepileuptoint (ltop, roundr(mulrr(D,sum)));
 }
