@@ -330,7 +330,7 @@ install(void *f, char *name, char *code)
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
     if (*s) pari_err(talker2,"not a valid identifier", s, name);
-    ep = installep(name, strlen(name), functions_hash + hash);
+    if (!ep) ep = installep(name, strlen(name), functions_hash + hash);
     ep->value=f; ep->valence=EpINSTALL;
   }
   ep->code = pari_strdup(code);
@@ -857,7 +857,8 @@ fetch_named_var(char *s)
 {
   entree **funhash = functions_hash + hashvalue(s);
   entree *ep = findentry(s, strlen(s), *funhash);
-  if (ep)
+  if (!ep) ep = installep(s,strlen(s),funhash);
+  else if (EpVALENCE(ep)!=EpNEW)
   {
     switch (EpVALENCE(ep))
     {
@@ -866,7 +867,6 @@ fetch_named_var(char *s)
     }
     return ep;
   }
-  ep = installep(s,strlen(s),funhash);
   ep->valence=EpVAR;
   (void)manage_var(manage_var_create,ep);
   ep->value=initial_value(ep);
