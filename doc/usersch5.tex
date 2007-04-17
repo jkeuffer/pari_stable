@@ -1395,7 +1395,12 @@ in $0, 1, \dots p-1$.
 \kbd{b} modulo \kbd{m} (smallest non-negative residue). 
 
 \fun{ulong}{Fp_powu}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
-power modulo \kbd{p} (smallest non-negative residue).
+power modulo \kbd{p} (smallest non-negative residue). Not memory-clean, but
+suitable for \kbd{gerepileupto}.
+
+\fun{ulong}{Fp_pows}{GEN x, long n, GEN m} raises \kbd{x} to the \kbd{n}-th
+power modulo \kbd{p} (smallest non-negative residue). A negative \kbd{n} is
+allowed Not memory-clean, but suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{Fp_pow}{GEN x, GEN n, GEN m} returns $\kbd{x}^\kbd{n}$
 modulo \kbd{p} (smallest non-negative residue).
@@ -1417,6 +1422,11 @@ $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 \fun{GEN}{Fp_log}{GEN a, GEN g, GEN ord, GEN p} Let $g$ such that $g^ord=1
 \pmod{p}$. Return an integer $e$ such that $a^e=g \pmod{p}$. If $e$ does not
 exists, the result is currently undefined.
+
+\fun{GEN}{Fp_order}{GEN a, GEN ord, GEN p} returns the order of the
+\typ{Fp} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
+is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
+factorization matrix.
 
 \fun{GEN}{Fp_sqrt}{GEN x, GEN p} returns a square root of \kbd{x} modulo
 \kbd{p} (the smallest non-negative residue), where \kbd{x}, \kbd{p} are
@@ -1526,7 +1536,7 @@ linear algebra over finite fields, in fact over finite rings of the form
 $(\Z/p\Z)[X]/(T)$, where $p$ is not necessarily prime and $T\in(\Z/p\Z)[X]$ is
 possibly reducible; and finite extensions thereof. All this can be emulated
 with \typ{INTMOD} and \typ{POLMOD} coefficients and using generic routines,
-at a considerable loss of efficiency. Also, some specialized routines are
+at a considerable loss of efficiency. Also, specialized routines are
 available that have no obvious generic equivalent.
 
 \subsec{Naming scheme}. A function name is built in the following way:
@@ -1923,9 +1933,17 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
-\fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let $g$ such that
-$g^ord=1$ in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$ does
-not exists, the result is currently undefined.
+\fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let $g$ of order
+\kbd{ord} in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$
+does not exists, the result is currently undefined.
+
+\fun{GEN}{Fp_FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} As
+\kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
+
+\fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
+\typ{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
+is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
+factorization matrix.
 
 \fun{GEN}{FpXQ_sqrtn}{GEN x, GEN n, GEN T, GEN p, GEN *zn} returns an
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
@@ -2015,6 +2033,9 @@ by its leading term.
 (This function is suitable for \kbd{gerepilupto} but not memory-clean.)
 
 \fun{GEN}{FqX_gcd}{GEN P, GEN Q, GEN T, GEN p}
+
+\fun{GEN}{FqX_eval}{GEN x, GEN y, GEN T, GEN p} evaluates the \kbd{FqX}~\kbd{x}
+at the \kbd{Fq}~\kbd{y}. The result is an~\kbd{Fq}.
 
 \fun{GEN}{FpXQX_red}{GEN z, GEN T, GEN p} \kbd{z} a \typ{POL} whose
 coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
@@ -2303,9 +2324,15 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
 
-\fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ such that
-$g^ord=1$ in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$ does
-not exists, the result is currently undefined.
+\fun{GEN}{Flxq_order}{GEN a, GEN ord, GEN T, ulong p}
+returns the order of the \typ{Flxq} \kbd{a}.
+If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o} is a multiple of the
+order of \kbd{a}, either as a \typ{INT} or a factorization matrix.
+
+
+\fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ of exact
+order \kbd{ord} in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If
+$e$ does not exists, the result is currently undefined.
 
 \fun{GEN}{Flxq_sqrtn}{GEN x, GEN n, GEN T, ulong p, GEN *zn} returns an
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
