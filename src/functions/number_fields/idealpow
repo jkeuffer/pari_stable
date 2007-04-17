@@ -13,9 +13,8 @@ Doc: computes the $k$-th power of
  that this is NOT the same as as $\kbd{idealpow}(\var{nf},x,k)$ followed by
  reduction, since the reduction is performed throughout the powering process.
  
- The library syntax corresponding to $\fl=0$ is
- \funs{idealpow}{\var{nf},x,k}. If $k$ is a \kbd{long}, you can use
- \funs{idealpows}{\var{nf},x,k}. Corresponding to $\fl=1$ is
- \funs{idealpowred}{\var{nf},vp,k,\var{prec}}, where $\var{prec}$ is a
- \kbd{long}.
-
+Variant: Also available are
+ \fun{GEN}{idealpow}{GEN nf, GEN x, GEN k} and
+ \fun{GEN}{idealpows}{GEN nf, GEN x, long k} ($\fl = 0$).
+ Corresponding to $\fl=1$ is \fun{GEN}{idealpowred}{GEN nf, GEN vp, GEN k,
+ long prec}.

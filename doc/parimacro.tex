@@ -175,13 +175,14 @@
 \begingroup
 \catcode`<=1\catcode`\{=12
 \catcode`>=2\catcode`\}=12
-\gdef\d@verb#1<% gobble #1 = {
-  \def\next##1}<\gdef\@verb<##1>\endgroup%
-  \do<\@verb>>% \@verb is the (verbatim) argument
+\gdef\d@verb<%
+  \def\next{##1}<\gdef\@va<##1>\endgroup%
+  \do<\@va>>% \@va is the verbatim argument
   \next>
-\gdef\d@verbb#1<% gobble #1 = {
-  \def\next##1}{##2}<\gdef\@verba<##1>\gdef\@verbb<##2>\endgroup%
-  \do<\@verba><\@verbb>>% \@verba, \@verbb are the two (verbatim) argument
+%
+\gdef\d@verbb<%
+  \def\next{##1}{##2}{##3}<\gdef\@va<##1>\gdef\@vb<##2>\gdef\@vc<##3>\endgroup%
+  \do<\@va><\@vb><\@vc>>% \@vxxx are the verbatim arguments
   \next>
 %
 \endgroup
@@ -216,12 +217,9 @@
 \def\synt{\let\do=\@synt\doverb}
 
 % function prototypes
-% types omitted in funs (for chap 3)
 \def\funno#1#2#3{\noindent{\tt#1 $\key{#2}$(#3)}} % no index
-\def\@funs#1#2{\gdef\f@nt{tt}\noindent\toindex{#1}$\key{#1}(#2)$}
 \def\@fun#1#2#3{\gdef\f@nt{tt}\toindex{#2}\funno{#1}{#2}{#3}}
 \def\fun{\let\do=\@fun\doverbb}
-\def\funs{\let\do=\@funs\doverb}  % simple fun (omit return type)
 
 %%
 %% SECTIONS

@@ -46,7 +46,7 @@ in a program, and cleanup without exiting the whole program.
 
 \subsec{General purpose}
 
-\fun{void}{pari_init}{size\_t size, ulong maxprime} initialize the
+\fun{void}{pari_init}{size_t size, ulong maxprime} initialize the
 library, with a stack of \kbd{size} bytes and a prime table
 up to the maximum of \kbd{maxprime} and $2^{16}$. Unless otherwise
 mentioned, no PARI function will function properly before such an
@@ -57,7 +57,7 @@ initialized with \kbd{pari\_init}) and frees all allocated objects.
 
 \subsec{Technical functions}
 
-\fun{void}{pari_init_opts}{size\_t size, ulong maxprime, ulong opts} as
+\fun{void}{pari_init_opts}{size_t size, ulong maxprime, ulong opts} as
 \kbd{pari\_init}, more flexible. \kbd{opts} is a mask of flags
 among the following:
 
@@ -71,7 +71,7 @@ This one \emph{must} be enabled once. If you close pari, then restart it,
 you need not reinitialize \kbd{GP\_DATA}; if you do not, then old values are
 restored.
 
-\fun{void}{pari_close_opts}{ulong init\_opts} as \kbd{pari\_close},
+\fun{void}{pari_close_opts}{ulong init_opts} as \kbd{pari\_close},
 for a library initialized with a mask of options using
 \kbd{pari\_init\_opts}. \kbd{opts} is a mask of flags among
 
@@ -434,13 +434,13 @@ of length~\kbd{n}.
 those of~\kbd{x}, but does not copy (the $p$-adic unit or zero representative
 and the modulus of)~\kbd{x}.
 
-\fun{GEN}{new_chunk}{size\_t n} allocates a \kbd{GEN} with $n$ components,
+\fun{GEN}{new_chunk}{size_t n} allocates a \kbd{GEN} with $n$ components,
 \emph{without} filling the required code words. This is the low-level
 constructor underlying \kbd{cgetg}, which calls \kbd{new\_chunk} then sets
 the first code word. It works by simply returning the address
 \kbd{((GEN)avma) - n}, after checking that it is larger than \kbd{(GEN)bot}.
 
-\fun{char*}{stackmalloc}{size\_t n} allocates memory on the stack for $n$
+\fun{char*}{stackmalloc}{size_t n} allocates memory on the stack for $n$
 chars (\emph{not} $n$ \kbd{GEN}s). This is faster than using \kbd{malloc},
 and easier to use in most situations when temporary storage is needed. In
 particular there is no need to \kbd{free} individually all variables thus
@@ -456,15 +456,15 @@ See \secref{se:garbage} for a detailed explanation and many examples.
 \fun{void}{cgiv}{GEN x} frees object \kbd{x} if it is the last created on the
 stack (otherwise nothing happens).
 
-\fun{GEN}{gerepile}{pari\_sp p, pari\_sp q, GEN x} general garbage collector
+\fun{GEN}{gerepile}{pari_sp p, pari_sp q, GEN x} general garbage collector
 for the stack.
 
-\fun{void}{gerepileall}{pari\_sp av, int n, ...} cleans up the stack from
+\fun{void}{gerepileall}{pari_sp av, int n, ...} cleans up the stack from
 \kbd{av} on (i.e from \kbd{avma} to \kbd{av}), preserving the \kbd{n} objects
 which follow in the argument list (of type \kbd{GEN*}). E.g:
 \kbd{gerepileall(av, 2, \&x, \&y)} preserves \kbd{x} and \kbd{y}.
 
-\fun{void}{gerepileallsp}{pari\_sp av, pari\_sp ltop, int n, ...}
+\fun{void}{gerepileallsp}{pari_sp av, pari_sp ltop, int n, ...}
 cleans up the stack between \kbd{av} and \kbd{ltop}, updating
 the \kbd{n} elements which follow \kbd{n} in the argument list (of type
 \kbd{GEN*}). Check that the elements of \kbd{g} have no component between
@@ -472,22 +472,22 @@ the \kbd{n} elements which follow \kbd{n} in the argument list (of type
 \kbd{avma} and \kbd{ltop}. Analogous to (but faster than) \kbd{gerepileall}
 otherwise.
 
-\fun{GEN}{gerepilecopy}{pari\_sp av, GEN x} cleans up the stack  from
+\fun{GEN}{gerepilecopy}{pari_sp av, GEN x} cleans up the stack  from
 \kbd{av} on, preserving the object \kbd{x}. Special case of \kbd{gerepileall}
 (case $\kbd{n} = 1$), except that the routine returns the preserved \kbd{GEN}
 instead of updating its address through a pointer.
 
-\fun{void}{gerepilemany}{pari\_sp av, GEN* g[], int n} alternative interface
+\fun{void}{gerepilemany}{pari_sp av, GEN* g[], int n} alternative interface
 to \kbd{gerepileall}
 
-\fun{void}{gerepilemanysp}{pari\_sp av, pari\_sp ltop, GEN* g[], int n}
+\fun{void}{gerepilemanysp}{pari_sp av, pari_sp ltop, GEN* g[], int n}
 alternative interface to \kbd{gerepileallsp}.
 
-\fun{void}{gerepilecoeffs}{pari\_sp av, GEN x, int n} cleans up the stack
+\fun{void}{gerepilecoeffs}{pari_sp av, GEN x, int n} cleans up the stack
 from \kbd{av} on, preserving \kbd{x[0]}, \dots, \kbd{x[n-1]} (which are
 \kbd{GEN}s).
 
-\fun{void}{gerepilecoeffssp}{pari\_sp av, pari\_sp ltop, GEN x, int n}
+\fun{void}{gerepilecoeffssp}{pari_sp av, pari_sp ltop, GEN x, int n}
 cleans up the stack from \kbd{av} to \kbd{ltop}, preserving \kbd{x[0]},
 \dots, \kbd{x[n-1]} (which are \kbd{GEN}s). Same assumptions as in
 \kbd{gerepilemanysp}, of which this is a variant. For instance
@@ -508,21 +508,21 @@ and its two components. This is marginally more efficient than the standard
   z[2] = fun2(); return gerepile(av, ltop, z);
 @eprog\noindent
 
-\fun{GEN}{gerepileupto}{pari\_sp av, GEN q} analogous to (but faster than)
+\fun{GEN}{gerepileupto}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepilecopy}. Assumes that \kbd{q} is connected and that its root was
 created before any component.
 
-\fun{GEN}{gerepileuptoint}{pari\_sp av, GEN q} analogous to (but faster than)
+\fun{GEN}{gerepileuptoint}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepileupto}. Assumes further that \kbd{q} is a \typ{INT}. The
 length and effective length of the resulting \typ{INT} are equal.
 
-\fun{GEN}{gerepileuptoleaf}{pari\_sp av, GEN q} analogous to (but faster than)
+\fun{GEN}{gerepileuptoleaf}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepileupto}. Assumes further that \kbd{q} is a leaf, i.e a
 non-recursive type (\kbd{is\_recursive\_t(typ(q))} is non-zero). Contrary to
 \kbd{gerepileuptoint}, \kbd{gerepileuptoleaf} leaves length and effective
 length of a \typ{INT} unchanged.
 
-\fun{void}{stackdummy}{pari\_sp av, pari\_sp ltop} inhibits the memory area
+\fun{void}{stackdummy}{pari_sp av, pari_sp ltop} inhibits the memory area
 between \kbd{av} \emph{included} and \kbd{ltop} \emph{excluded} with respect to
 \kbd{gerepile}, in order to avoid a call to \kbd{gerepile(av, ltop,...)}.
 The stack space is not reclaimed though.
@@ -2800,7 +2800,7 @@ $\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
 $P(\kbd{pol\_x[w]},u)$, assuming \kbd{n} is an upper bound for
 $\deg_v(\kbd{P})$.
 
-\fun{GEN}{greffe}{GEN x, long l, int use\_stack} applied to a
+\fun{GEN}{greffe}{GEN x, long l, int use_stack} applied to a
 \typ{POL}~\kbd{x}, creates a \typ{SER} of length~\kbd{l} starting
 with~\kbd{x}, but without actually copying the coefficients, just the
 pointers. If \kbd{use\_stack} is $0$, this is created through malloc, and
@@ -3045,10 +3045,10 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 \subsec{Comparison operators}
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
-to~0, 0~(false) otherwise. Note that many PARI functions return a
-pointer to \kbd{gen\_0} when they are aware that the result they return is an
-exact zero, so it is almost always faster to test for pointer equality first,
-and call \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
+to~0, 0~(false) otherwise. Note that many PARI functions return \kbd{gen\_0}
+when they are aware that the result they return is an exact zero, so it is
+almost always faster to test for pointer equality first, and call
+\kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
 
 \fun{int}{isinexact}{GEN x} returns 0 (false) if \kbd{x} has an inexact
 component, and 1 (true) otherwise.
@@ -3071,7 +3071,7 @@ otherwise.
 0~(false) otherwise.
 
 \fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
-the sign of $\kbd{x}-\kbd{y}$).
+the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
 
 \fun{long}{gcmpsg}{long s, GEN x} comparison of the \kbd{long}~\kbd{s}
 with~\kbd{x}.
@@ -3085,8 +3085,8 @@ lexicographic ordering.
 \fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
 to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
 \kbd{y} have the same type. When the types are different, a \kbd{true} result
-means that \kbd{x - y} was successfully computed and found equal to $0$
-(by \kbd{gcmp0}). In particular
+means that \kbd{x - y} was successfully computed and that
+\kbd{gcmp0} found it equal to $0$. In particular
 \bprog
   gequal(cgetg(1, t_VEC), gen_0)
 @eprog\noindent is true, and the relation is not transitive. E.g.~an empty
@@ -3106,6 +3106,28 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
 
 \fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
 monomial in its main variable, 0~otherwise.
+
+The following less convenient comparison functions and boolean operators were
+used by the historical GP interpreter. They are provided for backward
+compatibility only and should not be used:
+
+\fun{GEN}{gle}{GEN x, GEN y}
+
+\fun{GEN}{glt}{GEN x, GEN y}
+
+\fun{GEN}{gge}{GEN x, GEN y}
+
+\fun{GEN}{ggt}{GEN x, GEN y}
+
+\fun{GEN}{geq}{GEN x, GEN y}
+
+\fun{GEN}{gne}{GEN x, GEN y}
+
+\fun{GEN}{gor}{GEN x, GEN y}
+
+\fun{GEN}{gand}{GEN x, GEN y}
+
+\fun{GEN}{gnot}{GEN x, GEN y}
 
 \subsec{Sorting}
 

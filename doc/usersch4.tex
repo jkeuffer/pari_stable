@@ -43,7 +43,7 @@ Before any PARI routine is called, one must initialize the system, and in
 particular the PARI stack which is both a scratchboard and a repository for
 computed objects. This is done with a call to the function
 
-\fun{void}{pari_init}{size\_t size, ulong maxprime}
+\fun{void}{pari_init}{size_t size, ulong maxprime}
 
 \noindent The first argument is the number of bytes given to PARI to work
 with, and the second is the upper limit on a precomputed prime number table;
@@ -250,13 +250,13 @@ You should make use of the PARI stack as much as possible, and avoid
 allocating objects using the customary functions. If you do, you should
 use, or at least have a very close look at, the following wrappers:
 
-\fun{char*}{gpmalloc}{size\_t size} calls \kbd{malloc} to allocate
+\fun{char*}{gpmalloc}{size_t size} calls \kbd{malloc} to allocate
 \kbd{size} bytes and returns a pointer to the allocated memory. If the
 request fails, an error is raised. The \kbd{SIGINT} signal is blocked until
 \kbd{malloc} returns, to avoid leaving the system stack in an inconsistent
 state.
 
-\fun{char*}{gprealloc}{void* ptr, size\_t size} as \kbd{gpmalloc} but calls
+\fun{char*}{gprealloc}{void* ptr, size_t size} as \kbd{gpmalloc} but calls
 \kbd{realloc} instead of \kbd{malloc}.
 
 \fun{char*}{gpfree}{void* ptr} calls \kbd{free} to liberate the memory space
@@ -349,7 +349,7 @@ to give back accumulated garbage \emph{during} a computation without losing
 recent data. For this you need the \kbd{gerepile} function (or one of its
 simpler variants described hereafter):
 
-\fun{GEN}{gerepile}{pari\_sp ltop, pari\_sp lbot, GEN q}
+\fun{GEN}{gerepile}{pari_sp ltop, pari_sp lbot, GEN q}
 
 \noindent
 This function cleans up the stack between \kbd{ltop} and \kbd{lbot}, where
@@ -434,7 +434,7 @@ pointer to random garbage.
 
 \noindent$\bullet$ A simple variant is
 
-\fun{GEN}{gerepileupto}{pari\_sp ltop, GEN q}
+\fun{GEN}{gerepileupto}{pari_sp ltop, GEN q}
 
 \noindent which cleans the stack between \kbd{ltop} and the \emph{connected}
 object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
@@ -445,7 +445,7 @@ functions guarantee this.
 \noindent$\bullet$ Another variant (a special case of \tet{gerepileall}
 below, where $n=1$) is
 
-\fun{GEN}{gerepilecopy}{pari\_sp ltop, GEN x)}
+\fun{GEN}{gerepilecopy}{pari_sp ltop, GEN x)}
 
 \noindent which is functionally equivalent to \kbd{gerepileupto(ltop,
 gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
@@ -458,7 +458,7 @@ is less efficient than either \tet{gerepileupto} or \tet{gerepile}, because
 To cope with complicated cases where many objects have to be
 preserved, you can use
 
-\fun{void}{gerepileall}{pari\_sp ltop, int n, ...}
+\fun{void}{gerepileall}{pari_sp ltop, int n, ...}
 
 \noindent where the routine expects $n$ further arguments, which are the
 \emph{addresses} of the \kbd{GEN}s you want to preserve. It cleans up the most
@@ -471,7 +471,7 @@ functions (the less prone to user error), hence the slowest.
 An alternative syntax, obsolete but kept for backward compatibility, is
 given by
 
-\fun{void}{gerepilemany}{pari\_sp ltop, GEN *gptr[], int n}
+\fun{void}{gerepilemany}{pari_sp ltop, GEN *gptr[], int n}
 
 \noindent which works exactly as above, except that the preserved \kbd{GEN}s
 are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
@@ -479,7 +479,7 @@ are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
 
 \noindent$\bullet$ More efficient, but tricky to use is
 
-\fun{void}{gerepilemanysp}{pari\_sp ltop, pari\_sp lbot, GEN *gptr[], int n}
+\fun{void}{gerepilemanysp}{pari_sp ltop, pari_sp lbot, GEN *gptr[], int n}
 
 \noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
 updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
@@ -1793,11 +1793,11 @@ uses these timers, and many PARI functions do use \kbd{timer2} when
 timing in a reentrant way, PARI defines a dedicated data type,
 \tet{pari_timer}. The functions
 
-\fun{void}{TIMERstart}{pari\_timer *T}
+\fun{void}{TIMERstart}{pari_timer *T}
 
-\fun{long}{TIMER}{pari\_timer *T}
+\fun{long}{TIMER}{pari_timer *T}
 
-\fun{long}{msgTIMER}{pari\_timer *T, char *format,...}
+\fun{long}{msgTIMER}{pari_timer *T, char *format,...}
 
 \noindent provide an equivalent to \kbd{timer} and \kbd{msgtimer}, except
 they use a unique timer \kbd{T} containing all the information needed, so

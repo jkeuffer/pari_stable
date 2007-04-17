@@ -28,8 +28,8 @@ Variant: Also available are
  
  \fun{GEN}{redreal}{GEN x}
  
- \fun{GEN}{rhoreal}{GEN x} (= \funs{qfbred}{x,1}),
+ \fun{GEN}{rhoreal}{GEN x} (= \kbd{qfbred(x,1)}),
  
- \fun{GEN}{redrealnod}{GEN x, GEN isqrtD} (= \funs{qfbred}{x,2,,isqrtD}),
+ \fun{GEN}{redrealnod}{GEN x, GEN isqrtD} (= \kbd{qfbred(x,2,,isqrtD)}),
  
- \fun{GEN}{rhorealnod}{GEN x, GEN issqrtD} (= \funs{qfbred}{x,3,,isqrtD}).
+ \fun{GEN}{rhorealnod}{GEN x, GEN issqrtD} (= \kbd{qfbred(x,3,,isqrtD)}).

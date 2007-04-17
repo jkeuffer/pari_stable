@@ -141,7 +141,7 @@ function prototypes below. See \secref{se:sums} for more details.
 \subseckbd{+$/$-}: The expressions \kbd{+}$x$ and \kbd{-}$x$ refer
 to monadic operators (the first does nothing, the second negates $x$).
 
-\syn{gneg}{x} for \kbd{-}$x$.
+The library syntax is \fun{GEN}{gneg}{GEN x} for \kbd{-}$x$.
 
 \subseckbd{+}, \kbd{-}: The expression $x$ \kbd{+} $y$ is the \idx{sum} and
 $x$ \kbd{-} $y$ is the \idx{difference} of $x$ and $y$. Among the prominent
@@ -149,7 +149,8 @@ impossibilities are addition/subtraction between a scalar type and a vector
 or a matrix, between vector/matrices of incompatible sizes and between an
 intmod and a real number.
 
-\syn{gadd}{x,y} $x$ \kbd{+} $y$, \funs{gsub}{x,y} for $x$ \kbd{-} $y$.
+The library syntax is \fun{GEN}{gadd}{GEN x, GEN y} for $x$ \kbd{+} $y$,
+\fun{GEN}{gsub}{GEN x, GEN y} for $x$ \kbd{-} $y$.
 
 \subseckbd{*}: The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
 and $y$. Among the prominent impossibilities are multiplication between
@@ -165,8 +166,8 @@ the operator \kbd{\til} or the function \kbd{mattranspose}, see
 If $x$ and $y$ are binary quadratic forms, compose them. See also
 \kbd{qfbnucomp} and \kbd{qfbnupow}.
 
-\syn{gmul}{x,y} for $x$ \kbd{*} $y$. Also available is
-\funs{gsqr}{x} for $x$ \kbd{*} $x$ (faster of course!).
+The library syntax is \fun{GEN}{gmul}{GEN x, GEN y} for $x$ \kbd{*} $y$.
+Also available is \fun{GEN}{gsqr}{GEN x} for $x$ \kbd{*} $x$.
 
 \subseckbd{/}: The expression $x$ \kbd{/} $y$ is the \idx{quotient} of $x$
 and $y$. In addition to the impossibilities for multiplication, note that if
@@ -183,7 +184,7 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 \kbd{O(X\pow k)} to the result or use the \kbd{taylor} function
 (see \secref{se:taylor}). \label{se:gdiv}
 
-\syn{gdiv}{x,y} for $x$ \kbd{/} $y$.
+The library syntax is \fun{GEN}{gdiv}{GEN x, GEN y} for $x$ \kbd{/} $y$.
 
 \subseckbd{\bs}: The expression \kbd{$x$ \bs\ $y$} is the \idx{Euclidean
 quotient} of $x$ and $y$. If $y$ is a real scalar, this is defined as
@@ -195,7 +196,8 @@ Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
 to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
 is applied componentwise.
 
-\syn{gdivent}{x,y} for $x$ \kbd{\bs} $y$.
+The library syntax is \fun{GEN}{gdivent}{GEN x, GEN y}
+for $x$ \kbd{\bs} $y$.
 
 \subseckbd{\bs/}: The expression $x$ \b{/} $y$ evaluates to the rounded
 \idx{Euclidean quotient} of $x$ and $y$. This is the same as \kbd{$x$ \bs\ $y$}
@@ -206,7 +208,8 @@ $]-|y|/2, |y|/2]$).
 
 When $x$ is a vector or matrix, the operator is applied componentwise.
 
-\syn{gdivround}{x,y} for $x$ \b{/} $y$.
+The library syntax is \fun{GEN}{gdivround}{GEN x, GEN y}
+for $x$ \b{/} $y$.
 
 \subseckbd{\%}: The expression \kbd{$x$ \% $y$} evaluates to the modular
 \idx{Euclidean remainder} of $x$ and $y$, which we now define. If $y$ is an
@@ -228,7 +231,8 @@ Note that when $y$ is an integer and $x$ a polynomial, $y$ is first promoted
 to a polynomial of degree $0$. When $x$ is a vector or matrix, the operator
 is applied componentwise.
 
-\syn{gmod}{x,y} for $x$ \kbd{\%} $y$.
+The library syntax is \fun{GEN}{gmod}{GEN x, GEN y}
+for $x$ \kbd{\%} $y$.
 
 \subseckbd{\pow}: The expression $x\hbox{\kbd{\pow}}n$ is \idx{powering}.
 If the exponent is an integer, then exact operations are performed using
@@ -307,50 +311,28 @@ In general, one can try the following approach
 This is not guaranteed to work either since it must invert pivots. See
 \secref{se:linear_algebra}.
 
-\syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
+The library syntax is \fun{GEN}{gpow}{GEN x, GEN n, long prec}
+for $x\hbox{\kbd{\pow}}n$.
 
 %SECTION: operators
 
 \subsec{Comparison and boolean operators}.\sidx{boolean operators} The six
 standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=}, \kbd{>},
-\kbd{==}, \kbd{!=} are available in GP, and in library mode under the names
-\tet{gle}, \tet{glt}, \tet{gge}, \tet{ggt}, \tet{geq}, \tet{gne} respectively.
-The library syntax is $\var{co}(x,y)$, where \var{co} is the comparison
-operator. The result is 1 (as a \kbd{GEN}) if the comparison is true, 0 (as a
-\kbd{GEN}) if it is false. For the purpose of comparison, \typ{STR} objects are
+\kbd{==}, \kbd{!=} are available in GP. The result is 1 if the comparison is
+true, 0 if it is false. For the purpose of comparison, \typ{STR} objects are
 strictly larger than any other non-string type; two \typ{STR} objects are
 compared using the standard lexicographic order.
 
-The standard boolean functions  \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
-(\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available, and the
-library syntax is \funs{gor}{x,y}, \funs{gand}{x,y} and \funs{gnot}{x}
-respectively.
+GP accepts the following synonyms for some of the above functions:
+\kbd{|} and \kbd{\&} are accepted as\sidx{bitwise and}\sidx{bitwise or}
+synonyms of \kbd{||} and \kbd{\&\&} respectively. Also, \kbd{<>} is accepted
+as a synonym for \kbd{!=}. On the other hand, \kbd{=} is definitely
+\emph{not} a synonym for \kbd{==}: it is the assignment statement. (We do not
+use the customary C operators for bitwise \kbd{and} or bitwise \kbd{or}; use
+\tet{bitand} or \tet{bitor}.)
 
-In library mode, it is in fact usually preferable to use the two basic
-functions which are \funs{gcmp}{x,y} which gives the sign (1, 0, or -1) of
-$x-y$, where $x$ and $y$ must be in $\R$, and \funs{gequal}{x,y} which can be
-applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if they are
-equal (but not necessarily identical), 0 (i.e.~false) otherwise. Comparisons
-to special constants are implemented and should be used instead of
-\kbd{gequal}: \funs{gcmp0}{x} ($x==0$ ?), \funs{gcmp1}{x} ($x==1$ ?), and
-\funs{gcmp_1}{x} ($x==-1$ ?).
-
-Note that $\kbd{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
-not an exact object. To test whether $x$ is an exact object which is equal to
-zero, one must use \funs{isexactzero}{x}.
-
-Also note that the \kbd{gcmp} and \kbd{gequal} functions return a C-integer,
-and \emph{not} a \kbd{GEN} like \kbd{gle} etc.
-
-\smallskip
-GP accepts the following synonyms for some of the above functions: since we
-thought it might easily lead to confusion, we don't use the customary C
-operators for bitwise \kbd{and} or bitwise \kbd{or} (use \tet{bitand} or
-\tet{bitor}), hence \kbd{|} and \kbd{\&} are accepted as\sidx{bitwise
-and}\sidx{bitwise or} synonyms of \kbd{||} and \kbd{\&\&} respectively.
-Also, \kbd{<>} is accepted as a synonym for \kbd{!=}. On the other hand,
-\kbd{=} is definitely \emph{not} a synonym for \kbd{==} since it is the
-assignment statement.
+The standard boolean operators \kbd{||} (\idx{inclusive or}), \kbd{\&\&}
+(\idx{and})\sidx{or} and \kbd{!} (\idx{not}) are also available.
 
 \section{Conversions and similar elementary functions or commands}
 \label{se:conversion}
@@ -363,54 +345,6 @@ is a vector or a matrix, the operation is done componentwise. This will not
 be restated for every function.
 
 %SECTION: conversions
-
-\subsec{Components of a PARI object}:
-
-There are essentially three ways to extract the \idx{components} from a PARI
-object.
-
-The first and most general, is the function \funs{component}{x,n} which
-extracts the $n^{\text{th}}$-component of $x$. This is to be understood as
-follows: every PARI type has one or two initial \idx{code words}. The
-components are counted, starting at 1, after these code words. In particular
-if $x$ is a vector, this is indeed the $n^{\text{th}}$-component of $x$, if
-$x$ is a matrix, the $n^{\text{th}}$ column, if $x$ is a polynomial, the
-$n^{\text{th}}$ coefficient (i.e.~of degree $n-1$), and for power series, the
-$n^{\text{th}}$ significant coefficient. The use of the function
-\kbd{component} implies the knowledge of the structure of the different PARI
-types, which can be recalled by typing \b{t} under \kbd{gp}.
-
-\syn{compo}{x,n}, where $n$ is a \kbd{long}.
-
-The two other methods are more natural but more restricted. The function
-\funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the polynomial
-or power series $x$, with respect to the main variable of $x$. (To check
-variable ordering, type \kbd{variable()}.) In particular
-if $n$ is less than the valuation of
-$x$ or in the case of a polynomial, greater than the degree, the result is
-zero (contrary to \kbd{compo} which would send an error message). If $x$ is
-a power series and $n$ is greater than the largest significant degree, then
-an error message is issued.
-
-For greater flexibility, vector or matrix types are also accepted for $x$,
-and the meaning is then identical with that of \kbd{compo}.
-
-Finally note that a scalar type is considered by \kbd{polcoeff} as a
-polynomial of degree zero.
-
-\syn{truecoeff}{x,n}.
-
-The third method is specific to vectors or matrices in GP. If $x$ is a
-(row or column) vector, then \tet{x[n]} represents the $n^{\text{th}}$
-component of $x$, i.e.~\kbd{compo(x,n)}. It is more natural and shorter to
-write. If $x$ is a matrix, \tet{x[m,n]} represents the coefficient of
-row \kbd{m} and column \kbd{n} of the matrix, \tet{x[m,]} represents
-the $m^{\text{th}}$ \emph{row} of $x$, and \tet{x[,n]} represents
-the $n^{\text{th}}$ \emph{column} of $x$.
-
-Finally note that in library mode, the macros \teb{gcoeff} and \teb{gmael}
-are available as direct accessors to a \kbd{GEN component}. See Chapter 4 for
-details.
 
 \section{Transcendental functions}\label{se:trans}
 
@@ -484,7 +418,8 @@ version \vers, will have a different name if they are implemented some day.
 effect as \kbd{exp(y*log(x))}. It can be applied to $p$-adic numbers as well
 as to the more usual types.\sidx{powering}
 
-\syn{gpow}{x,y,\var{prec}}.
+The library syntax is \fun{GEN}{gpow}{GEN x, GEN n, long prec}
+for $x\hbox{\kbd{\pow}}n$.
 
 %SECTION: transcendental
 
