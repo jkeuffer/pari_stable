@@ -788,11 +788,14 @@ $2^n$ if $n \geq 0$, and $0$ otherwise).
 \fun{GEN}{real2n}{long n, long prec} create a \typ{REAL} equal to $2^n$
 to \kbd{prec} words of accuracy.
 
-\fun{GEN}{stroi}{char *s} convert the character string \kbd{s} to a
-\typ{INT}.
+\fun{GEN}{strtoi}{char *s} convert the character string \kbd{s} to a
+non-negative \typ{INT}. The string \kbd{s} consists exclusively of digits (no
+leading sign).
 
-\fun{GEN}{stror}{char *s, long prec} convert the character string \kbd{s}
-to a \typ{REAL} of precision \kbd{prec}.
+\fun{GEN}{strtor}{char *s, long prec} convert the character string \kbd{s}
+to a non-negative \typ{REAL} of precision \kbd{prec}.
+The string \kbd{s} consists exclusively of digits and optional decimal
+point and exponent (no leading sign).
 
 \subsec{Assignment}.
 In this section, the \kbd{z} argument in the \kbd{z}-functions must be of type
