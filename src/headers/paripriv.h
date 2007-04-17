@@ -58,6 +58,29 @@ GEN incloop(GEN a);
 GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
 
+/* parser */
+void forpari(entree *ep, GEN a, GEN b, GEN node);
+void untilpari(GEN a, GEN b);
+void whilepari(GEN a, GEN b);
+GEN  ifpari(GEN g, GEN a, GEN b);
+GEN  andpari(GEN a, GEN b);
+GEN  orpari(GEN a, GEN b);
+void ifpari_void(GEN g, GEN a, GEN b);
+
+GEN  gadde(GEN *x, GEN y);
+GEN  gadd1e(GEN *x);
+GEN  gdive(GEN *x, GEN y);
+GEN  gdivente(GEN *x, GEN y);
+GEN  gdivrounde(GEN *x, GEN y);
+GEN  gmode(GEN *x, GEN y);
+GEN  gmule(GEN *x, GEN y);
+GEN  gshiftle(GEN *x, long n);
+GEN  gshiftre(GEN *x, long n);
+GEN  gstore(GEN *x, GEN y);
+GEN  gsube(GEN *x, GEN y);
+GEN  gsub1e(GEN *x);
+GEN  gshift_right(GEN x, long n);
+
 /* multiprecision */
 GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);
