@@ -79,5 +79,72 @@ inconsistent state.)
 \tet{PARI_SIGINT_pending}: if this is non-zero, then a \kbd{SIGINT} was
 blocked. Take action as appropriate.
 
+\section{Finite fields and black-box groups}
+
+A black box group is defined by a \tet{bb_group} struct, describing methods
+available to handle group elements:
+\bprog
+    struct bb_group
+    {
+      GEN (*mul)(void*, GEN, GEN);
+      GEN (*pow)(void*, GEN, GEN);
+      GEN (*rand)(void*);
+      int (*cmp)(GEN, GEN);
+      int (*cmp1)(GEN);
+    };
+@eprog
+\kbd{mul(E,x,y)} returns the product $xy$.
+
+\kbd{pow(E,x,n)} returns $x^n$ ($n$ integer, possibly negative or zero).
+
+\kbd{rand(E)} returns a random element in the group.
+
+\kbd{cmp(x,y)} implements a total ordering on the group elements
+(return value $-1$, $0$ or $1$).
+
+\kbd{cmp1(x)} returns zero if $x$ is not the neutral element in the group,
+and a non-zero value otherwise.
+
+A group is thus described by a \kbd{const bb\_struct} as above and auxiliary
+data typecast to \kbd{void*}. The following functions operate on black-box
+groups:
+
+\fun{GEN}{gen_Shanks_log}{GEN x,GEN g,GEN N, void *E, const struct bb_group
+*grp, GEN easy(void*E, GEN, GEN, GEN)} Generic baby-step/giant-step algorithm
+(Shanks's method). Assuming that $g$ has order $N$, compute an integer $k$
+such that $g^k = x$. This requires $O(\sqrt{N})$ group operations and uses an
+auxilliary table containing $O(\sqrt{N)$ group elements.
+
+\misctitle{FIXME:} could implement Floyd's cycle finding method to reduce to
+$O(1)$ space.
+
+If \kbd{easy} is not \kbd{NULL}, call \kbd{easy(E,a,g,N)} first and if the
+return value is not \kbd{NULL}, return it. For instance this is used over
+$\F_q^*$ to compute the discrete log of elements belonging to the prime
+field.
+
+\misctitle{FIXME:} more generally, one should compute the minimal polynomial
+of $x$ and restrict to its field of definition.
+
+\fun{GEN}{gen_Shanks_sqrtn}{GEN a, GEN n, GEN N, GEN *zetan, void *E, const
+struct bb_group *grp} returns one solution of $x^n = a$ in a black-box cyclic
+group of order $N$. Return \kbd{NULL} if no solution exists. If \kbd{zetan}
+is not \kbd{NULL} it is set to an element of exact order $n$.
+
+This function uses Shanks's baby-step giant step techniques for all prime
+divisors of $\gcd(n,N)$.
+
+\fun{GEN}{gen_PH_log}{GEN a, GEN g, GEN N, void *E, const struct bb_group *grp, GEN easy(void *E, GEN, GEN, GEN)}
+Generic Pohlig-Helman algorithm. Assuming that $g$ has order $N$, compute
+an integer $k$ such that $g^k = x$. This requires $O(p^{1/2+\epsilon})$ group
+operations, where $p$ is the largest prime divisor of $N$, and uses an
+auxiliary table containing $O(\sqrt{p})$ group elements.
+
+\kbd{easy} is as in \kbd{gen\_Shanks\_log}.
+
+\fun{GEN}{gen_eltorder}{GEN x, GEN N, void *E, const struct bb_group *grp}
+computes the order of $x$. If $N$ is not \kbd{NULL} it is a multiple of the
+order, as a \typ{INT} or a factorization matrix.
+
 \vfill\eject
 \input index\end
