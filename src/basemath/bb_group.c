@@ -78,7 +78,7 @@ gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
 
 /* easy() is an optional trapdoor function that catch easy logarithms*/
 /* Generic Pohlig-Hellman discrete logarithm*/
-/* smallest integer n such that g^n=a. Assume g has order q */
+/* smallest integer n such that g^n=a. Assume g has order ord */
 GEN
 gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     GEN easy(void *E, GEN, GEN, GEN))
