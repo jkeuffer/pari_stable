@@ -1782,7 +1782,7 @@ logr_abs(GEN X)
   b = bit_accuracy(L - (k-2)); /* take loss of accuracy into account */
   m = (long)(-a/2. + sqrt(a*a/4. + b/6.));
   if (m > b-a) m = b-a;
-  if (m <= 0) m = 0; else L += m>>TWOPOTBITS_IN_LONG;
+  if (m < 0.2*a) m = 0; else L += m>>TWOPOTBITS_IN_LONG;
   x = rtor(X,L);
   if (neg) x[1] = evalsigne(1) | _evalexpo(-1);
   else     x[1] = evalsigne(1) | _evalexpo(0);
