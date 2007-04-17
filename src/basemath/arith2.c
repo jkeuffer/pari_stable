@@ -951,79 +951,25 @@ factoru_pow(ulong n)
   avma = lbot; return gerepileupto(ltop,f);
 }
 
-/* Factor Phi_p(p) = (C_p(p))^2 - (p D_p(p))^2, p = 1 (mod 4)
- * or Phi_2p(p) = Phi_p(-p) = (C_p(p))^2 - (p D_p(p))^2, p = 3 (mod 4)
- * Algorithm L in R.P Brent "On computing factors of cyclotomic polynomials",
- * Math. Comp. 61 (1993), 131-14 */
-static GEN neg(long s, GEN x) { return s == 1? x: negi(x); }
-static GEN
-aurifeuille(long p)
-{
-  long j, k, u, v, d;
-  GEN q, C, D, P;
-
-  d = p >> 1; /* p = 1 + 2d */
-  u = d >> 1;
-  v = (d-1) >> 1;
-
-  q = cgetg(d+1, t_VECSMALL);
-  if ((p & 3) == 1) { /* 1 mod 4 */
-    for (k = 1; k <= d; k++) { q[k] = kross(p,k); q[++k] = -1; }
-  } else { /* 3 mod 4 */
-    for (k = 1; k <= d; k++) {
-      q[k] = kross(p,k); k++;
-      q[k] = (k & 3) == 2 ? 1: -1;
-    }
-  }
-  C = cgetg(d+2, t_VEC) + 1;
-  D = cgetg(d+1, t_VEC) + 1;
-  gel(C,0) = gel(D,0) = gen_1;
-  for (k = 1; k <= u; k++)
-  {
-    GEN SC = gen_0, SD = gen_0;
-    for (j = 0; j < k; j++)
-    {
-      long a = 2*(k-j);
-      SC = addii(SC, addii(mulsi(p * q[a-1], gel(D,j)), neg(-q[a],gel(C,j))));
-    }
-    gel(C,k) = diviuexact(SC, 2*k);
-    if (k > v) break;
-    for (j = 0; j < k; j++)
-    {
-      long a = 2*(k-j);
-      SD = addii(SD, addii(neg(q[a+1], gel(C,j)), neg(-q[a],gel(D,j))));
-    }
-    gel(D,k) = diviuexact(addii(gel(C,k),SD), 2*k+1);
-  }
-  for (k = u+1; k <=d; k++) gel(C,k) = gel(C, d-k);
-  for (k = v+1; k < d; k++) gel(D,k) = gel(D, d-k-1);
-  P = utoipos(p);
-  C = poleval(C-1, P);
-  D = poleval(D-1, P); D = mulis(D, p);
-  return mkvec2(addii(C, D), subii(C, D));
-}
-
 /* factor p^n - 1 */
 GEN
 factor_pn_1(GEN p, long n)
 {
   pari_sp av = avma;
   GEN A = Z_factor(subis(p,1)), d = divisorsu(n);
-  long i, dpp = 0, pp = itos_or_0(p);
-  if (pp && n % pp == 0)
-  {
-    dpp = ((pp & 3) == 3) ? (odd(n)? 0: 2*pp) : pp;
-  }
-  /* dpp = 0: can't apply Aurifeuille. Otherwise, may apply it for d = dpp */
+  long i, pp = itos_or_0(p);
   for(i=2; i<lg(d); i++)
   {
     GEN B;
-    if (d[i] == dpp)
+    if (pp && d[i]%pp==0 && (
+       ((pp&3)==1 && (d[1]&1)) ||
+       ((pp&3)==3 && (d[1]&3)==2) ||
+       (pp==2 && (d[1]&7)==4)))
     {
-      GEN t = aurifeuille(pp);
-      B = Z_factor(gel(t,1));
+      GEN f=factor_Aurifeuille(p,d[i]);
+      B = Z_factor(f);
       A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
-      B = Z_factor(gel(t,2));
+      B = Z_factor(diviiexact(poleval(polcyclo(d[i],0), p), f));
     }
     else
       B = Z_factor(poleval(polcyclo(d[i],0), p));
