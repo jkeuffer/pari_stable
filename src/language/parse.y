@@ -26,12 +26,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "tree.h"
 
 static THREAD int pari_once;
-static THREAD const char *pari_lex_start, *pari_lasterror, *pari_unusedchar;
+static THREAD const char *pari_lex_start, *pari_unused_chars;
+static THREAD GEN pari_lasterror;
 
 static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
 { 
-  if (pari_lasterror) gpfree((char *)pari_lasterror);
-  pari_lasterror=pari_strdup(s); 
+  if (pari_lasterror) cgiv(pari_lasterror);
+  pari_lasterror=strtoGENstr(s);
 }
 
 static THREAD gp2c_stack s_node;
@@ -56,26 +57,26 @@ pari_init_parser(void)
     pari_tree[i].len  = strlen(opname[i]);
   }
   avma=ltop;
-  pari_lasterror=NULL;
 }
 
 static void
 unused_chars(const char *lex, const char *c, int strict)
 {
+  pari_sp ltop=avma;
   long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
   char *s;
   if (strict) pari_err(talker2,"unused characters", lex, c);
   if ((long)strlen(lex) > n)
   {
-    s = gpmalloc(n + 1);
+    s = stackmalloc(n + 1);
     n -= 5;
     (void)strncpy(s,lex, n);
     strcpy(s + n, "[+++]");
   }
   else
-    s = pari_strdup(lex);
+    s = (char *)lex;
   pari_warn(warner, "unused characters: %s", s);
-  gpfree(s);
+  ltop=avma;
 }
 
 const char*
@@ -92,17 +93,20 @@ parser_reset(void)
 GEN
 pari_eval_str(char *lex, int strict)
 {
+  pari_sp ltop=avma;
   GEN code, res;
   pari_lex_start = lex;
-  pari_unusedchar=NULL;
+  pari_unused_chars=NULL;
   pari_once=1;
+  pari_lasterror=NULL;
   if (pari_parse(&lex))
   {
-    if (pari_unusedchar)
-      unused_chars(pari_unusedchar,pari_lex_start,strict);
+    if (pari_unused_chars)
+      unused_chars(pari_unused_chars,pari_lex_start,strict);
     else  
-      pari_err(talker2,pari_lasterror,lex-1,pari_lex_start);
+      pari_err(talker2,GSTR(pari_lasterror),lex-1,pari_lex_start);
   }
+  avma=ltop;
   code=gp_closure(s_node.n-1);
   parser_reset();
   compiler_reset();
@@ -186,7 +190,7 @@ newintnode(struct node_loc *loc)
 %%
 
 sequnused: seq       {$$=$1;}
-         | seq error {$$=$1; pari_unusedchar=@1.end;YYABORT;}
+         | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
 
 seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2) 
                          @$.start=@$.end=pari_lex_start;
