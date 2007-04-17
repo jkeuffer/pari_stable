@@ -184,6 +184,7 @@ GEN to_famat(GEN g, GEN e);
 GEN trivfact(void);
 
 /* integer factorization / discrete log */
+GEN   factor_Aurifeuille(GEN p, long n);
 int   BSW_isprime(GEN x);
 int   BSW_isprime_small(GEN x);
 GEN   coprime_part(GEN x, GEN f);

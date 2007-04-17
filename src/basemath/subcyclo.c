@@ -800,3 +800,28 @@ polsubcyclo(long n, long d, long v)
     return gerepileupto(ltop,V);
   }
 }
+
+/* p prime, n > 1 */
+GEN
+factor_Aurifeuille(GEN p, long n)
+{
+  pari_sp ltop = avma;
+  long val, l;
+  long phi_n = itos(phi(stoi(n)));
+  GEN bound = ceil_safe(gpowgs(addrs(gsqrt(p,3),1),phi_n));
+  GEN zl = polsubcyclo_start(n, 0, 0, bound, &val, &l);
+  GEN le = gel(zl,1), z = gel(zl,2), gl = utoipos(l);
+  GEN pstar = (mod4(p) == 1? p: negi(p)), lr = Fp_sqrt(pstar, gl);
+  GEN r = padicsqrtnlift(pstar,gen_2,lr,gl,val);
+  GEN f, s, nr = negi(r);
+  long i;
+  s = z; f = subii(r,s);
+  for(i=2;i<n;i++)
+  {
+    s = Fp_mul(z,s,le);
+    if (cgcd(i,n)==1)
+      f = Fp_mul(f, subii((krosi(i,p)==1?r:nr),s), le);
+  }
+  return gerepileuptoint(ltop, f);
+}
+
