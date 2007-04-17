@@ -664,8 +664,8 @@ closure_eval(GEN C)
         }
     case OCcompo2ptr:
         {
-          long b=st[sp-2];
-          long c=st[sp-1];
+          long c=st[sp-2];
+          long d=st[sp-1];
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
           GEN p;
@@ -679,9 +679,9 @@ closure_eval(GEN C)
           sp-=2;
           if (typ(p)!=t_MAT)
             pari_err(talker,"_[_,_]: not a matrix");
-          check_array_index(b, lg(p));
-          check_array_index(c, lg(p[b]));
-          C->ptcell = (GEN *) gel(p,c)+b;
+          check_array_index(d, lg(p));
+          check_array_index(c, lg(p[d]));
+          C->ptcell = (GEN *) gel(p,d)+c;
           C->parent   = p;
           g->x = *(g->c.ptcell);
           break;
