@@ -858,14 +858,11 @@ fetch_named_var(char *s)
   entree **funhash = functions_hash + hashvalue(s);
   entree *ep = findentry(s, strlen(s), *funhash);
   if (!ep) ep = installep(s,strlen(s),funhash);
-  else if (EpVALENCE(ep)!=EpNEW)
+  else switch (EpVALENCE(ep))
   {
-    switch (EpVALENCE(ep))
-    {
-      case EpVAR: case EpGVAR: break;
-      default: pari_err(talker, "%s already exists with incompatible valence", s);
-    }
-    return ep;
+    case EpVAR: case EpGVAR: return ep;
+    case EpNEW: break;
+    default: pari_err(talker, "%s already exists with incompatible valence", s);
   }
   ep->valence=EpVAR;
   (void)manage_var(manage_var_create,ep);
