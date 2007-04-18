@@ -209,7 +209,7 @@ quadhilbertimag(GEN D, GEN pq)
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
     {
-      if (pq && degpol(srgcd(P, derivpol(P)))) { avma = av; return gen_0; }
+      if (pq && degpol(ZX_gcd(P, ZX_deriv(P)))) { avma = av; return gen_0; }
       break;
     }
     avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));

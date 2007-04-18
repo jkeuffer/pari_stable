@@ -212,7 +212,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     if (DEBUGLEVEL>1) pari_warn(warnprec, "inithue", prec_roots); 
   }
 
-  dP = derivpol(P);
+  dP = ZX_deriv(P);
   c1 = NULL; /* min |P'(r_i)|, i <= s */
   for (k=1; k<=s; k++)
   {
@@ -818,7 +818,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     fprintferr("c14 = %Z\n",c14);
   }
 
-  dP = derivpol(P);
+  dP = ZX_deriv(P);
   vecdP = cgetg(s+1, t_VEC);
   for (i=1; i<=s; i++) gel(vecdP,i) = poleval(dP, gel(ro,i));
 

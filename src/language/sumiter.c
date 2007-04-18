@@ -1055,9 +1055,9 @@ polzag(long n, long m)
   if (d <= 0 || m < 0) return gen_0;
   A  = mkpoln(2, stoi(-2), gen_1); /* 1 - 2x */
   Bx = mkpoln(3, stoi(-2), gen_2, gen_0); /* 2x - 2x^2 */
-  g = gmul(poleval(derivpol(polchebyshev1(d,0)), A), gpowgs(Bx, (m+1)>>1));
+  g = gmul(poleval(ZX_deriv(polchebyshev1(d,0)), A), gpowgs(Bx, (m+1)>>1));
   for (k = m; k >= 0; k--)
-    g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
+    g = (k&1)? ZX_deriv(g): gadd(gmul(A,g), gmul(Bx,ZX_deriv(g)));
   s = mulii(sqru(d), mpfact(m+1));
   return gerepileupto(av, gdiv(g,s));
 }

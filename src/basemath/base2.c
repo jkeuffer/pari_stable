@@ -803,7 +803,7 @@ maxord(GEN p,GEN f,long mf)
   GEN w = NULL, g, res, fp = FpX_red(f, p);
 
   if (cmpui(degpol(f),p) < 0)
-    g = FpX_div(fp, FpX_gcd(fp,derivpol(fp), p), p);
+    g = FpX_div(fp, FpX_gcd(fp,ZX_deriv(fp), p), p);
   else
   {
     w = gel(FpX_factor(fp,p),1);
@@ -1419,7 +1419,7 @@ update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
   for (k = 1;; k++)
   {
     kill_cache(ns);
-    pdr = respm(S->chi, derivpol(S->chi), pmr);
+    pdr = respm(S->chi, ZX_deriv(S->chi), pmr);
     if (signe(pdr)) break;
     
     pmr = sqri(pmr); /* try a larger precision */
@@ -1763,7 +1763,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
 {
   long l = lg(w)-1;
   GEN h = gel(w,l); /* largest factor */
-  GEN D = fast_respm(f, derivpol(f), p, mf);
+  GEN D = fast_respm(f, ZX_deriv(f), p, mf);
   decomp_t S;
 
   S.f = f;
@@ -1784,7 +1784,7 @@ indexpartial(GEN P, GEN DP)
 {
   pari_sp av = avma;
   long i, nb;
-  GEN fa, res = gen_1, dP = derivpol(P);
+  GEN fa, res = gen_1, dP = ZX_deriv(P);
   pari_timer T;
 
   if(DEBUGLEVEL>=5) (void)TIMER(&T);

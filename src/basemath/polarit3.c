@@ -2634,7 +2634,7 @@ GEN
 ZX_disc_all(GEN x, ulong bound)
 {
   pari_sp av = avma;
-  GEN l, d = ZX_resultant_all(x, derivpol(x), NULL, bound);
+  GEN l, d = ZX_resultant_all(x, ZX_deriv(x), NULL, bound);
   l = leading_term(x); if (!gcmp1(l)) d = diviiexact(d,l);
   if (degpol(x) & 2) d = negi(d);
   return gerepileuptoint(av,d);

@@ -1950,7 +1950,7 @@ gpolylog(long m, GEN x, long prec)
     GEN X = pol_x(0), t = mkpoln(2, gen_m1, gen_1); /* 1 - X */
     p1 = X;
     for (i=2; i <= -m; i++)
-      p1 = gmul(X, gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
+      p1 = gmul(X, gadd(gmul(t,ZX_deriv(p1)), gmulsg(i,p1)));
     p1 = gdiv(p1, gpowgs(t,1-m));
     return gerepileupto(av, poleval(p1,x));
   }

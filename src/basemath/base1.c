@@ -1193,7 +1193,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(MDI,2) = eltmul_get_table(nf, gel(MDI,2));
   gel(mat,7) = MDI;
   if (is_pm1(T->index))
-    D = idealhermite_aux(nf, derivpol(x));
+    D = idealhermite_aux(nf, ZX_deriv(x));
   else
     D = gmul(dA, idealinv(nf, A));
   gel(mat,3) = gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */
@@ -1640,7 +1640,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
       if (!ch) continue;
       return ch;
     }
-    d = ZX_gcd(derivpol(ch), ch);
+    d = ZX_gcd(ZX_deriv(ch), ch);
     if (degpol(d)) ch = gdivexact(ch,d);
 
     if (canon_pol(ch) < 0 && pta) gel(a,i) = gneg_i(gel(a,i));
@@ -1763,7 +1763,7 @@ static GEN
 get_polmin_w(CG_data *d, long k)
 {
   GEN g = get_pol(d, gel(d->ZKembed,k));
-  GEN h = ZX_gcd(g, derivpol(g));
+  GEN h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) g = gdivexact(g,h);
   return g;
 }
@@ -1775,7 +1775,7 @@ chk_gen(void *data, GEN x)
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
   av1 = avma;
-  h = ZX_gcd(g, derivpol(g));
+  h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
   avma = av1; return gerepileupto(av, g);
