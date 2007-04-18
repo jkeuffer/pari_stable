@@ -948,7 +948,6 @@ GEN     ellgenerators(GEN E);
 GEN     ellidentify(GEN E);
 GEN     ellsearch(GEN A);
 GEN     ellsearchcurve(GEN name);
-void    forell(entree *ep, long a, long b, GEN code);
 
 /* elliptic.c */
 
@@ -1385,35 +1384,21 @@ void    traverseheap( void(*f)(GEN, void *), void *data );
 /* intnum.c */
 
 GEN     intcirc(void *E, GEN (*eval) (GEN, void *), GEN a, GEN R, GEN tab, long prec);
-GEN     intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
-GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
-GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfouriercos(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
 GEN     intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, long prec);
 GEN     intfouriersin(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
-GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN     intfuncinit(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flag, long prec);
-GEN     intfuncinit0(entree *ep, GEN a, GEN b, GEN code, long flag, long m, long prec);
 GEN     intlaplaceinv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
-GEN     intlaplaceinv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
 GEN     intmellininv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
-GEN     intmellininv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
 GEN     intmellininvshort(GEN sig, GEN x, GEN tab, long prec);
 GEN     intnum(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN tab, long prec);
-GEN     intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec);
 GEN     intnuminit(GEN a, GEN b, long m, long prec);
-GEN     intnuminit0(GEN a, GEN b, GEN tab, long prec);
 GEN     intnuminitgen(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flext, long prec);
-GEN     intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec);
 GEN     intnumromb(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long flag, long prec);
-GEN     intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec);
 long    intnumstep(long prec);
 GEN     sumnum(void *E, GEN (*f) (GEN, void *), GEN a, GEN sig, GEN tab, long flag, long prec);
-GEN     sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN     sumnumalt(void *E, GEN (*f) (GEN, void *), GEN a, GEN s, GEN tab, long flag, long prec);
-GEN     sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
-GEN     sumnuminit0(GEN a, GEN tab, long sgn, long prec);
 
 /* kummer.c */
 
@@ -1786,6 +1771,7 @@ GEN     FqX_rem(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_sqr(GEN x, GEN T, GEN p);
 GEN     QXQ_inv(GEN A, GEN B);
+GEN     QX_gcd(GEN a,GEN b);
 ulong   Rg_to_Fl(GEN x, ulong p);
 GEN     Rg_to_Fp(GEN x, GEN p);
 GEN     RgC_to_FpC(GEN x, GEN p);
@@ -1800,6 +1786,7 @@ GEN     ZX_add(GEN x, GEN y);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
 int     ZX_is_squarefree(GEN x);
+GEN     ZX_gcd(GEN A, GEN B);
 GEN     ZX_neg(GEN x);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_resultant(GEN A, GEN B);
@@ -1808,7 +1795,6 @@ long    brent_kung_optpow(long d, long n);
 GEN     ffinit(GEN p, long n, long v);
 GEN     from_Kronecker(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
-GEN     modulargcd(GEN a,GEN b);
 GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 GEN     to_Kronecker(GEN P, GEN Q);

@@ -474,7 +474,7 @@ entree oldfonctions[]={
 {"mod",25,(void*)gmodulo,2,"GG","mod(x,y)=creates the integer x modulo y on the PARI stack"},
 {"modp",25,(void*)gmodulo,2,"GG","modp(x,y)=creates the integer x modulo y as a permanent object (on the heap)"},
 {"modreverse",1,(void*)polymodrecip,6,"G","modreverse(x)=reverse polymod of the polymod x, if it exists"},
-{"modulargcd",2,(void*)modulargcd,2,"GG","modulargcd(x,y)=gcd of the polynomials x and y using the modular method"},
+{"modulargcd",2,(void*)QX_gcd,2,"GG","modulargcd(x,y)=gcd of the polynomials x and y using the modular method"},
 {"mu",1,(void*)gmu,4,"G","mu(x)=Moebius function of x"},
 {"newtonpoly",2,(void*)newtonpoly,6,"GG","newtonpoly(x,p)=Newton polygon of polynomial x with respect to the prime p"},
 {"nextprime",1,(void*)nextprime,4,"G","nextprime(x)=smallest prime number>=x"},

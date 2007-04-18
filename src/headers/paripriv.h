@@ -81,6 +81,22 @@ GEN  gsube(GEN *x, GEN y);
 GEN  gsub1e(GEN *x);
 GEN  gshift_right(GEN x, long n);
 
+void forell(entree *ep, long a, long b, GEN code);
+GEN  intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
+GEN  intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
+GEN  intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
+GEN  intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
+GEN  intfuncinit0(entree *ep, GEN a, GEN b, GEN code, long flag, long m, long prec);
+GEN  intlaplaceinv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
+GEN  intmellininv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec);
+GEN  intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec);
+GEN  intnuminit0(GEN a, GEN b, GEN tab, long prec);
+GEN  intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec);
+GEN  intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec);
+GEN  sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
+GEN  sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
+GEN  sumnuminit0(GEN a, GEN tab, long sgn, long prec);
+
 /* multiprecision */
 GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);

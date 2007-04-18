@@ -2645,7 +2645,7 @@ int
 ZX_is_squarefree(GEN x)
 {
   pari_sp av = avma;
-  GEN d = modulargcd(x,derivpol(x));
+  GEN d = ZX_gcd(x,ZX_deriv(x));
   int r = (lg(d) == 3); avma = av; return r;
 }
 
@@ -2674,32 +2674,26 @@ maxnorm(GEN p)
   return gerepileuptoint(av, addis(absi(m),1));
 }
 
-/* A0 and B0 in Q[X] */
+/* A, B in Z[X] */
 GEN
-modulargcd(GEN A0, GEN B0)
+ZX_gcd(GEN A, GEN B)
 {
-  GEN a, b, Hp, D, A, B, q, qp, H, g, bound = NULL;
+  GEN a, b, q, qp, H, Hp, g, bound = NULL;
   long m, n;
   ulong p;
-  pari_sp av2, av = avma, avlim = stack_lim(av, 1);
+  pari_sp av, avlim;
   byteptr d;
 
-  if ((typ(A0) | typ(B0)) !=t_POL) pari_err(notpoler,"modulargcd");
-  if (!signe(A0)) return gcopy(B0);
-  if (!signe(B0)) return gcopy(A0);
-  A = primitive_part(A0, &a); check_ZX(A, "modulargcd");
-  B = primitive_part(B0, &b); check_ZX(B, "modulargcd");
-  D = _gcd(a,b);
-  if (varn(A) != varn(B)) pari_err(talker,"different variables in modulargcd");
- 
-  /* A, B in Z[X] */
+  if (!signe(A)) return gcopy(B);
+  if (!signe(B)) return gcopy(A);
+
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
   if (degpol(A) < degpol(B)) swap(A, B);
   n = 1 + degpol(B); /* > degree(gcd) */
 
-  av2 = avma; H = NULL;
-  d = init_modular(&p);
+  av = avma; avlim = stack_lim(av, 1);
+  H = NULL; d = init_modular(&p);
   for(;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
@@ -2707,7 +2701,7 @@ modulargcd(GEN A0, GEN B0)
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
-    if (m == 0) { H = pol_1(varn(A0)); break; } /* coprime. DONE */
+    if (m == 0) { H = pol_1(varn(A)); break; } /* coprime. DONE */
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
     if (!g) /* make sure lead(H) = g mod p */
@@ -2719,7 +2713,7 @@ modulargcd(GEN A0, GEN B0)
     }
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
-      H = ZX_init_CRT(Hp,p,varn(A0));
+      H = ZX_init_CRT(Hp,p,varn(A));
       q = utoipos(p); n = m; continue;
     }
     if (DEBUGLEVEL>5)
@@ -2742,19 +2736,31 @@ modulargcd(GEN A0, GEN B0)
         gunclone(bound); break;
       }
       if (gcmp0(RgX_rem(A,H)) && gcmp0(RgX_rem(B,H))) break; /* DONE */
-      if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed");
+      if (DEBUGLEVEL) fprintferr("QX_gcd: trial division failed");
     }
 next:
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"modulargcd");
-      gerepileall(av2, 2, &H, &q);
+      if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
+      gerepileall(av, 2, &H, &q);
     }
   }
-  return gerepileupto(av, gmul(D,H));
+  return H;
 }
 
+/* A0 and B0 in Q[X] */
+GEN
+QX_gcd(GEN A0, GEN B0)
+{
+  GEN a, b, A, B;
+  pari_sp av = avma;
+
+  A = Q_primitive_part(A0, &a);
+  B = Q_primitive_part(B0, &b);
+  return gerepileupto(av, gmul(_gcd(a,b), ZX_gcd(A, B)));
+}
+ 
 /* lift(1 / Mod(A,B)). B0 a t_POL, A0 a scalar or a t_POL. Rational coeffs */
 GEN
 QXQ_inv(GEN A0, GEN B0)

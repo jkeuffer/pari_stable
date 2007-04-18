@@ -1659,6 +1659,10 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$. 
 
+\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
+
 \fun{GEN}{ZX_caract}{GEN T, GEN A, long v} returns the characteristic
 polynomial of \kbd{Mod(A, T)}, where \kbd{T} is a \kbd{ZX}, \kbd{A}
 is a \kbd{ZX}. More generally, \kbd{A} is allowed to be a

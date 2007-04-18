@@ -1549,7 +1549,7 @@ ZX_DDF(GEN x, long hint)
 }
 
 /* SquareFree Factorization. f = prod P^e, all e distinct, in Z[X] (char 0
- * would be enough, if modulargcd --> ggcd). Return (P), set *ex = (e) */
+ * would be enough, if ZX_gcd --> ggcd). Return (P), set *ex = (e) */
 GEN
 ZX_squff(GEN f, GEN *ex)
 {
@@ -1562,11 +1562,11 @@ ZX_squff(GEN f, GEN *ex)
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
 
-  T = modulargcd(derivpol(f), f);
+  T = ZX_gcd(ZX_deriv(f), f);
   V = RgX_div(f,T);
   for (k=i=1;; k++)
   {
-    W = modulargcd(T,V); T = RgX_div(T,W); dW = degpol(W);
+    W = ZX_gcd(T,V); T = RgX_div(T,W); dW = degpol(W);
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
     if (dW != degpol(V)) { gel(P,i) = RgX_div(V,W); e[i] = k; i++; }
     if (dW <= 0) break;
@@ -1630,7 +1630,7 @@ nfrootsQ(GEN x)
   if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
   val = ZX_valuation(Q_primpart(x), &x);
-  d = modulargcd(derivpol(x), x);
+  d = ZX_gcd(ZX_deriv(x), x);
   if (degpol(d)) x = RgX_div(x, d);
   z = DDF(x, 1, 1);
   if (val) z = shallowconcat(z, gen_0);
@@ -3947,7 +3947,7 @@ srgcd(GEN x, GEN y)
   if (ismonome(y)) return gcdmonome(y,x);
   av = avma;
   if (can_use_modular_gcd(x) &&
-      can_use_modular_gcd(y)) return modulargcd(x,y); /* Q[X] */
+      can_use_modular_gcd(y)) return QX_gcd(x,y); /* Q[X] */
 
   if (issimplepol(x) || issimplepol(y)) x = RgX_gcd_simple(x,y);
   else

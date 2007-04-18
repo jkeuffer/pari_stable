@@ -3356,7 +3356,7 @@ nfissquarefree(GEN nf, GEN x)
   pari_sp av = avma;
   GEN g, y = derivpol(x);
   if (RgX_is_rational(x))
-    g = modulargcd(x, y);
+    g = QX_gcd(x, y);
   else
     g = nfgcd(x, y, nf, NULL);
   avma = av; return (degpol(g) == 0);

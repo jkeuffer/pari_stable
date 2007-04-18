@@ -1640,7 +1640,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
       if (!ch) continue;
       return ch;
     }
-    d = modulargcd(derivpol(ch), ch);
+    d = ZX_gcd(derivpol(ch), ch);
     if (degpol(d)) ch = gdivexact(ch,d);
 
     if (canon_pol(ch) < 0 && pta) gel(a,i) = gneg_i(gel(a,i));
@@ -1763,7 +1763,7 @@ static GEN
 get_polmin_w(CG_data *d, long k)
 {
   GEN g = get_pol(d, gel(d->ZKembed,k));
-  GEN h = modulargcd(g, derivpol(g));
+  GEN h = ZX_gcd(g, derivpol(g));
   if (degpol(h)) g = gdivexact(g,h);
   return g;
 }
@@ -1775,7 +1775,7 @@ chk_gen(void *data, GEN x)
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
   av1 = avma;
-  h = modulargcd(g, derivpol(g));
+  h = ZX_gcd(g, derivpol(g));
   if (degpol(h)) { avma = av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
   avma = av1; return gerepileupto(av, g);
