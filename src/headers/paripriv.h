@@ -81,7 +81,15 @@ GEN  gsube(GEN *x, GEN y);
 GEN  gsub1e(GEN *x);
 GEN  gshift_right(GEN x, long n);
 
+GEN  derivnum0(entree *ep, GEN a, GEN code, long prec);
+GEN  direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c);
+GEN  divsum(GEN num,entree *ep, GEN code);
+void fordiv(GEN a, entree *ep, GEN code);
 void forell(entree *ep, long a, long b, GEN code);
+void forprime(entree *ep, GEN a, GEN b, GEN code);
+void forstep(entree *ep, GEN a, GEN b, GEN s, GEN code);
+void forvec(entree *ep, GEN x, GEN code, long flag);
+GEN  forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN  intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
 GEN  intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN  intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
@@ -93,9 +101,19 @@ GEN  intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec);
 GEN  intnuminit0(GEN a, GEN b, GEN tab, long prec);
 GEN  intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec);
 GEN  intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec);
+GEN  matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code);
+GEN  prodeuler0(entree *ep, GEN a, GEN b, GEN code, long prec);
+GEN  prodinf0(entree *ep, GEN a, GEN code, long flag, long prec);
+GEN  produit(entree *ep, GEN a, GEN b, GEN code, GEN x);
+GEN  somme(entree *ep, GEN a, GEN b, GEN code, GEN x);
+GEN  sumalt0(entree *ep, GEN a, GEN code,long flag, long prec);
+GEN  suminf0(entree *ep, GEN a, GEN code, long prec);
 GEN  sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN  sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec);
 GEN  sumnuminit0(GEN a, GEN tab, long sgn, long prec);
+GEN  sumpos0(entree *ep, GEN a, GEN code, long flag,long prec);
+GEN  vecteursmall(GEN nmax, entree *ep, GEN code);
+GEN  zbrent0(entree *ep, GEN a, GEN b, GEN code, long prec);
 
 /* multiprecision */
 GEN   icopy_spec(GEN x, long nx);

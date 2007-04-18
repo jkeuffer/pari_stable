@@ -1874,7 +1874,6 @@ GEN     subfields0(GEN nf,GEN d);
 
 /* subgroup.c */
 
-void    forsubgroup(entree *oep, GEN cyc, GEN bound, GEN code);
 GEN     subgrouplist(GEN cyc, GEN bound);
 
 /* stark.c */
@@ -1886,39 +1885,21 @@ GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 /* sumiter.c */
 
 GEN     derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec);
-GEN     derivnum0(entree *ep, GEN a, GEN code, long prec);
 GEN     direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c);
-GEN     direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c);
-GEN     divsum(GEN num,entree *ep, GEN code);
-void    fordiv(GEN a, entree *ep, GEN code);
-void    forprime(entree *ep, GEN a, GEN b, GEN code);
-void    forstep(entree *ep, GEN a, GEN b, GEN s, GEN code);
-void    forvec(entree *ep, GEN x, GEN code, long flag);
-GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN     intnum(void *E, GEN (*e)(GEN, void*), GEN a,GEN b, GEN tab, long prec);
 long    intnumstep(long prec);
-GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code);
 GEN     polzag(long n, long m);
 GEN     polzagreel(long n, long m, long prec);
 GEN     prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec);
-GEN     prodeuler0(entree *ep, GEN a, GEN b, GEN code, long prec);
 GEN     prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     prodinf0(entree *ep, GEN a, GEN code, long flag, long prec);
 GEN     prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     produit(entree *ep, GEN a, GEN b, GEN code, GEN x);
-GEN     somme(entree *ep, GEN a, GEN b, GEN code, GEN x);
 GEN     sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumalt0(entree *ep, GEN a, GEN code,long flag, long prec);
 GEN     sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     sumpos0(entree *ep, GEN a, GEN code, long flag,long prec);
 GEN     suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     suminf0(entree *ep, GEN a, GEN code, long prec);
 GEN     vecteur(GEN nmax, entree *ep, GEN n);
-GEN     vecteursmall(GEN nmax, entree *ep, GEN code);
 GEN     vvecteur(GEN nmax, entree *ep, GEN n);
-GEN     zbrent0(entree *ep, GEN a, GEN b, GEN code, long prec);
 GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 
 /* thue.c */
