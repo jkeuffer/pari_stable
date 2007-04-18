@@ -415,7 +415,7 @@ pariputs(const char *s) {
 int
 pari_last_was_newline(void) { return last_was_newline; }
 void
-pari_set_last_newline(int last) { last_was_newline = last; };
+pari_set_last_newline(int last) { last_was_newline = last; }
 
 void
 pariflush(void) { pariOut->flush(); }
