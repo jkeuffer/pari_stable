@@ -2886,7 +2886,6 @@ centerlift0(GEN x, long v)
       y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = centerlift0(gel(x,2),v);
       gel(y,3) = centerlift0(gel(x,3),v); return y;
-      return gtrunc(x);
 
     case t_PADIC:
       if (!signe(x[4])) return gen_0;
