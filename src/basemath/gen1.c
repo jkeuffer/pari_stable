@@ -1747,7 +1747,7 @@ gsqr(GEN x)
       av = avma;
       if (ff_poltype(&x,&p,&pol))
       {
-        z = FpX_sqr(x, p);
+        z = ZX_sqr(x);
         if (p) z = FpX_to_mod(z,p);
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
