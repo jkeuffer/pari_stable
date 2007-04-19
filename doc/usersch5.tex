@@ -242,7 +242,7 @@ if \kbd{x} is numerically equal to zero. If \kbd{x} is of type
 \typ{COMPLEX}, returns the minimum of the precisions of the real and
 imaginary part. Otherwise, returns~0 (which stands for infinite precision).
 
-\fun{long}{gprecision}{GEN x} as \kbd{precision} for scalars; returns the
+\fun{long}{gprecision}{GEN x} as \kbd{precision} for scalars. Returns the
 lowest precision encountered among the components otherwise.
 
 \fun{long}{sizedigit}{GEN x} returns 0 if \kbd{x} is exactly~0. Otherwise,
@@ -359,14 +359,14 @@ or \typ{COL}.
 
 \fun{int}{is_scalar_t}{long t} \kbd{true} iff \kbd{t} is a scalar, i.e
 a \typ{INT},
-\typ{REAL},
-\typ{INTMOD},
-\typ{FRAC},
-\typ{COMPLEX},
-\typ{PADIC},
-\typ{QUAD},
+a \typ{REAL},
+a \typ{INTMOD},
+a \typ{FRAC},
+a \typ{COMPLEX},
+a \typ{PADIC},
+a \typ{QUAD},
 or
-\typ{POLMOD}.
+a \typ{POLMOD}.
 
 \fun{int}{is_extscalar_t}{long t} \kbd{true} iff \kbd{t} is a scalar (see
 \kbd{is\_scalar\_t}) or \kbd{t} is \typ{POL}.
@@ -461,7 +461,7 @@ for the stack.
 
 \fun{void}{gerepileall}{pari_sp av, int n, ...} cleans up the stack from
 \kbd{av} on (i.e from \kbd{avma} to \kbd{av}), preserving the \kbd{n} objects
-which follow in the argument list (of type \kbd{GEN*}). E.g:
+which follow in the argument list (of type \kbd{GEN*}). For instance,
 \kbd{gerepileall(av, 2, \&x, \&y)} preserves \kbd{x} and \kbd{y}.
 
 \fun{void}{gerepileallsp}{pari_sp av, pari_sp ltop, int n, ...}
@@ -1219,7 +1219,7 @@ as in the \kbd{div} functions.
 remainder of the \kbd{long}~\kbd{x} by a \typ{INT}~\kbd{y}.
 
 \fun{long}{smodss}{long x, long y} computes the true Euclidean
-remainder of the \kbd{long}~\kbd{x} by a \typ{long}~\kbd{y}.
+remainder of the \kbd{long}~\kbd{x} by a \kbd{long}~\kbd{y}.
 
 \fun{ulong}{umodiu}{GEN x, ulong y} computes the true Euclidean
 remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{y}.
@@ -1663,12 +1663,11 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
 
-\fun{GEN}{ZX_caract}{GEN T, GEN A, long v} returns the characteristic
-polynomial of \kbd{Mod(A, T)}, where \kbd{T} is a \kbd{ZX}, \kbd{A}
-is a \kbd{ZX}. More generally, \kbd{A} is allowed to be a
-\kbd{QX}, hence possibly has rational coefficients, \emph{assuming}
-the result is a \kbd{ZX}, i.e.~the algebraic number \kbd{Mod(A,T)} is
-integral over \kbd{Z}.
+\fun{GEN}{ZX_caract}{GEN T, GEN A, long v}: let \kbd{T} and \kbd{A} be
+\kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
+More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
+rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
+algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
 
 \fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}. 
 
@@ -1831,7 +1830,7 @@ returns their product.
 of \kbd{INT}s, returns the monic \kbd{FpX}
 $\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
 
-\fun{GEN}{FpX_chinese_coprime}{GEN x,GEN y, GEN Tx,GEN Ty, GEN Tz, GEN p}
+\fun{GEN}{FpX_chinese_coprime}{GEN x,GEN y, GEN Tx,GEN Ty, GEN Tz, GEN p}:
 returns an \kbd{FpX}, congruent to \kbd{x} mod \kbd{Tx} and to \kbd{y} mod
 \kbd{Ty}. Assumes \kbd{Tx} and \kbd{Ty} are coprime, and \kbd{Tz = Tx * Ty}
 or \kbd{NULL} (in which case it is computed within).
@@ -1908,9 +1907,9 @@ whose modulus is divisible by $T$ (once mapped to a \kbd{FpX}), a suitable
 \fun{GEN}{RgX_to_FpXQX}{GEN z, GEN T, GEN p}, \kbd{z} a \typ{POL}, returns the
 \kbd{FpXQ} obtained by applying \kbd{Rg\_to\_FpXQ} coefficientwise.
 
-\fun{GEN}{RgX_to_FqX}{GEN z, GEN T, GEN p}, \kbd{z} a \typ{POL}, returns the
-\kbd{FpXQ} obtained by applying \kbd{Rg\_to\_FpXQ} coefficientwise and
-simplifying scalars to \typ{INT}s.
+\fun{GEN}{RgX_to_FqX}{GEN z, GEN T, GEN p}: let \kbd{z} be a \typ{POL};
+returns the \kbd{FpXQ} obtained by applying \kbd{Rg\_to\_FpXQ}
+coefficientwise and simplifying scalars to \typ{INT}s.
 
 \fun{GEN}{Fq_red}{GEN x, GEN T, GEN p}, \kbd{x} a \kbd{ZX} or \typ{INT},
 reduce it to an \kbd{Fq} ($\kbd{T} = \kbd{NULL}$ is allowed iff \kbd{x} is a
@@ -1937,9 +1936,9 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
-\fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let $g$ of order
-\kbd{ord} in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If $e$
-does not exists, the result is currently undefined.
+\fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let \kbd{g} be of
+order \kbd{ord} in the finite field $\F_p[X]/(T)$. Return $e$ such that
+$a^e=g$. If $e$ does not exists, the result is currently undefined.
 
 \fun{GEN}{Fp_FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} As
 \kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
@@ -2124,13 +2123,13 @@ same with \kbd{Fp} coordinates; operations are understood over $\Z/p\Z$. An
 \subsubsec{Basic operations}
 
 \fun{GEN}{FpC_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{Col(z) *
-Mod(1,p)}, hence a \typ{COL} with \typ{INTMOD} coefficients.
+Mod(1,p)}, a \typ{COL} with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
-Mod(1,p)}, hence a \typ{VEC} with \typ{INTMOD} coefficients.
+Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
-Mod(1,p)}, hence with \typ{INTMOD} coefficients.
+Mod(1,p)}, with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
 Mod(1,p))}, hence a \typ{COL}.
@@ -2267,7 +2266,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 of \kbd{a} and \kbd{b}
 
 \fun{ulong}{Flx_extresultant}{GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV}
-returns the resultant and sets Bezout coefficients (if the resultant is 0,
+given two \kbd{Flx} \kbd{a} and \kbd{b},
+returns their resultant and sets Bezout coefficients (if the resultant is 0,
 the latter are not set).
 
 \fun{GEN}{Flx_invmontgomery}{GEN T, ulong p}, returns the Montgomery inverse
@@ -3176,7 +3176,7 @@ there in case your \kbd{cmp} requires additional context.
 as \kbd{indexsort}.
 
 \fun{void}{gen_sort_inplace}{GEN x, void *data, int (*cmp)(void*,GEN,GEN), GEN
-*perm} sorts \kbd{x} in place, without copying its components. If
+*perm} sort \kbd{x} in place, without copying its components. If
 \kbd{perm} is non-\kbd{NULL}, it is set to the permutation that would sort
 the original \kbd{x}.
 
@@ -3185,8 +3185,8 @@ assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
 is made) according to the comparison function \kbd{cmp} applied to its first
 column. 
 
-\fun{GEN}{merge_factor}{GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN)}:
-assuming \kbd{fx} and \kbd{fy} are factorization matrices for $X$ and $Y$
+\fun{GEN}{merge_factor}{GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN)}
+let \kbd{fx} and \kbd{fy} be factorization matrices for $X$ and $Y$
 sorted with respect to the comparison function \kbd{cmp} (see
 \tet{sort_factor}), returns the factorization of $X * Y$.
 
@@ -3234,7 +3234,7 @@ except that \kbd{x} is a \kbd{long}.
 \fun{GEN}{gdiventgs[z]}{GEN x, long s[, GEN z]}, as \kbd{gdivent}
 except that \kbd{y} is a \kbd{long}.
 
-\fun{GEN}{gmod[z]}{GEN x, GEN y[, GEN z]} yields the true remainder of \kbd{x}
+\fun{GEN}{gmod[z]}{GEN x, GEN y[, GEN z]} yields the remainder of \kbd{x}
 modulo the \typ{INT} or \typ{POL}~\kbd{y}. A \typ{REAL} or \typ{FRAC} \kbd{y}
 is also allowed, in which case the remainder is the unique real $r$ such that
 $0 \leq r < |\kbd{y}|$ and $\kbd{y} = q\kbd{x} + r$ for some (in fact unique)
