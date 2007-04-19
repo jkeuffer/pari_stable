@@ -34,8 +34,7 @@ forpari(entree *ep, GEN a, GEN b, GEN code)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    pari_sp av1=avma; closure_evalvoid(code); avma=av1;
-    if (loop_break()) break;
+    closure_evalvoid(code); if (loop_break()) break;
     a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -57,7 +56,6 @@ whilepari(GEN a, GEN b)
     if (gcmp0(res)) break;
     avma = av; 
     closure_evalvoid(b); if (loop_break()) break;
-    avma = av;
   }
   avma = av;
 }
@@ -70,7 +68,6 @@ untilpari(GEN a, GEN b)
   {
     GEN res;
     closure_evalvoid(b); if (loop_break()) break;
-    avma = av; 
     res = closure_evalnobrk(a);
     if (!gcmp0(res)) break;
     avma = av; 
@@ -101,8 +98,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    pari_sp av1=avma; closure_evalvoid(code); avma=av1;
-    if (loop_break()) break;
+    closure_evalvoid(code); if (loop_break()) break;
     if (v)
     {
       if (++i >= lg(v)) i = 1;
@@ -485,8 +481,7 @@ forvec(entree *ep, GEN x, GEN code, long flag)
   GEN v = forvec_start(x, flag, &D, &next);
   push_val(ep, v);
   while (v) {
-    pari_sp av2 = avma; closure_evalvoid(code); avma = av2;
-    if (loop_break()) break;
+    closure_evalvoid(code); if (loop_break()) break;
     v = next(D, v);
   }
   pop_val(ep); avma = av;
