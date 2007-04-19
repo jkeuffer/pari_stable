@@ -47,6 +47,8 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
     2- Removed obsolete optional flag in ellap(), Mod() and gcd()
+    3- Rename gen_search_aux -> gen_search and document it [ old gen_search
+       disappears: use tablesearch() ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

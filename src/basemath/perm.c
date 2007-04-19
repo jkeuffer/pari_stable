@@ -393,7 +393,13 @@ vecvecsmall_indexsort(GEN x)
 long
 vecvecsmall_search(GEN x, GEN y, long flag)
 {
-  return gen_search(x,y,flag,vecsmall_prefixcmp);
+  return gen_search(x,y,flag,vecsmall_prefixcmp, cmp_nodata);
+}
+
+static long
+vecvecsmall_tablesearch(GEN x, GEN y)
+{
+  return tablesearch(x,y,vecsmall_prefixcmp);
 }
 
 /*************************************************************************/
@@ -674,7 +680,7 @@ perm_relorder(GEN p, GEN S)
   pari_sp ltop = avma;
   long n = 1;
   GEN  q = p;
-  while (!vecvecsmall_search(S, q, 0)) { q = perm_mul(q, p); n++; }
+  while (!vecvecsmall_tablesearch(S, q)) { q = perm_mul(q, p); n++; }
   avma = ltop; return n;
 }
 
@@ -808,7 +814,7 @@ group_quotient(GEN G, GEN H)
     p2[i] = V[1];
     for(j=1;j<lg(V);j++) 
     {
-      long b=vecvecsmall_search(elt,gel(V,j),0);
+      long b=vecvecsmall_tablesearch(elt,gel(V,j));
       bitvec_set(used,b);
     }
     for (j = 1; j <= o; j++)
@@ -824,7 +830,7 @@ group_quotient(GEN G, GEN H)
 long
 cosets_perm_search(GEN C, GEN p)
 {
-  long n = gen_search(gel(C,2),p,0,vecsmall_prefixcmp);
+  long n = tablesearch(gel(C,2),p,vecsmall_prefixcmp);
   if (!n) pari_err(talker, "coset not found in cosets_perm_search");
   return mael3(C,2,n,lg(p));
 }

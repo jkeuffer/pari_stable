@@ -817,7 +817,7 @@ setisset(GEN x)
 
 /* looks if y belongs to the set x and returns the index if yes, 0 if no */
 long
-gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
+gen_search(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 {
   long lx,j,li,ri,fl, tx = typ(x);
 
@@ -848,23 +848,17 @@ cmp_nodata(void *data, GEN x, GEN y)
 }
 
 long
-gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
-{
-  return gen_search_aux(x, y, flag, (void *)cmp, cmp_nodata);
-}
-
-long
 setsearch(GEN x, GEN y, long flag)
 {
   pari_sp av = avma;
   long res;
   if (typ(y) != t_STR) y = GENtocanonicalstr(y);
-  res=gen_search(x,y,flag,gcmp);
+  res=gen_search(x,y,flag,gcmp,cmp_nodata);
   avma=av;
   return res;
 }
 long 
-ZV_search(GEN x, GEN y) { return gen_search(x, y, 0, cmpii); }
+ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 
 GEN
 ZV_sort_uniq(GEN L)
