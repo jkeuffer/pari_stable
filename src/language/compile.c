@@ -1029,6 +1029,7 @@ compilenode(long n, int mode, long flag)
     compilenode(x, mode,0);
     return;
   case Fnoarg:
+    compilecast(n,Gvoid,mode);
     return;
   default:
     pari_err(bugparier,"compilenode");
