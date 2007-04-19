@@ -393,7 +393,7 @@ vecvecsmall_indexsort(GEN x)
 long
 vecvecsmall_search(GEN x, GEN y, long flag)
 {
-  return gen_search(x,y,flag,vecsmall_prefixcmp, cmp_nodata);
+  return gen_search(x,y,flag,(void*)vecsmall_prefixcmp, cmp_nodata);
 }
 
 static long

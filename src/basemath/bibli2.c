@@ -853,7 +853,7 @@ setsearch(GEN x, GEN y, long flag)
   pari_sp av = avma;
   long res;
   if (typ(y) != t_STR) y = GENtocanonicalstr(y);
-  res=gen_search(x,y,flag,gcmp,cmp_nodata);
+  res=gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
   avma=av;
   return res;
 }
