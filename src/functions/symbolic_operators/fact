@@ -1,8 +1,8 @@
 Function: _!
-Help: _!
 Section: symbolic_operators
 C-Name: mpfact
 Prototype: L
+Help: n!: factorial of n
 Description: 
  (small):int			mpfact($1)
 
