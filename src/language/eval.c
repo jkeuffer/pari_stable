@@ -365,10 +365,10 @@ static void closure_eval(GEN C);
 INLINE GEN
 copyupto(GEN z, GEN t)
 {
-  if (isclone(z) || (z>t && (ulong)z<top))
-    return gcopy(z);
-  else
+  if (is_universal_constant(z) || (z>(GEN)bot && z<=t))
     return z;
+  else
+    return gcopy(z);
 }
 
 static GEN
