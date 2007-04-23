@@ -2005,7 +2005,7 @@ mpsc1(GEN x, long *ptmod8)
       setexpo(pitemp, 0);
       q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
     } else {
-      q = utoi((ulong)floor(rtodbl(x) / (PI/2) + 0.5));
+      q = stoi((long)floor(rtodbl(x) / (PI/2) + 0.5));
     }
     if (signe(q))
     {
