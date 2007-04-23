@@ -2486,6 +2486,9 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 \fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
+\fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
+$\kbd{f}(\kbd{x})$ modulo $T$.
+
 \fun{GEN}{RgXQC_red}{GEN z, GEN T} \kbd{z} a vector whose
 coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \kbd{RgXQ}s (applying \kbd{grem} coefficientwise) in a \typ{COL}.
