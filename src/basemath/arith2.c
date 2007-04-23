@@ -962,9 +962,9 @@ factor_pn_1(GEN p, long n)
   {
     GEN B;
     if (pp && d[i]%pp==0 && (
-       ((pp&3)==1 && (d[1]&1)) ||
-       ((pp&3)==3 && (d[1]&3)==2) ||
-       (pp==2 && (d[1]&7)==4)))
+       ((pp&3)==1 && (d[i]&1)) ||
+       ((pp&3)==3 && (d[i]&3)==2) ||
+       (pp==2 && (d[i]&7)==4)))
     {
       GEN f=factor_Aurifeuille(p,d[i]);
       B = Z_factor(f);
