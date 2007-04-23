@@ -1272,7 +1272,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 GEN
 exp1r_abs(GEN x)
 {
-  long l = lg(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e;
+  long l = lg(x), a = expo(x), b = bit_accuracy(l), L, i, n, m, e, B;
   GEN y, p2, X;
   pari_sp av;
   double d;
@@ -1280,15 +1280,19 @@ exp1r_abs(GEN x)
   if (b + a <= 0) return mpabs(x);
 
   y = cgetr(l); av = avma;
-  d = a/2.; m = (long)(d + sqrt(d*d + b/2)); /* >= 0 ,*/
+  B = b/3 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG)/ b;
+  d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 ,*/
   if (m < (-a) * 0.1) m = 0; /* not worth it */
   L = l+1 + (m>>TWOPOTBITS_IN_LONG);
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
-  * sum x^k/k!: this costs roughly floor(b/e) b^2 / 3  + m b^2
+  * sum x^k/k!: this costs roughly
+  *    m b^2 + sum_{k <= n} (k e + BITS_IN_LONG)^2
   * bit operations with |x| <  2^(1+a), |Y| < 2^(1-e) , m = e+a and b bits of
-  * accuracy needed, so we want b ~ 3 m (m-a) or m~b+a hence
-  *     m = min( a/2 + sqrt(a^2/4 + b/3),  b + a )
+  * accuracy needed, so
+  *    B := (b / 3 + BITS_IN_LONG + BITS_IN_LONG^2 / b) ~ m(m-a)
+  * we want b ~ 3 m (m-a) or m~b+a hence
+  *     m = min( a/2 + sqrt(a^2/4 + B),  b + a )
   * NB1: e ~ (b/3)^(1/2) or b.
   * NB2: We use b/2 instead of b/3 in the formula above: hand-optimized...
   *
@@ -1984,71 +1988,106 @@ glog(GEN x, long prec)
 static GEN
 mpsc1(GEN x, long *ptmod8)
 {
-  long e = expo(x), l = lg(x), l1, l2, i, n, m, s;
-  pari_sp av;
-  double beta, a, b, d;
-  GEN y, unr, p2, p1, x2;
+  long a = expo(x), b, l,  L, i, n, m, e, B;
+  GEN y, p2, x2;
+  double d;
 
   n = 0;
-  if (e >= 0)
+  if (a >= 0)
   {
-    GEN q, z, pitemp = mppi(nbits2prec(e + 32));
-    setexpo(pitemp,-1);
-    z = addrr(x,pitemp); /* = x + Pi/4 */
-    if (expo(z) >= bit_accuracy(min(l, lg(z))) + 3) pari_err(precer,"mpsc1");
-    setexpo(pitemp, 0);
-    q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
+    GEN q;
+    if (a > 30)
+    {
+      GEN z, pitemp = mppi(nbits2prec(a + 32));
+      setexpo(pitemp,-1);
+      z = addrr(x,pitemp); /* = x + Pi/4 */
+      if (expo(z) >= bit_accuracy(lg(z)) + 3) pari_err(precer,"mpsc1");
+      setexpo(pitemp, 0);
+      q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
+    } else {
+      q = utoi((ulong)floor(rtodbl(x) / (PI/2) + 0.5));
+    }
     if (signe(q))
     {
-      x = subrr(x, mulir(q, Pi2n(-1, l+1))); /* x mod Pi/2  */
-      e = expo(x);
+      x = subrr(x, mulir(q, Pi2n(-1, lg(x)+1))); /* x mod Pi/2  */
+      a = expo(x);
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
-  s = signe(x); *ptmod8 = (s < 0)? 4 + n: n;
-  if (!s) return real_0_bit(-bit_accuracy(l)<<1);
+  /* a < 0 */
+  l = lg(x);
+  b = signe(x); *ptmod8 = (b < 0)? 4 + n: n;
+  if (!b) return real_0_bit((expo(x)<<1) - 1);
 
-  l = lg(x); l2 = l+1; y = cgetr(l);
-  beta = 5. + bit_accuracy_mul(l2,LOG2);
-  a = sqrt(beta / LOG2);
-  d = a + 1/LOG2 - log2(a / (double)(ulong)x[2]) - (BITS_IN_LONG-1-e);
-  if (d >= 0)
-  {
-    n = (long)((1+a) / 2.0);
-    m = (long)(1+d);
-    l2 += m>>TWOPOTBITS_IN_LONG;
-  } else { /* rare ! */
-    b = -1 - log((double)(ulong)x[2]) + (BITS_IN_LONG-1-e)*LOG2; /*-1-log(x)*/
-    n = (long)(1 + beta/(2.0*b));
-    m = 0;
+  b = bit_accuracy(l);
+  if (b + (a<<1) <= 0) {
+    y = gsqr(x); y[1] = evalsigne(-1)|evalexpo(expo(y)-1);
+    return y;
   }
-  unr= real_1(l2);
-  p2 = real_1(l2);
-  x2 = cgetr(l2); av = avma;
-  affrr(gsqr(x), x2);
-  if (m) setexpo(x2, expo(x2) - (m<<1));
 
-  setlg(x2, 3); p1 = divru(x2, 2*n+1);
-  s = -expo(p1);
-  l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
-  setlg(p2,l1);
-  s = 0;
-  for (i=n; i>=2; i--)
+  y = cgetr(l);
+  B = b/6 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG/2)/ b;
+  d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 ,*/
+  if (m < (-a) * 0.1) m = 0; /* not worth it */
+  L = l+1 + (m>>TWOPOTBITS_IN_LONG);
+
+  b += m;
+  e = m - a; /* >= 1 */
+  /* ~ 2( -1/log(2) - log_2 Y ) */
+  d = 2.0 * (e+BITS_IN_LONG-1-1/LOG2 - log2((double)(ulong)x[2]));
+  n = (long)(b / d);
+  if (n > 1)
+    n = (long)(b / (d + log2((double)n+1))); /* log~constant in small ranges */
+  while (n*(d+log2((double)n+1)) < b) n++; /* expect few corrections */
+
+ /* Multiplication is quadratic in this range (l is small, otherwise we
+  * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
+  * sum Y^2k/(2k)!: this costs roughly
+  *   m b^2 + sum_{k <= n} (2k e + BITS_IN_LONG)^2
+  *   floor(b/2e) b^2 / 3  + m b^2
+  * bit operations with |x| <  2^(1+a), |Y| < 2^(1-e) , m = e+a and b bits of
+  * accuracy needed, so
+  *    B := ( b / 6 + BITS_IN_LONG + BITS_IN_LONG^2 / 2b) ~ m(m-a)
+  *
+  * we want b ~ 6 m (m-a) or m~b+a hence
+  *     m = min( a/2 + sqrt(a^2/4 + b/6),  b/2 + a )
+  * NB1: e ~ (b/6)^(1/2) or b/2.
+  * NB2: We use b/4 instead of b/6 in the formula above: hand-optimized...
+  *
+  * Truncate the sum at k = n (>= 1), the remainder is
+  * < sum_{k >= n+1} Y^2k / 2k! < Y^(2n+2) / (2n+2)!(1-Y^2) < Y^(2n+2)/(2n+1)!
+  * We want ... <= Y^2 2^-b, hence -2n log_2 |Y| + log_2 (2n+1)! >= b
+  *   log n! ~ (n + 1/2) log(n+1) - (n+1) + log(2Pi)/2,
+  * error bounded by 1/6(n+1) <= 1/12. Finally, we want
+  * 2n (-1/log(2) - log_2 |Y| + log_2(2n+2)) >= b  */
+  x = rtor(x, L); x[1] = evalsigne(1) | evalexpo(-e);
+  x2 = gsqr(x);
+  if (n == 1) p2 = x2;
+  else
   {
-    setlg(x2,l1); p1 = divrunu(x2, 2*i-1);
-    s -= expo(p1); p1 = mulrr(p1,p2);
-    l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
-    s &= (BITS_IN_LONG-1);
-    setlg(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
-    setlg(p2,l1); affrr(p1,p2); avma = av;
+    GEN unr = real_1(L);
+    pari_sp av;
+    long s = 0, l1 = nbits2prec((long)(d + n + 16));
+
+    p2 = cgetr(L); av = avma;
+    for (i=n; i>=2; i--)
+    {
+      GEN p1;
+      setlg(x2,l1); p1 = divrunu(x2, 2*i-1);
+      s -= expo(p1);
+      l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
+      s &= (BITS_IN_LONG-1);
+      if (i != n) p1 = mulrr(p1,p2);
+      setlg(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
+      setlg(p2,l1); affrr(p1,p2); avma = av;
+    }
+    p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
+    setlg(p2,L);
+    setlg(x2,L); p2 = mulrr(x2,p2);
   }
-  p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
-  setlg(p2,l2);
-  setlg(x2,l2); p2 = mulrr(x2,p2);
   /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)
   { /* p2 = cos(x)-1 --> cos(2x)-1 */
-    setlg(p2,l2);
     p2 = mulrr(p2, addsr(2,p2));
     setexpo(p2, expo(p2)+1);
   }

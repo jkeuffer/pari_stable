@@ -306,7 +306,9 @@ mulir(GEN x, GEN y)
   GEN z;
 
   if (!sx) return gen_0;
-  if (!is_bigint(x)) return mulsr(itos(x), y);
+  if (lg(x) == 3) {
+    z = mulur((ulong)x[2], y); if (sx < 0) togglesign(z); return z;
+  }
   sy = signe(y);
   if (!sy) return real_0_bit(expi(x) + expo(y));
   if (sy < 0) sx = -sx;
