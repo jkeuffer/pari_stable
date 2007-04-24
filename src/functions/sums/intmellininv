@@ -10,8 +10,8 @@ Help: intmellininv(X=sig,z,expr,{tab}): numerical integration on the
  al > 0 if s(z) decreases like exp(-al*z). tab is as in intnum. Use 
  intmellininvshort if several values must be computed.
 Doc: numerical
- integration of $\var{expr}(X)z^{-X}$ with respect to $X$ on the line
- $\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Mellin transform of
+ integration of $(2i\pi)^{-1}\var{expr}(X)z^{-X}$ with respect to $X$ on the
+ line $\Re(X)=sig$,  in other words, inverse Mellin transform of
  the function corresponding to \var{expr} at the value $z$.
  
  $sig$ is coded as follows. Either it is a real number $\sigma$, equal to the

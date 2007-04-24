@@ -12,8 +12,8 @@ Help: intmellininvshort(sig,z,tab): numerical integration on the
  (with possibly its two optional additional parameters), where sig[2] = 1
  if not given. Orders of magnitude faster than intmellininv.
 Doc: numerical integration
- of $s(X)z^{-X}$ with respect to $X$ on the line $\Re(X)=sig$, divided by
- $2i\pi$, in other words, inverse Mellin transform of $s(X)$ at the value $z$.
+ of $(2i\pi)^{-1}s(X)z^{-X}$ with respect to $X$ on the line $\Re(X)=sig$.
+ In other words, inverse Mellin transform of $s(X)$ at the value $z$.
  Here $s(X)$ is implicitly contained in \var{tab} in \kbd{intfuncinit} format,
  typically
  \bprog
