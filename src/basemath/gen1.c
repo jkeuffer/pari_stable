@@ -1218,39 +1218,35 @@ GEN
 mulcxI(GEN x)
 {
   GEN z;
-  if (typ(x) != t_COMPLEX)
+  switch(typ(x))
   {
-    z = cgetg(3,t_COMPLEX);
-    gel(z,1) = gen_0;
-    gel(z,2) = x;
+    case t_INT: case t_REAL: case t_FRAC:
+      return mkcomplex(gen_0, x);
+    case t_COMPLEX:
+      if (isexactzero(gel(x,1))) return gneg(gel(x,2));
+      z = cgetg(3,t_COMPLEX);
+      gel(z,1) = gneg(gel(x,2));
+      z[2] = x[1]; return z;
+    default:
+      return gmul(gi, x);
   }
-  else
-  {
-    if (isexactzero(gel(x,1))) return gneg(gel(x,2));
-    z = cgetg(3,t_COMPLEX);
-    gel(z,1) = gneg(gel(x,2));
-    z[2] = x[1];
-  }
-  return z;
 }
 GEN
 mulcxmI(GEN x)
 {
   GEN z;
-  if (typ(x) != t_COMPLEX)
+  switch(typ(x))
   {
-    z = cgetg(3,t_COMPLEX);
-    gel(z,1) = gen_0;
-    gel(z,2) = gneg(x);
+    case t_INT: case t_REAL: case t_FRAC:
+      return mkcomplex(gen_0, gneg(x));
+    case t_COMPLEX:
+      if (isexactzero(gel(x,1))) return gel(x,2);
+      z = cgetg(3,t_COMPLEX);
+      z[1] = x[2];
+      gel(z,2) = gneg(gel(x,1)); return z;
+    default:
+      return gmul(mkcomplex(gen_0, gen_m1), x);
   }
-  else
-  {
-    if (isexactzero(gel(x,1))) return gel(x,2);
-    z = cgetg(3,t_COMPLEX);
-    z[1] = x[2];
-    gel(z,2) = gneg(gel(x,1));
-  }
-  return z;
 }
 
 GEN

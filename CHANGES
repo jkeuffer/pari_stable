@@ -20,6 +20,7 @@ BA  6- bitnegimply(1,2^65) returned a wrong result [#560]
        [ for some accuracies, log & exp inacurate near 1 and 0 resp. ]
    12- numbpart inaccurate (and slow). E.g numbpart(52602) off by 1 [#557]. 
 BA 13- &, |, && and || were right-associative instead of left-associative 
+   14- remove type assumptions in mulcxI, mulcxmI: unsafe [#516]]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

@@ -2924,13 +2924,12 @@ then the above warning does not apply.
 
 \fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
 
-\fun{GEN}{mulcxI}{GEN x} creates the \typ{COMPLEX} $ix$, assuming 
-$x$ is a \typ{INT}, \typ{REAL}, \typ{COMPLEX} or \typ{FRAC}. The result in
-general contains data pointing back to the original $x$. Use \kbd{gcopy}
-if this is a problem. But in most cases, the result is to be used
-immediately, before $x$ is subject to garbage collection.
+\fun{GEN}{mulcxI}{GEN x} creates the \typ{COMPLEX} $ix$. The result in
+general contains data pointing back to the original $x$. Use \kbd{gcopy} if
+this is a problem. But in most cases, the result is to be used immediately,
+before $x$ is subject to garbage collection.
 
-\fun{GEN}{mulcxmI}{GEN x}, as \tet{mulcxI}, but creates the \typ{COMPLEX}
+\fun{GEN}{mulcxmI}{GEN x}, as \tet{mulcxI}, but returns the \typ{COMPLEX}
 $-ix$.
 
 \fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
