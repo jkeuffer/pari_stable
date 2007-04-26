@@ -1661,6 +1661,23 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 
 \fun{GEN}{ZV_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
 
+\subsubsec{\kbd{ZM}}
+
+\fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
+is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
+return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
+determinant of \kbd{M} is computed and used instead.
+
+\fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
+still assume that $M'$ has integer coefficients.
+
+\fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is square upper triangular with
+positive diagonal coefficients. Assumes $x$ is a \kbd{ZM} (has integer
+coefficiets).
+
+\fun{int}{RgM_ishnf}{GEN x} as \kbd{ZM_ishnf}, without assumptions on the
+types of the coefficients.
+
 \subsubsec{\kbd{ZX}}
 
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
@@ -1722,14 +1739,6 @@ some integer, e.g. $0$ which is used as a seed. The function then finds a
 small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
 $R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
 \kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
-
-\fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
-is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
-return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
-determinant of \kbd{M} is computed and used instead.
-
-\fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
-still assume that $M'$ has integer coefficients.
 
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
