@@ -1029,10 +1029,31 @@ $0$ otherwise.
 \fun{long}{uissquarerem}{ulong n, ulong *sqrtn} as \kbd{Z\_issquarerem},
 for an \kbd{ulong} operand \kbd{n}.
 
-%\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
-%factorization process as soon as the unfactored part is smaller than \kbd{lim}.
-%The resulting factorisation matrix only contains the factors found. No other
-%assumptions can be made on the remaining factors.
+\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
+factorization process as soon as the unfactored part is smaller than \kbd{lim}.
+The resulting factorisation matrix only contains the factors found. No other
+assumptions can be made on the remaining factors.
+
+\fun{GEN}{boundfact}{GEN x, long lim} trial divide $x$ by all primes $p <
+\kbd{lim}$ and return the corresponding factorization matrix. In this case,
+the last ``prime'' divisor in the first column of the factorization matrix
+may well be a proven composite.
+
+This requires \kbd{primelimit} to be larger than \kbd{lim}. If \kbd{lim} is
+zero, the effect is the same as setting $\kbd{lim} = \kbd{primelimit}$.
+
+\fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
+$n/d$ is a square.
+
+\fun{GEN}{core2}{GEN n} return $[d,f]$ with $d$ squarefree and $n = df^2$.
+
+\fun{GEN}{corepartial}{GEN n, long lim} as \kbd{core}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The result is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+\fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
+\kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
+necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
