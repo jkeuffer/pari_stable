@@ -1595,7 +1595,7 @@ Fp_mul(GEN a, GEN b, GEN m)
 {
   pari_sp av=avma;
   GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
-  new_chunk(lg(a)+lg(b)+(lg(m)<<1));
+  (void)new_chunk(lg(a)+lg(b)+(lg(m)<<1));
   p=mulii(a,b);
   avma=av;
   return modii(p,m);
@@ -1623,7 +1623,7 @@ Fp_div(GEN a, GEN b, GEN m)
 {
   pari_sp av=avma;
   GEN p;
-  new_chunk(lg(a)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
+  (void)new_chunk(lg(a)+lg(m)); /*HACK: assume remii use <=lg(p)+lg(m) space*/
   p=mulii(a,Fp_inv(b,m));
   avma=av;
   return remii(p,m);

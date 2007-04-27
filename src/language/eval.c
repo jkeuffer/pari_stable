@@ -277,7 +277,7 @@ derivgenwrap(GEN x, void* E)
   return z;
 }
 
-static long
+static void
 check_array_index(long c, long max)
 {
   if (c < 1 || c >= max)
@@ -289,7 +289,6 @@ check_array_index(long c, long max)
     else sprintf(s,"%s[1-%ld]",s,max-1);
     pari_err(talker,s);
   }
-  return c;
 }
 
 typedef struct matcomp
@@ -490,7 +489,7 @@ closure_eval(GEN C)
     case OCpushvar:
         ep=(entree*)operand;
         if (gel(initial_value(ep),0)==NULL)
-          manage_var(manage_var_create,ep);
+          (void)manage_var(manage_var_create,ep);
         gel(st,sp++)=(GEN)initial_value(ep);
         break;
     case OCpushvalue:
@@ -499,7 +498,7 @@ closure_eval(GEN C)
         {
         case EpNEW:
           ep->valence=EpVAR;
-          manage_var(manage_var_create,ep);
+          (void)manage_var(manage_var_create,ep);
           ep->value=initial_value(ep);
         case EpVAR: case EpGVAR: /*FALL THROUGH*/
           gel(st,sp++)=(GEN)ep->value;
@@ -518,7 +517,7 @@ closure_eval(GEN C)
           {
           case EpNEW:
             g->ep->valence=EpVAR;
-            manage_var(manage_var_create,g->ep);
+            (void)manage_var(manage_var_create,g->ep);
             g->ep->value=initial_value(g->ep);
           case EpVAR: case EpGVAR:/*FALL THROUGH*/
             g->x = (GEN) g->ep->value;
@@ -549,7 +548,7 @@ closure_eval(GEN C)
         {
         case EpNEW:
           ep->valence=EpVAR;
-          manage_var(manage_var_create,ep);
+          (void)manage_var(manage_var_create,ep);
           ep->value=initial_value(ep);
         case EpVAR: case EpGVAR:/*FALL THROUGH*/
           changevalue(ep, gel(st,--sp));
@@ -781,7 +780,7 @@ closure_eval(GEN C)
         ep=(entree *)operand;
         if (ep->valence==EpNEW)
         {
-          manage_var(manage_var_create,ep);
+          (void)manage_var(manage_var_create,ep);
           ep->value=initial_value(ep);
         }
         ep->valence = EpGVAR;

@@ -414,7 +414,7 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
   }
   if (!r) 
     pari_err(talker,"nth-root does not exist in FF_sqrtn");
-  _mkFF(x, y, r);
+  (void)_mkFF(x, y, r);
   if (zetan)
   { 
     GEN z = cgetg(lg(y),t_FFELT);
