@@ -1281,7 +1281,7 @@ exp1r_abs(GEN x)
 
   y = cgetr(l); av = avma;
   B = b/3 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG)/ b;
-  d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 ,*/
+  d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 */
   if (m < (-a) * 0.1) m = 0; /* not worth it */
   L = l+1 + (m>>TWOPOTBITS_IN_LONG);
  /* Multiplication is quadratic in this range (l is small, otherwise we
@@ -1293,8 +1293,7 @@ exp1r_abs(GEN x)
   *    B := (b / 3 + BITS_IN_LONG + BITS_IN_LONG^2 / b) ~ m(m-a)
   * we want b ~ 3 m (m-a) or m~b+a hence
   *     m = min( a/2 + sqrt(a^2/4 + B),  b + a )
-  * NB1: e ~ (b/3)^(1/2) or b.
-  * NB2: We use b/2 instead of b/3 in the formula above: hand-optimized...
+  * NB: e ~ (b/3)^(1/2) as b -> oo
   *
   * Truncate the sum at k = n (>= 1), the remainder is
   *   sum_{k >= n+1} Y^k / k! < Y^(n+1) / (n+1)! (1-Y) < Y^(n+1) / n!
@@ -1778,13 +1777,22 @@ logr_abs(GEN X)
   a = bit_accuracy(k) + bfffo(u); /* ~ -log2 |1-x| */
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use AGM). Set Y = x^(1/2^m), y = (Y - 1) / (Y + 1) and compute truncated
-  * series sum y^(2k+1)/(2k+1): this costs roughly floor(b/e) b^2 / 6  + m b^2
-  * bit operations with |x-1| <  2^-a, |Y| < 2^-e , m ~ e-a and b bits of
-  * accuracy needed, so we want b ~ 6 m (m+a) or m~b-a hence
-  *     m = min( -a/2 + sqrt(a^2/4 + b/6),  b - a ) */
+  * series sum y^(2k+1)/(2k+1): the costs is less than
+  *    m b^2 + sum_{k <= n} ((2k+1) e + BITS_IN_LONG)^2
+  * bit operations with |x-1| <  2^(1-a), |Y| < 2^(1-e) , m = e-a and b bits of
+  * accuracy needed (+ BITS_IN_LONG since bit accuracies increase by
+  * increments of BITS_IN_LONG), so
+  * 4n^3/3 e^2 + n^2 2e BITS_IN_LONG+ n BITS_IN_LONG ~ m b^2, with n ~ b/2e
+  * or b/6e + BITS_IN_LONG/2e + BITS_IN_LONG/2be ~ m
+  *    B := (b / 6 + BITS_IN_LONG/2 + BITS_IN_LONG^2 / 2b) ~ m(m+a)
+  *     m = min( -a/2 + sqrt(a^2/4 + B),  b - a )
+  * NB: e ~ (b/6)^(1/2) as b -> oo */
   L = l+1;
   b = bit_accuracy(L - (k-2)); /* take loss of accuracy into account */
-  m = (long)(-a/2. + sqrt(a*a/4. + b/6.));
+  /* instead of the above pessimistic estimate for the cost of the sum, use
+   * optimistic estimate (BITS_IN_LONG -> 0) */
+  d = -a/2.; m = (long)(d + sqrt(d*d + b/6)); /* >= 0 */
+
   if (m > b-a) m = b-a;
   if (m < 0.2*a) m = 0; else L += m>>TWOPOTBITS_IN_LONG;
   x = rtor(X,L);
