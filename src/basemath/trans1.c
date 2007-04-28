@@ -119,18 +119,21 @@ constpi(long prec)
   prec++;
 
   A = real_1(prec);
-  B = sqrtr_abs(real2n(1,prec)); setexpo(B, -1); /* = 1/sqrt(2) */
+  i = A[1]; A[1] = evalsigne(1) | evalexpo(-1);
+  B = sqrtr_abs(A); /* = 1/sqrt(2) */
+  A[1] = i;
   C = real2n(-2, prec); av2 = avma;
   for (i = 0;; i++)
   {
     GEN y, a, b, B_A = subrr(B, A);
+    pari_sp av3 = avma;
     if (expo(B_A) < G) break;
     a = addrr(A,B); setexpo(a, expo(a)-1);
-    b = sqrtr_abs( mulrr(A, B) );
+    b = mulrr(A,B);
+    affrr(a, A); avma = av3;
+    affrr(sqrtr_abs(b), B); avma = av3;
     y = gsqr(B_A); setexpo(y, expo(y) + i - 2);
-    affrr(subrr(C, y), C);
-    affrr(a, A);
-    affrr(b, B); avma = av2;
+    affrr(subrr(C, y), C); avma = av2;
   }
   setexpo(C, expo(C)+2);
   affrr(divrr(gsqr(addrr(A,B)), C), tmppi);
