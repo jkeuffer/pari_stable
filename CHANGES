@@ -40,6 +40,8 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
        input mod log(2) ]
    11- rewrote mpsc1 [ slow ] -> faster sin and cos
    12- [library] rename pointch ->  ellchangepoint, coordch -> ellchangecurve
+   13- prototype of constpi, consteuler.
+   14- use a little less memory to compute pi, euler, log(2)
 
   Added
     1- library functions expu, adduu, subuu

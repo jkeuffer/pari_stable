@@ -104,14 +104,14 @@ piold(long prec)
 }
 #endif
 /* Gauss - Brent-Salamin AGM iteration */
-void
+GEN
 constpi(long prec)
 {
   GEN A, B, C, tmppi;
   long i, G;
   pari_sp av, av2;
 
-  if (gpi && lg(gpi) >= prec) return;
+  if (gpi && lg(gpi) >= prec) return gpi;
 
   av = avma; tmppi = newbloc(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
@@ -135,15 +135,11 @@ constpi(long prec)
   setexpo(C, expo(C)+2);
   affrr(divrr(gsqr(addrr(A,B)), C), tmppi);
   if (gpi) gunclone(gpi);
-  avma = av;  gpi = tmppi;
+  avma = av;  return gpi = tmppi;
 }
 
 GEN
-mppi(long prec)
-{
-  GEN x = cgetr(prec);
-  constpi(prec); affrr(gpi,x); return x;
-}
+mppi(long prec) { return rtor(constpi(prec), prec); }
 
 /* Pi * 2^n */
 GEN
@@ -172,14 +168,14 @@ PiI2(long prec) { return PiI2n(1, prec); }
 /**                                                                **/
 /********************************************************************/
 
-void
+GEN
 consteuler(long prec)
 {
   GEN u,v,a,b,tmpeuler;
   long l, n1, n, k, x;
   pari_sp av1, av2;
 
-  if (geuler && lg(geuler) >= prec) return;
+  if (geuler && lg(geuler) >= prec) return geuler;
 
   av1 = avma; tmpeuler = newbloc(prec);
   *tmpeuler = evaltyp(t_REAL) | evallg(prec);
@@ -232,15 +228,11 @@ consteuler(long prec)
   }
   divrrz(u,v,tmpeuler);
   if (geuler) gunclone(geuler);
-  avma = av1; geuler = tmpeuler;
+  avma = av1; return geuler = tmpeuler;
 }
 
 GEN
-mpeuler(long prec)
-{
-  GEN x = cgetr(prec);
-  consteuler(prec); affrr(geuler,x); return x;
-}
+mpeuler(long prec) { return rtor(consteuler(prec), prec); }
 
 /********************************************************************/
 /**                                                                **/
@@ -1732,15 +1724,11 @@ constlog2(long prec)
   y = divrr(Pi2n(-1, l), agm1r_abs( real2n(2 - n, l) ));
   affrr(divru(y,n), tmplog2);
   if (glog2) gunclone(glog2);
-  glog2 = tmplog2; avma = av; return glog2;
+  avma = av; return glog2 = tmplog2;
 }
 
 GEN
-mplog2(long prec)
-{
-  GEN x = cgetr(prec);
-  affrr(constlog2(prec), x); return x;
-}
+mplog2(long prec) { return rtor(constlog2(prec), prec); }
 
 /*return log(|x|), assuming x != 0 */
 GEN

@@ -1358,12 +1358,16 @@ to \kbd{sqrtremi(N, NULL)}.
 
 \subsec{Cached constants}
 
-\fun{void}{consteuler}{long prec} precomputes Euler-Mascheroni's constant
+The cached constant is returned at its current precision, which may be larger
+than \kbd{prec}. One should always use the \kbd{mp\var{xxx}} variant:
+\kbd{mppi}, \kbd{mpeuler}, or \kbd{mplog2}.
+
+\fun{GEN}{consteuler}{long prec} precomputes Euler-Mascheroni's constant
 at precision \kbd{prec}.
 
-\fun{void}{constpi}{long prec} precomputes $\pi$ at precision \kbd{prec}.
+\fun{GEN}{constpi}{long prec} precomputes $\pi$ at precision \kbd{prec}.
 
-\fun{void}{constlog2}{long prec} precomputes $\log(2)$ at precision
+\fun{GEN}{constlog2}{long prec} precomputes $\log(2)$ at precision
 \kbd{prec}.
 
 \fun{void}{mpbern}{long n, long prec} precomputes the even \idx{Bernoulli}
