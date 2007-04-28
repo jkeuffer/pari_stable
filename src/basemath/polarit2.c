@@ -2166,6 +2166,7 @@ leftright_pow_u_fold(GEN x, ulong n, void *data, GEN  (*sqr)(void*,GEN),
 {
   GEN y;
   long m, j;
+  pari_sp av = avma, lim = stack_lim(av, 1);
 
   if (n == 1) return gcopy(x);
 
@@ -2179,6 +2180,11 @@ leftright_pow_u_fold(GEN x, ulong n, void *data, GEN  (*sqr)(void*,GEN),
   {
     if (m < 0) y = msqr(data,y); /* first bit set: multiply by base */
     else y = sqr(data,y);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
+      y = gerepilecopy(av, y);
+    }
   }
   return y;
 }

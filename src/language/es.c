@@ -1157,12 +1157,12 @@ wr_float(pariout_t *T, GEN x, int f_format)
   if (dif <= 0) f_format = 0; /* write in E format */
   beta = ex10(dif);
   if (beta)
-  {
+  { /* z = x 10^beta */
     if (beta > 0)
-      z = mulrr(x, rpowuu(10UL, (ulong)beta, lx+1));
+      z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
     else
-      z = divrr(x, rpowuu(10UL, (ulong)-beta, lx+1));
-    setsigne(z, 1);
+      z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
+    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
   }
   else z = mpabs(x);
 
@@ -1195,7 +1195,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
     }
   }
 
-  s = t = (char*)new_chunk(decdig + 1);
+  s = t = (char*)new_chunk(nchar2nlong(decdig + 1));
   res--;
   if (*res)
   {
