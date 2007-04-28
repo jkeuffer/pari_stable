@@ -1,25 +1,30 @@
-a=[a1,a2,a3,a4,a5,a6];
 prd(b)=prod(n=1,#b,a[n]^b[n])
 
-N = 4; k = 1;
-v = vector(3^N);
-w = vector(3^N);
-forvec(u = vector(N,i,[-1,1]), v[k] = prd(u); w[k] = u; k++);
-
+init(N) =
+{ k = 1;
+  v = vector(3^N);
+  w = vector(3^N);
+  forvec(u = vector(N,i,[-1,1]), v[k] = prd(u); w[k] = u; k++);
+}
 {doit(N)=
   for (i=1,#v, A = v[i];
     for (j=1,#v, B = v[j]; if ( A+B-A != B, error(A,"+",B))
     )
   )
 }
-
-doit(N);
-
-{doit(i)=
+{doit2(i)=
   for (i=1,#v, A = v[i];
     for (j=1,#v, B = v[j]; C = prd(w[i]-w[j]); if(A/B!=C, error(A,"/",B))))}
 
-doit(N);
+a=[a1,a2,a3,a4,a5,a6]; N = 4;
+init(N); doit(N); doit2(N);
+
+{doit3(i)=
+  for (i=1,#v, A = v[i];
+    for (j=1,#v, B = v[j]; D = A*C;
+      for (k=1,#v, C = v[k];  D - C)))}
+a=[x,1+x,y,1+y];
+init(N); doit3(N);
 
 print("Total time spent: ",gettime);
 \q
