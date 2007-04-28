@@ -1056,7 +1056,14 @@ ginv(GEN x)
       if (s < 0) { togglesign(z[1]); setsigne(z[2],1); }
       return z;
 
-    case t_COMPLEX: case t_QUAD:
+    case t_COMPLEX:
+      av=avma;
+      p1=cxnorm(x);
+      p2=mkcomplex(gel(x,1), gneg(gel(x,2)));
+      tetpil=avma;
+      return gerepile(av,tetpil,gdiv(p2,p1));
+    
+    case t_QUAD:
       av=avma; p1=gnorm(x); p2=gconj(x); tetpil=avma;
       return gerepile(av,tetpil,gdiv(p2,p1));
 
