@@ -1,14 +1,25 @@
 a=[a1,a2,a3,a4,a5,a6];
 prd(b)=prod(n=1,#b,a[n]^b[n])
 
-trap(,print(prd(u), "+", prd(v), "+", prd(w)))
-{doit(i)=
-  V = vector(i,n,[-1,1]);
-  forvec(u=V, A=prd(u);
-  forvec(v=V, B=A+prd(v);
-  forvec(w=V, B+prd(w))))}
+N = 4; k = 1;
+v = vector(3^N);
+w = vector(3^N);
+forvec(u = vector(N,i,[-1,1]), v[k] = prd(u); w[k] = u; k++);
 
-doit(4);
+{doit(N)=
+  for (i=1,#v, A = v[i];
+    for (j=1,#v, B = v[j]; if ( A+B-A != B, error(A,"+",B))
+    )
+  )
+}
+
+doit(N);
+
+{doit(i)=
+  for (i=1,#v, A = v[i];
+    for (j=1,#v, B = v[j]; C = prd(w[i]-w[j]); if(A/B!=C, error(A,"/",B))))}
+
+doit(N);
 
 print("Total time spent: ",gettime);
 \q
