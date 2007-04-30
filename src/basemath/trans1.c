@@ -130,7 +130,7 @@ constpi(long prec)
     if (expo(B_A) < G) break;
     a = addrr(A,B); setexpo(a, expo(a)-1);
     b = mulrr(A,B);
-    affrr(a, A); avma = av3;
+    affrr(a, A);
     affrr(sqrtr_abs(b), B); avma = av3;
     y = gsqr(B_A); setexpo(y, expo(y) + i - 2);
     affrr(subrr(C, y), C); avma = av2;
