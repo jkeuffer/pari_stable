@@ -22,6 +22,7 @@ BA  6- bitnegimply(1,2^65) returned a wrong result [#560]
 BA 13- &, |, && and || were right-associative instead of left-associative 
    14- remove type assumptions in mulcxI, mulcxmI: unsafe [#516]]
    15- too much memory allocated to print real numbers
+   16- (y/x)/(x^0/y) not correctly simplified
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

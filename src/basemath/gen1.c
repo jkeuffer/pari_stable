@@ -271,14 +271,9 @@ gred_rfrac2_i(GEN n, GEN d)
   n = simplify_i(n);
   if (isexactzero(n)) return gcopy(n);
   d = simplify_i(d);
-  tn = typ(n);
   td = typ(d);
-  if (td!=t_POL)
-  {
-    if (tn!=t_POL) return gdiv(n,d);
-    if (varncmp(gvar2(d), varn(n)) > 0) return RgX_Rg_div(n,d);
-    pari_err(talker,"incompatible variables in gred");
-  }
+  if (td!=t_POL || varncmp(varn(d), gvar(n)) > 0) return gdiv(n,d);
+  tn = typ(n);
   if (tn!=t_POL)
   {
     if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
