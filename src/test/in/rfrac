@@ -26,5 +26,8 @@ init(N); doit(N); doit2(N);
 a=[x,1+x,y,1+y];
 init(N); doit3(N);
 
+\\ regression tests
+(y/x)/(x^0/y)
+
 print("Total time spent: ",gettime);
 \q
