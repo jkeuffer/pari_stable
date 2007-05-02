@@ -980,27 +980,15 @@ void
 alias0(char *s, char *old)
 {
   entree *ep, *e;
-  long hash;
   GEN x;
 
-  ep = is_entry(old);
-  if (!ep) pari_err(talker,"unknown function");
-  switch(EpVALENCE(ep))
-  {
-    case EpVAR: case EpGVAR:
-      pari_err(talker,"only functions can be aliased");
-  }
-
-  if ( (e = is_entry_intern(s, functions_hash, &hash)) )
-  {
-    if (EpVALENCE(e) != EpALIAS)
-      pari_err(talker,"can't replace an existing symbol by an alias");
-    freeep(e);
-  }
-  ep = do_alias(ep); x = newbloc(2);
-  x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
+  ep = fetch_entry(old,strlen(old)); ep = do_alias(ep);
+  e  = fetch_entry(s,strlen(s));
+  if (EpVALENCE(e) != EpALIAS && EpVALENCE(e) != EpNEW)
+    pari_err(talker,"can't replace an existing symbol by an alias");
+  freeep(e);
+  x = newbloc(2); x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
   gel(x,1) = (GEN)ep;
-  e=installep(s, strlen(s), functions_hash + hash);
   e->value=x; e->valence=EpALIAS;
 }
 
