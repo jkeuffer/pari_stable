@@ -2,6 +2,6 @@ Function: %
 C-Name: parihist
 Prototype: D0,L,
 Class: gp
-Section: operators
+Section: symbolic_operators
 Help: last history item
 
