@@ -90,7 +90,6 @@ void forprime(entree *ep, GEN a, GEN b, GEN code);
 void forstep(entree *ep, GEN a, GEN b, GEN s, GEN code);
 void forsubgroup(entree *oep, GEN cyc, GEN bound, GEN code);
 void forvec(entree *ep, GEN x, GEN code, long flag);
-GEN  forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
 GEN  intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec);
 GEN  intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
 GEN  intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec);
