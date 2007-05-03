@@ -1877,7 +1877,7 @@ gauss_primpart_try(GEN x, GEN c)
 }
 
 static int
-gauss_cmp(void *E, GEN x, GEN y)
+gauss_cmp(GEN x, GEN y)
 {
   int v;
   (void)E;
