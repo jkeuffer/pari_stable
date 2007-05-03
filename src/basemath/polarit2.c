@@ -1880,7 +1880,6 @@ static int
 gauss_cmp(GEN x, GEN y)
 {
   int v;
-  (void)E;
   if (typ(x) != t_COMPLEX)
     return (typ(y) == t_COMPLEX)? -1: gcmp(x, y);
   if (typ(y) != t_COMPLEX) return 1;
