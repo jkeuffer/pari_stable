@@ -1843,6 +1843,7 @@ GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgX_Rg_div(GEN y, GEN x);
 GEN     RgX_Rg_mul(GEN y, GEN x);
 GEN     RgX_RgXQ_compo(GEN f, GEN x, GEN T);
+GEN     RgX_modXn_shallow(GEN a, long n);
 GEN     RgX_mulXn(GEN x, long d);
 GEN     RgX_shift_shallow(GEN x, long n);
 GEN     RgX_shift(GEN a, long n);

@@ -33,11 +33,10 @@ general background. \kbdsidx{BIL}
 
 We shall often refer to the notion of \tev{shallow} function, which means that
 some components of the result may point to components of the input (which is
-more efficient than a deep copy). In particular, such outputs are not
-suitable for \kbd{gerepileupto} and particular care must be taken when
-garbage collecting objects which have been input to shallow functions: in
-general corresponding outputs also become invalid and should no longer be
-accessed.
+more efficient than a deep copy). Such outputs are not suitable for
+\kbd{gerepileupto} and particular care must be taken when garbage collecting
+objects which have been input to shallow functions: in general corresponding
+outputs also become invalid and should no longer be accessed.
 
 \section{Initializing the library}
 
@@ -2504,8 +2503,10 @@ enough.
 and $\kbd{x} \bs t^{-n}$ otherwise.
 
 \fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
-shallow (coefficients are not copied). This is not suitable for
-\kbd{gerepile} or \kbd{gerepileupto}.
+shallow (coefficients are not copied).
+
+\fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
+where $n\geq 0$. Shallow function.
 
 \fun{GEN}{RgX_extgcd}{GEN x, GEN y, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
@@ -2760,15 +2761,12 @@ for \typ{REAL}, \typ{SER}, \typ{PADIC} components, respectively.
 
 \fun{GEN}{gprec_w}{GEN x, long l} returns a shallow copy of $x$ whose
 \typ{REAL} components have their precision changed to $l$ \emph{words}. This
-is often more useful than \kbd{gprec}. Shallow copy means that unaffected
-components are not copied; in particular, this function is not suitable for
-\kbd{gerepileupto}.
+is often more useful than \kbd{gprec}.
 
 \fun{GEN}{gprec_wtrunc}{GEN x, long l} returns a shallow copy of $x$ whose
 \typ{REAL} components have their precision \emph{truncated} to $l$
 \emph{words}. Contrary to \kbd{gprec\_w}, this function may never increase
-the precision of~$x$. Shallow copy means that unaffected components are not
-copied; in particular, this function is not suitable for \kbd{gerepileupto}.
+the precision of~$x$.
 
 \subsubsec{Modular objects}
 
@@ -3250,8 +3248,7 @@ use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
 
 \funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
 
-\fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$. The result
-is not suitable for gerepileupto.
+\fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$.
 
 \funno{GEN}{gabs[\key{z}]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
 
@@ -3666,7 +3663,7 @@ $-1$) else $0$.
 \fun{GEN}{FF_neg}{GEN a} returns $-a$ where \kbd{a} is a \typ{FFELT}.
 
 \fun{GEN}{FF_neg_i}{GEN a} shallow function returning $-a$ where \kbd{a} is a
-\typ{FFELT}. The result is not suitable for gerepileupto.
+\typ{FFELT}.
 
 \fun{GEN}{FF_inv}{GEN a} returns $a^{-1}$ where \kbd{a} is a \typ{FFELT}.
 

@@ -292,13 +292,27 @@ RgXY_swap(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
+/* return (x % X^n). Shallow */
+GEN
+RgX_modXn_shallow(GEN a, long n)
+{
+  long i, L, l = lg(a);
+  GEN  b;
+  if (l == 2 || !n) return zeropol(varn(a));
+  if (n < 0) err(talker,"n < 0 in RgX_modXn");
+  L = n+2; if (L > l) L = l;
+  b = cgetg(L, t_POL); b[1] = a[1];
+  for (i=2; i<L; i++) gel(b,i) = gel(a,i);
+  return b;
+}
+
 /* return (x * X^n). Shallow */
 GEN
 RgX_shift_shallow(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (lg(a) == 2 || !n) return a;
+  if (l == 2 || !n) return a;
   l += n;
   if (n < 0)
   {
@@ -320,7 +334,7 @@ RgX_shift(GEN a, long n)
 {
   long i, l = lg(a);
   GEN  b;
-  if (lg(a) == 2 || !n) return gcopy(a);
+  if (l == 2 || !n) return gcopy(a);
   l += n;
   if (n < 0)
   {
