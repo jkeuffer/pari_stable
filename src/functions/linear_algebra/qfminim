@@ -5,31 +5,33 @@ Prototype: GDGDGD0,L,p
 Help: qfminim(x,{b},{m},{flag=0}): x being a square and symmetric
  matrix representing a positive definite quadratic form, this function
  deals with the vectors of x whose norm is less than or equal to b,
- enumerated using the Fincke-Pohst algorithm. The function searches for
+ enumerated using the Fincke-Pohst algorithm, storing at most m vectors (no
+ limit if m is omitted). The function searches for
  the minimal non-zero vectors if b is omitted. The precise behaviour
- depends on flag. 0: seeks at most 2m vectors, result [N,M,mat] where
- N is the number of vectors found, M the maximum norm among these, and mat
- lists the vectors. 1: ignores m and returns the first vector whose norm is
- less than b. 2: as 0 but uses a more robust, slower implementation, valid for
-  non integral quadratic forms
-Doc: $x$ being a square and symmetric
- matrix representing a positive definite quadratic form, this function
- deals with the vectors of $x$ whose norm is less than or equal to $b$,
- enumerated using the Fincke-Pohst algorithm. The function searches for
- the minimal non-zero vectors if $b$ is omitted. The precise behaviour
- depends on $\fl$.
+ depends on flag. 0: seeks at most 2m vectors (unless m omitted), returns
+ [N,M,mat] where N is the number of vectors found, M the maximum norm among
+ these, and mat lists half the vectors (the other half is given by -mat). 1:
+ ignores m and returns the first vector whose norm is less than b. 2: as 0
+ but uses a more robust, slower implementation, valid for non integral
+ quadratic forms
+Doc: $x$ being a square and symmetric matrix representing a positive definite
+ quadratic form, this function deals with the vectors of $x$ whose norm is
+ less than or equal to $b$, enumerated using the Fincke-Pohst algorithm,
+ storing at most $m$ vectors (no limit if $m$ is omitted). The function
+ searches for the minimal non-zero vectors if $b$ is omitted. The precise
+ behaviour depends on $\fl$.
  
  If $\fl=0$ (default), seeks at most $2m$ vectors. The result is a
  three-component vector, the first component being the number of vectors
  found, the second being the maximum norm found, and the last vector is a
  matrix whose columns are the vectors found, only one being given for each
- pair $\pm v$ (at most $m$ such pairs). The vectors are returned in no
- particular order. In this variant, an explicit $m$ must be provided.
+ pair $\pm v$ (at most $m$ such pairs, unless $m$ was omitted). The vectors
+ are returned in no particular order.
  
  If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
  than $b$. In this variant, an explicit $b$ must be provided.
  
- In both these cases, $x$ is assumed to have integral entries. The
+ In these two cases, $x$ is assumed to have integral entries. The
  implementation uses low precision floating point computations for maximal
  speed, which gives incorrect result when $x$ has large entries. (The
  condition is checked in the code and the routine will raise an error if
@@ -42,6 +44,41 @@ Doc: $x$ being a square and symmetric
  will be stored and returned, but all minimal vectors are nevertheless
  enumerated. If $m$ is omitted, all vectors found are stored and returned;
  note that this may be a huge vector! 
+ 
+ \bprog
+ ? x = matid(2);
+ ? qfminim(x)  \\@com 4 minimal vectors of norm 1: $\pm[0,1]$, $\pm[1,0]$
+ %2 = [4, 1, [0, 1; 1, 0]] 
+ ? { x=
+ [492,18,18,18,18,18,18,18,18,18,18,18,32,32,32,32,32,32,32,32,32,32,32,18;
+ 18,4,2,2,2,2,2,2,2,2,2,2,1,2,1,0,0,1,2,2,1,1,1,4;
+ 18,2,4,2,2,2,2,2,2,2,2,2,2,2,1,1,0,2,2,1,1,1,0,4;
+ 18,2,2,4,2,2,2,2,2,2,2,2,1,2,1,1,1,1,2,2,0,2,0,4;
+ 18,2,2,2,4,2,2,2,2,2,2,2,1,1,1,1,1,2,1,2,1,1,1,4;
+ 18,2,2,2,2,4,2,2,2,2,2,2,2,2,0,1,1,1,1,2,1,1,0,4;
+ 18,2,2,2,2,2,4,2,2,2,2,2,1,2,1,0,1,2,1,1,1,2,0,4;
+ 18,2,2,2,2,2,2,4,2,2,2,2,1,1,1,1,0,2,2,1,0,2,1,4;
+ 18,2,2,2,2,2,2,2,4,2,2,2,2,2,0,1,1,2,1,1,0,2,1,4;
+ 18,2,2,2,2,2,2,2,2,4,2,2,2,1,1,0,1,1,1,2,0,2,1,4;
+ 18,2,2,2,2,2,2,2,2,2,4,2,2,1,0,1,0,1,2,2,1,2,1,4;
+ 18,2,2,2,2,2,2,2,2,2,2,4,2,1,0,0,1,2,2,1,1,1,1,4;
+ 32,1,2,1,1,2,1,1,2,2,2,2,4,2,1,2,2,2,2,2,2,2,2,2;
+ 32,2,2,2,1,2,2,1,2,1,1,1,2,4,2,2,2,2,2,2,2,2,1,2;
+ 32,1,1,1,1,0,1,1,0,1,0,0,1,2,4,2,2,2,2,2,2,2,2,0;
+ 32,0,1,1,1,1,0,1,1,0,1,0,2,2,2,4,2,2,2,2,2,2,2,0;
+ 32,0,0,1,1,1,1,0,1,1,0,1,2,2,2,2,4,2,1,2,2,2,2,0;
+ 32,1,2,1,2,1,2,2,2,1,1,2,2,2,2,2,2,4,2,1,2,2,2,2;
+ 32,2,2,2,1,1,1,2,1,1,2,2,2,2,2,2,1,2,4,2,2,2,2,2;
+ 32,2,1,2,2,2,1,1,1,2,2,1,2,2,2,2,2,1,2,4,2,2,2,2;
+ 32,1,1,0,1,1,1,0,0,0,1,1,2,2,2,2,2,2,2,2,4,1,2,0;
+ 32,1,1,2,1,1,2,2,2,2,2,1,2,2,2,2,2,2,2,2,1,4,2,2;
+ 32,1,0,0,1,0,0,1,1,1,1,1,2,1,2,2,2,2,2,2,2,2,4,0;
+ 18,4,4,4,4,4,4,4,4,4,4,4,2,2,0,0,0,2,2,2,0,2,0,8] }
+ ? qfminim(x,,0)  \\ the Leech lattice has 98256 minimal vectors of norm 4
+ %4 = [98256, 4, [;]]
+ @eprog\noindent\sidx{Leech lattice}\sidx{minimal vector}
+ In the last example, we store 0 vectors to limit memory use. All minimal
+ vectors are nevertheless enumerated.
  
 Variant: Also available are \fun{GEN}{minim}{GEN x, GEN b = NULL, GEN m =
  NULL} ($\fl=0$), \fun{GEN}{minim2}{GEN x, GEN b = NULL, GEN m = NULL}

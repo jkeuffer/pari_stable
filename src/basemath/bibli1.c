@@ -3003,12 +3003,12 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   pari_sp av0 = avma, av1, av, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q;
   const double eps = 0.0001;
+  int stockall = 0;
 
   if (!BORNE) BORNE = gen_0;
-  if (!STOCKMAX) pari_err(talker,"maximal number of vectors must be provided");
-  BORNE = gfloor(BORNE);
-  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT)
-    pari_err(typeer, "minim0");
+  else BORNE = gfloor(BORNE);
+  if (!STOCKMAX) stockall = 1; 
+  else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
   if (typ(a) != t_MAT) pari_err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
@@ -3078,7 +3078,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_ALL:
-      maxrank = itos(STOCKMAX);
+      maxrank = stockall? 200: itos(STOCKMAX);
       if (maxrank < 0) pari_err(talker,"negative number of vectors in minim0");
       L = new_chunk(1+maxrank);
       break;
@@ -3144,6 +3144,13 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     switch(flag)
     {
       case min_ALL:
+        if (s > maxrank && stockall) /* overflow */
+        {
+          long maxranknew = maxrank << 1; 
+          GEN Lnew = new_chunk(1 + maxranknew);
+          for (i=1; i<=maxrank; i++) Lnew[i] = L[i];
+          L = Lnew; maxrank = maxranknew;
+        }
         if (s<=maxrank)
         {
           p1 = new_chunk(n+1); gel(L,s) = p1;
@@ -3421,7 +3428,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       gel(S,s) = shallowcopy(x);
       if (s == stockmax)
       { /* overflow */
-        long stockmaxnew= (stockall && (stockmax < 10000L || maxnum != -1))
+        long stockmaxnew= (stockall && (stockmax < 10000L || maxnum == -1))
                           ? stockmax<<1 : stockmax;
         GEN Snew = cgetg(stockmaxnew + 1, t_VEC);
         if (check)

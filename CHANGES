@@ -43,6 +43,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    12- [library] rename pointch ->  ellchangepoint, coordch -> ellchangecurve
    13- prototype of constpi, consteuler.
    14- use a little less memory to compute pi, euler, log(2)
+   15- qfminim(x,b,m,flag) made 'm' parameter optionnal also when flag=0
 
   Added
     1- library functions expu, adduu, subuu
