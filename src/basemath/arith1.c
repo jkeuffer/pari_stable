@@ -1966,7 +1966,7 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
 GEN
 Fp_log(GEN a, GEN g, GEN ord, GEN p)
 {
-  return gen_PH_log(modii(a,p),modii(g,p),ord,(void*)p,&Fp_star,_Fp_easylog);
+  return gen_PH_log(a,g,ord,(void*)p,&Fp_star,_Fp_easylog);
 }
 
 GEN
