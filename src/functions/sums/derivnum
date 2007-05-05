@@ -1,7 +1,7 @@
 Function: derivnum
 Section: sums
 C-Name: derivnum0
-Prototype: V=GIp
+Prototype: V=GEp
 Help: derivnum(X=a,expr): numerical derivation of expr with respect to
  X at X = a
 Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
