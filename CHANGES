@@ -25,6 +25,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    16- (y/x)/(x^0/y) not correctly simplified
    17- \s reported a misleading number of available user variables
    18- polroots(pollegendre(51),1) -> stack corruption [#592]
+   19- 1/(quadgen(-4)*x)+0 -> exponent overflow [#591]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
