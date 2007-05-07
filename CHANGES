@@ -29,6 +29,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    20- acos(1) was non-zero [#590]
    21- sumpos(x=1,1/x^2,1) had the wrong sign [#587]
    22- matrixqz(x,0) would not work if first two determinants were 0
+       + might lose pointers in gerepile
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

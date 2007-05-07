@@ -1022,6 +1022,7 @@ jacobi(GEN a, long prec)
 GEN
 matrixqz0(GEN x,GEN p)
 {
+  if (!p) return matrixqz(x,NULL);
   if (typ(p)!=t_INT) pari_err(typeer,"matrixqz0");
   if (signe(p)>=0) return matrixqz(x,p);
   if (equaliu(p,1)) return matrixqz2(x);
@@ -1048,7 +1049,7 @@ matrixqz(GEN x, GEN p)
   if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   n = lg(x)-1; if (!n) return gcopy(x);
   m = lg(x[1])-1;
-  if (n > m) pari_err(talker,"more rows than columns in matrixqz");
+  if (n > m) pari_err(talker,"need more rows than columns in matrixqz");
   if (n==m)
   {
     p1 = det(x);
@@ -1070,7 +1071,7 @@ matrixqz(GEN x, GEN p)
     p1 = shallowtrans(x); setlg(p1,n+1);
     p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
     if (!signe(p2)) p2 = detint(x);
-    if (gcmp1(p2)) { avma = av1; return x; }
+    if (gcmp1(p2)) { avma = av1; return gcopy(x); }
   }
   else
     p2 = p;
