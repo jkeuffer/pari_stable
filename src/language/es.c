@@ -1603,7 +1603,7 @@ get_texvar(long v, char *buf, unsigned int len)
 void
 etatpile(void)
 {
-  long nu, l;
+  long nu, l, u, s;
   pari_sp av = avma;
   GEN adr;
   double r;
@@ -1626,9 +1626,10 @@ etatpile(void)
   pariprintf(" %ld objects on heap occupy %ld long words\n\n",
             itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
-
-  pariprintf(" %ld variable names used out of %d\n\n",
-            manage_var(manage_var_next,NULL), MAXVARN);
+  u = manage_var(manage_var_next,NULL);
+  s = MAXVARN - manage_var(manage_var_max_avail,NULL);
+  pariprintf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
+             u+s, u, s, MAXVARN);
 }
 
 #define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))
