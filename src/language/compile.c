@@ -932,7 +932,7 @@ compilenode(long n, int mode, long flag)
   case Fentry:
     {
       entree *ep=getentry(n);
-      if (!EpSTATIC(ep))
+      if (!EpSTATIC(do_alias(ep)))
       {
         op_push(OCpushvalue,(long)ep);
         compilecast(n,Ggen,mode);
