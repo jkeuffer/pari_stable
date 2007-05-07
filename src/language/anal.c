@@ -338,22 +338,6 @@ install(void *f, char *name, char *code)
   return ep;
 }
 
-#define ALIAS(ep) (entree *) ((GEN)ep->value)[1]
-
-/* kill aliases pointing to EP */
-static void 
-kill_alias(entree *EP)
-{
-  entree *ep, *epnext;
-  long n;
-  for (n = 0; n < functions_tblsz; n++)
-    for (ep = functions_hash[n]; ep; ep = epnext)
-    {
-      epnext = ep->next;
-      if (EpVALENCE(ep) == EpALIAS && EP == ALIAS(ep)) kill0(ep);
-    }
-}
-
 /* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
  * If it's a variable set a "black hole" in varentries[v]. x = 0-th variable
  * can NOT be killed (only the value) */
@@ -371,8 +355,6 @@ kill0(entree *ep)
       while (ep->pvalue) pop_val(ep);
       v = varn(ep->value); if (!v) return; /* never kill x */
       varentries[v] = NULL; break;
-    case EpUSER: kill_alias(ep);
-      break;
   }
   freeep(ep);
   ep->valence=EpNEW; ep->value=initial_value(ep); ep->pvalue=NULL;
@@ -969,6 +951,8 @@ pari_add_module(entree *ep)
 /**                                                                **/
 /********************************************************************/
 
+#define ALIAS(ep) (entree *) ((GEN)ep->value)[1]
+
 entree *
 do_alias(entree *ep)
 {
@@ -982,7 +966,7 @@ alias0(char *s, char *old)
   entree *ep, *e;
   GEN x;
 
-  ep = fetch_entry(old,strlen(old)); ep = do_alias(ep);
+  ep = fetch_entry(old,strlen(old));
   e  = fetch_entry(s,strlen(s));
   if (EpVALENCE(e) != EpALIAS && EpVALENCE(e) != EpNEW)
     pari_err(talker,"can't replace an existing symbol by an alias");
