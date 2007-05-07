@@ -1064,18 +1064,17 @@ matrixqz(GEN x, GEN p)
   }
   /* x integral */
 
-  if (gcmp0(p))
+  if (!p || gcmp0(p))
   {
     av1 = avma;
     p1 = shallowtrans(x); setlg(p1,n+1);
     p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
-    if (!signe(p2))
-      pari_err(impl,"matrixqz when the first 2 dets are zero");
+    if (!signe(p2)) p2 = detint(x);
     if (gcmp1(p2)) { avma = av1; return x; }
-
-    p1 = gel(Z_factor(p2),1);
   }
-  else p1 = mkvec(p);
+  else
+    p2 = p;
+  p1 = gel(Z_factor(p2),1);
   nfact = lg(p1)-1;
   av1 = avma; lim = stack_lim(av1,1);
   for (i=1; i<=nfact; i++)
