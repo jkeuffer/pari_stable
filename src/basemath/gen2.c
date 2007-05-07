@@ -1373,6 +1373,7 @@ quadtoc(GEN x, long prec)
 {
   GEN z, Q, u = gel(x,2), v = gel(x,3);
   pari_sp av;
+  if (prec < 3) prec = 3;
   if (gcmp0(v)) return gtofp(u, prec);
   av = avma; Q = gel(x,1);
   /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */

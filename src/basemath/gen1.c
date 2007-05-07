@@ -103,12 +103,10 @@ addqf(GEN x, GEN y, long prec) { pari_sp av = avma;
   long i = gexpo(x) - gexpo(y);
   if (i <= 0) i = 0; else i >>= TWOPOTBITS_IN_LONG;
   prec += i;
-  if (prec < 3) prec = 3;
   return gerepileupto(av, gadd(y, quadtoc(x, prec)));
 }
 static GEN
 mulqf(GEN x, GEN y, long prec) { pari_sp av = avma;
-  if (prec < 3) prec = 3;
   return gerepileupto(av, gmul(y, quadtoc(x, prec)));
 }
 static GEN
@@ -117,7 +115,6 @@ divqf(GEN x, GEN y, long prec) { pari_sp av = avma;
 }
 static GEN
 divfq(GEN x, GEN y, long prec) { pari_sp av = avma;
-  if (prec < 3) prec = 3;
   return gerepileupto(av, gdiv(x, quadtoc(y,prec)));
 }
 /* y PADIC, x + y by converting x to padic */
