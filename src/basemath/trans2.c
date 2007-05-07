@@ -564,7 +564,9 @@ static GEN
 mpach(GEN x)
 {
   pari_sp av = avma;
-  GEN z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
+  GEN z;
+  if (absrnz_egal1(x)) return real_0_bit(- (bit_accuracy(lg(x)) >> 1));
+  z = logr_abs( addrr_sign(x, 1, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
   return gerepileuptoleaf(av, z);
 }
 
