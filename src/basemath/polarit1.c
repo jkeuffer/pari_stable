@@ -2706,13 +2706,13 @@ rootsold(GEN x, long prec)
 }
 
 GEN
-roots2(GEN pol,long PREC)
+roots2(GEN T, long PREC)
 {
   pari_sp av = avma;
   long N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
   long nbpol, k, multiqol, deg, nbroot, fr, f, EPS;
   pari_sp av1;
-  GEN p1,p2,rr,qol,qolbis,x,b,c,ad,v, ex, factors;
+  GEN p1,p2,rr,qol,qolbis,x,b,c,ad,v, ex, factors, pol = T;
 
   if (typ(pol)!=t_POL) pari_err(typeer,"roots2");
   if (!signe(pol)) pari_err(zeropoler,"roots2");
@@ -2850,7 +2850,7 @@ roots2(GEN pol,long PREC)
     fprintferr("too many iterations in roots2() ( laguer() ):\n");
     fprintferr("     real coefficients polynomial, using zrhqr()\n");
   }
-  return zrhqr(pol,PREC);
+  return zrhqr(T,PREC);
 }
 
 static GEN
