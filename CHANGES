@@ -27,7 +27,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    18- polroots(pollegendre(51),1) -> stack corruption [#592]
    19- 1/(quadgen(-4)*x)+0 -> exponent overflow [#591]
    20- acos(1) was non-zero [#590]
-   21- sumpos(x=1,1/x^2,1) had the wrong sign [#585]
+   21- sumpos(x=1,1/x^2,1) had the wrong sign [#587]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
