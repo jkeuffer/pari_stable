@@ -834,7 +834,7 @@ gpreadbin(const char *s, int *vector)
 }
 
 static void
-escape0(char *tch)
+escape(char *tch)
 {
   const char *s;
   char c;
@@ -954,12 +954,6 @@ escape0(char *tch)
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
     default: pari_err(caracer1,tch,tch-1);
   }
-}
-
-static void
-escape(char *tch)
-{
-  escape0(tch);
 }
 
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
