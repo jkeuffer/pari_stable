@@ -1022,7 +1022,7 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for (k=1; k<=lg(pol)-2; k++)
   {
     GEN p1 = gmul(gel(pol,k+1),stock[k]);
-    if (odd(k)) p1 = gneg_i(p1);
+    if (!odd(k)) p1 = gneg_i(p1);
     s = gadd(s,p1);
   }
   return gerepileupto(av, gdiv(s,dn));
