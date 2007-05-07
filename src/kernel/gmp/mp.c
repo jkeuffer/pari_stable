@@ -62,7 +62,7 @@ int pari_kernel_init(void)
 
 #define LIMBS(x)  ((mp_limb_t *)((x)+2))
 #define NLIMBS(x) (lgefint(x)-2)
-/*This one is for t_REAL to emphasize there are not t_INT*/
+/*This one is for t_REALs to emphasize they are not t_INTs*/
 #define RLIMBS(x)  ((mp_limb_t *)((x)+2))
 #define RNLIMBS(x) (lg(x)-2)
 
