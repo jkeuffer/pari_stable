@@ -15,9 +15,10 @@ $class=$ARGV[0];
   'sums'               =>  9 ,
   'graphic'            => 10 ,
   'programming/control'        => 11 ,
-  'programming/specific'        => 11 ,
+  'programming/specific'       => 11 ,
   'symbolic_operators' => 13 , 
-  'member_functions'   => 14
+  'member_functions'   => 14 ,
+  'programming/internals'      => 15
 );
 
 print <<EOF;

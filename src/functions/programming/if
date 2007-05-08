@@ -1,7 +1,7 @@
 Function: _void_if
 C-Name: ifpari_void
+Section: programming/internals
 Prototype: vGDIDI
-Section: programming/control
 Help: internal variant of if() that does not return a value.
 
 Function: if
