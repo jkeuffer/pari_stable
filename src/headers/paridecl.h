@@ -1680,6 +1680,7 @@ GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);
 GEN     ggcd(GEN x, GEN y);
+GEN     ggcd0(GEN x, GEN y);
 GEN     ginvmod(GEN x, GEN y);
 GEN     gisirreducible(GEN x);
 GEN     glcm(GEN x, GEN y);

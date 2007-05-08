@@ -2540,6 +2540,8 @@ cont_gcd(GEN x, long tx, GEN y)
 {
   return (tx == t_RFRAC)? cont_gcd_rfrac(x, y): cont_gcd_gen(x, y);
 }
+GEN
+ggcd0(GEN x, GEN y) { return y? ggcd(x,y): content(x); }
 
 GEN
 ggcd(GEN x, GEN y)
