@@ -940,7 +940,7 @@ sumalt0(entree *ep, GEN a, GEN code, long flag, long prec)
 GEN
 sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
-  long k, kk, N, G;
+  long k, N, G;
   pari_sp av = avma;
   GEN r, reel, s, az, c, x, e1, d, *stock;
 
@@ -962,17 +962,18 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     else
     {
       pari_sp av2 = avma;
+      long i;
       x = gen_0; r = utoipos(2*k+2);
-      for(kk=0;;kk++)
+      for(i=0;;i++)
       {
         
         long ex;
         affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + kk; setexpo(reel,ex);
-	x = mpadd(x,reel); if (kk && ex < G) break;
+        ex = expo(reel) + i; setexpo(reel,ex);
+	x = mpadd(x,reel); if (i && ex < G) break;
         r = shifti(r,1);
       }
-      x = gerepileupto(av2, x);
+      x = gerepileupto(av2, x); /* sum_i f(a + (2k+2) 2^i) 2^i */
       if (2*k < N) stock[2*k+1] = x;
       affgr(eval(addsi(k+1,a), E), reel);
       x = addrr(reel, gmul2n(x,1));
@@ -987,7 +988,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 GEN
 sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
-  long k, kk, N, G;
+  long k, N, G;
   pari_sp av = avma;
   GEN r, reel, s, pol, dn, x, *stock;
 
@@ -1002,13 +1003,14 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (odd(k) || !stock[k])
     {
       pari_sp av2 = avma;
+      long i;
       x = gen_0; r = utoipos(2*k);
-      for(kk=0;;kk++)
+      for(i=0;;i++)
       {
         long ex;
         affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + kk; setexpo(reel,ex);
-	x = mpadd(x,reel); if (kk && ex < G) break;
+        ex = expo(reel) + i; setexpo(reel,ex);
+	x = mpadd(x,reel); if (i && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
