@@ -529,6 +529,9 @@ compilefunc(long n, int mode)
   if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
   {
     long a=tree[n].y;
+    if (a<0 || tree[a].f==Fnoarg)
+      pari_err(talker2,"too few arguments",
+        tree[n].str+tree[n].len-1, get_origin());
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     if (tree[a].f!=Ffunction || tree[a].x!=OPpow)
