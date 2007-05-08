@@ -299,7 +299,7 @@ RgX_modXn_shallow(GEN a, long n)
   long i, L, l = lg(a);
   GEN  b;
   if (l == 2 || !n) return zeropol(varn(a));
-  if (n < 0) err(talker,"n < 0 in RgX_modXn");
+  if (n < 0) pari_err(talker,"n < 0 in RgX_modXn");
   L = n+2; if (L > l) L = l;
   b = cgetg(L, t_POL); b[1] = a[1];
   for (i=2; i<L; i++) gel(b,i) = gel(a,i);

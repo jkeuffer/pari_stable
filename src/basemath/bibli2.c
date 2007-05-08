@@ -1325,14 +1325,14 @@ GEN
 vecsort(GEN x, GEN k)
 {
   struct veccmp_s v; v.cmp = &gcmp; v.k = k;
-  if (typ(k) != t_VECSMALL) err(typeer,"vecsort");
+  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
   return gen_sort(x, (void*)&v, &veccmp);
 }
 GEN
 indexvecsort(GEN x, GEN k)
 {
   struct veccmp_s v; v.cmp = &gcmp; v.k = k;
-  if (typ(k) != t_VECSMALL) err(typeer,"vecsort");
+  if (typ(k) != t_VECSMALL) pari_err(typeer,"vecsort");
   return gen_indexsort(x, (void*)&v, &veccmp);
 }
 

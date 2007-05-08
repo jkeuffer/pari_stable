@@ -1877,7 +1877,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i)); 
     /* V corresponds to 1_Z */
     V = grndtoi(V, &j);
-    if (j > -5) err(bugparier,"precision too low in chk_gen_init");
+    if (j > -5) pari_err(bugparier,"precision too low in chk_gen_init");
     M = mkmat(V); /* 1 */
 
     V = cgetg(N+1, t_VEC);

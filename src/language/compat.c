@@ -301,7 +301,7 @@ entree oldfonctions[]={
 {"forvec",87,(void*)forvec,11,"vV=GID0,L,","forvec(x=v,seq)=v being a vector of two-component vectors of length n, the sequence is evaluated with x[i] going from v[i][1] to v[i][2] for i=n,..,1"},
 {"fpn",21,(void*)ffinit,2,"GLDn","fpn(p,n)=monic irreducible polynomial of degree n over F_p[x]"},
 {"frac",1,(void*)gfrac,2,"G","frac(x)=fractional part of x=x-floor(x)"},
-{"galois",1,(void*)galois,6,"Gp","galois(x)=Galois group of the polynomial x (see manual for group coding)"},
+{"galois",1,(void*)polgalois,6,"Gp","galois(x)=Galois group of the polynomial x (see manual for group coding)"},
 {"galoisapply",3,(void*)galoisapply,6,"GGG","galoisapply(nf,aut,x)=Apply the Galois automorphism sigma (polynomial or polymod) to the object x (element or ideal) in the number field nf"},
 {"galoisconj",1,(void*)galoisconj,6,"G","galoisconj(nf)=list of conjugates of a root of the polynomial x=nf[1] in the same number field, using p-adics, LLL on integral basis (not always complete)"},
 {"galoisconj1",0,(void*)suppressed,6,"G","galoisconj1(nf)=list of conjugates of a root of the polynomial x=nf[1] in the same number field nf, using complex numbers, LLL on integral basis (not always complete)"},

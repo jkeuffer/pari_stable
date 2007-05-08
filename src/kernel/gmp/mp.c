@@ -987,7 +987,7 @@ resiu(GEN y, ulong x)
 GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
-  err(impl, "Montgomery reduction in gmp kernel");
+  pari_err(impl, "Montgomery reduction in gmp kernel");
   return NULL; /* not reached */
 }
 

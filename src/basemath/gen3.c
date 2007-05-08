@@ -2506,7 +2506,7 @@ gtovec(GEN x)
     }
     case t_VECSMALL:
       return vecsmall_to_vec(x);
-    default: err(typeer,"gtovec");
+    default: pari_err(typeer,"gtovec");
       return NULL; /*notreached*/
   }
 }
@@ -2569,7 +2569,7 @@ gtovecsmall(GEN x)
   V = cgetg(l,t_VECSMALL);
   for(i=1; i<l; i++) {
     GEN y = gel(x,i);
-    if (typ(y) != t_INT) err(typeer,"vectosmall");
+    if (typ(y) != t_INT) pari_err(typeer,"vectosmall");
     V[i] = itos(y);
   }
   return V;

@@ -243,7 +243,7 @@ pgener_Zl(ulong p)
   GEN y = Fp_powu(utoipos(x), p-1, q);
   if (is_pm1(y)) {
     x += p;
-    if (x < p) err(talker, "p too large in pgener_Zl");
+    if (x < p) pari_err(talker, "p too large in pgener_Zl");
   }
   avma = av;
 }

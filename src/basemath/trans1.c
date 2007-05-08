@@ -1033,8 +1033,9 @@ palogaux(GEN x)
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   if (e <= 0) {
-    if (!BSW_psp(p)) err(talker, "error in p-adic log, %Z is not a prime", p);
-    err(bugparier, "log_p");
+    if (!BSW_psp(p))
+      pari_err(talker, "error in p-adic log, %Z is not a prime", p);
+    pari_err(bugparier, "log_p");
   }
   pp = e+precp(y);
   if (equaliu(p,2)) pp--;
@@ -1391,7 +1392,7 @@ mpexp_basecase(GEN x)
 #ifdef DEBUG
 {
   GEN t = mplog(z), u = divrr(subrr(x, t),x);
-  if (signe(u) && expo(u) > 5-bit_accuracy(min(l,lg(t)))) err(talker,"");
+  if (signe(u) && expo(u) > 5-bit_accuracy(min(l,lg(t)))) pari_err(talker,"");
 }
 #endif
   return gerepileuptoleaf(av, z); /* NOT affrr, precision often increases */
