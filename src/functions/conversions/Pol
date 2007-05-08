@@ -5,11 +5,13 @@ Prototype: GDn
 Help: Pol(x,{v=x}): convert x (usually a vector or a power series) into a
  polynomial with variable v, starting with the leading coefficient
 Doc: 
- transforms the object $x$ into a polynomial with
- main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
- $x$ is a power series, the effect is identical to \kbd{truncate},
- i.e.~it chops off the $O(X^k)$. 
- 
+ transforms the object $x$ into a polynomial with main variable $v$. If $x$
+ is a scalar, this gives a constant polynomial. If $x$ is a power series with
+ non-negative valuation or a rational function, the effect is similar to
+ \kbd{truncate}, i.e.~we chop off the $O(X^k)$ or compute the Euclidean
+ quotient of the numerator by the denominator, then change the main variable
+ of the result to $v$.
+
  The main use of this function is when $x$ is a vector: it creates the
  polynomial whose coefficients are given by $x$, with $x[1]$ being the leading
  coefficient (which can be zero). It is much faster to evaluate
