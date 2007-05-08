@@ -970,7 +970,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
         long ex;
         affgr(eval(addii(r,a), E), reel);
         ex = expo(reel) + i; setexpo(reel,ex);
-	x = mpadd(x,reel); if (i && ex < G) break;
+	x = mpadd(x,reel); if (i && (ex < G || !signe(reel))) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x); /* sum_i f(a + (2k+2) 2^i) 2^i */
@@ -1010,7 +1010,7 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
         long ex;
         affgr(eval(addii(r,a), E), reel);
         ex = expo(reel) + i; setexpo(reel,ex);
-	x = mpadd(x,reel); if (i && ex < G) break;
+	x = mpadd(x,reel); if (i && (ex < G || !signe(reel))) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);

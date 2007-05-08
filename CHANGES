@@ -31,6 +31,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    22- matrixqz(x,0) would not work if first two determinants were 0
        + might lose pointers in gerepile
    23- gcd([2,3]) -> SEGV [#581]
+   24- sumpos(x=1,0) -> oo loop [#585]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
