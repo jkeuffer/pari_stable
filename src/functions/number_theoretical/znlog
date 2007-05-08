@@ -11,3 +11,17 @@ Doc: $g$ must be a primitive root mod a prime $p$, and
  $O(\sqrt{q})$ storage, where $q$ is the largest prime factor of $p-1$. Hence
  it cannot be used when the largest prime divisor of $p-1$ is greater than
  about $10^{13}$.
+ 
+ \bprog
+ ? g = znprimroot(101)
+ %1 = Mod(2,101)
+ ? znlog(Mod(5,101), g)
+ %2 = 24
+ ? g^24
+ %3 = Mod(5, 101)
+ @eprog\noindent
+ The result is undefined when $g$ is not a primitive root modulo a prime:
+ \bprog
+ ? znlog(Mod(2,4), Mod(1,3))
+ %3 = 1  \\ @com{Junk in, junk out}
+ @eprog
