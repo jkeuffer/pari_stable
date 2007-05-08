@@ -2567,7 +2567,11 @@ gtovecsmall(GEN x)
   if (!is_vec_t(tx)) pari_err(typeer,"vectosmall");
   l = lg(x);
   V = cgetg(l,t_VECSMALL);
-  for(i=1;i<l;i++) V[i] = itos(gel(x,i));
+  for(i=1; i<l; i++) {
+    GEN y = gel(x,i);
+    if (typ(y) != t_INT) err(typeer,"vectosmall");
+    V[i] = itos(y);
+  }
   return V;
 }
 
