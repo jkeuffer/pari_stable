@@ -2,7 +2,8 @@ Function: sumpos
 Section: sums
 C-Name: sumpos0
 Prototype: V=GED0,L,p
-Help: sumpos(X=a,expr,{flag=0}): sum of positive series expr, the formal
+Help: sumpos(X=a,expr,{flag=0}): sum of positive (or negative) series expr,
+ the formal
  variable X starting at a. flag is optional, and can be 0: default, or 1:
  uses a slightly different method using Zagier's polynomials
 Doc: numerical summation of the series \var{expr}, which must be a series of
@@ -14,7 +15,8 @@ Doc: numerical summation of the series \var{expr}, which must be a series of
  
  The routine is heuristic and assumes that \var{expr} is more or less a
  decreasing function of $X$. In particular, the result will be completely
- wrong if \var{expr} is 0 too often. As \tet{sumalt}, it should be used to
+ wrong if \var{expr} is 0 too often. We do not check either that all terms
+ have the same sign. As \tet{sumalt}, this function should be used to
  try and guess the value of an infinite sum.
  
  If $\fl=1$, use slightly different polynomials. Sometimes faster.
