@@ -997,6 +997,7 @@ Strchr(GEN g)
   }
   else
   {
+    if (t != t_INT) pari_err(typeer,"Strchr");
     x = cgetg(2, t_STR); s = GSTR(x);
     *s++ = itoc(g);
   }
