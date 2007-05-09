@@ -315,7 +315,7 @@ matqpascal(long n, GEN q)
   pari_sp av = avma;
   GEN m, *qpow = NULL; /* gcc -Wall */
 
-  if (n < 0) pari_err(talker,"Pascal triangle of negative order in matpascal");
+  if (n < -1) pari_err(talker,"Pascal triangle of negative order in matpascal");
   n++; m = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(m,j) = cgetg(n+1,t_COL);
   if (q)
