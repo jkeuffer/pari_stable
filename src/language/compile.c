@@ -229,7 +229,7 @@ compilecast(long n, int type, int mode)
 }
 
 static entree *
-getentry(long n)
+get_entree(long n)
 {
   long x=tree[n].x;
   if (tree[x].x==CSTmember)
@@ -239,9 +239,19 @@ getentry(long n)
 }
 
 static entree *
+getentry(n)
+{
+  while (tree[n].f==Ftag)
+    n=tree[n].x;
+  if (tree[n].f!=Fentry)
+    pari_err(talker2,"variable name expected",tree[n].str, get_origin());
+  return get_entree(n);
+}
+
+static entree *
 getfunc(long n)
 {
-  return do_alias(getentry(n));
+  return do_alias(get_entree(n));
 }
 
 INLINE int
@@ -492,8 +502,6 @@ compilefunc(long n, int mode)
       }
       else
         op_push(OCpushstoi,0);
-      if (tree[a].f==Ftag)
-        a=tree[a].x;
       en=(long)getentry(a);
       op_push(OCgetarg,en);
       var_push(en);
@@ -517,8 +525,6 @@ compilefunc(long n, int mode)
       }
       else
         op_push(OCpushlong,0);
-      if (tree[a].f==Ftag)
-        a=tree[a].x;
       en=(long)getentry(a);
       op_push(OCglobalvar,en);
     }
@@ -975,9 +981,7 @@ compilenode(long n, int mode, long flag)
         long en;
         switch (tree[a].f)
         {
-        case Ftag:
-          a=tree[a].x;
-        case Fentry: /*Fall through*/
+        case Fentry: case Ftag:
           en=(long)getentry(a);
           op_push(OCgetarg,en);
           var_push(en);
@@ -987,11 +991,8 @@ compilenode(long n, int mode, long flag)
             struct codepos lpos;
             getcodepos(&lpos);
             compilenode(tree[a].y,Ggen,0);
-            a=tree[a].x;
-            if (tree[a].f==Ftag)
-              a=tree[a].x;
             op_push(OCpushgen, data_push(getclosure(&lpos)));
-            en=(long)getentry(a);
+            en=(long)getentry(tree[a].x);
             op_push(OCdefaultarg,en);
             var_push(en);
             break;
