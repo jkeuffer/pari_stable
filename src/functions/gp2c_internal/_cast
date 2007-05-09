@@ -58,6 +58,7 @@ Description:
  (int):small            itos($1)
  (#lg):small:parens     ${1 value 1 sub}
  (lg):small:parens      $(1)-1
+ (gen):small            gtos($1)
  
  (void):int             gen_0
  (-1):int               gen_m1
