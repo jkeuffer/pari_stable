@@ -1807,7 +1807,7 @@ logr_abs(GEN X)
   {
     GEN S, T, y2 = gsqr(y), unr = real_1(L);
     pari_sp av = avma;
-    long s = 0, l1 = nbits2prec((long)d);
+    long s = 0, incs = (long)d, l1 = nbits2prec((long)d);
     S = x;
     setlg(S,  l1);
     setlg(unr,l1); affrr(divru(unr,k), S); /* destroy x, not needed anymore */
@@ -1816,7 +1816,7 @@ logr_abs(GEN X)
       setlg(y2, l1); T = mulrr(S,y2);
       if (k == 1) break;
 
-      s += d;
+      s += incs;
       l1 += s>>TWOPOTBITS_IN_LONG; if (l1>L) l1=L;
       s &= (BITS_IN_LONG-1);
       setlg(S, l1);
