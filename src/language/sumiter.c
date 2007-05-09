@@ -840,7 +840,7 @@ vvecteur(GEN nmax, entree *ep, GEN n)
 }
 
 GEN
-matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN ch)
+matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code)
 {
   GEN y, z, p1;
   long i, j, m, n;
@@ -853,7 +853,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN ch)
   if (m < 0) pari_err(talker,"negative number of columns in matrix");
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
-  if (!ep1 || !ep2 || ch<0 || !n) return zeromatcopy(n, m);
+  if (!ep1 || !ep2 || !code || !n) return zeromatcopy(n, m);
   push_val(ep1, c1);
   push_val(ep2, c2); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
@@ -861,7 +861,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN ch)
     c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;
     for (j=1; j<=n; j++)
     {
-      c1[2] = j; p1 = closure_evalnobrk(ch);
+      c1[2] = j; p1 = closure_evalnobrk(code);
       gel(z,j) = isonstack(p1)? p1 : gcopy(p1);
       changevalue_p(ep1,c1);
       changevalue_p(ep2,c2);
