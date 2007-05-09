@@ -2728,7 +2728,7 @@ into a \kbd{double} if possible.
 \fun{double}{gtodouble}{GEN x} if \kbd{x} is a real number (not necessarily
 a~\typ{REAL}), converts \kbd{x} into a \kbd{double} if possible.
 
-\fun{double}{gtos}{GEN x} convert the \typ{INT} \kbd{x} to a small
+\fun{long}{gtos}{GEN x} converts the \typ{INT} \kbd{x} to a small
 integer if possible, otherwise raise an exception. This function
 is similar to \tet{itos}, slightly slower since it checks the type of \kbd{x}.
 
