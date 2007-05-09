@@ -280,6 +280,9 @@ BA 38- Interrupting GP could lead to a freeze. [#488]
    16- remove gp-specific signal handler. Use the one in libpari
    17- [library] pol_1 and pol_x are no longer global arrays but functions
    18- [GMP] was inefficient for small sizes (e.g. 1-word operands)
+   19- optimized rectplothrawin & plot (remove gaffect, use gtodouble
+       whenever possible). Coordinate computations should be faster and more
+       accurate.
 
   Added
 BA  1- function Flm_rank
