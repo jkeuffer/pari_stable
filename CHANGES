@@ -32,6 +32,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
        + might lose pointers in gerepile
    23- gcd([2,3]) -> SEGV [#581]
    24- sumpos(x=1,0) -> oo loop [#585]
+   25- factorial('x) -> junk [ insufficient type checking in evaluator ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -62,6 +63,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
        Aurifeuille), merge_factor
     3- library function divru, dbllog2r
     4- library function ZX_gcd
+    5- library function gtos
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

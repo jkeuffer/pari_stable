@@ -421,7 +421,7 @@ closure_castgen(GEN z, long mode)
     gel(st,sp++)=z;
     break;
   case Gsmall:
-    st[sp++]=itos(z);
+    st[sp++]=gtos(z);
     break;
   case Gvar:
     st[sp++]=closure_varn(z);
@@ -571,7 +571,7 @@ closure_eval(GEN C)
         gel(st,sp-1)=stoi(st[sp-1]);
         break;
     case OCitos:
-        st[sp-1]=itos(gel(st,sp-1));
+        st[sp-1]=gtos(gel(st,sp-1));
         break;
     case OCtostr:
         if (operand==1)

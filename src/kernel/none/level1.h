@@ -110,8 +110,8 @@ long   expu(ulong x);
 void   fixlg(GEN z, long ly);
 GEN    fractor(GEN x, long prec);
 double gtodouble(GEN x);
-double dbllog2r(GEN x);
 GEN    gtofp(GEN z, long prec);
+long   gtos(GEN x);
 GEN    icopy_av(GEN x, GEN y);
 GEN    icopy(GEN x);
 GEN    init_gen_op(GEN x, long tx, long *lx, long *i);
@@ -608,6 +608,12 @@ itos(GEN x)
   u = x[2]; if (lgefint(x) > 3 || u < 0) pari_err(affer2);
   return (s>0) ? u : -u;
 }
+INLINE long
+gtos(GEN x) {
+  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Z'",x);
+  return itos(x);
+}
+
 
 /* as itos, but return 0 if too large. Cf is_bigint */
 INLINE long
