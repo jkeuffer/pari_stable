@@ -3242,6 +3242,7 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
     case 2:
     {
       long maxnum = stockmax? itos(stockmax): -2;
+      if (typ(a) != t_MAT) pari_err(typeer,"qfminim0");
       return fincke_pohst(a,borne,maxnum,prec,NULL);
     }
     default: pari_err(flagerr,"qfminim");
