@@ -24,14 +24,11 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    15- too much memory allocated to print real numbers
    16- (y/x)/(x^0/y) not correctly simplified
    17- \s reported a misleading number of available user variables
-   18- polroots(pollegendre(51),1) -> stack corruption [#592]
-   19- 1/(quadgen(-4)*x)+0 -> exponent overflow [#591]
-   20- acos(1) was non-zero [#590]
-   21- sumpos(x=1,1/x^2,1) had the wrong sign [#587]
-   22- matrixqz(x,0) would not work if first two determinants were 0
+   18- 1/(quadgen(-4)*x)+0. -> exponent overflow [#591]
+   19- sumpos(x=1,1/x^2,1) had the wrong sign [#587]
+   20- matrixqz(x,0) would not work if first two determinants were 0
        + might lose pointers in gerepile
-   23- gcd([2,3]) -> SEGV [#581]
-   24- sumpos(x=1,0) -> oo loop [#585]
+   21- sumpos(x=1,0) -> oo loop [#585]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
