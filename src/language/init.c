@@ -608,8 +608,11 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   ulong u;
 
   pari_stackcheck_init(&u);
-  if ((init_opts&INIT_DFTm)) 
-    { GP_DATA = default_gp_data(); pari_init_defaults(); }
+  if ((init_opts&INIT_DFTm)) {
+    GP_DATA = default_gp_data(); gp_expand_path(GP_DATA->path);
+    pari_init_defaults();
+  }
+  
   err_catch_stack=NULL;
   if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env))
   {

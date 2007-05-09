@@ -976,10 +976,7 @@ ltoc(long n) {
   return (char)n;
 }
 static char
-itoc(GEN x) {
-  if (typ(x) != t_INT) pari_err(typeer,"Strchr");
-  return ltoc(itos(x));
-}
+itoc(GEN x) { return ltoc(gtos(x)); }
 
 GEN
 Strchr(GEN g)

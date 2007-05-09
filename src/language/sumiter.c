@@ -799,8 +799,7 @@ vecteur(GEN nmax, entree *ep, GEN code)
   long i,m;
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
-  if (typ(nmax) != t_INT) pari_err(typeer,"vector");
-  m = itos(nmax);
+  m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
   if (!ep || !code) return zerovec(m);
   y = cgetg(m+1,t_VEC); push_val(ep, c);
@@ -820,15 +819,14 @@ vecteursmall(GEN nmax, entree *ep, GEN code)
   long i,m;
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
-  if (typ(nmax) != t_INT) pari_err(typeer,"vector");
-  m = itos(nmax);
+  m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
   if (!ep || !code) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
   for (i=1; i<=m; i++)
   {
     c[2] = i;
-    y[i] = itos(closure_evalnobrk(code));
+    y[i] = gtos(closure_evalnobrk(code));
     changevalue_p(ep,c);
   }
   pop_val(ep); return y;
@@ -849,10 +847,9 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN ch)
   long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
   long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
-  if (typ(ncol) != t_INT || typ(nlig) != t_INT) pari_err(typeer,"matrix");
   if (ep1 == ep2 && ep1) pari_err(talker, "identical index variables in matrix");
-  m = itos(ncol);
-  n = itos(nlig);
+  m = gtos(ncol);
+  n = gtos(nlig);
   if (m < 0) pari_err(talker,"negative number of columns in matrix");
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
@@ -940,7 +937,7 @@ sumalt0(entree *ep, GEN a, GEN code, long flag, long prec)
 GEN
 sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
-  long k, N, G;
+  long k, kk, N, G;
   pari_sp av = avma;
   GEN r, reel, s, az, c, x, e1, d, *stock;
 
@@ -962,18 +959,17 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     else
     {
       pari_sp av2 = avma;
-      long i;
       x = gen_0; r = utoipos(2*k+2);
-      for(i=0;;i++)
+      for(kk=0;;kk++)
       {
         
         long ex;
         affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + i; setexpo(reel,ex);
-	x = mpadd(x,reel); if (i && (ex < G || !signe(reel))) break;
+        ex = expo(reel) + kk; setexpo(reel,ex);
+	x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
-      x = gerepileupto(av2, x); /* sum_i f(a + (2k+2) 2^i) 2^i */
+      x = gerepileupto(av2, x);
       if (2*k < N) stock[2*k+1] = x;
       affgr(eval(addsi(k+1,a), E), reel);
       x = addrr(reel, gmul2n(x,1));
@@ -988,7 +984,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 GEN
 sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
-  long k, N, G;
+  long k, kk, N, G;
   pari_sp av = avma;
   GEN r, reel, s, pol, dn, x, *stock;
 
@@ -1003,14 +999,13 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
     if (odd(k) || !stock[k])
     {
       pari_sp av2 = avma;
-      long i;
       x = gen_0; r = utoipos(2*k);
-      for(i=0;;i++)
+      for(kk=0;;kk++)
       {
         long ex;
         affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + i; setexpo(reel,ex);
-	x = mpadd(x,reel); if (i && (ex < G || !signe(reel))) break;
+        ex = expo(reel) + kk; setexpo(reel,ex);
+	x = mpadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
@@ -1024,7 +1019,7 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   for (k=1; k<=lg(pol)-2; k++)
   {
     GEN p1 = gmul(gel(pol,k+1),stock[k]);
-    if (!odd(k)) p1 = gneg_i(p1);
+    if (odd(k)) p1 = gneg_i(p1);
     s = gadd(s,p1);
   }
   return gerepileupto(av, gdiv(s,dn));
