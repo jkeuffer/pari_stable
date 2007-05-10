@@ -616,7 +616,8 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p1 = eval(a, E); x = gmul(x,p1); a = incloop(a);
+    p1 = eval(a, E); if (gcmp0(p1)) { x = p1; break; }
+    x = gmul(x,p1); a = incloop(a);
     p1 = gsubgs(p1, 1);
     if (gcmp0(p1) || gexpo(p1) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
@@ -640,7 +641,9 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p2 = eval(a, E); p1 = gaddgs(p2,1); x = gmul(x,p1); a = incloop(a);
+    p2 = eval(a, E); p1 = gaddgs(p2,1);
+    if (gcmp0(p1)) { x = p1; break; }
+    x = gmul(x,p1); a = incloop(a);
     if (gcmp0(p2) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {

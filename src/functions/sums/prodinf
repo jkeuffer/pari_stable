@@ -8,8 +8,8 @@ Help: prodinf(X=a,expr,{flag=0}): infinite product (X goes from a to
 Doc: \idx{infinite product} of
  expression \var{expr}, the formal parameter $X$ starting at $a$. The evaluation
  stops when the relative error of the expression minus 1 is less than the
- default precision. The expressions must always evaluate to an element of
- $\C$.
+ default precision. In particular, non-convergent products result in infinite
+ loops. The expressions must always evaluate to an element of $\C$.
  
  If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
  
