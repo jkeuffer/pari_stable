@@ -120,9 +120,12 @@ typedef struct var_cell {
   struct var_cell *prev; /* cell associated to previous value on stack */
   GEN value; /* last value (not including current one, in ep->value) */
   char flag; /* status of _current_ ep->value: PUSH or COPY ? */
+  long valence; /* valence of entree* associated to 'value', to be restored
+                    * by pop_val */
 } var_cell;
 #define INITIAL NULL
-/* Push x on value stack associated to ep. Assume EpVALENCE(ep)=EpVAR/EpGVAR */
+
+/* Push x on value stack associated to ep. */
 static void
 new_val_cell(entree *ep, GEN x, char flag)
 {
@@ -130,6 +133,7 @@ new_val_cell(entree *ep, GEN x, char flag)
   v->value  = (GEN)ep->value;
   v->prev   = (var_cell*) ep->pvalue;
   v->flag   = flag;
+  v->valence= ep->valence;
 
   /* beware: f(p) = Nv = 0
    *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
@@ -181,11 +185,7 @@ pop_val(entree *ep)
   if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
   ep->value  = v->value;
   ep->pvalue = (char*) v->prev;
-  if (ep->pvalue == INITIAL)
-  {
-    if (ep->code) ep->valence=EpUSER;
-    else if (ep->value==NULL) ep->valence=EpNEW;
-  }
+  ep->valence=v->valence;
   gpfree((void*)v);
 }
 
