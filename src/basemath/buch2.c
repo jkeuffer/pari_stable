@@ -1839,6 +1839,31 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
   avma = av; return 1;
 }
 
+/* Check if we already have a column mat[i] equal to mat[s]
+ * General check for colinearity useless since exceedingly rare */
+static int
+already_known(RELCACHE_t *cache, REL_t *rel)
+{
+  REL_t *r;
+  GEN cols = rel->R;
+  long bs, l = lg(cols);
+
+  bs = 1; while (bs < l && !cols[bs]) bs++;
+  if (bs == l) return -1; /* zero relation */
+
+  for (r = rel - 1; r > cache->base; r--)
+  {
+    if (bs == r->nz) /* = index of first non zero elt in cols */
+    {
+      GEN coll = r->R;
+      long b = bs;
+      do b++; while (b < l && cols[b] == coll[b]);
+      if (b == l) return 1;
+    }
+  }
+  rel->nz = bs; return 0;
+}
+
 /* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
  * Starting from the identity (canonical basis of Q^n), we obtain a base
  * change matrix P by taking the independent columns of A and vectors from
@@ -1863,7 +1888,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   const long maxtry_DEP  = 20, maxtry_FACT = 500;
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
-  long nbsmallnorm, nbfact, j, k, noideal, precbound;
+  long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
   GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2); 
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
@@ -1885,12 +1910,13 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   if (precbound < prec) M = gprec_w(M, precbound);
 
   minim_alloc(N+1, &q, &x, &y, &z, &v);
-  for (av = avma, noideal = F->KC; noideal; noideal--, avma = av)
+  for (av = avma; noideal; noideal--, avma = av)
   {
     long nbrelideal = 0, dependent = 0, try_factor = 0;
-    GEN IDEAL, ideal = gel(F->LP,noideal);
+    GEN IDEAL, ideal;
     pari_sp av2;
 
+    ideal = gel(F->LP,noideal);
     if (DEBUGLEVEL>1)
       fprintferr("\n*** Ideal no %ld: [%Z, %Z, %Z, %Z]\n",
                  noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
@@ -2034,31 +2060,6 @@ dbg_cancelrel(long jid, long jdir, GEN col)
   wr_rel(col); flusherr();
 }
 
-/* Check if we already have a column mat[i] equal to mat[s]
- * General check for colinearity useless since exceedingly rare */
-static int
-already_known(RELCACHE_t *cache, REL_t *rel)
-{
-  REL_t *r;
-  GEN cols = rel->R;
-  long bs, l = lg(cols);
-
-  bs = 1; while (bs < l && !cols[bs]) bs++;
-  if (bs == l) return -1; /* zero relation */
-
-  for (r = rel - 1; r > cache->base; r--)
-  {
-    if (bs == r->nz) /* = index of first non zero elt in cols */
-    {
-      GEN coll = r->R;
-      long b = bs;
-      do b++; while (b < l && cols[b] == coll[b]);
-      if (b == l) return 1;
-    }
-  }
-  rel->nz = bs; return 0;
-}
-
 /* I integral ideal in HNF form */
 static GEN
 remove_content(GEN I)
@@ -2087,7 +2088,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
     GEN P;
     if (L_jid && jlist < lg(L_jid))
     {
-      if (++cptlist > 3) { jid = L_jid[jlist++]; cptlist = 0; }
+      if (++cptlist > 3)
+      {
+	jid = L_jid[jlist];
+	jlist++;
+	cptlist = 0;
+      }
       if (!jid) jid = 1;
     }
     else
@@ -2136,7 +2142,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
       /* Need more, try next prime ideal */
       if (rel < cache->end) { cptzer = 0; break; }
       /* We have found enough. Return */
-      avma = av; *pjid = jid; return 1;
+      avma = av; *pjid = jid;
+      return 1;
     }
   }
 }
