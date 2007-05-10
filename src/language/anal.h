@@ -39,20 +39,6 @@ GEN gp_eval(GEN x, void *dat);
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
-/* binary I/O */
-typedef struct GENbin {
-  size_t len; /* taille(x) */
-  GEN x; /* binary copy of x */
-  GEN base; /* base address of p->x */
-  int canon; /* 1: t_INT in canonical (native kernel) form,
-                0: t_INT according to current kernel */
-} GENbin;
-#define GENbase(p) ((GEN)(p + 1))
-
-GENbin* copy_bin(GEN x);
-GENbin* copy_bin_canon(GEN x);
-GEN bin_copy(GENbin *p);
-
 /* stacks */
 typedef struct stack {
   struct stack *prev;
