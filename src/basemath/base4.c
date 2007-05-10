@@ -2051,7 +2051,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     if (!aI) return I;
     goto END;
   }
-  if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
+  if (typ(I) != t_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   I = Q_primitive_part(I, &c1);
   y = ideallllred_elt(nf, I, vdir);
 
