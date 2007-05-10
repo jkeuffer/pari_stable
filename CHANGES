@@ -32,6 +32,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    22- qfminim([[;]],,,2) --> SEGV [#598]
    23- intformal(1) --> incorrect object
    24- intformal(y,x) --> y*y
+   25- matadjoint(0) --> gerepile error
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

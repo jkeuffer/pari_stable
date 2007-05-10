@@ -102,7 +102,7 @@ easychar(GEN x, long v, GEN *py)
       p1=cgetg(4,t_POL);
       p1[1]=evalsigne(1) | evalvarn(v);
       gel(p1,2) = gneg(x); gel(p1,3) = gen_1;
-      if (py) *py = mkmat(mkcolcopy(x));
+      if (py) { *py = cgetg(2, t_MAT); gel(*py,1) = mkcolcopy(x); }
       return p1;
 
     case t_COMPLEX: case t_QUAD:
