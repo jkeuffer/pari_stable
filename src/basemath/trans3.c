@@ -803,6 +803,7 @@ veceint1(GEN C, GEN nmax, long prec)
   GEN Mx, My, y, e1, e2, F0, F, den, minvn, mcn, p1, vdiff, unr;
 
   if (!nmax) return eint1(C,prec);
+  if (typ(nmax) != t_INT) err(typeer,"veceint1");
 
   if (signe(nmax)<=0) return cgetg(1,t_VEC);
   if (DEBUGLEVEL>1) fprintferr("Entering veceint1:\n");

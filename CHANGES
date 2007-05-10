@@ -36,6 +36,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    26- prodinf(x=0,0), prodinf(x=0,-1,1) --> oo loop
    27- agm(-1, 1+1e-55) --> oo loop, agm(-1,1) --> wrong result
 LGr28- killing hi-res graphic window created zombie process (missing wait())
+   29- missing type check in eint1(x,n)
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
