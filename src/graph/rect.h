@@ -18,7 +18,8 @@ BEGINEXTERN
 #define PLOT_NAME_LEN 20
 #define NUMRECT 18
 
-#define DTOL(t) ((long)(t + 0.5))
+INLINE long
+DTOL(double t) { return (long)(t + 0.5); }
 
 typedef struct PARI_plot {
   long width;
