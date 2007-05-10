@@ -1625,7 +1625,7 @@ agm1cx(GEN x, long prec)
   long L, l = precision(x); if (!l) l = prec;
 
   L = 5-bit_accuracy(l);
-  a1 = gmul2n(gadd(real_1(l), x), -1);
+  a1 = gtofp(gmul2n(gadd(real_1(l), x), -1), l); /* avoid loss of accuracy */
   av2 = avma;
   b1 = gsqrt(x, prec);
   while (agmcx_gap(a1,b1,L))
@@ -1649,6 +1649,10 @@ agm1(GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   switch(typ(x))
   {
+    case t_INT:
+      if (!is_pm1(x)) break;
+      return (signe(x) > 0)? real_1(prec): real_0(prec);
+
     case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
 
     case t_COMPLEX:
