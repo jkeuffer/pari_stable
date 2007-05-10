@@ -238,6 +238,7 @@ get_entree(long n)
     return fetch_entry(tree[x].str, tree[x].len);
 }
 
+/* match any Fentry */
 static entree *
 getentry(n)
 {
@@ -246,6 +247,16 @@ getentry(n)
   if (tree[n].f!=Fentry)
     pari_err(talker2,"variable name expected",tree[n].str, get_origin());
   return get_entree(n);
+}
+
+/* match Fentry that are not actually EpSTATIC functions called without parens*/
+static entree *
+getvar(n)
+{
+  entree *ep = getentry(n);
+  if (EpSTATIC(do_alias(ep)))
+    pari_err(talker2,"variable name expected",tree[n].str, get_origin());
+  return ep;
 }
 
 static entree *
@@ -281,7 +292,7 @@ getlvalue(long n)
 { 
   while (tree[n].f==Ffacteurmat)
     n=tree[n].x;
-  return getentry(n);
+  return getvar(n);
 }
 
 static void
@@ -502,7 +513,7 @@ compilefunc(long n, int mode)
       }
       else
         op_push(OCpushstoi,0);
-      en=(long)getentry(a);
+      en=(long)getvar(a);
       op_push(OCgetarg,en);
       var_push(en);
     }
@@ -525,7 +536,7 @@ compilefunc(long n, int mode)
       }
       else
         op_push(OCpushlong,0);
-      en=(long)getentry(a);
+      en=(long)getvar(a);
       op_push(OCglobalvar,en);
     }
     compilecast(n,Gvoid,mode);
@@ -640,6 +651,11 @@ compilefunc(long n, int mode)
             break;
           }
         case 'V':
+          {
+            entree *ep = getvar(arg[j++]);
+            op_push(OCpushlong, (long)ep);
+            break;
+          }
         case 'S':
           {
             entree *ep = getentry(arg[j++]);
@@ -654,7 +670,7 @@ compilefunc(long n, int mode)
             if (tree[arg[j]].f!=Faffect)
               pari_err(talker2,"expected character: '=' instead of",
                   tree[n].str+tree[n].len, get_origin());
-            ep = getentry(x);
+            ep = getvar(x);
             op_push(OCpushlong, (long)ep);
             compilenode(y,Ggen,0);
             i++; j++;
@@ -869,7 +885,7 @@ compilenode(long n, int mode, long flag)
   case Faffect:
     if (tree[x].f==Fentry)
     {
-      entree *ep=getentry(x);
+      entree *ep=getvar(x);
       compilenode(y,Ggen,Fnocopy);
       op_push(OCstore,(long)ep);
       if (mode!=Gvoid)
@@ -982,7 +998,7 @@ compilenode(long n, int mode, long flag)
         switch (tree[a].f)
         {
         case Fentry: case Ftag:
-          en=(long)getentry(a);
+          en=(long)getvar(a);
           op_push(OCgetarg,en);
           var_push(en);
           break;
@@ -992,7 +1008,7 @@ compilenode(long n, int mode, long flag)
             getcodepos(&lpos);
             compilenode(tree[a].y,Ggen,0);
             op_push(OCpushgen, data_push(getclosure(&lpos)));
-            en=(long)getentry(tree[a].x);
+            en=(long)getvar(tree[a].x);
             op_push(OCdefaultarg,en);
             var_push(en);
             break;
