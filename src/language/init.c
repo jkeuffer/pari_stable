@@ -311,6 +311,26 @@ pari_handle_SIGINT(void)
 #endif
 }
 
+#ifdef HAS_WAIT
+#  include <sys/wait.h>
+#  if !defined(SIGCHLD) && defined(SIGCLD)
+#    define SIGCHLD SIGCLD
+#  endif
+
+#  ifdef SIGCHLD
+static void
+pari_handle_SIGCHLD(void)
+{
+#    ifdef WNOHANG
+  while (wait3(NULL, WNOHANG, NULL) > 0);
+#    else
+  wait(NULL);
+#    endif
+}
+#  endif
+#endif
+
+
 static void
 pari_sighandler(int sig)
 {
@@ -332,6 +352,12 @@ pari_sighandler(int sig)
     case SIGINT:
       if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
       else pari_handle_SIGINT(); 
+      return;
+#endif
+
+#ifdef SIGCHLD
+    case SIGCHLD:
+      pari_handle_SIGCHLD();
       return;
 #endif
 
@@ -496,6 +522,9 @@ pari_sig_init(void (*f)(int))
 #endif
 #ifdef SIGSEGV
   (void)os_signal(SIGSEGV,f);
+#endif
+#ifdef SIGCHLD
+  (void)os_signal(SIGCHLD,f);
 #endif
 }
 

@@ -35,6 +35,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    25- matadjoint(0) --> gerepile error
    26- prodinf(x=0,0), prodinf(x=0,-1,1) --> oo loop
    27- agm(-1, 1+1e-55) --> oo loop, agm(-1,1) --> wrong result
+LG 28- killing hi-res graphic window created zombie process (missing wait())
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

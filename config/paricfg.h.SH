@@ -163,6 +163,10 @@ case $has_sigaction in
 yes) echo '#define HAS_SIGACTION' >> $file;;
 esac
 
+case $has_wait in
+yes) echo '#define HAS_WAIT' >> $file;;
+esac
+
 case $has_dlopen in
 yes|builtin) cat >> $file << EOT
 #define HAS_DLOPEN

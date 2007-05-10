@@ -22,6 +22,7 @@ list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
 list='stat opendir'; . ./look
 list=vsnprintf; . ./look
+list=wait; . ./look
 
 # For install(). Do we need libdl.so?
 # on irix and osf1 -ldl not needed
