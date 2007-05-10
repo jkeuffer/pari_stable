@@ -1671,11 +1671,7 @@ integ(GEN x, long v)
       gel(y,2) = integ(gel(x,2),v); return y;
     }
     if (gcmp0(x)) return gen_0;
-
-    y = cgetg(4,t_POL);
-    y[1] = evalsigne(1) | evalvarn(v);
-    gel(y,2) = gen_0;
-    gel(y,3) = gcopy(x); return y;
+    return deg1pol(x, gen_0, v);
   }
 
   switch(tx)
@@ -1684,13 +1680,7 @@ integ(GEN x, long v)
       vx = varn(x); lx = lg(x);
       if (varncmp(vx, v) < 0) v = vx;
       if (lx == 2) return zeropol(v);
-      if (varncmp(vx, v) > 0)
-      {
-        y = cgetg(4,t_POL);
-	y[1] = x[1];
-        gel(y,2) = gen_0;
-        gel(y,3) = gcopy(x); return y;
-      }
+      if (varncmp(vx, v) > 0) return deg1pol(x, gen_0, v);
       if (varncmp(vx, v) < 0) return triv_integ(x,v,tx,lx);
       y = cgetg(lx+1,tx); y[1] = x[1]; gel(y,2) = gen_0;
       for (i=3; i<=lx; i++) gel(y,i) = gdivgs(gel(x,i-1),i-2);
@@ -2280,7 +2270,7 @@ deg1pol(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v);
-  gel(x,2) = gcopy(x0);
+  gel(x,2) = x0 == gen_0? x0: gcopy(x0); /* gen_0 frequent */
   gel(x,3) = gcopy(x1); return normalizepol_i(x,4);
 }
 
