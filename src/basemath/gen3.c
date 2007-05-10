@@ -1661,12 +1661,12 @@ integ(GEN x, long v)
   GEN y,p1;
 
   tx = typ(x);
-  if (v < 0) v = gvar(x);
+  if (v < 0) { v = gvar(x); if (v == BIGINT) v = 0; }
   if (is_scalar_t(tx))
   {
-    if (tx == t_POLMOD && v>varn(x[1]))
+    if (tx == t_POLMOD && varncmp(v, varn(x[1])) > 0)
     {
-      y=cgetg(3,t_POLMOD);
+      y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = integ(gel(x,2),v); return y;
     }

@@ -30,6 +30,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
        + might lose pointers in gerepile
    21- sumpos(x=1,0) -> oo loop [#585]
    22- qfminim([[;]],,,2) --> SEGV [#598]
+   23- intformal(1) --> incorrect object
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
