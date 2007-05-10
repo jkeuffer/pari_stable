@@ -108,6 +108,7 @@ Emacs           @Using GP under GNU Emacs@2
 9               @Sums, products, integrals and similar functions
 10              @Plotting functions
 11              @Programming in GP: control statements
+13              @GP operators@2
 ell             @Functions related to elliptic curves
 nf              @Number field structures
 bnf             @Number field structures
