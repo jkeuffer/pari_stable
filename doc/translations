@@ -107,7 +107,7 @@ Emacs           @Using GP under GNU Emacs@2
 8               @Vectors, matrices, linear algebra and sets
 9               @Sums, products, integrals and similar functions
 10              @Plotting functions
-11              @Programming in GP
+11              @Programming in GP: control statements
 ell             @Functions related to elliptic curves
 nf              @Number field structures
 bnf             @Number field structures
@@ -115,7 +115,6 @@ bnr             @Number field structures
 rnf             @Relative extensions
 ideal           @Algebraic numbers and ideals
 idele           @Algebraic numbers and ideals
-component       @components of a PARI object
 modulus         @Class field theory
 CFT             @Class field theory
 bid             @Class field theory
