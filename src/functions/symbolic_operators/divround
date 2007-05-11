@@ -6,4 +6,3 @@ Prototype: GG
 Description: 
  (int, int):int			gdivround($1, $2)
  (gen, gen):gen			gdivround($1, $2)
-

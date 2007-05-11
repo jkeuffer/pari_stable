@@ -19,4 +19,3 @@ Doc: numerical
  @eprog
  
  \synt{intcirc}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN R,GEN tab, long prec}.
-

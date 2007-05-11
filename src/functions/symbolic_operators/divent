@@ -11,4 +11,3 @@ Description:
  (gen, small):gen			gdiventgs($1, $2)
  (small, gen):gen			gdiventsg($1, $2)
  (gen, gen):gen				gdivent($1, $2)
-

@@ -7,4 +7,3 @@ Description:
  (gal):int:copy                 gmael($1, 2, 1)
  (prid):int:copy                gel($1, 1)
  (gen):int                      member_p($1)
-

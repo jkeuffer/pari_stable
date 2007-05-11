@@ -9,7 +9,7 @@ Doc: \idx{field discriminant} of the number field defined by the integral,
  in \kbd{nfbasis}. That is, $fa$ provides the matrix of a partial
  factorization of the discriminant of $x$, and binary digits of $\fl$ are as
  follows:
-
+ 
  1: assume that no square of a prime greater than \kbd{primelimit}
  divides the discriminant.
  

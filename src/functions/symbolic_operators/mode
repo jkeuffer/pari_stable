@@ -10,4 +10,3 @@ Description:
  (*pol, gen):gen:parens	                 $1 = gmod($1, $2)
  (*gen, small):gen:parens                $1 = gmodgs($1, $2)
  (*gen, gen):gen:parens	                 $1 = gmod($1, $2)
-

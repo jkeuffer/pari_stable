@@ -37,4 +37,3 @@ Doc: product of expression
  @eprog
  
  \synt{produit}{entree *ep, GEN a, GEN b, char *expr, GEN x}.
-

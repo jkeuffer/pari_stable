@@ -9,6 +9,4 @@ Doc: incomplete gamma function. The argument $x$
  The result returned is $\int_x^\infty e^{-t}t^{s-1}\,dt$. When $y$ is given,
  assume (of course without checking!) that $y=\Gamma(s)$. For small $x$, this
  will speed up the computation.
- 
 Variant: Also available is \fun{GEN}{incgam}{GEN s, GEN x, long prec}.
-

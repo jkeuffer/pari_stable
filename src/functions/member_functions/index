@@ -6,4 +6,3 @@ Help: _.index
 Description: 
  (nf):int:copy                  gel($1, 4)
  (gen):int                      member_index($1)
-

@@ -9,7 +9,6 @@ Help: ellwp(E,{z=x},{flag=0}):
  P(z), 1 compute [P(z),P'(z)], 2 consider om as an elliptic curve and compute
  P(z) for that curve (identical to ellztopoint in that case). If z is omitted or
  is a simple variable, return formal expansion in z
-
 Doc: Computes the value at $z$ of the Weierstrass $\wp$ function attached to
  the elliptic curve $E$ as given by \kbd{ellinit} (alternatively, $E$ can be
  given as a lattice $[\omega_1,\omega_2]$).

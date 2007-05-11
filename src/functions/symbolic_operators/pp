@@ -12,4 +12,3 @@ Description:
  (*mp):mp:parens			 $1 = mpadd($1, gen_1)
  (*pol):pol:parens			 $1 = gaddgs($1, 1)
  (*gen):gen:parens			 $1 = gaddgs($1, 1)
-

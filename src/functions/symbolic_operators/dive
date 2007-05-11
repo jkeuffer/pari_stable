@@ -14,4 +14,3 @@ Description:
  (*vec, gen):gen:parens	         	 $1 = gdiv($1, $2)
  (*gen, small):gen:parens                $1 = gdivgs($1, $2)
  (*gen, gen):gen:parens	  	         $1 = gdiv($1, $2)
-

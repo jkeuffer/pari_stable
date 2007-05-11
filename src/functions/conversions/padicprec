@@ -3,8 +3,7 @@ Section: conversions
 C-Name: padicprec
 Prototype: lGG
 Help: padicprec(x,p): absolute p-adic precision of object x
-Doc: 
- absolute $p$-adic precision of the object $x$.
- This is the minimum precision of the components of $x$. The result is
- \kbd{VERYBIGINT} ($2^{31}-1$ for 32-bit machines or $2^{63}-1$ for 64-bit
- machines) if $x$ is an exact object.
+Doc: absolute $p$-adic precision of the object $x$. This is the minimum
+ precision of the components of $x$. The result is \kbd{VERYBIGINT}
+ ($2^{31}-1$ for 32-bit machines or $2^{63}-1$ for 64-bit machines) if $x$ is
+ an exact object.

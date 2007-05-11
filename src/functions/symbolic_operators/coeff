@@ -18,4 +18,3 @@ Description:
  (mp,small):gen                 $"Scalar has no rows"
  (vec,small):vec                rowcopy($1, $2)
  (gen,small):vec                rowcopy($1, $2)
-

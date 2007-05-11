@@ -33,4 +33,3 @@ Doc: evaluates the expression sequence \var{seq1} if $a$ is non-zero, otherwise
  Recall that functions such as \kbd{break} and \kbd{next} operate on
  \emph{loops} (such as \kbd{for$xxx$}, \kbd{while}, \kbd{until}). The \kbd{if}
  statement is \emph{not} a loop (obviously!).
-

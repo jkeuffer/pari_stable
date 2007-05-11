@@ -5,4 +5,3 @@ Prototype: L
 Help: n!: factorial of n
 Description: 
  (small):int			mpfact($1)
-

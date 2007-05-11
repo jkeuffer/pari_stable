@@ -15,4 +15,3 @@ Description:
  (gen, small):gen		gdivgs($1, $2)
  (small, gen):gen		gdivsg($1, $2)
  (gen, gen):gen	  	        gdiv($1, $2)
-

@@ -5,4 +5,3 @@ C-Name: member_orders
 Prototype: G
 Description: 
  (gal):vecsmall:copy   gel($1, 8)
-

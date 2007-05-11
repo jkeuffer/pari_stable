@@ -18,4 +18,3 @@ Description:
  (gen, small):gen		gsubgs($1, $2)
  (small, gen):gen		gsubsg($1, $2)
  (gen, gen):gen	  	        gsub($1, $2)
-

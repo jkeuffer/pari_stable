@@ -5,4 +5,3 @@ C-Name: member_b2
 Prototype: G
 Description: 
  (ell):gen:copy         gel($1, 6)
-

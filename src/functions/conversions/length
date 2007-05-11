@@ -9,8 +9,7 @@ Description:
  (vec):lg	lg($1)
  (pol):small:parens	lg($1)-2
  (gen):small	glength($1)
-Doc: 
- number of non-code words in $x$ really used
- (i.e.~the effective length minus 2 for integers and polynomials). In
- particular, the degree of a polynomial is equal to its length minus 1. If $x$
- has type \typ{STR}, output number of letters.
+Doc: number of non-code words in $x$ really used (i.e.~the effective length
+ minus 2 for integers and polynomials). In particular, the degree of a
+ polynomial is equal to its length minus 1. If $x$ has type \typ{STR}, output
+ number of letters.

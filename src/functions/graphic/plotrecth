@@ -12,6 +12,5 @@ Help: plotrecth(w,X=a,b,expr,{flags=0},{n=0}): plot graph(s) for expr
  x-axis, 16 omit y-axis, 32 omit frame, 64 do not join points, 128 plot both
  lines and points. n specifies the number of reference points on the graph
  (0=use default value). Returns a vector for the bounding box
-Doc: writes to
- rectwindow $w$ the curve output of \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.
-
+Doc: writes to rectwindow $w$ the curve output of
+ \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.

@@ -12,4 +12,3 @@ Description:
  (*mp):mp:parens			 $1 = mpsub($1, gen_1)
  (*pol):pol:parens			 $1 = gsubgs($1, 1)
  (*gen):gen:parens			 $1 = gsubgs($1, 1)
-

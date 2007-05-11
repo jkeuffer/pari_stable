@@ -17,4 +17,3 @@ Doc: plot graph(s) for
  successive pair corresponding to a curve. Otherwise, the first one contains
  the $x$ coordinates, and the other ones contain the $y$-coordinates
  of curves to plot.
-

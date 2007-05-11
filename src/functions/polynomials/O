@@ -18,4 +18,3 @@ Doc: if $p$ is an integer
  is the $X$-adic valuation of $p$ with respect to its main variable.
 Variant: \fun{GEN}{zeropadic}{GEN p, long e} for a $p$-adic and
  \fun{GEN}{zeroser}{long v, long e} for a power series zero in variable $v$.
-

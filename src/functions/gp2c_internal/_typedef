@@ -83,4 +83,3 @@ Help: Code to check for the default marker
 Description:
  (C!GEN):bool    !$(1)
  (var):bool      $(1) == -1
-

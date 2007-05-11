@@ -6,4 +6,3 @@ Prototype: G
 Description: 
  (clgp):gen:copy                gel($1, 1)
  (gen):gen                      member_no($1)
-

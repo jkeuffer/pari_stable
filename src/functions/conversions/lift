@@ -12,8 +12,7 @@ Description:
  (pol, var):pol	lift0($1, $2)
  (vec, var):vec	lift0($1, $2)
  (gen, var):gen	lift0($1, $2)
-Doc: 
- lifts an element $x=a \bmod n$ of $\Z/n\Z$ to
+Doc: lifts an element $x=a \bmod n$ of $\Z/n\Z$ to
  $a$ in $\Z$, and similarly lifts a polmod to a polynomial if $v$ is omitted.
  Otherwise, lifts only polmods whose modulus has main variable $v$ (if $v$
  does not occur in $x$, lifts only intmods). If $x$ is of recursive (non

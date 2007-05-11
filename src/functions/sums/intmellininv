@@ -38,4 +38,3 @@ Doc: numerical
  @eprog\noindent
  
  \synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, long prec}.
-

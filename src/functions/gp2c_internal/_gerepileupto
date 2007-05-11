@@ -6,4 +6,3 @@ Description:
  (pari_sp, vecsmall):vecsmall     gerepileuptoleaf($1, $2)
  (pari_sp, vec):vec               gerepileupto($1, $2)
  (pari_sp, gen):gen               gerepileupto($1, $2)
-

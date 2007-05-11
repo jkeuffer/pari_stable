@@ -7,4 +7,3 @@ Doc: evaluates \var{seq} until $a$ is not
  equal to 0 (i.e.~until $a$ is true). If $a$ is initially not equal to 0,
  \var{seq} is evaluated once (more generally, the condition on $a$ is tested
  \emph{after} execution of the \var{seq}, not before as in \kbd{while}).
-

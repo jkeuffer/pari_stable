@@ -19,4 +19,3 @@ Description:
  (small, gen):negbool                   gequalsg($1, $2)
  (gen, small):negbool                   gequalgs($1, $2)
  (gen, gen):negbool                     gequal($1, $2)
-

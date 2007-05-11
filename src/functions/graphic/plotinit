@@ -6,8 +6,7 @@ Prototype: vLD0,G,D0,G,D0,L,
 Help: plotinit(w,{x=0},{y=0},{flag=0}): initialize rectwindow w to size x,y.
  If flag!=0, x and y express fractions of the size of the current output
  device. x=0 or y=0 means use the full size of the device
-Doc: 
- initialize the rectwindow $w$,
+Doc: initialize the rectwindow $w$,
  destroying any rect objects you may have already drawn in $w$. The virtual
  cursor is set to $(0,0)$. The rectwindow size is set to width $x$ and height
  $y$. If $\fl=0$, $x$ and $y$ represent pixel units. Otherwise, $x$ and $y$
@@ -25,4 +24,3 @@ Doc:
  plotinit(0, s[1]-1, s[2]-1);
  plotscale(0, 0,1000, 0,1000);
  @eprog
-

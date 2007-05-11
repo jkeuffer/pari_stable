@@ -8,4 +8,3 @@ Description:
  (*int, int):int:parens			 $1 = gdivent($1, $2)
  (*pol, gen):gen:parens			 $1 = gdivent($1, $2)
  (*gen, gen):gen:parens			 $1 = gdivent($1, $2)
-

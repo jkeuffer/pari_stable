@@ -10,4 +10,3 @@ Description:
 Doc: if keyword \var{key} is the name of a function that was present in GP
  version 1.39.15 or lower, outputs the new function name and syntax, if it
  changed at all ($387$ out of $560$ did).
-

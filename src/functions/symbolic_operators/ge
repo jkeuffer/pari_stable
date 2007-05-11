@@ -15,4 +15,3 @@ Description:
  (small, gen):bool:parens		gcmpsg($1, $2) >= 0
  (gen, small):bool:parens		gcmpgs($1, $2) >= 0
  (gen, gen):bool:parens			gcmp($1, $2) >= 0
-

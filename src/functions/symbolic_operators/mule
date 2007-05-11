@@ -16,4 +16,3 @@ Description:
  (*vec, gen):gen:parens			 $1 = gmul($1, $2)
  (*gen, small):gen:parens		 $1 = gmulgs($1, $2)
  (*gen, gen):gen:parens			 $1 = gmul($1, $2)
-

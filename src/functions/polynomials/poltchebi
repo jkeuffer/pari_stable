@@ -7,4 +7,3 @@ Help: poltchebi(n,{v=x}): Tchebitcheff polynomial of degree n, in variable v
 Doc: creates the $n^{\text{th}}$ \idx{Chebyshev} polynomial~$T_n$ of the
  first kind in variable $v$. This function is retained for backward
  compatibility only. Use \tet{polchebyshev}.
-

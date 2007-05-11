@@ -8,4 +8,3 @@ Description:
  (vec):lg	lg($1)
  (pol):small:parens	lg($1)-2
  (gen):small	glength($1)
-

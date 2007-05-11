@@ -16,4 +16,3 @@ Description:
  (ell):void                     checkell($1)
  (bell):void                    checkbell($1)
  (*gal):gal:parens              $1 = checkgal($1)
-

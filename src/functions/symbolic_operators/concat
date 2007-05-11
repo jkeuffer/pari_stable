@@ -6,4 +6,3 @@ Description:
  (genstr, gen):genstr		        concat($1, $2)
  (gen, genstr):genstr		        concat($1, $2)
  (gen, gen):genstr		        concat($genstr:1, $2)
-

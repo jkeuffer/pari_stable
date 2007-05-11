@@ -12,4 +12,3 @@ Doc: find a real root of expression
  not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x))}).
  
  \synt{zbrent}{void *E,GEN (*eval)(GEN,void*),GEN a,GEN b,long prec}.
-

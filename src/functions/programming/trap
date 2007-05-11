@@ -71,4 +71,3 @@ Doc: tries to
  \kbd{typeer}: wrong type
  
  \kbd{user}: user error (from the \kbd{error} function)
-

@@ -11,4 +11,3 @@ Description:
  (gen, small):gen		gmodgs($1, $2)
  (small, gen):gen		gmodsg($1, $2)
  (gen, gen):gen	  	        gmod($1, $2)
-

@@ -46,4 +46,3 @@ Doc: numerical integration of
  where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
  You may store any additional information required by \kbd{eval} in $E$, or set
  it to \kbd{NULL}.
-

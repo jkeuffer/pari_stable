@@ -19,4 +19,3 @@ Description:
  (real, int):real	powgi($1, $2)
  (gen, int):gen		powgi($1, $2)
  (gen, gen):gen:prec	gpow($1, $2, prec)
-

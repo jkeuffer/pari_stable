@@ -91,4 +91,3 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  \item $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
  
  \item $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
-

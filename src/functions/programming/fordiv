@@ -33,4 +33,3 @@ Doc: evaluates \var{seq}, where
  ? for(i=1,10^5, fordiv(i, d, ))
  time = 490 ms.
  @eprog
-

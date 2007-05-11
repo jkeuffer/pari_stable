@@ -3,4 +3,3 @@ C-Name: gstore
 Prototype: &G
 Section: symbolic_operators
 Help: x=y: store value y in variable x
-

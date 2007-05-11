@@ -11,7 +11,7 @@ Doc:
  \kbd{truncate}, i.e.~we chop off the $O(X^k)$ or compute the Euclidean
  quotient of the numerator by the denominator, then change the main variable
  of the result to $v$.
-
+ 
  The main use of this function is when $x$ is a vector: it creates the
  polynomial whose coefficients are given by $x$, with $x[1]$ being the leading
  coefficient (which can be zero). It is much faster to evaluate
@@ -33,7 +33,7 @@ Doc:
  ? Vecrev( Polrev([1,2,3]) )
  %2 = [1, 2, 3]
  @eprog\noindent
- 
+  
  \misctitle{Warning:} this is \emph{not} a substitution function. It will not
  transform an object containing variables of higher priority than~$v$.
  \bprog

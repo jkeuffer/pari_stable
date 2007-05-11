@@ -6,4 +6,3 @@ Prototype: G
 Description: 
  (negbool):bool:parens		$1
  (bool):negbool:parens		$1
-

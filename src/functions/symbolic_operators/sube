@@ -17,4 +17,3 @@ Description:
  (*vec, gen):gen:parens			 $1 = gsub($1, $2)
  (*gen, small):gen:parens		 $1 = gsubgs($1, $2)
  (*gen, gen):gen:parens			 $1 = gsub($1, $2)
-

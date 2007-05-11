@@ -31,4 +31,3 @@ Doc: sum of expression \var{expr},
  return somme(ep, a, b, "i^2", gen_0);
  }
  @eprog
-

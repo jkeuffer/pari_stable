@@ -17,4 +17,3 @@ Doc: draw on the rectwindow $w$ the
  be (simultaneously) scalar. In this case, draw the single point $(X,Y)$ on
  the rectwindow $w$ (if it is actually inside $w$), and in any case
  \emph{move} the virtual cursor to position $(x,y)$.
-

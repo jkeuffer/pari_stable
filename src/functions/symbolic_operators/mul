@@ -18,4 +18,3 @@ Description:
  (small, gen):gen		gmulsg($1, $2)
  (vecsmall, vecsmall):vecsmall	perm_mul($1, $2)
  (gen, gen):gen	  	        gmul($1, $2)
-

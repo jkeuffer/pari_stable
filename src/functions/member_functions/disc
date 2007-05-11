@@ -7,4 +7,3 @@ Description:
  (nf):int:copy                  gel($1, 3)
  (ell):gen:copy                 gel($1, 12)
  (gen):gen                      member_disc($1)
-

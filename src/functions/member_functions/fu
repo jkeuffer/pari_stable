@@ -7,4 +7,3 @@ Description:
  (bnr):void		$"ray units not implemented"
  (bnf):gen:copy         gmael($1, 8, 5)
  (gen):gen:copy         gmael($1, 8, 5)
-

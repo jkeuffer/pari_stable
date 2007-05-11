@@ -51,4 +51,3 @@ Doc: numerical integration of $(2i\pi)^{-1}\var{expr}(X)e^{Xz}$ with respect
  @eprog
  
  \synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, long prec}.
-

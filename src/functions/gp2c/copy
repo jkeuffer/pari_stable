@@ -9,4 +9,3 @@ Description:
  (vec):vec			gcopy($1)
  (pol):pol			gcopy($1)
  (gen):gen			gcopy($1)
-
