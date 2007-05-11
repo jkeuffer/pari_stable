@@ -240,7 +240,7 @@ get_entree(long n)
 
 /* match any Fentry */
 static entree *
-getentry(n)
+getentry(long n)
 {
   while (tree[n].f==Ftag)
     n=tree[n].x;
@@ -251,7 +251,7 @@ getentry(n)
 
 /* match Fentry that are not actually EpSTATIC functions called without parens*/
 static entree *
-getvar(n)
+getvar(long n)
 {
   entree *ep = getentry(n);
   if (EpSTATIC(do_alias(ep)))
