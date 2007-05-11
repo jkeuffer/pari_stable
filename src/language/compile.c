@@ -499,8 +499,6 @@ compilefunc(long n, int mode)
     ep=is_entry("_void_if");
   if (is_func_named(x,"local"))
   {
-    if (mode!=Gvoid)
-      pari_err(talker,"local() is not allowed here");
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     for (i=1;i<=nb;i++)
@@ -1061,6 +1059,8 @@ gp_closure(long n)
 {
   struct codepos pos={0,0,0,-1};
   compilenode(n,Ggen,0);
+  if (s_lvar.n)
+    pari_err(talker,"local() only allowed inside a function");
   return getclosure(&pos); 
 }
 
