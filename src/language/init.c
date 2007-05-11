@@ -311,7 +311,7 @@ pari_handle_SIGINT(void)
 #endif
 }
 
-#ifdef HAS_WAITPID
+#if defined(HAS_WAITPID) && defined(HAS_SETSID)
 #  include <sys/wait.h>
 /* Properly fork a process, detaching from main process group without creating
  * zombies on exit. Parent returns 1, son returns 0 */
