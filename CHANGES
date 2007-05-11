@@ -37,7 +37,7 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    27- agm(-1, 1+1e-55) --> oo loop, agm(-1,1) --> wrong result
 LGr28- killing hi-res graphic window created zombie process (missing wait())
    29- missing type check in eint1(x,n)
-   30- ploth(...) + Ctrl-C --> hi-res graphic window killed [ use pari_fork() ]
+   30- ploth(...) + Ctrl-C --> hi-res graphic window killed [ use pari_daemon() ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -69,7 +69,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     3- library function divru, dbllog2r
     4- library function ZX_gcd
     5- library function gtos
-    6- library function pari_fork
+    6- library function pari_daemon
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

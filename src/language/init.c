@@ -316,7 +316,7 @@ pari_handle_SIGINT(void)
 /* Properly fork a process, detaching from main process group without creating
  * zombies on exit. Parent returns 1, son returns 0 */
 int
-pari_fork(void)
+pari_daemon(void)
 {
   switch(fork()) {
       case -1: return 1; /* father, fork failed */

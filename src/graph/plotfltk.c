@@ -180,7 +180,7 @@ void
 rectdraw0(long *w, long *x, long *y, long lw)
 {
     Plotter *win;
-    if (pari_fork()) return;  // parent process returns
+    if (pari_daemon()) return;  // parent process returns
 
     pari_close();
     PARI_get_plot(1);

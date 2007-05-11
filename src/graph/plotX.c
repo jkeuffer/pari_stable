@@ -175,7 +175,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   XSetWindowAttributes attrib;
   Atom wm_delete_window, wm_protocols;
 
-  if (pari_fork()) return;  /* parent process returns */
+  if (pari_daemon()) return;  /* parent process returns */
 
   pari_close();
   PARI_get_plot(1);
