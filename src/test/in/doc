@@ -1,0 +1,2 @@
+system("grep '^$' ../src/functions/*/*")
+print("Total time spent: ",gettime);
