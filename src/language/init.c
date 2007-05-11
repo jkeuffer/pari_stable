@@ -355,10 +355,12 @@ pari_sighandler(int sig)
       return;
 #endif
 
-#ifdef SIGCHLD
+#ifdef HAS_WAIT
+#  ifdef SIGCHLD
     case SIGCHLD:
       pari_handle_SIGCHLD();
       return;
+#  endif
 #endif
 
 #ifdef SIGSEGV
