@@ -74,11 +74,7 @@ if test -n "$with_gmp" -o "$fastread" != yes; then
   . ./get_gmp  # $_gmp_list
 fi
 if test "$optimization" != profiling; then
-  . ./get_X11  # X11, X11_INC, X11_LIBS
-  . ./get_graphic_lib # which_graphic_lib
-  . ./get_fltk # FLTKDIR, FLTK_LIBS
-  . ./get_Qt   # QTDIR, QTLIB
-  echo "Hi-Res Graphics: $which_graphic_lib"
+  . ./get_graphic_lib # $_graphic_list
   . ./get_readline # $_readline_list (includes 'readline')
 else
   which_graphic_lib=none  
@@ -137,8 +133,6 @@ for variable in\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat perl ln_s make_sh\
   sizeof_long doubleformat\
-  X11 X11_INC X11_LIBS which_graphic_lib\
-  FLTKDIR FLTK_LIBS QTDIR QTLIB\
   enable_tls\
   $_test_list\
   $_install_list\
@@ -147,6 +141,7 @@ for variable in\
   $_ld_list\
   $_dl_list\
   $_dlld_list\
+  $_graphic_list\
   $_modld_list\
   $_readline_list\
   $_gmp_list\

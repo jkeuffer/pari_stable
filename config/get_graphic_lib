@@ -1,15 +1,28 @@
-case $which_graphic_lib in
-  auto) which_graphic_lib=none;;
-esac
-if test "$fastread" != yes; then
-  cat << EOT
+_graphic_list="which_graphic_lib X11 X11_INC X11_LIBS \
+FLTKDIR FLTK_LIBS QTDIR QTLIB"
+
+if test -z "$has_waitpid" -o -z "$has_setsid"; then
+  echo "### Missing waitpid() or setsid(), no Hi-Res graphing window"
+  which_graphic_lib=none
+else
+  . ./get_X11  # X11,X11_INC,X11_LIBS. If auto try to set which_graphic_lib=X11
+
+  if test "$fastread" != yes; then
+    cat << EOT
 ==========================================================================
 GP contains high resolution plotting functions. Choose among
        none       X11       fltk      Qt
 EOT
-  echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
-  rep="none X11 fltk Qt";
-  dflt=$which_graphic_lib; . ./myread
-  which_graphic_lib=$ans
-
+    echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
+    rep="none X11 fltk Qt";
+    dflt=$which_graphic_lib; . ./myread
+    which_graphic_lib=$ans
+  fi
 fi
+
+if test "$which_graphic_lib" != none; then
+. ./get_fltk # FLTKDIR, FLTK_LIBS
+. ./get_Qt   # QTDIR, QTLIB
+fi
+
+echo "Hi-Res Graphics: $which_graphic_lib"
