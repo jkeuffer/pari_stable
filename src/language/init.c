@@ -311,22 +311,23 @@ pari_handle_SIGINT(void)
 #endif
 }
 
-#ifdef HAS_WAIT
+#ifdef HAS_WAITPID
 #  include <sys/wait.h>
 /* Properly fork a process, detaching from main process group without creating
  * zombies on exit. Parent returns 1, son returns 0 */
 int
 pari_daemon(void)
 {
-  switch(fork()) {
+  pid_t pid = fork();
+  switch(pid) {
       case -1: return 1; /* father, fork failed */
       case 0:
         setsid(); /* son becomes process group leader */
         if (fork()) exit(0); /* now son exits, also when fork fails */
-        break; /* grandson, its father is the son, which exited,
+        break; /* grandson: its father is the son, which exited,
                 * hence father becomes 'init', that'll take care of it */
       default: /* father, fork succeeded */
-        wait(NULL); /* wait for son to exit, immediate */
+        waitpid(pid,NULL,0); /* wait for son to exit, immediate */
         return 1;
   }
   /* grandson */

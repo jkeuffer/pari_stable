@@ -163,8 +163,8 @@ case $has_sigaction in
 yes) echo '#define HAS_SIGACTION' >> $file;;
 esac
 
-case $has_wait in
-yes) echo '#define HAS_WAIT' >> $file;;
+case $has_waitpid in
+yes) echo '#define HAS_WAITPID' >> $file;;
 esac
 
 case $has_dlopen in
