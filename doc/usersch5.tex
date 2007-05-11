@@ -97,6 +97,10 @@ int thread_start (...)
 }
 @eprog
 
+\fun{int}{pari_fork}{void} fork a PARI daemon, detaching from the main
+process group. The function returns 1 in the parent, and 0 in the
+forked son. 
+
 \subsec{Notions specific to the GP interpreter}
 
 An \kbd{entree} is the generic object associated to an identifier (a name)

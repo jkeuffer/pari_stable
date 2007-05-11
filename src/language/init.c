@@ -313,23 +313,26 @@ pari_handle_SIGINT(void)
 
 #ifdef HAS_WAIT
 #  include <sys/wait.h>
-#  if !defined(SIGCHLD) && defined(SIGCLD)
-#    define SIGCHLD SIGCLD
-#  endif
-
-#  ifdef SIGCHLD
-static void
-pari_handle_SIGCHLD(void)
+/* Properly fork a process, detaching from main process group without creating
+ * zombies on exit. Parent returns 1, son returns 0 */
+int
+pari_fork(void)
 {
-#    ifdef WNOHANG
-  while (wait3(NULL, WNOHANG, NULL) > 0);
-#    else
-  wait(NULL);
-#    endif
+  switch(fork()) {
+      case -1: return 1; /* father, fork failed */
+      case 0:
+        setsid(); /* son becomes process group leader */
+        if (fork()) exit(0); /* now son exits, also when fork fails */
+        break; /* grandson, its father is the son, which exited,
+                * hence father becomes 'init', that'll take care of it */
+      default: /* father, fork succeeded */
+        wait(NULL); /* wait for son to exit, immediate */
+        return 1;
+  }
+  /* grandson */
+  return 0;
 }
-#  endif
 #endif
-
 
 static void
 pari_sighandler(int sig)
@@ -353,14 +356,6 @@ pari_sighandler(int sig)
       if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
       else pari_handle_SIGINT(); 
       return;
-#endif
-
-#ifdef HAS_WAIT
-#  ifdef SIGCHLD
-    case SIGCHLD:
-      pari_handle_SIGCHLD();
-      return;
-#  endif
 #endif
 
 #ifdef SIGSEGV
@@ -524,9 +519,6 @@ pari_sig_init(void (*f)(int))
 #endif
 #ifdef SIGSEGV
   (void)os_signal(SIGSEGV,f);
-#endif
-#ifdef SIGCHLD
-  (void)os_signal(SIGCHLD,f);
 #endif
 }
 

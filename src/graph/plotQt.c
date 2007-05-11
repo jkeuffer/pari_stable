@@ -571,7 +571,7 @@ void PlotWindow::save( int id) {
 void
 rectdraw0(long *w, long *x, long *y, long lw)
 {
-    if (fork()) return;  // parent process returns
+    if (pari_fork()) return;  // parent process returns
 
     pari_close();
     PARI_get_plot(1);
