@@ -333,6 +333,9 @@ pari_daemon(void)
   /* grandson */
   return 0;
 }
+#else
+int
+pari_daemon(void) { err(impl,"pari_daemon without waitpid & setsid"); }
 #endif
 
 static void
