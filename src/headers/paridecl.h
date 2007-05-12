@@ -106,7 +106,7 @@ GEN     ZX_to_Flx(GEN x, ulong p);
 GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
-GEN     gener_Flxq(GEN T, ulong p);
+GEN     gener_Flxq(GEN T, ulong p, GEN *o);
 GEN     polx_Flx(long sv);
 GEN     zero_Flx(long sv);
 
@@ -151,7 +151,7 @@ GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
 GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     FpXV_prod(GEN V, GEN p);
-GEN     gener_FpXQ(GEN T, GEN p);
+GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 
 /* alglin1.c */
 
@@ -1090,7 +1090,7 @@ int     FF_cmp_1(GEN x);
 GEN     FF_div(GEN a, GEN b);
 int     FF_equal(GEN a, GEN b);
 GEN     FF_inv(GEN a);
-GEN     FF_log(GEN a, GEN b);
+GEN     FF_log(GEN a, GEN b, GEN o);
 GEN     FF_minpoly(GEN x); 
 GEN     FF_mul(GEN a, GEN b);
 GEN     FF_mul2n(GEN a, long n);
@@ -1100,7 +1100,7 @@ GEN     FF_norm(GEN x);
 GEN     FF_order(GEN x, GEN o);
 GEN     FF_p(GEN x);
 GEN     FF_pow(GEN x, GEN n);
-GEN     FF_primroot(GEN x);
+GEN     FF_primroot(GEN x, GEN *o);
 int     FF_samefield(GEN x, GEN y);
 GEN     FF_sqr(GEN a);
 GEN     FF_sqrt(GEN a);
@@ -1674,9 +1674,9 @@ GEN     factorback0(GEN fa,GEN e, GEN nf);
 GEN     factorbackelt(GEN fa, GEN e, GEN nf);
 GEN     factpol(GEN x, long hint);
 GEN     ffgen(GEN T, long v);
-GEN     fflog(GEN x, GEN g);
+GEN     fflog(GEN x, GEN g, GEN o);
 GEN     fforder(GEN x, GEN o);
-GEN     ffprimroot(GEN x);
+GEN     ffprimroot(GEN x, GEN *o);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);

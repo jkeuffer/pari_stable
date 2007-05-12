@@ -4481,22 +4481,22 @@ GEN ffgen(GEN T, long v)
 
 GEN fforder(GEN x, GEN o)
 {
-  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT))
+  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT && !is_Z_factor(o)))
     pari_err(typeer,"fforder");
   return FF_order(x,o);
 }
 
-GEN ffprimroot(GEN x)
+GEN ffprimroot(GEN x, GEN *o)
 {
   if (typ(x)!=t_FFELT)
     pari_err(typeer,"ffprimroot");
-  return FF_primroot(x);
+  return FF_primroot(x, o);
 }
 
-GEN fflog(GEN x, GEN g)
+GEN fflog(GEN x, GEN g, GEN o)
 {
   if (typ(x)!=t_FFELT || typ(g)!=t_FFELT)
     pari_err(typeer,"fflog");
-  return FF_log(x,g);
+  return FF_log(x,g,o);
 }
 

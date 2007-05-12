@@ -511,15 +511,34 @@ FF_minpoly(GEN x)
   }
 }
 
+int
+is_Z_factor(GEN f)
+{
+  long i, l;
+  GEN P, E;
+  if (typ(f) != t_MAT || lg(f) != 3) return 0;
+  P = gel(f,1);
+  E = gel(f,2); l = lg(P);
+  for (i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), e = gel(E,i);
+    if (typ(p) != t_INT || signe(p) <= 0 || typ(e) != t_INT || signe(e) <= 0)
+      return 0;
+  }
+  return 1;
+}
+
 GEN
-FF_log(GEN x, GEN g)
+FF_log(GEN x, GEN g, GEN ord)
 {
   pari_sp av=avma;
   ulong pp;
-  GEN r,ord,T,p;
+  GEN r, T, p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
-  ord = factor_pn_1(p,degpol(T));
+  if (!ord) ord = factor_pn_1(p,degpol(T));
+  else
+    if (!is_Z_factor(ord)) err(typeer, "FF_log");
   switch(x[1])
   {
   case t_FF_FpXQ:
@@ -551,17 +570,17 @@ FF_order(GEN x, GEN o)
 }
 
 GEN
-FF_primroot(GEN x)
+FF_primroot(GEN x, GEN *o)
 {
   ulong pp;
   GEN r,T,p,z=_initFF(x,&T,&p,&pp);
   switch(x[1])
   {
   case t_FF_FpXQ:
-    r = gener_FpXQ(T, p);
+    r = gener_FpXQ(T, p, o);
     break;
   default:
-    r = gener_Flxq(T, pp);
+    r = gener_Flxq(T, pp, o);
   }
   return _mkFF(x,z,r);
 }

@@ -66,6 +66,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    15- qfminim(x,b,m,flag) made 'm' parameter optionnal also when flag=0
    16- made second argument to matrixqz optional, allow non-prime values
    17- matpascal(n < -1), mathilbert(n < 0) now raise an error
+   18- add optional extra argument to ffprimroot, fforder, fflog
 
   Added
     1- library functions expu, adduu, subuu

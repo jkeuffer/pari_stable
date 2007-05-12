@@ -824,26 +824,34 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
 }
 
 GEN
-gener_FpXQ(GEN T, GEN p)
+gener_FpXQ(GEN T, GEN p, GEN *po)
 {
   long i, j, vT = varn(T), f = degpol(T);
-  GEN g, L, L2, p_1, q;
+  GEN g, L, L2, p_1, q, o;
   pari_sp av0 = avma, av;
 
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    g = gener_Flxq(ZX_to_Flx(T, pp), pp);
-    return gerepileupto(av0, Flx_to_ZX(g));
+    g = gener_Flxq(ZX_to_Flx(T, pp), pp, po);
+    g = Flx_to_ZX(g);
+    if (!po) g = gerepileupto(av0, g);
+    else
+    {
+      *po = Flx_to_ZX(*po);
+      gerepileall(av0, 2, &g, po);
+    }
+    return g;
   }
   p_1 = subis(p,1);
-  q = diviiexact(subis(powiu(p, f), 1), p_1);
+  q = diviiexact(subis(powiu(p,f), 1), p_1);
 
   L = NULL;
   (void)Z_lvalrem(p_1, 2, &L);
   L = gel(Z_factor(L),1);
   for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
-  L2 = gel(Z_factor(q),1);
+  o = factor_pn_1(p,f);
+  L2 = shallowcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++) 
   {
     if (remii(p_1, gel(L2,i)) == gen_0) continue;
@@ -865,5 +873,9 @@ gener_FpXQ(GEN T, GEN p)
     }
     if (i == j) break;
   }
-  return gerepilecopy(av0, g);
+  if (!po) g = gerepilecopy(av0, g);
+  else {
+    *po = o; gerepileall(av0, 2, &g, po);
+  }
+  return g;
 }

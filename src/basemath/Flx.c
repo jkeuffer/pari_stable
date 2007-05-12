@@ -1576,11 +1576,11 @@ Flxq_minpoly(GEN x, GEN T, ulong p)
 }
 
 GEN
-gener_Flxq(GEN T, ulong p)
+gener_Flxq(GEN T, ulong p, GEN *po)
 {
   long i, j, vT = T[1], f = degpol(T);
   ulong p_1 = p - 1;
-  GEN g, L, L2, q = diviuexact(subis(powuu(p, f), 1), p_1);
+  GEN g, L, L2, o, q = diviuexact(subis(powuu(p,f), 1), p_1);
   pari_sp av0 = avma, av;
 
   L = cgetg(1, t_VECSMALL);
@@ -1591,7 +1591,8 @@ gener_Flxq(GEN T, ulong p)
     L = gel(factoru(t),1);
     for (i=lg(L)-1; i; i--) L[i] = p_1 / L[i];
   }
-  L2 = gel(Z_factor(q),1);
+  o = factor_pn_1(utoipos(p),f);
+  L2 = shallowcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++) 
   {
     if (umodui(p_1, gel(L2,i)) == 0) continue;
@@ -1622,7 +1623,11 @@ gener_Flxq(GEN T, ulong p)
     }
     if (i == j) break;
   }
-  return gerepilecopy(av0, g);
+  if (!po) g = gerepilecopy(av0, g);
+  else {
+    *po = o; gerepileall(av0, 2, &g, po);
+  }
+  return g;
 }
 
 /***********************************************************************/
