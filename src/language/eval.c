@@ -306,9 +306,8 @@ typedef struct gp_pointer
 } gp_pointer;
 
 
-/* assign res at *pt in "simple array object" p and return it, or a copy.
- * In the latter case, reset avma to av */
-static GEN
+/* assign res at *pt in "simple array object" p and return it, or a copy.*/
+static void
 change_compo(matcomp *c, GEN res)
 {
   GEN p = c->parent, *pt = c->ptcell;
@@ -318,7 +317,7 @@ change_compo(matcomp *c, GEN res)
   {
     if (typ(res) != t_INT || is_bigint(res))
       pari_err(talker,"not a suitable VECSMALL component");
-    *pt = (GEN)itos(res); return res;
+    *pt = (GEN)itos(res); return;
   }
   if (c->full_row)
   {
@@ -329,7 +328,7 @@ change_compo(matcomp *c, GEN res)
       GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) killbloc(p1);
       gcoeff(p,c->full_row,i) = gclone(gel(res,i));
     }
-    return res;
+    return;
   }
   if (c->full_col)
     if (typ(res) != t_COL || lg(res) != lg(*pt))
@@ -337,7 +336,7 @@ change_compo(matcomp *c, GEN res)
 
   res = gclone(res);
   killbloc(*pt);
-  return *pt = res;
+  *pt = res;
 }
 
 /***************************************************************************
@@ -539,7 +538,7 @@ closure_eval(GEN C)
         {
           gp_pointer *g = &(ptrs[--rp]);
           if (g->ep) changevalue(g->ep, g->x);
-          else (void)change_compo(&(g->c), g->x);
+          else change_compo(&(g->c), g->x);
         }
         break;
     case OCstore:
