@@ -1863,6 +1863,7 @@ logagmcx(GEN q, long prec)
   pari_sp av;
   int neg = 0;
 
+  e = precision(q); if (e > prec) prec = e;
   z = cgetc(prec); av = avma; prec++;
   if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
   lim = bit_accuracy(prec) >> 1;
@@ -1893,6 +1894,7 @@ logagmcx(GEN q, long prec)
   a = gel(y,1);
   b = gel(y,2);
   a = addrr(a, mulsr(-e, mplog2(prec)));
+  if (lg(a) == 3) a = real_0_bit(expo(a));
   if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
                              : gsub(b, mppi(prec));
   affr_fixlg(a, gel(z,1));

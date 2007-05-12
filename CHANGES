@@ -43,6 +43,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    33- fix headers so that ulong is always defined
    34- read("a b.gz")   \\ filename contains a space
        gzip: ./a.gz: No such file or directory
+   35- logagmcx inaccurate [ used for log(t_COMPLEX), large precision ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
