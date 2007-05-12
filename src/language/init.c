@@ -335,7 +335,11 @@ pari_daemon(void)
 }
 #else
 int
-pari_daemon(void) { err(impl,"pari_daemon without waitpid & setsid"); }
+pari_daemon(void) 
+{ 
+  pari_err(impl,"pari_daemon without waitpid & setsid"); 
+  return 0;
+}
 #endif
 
 static void
