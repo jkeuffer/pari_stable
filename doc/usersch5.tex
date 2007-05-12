@@ -1004,8 +1004,10 @@ except \kbd{x} is now a \kbd{long}.
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
 in the factorization are actually strong pseudoprimes.
 
-\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ is the factorization of an
-integer, and $0$ otherwise. Useful for sanity checks.
+\fun{int}{is_Z_factor}{GEN f} returns $1$ if $f$ looks like the factorization
+of a positive integer, and $0$ otherwise. Useful for sanity checks but not
+100\% foolproof. Specifically, this routine checks that $f$ is a two-column
+matrix all of whose entries are positive integers.
 
 \fun{long}{Z_issquarefree}{GEN x} returns $1$ if the \typ{INT} \kbd{n}
 is square-free, and $0$ otherwise.
