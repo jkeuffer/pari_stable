@@ -1293,7 +1293,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
-    g = ff_to_nf(gener_FpXQ(T,p), modpr);
+    g = ff_to_nf(gener_FpXQ(T,p,NULL), modpr);
     g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */

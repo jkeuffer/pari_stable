@@ -1076,7 +1076,7 @@ void    closure_evalvoid(GEN code);
 void    closure_reset(void);
 void    freeep(entree *ep);
 
-/* ffelt.c */
+/* FF.c */
 
 GEN     FF_1(GEN a);
 GEN     FF_Z_Z_muldiv(GEN x, GEN y, GEN z);
@@ -1110,6 +1110,7 @@ GEN     FF_trace(GEN x);
 GEN     FF_zero(GEN a);
 GEN     FFX_factor(GEN f, GEN ff);
 GEN     Z_FF_div(GEN a, GEN b);
+int     is_Z_factor(GEN f);
 
 /* galconj.c */
 
