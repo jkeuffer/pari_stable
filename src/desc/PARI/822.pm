@@ -50,7 +50,7 @@ sub read
         $check=0 if (!defined($check));
 	my $invars=0;
 	my ($key, $value);
-	my $line;
+	my $last_was_void=0;
         my $entry;
         my ($store) = sub {
                 $value =~ s/\s*$//;
@@ -65,24 +65,20 @@ sub read
         };
 
         open FILE,"<$file";
-	while ($line = <FILE>) 
+	while (my $line = <FILE>) 
         {
 		chomp $line;
-		if ($invars) 
+                if ($invars && $line =~ /^\s/) 
                 {
-			if ($line =~ /^\s/) 
-                        {
-				$line =~ s/^\s+//;
-				$value.="\n$line";
-				next;
-			}
-			else
-                        {
-				$invars=0;
-                                $store->();
-			}
-		}
-                next if ($line eq '');
+                        $line =~ s/^\s+//;
+                        $value.= ($last_was_void?"\n\n$line":"\n$line");
+                        $last_was_void = 0; next;
+                }
+                $last_was_void = ($line eq '');
+                next if ($last_was_void);
+
+                $store->() if ($invars);
+
 		($key, $value)=split(/:\s*/, $line, 2);
                 die("Bad entry in $file: $key") if (!defined($value));
 		if ($key eq 'Function') 
