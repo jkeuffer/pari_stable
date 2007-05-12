@@ -260,7 +260,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   if (typ(pol)!=t_POL) pari_err(notpoler,"rnfinitalg");
   nf = checknf(nf); vpol = varn(pol);
   pol = fix_relative_pol(nf,pol,0);
-  if (vpol >= varn(nf[1]))
+  if (varncmp(vpol, varn(nf[1])) >= 0)
     pari_err(talker,"main variable must be of higher priority in rnfinitalg");
 
   bas = rnfallbase(nf,pol, &D,&d, &f);

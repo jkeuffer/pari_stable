@@ -3318,7 +3318,7 @@ init_resultant(GEN x, GEN y)
   }
   if (tx!=t_POL || ty!=t_POL) pari_err(typeer,"subresall");
   if (varn(x)==varn(y)) return NULL;
-  return (varn(x)<varn(y))? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
+  return (varncmp(varn(x),varn(y))<0)? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
 }
 
 /* return coefficients s.t x = x_0 X^n + ... + x_n */

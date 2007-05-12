@@ -38,11 +38,11 @@ gvar(GEN x)
     case t_RFRAC:  return varn(gel(x,2));
     case t_VEC: case t_COL: case t_MAT:
       v = BIGINT;
-      for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (w<v) v=w; }
+      for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (varncmp(w,v) < 0) v=w; }
       return v;
     case t_VECSMALL:
-    case t_STR: 
-    case t_LIST: 
+    case t_STR:
+    case t_LIST:
       pari_err(typeer, "gvar");
   }
   return BIGINT;
@@ -81,13 +81,19 @@ gvar2(GEN x)
       return var2_polmod(x);
     case t_POL: case t_SER:
       v = BIGINT;
-      for (i=2; i < lg(x); i++) { w = gvar9(gel(x,i)); if (w<v) v=w; }
+      for (i=2; i < lg(x); i++) {
+        w = gvar9(gel(x,i));
+        if (varncmp(w,v) < 0) v=w;
+      }
       return v;
     case t_RFRAC:
       return var2_rfrac(x);
     case t_VEC: case t_COL: case t_MAT:
       v = BIGINT;
-      for (i=1; i < lg(x); i++) { w = gvar2(gel(x,i)); if (w<v) v=w; }
+      for (i=1; i < lg(x); i++) {
+        w = gvar2(gel(x,i));
+        if (varncmp(w,v)<0) v=w;
+      }
       return v;
   }
   return BIGINT;
@@ -474,7 +480,7 @@ quotgs(GEN x, long y)
   return gerepileupto(av, _quotgs(x, y));
 }
 
-/* assume y a t_REAL, x a t_INT, t_FRAC or t_REAL. 
+/* assume y a t_REAL, x a t_INT, t_FRAC or t_REAL.
  * Return x mod y or NULL if accuracy error */
 GEN
 modr_safe(GEN x, GEN y)
@@ -574,7 +580,7 @@ gmod(GEN x, GEN y)
           {
             long d = degpol(y);
             if (lg(x)-2 + valp(x) < d) pari_err(operi,"%",x,y);
-            av = avma; 
+            av = avma;
             return gerepileupto(av, gmod(ser2rfrac_i(x), y));
           }
 	default: pari_err(operf,"%",x,y);
@@ -632,7 +638,7 @@ gmodulsg(long x, GEN y)
   switch(typ(y))
   {
     case t_INT: z = cgetg(3,t_INTMOD);
-      gel(z,1) = absi(y); 
+      gel(z,1) = absi(y);
       gel(z,2) = modsi(x,y); return z;
 
     case t_POL: z = cgetg(3,t_POLMOD);
@@ -651,7 +657,7 @@ gmodulss(long x, long y)
   gel(z,2) = modss(x, y); return z;
 }
 
-static GEN 
+static GEN
 specialmod(GEN x, GEN y)
 {
   GEN z = gmod(x,y);
@@ -1062,7 +1068,7 @@ ginv(GEN x)
       p2=mkcomplex(gel(x,1), gneg(gel(x,2)));
       tetpil=avma;
       return gerepile(av,tetpil,gdiv(p2,p1));
-    
+
     case t_QUAD:
       av=avma; p1=gnorm(x); p2=gconj(x); tetpil=avma;
       return gerepile(av,tetpil,gdiv(p2,p1));
@@ -1212,7 +1218,7 @@ gsubstpol(GEN x, GEN T, GEN y)
   av = avma;
   CATCH(cant_deflate) {
     avma = av;
-    return gsubst_expr(x,T,y);      
+    return gsubst_expr(x,T,y);
   } TRY {
     deflated = gdeflate(x, v, d);
   } ENDCATCH
@@ -1237,7 +1243,7 @@ gsubst(GEN x, long v, GEN y)
 
   if (is_scalar_t(tx))
   {
-    if (tx!=t_POLMOD || v <= varn(x[1]))
+    if (tx!=t_POLMOD || varncmp(v, varn(x[1])) <= 0)
     {
       if (ty==t_MAT) return gscalmat(x,ly-1);
       return gcopy(x);
@@ -1382,12 +1388,12 @@ gsubstvec(GEN e, GEN v, GEN r)
   GEN w,z;
   if ( !is_vec_t(typ(v)) || !is_vec_t(typ(r)) )
     pari_err(typeer,"substvec");
-  if (lg(r)!=l) 
+  if (lg(r)!=l)
     pari_err(talker,"different number of variables and values in substvec");
   w=cgetg(l,t_VECSMALL);
   z=cgetg(l,t_VECSMALL);
   for(i=1;i<l;i++)
-  { 
+  {
     GEN T = gel(v,i);
     if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
       pari_err(talker,"not a variable in substvec");
@@ -1516,7 +1522,7 @@ deriv(GEN x, long v)
   switch(tx)
   {
     case t_POLMOD:
-      if (v<=varn(x[1])) return gen_0;
+      if (varncmp(v, varn(x[1]))) return gen_0;
       y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = deriv(gel(x,2),v); return y;
@@ -1913,7 +1919,7 @@ grndtoi(GEN x, long *e)
 	if (signe(p1) >= 0) { *e = ex; avma = av; return gen_0; }
         *e = expo(addsr(1,x)); avma = av; return gen_m1;
       }
-      lx = lg(x); 
+      lx = lg(x);
       e1 = e1 - bit_accuracy(lx) + 1;
       y = ishiftr_lg(p1, lx, e1);
       if (signe(x) < 0) y = addsi(-1,y);
@@ -2094,7 +2100,7 @@ ser2rfrac_i(GEN x)
   GEN a = ser2pol_i(x, lg(x));
   if (e) {
     if (e > 0) a = RgX_shift_shallow(a, e);
-    else a = gred_rfrac_simple(a, monomial(gen_1, -e, varn(a))); 
+    else a = gred_rfrac_simple(a, monomial(gen_1, -e, varn(a)));
   }
   return a;
 }
@@ -2167,7 +2173,7 @@ trunc0(GEN x, GEN *pte)
 /*                                                                 */
 /*******************************************************************/
 
-/* return a_(n-1) B^(n-1) + ... + a_0, where B = 2^32. 
+/* return a_(n-1) B^(n-1) + ... + a_0, where B = 2^32.
  * The a_i are 32bits integers */
 GEN
 mkintn(long n, ...)
@@ -2180,7 +2186,7 @@ mkintn(long n, ...)
   n = (n+1) >> 1;
 #endif
   va_start(ap,n);
-  x = cgetipos(n+2); 
+  x = cgetipos(n+2);
   y = int_MSW(x);
   for (i=0; i <n; i++)
   {
@@ -2346,10 +2352,10 @@ GEN
 scalarser(GEN x, long v, long prec)
 {
   long i, l;
-  GEN y;                                                                       
+  GEN y;
 
-  if (isexactzero(x)) return zeroser(v,0);                                     
-  l = prec + 2; y = cgetg(l, t_SER);         
+  if (isexactzero(x)) return zeroser(v,0);
+  l = prec + 2; y = cgetg(l, t_SER);
   y[1] = evalsigne(1) | evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
@@ -2386,7 +2392,7 @@ poltoser(GEN x, long v, long prec)
 GEN
 rfractoser(GEN x, long v, long prec)
 {
-  return gdiv(poltoser(gel(x,1), v, prec), 
+  return gdiv(poltoser(gel(x,1), v, prec),
               poltoser(gel(x,2), v, prec));
 }
 
@@ -2540,7 +2546,7 @@ gtovecsmall(GEN x)
 {
   GEN V;
   long tx, l,i;
-  
+
   if (!x) return cgetg(1,t_VECSMALL);
   tx = typ(x);
   if (tx == t_VECSMALL) return gcopy(x);
@@ -2670,7 +2676,7 @@ polcoeff0(GEN x, long n, long v)
     case t_POL: x = _polcoeff(x,n,v); break;
     case t_SER: x = _sercoeff(x,n,v); break;
     case t_RFRAC: x = _rfraccoeff(x,n,v); break;
-   
+
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
       if (n>=1 && n<lg(x)) return gcopy(gel(x,n));
     /* fall through */
@@ -2697,7 +2703,7 @@ denom(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT: 
+    case t_INT: case t_REAL: case t_INTMOD: case t_FFELT:
     case t_PADIC: case t_SER:
       return gen_1;
 
@@ -2851,7 +2857,7 @@ lift_intern0(GEN x, long v)
 static GEN
 centerliftii(GEN x, GEN y)
 {
-  pari_sp av = avma; 
+  pari_sp av = avma;
   long i = cmpii(shifti(x,1), y);
   avma = av; return (i > 0)? subii(x,y): icopy(x);
 }

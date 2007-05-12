@@ -3741,7 +3741,7 @@ matfrobenius(GEN M, long flag, long v)
   GEN D, A, N, B, R, M_x;
   if (typ(M)!=t_MAT) pari_err(typeer,"matfrobenius");
   if (v<0) v=0;
-  if (gvar(M)<=v)
+  if (varncmp(gvar(M), v) <= 0)
     pari_err(talker,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");

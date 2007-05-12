@@ -676,7 +676,7 @@ ser_pow(GEN x, GEN n, long prec)
   pari_sp av, tetpil;
   GEN y, p1, p2, lead;
 
-  if (gvar(n) <= varn(x)) return gexp(gmul(n, glog(x,prec)), prec);
+  if (varncmp(gvar(n), varn(x)) <= 0) return gexp(gmul(n, glog(x,prec)), prec);
   lead = gel(x,2);
   if (gcmp1(lead))
   {
