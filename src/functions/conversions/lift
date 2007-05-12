@@ -18,7 +18,6 @@ Doc: lifts an element $x=a \bmod n$ of $\Z/n\Z$ to
  does not occur in $x$, lifts only intmods). If $x$ is of recursive (non
  modular) type, the lift is done coefficientwise. For $p$-adics, this routine
  acts as \tet{truncate}. It is not allowed to have $x$ of type \typ{REAL}.
- 
  \bprog
  ? lift(Mod(5,3))
  %1 = 2
@@ -33,6 +32,5 @@ Doc: lifts an element $x=a \bmod n$ of $\Z/n\Z$ to
  ? lift(x * Mod(y,y^2+1) + Mod(2,3), x)
  %6 = Mod(y, y^2+1) * x + Mod(2, y^2+1)
  @eprog
- 
 Variant: Also available is \fun{GEN}{lift}{GEN x} corresponding to
  \kbd{lift0(x,-1)}.
