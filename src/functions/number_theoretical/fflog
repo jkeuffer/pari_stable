@@ -5,7 +5,6 @@ Prototype: GGDG
 Help: fflog(x,g,{o}): return the discrete logarithm of the finite field
  element x in base g. If present, o is the factorization of the multiplicative
  order of g. If no o is given, assume that g is a primitive root.
-
 Doc: discrete logarithm of the finite field element $x$ in base $g$. If
  present, $o$ is the factorization of the multiplicative order of $g$.
  If no $o$ is given, assume that $g$ is a primitive root.
