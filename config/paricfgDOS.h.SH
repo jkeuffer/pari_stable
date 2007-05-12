@@ -64,9 +64,6 @@ cat > $file << EOT
 /* No exp2, log2 in libc */
 #define NOEXP2
 
-/* Headers are clean - ulong not defined */
-#define ULONG_NOT_DEFINED
-
 #if !defined(WINCE) && !(defined(_WIN32) && defined(_MSC_VER))
 /* Timings: Don't use times because of the HZ / CLK_TCK confusion. */
 #  define USE_FTIME 1

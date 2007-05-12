@@ -16,9 +16,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* This file defines the parameters of the GEN type               */
 
 typedef long *GEN;
-#ifdef ULONG_NOT_DEFINED
-  typedef unsigned long ulong;
-#endif
+typedef unsigned long pari_ulong;
+#define ulong pari_ulong
 
 #ifdef LONG_IS_64BIT
 #  define TWOPOTBYTES_IN_LONG  3

@@ -37,9 +37,10 @@ BA 13- &, |, && and || were right-associative instead of left-associative
    27- agm(-1, 1+1e-55) --> oo loop, agm(-1,1) --> wrong result
 LGr28- killing hi-res graphic window created zombie process (missing wait())
    29- missing type check in eint1(x,n)
-   30- ploth(...) + Ctrl-C --> hi-res graphic window killed [ use pari_daemon() ]
+   30- ploth(...) + Ctrl-C --> hi-res graphic window killed [use pari_daemon()]
    31- quadgen([]) --> incorrect object [#606]
    32- hyperu(0,1,1) --> oo loop [#608]
+   33- fix headers so that ulong is always defined
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

@@ -145,10 +145,6 @@ case "$has_log2" in
 yes) echo '#define HAS_LOG2' >> $file;;
 esac
 
-case "$has_ulong" in
-no) echo '#define ULONG_NOT_DEFINED' >> $file;;
-esac
-
 case "$has_getrusage" in
 yes) echo '#define USE_GETRUSAGE 1' >> $file;;
   *) case "$has_times" in
