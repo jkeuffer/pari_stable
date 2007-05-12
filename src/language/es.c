@@ -3098,7 +3098,7 @@ pari_get_infile(char *name, FILE *file)
   ))
   { /* compressed file (compress or gzip) */
     char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
-    sprintf(cmd,"%s %s",ZCAT,name);
+    sprintf(cmd,"%s \"%s\"",ZCAT,name);
     fclose(file); 
     return try_pipe(cmd, mf_IN);
   }

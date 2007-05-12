@@ -41,6 +41,8 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    31- quadgen([]) --> incorrect object [#606]
    32- hyperu(0,1,1) --> oo loop [#608]
    33- fix headers so that ulong is always defined
+   34- read("a b.gz")   \\ filename contains a space
+       gzip: ./a.gz: No such file or directory
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
