@@ -586,7 +586,8 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 	mulrrz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);
-	if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
+	if (gcmp0(p1) || gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1)))
+          break;
       }
       swap(e, u);
       swap(f, v);

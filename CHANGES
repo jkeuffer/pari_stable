@@ -39,6 +39,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    29- missing type check in eint1(x,n)
    30- ploth(...) + Ctrl-C --> hi-res graphic window killed [ use pari_daemon() ]
    31- quadgen([]) --> incorrect object [#606]
+   32- hyperu(0,1,1) --> oo loop [#608]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
