@@ -42,20 +42,12 @@ check_quaddisc_imag(GEN x, long *r, char *f)
   if (sx > 0) pari_err(talker, "positive discriminant in %s", f);
 }
 
-GEN
-quadpoly0(GEN x, long v)
+static GEN
+Zquadpoly(GEN x, long v)
 {
-  long res, i, sx, tx = typ(x);
+  long res, sx;
   GEN y, p1;
 
-  if (is_matvec_t(tx))
-  {
-    long l = lg(x);
-    y = cgetg(l, tx);
-    for (i=1; i<l; i++) gel(y,i) = quadpoly0(gel(x,i),v);
-    return y;
-  }
-  if (v < 0) v = 0;
   check_quaddisc(x, &sx, &res, "quadpoly");
   y = cgetg(5,t_POL);
   y[1] = evalsigne(1) | evalvarn(v);
@@ -73,13 +65,28 @@ quadpoly0(GEN x, long v)
 }
 
 GEN
+quadpoly0(GEN x, long v)
+{
+  long tx = typ(x);
+  if (is_matvec_t(tx))
+  {
+    long i, l = lg(x);
+    GEN y = cgetg(l, tx);
+    for (i=1; i<l; i++) gel(y,i) = quadpoly0(gel(x,i),v);
+    return y;
+  }
+  if (v < 0) v = 0;
+  return Zquadpoly(x,v);
+}
+
+GEN
 quadpoly(GEN x) { return quadpoly0(x, -1); }
 
 GEN
 quadgen(GEN x)
 {
   GEN y = cgetg(4,t_QUAD);
-  gel(y,1) = quadpoly(x); gel(y,2) = gen_0; gel(y,3) = gen_1; return y;
+  gel(y,1) = Zquadpoly(x,0); gel(y,2) = gen_0; gel(y,3) = gen_1; return y;
 }
 
 /***********************************************************************/
