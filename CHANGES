@@ -77,7 +77,6 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     4- library function ZX_gcd
     5- library function gtos
     6- library function pari_daemon
-    7- test-doc regression test
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

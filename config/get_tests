@@ -7,7 +7,6 @@ _test_list='test_extra_out test_extra test_basic top_test_extra top_dotest_extra
 test_extra="\
   bnfisintnorm\
   compat\
-  doc\
   ellglobalred\
   ffisom\
   galois\
