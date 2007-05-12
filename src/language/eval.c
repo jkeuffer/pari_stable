@@ -1117,7 +1117,6 @@ closure_disassemble(GEN C)
       pariprintf("compo1\t\t%s\n",disassemble_cast(operand));
       break;
     case OCcompo1ptr:
-      ep=(entree*)operand;
       pariprintf("compo1ptr\n");
       break;
     case OCcompo2:
