@@ -54,13 +54,18 @@ sub read
         my $entry;
         my ($store) = sub {
                 $value =~ s/\s*$//;
+                if ($value =~ /[^[:print:]\s]/)
+                {
+                        $value =~ s/([^[:print:]\s])/XXX:$1:XXX/g;
+                        die "Non-printing character: $entry: $key: $value";
+                }
                 if (!defined($ret->{$entry}->{$key}))
                 {
                         $ret->{$entry}->{$key}=$value;
                 }
                 elsif (($check&1) and $ret->{$entry}->{$key} ne $value)
                 {
-                        die ("Unmatched data: $entry: $key: $ret->{$entry}->{$key} ne $value");
+                        die "Unmatched data: $entry: $key: $ret->{$entry}->{$key} ne $value";
                 }
         };
 
