@@ -346,8 +346,9 @@ change_compo(matcomp *c, GEN res)
  ***************************************************************************/
 
 static THREAD long *st;
-static THREAD long sp;
-static THREAD gp2c_stack s_st;
+static THREAD long sp, rp;
+static THREAD gp_pointer *ptrs;
+static THREAD gp2c_stack s_st,s_ptrs;
 
 void
 pari_init_evaluator(void)
@@ -356,6 +357,10 @@ pari_init_evaluator(void)
   stack_init(&s_st,sizeof(*st),(void**)&st);
   stack_alloc(&s_st,32);
   s_st.n=s_st.alloc;
+  rp=0;
+  stack_init(&s_ptrs,sizeof(*ptrs),(void**)&ptrs);
+  stack_alloc(&s_ptrs,16);
+  s_ptrs.n=s_ptrs.alloc;
 }
 
 static void closure_eval(GEN C);
@@ -451,12 +456,11 @@ closure_castlong(long z, long mode)
 static void
 closure_eval(GEN C)
 {
-  gp_pointer ptrs[16];
-  long rp=0;
   char *code=GSTR(gel(C,1))-1;
   GEN oper=gel(C,2);
   GEN data=gel(C,3);
   long saved_sp=sp;
+  long saved_rp=rp;
   long pc, j;
   for(pc=1;pc<lg(oper);pc++)
   {
@@ -507,9 +511,11 @@ closure_eval(GEN C)
         }
         break;
     case OCnewptr:
-        if (rp<16)
         {
-          gp_pointer *g = &ptrs[rp++];
+          gp_pointer *g;
+          if (rp==s_ptrs.n-1) 
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
           g->ep = (entree*) operand;
           switch (g->ep->valence)
           {
@@ -525,7 +531,6 @@ closure_eval(GEN C)
           }
           break;
         }
-        else pari_err(impl,"more than 16 references");
     case OCpushptr:
         {
           gp_pointer *g = &ptrs[rp-1];
@@ -535,7 +540,7 @@ closure_eval(GEN C)
     case OCendptr:
         for(j=0;j<operand;j++)
         {
-          gp_pointer *g = &(ptrs[--rp]);
+          gp_pointer *g = &ptrs[--rp];
           if (g->ep) changevalue(g->ep, g->x);
           else change_compo(&(g->c), g->x);
         }
@@ -967,6 +972,7 @@ calluser:
   return;
 endeval:
   sp = saved_sp;
+  rp = saved_rp;
 }
 
 GEN
@@ -992,7 +998,7 @@ closure_evalvoid(GEN C)
 }
 
 void
-closure_reset(void) {sp=0;}
+closure_reset(void) {sp=0; rp=0;}
 
 INLINE const char *
 disassemble_cast(long mode)
