@@ -1069,7 +1069,6 @@ void    writetex(const char *s, GEN g);
 
 /* eval.c */
 
-void    closure_check(void);
 void    closure_disassemble(GEN n);
 GEN     closure_evalgen(GEN code);
 void    closure_evalvoid(GEN code);

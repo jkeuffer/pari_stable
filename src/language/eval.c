@@ -375,7 +375,6 @@ derivuserwrap(GEN x, void* E)
   pari_sp ltop;
   entree *ep=(entree*)E;
   GEN z;
-  long saved_sp=sp;
   long j;
   gel(st,sp)=x;
   for (j=1;j<ep->arity;j++)
@@ -388,7 +387,6 @@ derivuserwrap(GEN x, void* E)
     if (br_status!=br_RETURN)
       pari_err(talker, "break/next/allocatemem not allowed here");
     avma=ltop;
-    sp = saved_sp;
     z = br_res ? gcopy(br_res) : gnil;
     reset_break();
   }
@@ -458,6 +456,7 @@ closure_eval(GEN C)
   char *code=GSTR(gel(C,1))-1;
   GEN oper=gel(C,2);
   GEN data=gel(C,3);
+  long saved_sp=sp;
   long pc, j;
   for(pc=1;pc<lg(oper);pc++)
   {
@@ -809,7 +808,7 @@ closure_eval(GEN C)
           sp-=ep->arity;
           gp_function_name=ep->name;
           res = ((GEN (*)(ANYARG))ep->value)(ARGS);
-          if (br_status) return;
+          if (br_status) goto endeval;
           gp_function_name=NULL;
           gel(st,sp++)=res;
           break;
@@ -821,7 +820,7 @@ closure_eval(GEN C)
           sp-=ep->arity;
           gp_function_name=ep->name;
           res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
-          if (br_status) return;
+          if (br_status) goto endeval;
           gp_function_name=NULL;
           gel(st,sp++)=res;
           break;
@@ -833,7 +832,7 @@ closure_eval(GEN C)
           sp-=ep->arity;
           gp_function_name=ep->name;
           res = ((long (*)(ANYARG))ep->value)(ARGS);
-          if (br_status) return;
+          if (br_status) goto endeval;
           gp_function_name=NULL;
           st[sp++] = res;
           break;
@@ -845,7 +844,7 @@ closure_eval(GEN C)
           sp-=ep->arity;
           gp_function_name=ep->name;
           res = ((int (*)(ANYARG))ep->value)(ARGS);
-          if (br_status) return;
+          if (br_status) goto endeval;
           gp_function_name=NULL;
           st[sp++] = res;
           break;
@@ -856,7 +855,7 @@ closure_eval(GEN C)
           sp-=ep->arity;
           gp_function_name=ep->name;
           ((void (*)(ANYARG))ep->value)(ARGS);
-          if (br_status) return;
+          if (br_status) goto endeval;
           gp_function_name=NULL;
           break;
         }
@@ -882,7 +881,6 @@ calluser:
         {
           pari_sp ltop;
           long n=st[--sp];
-          long saved_sp=sp;
           entree *ep = (entree*) operand;
           GEN z, lvars=ep->lvars;
           if (ep->valence!=EpUSER)
@@ -908,7 +906,7 @@ calluser:
             if (br_status!=br_RETURN)
               pari_err(talker, "break/next/allocatemem not allowed here");
             avma=ltop;
-            sp = saved_sp - n;
+            sp-=ep->arity;
             z = br_res ? gcopy(br_res) : gnil;
             reset_break();
           }
@@ -966,17 +964,18 @@ calluser:
         break;
     }
   }
+  return;
+endeval:
+  sp = saved_sp;
 }
 
 GEN
 closure_evalgen(GEN C)
 {
   pari_sp ltop=avma;
-  long saved_sp=sp;
   closure_eval(C);
   if (br_status)
   {
-    sp=saved_sp;
     if (br_status!=br_ALLOCMEM) avma=ltop; 
     return NULL;
   }
@@ -987,26 +986,13 @@ void
 closure_evalvoid(GEN C)
 {
   pari_sp ltop=avma;
-  long saved_sp=sp;
   closure_eval(C);
-  if (br_status)
-  {
-    sp=saved_sp;
-    if (br_status!=br_ALLOCMEM) avma=ltop; 
-  }
-  else
-    avma=ltop;
+  if (br_status!=br_ALLOCMEM)
+    avma=ltop; 
 }
 
 void
 closure_reset(void) {sp=0;}
-
-void
-closure_check(void)
-{
-  if (sp) 
-    pari_err(bugparier,"closure_eval, stack not empty");
-}
 
 INLINE const char *
 disassemble_cast(long mode)
