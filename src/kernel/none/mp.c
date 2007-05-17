@@ -1208,7 +1208,8 @@ muliispec_basecase(GEN x, GEN y, long nx, long ny)
   long p1,lz;
   LOCAL_HIREMAINDER;
 
-  if (!ny) return gen_0;
+  if (ny == 1) return muluispec((ulong)*y, x, nx);
+  if (ny == 0) return gen_0;
   zd = (GEN)avma; lz = nx+ny+2;
   (void)new_chunk(lz);
   xd = x + nx;
@@ -1247,7 +1248,8 @@ sqrispec_basecase(GEN x, long nx)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (!nx) return gen_0;
+  if (nx == 1) return sqru((ulong)*x);
+  if (nx == 0) return gen_0;
   zd = (GEN)avma; lz = (nx+1) << 1;
   z0 = new_chunk(lz);
   if (nx == 1)
@@ -1341,8 +1343,6 @@ muliispec(GEN a, GEN b, long na, long nb)
   pari_sp av;
 
   if (na < nb) swapspec(a,b, na,nb);
-  if (nb == 1) return muluispec((ulong)*b, a, na);
-  if (nb == 0) return gen_0;
   if (nb < KARATSUBA_MULI_LIMIT) return muliispec_basecase(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
