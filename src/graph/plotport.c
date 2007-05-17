@@ -23,8 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "rect.h"
 #include "../language/anal.h"
 
-void postdraw0(long *w, long *x, long *y, long lw);
-void postdraw00(long *w, long *x, long *y, long lw, long scale);
+void postdraw0(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
 
 static long current_color[NUMRECT];
@@ -1628,7 +1627,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   if (WW)
   {
     if (flags & PLOT_POSTSCRIPT)
-      postdraw0(w,wx,wy,2);
+      postdraw0(w,wx,wy,2, 0);
     else
       rectdraw0(w,wx,wy,2);
 
@@ -1848,7 +1847,7 @@ gendraw(GEN list, long ps, long flag)
     ne = itos(win); check_rect(ne);
     w[i] = ne;
   }
-  if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n);
+  if (ps) postdraw0(w,x,y,n,flag); else rectdraw0(w,x,y,n);
   gpfree(x); gpfree(y); gpfree(w);
 }
 
@@ -1863,12 +1862,6 @@ postdraw_flag(GEN list, long flag) { gendraw(list, 1, flag); }
 
 void
 rectdraw_flag(GEN list, long flag) { gendraw(list, 0, flag); }
-
-void
-postdraw0(long *w, long *x, long *y, long lw)
-{
-  postdraw00(w, x, y, lw, 0);
-}
 
 static void
 ps_sc(void *data, long col) { (void)data; (void)col; }
@@ -1927,7 +1920,7 @@ ps_string(void *data, long x, long y, char *s, long length)
 }
 
 void
-postdraw00(long *w, long *x, long *y, long lw, long scale)
+postdraw0(long *w, long *x, long *y, long lw, long scale)
 {
   struct plot_eng plot;
   FILE *psfile;
