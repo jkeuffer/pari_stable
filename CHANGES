@@ -68,6 +68,8 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    16- made second argument to matrixqz optional, allow non-prime values
    17- matpascal(n < -1), mathilbert(n < 0) now raise an error
    18- add optional extra argument to ffprimroot, fforder, fflog
+   19- allow znlog(x,g) where g a t_PADIC or an t_INTMOD modulo any N
+       that znprimroot(N) would accept
 
   Added
     1- library functions expu, adduu, subuu

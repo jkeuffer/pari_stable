@@ -1969,13 +1969,77 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
   return gen_PH_log(a,g,ord,(void*)p,&Fp_star,_Fp_easylog);
 }
 
+/* find a s.t. g^a = x (mod p^k), p prime, k > 0, (x,p) = 1, g primitive root
+ * mod p^2 [ hence mod p^k ] */
+static GEN
+Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
+{
+  ulong l;
+  GEN b, c, ct, t, pl, pl_1, q, Q;
+  if (k == 1) return Fp_log(x, g, subis(p,1), p);
+  l = (k+1) >> 1;
+  pl_1 = powiu(p, l-1);
+  pl = mulii(pl_1, p);
+  q = odd(k)? pl_1: pl;
+  Q = subii(pl, pl_1);
+  /* write a = b + Q c, Q = (p-1)p^(l‐1), c defined mod q */
+  b = Zplog(remii(x, pl), remii(g, pl), p, l, pl); /* g^b = x (mod p^l) */
+  /* G := g^Q = 1 + t p^l (mod p^k), (t,p) = 1 */
+  t = diviiexact(subis(Fp_pow(g, Q, pk), 1), pl);
+  /* G^c = 1 + c p^l t (mod p^k) = x g^-b */
+  ct = diviiexact(subis(Fp_mul(x, Fp_pow(g, negi(b), pk), pk), 1), pl);
+  c = Fp_mul(ct, Fp_inv(t, q), q);
+  return addii(b, mulii(c, Q));
+}
+
+
 GEN
-znlog(GEN x, GEN g0)
+znlog(GEN x, GEN g)
 {
   pari_sp av = avma;
-  GEN p = gel(g0,1);
-  if (typ(g0) != t_INTMOD) pari_err(talker,"not an element of (Z/pZ)* in znlog");
-  return gerepileuptoint(av, Fp_log(Rg_to_Fp(x,p),gel(g0,2),subis(p,1),p));
+  long k;
+  GEN p, pk;
+  switch (typ(g))
+  {
+    case t_PADIC: {
+      pk = gel(g,3);
+      k = precp(g);
+      p = gel(g,2);
+      x = Rg_to_Fp(x, pk);
+      if (equaliu(p, 2))
+      {
+        if (k > 2) pari_err(talker, "not a primitive root in znlog");
+        avma = av;
+        return is_pm1(x)? gen_0: gen_1;
+      }
+      g = gel(g,4);
+      break;
+    }
+    case t_INTMOD: {
+      long e;
+      pk = gel(g,1);
+      e = mod4(pk);
+      if (e == 0)
+      {
+        if (!equaliu(pk, 4)) pari_err(talker, "not a primitive root in znlog");
+        x = Rg_to_Fp(x, pk);
+        avma = av;
+        return is_pm1(x)? gen_0: gen_1;
+      }
+      g = gel(g,2);
+      if (e == 2) {
+        pk = shifti(pk, -1);
+        if (cmpii(g, pk) >= 0) g = subii(g, pk);
+      }
+      x = Rg_to_Fp(x, pk);
+      k = isanypower(pk, &p);
+      if (k == 0) k = 1;
+      break;
+    }
+    default: pari_err(talker,"not an element of (Z/pZ)* in znlog");
+      return NULL; /* not reached */
+  }
+  return gerepileuptoint(av, Zplog(x, g, p, k, pk));
 }
 
 GEN
