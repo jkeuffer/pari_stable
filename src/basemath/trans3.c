@@ -808,7 +808,10 @@ veceint1(GEN C, GEN nmax, long prec)
 
   if (signe(nmax)<=0) return cgetg(1,t_VEC);
   if (DEBUGLEVEL>1) fprintferr("Entering veceint1:\n");
-  if (typ(C) != t_REAL || lg(C) > prec) C = gtofp(C, prec);
+  if (typ(C) != t_REAL || lg(C) > prec) {
+    C = gtofp(C, prec);
+    if (typ(C) != t_REAL) err(typeer,"veceint1");
+  }
   if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
 
   G = -bit_accuracy(prec);
