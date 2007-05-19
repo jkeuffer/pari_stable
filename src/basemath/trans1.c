@@ -1058,19 +1058,23 @@ static GEN
 palog(GEN x)
 {
   pari_sp av = avma;
-  GEN y, p = gel(x,2);
+  GEN y, p = gel(x,2), a = gel(x,4);
 
-  if (!signe(x[4])) pari_err(talker,"zero argument in palog");
+  if (!signe(a)) pari_err(talker,"zero argument in palog");
   if (equaliu(p,2))
   {
     y = gsqr(x); setvalp(y,0);
     y = palogaux(y);
   }
+  else if (gcmp1(modii(a, p)))
+  {
+    y = gmul2n(palogaux(x), 1);
+  } 
   else
   { /* compute log(x^(p-1)) / (p-1) */
     GEN mod = gel(x,3), p1 = subis(p,1);
     y = cgetp(x);
-    gel(y,4) = Fp_pow(gel(x,4), p1, mod);
+    gel(y,4) = Fp_pow(a, p1, mod);
     p1 = diviiexact(subsi(1,mod), p1); /* 1/(p-1) */
     y = gmul(palogaux(y), shifti(p1,1));
   }

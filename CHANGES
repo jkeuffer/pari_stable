@@ -70,6 +70,11 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    18- add optional extra argument to ffprimroot, fforder, fflog
    19- allow znlog(x,g) where g a t_PADIC or an t_INTMOD modulo any N
        that znprimroot(N) would accept
+   20- log(x t_PADIC): check whether x = 1 (mod p) before replacing x <- x^(p-1)
+   21- znprimroot(p^k): use isanypower() instead of factor().
+       E.g. znprimroot(nextprime(10^20)^1000): 8mn --> 12ms
+       znprimroot(N) no longer checks reliably whether (Z/N)^* is cyclic.
+       Result undefined if it is not.
 
   Added
     1- library functions expu, adduu, subuu

@@ -8,4 +8,5 @@ Description:
  (gen):gen	ggener($1)
 Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
   latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
-  odd prime and $k \geq 0$).
+  odd prime and $k \geq 0$). If the group is not cyclic, the result is
+  undefined.

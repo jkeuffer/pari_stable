@@ -269,7 +269,7 @@ gener(GEN m)
 {
   pari_sp av;
   long e;
-  GEN x, t, p, z;
+  GEN x, p, z;
 
   if (typ(m) != t_INT) pari_err(arither1);
   if (!signe(m)) pari_err(talker,"zero modulus in znprimroot");
@@ -290,11 +290,7 @@ gener(GEN m)
     if (!mod2(x)) x = addii(x,q);
     gel(z,2) = gerepileuptoint(av, x); return z;
   }
-
-  t = Z_factor(m);
-  if (lg(t[1]) != 2) pari_err(talker,"primitive root mod %Z does not exist", m);
-  p = gcoeff(t,1,1);
-  e = itos(gcoeff(t,1,2));
+  e = isanypower(m, &p);
   gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(p)); return z;
 }
 
@@ -1971,8 +1967,10 @@ Fp_log(GEN a, GEN g, GEN ord, GEN p)
 
 /* find a s.t. g^a = x (mod p^k), p prime, k > 0, (x,p) = 1, g primitive root
  * mod p^2 [ hence mod p^k ] */
+#if 0
+/* direct Pohlig-Helmann: O(k log p) mul*/
 static GEN
-Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
+Zplog2(GEN x, GEN g, GEN p, ulong k, GEN pk)
 {
   ulong l;
   GEN b, c, ct, t, pl, pl_1, q, Q;
@@ -1983,7 +1981,7 @@ Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
   q = odd(k)? pl_1: pl;
   Q = subii(pl, pl_1);
   /* write a = b + Q c, Q = (p-1)p^(l‐1), c defined mod q */
-  b = Zplog(remii(x, pl), remii(g, pl), p, l, pl); /* g^b = x (mod p^l) */
+  b = Zplog2(remii(x, pl), remii(g, pl), p, l, pl); /* g^b = x (mod p^l) */
   /* G := g^Q = 1 + t p^l (mod p^k), (t,p) = 1 */
   t = diviiexact(subis(Fp_pow(g, Q, pk), 1), pl);
   /* G^c = 1 + c p^l t (mod p^k) = x g^-b */
@@ -1991,7 +1989,18 @@ Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
   c = Fp_mul(ct, Fp_inv(t, q), q);
   return addii(b, mulii(c, Q));
 }
-
+#else
+/* use p-adic log: O(log p + k) mul*/
+static GEN
+Zplog(GEN x, GEN g, GEN p, ulong k, GEN pk)
+{
+  GEN b, n = subis(p,1), a = Fp_log(x, g, n, p);
+  if (k == 1) return a;
+  x = Fp_mul(x, Fp_pow(g, negi(a), pk), pk);
+  b = gdiv(glog(cvtop(x, p, k), 0), glog(cvtop(Fp_pow(g,n,pk), p, k), 0));
+  return addii(a, mulii(n, gtrunc(b)));
+}
+#endif
 
 GEN
 znlog(GEN x, GEN g)
