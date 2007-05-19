@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-int 
+int
 is_rational(GEN x) { long t = typ(x); return is_rational_t(t); }
 int
 RgX_is_rational(GEN x)
@@ -54,7 +54,7 @@ GEN
 RgM_zc_mul(GEN x, GEN y) { return RgM_zc_mul_i(x,y, lg(x), lg(x[1])); }
 
 /* x t_MAT, y a compatible zm (dimension > 0). */
-GEN 
+GEN
 RgM_zm_mul(GEN x, GEN y)
 {
   long j, c, l = lg(x), ly = lg(y);
@@ -76,7 +76,7 @@ RgV_zc_mul_i(GEN x, GEN y, long l)
 GEN
 RgV_zc_mul(GEN x, GEN y) { return RgV_zc_mul_i(x, y, lg(x)); }
 
-GEN 
+GEN
 RgV_zm_mul(GEN x, GEN y)
 {
   long j, l = lg(x), ly = lg(y);
@@ -490,7 +490,7 @@ addmulXn(GEN x, GEN y, long d)
 {
   GEN xd, yd, zd;
   long a, lz, nx, ny;
-  
+
   if (!signe(x)) return y;
   ny = lgpol(y);
   nx = lgpol(x);
@@ -530,7 +530,7 @@ addmulXncopy(GEN x, GEN y, long d)
 {
   GEN xd, yd, zd;
   long a, lz, nx, ny;
-  
+
   if (!signe(x)) return gcopy(y);
   nx = lgpol(x);
   ny = lgpol(y);
@@ -735,7 +735,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
 {
   pari_sp avy, av, av1;
   long dx,dy,dz,i,j,sx,lr;
-  GEN z,p1,rem,y_lead,mod;
+  GEN z,p1,p2,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
   if (!signe(y)) pari_err(gdiver);
@@ -774,14 +774,6 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
 
   /* x,y in R[X], y non constant */
   dz = dx-dy; av = avma;
-  p1 = new_chunk(dy+3);
-  for (i=2; i<dy+3; i++)
-  {
-    GEN p2 = gel(y,i);
-    /* gneg to avoid gsub's later on */
-    gel(p1,i) = isexactzero(p2)? NULL: gneg_i(p2);
-  }
-  y = p1;
   switch(typ(y_lead))
   {
     case t_INTMOD:
@@ -791,12 +783,25 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     default: if (gcmp1(y_lead)) y_lead = NULL;
       f = gdiv; mod = NULL;
   }
-  avy=avma;
+  p1 = new_chunk(dy+3);
+  avy = avma;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
-  x += 2; y += 2; z += 2;
+  x += 2; z += 2;
 
-  p1 = gel(x,dx);
-  gel(z,dz) = y_lead? f(p1,y_lead): gcopy(p1);
+  p2 = gel(x,dx);
+  gel(z,dz) = y_lead? f(p2,y_lead): gcopy(p2);
+  if (isexactzero(gel(z,dz)))
+    pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Z\nby %Z",
+             x-2, y);
+
+  for (i=2; i<dy+3; i++)
+  {
+    p2 = gel(y,i);
+    /* gneg to avoid gsub's later on */
+    gel(p1,i) = isexactzero(p2)? NULL: gneg_i(p2);
+  }
+  y = p1+2;
+
   for (i=dx-1; i>=dy; i--)
   {
     av1=avma; p1=gel(x,i);
