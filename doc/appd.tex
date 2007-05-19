@@ -13,7 +13,7 @@ storage class. As a major side effect, this breaks the \kbd{libpari} ABI: the
 resulting library will not be compatible with the old one. On the other hand,
 it now provides the following two public functions\sidx{threads}
 
-\fun{void}{pari_thread_init}{size\_t parisize} must be called when starting a
+\fun{void}{pari_thread_init}{size_t parisize} must be called when starting a
 thread: it allocates a local stack of size \kbd{parisize} and local cached
 universal constants (e.g. \kbd{Pi}, \kbd{Euler}). Here, \emph{local} means
 \emph{local to the present thread}.
@@ -21,15 +21,17 @@ universal constants (e.g. \kbd{Pi}, \kbd{Euler}). Here, \emph{local} means
 \fun{void}{pari_thread_close}{void} must be called when closing a thread,
 and deallocates the above resources.
 
-Under this model, some PARI states are reset in new threads. In particular
+\noindent Under this model, some PARI states are reset in new threads. In
+particular
 
 \item the random number generator is reset to the starting seed;
 
-\item the system stack exhaustion checking code is disabled (use
-\kbd{pari\_stackcheck\_init()} to reenable it);
+\item the system stack exhaustion checking code, meant to catch infinite
+recursions, is disabled (use \kbd{pari\_stackcheck\_init()} to reenable it);
 
-\item cached real constants (returned by \kbd{mppi, mpeuler and mplog2}) are not
-shared between threads and will be recomputed as needed;
+\item cached real constants (returned by \kbd{mppi}, \kbd{mpeuler} and
+\kbd{mplog2}) are not shared between threads and will be recomputed as
+needed;
 
 \item error handlers (set with \kbd{trap()}) are reset.
 
