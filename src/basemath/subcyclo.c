@@ -801,26 +801,60 @@ polsubcyclo(long n, long d, long v)
   }
 }
 
-/* p prime, n > 1 */
+/*Let z a primitive n-th root of 1, p prime, n > 1, p | n, such that
+ * Aurifeuillian factorization of Phi_n(p) exists ( zp is a square in Q(z) ).
+ * Let g the Gauss sum
+ *      sum_x (x|p) z^(xn/p) for p odd,  i - 1 for p = 2 [ i := z^(n/4) ]
+ * We have N(-1) = Nz = 1 (n != 1,2), and
+ *      g^2 = (-1|p) p for p odd,  g^2 = -2i for p = 2
+ * p = 1(4), n odd  : z^2 is a primitive root
+ *   Phi_n(p) = N(p - z^2) = N(g - z) N(g + z)
+ *
+ * p = 3(4), n = 2 (4) : -z^2 is a primitive root
+ *   Phi_n(p) = N(p - (-z^2)) = N(g - z) N(g + z)  [ N(-1) = 1 ]
+ *
+ * p = 2, n = 4 (8) : i z^2 primitive root
+ *   Phi_n(2) = N(2 - i z^2) = N(-2i -  z^2) = N(g - z) N(g + z) */
 GEN
 factor_Aurifeuille(GEN p, long n)
 {
   pari_sp ltop = avma;
-  long val, l;
+  long e, l, j;
   long phi_n = itos(phi(stoi(n)));
   GEN bound = ceil_safe(gpowgs(addrs(gsqrt(p,3),1),phi_n));
-  GEN zl = polsubcyclo_start(n, 0, 0, bound, &val, &l);
-  GEN le = gel(zl,1), z = gel(zl,2), gl = utoipos(l);
-  GEN pstar = (mod4(p) == 1? p: negi(p)), lr = Fp_sqrt(pstar, gl);
-  GEN r = padicsqrtnlift(pstar,gen_2,lr,gl,val);
-  GEN f, s, nr = negi(r);
-  long i;
-  s = z; f = subii(r,s);
-  for(i=2;i<n;i++)
+  GEN zl = polsubcyclo_start(n, 0, 0, bound, &e, &l);
+  GEN f, a, b, le = gel(zl,1), z = gel(zl,2), s = z;
+
+  if (equaliu(p, 2))
   {
-    s = Fp_mul(z,s,le);
-    if (cgcd(i,n)==1)
-      f = Fp_mul(f, subii((krosi(i,p)==1?r:nr),s), le);
+    GEN i = Fp_powu(z, n/4, le), z2 = Fp_powu(z, 2, le);
+    switch ((n/4)&7)
+    {
+      case 1: case 3: a = addsi(-1,i); b = subsi(-1,i); break;
+      case 5: case 7: a = subsi(1,i);  b = addsi(1,i); break;
+    }
+    a = addis(i, -1); b = subsi(-1,i);
+    f = subii(a, s);
+    for (j=3;j<n; j+=2)
+    {
+      s = Fp_mul(z2, s, le);
+      if (cgcd(j,n)==1)
+        f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
+    }
+  }
+  else
+  {
+    GEN pstar = mod4(p) == 1? p: negi(p);
+    ulong g = Fl_sqrt(umodiu(pstar,l), l);
+    a = padicsqrtnlift(pstar,gen_2, utoipos(g), utoipos(l), e);
+    b = negi(a);
+    f = subii(a, s);
+    for(j=2;j<n;j++)
+    {
+      s = Fp_mul(z,s,le);
+      if (cgcd(j,n)==1)
+        f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+    }
   }
   return gerepileuptoint(ltop, f);
 }
