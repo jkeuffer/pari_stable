@@ -1764,11 +1764,11 @@ logr_abs(GEN X)
   k = 2;
   if (u > (~0UL / 3) * 2) { /* choose 1-x/2 */
     EX++; u = ~u;
-    while (!u && k < l) { u = (ulong)X[++k]; u = ~u; }
+    while (!u && ++k < l) { u = (ulong)X[k]; u = ~u; }
     neg = 1;
   } else { /* choose x - 1 */
     u &= ~HIGHBIT; /* u - HIGHBIT, assuming HIGHBIT set */
-    while (!u && k < l) u = (ulong)X[++k];
+    while (!u && ++k < l) u = (ulong)X[k];
     neg = 0;
   }
   if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
