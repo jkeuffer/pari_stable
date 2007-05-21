@@ -654,11 +654,13 @@ add_rfrac(GEN x, GEN y)
   p1 = poldivrem(n, delta, &r); /* we want gcd(n,delta) */
   if (gcmp0(r))
   {
+    cgiv(r);
     if (lg(d) == 3) /* "constant" denominator */
     {
       d = gel(d,2);
            if (gcmp_1(d)) p1 = gneg(p1);
-      else if (!gcmp1(d)) p1 = gdiv(p1, d);
+      else if (gcmp1(d))  p1 = gcopy(p1);
+      else p1 = gdiv(p1, d);
       return gerepileupto((pari_sp)(z+3), p1);
     }
     gel(z,1) = p1; gel(z,2) = d;
