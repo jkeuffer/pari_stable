@@ -46,7 +46,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    35- logagmcx inaccurate [ used for log(t_COMPLEX), large precision ]
    36- RgX_divrem: prevent "impossible" situations for weird base rings
        1/ Mod((y-1)*x-1, Mod(2,6)*x^3-Mod(1,2)*x^2-1) --> SEGV
-
+   37- gclone didn't work on t_INTs with lg > lgefint
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

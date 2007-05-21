@@ -1407,8 +1407,14 @@ gclone(GEN x)
   GEN y = newbloc(t);
   if (!is_recursive_t(tx))
   {
-    lx = (tx==t_INT)? lgefint(x): lg(x);
-    for (i=0; i<lx; i++) y[i] = x[i];
+    if (tx == t_INT) {
+      lx = lgefint(x);
+      y[0] = evaltyp(t_INT)|evallg(lx);
+      for (i=1; i<lx; i++) y[i] = x[i];
+    } else {
+      lx = lg(x);
+      for (i=0; i<lx; i++) y[i] = x[i];
+    }
   }
   else
   {
