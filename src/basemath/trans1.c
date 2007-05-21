@@ -1772,7 +1772,7 @@ logr_abs(GEN X)
     neg = 0;
   }
   if (k == l) return EX? mulsr(EX, mplog2(l)): real_0(l);
-  z = cgetr(l - (k-2)); ltop = avma;
+  z = cgetr(EX? l: l - (k-2)); ltop = avma;
 
   a = bit_accuracy(k) + bfffo(u); /* ~ -log2 |1-x| */
  /* Multiplication is quadratic in this range (l is small, otherwise we
