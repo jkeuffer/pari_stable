@@ -925,9 +925,15 @@ compilenode(long n, int mode, long flag)
         op_push(OCpushgen,  data_push(strntoGENexp(tree[n].str,tree[n].len)));
         break;
       case CSTquote:
-        op_push(OCpushvar, (long)fetch_entry(tree[n].str+1,tree[n].len-1));
-        compilecast(n,Ggen, mode);
-        break;
+        {
+          entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
+          if (EpSTATIC(ep))
+            pari_err(talker2,"variable name expected",
+                tree[n].str+1,get_origin());
+          op_push(OCpushvar, (long)ep);
+          compilecast(n,Ggen, mode);
+          break;
+        }
       default:
         pari_err(bugparier,"compilenode, unsupported constant");
       }
