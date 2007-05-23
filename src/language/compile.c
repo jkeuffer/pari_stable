@@ -122,7 +122,7 @@ var_push(long x)
   localvars[n] = x;
 } 
 
-enum Fflag {Fnocopy=1};
+enum FLflag {FLnocopy=1};
 
 static void compilenode(long n, int mode, long flag);
 
@@ -347,7 +347,7 @@ compilefacteurmat(long n, int mode)
   long yx=tree[y].x;
   long yy=tree[y].y;
   long f=tree[y].f;
-  compilenode(x,Ggen,Fnocopy);
+  compilenode(x,Ggen,FLnocopy);
   compilenode(yx,Gsmall,0);
   if (f==Fmatrix && yy==-1)
   {
@@ -385,7 +385,7 @@ compilevec(long n, long mode, op_code op)
   for (lnc=l-1; lnc>0 && tree[arg[lnc]].f==Fconst; lnc--);
   for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen,i>=lnc?Fnocopy:0);
+    compilenode(arg[i],Ggen,i>=lnc?FLnocopy:0);
     op_push(OCstackgen,i);
   }
   avma=ltop;
@@ -551,7 +551,7 @@ compilefunc(long n, int mode)
     a = arg[1];
     if (tree[a].f!=Ffunction || tree[a].x!=OPpow)
     {
-      compilenode(a,Ggen,Fnocopy);
+      compilenode(a,Ggen,FLnocopy);
       op_push(OCpushlong,1);
     }
     else
@@ -606,7 +606,7 @@ compilefunc(long n, int mode)
         switch(c)
         {
         case 'G':
-          compilenode(arg[j],Ggen,j>=lnc?Fnocopy:0);
+          compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
           j++;
           break;
         case 'M':
@@ -684,7 +684,7 @@ compilefunc(long n, int mode)
             }
             else
             {
-              compilenode(a,Ggen,Fnocopy);
+              compilenode(a,Ggen,FLnocopy);
               op_push(OCtostr, 1);
             }
             break;
@@ -877,14 +877,14 @@ compilenode(long n, int mode, long flag)
     return;
   case Ffacteurmat:
     compilefacteurmat(n,mode);
-    if (mode==Ggen && !(flag&Fnocopy))
+    if (mode==Ggen && !(flag&FLnocopy))
       op_push(OCcopy,0);
     break;
   case Faffect:
     if (tree[x].f==Fentry)
     {
       entree *ep=getvar(x);
-      compilenode(y,Ggen,Fnocopy);
+      compilenode(y,Ggen,FLnocopy);
       op_push(OCstore,(long)ep);
       if (mode!=Gvoid)
       {
