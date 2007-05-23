@@ -510,7 +510,7 @@ compilefunc(long n, int mode)
         a=tree[a].x;
       }
       else
-        op_push(OCpushstoi,0);
+        op_push(OCpushlong,(long)gen_0);
       en=(long)getvar(a);
       op_push(OCgetarg,en);
       var_push(en);
@@ -942,7 +942,13 @@ compilenode(long n, int mode, long flag)
     }
   case Fsmall:
     if (mode==Ggen)
-      op_push(OCpushstoi, x);
+    {
+      GEN stog[]={gen_m1, gen_0, gen_1, gen_2};
+      if (x>=-1 && x<=2)
+        op_push(OCpushlong, (long) stog[x+1]);
+      else
+        op_push(OCpushstoi, x);
+    }
     else
     {
       op_push(OCpushlong, x);
