@@ -46,4 +46,8 @@ if test -f $Xincroot/X11/Xos.h -a -n "$X11"; then
 else
   echo "### X11 not found"
   X11=
-fi
+  case $which_graphic_lib in
+    auto) which_graphic_lib=none;;
+  esac
+fi 
+
