@@ -48,6 +48,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
        1/ Mod((y-1)*x-1, Mod(2,6)*x^3-Mod(1,2)*x^2-1) --> SEGV
    37- gclone didn't work on t_INTs with lg > lgefint
    38- GC error in add_rfrac() [#612]
+   39- missing type check in subgrouplist [#616]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

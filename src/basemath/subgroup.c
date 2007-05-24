@@ -538,14 +538,14 @@ get_snf(GEN x, long *N)
   for (n = *N; n > 0; n--) /* take care of trailing 1s */
   {
     GEN c = gel(cyc,n);
-    if (typ(c) != t_INT) return NULL;
-    if (!gcmp1(c)) break;
+    if (typ(c) != t_INT || signe(c) <= 0) return NULL;
+    if (!is_pm1(c)) break;
   }
   setlg(cyc, n+1);
   for ( ; n > 0; n--)
   {
     GEN c = gel(cyc,n);
-    if (typ(c) != t_INT) return NULL;
+    if (typ(c) != t_INT || signe(c) <= 0) return NULL;
   }
   return cyc;
 }
