@@ -1533,7 +1533,7 @@ hensel_lift_accel(long n, long *pmask)
   for(j=BITS_IN_LONG-1, a=n ;; j--)
   {
     mask |= (a&1)<<j;
-    a = (a>>1) + (a&1);
+    a = (a+1)>>1;
     if (a==1) break;
   }
   *pmask = mask>>j;
@@ -1550,7 +1550,7 @@ ZpX_liftroot(GEN f, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN     qold, q, qm1;
-  GEN     W, fr, ar, Wr = gen_0;
+  GEN     W, fr, Wr = gen_0;
   long    i, nb, mask;
   qold = q = p; qm1 = gen_1;
   nb = hensel_lift_accel(e, &mask);
@@ -1563,14 +1563,13 @@ ZpX_liftroot(GEN f, GEN a, GEN p, long e)
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     fr = FpX_red(f,q);
-    ar = a;
     if (i)
     {
-      W = Fp_mul(Wr, FpX_eval(ZX_deriv(fr),ar,qold), qold);
+      W = Fp_mul(Wr, FpX_eval(ZX_deriv(fr),a,qold), qold);
       W = Fp_mul(Wr, subsi(2,W), qold);
     }
     Wr = W;
-    a = subii(ar, mulii(Wr, FpX_eval(fr, ar,q)));
+    a = subii(a, mulii(Wr, FpX_eval(fr, a,q)));
     a = modii(a,q);
     qold = q;
   }
@@ -1581,7 +1580,7 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
 {
   pari_sp ltop=avma;
   GEN     qold, q, qm1;
-  GEN     W, fr, ar, Wr = gen_0;
+  GEN     W, fr, Wr = gen_0;
   long    i, nb, mask;
   qold = p ;  q = p; qm1 = gen_1;
   nb=hensel_lift_accel(e, &mask);
@@ -1594,14 +1593,13 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     fr = FpXQX_red(f,T,q);
-    ar = a;
     if (i)
     {
-      W = Fq_red(gmul(Wr,FqX_eval(derivpol(fr),ar,T,qold)), T, qold);
+      W = Fq_red(gmul(Wr,FqX_eval(derivpol(fr),a,T,qold)), T, qold);
       W = Fq_red(gmul(Wr, gadd(gen_2, gneg(W))), T, qold);
     }
     Wr = W;
-    a = gadd(ar, gmul(gneg(Wr), FqX_eval(fr, ar, T, q)));
+    a = gadd(a, gmul(gneg(Wr), FqX_eval(fr, a, T, q)));
     a = Fq_red(a, T, q);
     qold = q;
   }
@@ -1651,29 +1649,61 @@ GEN
 padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
 {
   pari_sp ltop=avma;
-  GEN     qold, q, qm1;
-  GEN     W, ar, Wr = gen_0;
-  long    i, nb, mask;
-  qold = q = p; qm1 = gen_1;
+  GEN q, W;
+  long i, nb, mask;
+
+  if (equalii(n, gen_2)) return padicsqrtlift(T,a,p,e);
   nb = hensel_lift_accel(e, &mask);
-  W = Fp_mul(n,Fp_pow(a,subis(n,1),q),q);
-  W = Fp_inv(W,q);
-  for(i=0;i<nb;i++)
+  W = Fp_inv(Fp_mul(n,Fp_pow(a,subis(n,1),p), p), p);
+  q = p;
+  for(i=0;;i++)
   {
-    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
-    q   =  mulii(qm1, p);
-    ar = a;
-    if (i)
-    {
-      W = Fp_mul(Wr, mulii(n,Fp_pow(ar,subis(n,1),qold)),qold);
-      W = Fp_mul(Wr, subsi(2,W),qold);
-    }
-    Wr = W;
-    a = subii(ar, mulii(Wr, subii(Fp_pow(ar,n,q),T)));
-    a = modii(a,q);
-    qold = q;
+    q = sqri(q);
+    if (mask & (1<<i)) q = diviiexact(q, p);
+    a = modii(subii(a, mulii(W, subii(Fp_pow(a,n,q),T))), q);
+    if (i == nb-1) break;
+
+    W = subii(shifti(W,1),
+              Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
   }
-  return gerepileupto(ltop,a);
+  return gerepileuptoint(ltop,a);
+}
+/* Same as ZpX_liftroot for the polynomial X^2-T */
+GEN
+padicsqrtlift(GEN T, GEN a, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN q, W;
+  long i, nb, mask;
+  
+  if (e == 1) return icopy(a);
+  nb = hensel_lift_accel(e, &mask);
+  W = Fp_inv(modii(shifti(a,1), p), p);
+  q = p;
+  for(i=0;;i++)
+  {
+    q = sqri(q);
+    if (mask & (1<<i)) q = diviiexact(q, p);
+    if (lgefint(q) == 3)
+    {
+      ulong Q = (ulong)q[2];
+      ulong A = umodiu(a, Q);
+      ulong t = umodiu(T, Q);
+      ulong w = umodiu(W, Q);
+      A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_sqr(A,Q), t, Q), Q), Q);
+      a = utoi(A);
+      if (i == nb-1) break;
+      w = Fl_sub(Fl_add(w,w,Q), Fl_mul(Fl_sqr(w,Q), Fl_add(A,A,Q),Q), Q);
+      W = utoi(w);
+    }
+    else
+    {
+      a = modii(subii(a, mulii(W, subii(Fp_sqr(a,q),T))), q);
+      if (i == nb-1) break;
+      W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), shifti(a,1),q));
+    }
+  }
+  return gerepileuptoint(ltop,a);
 }
 /**************************************************************************/
 

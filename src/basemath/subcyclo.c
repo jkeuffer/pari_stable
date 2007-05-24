@@ -801,8 +801,8 @@ polsubcyclo(long n, long d, long v)
   }
 }
 
-/*Let z a primitive n-th root of 1, p prime, n > 1, p | n, such that
- * Aurifeuillian factorization of Phi_n(p) exists ( zp is a square in Q(z) ).
+/* Let z a primitive n-th root of 1, p prime, n > 1, p | n, such that
+ * Aurifeuillian factorization of Phi_n(p) exists ( z.p is a square in Q(z) ).
  * Let g the Gauss sum
  *      sum_x (x|p) z^(xn/p) for p odd,  i - 1 for p = 2 [ i := z^(n/4) ]
  * We have N(-1) = Nz = 1 (n != 1,2), and
@@ -825,28 +825,43 @@ factor_Aurifeuille(GEN p, long n)
   GEN zl = polsubcyclo_start(n, 0, 0, bound, &e, &l);
   GEN f, a, b, le = gel(zl,1), z = gel(zl,2), s = z;
 
-  if (equaliu(p, 2))
-  {
-    GEN i = Fp_powu(z, n/4, le), z2 = Fp_powu(z, 2, le);
-    switch ((n/4)&7)
+  if ((n & 7) == 4) 
+  { /* p = 2 */
+    long m = n>>2;
+    GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
+    switch (m&7)
     {
       case 1: case 3: a = addsi(-1,i); b = subsi(-1,i); break;
       case 5: case 7: a = subsi(1,i);  b = addsi(1,i); break;
     }
     a = addis(i, -1); b = subsi(-1,i);
     f = subii(a, s);
-    for (j=3;j<n; j+=2)
+    for (j=3;j<n;j+=2)
     {
       s = Fp_mul(z2, s, le);
-      if (cgcd(j,n)==1)
+      if (cgcd(j,m)==1)
         f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
     }
   }
-  else
-  {
-    GEN pstar = mod4(p) == 1? p: negi(p);
+  else if ((n & 3) == 2)
+  { /* p = 3 (mod 4) */
+    GEN pstar = negi(p), z2 = Fp_sqr(z,le);
     ulong g = Fl_sqrt(umodiu(pstar,l), l);
-    a = padicsqrtnlift(pstar,gen_2, utoipos(g), utoipos(l), e);
+    long m = n>>1;
+    a = padicsqrtlift(pstar, utoipos(g), utoipos(l), e);
+    b = negi(a);
+    f = subii(a, s);
+    for(j=3;j<n;j+=2)
+    {
+      s = Fp_mul(z2,s,le);
+      if (cgcd(j,m)==1)
+        f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+    }
+  }
+  else
+  { /* p = 1 (mod 4) */
+    ulong g = Fl_sqrt(umodiu(p,l), l);
+    a = padicsqrtlift(p, utoipos(g), utoipos(l), e);
     b = negi(a);
     f = subii(a, s);
     for(j=2;j<n;j++)

@@ -861,33 +861,10 @@ sqrt_2adic(GEN x, long pp)
 static GEN
 sqrt_padic(GEN x, GEN modx, long pp, GEN p)
 {
-  GEN mod, z = Fp_sqrt(x, p);
-  long zp = 1;
-  pari_sp av, lim;
-
+  GEN z = Fp_sqrt(x, p);
   if (!z) pari_err(sqrter5);
-  if (pp <= zp) return z;
-
-  av = avma; lim = stack_lim(av,2);
-  mod = p;
-  for(;;)
-  { /* could use the hensel_lift_accel idea. Not really worth it */
-    GEN inv2;
-    zp <<= 1;
-    if (zp < pp) mod = sqri(mod); else { zp = pp; mod = modx; }
-    inv2 = shifti(addis(mod,1), -1); /* = (mod + 1)/2 = 1/2 */
-    z = addii(z, remii(mulii(x, Fp_inv(z,mod)), mod));
-    z = mulii(z, inv2);
-    z = modii(z, mod); /* (z + x/z) / 2 */
-    if (pp <= zp) return z;
-
-    if (low_stack(lim,stack_lim(av,2)))
-    {
-      GEN *gptr[2]; gptr[0]=&z; gptr[1]=&mod;
-      if (DEBUGMEM>1) pari_warn(warnmem,"padic_sqrt");
-      gerepilemany(av,gptr,2);
-    }
-  }
+  if (pp <= 1) return z;
+  return padicsqrtlift(x, z, p, pp);
 }
 
 GEN

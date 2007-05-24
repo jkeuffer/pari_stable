@@ -79,6 +79,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
        E.g. znprimroot(nextprime(10^20)^1000): 8mn --> 12ms
        znprimroot(N) no longer checks reliably whether (Z/N)^* is cyclic.
        Result undefined if it is not.
+   22- padic sqrt much faster [ small and large accuracies ]
 
   Added
     1- library functions expu, adduu, subuu
@@ -88,6 +89,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     4- library function ZX_gcd
     5- library function gtos
     6- library function pari_daemon
+    7- library function Fp_sqr, padicsqrtlift
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

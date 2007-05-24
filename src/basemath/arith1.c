@@ -1598,6 +1598,17 @@ Fp_mul(GEN a, GEN b, GEN m)
 }
 
 GEN
+Fp_sqr(GEN a, GEN m)
+{
+  pari_sp av=avma;
+  GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
+  (void)new_chunk((lg(a)+lg(m))<<1);
+  p=sqri(a);
+  avma=av;
+  return modii(p,m);
+}
+
+GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
@@ -1742,7 +1753,7 @@ Fp_powu(GEN A, ulong k, GEN N)
   }
   if (k <= 2)
   { /* frequent special cases */
-    if (k == 2) return remii(sqri(A),N);
+    if (k == 2) return Fp_sqr(A,N);
     if (k == 1) return A;
     if (k == 0) return gen_1;
   }

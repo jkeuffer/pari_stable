@@ -1427,6 +1427,9 @@ in $0, 1, \dots p-1$.
 \fun{GEN}{Fp_mul}{GEN a, GEN b, GEN m} returns the product of \kbd{a} by
 \kbd{b} modulo \kbd{m} (smallest non-negative residue). 
 
+\fun{GEN}{Fp_sqr}{GEN a, GEN m} returns $\kbd{a}^2$ modulo \kbd{m} (smallest
+non-negative residue). 
+
 \fun{ulong}{Fp_powu}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
 power modulo \kbd{p} (smallest non-negative residue). Not memory-clean, but
 suitable for \kbd{gerepileupto}.
@@ -2572,6 +2575,33 @@ stack. Suitable but inefficient for \kbd{gerepileupto}.)
 on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
 
 \fun{GEN}{RgXV_unscale}{GEN v, GEN h}
+
+\subsec{Hensel lifts}
+
+\fun{GEN}{padicsqrtlift}{GEN a, GEN S, GEN p, long e} returns a \typ{INT}
+which is a square root of $a$ mod $p^e$, assuming $S$ is a square root mod
+$p$. $p$ is odd.
+
+\fun{GEN}{padicsqrtnlift}{GEN a, GEN n, GEN S, GEN p, long e} returns a
+\typ{INT} which is an $n$-th root of $a$ mod $p^e$, assuming $S$ is an
+$n$-th root mod $p$. Assumes $n > 1$ and $p$ does not divide $n$.
+
+%\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
+%term prime to $p$, and without multiple roots mod $p$. Return a vector 
+%of \typ{INT}s which are the roots of $f$ mod $p^e$.
+
+\fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
+leading term prime to $p$, and $a$ a simple root mod $p$. Return a \typ{INT}
+which are the root of $f$ mod $p^e$ congruent to $a$ mod $p$.
+
+\fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
+leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
+vector of \typ{INT}s which are the root of $f$ mod $p^e$ congruent to the 
+$S[i]$ mod $p$.
+
+\fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
+\tet{ZpX_liftroot}, but $f$ is now a polynomial in $\Z[X,Y]$ and we find
+roots in the unramified extension of $\Q_p$ with reѕidue field $\F_p[Y]/(T)$.
 
 \subsec{Conversions involving single precision objects}
 
