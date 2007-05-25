@@ -2843,8 +2843,6 @@ nfsmith(GEN nf, GEN x)
   return gerepileupto(av, z);
 }
 
-#define trivlift(x) ((typ(x)==t_POLMOD)? gel(x,2): lift_intern(x))
-
 GEN
 element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
@@ -2857,11 +2855,11 @@ GEN
 element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
-  GEN p1, T = gel(nf,1);
-
-  nf = checknf(nf);
-  p1 = QXQ_inv(coltoliftalg(nf,trivlift(y)), T);
-  p1 = RgXQ_mul(coltoliftalg(nf,trivlift(x)), p1, T);
+  GEN p1, T;
+ 
+  nf = checknf(nf); T = gel(nf,1);
+  p1 = QXQ_inv(basistoalg_i(nf,y), T);
+  p1 = RgX_rem(gmul(basistoalg_i(nf,x), p1), T);
   p1 = poltobasis(nf,p1);
   return gerepileupto(av,nfreducemodpr(nf,p1,modpr));
 }
@@ -2872,7 +2870,7 @@ element_invmodpr(GEN nf, GEN y, GEN modpr)
   pari_sp av=avma;
   GEN p1;
 
-  p1 = QXQ_inv(coltoliftalg(nf,trivlift(y)), gel(nf,1));
+  p1 = QXQ_inv(basistoalg_i(nf,y), gel(nf,1));
   p1 = poltobasis(nf,p1);
   return gerepileupto(av, nfreducemodpr(nf,p1,modpr));
 }

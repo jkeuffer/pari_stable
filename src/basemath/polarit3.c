@@ -2774,10 +2774,10 @@ QXQ_inv(GEN A0, GEN B0)
   if (typ(B0) != t_POL) pari_err(notpoler,"QXQ_inv");
   if (typ(A0) != t_POL)
   {
-    if (is_scalar_t(typ(A0))) return ginv(A0);
+    if (is_scalar_t(typ(A0))) return scalarpol(ginv(A0), varn(B0));
     pari_err(notpoler,"QXQ_inv");
   }
-  if (degpol(A0) < 15) return ginvmod(A0,B0);
+  if (degpol(A0) < 15) return RgXQ_inv(A0,B0);
   A = Q_primitive_part(A0, &D);
   B = Q_primpart(B0);
   /* A, B in Z[X] */

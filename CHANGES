@@ -49,6 +49,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    37- gclone didn't work on t_INTs with lg > lgefint
    38- GC error in add_rfrac() [#612]
    39- missing type check in subgrouplist [#616]
+   40- inconsistent type checking in nfeltdivmodpr [#617]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -91,6 +92,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     5- library function gtos
     6- library function pari_daemon
     7- library function Fp_sqr, padicsqrtlift
+    7- library function RgXQ_inv
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

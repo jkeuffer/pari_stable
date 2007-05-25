@@ -643,7 +643,14 @@ basistoalg(GEN nf, GEN x)
  * Assume nf is a genuine nf. */
 GEN
 basistoalg_i(GEN nf, GEN x)
-{ return typ(x) == t_COL? coltoalg(nf, x): x; }
+{
+  switch(typ(x))
+  {
+    case t_COL: return coltoliftalg(nf, x);
+    case t_POLMOD: return gel(x,2);
+    default: return x;
+  }
+}
 GEN
 algtobasis_i(GEN nf, GEN x)
 {

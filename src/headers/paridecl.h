@@ -1658,6 +1658,7 @@ GEN     Q_primitive_part(GEN x, GEN *ptc);
 GEN     Q_primpart(GEN x);
 GEN     Q_remove_denom(GEN x, GEN *ptd);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
+GEN     RgXQ_inv(GEN x, GEN y);
 GEN     ZX_squff(GEN f, GEN *ex);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);

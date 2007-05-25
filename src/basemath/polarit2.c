@@ -4188,20 +4188,20 @@ RgXQ_inv_inexact(GEN x, GEN y)
   for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
   return gerepilecopy(av, normalizepol_i(z, dy+2));
 }
-/* assume typ(x) = t_POL */
-static GEN
+/* assume typ(x) = typ(y) = t_POL */
+GEN
 RgXQ_inv(GEN x, GEN y)
 {
   long vx=varn(x), vy=varn(y);
-  pari_sp av, av1;
+  pari_sp av;
   GEN u, v, d;
 
   while (vx != vy)
   {
     if (varncmp(vx,vy) > 0)
     {
-      if (vx == BIGINT) return ginv(x);
-      return gred_rfrac_simple(gen_1, x);
+      d = (vx == BIGINT)? ginv(x): gred_rfrac_simple(gen_1, x);
+      return scalarpol(d, vy);
     }
     if (lg(x)!=3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
     x = gel(x,2); vx = gvar(x);
@@ -4215,7 +4215,9 @@ RgXQ_inv(GEN x, GEN y)
     if (lg(d) > 3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
     d = gel(d,2);
   }
-  av1 = avma; return gerepile(av,av1, gdiv(u,d));
+  d = gdiv(u,d);
+  if (typ(d) != t_POL || varn(d) != vy) d = scalarpol(d, vy);
+  return gerepileupto(av, d);
 }
 
 GEN

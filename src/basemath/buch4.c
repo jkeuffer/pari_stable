@@ -356,9 +356,9 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
   long rep;
   GEN pol;
 
-  if (typ(a) != t_POLMOD) a = basistoalg_i(nf, a);
-  if (typ(b) != t_POLMOD) b = basistoalg_i(nf, b);
-  pol = mkpoln(3, lift(a), gen_0, lift(b));
+  a = basistoalg_i(nf, a);
+  b = basistoalg_i(nf, b);
+  pol = mkpoln(3, a, gen_0, b);
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
 
@@ -403,21 +403,18 @@ nfhilbert(GEN nf,GEN a,GEN b)
 {
   pari_sp av = avma;
   long r1, i;
-  GEN S, al, bl, ro;
+  GEN S, ro;
 
   if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbert");
   nf = checknf(nf);
 
-  if (typ(a) != t_POLMOD) a = basistoalg_i(nf, a);
-  if (typ(b) != t_POLMOD) b = basistoalg_i(nf, b);
-
-  al = lift(a);
-  bl = lift(b);
+  a = basistoalg_i(nf, a);
+  b = basistoalg_i(nf, b);
  /* local solutions in real completions ? */
   r1 = nf_get_r1(nf); ro = gel(nf,6);
   for (i=1; i<=r1; i++)
-    if (signe(poleval(al,gel(ro,i))) < 0 &&
-        signe(poleval(bl,gel(ro,i))) < 0)
+    if (signe(poleval(a,gel(ro,i))) < 0 &&
+        signe(poleval(b,gel(ro,i))) < 0)
     {
       if (DEBUGLEVEL>=4)
         fprintferr("nfhilbert not soluble at real place %ld\n",i);
@@ -427,7 +424,7 @@ nfhilbert(GEN nf,GEN a,GEN b)
   /* local solutions in finite completions ? (pr | 2ab)
    * primes above 2 are toughest. Try the others first */
 
-  S = gel(idealfactor(nf,gmul(gmulsg(2,a),b)),1);
+  S = gel(idealfactor(nf,gmod(gmul(gmulsg(2,a),b), gel(nf,1))), 1);
   /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
   for (i=lg(S)-1; i>1; i--)
     if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
