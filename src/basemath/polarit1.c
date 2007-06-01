@@ -260,7 +260,8 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   if (unknown && kronecker(D,p) == -1) return NULL;
 
   s = Fp_sqrt(D,p);
-  if (!s) pari_err(talker,"not a prime in FpX_quad_root");
+  /* p is not prime, go on and give e.g. maxord a chance to recover */
+  if (!s) return NULL;
   u = addis(shifti(p,-1), 1); /* = 1/2 */
   return Fp_mul(u, subii(s,b), p);
 }
