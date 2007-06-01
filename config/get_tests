@@ -8,6 +8,7 @@ test_extra="\
   bnfisintnorm\
   compat\
   ellglobalred\
+  extract\
   ffisom\
   galois\
   intnum\

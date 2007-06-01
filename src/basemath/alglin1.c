@@ -583,19 +583,24 @@ extract(GEN x, GEN L)
   if (! is_matvec_t(tx)) pari_err(typeer,"extract");
   if (tl==t_INT)
   { /* extract components of x as per the bits of mask L */
-    long k, l, ix, iy;
+    long k, l, ix, iy, maxj;
     GEN Ld;
     if (!signe(L)) return cgetg(1,tx);
     y = (GEN) gpmalloc(lx*sizeof(long));
-    l = lgefint(L); ix = iy = 1;
+    l = lgefint(L)-1; ix = iy = 1;
+    maxj = BITS_IN_LONG - bfffo(*int_MSW(L));
+    if ((l-2) * BITS_IN_LONG + maxj >= lx)
+      pari_err(talker,"mask too large in vecextract");
     for (k = 2, Ld = int_LSW(L); k < l; k++, Ld = int_nextW(Ld))
     {
       ulong B = *Ld;
-      for (j = 0; B && (j < BITS_IN_LONG); j++, B >>= 1)
-      {
+      for (j = 0; j < BITS_IN_LONG; j++, B >>= 1, ix++)
         if (B & 1) y[iy++] = x[ix];
-        if (ix++ == lx) pari_err(talker,"mask too large in vecextract");
-      }
+    }
+    { /* k = l */
+      ulong B = *Ld;
+      for (j = 0; j < maxj; j++, B >>= 1, ix++)
+        if (B & 1) y[iy++] = x[ix];
     }
     y[0] = evaltyp(tx) | evallg(iy);
     x = gcopy(y); gpfree(y); return x;
