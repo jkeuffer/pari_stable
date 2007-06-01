@@ -88,17 +88,20 @@ primepi(GEN x)
 }
 
 GEN
-primes(long n)
+primes(long m)
 {
   byteptr p = diffptr;
   ulong prime = 0;
-  GEN y,z;
+  long n;
+  GEN y, z;
 
-  if (n < 0) n = 0;
+  n = (m < 0)? 0: m;
   z = y = cgetg(n+1,t_VEC);
   while (n--)
   {
-    NEXT_PRIME_VIADIFF_CHECK(prime,p);
+    NEXT_PRIME_VIADIFF(prime,p);
+    if (!*p) /* use something close to Dusart's bound */
+      pari_err(primer2, (long)(m*( log((double)m*log((double)m))-0.948 )));
     gel(++z, 0) = utoi(prime);
   }
   return y;
