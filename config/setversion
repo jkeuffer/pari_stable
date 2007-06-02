@@ -1,0 +1,10 @@
+#!/bin/sh
+# to be run from the Oxxx directory
+cfg=../config
+if test ! -d $cfg/CVS; then exit 0; fi
+f=paricfg.h
+mv $f $f.old
+. $cfg/get_head
+. $cfg/version
+v="GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
+sed -e "s,define PARIVERSION.*,define PARIVERSION \"$v\"," $f.old > $f

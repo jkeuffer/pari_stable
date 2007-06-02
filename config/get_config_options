@@ -1,20 +1,3 @@
-# Version number and patch level.
-. ./version
-patchlevel_verbose=
-if test -d CVS -a $status = development; then
- status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
- patchlevel_verbose="[ $status ]"
-fi
-
-version=$VersionMajor.$VersionMinor
-pari_release="$version.$patch"
-if test `expr $VersionMinor % 2` = 1; then
-  pari_release_verbose="$pari_release (STABLE)"
-else
-  pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
-fi
-echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
-
 # Processing Options
 dflt_conf_file=pari.cfg
 fastread=yes

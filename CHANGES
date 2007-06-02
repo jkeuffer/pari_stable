@@ -54,6 +54,9 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
        --> "not a prime" error (help Round4 to recover when using non-primes,
        instead of raising immediate errors) [#624]
    42- vecextract: C14 in 2.4.0 didn't work for large masks [#623]
+   43- clean up version handling: move version setting code to config/version
+       and always set PARIVERSION from CHANGES if 'CVS' [ used to require
+       a 'Configure' ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

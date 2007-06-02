@@ -12,3 +12,17 @@ status=development
 
 # soname of stable libpari.so is libpari.so.$soname_num
 soname_num=$patch
+
+patchlevel_verbose=
+if test -d $TOP/CVS; then
+ status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
+ patchlevel_verbose="[ $status ]"
+fi
+
+version=$VersionMajor.$VersionMinor
+pari_release="$version.$patch"
+if test `expr $VersionMinor % 2` = 1; then
+  pari_release_verbose="$pari_release (STABLE)"
+else
+  pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
+fi

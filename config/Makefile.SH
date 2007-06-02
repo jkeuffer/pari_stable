@@ -265,6 +265,9 @@ all: $exec lib-sta
 lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
+paricfg.h: $TOP/CHANGES
+	@-sh $cfg/setversion
+
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
