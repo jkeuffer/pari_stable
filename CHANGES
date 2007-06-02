@@ -87,6 +87,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
        Result undefined if it is not.
    22- padic sqrt much faster [ small and large accuracies ]
    23- let primes() indicate a value of primelimit if unable to answer [#625]
+   24- remove variable names from ?0
 
   Added
     1- library functions expu, adduu, subuu

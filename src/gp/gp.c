@@ -289,15 +289,23 @@ commands(long n)
 
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
-      if (ep->valence!=EpNEW &&  ((n < 0 && ep->menu) || ep->menu == n))
+    {
+      switch (EpVALENCE(ep))
+      {
+        case EpNEW:
+        case EpVAR:
+        case EpGVAR: continue;
+      }
+      if ((n < 0 && ep->menu) || ep->menu == n)
       {
         list[s] = ep->name;
         if (++s >= size)
         {
-	  size += (LIST_LEN+1);
+	  size += LIST_LEN+1;
           list = (char**) gprealloc(list, size*sizeof(char *));
         }
       }
+    }
   list[s] = NULL;
   print_fun_list(list, term_height()-4);
   gpfree(list);
