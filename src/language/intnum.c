@@ -635,10 +635,11 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
-  bpa = gmul2n(gadd(b, a), -1);
-  bma = gsub(bpa, a);
-  bmb = gmul(bma, tabx0);
+  bpa = gmul2n(gadd(b, a), -1); /* (b+a)/2 */
+  bma = gsub(bpa, a); /* (b-a)/2 */
+  bmb = gmul(bma, tabx0); /* (b-a)/2 phi(0) */
   av = avma;
+  /* phi'(0) f( (b+a)/2 + (b-a)/2 * phi(0) ) */
   S = gmul(tabw0, eval(gadd(bpa, bmb), E));
   for (k = 1; k <= m; k++)
   {
