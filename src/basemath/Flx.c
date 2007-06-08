@@ -1605,17 +1605,15 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     GEN tt;
     g = random_Flx(f, vT, p);
     if (degpol(g) < 1) continue;
-    if (p > 2)
+    if (p == 2) tt = g;
+    else
     {
       ulong t;
-      tt = Flxq_pow(g, q, T, p); t = tt[2];
+      t = Flx_resultant(T, g, p);
       if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
       tt = Flxq_pow(g, utoi(p_1>>1), T, p);
-      RES = p_1;
-    } else {
-      tt = Flxq_pow(g, utoi(p_1), T, p);
-      RES = 1;
     }
+    RES = p_1;
     for (i = 1; i < j; i++)
     {
       GEN a = Flxq_pow(tt, gel(L2,i), T, p);

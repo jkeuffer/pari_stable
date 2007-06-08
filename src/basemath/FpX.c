@@ -863,7 +863,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     GEN t;
     g = random_FpX(f, vT, p);
     if (degpol(g) < 1) continue;
-    t = constant_term(FpXQ_pow(g, q, T, p));
+    t = FpX_resultant(T, g, p); /* Ng = g^q */
     if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
     t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     for (i = 1; i < j; i++)
