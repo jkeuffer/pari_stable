@@ -919,6 +919,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   if (typ(*s0)==t_COMPLEX && gcmp0(gel(*s0,2))) *s0 = gel(*s0,1);
   s = *s0;
   l = precision(s); if (!l) l = *prec;
+  if (l < 3) l = 3;
 
   if (typ(s) == t_COMPLEX)
   { /* s = sig + i t */
