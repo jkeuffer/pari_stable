@@ -57,7 +57,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
    43- clean up version handling: move version setting code to config/version
        and always set PARIVERSION from CHANGES if 'CVS' [ used to require
        a 'Configure' ]
-   44- zeta(0e1) --> SEGV [#627]
+   44- zeta(0e1) --> SEGV [#627], exp(0e1*I) --> SEGV [#630]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -92,6 +92,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    22- padic sqrt much faster [ small and large accuracies ]
    23- let primes() indicate a value of primelimit if unable to answer [#625]
    24- remove variable names from ?0
+   25- exp(0e10) returned 1.000, made it 0exxx [ no significant digit ]
 
   Added
     1- library functions expu, adduu, subuu

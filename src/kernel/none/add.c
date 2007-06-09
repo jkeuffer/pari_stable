@@ -117,7 +117,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
     l = ly - (e>>TWOPOTBITS_IN_LONG);
     if (l < 3) return rcopy_sign(y, sy);
   }
-  else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
+  else l = ly + nbits2nlong(-e);
   z = (GEN)avma;
   y = addrr_sign(itor(x,l), sx, y, sy);
   ly = lg(y); while (ly--) *--z = y[ly];
@@ -146,7 +146,7 @@ addsr_sign(long x, GEN y, long sy)
     l = ly - (e>>TWOPOTBITS_IN_LONG);
     if (l < 3) return rcopy_sign(y, sy);
   }
-  else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
+  else l = ly + nbits2nlong(-e);
   z = (GEN)avma;
   y = addrr_sign(stor(x,l), sx, y, sy);
   ly = lg(y); while (ly--) *--z = y[ly];

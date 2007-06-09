@@ -1387,9 +1387,8 @@ mpexp(GEN x)
   GEN a, z;
 
   if (!sx) {
-    l = nbits2prec(-expo(x));
-    if (l < 3) l = 3;
-    return real_1(l);
+    long e = expo(x);
+    return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
   }
 
   l = lg(x);
@@ -2249,7 +2248,7 @@ mpsincos(GEN x, GEN *s, GEN *c)
   {
     long e = expo(x);
     *s = real_0_bit(e);
-    *c = real_1(3 + ((-e) >> TWOPOTBITS_IN_LONG));
+    *c = e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
     return;
   }
 

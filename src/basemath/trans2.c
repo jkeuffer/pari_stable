@@ -369,8 +369,7 @@ mpch(GEN x)
 
   if (!signe(x)) { /* 1 + x */
     long e = expo(x);
-    if (e > 0) return real_0_bit(e);
-    return real_1(3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    return e >= 0? real_0_bit(e): real_1(nbits2prec(-e));
   }
   av = avma;
   z = mpexp(x); z = addrr(z, ginv(z)); setexpo(z, expo(z)-1);
