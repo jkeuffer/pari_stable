@@ -1997,6 +1997,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       x = subrr(x, mulir(q, Pi2n(-1, lg(x)+1))); /* x mod Pi/2  */
       a = expo(x);
+      if (!signe(x) && a >= 0) pari_err(precer,"mpsc1");
       n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
@@ -2290,9 +2291,9 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      *s = gtofp(x, prec);
+      *s = cgetr(prec);
       *c = cgetr(prec); av = avma;
-      mpsincos(*s, &ps, &pc);
+      mpsincos(tofp_safe(x, prec), &ps, &pc);
       affr_fixlg(ps,*s);
       affr_fixlg(pc,*c); avma = av; return;
 

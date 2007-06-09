@@ -58,6 +58,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
        and always set PARIVERSION from CHANGES if 'CVS' [ used to require
        a 'Configure' ]
    44- zeta(0e1) --> SEGV [#627], exp(0e1*I) --> SEGV [#630]
+   45- exp(2^200*I) --> catastrophic cancellation [cos/sin were OK] [#631]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
