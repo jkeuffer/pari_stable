@@ -106,6 +106,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
     7- library function Fp_sqr, padicsqrtlift
     7- library function RgXQ_inv
     8- bench 'extract'
+    9- charpoly: Berkowitz division-free algorithm (new default) [#541]
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
