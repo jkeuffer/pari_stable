@@ -314,8 +314,10 @@ cleandesc:
 
 clean: cleanobj cleantest cleandesc
 
+# sleep 3 to avoid problems with NFS and slightly out of synch
+# fileserver/host. We are recompiling everything anyway.
 .headers: $HEADERS
-	@touch \$@
+	@sleep 3; touch \$@
 
 install: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg install-data
 
