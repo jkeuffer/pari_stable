@@ -828,6 +828,11 @@ sub basic_subst {
   s/\\kbdsidx/\\sidx/g;
   s/\\sidx\{[^\}]*\}//g unless $to_pod;
   s/\\[a-zA-Z]*idx\{([^\}]*)\}/$1/g unless $to_pod;
+  s/{\\text{(st|nd|th)}}/\\text{$1}/g;
+  s/\^\\text{th}/-th/g;
+  s/1\^\\text{st}/1st/g;
+  s/2\^\\text{st}/2nd/g;
+
   s/\\(text|hbox|Big)//g;
   s/^([ \t]+)\{ *\\(it|sl|bf|tt)\b/S<$1>{\\$2/gm;
   s/\{ *\\(it|sl) *(([^{}]+(?=[{}])|\{[^{}]*\})*)\}/$tr{startit}$2$tr{endit}/g;
