@@ -1396,7 +1396,7 @@ gp_read_line(filtre_t *F, char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
   int res;
-  if (compatible == OLDALL) F->downcase = 1;
+  F->downcase = (compatible == OLDALL);
   if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
   {
