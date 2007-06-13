@@ -38,7 +38,8 @@ polchebyshev1(long n, long v) /* Assume 4*n < VERYBIGINT */
   GEN q,a,r;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in polchebyshev2");
+  /* polchebyshev(-n,1) = polchebyshev(n,1) */
+  if (n < 0) n = -n;
   if (n==0) return pol_1(v);
   if (n==1) return pol_x(v);
 
@@ -74,13 +75,15 @@ polchebyshev1(long n, long v) /* Assume 4*n < VERYBIGINT */
 GEN
 polchebyshev2(long n, long v)
 {
-  long m;
   pari_sp av;
-  GEN q,a,r;
+  GEN q, a, r;
+  long m;
+  int neg = 0;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in polchebyshev2");
-  if (n==0) return pol_1(v);
+  /* polchebyshev(-n,2) = -polchebyshev(n-2,2) */
+  if (n < 0) { neg = 1; n = -n-2; }
+  if (n==0) return neg ? scalarpol(gen_m1, v): pol_1(v);
 
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n);
@@ -91,7 +94,7 @@ polchebyshev2(long n, long v)
     {
       av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m*(n-m+1));
-      togglesign(a);
+      if (!neg) togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -101,7 +104,7 @@ polchebyshev2(long n, long v)
       av = avma;
       a = muliu(muliu(a, n-2*m+2), n-2*m+1);
       a = diviuexact(diviuexact(a, 4*m), n-m+1);
-      togglesign(a);
+      if (!neg) togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -170,7 +173,8 @@ pollegendre(long n, long v)
   GEN p0, p1, p2;
 
   if (v<0) v = 0;
-  if (n < 0) pari_err(talker,"negative degree in pollegendre");
+  /* pollegendre(-n) = pollegendre(n-1) */
+  if (n < 0) n = -n-1;
   if (n==0) return pol_1(v);
   if (n==1) return pol_x(v);
 

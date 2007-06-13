@@ -95,6 +95,7 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
    23- let primes() indicate a value of primelimit if unable to answer [#625]
    24- remove variable names from ?0
    25- exp(0e10) returned 1.000, made it 0exxx [ no significant digit ]
+MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
 
   Added
     1- library functions expu, adduu, subuu
