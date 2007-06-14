@@ -494,15 +494,14 @@ gequal(GEN x, GEN y)
       case t_REAL:
         return cmprr(x,y) == 0;
 
+      case t_FRAC: case t_INTMOD:
+	return equalii(gel(x,2), gel(y,2)) && equalii(gel(x,1), gel(y,1));
+      
+      case t_COMPLEX: case t_POLMOD: 
+	return gequal(gel(x,2),gel(y,2)) && gequal(gel(x,1),gel(y,1));
+
       case t_POL:
         return polegal(x,y);
-
-      case t_COMPLEX:
-	return gequal(gel(x,1),gel(y,1)) && gequal(gel(x,2),gel(y,2));
-
-      case t_INTMOD: case t_POLMOD:
-	return gequal(gel(x,2),gel(y,2))
-            && (x[1]==y[1] || gequal(gel(x,1),gel(y,1)));
 
       case t_FFELT:
         return FF_equal(x,y);
@@ -518,10 +517,6 @@ gequal(GEN x, GEN y)
 	return gequal(gel(x,1),gel(y,1))
 	    && gequal(gel(x,2),gel(y,2))
 	    && gequal(gel(x,3),gel(y,3));
-
-      case t_FRAC:
-	return equalii(gel(x,1), gel(y,1))
-            && equalii(gel(x,2), gel(y,2));
 
       case t_RFRAC:
 	av=avma; i=gequal(gmul(gel(x,1),gel(y,2)),gmul(gel(x,2),gel(y,1)));
