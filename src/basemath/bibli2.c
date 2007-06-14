@@ -82,11 +82,15 @@ polchebyshev2(long n, long v)
 
   if (v<0) v = 0;
   /* polchebyshev(-n,2) = -polchebyshev(n-2,2) */
-  if (n < 0) { neg = 1; n = -n-2; }
+  if (n < 0) { 
+    if (n == -1) return zeropol(v);
+    neg = 1; n = -n-2;
+  }
   if (n==0) return neg ? scalarpol(gen_m1, v): pol_1(v);
 
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n);
+  if (neg) togglesign(a);
   gel(r--,0) = a;
   gel(r--,0) = gen_0;
   if (n < SQRTVERYBIGINT)
