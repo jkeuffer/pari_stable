@@ -98,7 +98,7 @@ polchebyshev2(long n, long v)
     {
       av = avma;
       a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m*(n-m+1));
-      if (!neg) togglesign(a);
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
@@ -108,7 +108,7 @@ polchebyshev2(long n, long v)
       av = avma;
       a = muliu(muliu(a, n-2*m+2), n-2*m+1);
       a = diviuexact(diviuexact(a, 4*m), n-m+1);
-      if (!neg) togglesign(a);
+      togglesign(a);
       gel(r--,0) = gerepileuptoint(av, a);
       gel(r--,0) = gen_0;
     }
