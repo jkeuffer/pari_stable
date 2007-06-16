@@ -11,5 +11,8 @@ Description:
 Doc: $x$ must be an integer mod $n$, and the
  result is the order of $x$ in the multiplicative group $(\Z/n\Z)^*$. Returns
  an error if $x$ is not invertible. If optional parameter $o$ is given it is
- assumed to be a multiple of the order (used to limit the search space).
+ assumed to be a multiple of the order, used to limit the search space; $o$
+ may be given as a factorization matrix, which is especially useful if many
+ orders are to be computed for the same $n$: $\phi(n)$ need only be factored
+ once.
 Variant: Also available is \fun{GEN}{order}{GEN x}.

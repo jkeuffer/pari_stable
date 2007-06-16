@@ -1929,18 +1929,61 @@ Fp_order(GEN a, GEN o, GEN p)
   return gen_eltorder(a, o, (void*)p, &Fp_star);
 }
 
+/* return order of a mod p^e, e > 0, pe = p^e */
+static GEN
+Zp_order(GEN a, GEN p, long e, GEN pe)
+{
+  GEN ap, op;
+  if (equalii(p, gen_2))
+  {
+    if (e == 1) return gen_1;
+    if (e == 2) return mod4(a) == 1? gen_1: gen_2;
+    if (mod4(a) == 1)
+      op = gen_1;
+    else {
+      op = gen_2;
+      a = Fp_sqr(a, pe);
+    }
+  } else {
+    ap = (e == 1)? a: resii(a,p);
+    op = Fp_order(ap, subis(p,1), p);
+    if (e == 1) return op;
+    a = Fp_pow(a, op, pe); /* 1 mod p */
+  }
+  if (is_pm1(a)) return op;
+  return mulii(op, gpowgs(p, e - Z_pval(subis(a,1), p)));
+}
+
 GEN
 znorder(GEN x, GEN o)
 {
   pari_sp av = avma;
   GEN b = gel(x,1), a = gel(x,2);
+  long to;
 
   if (typ(x) != t_INTMOD || !gcmp1(gcdii(a,b)))
     pari_err(talker,"not an element of (Z/nZ)* in order");
   if (!o)
-    return gerepileuptoint(av, Fp_order(a, phi(b), b));
-  else if (typ(o) != t_INT)
-    pari_err(arither1);
+  {
+    GEN fa = Z_factor(b), P = gel(fa,1), E = gel(fa,2);
+    long i, l = lg(P);
+    o = gen_1;
+    for (i = 1; i < l; i++)
+    {
+      GEN p = gel(P,i);
+      long e = itos(gel(E,i));
+
+      if (l == 2)
+        o = Zp_order(a, p, e, b);
+      else {
+        GEN pe = gpowgs(p,e);
+        o = lcmii(o, Zp_order(resii(a,pe), p, e, pe));
+      }
+    }
+    return gerepileuptoint(av, o);
+  }
+  to = typ(o);
+  if (to != t_INT && to != t_MAT) pari_err(arither1);
   return Fp_order(a, o, b);
 }
 GEN
