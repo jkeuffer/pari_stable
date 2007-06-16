@@ -981,6 +981,63 @@ factor_pn_1(GEN p, long n)
   return gerepilecopy(av, A);
 }
 
+#if 0
+static GEN
+to_mat(GEN p, long e) {
+  GEN B = cgetg(3, t_MAT);
+  gel(B,1) = mkcol(p);
+  gel(B,2) = mkcol(utoipos(e)); return B;
+}
+/* factor phi(n) */
+GEN
+factor_phi(GEN n)
+{
+  pari_sp av = avma;
+  GEN B = NULL, A, P, E, AP, AE;
+  long i, l, v = vali(n);
+
+  l = lg(n);
+  /* result requires less than this: at most expi(n) primes */
+  (void)new_chunk(bit_accuracy(l) * (l /*p*/ + 3 /*e*/ + 2 /*vectors*/) + 3+2);
+  if (v) { n = shifti(n, -v); v--; }
+  A = Z_factor(n); P = gel(A,1); E = gel(A,2); l = lg(P);
+  for(i = 1; i < l; i++)
+  {
+    GEN p = gel(P,i), q = subis(p,1), fa;
+    long e = itos(gel(E,i)), w;
+
+    w = vali(q); v += w; q = shifti(q,-w);
+    if (! is_pm1(q))
+    {
+      fa = Z_factor(q);
+      B = B? merge_factor(B, fa, (void*)&cmpii, cmp_nodata): fa;
+    }
+    if (e > 1) {
+      if (B) {
+        gel(B,1) = shallowconcat(gel(B,1), p);
+        gel(B,2) = shallowconcat(gel(B,2), utoipos(e-1));
+      } else
+        B = to_mat(p, e-1);
+    }
+  }
+  avma = av;
+  if (!B) return v? to_mat(gen_2, v): trivfact();
+  A = cgetg(3, t_MAT);
+  P = gel(B,1); E = gel(B,2); l = lg(P);
+  AP = cgetg(l+1, t_COL); gel(A,1) = AP; AP++;
+  AE = cgetg(l+1, t_COL); gel(A,2) = AE; AE++;
+  /* prepend "2^v" */
+  gel(AP,0) = gen_2;
+  gel(AE,0) = utoipos(v);
+  for (i = 1; i < l; i++)
+  {
+    gel(AP,i) = icopy(gel(P,i));
+    gel(AE,i) = icopy(gel(E,i));
+  }
+  return A;
+}
+#endif
+
 /***********************************************************************/
 /**                                                                   **/
 /**                    BASIC ARITHMETIC FUNCTIONS                     **/
