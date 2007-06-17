@@ -154,6 +154,8 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
   {
     m = o;
     o = factorback(m,NULL);
+    if (typ(o) != t_INT)
+      pari_err(talker, "incorrect order in gen_eltorder: %Z", o);
   }
   else
     m = Z_factor(o);
