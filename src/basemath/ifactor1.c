@@ -3218,7 +3218,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
         }
         continue;
       }
-      if (BSW_psp(gel(scan,0))) {
+      if (BSW_psp_nosmalldiv(gel(scan,0))) {
         gel(scan,2) = gen_2; /* P_i, finished prime */
         if (DEBUGLEVEL>=3) fprintferr("IFAC: factor %Z\n\tis prime\n", *scan);
       } else { /* composite */
@@ -3231,7 +3231,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
   for (; scan >= *where; scan -= 3)
   {
     if (gel(scan,2)) continue;
-    if (BSW_psp(gel(scan,0))) {
+    if (BSW_psp_nosmalldiv(gel(scan,0))) {
       gel(scan,2) = gen_1; /* Q_j, unfinished prime */
       if (DEBUGLEVEL>=3) fprintferr("IFAC: factor %Z\n\tis prime\n", *scan);
     } else {
@@ -3321,22 +3321,20 @@ ifac_crack(GEN *partial, GEN *where)
 {
   long cmp_res, exp1 = 1, hint = get_hint(partial);
   pari_sp av;
-  GEN factor = NULL, exponent;
+  GEN factor = NULL, exponent = gel(*where,1);
 
 #ifdef IFAC_DEBUG
-  long lgp;
   if (!*partial || typ(*partial) != t_VEC)
     pari_err(typeer, "ifac_crack");
-  if ((lgp = lg(*partial)) < ifac_initial_length)
+  if (lg(*partial) < ifac_initial_length)
     pari_err(talker, "partial impossibly short in ifac_crack");
-  if (!(*where) || *where < *partial + 6 || *where > *partial + lgp - 3)
+  if (!(*where) || *where < *partial + 6 || *where > *partial+lg(*partial)-3)
     pari_err(talker, "`*where\' out of bounds in ifac_crack");
   if (!(**where) || typ(**where) != t_INT)
     pari_err(typeer, "ifac_crack");
   if (gel(*where,2) != gen_0)
     pari_err(talker, "operand not known composite in ifac_crack");
 #endif
-  exponent = gel(*where,1);
 
   if (DEBUGLEVEL >= 3) {
     fprintferr("IFAC: cracking composite\n\t%Z\n", **where);
@@ -3678,7 +3676,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 {
   GEN res, here = ifac_main(partial);
 
-  if (here == gen_1) { *exponent = 0; return gen_1; }
+  if      (here == gen_1) { *exponent = 0; return gen_1; }
   else if (here == gen_0) { *exponent = 0; return gen_0; }
 
   res = icopy(gel(here,0));

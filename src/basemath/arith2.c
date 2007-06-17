@@ -700,22 +700,21 @@ static const long decomp_default_hint = 0;
 
 /* where to stop trial dividing in factorization */
 static ulong
-default_bound(GEN n, ulong all)
+default_bound(GEN n)
 {
-  ulong l;
-  if (all > 1) return all; /* use supplied limit */
-  if (!all) return ~0UL; /* smallfact() case */
-  l = (ulong)expi(n) + 1;
+  ulong l = (ulong)expi(n) + 1;
   if (l <= 32)  return 1UL<<14;
   if (l <= 512) return (l-16) << 10;
   return 1UL<<19; /* Rho is generally faster above this */
 }
+
 static ulong
-tridiv_bound(GEN n, ulong all)
+tridiv_bound(GEN n)
 {
-  ulong p = maxprime(), l = default_bound(n, all);
+  ulong p = maxprime(), l = default_bound(n);
   return min(p, l);
 }
+
 static ulong
 utridiv_bound(ulong n)
 {
@@ -776,7 +775,12 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     av = avma; affii(shifti(n,-i), n); avma = av;
   }
   if (is_pm1(n)) return aux_end(n,nb);
-  lim = tridiv_bound(n, all);
+
+  /* trial division bound */
+  p = maxprime();
+  if (!all) lim = p; /* smallfact() */
+  else if (all > 1) lim = min(all, p); /* use supplied limit */
+  else { lim = tridiv_bound(n); if (lim > p) lim = p; }
 
   /* trial division */
   p = 2;
@@ -812,9 +816,27 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
       }
     }
 
-  if (all != 1) hint = 15; /* smallfact: turn off all except pure powers */
-  else /* else test primality */
-    if (BSW_psp(n)) { STOREi(n, 1); return aux_end(n,nb); }
+  if (all != 1)
+  { /* smallfact: look for easy pure powers then stop. Cf isanypower */
+    GEN x = n, y;
+    ulong mask = 7, ex0 = 11;
+    long ex, k = 1;
+    av = avma;
+    while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
+    while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+    /* stop when x^(1/k) < 2^14 */
+    while ( (ex = is_odd_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
+    if (k > 1) affii(x, n);
+    avma = av; STOREi(n, k);
+    if (DEBUGLEVEL >= 2) {
+      pari_warn(warner, "IFAC: untested integer declared prime");
+      fprintferr("\t%Z\n", n);
+    }
+    return aux_end(n,nb);
+  }
+
+  /* test primality */
+  if (BSW_psp_nosmalldiv(n)) { STOREi(n, 1); return aux_end(n,nb); }
 
   /* now we have a large composite */
   if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/
@@ -1080,7 +1102,7 @@ mu(GEN n)
   if (p == 2) { s = -1; n = shifti(n, -1); } else { s = 1; n = icopy(n); }
   setsigne(n, 1);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1091,7 +1113,7 @@ mu(GEN n)
     if (v) s = -s;
     if (stop) { avma = av; return is_pm1(n)? s: -s; }
   }
-  if (BSW_psp(n)) { avma=av; return -s; }
+  if (BSW_psp_nosmalldiv(n)) { avma=av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n, decomp_default_hint);
   avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
@@ -1114,7 +1136,7 @@ Z_issquarefree(GEN x)
   x = (p == 2)? shifti(x, -1): icopy(x); 
   setsigne(x, 1);
 
-  lim = tridiv_bound(x,1);
+  lim = tridiv_bound(x);
   p = 2;
   while (p < lim)
   {
@@ -1124,7 +1146,7 @@ Z_issquarefree(GEN x)
     if (v > 1) { avma = av; return 0; }
     if (stop) { avma = av; return 1; }
   }
-  if (BSW_psp(x)) { avma = av; return 1; }
+  if (BSW_psp_nosmalldiv(x)) { avma = av; return 1; }
   v = ifac_issquarefree(x, decomp_default_hint);
   avma = av; return v;
 }
@@ -1163,7 +1185,7 @@ omega(GEN n)
   if (is_pm1(n)) return nb;
   setsigne(n, 1);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1173,7 +1195,7 @@ omega(GEN n)
     if (v) nb++;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
   }
-  if (BSW_psp(n)) { avma = av; return nb+1; }
+  if (BSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
   /* large composite without small factors */
   nb += ifac_omega(n, decomp_default_hint);
   avma = av; return nb;
@@ -1195,7 +1217,7 @@ bigomega(GEN n)
   if (is_pm1(n)) { avma = av; return nb; }
   setsigne(n, 1);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1205,7 +1227,7 @@ bigomega(GEN n)
     nb += v;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
   }
-  if (BSW_psp(n)) { avma = av; return nb+1; }
+  if (BSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
   nb += ifac_bigomega(n, decomp_default_hint);
   avma = av; return nb;
 }
@@ -1263,7 +1285,7 @@ phi(GEN n)
   m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1280,7 +1302,7 @@ phi(GEN n)
       return gerepileuptoint(av,m);
     }
   }
-  if (BSW_psp(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
+  if (BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
   m = mulii(m, ifac_totient(n, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1302,7 +1324,7 @@ numbdiv(GEN n)
   m = utoipos(v+1);
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1316,7 +1338,7 @@ numbdiv(GEN n)
       return gerepileuptoint(av,m);
     }
   }
-  if(BSW_psp(n)) return gerepileuptoint(av, shifti(m,1));
+  if(BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, shifti(m,1));
   m = mulii(m, ifac_numdiv(n, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1338,7 +1360,7 @@ sumdiv(GEN n)
   m = v ? addsi(-1, int2n(v+1)) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2; av2 = avma; limit = stack_lim(av2,3);
   while (p < lim)
   {
@@ -1363,7 +1385,7 @@ sumdiv(GEN n)
       return gerepileuptoint(av, m);
     }
   }
-  if(BSW_psp(n)) return gerepileuptoint(av, mulii(m,addsi(1,n)));
+  if(BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m,addsi(1,n)));
   m = mulii(m, ifac_sumdiv(n, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1391,7 +1413,7 @@ sumdivk(GEN n, long k)
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
 
-  lim = tridiv_bound(n,1);
+  lim = tridiv_bound(n);
   p = 2; av2 = avma; limit = stack_lim(av2,3);
   while (p < lim)
   {
@@ -1416,7 +1438,7 @@ sumdivk(GEN n, long k)
       goto fin;
     }
   }
-  if (BSW_psp(n)) { m = mulii(m, addsi(1, powiu(n,k))); goto fin; }
+  if (BSW_psp_nosmalldiv(n)) { m = mulii(m, addsi(1, powiu(n,k))); goto fin; }
   m = mulii(m, ifac_sumdivk(n, k, decomp_default_hint));
  fin:
   if (k1 < 0) m = gdiv(m, powiu(n1,k));
