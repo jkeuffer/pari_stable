@@ -62,6 +62,7 @@ LGr28- killing hi-res graphic window created zombie process (missing wait())
 DE 46- on NFS filesystems, make install would rebuild all [#503]
    47- default(compatible,3); default(compatible,1) --> case no longer taken
        into account [#629]
+   48- missing GC in 'sigma'
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

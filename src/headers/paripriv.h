@@ -806,6 +806,8 @@ GEN     ifac_start(GEN n, long moebius, long hint);
 GEN     pollardbrent(GEN n);
 ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
 GEN     squfof(GEN n);
+int     uisprime_nosmalldiv(ulong n);
+long    BSW_psp_nosmalldiv(GEN N);
 
 /* init.c */
 

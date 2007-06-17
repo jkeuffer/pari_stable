@@ -432,7 +432,7 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
        prime differences (starting from (5-3)=2) start at known_primes[2],
        are terminated by a 0 byte;
 
-       Checks cnt odd numbers starting at `start', setting bytes
+       Checks cnt odd numbers starting at 'start', setting bytes
        starting at data to 0 or 1 depending on whether the
        corresponding odd number is prime or not */
     ulong p;
@@ -716,6 +716,19 @@ tridiv_bound(GEN n, ulong all)
   ulong p = maxprime(), l = default_bound(n, all);
   return min(p, l);
 }
+static ulong
+utridiv_bound(ulong n)
+{
+#ifdef LONG_IS_64BIT
+  if (n & HIGHMASK)
+  {
+    ulong p = maxprime(), l;
+    l = ((ulong)expu(n) + 1 - 16) << 10;
+    return min(p, l);
+  }
+#endif
+  return 1UL<<14;
+}
 
 static GEN
 aux_end(GEN n, long nb)
@@ -846,8 +859,8 @@ auxdecomp(GEN n, long all)
   return auxdecomp1(n,NULL,NULL, all,decomp_default_hint);
 }
 
-/* see before ifac_crack() in ifactor1.c for current semantics of `hint'
-   (factorint's `flag') */
+/* see before ifac_crack() in ifactor1.c for current semantics of 'hint'
+   (factorint's 'flag') */
 GEN
 factorint(GEN n, long flag)
 {
@@ -1213,7 +1226,7 @@ phiu(ulong n)
   m = v > 1 ? 1 << (v-1) : 1;
   if (n == 1) return m;
 
-  lim = maxprime();
+  lim = utridiv_bound(n);
   p = 2;
   while (p < lim)
   {
@@ -1229,7 +1242,7 @@ phiu(ulong n)
       return m;
     }
   }
-  if (uisprime(n)) return m*(n-1);
+  if (uisprime_nosmalldiv(n)) return m*(n-1);
   av = avma;
   m *= itou( ifac_totient(utoipos(n), decomp_default_hint) );
   avma = av; return m;
@@ -1315,7 +1328,7 @@ GEN
 sumdiv(GEN n)
 {
   byteptr d = diffptr+1;
-  pari_sp av = avma;
+  pari_sp av = avma, av2, limit;
   GEN m;
   ulong p, lim;
   long v;
@@ -1326,7 +1339,7 @@ sumdiv(GEN n)
   if (is_pm1(n)) return gerepileuptoint(av,m);
 
   lim = tridiv_bound(n,1);
-  p = 2;
+  p = 2; av2 = avma; limit = stack_lim(av2,3);
   while (p < lim)
   {
     int stop;
@@ -1338,6 +1351,11 @@ sumdiv(GEN n)
       long i;
       for (i = 1; i < v; i++) m1 = addsi(1, mului(p,m1));
       m = mulii(m1,m);
+    }
+    if (low_stack(limit, stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
+      m = gerepileuptoint(av2, m);
     }
     if (stop)
     {
@@ -1357,7 +1375,7 @@ GEN
 sumdivk(GEN n, long k)
 {
   byteptr d = diffptr+1;
-  pari_sp av = avma;
+  pari_sp av = avma, av2, limit;
   GEN n1, m;
   ulong p, lim;
   long k1,v;
@@ -1374,7 +1392,7 @@ sumdivk(GEN n, long k)
   if (is_pm1(n)) goto fin;
 
   lim = tridiv_bound(n,1);
-  p = 2;
+  p = 2; av2 = avma; limit = stack_lim(av2,3);
   while (p < lim)
   {
     int stop;
@@ -1386,6 +1404,11 @@ sumdivk(GEN n, long k)
       GEN pk = powuu(p,k), m1 = addsi(1,pk);
       for (i = 1; i < v; i++) m1 = addsi(1, mulii(pk,m1));
       m = mulii(m1,m);
+    }
+    if (low_stack(limit, stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"sumdiv");
+      m = gerepileuptoint(av2, m);
     }
     if (stop)
     {
