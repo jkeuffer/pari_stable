@@ -260,6 +260,7 @@ int   miller(GEN n, long k);
 GEN   mpqs(GEN N);
 ulong ugcd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
+long  u_lvalrem_stop(ulong *n, ulong p, int *stop);
 
 /* blackbox group */
 

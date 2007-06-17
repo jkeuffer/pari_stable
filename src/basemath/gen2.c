@@ -805,6 +805,18 @@ isless_iu(GEN q, ulong p) {
   return l==2 || (l == 3 && (ulong)q[2] <= p);
 }
 
+long
+u_lvalrem_stop(ulong *n, ulong p, int *stop)
+{
+  ulong N = *n, q = N / p, r = N % p; /* gcc makes a single div */
+  long v = 0;
+  if (!r)
+  {
+    do { v++; N = q; q = N / p; r = N % p; } while (!r);
+    *n = N;
+  }
+  *stop = q <= p; return v;
+}
 /* Assume n > 0. Return v_p(n), assign n := n/p^v_p(n). Set 'stop' if now
  * n < p^2 [implies n prime if no prime < p divides n] */
 long

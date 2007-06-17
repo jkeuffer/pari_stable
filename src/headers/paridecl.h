@@ -502,6 +502,7 @@ GEN     removeprimes(GEN primes);
 GEN     smallfact(GEN n);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
+ulong   phiu(ulong n);
 GEN     Z_factor(GEN n);
 
 /* base1.c */

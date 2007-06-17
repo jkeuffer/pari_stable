@@ -711,7 +711,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     n = cnd;
   }
   card = group_order(H);
-  phi_n= itos(phi(utoipos(n)));
+  phi_n= phiu(n);
   if ( card==phi_n )
   {
     avma=ltop;
@@ -820,7 +820,7 @@ factor_Aurifeuille(GEN p, long n)
 {
   pari_sp ltop = avma;
   long e, l, j;
-  long phi_n = itos(phi(stoi(n)));
+  long phi_n = phiu(n);
   GEN bound = ceil_safe(gpowgs(addrs(gsqrt(p,3),1),phi_n));
   GEN zl = polsubcyclo_start(n, 0, 0, bound, &e, &l);
   GEN f, a, b, le = gel(zl,1), z = gel(zl,2), s = z;

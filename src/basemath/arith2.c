@@ -1200,6 +1200,41 @@ bigomega(GEN n)
 GEN
 gphi(GEN n) { return garith_proto(phi,n,1); }
 
+ulong
+phiu(ulong n)
+{
+  byteptr d = diffptr+1;
+  pari_sp av;
+  ulong p, lim, m;
+  long v;
+
+  if (n == 1) return 1;
+  v = vals(n); n >>= v;
+  m = v > 1 ? 1 << (v-1) : 1;
+  if (n == 1) return m;
+
+  lim = maxprime();
+  p = 2;
+  while (p < lim)
+  {
+    int stop;
+    NEXT_PRIME_VIADIFF(p,d);
+    v = u_lvalrem_stop(&n, p, &stop);
+    if (v) {
+      m *= p-1;
+      if (v > 1) m *= upowuu(p, v-1);
+    }
+    if (stop) { 
+      if (n != 1) m *= n-1;
+      return m;
+    }
+  }
+  if (uisprime(n)) return m*(n-1);
+  av = avma;
+  m *= itou( ifac_totient(utoipos(n), decomp_default_hint) );
+  avma = av; return m;
+}
+
 GEN
 phi(GEN n)
 {
@@ -1209,7 +1244,8 @@ phi(GEN n)
   ulong p, lim;
   long v;
 
-  chk_arith(n); if (is_pm1(n)) return gen_1;
+  chk_arith(n);
+  if (lgefint(n) == 3) return utoipos(phiu((ulong)n[2]));
   v = vali(n); n = shifti(n,-v); setsigne(n, 1);
   m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);
