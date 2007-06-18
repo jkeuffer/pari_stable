@@ -2906,9 +2906,9 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 	  {
 	    /* GN20050707:
 	     * on-stack contents of RES must be rejuvenated */
-	    icopyifstack(res[i1], RES[i1]); /* factors */
-	    if (res[res_size+i1])
-	      icopyifstack(res[res_size+i1], RES[size+i1]);
+	    icopyifstack(gel(res,i1), gel(RES,i1)); /* factors */
+	    if ( gel(res,res_size+i1) )
+	      icopyifstack(gel(res,res_size+i1), gel(RES,size+i1));
 	    /* primality tags */
 	  }
 	  res = RES; res_size = size;   /* res_next unchanged */
@@ -2957,10 +2957,10 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
       for (i1=2*res_size; i1>=res_next; i1--) new_res[i1] = 0;
       for (i1=1; i1<res_next; i1++)
       {
-        icopyifstack(res[i1], new_res[i1]);
+        icopyifstack(gel(res,i1), gel(new_res,i1));
         /* GN20050707: the marker GENs might need rejuvenating, too */
-        if (res[res_size+i1])
-          icopyifstack(res[res_size+i1], new_res[res_size+i1]);
+        if (gel(res,res_size+i1))
+          icopyifstack(gel(res,res_size+i1), gel(new_res,res_size+i1));
       }
       res = gerepileupto(av2, new_res);
     }
@@ -2981,7 +2981,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   for (i=1,j=1; i <= res_last; i++)
   {
     GEN F = gel(res, res_size+i);
-    icopyifstack(res[i], new_res[j++]); /* factor */
+    icopyifstack(gel(res,i), gel(new_res,j++)); /* factor */
     gel(new_res,j++) = /* exponent */
       F ? (F == gen_0 ? gen_1
                       : (isonstack(F) ? icopy(F) : F))

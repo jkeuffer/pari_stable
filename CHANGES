@@ -101,6 +101,8 @@ BA  7- use factor_pn_1 to compute various orders in FF.c
 MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    27- znorder faster for non-prime modulus [ try it for Mod(2,5^10*7^10) ]
        (compute lcm of local p-adic orders)
+   28- changed icopyifstack / copyifstack macros so that their arguments
+       are GENs, not GENs typecast to long.
 
   Added
     1- library functions expu, adduu, subuu
