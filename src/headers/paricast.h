@@ -24,8 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define gmael3(m,x1,x2,x3)       (((GEN***)  (m))[x1][x2][x3])
 #define gmael4(m,x1,x2,x3,x4)    (((GEN****) (m))[x1][x2][x3][x4])
 #define gmael5(m,x1,x2,x3,x4,x5) (((GEN*****)(m))[x1][x2][x3][x4][x5])
-#define gmael gmael2
-#define gel   gmael1
+#define gmael(m,x,y) gmael2(m,x,y)
+#define gel(m,x)     gmael1(m,x)
 
 #define gcoeff(a,i,j) (((GEN**)(a))[j][i])
 #define coeff(a,i,j) (((GEN*)(a))[j][i])
