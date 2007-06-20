@@ -9,4 +9,9 @@ Description:
 Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
   latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
   odd prime and $k \geq 0$). If the group is not cyclic, the result is
-  undefined.
+  undefined. If $n$ is a prime, then the smallest positive primitive root is
+  returned. This is no longer true for composites.
+  
+  Note that this function requires factoring $n$ and $p-1$ for each prime
+  divisor $p$ of $n$, in order to determine the exact order of elements in
+  $(\Z/n\Z)^*$: this is likely to be very costly if $n$ is large.
