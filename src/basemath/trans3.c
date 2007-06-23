@@ -2046,13 +2046,69 @@ qq(GEN x, long prec)
   return x;
 }
 
+/* return (y * X^d) + x. Assume d > 0, x != 0, valp(x) = 0 */
+static GEN
+ser_addmulXn(GEN y, GEN x, long d)
+{
+  long i, lx, ly, l = valp(y) + d; /* > 0 */
+  GEN z;
+
+  lx = lg(x);
+  ly = lg(y) + l; if (lx < ly) ly = lx;
+  if (l > lx-2) return gcopy(x);
+  z = cgetg(ly,t_SER);
+  for (i=2; i<=l+1; i++) gel(z,i) = gel(x,i);
+  for (   ; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i-l));
+  z[1] = x[1]; return z;
+}
+
+static GEN
+inteta_pol(GEN q, long v, long l)
+{
+  pari_sp av = avma, lim = stack_lim(av, 3);
+  GEN qn, ps, y = pol_1(0);
+  ulong vps, vqn, n;
+
+  qn = gen_1; ps = gen_1;
+  vps = vqn = 0;
+  for(n = 0;; n++)
+  { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2), 
+     * vps, vqn valuation of ps, qn HERE */
+    ulong vp1 = vps + 2*vqn + v; /* valuation of p1 at END of loop body */
+    long k1, k2;
+    GEN p1, t;
+    vqn += v; vps = vp1 + vqn; /* valuation of qn, ps at END of body */
+    k1 = l-2 + v - vp1 + 1;
+    k2 = k1 - vqn; /* = l-2 + v - vps + 1 */
+    if (k1 <= 0) break;
+    t = gmul(q,gsqr(qn));
+    t = RgX_modXn_shallow(t, k1);
+    p1 = gneg_i(gmul(ps,t)); /* p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+    p1 = RgX_modXn_shallow(p1, k1);
+    y = addmulXn(p1, y, vp1);
+    if (k2 <= 0) break;
+    
+    qn = gmul(qn,q);
+    ps = gmul(p1,qn);
+    ps = RgX_modXn_shallow(ps, k2);
+    y = addmulXn(ps, y, vps);
+
+    if (low_stack(lim, stack_lim(av,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"eta");
+      gerepileall(av, 3, &y, &qn, &ps);
+    }
+  }
+  setvarn(y, varn(q)); return greffe(y, l+1, 1);
+}
+
 static GEN
 inteta(GEN q)
 {
-  long tx=typ(q);
-  GEN p1,ps,qn,y;
+  long tx = typ(q);
+  GEN p1, ps, qn, y;
 
-  y=gen_1; qn=gen_1; ps=gen_1;
+  y = gen_1; qn = gen_1; ps = gen_1;
   if (tx==t_PADIC)
   {
     if (valp(q) <= 0) pari_err(talker,"non-positive valuation in eta");
@@ -2064,15 +2120,53 @@ inteta(GEN q)
       y = gadd(y,ps); if (gequal(p1,y)) return y;
     }
   }
-  else
+
+  if (tx == t_SER)
   {
-    long l, v = 0; /* gcc -Wall */
+    ulong vps, vqn;
+    long l = lg(q), v, n;
+    pari_sp av, lim;
+ 
+    v = valp(q); /* handle valuation separately to avoid overflow */
+    if (v <= 0) pari_err(talker,"non-positive valuation in eta");
+    y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
+    n = degpol(y);
+//    if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
+
+    q = shallowcopy(q); av = avma; lim = stack_lim(av, 3);
+    setvalp(q, 0);
+    y = scalarser(gen_1, varn(q), l+v);
+    vps = vqn = 0;
+    for(n = 0;; n++)
+    { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2) */
+      ulong vp1 = vps + 2*vqn + v;
+      long k;
+      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      /* p1 = (-1)^(n+1) q^(n(3n+1)/2 + 2n+1) */
+      y = ser_addmulXn(p1, y, vp1);
+      qn = gmul(qn,q); ps = gmul(p1,qn);
+      vqn += v; vps = vp1 + vqn;
+      k = l+v - vps; if (k <= 2) return y;
+ 
+      y = ser_addmulXn(ps, y, vps);
+      setlg(q, k);
+      setlg(qn, k);
+      setlg(ps, k);
+      if (low_stack(lim, stack_lim(av,3)))
+      {
+        if(DEBUGMEM>1) pari_warn(warnmem,"eta");
+        gerepileall(av, 3, &y, &qn, &ps);
+      }
+    }
+  }
+  {
+    long l; /* gcc -Wall */
     pari_sp av = avma, lim = stack_lim(av, 3);
 
     if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
     else
     {
-      v = gvar(q); l = lg(q)-2; tx = 0;
+      l = lg(q)-2; tx = 0;
       if (valp(q) <= 0) pari_err(talker,"non-positive valuation in eta");
     }
     for(;;)
@@ -2086,7 +2180,7 @@ inteta(GEN q)
       if (tx)
         { if (gexpo(ps)-gexpo(y) < l) return y; }
       else
-        { if (gval(ps,v) >= l) return y; }
+        { if (valp(ps) >= l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
         if(DEBUGMEM>1) pari_warn(warnmem,"eta");
@@ -2100,8 +2194,9 @@ GEN
 eta(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN q = qq(x,prec);
-  return gerepileupto(av,inteta(q));
+  GEN z = inteta( qq(x,prec) );
+  if (typ(z) == t_SER) return gerepilecopy(av, z);
+  return gerepileupto(av, z);
 }
 
 /* sqrt(3)/2 */
