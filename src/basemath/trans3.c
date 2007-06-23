@@ -2131,7 +2131,7 @@ inteta(GEN q)
     if (v <= 0) pari_err(talker,"non-positive valuation in eta");
     y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
     n = degpol(y);
-//    if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
+    if (n == 1 || n < (l>>2)) return inteta_pol(y, v, l);
 
     q = shallowcopy(q); av = avma; lim = stack_lim(av, 3);
     setvalp(q, 0);
