@@ -1189,36 +1189,42 @@ GEN
 group_export_GAP(GEN G)
 {
   pari_sp ltop = avma;
-  GEN s, g = gel(G,1);
-  long i, l = lg(g);
+  GEN s, comma, g = gel(G,1);
+  long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("Group(())");
-  s = strtoGENstr("Group(");
+  s = cgetg(2*l, t_VEC); k = 2;
+  comma = strtoGENstr(", ");
+  gel(s,1) = strtoGENstr("Group(");
   for (i = 1; i < l; ++i)
   {
-    if (i > 1) s = shallowconcat(s, strtoGENstr(", "));
-    s = shallowconcat(s, perm_to_GAP(gel(g,i)));
+    if (i > 1) gel(s,k++) = comma;
+    gel(s,k++) = perm_to_GAP(gel(g,i));
   }
-  s = concat(s, strtoGENstr(")"));
-  return gerepileupto(ltop,s);
+  gel(s,k++) = strtoGENstr(")");
+  return gerepileuptoleaf(ltop, concat(s, NULL));
 }  
 
 GEN 
 group_export_MAGMA(GEN G)
 {
-  pari_sp ltop=avma;
-  GEN s, g = gel(G,1);
-  long i, l = lg(g);
+  pari_sp ltop = avma;
+  GEN s, comma, g = gel(G,1);
+  long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
-  s = strtoGENstr("PermutationGroup<");
-  s = shallowconcat(s, stoi(group_domain(G)));
-  s = shallowconcat(s, strtoGENstr("|"));
+  s = cgetg(2*l+2, t_VEC); k = 1;
+  gel(s,k++) = strtoGENstr("PermutationGroup<"); 
+  gel(s,k++) = strtoGENstr( itostr( stoi(group_domain(G)) ) );
+  gel(s,k++) = strtoGENstr("|"); comma = strtoGENstr(", ");
   for (i = 1; i < l; ++i)
   {
-    if (i > 1) s = shallowconcat(s, strtoGENstr(", "));
-    s = shallowconcat(s, vecsmall_to_vec(gel(g,i)));
+    char *t = GENtostr( vecsmall_to_vec(gel(g,i)) );
+    if (i > 1) gel(s,k++) = comma;
+    gel(s,k++) = strtoGENstr(t);
+    gpfree(t);
   }
-  s = concat(s, strtoGENstr(">"));
-  return gerepileupto(ltop,s);
+  gel(s,k++) = strtoGENstr(">");
+  s = concat(s, NULL);
+  return gerepileuptoleaf(ltop,s);
 }  
 
 GEN 
