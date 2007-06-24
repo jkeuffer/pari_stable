@@ -14,7 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* DO NOT REORDER THESE
- * actual values can be changed. Adapt lontyp/lontyp2 in gen2.c */
+ * actual values can be changed. Adapt lontyp in gen2.c */
 enum {
   t_INT    =  1,
   t_REAL   =  2,
