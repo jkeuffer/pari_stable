@@ -1839,11 +1839,17 @@ convi_dac(GEN x, ulong l, ulong *res)
 ulong *
 convi(GEN x, long *l)
 {
-  long lz = 3 + (long)((lgefint(x)-2) * BITS_IN_LONG * L2SL10 / 9);
-  ulong *z = (ulong*)new_chunk(lz);
+  long lz, lx = lgefint(x);
+  ulong *z;
+  if (lx == 3 && (ulong)x[2] < 1000000000UL) {
+    z = (ulong*)new_chunk(1);
+    *z = x[2];
+    *l = 1; return z+1;
+  }
+  lz = 1 + (long)bit_accuracy_mul(lx, L2SL10/9);
+  z = (ulong*)new_chunk(lz);
   convi_dac(x,(ulong)lz,z);
   while (z[lz-1]==0) lz--;
-  *l=lz;
-  return z+lz;
+  *l=lz; return z+lz;
 }
  

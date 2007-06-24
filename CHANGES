@@ -64,6 +64,7 @@ DE 46- on NFS filesystems, make install would rebuild all [#503]
        into account [#629]
    48- missing GC in 'sigma'
    49- eta(x): valuation would overflow if seriesprecision is large
+   50- typo in src/kernel/none/mp.c:convi --> inefficiency
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
