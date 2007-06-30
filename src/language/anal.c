@@ -858,6 +858,13 @@ fetch_user_var(char *s)
   return varn( initial_value(fetch_named_var(s)) );
 }
 
+GEN
+fetch_var_value(long vx)
+{
+  entree *ep = varentries[vx];
+  return (ep && ep->value)? (GEN)ep->value: NULL;
+}
+
 void
 delete_named_var(entree *ep)
 {

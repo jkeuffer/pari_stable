@@ -1481,6 +1481,12 @@ may use the lower level
 \noindent which returns an \kbd{entree*} suitable for inclusion in the
 interpreter hashlists of symbols.
 
+\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the current
+value of the variable numbered $v$. Returns \kbd{NULL} if that variable
+number is unknown to the interpreter,  e.g. it is a user variable. Note
+that this may not be the same as \kbd{pol\_x(v)} if assignments have been
+performed in the interpreter.
+
 \subsubsec{Temporary variables}\sidx{variable (temporary)}:
 \kbd{MAXVARN} is available, but is better left to pari internal functions
 (some of which do not check that \kbd{MAXVARN} is free for them to use,

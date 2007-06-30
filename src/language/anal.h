@@ -110,6 +110,8 @@ extern THREAD void *PARI_stack_limit;
 #define EpPREDEFINED(ep) (EpVALENCE(ep) < EpUSER)
 enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 
+extern entree  **varentries;
+
 /* defaults  */
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);

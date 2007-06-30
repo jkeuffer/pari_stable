@@ -315,6 +315,7 @@ long    delete_var(void);
 entree* fetch_named_var(char *s);
 long    fetch_user_var(char *s);
 long    fetch_var(void);
+GEN     fetch_var_value(long vx);
 GEN     gp_read_str(char *t);
 entree* install(void *f, char *name, char *code);
 entree* is_entry(const char *s);

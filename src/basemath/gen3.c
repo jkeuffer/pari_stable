@@ -3097,14 +3097,8 @@ geval(GEN x)
 
     case t_POL:
       lx=lg(x); if (lx==2) return gen_0;
-      {
-        long vx = varn(x);
-        entree *ep = varentries[vx];
-        if (!ep) return gcopy(x);
-        z = (GEN)ep->value;
-        if (degpol(x) == 1 && gequal(gel(x,2),gen_0) && gequal(gel(x,3),gen_1))
-          return gcopy(z);
-      }
+      z = fetch_var_value(varn(x));
+      if (!z) return gcopy(x);
       y=gen_0; av=avma;
       for (i=lx-1; i>1; i--)
         y = gadd(geval(gel(x,i)), gmul(z,y));

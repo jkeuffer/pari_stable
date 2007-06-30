@@ -79,7 +79,6 @@ extern pari_sp THREAD avma,bot,top;
 #define DISABLE_MEMUSED (size_t)-1
 extern size_t memused;
 extern byteptr diffptr;
-extern entree  **varentries;
 extern char    *errmessage[], *current_psfile, *pari_datadir;
 
 #define is_universal_constant(x) ((GEN)(x) >= gen_0 && (GEN)(x) <= gi)
