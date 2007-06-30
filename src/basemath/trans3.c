@@ -2099,7 +2099,7 @@ inteta_pol(GEN q, long v, long l)
       gerepileall(av, 3, &y, &qn, &ps);
     }
   }
-  setvarn(y, varn(q)); return greffe(y, l+1, 1);
+  setvarn(y, varn(q)); return greffe(y, l+v, 1);
 }
 
 static GEN
