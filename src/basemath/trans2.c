@@ -136,7 +136,7 @@ gatan(GEN x, long prec)
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) pari_err(negexper,"gatan");
-      if (lg(y)==2) return gcopy(y);
+      if (lg(y)==2) return gerepilecopy(av, y);
       /* lg(y) > 2 */
       a = integ(gdiv(derivser(y), gaddsg(1,gsqr(y))), varn(y));
       if (!valp(y)) a = gadd(a, gatan(gel(y,2),prec));
@@ -194,7 +194,7 @@ gasin(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gasin");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       /* lg(y) > 2*/
       if (valp(y) < 0) pari_err(negexper,"gasin");
       p1 = gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec));
@@ -391,7 +391,7 @@ gch(GEN x, long prec)
     case t_INTMOD: pari_err(typeer,"gch");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y) && valp(y) == 0) return gcopy(y);
+      if (gcmp0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
@@ -432,7 +432,7 @@ gsh(GEN x, long prec)
     case t_INTMOD: 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y) && valp(y) == 0) return gcopy(y);
+      if (gcmp0(y) && valp(y) == 0) return gerepilecopy(av, y);
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
   }
@@ -483,7 +483,7 @@ gth(GEN x, long prec)
     case t_INTMOD: pari_err(typeer,"gth");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       t = gexp(gmul2n(y, 1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
@@ -542,7 +542,7 @@ gash(GEN x, long prec)
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gash");
 
       p1 = gdiv(derivser(y), gsqrt(gaddsg(1,gsqr(y)),prec));
@@ -605,7 +605,7 @@ gach(GEN x, long prec)
       if (v < 0) pari_err(negexper,"gach");
       if (gcmp0(y))
       {
-        if (!v) return gcopy(y);
+        if (!v) return gerepilecopy(av, y);
         return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
       p1 = gdiv(derivser(y), gsqrt(gsubgs(gsqr(y),1),prec));

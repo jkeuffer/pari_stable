@@ -217,9 +217,8 @@ jbesselh(GEN n, GEN z, long prec)
 
     case t_PADIC: pari_err(impl,"p-adic jbesselh function");
     default:
-      av = avma;
-      if (!(y = toser_i(z))) break;
-      if (gcmp0(y)) return gpowgs(y,k);
+      av = avma; if (!(y = toser_i(z))) break;
+      if (gcmp0(y)) return gerepileupto(av, gpowgs(y,k));
       if (valp(y) < 0) pari_err(negexper,"jbesselh");
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
       p1 = gdiv(_jbesselh(k,y,prec),gpowgs(y,k));
@@ -1977,7 +1976,7 @@ gpolylog(long m, GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (!m) { avma = av; return mkfrac(gen_m1,gen_2); }
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       v = valp(y);
       if (v <= 0) pari_err(impl,"polylog around a!=0");
       n = (lg(y)-3 + v) / v;

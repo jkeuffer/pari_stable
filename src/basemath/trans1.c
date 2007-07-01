@@ -756,14 +756,15 @@ gpow(GEN x, GEN n, long prec)
     return y;
   }
   av = avma;
-  if (tx == t_POL || tx == t_RFRAC) { x = toser_i(x); tx = t_SER; }
-  if (tx == t_SER)
+  switch (tx)
   {
-    if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
-    if (valp(x))
-      pari_err(talker,"gpow: need integer exponent if series valuation != 0");
-    if (lg(x) == 2) return gcopy(x); /* O(1) */
-    return gerepileupto(av, ser_pow(x, n, prec));
+    case t_POL: case t_RFRAC: x = toser_i(x); /* fall through */
+    case t_SER:
+      if (tn == t_FRAC) return gerepileupto(av, ser_powfrac(x, n, prec));
+      if (valp(x))
+        pari_err(talker,"gpow: need integer exponent if series valuation != 0");
+      if (lg(x) == 2) return gerepilecopy(av, x); /* O(1) */
+      return gerepileupto(av, ser_pow(x, n, prec));
   }
   if (gcmp0(x))
   {
@@ -2162,7 +2163,7 @@ gcos(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gaddsg(1,y);
+      if (gcmp0(y)) return gerepileupto(av, gaddsg(1,y));
       if (valp(y) < 0) pari_err(negexper,"gcos");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,v);
@@ -2227,7 +2228,7 @@ gsin(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gsin");
       gsincos(y,&u,&v,prec);
       return gerepilecopy(av,u);
@@ -2319,7 +2320,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) { *c = gaddsg(1,y); *s = gcopy(y); return; }
+      if (gcmp0(y)) { *s = gerepilecopy(av,y); *c = gaddsg(1,*s); return; }
 
       ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
       if (ex < 0) pari_err(talker,"non zero exponent in gsincos");
@@ -2416,7 +2417,7 @@ gtan(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      if (gcmp0(y)) return gcopy(y);
+      if (gcmp0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gtan");
       gsincos(y,&s,&c,prec);
       return gerepileupto(av, gdiv(s,c));
