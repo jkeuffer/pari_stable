@@ -68,6 +68,7 @@ DE 46- on NFS filesystems, make install would rebuild all [#503]
    51- concat(v) used too much memory (quadratic in #v, make it linear) [#634]
 BA 52- gp -q -f < eval('y) --> SEGV
    53- "significant pointers lost" for objects involving 0 t_SERs [#635]
+   54- for trivial x, isanypower(x,&p) would not set p 
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

@@ -898,7 +898,10 @@ isanypower(GEN x, GEN *pty)
   ulong mask = 7, p = 0, ex0 = 11, e2;
 
   if (typ(x) != t_INT) pari_err(typeer, "isanypower");
-  if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
+  if (absi_cmp(x, gen_2) < 0) {
+    if (pty) *pty = icopy(x);
+    return 0; /* -1,0,1 */
+  }
   if (s < 0)
     x = absi(x);
   else
@@ -2091,6 +2094,7 @@ znlog(GEN x, GEN g)
       }
       g = gel(g,2);
       if (e == 2) {
+        if (equaliu(pk, 2)) return gen_0;
         pk = shifti(pk, -1);
         if (cmpii(g, pk) >= 0) g = subii(g, pk);
       }
