@@ -71,6 +71,7 @@ BA 52- gp -q -f < eval('y) --> SEGV
    54- for trivial x, isanypower(x,&p) would not set p 
 MSo55- [Configure] don't rely on $CC exit status, check whether a non-0 size
        executable is produced [ problems with tcc ]
+BA 56- wrong Prototype for subgrouplist [ extra 'p' ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
