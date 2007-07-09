@@ -9,13 +9,8 @@ for fun in $list; do
         *) _has_list="$_has_list has_$fun";;
       esac
       break
-    else
-      eval "has_$fun=no"; echo ..."I did not find $fun."
     fi
   fi;
-  case "$_has_list" in
-    *has_$fun*);;
-    *) _has_list="$_has_list has_$fun";;
-  esac
+  eval "has_$fun=no"; echo ..."I did not find $fun."
 done
 rm -f $exe
