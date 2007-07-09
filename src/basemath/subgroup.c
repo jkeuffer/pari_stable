@@ -106,7 +106,7 @@ addcell(sublist_t *S, GEN H)
 
   S->list->next = cell; cell->data = pt = (long*) (cell + 1);
   for (j=1; j<=n; j++)
-    for(i=1; i<=j; i++) pt[k++] = itos(gcoeff(H,i,j));
+    for(i=1; i<=j; i++) pt[k++] = itou(gcoeff(H,i,j));
   S->list = cell;
   S->count++;
 }
@@ -186,8 +186,8 @@ dogroup(subgp_iter *T)
     }
     for (i=1; i<=t; i++)
     {
-      for (r=1; r<i; r++) affsi(0, H[i][c[r]]);
-      affsi(powlist[L[c[r]] - M[r]], H[r][c[r]]);
+      for (r=1; r<i; r++) affui(0, H[i][c[r]]);
+      affui(powlist[L[c[r]] - M[r]], H[r][c[r]]);
       for (r=i+1; r<=l; r++)
       {
         if (c[r] < c[i])
@@ -195,7 +195,7 @@ dogroup(subgp_iter *T)
         else
           if (L[c[r]] < M[i]) e = g[i][r];
           else e = g[i][r] * powlist[L[c[r]] - M[i]];
-        affsi(e, H[i][c[r]]);
+        affui(e, H[i][c[r]]);
       }
     }
     treatsub(T, (GEN)H); avma = av;
@@ -228,7 +228,7 @@ dopsubtyp(subgp_iter *T)
   if (!t) { treatsub(T, mkmat( zerocol(l) )); avma = av; return; }
   if (l==1) /* imply t = 1 */
   {
-    GEN p1 = gtomat(stoi(T->powlist[T->L[1]-T->M[1]]));
+    GEN p1 = gtomat(utoi(T->powlist[T->L[1]-T->M[1]]));
     treatsub(T, p1); avma = av; return;
   }
   T->c         = new_chunk(l+1); setlen(T->c, l);
@@ -407,7 +407,7 @@ expand_sub(GEN x, long n)
 }
 
 static GEN
-init_powlist(long k, long p)
+init_powlist(long k, ulong p)
 {
   GEN z = new_chunk(k+1);
   long i;
@@ -415,7 +415,7 @@ init_powlist(long k, long p)
   for (i=1; i<=k; i++)
   {
     GEN t = muluu(p, z[i-1]);
-    z[i] = itos(t);
+    z[i] = itou(t);
   }
   return z;
 }
@@ -466,7 +466,7 @@ subgroup_engine(subgp_iter *T)
   L = gel(listL,imax); p = gel(primlist,imax);
   k = L[1];
   T->L = L;
-  T->powlist = init_powlist(k, itos(p));
+  T->powlist = init_powlist(k, itou(p));
   B = T->bound;
   parse_bound(T);
 
@@ -608,7 +608,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     for (j=1; j<=n; j++)
     {
       gel(H,j) = cgetg(N+1, t_COL);
-      for (i=1; i<=j; i++) gcoeff(H,i,j) = stoi(sublist->data[k++]);
+      for (i=1; i<=j; i++) gcoeff(H,i,j) = utoi(sublist->data[k++]);
       for (   ; i<=N; i++) gcoeff(H,i,j) = gen_0;
     }
     for (   ; j<=N; j++) gel(H,j) = col_ei(N, j);
