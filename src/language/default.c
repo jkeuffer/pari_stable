@@ -539,6 +539,16 @@ TeX_define2(const char *s, const char *def) {
   fprintf(logfile, "\\ifx\\%s\\undefined\n  \\def\\%s#1#2{%s}\\fi\n", s,s,def);
 }
 
+static FILE *
+open_logfile(const char *s) {
+  FILE *log = fopen(s, "a");
+  if (!log) pari_err(openfiler,"logfile",s);
+#ifndef WINCE
+  setbuf(log,(char *)NULL);
+#endif
+  return log;
+}
+
 GEN
 sd_log(const char *v, long flag)
 {
@@ -560,13 +570,7 @@ sd_log(const char *v, long flag)
       fclose(logfile); logfile = NULL;
     }
     else
-    { /* open log */
-      logfile = fopen(current_logfile, "a");
-      if (!logfile) pari_err(openfiler,"logfile",current_logfile);
-#ifndef WINCE
-      setbuf(logfile,(char *)NULL);
-#endif
-    }
+      logfile = open_logfile(current_logfile);
   }
   if (logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
@@ -654,13 +658,18 @@ sd_filename(const char *v, long flag, char *s, char **f)
 {
   if (*v)
   {
-    char *s, *old = *f;
+    char *str, *old = *f;
     long l;
     char *ev = expand_tilde(v);
     l = strlen(ev) + 256;
-    s = (char *) malloc(l);
-    do_strftime(ev,s, l-1); gpfree(ev);
-    *f = pari_strdup(s); gpfree(s); gpfree(old);
+    str = (char *) malloc(l);
+    do_strftime(ev,str, l-1); gpfree(ev);
+    if (GP_DATA->flags & SECURE)
+    {
+      fprintferr("[secure mode]: about to change %s to '%s'. OK ? (^C if not)\n",s, str);
+      hit_return();
+    }
+    *f = pari_strdup(str); gpfree(str); gpfree(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f);
   if (flag == d_ACKNOWLEDGE) pariprintf("   %s = \"%s\"\n",s,*f);
@@ -673,12 +682,8 @@ sd_logfile(const char *v, long flag)
   GEN r = sd_filename(v, flag, "logfile", &current_logfile);
   if (*v && logfile)
   {
-    fclose(logfile);
-    logfile = fopen(current_logfile, "a");
-    if (!logfile) pari_err(openfiler,"logfile",current_logfile);
-#ifndef WINCE
-    setbuf(logfile,(char *)NULL);
-#endif
+    FILE *log = open_logfile(current_logfile);
+    fclose(logfile); logfile = log;
   }
   return r;
 }

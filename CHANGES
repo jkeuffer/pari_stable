@@ -72,6 +72,7 @@ BA 52- gp -q -f < eval('y) --> SEGV
 MSo55- [Configure] don't rely on $CC exit status, check whether a non-0 size
        executable is produced [ problems with tcc ]
 BA 56- wrong Prototype for subgrouplist [ extra 'p' ]
+   57- hole in 'secure' mode: don't allow changing psfile / logfile [#645]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
