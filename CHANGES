@@ -113,6 +113,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
        (compute lcm of local p-adic orders)
    28- changed icopyifstack / copyifstack macros so that their arguments
        are GENs, not GENs typecast to long.
+   29- add -funroll-loops to gcc flags when compiling arithmetic kernel
 
   Added
     1- library functions expu, adduu, subuu

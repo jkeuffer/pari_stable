@@ -120,6 +120,7 @@ if test -n "$__gnuc__"; then
   case "$__gnuc__" in
     2.95.[3-9]*|[3-9].*) OPTFLAGS="$OPTFLAGS -fno-strict-aliasing";;
   esac
+  KERNELCFLAGS=-funroll-loops
 
   DBGFLAGS=${DBGFLAGS:-"-g $warn"}
   # Specific optimisations for some architectures

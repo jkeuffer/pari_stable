@@ -8,5 +8,5 @@ MP_C=$kern1/mp.c $knone/cmp.c $knone/gcdll.c $knone/ratlift.c\
 mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c
-	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
+	\$(CC) -c \$(CFLAGS) \$(KERNELCFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
 EOT
