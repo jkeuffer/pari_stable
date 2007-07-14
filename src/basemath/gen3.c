@@ -2260,6 +2260,18 @@ mkcoln(long n, ...)
 }
 
 GEN
+mkvecsmalln(long n, ...)
+{
+  va_list ap;
+  GEN x;
+  long i;
+  va_start(ap,n);
+  x = cgetg(n+1, t_VECSMALL);
+  for (i=1; i <= n; i++) gel(x,i) = va_arg(ap, GEN);
+  va_end(ap); return x;
+}
+
+GEN
 scalarpol(GEN x, long v)
 {
   GEN y;

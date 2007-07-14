@@ -1290,6 +1290,7 @@ GEN     mkcoln(long n, ...);
 GEN     mkintn(long n, ...);
 GEN     mkpoln(long n, ...);
 GEN     mkvecn(long n, ...);
+GEN     mkvecsmalln(long n, ...);
 GEN     mulmat_real(GEN x, GEN y);
 GEN     numer(GEN x);
 long    padicprec(GEN x, GEN p);

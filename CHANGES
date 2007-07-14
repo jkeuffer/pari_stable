@@ -128,6 +128,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
     8- bench 'extract'
     9- charpoly: Berkowitz division-free algorithm (new default) [#541]
    10- library function phiu
+   11- library function mkvecsmalln
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
