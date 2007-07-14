@@ -2474,7 +2474,14 @@ apell1(GEN e, GEN p)
   p1p = addsi(1, p);
   p2p = shifti(p1p, 1);
   x = 0; u = c6; KRO = kronecker(u, p); KROold = - KRO;
-  A = gen_0; B = gen_1; h = p1p;
+  /* how many 2-torsion points ? */
+  switch(FpX_nbroots(mkpoln(4, gen_1, gen_0, c4, c6), p))
+  {
+    case 3:  A = gen_0; B = utoipos(4); break;
+    case 1:  A = gen_0; B = gen_2; break;
+    default: A = gen_1; B = gen_2; break; /* 0 */
+  }
+  h = closest_lift(A, B, p1p);
   for(;;)
   {
     long CODE;
@@ -2752,6 +2759,13 @@ typedef struct
 static int
 compare_multiples(multiple *a, multiple *b) { return a->x - b->x; }
 
+
+static long
+sclosest_lift(long A, long B, ulong p2p)
+{
+  return A + B * (((ulong)(p2p + B - (A << 1))) / (B << 1));
+}
+
 /* assume e has good reduction at p. Should use Montgomery.
  * See apell1() */
 static GEN
@@ -2774,7 +2788,14 @@ apell0(GEN e, ulong p)
   p1p = p+1;
   p2p = p1p << 1;
   x = 0; u = c6; KRO = kross(u, p); KROold = -KRO;
-  A = 0; B = 1; h = p1p;
+
+  switch(Flx_nbroots(mkvecsmalln(5,0, 1, 0, c4, c6), p))
+  {
+    case 3:  A = 0; B = 4; break;
+    case 1:  A = 0; B = 2; break;
+    default: A = 1; B = 2; break; /* 0 */
+  }
+  h = sclosest_lift(A, B, p2p);
   for(;;)
   {
     while (!KRO || KRO == KROold)
@@ -2798,8 +2819,7 @@ apell0(GEN e, ulong p)
       table = (multiple *) gpmalloc((s+1) * sizeof(multiple));
       F = f;
     }
-    else
-      s_powell(&F, &f, B, cp4, p);
+    s_powell(&F, &f, B, cp4, p);
     for (i=0; i < s; i++)
     {
       if (fh.isnull) { h += B*i; goto FOUND; }
@@ -2847,7 +2867,7 @@ FOUND:
       if ((A << 1) > B) A -= B;
     }
     /* h = A mod B, closest lift to p+1 */
-    h = A + B * (((ulong)(p2p + B - (A << 1))) / (B << 1));
+    h = sclosest_lift(A, B, p2p);
     avma = av; if (!i) break;
   }
   if (table) gpfree(table);
