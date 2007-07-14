@@ -163,8 +163,8 @@ adduispec(ulong s, GEN x, long nx)
 static GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
-  GEN xd,yd,zd;
-  long lz;
+  GEN xd, yd, zd;
+  long lz, i;
   LOCAL_OVERFLOW;
 
   if (nx < ny) swapspec(x,y, nx,ny);
@@ -173,17 +173,19 @@ addiispec(GEN x, GEN y, long nx, long ny)
   lz = nx+3; (void)new_chunk(lz);
   xd = x + nx;
   yd = y + ny;
-  *--zd = addll(*--xd, *--yd);
-  while (yd > y) *--zd = addllx(*--xd, *--yd);
+  zd[-1] = addll(xd[-1], yd[-1]);
+  for (i = -2; i >= -ny; i--) zd[i] = addllx(xd[i], yd[i]);
   if (overflow)
     for(;;)
     {
-      if (xd == x) { *--zd = 1; break; } /* enlarge z */
-      *--zd = ((ulong)*--xd) + 1;
-      if (*zd) { lz--; break; }
+      if (i < -nx) { zd[i] = 1; i--; break; } /* enlarge z */
+      zd[i] = (ulong)xd[i] + 1;
+      if (zd[i]) { i--; lz--; break; }
+      i--;
     }
   else lz--;
-  while (xd > x) *--zd = *--xd;
+  for (; i >= -nx; i--) zd[i] = xd[i];
+  zd += i+1;
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
   avma=(pari_sp)zd; return zd;
