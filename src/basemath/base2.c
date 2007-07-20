@@ -2503,10 +2503,10 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   checkmodpr(modpr);
   pr = gel(modpr,mpr_PR);
   p = gel(pr,1);
-  x = algtobasis_i(nf,x);
+  x = algtobasis_i(nf,x); /* FIXME: should reduce mod p^* */
   x = kill_denom(x, nf, p, modpr);
   x = ff_to_nf(zk_to_ff(x,modpr), modpr);
-  return gerepilecopy(av, algtobasis_i(nf,x));
+  return gerepileupto(av, FpC_red(algtobasis_i(nf,x), p));
 }
 
 GEN
