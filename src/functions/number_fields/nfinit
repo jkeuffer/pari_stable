@@ -56,14 +56,14 @@ Doc: \var{pol} being a non-constant,
  \quad\item $T$ is the $n\times n$ matrix whose coefficients are
  $\text{Tr}(\omega_i\omega_j)$ where the $\omega_i$ are the elements of the
  integral basis. Note also that $\det(T)$ is equal to the discriminant of the
- field $K$.
+ field $K$. Also, when understood as an ideal, the matrix $T^{-1}$
+ generates the codifferent ideal.
  
  \quad\item The columns of $MD$ (\kbd{\var{nf}.diff}) express a $\Z$-basis
  of the different of $K$ on the integral basis.
  
- \quad\item $TI$ is equal to $d(K)T^{-1}$, which has integral
- coefficients. Note that, understood as as ideal, the matrix $T^{-1}$
- generates the codifferent ideal.
+ \quad\item $TI$ is equal to the primitive part of $T^{-1}$, which has integral
+ coefficients.
  
  \quad\item Finally, $MDI$ is a two-element representation (for faster
  ideal product) of $d(K)$ times the codifferent ideal

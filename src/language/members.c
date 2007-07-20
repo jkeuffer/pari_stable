@@ -220,10 +220,12 @@ member_diff(GEN x) /* different */
 GEN
 member_codiff(GEN x) /* codifferent */
 {
-  long t; GEN H, nf = get_nf(x,&t), y = nfmats(nf);
+  long t; GEN T, D, DinvT, nf = get_nf(x,&t), y = nfmats(nf);
   if (!y) member_err("codiff");
-  H = hnf(gel(y,6));
-  return gdiv(H, gcoeff(H,1,1));
+  T = gel(y,4);
+  D = absi(gel(nf,3));
+  DinvT = ZM_inv(T,D);
+  return gdiv(hnfmod(DinvT, D), D);
 }
 
 GEN
