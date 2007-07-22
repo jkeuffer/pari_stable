@@ -2332,7 +2332,7 @@ modprinit(GEN nf, GEN pr, int zk)
     if (N == f) T = gel(nf,1); /* pr inert */
     else
     {
-      T = Q_primpart(gmul(basis, gel(pr,2)));
+      T = gmul(Q_primpart(basis), gel(pr,2));
       basis = vecpermute(basis, c);
     }
     T = FpX_red(T, p);
@@ -2455,19 +2455,20 @@ zk_to_ff(GEN x, GEN modpr)
 static GEN
 kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
 {
-  GEN cx, den = denom(x);
+  GEN den;
   long v;
-  if (gcmp1(den)) return x;
+  x = Q_remove_denom(x, &den);
+  if (!den) return x;
 
-  v = Z_pval(den,p);
+  v = Z_pvalrem(den, p, &den);
   if (v)
   {
     GEN tau = modpr_TAU(modpr);
     if (!tau) pari_err(talker,"modpr initialized for integers only!");
     x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
+    x = gdivexact(x, gpowgs(p, v));
   }
-  x = Q_primitive_part(x, &cx);
-  if (cx) x = gmul(Rg_to_Fp(cx, p), x);
+  if (!is_pm1(den)) { den = resii(den, p); x = gmul(x, Fp_inv(den, p)); }
   return FpC_red(x, p);
 }
 
@@ -2503,7 +2504,34 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   checkmodpr(modpr);
   pr = gel(modpr,mpr_PR);
   p = gel(pr,1);
-  x = algtobasis_i(nf,x); /* FIXME: should reduce mod p^* */
+  /* cf algtobasis_i */
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return gscalcol_i(Rg_to_Fp(x,p), degpol( gel(nf,1) ));
+    case t_POLMOD:
+      x = gel(x,2);
+      if (typ(x) != t_POL) return gscalcol_i(Rg_to_Fp(x,p), degpol(gel(nf,1)));
+      /* fall through */
+    case t_POL:
+    {
+      GEN d, pv;
+      long v;
+
+      x = poltobasis(nf, Q_remove_denom(x, &d));
+      if (d) {
+        v = Z_pvalrem(d, p, &d);
+        pv = gpowgs(p, v+1);
+        d = Fp_inv(resii(d, pv), pv);
+        x = gmul(x, d);
+      } else pv = p;
+      x = FpC_red(x, pv);
+    }
+
+    case t_COL:
+      if (lg(x) == lg(gel(nf,7))) break;
+    default: pari_err(typeer,"algtobasis_i");
+  }
   x = kill_denom(x, nf, p, modpr);
   x = ff_to_nf(zk_to_ff(x,modpr), modpr);
   return gerepileupto(av, FpC_red(algtobasis_i(nf,x), p));
