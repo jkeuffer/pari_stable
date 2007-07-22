@@ -1422,14 +1422,41 @@ nfpolred(int part, nfbasic_t *T)
   T->x  = xbest; return rev;
 }
 
+/* let bas a t_VEC of QX giving a Z-basis of O_K. Return the index of the
+ * basis. Assume bas[1] is 1 and that the leading coefficient of elements
+ * of bas are of the form 1/b for a t_INT b */
 GEN
 get_nfindex(GEN bas)
 {
   pari_sp av = avma;
-  long n = lg(bas)-1;
-  GEN d, mat = RgXV_to_RgM(Q_remove_denom(bas, &d), n);
-  if (!d) { avma = av; return gen_1; }
-  return gerepileuptoint(av, diviiexact(powiu(d, n), det(mat)));
+  long n = lg(bas)-1, i;
+  GEN D, d, mat;
+
+  D = gen_1; /* assume bas[1] = 1 */
+  for (i = 2; i <= n; i++)
+  { /* in most cases [e.g after nfbasis] basis is upper triangular! */
+    GEN B = gel(bas,i), lc;
+    if (degpol(B) != i-1) break;
+    lc = gel(B, i+1);
+    switch (typ(lc))
+    {
+      case t_INT: continue;
+      case t_FRAC: lc = gel(lc,2); break;
+      default: pari_err(typeer,"get_nfindex");
+    }
+    D = mulii(D, lc);
+  }
+  if (i <= n)
+  { /* not triangular after all */
+    bas = vecslice(bas, i, n);
+    n = n-i+1;
+    bas = Q_remove_denom(bas, &d);
+    if (!d) { avma = av; return D; }
+    mat = RgXV_to_RgM(bas, n);
+    d = diviiexact(powiu(d, n), det(mat));
+    D = mulii(D,d);
+  }
+  return gerepileuptoint(av, D);
 }
 
 void
