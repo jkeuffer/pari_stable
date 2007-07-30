@@ -784,6 +784,12 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       f = gdiv; mod = NULL;
   }
   p1 = new_chunk(dy+3);
+  for (i=2; i<dy+3; i++)
+  {
+    p2 = gel(y,i);
+    /* gneg to avoid gsub's later on */
+    gel(p1,i) = isexactzero(p2)? NULL: gneg(p2);
+  }
   avy = avma;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; z += 2;
@@ -793,14 +799,8 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   if (isexactzero(p2))
     pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Z\nby %Z",
              x-2, y);
-  gel(z,dz) = p2;
-  for (i=2; i<dy+3; i++)
-  {
-    p2 = gel(y,i);
-    /* gneg to avoid gsub's later on */
-    gel(p1,i) = isexactzero(p2)? NULL: gneg_i(p2);
-  }
   y = p1+2;
+  gel(z,dz) = p2;
 
   for (i=dx-1; i>=dy; i--)
   {
@@ -825,7 +825,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
-    if (!isinexactreal(p1) && !isexactzero(p1)) break;
+    if (!isexactzero(p1)) break;
     if (!i) break;
     avma=av1;
   }
