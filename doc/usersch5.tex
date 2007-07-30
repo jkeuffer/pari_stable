@@ -456,8 +456,8 @@ beware that this is not permanent independent storage, but part of the stack.
 \subsec{Garbage collection}.
 See \secref{se:garbage} for a detailed explanation and many examples.
 
-\fun{void}{cgiv}{GEN x} frees object \kbd{x} if it is the last created on the
-stack (otherwise nothing happens).
+\fun{void}{cgiv}{GEN x} frees object \kbd{x}, assuming it is the last created
+on the stack.
 
 \fun{GEN}{gerepile}{pari_sp p, pari_sp q, GEN x} general garbage collector
 for the stack.

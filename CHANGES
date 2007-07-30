@@ -75,6 +75,7 @@ BA 56- wrong Prototype for subgrouplist [ extra 'p' ]
    57- hole in 'secure' mode: don't allow changing psfile / logfile [#645]
    58- nf.codiff was only correct up to multiplication by some rational number
        [cf #510 & 2.4.1-F7]
+   59- cgiv failed to delete the last object on stack [ if recursive ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

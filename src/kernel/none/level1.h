@@ -302,7 +302,8 @@ cgetg(long x, long y)
 INLINE void
 cgiv(GEN x)
 {
-  if (x == (GEN)avma) avma = (pari_sp)(x+lg(x));
+  pari_sp av = (pari_sp)(x+lg(x));
+  if (isonstack(av)) avma = av;
 }
 
 

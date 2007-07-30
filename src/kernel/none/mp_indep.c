@@ -481,11 +481,17 @@ truedvmdii(GEN x, GEN y, GEN *z)
   av = avma;
   q = dvmdii(x,y,&r); /* assume that r is last on stack */
 
-  if (signe(r)>=0)
+  switch(signe(r))
   {
-    if (z == ONLY_REM) return gerepileuptoint(av,r);
-    if (z) *z = r; else cgiv(r);
-    return q;
+    case 0:
+      if (z == ONLY_REM) { avma = av; return gen_0; }
+      if (z) *z = gen_0;
+      return q;
+    case 1:
+      if (z == ONLY_REM) return gerepileuptoint(av,r);
+      if (z) *z = r; else cgiv(r);
+      return q;
+    case -1: break;
   }
 
   if (z == ONLY_REM)

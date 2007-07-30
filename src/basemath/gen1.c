@@ -295,7 +295,7 @@ gred_rfrac2_i(GEN n, GEN d)
   if (!isinexact(n) && !isinexact(d))
   {
     y = RgX_divrem(n, d, &z);
-    if (!signe(z)) return v? RgX_mulXn(y, v): y;
+    if (!signe(z)) { cgiv(z); return v? RgX_mulXn(y, v): y; }
     z = srgcd(d, z);
     if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
   }
