@@ -2294,6 +2294,9 @@ get_proj_modT(GEN basis, GEN T, GEN p)
   return z;
 }
 
+/* initialize reduction mod pr; if zk = 1, will only init data required to
+ * reduce *integral* element.  Realize (O_K/pr) as Fp[X] / (T), for a
+ * *monic* T */
 static GEN
 modprinit(GEN nf, GEN pr, int zk)
 {
@@ -2333,6 +2336,7 @@ modprinit(GEN nf, GEN pr, int zk)
     else
     {
       T = gmul(Q_primpart(basis), gel(pr,2));
+      T = FpX_normalize(T,p);
       basis = vecpermute(basis, c);
     }
     T = FpX_red(T, p);

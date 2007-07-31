@@ -1609,6 +1609,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
     else
     {
       ulong t;
+      /* norm(g), assuming T is monic */
       t = Flx_resultant(T, g, p);
       if (t == 1 || !is_gener_Fl(t, p, p_1, L)) continue;
       tt = Flxq_pow(g, utoi(p_1>>1), T, p);

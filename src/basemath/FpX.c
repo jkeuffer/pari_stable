@@ -666,7 +666,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
   ord  = typ(o)==t_MAT ? factorback(o, NULL) : o;
   ordp = subis(p, 1); /* even */
   if (equalii(a, ordp)) /* -1 */
-    return gerepileupto(av, shifti(ord,-1)); 
+    return gerepileuptoint(av, shifti(ord,-1)); 
   ordp = gcdii(ordp,ord);
   op = typ(o)==t_MAT ? famat_Z_gcd(o,ordp) : ordp;
 
@@ -863,7 +863,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
     GEN t;
     g = random_FpX(f, vT, p);
     if (degpol(g) < 1) continue;
-    t = FpX_resultant(T, g, p); /* Ng = g^q */
+    t = FpX_resultant(T, g, p); /* Ng = g^q, assuming T is monic */
     if (is_pm1(t) || !is_gener_Fp(t, p, p_1, L)) continue;
     t = FpXQ_pow(g, shifti(p_1,-1), T, p);
     for (i = 1; i < j; i++)
