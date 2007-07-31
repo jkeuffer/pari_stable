@@ -1668,7 +1668,7 @@ gerepileuptoint(pari_sp av, GEN q)
 }
 
 static int
-_ok_gerepileupto(GEN av, GEN x)
+dochk_gerepileupto(GEN av, GEN x)
 {
   long i,lx,tx;
   if (!isonstack(x)) return 1;
@@ -1682,7 +1682,7 @@ _ok_gerepileupto(GEN av, GEN x)
 
   lx = LG(x, tx);
   for (i=lontyp[tx]; i<lx; i++)
-    if (!_ok_gerepileupto(av, gel(x,i)))
+    if (!dochk_gerepileupto(av, gel(x,i)))
     {
       pari_warn(warner,"bad component %ld in object %Z",i,x);
       return 0;
@@ -1692,7 +1692,32 @@ _ok_gerepileupto(GEN av, GEN x)
 /* check that x and all its components are out of stack, or have been
  * created after av */
 int
-ok_gerepileupto(GEN x) { return _ok_gerepileupto(x, x); }
+chk_gerepileupto(GEN x) { return dochk_gerepileupto(x, x); }
+
+/* print stack between avma & av */
+void
+dbg_gerepile(pari_sp av)
+{
+  GEN x = (GEN)avma;
+  while (x < (GEN)av)
+  {
+    const long tx = typ(x), lx = lg(x);
+    GEN a, b;
+
+    if (! is_recursive_t(tx)) { x += lx; continue; }
+    a = x + lontyp[tx];
+    pariprintf(" [%ld] %Z:", x - (GEN)avma, x);
+    if (tx == t_LIST) { b = x + lgeflist(x); x += lx; } else { x += lx; b = x; }
+    for (  ; a < b; a++) pariprintf("  %Z,", *a);
+    pariprintf("\n");
+  }
+}
+void
+dbg_gerepileupto(GEN q)
+{
+  fprintferr("%Z:\n", q);
+  dbg_gerepile((pari_sp) (q+lg(q)));
+}
 
 GEN
 gerepile(pari_sp av, pari_sp tetpil, GEN q)

@@ -574,6 +574,19 @@ or to its last \kbd{l} components:
   z += L; setlg(z, L);
 @eprog
 
+\subsec{Debugging the PARI stack}
+
+\fun{int}{chk_gerepileupto}{GEN x} returns 1 if \kbd{x} is suitable for
+\kbd{gerepileupto}, and 0 otherwise. In the latter case, print a warning
+explaining the problem.
+
+\fun{void}{dbg_gerepile}{pari_sp ltop} outputs the list of all objects on the
+stack between \kbd{avma} and \kbd{ltop}, i.e. the ones that would be inspected
+in a call to \kbd{gerepile(...,ltop,...)}.
+
+\fun{void}{dbg_gerepileupto}{GEN q} outputs the list of all objects on the
+stack that would be inspected in a call to \kbd{gerepileupto(...,q)}.
+
 \subsec{Copies and clones}
 
 \fun{GEN}{gclone}{GEN x} creates a new permanent copy of the object \kbd{x}
