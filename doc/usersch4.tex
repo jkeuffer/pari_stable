@@ -1668,13 +1668,13 @@ converts a PARI \kbd{GEN} to an ASCII string. The syntax is
 \fun{char*}{GENtostr}{GEN obj}, which returns a \kbd{malloc}'ed character
 string (which you should \kbd{free} after use).
 
-\noindent $\bullet$ The third and final one outputs the \idx{hexadecimal tree}
-corresponding to the \kbd{gp} metacommand \kbd{\b x} using the function
+\noindent $\bullet$ The third and final one corresponds to the \kbd{gp}
+metacommand \kbd{\b x} and outputs the \idx{hexadecimal tree} associated to
+an object. This last type of output is only used for debugging purposes.
 
 \fun{void}{voir}{GEN obj, long nb}, which only outputs the first
-\kbd{nb} words corresponding to leaves (very handy when you have a look at
-big recursive structures). If you set this parameter to $-1$ all significant
-words are printed. This last type of output is only used for debugging purposes.
+\kbd{nb} words corresponding to leaves. If you set $\kbd{nb} = -1$, all
+words are printed.
 
 \misctitle{Remark}. Apart from \teb{GENtostr}, all PARI output is done on
 the stream \teb{outfile}, which by default is initialized to \teb{stdout}. If

@@ -1344,11 +1344,13 @@ voir2(GEN x, long nb, long bl)
     if (tx == t_STR)
       pariputs("chars:");
     else if (tx == t_INT)
-      pariprintf("(%c,lgefint=%ld):", vsigne(x), lgefint(x));
+    {
+      lx = lgefint(x);
+      pariprintf("(%c,lgefint=%ld):", vsigne(x), lx);
+    }
     else if (tx == t_REAL)
       pariprintf("(%c,expo=%ld):", vsigne(x), expo(x));
-    if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
-    if (tx == t_VECSMALL) nb = lx;
+    if (nb < 0) nb = lx;
     for (i=1; i < nb; i++) pariprintf(VOIR_STRING2,x[i]);
     pariputc('\n'); return;
   }
