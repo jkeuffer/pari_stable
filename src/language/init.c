@@ -32,7 +32,7 @@ GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, gi;
 THREAD GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
-FILE    *pari_outfile, *errfile, *logfile, *infile;
+FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
@@ -457,7 +457,7 @@ pari_init_defaults(void)
 
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
-  logfile = NULL;
+  pari_logfile = NULL;
 
   pari_datadir = os_getenv("GP_DATA_DIR");
   if (!pari_datadir) pari_datadir = GPDATADIR;

@@ -15,6 +15,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define infile pari_infile
+#define errfile pari_errfile
+#define logfile pari_logfile
 #define voir dbgGEN
 #define pointch ellchangepoint
 #define coordch ellchangecurve

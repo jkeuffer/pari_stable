@@ -62,7 +62,7 @@ enum { mf_IN  = 1, mf_PIPE = 2, mf_FALSE = 4, mf_OUT = 8, mf_PERM = 16 };
 /* Common global variables: */
 
 extern PariOUT *pariOut, *pariErr;
-extern FILE    *pari_outfile, *logfile, *infile, *errfile;
+extern FILE    *pari_outfile, *pari_logfile, *pari_infile, *pari_errfile;
 extern ulong    logstyle;
 
 enum logstyles {

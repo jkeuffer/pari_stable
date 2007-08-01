@@ -130,6 +130,8 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    33- remove obsolete undocumented functions outerr, outbeauterr, outsor,
     outtex. Rename voir -> dbgGEN. Functions brute, outbrute, matbrute,
     outmat, sor, outbeaut are obsoleted and no longer documented.
+   34- rename errfile -> pari_errfile, infile -> pari_infile, logfile ->
+    pari_logfile
 
   Added
     1- library functions expu, adduu, subuu

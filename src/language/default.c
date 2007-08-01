@@ -532,11 +532,11 @@ sd_histsize(const char *v, long flag)
 
 static void
 TeX_define(const char *s, const char *def) {
-  fprintf(logfile, "\\ifx\\%s\\undefined\n  \\def\\%s{%s}\\fi\n", s,s,def);
+  fprintf(pari_logfile, "\\ifx\\%s\\undefined\n  \\def\\%s{%s}\\fi\n", s,s,def);
 }
 static void
 TeX_define2(const char *s, const char *def) {
-  fprintf(logfile, "\\ifx\\%s\\undefined\n  \\def\\%s#1#2{%s}\\fi\n", s,s,def);
+  fprintf(pari_logfile, "\\ifx\\%s\\undefined\n  \\def\\%s#1#2{%s}\\fi\n", s,s,def);
 }
 
 static FILE *
@@ -567,12 +567,12 @@ sd_log(const char *v, long flag)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
         pariprintf("   [logfile was \"%s\"]\n", current_logfile);
-      fclose(logfile); logfile = NULL;
+      fclose(pari_logfile); pari_logfile = NULL;
     }
     else
-      logfile = open_logfile(current_logfile);
+      pari_logfile = open_logfile(current_logfile);
   }
-  if (logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
+  if (pari_logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
     TeX_define("PARIbreak", 
                "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
@@ -680,10 +680,10 @@ GEN
 sd_logfile(const char *v, long flag)
 {
   GEN r = sd_filename(v, flag, "logfile", &current_logfile);
-  if (*v && logfile)
+  if (*v && pari_logfile)
   {
     FILE *log = open_logfile(current_logfile);
-    fclose(logfile); logfile = log;
+    fclose(pari_logfile); pari_logfile = log;
   }
   return r;
 }

@@ -837,7 +837,7 @@ gp_quit(void)
 static GEN
 gpreadbin(const char *s, int *vector)
 {
-  GEN x = readbin(s,infile, vector);
+  GEN x = readbin(s,pari_infile, vector);
   popinfile(); return x;
 }
 
@@ -922,9 +922,9 @@ escape(char *tch)
       if (*s)
       {
         (void)sd_logfile(s,d_ACKNOWLEDGE);
-        if (logfile) break;
+        if (pari_logfile) break;
       }
-      (void)sd_log(logfile?"0":"1",d_ACKNOWLEDGE);
+      (void)sd_log(pari_logfile?"0":"1",d_ACKNOWLEDGE);
       break;
     case 'o': (void)sd_output(s,d_ACKNOWLEDGE); break;
     case 'p':
@@ -938,7 +938,7 @@ escape(char *tch)
     case 'r':
       s = get_sep(s);
       switchin(s);
-      if (file_is_binary(infile))
+      if (file_is_binary(pari_infile))
       {
         int vector;
         GEN x = gpreadbin(s, &vector);
@@ -1323,18 +1323,18 @@ update_logfile(const char *prompt, const char *s)
 {
   switch (logstyle) {
   case logstyle_TeX:
-    fprintf(logfile,
+    fprintf(pari_logfile,
             "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
             prompt,s);
     break;
   case logstyle_plain:
-    fprintf(logfile, "%s%s\n",prompt,s);
+    fprintf(pari_logfile, "%s%s\n",prompt,s);
     break;
   case logstyle_color:
     /* Can't do in one pass, since term_get_color() returns a static */
-    fprintf(logfile, "%s%s", term_get_color(c_PROMPT), prompt);
-    fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
-    fprintf(logfile, "%s\n", term_get_color(c_NONE));
+    fprintf(pari_logfile, "%s%s", term_get_color(c_PROMPT), prompt);
+    fprintf(pari_logfile, "%s%s", term_get_color(c_INPUT), s);
+    fprintf(pari_logfile, "%s\n", term_get_color(c_NONE));
     break;
   }
 }
@@ -1363,7 +1363,7 @@ get_line_from_file(char *PROMPT, filtre_t *F, FILE *file)
   {
     if (GP_DATA->flags & ECHO)
       { pariputs(PROMPT); pariputs(s); pariputc('\n'); }
-    else if (logfile)
+    else if (pari_logfile)
       update_logfile(PROMPT, s);
     pariflush();
   }
@@ -1383,10 +1383,10 @@ is_interactive(void)
 {
   ulong f = GP_DATA->flags;
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
-  return (infile == stdin && !(f & TEXMACS)
+  return (pari_infile == stdin && !(f & TEXMACS)
                           && (f & EMACS || isatty(fileno(stdin))));
 #else
-  return (infile == stdin && !(f & TEXMACS));
+  return (pari_infile == stdin && !(f & TEXMACS));
 #endif
 }
 
@@ -1409,12 +1409,12 @@ gp_read_line(filtre_t *F, char *PROMPT)
     {
       if (!PROMPT) PROMPT = color_prompt( expand_prompt(GP_DATA->prompt, F) );
       pariputs(PROMPT);
-      res = get_line_from_file(PROMPT,F,infile);
+      res = get_line_from_file(PROMPT,F,pari_infile);
     }
     if (!disable_color) { term_color(c_NONE); pariflush(); }
   }
   else
-    res = get_line_from_file(DFT_PROMPT,F,infile);
+    res = get_line_from_file(DFT_PROMPT,F,pari_infile);
   return res;
 }
 
@@ -1537,7 +1537,7 @@ break_loop(long numerr)
     t = oldb->buf;
     /* something fishy, probably a ^C, or we overran analyseur */
   }
-  oldinfile = infile;
+  oldinfile = pari_infile;
   init_filtre(&F, b);
 
   term_color(c_ERR); pariputc('\n');
@@ -1545,7 +1545,7 @@ break_loop(long numerr)
   term_color(c_NONE);
   if (numerr == siginter)
     pariputs("[type <Return> in empty line to continue]\n");
-  infile = stdin;
+  pari_infile = stdin;
   for(;;)
   {
     GEN x;
@@ -1570,7 +1570,7 @@ break_loop(long numerr)
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pariputc('\n');
   }
-  b = NULL; infile = oldinfile;
+  b = NULL; pari_infile = oldinfile;
   pop_buffer(); return go_on;
 }
 
@@ -1614,7 +1614,7 @@ GEN
 read0(char *s)
 {
   switchin(s);
-  if (file_is_binary(infile)) {
+  if (file_is_binary(pari_infile)) {
     int junk;
     return gpreadbin(s, &junk);
   }
@@ -1625,7 +1625,7 @@ GEN
 extern0(char *s)
 {
   check_secure(s);
-  infile = try_pipe(s, mf_IN)->file;
+  pari_infile = try_pipe(s, mf_IN)->file;
   return gp_main_loop(0);
 }
 
@@ -1638,7 +1638,7 @@ input0(void)
 
   init_filtre(&F, b);
   push_stack(&bufstack, (void*)b);
-  while (! get_line_from_file(DFT_INPROMPT,&F,infile))
+  while (! get_line_from_file(DFT_INPROMPT,&F,pari_infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = readseq(b->buf);
   pop_buffer(); return x;
@@ -1819,9 +1819,9 @@ main(int argc, char **argv)
   if (A->n)
   {
     VOLATILE ulong f = GP_DATA->flags;
-    FILE *l = logfile;
+    FILE *l = pari_logfile;
     VOLATILE long i;
-    GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
+    GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
     for (i = 0; i < A->n; i++) {
       if (setjmp(GP_DATA->env))
       {
@@ -1830,7 +1830,7 @@ main(int argc, char **argv)
       }
       (void)read0((char*)A->v[i]); gpfree(A->v[i]);
     }
-    GP_DATA->flags = f; logfile = l;
+    GP_DATA->flags = f; pari_logfile = l;
   }
   grow_kill(A);
   (void)gp_main_loop(1);
@@ -1874,7 +1874,7 @@ static int
 tex2mail_output(GEN z, long n)
 {
   pariout_t T = *(GP_DATA->fmt); /* copy */
-  FILE *o_out, *o_logfile = logfile;
+  FILE *o_out, *o_logfile = pari_logfile;
 
   if (!prettyp_init()) return 0;
   o_out = pari_outfile; /* save state */
@@ -1884,7 +1884,7 @@ tex2mail_output(GEN z, long n)
   pariflush();
   pari_outfile = GP_DATA->pp->file->file;
   T.prettyp = f_TEX;
-  logfile = NULL;
+  pari_logfile = NULL;
 
   /* history number */
   if (n)
@@ -1929,7 +1929,7 @@ tex2mail_output(GEN z, long n)
 	outbrute(z);
     pariputc('\n'); pariflush();
   }
-  logfile = o_logfile;
+  pari_logfile = o_logfile;
   pari_outfile = o_out;
   if (n) term_color(c_NONE);
   return 1;

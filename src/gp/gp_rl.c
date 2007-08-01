@@ -952,7 +952,7 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
 
 /* request one line interactively.
  * Return 0: EOF
- *        1: got one line from readline or infile */
+ *        1: got one line from readline or pari_infile */
 int
 get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
 {
@@ -979,7 +979,7 @@ get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
       gp_add_history(s);
     }
 
-    if (logfile) update_logfile(expand_prompt(IM.prompt, F), s);
+    if (pari_logfile) update_logfile(expand_prompt(IM.prompt, F), s);
   }
   return 1;
 }

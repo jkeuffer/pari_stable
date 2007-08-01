@@ -229,14 +229,14 @@ gp_read_file(char *s)
 {
   GEN x = gnil;
   switchin(s);
-  if (file_is_binary(infile)) {
+  if (file_is_binary(pari_infile)) {
     int junk;
-    x = readbin(s,infile, &junk);
+    x = readbin(s,pari_infile, &junk);
   } else {
     Buffer *b = new_buffer();
     x = gnil;
     for (;;) {
-      if (!gp_read_stream_buf(infile, b)) break;
+      if (!gp_read_stream_buf(pari_infile, b)) break;
       if (*(b->buf)) x = readseq(b->buf);
     }
     delete_buffer(b);
@@ -273,11 +273,11 @@ gp_readvec_file(char *s)
 {
   GEN x = NULL;
   switchin(s);
-  if (file_is_binary(infile)) {
+  if (file_is_binary(pari_infile)) {
     int junk;
-    x = readbin(s,infile,&junk);
+    x = readbin(s,pari_infile,&junk);
   } else 
-    x = gp_readvec_stream(infile);
+    x = gp_readvec_stream(pari_infile);
   popinfile(); return x;
 }
 
@@ -353,39 +353,39 @@ static void
 normalOutC(char c)
 {
   putc(c, pari_outfile);
-  if (logfile) putc(c, logfile);
+  if (pari_logfile) putc(c, pari_logfile);
 }
 static void
 normalOutS(const char *s)
 {
   fputs(s, pari_outfile);
-  if (logfile) { fputs(s, logfile); }
+  if (pari_logfile) { fputs(s, pari_logfile); }
 }
 static void
 normalOutF(void)
 {
   fflush(pari_outfile);
-  if (logfile) fflush(logfile);
+  if (pari_logfile) fflush(pari_logfile);
 }
 PariOUT defaultOut = {normalOutC, normalOutS, normalOutF, NULL};
 
 static void
 normalErrC(char c)
 {
-  putc(c, errfile);
-  if (logfile) putc(c, logfile);
+  putc(c, pari_errfile);
+  if (pari_logfile) putc(c, pari_logfile);
 }
 static void
 normalErrS(const char *s)
 {
-  fputs(s, errfile);
-  if (logfile) fputs(s, logfile);
+  fputs(s, pari_errfile);
+  if (pari_logfile) fputs(s, pari_logfile);
 }
 static void
 normalErrF(void)
 {
-  fflush(errfile);
-  if (logfile) fflush(logfile);
+  fflush(pari_errfile);
+  if (pari_logfile) fflush(pari_logfile);
 }
 PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 
@@ -393,7 +393,7 @@ PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 void
 initout(int initerr)
 {
-  infile = stdin; pari_outfile = stdout; errfile = stderr;
+  pari_infile = stdin; pari_outfile = stdout; pari_errfile = stderr;
   pariOut = &defaultOut;
   if (initerr) pariErr = &defaultErr;
 }
@@ -514,12 +514,12 @@ pariprintf(const char *format, ...)
 void
 term_color(long c)
 {
-  FILE *o_logfile = logfile;
+  FILE *o_logfile = pari_logfile;
 
-  if (logstyle != logstyle_color) logfile = 0; /* Ugly hack */
+  if (logstyle != logstyle_color) pari_logfile = 0; /* Ugly hack */
   /* _not_ pariputs, because of last_was_newline */
   pariOut->puts(term_get_color(c));
-  logfile = o_logfile;
+  pari_logfile = o_logfile;
 }
 
 void
@@ -2689,7 +2689,7 @@ check_filtre(filtre_t *T)
   }
 }
 
-/* Remove one INFILE from the stack. Reset infile (to the most recent infile)
+/* Remove one INFILE from the stack. Reset pari_infile (to the most recent pari_infile)
  * Return -1, if we're trying to pop out stdin itself; 0 otherwise
  * Check for leaked file handlers (temporary files)
  */
@@ -2707,8 +2707,8 @@ popinfile(void)
   last_tmp_file = f; if (!last_tmp_file) return -1;
   pari_fclose(last_tmp_file);
   for (f = last_tmp_file; f; f = f->prev)
-    if (f->type & mf_IN) { infile = f->file; return 0; }
-  infile = stdin; return 0;
+    if (f->type & mf_IN) { pari_infile = f->file; return 0; }
+  pari_infile = stdin; return 0;
 }
 
 static void
@@ -2732,7 +2732,7 @@ killallfiles(int leaving)
     kill_file_stack(&last_file);
   }
   kill_file_stack(&last_tmp_file);
-  infile = stdin;
+  pari_infile = stdin;
 }
 
 static int
@@ -3056,7 +3056,7 @@ gp_expand_path(gp_path *p)
   dirs[i] = NULL; p->dirs = dirs;
 }
 
-/* name is a malloc'ed (existing) filename. Accept it as new infile
+/* name is a malloc'ed (existing) filename. Accept it as new pari_infile
  * (unzip if needed). */
 static pariFILE *
 pari_get_infile(char *name, FILE *file)
@@ -3121,7 +3121,7 @@ try_name(char *name)
       if (last_filename) gpfree(last_filename);
       last_filename = pari_strdup(s);
     }
-    file = infile = pari_get_infile(s,file)->file;
+    file = pari_infile = pari_get_infile(s,file)->file;
   }
   gpfree(name); avma = av;
   return file;
