@@ -1817,7 +1817,7 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
     fprintferr("adding vector = %Z\n",V);
     fprintferr("vector in new basis = %Z\n",a);
     fprintferr("list = %Z\n",L);
-    fprintferr("base change =\n"); outerr(invp);
+    fprintferr("base change =\n%Z\n", invp);
   }
   k = 1; while (k<n && (L[k] || !a[k])) k++;
   if (k == n) { avma = av; return 0; }

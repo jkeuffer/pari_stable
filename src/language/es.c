@@ -1326,8 +1326,9 @@ vsigne(GEN x)
 #  define VOIR_STRING2 "%016lx  "
 #endif
 
+/* bl: indent level */
 static void
-voir2(GEN x, long nb, long bl)
+dbg(GEN x, long nb, long bl)
 {
   long tx,i,j,e,dx,lx;
 
@@ -1375,37 +1376,37 @@ voir2(GEN x, long nb, long bl)
     {
       const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
       blancs(bl);
-      pariputs("mod = "); voir2(gel(x,1),nb,bl);
-      blancs(bl); pariputs(s);        voir2(gel(x,2),nb,bl);
+      pariputs("mod = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pariputs(s);        dbg(gel(x,2),nb,bl);
       break;
     }
     case t_FRAC: case t_RFRAC:
-      blancs(bl); pariputs("num = "); voir2(gel(x,1),nb,bl);
-      blancs(bl); pariputs("den = "); voir2(gel(x,2),nb,bl);
+      blancs(bl); pariputs("num = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pariputs("den = "); dbg(gel(x,2),nb,bl);
       break;
 
     case t_FFELT:
-      blancs(bl); pariputs("pol = "); voir2(gel(x,2),nb,bl);
-      blancs(bl); pariputs("mod = "); voir2(gel(x,3),nb,bl);
-      blancs(bl); pariputs("p   = "); voir2(gel(x,4),nb,bl);
+      blancs(bl); pariputs("pol = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pariputs("mod = "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pariputs("p   = "); dbg(gel(x,4),nb,bl);
       break;
 
     case t_COMPLEX:
-      blancs(bl); pariputs("real = "); voir2(gel(x,1),nb,bl);
-      blancs(bl); pariputs("imag = "); voir2(gel(x,2),nb,bl);
+      blancs(bl); pariputs("real = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pariputs("imag = "); dbg(gel(x,2),nb,bl);
       break;
 
     case t_PADIC:
       blancs(bl);
-                  pariputs("  p : "); voir2(gel(x,2),nb,bl);
-      blancs(bl); pariputs("p^l : "); voir2(gel(x,3),nb,bl);
-      blancs(bl); pariputs("  I : "); voir2(gel(x,4),nb,bl);
+                  pariputs("  p : "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pariputs("p^l : "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pariputs("  I : "); dbg(gel(x,4),nb,bl);
       break;
 
     case t_QUAD:
-      blancs(bl); pariputs("pol = ");  voir2(gel(x,1),nb,bl);
-      blancs(bl); pariputs("real = "); voir2(gel(x,2),nb,bl);
-      blancs(bl); pariputs("imag = "); voir2(gel(x,3),nb,bl);
+      blancs(bl); pariputs("pol = ");  dbg(gel(x,1),nb,bl);
+      blancs(bl); pariputs("real = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pariputs("imag = "); dbg(gel(x,3),nb,bl);
       break;
 
     case t_POL: case t_SER:
@@ -1413,7 +1414,7 @@ voir2(GEN x, long nb, long bl)
       for (i=2; i<lx; i++)
       {
 	blancs(bl); pariprintf("coef of degree %ld = ",e);
-	e++; voir2(gel(x,i),nb,bl);
+	e++; dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -1422,7 +1423,7 @@ voir2(GEN x, long nb, long bl)
       for (   ; i<lx; i++)
       {
         blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
-	voir2(gel(x,i),nb,bl);
+	dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -1435,7 +1436,7 @@ voir2(GEN x, long nb, long bl)
         for (i = 1; i < lx; i++)
         {
           blancs(bl); pariprintf("%ld%s column = ",i,eng_ord(i));
-          voir2(gel(x,i),nb,bl);
+          dbg(gel(x,i),nb,bl);
         }
       }
       else
@@ -1445,7 +1446,7 @@ voir2(GEN x, long nb, long bl)
           for (j=1; j<lx; j++)
           {
             blancs(bl); pariprintf("mat(%ld,%ld) = ",i,j);
-            voir2(gcoeff(x,i,j),nb,bl);
+            dbg(gcoeff(x,i,j),nb,bl);
           }
       }
     }
@@ -1453,10 +1454,7 @@ voir2(GEN x, long nb, long bl)
 }
 
 void
-voir(GEN x, long nb)
-{
-  voir2(x,nb,0);
-}
+dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 
 static void
 print_entree(entree *ep, long hash)
@@ -2529,12 +2527,6 @@ void
 outbrute(GEN g) { brute(g,'g',-1); }
 
 void
-outsor(GEN g) { sor(g,'g',-1,1); }
-
-void
-outtex(GEN g) { texe(g,'g',-1); }
-
-void
 output(GEN x)
 {
   outbrute(x); pariputc('\n'); pariflush();
@@ -2544,26 +2536,6 @@ void
 outmat(GEN x)
 {
   matbrute(x,'g',-1); pariputc('\n'); pariflush();
-}
-
-void
-outbeaut(GEN x)
-{
-  outsor(x); pariputc('\n'); pariflush();
-}
-
-void
-outerr(GEN x)
-{
-  PariOUT *out = pariOut; pariOut = pariErr;
-  output(x); pariOut = out;
-}
-
-void
-outbeauterr(GEN x)
-{
-  PariOUT *out = pariOut; pariOut = pariErr;
-  outbeaut(x); pariOut = out;
 }
 
 void

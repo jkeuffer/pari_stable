@@ -510,10 +510,7 @@ subgroup_engine(subgp_iter *T)
     for (i=1; i<lsubq; i++)
       gel(T->subq,i) = gmulsg(T->powlist[k],gel(T->subq,i));
     if (DEBUGLEVEL>2)
-    {
-      fprintferr("(lifted) subgp of prime to %Z part:\n",p);
-      outbeaut(T->subq);
-    }
+      fprintferr("(lifted) subgp of prime to %Z part:\n%Z\n",p, T->subq);
   }
   dopsub(T, p,indexsubq);
   if (DEBUGLEVEL) fprintferr("nb subgroup = %ld\n",T->count);

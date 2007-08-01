@@ -2961,7 +2961,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
     fprintferr("adding vector = %Z\n",V);
     fprintferr("vector in new basis = %Z\n",a);
     fprintferr("list = %Z\n",L);
-    fprintferr("base change matrix =\n"); outerr(invp);
+    fprintferr("base change matrix =\n%Z\n", invp);
   }
   k = 1; while (k<n && (L[k] || gcmp0(gel(a,k)))) k++;
   if (k == n) return 0;

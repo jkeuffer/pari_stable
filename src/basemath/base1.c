@@ -1351,7 +1351,7 @@ ok_pol(void *TT, GEN xn)
   if (++T->ind > T->indmax && T->xbest) return T->xbest;
 
   if (!ZX_is_squarefree(xn)) return (T->ind == T->indmax)? T->xbest: NULL;
-  if (DEBUGLEVEL>3) outerr(xn);
+  if (DEBUGLEVEL>3) fprintferr("ok_pol: generator %Z\n", xn);
   dxn = ZX_disc(xn);
   if (better_pol(xn, dxn, T->xbest, T->dxbest))
   {
@@ -1671,7 +1671,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
     if (degpol(d)) ch = gdivexact(ch,d);
 
     if (canon_pol(ch) < 0 && pta) gel(a,i) = gneg_i(gel(a,i));
-    if (DEBUGLEVEL > 3) outerr(ch);
+    if (DEBUGLEVEL>3) fprintferr("polred: generator %Z\n", ch);
     gel(y,i) = ch;
   }
   if (CHECK) return NULL; /* no suitable polynomial found */

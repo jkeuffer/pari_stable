@@ -125,8 +125,11 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
         modpr=nfmodprinit(nf, idealprimedec(nf,5)[1]);
         L = nfgaloisconj(w); vector(#L,i, nfeltreducemodpr(nf,L[i],modpr));
       (in this example, the last reduction is down from ~ 1minute to ~ 2s)
-    32- make sure nfmodprininit chooses a monic T to represent
+   32- make sure nfmodprininit chooses a monic T to represent
       Fq ~ Fp[X]/(T)  [#646]
+   33- remove obsolete undocumented functions outerr, outbeauterr, outsor,
+    outtex. Rename voir -> dbgGEN. Functions brute, outbrute, matbrute,
+    outmat, sor, outbeaut are obsoleted and no longer documented.
 
   Added
     1- library functions expu, adduu, subuu
