@@ -3,27 +3,8 @@
 #   by (weight / 1000)
 _test_list='test_extra_out test_extra test_basic top_test_extra top_dotest_extra'
 
-# included in 'make test-all' in addition to regular components of 'make bench'
-test_extra="\
-  bnfisintnorm\
-  compat\
-  ellglobalred\
-  extract\
-  ffisom\
-  galois\
-  intnum\
-  qfbsolve\
-  quadclassunit\
-  rfrac\
-  rnfkummer\
-  round4\
-  stark\
-"
-
 # _not_ included in 'make test-all' (annoying)
-test_extra_out="\
-  ploth\
-"
+test_extra_out="ploth"
 
 # included in 'make bench'
 test_basic="\
@@ -39,6 +20,11 @@ test_basic="\
   trans\
   nfields_200\
 "
+
+pattern_out=`echo $test_extra_out | sed -e 's/ /|/'`
+# included in 'make test-all' in addition to regular components of 'make bench'
+test_extra=`ls ../src/test/in | egrep -v "CVS|$pattern_out"`
+test_extra=`echo $test_extra | sed -e 's/\n/ /g'`
 
 top_test_extra="test-`echo $test_extra $test_extra_out | sed -e 's/ \\([^ ]\\)/ test-\\1/g'`"
 top_dotest_extra="dotest-`echo $test_extra $test_extra_out | sed -e 's/ \\([^ ]\\)/ dotest-\\1/g'`"

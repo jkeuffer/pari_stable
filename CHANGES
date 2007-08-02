@@ -133,6 +133,8 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
     outmat, sor, outbeaut are obsoleted and no longer documented.
    34- rename errfile -> pari_errfile, infile -> pari_infile, logfile ->
     pari_logfile
+   35- extra test infrastructure [ drop file in src/test/in and possibly
+    src/test/[32|64], then run Configure, no need to edit config/get_tests ]
 
   Added
     1- library functions expu, adduu, subuu

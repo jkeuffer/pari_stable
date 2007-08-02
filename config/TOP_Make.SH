@@ -35,7 +35,7 @@ dft target::
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
-	@echo "Available extra tests: test-all $top_test_extra"
+	@echo "Available tests: test-all $top_test_extra"
 
 all::
 	@-cd doc && \$(MAKE) doc

@@ -454,9 +454,9 @@ bench: $exec
 dobench::
 	@\$(DOTEST) $test_basic
 test-all: $exec
-	@\$(DOTEST) $test_basic $test_extra
+	@\$(DOTEST) $test_extra
 dotest-all::
-	@\$(DOTEST) $test_basic $test_extra
+	@\$(DOTEST) $test_extra
 EOT
 for i in $test_extra $test_extra_out; do
   cat >> $file << EOT

@@ -1,0 +1,24 @@
+/* Multivariable Laurent polynomial bug finding */
+/* 05 Jul 2007 Michael Somos */
+
+x;y;z;
+
+/* This is a term of a polynomial in x */
+t(n)=x^max((n-1)\2,0)/if(n<1,1,if(n%2,y,z))
+
+/* Attempt to multiply two polynomials in x */
+{f(N,M,v,w)=
+  t1=sum(n=1,#v,t(v[n]),x^N);
+  t2=sum(n=1,#w,t(w[n]),x^M);
+  trap(, return(1), t1*t2); 0;
+}
+
+{doit(N,M)=
+forvec(v=[[0,2*N],[0,2*N],[0,2*N]],
+forvec(w=[[0,2*M],[0,2*M]],
+if(f(N,M,v,w), print("("t1")*("t2") ",[N,M],v,w)),2),2)
+}
+
+doit(9,9);
+print("Total time spent: ",gettime);
+\q
