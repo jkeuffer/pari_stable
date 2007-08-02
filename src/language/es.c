@@ -408,8 +408,11 @@ pariputc(char c) {
 
 void
 pariputs(const char *s) {
-  last_was_newline = s[strlen(s)-1] == '\n';
-  pariOut->puts(s);
+  if (*s) {
+    last_was_newline = s[strlen(s)-1] == '\n';
+    pariOut->puts(s);
+  } else
+    last_was_newline = 0;
 }
 
 int
