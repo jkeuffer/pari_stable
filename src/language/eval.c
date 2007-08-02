@@ -99,6 +99,11 @@ allocatemem0(GEN z)
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
   (void)allocatemoremem(newsize);
+}
+
+void
+allocating_mem(void)
+{
   br_status = br_ALLOCMEM;
 }
 

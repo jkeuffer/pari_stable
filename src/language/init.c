@@ -1757,6 +1757,7 @@ allocatemoremem(size_t newsize)
     pari_warn(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
+  allocating_mem();
   return init_stack(newsize);
 }
 

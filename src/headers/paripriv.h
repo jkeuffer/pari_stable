@@ -743,6 +743,9 @@ void    texi(GEN g, pariout_t *T, int addsign);
 void    writeGEN(GEN x, FILE *f);
 void    writenamedGEN(GEN x, char *s, FILE *f);
 
+/* eval.c */
+void allocating_mem(void);
+
 /* galconj.c */
 
 GEN     fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod);
