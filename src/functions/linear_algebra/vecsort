@@ -6,7 +6,8 @@ Help: vecsort(x,{k},{flag=0}): sorts the vector of vectors (or matrix) x in
  ascending order, according to the value of its k-th component if k is not
  omitted. Binary digits of flag (if present) mean: 1: indirect sorting,
  return the permutation instead of the permuted vector, 2: sort using
- lexicographic order, 4: use descending instead of ascending order
+ lexicographic order, 4: use descending instead of ascending order, 8: remove
+ duplicate entries
 Description: 
  (vec):vec	sort($1)
  (vec, gen):vec	vecsort0($1, $2, 0)
@@ -15,13 +16,12 @@ Description:
  (vec, , 2):vec	lexsort($1)
  (vec, , small):vec	vecsort0($1, NULL, $3)
  (vec, gen, small):vec	vecsort0($1, $2, $3)
-Doc: sorts the vector $x$ in ascending
- order, using a mergesort method. $x$ must be a vector, and its components
- integers, reals, or fractions.
+Doc: sorts the vector $x$ in ascending order, using a mergesort method.
+ $x$ must be a vector, and its components integers, reals, or fractions.
  
  If $k$ is present and is an integer, sorts according to the value of the
  $k$-th subcomponents of the components of~$x$. Note that mergesort is
- stable, hence is the initial ordering of "equal" entries (with respect to
+ stable, hence the initial ordering of "equal" entries (with respect to
  the sorting criterion) is not changed.
  
  $k$ can also be a vector, in which case the sorting is done lexicographically
@@ -42,3 +42,11 @@ Doc: sorts the vector $x$ in ascending
  \kbd{lex} comparison function).
  
  \item 4: use descending instead of ascending order.
+
+ \item 8: remove "duplicate" entries with respect to the sorting function
+ (keep the first occuring entry). If $k$ is given, entries having the same
+ $k$-th component as a given one are deleted:
+ \bprog
+   ? vecsort([[1,2],[0,2]], 2, 8)
+   %1 = [[1, 2]]
+ @eprog

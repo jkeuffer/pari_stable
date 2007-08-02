@@ -149,6 +149,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    10- library function phiu
    11- library function mkvecsmalln
    12- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
+   13- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

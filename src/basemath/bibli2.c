@@ -1165,6 +1165,73 @@ veccmp(void *data, GEN x, GEN y)
   return 0;
 }
 
+/* return permutation sorting v[1..n], removing duplicateѕ. Assume n > 0 */
+static GEN
+gen_sortspec_uniq(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
+{
+  pari_sp av;
+  long NX, nx, ny, m, ix, iy, i;
+  GEN x, y, w, W;
+  int s;
+  switch(n)
+  {
+    case 1: return mkvecsmall(1);
+    case 2:
+      s = cmp(E,gel(v,1),gel(v,2));
+      if      (s < 0) return mkvecsmall2(1,2);
+      else if (s > 0) return mkvecsmall2(2,1);
+      return mkvecsmall(1);
+    case 3:
+      s = cmp(E,gel(v,1),gel(v,2));
+      if (s < 0) {
+        s = cmp(E,gel(v,2),gel(v,3));
+        if (s < 0) return mkvecsmall3(1,2,3);
+        else if (s == 0) mkvecsmall2(1,2);
+        s = cmp(E,gel(v,1),gel(v,3));
+        if      (s < 0) return mkvecsmall3(1,3,2);
+        else if (s > 0) return mkvecsmall3(3,1,2);
+        return mkvecsmall2(1,2);
+      } else if (s > 0) {
+        s = cmp(E,gel(v,1),gel(v,3));
+        if (s < 0) return mkvecsmall3(2,1,3);
+        else if (s == 0) return mkvecsmall2(2,1);
+        s = cmp(E,gel(v,2),gel(v,3));
+        if (s < 0) return mkvecsmall3(2,3,1);
+        else if (s > 0) return mkvecsmall3(3,2,1);
+        return mkvecsmall2(2,1);
+      } else {
+        s = cmp(E,gel(v,1),gel(v,3));
+        if (s < 0) return mkvecsmall2(1,3);
+        else if (s == 0) return mkvecsmall(1);
+        return mkvecsmall2(3,1);
+      }
+  }
+  NX = nx = n>>1; ny = n-nx;
+  av = avma;
+  x = gen_sortspec_uniq(v,   nx,E,cmp); nx = lg(x)-1;
+  y = gen_sortspec_uniq(v+NX,ny,E,cmp); ny = lg(y)-1;
+  w = cgetg(n+1, t_VECSMALL);
+  m = ix = iy = 1;
+  while (ix<=nx && iy<=ny)
+  {
+    s = cmp(E, gel(v,x[ix]), gel(v,y[iy]+NX));
+    if (s < 0)
+      w[m++] = x[ix++];
+    else if (s > 0)
+      w[m++] = y[iy++]+NX;
+    else {
+      w[m++] = x[ix++];
+      iy++;
+    }
+  }
+  while (ix<=nx) w[m++] = x[ix++];
+  while (iy<=ny) w[m++] = y[iy++]+NX;
+  avma = av;
+  W = cgetg(m, t_VECSMALL);
+  for (i = 1; i < m; i++) W[i] = w[i];
+  return W;
+}
+
 /* return permutation sorting v[1..n]. Assume n > 0 */
 static GEN
 gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
@@ -1214,6 +1281,25 @@ init_sort(GEN *x, long *tx, long *lx)
   if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
 }
 
+/* Sort the vector x, using cmp to compare entries. */
+GEN
+gen_sort_uniq(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
+{
+  long tx, lx, i;
+  GEN y;
+
+  init_sort(&x, &tx, &lx);
+  if (lx==1) return cgetg(1, tx);
+  y = gen_sortspec_uniq(x,lx-1,E,cmp);
+  lx = lg(y);
+  if (tx == t_VECSMALL)
+    for (i=1; i<lx; i++) y[i] = x[y[i]];
+  else {
+    settyp(y,tx);
+    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
+  }
+  return y;
+}
 
 /* Sort the vector x, using cmp to compare entries. */
 GEN
@@ -1232,6 +1318,15 @@ gen_sort(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
     for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
   }
   return y;
+}
+/* indirect sort: return the permutation that would sort x */
+GEN
+gen_indexsort_uniq(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
+{
+  long tx, lx;
+  init_sort(&x, &tx, &lx);
+  if (lx==1) return cgetg(1, t_VECSMALL);
+  return gen_sortspec_uniq(x,lx-1,E,cmp);
 }
 /* indirect sort: return the permutation that would sort x */
 GEN
@@ -1275,6 +1370,7 @@ gen_sort_inplace(GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN *perm)
 #define cmp_IND 1
 #define cmp_LEX 2
 #define cmp_REV 4
+#define cmp_UNIQ 8
 GEN
 vecsort0(GEN x, GEN k, long flag)
 {
@@ -1282,7 +1378,8 @@ vecsort0(GEN x, GEN k, long flag)
   int (*cmp)(GEN,GEN) = (flag & cmp_LEX)? &lexcmp: &gcmp;
   void *E;
 
-  if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND)) pari_err(flagerr,"vecsort");
+  if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND|cmp_UNIQ))
+    pari_err(flagerr,"vecsort");
   if (k) {
     long i, j, l, lk, tx = typ(x), lx = lg(x);
     struct veccmp_s v;
@@ -1315,7 +1412,10 @@ vecsort0(GEN x, GEN k, long flag)
     E = (void*)((typ(x) == t_VECSMALL)? cmp_small: cmp);
     CMP = &cmp_nodata;
   }
-  x = flag & cmp_IND? gen_indexsort(x, E, CMP): gen_sort(x, E, CMP);
+  if (flag & cmp_UNIQ)
+    x = flag & cmp_IND? gen_indexsort_uniq(x, E, CMP): gen_sort_uniq(x, E, CMP);
+  else
+    x = flag & cmp_IND? gen_indexsort(x, E, CMP): gen_sort(x, E, CMP);
   if (flag & cmp_REV) { /* reverse order */
     long j, lx = lg(x);
     for (j=1; j<=(lx-1)>>1; j++) lswap(x[j], x[lx-j]);

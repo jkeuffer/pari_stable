@@ -3269,8 +3269,14 @@ there in case your \kbd{cmp} requires additional context.
 
 \fun{GEN}{gen_sort}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as \kbd{sort}.
 
+\fun{GEN}{gen_sort_uniq}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as
+\kbd{sort}, removing duplicate entries.
+
 \fun{GEN}{gen_indexsort}{GEN x, void *data, int (*cmp)(void*,GEN,GEN)},
 as \kbd{indexsort}.
+
+\fun{GEN}{gen_indexsort_uniq}{GEN x, void *data, int (*cmp)(void*,GEN,GEN)},
+as \kbd{indexsort}, removing duplicate entries.
 
 \fun{void}{gen_sort_inplace}{GEN x, void *data, int (*cmp)(void*,GEN,GEN), GEN
 *perm} sort \kbd{x} in place, without copying its components. If
