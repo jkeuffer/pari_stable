@@ -12,7 +12,10 @@ Doc: this very special operation
  the new stack is twice the size of the old one.
  
  Although it is a function, \kbd{allocatemem} cannot be used in loop-like
- constructs, or as part of a larger expression, e.g \kbd{2 + allocatemem()}.
- Such an attempt will raise an error. The technical reason is that this
- routine usually moves the stack, so objects from the current expression may
- not be correct anymore, e.g. loop indexes.
+ constructs, or as part of a larger expression sequence, e.g 
+ \kbd{allocatemem(); something\_else()}. The former attempt will raise an
+ error; in the latter the rest of the sequence following \kbd{allocatemem()}
+ will be silently discarded. The technical reason is that this routine
+ moves the stack, so temporary objects created during the current expression
+ evaluation will not be correct anymore. (In particular byte-compiled
+ expressions, which are allocated on the stack.)
