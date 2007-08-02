@@ -416,7 +416,7 @@ member_gen(GEN x)
 {
   long t;
   GEN y = get_primeid(x);
-  if (y) return mkvec2(gel(y,1), gel(y,2));
+  if (y) return mkvec2copy(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gel(x,7);
@@ -534,7 +534,7 @@ member_omega(GEN x)
 {
   if (!is_bigell(x)) member_err("omega");
   if (gcmp0(gel(x,19))) pari_err(talker,"curve not defined over R");
-  return mkvec2(gel(x,15), gel(x,16));
+  return mkvec2copy(gel(x,15), gel(x,16));
 }
 
 GEN
@@ -542,7 +542,7 @@ member_eta(GEN x)
 {
   if (!is_bigell(x)) member_err("eta");
   if (gcmp0(gel(x,19))) pari_err(talker,"curve not defined over R");
-  return mkvec2(gel(x,17), gel(x,18));
+  return mkvec2copy(gel(x,17), gel(x,18));
 }
 
 GEN
