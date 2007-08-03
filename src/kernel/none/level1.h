@@ -109,6 +109,8 @@ long   expi(GEN x);
 long   expu(ulong x);
 void   fixlg(GEN z, long ly);
 GEN    fractor(GEN x, long prec);
+GEN    gerepileuptoleaf(pari_sp av, GEN q);
+GEN    gerepileuptoint(pari_sp av, GEN q);
 double gtodouble(GEN x);
 GEN    gtofp(GEN z, long prec);
 long   gtos(GEN x);
@@ -291,14 +293,6 @@ init_gen_op(GEN x, long tx, long *lx, long *i) {
   return y;
 }
 
-INLINE GEN
-cgetg(long x, long y)
-{
-  const GEN z = new_chunk((size_t)x);
-  z[0] = evaltyp(y) | evallg(x);
-  return z;
-}
-
 INLINE void
 cgiv(GEN x)
 {
@@ -306,6 +300,13 @@ cgiv(GEN x)
   if (isonstack(av)) avma = av;
 }
 
+INLINE GEN
+cgetg(long x, long y)
+{
+  const GEN z = new_chunk((size_t)x);
+  z[0] = evaltyp(y) | evallg(x);
+  return z;
+}
 
 INLINE GEN
 cgeti(long x)
@@ -529,6 +530,24 @@ icopy_av(GEN x, GEN y)
   while (--lx > 0) y[lx]=x[lx];
   y[0] = evaltyp(t_INT)|evallg(ly);
   return y;
+}
+INLINE GEN
+gerepileuptoleaf(pari_sp av, GEN q)
+{
+  long i;
+  GEN q0;
+
+  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
+  i = lg(q); avma = (pari_sp)(((GEN)av) -  i);
+  q0 = (GEN)avma; while (--i >= 0) q0[i] = q[i];
+  return q0;
+}
+INLINE GEN
+gerepileuptoint(pari_sp av, GEN q)
+{
+  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
+  avma = (pari_sp)icopy_av(q, (GEN)av);
+  return (GEN)avma;
 }
 
 INLINE GEN

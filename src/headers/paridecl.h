@@ -1352,8 +1352,6 @@ GEN     gerepilecopy(pari_sp av, GEN x);
 void    gerepilemany(pari_sp av, GEN* g[], int n);
 void    gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* g[], int n);
 GEN     gerepileupto(pari_sp av, GEN q);
-GEN     gerepileuptoint(pari_sp av, GEN q);
-GEN     gerepileuptoleaf(pari_sp av, GEN q);
 GEN     getheap(void);
 void    gpfree(void *pointer);
 char*   gpmalloc(size_t bytes);

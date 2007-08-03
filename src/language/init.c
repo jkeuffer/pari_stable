@@ -1632,6 +1632,10 @@ gerepilecoeffssp(pari_sp av, pari_sp tetpil, long *g, int n)
 GEN
 gerepileupto(pari_sp av, GEN q)
 {
+  long tq = typ(q);
+  if (!is_recursive_t(tq)) 
+    return tq == t_INT? gerepileuptoint(av,q):
+                        gerepileuptoleaf(av,q);
   if (!isonstack(q)) { avma = av; return q; } /* universal object */
   /* empty garbage */
   if (av <= (pari_sp)q) return q;
@@ -1644,27 +1648,6 @@ gerepileupto(pari_sp av, GEN q)
 
   /* Beware: (long)(q+i) --> ((long)q)+i*sizeof(long) */
   return gerepile(av, (pari_sp) (q+lg(q)), q);
-}
-
-/* internal */
-GEN
-gerepileuptoleaf(pari_sp av, GEN q)
-{
-  long i;
-  GEN q0;
-
-  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
-  i = lg(q); avma = (pari_sp)(((GEN)av) -  i);
-  q0 = (GEN)avma; while (--i >= 0) q0[i] = q[i];
-  return q0;
-}
-/* internal */
-GEN
-gerepileuptoint(pari_sp av, GEN q)
-{
-  if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
-  avma = (pari_sp)icopy_av(q, (GEN)av);
-  return (GEN)avma;
 }
 
 static int
