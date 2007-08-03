@@ -1704,9 +1704,9 @@ dbg_gerepile(pari_sp av)
     const long tx = typ(x), lx = lg(x);
     GEN a, b;
 
-    if (! is_recursive_t(tx)) { x += lx; continue; }
-    a = x + lontyp[tx];
     pariprintf(" [%ld] %Z:", x - (GEN)avma, x);
+    if (! is_recursive_t(tx)) { pariputc('\n'); x += lx; continue; }
+    a = x + lontyp[tx];
     if (tx == t_LIST) { b = x + lgeflist(x); x += lx; } else { x += lx; b = x; }
     for (  ; a < b; a++) pariprintf("  %Z,", *a);
     pariprintf("\n");
