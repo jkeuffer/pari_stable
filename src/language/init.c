@@ -664,7 +664,6 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
 
-  (void)fetch_var(); /* create MAXVARN */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
@@ -684,8 +683,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   reset_traps();
   default_exception_handler = NULL;
 
-  (void)manage_var(manage_var_init,NULL); /* init nvar */
-  (void)fetch_named_var("x");
+  pari_var_init();
   try_to_recover = 1;
 }
 

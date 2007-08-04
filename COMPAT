@@ -53,6 +53,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     outmat, sor, outbeaut are obsoleted and no longer documented.
   - rename errfile -> pari_errfile, infile -> pari_infile, logfile ->
     pari_logfile
+  - manage_var obsoleted (kept for backward compatibility, to be removed),
+    use pari_var_init, pari_var_next, pari_var_max_avil, pari_var_create
+    instead.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

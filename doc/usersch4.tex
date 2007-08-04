@@ -1473,14 +1473,6 @@ commands (e.g \kbd {y = 1}), then the value of \kbd{gy} is not what you
 expected it to be and corresponds instead to the current value of the
 \kbd{gp} variable (e.g \kbd{gen\_1}).
 
-\misctitle{Technical remark} If you are rewriting the gp interpreter, you
-may use the lower level
-
-\fun{entree *}{fetch_named_var}{char *$s$}
-
-\noindent which returns an \kbd{entree*} suitable for inclusion in the
-interpreter hashlists of symbols.
-
 \fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the current
 value of the variable numbered $v$. Returns \kbd{NULL} if that variable
 number is unknown to the interpreter,  e.g. it is a user variable. Note

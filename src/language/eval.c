@@ -18,9 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "opcode.h"
 
 THREAD char *gp_function_name=NULL;
-
-#define initial_value(ep) ((ep)+1)
-
 /********************************************************************/
 /*                                                                  */
 /*         break/next/return/allocatemem handling                   */
@@ -495,8 +492,7 @@ closure_eval(GEN C)
         break;
     case OCpushvar:
         ep=(entree*)operand;
-        if (gel(initial_value(ep),0)==NULL)
-          (void)manage_var(manage_var_create,ep);
+        pari_var_create(ep);
         gel(st,sp++)=(GEN)initial_value(ep);
         break;
     case OCpushvalue:
@@ -504,9 +500,7 @@ closure_eval(GEN C)
         switch(ep->valence)
         {
         case EpNEW:
-          ep->valence=EpVAR;
-          (void)manage_var(manage_var_create,ep);
-          ep->value=initial_value(ep);
+          pari_var_create(ep);
         case EpVAR: case EpGVAR: /*FALL THROUGH*/
           gel(st,sp++)=(GEN)ep->value;
           break;
@@ -525,9 +519,7 @@ closure_eval(GEN C)
           switch (g->ep->valence)
           {
           case EpNEW:
-            g->ep->valence=EpVAR;
-            (void)manage_var(manage_var_create,g->ep);
-            g->ep->value=initial_value(g->ep);
+            pari_var_create(g->ep);
           case EpVAR: case EpGVAR:/*FALL THROUGH*/
             g->x = (GEN) g->ep->value;
             break;
@@ -555,9 +547,7 @@ closure_eval(GEN C)
         switch (ep->valence)
         {
         case EpNEW:
-          ep->valence=EpVAR;
-          (void)manage_var(manage_var_create,ep);
-          ep->value=initial_value(ep);
+          pari_var_create(ep);
         case EpVAR: case EpGVAR:/*FALL THROUGH*/
           changevalue(ep, gel(st,--sp));
           break;
@@ -786,11 +776,7 @@ closure_eval(GEN C)
         break;
     case OCglobalvar:
         ep=(entree *)operand;
-        if (ep->valence==EpNEW)
-        {
-          (void)manage_var(manage_var_create,ep);
-          ep->value=initial_value(ep);
-        }
+        if (ep->valence==EpNEW) pari_var_create(ep);
         ep->valence = EpGVAR;
         if (gel(st,sp-1))
           changevalue(ep,gel(st,sp-1));

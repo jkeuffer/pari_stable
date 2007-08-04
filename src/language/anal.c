@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "anal.h"
 #include "parse.h"
-
-
-#define initial_value(ep) ((ep)+1)
-
 /* Mnemonic codes parser:
  *
  * TEMPLATE is assumed to be ";"-separated list of items.  Each item
@@ -786,52 +782,71 @@ fetch_member(const char *s, long len)
 /*                Formal variables management                       */
 /*                                                                  */
 /********************************************************************/
+static long max_avail; /* max variable not yet used */
+static long nvar; /* first GP free variable */
 
-long
-manage_var(long n, entree *ep)
+void pari_var_init() {
+  nvar = 0; max_avail = MAXVARN;
+  (void)fetch_var();
+  (void)fetch_named_var("x"); 
+}
+long pari_var_next() { return nvar; }
+long pari_var_max_avail() { return max_avail; }
+static long
+pari_var_pop(long v)
 {
-  static long max_avail = MAXVARN; /* max variable not yet used */
-  static long nvar; /* first GP free variable */
-  long var;
-
-  switch(n) {
-      case manage_var_init: return nvar=0;
-      case manage_var_next: return nvar;
-      case manage_var_max_avail: return max_avail;
-      case manage_var_pop:
-        var = (long)ep;
-        if (var != nvar-1) pari_err(talker,"can't pop gp variable");
-        return --nvar;
-      case manage_var_delete:
-	/* user wants to delete one of his/her/its variables */
-	if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
-	max_avail++;
-	return max_avail+1;
-      case manage_var_create: break;
-      default: pari_err(talker, "panic");
-  }
-
+  if (v != nvar-1) pari_err(talker,"can't pop user variable %ld", v);
+  return --nvar;
+}
+void
+pari_var_create(entree *ep)
+{
+  GEN p = (GEN)initial_value(ep);
+  long v;
+  if (*p) return;
   if (nvar == max_avail) pari_err(talker,"no more variables available");
-  if (ep)
-  {
-    GEN p = (GEN) initial_value(ep);
-    var = nvar++;
-    /* create pol_x[var] */
-    p[0] = evaltyp(t_POL) | evallg(4);
-    p[1] = evalsigne(1) | evalvarn(var);
-    gel(p,2) = gen_0;
-    gel(p,3) = gen_1;
-    varentries[var] = ep;
-  }
-  else
-    var = max_avail--;
-  return var;
+  v = nvar++;
+  /* set p = pol_x(v) */
+  p[0] = evaltyp(t_POL) | evallg(4);
+  p[1] = evalsigne(1) | evalvarn(v);
+  gel(p,2) = gen_0;
+  gel(p,3) = gen_1;
+  varentries[v] = ep;
+
+  ep->valence = EpVAR;
+  ep->value = p;
 }
 
 long
+delete_var()
+{ /* user wants to delete one of his/her/its variables */
+  if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
+  max_avail++;
+  return max_avail+1;
+}
+long
 fetch_var(void)
 {
-  return manage_var(manage_var_create,NULL);
+  if (nvar == max_avail) pari_err(talker,"no more variables available");
+  return --max_avail;
+}
+
+/* FIXE: obsolete, kept for backward compatibility */
+long
+manage_var(long n, entree *ep)
+{
+  switch(n) {
+      case manage_var_init: pari_var_init(); return 0;
+      case manage_var_next: return pari_var_next();
+      case manage_var_max_avail: return pari_var_max_avail();
+      case manage_var_pop: return pari_var_pop((long)ep);
+      case manage_var_delete: return delete_var();
+      case manage_var_create:
+        pari_var_create(ep);
+        return varn(initial_value(ep));
+  }
+  pari_err(talker, "panic");
+  return -1; /* not reached */
 }
 
 entree *
@@ -846,9 +861,7 @@ fetch_named_var(char *s)
     case EpNEW: break;
     default: pari_err(talker, "%s already exists with incompatible valence", s);
   }
-  ep->valence=EpVAR;
-  (void)manage_var(manage_var_create,ep);
-  ep->value=initial_value(ep);
+  pari_var_create(ep);
   return ep;
 }
 
@@ -868,14 +881,8 @@ fetch_var_value(long vx)
 void
 delete_named_var(entree *ep)
 {
-  (void)manage_var(manage_var_pop, (entree*)varn(initial_value(ep)));
+  (void)pari_var_pop( varn(initial_value(ep)) );
   kill0(ep);
-}
-
-long
-delete_var(void)
-{
-  return manage_var(manage_var_delete,NULL);
 }
 
 void
@@ -884,7 +891,7 @@ name_var(long n, char *s)
   entree *ep;
   char *u;
 
-  if (n < manage_var(manage_var_next,NULL))
+  if (n < pari_var_next())
     pari_err(talker, "renaming a GP variable is forbidden");
   if (n > (long)MAXVARN)
     pari_err(talker, "variable number too big");
@@ -903,7 +910,7 @@ gpolvar(GEN x)
 {
   long v;
   if (!x) {
-    long k = 1, n = manage_var(manage_var_next,NULL);
+    long k = 1, n = pari_var_next();
     GEN z = cgetg(n+1, t_VEC);
     for (v = 0; v < n; v++)
     {

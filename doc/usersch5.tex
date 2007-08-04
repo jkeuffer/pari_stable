@@ -3799,4 +3799,54 @@ polynomial \kbd{f} over the definition field of the \typ{FFELT} \kbd{a}. The
 coefficients of \kbd{f} must be of type \typ{INT}, \typ{INTMOD} or \typ{FFELT}
 and compatible with \kbd{a}.
 
+\section{Handling user and temp variables}
+Low-level implementation of user / temporary variables is liable to change. We
+describe it nevertheless for completeness. Currently variables are
+implemented by a single array of values divided in 3 zones: 0--\kbd{nvar}
+(user variables), \kbd{max\_avail}--\kbd{MAXVARN} (temporary variables), 
+and \kbd{nvar+1}--\kbd{max\_avail-1} (pool of free variable numbers).
+
+\fun{void}{pari_var_init}{}: a small part of \kbd{pari\_init}. Resets
+variable counters \kbd{nvar} and \kbd{max\_avail}, notwithstanding existing
+variables! In effect, this even deletes \kbd{x}. Don't use it.
+
+\fun{long}{pari_var_next}{}: returns \kbd{nvar}.
+
+\fun{long}{pari_var_max_avail}{} returns \kbd{max\_avail}.
+
+\fun{long}{fetch_user_var}{char *s} returns a user variable whose name
+is \kbd{s}, creating it is needed (and using an existing variable otherwise).
+Returns its variable number.
+
+\fun{entree*}{fetch_named_var}{char *s} as \kbd{fetch\_user\_var}, but
+returns an \kbd{entree*} suitable for inclusion in the interpreter hashlists
+of symbols, not a variable number. \kbd{fetch\_user\_var} is a trivial
+wrapper.
+
+\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the 
+current value of the variable numberd $v$. Return \kbd{NULL} for a temporary
+variable.
+
+\fun{void}{pari_var_create}{entree *ep} low-level initialization of an
+\kbd{EpVAR}.
+
+\fun{void}{delete_named_var}{entree *ep} delete variable created by
+\kbd{fetch\_named\_var}, which must be the last one created. Don't use this:
+if a variable is to de deleted, it should be a temp.
+
+\fun{long}{fetch_var}{void} returns the number of a new temporary variable
+(decreasing \kbd{max\_avail}).
+
+\fun{long}{delete_var}{void} delete latest temp variable created and return 
+the number of previous one.
+
+\fun{void}{name_var}{long n, char *s} rename temporary variable number
+\kbd{n} to \kbd{s}; mostly useful for nicer printout. Error when trying to
+rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
+the right name in the first place.
+
+\fun{entree*}{is_entry}{const char *s} returns the \kbd{entree*} associated
+to an identifier \kbd{s} (variable or function), from the interpreter
+hashtables. Return \kbd{NULL} is the identifier is unknown.
+
 \vfill\eject

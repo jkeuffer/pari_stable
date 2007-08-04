@@ -2092,7 +2092,7 @@ factor(GEN x)
           long killv;
 	  x = shallowcopy(x); lx=lg(x);
           pol = shallowcopy(pol);
-          v = manage_var(manage_var_max_avail,NULL);
+          v = pari_var_max_avail();
           for(i=2; i<lx; i++)
           {
             p1 = gel(x,i);

@@ -23,25 +23,31 @@ Doc: tries to
  %1 = 1/2
  ? inv(0)
  %2 = INFINITY
+ @eprog\noindent
+ Note that \var{seq} is effectively evaluated up to the point that produced
+ the error, and the recovery sequence is evaluated starting from that same
+ context, it does not "undo" whatever happened in the other branch (restore
+ the evaluation context):
+ \bprog
+ ? x = 1; trap (, /* recover: */ x, /* try: */ x = 0; 1/x)
+ %1 = 0
  @eprog
  
  If \var{seq} is omitted, defines \var{rec} as a default action when
  catching exception $e$, provided no other trap as above intercepts it first.
  The error message is printed, as well as the result of the evaluation of
- \var{rec}, and control is given back to the \kbd{gp} prompt. In particular, current
- computation is then lost.
+ \var{rec}, and control is given back to the \kbd{gp} prompt. In particular,
+ current computation is then lost.
  
- The following error handler prints the list of all user variables, then
- stores in the file \kbd{crash} their names and values:\kbdsidx{writebin}
+ For instance, the following error handler prints the list of all user
+ variables, then stores in the file \kbd{crash} their names and
+ values:\kbdsidx{writebin}
  \bprog
  ? trap(, print(variable()); writebin("crash"))
  @eprog
  
  If no recovery code is given (\var{rec} is omitted) a \tev{break loop} will
- be started (see \secref{se:breakloop}). In particular
- \bprog
- ? trap()
- @eprog\noindent
+ be started, see \secref{se:breakloop}. In particular, typing \kbd{trap()}
  by itself installs a default error handler, that will start a break
  loop whenever an exception is raised.
  

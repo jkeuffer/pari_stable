@@ -1629,8 +1629,8 @@ etatpile(void)
   pariprintf(" %ld objects on heap occupy %ld long words\n\n",
             itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
-  u = manage_var(manage_var_next,NULL);
-  s = MAXVARN - manage_var(manage_var_max_avail,NULL);
+  u = pari_var_next();
+  s = MAXVARN - pari_var_max_avail();
   pariprintf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
              u+s, u, s, MAXVARN);
 }
@@ -3383,7 +3383,7 @@ writebin(char *name, GEN x)
   if (x) writeGEN(x,f);
   else
   {
-    long v, maxv = manage_var(manage_var_next,NULL);
+    long v, maxv = pari_var_next();
     for (v=0; v<maxv; v++)
     {
       entree *ep = varentries[v];
