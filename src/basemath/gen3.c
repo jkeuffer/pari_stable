@@ -3111,9 +3111,12 @@ geval(GEN x)
       lx=lg(x); if (lx==2) return gen_0;
       z = fetch_var_value(varn(x));
       if (!z) return gcopy(x);
-      y=gen_0; av=avma;
-      for (i=lx-1; i>1; i--)
-        y = gadd(geval(gel(x,i)), gmul(z,y));
+      av = avma; y = geval(gel(x,lx-1));
+      for (i=lx-2; i>1; i--)
+      {
+        GEN t = geval(gel(x,i));
+        y = gadd(t, gmul(z,y));
+      }
       return gerepileupto(av, y);
 
     case t_SER:
