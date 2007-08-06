@@ -560,16 +560,17 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   gel(gt->pauto,2) = gcopy(plift);
   if (gt->f > 2)
   {
-    pari_sp ltop=avma;
+    pari_sp av = avma, ltop;
     long i;
     long nautpow=brent_kung_optpow(gt->n-1,gt->f-2);
     GEN autpow;
     if (DEBUGLEVEL >= 1) (void)timer2();
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
+    ltop = avma;
     for (i = 3; i <= gt->f; i++)
       gel(gt->pauto,i) = FpX_FpXQV_compo(gel(gt->pauto,i-1),autpow,gl->TQ,gl->Q);
     /*Somewhat paranoid with memory, but this function use a lot of stack.*/
-    gt->pauto=gerepileupto(ltop, gt->pauto);
+    gerepilecoeffssp(av, ltop, gt->pauto + 3, gt->f-2);
     if (DEBUGLEVEL >= 1) msgtimer("frobenius power");
   }
 }

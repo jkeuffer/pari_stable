@@ -80,6 +80,7 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    61- pariputs("") --> invalid read of size 1 [ valgrind ]
    62- ell.omega, ell.eta, pr.gen could lead to gerepile error [#641]
    63- y=[x];eval('y) --> error [#652]
+   64- incorrect use of gerepileupto in inittestlift [ galoisconj ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
