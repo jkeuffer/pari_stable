@@ -513,7 +513,9 @@ and its two components. This is marginally more efficient than the standard
 
 \fun{GEN}{gerepileupto}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepilecopy}. Assumes that \kbd{q} is connected and that its root was
-created before any component.
+created before any component. If \kbd{q} is not on the stack, this is
+equivalent to \kbd{avma = av}; in particular, sentinels which are not even
+proper \kbd{GEN}s such as \kbd{q = NULL} are allowed.
 
 \fun{GEN}{gerepileuptoint}{pari_sp av, GEN q} analogous to (but faster than)
 \kbd{gerepileupto}. Assumes further that \kbd{q} is a \typ{INT}. The

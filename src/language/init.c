@@ -1627,16 +1627,30 @@ gerepilecoeffssp(pari_sp av, pari_sp tetpil, long *g, int n)
   for (i=0; i<n; i++,g++) dec_gerepile((pari_sp*)g, av0, av, tetpil, dec);
 }
 
+static GEN
+gerepileuptoleaffast(pari_sp av, GEN q)
+{
+  long i;
+  GEN q0;
+  i = lg(q); avma = (pari_sp)(((GEN)av) -  i);
+  q0 = (GEN)avma; while (--i >= 0) q0[i] = q[i];
+  return q0;
+}
+static GEN
+gerepileuptointfast(pari_sp av, GEN q)
+{
+  avma = (pari_sp)icopy_av(q, (GEN)av);
+  return (GEN)avma;
+}
 GEN
 gerepileupto(pari_sp av, GEN q)
 {
-  long tq = typ(q);
+  long tq;
+  if (!isonstack(q) || (GEN)av<=q) { avma = av; return q; }
+  tq = typ(q);
   if (!is_recursive_t(tq)) 
-    return tq == t_INT? gerepileuptoint(av,q):
-                        gerepileuptoleaf(av,q);
-  if (!isonstack(q)) { avma = av; return q; } /* universal object */
-  /* empty garbage */
-  if (av <= (pari_sp)q) return q;
+    return tq == t_INT? gerepileuptointfast(av,q):
+                        gerepileuptoleaffast(av,q);
   /* The garbage is only empty when av==q. It's probably a mistake if
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by pushentryval and they can be in the
