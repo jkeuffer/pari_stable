@@ -734,10 +734,7 @@ pari_close_opts(ulong init_opts)
   if ((init_opts&INIT_SIGm)) pari_sig_init(SIG_DFL);
 
   while (delete_var()) /* empty */;
-  for (i = 0; i < functions_tblsz; i++)
-  {
-    kill_hashlist(functions_hash[i]);
-  }
+  for (i = 0; i < functions_tblsz; i++) kill_hashlist(functions_hash[i]);
   gpfree((void*)varentries);
   gpfree((void*)primetab);
   gpfree((void*)universal_constants);
