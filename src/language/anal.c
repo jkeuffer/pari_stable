@@ -791,7 +791,7 @@ void pari_var_init() {
   (void)fetch_named_var("x"); 
 }
 long pari_var_next() { return nvar; }
-long pari_var_max_avail() { return max_avail; }
+long pari_var_next_temp() { return max_avail; }
 static long
 pari_var_pop(long v)
 {
@@ -821,14 +821,13 @@ long
 delete_var()
 { /* user wants to delete one of his/her/its variables */
   if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
-  max_avail++;
-  return max_avail+1;
+  max_avail++; return max_avail+1;
 }
 long
 fetch_var(void)
 {
   if (nvar == max_avail) pari_err(talker,"no more variables available");
-  return --max_avail;
+  return max_avail--;
 }
 
 /* FIXE: obsolete, kept for backward compatibility */
@@ -838,7 +837,7 @@ manage_var(long n, entree *ep)
   switch(n) {
       case manage_var_init: pari_var_init(); return 0;
       case manage_var_next: return pari_var_next();
-      case manage_var_max_avail: return pari_var_max_avail();
+      case manage_var_max_avail: return pari_var_next_temp();
       case manage_var_pop: return pari_var_pop((long)ep);
       case manage_var_delete: return delete_var();
       case manage_var_create:

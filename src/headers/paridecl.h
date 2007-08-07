@@ -323,7 +323,7 @@ void    kill0(entree *ep);
 long    manage_var(long n, entree *ep);
 void    pari_var_init();
 long    pari_var_next();
-long    pari_var_max_avail();
+long    pari_var_next_temp();
 void    pari_var_create(entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *t);

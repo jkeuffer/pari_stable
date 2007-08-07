@@ -3814,9 +3814,11 @@ and \kbd{nvar+1}--\kbd{max\_avail-1} (pool of free variable numbers).
 variable counters \kbd{nvar} and \kbd{max\_avail}, notwithstanding existing
 variables! In effect, this even deletes \kbd{x}. Don't use it.
 
-\fun{long}{pari_var_next}{}: returns \kbd{nvar}.
+\fun{long}{pari_var_next}{}: returns \kbd{nvar}, the number of the next user
+variable we can create.
 
-\fun{long}{pari_var_max_avail}{} returns \kbd{max\_avail}.
+\fun{long}{pari_var_next_temp}{} returns \kbd{max\_avail}, the number of the
+next temp variable we can create.
 
 \fun{void}{pari_var_create}{entree *ep} low-level initialization of an
 \kbd{EpVAR}.

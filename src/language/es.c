@@ -1630,7 +1630,7 @@ etatpile(void)
             itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
   u = pari_var_next();
-  s = MAXVARN - pari_var_max_avail();
+  s = MAXVARN - pari_var_next_temp();
   pariprintf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
              u+s, u, s, MAXVARN);
 }
