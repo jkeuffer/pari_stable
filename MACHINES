@@ -183,6 +183,7 @@ IBM/POWER,PowerPC
 CoreDuo     2160MHz  MacOS X 10.4    gcc-4.0.1       376       -  2.3.0     LG
 PPC G5      2000MHz  MacOS X 10.4    gcc-4.0.1       461       -  2.3.0     LG
 PPC G4      1667MHz  MacOS X 10.4    gcc-3.3         543       -  2.3.0     LG
+PPC G4      1000MHz  MacOS X 10.3    gcc-3.3         940       -  2.3.2     BM
 *PPC G4      400MHz  MacOS X 10.2    gcc-3.1        5174!      -  2.1.4     MB
 *PowerMac3,3 500MHz  Linux-2.4.2     gcc            3742    3732  2.1.1     BA
 *PPC800(G3)  400MHz  Linux-2.4.3     gcc            4640    4624  2.2.0     GH
@@ -373,6 +374,7 @@ Contributors:
   AW = Aleksander Wittlin
   AP = Andreas Piotrowski
   BA = Bill Allombert
+  BM = Brían Mach Innéirghthe
   BN = Balasubramanian Narasimhan
   CC = Christian Cornelssen
   CL = Christian Labesse
