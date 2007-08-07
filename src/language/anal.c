@@ -280,14 +280,24 @@ check_proto(char *code)
   return arity;
 }
 
+static void
+init_initial_value(entree *ep)
+{
+  gel(ep,0)  = 0;
+  gel(ep,1)  = 0;
+  gel(ep,2)  = 0;
+  gel(ep,3)  = 0;
+}
+
 static entree *
 installep(const char *name, long len, entree **table)
 {
   const long add = 4*sizeof(long);
   entree *ep = (entree *) gpmalloc(sizeof(entree) + add + len+1);
-  const entree *ep1 = initial_value(ep);
+  entree *ep1 = initial_value(ep);
   char *u = (char *) ep1 + add;
 
+  init_initial_value(ep1);
   ep->name    = u; strncpy(u, name,len); u[len]=0;
   ep->valence = EpNEW;
   ep->value   = NULL;
@@ -298,11 +308,6 @@ installep(const char *name, long len, entree **table)
   ep->arity   = 0;
   ep->lvars   = NULL;
   ep->next    = *table;
-  gel(ep1,0)  = 0;
-  gel(ep1,1)  = 0;
-  gel(ep1,2)  = 0;
-  gel(ep1,3)  = 0;
-
   return *table = ep;
 }
 
@@ -340,6 +345,7 @@ install(void *f, char *name, char *code)
 void
 kill0(entree *ep)
 {
+  entree *ep1;
   long v;
 
   if (EpSTATIC(ep))
@@ -352,8 +358,12 @@ kill0(entree *ep)
       v = varn(ep->value); if (!v) return; /* never kill x */
       varentries[v] = NULL; break;
   }
-  freeep(ep);
-  ep->valence=EpNEW; ep->value=initial_value(ep); ep->pvalue=NULL;
+  freeep(ep); 
+  ep1 = initial_value(ep);
+  init_initial_value(ep1);
+  ep->valence = EpNEW;
+  ep->value   = ep1;
+  ep->pvalue  = NULL;
 }
 
 void
