@@ -514,7 +514,13 @@ directly; you have to use the function \kbd{listcreate} first, then
 \kbd{listput} each time you want to append a new element (but you can access
 the elements directly as with the vector types described above). The function
 \kbd{List} can be used to transform (row or column) vectors into lists (see
-Chapter~3).
+Chapter~3).  Due to a design flaw, Lists must be stored in GP variables, not as
+components; in particular, Lists of Lists or Vectors of Lists are not
+supported:
+\bprog
+  ? L=[0]; L[1] = listcreate(1)
+  ***   sorry, "lists as components" is not yet implemented.
+@eprog
 
 \subsec{Strings} (type \tet{t_STR}):\sidx{string}\sidx{character string} to
 enter a string, just enclose it between double quotes \kbd{"}, like this:

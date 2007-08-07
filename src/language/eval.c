@@ -313,7 +313,7 @@ static void
 change_compo(matcomp *c, GEN res)
 {
   GEN p = c->parent, *pt = c->ptcell;
-  long i;
+  long i, t;
 
   if (typ(p) == t_VECSMALL)
   {
@@ -321,9 +321,11 @@ change_compo(matcomp *c, GEN res)
       pari_err(talker,"not a suitable VECSMALL component");
     *pt = (GEN)itos(res); return;
   }
+  t = typ(res);
+  if (t == t_LIST) err(impl, "\"lists as components\"");
   if (c->full_row)
   {
-    if (typ(res) != t_VEC || lg(res) != lg(p))
+    if (t != t_VEC || lg(res) != lg(p))
       pari_err(talker,"incorrect type or length in matrix assignment");
     for (i=1; i<lg(p); i++)
     {
@@ -333,7 +335,7 @@ change_compo(matcomp *c, GEN res)
     return;
   }
   if (c->full_col)
-    if (typ(res) != t_COL || lg(res) != lg(*pt))
+    if (t != t_COL || lg(res) != lg(*pt))
       pari_err(talker,"incorrect type or length in matrix assignment");
 
   res = gclone(res);
