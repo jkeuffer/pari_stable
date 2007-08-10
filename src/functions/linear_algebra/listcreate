@@ -1,8 +1,12 @@
 Function: listcreate
 Section: linear_algebra
 C-Name: listcreate
-Prototype: L
-Help: listcreate(n): creates an empty list of maximum length n
+Prototype: D0,L,
+Help: listcreate(): creates an empty list
 Description: 
- (small):list	listcreate($1)
-Doc: creates an empty list of maximal length $n$.
+ (?int):void	listcreate()
+ (small):list	listcreate()
+Doc: creates an empty list. This routine used to have a mandatory argument,
+ which is now ignored (for backward compatibility). In fact, this function
+ has become redundant and obsolete; it will disappear in future versions of
+ PARI: just use \kbd{List()}

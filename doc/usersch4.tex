@@ -53,15 +53,15 @@ primes up to about $2^{16}$.
 
 \noindent We have now at our disposal:
 
-$\bullet$ a PARI \tev{stack} containing nothing. It is a big
-connected chunk of \kbd{size} bytes of memory. All your computations
-take place here. In large computations, unwanted intermediate results quickly
-clutter up memory so some kind of garbage collecting is needed. Most large
+$\bullet$ a PARI \tev{stack} containing nothing. This is a big
+connected chunk of \kbd{size} bytes of memory, where all computations
+take place. In large computations, intermediate results quickly
+clutter up memory so some kind of garbage collecting is needed. Most
 systems do garbage collecting when the memory is getting scarce, and this
-slows down the performance. PARI takes a different approach: you must do your
-own cleaning up when the intermediate results are not needed anymore. Special
-purpose routines have been written to do this; we will see later how (and
-when) you should use them.
+slows down the performance. PARI takes a different approach, admittedly more
+demanding on the programmer: you must do your own cleaning up when the
+intermediate results are not needed anymore. We will see later how (and when)
+this is done.
 
 $\bullet$ the following \emph{universal objects} (by definition, objects
 which do not belong to the stack): the integers $0$, $1$, $-1$ and $2$
@@ -190,7 +190,7 @@ completeness, Chapter 5 gives a description of these low-level functions.
 
 \noindent
 PARI supports both 32-bit and 64-bit based machines, but not simultaneously!
-The library will have been compiled assuming a given architecture, and some
+The library is compiled assuming a given architecture, and some
 of the header files you include (through \kbd{pari.h}) will have been
 modified to match the library.
 
@@ -265,7 +265,7 @@ pointed to by \kbd{ptr}, which must have been allocated by \kbd{malloc}
 is blocked until \kbd{free} returns.
 
 If you use the standard \kbd{libc} functions instead of our wrappers, then
-your functions will be subtly incompatible with the \kbd{gp} calculator: if
+your functions will be subtly incompatible with the \kbd{gp} calculator: when
 the user tries to interrupt a computation, the calculator may crash
 (if a system call is interrupted at the wrong time).
 
@@ -274,7 +274,7 @@ the user tries to interrupt a computation, the calculator may crash
 \subsec{Why and how}.
 
 \noindent
-As we have seen, the \kbd{pari\_init} routine allocates a big range of
+As we have seen, \kbd{pari\_init} allocates a big range of
 addresses, the \tev{stack}, that are going to be used throughout. Recall
 that all PARI objects are pointers. Except for a few universal objects,
 they all point at some part of the stack.
@@ -1359,21 +1359,18 @@ integers. This type is used instead of a \typ{VEC} of \typ{INT}s for
 efficiency reasons, for instance to implement efficiently permutations,
 polynomial arithmetic and linear algebra over small finite fields, etc.
 
-\noindent The next two types were introduced for specific \kbd{gp} use, and
-you are better off using the standard malloc'ed C constructs when programming
-in library mode. We quote them for completeness, advising you not to use
-them:
-
-\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list} This one has a
-second codeword which contains an effective length (handled through
-\teb{lgeflist}~/ \teb{setlgeflist}). \kbd{z[2]},\dots, \kbd{z[lgeflist(z)-1]}
-contain the components of the list.
-
 \subsec{Type \typ{STR} (character string)}:%
 \kbdsidx{t_STR}\sidx{character string}
 
 \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
 (\kbd{NULL}-terminated) string.
+
+
+\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list} 
+this type was introduced for specific \kbd{gp} use and is rather inefficient
+compared to a straightforward linked list implementation (it requires more
+memory, as well as many unnecessary copies). Hence we do not describe it
+here and refer to the Developer's Guide.
 
 \misctitle{Implementation note}: for the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the

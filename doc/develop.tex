@@ -29,10 +29,11 @@
 
 \chapter{Work in progress}
 
-This draft documents private internal functions for hard-core PARI
-developers. Anything in here is liable to change on short notice. Don't
-use anything in there, unless you are implementing new features for
-the PARI library. Try to fix the interfaces before using them.
+This draft documents private internal functions and structures for hard-core
+PARI developers. Anything in here is liable to change on short notice. Don't
+use anything in the present document, unless you are implementing new
+features for the PARI library. Try to fix the interfaces before using them,
+or document them in a better way.
 If you find an undocumented hack somewhere, add it here.
 
 Hopefully, this will eventually document everything that we burried in
@@ -45,16 +46,16 @@ A \teb{growarray} is a container type, wich enlarges itself as one appends
 elements to it. It has the following fields, accessed as \kbd{A->v},
 \kbd{A->len}, \kbd{A->n}:
 
-  \kbd{v}: an array of values, of type \kbd{void*}, possibly from $0$ to
+  \kbd{void **v}: an array of values, possibly from $0$ to
 $\kbd{len}-1$, the ones from $0$ to $\kbd{n}-1$ being occupied. This array
 is allocated using \kbd{malloc}, not on the PARI stack.
 
-  \kbd{len}: the number of cells allocated in \kbd{v}.
+  \kbd{long len}: the number of cells allocated in \kbd{v}.
 
-  \kbd{n}: the number of occupied cells.
+  \kbd{long n}: the number of occupied cells.
 
 \noindent These containers are used when initializing the library, before the
-PARI stack is available, hence allocate memory using \kbd{malloc(3)}, not on
+PARI stack is available, hence allocate memory using \kbd{malloc}, not on
 the stack. They are manipulated with the following functions.
 
 \fun{void}{grow_init}{growarray A} initialize the \kbd{growarray} \kbd{A}.
@@ -67,6 +68,49 @@ enlarging \kbd{A} if necessary.
 \kbd{A} is \kbd{NULL}, this has the same effect as \kbd{grow\_init(B)}.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
+
+\section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This dynamic type
+is implemented by a \kbd{GEN} of length 4: three codewords and one
+component containing the actual entries in a malloc'ed vector (so that it can
+be realloc'ated without moving the parent \kbd{GEN}). All the entries are
+clones. This is in practice considered as a non-recursive type, i.e. copies
+from \kbd{gcopy} are shallow.
+
+The following three macros are proper lvalues and access the
+components
+
+\fun{long}{list_n}{GEN L}: current number of elements.
+
+\fun{long}{list_nmax}{GEN L}: current maximal number of elements. This grows
+as needed.
+
+\fun{GEN}{list_data}{GEN L}: the elements. If \kbd{v = list\_data(L)} and
+\kbd{n = list\_n(L)}, then the elements are \kbd{v[0]}, \dots, \kbd{v[n-1]}.
+
+The following routines may be useful:
+
+\fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L}.
+Note that \kbd{gcopy} would return a shallow copy.
+
+\fun{GEN}{dummy_vec_from_list}{GEN L, long *l} discards the
+list wrapper and return a pseudo-\kbd{GEN} (it has no codeword)
+whose elements can be manipulated as if it were a \typ{VEC} of length
+\kbd{*l} (\kbd{l} is set by the function since the returned value has no
+codeword); in particular, one can assign other \kbd{GEN}s to them. No stack
+allocation takes place. A typical construct:
+\bprog
+  long l;
+  /* assume L is a t_LIST */
+  L = dummy_vec_from_list(L, &l)
+  /* now L can be treated as a t_VEC with lg(L) = l */
+  for (i = 1; i < l; i++) output( gel(L, i) );
+  for (i = 1; i < l; i++) gel(L, i) = gclone( ... );
+@eprog\noindent 
+The main reason the data is not represented as a true \kbd{GEN}, e.g.~a
+\typ{VEC}, is that it must not reside on the stack (otherwise it can't be
+easily reallocated) and neither can its component (otherwise they can't be
+easily replaced by new values). All this is done to support GP's inconvenient
+memory model. In pure library mode, don't use this type!
 
 \section{Otherwise undocumented global variables}
 

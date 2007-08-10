@@ -23,6 +23,14 @@ This file lists the incompatible changes between Version 2.x and older versions
   - besselk no longer admits a flag, the default implementation caters for
     all cases
   - removed (obsolete) optional flag in ellap(), Mod() and gcd()
+  - the weird extra argument to listcreate() [ maximal length ] has
+    disappeared. In fact, listcreate() is now obsolete: juste use List() to
+    create an empty list. It will grow as needed.  
+  - listkill() is also obsolete: no need for a specific function
+    to kill old lists floating around. L = List() reclaims memory just as
+    efficiently as listkill(L) would. In most cases, you won't even need
+    that, e.g. local variables are automatically cleared when a user function
+    returns; no need to kill the ones which are lists specifically.
 
 * Specific to the PARI library:
 ===============================

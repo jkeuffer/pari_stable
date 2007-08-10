@@ -603,9 +603,13 @@ closure_eval(GEN C)
             closure_castgen(gel(p,c),operand);
             break;
           case t_LIST:
-            check_array_index(c,lgeflist(p)-1);
-            closure_castgen(gel(p,c+1),operand);
+          {
+            long lx;
+            p = dummy_vec_from_list(p, &lx);
+            check_array_index(c, lx);
+            closure_castgen(gel(p,c),operand);
             break;
+          }
           case t_VECSMALL:
             check_array_index(c,lg(p));
             closure_castlong(p[c],operand);
@@ -638,9 +642,13 @@ closure_eval(GEN C)
             C->ptcell = (GEN *) p+c;
             break;
           case t_LIST:
-            check_array_index(c,lgeflist(p)-1);
-            C->ptcell = (GEN *) p+c+1;
+          {
+            long lx;
+            p = dummy_vec_from_list(p, &lx);
+            check_array_index(c,lx);
+            C->ptcell = (GEN *) p+c;
             break;
+          }
           default:
             pari_err(talker,"_[_]: not a vector");
           }

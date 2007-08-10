@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.22}% Version of this reference card
-\def\PARIversion{2.4.0}% Version of PARI described on this reference card
+\def\versionnumber{2.23}% Version of this reference card
+\def\PARIversion{2.4.2}% Version of PARI described on this reference card
 \def\year{2007}
-\def\month{March}
+\def\month{August}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -412,11 +412,10 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{look if $y$ belongs to the set $x$}{setsearch$(x,y,\fl)$}
 %
 \subsec{Lists}
-\li{create empty list of maximal length $n$}{listcreate$(n)$}
-\li{delete all components of list $l$}{listkill$(l)$}
+\li{create empty list}{List$()$}
 \li{append $x$ to list $l$}{listput$(l,x,\{i\})$}
 \li{insert $x$ in list $l$ at position $i$}{listinsert$(l,x,i)$}
-\li{sort the list $l$}{listsort$(l,\fl)$}
+\li{sort the list $l$ in place}{listsort$(l,\fl)$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}

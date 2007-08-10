@@ -80,7 +80,7 @@ glength(GEN x)
   switch(tx)
   {
     case t_INT:  return lgefint(x)-2;
-    case t_LIST: return lgeflist(x)-2;
+    case t_LIST: return list_n(x);
     case t_REAL: return signe(x)? lg(x)-2: 0;
     case t_STR:  return strlen( GSTR(x) );
     case t_VECSMALL: return lg(x)-1;
@@ -1644,129 +1644,173 @@ gsigne(GEN x)
 /*******************************************************************/
 
 GEN
-listcreate(long n)
+listcreate(void)
 {
-  GEN L;
-  if (n < 0) pari_err(talker,"negative length in listcreate");
-  L = cgetg(n+2,t_LIST);
-  L[1] = evallgeflist(2); return L;
-}
-
-static void
-listaffect(GEN L, long index, GEN object)
-{
-  if (index < lgeflist(L) && isclone(L[index])) gunclone(gel(L,index));
-  gel(L,index) = gclone(object);
+  GEN L = cgetg(4,t_LIST);
+  list_n(L) = 0;
+  list_nmax(L) = 0;
+  list_data(L) = NULL; return L;
 }
 
 void
 listkill(GEN L)
 {
-  long l, i;
+  long i, l;
+  GEN v;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listkill");
-  l = lgeflist(L);
-  for (i=2; i<l; i++)
-    if (isclone(L[i])) gunclone(gel(L,i));
-  L[1] = evallgeflist(2);
+  v = dummy_vec_from_list(L, &l);
+  if (l > 1) {
+    for (i=1; i<l; i++) gunclone(gel(v,i));
+    gpfree(list_data(L)); list_data(L) = NULL;
+  }
+  list_n(L) = 0;
+  list_nmax(L) = 0;
+}
+
+static void
+ensure_length(GEN L, long l)
+{
+  long nmax = list_nmax(L);
+  if (l <= nmax) return;
+  nmax = nmax ? (nmax<<1): 32;
+  if (l > nmax) nmax = l;
+  list_data(L) = (GEN)gprealloc(list_data(L), nmax * sizeof(long));
+  list_nmax(L) = nmax;
 }
 
 GEN
-listput(GEN L, GEN object, long index)
+listput(GEN L, GEN x, long index)
 {
-  long l = lgeflist(L);
+  long l;
+  GEN z;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listput");
   if (index < 0) pari_err(talker,"negative index (%ld) in listput", index);
-  if (!index || index >= l-1)
+  if (typ(x) == t_LIST) err(impl, "\"lists as components\"");
+  l = list_n(L);
+
+  if (!index || index >= l)
   {
-    index = l-1; l++;
-    if (l > lg(L))
-      pari_err(talker,"no more room in this L (size %ld)", lg(L)-2);
+    ensure_length(L, ++l);
+    index = l;
+    z = list_data(L);
+  } else {
+    z = list_data(L);
+    gunclone( gel(z, index-1) );
   }
-  listaffect(L, index+1, object);
-  L[1] = evallgeflist(l);
-  return gel(L,index+1);
+  x = gclone(x); gel(z,index-1) = x;
+  list_n(L) = l; return x;
 }
 
 GEN
-listinsert(GEN L, GEN object, long index)
+listinsert(GEN L, GEN x, long index)
 {
-  long l = lgeflist(L), i;
+  long l, i;
+  GEN z;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
-  if (index <= 0 || index > l-1) pari_err(talker,"bad index in listinsert");
-  l++; if (l > lg(L)) pari_err(talker,"no more room in this list");
+  if (typ(x) == t_LIST) err(impl, "\"lists as components\"");
 
-  for (i=l-2; i > index; i--) L[i+1] = L[i];
-  gel(L,index+1) = gclone(object);
-  L[1] = evallgeflist(l);
-  return gel(L,index+1);
+  l = list_n(L);
+  if (index <= 0 || index > l) pari_err(talker,"bad index in listinsert");
+  ensure_length(L, ++l);
+  z = list_data(L);
+  for (i=l-1; i >= index; i--) z[i] = z[i-1];
+  x = gclone(x); gel(z,index-1) = x;
+  list_n(L) = l; return x;
 }
 
 GEN
 gtolist(GEN x)
 {
-  long tx, lx, i;
-  GEN L;
+  long l, i;
+  GEN L, v;
 
-  if (!x) { L = cgetg(2, t_LIST); L[1] = evallgeflist(2); return L; }
-
-  tx = typ(x);
-  lx = (tx==t_LIST)? lgeflist(x): lg(x);
-  switch(tx)
+  if (!x) return listcreate();
+  switch(typ(x))
   {
-    case t_VEC: case t_COL:
-      lx++; x--; /* fall through */
-    case t_LIST:
-      L = cgetg(lx,t_LIST);
-      for (i=2; i<lx; i++) gel(L,i) = gclone(gel(x,i));
-      break;
-    default: pari_err(typeer,"gtolist");
-      return NULL; /* not reached */
+    case t_VEC: case t_COL: break;
+    case t_LIST: return listcopy(x);
+    default:
+      L = listcreate();
+      (void)listput(L, x, 0);
+      return L;
   }
-  L[1] = evallgeflist(lx); return L;
+  /* VEC, COL */
+  l = lg(x)-1;
+  L = listcreate();
+  ensure_length(L, l);
+  list_n(L) = l;
+  v = dummy_vec_from_list(L, &l);
+  for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
+  return L;
 }
 
 GEN
 listconcat(GEN L1, GEN L2)
 {
   long i, l1, lx;
-  GEN L;
+  GEN L, z;
 
-  if (typ(L1) != t_LIST || typ(L2) != t_LIST) pari_err(typeer,"listconcat");
-  l1 = lgeflist(L1)-2;
-  lx = l1 + lgeflist(L2);
-  L = listcreate(lx-2);
-  for (i=2; i<=l1+1; i++) listaffect(L, i, gel(L1,i));
-  for (   ; i<lx;    i++) listaffect(L, i, gel(L2,i-l1));
-  L[1] = evallgeflist(lx); return L;
+  if (typ(L1) != t_LIST) {
+    if (typ(L2) != t_LIST) pari_err(typeer,"listconcat");
+    L = listcopy(L2);
+    (void)listinsert(L, L1, 1);
+    return L;
+  } else if (typ(L2) != t_LIST) {
+    L = listcopy(L1);
+    (void)listput(L, L2, 0);
+    return L;
+  }
+  /* L1, L2 both t_LISTs */
+  l1 = list_n(L1);
+  lx = l1 + list_n(L2);
+  z = cgetg(4, t_LIST);
+  list_n(z) = lx;
+  list_nmax(z) = lx;
+  list_data(z) = L = (GEN)gpmalloc(lx * sizeof(long));
+  L1 = list_data(L1);
+  L2 = list_data(L2) - l1;
+  for (i=0; i<l1; i++) gel(L,i) = gclone(gel(L1,i));
+  for (   ; i<lx; i++) gel(L,i) = gclone(gel(L2,i));
+  return z;
 }
 
 GEN
 listsort(GEN L, long flag)
 {
-  long i, c, lx = lgeflist(L)-1;
+  long i, l;
   pari_sp av = avma;
-  GEN perm, vec, l;
+  GEN perm, v, vnew;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listsort");
-  if (lx < 2) return L;
-  perm = indexlexsort(L);
-  l = cgetg(lx,t_VEC); vec = L+1;
-  for (i=1; i<lx; i++) l[i] = vec[perm[i]];
+  v = dummy_vec_from_list(L, &l);
+  if (l < 3) return L;
   if (flag)
   {
-    c=1; vec[1] = l[1];
-    for (i=2; i<lx; i++)
-      if (!gequal(gel(l,i), gel(vec,c)))
-        vec[++c] = l[i];
-      else
-        if (isclone(l[i])) gunclone(gel(l,i));
-    setlgeflist(L, c+2);
+    long lnew;
+    perm = gen_indexsort_uniq(L, (void*)&lexcmp, cmp_nodata);
+    lnew = lg(perm); /* may have changed since 'uniq' */
+    vnew = cgetg(lnew,t_VEC);
+    for (i=1; i<lnew; i++) {
+      long c = perm[i];
+      gel(vnew,i) = gel(v,c);
+      gel(v,c) = NULL;
+    }
+    if (l != lnew) { /* was shortened */
+      for (i=1; i<l; i++)
+        if (gel(v,i)) gunclone(gel(v,i));
+      l = lnew;
+      list_n(L) = l-1;
+    }
   }
   else
-    for (i=1; i<lx; i++) vec[i] = l[i];
-
+  {
+    perm = gen_indexsort(L, (void*)&lexcmp, cmp_nodata);
+    vnew = cgetg(l,t_VEC);
+    for (i=1; i<l; i++) gel(vnew,i) = gel(v,perm[i]);
+  }
+  for (i=1; i<l; i++) gel(v,i) = gel(vnew,i);
   avma = av; return L;
 }

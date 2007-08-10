@@ -370,8 +370,8 @@ isinexact(GEN x)
         if (isinexact(gel(x,i))) return 1;
       return 0;
     case t_LIST:
-      lx = lgeflist(x);
-      for (i=lontyp[tx]; i<lx; i++)
+      x = dummy_vec_from_list(x, &lx);
+      for (i=1; i<lx; i++)
         if (isinexact(gel(x,i))) return 1;
       return 0;
   }
@@ -2501,8 +2501,9 @@ gtovec(GEN x)
       return y;
     case t_RFRAC: return mkveccopy(x);
     case t_LIST:
-      lx=lgeflist(x); y=cgetg(lx-1,t_VEC); x++;
-      for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
+      x = dummy_vec_from_list(x, &lx);
+      y = cgetg(lx, t_VEC);
+      for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
     case t_STR:
     {
@@ -2593,7 +2594,11 @@ compo(GEN x, long n)
     pari_err(talker, "this object is a leaf. It has no components");
   if (n < 1) pari_err(talker,"nonexistent component");
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
-  if (tx == t_LIST) lx = (ulong)lgeflist(x);
+  if (tx == t_LIST) {
+    long llx;
+    x = dummy_vec_from_list(x, &llx);
+    lx = (ulong)llx; tx = t_VEC;
+  }
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
   if (l >= lx) pari_err(talker,"nonexistent component");
   return gcopy(gel(x,l));

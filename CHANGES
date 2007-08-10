@@ -144,6 +144,9 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    obsoleted (kept for backward compatibility, to be removed), see Section 5.9
    for new equivalents. Fixes #633, #650
    38- explicitly disallow t_LIST as components [ didn't work, #468]
+   39- listcreate() and listkill() are obsolete, don't use them. L = List()
+    should be enough in all cases. All lists now grow as needed, without
+    requiring an awkward maximal length (from listcreate).
 
   Added
     1- library functions expu, adduu, subuu

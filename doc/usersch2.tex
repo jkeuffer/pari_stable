@@ -509,16 +509,16 @@ given positive number of columns, each of which has zero rows. It is not
 possible to create or represent matrices with zero columns and a nonzero
 number of rows.
 
-\subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists cannot be input
-directly; you have to use the function \kbd{listcreate} first, then
-\kbd{listput} each time you want to append a new element (but you can access
-the elements directly as with the vector types described above). The function
-\kbd{List} can be used to transform (row or column) vectors into lists (see
-Chapter~3).  Due to a design flaw, Lists must be stored in GP variables, not as
+\subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists can be input
+directly, as in \kbd{List([1,2,3,4])}; but in most cases, creates
+an empty list using {listcreate}, then appends elements using \kbd{listput}.
+Elements can be accessed directly as with the vector types described above.
+
+Due to a design flaw, Lists must be stored in GP variables, not as
 components; in particular, Lists of Lists or Vectors of Lists are not
 supported:
 \bprog
-  ? L=[0]; L[1] = listcreate(1)
+  ? L=[0]; L[1] = listcreate()
   ***   sorry, "lists as components" is not yet implemented.
 @eprog
 

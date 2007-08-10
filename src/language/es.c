@@ -1368,8 +1368,8 @@ dbg(GEN x, long nb, long bl)
                vsigne(x), varn(x), lgpol(x), valp(x));
   else if (tx == t_LIST)
   {
-    lx = lgeflist(x);
-    pariprintf("(lgeflist=%ld):", lx);
+    pariprintf("(l=%ld, lmax=%ld):", list_n(x), list_nmax(x));
+    x = dummy_vec_from_list(x, &lx);
   }
   for (i=1; i<lx; i++) pariprintf(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
@@ -1421,9 +1421,10 @@ dbg(GEN x, long nb, long bl)
       }
       break;
 
-    case t_LIST: case t_QFR: case t_QFI: case t_VEC: case t_COL:
-      i = (tx==t_LIST)? 2: 1;
-      for (   ; i<lx; i++)
+    case t_LIST:
+      x = dummy_vec_from_list(x,&lx); /* fall through */
+    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      for (i=1; i<lx; i++)
       {
         blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
 	dbg(gel(x,i),nb,bl);
@@ -2073,8 +2074,9 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
     case t_VECSMALL: wr_vecsmall(T,g); break;
 
     case t_LIST:
-      pariputs("List(["); l = lgeflist(g);
-      for (i=2; i<l; i++)
+      pariputs("List([");
+      g = dummy_vec_from_list(g,&l);
+      for (i=1; i<l; i++)
       {
         bruti(gel(g,i),T,1);
         if (i<l-1) comma_sp(T);
@@ -2163,8 +2165,9 @@ sori(GEN g, pariout_t *T)
     case t_STR:
       quote_string(GSTR(g)); return;
     case t_LIST:
-      pariputs("List("); l = lgeflist(g);
-      for (i=2; i<l; i++)
+      pariputs("List([");
+      g = dummy_vec_from_list(g,&l);
+      for (i=1; i<l; i++)
       {
 	sori(gel(g,i), T); if (i < l-1) pariputs(", ");
       }
@@ -2406,8 +2409,9 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\cr}\n"); break;
 
     case t_LIST:
-      pariputs("\\pmatrix{ "); l = lgeflist(g);
-      for (i=2; i<l; i++)
+      pariputs("\\pmatrix{ ");
+      g = dummy_vec_from_list(g,&l);
+      for (i=1; i<l; i++)
       {
 	texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
       }

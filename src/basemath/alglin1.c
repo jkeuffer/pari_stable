@@ -393,19 +393,19 @@ concat(GEN x, GEN y)
     GEN c, z;
 
     if (tx == t_LIST)
-      { lx = lgeflist(x); i = 2; }
+      x = dummy_vec_from_list(x, &lx);
     else if (tx == t_VEC)
-      { lx = lg(x); i = 1; }
+      lx = lg(x);
     else
     {
       pari_err(typeer,"concat");
       return NULL; /* not reached */
     }
-    if (i>=lx) pari_err(talker,"trying to concat elements of an empty vector");
-    c = gel(x,i); t = typ(c);
+    if (lx==1) pari_err(talker,"trying to concat elements of an empty vector");
+    c = gel(x,1); t = typ(c);
     if (!is_matvec_t(t) && t != t_VECSMALL && t != t_STR) t = 0;
-    istart = i; y = NULL;
-    for (i++; i<lx; i++) {
+    istart = 1; y = NULL;
+    for (i = 2; i<lx; i++) {
       long tc;
       c = gel(x,i); tc = typ(c);
       if (tc == t) continue;
