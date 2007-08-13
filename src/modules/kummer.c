@@ -992,7 +992,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   Q = FpM_ker(gsubgs(shallowtrans(Tc), g), gell);
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
-  p1 = RgX_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
+  p1 = RgXQ_powers(lift_intern(COMPO.p), degK-1, COMPO.R);
   p1 = RgXV_to_RgM(p1, degKz);
   T.invexpoteta1 = invmat(p1); /* left inverse */
   T.polnf = polnf;

@@ -169,7 +169,7 @@ nfroots(GEN nf,GEN pol)
   A = QXQX_normalize(A, T);
   A = Q_primpart(A);
   A = nfsqff(nf,A,1);
-  return gerepileupto(av, gen_sort(A, (void*)&cmp_pol, &cmp_nodata));
+  return gerepileupto(av, gen_sort(A, (void*)&cmp_RgX, &cmp_nodata));
 }
 
 /* assume x is squarefree */
@@ -313,7 +313,7 @@ nffactor(GEN nf,GEN pol)
   if (DEBUGLEVEL>3)
     fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
   gel(rep,1) = y;
-  gel(rep,2) = p1; return sort_factor_pol(rep, cmp_pol);
+  gel(rep,2) = p1; return sort_factor_pol(rep, cmp_RgX);
 }
 
 /* assume x scalar or t_COL */
@@ -1537,7 +1537,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       d = FpX_split_Berlekamp((GEN*)(rep + 1), L.p);
       setlg(rep, d + 1);
     }
-    gen_sort_inplace(rep, (void*)&cmp_pol, &cmp_pol_aux, NULL);
+    gen_sort_inplace(rep, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
     T.fact  = gerepilecopy(av2, rep);
   }
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);

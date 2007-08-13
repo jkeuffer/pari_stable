@@ -1139,11 +1139,18 @@ The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 \fun{int}{equalis}{GEN x, long s} compare the \typ{INT} \kbd{x} and 
 the \kbd{long}~\kbd{s}. The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 
+The remaining comparison operators disregard the sign of their operands:
+
 \fun{int}{equalui}{ulong s, GEN x}
 
-\fun{int}{equaliu}{GEN x, ulong s} compare the \typ{INT} \kbd{x} and 
-the \kbd{ulong}~\kbd{s}. The result is $1$ if $|\kbd{x}| = \kbd{y}$, $0$
-otherwise.
+\fun{int}{equaliu}{GEN x, ulong s} compare the absolute value of the
+\typ{INT} \kbd{x} and the \kbd{ulong}~\kbd{s}. The result is $1$ if
+$|\kbd{x}| = \kbd{y}$, $0$ otherwise.
+
+\fun{int}{cmpui}{ulong u, GEN x}
+
+\fun{int}{cmpiu}{GEN x, ulong u} compare the absolute value of the
+\typ{INT} \kbd{x} and the \kbd{ulong}~\kbd{s}.
 
 \fun{int}{absi_cmp}{GEN x, GEN y} compares the \typ{INT}s \kbd{x} and~\kbd{y}.
 The result is the sign of $|\kbd{x}| - |\kbd{y}|$.
@@ -1190,7 +1197,9 @@ appears in the argument code (no \typ{REAL} operand is involved, only integer
 types), and of type \typ{REAL} otherwise.
 
 \funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
-the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}.
+the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}. The function
+\kbd{mpdivz} does not exist (its semantic would change drastically
+depending on the type of the \kbd{z} argument).
 
 \funno{GEN}{\op si[z]}{long s, GEN x[, GEN z]} applies \op\ to the
 \kbd{long}~\kbd{s} and the \typ{INT}~\kbd{x}.
@@ -1246,6 +1255,8 @@ the real number equal to $x$. This is a special case of \kbd{gexpo}.
 \typ{INT}s \kbd{x}, \kbd{y}, returns $z$ congruent to \kbd{x} modulo \kbd{y},
 such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. Assumes that \kbd{y2 = shifti(y,
 -1)}. the representative of ssquares the \typ{INT}~\kbd{x}
+
+\fun{GEN}{remi2n}{GEN x, long n} returns \kbd{x} mod $2^n$.
 
 \subsec{Modulo to longs}. The following variants of \kbd{modii} do not
 clutter the stack:
@@ -1356,6 +1367,9 @@ and remainder of the \typ{long}~\kbd{x} by the \kbd{long}~\kbd{y}. As
 \kbd{sdivss\_rem} otherwise.
 \smallskip
 \fun{GEN}{truedvmdii}{GEN x, GEN y, GEN *r}, as \kbd{dvmdii} but with a
+non-negative remainder.
+
+\fun{GEN}{truedvmdis}{GEN x, long y, GEN *z}, as \kbd{dvmdis} but with a
 non-negative remainder.
 
 \subsec{Square root and remainder}
@@ -2537,6 +2551,24 @@ where $n\geq 0$. Shallow function.
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
 coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
+\fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
+equal to (necessarily inexact) zeros.
+
+\fun{GEN}{RgX_rescale}{GEN P, GEN h} returns $h^{\deg(P)} P(x/h)$.
+\kbd{P} is an \kbd{RgX} and \kbd{h} is non-zero. (Leaves small objects on the
+stack. Suitable but inefficient for \kbd{gerepileupto}.)
+
+\fun{GEN}{RgX_unscale}{GEN P, GEN h} returns $P(h x)$. (Leaves small objects
+on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
+
+\fun{GEN}{RgXV_unscale}{GEN v, GEN h} apply \kbd{RgX\_unscale} to a vector
+of \kbd{RgX}.
+
+\fun{int}{RgX_is_rational}{GEN P} return 1 is the \kbd{RgX}~\kbd{P} hasonly
+rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
+
+\smallskip
+
 \fun{GEN}{RgXQ_mul}{GEN y, GEN x, GEN T}
 
 \fun{GEN}{RgXQ_norm}{GEN x, GEN T} returns the norm of \kbd{Mod(x, T)}.
@@ -2545,8 +2577,11 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
 \fun{GEN}{RgXQ_inv}{GEN x, GEN T} return the inverse of $x$ mod $T$.
 
-\fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
+\fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
+
+\fun{GEN}{RgXQ_matrix_pow}{GEN y, long n, long m, GEN P} returns
+\kbd{RgXQ\_powers(y,m-1,P)} as a matrix of dimension $n \geq \deg P$.
 
 \fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
@@ -2581,15 +2616,6 @@ by the scalar \kbd{x}.
 \fun{GEN}{RgXQX_div}{GEN x, GEN y, GEN T, GEN *r}
 
 \fun{GEN}{RgXQX_rem}{GEN x, GEN y, GEN T, GEN *r}
-
-\fun{GEN}{RgX_rescale}{GEN P, GEN h} returns $h^{\deg(P)} P(x/h)$.
-\kbd{P} is an \kbd{RgX} and \kbd{h} is non-zero. (Leaves small objects on the
-stack. Suitable but inefficient for \kbd{gerepileupto}.)
-
-\fun{GEN}{RgX_unscale}{GEN P, GEN h} returns $P(h x)$. (Leaves small objects
-on the stack. Suitable but inefficient for \kbd{gerepileupto}.)
-
-\fun{GEN}{RgXV_unscale}{GEN v, GEN h}
 
 \subsec{Hensel lifts}
 
@@ -2758,6 +2784,49 @@ an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 
 \fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
 constant \kbd{Flx} in variable $v$.
+
+\section{Further variants on transcendantal functions}
+
+The following two functions are only useful when interacting with \kbd{gp},
+to manipulate its internal default precision (expressed as a number of
+decimal digits, not in words as used everywhere else):
+
+\fun{long}{getrealprecision}{void} returns \kbd{realprecision}.
+
+\fun{long}{setrealprecision}{long n, long *prec} sets the new
+\kbd{realprecision} to $n$, which is returned. As a side effect, set
+\kbd{prec} to the corresponding number of words \kbd{ndec2prec(n)}.
+
+In the following routines, $x$ is assumed to be a \typ{REAL} and the result
+is a \typ{REAL} with the largest accuracy which can be deduced from the input:
+The naming scheme is inconsistant here, since we somethimes use the
+prefix\kbd{mp} even though \typ{INT} inputs are forbidden:
+
+\fun{GEN}{sqrtr}{GEN x} returns the square root of $x$.
+
+\fun{GEN}{sqrtnr}{GEN x, long n} returns the $n$-th root of $x$, assuming
+$n\geq 1$.
+
+
+\fun{GEN}{mpcos}{GEN x} returns $\cos(x)$.
+
+\fun{GEN}{mpsin}{GEN x} returns $\sin(x)$.
+
+\fun{GEN}{mplog}{GEN x} returns $\log(x)$. We must have $x > 0$ since the
+result must be a \typ{REAL}. Use \kbd{glog} for the general case, where
+you want such computations as $\log -1 = i$.
+
+\fun{GEN}{mpexp}{GEN x} returns $\exp(x)$.
+
+\fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
+\kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
+$|x|$ is very small.
+Two variants of sin and cos:
+
+\fun{void}{mpsincos}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to 
+$\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
+
+\fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
 
 \section{Operations on general PARI objects}
 
@@ -3311,6 +3380,32 @@ argument, i.e. with prototype \kbd{int (*cmp)(GEN x, GEN y)}. Instead of
 compiler handles typecasts between incompatible function pointers, one should
 use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
 
+Here are a few basic comparison functions, to be used with \kbd{cmp\_nodata}:
+
+\fun{int}{cmp_ZV}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
+the same length (lexicographic order).
+
+\fun{int}{cmp_RgX}{GEN x, GEN y} compare two polynomials, which we assume
+have the same main variable (lexicographic order). The coefficients are
+compared using \kbd{gcmp}.
+
+\fun{int}{cmp_prime_over_p}{GEN x, GEN y} compare two prime ideals, which
+we assume divide the same prime number. The comparison is ad hoc but orders
+according to increasing residue degrees. 
+
+\fun{int}{cmp_prime_ideal}{GEN x, GEN y} compare two prime ideals in the same
+\kbd{nf}. Orders by increasing primes, breaking ties using
+\kbd{cmp\_prime\_over\_p}.
+
+Finally a more elaborate comparison function:
+
+\fun{int}{gen_cmp_RgX}{void *data, GEN x, GEN y} compare two polynomials,
+ordering first by increasing degree, then according to the coefficient
+comparison function:
+\bprog
+  int (*cmp_coeff)(GEN,GEN) = (int(*)(GEN,GEN)) data;
+@eprog
+
 \subsec{Generic unary operators}
 
 \funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
@@ -3322,6 +3417,30 @@ use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
 \fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
 
 \fun{GEN}{ginv}{GEN x} creates the inverse of~\kbd{x}.
+
+\subsec{Generic binary operators}
+
+\fun{GEN}{gadd[z]}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gmul[z]}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gdiv[z]}{GEN x, GEN y[, GEN z]}
+
+\fun{GEN}{gaddgs[z]}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gaddsg[z]}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gsubgs[z]}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gsubsg[z]}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gmulgs[z]}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gmulsg[z]}{GEN s, GEN x[, GEN z]}
+
+\fun{GEN}{gdivgs[z]}{GEN x, long s[, GEN z]}
+
+\fun{GEN}{gdivsg[z]}{GEN s, GEN x[, GEN z]}
 
 \subsec{Divisibility, Euclidean division}
 
@@ -3412,11 +3531,52 @@ $u\kbd{x}+v\kbd{y}=\text{Res}(\kbd{x},\kbd{y})$ into \kbd{*U} and~\kbd{*V}.
 
 \fun{GEN}{content}{GEN x} creates the GCD of all the components of~\kbd{x}.
 
-\fun{GEN}{primitive_part}{GEN x, GEN *c}, sets \kbd{c} to \kbd{content(x)}
-and returns the primitive part \kbd{x} / \kbd{c}.
+\fun{GEN}{primitive_part}{GEN x, GEN *c} sets \kbd{c} to \kbd{content(x)}
+and returns the primitive part \kbd{x} / \kbd{c}. A trivial content is set to
+\kbd{NULL}.
 
-\fun{GEN}{primpart}{GEN x} as \kbd{primitive\_part} but the content is lost.
+\fun{GEN}{primpart}{GEN x} as above but the content is lost.
 (For efficiency, the content remains on the stack.)
+
+\subsec{GCD, content and primitive part over the rationals}
+
+\fun{GEN}{Q_abs}{GEN x} absolute value of the \typ{INT} or \typ{FRAC}~\kbd{x}
+
+\fun{GEN}{Q_gcd}{GEN x, GEN y} gcd of the \typ{INT} or \typ{FRAC}~\kbd{x}
+and~\kbd{y}.
+\smallskip
+
+In the following functions, arguments belong to a $M\otimes_\Z\Q$
+for some natural $\Z$-module $M$, e.g. multivariate polynomials with integer
+coefficients (or vectors/matrices recursively built from such objects), and
+an element of $M$ is said to be \emph{integral}.
+We are interested in contents, denominators, etc. with respect to this
+canonical integral structure; in particular, contents belong to $\Q$,
+denominators to $\Z$. For instance the $\Q$-content of $(1/2)xy$ is $(1/2)$,
+and its $\Q$-denominator is $2$, whereas \kbd{content} would return $y/2$ and
+\kbd{denom}~1.
+
+\fun{GEN}{Q_content}{GEN x} the $\Q$-content of $x$
+
+\fun{GEN}{Q_denom}{GEN x} the $\Q$-denominator of $x$
+
+\fun{GEN}{Q_primitive_part}{GEN x, GEN *c} sets \kbd{c} to the $\Q$-content
+of \kbd{x} and returns \kbd{x / c}, which is integral.
+
+\fun{GEN}{Q_primpart}{GEN x} as above but the content is lost. (For
+efficiency, the content remains on the stack.)
+
+\fun{GEN}{Q_remove_denom}{GEN x, GEN *ptd} sets \kbd{d} to the
+$\Q$-denominator of \kbd{x} and returns \kbd{x * d}, which is integral.
+
+\fun{GEN}{Q_div_to_int}{GEN x, GEN c} returns \kbd{x / c}, assuming $c$
+is a rational number (\typ{INT} or \typ{FRAC}) and the result is integral.
+
+\fun{GEN}{Q_mul_to_int}{GEN x, GEN c} returns \kbd{x * c}, assuming $c$
+is a rational number (\typ{INT} or \typ{FRAC}) and the result is integral.
+
+\fun{GEN}{Q_muli_to_int}{GEN x, GEN d} returns \kbd{x * c}, assuming $c$
+is a \typ{INT} and the result is integral.
 
 \subsec{Complex numbers}
 
@@ -3527,7 +3687,7 @@ place without destroying $x$. This is essentially equivalent to
   return y;
 @eprog\noindent
 except that \typ{POLMOD} (resp.~\typ{MAT}) are treated specially since a
-dummy copy of the representative (resp.~all columns) is also made.
+shallow copy of the representative (resp.~all columns) is also made.
 
 \fun{GEN}{shallowtrans}{GEN x} returns the transpose of $x$, \emph{without}
 copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
@@ -3546,8 +3706,11 @@ empty matrix. See \tet{shallowconcat}.
 $A$.
 
 \fun{GEN}{row_i}{GEN A, long i, long j1, long j2} return part of the $i$-th
-row of \typ{MAT} $A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
+row of \typ{MAT}~$A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
 \leq j_2$.
+
+\fun{GEN}{rowcopy}{GEN A, long i} return the row $A[i,]$ of
+the~\typ{MAT}~$A$.
 
 \fun{GEN}{rowslice}{GEN A, long i1, long i2} return the \typ{MAT}
 formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1

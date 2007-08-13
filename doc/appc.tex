@@ -95,10 +95,10 @@ Here, we use the general error handling function \kbd{pari\_err} (see
 \secref{se:err}), with the codeword \kbd{primer1}, raising the ``not enough
 primes'' error.
 
-You can use the function \kbd{initprimes} from the file \kbd{arith2.c} to
-compute a new table on the fly and assign it to \kbd{diffptr} or to a
-similar variable of your own. Beware that before changing \kbd{diffptr},
-you should really free the (\kbd{malloc}ed) precomputed table first, and then
+\fun{bytepr}{initprimes}{ulong maxprime} computes a prime table (of all prime
+differences for $p < maxp$) on the fly. You may assign it to \kbd{diffptr} or
+to a similar variable of your own. Beware that before changing \kbd{diffptr},
+you should really free the (\kbd{malloc}ed) precomputed table first; and then
 all pointers into the old table will become invalid.
 
 PARI currently guarantees that the first 6547 primes, up to and including

@@ -164,12 +164,20 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    11- library function mkvecsmalln
    12- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
    13- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
+   14- library function remi2n, cmp_RgX, gen_cmp_RgX
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
     2- Removed obsolete optional flag in ellap(), Mod() and gcd()
     3- Rename gen_search_aux -> gen_search and document it [ old gen_search
        disappears: use tablesearch() ]
+    4- undocumented library functions gpolylogz, polylog, polylogd, polylogp,
+       polylogdold. Use polylog0 with appropriate flags.
+    5- undocumented library function ghell2. Use ellheight0 with appropriate
+       flag.
+    6- obsolete function log0; use glog
+    7- obsolete undocumented library function mpdivz, polzagreel, RgX_powers
+       (use RgXQ_powers)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

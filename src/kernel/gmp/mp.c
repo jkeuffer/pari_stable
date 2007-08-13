@@ -1121,13 +1121,13 @@ sqrispec(GEN x, long nx)
 
 /* x % (2^n), assuming x, n >= 0 */
 GEN
-resmod2n(GEN x, long n)
+remi2n(GEN x, long n)
 {
   ulong hi;
-  long l,k,lx,ly;
+  long l, k, lx, ly, sx = signe(x);
   GEN z, xd, zd;
 
-  if (!signe(x) || !n) return gen_0;
+  if (!sx || !n) return gen_0;
 
   l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */
   k = n >> TWOPOTBITS_IN_LONG; /* n / BITS_IN_LONG */
@@ -1148,7 +1148,7 @@ resmod2n(GEN x, long n)
     ly = k+3;
 
   zd = z = cgeti(ly);
-  *++zd = evalsigne(1) | evallgefint(ly);
+  *++zd = evalsigne(sx) | evallgefint(ly);
   xd = x+1; for ( ;k; k--) *++zd = *++xd;
   if (hi) *++zd = hi;
   return z;

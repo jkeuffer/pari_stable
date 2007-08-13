@@ -844,7 +844,7 @@ sqrt_2adic(GEN x, long pp)
     zp = (zp<<1) - 1;
     if (zp > pp) zp = pp;
     mod = int2n(zp);
-    z = addii(z, resmod2n(mulii(x, Fp_inv(z,mod)), zp));
+    z = addii(z, remi2n(mulii(x, Fp_inv(z,mod)), zp));
     z = shifti(z, -1); /* (z + x/z) / 2 */
     if (pp == zp) return z;
 
@@ -1912,18 +1912,6 @@ teich(GEN x)
       z = Fp_mul(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q)))), q);
   }
   affii(z, gel(y,4)); avma = av; return y;
-}
-
-GEN
-log0(GEN x, long flag,long prec)
-{
-  switch(flag)
-  {
-    case 0:
-    case 1: return glog(x,prec);
-    default: pari_err(flagerr,"log");
-  }
-  return NULL; /* not reached */
 }
 
 GEN

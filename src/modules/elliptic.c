@@ -3443,9 +3443,6 @@ ellheight0(GEN e, GEN a, long flag, long prec)
 }
 
 GEN
-ghell2(GEN e, GEN a, long prec) { return ellheight0(e,a,0,prec); }
-
-GEN
 ghell(GEN e, GEN a, long prec) { return ellheight0(e,a,2,prec); }
 
 GEN

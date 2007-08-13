@@ -115,24 +115,6 @@ RgX_RgXQ_compo(GEN f, GEN x, GEN T)
   return gerepileupto(av, y);
 }
 
-/* return (1,...a^l) mod T. Not memory clean */
-GEN
-RgX_powers(GEN a, GEN T, long l)
-{
-  long i;
-  GEN v;
-
-  if (typ(a) != t_POL) pari_err(typeer,"RgX_powers");
-  l += 2;
-  v = cgetg(l,t_VEC);
-  gel(v,1) = gen_1; if (l == 2) return v;
-
-  if (degpol(a) >= degpol(T)) a = grem(a, T);
-  gel(v,2) = a;
-  for (i=3; i<l; i++) gel(v,i) = grem(gmul(gel(v,i-1), a), T);
-  return v;
-}
-
 /* Return P(h * x), not memory clean */
 GEN
 RgX_unscale(GEN P, GEN h)

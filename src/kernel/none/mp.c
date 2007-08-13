@@ -1387,7 +1387,7 @@ muliispec(GEN a, GEN b, long na, long nb)
 
 /* x % (2^n), assuming x, n >= 0 */
 GEN
-resmod2n(GEN x, long n)
+remi2n(GEN x, long n)
 {
   long hi,l,k,lx,ly;
   GEN z, xd, zd;
@@ -1706,7 +1706,7 @@ sqrtremi(GEN N, GEN *r)
      * 2^(2k) n = S^2 + R, k = sh + (ln & 1)*BIL/2
      * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
     k = sh + (ln & 1) * (BITS_IN_LONG/2);
-    s0 = resmod2n(S, k);
+    s0 = remi2n(S, k);
     R = addii(shifti(R,-1), mulii(s0, S));
     R = shifti(R, 1 - (k<<1));
     S = shifti(S, -k);

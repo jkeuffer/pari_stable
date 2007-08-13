@@ -143,7 +143,7 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return gscalmat(gabs(gel(x,1),0), lg(x)-1);
+    if (RgV_isscalar(x)) return gscalmat(Q_abs(gel(x,1)), lg(x)-1);
     x = Q_primitive_part(x, &cx);
     x = eltmul_get_table(nf, x);
   } else {
@@ -643,10 +643,9 @@ idealfactor(GEN nf, GEN x)
   {
     x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) x = gel(x,1);
-    tx = typ(x);
-    if (tx == t_INT || tx == t_FRAC)
+    if (typ(x) != t_COL)
     {
-      f = factor(gabs(x,0));
+      f = factor(Q_abs(x));
       c1 = gel(f,1); f1 = cgetg(1, t_VEC);
       c2 = gel(f,2); f2 = cgetg(1, t_COL);
       for (i = 1; i < lg(c1); i++)
@@ -1222,7 +1221,7 @@ elt_cmp(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y);
   if (ty == tx)
-    return (tx == t_POL || tx == t_POLMOD)? cmp_pol(x,y): lexcmp(x,y);
+    return (tx == t_POL || tx == t_POLMOD)? cmp_RgX(x,y): lexcmp(x,y);
   return tx - ty;
 }
 static int
@@ -1483,7 +1482,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   long t = typ(x);
   if (t == t_POL || t == t_POLMOD) x = algtobasis(nf,x);
   if (isnfscalar(x)) x = gel(x,1);
-  if (typ(x) != t_COL) return gmul(gabs(x,0), v);
+  if (typ(x) != t_COL) return gmul(Q_abs(x), v);
   return idealmat_to_hnf(nf, element_mulvec(nf, x, v));
 }
 
@@ -1572,7 +1571,7 @@ idealnorm(GEN nf, GEN x)
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
   if (tx != t_FRAC) pari_err(typeer, "idealnorm");
-  return gerepileupto(av, gabs(x,0));
+  return gerepileupto(av, Q_abs(x));
 }
 
 /* inverse */

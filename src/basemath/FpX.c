@@ -705,7 +705,7 @@ _FpXQ_rand(void *data)
   return z;
 }
 
-static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,cmp_pol,gcmp1};
+static const struct bb_group FpXQ_star={_FpXQ_mul,_FpXQ_pow,_FpXQ_rand,cmp_RgX,gcmp1};
 
 GEN
 FpXQ_order(GEN a, GEN ord, GEN T, GEN p)

@@ -697,6 +697,26 @@ trivfact(void)
   gel(y,2) = cgetg(1,t_COL); return y;
 }
 
+/* polynomial in variable v, whose coeffs are the digits of m in base p */
+static GEN
+stoFpX(ulong m, ulong p, long v)
+{
+  GEN y = new_chunk(BITS_IN_LONG + 2);
+  long l = 2;
+  do { ulong q = m/p; gel(y,l++) = utoi(m - q*p); m=q; } while (m);
+  y[1] = evalsigne(1) | evalvarn(v); 
+  y[0] = evaltyp(t_POL) | evallg(l); return y;
+}
+static GEN
+itoFpX(GEN m, GEN p, long v)
+{
+  GEN y = new_chunk(bit_accuracy(lgefint(m))+2);
+  long l = 2;
+  do { m = dvmdii(m, p, &gel(y,l)); l++; } while (signe(m));
+  y[1] = evalsigne(1) | evalvarn(v);
+  y[0] = evaltyp(t_POL) | evallg(l); return y;
+}
+
 static GEN
 try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
 {
@@ -713,7 +733,7 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
 }
 
 /* INPUT:
- *  m integer (converted to polynomial w in Z[X] by stopoly)
+ *  m integer (converted to polynomial w in Z[X] by stoFpX)
  *  p prime; q = (p^d-1) / 2^r
  *  t[0] polynomial of degree k*d product of k irreducible factors of degree d
  *  t[0] is expected to be normalized (leading coeff = 1)
@@ -739,7 +759,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
     }
     else
     {
-      w = FpX_rem(stopoly(m,ps,v),*t, p);
+      w = FpX_rem(stoFpX(m,ps,v),*t, p);
       m++; w = try_pow(w,*t,p,q,r);
       if (!w) continue;
       w = ZX_Z_add(w, gen_m1);
@@ -768,7 +788,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   for(;; avma = av)
   {
     m = incloop(m);
-    w = FpX_rem(stopoly_gen(m,p,v),*t, p);
+    w = FpX_rem(itoFpX(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
     w = ZX_Z_add(w, gen_m1);
@@ -2178,7 +2198,7 @@ polfnf(GEN a, GEN T)
     gel(P,i) = gdiv(gmul(unt,F), leading_term(F));
     gel(E,i) = utoipos(e);
   }
-  return gerepilecopy(av, sort_factor_pol(mkmat2(P,E), cmp_pol));
+  return gerepilecopy(av, sort_factor_pol(mkmat2(P,E), cmp_RgX));
 }
 
 static GEN
@@ -2419,7 +2439,7 @@ FpX_factorff(GEN P,GEN l, GEN Q)
     }
   }
   setlg(V,lfact);
-  setlg(E,lfact); return sort_factor_pol(mkvec2(V,E), cmp_pol);
+  setlg(E,lfact); return sort_factor_pol(mkvec2(V,E), cmp_RgX);
 }
 
 static GEN
@@ -2506,7 +2526,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       }
   }
   setlg(t, nbfact);
-  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t, E), cmp_pol);
+  setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t, E), cmp_RgX);
 }
 GEN
 factorff(GEN f, GEN p, GEN T)

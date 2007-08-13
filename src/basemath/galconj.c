@@ -89,7 +89,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
     }
   }
   setlg(y, 1 + nbauto);
-  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &cmp_pol_aux));
+  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &gen_cmp_RgX));
 }
 
 GEN
@@ -145,7 +145,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
     }
   }
   setlg(y, 1 + nbauto);
-  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &cmp_pol_aux));
+  return gerepileupto(av, gen_sort(y, (void*)&gcmp, &gen_cmp_RgX));
 }
 /*************************************************************************/
 /**									**/
@@ -2868,7 +2868,7 @@ galoisconj4(GEN T, GEN den, long flag)
   aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
   if (DEBUGLEVEL >= 1)
     msgtimer("Computation of polynomials");
-  return gerepileupto(ltop, gen_sort(aut, (void*)&gcmp, &cmp_pol_aux));
+  return gerepileupto(ltop, gen_sort(aut, (void*)&gcmp, &gen_cmp_RgX));
 }
 
 /* Heuristic computation of #Aut(T), pdepart first prime to be tested */

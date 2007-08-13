@@ -2540,8 +2540,34 @@ cont_gcd(GEN x, long tx, GEN y)
 {
   return (tx == t_RFRAC)? cont_gcd_rfrac(x, y): cont_gcd_gen(x, y);
 }
+static GEN
+gcdiq(GEN x, GEN y)
+{
+  GEN z;
+  if (!signe(x)) return Q_abs(y);
+  z = cgetg(3,t_FRAC);
+  gel(z,1) = gcdii(x,gel(y,1));
+  gel(z,2) = icopy(gel(y,2));
+  return z;
+}
+static GEN
+gcdqq(GEN x, GEN y)
+{
+  GEN z = cgetg(3,t_FRAC);
+  gel(z,1) = gcdii(gel(x,1), gel(y,1));
+  gel(z,2) = lcmii(gel(x,2), gel(y,2));
+  return z;
+}
+/* assume x,y t_INT or t_FRAC */
 GEN
-ggcd0(GEN x, GEN y) { return y? ggcd(x,y): content(x); }
+Q_gcd(GEN x, GEN y)
+{
+  long tx = typ(x), ty = typ(y);
+  if (tx == t_INT)
+  { return (ty == t_INT)? gcdii(x,y): gcdiq(x,y); }
+  else
+  { return (ty == t_INT)? gcdiq(y,x): gcdqq(x,y); }
+}
 
 GEN
 ggcd(GEN x, GEN y)
@@ -2588,10 +2614,8 @@ ggcd(GEN x, GEN y)
         }
         return z;
 
-      case t_FRAC: z=cgetg(3,t_FRAC);
-        gel(z,1) = gcdii(gel(x,1), gel(y,1));
-        gel(z,2) = lcmii(gel(x,2), gel(y,2));
-        return z;
+      case t_FRAC:
+        return gcdqq(x,y);
 
       case t_COMPLEX:
         if (c_is_rational(x) && c_is_rational(y)) return gauss_gcd(x,y);
@@ -2628,9 +2652,8 @@ ggcd(GEN x, GEN y)
             if (!is_pm1(p1)) p1 = gerepileuptoint(av, gcdii(x,p1));
             gel(z,2) = p1; return z;
 
-          case t_FRAC: z = cgetg(3,t_FRAC);
-            gel(z,1) = gcdii(x,gel(y,1));
-            gel(z,2) = icopy(gel(y,2)); return z;
+          case t_FRAC:
+            return gcdiq(x,y);
 
           case t_COMPLEX:
             if (c_is_rational(y)) return gauss_gcd(x,y);
@@ -2649,7 +2672,7 @@ ggcd(GEN x, GEN y)
           case t_FRAC:
             av = avma; p1=gcdii(gel(x,1),gel(y,2)); avma = av;
             if (!is_pm1(p1)) pari_err(operi,"g",x,y);
-            return ggcd(gel(y,1), x);
+            return gcdiq(gel(y,1), x);
 
           case t_COMPLEX: case t_QUAD:
             return triv_cont_gcd(y,x);
@@ -2762,6 +2785,8 @@ ggcd(GEN x, GEN y)
   pari_err(operf,"g",x,y);
   return NULL; /* not reached */
 }
+GEN
+ggcd0(GEN x, GEN y) { return y? ggcd(x,y): content(x); }
 
 /* x a t_VEC,t_COL or t_MAT */
 static GEN
@@ -3080,7 +3105,7 @@ Q_content(GEN x)
       av = avma; d = Q_content(gel(x,1));
       for (i=2; i<l; i++)
       {
-        d = ggcd(d, Q_content(gel(x,i)));
+        d = Q_gcd(d, Q_content(gel(x,i)));
         if ((i & 255) == 0) d = gerepileupto(av, d);
       }
       return gerepileupto(av, d);
@@ -3089,10 +3114,10 @@ Q_content(GEN x)
       l = lg(x); if (l == 2) return gen_0;
       av = avma; d = Q_content(gel(x,2));
       for (i=3; i<l; i++)
-        d = ggcd(d, Q_content(gel(x,i)));
+        d = Q_gcd(d, Q_content(gel(x,i)));
       return gerepileupto(av, d);
     case t_POLMOD: return Q_content(gel(x,2));
-    case t_COMPLEX: return ggcd(Q_content(gel(x,1)), Q_content(gel(x,2)));
+    case t_COMPLEX: return Q_gcd(Q_content(gel(x,1)), Q_content(gel(x,2)));
   }
   pari_err(typeer,"Q_content");
   return NULL; /* not reached */
@@ -3205,7 +3230,7 @@ Q_muli_to_int(GEN x, GEN d)
 }
 
 /* return x * n/d. x: rational; d,n,result: integral. n = NULL represents 1 */
-GEN
+static GEN
 Q_divmuli_to_int(GEN x, GEN d, GEN n)
 {
   long i, l, t = typ(x);
@@ -3260,6 +3285,23 @@ Q_div_to_int(GEN x, GEN c)
       return Q_divmuli_to_int(x, n,d);
   }
   pari_err(typeer,"Q_div_to_int");
+  return NULL; /* not reached */
+}
+/* return y = x * c, assuming x,c rational, and y integral */
+GEN
+Q_mul_to_int(GEN x, GEN c)
+{
+  GEN d, n;
+  switch(typ(c))
+  {
+    case t_INT:
+      return Q_muli_to_int(x, c);
+    case t_FRAC:
+      n = gel(c,1);
+      d = gel(c,2);
+      return Q_divmuli_to_int(x, d,n);
+  }
+  pari_err(typeer,"Q_mul_to_int");
   return NULL; /* not reached */
 }
 

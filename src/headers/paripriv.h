@@ -696,7 +696,7 @@ GEN     sqscal(GEN x);
 
 /* bibli2.c */
 
-int     cmp_pol_aux(void *data, GEN x, GEN y);
+int     gen_cmp_RgX(void *data, GEN x, GEN y);
 GEN     gen_vecsort(GEN x, GEN k, long flag);
 long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort_uniq(GEN L);
@@ -855,11 +855,10 @@ GEN     zrhqr(GEN a, long prec);
 /* polarit2.c */
 
 GEN     DDF_roots(GEN pol, GEN polp, GEN p);
-GEN     Q_divmuli_to_int(GEN x, GEN d, GEN n);
 long    checkdeflate(GEN x);
 void    factor_quad(GEN x, GEN res, long *ptcnt);
 GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow) (void *, GEN, GEN), void *data);
-GEN     matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
+long    logint(GEN B, GEN y, GEN *ptq);
 GEN     pseudodiv(GEN x, GEN y, GEN *ptr);
 long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);

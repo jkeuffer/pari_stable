@@ -805,7 +805,7 @@ nfiso0(GEN a, GEN b, long fliso)
       if (lg(y[i]) != 4) { setlg(y,i); break; }
       gel(y,i) = gneg_i(lift_intern(gmael(y,i,2)));
     }
-    y = gen_sort(y, (void*)&gcmp, &cmp_pol_aux);
+    y = gen_sort(y, (void*)&gcmp, &gen_cmp_RgX);
     settyp(y, t_VEC);
     if (vb == 0) (void)delete_var();
   }
@@ -2107,7 +2107,7 @@ polredabs0(GEN x, long flag)
     {
       GEN t, y0 = y, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern(gel(y,2)): modreverse_i(a, x);
-      t = gmul(RgX_powers(t, z, degpol(z)-1), B);
+      t = gmul(RgXQ_powers(t, degpol(z)-1, z), B);
       y = mkvec2(y0, t);
     }
   }

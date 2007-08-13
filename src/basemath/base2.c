@@ -3350,7 +3350,7 @@ polcompositum0(GEN A, GEN B, long flall)
   }
   else
     C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
-  gen_sort_inplace(C, (void*)&cmpii, &cmp_pol_aux, NULL);
+  gen_sort_inplace(C, (void*)&cmpii, &gen_cmp_RgX, NULL);
   if (flall)
   {
     long i,l = lg(C);
@@ -3828,7 +3828,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 
   plg0= Q_remove_denom(plg, &den); /* plg = plg0/den */
   /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
-  vbs = RgX_powers(plg0, polabs, n-1);
+  vbs = RgXQ_powers(plg0, n-1, polabs);
   if (den)
   { /* restore denominators */
     gel(vbs,2) = plg; d = den;

@@ -1816,28 +1816,6 @@ ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
   return stable;
 }
 
-/* returns a polynomial in variable v, whose coeffs correspond to the digits
- * of m (in base p) */
-GEN
-stopoly(ulong m, ulong p, long v)
-{
-  GEN y = new_chunk(BITS_IN_LONG + 2);
-  long l = 2;
-  do { ulong q = m/p; gel(y,l++) = utoi(m - q*p); m=q; } while (m);
-  y[1] = evalsigne(1) | evalvarn(v); 
-  y[0] = evaltyp(t_POL) | evallg(l); return y;
-}
-
-GEN
-stopoly_gen(GEN m, GEN p, long v)
-{
-  GEN y = new_chunk(bit_accuracy(lgefint(m))+2);
-  long l = 2;
-  do { m = dvmdii(m, p, &gel(y,l)); l++; } while (signe(m));
-  y[1] = evalsigne(1) | evalvarn(v);
-  y[0] = evaltyp(t_POL) | evallg(l); return y;
-}
-
 /* assuming the PRS finishes on a degree 1 polynomial C0 + C1X, with "generic"
  * degree sequence as given by dglist, set *Ci and return resultant(a,b) */
 static ulong
@@ -2654,7 +2632,7 @@ _gcd(GEN a, GEN b)
 {
   if (!a) a = gen_1;
   if (!b) b = gen_1;
-  return ggcd(a,b);
+  return Q_gcd(a,b);
 }
 
 /* ceil( || p ||_oo / lc(p) ) */

@@ -1105,7 +1105,7 @@ modreverse_i(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   if (gcmp0(a) || typ(a) != t_POL) pari_err(talker,"reverse polmod does not exist");
 
-  y = RgXV_to_RgM(RgX_powers(a,T,n-1), n);
+  y = RgXV_to_RgM(RgXQ_powers(a,n-1,T), n);
   y = gauss(y, col_ei(n, 2));
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
@@ -1469,7 +1469,7 @@ tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 
 /* assume lg(x) = lg(y), x,y in Z^n */
 int
-cmp_vecint(GEN x, GEN y)
+cmp_ZV(GEN x, GEN y)
 {
   long fl,i, lx = lg(x);
   for (i=1; i<lx; i++)
@@ -1481,9 +1481,10 @@ cmp_vecint(GEN x, GEN y)
 int
 cmp_prime_over_p(GEN x, GEN y)
 {
-  long k = mael(x,4,2) - mael(y,4,2); /* diff. between residue degree */
+  GEN fx = gel(x,4), fy = gel(y,4);
+  long k = fx[2] - fy[2]; /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
-          : cmp_vecint(gel(x,2), gel(y,2));
+          : cmp_ZV(gel(x,2), gel(y,2));
 }
 
 int
@@ -1496,7 +1497,7 @@ cmp_prime_ideal(GEN x, GEN y)
 /* assume x and y are t_POL in the same variable whose coeffs can be
  * compared (used to sort polynomial factorizations) */
 int
-cmp_pol_aux(void *data, GEN x, GEN y)
+gen_cmp_RgX(void *data, GEN x, GEN y)
 {
   int (*coeff_cmp)(GEN,GEN)=(int(*)(GEN,GEN))data;
   long i, lx = lg(x), ly = lg(y);
@@ -1509,7 +1510,7 @@ cmp_pol_aux(void *data, GEN x, GEN y)
 }
 
 int
-cmp_pol(GEN x, GEN y)
+cmp_RgX(GEN x, GEN y)
 {
   long F[3] = {evallg(3)|evaltyp(t_POL)};
   if (typ(x) == t_POLMOD) x = gel(x,2);
@@ -1520,7 +1521,7 @@ cmp_pol(GEN x, GEN y)
     if (typ(y) != t_POL) return gcmp(x,y);
     gel(F,2) = x; x = F;
   }
-  return cmp_pol_aux((void*)&gcmp,x,y);
+  return gen_cmp_RgX((void*)&gcmp,x,y);
 }
 
 /* merge fx, fy two factorizations, whose 1st column is sorted in strictly
@@ -1574,7 +1575,7 @@ sort_factor(GEN y, void *data, int (*cmp)(void *,GEN,GEN))
 GEN
 sort_factor_pol(GEN y,int (*cmp)(GEN,GEN))
 {
-  (void)sort_factor(y,(void*)cmp, &cmp_pol_aux);
+  (void)sort_factor(y,(void*)cmp, &gen_cmp_RgX);
   return y;
 }
 

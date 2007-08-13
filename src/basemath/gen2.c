@@ -1023,6 +1023,19 @@ is_negative(GEN x) {
   return 0;
 }
 
+static GEN
+absq(GEN x)
+{
+  GEN y = cgetg(3, t_FRAC);
+  gel(y,1) = absi(gel(x,1));
+  gel(y,2) = icopy(gel(x,2)); return y;
+}
+GEN
+Q_abs(GEN x)
+{
+  return (typ(x) == t_INT)? absi(x): absq(x);
+}
+
 GEN
 gabs(GEN x, long prec)
 {
@@ -1035,9 +1048,8 @@ gabs(GEN x, long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
 
-    case t_FRAC: y=cgetg(3, t_FRAC);
-      gel(y,1) = absi( gel(x,1));
-      gel(y,2) = icopy(gel(x,2)); return y;
+    case t_FRAC: 
+      return absq(x);
 
     case t_COMPLEX:
       av=avma; p1=cxnorm(x);
@@ -1064,7 +1076,7 @@ gabs(GEN x, long prec)
       lx = lg(x); if (lx<=2) return gcopy(x);
       return is_negative(gel(x,lx-1))? gneg(x): gcopy(x);
 
-   case t_SER:
+    case t_SER:
      if (valp(x) || !signe(x))
        pari_err(talker, "abs is not meromorphic at 0");
      return is_negative(gel(x,2))? gneg(x): gcopy(x);

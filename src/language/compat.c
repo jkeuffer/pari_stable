@@ -15,6 +15,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
+static GEN
+ghell2(GEN e, GEN a, long prec) { return ellheight0(e,a,0,prec); }
+
+static GEN
+polylogd(long m, GEN x, long prec) { return polylog0(m,x,1,prec); }
+
+static GEN
+polylogdold(long m, GEN x, long prec) { return polylog0(m,x,2,prec); }
+
+static GEN
+polylogp(long m, GEN x, long prec) { return polylog0(m,x,3,prec); }
 
 static GEN
 prod0(GEN x, entree *ep, GEN a, GEN b, GEN ch) {return produit(ep,a,b,ch,x);}

@@ -880,6 +880,74 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code)
 /**                                                                **/
 /********************************************************************/
 GEN
+polzag(long n, long m)
+{
+  pari_sp av = avma;
+  long k, d = n - m;
+  GEN A, Bx, g, s;
+
+  if (d <= 0 || m < 0) return gen_0;
+  A  = mkpoln(2, stoi(-2), gen_1); /* 1 - 2x */
+  Bx = mkpoln(3, stoi(-2), gen_2, gen_0); /* 2x - 2x^2 */
+  g = gmul(poleval(ZX_deriv(polchebyshev1(d,0)), A), gpowgs(Bx, (m+1)>>1));
+  for (k = m; k >= 0; k--)
+    g = (k&1)? ZX_deriv(g): gadd(gmul(A,g), gmul(Bx,ZX_deriv(g)));
+  s = mulii(sqru(d), mpfact(m+1));
+  return gerepileupto(av, gdiv(g,s));
+}
+
+#ifdef _MSC_VER /* Bill Daly: work around a MSVC bug */
+#pragma optimize("g",off)
+#endif
+static GEN
+polzagreel(long n, long m, long prec)
+{
+  const long d = n - m, d2 = d<<1, r = (m+1)>>1;
+  long j, k, k2;
+  pari_sp av = avma;
+  GEN Bx, g, h, v, b, s;
+
+  if (d <= 0 || m < 0) return gen_0;
+  Bx = mkpoln(3, gen_1, gen_1, gen_0); /* x + x^2 */
+  v = cgetg(d+1,t_VEC);
+  g = cgetg(d+1,t_VEC);
+  gel(v,d) = gen_1; b = stor(d2, prec);
+  gel(g,d) = b;
+  for (k = 1; k < d; k++)
+  {
+    gel(v,d-k) = gen_1;
+    for (j=1; j<k; j++)
+      gel(v,d-k+j) = addii(gel(v,d-k+j), gel(v,d-k+j+1));
+    /* v[d-k+j] = binom(k, j), j = 0..k */
+    k2 = k+k; b = divri(mulri(b,mulss(d2-k2+1,d2-k2)), mulss(k2,k2+1));
+    for (j=1; j<=k; j++)
+      gel(g,d-k+j) = mpadd(gel(g,d-k+j), mulri(b,gel(v,d-k+j)));
+    gel(g,d-k) = b;
+  }
+  g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));
+  for (j=0; j<=r; j++)
+  {
+    if (j) g = derivpol(g);
+    if (j || !(m&1))
+    {
+      h = cgetg(n+3,t_POL);
+      h[1] = evalsigne(1);
+      h[2] = g[2];
+      for (k=1; k<n; k++)
+	gel(h,k+2) = gadd(gmulsg(k+k+1,gel(g,k+2)), gmulsg(k<<1,gel(g,k+1)));
+      gel(h,n+2) = gmulsg(n<<1, gel(g,n+1));
+      g = h;
+    }
+  }
+  g = gmul2n(g, r-1);
+  s = mului(d, mpfact(m+1));
+  return gerepileupto(av, gdiv(g,s));
+}
+
+#ifdef _MSC_VER
+#pragma optimize("g",on)
+#endif
+GEN
 sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, N;
@@ -1039,74 +1107,6 @@ sumpos0(entree *ep, GEN a, GEN code, long flag, long prec)
   }
   return NULL; /* not reached */
 }
-
-GEN
-polzag(long n, long m)
-{
-  pari_sp av = avma;
-  long k, d = n - m;
-  GEN A, Bx, g, s;
-
-  if (d <= 0 || m < 0) return gen_0;
-  A  = mkpoln(2, stoi(-2), gen_1); /* 1 - 2x */
-  Bx = mkpoln(3, stoi(-2), gen_2, gen_0); /* 2x - 2x^2 */
-  g = gmul(poleval(ZX_deriv(polchebyshev1(d,0)), A), gpowgs(Bx, (m+1)>>1));
-  for (k = m; k >= 0; k--)
-    g = (k&1)? ZX_deriv(g): gadd(gmul(A,g), gmul(Bx,ZX_deriv(g)));
-  s = mulii(sqru(d), mpfact(m+1));
-  return gerepileupto(av, gdiv(g,s));
-}
-
-#ifdef _MSC_VER /* Bill Daly: work around a MSVC bug */
-#pragma optimize("g",off)
-#endif
-GEN
-polzagreel(long n, long m, long prec)
-{
-  const long d = n - m, d2 = d<<1, r = (m+1)>>1;
-  long j, k, k2;
-  pari_sp av = avma;
-  GEN Bx, g, h, v, b, s;
-
-  if (d <= 0 || m < 0) return gen_0;
-  Bx = mkpoln(3, gen_1, gen_1, gen_0); /* x + x^2 */
-  v = cgetg(d+1,t_VEC);
-  g = cgetg(d+1,t_VEC);
-  gel(v,d) = gen_1; b = stor(d2, prec);
-  gel(g,d) = b;
-  for (k = 1; k < d; k++)
-  {
-    gel(v,d-k) = gen_1;
-    for (j=1; j<k; j++)
-      gel(v,d-k+j) = addii(gel(v,d-k+j), gel(v,d-k+j+1));
-    /* v[d-k+j] = binom(k, j), j = 0..k */
-    k2 = k+k; b = divri(mulri(b,mulss(d2-k2+1,d2-k2)), mulss(k2,k2+1));
-    for (j=1; j<=k; j++)
-      gel(g,d-k+j) = mpadd(gel(g,d-k+j), mulri(b,gel(v,d-k+j)));
-    gel(g,d-k) = b;
-  }
-  g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));
-  for (j=0; j<=r; j++)
-  {
-    if (j) g = derivpol(g);
-    if (j || !(m&1))
-    {
-      h = cgetg(n+3,t_POL);
-      h[1] = evalsigne(1);
-      h[2] = g[2];
-      for (k=1; k<n; k++)
-	gel(h,k+2) = gadd(gmulsg(k+k+1,gel(g,k+2)), gmulsg(k<<1,gel(g,k+1)));
-      gel(h,n+2) = gmulsg(n<<1, gel(g,n+1));
-      g = h;
-    }
-  }
-  g = gmul2n(g, r-1);
-  s = mului(d, mpfact(m+1));
-  return gerepileupto(av, gdiv(g,s));
-}
-#ifdef _MSC_VER
-#pragma optimize("g",on)
-#endif
 
 /********************************************************************/
 /**                                                                **/

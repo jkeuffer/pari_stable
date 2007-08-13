@@ -369,22 +369,6 @@ divir(GEN x, GEN y)
   avma = av; return z;
 }
 
-void
-mpdivz(GEN x, GEN y, GEN z)
-{
-  pari_sp av = avma;
-  long tx = typ(x), ty = typ(y);
-  GEN q = tx==t_INT && ty==t_INT? divii(x,y): mpdiv(x,y);
-
-  if (typ(z) == t_REAL) affrr(q, z);
-  else
-  {
-    if (typ(q) == t_REAL) pari_err(gdiver);
-    affii(q, z); 
-  }
-  avma = av;
-}
-
 GEN
 divsr(long x, GEN y)
 {
