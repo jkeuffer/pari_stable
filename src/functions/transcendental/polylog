@@ -14,8 +14,8 @@ Doc: one of the different polylogarithms, depending on \fl:
  $|x|^2\le1/2$, and the power series expansion in $\log(x)$ otherwise.
  
  Using $\fl$, computes a modified $m^\text{th}$ polylogarithm of $x$.
- We use Zagier's notations; let $\Re_m$ denotes $\Re$ or $\Im$ depending
- whether $m$ is odd or even:
+ We use Zagier's notations; let $\Re_m$ denote $\Re$ or $\Im$ depending
+ on whether $m$ is odd or even:
  
  If $\fl=1$: compute $\tilde D_m(x)$, defined for $|x|\le1$ by
  $$\Re_m\left(\sum_{k=0}^{m-1} \dfrac{(-\log|x|)^k}{k!}\text{Li}_{m-k}(x)
@@ -31,3 +31,5 @@ Doc: one of the different polylogarithms, depending on \fl:
  
  These three functions satisfy the functional equation
  $f_m(1/x) = (-1)^{m-1}f_m(x)$.
+Variant: Also available is
+ \fun{GEN}{gpolylog}{long m, GEN x, long prec} (\fl = 0).
