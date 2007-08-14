@@ -64,6 +64,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - manage_var obsoleted (kept for backward compatibility, to be removed),
     use pari_var_init, pari_var_next, pari_var_max_avil, pari_var_create
     instead.
+  - rename sqred -> qfgaussred, signat -> qfsign
+  - rename gscalmat -> scalarmat, gscalsmat -> scalarmat_s,
+    gscalcol -> scalarcol, gscalcol_i -> scalarcol_shallow
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

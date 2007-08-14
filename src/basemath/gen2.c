@@ -903,10 +903,11 @@ gneg(GEN x)
   long tx=typ(x),lx,i;
   GEN y;
 
-  if (gcmp0(x)) return gcopy(x);
   switch(tx)
   {
-    case t_INT: case t_REAL:
+    case t_INT:
+      return signe(x)? negi(x): gen_0;
+    case t_REAL:
       return mpneg(x);
 
     case t_COMPLEX:
@@ -961,10 +962,11 @@ gneg_i(GEN x)
   long tx=typ(x),lx,i;
   GEN y;
 
-  if (gcmp0(x)) return x;
   switch(tx)
   {
-    case t_INT: case t_REAL:
+    case t_INT:
+      return signe(x)? negi(x): gen_0;
+    case t_REAL:
       return mpneg(x);
 
     case t_INTMOD: y=cgetg(3,t_INTMOD); y[1]=x[1];

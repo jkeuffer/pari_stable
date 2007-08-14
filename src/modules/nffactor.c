@@ -207,7 +207,7 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *L)
   {
     u = gmul(elt, gel(L->iprk,1));
     for (i=1; i<l; i++) gel(u,i) = diviiround(gel(u,i), L->den);
-    elt = gscalcol(elt, l-1);
+    elt = scalarcol(elt, l-1);
   }
   u = gsub(elt, gmul(L->prk, u));
   if (bound && gcmp(QuickNormL2(u,DEFAULTPREC), bound) > 0) u = NULL;
@@ -999,7 +999,7 @@ get_R(GEN M)
 
   for(;;)
   {
-    R = sqred1_from_QR(M, prec);
+    R = Q_from_QR(M, prec);
     if (R) break;
     prec = (prec-1)<<1;
   }
@@ -1144,7 +1144,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   TT = cgetg(n0+1, t_VEC);
   Tra  = cgetg(n0+1, t_MAT);
   for (i=1; i<=n0; i++) TT[i] = 0;
-  CM_L = gscalsmat(C, n0);
+  CM_L = scalarmat_s(C, n0);
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {

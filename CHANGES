@@ -81,6 +81,8 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    62- ell.omega, ell.eta, pr.gen could lead to gerepile error [#641]
    63- y=[x];eval('y) --> error [#652]
    64- incorrect use of gerepileupto in inittestlift [ galoisconj ]
+   65- extra multiplication in the innermost loop of Cholesky decomposition
+       (qfgaussred, etc).
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -147,6 +149,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    39- listcreate() and listkill() are obsolete, don't use them. L = List()
     should be enough in all cases. All lists now grow as needed, without
     requiring an awkward maximal length (from listcreate).
+   40- rename sqred -> qfgaussred, signat -> qfsign, sqred1 -> qfgaussred_positive
 
   Added
     1- library functions expu, adduu, subuu
@@ -165,6 +168,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    12- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
    13- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
    14- library function remi2n, cmp_RgX, gen_cmp_RgX
+   15- library function dotproduct, dotproduct_i, dotsquare, dotsquare_i
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
@@ -178,6 +182,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
     6- obsolete function log0; use glog
     7- obsolete undocumented library function mpdivz, polzagreel, RgX_powers
        (use RgXQ_powers)
+    8- obsolete undocumented library function sqred3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

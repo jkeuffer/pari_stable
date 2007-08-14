@@ -99,7 +99,7 @@ int thread_start (...)
 
 \fun{int}{pari_daemon}{void} fork a PARI daemon, detaching from the main
 process group. The function returns 1 in the parent, and 0 in the
-forked son. 
+forked son.
 
 \subsec{Notions specific to the GP interpreter}
 
@@ -128,7 +128,7 @@ are arrays of \kbd{entree} structs, the last of which satisfy
 There are currently six modules in GP: general functions
 (\tet{functions_basic}), gp-specific functions (\tet{functions_fp}),
 gp-specific highlevel functions (\tet{functions_highlevel}),
-member functions, and two modules of obsolete functions. The function 
+member functions, and two modules of obsolete functions. The function
 \kbd{pari\_init} initializes the interpreter and declares all symbols
 in \kbd{functions\_basic}. You may declare further functions on a case by
 case basis or as a whole module using
@@ -724,7 +724,7 @@ assuming \kbd{p} is prime.
 
 \fun{ulong}{pgener_Zl}{ulong p} returns a primitive root modulo $p^k$, $k
 > 1$, assuming $p$ is an odd prime. On a 64-bit machine,
-this function may fail and raise an exception, if $p > 2^{63}$; namely 
+this function may fail and raise an exception, if $p > 2^{63}$; namely
 when $g := \kbd{pgener\_Fl}(p)$ is not a primitive element and $g + p$ no
 longer fits in an \kbd{ulong}. (It turns out that this cannot happen on a
 32-bit architecture.) Use \kbd{gener\_Fp} if this is a problem.
@@ -1136,7 +1136,7 @@ The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 
 \fun{int}{equalsi}{long s, GEN x}
 
-\fun{int}{equalis}{GEN x, long s} compare the \typ{INT} \kbd{x} and 
+\fun{int}{equalis}{GEN x, long s} compare the \typ{INT} \kbd{x} and
 the \kbd{long}~\kbd{s}. The result is $1$ if $\kbd{x} = \kbd{y}$, $0$ otherwise.
 
 The remaining comparison operators disregard the sign of their operands:
@@ -1296,7 +1296,7 @@ $\kbd{x}$ and $\kbd{y}$ is non-zero. (Note the absolute value!)
 
 The following routines return 1 (true) if \kbd{y} divides \kbd{x}, and
 0 otherwise. All \kbd{GEN} are assumed to be \typ{INT}s.
-\fun{int}{dvdii}{GEN x, GEN y} 
+\fun{int}{dvdii}{GEN x, GEN y}
 \fun{int}{dvdis}{GEN x, long y}
 \fun{int}{dvdiu}{GEN x, ulong y}
 \fun{int}{dvdsi}{long x, GEN y}
@@ -1412,7 +1412,7 @@ called previously with $n > i$. The macro does not check whether
 $0 \leq i < n$. If cached Bernoullis were initialized to a larger accuracy
 than desired, use e.g.~\kbd{rtor(bern(i), prec)}.
 
-The following functions use cached data if \kbd{prec} is not too large; 
+The following functions use cached data if \kbd{prec} is not too large;
 otherwise the newly computed data replaces the old cache.
 
 \fun{GEN}{mppi}{long prec} returns $\pi$ at precision \kbd{prec}.
@@ -1450,10 +1450,10 @@ in $0, 1, \dots p-1$.
 \subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
 
 \fun{GEN}{Fp_mul}{GEN a, GEN b, GEN m} returns the product of \kbd{a} by
-\kbd{b} modulo \kbd{m} (smallest non-negative residue). 
+\kbd{b} modulo \kbd{m} (smallest non-negative residue).
 
 \fun{GEN}{Fp_sqr}{GEN a, GEN m} returns $\kbd{a}^2$ modulo \kbd{m} (smallest
-non-negative residue). 
+non-negative residue).
 
 \fun{ulong}{Fp_powu}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
 power modulo \kbd{p} (smallest non-negative residue). Not memory-clean, but
@@ -1636,7 +1636,7 @@ $\deg(z) < \deg \kbd{T}$.
   \kbd{X}: polynomial in $X$ (\typ{POL} in a fixed variable), e.g. \kbd{FpX}
            means $\Z/p\Z[X]$
 
-  \kbd{Y}: polynomial in $Y\neq X$. This is used to resolve ambiguities. 
+  \kbd{Y}: polynomial in $Y\neq X$. This is used to resolve ambiguities.
            E.g. \kbd{FpXY} means $((\Z/p\Z)[X])[Y]$.
 
   \kbd{V}: vector (\typ{VEC} or \typ{COL}), treated as a line vector
@@ -1660,7 +1660,7 @@ $\deg(z) < \deg \kbd{T}$.
   \kbd{x} and \kbd{y} (and \kbd{q}) are implemented by a \typ{VECSMALL} whose
   first coefficient is used as a code-word and the following are the
   coefficients , similarly to a \typ{POL}. This is known as a 'POLSMALL'.
-  
+
   \kbd{m} are implemented by a \typ{MAT} whose components (columns) are
   \typ{VECSMALL}s. This is know as a 'MATSMALL'.
 
@@ -1725,21 +1725,21 @@ types of the coefficients.
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}. 
+\fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
-\fun{GEN}{ZX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}. 
+\fun{GEN}{ZX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
 
 \fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
-\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the polynomial \kbd{x}. 
+\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the polynomial \kbd{x}.
 
-\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the polynomial \kbd{x} by the integer \kbd{y}. 
+\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the polynomial \kbd{x} by the integer \kbd{y}.
 
-\fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}. 
+\fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
 
-\fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$. 
+\fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
-\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}. 
+\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}.
 
 \fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
 
@@ -1749,7 +1749,7 @@ More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
 rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
 algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
 
-\fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}. 
+\fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}.
 
 \fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
 \kbd{T}.
@@ -1758,7 +1758,7 @@ algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
 \kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
 
 \fun{GEN}{ZX_factor}{GEN T} returns the factorization of the primitive part
-of \kbd{T} over $\Q[X]$ (the content is lost). 
+of \kbd{T} over $\Q[X]$ (the content is lost).
 
 \fun{GEN}{QX_factor}{GEN T} as \kbd{ZX\_factor}.
 
@@ -1766,7 +1766,7 @@ of \kbd{T} over $\Q[X]$ (the content is lost).
 \kbd{ZX}~\kbd{A} and \kbd{B}.
 
 \fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
-\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result 
+\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result
 is an integer.
 
 \fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
@@ -1823,18 +1823,18 @@ of \kbd{FpX}s).
 \noindent Now, except for \kbd{p}, the operands and outputs are all \kbd{FpX}
 objects. Results are undefined on other inputs.
 
-\fun{GEN}{FpX_add}{GEN x,GEN y, GEN p} adds \kbd{x} and \kbd{y}. 
+\fun{GEN}{FpX_add}{GEN x,GEN y, GEN p} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{FpX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
 \fun{GEN}{FpX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}. 
+\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}.
 
-\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}. 
+\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}.
 
-\fun{GEN}{FpX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$. 
+\fun{GEN}{FpX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
 \fun{GEN}{FpX_divrem}{GEN x, GEN y, GEN p, GEN *pr} returns the quotient
 of \kbd{x} by \kbd{y}, and sets \kbd{pr} to the remainder.
@@ -2070,7 +2070,7 @@ Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
 coefficients are either \typ{INT}s or \typ{FpX}s. This reduce memory
 overhead at the expense of consistency.
 
-\fun{GEN}{FpXX_add}{GEN x, GEN y, GEN p} adds \kbd{x} and \kbd{y}. 
+\fun{GEN}{FpXX_add}{GEN x, GEN y, GEN p} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
 either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
@@ -2227,7 +2227,7 @@ and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 
 \fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
-dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.  
+dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
 
 \fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
 (seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
@@ -2397,7 +2397,7 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{Flxq_powers}{GEN x, long l, GEN T, ulong p}
 
-\fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
+\fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
 
 \fun{GEN}{Flxq_order}{GEN a, GEN ord, GEN T, ulong p}
@@ -2413,7 +2413,7 @@ $e$ does not exists, the result is currently undefined.
 \fun{GEN}{Flxq_sqrtn}{GEN x, GEN n, GEN T, ulong p, GEN *zn} returns an
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
 \kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
-primitive \kbd{n}-th root of $1$.  
+primitive \kbd{n}-th root of $1$.
 
 \fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
 polynomial of \kbd{x}
@@ -2441,7 +2441,7 @@ $\text{Res}_X(u, v)$, which is an \kbd{Flx}. The coefficients of \kbd{u}
 and \kbd{v} are assumed to be in the variable $v$.
 
 \fun{GEN}{Flx_FlxY_resultant}{GEN a, GEN b, ulong p}
-Returns $\text{Res}_x(a, b)$, which is an \kbd{Flx} 
+Returns $\text{Res}_x(a, b)$, which is an \kbd{Flx}
 in the main variable of \kbd{b}.
 
 \fun{GEN}{FlxX_shift}{GEN a, long n}
@@ -2471,7 +2471,7 @@ in the main variable of \kbd{b}.
 \fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
 \fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
- 
+
 \fun{GEN}{Flm_indexrank}{GEN x, ulong p}
 
 \fun{GEN}{Flm_inv}{GEN x, ulong p}
@@ -2498,9 +2498,9 @@ where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
 \subsec{\kbd{RgX}}.
 
-\fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}. 
+\fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
-\fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}. 
+\fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
 
 \fun{GEN}{RgX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
@@ -2628,7 +2628,7 @@ $p$. $p$ is odd.
 $n$-th root mod $p$. Assumes $n > 1$ and $p$ does not divide $n$.
 
 %\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
-%term prime to $p$, and without multiple roots mod $p$. Return a vector 
+%term prime to $p$, and without multiple roots mod $p$. Return a vector
 %of \typ{INT}s which are the roots of $f$ mod $p^e$.
 
 \fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
@@ -2637,7 +2637,7 @@ which are the root of $f$ mod $p^e$ congruent to $a$ mod $p$.
 
 \fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
-vector of \typ{INT}s which are the root of $f$ mod $p^e$ congruent to the 
+vector of \typ{INT}s which are the root of $f$ mod $p^e$ congruent to the
 $S[i]$ mod $p$.
 
 \fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
@@ -2772,7 +2772,7 @@ identity matrix.
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
-\fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as 
+\fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as
 \kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial
 in variable $w$.
 
@@ -2784,49 +2784,6 @@ an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 
 \fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
 constant \kbd{Flx} in variable $v$.
-
-\section{Further variants on transcendantal functions}
-
-The following two functions are only useful when interacting with \kbd{gp},
-to manipulate its internal default precision (expressed as a number of
-decimal digits, not in words as used everywhere else):
-
-\fun{long}{getrealprecision}{void} returns \kbd{realprecision}.
-
-\fun{long}{setrealprecision}{long n, long *prec} sets the new
-\kbd{realprecision} to $n$, which is returned. As a side effect, set
-\kbd{prec} to the corresponding number of words \kbd{ndec2prec(n)}.
-
-In the following routines, $x$ is assumed to be a \typ{REAL} and the result
-is a \typ{REAL} with the largest accuracy which can be deduced from the input:
-The naming scheme is inconsistant here, since we somethimes use the
-prefix\kbd{mp} even though \typ{INT} inputs are forbidden:
-
-\fun{GEN}{sqrtr}{GEN x} returns the square root of $x$.
-
-\fun{GEN}{sqrtnr}{GEN x, long n} returns the $n$-th root of $x$, assuming
-$n\geq 1$.
-
-
-\fun{GEN}{mpcos}{GEN x} returns $\cos(x)$.
-
-\fun{GEN}{mpsin}{GEN x} returns $\sin(x)$.
-
-\fun{GEN}{mplog}{GEN x} returns $\log(x)$. We must have $x > 0$ since the
-result must be a \typ{REAL}. Use \kbd{glog} for the general case, where
-you want such computations as $\log -1 = i$.
-
-\fun{GEN}{mpexp}{GEN x} returns $\exp(x)$.
-
-\fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
-\kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
-$|x|$ is very small.
-Two variants of sin and cos:
-
-\fun{void}{mpsincos}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to 
-$\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
-
-\fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
 
 \section{Operations on general PARI objects}
 
@@ -3015,12 +2972,18 @@ Assumes that \kbd{x} is non-zero.
 \kbd{gen\_0}.
 
 \fun{GEN}{col_ei}{long n, long i} creates a \typ{COL} with \kbd{n} components
-set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to \kbd{gen\_1}
+set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 (\kbd{i}-th vector in the canonical basis).
 
 \fun{GEN}{vec_ei}{long n, long i} creates a \typ{VEC} with \kbd{n} components
-set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to \kbd{gen\_1}
+set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 (\kbd{i}-th vector in the canonical basis).
+
+\fun{GEN}{scalarcol}{GEN x, long n} creates a \typ{COL} with \kbd{n}
+components set to \kbd{gen\_0}, but the first one which is set to a copy
+of \kbd{x}. (The name comes from \kbd{RgV\_isscalar}.)
+
+\smallskip
 
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
 components set to \kbd{gen\_0}. Note that the result allocates a
@@ -3029,14 +2992,14 @@ all columns. To fully allocate a matrix initialized with zero entries,
 use \kbd{zeromatcopy}.
 
 \fun{GEN}{zeromatcopy}{long m, long n} creates a \typ{MAT} with \kbd{m} x
-\kbd{n} components set to \kbd{gen\_0}. Note that 
+\kbd{n} components set to \kbd{gen\_0}. Note that
 
 \fun{GEN}{matid}{long n} identity matrix in dimension \kbd{n} (with
 components \kbd{gen\_1} and\kbd{gen\_0}).
 
-\fun{GEN}{gscalmat}{GEN x, long n} scalar matrix, \kbd{x} times the identity.
+\fun{GEN}{scalarmat}{GEN x, long n} scalar matrix, \kbd{x} times the identity.
 
-\fun{GEN}{gscalsmat}{long x, long n} scalar matrix, \kbd{stoi(x)} times
+\fun{GEN}{scalarmat_s}{long x, long n} scalar matrix, \kbd{stoi(x)} times
 the identity.
 
 \smallskip
@@ -3154,6 +3117,13 @@ coefficients (\kbd{GEN}) follow.
 \fun{GEN}{mkvecsmalln}{long n, ...} returns the \typ{VECSMALL} whose $n$
 coefficients (\kbd{long}) follow.
 
+\fun{GEN}{scalarcol_shallow}{GEN x, long n} creates a \typ{COL} with \kbd{n}
+components set to \kbd{gen\_0}, but the first one which is set to a shallow
+copy of \kbd{x}. (The name comes from \kbd{RgV\_isscalar}.)
+
+\fun{GEN}{scalarmat_shallow}{GEN x, long n} creates an $n\times n$
+scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
+
 \subsec{Integer parts}
 
 \fun{GEN}{gfloor}{GEN x} creates the floor of~\kbd{x}, i.e.\ the (true)
@@ -3218,8 +3188,17 @@ when they are aware that the result they return is an exact zero, so it is
 almost always faster to test for pointer equality first, and call
 \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
 
-\fun{int}{isinexact}{GEN x} returns 0 (false) if \kbd{x} has an inexact
-component, and 1 (true) otherwise.
+\fun{int}{isexactzeroscalar}{GEN g} equivalent to, but faster than,
+\bprog
+  is_scalar_t(typ(x)) && isexactzero(x)
+@eprog
+
+\fun{int}{isinexact}{GEN x} returns 1 (true) if \kbd{x} has an inexact
+component, and 0 (false) otherwise.
+
+\fun{int}{isinexactreal}{GEN x} return 1 if \kbd{x} has an inexact
+\typ{REAL} component, and 0  otherwise.
+
 
 \fun{int}{isint}{GEN x, GEN *n} returns 0 (false) if \kbd{x} does not round
 to an integer. Otherwise, returns 1 (true) and set \kbd{n} to the rounded
@@ -3314,7 +3293,7 @@ vector \kbd{x} in ascending \emph{lexicographic} order, according to the
 entries of the \typ{VECSMALL} \kbd{k}. For example,  if $\kbd{k} = [2,1,3]$,
 sorting will be done with respect to the second component,  and when these
 are  equal, with respect to the first,  and when these are equal,  with
-respect to the third.                                                           
+respect to the third.
 
 \subsubsec{Indirect sorting}
 
@@ -3353,7 +3332,7 @@ the original \kbd{x}.
 \fun{GEN}{sort_factor}{GEN y, void *data, int (*cmp)(void *,GEN,GEN)}:
 assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
 is made) according to the comparison function \kbd{cmp} applied to its first
-column. 
+column.
 
 \fun{GEN}{merge_factor}{GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN)}
 let \kbd{fx} and \kbd{fy} be factorization matrices for $X$ and $Y$
@@ -3391,7 +3370,7 @@ compared using \kbd{gcmp}.
 
 \fun{int}{cmp_prime_over_p}{GEN x, GEN y} compare two prime ideals, which
 we assume divide the same prime number. The comparison is ad hoc but orders
-according to increasing residue degrees. 
+according to increasing residue degrees.
 
 \fun{int}{cmp_prime_ideal}{GEN x, GEN y} compare two prime ideals in the same
 \kbd{nf}. Orders by increasing primes, breaking ties using
@@ -3664,7 +3643,7 @@ of Sylvester's matrix.
 
 \fun{GEN}{subresall}{GEN u, GEN v, GEN *sol} returns \kbd{subres(x,y)}. If
 \kbd{sol} is not \kbd{NULL}, sets it to the last non-zero remainder
-in the polynomial remainder sequence if such a sequence was computed, 
+in the polynomial remainder sequence if such a sequence was computed,
 and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0).
 
 \subsec{Vectors and Matrices}
@@ -3695,7 +3674,7 @@ copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
 \tet{gtrans}.
 
 \fun{GEN}{shallowconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
-copying components, i.~e.,~it returns a \kbd{GEN} whose components are 
+copying components, i.~e.,~it returns a \kbd{GEN} whose components are
 (physically) the components of $x$ and $y$.
 
 \fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
@@ -3737,7 +3716,7 @@ type as $A$ (\typ{VEC}, \typ{COL} or \typ{MAT}), and whose components
 are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 \emph{columns} of $A$.
 
-\fun{GEN}{vecslicepermute}{GEN A, GEN p, long y1, long y2} short for 
+\fun{GEN}{vecslicepermute}{GEN A, GEN p, long y1, long y2} short for
 \bprog
   vecslice(vecpermute(A,p), y1, y2)
 @eprog\noindent
@@ -3952,7 +3931,7 @@ order of \kbd{a}.
 
 \fun{GEN}{FF_primroot}{GEN a, GEN *o} returns a generator of the
 multiplicative group of the definition field of the \typ{FFELT} \kbd{a}.
-If \kbd{o} is not \kbd{NULL}, set it to the factorization of the order 
+If \kbd{o} is not \kbd{NULL}, set it to the factorization of the order
 of the primitive root (to speed up \tet{FF_log}).
 
 \fun{GEN}{FFX_factor}{GEN f, GEN a} returns the factorisation of the univariate
@@ -3964,7 +3943,7 @@ and compatible with \kbd{a}.
 Low-level implementation of user / temporary variables is liable to change. We
 describe it nevertheless for completeness. Currently variables are
 implemented by a single array of values divided in 3 zones: 0--\kbd{nvar}
-(user variables), \kbd{max\_avail}--\kbd{MAXVARN} (temporary variables), 
+(user variables), \kbd{max\_avail}--\kbd{MAXVARN} (temporary variables),
 and \kbd{nvar+1}--\kbd{max\_avail-1} (pool of free variable numbers).
 
 \subsec{Low-level}
@@ -3993,7 +3972,7 @@ returns an \kbd{entree*} suitable for inclusion in the interpreter hashlists
 of symbols, not a variable number. \kbd{fetch\_user\_var} is a trivial
 wrapper.
 
-\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the 
+\fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the
 current value of the variable numbered $v$. Return \kbd{NULL} for a temporary
 variable.
 
@@ -4010,12 +3989,89 @@ hashtables. Return \kbd{NULL} is the identifier is unknown.
 \fun{long}{fetch_var}{void} returns the number of a new temporary variable
 (decreasing \kbd{max\_avail}).
 
-\fun{long}{delete_var}{void} delete latest temp variable created and return 
+\fun{long}{delete_var}{void} delete latest temp variable created and return
 the number of previous one.
 
 \fun{void}{name_var}{long n, char *s} rename temporary variable number
 \kbd{n} to \kbd{s}; mostly useful for nicer printout. Error when trying to
 rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
 the right name in the first place.
+
+\section{Miscellaneous routines}
+
+\subsec{Linear algebra}
+
+\fun{GEN}{dotproduct}{GEN x,GEN y} returns the scala product of $x$ and $y$
+
+\fun{GEN}{dotproduct_i}{GEN x,GEN y} as \kbd{dotproduct} assuming $x$ and $y$
+have \typ{INT} entries.
+
+\fun{GEN}{dotsquare}{GEN x} returns the scala product of $x$ with itself.
+
+\fun{GEN}{dotsquare_i}{GEN x} as \kbd{dotsquare} assuming $x$
+has \typ{INT} entries.
+
+\fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} associated to the
+vector of
+
+\fun{long}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
+except possibly the first one. The name comes from vectors expressed on a
+standard polynomial basis $1,T,\dots, T^{n-1}$, or on \kbd{nf.zk} (whose
+first element is $1$).
+
+\fun{long}{isnfscalar}{GEN x} returns $1$ if $x$ is a number field element
+in \typ{COL} form, which is a scalar (such that \kbd{RgV\_isscalar(x)}
+is $1$) and $0$ otherwise.
+
+\fun{long}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
+equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
+whether $x$ is an arbitrary scalar matrix.
+
+\subsec{Transcendental functions}
+
+The following two functions are only useful when interacting with \kbd{gp},
+to manipulate its internal default precision (expressed as a number of
+decimal digits, not in words as used everywhere else):
+
+\fun{long}{getrealprecision}{void} returns \kbd{realprecision}.
+
+\fun{long}{setrealprecision}{long n, long *prec} sets the new
+\kbd{realprecision} to $n$, which is returned. As a side effect, set
+\kbd{prec} to the corresponding number of words \kbd{ndec2prec(n)}.
+
+In the following routines, $x$ is assumed to be a \typ{REAL} and the result
+is a \typ{REAL} with the largest accuracy which can be deduced from the input:
+The naming scheme is inconsistant here, since we somethimes use the
+prefix\kbd{mp} even though \typ{INT} inputs are forbidden:
+
+\fun{GEN}{sqrtr}{GEN x} returns the square root of $x$.
+
+\fun{GEN}{sqrtnr}{GEN x, long n} returns the $n$-th root of $x$, assuming
+$n\geq 1$.
+
+
+\fun{GEN}{mpcos}{GEN x} returns $\cos(x)$.
+
+\fun{GEN}{mpsin}{GEN x} returns $\sin(x)$.
+
+\fun{GEN}{mplog}{GEN x} returns $\log(x)$. We must have $x > 0$ since the
+result must be a \typ{REAL}. Use \kbd{glog} for the general case, where
+you want such computations as $\log -1 = i$.
+
+\fun{GEN}{mpexp}{GEN x} returns $\exp(x)$.
+
+\fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
+\kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
+$|x|$ is very small.
+Two variants of sin and cos:
+
+\fun{void}{mpsincos}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to
+$\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
+
+\fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
+
+\fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
+function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
+
 
 \vfill\eject

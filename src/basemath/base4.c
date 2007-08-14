@@ -109,7 +109,7 @@ idealmat_to_hnf(GEN nf, GEN x)
   long nx = lg(x)-1, N = degpol(nf[1]);
   GEN cx;
 
-  if (!nx) return gscalmat(gen_0,N);
+  if (!nx) return scalarmat(gen_0,N);
 
   x = Q_primitive_part(x, &cx);
   if (nx < N) x = vec_mulid(nf, x, nx, N);
@@ -143,7 +143,7 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return gscalmat(Q_abs(gel(x,1)), lg(x)-1);
+    if (RgV_isscalar(x)) return scalarmat(Q_abs(gel(x,1)), lg(x)-1);
     x = Q_primitive_part(x, &cx);
     x = eltmul_get_table(nf, x);
   } else {
@@ -177,7 +177,7 @@ principalideal(GEN nf, GEN x)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      x = gscalcol(x, degpol(nf[1])); break;
+      x = scalarcol(x, degpol(nf[1])); break;
 
     case t_POLMOD:
       x = checknfelt_mod(nf,x,"principalideal");
@@ -520,7 +520,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   {
     cx = gerepilecopy(av,cx);
     gel(y,1) = cx;
-    gel(y,2) = gscalcol_i(cx, N); return y;
+    gel(y,2) = scalarcol_shallow(cx, N); return y;
   }
   if (N < 6)
     a = get_random_a(nf, x, xZ);
@@ -873,7 +873,7 @@ idealadd(GEN nf, GEN x, GEN y)
   {
     if (!dz) { avma = av; return matid(N); }
     dz = gclone(ginv(dz)); avma = av;
-    z = gscalmat(dz, N);
+    z = scalarmat(dz, N);
     gunclone(dz); return z;
   }
   z = shallowconcat(x,y);
@@ -1360,7 +1360,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN t,sarch,module,cyc,fa2;
   long lc;
-  if (lg(g) == 1) return gscalcol_i(gen_1, degpol(nf[1])); /* 1 */
+  if (lg(g) == 1) return scalarcol_shallow(gen_1, degpol(nf[1])); /* 1 */
   module = gel(bid,1);
   fa2 = gel(bid,4); sarch = gel(fa2,lg(fa2)-1);
   cyc = gmael(bid,2,2); lc = lg(cyc);
@@ -2165,7 +2165,7 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
 #if 0 /*1) via many gcds. Expensive ! */
   GEN f = idealprodprime(nf, listpr);
   f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
-  x = gscalmat(x, N);
+  x = scalarmat(x, N);
   for (;;)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
@@ -2184,7 +2184,7 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
     x1 = x1? idealmulpowprime(nf, x1, pr, ex)
            : idealpow(nf, pr, ex);
   }
-  x = gscalmat(x, N);
+  x = scalarmat(x, N);
   x2 = x1? idealdivexact(nf, x, x1): x;
 #endif
   return x2;
@@ -2313,7 +2313,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
     q = element_pow(nf, pi, gel(e,i));
     z = z? element_mul(nf, z, q): q;
   }
-  if (!z) return gscalcol_i(gen_1, degpol(nf[1]));
+  if (!z) return scalarcol_shallow(gen_1, degpol(nf[1]));
   if (nored)
   {
     if (flagden) pari_err(impl,"nored + denominator in idealapprfact");
@@ -2402,7 +2402,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   e = gel(x,2);
   if (!is_vec_t(ty) || lg(w) != r)
     pari_err(talker,"not a suitable vector of elements in idealchinese");
-  if (r == 1) return gscalcol_i(gen_1,N);
+  if (r == 1) return scalarcol_shallow(gen_1,N);
 
   w = Q_remove_denom(w, &den);
   if (den)
@@ -2947,7 +2947,7 @@ nfdetint(GEN nf, GEN x)
   m1 = lg(A[1]); m = m1-1;
   id = matid(N);
   c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
-  piv = pivprec = gscalcol_i(gen_1,N);
+  piv = pivprec = scalarcol_shallow(gen_1,N);
 
   av1 = avma; lim = stack_lim(av1,1);
   det1 = idprod = gen_0; /* dummy for gerepilemany */
@@ -3009,7 +3009,7 @@ nfdetint(GEN nf, GEN x)
       gerepileall(av1,6, &det1,&piv,&pivprec,&pass,&v,&idprod);
     }
   }
-  if (!cm) { avma = av; return gscalmat(gen_0,N); }
+  if (!cm) { avma = av; return scalarmat(gen_0,N); }
   return gerepileupto(av, idealmul(nf,idprod,det1));
 }
 
@@ -3038,7 +3038,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lg(A[1]);
-  unnf = gscalcol_i(gen_1,N);
+  unnf = scalarcol_shallow(gen_1,N);
   detmat = lllint_ip(Q_remove_denom(detmat, NULL), 100);
 
   av = avma; lim = stack_lim(av,2);

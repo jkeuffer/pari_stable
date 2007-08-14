@@ -1103,7 +1103,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     TT[i]  = 0;
     gel(Tra,i) = cgetg(N0+1, t_COL);
   }
-  CM_L = gscalsmat(C, n0);
+  CM_L = scalarmat_s(C, n0);
   /* tmax = current number of traces used (and computed so far) */
   for (tmax = 0;; tmax += N0)
   {
@@ -1172,7 +1172,7 @@ AGAIN:
     m = vconcat( CM_L, gdivround(T2, q) );
     if (first)
     {
-      GEN P1 = gscalmat(powiu(p, a-b), N0);
+      GEN P1 = scalarmat(powiu(p, a-b), N0);
       first = 0;
       m = shallowconcat( m, vconcat(ZERO, P1) );
       /*     [ C M_L        0     ]

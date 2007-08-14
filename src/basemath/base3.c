@@ -28,15 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
-int
-RgV_isscalar(GEN x)
-{
-  long lx = lg(x),i;
-  for (i=2; i<lx; i++)
-    if (!gcmp0(gel(x, i))) return 0;
-  return 1;
-}
-int
+long
 isnfscalar(GEN x) { return typ(x) == t_COL? RgV_isscalar(x): 0; }
 
 static GEN
@@ -213,7 +205,7 @@ element_muli(GEN nf, GEN x, GEN y)
   long i, j, k, N, tx = typ(x), ty = typ(y);
   GEN s, v, tab = get_tab(nf, &N);
 
-  if (tx == t_INT) { return ty == t_INT? gscalcol(mulii(x,y), N): gmul(x, y); }
+  if (tx == t_INT) { return ty == t_INT? scalarcol(mulii(x,y), N): gmul(x, y); }
   if (tx != t_COL || lg(x) != N+1
    || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
   v = cgetg(N+1,t_COL);
@@ -394,7 +386,7 @@ element_pow(GEN nf, GEN x, GEN n)
 
   if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
-  s=signe(n); if (!s) return gscalcol_i(gen_1,N);
+  s=signe(n); if (!s) return scalarcol_shallow(gen_1,N);
   if (typ(x) != t_COL)
   {
     x = algtobasis(nf,x);
@@ -403,7 +395,7 @@ element_pow(GEN nf, GEN x, GEN n)
 
   if (RgV_isscalar(x))
   {
-    y = gscalcol_i(gen_1,N);
+    y = scalarcol_shallow(gen_1,N);
     gel(y,1) = powgi(gel(x,1),n); return y;
   }
   x = primitive_part(x, &cx);
@@ -445,7 +437,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   nf = checknf(nf); N = degpol(nf[1]);
   s = signe(n);
   if (s < 0) pari_err(talker,"negative power in element_powid_mod_p");
-  if (!s || I == 1) return gscalcol_i(gen_1,N);
+  if (!s || I == 1) return scalarcol_shallow(gen_1,N);
   D.nf = nf;
   D.p = p;
   D.I = I;
@@ -509,7 +501,7 @@ eltmul_get_table(GEN nf, GEN x)
     long i, N = degpol(nf[1]);
     GEN mul = cgetg(N+1,t_MAT);
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return gscalmat(gel(x,1), N);
+    if (RgV_isscalar(x)) return scalarmat(gel(x,1), N);
     gel(mul,1) = x; /* assume w_1 = 1 */
     for (i=2; i<=N; i++) gel(mul,i) = element_mulid(nf,x,i);
     return mul;
@@ -657,10 +649,10 @@ algtobasis_i(GEN nf, GEN x)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      return gscalcol_i(x, degpol( gel(nf,1) ));
+      return scalarcol_shallow(x, degpol( gel(nf,1) ));
     case t_POLMOD:
       x = gel(x,2);
-      if (typ(x) != t_POL) return gscalcol_i(x, degpol( gel(nf,1) ));
+      if (typ(x) != t_POL) return scalarcol_shallow(x, degpol( gel(nf,1) ));
       /* fall through */
     case t_POL:
       return poltobasis(nf,x);
@@ -724,7 +716,7 @@ algtobasis(GEN nf, GEN x)
       return gerepileupto(av,poltobasis(nf,x));
 
   }
-  N=degpol(nf[1]); return gscalcol(x,N);
+  N=degpol(nf[1]); return scalarcol(x,N);
 }
 
 GEN
@@ -822,7 +814,7 @@ rnfalgtobasis(GEN rnf,GEN x)
       return gerepileupto(av, poltobasis(rnf, x));
     }
   }
-  return gscalcol(x, degpol(rnf[1]));
+  return scalarcol(x, degpol(rnf[1]));
 }
 
 /* Given a and b in nf, gives an algebraic integer y in nf such that a-b.y
@@ -1125,7 +1117,7 @@ element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
     k = shifti(k,-1); if (!signe(k)) break;
     x = element_sqrmodideal(nf,x,ideal);
   }
-  return y? y: gscalcol_i(gen_1,degpol(nf[1]));
+  return y? y: scalarcol_shallow(gen_1,degpol(nf[1]));
 }
 
 /* assume k >= 0, assume idele = [HNFideal, arch] */
@@ -1172,7 +1164,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
   }
   if (minus)
     plus = element_mulmodideal(nf, plus, element_invmodideal(nf,minus,id), id);
-  return plus? plus: gscalcol_i(gen_1, lg(id)-1);
+  return plus? plus: scalarcol_shallow(gen_1, lg(id)-1);
 }
 
 /* given 2 integral ideals x, y in HNF s.t x | y | x^2, compute the quotient
@@ -1296,7 +1288,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
   if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Z\n",e,pr);
   if (f == 1)
-    g = gscalcol_i(pgener_Fp(p), degpol(nf[1]));
+    g = scalarcol_shallow(pgener_Fp(p), degpol(nf[1]));
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
@@ -1432,7 +1424,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
   if (nba == 1)
   {
     gel(y,2) = mkvec(gZ);
-    gel(y,3) = gscalmat(gen_1,1); return y;
+    gel(y,3) = scalarmat(gen_1,1); return y;
   }
   bas = gmael(nf,5,1);
   if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);

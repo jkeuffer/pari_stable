@@ -2157,7 +2157,7 @@ static GEN
 trivroots(GEN nf) {
   GEN y = cgetg(3, t_VEC);
   gel(y,1) = gen_2;
-  gel(y,2) = gscalcol_i(gen_m1, degpol(nf[1]));
+  gel(y,2) = scalarcol_shallow(gen_m1, degpol(nf[1]));
   return y;
 }
 

@@ -393,7 +393,6 @@ isexactzeroscalar(GEN g)
       return isexactzeroscalar(gel(g,1)) && isexactzeroscalar(gel(g,2));
     case t_QUAD:
       return isexactzeroscalar(gel(g,2)) && isexactzeroscalar(gel(g,3));
-    case t_POL: return lg(g) == 2;
   }
   return 0;
 }
@@ -1245,7 +1244,7 @@ gsubst(GEN x, long v, GEN y)
   {
     if (tx!=t_POLMOD || varncmp(v, varn(x[1])) <= 0)
     {
-      if (ty==t_MAT) return gscalmat(x,ly-1);
+      if (ty==t_MAT) return scalarmat(x,ly-1);
       return gcopy(x);
     }
     av=avma;
@@ -1264,7 +1263,7 @@ gsubst(GEN x, long v, GEN y)
   {
     case t_POL:
       if (lx==2)
-        return (ty==t_MAT)? gscalmat(gen_0,ly-1): gen_0;
+        return (ty==t_MAT)? scalarmat(gen_0,ly-1): gen_0;
 
       vx = varn(x);
       if (varncmp(vx, v) < 0)
@@ -1284,19 +1283,19 @@ gsubst(GEN x, long v, GEN y)
       if (ty!=t_MAT)
         return varncmp(vx,v) > 0 ? gcopy(x): poleval(x,y);
 
-      if (varncmp(vx, v) > 0) return gscalmat(x,ly-1);
-      if (lx==3) return gscalmat(gel(x,2),ly-1);
+      if (varncmp(vx, v) > 0) return scalarmat(x,ly-1);
+      if (lx==3) return scalarmat(gel(x,2),ly-1);
       av = avma; z = gel(x,lx-1);
       for (i=lx-2; i>=2; i--) z = gaddmat(gel(x,i),gmul(z,y));
       return gerepileupto(av,z);
 
     case t_SER:
       vx = varn(x);
-      if (varncmp(vx, v) > 0) return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
+      if (varncmp(vx, v) > 0) return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
       ex = valp(x);
       if (varncmp(vx, v) < 0)
       {
-        if (lx == 2) return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
+        if (lx == 2) return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
         av = avma; X = pol_x(vx);
         z = gadd(gsubst(gel(x,lx-1),v,y), zeroser(vx,1));
         for (i = lx-2; i>=2; i--) z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));

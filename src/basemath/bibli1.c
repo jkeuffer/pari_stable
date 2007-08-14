@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* scalar product x.x */
 GEN
-sqscal(GEN x)
+dotsquare(GEN x)
 {
   long i, lx;
   pari_sp av;
@@ -42,12 +42,12 @@ sqscal(GEN x)
 
 /* scalar product x.y */
 GEN
-gscal(GEN x,GEN y)
+dotproduct(GEN x,GEN y)
 {
   long i, lx;
   pari_sp av;
   GEN z;
-  if (x == y) return sqscal(x);
+  if (x == y) return dotsquare(x);
   lx = lg(x);
   if (lx == 1) return gen_0;
   av = avma;
@@ -57,8 +57,8 @@ gscal(GEN x,GEN y)
   return gerepileupto(av,z);
 }
 
-static GEN
-sqscali(GEN x)
+GEN
+dotsquare_i(GEN x)
 {
   long i, lx;
   pari_sp av;
@@ -72,13 +72,13 @@ sqscali(GEN x)
   return gerepileuptoint(av,z);
 }
 
-static GEN
-gscali(GEN x,GEN y)
+GEN
+dotproduct_i(GEN x,GEN y)
 {
   long i, lx;
   pari_sp av;
   GEN z;
-  if (x == y) return sqscali(x);
+  if (x == y) return dotsquare_i(x);
   lx = lg(x);
   if (lx == 1) return gen_0;
   av = avma;
@@ -145,8 +145,8 @@ ApplyQ(GEN Q, GEN r)
   rd = r + (lr - l);
   s = mpmul(gel(v,1), gel(rd,1));
   for (i=2; i<l; i++) s = mpadd(s, mpmul(gel(v,i) ,gel(rd,i)));
-  s = mpneg(mpmul(beta, s));
-  for (i=1; i<l; i++) gel(rd,i) = mpadd(gel(rd,i), mpmul(s, gel(v,i)));
+  s = mpmul(beta, s);
+  for (i=1; i<l; i++) gel(rd,i) = mpsub(gel(rd,i), mpmul(s, gel(v,i)));
 }
 
 static GEN
@@ -191,7 +191,7 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
 }
 
 GEN
-sqred1_from_QR(GEN x, long prec)
+Q_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
   GEN L, B = zerovec(k);
@@ -232,7 +232,7 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
     /* A[j] <-- x[k,j] - sum_{i<j} mu[j,i] A[i] */
     s = mpmul(gcoeff(mu,j,1),gel(A,1));
     for (i=2; i<j; i++) s = mpadd(s, mpmul(gcoeff(mu,j,i),gel(A,i)));
-    s = mpneg(s); gel(A,j) = gerepileuptoleaf(av, mpadd(gcoeff(x,k,j), s));
+    gel(A,j) = gerepileuptoleaf(av, mpsub(gcoeff(x,k,j), s));
   }
   B[k] = A[k]; return (signe(gel(B,k)) > 0 && no_prec_pb(gel(B,k)));
 }
@@ -253,11 +253,11 @@ gram_schmidt(GEN e, GEN *ptB)
   {
     GEN p1 = NULL;
     pari_sp av;
-    gel(B,i) = sqscal(gel(f,i));
+    gel(B,i) = dotsquare(gel(f,i));
     gel(iB,i) = ginv(gel(B,i)); av = avma;
     for (j=1; j<i; j++)
     {
-      GEN mu = gmul(gscal(gel(e,i),gel(f,j)), gel(iB,j));
+      GEN mu = gmul(dotproduct(gel(e,i),gel(f,j)), gel(iB,j));
       GEN p2 = gmul(mu, gel(f,j));
       p1 = p1? gadd(p1,p2): p2;
     }
@@ -635,7 +635,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
     if (j==k || fl[j])
     {
       pari_sp av = avma;
-      u = gram? gcoeff(x,k,j): gscali(gel(x,k), gel(x,j));
+      u = gram? gcoeff(x,k,j): dotproduct_i(gel(x,k), gel(x,j));
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -671,7 +671,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   if (gram && hx != lx) pari_err(mattype1,"lllint");
 
   av = avma; lim = stack_lim(av,1); x = shallowcopy(x);
-  B = gscalcol_i(gen_1, lx);
+  B = scalarcol_shallow(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
@@ -929,7 +929,7 @@ lllgramallgen(GEN x, long flag)
   fl = cgetg(lx, t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1);
-  B = gscalcol_i(gen_1, lx);
+  B = scalarcol_shallow(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { gel(L,j) = zerocol(n); fl[j] = 0; }
 
@@ -1428,17 +1428,17 @@ qflllgram0(GEN x, long flag, long prec)
 }
 
 GEN
-gram_matrix(GEN b)
+gram_matrix(GEN x)
 {
-  long i,j, lx = lg(b);
+  long i,j, lx = lg(x), tx = typ(x);
   GEN g;
-  if (typ(b) != t_MAT) pari_err(typeer,"gram");
+  if (!is_matvec_t(tx)) pari_err(typeer,"gram");
   g = cgetg(lx,t_MAT);
   for (i=1; i<lx; i++)
   {
     gel(g,i) = cgetg(lx,t_COL);
     for (j=1; j<=i; j++)
-      gcoeff(g,i,j) = gcoeff(g,j,i) = gscal(gel(b,i),gel(b,j));
+      gcoeff(g,i,j) = gcoeff(g,j,i) = dotproduct(gel(x,i),gel(x,j));
   }
   return g;
 }
@@ -1496,9 +1496,9 @@ lllintpartialall(GEN m, long flag)
   tm1 = flag? matid(ncol): NULL;
   {
     const pari_sp av2 = avma;
-    GEN dot11 = sqscali(gel(m,1));
-    GEN dot22 = sqscali(gel(m,2));
-    GEN dot12 = gscali(gel(m,1), gel(m,2));
+    GEN dot11 = dotsquare_i(gel(m,1));
+    GEN dot22 = dotsquare_i(gel(m,2));
+    GEN dot12 = dotproduct_i(gel(m,1), gel(m,2));
     GEN tm  = matid(2); /* For first two columns only */
 
     int progress = 0;
@@ -1551,8 +1551,8 @@ lllintpartialall(GEN m, long flag)
       for (i = 3; i <= ncol; i++)
       {
         GEN c = gel(m,i);
-	GEN dot1i = gscali(gel(mid,1), c);
-        GEN dot2i = gscali(gel(mid,2), c);
+	GEN dot1i = dotproduct_i(gel(mid,1), c);
+        GEN dot2i = dotproduct_i(gel(mid,2), c);
        /* ( dot11  dot12 ) (q1)   ( dot1i )
         * ( dot12  dot22 ) (q2) = ( dot2i )
         *
@@ -1595,7 +1595,7 @@ lllintpartialall(GEN m, long flag)
     {
       gel(dot,i) = cgetg(ncol+1,t_COL);
       for (j=1; j <= i; j++)
-	gcoeff(dot,j,i) = gcoeff(dot,i,j) = gscali(gel(mid,i),gel(mid,j));
+	gcoeff(dot,j,i) = gcoeff(dot,i,j) = dotproduct_i(gel(mid,i),gel(mid,j));
     }
     for(;;)
     {
@@ -1990,19 +1990,19 @@ lindep(GEN x, long prec)
     for (j=1; j<i ; j++) m[i][j] = cgetr(prec+1);
     for (j=1; j<=n; j++) be[i][j]= (long)cgetr(prec+1);
   }
-  px = sqscal(re);
-  py = sqscal(im); pxy = gscal(re,im);
+  px = dotsquare(re);
+  py = dotsquare(im); pxy = dotproduct(re,im);
   p1 = mpsub(mpmul(px,py), gsqr(pxy));
   if (quazero(px)) { re = im; px = py; fl = 1; } else fl = quazero(p1);
   av0 = av1 = avma;
   for (i=1; i<=n; i++)
   {
-    p2 = gscal(b[i],re);
+    p2 = dotproduct(b[i],re);
     if (fl) p2 = gmul(gdiv(p2,px),re);
     else
     {
       GEN p5,p6,p7;
-      p5 = gscal(b[i],im);
+      p5 = dotproduct(b[i],im);
       p6 = gdiv(gsub(gmul(py,p2),gmul(pxy,p5)), p1);
       p7 = gdiv(gsub(gmul(px,p5),gmul(pxy,p2)), p1);
       p2 = gadd(gmul(p6,re), gmul(p7,im));
@@ -2012,11 +2012,11 @@ lindep(GEN x, long prec)
       if (qzer[j]) affrr(bn[j], m[i][j]);
       else
       {
-        gdivz(gscal(b[i],be[j]),bn[j], m[i][j]);
+        gdivz(dotproduct(b[i],be[j]),bn[j], m[i][j]);
         p2 = gsub(p2, gmul(m[i][j],be[j]));
       }
     for (j=1; j<=n; j++) affrr(gel(p2,j), gel(be[i],j));
-    affrr(sqscal(be[i]), bn[i]);
+    affrr(dotsquare(be[i]), bn[i]);
     qzer[i] = quazero(bn[i]); avma = av1;
   }
   while (qzer[n])
@@ -3052,7 +3052,9 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   a = qf_base_change(a,u,1);
 
   n--;
-  a = mat_to_MP(a, DEFAULTPREC); r = sqred1(a);
+  a = mat_to_MP(a, DEFAULTPREC);
+  r = qfgaussred_positive(a);
+  if (!r) err(precer, "minim0");
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));
@@ -3290,7 +3292,7 @@ step(GEN x, GEN y, GEN inc, long k)
     inc[k] = (i > 0)? -1-i: 1-i;
   }
 }
-/* q is the Gauss reduction (sqred1) of the quadratic form */
+/* q is the Gauss reduction of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * Enumerate vectors whose norm is less than BORNE, minimal vectors
  * if BORNE = NULL (implies check = NULL).
@@ -3547,7 +3549,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
       prec = DEFAULTPREC + nbits2nlong(gexpo(r));
       if (prec < PREC) prec = PREC;
     }
-    r = sqred1intern(r);
+    r = qfgaussred_positive(r);
     if (!r) return NULL;
     for (i=1; i<l; i++)
     {
@@ -3579,7 +3581,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   CATCH(precer) { }
   TRY {
     if (CHECK && CHECK->f_init) bound = CHECK->f_init(CHECK, r, u);
-    r = sqred1_from_QR(r, gprecision(vnorm));
+    r = Q_from_QR(r, gprecision(vnorm));
     if (!r) pari_err(precer,"fincke_pohst");
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;

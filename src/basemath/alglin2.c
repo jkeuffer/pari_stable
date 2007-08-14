@@ -806,21 +806,19 @@ gtrace(GEN x)
   return NULL; /* not reached */
 }
 
-/* Cholesky Decomposition for positive definite matrix a [matrix Q, Algo 2.7.6]
- * If a is not positive definite:
- *   if flag is zero: raise an error
- *   else: return NULL. */
+/* Gauss decomposition for positive definite matrix a [matrix Q, Algo 2.7.6]
+ * If a is not positive definite return NULL. */
 GEN
-sqred1intern(GEN a)
+qfgaussred_positive(GEN a)
 {
   pari_sp av = avma, lim=stack_lim(av,1);
-  GEN b,p;
+  GEN b;
   long i,j,k, n = lg(a);
 
-  if (typ(a)!=t_MAT) pari_err(typeer,"sqred1");
+  if (typ(a)!=t_MAT) pari_err(typeer,"qfgaussred_positive");
   if (n == 1) return cgetg(1, t_MAT);
-  if (lg(a[1])!=n) pari_err(mattype1,"sqred1");
-  b=cgetg(n,t_MAT);
+  if (lg(a[1])!=n) pari_err(mattype1,"qfgaussred_positive");
+  b = cgetg(n,t_MAT);
   for (j=1; j<n; j++)
   {
     GEN p1=cgetg(n,t_COL), p2=gel(a,j);
@@ -831,63 +829,20 @@ sqred1intern(GEN a)
   }
   for (k=1; k<n; k++)
   {
-    p = gcoeff(b,k,k);
+    GEN bk, p = gcoeff(b,k,k), invp;
     if (gsigne(p)<=0) { avma = av; return NULL; } /* not positive definite */
-    p = ginv(p);
+    invp = ginv(p);
+    bk = gneg_i( row(b, k) );
+    for (i=k+1; i<n; i++) gcoeff(b,k,i) = gmul(gcoeff(b,k,i), invp);
     for (i=k+1; i<n; i++)
+    {
+      GEN c = gel(bk, i);
       for (j=i; j<n; j++)
-	gcoeff(b,i,j) = gsub(gcoeff(b,i,j),
-	                  gmul(gmul(gcoeff(b,k,i),gcoeff(b,k,j)), p));
-    for (j=k+1; j<n; j++)
-      gcoeff(b,k,j) = gmul(gcoeff(b,k,j), p);
+	gcoeff(b,i,j) = gadd(gcoeff(b,i,j), gmul(c,gcoeff(b,k,j)));
+    }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sqred1");
-      b=gerepilecopy(av,b);
-    }
-  }
-  return gerepilecopy(av,b);
-}
-
-GEN
-sqred1(GEN a)
-{
-  GEN x = sqred1intern(a);
-  if (!x) pari_err(talker,"not a positive definite matrix in sqred1");
-  return x;
-}
-
-GEN
-sqred3(GEN a)
-{
-  pari_sp av = avma, lim = stack_lim(av,1);
-  long i,j,k,l, n = lg(a);
-  GEN p1,b;
-
-  if (typ(a)!=t_MAT) pari_err(typeer,"sqred3");
-  if (lg(a[1])!=n) pari_err(mattype1,"sqred3");
-  av=avma; b=cgetg(n,t_MAT);
-  for (j=1; j<n; j++)
-  {
-    p1=cgetg(n,t_COL); gel(b,j) = p1;
-    for (i=1; i<n; i++) gel(p1,i) = gen_0;
-  }
-  for (i=1; i<n; i++)
-  {
-    for (k=1; k<i; k++)
-    {
-      p1=gen_0;
-      for (l=1; l<k; l++)
-	p1=gadd(p1, gmul(gmul(gcoeff(b,l,l),gcoeff(b,k,l)), gcoeff(b,i,l)));
-      gcoeff(b,i,k) = gdiv(gsub(gcoeff(a,i,k),p1),gcoeff(b,k,k));
-    }
-    p1=gen_0;
-    for (l=1; l<i; l++)
-      p1=gadd(p1, gmul(gcoeff(b,l,l), gsqr(gcoeff(b,i,l))));
-    gcoeff(b,i,k) = gsub(gcoeff(a,i,i),p1);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if (DEBUGMEM>1) pari_warn(warnmem,"sqred3");
+      if (DEBUGMEM>1) pari_warn(warnmem,"qfgaussred_positive");
       b=gerepilecopy(av,b);
     }
   }
@@ -895,17 +850,18 @@ sqred3(GEN a)
 }
 
 /* Gauss reduction (arbitrary symetric matrix, only the part above the
- * diagonal is considered). If signature is zero, return only the
+ * diagonal is considered). If signature is non-zero, return only the
  * signature, in which case gsigne() should be defined for elements of a. */
 static GEN
-sqred2(GEN a, long signature)
+gaussred(GEN a, long signature)
 {
-  GEN r, p;
+  GEN r, p, invp, ak, al;
   pari_sp av, av1, lim;
-  long n, i, j, k, l, sp, sn, t;
+  long n = lg(a), i, j, k, l, sp, sn, t;
 
-  if (typ(a) != t_MAT) pari_err(typeer,"sqred2");
-  n = lg(a); if (n > 1 && lg(a[1]) != n) pari_err(mattype1,"sqred2");
+  if (typ(a) != t_MAT) pari_err(typeer,"gaussred");
+  if (n == 1) return signature? mkvec2(gen_0, gen_0): cgetg(1, t_MAT);
+  if (lg(a[1]) != n) pari_err(mattype1,"gaussred");
   n--;
 
   av = avma;
@@ -916,57 +872,71 @@ sqred2(GEN a, long signature)
   while (t)
   {
     k=1; while (k<=n && (!r[k] || gcmp0(gcoeff(a,k,k)))) k++;
-    if (k<=n)
+    if (k <= n)
     {
-      p = gcoeff(a,k,k);
-      if (signature) { /* don't check if signature = 0: gsigne may fail ! */
+      p = gcoeff(a,k,k); invp = ginv(p); /* != 0 */
+      if (signature) { /* skip if (!signature): gsigne may fail ! */
         if (gsigne(p) > 0) sp++; else sn++;
       }
       r[k] = 0; t--;
-      for (j=1; j<=n; j++)
-	gcoeff(a,k,j) = r[j] ? gdiv(gcoeff(a,k,j),p) : gen_0;
+      ak = gneg_i( row(a, k) );
+      for (i=1; i<=n; i++)
+	gcoeff(a,k,i) = r[i]? gmul(gcoeff(a,k,i), invp): gen_0;
 	
       for (i=1; i<=n; i++) if (r[i])
-	for (j=1; j<=n; j++)
-	  gcoeff(a,i,j) = r[j] ? gsub(gcoeff(a,i,j),
-	                             gmul(gmul(gcoeff(a,k,i),gcoeff(a,k,j)),p))
-			      : gen_0;
+      {
+        GEN c = gel(ak,i); /* - p * a[k,i] */
+        if (gcmp0(c)) continue;
+	for (j=1; j<=n; j++) if (r[j])
+          gcoeff(a,i,j) = gadd(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
+      }
       gcoeff(a,k,k) = p;
     }
     else
-    {
+    { /* all remaining diagonal coeffs are currently 0 */
       for (k=1; k<=n; k++) if (r[k])
       {
 	l=k+1; while (l<=n && (!r[l] || gcmp0(gcoeff(a,k,l)))) l++;
-	if (l <= n)
-	{
-	  p = gcoeff(a,k,l); r[k] = r[l] = 0;
-          sp++; sn++; t -= 2;
-	  for (i=1; i<=n; i++) if (r[i])
-	    for (j=1; j<=n; j++)
-	      gcoeff(a,i,j) =
-		r[j]? gsub(gcoeff(a,i,j),
-			   gdiv(gadd(gmul(gcoeff(a,k,i),gcoeff(a,l,j)),
-				     gmul(gcoeff(a,k,j),gcoeff(a,l,i))),
-				p))
-		    : gen_0;
-	  for (i=1; i<=n; i++) if (r[i])
-          {
-            GEN u = gcoeff(a,k,i);
-	    gcoeff(a,k,i) = gdiv(gadd(u, gcoeff(a,l,i)), p);
-	    gcoeff(a,l,i) = gdiv(gsub(u, gcoeff(a,l,i)), p);
-          }
-	  gcoeff(a,k,l) = gen_1;
-          gcoeff(a,l,k) = gen_m1;
-	  gcoeff(a,k,k) = gmul2n(p,-1);
-          gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
-	  if (low_stack(lim, stack_lim(av1,1)))
-	  {
-	    if(DEBUGMEM>1) pari_warn(warnmem,"sqred2");
-	    a = gerepilecopy(av1, a);
-	  }
-	  break;
-	}
+	if (l > n) continue;
+
+        p = gcoeff(a,k,l); invp = ginv(p);
+        sp++; sn++;
+        r[k] = r[l] = 0; t -= 2;
+        ak = gneg_i( row(a, k) );
+        al = gneg_i( row(a, l) );
+        for (i=1; i<=n; i++) if (r[i])
+        {
+          gcoeff(a,k,i) = gmul(gcoeff(a,k,i), p);
+          gcoeff(a,l,i) = gmul(gcoeff(a,l,i), p);
+        } else {
+          gcoeff(a,k,i) = gen_0;
+          gcoeff(a,l,i) = gen_0;
+        }
+
+        for (i=1; i<=n; i++) if (r[i])
+        { /* c = -a[k,i] * p, d = -a[l,i] * p; */
+          GEN c = gel(ak,i), d = gel(al,i); 
+          for (j=1; j<=n; j++) if (r[j])
+            gcoeff(a,i,j) = gadd(gcoeff(a,i,j),
+                            gadd(gmul(gcoeff(a,l,j), c),
+                                 gmul(gcoeff(a,k,j), d)));
+        }
+        for (i=1; i<=n; i++) if (r[i])
+        {
+          GEN c = gcoeff(a,k,i), d = gcoeff(a,l,i);
+          gcoeff(a,k,i) = gadd(c, d);
+          gcoeff(a,l,i) = gsub(c, d);
+        }
+        gcoeff(a,k,l) = gen_1;
+        gcoeff(a,l,k) = gen_m1;
+        gcoeff(a,k,k) = gmul2n(p,-1);
+        gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
+        if (low_stack(lim, stack_lim(av1,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"gaussred");
+          a = gerepilecopy(av1, a);
+        }
+        break;
       }
       if (k > n) break;
     }
@@ -976,10 +946,10 @@ sqred2(GEN a, long signature)
 }
 
 GEN
-sqred(GEN a) { return sqred2(a,0); }
+qfgaussred(GEN a) { return gaussred(a,0); }
 
 GEN
-signat(GEN a) { return sqred2(a,1); }
+qfsign(GEN a) { return gaussred(a,1); }
 
 static void
 rot(GEN x, GEN y, GEN s, GEN u) {
@@ -2394,7 +2364,7 @@ hnfmerge_get_1(GEN A, GEN B)
   t = NULL; /* -Wall */
   b = gcoeff(B,1,1); lb = lgefint(b);
   if (!signe(b)) {
-    if (gcmp1(gcoeff(A,1,1))) return gscalcol_i(gen_1, l-1);
+    if (gcmp1(gcoeff(A,1,1))) return scalarcol_shallow(gen_1, l-1);
     l = 0; /* trigger error */
   }
   for (j = 1; j < l; j++)

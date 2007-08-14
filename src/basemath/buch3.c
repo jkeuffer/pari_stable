@@ -59,7 +59,7 @@ buchnarrow(GEN bnf)
    * [ logs 2 ] = relation matrix for Cl_f */
   R = shallowconcat(
     vconcat(diagonal_i(cyc), logs),
-    vconcat(zeromat(ngen, r1-t), gscalmat(gen_2,r1-t))
+    vconcat(zeromat(ngen, r1-t), scalarmat(gen_2,r1-t))
   );
  
   met = smithrel(R,NULL,&u1);
@@ -782,7 +782,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(gmael(nf,5,1), prec);
   a = gmul(gmael(nf,5,2), real_1(prec));
-  r = sqred1_from_QR(a, prec);
+  r = Q_from_QR(a, prec);
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));

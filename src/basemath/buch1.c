@@ -574,8 +574,8 @@ getallrootsof1(GEN bnf)
 
   if (n == 2) {
     long N = degpol(gel(nf,1));
-    return mkvec2(gscalcol_i(gen_m1, N),
-                  gscalcol_i(gen_1, N));
+    return mkvec2(scalarcol_shallow(gen_m1, N),
+                  scalarcol_shallow(gen_1, N));
   }
   tu = poltobasis(nf, gmael3(bnf,8,4,2));
   T = eltmul_get_table(nf, tu);

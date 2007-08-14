@@ -821,12 +821,17 @@ fill_scalmat(GEN y, GEN t, GEN _0, long n)
 }
 
 GEN
-gscalmat(GEN x, long n) {
+scalarmat(GEN x, long n) {
   GEN y = cgetg(n+1, t_MAT);
   fill_scalmat(y, gcopy(x), gen_0, n); return y;
 }
 GEN
-gscalsmat(long x, long n) { 
+scalarmat_shallow(GEN x, long n) {
+  GEN y = cgetg(n+1, t_MAT);
+  fill_scalmat(y, x, gen_0, n); return y;
+}
+GEN
+scalarmat_s(long x, long n) { 
   GEN y = cgetg(n+1, t_MAT);
   fill_scalmat(y, stoi(x), gen_0, n); return y;
 }
@@ -849,12 +854,12 @@ fill_scalcol(GEN y, GEN t, GEN _0, long n)
   }
 }
 GEN
-gscalcol(GEN x, long n) {
+scalarcol(GEN x, long n) {
   GEN y = cgetg(n+1,t_COL);
   fill_scalcol(y, gcopy(x), gen_0, n); return y;
 }
 GEN
-gscalcol_i(GEN x, long n) {
+scalarcol_shallow(GEN x, long n) {
   GEN y = cgetg(n+1,t_COL);
   fill_scalcol(y, x, gen_0, n); return y;
 }
@@ -916,13 +921,23 @@ gtomat(GEN x)
 }
 
 long
-isscalarmat(GEN x, GEN s)
+RgV_isscalar(GEN x)
+{
+  long lx = lg(x),i;
+  for (i=2; i<lx; i++)
+    if (!gcmp0(gel(x, i))) return 0;
+  return 1;
+}
+
+long
+RgM_isscalar(GEN x, GEN s)
 {
   long nco,i,j;
 
   if (typ(x)!=t_MAT) pari_err(typeer,"isdiagonal");
   nco=lg(x)-1; if (!nco) return 1;
   if (nco != lg(x[1])-1) return 0;
+  if (!s) s = gcoeff(x,1,1);
 
   for (j=1; j<=nco; j++)
   {
@@ -962,7 +977,7 @@ diagonal(GEN x)
   long j, lx, tx = typ(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) return gscalmat(x,1);
+  if (! is_matvec_t(tx)) return scalarmat(x,1);
   if (tx==t_MAT)
   {
     if (isdiagonal(x)) return gcopy(x);
@@ -1757,7 +1772,7 @@ ZM_inv(GEN M, GEN dM)
       q = qp;
     }
     if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);
-    if (stable && isscalarmat(gmul(M, H), dM)) break; /* DONE */
+    if (stable && RgM_isscalar(gmul(M, H), dM)) break; /* DONE */
 
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -2107,7 +2122,7 @@ deplin(GEN x0)
     c[i] = k; l[k] = i; /* pivot d[k] in x[i,k] */
   }
   if (k > nc) { avma = av; return zerocol(nc); }
-  if (k == 1) { avma = av; return gscalcol_i(gen_1,nc); }
+  if (k == 1) { avma = av; return scalarcol_shallow(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
   y[1] = ck[ l[1] ];
   for (q=gel(d,1),j=2; j<k; j++)
@@ -3632,7 +3647,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   {
     case t_VEC:
     case t_COL: delta = diagonal_i(D); break;
-    case t_INT: delta =gscalmat(D,n); break;
+    case t_INT: delta =scalarmat(D,n); break;
     default: pari_err(typeer,"gaussmodulo");
       return NULL; /* not reached */
   }

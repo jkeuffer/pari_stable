@@ -204,7 +204,7 @@ GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
 GEN lllint_marked(long *M, GEN x, long D, int g, GEN *h, GEN *f, GEN *B);
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
-GEN sqred1intern(GEN a);
+GEN qfgaussred_positive(GEN a);
 GEN lllgramintern(GEN x, long alpha, long flag, long prec);
 GEN lllintern(GEN x, long D, long flag, long prec);
 
@@ -213,10 +213,8 @@ GEN  diagonal_i(GEN x);
 GEN  F2V_red_ip(GEN v);
 GEN  gauss_realimag(GEN x, GEN y);
 GEN  imagecomplspec(GEN x, long *nlze);
-GEN  R_from_QR(GEN x, long prec);
 void rowselect_p(GEN A, GEN B, GEN p, long init);
 GEN  split_realimag(GEN x, long r1, long r2);
-GEN  sqred1_from_QR(GEN x, long prec);
 GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
@@ -685,18 +683,15 @@ GEN     hnfcenter_ip(GEN M);
 
 /* bibli1.c */
 
-GEN     gscal(GEN x, GEN y);
 GEN     lll_scaled(long MARKED, GEN X0, long D);
 GEN     lllall(GEN x, long D, int gram, long flag);
 GEN     lllintpartialall(GEN m, long flag);
 GEN     plindep(GEN x);
 GEN     pslq(GEN x);
 GEN     pslqL2(GEN x);
-GEN     sqscal(GEN x);
 
 /* bibli2.c */
 
-int     gen_cmp_RgX(void *data, GEN x, GEN y);
 GEN     gen_vecsort(GEN x, GEN k, long flag);
 long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort_uniq(GEN L);

@@ -1733,7 +1733,7 @@ red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
   GEN u = lll(gmul(G0, *ideal), DEFAULTPREC);
   *ideal = gmul(*ideal,u); /* approximate LLL reduction */
-  return sqred1_from_QR(gmul(G, *ideal), prec);
+  return Q_from_QR(gmul(G, *ideal), prec);
 }
 
 static GEN

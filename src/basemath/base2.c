@@ -898,7 +898,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   long n = degpol(f), dU, i;
   GEN b, ha, pd, pdp;
 
-  if (n == 1) return gscalmat(gen_1, 1);
+  if (n == 1) return scalarmat(gen_1, 1);
   if (DEBUGLEVEL>5)
   {
     fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
@@ -1903,7 +1903,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
   GEN u, Mv, x, q;
 
-  if (!m) return gscalcol_i(p,N);
+  if (!m) return scalarcol_shallow(p,N);
   /* we want v_p(Norm(x)) = p^f, f = N-m */
   f = N - m;
   q = powiu(p,f+1);
@@ -2000,8 +2000,8 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
 
   if (f == N) /* inert */
   {
-    u = gscalcol_i(p,N);
-    t = gscalcol_i(gen_1,N);
+    u = scalarcol_shallow(p,N);
+    t = scalarcol_shallow(gen_1,N);
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
@@ -2046,7 +2046,7 @@ get_powers(GEN mul, GEN p)
   long i, d = lg(mul[1]);
   GEN z, pow = cgetg(d+2,t_MAT), P = pow+1;
 
-  gel(P,0) = gscalcol_i(gen_1, d-1);
+  gel(P,0) = scalarcol_shallow(gen_1, d-1);
   z = gel(mul,1);
   for (i=1; i<=d; i++)
   {
@@ -2512,10 +2512,10 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      return gscalcol_i(Rg_to_Fp(x,p), degpol( gel(nf,1) ));
+      return scalarcol_shallow(Rg_to_Fp(x,p), degpol( gel(nf,1) ));
     case t_POLMOD:
       x = gel(x,2);
-      if (typ(x) != t_POL) return gscalcol_i(Rg_to_Fp(x,p), degpol(gel(nf,1)));
+      if (typ(x) != t_POL) return scalarcol_shallow(Rg_to_Fp(x,p), degpol(gel(nf,1)));
       /* fall through */
     case t_POL:
     {
@@ -2750,7 +2750,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   I = cgetg(m+d+1,t_VEC); base = mkvec2(A, I);
  /* base[2] temporarily multiplied by p, for the final nfhermitemod,
   * which requires integral ideals */
-  matid = gscalmat(p, n);
+  matid = scalarmat(p, n);
   prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
   for (j=1; j<=m; j++)
   {

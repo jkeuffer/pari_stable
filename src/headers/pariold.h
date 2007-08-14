@@ -15,6 +15,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define gscalsmat scalarmat_s
+#define sqred qfgaussred
+#define signat qfsign
 #define infile pari_infile
 #define errfile pari_errfile
 #define logfile pari_logfile
@@ -290,8 +293,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lrem    (long)grem
 #define lrndtoi (long)grndtoi
 #define lroots  (long)roots
-#define lscalmat (long)gscalmat
-#define lscalsmat (long)gscalsmat
+#define lscalmat (long)scalarmat
+#define lscalsmat (long)scalarmat_s
 #define lsh     (long)gsh
 #define lshifti (long)shifti
 #define lshift  (long)gshift
