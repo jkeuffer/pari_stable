@@ -1209,27 +1209,6 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   return gtopoly(c, 0);
 }
 
-/* guess if a mod chi has positive valuation
-   by looking at the newton sums */
-static long
-fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
-{
-  GEN v, d, pp;
-  long m, n = degpol(chi), j, c;
-
-  c = equaliu(p, 2)? 2*n/3 : min(2*E, n);
-  if (c < 2) c = 2;
-  a = Q_remove_denom(a, &d);
-  m = d? Z_pval(d, p): 0; /* >= 0 */
-  pp = powiu(p, (m+1)*c+1);
-  ns = manage_cache(chi, pp, ns);
-  v = newtonsums(a, d, chi, c, pp, ns);
-  if (!v) return 0;
-  for (j = 1; j <= c; j++)
-    if (signe(gel(v,j)) && E*Z_pval(gel(v,j), p) - j*(E*m+1) < 0) return 0;
-  return 1;
-}
-
 /* return v_p(n!) */
 long
 val_fact(ulong n, ulong p)
@@ -1283,78 +1262,6 @@ factcp(decomp_t *S, GEN ns)
   long l;
   S->chi= chi;
   S->nu = get_nu(chi, S->p, &l); return l;
-}
-
-/* Compute nu_beta in Fp[X]. If something unexpected happens, return NULL */
-static GEN
-fastnu(GEN p, GEN f, GEN beta, GEN pdr)
-{
-  long j, k, l, n = degpol(f), v = varn(f), N = 2*n+1, av = avma;
-  GEN p1, p2, c, d, B, G, V, nu, h;
-
-  G   = cgetg(N+1, t_MAT);
-  c  = gen_0;
-  d  = mulii(pdr, sqri(p));
-
-  beta = gmul(pdr, beta);
-  B    = beta;
-  for (k = 1; k <= n; k++)
-  {
-    V = zerocol(N); gel(G,N-k) = V;
-    gel(V,n+1-k) = gen_1;
-    for (j = n+1; j <= N; j++)
-    {
-      p2 = polcoeff0(B, N-j, -1);
-      if (signe(p2)) c = gcdii(c, p2);
-      gel(V,j) = p2;
-    }
-    if (k < n)
-    {
-      B = gdiv(grem(gmul(B, beta), f), pdr);
-      if (!gcmp1(Q_denom(B))) { avma = av; return NULL; }
-      B = centermod(B, d);
-    }
-  }
-
-  if (DEBUGLEVEL >= 6)
-    fprintferr(" content in fastnu is %Z\n", c);
-
-  for (k = 1; k <= n; k++)
-  {
-    p1 = gel(G,N-k);
-    for (j = n+1; j <= N; j++)
-    {
-      p2 = gel(p1,j);
-      if (signe(p2)) { p2 = diviiexact(p2, c); gel(p1,j) = p2; }
-    }
-  }
-  pdr = diviiexact(pdr, c);
-  d   = diviiexact(d, c);
-
-  V = zerocol(N); gel(G,N) = V;
-  gel(V,N) = pdr; gel(V,n+1) = gen_1;
-
-  p1 = mulii(pdr, p);
-  for (k = 1; k <= n; k++)
-  {
-    V = zerocol(N); gel(G,k) = V;
-    gel(V,n+k+1) = p1;
-  }
-  if (DEBUGLEVEL >= 6) fprintferr("  fastnu: G is computed\n");
-
-  G = hnfmodidpart(G, d);
-  if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
-
-  setlg(G, n+2);
-  G = rowslice(G, 1, n+1);
-  h = gtopoly(gel(G,n+1), v);
-  for (j = 1; j <= n; j++)
-    h = FpX_gcd(h, gtopoly(gel(G,j), v), p);
-
-  if (!degpol(h)) { avma = av; return NULL; }
-  nu = get_nu(h, p, &l);
-  if (l > 1) { avma = av; return NULL; }
-  return gerepilecopy(av, nu);
 }
 
 /* return the prime element in Zp[phi], nup, chip in Z[X]
@@ -1533,9 +1440,8 @@ static int
 loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
 {
   pari_sp av2 = avma, limit = stack_lim(av2, 1);
-  GEN w, chib, beta, gamm, chig, nug, delt = NULL;
-  long i, l, Fg, fm = 0, go_fm = 2, eq = 0, er = 0;
-  long N = degpol(S->f), v = varn(S->f);
+  GEN R, w, chib, beta, gamm, chig, nug, delt = NULL;
+  long L, E, i, l, Fg, eq = 0, er = 0, N = degpol(S->f), v = varn(S->f);
 
   beta  = FpXQ_pow(S->nu, stoi(Ea), S->chi, S->p);
   S->invnu = NULL;
@@ -1543,83 +1449,60 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
   for (;;)
   { /* beta tends to a factor of chi */
     if (DEBUGLEVEL>4) fprintferr("  beta = %Z\n", beta);
-    
-    if (fm == -1) {
-      if (DEBUGLEVEL>4) fprintferr("  ** switching to normal mode\n");
-      fm = 0;
-      go_fm = eq + 2;
-    } else if (!fm && eq > go_fm && !er) {
-      if (DEBUGLEVEL>4) fprintferr("  ** switching to fast mode\n");
-      fm = 1;
-    }
 
-    if (fm)
+    R = modii(ZX_resultant(beta, S->chi), S->pmf);
+    if (signe(R))
     {
-      er++;
-      if (er % Ea == 0)  { er = 0; eq++; }
-      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-      nug = fastnu(S->p, S->chi, gamm, S->pdr);
-      if (!nug) { fm = -1; continue; }
+      chib = NULL;
+      L = Z_pval(R, S->p);
+      E = N;
     }
     else
-    {
-      GEN R = modii(ZX_resultant(beta, S->chi), S->pmf);
-      long L, E;
-      if (signe(R))
-      {
-        chib = NULL;
-        L = Z_pval(R, S->p);
-        E = N;
-      }
-      else
-      { /* pmf | norm(beta) ==> useless */
-        chib = ZX_caract(S->chi, beta, v);
-        vstar(S->p, chib, &L, &E);
-      }
+    { /* pmf | norm(beta) ==> useless */
+      chib = ZX_caract(S->chi, beta, v);
+      vstar(S->p, chib, &L, &E);
+    }
+    eq = (long)(L / E);
+    er = (long)(L*Ea / E - eq*Ea);
+    if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld)\n", eq,er);
+    if (er || !chib)
+    { /* gamm might not be an integer ==> chig = NULL */
+      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
+      chig = mycaract(S->chi, gamm, S->p, S->pmr, -1, ns);
+    }
+    else
+    { /* gamm = beta/p^eq, special case of the above */
+      GEN h = powiu(S->p, eq);
+      gamm = gdiv(beta, h);
+      chig = gdiv(RgX_unscale(chib, h), powiu(h, N));
+      chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
+    }
+
+    if (!chig)
+    { /* Valuation of beta was wrong ==> gamma fails the v*-test */
+      chib = ZX_caract(S->chi, beta, v);
+      vstar(S->p, chib, &L, &E);
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
-      if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld)\n", eq,er);
-      if (er || !chib)
-      { /* gamm might not be an integer ==> chig = NULL */
-        gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-        chig = mycaract(S->chi, gamm, S->p, S->pmr, -1, ns);
-      }
-      else
-      { /* gamm = beta/p^eq, special case of the above */
-        GEN h = powiu(S->p, eq);
-        gamm = gdiv(beta, h);
-        chig = gdiv(RgX_unscale(chib, h), powiu(h, N));
-        chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
-      }
-
-      if (!chig)
-      { /* Valuation of beta was wrong ==> gamma fails the v*-test */
-        chib = ZX_caract(S->chi, beta, v);
-        vstar(S->p, chib, &L, &E);
-        eq = (long)(L / E);
-        er = (long)(L*Ea / E - eq*Ea);
       
-        gamm = get_gamma(S, beta, eq, er); /* an integer */
-        chig = mycaract(S->chi, gamm, S->p, S->pmf, -1, ns);
-      }
-      
-      nug = get_nu(chig, S->p, &l);
-      if (l > 1) {
-        S->chi = chig;
-        S->nu  = nug; composemod(S, gamm, S->phi); return 1;
-      }
-      
-      Fg = degpol(nug);
-      if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm, ns);
+      gamm = get_gamma(S, beta, eq, er); /* an integer */
+      chig = mycaract(S->chi, gamm, S->p, S->pmf, -1, ns);
     }
+      
+    nug = get_nu(chig, S->p, &l);
+    if (l > 1) 
+    {
+      S->chi = chig;
+      S->nu  = nug; composemod(S, gamm, S->phi); return 1;
+    }
+      
+    Fg = degpol(nug);
+    if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm, ns);
 
     /* nug irreducible mod p */
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(w[1]) != 1)
-    {
-      if (fm) { fm = -1; continue; }
       pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
-    }
 
     for (i = 1; i < lg(w); i++)
     { /* Look for a root delt of nug in Fp[phi] such that vp(gamma - delta) > 0
@@ -1627,18 +1510,13 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       GEN eta, chie, nue, W = gel(w,i); /* monic linear polynomial */
       delt = gneg_i( ch_var(gel(W,2), v) );
       eta  = gsub(gamm, delt);	
-      if (fm)
-      {
-        if (fastvalpos(eta, S->chi, S->p, ns, Ea)) break;
-        continue;
-      }
-      
+
       if (typ(delt) == t_INT)
         chie = translate_pol(chig, delt); /* frequent special case */
       else
       {
         if (!dvdii(ZX_QX_resultant(S->chi, eta), S->p)) continue;
-        chie = mycaract(S->chi, eta, S->p, S->pmr, -1, ns);
+        chie = mycaract(S->chi, eta, S->p, S->pmr, S->df, ns);
       }
       nue = get_nu(chie, S->p, &l);
       if (l > 1) { 
@@ -1659,10 +1537,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       }
     }
     if (i == lg(w))
-    {
-      if (fm) { fm = -1; continue; }
       pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
-    }
 
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));
