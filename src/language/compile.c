@@ -628,9 +628,14 @@ compilefunc(long n, int mode)
               a=tree[a].x;
             }
             ep=getlvalue(a);
-            op_push(OCnewptr, (long) ep);
-            compilelvalue(a);
-            op_push(OCpushptr, 0);
+            if (tree[a].f==Fentry)
+              op_push(OCsimpleptr, (long) ep);
+            else
+            {
+              op_push(OCnewptr, (long) ep);
+              compilelvalue(a);
+              op_push(OCpushptr, 0);
+            }
             nbpointers++;
             break;
           }

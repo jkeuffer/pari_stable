@@ -511,7 +511,7 @@ closure_eval(GEN C)
           goto calluser; /*Maybe it is a function*/
         }
         break;
-    case OCnewptr:
+    case OCsimpleptr:
         {
           gp_pointer *g;
           if (rp==s_ptrs.n-1) 
@@ -528,6 +528,33 @@ closure_eval(GEN C)
           default:
             pari_err(varer1,"variable name expected",NULL,NULL);
           }
+          gel(st,sp++) = (GEN)&(g->x);
+          break;
+        }
+    case OCnewptr:
+        {
+          gp_pointer *g;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          matcomp *C=&g->c;
+          ep = (entree*) operand;
+          switch (ep->valence)
+          {
+          case EpNEW:
+            pari_var_create(ep);
+            ep->valence=EpVAR;
+          case EpVAR: case EpGVAR:/*FALL THROUGH*/
+            g->x = (GEN) ep->value;
+            break;
+          default:
+            pari_err(varer1,"variable name expected",NULL,NULL);
+          }
+          g->x = (GEN) ep->value;
+          g->ep=NULL;
+          C->full_col = C->full_row = 0;
+          C->parent   = (GEN)    g->x;
+          C->ptcell   = (GEN *) &g->x;
           break;
         }
     case OCpushptr:
@@ -626,13 +653,6 @@ closure_eval(GEN C)
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
           GEN p;
-          if (g->ep)
-          {
-            g->ep=NULL;
-            C->full_col = C->full_row = 0;
-            C->parent   = (GEN)    g->x;
-            C->ptcell   = (GEN *) &g->x;
-          }
           p=*C->ptcell;
           sp--;
           switch(typ(p))
@@ -676,12 +696,6 @@ closure_eval(GEN C)
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
           GEN p;
-          if (g->ep)
-          {
-            g->ep=NULL;
-            C->full_col = C->full_row = 0;
-            C->ptcell   = (GEN *) &g->x;
-          }
           p=*C->ptcell;
           sp-=2;
           if (typ(p)!=t_MAT)
@@ -710,12 +724,6 @@ closure_eval(GEN C)
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
           GEN p;
-          if (g->ep)
-          {
-            g->ep=NULL;
-            C->full_row = 0;
-            C->ptcell   = (GEN *) &g->x;
-          }
           p=*C->ptcell;
           sp--;
           if (typ(p)!=t_MAT)
@@ -745,12 +753,6 @@ closure_eval(GEN C)
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
           GEN p, p2;
-          if (g->ep)
-          {
-            g->ep=NULL;
-            C->full_col = 0;
-            C->ptcell   = (GEN *) &g->x;
-          }
           p=*C->ptcell;
           sp--;
           if (typ(p)!=t_MAT)
@@ -1066,6 +1068,10 @@ closure_disassemble(GEN C)
     case OCpushvalue:
       ep=(entree*)operand;
       pariprintf("pushvalue\t%s\n",ep->name);
+      break;
+    case OCsimpleptr:
+      ep=(entree*)operand;
+      pariprintf("simpleptr\t%s\n",ep->name);
       break;
     case OCnewptr:
       ep=(entree*)operand;
