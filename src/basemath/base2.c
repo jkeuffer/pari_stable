@@ -963,7 +963,8 @@ typedef struct __decomp {
   GEN nu; /* irreducible divisor of chi mod p, in Z[X] */
   GEN invnu; /* numerator ( 1/ Mod(nu, chi) mod pmr ) */
   GEN Dinvnu;/* denominator ( ... ) */
-  GEN pdr, pmr, pmf;
+  GEN pdr, pmr, pmf; /* reduced discriminant */
+  GEN ns, precns; /* cached Newton sums and their precision */
 } decomp_t;
 
 /* if flag = 0, maximal order, else factorization to precision r = flag */
@@ -1118,25 +1119,6 @@ polsymmodp(GEN g, GEN p)
   return y;
 }
 
-/* no GC */
-static GEN
-manage_cache(GEN chi, GEN pp, GEN ns)
-{
-  if (lgefint(pp) > lg(ns[1]))
-  {
-    if (DEBUGLEVEL > 4) fprintferr("newtonsums: result doesn't fit in cache\n");
-    return polsymmodp(chi, pp);
-  }
-
-  if (!signe(ns[1]))
-  {
-    GEN ns2 = polsymmodp(chi, pp);
-    long j, l = lg(ns);
-    for (j = 1; j < l; j++) affii(gel(ns2,j), gel(ns,j));
-  }
-  return ns;
-}
-
 /* compute the c first Newton sums modulo pp of the
    characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gen_1),
    a, chi in Zp[X]
@@ -1218,29 +1200,48 @@ val_fact(ulong n, ulong p)
   return (long)v;
 }
 
+static void
+manage_cache(decomp_t *S, GEN f, GEN pp)
+{
+  if (!(S->precns) || (gcmp(S->precns, pp) < 0))
+  {
+    /* Add some extra digits so that we don't have to recompute it too often */
+    pp = mulii(pp, powiu(S->p, 20));
+    if (DEBUGLEVEL>4 && S->precns)
+      fprintferr("  Increasing precision for Newton sums: %Z -> %Z\n",
+		 S->precns, pp);
+    S->ns = polsymmodp(f, pp);
+    S->precns = pp;
+  }
+} 
+
 /* return NULL if a mod f is not an integer
  * if dr >= 0, a mod f is an integer and the denominator of any integer
  * in Zp[X]/(f) divides p^dr */
 static GEN
-mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
+mycaract(decomp_t *S, GEN f, GEN a, GEN pp, long dr)
 {
-  pari_sp av = avma;
-  GEN d, chi, npp, NPP, nspp;
+  pari_sp av;
+  GEN d, chi, npp, NPP, nspp, ns;
   long n = degpol(f);
 
   if (gcmp0(a)) return zeropol(varn(f));
 
   a = Q_remove_denom(a, &d);
   npp = pp;
-  if (lgefint(p) == 3) npp = mulii(npp, powiu(p, val_fact(n, itou(p))));
+  if (lgefint(S->p) == 3) 
+    npp = mulii(npp, powiu(S->p, val_fact(n, itou(S->p))));
   nspp = NPP = npp;
   if (d) {
     NPP = mulii(NPP, powiu(d, n));
-    nspp = (dr < 0)? NPP: mulii(nspp, powiu(p, dr));
+    nspp = (dr < 0)? NPP: mulii(nspp, powiu(S->p, dr));
   }
-  ns = newtonsums(a, d, f, n, NPP, manage_cache(f, nspp, ns));
+  manage_cache(S, f, nspp);
+
+  av = avma;
+  ns = newtonsums(a, d, f, n, NPP, S->ns);
   if (!ns) return NULL;
-  chi = newtoncharpoly(npp, p, ns);
+  chi = newtoncharpoly(npp, S->p, ns);
   if (!chi) return NULL;
   setvarn(chi, varn(f));
   return gerepileupto(av, centermod(chi, pp));
@@ -1256,9 +1257,9 @@ get_nu(GEN chi, GEN p, long *ptl)
 
 /* Factor characteristic polynomial of S->phi mod (p, S->chi) */
 static long
-factcp(decomp_t *S, GEN ns)
+factcp(decomp_t *S)
 {
-  GEN chi = mycaract(S->chi, S->phi, S->p, S->pmf, -1, ns);
+  GEN chi = mycaract(S, S->chi, S->phi, S->pmf, -1);
   long l;
   S->chi= chi;
   S->nu = get_nu(chi, S->p, &l); return l;
@@ -1303,29 +1304,29 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
 }
 
 static void
-kill_cache(GEN ns) { setsigne(ns[1], 0); }
+kill_cache(decomp_t *S) { S->precns = NULL; }
 
 /* S->phi := T o T0 mod (p, f) */
 static void
 composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
 
 static int 
-update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
+update_phi(decomp_t *S, long *ptl, long flag)
 {
   GEN PHI = NULL, pdr, pmr = S->pmr, X = pol_x( varn(S->f) );
   long k;
 
   if (!S->chi) 
   {
-    kill_cache(ns);
-    S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
+    kill_cache(S);
+    S->chi = mycaract(S, S->f, S->phi, pmr, S->df);
     S->nu = get_nu(S->chi, S->p, ptl);
     if (*ptl > 1) return 0; /* we can get a decomposition */
   }
     
   for (k = 1;; k++)
   {
-    kill_cache(ns);
+    kill_cache(S);
     pdr = respm(S->chi, ZX_deriv(S->chi), pmr);
     if (signe(pdr)) break;
     
@@ -1333,7 +1334,7 @@ update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
 
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, pmr): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
-    S->chi = mycaract(S->f, PHI, S->p, pmr, S->df, ns);
+    S->chi = mycaract(S, S->f, PHI, pmr, S->df);
   }
   pmr = mulii(sqri(pdr), S->p);
   S->chi = FpX_red(S->chi, pmr);
@@ -1354,7 +1355,7 @@ update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
 /* return 1 if at least 2 factors mod p ==> chi can be split
  * Replace S->phi such that F increases (to D) */
 static int
-testb2(decomp_t *S, long D, GEN theta, GEN ns)
+testb2(decomp_t *S, long D, GEN theta)
 {
   long v = varn(S->chi), dlim = degpol(S->chi)-1;
   GEN T0 = S->phi, chi0 = S->chi;
@@ -1364,7 +1365,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
   {
     S->phi = gadd(theta, random_FpX(dlim, v, S->p));
     /* phi non-primary ? */
-    if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
+    if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
     S->chi = chi0;
   }
@@ -1374,7 +1375,7 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
 /* return 1 if at least 2 factors mod p ==> chi can be split. 
  * compute a new S->phi such that E = lcm(Ea, Et) */
 static int
-testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
+testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 {
   GEN c, T0 = S->phi;
   long r, s, t; 
@@ -1387,21 +1388,8 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
   c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
   c = gdiv(RgX_rem(c, S->chi), powiu(S->p, t));
   S->phi = gadd( pol_x( varn(S->chi) ), redelt(c, S->pmr, S->p) );
-  if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
+  if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
-}
-
-/* used to cache the newton sums of chi */
-static GEN
-init_NS(long N, GEN pp, GEN pmf, GEN pmr)
-{
-  GEN q, ns = cgetg(N+1, t_COL);
-  long i, l, p = itos_or_0(pp);
-  q = p? powiu(pp, (ulong)ceil( N * 1. / (p * (p-1)) )): pp;
-  q = sqri(mulii(q, mulii(pmf, powiu(pmr, N))));
-  l  = lgefint(q); /* should be more than enough ... */
-  for (i = 1; i <= N; i++) gel(ns,i) = cgeti(l);
-  kill_cache(ns); return ns;
 }
 
 static GEN
@@ -1437,7 +1425,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
 
 /* return 1 if at least 2 factors mod p ==> chi can be split */
 static int
-loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
+loop(decomp_t *S, long nv, long Ea, long Fa)
 {
   pari_sp av2 = avma, limit = stack_lim(av2, 1);
   GEN R, w, chib, beta, gamm, chig, nug, delt = NULL;
@@ -1468,7 +1456,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     if (er || !chib)
     { /* gamm might not be an integer ==> chig = NULL */
       gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
-      chig = mycaract(S->chi, gamm, S->p, S->pmr, -1, ns);
+      chig = mycaract(S, S->chi, gamm, S->pmr, -1);
     }
     else
     { /* gamm = beta/p^eq, special case of the above */
@@ -1486,7 +1474,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       er = (long)(L*Ea / E - eq*Ea);
       
       gamm = get_gamma(S, beta, eq, er); /* an integer */
-      chig = mycaract(S->chi, gamm, S->p, S->pmf, -1, ns);
+      chig = mycaract(S, S->chi, gamm, S->pmf, -1);
     }
       
     nug = get_nu(chig, S->p, &l);
@@ -1497,7 +1485,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     }
       
     Fg = degpol(nug);
-    if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm, ns);
+    if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm);
 
     /* nug irreducible mod p */
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
@@ -1516,7 +1504,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       else
       {
         if (!dvdii(ZX_QX_resultant(S->chi, eta), S->p)) continue;
-        chie = mycaract(S->chi, eta, S->p, S->pmr, S->df, ns);
+        chie = mycaract(S, S->chi, eta, S->pmr, S->df);
       }
       nue = get_nu(chie, S->p, &l);
       if (l > 1) { 
@@ -1529,10 +1517,10 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
         long Le, Ee;
         GEN pie;
         if (dvdii(constant_term(chie), S->pmr))
-          chie = mycaract(S->chi, eta, S->p, S->pmf, -1, ns);
+          chie = mycaract(S, S->chi, eta, S->pmf, -1);
         
         pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
-        if (pie) return testc2(S, S->nu, Ea, pie, Ee, ns);
+        if (pie) return testc2(S, S->nu, Ea, pie, Ee);
         break;
       }
     }
@@ -1558,7 +1546,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
 {
   GEN p = S->p;
   long Fa, La, Ea, oE, l, N  = degpol(S->f), v = varn(S->f), nv = fetch_var();
-  GEN ns, pia, opa;
+  GEN pia, opa;
 
   if (DEBUGLEVEL>2)
   {
@@ -1575,7 +1563,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->pdr = mulii(dred, p);
   S->chi = centermod(S->f, S->pmr);
   S->pmf = powiu(p, mf + 1);
-  ns = init_NS(N, p, S->pmf, S->pmr);
+  S->precns = NULL;
   oE = 0;
   opa = NULL;
 
@@ -1590,7 +1578,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (pia) break;
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, ns, &l, flag)) break;
+      if (!update_phi(S, &l, flag)) break;
     }
     if (!pia) break;
     oE = Ea; opa = RgX_RgXQ_compo(pia, S->phi, S->f);
@@ -1598,7 +1586,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, ns, &l, flag)) break;
+      if (!update_phi(S, &l, flag)) break;
     }
 
     if (DEBUGLEVEL>5) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
@@ -1608,8 +1596,8 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       S->chi = NULL; l = 1; break;
     }
     l = 2;
-    if (loop(S, nv, Ea, Fa, ns)) break;
-    if (!update_phi(S, ns, &l, flag)) break;
+    if (loop(S, nv, Ea, Fa)) break;
+    if (!update_phi(S, &l, flag)) break;
   }
   (void)delete_var();
   if (l == 1) return flag? NULL: dbasis(p, S->f, mf, S->phi, S->chi);
