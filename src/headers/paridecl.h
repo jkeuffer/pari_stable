@@ -209,6 +209,7 @@ GEN     gaussmodulo2(GEN M, GEN D, GEN Y);
 GEN     scalarcol(GEN x, long n);
 GEN     scalarcol_shallow(GEN x, long n);
 GEN     scalarmat(GEN x, long n);
+GEN     scalarmat_shallow(GEN x, long n);
 GEN     scalarmat_s(long x, long n);
 GEN     gtomat(GEN x);
 GEN     gtrans(GEN x);
