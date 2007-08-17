@@ -16,10 +16,10 @@ BA  6- bitnegimply(1,2^65) returned a wrong result [#560]
     8- [library] missing function intfourierexp()
     9- segv in polrootspadic / repeated roots in FpX_root (only in deg 2) [#562]
    10- log(2+O(4^4)) --> oo loop
-   11- log(exp(1e-100)) -> 1.000000000149525401279188592 E-100 
+   11- log(exp(1e-100)) -> 1.000000000149525401279188592 E-100
        [ for some accuracies, log & exp inacurate near 1 and 0 resp. ]
-   12- numbpart inaccurate (and slow). E.g numbpart(52602) off by 1 [#557]. 
-BA 13- &, |, && and || were right-associative instead of left-associative 
+   12- numbpart inaccurate (and slow). E.g numbpart(52602) off by 1 [#557].
+BA 13- &, |, && and || were right-associative instead of left-associative
    14- remove type assumptions in mulcxI, mulcxmI: unsafe [#516]]
    15- too much memory allocated to print real numbers
    16- (y/x)/(x^0/y) not correctly simplified
@@ -68,7 +68,7 @@ DE 46- on NFS filesystems, make install would rebuild all [#503]
    51- concat(v) used too much memory (quadratic in #v, make it linear) [#634]
 BA 52- gp -q -f < eval('y) --> SEGV
    53- "significant pointers lost" for objects involving 0 t_SERs [#635]
-   54- for trivial x, isanypower(x,&p) would not set p 
+   54- for trivial x, isanypower(x,&p) would not set p
 MSo55- [Configure] don't rely on $CC exit status, check whether a non-0 size
        executable is produced [ problems with tcc ]
 BA 56- wrong Prototype for subgrouplist [ extra 'p' ]
@@ -149,7 +149,9 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    39- listcreate() and listkill() are obsolete, don't use them. L = List()
     should be enough in all cases. All lists now grow as needed, without
     requiring an awkward maximal length (from listcreate).
-   40- rename sqred -> qfgaussred, signat -> qfsign, sqred1 -> qfgaussred_positive
+   40- rename sqred -> qfgaussred, signat -> qfsign,
+    sqred1 -> qfgaussred_positive
+   41- rename gaddmat -> RgM_Rg_add and swap arguments. Add RgM_Rg_add_shallow
 
   Added
     1- library functions expu, adduu, subuu
@@ -224,7 +226,7 @@ LGr 4- [gphelp] race condition --> incomplete cleanup (improved patch BA)
    25- elleta(e) was different from elleta(e.omega). Analogous problems
        in all quasi-elliptic functions. COMPAT: change e.omega so that
        e.omega[1] / e.omega[2] belongs to the Poincare half plane [ used
-       to be the inverse ]. Together with 24: the Legendre relation now reads 
+       to be the inverse ]. Together with 24: the Legendre relation now reads
        w1 e2 - w2 e1 = 2 I Pi
        Rationale: 1) the action of Sl_2(R) becomes the standard one, not a
        twisted one 2) fixes quite a few normalization problems in our code.
@@ -287,8 +289,8 @@ BA 15- library function FpX_valrem()
    16- library function Flxq_gener
 BA 17- library function Flxq_norm, Flxq_minpoly, Flxq_charpoly
 BA 18- [toplevel benchmark] ffisom
-BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn, 
-       Flxq_order, Flxq_log, Flxq_sqrtn 
+BA 19- library functions Fp_order, FpXQ_order, FpXQ_log, FpXQ_sqrtn,
+       Flxq_order, Flxq_log, Flxq_sqrtn
    20- library functions gen_sort_inplace, gen_indexsort, sort_factor,
        indexvecsort
 BA 21- New PARI type t_FFELT and support functions (FF_*) for finite field
@@ -296,7 +298,7 @@ BA 21- New PARI type t_FFELT and support functions (FF_*) for finite field
 BA 22- functions ffgen, fforder, fflog, ffprimroot for finite field elements.
 
   Removed
-    1- obsolete functions readexpr(), readexpr_nobreak() 
+    1- obsolete functions readexpr(), readexpr_nobreak()
     2- pariemacs support from Configure
     3- obsolete functions sindexsort, sindexlexsort, sindexrank
 
@@ -347,8 +349,8 @@ BA 10- ellheight short help was accidentally truncated.
    23- wrong result in conversion t_QUAD -> t_PADIC whenever disc  = 1 (4)
 JJ 24- gaddgsz macro was wrong [#481]
    25- gener_Fl(p^k) can't handle k > 1, use gener_Zl instead [#480]
-SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc 
-       function. [#484] 
+SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
+       function. [#484]
    27- raising a t_QFI or t_QFR to the power n would return a reduced form (OK)
        except when n = 1. Make it systematic.
    28- in rare cases (return 0, native kernel) int_normalize was not suitable
@@ -356,7 +358,7 @@ SC 26- [GMP] mp_set_memory_functions was called with an incompatible realloc
    29- idealnorm(nf, t_POL) didn't work
 AM 30- [TeXmacs] typo in texmacs_output: x --> <bluex> [#491]
    31- accuracy errors in bnfinit: setrand(3); bnfinit(x^2+999999999999971)
-       [ use a failsafe version of gmod (modr_safe), and increase accuracy 
+       [ use a failsafe version of gmod (modr_safe), and increase accuracy
          if necessary ]
    32- possible corruption of gen_2 in mynegi() [ hnflll ]
    33- factor(4/x) --> [2, 2; x -1]  (content not removed)
@@ -375,7 +377,7 @@ BA 38- Interrupting GP could lead to a freeze. [#488]
     3- remove CPP from Configure tests (not needed)
     4- allow arbitrary sequences (not only expressions) in sum, prod, etc.
        sum(i = 1, 2, 1;2) --> 4  [ was: error ]
-    5- checked that no 2-strong pseudoprime passes BSPW primality test up to 
+    5- checked that no 2-strong pseudoprime passes BSPW primality test up to
        10^15 (use Galway's list, extending Pinch's 10^13)
     6- random() now uses Brent's XORGEN (replaces congruential linear generator)
        getrand() returns the FSR internal state array, used by setrand(). The
@@ -402,7 +404,7 @@ BA 38- Interrupting GP could lead to a freeze. [#488]
 
   Added
 BA  1- function Flm_rank
-BA  2- Add experimental --enable-tls Configure option and thread-local stack 
+BA  2- Add experimental --enable-tls Configure option and thread-local stack
        support. Warning: using this option break the ABI.
     3- centerlift(t_PADIC)
     4- pgener_Zp, pgener_Zl

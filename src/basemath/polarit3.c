@@ -1180,13 +1180,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
       z = negi(z);
       if (DEBUGLEVEL>=4) (void)timer2();
-      A = FpM_ker(gaddmat(z, MA),l);
+      A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2)
 	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,pol_x(vp),P);
       A = RgV_to_RgX(gel(A,1),vp);
 
-      B = FpM_ker(gaddmat(z, MB),l);
+      B = FpM_ker(RgM_Rg_add_shallow(MB, z),l);
       if (lg(B)!=2)
 	pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,pol_x(vq),Q);
@@ -1228,8 +1228,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   {
     GEN VP, VQ, Ay, By, lmun = addis(l,-1);
     long i, j;
-    MA = gaddmat(gen_m1,MA);
-    MB = gaddmat(gen_m1,MB);
+    MA = RgM_Rg_add_shallow(MA,gen_m1);
+    MB = RgM_Rg_add_shallow(MB,gen_m1);
     Ay = pol_1(vp);
     By = pol_1(vq);
     VP = col_ei(np, 1);

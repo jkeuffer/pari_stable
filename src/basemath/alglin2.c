@@ -154,7 +154,7 @@ caract(GEN x, long v)
   {
     GEN mk = stoi(-k), d;
     gel(x_k,2) = mk;
-    d = det(gaddmat_i(mk, x));
+    d = det(RgM_Rg_add_shallow(x, mk));
     p1 = gadd(gmul(p1, x_k), gmul(gmul(C, d), Q));
     if (k == n) break;
 
@@ -3772,7 +3772,7 @@ matfrobenius(GEN M, long flag, long v)
     pari_err(talker,"variable must have higher priority in matfrobenius");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) pari_err(mattype1,"matfrobenius");
-  M_x = gaddmat(monomial(gen_m1, 1, v), M);
+  M_x = RgM_Rg_add_shallow(M, monomial(gen_m1, 1, v));
   if (flag<2)
   {
     D = matsnf0(M_x,6);

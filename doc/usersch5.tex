@@ -4027,6 +4027,12 @@ is $1$) and $0$ otherwise.
 equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
 whether $x$ is an arbitrary scalar matrix.
 
+\fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
+and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
+
+\fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
+fewer copies.
+
 \subsec{Transcendental functions}
 
 The following two functions are only useful when interacting with \kbd{gp},

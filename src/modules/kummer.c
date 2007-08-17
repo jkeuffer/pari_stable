@@ -984,12 +984,12 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       p1 = factorbackelt(gel(p1,1), FpC_red(gel(p1,2),gell), nfz);
     gel(Tv,j) = isvirtualunit(bnfz, p1, cycgen,cyc,gell,rc);
   }
-  P = FpM_ker(gsubgs(Tv, g), gell);
+  P = FpM_ker(RgM_Rg_add_shallow(Tv, stoi(-g)), gell);
   lW = lg(P); vecW = cgetg(lW,t_VEC);
   for (j=1; j<lW; j++) gel(vecW,j) = famat_factorback(vselmer, gel(P,j));
   /* step 6 */
   if (DEBUGLEVEL>2) fprintferr("Step 6\n");
-  Q = FpM_ker(gsubgs(shallowtrans(Tc), g), gell);
+  Q = FpM_ker(RgM_Rg_add_shallow(shallowtrans(Tc), stoi(-g)), gell);
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
   p1 = RgXQ_powers(lift_intern(COMPO.p), degK-1, COMPO.R);

@@ -2029,7 +2029,7 @@ _primedec(GEN nf, GEN p)
       for (i=1; i<=n; i++)
       {
         r = lift_intern(gel(R,i));
-        I = gaddmat_i(negi(r), mula);
+        I = RgM_Rg_add_shallow(mula, negi(r));
 	gel(h,c++) = FpM_image(shallowconcat(H, I), p);
       }
       if (n == dim)

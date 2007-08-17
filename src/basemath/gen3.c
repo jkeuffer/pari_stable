@@ -1286,8 +1286,8 @@ gsubst(GEN x, long v, GEN y)
       if (varncmp(vx, v) > 0) return scalarmat(x,ly-1);
       if (lx==3) return scalarmat(gel(x,2),ly-1);
       av = avma; z = gel(x,lx-1);
-      for (i=lx-2; i>=2; i--) z = gaddmat(gel(x,i),gmul(z,y));
-      return gerepileupto(av,z);
+      for (i=lx-2; i>=2; i--) z = RgM_Rg_add_shallow(gmul(z,y), gel(x,i));
+      return gerepilecopy(av,z);
 
     case t_SER:
       vx = varn(x);

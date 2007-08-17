@@ -875,7 +875,7 @@ gadd(GEN x, GEN y)
   if (ty == t_MAT) {
     if (is_matvec_t(tx)) pari_err(operf,"+",x,y);
     if (isexactzero(x)) return gcopy(y);
-    return gaddmat(x,y);
+    return RgM_Rg_add(y, x);
   }
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
     return add_polmod_scal(gel(y,1), gel(y,2), x);

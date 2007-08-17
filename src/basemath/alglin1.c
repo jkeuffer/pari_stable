@@ -1069,42 +1069,39 @@ mattodiagonal(GEN m)
 /*                                                                 */
 /*******************************************************************/
 
-/* create the square matrix x*Id + y */
+/* x square matrix, y scalar; create the square matrix x + y*Id */
 GEN
-gaddmat(GEN x, GEN y)
+RgM_Rg_add(GEN x, GEN y)
 {
-  long l,d,i,j;
-  GEN z, cz,cy;
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
 
-  l = lg(y); if (l==1) return cgetg(1,t_MAT);
-  d = lg(y[1]);
-  if (typ(y)!=t_MAT || l!=d) pari_err(mattype1,"gaddmat");
-  z=cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-  {
-    cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
-    for (j=1; j<d; j++)
-      gel(cz,j) = i==j? gadd(x,gel(cy,j)): gcopy(gel(cy,j));
-  }
-  return z;
-}
-
-/* same, no copy */
-GEN
-gaddmat_i(GEN x, GEN y)
-{
-  long l,d,i,j;
-  GEN z, cz,cy;
-
-  l = lg(y); if (l==1) return cgetg(1,t_MAT);
-  d = lg(y[1]);
-  if (typ(y)!=t_MAT || l!=d) pari_err(mattype1,"gaddmat");
+  if (l==1) return z;
+  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
   z = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
-    cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
-    for (j=1; j<d; j++)
-      gel(cz,j) = i==j? gadd(x,gel(cy,j)): gel(cy,j);
+    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++)
+      gel(zi,j) = i==j? gadd(y,gel(xi,j)): gcopy(gel(xi,j));
+  }
+  return z;
+}
+GEN
+RgM_Rg_add_shallow(GEN x, GEN y)
+{
+  long l = lg(x), i, j;
+  GEN z = cgetg(l,t_MAT);
+
+  if (l==1) return z;
+  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
+  for (i=1; i<l; i++)
+  {
+    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
+    gel(z,i) = zi;
+    for (j=1; j<l; j++) gel(zi,j) = gel(xi,j);
+    gel(zi,i) = gadd(gel(zi,i), y);
   }
   return z;
 }
