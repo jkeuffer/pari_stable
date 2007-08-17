@@ -3138,6 +3138,9 @@ scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
 \fun{GEN}{gfloor}{GEN x} creates the floor of~\kbd{x}, i.e.\ the (true)
 integral part.
 
+\fun{GEN}{gfloor2n}{GEN x, long n} creates the floor of~$2^n$\kbd{x}, this is
+only implemented for \typ{INT}, \typ{REAL}, and \typ{COMPLEX} of those.
+
 \fun{GEN}{gfrac}{GEN x} creates the fractional part of~\kbd{x}, i.e.\ \kbd{x}
 minus the floor of~\kbd{x}.
 
