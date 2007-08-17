@@ -478,7 +478,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     {
       W = FpXQ_mul(Wr, FpX_FpXQV_compo(ZX_deriv(Pr),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
-      W = FpX_Fp_add(W, gen_2, qold);
+      W = FpX_Fp_add_shallow(W, gen_2, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
     }
     Wr = W;

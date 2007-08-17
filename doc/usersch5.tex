@@ -1881,6 +1881,10 @@ copy. If not, the inverse remains uncollected on the stack.
 \fun{GEN}{FpX_Fp_add}{GEN y, GEN x, GEN p} add the \kbd{Fp}~\kbd{x} to the
 \kbd{FpX}~\kbd{y}.
 
+\fun{GEN}{FpX_Fp_add_shallow}{GEN y, GEN x, GEN p} add the \kbd{Fp}~\kbd{x}
+to the \kbd{FpX}~\kbd{y}, using a shallow copy (result not suitable for
+\kbd{gerepileupto})
+
 \fun{GEN}{FpX_Fp_mul}{GEN y, GEN x, GEN p} multiplies the \kbd{FpX}~\kbd{y}
 by the \kbd{Fp}~\kbd{x}.
 

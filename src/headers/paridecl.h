@@ -115,6 +115,7 @@ GEN     zero_Flx(long sv);
 GEN     Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 GEN     FpX_Fp_add(GEN x, GEN y, GEN p);
+GEN     FpX_Fp_add_shallow(GEN y,GEN x,GEN p);
 GEN     FpX_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpX_add(GEN x, GEN y, GEN p);
 GEN     FpX_center(GEN x, GEN p);

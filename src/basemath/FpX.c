@@ -39,7 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 FpX_red(GEN z, GEN p)
 {
-  long i, l = lg(z); 
+  long i, l = lg(z);
   GEN x = cgetg(l, t_POL);
   for (i=2; i<l; i++) gel(x,i) = modii(gel(z,i),p);
   x[1] = z[1]; return FpX_renormalize(x,l);
@@ -75,17 +75,27 @@ FpX_add(GEN x,GEN y,GEN p)
 GEN
 FpX_Fp_add(GEN y,GEN x,GEN p)
 {
+  long i, lz = lg(y);
   GEN z;
-  long lz, i;
-  if (!signe(y))
-    return scalarpol(x,varn(y));
-  lz=lg(y);
-  z=cgetg(lz,t_POL);
-  z[1]=y[1];
-  gel(z,2) = modii(addii(gel(y,2),x),p);
-  for(i=3;i<lz;i++)
-    gel(z,i) = icopy(gel(y,i));
-  if (lz==3) z = FpX_renormalize(z,lz);
+  if (lz == 2) return scalarpol(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = modii(addii(gel(y,2),x), p);
+  if (lz == 3) z = FpX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = icopy(gel(y,i));
+  return z;
+}
+GEN
+FpX_Fp_add_shallow(GEN y,GEN x,GEN p)
+{
+  long i, lz = lg(y);
+  GEN z;
+  if (lz == 2) return scalarpol(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = modii(addii(gel(y,2),x), p);
+  if (lz == 3) z = FpX_renormalize(z,lz);
+  else
+    for(i=3;i<lz;i++) gel(z,i) = gel(y,i);
   return z;
 }
 
@@ -159,7 +169,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    av0 = avma; z = FpX_normalize(x, p); 
+    av0 = avma; z = FpX_normalize(x, p);
     if (z==x) return gcopy(z);
     else return gerepileupto(av0, z);
   }
@@ -261,7 +271,7 @@ FpX_valrem(GEN x, GEN t, GEN p, GEN *py)
     if (signe(r)) break;
     x = y;
   }
-  *py = gerepilecopy(av,x); 
+  *py = gerepilecopy(av,x);
   return k;
 }
 
@@ -301,7 +311,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
   GEN a,b,c;
   pari_sp av=avma;
 
-  a = FpX_red(x, p); 
+  a = FpX_red(x, p);
   b = FpX_red(y, p);
   while (signe(b))
   {
@@ -367,8 +377,8 @@ FpX_rescale(GEN P, GEN h, GEN p)
 }
 
 GEN
-FpX_deriv(GEN x, GEN p) 
-{ 
+FpX_deriv(GEN x, GEN p)
+{
    GEN z = ZX_deriv(x);
    return FpX_red(z, p);
 }
@@ -485,7 +495,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
 }
 
 static GEN _FpX_mul(void *p,GEN a,GEN b){return FpX_mul(a,b,(GEN)p);}
-GEN 
+GEN
 FpXV_prod(GEN V, GEN p)
 {
   return divide_conquer_assoc(V, &_FpX_mul,(void *)p);
@@ -660,20 +670,20 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
   pari_sp av = avma;
   GEN q,n_q,ord,ordp, op;
 
-  if (is_pm1(a)) return gen_0; 
+  if (is_pm1(a)) return gen_0;
   /* p > 2 */
 
   ord  = typ(o)==t_MAT ? factorback(o, NULL) : o;
   ordp = subis(p, 1); /* even */
   if (equalii(a, ordp)) /* -1 */
-    return gerepileuptoint(av, shifti(ord,-1)); 
+    return gerepileuptoint(av, shifti(ord,-1));
   ordp = gcdii(ordp,ord);
   op = typ(o)==t_MAT ? famat_Z_gcd(o,ordp) : ordp;
 
   q = NULL;
   if (T)
   { /* we want < g > = Fp^* */
-    if (!equalii(ord,ordp)) { 
+    if (!equalii(ord,ordp)) {
       q = diviiexact(ord,ordp);
       g = FpXQ_pow(g,q,T,p);
     }
@@ -697,7 +707,7 @@ _FpXQ_rand(void *data)
   pari_sp av=avma;
   FpX_muldata *D = (FpX_muldata*)data;
   GEN z;
-  do 
+  do
   {
     avma=av;
     z=random_FpX(degpol(D->pol),varn(D->pol),D->p);
@@ -719,13 +729,13 @@ FpXQ_order(GEN a, GEN ord, GEN T, GEN p)
   }
   else
   {
-    FpX_muldata s;  
+    FpX_muldata s;
     s.pol=T; s.p=p;
     return gen_eltorder(a,ord, (void*)&s,&FpXQ_star);
   }
 }
 
-static GEN 
+static GEN
 _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
 {
   FpX_muldata *s=(FpX_muldata*) E;
@@ -735,7 +745,7 @@ _FpXQ_easylog(void *E, GEN a, GEN g, GEN ord)
 
 GEN
 FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
-{ 
+{
   if (lgefint(p)==3)
   {
     pari_sp av=avma;
@@ -745,7 +755,7 @@ FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
   }
   else
   {
-    FpX_muldata s;  
+    FpX_muldata s;
     s.pol=T; s.p=p;
     return gen_PH_log(a,g,ord, (void*)&s,&FpXQ_star,_FpXQ_easylog);
   }
@@ -777,7 +787,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
   }
   else
   {
-    FpX_muldata s;  
+    FpX_muldata s;
     s.pol=T; s.p=p;
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
         (void*)&s,&FpXQ_star);
@@ -787,7 +797,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
 GEN
 FpXQ_norm(GEN x, GEN T, GEN p)
 {
-  pari_sp av = avma; 
+  pari_sp av = avma;
   GEN y = FpX_resultant(T, x, p);
   GEN L = leading_term(T);
   if (gcmp1(L) || signe(x)==0) return y;
@@ -806,7 +816,7 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   return gerepileupto(ltop,R);
 }
 
-GEN 
+GEN
 FpXQ_minpoly(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
@@ -816,7 +826,7 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
   {
     R  = poldeflate_i(R,itos(p));
     dR = FpX_deriv(R,p);
-  } 
+  }
   G=FpX_gcd(R,dR,p);
   G=FpX_normalize(G,p);
   G=FpX_div(R,G,p);
@@ -852,7 +862,7 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   for (i=lg(L)-1; i; i--) gel(L,i) = diviiexact(p_1, gel(L,i));
   o = factor_pn_1(p,f);
   L2 = shallowcopy( gel(o, 1) );
-  for (i = j = 1; i < lg(L2); i++) 
+  for (i = j = 1; i < lg(L2); i++)
   {
     if (remii(p_1, gel(L2,i)) == gen_0) continue;
     gel(L2,j++) = diviiexact(q, gel(L2,i));
