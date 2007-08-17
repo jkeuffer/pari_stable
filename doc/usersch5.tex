@@ -3191,11 +3191,61 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 
 \subsec{Comparison operators}
 
+\fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
+the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
+\fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
+lexicographic ordering.
+
+\fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
+to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
+\kbd{y} have the same type. When the types are different, a \kbd{true} result
+means that \kbd{x - y} was successfully computed and that
+\kbd{gcmp0} found it equal to $0$. In particular
+\bprog
+  gequal(cgetg(1, t_VEC), gen_0)
+@eprog\noindent is true, and the relation is not transitive. E.g.~an empty
+\typ{COL} and an empty \typ{VEC} are not equal but are both equal to
+\kbd{gen\_0}.
+
+\subsubsec{Comparison with a small integer}
+
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
-to~0, 0~(false) otherwise. Note that many PARI functions return \kbd{gen\_0}
+to~0, and 0~(false) otherwise. Note that many PARI functions return \kbd{gen\_0}
 when they are aware that the result they return is an exact zero, so it is
 almost always faster to test for pointer equality first, and call
 \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
+
+\fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
+otherwise.
+
+\fun{int}{gcmp1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)
+otherwise.
+
+\fun{int}{gcmp_1}{GEN x} returns 1 (true) if \kbd{x} is equal to~$-1$,
+0~(false) otherwise.
+
+
+\fun{long}{gcmpsg}{long s, GEN x}
+
+\fun{long}{gcmpgs}{GEN x, long s} comparison of \kbd{x} with the
+\kbd{long}~\kbd{s}.
+
+\fun{GEN}{gmaxsg}{long s, GEN x}
+
+\fun{GEN}{gmaxgs}{GEN x, long s} returns the largest of \kbd{x} and
+the \kbd{long}~\kbd{s} (converted to \kbd{GEN})
+
+\fun{GEN}{gminsg}{long s, GEN x}
+
+\fun{GEN}{gmings}{GEN x, long s} returns the smallest of \kbd{x} and the
+\kbd{long}~\kbd{s} (converted to \kbd{GEN})
+
+\fun{long}{gequalsg}{long s, GEN x}
+
+\fun{long}{gequalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
+the \kbd{long}~\kbd{s}, 0~otherwise.
+
+\subsubsec{Other related boolean functions}
 
 \fun{int}{isexactzeroscalar}{GEN g} equivalent to, but faster than,
 \bprog
@@ -3217,44 +3267,6 @@ value.
 round to a small integer (suitable for \kbd{itos}). Otherwise, returns 1
 (true) and set \kbd{n} to the rounded value.
 
-\fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
-otherwise.
-
-\fun{int}{gcmp1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)
-otherwise.
-
-\fun{int}{gcmp_1}{GEN x} returns 1 (true) if \kbd{x} is equal to~$-1$,
-0~(false) otherwise.
-
-\fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
-the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
-
-\fun{long}{gcmpsg}{long s, GEN x} comparison of the \kbd{long}~\kbd{s}
-with~\kbd{x}.
-
-\fun{long}{gcmpgs}{GEN x, long s} comparison of \kbd{x} with the
-\kbd{long}~\kbd{s}.
-
-\fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
-lexicographic ordering.
-
-\fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
-to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
-\kbd{y} have the same type. When the types are different, a \kbd{true} result
-means that \kbd{x - y} was successfully computed and that
-\kbd{gcmp0} found it equal to $0$. In particular
-\bprog
-  gequal(cgetg(1, t_VEC), gen_0)
-@eprog\noindent is true, and the relation is not transitive. E.g.~an empty
-\typ{COL} and an empty \typ{VEC} are not equal but are both equal to
-\kbd{gen\_0}.
-
-\fun{long}{gequalsg}{long s, GEN x} returns 1 (true) if the \kbd{long}~\kbd{s}
-is equal to~\kbd{x}, 0~otherwise.
-
-\fun{long}{gequalgs}{GEN x, long s} returns 1 (true) if \kbd{x} is equal to
-the \kbd{long}~\kbd{s}, 0~otherwise.
-
 \fun{long}{iscomplex}{GEN x} returns 1 (true) if \kbd{x} is a complex number
 (of component types embeddable into the reals) but is not itself real, 0~if
 \kbd{x} is a real (not necessarily of type \typ{REAL}), or raises an error if
@@ -3262,6 +3274,8 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
 
 \fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
 monomial in its main variable, 0~otherwise.
+
+\subsubsec{Obsolete}
 
 The following less convenient comparison functions and boolean operators were
 used by the historical GP interpreter. They are provided for backward

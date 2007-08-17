@@ -154,6 +154,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    41- rename gaddmat -> RgM_Rg_add and swap arguments. Add RgM_Rg_add_shallow
    42- document library functions zv_neg, zm_transpose, fix typo in
     documentation for RgX_neg
+   43- document library functions gmaxgs, gmaxsg, gmings, gminsg.
 
   Added
     1- library functions expu, adduu, subuu
