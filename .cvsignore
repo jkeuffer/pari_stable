@@ -1,3 +1,5 @@
 O*
 Makefile*
 data
+.pc
+patches
