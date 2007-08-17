@@ -156,6 +156,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
     documentation for RgX_neg
    43- document library functions gmaxgs, gmaxsg, gmings, gminsg.
    44- document library function gfloor2n
+   45- document library function zx_shift
 
   Added
     1- library functions expu, adduu, subuu

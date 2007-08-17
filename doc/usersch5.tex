@@ -2385,6 +2385,15 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{Flv_roots_to_pol}{GEN a, ulong p, long sv} as
 \kbd{FpV\_roots\_to\_pol} returning an \kbd{Flx} in variable $v$.
 
+\subsec{\kbd{zx}}.
+
+\fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.
+
+\fun{GEN}{polx_zx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
+
+\fun{GEN}{zx_shift}{GEN T, long n} returns \kbd{T}
+multiplied by $\kbd{x}^n$.
+
 \subsec{\kbd{Flxq}}. See \kbd{FpXQ} operations.
 
 \fun{GEN}{Flxq_mul}{GEN x, GEN y, GEN T, ulong p}
@@ -2743,11 +2752,7 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{zero_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
 
-\fun{GEN}{zero_zx}{long sv} as \kbd{zero\_Flx}
-
 \fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
-
-\fun{GEN}{polx_zx}{long sv} as \kbd{polx\_Flx}
 
 \fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
 scalar \kbd{Flx}. Assume that \kbd{evx = evalvarn(vx)} for some variable
