@@ -1297,7 +1297,8 @@ ZV_neg_ip(GEN M)
   for (i = lg(M)-1; i; i--) mynegi(&gel(M,i));
 }
 
-GEN zv_neg(GEN x)
+GEN
+zv_neg(GEN x)
 {
   long i, lx=lg(x); 
   GEN y=cgetg_copy(lx,x);

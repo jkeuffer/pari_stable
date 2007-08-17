@@ -2506,7 +2506,7 @@ where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
 \fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
 
-\fun{GEN}{RgX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
+\fun{GEN}{RgX_neg}{GEN x} returns $-\kbd{x}$.
 
 The functions above are currently implemented through the generic routines,
 but it might change in the future.
@@ -2767,6 +2767,9 @@ array) to (normalized) polynomial in variable $v$.
 
 \fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
 
+\fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
+occurs in the fringe case where an entry is equal to $2^{\B-1}$.
+
 \fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
 identity matrix.
 
@@ -2775,6 +2778,8 @@ identity matrix.
 (repeated calls to \kbd{Flv\_to\_Flx}).
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
+
+\fun{GEN}{zm_transpose}{GEN x}
 
 \fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as
 \kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial

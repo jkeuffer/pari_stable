@@ -152,6 +152,8 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    40- rename sqred -> qfgaussred, signat -> qfsign,
     sqred1 -> qfgaussred_positive
    41- rename gaddmat -> RgM_Rg_add and swap arguments. Add RgM_Rg_add_shallow
+   42- document library functions zv_neg, zm_transpose, fix typo in
+    documentation for RgX_neg
 
   Added
     1- library functions expu, adduu, subuu
