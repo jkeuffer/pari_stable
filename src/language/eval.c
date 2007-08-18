@@ -534,10 +534,11 @@ closure_eval(GEN C)
     case OCnewptr:
         {
           gp_pointer *g;
+          matcomp *C;
           if (rp==s_ptrs.n-1)
             stack_new(&s_ptrs);
           g = &ptrs[rp++];
-          matcomp *C=&g->c;
+          C=&g->c;
           ep = (entree*) operand;
           switch (ep->valence)
           {
