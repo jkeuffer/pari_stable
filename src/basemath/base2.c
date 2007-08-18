@@ -1205,15 +1205,23 @@ val_fact(ulong n, ulong p)
 static void
 manage_cache(decomp_t *S, GEN f, GEN pp)
 {
-  if (!(S->precns) || (gcmp(S->precns, pp) < 0))
+  GEN p1 = S->precns;
+
+  if (!p1)
   {
-    /* Add some extra digits so that we don't have to recompute it too often */
-    pp = mulii(pp, powiu(S->p, 20));
-    if (DEBUGLEVEL>4 && S->precns)
-      fprintferr("  Increasing precision for Newton sums: %Z -> %Z\n",
-		 S->precns, pp);
-    S->ns = polsymmodp(f, pp);
-    S->precns = pp;
+    p1 = mulii(S->pmf, powiu(S->p, S->df));
+    if (DEBUGLEVEL>4) fprintferr("  Initializing cached Newton sums\n");
+  }
+  
+  p1 = gmax(p1, pp);
+
+  if (!(S->precns) || gcmp(S->precns, p1) < 0)
+  {
+    if (DEBUGLEVEL>4)
+      fprintferr("  Precision for cached Newton sums: %Z -> %Z\n", 
+		 S->precns? S->precns: gen_0, p1);
+    S->ns = polsymmodp(f, p1);
+    S->precns = p1;
   }
 } 
 
@@ -1517,10 +1525,11 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
       { /* vp(eta) = vp(gamma - delta) > 0 */
         long Le, Ee;
         GEN pie;
+
         if (dvdii(constant_term(chie), S->psc))
-          chie = mycaract(S, S->chi, eta, S->pmf, S->prc);
-        
-        pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
+	  chie = ZX_caract(S->chi, eta, v);
+
+	pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
         if (pie) return testc2(S, S->nu, Ea, pie, Ee);
         break;
       }
