@@ -1338,7 +1338,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   for (k = 1;; k++)
   {
     kill_cache(S);
-    prc = respm(S->chi, ZX_deriv(S->chi), S->pmf);
+    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, ggval(S->pmf, S->p));
     if (signe(prc)) break;
     
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
@@ -1526,8 +1526,12 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
         long Le, Ee;
         GEN pie;
 
-        if (dvdii(constant_term(chie), S->psc))
-	  chie = ZX_caract(S->chi, eta, v);
+	if (dvdii(constant_term(chie), S->psc))
+        {
+	  chie = mycaract(S, S->chi, eta, S->pmf, S->prc);
+	  if (dvdii(constant_term(chie), S->pmf))
+	    chie = ZX_caract(S->chi, eta, v);
+	}
 
 	pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
         if (pie) return testc2(S, S->nu, Ea, pie, Ee);
