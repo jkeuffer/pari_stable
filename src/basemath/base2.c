@@ -1339,7 +1339,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   {
     kill_cache(S);
     prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, ggval(S->pmf, S->p));
-    if (signe(prc)) break;
+    if (!equalii(prc, S->pmf)) break;
     
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
@@ -1604,7 +1604,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, &l, flag)) break;
     }
 
-    if (DEBUGLEVEL>5) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
+    if (DEBUGLEVEL>4) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
     if (Ea*Fa == N)
     { /* O = Zp[phi] */
       if (!flag) S->phi = redelt(S->phi, sqri(p), p);
