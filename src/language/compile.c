@@ -183,18 +183,18 @@ parseproto(char const **q, char *c)
       *c=*p;
     *q=p+1;
     return PPstd;
-  case 's': /*fall through*/
+  case 's':
     if (p[1]=='*')
     {
       *c=*p++;
       *q=p+1;
       return PPstar;
     }
-  default:/*fall through*/
-    *c=*p;
-    *q=p+1;
-    return PPstd;
+    /*fall through*/
   }
+  *c=*p;
+  *q=p+1;
+  return PPstd;
 }
 /*supported types:
  * type: Gsmall, Ggen, Gvoid, Gvec
