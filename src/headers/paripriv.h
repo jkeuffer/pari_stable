@@ -406,6 +406,9 @@ void    grow_kill(growarray A);
 void  errcontext(char *msg, char *s, char *entry);
 GEN   geni(void);
 void* get_stack(double fraction, long min);
+void  init_graph(void);
+void  free_graph(void);
+void  hit_return(void);
 void  initout(int initerr);
 void  init80col(long n);
 int   pari_kernel_init(void);
@@ -417,10 +420,16 @@ void  pop_val(entree *ep);
 void  push_val(entree *ep, GEN a);
 GEN   readbin(const char *name, FILE *f, int *vector);
 void  recover(int flag);
+void  term_color(long c);
+char *term_get_color(long c);
 int   term_height(void);
 int   term_width(void);
 void  var_make_safe(void);
 void  whatnow_new_syntax(char *f, long n);
+/* gp_colors */
+void decode_color(long n, long *c);
+#define c_NONE 0xffffUL
+enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 
 /* defaults */
 #define is_default(s) setdefault((s),"",d_EXISTS) == gen_1

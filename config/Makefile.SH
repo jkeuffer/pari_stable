@@ -559,6 +559,8 @@ fi
 f=$src_dir/kernel/$kernlvl1/MakeLVL1.SH
 if test -s $f; then . $f; fi
 
+ANAL_H=$src/language/anal.h
+RECT_H=$src/graph/rect.h
 HUGELINE=
 for dir in basemath modules language gp graph graphdyn systems; do
   eval list='$'$dir
@@ -576,61 +578,61 @@ for dir in basemath modules language gp graph graphdyn systems; do
   case "$f" in
   gp|gp_rl)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
-    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h"
+    depend="$ANAL_H $src/gp/gp.h ./paricfg.h"
     ;;
   gp_init)
     cflags="$cflags -I$src/graph"
-    depend="$src/graph/rect.h $src/gp/gp_init.h"
+    depend="$RECT_H $src/gp/gp_init.h $ANAL_H"
     ;;
   default)
-    depend="$src/language/anal.h ./paricfg.h"
+    depend="$ANAL_H ./paricfg.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   plotport)
     cflags="$cflags -I$src/graph"
-    depend="$src/graph/rect.h"
+    depend="$RECT_H"
     ;;
   highlvl)
     cflags="$cflags -DDL_DFLT_NAME=\$(DL_DFLT_NAME)"
-    depend="$src/gp/highlvl.h"
+    depend="$RECT_H $src/gp/highlvl.h"
     ;;
   plotQt)
     cflags="$cflags \$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h"
+    depend="$RECT_H"
     compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c && \$(CPLUSPLUS)"
     ;;
   plotfltk)
     cflags="$cflags \$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h"
+    depend="$RECT_H"
     compile="\$(CPLUSPLUS)"
     ;;
   plot*)
     cflags="$cflags \$(PLOTCFLAGS)"
-    depend="$src/graph/rect.h"
+    depend="$RECT_H"
     ;;
-  es|sumiter)
-    depend="$src/language/anal.h"
+  es|sumiter|intnum)
+    depend="$ANAL_H"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   whatnow);;
   init)
-    depend="$src/language/anal.h $src/language/init.h"
+    depend="$ANAL_H $src/language/init.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   anal)
-    depend="$src/language/anal.h $src/language/parse.h"
+    depend="$ANAL_H $src/language/parse.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   parse)
-    depend="$src/language/anal.h $src/language/parse.h $src/language/tree.h"
+    depend="$ANAL_H $src/language/parse.h $src/language/tree.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   compile)
-    depend="$src/language/anal.h $src/language/tree.h $src/language/opcode.h"
+    depend="$ANAL_H $src/language/tree.h $src/language/opcode.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   eval)
-    depend="$src/language/anal.h $src/language/opcode.h"
+    depend="$ANAL_H $src/language/opcode.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
   *)

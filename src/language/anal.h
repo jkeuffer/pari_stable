@@ -60,10 +60,6 @@ long   did_break(void);
 
 const char*  get_origin(void);
 
-void term_color(long c);
-char *term_get_color(long c);
-void hit_return(void);
-
 extern THREAD char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);
 extern void (*sigint_fun)(void);
@@ -137,11 +133,6 @@ extern default_type gp_default_list[];
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""
 #define MAX_PROMPT_LEN 128
-
-/* gp_colors */
-void decode_color(long n, long *c);
-#define c_NONE 0xffffUL
-enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 
 /* general printing */
 void print_prefixed_text(char *s, char *prefix, char *str);

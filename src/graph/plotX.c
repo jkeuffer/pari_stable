@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 
 #include "pari.h"
+#include "paripriv.h"
 #include "rect.h"
-#include "../language/anal.h"
 
 #ifdef HPPA
 #  ifndef __GNUC__
@@ -242,8 +242,8 @@ rectdraw0(long *w, long *x, long *y, long lw)
             (Atom)event.xclient.data.l[0] != wm_delete_window) break;
       case ButtonPress:
       case DestroyNotify:
-	XUnloadFont(display,font_info->fid); XFreeGC(display,gc);
-	free_graph();
+	XUnloadFont(display,font_info->fid);
+        XFreeGC(display,gc);
 	XCloseDisplay(display); exit(0);
 
       case ConfigureNotify:

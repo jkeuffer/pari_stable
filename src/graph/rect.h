@@ -304,9 +304,6 @@ void  rectstring(long ne, char *x);
 void  rectstring3(long ne, char *x, long dir);
 void  rectclip(long rect);
 
-void  init_graph(void);
-void  free_graph(void);
-
 void gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys);
 
 /* architecture-dependent plot file (plotX.c ...) */

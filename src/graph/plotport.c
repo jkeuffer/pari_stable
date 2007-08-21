@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "rect.h"
-#include "../language/anal.h"
 
 void postdraw0(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
