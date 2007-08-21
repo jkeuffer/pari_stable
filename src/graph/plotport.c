@@ -102,12 +102,9 @@ fill_gap(screen scr, long i, int jnew, int jpre)
 static double
 todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
 
-#define QUARK  NULL /* Used as a special-case */
-static GEN quark_gen;
-
 static GEN
 READ_EXPR(GEN code, entree *ep, GEN x) {
-  if (code == QUARK) return gsubst(quark_gen,0,x);
+  if (!ep) return gsubst(code,0,x);
   ep->value = x; return closure_evalgen(code);
 }
 
@@ -1283,7 +1280,8 @@ rectplothin(entree *ep, GEN a, GEN b, GEN code, long prec, ulong flags,
   if (sig<0) swap(a, b);
   dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
 
-  x = gtofp(a, prec); push_val(ep, x);
+  x = gtofp(a, prec);
+  if (ep) push_val(ep, x);
   av2=avma; t=READ_EXPR(code,ep,x); tx=typ(t);
   if (!is_matvec_t(tx))
   {
@@ -1420,8 +1418,9 @@ rectplothin(entree *ep, GEN a, GEN b, GEN code, long prec, ulong flags,
 	addrrz(x,dx,x); avma=av2;
       }
   }
-  pl[0].nb=nc; pop_val(ep); avma = av;
-  return pl;
+  pl[0].nb=nc; 
+  if (ep) pop_val(ep);
+  avma = av; return pl;
 }
 
 /* Uses highlevel plotting functions to implement splines as
@@ -1433,8 +1432,8 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 {
   long i, j;
   pari_sp oldavma = avma;
-  GEN tas, X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
-  entree *var0 = varentries[0];
+  GEN X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
+  GEN tas, quark_gen;
 
   if (lx < 4) pari_err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
@@ -1458,10 +1457,10 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
       quark_gen = polint_i(xa, ya, X, 4, NULL);
       tas = xa;
     }
-    rectploth(ne, var0,
+    rectploth(ne, NULL,
                i==0 ? gel(tas,0) : gel(tas,1),
                i==lx-4 ? gel(tas,3) : gel(tas,2),
-               QUARK, DEFAULTPREC,
+               quark_gen, DEFAULTPREC,
                PLOT_RECURSIVE | PLOT_NO_RESCALE | PLOT_NO_FRAME
                  | PLOT_NO_AXE_Y | PLOT_NO_AXE_X | (flag & PLOT_PARAMETRIC),
                2); /* Start with 3 points */

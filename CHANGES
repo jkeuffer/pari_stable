@@ -157,6 +157,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    43- document library functions gmaxgs, gmaxsg, gmings, gminsg.
    44- document library function gfloor2n
    45- document library function zx_shift
+   46- cleaned up splines handling [ ploth(,,,256) ] : remove quark_gen & QUARK
 
   Added
     1- library functions expu, adduu, subuu
