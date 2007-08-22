@@ -1432,7 +1432,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   long i, j;
   pari_sp oldavma = avma;
   GEN X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
-  GEN tas, quark_gen;
+  GEN tas, pol3;
 
   if (lx < 4) pari_err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
@@ -1442,24 +1442,25 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   if (flag & PLOT_PARAMETRIC) {
     tas = new_chunk(4);
     for (j = 1; j <= 4; j++) gel(tas,j-1) = stoi(j);
-    quark_gen = cgetg(3, t_VEC);
+    pol3 = cgetg(3, t_VEC);
   }
-  else tas = NULL; /* for lint */
+  else
+    tas = pol3 = NULL; /* gcc -Wall */
   for (i = 0; i <= lx - 4; i++) {
     pari_sp av = avma;
 
     xa++; ya++;
     if (flag & PLOT_PARAMETRIC) {
-      gel(quark_gen,1) = polint_i(tas, xa, X, 4, NULL);
-      gel(quark_gen,2) = polint_i(tas, ya, X, 4, NULL);
+      gel(pol3,1) = polint_i(tas, xa, X, 4, NULL);
+      gel(pol3,2) = polint_i(tas, ya, X, 4, NULL);
     } else {
-      quark_gen = polint_i(xa, ya, X, 4, NULL);
+      pol3 = polint_i(xa, ya, X, 4, NULL);
       tas = xa;
     }
     rectploth(ne, NULL,
                i==0 ? gel(tas,0) : gel(tas,1),
                i==lx-4 ? gel(tas,3) : gel(tas,2),
-               quark_gen, DEFAULTPREC,
+               pol3, DEFAULTPREC,
                PLOT_RECURSIVE | PLOT_NO_RESCALE | PLOT_NO_FRAME
                  | PLOT_NO_AXE_Y | PLOT_NO_AXE_X | (flag & PLOT_PARAMETRIC),
                2); /* Start with 3 points */
