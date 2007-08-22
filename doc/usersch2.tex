@@ -16,9 +16,9 @@ operations and functions available in PARI and \kbd{gp} are described in
 the next chapter. In the present one, we describe the specific use of the
 \kbd{gp} programmable calculator.
 
-\emacs If you have GNU Emacs, you can work in a special Emacs shell,
-described in \secref{se:emacs}. Specific features of this Emacs shell are
-indicated by an EMACS sign in the left margin.
+\emacs If you have GNU Emacs and use the PariEmacs package, you can work in a
+special Emacs shell, described in \secref{se:emacs}. Specific features of
+this Emacs shell are indicated by an EMACS sign in the left margin.
 
 \subsec{Startup}
 
@@ -1787,11 +1787,11 @@ recognized as an abbreviation for \kbd{darkbg}). A bold variant of
 \kbd{darkbg}, called \kbd{boldfg}, is provided if you find the former too
 pale.
 
-\emacs In the present version, this default is incompatible with Emacs.
+\emacs In the present version, this default is incompatible with PariEmacs.
 Changing it will just fail silently (the alternative would be to display
-escape sequences as is, since Emacs will refuse to interpret them). On the
-other hand, you can customize highlighting in your \kbd{.emacs} so as to mimic
-exactly this behaviour. See \kbd{emacs/pariemacs.txt}.
+escape sequences as is, since Emacs will refuse to interpret them). 
+You must customize color highlighting from the PariEmacs side, see its
+documentation.
 
 \misctitle{Technical note:}
 If you use an old \kbd{readline} library (version number less than 2.0),
@@ -2030,14 +2030,11 @@ at the end of \secref{se:colors}), you can brace them with special sequences
 extra spaces in your prompt, then you'll have to get a more recent
 \kbd{readline}. See the file \kbd{misc/gprc.dft} for an example.
 
-\emacs {\bf Caution}: Emacs needs to know about the prompt pattern to
+\emacs {\bf Caution}: PariEmacs needs to know about the prompt pattern to
 separate your input from previous \kbd{gp} results, without ambiguity. It is
 not a trivial problem to adapt automatically this regular expression to an
-arbitrary prompt (which can be self-modifying!). Thus, in this version \vers,
-Emacs relies on the prompt being the default one. So, do not tamper with the
-\kbd{prompt} variable \emph{unless} you modify it simultaneously in your
-\kbd{.emacs} file (see \kbd{emacs/pariemacs.txt} and \kbd{misc/gprc.dft} for
-examples).
+arbitrary prompt (which can be self-modifying!). See PariEmacs's
+documentation.
 
 \subsec{prompt\_cont}\kbdsidx{prompt_cont} (default \kbd{""}): a string that will be printed
 to prompt for continuation lines (e.g. in between braces, or after a
@@ -2474,113 +2471,38 @@ thus is hidden to regular \kbd{ls} commands; you need to type \kbd{ls -a} to
 list it.
 
 
-\section{Using GNU Emacs}
-\label{se:emacs}
-
-If GNU \idx{Emacs} is installed on your machine, it is possible to use
-\kbd{gp} as
-a subprocess in \idx{Emacs}. To use this, you should include in your
-\kbd{.emacs} file the following lines:
-\bprog
-(autoload 'gp-mode "pari" nil t)
-(autoload 'gp-script-mode "pari" nil t)
-(autoload 'gp "pari" nil t)
-(autoload 'gpman "pari" nil t)
-(setq auto-mode-alist
-  (cons '("\\.gp$" . gp-script-mode) auto-mode-alist))
-@eprog
-\noindent which autoloads functions from \kbd{pari.el}. See also
-\kbd{pariemacs.txt}. These files are included in the PARI distribution and
-are installed at the same time as \kbd{gp}.
-
-Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
-\kbd{M} is the \kbd{Meta} key), a special shell will be started, which in particular launches \kbd{gp} with
-the default stack size, prime limit and input buffer size. If you type
-instead \kbd{C-u M-x gp}, you will be asked for the name of the \kbd{gp}
-executable, the stack size and the prime limit before the execution of
-\kbd{gp}
-begins. If for any of these you simply type return, the default value will
-be used. On UNIX machines it will be the place you told \kbd{Configure}
-(usually \kbd{/usr/local/bin/gp}) for the executable, \kbd{10M} for the
-stack and \kbd{500k} for the prime limit.
-
-\smallskip
-  You can then work as usual under \kbd{gp}, but with two notable advantages (which
-don't really matter if readline is available to you, see below). First and
-foremost, you have at your disposal all the facilities of a text editor like
-Emacs, in particular for correcting or copying blocks. Second, you can have
-an on-line help which is much more complete than what you obtain by typing
-\kbd{?name}. This is done by typing \kbd{M-?}. In the minibuffer, Emacs asks
-what function you want to describe, and after your reply you obtain the
-description which is in the users manual, including the description of
-functions (such as \kbd{\bs}, \kbd{\%}) which use special symbols.
-
-  This help system can also be menu-driven, by using the command
-\kbd{M-\char`\\ c} which opens a help menu window which enables you to choose
-the category of commands for which you want an explanation.
-
-  Nevertheless, if extended help is available on your system (see
-\secref{se:exthelp}), you should use it instead of the above, since it's
-nicer (it ran through \TeX) and understands many more keywords.
-
-  Finally you can use command completion in the following way. After the
-prompt, type the first few letters of the command, then \kbd{<TAB>} where
-\kbd{<TAB>} is the TAB key. If there exists a unique command starting with
-the letters you have typed, the command name will be completed. If not,
-either the list of commands starting with the letters you typed will be
-displayed in a separate window (which you can then kill by typing as usual
-\kbd{C-x 1} or by typing in more letters), or ``no match found'' will be
-displayed in the Emacs command line. If your \kbd{gp} was linked with the readline
-library, read the section on completion in the section below (the paragraph
-on online help is not relevant).
-
-Note that if for some reason the session crashes (due to a bug in your
-program or in the PARI system), you will usually stay under Emacs, but the
-\kbd{gp} buffer will be killed. To recover it, simply type again \kbd{M-x gp}
-(or \kbd{C-u M-x gp}), and a new session of \kbd{gp} will be started after
-the old one, so you can recover what you have typed. Note that this will of
-course \emph{not} work if for some reason you kill Emacs and start a new
-session.
-
-\smallskip You also have at your disposal a few other commands and many
-possible customizations (colours, prompt). Read the file
-\kbd{emacs/pariemacs.txt} in standard distribution for details.
-
-
 \section{Using readline} \sidx{line editor}\sidx{completion}
 
-  Thanks to the initial help of Ilya Zakharevich, there is a possibility of
-line editing and command name completion outside of an Emacs buffer \emph{if}
-you have compiled \kbd{gp} with the GNU \idx{readline} library. If you do not
-have Emacs available, or cannot stand using it, we really advise you to make
-sure you get this very useful library before configuring or compiling
-\kbd{gp}. In fact, with \kbd{readline}, even line editing becomes \emph{more}
-powerful outside an Emacs buffer!
+This very useful library provides line editing and contextual completion
+to \kbd{gp}. You are encouraged to read the \kbd{readline} user manual,
+but we describe basic usage here.
 
-\subsec{A (too) short introduction to readline}: \label{se:readline} The
-basics are as follows (read the readline user manual~!), assume that \kbd{C-}
-stands for ``the \kbd{Control} key combined with another'' and the same for
-\kbd{M-} with the \kbd{Meta} key (generally \kbd{C-} combinations act on
-characters, while the \kbd{M-} ones operate on words). The \kbd{Meta} key
-might be called \kbd{Alt} on some keyboards, will display a black diamond on
-most others, and can safely be replaced by \kbd{Esc} in any case. Typing any
-ordinary key inserts text where the cursor stands, the arrow keys enabling
-you to move in the line. There are many more movement commands, which will be
-familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e} will take you to
-the start/end of the line, \kbd{M-b}/\kbd{M-f} move the cursor
-backward/forward by a word, etc. Just press the \kbd{<Return>} key at any
-point to send your command to \kbd{gp}.
+\subsec{A (too) short introduction to readline}: \label{se:readline}
+In the following, \kbd{C-} stands for ``the \kbd{Control} key combined with
+another'' and the same for \kbd{M-} with the \kbd{Meta} key; generally
+\kbd{C-} combinations act on characters, while the \kbd{M-} ones operate on
+words. The \kbd{Meta} key might be called \kbd{Alt} on some keyboards, will
+display a black diamond on most others, and can safely be replaced by
+\kbd{Esc} in any case.
 
-  All the commands you type in are stored in a history (with multiline
-commands being saved as single concatenated lines). The Up and Down arrows
-(or \kbd{C-p}/\kbd{C-n}) will move you through it, \kbd{M-<}/\kbd{M->}
-sending you to the start/end of the history. \kbd{C-r}/\kbd{C-s} will start
-an incremental backward/forward search. You can kill text (\kbd{C-k} kills
-till the end of line, \kbd{M-d} to the end of current word) which you can
-then yank back using the \kbd{C-y} key (\kbd{M-y} will rotate the kill-ring).
-\kbd{C-\_} will undo your last changes incrementally (\kbd{M-r} undoes all
-changes made to the current line). \kbd{C-t} and \kbd{M-t} will transpose the
-character (word) preceding the cursor and the one under the cursor.
+Typing any ordinary key inserts text where the cursor stands, the arrow keys
+enabling you to move in the line. There are many more movement commands,
+which will be familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e}
+will take you to the start/end of the line, \kbd{M-b}/\kbd{M-f} move the
+cursor backward/forward by a word, etc. Just press the \kbd{<Return>} key at
+any point to send your command to \kbd{gp}.
+
+  All the commands you type at the \kbd{gp} prompt are stored in a history,
+a multiline command being saved as a single concatenated line. The Up and Down
+arrows (or \kbd{C-p}/\kbd{C-n}) will move you through the history,
+\kbd{M-<}/\kbd{M->} sending you to the start/end of the history.
+\kbd{C-r}/\kbd{C-s} will start an incremental backward/forward search. You
+can kill text (\kbd{C-k} kills till the end of line, \kbd{M-d} to the end of
+current word) which you can then yank back using the \kbd{C-y} key (\kbd{M-y}
+will rotate the kill-ring). \kbd{C-\_} will undo your last changes
+incrementally (\kbd{M-r} undoes all changes made to the current line).
+\kbd{C-t} and \kbd{M-t} will transpose the character (word) preceding the
+cursor and the one under the cursor.
 
   Keeping the \kbd{M-} key down while you enter an integer (a minus sign
 meaning reverse behaviour) gives an argument to your next readline command
@@ -2625,11 +2547,11 @@ combination, put the following two lines in your \kbd{.inputrc}:
 @eprog
 
 % don't remove this leading space (prevent gphelp from splitting the entry)
- \subsec{Command completion and online help}. As in the Emacs shell,
-\kbd{<TAB>} will complete words for you. But, under readline, this mechanism
-will be context-dependent: \kbd{gp} will strive to only give you meaningful
-completions in a given context (it will fail sometimes, but only under rare
-and restricted conditions).
+ \subsec{Command completion and online help}. Hitting
+\kbd{<TAB>} will complete words for you. This mechanism is context-dependent:
+\kbd{gp} will strive to only give you meaningful completions in a given
+context (it will fail sometimes, but only under rare and restricted
+conditions).
 
   For instance, shortly after a \kbd{\til}, we expect a user name, then a
 path to some file. Directly after \kbd{default(} has been typed, we would
@@ -2660,4 +2582,29 @@ word directly beneath the cursor, \kbd{M-H} will yield the extended help
 corresponding to the \kbd{help} default program (usually opens a \idx{dvi}
 previewer, or runs a primitive tex-to-ASCII program). None of these disturb
 the line you were editing.
+
+\section{GNU Emacs and PariEmacs}
+\label{se:emacs}
+
+If you install the PariEmacs package (see Appendix A), you may use \kbd{gp}
+as a subprocess in \idx{Emacs}. You then need to include in your \kbd{.emacs}
+file the following lines:
+\bprog
+  (autoload 'gp-mode "pari" nil t)
+  (autoload 'gp-script-mode "pari" nil t)
+  (autoload 'gp "pari" nil t)
+  (autoload 'gpman "pari" nil t)
+
+  (setq auto-mode-alist
+    (cons '("\\.gp$" . gp-script-mode) auto-mode-alist))
+@eprog
+\noindent which autoloads functions from the PariEmacs package and ensures
+that file with the \kbd{.gp} suffix are edited in gp-script mode.
+
+Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
+\kbd{M} is the \kbd{Meta} key), a special shell will be started launching
+\kbd{gp} with the default stack size and prime limit. You can then work as
+usual under \kbd{gp}, but with all the facilities of an advanced text editor.
+See the PariEmacs documentation for customizations, menus, etc.
+
 \vfill\eject

@@ -25,6 +25,9 @@ This results in at least 20\% speedup on most architectures.
 \misctitle{Optional packages.} The following programs and libraries are useful
 in conjunction with \kbd{gp}, but not mandatory. In any case, get them before
 proceeding if you want the functionalities they provide. All of them are free.
+The download page on our website
+\kbd{http://pari.math.u-bordeaux.fr/download.html} contains pointers on how
+to get these.
 
   $\bullet$ GNU \kbd{MP} library. This provides an alternative multiprecision
 kernel, which is faster than PARI's native one, but unfortunately binary
@@ -37,18 +40,17 @@ an automatic context-dependent completion, and an editable history of
 commands. Note that it is incompatible with SUN commandtools (yet another
 reason to dump Suntools for X Windows).
 
+  $\bullet$ GNU \kbd{emacs} and the \tet{PariEmacs} package. GP can be run in
+an Emacs buffer, with all the obvious advantages if you are familiar with
+this editor. Note that \kbd{readline} is still useful in this case since it
+provides a better automatic completion than is provided by Emacs's GP-mode.
+
   $\bullet$ GNU \kbd{gzip/gunzip/gzcat} package enables GP to read compressed
 data.
 
-  $\bullet$ GNU \kbd{emacs}. GP can be run in an Emacs buffer, with all the
-obvious advantages if you are familiar with this editor. Note that
-\kbd{readline} is still useful in this case since it provides a better
-automatic completion than is provided by Emacs GP-mode.
-
   $\bullet$ \kbd{perl} provides extended online help (full text from this
 manual) about functions and concepts, which can be used under GP or
-independently (\kbd{http://www.perl.com} will direct you to the nearest
-\kbd{CPAN} archive site).
+independently.
 
   $\bullet$ A colour-capable \kbd{xterm}, which enables GP to use different
 (user configurable) colours for its output. All \kbd{xterm} programs which
@@ -154,8 +156,7 @@ to \kbd{\$prefix/lib/pari}.
 Architecture independent files go to various subdirectories of
 \kbd{\$share\_prefix}, which defaults to \kbd{\$prefix/share}, and can be
 specified via the \kbd{--share-prefix} argument. Man pages go into
-\kbd{\$share\_prefix/man}, Emacs files into
-\kbd{\$share\_prefix/emacs/site-lisp/pari}, and other system-independant data
+\kbd{\$share\_prefix/man}, and other system-independant data
 to various subdirectories of \kbd{\$share\_prefix/pari}: documentation,
 sample GP scripts and C code, extra packages like \kbd{elldata} or
 \kbd{galdata}.
@@ -373,7 +374,7 @@ once in a while).
 This installs in the directories chosen at \kbd{Configure} time the default
 GP executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the default
 PARI library (probably \kbd{libpari.so}), the necessary include files, the
-manual pages, the documentation and help scripts and emacs macros.
+manual pages, the documentation and help scripts.
 
 To save on disk space, you can manually \kbd{gzip} some of the documentation
 files if you wish: \kbd{usersch*.tex} and all \kbd{dvi} files (assuming your
@@ -476,10 +477,6 @@ the \kbd{examples} directory, for example Shanks's SQUFOF factoring method,
 the Pollard rho factoring method, the Lucas-Lehmer primality test for
 Mersenne numbers and a simple general class group and fundamental unit
 algorithm. See the file \kbd{examples/EXPLAIN} for some explanations.
-
-\subsec{EMACS:} If you want to use \kbd{gp} under GNU Emacs, read the file
-\kbd{emacs/pariemacs.txt}. If you are familiar with Emacs, we suggest that
-you do~so.
 
 \subsec{The PARI Community:} PARI's home page at the address
 \bprog

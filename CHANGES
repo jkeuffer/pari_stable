@@ -196,6 +196,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
     7- obsolete undocumented library function mpdivz, polzagreel, RgX_powers
        (use RgXQ_powers)
     8- obsolete undocumented library function sqred3
+    9- the emacs/ directory: PariEmacs is now distributed separately.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

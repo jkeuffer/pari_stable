@@ -33,6 +33,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     returns; no need to kill the ones which are lists specifically.
   - local variables declared implicitly are now lexically-scoped. The keyword
     my allow to declare lexically-scoped variables explicitly.
+  - PariEmacs is now distributed as a separate package, and is no longer
+    included in the PARI distribution
 
 * Specific to the PARI library:
 ===============================
