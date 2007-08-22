@@ -146,6 +146,20 @@ new_val_cell(entree *ep, GEN x, char flag)
   ep->valence=EpVAR;
 }
 
+/* kill ep->value and replace by preceding one, poped from value stack */
+static void
+pop_val(entree *ep)
+{
+  var_cell *v = (var_cell*) ep->pvalue;
+
+  if (v == INITIAL) return;
+  if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
+  ep->value  = v->value;
+  ep->pvalue = (char*) v->prev;
+  ep->valence=v->valence;
+  gpfree((void*)v);
+}
+
 void
 freeep(entree *ep)
 {
@@ -168,20 +182,6 @@ freeep(entree *ep)
     case EpALIAS:
       gunclone((GEN)ep->value); ep->value=NULL; break;
   }
-}
-
-/* kill ep->value and replace by preceding one, poped from value stack */
-void
-pop_val(entree *ep)
-{
-  var_cell *v = (var_cell*) ep->pvalue;
-
-  if (v == INITIAL) return;
-  if (v->flag == COPY_VAL) killbloc((GEN)ep->value);
-  ep->value  = v->value;
-  ep->pvalue = (char*) v->prev;
-  ep->valence=v->valence;
-  gpfree((void*)v);
 }
 
 INLINE void

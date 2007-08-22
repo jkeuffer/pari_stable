@@ -338,7 +338,7 @@ install(void *f, char *name, char *code)
   return ep;
 }
 
-/* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
+/* Kill entree ep, i.e free all memory it references but keep it in hashtable.
  * If it's a variable set a "black hole" in varentries[v]. x = 0-th variable
  * can NOT be killed (only the value) */
 void
@@ -349,15 +349,12 @@ kill0(entree *ep)
 
   if (EpSTATIC(ep))
     pari_err(talker,"can't kill that");
-  switch(EpVALENCE(ep))
-  {
-    case EpVAR:
-    case EpGVAR:
-      while (ep->pvalue) pop_val(ep);
-      v = varn(ep->value); if (!v) return; /* never kill x */
-      varentries[v] = NULL; break;
-  }
   freeep(ep); 
+  if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
+  {
+      v = varn(ep->value); if (!v) return; /* never kill x */
+      varentries[v] = NULL;
+  }
   ep1 = initial_value(ep);
   init_initial_value(ep1);
   ep->valence = EpNEW;
