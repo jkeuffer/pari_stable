@@ -2028,8 +2028,8 @@ geni(void) { return gi; }
  *  E  closure whose value is used, like in sum() loop
  *  G  GEN
  *  L  long
- *  S  symbol (i.e GP function name)
- *  V  variable (same as S, but valence must equal EpVAR/EpGVAR)
+ *  S  symbol (i.e GP function name) as a entree *
+ *  V  lexical variable
  *  n  variable number
  *  &  *GEN
  *  f  Fake *long (function requires it, but we don't use the resulting long)

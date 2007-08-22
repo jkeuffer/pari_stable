@@ -239,12 +239,12 @@ ellgenerators(GEN E)
 }
 
 void
-forell(entree *ep, long a, long b, GEN code)
+forell(long a, long b, GEN code)
 {
   long ca=a/1000, cb=b/1000;
   long i, j, k;
 
-  push_val(ep, NULL);
+  push_lex(NULL);
   for(i=ca; i<=cb; i++)
   {
     pari_sp ltop=avma;
@@ -259,7 +259,7 @@ forell(entree *ep, long a, long b, GEN code)
       for(k=2; k<lg(ells); k++)
       {
         pari_sp av=avma;
-        ep->value = (void*)gel(ells, k);
+        set_lex(-1,gel(ells, k));
         closure_evalvoid(code);
         avma=av;
         if (loop_break()) goto forell_end;
@@ -268,5 +268,5 @@ forell(entree *ep, long a, long b, GEN code)
     avma = ltop;
   }
   forell_end:
-  pop_val(ep);
+  pop_lex();
 }

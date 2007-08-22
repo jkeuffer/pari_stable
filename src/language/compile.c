@@ -26,12 +26,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  **                                                                       **
  ***************************************************************************/
 
+typedef enum {Lglobal, Llocal, Lmy} Ltype;
+
+struct vars_s
+{
+  Ltype type; /*Only Llocal and Lmy are allowed */
+  entree *ep;
+};
+
 static THREAD gp2c_stack s_opcode, s_operand, s_data, s_lvar;
 static THREAD char *opcode;
 static THREAD long *operand;
 static THREAD GEN *data;
 static THREAD long offset=-1;
-static THREAD long *localvars;
+static THREAD struct vars_s *localvars;
 
 void
 pari_init_compiler(void)
@@ -94,6 +102,7 @@ getclosure(struct codepos *pos)
     gunclone(data[i+pos->data-1]);
   }
   s_data.n=pos->data;
+  s_lvar.n=pos->localvars;
   offset=pos->offset;
   return cl;
 }
@@ -116,13 +125,14 @@ data_push(GEN x)
 }
 
 static void
-var_push(long x)
+var_push(entree *ep, Ltype type)
 {
   long n=stack_new(&s_lvar);
-  localvars[n] = x;
+  localvars[n].ep   = ep;
+  localvars[n].type = type;
 } 
 
-enum FLflag {FLnocopy=1};
+enum FLflag {FLnocopy=1, FLreturn=2};
 
 static void compilenode(long n, int mode, long flag);
 
@@ -259,6 +269,21 @@ getvar(long n)
   return ep;
 }
 
+static long
+getmvar(entree *ep)
+{
+  long i;
+  long vn=0;
+  for(i=s_lvar.n-1;i>=0;i--)
+  {
+    if(localvars[i].type==Lmy)
+      vn--;
+    if(localvars[i].ep==ep)
+      return localvars[i].type==Lmy?vn:0;
+  }
+  return 0;
+}
+
 static entree *
 getfunc(long n)
 {
@@ -271,6 +296,14 @@ is_func_named(long x, const char *s)
   if (tree[x].x!=CSTentry) return 0;
   if (strlen(s)!=tree[x].len) return 0;
   return !strncmp(tree[x].str, s, tree[x].len);
+}
+
+INLINE int
+is_node_zero(long n)
+{
+  while (tree[n].f==Ftag)
+    n=tree[n].x;
+  return (tree[n].f==Fsmall && tree[n].x==0);
 }
 
 static GEN 
@@ -474,8 +507,9 @@ compilefunc(long n, int mode)
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
   long nbpointers=0;
-  long nb=lg(arg)-1, lnc;
+  long nb=lg(arg)-1, lnc, lev=0;
   entree *ep = getfunc(n);
+  entree *ev[8];
   if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
     pari_err(talker2,"not a function in function call",
         tree[n].str, get_origin());
@@ -497,23 +531,55 @@ compilefunc(long n, int mode)
   }
   if (is_func_named(x,"if") && mode==Gvoid)
     ep=is_entry("_void_if");
+  if (is_func_named(x,"my"))
+  {
+    if (tree[n].f==Fderfunc)
+      pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+    if (nb)
+    {
+      op_push(OCnewframe,nb);
+      for(i=1;i<=nb;i++)
+        var_push(NULL,Lmy);
+    }
+    for (i=1;i<=nb;i++)
+    {
+      long a=arg[i];
+      if (tree[a].f==Faffect)
+      {
+        if (!is_node_zero(tree[a].y))
+        {
+          compilenode(tree[a].y,Ggen,0);
+          op_push(OCstorelex,-nb+i-1);
+        }
+        a=tree[a].x;
+      }
+      localvars[s_lvar.n-nb+i-1].ep=getvar(a);
+    }
+    compilecast(n,Gvoid,mode);
+    avma=ltop;
+    return;
+  }
   if (is_func_named(x,"local"))
   {
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     for (i=1;i<=nb;i++)
     {
-      long en, a=arg[i];
+      entree *en;
+      long a=arg[i];
+      op_code op=OClocalvar0;
       if (tree[a].f==Faffect)
       {
-        compilenode(tree[a].y,Ggen,0);
+        if (!is_node_zero(tree[a].y))
+        {
+          compilenode(tree[a].y,Ggen,0);
+          op=OClocalvar;
+        }
         a=tree[a].x;
       }
-      else
-        op_push(OCpushlong,(long)gen_0);
-      en=(long)getvar(a);
-      op_push(OCgetarg,en);
-      var_push(en);
+      en=getvar(a);
+      op_push(op,(long)en);
+      var_push(en,Llocal);
     }
     compilecast(n,Gvoid,mode);
     avma=ltop;
@@ -592,7 +658,7 @@ compilefunc(long n, int mode)
     while((mod=parseproto(&p,&c))!=PPend)
     {
       if (j<=nb && tree[arg[j]].f!=Fnoarg 
-                && (mod==PPdefault || mod==PPdefaultmulti))
+          && (mod==PPdefault || mod==PPdefaultmulti))
         mod=PPstd;
       switch(mod)
       {
@@ -618,7 +684,7 @@ compilefunc(long n, int mode)
           break;
         case '&': case '*': 
           {
-            long a=arg[j++];
+            long vn, a=arg[j++];
             entree *ep;
             if (c=='&')
             {
@@ -628,11 +694,20 @@ compilefunc(long n, int mode)
               a=tree[a].x;
             }
             ep=getlvalue(a);
+            vn=getmvar(ep);
             if (tree[a].f==Fentry)
-              op_push(OCsimpleptr, (long) ep);
+            {
+              if (vn)
+                op_push(OCsimpleptrlex, vn);
+              else
+                op_push(OCsimpleptrdyn, (long) ep);
+            }
             else
             {
-              op_push(OCnewptr, (long) ep);
+              if (vn)
+                op_push(OCnewptrlex, vn);
+              else
+                op_push(OCnewptrdyn, (long) ep);
               compilelvalue(a);
               op_push(OCpushptr, 0);
             }
@@ -645,18 +720,25 @@ compilefunc(long n, int mode)
             struct codepos pos;
             long a=arg[j++];
             int type=c=='I'?Gvoid:Ggen;
+            long flag=c=='I'?0:FLreturn;
             getcodepos(&pos);
+            for(i=0;i<lev;i++)
+            {
+              if (!ev[i])
+                pari_err(talker2,"missing variable name",
+                  tree[a].str-1, get_origin());
+              var_push(ev[i],Lmy);
+            }
             if (tree[a].f==Fnoarg)
               compilecast(a,Gvoid,type);
             else
-              compilenode(a,type,0);
+              compilenode(a,type,flag);
             op_push(OCpushgen, data_push(getclosure(&pos)));
             break;
           }
         case 'V':
           {
-            entree *ep = getvar(arg[j++]);
-            op_push(OCpushlong, (long)ep);
+            ev[lev++] = getvar(arg[j++]);
             break;
           }
         case 'S':
@@ -669,12 +751,10 @@ compilefunc(long n, int mode)
           {
             long x=tree[arg[j]].x;
             long y=tree[arg[j]].y;
-            entree *ep;
             if (tree[arg[j]].f!=Faffect)
               pari_err(talker2,"expected character: '=' instead of",
                   tree[n].str+tree[n].len, get_origin());
-            ep = getvar(x);
-            op_push(OCpushlong, (long)ep);
+            ev[lev++] = getvar(x);
             compilenode(y,Ggen,0);
             i++; j++;
           }
@@ -731,7 +811,6 @@ compilefunc(long n, int mode)
         {
         case 'G':
         case '&':
-        case 'V':
         case 'r':
         case 'E':
         case 'I':
@@ -739,6 +818,9 @@ compilefunc(long n, int mode)
           break;
         case 'n':
           op_push(OCpushlong,-1);
+          break;
+        case 'V':
+          ev[lev++] = NULL;
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
@@ -878,7 +960,7 @@ compilenode(long n, int mode, long flag)
   case Fseq:
     if (tree[x].f!=Fnoarg)
       compilenode(x,Gvoid,0);
-    compilenode(y,mode,0);
+    compilenode(y,mode,flag&FLreturn);
     return;
   case Ffacteurmat:
     compilefacteurmat(n,mode);
@@ -889,11 +971,20 @@ compilenode(long n, int mode, long flag)
     if (tree[x].f==Fentry)
     {
       entree *ep=getvar(x);
+      long vn=getmvar(ep);
       compilenode(y,Ggen,FLnocopy);
-      op_push(OCstore,(long)ep);
+      if (vn)
+        op_push(OCstorelex,vn);
+      else
+        op_push(OCstoredyn,(long)ep);
       if (mode!=Gvoid)
       {
-        op_push(OCpushvalue,(long)ep);
+        if (vn)
+          op_push(OCpushlex,vn);
+        else
+          op_push(OCpushdyn,(long)ep);
+        if (flag&FLreturn)
+          op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
       }
     }
@@ -972,9 +1063,20 @@ compilenode(long n, int mode, long flag)
   case Fentry:
     {
       entree *ep=getentry(n);
-      if (!EpSTATIC(do_alias(ep)))
+      long vn=getmvar(ep);
+      if (vn)
       {
-        op_push(OCpushvalue,(long)ep);
+        op_push(OCpushlex,(long)vn);
+        if (flag&FLreturn)
+          op_push(OCcopyifclone,0);
+        compilecast(n,Ggen,mode);
+        break;
+      }
+      else if (!EpSTATIC(do_alias(ep)))
+      {
+        op_push(OCpushdyn,(long)ep);
+        if (flag&FLreturn)
+          op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
         break;
       }
@@ -991,8 +1093,6 @@ compilenode(long n, int mode, long flag)
       GEN arg2=listtogen(tree[x].y,Flistarg);
       entree *ep=getfunc(x);
       long loc=y;
-      long nbvar;
-      GEN lvar;
       long arity=lg(arg2)-1;
       if (loc>=0)
         while (tree[loc].f==Fseq) loc=tree[loc].x;
@@ -1006,16 +1106,17 @@ compilenode(long n, int mode, long flag)
               tree[n].str,get_origin());
       }
       getcodepos(&pos);
+      if (arity) op_push(OCnewframe,arity);
       for (i=1;i<=arity;i++)
       {
         long a = arg2[lg(arg2)-i];
-        long en;
+        entree *en;
         switch (tree[a].f)
         {
         case Fentry: case Ftag:
-          en=(long)getvar(a);
-          op_push(OCgetarg,en);
-          var_push(en);
+          en=getvar(a);
+          var_push(en,Lmy);
+          op_push(OCgetarg,-arity+i-1);
           break;
         case Faffect:
           { 
@@ -1023,9 +1124,9 @@ compilenode(long n, int mode, long flag)
             getcodepos(&lpos);
             compilenode(tree[a].y,Ggen,0);
             op_push(OCpushgen, data_push(getclosure(&lpos)));
-            en=(long)getvar(tree[a].x);
-            op_push(OCdefaultarg,en);
-            var_push(en);
+            en=getvar(tree[a].x);
+            var_push(en,Lmy);
+            op_push(OCdefaultarg,-arity+i-1);
             break;
           }
         default: 
@@ -1033,25 +1134,11 @@ compilenode(long n, int mode, long flag)
               tree[a].str,get_origin());
         }
       }
-      if (y>=0 && tree[y].f!=Fnoarg) compilenode(y,Ggen,0);
-      else compilecast(n,Gvoid,Ggen);
-      nbvar=s_lvar.n-pos.localvars;
-      s_lvar.n=pos.localvars;
-      lvar=cgetg(nbvar+1,t_VECSMALL);
-      for(i=1;i<=nbvar;i++)
-        lvar[i]=localvars[pos.localvars+i-1];
-      if (nbvar > 1)
-      { /* check for duplicates */
-        GEN x = vecsmall_copy(lvar);
-        long k;
-        vecsmall_sort(x);
-        for (k=x[1],i=2; i<lg(x); k=x[i],i++)
-          if (x[i] == k)
-            pari_err(talker,"user function %s: variable %s declared twice",
-                ep->name, ((entree*)x[i])->name);
-      }
+      if (y>=0 && tree[y].f!=Fnoarg)
+        compilenode(y,Ggen,FLreturn);
+      else
+        compilecast(n,Gvoid,Ggen);
       op_push(OCpushgen, data_push(getclosure(&pos)));
-      op_push(OCpushgen, data_push(lvar));
       op_push(OCpushgen, data_push(
             strntoGENstr(tree[n].str,tree[n].len)));
       op_push(OCpushlong, arity);

@@ -16,19 +16,20 @@ BEGINEXTERN
 
 typedef enum {Gvoid, Gsmall, Gvec, Gvar, Ggen} Gtype;
 
-typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,
-              OCpushvalue,OCpushvar,
+typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,OCpushvar,
               OCpop,
-              OCstoi,OCitos,OCtostr,OCvarn,OCcopy,
+              OCstoi,OCitos,OCtostr,OCvarn,OCcopy,OCcopyifclone,
               OCprecreal,OCprecdl,
               OCvec,OCmat,OCcol,
-              OCstackgen,OCstore,
+              OCstackgen,
               OCcompo1,OCcompo2,OCcompoC,OCcompoL,
-              OCnewptr,OCpushptr,OCendptr,OCsimpleptr,
+              OCpushptr,OCendptr,
               OCcompo1ptr,OCcompo2ptr,OCcompoCptr,OCcompoLptr,
               OCcalllong,OCcallgen,OCcallgen2,OCcallint,OCcallvoid,OCcalluser,
               OCderivgen,OCderivuser,
-              OCdeffunc,OCgetarg,OCdefaultarg,
-              OCglobalvar} op_code;
+              OCdeffunc,OCnewframe,
+              OCpushdyn,OCstoredyn,OCnewptrdyn,OCsimpleptrdyn,
+              OCpushlex,OCstorelex,OCnewptrlex,OCsimpleptrlex,
+              OCgetarg,OCdefaultarg,OClocalvar,OClocalvar0,OCglobalvar} op_code;
 
 ENDEXTERN

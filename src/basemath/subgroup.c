@@ -92,9 +92,9 @@ static void
 std_fun(subgp_iter *T, GEN x)
 {
   pari_sp ltop=avma;
-  exprdat *E = (exprdat *)T->fundata;
-  E->ep->value = (void*)x;
-  closure_evalvoid(E->code); T->countsub++;
+  GEN code = (GEN) T->fundata;
+  set_lex(-1,x);
+  closure_evalvoid(code); T->countsub++;
   avma=ltop;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
@@ -548,10 +548,9 @@ get_snf(GEN x, long *N)
 }
 
 void
-forsubgroup(entree *ep, GEN cyc, GEN bound, GEN code)
+forsubgroup(GEN cyc, GEN bound, GEN code)
 {
   subgp_iter T;
-  exprdat E;
   long N;
 
   T.fun = &std_fun;
@@ -559,13 +558,12 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, GEN code)
   if (!cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
   T.cyc = cyc;
-  E.code = code;
-  E.ep= ep; T.fundata = (void*)&E;
-  push_val(ep, gen_0);
+  T.fundata = (void*)code;
+  push_lex(gen_0);
 
   subgroup_engine(&T);
 
-  pop_val(ep);
+  pop_lex();
 }
 
 static GEN

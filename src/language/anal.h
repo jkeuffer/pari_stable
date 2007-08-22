@@ -21,15 +21,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 
 /* GP control structures */
-typedef struct {
-  entree *ep;
-  GEN code;
-} exprdat;
 GEN gp_eval(GEN x, void *dat);
-#define EXPR_WRAP(ep, ch, call) \
-{ GEN z; exprdat __E; __E.code = ch; __E.ep = ep;\
-  push_val(ep,NULL); z = call; pop_val(ep); return z; }
-#define EXPR_ARG &__E, &gp_eval
+#define EXPR_WRAP(code, call) \
+{ GEN z; GEN __E = code; \
+  push_lex(NULL); z = call; pop_lex(); return z; }
+#define EXPR_ARG __E, &gp_eval
 
 /* to manipulate 'blocs' */
 #define BL_HEAD 4
@@ -49,7 +45,6 @@ void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
 
 /* functions */
-void   changevalue_p(entree *ep, GEN x);
 void   changevalue(entree *ep, GEN val);
 entree *do_alias(entree *ep);
 entree *is_entry_intern(const char *s, entree **table, long *hash);
@@ -214,5 +209,10 @@ void **stack_base(gp2c_stack *s);
 void stack_alloc(gp2c_stack *s, long nb);
 void stack_init(gp2c_stack *s, size_t size, void **data);
 long stack_new(gp2c_stack *s);
+
+void push_lex(GEN a);
+void set_lex(long vn, GEN x);
+GEN  get_lex(long vn);
+void pop_lex(void);
 
 ENDEXTERN

@@ -71,7 +71,7 @@ while (<FILE>)
               next;
             }
             if ($c eq 'V') {
-              $args .= ", entree *". shift(@ARGS) ." = NULL"; next;
+              next;
             }
             if ($c =~ /^[EI]$/) {
               $args .= ", char *". shift(@ARGS) ." = NULL"; next;

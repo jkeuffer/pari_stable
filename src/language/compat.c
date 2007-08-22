@@ -28,10 +28,10 @@ static GEN
 polylogp(long m, GEN x, long prec) { return polylog0(m,x,3,prec); }
 
 static GEN
-prod0(GEN x, entree *ep, GEN a, GEN b, GEN ch) {return produit(ep,a,b,ch,x);}
+prod0(GEN x, GEN a, GEN b, GEN ch) {return produit(a,b,ch,x);}
 
 static GEN
-sum0(GEN x, entree *ep, GEN a, GEN b, GEN ch) {return somme(ep,a,b,ch,x);}
+sum0(GEN x, GEN a, GEN b, GEN ch) {return somme(a,b,ch,x);}
 
 static long
 sturm0(GEN x) {return sturm(x);}

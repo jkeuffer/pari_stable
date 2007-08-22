@@ -31,6 +31,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     efficiently as listkill(L) would. In most cases, you won't even need
     that, e.g. local variables are automatically cleared when a user function
     returns; no need to kill the ones which are lists specifically.
+  - local variables declared implicitly are now lexically-scoped. The keyword
+    my allow to declare lexically-scoped variables explicitly.
 
 * Specific to the PARI library:
 ===============================

@@ -30,9 +30,9 @@ typedef struct {
 GEN
 gp_eval(GEN x, void *dat)
 {
-  exprdat *E = (exprdat*)dat;
-  E->ep->value = x;
-  return closure_evalnobrk(E->code);
+  GEN code = (GEN)dat;
+  set_lex(-1,x);
+  return closure_evalnobrk(code);
 }
 
 #if 0
@@ -1605,38 +1605,38 @@ intnumromb(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
 }
 
 GEN
-intnumromb0(entree *ep, GEN a, GEN b, GEN code, long flag, long prec)
-{ EXPR_WRAP(ep,code, intnumromb(EXPR_ARG, a, b, flag, prec)); }
+intnumromb0(GEN a, GEN b, GEN code, long flag, long prec)
+{ EXPR_WRAP(code, intnumromb(EXPR_ARG, a, b, flag, prec)); }
 GEN
-intnum0(entree *ep, GEN a, GEN b, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intnum(EXPR_ARG, a, b, tab, prec)); }
+intnum0(GEN a, GEN b, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intnum(EXPR_ARG, a, b, tab, prec)); }
 GEN
-intcirc0(entree *ep, GEN a, GEN R, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intcirc(EXPR_ARG, a, R, tab, prec)); }
+intcirc0(GEN a, GEN R, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intcirc(EXPR_ARG, a, R, tab, prec)); }
 GEN
-intmellininv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intmellininv(EXPR_ARG, sig, x, tab, prec)); }
+intmellininv0(GEN sig, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intmellininv(EXPR_ARG, sig, x, tab, prec)); }
 GEN
-intlaplaceinv0(entree *ep, GEN sig, GEN x, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intlaplaceinv(EXPR_ARG, sig, x, tab, prec)); }
+intlaplaceinv0(GEN sig, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intlaplaceinv(EXPR_ARG, sig, x, tab, prec)); }
 GEN
-intfourcos0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intfouriercos(EXPR_ARG, a, b, x, tab, prec)); }
+intfourcos0(GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intfouriercos(EXPR_ARG, a, b, x, tab, prec)); }
 GEN
-intfoursin0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intfouriersin(EXPR_ARG, a, b, x, tab, prec)); }
+intfoursin0(GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intfouriersin(EXPR_ARG, a, b, x, tab, prec)); }
 GEN
-intfourexp0(entree *ep, GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
-{ EXPR_WRAP(ep,code, intfourierexp(EXPR_ARG, a, b, x, tab, prec)); }
+intfourexp0(GEN a, GEN b, GEN x, GEN code, GEN tab, long prec)
+{ EXPR_WRAP(code, intfourierexp(EXPR_ARG, a, b, x, tab, prec)); }
 
 GEN
-intnuminitgen0(entree *ep, GEN a, GEN b, GEN code, long m, long flag, long prec)
-{ EXPR_WRAP(ep,code, intnuminitgen(EXPR_ARG, a, b, m, flag, prec)); }
+intnuminitgen0(GEN a, GEN b, GEN code, long m, long flag, long prec)
+{ EXPR_WRAP(code, intnuminitgen(EXPR_ARG, a, b, m, flag, prec)); }
 
 /* m and flag reversed on purpose */
 GEN
-intfuncinit0(entree *ep, GEN a, GEN b, GEN code, long flag, long m, long prec)
-{ EXPR_WRAP(ep,code, intfuncinit(EXPR_ARG, a, b, m, flag? 1: 0, prec)); }
+intfuncinit0(GEN a, GEN b, GEN code, long flag, long m, long prec)
+{ EXPR_WRAP(code, intfuncinit(EXPR_ARG, a, b, m, flag? 1: 0, prec)); }
 
 #if 0
 /* Two variable integration */
@@ -1701,20 +1701,13 @@ intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, 
 }
 
 GEN
-intnumdoub0(entree *epx, GEN a, GEN b, entree *epy, int nc, int nd, int nf, GEN tabext, GEN tabint, long prec)
+intnumdoub0(GEN a, GEN b, int nc, int nd, int nf, GEN tabext, GEN tabint, long prec)
 {
-  exprdat Ec, Ed;
-  exprdoub Ef;
   GEN z;
-
-  Ec.ep = epx; Ec.ch = chc;
-  Ed.ep = epx; Ed.ch = chd;
-  Ef.epx = epx; push_val(epx, NULL);
-  Ef.epy = epy; push_val(epy, NULL);
-  Ef.ch = chf;
-  z = intnumdoub(&Ef, &gp_eval2, &Ec, &gp_eval, &Ed, &gp_eval, a, b, tabext, tabint, prec);
-  pop_val(epy);
-  pop_val(epx); return z;
+  push_lex(NULL);
+  push_lex(NULL);
+  z = intnumdoub(chf, &gp_eval2, chc, &gp_eval, chd, &gp_eval, a, b, tabext, tabint, prec);
+  pop_lex(); pop_lex(); return z;
 }
 #endif
 
@@ -1816,8 +1809,8 @@ sumnumalt(void *E, GEN (*f)(GEN,void*),GEN a,GEN s,GEN tab,long flag,long prec)
 { return sumnumall(E,f,a,s,tab,flag,-1,prec); }
 
 GEN
-sumnum0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
-{ EXPR_WRAP(ep,code, sumnum(EXPR_ARG, a, sig, tab, flag, prec)); }
+sumnum0(GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
+{ EXPR_WRAP(code, sumnum(EXPR_ARG, a, sig, tab, flag, prec)); }
 GEN
-sumnumalt0(entree *ep, GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
-{ EXPR_WRAP(ep,code, sumnumalt(EXPR_ARG, a, sig, tab, flag, prec)); }
+sumnumalt0(GEN a, GEN sig, GEN code, GEN tab, long flag, long prec)
+{ EXPR_WRAP(code, sumnumalt(EXPR_ARG, a, sig, tab, flag, prec)); }

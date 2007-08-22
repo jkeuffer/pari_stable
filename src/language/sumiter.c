@@ -23,27 +23,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 
 void
-forpari(entree *ep, GEN a, GEN b, GEN code)
+forpari(GEN a, GEN b, GEN code)
 {
-  pari_sp av, av0 = avma, lim;
+  pari_sp av=avma, lim;
 
-  b = gcopy(b); av=avma; lim = stack_lim(av,1);
- /* gcopy nedeed in case b gets overwritten in ch, as in
-  * b=10; for(a=1,b, print(a);b=1)
-  */
-  push_val(ep, a);
+  lim = stack_lim(av,1);
+  push_lex(a);
   while (gcmp(a,b) <= 0)
   {
     closure_evalvoid(code); if (loop_break()) break;
-    a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
+    a = get_lex(-1); a = typ(a) == t_INT? addis(a, 1): gaddgs(a,1);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"forpari");
       a = gerepileupto(av,a);
     }
-    changevalue_p(ep,a);
+    set_lex(-1, a);
   }
-  pop_val(ep); avma = av0;
+  pop_lex(); avma = av;
 }
 
 void
@@ -78,7 +75,7 @@ untilpari(GEN a, GEN b)
 static int negcmp(GEN x, GEN y) { return gcmp(y,x); }
 
 void
-forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
+forstep(GEN a, GEN b, GEN s, GEN code)
 {
   long ss, i;
   pari_sp av, av0 = avma, lim;
@@ -86,7 +83,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
   int (*cmp)(GEN,GEN);
 
   b = gcopy(b); av=avma; lim = stack_lim(av,1);
-  push_val(ep, a);
+  push_lex(a);
   if (is_vec_t(typ(s)))
   {
     v = s; s = gen_0;
@@ -104,16 +101,16 @@ forstep(entree *ep, GEN a, GEN b, GEN s, GEN code)
       if (++i >= lg(v)) i = 1;
       s = gel(v,i);
     }
-    a = (GEN) ep->value; a = gadd(a,s);
+    a = get_lex(-1); a = gadd(a,s);
 
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"forstep");
       a = gerepileupto(av,a);
     }
-    changevalue_p(ep,a);
+    set_lex(-1,a);
   }
-  pop_val(ep); avma = av0;
+  pop_lex(); avma = av0;
 }
 
 /* assume ptr is the address of a diffptr containing the succesive
@@ -132,9 +129,9 @@ sinitp(ulong a, ulong c, byteptr *ptr)
 /* value changed during the loop, replace by the first prime whose
    value is strictly larger than new value */
 static void
-update_p(entree *ep, byteptr *ptr, ulong prime[])
+update_p(byteptr *ptr, ulong prime[])
 {
-  GEN z = (GEN)ep->value;
+  GEN z = get_lex(-1);
   ulong a, c;
 
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
@@ -147,7 +144,7 @@ update_p(entree *ep, byteptr *ptr, ulong prime[])
     *ptr = diffptr;
     prime[2] = sinitp(a, 0, ptr);
   }
-  changevalue_p(ep, (GEN)prime);
+  set_lex(-1,(GEN)prime);
 }
 
 static byteptr
@@ -172,7 +169,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
 }
 
 void
-forprime(entree *ep, GEN ga, GEN gb, GEN code)
+forprime(GEN ga, GEN gb, GEN code)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong *prime = (ulong*)p;
@@ -183,37 +180,37 @@ forprime(entree *ep, GEN ga, GEN gb, GEN code)
   d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   if (!d) { avma = av; return; }
 
-  avma = av; push_val(ep, (GEN)prime);
+  avma = av; push_lex((GEN)prime);
   while (prime[2] < b)
   {
     closure_evalvoid(code); if (loop_break()) break;
-    if (ep->value == prime)
+    if (get_lex(-1) == (GEN) prime)
       NEXT_PRIME_VIADIFF(prime[2], d);
     else
-      update_p(ep, &d, prime);
+      update_p(&d, prime);
     avma = av;
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
   if (prime[2] == b) { closure_evalvoid(code); (void)loop_break(); avma = av; }
-  pop_val(ep);
+  pop_lex();
 }
 
 void
-fordiv(GEN a, entree *ep, GEN code)
+fordiv(GEN a, GEN code)
 {
   long i, l;
   pari_sp av2, av = avma;
   GEN t = divisors(a);
 
-  push_val(ep, NULL); l=lg(t); av2 = avma;
+  push_lex(NULL); l=lg(t); av2 = avma;
   for (i=1; i<l; i++)
   {
-    ep->value = (void*) t[i];
+    set_lex(-1,gel(t,i));
     closure_evalvoid(code); if (loop_break()) break;
     avma = av2;
   }
-  pop_val(ep); avma=av;
+  pop_lex(); avma=av;
 }
 
 /* Embedded for loops:
@@ -473,18 +470,18 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
 }
 
 void
-forvec(entree *ep, GEN x, GEN code, long flag)
+forvec(GEN x, GEN code, long flag)
 {
   pari_sp av = avma;
   GEN D;
   GEN (*next)(GEN,GEN);
   GEN v = forvec_start(x, flag, &D, &next);
-  push_val(ep, v);
+  push_lex(v);
   while (v) {
     closure_evalvoid(code); if (loop_break()) break;
     v = next(D, v);
   }
-  pop_val(ep); avma = av;
+  pop_lex(); avma = av;
 }
 
 /********************************************************************/
@@ -494,7 +491,7 @@ forvec(entree *ep, GEN x, GEN code, long flag)
 /********************************************************************/
 
 GEN
-somme(entree *ep, GEN a, GEN b, GEN code, GEN x)
+somme(GEN a, GEN b, GEN code, GEN x)
 {
   pari_sp av, av0 = avma, lim;
   GEN p1;
@@ -506,7 +503,7 @@ somme(entree *ep, GEN a, GEN b, GEN code, GEN x)
   b = gfloor(b);
   a = setloop(a);
   av=avma; lim = stack_lim(av,1);
-  push_val(ep, a);
+  push_lex(a);
   for(;;)
   {
     p1 = closure_evalnobrk(code);
@@ -517,9 +514,9 @@ somme(entree *ep, GEN a, GEN b, GEN code, GEN x)
       if (DEBUGMEM>1) pari_warn(warnmem,"sum");
       x = gerepileupto(av,x);
     }
-    ep->value = (void*) a;
+    set_lex(-1,a);
   }
-  pop_val(ep); return gerepileupto(av0,x);
+  pop_lex(); return gerepileupto(av0,x);
 }
 
 GEN
@@ -549,23 +546,23 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   return gerepileupto(av0, gaddgs(x,-1));
 }
 GEN
-suminf0(entree *ep, GEN a, GEN code, long prec)
-{ EXPR_WRAP(ep,code, suminf(EXPR_ARG, a, prec)); }
+suminf0(GEN a, GEN code, long prec)
+{ EXPR_WRAP(code, suminf(EXPR_ARG, a, prec)); }
 
 GEN
-divsum(GEN num, entree *ep, GEN code)
+divsum(GEN num, GEN code)
 {
   pari_sp av = avma;
   GEN y = gen_0, t = divisors(num);
   long i, l = lg(t);
 
-  push_val(ep, NULL);
+  push_lex(NULL);
   for (i=1; i<l; i++)
   {
-    ep->value = (void*)t[i];
+    set_lex(-1,gel(t,i));
     y = gadd(y, closure_evalnobrk(code));
   }
-  pop_val(ep); return gerepileupto(av,y);
+  pop_lex(); return gerepileupto(av,y);
 }
 
 /********************************************************************/
@@ -575,7 +572,7 @@ divsum(GEN num, entree *ep, GEN code)
 /********************************************************************/
 
 GEN
-produit(entree *ep, GEN a, GEN b, GEN code, GEN x)
+produit(GEN a, GEN b, GEN code, GEN x)
 {
   pari_sp av, av0 = avma, lim;
   GEN p1;
@@ -587,7 +584,7 @@ produit(entree *ep, GEN a, GEN b, GEN code, GEN x)
   b = gfloor(b);
   a = setloop(a);
   av=avma; lim = stack_lim(av,1);
-  push_val(ep, a);
+  push_lex(a);
   for(;;)
   {
     p1 = closure_evalnobrk(code);
@@ -598,9 +595,9 @@ produit(entree *ep, GEN a, GEN b, GEN code, GEN x)
       if (DEBUGMEM>1) pari_warn(warnmem,"prod");
       x = gerepileupto(av,x);
     }
-    ep->value = (void*) a;
+    set_lex(-1,a);
   }
-  pop_val(ep); return gerepileupto(av0,x);
+  pop_lex(); return gerepileupto(av0,x);
 }
 
 GEN
@@ -654,12 +651,12 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   return gerepilecopy(av0,x);
 }
 GEN
-prodinf0(entree *ep, GEN a, GEN code, long flag, long prec)
+prodinf0(GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,code, prodinf (EXPR_ARG, a, prec));
-    case 1: EXPR_WRAP(ep,code, prodinf1(EXPR_ARG, a, prec));
+    case 0: EXPR_WRAP(code, prodinf (EXPR_ARG, a, prec));
+    case 1: EXPR_WRAP(code, prodinf1(EXPR_ARG, a, prec));
   }
   pari_err(flagerr);
   return NULL; /* not reached */
@@ -694,8 +691,8 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
   return gerepilecopy(av0,x);
 }
 GEN
-prodeuler0(entree *ep, GEN a, GEN b, GEN code, long prec)
-{ EXPR_WRAP(ep,code, prodeuler(EXPR_ARG, a, b, prec)); }
+prodeuler0(GEN a, GEN b, GEN code, long prec)
+{ EXPR_WRAP(code, prodeuler(EXPR_ARG, a, b, prec)); }
 
 GEN
 direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
@@ -786,8 +783,8 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
   return gerepilecopy(av0,x);
 }
 GEN
-direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c)
-{ EXPR_WRAP(ep,code, direuler(EXPR_ARG, a, b, c)); }
+direuler0(GEN a, GEN b, GEN code, GEN c)
+{ EXPR_WRAP(code, direuler(EXPR_ARG, a, b, c)); }
 
 /********************************************************************/
 /**                                                                **/
@@ -796,7 +793,7 @@ direuler0(entree *ep, GEN a, GEN b, GEN code, GEN c)
 /********************************************************************/
 
 GEN
-vecteur(GEN nmax, entree *ep, GEN code)
+vecteur(GEN nmax, GEN code)
 {
   GEN y,p1;
   long i,m;
@@ -804,19 +801,19 @@ vecteur(GEN nmax, entree *ep, GEN code)
 
   m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
-  if (!ep || !code) return zerovec(m);
-  y = cgetg(m+1,t_VEC); push_val(ep, c);
+  if (!code) return zerovec(m);
+  y = cgetg(m+1,t_VEC); push_lex(c);
   for (i=1; i<=m; i++)
   {
     c[2] = i; p1 = closure_evalnobrk(code);
     gel(y,i) = isonstack(p1)? p1 : gcopy(p1);
-    changevalue_p(ep,c);
+    set_lex(-1,c);
   }
-  pop_val(ep); return y;
+  pop_lex(); return y;
 }
 
 GEN
-vecteursmall(GEN nmax, entree *ep, GEN code)
+vecteursmall(GEN nmax, GEN code)
 {
   GEN y;
   long i,m;
@@ -824,41 +821,40 @@ vecteursmall(GEN nmax, entree *ep, GEN code)
 
   m = gtos(nmax);
   if (m < 0)  pari_err(talker,"negative number of components in vector");
-  if (!ep || !code) return const_vecsmall(m, 0);
-  y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
+  if (!code) return const_vecsmall(m, 0);
+  y = cgetg(m+1,t_VECSMALL); push_lex(c);
   for (i=1; i<=m; i++)
   {
     c[2] = i;
     y[i] = gtos(closure_evalnobrk(code));
-    changevalue_p(ep,c);
+    set_lex(-1,c);
   }
-  pop_val(ep); return y;
+  pop_lex(); return y;
 }
 
 GEN
-vvecteur(GEN nmax, entree *ep, GEN n)
+vvecteur(GEN nmax, GEN n)
 {
-  GEN y = vecteur(nmax,ep,n);
+  GEN y = vecteur(nmax,n);
   settyp(y,t_COL); return y;
 }
 
 GEN
-matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code)
+matrice(GEN nlig, GEN ncol, GEN code)
 {
   GEN y, z, p1;
   long i, j, m, n;
   long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
   long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
-  if (ep1 == ep2 && ep1) pari_err(talker, "identical index variables in matrix");
   m = gtos(ncol);
   n = gtos(nlig);
   if (m < 0) pari_err(talker,"negative number of columns in matrix");
   if (n < 0) pari_err(talker,"negative number of rows in matrix");
   if (!m) return cgetg(1,t_MAT);
-  if (!ep1 || !ep2 || !code || !n) return zeromatcopy(n, m);
-  push_val(ep1, c1);
-  push_val(ep2, c2); y = cgetg(m+1,t_MAT);
+  if (!code || !n) return zeromatcopy(n, m);
+  push_lex(c1);
+  push_lex(c2); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
   {
     c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;
@@ -866,12 +862,11 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, GEN code)
     {
       c1[2] = j; p1 = closure_evalnobrk(code);
       gel(z,j) = isonstack(p1)? p1 : gcopy(p1);
-      changevalue_p(ep1,c1);
-      changevalue_p(ep2,c2);
+      set_lex(-2,c1);
+      set_lex(-1,c2);
     }
   }
-  pop_val(ep2);
-  pop_val(ep1); return y;
+  pop_lex(); pop_lex(); return y;
 }
 
 /********************************************************************/
@@ -994,12 +989,12 @@ sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumalt0(entree *ep, GEN a, GEN code, long flag, long prec)
+sumalt0(GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,code, sumalt (EXPR_ARG,a,prec));
-    case 1: EXPR_WRAP(ep,code, sumalt2(EXPR_ARG,a,prec));
+    case 0: EXPR_WRAP(code, sumalt (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(code, sumalt2(EXPR_ARG,a,prec));
     default: pari_err(flagerr);
   }
   return NULL; /* not reached */
@@ -1097,12 +1092,12 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 }
 
 GEN
-sumpos0(entree *ep, GEN a, GEN code, long flag, long prec)
+sumpos0(GEN a, GEN code, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: EXPR_WRAP(ep,code, sumpos (EXPR_ARG,a,prec));
-    case 1: EXPR_WRAP(ep,code, sumpos2(EXPR_ARG,a,prec));
+    case 0: EXPR_WRAP(code, sumpos (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(code, sumpos2(EXPR_ARG,a,prec));
     default: pari_err(flagerr);
   }
   return NULL; /* not reached */
@@ -1181,8 +1176,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
 }
 
 GEN
-zbrent0(entree *ep, GEN a, GEN b, GEN code, long prec)
-{ EXPR_WRAP(ep,code, zbrent(EXPR_ARG, a,b, prec)); }
+zbrent0(GEN a, GEN b, GEN code, long prec)
+{ EXPR_WRAP(code, zbrent(EXPR_ARG, a,b, prec)); }
 
 /* x = solve_start(&D, a, b, prec)
  * while (x) {
@@ -1227,8 +1222,8 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
 }
 
 GEN
-derivnum0(entree *ep, GEN a, GEN code, long prec)
+derivnum0(GEN a, GEN code, long prec)
 {
-  EXPR_WRAP(ep,code, derivnum (EXPR_ARG,a,prec));  
+  EXPR_WRAP(code, derivnum (EXPR_ARG,a,prec));
 }
 

@@ -246,7 +246,6 @@ check_proto(char *code)
     case 'M':
     case 'P':
     case 'S':
-    case 'V':
     case 'f':
     case 'n':
     case 'p':
@@ -262,12 +261,13 @@ check_proto(char *code)
       if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E' 
                     || *s == 'V')
       {
-        arity++;
+        if (*s != 'V') arity++;
         s++; break;
       }
       old = s; while (*s != ',') s++;
       if (*s != ',') pari_err(talker2, "missing comma", old, code);
       break;
+    case 'V':
     case '=':
     case ',': break;
     case '\n': return arity; /* Before the mnemonic */
@@ -306,7 +306,6 @@ installep(const char *name, long len, entree **table)
   ep->help    = NULL;
   ep->pvalue  = NULL;
   ep->arity   = 0;
-  ep->lvars   = NULL;
   ep->next    = *table;
   return *table = ep;
 }

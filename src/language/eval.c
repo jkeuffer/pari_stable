@@ -158,7 +158,6 @@ freeep(entree *ep)
   switch(EpVALENCE(ep))
   {
     case EpUSER:
-      gunclone(ep->lvars); ep->lvars=NULL;
       while (ep->pvalue!=INITIAL) pop_val(ep);
       gunclone((GEN)ep->value); ep->value=NULL;
       break;
@@ -169,12 +168,6 @@ freeep(entree *ep)
     case EpALIAS:
       gunclone((GEN)ep->value); ep->value=NULL; break;
   }
-}
-
-void
-push_val(entree *ep, GEN a)
-{
-  new_val_cell(ep, a, PUSH_VAL); 
 }
 
 /* kill ep->value and replace by preceding one, poped from value stack */
@@ -195,6 +188,20 @@ INLINE void
 copyvalue(entree *ep, GEN x) {
   new_val_cell(ep, x, typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL);
 }
+
+INLINE void
+zerovalue (entree *ep)
+{
+  var_cell *v = (var_cell*) gpmalloc(sizeof(var_cell));
+  v->value  = (GEN)ep->value;
+  v->prev   = (var_cell*) ep->pvalue;
+  v->flag   = PUSH_VAL;
+  v->valence= ep->valence;
+  ep->value = gen_0;
+  ep->pvalue= (char*)v;
+  ep->valence=EpVAR;
+}
+
 
 /* as above IF ep->value was PUSHed, or was created after block number 'loc'
    return 0 if not deleted, 1 otherwise [for recover()] */
@@ -226,19 +233,6 @@ changevalue(entree *ep, GEN x)
   {
     x = gclone(x); /* beware: killbloc may destroy old x */
     if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
-    ep->value = (void*)x;
-  }
-}
-
-/* as above, but PUSH, not COPY */
-void
-changevalue_p(entree *ep, GEN x)
-{
-  var_cell *v = (var_cell*) ep->pvalue;
-  if (v == INITIAL) new_val_cell(ep,x, PUSH_VAL);
-  else
-  {
-    if (v->flag == COPY_VAL) { killbloc((GEN)ep->value); v->flag = PUSH_VAL; }
     ep->value = (void*)x;
   }
 }
@@ -305,6 +299,7 @@ typedef struct gp_pointer
   matcomp c;
   GEN x;
   entree *ep;
+  long vn;
 } gp_pointer;
 
 
@@ -349,10 +344,82 @@ change_compo(matcomp *c, GEN res)
  **                                                                       **
  ***************************************************************************/
 
-static THREAD long *st;
+struct var_lex
+{
+  long flag;
+  GEN value;
+};
+
 static THREAD long sp, rp;
+static THREAD long *st;
 static THREAD gp_pointer *ptrs;
-static THREAD gp2c_stack s_st,s_ptrs;
+static THREAD entree **lvars;
+static THREAD struct var_lex *var;
+static THREAD gp2c_stack s_st, s_ptrs, s_var, s_lvars;
+
+static void
+changelex(long vn, GEN x)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  x = gclone(x); /* beware: killbloc may destroy old x */
+  if (v->flag == COPY_VAL) killbloc(v->value); else v->flag = COPY_VAL;
+  v->value = x;
+}
+
+INLINE void
+zerolex(long vn)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  v->flag  = PUSH_VAL;
+  v->value = gen_0;
+}
+
+INLINE void
+copylex(long vn, GEN x)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  v->flag  = typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL;
+  v->value = (v->flag == COPY_VAL)? gclone(x):
+                                  (isclone(x))? gcopy(x): x;
+}
+
+INLINE void
+freelex(long vn)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  if (v->flag == COPY_VAL) killbloc(v->value);
+}
+
+void
+push_lex(GEN a)
+{
+  long vn=stack_new(&s_var);
+  struct var_lex *v=var+vn;
+  v->flag  = PUSH_VAL;
+  v->value = a;
+}
+
+GEN
+get_lex(long vn)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  return v->value;
+}
+
+void
+set_lex(long vn, GEN x)
+{
+  struct var_lex *v=var+s_var.n+vn;
+  if (v->flag == COPY_VAL) { killbloc(v->value); v->flag = PUSH_VAL; }
+  v->value = x;
+}
+
+void
+pop_lex(void)
+{
+  freelex(-1);
+  s_var.n--;
+}
 
 void
 pari_init_evaluator(void)
@@ -365,6 +432,8 @@ pari_init_evaluator(void)
   stack_init(&s_ptrs,sizeof(*ptrs),(void**)&ptrs);
   stack_alloc(&s_ptrs,16);
   s_ptrs.n=s_ptrs.alloc;
+  stack_init(&s_var,sizeof(*var),(void**)&var);
+  stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
 }
 
 static void closure_eval(GEN C);
@@ -400,12 +469,7 @@ derivuserwrap(GEN x, void* E)
     reset_break();
   }
   else
-  {
     z = gerepileupto(ltop, gel(st,--sp));
-    if (isclone(z)) z = gcopy(z);
-  }
-  for(j=1;j<lg(ep->lvars);j++)
-    pop_val((entree*)ep->lvars[j]);
   return z;
 }
 
@@ -465,7 +529,7 @@ closure_eval(GEN C)
   GEN data=gel(C,3);
   long saved_sp=sp;
   long saved_rp=rp;
-  long pc, j;
+  long pc, j, nbmvar=0, nblvar=0;
   for(pc=1;pc<lg(oper);pc++)
   {
     op_code opcode=(op_code) code[pc];
@@ -497,7 +561,7 @@ closure_eval(GEN C)
         pari_var_create(ep);
         gel(st,sp++)=(GEN)initial_value(ep);
         break;
-    case OCpushvalue:
+    case OCpushdyn:
         ep=(entree*)operand;
         switch(ep->valence)
         {
@@ -511,12 +575,16 @@ closure_eval(GEN C)
           goto calluser; /*Maybe it is a function*/
         }
         break;
-    case OCsimpleptr:
+    case OCpushlex:
+        gel(st,sp++)=var[s_var.n+operand].value;
+        break;
+    case OCsimpleptrdyn:
         {
           gp_pointer *g;
           if (rp==s_ptrs.n-1) 
             stack_new(&s_ptrs);
           g = &ptrs[rp++];
+          g->vn=0;
           g->ep = (entree*) operand;
           switch (g->ep->valence)
           {
@@ -531,14 +599,25 @@ closure_eval(GEN C)
           gel(st,sp++) = (GEN)&(g->x);
           break;
         }
-    case OCnewptr:
+    case OCsimpleptrlex:
+        {
+          gp_pointer *g;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          g->vn=operand;
+          g->ep=(entree *)0x1L;
+          g->x = (GEN) var[s_var.n+operand].value;
+          gel(st,sp++) = (GEN)&(g->x);
+          break;
+        }
+    case OCnewptrdyn:
         {
           gp_pointer *g;
           matcomp *C;
           if (rp==s_ptrs.n-1)
             stack_new(&s_ptrs);
           g = &ptrs[rp++];
-          C=&g->c;
           ep = (entree*) operand;
           switch (ep->valence)
           {
@@ -552,7 +631,25 @@ closure_eval(GEN C)
             pari_err(varer1,"variable name expected",NULL,NULL);
           }
           g->x = (GEN) ep->value;
+          g->vn=0;
           g->ep=NULL;
+          C=&g->c;
+          C->full_col = C->full_row = 0;
+          C->parent   = (GEN)    g->x;
+          C->ptcell   = (GEN *) &g->x;
+          break;
+        }
+    case OCnewptrlex:
+        {
+          gp_pointer *g;
+          matcomp *C;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          g->x = (GEN) var[s_var.n+operand].value;
+          g->vn=0;
+          g->ep=NULL;
+          C=&g->c;
           C->full_col = C->full_row = 0;
           C->parent   = (GEN)    g->x;
           C->ptcell   = (GEN *) &g->x;
@@ -568,11 +665,17 @@ closure_eval(GEN C)
         for(j=0;j<operand;j++)
         {
           gp_pointer *g = &ptrs[--rp];
-          if (g->ep) changevalue(g->ep, g->x);
+          if (g->ep)
+          {
+            if (g->vn)
+              changelex(g->vn,g->x);
+            else
+              changevalue(g->ep, g->x);
+          }
           else change_compo(&(g->c), g->x);
         }
         break;
-    case OCstore:
+    case OCstoredyn:
         ep=(entree *)operand;
         switch (ep->valence)
         {
@@ -584,6 +687,9 @@ closure_eval(GEN C)
         default:
           pari_err(varer1,"variable name expected",NULL,NULL);
         }
+        break;
+    case OCstorelex:
+        changelex(operand,gel(st,--sp));
         break;
     case OCstackgen:
         gmael(st,sp-2,operand)=copyupto(gel(st,sp-1),gel(st,sp-2));
@@ -618,6 +724,10 @@ closure_eval(GEN C)
         break;
     case OCcopy:
         gel(st,sp-1) = gcopy(gel(st,sp-1));
+        break;
+    case OCcopyifclone:
+        if (isclone(gel(st,sp-1)))
+          gel(st,sp-1) = gcopy(gel(st,sp-1));
         break;
     case OCcompo1:
         {
@@ -768,24 +878,37 @@ closure_eval(GEN C)
           break;
         }
     case OCgetarg:
-        ep=(entree *)operand;
         if (gel(st,sp-1))
-          copyvalue(ep,gel(st,sp-1));
+          copylex(operand,gel(st,sp-1));
         else
-          copyvalue(ep,gen_0);
+          zerolex(operand);
         sp--;
         break;
     case OCdefaultarg:
         ep=(entree *)operand;
         if (gel(st,sp-2))
-          copyvalue(ep,gel(st,sp-2));
+          copylex(operand,gel(st,sp-2));
         else
         {
           GEN z = closure_evalgen(gel(st,sp-1));
           if (!z) pari_err(talker,"break not allowed in function parameter");
-          copyvalue(ep,z);
+          copylex(operand,z);
         }
         sp-=2;
+        break;
+    case OClocalvar:
+        ep=(entree *)operand;
+        j=stack_new(&s_lvars);
+        lvars[j]=ep;
+        nblvar++;
+        copyvalue(ep,gel(st,--sp));
+        break;
+    case OClocalvar0:
+        ep=(entree *)operand;
+        j=stack_new(&s_lvars);
+        lvars[j]=ep;
+        nblvar++;
+        zerovalue(ep);
         break;
     case OCglobalvar:
         ep=(entree *)operand;
@@ -891,7 +1014,7 @@ calluser:
           pari_sp ltop;
           long n=st[--sp];
           entree *ep = (entree*) operand;
-          GEN z, lvars=ep->lvars;
+          GEN z;
           if (ep->valence!=EpUSER)
           {
             int w;
@@ -920,15 +1043,20 @@ calluser:
             reset_break();
           }
           else
-          {
             z = gerepileupto(ltop, gel(st,--sp));
-            if (isclone(z)) z = gcopy(z);
-          }
-          for(j=1;j<lg(lvars);j++)
-            pop_val((entree*)lvars[j]);
           gel(st, sp++) = z;
           break;
         }
+    case OCnewframe:
+        stack_alloc(&s_var,operand);
+        s_var.n+=operand;
+        nbmvar+=operand;
+        for(j=1;j<=operand;j++)
+        {
+          var[s_var.n-j].flag=PUSH_VAL;
+          var[s_var.n-j].value=gen_0;
+        }
+        break;
     case OCvec:
         gel(st,sp++)=cgetg(operand,t_VEC);
         break;
@@ -953,7 +1081,6 @@ calluser:
           gpfree(ep->code);
           /*FIXME: the function might be in use...
             gunclone(ep->value);
-          gunclone(ep->lvars);
           */
           break;
         case EpNEW:
@@ -962,21 +1089,28 @@ calluser:
         default:
           pari_err(talker,"function name expected");
         }
-        ep->value = (void *) gclone(gel(st,sp-4));
-        ep->lvars = gclone(gel(st,sp-3));
+        ep->value = (void *) gclone(gel(st,sp-3));
         ep->code  = pari_strdup(GSTR(gel(st,sp-2)));
         ep->arity = st[sp-1];
-        sp-=4;
+        sp-=3;
         break;
     case OCpop:
         sp-=operand;
         break;
     }
   }
-  return;
-endeval:
-  sp = saved_sp;
-  rp = saved_rp;
+  if (0)
+  {
+  endeval:
+    sp = saved_sp;
+    rp = saved_rp;
+  }
+  for(j=1;j<=nbmvar;j++)
+    freelex(-j);
+  s_var.n-=nbmvar;
+  for(j=1;j<=nblvar;j++)
+    pop_val(lvars[s_lvars.n-j]);
+  s_lvars.n-=nblvar;
 }
 
 GEN
@@ -1066,17 +1200,34 @@ closure_disassemble(GEN C)
       ep=(entree*)operand;
       pariprintf("pushvar\t%s\n",ep->name);
       break;
-    case OCpushvalue:
+    case OCpushdyn:
       ep=(entree*)operand;
-      pariprintf("pushvalue\t%s\n",ep->name);
+      pariprintf("pushdyn\t\t%s\n",ep->name);
       break;
-    case OCsimpleptr:
-      ep=(entree*)operand;
-      pariprintf("simpleptr\t%s\n",ep->name);
+    case OCpushlex:
+      pariprintf("pushlex\t\t%ld\n",operand);
       break;
-    case OCnewptr:
+    case OCstoredyn:
+      ep=(entree *)operand;
+      pariprintf("storedyn\t%s\n",ep->name);
+      break;
+    case OCstorelex:
+      pariprintf("storelex\t%ld\n",operand);
+      break;
+    case OCsimpleptrdyn:
       ep=(entree*)operand;
-      pariprintf("newptr\t\t%s\n",ep->name);
+      pariprintf("simpleptrdyn\t%s\n",ep->name);
+      break;
+    case OCsimpleptrlex:
+      ep=(entree*)operand;
+      pariprintf("simpleptrlex\t%ld\n",operand);
+      break;
+    case OCnewptrdyn:
+      ep=(entree*)operand;
+      pariprintf("newptrdyn\t%s\n",ep->name);
+      break;
+    case OCnewptrlex:
+      pariprintf("newptrlex\t%ld\n",operand);
       break;
     case OCpushptr:
       pariprintf("pushptr\n");
@@ -1086,10 +1237,6 @@ closure_disassemble(GEN C)
       break;
     case OCendptr:
       pariprintf("endptr\t\t%ld\n",operand);
-      break;
-    case OCstore:
-      ep=(entree *)operand;
-      pariprintf("store\t\t%s\n",ep->name);
       break;
     case OCprecreal:
       pariprintf("precreal\n");
@@ -1111,6 +1258,9 @@ closure_disassemble(GEN C)
       break;
     case OCcopy:
       pariprintf("copy\n");
+      break;
+    case OCcopyifclone:
+      pariprintf("copyifclone\n");
       break;
     case OCcompo1:
       pariprintf("compo1\t\t%s\n",disassemble_cast(operand));
@@ -1137,12 +1287,18 @@ closure_disassemble(GEN C)
       pariprintf("compoLptr\n");
       break;
     case OCgetarg:
-      ep=(entree*)operand;
-      pariprintf("getarg\t\t%s\n",ep->name);
+      pariprintf("getarg\t\t%ld\n",operand);
       break;
     case OCdefaultarg:
+      pariprintf("defaultarg\t%ld\n",operand);
+      break;
+    case OClocalvar:
       ep=(entree*)operand;
-      pariprintf("defaultarg\t%s\n",ep->name);
+      pariprintf("localvar\t%s\n",ep->name);
+      break;
+    case OClocalvar0:
+      ep=(entree*)operand;
+      pariprintf("localvar0\t%s\n",ep->name);
       break;
     case OCglobalvar:
       ep=(entree*)operand;
@@ -1192,6 +1348,9 @@ closure_disassemble(GEN C)
     case OCdeffunc:
       ep=(entree*)operand;
       pariprintf("deffunc\t\t%s\n",ep->name);
+      break;
+    case OCnewframe:
+      pariprintf("newframe\t%ld\n",operand);
       break;
     case OCpop:
       pariprintf("pop\t\t%ld\n",operand);
