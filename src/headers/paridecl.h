@@ -1158,6 +1158,7 @@ GEN     gsub(GEN x, GEN y);
 
 GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
 
+long    Q_pval(GEN x, GEN p);
 long    ZX_valuation(GEN x, GEN *Z);
 GEN     cgetimag(void);
 GEN     cgetp(GEN x);

@@ -1507,7 +1507,7 @@ pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
   *prev = 0;
   if (!is_pm1(*plead))
   {
-    long v = ggval(*plead,p), v1 = ggval(constant_term(f),p);
+    long v = Z_pval(*plead,p), v1 = Z_pval(constant_term(f),p);
     if (v1 < v)
     {
       *prev = 1; f = polrecip_i(f);

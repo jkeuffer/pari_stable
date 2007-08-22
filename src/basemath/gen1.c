@@ -2228,7 +2228,7 @@ gdiv(GEN x, GEN y)
       {
         case t_INT: case t_FRAC: { GEN p = gel(x,2);
           return signe(x[4])? divpT(x, y)
-                            : zeropadic(p, valp(x) - ggval(y,p));
+                            : zeropadic(p, valp(x) - Q_pval(y,p));
         }
         case t_INTMOD: { GEN Y = gel(y,1);
           z = cgetg(3, t_INTMOD);

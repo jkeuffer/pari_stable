@@ -543,7 +543,7 @@ long
 element_val(GEN nf, GEN x, GEN vp)
 {
   pari_sp av = avma;
-  long w, vcx, e;
+  long w, e;
   GEN cx,p;
 
   if (gcmp0(x)) return VERYBIGINT;
@@ -553,16 +553,15 @@ element_val(GEN nf, GEN x, GEN vp)
   e = itos(gel(vp,3));
   switch(typ(x))
   {
-    case t_INT: return e*Z_pval(x,p);
-    case t_FRAC:return e*(Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p));
+    case t_INT: return e * Z_pval(x,p);
+    case t_FRAC:return e * Q_pval(x,p);
     default: x = algtobasis_i(nf,x); break;
   }
-  if (RgV_isscalar(x)) return e*ggval(gel(x,1),p);
+  if (RgV_isscalar(x)) return e*Q_pval(gel(x,1),p);
 
-  cx = content(x);
-  if (gcmp1(cx)) vcx=0; else { x = gdiv(x,cx); vcx = ggval(cx,p); }
+  x = Q_primitive_part(x, &cx);
   w = int_elt_val(nf,x,p,gel(vp,5),NULL);
-  avma = av; return w + vcx*e;
+  avma = av; return w + e * (cx? Q_pval(cx,p): 0);
 }
 
 /* polegal without comparing variables */

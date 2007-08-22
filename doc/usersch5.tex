@@ -1010,6 +1010,9 @@ except the inputs/outputs are now \kbd{ulong}s.
 \fun{long}{z_pval}{long x, GEN p} as \kbd{Z\_pval},
 except \kbd{x} is now a \kbd{long}.
 
+\fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
+of the \typ{INT} or \typ{FRAC}~\kbd{x}.
+
 \subsec{Factorization}
 
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''
@@ -3550,7 +3553,11 @@ and returns the primitive part \kbd{x} / \kbd{c}. A trivial content is set to
 
 \subsec{GCD, content and primitive part over the rationals}
 
-\fun{GEN}{Q_abs}{GEN x} absolute value of the \typ{INT} or \typ{FRAC}~\kbd{x}
+\fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
+of the \typ{INT} or \typ{FRAC}~\kbd{x}.
+
+\fun{GEN}{Q_abs}{GEN x} absolute value of the \typ{INT} or
+\typ{FRAC}~\kbd{x}.
 
 \fun{GEN}{Q_gcd}{GEN x, GEN y} gcd of the \typ{INT} or \typ{FRAC}~\kbd{x}
 and~\kbd{y}.

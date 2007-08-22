@@ -178,6 +178,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    14- library function remi2n, cmp_RgX, gen_cmp_RgX
    15- library function dotproduct, dotproduct_i, dotsquare, dotsquare_i
    16- library function FpX_Fp_add_shallow
+   17- library function Q_pval
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

@@ -605,6 +605,13 @@ intdvd(GEN x, GEN y, GEN *z) {
   *z = q; return 1;
 }
 
+/* x t_FRAC, p t_INT, return v_p(x) */
+static long
+ratval(GEN x, GEN p) { return Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p); }
+
+long
+Q_pval(GEN x, GEN p) { return (typ(x) == t_INT)? Z_pval(x, p): ratval(x, p); }
+
 long
 ggval(GEN x, GEN p)
 {
@@ -632,7 +639,7 @@ ggval(GEN x, GEN p)
 
     case t_FRAC:
       if (tp != t_INT) break;
-      return Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p);
+      return ratval(x, p);
 
     case t_PADIC:
       if (!gequal(p,gel(x,2))) break;

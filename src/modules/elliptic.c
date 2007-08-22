@@ -1537,7 +1537,7 @@ localred_p(GEN e, GEN p, int minim)
   c4 = gel(e,10);
   c6 = gel(e,11);
   D  = gel(e,12);
-  nuj = gcmp0(gel(e,13))? 0: - ggval(gel(e,13), p);
+  nuj = gcmp0(gel(e,13))? 0: - Q_val(gel(e,13), p);
   nuD = Z_pval(D, p);
   k = (nuj > 0 ? nuD - nuj : nuD) / 12;
   if (k <= 0)
@@ -1865,7 +1865,7 @@ ellintegralmodel(GEN e)
       if (!gcmp0(gel(a,i)))
       {
         long r = (i == 5)? 6: i; /* a5 is missing */
-	m = r * n + ggval(gel(a,i), p);
+	m = r * n + Q_val(gel(a,i), p);
 	while (m < 0) { n++; m += r; }
       }
     u = mulii(u, powiu(p, n));
@@ -2207,7 +2207,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (!ex) return 1;
   if (ex == 1) return -kronecker(negi(gel(e,11)),p);
   j=gel(e,13);
-  if (!gcmp0(j) && ggval(j,p) < 0) return krosi(-1,p);
+  if (!gcmp0(j) && Q_val(j,p) < 0) return krosi(-1,p);
   ep = 12 / cgcd(12, Z_pval(gel(e,12),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);

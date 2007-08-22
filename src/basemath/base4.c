@@ -692,7 +692,7 @@ idealfactor(GEN nf, GEN x)
   {
     long l = f2[i]; /* = v_p(Nx) */
     p1 = primedec(nf,gel(f1,i));
-    vc = cx? ggval(cx,gel(f1,i)): 0;
+    vc = cx? Q_pval(cx,gel(f1,i)): 0;
     for (j=1; j<lg(p1); j++)
     {
       P = gel(p1,j); e = itos(gel(P,3));
@@ -757,11 +757,11 @@ idealval(GEN nf, GEN ix, GEN P)
   if (lg(ix) != N+1) ix = idealmat_to_hnf(nf,ix);
 
   i = val_norm(ix,p, &k);
-  if (!i) { avma = av; return cx? itos(gel(P,3)) * ggval(cx,p): 0; }
+  if (!i) { avma = av; return cx? itos(gel(P,3)) * Q_pval(cx,p): 0; }
 
   e = itos(gel(P,3));
   f = itos(gel(P,4));
-  vd = cx? e * ggval(cx,p): 0;
+  vd = cx? e * Q_pval(cx,p): 0;
   /* 0 <= ceil[v_P(ix) / e] <= v_p(ix \cap Z) --> v_P <= e * v_p */
   j = k * e;
   /* 0 <= v_P(ix) <= floor[v_p(Nix) / f] */
@@ -803,7 +803,7 @@ idealval(GEN nf, GEN ix, GEN P)
   for (j = 2; j <= N; j++)
   {
     gel(B,j) = Q_primitive_part(gel(B,j), &cx);
-    vals[j] = cx? 1 + e * ggval(cx, p): 1;
+    vals[j] = cx? 1 + e * Q_pval(cx, p): 1;
   }
   av1 = avma; lim = stack_lim(av1,3);
   y = cgetg(N+1,t_COL);

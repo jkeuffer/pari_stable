@@ -186,7 +186,7 @@ fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
   long v = int_elt_val(nf,L0,p,tau,NULL);
   if (cx)
   {
-    long w = ggval(cx, p);
+    long w = Q_pval(cx, p);
     if (w) v += w * itos(gel(pr,3));
   }
   avma = av; return v;
