@@ -2207,7 +2207,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (!ex) return 1;
   if (ex == 1) return -kronecker(negi(gel(e,11)),p);
   j=gel(e,13);
-  if (!gcmp0(j) && Q_val(j,p) < 0) return krosi(-1,p);
+  if (!gcmp0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
   ep = 12 / cgcd(12, Z_pval(gel(e,12),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
