@@ -1537,7 +1537,7 @@ localred_p(GEN e, GEN p, int minim)
   c4 = gel(e,10);
   c6 = gel(e,11);
   D  = gel(e,12);
-  nuj = gcmp0(gel(e,13))? 0: - Q_val(gel(e,13), p);
+  nuj = gcmp0(gel(e,13))? 0: - Q_pval(gel(e,13), p);
   nuD = Z_pval(D, p);
   k = (nuj > 0 ? nuD - nuj : nuD) / 12;
   if (k <= 0)
@@ -1865,7 +1865,7 @@ ellintegralmodel(GEN e)
       if (!gcmp0(gel(a,i)))
       {
         long r = (i == 5)? 6: i; /* a5 is missing */
-	m = r * n + Q_val(gel(a,i), p);
+	m = r * n + Q_pval(gel(a,i), p);
 	while (m < 0) { n++; m += r; }
       }
     u = mulii(u, powiu(p, n));
