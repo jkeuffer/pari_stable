@@ -799,7 +799,7 @@ gtoset(GEN x)
   {
     if (tx != t_LIST)
       { y=cgetg(2,t_VEC); gel(y,1) = GENtocanonicalstr(x); return y; }
-    x = dummy_vec_from_list(x, &lx);
+    x = list_data(x); lx = lg(x);
   }
   if (lx==1) return cgetg(1,t_VEC);
   av=avma; y=cgetg(lx,t_VEC);
@@ -833,7 +833,7 @@ gen_search(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
   else
   {
     if (tx!=t_LIST) pari_err(talker,"not a set in setsearch");
-    x = dummy_vec_from_list(x, &lx);
+    x = list_data(x); lx = lg(x);
   }
   if (lx==1) return flag? 1: 0;
 
@@ -1275,12 +1275,12 @@ init_sort(GEN *x, long *tx, long *lx)
 {
   *tx = typ(*x);
   if (*tx != t_LIST) {
-    *lx = lg(*x);
     if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
   } else {
-    *x = dummy_vec_from_list(*x, lx);
+    *x = list_data(*x);
     *tx = t_VEC;
   }
+  *lx = lg(*x);
 }
 
 /* Sort the vector x, using cmp to compare entries. */

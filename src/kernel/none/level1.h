@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN    const_col(long n, GEN x)
 GEN    const_vec(long n, GEN x)
 GEN    const_vecsmall(long n, long c)
-GEN    dummy_vec_from_list(GEN x, long *lx);
 GEN    mkcol(GEN x);
 GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
@@ -434,12 +433,6 @@ const_vecsmall(long n, long c)
   GEN V = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) V[i] = c;
   return V;
-}
-
-INLINE GEN
-dummy_vec_from_list(GEN x, long *lx)
-{
-  *lx = x[1]+1; return gel(x,3)-1;
 }
 
 /***   ZERO   ***/

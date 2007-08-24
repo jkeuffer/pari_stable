@@ -70,47 +70,37 @@ enlarging \kbd{A} if necessary.
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
 
 \section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This dynamic type
-is implemented by a \kbd{GEN} of length 4: three codewords and one
-component containing the actual entries in a malloc'ed vector (so that it can
-be realloc'ated without moving the parent \kbd{GEN}). All the entries are
-clones. This is in practice considered as a non-recursive type, i.e. copies
-from \kbd{gcopy} are shallow.
+is implemented by a \kbd{GEN} of length 3: two codewords and one component
+containing the actual entries in a malloc'ed vector (so that it can be
+realloc'ated without moving the parent \kbd{GEN}). All the entries are
+clones, possibly with cloned subcomponents (the must be deleted with
+\kbd{killbloc}, not \kbd{gunclone}). This is in practice considered as a
+non-recursive type, i.e. copies from \kbd{gcopy} are shallow. Of course, this
+is done to support GP's inconvenient memory model. In pure library mode,
+don't use this type!
 
-The following three macros are proper lvalues and access the
-components
-
-\fun{long}{list_n}{GEN L}: current number of elements.
+The following macros are proper lvalues and access the components
 
 \fun{long}{list_nmax}{GEN L}: current maximal number of elements. This grows
 as needed.
 
 \fun{GEN}{list_data}{GEN L}: the elements. If \kbd{v = list\_data(L)} and
-\kbd{n = list\_n(L)}, then the elements are \kbd{v[0]}, \dots, \kbd{v[n-1]}.
+\kbd{l = lg(v)}, then the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 
-The following routines may be useful:
+The following routine may be useful:
 
 \fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L}.
 Note that \kbd{gcopy} would return a shallow copy.
 
-\fun{GEN}{dummy_vec_from_list}{GEN L, long *l} discards the
-list wrapper and return a pseudo-\kbd{GEN} (it has no codeword)
-whose elements can be manipulated as if it were a \typ{VEC} of length
-\kbd{*l} (\kbd{l} is set by the function since the returned value has no
-codeword); in particular, one can assign other \kbd{GEN}s to them. No stack
-allocation takes place. A typical construct:
+A typical low-level construct:
 \bprog
   long l;
   /* assume L is a t_LIST */
-  L = dummy_vec_from_list(L, &l)
-  /* now L can be treated as a t_VEC with lg(L) = l */
+  L = list_data(L); /* discard t_LIST wrapper */
+  l = lg(L);
   for (i = 1; i < l; i++) output( gel(L, i) );
   for (i = 1; i < l; i++) gel(L, i) = gclone( ... );
 @eprog\noindent 
-The main reason the data is not represented as a true \kbd{GEN}, e.g.~a
-\typ{VEC}, is that it must not reside on the stack (otherwise it can't be
-easily reallocated) and neither can its component (otherwise they can't be
-easily replaced by new values). All this is done to support GP's inconvenient
-memory model. In pure library mode, don't use this type!
 
 \section{Otherwise undocumented global variables}
 

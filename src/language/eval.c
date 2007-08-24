@@ -743,7 +743,7 @@ closure_eval(GEN C)
           case t_LIST:
           {
             long lx;
-            p = dummy_vec_from_list(p, &lx);
+            p = list_data(p); lx = lg(p);
             check_array_index(c, lx);
             closure_castgen(gel(p,c),operand);
             break;
@@ -775,7 +775,7 @@ closure_eval(GEN C)
           case t_LIST:
           {
             long lx;
-            p = dummy_vec_from_list(p, &lx);
+            p = list_data(p); lx = lg(p);
             check_array_index(c,lx);
             C->ptcell = (GEN *) p+c;
             break;

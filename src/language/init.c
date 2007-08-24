@@ -178,10 +178,9 @@ killbloc(GEN x)
       for (i=1;i<lx;i++) killbloc(gel(x,i));
       break;
     case t_LIST:
-      v = dummy_vec_from_list(x, &lx);
+      v = list_data(x); lx = lg(v);
       for (i=1;i<lx;i++) killbloc(gel(v,i));
-      gpfree(list_data(x));
-      break;
+      gpfree(v); break;
   }
   if (isclone(x)) gunclone(x);
 }
@@ -1192,7 +1191,7 @@ trap0(char *e, GEN r, GEN f)
 }
 
 /*******************************************************************/
-/*                                                                 */
+/*                                                                */
 /*                       CLONING & COPY                            */
 /*                  Replicate an existing GEN                      */
 /*                                                                 */
@@ -1201,23 +1200,20 @@ trap0(char *e, GEN r, GEN f)
 const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0 };
 
 static GEN
-list_internal_copy(GEN z, long n, long nmax)
+list_internal_copy(GEN z, long nmax)
 {
-  long i;
-  GEN a;
-  if (!nmax) return NULL;
-  a = (GEN)gpmalloc(nmax * sizeof(long));
-  for (i = 0; i < n; i++) gel(a,i) = gclone( gel(z,i) );
-  return a;
+  GEN a = (GEN)gpmalloc(nmax * sizeof(long));
+  long i, l = lg(z);
+  for (i = 1; i < l; i++) gel(a,i) = gclone( gel(z,i) );
+  a[0] = z[0]; return a;
 }
 
 static void
 listassign(GEN x, GEN y)
 {
-  long n = list_n(x), nmax = list_nmax(x);
-  list_n(y) = n;
+  long nmax = list_nmax(x);
   list_nmax(y) = nmax;
-  list_data(y) = list_internal_copy(list_data(x), n, nmax);
+  list_data(y) = list_internal_copy(list_data(x), nmax);
 }
 
 GEN
@@ -1419,7 +1415,7 @@ taille0(GEN x)
     {
       case t_INT: return lgefint(x);
       case t_LIST:
-        x = dummy_vec_from_list(x, &lx);
+        x = list_data(x); lx = lg(x);
         tx = t_VEC; break;
       default: return lg(x);
     }
