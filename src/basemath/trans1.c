@@ -453,7 +453,7 @@ powrfrac(GEN x, long n, long d)
 {
   long z;
   if (!n) return real_1(lg(x));
-  z = gcdss(n, d); if (z > 1) { n /= z; d /= z; }
+  z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
   if (d == 1) return gpowgs(x, n);
   x = gpowgs(x, n);
   if (d == 2) return sqrtr(x);

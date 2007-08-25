@@ -1439,7 +1439,7 @@ checkdeflate(GEN x)
 {
   ulong d, i, lx = (ulong)lg(x);
   for (i=3; i<lx; i++)
-    if (!gcmp0(gel(x,i))) { d = gcduu(d,i-2); if (d == 1) break; }
+    if (!gcmp0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
   return (long)d;
 }
 

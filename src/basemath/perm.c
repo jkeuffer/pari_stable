@@ -546,13 +546,13 @@ cyc_pow(GEN cyc, long exp)
   for (r = j = 1; j < lg(cyc); j++)
   {
     long n = lg(cyc[j]) - 1;
-    r += gcdss(n, exp);
+    r += cgcd(n, exp);
   }
   c = cgetg(r, t_VEC);
   for (r = j = 1; j < lg(cyc); j++)
   {
     GEN v = gel(cyc,j);
-    long n = lg(v) - 1, e = smodss(exp,n), g = (long)gcduu(n, e), m = n / g;
+    long n = lg(v) - 1, e = smodss(exp,n), g = (long)ugcd(n, e), m = n / g;
     for (i = 0; i < g; i++)
     {
       GEN p = cgetg(m+1, t_VECSMALL);

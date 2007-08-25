@@ -2208,7 +2208,7 @@ ellrootno_p(GEN e, GEN p, ulong ex)
   if (ex == 1) return -kronecker(negi(gel(e,11)),p);
   j=gel(e,13);
   if (!gcmp0(j) && Q_pval(j,p) < 0) return krosi(-1,p);
-  ep = 12 / gcduu(12, Z_pval(gel(e,12),p));
+  ep = 12 / ugcd(12, Z_pval(gel(e,12),p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
 }
@@ -3604,7 +3604,7 @@ best_in_cycle(GEN e, GEN p, long k)
   for (i=2; i+i<k; i++)
   {
     q = addell(e,q,p0);
-    if (gcduu(i,k)==1 && smaller_x(gel(q,1), gel(p,1))) p = q;
+    if (ugcd(i,k)==1 && smaller_x(gel(q,1), gel(p,1))) p = q;
   }
   return (gsigne(d_ellLHS(e,p)) < 0)? invell(e,p): p;
 }
@@ -3812,7 +3812,7 @@ torsbound(GEN e)
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
     if (umodiu(D, prime))
     {
-      b = gcduu(b, prime+1 - itos(apell0(e, (ulong)prime)));
+      b = ugcd(b, prime+1 - itos(apell0(e, (ulong)prime)));
       avma = av;
       if (b == 1) break;
       if (b == bold) m++; else { bold = b; m = 0; }

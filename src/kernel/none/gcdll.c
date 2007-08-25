@@ -82,7 +82,7 @@ mygcduodd(ulong a, ulong b)
 
 /* modified right shift binary algorithm with at most one division */
 long
-gcdss(long a,long b)
+cgcd(long a,long b)
 {
   long v;
   a=labs(a); if (!b) return a;
@@ -93,7 +93,7 @@ gcdss(long a,long b)
   return (long)(mygcduodd((ulong)(a>>v), (ulong)(b>>v)) << v);
 }
 long
-gcduu(ulong a,ulong b)
+ugcd(ulong a,ulong b)
 {
   long v;
   if (!b) return a;
@@ -118,7 +118,7 @@ igcduu(ulong a, ulong b)
 long
 clcm(long a,long b)
 {
-  long d = gcdss(a,b);
+  long d = cgcd(a,b);
   if (!d) return 0;
   return d == 1? a*b: a*(b/d);
 }

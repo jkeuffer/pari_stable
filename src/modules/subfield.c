@@ -165,7 +165,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
       {
         if (++lpn >= BIL) pari_err(talker,"overflow in calc_block");
         pn[lpn] = n[j]; pnon[lpn] = j;
-        ngcd = gcduu(ngcd, n[j]);
+        ngcd = ugcd(ngcd, n[j]);
       }
     if (dk % ngcd) continue;
     T = (1<<lpn) - 1;

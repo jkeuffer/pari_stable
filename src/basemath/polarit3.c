@@ -1346,7 +1346,7 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
 {
   pari_sp ltop = avma, av;
   GEN SP, SQ, MP, MQ, M, FP, FQ, E, V, IR, res;
-  long np = degpol(P), nq = degpol(Q), d = gcdss(np,nq);
+  long np = degpol(P), nq = degpol(Q), d = cgcd(np,nq);
   long i, vp = varn(P), vq = varn(Q);
 
   if (d==1) return mkcolcopy(P);
@@ -2905,7 +2905,7 @@ fpinit_check(GEN p, long n, long l)
   if (!q) {avma=ltop; return 0;}
   o = itos(order(mkintmodu(q,n)));
   avma = ltop;
-  return ( gcdss((n-1)/o,l) == 1 );
+  return ( cgcd((n-1)/o,l) == 1 );
 }
 
 /* let k=2 if p%4==1, and k=4 else and assume k*p does not divide l.

@@ -112,7 +112,7 @@ L(GEN n, ulong q, long bitprec)
   {
     GEN t;
     hn += nmodq; if (hn >= q) hn -= q;
-    if (gcduu(q, h) > 1) continue;
+    if (ugcd(q, h) > 1) continue;
     r = gsubgs(g(q,h), hn << 1);
     t = gcmp0(r)? addrs(res, 1): addrr(res, mpcos(gmul(pi_q,r)));
     affrr(t, res);

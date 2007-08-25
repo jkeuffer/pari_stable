@@ -607,7 +607,7 @@ gmodgs(GEN x, long y)
       return modis(x,y);
 
     case t_INTMOD: z=cgetg(3,tx);
-      i = gcdss(smodis(gel(x,1), y), y);
+      i = cgcd(smodis(gel(x,1), y), y);
       gel(z,1) = utoi(i);
       gel(z,2) = modis(gel(x,2), i); return z;
 

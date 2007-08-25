@@ -1114,7 +1114,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
 
     /* check that gcd_{P|p} f_P | n_p */
     for (j=2; gcd>1 && j<=ldec; j++)
-      gcd = gcduu(gcd, itou(gmael(dec,j,4)));
+      gcd = ugcd(gcd, itou(gmael(dec,j,4)));
 
     gcdlist[i]=gcd;
 

@@ -206,7 +206,7 @@ znstar_conductor(long n, GEN H)
       for (j = 1; j < p; j++)
       {
 	z += q;
-	if (!bitvec_test(gel(H,3),z) && gcduu(z,n)==1)
+	if (!bitvec_test(gel(H,3),z) && ugcd(z,n)==1)
           break;
       } 
       if ( j < p )
@@ -241,7 +241,7 @@ znstar_cosets(long n, long phi_n, GEN H)
   GEN     bits   = bitvec_alloc(n);
   for (k = 1; k <= index; k++)
   {
-    for (c++ ; bitvec_test(bits,c) || gcduu(c,n)!=1; c++);
+    for (c++ ; bitvec_test(bits,c) || ugcd(c,n)!=1; c++);
     cosets[k]=c;
     znstar_coset_bits_inplace(n, H, bits, c);
   }
@@ -332,7 +332,7 @@ lift_check_modulus(GEN H, long n)
       H = gel(H,2);
     case t_INT:
       h=smodis(H,n);
-      if (gcduu(h,n)!=1)
+      if (ugcd(h,n)!=1)
 	pari_err(talker,"generators must be prime to conductor in galoissubcyclo");
       return h;
   }
@@ -755,8 +755,8 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
     pari_err(talker,"degree does not divide phi(n) in polsubcyclo");
   o = itos(gel(Z,1));
   g = itos(gmael3(Z,3,1,2));
-  p = n/gcduu(n,o); /* p^a/gcd(p^a,phi(p^a))=p*/
-  r = gcduu(d,n); /* = p^(v_p(d)) < n */
+  p = n/ugcd(n,o); /* p^a/gcd(p^a,phi(p^a))=p*/
+  r = ugcd(d,n); /* = p^(v_p(d)) < n */
   n = r*p; /* n is now the conductor */
   o = n-r; /* = phi(n) */
   if (o == d) return polcyclo(n,v);
@@ -839,7 +839,7 @@ factor_Aurifeuille(GEN p, long n)
     for (j=3;j<n;j+=2)
     {
       s = Fp_mul(z2, s, le);
-      if (gcduu(j,m)==1)
+      if (ugcd(j,m)==1)
         f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
     }
   }
@@ -854,7 +854,7 @@ factor_Aurifeuille(GEN p, long n)
     for(j=3;j<n;j+=2)
     {
       s = Fp_mul(z2,s,le);
-      if (gcduu(j,m)==1)
+      if (ugcd(j,m)==1)
         f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
     }
   }
@@ -867,7 +867,7 @@ factor_Aurifeuille(GEN p, long n)
     for(j=2;j<n;j++)
     {
       s = Fp_mul(z,s,le);
-      if (gcduu(j,n)==1)
+      if (ugcd(j,n)==1)
         f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
     }
   }

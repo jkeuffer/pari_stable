@@ -2366,7 +2366,7 @@ gmulsg(long s, GEN y)
     case t_FRAC:
       if (!s) return gen_0;
       z = cgetg(3,t_FRAC);
-      i = gcdss(s, smodis(gel(y,2), s));
+      i = cgcd(s, smodis(gel(y,2), s));
       if (i == 1)
       {
         gel(z,2) = icopy(gel(y,2));
@@ -2455,7 +2455,7 @@ gdivgs(GEN x, long s)
       av = avma; z = divis_rem(x,s,&i);
       if (!i) return z;
 
-      i = gcdss(s, i);
+      i = cgcd(s, i);
       avma=av; z = cgetg(3,t_FRAC);
       if (i == 1)
         y = icopy(x);
@@ -2477,7 +2477,7 @@ gdivgs(GEN x, long s)
     case t_FFELT: return FF_Z_Z_muldiv(x,gen_1,stoi(s));
 
     case t_FRAC: z = cgetg(3, t_FRAC);
-      i = gcdss(s, smodis(gel(x,1), s));
+      i = cgcd(s, smodis(gel(x,1), s));
       if (i == 1)
       {
         gel(z,2) = mulsi(s, gel(x,2));

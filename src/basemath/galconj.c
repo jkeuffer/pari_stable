@@ -1507,22 +1507,22 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       {
 	if (!(group&ga_all_normal) || o > order || 
 	    (o == order && (plift == 0 || norm_o > deg 
-			    || (norm_o == deg && gcduu(p-1,n) > (long)karma ))))
+			    || (norm_o == deg && ugcd(p-1,n) > (long)karma ))))
 	{
 	  deg = norm_o;
 	  order = o;
 	  plift = p;
-	  karma=gcduu(p-1,n);
+	  karma=ugcd(p-1,n);
 	  pp = primepointer;
 	  group |= ga_all_normal;
 	}
       }
       else if (!(group&ga_all_normal) && (plift == 0 || o > order 
-	    || ( o == order && (long)gcduu(p-1,n) > (long)karma )))
+	    || ( o == order && (long)ugcd(p-1,n) > (long)karma )))
       {
 	order = o;
 	plift = p;
-	karma=gcduu(p-1,n);
+	karma=ugcd(p-1,n);
 	pp = primepointer;
       }
     }
@@ -2719,7 +2719,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       wg = cgetg(e+2,t_VECSMALL);
       wg[e+1] = deg;
       for (i=e; i>=1; i--)
-        wg[i]=gcduu(wg[i+1], w[i]);
+        wg[i]=ugcd(wg[i+1], w[i]);
       for (i=1; i<lg(O); i++) oX[i] = 0;
       for (f=1; f<=e; f++)
       { 
@@ -2730,7 +2730,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
         sel = Fl_powu(s,el,deg); 
         if (DEBUGLEVEL >= 6)
           fprintferr("GaloisConj: B=%Z\n", Bel);
-        sr  = gcdss(stpow(sel,p,deg),deg);
+        sr  = cgcd(stpow(sel,p,deg),deg);
         if (DEBUGLEVEL >= 6)
           fprintferr("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
               dg, sel, deg, a, w[f], wg[f+1], sr);
@@ -2883,7 +2883,7 @@ numberofconjugates(GEN T, long pdepart)
   GEN     L;
   n = degpol(T);
   card = sturm(T);
-  card = gcduu(card, n - card);
+  card = ugcd(card, n - card);
   nbmax = (n<<1) + 1;
   if (nbmax < 20) nbmax=20;
   nbtest = 0;
@@ -2906,8 +2906,8 @@ numberofconjugates(GEN T, long pdepart)
       for (i = 1; i <= n; i++) L[i] = 0;
       for (i = 1; i < lg(S[1]) && !isram; i++) L[ mael(S,1,i) ]++;
       s = L[1];
-      for (i = 2; i <= n; i++) s = gcduu(s, L[i] * i);
-      card = gcduu(s, card);
+      for (i = 2; i <= n; i++) s = ugcd(s, L[i] * i);
+      card = ugcd(s, card);
     }
     if (DEBUGLEVEL >= 6)
       fprintferr("NumberOfConjugates:Nbtest=%ld,card=%ld,p=%ld\n", nbtest,
