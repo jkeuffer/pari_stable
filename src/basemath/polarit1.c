@@ -975,7 +975,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       }
     }
     j = lg(f2); if (j==3) break;
-    e *= p; f = poldeflate_i(f2, p);
+    e *= p; f = RgX_deflate(f2, p);
   }
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
@@ -1263,7 +1263,7 @@ FpX_factor_i(GEN f, GEN pp)
     if (!p) break;
     j = degpol(f2); if (!j) break;
     if (j % p) pari_err(talker, "factmod: %lu is not prime", p);
-    e *= p; f = poldeflate_i(f2, p);
+    e *= p; f = RgX_deflate(f2, p);
   }
   setlg(t, nbfact);
   setlg(E, nbfact); return sort_factor_pol(mkvec2((GEN)t,E), cmpii);
@@ -2204,7 +2204,7 @@ polfnf(GEN a, GEN T)
 static GEN
 FqX_frob_deflate(GEN f, GEN T, GEN p)
 {
-  GEN F = poldeflate_i(f, itos(p)), frobinv = powiu(p, degpol(T)-1);
+  GEN F = RgX_deflate(f, itos(p)), frobinv = powiu(p, degpol(T)-1);
   long i, l = lg(F);
   for (i=2; i<l; i++) gel(F,i) = Fq_pow(gel(F,i), frobinv, T,p);
   return F;

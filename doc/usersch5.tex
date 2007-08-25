@@ -2380,6 +2380,11 @@ Euclidean quotient of the \kbd{Flx}~\kbd{A} by $X - \kbd{a}$, and sets
 
 \fun{ulong}{Flx_eval}{GEN x, ulong y, ulong p}, as \kbd{FpX\_eval}.
 
+\fun{GEN}{Flx_deflate}{GEN P, long d} assuming $P$ is a polynomial of the
+form $Q(X^d)$, return $Q$.
+
+\fun{GEN}{Flx_inflate}{GEN P, long d} returns $P(X^d)$.
+
 \fun{GEN}{FlxV_Flc_mul}{GEN V, GEN W, ulong p}, as \kbd{FpXV\_FpC\_mul}.
 
 \fun{int}{Flx_is_squarefree}{GEN z, ulong p}
@@ -2575,6 +2580,13 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
 \fun{GEN}{RgX_renormalize}{GEN x} remove leading terms in \kbd{x} which are
 equal to (necessarily inexact) zeros.
+
+\fun{GEN}{RgX_deflate}{GEN P, long d} assuming $P$ is a polynomial of the
+form $Q(X^d)$, return $Q$. Shallow function, not suitable for
+\kbd{gerepileupto}.
+
+\fun{GEN}{RgX_inflate}{GEN P, long d} return $P(X^d)$. Shallow function, not
+suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{RgX_rescale}{GEN P, GEN h} returns $h^{\deg(P)} P(x/h)$.
 \kbd{P} is an \kbd{RgX} and \kbd{h} is non-zero. (Leaves small objects on the
@@ -3202,6 +3214,11 @@ to $\kbd{P} / X^v$.
 
 \fun{long}{polvaluation_inexact}{GEN P, GEN *z} as \kbd{polvaluation}
 but use \kbd{isexactzero} instead of \kbd{gcmp0}.
+
+\fun{long}{poldeflate}{GEN P, long *d} sets \kbd{d} to the largest exponent
+such that $P$ is of the form $P(x^d)$ (use \kbd{gcmp0} to check
+coefficients), $0$ if $P$ is the zero polynomial. Returns
+\kbd{RgX_deflate(P,d)}.
 
 \fun{long}{ZX_valuation}{GEN P, GEN *z} as \kbd{polvaluation}, but assumes
 \kbd{P} has \typ{INT} coefficients.

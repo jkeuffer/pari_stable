@@ -824,7 +824,7 @@ FpXQ_minpoly(GEN x, GEN T, GEN p)
   GEN dR=FpX_deriv(R,p);
   while (signe(dR)==0)
   {
-    R  = poldeflate_i(R,itos(p));
+    R  = RgX_deflate(R,itos(p));
     dR = FpX_deriv(R,p);
   }
   G=FpX_gcd(R,dR,p);

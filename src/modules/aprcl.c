@@ -498,7 +498,7 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
     for (x=1; x<=8; x++) v8[x] = 0;
     for (x=2; x<=qs2; x++) v8[ ((3*T[x]+T[x-1]+qs2)&7) + 1 ]++;
     for (   ; x<=q-1; x++) v8[ ((3*T[q-x]+T[q-x+1]-3*qs2)&7) + 1 ]++;
-    *j2q = polinflate(gsqr(u_red_cyclo2n_ip(v8,3)), pk>>3);
+    *j2q = RgX_inflate(gsqr(u_red_cyclo2n_ip(v8,3)), pk>>3);
     *j2q = red_cyclo2n_ip(*j2q, k);
   }
   else *j2q = NULL;

@@ -183,6 +183,7 @@ BA 48- local and my can now appear anywhere in a program.
    17- library function Q_pval
 BA 18- new keyword "my" to declare lexically-scopped local variables. 
    19- new GP function listpop()
+   20- library function RgX_inflate, RgX_deflate, Flx_inflate, Flx_deflate, poldeflate
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

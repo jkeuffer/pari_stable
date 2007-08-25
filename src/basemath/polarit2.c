@@ -1420,7 +1420,7 @@ DDF(GEN a, long hint, int fl)
 
 /* A(X^d) --> A(X) */
 GEN
-poldeflate_i(GEN x0, long d)
+RgX_deflate(GEN x0, long d)
 {
   GEN z, y, x;
   long i,id, dy, dx = degpol(x0);
@@ -1472,11 +1472,11 @@ gdeflate(GEN x, long v, long d)
       y = ser2pol_i(x, lx);
       if (V % d != 0 || checkdeflate(y) % d != 0)
         pari_err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
-      y = poltoser(poldeflate_i(y, d), v, 1 + (lx-3)/d);
+      y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
       setvalp(y, V/d); return gerepilecopy(av, y);
     }
     if (checkdeflate(x) % d != 0) pari_err(cant_deflate);
-    return gerepilecopy(av, poldeflate_i(x,d));
+    return gerepilecopy(av, RgX_deflate(x,d));
   }
   if (tx == t_RFRAC)
   {
@@ -1500,12 +1500,12 @@ GEN
 poldeflate(GEN x, long *m)
 {
   *m = checkdeflate(x);
-  return poldeflate_i(x, *m);
+  return RgX_deflate(x, *m);
 }
 
 /* return x0(X^d) */
 GEN
-polinflate(GEN x0, long d)
+RgX_inflate(GEN x0, long d)
 {
   long i, id, dy, dx = degpol(x0);
   GEN x = x0 + 2, z, y;
@@ -1541,7 +1541,7 @@ ZX_DDF(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = shallowconcat(L2, DDF(polinflate(gel(L,i), v[k]), hint, 0));
+        L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), hint, 0));
       L = L2;
     }
   }
