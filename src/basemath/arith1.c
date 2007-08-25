@@ -1588,6 +1588,64 @@ Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)
 /**                      OPERATIONS MODULO m                        **/
 /**                                                                 **/
 /*********************************************************************/
+/* Assume m > 0, more efficient if 0 <= a, b < m */
+GEN
+Fp_add(GEN a, GEN b, GEN m)
+{
+  pari_sp av=avma;
+  GEN p = addii(a,b);
+  long s = signe(p);
+  if (!s) { avma = av; return gen_0; }
+  if (s > 0) /* general case */
+  {
+    GEN t = subii(p, m);
+    s = signe(t);
+    if (!s) { avma = av; return gen_0; }
+    if (s < 0) { avma = (pari_sp)p; return p; }
+    if (cmpii(t, m) < 0) return gerepileuptoint(av, t); /* general case ! */
+    p = remii(t, m);
+  }
+  else
+    p = modii(p, m);
+  return gerepileuptoint(av, p);
+}
+GEN
+Fp_sub(GEN a, GEN b, GEN m)
+{
+  pari_sp av=avma;
+  GEN p = subii(a,b);
+  long s = signe(p);
+  if (!s) { avma = av; return gen_0; }
+  if (s > 0)
+  {
+    if (cmpii(p, m) < 0) return p; /* general case ! */
+    p = remii(p, m);
+  }
+  else
+  {
+    GEN t = addii(p, m);
+    if (!s) { avma = av; return gen_0; }
+    if (s > 0) return gerepileuptoint(av, t); /* general case ! */
+    p = modii(t, m);
+  }
+  return gerepileuptoint(av, p);
+}
+GEN
+Fp_neg(GEN b, GEN m)
+{
+  pari_sp av=avma;
+  long s = signe(b);
+  GEN p;
+  if (!s) return gen_0;
+  if (s > 0)
+  {
+    p = subii(m, b);
+    if (signe(p) >= 0) return p; /* general case ! */
+    p = modii(p, m);
+  } else
+    p = remii(negi(b), m);
+  return gerepileuptoint(av, p);
+}
 
 GEN
 Fp_mul(GEN a, GEN b, GEN m)

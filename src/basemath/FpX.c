@@ -68,8 +68,15 @@ FpX_center(GEN T,GEN mod)
 GEN
 FpX_add(GEN x,GEN y,GEN p)
 {
-  GEN z = ZX_add(x,y);
-  return FpX_red(z, p);
+  long lx = lg(x), ly = lg(y), i;
+  GEN z;
+  if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) gel(z,i) = Fp_add(gel(x,i),gel(y,i), p);
+  for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
+  if (lx == ly) z = ZX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  return z;
 }
 
 GEN
@@ -79,7 +86,7 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
   GEN z;
   if (lz == 2) return scalarpol(x,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
-  gel(z,2) = modii(addii(gel(y,2),x), p);
+  gel(z,2) = Fp_add(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
   else
     for(i=3;i<lz;i++) gel(z,i) = icopy(gel(y,i));
@@ -92,7 +99,7 @@ FpX_Fp_add_shallow(GEN y,GEN x,GEN p)
   GEN z;
   if (lz == 2) return scalarpol(x,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
-  gel(z,2) = modii(addii(gel(y,2),x), p);
+  gel(z,2) = Fp_add(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
   else
     for(i=3;i<lz;i++) gel(z,i) = gel(y,i);
@@ -102,20 +109,25 @@ FpX_Fp_add_shallow(GEN y,GEN x,GEN p)
 GEN
 FpX_neg(GEN x,GEN p)
 {
-  long i,d=lg(x);
-  GEN y;
-  y=cgetg(d,t_POL); y[1]=x[1];
-  for(i=2;i<d;i++)
-    if (signe(x[i])) gel(y,i) = subii(p,gel(x,i));
-    else gel(y,i) = gen_0;
-  return y;
+  long i, lx = lg(x);
+  GEN y = cgetg(lx,t_POL);
+  y[1] = x[1];
+  for(i=2; i<lx; i++) gel(y,i) = Fp_neg(gel(x,i), p);
+  return ZX_renormalize(y, lx);
 }
 
 GEN
 FpX_sub(GEN x,GEN y,GEN p)
 {
-  GEN z = ZX_sub(x,y);
-  return FpX_red(z, p);
+  long lx = lg(x), ly = lg(y), i;
+  GEN z;
+  if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
+  for (   ; i<lx; i++) gel(z,i) = Fp_neg(gel(x,i), p);
+  if (lx == ly) z = ZX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  return z;
 }
 
 GEN

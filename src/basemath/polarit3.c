@@ -43,7 +43,7 @@ ZX_add(GEN x, GEN y)
   z = cgetg(lx,t_POL); z[1] = x[1];
   for (i=2; i<ly; i++) gel(z,i) = addii(gel(x,i),gel(y,i));
   for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
-  z = ZX_renormalize(z, lx);
+  if (lx == ly) z = ZX_renormalize(z, lx);
   if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
   return z;
 }
