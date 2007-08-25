@@ -1437,7 +1437,7 @@ RgX_deflate(GEN x0, long d)
 long
 checkdeflate(GEN x)
 {
-  ulong d, i, lx = (ulong)lg(x);
+  ulong d = 0, i, lx = (ulong)lg(x);
   for (i=3; i<lx; i++)
     if (!gcmp0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
   return (long)d;
