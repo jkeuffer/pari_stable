@@ -711,7 +711,7 @@ Fq_add(GEN x, GEN y, GEN T/*unused*/, GEN p)
   (void)T;
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
-    case 0: return modii(addii(x,y),p);
+    case 0: return Fp_add(x,y,p);
     case 1: return FpX_Fp_add(x,y,p);
     case 2: return FpX_Fp_add(y,x,p);
     case 3: return FpX_add(x,y,p);
@@ -725,7 +725,7 @@ Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p)
   (void)T;
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
-    case 0: return modii(subii(x,y),p);
+    case 0: return Fp_sub(x,y,p);
     case 1: return FpX_Fp_add(x,negi(y),p);
     case 2: return FpX_Fp_add(FpX_neg(y,p),x,p);
     case 3: return FpX_sub(x,y,p);
@@ -739,7 +739,7 @@ Fq_neg(GEN x, GEN T/*unused*/, GEN p)
   (void)T;
   switch(typ(x)==t_POL)
   {
-    case 0: return signe(x)?subii(p,x):gen_0;
+    case 0: return Fp_neg(x,p);
     case 1: return FpX_neg(x,p);
   }
   return NULL;
