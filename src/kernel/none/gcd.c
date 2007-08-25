@@ -75,12 +75,12 @@ gcdii(GEN a, GEN b)
   if (!signe(b)) return absi(a);
   /* here |a|>|b|>0. Try single precision first */
   if (lgefint(a)==3)
-    return gcduu((ulong)a[2], (ulong)b[2]);
+    return igcduu((ulong)a[2], (ulong)b[2]);
   if (lgefint(b)==3)
   {
     ulong u = resiu(a,(ulong)b[2]);
     if (!u) return absi(b);
-    return gcduu((ulong)b[2], u);
+    return igcduu((ulong)b[2], u);
   }
 
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
@@ -118,7 +118,7 @@ gcdii(GEN a, GEN b)
   }
   {
     long r[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-    r[2] = (long) ugcd((ulong)b[2], (ulong)a[2]);
+    r[2] = (long) gcduodd((ulong)b[2], (ulong)a[2]);
     avma = av; return shifti(r,v);
   }
 }

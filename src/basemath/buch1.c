@@ -171,7 +171,7 @@ quadhilbertimag(GEN D, GEN pq)
   if (h == 1) { avma=av; return pol_x(0); }
 
   get_pq(D, z, pq, &p, &q);
-  e = 24 / cgcd((p%24 - 1) * (q%24 - 1), 24);
+  e = 24 / gcduu((p%24 - 1) * (q%24 - 1), 24);
   if(DEBUGLEVEL>1) fprintferr("p = %lu, q = %lu, e = %ld\n",p,q,e);
   qfp = primeform_u(D, p);
   if (p == q)
@@ -848,7 +848,7 @@ factorquad(GEN f, long kcz, ulong limp)
 
   if (p != 1 && p <= limp)
   {
-    if (B->badprim && cgcd(p, umodiu(B->badprim,p)) > 1) return 0;
+    if (B->badprim && gcduu(p, umodiu(B->badprim,p)) > 1) return 0;
     B->primfact[++lo] = B->numFB[p]; B->exprimfact[lo] = 1;
     p = 1;
   }
@@ -909,7 +909,7 @@ END:
   if (X > B->limhash) return 0;
   if (X != 1 && X <= limp)
   {
-    if (B->badprim && cgcd(X, umodiu(B->badprim,X)) > 1) return 0;
+    if (B->badprim && gcduu(X, umodiu(B->badprim,X)) > 1) return 0;
     B->primfact[++lo] = B->numFB[X]; B->exprimfact[lo] = 1;
     X = 1;
   }

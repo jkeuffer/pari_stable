@@ -29,12 +29,12 @@ gcdii(GEN a, GEN b)
   if (!signe(b)) return absi(a);
   /* here |a|>|b|>0. Try single precision first */
   if (lgefint(a)==3)
-    return gcduu((ulong)a[2], (ulong)b[2]);
+    return igcduu((ulong)a[2], (ulong)b[2]);
   if (lgefint(b)==3)
   {
     ulong u = resiu(a,(ulong)b[2]);
     if (!u) return absi(b);
-    return gcduu((ulong)b[2], u);
+    return igcduu((ulong)b[2], u);
   }
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
   av = avma; (void)new_chunk(lgefint(b)+1); /* HACK */

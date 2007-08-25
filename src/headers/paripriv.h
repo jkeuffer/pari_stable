@@ -260,7 +260,7 @@ GEN   ifac_sumdiv(GEN n, long hint);
 GEN   ifac_sumdivk(GEN n, long k, long hint);
 int   miller(GEN n, long k);
 GEN   mpqs(GEN N);
-ulong ugcd(ulong x, ulong y);
+ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
 long  u_lvalrem_stop(ulong *n, ulong p, int *stop);
 

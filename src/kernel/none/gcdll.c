@@ -19,15 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**		          GCD                            	      **/
 /**                                                                   **/
 /***********************************************************************/
-
-/* Ultra-fast private ulong gcd for trial divisions.  Called with y odd;
-   x can be arbitrary (but will most of the time be smaller than y).
-   Will also be used from inside ifactor2.c, so it's `semi-private' really.
-   --GN */
+/* Fast ulong gcd.  Called with y odd; x can be arbitrary (but will most of
+ * the time be smaller than y). */
 
 /* Gotos are Harmful, and Programming is a Science.  E.W.Dijkstra. */
 ulong
-ugcd(ulong x, ulong y)         /* assume y&1==1, y > 1 */
+gcduodd(ulong x, ulong y)         /* assume y&1==1, y > 1 */
 {
   if (!x) return y;
   /* fix up x */
@@ -61,50 +58,69 @@ ugcd(ulong x, ulong y)         /* assume y&1==1, y > 1 */
 /* Gotos are useful, and Programming is an Art.  D.E.Knuth. */
 /* PS: Of course written with Dijkstra's lessons firmly in mind... --GN */
 
+/* at least one of a or b is odd, return gcd(a,b) */
+INLINE ulong
+mygcduodd(ulong a, ulong b)
+{
+  ulong c;
+  if (b&1)
+  {
+    if (a==1 || b==1)
+      c = 1;
+    else
+     c = gcduodd(a, b);
+  }
+  else
+  {
+    if (a==1)
+      c = 1;
+    else
+      c = gcduodd(b, a);
+  }
+  return c;
+}
+
 /* modified right shift binary algorithm with at most one division */
 long
-cgcd(long a,long b)
+gcdss(long a,long b)
 {
   long v;
   a=labs(a); if (!b) return a;
   b=labs(b); if (!a) return b;
   if (a>b) { a %= b; if (!a) return b; }
-  else { b %= a; if (!b) return a; }
-  v=vals(a|b); a>>=v; b>>=v;
-  if (a==1 || b==1) return 1L<<v;
-  if (b&1)
-    return ((long)ugcd((ulong)a, (ulong)b)) << v;
-  else
-    return ((long)ugcd((ulong)b, (ulong)a)) << v;
+  else     { b %= a; if (!b) return a; }
+  v = vals(a|b);
+  return (long)(mygcduodd((ulong)(a>>v), (ulong)(b>>v)) << v);
+}
+long
+gcduu(ulong a,ulong b)
+{
+  long v;
+  if (!b) return a;
+  if (!a) return b;
+  if (a>b) { a %= b; if (!a) return b; }
+  else     { b %= a; if (!b) return a; }
+  v = vals(a|b);
+  return mygcduodd(a>>v, b>>v) << v;
 }
 
-/*Warning: will overflow silently if lcm does not fit*/
+/* For gcdii(): assume a>b>0, return gcd(a,b) as a GEN */
+static GEN
+igcduu(ulong a, ulong b)
+{
+  long v;
+  a %= b; if (!a) return utoipos(b);
+  v = vals(a|b);
+  return utoipos( mygcduodd(a>>v, b>>v) << v );
+}
+
+/*Warning: overflows silently if lcm does not fit*/
 long
 clcm(long a,long b)
 {
-  long d;
-  if(!a) return 0;
-  d=cgcd(a,b);
-  if(d!=1) return a*(b/d);
-  return a*b;
-}
-
-/* assume a>b>0, return gcd(a,b) as a GEN (for gcdii) */
-static GEN
-gcduu(ulong a, ulong b)
-{
-  GEN r = cgeti(3);
-  long v;
-
-  r[1] = evalsigne(1)|evallgefint(3);
-  a %= b; if (!a) { r[2]=(long)b; return r; }
-  v=vals(a|b); a>>=v; b>>=v;
-  if (a==1 || b==1) { r[2]=(long)(1UL<<v); return r; }
-  if (b&1)
-    r[2] = (long)(ugcd((ulong)a, (ulong)b) << v);
-  else
-    r[2] = (long)(ugcd((ulong)b, (ulong)a) << v);
-  return r;
+  long d = gcdss(a,b);
+  if (!d) return 0;
+  return d == 1? a*b: a*(b/d);
 }
 
 /********************************************************************/

@@ -378,13 +378,13 @@ static int
 iu_coprime(GEN N, ulong u)
 {
   const ulong n = umodiu(N, u);
-  return (n == 1 || ugcd(n, u) == 1);
+  return (n == 1 || gcduodd(n, u) == 1);
 }
 /* assume u odd, u > 1 */
 static int
 uu_coprime(ulong n, ulong u)
 {
-  return (n == 1 || ugcd(n, u) == 1);
+  return (n == 1 || gcduodd(n, u) == 1);
 }
 
 /* Fl_BSW_psp */
@@ -2110,7 +2110,7 @@ squfof_ambig(long a, long B, long dd, GEN D)
     if (q > 1)
       fprintferr("SQUFOF: found factor %ld from ambiguous form\n"
                  "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
-                 q / cgcd(q,15), cnt, timer2());
+                 q / gcduu(q,15), cnt, timer2());
     else
       fprintferr("SQUFOF: ...found nothing on the ambiguous cycle\n"
 	         "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
@@ -2283,7 +2283,7 @@ squfof(GEN n)
 	}
 	if (a > 0)
 	{ /* not blacklisted */
-	  q = cgcd(a, b1); /* imprimitive form? */
+	  q = gcduu(a, b1); /* imprimitive form? */
 	  if (q > 1)
 	  { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
 	    avma = av;
@@ -2325,7 +2325,7 @@ squfof(GEN n)
 	}
 	if (a > 0)
 	{ /* not blacklisted */
-	  q = cgcd(a, b2); /* imprimitive form? */
+	  q = gcduu(a, b2); /* imprimitive form? */
 	  /* NB if b2 is even, a is odd, so the gcd is always odd */
 	  if (q > 1)
 	  { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */

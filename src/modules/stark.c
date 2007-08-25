@@ -1457,7 +1457,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
-    gel(R->rayZ,i) = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
+    gel(R->rayZ,i) = (gcduu(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gen_0;
 
   gptr[0] = &(R->L0);
   gptr[1] = &(R->L2);  gptr[2] = &(R->rayZ);

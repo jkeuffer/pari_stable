@@ -1065,7 +1065,7 @@ vstar(GEN p,GEN h, long *L, long *E)
       if (first || w*k < v*j) { v = w; k = j; }
       first = 0;
     }
-  w = cgcd(v,k);
+  w = (long)gcduu(v,k);
   *L = v/w;
   *E = k/w;
 }

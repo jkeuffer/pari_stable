@@ -1544,8 +1544,9 @@ obtained is never a square.
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
-\fun{long}{cgcd}{long x, long y}, returns the GCD of the \typ{long}s \kbd{x}
-and \kbd{y}.
+\fun{long}{gcdss}{long x, long y} returns the GCD of \kbd{x} and \kbd{y}.
+
+\fun{ulong}{gcduu}{ulong x, ulong y} returns the GCD of \kbd{x} and \kbd{y}.
 
 \fun{long}{cbezout}{long a,long b, long *u,long *v}, returns the GCD
 $d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients

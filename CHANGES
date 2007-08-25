@@ -162,6 +162,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    46- cleaned up splines handling [ ploth(,,,256) ] : remove quark_gen & QUARK
 BA 47- implicitly local variables are lexically-scoped
 BA 48- local and my can now appear anywhere in a program.
+   49- rename cgcd -> gcdss
 
   Added
     1- library functions expu, adduu, subuu
@@ -187,6 +188,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
    19- new GP function listpop()
    20- library function RgX_inflate, RgX_deflate, Flx_inflate, Flx_deflate, poldeflate
    21- library function Fp_neg, Fp_add, Fp_sub
+   22- library function gcduu
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

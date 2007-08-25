@@ -712,7 +712,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   gen = gel(res,3); l = lg(cyc);
   for(i=1; i<l; i++)
   {
-    if (cgcd(umodiu(gel(cyc,i), drel), drel) == 1) break;
+    if (gcduu(umodiu(gel(cyc,i), drel), drel) == 1) break;
     fa_pr_append(nf,bnfabs,gmael3(gen,i,1,1),&prod,&S1,&S2);
   }
   if (!galois)
