@@ -86,9 +86,6 @@ extern ulong compatible;
 enum { NONE, WARN, OLDFUN, OLDALL };
 #define new_fun_set (compatible == NONE || compatible == WARN)
 
-/* return type for GP functions */
-enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
-
 #ifdef STACK_CHECK
 extern THREAD void *PARI_stack_limit;
 #endif

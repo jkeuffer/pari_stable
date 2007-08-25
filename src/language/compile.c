@@ -494,6 +494,9 @@ cattovec(long n, long fnum)
   return stack;
 }
 
+/* return type for GP functions */
+enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
+
 static void 
 compilefunc(long n, int mode)
 {
