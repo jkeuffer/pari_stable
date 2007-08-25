@@ -70,9 +70,10 @@ course)
 byteptr ptr = diffptr;
 ulong p = 0;
 @eprog
-\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK(p, ptr)} repeatedly will
-assign the successive prime numbers to $p$. Overrunning the prime table boundary
-will raise the error \tet{primer1}, which will just print the error message:
+\noindent calling the macro \tet{NEXT_PRIME_VIADIFF_CHECK}$(p, \var{ptr})$
+repeatedly will assign the successive prime numbers to $p$. Overrunning the
+prime table boundary will raise the error \tet{primer1}, which will just
+print the error message:
 
 \kbd{*** not enough precomputed primes}
 
