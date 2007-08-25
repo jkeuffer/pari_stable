@@ -121,12 +121,22 @@ FpX_sub(GEN x,GEN y,GEN p)
 {
   long lx = lg(x), ly = lg(y), i;
   GEN z;
-  if (lx < ly) swapspec(x,y, lx,ly);
-  z = cgetg(lx,t_POL); z[1] = x[1];
-  for (i=2; i<ly; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
-  for (   ; i<lx; i++) gel(z,i) = Fp_neg(gel(x,i), p);
-  if (lx == ly) z = ZX_renormalize(z, lx);
-  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  if (lx >= ly)
+  {
+    z = cgetg(lx,t_POL); z[1] = x[1];
+    for (i=2; i<ly; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
+    for (   ; i<lx; i++) gel(z,i) = Fp_neg(gel(x,i), p);
+    z = ZX_renormalize(z, lx);
+    if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  }
+  else
+  {
+    z = cgetg(ly,t_POL); z[1] = y[1];
+    for (i=2; i<lx; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
+    for (   ; i<ly; i++) gel(z,i) = Fp_neg(gel(y,i), p);
+    z = ZX_renormalize(z, lx);
+    if (!lgpol(z)) { avma = (pari_sp)(z + ly); return zeropol(varn(x)); }
+  }
   return z;
 }
 

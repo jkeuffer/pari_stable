@@ -51,25 +51,26 @@ ZX_add(GEN x, GEN y)
 GEN
 ZX_sub(GEN x,GEN y)
 {
-  long lx,ly,i,lz;
+  long i, lx = lg(x), ly = lg(y);
   GEN z;
-  lx = lg(x); ly = lg(y);
-  lz=max(lx,ly);
-  z = cgetg(lz,t_POL);
   if (lx >= ly)
   {
-    z[1] = x[1];
+    z = cgetg(lx,t_POL); z[1] = x[1];
     for (i=2; i<ly; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
-    for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
-    if (lx == ly) z = ZX_renormalize(z, lz);
+    if (lx == ly)
+    {
+      z = ZX_renormalize(z, lx);
+      if (!lgpol(z)) { avma = (pari_sp)(z + lx); z = zeropol(varn(x)); }
+    }
+    else
+      for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
   }
   else
   {
-    z[1] = y[1];
+    z = cgetg(ly,t_POL); z[1] = y[1];
     for (i=2; i<lx; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
     for (   ; i<ly; i++) gel(z,i) = negi(gel(y,i));
   }
-  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
   return z;
 }
 
