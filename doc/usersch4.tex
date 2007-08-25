@@ -1116,11 +1116,20 @@ instance the native one or GNU MP, with incompatible internal structures
 
 \fun{long}{mpodd}{GEN x} which is 1 if \kbd{x} is odd, and 0 otherwise.
 
-\fun{long}{mod2}{GEN x}, \fun{}{mod4}{x}, and so on up to \fun{}{mod64}{x},
-which give the residue class of \kbd{x} modulo the corresponding power of
-2, for \emph{positive}~\kbd{x}. By definition, $\kbd{mod}n(x) :=
-\kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the sign), and the
-result is undefined if $x = 0$.
+\fun{long}{mod2}{GEN x}
+
+\fun{long}{mod4}{GEN x}
+
+\fun{long}{mod8}{GEN x}
+
+\fun{long}{mod16}{GEN x}
+
+\fun{long}{mod32}{GEN x}
+
+\fun{long}{mod64}{GEN x} give the residue class of \kbd{x} modulo the
+corresponding power of 2, for \emph{positive}~\kbd{x}. By definition,
+$\kbd{mod}n(x) := \kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the
+sign), and the result is undefined if $x = 0$.
 
 These macros directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
