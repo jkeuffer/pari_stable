@@ -1085,6 +1085,11 @@ GEN     closure_evalgen(GEN code);
 void    closure_evalvoid(GEN code);
 void    closure_reset(void);
 void    freeep(entree *ep);
+GEN     get_lex(long vn);
+long    loop_break(void);
+void    pop_lex(void);
+void    push_lex(GEN a);
+void    set_lex(long vn, GEN x);
 
 /* FF.c */
 

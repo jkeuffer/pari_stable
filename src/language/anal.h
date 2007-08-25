@@ -49,7 +49,6 @@ void   changevalue(entree *ep, GEN val);
 entree *do_alias(entree *ep);
 entree *is_entry_intern(const char *s, entree **table, long *hash);
 long   is_keyword_char(char c);
-long   loop_break(void);
 void   reset_break(void);
 long   did_break(void);
 
@@ -209,10 +208,5 @@ void **stack_base(gp2c_stack *s);
 void stack_alloc(gp2c_stack *s, long nb);
 void stack_init(gp2c_stack *s, size_t size, void **data);
 long stack_new(gp2c_stack *s);
-
-void push_lex(GEN a);
-void set_lex(long vn, GEN x);
-GEN  get_lex(long vn);
-void pop_lex(void);
 
 ENDEXTERN
