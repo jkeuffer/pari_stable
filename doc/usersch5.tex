@@ -2241,6 +2241,12 @@ dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
 assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
 an \kbd{Fp}.
 
+\fun{GEN}{FpV_dotproduct}{GEN x,GEN y,GEN p} scalar product of
+$x$ and $y$.
+
+\fun{GEN}{FpV_dotsquare}{GEN x, GEN p} scalar product of $x$ with itself.
+has \typ{INT} entries.
+
 \subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
 asymptotically efficient ($O(n^3)$ standard algorithms).
 
@@ -4039,14 +4045,14 @@ the right name in the first place.
 
 \subsec{Linear algebra}
 
-\fun{GEN}{dotproduct}{GEN x,GEN y} returns the scala product of $x$ and $y$
+\fun{GEN}{RgV_dotproduct}{GEN x,GEN y} returns the scala product of $x$ and $y$
 
-\fun{GEN}{dotproduct_i}{GEN x,GEN y} as \kbd{dotproduct} assuming $x$ and $y$
+\fun{GEN}{ZV_dotproduct}{GEN x,GEN y} as \kbd{RgV_dotproduct} assuming $x$ and $y$
 have \typ{INT} entries.
 
-\fun{GEN}{dotsquare}{GEN x} returns the scala product of $x$ with itself.
+\fun{GEN}{RgV_dotsquare}{GEN x} returns the scala product of $x$ with itself.
 
-\fun{GEN}{dotsquare_i}{GEN x} as \kbd{dotsquare} assuming $x$
+\fun{GEN}{ZV_dotsquare}{GEN x} as \kbd{RgV_dotsquare} assuming $x$
 has \typ{INT} entries.
 
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} associated to the

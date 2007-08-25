@@ -178,7 +178,7 @@ BA 48- local and my can now appear anywhere in a program.
    12- library function chk_gerepileupto, dbg_gerepile, dbg_gerepileupto
    13- library function gen_sort_uniq, gen_indexsort_uniq+add flag 8 in vecsort
    14- library function remi2n, cmp_RgX, gen_cmp_RgX
-   15- library function dotproduct, dotproduct_i, dotsquare, dotsquare_i
+   15- library function RgV_dotproduct, ZV_dotproduct, RgV_dotsquare, ZV_dotsquare, FpV_dotproduct, FpV_dotsquare
    16- library function FpX_Fp_add_shallow
    17- library function Q_pval
 BA 18- new keyword "my" to declare lexically-scopped local variables. 

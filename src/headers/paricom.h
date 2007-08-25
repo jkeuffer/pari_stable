@@ -356,6 +356,7 @@ enum manage_var_t {
 #define FpX_div(x,y,p)   (FpX_divrem((x),(y),(p), NULL))
 #define FpX_rem(x,y,p)   (FpX_divrem((x),(y),(p), ONLY_REM))
 #define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
+#define FpV_FpC_mul(x,y,p) FpV_dotproduct((x),(y),(p)) 
 
 #define FpX_renormalize   ZX_renormalize
 #define FpXX_renormalize  ZX_renormalize

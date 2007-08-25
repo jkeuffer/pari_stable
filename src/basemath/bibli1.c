@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* scalar product x.x */
 GEN
-dotsquare(GEN x)
+RgV_dotsquare(GEN x)
 {
   long i, lx;
   pari_sp av;
@@ -42,12 +42,12 @@ dotsquare(GEN x)
 
 /* scalar product x.y */
 GEN
-dotproduct(GEN x,GEN y)
+RgV_dotproduct(GEN x,GEN y)
 {
   long i, lx;
   pari_sp av;
   GEN z;
-  if (x == y) return dotsquare(x);
+  if (x == y) return RgV_dotsquare(x);
   lx = lg(x);
   if (lx == 1) return gen_0;
   av = avma;
@@ -58,7 +58,7 @@ dotproduct(GEN x,GEN y)
 }
 
 GEN
-dotsquare_i(GEN x)
+ZV_dotsquare(GEN x)
 {
   long i, lx;
   pari_sp av;
@@ -73,12 +73,12 @@ dotsquare_i(GEN x)
 }
 
 GEN
-dotproduct_i(GEN x,GEN y)
+ZV_dotproduct(GEN x,GEN y)
 {
   long i, lx;
   pari_sp av;
   GEN z;
-  if (x == y) return dotsquare_i(x);
+  if (x == y) return ZV_dotsquare(x);
   lx = lg(x);
   if (lx == 1) return gen_0;
   av = avma;
@@ -253,11 +253,11 @@ gram_schmidt(GEN e, GEN *ptB)
   {
     GEN p1 = NULL;
     pari_sp av;
-    gel(B,i) = dotsquare(gel(f,i));
+    gel(B,i) = RgV_dotsquare(gel(f,i));
     gel(iB,i) = ginv(gel(B,i)); av = avma;
     for (j=1; j<i; j++)
     {
-      GEN mu = gmul(dotproduct(gel(e,i),gel(f,j)), gel(iB,j));
+      GEN mu = gmul(RgV_dotproduct(gel(e,i),gel(f,j)), gel(iB,j));
       GEN p2 = gmul(mu, gel(f,j));
       p1 = p1? gadd(p1,p2): p2;
     }
@@ -635,7 +635,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
     if (j==k || fl[j])
     {
       pari_sp av = avma;
-      u = gram? gcoeff(x,k,j): dotproduct_i(gel(x,k), gel(x,j));
+      u = gram? gcoeff(x,k,j): ZV_dotproduct(gel(x,k), gel(x,j));
       for (i=1; i<j; i++)
         if (fl[i])
         {
@@ -1438,7 +1438,7 @@ gram_matrix(GEN x)
   {
     gel(g,i) = cgetg(lx,t_COL);
     for (j=1; j<=i; j++)
-      gcoeff(g,i,j) = gcoeff(g,j,i) = dotproduct(gel(x,i),gel(x,j));
+      gcoeff(g,i,j) = gcoeff(g,j,i) = RgV_dotproduct(gel(x,i),gel(x,j));
   }
   return g;
 }
@@ -1496,9 +1496,9 @@ lllintpartialall(GEN m, long flag)
   tm1 = flag? matid(ncol): NULL;
   {
     const pari_sp av2 = avma;
-    GEN dot11 = dotsquare_i(gel(m,1));
-    GEN dot22 = dotsquare_i(gel(m,2));
-    GEN dot12 = dotproduct_i(gel(m,1), gel(m,2));
+    GEN dot11 = ZV_dotsquare(gel(m,1));
+    GEN dot22 = ZV_dotsquare(gel(m,2));
+    GEN dot12 = ZV_dotproduct(gel(m,1), gel(m,2));
     GEN tm  = matid(2); /* For first two columns only */
 
     int progress = 0;
@@ -1551,8 +1551,8 @@ lllintpartialall(GEN m, long flag)
       for (i = 3; i <= ncol; i++)
       {
         GEN c = gel(m,i);
-	GEN dot1i = dotproduct_i(gel(mid,1), c);
-        GEN dot2i = dotproduct_i(gel(mid,2), c);
+	GEN dot1i = ZV_dotproduct(gel(mid,1), c);
+        GEN dot2i = ZV_dotproduct(gel(mid,2), c);
        /* ( dot11  dot12 ) (q1)   ( dot1i )
         * ( dot12  dot22 ) (q2) = ( dot2i )
         *
@@ -1595,7 +1595,7 @@ lllintpartialall(GEN m, long flag)
     {
       gel(dot,i) = cgetg(ncol+1,t_COL);
       for (j=1; j <= i; j++)
-	gcoeff(dot,j,i) = gcoeff(dot,i,j) = dotproduct_i(gel(mid,i),gel(mid,j));
+	gcoeff(dot,j,i) = gcoeff(dot,i,j) = ZV_dotproduct(gel(mid,i),gel(mid,j));
     }
     for(;;)
     {
@@ -1990,19 +1990,19 @@ lindep(GEN x, long prec)
     for (j=1; j<i ; j++) m[i][j] = cgetr(prec+1);
     for (j=1; j<=n; j++) be[i][j]= (long)cgetr(prec+1);
   }
-  px = dotsquare(re);
-  py = dotsquare(im); pxy = dotproduct(re,im);
+  px = RgV_dotsquare(re);
+  py = RgV_dotsquare(im); pxy = RgV_dotproduct(re,im);
   p1 = mpsub(mpmul(px,py), gsqr(pxy));
   if (quazero(px)) { re = im; px = py; fl = 1; } else fl = quazero(p1);
   av0 = av1 = avma;
   for (i=1; i<=n; i++)
   {
-    p2 = dotproduct(b[i],re);
+    p2 = RgV_dotproduct(b[i],re);
     if (fl) p2 = gmul(gdiv(p2,px),re);
     else
     {
       GEN p5,p6,p7;
-      p5 = dotproduct(b[i],im);
+      p5 = RgV_dotproduct(b[i],im);
       p6 = gdiv(gsub(gmul(py,p2),gmul(pxy,p5)), p1);
       p7 = gdiv(gsub(gmul(px,p5),gmul(pxy,p2)), p1);
       p2 = gadd(gmul(p6,re), gmul(p7,im));
@@ -2012,11 +2012,11 @@ lindep(GEN x, long prec)
       if (qzer[j]) affrr(bn[j], m[i][j]);
       else
       {
-        gdivz(dotproduct(b[i],be[j]),bn[j], m[i][j]);
+        gdivz(RgV_dotproduct(b[i],be[j]),bn[j], m[i][j]);
         p2 = gsub(p2, gmul(m[i][j],be[j]));
       }
     for (j=1; j<=n; j++) affrr(gel(p2,j), gel(be[i],j));
-    affrr(dotsquare(be[i]), bn[i]);
+    affrr(RgV_dotsquare(be[i]), bn[i]);
     qzer[i] = quazero(bn[i]); avma = av1;
   }
   while (qzer[n])

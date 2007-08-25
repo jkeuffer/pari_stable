@@ -862,7 +862,7 @@ galois_test_perm(struct galois_test *td, GEN pf)
 	V = addii(V, gmael(PW,j,pf[j]));
     }
     else
-      V = centermod(FpV_FpC_mul(gel(td->TM,ord), P, td->ladic), td->ladic);
+      V = centermod(FpV_dotproduct(gel(td->TM,ord), P, td->ladic), td->ladic);
     if (!padicisint(V, td))
       break;
   }
