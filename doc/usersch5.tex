@@ -1548,6 +1548,9 @@ obtained is never a square.
 
 \fun{ulong}{ugcd}{ulong x, ulong y} returns the GCD of \kbd{x} and \kbd{y}.
 
+\fun{long}{clcm}{long x, long y} returns the LCM of \kbd{x} and \kbd{y},
+provided it fits into a \kbd{long}. Silently overflows otherwise.
+
 \fun{long}{cbezout}{long a,long b, long *u,long *v}, returns the GCD
 $d$ of \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout coefficients
 such that $\kbd{au} + \kbd{bv} = d$.
@@ -3229,7 +3232,7 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 \fun{long}{poldeflate}{GEN P, long *d} sets \kbd{d} to the largest exponent
 such that $P$ is of the form $P(x^d)$ (use \kbd{gcmp0} to check
 coefficients), $0$ if $P$ is the zero polynomial. Returns
-\kbd{RgX_deflate(P,d)}.
+\kbd{RgX\_deflate(P,d)}.
 
 \fun{long}{ZX_valuation}{GEN P, GEN *z} as \kbd{polvaluation}, but assumes
 \kbd{P} has \typ{INT} coefficients.
