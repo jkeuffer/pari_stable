@@ -1751,6 +1751,25 @@ listinsert(GEN L, GEN x, long index)
   return gel(z,index) = gclone(x);
 }
 
+void
+listpop(GEN L, long index)
+{
+  long l, i;
+  GEN z;
+
+  if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
+
+  if (index < 0) pari_err(talker,"negative index (%ld) in listpop", index);
+  z = list_data(L);
+  l = lg(z)-1;
+  if (!l) pari_err(talker,"empty list in listpop");
+
+  if (!index || index > l) index = l;
+  killbloc( gel(z, index) );
+  z[0] = evaltyp(t_VEC) | evallg(l);
+  for (i=index; i < l; i++) z[i] = z[i+1];
+}
+
 GEN
 gtolist(GEN x)
 {

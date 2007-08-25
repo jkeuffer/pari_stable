@@ -1198,6 +1198,7 @@ GEN     listconcat(GEN list1, GEN list2);
 GEN     listcreate(void);
 GEN     listinsert(GEN list, GEN object, long index);
 void    listkill(GEN list);
+void    listpop(GEN L, long index);
 GEN     listput(GEN list, GEN object, long index);
 GEN     listsort(GEN list, long flag);
 GEN     matsize(GEN x);

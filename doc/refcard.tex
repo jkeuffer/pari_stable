@@ -412,10 +412,11 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{look if $y$ belongs to the set $x$}{setsearch$(x,y,\fl)$}
 %
 \subsec{Lists}
-\li{create empty list}{List$()$}
-\li{append $x$ to list $l$}{listput$(l,x,\{i\})$}
-\li{insert $x$ in list $l$ at position $i$}{listinsert$(l,x,i)$}
-\li{sort the list $l$ in place}{listsort$(l,\fl)$}
+\li{create empty list $L$}{$L$ = List$()$}
+\li{append $x$ to list $L$}{listput$(L,x,\{i\})$}
+\li{remove $i$-th component from list $L$}{listpop$(L,\{i\})$}
+\li{insert $x$ in list $L$ at position $i$}{listinsert$(L,x,i)$}
+\li{sort the list $L$ in place}{listsort$(L,\fl)$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
