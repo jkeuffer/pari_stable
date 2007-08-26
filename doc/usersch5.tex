@@ -3795,7 +3795,32 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 \bprog
   vecslice(vecpermute(A,p), y1, y2)
 @eprog\noindent
-(more efficient).
+(more efficient). Finally, the following convenience routines automate
+trivial loops of the form 
+\bprog
+  for (i = 1; i < lg(a); i++) gel(v,i) = f(gel(a,i), gel(b,i))
+@eprog\noindent 
+for suitable $f$:
+
+\fun{GEN}{vecinv}{GEN a}. Given a vector $a$,
+returns the vector whose $i$-th component is \kbd{ginv}$(a[i])$.
+
+\fun{GEN}{vecmul}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
+length, returns the vector whose $i$-th component is \kbd{gmul}$(a[i], b[i])$.
+
+\fun{GEN}{vecdiv}{GEN a, GEN b}. Given $a$ and $b$ two vectors of the same
+length, returns the vector whose $i$-th component is \kbd{gdiv}$(a[i], b[i])$.
+
+\fun{GEN}{vecpow}{GEN a, GEN n}. Given $n$ a \typ{INT}, returns
+the vector whose $i$-th component is $a[i]^n$.
+
+\fun{GEN}{vecmodii}{GEN a, GEN b}. Assuming $a$ and $b$ are two \kbd{ZV}
+of the same length, returns the vector whose $i$-th component
+is \kbd{modii}$(a[i], b[i])$.
+
+Note that \kbd{vecadd} or \kbd{vecsub} do not exist since \kbd{gadd}
+and \kbd{gsub} have the expected behaviour. On the other hand, 
+\kbd{ginv} does not accept vector types, hence \kbd{vecinv}.
 
 \subsec{Low-level vectors and columns functions}
 
