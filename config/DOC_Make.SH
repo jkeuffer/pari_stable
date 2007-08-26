@@ -6,8 +6,8 @@ SHELL = $make_sh
 PERL  = $perl
 
 MACROS= paricfg.tex parimacro.tex
-USERS_TEX=\$(MACROS) users.tex usersch1.tex usersch2.tex usersch3.tex
-PARI_TEX=\$(MACROS) libpari.tex appa.tex appb.tex appc.tex appd.tex usersch4.tex usersch5.tex
+USERS_TEX=\$(MACROS) appa.tex users.tex usersch1.tex usersch2.tex usersch3.tex
+PARI_TEX=\$(MACROS) libpari.tex appb.tex appc.tex appd.tex usersch4.tex usersch5.tex
 
 doc all: develop.dvi libpari.dvi users.dvi refcard.ps tutorial.dvi
 docps: develop.ps libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
