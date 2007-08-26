@@ -727,7 +727,7 @@ Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p)
   switch((typ(x)==t_POL)|((typ(y)==t_POL)<<1))
   {
     case 0: return Fp_sub(x,y,p);
-    case 1: return FpX_Fp_add(x,negi(y),p);
+    case 1: return FpX_Fp_add(x,Fp_neg(y),p);
     case 2: return FpX_Fp_add(FpX_neg(y,p),x,p);
     case 3: return FpX_sub(x,y,p);
   }
@@ -764,7 +764,7 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
 GEN
 Fq_neg_inv(GEN x, GEN T, GEN p)
 {
-  if (typ(x) == t_INT) return Fp_inv(negi(x),p);
+  if (typ(x) == t_INT) return Fp_inv(Fp_neg(x),p);
   return FpXQ_inv(FpX_neg(x,p),T,p);
 }
 
