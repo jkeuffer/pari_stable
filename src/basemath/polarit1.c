@@ -1446,7 +1446,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
     return mkcol(a0);
   }
 
-  f = poleval(f, gadd(a, gmul(p,pol_x(varn(f)))));
+  f = poleval(f, deg1pol_i(p, a, varn(f)));
   f = gdivexact(f, powiu(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
@@ -1759,7 +1759,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
     return mkcol(a);
   }
   /* TODO: need RgX_RgYQX_compo ? */
-  f = lift_intern(poleval(f, gadd(mkpolmod(a,T), gmul(p, pol_x(varn(f))))));
+  f = lift_intern(poleval(f, deg1pol_i(p, mkpolmod(a,T), varn(f))));
   f = gdiv(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
 
@@ -2168,7 +2168,7 @@ polfnf(GEN a, GEN T)
   if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
   if (!sqfree)
   {
-    G = poleval(G, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
+    G = poleval(G, deg1pol_i(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
     G = ZX_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
@@ -2220,7 +2220,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   n = NULL;
   for (k = 0; cmpui(k, p) < 0; k++)
   {
-    GEN U = poleval(u, gadd(pol_x(varn(A)), gmulsg(k, pol_x(varn(T)))));
+    GEN U = poleval(u, deg1pol_i(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
     n = FpX_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
     n = NULL;

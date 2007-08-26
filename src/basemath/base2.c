@@ -3766,8 +3766,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     GEN rel, eq = rnfequation2(nf,relpol);
     POL = gel(eq,1);
     a   = gel(eq,3);
-    rel = poleval(relpol, gsub(pol_x(v),
-                               gmul(a, gmodulo(pol_x(varn(T)),T))));
+    rel = eltabstorel(relpol, T, pol, negi(a));
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {

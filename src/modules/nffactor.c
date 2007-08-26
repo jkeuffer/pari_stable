@@ -1576,11 +1576,11 @@ rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
   nf=checknf(nf); vnf = varn(nf[1]);
   if (v<0) v = 0;
   T = fix_relative_pol(nf,T,1);
-  if (typ(alpha) == t_POLMOD) alpha = lift_to_pol(alpha);
-  lT = lg(T);
+  if (typ(alpha) == t_POLMOD) alpha = gel(alpha, 2);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
-    return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), lT - 3));
+    return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), degpol(T)));
   vT = varn(T);
+  lT = lg(T);
   if (varn(alpha) != vT || varncmp(v, vnf)>=0)
     pari_err(talker,"incorrect variables in rnfcharpoly");
   if (lg(alpha) >= lT) alpha = RgX_rem(alpha, T);

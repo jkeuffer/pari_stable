@@ -296,33 +296,24 @@ rnfelementreltoabs(GEN rnf,GEN x)
       for (i=1; i<lx; i++) gel(z,i) = rnfelementreltoabs(rnf, gel(x,i));
       return z;
 
-    case t_POLMOD: x = lift_to_pol(x); /* fall through */
+    case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL: return eltreltoabs(rnf, x);
     default: return gcopy(x);
   }
 }
 
-/* assume x,T,pol t_POL. T defines base field, pol defines rnf over T.
- * x an absolute element of the extension */
+/* Let T,pol t_POL. T(y) defines base field, pol(x) defines rnf over T
+ * Return Mod(x + k y, pol) */
 GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
-  return mkpolmod(gadd(pol_x(varn(pol)),
-                       gmul(k, mkpolmod(pol_x(varn(T)),T))), pol);
+  GEN u = deg1pol_i(gen_1, mkpolmod(deg1pol_i(k, gen_0, varn(T)),T), varn(pol));
+  return mkpolmod(u, pol);
 }
 GEN
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)
 {
   return poleval(x, get_theta_abstorel(T,pol,k));
-}
-static GEN
-rnf_get_theta_abstorel(GEN rnf)
-{
-  GEN k, nf, T, pol, rnfeq;
-  rnfeq  = gel(rnf,11); k = gel(rnfeq,3);
-  nf = gel(rnf,10); T = gel(nf,1);
-  pol = gel(rnf,1);
-  return get_theta_abstorel(T, pol, k);
 }
 
 GEN
@@ -343,7 +334,13 @@ rnfelementabstorel(GEN rnf,GEN x)
     case t_POLMOD:
       x = lift_to_pol(x); /* fall through */
     case t_POL:
-      return gerepileupto(av, poleval(x, rnf_get_theta_abstorel(rnf)));
+    {
+      GEN k, T, pol, rnfeq = gel(rnf,11), nf = gel(rnf,10);
+      k = gel(rnfeq,3);
+      T = gel(nf,1);
+      pol = gel(rnf,1);
+      return gerepileupto(av, eltabstorel(x, T, pol, k));
+    }
 
     default: return gcopy(x);
   }
