@@ -2079,6 +2079,10 @@ $p$.
 \fun{GEN}{FpXQ_powers}{GEN x, long n, GEN T, GEN p} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{FpXQ}s.
 
+\fun{GEN}{FpXQ_matrix_pow}{GEN x, long m, long n, GEN T, GEN p}, as
+\kbd{FpXQ\_powers}$(x, n-1, T, p)$, but returns the powers as a an
+$m\times n$ matrix. Usually, we have $m = n = \deg T$.
+
 \fun{GEN}{FpX_FpXQ_compo}{GEN f,GEN x,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$.
 
@@ -2436,7 +2440,10 @@ multiplied by $\kbd{x}^n$.
 
 \fun{GEN}{Flxq_pow}{GEN x, GEN n, GEN T, ulong p}
 
-\fun{GEN}{Flxq_powers}{GEN x, long l, GEN T, ulong p}
+\fun{GEN}{Flxq_powers}{GEN x, long n, GEN T, ulong p}
+
+\fun{GEN}{Flxq_matrix_pow}{GEN x, long m, long n, GEN T, ulong p}, 
+see \kbd{FpXQ\_matrix\_pow}.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
