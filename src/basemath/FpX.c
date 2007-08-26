@@ -134,7 +134,7 @@ FpX_sub(GEN x,GEN y,GEN p)
     z = cgetg(ly,t_POL); z[1] = y[1];
     for (i=2; i<lx; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
     for (   ; i<ly; i++) gel(z,i) = Fp_neg(gel(y,i), p);
-    z = ZX_renormalize(z, lx);
+    z = ZX_renormalize(z, ly);
     if (!lgpol(z)) { avma = (pari_sp)(z + ly); return zeropol(varn(x)); }
   }
   return z;
