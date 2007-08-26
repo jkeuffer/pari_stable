@@ -1202,7 +1202,7 @@ const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0 };
 static GEN
 list_internal_copy(GEN z, long nmax)
 {
-  GEN a = (GEN)gpmalloc(nmax * sizeof(long));
+  GEN a = (GEN)gpmalloc((nmax+1) * sizeof(long));
   long i, l = lg(z);
   for (i = 1; i < l; i++) gel(a,i) = gclone( gel(z,i) );
   a[0] = z[0]; return a;
@@ -1219,7 +1219,7 @@ listassign(GEN x, GEN y)
 GEN
 listcopy(GEN x)
 {
-  GEN y = cgetg(4, t_LIST);
+  GEN y = cgetg(3, t_LIST);
   listassign(x,y); return y;
 }
 
@@ -1454,7 +1454,7 @@ gclone(GEN x)
         for (i=1; i<lx; i++) y[i] = x[i];
         break;
       case t_LIST:
-        y[0] = evaltyp(t_LIST)|evallg(4);
+        y[0] = evaltyp(t_LIST)|evallg(3);
         listassign(x, y);
         break;
       default:
