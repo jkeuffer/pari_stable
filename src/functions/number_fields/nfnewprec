@@ -9,3 +9,5 @@ Doc: transforms the number field $\var{nf}$
  function works as expected if $\var{nf}$ is in fact a $\var{bnf}$ (update
  $\var{bnf}$ to current precision) but may be quite slow (many generators of
  principal ideals have to be computed).
+Variant: One may call directly \fun{GEN}{bnfnewprec}{GEN bnf, long prec}
+ or \fun{GEN}{bnrnewprec}{GEN bnr, long prec}.
