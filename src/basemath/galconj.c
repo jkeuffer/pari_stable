@@ -2782,11 +2782,8 @@ galoisconj4(GEN T, GEN den, long flag)
     T = gel(T,1);
   }
   n = degpol(T);
-  if (n <= 0)
-    pari_err(constpoler, "galoisconj4");
-  for (k = 2; k <= n + 2; k++)
-    if (typ(T[k]) != t_INT)
-      pari_err(talker, "polynomial not in Z[X] in galoisconj4");
+  if (n <= 0) pari_err(constpoler, "galoisconj4");
+  check_ZX(T, "galoisconj4");
   if (!gcmp1(gel(T,n + 2)))
     pari_err(talker, "non-monic polynomial in galoisconj4");
   n = degpol(T);

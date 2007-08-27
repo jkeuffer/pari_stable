@@ -73,8 +73,8 @@ FpX_add(GEN x,GEN y,GEN p)
   if (lx < ly) swapspec(x,y, lx,ly);
   z = cgetg(lx,t_POL); z[1] = x[1];
   for (i=2; i<ly; i++) gel(z,i) = Fp_add(gel(x,i),gel(y,i), p);
-  for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
-  if (lx == ly) z = ZX_renormalize(z, lx);
+  for (   ; i<lx; i++) gel(z,i) = modii(gel(x,i), p);
+  z = ZX_renormalize(z, lx);
   if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
   return z;
 }
@@ -125,7 +125,7 @@ FpX_sub(GEN x,GEN y,GEN p)
   {
     z = cgetg(lx,t_POL); z[1] = x[1];
     for (i=2; i<ly; i++) gel(z,i) = Fp_sub(gel(x,i),gel(y,i), p);
-    for (   ; i<lx; i++) gel(z,i) = Fp_neg(gel(x,i), p);
+    for (   ; i<lx; i++) gel(z,i) = modii(gel(x,i), p);
     z = ZX_renormalize(z, lx);
     if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
   }
