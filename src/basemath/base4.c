@@ -117,7 +117,7 @@ idealmat_to_hnf(GEN nf, GEN x)
   return cx? gmul(x,cx): x;
 }
 
-int
+long
 RgM_isidentity(GEN x)
 {
   long i,j, lx = lg(x);

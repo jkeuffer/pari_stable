@@ -235,7 +235,7 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     l = lg(p1);
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
     for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */
-    n = isinvector(TYP, dtyp);
+    n = RgV_isin(TYP, dtyp);
     if (!n) return 1; /* only for N=11 */
     nbremain -= rayergroup(GR,n,gr);
     if (nbremain==1) return 1;

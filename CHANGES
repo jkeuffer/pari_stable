@@ -189,7 +189,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
    21- library function Fp_neg, Fp_add, Fp_sub
    22- library function ugcd
    23- library function vecinv, vecmul, vecpow, vecdiv, vecmodii
-   24- library function RgM_isidentity
+   24- library function RgM_isidentity, RgV_isin
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

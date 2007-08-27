@@ -1723,9 +1723,9 @@ Lbnrclassno(GEN L, GEN fac)
   return NULL; /* not reached */
 }
 
-/* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
+/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
 long
-isinvector(GEN v, GEN x)
+RgV_isin(GEN v, GEN x)
 {
   long i, l = lg(v);
   for (i = 1; i < l; i++)
@@ -1745,7 +1745,7 @@ factordivexact(GEN fa1,GEN fa2)
   E = cgetg(l,t_COL);
   for (c = i = 1; i < l; i++)
   {
-    j = isinvector(P2,gel(P1,i));
+    j = RgV_isin(P2,gel(P1,i));
     if (!j) { P[c] = P1[i]; E[c] = E1[i]; c++; }
     else
     {

@@ -308,7 +308,7 @@ vecsmall_coincidence(GEN u, GEN v)
   return s;
 }
 
-/* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
+/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
 long
 vecsmall_isin(GEN v, long x)
 {
