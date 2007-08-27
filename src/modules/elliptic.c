@@ -2537,8 +2537,8 @@ apell1(GEN e, GEN p)
     for (i=1; i<=nb; i++)
     { /* baby steps */
       gel(pts,i) = P; /* h.f + (i-1).F */
-      _fix(P+1, j); tx[i] = modBIL(gel(P,1));
-      _fix(P+2, j); ty[i] = modBIL(gel(P,2));
+      _fix(P+1, j); tx[i] = mod2BIL(gel(P,1));
+      _fix(P+2, j); ty[i] = mod2BIL(gel(P,2));
       P = addsell(cp4,P,F,p); /* h.f + i.F */
       if (!P) { h = addii(h, mului(i,B)); goto FOUND; }
     }
@@ -2567,8 +2567,8 @@ apell1(GEN e, GEN p)
       {
         P = gel(pts,j);
         addsell_part2(cp4,P,fg,p, gel(v,j));
-        tx[i] = modBIL(gel(P,1));
-        ty[i] = modBIL(gel(P,2));
+        tx[i] = mod2BIL(gel(P,1));
+        ty[i] = mod2BIL(gel(P,2));
       }
       avma = av2;
     }
@@ -2579,7 +2579,7 @@ apell1(GEN e, GEN p)
     /* giant steps: fg = s.F */
     fg = addsell(cp4,P,F,p);
     if (!fg) { h = mului(s,B); goto FOUND; }
-    pfinal = modBIL(p); av2 = avma;
+    pfinal = mod2BIL(p); av2 = avma;
     /* Goal of the following: sort points by increasing x-coordinate hash.
      * Done in a complicated way to avoid allocating a large temp vector */
     p1 = vecsmall_indexsort(tx); /* = permutation sorting tx */
@@ -2611,7 +2611,7 @@ apell1(GEN e, GEN p)
       long k, k2, j2;
 
       avma = av2;
-      k = modBIL(gel(ftest,1));
+      k = mod2BIL(gel(ftest,1));
       while (l<r)
       {
         m = (l+r) >> 1;
@@ -2620,7 +2620,7 @@ apell1(GEN e, GEN p)
       if (r <= (ulong)s && tx[r] == k)
       {
         while (tx[r] == k && r) r--;
-        k2 = modBIL(gel(ftest,2));
+        k2 = mod2BIL(gel(ftest,2));
         for (r++; tx[r] == k && r <= (ulong)s; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */

@@ -346,7 +346,7 @@ FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
 GEN
 FpX_roots(GEN f, GEN p) {
   pari_sp av = avma;
-  long q = modBIL(p);
+  long q = mod2BIL(p);
   GEN F = FpX_factmod_init(f,p);
   switch(degpol(F))
   {
@@ -364,7 +364,7 @@ rootmod(GEN f, GEN p)
   GEN y;
 
   if (!factmod_init(&f, p)) { avma=av; return cgetg(1,t_COL); }
-  q = init_p(p); if (!q) q = modBIL(p);
+  q = init_p(p); if (!q) q = mod2BIL(p);
   if (q & 1)
     y = FpX_roots_i(f, p);
   else

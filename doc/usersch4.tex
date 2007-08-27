@@ -1129,7 +1129,10 @@ instance the native one or GNU MP, with incompatible internal structures
 \fun{long}{mod64}{GEN x} give the residue class of \kbd{x} modulo the
 corresponding power of 2, for \emph{positive}~\kbd{x}. By definition,
 $\kbd{mod}n(x) := \kbd{mod}n(|x|)$ for $x < 0$ (the macros disregard the
-sign), and the result is undefined if $x = 0$.
+sign), and the result is undefined if $x = 0$. As well,
+
+\fun{long}{mod2BIL}{GEN x} returns the least significant word of $|x|$, still
+assuming that $x\neq 0$.
 
 These macros directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of

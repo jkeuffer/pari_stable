@@ -944,7 +944,7 @@ isanypower(GEN x, GEN *pty)
 /*********************************************************************/
 /* u = 3,5 mod 8 ?  (= 2 not a square mod u) */
 #define  ome(t) (labs(((t)&7)-4) == 1)
-#define gome(t) (ome(modBIL(t)))
+#define gome(t) (ome(mod2BIL(t)))
 
 /* assume y odd, return kronecker(x,y) * s */
 long
@@ -998,7 +998,7 @@ kronecker(GEN x, GEN y)
       x = shifti(x,-r);
     }
     /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
-    if (modBIL(x) & modBIL(y) & 2) s = -s;
+    if (mod2BIL(x) & mod2BIL(y) & 2) s = -s;
     z = remii(y,x); y = x; x = z;
   }
   xu = itou(x);
@@ -1010,7 +1010,7 @@ kronecker(GEN x, GEN y)
     xu >>= r;
   }
   /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
-  if (xu & modBIL(y) & 2) s = -s;
+  if (xu & mod2BIL(y) & 2) s = -s;
   yu = umodiu(y, xu);
   avma = av; return krouu_s(yu, xu, s);
 }
@@ -1072,7 +1072,7 @@ krosi(long x, GEN y)
     xu >>= r;
   }
   /* xu=3 mod 4 && y=3 mod 4 ? (both are odd here) */
-  if (xu & modBIL(y) & 2) s = -s;
+  if (xu & mod2BIL(y) & 2) s = -s;
   u = umodiu(y, xu);
   avma = av; return krouu_s(u, xu, s);
 }
@@ -1123,7 +1123,7 @@ hil0(GEN x, GEN y, GEN p)
   return hil(x,y, p? p: gen_0);
 }
 
-#define eps(t) (((signe(t)*(modBIL(t)))&3)==3)
+#define eps(t) (((signe(t)*(mod2BIL(t)))&3)==3)
 long
 hilii(GEN x, GEN y, GEN p)
 {
@@ -1715,7 +1715,7 @@ static void
 init_montdata(GEN N, montdata *s)
 {
   s->N = N;
-  s->inv = (ulong) -invrev(modBIL(N));
+  s->inv = (ulong) -invrev(mod2BIL(N));
 }
 
 GEN
@@ -3031,7 +3031,7 @@ static GEN
 sqr_primeform(GEN x, long f) { return redimag(gsqr(primeform_u(x, f))); }
 
 #define MAXFORM 11
-#define _low(to, x) { GEN __x = (GEN)(x); to = signe(__x)?modBIL(__x):0; }
+#define _low(to, x) { GEN __x = (GEN)(x); to = signe(__x)?mod2BIL(__x):0; }
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.

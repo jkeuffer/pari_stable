@@ -211,9 +211,9 @@ static double speed_Flx_karamul(speed_param *s)
   op = cgetipos(2*lx - 2);                                 \
   for (i=2; i<lx; i++) op[i]      = s->x[i];            \
   for (i=2; i<lx; i++) op[lx-2+i] = s->x[i];            \
-  modBIL(s->y) |= 1; /* make sure modulus is odd */
+  mod2BIL(s->y) |= 1; /* make sure modulus is odd */
 static double speed_redc(speed_param *s) {
-  ulong inv = (ulong)-invrev(modBIL(s->y));
+  ulong inv = (ulong)-invrev(mod2BIL(s->y));
   GEN op; INIT_RED(s, op);
   TIME_FUN( red_montgomery(op, s->y, inv) ); };
 static double speed_modii(speed_param *s) {

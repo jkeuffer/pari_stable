@@ -658,7 +658,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   {
     long s = vali(m); m = shifti(m,-s);
     tabt[e] = e==1? s: s + R->k;
-    taba[e] = signe(m)? ((modBIL(m) & R->mask)+1)>>1: 0;
+    taba[e] = signe(m)? ((mod2BIL(m) & R->mask)+1)>>1: 0;
     m = shifti(m, -R->k);
   }
   setlg(taba, e); C->aall = taba;
