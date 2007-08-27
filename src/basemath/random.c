@@ -19,39 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-
-#if 0
-static THREAD long pari_randseed = 1;
-
-/*Return 31 ``random'' bits.*/
-long
-pari_rand31(void)
-{ /* BSD rand uses this: seed = 1103515245*seed + 12345 */
-  pari_randseed = (1000276549*pari_randseed + 12347) & 0x7fffffff;
-  return pari_randseed;
-}
-
-void
-setrand(GEN seed) { pari_randseed = itou(seed); }
-
-GEN
-getrand(void) { return utoi( pari_randseed ); }
-
-#define RAND_BITS16() (pari_rand31()>>12 & 0xffffUL)
-static ulong
-pari_rand32(void) { return (RAND_BITS16() << 16) | RAND_BITS16(); }
-/* 32 or 64 uniform random bits */
-ulong
-urand(void)
-{
-#if !defined(LONG_IS_64BIT)
-  return pari_rand32();
-#else
-  return (pari_rand32() << 32) | pari_rand32();
-#endif
-}
-#endif
-
 /********************************************************************/
 /*                    XORGEN (Richard P. Brent)                     */
 /*          http://wwwmaths.anu.edu.au/~brent/random.html           */
