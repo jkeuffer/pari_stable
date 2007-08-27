@@ -236,6 +236,14 @@ impossible, but an inexact $0$ is allowed). By convention the degree of an
 exact $0$ polynomial is $-1$. If the leading coefficient of \kbd{x} is $0$,
 the result is undefined.
 
+\fun{long}{lgpol}{GEN x} is equal to \kbd{degpol(x) + 1}. Used to loop over
+the coefficients of a \typ{POL} in the following situation:
+\bprog
+    GEN xd = x + 2;
+    long i, l = lgpol(x);
+    for (i = 0; i < l; i++) foo( xd[i] ).
+@eprog
+
 \fun{long}{precision}{GEN x} If \kbd{x} is of type \typ{REAL}, returns the
 precision of~\kbd{x}, namely the length of \kbd{x} in \B-bit words if \kbd{x}
 is not zero, and a reasonable quantity obtained from the exponent of \kbd{x}
