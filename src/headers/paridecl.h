@@ -889,7 +889,6 @@ GEN     bnfnewprec(GEN nf, long prec);
 GEN     bnrnewprec(GEN bnr, long prec);
 GEN     buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
 GEN     buchfu(GEN bignf);
-GEN     check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
 GEN     classgrouponly(GEN P,GEN data,long prec);
 GEN     isprincipal(GEN bignf, GEN x);
 GEN     isprincipalall(GEN bignf, GEN x,long flall);

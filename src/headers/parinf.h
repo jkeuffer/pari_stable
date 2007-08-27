@@ -138,6 +138,7 @@ GEN    coltoalg(GEN nf,GEN x);
 GEN    arch_mul(GEN x, GEN y);
 GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
 GEN    bnrGetSurj(GEN bnr1, GEN bnr2);
+GEN    check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
 GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);
 GEN    checkbnf_i(GEN bnf);
