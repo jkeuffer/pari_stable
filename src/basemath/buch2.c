@@ -1473,7 +1473,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
     if (y) return gerepilecopy(av, y);
 
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",pr);
-    avma = av1; bnf = bnfnewprec(bnf,pr); setrand(c);
+    avma = av1; bnf = bnfnewprec_shallow(bnf,pr); setrand(c);
   }
 }
 
@@ -1544,7 +1544,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       avma = av; return utoipos(prec);
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",prec);
-    avma = av1; bnf = bnfnewprec(bnf,prec); setrand(c);
+    avma = av1; bnf = bnfnewprec_shallow(bnf,prec); setrand(c);
   }
 }
 
@@ -1652,7 +1652,7 @@ isunit(GEN bnf,GEN x)
     }
     i++;
     if (DEBUGLEVEL) pari_warn(warnprec,"isunit",prec);
-    nf = nfnewprec(nf, prec);
+    nf = nfnewprec_shallow(nf, prec);
   }
 
   setlg(ex, RU);
@@ -2541,7 +2541,7 @@ makematal(GEN bnf)
 
     prec = itos(y); j--;
     if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
-    nf = nfnewprec(nf,prec);
+    nf = nfnewprec_shallow(nf,prec);
     bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
@@ -2632,22 +2632,18 @@ my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 }
 
 GEN
-bnfnewprec(GEN bnf, long prec)
+bnfnewprec_shallow(GEN bnf, long prec)
 {
   GEN nf0 = gel(bnf,7), nf, res, funits, mun, matal, clgp, clgp2, y;
-  pari_sp av = avma;
   long r1, r2, prec1;
 
-  bnf = checkbnf(bnf);
-  if (prec <= 0) return nfnewprec(checknf(bnf),prec);
-  nf = gel(bnf,7);
-  nf_get_sign(nf, &r1, &r2);
-  funits = algtobasis(nf, check_units(bnf,"bnfnewprec"));
+  nf_get_sign(nf0, &r1, &r2);
+  funits = algtobasis(nf0, check_units(bnf,"bnfnewprec"));
 
   prec1 = prec;
   if (r2 > 1 || r1 != 0)
     prec += 1 + (gexpo(funits) >> TWOPOTBITS_IN_LONG);
-  nf = nfnewprec(nf0,prec);
+  nf = nfnewprec_shallow(nf0,prec);
   mun = get_archclean(nf,funits,prec,1);
   if (!mun) pari_err(precer,"bnfnewprec");
   if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
@@ -2663,9 +2659,22 @@ bnfnewprec(GEN bnf, long prec)
   gel(res,1) = clgp;
   gel(res,2) = get_regulator(mun);
   gel(y,8) = res;
-  gel(y,9) = clgp2; return gerepilecopy(av, y);
+  gel(y,9) = clgp2; return y;
+}
+GEN
+bnfnewprec(GEN bnf, long prec)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, bnfnewprec_shallow(checkbnf(bnf), prec));
 }
 
+GEN
+bnrnewprec_shallow(GEN bnr, long prec)
+{
+  GEN y = shallowcopy(bnr);
+  gel(y,1) = bnfnewprec_shallow(gel(bnr,1), prec);
+  return y;
+}
 GEN
 bnrnewprec(GEN bnr, long prec)
 {
@@ -2926,7 +2935,7 @@ static GEN
 nf_cloneprec(GEN nf, long prec, GEN *pnf)
 {
   pari_sp av = avma;
-  nf = gclone( nfnewprec_i(nf, prec) );
+  nf = gclone( nfnewprec_shallow(nf, prec) );
   if (*pnf) gunclone(*pnf);
   avma = av; return *pnf = nf;
 }

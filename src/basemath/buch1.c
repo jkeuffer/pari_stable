@@ -399,7 +399,7 @@ PRECPB:
   if (!first)
   {
     if (DEBUGLEVEL) pari_warn(warnprec,"computeP2",prec);
-    nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
+    nf = gerepilecopy(av2, nfnewprec_shallow(checknf(bnr),prec));
   }
   first = 0; lanum = to_approx(nf,la);
   P = cgetg(clrayno+1,t_VEC);

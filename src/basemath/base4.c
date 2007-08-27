@@ -735,7 +735,7 @@ idealval(GEN nf, GEN ix, GEN P)
   }
   nf = checknf(nf);
   N = degpol(nf[1]);
-  checkid(ix, N);
+  checksqmat(ix, N);
   ix = Q_primitive_part(ix, &cx);
   if (lg(ix) != N+1) ix = idealmat_to_hnf(nf,ix);
 

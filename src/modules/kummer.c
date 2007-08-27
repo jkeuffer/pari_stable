@@ -208,7 +208,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     if (z) break;
     prec = (prec-1)<<1;
     if (DEBUGLEVEL) pari_warn(warnprec,"reducebeta",prec);
-    nf = nfnewprec(nf,prec);
+    nf = nfnewprec_shallow(nf,prec);
   }
   z = shallowconcat(matunit, z);
   u = lllintern(z, 100, 1, prec);
@@ -560,7 +560,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
 
   prec = DEFAULTPREC +
     nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(gmael(nf,5,1)))));
-  if (nfgetprec(nf) < prec) nf = nfnewprec(nf, prec);
+  if (nfgetprec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
   msign = zsigns(nf, vecWB);
 
   vecMsup = cgetg(lSml2+1,t_VEC);

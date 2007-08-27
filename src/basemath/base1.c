@@ -104,7 +104,7 @@ check_units(GEN BNF, char *f)
 }
 
 void
-checkid(GEN x, long N)
+checksqmat(GEN x, long N)
 {
   if (typ(x)!=t_MAT) pari_err(talker,"incorrect ideal");
   if (lg(x) == 1 || lg(x[1]) != N+1)
@@ -182,9 +182,6 @@ get_bnf(GEN x, long *t)
     case t_VEC:
       switch(lg(x))
       {
-        case 3:
-          if (typ(x[2]) != t_POLMOD) break;
-          return get_bnf(gel(x,1),t);
         case 5 : *t = typ_QUA; return NULL;
         case 6 :
           if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
@@ -246,6 +243,44 @@ get_nf(GEN x, long *t)
         }
   }
   *t = typ_NULL; return NULL;
+}
+
+long 
+nftyp(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_POL : return typ_POL;
+    case t_QUAD: return typ_Q;
+    case t_VEC:
+      switch(lg(x))
+      {
+        case 10: return typ_NF;
+        case 11:
+          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+          return typ_BNF;
+        case 7 : 
+          x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
+          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+          return typ_BNR;
+        case 6 :
+          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          return typ_BID;
+        case 9 :
+          x = gel(x,2);
+          if (typ(x) == t_VEC && lg(x) == 4) return typ_GAL;
+        case 14: case 20:
+          return typ_ELL; 
+      }break;
+    case t_MAT:
+      if (lg(x)==2)
+        switch(lg(x[1]))
+        {
+          case 7: case 10:
+            return typ_CLA;
+        }
+  }
+  return typ_NULL;
 }
 
 /*************************************************************************/
@@ -1581,7 +1616,7 @@ nfgetprec(GEN x)
 
 /* assume nf is an nf */
 GEN
-nfnewprec_i(GEN nf, long prec)
+nfnewprec_shallow(GEN nf, long prec)
 {
   GEN NF = shallowcopy(nf);
   nffp_t F;
@@ -1592,12 +1627,6 @@ nfnewprec_i(GEN nf, long prec)
   gmael(NF,5,2) = F.G;
   return NF;
 }
-static GEN
-_nfnewprec(GEN nf, long prec)
-{
-  pari_sp av = avma;
-  return gerepilecopy(av, nfnewprec_i(nf, prec));
-}
 
 GEN
 nfnewprec(GEN nf, long prec)
@@ -1605,17 +1634,21 @@ nfnewprec(GEN nf, long prec)
   long l = lg(nf);
   GEN z, res = NULL;
 
-  if (typ(nf) != t_VEC) pari_err(talker,"incorrect nf in nfnewprec");
   if (l == 3) {
     res = cgetg(3, t_VEC);
     gel(res,2) = gcopy(gel(nf,2));
     nf = gel(nf,1); l = lg(nf);
   }
-  switch(l)
+  switch(nftyp(nf))
   {
-    case 11: z = bnfnewprec(nf,prec); break;
-    case  7: z = bnrnewprec(nf,prec); break;
-    default: z = _nfnewprec(checknf(nf),prec); break;
+    default: pari_err(talker,"incorrect nf in nfnewprec");
+    case typ_BNF: z = bnfnewprec(nf,prec); break;
+    case typ_BNR: z = bnrnewprec(nf,prec); break;
+    case typ_NF: {
+      pari_sp av = avma;
+      z = gerepilecopy(av, nfnewprec_shallow(checknf(nf), prec));
+      break;
+    }
   }
   if (res) gel(res,1) = z; else res = z;
   return res;
@@ -2182,7 +2215,7 @@ rootsof1(GEN nf)
     }
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) pari_warn(warnprec,"rootsof1",prec);
-    nf = nfnewprec(nf,prec);
+    nf = nfnewprec_shallow(nf,prec);
   }
   if (itos(ground(gel(y,2))) != N) pari_err(bugparier,"rootsof1 (bug1)");
   w = gel(y,1); ws = itos(w);

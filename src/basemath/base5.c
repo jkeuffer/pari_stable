@@ -892,7 +892,7 @@ PRECNF:
   {
     prec = (prec<<1)-2; count = 0;
     if (DEBUGLEVEL) pari_warn(warnprec,"rnflllgram",prec);
-    nf = nfnewprec(nf,prec);
+    nf = nfnewprec_shallow(nf,prec);
   }
   mth = rel_T2(nf, pol, lx, prec);
   if (!mth) { count = MAX_COUNT; goto PRECNF; }

@@ -1787,7 +1787,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   Bd = addis(Bd, 1);
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
   prec2 = max((prec << 1) - 2, prec2);
-  nf2   = nfnewprec(nf, prec2);
+  nf2   = nfnewprec_shallow(nf, prec2);
   beta2 = gprec_w(beta, prec2);
 
 LABrcf: ct++;
@@ -1830,7 +1830,7 @@ LABrcf: ct++;
 
     prec2 = (prec2 << 1) - 2;
     if (DEBUGLEVEL>1) pari_warn(warnprec,"RecCoeff", prec2);
-    nf2 = nfnewprec(nf2, prec2);
+    nf2 = nfnewprec_shallow(nf2, prec2);
     beta2 = gprec_w(beta2, prec2);
     goto LABrcf;
   }
@@ -2492,7 +2492,7 @@ LABDOUB:
 
     if (DEBUGLEVEL) pari_warn(warnprec, "AllStark", newprec);
 
-    nf = nfnewprec(nf, newprec);
+    nf = nfnewprec_shallow(nf, newprec);
     dataCR = CharNewPrec(dataCR, nf, newprec);
 
     gerepileall(av, 2, &nf, &dataCR);
@@ -2632,7 +2632,7 @@ START:
     if (newprec > prec)
     {
       if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
-      nf = nfnewprec(nf, newprec);
+      nf = nfnewprec_shallow(nf, newprec);
     }
     pol = AllStark(data, nf, 0, newprec);
   } ENDCATCH;
@@ -2709,7 +2709,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (newprec > prec)
   {
     if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
-    nf = nfnewprec(nf, newprec);
+    nf = nfnewprec_shallow(nf, newprec);
   }
 
   return gerepileupto(av, AllStark(data, nf, 0, newprec));
