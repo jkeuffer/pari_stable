@@ -118,7 +118,7 @@ idealmat_to_hnf(GEN nf, GEN x)
 }
 
 int
-isidentity(GEN x)
+RgM_isidentity(GEN x)
 {
   long i,j, lx = lg(x);
   for (j=1; j<lx; j++)

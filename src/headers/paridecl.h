@@ -726,7 +726,7 @@ GEN     idealred_elt(GEN nf, GEN I);
 long    idealtyp(GEN *ideal, GEN *arch);
 long    idealval(GEN nf,GEN ix,GEN vp);
 GEN     ideleaddone(GEN nf, GEN x, GEN idele);
-int     isidentity(GEN x);
+int     RgM_isidentity(GEN x);
 long    isideal(GEN nf,GEN x);
 GEN     minideal(GEN nf,GEN ix,GEN vdir,long prec);
 GEN     mul_content(GEN cx, GEN cy);

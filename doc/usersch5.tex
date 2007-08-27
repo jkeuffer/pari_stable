@@ -4128,6 +4128,16 @@ has \typ{INT} entries.
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} associated to the
 vector of
 
+\fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
+and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
+
+\fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
+fewer copies.
+
+The following routines check whether matrices or vectors have a special
+shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This may make a
+difference when components are inexact.)
+
 \fun{long}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
 except possibly the first one. The name comes from vectors expressed on a
 standard polynomial basis $1,T,\dots, T^{n-1}$, or on \kbd{nf.zk} (whose
@@ -4141,11 +4151,8 @@ is $1$) and $0$ otherwise.
 equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
 whether $x$ is an arbitrary scalar matrix.
 
-\fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
-and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
-
-\fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
-fewer copies.
+\fun{int}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
+identity matrix, and 0 otherwise.
 
 \subsec{Transcendental functions}
 

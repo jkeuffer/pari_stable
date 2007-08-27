@@ -900,7 +900,7 @@ PRECNF:
 PRECPB:
   if (h)
   { /* precision problem, recompute. If no progress, increase nf precision */
-    if (++count == MAX_COUNT || isidentity(h)) {count = MAX_COUNT; goto PRECNF;}
+    if (++count == MAX_COUNT || RgM_isidentity(h)) {count = MAX_COUNT; goto PRECNF;}
     H = H? gmul(H, h): h;
     MPOL = gmul(MPOL, h);
   }
