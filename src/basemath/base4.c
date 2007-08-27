@@ -117,23 +117,6 @@ idealmat_to_hnf(GEN nf, GEN x)
   return cx? gmul(x,cx): x;
 }
 
-long
-RgM_isidentity(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (j=1; j<lx; j++)
-  {
-    GEN c = gel(x,j);
-    for (i=1; i<j; )
-      if (!gcmp0(gel(c,i++))) return 0;
-    /* i = j */
-      if (!gcmp1(gel(c,i++))) return 0;
-    for (   ; i<lx; )
-      if (!gcmp0(gel(c,i++))) return 0;
-  }
-  return 1;
-}
-
 GEN
 idealhermite_aux(GEN nf, GEN x)
 {

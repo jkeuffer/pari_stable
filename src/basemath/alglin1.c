@@ -953,6 +953,23 @@ RgM_isscalar(GEN x, GEN s)
 }
 
 long
+RgM_isidentity(GEN x)
+{
+  long i,j, lx = lg(x);
+  for (j=1; j<lx; j++)
+  {
+    GEN c = gel(x,j);
+    for (i=1; i<j; )
+      if (!gcmp0(gel(c,i++))) return 0;
+    /* i = j */
+      if (!gcmp1(gel(c,i++))) return 0;
+    for (   ; i<lx; )
+      if (!gcmp0(gel(c,i++))) return 0;
+  }
+  return 1;
+}
+
+long
 isdiagonal(GEN x)
 {
   long nco,i,j;
