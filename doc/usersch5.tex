@@ -86,8 +86,8 @@ tampered with by pari signal handler.
 \fun{void}{pari_stackcheck_init}{void *stackbase} controls the system stack
 exhaustion checking code in the GP interpreter. This should be used when the
 system stack base address change or when the address seen by \kbd{pari\_init}
-is to far from the base address. If stackbase is NULL, disable the check, else
-set the base address to stackbase. It is normally used this way
+is too far from the base address. If stackbase is \kbd{NUL}L, disable the
+check, else set the base address to stackbase. It is normally used this way
 \bprog
 int thread_start (...)
 {
@@ -108,8 +108,6 @@ in GP's interpreter, be it a built-in or user function, or a variable. For
 a function, it has at least the following fields:
 
   \kbd{char *name} : the name under which the interpreter knows us.
-
-  \kbd{ulong valence} : obsolete, set it to 1.
 
   \kbd{void *value} :  a pointer to the C function to call.
 
@@ -178,8 +176,8 @@ words. Returns the smallest word count containing $x$ bytes, i.e
 $\kbd{ceil}(x / \kbd{sizeof(long)})$.
 
 \fun{long}{bit_accuracy}{long x} converts a \typ{REAL} length into a number
-of significant bits. Returns $(x - 2)\B$. The macro \tet{bit_accuracy_mul(x,y)}
-computes the same thing multiplied by $y$.
+of significant bits. Returns $(x - 2)\B$. The macro
+\tet{bit_accuracy_mul}$(x,y)$ computes the same thing multiplied by $y$.
 
 \subsec{Read type-dependent information}
 
@@ -204,9 +202,9 @@ in \B-bit words.
 used for \typ{INT}, \typ{REAL}, \typ{POL} and \typ{SER} (for the last two
 types, only 0 or 1 are possible).
 
-\fun{long}{gsigne}{GEN x} same as \kbd{signe}, but also valid for \typ{FRAC}
-(and marginally less efficient for the other types). Raise a type error if
-\kbd{typ(x)} is not among those three.
+\fun{long}{gsigne}{GEN x} returns the sign of a real number $x$,
+valid for \typ{INT}, \typ{REAL} as \kbd{signe}, but also for \typ{FRAC}.
+Raise a type error if \kbd{typ(x)} is not among those three.
 
 \fun{long}{expi}{GEN x} returns the binary exponent of the real number equal
 to the \typ{INT}~\kbd{x}. This is a special case of \kbd{gexpo}.
@@ -341,8 +339,9 @@ Some of these macros may evaluate their argument twice. Always use them as in
 @eprog
 
 \fun{int}{is_recursive_t}{long t} \kbd{true} iff \kbd{t} is a recursive
-type (the recursive types are \typ{INT}, \typ{REAL}, \typ{STR} or
-\typ{VECSMALL}).
+type (the non-recursive types are \typ{INT}, \typ{REAL}, 
+\typ{STR}, \typ{VECSMALL}). Somewhat contrary to intuition, \typ{LIST} is
+also non-recursive, ; see the Developer's guide for details.
 
 \fun{int}{is_intreal_t}{long t} \kbd{true} iff \kbd{t} is \typ{INT}
 or \typ{REAL}.
@@ -560,14 +559,14 @@ And even if it were made of valid \kbd{GEN}s, inhibiting the area makes sure
 \kbd{gerepile} will not inspect their components, saving time.
 
 Another natural use in low-level routines is to ``shorten'' an existing
-\kbd{GEN} \kbd{z} to its first $\kbd{l}-1$ components:
+\kbd{GEN} \kbd{z} to its first $\kbd{n}-1$ components:
 \bprog
-  setlg(z, l);
-  stackdummy((pari_sp)(z + lg(z)), (pari_sp)(z + l));
+  setlg(z, n);
+  stackdummy((pari_sp)(z + lg(z)), (pari_sp)(z + n));
 @eprog\noindent
-or to its last \kbd{l} components:
+or to its last \kbd{n} components:
 \bprog
-  long L = lg(z) - l;
+  long L = lg(z) - n;
   stackdummy((pari_sp)(z + L), (pari_sp)z);
   z += L; setlg(z, L);
 @eprog
@@ -3275,6 +3274,13 @@ to~0, and 0~(false) otherwise. Note that many PARI functions return \kbd{gen\_0}
 when they are aware that the result they return is an exact zero, so it is
 almost always faster to test for pointer equality first, and call
 \kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
+
+\fun{int}{is_pm1}{GEN x}. This quick and dirty macro assumes that \kbd{x} is
+a non-zero \typ{INT}. Under these assumptions, it returns 1 (true) if \kbd{x}
+is equal to $-1$ or $1$, and return 0~(false) otherwise.
+
+\fun{int}{is_pm1_lg}{GEN x, long L} as \kbd{is\_pm1} but even lower level:
+assumes further that \kbd{lgefint(x) = L}.
 
 \fun{int}{gcmp0}{GEN x} returns 1 (true) if \kbd{x} is equal to~0, 0~(false)
 otherwise.
