@@ -543,6 +543,7 @@ FF_log(GEN x, GEN g, GEN ord)
   {
   case t_FF_FpXQ:
     r = FpXQ_log(gel(x,2), gel(g,2), ord, T, p);
+    break;
   default:
     r = Flxq_log(gel(x,2), gel(g,2), ord, T, pp);
   }
