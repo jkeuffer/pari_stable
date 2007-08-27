@@ -1642,26 +1642,17 @@ a4galoisgen(GEN T, struct galois_test *td)
       switch (y)
       {
       case 3:
-	x = t[2];
 	if (a == 1)
-	{
-	  t[2] = t[1];
-	  t[1] = x;
-	}
+	{ lswap(t[1], t[2]); }
 	else
-	{
-	  t[2] = t[0];
-	  t[0] = x;
-	}
+	{ lswap(t[0], t[2]); }
 	break;
       case 5:
 	x = t[0];
 	t[0] = t[2];
 	t[2] = t[1];
 	t[1] = x;
-	x = t[4];
-	t[4] = t[4 - a];
-	t[4 - a] = x;
+        lswap(t[4], t[4-a]);
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 7:
@@ -1671,9 +1662,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[3] = t[1];
 	t[1] = t[2];
 	t[2] = x;
-	x = t[6];
-	t[6] = t[6 - a];
-	t[6 - a] = x;
+        lswap(t[6], t[6-a]);
 	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
@@ -1683,12 +1672,8 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[6] = t[5];
 	t[5] = t[3];
 	t[3] = x;
-	x = t[4];
-	t[4] = t[1];
-	t[1] = x;
-	x = t[8];
-	t[8] = t[8 - a];
-	t[8 - a] = x;
+        lswap(t[1], t[4]);
+        lswap(t[8], t[8-a]);
 	addiiz(gel(ar,4), addii(gmael(mt,t[8],t[9]), gmael(mt,t[9],t[8])), gel(ar,3));
 	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
@@ -1707,9 +1692,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	    t[j] = t[j - 1];
 	  t[0] = x;
 	}
-	x = t[y];
-	t[y] = t[y - a];
-	t[y - a] = x;
+        lswap(t[y], t[y-a]);
 	for (k = y; k > 2; k -= 2)
 	  addiiz(gel(ar,k >> 1),
 		addii(gmael(mt,t[k],t[k + 1]), gmael(mt,t[k + 1],t[k])),
@@ -1770,26 +1753,18 @@ a4galoisgen(GEN T, struct galois_test *td)
 	x = x/y;
       }
       while (!a);
-      x = u[2];
-      u[2] = u[0];
-      u[0] = x;
+      lswap(u[0],u[2]);
       switch (y)
       {
       case 2:
 	break;
       case 6:
-	x = u[4];
-	u[4] = u[6];
-	u[6] = x;
+        lswap(u[4],u[6]);
 	if (!(a & 1))
 	{
 	  a = 4 - (a >> 1);
-	  x = u[6];
-	  u[6] = u[a];
-	  u[a] = x;
-	  x = u[4];
-	  u[4] = u[a - 2];
-	  u[a - 2] = x;
+          lswap(u[6], u[a]);
+          lswap(u[4], u[a-2]);
 	}
 	break;
       case 10:
@@ -1803,12 +1778,8 @@ a4galoisgen(GEN T, struct galois_test *td)
 	if (a >= 3)
 	  a += 2;
 	a = 8 - a;
-	x = u[10];
-	u[10] = u[a];
-	u[a] = x;
-	x = u[8];
-	u[8] = u[a - 2];
-	u[a - 2] = x;
+        lswap(u[10],u[a]);
+        lswap(u[8],u[a-2]);
 	break;
       }
     }
@@ -1856,35 +1827,22 @@ a4galoisgen(GEN T, struct galois_test *td)
     pfv[mael(O,1,4)] = mael(O,2,2 + j);
     for (i = 0; i < 4; i++)
     {
-      long    x;
-      GEN     g;
+      GEN g;
       switch (i)
       {
       case 0:
 	break;
       case 1:
-	x = mael(O,3,1);
-	mael(O,3,1) = mael(O,3,2);
-	mael(O,3,2) = x;
-	x = mael(O,3,3);
-	mael(O,3,3) = mael(O,3,4);
-	mael(O,3,4) = x;
+	lswap(mael(O,3,1), mael(O,3,2));
+	lswap(mael(O,3,3), mael(O,3,4));
 	break;
       case 2:
-	x = mael(O,3,1);
-	mael(O,3,1) = mael(O,3,4);
-	mael(O,3,4) = x;
-	x = mael(O,3,2);
-	mael(O,3,2) = mael(O,3,3);
-	mael(O,3,3) = x;
+	lswap(mael(O,3,1), mael(O,3,4));
+	lswap(mael(O,3,2), mael(O,3,3));
 	break;
       case 3:
-	x = mael(O,3,1);
-	mael(O,3,1) = mael(O,3,2);
-	mael(O,3,2) = x;
-	x = mael(O,3,3);
-	mael(O,3,3) = mael(O,3,4);
-	mael(O,3,4) = x;
+	lswap(mael(O,3,1), mael(O,3,2));
+	lswap(mael(O,3,3), mael(O,3,4));
       }
       pfv[mael(O,2,1)] = mael(O,3,1);
       pfv[mael(O,2,3 + j)] = mael(O,3,4 - j);
@@ -2042,18 +2000,10 @@ s4galoisgen(struct galois_lift *gl)
     GEN u1, u2, u3;
     if (i)
     {
-      long x;
-      x = sg[3];
       if (i == 1)
-      {
-	sg[3] = sg[2];
-	sg[2] = x;
-      }
+      { lswap(sg[2],sg[3]); }
       else
-      {
-	sg[3] = sg[1];
-	sg[1] = x;
-      }
+      { lswap(sg[1],sg[3]); }
     }
     u=s4releveauto(misom,Tmod,Tp,p,sg[1],sg[2],sg[3],sg[4],sg[5],sg[6]);
     s4makelift(u, gl, liftpow);
