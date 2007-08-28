@@ -162,6 +162,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
    46- cleaned up splines handling [ ploth(,,,256) ] : remove quark_gen & QUARK
 BA 47- implicitly local variables are lexically-scoped
 BA 48- local and my can now appear anywhere in a program.
+   49- [library] rename apell -> ellap
 
   Added
     1- library functions expu, adduu, subuu
@@ -206,6 +207,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
        (use RgXQ_powers)
     8- obsolete undocumented library function sqred3
     9- the emacs/ directory: PariEmacs is now distributed separately.
+   10- obsolete functions ellap0, apell2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

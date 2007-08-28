@@ -729,7 +729,6 @@ GEN     minkowski_bound(GEN D, long N, long r2, long prec);
 
 GEN     CM_CardEFp(GEN E, GEN p);
 GEN     CM_ellap(GEN E, GEN p);
-GEN     apell1(GEN e, GEN p);
 void    checkpt(GEN z);
 GEN     multi_invmod(GEN x, GEN p);
 GEN     ratroot(GEN p);

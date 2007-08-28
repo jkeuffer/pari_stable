@@ -2300,14 +2300,6 @@ ap_jacobi(GEN e, ulong p)
   }
 }
 
-GEN
-apell2(GEN e, GEN pp)
-{
-  checkell(e); if (typ(pp)!=t_INT) pari_err(elliper1);
-  if (expi(pp) > 29) pari_err(talker,"prime too large in apell2, use apell");
-  return ap_jacobi(e, (ulong)pp[2]);
-}
-
 /* invert all elements of x mod p using Montgomery's trick */
 GEN
 multi_invmod(GEN x, GEN p)
@@ -2456,8 +2448,8 @@ closest_lift(GEN a, GEN b, GEN h)
 }
 
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
-GEN
-apell1(GEN e, GEN p)
+static GEN
+ellap1(GEN e, GEN p)
 {
   long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
   ulong x;
@@ -2574,7 +2566,7 @@ apell1(GEN e, GEN p)
     }
     P = addsell(cp4,gel(pts,j-1),mfh,p); /* = (s-1).F */
     if (!P) { h = mului(s-1,B); goto FOUND; }
-    if (DEBUGLEVEL) msgtimer("[apell1] baby steps, s = %ld",s);
+    if (DEBUGLEVEL) msgtimer("[ellap1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
     fg = addsell(cp4,P,F,p);
@@ -2589,7 +2581,7 @@ apell1(GEN e, GEN p)
     /* tx is sorted. ti = ty sorted */
     for (i=1; i<=s; i++) { ty[i] = ti[i]; ti[i] = p1[i]; }
     /* ty is sorted. ti = permutation sorting tx */
-    if (DEBUGLEVEL) msgtimer("[apell1] sorting");
+    if (DEBUGLEVEL) msgtimer("[ellap1] sorting");
     avma = av2;
 
     gaffect(fg, gel(pts,1));
@@ -2625,7 +2617,7 @@ apell1(GEN e, GEN p)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == +/- ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
-            if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
+            if (DEBUGLEVEL) msgtimer("[ellap1] giant steps, i = %ld",i);
             P = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
             if (equalii(gel(P,1), gel(ftest,1)))
             {
@@ -2767,9 +2759,9 @@ sclosest_lift(long A, long B, ulong p2p)
 }
 
 /* assume e has good reduction at p. Should use Montgomery.
- * See apell1() */
+ * See ellap1() */
 static GEN
-apell0(GEN e, ulong p)
+ellap2(GEN e, ulong p)
 {
   sellpt f, fh, fg, ftest, F;
   ulong x, u, c4, c6, cp4, p1p, p2p, h;
@@ -2834,7 +2826,7 @@ apell0(GEN e, ulong p)
     {
       if (ftest.isnull) {
         if (!uisprime(p)) pari_err(talker,"%lu is not prime, use ellak", p);
-        pari_err(bugparier,"apell (f^(i*s) = 1)");
+        pari_err(bugparier,"ellap (f^(i*s) = 1)");
       }
       l=0; r=s;
       while (l<r)
@@ -2874,7 +2866,7 @@ FOUND:
   return stoi(KRO==1? p1p-h: h-p1p);
 }
 
-/** apell from CM (original code contributed by Mark Watkins) **/
+/** ellap from CM (original code contributed by Mark Watkins) **/
 
 static ulong
 Mod16(GEN x) {
@@ -3018,19 +3010,16 @@ CM_CardEFp(GEN E, GEN p)
 }
 
 GEN
-apell(GEN e, GEN p)
+ellap(GEN e, GEN p)
 {
   GEN a;
   checkell(e);
-  if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in apell");
+  if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
   a = CM_ellap(e, p); if (a) return a;
 
-  if (cmpiu(p, 0x3fffffff) > 0) return apell1(e, p);
-  return apell0(e, itou(p));
+  if (cmpiu(p, 0x3fffffff) > 0) return ellap1(e, p);
+  return ellap2(e, itou(p));
 }
-
-GEN
-ellap0(GEN e, GEN p, long flag) { return flag? apell2(e,p): apell(e,p); }
 
 static void
 checkell_int(GEN e)
@@ -3080,7 +3069,7 @@ anell(GEN e, long n0)
     else /* good reduction */
     {
       GEN ap;
-      P[2] = p; ap = apell(e, P);
+      P[2] = p; ap = ellap(e, P);
 
       if (p <= SQRTn) {
         ulong pk, oldpk = 1;
@@ -3146,7 +3135,7 @@ akell(GEN e, GEN n)
   { /* good reduction */
     p = gel(P,i);
     ex = itos(gel(E,i));
-    ap = apell(e,p);
+    ap = ellap(e,p);
     u = ap; v = gen_1;
     for (j=2; j<=ex; j++)
     {
@@ -3812,7 +3801,7 @@ torsbound(GEN e)
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
     if (umodiu(D, prime))
     {
-      b = ugcd(b, prime+1 - itos(apell0(e, (ulong)prime)));
+      b = ugcd(b, prime+1 - itos(ellap2(e, (ulong)prime)));
       avma = av;
       if (b == 1) break;
       if (b == bold) m++; else { bold = b; m = 0; }
