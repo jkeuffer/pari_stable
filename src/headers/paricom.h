@@ -404,6 +404,10 @@ enum manage_var_t {
 #define typ_QUA  8 /* quadclassunit  */
 #define typ_GAL  9 /* galoisinit     */
 #define typ_BID 10
+/* idealtyp */
+#define id_PRINCIPAL 0
+#define id_PRIME     1
+#define id_MAT       2
 
 #define DIFFPTR_SKIP	255		/* Skip these entries */
 #define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \

@@ -42,10 +42,6 @@ typedef struct {
 
 void remake_GM(GEN nf, nffp_t *F, long prec);
 
-#define id_PRINCIPAL 0
-#define id_PRIME     1
-#define id_MAT       2
-
 /* for initalg_i */
 #define nf_ROUND2      64
 #define nf_NOROOTS     32
