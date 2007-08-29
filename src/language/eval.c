@@ -317,7 +317,6 @@ change_compo(matcomp *c, GEN res)
     *pt = (GEN)itos(res); return;
   }
   t = typ(res);
-  if (t == t_LIST) err(impl, "\"lists as components\"");
   if (c->full_row)
   {
     if (t != t_VEC || lg(res) != lg(p))

@@ -1718,7 +1718,6 @@ listput(GEN L, GEN x, long index)
 
   if (typ(L) != t_LIST) pari_err(typeer,"listput");
   if (index < 0) pari_err(talker,"negative index (%ld) in listput", index);
-  if (typ(x) == t_LIST) err(impl, "\"lists as components\"");
   z = list_data(L);
   l = lg(z);
 
@@ -1740,7 +1739,6 @@ listinsert(GEN L, GEN x, long index)
   GEN z;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
-  if (typ(x) == t_LIST) err(impl, "\"lists as components\"");
 
   z = list_data(L); l = lg(z);
   if (index <= 0 || index >= l) pari_err(talker,"bad index in listinsert");
@@ -1770,28 +1768,33 @@ listpop(GEN L, long index)
   for (i=index; i < l; i++) z[i] = z[i+1];
 }
 
+/* x a t_VEC/t_COL */
+GEN
+vectolist(GEN x)
+{
+  GEN v, L = listcreate();
+  long i, l = lg(x);
+  ensure_nb(L, l-1);
+  v = list_data(L); v[0] = x[0];
+  for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
+  return L;
+}
+
 GEN
 gtolist(GEN x)
 {
-  long l, i;
-  GEN L, v;
+  GEN L;
 
   if (!x) return listcreate();
   switch(typ(x))
   {
-    case t_VEC: case t_COL: break;
+    case t_VEC: case t_COL: return vectolist(x);
     case t_LIST: return listcopy(x);
     default:
       L = listcreate();
       (void)listput(L, x, 0);
       return L;
   }
-  /* VEC, COL */
-  L = listcreate(); l = lg(x);
-  ensure_nb(L, l-1);
-  v = list_data(L); v[0] = x[0];
-  for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
-  return L;
 }
 
 GEN

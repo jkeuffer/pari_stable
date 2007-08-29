@@ -1223,6 +1223,7 @@ long    u_lvalrem(ulong x, ulong p, ulong *py);
 long    u_pvalrem(ulong x, GEN p, ulong *py);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
+GEN     vectolist(GEN x);
 long    Z_lval(GEN n, ulong p);
 long    Z_lvalrem(GEN n, ulong p, GEN *py);
 long    z_pval(long n, GEN p);

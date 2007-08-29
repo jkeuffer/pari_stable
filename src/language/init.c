@@ -336,9 +336,9 @@ pari_daemon(void)
 }
 #else
 int
-pari_daemon(void) 
-{ 
-  pari_err(impl,"pari_daemon without waitpid & setsid"); 
+pari_daemon(void)
+{
+  pari_err(impl,"pari_daemon without waitpid & setsid");
   return 0;
 }
 #endif
@@ -354,16 +354,16 @@ pari_sighandler(int sig)
   switch(sig)
   {
 #ifdef SIGBREAK
-    case SIGBREAK: 
+    case SIGBREAK:
       if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
-      else pari_handle_SIGINT(); 
+      else pari_handle_SIGINT();
       return;
 #endif
 
 #ifdef SIGINT
     case SIGINT:
       if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
-      else pari_handle_SIGINT(); 
+      else pari_handle_SIGINT();
       return;
 #endif
 
@@ -586,7 +586,7 @@ init_stack(size_t size)
     gpfree((void*)bot);
   }
   /* NOT gpmalloc, memer would be deadly */
-  
+
   BLOCK_SIGINT(
   bot = (pari_sp)malloc(s);
   )
@@ -644,7 +644,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
     GP_DATA = default_gp_data(); gp_expand_path(GP_DATA->path);
     pari_init_defaults();
   }
-  
+
   err_catch_stack=NULL;
   if ((init_opts&INIT_JMPm) && setjmp(GP_DATA->env))
   {
@@ -660,7 +660,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_parser();
   pari_init_compiler();
   pari_init_evaluator();
-  
+
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
@@ -675,7 +675,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   grow_init(MODULES);    grow_append(MODULES, functions_basic);
   grow_init(OLDMODULES); grow_append(OLDMODULES, oldfonctions);
-  pari_fill_hashtable(functions_hash, 
+  pari_fill_hashtable(functions_hash,
                       new_fun_set? functions_basic:oldfonctions);
 
   whatnow_fun = NULL;
@@ -1185,7 +1185,7 @@ trap0(char *e, GEN r, GEN f)
   kill_dft_handler(numerr);
   if (!F)
     dft_handler[numerr] = BREAK_LOOP;
-  else 
+  else
     dft_handler[numerr] = gclone(F);
   return gnil;
 }
@@ -1306,15 +1306,6 @@ cgetg_copy_av(long lx, GEN x, GEN *AVMA) {
   (*AVMA)[0] = x[0] & (TYPBITS|LGBITS); return (*AVMA);
 }
 
-/* lists can't be conveniently represented in binary form. Store as t_VEC */
-static GEN
-copy_list_av(GEN x, GEN *AVMA, GEN (*cp)(GEN,GEN*))
-{
-  pari_sp av = avma;
-  GEN y = cp(gtovec(x), AVMA);
-  avma = av; return y;
-}
-
 /* copy x as if avma = *AVMA, update *AVMA */
 GEN
 gcopy_av(GEN x, GEN *AVMA)
@@ -1327,7 +1318,9 @@ gcopy_av(GEN x, GEN *AVMA)
     switch(tx)
     {
       case t_INT: return *AVMA = icopy_av(x, *AVMA);
-      case t_LIST: return copy_list_av(x, AVMA, &gcopy_av);
+      case t_LIST:
+        y = cgetg_copy_av(3, x, AVMA);
+        listassign(x, y); return y;
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
@@ -1339,6 +1332,15 @@ gcopy_av(GEN x, GEN *AVMA)
     for (; i<lx; i++) gel(y,i) = gcopy_av(gel(x,i), AVMA);
   }
   return y;
+}
+
+/* lists can't be conveniently represented in binary form. Store as t_VEC */
+static GEN
+copy_list_av(GEN x, GEN *AVMA, GEN (*cp)(GEN,GEN*))
+{
+  GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
+  list_data(y) = cp(z, AVMA);
+  list_nmax(y) = lg(z)-1; return y;
 }
 
 /* [copy_bin/bin_copy:] same as gcopy_av but use NULL to code an exact 0,
@@ -1369,8 +1371,18 @@ gcopy_av0(GEN x, GEN *AVMA)
   return y;
 }
 
+INLINE GEN
+icopy_av_canon(GEN x, GEN AVMA)
+{
+  long i, lx = lgefint(x);
+  GEN y = AVMA - lx;
+  y[0] = evaltyp(t_INT)|evallg(lx); /* kills isclone */
+  y[1] = x[1]; x = int_MSW(x);
+  for (i=2; i<lx; i++, x = int_precW(x)) y[i] = *x;
+  return y;
+}
 /* [copy_bin_canon/bin_copy_canon:] same as gcopy_av0, but copy integers in
- * canonical (native kernel) form */
+ * canonical (native kernel) form and make a full copy of t_LISTs */
 static GEN
 gcopy_av0_canon(GEN x, GEN *AVMA)
 {
@@ -1382,13 +1394,7 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
     if (is_0INT(x)) return NULL; /* special marker */
     switch(tx)
     {
-      case t_INT:
-        lx = lgefint(x);
-        *AVMA = y = *AVMA - lx;
-        y[0] = evaltyp(t_INT)|evallg(lx); /* kills isclone */
-        y[1] = x[1]; x = int_MSW(x);
-        for (i=2; i<lx; i++, x = int_precW(x)) y[i] = *x;
-        return y;
+      case t_INT: return *AVMA = icopy_av_canon(x, *AVMA);
       case t_LIST: return copy_list_av(x, AVMA, &gcopy_av0_canon);
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
@@ -1414,13 +1420,11 @@ taille0(GEN x)
     switch(tx)
     {
       case t_INT: return lgefint(x);
-      case t_LIST:
-        x = list_data(x); lx = lg(x);
-        tx = t_VEC; break;
+      case t_LIST: return 3 + taille0(list_data(x));
       default: return lg(x);
     }
-  } else lx = lg(x);
-  n = lx;
+  }
+  n = lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++) n += taille0(gel(x,i));
   return n;
 }
@@ -1430,8 +1434,12 @@ taille(GEN x)
 {
   long i,n,lx, tx = typ(x);
   if (!is_recursive_t(tx))
-    return (tx == t_INT)? lgefint(x): lg(x);
-  lx = n = lg(x);
+    switch(tx)
+    {
+      case t_INT: return lgefint(x);
+      default: return lg(x);
+    }
+  n = lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++) n += taille(gel(x,i));
   return n;
 }
@@ -1498,8 +1506,7 @@ shiftaddress_canon(GEN x, long dec)
   long i, lx, tx = typ(x);
   if (!is_recursive_t(tx))
   {
-    if (tx == t_INT)
-    {
+    if (tx == t_INT) {
       GEN y;
       lx = lgefint(x); if (lx <= 3) return;
       y = x + 2;
@@ -1509,6 +1516,14 @@ shiftaddress_canon(GEN x, long dec)
         long m=*x; *x=*y; *y=m;
         x = int_precW(x); y++;
       }
+    } else if (tx == t_LIST) {
+      pari_sp av = avma;
+      GEN L = (GEN)((long)list_data(x)+dec);
+      shiftaddress_canon(L, dec);
+      L = vectolist(L);
+      x[0] = evaltyp(t_LIST)|evallg(3);
+      list_nmax(x) = list_nmax(L);
+      list_data(x) = list_data(L); avma = av;
     }
   }
   else
@@ -1697,7 +1712,7 @@ gerepileupto(pari_sp av, GEN q)
   long tq;
   if (!isonstack(q) || (GEN)av<=q) { avma = av; return q; }
   tq = typ(q);
-  if (!is_recursive_t(tq)) 
+  if (!is_recursive_t(tq))
     return tq == t_INT? gerepileuptointfast(av,q):
                         gerepileuptoleaffast(av,q);
   /* The garbage is only empty when av==q. It's probably a mistake if
