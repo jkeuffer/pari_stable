@@ -320,6 +320,42 @@ listtogen(long n, long f)
   return z;
 }
 
+static long
+arg_is_safe(long a)
+{
+  if (a<0) return 1;
+  switch (tree[a].f)
+  {
+  case FmatrixL: case FmatrixR:
+  case Ftag:
+    return arg_is_safe(tree[a].x);
+  case Fconst: case Fsmall: case Fnoarg:
+    return 1;
+  case Ffacteurmat:
+  case Fmatrix:
+    return arg_is_safe(tree[a].x) && arg_is_safe(tree[a].y);
+  case Fentry:
+    {
+      entree *ep=get_entree(a);
+      long i;
+      for (i=s_lvar.n-1; i>=0; i--)
+        if (localvars[i].ep==ep) 
+          return 1;
+      return 0;
+    }
+  default:
+    return 0;
+  }
+}
+
+static long
+first_safe_arg(GEN arg)
+{
+  long lnc, l=lg(arg);
+  for (lnc=l-1; lnc>0 && arg_is_safe(arg[lnc]); lnc--);
+  return lnc;
+}
+
 static entree *
 getlvalue(long n)
 { 
@@ -413,9 +449,8 @@ compilevec(long n, long mode, op_code op)
   long x=tree[n].x;
   long i;
   GEN arg=listtogen(x,Fmatrixelts);
-  long l=lg(arg),lnc;
+  long l=lg(arg),lnc=first_safe_arg(arg);
   op_push(op,l);
-  for (lnc=l-1; lnc>0 && tree[arg[lnc]].f==Fconst; lnc--);
   for (i=1;i<l;i++)
   {
     compilenode(arg[i],Ggen,i>=lnc?FLnocopy:0);
@@ -509,8 +544,9 @@ compilefunc(long n, int mode)
   char c;
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
+  long lnc=first_safe_arg(arg);
   long nbpointers=0;
-  long nb=lg(arg)-1, lnc, lev=0;
+  long nb=lg(arg)-1, lev=0;
   entree *ep = getfunc(n);
   entree *ev[8];
   if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
@@ -652,8 +688,6 @@ compilefunc(long n, int mode)
   else ret = RET_GEN;
   if (tree[n].f==Fderfunc && (ret!=RET_GEN || *p!='G'))
     pari_err(talker2,"can't derive this",tree[n].str,get_origin());
-  /*lnc: last non-constant */
-  for (lnc=nb; lnc>0 && tree[arg[lnc]].f==Fconst; lnc--);
   i=0; j=1;
   if (*p)
   {
