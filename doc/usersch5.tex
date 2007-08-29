@@ -739,18 +739,19 @@ longer fits in an \kbd{ulong}. (It turns out that this cannot happen on a
 \fun{ulong}{pgener_Fl_local}{ulong p, GEN L}, see \kbd{gener\_Fp\_local},
 \kbd{L} is an \kbd{Flv}.
 
-Even though these routines are efficient, they are slower than ordinary
-\kbd{long} operations, using the standard \kbd{+}, \kbd{\%}, etc. operators.
+\subsec{Switching between Fl\_xxx and standard operators}
+
+Even though the \kbd{Fl\_xxx} routines are efficient, they are slower than
+ordinary \kbd{long} operations, using the standard \kbd{+}, \kbd{\%}, etc.
+operators.
 The following macro is used to choose in a portable way the most efficient
-functions given operands:
+functions for given operands:
 
 \fun{int}{SMALL_ULONG}{ulong p} true if $2p^2 <2^\B$. In that case, it is
 possible to use ordinary operators efficiently. If $p < 2^\B$, one
-may still use the $Fl\_xxx$ routines. Otherwise, one must use generic
-routines.
-
-For instance, the scalar product of the \kbd{GEN}s $x$ and $y$ mod $p$ could
-be computed as:
+may still use the \kbd{Fl\_xxx} routines. Otherwise, one must use generic
+routines. For instance, the scalar product of the \kbd{GEN}s $x$ and $y$ mod
+$p$ could be computed as follows.
 \bprog
     long i, l = lg(x);
     if (lgefint(p) > 3)
