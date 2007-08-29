@@ -1074,7 +1074,7 @@ the process available stack space (increase \tet{stacksize}).
 Use the following trick (neat example due to Bill Daly):
 
 \bprog
-calc(f, x) = eval( Str(f, "(x)") )
+calc(f, lx) = local(x=lx); eval( Str(f, "(x)") )
 @eprog
 
 \noindent If you call this with \kbd{calc("sin", 1)}, it will
