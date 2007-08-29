@@ -119,15 +119,13 @@ enum manage_var_t {
 #ifdef LONG_IS_64BIT
 #  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
 #  define BIGINT (2147483647)               /* 2^31-1 */
-#  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
+#  define SMALL_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
 #  define VERYBIGINT (2147483647L) /* 2^31-1 */
 #  define BIGINT (32767)           /* 2^15-1 */
-#  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
+#  define SMALL_ULONG(p) ((ulong)p <= 46337UL) /* 2p^2 < 2^BITS_IN_LONG */
 #endif
 
-/* 2p^2 < 2^BITS_IN_LONG */
-#define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 #ifndef HAS_EXP2
 #  undef exp2

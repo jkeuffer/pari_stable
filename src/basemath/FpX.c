@@ -196,7 +196,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     else return gerepileupto(av0, z);
   }
   av0 = avma; dz = dx-dy;
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   { /* assume ab != 0 mod p */
     ulong pp = (ulong)p[2];
     GEN a = ZX_to_Flx(x, pp);

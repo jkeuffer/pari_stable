@@ -499,7 +499,7 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
 
   lz = nx+ny+1; nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2; /* x:y:z [i] = term of degree i */
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i=0; i<ny; i++)z[i] = Flx_mullimb_ok(x+i,y,p,0,i+1);
     for (  ; i<nx; i++) z[i] = Flx_mullimb_ok(x+i,y,p,0,ny);
@@ -593,7 +593,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
   if (!nx) return zero_Flx(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz, t_VECSMALL) + 2;
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i=0; i<nx; i++)
     {
@@ -727,7 +727,7 @@ Flx_rem(GEN x, GEN y, ulong p)
   c = cgetg(dy+3, t_VECSMALL); c[1]=vs; c += 2; av=avma;
   z = cgetg(dz+3, t_VECSMALL); z[1]=vs; z += 2;
 
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     z[dz] = (inv*x[dx]) % p;
     for (i=dx-1; i>=dy; --i)
@@ -810,7 +810,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   inv = (ulong)y[dy];
   if (inv != 1UL) inv = Fl_inv(inv,p);
 
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     z[dz] = (inv*x[dx]) % p;
     for (i=dx-1; i>=dy; --i)
@@ -840,7 +840,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (!pr) return q;
 
   c = cgetg(dy + 3, t_VECSMALL); c[1] = sv; c += 2;
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i=0; i<dy; i++)
     {
@@ -906,7 +906,7 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
   long i, l=lg(T)-1, k;
   GEN r=cgetg(l,t_VECSMALL); r[1]=T[1];
   r[2]=0; r[3]=1;
-  if (u_OK_ULONG(p)) {
+  if (SMALL_ULONG(p)) {
     for (i=4;i<l;i++)
     {
       long u = 0;
@@ -1216,7 +1216,7 @@ Flx_eval(GEN x, ulong y, ulong p)
     return (i==2)? x[2]: 0;
   p1 = x[i];
   /* specific attention to sparse polynomials (see poleval)*/
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i--; i>=2; i=j-1)
     {
@@ -1288,7 +1288,7 @@ Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem)
   z[1] = a[1];
   a0 = a + l-1;
   z0 = z + l-2; *z0 = *a0--;
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
     {

@@ -1368,7 +1368,7 @@ _Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
   gel(b,k) = gadd(gel(b,k), gmul(m, gel(b,i)));
 }
 
-/* assume m < p && u_OK_ULONG(p) && (! (b[i] & b[k] & MASK)) */
+/* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & MASK)) */
 static void
 _Fl_addmul_OK(uGEN b, long k, long i, ulong m, ulong p)
 {
@@ -1514,7 +1514,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
 {
   long iscol, i, j, k, li, bco, aco = lg(a)-1;
   ulong piv, invpiv, m;
-  const int OK_ulong = u_OK_ULONG(p);
+  const int OK_ulong = SMALL_ULONG(p);
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
@@ -2728,7 +2728,7 @@ Flm_mul(GEN x, GEN y, ulong p)
   {
     long k;
     gel(z,j) = cgetg(l,t_VECSMALL);
-    if (u_OK_ULONG(p))
+    if (SMALL_ULONG(p))
     {
       for (i=1; i<l; i++)
       {
@@ -2764,7 +2764,7 @@ Flm_Flc_mul(GEN x, GEN y, ulong p)
   if (lx==1) return cgetg(1,t_VECSMALL);
   l = lg(x[1]);
   z = cgetg(l,t_VECSMALL);
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (i=1; i<l; i++)
     {
@@ -2800,7 +2800,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
   GEN y, c, d;
   long i, j, k, r, t, m, n;
   ulong a, piv;
-  const int OK_ulong = u_OK_ULONG(p);
+  const int OK_ulong = SMALL_ULONG(p);
 
   n = lg(x)-1;
   m=lg(x[1])-1; r=0;

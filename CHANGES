@@ -163,6 +163,7 @@ MSo26- define polchebyshev(n, 1 or 2), pollegendre(n) for n < 0
 BA 47- implicitly local variables are lexically-scoped
 BA 48- local and my can now appear anywhere in a program.
    49- [library] rename apell -> ellap
+   50- Removed the OK_ULONG macro and renamed u_OK_ULONG -> SMALL_ULONG
 
   Added
     1- library functions expu, adduu, subuu

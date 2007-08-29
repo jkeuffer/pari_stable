@@ -556,7 +556,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   l = lg(x[1]);
   y++;
   z = const_vecsmall(l,0) + 1;
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
   {
     for (k=1; k<ly; k++)
     {
@@ -1061,7 +1061,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
   lx = lg(gx);
   ly = lg(gy);
   if (lx<ly) pari_err(bugparier,"lx<ly in Flx_addmul_inplace");
-  if (u_OK_ULONG(p))
+  if (SMALL_ULONG(p))
     for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else
     for (i=2; i<ly;  i++) x[i] = Fl_add(x[i], Fl_mul(c,y[i],p),p);

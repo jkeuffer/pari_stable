@@ -628,7 +628,7 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   pari_sp av = avma;
   FpXYQQ_muldata D;
   GEN y;
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   {
     ulong pp = p[2];
     x = ZXX_to_FlxX(x, pp, varn(T));
@@ -676,7 +676,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   pari_sp ltop = avma;
   GEN y;
   kronecker_muldata D;
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   {
     ulong pp = p[2];
     GEN z;
@@ -1602,7 +1602,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     return gerepile(av0,tetpil,FpXQX_red(x,T,p));
   }
   av0 = avma; dz = dx-dy;
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   { /* assume ab != 0 mod p */
     {
       GEN *gptr[2];
@@ -2243,7 +2243,7 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
   long i,n,dres, vX = varn(b), vY = varn(a);
   GEN la,x,y;
  
-  if (OK_ULONG(p))
+  if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
     b = ZXX_to_FlxX(b, pp, vY);
