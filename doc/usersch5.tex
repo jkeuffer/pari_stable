@@ -1586,6 +1586,9 @@ of \typ{INT}s~x and~\kbd{y}. As \kbd{kross} otherwise.
 \fun{GEN}{pgener_Zp}{GEN p} returns a primitive root modulo $p^k$, $k > 1$,
 assuming \kbd{p} is an odd prime.
 
+\fun{long}{Zp_issquare}{GEN x, GEN p} returns 1 if the \typ{INT} $x$ is
+a $p$-adic square, $0$ otherwise.
+
 \fun{GEN}{pgener_Fp_local}{GEN p, GEN L}, \kbd{L} being a vector of
 primes dividing $p - 1$, returns an integer $x$ which is a generator of the
 $\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,

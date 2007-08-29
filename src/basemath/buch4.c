@@ -22,39 +22,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-static int
-psquare(GEN a,GEN p)
-{
-  long v;
-  GEN ap;
-
-  if (!signe(a) || gcmp1(a)) return 1;
-  v = Z_pvalrem(a, p, &ap);
-  if (v&1) return 0;
-  return equaliu(p, 2)? umodiu(ap, 8) == 1
-                      : kronecker(ap,p) == 1;
-}
-
+/* p > 2 */
 static long
 lemma6(GEN pol,GEN p,long nu,GEN x)
 {
-  long lambda, mu;
-  pari_sp ltop=avma;
-  GEN gx, gpx;
+  long la, mu;
+  pari_sp av = avma;
+  GEN gpx, gx = poleval(pol, x);
 
-  gx = poleval(pol, x);
-  if (psquare(gx,p)) return 1;
+  if (Zp_issquare(gx,p)) { avma = av; return 1; }
 
+  la = Z_pval(gx, p);
   gpx = poleval(derivpol(pol), x);
-  lambda = Z_pval(gx, p);
   mu = gcmp0(gpx)? BIGINT: Z_pval(gpx,p);
-  avma = ltop;
+  avma = av;
 
-  if (lambda > (mu<<1)) return 1;
-  if (lambda >= (nu<<1) && mu >= nu) return 0;
+  if (la > (mu<<1)) return 1;
+  if (la >= (nu<<1) && mu >= nu) return 0;
   return -1;
 }
-
+/* p = 2 */
 static long
 lemma7(GEN pol,long nu,GEN x)
 {
@@ -63,7 +50,7 @@ lemma7(GEN pol,long nu,GEN x)
   GEN gx, gpx, oddgx;
 
   gx = poleval(pol, x);
-  if (psquare(gx,gen_2)) return 1;
+  if (Zp_issquare(gx,gen_2)) return 1;
 
   gpx = poleval(derivpol(pol), x);
   lambda = Z_lvalrem(gx, 2, &oddgx);
@@ -647,7 +634,7 @@ pol_up(GEN rnfeq, GEN x, long v)
 {
   long i, l = lg(x);
   GEN y = cgetg(l, t_POL); y[1] = x[1];
-  for (i=2; i<l; i++) 
+  for (i=2; i<l; i++)
   {
     GEN t = eltreltoabs(rnfeq, gel(x,i));
     if (typ(t) == t_POL) setvarn(t, v);
@@ -660,7 +647,7 @@ GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   pari_sp av = avma;
-  long i, l, drel, vbas; 
+  long i, l, drel, vbas;
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
 

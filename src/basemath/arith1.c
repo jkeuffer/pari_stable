@@ -462,6 +462,19 @@ Z_issquarerem(GEN x, GEN *pt)
   return 1;
 }
 
+long
+Zp_issquare(GEN a, GEN p)
+{
+  long v;
+  GEN ap;
+
+  if (!signe(a) || gcmp1(a)) return 1;
+  v = Z_pvalrem(a, p, &ap);
+  if (v&1) return 0;
+  return equaliu(p, 2)? umodiu(ap, 8) == 1
+                      : kronecker(ap,p) == 1;
+}
+
 static long
 polissquarerem(GEN x, GEN *pt)
 {

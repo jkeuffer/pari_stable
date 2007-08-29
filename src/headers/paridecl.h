@@ -396,6 +396,7 @@ GEN     Fp_sqrt(GEN a, GEN p);
 GEN     Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan);
 GEN     Fp_sub(GEN a, GEN b, GEN m);
 long    Z_issquarerem(GEN x, GEN *pt);
+long    Zp_issquare(GEN a, GEN p);
 GEN     bestappr0(GEN x, GEN a, GEN b);
 GEN     bestappr(GEN x, GEN k);
 long    cgcd(long a,long b);
