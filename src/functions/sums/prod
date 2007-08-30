@@ -36,4 +36,4 @@ Doc: product of expression
  %4 = O(X^1001)
  @eprog
  
- \synt{produit}{entree *ep, GEN a, GEN b, char *expr, GEN x}.
+ \synt{produit}{GEN a, GEN b, char *expr, GEN x}.

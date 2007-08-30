@@ -19,15 +19,4 @@ Doc: sum of expression \var{expr},
  %2 = 9.787606036044382264178477904
  @eprog
  
- \synt{somme}{entree *ep, GEN a, GEN b, char *expr, GEN x}. This is to be
- used as follows: \kbd{ep} represents the dummy variable used in the
- expression \kbd{expr}
- \bprog
- /* compute a^2 + @dots + b^2 */
- {
- /* define the dummy variable "i" */
- entree *ep = is_entry("i");
- /* sum for a <= i <= b */
- return somme(ep, a, b, "i^2", gen_0);
- }
- @eprog
+ \synt{somme}{GEN a, GEN b, char *expr, GEN x}.
