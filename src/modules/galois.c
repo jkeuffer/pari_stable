@@ -244,21 +244,23 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 }
 
 static void
-preci(buildroot *BR, long p)
+preci(GEN o, long p)
+{
+  long i;
+  for (i=1; i<=N; i++)
+  {
+    GEN x = gel(o,i);
+    if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
+  }
+}
+static void
+fixprec(buildroot *BR)
 {
   GEN r = BR->r;
-  long i, j, l = lg(r);
+  long i, l = lg(r), p = BR->pr;
 
-  if (p > BR->prmax) pari_err(talker,"too large precision in preci()");
-  for (j = 1; j < l; j++)
-  {
-    GEN x, o = gel(r,j);
-    for (i=1; i<=N; i++)
-    {
-      x = gel(o,i);
-      if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
-    }
-  }
+  if (p > BR->prmax) pari_err(talker,"too large precision in fixprec()");
+  for (i = 1; i < l; i++) preci(gel(r,i), p);
 }
 
 static long
@@ -711,7 +713,7 @@ static void
 tschirn(buildroot *BR)
 {
   long i, k, v = varn(BR->p), l = lg(BR->r);
-  GEN a, h;
+  GEN a, h, r;
 
   if (l >= N) pari_err(bugparier,"tschirn");
   if (DEBUGLEVEL)
@@ -726,11 +728,12 @@ tschirn(buildroot *BR)
   } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
   (void)ZX_caract_sqf(h, BR->p, &k, v);
-  a[1] += k;
+  a[2] += k;
 
-  preci(BR, BR->prmax);
-  appendL(BR->r, new_pol(gel(BR->r,1), a));
-  preci(BR, BR->pr);
+  r = gel(BR->r,1);
+  preci(r, BR->prmax); /* max accuracy original roots */
+  appendL(BR->r, new_pol(r, a));
+  fixprec(BR); /* restore accuracy */
 }
 
 static GEN 
@@ -768,7 +771,6 @@ static void
 moreprec(buildroot *BR)
 {
   long d = BR->pr - BR->prmax;
-  if (DEBUGLEVEL) { fprintferr("$$$$$ New prec = %ld\n",BR->pr); flusherr(); }
   if (d > 0)
   { /* recompute roots */
     pari_sp av = avma;
@@ -776,70 +778,71 @@ moreprec(buildroot *BR)
     GEN ro;
     
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
-    BR->prmax += d;
+    BR->prmax = max(BR->prmax+d, BR->prmax * 1.2);
+    if (DEBUGLEVEL)
+      { fprintferr("$$$$$ New prec = %ld\n",BR->prmax); flusherr(); }
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
     appendL(BR->r, gclone(ro));
     for (d = 2; d < l; d++) appendL(BR->r, new_pol(ro, gel(BR->coef,d)));
     avma = av;
   }
-  preci(BR, BR->pr);
+  fixprec(BR);
 }
 
-static int
-is_zero(GEN g) {
-  return !signe(g) || (lg(g) <= MEDDEFAULTPREC && expo(g) < -90);
-}
-
+/* determine "sufficient" extra bit-precision such that we may decide
+ * (heuristic) whether z is an integer. */
 static GEN
-is_int(GEN g)
+get_ro(GEN rr, PERM S1, PERM S2, resolv *R)
 {
-  GEN gint;
-  pari_sp av;
-
-  if (typ(g) == t_COMPLEX)
-  {
-    if (!is_zero(gel(g,2))) return NULL;
-    g = gel(g,1);
-  }
-  gint = ground(g); av = avma;
-  if (!is_zero(subri(g, gint))) return NULL;
-  avma = av; return gint;
+  GEN r = cgetg(N+1, t_VEC);
+  long i;
+  for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
+  return R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
 }
-
-/* bit_accuracy - expo = # significant bits in fractional part */
+/* typ(z) = t_REAL, return zi = t_INT approximation */
 static long
-aux(GEN z)
+sufprec_r(GEN z)
 {
-  long e = expo(z);
-  return max(4*32, e) + e - (signe(z)? bit_accuracy(lg(z)): 0);
+  long p = bit_accuracy( lg(z) );
+  /* bit accuracy of fractional part large enough ? */
+  return ( p - expo(z) > max(4*32, 0.2*p) );
 }
-
+/* typ(z) = t_REAL or t_COMPLEX, return zi = t_INT approximation */
 static long
-suffprec(GEN z)
+sufprec(GEN z)
 {
-  if (typ(z)==t_COMPLEX)
-  {
-    long s = aux(gel(z,1));
-    long t = aux(gel(z,2)); return max(t, s);
-  }
-  return aux(z);
+  if (typ(z) == t_REAL)
+    return sufprec_r(z);
+  else
+    return sufprec_r(gel(z,2)) && sufprec_r(gel(z,1));
 }
 
 static GEN
 get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
 {
-  GEN ro, r = cgetg(N+1, t_VEC);
-  long i, sp;
+  GEN ro, roi;
+  long e;
   for (;;)
   {
-    GEN rr = gel(BR->r,d);
-    for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
-    ro = R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
-    sp = suffprec(ro);
-    if (sp <= 0) return is_int(ro);
-    BR->pr += 1 + (sp >> TWOPOTBITS_IN_LONG); moreprec(BR);
+    ro = get_ro(gel(BR->r, d), S1,S2,R); roi = grndtoi(ro, &e);
+    if (e < 0)
+    {
+      if (e < -64 || sufprec(ro)) break;
+      e = 0;
+    }
+    BR->pr += nbits2nlong(e + 10);
+    moreprec(BR);
   }
+  if (e > -10 || typ(roi) == t_COMPLEX) return NULL;
+  /* compute with 64 more bits */
+  BR->pr += DEFAULTPREC-2;
+  moreprec(BR);
+  ro = get_ro(gel(BR->r, d), S1,S2,R);
+  BR->pr -= DEFAULTPREC-2;
+  fixprec(BR);
+  /* ro much closer to roi ? */
+  return (gexpo(gsub(ro, roi)) < e - 32) ? roi: NULL;
 }
 
 static void
@@ -864,7 +867,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
   GEN  racint[M], roint;
 
-  if (getpreci(BR) != BR->pr) preci(BR, BR->pr);
+  if (getpreci(BR) != BR->pr) fixprec(BR);
   nbcos = getcard_obj(ss);
   nbgr  = getcard_obj(tau);
   lastnbri = lastnbrm = -1; nbracint = nbrac = 0; /* gcc -Wall*/
@@ -890,11 +893,11 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
             avma = av1; goto NEXT;
           }
           for (j=1; j<=nbracint; j++)
-            if (gequal(roint,racint[j])) { multi[j]++; break; }
+            if (equalii(roint,racint[j])) { multi[j]++; break; }
           if (j > nbracint)
           {
             nbracint = j; multi[j] = 1; numi[j] = nocos;
-            racint[j] = gerepileupto(av2,roint); av2 = avma;
+            racint[j] = gerepileuptoint(av2,roint); av2 = avma;
           }
           numj[nbrac] = nocos; norac[nbrac] = j;
         }
@@ -919,11 +922,11 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 
               nbrac++;
               for (j=nri+1; j<=nbracint; j++)
-                if (gequal(roint,racint[j])) { multi[j]++; break; }
+                if (equalii(roint,racint[j])) { multi[j]++; break; }
               if (j > nbracint)
               {
                 nbracint = j; multi[j] = 1; numi[j] = nocos;
-                racint[j] = gerepileupto(av2,roint); av2=avma;
+                racint[j] = gerepileuptoint(av2,roint); av2=avma;
               }
               numj[nbrac] = nocos; norac[nbrac] = j;
             }
@@ -2477,8 +2480,7 @@ galoisbig(GEN pol, long prec)
   
   if (DEBUGLEVEL)
   {
-    fprintferr("Galoisbig: reduced polynomial #1 = %Z\n", pol);
-    fprintferr("discriminant = %Z\n", dpol);
+    fprintferr("Galoisbig: polynomial #1 = %Z\n", pol);
     fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
   }
   switch(N)
@@ -2494,7 +2496,7 @@ galoisbig(GEN pol, long prec)
   {
     buildroot BR;
     long i;
-    GEN z = cgetg(N + 1, t_VEC);
+    GEN r, z = cgetg(N + 1, t_VEC);
     for (i = 1; i <= N; i++) 
     {
       gel(z,i) = cgetg(i+2,t_VECSMALL);
@@ -2505,8 +2507,8 @@ galoisbig(GEN pol, long prec)
     BR.pr = (long)(cauchy_bound(pol) / (LOG2 * BITS_IN_LONG)) + prec;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
     BR.r = cget1(N+1, t_VEC);
-    appendL(BR.r, gclone ( cleanroots(BR.p, BR.prmax) ));
-    preci(&BR, BR.pr);
+    r = gclone ( cleanroots(BR.p, BR.prmax) );
+    appendL(BR.r, r); preci(r, BR.pr);
     switch(N)
     {
       case  8: t = closure8(&BR); break;
