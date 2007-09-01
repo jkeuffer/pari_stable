@@ -867,7 +867,7 @@ bernvec(long nb)
 GEN
 divrunu(GEN x, ulong i)
 {
-  if (i <= MAXHALFULONG) /* i(i+1) < 2^BITS_IN_LONG*/
+  if (i <= LOWMASK) /* i(i+1) < 2^BITS_IN_LONG*/
     return divru(x, i*(i+1));
   else
     return divru(divru(x, i), i+1);

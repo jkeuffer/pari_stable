@@ -595,7 +595,7 @@ usqrtsafe(ulong a)
 {
   ulong x = (ulong)sqrt((double)a);
 #ifdef LONG_IS_64BIT
-  ulong y = x+1; if (y <= MAXHALFULONG && y*y <= a) x = y;
+  ulong y = x+1; if (y <= LOWMASK && y*y <= a) x = y;
 #endif
   return x;
 }

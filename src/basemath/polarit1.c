@@ -1803,7 +1803,7 @@ padicappr(GEN f, GEN a)
   z = ggcd(f, derivpol(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
-  p = NULL; prec = BIGINT;
+  p = NULL; prec = VERYBIGINT;
   getprec(a, &prec, &p);
   getprec(T, &prec, &p); if (!p) pari_err(typeer,"padicappr");
   f = QpXQ_to_ZXY(lift_intern(f));

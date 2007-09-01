@@ -34,8 +34,7 @@ typedef unsigned long pari_ulong;
 #define HIGHBIT (1UL << (BITS_IN_LONG-1))
 #define BITS_IN_HALFULONG (BITS_IN_LONG>>1)
 #define MAXULONG (~0x0UL)
-#define MAXHALFULONG ((1UL<<BITS_IN_HALFULONG) - 1)
-#define LOWMASK  (MAXHALFULONG)
+#define LOWMASK ((1UL<<BITS_IN_HALFULONG) - 1)
 #define HIGHMASK (~LOWMASK)
 
 #define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)

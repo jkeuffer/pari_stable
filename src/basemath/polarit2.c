@@ -1654,7 +1654,7 @@ static long
 poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
   long t[16];
-  long tx = typ(x),lx,i,j,s,pa=BIGINT;
+  long tx = typ(x), lx, i, j, s, pa = VERYBIGINT;
   GEN pcx=NULL, p=NULL,pol=NULL,ff=NULL,p1,p2;
 
   if (is_scalar_t(tx))

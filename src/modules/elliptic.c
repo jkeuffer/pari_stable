@@ -353,7 +353,7 @@ initell0(GEN x, long prec)
 
   smallinitell0(x,y);
 
-  e = BIGINT; p = NULL;
+  e = VERYBIGINT; p = NULL;
   for (i=1; i<=5; i++)
   {
     q = gel(y,i);
@@ -373,7 +373,7 @@ initell0(GEN x, long prec)
         stop = 1; break;
     }
   }
-  if (e < BIGINT) return padic_initell(y,p,e);
+  if (e < VERYBIGINT) return padic_initell(y,p,e);
   if (!prec || stop) { set_dummy(y); return y; }
 
   D = gel(y,12);

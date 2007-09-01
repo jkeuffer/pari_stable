@@ -780,7 +780,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
   R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
-  if (RU==1) { *pte=BIGINT; return cgetg(1,t_VEC); }
+  if (RU==1) { *pte=VERYBIGINT; return cgetg(1,t_VEC); }
 
   *pte = 0; A = *ptA;
   matep = cgetg(RU,t_MAT);
@@ -797,7 +797,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   if (!u) return not_given(av,fl,fupb_PRECI);
 
   p1 = gmul(matep,u);
-  if (expgexpo(p1) > 20) { *pte = BIGINT; return not_given(av,fl,fupb_LARGE); }
+  if (expgexpo(p1) > 20) { *pte = VERYBIGINT; return not_given(av,fl,fupb_LARGE); }
   matep = gexp(p1,prec);
   y = grndtoi(gauss_realimag(nf,matep), &e);
   *pte = -e;
