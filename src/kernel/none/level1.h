@@ -610,13 +610,6 @@ mkintmodu(ulong x, ulong y) {
   gel(v,2) = utoi(x); return v;
 }
 
-INLINE GEN
-stosmall(long x)
-{
-  if (labs(x) & SMALL_MASK) return stoi(x);
-  return (GEN) (1 | (x<<1));
-}
-
 INLINE long
 itos(GEN x)
 {
