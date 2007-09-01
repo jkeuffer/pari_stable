@@ -415,6 +415,97 @@ element.)
 \fun{GEN}{gmael2}{GEN A, long x1, long x2} is an alias for \kbd{gmael}.
 Similar macros \tet{gmael3}, \tet{gmael4}, \tet{gmael5} are available.
 
+\section{Global numerical constants}
+These are defined in the various public PARI headers.
+
+\subsec{Constants related to word size}
+
+\noindent $\tet{BYTES_IN_LONG}  = 2^{\tet{TWOPOTBYTES_IN_LONG}}$: number of
+bytes in a \kbd{long}
+
+\noindent $\tet{BITS_IN_LONG}  = 2^{\tet{TWOPOTBITS_IN_LONG}}$: number of
+bits in a \kbd{long}
+
+\noindent \tet{BITS_IN_HALFULONG}: \kbd{BITS\_IN\_LONG} divided by $2$.
+
+\noindent \tet{DEFAULTPREC}:    the length (\kbd{lg}) of a \typ{REAL} with 64
+bits of accuracy
+
+\noindent \tet{MEDDEFAULTPREC}: the length (\kbd{lg}) of a \typ{REAL} with
+128 bits of accuracy
+
+\noindent \tet{BIGDEFAULTPREC}: the length (\kbd{lg}) of a \typ{REAL} with
+192 bits of accuracy
+
+\noindent \tet{HIGHBIT}: the largest power of $2$ fitting in an \kbd{ulong}.
+
+\noindent \tet{LOWMASK}: bitmask yielding the least significant bits, to be
+used in \fun{ulong}{HIGHWORD}{ulong a}
+
+\noindent \tet{HIGHMASK}: bitmask yielding the most sicgnificant bits, to be
+used in \fun{ulong}{LOWWORD}{ulong a}
+
+The following constants are obsolete:
+
+\noindent \tet{VERYBIGINT}: the largest positive \kbd{long}. Was introduced
+before C89 standardized \kbd{INT\_MAX}. Use the latter!
+
+\noindent \tet{MAXULONG}: the largest \kbd{ulong}. Was introduced before C89
+standardized \kbd{UINT\_MAX}. Use the latter!
+
+\noindent \tet{BIGINT}:  sentinel returned by \kbd{gvar(x)} when \kbd{x} does
+not contain any polynomial; has a lower priority than any valid variable
+number. FIXME: name not appropriate.
+
+\subsec{Masks used to implement the \kbd{GEN} type}
+
+These constants are used by higher level macros, like \kbd{typ} or \kbd{lg}:
+
+\noindent \tet{EXPOnumBITS},
+\tet{LGnumBITS},
+\tet{SIGNnumBITS},
+\tet{TYPnumBITS},
+\tet{VALPnumBITS},
+\tet{VARNnumBITS}:
+number of bits used to encode \kbd{expo}, \kbd{lg}, \kbd{signe},
+\kbd{typ}, \kbd{valp}, \kbd{varn}.
+
+\noindent \tet{PRECPSHIFT},
+\tet{SIGNSHIFT},
+\tet{TYPSHIFT},
+\tet{VARNSHIFT}: shifts used to recover or encore \kbd{precp}, \kbd{varn},
+\kbd{typ}, \kbd{signe}
+
+\noindent \tet{CLONEBIT},
+\tet{EXPOBITS},
+\tet{LGBITS},
+\tet{PRECPBITS},
+\tet{SIGNBITS},
+\tet{TYPBITS},
+\tet{VALPBITS},
+\tet{VARNBITS}: bitmasks used to extract \kbd{isclone}, \kbd{expo}, \kbd{lg},
+\kbd{precp}, \kbd{signe}, \kbd{typ}, \kbd{valp}, \kbd{varn} from \kbd{GEN}
+codewords.
+
+\noindent \tet{MAXVARN}: the largest possible variable number.
+
+\noindent \tet{HIGHEXPOBIT}: a power of $2$, one more that the largest possible
+exponent for a \typ{REAL}.
+
+\noindent \tet{HIGHVALPBIT}: a power of $2$, one more that the largest possible
+valuation for a \typ{PADIC} or a \typ{SER}.
+
+\subsec{Miscellaneous constants}
+
+These are \kbd{double} approximations to useful constants:
+
+\noindent \tet{LOG2}: $\log 2$.
+
+\noindent \tet{L2SL10}: $\log 2 / \log 10$ (obsolete: should disappear or be
+renamed).
+
+\noindent \tet{PI}: $\pi$.
+
 \section{Handling the PARI stack}
 
 \subsec{Allocating memory on the stack}
