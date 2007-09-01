@@ -436,23 +436,40 @@ Monomial(GEN r, PERM bb, long nbv)
   return t;
 }
 
+/* sum(i = 1, R->nm, Monomial(r, R->a[i], R->nv)). Sort real / imaginary part
+ * separately by increasing absolute values, to increase stability */
 static GEN
 gpolynomial(GEN r, resolv *R)
 {
-  long i;
-  GEN p1 = Monomial(r,R->a[1], R->nv);
-
-  for (i=2; i<=R->nm; i++)
-    p1 = gadd(p1, Monomial(r,R->a[i], R->nv));
-  return p1;
+  GEN RE = cgetg(R->nm+1, t_VEC), IM = cgetg(R->nm+1, t_VEC), re, im;
+  long i, k;
+  for (i = k = 1; i <= R->nm; i++)
+  {
+    GEN m = Monomial(r,R->a[i], R->nv);
+    if (typ(m) == t_REAL)
+      gel(RE, i) = m;
+    else {
+      gel(RE, i)   = gel(m,1);
+      gel(IM, k++) = gel(m,2);
+    }
+  }
+  setlg(IM, k);
+  RE = vecpermute(RE, gen_indexsort(RE, (void*)&absr_cmp, cmp_nodata));
+  IM = vecpermute(IM, gen_indexsort(IM, (void*)&absr_cmp, cmp_nodata));
+  re = gel(RE,1);
+  for (i = 2; i <= R->nm; i++) re = addrr(re, gel(RE,i));
+  if (k == 1) return re;
+  im = gel(IM,1);
+  for (i = 2; i < k; i++) im = addrr(im, gel(IM,i));
+  return mkcomplex(re, im);
 }
 
 static void
 zaux1(GEN *z, GEN *r)
 {
   GEN p2,p1;
-  p2=gsub(r[1],gadd(r[2],r[5]));
-  p2=gmul(p2,gsub(r[2],r[5]));
+  p2=gsub(r[1], gadd(r[2],r[5]));
+  p2=gmul(p2, gsub(r[2],r[5]));
   p1=gmul(p2,r[1]);
   p2=gsub(r[3],gadd(r[2],r[4]));
   p2=gmul(p2,gsub(r[4],r[2]));
@@ -806,7 +823,7 @@ sufprec_r(GEN z)
 {
   long p = bit_accuracy( lg(z) );
   /* bit accuracy of fractional part large enough ? */
-  return ( p - expo(z) > max(4*32, 0.2*p) );
+  return ( p - expo(z) > max(3*32, 0.2*p) );
 }
 /* typ(z) = t_REAL or t_COMPLEX, return zi = t_INT approximation */
 static long
