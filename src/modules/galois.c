@@ -795,7 +795,7 @@ moreprec(buildroot *BR)
     GEN ro;
     
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
-    BR->prmax = max(BR->prmax+d, BR->prmax * 1.2);
+    BR->prmax = max(BR->prmax+d, (long)(BR->prmax * 1.2));
     if (DEBUGLEVEL)
       { fprintferr("$$$$$ New prec = %ld\n",BR->prmax); flusherr(); }
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
