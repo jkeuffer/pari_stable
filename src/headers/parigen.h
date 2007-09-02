@@ -23,11 +23,11 @@ typedef unsigned long pari_ulong;
 #undef LONG_MAX
 
 #ifdef LONG_IS_64BIT
-#  define TWOPOTBITS_IN_LONG  6
+#  define BITS_IN_LONG 64
 #  define LONG_MAX (9223372036854775807L) /* 2^63-1 */
 #  define SMALL_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
-#  define TWOPOTBITS_IN_LONG  5
+#  define BITS_IN_LONG 32
 #  define LONG_MAX (2147483647L) /* 2^31-1 */
 #  define SMALL_ULONG(p) ((ulong)p <= 46337UL) /* 2p^2 < 2^BITS_IN_LONG */
 #endif
@@ -36,7 +36,6 @@ typedef unsigned long pari_ulong;
 #define DEFAULTPREC    2 + (8/sizeof(long))
 #define MEDDEFAULTPREC 2 + (16/sizeof(long))
 #define BIGDEFAULTPREC 2 + (24/sizeof(long))
-#define BITS_IN_LONG  (1L<<TWOPOTBITS_IN_LONG)
 #define HIGHBIT (1UL << (BITS_IN_LONG-1))
 #define BITS_IN_HALFULONG (BITS_IN_LONG>>1)
 

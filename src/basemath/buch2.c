@@ -1422,7 +1422,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   }
   if (!col)
   {
-    *ptprec = prec + (e >> TWOPOTBITS_IN_LONG) + (MEDDEFAULTPREC-2);
+    *ptprec = prec + (e / BITS_IN_LONG) + (MEDDEFAULTPREC-2);
     if (flag & nf_FORCE)
     {
       if (DEBUGLEVEL) pari_warn(warner,"precision too low for generators, e = %ld",e);
@@ -1644,7 +1644,7 @@ isunit(GEN bnf,GEN x)
       if (gcmp0(gel(ex,RU)) && e < -4) break;
     }
     if (i == 1)
-      prec = MEDDEFAULTPREC + (gexpo(x) >> TWOPOTBITS_IN_LONG);
+      prec = MEDDEFAULTPREC + (gexpo(x) / BITS_IN_LONG);
     else
     {
       if (i > 4) pari_err(precer,"isunit");
@@ -2211,7 +2211,7 @@ int
 trunc_error(GEN x)
 {
   return typ(x)==t_REAL && signe(x)
-                        && (expo(x)>>TWOPOTBITS_IN_LONG) + 3 > lg(x);
+                        && (expo(x) / BITS_IN_LONG) + 3 > lg(x);
 }
 
 /* A = complex logarithmic embeddings of units (u_j) found so far */
@@ -2642,7 +2642,7 @@ bnfnewprec_shallow(GEN bnf, long prec)
 
   prec1 = prec;
   if (r2 > 1 || r1 != 0)
-    prec += 1 + (gexpo(funits) >> TWOPOTBITS_IN_LONG);
+    prec += 1 + (gexpo(funits) / BITS_IN_LONG);
   nf = nfnewprec_shallow(nf0,prec);
   mun = get_archclean(nf,funits,prec,1);
   if (!mun) pari_err(precer,"bnfnewprec");
@@ -3205,8 +3205,7 @@ PRECPB:
     A = cleanarch(B, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
     if (!A) {
-      precadd = (DEFAULTPREC-2) + (gexpo(B) >> TWOPOTBITS_IN_LONG)
-                                - gprecision(B);
+      precadd = (DEFAULTPREC-2) + (gexpo(B) / BITS_IN_LONG) - gprecision(B);
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch"; goto PRECPB;
     }
@@ -3218,7 +3217,7 @@ PRECPB:
     fu = getfu(nf, &A, flun, &e, PRECREG);
     if (e <= 0 && (flun & nf_FORCE))
     {
-      if (e < 0) precadd = (DEFAULTPREC-2) + ((-e) >> TWOPOTBITS_IN_LONG);
+      if (e < 0) precadd = (DEFAULTPREC-2) + ((-e) / BITS_IN_LONG);
       precpb = "getfu"; goto PRECPB;
     }
   }
@@ -3226,8 +3225,7 @@ PRECPB:
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
   C0 = C; C = cleanarch(C, N, PRECREG);
   if (!C) {
-    precadd = (DEFAULTPREC-2) + (gexpo(C0) >> TWOPOTBITS_IN_LONG)
-                              - gprecision(C0);
+    precadd = (DEFAULTPREC-2) + (gexpo(C0) / BITS_IN_LONG) - gprecision(C0);
     if (precadd <= 0) precadd = 1;
     precpb = "cleanarch"; goto PRECPB;
   }

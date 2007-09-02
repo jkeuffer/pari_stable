@@ -995,7 +995,7 @@ static GEN
 get_R(GEN M)
 { 
   GEN R;
-  long i, l, prec = DEFAULTPREC + (gexpo(M) >> TWOPOTBITS_IN_LONG);
+  long i, l, prec = DEFAULTPREC + gexpo(M) / BITS_IN_LONG;
 
   for(;;)
   {

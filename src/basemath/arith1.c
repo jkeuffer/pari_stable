@@ -2557,7 +2557,7 @@ sfcont2(GEN b, GEN x, long k)
     if (tx == t_REAL)
     {
       long e = expo(x);
-      if (e>0 && (e>>TWOPOTBITS_IN_LONG)+3 > lg(x)) break;
+      if (e>0 && (e / BITS_IN_LONG)+3 > lg(x)) break;
     }
     gel(y,i) = gfloor(x);
     p1 = gsub(x,gel(y,i));

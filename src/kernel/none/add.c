@@ -114,7 +114,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   ly = lg(y);
   if (e > 0)
   {
-    l = ly - (e>>TWOPOTBITS_IN_LONG);
+    l = ly - (e / BITS_IN_LONG);
     if (l < 3) return rcopy_sign(y, sy);
   }
   else l = ly + nbits2nlong(-e);
@@ -143,7 +143,7 @@ addsr_sign(long x, GEN y, long sy)
   ly = lg(y);
   if (e > 0)
   {
-    l = ly - (e>>TWOPOTBITS_IN_LONG);
+    l = ly - (e / BITS_IN_LONG);
     if (l < 3) return rcopy_sign(y, sy);
   }
   else l = ly + nbits2nlong(-e);
@@ -236,9 +236,9 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   extend = 0;
   if (e)
   {
-    long d = e >> TWOPOTBITS_IN_LONG, l = ly-d;
+    long d = e / BITS_IN_LONG, l = ly-d;
     if (l <= 2) return rcopy_sign(y, sy);
-    m = e & (BITS_IN_LONG-1);
+    m = e % BITS_IN_LONG;
     if (l > lx) { lz = lx + d + 1; extend = 1; }
     else        { lz = ly; lx = l; }
     if (m)
@@ -324,7 +324,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   x = z+2; i = 0; while (!x[i]) i++;
   lz -= i; z += i;
   j = bfffo(z[2]); /* need to shift left by j bits to normalize mantissa */
-  ez = ey - (j | (i<<TWOPOTBITS_IN_LONG));
+  ez = ey - (j | (i * BITS_IN_LONG));
   if (extend)
   { /* z was extended by d+1 words [should be e bits = d words + m bits] */
     /* not worth keeping extra word if less than 5 significant bits in there */

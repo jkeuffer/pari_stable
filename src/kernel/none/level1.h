@@ -838,7 +838,7 @@ vali(GEN x)
   if (!signe(x)) return -1;
   xp=int_LSW(x); 
   for (i=0; !*xp; i++) xp=int_nextW(xp);
-  return (i<<TWOPOTBITS_IN_LONG) + vals(*xp);
+  return vals(*xp) + i * BITS_IN_LONG;
 }
 
 INLINE GEN

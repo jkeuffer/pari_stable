@@ -49,7 +49,7 @@ mpatan(GEN x)
   }
 
   e = expo(x); inv = (e >= 0); /* = (|x| > 1 ) */
-  if (e > 0) lp += (e>>TWOPOTBITS_IN_LONG);
+  if (e > 0) lp += e / BITS_IN_LONG;
 
   y = cgetr(lp); av0 = avma;
   p1 = rtor(x, l+1); setsigne(p1, 1); /* p1 = |x| */
@@ -86,7 +86,7 @@ mpatan(GEN x)
       m = 0;
     }
   }
-  l2 = l+1+(m>>TWOPOTBITS_IN_LONG);
+  l2 = l+1+(m / BITS_IN_LONG);
   p2 = rtor(p1, l2); av = avma;
   for (i=1; i<=m; i++)
   {
@@ -102,7 +102,7 @@ mpatan(GEN x)
   for (i = n; i > 1; i--) /* n >= 1. i = 1 done outside for efficiency */
   {
     setlg(p3,l1); p5 = mulrr(p4,p3);
-    s -= e; l1 += (s>>TWOPOTBITS_IN_LONG);
+    s -= e; l1 += s / BITS_IN_LONG;
     s %= BITS_IN_LONG;
     if (l1 > l2) l1 = l2;
     setlg(unr,l1); p5 = subrr(divru(unr,2*i-1), p5);
@@ -211,7 +211,7 @@ gasin(GEN x, long prec)
 /********************************************************************/
 static GEN
 acos0(long e) {
-  long l = e >> TWOPOTBITS_IN_LONG; if (l >= 0) l = -1;
+  long l = e / BITS_IN_LONG; if (l >= 0) l = -1;
   return Pi2n(-1, 2-l);
 }
 
@@ -943,7 +943,7 @@ red_mod_2z(GEN x, GEN z)
   GEN Z = gmul2n(z, 1), d = subrr(z, x);
   /* require little accuracy */
   if (!signe(d)) return x;
-  setlg(d, 3 + ((expo(d) - expo(Z)) >> TWOPOTBITS_IN_LONG));
+  setlg(d, 3 + ((expo(d) - expo(Z)) / BITS_IN_LONG));
   return addrr(mulir(floorr(divrr(d, Z)), Z), x);
 }
 #endif

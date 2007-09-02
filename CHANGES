@@ -168,7 +168,8 @@ BA 48- local and my can now appear anywhere in a program.
    49- [library] rename apell -> ellap
    50- Removed the OK_ULONG macro and renamed u_OK_ULONG -> SMALL_ULONG
    51- Rename BIGINT -> NO_VARIABLE (was only used by gvar()), VERYBIGINT ->
-       LONG_MAX, MAXULONG -> LONG_UMAX. Remove BYTES_IN_LONG,TWOPOTBYTES_IN_LONG
+       LONG_MAX, MAXULONG -> LONG_UMAX. Remove BYTES_IN_LONG,
+       TWOPOTBYTES_IN_LONG, TWOPOTBITS_IN_LONG
 
   Added
     1- library functions expu, adduu, subuu

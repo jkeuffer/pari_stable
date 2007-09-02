@@ -163,7 +163,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     }
     else			/* take difference of bit lengths */
     {
-      lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
+      lr = lr*BITS_IN_LONG - lbb + lbr;
       if ((ulong)lr > BITS_IN_LONG)
 	vmax = ULONG_MAX;
       else if (lr == 0)
@@ -314,7 +314,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     }
     else			/* take difference of bit lengths */
     {
-      lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
+      lr = lr*BITS_IN_LONG - lbb + lbr;
       if ((ulong)lr > BITS_IN_LONG)
 	vmax = ULONG_MAX;
       else if (lr == 0)

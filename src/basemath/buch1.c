@@ -212,7 +212,7 @@ quadhilbertimag(GEN D, GEN pq)
       if (pq && degpol(ZX_gcd(P, ZX_deriv(P)))) { avma = av; return gen_0; }
       break;
     }
-    avma = av0; prec += (DEFAULTPREC-2) + (1 + (exmax >> TWOPOTBITS_IN_LONG));
+    avma = av0; prec += (DEFAULTPREC-2) + nbits2nlong(exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
   }
   return gerepileupto(av,P);
@@ -340,7 +340,7 @@ get_prec(GEN P, long prec)
   if (k == 3) return (prec<<1)-2; /* approximation not trustworthy */
   k = prec - k; /* lost precision when computing P */
   if (k < 0) k = 0;
-  k += MEDDEFAULTPREC + (gexpo(P) >> TWOPOTBITS_IN_LONG);
+  k += MEDDEFAULTPREC + (gexpo(P) / BITS_IN_LONG);
   if (k <= prec) k = (prec<<1)-2; /* dubious: old prec should have worked */
   return k;
 }
@@ -1569,7 +1569,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
     }
     BQ.PRECREG = 0;
   } else {
-    BQ.PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(BQ.Disc)>>TWOPOTBITS_IN_LONG));
+    BQ.PRECREG = max(prec+1, MEDDEFAULTPREC + 2*(expi(BQ.Disc) / BITS_IN_LONG));
   }
   if (DEBUGLEVEL) (void)timer2();
   BQ.primfact   = new_chunk(100);

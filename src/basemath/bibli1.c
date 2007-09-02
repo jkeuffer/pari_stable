@@ -1127,7 +1127,7 @@ PRECPB:
 static long
 good_prec(GEN x, long kmax)
 {
-  long prec = ((kmax<<2) + gexpo(gel(x,kmax))) >> TWOPOTBITS_IN_LONG;
+  long prec = ((kmax<<2) + gexpo(gel(x,kmax))) / BITS_IN_LONG;
   if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   return prec;
 }

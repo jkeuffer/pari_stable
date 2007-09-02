@@ -336,39 +336,38 @@ vecsmall_pack(GEN V, long base, long mod)
 GEN
 bitvec_alloc(long n)
 {
-  long l = 1 + (n>>TWOPOTBITS_IN_LONG);
+  long l = 1 + (n / BITS_IN_LONG);
   return const_vecsmall(l,0);
 }
-
 
 GEN
 bitvec_shorten(GEN bitvec, long n)
 {
-  long l = 1 + (n>>TWOPOTBITS_IN_LONG);
+  long l = 1 + (n / BITS_IN_LONG);
   return vecsmall_shorten(bitvec,l);
 }
 
 long
 bitvec_test(GEN bitvec, long b)
 {
-  long q = b>>TWOPOTBITS_IN_LONG;
-  long r = b&(BITS_IN_LONG-1);
+  long q = b / BITS_IN_LONG;
+  long r = b % BITS_IN_LONG;
   return (bitvec[1+q]>>r) & 1L;
 }
 
 void
 bitvec_set(GEN bitvec, long b)
 {
-  long q = b>>TWOPOTBITS_IN_LONG;
-  long r = b&(BITS_IN_LONG-1);
+  long q = b / BITS_IN_LONG;
+  long r = b % BITS_IN_LONG;
   bitvec[1+q] |= 1L<<r;
 }
 
 void
 bitvec_clear(GEN bitvec, long b)
 {
-  long q = b>>TWOPOTBITS_IN_LONG;
-  long r = b&(BITS_IN_LONG-1);
+  long q = b / BITS_IN_LONG;
+  long r = b % BITS_IN_LONG;
   bitvec[1+q] &= ~(1L<<r);
 }
 

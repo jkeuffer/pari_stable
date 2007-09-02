@@ -1325,7 +1325,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
       if (u0) u0 = gerepileupto(av, gmul(u0,u));
       else    u0 = gerepilecopy(av, u);
     }
-    prec = (prec<<1)-2 + (gexpo(u0) >> TWOPOTBITS_IN_LONG);
+    prec = (prec<<1)-2 + (gexpo(u0) / BITS_IN_LONG);
     F.ro = NULL;
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
