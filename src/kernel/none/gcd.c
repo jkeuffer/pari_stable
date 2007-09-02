@@ -245,7 +245,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   /* main loop is almost identical to that of invmod() */
   while (lgefint(d) > 3 && signe(d1))
   {
-    lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, MAXULONG);
+    lhmres = lgcdii((ulong *)d, (ulong *)d1, &xu, &xu1, &xv, &xv1, ULONG_MAX);
     if (lhmres != 0)		/* check progress */
     {				/* apply matrix */
       if ((lhmres == 1) || (lhmres == -1))

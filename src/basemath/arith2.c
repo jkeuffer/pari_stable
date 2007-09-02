@@ -591,7 +591,7 @@ initprimes(ulong maxnum)
   /* The algorithm must see the next prime beyond maxnum, whence the +512. */
   ulong maxnum1 = ((maxnum<65302?65302:maxnum)+512ul);
 
-  if ((maxnum>>1) > VERYBIGINT - 1024)
+  if ((maxnum>>1) > LONG_MAX - 1024)
       pari_err(talker, "Too large primelimit");
   p = initprimes0(maxnum1, &len, &last);
 #if 0 /* not yet... GN */

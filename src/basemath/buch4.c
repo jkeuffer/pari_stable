@@ -34,7 +34,7 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
 
   la = Z_pval(gx, p);
   gpx = poleval(derivpol(pol), x);
-  mu = gcmp0(gpx)? VERYBIGINT: Z_pval(gpx,p);
+  mu = gcmp0(gpx)? LONG_MAX: Z_pval(gpx,p);
   avma = av;
 
   if (la > (mu<<1)) return 1;
@@ -54,7 +54,7 @@ lemma7(GEN pol,long nu,GEN x)
 
   gpx = poleval(derivpol(pol), x);
   lambda = Z_lvalrem(gx, 2, &oddgx);
-  mu = gcmp0(gpx)? VERYBIGINT: vali(gpx);
+  mu = gcmp0(gpx)? LONG_MAX: vali(gpx);
   mnl = mu+nu-lambda;
   odd4 = umodiu(oddgx,4);
   avma=ltop;
@@ -187,7 +187,7 @@ lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
   lambda = element_val(nf,gx,pr);
 
   gpx = poleval(derivpol(pol), x);
-  mu = gcmp0(gpx)? VERYBIGINT: idealval(nf,gpx,pr);
+  mu = gcmp0(gpx)? LONG_MAX: idealval(nf,gpx,pr);
   if (lambda > mu<<1) return 1;
 
   if (lambda >= nu<<1  && mu >= nu) return 0;
@@ -205,7 +205,7 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
   lambda = element_val(nf,gx,pr);
 
   gpx = poleval(derivpol(pol), x);
-  mu = gcmp0(gpx)? VERYBIGINT: idealval(nf,gpx,pr);
+  mu = gcmp0(gpx)? LONG_MAX: idealval(nf,gpx,pr);
   if (lambda > (mu<<1)) return 1;
 
   if (nu > mu)

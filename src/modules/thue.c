@@ -603,7 +603,7 @@ thueinit(GEN pol, long flag, long prec)
      * necessary. Note that the limiting step is the reduction. See paper. */
     PREC = 3 + (long)((5.83 + (dr+4)*5 + log(fact(dr+3)) + (dr+3)*log(dr+2) +
 		     (dr+3)*log(d) + log(log(2*d*(dr+2))) + (dr+1))
-                     / ((BYTES_IN_LONG/4)* 10.));
+                     / ((sizeof(long)/4)* 10.));
 
     if (flag == 0) PREC = (long)(2.2 * PREC); /* Lazy, to be improved */
     if (PREC < prec) PREC = prec;

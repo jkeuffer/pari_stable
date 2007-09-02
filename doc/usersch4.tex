@@ -1285,7 +1285,7 @@ in \secref{se:priority}. We will give more details in \secref{se:vars}. Note
 also the function \fun{long}{gvar}{GEN z} which tries to return a
 \idx{variable number} for \kbd{z}, even if \kbd{z} is not a polynomial or
 power series. The variable number of a scalar type is set by definition equal
-to \tet{BIGINT}, which has lower priority than any other variable number.
+to \tet{NO_VARIABLE}, which has lower priority than any other variable number.
 
 The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
@@ -1413,7 +1413,7 @@ its ``principal variable number'' which is given by the function
 
 \noindent which returns a \idx{variable number} for \kbd{z}, even if \kbd{z}
 is not a polynomial or power series. The variable number of a scalar type is
-set by definition equal to \tet{BIGINT} which has lower priority than any
+set by definition equal to \tet{NO_VARIABLE} which has lower priority than any
 valid variable number. The variable number of a recursive type which is not a
 polynomial or power series is the variable number with highest priority among
 its components. But for polynomials and power series only the ``outermost''

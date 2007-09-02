@@ -2282,8 +2282,8 @@ gdiv(GEN x, GEN y)
     return gerepileupto(av, mul_polmod_same(X, gel(x,2), y));
   }
   /* x and y are not both is_scalar_t. If one of them is scalar, it's not a
-   * POLMOD (done already), hence its variable is BIGINT. If the other has
-   * variable BIGINT, then the operation is incorrect */
+   * POLMOD (done already), hence its variable is NO_VARIABLE. If the other has
+   * variable NO_VARIABLE, then the operation is incorrect */
   vx = gvar(x);
   if (vx != vy) { /* includes cases where one is scalar */
     if (varncmp(vx, vy) < 0) return div_T_scal(x, y, tx);

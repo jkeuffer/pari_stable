@@ -2785,7 +2785,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
    * or some t_INT) if it is a proper power */
   av2 = avma; lim = stack_lim(av2,1);
   if (rank > (long)BITS_IN_LONG - 2)
-    res_max = VERYBIGINT; /* the common case, unfortunately */
+    res_max = LONG_MAX; /* the common case, unfortunately */
   else
     res_max = 1L<<rank; /* max number of factors we can hope for */
   res_size = 8; /* no. of factors we can store in this res */

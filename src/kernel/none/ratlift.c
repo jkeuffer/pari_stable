@@ -159,13 +159,13 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     }
     else if (lr > 1)		/* still more than a word's worth to go */
     {
-      vmax = MAXULONG;
+      vmax = ULONG_MAX;
     }
     else			/* take difference of bit lengths */
     {
       lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
       if ((ulong)lr > BITS_IN_LONG)
-	vmax = MAXULONG;
+	vmax = ULONG_MAX;
       else if (lr == 0)
 	vmax = 1UL;
       else
@@ -310,13 +310,13 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     }
     else if (lr > 1)		/* still more than a word's worth to go */
     {
-      vmax = MAXULONG;		/* (cannot in fact happen) */
+      vmax = ULONG_MAX;		/* (cannot in fact happen) */
     }
     else			/* take difference of bit lengths */
     {
       lr = (lr << TWOPOTBITS_IN_LONG) - lbb + lbr;
       if ((ulong)lr > BITS_IN_LONG)
-	vmax = MAXULONG;
+	vmax = ULONG_MAX;
       else if (lr == 0)
 	vmax = 1UL;
       else

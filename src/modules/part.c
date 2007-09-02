@@ -75,7 +75,7 @@ g(ulong q, ulong h)
   /* TODO: expr for h-1 mod h  +  gcd-style computation */
   
   kh = h;
-  if (MAXULONG/h > q)
+  if (ULONG_MAX/h > q)
   {
     long l3 = 0;
     for (k = 1; k < q; k++)

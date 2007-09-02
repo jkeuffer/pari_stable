@@ -79,7 +79,7 @@ invmod(GEN a, GEN b, GEN *res)
 #ifdef DEBUG_LEHMER
     fprintferr("Calling Lehmer:\n");
 #endif
-    lhmres = lgcdii((ulong*)d, (ulong*)d1, &xu, &xu1, &xv, &xv1, MAXULONG);
+    lhmres = lgcdii((ulong*)d, (ulong*)d1, &xu, &xu1, &xv, &xv1, ULONG_MAX);
     if (lhmres != 0)		/* check progress */
     {				/* apply matrix */
 #ifdef DEBUG_LEHMER

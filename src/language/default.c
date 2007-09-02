@@ -487,7 +487,7 @@ sd_echo(const char *v, long flag)
 
 GEN
 sd_lines(const char *v, long flag)
-{ return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,VERYBIGINT,NULL); }
+{ return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,LONG_MAX,NULL); }
 
 GEN
 sd_histsize(const char *v, long flag)
@@ -495,7 +495,7 @@ sd_histsize(const char *v, long flag)
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
   GEN r = sd_ulong(v,flag,"histsize",&n, 1,
-                     (VERYBIGINT / sizeof(long)) - 1,NULL);
+                     (LONG_MAX / sizeof(long)) - 1,NULL);
   if (n != H->size)
   {
     const ulong total = H->total;
@@ -611,7 +611,7 @@ GEN
 sd_parisize(const char *v, long flag)
 {
   ulong oldn = top-bot, n = oldn;
-  GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
+  GEN r = sd_ulong(v,flag,"parisize",&n, 10000,LONG_MAX,NULL);
   if (n != oldn)
   {
     if (!bot) top = (pari_sp)n; /* no stack allocated yet */
@@ -628,7 +628,7 @@ GEN
 sd_primelimit(const char *v, long flag)
 {
   ulong n = GP_DATA->primelimit;
-  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(VERYBIGINT-1024) + 1,NULL);
+  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(LONG_MAX-1024) + 1,NULL);
   if (n != GP_DATA->primelimit)
   {
     if (flag != d_INITRC)

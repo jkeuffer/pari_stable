@@ -210,7 +210,7 @@ clcm(long a,long b)
  * rgcduu() is a variant of xxgcduu() which does not have f  (the effect is
  * that of f=0),  but instead has a ulong vmax parameter, for use in rational
  * reconstruction below.  It returns when v1 exceeds vmax;  v will never
- * exceed vmax.  (vmax=0 is taken as a synonym of MAXULONG i.e. unlimited,
+ * exceed vmax.  (vmax=0 is taken as a synonym of ULONG_MAX i.e. unlimited,
  * in which case rgcduu behaves exactly like xxgcduu with f=0.)  The return
  * value of rgcduu() is typically meaningless;  the interesting part is the
  * matrix.
@@ -356,7 +356,7 @@ rgcduu(ulong d, ulong d1, ulong vmax,
   int f = 0;
   LOCAL_HIREMAINDER;
 
-  if (vmax == 0) vmax = MAXULONG;
+  if (vmax == 0) vmax = ULONG_MAX;
   xs = res = 0;
   xu = xv1 = 1UL;
   xu1 = xv = 0UL;
@@ -599,7 +599,7 @@ lgcdii(ulong* d, ulong* d1,
   voir(d, -1); voir(d1, -1);
 #endif
   /* following is just for convenience: vmax==0 means no bound */
-  if (vmax == 0) vmax = MAXULONG;
+  if (vmax == 0) vmax = ULONG_MAX;
   ld = lgefint(d); ld1 = lgefint(d1); lz = ld - ld1; /* >= 0 */
   if (lz > 1) return 0;		/* rare, quick and desperate exit */
 

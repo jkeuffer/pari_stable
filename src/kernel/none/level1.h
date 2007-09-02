@@ -260,7 +260,7 @@ INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */
 {
   const GEN z = ((GEN) avma) - x;
-  if (x > ((avma-bot)>>TWOPOTBYTES_IN_LONG)) pari_err(errpile);
+  if (x > (avma-bot) / sizeof(long)) pari_err(errpile);
 #if defined(_WIN32) || defined(__CYGWIN32__)
   if (win32ctrlc) dowin32ctrlc();
 #endif

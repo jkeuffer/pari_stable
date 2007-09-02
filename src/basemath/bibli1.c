@@ -1587,7 +1587,7 @@ lllintpartialall(GEN m, long flag)
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly. */
     const pari_sp av3 = avma, lim = stack_lim(av3,2);
-    long i, j, npass = 0, e = VERYBIGINT;
+    long i, j, npass = 0, e = LONG_MAX;
     GEN dot = cgetg(ncol+1, t_MAT); /* scalar products */
 
     tm2 = matid(ncol);
@@ -2760,7 +2760,7 @@ DOGEN:
 GEN
 plindep(GEN x)
 {
-  long i, j, prec = VERYBIGINT, nx = lg(x)-1, v;
+  long i, j, prec = LONG_MAX, nx = lg(x)-1, v;
   pari_sp av = avma;
   GEN p = NULL, pn,p1,m,a;
 

@@ -1654,7 +1654,7 @@ static long
 poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
   long t[16];
-  long tx = typ(x), lx, i, j, s, pa = VERYBIGINT;
+  long tx = typ(x), lx, i, j, s, pa = LONG_MAX;
   GEN pcx=NULL, p=NULL,pol=NULL,ff=NULL,p1,p2;
 
   if (is_scalar_t(tx))
@@ -4242,7 +4242,7 @@ RgXQ_inv(GEN x, GEN y)
   {
     if (varncmp(vx,vy) > 0)
     {
-      d = (vx == BIGINT)? ginv(x): gred_rfrac_simple(gen_1, x);
+      d = (vx == NO_VARIABLE)? ginv(x): gred_rfrac_simple(gen_1, x);
       return scalarpol(d, vy);
     }
     if (lg(x)!=3) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
@@ -4332,16 +4332,16 @@ newtonpoly(GEN x, GEN p)
   for (a=0; a<=n; a++) vval[a] = ggval(gel(x,a),p);
   for (a=0, ind=1; a<n; a++)
   {
-    if (vval[a] != VERYBIGINT) break;
-    gel(y,ind++) = utoipos(VERYBIGINT);
+    if (vval[a] != LONG_MAX) break;
+    gel(y,ind++) = utoipos(LONG_MAX);
   }
   for (b=a+1; b<=n; a=b, b=a+1)
   {
-    while (vval[b] == VERYBIGINT) b++;
+    while (vval[b] == LONG_MAX) b++;
     u1=vval[a]-vval[b]; u2=b-a;
     for (c=b+1; c<=n; c++)
     {
-      if (vval[c] == VERYBIGINT) continue;
+      if (vval[c] == LONG_MAX) continue;
       r1=vval[a]-vval[c]; r2=c-a;
       if (u1*r2<=u2*r1) { u1=r1; u2=r2; b=c; }
     }

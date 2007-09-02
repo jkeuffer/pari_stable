@@ -658,7 +658,7 @@ divrr(GEN x, GEN y)
 
     if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k = addll(y0,r1[2]);
+      qp = ULONG_MAX; k = addll(y0,r1[2]);
     }
     else
     {
@@ -838,7 +838,7 @@ DIVIDE: /* quotient is non-zero */
 
     if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k = addll(y0,r1[2]);
+      qp = ULONG_MAX; k = addll(y0,r1[2]);
     }
     else
     {
@@ -1074,7 +1074,7 @@ diviuexact_i(GEN x, ulong y)
         if ((ulong)*x1 < hiremainder)
         {
           *x1 -= hiremainder;
-          do (*--x1)--; while ((ulong)*x1 == MAXULONG);
+          do (*--x1)--; while ((ulong)*x1 == ULONG_MAX);
         }
         else
           *x1 -= hiremainder;
@@ -1182,7 +1182,7 @@ diviiexact(GEN x, GEN y)
         if ((ulong)*x0 < hiremainder)
         {
           *x0 -= hiremainder;
-          do (*--x0)--; while ((ulong)*x0 == MAXULONG);
+          do (*--x0)--; while ((ulong)*x0 == ULONG_MAX);
         }
         else
           *x0 -= hiremainder;

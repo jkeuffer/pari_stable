@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                               **/
 /*******************************************************************/
 #ifdef LONG_IS_64BIT
-# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(VERYBIGINT)) */
+# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(LONG_MAX)) */
 #else
 # define SQRTVERYBIGINT 46341
 #endif
@@ -31,7 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   where a_k = (-1)^k 2^(n-2k) (n-k-1)! / k!(n-2k)! is an integer
  *   and a_0 = 2^(n-1), a_k / a_{k-1} = - (n-2k+2)(n-2k+1) / 4k(n-k) */
 GEN
-polchebyshev1(long n, long v) /* Assume 4*n < VERYBIGINT */
+polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
 {
   long k, l;
   pari_sp av;

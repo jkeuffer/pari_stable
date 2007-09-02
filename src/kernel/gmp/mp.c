@@ -806,7 +806,7 @@ divrr(GEN x, GEN y)
     
     if ((ulong)r1[1] == y0)
     {
-      qp = MAXULONG; k=addll(y0,r1[2]);
+      qp = ULONG_MAX; k=addll(y0,r1[2]);
     }
     else
     {

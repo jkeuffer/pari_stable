@@ -546,7 +546,7 @@ element_val(GEN nf, GEN x, GEN vp)
   long w, e;
   GEN cx,p;
 
-  if (gcmp0(x)) return VERYBIGINT;
+  if (gcmp0(x)) return LONG_MAX;
   nf = checknf(nf);
   checkprimeid(vp);
   p = gel(vp,1);

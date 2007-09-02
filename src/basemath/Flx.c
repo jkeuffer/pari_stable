@@ -872,7 +872,7 @@ long
 Flx_valuation(GEN x)
 {
   long i, l=lg(x);
-  if (l==2)  return VERYBIGINT;
+  if (l==2)  return LONG_MAX;
   for (i=2; i<l && x[i]==0; i++);
   return i-2;
 }

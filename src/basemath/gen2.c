@@ -559,7 +559,7 @@ gequalsg(long s, GEN x)
 static long
 minval(GEN x, GEN p, long first, long lx)
 {
-  long i,k, val = VERYBIGINT;
+  long i,k, val = LONG_MAX;
   for (i=first; i<lx; i++)
   {
     k = ggval(gel(x,i),p);
@@ -572,7 +572,7 @@ long
 polvaluation(GEN x, GEN *Z)
 {
   long vx;
-  if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
   for (vx = 0;; vx++)
     if (!isexactzero(gel(x,2+vx))) break;
   if (Z) *Z = RgX_shift_shallow(x, -vx);
@@ -582,7 +582,7 @@ long
 ZX_valuation(GEN x, GEN *Z)
 {
   long vx;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
   for (vx = 0;; vx++)
     if (signe(gel(x,2+vx))) break;
   if (Z) *Z = RgX_shift_shallow(x, -vx);
@@ -592,7 +592,7 @@ long
 polvaluation_inexact(GEN x, GEN *Z)
 {
   long vx;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
   for (vx = 0;; vx++)
     if (!gcmp0(gel(x,2+vx))) break;
   if (Z) *Z = RgX_shift_shallow(x, -vx);
@@ -619,7 +619,7 @@ ggval(GEN x, GEN p)
   pari_sp av, limit;
   GEN p1, p2;
 
-  if (isexactzero(x)) return VERYBIGINT;
+  if (isexactzero(x)) return LONG_MAX;
   if (is_const_t(tx) && tp==t_POL) return 0;
   if (tp == t_INT && (!signe(p) || is_pm1(p)))
     pari_err(talker, "forbidden divisor %Z in ggval", p);

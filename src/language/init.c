@@ -571,7 +571,7 @@ init_universal_constants(void)
 static size_t
 fix_size(size_t a)
 {
-  size_t b = a - (a & (BYTES_IN_LONG-1)); /* sizeof(long) | b <= a */
+  size_t b = (a / sizeof(long)) * sizeof(long); /* Align */
   if (b < 1024) b = 1024;
   return b;
 }

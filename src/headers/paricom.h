@@ -86,7 +86,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ndec2prec(x) (3 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
 #define nbits2prec(x) (((x)+3*BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
 #define nbits2nlong(x) (((x)+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
-#define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
+#define nchar2nlong(x) (((x)+sizeof(long)-1) / sizeof(long))
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
 #define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
 #define prec2ndec(x) ((long)bit_accuracy_mul((x), L2SL10))
@@ -115,17 +115,6 @@ enum manage_var_t {
   manage_var_max_avail,
   manage_var_pop
 };
-
-#ifdef LONG_IS_64BIT
-#  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
-#  define BIGINT (2147483647)               /* 2^31-1 */
-#  define SMALL_ULONG(p) ((ulong)p <= 3037000493UL)
-#else
-#  define VERYBIGINT (2147483647L) /* 2^31-1 */
-#  define BIGINT (32767)           /* 2^15-1 */
-#  define SMALL_ULONG(p) ((ulong)p <= 46337UL) /* 2p^2 < 2^BITS_IN_LONG */
-#endif
-
 
 #ifndef HAS_EXP2
 #  undef exp2

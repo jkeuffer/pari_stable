@@ -228,7 +228,7 @@ the main variable) of~\kbd{x}.
 
 \fun{long}{gvar}{GEN x} returns the main variable number when any variable
 at all occurs in the composite object~\kbd{x} (the smallest variable number
-which occurs), and \kbd{BIGINT} otherwise.
+which occurs), and \tet{NO_VARIABLE} otherwise.
 
 \fun{long}{degpol}{GEN x} returns the degree of \typ{POL}~\kbd{x},
 \emph{assuming} its leading coefficient is non-zero (an exact $0$ is
@@ -420,13 +420,14 @@ These are defined in the various public PARI headers.
 
 \subsec{Constants related to word size}
 
-\noindent $\tet{BYTES_IN_LONG}  = 2^{\tet{TWOPOTBYTES_IN_LONG}}$: number of
-bytes in a \kbd{long}
-
 \noindent $\tet{BITS_IN_LONG}  = 2^{\tet{TWOPOTBITS_IN_LONG}}$: number of
 bits in a \kbd{long}
 
 \noindent \tet{BITS_IN_HALFULONG}: \kbd{BITS\_IN\_LONG} divided by $2$.
+
+\noindent \tet{LONG_MAX}: the largest positive \kbd{long}.
+
+\noindent \tet{ULONG_MAX}: the largest \kbd{ulong}.
 
 \noindent \tet{DEFAULTPREC}:    the length (\kbd{lg}) of a \typ{REAL} with 64
 bits of accuracy
@@ -444,18 +445,6 @@ used in \fun{ulong}{HIGHWORD}{ulong a}
 
 \noindent \tet{HIGHMASK}: bitmask yielding the most sicgnificant bits, to be
 used in \fun{ulong}{LOWWORD}{ulong a}
-
-The following constants are obsolete:
-
-\noindent \tet{VERYBIGINT}: the largest positive \kbd{long}. Was introduced
-before C89 standardized \kbd{INT\_MAX}. Use the latter!
-
-\noindent \tet{MAXULONG}: the largest \kbd{ulong}. Was introduced before C89
-standardized \kbd{UINT\_MAX}. Use the latter!
-
-\noindent \tet{BIGINT}:  sentinel returned by \kbd{gvar(x)} when \kbd{x} does
-not contain any polynomial; has a lower priority than any valid variable
-number. FIXME: name not appropriate.
 
 \subsec{Masks used to implement the \kbd{GEN} type}
 
@@ -488,6 +477,10 @@ number of bits used to encode \kbd{expo}, \kbd{lg}, \kbd{signe},
 codewords.
 
 \noindent \tet{MAXVARN}: the largest possible variable number.
+
+\noindent \tet{NO_VARIABLE}:  sentinel returned by \kbd{gvar(x)} when \kbd{x}
+does not contain any polynomial; has a lower priority than any valid variable
+number.
 
 \noindent \tet{HIGHEXPOBIT}: a power of $2$, one more that the largest possible
 exponent for a \typ{REAL}.

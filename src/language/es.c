@@ -1612,17 +1612,17 @@ etatpile(void)
   GEN adr;
   double r;
 
-  nu = (top-avma)/BYTES_IN_LONG;
-  l = (top-bot)/BYTES_IN_LONG;
+  nu = (top-avma)/sizeof(long);
+  l = (top-bot)/sizeof(long);
   r = 100.0*nu/l;
   pariprintf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
             top, bot, avma);
 
   pariprintf(" Used :                         %ld  long words  (%ld K)\n",
-            nu, nu/1024*BYTES_IN_LONG);
+            nu, nu/1024*sizeof(long));
 
   pariprintf(" Available :                    %ld  long words  (%ld K)\n",
-           (l-nu), (l-nu)/1024*BYTES_IN_LONG);
+           (l-nu), (l-nu)/1024*sizeof(long));
 
   pariprintf(" Occupation of the PARI stack : %6.2f percent\n",r);
 

@@ -37,7 +37,7 @@ gvar(GEN x)
     case t_POLMOD: return varn(gel(x,1));
     case t_RFRAC:  return varn(gel(x,2));
     case t_VEC: case t_COL: case t_MAT:
-      v = BIGINT;
+      v = NO_VARIABLE;
       for (i=1; i < lg(x); i++) { w=gvar(gel(x,i)); if (varncmp(w,v) < 0) v=w; }
       return v;
     case t_VECSMALL:
@@ -45,7 +45,7 @@ gvar(GEN x)
     case t_LIST:
       pari_err(typeer, "gvar");
   }
-  return BIGINT;
+  return NO_VARIABLE;
 }
 /* T main polynomial in R[X], A auxiliary in R[X] (possibly degree 0).
  * Guess and return the main variable of R */
@@ -80,7 +80,7 @@ gvar2(GEN x)
     case t_POLMOD:
       return var2_polmod(x);
     case t_POL: case t_SER:
-      v = BIGINT;
+      v = NO_VARIABLE;
       for (i=2; i < lg(x); i++) {
         w = gvar9(gel(x,i));
         if (varncmp(w,v) < 0) v=w;
@@ -89,14 +89,14 @@ gvar2(GEN x)
     case t_RFRAC:
       return var2_rfrac(x);
     case t_VEC: case t_COL: case t_MAT:
-      v = BIGINT;
+      v = NO_VARIABLE;
       for (i=1; i < lg(x); i++) {
         w = gvar2(gel(x,i));
         if (varncmp(w,v)<0) v=w;
       }
       return v;
   }
-  return BIGINT;
+  return NO_VARIABLE;
 }
 
 /*******************************************************************/
@@ -171,13 +171,13 @@ gprecision(GEN x)
   switch(tx)
   {
     case t_POL: case t_VEC: case t_COL: case t_MAT:
-      k=VERYBIGINT;
+      k=LONG_MAX;
       for (i=lontyp[tx]; i<lx; i++)
       {
         l = gprecision(gel(x,i));
 	if (l && l<k) k = l;
       }
-      return (k==VERYBIGINT)? 0: k;
+      return (k==LONG_MAX)? 0: k;
 
     case t_RFRAC:
     {
@@ -195,7 +195,7 @@ GEN
 ggprecision(GEN x)
 {
   long a = gprecision(x);
-  return utoipos(a ? prec2ndec(a): VERYBIGINT);
+  return utoipos(a ? prec2ndec(a): LONG_MAX);
 }
 
 GEN
@@ -210,7 +210,7 @@ padicprec(GEN x, GEN p)
   switch(tx)
   {
     case t_INT: case t_FRAC:
-      return VERYBIGINT;
+      return LONG_MAX;
 
     case t_INTMOD:
       return Z_pval(gel(x,1),p);
@@ -223,7 +223,7 @@ padicprec(GEN x, GEN p)
     case t_POL:
     case t_COMPLEX: case t_QUAD: case t_POLMOD: case t_SER: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      for (s=VERYBIGINT, i=lontyp[tx]; i<lx; i++)
+      for (s=LONG_MAX, i=lontyp[tx]; i<lx; i++)
       {
         t = padicprec(gel(x,i),p); if (t<s) s = t;
       }
@@ -233,7 +233,7 @@ padicprec(GEN x, GEN p)
   return 0; /* not reached */
 }
 
-#define DEGREE0 -VERYBIGINT
+#define DEGREE0 -LONG_MAX
 /* Degree of x (scalar, t_POL, t_RFRAC) wrt variable v if v >= 0,
  * wrt to main variable if v < 0.
  */
@@ -1666,7 +1666,7 @@ integ(GEN x, long v)
   GEN y,p1;
 
   tx = typ(x);
-  if (v < 0) { v = gvar(x); if (v == BIGINT) v = 0; }
+  if (v < 0) { v = gvar(x); if (v == NO_VARIABLE) v = 0; }
   if (is_scalar_t(tx))
   {
     if (tx == t_POLMOD && varncmp(v, varn(x[1])) > 0)

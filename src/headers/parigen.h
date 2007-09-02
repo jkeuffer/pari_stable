@@ -19,21 +19,27 @@ typedef long *GEN;
 typedef unsigned long pari_ulong;
 #define ulong pari_ulong
 
-#ifdef LONG_IS_64BIT
-#  define TWOPOTBYTES_IN_LONG  3
-#else
-#  define TWOPOTBYTES_IN_LONG  2
-#endif
+#undef ULONG_MAX
+#undef LONG_MAX
 
-#define DEFAULTPREC    2 + (8>>TWOPOTBYTES_IN_LONG)
-#define MEDDEFAULTPREC 2 + (16>>TWOPOTBYTES_IN_LONG)
-#define BIGDEFAULTPREC 2 + (24>>TWOPOTBYTES_IN_LONG)
-#define TWOPOTBITS_IN_LONG (TWOPOTBYTES_IN_LONG+3)
-#define BYTES_IN_LONG (1L<<TWOPOTBYTES_IN_LONG)
+#ifdef LONG_IS_64BIT
+#  define TWOPOTBITS_IN_LONG  6
+#  define LONG_MAX (9223372036854775807L) /* 2^63-1 */
+#  define SMALL_ULONG(p) ((ulong)p <= 3037000493UL)
+#else
+#  define TWOPOTBITS_IN_LONG  5
+#  define LONG_MAX (2147483647L) /* 2^31-1 */
+#  define SMALL_ULONG(p) ((ulong)p <= 46337UL) /* 2p^2 < 2^BITS_IN_LONG */
+#endif
+#define ULONG_MAX (~0x0UL)
+
+#define DEFAULTPREC    2 + (8/sizeof(long))
+#define MEDDEFAULTPREC 2 + (16/sizeof(long))
+#define BIGDEFAULTPREC 2 + (24/sizeof(long))
 #define BITS_IN_LONG  (1L<<TWOPOTBITS_IN_LONG)
 #define HIGHBIT (1UL << (BITS_IN_LONG-1))
 #define BITS_IN_HALFULONG (BITS_IN_LONG>>1)
-#define MAXULONG (~0x0UL)
+
 #define LOWMASK ((1UL<<BITS_IN_HALFULONG) - 1)
 #define HIGHMASK (~LOWMASK)
 
@@ -73,6 +79,8 @@ typedef unsigned long pari_ulong;
 #define VALPBITS    ((1UL<<VALPnumBITS)-1)
 #define VARNBITS    (MAXVARN<<VARNSHIFT)
 #define MAXVARN     ((1UL<<VARNnumBITS)-1)
+#define NO_VARIABLE (2147483647) /* > MAXVARN */
+
 #define HIGHEXPOBIT (1UL<<(EXPOnumBITS-1))
 #define HIGHVALPBIT (1UL<<(VALPnumBITS-1))
 #define CLONEBIT    (1UL<<LGnumBITS)

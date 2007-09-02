@@ -22,8 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 #ifdef LONG_IS_64BIT
-# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(VERYBIGINT)) */
-# define CBRTVERYBIGINT 2097152      /* ceil(cbrt(VERYBIGINT)) */
+# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(LONG_MAX)) */
+# define CBRTVERYBIGINT 2097152      /* ceil(cbrt(LONG_MAX)) */
 #else
 # define SQRTVERYBIGINT 46341
 # define CBRTVERYBIGINT  1291
@@ -1345,7 +1345,7 @@ modlog2(GEN x, long *sh)
 {
   double d = rtodbl(x);
   long q = (long) ((fabs(d) + (LOG2/2))/LOG2);
-  if (d > LOG2 * VERYBIGINT) pari_err(errexpo); /* avoid overflow in  q */
+  if (d > LOG2 * LONG_MAX) pari_err(errexpo); /* avoid overflow in  q */
   if (d < 0) q = -q;
   *sh = q;
   if (q) {
