@@ -95,7 +95,7 @@ static int
 no_prec_pb(GEN x)
 {
   return (typ(x) != t_REAL || lg(x) >  3
-                           || expo(x) < (long)BITS_IN_HALFULONG);
+                           || expo(x) < BITS_IN_LONG/2);
 }
 /* zero x[1..k-1], fill mu */
 static int

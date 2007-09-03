@@ -1212,7 +1212,7 @@ derivnum(void *E, GEN (*eval)(GEN,void*), GEN x, long prec)
   if (ex < 0) ex = 0; /* at 0 */
   pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
   l = 2+pr;
-  e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
+  e = fpr * (BITS_IN_LONG/2); /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
   y = gtofp(gsub(x, eps), l); a = eval(y, E);
