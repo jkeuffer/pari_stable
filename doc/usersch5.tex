@@ -420,30 +420,40 @@ These are defined in the various public PARI headers.
 
 \subsec{Constants related to word size}
 
-\noindent $\tet{BITS_IN_LONG}$: number of bits in a \kbd{long} (32 or 64).
+\noindent \kbd{long} \tet{BITS_IN_LONG}: number of bits in a \kbd{long} (32
+or 64).
 
-\noindent \tet{BITS_IN_HALFULONG}: \kbd{BITS\_IN\_LONG} divided by $2$.
+\noindent \kbd{long} \tet{BITS_IN_HALFULONG}: \kbd{BITS\_IN\_LONG} divided by
+$2$.
 
-\noindent \tet{LONG_MAX}: the largest positive \kbd{long}.
+\noindent \kbd{long} \tet{LONG_MAX}: the largest positive \kbd{long}.
 
-\noindent \tet{ULONG_MAX}: the largest \kbd{ulong}.
+\noindent \kbd{ulong} \tet{ULONG_MAX}: the largest \kbd{ulong}.
 
-\noindent \tet{DEFAULTPREC}:    the length (\kbd{lg}) of a \typ{REAL} with 64
-bits of accuracy
+\noindent \kbd{long} \tet{DEFAULTPREC}:    the length (\kbd{lg}) of a
+\typ{REAL} with 64 bits of accuracy
 
-\noindent \tet{MEDDEFAULTPREC}: the length (\kbd{lg}) of a \typ{REAL} with
-128 bits of accuracy
+\noindent \kbd{long} \tet{MEDDEFAULTPREC}: the length (\kbd{lg}) of a
+\typ{REAL} with 128 bits of accuracy
 
-\noindent \tet{BIGDEFAULTPREC}: the length (\kbd{lg}) of a \typ{REAL} with
-192 bits of accuracy
+\noindent \kbd{long} \tet{BIGDEFAULTPREC}: the length (\kbd{lg}) of a
+\typ{REAL} with 192 bits of accuracy
 
-\noindent \tet{HIGHBIT}: the largest power of $2$ fitting in an \kbd{ulong}.
+\noindent \kbd{ulong} \tet{HIGHBIT}: the largest power of $2$ fitting in an
+\kbd{ulong}.
 
-\noindent \tet{LOWMASK}: bitmask yielding the least significant bits, to be
-used in \fun{ulong}{HIGHWORD}{ulong a}
+\noindent \kbd{ulong} \tet{LOWMASK}: bitmask yielding the least significant
+bits.
 
-\noindent \tet{HIGHMASK}: bitmask yielding the most sicgnificant bits, to be
-used in \fun{ulong}{LOWWORD}{ulong a}
+\noindent \kbd{ulong} \tet{HIGHMASK}: bitmask yielding the most sicgnificant
+bits.
+
+\noindent The last two are used to implement the convenience macros,
+returning half the bits of their operand:
+
+\fun{ulong}{LOWWORD}{ulong a} returns least significant bits.
+
+\fun{ulong}{HIGHWORD}{ulong a} returns most significant bits.
 
 \subsec{Masks used to implement the \kbd{GEN} type}
 

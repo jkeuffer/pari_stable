@@ -33,9 +33,9 @@ typedef unsigned long pari_ulong;
 #endif
 #define ULONG_MAX (~0x0UL)
 
-#define DEFAULTPREC    2 + (8/sizeof(long))
-#define MEDDEFAULTPREC 2 + (16/sizeof(long))
-#define BIGDEFAULTPREC 2 + (24/sizeof(long))
+#define DEFAULTPREC    (2 + (long)(8/sizeof(long)))
+#define MEDDEFAULTPREC (2 + (long)(16/sizeof(long)))
+#define BIGDEFAULTPREC (2 + (long)(24/sizeof(long)))
 #define HIGHBIT (1UL << (BITS_IN_LONG-1))
 #define BITS_IN_HALFULONG (BITS_IN_LONG>>1)
 
