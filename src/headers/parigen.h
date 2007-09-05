@@ -24,10 +24,12 @@ typedef unsigned long pari_ulong;
 
 #ifdef LONG_IS_64BIT
 #  define BITS_IN_LONG 64
+#  define TWOPOTBITS_IN_LONG 6
 #  define LONG_MAX (9223372036854775807L) /* 2^63-1 */
 #  define SMALL_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
 #  define BITS_IN_LONG 32
+#  define TWOPOTBITS_IN_LONG 5
 #  define LONG_MAX (2147483647L) /* 2^31-1 */
 #  define SMALL_ULONG(p) ((ulong)p <= 46337UL) /* 2p^2 < 2^BITS_IN_LONG */
 #endif
