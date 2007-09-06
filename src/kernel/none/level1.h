@@ -98,6 +98,7 @@ int    dvdui(ulong x, GEN y);
 void   dvmdiiz(GEN x, GEN y, GEN z, GEN t);
 GEN    dvmdis(GEN x, long y, GEN *z);
 void   dvmdisz(GEN x, long y, GEN z, GEN t);
+long   dvmdsBIL(long n, long *r);
 GEN    dvmdsi(long x, GEN y, GEN *z);
 void   dvmdsiz(long x, GEN y, GEN z, GEN t);
 GEN    dvmdss(long x, long y, GEN *z);
@@ -866,6 +867,9 @@ dvmdss(long x, long y, GEN *z)
   const GEN q = divss_rem(x,y, &rem);
   *z = stoi(rem); return q;
 }
+
+INLINE long
+dvmdsBIL(long n, long *r) { *r = remsBIL(n); return divsBIL(n); }
 
 INLINE ulong
 udivui_rem(ulong x, GEN y, ulong *rem)

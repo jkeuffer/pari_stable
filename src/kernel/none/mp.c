@@ -312,11 +312,10 @@ shifti_spec(GEN x, long lx, long n)
   if (n > 0)
   {
     GEN z = (GEN)avma;
-    long d = n / BITS_IN_LONG;
+    long d = dvmdsBIL(n, &m);
 
     ly = lx+d; y = new_chunk(ly);
     for ( ; d; d--) *--z = 0;
-    m = n % BITS_IN_LONG;
     if (!m) for (i=2; i<lx; i++) y[i]=x[i];
     else
     {
@@ -329,11 +328,9 @@ shifti_spec(GEN x, long lx, long n)
   }
   else
   {
-    n = -n;
-    ly = lx - (n / BITS_IN_LONG);
+    ly = lx - dvmdsBIL(-n, &m);
     if (ly<3) return gen_0;
     y = new_chunk(ly);
-    m = n % BITS_IN_LONG;
     if (m) {
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
@@ -368,7 +365,7 @@ truncr(GEN x)
   GEN y;
 
   if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gen_0;
-  d = nbits2prec(e+1); m = e % BITS_IN_LONG;
+  d = nbits2prec(e+1); m = remsBIL(e);
   if (d > lg(x)) pari_err(precer, "truncr (precision loss in truncation)");
 
   y=cgeti(d); y[1] = evalsigne(s) | evallgefint(d);
@@ -391,7 +388,7 @@ floorr(GEN x)
 
   if (signe(x) >= 0) return truncr(x);
   if ((e=expo(x)) < 0) return gen_m1;
-  d = nbits2prec(e+1); m = e % BITS_IN_LONG;
+  d = nbits2prec(e+1); m = remsBIL(e);
   lx=lg(x); if (d>lx) pari_err(precer, "floorr (precision loss in truncation)");
   y = new_chunk(d);
   if (++m == BITS_IN_LONG)
@@ -1394,8 +1391,7 @@ remi2n(GEN x, long n)
 
   if (!signe(x) || !n) return gen_0;
 
-  k = n / BITS_IN_LONG;
-  l = n % BITS_IN_LONG;
+  k = dvmdsBIL(n, &l);
   lx = lgefint(x);
   if (lx < k+3) return icopy(x);
 

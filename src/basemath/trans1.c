@@ -1261,7 +1261,7 @@ exp1r_abs(GEN x)
   B = b/3 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG)/ b;
   d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 */
   if (m < (-a) * 0.1) m = 0; /* not worth it */
-  L = l+1 + (m / BITS_IN_LONG);
+  L = l + nbits2nlong(m);
  /* Multiplication is quadratic in this range (l is small, otherwise we
   * use logAGM + Newton). Set Y = 2^(-e-a) x, compute truncated series
   * sum x^k/k!: this costs roughly
@@ -1301,9 +1301,7 @@ exp1r_abs(GEN x)
     { /* compute X^(n-1)/n! + ... + X/2 + 1 */
       GEN p1, p3;
       setlg(X,l1); p3 = divru(X,i);
-      s -= expo(p3);
-      l1 += s / BITS_IN_LONG; if (l1>L) l1=L;
-      s %= BITS_IN_LONG;
+      l1 += dvmdsBIL(s - expo(p3), &s); if (l1>L) l1=L;
       setlg(unr,l1); p1 = addrr_sign(unr,1, i == n? p3: mulrr(p3,p2),1);
       setlg(p2,l1); affrr(p1,p2); /* p2 <- 1 + (X/i)*p2 */
     }
@@ -1771,7 +1769,7 @@ logr_abs(GEN X)
   d = -a/2.; m = (long)(d + sqrt(d*d + b/6)); /* >= 0 */
 
   if (m > b-a) m = b-a;
-  if (m < 0.2*a) m = 0; else L += m / BITS_IN_LONG;
+  if (m < 0.2*a) m = 0; else L += divsBIL(m);
   x = rtor(X,L);
   if (neg) x[1] = evalsigne(1) | _evalexpo(-1);
   else     x[1] = evalsigne(1) | _evalexpo(0);
@@ -1801,9 +1799,7 @@ logr_abs(GEN X)
       setlg(y2, l1); T = mulrr(S,y2);
       if (k == 1) break;
 
-      s += incs;
-      l1 += s / BITS_IN_LONG; if (l1>L) l1=L;
-      s %= BITS_IN_LONG;
+      l1 += dvmdsBIL(s + incs, &s); if (l1>L) l1=L;
       setlg(S, l1);
       setlg(unr,l1);
       affrr(addrr(divru(unr, k), T), S); avma = av;
@@ -2005,7 +2001,7 @@ mpsc1(GEN x, long *ptmod8)
   B = b/6 + BITS_IN_LONG + (BITS_IN_LONG*BITS_IN_LONG/2)/ b;
   d = a/2.; m = (long)(d + sqrt(d*d + B)); /* >= 0 ,*/
   if (m < (-a) * 0.1) m = 0; /* not worth it */
-  L = l+1 + (m / BITS_IN_LONG);
+  L = l + nbits2nlong(m);
 
   b += m;
   e = m - a; /* >= 1 */
@@ -2050,9 +2046,7 @@ mpsc1(GEN x, long *ptmod8)
     {
       GEN p1;
       setlg(x2,l1); p1 = divrunu(x2, 2*i-1);
-      s -= expo(p1);
-      l1 += s / BITS_IN_LONG; if (l1>L) l1=L;
-      s %= BITS_IN_LONG;
+      l1 += dvmdsBIL(s - expo(p1), &s); if (l1>L) l1=L;
       if (i != n) p1 = mulrr(p1,p2);
       setlg(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
       setlg(p2,l1); affrr(p1,p2); avma = av;

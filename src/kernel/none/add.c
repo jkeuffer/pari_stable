@@ -114,7 +114,7 @@ addir_sign(GEN x, long sx, GEN y, long sy)
   ly = lg(y);
   if (e > 0)
   {
-    l = ly - (e / BITS_IN_LONG);
+    l = ly - divsBIL(e);
     if (l < 3) return rcopy_sign(y, sy);
   }
   else l = ly + nbits2nlong(-e);
@@ -143,7 +143,7 @@ addsr_sign(long x, GEN y, long sy)
   ly = lg(y);
   if (e > 0)
   {
-    l = ly - (e / BITS_IN_LONG);
+    l = ly - divsBIL(e);
     if (l < 3) return rcopy_sign(y, sy);
   }
   else l = ly + nbits2nlong(-e);
@@ -190,7 +190,7 @@ subrex01(GEN x)
   else
   { for (i = 2; i < lx-k+2; i++) y[i] = x[k-2 + i]; }
   for (i = lx-k+2; i < ly; i++) y[i] = 0;
-  y[1] = evalsigne(1) | evalexpo(- ((k-2)*BITS_IN_LONG + sh));
+  y[1] = evalsigne(1) | evalexpo(- (bit_accuracy(k) + sh));
   return y;
 }
 
@@ -236,9 +236,8 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   extend = 0;
   if (e)
   {
-    long d = e / BITS_IN_LONG, l = ly-d;
+    long d = dvmdsBIL(e, &m), l = ly-d;
     if (l <= 2) return rcopy_sign(y, sy);
-    m = e % BITS_IN_LONG;
     if (l > lx) { lz = lx + d + 1; extend = 1; }
     else        { lz = ly; lx = l; }
     if (m)

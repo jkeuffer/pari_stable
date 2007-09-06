@@ -336,38 +336,35 @@ vecsmall_pack(GEN V, long base, long mod)
 GEN
 bitvec_alloc(long n)
 {
-  long l = 1 + (n / BITS_IN_LONG);
+  long l = 1 + divsBIL(n);
   return const_vecsmall(l,0);
 }
 
 GEN
 bitvec_shorten(GEN bitvec, long n)
 {
-  long l = 1 + (n / BITS_IN_LONG);
+  long l = 1 + divsBIL(n);
   return vecsmall_shorten(bitvec,l);
 }
 
 long
 bitvec_test(GEN bitvec, long b)
 {
-  long q = b / BITS_IN_LONG;
-  long r = b % BITS_IN_LONG;
+  long r, q = dvmdsBIL(b, &r);
   return (bitvec[1+q]>>r) & 1L;
 }
 
 void
 bitvec_set(GEN bitvec, long b)
 {
-  long q = b / BITS_IN_LONG;
-  long r = b % BITS_IN_LONG;
+  long r, q = dvmdsBIL(b, &r);
   bitvec[1+q] |= 1L<<r;
 }
 
 void
 bitvec_clear(GEN bitvec, long b)
 {
-  long q = b / BITS_IN_LONG;
-  long r = b % BITS_IN_LONG;
+  long r, q = dvmdsBIL(b, &r);
   bitvec[1+q] &= ~(1L<<r);
 }
 

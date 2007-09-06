@@ -117,7 +117,7 @@ precrealexact(GEN t, GEN s) {
   e -= expo(t);
   if (!signe(t)) return prec0(-e);
   l = lg(t);
-  return (e > 0)? l + (e / BITS_IN_LONG): l;
+  return (e > 0)? l + divsBIL(e): l;
 }
 long
 precision(GEN z)
@@ -154,7 +154,7 @@ precision(GEN z)
     lx = lg(x);
     ly = lg(y);
     if (e) {
-      long d = e / BITS_IN_LONG, l = ly-d;
+      long d = divsBIL(e), l = ly-d;
       return (l > lx)? lx + d: ly;
     }
     return min(lx, ly);

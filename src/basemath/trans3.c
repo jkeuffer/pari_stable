@@ -181,9 +181,9 @@ jbesselh(GEN n, GEN z, long prec)
       res = cgetc(linit);
       av = avma;
       if (gz>=0) l = linit;
-      else l = linit - 1 + ((-2*k*gz) / BITS_IN_LONG);
+      else l = linit - 1 + divsBIL(-2*k*gz);
       if (l>prec) prec = l;
-      prec += (-gz) / BITS_IN_LONG;
+      prec += divsBIL(-gz);
       if (prec < 3) prec = 3;
       z = gadd(z, real_0(prec));
       if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
@@ -441,9 +441,9 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       ex = gexpo(s);
       if (ex < 0)
       {
-        long rab = (-ex) / BITS_IN_LONG;
+        long rab = nbits2nlong(-ex);
         if (fl) rab *= 2;
-        precnew += 1 + rab;
+        precnew += rab;
       }
       if (i && i < precnew) {
         n = gtofp(n,precnew);

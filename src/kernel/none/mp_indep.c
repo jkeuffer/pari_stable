@@ -512,14 +512,13 @@ truedvmdis(GEN x, long y, GEN *z)
 /* 2^n = shifti(gen_1, n) */
 GEN
 int2n(long n) {
-  long i, m, d, l;
+  long i, m, l;
   GEN z;
   if (n < 0) return gen_0;
   if (n == 0) return gen_1;
 
-  d = n / BITS_IN_LONG;
-  m = n % BITS_IN_LONG;
-  l = d + 3; z = cgetipos(l);
+  l = dvmdsBIL(n, &m) + 3;
+  z = cgetipos(l);
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
 }
@@ -527,13 +526,12 @@ int2n(long n) {
  * returns gen_0 */
 GEN
 int2u(ulong n) {
-  ulong i, m, d, l;
+  ulong i, m, l;
   GEN z;
   if (n == 0) return gen_1;
 
-  d = n / BITS_IN_LONG;
-  m = n % BITS_IN_LONG;
-  l = d + 3; z = cgetipos(l);
+  l = dvmdsBIL(n, &m) + 3;
+  z = cgetipos(l);
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
 }

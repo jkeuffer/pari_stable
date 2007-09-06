@@ -91,6 +91,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
 #define prec2ndec(x) ((long)bit_accuracy_mul((x), L2SL10))
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
+#define divsBIL(n) ((n)>> TWOPOTBITS_IN_LONG)
+#define remsBIL(n) ((n) & (BITS_IN_LONG-1))
 
 #include "pariold.h"
 

@@ -1620,7 +1620,7 @@ binaire(GEN x)
       if (lx==2) return mkvec(gen_0);
       ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
-      y = cgetg(ly + (lx-3)*BITS_IN_LONG, t_VEC); ly=1;
+      y = cgetg(ly + bit_accuracy(lx-1), t_VEC); ly=1;
       do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
@@ -1680,8 +1680,7 @@ binaire(GEN x)
 long
 bittest(GEN x, long n)
 {
-  ulong u;
-  long l;
+  long q, r;
 
   if (!signe(x) || n < 0) return 0;
   if (signe(x) < 0)
@@ -1691,10 +1690,9 @@ bittest(GEN x, long n)
     avma=ltop;
     return b;
   }
-  l = n / BITS_IN_LONG;
-  if (l+3 > lgefint(x)) return 0;
-  u = (1UL << (n % BITS_IN_LONG)) & *int_W(x,l);
-  return u? 1: 0;
+  q = dvmdsBIL(n, &r);
+  if (q+3 > lgefint(x)) return 0;
+  return (*int_W(x,q) >> r) & 1;
 }
 
 GEN
@@ -1713,20 +1711,21 @@ gbittest(GEN x, GEN n)
 static GEN
 ibittrunc(GEN x, long bits)
 {
-  long known_zero_words, xl = lgefint(x) - 2;
+  long lowbits, known_zero_words, xl = lgefint(x) - 2;
   long len_out = nbits2nlong(bits);
 
   if (xl < len_out)
       return x;
       /* Check whether mask is trivial */
-  if (!(bits % BITS_IN_LONG)) {
+  lowbits = bits & (BITS_IN_LONG-1);
+  if (!lowbits) {
       if (xl == len_out)
           return x;
   } else if (len_out <= xl) {
     GEN xi = int_W(x, len_out-1);
     /* Non-trival mask is given by a formula, if x is not
        normalized, this works even in the exceptional case */
-    *xi = *xi & ((1 << (bits % BITS_IN_LONG)) - 1);
+    *xi &= (1 << lowbits) - 1;
     if (*xi && xl == len_out) return x;
   }
   /* Normalize */
@@ -1739,7 +1738,7 @@ GEN
 gbitneg(GEN x, long bits)
 {
   const ulong uzero = 0;
-  long xl, len_out, i;
+  long lowbits, xl, len_out, i;
 
   if (typ(x) != t_INT)
       pari_err(typeer, "bitwise negation");
@@ -1753,14 +1752,15 @@ gbitneg(GEN x, long bits)
   }
   xl = lgefint(x);
   len_out = nbits2prec(bits);
+  lowbits = bits & (BITS_IN_LONG-1);
   if (len_out > xl) { /* Need to grow */
     GEN out, outp, xp = int_MSW(x);
     out = cgetipos(len_out);
     outp = int_MSW(out);
-    if (!(bits % BITS_IN_LONG))
+    if (!lowbits)
       *outp = ~uzero;
     else
-      *outp = (1 << (bits % BITS_IN_LONG)) - 1;
+      *outp = (1 << lowbits) - 1;
     for (i = 3; i < len_out - xl + 2; i++)
     {
       outp = int_precW(outp); *outp = ~uzero;

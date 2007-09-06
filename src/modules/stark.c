@@ -457,7 +457,7 @@ CplxModulus(GEN data, long *newprec, long prec)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
     pol = AllStark(data, nf, -1, dprec);
-    pr = 1 + gexpo(pol) / BITS_IN_LONG;
+    pr = nbits2nlong( gexpo(pol) );
     if (pr < 0) pr = 0;
     dprec = max(dprec, pr) + EXTRA_PREC;
     if (!gcmp0(leading_term(pol)))
@@ -1785,7 +1785,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   Bd    = grndtoi(gmin(B, tB), &e);
   if (e > 0) return NULL; /* failure */
   Bd = addis(Bd, 1);
-  prec2 = BIGDEFAULTPREC + expi(Bd) / BITS_IN_LONG;
+  prec2 = BIGDEFAULTPREC + divsBIL( expi(Bd) );
   prec2 = max((prec << 1) - 2, prec2);
   nf2   = nfnewprec_shallow(nf, prec2);
   beta2 = gprec_w(beta, prec2);
@@ -2484,7 +2484,7 @@ LABDOUB:
           a) get at least EXTRA_PREC fractional digits if there is none;
        or b) double the fractional digits.
     */
-    incr_pr = gprecision(polrelnum)-2 - gexpo(polrelnum) / BITS_IN_LONG;
+    incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
     if (incr_pr < 0) 
       incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + max(ADD_PREC, cpt*incr_pr);
