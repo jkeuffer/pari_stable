@@ -530,7 +530,7 @@ int2u(ulong n) {
   GEN z;
   if (n == 0) return gen_1;
 
-  l = dvmdsBIL(n, &m) + 3;
+  l = dvmduBIL(n, &m) + 3;
   z = cgetipos(l);
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
