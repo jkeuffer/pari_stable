@@ -954,7 +954,7 @@ QpX_mod(GEN e, GEN f, GEN pk)
 typedef struct __decomp {
   /* constants */
   GEN p, f; /* goal: factor f p-adically */
-  long df, mf; /* p^df = reduced discriminant of f, p^mf = mpf */
+  long df; /* p^df = reduced discriminant of f */
   GEN psf, pmf; /* stability precision for f, wanted precision for f */
   /* these are updated along the way */
   GEN phi; /* a p-integer, in Q[X] */
@@ -1338,7 +1338,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   for (k = 1;; k++)
   {
     kill_cache(S);
-    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, ggval(S->psc, S->p));
+    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, Z_pval(S->psc, S->p));
     if (!equalii(prc, S->psc)) break;
     
     S->psc = S->psf; /* work full precision */
@@ -1578,8 +1578,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->prc = mulii(dred, p);
   S->psf = S->psc;
   S->chi = FpX_red(S->f, S->psc);
-  S->mf  = mf + 1;
-  S->pmf = powiu(p, S->mf);
+  S->pmf = powiu(p, mf+1);
   S->precns = NULL;
   oE = 0;
   opa = NULL;
