@@ -455,6 +455,19 @@ returning half the bits of their operand:
 
 \fun{ulong}{HIGHWORD}{ulong a} returns most significant bits.
 
+\noindent Finally
+
+\fun{long}{divsBIL}{long n} returns the Euclidean quotient of $n$ by
+\kbd{BITS\_IN\_LONG} (with non-negative remainder).
+
+\fun{long}{remsBIL}{n} returns the (non-negative) Euclidean remainder of $n$
+by \kbd{BITS\_IN\_LONG}
+
+\fun{long}{dvmdsBIL}{long n, long *r}
+
+\fun{ulong}{dvmduBIL}{ulong n, ulong *r} sets $r$ to \kbd{remsBIL(n)}
+and returns \kbd{divsBIL(n)}.
+
 \subsec{Masks used to implement the \kbd{GEN} type}
 
 These constants are used by higher level macros, like \kbd{typ} or \kbd{lg}:
