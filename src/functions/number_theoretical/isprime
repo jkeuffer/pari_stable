@@ -43,6 +43,12 @@ Doc: true (1) if $x$ is a prime
  third the output of isprime(p,1).
  
  The algorithm fails if one of the pseudo-prime factors is not prime, which is
- exceedingly unlikely and well worth a bug report.
+ exceedingly unlikely and well worth a bug report. Note that if you monitor
+ \kbd{isprime} at a high enough debug level, you may see warnings about
+ untested integers being declared primes. This is normal: we ask for partial
+ factorisations (sufficient to prove primality if the unfactored part is not
+ too large), and \kbd{factor} warns us that the cofactor hasn't been tested.
+ It may or may not be tested later, and may or may not be prime. This does
+ not affect the validity of the whole \kbd{isprime} procedure.
  
  If $\fl=2$, use APRCL.
