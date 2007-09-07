@@ -960,7 +960,7 @@ typedef struct __decomp {
   GEN phi; /* a p-integer, in Q[X] */
   GEN phi0; /* a p-integer, in Q[X] from testb2 / testc2, to be composed with
              * phi when correct precision is known */
-  GEN chi; /* characteristic polynomial of phi (mod p^*), in Z[X] */
+  GEN chi; /* characteristic polynomial of phi (mod psc) in Z[X] */
   GEN nu; /* irreducible divisor of chi mod p, in Z[X] */
   GEN invnu; /* numerator ( 1/ Mod(nu, chi) mod pmr ) */
   GEN Dinvnu;/* denominator ( ... ) */
@@ -1270,7 +1270,7 @@ get_nu(GEN chi, GEN p, long *ptl)
 static long
 factcp(decomp_t *S)
 {
-  GEN chi = mycaract(S, S->chi, S->phi, S->pmf, S->prc);
+  GEN chi = mycaract(S, S->chi, S->phi, S->psf, S->prc);
   long l;
   S->chi = chi;
   S->nu  = get_nu(chi, S->p, &l); return l;
@@ -1330,7 +1330,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   if (!S->chi) 
   {
     kill_cache(S);
-    S->chi = mycaract(S, S->f, S->phi, S->pmf, powiu(S->p, S->df));
+    S->chi = mycaract(S, S->f, S->phi, S->psf, powiu(S->p, S->df));
     S->nu = get_nu(S->chi, S->p, ptl);
     if (*ptl > 1) return 0; /* we can get a decomposition */
   }
@@ -1338,12 +1338,13 @@ update_phi(decomp_t *S, long *ptl, long flag)
   for (k = 1;; k++)
   {
     kill_cache(S);
-    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, S->mf);
-    if (!equalii(prc, S->pmf)) break;
+    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, ggval(S->psc, S->p));
+    if (!equalii(prc, S->psc)) break;
     
+    S->psc = S->psf; /* work full precision */
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
-    S->chi = mycaract(S, S->f, PHI, S->pmf, powiu(S->p, S->df));
+    S->chi = mycaract(S, S->f, PHI, S->psf, powiu(S->p, S->df));
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
@@ -1576,8 +1577,8 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->psc = mulii(sqri(dred), p);
   S->prc = mulii(dred, p);
   S->psf = S->psc;
-  S->chi = centermod(S->f, S->psc);
-  S->mf = mf + 1;
+  S->chi = FpX_red(S->f, S->psc);
+  S->mf  = mf + 1;
   S->pmf = powiu(p, S->mf);
   S->precns = NULL;
   oE = 0;
