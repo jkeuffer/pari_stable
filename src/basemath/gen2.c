@@ -256,9 +256,9 @@ gcmp1(GEN x)
     case t_REAL:
       return signe(x) > 0 ? absrnz_egal1(x): 0;
 
-    case t_INTMOD: case t_POLMOD: 
+    case t_INTMOD: case t_POLMOD:
       return gcmp1(gel(x,2));
-  
+
     case t_FFELT:
       return FF_cmp1(x);
 
@@ -301,7 +301,7 @@ gcmp_1(GEN x)
 
     case t_FRAC:
       return 0;
-      
+
     case t_FFELT:
       return FF_cmp_1(x);
 
@@ -496,8 +496,8 @@ gequal(GEN x, GEN y)
 
       case t_FRAC: case t_INTMOD:
 	return equalii(gel(x,2), gel(y,2)) && equalii(gel(x,1), gel(y,1));
-      
-      case t_COMPLEX: case t_POLMOD: 
+
+      case t_COMPLEX: case t_POLMOD:
 	return gequal(gel(x,2),gel(y,2)) && gequal(gel(x,1),gel(y,1));
 
       case t_POL:
@@ -513,7 +513,7 @@ gequal(GEN x, GEN y)
 	    && equalii(gel(x,2),gel(y,2))
 	    && equalii(gel(x,3),gel(y,3));
 
-      case t_QUAD: 
+      case t_QUAD:
 	return gequal(gel(x,1),gel(y,1))
 	    && gequal(gel(x,2),gel(y,2))
 	    && gequal(gel(x,3),gel(y,3));
@@ -601,7 +601,7 @@ polvaluation_inexact(GEN x, GEN *Z)
 static int
 intdvd(GEN x, GEN y, GEN *z) {
   GEN r, q = dvmdii(x,y,&r);
-  if (r != gen_0) return 0; 
+  if (r != gen_0) return 0;
   *z = q; return 1;
 }
 
@@ -741,7 +741,7 @@ z_pval(long n, GEN p)
 }
 
 /* return v_q(x) and set *py = x / q^v_q(x), using divide & conquer */
-static long 
+static long
 Z_pvalrem_DC(GEN x, GEN q, GEN *py)
 {
   GEN r, z = dvmdii(x, q, &r);
@@ -749,7 +749,7 @@ Z_pvalrem_DC(GEN x, GEN q, GEN *py)
   if (r != gen_0) { *py = x; return 0; }
   if (2 * lgefint(q) <= lgefint(z)+3) /* avoid squaring if pointless */
     v = Z_pvalrem_DC(z, sqri(q), py) << 1;
-  else 
+  else
   { v = 0; *py = z; }
   z = dvmdii(*py, q, &r);
   if (r != gen_0) return v + 1;
@@ -847,7 +847,7 @@ Z_lvalrem_stop(GEN n, ulong p, int *stop)
     GEN N, q = diviu_rem(n, p, &r);
     if (!r)
     {
-      do { 
+      do {
         v++; N = q;
         if (v == 32) { v = 32 + Z_pvalrem_DC(N, utoipos(p), &N); break; }
         q = diviu_rem(N, p, &r);
@@ -883,7 +883,7 @@ u_pvalrem(ulong x, GEN p, ulong *py)
   *py = x; return 0;
 }
 long
-Z_pval(GEN x, GEN p) { 
+Z_pval(GEN x, GEN p) {
   long vx;
   pari_sp av;
 
@@ -1057,7 +1057,7 @@ gabs(GEN x, long prec)
     case t_INT: case t_REAL:
       return mpabs(x);
 
-    case t_FRAC: 
+    case t_FRAC:
       return absq(x);
 
     case t_COMPLEX:
@@ -1331,7 +1331,7 @@ gaffect(GEN x, GEN y)
         default: pari_err(operf,"",x,y);
       }
       break;
-    
+
     case t_REAL:
       switch(ty)
       {
@@ -1339,7 +1339,7 @@ gaffect(GEN x, GEN y)
         default: pari_err(operf,"",x,y);
       }
       break;
-    
+
     case t_FRAC:
       switch(ty)
       {
@@ -1362,7 +1362,7 @@ gaffect(GEN x, GEN y)
         default: pari_err(operf,"",x,y);
       }
       break;
-    
+
     case t_PADIC:
       switch(ty)
       {
@@ -1372,7 +1372,7 @@ gaffect(GEN x, GEN y)
         default: pari_err(operf,"",x,y);
       }
       break;
-    
+
     case t_QUAD:
       switch(ty)
       {

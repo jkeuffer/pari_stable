@@ -386,7 +386,7 @@ lireresolv(long n1, long n2, long n, resolv *R)
   (void)fread(ch,sizeof(char),5,f->file); nm = atol(ch);
   (void)fread(ch,sizeof(char),3,f->file); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
-  read_obj(R->a, f,nm,nv); 
+  read_obj(R->a, f,nm,nv);
   R->nm = nm;
   R->nv = nv;
 }
@@ -753,7 +753,7 @@ tschirn(buildroot *BR)
   fixprec(BR); /* restore accuracy */
 }
 
-static GEN 
+static GEN
 sortroots(GEN newr, GEN oldr)
 {
   long e, e0, i, j, k, l = lg(newr);
@@ -793,7 +793,7 @@ moreprec(buildroot *BR)
     pari_sp av = avma;
     long l = lg(BR->r);
     GEN ro;
-    
+
     if (d < BIGDEFAULTPREC-2) d = BIGDEFAULTPREC-2;
     BR->prmax = max(BR->prmax+d, (long)(BR->prmax * 1.2));
     if (DEBUGLEVEL)
@@ -2461,7 +2461,7 @@ polgaloisnamesbig(long n, long k)
 
   (void)sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
   f = pari_fopengz(s);
-  if (!f) 
+  if (!f)
   {
     pari_warn(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
     avma = av; return strtoGENstr("");
@@ -2494,7 +2494,7 @@ galoisbig(GEN pol, long prec)
 
   N = degpol(pol); dpol = ZX_disc(pol); EVEN = Z_issquare(dpol);
   ID[0] = (IND)N;
-  
+
   if (DEBUGLEVEL)
   {
     fprintferr("Galoisbig: polynomial #1 = %Z\n", pol);
@@ -2509,12 +2509,12 @@ galoisbig(GEN pol, long prec)
     default: pari_err(impl,"galois in degree > 11");
       return NULL; /* not reached */
   }
-  if (!t) 
+  if (!t)
   {
     buildroot BR;
     long i;
     GEN r, z = cgetg(N + 1, t_VEC);
-    for (i = 1; i <= N; i++) 
+    for (i = 1; i <= N; i++)
     {
       gel(z,i) = cgetg(i+2,t_VECSMALL);
       mael(z,i,1)=0;
@@ -2522,7 +2522,7 @@ galoisbig(GEN pol, long prec)
     BR.coef = z;
     BR.p = pol;
     BR.pr = (long)(cauchy_bound(pol) / (LOG2 * BITS_IN_LONG)) + prec;
-    BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
+    BR.prmax = BR.pr + BIGDEFAULTPREC-2;
     BR.r = cget1(N+1, t_VEC);
     r = gclone ( cleanroots(BR.p, BR.prmax) );
     appendL(BR.r, r); preci(r, BR.pr);
@@ -2535,7 +2535,7 @@ galoisbig(GEN pol, long prec)
     }
     for (i = 1; i < lg(BR.r); i++) gunclone(gel(BR.r,i));
   }
-  avma = av; 
+  avma = av;
   res    = cgetg(5,t_VEC);
   gel(res,1) = stoi(tab[t]);
   gel(res,2) = stoi(EVEN? 1: -1);

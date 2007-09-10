@@ -245,7 +245,7 @@ get_nf(GEN x, long *t)
   *t = typ_NULL; return NULL;
 }
 
-long 
+long
 nftyp(GEN x)
 {
   switch(typ(x))
@@ -259,7 +259,7 @@ nftyp(GEN x)
         case 11:
           x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
           return typ_BNF;
-        case 7 : 
+        case 7 :
           x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
           x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
           return typ_BNR;
@@ -270,7 +270,7 @@ nftyp(GEN x)
           x = gel(x,2);
           if (typ(x) == t_VEC && lg(x) == 4) return typ_GAL;
         case 14: case 20:
-          return typ_ELL; 
+          return typ_ELL;
       }break;
     case t_MAT:
       if (lg(x)==2)
@@ -407,21 +407,21 @@ roots_to_ZX(GEN z, long *e)
 GEN
 polgaloisnames(long a, long b)
 {
-  const char * const t[]={"S1", "S2", "A3", "S3", 
+  const char * const t[]={"S1", "S2", "A3", "S3",
        "C(4) = 4", "E(4) = 2[x]2", "D(4)", "A4", "S4",
        "C(5) = 5", "D(5) = 5:2", "F(5) = 5:4", "A5", "S5",
        "C(6) = 6 = 3[x]2", "D_6(6) = [3]2", "D(6) = S(3)[x]2",
-             "A_4(6) = [2^2]3", "F_18(6) = [3^2]2 = 3 wr 2", 
-             "2A_4(6) = [2^3]3 = 2 wr 3", "S_4(6d) = [2^2]S(3)", 
-             "S_4(6c) = 1/2[2^3]S(3)", "F_18(6):2 = [1/2.S(3)^2]2", 
-             "F_36(6) = 1/2[S(3)^2]2", "2S_4(6) = [2^3]S(3) = 2 wr S(3)", 
-             "L(6) = PSL(2,5) = A_5(6)", "F_36(6):2 = [S(3)^2]2 = S(3) wr 2", 
+             "A_4(6) = [2^2]3", "F_18(6) = [3^2]2 = 3 wr 2",
+             "2A_4(6) = [2^3]3 = 2 wr 3", "S_4(6d) = [2^2]S(3)",
+             "S_4(6c) = 1/2[2^3]S(3)", "F_18(6):2 = [1/2.S(3)^2]2",
+             "F_36(6) = 1/2[S(3)^2]2", "2S_4(6) = [2^3]S(3) = 2 wr S(3)",
+             "L(6) = PSL(2,5) = A_5(6)", "F_36(6):2 = [S(3)^2]2 = S(3) wr 2",
              "L(6):2 = PGL(2,5) = S_5(6)", "A6", "S6",
-       "C(7) = 7", "D(7) = 7:2", "F_21(7) = 7:3", "F_42(7) = 7:6", 
+       "C(7) = 7", "D(7) = 7:2", "F_21(7) = 7:3", "F_42(7) = 7:6",
              "L(7) = L(3,2)", "A7", "S7"};
 
    const long idx[]={0,1,2,4,9,14,30};
-   return strtoGENstr(t[idx[a-1]+b-1]); 
+   return strtoGENstr(t[idx[a-1]+b-1]);
 }
 
 static GEN
@@ -474,7 +474,7 @@ polgalois(GEN x, long prec)
     /* n = 3 */
     f = Z_issquare(ZX_disc(x));
     avma = av;
-    return f? galois_res(n,3,1,1): 
+    return f? galois_res(n,3,1,1):
               galois_res(n,6,-1,2);
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
@@ -1009,7 +1009,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
 {
   long i,j, n = degpol(x);
   GEN z, d, bas, den, mul = cgetg(n*n+1,t_MAT);
-  
+
   if (typ(basden[1]) != t_VEC) basden = get_bas_den(basden); /*integral basis*/
   bas = gel(basden,1);
   den = gel(basden,2);
@@ -1329,7 +1329,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     F.ro = NULL;
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
-  *pro = F.ro; 
+  *pro = F.ro;
   if (u0) u = gmul(u0,u);
   if (MARKED != 1) lswap(u[1], u[MARKED]);
   return u;
@@ -1512,7 +1512,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     if (DEBUGLEVEL) msgtimer("round4");
     r1 = sturm(x);
   }
-  else if (typ(x) == t_VEC && lg(x)==3 
+  else if (typ(x) == t_VEC && lg(x)==3
            && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]))
   { /* monic integral polynomial + integer basis */
     GEN mat;
@@ -1848,7 +1848,7 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   GEN v, Mk = cgetg(N+1, t_MAT);
   long i, e;
   for (i = 1; i < k; i++) gel(Mk,i) = gmael(V, i, k);
-  for (     ; i <=N; i++) 
+  for (     ; i <=N; i++)
   {
     v = vecmul(gel(M,k), gel(M,i));
     v = gmul(Mi, split_realimag(v, r1, r2));
@@ -1934,7 +1934,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   {
     inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
     V = gel(inv,1);
-    for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i)); 
+    for (i = 2; i <= r1+r2; i++) V = gadd(V, gel(inv,i));
     /* V corresponds to 1_Z */
     V = grndtoi(V, &j);
     if (j > -5) pari_err(bugparier,"precision too low in chk_gen_init");
@@ -1955,7 +1955,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       gel(M2,1) = col_ei(N, i); /* nf.zk[i] */
       k = 2;
       for (h = 1; h < dP; h++)
-      { 
+      {
         long r; /* add to M2 the elts of M * nf.zk[i]  */
         for (j = 1; j <= rkM; j++) gel(M2,k++) = gmul(Mx, gel(M,j));
         setlg(M2, k); k = 1;

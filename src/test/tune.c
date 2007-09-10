@@ -343,7 +343,7 @@ add_dat(long size, double d)
   dat[ndat].d    = d; ndat++;
 }
 
-void 
+void
 diag(const char *format, ...)
 {
   va_list ap;

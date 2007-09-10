@@ -492,7 +492,7 @@ coefficients of \kbd{1/hr} are wrong by as much as $10^{24}$ (the largest
 error is in fact equal to $4.244 \cdot 10^{24}$ for the coefficient of row 15
 and column 15, which is a 28 digit integer). To obtain the correct result
 after rounding for the inverse, we have to use a default precision of 56
-digits (try it). 
+digits (try it).
 
 Although vectors and matrices can be entered manually, by typing explicitly
 their elements, very often the elements satisfy a simple law and one uses a
@@ -674,7 +674,7 @@ algebraic extensions, for example elements of number fields (if the base
 field is $\Q$), or elements of finite fields (if the base field is
 $\Z/p\Z$ for a prime $p$). In a sense it is a generalization of the type
 quadratic number. The syntax used is the same as for intmods. For example,
-instead of typing \kbd{w = quadgen(-163)}, you can type 
+instead of typing \kbd{w = quadgen(-163)}, you can type
 \bprog
   w = Mod(x, quadpoly(-163))
 @eprog\noindent
@@ -859,7 +859,7 @@ components of \kbd{u = [log(15), log(5), log(3)]}. So input \kbd{u} then type
 Pretty close. In fact, \kbd{lindep} automates this kind of search for integer
 relations, using more sophisticated algorithms like PSLQ.
 
-Let's come back to $\Lambda$ above, and our LLL basis in \kbd{M}. Type 
+Let's come back to $\Lambda$ above, and our LLL basis in \kbd{M}. Type
 \bprog
   G = M~*M  \\@com Gram matrix
   m = qfminim(G, norml2(M[,1]), 100)
@@ -868,7 +868,7 @@ This enumerates the vectors in $\Lambda$ which are shorter than the first LLL
 basis vector, at most 100 of them. There are $\kbd{m[1]} = 6$ such vectors,
 and \kbd{m[3]} gives half of them (\kbd{-m[3]} would complete the lot): they
 are the first 3 basis vectors! So these are optimally short, at least with
-respect to the Euclidean length. Let us try 
+respect to the Euclidean length. Let us try
 \bprog
   m = qfminim(G, norml2(M[,4]), 100, 2)
 @eprog\noindent
@@ -1020,7 +1020,7 @@ started with? This is normal: type
 \bprog
   exp(b) * teichmuller(5 + O(7^10))
 @eprog\noindent
-and we indeed recover our initial number. The Teichm\"uller 
+and we indeed recover our initial number. The Teichm\"uller
 character \kbd{teichmuller(x)} on $\Z_p^*$ is the unique \hbox{$(p-1)$-st}
 root of unity which is congruent to \kbd{x} modulo $p$, assuming that \kbd{x}
 is a $p$-adic unit.\smallskip
@@ -1414,8 +1414,8 @@ minimal. Type \kbd{q = [0,0]} which is clearly a point on \kbd{e}, and
 \kbd{ellheight(e, q)}. This time we obtain a value which is very close to
 zero, hence \kbd{q} must be a torsion point. Indeed, typing
 \bprog
-        for(k=1, 5, print(ellpow(e, q,k))) 
-@eprog\noindent 
+        for(k=1, 5, print(ellpow(e, q,k)))
+@eprog\noindent
 we see that \kbd{q} is a point of order 5. More simply, you can type
 \kbd{ellorder(e, q)}.  Moreover, typing \kbd{elltors(e)} shows that
 \kbd{q} generates all the torsion of \kbd{e}, which is cyclic of
@@ -1445,7 +1445,7 @@ function and type (for instance in \kbd{points.gp} which you can read in with
       if (#s, listput(v, [x,s[1]]))  \\ @com if \kbd{\#s != 0}
     ); v
   }
-@eprog\noindent 
+@eprog\noindent
 (If cardinality of \kbd{s} is non-zero, insert the first point with given
 \kbd{x}.) By the way, this is how you insert a comment in a script:
 everything following a double backslash, up to the first newline character,
@@ -1518,7 +1518,7 @@ which gives an upper bound on the maximum distance to an integer. Thus
 \kbd{wr} is the vector expressing all the components of \kbd{v} on its first
 3. We are thus led to strongly believe that the curve has rank exactly
 3, with generators \kbd{v[1],v[2]} and \kbd{v[3]}, and this can be
-proved to be the case.  
+proved to be the case.
 
 Two remarks: (1) Using the height pairing to find dependence relations
 as we have done only in fact finds relations modulo torsion; but in
@@ -1944,7 +1944,7 @@ The integral basis is expressed in terms of a generic root \kbd{x} of \kbd{T}
 and we notice it's very far from being a power integral basis, which is a
 little strange for such a small field. Hum, let's check that: \kbd{poldisc(T)}?
 Ooops, small wonder we had such denominators, the index of the power order
-$\Z[x]/(T)$ in the maximal order $\Z_K$ is, well, 
+$\Z[x]/(T)$ in the maximal order $\Z_K$ is, well,
 \kbd{nf.index}. Note that this is also given by
 \bprog
   sqrtint(poldisc(nf.pol) / nf.disc)
@@ -2063,7 +2063,7 @@ easily write one:
 \bprog
   nfeltnorm(nf,u) =
   { local(t = type(u));
-    
+
     norm(
       if (t == "t_POLMOD", u,
       if (t == "t_COL",    nfbasistoalg(nf, u),
@@ -2077,7 +2077,7 @@ feature of the GP language: all expressions have a value, including branching
 statements like \kbd{if} (namely, the value of the branch that was taken). An
 alternative implementation would introduce a new variable \kbd{v}, insert
 assignments to \kbd{v} in each of the three branches, and take the norm of
-\kbd{v} at the very end. 
+\kbd{v} at the very end.
 
 Notice that this is certainly not foolproof (try it with complex or quadratic
 arguments!), but we could refine it if the need arose. In fact, you can
@@ -2231,7 +2231,7 @@ The result is a vector with 4 components, showing that 7 is totally split in
 the field $K$ into prime ideals of norm 7 (you can check:
 \kbd{idealnorm(nf,P[1])}). Let us take one of these ideals, say the first, so
 type \kbd{pr = P[1]}. We obtain its inertia and residue degree as \kbd{pr.e}
-and \kbd{pr.f}, and its two generators as \kbd{pr.gen}. One of them is 
+and \kbd{pr.f}, and its two generators as \kbd{pr.gen}. One of them is
 $\kbd{pr.p} = 7$, and the other is guaranteed to have valuation $1$ at
 \kbd{pr}. What is the Hermite Normal Form of this ideal? No problem:
 \bprog
@@ -2313,7 +2313,7 @@ Another method which avoids sign ambiguities is as follows. Type
 to find the remainder of the characteristic polynomial of \kbd{u2} divided by
 \kbd{x\pow 2 - $u$}. This is a polynomial of degree 1 in \kbd{x}, with polmod
 coefficients, and we know that \kbd{u2}, being a root of both polynomials,
-is the root of \kbd{r}, hence can be obtained by typing 
+is the root of \kbd{r}, hence can be obtained by typing
 \bprog
   u2 = -polcoeff(r,0) / polcoeff(r,1)
 @eprog
@@ -2377,7 +2377,7 @@ end. In this case, the \kbd{bnf} is correct \emph{provided} the ideals
 of norm less than $12\log^2(|\kbd{bnf.disc}|)$ generate the class group.
 This is actually a theorem of Bach, \emph{provided} the Generalized Riemann
 Hypothesis is true. So, the above command will not be much slower than the
-original one, and will at least guarantee further results under GRH. 
+original one, and will at least guarantee further results under GRH.
 \smallskip
 
 Member functions are still available for \kbd{bnf} structures. So, let's try
@@ -2428,7 +2428,7 @@ soon impractical, while \kbd{bnfinit} still happily spits out results. So it
 makes sense to dissociate the two: you can always check afterwards, if the
 result is interesting enough. Looking at the tentative regulator, you know in
 advance whether the certification can possibly succeed: if \kbd{bnf.reg} is
-large, don't waste your time. 
+large, don't waste your time.
 
 
 Now that we feel safe about the \kbd{bnf} output, let's do some real work.
@@ -2510,7 +2510,7 @@ resp.~arbitrary. (Subgroups are given by a matrix of generators, in terms of
 we already know. \kbd{L} has $7$ elements, the $2$ from \kbd{L0}, and
 $5$ new ones:
 \bprog
-  L1 = eval( setminus(Set(L), Set(L0)) ) 
+  L1 = eval( setminus(Set(L), Set(L0)) )
 @eprog\noindent
 The conductors are
 \bprog
@@ -2539,7 +2539,7 @@ Let $\zeta$ a $8$th-root of unity and $K=\Q(\zeta)$. The minimal
 polynomial of $\zeta$ is the 8$th$ cyclotomic polynomial, namely
 \kbd{polcyclo(8)} (=$x^4+1$).
 
-We issue the command 
+We issue the command
 \bprog
 G = galoisinit(x^4 + 1);
 @eprog\noindent
@@ -2554,7 +2554,7 @@ $\sigma\tau$=\kbd{G.gen[1]*G.gen[2]} and we have
 $\sigma\tau(\zeta)=-\zeta^3$. (At least in my version, yours may return a
 different set of generators, rename accordingly.)
 
-We compute the fixed field of $K$ by the subgroup generated by $\tau$ with 
+We compute the fixed field of $K$ by the subgroup generated by $\tau$ with
 \bprog
 galoisfixedfield(G, G.gen[2], 1)
 @eprog\noindent
@@ -2587,9 +2587,9 @@ fortunately we can ask PARI : \kbd{galoissubgroups(G)}.
 Let us look for a polynomial $Q$ with the property that $K$ is the splitting
 field of $Q(x^2)$. For that purpose, let us take $\sigma$=\kbd{G.gen[3]}.  We
 check that \kbd{G.gen[3]\^{}2} is the identity, so $\sigma$ is of order $2$. We now compute the fixed field $K^\sigma$ and the relative factorisation of $P$ over
-$K^\sigma$: 
-\bprog 
-F = galoisfixedfield(G, G.gen[3], 2); 
+$K^\sigma$:
+\bprog
+F = galoisfixedfield(G, G.gen[3], 2);
 @eprog\noindent
 So $K$ is a quadratic extension of $K^\sigma$ defined by the polynomial
 \kbd{R=F[3][1]}. It is well-known that $K$ is also defined by $x^2-D$
@@ -2598,7 +2598,7 @@ To compute $D$ we issue:
 \bprog
 D = poldisc(F[3][1]) * Mod(1,subst(F[1],x,y));
 @eprog\noindent
-Note that since \kbd{y} in \kbd{F[3][1]} denotes a root of \kbd{F[1]}, we 
+Note that since \kbd{y} in \kbd{F[3][1]} denotes a root of \kbd{F[1]}, we
 have to use \kbd{subst(,x,y)}.  Now we hope that $D$ generate $K^\sigma$ and
 compute \kbd{Q=charpoly(D)}. We check that $Q=x^9+270\*x^6+12393\*x^3+19683$ is
 irreducible with \kbd{polisirreducible(Q)}. (Were it not the case, we would
@@ -2993,7 +2993,7 @@ First of all, we need to measure the height of the smaller rectangle:
   curve_only = no_x_axis+no_y_axis+no_frame;
   lims = plotrecth(3, x= -xlim, xlim, f(x), recursive+curve_only,16);
   h = lims[4] - lims[3];
-@eprog\noindent 
+@eprog\noindent
 Next step is to create a larger rectangle, and plot the Taylor polynomials
 into the larger rectangle:
 \bprog

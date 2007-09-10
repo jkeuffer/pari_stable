@@ -129,7 +129,7 @@ vecsmall_shorten(GEN v, long n)
   GEN V = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) V[i] = v[i];
   return V;
- 
+
 }
 
 GEN
@@ -142,7 +142,7 @@ vecsmall_lengthen(GEN v, long n)
   return V;
 }
 
-/* Sort v[0]...v[n-1] and put result in w[0]...w[n-1]. 
+/* Sort v[0]...v[n-1] and put result in w[0]...w[n-1].
  * We accept v==w. w must be allocated.
  */
 
@@ -155,7 +155,7 @@ vecsmall_sortspec(GEN v, long n, GEN w)
   GEN x, y;
   if (n<=2)
   {
-    if (n==1) 
+    if (n==1)
       w[0]=v[0];
     else if (n==2)
     {
@@ -416,7 +416,7 @@ perm_identity(long l)
   long i;
   for (i = 1; i <= l; i++) perm[i] = i;
   return perm;
-} 
+}
 
 GEN
 cyclicperm(long l, long d)
@@ -459,7 +459,7 @@ perm_inv(GEN x)
 }
 
 /* Return s*t*s^-1 */
-GEN 
+GEN
 perm_conj(GEN s, GEN t)
 {
   long i, l = lg(s);
@@ -593,7 +593,7 @@ perm_pow(GEN perm, long exp)
   return cyc_pow_perm(perm_cycles(perm), exp);
 }
 
-GEN 
+GEN
 perm_to_GAP(GEN p)
 {
   pari_sp ltop=avma;
@@ -658,7 +658,7 @@ perm_commute(GEN p, GEN q)
 /*************************************************************************/
 
 /* Groups are vectors [gen,orders]
- * gen (vecvecsmall): list of generators given by permutations 
+ * gen (vecvecsmall): list of generators given by permutations
  * orders (vecsmall): relatives orders of generators. */
 
 static GEN
@@ -808,7 +808,7 @@ group_quotient(GEN G, GEN H)
     while(bitvec_test(used,a)) a++;
     V = group_leftcoset(H,gel(elt,a));
     p2[i] = V[1];
-    for(j=1;j<lg(V);j++) 
+    for(j=1;j<lg(V);j++)
     {
       long b=vecvecsmall_tablesearch(elt,gel(V,j));
       bitvec_set(used,b);
@@ -959,7 +959,7 @@ group_isA4S4(GEN G)
 }
 /* compute all the subgroups of a group G */
 GEN
-group_subgroups(GEN G) 
+group_subgroups(GEN G)
 {
   pari_sp ltop = avma;
   GEN p1, H, C, Q, M, sg1, sg2, sg3, gen = gel(G,1), ord = gel(G,2);
@@ -981,16 +981,16 @@ group_subgroups(GEN G)
       GEN u = gel(gen,3);
       GEN v = gel(gen,4), st = perm_mul(s,t), w, u2;
       if (gequal(perm_conj(u,s), t)) /*u=(2,3,4)*/
-        u2 = perm_mul(u,u); 
-      else 
-      { 
-        u2 = u; 
-        u = perm_mul(u,u); 
+        u2 = perm_mul(u,u);
+      else
+      {
+        u2 = u;
+        u = perm_mul(u,u);
       }
       if (perm_order(v)==2)
       {
         if (!perm_commute(s,v)) /*v=(1,2)*/
-        { 
+        {
           v = perm_conj(u,v);
           if (!perm_commute(s,v)) v = perm_conj(u,v);
         }
@@ -1055,7 +1055,7 @@ group_subgroups(GEN G)
 }
 
 /*return 1 if G is abelian, else 0*/
-long 
+long
 group_isabelian(GEN G)
 {
   long i, j;
@@ -1063,7 +1063,7 @@ group_isabelian(GEN G)
   for(i=2; i<lg(g); i++)
     for(j=1; j<i; j++)
       if (!perm_commute(gel(g,i), gel(g,j))) return 0;
-  return 1;  
+  return 1;
 }
 
 /*If G is abelian, return its HNF matrix*/
@@ -1092,7 +1092,7 @@ group_abelianHNF(GEN G, GEN S)
       long q = j / o[k];
       gel(C,k) = stoi(j - q*o[k]);
       j = q;
-    }  
+    }
     gel(C,k) = stoi(o[i]);
     for (k++; k<n; k++) gel(C,k) = gen_0;
   }
@@ -1177,11 +1177,11 @@ groupelts_abelian_group(GEN S)
     }
   }
   setlg(Qgen,j);
-  setlg(Qord,j); 
+  setlg(Qord,j);
   return gerepilecopy(ltop, mkvec2(Qgen, Qord));
 }
- 
-GEN 
+
+GEN
 group_export_GAP(GEN G)
 {
   pari_sp ltop = avma;
@@ -1198,9 +1198,9 @@ group_export_GAP(GEN G)
   }
   gel(s,k++) = strtoGENstr(")");
   return gerepileuptoleaf(ltop, concat(s, NULL));
-}  
+}
 
-GEN 
+GEN
 group_export_MAGMA(GEN G)
 {
   pari_sp ltop = avma;
@@ -1208,7 +1208,7 @@ group_export_MAGMA(GEN G)
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
   s = cgetg(2*l+2, t_VEC); k = 1;
-  gel(s,k++) = strtoGENstr("PermutationGroup<"); 
+  gel(s,k++) = strtoGENstr("PermutationGroup<");
   gel(s,k++) = strtoGENstr( itostr( stoi(group_domain(G)) ) );
   gel(s,k++) = strtoGENstr("|"); comma = strtoGENstr(", ");
   for (i = 1; i < l; ++i)
@@ -1221,9 +1221,9 @@ group_export_MAGMA(GEN G)
   gel(s,k++) = strtoGENstr(">");
   s = concat(s, NULL);
   return gerepileuptoleaf(ltop,s);
-}  
+}
 
-GEN 
+GEN
 group_export(GEN G, long format)
 {
   switch(format)

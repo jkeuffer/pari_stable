@@ -312,7 +312,7 @@ static int
 isconjinprimelist(GEN nfz, GEN S, GEN pr, tau_s *tau)
 {
   long i, l;
-  
+
   if (!tau) return 0;
   l = lg(S);
   for (i=1; i<l; i++)
@@ -454,7 +454,7 @@ famat_factorback(GEN v, GEN e)
 {
   long i, l = lg(e);
   GEN V = cgetg(1, t_MAT);
-  for (i=1; i<l; i++) 
+  for (i=1; i<l; i++)
     if (signe(e[i])) V = famat_mul(V, famat_pow(gel(v,i), gel(e,i)));
   return V;
 }
@@ -499,7 +499,7 @@ lift_if_rational(GEN x)
         return (d < 0)? gen_0: gel(y,2);
       }
       return y;
-  
+
     case t_POL: lx = lg(x);
       for (i=2; i<lx; i++) gel(x,i) = lift_if_rational(gel(x,i));
       break;
@@ -528,7 +528,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   bnf = gel(bnr,1);
   nf  = gel(bnf,7);
   degK = degpol(nf[1]);
-  
+
   bid = gel(bnr,2);
   ideal= gmael(bid,1,1);
   arch = gmael(bid,1,2); /* this is the conductor */
@@ -592,7 +592,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     {
       pari_sp av = avma;
       GEN be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
-      if (ok_congruence(X, gell, lW, vecMsup) && ok_sign(X, msign, arch)) 
+      if (ok_congruence(X, gell, lW, vecMsup) && ok_sign(X, msign, arch))
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
         be = compute_beta(X, vecWB, gell, bnf);
@@ -678,7 +678,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   GEN nf = checknf(bnr), nfz = checknf(bnrz), polz = gel(nfz,1);
 
   polrel = polrelKzK(T, pol_x(varn(polz)));
-  StZk = Stelt(nf, gel(nfz,7), polrel); 
+  StZk = Stelt(nf, gel(nfz,7), polrel);
   rayclgpz = gel(bnrz,5);
   raycycz = gel(rayclgpz,2); l = lg(raycycz);
   raygenz = gel(rayclgpz,3);
@@ -774,7 +774,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   GEN r, powtaubet, S, p1, root, num_t, den_t, nfzpol, powtau_prim_invbe;
   GEN prim_Rk, C_Rk, prim_root, C_root, prim_invbe, C_invbe;
   pari_timer ti;
-    
+
   r = cgetg(m+1,t_VECSMALL); /* r[i+1] = g^i mod ell */
   r[1] = 1;
   for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
@@ -796,7 +796,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
     gel(root, 2 + r[i+1]) = monomial(p1, r[i+1], vT);
   }
-  /* Other roots are as above with z_ell --> z_ell^j. 
+  /* Other roots are as above with z_ell --> z_ell^j.
    * Treat all contents (C_*) and principal parts (prim_*) separately */
   prim_Rk = prim_root = Q_primitive_part(root, &C_root);
   C_Rk = C_root;
@@ -853,7 +853,7 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
   gel(I,2) = algtobasis(nfz, RgX_RgXQ_compo(x, C->p, C->R));
   return prime_to_ideal(nfz,I);
 }
-  
+
 static void
 compositum_red(compo_s *C, GEN P, GEN Q)
 {
@@ -869,7 +869,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   a    = gel(z,2);
   C->p = poleval(p, a);
   if (C->p == gen_0) C->p = mkpolmod(zeropol(v),gel(a,1));
-  C->q = poleval(q, a); 
+  C->q = poleval(q, a);
   C->rev = modreverse_i(gel(a,2), gel(a,1));
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);
 }
@@ -900,7 +900,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 7 */
   p1 = conductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
-  bnr      = gel(p1,2); 
+  bnr      = gel(p1,2);
   subgroup = gel(p1,3);
   gell = get_gell(bnr,subgroup,all);
   ell = itos(gell);
@@ -998,7 +998,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   T.polnf = polnf;
   T.tau = tau;
   T.m = m;
- 
+
   idealz = lifttoKz(nfz, nf, ideal, &COMPO);
   if (smodis(gcoeff(ideal,1,1), ell)) gothf = idealz;
   else

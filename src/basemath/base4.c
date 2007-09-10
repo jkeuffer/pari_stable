@@ -622,7 +622,7 @@ idealfactor(GEN nf, GEN x)
   av = avma;
   nf = checknf(nf);
   N = degpol(nf[1]);
-  if (tx == id_PRINCIPAL) 
+  if (tx == id_PRINCIPAL)
   {
     x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) x = gel(x,1);
@@ -1525,7 +1525,7 @@ idealmul(GEN nf, GEN x, GEN y)
 }
 
 /* assume pr in primedec format */
-GEN 
+GEN
 pr_norm(GEN pr) {
   GEN F = gel(pr,4), p = gel(pr,1);
   ulong f = (ulong)F[2];
@@ -2024,7 +2024,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   long N, i;
   GEN J, aI, y, x, T, b, c1, c, pol;
 
-  nf = checknf(nf); 
+  nf = checknf(nf);
   pol = gel(nf,1); N = degpol(pol);
   T = x = c = c1 = NULL;
   if (idealtyp(&I,&aI) == id_PRINCIPAL)
@@ -2544,7 +2544,7 @@ element_reduce(GEN nf, GEN x, GEN ideal)
 }
 /* Given an element x and an ideal in matrix form (not necessarily HNF),
  * gives an a in ideal such that x-a is small. No checks */
-static GEN 
+static GEN
 element_close(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
@@ -2590,7 +2590,7 @@ zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
   pari_sp av;
 
   *di = idealinv(nf,d);
-  av = avma; 
+  av = avma;
   *w = gerepileupto(av, idealmul(nf, idealmul(nf,A,B), *di));
   *v = element_inv(nf,b);
   *u = gen_0; return d;
@@ -2838,7 +2838,7 @@ element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
   GEN p1, T;
- 
+
   nf = checknf(nf); T = gel(nf,1);
   p1 = QXQ_inv(basistoalg_i(nf,y), T);
   p1 = RgX_rem(gmul(basistoalg_i(nf,x), p1), T);

@@ -1190,12 +1190,12 @@ Components of this type should normaly not be accessed directly.
 Instead, finite field elements should be created using \kbd{ffgen}.
 
 This type has a second codeword \kbd{z[1]} which determines the storage format
-of the element. 
+of the element.
 
 The format \tet{t_FF_FpXQ}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{FpX},
 \kbd{p=z[4]} is a \typ{INT}, where $p$ is a prime number, $T$ is irreducible
 modulo $p$, and the degree of $A$ is strictly less than the degree of $T$.
-This represents the element $A\pmod{T}$ in $\F_p[X]/T$.  
+This represents the element $A\pmod{T}$ in $\F_p[X]/T$.
 
 The format \tet{t_FF_Flxq}:\kbd{A=z[2]} and \kbd{T=z[3]} are \kbd{Flx},
 \kbd{l=z[4]} is a \typ{INT}, where $l$ prime number, $T$ is irreducible
@@ -1208,7 +1208,7 @@ This represents the element $A\pmod{T}$ in $\F_l[X]/T$.
 The components \kbd{z[1]} and \kbd{z[2]} must be of type
 \typ{INT}, \typ{REAL} or \typ{FRAC}. For historical reasons \typ{INTMOD}
 and \typ{PADIC} are also allowed (the latter for $p = 2$ or
-congruent to 3 mod 4 only), but one should rather use the more general 
+congruent to 3 mod 4 only), but one should rather use the more general
 \typ{POLMOD} construction.
 
 \subsec{Type \typ{PADIC} ($p$-adic numbers)}:%
@@ -1378,7 +1378,7 @@ polynomial arithmetic and linear algebra over small finite fields, etc.
 (\kbd{NULL}-terminated) string.
 
 
-\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list} 
+\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list}
 this type was introduced for specific \kbd{gp} use and is rather inefficient
 compared to a straightforward linked list implementation (it requires more
 memory, as well as many unnecessary copies). Hence we do not describe it
@@ -1464,7 +1464,7 @@ long v = fetch_user_var("y");
 GEN gy = pol_x(v);
 @eprog\noindent
 This function raises an error if $s$ is already registered as a function
-name. 
+name.
 
 \misctitle{Caveat}: you can use \tet{gp_read_str}
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP
@@ -1474,8 +1474,8 @@ GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x($v$), for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}
-might work, but is dangerous, especially when programming functions to 
-be used under \kbd{gp}. The latter reads the value of \kbd{y}, as 
+might work, but is dangerous, especially when programming functions to
+be used under \kbd{gp}. The latter reads the value of \kbd{y}, as
 \emph{currently} known by the \kbd{gp} interpreter, possibly creating it
 in the process. But if \kbd{y} has been modified by previous \kbd{gp}
 commands (e.g \kbd {y = 1}), then the value of \kbd{gy} is not what you
@@ -1648,7 +1648,7 @@ buffer flush. This is more or less equivalent to
 
 \misctitle{Remark}. All such output is done on the stream \tet{pari_outfile},
 which is initialized to \tet{stdout}. To direct your default output to
-another file, use 
+another file, use
 
 \fun{void}{switchout}{char *name} where \kbd{name} is a character string
 giving the name of the file you are going to use; the output is
@@ -1657,7 +1657,7 @@ previous output stream, call \kbd{switchout(NULL)}.
 
 Similarly, errors are sent to the stream \tet{pari_errfile} (\tet{stderr} by
 default), and input is done on the stream \tet{pari_infile}, which you can
-change using 
+change using
 
 \fun{void}{switchin}{const char *name}, analogous to \tet{switchout} for
 \var{in}-files.
@@ -1815,11 +1815,11 @@ optimal but is not too far from the one used in the PARI function
 \teb{bezout}.
 
 Let $x,y$ two integers and initially
-$ \pmatrix{s_x & s_y \cr t_x & t_y } = 
+$ \pmatrix{s_x & s_y \cr t_x & t_y } =
   \pmatrix{1 & 0 \cr 0 & 1}$, so that
 $$ \pmatrix{s_x & s_y \cr
             t_x & t_y }
-   \pmatrix{x \cr y } = 
+   \pmatrix{x \cr y } =
    \pmatrix{x \cr y }.
 $$
 To apply the ordinary Euclidean algorithm to the right hand side,

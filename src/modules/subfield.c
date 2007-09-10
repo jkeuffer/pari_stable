@@ -145,7 +145,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   {
     pari_sp av = avma;
     long k = nn / B->size;
-    for (j = 1; j < r; j++) 
+    for (j = 1; j < r; j++)
       if (n[j] % k) break;
     if (j == r)
     {
@@ -521,7 +521,7 @@ init_traces(GEN ff, GEN T, GEN p)
     gel(pow1,i) = p1; p2 = gel(pow,i);
     for (j=1; j<=N; j++) gel(p1,j) = gcoeff(p2,1,j);
   }
-  
+
   /* Trk[i] = line 1 of x -> x + x^p + ... + x^{p^(i-1)} */
   Trk = pow; /* re-use (destroy) pow */
   gel(Trk,1) = vec_ei(N,1);

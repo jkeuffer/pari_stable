@@ -276,7 +276,7 @@ gp_readvec_file(char *s)
   if (file_is_binary(pari_infile)) {
     int junk;
     x = readbin(s,pari_infile,&junk);
-  } else 
+  } else
     x = gp_readvec_stream(pari_infile);
   popinfile(); return x;
 }
@@ -1066,7 +1066,7 @@ itostr_sign(GEN x, int sx)
 }
 
 char *
-itostr(GEN x) { 
+itostr(GEN x) {
   long sx = signe(x);
   if (!sx)
   {
@@ -1979,7 +1979,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       bruti(gel(g,1),T,1); pariputc(')'); break;
 
     case t_FFELT:
-      bruti(FF_to_FpXQ(g),T,addsign); 
+      bruti(FF_to_FpXQ(g),T,addsign);
       break;
 
     case t_FRAC: case t_RFRAC:
@@ -2325,7 +2325,7 @@ texi(GEN g, pariout_t *T, int addsign)
       texi(gel(g,2),T,1); pariputs(" mod ");
       texi(gel(g,1),T,1); break;
 
-    case t_FRAC: 
+    case t_FRAC:
       if (addsign && isfactor(gel(g,1)) < 0) pariputc('-');
       pariputs("\\frac{");
       texi(gel(g,1),T,0);
@@ -2887,7 +2887,7 @@ is_dir_opendir(char *name)
 static int
 is_dir_stat(char *name)
 {
-  struct stat buf; 
+  struct stat buf;
   if (stat(name, &buf)) return 0;
   return (buf.st_mode & S_IFDIR);
 }
@@ -3080,7 +3080,7 @@ pari_get_infile(char *name, FILE *file)
   { /* compressed file (compress or gzip) */
     char *cmd = stackmalloc(strlen(ZCAT) + l + 2);
     sprintf(cmd,"%s \"%s\"",ZCAT,name);
-    fclose(file); 
+    fclose(file);
     return try_pipe(cmd, mf_IN);
   }
 #endif
@@ -3657,7 +3657,7 @@ init_unique(char *s)
   strcpy(buf, pre);
   if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
   swap_slash(buf);
-  
+
   sprintf(buf + lpre, "%.8s%s", s, suf);
   return buf;
 }

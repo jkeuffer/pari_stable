@@ -179,11 +179,11 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  if (lz > KARATSUBA_MULR_LIMIT) 
+  if (lz > KARATSUBA_MULR_LIMIT)
   {
     pari_sp av = avma;
 #ifdef KARAMULR_VARIANT
-    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); 
+    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2);
 #else
     GEN hi = muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
 #endif
@@ -364,7 +364,7 @@ divir(GEN x, GEN y)
 
   if (!signe(y)) pari_err(gdiver);
   if (!signe(x)) return gen_0;
-  ly = lg(y); z = cgetr(ly); av = avma; 
+  ly = lg(y); z = cgetr(ly); av = avma;
   affrr(divrr(itor(x, ly+1), y), z);
   avma = av; return z;
 }
@@ -754,7 +754,7 @@ dbltor(double x)
         z[2] = (A << sh) | (B >> (32-sh));
         z[3] = B << sh;
       }
-      else 
+      else
       {
         sh = bfffo(B); /* B != 0 */
         e -= sh-1 + 32;

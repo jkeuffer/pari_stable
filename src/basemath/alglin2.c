@@ -113,7 +113,7 @@ easychar(GEN x, long v, GEN *py)
       gel(p1,2) = gnorm(x); av = avma;
       gel(p1,3) = gerepileupto(av, gneg(gtrace(x)));
       gel(p1,4) = gen_1; return p1;
-      
+
     case t_FFELT: {
       pari_sp ltop=avma;
       if (py) pari_err(typeer,"easychar");
@@ -249,7 +249,7 @@ adj(GEN x)
 /*                                                                 */
 /*******************************************************************/
 
-static GEN 
+static GEN
 easymin(GEN x, long v)
 {
   pari_sp ltop=avma;
@@ -406,7 +406,7 @@ carberkowitz(GEN x, long v)
     av = avma; t = gmul(gcoeff(x,r,1), gel(S,1));
     for (j = 2; j < r; j++) t = gadd(t, gmul(gcoeff(x,r,j), gel(S,j)));
     gel(C,r+1) = gerepileupto(av, t);
-        
+
     for (i = 1; i <= r+1; i++)
     {
       av = avma; t = gmul(gel(C,i), gel(V,1));
@@ -459,7 +459,7 @@ gnorm(GEN x)
       gel(y,1) = icopy(FF_p(x));
       gel(y,2) = FF_norm(x);
       return y;
-    case t_POLMOD: 
+    case t_POLMOD:
       if (typ(gel(x,2)) != t_POL) return gpowgs(gel(x,2), degpol(gel(x,1)));
       return RgXQ_norm(gel(x,2), gel(x,1));
 
@@ -638,7 +638,7 @@ gconj(GEN x)
       long d = degpol(X);
       if (d < 2) return gcopy(x);
       if (d == 2) {
-        z = cgetg(3, t_POLMOD); 
+        z = cgetg(3, t_POLMOD);
         gel(z,1) = gcopy(X);
         gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
       }
@@ -780,8 +780,8 @@ gtrace(GEN x)
       if (typ(z) != t_POL || varn(y) != varn(z)) return gmulsg(degpol(y), z);
       av = avma;
       return gerepileupto(av, quicktrace(z, polsym(y, degpol(y)-1)));
-      
-    case t_FFELT: 
+
+    case t_FFELT:
       y=cgetg(3, t_INTMOD);
       gel(y,1) = icopy(FF_p(x));
       gel(y,2) = FF_trace(x);
@@ -915,7 +915,7 @@ gaussred(GEN a, long signature)
 
         for (i=1; i<=n; i++) if (r[i])
         { /* c = -a[k,i] * p, d = -a[l,i] * p; */
-          GEN c = gel(ak,i), d = gel(al,i); 
+          GEN c = gel(ak,i), d = gel(al,i);
           for (j=1; j<=n; j++) if (r[j])
             gcoeff(a,i,j) = gadd(gcoeff(a,i,j),
                             gadd(gmul(gcoeff(a,l,j), c),
@@ -1300,7 +1300,7 @@ ZV_neg_ip(GEN M)
 GEN
 zv_neg(GEN x)
 {
-  long i, lx=lg(x); 
+  long i, lx=lg(x);
   GEN y=cgetg_copy(lx,x);
   for (i=1; i<lx; i++) y[i] = -x[i];
   return y;
@@ -3234,16 +3234,16 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 {
   GEN a = *pa, b = *pb, d;
   if (absi_equal(a,b))
-  { 
+  {
     long sa = signe(a), sb = signe(b);
     *pv = gen_0;
-    if (sb == sa) { 
+    if (sb == sa) {
       *pa = *pb = gen_1;
-      if (sa > 0) {*pu=gen_1; return a;} else {*pu=gen_m1; return absi(a);} 
-    } 
-    if (sa > 0) { *pa = *pu = gen_1; *pb = gen_m1; return a; } 
+      if (sa > 0) {*pu=gen_1; return a;} else {*pu=gen_m1; return absi(a);}
+    }
+    if (sa > 0) { *pa = *pu = gen_1; *pb = gen_m1; return a; }
     *pa = *pu = gen_m1; *pb = gen_1; return b;
-  } 
+  }
   d = bezout(a,b, pu,pv);
   *pa = diviiexact(a, d);
   *pb = diviiexact(b, d); return d;
@@ -3512,7 +3512,7 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 #if 1
     { /* possible accuracy problem */
       GEN D = RgX_gcd_simple(a,b);
-      if (degpol(D)) { 
+      if (degpol(D)) {
         D = gdiv(D, leading_term(D));
         a = RgX_div(a, D); b = RgX_div(b, D);
         d = RgX_extgcd(a,b, pu,pv); /* retry now */

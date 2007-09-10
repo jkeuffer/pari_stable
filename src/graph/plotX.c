@@ -253,13 +253,13 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
         if (width == oldwidth && height == oldheight) break;
         oldwidth  = width;
-        oldheight = height; 
+        oldheight = height;
 
         /* recompute scale */
 	xs = ((double)width)/pari_plot.width;
         ys = ((double)height)/pari_plot.height;
       }
-      case Expose: 
+      case Expose:
         gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
     }
   }

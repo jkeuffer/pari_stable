@@ -64,7 +64,7 @@ the stack. They are manipulated with the following functions.
 enlarging \kbd{A} if necessary.
 
 \fun{void}{grow_copy}{growarray A, growarray B} creates a copy \kbd{B} of
-\kbd{A}. Do not initialize \kbd{B} first (memory leak otherwise). If 
+\kbd{A}. Do not initialize \kbd{B} first (memory leak otherwise). If
 \kbd{A} is \kbd{NULL}, this has the same effect as \kbd{grow\_init(B)}.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
@@ -100,13 +100,13 @@ A typical low-level construct:
   l = lg(L);
   for (i = 1; i < l; i++) output( gel(L, i) );
   for (i = 1; i < l; i++) gel(L, i) = gclone( ... );
-@eprog\noindent 
+@eprog\noindent
 
 \section{Otherwise undocumented global variables}
 
 \tet{PARI_SIGINT_block}: set this to a non-zero value if you want to block
 the \kbd{SIGINT} signal in a critical part of your code. We use it
-before calling \kbd{malloc}, \kbd{free} and such. (Because \kbd{SIGINT} 
+before calling \kbd{malloc}, \kbd{free} and such. (Because \kbd{SIGINT}
 is non-fatal for us, and we don't want to leave the system stack in an
 inconsistent state.)
 

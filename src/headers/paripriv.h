@@ -218,7 +218,7 @@ GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 GEN  vec_setconst(GEN v, GEN x);
-  
+
 GEN  GS_norms(GEN B, long prec);
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
@@ -275,12 +275,12 @@ struct bb_group
   int (*cmp1)(GEN);
 };
 
-GEN gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, 
+GEN gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
     GEN easy(void*E, GEN, GEN, GEN));
 GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     GEN easy(void *E, GEN, GEN, GEN));
 GEN gen_eltorder(GEN x, GEN o, void *E, const struct bb_group *grp);
-GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, 
+GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E,
     const struct bb_group *grp);
 
 /* quadratic forms, quadratic numbers */

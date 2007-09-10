@@ -69,7 +69,7 @@ ellrecode(long x)
   char *s;
   long d = 0, n = x;
   do
-  { 
+  {
     d++;
     n/=26;
   } while(n);
@@ -78,14 +78,14 @@ ellrecode(long x)
   s[d] = 0;
   n = x;
   do
-  { 
+  {
     s[--d] = n%26 + 'a';
     n/=26;
   } while(n);
   return str;
 }
 
-GEN 
+GEN
 ellconvertname(GEN n)
 {
   switch(typ(n))
@@ -122,7 +122,7 @@ ellcondfile(long f)
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
   F = pari_fopengz(s);
-  if (!F) 
+  if (!F)
     pari_err(talker,"Elliptic curves files not available for conductor %ld\n"
                "[missing %s]",f,s);
   V = gp_read_stream(F->file);
@@ -142,13 +142,13 @@ ellcondlist(long f)
       break;
   if (i==lg(V) || !equalis(gmael(V,i,1), f))
   {
-    avma=ltop; 
+    avma=ltop;
     return cgetg(1,t_VEC);
   }
-  return gerepilecopy(ltop, vecslice(gel(V,i),2, lg(gel(V,i))-1)); 
+  return gerepilecopy(ltop, vecslice(gel(V,i),2, lg(gel(V,i))-1));
 }
 
-static GEN 
+static GEN
 ellsearchbyname(GEN V, GEN name)
 {
   long j;
@@ -182,8 +182,8 @@ ellsearch(GEN A)
   GEN V;
   if (typ(A)==t_INT)
   {
-    f=itos(A); 
-    c=-1; 
+    f=itos(A);
+    c=-1;
     i=-1;
   } else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
@@ -193,9 +193,9 @@ ellsearch(GEN A)
     return NULL;
   }
   V=ellcondlist(f);
-  if (c<0) 
+  if (c<0)
     return V;
-  if (i<0) 
+  if (i<0)
     return gerepilecopy(ltop, ellsearchbyclass(V,c));
   return gerepilecopy(ltop, ellsearchbyname(V,A));
 }
@@ -252,7 +252,7 @@ forell(long a, long b, GEN code)
     {
       GEN ells = gel(V,j);
       long cond= itos(gel(ells,1));
-      
+
       if (i==ca && cond<a) continue;
       if (i==cb && cond>b) break;
       for(k=2; k<lg(ells); k++)

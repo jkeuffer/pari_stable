@@ -36,7 +36,7 @@ typedef struct Red {
 
 typedef struct Cache { /* data associated to p^k */
   GEN aall, tall;
-  GEN cyc; 
+  GEN cyc;
   GEN E;
   GEN eta;
   GEN matvite, matinvvite;
@@ -260,7 +260,7 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
     res = (f==efin)? t: _mul(t, res, R);
     while (tf--) {
       res = _sqr(res, R);
-      if (low_stack(lim, stack_lim(av,1))) { 
+      if (low_stack(lim, stack_lim(av,1))) {
         res = gerepilecopy(av, res);
         if(DEBUGMEM>1) pari_warn(warnmem,"powpolmod: f = %ld",f);
       }
@@ -557,7 +557,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
     GEN ph, b, q;
     ulong u = 2;
     long v = Z_lvalrem(addis(N,-1), p, &q);
-    ph = powuu(p, v-1); pv = muliu(ph, p); /* N - 1 = p^v q */ 
+    ph = powuu(p, v-1); pv = muliu(ph, p); /* N - 1 = p^v q */
     if (p > 2)
     {
       for (;;u++)
@@ -576,7 +576,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
     /* checking b^p = 1 mod N done economically in caller */
     b = gcdii(addis(b,-1), N);
     if (!gcmp1(b)) return NULL;
-    
+
     if (Cp) {
       Cp->avite  = a; /* a has order p^v */
       Cp->pkvite = pv;
@@ -624,14 +624,14 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   {
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(Cp, R->N, pk, p);
     long jj, ph;
-    
+
     if (!a) return 0;
     ph = pk - pk/p;
     vpa = cgetg(ph+1,t_COL); gel(vpa,1) = a;
     if (pk > p) a2 = centermodii(sqri(a), R->N, R->N2);
     jj = 1;
     for (i=2; i<pk; i++) /* vpa = { a^i, (i,p) = 1 } */
-      if (i%p) { 
+      if (i%p) {
         GEN z = mulii((i%p==1) ? a2 : a, gel(vpa,jj));
         gel(vpa,++jj) = centermodii(z , R->N, R->N2);
       }
@@ -643,7 +643,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
     for (j++; j <= ph; j++)
     {
       p2 = cgetg(ph+1,t_COL); gel(p1,j) = p2;
-      for (i=1; i<=ph; i++) 
+      for (i=1; i<=ph; i++)
         gel(p2,i) = centermodii(mulii(gel(vpa,i),gel(p3,i)), R->N, R->N2);
       p3 = p2;
     }
@@ -671,7 +671,7 @@ alloc_cache(void)
 {
   Cache *C = (Cache*)new_chunk(sizeof(Cache) / sizeof(long));
   C->matvite = NULL;
-  C->avite   = NULL; 
+  C->avite   = NULL;
   C->ctsgt = 0; return C;
 }
 
@@ -776,7 +776,7 @@ look_eta2(long k, GEN z)
   long d, s;
   if (typ(z) != t_POL) d = 0; /* t_INT */
   else
-  { 
+  {
     if (!ismonome(z)) return -1;
     d = degpol(z);
     z = gel(z,d+2); /* leading term */
@@ -792,7 +792,7 @@ step4a(Cache *C, Red *R, ulong q, long p, long k, GEN jpq)
   const long pk = upowuu(p,k);
   long ind;
   GEN s1, s2, s3;
-  
+
   if (!jpq) jpq = get_jac(C, q, pk, compute_g(q));
   s1 = autvec_TH(pk, jpq, C->E, C->cyc);
   s2 = powpolmod(C,R, p,k, s1);
@@ -859,7 +859,7 @@ step4c(Cache *C, Red *R, ulong q)
 static long
 step4d(Cache *C, Red *R, ulong q)
 {
-  GEN s1 = Fp_pow(utoipos(q), R->N2, R->N); 
+  GEN s1 = Fp_pow(utoipos(q), R->N2, R->N);
   if (DEBUGLEVEL>2) C->ctsgt++;
   if (is_pm1(s1)) return 0;
   if (is_m1(s1, R->N)) return (mod4(R->N) == 1);
@@ -887,8 +887,8 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
       C = pC[1]; C->matvite = NULL; /* re-init */
       Cp = NULL;
     }
-    
-    if (!filltabs(C, Cp, R, p, pk, ltab)) return 0; 
+
+    if (!filltabs(C, Cp, R, p, pk, ltab)) return 0;
     R->C = C->cyc;
     if (p >= 3)      fl = step4a(C,R, q,p,k, NULL);
     else if (k >= 3) fl = step4b(C,R, q,k);
@@ -950,7 +950,7 @@ aprcl(GEN N)
 
   R.N = N;
   R.N2= shifti(N, -1);
-  pC = calcglobs(&R, t, &ltab, &fat); 
+  pC = calcglobs(&R, t, &ltab, &fat);
   if (!pC) return _res(1,0);
   lfat = lg(fat); p = fat[lfat-1]; /* largest p | t */
   flaglp = cgetg(p+1, t_VECSMALL);
@@ -961,7 +961,7 @@ aprcl(GEN N)
     flaglp[p] = (Fl_powu(umodiu(N,q),p-1,q) != 1);
   }
   calcjac(pC, globfa, &tabfaq, &tabj);
-  
+
   av = avma; l = lg(globfa);
   if (DEBUGLEVEL>2)
   {
@@ -996,7 +996,7 @@ aprcl(GEN N)
 
     fl = step5(pC, &R, p, et, ltab);
     if (!fl) return _res(1,0);
-    if (fl < 0) return _res(fl,p); 
+    if (fl < 0) return _res(fl,p);
     if (fl > ctglob) ctglob = fl; /* DEBUG */
   }
   if (DEBUGLEVEL>2) fprintferr("Step6: testing potential divisors\n");
@@ -1005,7 +1005,7 @@ aprcl(GEN N)
   {
     ulong sc = pC[1]->ctsgt;
     fprintferr("Individual Fermat powerings:\n");
-    for (i=2; i<lg(pC); i++) 
+    for (i=2; i<lg(pC); i++)
       if (pC[i]) {
         fprintferr("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
         sc += pC[i]->ctsgt;

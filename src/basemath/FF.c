@@ -79,8 +79,8 @@ FF_samefield(GEN x, GEN y)
 int
 FF_equal(GEN x, GEN y)
 {
-  return x[1] == y[1] && equalii(gel(x,4),gel(y,4)) 
-                      && gequal(gel(x,3),gel(y,3)) 
+  return x[1] == y[1] && equalii(gel(x,4),gel(y,4))
+                      && gequal(gel(x,3),gel(y,3))
                       && gequal(gel(x,2),gel(y,2));
 }
 
@@ -250,7 +250,7 @@ FF_mul(GEN x, GEN y)
 {
   ulong pp;
   GEN r, T, p, z=_initFF(x,&T,&p,&pp);
-  _checkFF(x,y,"*"); 
+  _checkFF(x,y,"*");
   switch(x[1])
   {
   case t_FF_FpXQ:
@@ -406,17 +406,17 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
   GEN r, T, p, y=_initFF(x,&T,&p,&pp);
   switch (x[1])
   {
-  case t_FF_FpXQ: 
+  case t_FF_FpXQ:
     r=FpXQ_sqrtn(gel(x,2),n,T,p,zetan);
     break;
   default:
     r=Flxq_sqrtn(gel(x,2),n,T,pp,zetan);
   }
-  if (!r) 
+  if (!r)
     pari_err(talker,"nth-root does not exist in FF_sqrtn");
   (void)_mkFF(x, y, r);
   if (zetan)
-  { 
+  {
     GEN z = cgetg(lg(y),t_FFELT);
     *zetan=_mkFF(x, z, *zetan);
   }
@@ -446,7 +446,7 @@ FF_pow(GEN x, GEN n)
 }
 
 GEN
-FF_norm(GEN x) 
+FF_norm(GEN x)
 {
   ulong pp;
   GEN T,p;
@@ -480,7 +480,7 @@ FF_trace(GEN x)
 }
 
 GEN
-FF_charpoly(GEN x) 
+FF_charpoly(GEN x)
 {
   ulong pp;
   GEN T,p;
@@ -496,7 +496,7 @@ FF_charpoly(GEN x)
 }
 
 GEN
-FF_minpoly(GEN x) 
+FF_minpoly(GEN x)
 {
   ulong pp;
   GEN T,p;
@@ -643,7 +643,7 @@ FFX_to_FqX(GEN x, GEN T, GEN p)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
-  for (i = 2; i < l; i++) 
+  for (i = 2; i < l; i++)
     if (typ(gel(x,i))==t_FFELT)
       gel(z,i) = simplify_i(FF_to_FpXQ(gel(x,i)));
     else

@@ -98,7 +98,7 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: 
+      case typ_Q:
         y = cgetg(3,t_VEC);
         gel(y,1) = gen_1;
         gel(y,2) = pol_x(varn(x[1])); return y;

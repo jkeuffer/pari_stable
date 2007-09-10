@@ -82,7 +82,7 @@ polchebyshev2(long n, long v)
 
   if (v<0) v = 0;
   /* polchebyshev(-n,2) = -polchebyshev(n-2,2) */
-  if (n < 0) { 
+  if (n < 0) {
     if (n == -1) return zeropol(v);
     neg = 1; n = -n-2;
   }
@@ -559,7 +559,7 @@ binomial(GEN n, long k)
     if (signe(n) > 0)
     {
       GEN z = subis(n,k);
-      if (cmpis(z,k) < 0) 
+      if (cmpis(z,k) < 0)
       {
         k = itos(z); avma = av;
         if (k <= 1)
@@ -615,7 +615,7 @@ vecbinome(long n)
 /**                                                                **/
 /********************************************************************/
 
-/** 
+/**
 Stirling number of the 2nd kind. The number of ways of partitioning
 a set of n elements into m non-empty subsets.
 */
@@ -645,7 +645,7 @@ stirling2uu(ulong n, ulong m)
   if ((m&1)==0)
   { /*k=m/2*/
     bmk = diviuexact(mului(k+1, bmk), k);
-    p2  = mulii(bmk, powuu(k,n)); 
+    p2  = mulii(bmk, powuu(k,n));
     p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
   }
   return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
@@ -659,7 +659,7 @@ stirling2(long n, long m)
   return stirling2uu((ulong)n,(ulong)m);
 }
 
-/** 
+/**
 Stirling number of the first kind. Up to the sign, the number of
 permutations of n symbols which have exactly m cycles.
 */
@@ -865,7 +865,7 @@ setsearch(GEN x, GEN y, long flag)
   avma=av;
   return res;
 }
-long 
+long
 ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 
 GEN
@@ -1529,7 +1529,7 @@ cmp_RgX(GEN x, GEN y)
 GEN
 merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN))
 {
-  GEN x = gel(fx,1), e = gel(fx,2), M, E; 
+  GEN x = gel(fx,1), e = gel(fx,2), M, E;
   GEN y = gel(fy,1), f = gel(fy,2);
   long ix, iy, m, lx = lg(x), ly = lg(y), l = lx+ly-1;
 

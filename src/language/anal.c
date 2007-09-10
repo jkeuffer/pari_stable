@@ -250,7 +250,7 @@ check_proto(char *code)
     case 'n':
     case 'p':
     case 'r':
-    case 'x': 
+    case 'x':
       arity++;
       break;
     case 's':
@@ -258,7 +258,7 @@ check_proto(char *code)
       arity++;
       break;
     case 'D':
-      if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E' 
+      if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E'
                     || *s == 'V')
       {
         if (*s != 'V') arity++;
@@ -349,7 +349,7 @@ kill0(entree *ep)
 
   if (EpSTATIC(ep))
     pari_err(talker,"can't kill that");
-  freeep(ep); 
+  freeep(ep);
   if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
   {
       v = varn(ep->value); if (!v) return; /* never kill x */
@@ -488,7 +488,7 @@ int_read(const char **s)
 GEN
 strtoi(const char *s) { return int_read(&s); }
 
-GEN 
+GEN
 strtor(const char *s, long prec)
 {
   pari_sp av = avma;
@@ -571,16 +571,16 @@ int
 pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
 {
   yylloc->start=*lex;
-  if (!**lex) 
+  if (!**lex)
   {
-    yylloc->end=*lex;   
+    yylloc->end=*lex;
     return 0;
   }
-  if (isalpha((int)**lex)) 
+  if (isalpha((int)**lex))
   {
     while (is_key(**lex))
       ++*lex;
-    yylloc->end=*lex;   
+    yylloc->end=*lex;
     return KENTRY;
   }
   if (**lex=='"')
@@ -590,7 +590,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     if (!**lex)
       pari_err(talker2,"run-away string",*lex-1,get_origin());
     ++*lex;
-    yylloc->end=*lex;   
+    yylloc->end=*lex;
     return KSTRING;
   }
   if (**lex == '.')
@@ -668,7 +668,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
       if ((*lex)[2]=='=') { *lex+=3; yylloc->end = *lex; return KSRE;}
       *lex+=2; yylloc->end = *lex; return KSR;
     case '<':
-      if ((*lex)[2]=='=') 
+      if ((*lex)[2]=='=')
       { *lex+=3; yylloc->end = *lex; return KSLE; }
       *lex+=2; yylloc->end = *lex; return KSL;
     }
@@ -697,7 +697,7 @@ strtoGENstr(const char *s) { return strntoGENstr(s, strlen(s)); }
 
 GEN
 chartoGENstr(char c)
-{ 
+{
   GEN x = cgetg(2, t_STR);
   char *t = GSTR(x);
   t[0] = c; t[1] = 0; return x;
@@ -718,7 +718,7 @@ hashvalue(const char *s)
   return n % functions_tblsz;
 }
 
-static long 
+static long
 hashvalue_raw(const char *s, long len, long n)
 {
   long i;
@@ -745,7 +745,7 @@ findentry(const char *name, long len, entree *ep1)
 entree *
 is_entry_intern(const char *s, entree **table, long *pthash)
 {
-  long hash = hashvalue(s); 
+  long hash = hashvalue(s);
   if (pthash) *pthash = hash;
   return findentry(s, strlen(s), table[hash]);
 }
@@ -765,7 +765,7 @@ fetch_entry(const char *s, long len)
   else return installep(s,len,funhash);
 }
 
-/* Assume s point somewhere in the code text, so s[-1]='.' and s[-2]>0 
+/* Assume s point somewhere in the code text, so s[-1]='.' and s[-2]>0
  * So many kludges, so little time */
 entree *
 fetch_member(const char *s, long len)
@@ -794,7 +794,7 @@ static long nvar; /* first GP free variable */
 void pari_var_init() {
   nvar = 0; max_avail = MAXVARN;
   (void)fetch_var();
-  (void)fetch_named_var("x"); 
+  (void)fetch_named_var("x");
 }
 long pari_var_next() { return nvar; }
 long pari_var_next_temp() { return max_avail; }
@@ -995,7 +995,7 @@ alias0(char *s, char *old)
   e->value=x; e->valence=EpALIAS;
 }
 
-GEN 
+GEN
 ifpari(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 {
   if (gcmp0(g)) /* false */
@@ -1004,7 +1004,7 @@ ifpari(GEN g, GEN a/*closure*/, GEN b/*closure*/)
     return a?closure_evalgen(a):gnil;
 }
 
-void 
+void
 ifpari_void(GEN g, GEN a/*closure*/, GEN b/*closure*/)
 {
   if (gcmp0(g)) /* false */
@@ -1136,7 +1136,7 @@ print_all_user_fun(void)
 
 /********************************************************************/
 /**                                                                **/
-/**            GP2C stack implementation                           **/ 
+/**            GP2C stack implementation                           **/
 /**                                                                **/
 /********************************************************************/
 

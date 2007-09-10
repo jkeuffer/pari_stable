@@ -432,7 +432,7 @@ initell(GEN x, long prec)
 /********************************************************************/
 /* [1,0,0,0] */
 static GEN
-init_ch(void) { 
+init_ch(void) {
   GEN v = cgetg(5, t_VEC);
   gel(v,1) = gen_1;
   gel(v,2) = gel(v,3) = gel(v,4) = gen_0;
@@ -622,7 +622,7 @@ ellchangepointinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
   if (is_inf(x)) return x;
 
   u2X = gmul(u2,X);
-  z = cgetg(3, t_VEC); 
+  z = cgetg(3, t_VEC);
   gel(z,1) = gadd(u2X, r);
   gel(z,2) = gadd(gmul(u3, Y), gadd(gmul(s, u2X), t));
   return z;
@@ -2218,7 +2218,7 @@ ellrootno_global(GEN e, GEN N)
 {
   long i, v, s = -1;
   GEN fa, P, E;
-  
+
   v = Z_lvalrem(N, 2, &N); if (v) s *= ellrootno_2(e);
   v = Z_lvalrem(N, 3, &N); if (v) s *= ellrootno_3(e);
   fa = Z_factor(N);

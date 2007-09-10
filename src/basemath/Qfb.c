@@ -1023,7 +1023,7 @@ primeform(GEN x, GEN p, long prec)
   }
   if (sp < 0 && sx < 0) pari_err(impl,"negative definite t_QFI");
   if (lgefint(p) == 3)
-  { 
+  {
     y = primeform_u(x, p[2]);
     if (sx < 0) return y;
     if (sp < 0) { gel(y,1) = negi(gel(y,1)); gel(y,3) = negi(gel(y,3)); }
@@ -1056,9 +1056,9 @@ primeform(GEN x, GEN p, long prec)
 }
 
 /* Let M and N in SL_2(Z), return (N*M^-1)[,1]
- * 
+ *
 */
-static GEN 
+static GEN
 SL2_div_mul_e1(GEN N, GEN M)
 {
   GEN b = gcoeff(M, 2, 1);
@@ -1071,9 +1071,9 @@ SL2_div_mul_e1(GEN N, GEN M)
   return p2;
 }
 /* Let M and N in SL_2(Z), return (N*[1,0;0,-1]*M^-1)[,1]
- * 
+ *
 */
-static GEN 
+static GEN
 SL2_swap_div_mul_e1(GEN N, GEN M)
 {
   GEN b = gcoeff(M, 2, 1);
@@ -1148,13 +1148,13 @@ redrealsl2step(GEN A)
 {
   pari_sp ltop = avma;
   GEN N;
-  GEN V = gel(A,1); 
+  GEN V = gel(A,1);
   GEN M = gel(A,2);
-  GEN a = gel(V,1); 
+  GEN a = gel(V,1);
   GEN b = gel(V,2);
   GEN c = gel(V,3);
   GEN d = qf_disc0(a,b,c);
-  GEN rd = sqrti(d); 
+  GEN rd = sqrti(d);
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
   GEN q = truedvmdii(r, shifti(ac, 1), NULL);
@@ -1180,7 +1180,7 @@ redrealsl2(GEN V)
   GEN d = qf_disc0(a,b,c);
   GEN rd = sqrti(d);
   btop = avma; st_lim = stack_lim(btop, 1);
-  u1 = v2 = gen_1; v1 = u2 = gen_0; 
+  u1 = v2 = gen_1; v1 = u2 = gen_0;
   while (!abi_isreduced(a,b,rd))
   {
     GEN ac = mpabs(c);
@@ -1297,7 +1297,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
       default: return 0;
     }
     *py = gen_1; return 1;
-  } 
+  }
   b = Fp_sqrt(negi(d), p);
   if (!b) { avma = av; return 0; }
   if (!signe(b)) { /* d = p,2p,3p,4p */

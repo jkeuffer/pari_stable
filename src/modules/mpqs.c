@@ -983,7 +983,7 @@ mpqs_sort_lp_file(char *filename)
   buflist_head = (char**) stackmalloc(buflist_size * sizeof(char*));
   buflist = buflist_head;
   *buflist++ = NULL; /* flag this as last and only buflist block */
-  /* extra blocks may be allocated as needed and linked ahead of 
+  /* extra blocks may be allocated as needed and linked ahead of
    * buflist_head.  NB: whilst extra buflist blocks might have been
    * needed when we were still sorting entire FREL files (more than 1023
    * buffers, corresponding to about 20000 lines of ~200 characters), they
@@ -1105,7 +1105,7 @@ mpqs_sort_lp_file(char *filename)
   pari_fclose(pTMP);
   if (MPQS_DEBUGLEVEL >= 6) fprintferr("MPQS: done sorting one file.\n");
 
-  /* deallocate buffers and any extraneous buflist blocks except the first */  
+  /* deallocate buffers and any extraneous buflist blocks except the first */
   while (*--buflist)
   {
     if (buflist != buflist_head) /* not a linkage pointer */
@@ -1340,7 +1340,7 @@ mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, char *TMP_str, pariFILE *pC
   pariFILE *pNEW = pari_fopen(NEW_str, READ);
   pariFILE *pTMP = pari_fopen(TMP_str, WRITE);
   long tp;
-  
+
   tp = mpqs_mergesort_lp_file0(pREL->file, pNEW->file, pCOMB, pTMP);
   pari_fclose(pREL);
   pari_fclose(pNEW);
@@ -2668,7 +2668,7 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
-  
+
   res = remii(mulii(Y_prod, strtoi(rel)), N);
 
   s = strtok(s + 3, " \n");

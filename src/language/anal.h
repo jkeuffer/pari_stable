@@ -164,8 +164,8 @@ int  whatnow(char *s, int silent);
 
 struct node_loc
 {
-  const char *start,*end;  
-}; 
+  const char *start,*end;
+};
 
 union token_value {
   int val;
@@ -184,7 +184,7 @@ void parser_reset(void);
 void compiler_reset(void);
 GEN  gp_closure(long n);
 
-INLINE GEN 
+INLINE GEN
 closure_evalnobrk(GEN code)
 {
   GEN r=closure_evalgen(code);

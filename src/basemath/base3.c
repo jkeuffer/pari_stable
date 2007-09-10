@@ -630,7 +630,7 @@ basistoalg(GEN nf, GEN x)
  * since t_COLs are ambiguous, and the functionnality is almost useless.
  * (Even then, matbasistoalg and matalgtobasis can be used instead.)
  * The following shallow functions do what the public functions should do,
- * without sanity checks. 
+ * without sanity checks.
  * Assume nf is a genuine nf. */
 GEN
 basistoalg_i(GEN nf, GEN x)
@@ -1189,7 +1189,7 @@ zidealij(GEN x, GEN y, GEN *U)
 static GEN
 Fq_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p)
 {
-  if (!T) 
+  if (!T)
     return Fp_log(a,g,ord,p);
   if (typ(a)==t_INT)
     return Fp_FpXQ_log(a,g,ord,T,p);

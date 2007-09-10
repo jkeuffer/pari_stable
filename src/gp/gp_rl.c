@@ -503,7 +503,7 @@ member_generator(const char *text, int state)
       if (++hashpos >= functions_tblsz) return NULL; /* no names matched */
       ep = hash[hashpos];
     }
-    else if (ep->name[0]=='_' && ep->name[1]=='.' 
+    else if (ep->name[0]=='_' && ep->name[1]=='.'
              && !strncmp(ep->name+2,TEXT,len))
         break;
     else
@@ -667,7 +667,7 @@ pari_completion(char *text, int START, int END)
       while (is_keyword_char(*s)) s++;
       if (*s++ == '(')
       { /* function call: insert arguments */
-        char *e = s; 
+        char *e = s;
         while (*e && *e != ')' && *e != '(') e++;
         if (*e == ')')
         { /* we just skipped over the arguments in short help text */

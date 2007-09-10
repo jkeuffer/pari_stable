@@ -109,7 +109,7 @@ ZX_Z_mul(GEN y,GEN x)
 {
   GEN z;
   long i;
-  if (!signe(x)) 
+  if (!signe(x))
     return zeropol(varn(y));
   z=cgetg(lg(y),t_POL);
   z[1]=y[1];
@@ -119,7 +119,7 @@ ZX_Z_mul(GEN y,GEN x)
 }
 
 /************************************************************************
- **                                                                    ** 
+ **                                                                    **
  **                      Ring conversion                               **
  **                                                                    **
  ************************************************************************/
@@ -258,7 +258,7 @@ static long brent_kung_nbmul(long d, long n, long p)
   return p+n*((d+p-1)/p);
 }
   TODO: This the the optimal parameter for the purpose of reducing
-  multiplications, but profiling need to be done to ensure it is not slower 
+  multiplications, but profiling need to be done to ensure it is not slower
   than the other option in practice
 /*Return optimal parameter l for the evaluation of n polynomials of degree d*/
 long brent_kung_optpow(long d, long n)
@@ -273,7 +273,7 @@ long brent_kung_optpow(long d, long n)
   f=(long)floor(d/floor(r));
   return (brent_kung_nbmul(d, n, c) <= brent_kung_nbmul(d, n, f))?c:f;
 }
-#endif 
+#endif
 /*Return optimal parameter l for the evaluation of n polynomials of degree d*/
 long
 brent_kung_optpow(long d, long n)
@@ -299,7 +299,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
 }
 /*Try to implement algorithm in Brent & Kung (Fast algorithms for
  *manipulating formal power series, JACM 25:581-595, 1978)
- 
+
  V must be as output by FpXQ_powers.
  For optimal performance, l (of FpXQ_powers) must be as output by
  brent_kung_optpow
@@ -407,7 +407,7 @@ GEN
 FpXX_add(GEN x, GEN y, GEN p)
 {
   long i,lz;
-  GEN z; 
+  GEN z;
   long lx=lg(x);
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
@@ -605,14 +605,14 @@ FpXYQQ_redswap(GEN x, GEN S, GEN T, GEN p)
   V = FpXQX_red(V,T,p);
   setvarn(T,v);
   V = RgXY_swap(V,m,w);
-  return gerepilecopy(ltop,V); 
+  return gerepilecopy(ltop,V);
 }
 static GEN
 FpXYQQ_sqr(void *data, GEN x)
 {
   FpXYQQ_muldata *D = (FpXYQQ_muldata*)data;
   return FpXYQQ_redswap(FpXQX_sqr(x, D->S, D->p),D->S,D->T,D->p);
-  
+
 }
 static GEN
 FpXYQQ_mul(void *data, GEN x, GEN y)
@@ -696,7 +696,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     D.v = v;
     y = leftright_pow(to_Kronecker(x,T), n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
     y = FpXQX_from_Kronecker(y, T,p);
-    setvarn(y, v); 
+    setvarn(y, v);
   }
   return gerepileupto(ltop, y);
 }
@@ -840,7 +840,7 @@ static GEN _FpXQX_mul(void *data, GEN a,GEN b)
   struct _FpXQX *d=(struct _FpXQX*)data;
   return FpXQX_mul(a,b,d->T,d->p);
 }
-GEN 
+GEN
 FpXQXV_prod(GEN V, GEN T, GEN p)
 {
   if (lgefint(p) == 3)
@@ -855,7 +855,7 @@ FpXQXV_prod(GEN V, GEN T, GEN p)
   else
   {
     struct _FpXQX d;
-    d.p=p; 
+    d.p=p;
     d.T=T;
     return divide_conquer_assoc(V, &_FpXQX_mul,(void*)&d);
   }
@@ -903,7 +903,7 @@ FqV_to_FlxV(GEN v, GEN T, GEN pp)
   long vT = varn(T);
   ulong p = pp[2];
   GEN y = cgetg(N, t_VEC);
-  for (j=1; j<N; j++) 
+  for (j=1; j<N; j++)
     gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
                                   : ZX_to_Flx(gel(v,j), p));
   return y;
@@ -916,7 +916,7 @@ FqC_to_FlxC(GEN v, GEN T, GEN pp)
   long vT = varn(T);
   ulong p = pp[2];
   GEN y = cgetg(N, t_COL);
-  for (j=1; j<N; j++) 
+  for (j=1; j<N; j++)
     gel(y,j) = (typ(v[j])==t_INT?  Z_to_Flx(gel(v,j), p, vT)
                                   : ZX_to_Flx(gel(v,j), p));
   return y;
@@ -928,7 +928,7 @@ FqM_to_FlxM(GEN x, GEN T, GEN pp)
   long j, n = lg(x);
   GEN y = cgetg(n,t_MAT);
   if (n == 1) return y;
-  for (j=1; j<n; j++) 
+  for (j=1; j<n; j++)
     gel(y,j) = FqC_to_FlxC(gel(x,j), T, pp);
   return y;
 }
@@ -1122,7 +1122,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
     pari_err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
         ,l,pol_x(vp),P);
   A=gerepileupto(ltop,A);
-  /*The formula is 
+  /*The formula is
    * a_{r-1}=-\phi(a_0)/b_0
    * a_{i-1}=\phi(a_i)+b_ia_{r-1}  i=r-1 to 1
    * Where a_0=A[1] and b_i=U[i+2]
@@ -1209,7 +1209,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     {
       GEN L, An, Bn, z, U;
       U = gmael(FpX_factor(polcyclo(pg,MAXVARN),l),1,1);
-      A = intersect_ker(P, MA, U, l); 
+      A = intersect_ker(P, MA, U, l);
       B = intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
       An = gel(FpXYQQ_pow(A,ipg,U,P,l),2);
@@ -1262,7 +1262,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   lbot = avma;
   *SP = FpX_red(A,l);
   *SQ = FpX_red(B,l);
-  gptr[0] = SP; 
+  gptr[0] = SP;
   gptr[1] = SQ; gerepilemanysp(ltop,lbot,gptr,2);
 }
 /* Let l be a prime number, P, Q in ZZ[X].  P and Q are both
@@ -1613,7 +1613,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       GEN t = ZX_to_Flx(T, pp);
       z = FlxqX_divrem(a,b,t,pp,pr);
       tetpil=avma;
-      z = FlxX_to_ZXX(z); 
+      z = FlxX_to_ZXX(z);
       if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
         *pr = FlxX_to_ZXX(*pr);
       else return gerepile(av0,tetpil,z);
@@ -1733,7 +1733,7 @@ ZX_init_CRT(GEN Hp, ulong p, long v)
 }
 
 /* assume lg(Hp) > 1 */
-GEN 
+GEN
 ZM_init_CRT(GEN Hp, ulong p)
 {
   long i,j, m = lg(Hp[1]), l = lg(Hp), lim = (long)(p>>1);
@@ -1744,7 +1744,7 @@ ZM_init_CRT(GEN Hp, ulong p)
     c = cgetg(m, t_COL);
     gel(H,j) = c;
     for (i=1; i<l; i++) gel(c,i) = stoi(Fl_center(cp[i],p, lim));
-  }   
+  }
   return H;
 }
 
@@ -2221,7 +2221,7 @@ Flx_FlxY_resultant(GEN a, GEN b, ulong pp)
  * in variable v. This is an incorrect PARI object if initially varn(b) << v.
  * We could return a vector of coeffs, but it is convenient to have degpol()
  * and friends available. Even in that case, it will behave nicely with all
- * functions treating a polynomial as a vector of coeffs (eg poleval). 
+ * functions treating a polynomial as a vector of coeffs (eg poleval).
  * FOR INTERNAL USE! */
 GEN
 swap_vars(GEN b0, long v)
@@ -2242,7 +2242,7 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
 {
   long i,n,dres, vX = varn(b), vY = varn(a);
   GEN la,x,y;
- 
+
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
@@ -2252,7 +2252,7 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
     return Flx_to_ZX(x);
   }
   dres = degpol(a)*degpol(b);
-  b = swap_vars(b, vY); 
+  b = swap_vars(b, vY);
   la = leading_term(a);
   x = cgetg(dres+2, t_VEC);
   y = cgetg(dres+2, t_VEC);
@@ -2260,9 +2260,9 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
   {
-    gel(x,++i) = utoipos(n); 
+    gel(x,++i) = utoipos(n);
     gel(y,i) = FpX_FpXY_eval_resultant(a,b,gel(x,i),p,la);
-    gel(x,++i) = subis(p,n); 
+    gel(x,++i) = subis(p,n);
     gel(y,i) = FpX_FpXY_eval_resultant(a,b,gel(x,i),p,la);
   }
   if (i == dres)
@@ -2328,7 +2328,7 @@ ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   lim = stack_lim(av,2);
 
 INIT:
-  if (av2) { avma = av2; *lambda = next_lambda(*lambda); } 
+  if (av2) { avma = av2; *lambda = next_lambda(*lambda); }
   if (lambda)
   {
     L = gadd(pol_x(MAXVARN), gmulsg(*lambda, pol_x(vY)));
@@ -2357,7 +2357,7 @@ INIT:
   while (p < (ulong)(dres<<1)) NEXT_PRIME_VIADIFF(p,d);
 
   H = H0 = H1 = NULL;
-  lb = lg(B); 
+  lb = lg(B);
   bound = ZX_ZXY_ResBound(A, B, dB);
   if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
   check_theta(bound);
@@ -2445,7 +2445,7 @@ INIT:
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
       if (DEBUGMEM>1) pari_warn(warnmem,"ZX_ZXY_rnfequation");
-      gerepilemany(av2,gptr,LERS? 4: 2); 
+      gerepilemany(av2,gptr,LERS? 4: 2);
     }
   }
 END:
@@ -2739,7 +2739,7 @@ QX_gcd(GEN A0, GEN B0)
   B = Q_primitive_part(B0, &b);
   return gerepileupto(av, gmul(_gcd(a,b), ZX_gcd(A, B)));
 }
- 
+
 /* lift(1 / Mod(A,B)). B0 a t_POL, A0 a scalar or a t_POL. Rational coeffs */
 GEN
 QXQ_inv(GEN A0, GEN B0)
@@ -2840,7 +2840,7 @@ FpX_compositum(GEN A, GEN B, GEN p)
   return C;
 }
 
-/* return an extension of degree 2^l of F_2, assume l > 0 
+/* return an extension of degree 2^l of F_2, assume l > 0
  * using Adleman-Lenstra Algorithm.
  * Not stack clean. */
 static GEN
@@ -2868,7 +2868,7 @@ f2init(long l)
   return T;
 }
 
-/* return an extension of degree p^l of F_p, assume l > 0 
+/* return an extension of degree p^l of F_p, assume l > 0
  * using Adleman-Lenstra Algorithm, see below.
  * Not stack clean. */
 GEN
@@ -2881,7 +2881,7 @@ ffinit_Artin_Shreier(GEN ip, long l)
   xp=monomial(gen_1,p,0);
   P = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0));
   if (l == 1) return P;
-  
+
   yp=monomial(gen_1,p,MAXVARN);
   y2pm1=monomial(gen_1,2*p-1,MAXVARN);
   Q = gsub(ZX_sub(xp, pol_x(0)), ZX_sub(y2pm1, yp));

@@ -699,7 +699,7 @@ update_fact(GEN x, GEN f)
   long iq, i, k, l;
   if (typ(f)!=t_MAT || lg(f)!=3) pari_err(talker,"not a factorisation in nfbasis");
   l = lg(p);
-  q = cgetg(l,t_COL); 
+  q = cgetg(l,t_COL);
   e = cgetg(l,t_COL); iq = 1;
   for (i=1; i<l; i++)
   {
@@ -964,7 +964,7 @@ typedef struct __decomp {
   GEN nu; /* irreducible divisor of chi mod p, in Z[X] */
   GEN invnu; /* numerator ( 1/ Mod(nu, chi) mod pmr ) */
   GEN Dinvnu;/* denominator ( ... ) */
-  GEN prc, psc; /* reduced discriminant of chi, 
+  GEN prc, psc; /* reduced discriminant of chi,
                         stability precision for chi */
   GEN ns, precns; /* cached Newton sums and their precision */
 } decomp_t;
@@ -1212,18 +1212,18 @@ manage_cache(decomp_t *S, GEN f, GEN pp)
     p1 = mulii(S->pmf, powiu(S->p, S->df));
     if (DEBUGLEVEL>4) fprintferr("  Initializing cached Newton sums\n");
   }
-  
+
   p1 = gmax(p1, pp);
 
   if (!(S->precns) || gcmp(S->precns, p1) < 0)
   {
     if (DEBUGLEVEL>4)
-      fprintferr("  Precision for cached Newton sums: %Z -> %Z\n", 
+      fprintferr("  Precision for cached Newton sums: %Z -> %Z\n",
 		 S->precns? S->precns: gen_0, p1);
     S->ns = polsymmodp(f, p1);
     S->precns = p1;
   }
-} 
+}
 
 /* return NULL if a mod f is not an integer
  * The denominator of any integer in Zp[X]/(f) divides pdr */
@@ -1238,10 +1238,10 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
 
   a = Q_remove_denom(a, &d);
   prec1 = pp;
-  if (lgefint(S->p) == 3) 
+  if (lgefint(S->p) == 3)
     prec1 = mulii(prec1, powiu(S->p, val_fact(n, itou(S->p))));
   prec2 = prec3 = prec1;
-  if (d) 
+  if (d)
   {
     GEN p1 = powiu(d, n-1);
     prec2 = mulii(prec1, p1);
@@ -1280,7 +1280,7 @@ factcp(decomp_t *S)
  * if *Ep < oE or Ep divides Ediv (!=0) return NULL (not interesting)
  * */
 static GEN
-getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep, 
+getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
          long oE, long Ediv)
 {
   GEN chin, q;
@@ -1321,26 +1321,26 @@ kill_cache(decomp_t *S) { S->precns = NULL; }
 static void
 composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
 
-static int 
+static int
 update_phi(decomp_t *S, long *ptl, long flag)
 {
   GEN PHI = NULL, prc, psc = S->psc, X = pol_x( varn(S->f) );
   long k;
 
-  if (!S->chi) 
+  if (!S->chi)
   {
     kill_cache(S);
     S->chi = mycaract(S, S->f, S->phi, S->psf, powiu(S->p, S->df));
     S->nu = get_nu(S->chi, S->p, ptl);
     if (*ptl > 1) return 0; /* we can get a decomposition */
   }
-    
+
   for (k = 1;; k++)
   {
     kill_cache(S);
     prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, Z_pval(S->psc, S->p));
     if (!equalii(prc, S->psc)) break;
-    
+
     S->psc = S->psf; /* work full precision */
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
@@ -1382,13 +1382,13 @@ testb2(decomp_t *S, long D, GEN theta)
   S->phi0 = T0; return 0; /* F_phi=lcm(F_alpha, F_theta)=D and E_phi=E_alpha */
 }
 
-/* return 1 if at least 2 factors mod p ==> chi can be split. 
+/* return 1 if at least 2 factors mod p ==> chi can be split.
  * compute a new S->phi such that E = lcm(Ea, Et) */
 static int
 testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
 {
   GEN c, T0 = S->phi;
-  long r, s, t; 
+  long r, s, t;
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Ea\n");
   (void)cbezout(Ea, Et, &r, &s); t = 0;
@@ -1482,18 +1482,18 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
       vstar(S->p, chib, &L, &E);
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
-      
+
       gamm = get_gamma(S, beta, eq, er); /* an integer */
       chig = mycaract(S, S->chi, gamm, S->psc, S->prc);
     }
-      
+
     nug = get_nu(chig, S->p, &l);
-    if (l > 1) 
+    if (l > 1)
     {
       S->chi = chig;
       S->nu  = nug; composemod(S, gamm, S->phi); return 1;
     }
-      
+
     Fg = degpol(nug);
     if (Fa % Fg) return testb2(S, clcm(Fa,Fg), gamm);
 
@@ -1517,7 +1517,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
         chie = mycaract(S, S->chi, eta, S->psc, S->prc);
       }
       nue = get_nu(chie, S->p, &l);
-      if (l > 1) { 
+      if (l > 1) {
         S->nu = nue;
         S->chi= chie; composemod(S, eta, S->phi); return 1;
       }

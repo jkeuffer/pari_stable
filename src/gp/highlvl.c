@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
 
-void 
+void
 install0(char *name, char *code, char *gpname, char *lib)
 {
   void *f, *handle;
@@ -57,7 +57,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 #else
 #  ifdef _WIN32
 #  include <windows.h>
-void 
+void
 install0(char *name, char *code, char *gpname, char *lib)
 {
   FARPROC f;
@@ -76,7 +76,7 @@ install0(char *name, char *code, char *gpname, char *lib)
 #endif
   if (! *gpname) gpname=name;
   if (lib) lib = expand_tilde(lib);
-  
+
   handle = LoadLibrary(lib);
   if (!handle)
   {
@@ -93,12 +93,12 @@ install0(char *name, char *code, char *gpname, char *lib)
   install((void*)f,gpname,code);
 }
 #  else
-void 
+void
 install0(char *name, char *code, char *gpname, char *lib) { pari_err(archer); }
 #endif
 #endif
 
-void 
+void
 gpinstall(char *s, char *code, char *gpname, char *lib)
 {
   if (GP_DATA->flags & SECURE)

@@ -71,7 +71,7 @@ my_int(char *s)
   ulong n = 0;
   char *p = s;
 
-  while (isdigit((int)*p)) { 
+  while (isdigit((int)*p)) {
     ulong m;
     if (n > (~0UL / 10)) pari_err(talker2,"integer too large",s,s);
     n *= 10; m = n;
@@ -98,7 +98,7 @@ get_int(const char *s, long dflt)
   char *p = get_sep(s);
   long n;
   int minus = 0;
-  
+
   if (*p == '-') { minus = 1; p++; }
   if (!isdigit((int)*p)) return dflt;
 
@@ -191,7 +191,7 @@ getrealprecision(void)
 long
 setrealprecision(long n, long *prec)
 {
-  GP_DATA->fmt->sigd = n; 
+  GP_DATA->fmt->sigd = n;
   *prec = precreal = ndec2prec(n);
   return n;
 }
@@ -574,7 +574,7 @@ sd_log(const char *v, long flag)
   }
   if (pari_logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
-    TeX_define("PARIbreak", 
+    TeX_define("PARIbreak",
                "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
     TeX_define("PARIpromptSTART", "\\vskip\\medskipamount\\bgroup\\bf");
     TeX_define("PARIpromptEND", "\\egroup\\bgroup\\tt");

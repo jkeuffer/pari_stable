@@ -126,7 +126,7 @@ getrand(void) {
 /********************************************************************/
 
 /* assume n > 0 */
-ulong 
+ulong
 random_Fl(ulong n)
 {
   ulong d;

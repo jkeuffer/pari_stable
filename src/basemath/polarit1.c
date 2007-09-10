@@ -704,7 +704,7 @@ stoFpX(ulong m, ulong p, long v)
   GEN y = new_chunk(BITS_IN_LONG + 2);
   long l = 2;
   do { ulong q = m/p; gel(y,l++) = utoi(m - q*p); m=q; } while (m);
-  y[1] = evalsigne(1) | evalvarn(v); 
+  y[1] = evalsigne(1) | evalvarn(v);
   y[0] = evaltyp(t_POL) | evallg(l); return y;
 }
 static GEN
@@ -784,7 +784,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   if (dv==d) return;
   v = varn(*t);
   m = setloop(m);
-  av = avma; 
+  av = avma;
   for(;; avma = av)
   {
     m = incloop(m);
@@ -1239,7 +1239,7 @@ FpX_factor_i(GEN f, GEN pp)
     while (lg(g1)>3)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
-      u = g1; 
+      u = g1;
       if (!degpol(f2)) g1 = pol_1(0); /* only its degree (= 0) matters */
       else
       {
@@ -1696,7 +1696,7 @@ padicsqrtlift(GEN T, GEN a, GEN p, long e)
   pari_sp ltop=avma;
   GEN q, W;
   long i, nb, mask;
-  
+
   if (e == 1) return icopy(a);
   nb = hensel_lift_accel(e, &mask);
   W = Fp_inv(modii(shifti(a,1), p), p);
@@ -2230,7 +2230,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   /* n guaranteed to be squarefree */
   fa = FpX_factor(n, p); fa = gel(fa,1); lx = lg(fa);
   if (lx == 2) return mkcol(A); /* P^k, P irreducible */
-  
+
   P = cgetg(lx,t_COL);
   x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
   for (i=lx-1; i>1; i--)

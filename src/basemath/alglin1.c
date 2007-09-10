@@ -103,7 +103,7 @@ Flm_transpose(GEN x)
 {
   long i,j;
   GEN y;
-  long dx, lx=lg(x); 
+  long dx, lx=lg(x);
   if (lx==1) return cgetg(1,t_MAT);
   dx=lg(x[1]); y=cgetg(dx,t_MAT);
   for (i=1; i<dx; i++)
@@ -831,7 +831,7 @@ scalarmat_shallow(GEN x, long n) {
   fill_scalmat(y, x, gen_0, n); return y;
 }
 GEN
-scalarmat_s(long x, long n) { 
+scalarmat_s(long x, long n) {
   GEN y = cgetg(n+1, t_MAT);
   fill_scalmat(y, stoi(x), gen_0, n); return y;
 }
@@ -896,7 +896,7 @@ gtomat(GEN x)
       for (i=1; i<lx; i++) gel(y,i) = mkcolcopy(gel(x,i));
       break;
     }
-    case t_COL: 
+    case t_COL:
       lx = lg(x);
       if (lx == 1) return cgetg(1, t_MAT);
       if (typ(x[1]) == t_VEC) {
@@ -1232,7 +1232,7 @@ hnf_invimage(GEN A, GEN b)
 
 /* A upper HNF, B integral matrix or column. Return A^(-1) B if integral,
  * NULL otherwise. Not memory clean */
-GEN 
+GEN
 hnf_gauss(GEN A, GEN B)
 {
   long i, l;
@@ -1321,7 +1321,7 @@ Fl_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)
       m += ucoeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
     }
     m %= p;
-    if (m) m = ((p-m) * Fl_inv(ucoeff(a,i,i), p)) % p; 
+    if (m) m = ((p-m) * Fl_inv(ucoeff(a,i,i), p)) % p;
     u[i] = m;
   }
   return u;
@@ -1679,7 +1679,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 
   if (!T) return FpM_gauss(a,b,p);
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
- 
+
   lim = stack_lim(av,1);
   a = shallowcopy(a);
   bco = lg(b)-1;
@@ -2536,7 +2536,7 @@ Flm_indexrank(GEN x, ulong p)
   long i,j,r;
   GEN res,d,p1,p2;
   pari_sp av = avma;
-  long n = lg(x)-1; 
+  long n = lg(x)-1;
   (void)new_chunk(3+n+1+n+1);
   /* yield r = dim ker(x) */
   d = Flm_gauss_pivot(x,p,&r);
@@ -3166,7 +3166,7 @@ Flm_rank(GEN x, ulong p)
   d = Flm_gauss_pivot(x,p,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; 
+  avma=av;
   return lg(x)-1 - r;
 }
 
@@ -3298,7 +3298,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
         c = cgetg(n+1, t_COL);
         for (i=1; i<k; i++) gel(c,i) = Fq_red(gcoeff(x,d[i],k), T, p);
         gel(c,k) = gen_1; for (i=k+1; i<=n; i++) gel(c,i) = gen_0;
-        return gerepileupto(av0, c); 
+        return gerepileupto(av0, c);
       }
       r++; d[k]=0;
       for(j=1; j<k; j++)
@@ -3383,9 +3383,9 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
       if (deplin) {
         c = cgetg(n+1, t_COL);
         for (i=1; i<k; i++) gel(c,i) = Flx_rem(gcoeff(x,d[i],k), T, p);
-        gel(c,k) = Fl_to_Flx(1,vs); 
+        gel(c,k) = Fl_to_Flx(1,vs);
         for (i=k+1; i<=n; i++) gel(c,i) = zero_Flx(vs);
-        return gerepileupto(av0, c); 
+        return gerepileupto(av0, c);
       }
       r++; d[k]=0;
       for(j=1; j<k; j++)

@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define STMT_END	while (0)
 /*=====================================================================*/
 /* CATCH(numer) {
- *   recovery 
+ *   recovery
  * } TRY {
  *   code
  * } ENDCATCH
@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   int pari_errno;            \
   jmp_buf __env;             \
   void *__catcherr = NULL;   \
-  if ((pari_errno = setjmp(__env))) 
+  if ((pari_errno = setjmp(__env)))
 
 #define RETRY { __catcherr = err_catch(__err, &__env); {
 #define TRY else RETRY
@@ -345,7 +345,7 @@ enum manage_var_t {
 #define FpX_div(x,y,p)   (FpX_divrem((x),(y),(p), NULL))
 #define FpX_rem(x,y,p)   (FpX_divrem((x),(y),(p), ONLY_REM))
 #define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
-#define FpV_FpC_mul(x,y,p) FpV_dotproduct((x),(y),(p)) 
+#define FpV_FpC_mul(x,y,p) FpV_dotproduct((x),(y),(p))
 
 #define FpX_renormalize   ZX_renormalize
 #define FpXX_renormalize  ZX_renormalize
@@ -403,9 +403,9 @@ enum manage_var_t {
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
- 
+
 /* For use with pari_init_opts */
- 
+
 #define INIT_JMPm 1
 #define INIT_SIGm 2
 #define INIT_DFTm 4

@@ -130,7 +130,7 @@ var_push(entree *ep, Ltype type)
   long n=stack_new(&s_lvar);
   localvars[n].ep   = ep;
   localvars[n].type = type;
-} 
+}
 
 enum FLflag {FLnocopy=1, FLreturn=2};
 
@@ -182,8 +182,8 @@ parseproto(char const **q, char *c)
     *q=p+1;
     return PPstd;
   case 'V':
-    if (p[1]=='=') 
-    { 
+    if (p[1]=='=')
+    {
       if (p[2]!='G')
         pari_err(impl,"prototype not supported");
       *c='=';
@@ -306,7 +306,7 @@ is_node_zero(long n)
   return (tree[n].f==Fsmall && tree[n].x==0);
 }
 
-static GEN 
+static GEN
 listtogen(long n, long f)
 {
   GEN z;
@@ -339,7 +339,7 @@ arg_is_safe(long a)
       entree *ep=get_entree(a);
       long i;
       for (i=s_lvar.n-1; i>=0; i--)
-        if (localvars[i].ep==ep) 
+        if (localvars[i].ep==ep)
           return 1;
       return 0;
     }
@@ -358,7 +358,7 @@ first_safe_arg(GEN arg)
 
 static entree *
 getlvalue(long n)
-{ 
+{
   while (tree[n].f==Ffacteurmat)
     n=tree[n].x;
   return getvar(n);
@@ -366,7 +366,7 @@ getlvalue(long n)
 
 static void
 compilelvalue(long n)
-{ 
+{
   if (tree[n].f==Fentry)
     return;
   else
@@ -376,7 +376,7 @@ compilelvalue(long n)
     long yx=tree[y].x;
     long yy=tree[y].y;
     long f=tree[y].f;
-    if (tree[x].f==Ffacteurmat && f==Fmatrix && yy==-1 && 
+    if (tree[x].f==Ffacteurmat && f==Fmatrix && yy==-1 &&
         tree[tree[x].y].f==FmatrixL)
     {
       compilelvalue(tree[x].x);
@@ -405,12 +405,12 @@ compilelvalue(long n)
         break;
       }
     }
-  } 
+  }
 }
 
-static void 
+static void
 compilefacteurmat(long n, int mode)
-{ 
+{
   long x=tree[n].x;
   long y=tree[n].y;
   long yx=tree[y].x;
@@ -532,7 +532,7 @@ cattovec(long n, long fnum)
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
-static void 
+static void
 compilefunc(long n, int mode)
 {
   pari_sp ltop=avma;
@@ -691,10 +691,10 @@ compilefunc(long n, int mode)
   i=0; j=1;
   if (*p)
   {
-    q=p; 
+    q=p;
     while((mod=parseproto(&p,&c))!=PPend)
     {
-      if (j<=nb && tree[arg[j]].f!=Fnoarg 
+      if (j<=nb && tree[arg[j]].f!=Fnoarg
           && (mod==PPdefault || mod==PPdefaultmulti))
         mod=PPstd;
       switch(mod)
@@ -719,7 +719,7 @@ compilefunc(long n, int mode)
         case 'n':
           compilenode(arg[j++],Gvar,0);
           break;
-        case '&': case '*': 
+        case '&': case '*':
           {
             long vn, a=arg[j++];
             entree *ep;
@@ -906,7 +906,7 @@ compilefunc(long n, int mode)
               for(l=1;l<lg(g[k]);l++,m++)
               {
                 compilenode(mael(g,k,l),Ggen,0);
-                op_push(OCstackgen,m); 
+                op_push(OCstackgen,m);
               }
             j=nb+1;
             break;
@@ -927,7 +927,7 @@ compilefunc(long n, int mode)
     pari_err(talker2,"too many arguments",tree[arg[j]].str,get_origin());
   switch (ret)
   {
-  case RET_GEN: 
+  case RET_GEN:
     if (tree[n].f==Fderfunc)
       op_push(OCderivgen, (long) ep);
     else if (ep->arity==2)
@@ -991,7 +991,7 @@ compilenode(long n, int mode, long flag)
     pari_err(bugparier,"compilenode");
   x=tree[n].x;
   y=tree[n].y;
-   
+
   switch(tree[n].f)
   {
   case Fseq:
@@ -1047,10 +1047,10 @@ compilenode(long n, int mode, long flag)
             tree[n].str,get_origin());
       switch(tree[n].x)
       {
-      case CSTreal: 
+      case CSTreal:
         op_push(OCpushreal, data_push(strntoGENstr(tree[n].str,tree[n].len)));
         break;
-      case CSTint: 
+      case CSTint:
         op_push(OCpushgen,  data_push(strtoi((char*)tree[n].str)));
         compilecast(n,Ggen, mode);
         break;
@@ -1095,7 +1095,7 @@ compilenode(long n, int mode, long flag)
     compilemat(n, mode);
     return;
   case Frefarg:
-    pari_err(talker,"unexpected &"); 
+    pari_err(talker,"unexpected &");
     break;
   case Fentry:
     {
@@ -1156,7 +1156,7 @@ compilenode(long n, int mode, long flag)
           op_push(OCgetarg,-arity+i-1);
           break;
         case Faffect:
-          { 
+          {
             struct codepos lpos;
             getcodepos(&lpos);
             compilenode(tree[a].y,Ggen,0);
@@ -1166,7 +1166,7 @@ compilenode(long n, int mode, long flag)
             op_push(OCdefaultarg,-arity+i-1);
             break;
           }
-        default: 
+        default:
           pari_err(talker2,"invalid function definition",
               tree[a].str,get_origin());
         }
@@ -1202,6 +1202,6 @@ gp_closure(long n)
   compilenode(n,Ggen,0);
   if (s_lvar.n)
     pari_err(talker,"local() only allowed inside a function");
-  return getclosure(&pos); 
+  return getclosure(&pos);
 }
 

@@ -160,7 +160,7 @@ dlerror(void)
 	    && DosGetMessage(NULL, 0, buf, sizeof buf - 1, retcode,
 			     "OSO001.MSG", &len)) {
 		if (fail[0])
-		  sprintf(buf, 
+		  sprintf(buf,
 "OS/2 system error code %d, possible problematic module: '%s'",
 			  (int)retcode, fail);
 		else
@@ -200,7 +200,7 @@ get_stack(double fraction, long min)
   PIB *pib;
   char *s, *e;
   unsigned long d;
-    
+
   if (!(_emx_env & 0x200)) return 0;	/* not OS/2. */
   rc = DosGetInfoBlocks(&tib, &pib);
   if (rc) return 0;			/* ignore error */

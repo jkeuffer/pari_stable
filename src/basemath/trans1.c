@@ -1047,7 +1047,7 @@ palog(GEN x)
   else if (gcmp1(modii(a, p)))
   {
     y = gmul2n(palogaux(x), 1);
-  } 
+  }
   else
   { /* compute log(x^(p-1)) / (p-1) */
     GEN mod = gel(x,3), p1 = subis(p,1);

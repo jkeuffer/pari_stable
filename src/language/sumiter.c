@@ -46,12 +46,12 @@ forpari(GEN a, GEN b, GEN code)
 void
 whilepari(GEN a, GEN b)
 {
-  pari_sp av = avma; 
+  pari_sp av = avma;
   for(;;)
   {
     GEN res = closure_evalnobrk(a);
     if (gcmp0(res)) break;
-    avma = av; 
+    avma = av;
     closure_evalvoid(b); if (loop_break()) break;
   }
   avma = av;
@@ -60,14 +60,14 @@ whilepari(GEN a, GEN b)
 void
 untilpari(GEN a, GEN b)
 {
-  pari_sp av = avma; 
+  pari_sp av = avma;
   for(;;)
   {
     GEN res;
     closure_evalvoid(b); if (loop_break()) break;
     res = closure_evalnobrk(a);
     if (!gcmp0(res)) break;
-    avma = av; 
+    avma = av;
   }
   avma = av;
 }
@@ -305,7 +305,7 @@ forvec_next_le(GEN gd, GEN v)
           imin = i;
           gel(v,i) = gaddgs(gel(v,i), 1);
           if (gcmp(gel(v,i), d->M[i]) <= 0) break;
-        } 
+        }
         if (i > 1) { /* a >= a[i-1] - a[i] */
           GEN a = gceil(gsub(gel(v,i-1), gel(v,i)));
           gel(v,i) = gadd(gel(v,i), a);
@@ -375,7 +375,7 @@ forvec_next_lt(GEN gd, GEN v)
           imin = i;
           gel(v,i) = gaddgs(gel(v,i), 1);
           if (gcmp(gel(v,i), d->M[i]) <= 0) break;
-        } 
+        }
       }
       return v;
     }
@@ -1028,7 +1028,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       x = gen_0; r = utoipos(2*k+2);
       for(kk=0;;kk++)
       {
-        
+
         long ex;
         affgr(eval(addii(r,a), E), reel);
         ex = expo(reel) + kk; setexpo(reel,ex);

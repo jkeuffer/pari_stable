@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
    x[1] = evalvarn(variable number)  (signe is not stored).
    x[2] = a_0 x[3] = a_1, etc.
    With 0 <= a_i < l
-   
+
    signe(x) is not valid. Use degpol(x)>=0 instead.
 */
 
@@ -105,7 +105,7 @@ Flv_to_Flx(GEN x, long vs)
 {
   long i, l=lg(x)+1;
   GEN z = cgetg(l,t_VECSMALL); z[1]=vs;
-  x--; 
+  x--;
   for (i=2; i<l ; i++) z[i]=x[i];
   return Flx_renormalize(z,l);
 }
@@ -125,7 +125,7 @@ GEN
 FlxC_to_ZXC(GEN x)
 {
   long i, l=lg(x);
-  GEN z = cgetg(l,t_COL); 
+  GEN z = cgetg(l,t_COL);
   for (i=1; i<l ; i++) gel(z,i) = Flx_to_ZX(gel(x,i));
   return z;
 }
@@ -181,7 +181,7 @@ GEN
 ZX_to_Flx(GEN x, ulong p)
 {
   long i;
-  long lx = lg(x); 
+  long lx = lg(x);
   GEN a = cgetg(lx, t_VECSMALL);
   a[1]=((ulong)x[1])&VARNBITS;
   for (i=2; i<lx; i++) a[i] = umodiu(gel(x,i), p);
@@ -232,15 +232,15 @@ Flx_red_lg_i(GEN z, long l, ulong p)
   ulong *y=(ulong *)z;
   GEN x = cgetg(l, t_VECSMALL);
   for (i=2; i<l; i++) x[i] = y[i]%p;
-  return x; 
+  return x;
 }
 
 GEN
 Flx_red(GEN z, ulong p)
 {
   long l = lg(z);
-  GEN x = Flx_red_lg_i(z,l,p); 
-  x[1] = z[1]; 
+  GEN x = Flx_red_lg_i(z,l,p);
+  x[1] = z[1];
   return Flx_renormalize(x,l);
 }
 
@@ -276,7 +276,7 @@ GEN
 Flx_add(GEN x, GEN y, ulong p)
 {
   long i,lz;
-  GEN z; 
+  GEN z;
   long lx=lg(x);
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
@@ -378,7 +378,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
   GEN z;
   long i, l;
   if (!x) return zero_Flx(y[1]);
-  l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1]; 
+  l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1];
   if (HIGHWORD(x | p))
     for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
   else
@@ -511,7 +511,7 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
     for (  ; i<nx; i++) z[i] = Flx_mullimb(x+i,y,p,0,ny);
     for (  ; i<nz; i++) z[i] = Flx_mullimb(x+i,y,p,i-nx+1,ny);
   }
-  z -= 2; return z; 
+  z -= 2; return z;
 }
 
 INLINE GEN
@@ -598,14 +598,14 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
     for (i=0; i<nx; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,0, (i+1)>>1);
-      p1 <<= 1; 
+      p1 <<= 1;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (p1 % p);
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,i-nx+1, (i+1)>>1);
-      p1 <<= 1; 
+      p1 <<= 1;
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (p1 % p);
     }
@@ -660,7 +660,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
   av = avma;
   if (na > 30 && maxlenghtcoeffpol(p,na)==1)
     return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
-  if (na < Flx_SQR_LIMIT) 
+  if (na < Flx_SQR_LIMIT)
     return Flx_shiftip(av, Flx_sqrspec_basecase(a,p,na), v);
   i=(na>>1); n0=na-i; na=i;
   a0=a+n0; n0a=n0;
@@ -710,7 +710,7 @@ Flx_pow(GEN x, long n, ulong p)
 /* separate from Flx_divrem for maximal speed. */
 GEN
 Flx_rem(GEN x, GEN y, ulong p)
-{ 
+{
   pari_sp av;
   GEN z, c;
   long dx,dy,dz,i,j;
@@ -868,7 +868,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   *pr = c; return q;
 }
 
-long 
+long
 Flx_valuation(GEN x)
 {
   long i, l=lg(x);
@@ -900,7 +900,7 @@ Flx_recip(GEN x)
 /*
  * x/polrecip(P)+O(x^n)
  */
-static GEN 
+static GEN
 Flx_invmontgomery_basecase(GEN T, ulong p)
 {
   long i, l=lg(T)-1, k;
@@ -1010,7 +1010,7 @@ Flx_invmontgomery(GEN T, ulong p)
 }
 
 /* Compute x mod T where lg(x)<=2*lg(T)-2
- * and mg is the Montgomery inverse of T. 
+ * and mg is the Montgomery inverse of T.
  */
 GEN
 Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
@@ -1260,14 +1260,14 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
   long i,k,lx = lg(a);
   GEN p1,p2;
   if (lx == 1) return Fl_to_Flx(1,vs);
-  p1 = cgetg(lx, t_VEC); 
+  p1 = cgetg(lx, t_VEC);
   for (k=1,i=1; i<lx-1; i+=2)
   {
     p2 = cgetg(5,t_VECSMALL); gel(p1,k++) = p2;
     p2[1] = vs;
     p2[2] = Fl_mul(a[i], a[i+1], p);
     p2[3] = Fl_neg(Fl_add(a[i],a[i+1],p),p);
-    p2[4] = 1; 
+    p2[4] = 1;
   }
   if (i < lx)
   {
@@ -1523,7 +1523,7 @@ const static struct bb_group Flxq_star={_Flxq_mul,_Flxq_pow,_Flxq_rand,vecsmall_
 
 GEN
 Flxq_order(GEN a, GEN ord, GEN T, ulong p)
-{ 
+{
   Flxq_muldata E;
   E.pol=T; E.p=p;
   return gen_eltorder(a,ord,(void*)&E,&Flxq_star);
@@ -1531,7 +1531,7 @@ Flxq_order(GEN a, GEN ord, GEN T, ulong p)
 
 GEN
 Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
-{ 
+{
   Flxq_muldata E;
   E.pol=T; E.p=p;
   return gen_PH_log(a,g,ord,(void*)&E,&Flxq_star,NULL);
@@ -1539,7 +1539,7 @@ Flxq_log(GEN a, GEN g, GEN ord, GEN T, ulong p)
 
 GEN
 Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
-{ 
+{
   Flxq_muldata E;
   if (!lgpol(a))
   {
@@ -1570,7 +1570,7 @@ Flxq_charpoly(GEN x, GEN T, ulong p)
   return gerepileupto(ltop,R);
 }
 
-GEN 
+GEN
 Flxq_minpoly(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
@@ -1605,7 +1605,7 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   }
   o = factor_pn_1(utoipos(p),f);
   L2 = shallowcopy( gel(o, 1) );
-  for (i = j = 1; i < lg(L2); i++) 
+  for (i = j = 1; i < lg(L2); i++)
   {
     if (umodui(p_1, gel(L2,i)) == 0) continue;
     gel(L2,j++) = diviiexact(q, gel(L2,i));
@@ -1699,25 +1699,25 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
 }
 
 /*Lift coefficient of B to constant Flx, to give a FlxY*/
-GEN 
+GEN
 Fly_to_FlxY(GEN B, long sv)
 {
   long lb=lg(B);
   long i;
   GEN b=cgetg(lb,t_POL);
   b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
-  for (i=2; i<lb; i++) 
+  for (i=2; i<lb; i++)
     gel(b,i) = Fl_to_Flx(B[i], sv);
   return FlxX_renormalize(b, lb);
 }
 
-GEN 
+GEN
 FlxX_to_ZXX(GEN B)
 {
   long lb=lg(B);
   long i;
   GEN b=cgetg(lb,t_POL);
-  for (i=2; i<lb; i++) 
+  for (i=2; i<lb; i++)
     if (lgpol(B[i]))
       gel(b,i) = Flx_to_ZX(gel(B,i));
     else
@@ -1727,17 +1727,17 @@ FlxX_to_ZXX(GEN B)
 
 /* Note: v is used _only_ for the t_INT. It must match
  * the variable of any t_POL coefficients. */
-GEN 
+GEN
 ZXX_to_FlxX(GEN B, ulong p, long v)
 {
   long lb=lg(B);
   long i;
   GEN b=cgetg(lb,t_POL);
   b[1]=evalsigne(1)|(((ulong)B[1])&VARNBITS);
-  for (i=2; i<lb; i++) 
+  for (i=2; i<lb; i++)
     switch (typ(B[i]))
     {
-    case t_INT:  
+    case t_INT:
       gel(b,i) = Z_to_Flx(gel(B,i), p, v);
       break;
     case t_POL:
@@ -1847,7 +1847,7 @@ GEN
 FlxX_add(GEN x, GEN y, ulong p)
 {
   long i,lz;
-  GEN z; 
+  GEN z;
   long lx=lg(x);
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
@@ -2025,7 +2025,7 @@ FlxqX_sqr(GEN x, GEN T, ulong p)
   pari_sp ltop=avma;
   GEN z,kx;
   kx= FlxX_to_Kronecker(x,T);
-  z = Flx_sqr(kx, p); 
+  z = Flx_sqr(kx, p);
   z = FlxqX_from_Kronecker(z,T,p);
   return gerepileupto(ltop,z);
 }
@@ -2064,10 +2064,10 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
     if (pr)
     {
       av0 = avma; x = FlxqX_red(x, T, p);
-      if (pr == ONLY_DIVIDES) 
-      { 
-        avma=av0; 
-        return signe(x)? NULL: zeropol(vx); 
+      if (pr == ONLY_DIVIDES)
+      {
+        avma=av0;
+        return signe(x)? NULL: zeropol(vx);
       }
       if (pr == ONLY_REM) return x;
       *pr = x;
@@ -2138,13 +2138,13 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   *pr = rem; return z-2;
 }
 
-static GEN 
+static GEN
 FlxqX_invmontgomery_basecase(GEN T, GEN Q, ulong p)
 {
   long i, l=lg(T)-1, k;
   long sv=Q[1];
   GEN r=cgetg(l,t_POL); r[1]=T[1];
-  gel(r,2) = zero_Flx(sv); 
+  gel(r,2) = zero_Flx(sv);
   gel(r,3) = Fl_to_Flx(1,sv);
   for (i=4;i<l;i++)
   {
@@ -2256,7 +2256,7 @@ FlxYqQ_redswap(GEN x, GEN S, GEN mg, GEN T, ulong p)
   GEN V = FlxX_swap(x,n,w);
   V = FlxqX_red(V,T,p);
   V = FlxX_swap(V,m,w);
-  return gerepilecopy(ltop,V); 
+  return gerepilecopy(ltop,V);
 }
 static GEN
 FlxYqQ_sqr(void *data, GEN x)
@@ -2345,14 +2345,14 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   {
     /* We do not handle polynomials multiple of x yet */
     D.mg  = FlxqX_invmontgomery(S,T,p);
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n, 
+    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr_montgomery, &FlxqXQ_mul_montgomery);
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n, 
+    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   }
   else
 #endif
-    y = leftright_pow(FlxX_to_Kronecker(x,T), n, 
+    y = leftright_pow(FlxX_to_Kronecker(x,T), n,
         (void*)&D, &FlxqXQ_sqr, &FlxqXQ_mul);
   y = FlxqX_from_Kronecker(y, T,p);
   return gerepileupto(av0, y);
@@ -2365,7 +2365,7 @@ static GEN _FlxqX_mul(void *data,GEN a,GEN b)
   return FlxqX_mul(a,b,d->T,d->p);
 }
 
-GEN 
+GEN
 FlxqXV_prod(GEN V, GEN T, ulong p)
 {
   struct _FlxqX d; d.p=p; d.T=T;

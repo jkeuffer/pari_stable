@@ -47,9 +47,9 @@ typedef struct /* for use in nfsqff */
 {
   nflift_t *L;
   GEN nf;
-  GEN pol, polbase; 
-  GEN fact; 
-  GEN pr; 
+  GEN pol, polbase;
+  GEN fact;
+  GEN pr;
   GEN Br, bound, ZC, BS_2;
   GEN dn;
   long hint;
@@ -222,7 +222,7 @@ nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *L)
   GEN v, u = nf_bestlift(elt,bound,L);
   if (!u) return NULL;
   v = gclone(u); avma = av;
-  u = gmul(L->topow, v); 
+  u = gmul(L->topow, v);
   gunclone(v); return u;
 }
 
@@ -615,7 +615,7 @@ get_trace(GEN ind, trace_data *T)
       v[i] = - (long)r;
   }
   return gadd(s, ZM_zc_mul(T->P1, v));
-} 
+}
 
 static trace_data *
 init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
@@ -754,7 +754,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
     }
     T1 = init_trace(&_T1, trace1, T->L, q);
     T2 = init_trace(&_T2, trace2, T->L, q);
-    for (i=1; i <= lfamod; i++) { 
+    for (i=1; i <= lfamod; i++) {
       gunclone(gel(trace1,i));
       gunclone(gel(trace2,i));
     }
@@ -883,8 +883,8 @@ END:
     gel(fa,cnt++) = pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
-  if (cnt == 2) { 
-    avma = av0; 
+  if (cnt == 2) {
+    avma = av0;
     gel(res,1) = mkvec(T->pol);
     gel(res,2) = mkvec(T->fact);
   }
@@ -925,7 +925,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
                  i, avma - bot);
     y = chk_factors_get(lt, famod, gel(piv,i), Tpk, pk);
     if (DEBUGLEVEL>2) fprintferr("... mod p^k (avma - bot = %lu)\n", avma-bot);
-    
+
     if (! (y = nf_pol_lift(y, bound, T)) ) return NULL;
     if (DEBUGLEVEL>2) fprintferr("... lifted (avma - bot = %lu)\n", avma-bot);
 
@@ -993,7 +993,7 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 
 static GEN
 get_R(GEN M)
-{ 
+{
   GEN R;
   long i, l, prec = DEFAULTPREC + divsBIL( gexpo(M) );
 
@@ -1095,7 +1095,7 @@ get_V(GEN Tra, GEN M_L, GEN PRK, GEN PRKinv, GEN pk, long *eT2)
   { /* cf nf_bestlift(Tra * c) */
     pari_sp av = avma, av2;
     GEN v, T2 = gmul(Tra, gel(M_L,i));
-      
+
     v = gdivround(gmul(PRKinv, T2), pk); /* small */
     av2 = avma;
     T2 = gsub(T2, gmul(PRK, v));
@@ -1326,7 +1326,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
     r = nf_bestlift_to_pol(lt? gmul(lt,r): r, NULL, L);
     gel(Cltx_r,2) = gneg(r); /* check P(r) == 0 */
     q = RgXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
-    if (q) { 
+    if (q) {
       C2ltpol = C2lt? gmul(Clt,q): q;
       if (Clt) r = gdiv(r, Clt);
       gel(z,m++) = r;
@@ -1363,7 +1363,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       if (n >= 15) maxf = 4;
     }
   }
-  
+
   for (ct = 5;;)
   {
     GEN aT, apr, ap, modpr, red;
@@ -1461,7 +1461,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (dpol == 1) /* irreducible */
     return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
   /* heuristic */
-  if (dpol*3 < n) 
+  if (dpol*3 < n)
   {
     GEN z, t;
     long i;

@@ -14,7 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* Original code contributed by: Ralf Stephan (ralf@ark.in-berlin.de).
- * 
+ *
  * This program is basically the implementation of the script
  *
  * Psi(n, q) = local(a, b, c); a=sqrt(2/3)*Pi/q; b=n-1/24; c=sqrt(b);
@@ -30,7 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   The first restriction depends on Pari's maximum precision of floating
  * point reals, which is 268435454 bits in 2.2.4, since the algorithm needs
  * high precision exponentials. For that engine, the maximum possible argument
- * would be in [5*10^15,10^16], the computation of which would need days on 
+ * would be in [5*10^15,10^16], the computation of which would need days on
  * a ~1-GHz computer. */
 
 #include "pari.h"
@@ -70,10 +70,10 @@ g(ulong q, ulong h)
     GEN h2 = sqru(h);
     return k == 1? gdivgs(mului((q-1)/h, subsi(q-1, h2)), 12)
                  : gdivgs(mului((q-2)/h, subsi((q<<1)-1, h2)), 24); /* k=2 */
-  
+
   }
   /* TODO: expr for h-1 mod h  +  gcd-style computation */
-  
+
   kh = h;
   if (ULONG_MAX/h > q)
   {
@@ -139,8 +139,8 @@ pinit(GEN n, GEN *c, GEN *d, ulong prec)
 {
   GEN b = divru( itor( subis(muliu(n,24), 1), prec ), 24 ); /* n - 1/24 */
   GEN sqrtb = sqrtr(b), Pi = mppi(prec), pi2sqrt2, pisqrt2d3;
- 
-  
+
+
   pisqrt2d3 = mulrr(Pi, sqrtr( divru(stor(2, prec), 3) ));
   pi2sqrt2  = mulrr(Pi, sqrtr( stor(8, prec) ));
   *c = mulrr(pisqrt2d3, sqrtb);

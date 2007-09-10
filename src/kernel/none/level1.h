@@ -527,7 +527,7 @@ icopy_av(GEN x, GEN y)
 {
   register long lx = lgefint(x);
   register long ly = lx;
-  y -= lx; 
+  y -= lx;
   while (--lx > 0) y[lx]=x[lx];
   y[0] = evaltyp(t_INT)|evallg(ly);
   return y;
@@ -576,7 +576,7 @@ smodis(GEN x, long y)
 
 INLINE long
 smodss(long x, long y)
-{ 
+{
   long rem = x%y;
   return (rem >= 0)? rem: labs(y) + rem;
 }
@@ -656,7 +656,7 @@ affii(GEN x, GEN y)
 
   if (x==y) return;
   lx=lgefint(x); if (lg(y)<lx) pari_err(talker,"impossible assignment I-->I");
-  
+
   while (--lx) y[lx]=x[lx];
 }
 
@@ -794,9 +794,9 @@ cmpsr(long x, GEN y)
   return cmprr(z,y);
 }	
 
-INLINE long 
+INLINE long
 maxss(long x, long y) { return x>y?x:y; }
-INLINE long 
+INLINE long
 minss(long x, long y) { return x<y?x:y; }
 
 INLINE GEN
@@ -838,7 +838,7 @@ vali(GEN x)
   GEN xp;
 
   if (!signe(x)) return -1;
-  xp=int_LSW(x); 
+  xp=int_LSW(x);
   for (i=0; !*xp; i++) xp=int_nextW(xp);
   return vals(*xp) + i * BITS_IN_LONG;
 }
@@ -1053,7 +1053,7 @@ rdiviiz(GEN x, GEN y, GEN z)
   avma = av;
 }
 
-INLINE GEN 
+INLINE GEN
 rdivii(GEN x, GEN y, long prec)
 {
   GEN z = cgetr(prec);

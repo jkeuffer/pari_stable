@@ -31,7 +31,7 @@ enum {
 /* mp.s ou mp.c */
 
   affer2,
-  
+
   errpile, errlg, errexpo, errvalp, rtodber,
 
 /* alglin.c */

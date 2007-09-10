@@ -114,7 +114,7 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
   pari_sp av = avma, av2, limite;
   int jnew, jpre = 0; /* for lint */
   GEN x, dx;
-  double diff, dyj, ysml, ybig, y[ISCR+1]; 
+  double diff, dyj, ysml, ybig, y[ISCR+1];
   screen scr;
   char buf[80], z;
 
@@ -745,7 +745,7 @@ rectpointtype(long ne, long type) /* code = ROt_PTT */
  } else {
    PariRect *e = check_rect_init(ne);
    RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPN));
-   
+
    RoType(z) = ROt_PTT;
    RoPTTpen(z) = type;
    Rchain(e, z);
@@ -776,7 +776,7 @@ rectlinetype(long ne, long type)
  } else {
    PariRect *e = check_rect_init(ne);
    RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPN));
- 
+
    RoType(z) = ROt_LNT;
    RoLNTpen(z) = type;
    Rchain(e, z);
@@ -1417,7 +1417,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 	addrrz(x,dx,x); avma=av2;
       }
   }
-  pl[0].nb=nc; 
+  pl[0].nb=nc;
   if (code) pop_lex();
   avma = av; return pl;
 }
@@ -1993,15 +1993,15 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
         eng->bx(data,
                 DTOL((RoBXx1(R)+x0)*xs),
                 DTOL((RoBXy1(R)+y0)*ys),
-                DTOL((RoBXx2(R)-RoBXx1(R))*xs), 
+                DTOL((RoBXx2(R)-RoBXx1(R))*xs),
                 DTOL((RoBXy2(R)-RoBXy1(R))*ys));
         break;
       case ROt_MP:
         {
-          double *ptx = RoMPxs(R); 
+          double *ptx = RoMPxs(R);
           double *pty = RoMPys(R);
           long     nb = RoMPcnt(R);
-          struct plot_points *points = 
+          struct plot_points *points =
             (struct plot_points *) gpmalloc(sizeof(*points)*nb);
           for(j=0;j<nb;j++)
           {
@@ -2015,10 +2015,10 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
         }
       case ROt_ML:
         {
-          double *ptx = RoMLxs(R); 
+          double *ptx = RoMLxs(R);
           double *pty = RoMLys(R);
           long     nb = RoMLcnt(R);
-          struct plot_points *points = 
+          struct plot_points *points =
             (struct plot_points *) gpmalloc(sizeof(*points)*nb);
           for(j=0;j<nb;j++)
           {
@@ -2049,10 +2049,10 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
           x = DTOL((RoSTx(R) + x0 + hgap - (l * fwidth * shift)/2)*xs);
           y = DTOL((RoSTy(R) + y0 - vgap/2)*ys);
           eng->sc(data,RoCol(R));
-          eng->st(data, x, y, text, l); 
+          eng->st(data, x, y, text, l);
           break;
         }
-      default: 
+      default:
         break;
       }
     }

@@ -1,4 +1,4 @@
-/* $Id$ 
+/* $Id$
 Copyright (C) 2000  The PARI group.
 
 This file is part of the PARI/GP package.

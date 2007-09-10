@@ -72,7 +72,7 @@ static ulong
 check_pq(GEN gp, GEN z, long d, GEN D)
 {
   ulong p = itou(gp);
-  if (!umodiu(z,p) || kross(d,(long)p) <= 0 || 
+  if (!umodiu(z,p) || kross(d,(long)p) <= 0 ||
     gcmp1(gel(redimag(primeform_u(D,p)),1)));
       pari_err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
   return p;
@@ -882,7 +882,7 @@ factorquad(struct buch_quad *B, GEN f, long kcz, ulong limp)
     {
       long k = 0;
       do { k++; x = q; q = diviu_rem(x, p, &r); } while (!r);
-      B->primfact[++lo] = i; B->exprimfact[lo] = k; 
+      B->primfact[++lo] = i; B->exprimfact[lo] = k;
     }
     if (isless_iu(q,p)) {
       avma = av;
@@ -900,7 +900,7 @@ factorquad(struct buch_quad *B, GEN f, long kcz, ulong limp)
     {
       long k = 0;
       do { k++; X = q; q = X / p; r = X % p; } while (!r);
-      B->primfact[++lo] = i; B->exprimfact[lo] = k; 
+      B->primfact[++lo] = i; B->exprimfact[lo] = k;
     }
     if (q <= p) break;
     if (i == kcz) return 0;
@@ -1183,7 +1183,7 @@ trivial_relations(struct buch_quad *B, GEN mat, GEN C)
 {
   long i, j = 0;
   GEN col;
-  for (i = 1; i <= B->KC; i++) 
+  for (i = 1; i <= B->KC; i++)
   { /* ramified prime ==> trivial relation */
     if (umodiu(B->Disc, B->FB[i])) continue;
     col = const_vecsmall(B->KC, 0);
@@ -1215,7 +1215,7 @@ dbg_rel(long s, GEN col)
 {
   if (DEBUGLEVEL == 1) fprintferr("%ld ",s);
   else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
-  flusherr(); 
+  flusherr();
 }
 /* Imaginary Quadratic fields */
 
@@ -1311,7 +1311,7 @@ real_relations(struct buch_quad *B, long need, long *pc, long lim, ulong LIMC, G
 {
   long lgsub = lg(B->subFB), current = *pc, nbtest = 0, s = 0;
   long i, fpc, endcycle, rhoacc, rho;
-  /* in a 2nd phase, don't include FB[current] but run along the cyle 
+  /* in a 2nd phase, don't include FB[current] but run along the cyle
    * ==> get more units */
   int first = (current == 0);
   pari_sp av, av1, limstack;
@@ -1686,7 +1686,7 @@ MORE:
 
     case fupb_RELAT:
       if (++nrelsup <= 7 || cbach > 1) {
-        need = min(BQ.KC, nrelsup); 
+        need = min(BQ.KC, nrelsup);
         if (cbach > 1 && nsubFB < 3 && lg(BQ.vperm) > 3) nsubFB++;
         goto MORE;
       }

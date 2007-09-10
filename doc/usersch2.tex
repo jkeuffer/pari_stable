@@ -369,7 +369,7 @@ Note that this type is available for convenience, not for speed: each
 elementary operation involves a reduction modulo $y$.
 
 \label{se:rempolmod}
-\misctitle{Important remark.}\sidx{variable (priority)} 
+\misctitle{Important remark.}\sidx{variable (priority)}
 Mathematically, the variables\sidx{variable} occurring in a polmod are not
 free variables. But internally, a congruence class in $R[t]/(y)$ is
 represented by its representative  of lowest degree, which is a \typ{POL} in
@@ -396,7 +396,7 @@ want: \kbd{y} is treated here as a numerical parameter, not as a polynomial
 variable.
 
 If the main variables are the same, it is allowed to mix \typ{POL} and
-\typ{POLMOD}s. The result is the expected \typ{POLMOD}. For instance 
+\typ{POLMOD}s. The result is the expected \typ{POLMOD}. For instance
 \bprog
     ? x + Mod(x, x^2 + 1)
     %1 = Mod(2*x, x^2 + 1)
@@ -669,7 +669,7 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 \kbd{/}: exact division (\kbd{3/2}=$3/2$, not $1.5$).
 
 \kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
-qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$ 
+qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$
 are scalars, $q$ is an integer and $r$ satisfies $0\le r < y$; if $x$ and $y$
 are polynomials, $q$ and $r$ are polynomials such that $\deg r< \deg y$ and
 the leading terms of $r$ and $x$ have the same sign.
@@ -964,7 +964,7 @@ sign following a variable name in the function definition, followed by any
 expression, gives the variable a default value. The said expression gets
 evaluated the moment the function is called, hence may involve the preceding
 function parameters (a default value for $x_i$ may involve $x_j$ for $j <
-i$). A variable for which you supply no default value is initialized to 
+i$). A variable for which you supply no default value is initialized to
 (the integer) zero. For instance
 \bprog
   foo(x, y=2, z=3) = print(x ":" y ":" z)
@@ -1789,7 +1789,7 @@ pale.
 
 \emacs In the present version, this default is incompatible with PariEmacs.
 Changing it will just fail silently (the alternative would be to display
-escape sequences as is, since Emacs will refuse to interpret them). 
+escape sequences as is, since Emacs will refuse to interpret them).
 You must customize color highlighting from the PariEmacs side, see its
 documentation.
 
@@ -2155,7 +2155,7 @@ field'' as used in most algebraic number theory computations), \kbd{ell}
 
 In case of conflicts between function and default names (e.g \tet{log},
 \tet{simplify}), the function has higher priority. To get the default help,
-use 
+use
 \bprog
   ?? default(log)
   ?? default(simplify)

@@ -255,7 +255,7 @@ var_make_safe(void)
       }
 }
 
-struct derivgenwrap_s 
+struct derivgenwrap_s
 {
   GEN (*f)(ANYARG);
   GEN *x;
@@ -266,7 +266,7 @@ derivgenwrap(GEN x, void* E)
 {
   struct derivgenwrap_s *c=(struct derivgenwrap_s *) E;
   GEN z = c->f(x,c->x[1],c->x[2],c->x[3],c->x[4],c->x[5],c->x[6],c->x[7]);
-  if (!z) 
+  if (!z)
     /*This cannot actually happen since no functions returning NULL
      *take a GEN as first parameter*/
     pari_err(talker, "break not allowed here");
@@ -476,7 +476,7 @@ INLINE long
 closure_varn(GEN x)
 {
   if (typ(x) != t_POL || lg(x) != 4 ||
-      !gcmp0(gel(x,2)) || !gcmp1(gel(x,3))) 
+      !gcmp0(gel(x,2)) || !gcmp1(gel(x,3)))
     pari_err(varer1,"variable name expected",NULL,NULL);
   return varn(x);
 }
@@ -536,7 +536,7 @@ closure_eval(GEN C)
     entree *ep;
     if (sp<0) pari_err(bugparier,"closure_eval, stack underflow");
     if (sp+16>s_st.n)
-    { 
+    {
       stack_alloc(&s_st,32);
       s_st.n=s_st.alloc;
       if (DEBUGMEM>=2) pari_warn(warner,"doubling evaluator stack");
@@ -580,7 +580,7 @@ closure_eval(GEN C)
     case OCsimpleptrdyn:
         {
           gp_pointer *g;
-          if (rp==s_ptrs.n-1) 
+          if (rp==s_ptrs.n-1)
             stack_new(&s_ptrs);
           g = &ptrs[rp++];
           g->vn=0;
@@ -657,7 +657,7 @@ closure_eval(GEN C)
     case OCpushptr:
         {
           gp_pointer *g = &ptrs[rp-1];
-          gel(st,sp++) = (GEN)&(g->x); 
+          gel(st,sp++) = (GEN)&(g->x);
         }
         break;
     case OCendptr:
@@ -758,7 +758,7 @@ closure_eval(GEN C)
           break;
         }
     case OCcompo1ptr:
-        { 
+        {
           long c=st[sp-1];
           gp_pointer *g = &ptrs[rp-1];
           matcomp *C=&g->c;
@@ -1007,7 +1007,7 @@ closure_eval(GEN C)
           gel(st, sp++) = z;
           break;
         }
-    case OCcalluser: 
+    case OCcalluser:
 calluser:
         {
           pari_sp ltop;
@@ -1068,15 +1068,15 @@ calluser:
           long l=st[sp-1];
           z=cgetg(operand,t_MAT);
           for(j=1;j<operand;j++)
-            gel(z,j) = cgetg(l,t_COL); 
+            gel(z,j) = cgetg(l,t_COL);
           gel(st,sp-1) = z;
-        } 
+        }
         break;
     case OCdeffunc:
         ep=(entree*)operand;
         switch(ep->valence)
         {
-        case EpUSER: 
+        case EpUSER:
           gpfree(ep->code);
           /*FIXME: the function might be in use...
             gunclone(ep->value);
@@ -1119,7 +1119,7 @@ closure_evalgen(GEN C)
   closure_eval(C);
   if (br_status)
   {
-    if (br_status!=br_ALLOCMEM) avma=ltop; 
+    if (br_status!=br_ALLOCMEM) avma=ltop;
     return NULL;
   }
   return gerepileupto(ltop,gel(st,--sp));
@@ -1131,7 +1131,7 @@ closure_evalvoid(GEN C)
   pari_sp ltop=avma;
   closure_eval(C);
   if (br_status!=br_ALLOCMEM)
-    avma=ltop; 
+    avma=ltop;
 }
 
 void
@@ -1168,7 +1168,7 @@ closure_disassemble(GEN C)
       pari_err(typeer,"disassemble");
     C=(GEN)ep->value;
   }
-  if (typ(C)!=t_VEC || lg(C)!=4 || typ(C[1])!=t_STR || typ(C[2])!=t_VECSMALL) 
+  if (typ(C)!=t_VEC || lg(C)!=4 || typ(C[1])!=t_STR || typ(C[2])!=t_VECSMALL)
     pari_err(typeer,"disassemble");
   code=GSTR(gel(C,1))-1;
   oper=gel(C,2);

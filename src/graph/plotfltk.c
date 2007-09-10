@@ -46,13 +46,13 @@ private:
 };
 
 Fl_Color rgb_color(int R, int G, int B)
-{ 
+{
   return fl_color_cube(R*FL_NUM_RED/256, G*FL_NUM_GREEN/256,
          B*FL_NUM_BLUE/256);
 }
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
-	     const char* name) 
+	     const char* name)
         : Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
 
 {
@@ -111,7 +111,7 @@ static void DrawString(void *data, long x, long y, char *text, long numtext)
   fl_draw(text,numtext,x,y);
 }
 
-void Plotter::draw() 
+void Plotter::draw()
 {
   struct plot_eng pl;
 
@@ -126,7 +126,7 @@ void Plotter::draw()
   pl.ln = &DrawLine;
   pl.bx = &DrawRectangle;
   pl.mp = &DrawPoints;
-  pl.ml = &DrawLines; 
+  pl.ml = &DrawLines;
   pl.st = &DrawString;
   pl.pl = &pari_plot;
 
@@ -135,7 +135,7 @@ void Plotter::draw()
 
 int Plotter::handle(int event)
 {
-  switch(event) 
+  switch(event)
   {
   case FL_PUSH:
     switch(Fl::event_button())
@@ -203,7 +203,7 @@ PARI_get_plot(long f)
     if (pari_plot.init) return;      // pari_plot is already set
     pari_plot.width   = 400;         // width and
     pari_plot.height  = 300;         //  height of plot window
-    pari_plot.hunit   = 3;           // 
+    pari_plot.hunit   = 3;           //
     pari_plot.vunit   = 3;           //
     pari_plot.fwidth  = 6;           // font width
     pari_plot.fheight = 9;           //   and height

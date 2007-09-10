@@ -1140,7 +1140,7 @@ prec_col(GEN c, long M, long *pl, GEN *D)
   {
     GEN x = gel(c,i);
     switch(typ(x)) {
-      case t_REAL: 
+      case t_REAL:
         *D = NULL;
         l = lg(x); if (l > *pl) *pl = l;
         break;
@@ -1696,8 +1696,8 @@ check_condition(double beta, double tau, double rho, long d, long delta, long t)
     + rho*delta*(delta - 1) / 2
     + rho * t * delta + tau*dim*(dim - 1)/2;
 
-  if (DEBUGLEVEL >= 4) 
-    fprintferr("delta = %d, t = %d, cond = %lf\n", delta, t, cond); 
+  if (DEBUGLEVEL >= 4)
+    fprintferr("delta = %d, t = %d, cond = %lf\n", delta, t, cond);
 
   return (cond <= 0);
 }
@@ -1731,8 +1731,8 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
   }
 }
 
-static GEN 
-do_exhaustive(GEN P, GEN N, long x, GEN B) 
+static GEN
+do_exhaustive(GEN P, GEN N, long x, GEN B)
 {
   GEN tst, sol = cget1(2*x + 2, t_VECSMALL);
   long j, l;
@@ -1740,14 +1740,14 @@ do_exhaustive(GEN P, GEN N, long x, GEN B)
   for (j = -x; j <= x; j++)
   {
     tst = gcdii(FpX_eval(P, stoi(j), N), N);
-    
+
     if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
     {
       for (l = 1; l < lg(sol) && j != sol[l]; l++) /*empty*/;
       if (l == lg(sol)) appendL(sol, (GEN)j);
     }
   }
-  return zv_to_ZV(sol); 
+  return zv_to_ZV(sol);
 }
 
 #define X_SMALL 1000
@@ -1769,8 +1769,8 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
-  if (cmpis(X, X_SMALL) <= 0) 
-    return gerepileupto(av, do_exhaustive(P0, N, itos(X), B)); 
+  if (cmpis(X, X_SMALL) <= 0)
+    return gerepileupto(av, do_exhaustive(P0, N, itos(X), B));
 
   /* bnd-hack is only for the case B = N */
   if (!equalii(B,N)) bnd = 1;
@@ -1810,7 +1810,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     for (j = 1; j <= d;   j++) gcoeff(M, j, j) = gel(Xpowers,j-1);
 
     /* P-part */
-    if (delta) row = d + 1; else row = 0; 
+    if (delta) row = d + 1; else row = 0;
 
     Q = P;
     for (i = 1; i < delta; i++)
@@ -1833,9 +1833,9 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
           gcoeff(M, l, row) = mulii(gmael(M, row, l), N0);
       if (row >= 1) N0 = mulii(N0, N);
     }
-    /* Z is the upper bound for the L^1 norm of the polynomial, 
-       ie. N^delta if B = N, B^delta otherwise */ 
-    if (B != N) Z = powiu(B, delta); else Z = N0; 
+    /* Z is the upper bound for the L^1 norm of the polynomial,
+       ie. N^delta if B = N, B^delta otherwise */
+    if (B != N) Z = powiu(B, delta); else Z = N0;
 
     if (DEBUGLEVEL >= 2)
     {
@@ -1886,7 +1886,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     {
       z = gel(r,j);
       tst = gcdii(FpX_eval(P, z, N), N);
-    
+
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
         for (l = 1; l < lg(sol) && !equalii(z, gel(sol,l)); l++) /*empty*/;
@@ -3007,7 +3007,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   if (!BORNE) BORNE = gen_0;
   else BORNE = gfloor(BORNE);
-  if (!STOCKMAX) stockall = 1; 
+  if (!STOCKMAX) stockall = 1;
   else if (typ(STOCKMAX) != t_INT) pari_err(typeer, "minim0");
   if (typ(a) != t_MAT) pari_err(typeer,"minim0");
 
@@ -3148,7 +3148,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       case min_ALL:
         if (s > maxrank && stockall) /* overflow */
         {
-          long maxranknew = maxrank << 1; 
+          long maxranknew = maxrank << 1;
           GEN Lnew = new_chunk(1 + maxranknew);
           for (i=1; i<=maxrank; i++) Lnew[i] = L[i];
           L = Lnew; maxrank = maxranknew;
@@ -3418,7 +3418,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
         {
           borne1 = mpadd(norme1, eps);
           borne2 = mpsub(norme1, eps);
-          s = 0; 
+          s = 0;
         }
       }
       else

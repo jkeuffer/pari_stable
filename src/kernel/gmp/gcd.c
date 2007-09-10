@@ -78,7 +78,7 @@ invmod(GEN a, GEN b, GEN *res)
 {
   if (typ(a) != t_INT || typ(b) != t_INT) pari_err(arither1);
   if (!signe(b)) { *res=absi(a); return 0; }
-  if (NLIMBS(b) < INVMOD_GMP_LIMIT) 
+  if (NLIMBS(b) < INVMOD_GMP_LIMIT)
     return invmod_pari(a,b,res);
   { /* General case: use gcdext(a+b, b) since mpn_gcdext require S1>=S2 */
     pari_sp av = avma;

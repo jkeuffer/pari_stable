@@ -383,7 +383,7 @@ gch(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpch(x);
-    case t_COMPLEX: case t_PADIC: 
+    case t_COMPLEX: case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
     case t_INTMOD: pari_err(typeer,"gch");
@@ -427,7 +427,7 @@ gsh(GEN x, long prec)
     case t_COMPLEX: case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: 
+    case t_INTMOD:
     default:
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gerepilecopy(av, y);
@@ -501,7 +501,7 @@ mpash(GEN x)
   GEN z, res;
   pari_sp av;
   long lx = lg(x), ex = expo(x);
-  
+
   res = cgetr(lx); av = avma;
   if (ex < 1 - BITS_IN_LONG) x = rtor(x, lx + nbits2nlong(-ex)-1);
   z = logr_abs( addrr_sign(x,1, sqrtr( addrs(mulrr(x,x), 1) ), 1) );
@@ -522,7 +522,7 @@ gash(GEN x, long prec)
     case t_REAL:
       return mpash(x);
 
-    case t_COMPLEX: av = avma; 
+    case t_COMPLEX: av = avma;
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
       y = glog(p1,prec);
       sz = (typ(y)==t_COMPLEX)? gsigne(gel(y,1)): gsigne(y);
@@ -589,7 +589,7 @@ gach(GEN x, long prec)
       gel(y,2) = mppi(lg(x)); return y;
 
     case t_COMPLEX:
-      av = avma; 
+      av = avma;
       p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec)); /* x + sqrt(x^2-1) */
       y = glog(p1,prec);
       if (typ(y) == t_COMPLEX && signe(y[2]) < 0) y = gneg(y);
@@ -1210,7 +1210,7 @@ static long nboft(long k, long p)
 {
   long s,n;
   for (s=0,n=0; n-s<k; s += u_lval(++n, p));
-  return n; 
+  return n;
 }
 
 /*
@@ -1220,7 +1220,7 @@ static long nboft(long k, long p)
  * Maurizio Boyarsky
  * Transactions of the American Mathematical Society,
  * Vol. 257, No. 2. (Feb., 1980), pp. 359-369.
- * Inspired by a GP script by Fernando Rodriguez-Villegas 
+ * Inspired by a GP script by Fernando Rodriguez-Villegas
  */
 
 static GEN
@@ -1241,12 +1241,12 @@ gadw(GEN x, long p)
     gel(u, 1) = gdivgs(gdivgs(gadd(gel(u, 1), gel(u, p)), k), p);
     for (j = 1; j < p; ++j)
       gel(u, j + 1) = gdivgs(gadd(gel(u, j), gel(u, j + 1)), (k*p) + j);
-    
+
     t = gmul(t, gaddgs(x, k-1));
     s = gadd(s, gmul(gmul(gel(u, 1), gpowgs(gel(x,2), k)), t));
     if ((k&0xFL)==0) gerepileall(ltop, 3, &u,&s,&t);
   }
-  
+
   return gneg(s);
 }
 
@@ -1275,7 +1275,7 @@ gammap_Dwork(GEN x, long p)
   return gerepileupto(ltop, p1);
 }
 
-/* 
+/*
  * Compute gammap using the definition. This is a O(x*M(log(pe))) algorithm.
  * This should be used if x is very small.
  */
@@ -1322,7 +1322,7 @@ gammap(GEN x)
   GEN p = gel(x,2);
   long e= precp(x);
   GEN n,m,nm;
-  if (valp(x)<0) 
+  if (valp(x)<0)
     pari_err(talker,"Gamma not defined for non-integral p-adic number");
   n = gtrunc(x);
   m = gtrunc(gneg(x));
@@ -1331,7 +1331,7 @@ gammap(GEN x)
   {
     if(nm==n)
       return gammap_Morita(itos(n),p,e);
-    else 
+    else
       return gammap_neg_Morita(itos(m),p,e);
   }
   return gammap_Dwork(x, itos(p));

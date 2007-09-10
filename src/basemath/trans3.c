@@ -552,7 +552,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   {
     GEN q = stor(n, l1), s = gen_1, t = gen_0, v, c, e, f;
     pari_sp av1, av2;
-   
+
     if (ex) { u=cgetc(l1); v=cgetc(l1); e=cgetc(l1); f=cgetc(l1); }
     else    { u=cgetr(l1); v=cgetr(l1); e=cgetr(l1); f=cgetr(l1); }
     av1 = avma;
@@ -595,7 +595,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
   }
   else
-  { 
+  {
     GEN zz = divsr(-1,x), s = gen_1;
     zf = gpow(x,gneg_i(a),l1);
     T = gadd(gadd(P, gmulsg(n-1, S)), sqrs(n-1));
@@ -1409,13 +1409,13 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   Cx  = Ax;
   Bx  = gen_1;
   av  = avma; lim = stack_lim(av, 1);
-  for (j = 2; j <= N; j++) 
+  for (j = 2; j <= N; j++)
   {
     Bx = gadd(Bx, Cx);
     Bx = FpXQX_red(Bx, cyc, q);
     Cx = FpXQX_mul(Cx, Ax, cyc, q);
     Cx = pol_mod_xn(Cx, N);
-    if (gcmp0(Cx)) break; 
+    if (gcmp0(Cx)) break;
     if (low_stack(lim, stack_lim(av, 1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem, "twistpartialzeta (1), j = %ld/%ld", j, N);
@@ -1428,31 +1428,31 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   Dx = pol_1(varn(x));
   av2 = avma; lim = stack_lim(av2, 1);
   for (j = lva; j > 1; j--)
-  {  
+  {
     GEN Ex;
     long e = va[j] - va[j-1];
     if (e == 1)
       Ex = Cx;
     else
       /* e is very small in general and actually very rarely different
-	 to 1, it is always 1 for zetap (so it should be OK not to store 
-	 them or to compute them in a smart way) */ 
+	 to 1, it is always 1 for zetap (so it should be OK not to store
+	 them or to compute them in a smart way) */
       Ex = gpowgs(Cx, e);
     Dx = gaddsg(1, FpXQX_mul(Dx, Ex, cyc, q));
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      if(DEBUGMEM>1) 
+      if(DEBUGMEM>1)
 	pari_warn(warnmem, "twistpartialzeta (2), j = %ld/%ld", lva-j, lva);
       Dx = gerepileupto(av2, FpXQX_red(Dx, cyc, q));
     }
   }
   Dx = FpXQX_mul(Dx, Cx, cyc, q); /* va[1] = 1 */
-  Bx = gerepileupto(av, FpXQX_mul(Dx, Bx, cyc, q));  
+  Bx = gerepileupto(av, FpXQX_mul(Dx, Bx, cyc, q));
   rep = gen_0;
   av2 = avma; lim = stack_lim(av2, 1);
   for (k = 1; k <= N; k++)
   {
-    GEN p2, ak = polcoeff_i(Bx, k, 0); 
+    GEN p2, ak = polcoeff_i(Bx, k, 0);
     p2  = quicktrace(ak, psm);
     rep = modii(addii(rep, mulii(gel(cff, k), p2)), q);
     if (low_stack(lim, stack_lim(av2, 1)))
@@ -1502,14 +1502,14 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
   if (!xp) return gen_0;
   if (vz)
     p1 =gel(vz,xp); /* vz[x] = Teichmuller(x) */
-  else 
+  else
     p1 = (x & 2)? gen_m1: gen_1;
   p1 = Fp_pow(p1, addis(s, m), q);
   p2 = Fp_pow(stoi(x), negi(s), q);
   return modii(mulii(p1,p2), q);
 }
 
-/* compute the first N coefficients of the Mahler expansion 
+/* compute the first N coefficients of the Mahler expansion
    of phi^m_s skipping the first one (which is zero) */
 GEN
 coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
@@ -1519,12 +1519,12 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
   long k, j;
 
   av = avma; lim = stack_lim(av, 2);
-  for (k = 1; k <= N; k++) 
+  for (k = 1; k <= N; k++)
   {
-    gel(cff, k) = phi_ms(p, q, m, s, k, vz); 
+    gel(cff, k) = phi_ms(p, q, m, s, k, vz);
     if (low_stack(lim, stack_lim(av, 2)))
     {
-      if(DEBUGMEM>1) 
+      if(DEBUGMEM>1)
 	pari_warn(warnmem, "coeff_of_phi_ms (1), k = %ld/%ld", N-k, N);
       cff = gerepileupto(av, gcopy(cff));
     }
@@ -1535,7 +1535,7 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
     gel(cff, j) = centermodii(b, q, qs2);
     if (low_stack(lim, stack_lim(av, 2)))
     {
-      if(DEBUGMEM>1) 
+      if(DEBUGMEM>1)
 	pari_warn(warnmem, "coeff_of_phi_ms (2), j = %ld/%ld", N-j, N);
       cff = gerepileupto(av, gcopy(cff));
     }
@@ -1547,16 +1547,16 @@ coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
       gel(cff, j) = centermodii(b, q, qs2);
       if (low_stack(lim, stack_lim(av, 2)))
       {
-	if(DEBUGMEM>1) 
-	  pari_warn(warnmem, "coeff_of_phi_ms (3), (k,j) = (%ld,%ld)/%ld", 
+	if(DEBUGMEM>1)
+	  pari_warn(warnmem, "coeff_of_phi_ms (3), (k,j) = (%ld,%ld)/%ld",
 	      k, N-j, N);
 	cff = gerepileupto(av, gcopy(cff));
       }
     }
   k = N; while(gcmp0(gel(cff, k))) k--;
   setlg(cff, k+1);
-  if (DEBUGLEVEL > 2) 
-    fprintferr("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n", 
+  if (DEBUGLEVEL > 2)
+    fprintferr("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n",
 	       k, N);
   return gerepileupto(av, cff);
 }
@@ -1565,7 +1565,7 @@ static long
 valfact(long N, ulong p)
 {
   long f = 0;
-  while (N > 1) 
+  while (N > 1)
   {
     N /= p;
     f += N;
@@ -1582,12 +1582,12 @@ number_of_terms(ulong p, long prec)
   N = (long)((p-1)*prec + (p>>1)*(log2(prec)/log2(p)));
   N = p*(N/p);
   f = valfact(N, p);
-  while (f > prec) 
+  while (f > prec)
   {
     N = p*(N/p) - 1;
     f -= u_lval(N+1, p);
   }
-  while (f < prec) 
+  while (f < prec)
   {
     N = p*(N/p+1);
     f += u_lval(N, p);
@@ -1825,7 +1825,7 @@ polylog(long m, GEN x, long prec)
     else
       p1 = gsub(glog(x,l), z);
     p1 = gmul2n(gsqr(p1), -1); /* = (log(-x))^2 / 2 */
-    
+
     p1 = gadd(p1, divru(gsqr(mppi(l)), 6));
     p1 = gneg_i(p1);
   }
@@ -1918,7 +1918,7 @@ polylogP(long m, GEN x, long prec)
   /* |x| <= 1 */
   if (k > 0) setsigne(p1, -1);
   setexpo(p1, expo(p1)+1); /* 2log|x| <= 0 */
-  
+
   y = polylog(m,x,l);
   y = m2? real_i(y): imag_i(y);
 
@@ -2063,7 +2063,7 @@ inteta_pol(GEN q, long v, long l)
   qn = gen_1; ps = gen_1;
   vps = vqn = 0;
   for(n = 0;; n++)
-  { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2), 
+  { /* qn = q^n,  ps = (-1)^n q^(n(3n+1)/2),
      * vps, vqn valuation of ps, qn HERE */
     ulong vp1 = vps + 2*vqn + v; /* valuation of p1 at END of loop body */
     long k1, k2;
@@ -2078,7 +2078,7 @@ inteta_pol(GEN q, long v, long l)
     p1 = RgX_modXn_shallow(p1, k1);
     y = addmulXn(p1, y, vp1);
     if (k2 <= 0) break;
-    
+
     qn = gmul(qn,q);
     ps = gmul(p1,qn);
     ps = RgX_modXn_shallow(ps, k2);
@@ -2117,7 +2117,7 @@ inteta(GEN q)
     ulong vps, vqn;
     long l = lg(q), v, n;
     pari_sp av, lim;
- 
+
     v = valp(q); /* handle valuation separately to avoid overflow */
     if (v <= 0) pari_err(talker,"non-positive valuation in eta");
     y = ser2pol_i(q, l); /* t_SER inefficient when input has low degree */
@@ -2138,7 +2138,7 @@ inteta(GEN q)
       qn = gmul(qn,q); ps = gmul(p1,qn);
       vqn += v; vps = vp1 + vqn;
       k = l+v - vps; if (k <= 2) return y;
- 
+
       y = ser_addmulXn(ps, y, vps);
       setlg(q, k);
       setlg(qn, k);

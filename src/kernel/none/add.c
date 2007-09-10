@@ -167,11 +167,11 @@ addrex01(GEN x)
   GEN y = cgetr(l);
   y[1] = evalsigne(1) | evalexpo(1);
   y[2] = HIGHBIT | (((ulong)x[2] & ~HIGHBIT) >> 1);
-  shift_right(y, x, 3,l, x[2], 1); 
+  shift_right(y, x, 3,l, x[2], 1);
   return y;
 }
 /* return subrs(x,1) to the min of (prec(x), prec(x-1) + 1),
- * assuming x > 1 is a normalized t_REAL of exponent 0 
+ * assuming x > 1 is a normalized t_REAL of exponent 0
  * [ goal: avoid the loss of significant bits form subrs ]*/
 GEN
 subrex01(GEN x)

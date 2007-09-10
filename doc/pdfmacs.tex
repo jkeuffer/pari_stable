@@ -26,7 +26,7 @@
 \catcode`\@=11
 %% Now we redefine several of the macros so as to provide hyperlinks.
 %
-%  Colors 
+%  Colors
 %
 %% We use TeX's grouping mechanism to make \currentcolor into a  stack.
 %
@@ -41,7 +41,7 @@
  \def\Blue{1 1 0 0}
  \def\Green{1 0 1 0}
  \def\Black{0 0 0 1}
- \def\textcolor{\Black} 
+ \def\textcolor{\Black}
  \def\linkcolor{\Red}
  \def\emacscolor{\Green}
  \def\unixcolor{\Blue}
@@ -56,7 +56,7 @@
 %% bookmark entry is created on the second pass.
 
 % These keep track of the number of sections in each chapter and appendix.
-\newtoks\numsectok    \numsectok={\or}      
+\newtoks\numsectok    \numsectok={\or}
 \newtoks\numsecapptok \numsecapptok={\or}
 
 % Append #1 to the token list given in #2, separated by \or.  #1 is
@@ -94,7 +94,7 @@
   \title{Chapter \number\chapno:}{#1}#2\noindent\ignorespaces
   \ifsecondpass
    \pdfoutline goto name {pdfchap@\number\pdfchapcntr} count -\numsecs\chapno
-     {\number\chapno\ #1} 
+     {\number\chapno\ #1}
    \fi
 }
 \def\appendix#1{
@@ -105,8 +105,8 @@
   \def\applet{\ifcase\appno\or A\or B\or C\or D\or E\or F\or G\fi}
   \title{Appendix \applet:}{#1}\noindent\ignorespaces
   \ifsecondpass
-   \pdfoutline goto name {pdfchap@\number\pdfchapcntr} 
-    count -\numsecsapp\appno {\applet\ #1} 
+   \pdfoutline goto name {pdfchap@\number\pdfchapcntr}
+    count -\numsecsapp\appno {\applet\ #1}
    \fi}
 \def\section#1{
   \subsecno=0\global\advance\secno by 1

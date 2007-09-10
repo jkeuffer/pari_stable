@@ -31,9 +31,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   only you know it may be quite different on beyond.  Oh, Kitty!
  *   how nice it would be if we could only get through into Looking-
  *   glass House!  I'm sure it's got, oh! such beautiful things in it!
- *                                                                             
+ *
  *  Through the Looking Glass,  Lewis Carrol
- *  
+ *
  *  (pityful attempt to beat GN code/comments rate)
  *  */
 
@@ -239,7 +239,7 @@ subiuspec(GEN x, ulong s, long nx)
   GEN zd;
   long lz;
   lz = nx + 2; zd = cgeti(lz);
-  
+
   mpn_sub_1 (LIMBS(zd), (mp_limb_t *)x, nx, s);
   if (! zd[lz - 1]) { --lz; }
 
@@ -255,10 +255,10 @@ subiispec(GEN x, GEN y, long nx, long ny)
   long lz;
   if (ny==1) return subiuspec(x,*y,nx);
   lz = nx+2; zd = cgeti(lz);
-  
+
   mpn_sub (LIMBS(zd), (mp_limb_t *)x, nx, (mp_limb_t *)y, ny);
   while (lz >= 3 && zd[lz - 1] == 0) { lz--; }
-  
+
   zd[1] = evalsigne(1) | evallgefint(lz);
   return zd;
 }
@@ -330,16 +330,16 @@ shifti(GEN x, long n)
     long d = dvmdsBIL(n, &m);
     long i;
 
-    lz = lx + d + (m!=0);  
-    z = cgeti(lz); 
+    lz = lx + d + (m!=0);
+    z = cgeti(lz);
     for (i=0; i<d; i++) LIMBS(z)[i] = 0;
 
-    if (!m) xmpn_copy(LIMBS(z)+d, LIMBS(x), NLIMBS(x)); 
+    if (!m) xmpn_copy(LIMBS(z)+d, LIMBS(x), NLIMBS(x));
     else
     {
-      ulong carry = mpn_lshift(LIMBS(z)+d, LIMBS(x), NLIMBS(x), m); 
-      if (carry) z[lz - 1] = carry; 
-      else lz--; 
+      ulong carry = mpn_lshift(LIMBS(z)+d, LIMBS(x), NLIMBS(x), m);
+      if (carry) z[lz - 1] = carry;
+      else lz--;
     }
   }
   else
@@ -353,11 +353,11 @@ shifti(GEN x, long n)
     if (!m) xmpn_copy(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d);
     else
     {
-      mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m); 
+      mpn_rshift(LIMBS(z), LIMBS(x) + d, NLIMBS(x) - d, m);
       if (z[lz - 1] == 0)
       {
         if (lz == 3) { avma = (pari_sp)(z+3); return gen_0; }
-        lz--; 
+        lz--;
       }
     }
   }
@@ -371,7 +371,7 @@ ishiftr_lg(GEN x, long lx, long n)
   long ly, i, m, s = signe(x);
   GEN y;
   if (!s) return gen_0;
-  if (!n) 
+  if (!n)
   {
     y = cgeti(lx);
     y[1] = evalsigne(s) | evallgefint(lx);
@@ -467,7 +467,7 @@ floorr(GEN x)
     }
   }
   if (mpn_add_1(LIMBS(y),LIMBS(y),d-2,1))
-    y[d++]=1; 
+    y[d++]=1;
 END:
   y[1] = evalsigne(-1) | evallgefint(d);
   return y;
@@ -617,7 +617,7 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   ly = lgefint(y);
   if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = (ulong)y[2]; return gen_0; }
 
-  z = cgeti(ly); 
+  z = cgeti(ly);
   *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (z [ly - 1] == 0) ly--;
   z[1] = evallgefint(ly) | evalsigne(1);
@@ -637,7 +637,7 @@ divis_rem(GEN y, long x, long *rem)
   ly = lgefint(y);
   if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = itos(y); return gen_0; }
 
-  z = cgeti(ly); 
+  z = cgeti(ly);
   *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (sy<0) *rem = -  *rem;
   if (z[ly - 1] == 0) ly--;
@@ -658,7 +658,7 @@ divis(GEN y, long x)
   ly = lgefint(y);
   if (ly == 3 && (ulong)x > (ulong)y[2]) return gen_0;
 
-  z = cgeti(ly); 
+  z = cgeti(ly);
   (void)mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (z[ly - 1] == 0) ly--;
   z[1] = evallgefint(ly) | evalsigne(s);
@@ -687,11 +687,11 @@ divrr_with_gmp(GEN x, GEN y)
   r = (mp_limb_t *)new_chunk(lly);
 
   mpn_tdiv_qr(q,r,0,u,lu,z,lly);
-  
+
   /*Round up: This is not exactly correct we should test 2*r>z*/
   if ((ulong)r[lly-1] > ((ulong)z[lly-1]>>1))
     mpn_add_1(q,q,lw+1,1);
-  
+
   xmpn_mirrorcopy(RLIMBS(w),q,lw);
 
   if (q[lw] == 0) e--;
@@ -725,11 +725,11 @@ divri_with_gmp(GEN x, GEN y)
   r = (mp_limb_t *)new_chunk(lly);
 
   mpn_tdiv_qr(q,r,0,u,lu,z,lly);
-  
+
   /*Round up: This is not exactly correct we should test 2*r>z*/
   if ((ulong)r[lly-1] > ((ulong)z[lly-1]>>1))
     mpn_add_1(q,q,llx+1,1);
-  
+
   xmpn_mirrorcopy(RLIMBS(w),q,llx);
 
   if (q[llx] == 0) e--;
@@ -767,7 +767,7 @@ divrr(GEN x, GEN y)
   e = expo(x) - expo(y);
   if (!sx) return real_0_bit(e);
   if (sy<0) sx = -sx;
-    
+
   lx=lg(x); ly=lg(y);
   if (ly==3)
   {
@@ -796,7 +796,7 @@ divrr(GEN x, GEN y)
     ulong k,qp;
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
-    
+
     if ((ulong)r1[1] == y0)
     {
       qp = ULONG_MAX; k=addll(y0,r1[2]);
@@ -820,7 +820,7 @@ divrr(GEN x, GEN y)
       while (!overflow && k4) { qp--; k3=subll(k3,y1); k4=subllx(k4,y0); }
     }
     j = lr-i+1;
-    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder = 0 ; j = ly; } 
+    if (j<ly) (void)mulll(qp,y[j]); else { hiremainder = 0 ; j = ly; }
     for (j--; j>1; j--)
     {
       r1[j] = subll(r1[j], addmul(qp,y[j]));
@@ -858,7 +858,7 @@ divrr(GEN x, GEN y)
   if (r[0] == 0) e--;
   else if (r[0] == 1) { shift_right(r,r, 2,lr, 1,1); }
   else { /* possible only when rounding up to 0x2 0x0 ... */
-    r[2] = HIGHBIT; e++; 
+    r[2] = HIGHBIT; e++;
   }
   r[0] = evaltyp(t_REAL)|evallg(lr);
   r[1] = evalsigne(sx) | evalexpo(e);
@@ -895,7 +895,7 @@ dvmdii(GEN x, GEN y, GEN *z)
     {
       long s=mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x));
       if (s>0) goto DIVIDE;
-      if (s==0) 
+      if (s==0)
       {
         if (z == ONLY_REM) return gen_0;
         if (z) *z = gen_0;
@@ -943,7 +943,7 @@ DIVIDE: /* quotient is non-zero */
       if (lr == 2) {avma=av; return gen_0;} /* exact division */
     }
     r[1] = evalsigne(sx) | evallgefint(lr);
-    avma = (pari_sp) r; return r; 
+    avma = (pari_sp) r; return r;
   }
   else
   {
@@ -961,7 +961,7 @@ DIVIDE: /* quotient is non-zero */
       if (lr == 2) {avma=(pari_sp) q; *z=gen_0; return q;} /* exact division */
     }
     r[1] = evalsigne(sx) | evallgefint(lr);
-    avma = (pari_sp) r; *z = r; return q; 
+    avma = (pari_sp) r; *z = r; return q;
   }
 }
 
@@ -1083,7 +1083,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   if (nx < ny) swapspec(x,y, nx,ny);
   if (!ny) return gen_0;
   if (ny == 1) return muluispec((ulong)*y, x, nx);
-    
+
   lz = nx+ny+2;
   zd = cgeti(lz);
   hi = mpn_mul(LIMBS(zd), (mp_limb_t *)x, nx, (mp_limb_t *)y, ny);
@@ -1102,7 +1102,7 @@ sqrispec(GEN x, long nx)
 
   if (!nx) return gen_0;
   if (nx==1) return muluu(*x,*x);
-    
+
   lz = (nx<<1)+2;
   zd = cgeti(lz);
   mpn_mul_n(LIMBS(zd), (mp_limb_t *)x, (mp_limb_t *)x, nx);
@@ -1153,7 +1153,7 @@ remi2n(GEN x, long n)
 /********************************************************************/
 
 /* Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S.
- * As for dvmdii, R is last on stack and guaranteed to be gen_0 in case the 
+ * As for dvmdii, R is last on stack and guaranteed to be gen_0 in case the
  * remainder is 0. R = NULL is allowed. */
 GEN
 sqrtremi(GEN a, GEN *r)
@@ -1208,7 +1208,7 @@ sqrtr_abs(GEN a)
     c = (mp_limb_t *) new_chunk(l + 1);
     n = mpn_sqrtrem(c,b,b,(l<<1)+2); /* c <- sqrt; b <- rem */
     u = (ulong)*c++;
-    if ( u&HIGHBIT || (u == ~HIGHBIT && 
+    if ( u&HIGHBIT || (u == ~HIGHBIT &&
              (n>l || (n==l && mpn_cmp(b,c,l)>0))))
       mpn_add_1(c,c,l,1);
   }
@@ -1244,7 +1244,7 @@ convi(GEN x, long *l)
   long i, j;
   unsigned char *t;
   while (!*res) {res++; llz--;} /*Strip leading zeros*/
-  lz  = (8+llz)/9; 
+  lz  = (8+llz)/9;
   z = (ulong*)new_chunk(1+lz);
   t=res+llz+9;
   for(i=0;i<llz-8;i+=9)

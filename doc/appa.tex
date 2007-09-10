@@ -59,7 +59,7 @@ come with current X11 distributions satisfy this requirement.
 
 \subsec{Basic configuration:} First, have a look at the \kbd{MACHINES} file
 to see if anything funny applies to your architecture or operating system.
-Then, type 
+Then, type
 
 \kbd{./Configure}
 
@@ -80,7 +80,7 @@ architecture and operating system, thus you can build GP for several
 different machines from the same source tree (the builds are
 independent and can be done simultaneously).
 
-\kbd{./Configure --tune} 
+\kbd{./Configure --tune}
 
 \noindent fine tunes the library for the host used for compilation. This
 adjusts thresholds by running a large number of comparative tests. (It will
@@ -137,7 +137,7 @@ the expected results. Have a look and decide for yourself if something is
 amiss. If it looks like a bug in the Pari system, we would appreciate a
 report (see the last section).
 
-\section{Troubleshooting and fine tuning} 
+\section{Troubleshooting and fine tuning}
 In case the default \kbd{Configure} run fails miserably, try
 
 \kbd{./Configure -a}
@@ -203,7 +203,7 @@ the values computed by \kbd{Configure}:
 \kbd{C\_INCLUDE\_PATH} is prepended to the list of directories
 searched for include files. Note that adding \kbd{-I} flags to
 \kbd{CFLAGS} is not enough since \kbd{Configure} sometimes
-relies on finding the include files and parsing them, and it does not 
+relies on finding the include files and parsing them, and it does not
 parse \kbd{CFLAGS} at this time.
 
 \kbd{LIBRARY\_PATH} is prepended to the list of directories
@@ -250,7 +250,7 @@ L1: \kbd{auto}, \kbd{none} and \kbd{gmp}
 
 \noindent \kbd{auto} means to use the auto-detected value. L0=\kbd{none} means
 to use the portable C kernel (no assembler), L1=\kbd{none} means to use the
-PARI L1 kernel. 
+PARI L1 kernel.
 
 \noindent$\bullet$ A fully qualified kernel name \emph{fqkn} is of the form
 \kbd{$L_0$-$L_1$}.
@@ -270,7 +270,7 @@ probably should, you can get the source and compile it there (you do not need
 to install it). You can also use this feature together with a symbolic link,
 named \kbd{readline}, in the PARI toplevel directory if you have compiled the
 readline library somewhere else, without installing it to one of its standard
-locations. 
+locations.
 
 You can also invoke \kbd{Configure} with one of the following arguments:
 
@@ -414,7 +414,7 @@ install} installs all such packages.
 \kbd{gprc.dos} if you are using \kbd{GP.EXE}) to \kbd{\$HOME/.gprc}. Modify
 it to your liking. For instance, if you are not using an ANSI terminal,
 remove control characters from the \kbd{prompt} variable. You can also
-enable colors. 
+enable colors.
 
 If desired, read \kbd{\$datadir/misc/gpalias}  from the \kbd{gprc}
 file, which provides some common shortcuts to lengthy names; fix the path in
@@ -458,7 +458,7 @@ you can link your C programs to the PARI library. A sample makefile
 \kbd{examples/Makefile} is provided to illustrate the use of the various
 libraries. Type \kbd{make all} in the \kbd{examples} directory to see how
 they perform on the \kbd{extgcd.c} program, which is commented in the
-manual. 
+manual.
 
 This should produce a statically linked binary \kbd{extgcd-sta}
 (standalone), a dynamically linked binary \kbd{extgcd-dyn} (loads libpari

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static void whatnow0(char *s) { whatnow(s,0); }
 
-GEN 
+GEN
 parihist(long p)
 {
   return gp_history(GP_DATA->hist, p, NULL,NULL);

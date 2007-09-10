@@ -143,9 +143,9 @@ delete_cache(RELCACHE_t *M)
   {
     gpfree((void*)rel->R);
     if (!rel->m) continue;
-    gunclone(rel->m); 
+    gunclone(rel->m);
     if (!rel->ex) continue;
-    gunclone(rel->ex); 
+    gunclone(rel->ex);
   }
   gpfree((void*)M->base); M->base = NULL;
 }
@@ -247,7 +247,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
   for (   ; j<lv; j++)       F->perm[j] =  perm[j];
   F->subFB = gclone(yes);
-  F->newpow = 1; 
+  F->newpow = 1;
   F->pow = NULL;
   if (DEBUGLEVEL)
     msgtimer("sub factorbase (%ld elements)",lg(F->subFB)-1);
@@ -502,7 +502,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     if (l == N+1) continue; /* p inert */
 
     /* keep non-inert ideals with Norm <= C2 */
-    for (m = 1; m <= k; m++) 
+    for (m = 1; m <= k; m++)
     {
       GEN t = gel(LP,m);
       gel(t,5) = eltmul_get_table(nf, gel(t,5));
@@ -1743,7 +1743,7 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   long i;
   if (!rel->m) return zerocol(RU);
   arch = gmul(M, rel->m);
-  if (rel->ex) 
+  if (rel->ex)
   {
     GEN t, ex = rel->ex, x = NULL;
     long l = lg(ex);
@@ -1778,7 +1778,7 @@ powFB_fill(RELCACHE_t *cache, GEN M)
     Alg = pow->alg; l = lg(Alg); Arc = cgetg(l, t_VEC);
     for (i = 1; i < l; i++)
     {
-      GEN z, t = gel(Alg,i); 
+      GEN z, t = gel(Alg,i);
       long lt = lg(t);
       z = cgetg(lt, t_VEC);
       gel(Arc,i) = z; if (lt == 1) continue;
@@ -1823,7 +1823,7 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
   if (k == n) { avma = av; return 0; }
   invak = Fl_inv((ulong)a[k], p);
   L[k] = 1;
-  for (i=k+1; i<n; i++) 
+  for (i=k+1; i<n; i++)
     if (a[i]) a[i] = p - ((a[i] * invak) % p);
   for (j=1; j<=k; j++)
   {
@@ -1890,7 +1890,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
-  GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2); 
+  GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
@@ -1983,7 +1983,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
           gx = ZM_zc_mul(IDEAL,x);
           if (!RgV_isscalar(gx))
           {
-            GEN Nx, xembed = gmul(M, gx); 
+            GEN Nx, xembed = gmul(M, gx);
             long e;
             nbsmallnorm++;
             if (++try_factor > maxtry_FACT) goto ENDIDEAL;
@@ -2047,7 +2047,7 @@ pseudomin(GEN I, GEN G)
 static void
 dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
 {
-  fprintferr("\n++++ cglob = %ld: new relation (need %ld)", 
+  fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
              cache->last - cache->base, cache->end - cache->base);
   wr_rel(cache->last->R); msgtimer("for this relation");
 }
@@ -2076,7 +2076,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
   GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
- 
+
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
@@ -3019,7 +3019,7 @@ compute_vecG(GEN nf, FB_t *F, long n)
 }
 
 static GEN
-buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun, 
+buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
      long PRECREG)
 {
   pari_sp av, av2;
@@ -3062,7 +3062,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   init_GRHcheck(GRHcheck, N, R1, LOGD);
 
 START:
-  avma = av; 
+  avma = av;
   if (cache.base) delete_cache(&cache);
   if (F.subFB) delete_FB(&F);
   cbach = check_bach(cbach,12.);
@@ -3125,7 +3125,7 @@ PRECPB:
     GEN M = gmael(nf, 5, 1), mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
     int first = (W == NULL); /* never reduced before */
     REL_t *rel;
-    
+
     if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
     for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
     {
@@ -3147,7 +3147,7 @@ PRECPB:
       {
         if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
         L_jid = vecslice(F.perm, 1, need);
-        vecsmall_sort(L_jid); jid = 0; 
+        vecsmall_sort(L_jid); jid = 0;
       }
       goto MORE;
     }
@@ -3253,7 +3253,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
     nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
     if (lg(nf)==3) {
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
-      nf = gel(nf,1); 
+      nf = gel(nf,1);
     }
   }
   z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);

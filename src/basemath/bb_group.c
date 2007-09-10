@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*Generic Shanks baby-step/giant-step algorithm*/
 GEN
-gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp, 
+gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
     GEN easy(void*E, GEN, GEN, GEN))
 {
   pari_sp av=avma,av1,lim;
@@ -230,7 +230,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
     k = 0;
     p1 = w;
     do
-    { 
+    {
       z = p1; p1 = grp->pow(E,p1,l);
       k++;
     } while(!grp->cmp1(p1));
@@ -256,7 +256,7 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
  *
  * 2) If there is a solution, there are exactly m of them [m = gcd(p-1,n)].
  * If zetan!=NULL, *zetan is set to a primitive mth root of unity so that
- * the set of solutions is { x*zetan^k; k=0..m-1 } 
+ * the set of solutions is { x*zetan^k; k=0..m-1 }
  */
 GEN
 gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group *grp)
@@ -264,9 +264,9 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
   pari_sp ltop = avma, lim;
   GEN m, u1, u2, z;
 
-  if (grp->cmp1(n)) 
-  { 
-    if (zetan) *zetan = grp->pow(E,a,gen_0); 
+  if (grp->cmp1(n))
+  {
+    if (zetan) *zetan = grp->pow(E,a,gen_0);
     return gcopy(a);
   }
   m = bezout(n,q,&u1,&u2);

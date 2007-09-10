@@ -750,7 +750,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
     gel(vB,i) = set_sign_mod_idele(nf, NULL, gel(vB,i), cond,sarch);
     beta2 = element_mul(nf, gel(vB,i), muslambda);
-    
+
     s0 = powgi(z, Rg_to_Fp(gmul(vt, beta2), den));
     for (ic = 1; ic <= nChar; ic++)
     {
@@ -1368,7 +1368,7 @@ ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
   L = R->L1; l = lg(L);
   for (i=1; i<l; i++, avma = av2)
   {
-    np = L[i]; 
+    np = L[i];
     chi  = EvalChar(&C, gel(R->L1ray,i));
     an_AddMul(an,an2,np,n,deg,chi,reduc);
   }
@@ -2378,8 +2378,8 @@ LABDOUB:
   Lp = cgetg(cl + 1, t_VEC);
   if (!flag)
   {
-    if (degpol(nf[1]) == 2) 
-      QuadGetST(bnr, &S,&T,dataCR,vChar,newprec); 
+    if (degpol(nf[1]) == 2)
+      QuadGetST(bnr, &S,&T,dataCR,vChar,newprec);
     else
       GetST(bnr, &S, &T, dataCR, vChar, newprec);
     for (i = 1; i <= cl; i++)
@@ -2480,12 +2480,12 @@ LABDOUB:
     long incr_pr;
     if (++cpt >= 3) pari_err(precer, "stark (computation impossible)");
 
-    /* compute the precision, we need 
+    /* compute the precision, we need
           a) get at least EXTRA_PREC fractional digits if there is none;
        or b) double the fractional digits.
     */
     incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
-    if (incr_pr < 0) 
+    if (incr_pr < 0)
       incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + max(ADD_PREC, cpt*incr_pr);
 
@@ -2556,7 +2556,7 @@ makescind(GEN nf, GEN P, long cl)
   is_P = gcmp0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
   /* record whether roo[1] is a root of P or tau(P) */
-  
+
   perm = NULL; /*-Wall*/
   for (i = 1; lg(L); i++)
   {
@@ -2722,7 +2722,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
  * If flag & 2: compute the value of the L-function L_S(s, chi) where S is the
  *   set of places dividing the modulus of bnr (and the infinite places),
  * else
- *   compute the value of the primitive L-function associated to chi, 
+ *   compute the value of the primitive L-function associated to chi,
  * If flag & 4: return also the character */
 GEN
 bnrL1(GEN bnr, GEN subgp, long flag, long prec)

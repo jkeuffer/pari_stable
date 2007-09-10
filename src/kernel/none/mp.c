@@ -1092,7 +1092,7 @@ diviuexact(GEN x, ulong y)
   pari_sp av;
   long lx, vy, s = signe(x);
   GEN z;
-  
+
   if (!s) return gen_0;
   if (y == 1) return icopy(x);
   lx = lgefint(x);
@@ -1101,7 +1101,7 @@ diviuexact(GEN x, ulong y)
     return (s > 0)? utoipos(q): utoineg(q);
   }
   av = avma; (void)new_chunk(lx); vy = vals(y);
-  if (vy) { 
+  if (vy) {
     y >>= vy;
     if (y == 1) { avma = av; return shifti(x, -vy); }
     x = shifti(x, -vy);
@@ -1825,7 +1825,7 @@ convi_dac(GEN x, ulong l, ulong *res)
   pari_sp ltop=avma;
   ulong m;
   GEN x1,x2;
-  if (l==1) { *res=itou(x); return; } 
+  if (l==1) { *res=itou(x); return; }
   m=l>>1;
   x1=dvmdii(x,powuu(1000000000UL,m),&x2);
   convi_dac(x1,l-m,res+m);
@@ -1850,4 +1850,4 @@ convi(GEN x, long *l)
   while (z[lz-1]==0) lz--;
   *l=lz; return z+lz;
 }
- 
+

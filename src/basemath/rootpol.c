@@ -1252,7 +1252,7 @@ conformal_pol(GEN p, GEN a, long bit)
   GEN z, r, ma = gneg(a), ca = gconj(a);
   long n = degpol(p), i;
   pari_sp av = avma, lim = stack_lim(av,2);
-  
+
   z = mkpoln(2, ca, negr(myreal_1(bit)));
   r = scalarpol(gel(p,2+n), 0);
   for (i=n-1; ; i--)

@@ -450,7 +450,7 @@ Z_issquarerem(GEN x, GEN *pt)
   }
   if (lgefint(x) == 3)
   {
-    ulong a; 
+    ulong a;
     if (!uissquarerem((ulong)x[2], &a)) return 0;
     if (pt) *pt = utoipos(a);
     return 1;
@@ -657,7 +657,7 @@ gissquare(GEN x)
         a = modii(a, q);
         if (kronecker(a,q) == -1) { avma = av; return gen_0; }
       }
-      /* kro(a,q) = 1, q odd: need to factor q and check all p|q 
+      /* kro(a,q) = 1, q odd: need to factor q and check all p|q
        * (can't use product formula in case v_p(q) is even for some p) */
       p = gel(Z_factor(q),1); l = lg(p);
       for (i=1; i<l; i++)
@@ -844,10 +844,10 @@ ispower(GEN x, GEN K, GEN *pt)
           *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
         }
         avma = (pari_sp)(z + 3); return 0;
-      } 
+      }
       return (ispower(a, K, NULL) && polispower(b, K, NULL));
     }
-    case t_REAL: 
+    case t_REAL:
       if (signe(x) < 0 && !mpodd(K)) return 0;
     case t_COMPLEX:
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
@@ -1326,7 +1326,7 @@ Fl_sqrt(ulong a, ulong p)
 
 static GEN
 sqrt_Cipolla_sqr(void *data, GEN y)
-{ 
+{
   GEN u = gel(y,1), v = gel(y,2);
   GEN p = gel(data,2);
   GEN n = gel(data,3);
@@ -1339,7 +1339,7 @@ sqrt_Cipolla_sqr(void *data, GEN y)
 
 static GEN
 sqrt_Cipolla_msqr(void *data, GEN y)
-{ 
+{
   GEN u = gel(y,1), v = gel(y,2);
   GEN a = gel(data,1);
   GEN p = gel(data,2);
@@ -1997,7 +1997,7 @@ const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,cmpii,gcmp1};
 /**                                                                 **/
 /*********************************************************************/
 
-GEN 
+GEN
 Fp_order(GEN a, GEN o, GEN p)
 {
   return gen_eltorder(a, o, (void*)p, &Fp_star);
@@ -2077,11 +2077,11 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
   GEN p1,p=(GEN)E;
   if (is_pm1(x)) return gen_0;
   /* p > 2 */
-  p1 = addsi(-1, p); 
+  p1 = addsi(-1, p);
   if (equalii(p1,x))  /* -1 */
-  { 
-    ord = (typ(ord)==t_MAT) ? factorback(ord,NULL) : ord; 
-    return gerepileupto(av, shifti(ord,-1)); 
+  {
+    ord = (typ(ord)==t_MAT) ? factorback(ord,NULL) : ord;
+    return gerepileupto(av, shifti(ord,-1));
   }
   avma = av;
   return NULL;
@@ -2971,7 +2971,7 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
 static void
 corediscfact(GEN x, long xmod4, GEN *ptD, GEN *ptP, GEN *ptE)
 {
-  long s = signe(x), l, i; 
+  long s = signe(x), l, i;
   GEN fa = Z_factor(s < 0? absi(x): x);
   GEN d, P = gel(fa,1), E = gtovecsmall(gel(fa,2));
 

@@ -248,8 +248,8 @@ void Plotter::mouseReleaseEvent( QMouseEvent*) {
 #include <qtoolbar.h>
 #include <qaction.h>
 #include <qfiledialog.h>
-#include <qmessagebox.h> 
-#include <qfile.h> 
+#include <qmessagebox.h>
+#include <qfile.h>
 #include <qstatusbar.h>
 #include <qimage.h>
 #include <qstrlist.h>
@@ -276,7 +276,7 @@ static const char * const fullscreen_xpm[] = {
 ".    ....    .",
 ".     ..     .",
 ".     ..     .",
-".............."}; 
+".............."};
 
 
 class SaveAsDialog: public
@@ -477,7 +477,7 @@ PlotWindow::~PlotWindow() {
 
 #ifndef __QPE__
 void PlotWindow::resizeEvent( QResizeEvent *e) {
-    
+
     QMainWindow::resizeEvent( e);
     res->setText( QString( "Resolution: ") +
 		  QString::number( plr->width()) + "x" +
@@ -613,7 +613,7 @@ PARI_get_plot(long f)
     pari_plot.width   = 400;         // width and
     pari_plot.height  = 300;         //  height of plot window
 #endif
-    pari_plot.hunit   = 3;           // 
+    pari_plot.hunit   = 3;           //
     pari_plot.vunit   = 3;           //
     pari_plot.fwidth  = 6;           // font width
     pari_plot.fheight = 9;           //   and height

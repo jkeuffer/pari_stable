@@ -61,7 +61,7 @@ buchnarrow(GEN bnf)
     vconcat(diagonal_i(cyc), logs),
     vconcat(zeromat(ngen, r1-t), scalarmat(gen_2,r1-t))
   );
- 
+
   met = smithrel(R,NULL,&u1);
   lo = lg(R); c = lg(met);
   if (DEBUGLEVEL>3) msgtimer("smith/class group");
@@ -113,7 +113,7 @@ compute_fact(GEN nf, GEN u1, GEN gen)
       g = gel(gen,i);
       if (typ(g) != t_MAT)
       {
-        if (z) 
+        if (z)
           gel(z,2) = arch_mul(gel(z,2), to_famat_all(g, e));
         else
           z = mkvec2(NULL, to_famat_all(g, e));
@@ -209,14 +209,14 @@ get_pinvpi(GEN nf, GEN fZ, GEN p, GEN pi, GEN *v)
     GEN invpi = element_inv(nf, pi);
     *v = make_integral_Z(gmul(p, invpi), mulii(p, fZ));
   }
-  return *v; 
+  return *v;
 }
 /* p pi^(-1) mod f */
 static GEN
 get_pi(GEN F, GEN pr, GEN *v)
 {
   if (!*v) *v = unif_mod_fZ(pr, F);
-  return *v; 
+  return *v;
 }
 
 static GEN
@@ -242,7 +242,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
   vecpinvpi = cgetg(lp, t_VEC);
   vecpi  = cgetg(lp, t_VEC);
   vectau = cgetg(lp, t_VEC);
-  for (i=1; i<lp; i++) 
+  for (i=1; i<lp; i++)
   {
     pr = gel(listpr,i);
     gel(vecpi,i)    = NULL; /* to be computed if needed */
@@ -280,7 +280,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     dmulI = mulI = NULL;
     for (j=1; j<lp; j++)
     {
-      pr = gel(listpr,j); 
+      pr = gel(listpr,j);
       v  = idealval(nf, I, pr);
       if (!v) continue;
       p  = gel(pr,1);
@@ -292,7 +292,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       dmulI = dmulI? mulii(dmulI, t): t;
     }
 
-    /* make all components of L coprime to f. 
+    /* make all components of L coprime to f.
      * Assuming (L^e * I, f) = 1, then newL^e * mulI = L^e */
     la = lg(e); newL = cgetg(la, t_VEC);
     for (k=1; k<la; k++)
@@ -450,7 +450,7 @@ Buchray(GEN bnf,GEN module,long flag)
   for (j=1; j<=RU; j++) { u1[j]=u[j]; setlg(u[j],RU+1); }
   u += RU;
   for (j=1; j<=Ri; j++) { u2[j]=u[j]; setlg(u[j],RU+1); }
- 
+
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
   u1 = lllint_ip(u1,100);
@@ -888,7 +888,7 @@ compute_M0(GEN M_star,long N)
       { /* n3 > N/3 >= n1 */
 	long k = N - 2*n2;
 	p2 = gsub(M_star, gmulgs(X,n2));
-	p3 = gmul(powuu(k,k), 
+	p3 = gmul(powuu(k,k),
                   gpowgs(gsubgs(gmul(M_star,p2),k*k),n2));
 	pol = gsub(p3, gmul(gmul(powuu(n2,n2),gpowgs(X,n2)),
                             gpowgs(p2, N-n2)));
@@ -1172,7 +1172,7 @@ certifybuchall(GEN bnf)
   funits = algtobasis(nf, funits);
   zu = mkvec2(gel(zu,1), algtobasis(nf, gel(zu,2)));
 
-  for (p = *delta++; p <= bound; ) {  
+  for (p = *delta++; p <= bound; ) {
     check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
     NEXT_PRIME_VIADIFF(p, delta);
   }
@@ -1854,7 +1854,7 @@ typedef struct _disc_data {
 static GEN
 get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
 {
-  GEN idealrel = D->idealrelinit; 
+  GEN idealrel = D->idealrelinit;
   GEN mod = gel(z,3), Fa = gel(z,1);
   GEN P = gel(Fa,1), E = gel(Fa,2);
   long k, nz, clhray = z[2], lP = lg(P);
@@ -1921,7 +1921,7 @@ discrayabslist(GEN bnf, GEN L)
  *
  * Implementation: a vector v whose components have exactly 2^LGVINT entries
  * but for the last one which is allowed to be shorter. v[i][j]
- * (where j<=2^LGVINT) is understood as component number I = (i-1)*2^LGVINT+j 
+ * (where j<=2^LGVINT) is understood as component number I = (i-1)*2^LGVINT+j
  * in a unique huge vector V. */
 
 #define SHLGVINT 15
@@ -2113,7 +2113,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   Z = bigcgetvec(bound);
   for (i=2; i<=bound; i++) bigel(Z,i) = cgetg(1,t_VEC);
   embunit = zlog_units(nf, U, sgnU, bidp);
-  bigel(Z,1) = mkvec(zsimp(bidp,embunit)); 
+  bigel(Z,1) = mkvec(zsimp(bidp,embunit));
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
   /* The goal is to compute Ray (lists of bnrclassno). Z contains "zsimps",
@@ -2193,7 +2193,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
   }
   Ray = gerepilecopy(av, Ray);
-  
+
   if (DEBUGLEVEL>1) fprintferr("Starting discrayabs computations\n");
   if (allarch) nbarch = 1<<r1;
   else
