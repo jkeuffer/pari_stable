@@ -521,11 +521,11 @@ if test -n "$add_funclist"; then
 desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h
 
 $src/funclist::
-	@-cksum \`env LANG= LC_COLLATE= LC_ALL= find ../src/functions -name 'CVS' -prune -o -type f -print\` > funclist\$(TMPSUF)
-	@-sh $cfg/mv-if-diff funclist\$(TMPSUF) $src/funclist
+	@-cd $desc && env LANG= LC_COLLATE= LC_ALL= find ../functions -name CVS -prune -o -type f -print | xargs cksum > funclist\$(TMPSUF)
+	@-sh $cfg/mv-if-diff $desc/funclist\$(TMPSUF) $src/funclist
 
 $desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
-	cd $desc && \$(PERL) merge_822 ../functions/*/* > def\$(TMPSUF)
+	cd $desc && \$(PERL) merge_822 ../funclist > def\$(TMPSUF)
 	mv $desc/def\$(TMPSUF) \$@
 
 $src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)

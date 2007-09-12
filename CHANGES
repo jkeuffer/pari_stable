@@ -87,7 +87,7 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    returned an incorrect result if input was not reduced mod p
    67- setrand(4);polgalois(x^8-264*x^6+25410*x^4-1054152*x^2+15856203)
        --> wrong result [#660]
-   68- "env: parameter list too long" when building [#661]
+   68- build fails with "env: parameter list too long" [#661]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
