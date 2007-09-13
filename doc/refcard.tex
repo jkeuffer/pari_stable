@@ -332,6 +332,7 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{\typ{REAL}. Real Numbers}{$\pm n.ddd$}
 \li{\typ{INTMOD}. Integers modulo $m$}{Mod$(n,m)$}
 \li{\typ{FRAC}. Rational Numbers}{$n/m$}
+\li{\typ{FFELT}. Elt in a Finite Field}{ffgen(T)}
 \li{\typ{COMPLEX}. Complex Numbers}{$x +y\,*\;$I}
 \li{\typ{PADIC}. $p$-adic Numbers}{$x\;+\;$O$(p$\pow$k)$}
 \li{\typ{QUAD}. Quadratic Numbers}{$x + y\,*\;$quadgen$(D)$}
@@ -354,7 +355,7 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{euclidean quotient, remainder}{$x$\bs/$y${\rm,} $x$\bs$y${\rm,}
 $x$\%$y${\rm,} divrem$(x,y)$}
 \li{shift $x$ left or right $n$ bits}{ $x$<<$n$, $x$>>$n$
-  {\rm or} shift$(x,n)$}
+  {\rm or} shift$(x,\pm n)$}
 \li{comparison operators}{<={\rm, }<{\rm, }>={\rm, }>{\rm, }=={\rm, }!=}
 \li{boolean operators (or, and, not)}{||{\rm, } \&\&{\rm ,} !}
 \li{sign of $x=-1,0,1$}{sign$(x)$}
@@ -451,7 +452,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 %
 \subsec{User Defined Functions}
 \leavevmode
-  {\tt name(formal vars) = local(local vars); \var{seq}}\hfill\break
+  {\tt name(formal vars) = my(local vars); \var{seq}}\hfill\break
   {\tt struct.member = \var{seq}}\hfill\break
 \li{kill value of variable or function $x$}{kill$(x)$}
 \li{declare global variables}{global$(x,...)$}
