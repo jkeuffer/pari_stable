@@ -176,7 +176,11 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
 {
   long ta, tx = typ(x), v = varn(T);
   GEN a, b;
-  if (is_const_t(tx)) return scalarpol(Rg_to_Fp(x, p), v);
+  if (is_const_t(tx)) 
+  {
+    if (tx == t_FFELT) return FF_to_FpXQ(x);
+    return scalarpol(Rg_to_Fp(x, p), v);
+  }
   switch(tx)
   {
     case t_POLMOD:
