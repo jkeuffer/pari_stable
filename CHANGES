@@ -200,6 +200,9 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
    25- library function nfnewprec_shallow, bnfnewprec_shallow, bnrnewprec_shallow
    26- library function Zp_issquare
    27- library function dvmdsBIL, divsBIL, remsBIL
+   28- library functions gassoc_proto, map_proto_G, map_proto_GG, map_proto_GL,
+       map_proto_lG, map_proto_lGG, map_proto_lGL [ were private with
+       other names ]
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

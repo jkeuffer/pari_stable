@@ -1169,6 +1169,13 @@ GEN     gsub(GEN x, GEN y);
 /* gen2.c */
 
 GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
+GEN     gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
+GEN     map_proto_G(GEN f(GEN), GEN x);
+GEN     map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n);
+GEN     map_proto_GL(GEN f(GEN,long), GEN x, long y);
+GEN     map_proto_lG(long f(GEN), GEN x);
+GEN     map_proto_lGG(long f(GEN,GEN), GEN x, GEN n);
+GEN     map_proto_lGL(long f(GEN,long), GEN x, long y);
 
 long    Q_pval(GEN x, GEN p);
 long    ZX_valuation(GEN x, GEN *Z);

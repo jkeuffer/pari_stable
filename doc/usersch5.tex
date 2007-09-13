@@ -1704,6 +1704,39 @@ It is not necessary, and in fact slightly inefficient, to include $\ell=2$,
 since 2 is treated separately in any case, i.e. the generator
 obtained is never a square.
 
+\subsec{Extending functions to vector inputs}
+
+The following functions apply $f$ to the given arguments, recursively
+if they are of vector / matrix type:
+
+\fun{GEN}{map_proto_G}{GEN (*f)(GEN), GEN x} For instance, if $x$ is a
+\typ{VEC}, return a \typ{VEC} whose components are the $f(x[i])$.
+
+\fun{GEN}{map_proto_lG}{long (*f)(GEN), GEN x} As above, applying the
+function \kbd{stoi( f() )}.
+
+\fun{GEN}{map_proto_GG}{GEN (*f)(GEN,GEN), GEN x, GEN n} If $x$ and $n$
+are both vector types, expand $x$ first, then $n$.
+
+\fun{GEN}{map_proto_lGG}{long (*f)(GEN,GEN), GEN x, GEN n}
+
+\fun{GEN}{map_proto_GL}{GEN (*f)(GEN,long), GEN x, long y}
+
+\fun{GEN}{map_proto_lGL}{long (*f)(GEN,long), GEN x, long y}
+
+In the last function, $f$ implements an associative binary operator, which we
+extend naturally to an $n$-ary operator $f_n$ for any $n$ : by convention,
+$f_0() = 1$, $f_1(x) = x$, and
+$$ f_n(x_1,\dots,x_n) = f( f_{n-1}(x_1,\dots,x_{n-1}), x_n)),$$
+for $n \geq 2$.
+
+\fun{GEN}{gassoc_proto}{GEN (*f)(GEN,GEN),GEN x, GEN y} If $y$ is not
+\kbd{NULL}, return $f(x,y)$. Otherwise, $x$ must be of vector type, and we
+return the result of $f$ applied to its components, computed using a
+divide-and-conquer algorithm. More precisely, return
+$$f( f(x_1,\kbd{NULL}), f(x_2,\kbd{NULL}) ),$$
+where $x_1$, $x_2$ are the two halves of $x$.
+
 \subsec{Miscellaneous functions}
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.

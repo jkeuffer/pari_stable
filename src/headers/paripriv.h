@@ -47,12 +47,6 @@ void ellprint(GEN e);
 GEN mpinv(GEN b);
 
 /* generic */
-GEN arith_proto(long f(GEN), GEN x, int do_error);
-GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
-GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
-GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
-GEN garith_proto(GEN f(GEN), GEN x, int do_error);
-GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
 GEN sort_factor_pol(GEN y, int (*cmp)(GEN,GEN));

@@ -22,109 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/*********************************************************************/
-/**                                                                 **/
-/**                  ARITHMETIC FUNCTION PROTOTYPES                 **/
-/**                                                                 **/
-/*********************************************************************/
-GEN
-garith_proto(GEN f(GEN), GEN x, int do_error)
-{
-  long tx = typ(x), lx, i;
-  GEN y;
-  if (is_matvec_t(tx))
-  {
-    lx = lg(x); y = cgetg(lx,tx);
-    for (i=1; i<lx; i++) gel(y,i) = garith_proto(f, gel(x,i), do_error);
-    return y;
-  }
-  if (tx != t_INT && do_error) pari_err(arither1);
-  return f(x);
-}
-
-GEN
-arith_proto(long f(GEN), GEN x, int do_error)
-{
-  long tx = typ(x), lx, i;
-  GEN y;
-  if (is_matvec_t(tx))
-  {
-    lx = lg(x); y = cgetg(lx,tx);
-    for (i=1; i<lx; i++) gel(y,i) = arith_proto(f, gel(x,i), do_error);
-    return y;
-  }
-  if (tx != t_INT && do_error) pari_err(arither1);
-  return stoi(f(x));
-}
-
-GEN
-arith_proto2(long f(GEN,GEN), GEN x, GEN n)
-{
-  long l,i,tx = typ(x);
-  GEN y;
-  if (is_matvec_t(tx))
-  {
-    l=lg(x); y=cgetg(l,tx);
-    for (i=1; i<l; i++) gel(y,i) = arith_proto2(f,gel(x,i),n);
-    return y;
-  }
-  if (tx != t_INT) pari_err(arither1);
-  tx=typ(n);
-  if (is_matvec_t(tx))
-  {
-    l = lg(n); y = cgetg(l,tx);
-    for (i=1; i<l; i++) gel(y,i) = arith_proto2(f,x,gel(n,i));
-    return y;
-  }
-  if (tx != t_INT) pari_err(arither1);
-  return stoi(f(x,n));
-}
-
-GEN
-arith_proto2gs(long f(GEN,long), GEN x, long y)
-{
-  long l, i, tx = typ(x);
-  GEN t;
-
-  if (is_matvec_t(tx))
-  {
-    l=lg(x); t=cgetg(l,tx);
-    for (i=1; i<l; i++) gel(t,i) = arith_proto2gs(f,gel(x,i),y);
-    return t;
-  }
-  if (tx != t_INT) pari_err(arither1);
-  return stoi(f(x,y));
-}
-
-GEN
-garith_proto2gs(GEN f(GEN,long), GEN x, long y)
-{
-  long l, i, tx = typ(x);
-  GEN t;
-
-  if (is_matvec_t(tx))
-  {
-    l = lg(x); t = cgetg(l,tx);
-    for (i=1; i<l; i++) gel(t,i) = garith_proto2gs(f,gel(x,i),y);
-    return t;
-  }
-  if (tx != t_INT) pari_err(arither1);
-  return f(x,y);
-}
-
-GEN
-gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
-{
-  if (!y)
-  {
-    pari_sp av = avma;
-    long tx = typ(x);
-    if (!is_vec_t(tx)) pari_err(typeer,"association");
-    return gerepileupto(av, divide_conquer_prod(x,f));
-  }
-  return f(x,y);
-}
-
 /******************************************************************/
 /*                                                                */
 /*                 GENERATOR of (Z/mZ)*                           */
@@ -134,7 +31,7 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 GEN
 ggener(GEN m)
 {
-  return garith_proto(gener,m,1);
+  return map_proto_G(gener,m);
 }
 
 int
@@ -384,7 +281,7 @@ znstar(GEN n)
 GEN
 gracine(GEN a)
 {
-  return garith_proto(racine,a,1); /* hm. --GN */
+  return map_proto_G(racine,a);
 }
 
 GEN
@@ -979,7 +876,7 @@ krouu_s(ulong x, ulong y, long s)
 }
 
 GEN
-gkronecker(GEN x, GEN y) { return arith_proto2(kronecker,x,y); }
+gkronecker(GEN x, GEN y) { return map_proto_lGG(kronecker,x,y); }
 
 long
 kronecker(GEN x, GEN y)
@@ -1029,7 +926,7 @@ kronecker(GEN x, GEN y)
 }
 
 GEN
-gkrogs(GEN x, long y) { return arith_proto2gs(krois,x,y); }
+gkrogs(GEN x, long y) { return map_proto_lGL(krois,x,y); }
 
 long
 krois(GEN x, long y)
@@ -2199,19 +2096,19 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 /**                                                                 **/
 /*********************************************************************/
 GEN
-gnextprime(GEN n) { return garith_proto(nextprime,n,0); }
+gnextprime(GEN n) { return map_proto_G(nextprime,n); }
 
 GEN
-gprecprime(GEN n) { return garith_proto(precprime,n,0); }
+gprecprime(GEN n) { return map_proto_G(precprime,n); }
 
 GEN
 gisprime(GEN x, long flag)
 {
   switch (flag)
   {
-    case 0: return arith_proto(isprime,x,1);
-    case 1: return garith_proto2gs(plisprime,x,1);
-    case 2: return arith_proto(isprimeAPRCL,x,1);
+    case 0: return map_proto_lG(isprime,x);
+    case 1: return map_proto_GL(plisprime,x,1);
+    case 2: return map_proto_lG(isprimeAPRCL,x);
   }
   pari_err(flagerr,"gisprime");
   return 0;
@@ -2247,7 +2144,7 @@ isprime(GEN x)
 GEN
 gispseudoprime(GEN x, long flag)
 {
-  if (flag == 0) return arith_proto(BSW_psp,x,1);
+  if (flag == 0) return map_proto_lG(BSW_psp,x);
   return gmillerrabin(x, flag);
 }
 
@@ -2259,13 +2156,13 @@ ispseudoprime(GEN x, long flag)
 }
 
 GEN
-gispsp(GEN x) { return arith_proto(ispsp,x,1); }
+gispsp(GEN x) { return map_proto_lG(ispsp,x); }
 
 long
 ispsp(GEN x) { return millerrabin(x,1); }
 
 GEN
-gmillerrabin(GEN n, long k) { return arith_proto2gs(millerrabin,n,k); }
+gmillerrabin(GEN n, long k) { return map_proto_lGL(millerrabin,n,k); }
 
 /*********************************************************************/
 /**                                                                 **/
@@ -2273,7 +2170,7 @@ gmillerrabin(GEN n, long k) { return arith_proto2gs(millerrabin,n,k); }
 /**                                                                 **/
 /*********************************************************************/
 GEN
-gisfundamental(GEN x) { return arith_proto(isfundamental,x,1); }
+gisfundamental(GEN x) { return map_proto_lG(isfundamental,x); }
 
 long
 isfundamental(GEN x)
@@ -2782,7 +2679,7 @@ bestappr0(GEN x, GEN a, GEN b)
 /***********************************************************************/
 
 GEN
-gfundunit(GEN x) { return garith_proto(fundunit,x,1); }
+gfundunit(GEN x) { return map_proto_G(fundunit,x); }
 
 static GEN
 get_quad(GEN f, GEN pol, long r)
@@ -2842,7 +2739,7 @@ fundunit(GEN x)
 }
 
 GEN
-gregula(GEN x, long prec) { return garith_proto2gs(regula,x,prec); }
+gregula(GEN x, long prec) { return map_proto_GL(regula,x,prec); }
 
 GEN
 regula(GEN x, long prec)
@@ -2889,19 +2786,13 @@ regula(GEN x, long prec)
 /**                                                                     **/
 /*************************************************************************/
 
-static GEN
-gclassno(GEN x) { return garith_proto(classno,x,1); }
-
-static GEN
-gclassno2(GEN x) { return garith_proto(classno2,x,1); }
-
 GEN
 qfbclassno0(GEN x,long flag)
 {
   switch(flag)
   {
-    case 0: return gclassno(x);
-    case 1: return gclassno2(x);
+    case 0: return map_proto_G(classno,x);
+    case 1: return map_proto_G(classno2,x);
     default: pari_err(flagerr,"qfbclassno");
   }
   return NULL; /* not reached */

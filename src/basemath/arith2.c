@@ -917,7 +917,7 @@ smallfact(GEN n)
 GEN
 gboundfact(GEN n, long lim)
 {
-  return garith_proto2gs(boundfact,n,lim);
+  return map_proto_GL(boundfact,n,lim);
 }
 
 GEN
@@ -1080,7 +1080,7 @@ factor_phi(GEN n)
 /***********************************************************************/
 
 GEN
-gmu(GEN n) { return arith_proto(mu,n,1); }
+gmu(GEN n) { return map_proto_lG(mu,n); }
 
 INLINE void
 chk_arith(GEN n) {
@@ -1120,7 +1120,7 @@ mu(GEN n)
 }
 
 GEN
-gissquarefree(GEN x) { return arith_proto(issquarefree,x,0); }
+gissquarefree(GEN x) { return map_proto_lG(issquarefree,x); }
 
 long
 Z_issquarefree(GEN x)
@@ -1169,7 +1169,7 @@ issquarefree(GEN x)
 }
 
 GEN
-gomega(GEN n) { return arith_proto(omega,n,1); }
+gomega(GEN n) { return map_proto_lG(omega,n); }
 
 long
 omega(GEN n)
@@ -1202,7 +1202,7 @@ omega(GEN n)
 }
 
 GEN
-gbigomega(GEN n) { return arith_proto(bigomega,n,1); }
+gbigomega(GEN n) { return map_proto_lG(bigomega,n); }
 
 long
 bigomega(GEN n)
@@ -1233,7 +1233,7 @@ bigomega(GEN n)
 }
 
 GEN
-gphi(GEN n) { return garith_proto(phi,n,1); }
+gphi(GEN n) { return map_proto_G(phi,n); }
 
 ulong
 phiu(ulong n)
@@ -1308,7 +1308,7 @@ phi(GEN n)
 }
 
 GEN
-gnumbdiv(GEN n) { return garith_proto(numbdiv,n,1); }
+gnumbdiv(GEN n) { return map_proto_G(numbdiv,n); }
 
 GEN
 numbdiv(GEN n)
@@ -1344,7 +1344,7 @@ numbdiv(GEN n)
 }
 
 GEN
-gsumdiv(GEN n) { return garith_proto(sumdiv,n,1); }
+gsumdiv(GEN n) { return map_proto_G(sumdiv,n); }
 
 GEN
 sumdiv(GEN n)
@@ -1391,7 +1391,7 @@ sumdiv(GEN n)
 }
 
 GEN
-gsumdivk(GEN n, long k) { return garith_proto2gs(sumdivk,n,k); }
+gsumdivk(GEN n, long k) { return map_proto_GL(sumdivk,n,k); }
 
 GEN
 sumdivk(GEN n, long k)
@@ -1698,7 +1698,7 @@ bittest(GEN x, long n)
 GEN
 gbittest(GEN x, GEN n)
 {
-  return arith_proto2gs(bittest,x,itos(n));
+  return map_proto_lGL(bittest,x,itos(n));
 }
 
 /***********************************************************************/

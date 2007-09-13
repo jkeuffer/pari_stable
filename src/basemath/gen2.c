@@ -21,6 +21,124 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+
+/*********************************************************************/
+/**                                                                 **/
+/**                MAP FUNCTIONS WITH GIVEN PROTOTYPES              **/
+/**                                                                 **/
+/*********************************************************************/
+GEN
+map_proto_G(GEN f(GEN), GEN x)
+{
+  long tx = typ(x), lx, i;
+  GEN y;
+  if (is_matvec_t(tx))
+  {
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) gel(y,i) = map_proto_G(f, gel(x,i));
+    return y;
+  }
+  return f(x);
+}
+
+GEN
+map_proto_lG(long f(GEN), GEN x)
+{
+  long tx = typ(x), lx, i;
+  GEN y;
+  if (is_matvec_t(tx))
+  {
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) gel(y,i) = map_proto_lG(f, gel(x,i));
+    return y;
+  }
+  return stoi(f(x));
+}
+
+GEN
+map_proto_GG(GEN f(GEN,GEN), GEN x, GEN n)
+{
+  long l,i,tx = typ(x);
+  GEN y;
+  if (is_matvec_t(tx))
+  {
+    l=lg(x); y=cgetg(l,tx);
+    for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,gel(x,i),n);
+    return y;
+  }
+  tx=typ(n);
+  if (is_matvec_t(tx))
+  {
+    l = lg(n); y = cgetg(l,tx);
+    for (i=1; i<l; i++) gel(y,i) = map_proto_GG(f,x,gel(n,i));
+    return y;
+  }
+  return f(x,n);
+}
+
+GEN
+map_proto_lGG(long f(GEN,GEN), GEN x, GEN n)
+{
+  long l,i,tx = typ(x);
+  GEN y;
+  if (is_matvec_t(tx))
+  {
+    l=lg(x); y=cgetg(l,tx);
+    for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,gel(x,i),n);
+    return y;
+  }
+  tx=typ(n);
+  if (is_matvec_t(tx))
+  {
+    l = lg(n); y = cgetg(l,tx);
+    for (i=1; i<l; i++) gel(y,i) = map_proto_lGG(f,x,gel(n,i));
+    return y;
+  }
+  return stoi(f(x,n));
+}
+
+GEN
+map_proto_lGL(long f(GEN,long), GEN x, long y)
+{
+  long l, i, tx = typ(x);
+  GEN t;
+
+  if (is_matvec_t(tx))
+  {
+    l=lg(x); t=cgetg(l,tx);
+    for (i=1; i<l; i++) gel(t,i) = map_proto_lGL(f,gel(x,i),y);
+    return t;
+  }
+  return stoi(f(x,y));
+}
+
+GEN
+map_proto_GL(GEN f(GEN,long), GEN x, long y)
+{
+  long l, i, tx = typ(x);
+  GEN t;
+
+  if (is_matvec_t(tx))
+  {
+    l = lg(x); t = cgetg(l,tx);
+    for (i=1; i<l; i++) gel(t,i) = map_proto_GL(f,gel(x,i),y);
+    return t;
+  }
+  return f(x,y);
+}
+
+GEN
+gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
+{
+  if (!y)
+  {
+    pari_sp av = avma;
+    long tx = typ(x);
+    if (!is_vec_t(tx)) pari_err(typeer,"association");
+    return gerepileupto(av, divide_conquer_prod(x,f));
+  }
+  return f(x,y);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                OPERATIONS USING SMALL INTEGERS                  */
