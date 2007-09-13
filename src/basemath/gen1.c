@@ -968,6 +968,31 @@ gaddsg(long x, GEN y)
   }
 }
 
+GEN
+gsubsg(long x, GEN y)
+{
+  long ty = typ(y);
+  GEN z, a, b;
+
+  switch(ty)
+  {
+    case t_INT:  return subsi(x,y);
+    case t_REAL: return subsr(x,y);
+    case t_INTMOD:
+      z = cgetg(3, t_INTMOD); a = gel(y,1); b = gel(y,2); 
+      return add_intmod_same(z, a, Fp_neg(b,a), modsi(x, a));
+    case t_FRAC: z = cgetg(3,t_FRAC); a = gel(y,1); b = gel(y,2); 
+      gel(z,1) = gerepileuptoint((pari_sp)z, subii(mulis(b,x), a));
+      gel(z,2) = icopy(gel(y,2)); return z;
+    case t_COMPLEX:
+      z = cgetg(3, t_COMPLEX);
+      gel(z,1) = gsubsg(x, gel(y,1));
+      gel(z,2) = gneg(gel(y,2)); return z;
+
+    default: return gsub(stoi(x), y);
+  }
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                        MULTIPLICATION                          **/

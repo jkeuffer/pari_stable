@@ -1165,6 +1165,7 @@ GEN     gmul2n(GEN x, long n);
 GEN     gmulsg(long s, GEN y);
 GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
+GEN     gsubsg(long x, GEN y);
 
 /* gen2.c */
 

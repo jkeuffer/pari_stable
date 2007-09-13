@@ -291,7 +291,6 @@ enum manage_var_t {
 #define gmodsg(s,y)     (gopsg2(gmod,(s),(y)))
 #define gmulgs(y,s)     (gmulsg((s),(y)))
 #define gsubgs(y,s)     gaddgs((y), -(s))
-#define gsubsg(s,y)     (gopsg2(gsub,(s),(y)))
 
 #define gaddgsz(y,s,z)    gopgsz(gaddgs,(y),(s),(z))
 #define gaddsgz(s,y,z)    gaddgsz((y),(s),(z))

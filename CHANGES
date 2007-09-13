@@ -169,6 +169,7 @@ BA 48- local and my can now appear anywhere in a program.
    50- Removed the OK_ULONG macro and renamed u_OK_ULONG -> SMALL_ULONG
    51- Rename BIGINT -> NO_VARIABLE [used by gvar()], VERYBIGINT -> LONG_MAX,
        MAXULONG -> LONG_UMAX. Remove BYTES_IN_LONG, TWOPOTBYTES_IN_LONG
+   52- implement directly gsubsg [ was a macro calling a trivial wrapper ]
 
   Added
     1- library functions expu, adduu, subuu
