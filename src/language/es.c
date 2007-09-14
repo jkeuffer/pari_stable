@@ -2933,13 +2933,12 @@ _expand_tilde(const char *s)
   }
   else
   {
-    pari_sp av = avma;
     char *tmp;
     while (*u && *u != '/') u++;
-    len = u-s; tmp = stackmalloc(len+1);
+    len = u-s; tmp = gpmalloc(len+1);
     (void)strncpy(tmp,s,len);
     tmp[len] = 0;
-    p = getpwnam(tmp); avma = av;
+    p = getpwnam(tmp); free(tmp);
   }
   if (!p) pari_err(talker2,"unknown user ",s,s-1);
   ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
