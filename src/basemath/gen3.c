@@ -495,6 +495,18 @@ modr_safe(GEN x, GEN y)
   if (gsigne(y) < 0 && signe(subri(q,f))) f = addrs(f, 1);
   return signe(f)? gadd(x, negr(mulir(f,y))): x;
 }
+
+/* x t_POLMOD, y t_POL, return x % y */
+static GEN
+polmod_mod(GEN x, GEN y)
+{
+  GEN z;
+  if (gequal(gel(x,1), y)) return gcopy(x); 
+  z = cgetg(3,t_POLMOD);
+  gel(z,1) = ggcd(gel(x,1),y);
+  gel(z,2) = grem(gel(x,2),gel(z,1));
+  return z;
+}
 GEN
 gmod(GEN x, GEN y)
 {
@@ -560,9 +572,7 @@ gmod(GEN x, GEN y)
         if (tx!=t_POLMOD || varncmp(varn(x[1]), varn(y)) > 0)
           return degpol(y)? gcopy(x): gen_0;
 	if (varn(x[1])!=varn(y)) return gen_0;
-        z=cgetg(3,t_POLMOD);
-        gel(z,1) = ggcd(gel(x,1),y);
-        gel(z,2) = grem(gel(x,2),gel(z,1)); return z;
+        return polmod_mod(x, y);
       }
       switch(tx)
       {
@@ -667,7 +677,7 @@ specialmod(GEN x, GEN y)
 GEN
 gmodulo(GEN x,GEN y)
 {
-  long tx=typ(x),l,i;
+  long tx = typ(x), l, i;
   GEN z;
 
   if (is_matvec_t(tx))
@@ -683,16 +693,32 @@ gmodulo(GEN x,GEN y)
       gel(z,2) = Rg_to_Fp(x,y); return z;
 
     case t_POL: z = cgetg(3,t_POLMOD);
+      if (tx == t_POLMOD)
+      {
+        long vx = varn(gel(x,1)), vy = varn(y);
+        if (vx == vy) return polmod_mod(x,y);
+        if (varncmp(vx, vy) < 0)
+          gel(z,2) = gen_0;
+        else if (vx > vy)
+          gel(z,2) = (lg(y) > 3)? gcopy(x): gen_0;
+        gel(z,1) = gcopy(y);
+        return z;
+      }
+
       gel(z,1) = gcopy(y);
-      if (is_scalar_t(tx))
+      if (is_const_t(tx))
       {
         gel(z,2) = (lg(y) > 3)? gcopy(x): gmod(x,y);
         return z;
       }
-      if (tx!=t_POL && tx != t_RFRAC && tx!=t_SER) break;
-      gel(z,2) = specialmod(x,y); return z;
+      switch(tx)
+      {
+        case t_POL: case t_RFRAC: case t_SER:
+          gel(z,2) = specialmod(x,y); return z;
+      }
   }
-  pari_err(operf,"%",x,y); return NULL; /* not reached */
+  pari_err(operf,"%",x,y);
+  return NULL; /* not reached */
 }
 
 /* FIXME: obsolete, kept for backward compatibility */

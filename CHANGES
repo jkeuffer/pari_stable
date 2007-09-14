@@ -90,6 +90,7 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    68- build fails with "env: parameter list too long" [#661]
    69- factorff did not accept inputs with t_FFELT coeffs
    70- could use PARI stack while reading gprc [ before pari_init ]
+   71- Mod(Mod(1,v),v) --> invalid object.
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
