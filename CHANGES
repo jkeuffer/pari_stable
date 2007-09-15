@@ -173,6 +173,7 @@ BA 48- local and my can now appear anywhere in a program.
    51- Rename BIGINT -> NO_VARIABLE [used by gvar()], VERYBIGINT -> LONG_MAX,
        MAXULONG -> LONG_UMAX. Remove BYTES_IN_LONG, TWOPOTBYTES_IN_LONG
    52- implement directly gsubsg [ was a macro calling a trivial wrapper ]
+   53- optimize multiplication for quadratic t_POLMOD [ t_QUAD remains faster ]
 
   Added
     1- library functions expu, adduu, subuu

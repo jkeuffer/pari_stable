@@ -1093,20 +1093,70 @@ mul_polmod_scal(GEN Y, GEN y, GEN x)
   gel(z,1) = gcopy(Y);
   gel(z,2) = gmul(x,y); return z;
 }
-/* Mod(x,X) * Mod(y,X) */
+
+/* cf mulqq */
 static GEN
-mul_polmod_same(GEN X, GEN x, GEN y)
+quad_polmod_mul(GEN P, GEN x, GEN y)
 {
-  GEN t, z = cgetg(3,t_POLMOD);
-  pari_sp av;
-  long v;
-  gel(z,1) = gcopy(X); av = avma;
-  t = gmul(x, y);
-  /* gmod(t, gel(z,1))) optimised */
-  if (typ(t) == t_POL  && (v = varn(X)) == varn(t) && lg(t) >= lg(X))
-    gel(z,2) = gerepileupto(av, RgX_divrem(t, X, ONLY_REM));
+  GEN T = cgetg(4, t_POL), b = gel(P,3), c = gel(P,2), p1, p2, p3, p4;
+  pari_sp tetpil, av = avma;
+  T[1] = x[1];
+  p2 = gmul(gel(x,2), gel(y,2));
+  p3 = gmul(gel(x,3), gel(y,3));
+  p1 = gmul(gneg_i(c),p3);
+  /* operands are usually small: gadd ~ gmul and Karatsuba is a waste */
+  if (typ(b) == t_INT)
+  {
+    if (signe(b))
+    {
+      p4 = gadd(gmul(gel(x,2), gel(y,3)), gmul(gel(x,3), gel(y,2)));
+      if (is_pm1(b))
+      {
+        if (signe(b) > 0) p3 = gneg(p3);
+      }
+      else
+        p3 = gmul(negi(b), p3);
+    }
+    else
+    {
+      p3 = gmul(gel(x,2),gel(y,3));
+      p4 = gmul(gel(x,3),gel(y,2));
+    }
+  }
   else
-    gel(z,2) = t;
+  {
+    p4 = gadd(gmul(gel(x,2), gel(y,3)), gmul(gel(x,3), gel(y,2)));
+    p3 = gmul(gneg_i(b), p3);
+  }
+  tetpil = avma;
+  gel(T,2) = gadd(p2, p1);
+  gel(T,3) = gadd(p4, p3);
+  gerepilecoeffssp(av,tetpil,T+2,2);
+  return normalizepol_i(T,4);
+}
+static int
+is_int1(GEN a) { return  (typ(a) == t_INT && is_pm1(a) && signe(a) == 1); }
+/* Mod(x,P) * Mod(y,P) */
+static GEN
+mul_polmod_same(GEN P, GEN x, GEN y)
+{
+  GEN z = cgetg(3,t_POLMOD);
+  long v = varn(P), lx = lg(x), ly = lg(y);
+  gel(z,1) = gcopy(P);
+  /* x * y mod P optimised */
+  if (typ(x) != t_POL || varn(x) != v || lx <= 3
+   || typ(y) != t_POL || varn(y) != v || ly <= 3)
+    gel(z,2) = gmul(x, y);
+  else
+  {
+    if (lg(P) == 5 && is_int1(gel(P,4))) /* quadratic fields */
+      gel(z,2) = quad_polmod_mul(P, x, y);
+    else
+    {
+      pari_sp av = avma;
+      gel(z,2) = gerepileupto(av, RgXQ_mul(x, y, gel(z,1)));
+    }
+  }
   return z;
 }
 /* Mod(x,X) * Mod(y,Y) */
@@ -1120,7 +1170,8 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
 
   if (vx==vy) {
     gel(z,1) = srgcd(X,Y); av = avma;
-    gel(z,2) = gerepileupto(av, gmod(gmul(x, y), gel(z,1))); return z;
+    gel(z,2) = gerepileupto(av, gmod(gmul(x, y), gel(z,1)));
+    return z;
   }
   if (varncmp(vx, vy) < 0)
   { gel(z,1) = gcopy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
@@ -1208,31 +1259,27 @@ mulpp(GEN x, GEN y) {
 }
 /* x,y QUAD */
 static GEN
-mulqq(GEN x, GEN y) {
-  GEN p1,p2,p3,p4, z = cgetg(4,t_QUAD);
+mulqq(GEN x, GEN y) { 
+  GEN z = cgetg(4,t_QUAD);
+  GEN p1, p2, p3, p4, P = gel(x,1), b = gel(P,3), c = gel(P,2);
   pari_sp av, tetpil;
-  p1 = gel(x,1);
-  if (!gequal(p1, gel(y,1))) pari_err(operi,"*",x,y);
+  if (!gequal(P, gel(y,1))) pari_err(operi,"*",x,y);
 
-  gel(z,1) = gcopy(p1); av = avma;
+  gel(z,1) = gcopy(P); av = avma;
   p2 = gmul(gel(x,2),gel(y,2));
   p3 = gmul(gel(x,3),gel(y,3));
-  p4 = gmul(gneg_i(gel(p1,2)),p3);
+  p1 = gmul(gneg_i(c),p3);
 
-  if (gcmp0(gel(p1,3)))
+  if (signe(b))
+    p4 = gadd(gmul(gel(x,2),gel(y,3)), gmul(gel(x,3),gel(y,2)));
+  else
   {
-    tetpil = avma;
-    gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
-    av = avma;
-    p2 = gmul(gel(x,2),gel(y,3));
-    p3 = gmul(gel(x,3),gel(y,2)); tetpil = avma;
-    gel(z,3) = gerepile(av,tetpil,gadd(p2,p3)); return z;
+    p3 = gmul(gel(x,2),gel(y,3));
+    p4 = gmul(gel(x,3),gel(y,2));
   }
-
-  p1 = gadd(gmul(gel(x,2),gel(y,3)), gmul(gel(x,3),gel(y,2)));
   tetpil = avma;
-  gel(z,2) = gadd(p2,p4);
-  gel(z,3) = gadd(p1,p3);
+  gel(z,2) = gadd(p2,p1);
+  gel(z,3) = gadd(p4,p3);
   gerepilecoeffssp(av,tetpil,z+2,2); return z;
 }
 
