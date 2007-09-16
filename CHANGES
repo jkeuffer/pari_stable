@@ -91,6 +91,8 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    69- factorff did not accept inputs with t_FFELT coeffs
    70- could use PARI stack while reading gprc [ before pari_init ]
    71- Mod(Mod(1,v),v) --> invalid object.
+   72- a = Mod(y, v); y = Mod(1,v); eval(a) --> invalid object
+   73- for some complicated t_RFRAC z: z' --> impossible assignment I-->S
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

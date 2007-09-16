@@ -2481,21 +2481,10 @@ gmulsg(long s, GEN y)
       return normalize(z);
 
     case t_RFRAC:
-      if (!s) return zeropol(gvar(y));
-      z = cgetg(3, t_RFRAC);
-      i = itos( ggcd(stoi(s),gel(y,2)) );
-      avma = (pari_sp)z;
-      if (i == 1)
-      {
-        gel(z,1) = gmulgs(gel(y,1), s);
-        gel(z,2) = gcopy(gel(y,2));
-      }
-      else
-      {
-        gel(z,1) = gmulgs(gel(y,1), s/i);
-        gel(z,2) = gdivgs(gel(y,2), i);
-      }
-      return z;
+      if (!s) return zeropol(varn(gel(y,2)));
+      if (s == 1) return gcopy(y);
+      if (s == -1) return gneg(y);
+      return mul_rfrac_scal(gel(y,1), gel(y,2), stoi(s));
 
     case t_VEC: case t_COL: case t_MAT:
       ly = lg(y); z = cgetg(ly,ty);

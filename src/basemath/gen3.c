@@ -1511,8 +1511,8 @@ derivpol(GEN x)
   GEN y;
 
   if (lx<3) return zeropol(varn(x));
-  y = cgetg(lx,t_POL);
-  for (i=2; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
+  y = cgetg(lx,t_POL); gel(y,2) = gcopy(gel(x,3));
+  for (i=3; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   y[1] = x[1]; return normalizepol_i(y,i);
 }
 
@@ -3115,8 +3115,8 @@ GEN
 geval(GEN x)
 {
   long lx, i, tx = typ(x);
-  pari_sp av, tetpil;
-  GEN y,z;
+  pari_sp av;
+  GEN y, z;
 
   if (is_const_t(tx)) return gcopy(x);
   if (is_graphicvec_t(tx))
@@ -3131,11 +3131,9 @@ geval(GEN x)
     case t_STR:
       return gp_read_str(GSTR(x));
 
-    case t_POLMOD: y=cgetg(3,tx);
-      gel(y,1) = geval(gel(x,1));
-      av=avma; z=geval(gel(x,2)); tetpil=avma;
-      gel(y,2) = gerepile(av,tetpil,gmod(z,gel(y,1)));
-      return y;
+    case t_POLMOD:
+      av = avma;
+      return gerepileupto(av, gmodulo(geval(gel(x,2)), geval(gel(x,1))));
 
     case t_POL:
       lx=lg(x); if (lx==2) return gen_0;
@@ -3150,7 +3148,8 @@ geval(GEN x)
       pari_err(impl, "evaluation of a power series");
 
     case t_RFRAC:
-      return gdiv(geval(gel(x,1)),geval(gel(x,2)));
+      av = avma;
+      return gerepileupto(av, gdiv(geval(gel(x,1)), geval(gel(x,2))));
   }
   pari_err(typeer,"geval");
   return NULL; /* not reached */
