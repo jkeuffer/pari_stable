@@ -22,6 +22,6 @@ Doc: intersection of the two ideals
  \bprog
  ZM_intersect(A,B) =
  { my(Ker = matkerint(concat(A,B));
-   mathnf(vecextract(Ker, Str(1, "..", #A), "..") * A)
+   mathnf( A * vecextract(Ker, Str("1..", #A), "..") )
  }
  @eprog
