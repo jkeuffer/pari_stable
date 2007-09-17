@@ -17,10 +17,11 @@ Doc: \idx{LLL} reduction of
  logarithmic embeddings of $a$ are subtracted to the Archimedean part.
  
  More often than not, a \idx{principal ideal} will yield the identity
- matrix. This is a quick and dirty way to check if ideals are principal
- without computing a full \kbd{bnf} structure, but it's not a necessary
- condition; hence, a non-trivial result doesn't prove the ideal is
- non-trivial in the class group.
+ matrix. This is a quick and dirty way to check if ideals are principal,
+ but it is not a necessary condition; a non-trivial result does not prove
+ that the ideal is non-trivial in the class group. For guaranteed results,
+ see \kbd{bnfisprincipal}, which requires the computation of a full
+ \kbd{bnf} structure.
  
  Note that this is \emph{not} the same as the LLL reduction of the lattice
  $I$ since ideal operations are involved.

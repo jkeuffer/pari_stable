@@ -9,7 +9,7 @@ Help: bnfisprincipal(bnf,x,{flag=1}): bnf being output by bnfinit (with
  vector. flag is optional, whose meaning is: 0: output only v; 1: default; 2:
  output only v, precision being doubled until the result is obtained; 3: as 2
  but output generators
-Doc: $\var{bnf}$ being the
+Doc: $\var{bnf}$ being the \sidx{principal ideal}
  number field data output by \kbd{bnfinit}, and $x$ being either a $\Z$-basis
  of an ideal in the number field (not necessarily in HNF) or a prime ideal in
  the format output by the function \kbd{idealprimedec}, this function tests
