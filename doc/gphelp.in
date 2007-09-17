@@ -1104,7 +1104,7 @@ sub TeXprint {
   s/\@\[start(bold|code|bcode|bi)\]/$cb/g;
   s/\@\[startit\]/$cu/g;
   s/\@\[(dollar|empty|endl?word|endpodcode|startl?word|startpodcode)\]//g;
-  s/\@\[pm\]/±/g;
+  s/\@\[pm\]/+\/-/g;
   s/\@\[lt\]/</g;
   s/\@\[gt\]/>/g;
   s/\\([\{\}])/$1/g;

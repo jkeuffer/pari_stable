@@ -2005,7 +2005,7 @@ Zplog2(GEN x, GEN g, GEN p, ulong k, GEN pk)
   pl = mulii(pl_1, p);
   q = odd(k)? pl_1: pl;
   Q = subii(pl, pl_1);
-  /* write a = b + Q c, Q = (p-1)p^(l‐1), c defined mod q */
+  /* write a = b + Q c, Q = (p-1)p^(l-1), c defined mod q */
   b = Zplog2(remii(x, pl), remii(g, pl), p, l, pl); /* g^b = x (mod p^l) */
   /* G := g^Q = 1 + t p^l (mod p^k), (t,p) = 1 */
   t = diviiexact(subis(Fp_pow(g, Q, pk), 1), pl);

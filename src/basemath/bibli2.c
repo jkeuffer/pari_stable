@@ -1165,7 +1165,7 @@ veccmp(void *data, GEN x, GEN y)
   return 0;
 }
 
-/* return permutation sorting v[1..n], removing duplicateѕ. Assume n > 0 */
+/* return permutation sorting v[1..n], removing duplicates. Assume n > 0 */
 static GEN
 gen_sortspec_uniq(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
 {
