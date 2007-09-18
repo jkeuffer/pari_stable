@@ -1882,6 +1882,14 @@ other factorizations. If a routine is performing (or has performed) a
 factorization and is interrupted by an error or via Control-C, this lets you
 recover the prime factors already found.
 
+\subsec{factor\_proven}\kbdsidx{factor_proven} (default \kbd{0}): by
+default, the factors output by the integer factorization machinery are
+only pseudo-primes, not proven primes. If this is
+set, a primality proof is done for each factor and all results depending on
+integer factorization are fully proven. This flag does not affect partial
+factorization when it is explicitely requested. Note that if affects all
+other factorizations, and will in general lead to significant slowdowns.
+
 \subsecidx{format} (default \kbd{"g0.28"} and \kbd{"g0.38"} on 32-bit and
 64-bit machines, respectively): of the form x$m.n$, where x is a letter in
 $\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},

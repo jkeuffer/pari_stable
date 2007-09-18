@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-int factor_add_primes = 0;
+int factor_add_primes = 0, factor_proven = 0;
 
 /*********************************************************************/
 /**                                                                 **/
@@ -3178,6 +3178,27 @@ ifac_resort(GEN *partial, GEN *where)
   return 0;
 }
 
+static int
+ifac_isprime(GEN x)
+{
+  int res = 0;
+  if (!BSW_psp_nosmalldiv(VALUE(x))) 
+    CLASS(x) = gen_0; /* composite */
+  else if (factor_proven && ! BSW_isprime(VALUE(x)))
+  {
+    pari_warn(warner, "IFAC: pseudo-prime %Z\n\tis not prime. PLEASE REPORT!\n",
+              VALUE(x));
+    CLASS(x) = gen_0;
+  }
+  else
+  {
+    CLASS(x) = gen_1; /* prime (not proven if factor_proven = 0) */
+    res = 1;
+  }
+  if (DEBUGLEVEL>2) ifac_factor_dbg(x);
+  return res;
+}
+
 /* sweep downward so we can with luck turn some Qs into Ps */
 static void
 ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
@@ -3209,21 +3230,15 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
         }
         continue;
       }
-      if (BSW_psp_nosmalldiv(VALUE(scan))) {
-        CLASS(scan) = gen_2; /* P_i, finished prime */
-        if (DEBUGLEVEL>=3) ifac_factor_dbg(scan);
-      } else { /* composite */
-        CLASS(scan) = gen_0;
-        if (DEBUGLEVEL>=3) ifac_factor_dbg(scan);
-        break; /* must disable Q-to-P */
-      }
+      if (!ifac_isprime(scan)) break; /* must disable Q-to-P */
+      CLASS(scan) = gen_2; /* P_i, finished prime */
+      if (DEBUGLEVEL>2) ifac_factor_dbg(scan);
     }
   /* go on, Q-to-P trick now disabled */
   for (; scan >= *where; scan -= 3)
   {
     if (CLASS(scan)) continue;
-    CLASS(scan) = BSW_psp_nosmalldiv(VALUE(scan))? gen_1: gen_0; /* Qj | Ck */
-    if (DEBUGLEVEL>=3) ifac_factor_dbg(scan);
+    CLASS(scan) = ifac_isprime(scan)? gen_1: gen_0; /* Qj | Ck */
   }
 }
 
@@ -3336,13 +3351,9 @@ ifac_crack(GEN *partial, GEN *where)
     exp1 = 2;
   } /* while Z_issquarerem */
 
-  /* check whether our composite hasn't become prime */
-  if (exp1 > 1 && hint != 15 && BSW_psp_nosmalldiv(VALUE(*where)))
-  {
-    CLASS(*where) = gen_1;
-    if (DEBUGLEVEL >= 4) fprintferr("IFAC: factor %Z\n\tis prime\n",**where);
-    return 0; /* bypass subsequent ifac_whoiswho() call */
-  }
+  /* if our composite has become prime, bypass ifac_whoiswho() */
+  if (exp1 > 1 && hint != 15 && ifac_isprime(*where)) return 0;
+
   /* MPQS cannot factor prime powers. Do this even if MPQS is blocked by hint:
    * it is useful in bounded factorization */
   {
@@ -3384,9 +3395,8 @@ ifac_crack(GEN *partial, GEN *where)
       if (moebius_mode) return 0; /* no need to carry on */
     } /* while is_odd_power */
 
-    if (exp2 > 1 && hint != 15 && BSW_psp_nosmalldiv(VALUE(*where)))
+    if (exp2 > 1 && hint != 15 && ifac_isprime(*where))
     { /* Something nice has happened and our composite has become prime */
-      CLASS(*where) = gen_1;
       if (DEBUGLEVEL >= 4)
         fprintferr("IFAC: factor %Z\n\tis prime\n", VALUE(*where));
       return 0;	/* bypass subsequent ifac_whoiswho() call */

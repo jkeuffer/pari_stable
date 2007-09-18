@@ -15,7 +15,7 @@ Doc: general factorization function.
  result is a two-column matrix, the first column being the irreducibles
  dividing $x$ (prime numbers or polynomials), and the second the exponents.
  If $x$ is a vector or a matrix, the factoring is done componentwise (hence
- the result is a vector or matrix of two-column matrices). By definition,
+ the result is a vector or matrix of two-column matrices). By convention,
  $0$ is factored as $0^1$.
  
  If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
@@ -26,6 +26,9 @@ Doc: general factorization function.
  fa = factor(2^2^7 +1)
  isprime( fa[,1] )
  @eprog\noindent
+ Another possibility is to set the global default \tet{factor_proven}, which 
+ will perform a rigorous primality proof for each pseudoprime factor.
+
  An argument \var{lim} can be added, meaning that we look only for prime
  factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
  (except when $\var{lim}=0$ where the effect is identical to setting

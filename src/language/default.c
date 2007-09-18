@@ -693,6 +693,10 @@ sd_factor_add_primes(char *v, long flag)
 { return sd_toggle(v,flag,"factor_add_primes", &factor_add_primes); }
 
 GEN
+sd_factor_proven(char *v, long flag)
+{ return sd_toggle(v,flag,"factor_proven", &factor_proven); }
+
+GEN
 sd_new_galois_format(char *v, long flag)
 { return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
 
@@ -840,6 +844,7 @@ default_type gp_default_list[] =
   {"debugmem",(void*)sd_debugmem},
   {"echo",(void*)sd_echo},
   {"factor_add_primes",(void*)sd_factor_add_primes},
+  {"factor_proven",(void*)sd_factor_proven},
   {"format",(void*)sd_format},
   {"help",(void*)sd_help},
   {"histsize",(void*)sd_histsize},
@@ -850,8 +855,8 @@ default_type gp_default_list[] =
   {"output",(void*)sd_output},
   {"parisize",(void*)sd_parisize},
   {"path",(void*)sd_path},
-  {"primelimit",(void*)sd_primelimit},
   {"prettyprinter",(void*)sd_prettyprinter},
+  {"primelimit",(void*)sd_primelimit},
   {"prompt",(void*)sd_prompt},
   {"prompt_cont",(void*)sd_prompt_cont},
   {"psfile",(void*)sd_psfile},

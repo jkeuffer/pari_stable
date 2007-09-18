@@ -210,6 +210,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
    28- library functions gassoc_proto, map_proto_G, map_proto_GG, map_proto_GL,
        map_proto_lG, map_proto_lGG, map_proto_lGL [ were private with
        other names ]
+   29- default factor_proven
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
