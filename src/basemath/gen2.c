@@ -1844,9 +1844,10 @@ listput(GEN L, GEN x, long index)
     ensure_nb(L, l);
     z = list_data(L); /* it may change ! */
     index = l;
+    l++;
   } else
     killbloc( gel(z, index) );
-  z[0] = evaltyp(t_VEC) | evallg(l+1);
+  z[0] = evaltyp(t_VEC) | evallg(l);
   return gel(z,index) = gclone(x);
 }
 
