@@ -93,6 +93,8 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    71- Mod(Mod(1,v),v) --> invalid object.
    72- a = Mod(y, v); y = Mod(1,v); eval(a) --> invalid object
    73- for some complicated t_RFRAC z: z' --> impossible assignment I-->S
+   74- typo in bnfisintnorm(): missed some solutions  [ couldn't find a unit
+       of norm -1 even though one exists ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

@@ -1187,11 +1187,11 @@ get_unit_1(GEN bnf, GEN *unit)
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
   if (odd(n)) { *unit = gen_m1; return 1; }
-  v = signunits(bnf);
+  v = zsignunits(bnf, NULL, 0);
   for (i = 1; i < lg(v); i++)
   {
     GEN s = sum(gel(v,i), 1, lg(v[i])-1);
-    if (!gcmp0(s)) {
+    if (mpodd(s)) {
       GEN fu = check_units(bnf, "bnfisintnorm");
       *unit = gel(fu,i); return 1;
     }
