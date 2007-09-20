@@ -862,6 +862,12 @@ gener_FpXQ(GEN T, GEN p, GEN *po)
   GEN g, L, L2, p_1, q, o;
   pari_sp av0 = avma, av;
 
+  if (f == 1) {
+    g = cgetg(3, t_POL);
+    g[1] = evalsigne(1) | evalvarn(vT);
+    gel(g,2) = pgener_Fp(p);
+    return g;
+  }
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];

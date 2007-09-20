@@ -1591,9 +1591,14 @@ GEN
 gener_Flxq(GEN T, ulong p, GEN *po)
 {
   long i, j, vT = T[1], f = degpol(T);
-  ulong p_1 = p - 1;
-  GEN g, L, L2, o, q = diviuexact(subis(powuu(p,f), 1), p_1);
-  pari_sp av0 = avma, av;
+  ulong p_1;
+  GEN g, L, L2, o, q;
+  pari_sp av0, av;
+
+  if (f == 1) return Fl_to_Flx(pgener_Fl(p), vT);
+  av0 = avma;
+  q = diviuexact(subis(powuu(p,f), 1), p_1);
+  p_1 = p - 1;
 
   L = cgetg(1, t_VECSMALL);
   if (p > 3)
