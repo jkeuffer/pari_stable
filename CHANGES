@@ -96,6 +96,7 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    74- typo in bnfisintnorm(): missed some solutions  [ couldn't find a unit
        of norm -1 even though one exists ]
    75- ffprimroot(ffgen( t_POL of degree 1)) --> oo loop
+   76- wrong result in theta(q, z) if sin(nz) was small for some small n [#667]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -179,6 +180,7 @@ BA 48- local and my can now appear anywhere in a program.
        MAXULONG -> LONG_UMAX. Remove BYTES_IN_LONG, TWOPOTBYTES_IN_LONG
    52- implement directly gsubsg [ was a macro calling a trivial wrapper ]
    53- optimize multiplication for quadratic t_POLMOD [ t_QUAD remains faster ]
+   54- theta(q,z) very inefficient for large accuracies
 
   Added
     1- library functions expu, adduu, subuu

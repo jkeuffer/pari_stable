@@ -2336,8 +2336,8 @@ GEN
 theta(GEN q, GEN z, long prec)
 {
   long l, n;
-  pari_sp av = avma;
-  GEN ps, qn, y, zy, ps2, k, zold;
+  pari_sp av = avma, av2, lim;
+  GEN s, c, snz, cnz, s2z, c2z, ps, qn, y, zy, ps2, k, zold;
 
   l = precision(q);
   n = precision(z); if (n && n < l) l = n;
@@ -2355,14 +2355,30 @@ theta(GEN q, GEN z, long prec)
   qn = gen_1;
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
-  y = gsin(z,prec);
+  gsincos(z, &s, &c, prec);
+  s2z = gmul2n(gmul(s,c),1); /* sin 2z */
+  c2z = gsubgs(gmul2n(gsqr(c),1), 1); /* cos 2z */
+  snz = s;
+  cnz = c; y = s;
+  av2 = avma; lim = stack_lim(av2,2);
   for (n = 3;; n += 2)
   {
-    GEN t;
+    long e;
+    s = gadd(gmul(snz, c2z), gmul(cnz,s2z));
     qn = gmul(qn,ps);
+    y = gadd(y, gmul(qn, s));
+    e = gexpo(s); if (e < 0) e = 0;
+    if (gexpo(qn) + e < -bit_accuracy(prec)) break;
+
     ps = gmul(ps,ps2);
-    t = gmul(qn, gsin(gmulsg(n,z),prec)); y = gadd(y, t);
-    if (gexpo(t) < -bit_accuracy(prec)) break;
+    c = gsub(gmul(cnz, c2z), gmul(snz,s2z));
+    snz = s; /* sin nz */
+    cnz = c; /* cos nz */
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"theta (n = %ld)", n);
+      gerepileall(av2, 5, &snz, &cnz, &ps, &qn, &y);
+    }
   }
   if (signe(k))
   {
