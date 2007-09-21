@@ -1596,9 +1596,8 @@ gener_Flxq(GEN T, ulong p, GEN *po)
   pari_sp av0, av;
 
   if (f == 1) return Fl_to_Flx(pgener_Fl(p), vT);
-  av0 = avma;
+  av0 = avma; p_1 = p - 1;
   q = diviuexact(subis(powuu(p,f), 1), p_1);
-  p_1 = p - 1;
 
   L = cgetg(1, t_VECSMALL);
   if (p > 3)
