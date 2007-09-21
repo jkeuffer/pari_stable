@@ -2060,6 +2060,7 @@ mpsc1(GEN x, long *ptmod8)
   { /* p2 = cos(x)-1 --> cos(2x)-1 */
     p2 = mulrr(p2, addsr(2,p2));
     setexpo(p2, expo(p2)+1);
+    if ((i & 31) == 0) p2 = gerepileuptoleaf((pari_sp)y, p2);
   }
   affr_fixlg(p2,y); return y;
 }
