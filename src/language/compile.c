@@ -208,7 +208,7 @@ parseproto(char const **q, char *c)
 }
 /*supported types:
  * type: Gsmall, Ggen, Gvoid, Gvec
- * mode: Gsmall, Ggen, Ggen_nocopy, Gvar, Gvoid
+ * mode: Gsmall, Ggen, Gvar, Gvoid
  */
 static void
 compilecast(long n, int type, int mode)
@@ -219,7 +219,7 @@ compilecast(long n, int type, int mode)
   case Gsmall:
     if (type==Ggen)        op_push(OCitos,0);
     else if (type==Gvoid)  op_push(OCpushlong,0);
-    else pari_err(talker2,"this should be an integer",
+    else pari_err(talker2,"this should be a small integer",
              tree[n].str, get_origin());
     break;
   case Ggen:
@@ -705,7 +705,7 @@ compilefunc(long n, int mode)
               tree[n].str+tree[n].len-1, get_origin());
         if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
           pari_err(talker2,"missing mandatory argument",
-              tree[n].str+tree[n].len, get_origin());
+              tree[arg[j]].str, get_origin());
         switch(c)
         {
         case 'G':
@@ -790,7 +790,7 @@ compilefunc(long n, int mode)
             long y=tree[arg[j]].y;
             if (tree[arg[j]].f!=Faffect)
               pari_err(talker2,"expected character: '=' instead of",
-                  tree[n].str+tree[n].len, get_origin());
+                  tree[arg[j]].str+tree[arg[j]].len, get_origin());
             ev[lev++] = getvar(x);
             compilenode(y,Ggen,0);
             i++; j++;

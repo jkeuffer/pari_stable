@@ -997,7 +997,12 @@ closure_eval(GEN C)
           long n=st[--sp];
           ep = (entree*) operand;
           if (ep->valence!=EpUSER)
-            pari_err(talker,"function '%s' not yet defined",ep->name);
+          {
+            if (ep->valence==EpNEW)
+              pari_err(talker,"function '%s' not yet defined",ep->name);
+            else 
+              pari_err(talker,"not a function in function call: %s",ep->name);
+          }
           if (n>ep->arity)
             pari_err(talker,"Too many arguments for function '%s'",ep->name);
           for (j=n+1;j<=ep->arity;j++)
@@ -1020,7 +1025,12 @@ calluser:
             if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
               pari_err(obsoler, ep->name, w);
             else
-              pari_err(talker,"function '%s' not yet defined",ep->name);
+            {
+              if (ep->valence==EpNEW)
+                pari_err(talker,"function '%s' not yet defined",ep->name);
+              else 
+                pari_err(talker,"not a function in function call: %s",ep->name);
+            }
           }
           if (n>ep->arity)
             pari_err(talker,"Too many arguments for function '%s'",ep->name);
