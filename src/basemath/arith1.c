@@ -1583,7 +1583,7 @@ GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
-  if (! invmod(a,m,&res)) pari_err(invmoder,"%Z", mkintmod(res,m));
+  if (! invmod(a,m,&res)) pari_err(invmoder,"%Z", gmodulo(res,m));
   return res;
 }
 
