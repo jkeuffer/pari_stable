@@ -1043,7 +1043,7 @@ gneg(GEN x)
 
     case t_INTMOD: y=cgetg(3,t_INTMOD);
       gel(y,1) = icopy(gel(x,1));
-      gel(y,2) = subii(gel(y,1),gel(x,2));
+      gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
       break;
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
@@ -1095,7 +1095,7 @@ gneg_i(GEN x)
       return mpneg(x);
 
     case t_INTMOD: y=cgetg(3,t_INTMOD); y[1]=x[1];
-      gel(y,2) = subii(gel(y,1),gel(x,2));
+      gel(y,2) = signe(gel(x,2))? subii(gel(y,1),gel(x,2)): gen_0;
       break;
 
     case t_FRAC: case t_RFRAC:
