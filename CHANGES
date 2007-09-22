@@ -98,6 +98,7 @@ LGr60- first default(parisize,*) would segfault [due to C-1, #569]
    75- ffprimroot(ffgen( t_POL of degree 1)) --> oo loop
    76- wrong result in theta(q, z) if sin(nz) was small for some small n [#667]
    77- 1/Mod(0,2) --> impossible inverse modulo: Mod(2, 2)
+   78- alias(a,b), then ?a --> 'a is aliased to a'
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

@@ -665,7 +665,7 @@ aide0(char *s, int flag)
   }
 
   ep1 = ep;  ep = do_alias(ep);
-  if (ep1 != ep) pariprintf("%s is aliased to:\n\n",s);
+  if (ep1 != ep) { pariprintf("%s is aliased to:\n\n",s); s = ep->name; }
 
   switch(EpVALENCE(ep))
   {
