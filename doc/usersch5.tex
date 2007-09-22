@@ -3456,7 +3456,8 @@ lexicographic ordering.
 
 \fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
 to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
-\kbd{y} have the same type. When the types are different, a \kbd{true} result
+\kbd{y} have the same type, in which case they are recursively compared
+componentwise. When the types are different, a \kbd{true} result
 means that \kbd{x - y} was successfully computed and that
 \kbd{gcmp0} found it equal to $0$. In particular
 \bprog
