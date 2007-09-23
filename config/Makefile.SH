@@ -521,7 +521,7 @@ if test -n "$add_funclist"; then
 desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h
 
 $src/funclist::
-	@-cd $desc && env LANG= LC_COLLATE= LC_ALL= find ../functions -name CVS -prune -o -type f -print | xargs cksum > funclist\$(TMPSUF)
+	@-cd $desc && env LANG= LC_COLLATE= LC_ALL= find ../functions -name CVS -prune -o -name .\\* -prune -o -type f -print | xargs cksum > funclist\$(TMPSUF)
 	@-sh $cfg/mv-if-diff $desc/funclist\$(TMPSUF) $src/funclist
 
 $desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
