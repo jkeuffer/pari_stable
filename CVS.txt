@@ -72,11 +72,11 @@ simultaneously accessed without tracking version numbers. Tag names are
 
 If you want to fetch a specific version of pari (2.0.17 or more recent), add
 the argument '-r <TAG>' to your checkout or update command. The tag
-'release-2-1-patches' denotes the stable branch 2.1 as a whole, and can be
+'release-2-3-patches' denotes the stable branch 2.3 as a whole, and can be
 used to checkout up to date sources from that branch in between releases. For
 instance: 
 
-  cvs update -r release-2-1-patches
+  cvs update -r release-2-3-patches
 
 produces the latest stable distribution with all relevant patches [the ones
 not affecting stability] backported.
