@@ -146,6 +146,7 @@ millerrabin(GEN n, long k)
   long i;
   miller_t S;
 
+  if (typ(n) != t_INT) pari_err(arither1);
   if (!signe(n)) return 0;
   /* If |n| <= 3, check if n = +- 1 */
   if (lgefint(n)==3 && (ulong)(n[2])<=3) return (n[2] != 1);

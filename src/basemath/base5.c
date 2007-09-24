@@ -473,9 +473,8 @@ GEN
 rnfidealnormrel(GEN rnf, GEN id)
 {
   pari_sp av = avma;
-  GEN z, nf = gel(rnf,10);
-
-  checkrnf(rnf);
+  GEN z, nf;
+  checkrnf(rnf); nf = gel(rnf,10);
   if (degpol(rnf[1]) == 1) return matid(degpol(nf[1]));
 
   z = prodid(nf, gel(rnfidealhermite(rnf,id),2));

@@ -1931,10 +1931,13 @@ GEN
 znorder(GEN x, GEN o)
 {
   pari_sp av = avma;
-  GEN b = gel(x,1), a = gel(x,2);
+  GEN b, a;
   long to;
 
-  if (typ(x) != t_INTMOD || !gcmp1(gcdii(a,b)))
+  if (typ(x) != t_INTMOD)
+    pari_err(talker,"not an element of (Z/nZ)* in order");
+  b = gel(x,1); a = gel(x,2);
+  if (!gcmp1(gcdii(a,b)))
     pari_err(talker,"not an element of (Z/nZ)* in order");
   if (!o)
   {

@@ -729,12 +729,13 @@ GEN
 rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
-  GEN bnf = gel(T,1), rel = gel(T,2), relpol = gel(T,3), theta = gel(T,4);
+  GEN bnf, rel, relpol, theta;
   GEN nf, aux, H, U, Y, M, A, bnfS, sunitrel, futu, tu, w, prod, S1, S2;
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
     pari_err(talker,"please apply rnfisnorminit first");
+  bnf = gel(T,1); rel = gel(T,2); relpol = gel(T,3); theta = gel(T,4);
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
   nf = checknf(bnf);

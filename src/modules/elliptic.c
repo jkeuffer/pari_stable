@@ -920,9 +920,10 @@ zell(GEN e, GEN z, long prec)
 {
   long ty, sw, fl;
   pari_sp av = avma;
-  GEN t, u, p1, p2, a, b, x1, u2, D = gel(e,12);
+  GEN t, u, p1, p2, a, b, x1, u2, D;
 
   checkbell(e); checkpt(z);
+  D = gel(e,12);
   ty = typ(D); if (ty == t_INTMOD) pari_err(typeer,"zell");
   if (is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
@@ -1426,9 +1427,10 @@ _weipell(GEN c4, GEN c6, long PREC)
 GEN
 weipell(GEN e, long PREC)
 {
-  GEN c4 = gel(e,10);
-  GEN c6 = gel(e,11);
-  checkell(e); return _weipell(c4,c6,PREC);
+  GEN c4, c6;
+  checkell(e);
+  c4 = gel(e,10);
+  c6 = gel(e,11); return _weipell(c4,c6,PREC);
 }
 
 GEN

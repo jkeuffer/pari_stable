@@ -844,8 +844,9 @@ static GEN
 redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
   pari_sp av = avma;
-  GEN d = gel(x,4);
+  GEN d;
   if (typ(x) != t_QFR) pari_err(talker,"not a real quadratic form in redreal");
+  d = gel(x,4);
   x = (flag & qf_NOD)? qfr3_init(x, &D,&isqrtD)
                      : qfr5_init(x, &D,&isqrtD,&sqrtD);
   switch(flag) {
