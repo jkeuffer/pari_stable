@@ -1422,6 +1422,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   }
   if (!col)
   {
+    if (e < 0) e = 0;
     *ptprec = prec + divsBIL(e) + (MEDDEFAULTPREC-2);
     if (flag & nf_FORCE)
     {
