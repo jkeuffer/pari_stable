@@ -1631,14 +1631,7 @@ nfnewprec_shallow(GEN nf, long prec)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  long l = lg(nf);
-  GEN z, res = NULL;
-
-  if (l == 3) {
-    res = cgetg(3, t_VEC);
-    gel(res,2) = gcopy(gel(nf,2));
-    nf = gel(nf,1); l = lg(nf);
-  }
+  GEN z;
   switch(nftyp(nf))
   {
     default: pari_err(talker,"incorrect nf in nfnewprec");
@@ -1650,8 +1643,7 @@ nfnewprec(GEN nf, long prec)
       break;
     }
   }
-  if (res) gel(res,1) = z; else res = z;
-  return res;
+  return z;
 }
 
 /********************************************************************/

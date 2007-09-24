@@ -187,6 +187,8 @@ BA 48- local and my can now appear anywhere in a program.
    52- implement directly gsubsg [ was a macro calling a trivial wrapper ]
    53- optimize multiplication for quadratic t_POLMOD [ t_QUAD remains faster ]
    54- theta(q,z) very inefficient for large accuracies
+   55- remove support for nf of the form [nf, change of variable] in
+       nfnewprec() [#672]
 
   Added
     1- library functions expu, adduu, subuu
