@@ -222,6 +222,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
        map_proto_lG, map_proto_lGG, map_proto_lGL [ were private with
        other names ]
    29- default factor_proven
+   30- experimental -balloon option to gphelp
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
