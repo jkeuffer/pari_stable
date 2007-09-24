@@ -886,6 +886,8 @@ kronecker(GEN x, GEN y)
   long s = 1, r;
   ulong xu, yu;
 
+  if (typ(x) != t_INT || typ(y) != t_INT) pari_err(arither1);
+
   switch (signe(y))
   {
     case -1: y = negi(y); if (signe(x) < 0) s = -1; break;
@@ -2176,6 +2178,7 @@ long
 isfundamental(GEN x)
 {
   long r;
+  if (typ(x) != t_INT) pari_err(arither1);
   if (!signe(x)) return 0;
   r = mod16(x);
   if (!r) return 0;
@@ -2746,9 +2749,10 @@ regula(GEN x, long prec)
 {
   pari_sp av = avma, av2, lim;
   long r, fl, rexp;
-  GEN reg, rsqd, y, u, v, u1, v1, sqd = sqrti(x);
+  GEN reg, rsqd, y, u, v, u1, v1, sqd;
 
   check_quaddisc_real(x, &r, "regula");
+  sqd = sqrti(x);
   rsqd = gsqrt(x,prec);
   rexp = 0; reg = stor(2, prec);
   av2 = avma; lim = stack_lim(av2,2);
