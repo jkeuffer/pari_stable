@@ -21,8 +21,6 @@
 \@ifundef{fromgphelp}{\GPHELPfalse}{\GPHELPtrue}
 \ifGPHELP %YES
   \overfullrule=0pt
-  \magnification=\magstep1
-  \baselineskip=13pt
 \else     %NO
   \magnification=\magstephalf
   \ifx\pdfoutput\undefined
@@ -243,8 +241,9 @@
   \fi
   \centerline{\let\bf\chaptertitlebf \chaptertitlefont #2}\vskip1cm}
 \def\sectitle#1{%
-  \vskip 0pt plus 54pt\penalty-600% good break
-  \vskip 24pt plus -45pt minus 9pt%
+  \ifGPHELP\else%
+    \vskip 0pt plus 54pt\penalty-600% good break
+    \vskip 24pt plus -45pt minus 9pt\fi%
   \putchapdest%
   \tocwrite{{\hskip0.5cm#1\string\dotfill\the\pageno}}%
   \leftline{\sectionhook{\sectiontitlebf #1}.}
@@ -252,14 +251,16 @@
   \smallskip}% whatever follows will add a \parskip
 
 \def\subsectitle#1{%
-  \vskip 0pt plus 45pt\penalty-300
-  \vskip 6pt plus -42pt minus 3pt
+  \ifGPHELP\else%
+    \vskip 0pt plus 45pt\penalty-300
+    \vskip 6pt plus -42pt minus 3pt\fi%
   \tocwrite{{\sevenrm \hskip1cm#1\string\dotfill\the\pageno}}%
   \sectionhook\noindent{\bf#1}}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
-  \par\vskip 0pt plus 39pt\penalty-200
-  \vskip 0pt plus -37pt minus 1.5pt
+  \ifGPHELP\else%
+    \par\vskip 0pt plus 39pt\penalty-200
+    \vskip 0pt plus -37pt minus 1.5pt\fi%
   \sectionhook\noindent{\bf#1}}
 
 \ifGPHELP
