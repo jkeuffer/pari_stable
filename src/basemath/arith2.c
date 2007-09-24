@@ -1682,6 +1682,7 @@ bittest(GEN x, long n)
 {
   long q, r;
 
+  if (typ(x) != t_INT) pari_err(arither1);
   if (!signe(x) || n < 0) return 0;
   if (signe(x) < 0)
   {
