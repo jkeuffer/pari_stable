@@ -104,6 +104,7 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
    81- possible oo loop in _isprincipal [ precision was supposed to increase,
        but could in fact remain the same ]
    82- quadregulator(y) -> SEGV [#674]
+   83- acos(x^0) -> division by 0 [ instead of O(x^8), at \ps 16 ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

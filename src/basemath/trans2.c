@@ -260,9 +260,10 @@ gacos(GEN x, long prec)
       if (valp(y) < 0) pari_err(negexper,"gacos");
       if (lg(y) > 2)
       {
-	p1 = integ(gdiv(gneg(derivser(y)),
-                        gsqrt(gsubsg(1,gsqr(y)),prec)), varn(y));
-	if (gcmp1(gel(y,2)) && !valp(y)) /*y = 1+O(y^k), k>=1*/
+        p1 = gsubsg(1,gsqr(y));
+        if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
+	p1 = integ(gdiv(gneg(derivser(y)), gsqrt(p1,prec)), varn(y));
+	if (gcmp1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
 	  return gerepileupto(av, p1);
       }
       else p1 = y;
