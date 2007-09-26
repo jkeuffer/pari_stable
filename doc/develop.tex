@@ -73,7 +73,7 @@ enlarging \kbd{A} if necessary.
 is implemented by a \kbd{GEN} of length 3: two codewords and one component
 containing the actual entries in a malloc'ed vector (so that it can be
 realloc'ated without moving the parent \kbd{GEN}). All the entries are
-clones, possibly with cloned subcomponents (the must be deleted with
+clones, possibly with cloned subcomponents (they must be deleted with
 \kbd{killbloc}, not \kbd{gunclone}). This is in practice considered as a
 non-recursive type, i.e. copies from \kbd{gcopy} are shallow. Of course, this
 is done to support GP's inconvenient memory model. In pure library mode,
@@ -84,8 +84,9 @@ The following macros are proper lvalues and access the components
 \fun{long}{list_nmax}{GEN L}: current maximal number of elements. This grows
 as needed.
 
-\fun{GEN}{list_data}{GEN L}: the elements. If \kbd{v = list\_data(L)} and
-\kbd{l = lg(v)}, then the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
+\fun{GEN}{list_data}{GEN L}: the elements. If \kbd{v = list\_data(L)}, then
+either \kbd{v} is \kbd{NULL} (empty list) or \kbd{l = lg(v)} is defined, and
+the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 
 The following routine may be useful:
 
@@ -97,7 +98,7 @@ A typical low-level construct:
   long l;
   /* assume L is a t_LIST */
   L = list_data(L); /* discard t_LIST wrapper */
-  l = lg(L);
+  l = L? lg(L): 1;
   for (i = 1; i < l; i++) output( gel(L, i) );
   for (i = 1; i < l; i++) gel(L, i) = gclone( ... );
 @eprog\noindent

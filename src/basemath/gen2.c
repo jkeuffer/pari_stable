@@ -198,7 +198,10 @@ glength(GEN x)
   switch(tx)
   {
     case t_INT:  return lgefint(x)-2;
-    case t_LIST: return lg(list_data(x))-1;
+    case t_LIST: {
+      GEN L = list_data(x);
+      return L? lg(L)-1: 0;
+    }
     case t_REAL: return signe(x)? lg(x)-2: 0;
     case t_STR:  return strlen( GSTR(x) );
     case t_VECSMALL: return lg(x)-1;
@@ -1814,9 +1817,10 @@ listkill(GEN L)
     GEN v = list_data(L);
     long i, l = lg(v);
     for (i=1; i<l; i++) killbloc(gel(v,i));
-    gpfree(v); list_nmax(L) = 0;
+    gpfree(v);
+    list_nmax(L) = 0;
+    list_data(L) = NULL;
   }
-  ensure_nb(L, 32);
 }
 
 GEN
@@ -1824,8 +1828,7 @@ listcreate(void)
 {
   GEN L = cgetg(3,t_LIST);
   list_nmax(L) = 0;
-  ensure_nb(L, 32);
-  return L;
+  list_data(L) = NULL; return L;
 }
 
 GEN
@@ -1837,7 +1840,7 @@ listput(GEN L, GEN x, long index)
   if (typ(L) != t_LIST) pari_err(typeer,"listput");
   if (index < 0) pari_err(talker,"negative index (%ld) in listput", index);
   z = list_data(L);
-  l = lg(z);
+  l = z? lg(z): 1;
 
   if (!index || index >= l)
   {
@@ -1859,7 +1862,7 @@ listinsert(GEN L, GEN x, long index)
 
   if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
 
-  z = list_data(L); l = lg(z);
+  z = list_data(L); l = z? lg(z): 1;
   if (index <= 0 || index >= l) pari_err(talker,"bad index in listinsert");
   ensure_nb(L, l);
   z = list_data(L);
@@ -1878,8 +1881,8 @@ listpop(GEN L, long index)
 
   if (index < 0) pari_err(talker,"negative index (%ld) in listpop", index);
   z = list_data(L);
+  if (!z) pari_err(talker,"empty list in listpop");
   l = lg(z)-1;
-  if (!l) pari_err(talker,"empty list in listpop");
 
   if (!index || index > l) index = l;
   killbloc( gel(z, index) );
@@ -1893,9 +1896,12 @@ vectolist(GEN x)
 {
   GEN v, L = listcreate();
   long i, l = lg(x);
-  ensure_nb(L, l-1);
-  v = list_data(L); v[0] = x[0];
-  for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
+  if (l > 1)
+  {
+    ensure_nb(L, l-1);
+    v = list_data(L); v[0] = x[0];
+    for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
+  }
   return L;
 }
 
@@ -1917,24 +1923,24 @@ gtolist(GEN x)
 }
 
 GEN
-listconcat(GEN L1, GEN L2)
+listconcat(GEN A, GEN B)
 {
   long i, l1, lx;
-  GEN L, z;
+  GEN L, z, L1, L2;
 
-  if (typ(L1) != t_LIST) {
-    if (typ(L2) != t_LIST) pari_err(typeer,"listconcat");
-    L = listcopy(L2);
-    (void)listinsert(L, L1, 1);
+  if (typ(A) != t_LIST) {
+    if (typ(B) != t_LIST) pari_err(typeer,"listconcat");
+    L = listcopy(B);
+    (void)listinsert(L, A, 1);
     return L;
-  } else if (typ(L2) != t_LIST) {
-    L = listcopy(L1);
-    (void)listput(L, L2, 0);
+  } else if (typ(B) != t_LIST) {
+    L = listcopy(A);
+    (void)listput(L, B, 0);
     return L;
   }
-  /* L1, L2 both t_LISTs */
-  L1 = list_data(L1);
-  L2 = list_data(L2);
+  /* A, B both t_LISTs */
+  L1 = list_data(A); if (!L1) return listcopy(B);
+  L2 = list_data(B); if (!L2) return listcopy(A);
 
   l1 = lg(L1);
   lx = l1-1 + lg(L2);
@@ -1955,7 +1961,7 @@ listsort(GEN L, long flag)
   GEN perm, v, vnew;
 
   if (typ(L) != t_LIST) pari_err(typeer,"listsort");
-  v = list_data(L); l = lg(v);
+  v = list_data(L); l = v? lg(v): 1;
   if (l < 3) return L;
   if (flag)
   {

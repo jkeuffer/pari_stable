@@ -178,7 +178,7 @@ killbloc(GEN x)
       for (i=1;i<lx;i++) killbloc(gel(x,i));
       break;
     case t_LIST:
-      v = list_data(x); lx = lg(v);
+      v = list_data(x); lx = v? lg(v): 1;
       for (i=1;i<lx;i++) killbloc(gel(v,i));
       gpfree(v); break;
   }
@@ -1202,8 +1202,11 @@ const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0 };
 static GEN
 list_internal_copy(GEN z, long nmax)
 {
-  GEN a = (GEN)gpmalloc((nmax+1) * sizeof(long));
-  long i, l = lg(z);
+  long i, l;
+  GEN a;
+  if (!z) return NULL;
+  l = lg(z);
+  a = (GEN)gpmalloc((nmax+1) * sizeof(long));
   for (i = 1; i < l; i++) gel(a,i) = gclone( gel(z,i) );
   a[0] = z[0]; return a;
 }
@@ -1339,8 +1342,14 @@ static GEN
 copy_list_av(GEN x, GEN *AVMA, GEN (*cp)(GEN,GEN*))
 {
   GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
-  list_data(y) = cp(z, AVMA);
-  list_nmax(y) = lg(z)-1; return y;
+  if (z) {
+    list_data(y) = cp(z, AVMA);
+    list_nmax(y) = lg(z)-1;
+  } else {
+    list_data(y) = NULL;
+    list_nmax(y) = 0;
+  }
+  return y;
 }
 
 /* [copy_bin/bin_copy:] same as gcopy_av but use NULL to code an exact 0,
@@ -1420,7 +1429,11 @@ taille0(GEN x)
     switch(tx)
     {
       case t_INT: return lgefint(x);
-      case t_LIST: return 3 + taille0(list_data(x));
+      case t_LIST:
+      {
+        GEN L = list_data(x);
+        return L? 3 + taille0(L): 3;
+      }
       default: return lg(x);
     }
   }
@@ -1517,13 +1530,13 @@ shiftaddress_canon(GEN x, long dec)
         x = int_precW(x); y++;
       }
     } else if (tx == t_LIST) {
-      pari_sp av = avma;
-      GEN L = (GEN)((long)list_data(x)+dec);
-      shiftaddress_canon(L, dec);
-      L = vectolist(L);
-      x[0] = evaltyp(t_LIST)|evallg(3);
-      list_nmax(x) = list_nmax(L);
-      list_data(x) = list_data(L); avma = av;
+      GEN Lx = list_data(x);
+      if (Lx) {
+        pari_sp av = avma;
+        GEN L = (GEN)((long)Lx+dec);
+        shiftaddress_canon(L, dec);
+        list_data(x) = list_data(vectolist(L)); avma = av;
+      }
     }
   }
   else

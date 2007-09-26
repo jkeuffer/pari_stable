@@ -393,7 +393,7 @@ concat(GEN x, GEN y)
     GEN c, z;
 
     if (tx == t_LIST)
-    { x = list_data(x); lx = lg(x); }
+    { x = list_data(x); lx = x ? lg(x): 1; }
     else if (tx == t_VEC)
       lx = lg(x);
     else

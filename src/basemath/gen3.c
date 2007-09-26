@@ -370,7 +370,7 @@ isinexact(GEN x)
         if (isinexact(gel(x,i))) return 1;
       return 0;
     case t_LIST:
-      x = list_data(x); lx = lg(x);
+      x = list_data(x); lx = x? lg(x): 1;
       for (i=1; i<lx; i++)
         if (isinexact(gel(x,i))) return 1;
       return 0;
@@ -2526,7 +2526,7 @@ gtovec(GEN x)
       return y;
     case t_RFRAC: return mkveccopy(x);
     case t_LIST:
-      x = list_data(x); lx = lg(x);
+      x = list_data(x); lx = x? lg(x): 1;
       y = cgetg(lx, t_VEC);
       for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
@@ -2621,7 +2621,7 @@ compo(GEN x, long n)
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
   if (tx == t_LIST) {
     long llx;
-    x = list_data(x); llx = lg(x);
+    x = list_data(x); llx = x? lg(x): 1;
     lx = (ulong)llx; tx = t_VEC;
   }
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
