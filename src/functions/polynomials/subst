@@ -22,3 +22,6 @@ Doc: replace the simple variable $y$ by the argument $z$ in the ``polynomial''
  @eprog\noindent
  If $x$ is a power series, $z$ must be either a polynomial, a power
  series, or a rational function.
+ 
+ Use the function \kbd{substvec} to replace several variables at once,
+ or the function \kbd{substpol} to replace a polynomial expression.
