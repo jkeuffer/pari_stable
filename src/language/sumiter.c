@@ -28,6 +28,7 @@ forpari(GEN a, GEN b, GEN code)
   pari_sp av=avma, lim;
 
   lim = stack_lim(av,1);
+  b = gcopy(b); /* Kludge to work-around the a+(a=2) bug */
   push_lex(a);
   while (gcmp(a,b) <= 0)
   {
