@@ -5,7 +5,7 @@ Prototype: vGD0,L,
 Help: listpop(list,{n}): removes n-th element from list. If n is
  omitted or greater than the current list length, removes last element
 Description: 
- (list, gen, small):gen	listput($1, $2, $3)
+ (list, small):gen	listpop($1, $2)
 Doc: 
  removes the $n$-th element of the list
  \var{list} (which must be of type \typ{LIST}). If $n$ is omitted,
