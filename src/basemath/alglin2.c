@@ -117,7 +117,7 @@ easychar(GEN x, long v, GEN *py)
     case t_FFELT: {
       pari_sp ltop=avma;
       if (py) pari_err(typeer,"easychar");
-      p1 = FpX_to_mod(FF_charpoly(x), FF_p(x));
+      p1 = FpX_to_mod(FF_charpoly(x), FF_p_i(x));
       setvarn(p1,v); return gerepileupto(ltop,p1);
     }
 
@@ -274,7 +274,7 @@ minpoly(GEN x, long v)
   if (v<0) v = 0;
   if (typ(x)==t_FFELT)
   {
-      GEN p1 = FpX_to_mod(FF_minpoly(x), FF_p(x));
+      GEN p1 = FpX_to_mod(FF_minpoly(x), FF_p_i(x));
       setvarn(p1,v); return gerepileupto(ltop,p1);
   }
 
@@ -456,7 +456,7 @@ gnorm(GEN x)
 
     case t_FFELT:
       y=cgetg(3, t_INTMOD);
-      gel(y,1) = icopy(FF_p(x));
+      gel(y,1) = FF_p(x);
       gel(y,2) = FF_norm(x);
       return y;
     case t_POLMOD:
@@ -783,7 +783,7 @@ gtrace(GEN x)
 
     case t_FFELT:
       y=cgetg(3, t_INTMOD);
-      gel(y,1) = icopy(FF_p(x));
+      gel(y,1) = FF_p(x);
       gel(y,2) = FF_trace(x);
       return y;
 

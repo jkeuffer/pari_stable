@@ -1695,7 +1695,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
       case t_FFELT:
         if (ff==NULL) ff=p1;
         else if (!FF_samefield(p1,ff)) return 0;
-        p2=FF_p(p1);
+        p2=FF_p_i(p1);
         assign_or_fail(p2,p);
         t[15]=1; break;
       case t_COMPLEX:

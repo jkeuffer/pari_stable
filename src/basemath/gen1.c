@@ -838,7 +838,7 @@ gadd(GEN x, GEN y)
           return add_intmod_same(z, X, p1, gel(x,2));
         }
         case t_FFELT:
-          if (!equalii(gel(x,1),FF_p(y)))
+          if (!equalii(gel(x,1),FF_p_i(y)))
             pari_err(operi,"+",x,y);
           return FF_Z_add(y,gel(x,2));
         case t_COMPLEX: return addRc(x, y);
@@ -1498,7 +1498,7 @@ gmul(GEN x, GEN y)
         }
         case t_QUAD: return mulRq(x, y);
         case t_FFELT:
-          if (!equalii(gel(x,1),FF_p(y)))
+          if (!equalii(gel(x,1),FF_p_i(y)))
             pari_err(operi,"*",x,y);
           return FF_Z_mul(y,gel(x,2));
       }
@@ -2207,7 +2207,7 @@ gdiv(GEN x, GEN y)
           return div_intmod_same(z, X, p1, modii(gel(y,1), X));
         }
         case t_FFELT:
-          if (!equalii(gel(x,1),FF_p(y)))
+          if (!equalii(gel(x,1),FF_p_i(y)))
             pari_err(operi,"/",x,y);
           return Z_FF_div(gel(x,2),y);
 
@@ -2275,7 +2275,7 @@ gdiv(GEN x, GEN y)
         case t_INT: return FF_Z_Z_muldiv(x,gen_1,y);
         case t_FRAC: return FF_Z_Z_muldiv(x,gel(y,2),gel(y,1));
         case t_INTMOD:
-          if (!equalii(gel(y,1),FF_p(x)))
+          if (!equalii(gel(y,1),FF_p_i(x)))
             pari_err(operi,"/",x,y);
           return FF_Z_Z_muldiv(x,gen_1,gel(y,2));
         default:

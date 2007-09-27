@@ -159,11 +159,28 @@ FF_1(GEN x)
 GEN
 FF_p(GEN x)
 {
+  return icopy(gel(x,4));
+}
+
+GEN
+FF_p_i(GEN x)
+{
   return gel(x,4);
 }
 
 GEN
 FF_to_FpXQ(GEN x)
+{
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    return gcopy(gel(x,2));
+  default:
+    return Flx_to_ZX(gel(x,2));
+  }
+}
+GEN
+FF_to_FpXQ_i(GEN x)
 {
   switch(x[1])
   {

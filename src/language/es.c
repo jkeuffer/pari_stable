@@ -1701,7 +1701,7 @@ isfactor(GEN g)
     case t_FRAC: case t_RFRAC:
       return isfactor(gel(g,1));
     case t_FFELT:
-      return isfactor(FF_to_FpXQ(g));
+      return isfactor(FF_to_FpXQ_i(g));
     case t_COMPLEX:
       if (isnull(gel(g,1))) return isfactor(gel(g,2));
       if (isnull(gel(g,2))) return isfactor(gel(g,1));
@@ -1979,7 +1979,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       bruti(gel(g,1),T,1); pariputc(')'); break;
 
     case t_FFELT:
-      bruti(FF_to_FpXQ(g),T,addsign);
+      bruti(FF_to_FpXQ_i(g),T,addsign);
       break;
 
     case t_FRAC: case t_RFRAC:

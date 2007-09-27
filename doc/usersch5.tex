@@ -4158,10 +4158,14 @@ functions class \kbd{FpXQ} and/or \kbd{Flxq} as appropriate.
 \fun{GEN}{FF_p}{GEN a} returns the characteristic of the definition field of the
 \typ{FFELT} element \kbd{a}.
 
+\fun{GEN}{FF_p_i}{GEN a} shallow version of \kbd{FF_p}.
+
 \fun{GEN}{FF_to_FpXQ}{GEN a} converts the \typ{FFELT} \kbd{a} to a polynomial
 $P$ with \typ{INT} coefficients such that $a=P(g)$ where $g$ is the generator
 of the finite field returned by \kbd{ffgen}, in the variable used to display
 $g$.
+
+\fun{GEN}{FF_to_FpXQ_i}{GEN a} shallow version of \kbd{FF_to_FpXQ}.
 
 \fun{GEN}{FF_1}{GEN a} returns the unity in the definition field of the
 \typ{FFELT} element \kbd{a}.
