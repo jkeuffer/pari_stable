@@ -284,7 +284,7 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \key{extend statements on several lines}{\{$\seq_1$; $\seq_2$;\}}
 \key{comment}{/* $\dots$ */}
 \key{one-line comment, rest of line ignored}{\\\\ \dots}
-\li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\fl)$}
+\li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\{\fl\})$}
 \li{mimic behaviour of GP 1.39} {default(compatible,3)}
 
 \section{Metacommands}
@@ -409,14 +409,14 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{intersection of sets $x$ and $y$}{setintersect$(x,y)$}
 \li{set of elements in $x$ not belonging to $y$}{setminus$(x,y)$}
 \li{union of sets $x$ and $y$}{setunion$(x,y)$}
-\li{look if $y$ belongs to the set $x$}{setsearch$(x,y,\fl)$}
+\li{look if $y$ belongs to the set $x$}{setsearch$(x,y,\{\fl\})$}
 %
 \subsec{Lists}
 \li{create empty list $L$}{$L$ = List$()$}
 \li{append $x$ to list $L$}{listput$(L,x,\{i\})$}
 \li{remove $i$-th component from list $L$}{listpop$(L,\{i\})$}
 \li{insert $x$ in list $L$ at position $i$}{listinsert$(L,x,i)$}
-\li{sort the list $L$ in place}{listsort$(L,\fl)$}
+\li{sort the list $L$ in place}{listsort$(L,\{\fl\})$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
@@ -458,7 +458,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{declare global variables}{global$(x,...)$}
 
 \section{Iterations, Sums \& Products}
-\li{numerical integration}{intnum$(X\,$=$\;a,b,\expr,\fl)$}
+\li{numerical integration}{intnum$(X\,$=$\;a,b,\expr,\{\fl\})$}
 \li{sum \expr\ over divisors of $n$}{sumdiv$(n,X,\expr)$}
 \li{sum $X=a$ to $X=b$, initialized at $x$}{sum$(X\,$=$\;a,b,\expr,\{x\})$}
 \li{sum of series \expr}{suminf$(X\,$=$\;a,\expr)$}
@@ -479,7 +479,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{transpose of vector or matrix $x$}{mattranspose$(x)$ {\rm or} $x$\til}
 \li{adjoint of the matrix $x$}{matadjoint$(x)$}
 \li{eigenvectors of matrix $x$}{mateigen$(x)$}
-\li{characteristic polynomial of $x$}{charpoly$(x,\{v\},\fl)$}
+\li{characteristic polynomial of $x$}{charpoly$(x,\{v\},\{\fl\})$}
 \li{minimal polynomial of $x$}{minpoly$(x,\{v\})$}
 \li{trace of matrix $x$}{trace$(x)$}
 %
@@ -495,8 +495,8 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{companion matrix to polynomial $x$}{matcompanion$(x)$}
 %
 \subsec{Gaussian elimination}
-\li{determinant of matrix $x$}{matdet$(x,\fl)$}
-\li{kernel of matrix $x$}{matker$(x,\fl)$}
+\li{determinant of matrix $x$}{matdet$(x,\{\fl\})$}
+\li{kernel of matrix $x$}{matker$(x,\{\fl\})$}
 \li{intersection of column spaces of $x$ and $y$}{matintersect$(x,y)$}
 \li{solve $M*X = B$ ($M$ invertible)}{matsolve$(M,B)$}
 \li{as solve, modulo $D$ (col. vector)}{matsolvemod$(M,D,B)$}
@@ -510,16 +510,16 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{upper triangular Hermite Normal Form}{mathnf$(x)$}
 \li{HNF of $x$ where $d$ is a multiple of det$(x)$}{mathnfmod$(x,d)$}
 \li{elementary divisors of $x$}{matsnf$(x)$}
-\li{LLL-algorithm applied to columns of $x$}{qflll$(x,\fl)$}
+\li{LLL-algorithm applied to columns of $x$}{qflll$(x,\{\fl\})$}
 \li{like \kbd{qflll}, $x$ is Gram matrix of lattice}
-  {qflllgram$(x,\fl)$}
+  {qflllgram$(x,\{\fl\})$}
 \li{LLL-reduced basis for kernel of $x$}{matkerint$(x)$}
 \li{$\ZZ$-lattice $\longleftrightarrow$ $\QQ$-vector space}{matrixqz$(x,p)$}
 %
 \li{signature of quad form $^ty*x*y$}{qfsign$(x)$}
 \li{decomp into squares of $^ty*x*y$}{qfgaussred$(x)$}
 \li{find up to $m$ sols of $^ty*x*y\le b$}{qfminim$(x,b,m)$}
-\li{$v$, $v[i]:=$number of sols of $^ty*x*y = i$}{qfrep$(x,B,\fl)$}
+\li{$v$, $v[i]:=$number of sols of $^ty*x*y = i$}{qfrep$(x,B,\{\fl\})$}
 %\li{perfection rank of $x$}{qfperfection$(x)$}
 \li{eigenvals/eigenvecs for real symmetric $x$}{qfjacobi$(x)$}
 
@@ -550,7 +550,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{replace $x$ by $y$ in $f$}{subst$(f,x,y)$}
 \li{discriminant of polynomial $f$}{poldisc$(f)$}
 %\li{elementary divisors of Z[a]/f'(a)Z[a]}{poldiscreduced$(f)$}
-\li{resultant of $f$ and $g$}{polresultant$(f,g,\{v\},\fl)$}
+\li{resultant of $f$ and $g$}{polresultant$(f,g,\{v\},\{\fl\})$}
 \li{as above, give $[u,v,d]$, $xu + yv = d$}{bezoutres$(x,y)$}
 \li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
 \li{formal integral of $f$ w.r.t. $x$}{intformal$(f,x)$}
@@ -563,11 +563,11 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{number of real roots of $f$, $a < x\le b$}{polsturm$(f,\{a\},\{b\})$}
 \li{complex roots of $f$}{polroots$(f)$}
 \li{symmetric powers of roots of $f$ up to $n$}{polsym$(f,n)$}
-\li{roots of $f \mod p$}{polrootsmod$(f,p,\fl)$}
+\li{roots of $f \mod p$}{polrootsmod$(f,p,\{\fl\})$}
 \li{factor $f$}{factor$(f,\{lim\})$}
-\li{factorization of $f\mod p$}{factormod$(f,p,\fl)$}
+\li{factorization of $f\mod p$}{factormod$(f,p,\{\fl\})$}
 \li{factorization of $f$ over $\FF_{p^a}$}{factorff$(f,p,a)$}
-\li{$p$-adic fact. of $f$ to prec. $r$}{factorpadic$(f,p,r,\fl)$}
+\li{$p$-adic fact. of $f$ to prec. $r$}{factorpadic$(f,p,r,\{\fl\})$}
 \li{$p$-adic roots of $f$ to prec. $r$}{polrootspadic$(f,p,r)$}
 \li{$p$-adic root of $f$ cong. to $a\mod p$}{padicappr$(f,a)$}
 \li{Newton polygon of $f$ for prime $p$}{newtonpoly$(f,p)$}
@@ -576,7 +576,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{$n$th cyclotomic polynomial in var. $v$}{polcyclo$(n,\{v\})$}
 \li{$d$-th degree subfield of $\QQ(\zeta_n)$} {polsubcyclo$(n,d,\{v\})$}
 \li{$n$-th Legendre polynomial}{pollegendre$(n,\{v=x\})$}
-\li{$n$-th Tchebicheff polynomial}{polchebyshev$(n,\fl,\{v=x\})$}
+\li{$n$-th Tchebicheff polynomial}{polchebyshev$(n,\{\fl\},\{v=x\})$}
 \li{Zagier's polynomial of index $n$,$m$}{polzagier$(n,m)$}
 
 \section{Transcendental Functions}
@@ -598,9 +598,9 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 \li{exponential integral $\int_x^\infty e^{-t}/t\,dt$}{eint1$(x)$}
 \li{error function $2/\sqrt\pi\int_x^\infty e^{-t^2}dt$}{erfc$(x)$}
 \li{dilogarithm of $x$}{dilog$(x)$}
-\li{$m$th polylogarithm of $x$}{polylog$(m,x,\fl)$}
+\li{$m$th polylogarithm of $x$}{polylog$(m,x,\{\fl\})$}
 \li{$U$-confluent hypergeometric function}{hyperu$(a,b,u)$}
-\li{$J$-Bessel function and $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
+\li{$J$-Bessel function, $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
 \li{$K$-Bessel function of index \var{nu}}{besselk$(\var{nu},x)$}
 
 \section{Elementary Arithmetic Functions}
@@ -676,7 +676,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
 Elliptic curve initially given by $5$-tuple $E=$\kbd{[$a_1,a_2,a_3,a_4,a_6$]}.
 Points are \kbd{[x,y]}, the origin is \kbd{[0]}.
 \hfill\break
-\li{Initialize elliptic struct. $\var{ell}$, i.e create}{ellinit$(E,\fl)$}
+\li{Initialize elliptic struct. $\var{ell}$, i.e create}{ellinit$(E,\{\fl\})$}
 \leavevmode\strut\hskip1em
 $a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,disc,j$. This data can be
 recovered by typing \kbd{\var{ell}.a1},$\dots$,\kbd{\var{ell}.j}.
@@ -708,7 +708,7 @@ If $\var{fl}$ omitted, also
 \li{torsion subgroup with generators}{elltors$(ell)$}
 \li{$y$-coordinates of point(s) for $x$}{ellordinate$(ell,x)$}
 \li{canonical bilinear form taken at $z_1$, $z_2$}{ellbil$(ell,z_1,z_2)$}
-\li{canonical height of $z$}{ellheight$(ell,z,\fl)$}
+\li{canonical height of $z$}{ellheight$(ell,z,\{\fl\})$}
 \li{height regulator matrix for pts in $x$}{ellheightmatrix$(ell,x)$}
 \li{$p$th coeff $a_p$ of $L$-function, $p$ prime}{ellap$(ell,p)$}
 \li{$k$th coeff $a_k$ of $L$-function}{ellak$(ell,k)$}
@@ -723,13 +723,13 @@ If $\var{fl}$ omitted, also
 %
 \li{arithmetic-geometric mean}{agm$(x,y)$}
 \li{elliptic $j$-function $1/q+744+\cdots$}{ellj$(x)$}
-\li{Weierstrass $\sigma$ function}{ellsigma$(ell,z,\fl)$}
-\li{Weierstrass $\wp$ function}{ellwp$(ell,\{z\},\fl)$}
+\li{Weierstrass $\sigma$ function}{ellsigma$(ell,z,\{\fl\})$}
+\li{Weierstrass $\wp$ function}{ellwp$(ell,\{z\},\{\fl\})$}
 \li{Weierstrass $\zeta$ function}{ellzeta$(ell,z)$}
-\li{modified Dedekind $\eta$ func. $\prod(1-q^n)$}{eta$(x,\fl)$}
+\li{modified Dedekind $\eta$ func. $\prod(1-q^n)$}{eta$(x,\{\fl\})$}
 \li{Jacobi sine theta function}{theta$(q,z)$}
 \li{k-th derivative at z=0 of \kbd{theta}$(q,z)$}{thetanullk$(q,k)$}
-\li{Weber's $f$ functions}{weber$(x,\fl)$}
+\li{Weber's $f$ functions}{weber$(x,\{\fl\})$}
 \li{Riemann's zeta $\zeta(s)=\sum n^{-s}$}{zeta$(s)$}
 %
 \shortcopyrightnotice
@@ -738,8 +738,8 @@ If $\var{fl}$ omitted, also
 \section{Graphic Functions}
 \li{crude graph of \expr\ between $a$ and $b$}{plot$(X\,$=$\;a,b,expr)$}
 \subsec{High-resolution plot {\rm (immediate plot)}}
-\li{plot \expr\ between $a$ and $b$}{ploth$(X\,$=$\;a,b,expr,\fl,\{n\})$}
-\li{plot points given by lists $lx$, $ly$}{plothraw$(lx,ly,\fl)$}
+\li{plot \expr\ between $a$ and $b$}{ploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{plot points given by lists $lx$, $ly$}{plothraw$(lx,ly,\{\fl\})$}
 \li{terminal dimensions}{plothsizes$()$}
 %
 \subsec{Rectwindow functions}
@@ -747,8 +747,8 @@ If $\var{fl}$ omitted, also
 \li{erase window $w$}{plotkill$(w)$}
 \li{copy $w$ to $w_2$ with offset $(dx,dy)$}{plotcopy$(w,w_2,dx,dy)$}
 \li{scale coordinates in $w$}{plotscale$(w,x_1,x_2,y_1,y_2)$}
-\li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\fl,\{n\})$}
-\li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\fl)$}
+\li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\{\fl\})$}
 \li{draw window $w_1$ at $(x_1,y_1)$, \dots} {plotdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
 %
 \subsec{Low-level Rectwindow Functions}
@@ -763,22 +763,22 @@ If $\var{fl}$ omitted, also
 \li{move cursor to $(x+dx,y+dy)$}{plotrmove$(w,dx,dy)$}
 \li{draw a box to $(x_2,y_2)$}{plotbox$(w,x_2,y_2)$}
 \li{draw a box to $(x+dx,y+dy)$}{plotrbox$(w,dx,dy)$}
-\li{draw polygon}{plotlines$(w,lx,ly,\fl)$}
+\li{draw polygon}{plotlines$(w,lx,ly,\{\fl\})$}
 \li{draw points}{plotpoints$(w,lx,ly)$}
 \li{draw line to $(x+dx,y+dy)$}{plotrline$(w,dx,dy)$}
 \li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
 %
 \subsec{Postscript Functions}
-\li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\fl,\{n\})$}
-\li{as {\tt plothraw}}{psplothraw$(lx,ly,\fl)$}
+\li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\{\fl\},\{n\})$}
+\li{as {\tt plothraw}}{psplothraw$(lx,ly,\{\fl\})$}
 \li{as {\tt plotdraw}}{psdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
 \newcolumn
 
 \section{Binary Quadratic Forms}
 %
 \li{create $ax^2+bxy+cy^2$ (distance $d$) }{Qfb$(a,b,c,\{d\})$}
-\li{reduce $x$ ($s =\sqrt{D}$, $l=\floor{s}$)}
-  {qfbred$(x,\fl,\{D\},\{l\},\{s\})$}
+\li{reduce $x$ ($s =\sqrt{D}$, $l=\{\fl\}oor{s}$)}
+  {qfbred$(x,\{\fl\},\{D\},\{l\},\{s\})$}
 \li{composition of forms}{$x$*$y$ {\rm or }qfbnucomp$(x,y,l)$}
 \li{$n$-th power of form}{$x$\pow$n$ {\rm or }qfbnupow$(x,n)$}
 \li{composition without reduction}{qfbcompraw$(x,y)$}
@@ -794,13 +794,13 @@ If $\var{fl}$ omitted, also
 \li{discriminant of $\QQ(\sqrt{D})$}{quaddisc$(x)$}
 \li{regulator of real quadratic field}{quadregulator$(x)$}
 \li{fundamental unit in real $\QQ(x)$}{quadunit$(x)$}
-\li{class group of $\QQ(\sqrt{D})$}{quadclassunit$(D,\fl,\{t\})$}
-\li{Hilbert class field of $\QQ(\sqrt{D})$}{quadhilbert$(D,\fl)$}
-\li{ray class field modulo $f$ of $\QQ(\sqrt{D})$}{quadray$(D,f,\fl)$}
+\li{class group of $\QQ(\sqrt{D})$}{quadclassunit$(D,\{\fl\},\{t\})$}
+\li{Hilbert class field of $\QQ(\sqrt{D})$}{quadhilbert$(D,\{\fl\})$}
+\li{ray class field modulo $f$ of $\QQ(\sqrt{D})$}{quadray$(D,f,\{\fl\})$}
 
 \section{General Number Fields: Initializations}
 A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
-\li{init number field structure \var{nf}}{nfinit$(f,\fl)$}
+\li{init number field structure \var{nf}}{nfinit$(f,\{\fl\})$}
 \subsec{nf members:}
 \beginindentedkeys
 \key{polynomial defining \var{nf}, $f(\theta)=0$}{\var{nf}.pol}
@@ -815,7 +815,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \li{recompute \var{nf}\ using current precision}{nfnewprec$(nf)$}
 \li{init relative \var{rnf}\ given by $g=0$ over $K$}{rnfinit$(\var{nf},g)$}
 %
-\li{init\var{bnf} structure}{bnfinit$(f,\fl)$}
+\li{init\var{bnf} structure}{bnfinit$(f,\{\fl\})$}
 \subsec{bnf members: {\rm same as \var{nf}, plus}}
 \beginindentedkeys
 \key{underlying \var{nf}}{\var{bnf}.nf}
@@ -828,7 +828,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \li{compute a \var{bnf}\ from small \var{bnf}}{bnfmake$(\var{sbnf})$}
 %
 \li{add $S$-class group and units, yield \var{bnf} s}{bnfsunit$(\var{nf},S)$}
-\li{init class field structure \var{bnr}}{bnrinit$(\var{bnf},m,\fl)$}
+\li{init class field structure \var{bnr}}{bnrinit$(\var{bnf},m,\{\fl\})$}
 %
 \subsec{bnr members: {\rm same as \var{bnf}, plus}}
 \beginindentedkeys
@@ -843,14 +843,14 @@ integral basis \kbd{\var{nf}.zk}).\hfill\break
 \li{field discriminant of field $f=0$}{nfdisc$(f)$}
 \li{reverse polmod $a=A(X)\mod T(X)$}{modreverse$(a)$}
 \li{Galois group of field $f=0$, $\deg f\le 11$}{polgalois$(f)$}
-\li{smallest poly defining $f=0$}{polredabs$(f,\fl)$}
-\li{small polys defining subfields of $f=0$}{polred$(f,\fl,\{p\})$}
+\li{smallest poly defining $f=0$}{polredabs$(f,\{\fl\})$}
+\li{small polys defining subfields of $f=0$}{polred$(f,\{\fl\},\{p\})$}
 \li{small polys defining suborders of $f=0$}{polredord$(f)$}
 \li{poly of degree $\le k$ with root $x\in\CC$}{algdep$(x,k)$}
 \li{small linear rel.\ on coords of vector $x$}{lindep$(x)$}
 \li{are fields $f=0$ and $g=0$ isomorphic?}{nfisisom$(f,g)$}
 \li{is field $f=0$ a subfield of $g=0$?}{nfisincl$(f,g)$}
-\li{compositum of $f=0$, $g=0$}{polcompositum$(f,g,\fl)$}
+\li{compositum of $f=0$, $g=0$}{polcompositum$(f,g,\{\fl\})$}
 %
 \li{basic element operations (prefix \kbd{nfelt}):}{}
 \leavevmode\strut\hskip1em
@@ -865,15 +865,15 @@ $($\kbd{nfelt}$)$\kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 \li{factor $g$ in \var{nf}}{nffactor$(\var{nf},g)$}
 \li{factor $g$ mod prime $pr$ in \var{nf}}{nffactormod$(\var{nf},g,pr)$}
 \li{number of roots of unity in \var{nf}}{nfrootsof1$(\var{nf}\,)$}
-\li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\fl)$}
+\li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\{\fl\})$}
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
 \li{subfields (of degree $d$) of \var{nf}}{nfsubfields$(\var{nf},\{d\})$}
 %
 \subsec{Dedekind Zeta Function $\zeta_K$}
 \li{$\zeta_K$ as Dirichlet series, $N(I)<b$}{dirzetak$(\var{nf},b)$}
 \li{init \var{nfz}\ for field $f=0$}{zetakinit$(f)$}
-\li{compute $\zeta_K(s)$}{zetak$(\var{nfz},s,\fl)$}
-\li{Artin root number of $K$}{bnrrootnumber$(\var{bnr},\var{chi},\fl)$}
+\li{compute $\zeta_K(s)$}{zetak$(\var{nfz},s,\{\fl\})$}
+\li{Artin root number of $K$}{bnrrootnumber$(\var{bnr},\var{chi},\{\fl\})$}
 
 \section{Class Groups \& Units (bnf, bnr)}
 \leavevmode
@@ -881,28 +881,28 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \hfill\break
 %
 \li{remove GRH assumption from \var{bnf}}{bnfcertify$(\var{bnf})$}
-\li{expo.~of ideal $x$ on class gp}{bnfisprincipal$(\var{bnf},x,\fl)$}
-\li{expo.~of ideal $x$ on ray class gp}{bnrisprincipal$(\var{bnr},x,\fl)$}
+\li{expo.~of ideal $x$ on class gp}{bnfisprincipal$(\var{bnf},x,\{\fl\})$}
+\li{expo.~of ideal $x$ on ray class gp}{bnrisprincipal$(\var{bnr},x,\{\fl\})$}
 \li{expo.~of $x$ on fund.~units}{bnfisunit$(\var{bnf},x)$}
 \li{as above for $S$-units}{bnfissunit$(\var{bnfs},x)$}
 \li{fundamental units of \var{bnf}}{bnfunit$(\var{bnf})$}
 \li{signs of real embeddings of \kbd{\var{bnf}.fu}}{bnfsignunit$(\var{bnf})$}
 %
 \subsec{Class Field Theory}
-\li{ray class group structure for mod.~$m$}{bnrclass$(\var{bnf},m,\fl)$}
+\li{ray class group structure for mod.~$m$}{bnrclass$(\var{bnf},m,\{\fl\})$}
 \li{ray class number for mod.~$m$}{bnrclassno$(\var{bnf},m)$}
 \li{discriminant of class field ext}{bnrdisc$(a_1,\{a_2\},\{a_3\})$}
 \li{ray class numbers, $l$ list of mods}{bnrclassnolist$(\var{bnf},l)$}
-\li{discriminants of class fields}{bnrdisclist$(\var{bnf},l,\{arch\},\fl)$}
+\li{discriminants of class fields}{bnrdisclist$(\var{bnf},l,\{arch\},\{\fl\})$}
 \li{decode output from \kbd{bnrdisclist}}{bnfdecodemodule$(\var{nf},fa)$}
 \li{is modulus the conductor?}{bnrisconductor$(a_1,\{a_2\},\{a_3\})$}
 \li{conductor of character $chi$}{bnrconductorofchar$(\var{bnr},chi)$}
-\li{conductor of extension}{bnrconductor$(a_1,\{a_2\},\{a_3\},\fl)$}
+\li{conductor of extension}{bnrconductor$(a_1,\{a_2\},\{a_3\},\{\fl\})$}
 \li{conductor of extension def.\ by $g$}{rnfconductor$(\var{bnf},g)$}
 \li{Artin group of ext.\ def'd by $g$}{rnfnormgroup$(\var{bnr},g)$}
-\li{subgroups of \var{bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\fl)$}
+\li{subgroups of \var{bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\{\fl\})$}
 \li{rel.\ eq.\ for class field def'd by $sub$}{rnfkummer$(\var{bnr},sub,\{d\})$}
-\li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\fl)$}
+\li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\{\fl\})$}
 
 \newcolumn
 \title{PARI-GP Reference Card (2)}
@@ -922,11 +922,11 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 %
 \subsec{Ideal Operations}
 \li{add ideals $x$ and $y$}{idealadd$(\var{nf},x,y)$}
-\li{multiply ideals $x$ and $y$}{idealmul$(\var{nf},x,y,\fl)$}
-\li{intersection of ideals $x$ and $y$}{idealintersect$(\var{nf},x,y,\fl)$}
-\li{$n$-th power of ideal $x$}{idealpow$(\var{nf},x,n,\fl)$}
+\li{multiply ideals $x$ and $y$}{idealmul$(\var{nf},x,y,\{\fl\})$}
+\li{intersection of ideals $x$ and $y$}{idealintersect$(\var{nf},x,y,\{\fl\})$}
+\li{$n$-th power of ideal $x$}{idealpow$(\var{nf},x,n,\{\fl\})$}
 \li{inverse of ideal $x$}{idealinv$(\var{nf},x)$}
-\li{divide ideal $x$ by $y$}{idealdiv$(\var{nf},x,y,\fl)$}
+\li{divide ideal $x$ by $y$}{idealdiv$(\var{nf},x,y,\{\fl\})$}
 \li{Find $(a,b)\in x\times y$, $a+b=1$}{idealaddtoone$(\var{nf},x,\{y\})$}
 %
 \subsec{Primes and Multiplicative Structure}
@@ -935,10 +935,10 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{decomposition of prime $p$ in \var{nf}}{idealprimedec$(\var{nf},p)$}
 \li{valuation of $x$ at prime ideal $pr$}{idealval$(\var{nf},x,pr)$}
 \li{weak approximation theorem in \var{nf}}{idealchinese$(\var{nf},x,y)$}
-\li{give $bid=$structure of $(\ZZ_K/id)^*$}{idealstar$(\var{nf},id,\fl)$}
+\li{give $bid=$structure of $(\ZZ_K/id)^*$}{idealstar$(\var{nf},id,\{\fl\})$}
 \li{discrete log of $x$ in $(\ZZ_K/bid)^*$}{ideallog$(\var{nf},x,bid)$}
-\li{\kbd{idealstar} of all ideals of norm $\le b$}{ideallist$(\var{nf},b,\fl)$}
-\li{add archimedean places}{ideallistarch$(\var{nf},b,\{ar\},\fl)$}
+\li{\kbd{idealstar} of all ideals of norm $\le b$}{ideallist$(\var{nf},b,\{\fl\})$}
+\li{add archimedean places}{ideallistarch$(\var{nf},b,\{ar\},\{\fl\})$}
 \li{init \kbd{prmod} structure}{nfmodprinit$(\var{nf},pr)$}
 \li{kernel of matrix $M$ in $(\ZZ_K/pr)^*$}{nfkermodpr$(\var{nf},M,prmod)$}
 \li{solve $M x = B$ in $(\ZZ_K/pr)^*$}{nfsolvemodpr$(\var{nf},M,B,prmod)$}
@@ -947,18 +947,18 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{initializes a Galois group structure}{galoisinit$(\var{pol},\{den\})$}
 \li{action of $p$ in nfgaloisconj form}{galoispermtopol$(G,\{p\})$}
 \li{identifies as abstract group}{galoisidentify$(G)$}
-\li{exports a group for GAP or MAGMA}{galoisexport$(G,\fl)$}
+\li{exports a group for GAP or MAGMA}{galoisexport$(G,\{\fl\})$}
 \li{subgroups of the Galois group $G$}{galoissubgroups$(G)$}
-\li{subfields from subgroups of $G$}{galoissubfields$(G,\fl,\{v\})$}
-\li{fixed field}{galoisfixedfield$(G,\var{perm},\fl,\{v\})$}
-\li{is $G$ abelian?}{galoisisabelian$(G,\fl)$}
-\li{abelian number fields}{galoissubcyclo(N,H,\fl,\{v\})}
+\li{subfields from subgroups of $G$}{galoissubfields$(G,\{\fl\},\{v\})$}
+\li{fixed field}{galoisfixedfield$(G,\var{perm},\{\fl\},\{v\})$}
+\li{is $G$ abelian?}{galoisisabelian$(G,\{\fl\})$}
+\li{abelian number fields}{galoissubcyclo(N,H,\{\fl\},\{v\})}
 
 \section{Relative Number Fields (rnf)}
 Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \hfill\break
 %
-\li{absolute equation of $L$}{rnfequation$(\var{nf},g,\fl)$}
+\li{absolute equation of $L$}{rnfequation$(\var{nf},g,\{\fl\})$}
 \li{relative {\tt nfalgtobasis}}{rnfalgtobasis$(\var{rnf},x)$}
 \li{relative {\tt nfbasistoalg}}{rnfbasistoalg$(\var{rnf},x)$}
 \li{relative {\tt idealhnf}}{rnfidealhnf$(\var{rnf},x)$}
@@ -994,9 +994,9 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \li{absolute norm of ideal $x$}{rnfidealnormabs$(\var{rnf},x)$}
 \li{relative norm of ideal $x$}{rnfidealnormrel$(\var{rnf},x)$}
 \li{solutions of $N_{K/\QQ}(y)=x\in \ZZ$}{bnfisintnorm$(\var{bnf},x)$}
-\li{is $x\in\QQ$ a norm from $K$?}{bnfisnorm$(\var{bnf},x,\fl)$}
-\li{initialize $T$ for norm eq.~solver}{rnfisnorminit$(K,pol,\fl)$}
-\li{is $a\in K$ a norm from $L$?}{rnfisnorm$(T,a,\fl)$}
+\li{is $x\in\QQ$ a norm from $K$?}{bnfisnorm$(\var{bnf},x,\{\fl\})$}
+\li{initialize $T$ for norm eq.~solver}{rnfisnorminit$(K,pol,\{\fl\})$}
+\li{is $a\in K$ a norm from $L$?}{rnfisnorm$(T,a,\{\fl\})$}
 \vfill
 \copyrightnotice
 \bye
