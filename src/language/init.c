@@ -1371,19 +1371,6 @@ icopy_av_canon(GEN x, GEN AVMA)
   for (i=2; i<lx; i++, x = int_precW(x)) y[i] = *x;
   return y;
 }
-static GEN
-copy_list_av(GEN x, GEN *AVMA)
-{
-  GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
-  if (z) {
-    list_data(y) = gcopy_av0_canon(z, AVMA);
-    list_nmax(y) = lg(z)-1;
-  } else {
-    list_data(y) = NULL;
-    list_nmax(y) = 0;
-  }
-  return y;
-}
 
 /* [copy_bin_canon/bin_copy_canon:] same as gcopy_av0, but copy integers in
  * canonical (native kernel) form and make a full copy of t_LISTs */
@@ -1399,7 +1386,18 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
     switch(tx)
     {
       case t_INT: return *AVMA = icopy_av_canon(x, *AVMA);
-      case t_LIST: return copy_list_av(x, AVMA);
+      case t_LIST:
+      {
+        GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
+        if (z) {
+          list_data(y) = gcopy_av0_canon(z, AVMA);
+          list_nmax(y) = lg(z)-1;
+        } else {
+          list_data(y) = NULL;
+          list_nmax(y) = 0;
+        }
+        return y;
+      }
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
