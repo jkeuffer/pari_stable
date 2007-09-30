@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.23}% Version of this reference card
+\def\versionnumber{2.24}% Version of this reference card
 \def\PARIversion{2.4.2}% Version of PARI described on this reference card
 \def\year{2007}
-\def\month{August}
+\def\month{October}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -328,8 +328,7 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \newcolumn
 
 \section{PARI Types \& Input Formats}
-\li{\typ{INT}. Integers}{$\pm n$}
-\li{\typ{REAL}. Real Numbers}{$\pm n.ddd$}
+\li{\typ{INT}/\typ{REAL}. Integers, Reals}{$\pm n$, $\pm n.ddd$}
 \li{\typ{INTMOD}. Integers modulo $m$}{Mod$(n,m)$}
 \li{\typ{FRAC}. Rational Numbers}{$n/m$}
 \li{\typ{FFELT}. Elt in a Finite Field}{ffgen(T)}
@@ -371,7 +370,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{make $x$ a polynomial of $v$}{Pol$(x,\{v\})$}
 \li{as above, starting with constant term}{Polrev$(x,\{v\})$}
 \li{make $x$ a power series of $v$}{Ser$(x,\{v\})$}
-\li{PARI type of object $x$}{type$(x, \{t\})$}
+\li{PARI type of object $x$}{type$(x)$}
 \li{object $x$ with precision $n$}{prec$(x,\{n\})$}
 \li{evaluate $f$ replacing vars by their value}{eval$(f)$}
 %
@@ -421,17 +420,18 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
-\li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\seq)$}
-\li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\seq)$}
-\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X\,$=$\;a,b,\seq)$}
-\li{eval.\ \seq\ for $a\le X\le b$ stepping $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
-\li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\seq)$}
+\li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\{\seq\})$}
+\li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\{\seq\})$}
+\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X\,$=$\;a,b,\{\seq\})$}
+\li{eval.\ \seq\ for $a\le X\le b$ stepping
+$s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
+\li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\{\seq\})$}
 \li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
-\li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
-\li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
+\li{evaluate \seq\ until $a\ne0$}{until$(a,\{\seq\})$}
+\li{while $a\ne0$, evaluate \seq}{while$(a,\{\seq\})$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
 \li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
-\li{return $x$ from current subroutine}{return$(x)$}
+\li{return $x$ from current subroutine}{return$(\{x\})$}
 \li{error recovery (try $\seq_1$)}{trap$(\{err\},\{\seq_2\},\{\seq_1\})$}
 %
 \subsec{Input/Output}
@@ -487,7 +487,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{row vec.\ of \expr\ eval'ed at $1\le i\le n$}{vector$(n,\{i\},\{\expr\})$}
 \li{col.\ vec.\ of \expr\ eval'ed at $1\le i\le n$}{vectorv$(n,\{i\},\{\expr\})$}
 \li{matrix $1\le i\le m$, $1\le j\le n$}{matrix$(m,n,\{i\},\{j\},\{\expr\})$}
-\li{diagonal matrix whose diag. is $x$}{matdiagonal$(x)$}
+\li{diagonal matrix with diagonal $x$}{matdiagonal$(x)$}
 \li{$n\times n$ identity matrix}{matid$(n)$}
 \li{Hessenberg form of square matrix $x$}{mathess$(x)$}
 \li{$n\times n$ Hilbert matrix $H_{ij}=(i+j-1)^{-1}$}{mathilbert$(n)$}
@@ -528,8 +528,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{valuation of $x$ at $p$}{valuation$(x,p)$}
 \subsec{Dirichlet and Power Series}
 \li{Taylor expansion around $0$ of $f$ w.r.t. $x$}{taylor$(f,x)$}
-\li{$\sum a_kb_kt^k$ from $\sum a_kt^k$ and $\sum b_kt^k$}{serconvol$(x,y)$}
-\li{$f=\sum a_k*t^k$ from $\sum (a_k/k!)*t^k$}{serlaplace$(f)$}
+\li{$\sum a_kb_k t^k$ from $\sum a_kt^k$ and $\sum b_kt^k$}{serconvol$(x,y)$}
+\li{$f=\sum a_k t^k$ from $\sum (a_k/k!)t^k$}{serlaplace$(f)$}
 \li{reverse power series $F$ so $F(f(x))=x$}{serreverse$(f)$}
 \li{Dirichlet series multiplication / division}{dirmul{\rm,} dirdiv$(x,y)$}
 \li{Dirichlet Euler product ($b$ terms)}{direuler$(p\,$=$\;a,b,\expr)$}
@@ -550,7 +550,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{replace $x$ by $y$ in $f$}{subst$(f,x,y)$}
 \li{discriminant of polynomial $f$}{poldisc$(f)$}
 %\li{elementary divisors of Z[a]/f'(a)Z[a]}{poldiscreduced$(f)$}
-\li{resultant of $f$ and $g$}{polresultant$(f,g,\fl)$}
+\li{resultant of $f$ and $g$}{polresultant$(f,g,\{v\},\fl)$}
 \li{as above, give $[u,v,d]$, $xu + yv = d$}{bezoutres$(x,y)$}
 \li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
 \li{formal integral of $f$ w.r.t. $x$}{intformal$(f,x)$}
@@ -575,14 +575,14 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \subsec{Special Polynomials}
 \li{$n$th cyclotomic polynomial in var. $v$}{polcyclo$(n,\{v\})$}
 \li{$d$-th degree subfield of $\QQ(\zeta_n)$} {polsubcyclo$(n,d,\{v\})$}
-\li{$n$-th Legendre polynomial}{pollegendre$(n)$}
-\li{$n$-th Tchebicheff polynomial}{polchebyshev$(n)$}
+\li{$n$-th Legendre polynomial}{pollegendre$(n,\{v=x\})$}
+\li{$n$-th Tchebicheff polynomial}{polchebyshev$(n,\fl,\{v=x\})$}
 \li{Zagier's polynomial of index $n$,$m$}{polzagier$(n,m)$}
 
 \section{Transcendental Functions}
 \li{real, imaginary part of $x$}{real$(x)$, imag$(x)$}
 \li{absolute value, argument of $x$}{abs$(x)$, arg$(x)$}
-\li{square/nth root of $x$}{sqrt$(x)$, sqrtn$(x,n,$\&$z)$}
+\li{square/nth root of $x$}{sqrt$(x)$, sqrtn$(x,n,\{$\&$z\})$}
 \li{trig functions}{sin, cos, tan, cotan}
 \li{inverse trig functions}{asin, acos, atan}
 \li{hyperbolic functions}{sinh, cosh, tanh}
@@ -600,7 +600,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{dilogarithm of $x$}{dilog$(x)$}
 \li{$m$th polylogarithm of $x$}{polylog$(m,x,\fl)$}
 \li{$U$-confluent hypergeometric function}{hyperu$(a,b,u)$}
-\li{$J$-Bessel function $J_{n+1/2}(x)$}{besseljh$(n,x)$}
+\li{$J$-Bessel function and $J_{n+1/2}(x)$}{besselj$(n,x)$, besseljh$(n,x)$}
 \li{$K$-Bessel function of index \var{nu}}{besselk$(\var{nu},x)$}
 
 \section{Elementary Arithmetic Functions}
