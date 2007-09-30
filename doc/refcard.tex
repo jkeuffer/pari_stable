@@ -699,7 +699,7 @@ If $\var{fl}$ omitted, also
 \li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
 \li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
 \li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(ell)$}
-\li{Kodaira type of $p$ fiber of $E$}{elllocalred$(ell,p)$}
+\li{Kodaira type of $p$-fiber of $E$}{elllocalred$(ell,p)$}
 \li{add points $z_1+z_2$}{elladd$(ell,z_1,z_2)$}
 \li{subtract points $z_1-z_2$}{ellsub$(ell,z_1,z_2)$}
 \li{compute $n\cdot z$}{ellpow$(ell,z,n)$}
@@ -718,6 +718,13 @@ If $\var{fl}$ omitted, also
 \li{modular parametrization of $E$}{elltaniyama$(ell)$}
 \li{point $[\wp(z),\wp'(z)]$ corresp. to $z$}{ellztopoint$(ell,z)$}
 \li{complex $z$ such that $p=[\wp(z),\wp'(z)]$}{ellpointtoz$(ell,p)$}
+
+\subsec{Elldata package, Cremona's database:}
+\li{db code $\leftrightarrow$ $[\var{conductor}, \var{class}, \var{index}]$}{ellconvertname$(s)$}
+\li{generators of Mordell-Weil group}{ellgenerators$(E)$}
+\li{look up $E$ in database}{ellidentify$(E)$}
+\li{all curves matching criterion}{ellsearch$(N)$}
+\li{loop over curves with cond.~from $a$ to $b$}{forell$(E, a,b,\{\seq\})$}
 
 \section{Elliptic \& Modular Functions}
 %
