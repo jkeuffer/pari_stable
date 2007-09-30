@@ -1337,23 +1337,8 @@ gcopy_av(GEN x, GEN *AVMA)
   return y;
 }
 
-/* lists can't be conveniently represented in binary form. Store as t_VEC */
-static GEN
-copy_list_av(GEN x, GEN *AVMA, GEN (*cp)(GEN,GEN*))
-{
-  GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
-  if (z) {
-    list_data(y) = cp(z, AVMA);
-    list_nmax(y) = lg(z)-1;
-  } else {
-    list_data(y) = NULL;
-    list_nmax(y) = 0;
-  }
-  return y;
-}
-
-/* [copy_bin/bin_copy:] same as gcopy_av but use NULL to code an exact 0,
- * code t_LIST as t_VEC */
+/* [copy_bin/bin_copy:] same as gcopy_av but use NULL to code an exact 0, and
+ * make shallow copies of t_LISTs */
 static GEN
 gcopy_av0(GEN x, GEN *AVMA)
 {
@@ -1363,11 +1348,7 @@ gcopy_av0(GEN x, GEN *AVMA)
   if (! is_recursive_t(tx))
   {
     if (is_0INT(x)) return NULL; /* special marker */
-    switch(tx)
-    {
-      case t_INT: return *AVMA = icopy_av(x, *AVMA);
-      case t_LIST: return copy_list_av(x, AVMA, &gcopy_av0);
-    }
+    if (tx == t_INT) return *AVMA = icopy_av(x, *AVMA);
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
   }
@@ -1390,6 +1371,20 @@ icopy_av_canon(GEN x, GEN AVMA)
   for (i=2; i<lx; i++, x = int_precW(x)) y[i] = *x;
   return y;
 }
+static GEN
+copy_list_av(GEN x, GEN *AVMA)
+{
+  GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
+  if (z) {
+    list_data(y) = gcopy_av0_canon(z, AVMA);
+    list_nmax(y) = lg(z)-1;
+  } else {
+    list_data(y) = NULL;
+    list_nmax(y) = 0;
+  }
+  return y;
+}
+
 /* [copy_bin_canon/bin_copy_canon:] same as gcopy_av0, but copy integers in
  * canonical (native kernel) form and make a full copy of t_LISTs */
 static GEN
@@ -1404,7 +1399,7 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
     switch(tx)
     {
       case t_INT: return *AVMA = icopy_av_canon(x, *AVMA);
-      case t_LIST: return copy_list_av(x, AVMA, &gcopy_av0_canon);
+      case t_LIST: return copy_list_av(x, AVMA);
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
@@ -1442,16 +1437,27 @@ taille0(GEN x)
   return n;
 }
 
+/* [copy_bin/bin_copy:] size (number of words) required for gcopy_av0(x) */
+static long
+taille0_nolist(GEN x)
+{
+  long i,n,lx, tx = typ(x);
+  if (!is_recursive_t(tx))
+  {
+    if (is_0INT(x)) return 0;
+    return (tx == t_INT)? lgefint(x): lg(x);
+  }
+  n = lx = lg(x);
+  for (i=lontyp[tx]; i<lx; i++) n += taille0_nolist(gel(x,i));
+  return n;
+}
+
 long
 taille(GEN x)
 {
   long i,n,lx, tx = typ(x);
   if (!is_recursive_t(tx))
-    switch(tx)
-    {
-      case t_INT: return lgefint(x);
-      default: return lg(x);
-    }
+    return (tx == t_INT)? lgefint(x): lg(x);
   n = lx = lg(x);
   for (i=lontyp[tx]; i<lx; i++) n += taille(gel(x,i));
   return n;
@@ -1524,11 +1530,7 @@ shiftaddress_canon(GEN x, long dec)
       lx = lgefint(x); if (lx <= 3) return;
       y = x + 2;
       x = int_MSW(x);  if (x == y) return;
-      while (x > y)
-      {
-        long m=*x; *x=*y; *y=m;
-        x = int_precW(x); y++;
-      }
+      while (x > y) { lswap(*x, *y); x = int_precW(x); y++; }
     } else if (tx == t_LIST) {
       GEN Lx = list_data(x);
       if (Lx) {
@@ -1557,7 +1559,7 @@ shiftaddress_canon(GEN x, long dec)
 GENbin*
 copy_bin(GEN x)
 {
-  long t = taille0(x);
+  long t = taille0_nolist(x);
   GENbin *p = (GENbin*)gpmalloc(sizeof(GENbin) + t*sizeof(long));
   GEN AVMA = GENbase(p) + t;
   p->canon = 0;
