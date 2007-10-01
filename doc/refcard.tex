@@ -420,15 +420,15 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
-\li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\{\seq\})$}
-\li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\{\seq\})$}
-\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X\,$=$\;a,b,\{\seq\})$}
+\li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\seq)$}
+\li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\seq)$}
+\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X\,$=$\;a,b,\seq)$}
 \li{eval.\ \seq\ for $a\le X\le b$ stepping
-$s$}{forstep$(X\,$=$\;a,b,s,\{\seq\})$}
-\li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\{\seq\})$}
+$s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
+\li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\seq)$}
 \li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
-\li{evaluate \seq\ until $a\ne0$}{until$(a,\{\seq\})$}
-\li{while $a\ne0$, evaluate \seq}{while$(a,\{\seq\})$}
+\li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
+\li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
 \li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(\{x\})$}
@@ -724,7 +724,7 @@ If $\var{fl}$ omitted, also
 \li{generators of Mordell-Weil group}{ellgenerators$(E)$}
 \li{look up $E$ in database}{ellidentify$(E)$}
 \li{all curves matching criterion}{ellsearch$(N)$}
-\li{loop over curves with cond.~from $a$ to $b$}{forell$(E, a,b,\{\seq\})$}
+\li{loop over curves with cond.~from $a$ to $b$}{forell$(E, a,b,\seq)$}
 
 \section{Elliptic \& Modular Functions}
 %
