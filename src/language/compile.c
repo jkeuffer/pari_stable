@@ -1200,8 +1200,6 @@ gp_closure(long n)
 {
   struct codepos pos={0,0,0,-1};
   compilenode(n,Ggen,0);
-  if (s_lvar.n)
-    pari_err(talker,"local() only allowed inside a function");
   return getclosure(&pos);
 }
 
