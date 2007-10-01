@@ -791,12 +791,12 @@ fetch_member(const char *s, long len)
 static long max_avail; /* max variable not yet used */
 static long nvar; /* first GP free variable */
 
-void pari_var_init() {
+void pari_var_init(void) {
   nvar = 0; max_avail = MAXVARN;
   (void)fetch_var();
   (void)fetch_named_var("x");
 }
-long pari_var_next() { return nvar; }
+long pari_var_next(void) { return nvar; }
 long pari_var_next_temp() { return max_avail; }
 static long
 pari_var_pop(long v)
@@ -824,7 +824,7 @@ pari_var_create(entree *ep)
 }
 
 long
-delete_var()
+delete_var(void)
 { /* user wants to delete one of his/her/its variables */
   if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
   max_avail++; return max_avail+1;
