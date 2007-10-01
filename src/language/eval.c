@@ -237,6 +237,14 @@ changevalue(entree *ep, GEN x)
   }
 }
 
+INLINE void
+createvalue(entree *ep)
+{
+  pari_var_create(ep);
+  ep->valence = EpVAR;
+  ep->value = initial_value(ep);
+}
+
 /* make GP variables safe for avma = top */
 void
 var_make_safe(void)
@@ -565,7 +573,7 @@ closure_eval(GEN C)
         switch(ep->valence)
         {
         case EpNEW:
-          pari_var_create(ep);
+          createvalue(ep);
         case EpVAR: case EpGVAR: /*FALL THROUGH*/
           gel(st,sp++)=(GEN)ep->value;
           break;
@@ -588,7 +596,7 @@ closure_eval(GEN C)
           switch (g->ep->valence)
           {
           case EpNEW:
-            pari_var_create(g->ep);
+            createvalue(g->ep);
           case EpVAR: case EpGVAR:/*FALL THROUGH*/
             g->x = (GEN) g->ep->value;
             break;
@@ -621,8 +629,7 @@ closure_eval(GEN C)
           switch (ep->valence)
           {
           case EpNEW:
-            pari_var_create(ep);
-            ep->valence=EpVAR;
+            createvalue(ep);
           case EpVAR: case EpGVAR:/*FALL THROUGH*/
             g->x = (GEN) ep->value;
             break;
@@ -679,7 +686,7 @@ closure_eval(GEN C)
         switch (ep->valence)
         {
         case EpNEW:
-          pari_var_create(ep);
+          createvalue(ep);
         case EpVAR: case EpGVAR:/*FALL THROUGH*/
           changevalue(ep, gel(st,--sp));
           break;
@@ -911,7 +918,7 @@ closure_eval(GEN C)
         break;
     case OCglobalvar:
         ep=(entree *)operand;
-        if (ep->valence==EpNEW) pari_var_create(ep);
+        if (ep->valence==EpNEW) createvalue(ep);
         ep->valence = EpGVAR;
         if (gel(st,sp-1))
           changevalue(ep,gel(st,sp-1));

@@ -818,9 +818,6 @@ pari_var_create(entree *ep)
   gel(p,2) = gen_0;
   gel(p,3) = gen_1;
   varentries[v] = ep;
-
-  ep->valence = EpVAR;
-  ep->value = p;
 }
 
 long
@@ -867,6 +864,8 @@ fetch_named_var(char *s)
     default: pari_err(talker, "%s already exists with incompatible valence", s);
   }
   pari_var_create(ep);
+  ep->valence=EpVAR;
+  ep->value=initial_value(ep);
   return ep;
 }
 
