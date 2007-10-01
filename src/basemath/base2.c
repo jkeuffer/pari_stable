@@ -1341,7 +1341,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
     prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, Z_pval(S->psc, S->p));
     if (!equalii(prc, S->psc)) break;
 
-    S->psc = S->psf; /* work full precision */
+    S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
     S->chi = mycaract(S, S->f, PHI, S->psf, powiu(S->p, S->df));
