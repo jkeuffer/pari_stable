@@ -69,15 +69,18 @@ enlarging \kbd{A} if necessary.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
 
-\section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This dynamic type
-is implemented by a \kbd{GEN} of length 3: two codewords and one component
-containing the actual entries in a malloc'ed vector (so that it can be
-realloc'ated without moving the parent \kbd{GEN}). All the entries are
-clones, possibly with cloned subcomponents (they must be deleted with
-\kbd{killbloc}, not \kbd{gunclone}). This is in practice considered as a
-non-recursive type, i.e. copies from \kbd{gcopy} are shallow. Of course, this
-is done to support GP's inconvenient memory model. In pure library mode,
-don't use this type!
+\section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type need to go
+through various hoops to support GP's inconvenient memory model. Don't
+use \typ{LIST}s in pure library mode, reimplement ordinary lists! This
+dynamic type is implemented by a \kbd{GEN} of length 3: two codewords and a
+vector containing the actual entries. In a normal setup (a finished list,
+ready to be used), 
+
+\item the vector is malloc'ed, so that it can be realloc'ated without moving
+the parent \kbd{GEN}.
+
+\item all the entries are clones, possibly with cloned subcomponents; they
+must be deleted with \kbd{killbloc}, not \kbd{gunclone}.
 
 The following macros are proper lvalues and access the components
 
@@ -88,10 +91,32 @@ as needed.
 either \kbd{v} is \kbd{NULL} (empty list) or \kbd{l = lg(v)} is defined, and
 the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 
-The following routine may be useful:
+\typ{LIST} is not considered a recursive type, i.e.
+\kbd{is\_recursive\_t(\typ{LIST})} is false. In most cases,
+e.g.~\kbd{gerepile}, this means that the list components are not inspected
+and a shallow copy of the malloced vector is made. \kbd{gcopy}, \kbd{gcone},
+\kbd{copy\_bin\_canon} are exceptions, and make a full copy of the list.
+
+The main problem with lists is to avoid memory leaks; in the above setup,
+a statement like \kbd{a = List(1)} would already leak memory, since 
+\kbd{List(1)} allocates memory, which is cloned (second allocation) when
+assigned to \kbd{a}; and the original list is lost. So,
+when a \typ{LIST} is created viw \kbd{List} / \kbd{gtolist}, it is
+created entirely on the stack, \emph{not} as described above. Such
+a list is not yet proper and trying to append elements to it fails:
+\bprog
+? listput(List([1,2,3]),1)
+  *** listput: store list in variable before appending elements.
+@eprog\noindent
+If we had been malloc'ing memory for the
+\kbd{List([1,2,3])}, it would have leaked already. On the other hand, as soon
+as this is copied, cloned, etc., the copy is a finished list as previously
+described. In particular, assigning a list to a variable (or a component
+thereof) ensures the assigned list is a proper one.
+
+The following routine is a shortcut for \kbd{gcopy}:
 
 \fun{GEN}{listcopy}{GEN L}: return a full copy of the \typ{LIST}~\kbd{L}.
-Note that \kbd{gcopy} would return a shallow copy.
 
 A typical low-level construct:
 \bprog

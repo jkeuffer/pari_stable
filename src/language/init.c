@@ -1215,8 +1215,10 @@ static void
 listassign(GEN x, GEN y)
 {
   long nmax = list_nmax(x);
+  GEN L = list_data(x);
+  if (!nmax && L) nmax = lg(L) + 32; /* not malloc'ed yet */
   list_nmax(y) = nmax;
-  list_data(y) = list_internal_copy(list_data(x), nmax);
+  list_data(y) = list_internal_copy(L, nmax);
 }
 
 GEN
@@ -1535,7 +1537,7 @@ shiftaddress_canon(GEN x, long dec)
         pari_sp av = avma;
         GEN L = (GEN)((long)Lx+dec);
         shiftaddress_canon(L, dec);
-        list_data(x) = list_data(vectolist(L)); avma = av;
+        list_data(x) = list_internal_copy(L, lg(L)); avma = av;
       }
     }
   }

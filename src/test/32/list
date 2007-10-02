@@ -10,5 +10,5 @@ List([[1, 2, 3], 2])
 List([[3, 2, 3], 2])
 List([Vecsmall([1, 2, 3]), 2])
 3
-[92, 677]
-Total time spent: 48
+[81, 589]
+Total time spent: 60

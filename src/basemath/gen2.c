@@ -1798,9 +1798,11 @@ ensure_nb(GEN L, long l)
     if (l > nmax) nmax = l;
     v = (GEN)gprealloc(list_data(L), (nmax+1) * sizeof(long));
   }
-  else
+  else /* unallocated */
   {
     nmax = 32;
+    if (list_data(L))
+      pari_err(talker, "store list in variable before appending elements");
     v = (GEN)gpmalloc((nmax+1) * sizeof(long));
     v[0] = evaltyp(t_VEC) | evallg(1);
   }
@@ -1890,35 +1892,30 @@ listpop(GEN L, long index)
   for (i=index; i < l; i++) z[i] = z[i+1];
 }
 
-/* x a t_VEC/t_COL */
-GEN
-vectolist(GEN x)
-{
-  GEN v, L = listcreate();
-  long i, l = lg(x);
-  if (l > 1)
-  {
-    ensure_nb(L, l-1);
-    v = list_data(L); v[0] = x[0];
-    for (i = 1; i < l; i++) gel(v,i) = gclone(gel(x,i));
-  }
-  return L;
-}
-
+/* return a copy fully allocated on stack. gclone from changevalue is
+ * supposed to malloc() it */
 GEN
 gtolist(GEN x)
 {
-  GEN L;
+  GEN y;
 
   if (!x) return listcreate();
   switch(typ(x))
   {
-    case t_VEC: case t_COL: return vectolist(x);
-    case t_LIST: return listcopy(x);
+    case t_VEC: case t_COL: 
+      y = listcreate();
+      if (lg(x) == 1) return y;
+      list_data(y) = gcopy(x);
+      settyp(list_data(y), t_VEC);
+      return y;
+    case t_LIST:
+      y = listcreate();
+      list_data(y) = list_data(x)? gcopy(list_data(x)): NULL;
+      return y;
     default:
-      L = listcreate();
-      (void)listput(L, x, 0);
-      return L;
+      y = listcreate();
+      list_data(y) = mkveccopy(x);
+      return y;
   }
 }
 
