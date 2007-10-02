@@ -1737,7 +1737,7 @@ gzeta(GEN x, long prec)
 /**                                                                   **/
 /***********************************************************************/
 
-/* validity domain contains .005 < |x| < 230
+/* m >= 2. Validity domain contains .005 < |x| < 230
  * Li_m(x = e^z) = sum_n=0 zeta(m-n) z^n / n!
  *    with zeta(1) := H_m - log(-z) */
 static GEN
@@ -1746,29 +1746,37 @@ cxpolylog(long m, GEN x, long prec)
   long li, i, n, bern_upto;
   pari_sp av=avma;
   GEN p1,z,h,q,s;
+  int real;
 
   if (gcmp1(x)) return szeta(m,prec);
-  z=glog(x,prec); h=gneg_i(glog(gneg_i(z),prec));
-  for (i=1; i<m; i++) h = gadd(h, ginv(utoipos(i)));
+  real = typ(x) == t_REAL;
 
-  bern_upto=m+50; mpbern(bern_upto,prec);
-  q=gen_1; s=szeta(m,prec);
+  z = glog(x,prec); h = gen_1;
+  for (i=2; i<m; i++) h = gadd(h, ginv(utoipos(i)));
+  h = gadd(h, gneg_i( glog(gneg_i(z),prec) ));
+
+  bern_upto = m+50; mpbern(bern_upto,prec);
+  q = gen_1; s = szeta(m,prec);
   for (n=1; n<=m+1; n++)
   {
-    q=gdivgs(gmul(q,z),n);
-    s=gadd(s,gmul((n==(m-1))? h: szeta(m-n,prec),q));
+    q = gdivgs(gmul(q,z),n);
+    if (n == m-1) {
+      p1 = gmul(h, q);
+      if (real) p1 = real_i(p1);
+    }
+    else
+      p1 = gmul(szeta(m-n,prec), real? real_i(q): q);
+    s = gadd(s, p1);
   }
 
-  n = m+3; z=gsqr(z); li = -(bit_accuracy(prec)+1);
-
-  for(;;)
+  z = gsqr(z); li = -(bit_accuracy(prec)+1);
+  for(n = m+3;; n += 2)
   {
-    q = gdivgs(gmul(q,z),(n-1)*n);
-    p1 = gmul(szeta(m-n,prec),q);
-    s = gadd(s,p1);
-    if (gexpo(p1) < li) break;
-    n+=2;
-    if (n>=bern_upto) { bern_upto += 50; mpbern(bern_upto,prec); }
+    GEN zet = szeta(m-n,prec);
+    q = divgunu(gmul(q,z), n-1);
+    s = gadd(s, gmul(zet, real? real_i(q): q));
+    if (gexpo(q) + expo(zet) < li) break;
+    if (n >= bern_upto) { bern_upto += 50; mpbern(bern_upto,prec); }
   }
   return gerepileupto(av,s);
 }
