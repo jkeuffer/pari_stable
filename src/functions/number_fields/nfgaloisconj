@@ -56,7 +56,7 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  $K$-automorphism for any base field $K$ as follows:
  \bprog
  rnfgaloisconj(nfK, R) = \\ K-automorphisms of L = K[X] / (R)
- { local(polabs, N, H);
+ { my(polabs, N, H);
    R *= Mod(1, nfK.pol);             \\ convert coeffs to polmod elts of K
    polabs = rnfequation(nfK, R);
    N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L

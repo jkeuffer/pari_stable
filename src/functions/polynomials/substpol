@@ -12,9 +12,9 @@ Doc: replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
  here. The substitution is done as per the following script:
  \bprog
  subst_poly(pol, from, to) =
- { local(t = 'subst_poly_t, M = from - t);
+ { my(t = 'subst_poly_t, M = from - t);
  
- subst(lift(Mod(pol,M), variable(M)), t, to)
+   subst(lift(Mod(pol,M), variable(M)), t, to)
  }
  @eprog\noindent
  For instance

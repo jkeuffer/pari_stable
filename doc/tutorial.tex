@@ -1108,7 +1108,7 @@ $$\dfrac{1}{2i\pi}\int_{C_r}\dfrac{h'(z)}{h(z)}\,dz\enspace,$$
 where $C_r$ is the circle of radius $r$ centered at the origin.
 The function we want to integrate is
 \bprog
-  fun(z) = local(u = exp(z)); (u-1) / (u-z)
+  fun(z) = my(u = exp(z)); (u-1) / (u-z)
 @eprog\noindent
 (Here \kbd{u} is a local variable to the function \kbd{f}: whenever
 a function is called, \kbd{gp} fills its argument list with the actual arguments
@@ -1144,7 +1144,7 @@ transformations, that $e^{2x}=x^2+y^2$ and that $e^x\cos(y)=x$. Hence
 $y=\pm\sqrt{e^{2x}-x^2}$ and hence $e^x\cos(\sqrt{e^{2x}-x^2})=x$.
 Therefore, type
 \bprog
-  fun(x) = local(u = exp(x)); u * cos(sqrt(u^2 - x^2)) - x
+  fun(x) = my(u = exp(x)); u * cos(sqrt(u^2 - x^2)) - x
 @eprog\noindent
 Then \kbd{fun(0)} is positive while \kbd{fun(1)} is negative. Come
 back to precision 28 and type
@@ -2062,7 +2062,7 @@ which would work whatever representation was chosen. There is no
 easily write one:
 \bprog
   nfeltnorm(nf,u) =
-  { local(t = type(u));
+  { my(t = type(u));
 
     norm(
       if (t == "t_POLMOD", u,
@@ -2072,7 +2072,7 @@ easily write one:
   }
 @eprog\noindent
 A few syntactical comments first: notice the initialization combined
-with the declaration \kbd{local(t = ...)}. Also, we have used an interesting
+with the declaration \kbd{my(t = ...)}. Also, we have used an interesting
 feature of the GP language: all expressions have a value, including branching
 statements like \kbd{if} (namely, the value of the branch that was taken). An
 alternative implementation would introduce a new variable \kbd{v}, insert
@@ -3108,10 +3108,9 @@ computation and gets you a new prompt so that you may e.g., increase debugging
 level, inspect or modify variables (in fact, run arbitrary commands), before
 letting the program go on.
 
-For clarity, it is advisable (though not mandatory) to separate local
-variables in user functions, as we have done so far with the keyword
-\kbd{local}, and global variables visible everywhere (with the key word
-\kbd{global}). It is possibly even more advisable to avoid global variables
+For clarity, it is advisable  to declare local variables in user functions
+(and in fact, with the smallest possible scope), as we have done so far with
+the keyword \kbd{my}. One is usually better off avoiding global variables
 altogether, but you are the sole master on board at this point.
 
 To reach grandwizard status, you may need to understand the all powerful

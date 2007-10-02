@@ -492,6 +492,10 @@ vector, type the vector horizontally, and add a tilde ``\til'' to transpose.
 \kbd{[ ]} yields the empty (row) vector. The function \tet{Vec} can be used
 to transform any object into a vector (see Chapter~3).
 
+If the variable $x$ contains a (row or column) vector, $x[m]$ refers to its
+$m$-th entry. You can assign a result to $x[m]$ (i.e.~write something like
+$x[k]=\var{expr}$). 
+
 \subsec{Matrices} (type \tet{t_MAT}):\sidx{matrix} to enter a matrix, type
 the components line by line, the components being separated by commas
 ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed in
@@ -509,18 +513,24 @@ given positive number of columns, each of which has zero rows. It is not
 possible to create or represent matrices with zero columns and a nonzero
 number of rows.
 
-\subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists can be input
-directly, as in \kbd{List([1,2,3,4])}; but in most cases, creates
-an empty list using {listcreate}, then appends elements using \kbd{listput}.
-Elements can be accessed directly as with the vector types described above.
+If $x$ is a matrix, $x[m,n]$ refers to its $(m,n)$ entry; you can assign a
+result to $x[m,n]$, but \emph{not} to $x[m]$. If you want to assign an
+expression to the $m$-th column of a matrix $x$, use $x[,m]=\var{expr}$
+instead. Similarly, use $x[m,]=\var{expr}$ to assign an expression to the
+$m$-th row of $x$. This process is recursive, so if $x$ is a matrix of
+matrices of \dots, an expression such as \kbd{x[1,1][,3][4] = 1} is perfectly
+valid (and actually identical to \kbd{x[1,1][4,3] = 1}), assuming that all
+matrices along the way have compatible dimensions.
 
-Due to a design flaw, Lists must be stored in GP variables, not as
-components; in particular, Lists of Lists or Vectors of Lists are not
-supported:
+\subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists can be input
+directly, as in \kbd{List([1,2,3,4])}; but in most cases, one creates
+an empty list, then appends elements using \kbd{listput}:
 \bprog
-  ? L=[0]; L[1] = listcreate()
-  ***   sorry, "lists as components" is not yet implemented.
-@eprog
+  ? a = List(); listput(a,1); listput(a,2);
+  ? a
+  %2 = List([1, 2])
+@eprog\noindent
+Elements can be accessed directly as with the vector types described above.
 
 \subsec{Strings} (type \tet{t_STR}):\sidx{string}\sidx{character string} to
 enter a string, just enclose it between double quotes \kbd{"}, like this:
@@ -731,71 +741,65 @@ time = 988 ms.
 @eprog
 
 \section{Variables and symbolic expressions}\sidx{variable}
+In this section we use \emph{variable} in the usual mathematical
+sense, symbols representing algebraically independent elements used to build
+rings of polynomials and power series, and explain the all-important concept
+of \emph{variable priority}. In the next \secref{se:scope}, we shall no
+longer consider only free variables, but adopt the viewpoint of computer
+programming and assign values to these symbols: (bound) variables are names
+associated to values in a given scope.
+
 \subsec{Variable names}. In GP you can use up to 16383 variable names (up to
-65535 on 64-bit machines). A valid identifier name starts with a letter and
-contain only valid keyword characters: \kbd{\_} or alphanumeric characters
-([\kbd{\_A-Za-z0-9}]). You may not use built-in function names; see the
-list with \b{c}, including the constants \kbd{Pi}, \kbd{Euler} and
-$\kbd{I}=\sqrt{-1}$.
+65535 on 64-bit machines). A valid name starts with a letter, followed by
+any number of keyword characters: \kbd{\_} or alphanumeric characters
+([\kbd{A-Za-z0-9}]). The built-in function names are reserved and cannot be
+used; see the list with \b{c}, including the constants \kbd{Pi}, \kbd{Euler}
+and $\kbd{I}=\sqrt{-1}$.
 
-Note that GP names are case sensitive. This means for instance that the
-symbol \kbd{i} is perfectly safe to use, and will not be mistaken for
-$\sqrt{-1}$, and that \kbd{o} is not synonymous to \kbd{O}.
-
-We will see in \secref{se:user_defined} that it is possible to restrict
-the use of a given variable by declaring it to be \tet{global} or
-\tet{local}. This can be useful to enforce clean programming style, but
-is in no way mandatory.
-
-\subsec{Vectors and matrices}. If the variable $x$ contains a vector or list,
-$x[m]$ refers to its $m$-th entry. You can assign a result to $x[m]$
-(i.e.~write something like $x[k]=\var{expr}$). If $x$ is a matrix, $x[m,n]$
-refers to its $(m,n)$ entry; you can assign a result to $x[m,n]$, but
-\emph{not} to $x[m]$. If you want to assign an expression to the $m$-th
-column of a matrix $x$, use $x[,m]=\var{expr}$ instead. Similarly, use
-$x[m,]=\var{expr}$ to assign an expression to the $m$-th row of $x$. This
-process is recursive, so if $x$ is a matrix of matrices of \dots, an
-expression such as \kbd{x[1,1][,3][4] = 1} is perfectly valid
-(and actually identical to \kbd{x[1,1][4,3] = 1}), assuming
-that all matrices along the way have compatible dimensions.
+Note that GP names are case sensitive. For instance, the symbol \kbd{i} is
+perfectly safe to use, and will not be mistaken for $\sqrt{-1}$; analogously,
+\kbd{o} is not synonymous to \kbd{O}.
 
 \subsec{Variables and polynomials}
-  The main thing to understand is that PARI/GP is \emph{not} a symbolic
-manipulation package. One of the main consequences of this fact is that all
-expressions are evaluated as soon as they are written, they never stay in an
-abstract form%
-\footnote{*}{An obvious but important exception are character strings which
-are evaluated essentially to themselves (type \typ{STR}). Not exactly
-so though, since we do some work to treat the quoted characters correctly
-(those preceded by a \b{)}.}.
+What happens when you use a valid variable name for the first time,\kbd{t}
+say, \emph{before} assigning a value into it? This registers a new free
+variable with the interpreter (which will be written as \kbd{t}), and
+evaluates to a monomial of degree $1$ in the said variable \kbd{t}. It is
+important to understand that PARI/GP is \emph{not} a symbolic manipulation
+package: variables already have default values%
+\footnote{*}{More generally, any expression has a value, and is
+\emph{replaced} by its value as soon as it is read; it never stays in an
+abstract form. An obvious exception are character strings which evaluate
+to themselves (type \typ{STR}).}%
+, there is no such thing as an ``unbound'' variable in GP.
+You have access to this default value using the quote operator: \kbd{'t}
+always evaluates to the above monomial of degree~$1$, independently of
+assignments made since then (e.g. \kbd{t = 1}).
 %
-As an important example, consider what happens when you use a variable name
-\emph{before} assigning a value into it, \kbd{x} say. This is perfectly
-acceptable, it is considered as a monomial of degree 1 in the variable
-\kbd{x}.
 \bprog
-  ? p = x^2 + 1
-  %1 = x^2 + 1
-  ? x = 2;
-  ? x^2 + 1
+  ? t^2 + 1
+  %1 = t^2 + 1
+  ? t = 2;
+  ? t^2 + 1
   %3 = 5
-  ? p
-  %4 = x^2 + 1
-  ? eval(p)
+  ? %1
+  %4 = t^2 + 1
+  ? eval(%1)
   %5 = 5
 @eprog\noindent
-As is shown above, assigning a value to a variable, does not affect
-polynomials that used it; to take into account the new variable's value, one
-must use the function \kbd{eval} (see \secref{se:eval}). It is in general
-preferable to use \kbd{subst}, rather than assigning values to polynomial
-variables.
+In the above, \kbd{t} is initially a free variable, later bound to $2$. We
+see that assigning a value to a variable does not affect previous expressions
+involving it; to take into account the new variable's value, one must force a
+new evaluation, using the function \kbd{eval} (see \secref{se:eval}). It is
+in general preferable to use \kbd{subst}, rather than assigning values to
+polynomial variables.
 
 \subsec{Variable priorities, multivariate objects}.\sidx{variable (priority)}\label{se:priority}
-PARI has no ``sparse'' representation of polynomials. So a
-multivariate polynomial in PARI is just a polynomial (in one variable), whose
-coefficients are themselves polynomials, arbitrary but for the fact that they
-do not involve the main variable. All computations are then just done
-formally on the coefficients as if the polynomial was univariate.
+A multivariate polynomial in PARI is just a polynomial (in one variable),
+whose coefficients are themselves polynomials, arbitrary but for the fact
+that they do not involve the main variable. (PARI currently has no sparse
+representation for polynomials.) All computations are then just
+done formally on the coefficients as if the polynomial was univariate.
 
 This is not symmetrical. So if I enter \kbd{x + y} in a clean session,
 what happens ? This is understood as
@@ -879,7 +883,7 @@ instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
 \tet{divrem} and remove the dependence on implicit orderings. This will
 hopefully be corrected in future versions.
 
-\subsec{Multivariate power series}
+\subsec{Multivariate power series}.
 Just like multivariate polynomials, power series are fundamentally
 single-variable objects. It is awkward to handle many variables at once,
 since PARI's implementation cannot handle multivariate error terms like
@@ -918,6 +922,133 @@ obviously wrong if $z$ is allowed to have negative valuation in $x$. Of
 course, the correct error term should be $O(xz)$, but this is not
 possible in PARI.
 
+\section{Variables and Scope}\sidx{variable scope}
+This section is rather technical, and strives to explain clearly potentially
+confusing concepts. Skip to the last subsection for practical advice, if the
+next discussion does not make sense to you.
+
+\subsec{Definitions}.
+
+A \emph{scope} is an enclosing context where names and values are associated.
+A user's function, the body of a loop, all define scopes; the whole program
+defines the \emph{global} scope. Variables are bound to values within a given
+scope. This is traditionnally implemented in two different ways:
+
+\item lexical (or static) scoping: the binding makes sense within a given block
+of program text. The value is private to the block and may not be accessed
+from outside. This is determined at compile time.
+
+\item dynamic scoping: introducing a local variable, say \kbd{x}, pushes a new
+value on a stack associated to the name \kbd{x} (possibly empty at this point),
+which is popped out when the control flow leaves the scope. Evaluating \kbd{x}
+in any context, possibly outside of the given block, always yields the top
+value on this dynamic stack.
+
+GP implements both lexical and dynamic scoping, using the keywords%
+\footnote{*}{The names are borrowed from Perl.}
+\tet{my} (lexical) and \tet{local} (dynamic):
+\bprog
+  x = 0;
+  f() = x
+  g() =    my(x = 1); f()
+  h() = local(x = 1); f()
+@eprog\noindent
+The function \kbd{g} returns 0 since the global \kbd{x} binding
+is unaffected by the introduction of a private variable of the same name in
+\kbd{g}. On the other hand, \kbd{h} returns 1; when it calls \kbd{f()}, the
+binding stack for the \kbd{x} identifier contains two items: the global
+binding to 0, and the binding to 1 introduced in \kbd{g}, which is still
+present on the stack since the control flow has not left \kbd{g} yet.
+
+\subsec{Scoping rules}.
+
+Named parameters in a function definition, as well as all loop
+indices\footnote{**}{
+More generally, in iterative constructs which use a variable name
+(\kbd{for$xxx$}, \kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix},
+\kbd{plot}, etc.) the given variable is lexically scoped to the construct's
+body.},
+have lexical scope within the function body and the loop body respectively.
+\bprog
+p = 0;
+forprime (p = 2, 11, print(p)); p   \\ prints 0 at the end
+
+x = 0;
+f(x) = x++;
+f(1)  \\ returns 2, and leave global x unaffected (= 0)
+@eprog\noindent
+If you exit the loop prematurely, e.g.~using the \kbd{break} statement, you
+must save the loop index in another variable since its value prior the loop
+will be restored upon exit. For instance
+\bprog
+  for(i = 1, n,
+    if (ok(i), break);
+  );
+  if (i > n, return(failure));
+@eprog\noindent
+is incorrect, since the value of $i$ tested by the $(i > n)$ is quite
+unrelated to the loop index. One ugly workaround is
+\bprog
+  for(i = 1, n,
+    if (ok(i), isave = i; break);
+  );
+  if (isave > n, return(failure));
+@eprog\noindent
+But it is usually more natural to wrap the loop in a user function
+and use \kbd{return} instead of \kbd{break}:
+\bprog
+try() =
+{
+  for(i = 1, n,
+    if (ok(i), return (i));
+  );
+  0 \\ failure
+}
+@eprog
+
+A list of variables can be lexically or dynamically scoped (to the block
+between the declaration and the end of the innermost enclosing scope) using a
+\kbd{my} or \kbd{local} declaration:
+\bprog
+for (i = 1, 10,
+  my(x, y, z, i2 = i^2); \\ temps needed within the loop body
+  ...
+)
+@eprog\noindent
+Note how the declaration can include (optional) initial values. Variables
+for which no explicit default value is given in the declaration are
+initialized to $0$. A more complicated example:
+\bprog
+for (i = 1, 3,
+  print("main loop");
+  my(x = i);          \\ local to the outermost loop
+  for (j = 1, 3,
+    my (y = x^2);     \\ local to the innermost loop
+    print (y + y^2);
+    x++;
+  )
+)
+@eprog\noindent
+When we leave the loops, the values of \kbd{x}, \kbd{y}, \kbd{i}, \kbd{j}
+are the same as before it was started.
+
+Note that lexical scoping has the unfortunate side effect of making break
+loops (see \secref{se:breakloop}) almost useless: break loops are run outside
+of the relevant scopes and are unable to access all lexically scoped
+variables.
+
+Variables dynamically scoped using \kbd{local} should more appropriately be
+called \emph{temporary values} since they are in fact local to the function
+declaring them \emph{and} any subroutine called from within. In practice, you
+almost certainly want true private variables, hence should use almost
+exclusively \kbd{my}. 
+
+We strongly recommended to explicitly scope (lexically) all variables to the
+smallest possible block. Should you forget this, if a function accesses a
+variable which is not one of its formal parameters, the value used will be
+the one which happens to be on top of the value stack at the time of the
+call. This is in general \emph{not} what you want to do. So, be warned.
+
 \section{User defined functions}\sidx{user defined functions}
 \label{se:user_defined}
 
@@ -926,22 +1057,23 @@ It is easy to define a new function in GP, which can then be used like any
 other function. The syntax is as follows:
 
 \kbd{name(}\var{list of formal variables}\kbd{) = %
-local(}\var{list of local variables}\kbd{);} \var{seq}
+my(}\var{list of local variables, lexically scoped}\kbd{);}
+   \var{seq}
 
 \noindent which looks better written on consecutive lines:
 \bprogpart
 name($x_0$, $x_1$, @dots) =
 {
-  local($t_0$, $t_1$, @dots);
-  local(@dots);
-
+  my($t_0$, $t_1$, @dots); \\ private variables, lexically scoped
   @dots
 }
 @eprog \noindent
 (the first newline is disregarded due to the preceding \kbd{=} sign, and the
-others because of the enclosing braces). Both lists of variables are
-comma-separated and allowed to be empty. The \tet{local} statements can be
-omitted; as usual \var{seq} is any expression sequence.
+others because of the enclosing braces). The list of formal variables
+is comma-separated and allowed to be empty. The \tet{my} statements can be
+omitted, and can actually occur anywhere within the function body, scoping
+the variables to more restricted blocks than the whole function body; as
+usual \var{seq} is any expression sequence.
 
 \noindent \kbd{name} is the name given to the function and is subject to the
 same restrictions as variable names. In addition, variable names are not
@@ -957,17 +1089,17 @@ has to be less than the number of formal variables. Arguments are passed by
 value, not as variables: modifying a function's argument in the function
 body is allowed, but does not modify its value in the calling frame. In fact,
 a \emph{copy} of the actual parameter is assigned to the formal parameter
-when the function is called.
+when the function is called. Formal parameters are lexically scoped to the
+function body.
 
-Uninitialized formal variables are given a default value. An equal (\kbd{=})
-sign following a variable name in the function definition, followed by any
-expression, gives the variable a default value. The said expression gets
-evaluated the moment the function is called, hence may involve the preceding
-function parameters (a default value for $x_i$ may involve $x_j$ for $j <
-i$). A variable for which you supply no default value is initialized to
-(the integer) zero. For instance
+An uninitialized formal variable is given an implicit default value of (the
+integer)~0. An equal (\kbd{=}) sign following a variable name in the function
+definition, followed by any expression, gives the variable an explicit
+default value. The said expression gets evaluated the moment the function is
+called, hence may involve the preceding function parameters (a default value
+for $x_i$ may involve $x_j$ for $j < i$). For instance
 \bprog
-  foo(x, y=2, z=3) = print(x ":" y ":" z)
+foo(x, y=2, z=3) = print(x ":" y ":" z)
 @eprog
 \noindent defines a function which prints its arguments (at most three of
 them), separated by colons. This then follows the rules of default
@@ -984,11 +1116,11 @@ arguments generation as explained at the beginning of
 
 \noindent \var{list of local variables} is the list of additional temporary
 variables used in the function body. Note that if you omit some or all of
-these local variable declarations, the non-declared variables will become
-global, hence known outside of the function, and this may have undesirable
-side-effects. On the other hand, in some cases it may also be what you want.
-See \secref{se:varscope} for details. Local variables can be given a default
-value as the formal variables.
+these local variable declarations, the non-declared variables automatically
+become global variables, modifiable outside of the function, and this may
+have undesirable side-effects. On the other hand, in some cases it may also
+be what you want. See \secref{se:scope} for details. Local variables can
+be given a default value, just as the formal variables.
 
 \misctitle{Restrictions on variable use:} it is not allowed to use the same
 variable name for different parameters of your function. Or to use a given
@@ -999,14 +1131,17 @@ Hence
   ***   user function f: variable x declared twice.
 @eprog
 
-\misctitle{Note:} The above syntax (using the \tet{local} keyword) was
-introduced in version 2.0.13. The old syntax
-
-\kbd{name(}\var{list of true formal variables, list of local variables}%
-\kbd{) = }{\var{seq}}
-
-\noindent is still recognized but is deprecated since genuine arguments and
-local variables become indistinguishable.
+\misctitle{Note:} Lexically scoped variables were introduced in
+version~2.4.2. Before that, the formal parameters were dynamically scoped.
+If your script depends on this behaviour, you may use the following trick:
+replace
+\bprog
+f(x) = 
+@eprog\noindent
+by
+\bprog
+f(x_orig) = local(x = x_orig)
+@eprog
 
 \subsec{Use}. Once the function is defined using the above syntax, you can
 use it like any other function, see the example with \kbd{fun} above. In
@@ -1028,15 +1163,15 @@ included in the standard functions, let us assume that this is not the case
 probably the simplest, but certainly not the most efficient, is as
 follows:\sidx{zeta function}
 \bprog
-zet(s) =
-{ local(n); /* not needed, and possibly confusing (see below) */
-
-  sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
-}
+zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 @eprog
 \noindent This gives reasonably good accuracy and speed as long as you are
 not too far from the domain of convergence. Try it for $s$ integral between
 $-5$ and $5$, say, or for $s=0.5+i*t$ where $t=14.134\dots$
+
+Note that \kbd{n} is automatically lexically scoped to the \kbd{sumalt}
+``loop'', and that it is unnecessary to add a \kbd{my(n)} declaration to the
+loop body.
 
 \subsec{Recursive functions}. Recursive functions\sidx{recursion} can easily
 be written as long as one pays proper attention to variable scope. Here is an
@@ -1061,7 +1196,7 @@ x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}.
 The operating system automatically limits the \idx{recursion depth}:
 \bprog
 ? dive(n) = if (n, dive(n-1))
-? dive(5000);
+? dive(20000);
   ***   deep recursion: if(n,dive(n-1))
                         ^---------------
 @eprog
@@ -1074,11 +1209,20 @@ the process available stack space (increase \tet{stacksize}).
 Use the following trick (neat example due to Bill Daly):
 
 \bprog
-calc(f, lx) = local(x=lx); eval( Str(f, "(x)") )
+calc(f, x_orig) = local(x=x_orig); eval( Str(f, "(x)") )
+@eprog
+\noindent If you call this with \kbd{calc("sin", 1)}, it will
+return $\sin(1)$ (evaluated!). Note that it is crucial to use \kbd{local}
+here, since \kbd{eval} evaluates its arguments in global scope. The simpler
+\bprog
+calc(f, x) = eval( Str(f, "(x)") )
+@eprog
+would not work, since \kbd{x} is lexically scoped to the function body.
+Another approach is
+\bprog
+calc(f, x) = eval( Str(f, "(", x, ")") )
 @eprog
 
-\noindent If you call this with \kbd{calc("sin", 1)}, it will
-return $\sin(1)$ (evaluated!).
 
 \subsec{Defining functions within a function ?}
 The first idea
@@ -1094,96 +1238,28 @@ evaluated independently:
   init(x) = ( add(y) = x+y ); ( mul(y) = x*y );
 @eprog
 
-\subsec{Variable scope}.\label{se:varscope}
-
-Local variables should more appropriately be called \emph{temporary values}
-since they are in fact local to the function declaring them \emph{and} any
-subroutine called from within. In the following example
-\bprog
-  f() = local(y); ... ; g()
-  g() = y + 1
-@eprog
-\noindent \kbd{g()} ``sees'' the $y$ introduced in \kbd{f()}. True lexical
-scoping does not exist in GP. (See e.g.~the difference between \kbd{local}
-and \kbd{my} in Perl.)
-
-In an iterative constructs which use a variable name (\kbd{for$xxx$},
-\kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix}, \kbd{plot},
-etc.) the given variable is also local to the construct. A value is pushed on
-entry and popped on exit. So, it is not necessary for a function using such an
-iterator to declare the variable as \kbd{local}. On the other hand, if you
-exit the loop prematurely, e.g.~using the \kbd{break} statement, you must
-save the loop index in another variable since its value prior the loop will
-be restored upon exit: for instance
-\bprog
-  for(i = 1, n,
-    if (ok(i), break);
-  );
-  if (i > n, return(failure));
-@eprog
-\noindent is incorrect, since the value of $i$ tested by the $(i > n)$ is quite
-unrelated to the loop index.
-
-Finally, the statement \sidx{global}\kbd{global(x, y, z, t)} (see
-\secref{se:global}) declares the corresponding variables to be global. It is
-then forbidden to use them as formal parameters or loop indexes as above,
-since the parameter would ``shadow'' the variable. If speed is of the essence
-and an object is large (e.g.~a \var{bnf}, a huge matrix), it should be
-declared \kbd{global}, not passed as a parameter, since this saves an
-expensive copy. It is possible to declare it local and use it as a global
-variables from relevant subroutines, but \tet{global} is safer.
-
-It is strongly recommended to explicitly declare all \tet{global} variables
-at the beginning of your program and all \tet{local} variable used inside a
-given function, with the possible exception of loop indexes which are local
-to their loop. If a function accesses a variable which is not one of its
-formal parameters, the value used will be the one which happens to be on top
-of the stack at the time of the call. This could be a ``global'' value, or a
-local value belonging to any function higher in the call chain, and is in
-general \emph{not} what you want to do. So, be warned.
-
-
-Coming back to our previous example \kbd{zet}, since loop variables are not
-visible outside their loops, the variable \kbd{n} need not be declared in the
-function prototype.
-\bprog
-zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
-@eprog
-
-\noindent would be a better definition. One last example: what is
-wrong with the following definition?
+\subsec{Beware scopes!}
+Be extra careful with the scopes of variables. What is wrong with the
+following definition?
 \bprog
 FirstPrimeDiv(x) =
-{ local(p);
-
+{ my(p);
   forprime(p=2, x, if (x%p == 0, break));
   p
 }
 ? FirstPrimeDiv(10)
 %1 = 0
-@eprog
-\noindent Well, the index $p$ in the \kbd{forprime} loop is local to
-the loop and is not visible to the outside world. Hence, it does not survive
-the \kbd{break} statement. More precisely, at this point the loop index is
-restored to its preceding value, which is 0 (local variables are
-initialized to 0 by default). To sum up, the routine returns the $p$
-declared local to it, not the one which was local to \kbd{forprime} and ran
-through consecutive prime numbers. Here is a corrected version:
+@eprog\noindent
+Well, the index $p$ in the \kbd{forprime} loop is lexically scoped to the
+loop and is not visible to the outside world. Hence, it does not survive the
+\kbd{break} statement. More precisely, at this point the loop index is
+restored to its preceding value, which is 0 (local variables are initialized
+to 0 by default). To sum up, the routine returns the $p$ declared local to
+it, not the one which was local to \kbd{forprime} and ran through consecutive
+prime numbers. Here is a corrected version:
 \bprog
 ? FirstPrimeDiv(x) = forprime(p=2, x, if (x%p == 0, return(p)))
 @eprog
-
-\misctitle{Implementation note:} For the curious reader, here is how values
-of variables are handled: a \idx{hashing function} is computed from the
-variable name, and used as an index in \tet{hashtable}, a table of linked
-list of structures (type \tet{entree}). The linked list is searched linearly
-for the identifier (each list typically has less than 10 components). When
-the correct \kbd{entree} is found, it points to the top of the stack of
-values for that identifier if it is a variable, to the function itself if it
-is a predefined function, and to a copy of the text of the function if it is
-a user-defined function. When an error occurs, all of this maze (rather a
-tree, in fact) is searched and restored to the state preceding the last call
-of the main evaluator.
 
 \section{Member functions}\sidx{member functions} \label{se:member}
 
@@ -1234,25 +1310,6 @@ confused with the usual floating point exponent. E.g compare
   %2 = 2
   ? 1.0.e2
   %3 = 2.00000000000
-@eprog
-
-\misctitle{Note:} Member functions were not meant to be too complicated or to
-depend on any data that wouldn't be global. Hence they do no have parameters
-(besides the implicit \kbd{structure}) or local variables. Of course, if you
-need some preprocessing work in there, there's nothing to prevent you from
-calling your own functions (using freely their local variables) from a member
-function. For instance, one could implement (a dreadful idea as far as
-efficiency goes):
-
-\bprog
-correct_ell_if_needed(x) =
-{ local(tmp);
-
-  if (type(x) != "t_VEC", tmp = ellinit(x))
-    \\ @com some further checks
-  tmp
-}
-x.j = correct_ell_if_needed(x)[13];
 @eprog
 
 \section{Strings and Keywords}\sidx{string}\sidx{keyword}
@@ -1513,25 +1570,23 @@ cleanup (since user variables will be restored to their former values).
 In current version \vers, an error is non-fatal if and only if it was
 initiated by a \kbd{C-c} typed by the user.
 
-Break loops are useful as a debugging tool to inspect the values of \kbd{gp}
-variables to understand why an error occurred, or to change \kbd{gp}'s state in the
-middle of a computation (increase debugging level, start storing results in a
-logfile, set variables to different values\dots): hit \kbd{C-c}, type in your
-modifications, then let the computation go on as explained above.
-
-A break loop looks like this:
+Break loops are useful as a debugging tool. You may inspect the values of
+\kbd{gp} variables to understand why an error occurred, or change
+\kbd{gp}'s state in the middle of a computation (increase debugging level,
+start storing results in a logfile, set variables to different values\dots):
+hit \kbd{C-c}, type in your modifications, then let the computation go on as
+explained above. A break loop looks like this:
 \bprog
-? for(v = -2, 2, print(1/v))
--1/2
--1
-  ***   division by zero in gdiv, gdivgs or ginv
-  ***   Starting break loop (type 'break' to go back to GP):
-  ***   for(v=-2,2,print(1/v))
-                            ^--
+? v = 0; 1/v
+  *** _/_: division by zero
+  ***   Break loop (type 'break' or Control-d to go back to GP)
 break>
 @eprog
-\noindent So the standard error message is printed first, except now we always
-have context, whether the error comes from the library or the parser. The
+\noindent So the standard error message\footnote{*}{Unfortunately, we
+can never have context here since the code if first compiled into bytecode,
+then run. When the error occurs, we have nothing but the bytecode at our
+disposal, which is not easy to understand.} is printed first. 
+The
 \kbd{break>} at the bottom is a prompt, and hitting \kbd{v} then
 \kbd{<Return>}, we see:
 \bprog
@@ -1541,6 +1596,20 @@ break> v
 \noindent explaining the problem. We could have typed any \kbd{gp} command, not
 only the name of a variable, of course. There is no special set of commands
 becoming available during a break loop, as they would in most debuggers.
+
+Unfortunately, lexically-scoped variables are inaccessible to the evaluator
+during the break loop:
+\bprog
+? for(v = -2, 2, print(1/v))
+-1/2
+-1
+  *** _/_: division by zero
+  ***   Break loop (type 'break' or Control-d to go back to GP)
+break> v
+v
+@eprog\noindent
+Since loop indices are automatically lexically scoped, they no longer exist
+when the break loop is run.
 
 \misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type
 \kbd{trap()} (or include it in a script) to start trapping errors in this

@@ -44,12 +44,11 @@ Doc: computes the subextension
  $\Q(\zeta_n)$ (of exact degree \kbd{d}, if \kbd{d} is set):
  \bprog
  polsubcyclo(n, d = -1)=
- {
- local(bnr,L,IndexBound);
- IndexBound = if (d < 0, n, [d]);
- bnr = bnrinit(bnfinit(y), [n,[1]], 1);
- L = subgrouplist(bnr, IndexBound, 1);
- vector(#L,i, galoissubcyclo(bnr,L[i]));
+ { my(bnr,L,IndexBound);
+   IndexBound = if (d < 0, n, [d]);
+   bnr = bnrinit(bnfinit(y), [n,[1]], 1);
+   L = subgrouplist(bnr, IndexBound, 1);
+   vector(#L,i, galoissubcyclo(bnr,L[i]));
  }
  @eprog\noindent
  Setting \kbd{L = subgrouplist(bnr, IndexBound)} would produce subfields of exact

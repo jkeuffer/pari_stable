@@ -20,12 +20,12 @@ Doc: evaluates \var{seq}, where
  space:
  \bprog
  FORDIV(N)=
- { local(P, E);
+ { my(P, E);
  
- P = factor(N); E = P[,2]; P = P[,1]; 
- forvec( v = vector(#E, i, [0,E[i]]),
- X = factorback(P, v)
- \\ ...
+   P = factor(N); E = P[,2]; P = P[,1]; 
+   forvec( v = vector(#E, i, [0,E[i]]),
+   X = factorback(P, v)
+   \\ ...
  );
  }
  ? for(i=1,10^5, FORDIV(i))

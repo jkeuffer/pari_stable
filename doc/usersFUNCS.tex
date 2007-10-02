@@ -299,7 +299,7 @@ will occur first. In this specific case, one should work with $2$-adics.
 In general, one can try the following approach
 \bprog
     ? inversemod(a, b) =
-    { local(m);
+    { my(m);
       m = polsylvestermatrix(polrecip(a), polrecip(b));
       m = matinverseimage(m, matid(#m)[,1]);
       Polrev( vecextract(m, Str("..", poldegree(b))), variable(b) )
@@ -1082,7 +1082,7 @@ expressions, including the empty sequence.
 \bprog
     for (X = a,b, seq)
 @eprog\noindent
-the variable \kbd{X} is considered local to the loop, leading to possibly
+the variable \kbd{X} is lexically scoped to the loop, leading to possibly
 unexpected behaviour:
 \bprog
     n = 5;
