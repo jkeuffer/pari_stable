@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static void
 member_err(char *s)
 {
-  pari_err(typeer,"%s",s);
+  pari_err(typeer,s);
 }
 
 GEN
