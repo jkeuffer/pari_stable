@@ -134,7 +134,10 @@ More precisely, you input either a metacommand or a sequence of
 expressions. Metacommands, described in \secref{se:meta}, are not part of the
 GP language and are simple shortcuts designed to alter gp's internal state
 (such as the working precision or general verbosity level), or speed up
-input/output.
+input/output. The evaluation proceeds itself in two phases: your input is
+first digested (byte-compiled) to a bytecode suitable for fast evaluation,
+in particular loop bodies are compiled only once but evaluated many times;
+then the bytecode is evaluated.
 
 An \idx{expression}\sidx{expression sequence} is formed by combining
 constants, variables, operator symbols, functions (including user-defined
@@ -741,7 +744,7 @@ time = 988 ms.
 @eprog
 
 \section{Variables and symbolic expressions}\sidx{variable}
-In this section we use \emph{variable} in the usual mathematical
+In this section we use \emph{variable} in the standard mathematical
 sense, symbols representing algebraically independent elements used to build
 rings of polynomials and power series, and explain the all-important concept
 of \emph{variable priority}. In the next \secref{se:scope}, we shall no
@@ -756,17 +759,17 @@ any number of keyword characters: \kbd{\_} or alphanumeric characters
 used; see the list with \b{c}, including the constants \kbd{Pi}, \kbd{Euler}
 and $\kbd{I}=\sqrt{-1}$.
 
-Note that GP names are case sensitive. For instance, the symbol \kbd{i} is
-perfectly safe to use, and will not be mistaken for $\sqrt{-1}$; analogously,
-\kbd{o} is not synonymous to \kbd{O}.
+GP names are case sensitive. For instance, the symbol \kbd{i} is perfectly
+safe to use, and will not be mistaken for $\sqrt{-1}$; analogously, \kbd{o}
+is not synonymous to \kbd{O}.
 
-\subsec{Variables and polynomials}
-What happens when you use a valid variable name for the first time,\kbd{t}
-say, \emph{before} assigning a value into it? This registers a new free
-variable with the interpreter (which will be written as \kbd{t}), and
-evaluates to a monomial of degree $1$ in the said variable \kbd{t}. It is
+\subsec{Variables and polynomials}\sidx{free variable}
+What happens when you use a valid variable name,\kbd{t} say, for the first
+time \emph{before} assigning a value into it? This registers a new 
+\emph{free variable} with the interpreter (which will be written as \kbd{t}),
+and evaluates to a monomial of degree $1$ in the said variable \kbd{t}. It is
 important to understand that PARI/GP is \emph{not} a symbolic manipulation
-package: variables already have default values%
+package: even free variables already have default values%
 \footnote{*}{More generally, any expression has a value, and is
 \emph{replaced} by its value as soon as it is read; it never stays in an
 abstract form. An obvious exception are character strings which evaluate
@@ -779,27 +782,38 @@ assignments made since then (e.g. \kbd{t = 1}).
 \bprog
   ? t^2 + 1
   %1 = t^2 + 1
-  ? t = 2;
-  ? t^2 + 1
-  %3 = 5
+  ? t = 2; t^2 + 1
+  %2 = 5
   ? %1
-  %4 = t^2 + 1
+  %3 = t^2 + 1
   ? eval(%1)
-  %5 = 5
+  %4 = 5
 @eprog\noindent
 In the above, \kbd{t} is initially a free variable, later bound to $2$. We
 see that assigning a value to a variable does not affect previous expressions
 involving it; to take into account the new variable's value, one must force a
 new evaluation, using the function \kbd{eval} (see \secref{se:eval}). It is
-in general preferable to use \kbd{subst}, rather than assigning values to
-polynomial variables.
+preferable to leave alone your ``polynomial variables'', never assigning
+values to them, and to use \kbd{subst} rather than \kbd{eval}. You will avoid
+the following kind of problems:
+\bprog
+  ? p = t^2 + 1; subst(p, t, 2)
+  %1 = 5
+  ? t = 2;
+  ? subst(p, t, 3)    \\ t is no longer free: evaluates to 2
+    ***   variable name expected.
+  ? subst(p, 't, 3)   \\ OK
+  %3 = 10
+@eprog\noindent
+A statement like \kbd{x = 'x} in effect restores \kbd{x} as a free variable.
 
 \subsec{Variable priorities, multivariate objects}.\sidx{variable (priority)}\label{se:priority}
 A multivariate polynomial in PARI is just a polynomial (in one variable),
 whose coefficients are themselves polynomials, arbitrary but for the fact
 that they do not involve the main variable. (PARI currently has no sparse
-representation for polynomials.) All computations are then just
-done formally on the coefficients as if the polynomial was univariate.
+representation for polynomials, listing only non-zero monomials.) All
+computations are then done formally on the coefficients as if the
+polynomial was univariate.
 
 This is not symmetrical. So if I enter \kbd{x + y} in a clean session,
 what happens ? This is understood as
@@ -807,7 +821,7 @@ $$ x^1 + y*x^0 \in (\Z[y])[x] $$
 but how do we know that $x$ is ``more important'' than $y$ ? Why not $y^1 +
 x*y^0$, which is the same mathematical entity after all ?
 
-The answer is that variables are ordered implicitly by the \kbd{gp} interpreter:
+The answer is that variables are ordered implicitly by the interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
 variable is registered as having a strictly lower priority than any variable in
 use at this point\footnote{**}{This is not strictly true: if an
@@ -923,26 +937,28 @@ course, the correct error term should be $O(xz)$, but this is not
 possible in PARI.
 
 \section{Variables and Scope}\sidx{variable scope}\label{se:scope}
-This section is rather technical, and strives to explain clearly potentially
+This section is rather technical, and strives to explain potentially
 confusing concepts. Skip to the last subsection for practical advice, if the
 next discussion does not make sense to you.
 
 \subsec{Definitions}.
 
 A \emph{scope} is an enclosing context where names and values are associated.
-A user's function, the body of a loop, all define scopes; the whole program
-defines the \emph{global} scope. Variables are bound to values within a given
-scope. This is traditionnally implemented in two different ways:
+A user's function, the body of a loop, an individual command line, all define
+scopes; the whole program defines the \emph{global} scope. Variables are
+bound to values within a given scope. This is traditionnally implemented in
+two different ways:
 
-\item lexical (or static) scoping: the binding makes sense within a given block
-of program text. The value is private to the block and may not be accessed
-from outside. This is determined at compile time.
+\item\sidx{lexical scoping} lexical (or static) scoping: the binding makes
+sense within a given block of program text. The value is private to the block
+and may not be accessed from outside. Where to find the value is determined
+at compile time.
 
-\item dynamic scoping: introducing a local variable, say \kbd{x}, pushes a new
-value on a stack associated to the name \kbd{x} (possibly empty at this point),
-which is popped out when the control flow leaves the scope. Evaluating \kbd{x}
-in any context, possibly outside of the given block, always yields the top
-value on this dynamic stack.
+\item\sidx{dynamic scoping} dynamic scoping: introducing a local variable,
+say \kbd{x}, pushes a new value on a stack associated to the name \kbd{x}
+(possibly empty at this point), which is popped out when the control flow
+leaves the scope. Evaluating \kbd{x} in any context, possibly outside of the
+given block, always yields the top value on this dynamic stack.
 
 GP implements both lexical and dynamic scoping, using the keywords%
 \footnote{*}{The names are borrowed from Perl.}
@@ -957,7 +973,7 @@ The function \kbd{g} returns 0 since the global \kbd{x} binding
 is unaffected by the introduction of a private variable of the same name in
 \kbd{g}. On the other hand, \kbd{h} returns 1; when it calls \kbd{f()}, the
 binding stack for the \kbd{x} identifier contains two items: the global
-binding to 0, and the binding to 1 introduced in \kbd{g}, which is still
+binding to 0, and the binding to 1 introduced in \kbd{h}, which is still
 present on the stack since the control flow has not left \kbd{g} yet.
 
 \subsec{Scoping rules}.
@@ -1015,9 +1031,16 @@ for (i = 1, 10,
   ...
 )
 @eprog\noindent
-Note how the declaration can include (optional) initial values. Variables
-for which no explicit default value is given in the declaration are
-initialized to $0$. A more complicated example:
+Note how the declaration can include (optional) initial values, \kbd{i2 =
+i\pow 2} in the above. Variables for which no explicit default value is given
+in the declaration are initialized to $0$. It would be more natural to
+initialize them to free variables, but this would break backward
+compatibility. To obtain this behaviour, you may explicitly use the quoting
+operator:
+\bprog
+my(x = 'x, y = 'y, z = 'z);
+@eprog\noindent
+A more complicated example:
 \bprog
 for (i = 1, 3,
   print("main loop");
@@ -1030,7 +1053,7 @@ for (i = 1, 3,
 )
 @eprog\noindent
 When we leave the loops, the values of \kbd{x}, \kbd{y}, \kbd{i}, \kbd{j}
-are the same as before it was started.
+are the same as before they were started.
 
 Note that lexical scoping has the unfortunate side effect of making break
 loops (see \secref{se:breakloop}) almost useless: break loops are run outside
@@ -1044,10 +1067,11 @@ almost certainly want true private variables, hence should use almost
 exclusively \kbd{my}. 
 
 We strongly recommended to explicitly scope (lexically) all variables to the
-smallest possible block. Should you forget this, if a function accesses a
-variable which is not one of its formal parameters, the value used will be
-the one which happens to be on top of the value stack at the time of the
-call. This is in general \emph{not} what you want to do. So, be warned.
+smallest possible block. Should you forget this, in expressions involving such
+``rogue'' variables, the value used will be the one which happens to be on
+top of the value stack at the time of the call; which depends on the whole
+calling context in a non-trivial way. This is in general \emph{not} what you
+want.
 
 \section{User defined functions}\sidx{user defined functions}
 \label{se:user_defined}
@@ -1194,6 +1218,7 @@ assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
 x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}.
 
 The operating system automatically limits the \idx{recursion depth}:
+\sidx{deep recursion}
 \bprog
 ? dive(n) = if (n, dive(n-1))
 ? dive(20000);
