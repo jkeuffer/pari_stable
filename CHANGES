@@ -193,6 +193,7 @@ BA 48- local and my can now appear anywhere in a program.
    54- theta(q,z) very inefficient for large accuracies
    55- remove support for nf of the form [nf, change of variable] in
        nfnewprec() [#672]
+   56- global() now obsolete and scheduled for removal
 
   Added
     1- library functions expu, adduu, subuu
