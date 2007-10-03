@@ -95,7 +95,7 @@ extern THREAD void *PARI_stack_limit;
 #define EpSTATIC(ep) ((ep)->valence & 0x100)
 #define EpSETSTATIC(ep) ((ep)->valence |= 0x100)
 #define EpPREDEFINED(ep) (EpVALENCE(ep) < EpUSER)
-enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
+enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpMEMBER, EpINSTALL };
 #define initial_value(ep) ((ep)+1)
 
 extern entree  **varentries;

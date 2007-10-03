@@ -176,7 +176,6 @@ freeep(entree *ep)
       gunclone((GEN)ep->value); ep->value=NULL;
       break;
     case EpVAR:
-    case EpGVAR:
       while (ep->pvalue!=INITIAL) pop_val(ep);
       break;
     case EpALIAS:
@@ -574,7 +573,7 @@ closure_eval(GEN C)
         {
         case EpNEW:
           createvalue(ep);
-        case EpVAR: case EpGVAR: /*FALL THROUGH*/
+        case EpVAR: /*FALL THROUGH*/
           gel(st,sp++)=(GEN)ep->value;
           break;
         default:
@@ -597,7 +596,7 @@ closure_eval(GEN C)
           {
           case EpNEW:
             createvalue(g->ep);
-          case EpVAR: case EpGVAR:/*FALL THROUGH*/
+          case EpVAR: /*FALL THROUGH*/
             g->x = (GEN) g->ep->value;
             break;
           default:
@@ -630,7 +629,7 @@ closure_eval(GEN C)
           {
           case EpNEW:
             createvalue(ep);
-          case EpVAR: case EpGVAR:/*FALL THROUGH*/
+          case EpVAR: /*FALL THROUGH*/
             g->x = (GEN) ep->value;
             break;
           default:
@@ -687,7 +686,7 @@ closure_eval(GEN C)
         {
         case EpNEW:
           createvalue(ep);
-        case EpVAR: case EpGVAR:/*FALL THROUGH*/
+        case EpVAR: /*FALL THROUGH*/
           changevalue(ep, gel(st,--sp));
           break;
         default:
@@ -915,14 +914,6 @@ closure_eval(GEN C)
         lvars[j]=ep;
         nblvar++;
         zerovalue(ep);
-        break;
-    case OCglobalvar:
-        ep=(entree *)operand;
-        if (ep->valence==EpNEW) createvalue(ep);
-        ep->valence = EpGVAR;
-        if (gel(st,sp-1))
-          changevalue(ep,gel(st,sp-1));
-        sp--;
         break;
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
     case OCderivgen:
@@ -1337,10 +1328,6 @@ closure_disassemble(GEN C)
     case OClocalvar0:
       ep=(entree*)operand;
       pariprintf("localvar0\t%s\n",ep->name);
-      break;
-    case OCglobalvar:
-      ep=(entree*)operand;
-      pariprintf("globalvar\t%s\n",ep->name);
       break;
     case OCderivgen:
       ep=(entree*)operand;

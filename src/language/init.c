@@ -426,7 +426,7 @@ init_hashtable(entree **table, long tblsz)
       EP = ep->next;
       switch(EpVALENCE(ep))
       {
-        case EpGVAR: case EpVAR: case EpINSTALL: /* keep this one */
+        case EpVAR: case EpINSTALL: /* keep this one */
           if (last)
             last->next = ep;
           else
@@ -814,7 +814,6 @@ recover(int flag)
       epnext = ep->next;
       switch(EpVALENCE(ep))
       {
-        case EpGVAR:
         case EpVAR:
           while (pop_val_if_newer(ep,listloc)) /* empty */;
           break;

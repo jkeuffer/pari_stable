@@ -292,8 +292,7 @@ commands(long n)
       switch (EpVALENCE(ep))
       {
         case EpNEW:
-        case EpVAR:
-        case EpGVAR: continue;
+        case EpVAR: continue;
       }
       if ((n < 0 && ep->menu) || ep->menu == n)
       {
@@ -675,7 +674,6 @@ aide0(char *s, int flag)
       if (long_help) { pariputs("\n\n"); long_help=0; }
       break;
 
-    case EpGVAR:
     case EpVAR:
       if (!ep->help) { aide_print(s, "user defined variable"); return; }
       long_help=0; break;

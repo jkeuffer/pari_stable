@@ -350,7 +350,7 @@ kill0(entree *ep)
   if (EpSTATIC(ep))
     pari_err(talker,"can't kill that");
   freeep(ep);
-  if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
+  if (EpVALENCE(ep)==EpVAR)
   {
       v = varn(ep->value); if (!v) return; /* never kill x */
       varentries[v] = NULL;
@@ -859,7 +859,7 @@ fetch_named_var(char *s)
   if (!ep) ep = installep(s,strlen(s),funhash);
   else switch (EpVALENCE(ep))
   {
-    case EpVAR: case EpGVAR: return ep;
+    case EpVAR: return ep;
     case EpNEW: break;
     default: pari_err(talker, "%s already exists with incompatible valence", s);
   }

@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  **                                                                       **
  ***************************************************************************/
 
-typedef enum {Lglobal, Llocal, Lmy} Ltype;
+typedef enum {Llocal, Lmy} Ltype;
 
 struct vars_s
 {
@@ -549,7 +549,7 @@ compilefunc(long n, int mode)
   long nb=lg(arg)-1, lev=0;
   entree *ep = getfunc(n);
   entree *ev[8];
-  if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpGVAR)
+  if (EpVALENCE(ep)==EpVAR)
     pari_err(talker2,"not a function in function call",
         tree[n].str, get_origin());
   if (EpVALENCE(ep)==EpUSER|| EpVALENCE(ep)==EpNEW)
@@ -624,8 +624,10 @@ compilefunc(long n, int mode)
     avma=ltop;
     return;
   }
+  /*We generate dummy code for global() for backward compatibility*/
   if (is_func_named(x,"global"))
   {
+    pari_warn(warner,"global(...) is deprecated");
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     for (i=1;i<=nb;i++)
@@ -636,11 +638,15 @@ compilefunc(long n, int mode)
       {
         compilenode(tree[a].y,Ggen,0);
         a=tree[a].x;
+        en=(long)getvar(a);
+        op_push(OCstoredyn,en);
       }
-      else
-        op_push(OCpushlong,0);
-      en=(long)getvar(a);
-      op_push(OCglobalvar,en);
+      else 
+      {
+        en=(long)getvar(a);
+        op_push(OCpushdyn,en);
+        op_push(OCpop,1);
+      } 
     }
     compilecast(n,Gvoid,mode);
     avma=ltop;
@@ -763,7 +769,7 @@ compilefunc(long n, int mode)
             {
               if (!ev[i])
                 pari_err(talker2,"missing variable name",
-                  tree[a].str-1, get_origin());
+                    tree[a].str-1, get_origin());
               var_push(ev[i],Lmy);
             }
             if (tree[a].f==Fnoarg)
@@ -1135,7 +1141,7 @@ compilenode(long n, int mode, long flag)
         while (tree[loc].f==Fseq) loc=tree[loc].x;
       if (ep->valence!=EpNEW && ep->valence!=EpUSER)
       {
-        if (ep->valence==EpVAR || ep->valence==EpGVAR)
+        if (ep->valence==EpVAR)
           pari_err(talker2,"this is a variable",
               tree[n].str,get_origin());
         else
