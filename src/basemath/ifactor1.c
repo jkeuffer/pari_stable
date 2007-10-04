@@ -3850,8 +3850,8 @@ ifac_totient(GEN n, long hint)
     if (here == gen_1) { avma = av; affii(t, phi); return phi; }
     p = VALUE(here);
     e = itou(EXPON(here));
-    t = mulii(phi, addsi(-1, p));
-    if (e != 1) t = mulii(phi, e == 2? p: powiu(p, e-1));
+    t = mulii(t, addsi(-1, p));
+    if (e != 1) t = mulii(t, e == 2? p: powiu(p, e-1));
 
     ifac_memcheck_extra(av, lim, part, here,  t,phi);
   }
