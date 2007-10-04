@@ -1324,7 +1324,7 @@ Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
   if (m == 1) {
     R = polx_Flx(v);
     gel(R,2) = z = polx_Flx(w); z[3] = l - 1; /* - y */
-    gel(R,3) = Fl_to_Flx(1, w);
+    gel(R,3) = pol1_Flx(w);
     return R; /* x - y */
   }
   M = Flm_Frobenius_pow(MP,d,P,l);
@@ -2161,7 +2161,7 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
   if (dy < 0) return zero_Flx(sx);
   if (dy==0) return gerepileupto(av, Flx_pow(gel(v,2),dx,p));
 
-  g = h = Fl_to_Flx(1,sx); av2 = avma; lim = stack_lim(av2,1);
+  g = h = pol1_Flx(sx); av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
     r = FlxX_pseudorem(u,v,p); dr = lg(r);

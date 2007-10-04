@@ -155,6 +155,11 @@ zero_Flx(long sv)
   x[1] = sv; return x;
 }
 
+/* pol1_Flx=pol1_zx*/
+
+GEN
+pol1_Flx(long sv) { return mkvecsmall2(sv, 1); }
+
 /* polx_Flx=polx_zx*/
 
 GEN
@@ -695,7 +700,7 @@ Flx_sqr(GEN x, ulong p)
 GEN
 Flx_pow(GEN x, long n, ulong p)
 {
-  GEN y = Fl_to_Flx(1,x[1]), z;
+  GEN y = pol1_Flx(x[1]), z;
   long m;
   if (n == 0) return y;
   m = n; z = x;
@@ -1112,7 +1117,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
   GEN q,z,u,v, x = a, y = b;
 
   u = zero_Flx(a[1]);
-  v = Fl_to_Flx(1,a[1]); /* v = 1 */
+  v = pol1_Flx(a[1]); /* v = 1 */
   while (lgpol(y))
   {
     q = Flx_divrem(x,y,p,&z);
@@ -1182,7 +1187,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   if (dx < 0) return 0;
 
   u = zero_Flx(vs);
-  v = Fl_to_Flx(1,vs); /* v = 1 */
+  v = pol1_Flx(vs); /* v = 1 */
   while (dy)
   { /* b u = x (a), b v = y (a) */
     lb = y[dy+2];
@@ -1259,7 +1264,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
 {
   long i,k,lx = lg(a);
   GEN p1,p2;
-  if (lx == 1) return Fl_to_Flx(1,vs);
+  if (lx == 1) return pol1_Flx(vs);
   p1 = cgetg(lx, t_VEC);
   for (k=1,i=1; i<lx-1; i+=2)
   {
@@ -1420,7 +1425,7 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
-  if (!signe(n)) return Fl_to_Flx(1,pol[1]);
+  if (!signe(n)) return pol1_Flx(pol[1]);
   if (signe(n) < 0)
     x=Flxq_inv(x,pol,p);
   else
@@ -1477,7 +1482,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
 {
   GEN V = cgetg(l+2,t_VEC);
   long i, v = T[1];
-  gel(V,1) = Fl_to_Flx(1, v);  if (l==0) return V;
+  gel(V,1) = pol1_Flx(v);  if (l==0) return V;
   gel(V,2) = vecsmall_copy(x); if (l==1) return V;
   gel(V,3) = Flxq_sqr(x,T,p);
   if ((degpol(x)<<1) < degpol(T)) {
@@ -1544,7 +1549,7 @@ Flxq_sqrtn(GEN a, GEN n, GEN T, ulong p, GEN *zeta)
   if (!lgpol(a))
   {
     if (zeta)
-      *zeta=Fl_to_Flx(1,T[1]);
+      *zeta=pol1_Flx(T[1]);
     return zero_Flx(T[1]);
   }
   E.pol=T; E.p=p;
@@ -1566,7 +1571,7 @@ Flxq_charpoly(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long v=varn(T);
-  GEN R = Flx_FlxY_resultant(T, deg1pol_i(Fl_to_Flx(1,x[1]),Flx_neg(x,p),v) ,p);
+  GEN R = Flx_FlxY_resultant(T, deg1pol_i(pol1_Flx(x[1]),Flx_neg(x,p),v) ,p);
   return gerepileupto(ltop,R);
 }
 
@@ -2149,7 +2154,7 @@ FlxqX_invmontgomery_basecase(GEN T, GEN Q, ulong p)
   long sv=Q[1];
   GEN r=cgetg(l,t_POL); r[1]=T[1];
   gel(r,2) = zero_Flx(sv);
-  gel(r,3) = Fl_to_Flx(1,sv);
+  gel(r,3) = pol1_Flx(sv);
   for (i=4;i<l;i++)
   {
     pari_sp ltop=avma;
@@ -2383,7 +2388,7 @@ FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v)
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    gel(W,k) = deg1pol_i(Fl_to_Flx(1,T[1]),Flx_neg(gel(V,k),p),v);
+    gel(W,k) = deg1pol_i(pol1_Flx(T[1]),Flx_neg(gel(V,k),p),v);
   return gerepileupto(ltop, FlxqXV_prod(W, T, p));
 }
 

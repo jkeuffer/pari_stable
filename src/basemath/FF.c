@@ -151,7 +151,7 @@ FF_1(GEN x)
     r=pol_1(varn(T));
     break;
   default:
-    r=Fl_to_Flx(1UL,T[1]);
+    r=pol1_Flx(T[1]);
   }
   return _mkFF(x,z,r);
 }

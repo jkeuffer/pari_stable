@@ -51,7 +51,6 @@ GEN     Flx_neg(GEN x, ulong p);
 GEN     Flx_neg_inplace(GEN x, ulong p);
 GEN     Flx_normalize(GEN z, ulong p);
 GEN     Flx_pow(GEN x, long n, ulong p);
-GEN     random_Flx(long d1, long v, ulong p);
 GEN     Flx_recip(GEN x);
 GEN     Flx_red(GEN z, ulong p);
 GEN     Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p);
@@ -108,7 +107,9 @@ GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
 GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
 GEN     gener_Flxq(GEN T, ulong p, GEN *o);
+GEN     pol1_Flx(long sv);
 GEN     polx_Flx(long sv);
+GEN     random_Flx(long d1, long v, ulong p);
 GEN     zero_Flx(long sv);
 
 /* FpX.c */

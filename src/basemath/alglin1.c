@@ -3383,7 +3383,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
       if (deplin) {
         c = cgetg(n+1, t_COL);
         for (i=1; i<k; i++) gel(c,i) = Flx_rem(gcoeff(x,d[i],k), T, p);
-        gel(c,k) = Fl_to_Flx(1,vs);
+        gel(c,k) = pol1_Flx(vs);
         for (i=k+1; i<=n; i++) gel(c,i) = zero_Flx(vs);
         return gerepileupto(av0, c);
       }
@@ -3429,7 +3429,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
       }
       else
 	gel(C,i) = zero_Flx(vs);
-    gel(C,k) = Fl_to_Flx(1,vs);
+    gel(C,k) = pol1_Flx(vs);
     for (i=k+1; i<=n; i++) gel(C,i) = zero_Flx(vs);
   }
   return gerepile(av0,tetpil,y);
