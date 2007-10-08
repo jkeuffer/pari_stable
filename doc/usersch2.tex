@@ -497,7 +497,7 @@ to transform any object into a vector (see Chapter~3).
 
 If the variable $x$ contains a (row or column) vector, $x[m]$ refers to its
 $m$-th entry. You can assign a result to $x[m]$ (i.e.~write something like
-$x[k]=\var{expr}$). 
+$x[k]=\var{expr}$).
 
 \subsec{Matrices} (type \tet{t_MAT}):\sidx{matrix} to enter a matrix, type
 the components line by line, the components being separated by commas
@@ -765,7 +765,7 @@ is not synonymous to \kbd{O}.
 
 \subsec{Variables and polynomials}\sidx{free variable}
 What happens when you use a valid variable name,\kbd{t} say, for the first
-time \emph{before} assigning a value into it? This registers a new 
+time \emph{before} assigning a value into it? This registers a new
 \emph{free variable} with the interpreter (which will be written as \kbd{t}),
 and evaluates to a monomial of degree $1$ in the said variable \kbd{t}. It is
 important to understand that PARI/GP is \emph{not} a symbolic manipulation
@@ -1064,7 +1064,7 @@ Variables dynamically scoped using \kbd{local} should more appropriately be
 called \emph{temporary values} since they are in fact local to the function
 declaring them \emph{and} any subroutine called from within. In practice, you
 almost certainly want true private variables, hence should use almost
-exclusively \kbd{my}. 
+exclusively \kbd{my}.
 
 We strongly recommended to explicitly scope (lexically) all variables to the
 smallest possible block. Should you forget this, in expressions involving such
@@ -1160,7 +1160,7 @@ version~2.4.2. Before that, the formal parameters were dynamically scoped.
 If your script depends on this behaviour, you may use the following trick:
 replace
 \bprog
-f(x) = 
+f(x) =
 @eprog\noindent
 by
 \bprog
@@ -1610,7 +1610,7 @@ break>
 \noindent So the standard error message\footnote{*}{Unfortunately, we
 can never have context here since the code if first compiled into bytecode,
 then run. When the error occurs, we have nothing but the bytecode at our
-disposal, which is not easy to understand.} is printed first. 
+disposal, which is not easy to understand.} is printed first.
 The
 \kbd{break>} at the bottom is a prompt, and hitting \kbd{v} then
 \kbd{<Return>}, we see:

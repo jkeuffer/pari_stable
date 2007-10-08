@@ -507,7 +507,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
         fprintferr("Checking (\\pm %Z, \\pm %Z)\n",p, q);
 
       z = poleval(RgX_rescale(poly,q), p); /* = P(p/q) q^dep(P) */
-      if (absi_equal(z, rhs)) 	
+      if (absi_equal(z, rhs))
       {
         if (signe(z) == signe(rhs))
         {

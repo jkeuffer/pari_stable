@@ -501,7 +501,7 @@ static GEN
 polmod_mod(GEN x, GEN y)
 {
   GEN z;
-  if (gequal(gel(x,1), y)) return gcopy(x); 
+  if (gequal(gel(x,1), y)) return gcopy(x);
   z = cgetg(3,t_POLMOD);
   gel(z,1) = ggcd(gel(x,1),y);
   gel(z,2) = grem(gel(x,2),gel(z,1));

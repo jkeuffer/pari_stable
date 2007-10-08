@@ -495,7 +495,7 @@ sd_histsize(const char *v, long flag)
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
   GEN r = sd_ulong(v,flag,"histsize",&n, 1,
-                     (LONG_MAX / sizeof(long)) - 1,NULL);
+		     (LONG_MAX / sizeof(long)) - 1,NULL);
   if (n != H->size)
   {
     const ulong total = H->total;
@@ -566,7 +566,7 @@ sd_log(const char *v, long flag)
     if (oldstyle)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
-        pariprintf("   [logfile was \"%s\"]\n", current_logfile);
+	pariprintf("   [logfile was \"%s\"]\n", current_logfile);
       fclose(pari_logfile); pari_logfile = NULL;
     }
     else
@@ -575,12 +575,12 @@ sd_log(const char *v, long flag)
   if (pari_logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
     TeX_define("PARIbreak",
-               "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
+	       "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
     TeX_define("PARIpromptSTART", "\\vskip\\medskipamount\\bgroup\\bf");
     TeX_define("PARIpromptEND", "\\egroup\\bgroup\\tt");
     TeX_define("PARIinputEND", "\\egroup");
     TeX_define2("PARIout",
-                "\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$");
+		"\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$");
   }
   return res;
 }
@@ -599,7 +599,7 @@ GEN
 sd_output(const char *v, long flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
-                 "(external prettyprint)", NULL};
+		 "(external prettyprint)", NULL};
   ulong n = GP_DATA->fmt->prettyp;
   GEN z = sd_ulong(v,flag,"output", &n, 0,3,msg);
   GP_DATA->fmt->prettyp = n;

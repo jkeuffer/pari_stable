@@ -998,7 +998,7 @@ closure_eval(GEN C)
           {
             if (ep->valence==EpNEW)
               pari_err(talker,"function '%s' not yet defined",ep->name);
-            else 
+            else
               pari_err(talker,"not a function in function call: %s",ep->name);
           }
           if (n>ep->arity)
@@ -1026,7 +1026,7 @@ calluser:
             {
               if (ep->valence==EpNEW)
                 pari_err(talker,"function '%s' not yet defined",ep->name);
-              else 
+              else
                 pari_err(talker,"not a function in function call: %s",ep->name);
             }
           }

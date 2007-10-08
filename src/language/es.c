@@ -2187,7 +2187,7 @@ sori(GEN g, pariout_t *T)
       a = gel(g,2); b = gel(g,1);
       if (tg == t_INTMOD && signe(a) < 0) a = addii(a,b);
       sori(a,T); pariputs(" mod "); sori(b,T); break;
-	
+
     case t_FRAC:
       a=gel(g,1); wr_int(T,a,0); pariputs(" /");
       b=gel(g,2); wr_int(T,b,0); break;
@@ -2232,7 +2232,7 @@ sori(GEN g, pariout_t *T)
         a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
       }
       break;
-	
+
     case t_SER: v = get_var(varn(g),buf);
       i = valp(g);
       if (lgpol(g))
@@ -2252,14 +2252,14 @@ sori(GEN g, pariout_t *T)
     case t_RFRAC:
       sori(gel(g,1),T); pariputs(" / "); sori(gel(g,2),T);
       break;
-	
+
     case t_QFR: case t_QFI: pariputc('{');
       sori(gel(g,1),T); pariputs(", ");
       sori(gel(g,2),T); pariputs(", ");
       sori(gel(g,3),T);
       if (tg == t_QFR) { pariputs(", "); sori(gel(g,4),T); }
       pariputs("}\n"); break;
-	
+
     case t_VEC: pariputc('[');
       for (i=1; i<lg(g); i++)
       {
@@ -2276,7 +2276,7 @@ sori(GEN g, pariout_t *T)
         pariputc('['); sori(gel(g,i),T); pariputs("]\n");
       }
       break;
-	
+
     case t_MAT:
     {
       void (*print)(GEN, pariout_t *);

@@ -612,9 +612,9 @@ gpoly(GEN rr, long n1, long n2)
     else if ((n1==39 && n2==36) || (n1==37 && n2==34) || (n1==29 && n2==23)
           || (n1==24 && n2==15))
     {
-      for (i=1; i<6; i++) z[i]=gadd(r[2*i-1],r[2*i]); 	
+      for (i=1; i<6; i++) z[i]=gadd(r[2*i-1],r[2*i]);
       p1=gsub(z[4],z[5]); p2=gmul(gsub(z[3],z[4]),gsub(z[3],z[5]));
-      for (i=1; i<3; i++) for (j=i+1; j<6; j++) p2=gmul(p2,gsub(z[i],z[j])); 	
+      for (i=1; i<3; i++) for (j=i+1; j<6; j++) p2=gmul(p2,gsub(z[i],z[j]));
       return gmul(p1,p2);
     }
     else if ((n1==39 && n2==29) || (n1==38 && n2==25) || (n1==37 && n2==24)
@@ -685,9 +685,9 @@ gpoly(GEN rr, long n1, long n2)
     }
     else if ((n1==22 && n2==11) || (n1==5 && n2==3))
     {
-      for (i=1; i<6; i++) z[i]=gadd(r[i],r[i+5]); 	
+      for (i=1; i<6; i++) z[i]=gadd(r[i],r[i+5]);
       p1=gsub(z[4],z[5]); p2=gmul(gsub(z[3],z[4]),gsub(z[3],z[5]));
-      for (i=1; i<3; i++) for (j=i+1; j<6; j++) p2=gmul(p2,gsub(z[i],z[j])); 	
+      for (i=1; i<3; i++) for (j=i+1; j<6; j++) p2=gmul(p2,gsub(z[i],z[j]));
       return gmul(p1,p2);
     }
     else if ((n1==22 && n2==5) || (n1==12 && n2==4) || (n1==11 && n2==3))

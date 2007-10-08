@@ -641,12 +641,12 @@ compilefunc(long n, int mode)
         en=(long)getvar(a);
         op_push(OCstoredyn,en);
       }
-      else 
+      else
       {
         en=(long)getvar(a);
         op_push(OCpushdyn,en);
         op_push(OCpop,1);
-      } 
+      }
     }
     compilecast(n,Gvoid,mode);
     avma=ltop;

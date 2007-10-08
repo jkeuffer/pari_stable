@@ -1902,7 +1902,7 @@ gtolist(GEN x)
   if (!x) return listcreate();
   switch(typ(x))
   {
-    case t_VEC: case t_COL: 
+    case t_VEC: case t_COL:
       y = listcreate();
       if (lg(x) == 1) return y;
       list_data(y) = gcopy(x);

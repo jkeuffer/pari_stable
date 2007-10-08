@@ -30,7 +30,7 @@ static THREAD const char *pari_lex_start, *pari_unused_chars;
 static THREAD GEN pari_lasterror;
 
 static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
-{ 
+{
   if (pari_lasterror) cgiv(pari_lasterror);
   pari_lasterror=strtoGENstr(s);
 }
@@ -103,7 +103,7 @@ pari_eval_str(char *lex, int strict)
   {
     if (pari_unused_chars)
       unused_chars(pari_unused_chars,pari_lex_start,strict);
-    else  
+    else
       pari_err(talker2,GSTR(pari_lasterror),lex-1,pari_lex_start);
   }
   avma=ltop;
@@ -116,7 +116,7 @@ pari_eval_str(char *lex, int strict)
   return res;
 }
 
-static long 
+static long
 newnode(Ffunc f, long x, long y, struct node_loc *loc)
 {
   long n=stack_new(&s_node);
@@ -128,7 +128,7 @@ newnode(Ffunc f, long x, long y, struct node_loc *loc)
   return n;
 }
 
-static long 
+static long
 newconst(long x, struct node_loc *loc)
 {
   return newnode(Fconst,x,-1,loc);
@@ -170,21 +170,21 @@ newintnode(struct node_loc *loc)
 %left INT LVAL
 %left ';' ','
 %right '=' KPE KSE KME KDE KDRE KEUCE KMODE KSRE KSLE
-%left '&' KAND '|' KOR 
-%left KEQ KNE KGE '<' KLE '>' 
+%left '&' KAND '|' KOR
+%left KEQ KNE KGE '<' KLE '>'
 %left '+' '-'
-%left KSR KSL 
+%left KSR KSL
 %left '%' KDR '\\' '/' '*'
 %left SIGN
 %right '^'
 %left '#'
 %left '!' '~' '[' '\''
 %left '.' MAT
-%token KPP KSS 
+%token KPP KSS
 %left ':'
 %type <val> seq sequnused matrix matrix_index expr
-%type <val> lvalue 
-%type <val> matrixelts matrixlines arg listarg definition 
+%type <val> lvalue
+%type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid funcder memberid
 %type <val> backticks
 %%
@@ -192,7 +192,7 @@ newintnode(struct node_loc *loc)
 sequnused: seq       {$$=$1;}
          | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
 
-seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2) 
+seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2)
                          @$.start=@$.end=pari_lex_start;
                        $$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
@@ -224,7 +224,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | funcder           {$$=$1;}
     | lvalue %prec LVAL	{$$=$1;}
     | matrix            {$$=$1;}
-    | definition        {$$=$1;} 
+    | definition        {$$=$1;}
     | lvalue '=' expr {$$=newnode(Faffect,$1,$3,&@$);}
     | lvalue KPP {$$=newopcall(OPpp,$1,-1,&@$);}
     | lvalue KSS {$$=newopcall(OPss,$1,-1,&@$);}
@@ -292,7 +292,7 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
 
 arg: seq        {$$=$1;}
    | '&' lvalue {$$=newnode(Frefarg,$2,-1,&@$);}
-   | arg error  {if (!pari_once) { yyerrok; } pari_once=1;}  expr 
+   | arg error  {if (!pari_once) { yyerrok; } pari_once=1;}  expr
                      {pari_once=0; $$=newopcall(OPcat,$1,$4,&@$);}
 ;
 
@@ -305,7 +305,7 @@ funcid: KENTRY '(' listarg ')' {$$=newnode(Ffunction,newconst(CSTentry,&@1),$3,&
 
 funcder: KENTRY KDER listarg ')' {$$=newnode(Fderfunc,newconst(CSTentry,&@1),$3,&@$);}
 
-memberid: 
+memberid:
      expr '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),$1,&@$);}
 ;
 

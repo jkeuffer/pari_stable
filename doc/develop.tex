@@ -74,7 +74,7 @@ through various hoops to support GP's inconvenient memory model. Don't
 use \typ{LIST}s in pure library mode, reimplement ordinary lists! This
 dynamic type is implemented by a \kbd{GEN} of length 3: two codewords and a
 vector containing the actual entries. In a normal setup (a finished list,
-ready to be used), 
+ready to be used),
 
 \item the vector is malloc'ed, so that it can be realloc'ated without moving
 the parent \kbd{GEN}.
@@ -98,7 +98,7 @@ and a shallow copy of the malloced vector is made. \kbd{gcopy}, \kbd{gcone},
 \kbd{copy\_bin\_canon} are exceptions, and make a full copy of the list.
 
 The main problem with lists is to avoid memory leaks; in the above setup,
-a statement like \kbd{a = List(1)} would already leak memory, since 
+a statement like \kbd{a = List(1)} would already leak memory, since
 \kbd{List(1)} allocates memory, which is cloned (second allocation) when
 assigned to \kbd{a}; and the original list is lost. So,
 when a \typ{LIST} is created viw \kbd{List} / \kbd{gtolist}, it is

@@ -3183,7 +3183,7 @@ static int
 ifac_isprime(GEN x)
 {
   int res = 0;
-  if (!BSW_psp_nosmalldiv(VALUE(x))) 
+  if (!BSW_psp_nosmalldiv(VALUE(x)))
     CLASS(x) = gen_0; /* composite */
   else if (factor_proven && ! BSW_isprime(VALUE(x)))
   {

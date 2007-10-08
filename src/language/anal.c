@@ -94,7 +94,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	while (('0' <= *e) && (*e <= '9'))
 	    e++;
 	if (*e == 0)
-	    ERR("numeric id in a stringified flag");	
+	    ERR("numeric id in a stringified flag");
 	negate = 0;
 	negated = NULL;
       find:

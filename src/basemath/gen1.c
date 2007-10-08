@@ -979,9 +979,9 @@ gsubsg(long x, GEN y)
     case t_INT:  return subsi(x,y);
     case t_REAL: return subsr(x,y);
     case t_INTMOD:
-      z = cgetg(3, t_INTMOD); a = gel(y,1); b = gel(y,2); 
+      z = cgetg(3, t_INTMOD); a = gel(y,1); b = gel(y,2);
       return add_intmod_same(z, a, Fp_neg(b,a), modsi(x, a));
-    case t_FRAC: z = cgetg(3,t_FRAC); a = gel(y,1); b = gel(y,2); 
+    case t_FRAC: z = cgetg(3,t_FRAC); a = gel(y,1); b = gel(y,2);
       gel(z,1) = gerepileuptoint((pari_sp)z, subii(mulis(b,x), a));
       gel(z,2) = icopy(gel(y,2)); return z;
     case t_COMPLEX:
@@ -1259,7 +1259,7 @@ mulpp(GEN x, GEN y) {
 }
 /* x,y QUAD */
 static GEN
-mulqq(GEN x, GEN y) { 
+mulqq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD);
   GEN p1, p2, p3, p4, P = gel(x,1), b = gel(P,3), c = gel(P,2);
   pari_sp av, tetpil;

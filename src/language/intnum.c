@@ -1748,7 +1748,7 @@ static GEN
 auxsumalt0(GEN t, void *E) { return auxsumintern(t, E, -1); }
 static GEN
 auxsumalt1(GEN t, void *E) { return auxsumintern1(t, E, -1); }
-		
+
 static GEN
 sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, long sgn, long prec)
 {
