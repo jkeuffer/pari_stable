@@ -980,8 +980,8 @@ present on the stack since the control flow has not left \kbd{g} yet.
 
 Named parameters in a function definition, as well as all loop
 indices\footnote{**}{
-More generally, in iterative constructs which use a variable name
-(\kbd{for$xxx$}, \kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix},
+More generally, in all iterative constructs which use a variable name
+(\kbd{for}, \kbd{prod}, \kbd{sum}, \kbd{vector}, \kbd{matrix},
 \kbd{plot}, etc.) the given variable is lexically scoped to the construct's
 body.},
 have lexical scope within the function body and the loop body respectively.
@@ -1123,7 +1123,7 @@ default value. The said expression gets evaluated the moment the function is
 called, hence may involve the preceding function parameters (a default value
 for $x_i$ may involve $x_j$ for $j < i$). For instance
 \bprog
-foo(x, y=2, z=3) = print(x ":" y ":" z)
+foo(x, y=2, z=3) = print(x, ":", y, ":", z)
 @eprog
 \noindent defines a function which prints its arguments (at most three of
 them), separated by colons. This then follows the rules of default
