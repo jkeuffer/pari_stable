@@ -108,8 +108,8 @@ done
 RUNPTH_FINAL=
 RUNPTH=
 if test -n "$runpathprefix"; then
-  RUNPTH_FINAL=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix$tmp"`
-  RUNPTH=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix\\\$(TOPDIR)/$objdir$dir_sep$tmp"`
+  RUNPTH_FINAL=`$config_dir/ldflags "$LDneedsWl" $runpathprefix"$tmp"`
+  RUNPTH=`$config_dir/ldflags "$LDneedsWl" $runpathprefix\\\$\(TOPDIR\)/$objdir$dir_sep"$tmp"`
 fi
 
 if test -z "$DLLD"; then

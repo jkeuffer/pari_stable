@@ -107,6 +107,7 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
    83- acos(x^0) -> division by 0 [ instead of O(x^8), at \ps 16 ]
    84- dilog(-1) [ more generally polylog of < 0 t_REALs ] should have
        0 imaginary part
+   85- problems with  [ build/install ] directory names containing spaces
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
