@@ -17,6 +17,7 @@ $tags = $^O eq 'os2' ? "$src/ctags" : "$src/tags";
 # so the following `&&' correspond to `||' in shell.
 # Assume ctags outputs sorted tags (e.g Exuberant Ctags)
 system('exuberant-ctags', '-f', $tmptags, @files)
+       && system('ctags', '-dT', $tmptags, @files) # gctags
        && system('ctags', '-f', $tmptags, @files)
        && die("ctags failed");
 

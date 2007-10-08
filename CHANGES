@@ -195,6 +195,7 @@ BA 48- local and my can now appear anywhere in a program.
    55- remove support for nf of the form [nf, change of variable] in
        nfnewprec() [#672]
    56- global() now obsolete and scheduled for removal
+LGr57- 'make ctags' gctags-specific flags [ add #defines, typedefs ]
 
   Added
     1- library functions expu, adduu, subuu
