@@ -96,8 +96,8 @@ fi
 . ./get_objdir  # objdir, cdobjdir
 . ./get_static  # static
 # For dynamic linking, before and after installing
-runpath="$libdir" 
-LDDYN="-L$libdir -lpari"
+runpath=\"$libdir\" 
+LDDYN="-L\"$libdir\" -lpari"
 # get_modld needs $includedir from get_install, static, and LDDYN
 . ./get_modld   # $_modld_list
 

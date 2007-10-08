@@ -8,7 +8,7 @@ which_graphic_lib=auto
 readline_enabledp=nil
 share_prefix=
 prefix=/usr/local
-test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
+test -n "$GP_INSTALL_PREFIX" && prefix="$GP_INSTALL_PREFIX"
 
 while test $# -gt 0; do
   case "$1" in

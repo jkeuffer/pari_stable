@@ -109,7 +109,7 @@ RUNPTH_FINAL=
 RUNPTH=
 if test -n "$runpathprefix"; then
   RUNPTH_FINAL=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix$tmp"`
-  RUNPTH=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix$TOP/$objdir$dir_sep$tmp"`
+  RUNPTH=`$config_dir/ldflags "$LDneedsWl" "$runpathprefix\\\$(TOPDIR)/$objdir$dir_sep$tmp"`
 fi
 
 if test -z "$DLLD"; then
@@ -143,6 +143,8 @@ cat > $file << EOT
 #  This file was created by Configure. Any change made to it will be
 #  lost when Configure is run.
 #
+TOPDIR="$TOP"
+
 SHELL      = $make_sh
 PERL       = $perl
 BISON      = bison
@@ -266,7 +268,7 @@ all: $exec lib-sta
 lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
-paricfg.h: $TOP/CHANGES
+paricfg.h: ../CHANGES
 	@-sh $cfg/setversion
 
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
