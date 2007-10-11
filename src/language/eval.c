@@ -213,11 +213,7 @@ pop_val_if_newer(entree *ep, long loc)
   if (v->flag == COPY_VAL && !pop_entree_bloc(ep, loc)) return 0;
   ep->value = v->value;
   ep->pvalue= (char*) v->prev;
-  if (ep->pvalue == INITIAL)
-  {
-    if (ep->code) ep->valence=EpUSER;
-    else if (ep->value==NULL) ep->valence=EpNEW;
-  }
+  ep->valence=v->valence;
   gpfree((void*)v); return 1;
 }
 
