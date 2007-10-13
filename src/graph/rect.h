@@ -119,18 +119,6 @@ struct plot_eng {
   void (*st)(void *data, long x, long y, char *s, long l);
 };
 
-
-#define BLACK      1 /* Default */
-#define BLUE       2 /* Axes */
-#define VIOLET     3 /* Odd numbered curves in ploth */
-#define RED        4 /* Curves, or Even numbered curves in ploth */
-#define GREEN      5
-#define GREY       6
-#define GAINSBORO  7
-
-#define MAX_COLORS 8
-#define DEFAULT_COLOR BLACK
-
 #define ROt_MV 0			/* Move */
 #define ROt_PT 1			/* Point */
 #define ROt_LN 2			/* Line */
@@ -223,7 +211,6 @@ struct plot_eng {
 
 #define PL_POINTS 1
 #define GOODRECT(r) (0 <= r && r < NUMRECT)
-#define GOODCOLOR(c) (1 <= c && c < MAX_COLORS)
 
 #define PLOT_PARAMETRIC   0x00001
 #define PLOT_RECURSIVE    0x00002
@@ -237,6 +224,7 @@ struct plot_eng {
 #define PLOT_NO_TICK_X    0x00200
 #define PLOT_NO_TICK_Y    0x00400
 #define PLOT_NODOUBLETICK 0x00800
+#define PLOT_COMPLEX      0x01000
 
 #define PLOT_POSTSCRIPT   0x80000
 
@@ -260,7 +248,8 @@ extern long  rectpoint_itype;
 extern long  rectline_itype;
 
 /* plotport.c */
-typedef long col_counter[MAX_COLORS][ROt_MAX];
+typedef long (*col_counter)[ROt_MAX];
+extern GEN pari_colormap, pari_graphcolors;
 
 void  initrect(long ne, long x, long y);
 void  initrect_gen(long ne, GEN x, GEN y, long flag);

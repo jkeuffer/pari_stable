@@ -232,6 +232,7 @@ BA 18- new keyword "my" to declare lexically-scopped local variables.
        other names ]
    29- default factor_proven
    30- experimental -balloon option to gphelp
+LGr31- defaults graphcolormap, graphcolors [runtime-defined colormap for plots]
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

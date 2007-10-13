@@ -28,6 +28,8 @@ extern "C" {
 #include <FL/Fl_Window.H>
 #include <FL/fl_draw.H>
 
+static long numcolors;
+
 class Plotter: public Fl_Window {
 
 public:
@@ -42,13 +44,116 @@ private:
     long *my_x;                        // x, y: array of x,y-coordinates of the
     long *my_y;                        // top left corners of the rectwindows
     long my_lw;                        // lw: number of rectwindows
-    Fl_Color color[MAX_COLORS];
+    Fl_Color *color;
 };
 
-Fl_Color rgb_color(int R, int G, int B)
+static Fl_Color
+rgb_color(int R, int G, int B)
 {
   return fl_color_cube(R*FL_NUM_RED/256, G*FL_NUM_GREEN/256,
          B*FL_NUM_BLUE/256);
+}
+
+static Fl_Color
+parse_real_color(const char *s)
+{
+  switch(s[0])
+  {
+    case 'b':
+      if (!strcasecmp(s, "black"))
+	return FL_BLACK;
+      else if (!strcasecmp(s, "blue"))
+	return FL_BLUE;
+      break;
+    case 'c':
+      if (!strcasecmp(s, "cyan"))
+	return FL_CYAN;
+      break;
+    case 'd':
+      if (!strcasecmp(s, "dark1"))
+       return FL_DARK1;
+      else if (!strcasecmp(s, "dark2"))
+       return FL_DARK2;
+      else if (!strcasecmp(s, "dark3"))
+       return FL_DARK3;
+      else if (!strcasecmp(s, "dark_blue")    || !strcasecmp(s, "dark blue"))
+       return FL_DARK_BLUE;
+      else if (!strcasecmp(s, "dark_cyan")    || !strcasecmp(s, "dark cyan"))
+       return FL_DARK_CYAN;
+      else if (!strcasecmp(s, "dark_green")   || !strcasecmp(s, "dark green"))
+       return FL_DARK_GREEN;
+      else if (!strcasecmp(s, "dark_magenta") || !strcasecmp(s, "dark magenta"))
+       return FL_DARK_MAGENTA;
+      else if (!strcasecmp(s, "dark_red")     || !strcasecmp(s, "dark red"))
+       return FL_DARK_RED;
+      else if (!strcasecmp(s, "dark_yellow")  || !strcasecmp(s, "dark yellow"))
+       return FL_DARK_YELLOW;
+      break;
+    case 'g':
+      if (!strcasecmp(s, "gray") || !strcasecmp(s, "grey"))
+	return rgb_color( 127, 127, 127);
+      else if (!strcasecmp(s, "gainsboro"))
+	return rgb_color( 220, 220, 220);
+      if (!strcasecmp(s, "gray0") || !strcasecmp(s, "grey0"))
+       return FL_GRAY0;
+      else if (!strcasecmp(s, "green"))
+       return FL_GREEN;
+      break;
+    case 'l':
+      if (!strcasecmp(s, "light1"))
+       return FL_LIGHT1;
+      else if (!strcasecmp(s, "light2"))
+       return FL_LIGHT2;
+      else if (!strcasecmp(s, "light3"))
+       return FL_LIGHT3;
+      break;
+    case 'm':
+      if (!strcasecmp(s, "magenta"))
+       return FL_MAGENTA;
+      break;
+    case 'r':
+      if (!strcasecmp(s, "red"))
+       return FL_RED;
+      break;
+    case 'v':
+      if (!strcasecmp(s, "violetred"))
+       return rgb_color( 208,  32, 144);
+      break;
+    case 'w':
+      if (!strcasecmp(s, "white"))
+       return FL_WHITE;
+      break;
+    case 'y':
+      if (!strcasecmp(s, "yellow"))
+       return FL_YELLOW;
+      break;
+  }
+  /* Everything unknown is white */
+  pari_warn(warner,"color %s: unknown", s);
+  return FL_WHITE;
+}
+
+static Fl_Color
+parse_color(const char *s)
+{
+  int dk = !strncasecmp(s, "dark", 4);
+  int lt = !strncasecmp(s, "light", 5);
+  Fl_Color res = parse_real_color(s);
+
+  if (res == FL_WHITE && (dk || lt))
+  {
+    if (dk)
+      s += 4;
+    else
+      s += 5;
+    while (*s == ' ' || *s == '\t' || *s == '_')
+      s++;
+    if (dk)
+      return fl_darker(parse_real_color(s));
+    else
+      return fl_lighter(parse_real_color(s));
+  }
+  return res;
 }
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
@@ -56,15 +161,24 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
         : Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
 
 {
+    long i;
+
     this->my_w=w; this->my_x=x; this->my_y=y; this->my_lw=lw;
-    color[0]         = FL_WHITE;
-    color[BLACK]     = FL_BLACK;
-    color[BLUE]      = FL_BLUE;
-    color[VIOLET]    = rgb_color( 208, 32, 144) ;
-    color[RED]       = FL_RED;
-    color[GREEN]     = FL_GREEN;
-    color[GREY]      = rgb_color( 127, 127, 127);
-    color[GAINSBORO] = rgb_color( 220, 220, 220);
+    numcolors = lg(pari_colormap)-1;
+    color = (Fl_Color*)gpmalloc(numcolors*sizeof(Fl_Color));
+    for (i = 1; i < lg(pari_colormap); i++)
+    {
+        GEN c = gel(pari_colormap, i);
+	switch(typ(c))
+	{
+	case t_STR:
+	  color[i-1]=parse_color(GSTR(c));
+	  break;
+	case t_VECSMALL:
+	  color[i-1]=rgb_color(c[1], c[2], c[3]);
+	  break;
+	}
+    }
 }
 
 static void DrawPoint(void *data, long x, long y)
@@ -95,6 +209,7 @@ static void DrawPoints(void *data, long nb, struct plot_points *p)
 static void SetForeground(void *data, long col)
 {
   Fl_Color *color = (Fl_Color*)data;
+  if (col >= numcolors) col = numcolors-1;
   fl_color(color[col]);
 }
 
@@ -119,7 +234,7 @@ void Plotter::draw()
   double ys = double(this->h())/pari_plot.height;
 
   fl_font(FL_COURIER, int(pari_plot.fheight * xs));
-  fl_color(FL_WHITE); // transparent window on Windows otherwise
+  fl_color(color[0]); // transparent window on Windows otherwise
   fl_rectf(0, 0, this->w(), this->h());
   pl.sc = &SetForeground;
   pl.pt = &DrawPoint;
@@ -166,6 +281,21 @@ int Plotter::handle(int event)
        return 1;
      }
     }
+  case FL_KEYUP:
+    switch(Fl::event_key())
+    {
+    case 'q':
+      switch(Fl::event_shift())
+      {
+	case 0:
+	case FL_CTRL:
+	  exit(0);
+      }
+      break;
+    case 'c':
+      if (Fl::event_state() == FL_CTRL) exit(0);
+      break;
+    }
   default:
     return 0;
   }
@@ -180,6 +310,7 @@ void
 rectdraw0(long *w, long *x, long *y, long lw)
 {
     Plotter *win;
+
     if (pari_daemon()) return;  // parent process returns
 
     pari_close();

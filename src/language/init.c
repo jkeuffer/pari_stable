@@ -81,6 +81,18 @@ static THREAD GEN *dft_handler;
   }                                  \
 }
 
+static char *PARI_DefaultColors[] =
+{
+  "white",
+  "black",     /* Default */
+  "blue",      /* Axes */
+  "violetred", /* Odd numbered curves in ploth */
+  "red",       /* Curves, or Even numbered curves in ploth */
+  "green",
+  "grey",
+  "gainsboro",
+};
+
 void
 push_stack(stack **pts, void *a)
 {
@@ -465,6 +477,28 @@ pari_init_defaults(void)
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
   next_bloc=0;
+
+  {
+    int i;
+    char buf[150], *p;
+
+    buf[0] = '[';
+    for (i = 0, p = buf+1;
+	 i < sizeof(PARI_DefaultColors)/sizeof(*PARI_DefaultColors);
+	 i++)
+    {
+      *p++ = '"';
+      strcpy(p, PARI_DefaultColors[i]);
+      p += strlen(p);
+      *p++ = '"';
+      *p++ = ',';
+    }
+    p--;
+    strcpy(p, "]");
+    setdefault("graphcolormap", buf, d_SILENT);
+    /* 4 = RED, 5 = GREEN */
+    setdefault("graphcolors", "[4, 5]", d_SILENT);
+  }
 }
 
 /* pari stack is a priori not available. Don't use it */

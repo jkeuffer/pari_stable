@@ -43,12 +43,14 @@ struct data_x
 {
   Display *display;
   Window win;
+  int numcolors;
   GC gc;
 };
 
 static void SetForeground(void *data, long col)
 {
   struct data_x *dx = (struct data_x *) data;
+  if (col >= dx->numcolors) col = dx->numcolors-1;
   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
 }
 
@@ -104,23 +106,11 @@ static void DrawString(void *data, long x, long y, char *text, long numtext)
   XDrawString(dx->display,dx->win,dx->gc, x,y, text, numtext);
 }
 
-static char *PARI_DefaultColors[MAX_COLORS] =
-{
-  " ",
-  "black",    /* Default */
-  "blue",     /* Axes */
-  "violetred",   /* Odd numbered curves in ploth */
-  "red",      /* Curves, or Even numbered curves in ploth */
-  "green",
-  "grey",
-  "gainsboro",
-};
-
 static void
-PARI_ColorSetUp(Display *display, char **Colors, int n)
+PARI_ColorSetUp(Display *display, GEN colors)
 {
   static int init_done = 0;
-  int i;
+  long i, n = lg(colors)-1;
 
   if (init_done) return;
   init_done=1;
@@ -128,9 +118,25 @@ PARI_ColorSetUp(Display *display, char **Colors, int n)
   PARI_Colormap = DefaultColormap(display, 0);
   PARI_Colors = (XColor *) gpmalloc((n+1) * sizeof(XColor));
   PARI_ExactColors = (XColor *) gpmalloc((n+1) * sizeof(XColor));
-  for (i=1; i<n; i++)
-    XAllocNamedColor(display, PARI_Colormap, Colors[i],
-		     &PARI_ExactColors[i], &PARI_Colors[i]);
+  for (i=0; i<n; i++)
+  {
+    GEN c = gel(colors, i+1);
+    switch(typ(c))
+    {
+    case t_STR:
+      XAllocNamedColor(display, PARI_Colormap, GSTR(c),
+		       &PARI_ExactColors[i], &PARI_Colors[i]);
+      break;
+    case t_VECSMALL:
+      PARI_ExactColors[i].red   = c[1]*65535/255;
+      PARI_ExactColors[i].green = c[2]*65535/255;
+      PARI_ExactColors[i].blue  = c[3]*65535/255;
+      PARI_ExactColors[i].flags = DoRed | DoGreen | DoBlue;
+      memcpy(&PARI_Colors[i],&PARI_ExactColors[i],sizeof(PARI_ExactColors[i]));
+      XAllocColor(display, PARI_Colormap, &PARI_Colors[i]);
+      break;
+    }
+  }
 }
 
 /* after fork(), we don't want the child to recover but to exit */
@@ -185,13 +191,13 @@ rectdraw0(long *w, long *x, long *y, long lw)
   if (!font_info) exiterr("cannot open 9x15 font");
   XSetErrorHandler(Xerror);
   XSetIOErrorHandler(IOerror);
-  PARI_ColorSetUp(display,PARI_DefaultColors,MAX_COLORS);
+  PARI_ColorSetUp(display,pari_colormap);
 
   screen = DefaultScreen(display);
   win = XCreateSimpleWindow
     (display, RootWindow(display, screen), 0, 0,
      pari_plot.width, pari_plot.height, 4,
-     BlackPixel(display, screen), WhitePixel(display, screen));
+     PARI_Colors[1].pixel, PARI_Colors[0].pixel);
 
   size_hints.flags = PPosition | PSize;
   size_hints.x = 0;
@@ -206,7 +212,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   XSetWMProtocols(display,win,&wm_delete_window, 1);
 
   XSelectInput (display, win,
-    ExposureMask | ButtonPressMask | StructureNotifyMask);
+    ExposureMask | ButtonPressMask | KeyReleaseMask | StructureNotifyMask);
 
   /* enable backing-store */
   attrib.backing_store = Always;
@@ -222,6 +228,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   oldheight = pari_plot.height;
   dx.display= display;
   dx.win = win;
+  dx.numcolors = lg(pari_colormap)-1;
   dx.gc = gc;
   plotX.sc = &SetForeground;
   plotX.pt = &DrawPoint;
@@ -242,9 +249,24 @@ rectdraw0(long *w, long *x, long *y, long lw)
             (Atom)event.xclient.data.l[0] != wm_delete_window) break;
       case ButtonPress:
       case DestroyNotify:
+EXIT:
 	XUnloadFont(display,font_info->fid);
         XFreeGC(display,gc);
 	XCloseDisplay(display); exit(0);
+
+      case KeyRelease:
+	switch (XKeycodeToKeysym(display, event.xkey.keycode, 0))
+	{
+	case XK_q:
+	  if (!event.xkey.state || event.xkey.state == ControlMask)
+	    goto EXIT;
+	  break;
+	case XK_c:
+	  if (event.xkey.state == ControlMask)
+	    goto EXIT;
+	  break;
+	}
+	break;
 
       case ConfigureNotify:
       {

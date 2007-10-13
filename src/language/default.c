@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
+#include "../graph/rect.h"
 
 #ifdef HAS_STRFTIME
 #  include <time.h>
@@ -422,6 +423,144 @@ sd_colors(char *v, long flag)
     }
     if (flag==d_RETURN) return strtoGENstr(s);
     pariprintf("   colors = \"%s\"\n",s);
+  }
+  return gnil;
+}
+
+static long
+atocolor(const char *s)
+{
+  long l = atol(s);
+  if (l <   0) l =   0;
+  if (l > 255) l = 255;
+  return l;
+}
+
+GEN
+sd_graphcolormap(char *v, long flag)
+{
+  char *p, *q, *ap[3];
+  long i, j, l, a, s, *lp;
+
+  if (*v)
+  {
+    v = filtre(v, 0);
+    if (*v != '[' || v[strlen(v)-1] != ']')
+      pari_err(talker2, "incorrect value for graphcolormap", v, v);
+    for (s = 0, p = v+1, l = 2, a=0; *p; p++)
+      if (*p == '[')
+      {
+	a++;
+	while (*++p != ']')
+	  if (!*p || *p == '[')
+	    pari_err(talker2, "incorrect value for graphcolormap", p, v);
+      }
+      else if (*p == '"')
+      {
+	s += sizeof(long)+1;
+	while (*p && *++p != '"') s++;
+        if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, v);
+	s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
+      }
+      else if (*p == ',')
+	l++;
+    if (l < 4)
+      pari_err(talker, "too few colors (< 4) in graphcolormap");
+    if (pari_colormap) gpfree(pari_colormap);
+    pari_colormap = (GEN)gpmalloc((l+4*a)*sizeof(long) + s);
+    pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
+    for (p = v+1, i = 1, lp = pari_colormap+l; i < l; p++)
+      switch(*p)
+      {
+      case '"':
+	gel(pari_colormap, i) = lp;
+	q = ++p; while (*q != '"') q++;
+        *q = 0;
+        j = 1 + nchar2nlong(q-p);
+	lp[0] = evaltyp(t_STR)|evallg(j);
+	strncpy(GSTR(lp), p, q-p+1);
+        lp += j; p = q;
+	break;
+      case '[':
+	gel(pari_colormap, i) = lp;
+	lp[0] = evaltyp(t_VECSMALL)|evallg(4);
+	for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
+	  if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
+	while (j<2) ap[++j] = "0";
+	if (j>2 || *p != ']')
+	{
+	  char buf[100];
+	  sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
+	  pari_err(talker2, buf, p, v);
+	}
+	*p = '\0';
+	lp[1] = atocolor(ap[0]);
+	lp[2] = atocolor(ap[1]);
+	lp[3] = atocolor(ap[2]);
+	lp += 4;
+	break;
+      case ',':
+      case ']':
+	i++;
+	break;
+      default:
+	pari_err(talker2, "incorrect value for graphcolormap", p, v);
+      }
+    free(v);
+  }
+  if (flag == d_RETURN || flag == d_ACKNOWLEDGE)
+  {
+    GEN cols = cgetg(lg(pari_colormap), t_VEC);
+    long i;
+
+    for (i = 1; i < lg(cols); i++)
+    {
+      GEN c = gel(pari_colormap, i);
+      if (typ(c) == t_STR)
+	gel(cols, i) = gcopy(c);
+      else
+	gel(cols, i) = vecsmall_to_vec(c);
+    }
+    if (flag == d_RETURN) return cols;
+    pariprintf("   graphcolormap = %Z\n", cols);
+  }
+  return gnil;
+}
+
+GEN
+sd_graphcolors(char *v, long flag)
+{
+  long i, l;
+  char *p;
+
+  if (*v) {
+    v = filtre(v, 0);
+    for (p = v+1, l=2; *p != ']'; p++)
+      if (*p == ',') l++;
+      else if (*p < '0' || *p > '9')
+	pari_err(talker2, "incorrect value for graphcolors", p, v);
+    if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, v);
+    if (pari_graphcolors) gpfree(pari_graphcolors);
+    pari_graphcolors = cgetalloc(t_VECSMALL, l);
+    for (p = v+1, i=0; *p; p++)
+    {
+      long n = 0;
+      while (*p >= '0' && *p <= '9')
+      {
+	n *= 10;
+	n += *p-'0';
+	p++;
+      }
+      pari_graphcolors[++i] = n;
+    }
+    free(v);
+  }
+  switch(flag)
+  {
+  case d_RETURN:
+    return vecsmall_to_vec(pari_graphcolors);
+  case d_ACKNOWLEDGE:
+    pariprintf("   graphcolors = %Z\n", vecsmall_to_vec(pari_graphcolors));
   }
   return gnil;
 }
@@ -846,6 +985,8 @@ default_type gp_default_list[] =
   {"factor_add_primes",(void*)sd_factor_add_primes},
   {"factor_proven",(void*)sd_factor_proven},
   {"format",(void*)sd_format},
+  {"graphcolormap",(void*)sd_graphcolormap},
+  {"graphcolors",(void*)sd_graphcolors},
   {"help",(void*)sd_help},
   {"histsize",(void*)sd_histsize},
   {"lines",(void*)sd_lines},

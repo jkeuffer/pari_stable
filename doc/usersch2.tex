@@ -2002,6 +2002,30 @@ numbers, except if $n<0$ where all the significant digits will be printed
 number of characters to be used for printing integers, but is ignored if
 equal to 0 (which is the default). This is a feeble attempt at formatting.
 
+\subsecidx{graphcolormap} (default value: \kbd{["white", "black", "blue",
+"violetred", "red", "green", "grey", "gainsboro"]}). A vector of colors, to be
+used by hi-res graphing routines. Its length is arbitrary, but it must
+contain at least 3 entries: the first 3 colors are used for background,
+frame/ticks and axes respectively. All colors in the colormap may be freely
+used in \tet{plotcolor} calls.
+
+A color is either given as in the default by character strings (see
+the standard \kbd{rgb.txt} file in X11 distributions), or by an RGB code (a
+vector with 3 integer entries between 0 and 255). For instance \kbd{[250,
+235, 215]} and \kbd{"antique white"} represent the same color. RGB codes are
+a little cryptic but more portable: some graphic drivers may not be able to
+understand all symbolic names (currently \kbd{fltk}: unrecognized color names
+behave as "white").
+
+\subsecidx{graphcolors} (default: \kbd{[4,5]}) Entries in the
+\tet{graphcolormap} that will be used to plot multi-curves. The successive
+curves are drawn in colors
+
+  \kbd{graphcolormap[graphcolors[1]]}, \kbd{graphcolormap[graphcolors[2]]},
+  \dots
+
+cycling when the \kbd{graphcolors} list is exhausted.
+
 \subsecidx{help} (default: the location of the \kbd{gphelp} script): the
 name of the external help program which will be used from within \kbd{gp} when
 extended help is invoked, usually through a \kbd{??} or \kbd{???} request

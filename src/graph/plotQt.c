@@ -75,7 +75,8 @@ private:
     long *x;                           // x, y: array of x,y-coorinates of the
     long *y;                           //   top left corners of the rectwindows
     long lw;                           // lw: number of rectwindows
-    QColor color[MAX_COLORS];
+    long numcolors;
+    QColor *color;
     QFont font;
     static QString *plotFile;
     void draw(QPainter *p);
@@ -92,22 +93,30 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
 		  QWidget* parent,  const char* name, WFlags fl)
     : QWidget( parent, name, fl), font( "lucida", 9) {
 
+    long i;
+
     this->w=w; this->x=x; this->y=y; this->lw=lw;
 #ifndef __FANCY_WIN__
     this->resize( pari_plot.width, pari_plot.height);
     this->setCaption( "Pari QtPlot");
 #endif
-    this->setBackgroundColor( white);
+    this->setBackgroundColor( color[0]);
     this->setFont( font);
-    // defaults as in plotX.c (cf. rgb.txt in a X11 system)
-    color[0]         = white;
-    color[BLACK]     = black;
-    color[BLUE]      = blue;
-    color[VIOLET]    = QColor( 208, 32, 144) ;
-    color[RED]       = red;
-    color[GREEN]     = green;
-    color[GREY]      = gray;
-    color[GAINSBORO] = QColor( 220, 220, 220);
+    numcolors = lg(pari_colormap)-1;
+    color = (QColor*)gpmalloc(numcolors*sizeof(QColor));
+    for (i = 1; i < lg(pari_colormap); i++)
+    {
+        GEN c = gel(pari_colormap,i);
+	switch(typ(c))
+	{
+	case t_STR:
+	  color[i-1] = QColor(GSTR(c));
+	  break;
+	case t_VECSMALL:
+	  color[i-1] = QColor(c[1], c[2], c[3]);
+	  break;
+	}
+    }
 }
 
 // void Plotter::setPlotFile( const char *s) {
@@ -119,12 +128,14 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
 struct data_qt
 {
   QPainter *p;
+  long numcolors;
   QColor *color;
 };
 
 static void SetForeground(void *data, long col)
 {
    struct data_qt *d = (struct data_qt *) data;
+   if (col >= d->numcolors) col = d->numcolors-1;
    d->p->setPen(d->color[col]);
 }
 
@@ -176,6 +187,7 @@ void Plotter::draw(QPainter *p){
   struct plot_eng plotQt;
   struct data_qt d;
   d.p= p;
+  d.numcolors = numcolors;
   d.color=color;
   plotQt.sc=&SetForeground;
   plotQt.pt=&DrawPoint;
@@ -196,7 +208,7 @@ void Plotter::save( const QString& s, const QString& f){
     QPainter p;
 
     p.begin( &pm, this);
-    p.fillRect( 0, 0, pm.width(), pm.height(), white);
+    p.fillRect( 0, 0, pm.width(), pm.height(), color[0]);
     this->draw(&p);
     p.end();
 

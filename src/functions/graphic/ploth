@@ -2,15 +2,16 @@ Function: ploth
 Class: highlevel
 Section: graphic
 C-Name: ploth
-Prototype: V=GGEpD0,M,D0,L,\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048
+Prototype: V=GGEpD0,M,D0,L,\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048; Complex|4096
 Help: ploth(X=a,b,expr,{flags=0},{n=0}): plot of expression expr, X goes
  from a to b in high resolution. Both flags and n are optional. Binary digits
  of flags mean: 1=Parametric, 2=Recursive, 4=no_Rescale, 8=no_X_axis,
  16=no_Y_axis, 32=no_Frame, 64=no_Lines (do not join points), 128=Points_too
  (plot both lines and points), 256=Splines (use cubic splines),
  512=no_X_ticks, 1024= no_Y_ticks, 2048=Same_ticks (plot all ticks with the
- same length). n specifies number of reference points on the graph (0=use
- default value). Returns a vector for the bounding box
+ same length), 4096=Complex (the two coordinates of each points are encoded
+ as a complex number). n specifies number of reference points on the graph
+ (0=use default value). Returns a vector for the bounding box
 Doc: high precision plot of the function $y=f(x)$ represented by the expression
  \var{expr}, $x$ going from $a$ to $b$. This opens a specific window (which is
  killed whenever you click on it), and returns a four-component vector giving
@@ -91,3 +92,15 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  \item $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
  
  \item $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
+ 
+ \item $4096 = \kbd{Complex}$: is a parametric plot but where each member of
+ \kbd{expr} is considered a complex number encoding the two coordinates of a
+ point.
+
+ For instance:
+  
+ \kbd{ploth(X=0,2*Pi,exp(I*X),4096)} will draw a circle.
+  
+ \kbd{ploth(X=0,2*Pi,[(1+I)*X,exp(I*X)],4096)} will draw a circle and the line
+ $y=x$.
+
