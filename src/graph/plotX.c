@@ -50,7 +50,11 @@ struct data_x
 static void SetForeground(void *data, long col)
 {
   struct data_x *dx = (struct data_x *) data;
-  if (col >= dx->numcolors) col = dx->numcolors-1;
+  if (col >= dx->numcolors)
+  {
+    pari_warn(warner,"non-existent color: %ld", col);
+    col = dx->numcolors-1;
+  }
   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
 }
 

@@ -47,8 +47,6 @@ GEN pari_colormap = NULL, pari_graphcolors = NULL;
 
 #define DEFAULT_COLOR 1
 #define AXIS_COLOR 2
-#define MAX_COLORS (lg(pari_colormap)-1)
-#define GOODCOLOR(c) (1 <= c && c < MAX_COLORS)
 
 /********************************************************************/
 /**                                                                **/
@@ -374,11 +372,12 @@ rectrpoint(long ne, GEN x, GEN y)
 }
 
 void
-rectcolor(long ne, long color)
+rectcolor(long ne, long c)
 {
   check_rect(ne);
-  if (!GOODCOLOR(color)) pari_err(talker,"This is not a valid color");
-  current_color[ne]=color;
+  if (c < 1 || c >= lg(pari_colormap)-1)
+    pari_err(talker,"This is not a valid color");
+  current_color[ne] = c;
 }
 
 void
@@ -1623,7 +1622,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   GEN res;
   dblPointList y,x;
   double xsml,xbig,ysml,ybig,tmp;
-  long ltype;
+  long ltype, max_graphcolors;
   pari_sp ltop=avma;
   long i,nc,nbpoints, w[2], wx[2], wy[2];
 
@@ -1668,7 +1667,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
     rectlinetype(stringrect,-2); /* Frame */
     current_color[stringrect] = DEFAULT_COLOR;
-    put_string( stringrect, lm, 0, c1,
+    put_string(stringrect, lm, 0, c1,
 		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirTOP);
     put_string(stringrect, lm, W.height - bm, c2,
 		RoSTdirRIGHT | RoSTdirHGAP | RoSTdirVGAP);
@@ -1688,7 +1687,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     PARI_plot *pl = WW;
     if (!pl) { PARI_get_plot(0); pl = &pari_plot; }
 
-    rectlinetype(drawrect, -2); 		/* Frame. */
+    rectlinetype(drawrect, -2); /* Frame. */
     current_color[drawrect] = DEFAULT_COLOR;
     rectmove0(drawrect,xsml,ysml,0);
     rectbox0(drawrect,xbig,ybig,0);
@@ -1708,7 +1707,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
   if (!(flags & PLOT_NO_AXE_Y) && (xsml<=0 && xbig >=0))
   {
-    rectlinetype(drawrect, -1); 		/* Axes. */
+    rectlinetype(drawrect, -1); /* Axes. */
     current_color[drawrect] = AXIS_COLOR;
     rectmove0(drawrect,0.0,ysml,0);
     rectline0(drawrect,0.0,ybig,0);
@@ -1716,22 +1715,23 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
   if (!(flags & PLOT_NO_AXE_X) && (ysml<=0 && ybig >=0))
   {
-    rectlinetype(drawrect, -1); 		/* Axes. */
+    rectlinetype(drawrect, -1); /* Axes. */
     current_color[drawrect] = AXIS_COLOR;
     rectmove0(drawrect,xsml,0.0,0);
     rectline0(drawrect,xbig,0.0,0);
   }
 
   i = (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX))? 0: 1;
+  max_graphcolors = lg(pari_graphcolors)-1;
   for (ltype = 0; ltype < nc; ltype++)
   {
-    current_color[drawrect] = pari_graphcolors[1+(ltype%MAX_COLORS)];
+    current_color[drawrect] = pari_graphcolors[1+(ltype%max_graphcolors)];
     if (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX)) x = data[i++];
 
     y = data[i++]; nbpoints = y.nb;
     if (flags & (PLOT_POINTS_LINES|PLOT_POINTS)) {
-      rectlinetype(drawrect, rectpoint_itype + ltype); 	/* Graphs */
-      rectpointtype(drawrect,rectpoint_itype + ltype); 	/* Graphs */
+      rectlinetype(drawrect, rectpoint_itype + ltype); /* Graphs */
+      rectpointtype(drawrect,rectpoint_itype + ltype); /* Graphs */
       rectpoints0(drawrect,x.d,y.d,nbpoints);
     }
     if ((flags & PLOT_POINTS_LINES) || !(flags & PLOT_POINTS)) {
@@ -1800,7 +1800,7 @@ init_output(long flags)
 
 static GEN
 ploth0(long stringrect,long drawrect,GEN a,GEN b,GEN code,
-	     long prec,ulong flags,long testpoints)
+       long prec,ulong flags,long testpoints)
 {
   PARI_plot *output = init_output(flags);
   dblPointList *pl=rectplothin(a,b, code, prec, flags,testpoints);
@@ -1861,8 +1861,7 @@ postploth(GEN a, GEN b, GEN code, long prec,long flags, long numpoints)
 }
 
 GEN
-postploth2(GEN a, GEN b, GEN code, long prec,
-	   long numpoints)
+postploth2(GEN a, GEN b, GEN code, long prec, long numpoints)
 {
   return ploth0(STRINGRECT,DRAWRECT,a,b,code,prec,
 		PLOT_PARAMETRIC|PLOT_POSTSCRIPT,numpoints);
@@ -1902,7 +1901,7 @@ plot_count(long *w, long lw, col_counter rcolcnt)
   RectObj *O;
   long col, i;
 
-  for (col = 1; col < MAX_COLORS; col++)
+  for (col = 1; col < lg(pari_colormap)-1; col++)
     for (i = 0; i < ROt_MAX; i++) rcolcnt[col][i] = 0;
   for (i = 0; i < lw; i++)
   {
