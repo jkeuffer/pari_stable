@@ -476,7 +476,7 @@ sd_graphcolormap(char *v, long flag)
 	gel(pari_colormap, i) = lp;
 	q = ++p; while (*q != '"') q++;
 	*q = 0;
-	j = 1 + nchar2nlong(q-p);
+	j = 1 + nchar2nlong(q-p+1);
 	lp[0] = evaltyp(t_STR)|evallg(j);
 	strncpy(GSTR(lp), p, q-p+1);
 	lp += j; p = q;

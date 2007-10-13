@@ -128,8 +128,9 @@ PARI_ColorSetUp(Display *display, GEN colors)
     switch(typ(c))
     {
     case t_STR:
-      XAllocNamedColor(display, PARI_Colormap, GSTR(c),
-		       &PARI_ExactColors[i], &PARI_Colors[i]);
+      if (!XAllocNamedColor(display, PARI_Colormap, GSTR(c),
+                            &PARI_Colors[i], &PARI_ExactColors[i]))
+        pari_err(talker, "cannot allocate color %s", GSTR(c));
       break;
     case t_VECSMALL:
       PARI_ExactColors[i].red   = c[1]*65535/255;
@@ -137,7 +138,8 @@ PARI_ColorSetUp(Display *display, GEN colors)
       PARI_ExactColors[i].blue  = c[3]*65535/255;
       PARI_ExactColors[i].flags = DoRed | DoGreen | DoBlue;
       memcpy(&PARI_Colors[i],&PARI_ExactColors[i],sizeof(PARI_ExactColors[i]));
-      XAllocColor(display, PARI_Colormap, &PARI_Colors[i]);
+      if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
+        pari_err(talker, "cannot allocate color %Z", c);
       break;
     }
   }
