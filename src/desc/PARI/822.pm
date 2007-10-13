@@ -40,12 +40,12 @@ mode&2: new functions are not allowed.
 
 =cut
 
-sub read 
+sub read
 {
-	
+
 	local $/="\n";
         local *FILE;
-	
+
 	my ($ret,$file,$check)=@_;
         $check=0 if (!defined($check));
 	my $invars=0;
@@ -70,10 +70,10 @@ sub read
         };
 
         open FILE,"<$file";
-	while (my $line = <FILE>) 
+	while (my $line = <FILE>)
         {
 		chomp $line;
-                if ($invars && $line =~ /^\s/) 
+                if ($invars && $line =~ /^\s/)
                 {
                         $line =~ s/^\s+//;
                         $value.= ($last_was_void?"\n\n$line":"\n$line");
@@ -86,7 +86,7 @@ sub read
 
 		($key, $value)=split(/:\s*/, $line, 2);
                 die("Bad entry in $file: $key") if (!defined($value));
-		if ($key eq 'Function') 
+		if ($key eq 'Function')
                 {
                         $entry=$value;
                         die("New function $value") if (($check&2) and !defined($ret->{$entry}));
@@ -116,14 +116,14 @@ output a database to STREAM in canonical 822 format.
 =cut
 
 
-sub write 
+sub write
 {
         my @order=("Function","Class","Section","C-Name","Prototype","Type","Help","Description");
         my %knowfields=map {$_ => 1}  @order;
 	my %data=%{shift()};
         my $STREAM=shift;
         defined($STREAM) or $STREAM=*STDOUT;
-	foreach my $func (sort keys %data) 
+	foreach my $func (sort keys %data)
         {
 	        foreach my $field (@order)
                 {

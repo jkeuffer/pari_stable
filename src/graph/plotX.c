@@ -245,13 +245,13 @@ rectdraw0(long *w, long *x, long *y, long lw)
     switch(event.type)
     {
       case ClientMessage:
-        if (event.xclient.message_type != wm_protocols ||
-            (Atom)event.xclient.data.l[0] != wm_delete_window) break;
+	if (event.xclient.message_type != wm_protocols ||
+	    (Atom)event.xclient.data.l[0] != wm_delete_window) break;
       case ButtonPress:
       case DestroyNotify:
 EXIT:
 	XUnloadFont(display,font_info->fid);
-        XFreeGC(display,gc);
+	XFreeGC(display,gc);
 	XCloseDisplay(display); exit(0);
 
       case KeyRelease:
@@ -270,19 +270,19 @@ EXIT:
 
       case ConfigureNotify:
       {
-        int width  = event.xconfigure.width;
-        int height = event.xconfigure.height;
+	int width  = event.xconfigure.width;
+	int height = event.xconfigure.height;
 
-        if (width == oldwidth && height == oldheight) break;
-        oldwidth  = width;
-        oldheight = height;
+	if (width == oldwidth && height == oldheight) break;
+	oldwidth  = width;
+	oldheight = height;
 
-        /* recompute scale */
+	/* recompute scale */
 	xs = ((double)width)/pari_plot.width;
-        ys = ((double)height)/pari_plot.height;
+	ys = ((double)height)/pari_plot.height;
       }
       case Expose:
-        gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
+	gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
     }
   }
 }

@@ -106,7 +106,7 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color = (QColor*)gpmalloc(numcolors*sizeof(QColor));
     for (i = 1; i < lg(pari_colormap); i++)
     {
-        GEN c = gel(pari_colormap,i);
+	GEN c = gel(pari_colormap,i);
 	switch(typ(c))
 	{
 	case t_STR:

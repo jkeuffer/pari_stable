@@ -157,7 +157,7 @@ parse_color(const char *s)
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
 	     const char* name)
-        : Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
+	: Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
 
 {
     long i;
@@ -167,7 +167,7 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color = (Fl_Color*)gpmalloc(numcolors*sizeof(Fl_Color));
     for (i = 1; i < lg(pari_colormap); i++)
     {
-        GEN c = gel(pari_colormap, i);
+	GEN c = gel(pari_colormap, i);
 	switch(typ(c))
 	{
 	case t_STR:

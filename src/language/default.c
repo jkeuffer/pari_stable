@@ -459,7 +459,7 @@ sd_graphcolormap(char *v, long flag)
       {
 	s += sizeof(long)+1;
 	while (*p && *++p != '"') s++;
-        if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, v);
+	if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, v);
 	s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
       }
       else if (*p == ',')
@@ -475,11 +475,11 @@ sd_graphcolormap(char *v, long flag)
       case '"':
 	gel(pari_colormap, i) = lp;
 	q = ++p; while (*q != '"') q++;
-        *q = 0;
-        j = 1 + nchar2nlong(q-p);
+	*q = 0;
+	j = 1 + nchar2nlong(q-p);
 	lp[0] = evaltyp(t_STR)|evallg(j);
 	strncpy(GSTR(lp), p, q-p+1);
-        lp += j; p = q;
+	lp += j; p = q;
 	break;
       case '[':
 	gel(pari_colormap, i) = lp;

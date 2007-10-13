@@ -1420,7 +1420,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       {
 	if (i) { affrr(tright,tleft); xleft = xright; yleft = yright; }
 	addrrz(tleft,dx,tright);
-        t = READ_EXPR(code,tright);
+	t = READ_EXPR(code,tright);
 	if (cplx)
 	{
 	  if (typ(t) == t_VEC)
@@ -1494,7 +1494,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       for (i=0; i<testpoints; i++)
       {
 	t = READ_EXPR(code,x);
-        if (typ(t) == t_VEC)
+	if (typ(t) == t_VEC)
 	{
 	  if (lg(t)!=nl+1) pari_err(talker,"inconsistent data in rectplothin");
 	}
@@ -1585,13 +1585,13 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
       tas = xa;
     }
     rectploth(ne,
-               i==0 ? gel(tas,0) : gel(tas,1),
-               i==lx-4 ? gel(tas,3) : gel(tas,2),
-               pol3, DEFAULTPREC,
-               PLOT_RECURSIVE | PLOT_NO_RESCALE | PLOT_NO_FRAME
-                 | PLOT_NO_AXE_Y | PLOT_NO_AXE_X |
+	       i==0 ? gel(tas,0) : gel(tas,1),
+	       i==lx-4 ? gel(tas,3) : gel(tas,2),
+	       pol3, DEFAULTPREC,
+	       PLOT_RECURSIVE | PLOT_NO_RESCALE | PLOT_NO_FRAME
+		 | PLOT_NO_AXE_Y | PLOT_NO_AXE_X |
 		 (flag & (PLOT_PARAMETRIC|PLOT_COMPLEX)),
-               2); /* Start with 3 points */
+	       2); /* Start with 3 points */
     avma = av;
   }
   avma = oldavma;
@@ -1736,15 +1736,15 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     }
     if ((flags & PLOT_POINTS_LINES) || !(flags & PLOT_POINTS)) {
       if (flags & PLOT_SPLINES) {
-        /* rectsplines will call us back with ltype == 0 */
-        int old = rectline_itype;
+	/* rectsplines will call us back with ltype == 0 */
+	int old = rectline_itype;
 
-        rectline_itype = rectline_itype + ltype;
-        rectsplines(drawrect,x.d,y.d,nbpoints,flags);
-        rectline_itype = old;
+	rectline_itype = rectline_itype + ltype;
+	rectsplines(drawrect,x.d,y.d,nbpoints,flags);
+	rectline_itype = old;
       } else {
-        rectlinetype(drawrect, rectline_itype + ltype); /* Graphs */
-        rectlines0(drawrect,x.d,y.d,nbpoints,0);
+	rectlinetype(drawrect, rectline_itype + ltype); /* Graphs */
+	rectlines0(drawrect,x.d,y.d,nbpoints,0);
       }
     }
   }
