@@ -165,7 +165,7 @@ parseproto(char const **q, char *c)
     default:
       for(i=0;*p && i<2;p++) i+=*p==',';
       if (i<2)
-        pari_err(talker,"incomplete prototype");
+	pari_err(talker,"incomplete prototype");
       *c=p[-2];
       *q=p;
       return PPdefaultmulti;
@@ -185,7 +185,7 @@ parseproto(char const **q, char *c)
     if (p[1]=='=')
     {
       if (p[2]!='G')
-        pari_err(impl,"prototype not supported");
+	pari_err(impl,"prototype not supported");
       *c='=';
       p+=2;
     }
@@ -220,7 +220,7 @@ compilecast(long n, int type, int mode)
     if (type==Ggen)        op_push(OCitos,0);
     else if (type==Gvoid)  op_push(OCpushlong,0);
     else pari_err(talker2,"this should be a small integer",
-             tree[n].str, get_origin());
+	     tree[n].str, get_origin());
     break;
   case Ggen:
     if (type==Gsmall)      op_push(OCstoi,0);
@@ -339,8 +339,8 @@ arg_is_safe(long a)
       entree *ep=get_entree(a);
       long i;
       for (i=s_lvar.n-1; i>=0; i--)
-        if (localvars[i].ep==ep)
-          return 1;
+	if (localvars[i].ep==ep)
+	  return 1;
       return 0;
     }
   default:
@@ -377,7 +377,7 @@ compilelvalue(long n)
     long yy=tree[y].y;
     long f=tree[y].f;
     if (tree[x].f==Ffacteurmat && f==Fmatrix && yy==-1 &&
-        tree[tree[x].y].f==FmatrixL)
+	tree[tree[x].y].f==FmatrixL)
     {
       compilelvalue(tree[x].x);
       compilenode(tree[tree[x].y].x,Gsmall,0);
@@ -394,15 +394,15 @@ compilelvalue(long n)
       switch(f)
       {
       case Fmatrix:
-        compilenode(yy,Gsmall,0);
-        op_push(OCcompo2ptr,0);
-        break;
+	compilenode(yy,Gsmall,0);
+	op_push(OCcompo2ptr,0);
+	break;
       case FmatrixR:
-        op_push(OCcompoCptr,0);
-        break;
+	op_push(OCcompoCptr,0);
+	break;
       case FmatrixL:
-        op_push(OCcompoLptr,0);
-        break;
+	op_push(OCcompoLptr,0);
+	break;
       }
     }
   }
@@ -482,7 +482,7 @@ compilemat(long n, long mode)
     }
     else if (l!=lgcol)
       pari_err(talker2,"matrix must be rectangular",
-          tree[line[i]].str,get_origin());
+	  tree[line[i]].str,get_origin());
     k=i;
     for(j=1;j<lgcol;j++)
     {
@@ -511,12 +511,12 @@ cattovec(long n, long fnum)
     y=tree[xy].y;
     if (tree[y].f==Fnoarg)
       pari_err(talker2,"unexpected character: ",
-               tree[y].str, get_origin());
+	       tree[y].str, get_origin());
     i++;
   }
   if (tree[x].f==Fnoarg)
     pari_err(talker2,"unexpected character: ",
-             tree[x].str, get_origin());
+	     tree[x].str, get_origin());
   nb=i+1;
   stack=cgetg(nb+1,t_VECSMALL);
   for(x=n;i>0;i--)
@@ -551,14 +551,14 @@ compilefunc(long n, int mode)
   entree *ev[8];
   if (EpVALENCE(ep)==EpVAR)
     pari_err(talker2,"not a function in function call",
-        tree[n].str, get_origin());
+	tree[n].str, get_origin());
   if (EpVALENCE(ep)==EpUSER|| EpVALENCE(ep)==EpNEW)
   {
     for (j=1;j<=nb;j++)
       if (tree[arg[j]].f!=Fnoarg)
-        compilenode(arg[j], Ggen,0);
+	compilenode(arg[j], Ggen,0);
       else
-        op_push(OCpushlong,0);
+	op_push(OCpushlong,0);
     op_push(OCpushlong, nb);
     if (tree[n].f==Fderfunc)
       op_push(OCderivuser, (long) ep);
@@ -578,19 +578,19 @@ compilefunc(long n, int mode)
     {
       op_push(OCnewframe,nb);
       for(i=1;i<=nb;i++)
-        var_push(NULL,Lmy);
+	var_push(NULL,Lmy);
     }
     for (i=1;i<=nb;i++)
     {
       long a=arg[i];
       if (tree[a].f==Faffect)
       {
-        if (!is_node_zero(tree[a].y))
-        {
-          compilenode(tree[a].y,Ggen,0);
-          op_push(OCstorelex,-nb+i-1);
-        }
-        a=tree[a].x;
+	if (!is_node_zero(tree[a].y))
+	{
+	  compilenode(tree[a].y,Ggen,0);
+	  op_push(OCstorelex,-nb+i-1);
+	}
+	a=tree[a].x;
       }
       localvars[s_lvar.n-nb+i-1].ep=getvar(a);
     }
@@ -609,12 +609,12 @@ compilefunc(long n, int mode)
       op_code op=OClocalvar0;
       if (tree[a].f==Faffect)
       {
-        if (!is_node_zero(tree[a].y))
-        {
-          compilenode(tree[a].y,Ggen,0);
-          op=OClocalvar;
-        }
-        a=tree[a].x;
+	if (!is_node_zero(tree[a].y))
+	{
+	  compilenode(tree[a].y,Ggen,0);
+	  op=OClocalvar;
+	}
+	a=tree[a].x;
       }
       en=getvar(a);
       op_push(op,(long)en);
@@ -636,16 +636,16 @@ compilefunc(long n, int mode)
       long en;
       if (tree[a].f==Faffect)
       {
-        compilenode(tree[a].y,Ggen,0);
-        a=tree[a].x;
-        en=(long)getvar(a);
-        op_push(OCstoredyn,en);
+	compilenode(tree[a].y,Ggen,0);
+	a=tree[a].x;
+	en=(long)getvar(a);
+	op_push(OCstoredyn,en);
       }
       else
       {
-        en=(long)getvar(a);
-        op_push(OCpushdyn,en);
-        op_push(OCpop,1);
+	en=(long)getvar(a);
+	op_push(OCpushdyn,en);
+	op_push(OCpop,1);
       }
     }
     compilecast(n,Gvoid,mode);
@@ -656,7 +656,7 @@ compilefunc(long n, int mode)
   {
     long a;
     if (nb!=1) pari_err(talker2,"wrong number of arguments",
-        tree[n].str+tree[n].len-1, get_origin());
+	tree[n].str+tree[n].len-1, get_origin());
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     a = arg[1];
@@ -684,7 +684,7 @@ compilefunc(long n, int mode)
   }
   if (x==OPcat)
     pari_err(talker2,"expected character: ',' or ')' instead of",
-        tree[arg[1]].str+tree[arg[1]].len, get_origin());
+	tree[arg[1]].str+tree[arg[1]].len, get_origin());
   p=ep->code;
   if (!ep->value)
     pari_err(talker2,"unknown function",tree[n].str, get_origin());
@@ -701,229 +701,229 @@ compilefunc(long n, int mode)
     while((mod=parseproto(&p,&c))!=PPend)
     {
       if (j<=nb && tree[arg[j]].f!=Fnoarg
-          && (mod==PPdefault || mod==PPdefaultmulti))
-        mod=PPstd;
+	  && (mod==PPdefault || mod==PPdefaultmulti))
+	mod=PPstd;
       switch(mod)
       {
       case PPstd:
-        if (j>nb)
-          pari_err(talker2,"too few arguments",
-              tree[n].str+tree[n].len-1, get_origin());
-        if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
-          pari_err(talker2,"missing mandatory argument",
-              tree[arg[j]].str, get_origin());
-        switch(c)
-        {
-        case 'G':
-          compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
-          j++;
-          break;
-        case 'M':
-        case 'L':
-          compilenode(arg[j++],Gsmall,0);
-          break;
-        case 'n':
-          compilenode(arg[j++],Gvar,0);
-          break;
-        case '&': case '*':
-          {
-            long vn, a=arg[j++];
-            entree *ep;
-            if (c=='&')
-            {
-              if (tree[a].f!=Frefarg)
-                pari_err(talker2,"expected character: '&'",
-                    tree[a].str, get_origin());
-              a=tree[a].x;
-            }
-            ep=getlvalue(a);
-            vn=getmvar(ep);
-            if (tree[a].f==Fentry)
-            {
-              if (vn)
-                op_push(OCsimpleptrlex, vn);
-              else
-                op_push(OCsimpleptrdyn, (long) ep);
-            }
-            else
-            {
-              if (vn)
-                op_push(OCnewptrlex, vn);
-              else
-                op_push(OCnewptrdyn, (long) ep);
-              compilelvalue(a);
-              op_push(OCpushptr, 0);
-            }
-            nbpointers++;
-            break;
-          }
-        case 'I':
-        case 'E':
-          {
-            struct codepos pos;
-            long a=arg[j++];
-            int type=c=='I'?Gvoid:Ggen;
-            long flag=c=='I'?0:FLreturn;
-            getcodepos(&pos);
-            for(i=0;i<lev;i++)
-            {
-              if (!ev[i])
-                pari_err(talker2,"missing variable name",
-                    tree[a].str-1, get_origin());
-              var_push(ev[i],Lmy);
-            }
-            if (tree[a].f==Fnoarg)
-              compilecast(a,Gvoid,type);
-            else
-              compilenode(a,type,flag);
-            op_push(OCpushgen, data_push(getclosure(&pos)));
-            break;
-          }
-        case 'V':
-          {
-            ev[lev++] = getvar(arg[j++]);
-            break;
-          }
-        case 'S':
-          {
-            entree *ep = getentry(arg[j++]);
-            op_push(OCpushlong, (long)ep);
-            break;
-          }
-        case '=':
-          {
-            long x=tree[arg[j]].x;
-            long y=tree[arg[j]].y;
-            if (tree[arg[j]].f!=Faffect)
-              pari_err(talker2,"expected character: '=' instead of",
-                  tree[arg[j]].str+tree[arg[j]].len, get_origin());
-            ev[lev++] = getvar(x);
-            compilenode(y,Ggen,0);
-            i++; j++;
-          }
-          break;
-        case 'r':
-          {
-            long a=arg[j++];
-            if (tree[a].f==Fentry)
-            {
-              op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)));
-              op_push(OCtostr, 1);
-            }
-            else
-            {
-              compilenode(a,Ggen,FLnocopy);
-              op_push(OCtostr, 1);
-            }
-            break;
-          }
-        case 's':
-          {
-            GEN g = cattovec(arg[j++], OPcat);
-            long l, nb = lg(g)-1;
-            for(l=1; l<=nb; l++)
-              compilenode(g[l], Ggen,0);
-            op_push(OCtostr, nb);
-            break;
-          }
-        default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
-              tree[x].len, tree[x].str);
-        }
-        break;
+	if (j>nb)
+	  pari_err(talker2,"too few arguments",
+	      tree[n].str+tree[n].len-1, get_origin());
+	if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
+	  pari_err(talker2,"missing mandatory argument",
+	      tree[arg[j]].str, get_origin());
+	switch(c)
+	{
+	case 'G':
+	  compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
+	  j++;
+	  break;
+	case 'M':
+	case 'L':
+	  compilenode(arg[j++],Gsmall,0);
+	  break;
+	case 'n':
+	  compilenode(arg[j++],Gvar,0);
+	  break;
+	case '&': case '*':
+	  {
+	    long vn, a=arg[j++];
+	    entree *ep;
+	    if (c=='&')
+	    {
+	      if (tree[a].f!=Frefarg)
+		pari_err(talker2,"expected character: '&'",
+		    tree[a].str, get_origin());
+	      a=tree[a].x;
+	    }
+	    ep=getlvalue(a);
+	    vn=getmvar(ep);
+	    if (tree[a].f==Fentry)
+	    {
+	      if (vn)
+		op_push(OCsimpleptrlex, vn);
+	      else
+		op_push(OCsimpleptrdyn, (long) ep);
+	    }
+	    else
+	    {
+	      if (vn)
+		op_push(OCnewptrlex, vn);
+	      else
+		op_push(OCnewptrdyn, (long) ep);
+	      compilelvalue(a);
+	      op_push(OCpushptr, 0);
+	    }
+	    nbpointers++;
+	    break;
+	  }
+	case 'I':
+	case 'E':
+	  {
+	    struct codepos pos;
+	    long a=arg[j++];
+	    int type=c=='I'?Gvoid:Ggen;
+	    long flag=c=='I'?0:FLreturn;
+	    getcodepos(&pos);
+	    for(i=0;i<lev;i++)
+	    {
+	      if (!ev[i])
+		pari_err(talker2,"missing variable name",
+		    tree[a].str-1, get_origin());
+	      var_push(ev[i],Lmy);
+	    }
+	    if (tree[a].f==Fnoarg)
+	      compilecast(a,Gvoid,type);
+	    else
+	      compilenode(a,type,flag);
+	    op_push(OCpushgen, data_push(getclosure(&pos)));
+	    break;
+	  }
+	case 'V':
+	  {
+	    ev[lev++] = getvar(arg[j++]);
+	    break;
+	  }
+	case 'S':
+	  {
+	    entree *ep = getentry(arg[j++]);
+	    op_push(OCpushlong, (long)ep);
+	    break;
+	  }
+	case '=':
+	  {
+	    long x=tree[arg[j]].x;
+	    long y=tree[arg[j]].y;
+	    if (tree[arg[j]].f!=Faffect)
+	      pari_err(talker2,"expected character: '=' instead of",
+		  tree[arg[j]].str+tree[arg[j]].len, get_origin());
+	    ev[lev++] = getvar(x);
+	    compilenode(y,Ggen,0);
+	    i++; j++;
+	  }
+	  break;
+	case 'r':
+	  {
+	    long a=arg[j++];
+	    if (tree[a].f==Fentry)
+	    {
+	      op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)));
+	      op_push(OCtostr, 1);
+	    }
+	    else
+	    {
+	      compilenode(a,Ggen,FLnocopy);
+	      op_push(OCtostr, 1);
+	    }
+	    break;
+	  }
+	case 's':
+	  {
+	    GEN g = cattovec(arg[j++], OPcat);
+	    long l, nb = lg(g)-1;
+	    for(l=1; l<=nb; l++)
+	      compilenode(g[l], Ggen,0);
+	    op_push(OCtostr, nb);
+	    break;
+	  }
+	default:
+	  pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+	      tree[x].len, tree[x].str);
+	}
+	break;
       case PPauto:
-        switch(c)
-        {
-        case 'p':
-          op_push(OCprecreal,0);
-          break;
-        case 'P':
-          op_push(OCprecdl,0);
-          break;
-        case 'f':
-          {
-            static long foo;
-            op_push(OCpushlong,(long)&foo);
-            break;
-          }
-        }
-        break;
+	switch(c)
+	{
+	case 'p':
+	  op_push(OCprecreal,0);
+	  break;
+	case 'P':
+	  op_push(OCprecdl,0);
+	  break;
+	case 'f':
+	  {
+	    static long foo;
+	    op_push(OCpushlong,(long)&foo);
+	    break;
+	  }
+	}
+	break;
       case PPdefault:
-        j++;
-        switch(c)
-        {
-        case 'G':
-        case '&':
-        case 'r':
-        case 'E':
-        case 'I':
-          op_push(OCpushlong,0);
-          break;
-        case 'n':
-          op_push(OCpushlong,-1);
-          break;
-        case 'V':
-          ev[lev++] = NULL;
-          break;
-        default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
-              tree[x].len, tree[x].str);
-        }
-        break;
+	j++;
+	switch(c)
+	{
+	case 'G':
+	case '&':
+	case 'r':
+	case 'E':
+	case 'I':
+	  op_push(OCpushlong,0);
+	  break;
+	case 'n':
+	  op_push(OCpushlong,-1);
+	  break;
+	case 'V':
+	  ev[lev++] = NULL;
+	  break;
+	default:
+	  pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+	      tree[x].len, tree[x].str);
+	}
+	break;
       case PPdefaultmulti:
-        j++;
-        switch(c)
-        {
-        case 'G':
-          op_push(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)));
-          op_push(OCcallgen,(long)is_entry("eval"));
-          break;
-        case 'L':
-        case 'M':
-          op_push(OCpushlong,strtol(q+1,NULL,10));
-          break;
-        case 'r':
-        case 's':
-          if (q[1]=='"' && q[2]=='"')
-            op_push(OCpushlong,(long)"");
-          else
-            pari_err(impl,"prototype not supported");
-          break;
-        default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
-              tree[x].len, tree[x].str);
-        }
-        break;
+	j++;
+	switch(c)
+	{
+	case 'G':
+	  op_push(OCpushgen,data_push(strntoGENstr(q+1,p-4-q)));
+	  op_push(OCcallgen,(long)is_entry("eval"));
+	  break;
+	case 'L':
+	case 'M':
+	  op_push(OCpushlong,strtol(q+1,NULL,10));
+	  break;
+	case 'r':
+	case 's':
+	  if (q[1]=='"' && q[2]=='"')
+	    op_push(OCpushlong,(long)"");
+	  else
+	    pari_err(impl,"prototype not supported");
+	  break;
+	default:
+	  pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+	      tree[x].len, tree[x].str);
+	}
+	break;
       case PPstar:
-        switch(c)
-        {
-        case 's':
-          {
-            long n=nb+1-j;
-            long k,l,l1,m;
-            GEN g=cgetg(n+1,t_VEC);
-            for(l1=0,k=1;k<=n;k++)
-            {
-              gel(g,k)=cattovec(arg[j+k-1],OPcat);
-              l1+=lg(g[k])-1;
-            }
-            op_push(OCvec, l1+1);
-            for(m=1,k=1;k<=n;k++)
-              for(l=1;l<lg(g[k]);l++,m++)
-              {
-                compilenode(mael(g,k,l),Ggen,0);
-                op_push(OCstackgen,m);
-              }
-            j=nb+1;
-            break;
-          }
-        default:
-          pari_err(talker,"Unknown prototype code `%c*' for `%*s'",c,
-              tree[x].len, tree[x].str);
-        }
-        break;
+	switch(c)
+	{
+	case 's':
+	  {
+	    long n=nb+1-j;
+	    long k,l,l1,m;
+	    GEN g=cgetg(n+1,t_VEC);
+	    for(l1=0,k=1;k<=n;k++)
+	    {
+	      gel(g,k)=cattovec(arg[j+k-1],OPcat);
+	      l1+=lg(g[k])-1;
+	    }
+	    op_push(OCvec, l1+1);
+	    for(m=1,k=1;k<=n;k++)
+	      for(l=1;l<lg(g[k]);l++,m++)
+	      {
+		compilenode(mael(g,k,l),Ggen,0);
+		op_push(OCstackgen,m);
+	      }
+	    j=nb+1;
+	    break;
+	  }
+	default:
+	  pari_err(talker,"Unknown prototype code `%c*' for `%*s'",c,
+	      tree[x].len, tree[x].str);
+	}
+	break;
       default:
-        pari_err(bugparier,"PPproto %d in gencallfunc",mod);
+	pari_err(bugparier,"PPproto %d in gencallfunc",mod);
       }
       i++;
       q=p;
@@ -1017,18 +1017,18 @@ compilenode(long n, int mode, long flag)
       long vn=getmvar(ep);
       compilenode(y,Ggen,FLnocopy);
       if (vn)
-        op_push(OCstorelex,vn);
+	op_push(OCstorelex,vn);
       else
-        op_push(OCstoredyn,(long)ep);
+	op_push(OCstoredyn,(long)ep);
       if (mode!=Gvoid)
       {
-        if (vn)
-          op_push(OCpushlex,vn);
-        else
-          op_push(OCpushdyn,(long)ep);
-        if (flag&FLreturn)
-          op_push(OCcopyifclone,0);
-        compilecast(n,Ggen,mode);
+	if (vn)
+	  op_push(OCpushlex,vn);
+	else
+	  op_push(OCpushdyn,(long)ep);
+	if (flag&FLreturn)
+	  op_push(OCcopyifclone,0);
+	compilecast(n,Ggen,mode);
       }
     }
     else
@@ -1044,37 +1044,37 @@ compilenode(long n, int mode, long flag)
       pari_sp ltop=avma;
       if (tree[n].x!=CSTquote)
       {
-        if (mode==Gvoid) return;
-        if (mode==Gvar)
-          pari_err(varer1,tree[n].str,get_origin());
+	if (mode==Gvoid) return;
+	if (mode==Gvar)
+	  pari_err(varer1,tree[n].str,get_origin());
       }
       if (mode==Gsmall)
-        pari_err(talker2,"this should be a small integer",
-            tree[n].str,get_origin());
+	pari_err(talker2,"this should be a small integer",
+	    tree[n].str,get_origin());
       switch(tree[n].x)
       {
       case CSTreal:
-        op_push(OCpushreal, data_push(strntoGENstr(tree[n].str,tree[n].len)));
-        break;
+	op_push(OCpushreal, data_push(strntoGENstr(tree[n].str,tree[n].len)));
+	break;
       case CSTint:
-        op_push(OCpushgen,  data_push(strtoi((char*)tree[n].str)));
-        compilecast(n,Ggen, mode);
-        break;
+	op_push(OCpushgen,  data_push(strtoi((char*)tree[n].str)));
+	compilecast(n,Ggen, mode);
+	break;
       case CSTstr:
-        op_push(OCpushgen,  data_push(strntoGENexp(tree[n].str,tree[n].len)));
-        break;
+	op_push(OCpushgen,  data_push(strntoGENexp(tree[n].str,tree[n].len)));
+	break;
       case CSTquote:
-        {
-          entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
-          if (EpSTATIC(ep))
-            pari_err(talker2,"variable name expected",
-                tree[n].str+1,get_origin());
-          op_push(OCpushvar, (long)ep);
-          compilecast(n,Ggen, mode);
-          break;
-        }
+	{
+	  entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
+	  if (EpSTATIC(ep))
+	    pari_err(talker2,"variable name expected",
+		tree[n].str+1,get_origin());
+	  op_push(OCpushvar, (long)ep);
+	  compilecast(n,Ggen, mode);
+	  break;
+	}
       default:
-        pari_err(bugparier,"compilenode, unsupported constant");
+	pari_err(bugparier,"compilenode, unsupported constant");
       }
       avma=ltop;
       return;
@@ -1084,9 +1084,9 @@ compilenode(long n, int mode, long flag)
     {
       GEN stog[]={gen_m1, gen_0, gen_1, gen_2};
       if (x>=-1 && x<=2)
-        op_push(OCpushlong, (long) stog[x+1]);
+	op_push(OCpushlong, (long) stog[x+1]);
       else
-        op_push(OCpushstoi, x);
+	op_push(OCpushstoi, x);
     }
     else
     {
@@ -1109,19 +1109,19 @@ compilenode(long n, int mode, long flag)
       long vn=getmvar(ep);
       if (vn)
       {
-        op_push(OCpushlex,(long)vn);
-        if (flag&FLreturn)
-          op_push(OCcopyifclone,0);
-        compilecast(n,Ggen,mode);
-        break;
+	op_push(OCpushlex,(long)vn);
+	if (flag&FLreturn)
+	  op_push(OCcopyifclone,0);
+	compilecast(n,Ggen,mode);
+	break;
       }
       else if (!EpSTATIC(do_alias(ep)))
       {
-        op_push(OCpushdyn,(long)ep);
-        if (flag&FLreturn)
-          op_push(OCcopyifclone,0);
-        compilecast(n,Ggen,mode);
-        break;
+	op_push(OCpushdyn,(long)ep);
+	if (flag&FLreturn)
+	  op_push(OCcopyifclone,0);
+	compilecast(n,Ggen,mode);
+	break;
       }
     }
   case Fderfunc: /*Fall through*/
@@ -1138,52 +1138,52 @@ compilenode(long n, int mode, long flag)
       long loc=y;
       long arity=lg(arg2)-1;
       if (loc>=0)
-        while (tree[loc].f==Fseq) loc=tree[loc].x;
+	while (tree[loc].f==Fseq) loc=tree[loc].x;
       if (ep->valence!=EpNEW && ep->valence!=EpUSER)
       {
-        if (ep->valence==EpVAR)
-          pari_err(talker2,"this is a variable",
-              tree[n].str,get_origin());
-        else
-          pari_err(talker2,"cannot redefine GP functions",
-              tree[n].str,get_origin());
+	if (ep->valence==EpVAR)
+	  pari_err(talker2,"this is a variable",
+	      tree[n].str,get_origin());
+	else
+	  pari_err(talker2,"cannot redefine GP functions",
+	      tree[n].str,get_origin());
       }
       getcodepos(&pos);
       if (arity) op_push(OCnewframe,arity);
       for (i=1;i<=arity;i++)
       {
-        long a = arg2[lg(arg2)-i];
-        entree *en;
-        switch (tree[a].f)
-        {
-        case Fentry: case Ftag:
-          en=getvar(a);
-          var_push(en,Lmy);
-          op_push(OCgetarg,-arity+i-1);
-          break;
-        case Faffect:
-          {
-            struct codepos lpos;
-            getcodepos(&lpos);
-            compilenode(tree[a].y,Ggen,0);
-            op_push(OCpushgen, data_push(getclosure(&lpos)));
-            en=getvar(tree[a].x);
-            var_push(en,Lmy);
-            op_push(OCdefaultarg,-arity+i-1);
-            break;
-          }
-        default:
-          pari_err(talker2,"invalid function definition",
-              tree[a].str,get_origin());
-        }
+	long a = arg2[lg(arg2)-i];
+	entree *en;
+	switch (tree[a].f)
+	{
+	case Fentry: case Ftag:
+	  en=getvar(a);
+	  var_push(en,Lmy);
+	  op_push(OCgetarg,-arity+i-1);
+	  break;
+	case Faffect:
+	  {
+	    struct codepos lpos;
+	    getcodepos(&lpos);
+	    compilenode(tree[a].y,Ggen,0);
+	    op_push(OCpushgen, data_push(getclosure(&lpos)));
+	    en=getvar(tree[a].x);
+	    var_push(en,Lmy);
+	    op_push(OCdefaultarg,-arity+i-1);
+	    break;
+	  }
+	default:
+	  pari_err(talker2,"invalid function definition",
+	      tree[a].str,get_origin());
+	}
       }
       if (y>=0 && tree[y].f!=Fnoarg)
-        compilenode(y,Ggen,FLreturn);
+	compilenode(y,Ggen,FLreturn);
       else
-        compilecast(n,Gvoid,Ggen);
+	compilecast(n,Gvoid,Ggen);
       op_push(OCpushgen, data_push(getclosure(&pos)));
       op_push(OCpushgen, data_push(
-            strntoGENstr(tree[n].str,tree[n].len)));
+	    strntoGENstr(tree[n].str,tree[n].len)));
       op_push(OCpushlong, arity);
       op_push(OCdeffunc, (long) ep);
       compilecast(n,Gvoid,mode);

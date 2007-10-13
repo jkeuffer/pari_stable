@@ -73,9 +73,9 @@ indexgroupcentre(GEN G, GEN Z, const long *good, const long *bad)
       long idx=group_ident(Q,NULL);
       avma=btop;
       for(p=good;*p;p++)
-        if (*p==idx) return 1;
+	if (*p==idx) return 1;
       for(p=bad;*p;p++)
-        if (*p==idx) return 0;
+	if (*p==idx) return 0;
     }
   }
   return 0;
@@ -125,31 +125,31 @@ group_ident_i(GEN G, GEN S)
       return 1;
     case 2: /* p^2 */
       if (s==1-p[1]+n*p[1])
-        return 2; /* pxp */
+	return 2; /* pxp */
       return 1; /* p^2 */
     case 3: /* p^3 */
       {
-        GEN H=group_abelianSNF(G, S);
-        if (H) /*G is abelian*/
-        {
-          long l=lg(H)-1;
-          if (l==3)
-            return 5; /*pxpxp*/
-          return l; /*p^3 or p^2xp*/
-        } /*G is not abelian*/
-        if (p[1] == 2)
-        {
-          if (s == 19) return 3; /*D8*/
-          return 4; /*Q8*/
-        }
-        else
-        {
-          long q = p[1]*p[1];
-          q *= q;
-          if (s == q - p[1] + 1)
-            return 3; /* pxp:p */
-          return 4;   /* p^2:p */
-        }
+	GEN H=group_abelianSNF(G, S);
+	if (H) /*G is abelian*/
+	{
+	  long l=lg(H)-1;
+	  if (l==3)
+	    return 5; /*pxpxp*/
+	  return l; /*p^3 or p^2xp*/
+	} /*G is not abelian*/
+	if (p[1] == 2)
+	{
+	  if (s == 19) return 3; /*D8*/
+	  return 4; /*Q8*/
+	}
+	else
+	{
+	  long q = p[1]*p[1];
+	  q *= q;
+	  if (s == q - p[1] + 1)
+	    return 3; /* pxp:p */
+	  return 4;   /* p^2:p */
+	}
       }
     }
     break;
@@ -158,49 +158,49 @@ group_ident_i(GEN G, GEN S)
     {
     case 2: /*pq*/
       if(p[2]%p[1]!=1)
-        return 1; /*pq*/
+	return 1; /*pq*/
       return 1+group_isabelian(G); /*pq || p:q*/
     case 3:
       if (p[1]==2 && e[1]==2) /* 4p */
       {
-        long q=p[2], q2=q*q;
-        long pmq2 = q%4 == 1 || q==3;
-        if (s==3+5*q+3*q2)
-          return 1; /* 2p.2 */
-        if (s==11-11*q+11*q2)
-          return 2; /* 4p */
-        if (s==3+q+3*q2)
-          return 3+pmq2; /* D4p */
-        if (s==7-7*q+7*q2)
-          return 4+pmq2; /* 2px2 */
-        return 3; /*A4 or p:4 */
+	long q=p[2], q2=q*q;
+	long pmq2 = q%4 == 1 || q==3;
+	if (s==3+5*q+3*q2)
+	  return 1; /* 2p.2 */
+	if (s==11-11*q+11*q2)
+	  return 2; /* 4p */
+	if (s==3+q+3*q2)
+	  return 3+pmq2; /* D4p */
+	if (s==7-7*q+7*q2)
+	  return 4+pmq2; /* 2px2 */
+	return 3; /*A4 or p:4 */
       }
       else if (p[1]==2 && e[1]==1) /*2p^2*/
       {
-        long q=p[2], q2=q*q, q3=q*q2, q4=q*q3;
-        if (s==1-q+3*q2-q3+q4)
-          return 1; /* p^2:2 */
-        if (s==3-3*q+3*q2-3*q3+3*q4)
-          return 2; /* 2p^2 */
-        if (s==1+q-2*q2+3*q3)
-          return 3; /* D2pxp */
-        if (s==1-q+2*q2+q3)
-          return 4; /* p:2+p:2 */
-        return 5;   /* 2pxp */
+	long q=p[2], q2=q*q, q3=q*q2, q4=q*q3;
+	if (s==1-q+3*q2-q3+q4)
+	  return 1; /* p^2:2 */
+	if (s==3-3*q+3*q2-3*q3+3*q4)
+	  return 2; /* 2p^2 */
+	if (s==1+q-2*q2+3*q3)
+	  return 3; /* D2pxp */
+	if (s==1-q+2*q2+q3)
+	  return 4; /* p:2+p:2 */
+	return 5;   /* 2pxp */
       }
       else if (p[1]==3 && e[1]==2) /*9p, p>3*/
       {
-        long q=p[2], q2=q*q;
-        long p3 = q%3 == 1, p9 = q%9 == 1;
-        if (s==7+47*q+7*q2)
-          return 1;       /* 3p.3 */
-        if (s==61-61*q+61*q2)
-          return 1+p3;    /* 9p */
-        if (s==1+59*q+q2)
-          return 3;       /* p:9 */
-        if (s==7+11*q+7*q2)
-          return 3+p9;    /* p:3x3 */
-        return 2+2*p3+p9; /* 3^2xp */
+	long q=p[2], q2=q*q;
+	long p3 = q%3 == 1, p9 = q%9 == 1;
+	if (s==7+47*q+7*q2)
+	  return 1;       /* 3p.3 */
+	if (s==61-61*q+61*q2)
+	  return 1+p3;    /* 9p */
+	if (s==1+59*q+q2)
+	  return 3;       /* p:9 */
+	if (s==7+11*q+7*q2)
+	  return 3+p9;    /* p:3x3 */
+	return 2+2*p3+p9; /* 3^2xp */
       }
       break;
     }
@@ -210,19 +210,19 @@ group_ident_i(GEN G, GEN S)
     case 3: /*pqr*/
       if (p[1]==2 && p[2]==3)  /*6p*/
       {
-        long q=p[3],q2=q*q;
-        long pmq=q%3==1?2:0;
-        if (s==13-13*q+13*q2)
-          return 1+pmq; /* S3xp */
-        if (s==7+7*q+7*q2)
-          return 2+pmq; /* D2px3 */
-        if (s==7-q+7*q2)
-          return 3+pmq; /* 3:2+p:2 */
-        if (s==21-21*q+21*q2)
-          return 4+pmq; /* 6p */
-        if (s==1+19*q+q2)
-          return 1;     /* p:6 */
-        return 2;       /* p:3x2 */
+	long q=p[3],q2=q*q;
+	long pmq=q%3==1?2:0;
+	if (s==13-13*q+13*q2)
+	  return 1+pmq; /* S3xp */
+	if (s==7+7*q+7*q2)
+	  return 2+pmq; /* D2px3 */
+	if (s==7-q+7*q2)
+	  return 3+pmq; /* 3:2+p:2 */
+	if (s==21-21*q+21*q2)
+	  return 4+pmq; /* 6p */
+	if (s==1+19*q+q2)
+	  return 1;     /* p:6 */
+	return 2;       /* p:3x2 */
       }
       break;
     }
@@ -246,17 +246,17 @@ group_ident_i(GEN G, GEN S)
       -1};
       long i,*t;
       if (DEBUGLEVEL)
-        fprintferr("GaloisIndex: Using hash value s=%ld\n",s);
+	fprintferr("GaloisIndex: Using hash value s=%ld\n",s);
       for(t=tab;*t!=-1;t++)
       {
-        if (t[0]==n)
-        {
-          for(i=1; t[i] != -1; i++)
-            if (t[i]==s)
-              return i;
-          pari_err(talker,"Not a group in group_ident");
-        }
-        while (*t>=0) t++;
+	if (t[0]==n)
+	{
+	  for(i=1; t[i] != -1; i++)
+	    if (t[i]==s)
+	      return i;
+	  pari_err(talker,"Not a group in group_ident");
+	}
+	while (*t>=0) t++;
       }
   {
     long tab[]={
@@ -282,156 +282,156 @@ group_ident_i(GEN G, GEN S)
       long u=svecgroup+10000*scenter; /*This is used as a hash value*/
 
       if (DEBUGLEVEL)
-        fprintferr("GaloisIndex: Using hash value u=%ld\n",u);
+	fprintferr("GaloisIndex: Using hash value u=%ld\n",u);
       for(t=tab; *t!=-1; t++)
       {
-        if (t[0]==n)
-        {
-          for(i=1; t[i] != -1; i++)
-            if (t[i]==u)
-              return i;
-          switch(n)
-          {
-          case 32:
-            switch(u)
-            {
-            case 230171:
-              {
-                const long good[]={2,0}, bad[]={4,5,0};
-                if (indexgroupcentre(G,Z,good,bad))
-                  return 4;
-                return 12;
-              }
-            case 70267:
-                if (s==135)
-                  return 9;
-                return 32;
-            case 70187:
-              {
-                const long good[]={8,0}, bad[]={7,9,0};
-                if (indexgroupcentre(G,Z,good,bad))
-                  return 13;
-                return 14;
-              }
-            case 70379:
-              {
-                const long good[]={4,0},bad[]={0};
-                if (indexgroupsubgroup(L,8,good,bad))
-                  return 31;
-                return 30;
-              }
-            }
-            break;
-          case 48: case 80:
-            {
-              const long good[]={5,8,0},bad[]={6,7,0};
-              if (indexgroupcentre(G,Z,good,bad))
-                return 12;
-              return 13;
-            }
-          case 112:
-            {
-              const long good[]={7,4,0},bad[]={5,6,0};
-              if (indexgroupcentre(G,Z,good,bad))
-                return 11;
-              return 12;
-            }
-          }
-          pari_err(talker,"Not a group in group_ident");
-        }
-        while (*t!=-1) t++;
+	if (t[0]==n)
+	{
+	  for(i=1; t[i] != -1; i++)
+	    if (t[i]==u)
+	      return i;
+	  switch(n)
+	  {
+	  case 32:
+	    switch(u)
+	    {
+	    case 230171:
+	      {
+		const long good[]={2,0}, bad[]={4,5,0};
+		if (indexgroupcentre(G,Z,good,bad))
+		  return 4;
+		return 12;
+	      }
+	    case 70267:
+		if (s==135)
+		  return 9;
+		return 32;
+	    case 70187:
+	      {
+		const long good[]={8,0}, bad[]={7,9,0};
+		if (indexgroupcentre(G,Z,good,bad))
+		  return 13;
+		return 14;
+	      }
+	    case 70379:
+	      {
+		const long good[]={4,0},bad[]={0};
+		if (indexgroupsubgroup(L,8,good,bad))
+		  return 31;
+		return 30;
+	      }
+	    }
+	    break;
+	  case 48: case 80:
+	    {
+	      const long good[]={5,8,0},bad[]={6,7,0};
+	      if (indexgroupcentre(G,Z,good,bad))
+		return 12;
+	      return 13;
+	    }
+	  case 112:
+	    {
+	      const long good[]={7,4,0},bad[]={5,6,0};
+	      if (indexgroupcentre(G,Z,good,bad))
+		return 11;
+	      return 12;
+	    }
+	  }
+	  pari_err(talker,"Not a group in group_ident");
+	}
+	while (*t!=-1) t++;
       }
       {
-        long tab[]={ 64, 1270001, /*4270003*/0, /*4270003*/0, 8190072, 6430073, 6670445, 5550446, 8190278, 7070279, 6350071, 5230072, 8110154, /*5870155*/0, /*5870155*/0, /*4270042*/0, /*4270042*/0, 7710246, 7390277, 6750037, 8032377, 8670266, 6750397, 11390022, 7710267, 7070277, /*3630046*/0, /*3630046*/0, 3630057, 4830196, 4830207, 4671808, 9070697, 6670700, 8750094, 6990091, 6350111, 5870115, 6671599, 5711601, 5551702, 5871512, 6351709, 5391711, /*3630046*/0, 3630047, 4111467, /*4430156*/0, /*4430156*/0, 3790166, /*2510026*/0, /*2510026*/0, 4470028, 4150300, 3830030, 13470021, 20350065, 10910041, 16514365, /*12190433*/0, 34110271, /*16514475*/0, 15230465, /*10910433*/0, 9630041, 13470233, /*16514475*/0, 20834696, /*10910433*/0, 13954343, /*12190433*/0, 19553542, 13474377, 25790466, 15870467, 18914476, 14110477, /*14590443*/0, 13310443, 11550043, /*14590443*/0, 10270043, 8990002, 8990546, 8990646, 8993647, 8356896, 13310905, 13310915, 12039018, 16990866, 12670888, 15071116, 11551217, 12038218, 16031739, 12512740, 12353138, 12993048, 15391849, 11872850, 12993551, 12353851, 8991446, 8991447, 8354830, 9951566, 9951666, 8674709, 9317039, 8031897, 8030187, 7713641, 7714641, 7074743, 9236585, 9236415, 9236586, 10990821, 9879066, 8751833, 9873399, 8751766, 10990754, 8593054, 8593087, 6830446, 6833546, 17472434, 13953445, 14432313, 16352544, 12833555, 13313423, 15635143, 13234877, 13874853, 12755287, 17870919, 14190949, 13075209, 11955310, 10835253, 9715354, 11312124, 10193135, 11074927, 12197529, 9957664, 11074970, 12196539, 9956674, 9958907, 10439497, 9479551, 9554015, 8433958, 9553915, 8434058, 8918081, 7798421, 10110856, 10110756, 9476648, 8991757, 8991857, 8356682, 10994275, 8750435, 8590474, 9230510, 10355254, 8115355, 13556790, 15790679, 11310691, 12275539, 14035061, 11795172, 8750465, 7474472, 8750475, 8114920, 6110196, 6111806, 5951808, 10191819, 9238364, 8271841, 8590736, 9390959, 8432079, 25470255, 41792701, 25470275, 20355344, 27233751, 18593673, 19717567, 23394762, 17312707, 19717633, 46115277, 31557088, 22917189, 24677288, 24039835, 24676366, 16032362, 17793529, 17153269, 38432486, 21153763, 23393635, 16037076, 27710971, 27074338, 20995174, 23396204, 20193482, 17157790, 19550231, 14751475, 17153832, 19070249, 16038080, 33391110, 25875097, 22197835, 22195018, 21070221, 24590112, 18999456, 15952565, 18356361, 17237769, 18359003, 15951169, 14832955, 16110295, 18350268, 21392354, 22030301, 18353365, 15955257, 13550032, 18430405, 18434015, 17150260, 17154128, 27234036, 23710639, 20194057, 21157900, 24198470, 20679613, 21158141, 22435065, 21318520, 20197076, 67390501, 83715011, 51070497, 54590283, 58915129, 50275230, 52035340, 263870051, -1,
-          -1};
-          long i,*t;
-          GEN V=vecgroup_idxlist(L,32);
-          long idxlist=vecsmall_pack(V,10,9967);
-          long w=10000*svecgroup+idxlist; /*This is used as a hash value*/
-          if (DEBUGLEVEL)
-            fprintferr("GaloisIndex: Using hash value w=%ld\n",w);
-          for(t=tab; *t!=-1; t++)
-          {
-            if (t[0]==n)
-            {
-              for(i=1; t[i] != -1; i++)
-                if (t[i]==w)
-                  return i;
-              switch(n)
-              {
-              case 64:
-                switch(w)
-                {
-                case 4270003:
-                  if (scenter==439)
-                    return 2;
-                  return 3;
-                case 5870155:
-                  {
-                    const long good[]={8,9,0},bad[]={7,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 13;
-                    return 14;
-                  }
-                case 4270042:
-                  {
-                    const long good[]={13,0},bad[]={14,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 15;
-                    return 16;
-                  }
-                case 4430156:
-                  {
-                    const long good[]={18,20,0},bad[]={19,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 47;
-                    return 48;
-                  }
-                case 2510026:
-                  if (scenter==1367)
-                    return 50;
-                  return 51;
-                case 12190433:
-                  if (scenter==47)
-                    return 59;
-                  return 70;
-                case 16514475:
-                  {
-                    const long good[]={22,24,28,0},bad[]={23,25,27,30,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 61;
-                    return 66;
-                  }
-                case 10910433:
-                  {
-                    const long good[]={23,31,0},bad[]={25,26,29,30,33,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 63;
-                    return 68;
-                  }
-                case 14590443:
-                  {
-                    const long good[]={28,33,0},bad[]={30,34,0};
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 77;
-                    return 80;
-                  }
-                case 3630046:
-                  {
-                    const long good[]={3,0},bad[]={12,16,0};
-                    if (scenter==695)
-                      return 26;
-                    if (indexgroupcentre(G,Z,good,bad))
-                      return 27;
-                    return 44;
-                  }
-                }
-                break;
-              }
-              pari_err(talker,"Not a group in group_ident");
-            }
-            while (*t!=-1) t++;
-          }
+	long tab[]={ 64, 1270001, /*4270003*/0, /*4270003*/0, 8190072, 6430073, 6670445, 5550446, 8190278, 7070279, 6350071, 5230072, 8110154, /*5870155*/0, /*5870155*/0, /*4270042*/0, /*4270042*/0, 7710246, 7390277, 6750037, 8032377, 8670266, 6750397, 11390022, 7710267, 7070277, /*3630046*/0, /*3630046*/0, 3630057, 4830196, 4830207, 4671808, 9070697, 6670700, 8750094, 6990091, 6350111, 5870115, 6671599, 5711601, 5551702, 5871512, 6351709, 5391711, /*3630046*/0, 3630047, 4111467, /*4430156*/0, /*4430156*/0, 3790166, /*2510026*/0, /*2510026*/0, 4470028, 4150300, 3830030, 13470021, 20350065, 10910041, 16514365, /*12190433*/0, 34110271, /*16514475*/0, 15230465, /*10910433*/0, 9630041, 13470233, /*16514475*/0, 20834696, /*10910433*/0, 13954343, /*12190433*/0, 19553542, 13474377, 25790466, 15870467, 18914476, 14110477, /*14590443*/0, 13310443, 11550043, /*14590443*/0, 10270043, 8990002, 8990546, 8990646, 8993647, 8356896, 13310905, 13310915, 12039018, 16990866, 12670888, 15071116, 11551217, 12038218, 16031739, 12512740, 12353138, 12993048, 15391849, 11872850, 12993551, 12353851, 8991446, 8991447, 8354830, 9951566, 9951666, 8674709, 9317039, 8031897, 8030187, 7713641, 7714641, 7074743, 9236585, 9236415, 9236586, 10990821, 9879066, 8751833, 9873399, 8751766, 10990754, 8593054, 8593087, 6830446, 6833546, 17472434, 13953445, 14432313, 16352544, 12833555, 13313423, 15635143, 13234877, 13874853, 12755287, 17870919, 14190949, 13075209, 11955310, 10835253, 9715354, 11312124, 10193135, 11074927, 12197529, 9957664, 11074970, 12196539, 9956674, 9958907, 10439497, 9479551, 9554015, 8433958, 9553915, 8434058, 8918081, 7798421, 10110856, 10110756, 9476648, 8991757, 8991857, 8356682, 10994275, 8750435, 8590474, 9230510, 10355254, 8115355, 13556790, 15790679, 11310691, 12275539, 14035061, 11795172, 8750465, 7474472, 8750475, 8114920, 6110196, 6111806, 5951808, 10191819, 9238364, 8271841, 8590736, 9390959, 8432079, 25470255, 41792701, 25470275, 20355344, 27233751, 18593673, 19717567, 23394762, 17312707, 19717633, 46115277, 31557088, 22917189, 24677288, 24039835, 24676366, 16032362, 17793529, 17153269, 38432486, 21153763, 23393635, 16037076, 27710971, 27074338, 20995174, 23396204, 20193482, 17157790, 19550231, 14751475, 17153832, 19070249, 16038080, 33391110, 25875097, 22197835, 22195018, 21070221, 24590112, 18999456, 15952565, 18356361, 17237769, 18359003, 15951169, 14832955, 16110295, 18350268, 21392354, 22030301, 18353365, 15955257, 13550032, 18430405, 18434015, 17150260, 17154128, 27234036, 23710639, 20194057, 21157900, 24198470, 20679613, 21158141, 22435065, 21318520, 20197076, 67390501, 83715011, 51070497, 54590283, 58915129, 50275230, 52035340, 263870051, -1,
+	  -1};
+	  long i,*t;
+	  GEN V=vecgroup_idxlist(L,32);
+	  long idxlist=vecsmall_pack(V,10,9967);
+	  long w=10000*svecgroup+idxlist; /*This is used as a hash value*/
+	  if (DEBUGLEVEL)
+	    fprintferr("GaloisIndex: Using hash value w=%ld\n",w);
+	  for(t=tab; *t!=-1; t++)
+	  {
+	    if (t[0]==n)
+	    {
+	      for(i=1; t[i] != -1; i++)
+		if (t[i]==w)
+		  return i;
+	      switch(n)
+	      {
+	      case 64:
+		switch(w)
+		{
+		case 4270003:
+		  if (scenter==439)
+		    return 2;
+		  return 3;
+		case 5870155:
+		  {
+		    const long good[]={8,9,0},bad[]={7,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 13;
+		    return 14;
+		  }
+		case 4270042:
+		  {
+		    const long good[]={13,0},bad[]={14,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 15;
+		    return 16;
+		  }
+		case 4430156:
+		  {
+		    const long good[]={18,20,0},bad[]={19,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 47;
+		    return 48;
+		  }
+		case 2510026:
+		  if (scenter==1367)
+		    return 50;
+		  return 51;
+		case 12190433:
+		  if (scenter==47)
+		    return 59;
+		  return 70;
+		case 16514475:
+		  {
+		    const long good[]={22,24,28,0},bad[]={23,25,27,30,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 61;
+		    return 66;
+		  }
+		case 10910433:
+		  {
+		    const long good[]={23,31,0},bad[]={25,26,29,30,33,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 63;
+		    return 68;
+		  }
+		case 14590443:
+		  {
+		    const long good[]={28,33,0},bad[]={30,34,0};
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 77;
+		    return 80;
+		  }
+		case 3630046:
+		  {
+		    const long good[]={3,0},bad[]={12,16,0};
+		    if (scenter==695)
+		      return 26;
+		    if (indexgroupcentre(G,Z,good,bad))
+		      return 27;
+		    return 44;
+		  }
+		}
+		break;
+	      }
+	      pari_err(talker,"Not a group in group_ident");
+	    }
+	    while (*t!=-1) t++;
+	  }
 
       }
       {
@@ -443,32 +443,32 @@ group_ident_i(GEN G, GEN S)
     long idx48=vecsmall_pack(V,10,9967);
     long idx32=vecgroup_idxlist(L,32)[1];
     long w=1000000*(svecgroup%997)+10000*idx32+idx48;
-         /*This is used as a hash value*/
+	 /*This is used as a hash value*/
     if (DEBUGLEVEL)
       fprintferr("GaloisIndex: Using hash value w=%ld\n",w);
     for(t=tab; *t!=-1; t++)
     {
       if (t[0]==n)
       {
-        for(i=1; t[i] != -1; i++)
-          if (t[i]==w)
-            return i;
-        switch(n)
-        {
-        case 96:
-          switch(w)
-          {
-            case 455322385:
-            {
-              const long good[]={37,40,0},bad[]={34,41,0};
-              if (indexgroupcentre(G,Z,good,bad))
-                return 96;
-              return 97;
-            }
-          }
-          break;
-        }
-        pari_err(talker,"Not a group in group_ident");
+	for(i=1; t[i] != -1; i++)
+	  if (t[i]==w)
+	    return i;
+	switch(n)
+	{
+	case 96:
+	  switch(w)
+	  {
+	    case 455322385:
+	    {
+	      const long good[]={37,40,0},bad[]={34,41,0};
+	      if (indexgroupcentre(G,Z,good,bad))
+		return 96;
+	      return 97;
+	    }
+	  }
+	  break;
+	}
+	pari_err(talker,"Not a group in group_ident");
       }
       while (*t!=-1) t++;
     }
@@ -493,31 +493,31 @@ long
 group_ident_trans(GEN G, GEN S)
 {
   long tab[]={
-        4, 1, 2, -1,
-        6, 2, 1, -1,
-        8, 1, 2, 4, 5, 3, -1,
-        9, 1, 2, -1,
-        10, 2, 1, -1,
-        12, 5, 1, 4, 3, 2, -1,
-        14, 2, 1, -1,
-        15, 1, -1,
-        16, 1, 4, 10, 8, 5, 6, 13, 12, 14, 2, 9, 7, 11, 3, -1,
-        18, 5, 1, 3, 4, 2, -1,
-        20, 2, 1, 5, 4, 3, -1,
-        21, 2, 1, -1,
-        22, 2, 1, -1,
-        24, 8, 1, 7, 5, 12, 13, 6, 14, 2, 15, 4, 10, 9, 11, 3, -1,
-        25, 1, 2, -1,
-        26, 2, 1, -1,
-        27, 1, 2, 3, 5, 4, -1,
-        28, 3, 1, 4, 2, -1,
-        30, 2, 4, 3, 1, -1,
-        -1};
+	4, 1, 2, -1,
+	6, 2, 1, -1,
+	8, 1, 2, 4, 5, 3, -1,
+	9, 1, 2, -1,
+	10, 2, 1, -1,
+	12, 5, 1, 4, 3, 2, -1,
+	14, 2, 1, -1,
+	15, 1, -1,
+	16, 1, 4, 10, 8, 5, 6, 13, 12, 14, 2, 9, 7, 11, 3, -1,
+	18, 5, 1, 3, 4, 2, -1,
+	20, 2, 1, 5, 4, 3, -1,
+	21, 2, 1, -1,
+	22, 2, 1, -1,
+	24, 8, 1, 7, 5, 12, 13, 6, 14, 2, 15, 4, 10, 9, 11, 3, -1,
+	25, 1, 2, -1,
+	26, 2, 1, -1,
+	27, 1, 2, 3, 5, 4, -1,
+	28, 3, 1, 4, 2, -1,
+	30, 2, 4, 3, 1, -1,
+	-1};
   long n = group_order(G), s, *t;
   if ( n == 1 ) return 1;
   if ( n > 30 )
     pari_err(talker,
-        "Classification of transitive groups of order > 30 is not known");
+	"Classification of transitive groups of order > 30 is not known");
   if (uisprime(n)) return 1;
   s=group_ident(G,S);
   for(t=tab;*t>=0;t++)

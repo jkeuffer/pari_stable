@@ -207,7 +207,7 @@ znstar_conductor(long n, GEN H)
       {
 	z += q;
 	if (!bitvec_test(gel(H,3),z) && ugcd(z,n)==1)
-          break;
+	  break;
       }
       if ( j < p )
       {
@@ -281,7 +281,7 @@ znstar_hnf_generators(GEN Z, GEN M)
     gen[j] = 1;
     for (h = 1; h < l; h++)
       gen[j] = Fl_mul((ulong)gen[j],
-                      Fl_powu(itou(gel(zgen,h)), itou(gmael(M,j,h)), n), n);
+		      Fl_powu(itou(gel(zgen,h)), itou(gmael(M,j,h)), n), n);
   }
   avma = ltop; return gen;
 }
@@ -621,25 +621,25 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_VEC:
       if (lg(N)==7)
-        N=bnr_to_znstar(N,&complex);
+	N=bnr_to_znstar(N,&complex);
       if (lg(N)==4)
       {
-        Z = N;
-        if (typ(Z[3])!=t_VEC)
-          pari_err(typeer,"galoissubcyclo");
-        if (lg(Z[3])==1)
-          n=1;
-        else
-        {
-          if (typ(gmael(Z,3,1))!= t_INTMOD)
+	Z = N;
+	if (typ(Z[3])!=t_VEC)
+	  pari_err(typeer,"galoissubcyclo");
+	if (lg(Z[3])==1)
+	  n=1;
+	else
+	{
+	  if (typ(gmael(Z,3,1))!= t_INTMOD)
 #ifdef NETHACK_MESSAGES
-            pari_err(talker,"You have transgressed!");
+	    pari_err(talker,"You have transgressed!");
 #else
-            pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
+	    pari_err(talker,"Please do not try to break PARI with ridiculous counterfeit data. Thanks!");
 #endif
-          n=itos(gmael3(Z,3,1,1));
-        }
-        break;
+	  n=itos(gmael3(Z,3,1,1));
+	}
+	break;
       }
     default: /*fall through*/
       pari_err(typeer,"galoissubcyclo");
@@ -655,7 +655,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       V = gcopy(sg);
       for (i=1;i<lg(V);i++)
       {
-        V[i] %= n; if (V[i] < 0) V[i] += n;
+	V[i] %= n; if (V[i] < 0) V[i] += n;
       }
       break;
     case t_VEC:
@@ -665,13 +665,13 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_MAT:/*Fall through*/
       {
-        if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
-          pari_err(talker,"not a HNF matrix in galoissubcyclo");
-        if (!Z)
-          pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
-        if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
-          pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
-        V = znstar_hnf_generators(znstar_small(Z),sg);
+	if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
+	  pari_err(talker,"not a HNF matrix in galoissubcyclo");
+	if (!Z)
+	  pari_err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
+	if ( lg(Z[2]) != lg(sg) || lg(Z[3]) != lg(sg))
+	  pari_err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+	V = znstar_hnf_generators(znstar_small(Z),sg);
       }
       break;
     default:
@@ -689,7 +689,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     fprintferr("Subcyclo: elements:");
     for (i=1;i<n;i++)
       if (bitvec_test(gel(H,3),i))
-        fprintferr(" %ld",i);
+	fprintferr(" %ld",i);
     fprintferr("\n");
   }
   complex = !bitvec_test(gel(H,3),n-1);
@@ -840,7 +840,7 @@ factor_Aurifeuille(GEN p, long n)
     {
       s = Fp_mul(z2, s, le);
       if (ugcd(j,m)==1)
-        f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
+	f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
     }
   }
   else if ((n & 3) == 2)
@@ -855,7 +855,7 @@ factor_Aurifeuille(GEN p, long n)
     {
       s = Fp_mul(z2,s,le);
       if (ugcd(j,m)==1)
-        f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+	f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
     }
   }
   else
@@ -868,7 +868,7 @@ factor_Aurifeuille(GEN p, long n)
     {
       s = Fp_mul(z,s,le);
       if (ugcd(j,n)==1)
-        f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+	f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
     }
   }
   return gerepileuptoint(ltop, f);

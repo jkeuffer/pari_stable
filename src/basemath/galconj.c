@@ -963,82 +963,82 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
       /* p5 = (p1 % d) - 1 */
       for (p1 = i + 1, p5 = p1 % d - 1 ; p1 >= 1; p1--, p5--)
       {
-        if (p5 == - 1)
-        {
-          p5 = d - 1;
-          p6 = p1 + 1 - d;
-        }
-        else
-          p6 = p1 + 1;
-        p4 = p5 ? x[p1 - 1] : 0;
-        V = 0;
-        for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
-        {
-          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
-          p3 += s;
-          if (p3 > b)
-            p3 -= b;
-        }
-        p3 = 1 + x[p1] - s;
-        if (p3 <= 0)
-          p3 += b;
-        for (p2 = p4; p2 >= 1; p2--)
-        {
-          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
-          p3 -= s;
-          if (p3 <= 0)
-            p3 += b;
-        }
-        ar[p1] = ar[p1+1] + V;
+	if (p5 == - 1)
+	{
+	  p5 = d - 1;
+	  p6 = p1 + 1 - d;
+	}
+	else
+	  p6 = p1 + 1;
+	p4 = p5 ? x[p1 - 1] : 0;
+	V = 0;
+	for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+	{
+	  V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
+	  p3 += s;
+	  if (p3 > b)
+	    p3 -= b;
+	}
+	p3 = 1 + x[p1] - s;
+	if (p3 <= 0)
+	  p3 += b;
+	for (p2 = p4; p2 >= 1; p2--)
+	{
+	  V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
+	  p3 -= s;
+	  if (p3 <= 0)
+	    p3 += b;
+	}
+	ar[p1] = ar[p1+1] + V;
       }
 
       if (-(ulong)ar[1]<=(ulong)n)
       {
-        for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
-        {
-          if (p5 == d)
-          {
-            p5 = 0;
-            p4 = 0;
-          }
-          else
-            p4 = x[p1 - 1];
-          if (p5 == d - 1)
-            p6 = p1 + 1 - d;
-          else
-            p6 = p1 + 1;
-          for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
-          {
-            pf[mael(G,p1,p2)] = mael(G,p6,p3);
-            p3 += s;
-            if (p3 > b)
-              p3 -= b;
-          }
-          p3 = 1 + x[p1] - s;
-          if (p3 <= 0)
-            p3 += b;
-          for (p2 = p4; p2 >= 1; p2--)
-          {
-            pf[mael(G,p1,p2)] = mael(G,p6,p3);
-            p3 -= s;
-            if (p3 <= 0)
-              p3 += b;
-          }
-        }
-        if (galois_test_perm(td, pf))
-        {
-          if (DEBUGLEVEL >= 1)
-          {
-            GEN nb=addis(mulss(l2,N1),l1);
-            msgtimer("testpermutation(%Z)", nb);
-            if (DEBUGLEVEL >= 2 && hop)
-              fprintferr("GaloisConj:%d hop sur %Z iterations\n", hop, nb);
-          }
-          avma = av;
-          return pf;
-        }
-        else
-          hop++;
+	for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
+	{
+	  if (p5 == d)
+	  {
+	    p5 = 0;
+	    p4 = 0;
+	  }
+	  else
+	    p4 = x[p1 - 1];
+	  if (p5 == d - 1)
+	    p6 = p1 + 1 - d;
+	  else
+	    p6 = p1 + 1;
+	  for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+	  {
+	    pf[mael(G,p1,p2)] = mael(G,p6,p3);
+	    p3 += s;
+	    if (p3 > b)
+	      p3 -= b;
+	  }
+	  p3 = 1 + x[p1] - s;
+	  if (p3 <= 0)
+	    p3 += b;
+	  for (p2 = p4; p2 >= 1; p2--)
+	  {
+	    pf[mael(G,p1,p2)] = mael(G,p6,p3);
+	    p3 -= s;
+	    if (p3 <= 0)
+	      p3 += b;
+	  }
+	}
+	if (galois_test_perm(td, pf))
+	{
+	  if (DEBUGLEVEL >= 1)
+	  {
+	    GEN nb=addis(mulss(l2,N1),l1);
+	    msgtimer("testpermutation(%Z)", nb);
+	    if (DEBUGLEVEL >= 2 && hop)
+	      fprintferr("GaloisConj:%d hop sur %Z iterations\n", hop, nb);
+	  }
+	  avma = av;
+	  return pf;
+	}
+	else
+	  hop++;
       }
     }
   }
@@ -1210,10 +1210,10 @@ sympol_is1to1_lg(GEN NS, long n)
     for(j=i+1;j<l;j++)
     {
       for(k=1;k<n;k++)
-        if (!equalii(gmael(NS,k,j),gmael(NS,k,i)))
-          break;
+	if (!equalii(gmael(NS,k,j),gmael(NS,k,i)))
+	  break;
       if (k>=n)
-        return 0;
+	return 0;
     }
   return 1;
 }
@@ -1240,7 +1240,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
     GEN L = sympol_eval_newtonsum(e++, O, mod);
     if (lg(O)>2)
       while (vec_isconst(L))
-        L = sympol_eval_newtonsum(e++, O, mod);
+	L = sympol_eval_newtonsum(e++, O, mod);
     W[i] = e-1; gel(NS,i) = L;
     if (sympol_is1to1_lg(NS,i+1))
       sym=fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
@@ -1445,8 +1445,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
        (plift == 0
 	|| (nbtest < nbmax && (nbtest <=8 || order < (n>>1)))
 	|| (n == 24 && O[6] == 0 && O[4] == 0)
-        || ((group&ga_non_wss) && order == Fp[np]))
-         && (nbtest < 3 * nbmax || !(group&ga_non_wss)) ;)
+	|| ((group&ga_non_wss) && order == Fp[np]))
+	 && (nbtest < 3 * nbmax || !(group&ga_non_wss)) ;)
   {
     pari_sp av;
     GEN ip, FS;
@@ -1483,7 +1483,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       if (o * Fp[1] >= n)
 	/*Subgroup of smallest index are normal*/
 	norm_o = o;
-      else		
+      else
       {
 	norm_o = 1;
 	for (i = np; i > 0; i--)
@@ -1652,7 +1652,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[0] = t[2];
 	t[2] = t[1];
 	t[1] = x;
-        lswap(t[4], t[4-a]);
+	lswap(t[4], t[4-a]);
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 7:
@@ -1662,7 +1662,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[3] = t[1];
 	t[1] = t[2];
 	t[2] = x;
-        lswap(t[6], t[6-a]);
+	lswap(t[6], t[6-a]);
 	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
@@ -1672,8 +1672,8 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[6] = t[5];
 	t[5] = t[3];
 	t[3] = x;
-        lswap(t[1], t[4]);
-        lswap(t[8], t[8-a]);
+	lswap(t[1], t[4]);
+	lswap(t[8], t[8-a]);
 	addiiz(gel(ar,4), addii(gmael(mt,t[8],t[9]), gmael(mt,t[9],t[8])), gel(ar,3));
 	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
@@ -1692,7 +1692,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	    t[j] = t[j - 1];
 	  t[0] = x;
 	}
-        lswap(t[y], t[y-a]);
+	lswap(t[y], t[y-a]);
 	for (k = y; k > 2; k -= 2)
 	  addiiz(gel(ar,k >> 1),
 		addii(gmael(mt,t[k],t[k + 1]), gmael(mt,t[k + 1],t[k])),
@@ -1759,12 +1759,12 @@ a4galoisgen(GEN T, struct galois_test *td)
       case 2:
 	break;
       case 6:
-        lswap(u[4],u[6]);
+	lswap(u[4],u[6]);
 	if (!(a & 1))
 	{
 	  a = 4 - (a >> 1);
-          lswap(u[6], u[a]);
-          lswap(u[4], u[a-2]);
+	  lswap(u[6], u[a]);
+	  lswap(u[4], u[a-2]);
 	}
 	break;
       case 10:
@@ -1778,8 +1778,8 @@ a4galoisgen(GEN T, struct galois_test *td)
 	if (a >= 3)
 	  a += 2;
 	a = 8 - a;
-        lswap(u[10],u[a]);
-        lswap(u[8],u[a-2]);
+	lswap(u[10],u[a]);
+	lswap(u[8],u[a-2]);
 	break;
       }
     }
@@ -2011,20 +2011,20 @@ s4galoisgen(struct galois_lift *gl)
     for (j1 = 0; j1 < 4; j1++)
     {
       u1 = ZX_add(ZX_mul(gel(bezoutcoeff, sg[5]), gel(pauto,1 + j1)),
-                  ZX_mul(gel(bezoutcoeff, sg[6]), gel(pauto, ((-j1) & 3) + 1)));
+		  ZX_mul(gel(bezoutcoeff, sg[6]), gel(pauto, ((-j1) & 3) + 1)));
       u1 = FpX_rem(u1, TQ, Q);
       avm1 = avma;
       for (j2 = 0; j2 < 4; j2++)
       {
-        u2 = ZX_add(ZX_mul(gel(bezoutcoeff,sg[3]), gel(pauto,1 + j2)),
-	            ZX_mul(gel(bezoutcoeff,sg[4]), gel(pauto,((-j2) & 3) + 1)));
+	u2 = ZX_add(ZX_mul(gel(bezoutcoeff,sg[3]), gel(pauto,1 + j2)),
+		    ZX_mul(gel(bezoutcoeff,sg[4]), gel(pauto,((-j2) & 3) + 1)));
 
 	u2 = FpX_rem(ZX_add(u1, u2), TQ,Q);
 	avm2 = avma;
 	for (j3 = 0; j3 < 4; j3++)
 	{
 	  u3 = ZX_add(ZX_mul(gel(bezoutcoeff,sg[1]), gel(pauto,1 + j3)),
-	              ZX_mul(gel(bezoutcoeff,sg[2]), gel(pauto,((-j3) & 3)+1)));
+		      ZX_mul(gel(bezoutcoeff,sg[2]), gel(pauto,((-j3) & 3)+1)));
 	  u3 = FpX_rem(ZX_add(u2, u3), TQ,Q);
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/4:%d/4:%d/4:%Z\n",
@@ -2071,8 +2071,8 @@ suites4:
 	GEN     uu;
 	pj[6] = (w + pj[3]) & 3;
 	uu =ZX_add(ZX_mul(gel(bezoutcoeff,sg[5]), gel(pauto,(pj[6] & 3) + 1)),
-                   ZX_mul(gel(bezoutcoeff,sg[6]), gel(pauto,((-pj[6])&3)+ 1)));
-        uu = FpX_rem(uu, TQ, Q);
+		   ZX_mul(gel(bezoutcoeff,sg[6]), gel(pauto,((-pj[6])&3)+ 1)));
+	uu = FpX_rem(uu, TQ, Q);
 	av3 = avma;
 	for (i = 0; i < 4; i++)
 	{
@@ -2090,7 +2090,7 @@ suites4:
 				gel(bezoutcoeff,sg[2])));
 	  u = ZX_add(u,  ZX_mul(gel(pauto,((-pj[5]) & 3) + 1),
 				gel(bezoutcoeff,sg[4])));
-          u = FpX_rem(u, TQ, Q);
+	  u = FpX_rem(u, TQ, Q);
 	  if (s4test(u, liftpow, gl, tau))
 	    goto suites4_2;
 	  avma = av3;
@@ -2648,44 +2648,44 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       GEN  Be = cgetg(e+1,t_VEC);
       gel(Be,e) = cyc_pow(B, op);
       for(i=e-1; i>=1; i--)
-        gel(Be,i) = cyc_pow(gel(Be,i+1), p);
+	gel(Be,i) = cyc_pow(gel(Be,i+1), p);
       w = wpow(Fl_powu(s,op,deg),deg,p,e);
       wg = cgetg(e+2,t_VECSMALL);
       wg[e+1] = deg;
       for (i=e; i>=1; i--)
-        wg[i]=ugcd(wg[i+1], w[i]);
+	wg[i]=ugcd(wg[i+1], w[i]);
       for (i=1; i<lg(O); i++) oX[i] = 0;
       for (f=1; f<=e; f++)
       {
-        long sel;
-        GEN Bel = gel(Be,f);
-        long t;
-        dg *= p; el /= p;
-        sel = Fl_powu(s,el,deg);
-        if (DEBUGLEVEL >= 6)
-          fprintferr("GaloisConj: B=%Z\n", Bel);
-        sr  = cgcd(stpow(sel,p,deg),deg);
-        if (DEBUGLEVEL >= 6)
-          fprintferr("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
-              dg, sel, deg, a, w[f], wg[f+1], sr);
-        for (t = 0; t < sr; t++)
-          if ((a+t*w[f])%wg[f+1]==0)
-          {
-            long i, j, k, st;
-            for (i = 1; i < lg(X); i++) X[i] = 0;
-            for (i = 0; i < lg(X); i+=dg)
-              for (j = 1, k = p, st = t; k <= dg; j++, k += p)
-              {
-                X[k+i] = (oX[j+i] + st)%deg;
-                st = (t + st*osel)%deg;
-              }
-            pf1 = testpermutation(O, Bel, X, sel, p, sr, &td);
-            if (pf1)
-              break;
-          }
-        if (!pf1) { freetest(&td); avma = ltop; return gen_0; }
-        for (i=1; i<lg(O); i++) oX[i] = X[i];
-        osel = sel; a = (a+t*w[f])%deg;
+	long sel;
+	GEN Bel = gel(Be,f);
+	long t;
+	dg *= p; el /= p;
+	sel = Fl_powu(s,el,deg);
+	if (DEBUGLEVEL >= 6)
+	  fprintferr("GaloisConj: B=%Z\n", Bel);
+	sr  = cgcd(stpow(sel,p,deg),deg);
+	if (DEBUGLEVEL >= 6)
+	  fprintferr("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
+	      dg, sel, deg, a, w[f], wg[f+1], sr);
+	for (t = 0; t < sr; t++)
+	  if ((a+t*w[f])%wg[f+1]==0)
+	  {
+	    long i, j, k, st;
+	    for (i = 1; i < lg(X); i++) X[i] = 0;
+	    for (i = 0; i < lg(X); i+=dg)
+	      for (j = 1, k = p, st = t; k <= dg; j++, k += p)
+	      {
+		X[k+i] = (oX[j+i] + st)%deg;
+		st = (t + st*osel)%deg;
+	      }
+	    pf1 = testpermutation(O, Bel, X, sel, p, sr, &td);
+	    if (pf1)
+	      break;
+	  }
+	if (!pf1) { freetest(&td); avma = ltop; return gen_0; }
+	for (i=1; i<lg(O); i++) oX[i] = X[i];
+	osel = sel; a = (a+t*w[f])%deg;
       }
       pf = perm_mul(pf, perm_pow(pf1, el));
     }
@@ -2993,7 +2993,7 @@ galoiscosets(GEN O, GEN perm)
 
 GEN
 fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
-                 long x,long y)
+		 long x,long y)
 {
   pari_sp ltop=avma;
   GEN     F,G,V,res,cosets;
@@ -3053,7 +3053,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   {
     for (i = 1; i < lg(perm); i++)
       if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
-        pari_err(typeer, "galoisfixedfield");
+	pari_err(typeer, "galoisfixedfield");
     O = vecperm_orbits(perm, n);
   }
   else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
@@ -3091,12 +3091,12 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
       Pden = galoisborne(P, NULL, &Pgb);
       if (Pgb.valabs > val)
       {
-        if (DEBUGLEVEL>=4)
-          fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
-              ,Pgb.valabs-val);
-        PL = ZpX_liftroots(P,PL,Pgb.l,Pgb.valabs);
-        L = ZpX_liftroots(gel(gal,1),L,Pgb.l,Pgb.valabs);
-        mod = Pgb.ladicabs;
+	if (DEBUGLEVEL>=4)
+	  fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
+	      ,Pgb.valabs-val);
+	PL = ZpX_liftroots(P,PL,Pgb.l,Pgb.valabs);
+	L = ZpX_liftroots(gel(gal,1),L,Pgb.l,Pgb.valabs);
+	mod = Pgb.ladicabs;
       }
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
@@ -3109,7 +3109,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     gel(res,1) = gcopy(P);
     gel(res,2) = gmodulo(S, gel(gal,1));
     gel(res,3) = fixedfieldfactor(L,O,gel(gal,6),
-        PM,Pden,mod,x,y);
+	PM,Pden,mod,x,y);
     return gerepile(ltop, lbot, res);
   }
 }

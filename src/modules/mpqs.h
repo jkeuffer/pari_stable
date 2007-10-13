@@ -280,7 +280,7 @@ typedef struct mpqs_handle {
   /* the following three are in non-descending order, and the first two must
    * be adjusted for omega_k at the beginning */
   mpqs_int32_t index0_FB;       /* lowest subscript into FB of a "real" prime
-                                 * (i.e. other than -1, 2, factors of k) */
+				 * (i.e. other than -1, 2, factors of k) */
   mpqs_int32_t index1_FB;       /* lowest subscript into FB for sieving */
   mpqs_int32_t index2_FB;       /* primes for A are chosen relative to this */
   unsigned char index2_moved;   /* true when we're starved for small A's */

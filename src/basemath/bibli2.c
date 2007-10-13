@@ -338,12 +338,12 @@ matqpascal(long n, GEN q)
     if (q)
     {
       for (j=2; j<=I; j++)
-        gcoeff(m,i,j) = gadd(gmul(qpow[j],gcoeff(m,i-1,j)), gcoeff(m,i-1,j-1));
+	gcoeff(m,i,j) = gadd(gmul(qpow[j],gcoeff(m,i-1,j)), gcoeff(m,i-1,j-1));
     }
     else
     {
       for (j=2; j<=I; j++)
-        gcoeff(m,i,j) = addii(gcoeff(m,i-1,j), gcoeff(m,i-1,j-1));
+	gcoeff(m,i,j) = addii(gcoeff(m,i-1,j), gcoeff(m,i-1,j-1));
     }
     for (   ; j<=i; j++) gcoeff(m,i,j) = gcoeff(m,i,i+1-j);
     for (   ; j<=n; j++) gcoeff(m,i,j) = gen_0;
@@ -561,13 +561,13 @@ binomial(GEN n, long k)
       GEN z = subis(n,k);
       if (cmpis(z,k) < 0)
       {
-        k = itos(z); avma = av;
-        if (k <= 1)
-        {
-          if (k < 0) return gen_0;
-          if (k == 0) return gen_1;
-          return icopy(n);
-        }
+	k = itos(z); avma = av;
+	if (k <= 1)
+	{
+	  if (k < 0) return gen_0;
+	  if (k == 0) return gen_1;
+	  return icopy(n);
+	}
       }
     }
     /* k > 1 */
@@ -674,7 +674,7 @@ stirling1uu(ulong n, ulong m)
   for (k = 0; k <= n-m; ++k)
   {
     GEN p2 = mulii(mulii(binomialuu(n-1+k, n-m+k), binomialuu(2*n-m, n-m-k)),
-                  stirling2uu(n-m+k, k));
+		  stirling2uu(n-m+k, k));
     if(k&1)
       p1 = subii(p1,p2);
     else
@@ -986,9 +986,9 @@ dirmul(GEN x, GEN y)
     else
     {
       if (gcmp_1(c))
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
+	for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
       else
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
+	for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1022,9 +1022,9 @@ dirdiv(GEN x, GEN y)
     else
     {
       if (gcmp_1(p1))
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
+	for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
       else
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
+	for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
     }
   }
   return gerepilecopy(av,z);
@@ -1184,26 +1184,26 @@ gen_sortspec_uniq(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
     case 3:
       s = cmp(E,gel(v,1),gel(v,2));
       if (s < 0) {
-        s = cmp(E,gel(v,2),gel(v,3));
-        if (s < 0) return mkvecsmall3(1,2,3);
-        else if (s == 0) mkvecsmall2(1,2);
-        s = cmp(E,gel(v,1),gel(v,3));
-        if      (s < 0) return mkvecsmall3(1,3,2);
-        else if (s > 0) return mkvecsmall3(3,1,2);
-        return mkvecsmall2(1,2);
+	s = cmp(E,gel(v,2),gel(v,3));
+	if (s < 0) return mkvecsmall3(1,2,3);
+	else if (s == 0) mkvecsmall2(1,2);
+	s = cmp(E,gel(v,1),gel(v,3));
+	if      (s < 0) return mkvecsmall3(1,3,2);
+	else if (s > 0) return mkvecsmall3(3,1,2);
+	return mkvecsmall2(1,2);
       } else if (s > 0) {
-        s = cmp(E,gel(v,1),gel(v,3));
-        if (s < 0) return mkvecsmall3(2,1,3);
-        else if (s == 0) return mkvecsmall2(2,1);
-        s = cmp(E,gel(v,2),gel(v,3));
-        if (s < 0) return mkvecsmall3(2,3,1);
-        else if (s > 0) return mkvecsmall3(3,2,1);
-        return mkvecsmall2(2,1);
+	s = cmp(E,gel(v,1),gel(v,3));
+	if (s < 0) return mkvecsmall3(2,1,3);
+	else if (s == 0) return mkvecsmall2(2,1);
+	s = cmp(E,gel(v,2),gel(v,3));
+	if (s < 0) return mkvecsmall3(2,3,1);
+	else if (s > 0) return mkvecsmall3(3,2,1);
+	return mkvecsmall2(2,1);
       } else {
-        s = cmp(E,gel(v,1),gel(v,3));
-        if (s < 0) return mkvecsmall2(1,3);
-        else if (s == 0) return mkvecsmall(1);
-        return mkvecsmall2(3,1);
+	s = cmp(E,gel(v,1),gel(v,3));
+	if (s < 0) return mkvecsmall2(1,3);
+	else if (s == 0) return mkvecsmall(1);
+	return mkvecsmall2(3,1);
       }
   }
   NX = nx = n>>1; ny = n-nx;
@@ -1243,16 +1243,16 @@ gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
     case 1: return mkvecsmall(1);
     case 2:
       return cmp(E,gel(v,1),gel(v,2)) <= 0? mkvecsmall2(1,2)
-                                          : mkvecsmall2(2,1);
+					  : mkvecsmall2(2,1);
     case 3:
       if (cmp(E,gel(v,1),gel(v,2)) <= 0) {
-        if (cmp(E,gel(v,2),gel(v,3)) <= 0) return mkvecsmall3(1,2,3);
-        return (cmp(E,gel(v,1),gel(v,3)) <= 0)? mkvecsmall3(1,3,2)
-                                              : mkvecsmall3(3,1,2);
+	if (cmp(E,gel(v,2),gel(v,3)) <= 0) return mkvecsmall3(1,2,3);
+	return (cmp(E,gel(v,1),gel(v,3)) <= 0)? mkvecsmall3(1,3,2)
+					      : mkvecsmall3(3,1,2);
       } else {
-        if (cmp(E,gel(v,1),gel(v,3)) <= 0) return mkvecsmall3(2,1,3);
-        return (cmp(E,gel(v,2),gel(v,3)) <= 0)? mkvecsmall3(2,3,1)
-                                              : mkvecsmall3(3,2,1);
+	if (cmp(E,gel(v,1),gel(v,3)) <= 0) return mkvecsmall3(2,1,3);
+	return (cmp(E,gel(v,2),gel(v,3)) <= 0)? mkvecsmall3(2,3,1)
+					      : mkvecsmall3(3,2,1);
       }
   }
   nx = n>>1; ny = n-nx;
@@ -1485,7 +1485,7 @@ cmp_prime_over_p(GEN x, GEN y)
   GEN fx = gel(x,4), fy = gel(y,4);
   long k = fx[2] - fy[2]; /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
-          : cmp_ZV(gel(x,2), gel(y,2));
+	  : cmp_ZV(gel(x,2), gel(y,2));
 }
 
 int

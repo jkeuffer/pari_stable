@@ -99,9 +99,9 @@ member_zk(GEN x)
     {
       case typ_CLA: return gmael(x,1,4);
       case typ_Q:
-        y = cgetg(3,t_VEC);
-        gel(y,1) = gen_1;
-        gel(y,2) = pol_x(varn(x[1])); return y;
+	y = cgetg(3,t_VEC);
+	gel(y,1) = gen_1;
+	gel(y,2) = pol_x(varn(x[1])); return y;
     }
     if (typ(x)==t_VEC && lg(x) == 13) return gel(x,7);
     member_err("zk");
@@ -119,9 +119,9 @@ member_disc(GEN x) /* discriminant */
     {
       case typ_Q  : return discsr(gel(x,1));
       case typ_CLA:
-        x = gmael(x,1,3);
-        if (typ(x) != t_VEC || lg(x) != 3) break;
-        return gel(x,1);
+	x = gmael(x,1,3);
+	if (typ(x) != t_VEC || lg(x) != 3) break;
+	return gel(x,1);
       case typ_ELL: return gel(x,12);
     }
     member_err("disc");
@@ -266,8 +266,8 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     if (typ(x)==t_VEC)
       switch(lg(x))
       {
-        case 3: /* no gen */
-        case 4: return x;
+	case 3: /* no gen */
+	case 4: return x;
       }
     member_err("clgp");
   }
@@ -303,10 +303,10 @@ member_fu(GEN x) /* fundamental units */
     switch(t)
     {
       case typ_CLA: x = gel(x,1); if (lg(x) < 10) break;
-        return gel(x,9);
+	return gel(x,9);
       case typ_Q:
-        x = discsr(gel(x,1));
-        return (signe(x)<0)? cgetg(1,t_VEC): fundunit(x);
+	x = discsr(gel(x,1));
+	return (signe(x)<0)? cgetg(1,t_VEC): fundunit(x);
     }
     member_err("fu");
   }
@@ -325,22 +325,22 @@ member_tu(GEN x)
     switch(t)
     {
       case typ_Q:
-        y = discsr(gel(x,1));
-        if (signe(y)<0 && cmpiu(y,4)<=0) /* |y| <= 4 */
-          y = stoi((itos(y) == -4)? 4: 6);
-        else
-        { y = gen_2; x = gen_m1; }
-        gel(res,1) = y;
-        gel(res,2) = x; return res;
+	y = discsr(gel(x,1));
+	if (signe(y)<0 && cmpiu(y,4)<=0) /* |y| <= 4 */
+	  y = stoi((itos(y) == -4)? 4: 6);
+	else
+	{ y = gen_2; x = gen_m1; }
+	gel(res,1) = y;
+	gel(res,2) = x; return res;
       case typ_CLA:
-        x = gel(x,1);
-        if (lg(x) > 8)
-        {
-          y = gel(x,8);
-          if (typ(y) == t_VEC || lg(y) == 3) { res[2] = y[2]; break; }
-        }
+	x = gel(x,1);
+	if (lg(x) > 8)
+	{
+	  y = gel(x,8);
+	  if (typ(y) == t_VEC || lg(y) == 3) { res[2] = y[2]; break; }
+	}
       default: member_err("tu");
-        return NULL; /* not reached */
+	return NULL; /* not reached */
     }
   }
   else
@@ -383,8 +383,8 @@ member_zkst(GEN bid)
     {
       case 6: return gel(bid,2);   /* idealstarinit */
       case 7: bid = gel(bid,2); /* bnrinit */
-        if (typ(bid) == t_VEC && lg(bid) > 2)
-          return gel(bid,2);
+	if (typ(bid) == t_VEC && lg(bid) > 2)
+	  return gel(bid,2);
     }
   member_err("zkst");
   return NULL; /* not reached */

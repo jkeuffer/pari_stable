@@ -604,7 +604,7 @@ lgcdii(ulong* d, ulong* d1,
   if (lz > 1) return 0;		/* rare, quick and desperate exit */
 
   d = int_MSW(d); d1 = int_MSW(d1);		/* point at the leading `digits' */
-  dm1 = *int_precW(d); d1m1 = *int_precW(d1);	
+  dm1 = *int_precW(d); d1m1 = *int_precW(d1);
   dm2 = *int_precW(int_precW(d)); d1m2 = *int_precW(int_precW(d1));
   dd1lo = 0;		        /* unless we find something better */
   sh = bfffo(*d);		/* obtain dividend left shift count */
@@ -617,9 +617,9 @@ lgcdii(ulong* d, ulong* d1,
       dd1 = (*d1 >> shc);
       if (!(HIGHMASK & dd1)) return 0;  /* overflow detected */
       if (ld1 > 3)
-        dd1lo = (*d1 << sh) + (d1m1 >> shc);
+	dd1lo = (*d1 << sh) + (d1m1 >> shc);
       else
-        dd1lo = (*d1 << sh);
+	dd1lo = (*d1 << sh);
     }
     else
     {				/* dividend and divisor have the same length */
@@ -627,11 +627,11 @@ lgcdii(ulong* d, ulong* d1,
       if (!(HIGHMASK & dd1)) return 0;
       if (ld1 > 3)
       {
-        dd1 += (d1m1 >> shc);
-        if (ld1 > 4)
-          dd1lo = (d1m1 << sh) + (d1m2 >> shc);
-        else
-          dd1lo = (d1m1 << sh);
+	dd1 += (d1m1 >> shc);
+	if (ld1 > 4)
+	  dd1lo = (d1m1 << sh) + (d1m2 >> shc);
+	else
+	  dd1lo = (d1m1 << sh);
       }
     }
     /* following lines assume d to have 2 or more significant words */

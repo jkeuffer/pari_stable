@@ -271,8 +271,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	u1 = subii(muliu(u,xu1), muliu(u1,xv1)); u = a;
 	a  = subii(muliu(v,xu),  muliu(v1,xv));
 	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1) { togglesign(d);  togglesign(u);  togglesign(v); }
-        else          { togglesign(d1); togglesign(u1); togglesign(v1); }
+	if (lhmres&1) { togglesign(d);  togglesign(u);  togglesign(v); }
+	else          { togglesign(d1); togglesign(u1); togglesign(v1); }
       }
     }
     if (lhmres <= 0 && signe(d1))

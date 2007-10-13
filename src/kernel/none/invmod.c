@@ -49,9 +49,9 @@ invmod(GEN a, GEN b, GEN *res)
     if (d1 == 0)
     {
       if (b[2] == 1L)
-        { *res = gen_0; return 1; }
+	{ *res = gen_0; return 1; }
       else
-        { *res = absi(b); return 0; }
+	{ *res = absi(b); return 0; }
     }
     g = xgcduu((ulong)(b[2]), d1, 1, &xv, &xv1, &s);
 #ifdef DEBUG_LEHMER
@@ -105,8 +105,8 @@ invmod(GEN a, GEN b, GEN *res)
 	a  = subii(muliu(v,xu),  muliu(v1,xv));
 	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
 	v1 = subii(muliu(v,xu1), muliu(v1,xv1)); v = a;
-        if (lhmres&1) { togglesign(d);  togglesign(v); }
-        else          { togglesign(d1); togglesign(v1); }
+	if (lhmres&1) { togglesign(d);  togglesign(v); }
+	else          { togglesign(d1); togglesign(v1); }
       }
     }
 #ifdef DEBUG_LEHMER

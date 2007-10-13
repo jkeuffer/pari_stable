@@ -792,7 +792,7 @@ cmpsr(long x, GEN y)
   if (!x) return -signe(y);
   av=avma; z = stor(x, 3); avma=av;
   return cmprr(z,y);
-}	
+}
 
 INLINE long
 maxss(long x, long y) { return x>y?x:y; }

@@ -72,7 +72,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	char *negated;			/* action found with 'no'-ID */
 	int negate;			/* Arg has 'no' prefix removed */
 	ulong l, action = 0, first = 1, singleton = 0;
-        char *buf, *inibuf;
+	char *buf, *inibuf;
 	static char b[80];
 
 	if (flag & PARSEMNU_ARG_WHITESP)
@@ -259,10 +259,10 @@ check_proto(char *code)
       break;
     case 'D':
       if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E'
-                    || *s == 'V')
+		    || *s == 'V')
       {
-        if (*s != 'V') arity++;
-        s++; break;
+	if (*s != 'V') arity++;
+	s++; break;
       }
       old = s; while (*s != ',') s++;
       if (*s != ',') pari_err(talker2, "missing comma", old, code);
@@ -395,7 +395,7 @@ ulong
 u_pow10(int n)
 {
   const ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
-                        1000000UL, 10000000UL, 100000000UL, 1000000000UL };
+			1000000UL, 10000000UL, 100000000UL, 1000000000UL };
   return pw10[n];
 }
 
@@ -446,19 +446,19 @@ real_read(pari_sp av, const char **s, GEN y, long PREC)
       const char *old = ++*s;
       if (isalpha((int)**s))
       {
-        if (**s == 'E' || **s == 'e') {
-          n = exponent(s);
-          if (!signe(y)) { avma = av; return real_0_digits(n); }
-          break;
-        }
-        --*s; return y; /* member */
+	if (**s == 'E' || **s == 'e') {
+	  n = exponent(s);
+	  if (!signe(y)) { avma = av; return real_0_digits(n); }
+	  break;
+	}
+	--*s; return y; /* member */
       }
       y = int_read_more(y, s);
       n = old - *s;
       if (**s != 'E' && **s != 'e')
       {
-        if (!signe(y)) { avma = av; return real_0(PREC); }
-        break;
+	if (!signe(y)) { avma = av; return real_0(PREC); }
+	break;
       }
     }
     /* Fall through */
@@ -540,8 +540,8 @@ skipconstante(char **lex)
       skipexponent(lex);
       if (*lex == old)
       {
-        --*lex; /* member */
-        return KINTEGER;
+	--*lex; /* member */
+	return KINTEGER;
       }
       return KREAL;
     }
@@ -844,8 +844,8 @@ manage_var(long n, entree *ep)
       case manage_var_pop: return pari_var_pop((long)ep);
       case manage_var_delete: return delete_var();
       case manage_var_create:
-        pari_var_create(ep);
-        return varn(initial_value(ep));
+	pari_var_create(ep);
+	return varn(initial_value(ep));
   }
   pari_err(talker, "panic");
   return -1; /* not reached */
@@ -1128,8 +1128,8 @@ print_all_user_fun(void)
     for (ep = functions_hash[i]; ep; ep = ep->next)
       if (EpVALENCE(ep) == EpUSER)
       {
-        pariputc('{'); pariputs(ep->code);
-        pariputc('}'); pariputs("\n\n");
+	pariputc('{'); pariputs(ep->code);
+	pariputc('}'); pariputs("\n\n");
       }
 }
 

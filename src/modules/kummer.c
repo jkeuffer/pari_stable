@@ -131,10 +131,10 @@ reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
     for (k=1; k<=n; k++)
       for (i=1; i<=ru; i++)
       {
-        p1 = vecmul(b, gmael(z,k,i));    p2 = T2_from_embed_norm(p1,r1);
-        if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk = k; continue; }
-        p1 = vecmul(b, gmael(z,k,i+ru)); p2 = T2_from_embed_norm(p1,r1);
-        if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk =-k; }
+	p1 = vecmul(b, gmael(z,k,i));    p2 = T2_from_embed_norm(p1,r1);
+	if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk = k; continue; }
+	p1 = vecmul(b, gmael(z,k,i+ru)); p2 = T2_from_embed_norm(p1,r1);
+	if (gcmp(p2,nmax) < 0) { B=p1; nmax=p2; besti=i; bestk =-k; }
       }
     if (!B) break;
     b = B; gel(c,besti) = addis(gel(c,besti), bestk);
@@ -385,11 +385,11 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
       else
       {
 	if (vp==1) return 2;
-        if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
-        {
-          appendL(L->Sml2, pr);
-          appendL(L->ESml2,(GEN)vp);
-        }
+	if (!isconjinprimelist(nfz, L->Sml2,pr,tau))
+	{
+	  appendL(L->Sml2, pr);
+	  appendL(L->ESml2,(GEN)vp);
+	}
       }
     }
   }
@@ -494,9 +494,9 @@ lift_if_rational(GEN x)
       y = gel(x,2);
       if (typ(y) == t_POL)
       {
-        long d = degpol(y);
-        if (d > 0) return x;
-        return (d < 0)? gen_0: gel(y,2);
+	long d = degpol(y);
+	if (d > 0) return x;
+	return (d < 0)? gen_0: gel(y,2);
       }
       return y;
 
@@ -594,16 +594,16 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
       GEN be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup) && ok_sign(X, msign, arch))
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
-        * and relative discriminant are correct */
-        be = compute_beta(X, vecWB, gell, bnf);
-        be = lift_if_rational(coltoalg(nf, be));
-        P = gsub(monomial(gen_1, ell, 0), be);
-        if (all) res = shallowconcat(res, gerepileupto(av, P));
-        else
-        {
-          if (gequal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
-          avma = av;
-        }
+	* and relative discriminant are correct */
+	be = compute_beta(X, vecWB, gell, bnf);
+	be = lift_if_rational(coltoalg(nf, be));
+	P = gsub(monomial(gen_1, ell, 0), be);
+	if (all) res = shallowconcat(res, gerepileupto(av, P));
+	else
+	{
+	  if (gequal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
+	  avma = av;
+	}
       }
       else avma = av;
     } while (increment(y, dK, ell));
@@ -970,7 +970,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       GEN z = FpM_red(gmulsg((j*d)%ell,gel(p1,m-j)), gell);
       p2 = tauofvec(p2, tau);
       for (i=1; i<=rc; i++)
-        gel(vecC,i) = famat_mul(gel(vecC,i), famat_factorback(p2,gel(z,i)));
+	gel(vecC,i) = famat_mul(gel(vecC,i), famat_factorback(p2,gel(z,i)));
     }
     for (i=1; i<=rc; i++) gel(vecC,i) = famat_reduce(gel(vecC,i));
   }
@@ -1084,17 +1084,17 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       GEN H, be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup))
       {
-        be = compute_beta(X, vecWB, gell, bnfz);
-        P = compute_polrel(nfz, &T, be, g, ell);
-        P = lift_if_rational(P);
-        if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
-        H = rnfnormgroup(bnr, P);
-        if (!all) {
-          if (gequal(subgroup, H)) return P; /* DONE */
-        } else {
-          if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
-        }
-        res = shallowconcat(res, P);
+	be = compute_beta(X, vecWB, gell, bnfz);
+	P = compute_polrel(nfz, &T, be, g, ell);
+	P = lift_if_rational(P);
+	if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
+	H = rnfnormgroup(bnr, P);
+	if (!all) {
+	  if (gequal(subgroup, H)) return P; /* DONE */
+	} else {
+	  if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
+	}
+	res = shallowconcat(res, P);
       }
     } while (increment(y, dK, ell));
     y[dK--] = 0;

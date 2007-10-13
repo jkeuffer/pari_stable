@@ -235,7 +235,7 @@ zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   GEN pnup;
 
   result = zinit? lemma7nf(nf,pol,pr,nu,x0,zinit)
-                : lemma6nf(nf,pol,pr,nu,x0);
+		: lemma6nf(nf,pol,pr,nu,x0);
   avma = ltop;
   if (result== 1) return 1;
   if (result==-1) return 0;
@@ -372,7 +372,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   vb = idealval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
   t = element_div(nf, element_pow(nf,a, stoi(vb)),
-                      element_pow(nf,b, stoi(va)));
+		      element_pow(nf,b, stoi(va)));
   if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
@@ -401,10 +401,10 @@ nfhilbert(GEN nf,GEN a,GEN b)
   r1 = nf_get_r1(nf); ro = gel(nf,6);
   for (i=1; i<=r1; i++)
     if (signe(poleval(a,gel(ro,i))) < 0 &&
-        signe(poleval(b,gel(ro,i))) < 0)
+	signe(poleval(b,gel(ro,i))) < 0)
     {
       if (DEBUGLEVEL>=4)
-        fprintferr("nfhilbert not soluble at real place %ld\n",i);
+	fprintferr("nfhilbert not soluble at real place %ld\n",i);
       avma = av; return -1;
     }
 
@@ -467,7 +467,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     p1 = gel(S,i); checkprimeid(p1);
     gel(M,i) = isprincipal(bnf,p1);
   }
-  /* 2) relations from bnf class group */		
+  /* 2) relations from bnf class group */
   M = shallowconcat(M, diagonal_i(gel(classgp,2)));
 
   /* S class group */

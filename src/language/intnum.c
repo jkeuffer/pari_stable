@@ -176,7 +176,7 @@ rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
   if (b == gen_1 || gcmpgs(b, -1) >= 0) /* a < -100, b >= -1 */
     return gadd(qromi(E,eval,a,gen_m1,prec), /* split at -1 */
-                qrom2(E,eval,gen_m1,b,prec));
+		qrom2(E,eval,gen_m1,b,prec));
   /* a < -100, b < -1 */
   return qromi(E,eval,a,b,prec);
 }
@@ -249,7 +249,7 @@ static int
 isinC(GEN z)
 {
   return (typ(z) == t_COMPLEX)? isinR(gel(z,1)) && isinR(gel(z,2)):
-                                isinR(z);
+				isinR(z);
 }
 
 static int
@@ -588,7 +588,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     {
       t = mulrr(pi, gel(tabxp,k));
       gel(tabwp,k) = (sgn < 0)? divrr(gel(tabwp,k), gch(t, prec))
-                              : mulrr(gel(tabwp,k), gth(t, prec));
+			      : mulrr(gel(tabwp,k), gth(t, prec));
     }
     else
       if (sgn < 0) gel(tabwp,k) = real_0_bit(-eps);
@@ -596,7 +596,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     {
       t = mulrr(pi, gel(tabxm,k));
       gel(tabwm,k) = (sgn < 0)? divrr(gel(tabwm,k), gch(t, prec))
-                              : mulrr(gel(tabwm,k), gth(t, prec));
+			      : mulrr(gel(tabwm,k), gth(t, prec));
     }
   }
   return gerepilecopy(ltop, tab);
@@ -651,7 +651,7 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 	SP = eval(gsub(bpa, bmb), E);
 	SM = eval(gadd(bpa, bmb), E);
 	S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
-        if ((i & 0x7f) == 1) S = gerepileupto(av, S);
+	if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
   }
   return gerepileupto(ltop, gmul(S, gmul2n(bma, -m)));
@@ -682,14 +682,14 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     for (i = pas; i < L; i += pas)
       if (i & pas || k == 1) /* i = odd multiple of pas = 2^(m-k) */
       {
-        GEN p = gaddsg(1, gel(tabxp,i));
-        GEN m = gsubsg(1, gel(tabxp,i));
+	GEN p = gaddsg(1, gel(tabxp,i));
+	GEN m = gsubsg(1, gel(tabxp,i));
 	bp = gmul(ba, gpow(p, ea, prec));
 	bm = gmul(ba, gpow(m, ea, prec));
 	SP = gmul(gdiv(bp, p), eval(gadd(bp, tra), E));
 	SM = gmul(gdiv(bm, m), eval(gadd(bm, tra), E));
 	S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
-        if ((i & 0x7f) == 1) S = gerepileupto(av, S);
+	if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
   }
   return gerepileupto(ltop, gmul(gmul2n(S, -m), ea));
@@ -725,7 +725,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
 	SP = eval(gadd(a, gel(tabxp,i)), E);
 	SM = eval(gadd(a, gel(tabxm,i)), E);
 	S = gadd(S, gadd(gmul(gel(tabwp,i), SP), gmul(gel(tabwm,i), SM)));
-        if ((i & 0x7f) == 1) S = gerepileupto(av, S);
+	if ((i & 0x7f) == 1) S = gerepileupto(av, S);
       }
   }
   return gerepileupto(ltop, gmul2n(S, -h));
@@ -764,10 +764,10 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
 	else
 	{
 	  SM = eval(negr(gel(tabxp,i)), E);
-          if (flag > 0) SM = gneg(SM);
+	  if (flag > 0) SM = gneg(SM);
 	  S = gadd(S, gmul(gel(tabwp,i), gadd(SP, SM)));
 	}
-        if ((i & 0x7f) == 1) S = gerepileupto(ltop, S);
+	if ((i & 0x7f) == 1) S = gerepileupto(ltop, S);
       }
   }
   if (spf) m--;
@@ -994,7 +994,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
 	case f_YVSLO: gel(T,2) = exptab(tmp, gel(b,2), prec); return T;
 	case f_YFAST: gel(T,2) = homtab(initexpexp(m, l), kmb); return T;
 	case f_YOSCS:
-        case f_YOSCC: gel(T,2) = homtab(initnumsine(m, l), kmb); return T;
+	case f_YOSCC: gel(T,2) = homtab(initnumsine(m, l), kmb); return T;
       }
     case f_YFAST:
       tmp = initexpexp(m, l);
@@ -1003,7 +1003,7 @@ intnuminit(GEN a, GEN b, long m, long prec)
       {
 	case f_YFAST: gel(T,2) = homtab(tmp, kmb); return T;
 	case f_YOSCS:
-        case f_YOSCC: gel(T,2) = homtab(initnumsine(m, l), kmb); return T;
+	case f_YOSCC: gel(T,2) = homtab(initnumsine(m, l), kmb); return T;
       }
     case f_YOSCS: case f_YOSCC: tmp = initnumsine(m, l);
       gel(T,1) = homtab(tmp, kma);
@@ -1118,7 +1118,7 @@ ffmodify(GEN tmp, GEN ab, long flag)
 
 GEN
 intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
-              long flext, long prec)
+	      long flext, long prec)
 {
   pari_sp ltop = avma;
   GEN hpr, hnpr, eps, pisurh = gen_0, tmpxw, tmpxwmodp, tmpxwmodm = gen_0, ab;
@@ -1305,7 +1305,7 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
     tm = gmul(pi2p, tm);
     if (labs(codeb) == f_YOSCC) tm = gsub(tm, pis2p);
     res1 = codea==f_SING? intnsing(E, eval, a,  tm,  gel(tab,1), prec)
-                        : intn    (E, eval, a,  tm,  gel(tab,1), prec);
+			: intn    (E, eval, a,  tm,  gel(tab,1), prec);
     res2 = intninfpm(E, eval, tm, tmpi,gel(tab,2), prec);
     if (tmpi < 0) res2 = gneg(res2);
     res1 = gadd(res1, res2);
@@ -1579,7 +1579,7 @@ intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
 
 GEN
 intfourierexp(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab,
-              long prec)
+	      long prec)
 {
   pari_sp ltop = avma;
   GEN R = intfouriercos(E, eval, a, b, x, tab, prec);
@@ -1781,8 +1781,8 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   D.prec = prec;
   if (!flii)
     S = intnum_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
-                             : (flag ? &auxsumalt1 : &auxsumalt0),
-                      gen_0, b, tab, prec);
+			     : (flag ? &auxsumalt1 : &auxsumalt0),
+		      gen_0, b, tab, prec);
   else
   {
     if (flag)

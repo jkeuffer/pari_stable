@@ -330,12 +330,12 @@ FpX_roots_i(GEN f, GEN p)
       b = FpX_gcd(a,b, p); db = degpol(b);
       if (db && db < da)
       {
-        b = FpX_normalize(b, p);
-        gel(y,j+db) = FpX_div(a,b, p);
-        gel(y,j)    = b; break;
+	b = FpX_normalize(b, p);
+	gel(y,j+db) = FpX_div(a,b, p);
+	gel(y,j)    = b; break;
       }
       if (pol0[2] == 100 && !BSW_psp(p))
-        pari_err(talker, "not a prime in polrootsmod");
+	pari_err(talker, "not a prime in polrootsmod");
     }
   }
   return sort(y);
@@ -564,17 +564,17 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
       if (!y[k]) continue;
       c = gel(x,k);
       if (y[k] == 1)
-        for (i=1; i<l; i++)
-        {
-          z[i] += c[i];
-          if (z[i] & HIGHBIT) z[i] %= p;
-        }
+	for (i=1; i<l; i++)
+	{
+	  z[i] += c[i];
+	  if (z[i] & HIGHBIT) z[i] %= p;
+	}
       else
-        for (i=1; i<l; i++)
-        {
-          z[i] += c[i] * y[k];
-          if (z[i] & HIGHBIT) z[i] %= p;
-        }
+	for (i=1; i<l; i++)
+	{
+	  z[i] += c[i] * y[k];
+	  if (z[i] & HIGHBIT) z[i] %= p;
+	}
     }
     for (i=1; i<l; i++) z[i] %= p;
   }
@@ -586,11 +586,11 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
       if (!y[k]) continue;
       c = gel(x,k);
       if (y[k] == 1)
-        for (i=1; i<l; i++)
-          z[i] = Fl_add(z[i], c[i], p);
+	for (i=1; i<l; i++)
+	  z[i] = Fl_add(z[i], c[i], p);
       else
-        for (i=1; i<l; i++)
-          z[i] = Fl_add(z[i], Fl_mul(c[i],y[k],p), p);
+	for (i=1; i<l; i++)
+	  z[i] = Fl_add(z[i], Fl_mul(c[i],y[k],p), p);
     }
   }
   while (--l && !z[l]);
@@ -755,7 +755,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
     {
       w0 = w = FpXQ_pow(pol_x(v), utoi(m-1), *t, gen_2); m += 2;
       for (l=1; l<d; l++)
-        w = gadd(w0, spec_FpXQ_pow(w, p, S));
+	w = gadd(w0, spec_FpXQ_pow(w, p, S));
     }
     else
     {
@@ -817,7 +817,7 @@ init_spec_FpXQ_pow(GEN p, GEN T)
   } else {
     for (i=2; i < n; i++)
       gel(S,i) = (i&1)? FpXQ_mul(gel(S,i-1), x, T,p)
-                      : FpXQ_sqr(gel(S,i>>1), T, p);
+		      : FpXQ_sqr(gel(S,i>>1), T, p);
   }
   return S;
 }
@@ -924,8 +924,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       u = g1; g1 = FpX_gcd(f2,g1, pp);
       if (lg(g1)>3)
       {
-        u = FpX_div( u,g1,pp);
-        f2= FpX_div(f2,g1,pp);
+	u = FpX_div( u,g1,pp);
+	f2= FpX_div(f2,g1,pp);
       }
       du = degpol(u);
       if (du <= 0) continue;
@@ -935,43 +935,43 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       pd=gen_1; v=pol_x(vf);
       for (d=1; d <= du>>1; d++)
       {
-        if (!flag) pd = mulii(pd,pp);
-        v = spec_FpXQ_pow(v, pp, S);
-        g = FpX_gcd(gadd(v, gneg(pol_x(vf))), u, pp);
-        dg = degpol(g);
-        if (dg <= 0) continue;
+	if (!flag) pd = mulii(pd,pp);
+	v = spec_FpXQ_pow(v, pp, S);
+	g = FpX_gcd(gadd(v, gneg(pol_x(vf))), u, pp);
+	dg = degpol(g);
+	if (dg <= 0) continue;
 
-        /* g is a product of irred. pols, all of which have degree d */
-        j = nbfact+dg/d;
-        if (flag)
-        {
-          if (flag > 1) return NULL;
-          for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; E[nbfact]=e*k; }
-        }
-        else
-        {
-          long r;
-          g = FpX_normalize(g, pp);
-          t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
-          r = vali(q); q = shifti(q,-r);
-         /* First parameter is an integer m, converted to polynomial w_m, whose
-          * coeffs are its digits in base p (initially m = p --> w_m = X). Take
-          * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
-          * treated separately */
-          if (p)
-            split(p,t+nbfact,d,pp,q,r,S);
-          else
-            splitgen(pp,t+nbfact,d,pp,q,r);
-          for (; nbfact<j; nbfact++) E[nbfact]=e*k;
-        }
-        du -= dg;
-        u = FpX_div(u,g,pp);
-        v = FpX_rem(v,u,pp);
+	/* g is a product of irred. pols, all of which have degree d */
+	j = nbfact+dg/d;
+	if (flag)
+	{
+	  if (flag > 1) return NULL;
+	  for ( ; nbfact<j; nbfact++) { t[nbfact]=(GEN)d; E[nbfact]=e*k; }
+	}
+	else
+	{
+	  long r;
+	  g = FpX_normalize(g, pp);
+	  t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
+	  r = vali(q); q = shifti(q,-r);
+	 /* First parameter is an integer m, converted to polynomial w_m, whose
+	  * coeffs are its digits in base p (initially m = p --> w_m = X). Take
+	  * gcd(g, w_m^(p^d-1)/2), m++, until a factor is found. p = 2 is
+	  * treated separately */
+	  if (p)
+	    split(p,t+nbfact,d,pp,q,r,S);
+	  else
+	    splitgen(pp,t+nbfact,d,pp,q,r);
+	  for (; nbfact<j; nbfact++) E[nbfact]=e*k;
+	}
+	du -= dg;
+	u = FpX_div(u,g,pp);
+	v = FpX_rem(v,u,pp);
       }
       if (du)
       {
-        t[nbfact] = flag? (GEN)du: FpX_normalize(u, pp);
-        E[nbfact++]=e*k;
+	t[nbfact] = flag? (GEN)du: FpX_normalize(u, pp);
+	E[nbfact++]=e*k;
       }
     }
     j = lg(f2); if (j==3) break;
@@ -981,7 +981,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2((GEN)t, E);
   return flag ? sort_factor(y, (void*)&cmpGsGs, cmp_nodata)
-              : sort_factor_pol(y, cmpii);
+	      : sort_factor_pol(y, cmpii);
 }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
@@ -1109,7 +1109,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       pol[1] = u[1];
       pol[2] = random_Fl(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)
-        Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
+	Flx_addmul_inplace(pol, gel(vker,i), random_Fl(ps), ps);
       (void)Flx_renormalize(pol,l-1);
 
       polt = Flx_to_ZX(pol);
@@ -1118,7 +1118,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     {
       GEN pol = scalarpol(randomi(p), vu);
       for (i=2; i<=d; i++)
-        pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
+	pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
       polt = FpX_red(pol,p);
     }
     for (i=ir; i<L && L<d; i++)
@@ -1127,28 +1127,28 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       if (la == 1) { set_irred(i); }
       else if (la == 2)
       {
-        GEN r = FpX_quad_root(a,p,1);
-        if (r)
-        {
-          t[i] = deg1pol_i(gen_1, subii(p,r), vu); r = otherroot(a,r,p);
-          t[L] = deg1pol_i(gen_1, subii(p,r), vu); L++;
-        }
-        set_irred(i);
+	GEN r = FpX_quad_root(a,p,1);
+	if (r)
+	{
+	  t[i] = deg1pol_i(gen_1, subii(p,r), vu); r = otherroot(a,r,p);
+	  t[L] = deg1pol_i(gen_1, subii(p,r), vu); L++;
+	}
+	set_irred(i);
       }
       else
       {
-        pari_sp av = avma;
-        b = FpX_rem(polt, a, p);
-        if (degpol(b) <= 0) { avma=av; continue; }
-        b = ZX_Z_add(FpXQ_pow(b,po2, a,p), gen_m1);
-        b = FpX_gcd(a,b, p); lb = degpol(b);
-        if (lb && lb < la)
-        {
-          b = FpX_normalize(b, p);
-          t[L] = FpX_div(a,b,p);
-          t[i]= b; L++;
-        }
-        else avma = av;
+	pari_sp av = avma;
+	b = FpX_rem(polt, a, p);
+	if (degpol(b) <= 0) { avma=av; continue; }
+	b = ZX_Z_add(FpXQ_pow(b,po2, a,p), gen_m1);
+	b = FpX_gcd(a,b, p); lb = degpol(b);
+	if (lb && lb < la)
+	{
+	  b = FpX_normalize(b, p);
+	  t[L] = FpX_div(a,b,p);
+	  t[i]= b; L++;
+	}
+	else avma = av;
       }
     }
   }
@@ -1195,20 +1195,20 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
       if (la == 1) { set_irred(i); }
       else
       {
-        pari_sp av = avma;
-        b = FqX_rem(polt, a, T,p);
-        if (!degpol(b)) { avma=av; continue; }
-        b = FpXQYQ_pow(b,qo2, a,T,p);
-        if (!degpol(b)) { avma=av; continue; }
-        gel(b,2) = gadd(gel(b,2), gen_1);
-        b = FqX_gcd(a,b, T,p); lb = degpol(b);
-        if (lb && lb < la)
-        {
-          b = FqX_normalize(b, T,p);
-          t[L] = FqX_div(a,b,T,p);
-          t[i]= b; L++;
-        }
-        else avma = av;
+	pari_sp av = avma;
+	b = FqX_rem(polt, a, T,p);
+	if (!degpol(b)) { avma=av; continue; }
+	b = FpXQYQ_pow(b,qo2, a,T,p);
+	if (!degpol(b)) { avma=av; continue; }
+	gel(b,2) = gadd(gel(b,2), gen_1);
+	b = FqX_gcd(a,b, T,p); lb = degpol(b);
+	if (lb && lb < la)
+	{
+	  b = FqX_normalize(b, T,p);
+	  t[L] = FqX_div(a,b,T,p);
+	  t[i]= b; L++;
+	}
+	else avma = av;
       }
     }
   }
@@ -1243,21 +1243,21 @@ FpX_factor_i(GEN f, GEN pp)
       if (!degpol(f2)) g1 = pol_1(0); /* only its degree (= 0) matters */
       else
       {
-        g1 = FpX_gcd(f2,g1, pp);
-        if (degpol(g1))
-        {
-          u = FpX_div( u,g1,pp);
-          f2= FpX_div(f2,g1,pp);
-        }
+	g1 = FpX_gcd(f2,g1, pp);
+	if (degpol(g1))
+	{
+	  u = FpX_div( u,g1,pp);
+	  f2= FpX_div(f2,g1,pp);
+	}
       }
       /* u is square-free (product of irred. of multiplicity e * k) */
       N = degpol(u);
       if (N > 0)
       {
-        t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
-        for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
-        nbfact += d;
+	t[nbfact] = FpX_normalize(u,pp);
+	d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
+	for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
+	nbfact += d;
       }
     }
     if (!p) break;
@@ -1685,7 +1685,7 @@ padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
     if (i == nb-1) break;
 
     W = subii(shifti(W,1),
-              Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
+	      Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
   }
   return gerepileuptoint(ltop,a);
 }
@@ -1895,7 +1895,7 @@ static GEN
 padic_trivfact(GEN x, GEN p, long r)
 {
   return mkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)),
-                mkcol(gen_1));
+		mkcol(gen_1));
 }
 
 GEN
@@ -1965,8 +1965,8 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
-        P[j] = p1[k];
-        gel(E,j) = p2;
+	P[j] = p1[k];
+	gel(E,j) = p2;
       }
       continue;
     }
@@ -1979,8 +1979,8 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       p2 = gel(p2,2);
       for (k=1; k<lg(p1); k++,j++)
       {
-        P[j] = p1[k];
-        gel(E,j) = muliu(gel(p2,k),ex[i]);
+	P[j] = p1[k];
+	gel(E,j) = muliu(gel(p2,k),ex[i]);
       }
     }
     else
@@ -2116,8 +2116,8 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
       w0 = w;
       for (l=1; l<dT; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
       {
-        w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
-        w = FpXX_red(gadd(w0,w), p);
+	w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
+	w = FpXX_red(gadd(w0,w), p);
       }
     }
     else
@@ -2263,7 +2263,7 @@ init_spec_FqXQ_pow(GEN X, GEN q, GEN u, GEN T, GEN p)
   } else {
     for (i=2; i < n; i++)
       gel(S,i) = (i&1)? FqX_rem(gmul(gel(S,i-1), x), u, T,p)
-                      : FqX_rem(gsqr(gel(S,i>>1)), u, T,p);
+		      : FqX_rem(gsqr(gel(S,i>>1)), u, T,p);
   }
   for (i=1; i < n; i++) gel(S,i) = to_Kronecker(gel(S,i), T);
   return S;
@@ -2482,9 +2482,9 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       if (gcmp0(df2)) { u = g1; f3 = f2; }
       else
       {
-        f3 = FqX_gcd(f2,df2, T,p);
-        u = degpol(f3)? FqX_div(f2, f3, T,p): f2;
-        u = FqX_div(g1, u, T,p);
+	f3 = FqX_gcd(f2,df2, T,p);
+	u = degpol(f3)? FqX_div(f2, f3, T,p): f2;
+	u = FqX_div(g1, u, T,p);
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
@@ -2496,15 +2496,15 @@ FqX_factor_i(GEN f, GEN T, GEN p)
       else
       {
 #if 0
-        nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
+	nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
 #else
-        GEN P = FqX_split_Trager(t[nbfact], T, p);
-        if (P) {
-          for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
-        } else {
-          if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
-          nbfact += FqX_sqf_split(t+nbfact, q, T, p);
-        }
+	GEN P = FqX_split_Trager(t[nbfact], T, p);
+	if (P) {
+	  for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
+	} else {
+	  if (DEBUGLEVEL) pari_warn(warner, "FqX_split_Trager failed!");
+	  nbfact += FqX_sqf_split(t+nbfact, q, T, p);
+	}
 #endif
       }
       for (j = nb0; j < nbfact; j++) E[j] = e;
@@ -2520,9 +2520,9 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     for (k=1; k<j; k++)
       if (gequal(t[j],t[k]))
       {
-        E[k] += E[j]; nbfact--;
-        E[j] = E[nbfact];
-        t[j] = t[nbfact]; break;
+	E[k] += E[j]; nbfact--;
+	E[j] = E[nbfact];
+	t[j] = t[nbfact]; break;
       }
   }
   setlg(t, nbfact);
@@ -2629,64 +2629,64 @@ rootsold(GEN x, long prec)
     {
       av3 = avma; p3 = gel(xd0,i);
       gel(xdabs,i) = gerepileupto(av3, gadd(gabs(real_i(p3),prec),
-                                     gabs(imag_i(p3),prec)));
+				     gabs(imag_i(p3),prec)));
     }
     av0 = avma; xc = gcopy(ps); xd = gcopy(xd0); av2 = avma;
     for (i=1; i<=deg; i++)
     {
       if (i == deg)
       {
-        p1 = gel(y,k+m*i);
-        gdivz(gneg_i(gel(xc,2)),gel(xc,3), p1);
-        p1r = gel(p1,1);
-        p1i = gel(p1,2);
+	p1 = gel(y,k+m*i);
+	gdivz(gneg_i(gel(xc,2)),gel(xc,3), p1);
+	p1r = gel(p1,1);
+	p1i = gel(p1,2);
       }
       else
       {
-        p3 = gshift(p2,e);
-        p4 = poleval(xc,p3);
-        p5 = gnorm(p4);
-        exc = 0;
-        while (exc >= -20)
-        {
-          p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
-          av3 = avma;
-          exc = gcmp0(p5)? -32: expo(gnorm(p7))-expo(gnorm(p3));
-          avma = av3;
-          for (j=1; j<=10; j++)
-          {
-            GEN p8, p9, p10;
-            p8 = gadd(p3,p7);
-            p9 = poleval(xc,p8);
-            p10= gnorm(p9);
-            if (exc < -20 || cmprr(p10,p5) < 0)
-            {
-              GEN *gptr[3];
-              p3=p8; p4=p9; p5=p10;
-              gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
-              gerepilemanysp(av2,av3,gptr,3);
-              break;
-            }
-            gshiftz(p7,-2,p7); avma = av3;
-          }
-          if (j > 10)
-          {
-            if (DEBUGLEVEL)
-              pari_warn(warner,"too many iterations in rootsold(): using roots2()");
-            avma = av; return roots2(x,prec);
-          }
-        }
-        p1 = gel(y,k+m*i);
-        p1r = gel(p1,1); setlg(p1r, 3);
-        p1i = gel(p1,2); setlg(p1i, 3); gaffect(p3, p1); avma = av2;
-        for (ln = 4; ln <= prec; ln = (ln<<1)-2)
-        {
-          setlg(p1r,ln); if (!signe(p1r)) gel(p1,1) = gen_0;
-          setlg(p1i,ln); if (!signe(p1i)) gel(p1,2) = gen_0;
-          p6 = gadd(p1, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
-          gel(p1,1) = p1r;
-          gel(p1,2) = p1i; gaffect(p6, p1); avma = av2;
-        }
+	p3 = gshift(p2,e);
+	p4 = poleval(xc,p3);
+	p5 = gnorm(p4);
+	exc = 0;
+	while (exc >= -20)
+	{
+	  p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
+	  av3 = avma;
+	  exc = gcmp0(p5)? -32: expo(gnorm(p7))-expo(gnorm(p3));
+	  avma = av3;
+	  for (j=1; j<=10; j++)
+	  {
+	    GEN p8, p9, p10;
+	    p8 = gadd(p3,p7);
+	    p9 = poleval(xc,p8);
+	    p10= gnorm(p9);
+	    if (exc < -20 || cmprr(p10,p5) < 0)
+	    {
+	      GEN *gptr[3];
+	      p3=p8; p4=p9; p5=p10;
+	      gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
+	      gerepilemanysp(av2,av3,gptr,3);
+	      break;
+	    }
+	    gshiftz(p7,-2,p7); avma = av3;
+	  }
+	  if (j > 10)
+	  {
+	    if (DEBUGLEVEL)
+	      pari_warn(warner,"too many iterations in rootsold(): using roots2()");
+	    avma = av; return roots2(x,prec);
+	  }
+	}
+	p1 = gel(y,k+m*i);
+	p1r = gel(p1,1); setlg(p1r, 3);
+	p1i = gel(p1,2); setlg(p1i, 3); gaffect(p3, p1); avma = av2;
+	for (ln = 4; ln <= prec; ln = (ln<<1)-2)
+	{
+	  setlg(p1r,ln); if (!signe(p1r)) gel(p1,1) = gen_0;
+	  setlg(p1i,ln); if (!signe(p1i)) gel(p1,2) = gen_0;
+	  p6 = gadd(p1, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
+	  gel(p1,1) = p1r;
+	  gel(p1,2) = p1i; gaffect(p6, p1); avma = av2;
+	}
       }
       setlg(p1r,prec);
       setlg(p1i,prec); p7 = gcopy(p1);
@@ -2694,45 +2694,45 @@ rootsold(GEN x, long prec)
       p1i = gel(p7,2); setlg(p1i,prec+1);
       for (ii=1; ii<=5; ii++)
       {
-        if (typ(p7) == t_COMPLEX)
-        {
-          if (!signe(gel(p7,1))) gel(p7,1) = gen_0;
-          if (!signe(gel(p7,2))) gel(p7,2) = gen_0;
-        }
-        p7 = gadd(p7, gneg_i(gdiv(poleval(ps,p7), poleval(xd0,p7))));
+	if (typ(p7) == t_COMPLEX)
+	{
+	  if (!signe(gel(p7,1))) gel(p7,1) = gen_0;
+	  if (!signe(gel(p7,2))) gel(p7,2) = gen_0;
+	}
+	p7 = gadd(p7, gneg_i(gdiv(poleval(ps,p7), poleval(xd0,p7))));
       }
       gaffect(p7, p1);
       p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,prec)));
       if (gexpo(p6) >= expmin)
       {
-        if (DEBUGLEVEL) pari_warn(warner,"error in rootsold(): using roots2()");
-        avma = av; return roots2(x,prec);
+	if (DEBUGLEVEL) pari_warn(warner,"error in rootsold(): using roots2()");
+	avma = av; return roots2(x,prec);
       }
       avma = av2;
       if (expo(p1[2]) < expmin && real)
       {
-        gaffsg(0, gel(p1,2));
-        for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
-        gel(p11,2) = gneg(gel(p1,1));
-        xc = gerepileupto(av0, RgX_div(xc,p11));
+	gaffsg(0, gel(p1,2));
+	for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
+	gel(p11,2) = gneg(gel(p1,1));
+	xc = gerepileupto(av0, RgX_div(xc,p11));
       }
       else
       {
-        for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
-        if (real)
-        {
-          p1 = gconj(p1);
-          for (j=1; j<=m; j++) gaffect(p1, gel(y, k+i*m+j));
-          i++;
-          gel(p12,2) = gnorm(p1);
-          gel(p12,3) = gmulsg(-2,gel(p1,1));
-          xc = gerepileupto(av0, RgX_div(xc,p12));
-        }
-        else
-        {
-          gel(p11,2) = gneg(p1);
-          xc = gerepileupto(av0, RgX_div(xc,p11));
-        }
+	for (j=1; j<m; j++) gaffect(p1, gel(y, k+(i-1)*m+j));
+	if (real)
+	{
+	  p1 = gconj(p1);
+	  for (j=1; j<=m; j++) gaffect(p1, gel(y, k+i*m+j));
+	  i++;
+	  gel(p12,2) = gnorm(p1);
+	  gel(p12,3) = gmulsg(-2,gel(p1,1));
+	  xc = gerepileupto(av0, RgX_div(xc,p12));
+	}
+	else
+	{
+	  gel(p11,2) = gneg(p1);
+	  xc = gerepileupto(av0, RgX_div(xc,p11));
+	}
       }
       xd = derivpol(xc); av2 = avma;
     }
@@ -2788,8 +2788,8 @@ roots2(GEN T, long PREC)
       case t_COMPLEX: flagexactpol = flagrealpol = 0; break;
 
       case t_QUAD: flagexactpol = 0;
-        if (gsigne(gmael(c,1,2)) > 0) flagrealpol = 0;
-        break;
+	if (gsigne(gmael(c,1,2)) > 0) flagrealpol = 0;
+	break;
       default: pari_err(typeer, "roots2");
     }
   }
@@ -2817,60 +2817,60 @@ roots2(GEN T, long PREC)
       if (j==1) x = gneg_i(gdiv(gel(qolbis,2),gel(qolbis,3)));
       else
       {
-        x = laguer(qolbis,j,x,EPS,PREC);
-        if (x == NULL) goto RLAB;
+	x = laguer(qolbis,j,x,EPS,PREC);
+	if (x == NULL) goto RLAB;
       }
       if (flagexactpol)
       {
-        x = gprec_w(x, PREC+2);
-        x = laguer(qol,deg,x, EPS-BITS_IN_LONG, PREC+1);
+	x = gprec_w(x, PREC+2);
+	x = laguer(qol,deg,x, EPS-BITS_IN_LONG, PREC+1);
       }
       else
-        x = laguer(qol,deg,x,EPS,PREC);
+	x = laguer(qol,deg,x,EPS,PREC);
       if (x == NULL) goto RLAB;
 
       if (typ(x)==t_COMPLEX && gexpo(imag_i(x)) <= gexpo(real_i(x)) + EPS+1)
-        { gel(x,2) = gen_0; flagrealrac = 1; }
+	{ gel(x,2) = gen_0; flagrealrac = 1; }
       else if (j==1 && flagrealpol)
-        { gel(x,2) = gen_0; flagrealrac = 1; }
+	{ gel(x,2) = gen_0; flagrealrac = 1; }
       else if (typ(x)!=t_COMPLEX) flagrealrac = 1;
 
       for (i=1; i<=multiqol; i++) gaffect(x, gel(rr,nbroot+i));
       nbroot += multiqol;
       if (!flagrealpol || flagrealrac)
       {
-        ad = new_chunk(j+1);
-        for (i=0; i<=j; i++) ad[i] = qolbis[i+2];
-        b = gel(ad,j);
-        for (i=j-1; i>=0; i--)
-        {
-          c = gel(ad,i); gel(ad,i) = b;
-          b = gadd(gmul(gel(rr,nbroot),b),c);
-        }
-        v = cgetg(j+1,t_VEC); for (i=1; i<=j; i++) v[i] = ad[j-i];
-        qolbis = gtopoly(v,varn(qolbis));
-        if (flagrealpol)
-          for (i=2; i<=j+1; i++)
-            if (typ(qolbis[i])==t_COMPLEX) gmael(qolbis,i,2)= gen_0;
+	ad = new_chunk(j+1);
+	for (i=0; i<=j; i++) ad[i] = qolbis[i+2];
+	b = gel(ad,j);
+	for (i=j-1; i>=0; i--)
+	{
+	  c = gel(ad,i); gel(ad,i) = b;
+	  b = gadd(gmul(gel(rr,nbroot),b),c);
+	}
+	v = cgetg(j+1,t_VEC); for (i=1; i<=j; i++) v[i] = ad[j-i];
+	qolbis = gtopoly(v,varn(qolbis));
+	if (flagrealpol)
+	  for (i=2; i<=j+1; i++)
+	    if (typ(qolbis[i])==t_COMPLEX) gmael(qolbis,i,2)= gen_0;
       }
       else
       {
-        ad = new_chunk(j-1);
-        ad[j-2] = qolbis[j+2];
-        p1 = gmulsg(2,real_i(gel(rr,nbroot)));
-        p2 = gnorm(gel(rr,nbroot));
-        gel(ad,j-3) = gadd(gel(qolbis,j+1), gmul(p1,gel(ad,j-2)));
-        for (i=j-2; i>=2; i--)
-          gel(ad,i-2) = gadd(gel(qolbis,i+2),
-                             gsub(gmul(p1,gel(ad,i-1)),
-                                  gmul(p2,gel(ad,i))));
-        v = cgetg(j,t_VEC); for (i=1; i<=j-1; i++) v[i] = ad[j-1-i];
-        qolbis = gtopoly(v,varn(qolbis));
-        for (i=2; i<=j; i++)
-          if (typ(qolbis[i])==t_COMPLEX) gmael(qolbis,i,2)= gen_0;
-        for (i=1; i<=multiqol; i++)
-          gaffect(gconj(gel(rr,nbroot)), gel(rr,nbroot+i));
-        nbroot+=multiqol; j--;
+	ad = new_chunk(j-1);
+	ad[j-2] = qolbis[j+2];
+	p1 = gmulsg(2,real_i(gel(rr,nbroot)));
+	p2 = gnorm(gel(rr,nbroot));
+	gel(ad,j-3) = gadd(gel(qolbis,j+1), gmul(p1,gel(ad,j-2)));
+	for (i=j-2; i>=2; i--)
+	  gel(ad,i-2) = gadd(gel(qolbis,i+2),
+			     gsub(gmul(p1,gel(ad,i-1)),
+				  gmul(p2,gel(ad,i))));
+	v = cgetg(j,t_VEC); for (i=1; i<=j-1; i++) v[i] = ad[j-1-i];
+	qolbis = gtopoly(v,varn(qolbis));
+	for (i=2; i<=j; i++)
+	  if (typ(qolbis[i])==t_COMPLEX) gmael(qolbis,i,2)= gen_0;
+	for (i=1; i<=multiqol; i++)
+	  gaffect(gconj(gel(rr,nbroot)), gel(rr,nbroot+i));
+	nbroot+=multiqol; j--;
       }
     }
     avma=av1;
@@ -2986,23 +2986,23 @@ balanc(GEN x)
     {
       r = c = gen_0;
       for (j=1; j<n; j++)
-        if (j!=i)
-        {
-          c = gadd(c, gabs(gcoeff(a,j,i),0));
-          r = gadd(r, gabs(gcoeff(a,i,j),0));
-        }
+	if (j!=i)
+	{
+	  c = gadd(c, gabs(gcoeff(a,j,i),0));
+	  r = gadd(r, gabs(gcoeff(a,i,j),0));
+	}
       if (!gcmp0(r) && !gcmp0(c))
       {
-        GEN g, s = gmul(cofgen, gadd(c,r));
-        long ex = 0;
-        g = gmul2n(r,-RADIX); while (gcmp(c,g) < 0) {ex++; c=gmul2n(c, sqrdx);}
-        g = gmul2n(r, RADIX); while (gcmp(c,g) > 0) {ex--; c=gmul2n(c,-sqrdx);}
-        if (gcmp(gadd(c,r), gmul2n(s,ex)) < 0)
-        {
-          last = 0;
-          for (j=1; j<n; j++) gcoeff(a,i,j) = gmul2n(gcoeff(a,i,j),-ex);
-          for (j=1; j<n; j++) gcoeff(a,j,i) = gmul2n(gcoeff(a,j,i), ex);
-        }
+	GEN g, s = gmul(cofgen, gadd(c,r));
+	long ex = 0;
+	g = gmul2n(r,-RADIX); while (gcmp(c,g) < 0) {ex++; c=gmul2n(c, sqrdx);}
+	g = gmul2n(r, RADIX); while (gcmp(c,g) > 0) {ex--; c=gmul2n(c,-sqrdx);}
+	if (gcmp(gadd(c,r), gmul2n(s,ex)) < 0)
+	{
+	  last = 0;
+	  for (j=1; j<n; j++) gcoeff(a,i,j) = gmul2n(gcoeff(a,i,j),-ex);
+	  for (j=1; j<n; j++) gcoeff(a,j,i) = gmul2n(gcoeff(a,j,i), ex);
+	}
       }
     }
   }
@@ -3039,8 +3039,8 @@ hqr(GEN mat)
     {
       for (l=N; l>=2; l--)
       {
-        s = fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.) s = anorm;
-        if (fabs(a[l][l-1])+s == s) break;
+	s = fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.) s = anorm;
+	if (fabs(a[l][l-1])+s == s) break;
       }
       x = a[N][N];
       if (l == N){ wr[N] = x+t; wi[N] = 0.; N--; break; } /* OK */
@@ -3049,70 +3049,70 @@ hqr(GEN mat)
       w = a[N][N-1]*a[N-1][N];
       if (l == N-1)
       {
-        p = 0.5*(y-x); q = p*p+w; z = sqrt(fabs(q)); x += t;
-        if (q >= 0. || fabs(q) <= eps)
-        {
-          z = p + SIGN(z,p);
-          wr[N-1] = wr[N] = x+z;
-          if (fabs(z)>eps) wr[N] = x-w/z;
-          wi[N-1] = wi[N] = 0.;
-        }
-        else { wr[N-1] = wr[N]= x+p; wi[N-1] = -z; wi[N] = z; }
-        N -= 2; break; /* OK */
+	p = 0.5*(y-x); q = p*p+w; z = sqrt(fabs(q)); x += t;
+	if (q >= 0. || fabs(q) <= eps)
+	{
+	  z = p + SIGN(z,p);
+	  wr[N-1] = wr[N] = x+z;
+	  if (fabs(z)>eps) wr[N] = x-w/z;
+	  wi[N-1] = wi[N] = 0.;
+	}
+	else { wr[N-1] = wr[N]= x+p; wi[N-1] = -z; wi[N] = z; }
+	N -= 2; break; /* OK */
       }
 
       if (its==30) pari_err(talker,"too many iterations in hqr");
       if (its==10 || its==20)
       {
-        t += x; for (i=1; i<=N; i++) a[i][i] -= x;
-        s = fabs(a[N][N-1]) + fabs(a[N-1][N-2]);
-        y = x = 0.75*s;
-        w = -0.4375*s*s;
+	t += x; for (i=1; i<=N; i++) a[i][i] -= x;
+	s = fabs(a[N][N-1]) + fabs(a[N-1][N-2]);
+	y = x = 0.75*s;
+	w = -0.4375*s*s;
       }
       its++;
       for (m=N-2; m>=l; m--)
       {
-        z = a[m][m]; r = x-z; s = y-z;
-        p = (r*s-w)/a[m+1][m]+a[m][m+1];
-        q = a[m+1][m+1]-z-r-s;
-        r = a[m+2][m+1];
-        s = fabs(p)+fabs(q)+fabs(r); p/=s; q/=s; r/=s;
-        if (m==l) break;
-        u = fabs(a[m][m-1])*(fabs(q)+fabs(r));
-        v = fabs(p) * (fabs(a[m-1][m-1])+fabs(z)+fabs(a[m+1][m+1]));
-        if (u+v==v) break;
+	z = a[m][m]; r = x-z; s = y-z;
+	p = (r*s-w)/a[m+1][m]+a[m][m+1];
+	q = a[m+1][m+1]-z-r-s;
+	r = a[m+2][m+1];
+	s = fabs(p)+fabs(q)+fabs(r); p/=s; q/=s; r/=s;
+	if (m==l) break;
+	u = fabs(a[m][m-1])*(fabs(q)+fabs(r));
+	v = fabs(p) * (fabs(a[m-1][m-1])+fabs(z)+fabs(a[m+1][m+1]));
+	if (u+v==v) break;
       }
       for (i=m+2; i<=N; i++){ a[i][i-2]=0.; if (i!=m+2) a[i][i-3]=0.; }
       for (k=m; k<=N-1; k++)
       {
-        if (k!=m)
-        {
-          p = a[k][k-1]; q = a[k+1][k-1];
-          r = (k != N-1)? a[k+2][k-1]: 0.;
-          x = fabs(p)+fabs(q)+fabs(r);
-          if (x != 0.) { p/=x; q/=x; r/=x; }
-        }
-        s = SIGN(sqrt(p*p+q*q+r*r),p);
-        if (s == 0.) continue;
+	if (k!=m)
+	{
+	  p = a[k][k-1]; q = a[k+1][k-1];
+	  r = (k != N-1)? a[k+2][k-1]: 0.;
+	  x = fabs(p)+fabs(q)+fabs(r);
+	  if (x != 0.) { p/=x; q/=x; r/=x; }
+	}
+	s = SIGN(sqrt(p*p+q*q+r*r),p);
+	if (s == 0.) continue;
 
-        if (k==m)
-          { if (l!=m) a[k][k-1] = -a[k][k-1]; }
-        else
-          a[k][k-1] = -s*x;
-        p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
-        for (j=k; j<=N; j++)
-        {
-          p = a[k][j]+q*a[k+1][j];
-          if (k != N-1) { p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
-          a[k+1][j] -= p*y; a[k][j] -= p*x;
-        }
-        mmin = (N < k+3)? N: k+3;
-        for (i=l; i<=mmin; i++)
-        {
-          p = x*a[i][k]+y*a[i][k+1];
-          if (k != N-1) { p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
-          a[i][k+1] -= p*q; a[i][k] -= p;
-        }
+	if (k==m)
+	  { if (l!=m) a[k][k-1] = -a[k][k-1]; }
+	else
+	  a[k][k-1] = -s*x;
+	p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
+	for (j=k; j<=N; j++)
+	{
+	  p = a[k][j]+q*a[k+1][j];
+	  if (k != N-1) { p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
+	  a[k+1][j] -= p*y; a[k][j] -= p*x;
+	}
+	mmin = (N < k+3)? N: k+3;
+	for (i=l; i<=mmin; i++)
+	{
+	  p = x*a[i][k]+y*a[i][k+1];
+	  if (k != N-1) { p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
+	  a[i][k+1] -= p*q; a[i][k] -= p;
+	}
       }
     }
   }
@@ -3135,7 +3135,7 @@ hqr(GEN mat)
   eig = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
     gel(eig,i) = (wi[i] == 0.)? dbltor(wr[i])
-                              : mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
+			      : mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
   return eig;
 }
 
@@ -3159,7 +3159,7 @@ zrhqr(GEN a, long prec)
     { /* Newton iteration */
       dx = poleval(b,x);
       if (gexpo(dx) < ex)
-        pari_err(talker,"polynomial has probably multiple roots in zrhqr");
+	pari_err(talker,"polynomial has probably multiple roots in zrhqr");
       y = gsub(x, gdiv(poleval(aa,x),dx));
       newval = gabs(poleval(aa,y),prec2);
       if (gexpo(newval) < ex || (oldval && gcmp(newval,oldval) > 0)) break;

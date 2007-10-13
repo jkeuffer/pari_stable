@@ -50,8 +50,7 @@ private:
 static Fl_Color
 rgb_color(int R, int G, int B)
 {
-  return fl_color_cube(R*FL_NUM_RED/256, G*FL_NUM_GREEN/256,
-         B*FL_NUM_BLUE/256);
+  return fl_color_cube(R*FL_NUM_RED/256, G*FL_NUM_GREEN/256, B*FL_NUM_BLUE/256);
 }
 
 static Fl_Color
@@ -267,16 +266,16 @@ int Plotter::handle(int event)
        flag=1-flag;
        if (flag)
        {
-         my_x=this->x();
-         my_y=this->y();
-         my_w=this->w();
-         my_h=this->h();
-         this->fullscreen();
+	 my_x=this->x();
+	 my_y=this->y();
+	 my_w=this->w();
+	 my_h=this->h();
+	 this->fullscreen();
        }
        else
        {
-         this->fullscreen_off(my_x,my_y,my_w,my_h);
-         this->size_range(1,1);
+	 this->fullscreen_off(my_x,my_y,my_w,my_h);
+	 this->size_range(1,1);
        }
        return 1;
      }

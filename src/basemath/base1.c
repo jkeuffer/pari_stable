@@ -159,7 +159,7 @@ checknfelt_mod(GEN nf, GEN x, char *s)
 {
   if (!gequal(gel(x,1),gel(nf,1)))
     pari_err(talker,"incompatible modulus in %s:\n  mod = %Z,\n  nf  = %Z",
-        s, x[1], nf[1]);
+	s, x[1], nf[1]);
   return gel(x,2);
 }
 
@@ -182,23 +182,23 @@ get_bnf(GEN x, long *t)
     case t_VEC:
       switch(lg(x))
       {
-        case 5 : *t = typ_QUA; return NULL;
-        case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
-          *t = typ_BID; return NULL;
-        case 10: *t = typ_NF; return NULL;
-        case 11: *t = typ_BNF; return x;
-        case 7 : *t = typ_BNR;
-          x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
-          return x;
+	case 5 : *t = typ_QUA; return NULL;
+	case 6 :
+	  if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+	  *t = typ_BID; return NULL;
+	case 10: *t = typ_NF; return NULL;
+	case 11: *t = typ_BNF; return x;
+	case 7 : *t = typ_BNR;
+	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  return x;
       }
     case t_MAT:
       if (lg(x)==2)
-        switch(lg(x[1]))
-        {
-          case 7: case 10:
-            *t = typ_CLA; return NULL;
-        }
+	switch(lg(x[1]))
+	{
+	  case 7: case 10:
+	    *t = typ_CLA; return NULL;
+	}
   }
   *t = typ_NULL; return NULL;
 }
@@ -213,34 +213,34 @@ get_nf(GEN x, long *t)
     case t_VEC:
       switch(lg(x))
       {
-        case 3:
-          if (typ(x[2]) != t_POLMOD) break;
-          return get_nf(gel(x,1),t);
-        case 10: *t = typ_NF; return x;
-        case 11: *t = typ_BNF;
-          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
-          return x;
-        case 7 : *t = typ_BNR;
-          x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
-          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
-          return x;
-        case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
-          *t = typ_BID; return NULL;
-        case 9 :
-          x = gel(x,2);
-          if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
+	case 3:
+	  if (typ(x[2]) != t_POLMOD) break;
+	  return get_nf(gel(x,1),t);
+	case 10: *t = typ_NF; return x;
+	case 11: *t = typ_BNF;
+	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  return x;
+	case 7 : *t = typ_BNR;
+	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  return x;
+	case 6 :
+	  if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+	  *t = typ_BID; return NULL;
+	case 9 :
+	  x = gel(x,2);
+	  if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
 	  return NULL;
-        case 14: case 20:
-          *t = typ_ELL; return NULL;
+	case 14: case 20:
+	  *t = typ_ELL; return NULL;
       }break;
     case t_MAT:
       if (lg(x)==2)
-        switch(lg(x[1]))
-        {
-          case 7: case 10:
-            *t = typ_CLA; return NULL;
-        }
+	switch(lg(x[1]))
+	{
+	  case 7: case 10:
+	    *t = typ_CLA; return NULL;
+	}
   }
   *t = typ_NULL; return NULL;
 }
@@ -255,30 +255,30 @@ nftyp(GEN x)
     case t_VEC:
       switch(lg(x))
       {
-        case 10: return typ_NF;
-        case 11:
-          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
-          return typ_BNF;
-        case 7 :
-          x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
-          x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
-          return typ_BNR;
-        case 6 :
-          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
-          return typ_BID;
-        case 9 :
-          x = gel(x,2);
-          if (typ(x) == t_VEC && lg(x) == 4) return typ_GAL;
-        case 14: case 20:
-          return typ_ELL;
+	case 10: return typ_NF;
+	case 11:
+	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  return typ_BNF;
+	case 7 :
+	  x = gel(x,1); if (typ(x)!=t_VEC || lg(x)!=11) break;
+	  x = gel(x,7); if (typ(x)!=t_VEC || lg(x)!=10) break;
+	  return typ_BNR;
+	case 6 :
+	  if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+	  return typ_BID;
+	case 9 :
+	  x = gel(x,2);
+	  if (typ(x) == t_VEC && lg(x) == 4) return typ_GAL;
+	case 14: case 20:
+	  return typ_ELL;
       }break;
     case t_MAT:
       if (lg(x)==2)
-        switch(lg(x[1]))
-        {
-          case 7: case 10:
-            return typ_CLA;
-        }
+	switch(lg(x[1]))
+	{
+	  case 7: case 10:
+	    return typ_CLA;
+	}
   }
   return typ_NULL;
 }
@@ -411,14 +411,14 @@ polgaloisnames(long a, long b)
        "C(4) = 4", "E(4) = 2[x]2", "D(4)", "A4", "S4",
        "C(5) = 5", "D(5) = 5:2", "F(5) = 5:4", "A5", "S5",
        "C(6) = 6 = 3[x]2", "D_6(6) = [3]2", "D(6) = S(3)[x]2",
-             "A_4(6) = [2^2]3", "F_18(6) = [3^2]2 = 3 wr 2",
-             "2A_4(6) = [2^3]3 = 2 wr 3", "S_4(6d) = [2^2]S(3)",
-             "S_4(6c) = 1/2[2^3]S(3)", "F_18(6):2 = [1/2.S(3)^2]2",
-             "F_36(6) = 1/2[S(3)^2]2", "2S_4(6) = [2^3]S(3) = 2 wr S(3)",
-             "L(6) = PSL(2,5) = A_5(6)", "F_36(6):2 = [S(3)^2]2 = S(3) wr 2",
-             "L(6):2 = PGL(2,5) = S_5(6)", "A6", "S6",
+	     "A_4(6) = [2^2]3", "F_18(6) = [3^2]2 = 3 wr 2",
+	     "2A_4(6) = [2^3]3 = 2 wr 3", "S_4(6d) = [2^2]S(3)",
+	     "S_4(6c) = 1/2[2^3]S(3)", "F_18(6):2 = [1/2.S(3)^2]2",
+	     "F_36(6) = 1/2[S(3)^2]2", "2S_4(6) = [2^3]S(3) = 2 wr S(3)",
+	     "L(6) = PSL(2,5) = A_5(6)", "F_36(6):2 = [S(3)^2]2 = S(3) wr 2",
+	     "L(6):2 = PGL(2,5) = S_5(6)", "A6", "S6",
        "C(7) = 7", "D(7) = 7:2", "F_21(7) = 7:3", "F_42(7) = 7:6",
-             "L(7) = L(3,2)", "A7", "S7"};
+	     "L(7) = L(3,2)", "A7", "S7"};
 
    const long idx[]={0,1,2,4,9,14,30};
    return strtoGENstr(t[idx[a-1]+b-1]);
@@ -433,13 +433,13 @@ galois_res(long d, long n, long s, long k)
   {
     switch (d) {
       case 6:
-        kk = (k == 6 || k == 2)? 2: 1;
-        break;
+	kk = (k == 6 || k == 2)? 2: 1;
+	break;
       case 3:
-        kk = (k == 2)? 1: 2;
-        break;
+	kk = (k == 2)? 1: 2;
+	break;
       default:
-        kk = 1;
+	kk = 1;
     }
   }
   gel(z,1) = stoi(n);
@@ -457,8 +457,8 @@ polgalois(GEN x, long prec)
   GEN x1,p1,p2,p3,p4,p5,w,z,ee;
   const int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   const int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
-                      1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
-                      1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
+		      1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
+		      1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) pari_err(notpoler,"galois");
   n=degpol(x); if (n<=0) pari_err(constpoler,"galois");
   if (n>11) pari_err(impl,"galois of degree higher than 11");
@@ -475,7 +475,7 @@ polgalois(GEN x, long prec)
     f = Z_issquare(ZX_disc(x));
     avma = av;
     return f? galois_res(n,3,1,1):
-              galois_res(n,6,-1,2);
+	      galois_res(n,6,-1,2);
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
   if (n > 7) return galoisbig(x, prec);
@@ -485,28 +485,28 @@ polgalois(GEN x, long prec)
     switch(n)
     {
       case 4: z = cgetg(7,t_VEC);
-        prec = DEFAULTPREC + (long)(cb*(18./ LOG2 / BITS_IN_LONG));
-        for(;;)
+	prec = DEFAULTPREC + (long)(cb*(18./ LOG2 / BITS_IN_LONG));
+	for(;;)
 	{
 	  p1=cleanroots(x,prec);
-          gel(z,1) = F4(p1);
-          gel(z,2) = F4(transroot(p1,1,2));
-          gel(z,3) = F4(transroot(p1,1,3));
-          gel(z,4) = F4(transroot(p1,1,4));
-          gel(z,5) = F4(transroot(p1,2,3));
-          gel(z,6) = F4(transroot(p1,3,4));
-          p5 = roots_to_ZX(z, &e); if (e <= -10) break;
+	  gel(z,1) = F4(p1);
+	  gel(z,2) = F4(transroot(p1,1,2));
+	  gel(z,3) = F4(transroot(p1,1,3));
+	  gel(z,4) = F4(transroot(p1,1,4));
+	  gel(z,5) = F4(transroot(p1,2,3));
+	  gel(z,6) = F4(transroot(p1,3,4));
+	  p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	  prec = (prec<<1)-2;
 	}
-        if (!ZX_is_squarefree(p5)) goto tchi;
+	if (!ZX_is_squarefree(p5)) goto tchi;
 	p2 = gel(ZX_factor(p5),1);
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
-            return f? galois_res(n,12,1,4): galois_res(n,24,-1,5);
+	    return f? galois_res(n,12,1,4): galois_res(n,24,-1,5);
 
 	  case 2: avma = av; return galois_res(n,8,-1,3);
-	
+
 	  case 3: avma = av;
 	    return (degpol(p2[1])==2)? galois_res(n,4,1,2): galois_res(n,4,-1,1);
 
@@ -514,43 +514,43 @@ polgalois(GEN x, long prec)
 	}
 
       case 5: z = cgetg(7,t_VEC);
-        ee= cgetg(7,t_VECSMALL);
-        w = cgetg(7,t_VECSMALL);
-        prec = DEFAULTPREC + (long)(cb*(21. / LOG2/ BITS_IN_LONG));
-        for(;;)
+	ee= cgetg(7,t_VECSMALL);
+	w = cgetg(7,t_VECSMALL);
+	prec = DEFAULTPREC + (long)(cb*(21. / LOG2/ BITS_IN_LONG));
+	for(;;)
 	{
-          for(;;)
+	  for(;;)
 	  {
 	    p1=cleanroots(x,prec);
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1: ((l<6)?transroot(p1,1,l): transroot(p1,2,5));
 	      p3=gen_0;
-              for (k=0,i=1; i<=5; i++,k+=4)
+	      for (k=0,i=1; i<=5; i++,k+=4)
 	      {
 		p5 = gadd(gmul(gel(p2,ind5[k]),gel(p2,ind5[k+1])),
-		          gmul(gel(p2,ind5[k+2]),gel(p2,ind5[k+3])));
+			  gmul(gel(p2,ind5[k+2]),gel(p2,ind5[k+3])));
 		p3 = gadd(p3, gmul(gsqr(gel(p2,i)),p5));
 	      }
 	      gel(w,l) = grndtoi(real_i(p3),&e);
-              e1 = gexpo(imag_i(p3)); if (e1>e) e=e1;
-              ee[l]=e; gel(z,l) = p3;
+	      e1 = gexpo(imag_i(p3)); if (e1>e) e=e1;
+	      ee[l]=e; gel(z,l) = p3;
 	    }
-            p5 = roots_to_ZX(z, &e); if (e <= -10) break;
+	    p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	    prec = (prec<<1)-2;
 	  }
-          if (!ZX_is_squarefree(p5)) goto tchi;
+	  if (!ZX_is_squarefree(p5)) goto tchi;
 	  p3=gel(ZX_factor(p5),1);
 	  f=Z_issquare(ZX_disc(x));
 	  if (lg(p3)-1==1)
 	  {
 	    avma = av;
-            return f? galois_res(n,60,1,4): galois_res(n,120,-1,5);
+	    return f? galois_res(n,60,1,4): galois_res(n,120,-1,5);
 	  }
 	  if (!f) { avma = av; return galois_res(n,20,-1,3); }
 
-          pr = - (bit_accuracy(prec) >> 1);
-          for (l=1; l<=6; l++)
+	  pr = - (bit_accuracy(prec) >> 1);
+	  for (l=1; l<=6; l++)
 	    if (ee[l] <= pr && gcmp0(poleval(p5,gel(w,l)))) break;
 	  if (l>6) pari_err(bugparier,"galois (bug4)");
 	  p2=(l==6)? transroot(p1,2,5):transroot(p1,1,l);
@@ -559,40 +559,40 @@ polgalois(GEN x, long prec)
 	  {
 	    j = i+1; if (j>5) j -= 5;
 	    p3 = gadd(p3,gmul(gmul(gel(p2,i),gel(p2,j)),
-		              gsub(gel(p2,j),gel(p2,i))));
+			      gsub(gel(p2,j),gel(p2,i))));
 	  }
 	  p5=gsqr(p3); p4=grndtoi(real_i(p5),&e);
-          e1 = gexpo(imag_i(p5)); if (e1>e) e=e1;
+	  e1 = gexpo(imag_i(p5)); if (e1>e) e=e1;
 	  if (e <= -10)
 	  {
 	    if (gcmp0(p4)) goto tchi;
 	    f = Z_issquare(p4); avma = av;
-            return f? galois_res(n,5,1,1): galois_res(n,10,1,2);
+	    return f? galois_res(n,5,1,1): galois_res(n,10,1,2);
 	  }
 	  prec=(prec<<1)-2;
 	}
 
       case 6: z = cgetg(7, t_VEC);
-        prec = DEFAULTPREC + (long)(cb * (42. / LOG2 / BITS_IN_LONG));
-        for(;;)
+	prec = DEFAULTPREC + (long)(cb * (42. / LOG2 / BITS_IN_LONG));
+	for(;;)
 	{
-          for(;;)
+	  for(;;)
 	  {
 	    p1=cleanroots(x,prec);
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1:transroot(p1,1,l);
 	      p3=gen_0; k=0;
-              for (i=1; i<=5; i++) for (j=i+1; j<=6; j++)
+	      for (i=1; i<=5; i++) for (j=i+1; j<=6; j++)
 	      {
 		p5=gadd(gmul(gel(p2,ind6[k]),gel(p2,ind6[k+1])),
-		        gmul(gel(p2,ind6[k+2]),gel(p2,ind6[k+3])));
+			gmul(gel(p2,ind6[k+2]),gel(p2,ind6[k+3])));
 		p3=gadd(p3,gmul(gsqr(gmul(gel(p2,i),gel(p2,j))),p5));
-                k += 4;
+		k += 4;
 	      }
 	      gel(z,l) = p3;
 	    }
-            p5 = roots_to_ZX(z, &e); if (e <= -10) break;
+	    p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	    prec=(prec<<1)-2;
 	  }
 	  if (!ZX_is_squarefree(p5)) goto tchi;
@@ -600,48 +600,48 @@ polgalois(GEN x, long prec)
 	  switch(lg(p2)-1)
 	  {
 	    case 1:
-              z = cgetg(11,t_VEC); ind=0;
+	      z = cgetg(11,t_VEC); ind=0;
 	      p3=gadd(gmul(gmul(gel(p1,1),gel(p1,2)),gel(p1,3)),
-	              gmul(gmul(gel(p1,4),gel(p1,5)),gel(p1,6)));
-              gel(z,++ind) = p3;
+		      gmul(gmul(gel(p1,4),gel(p1,5)),gel(p1,6)));
+	      gel(z,++ind) = p3;
 	      for (i=1; i<=3; i++)
 		for (j=4; j<=6; j++)
 		{
 		  p2=transroot(p1,i,j);
 		  p3=gadd(gmul(gmul(gel(p2,1),gel(p2,2)),gel(p2,3)),
-		          gmul(gmul(gel(p2,4),gel(p2,5)),gel(p2,6)));
+			  gmul(gmul(gel(p2,4),gel(p2,5)),gel(p2,6)));
 		  gel(z,++ind) = p3;
 		}
-              p5 = roots_to_ZX(z, &e);
+	      p5 = roots_to_ZX(z, &e);
 	      if (e <= -10)
 	      {
-                if (!ZX_is_squarefree(p5)) goto tchi;
+		if (!ZX_is_squarefree(p5)) goto tchi;
 		p2 = gel(ZX_factor(p5),1);
 		f = Z_issquare(ZX_disc(x));
 		avma = av;
 		if (lg(p2)-1==1)
-                  return f? galois_res(n,360,1,15): galois_res(n,720,-1,16);
+		  return f? galois_res(n,360,1,15): galois_res(n,720,-1,16);
 		else
-                  return f? galois_res(n,36,1,10): galois_res(n,72,-1,13);
+		  return f? galois_res(n,36,1,10): galois_res(n,72,-1,13);
 	      }
 	      prec=(prec<<1)-2; break;
-		
+
 	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
 		case 1: f = Z_issquare(ZX_disc(x));
 		  avma = av;
-                  return f? galois_res(n,60,1,12): galois_res(n,120,-1,14);
+		  return f? galois_res(n,60,1,12): galois_res(n,120,-1,14);
 		case 2: f = Z_issquare(ZX_disc(x));
 		  if (f) { avma = av; return galois_res(n,24,1,7); }
-                  p3 = (degpol(p2[1])==2)? gel(p2,2): gel(p2,1);
-                  f = Z_issquare(ZX_disc(p3));
-                  avma = av;
-                  return f? galois_res(n,24,-1,6): galois_res(n,48,-1,11);
-		case 3: f = Z_issquare(ZX_disc(gel(p2,1)))
-		         || Z_issquare(ZX_disc(gel(p2,2)));
+		  p3 = (degpol(p2[1])==2)? gel(p2,2): gel(p2,1);
+		  f = Z_issquare(ZX_disc(p3));
 		  avma = av;
-                  return f? galois_res(n,18,-1,5): galois_res(n,36,-1,9);
+		  return f? galois_res(n,24,-1,6): galois_res(n,48,-1,11);
+		case 3: f = Z_issquare(ZX_disc(gel(p2,1)))
+			 || Z_issquare(ZX_disc(gel(p2,2)));
+		  avma = av;
+		  return f? galois_res(n,18,-1,5): galois_res(n,36,-1,9);
 	      }
 	    case 3:
 	      for (l2=1; l2<=3; l2++)
@@ -649,44 +649,44 @@ polgalois(GEN x, long prec)
 	      if (degpol(p3) == 3)
 	      {
 		f = Z_issquare(ZX_disc(p3)); avma = av;
-                return f? galois_res(n,6,-1,1): galois_res(n,12,-1,3);
+		return f? galois_res(n,6,-1,1): galois_res(n,12,-1,3);
 	      }
 	      else
 	      {
 		f = Z_issquare(ZX_disc(x)); avma = av;
-                return f? galois_res(n,12,1,4): galois_res(n,24,-1,8);
+		return f? galois_res(n,12,1,4): galois_res(n,24,-1,8);
 	      }
 	    case 4: avma = av; return galois_res(n,6,-1,2);
-            default: pari_err(bugparier,"galois (bug3)");
+	    default: pari_err(bugparier,"galois (bug3)");
 	  }
 	}
-	
+
       case 7: z = cgetg(36,t_VEC);
-        prec = DEFAULTPREC + (long)(cb*(7. / LOG2 / BITS_IN_LONG));
-        for(;;)
+	prec = DEFAULTPREC + (long)(cb*(7. / LOG2 / BITS_IN_LONG));
+	for(;;)
 	{
 	  ind = 0; p1=cleanroots(x,prec);
 	  for (i=1; i<=5; i++)
 	    for (j=i+1; j<=6; j++)
-            {
-              GEN t = gadd(gel(p1,i),gel(p1,j));
+	    {
+	      GEN t = gadd(gel(p1,i),gel(p1,j));
 	      for (k=j+1; k<=7; k++) gel(z,++ind) = gadd(t, gel(p1,k));
-            }
-          p5 = roots_to_ZX(z, &e); if (e <= -10) break;
-          prec = (prec<<1)-2;
+	    }
+	  p5 = roots_to_ZX(z, &e); if (e <= -10) break;
+	  prec = (prec<<1)-2;
 	}
-        if (!ZX_is_squarefree(p5)) goto tchi;
+	if (!ZX_is_squarefree(p5)) goto tchi;
 	p2=gel(ZX_factor(p5),1);
 	switch(lg(p2)-1)
 	{
 	  case 1: f = Z_issquare(ZX_disc(x)); avma = av;
-            return f? galois_res(n,2520,1,6): galois_res(n,5040,-1,7);
+	    return f? galois_res(n,2520,1,6): galois_res(n,5040,-1,7);
 	  case 2: f = degpol(p2[1]); avma = av;
 	    return (f==7 || f==28)? galois_res(n,168,1,5): galois_res(n,42,-1,4);
 	  case 3: avma = av; return galois_res(n,21,1,3);
 	  case 4: avma = av; return galois_res(n,14,-1,2);
 	  case 5: avma = av; return galois_res(n,7,1,1);
-          default: pari_err(bugparier,"galois (bug2)");
+	  default: pari_err(bugparier,"galois (bug2)");
 	}
     }
     tchi: avma = av1; x = tschirnhaus(x1);
@@ -725,7 +725,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       {
 	y=cgetg(3,t_VEC);
 	gel(y,1) = galoisapply(nf,aut,gel(x,1));
-        gel(y,2) = gcopy(gel(x,2)); return gerepileupto(av, y);
+	gel(y,2) = gcopy(gel(x,2)); return gerepileupto(av, y);
       }
       if (lg(x)!=6) pari_err(typeer,"galoisapply");
       y=cgetg(6,t_VEC); y[1]=x[1]; y[3]=x[3]; y[4]=x[4];
@@ -734,7 +734,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       if (is_pm1(x[3]))
 	if (Z_pval(subres(coltoliftalg(nf,p1),pol), p) > itos(gel(x,4)))
 	  gel(p1,1) =  (signe(p1[1]) > 0)? subii(gel(p1,1), p)
-	                                 : addii(gel(p1,1), p);
+					 : addii(gel(p1,1), p);
       gel(y,2) = p1;
       gel(y,5) = centermod(galoisapply(nf,aut,gel(x,5)), p);
       return gerepilecopy(av,y);
@@ -820,8 +820,8 @@ nfiso0(GEN a, GEN b, long fliso)
       GEN fa=Z_factor(da), ex=gel(fa,2);
       fa=gel(fa,1); lx=lg(fa);
       for (i=1; i<lx; i++)
-        if (mod2(gel(ex,i)) && !dvdii(db, powiu(gel(fa,i),q)))
-          { avma=av; return gen_0; }
+	if (mod2(gel(ex,i)) && !dvdii(db, powiu(gel(fa,i),q)))
+	  { avma=av; return gen_0; }
     }
   }
   a = shallowcopy(a); setvarn(a,0);
@@ -1021,8 +1021,8 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
-        d = _mulii(gel(den,i), gel(den,j));
-        if (d) z = gdivexact(z, d);
+	d = _mulii(gel(den,i), gel(den,j));
+	if (d) z = gdivexact(z, d);
       }
       gel(mul,j+(i-1)*n) = gel(mul,i+(j-1)*n) = gerepileupto(av,z);
     }
@@ -1055,8 +1055,8 @@ make_Tr(GEN x, GEN w)
       t = quicktrace(p2, sym);
       if (den)
       {
-        d = _mulii(gel(den,i),gel(den,j));
-        if (d) t = diviiexact(t, d);
+	d = _mulii(gel(den,i),gel(den,j));
+	if (d) t = diviiexact(t, d);
       }
       gel(p1,j) = gerepileuptoint(av, t);
     }
@@ -1138,13 +1138,13 @@ make_G(nffp_t *F)
       GEN r = gel(m,i);
       if (typ(r) == t_COMPLEX)
       {
-        gel(g,k++) = mpadd(gel(r,1), gel(r,2));
-        gel(g,k++) = mpsub(gel(r,1), gel(r,2));
+	gel(g,k++) = mpadd(gel(r,1), gel(r,2));
+	gel(g,k++) = mpsub(gel(r,1), gel(r,2));
       }
       else
       {
-        gel(g,k++) = r;
-        gel(g,k++) = r;
+	gel(g,k++) = r;
+	gel(g,k++) = r;
       }
     }
   }
@@ -1317,7 +1317,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     if (u0) G = gmul(G, u0);
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
-                  prec + F.extraprec, prec, F.extraprec);
+		  prec + F.extraprec, prec, F.extraprec);
     if ((u = lllfp_marked(&MARKED, G, 100, 2, prec, 0)))
     {
       if (typ(u) == t_MAT) break;
@@ -1513,14 +1513,14 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     r1 = sturm(x);
   }
   else if (typ(x) == t_VEC && lg(x)==3
-           && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]))
+	   && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]))
   { /* monic integral polynomial + integer basis */
     GEN mat;
     bas = gel(x,2); x = gel(x,1);
     if (typ(bas) == t_MAT)
       { mat = bas; bas = RgM_to_RgXV(mat,varn(x)); }
     else
-        mat = RgXV_to_RgM(bas, lg(bas)-1);
+	mat = RgXV_to_RgM(bas, lg(bas)-1);
     index = get_nfindex(bas);
     dx = ZX_disc(x);
     dK = diviiexact(dx, sqri(index));
@@ -1888,20 +1888,20 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
-        GEN u = d->u, e = d->ZKembed;
-        GEN te = gel(e,i), tu = gel(u,i), tR = gel(R,i);
-        long tS = S[i];
-        for (j = i; j > firstprim; j--)
-        {
-          u[j] = u[j-1];
-          e[j] = e[j-1];
-          R[j] = R[j-1];
-          S[j] = S[j-1];
-        }
-        gel(u,firstprim) = tu;
-        gel(e,firstprim) = te;
-        gel(R,firstprim) = tR;
-        S[firstprim] = tS; firstprim++;
+	GEN u = d->u, e = d->ZKembed;
+	GEN te = gel(e,i), tu = gel(u,i), tR = gel(R,i);
+	long tS = S[i];
+	for (j = i; j > firstprim; j--)
+	{
+	  u[j] = u[j-1];
+	  e[j] = e[j-1];
+	  R[j] = R[j-1];
+	  S[j] = S[j-1];
+	}
+	gel(u,firstprim) = tu;
+	gel(e,firstprim) = te;
+	gel(R,firstprim) = tR;
+	S[firstprim] = tS; firstprim++;
       }
     }
   }
@@ -1948,17 +1948,17 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       k = 2;
       for (h = 1; h < dP; h++)
       {
-        long r; /* add to M2 the elts of M * nf.zk[i]  */
-        for (j = 1; j <= rkM; j++) gel(M2,k++) = gmul(Mx, gel(M,j));
-        setlg(M2, k); k = 1;
-        M = image(shallowconcat(M, M2));
-        r = lg(M) - 1;
-        if (r == rkM) break;
-        if (r > rkM)
-        {
-          rkM = r;
-          if (rkM == N) break;
-        }
+	long r; /* add to M2 the elts of M * nf.zk[i]  */
+	for (j = 1; j <= rkM; j++) gel(M2,k++) = gmul(Mx, gel(M,j));
+	setlg(M2, k); k = 1;
+	M = image(shallowconcat(M, M2));
+	r = lg(M) - 1;
+	if (r == rkM) break;
+	if (r > rkM)
+	{
+	  rkM = r;
+	  if (rkM == N) break;
+	}
       }
       if (rkM == N) break;
       /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
@@ -2264,10 +2264,10 @@ dirzetak0(GEN nf, long N0)
       for (k=2; k <= N0; k++) c2[k] = c[k];
       while (q <= (ulong)N0)
       {
-        LOCAL_HIREMAINDER;
-        for (k=1; k<=limk; k++) c2[k*q] += c[k];
-        q = mulll(q, p); if (hiremainder) break;
-        limk /= p;
+	LOCAL_HIREMAINDER;
+	for (k=1; k<=limk; k++) c2[k*q] += c[k];
+	q = mulll(q, p); if (hiremainder) break;
+	limk /= p;
       }
       N = c; c = c2; c2 = N;
     }
@@ -2342,7 +2342,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
   GEN B = gmul(sqrtr( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
-               gmul2n(powuu(5, r1), bit + r2));
+	       gmul2n(powuu(5, r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
   avma = av; return i0;
@@ -2482,8 +2482,8 @@ initzeta(GEN pol, long prec)
       gel(t,2) = mulur(coef[i], p1);
       for (j=2; j<=r; j++)
       {
-        pari_sp av2 = avma;
-        gel(t,j+1) = gerepileuptoleaf(av2, divru(mulrr(gel(t,j), p1), j));
+	pari_sp av2 = avma;
+	gel(t,j+1) = gerepileuptoleaf(av2, divru(mulrr(gel(t,j), p1), j));
       }
       gel(tabj,i) = t; /* tabj[n,j] = coef(n)*ln(c/n)^(j-1)/(j-1)! */
     }
@@ -2517,14 +2517,14 @@ initzeta(GEN pol, long prec)
     {
       p1 = NULL;
       for (n=1; n<=N0; n++)
-        if (coef[n])
-        {
-          GEN tabjn = gel(tabj,n), p2 = mpmul(gel(aiji,1+k), gel(tabjn,1));
-          for (j=2; j<=r-k+1; j++)
-            p2 = mpadd(p2, mpmul(gel(aiji,j+k), gel(tabjn,j)));
-          if (i > 1) p2 = mpmul(p2, gel(tabcstni,n));
-          p1 = p1? mpadd(p1,p2): p2;
-        }
+	if (coef[n])
+	{
+	  GEN tabjn = gel(tabj,n), p2 = mpmul(gel(aiji,1+k), gel(tabjn,1));
+	  for (j=2; j<=r-k+1; j++)
+	    p2 = mpadd(p2, mpmul(gel(aiji,j+k), gel(tabjn,j)));
+	  if (i > 1) p2 = mpmul(p2, gel(tabcstni,n));
+	  p1 = p1? mpadd(p1,p2): p2;
+	}
       gcoeff(C,i,k) = gerepileuptoleaf(av2,p1);
       av2 = avma;
     }
@@ -2533,7 +2533,7 @@ initzeta(GEN pol, long prec)
       z = i&1? zone1: zone0;
       (void)switch_stack(z, 1);
       for (n=1; n<=N0; n++)
-        if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
+	if (coef[n]) gel(tabcstni,n) = mpmul(gel(tabcstni,n),gel(tabcstn,n));
       /* come back */
       (void)switch_stack(z, 0);
     }
@@ -2586,7 +2586,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     lambd = gdiv(resi, mulis(s,sl-1));
     gammas2=ggamma(gmul2n(s,-1),prec);
     gar=gpowgs(gammas2,r1);
-    cs=gexp(gmul(cstlog,s),prec); 	
+    cs=gexp(gmul(cstlog,s),prec);
     val=s; valm=unmoins;
     if (sl < 0) /* r2 = 0 && odd(sl) */
     {
@@ -2595,7 +2595,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       for (i=2; i<=N0; i++)
 	if (coef[i])
 	{
-          gexpro=gexp(gmul(gel(coeflog,i),s),bigprec);
+	  gexpro=gexp(gmul(gel(coeflog,i),s),bigprec);
 	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
 	  var2 = gadd(var2,gdivsg(coef[i],gmulsg(i,gexpro)));
 	}
@@ -2606,15 +2606,15 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       for (i=1; i<=i0; i+=2)
       {
 	valk  = val;
-        valkm = valm;
-	for (k=1; k<=ru; k++)	
+	valkm = valm;
+	for (k=1; k<=ru; k++)
 	{
-          GEN c = gcoeff(C,i,k);
+	  GEN c = gcoeff(C,i,k);
 	  var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
 	  var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val, 2);
-        valm = addis(valm,2);
+	valm = addis(valm,2);
       }
     }
     else
@@ -2628,13 +2628,13 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 	{
 	  gexpro=gexp(gmul(gel(coeflog,i),s),bigprec);
 	  var1 = gadd(var1,gmulsg(coef[i],gexpro));
-          if (sl <= i0)
-          {
-            GEN t=gen_0;
-            for (j=1; j<=ru+1; j++)
-              t = gadd(t, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
-            var2=gadd(var2,gdiv(t,gmulsg(i,gexpro)));
-          }
+	  if (sl <= i0)
+	  {
+	    GEN t=gen_0;
+	    for (j=1; j<=ru+1; j++)
+	      t = gadd(t, gmul(gmael(aij,sl,j), gmael(tabj,i,j)));
+	    var2=gadd(var2,gdiv(t,gmulsg(i,gexpro)));
+	  }
 	}
       lambd=gadd(lambd,gmul(gmul(var1,cs),gar));
       lambd=gadd(lambd,gmul(var2,gdiv(cst,cs)));
@@ -2642,22 +2642,22 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       for (i=1; i<=i0; i++)
       {
 	valk  = val;
-        valkm = valm;
-        if (i == sl)
-          for (k=1; k<=ru; k++)
-          {	
-            GEN c = gcoeff(C,i,k);
-            var1 = gsub(var1,gdiv(c,valk)); valk = mulii(val,valk);
-          }
-        else
+	valkm = valm;
+	if (i == sl)
+	  for (k=1; k<=ru; k++)
+	  {
+	    GEN c = gcoeff(C,i,k);
+	    var1 = gsub(var1,gdiv(c,valk)); valk = mulii(val,valk);
+	  }
+	else
 	for (k=1; k<=ru; k++)
-	{	
-            GEN c = gcoeff(C,i,k);
-            var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
-            var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
+	{
+	    GEN c = gcoeff(C,i,k);
+	    var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
+	    var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val,1);
-        valm = addis(valm,1);
+	valm = addis(valm,1);
       }
     }
   }
@@ -2679,20 +2679,20 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     var1 = gmul(Pi,s);
     gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
     gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,smoinun,prec)),
-                             gammas2),
-                        gmul(gcos(gmul2n(var1,-1),prec),gammas));
+			     gammas2),
+			gmul(gcos(gmul2n(var1,-1),prec),gammas));
     var1 = var2 = gen_1;
     for (i=2; i<=N0; i++)
       if (coef[i])
       {
-        gexpro = gexp(gmul(gel(coeflog,i),s),bigprec);
+	gexpro = gexp(gmul(gel(coeflog,i),s),bigprec);
 	var1 = gadd(var1,gmulsg(coef[i], gexpro));
 	var2 = gadd(var2,gdivsg(coef[i], gmulsg(i,gexpro)));
       }
     lambd = gadd(lambd,gmul(gmul(var1,cs),gar));
     lambd = gadd(lambd,gmul(gmul(gmul(var2,gdiv(cst,cs)),
 	 		         gpowgs(gammaunmoins,r2)),
-                            gpowgs(gammaunmoins2,r1)));
+			    gpowgs(gammaunmoins2,r1)));
     val  = s;
     valm = unmoins;
     var1 = gen_0;
@@ -2702,19 +2702,19 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       valkm = valm;
       for (k=1; k<=ru; k++)
       {
-        GEN c = gcoeff(C,i,k);
+	GEN c = gcoeff(C,i,k);
 	var1 = gsub(var1,gdiv(c,valk )); valk  = gmul(val, valk);
 	var1 = gsub(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
       }
       if (r2)
       {
 	val  = gaddgs(val, 1);
-        valm = gaddgs(valm,1);
+	valm = gaddgs(valm,1);
       }
       else
       {
 	val  = gaddgs(val, 2);
-        valm = gaddgs(valm,2); i++;
+	valm = gaddgs(valm,2); i++;
       }
     }
   }

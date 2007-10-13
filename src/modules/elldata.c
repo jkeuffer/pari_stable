@@ -94,7 +94,7 @@ ellconvertname(GEN n)
     {
       long f,i,c;
       if (!ellparsename(GSTR(n),&f,&c,&i))
-        pari_err(talker,"Incorrect curve name in ellconvertname");
+	pari_err(talker,"Incorrect curve name in ellconvertname");
       return mkvec3s(f,c,i);
     }
   case t_VEC:
@@ -105,7 +105,7 @@ ellconvertname(GEN n)
       pari_sp ltop=avma;
       GEN f=gel(n, 1), c=gel(n, 2), s=gel(n, 3);
       if (typ(f)!=t_INT && typ(c)!=t_INT && typ(s)!=t_INT)
-        pari_err(typeer,"ellconvertname");
+	pari_err(typeer,"ellconvertname");
       return gerepileupto(ltop, concat(concat(f,ellrecode(itos(c))),s));
     }
   }
@@ -124,7 +124,7 @@ ellcondfile(long f)
   F = pari_fopengz(s);
   if (!F)
     pari_err(talker,"Elliptic curves files not available for conductor %ld\n"
-               "[missing %s]",f,s);
+	       "[missing %s]",f,s);
   V = gp_read_stream(F->file);
   if (!V || typ(V)!=t_VEC )
     pari_err(talker,"Elliptic files %s not compatible\n",s);
@@ -257,11 +257,11 @@ forell(long a, long b, GEN code)
       if (i==cb && cond>b) break;
       for(k=2; k<lg(ells); k++)
       {
-        pari_sp av=avma;
-        set_lex(-1,gel(ells, k));
-        closure_evalvoid(code);
-        avma=av;
-        if (loop_break()) goto forell_end;
+	pari_sp av=avma;
+	set_lex(-1,gel(ells, k));
+	closure_evalvoid(code);
+	avma=av;
+	if (loop_break()) goto forell_end;
       }
     }
     avma = ltop;

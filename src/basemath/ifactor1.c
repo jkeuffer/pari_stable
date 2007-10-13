@@ -72,8 +72,8 @@ miller_ok(miller_t *S, GEN c)
     if (!equalii(c, S->sqrt1) && !equalii(c, S->sqrt2))
     { /* too many sqrt(-1)s mod n */
       if (DEBUGLEVEL) {
-        GEN z = gcdii(addii(c, S->sqrt1), S->n);
-        pari_warn(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
+	GEN z = gcdii(addii(c, S->sqrt1), S->n);
+	pari_warn(warner,"found factor\n\t%Z\ncurrently lost to the factoring machinery", z);
       }
       return 1;
     }
@@ -271,20 +271,20 @@ LucasMod(GEN n, ulong P, GEN N)
     { /* v = v_k, v1 = v_{k+1} */
       if (m < 0)
       { /* set v = v_{2k+1}, v1 = v_{2k+2} */
-        v = subis(mulii(v,v1), (long)P);
-        v1= subis(sqri(v1), 2);
+	v = subis(mulii(v,v1), (long)P);
+	v1= subis(sqri(v1), 2);
       }
       else
       {/* set v = v_{2k}, v1 = v_{2k+1} */
-        v1= subis(mulii(v,v1), (long)P);
-        v = subis(sqri(v), 2);
+	v1= subis(mulii(v,v1), (long)P);
+	v = subis(sqri(v), 2);
       }
       v = modii(v, N);
       v1= modii(v1,N);
       if (low_stack(lim,stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"LucasMod");
-        gerepileall(av, 2, &v,&v1);
+	if(DEBUGMEM>1) pari_warn(warnmem,"LucasMod");
+	gerepileall(av, 2, &v,&v1);
       }
     }
     if (--i == 0) return v;
@@ -651,7 +651,7 @@ BSW_isprime(GEN N)
   /* N-1 = F U, F factored, U possibly composite */
   if (cmpii(gpowgs(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
     res = BLS_test(N, F)
-          && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
+	  && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
   else if (BSW_psp_nosmalldiv(p)) /* smooth */
     res = isprimeSelfridge(mkvec2(N,P));
   else
@@ -1078,7 +1078,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
     if (i) gl = modii(mulii(gl, Y1[i]), N);
     av2 = avma;
     L = modii(mulii(addsi(1, mului(3, sqri(X1[i]))),
-                    i? mulii(GL,W[i]): GL), N);
+		    i? mulii(GL,W[i]): GL), N);
     if (signe(L)) /* half of zero is still zero */
       L = shifti(mod2(L)? addii(L, N): L, -1);
     v = modii(subii(sqri(L), shifti(X1[i],1)), N);
@@ -1458,17 +1458,17 @@ ellfacteur(GEN n, int insist)
      * imply roughly the same number of E.C. additions.
      */
     gse = B1 < 656
-            ? (B1 < 200? 5: 6)
-            : (B1 < 10500
-              ? (B1 < 2625? 7: 8)
-              : (B1 < 42000? 9: 10));
+	    ? (B1 < 200? 5: 6)
+	    : (B1 < 10500
+	      ? (B1 < 2625? 7: 8)
+	      : (B1 < 42000? 9: 10));
     gss = 1UL << gse;
     XG = XT + gse*nbc2;	/* will later hold [2^(gse+1)*210]Q */
     YG = XG + nbc;
 
     if (DEBUGLEVEL >= 4) {
       fprintferr("ECM: time = %6ld ms\nECM: dsn = %2ld,\tB1 = %4lu,",
-                 timer2(), dsn, B1);
+		 timer2(), dsn, B1);
       fprintferr("\tB2 = %6lu,\tgss = %4ld*420\n", B2, gss);
     }
     p = 0;
@@ -1492,7 +1492,7 @@ ellfacteur(GEN n, int insist)
       {
 	if ((rflag = ellmult(nbc, p, X, X, XAUX)) > 1) goto fin;
 	else if (rflag) break;
-        avma = av;
+	avma = av;
       }
       avma = av;
     }
@@ -1721,13 +1721,13 @@ ellfacteur(GEN n, int insist)
 	m = ((ulong)k - 1) << 2;
 	/* accumulate product of differences of X coordinates */
 	j = rcn<<2;
-        avma = avtmp; /* go to garbage zone */
+	avma = avtmp; /* go to garbage zone */
 	gl = modii(mulii(gl, subii(XB[m],   Xh[j])), n);
 	gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), n);
 	gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), n);
 	gl = mulii(gl, subii(XB[m+3], Xh[j+3]));
-        avma = av1;
-        gl = modii(gl, n);
+	avma = av1;
+	gl = modii(gl, n);
       }	/* loop over p */
       avma = av1;
     } /* for i (loop over sets of 4 curves) */
@@ -1790,7 +1790,7 @@ rho_dbg(long c, long msg_mask)
 {
   if (c & msg_mask) return;
   fprintferr("Rho: time = %6ld ms,\t%3ld round%s\n",
-             timer2(), c, (c==1?"":"s"));
+	     timer2(), c, (c==1?"":"s"));
   flusherr();
 }
 
@@ -1826,7 +1826,7 @@ pollardbrent(GEN n)
 
   if (size <= 28)
     c0 = 32;/* amounts very nearly to 'insist'. Now that we have squfof(), we
-             * don't insist any more when input is 2^29 ... 2^32 */
+	     * don't insist any more when input is 2^29 ... 2^32 */
   else if (size <= 42)
     c0 = tune_pb_min;
   else if (size <= 59) /* match squfof() cutoff point */
@@ -1843,7 +1843,7 @@ pollardbrent(GEN n)
 
   c = c0 << 5; /* 2^5 iterations per round */
   msg_mask = (size >= 448? 0x1fff:
-                           (size >= 192? (256L<<((size-128)>>6))-1: 0xff));
+			   (size >= 192? (256L<<((size-128)>>6))-1: 0xff));
 PB_RETRY:
  /* trick to make a 'random' choice determined by n.  Don't use x^2+0 or
   * x^2-2, ever.  Don't use x^2-3 or x^2-7 with a starting value of 2.
@@ -1870,7 +1870,7 @@ PB_RETRY:
     else
       fprintferr("Rho: restarting for remaining rounds...\n");
     fprintferr("Rho: using X^2%+1ld for up to %ld rounds of 32 iterations\n",
-               delta, c >> 5);
+	       delta, c >> 5);
     flusherr();
   }
   x = gen_2; P = gen_1; g1 = NULL; k = 1; l = 1;
@@ -1897,13 +1897,13 @@ PB_RETRY:
       g = gcdii(n, P); if (!is_pm1(g)) goto fin;
       if (c <= 0)
       {	/* getting bored */
-        if (DEBUGLEVEL >= 4)
-        {
-          fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
-                     timer2());
-          flusherr();
-        }
-        avma = av; return NULL;
+	if (DEBUGLEVEL >= 4)
+	{
+	  fprintferr("Rho: time = %6ld ms,\tPollard-Brent giving up.\n",
+		     timer2());
+	  flusherr();
+	}
+	avma = av; return NULL;
       }
       P = gen_1;			/* not necessary, but saves 1 mulii/round */
       if (DEBUGLEVEL >= 4) rho_dbg(c0-(c>>5), msg_mask);
@@ -1966,7 +1966,7 @@ fin:
     {
       if (DEBUGLEVEL >= 4)
       {
-        rho_dbg(c0-(c>>5), 0);
+	rho_dbg(c0-(c>>5), 0);
 	fprintferr("\tfound factor = %Z\n",g);
 	flusherr();
       }
@@ -1999,8 +1999,8 @@ fin:
     { /* out of luck */
       if (DEBUGLEVEL >= 4)
       {
-        rho_dbg(c0-(c>>5), 0);
-        fprintferr("\tPollard-Brent failed.\n"); flusherr();
+	rho_dbg(c0-(c>>5), 0);
+	fprintferr("\tPollard-Brent failed.\n"); flusherr();
       }
       if (++retries >= 4) return NULL;
       goto PB_RETRY;
@@ -2110,11 +2110,11 @@ squfof_ambig(long a, long B, long dd, GEN D)
   {
     if (q > 1)
       fprintferr("SQUFOF: found factor %ld from ambiguous form\n"
-                 "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
-                 q / ugcd(q,15), cnt, timer2());
+		 "\tafter %ld steps on the ambiguous cycle, time = %ld ms\n",
+		 q / ugcd(q,15), cnt, timer2());
     else
       fprintferr("SQUFOF: ...found nothing on the ambiguous cycle\n"
-	         "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
+		 "\tafter %ld steps there, time = %ld ms\n", cnt, timer2());
     if (DEBUGLEVEL >= 6) fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
   }
   return q;
@@ -2305,7 +2305,7 @@ squfof(GEN n)
     /* examine second form if active */
     if (act2 && a2 == 1) /* back to identity form */
     { /* drop this discriminant */
-      act2 = 0;	
+      act2 = 0;
       if (DEBUGLEVEL >= 4)
 	fprintferr("SQUFOF: second cycle exhausted after %ld iterations,\n"
 		   "\tdropping it\n", cnt);
@@ -2532,7 +2532,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   *mask &= (powersmod[resbyte] >> shift); \
   if (DEBUGLEVEL >= 5)\
     fprintferr("\t   %3ld:  %3ld   (3rd %ld, 5th %ld, 7th %ld)\n",\
-               N, resbyte, *mask&1, (*mask>>1)&1, (*mask>>2)&1);\
+	       N, resbyte, *mask&1, (*mask>>1)&1, (*mask>>2)&1);\
   if (!*mask) return 0;\
 }
   check_res(211, 0);
@@ -2551,7 +2551,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     long e, b;
     /* priority to higher powers: if we have a 21st, it is easier to rediscover
      * that its 7th root is a cube than that its cube root is a 7th power */
-         if (*mask & 4) { b = 4; e = 7; }
+	 if (*mask & 4) { b = 4; e = 7; }
     else if (*mask & 2) { b = 2; e = 5; }
     else                { b = 1; e = 3; }
     y = mpround( sqrtnr(itor(x, 3 + (lx-2)/e), e) );
@@ -2598,9 +2598,9 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
     {
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
-        if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-        while (!uisprime(q)) { q += p; }
-        break;
+	if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
+	while (!uisprime(q)) { q += p; }
+	break;
       }
     } while (q % p != 1);
     if (DEBUGLEVEL>4) fprintferr("\tchecking modulo %ld\n", q);
@@ -3175,7 +3175,7 @@ ifac_resort(GEN *partial, GEN *where)
 
   for (scan = *where; scan <= scan_end; scan += 3)
     if (VALUE(scan) && !CLASS(scan) /* slot occupied with an unknown */
-        && (res = ifac_sort_one(partial, where, scan)) ) return res;
+	&& (res = ifac_sort_one(partial, where, scan)) ) return res;
   return 0;
 }
 
@@ -3188,7 +3188,7 @@ ifac_isprime(GEN x)
   else if (factor_proven && ! BSW_isprime(VALUE(x)))
   {
     pari_warn(warner, "IFAC: pseudo-prime %Z\n\tis not prime. PLEASE REPORT!\n",
-              VALUE(x));
+	      VALUE(x));
     CLASS(x) = gen_0;
   }
   else
@@ -3217,19 +3217,19 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
     {
       if (CLASS(scan))
       { /* known class of factor */
-        if (CLASS(scan) == gen_0) break;
-        if (CLASS(scan) == gen_1)
-        {
-          if (DEBUGLEVEL>=3)
-          {
-            fprintferr("IFAC: factor %Z\n\tis prime (no larger composite)\n",
-                       VALUE(*where));
-            fprintferr("IFAC: prime %Z\n\tappears with exponent = %ld\n",
-                       VALUE(*where), itos(EXPON(*where)));
-          }
-          CLASS(scan) = gen_2;
-        }
-        continue;
+	if (CLASS(scan) == gen_0) break;
+	if (CLASS(scan) == gen_1)
+	{
+	  if (DEBUGLEVEL>=3)
+	  {
+	    fprintferr("IFAC: factor %Z\n\tis prime (no larger composite)\n",
+		       VALUE(*where));
+	    fprintferr("IFAC: prime %Z\n\tappears with exponent = %ld\n",
+		       VALUE(*where), itos(EXPON(*where)));
+	  }
+	  CLASS(scan) = gen_2;
+	}
+	continue;
       }
       if (!ifac_isprime(scan)) break; /* must disable Q-to-P */
       CLASS(scan) = gen_2; /* P_i, finished prime */
@@ -3282,10 +3282,10 @@ ifac_divide(GEN *partial, GEN *where)
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("IFAC: a factor was a power of another prime factor\n");
       } else {
-        CLASS(scan) = NULL;	/* at any rate it's Unknown now */
-        if (DEBUGLEVEL >= 4)
-          fprintferr("IFAC: a factor was divisible by another prime factor,\n"
-	             "\tleaving a cofactor = %Z\n", VALUE(scan));
+	CLASS(scan) = NULL;	/* at any rate it's Unknown now */
+	if (DEBUGLEVEL >= 4)
+	  fprintferr("IFAC: a factor was divisible by another prime factor,\n"
+		     "\tleaving a cofactor = %Z\n", VALUE(scan));
       }
       res = 1;
       if (DEBUGLEVEL >= 5)
@@ -3374,7 +3374,7 @@ ifac_crack(GEN *partial, GEN *where)
       else if (exponent == gen_2)
       { EXPON(*where) = utoipos(exp1<<1); av = avma; }
       else
-        affsi(exp1 * itos(exponent), EXPON(*where));
+	affsi(exp1 * itos(exponent), EXPON(*where));
       exponent = EXPON(*where);
       if (moebius_mode) return 0; /* no need to carry on */
     } /* while is_357_power */
@@ -3391,7 +3391,7 @@ ifac_crack(GEN *partial, GEN *where)
       else if (exponent == gen_2)
       { EXPON(*where) = utoipos(exp1<<1); av = avma; }
       else
-        affsi(exp1 * itos(exponent), EXPON(*where));
+	affsi(exp1 * itos(exponent), EXPON(*where));
       exponent = EXPON(*where);
       if (moebius_mode) return 0; /* no need to carry on */
     } /* while is_odd_power */
@@ -3399,7 +3399,7 @@ ifac_crack(GEN *partial, GEN *where)
     if (exp2 > 1 && hint != 15 && ifac_isprime(*where))
     { /* Something nice has happened and our composite has become prime */
       if (DEBUGLEVEL >= 4)
-        fprintferr("IFAC: factor %Z\n\tis prime\n", VALUE(*where));
+	fprintferr("IFAC: factor %Z\n\tis prime\n", VALUE(*where));
       return 0;	/* bypass subsequent ifac_whoiswho() call */
     }
   } /* odd power stage */
@@ -3411,8 +3411,8 @@ ifac_crack(GEN *partial, GEN *where)
     if (!factor)
     { /* Shanks' squfof() */
       if (DEBUGLEVEL >= 4)
-        fprintferr("IFAC: trying Shanks' SQUFOF, will fail silently if input\n"
-                   "      is too large for it.\n");
+	fprintferr("IFAC: trying Shanks' SQUFOF, will fail silently if input\n"
+		   "      is too large for it.\n");
       factor = squfof(VALUE(*where));
     }
   }
@@ -3438,10 +3438,10 @@ ifac_crack(GEN *partial, GEN *where)
     { /* limited factorization */
       if (DEBUGLEVEL >= 2)
       {
-        if (hint != 15)
-          pari_warn(warner, "IFAC: unfactored composite declared prime");
-        else
-          pari_warn(warner, "IFAC: untested integer declared prime");
+	if (hint != 15)
+	  pari_warn(warner, "IFAC: unfactored composite declared prime");
+	else
+	  pari_warn(warner, "IFAC: untested integer declared prime");
 
 	/* don't print it out at level 3 or above, where it would appear
 	 * several times before and after this message already */
@@ -3537,9 +3537,9 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
       if (newexp != gen_1) /* new exp > 1 */
 	e = addis(EXPON(*where), exponent * itos(newexp));
       else if (EXPON(*where) == gen_1 && exponent == 1)
-        e = gen_2;
+	e = gen_2;
       else
-        e = addis(EXPON(*where), exponent);
+	e = addis(EXPON(*where), exponent);
       EXPON(*where) = e;
 
       if (moebius_mode) return 0; /* stop now, but with exponent updated */
@@ -3621,13 +3621,13 @@ ifac_main(GEN *partial)
 	{
 	  if (DEBUGLEVEL >= 3)
 	    fprintferr("IFAC: main loop: another factor was divisible by\n"
-	               "\t%Z\n", *here);
+		       "\t%Z\n", *here);
 	  return gen_0;
 	}
 	ifac_defrag(partial, &here);
 	(void)ifac_resort(partial, &here); /* sort new cofactors down */
-        /* it doesn't matter whether this finds a repeated factor: we never
-         * get to this point in Moebius mode */
+	/* it doesn't matter whether this finds a repeated factor: we never
+	 * get to this point in Moebius mode */
 	ifac_defrag(partial, &here); /* resort may have created new gaps */
 	ifac_whoiswho(partial, &here, -1);
       }

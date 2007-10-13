@@ -273,12 +273,12 @@ forvec_next_le_i(GEN gd, GEN ignored)
       /* m[i] < a[i] <= M[i] < M[i+1] */
       while (i < d->n)
       {
-        GEN t;
-        i++;
-        if (cmpii(d->a[i-1], d->a[i]) <= 0) continue;
-        /* a[i-1] <= M[i-1] <= M[i] */
-        t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-        d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1],m[i])*/
+	GEN t;
+	i++;
+	if (cmpii(d->a[i-1], d->a[i]) <= 0) continue;
+	/* a[i-1] <= M[i-1] <= M[i] */
+	t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
+	d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1],m[i])*/
       }
       return (GEN)d->a;
     }
@@ -298,19 +298,19 @@ forvec_next_le(GEN gd, GEN v)
     {
       while (i < d->n)
       {
-        i++;
-        if (gcmp(gel(v,i-1), gel(v,i)) <= 0) continue;
-        while (gcmp(gel(v,i-1), d->M[i]) > 0)
-        {
-          i = imin - 1; if (!i) return NULL;
-          imin = i;
-          gel(v,i) = gaddgs(gel(v,i), 1);
-          if (gcmp(gel(v,i), d->M[i]) <= 0) break;
-        }
-        if (i > 1) { /* a >= a[i-1] - a[i] */
-          GEN a = gceil(gsub(gel(v,i-1), gel(v,i)));
-          gel(v,i) = gadd(gel(v,i), a);
-        }
+	i++;
+	if (gcmp(gel(v,i-1), gel(v,i)) <= 0) continue;
+	while (gcmp(gel(v,i-1), d->M[i]) > 0)
+	{
+	  i = imin - 1; if (!i) return NULL;
+	  imin = i;
+	  gel(v,i) = gaddgs(gel(v,i), 1);
+	  if (gcmp(gel(v,i), d->M[i]) <= 0) break;
+	}
+	if (i > 1) { /* a >= a[i-1] - a[i] */
+	  GEN a = gceil(gsub(gel(v,i-1), gel(v,i)));
+	  gel(v,i) = gadd(gel(v,i), a);
+	}
       }
       return v;
     }
@@ -333,15 +333,15 @@ forvec_next_lt_i(GEN gd, GEN ignored)
       /* m[i] < a[i] <= M[i] < M[i+1] */
       while (i < d->n)
       {
-        pari_sp av;
-        GEN t;
-        i++;
-        if (cmpii(d->a[i-1], d->a[i]) < 0) continue;
-        av = avma;
-        /* a[i-1] <= M[i-1] < M[i] */
-        t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
-        d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1]+1,m[i]) <= M[i]*/
-        avma = av;
+	pari_sp av;
+	GEN t;
+	i++;
+	if (cmpii(d->a[i-1], d->a[i]) < 0) continue;
+	av = avma;
+	/* a[i-1] <= M[i-1] < M[i] */
+	t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
+	d->a[i] = resetloop(d->a[i], t);/*a[i]:=max(a[i-1]+1,m[i]) <= M[i]*/
+	avma = av;
       }
       return (GEN)d->a;
     }
@@ -361,22 +361,22 @@ forvec_next_lt(GEN gd, GEN v)
     {
       while (i < d->n)
       {
-        i++;
-        if (gcmp(gel(v,i-1), gel(v,i)) < 0) continue;
-        for(;;)
-        {
-          GEN a, b;
-          a = addis(gfloor(gsub(gel(v,i-1), gel(v,i))), 1); /* a> v[i-1]-v[i] */
-          b = gadd(gel(v,i), a);
-          /* v[i-1] < b <= v[i-1] + 1 */
-          if (gcmp(b, d->M[i]) <= 0) { gel(v,i) = b; break; }
+	i++;
+	if (gcmp(gel(v,i-1), gel(v,i)) < 0) continue;
+	for(;;)
+	{
+	  GEN a, b;
+	  a = addis(gfloor(gsub(gel(v,i-1), gel(v,i))), 1); /* a> v[i-1]-v[i] */
+	  b = gadd(gel(v,i), a);
+	  /* v[i-1] < b <= v[i-1] + 1 */
+	  if (gcmp(b, d->M[i]) <= 0) { gel(v,i) = b; break; }
 
-          for (; i >= imin; i--) gel(v,i) = d->m[i];
-          if (!i) return NULL;
-          imin = i;
-          gel(v,i) = gaddgs(gel(v,i), 1);
-          if (gcmp(gel(v,i), d->M[i]) <= 0) break;
-        }
+	  for (; i >= imin; i--) gel(v,i) = d->m[i];
+	  if (!i) return NULL;
+	  imin = i;
+	  gel(v,i) = gaddgs(gel(v,i), 1);
+	  if (gcmp(gel(v,i), d->M[i]) <= 0) break;
+	}
       }
       return v;
     }
@@ -412,18 +412,18 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     if (i > 1) switch(flag)
     {
       case 1: /* a >= m[i-1] - m */
-        a = gceil(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
-        if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
-        break;
+	a = gceil(gsub(d->m[i-1], m));
+	if (typ(a) != t_INT) pari_err(typeer,"forvec");
+	if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
+	break;
       case 2: /* a > m[i-1] - m */
-        a = gfloor(gsub(d->m[i-1], m));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
-        a = addis(a, 1);
-        if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
-        break;
+	a = gfloor(gsub(d->m[i-1], m));
+	if (typ(a) != t_INT) pari_err(typeer,"forvec");
+	a = addis(a, 1);
+	if (signe(a) > 0) m = gadd(m, a); else m = gcopy(m);
+	break;
       default: m = gcopy(m);
-        break;
+	break;
     }
     if (gcmp(m,M) > 0) return (GEN)NULL;
     d->m[i] = m;
@@ -434,21 +434,21 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     GEN a, M = d->M[i];
     switch(flag) {
       case 1:/* a >= M - M[i] */
-        a = gfloor(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
-        if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
-        /* M <= M[i+1] */
-        break;
+	a = gfloor(gsub(d->M[i+1], M));
+	if (typ(a) != t_INT) pari_err(typeer,"forvec");
+	if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
+	/* M <= M[i+1] */
+	break;
       case 2:
-        a = gceil(gsub(d->M[i+1], M));
-        if (typ(a) != t_INT) pari_err(typeer,"forvec");
-        a = subis(a, 1);
-        if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
-        /* M < M[i+1] */
-        break;
+	a = gceil(gsub(d->M[i+1], M));
+	if (typ(a) != t_INT) pari_err(typeer,"forvec");
+	a = subis(a, 1);
+	if (signe(a) < 0) M = gadd(M, a); else M = gcopy(M);
+	/* M < M[i+1] */
+	break;
       default:
-        M = gcopy(M);
-        break;
+	M = gcopy(M);
+	break;
     }
     d->M[i] = M;
   }
@@ -722,8 +722,8 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     {
       if (!gcmp1(polnum))
       {
-        if (!gcmp_1(polnum)) pari_err(talker,"constant term != 1 in direuler");
-        polden = gneg(polden);
+	if (!gcmp_1(polnum)) pari_err(talker,"constant term != 1 in direuler");
+	polden = gneg(polden);
       }
     }
     else
@@ -735,9 +735,9 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       c = gel(polnum,2);
       if (!gcmp1(c))
       {
-        if (!gcmp_1(c)) pari_err(talker,"constant term != 1 in direuler");
-        polnum = gneg(polnum);
-        polden = gneg(polden);
+	if (!gcmp_1(c)) pari_err(talker,"constant term != 1 in direuler");
+	polnum = gneg(polnum);
+	polden = gneg(polden);
       }
       for (i=1; i<=n; i++) y[i]=x[i];
       q = p; qlim = n/p;
@@ -747,7 +747,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 	if (!gcmp0(c))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
 	    gel(x,k1) = gadd(gel(x,k1), gmul(c,gel(y,k)));
-        if (q > qlim) break;
+	if (q > qlim) break;
 	q *= p;
       }
     }
@@ -1030,11 +1030,11 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       for(kk=0;;kk++)
       {
 
-        long ex;
-        affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + kk; setexpo(reel,ex);
+	long ex;
+	affgr(eval(addii(r,a), E), reel);
+	ex = expo(reel) + kk; setexpo(reel,ex);
 	x = mpadd(x,reel); if (kk && ex < G) break;
-        r = shifti(r,1);
+	r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k < N) stock[2*k+1] = x;
@@ -1069,11 +1069,11 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
       x = gen_0; r = utoipos(2*k);
       for(kk=0;;kk++)
       {
-        long ex;
-        affgr(eval(addii(r,a), E), reel);
-        ex = expo(reel) + kk; setexpo(reel,ex);
+	long ex;
+	affgr(eval(addii(r,a), E), reel);
+	ex = expo(reel) + kk; setexpo(reel,ex);
 	x = mpadd(x,reel); if (kk && ex < G) break;
-        r = shifti(r,1);
+	r = shifti(r,1);
       }
       x = gerepileupto(av2, x);
       if (2*k-1 < N) stock[2*k] = x;
@@ -1161,9 +1161,9 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
       min1 = gsub(gmulsg(3,gmul(xm,q)), gabs(gmul(q,tol1),0));
       min2 = gabs(gmul(e,q),0);
       if (gcmp(gmul2n(p,1), gmin(min1,min2)) < 0)
-        { e = d; d = gdiv(p,q); } /* interpolation OK */
+	{ e = d; d = gdiv(p,q); } /* interpolation OK */
       else
-        { d = xm; e = d; } /* failed, use bisection */
+	{ d = xm; e = d; } /* failed, use bisection */
     }
     else { d = xm; e = d; } /* bound decreasing too slowly, use bisection */
     a = b; fa = fb;

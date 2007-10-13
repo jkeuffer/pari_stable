@@ -197,7 +197,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 	d1 = subii(muliu(d,xu1), muliu(d1,xv1)); d = r;
 	r  = addii(muliu(v,xu),  muliu(v1,xv));
 	v1 = addii(muliu(v,xu1), muliu(v1,xv1)); v = r;
-        if (lhmres&1) { togglesign(d); s = -s; } else togglesign(d1);
+	if (lhmres&1) { togglesign(d); s = -s; } else togglesign(d1);
       }
       /* check whether we're done.  Assert v <= bmax here.  Examine v1:
        * if v1 > bmax, check d and return 0 or 1 depending on the outcome;

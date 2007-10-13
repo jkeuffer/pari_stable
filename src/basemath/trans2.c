@@ -175,8 +175,8 @@ gasin(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return real_0_bit(expo(x));
       if (absrnz_egal1(x)) { /* |x| = 1 */
-        if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
-        y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
+	if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
+	y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
       }
       if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
@@ -243,7 +243,7 @@ gacos(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return acos0(expo(x));
       if (absrnz_egal1(x)) /* |x| = 1 */
-        return sx > 0? real_0_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
+	return sx > 0? real_0_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
@@ -260,8 +260,8 @@ gacos(GEN x, long prec)
       if (valp(y) < 0) pari_err(negexper,"gacos");
       if (lg(y) > 2)
       {
-        p1 = gsubsg(1,gsqr(y));
-        if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
+	p1 = gsubsg(1,gsqr(y));
+	if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
 	p1 = integ(gdiv(gneg(derivser(y)), gsqrt(p1,prec)), varn(y));
 	if (gcmp1(gel(y,2)) && !valp(y)) /*y(t) = 1+O(t)*/
 	  return gerepileupto(av, p1);
@@ -528,11 +528,11 @@ gash(GEN x, long prec)
       y = glog(p1,prec);
       sz = (typ(y)==t_COMPLEX)? gsigne(gel(y,1)): gsigne(y);
       if (typ(p1) == t_COMPLEX) {
-        sx = gsigne(gel(p1,1));
-        sy = gsigne(gel(p1,2));
+	sx = gsigne(gel(p1,1));
+	sy = gsigne(gel(p1,2));
       } else {
-        sx = gsigne(p1);
-        sy = 0;
+	sx = gsigne(p1);
+	sy = 0;
       }
       if (sx > 0 || (!sx && sy*sz<=0)) return gerepileupto(av, y);
 
@@ -604,17 +604,17 @@ gach(GEN x, long prec)
       if (v < 0) pari_err(negexper,"gach");
       if (gcmp0(y))
       {
-        if (!v) return gerepilecopy(av, y);
-        return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
+	if (!v) return gerepilecopy(av, y);
+	return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
       p1 = gdiv(derivser(y), gsqrt(gsubgs(gsqr(y),1),prec));
       a = integ(p1, varn(y));
       if (v)
-        p1 = PiI2n(-1, prec); /* I Pi/2 */
+	p1 = PiI2n(-1, prec); /* I Pi/2 */
       else
       {
-        p1 = gel(y,2); if (gcmp1(p1)) return gerepileupto(av,a);
-        p1 = gach(p1, prec);
+	p1 = gel(y,2); if (gcmp1(p1)) return gerepileupto(av,a);
+	p1 = gach(p1, prec);
       }
       return gerepileupto(av, gadd(p1,a));
   }
@@ -717,7 +717,7 @@ mpbern(long nb, long prec)
   else i = 1;
   if (DEBUGLEVEL) {
     fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
-               i,nb,prec);
+	       i,nb,prec);
     TIMERstart(&T);
   }
 
@@ -894,7 +894,7 @@ darg(double s, double t)
   if (!s) return (t>0)? PI/2: -PI/2;
   x = atan(t/s);
   return (s>0)? x
-              : ((t>0)? x+PI : x-PI);
+	      : ((t>0)? x+PI : x-PI);
 }
 
 void
@@ -1010,24 +1010,24 @@ cxgamma(GEN s0, int dolog, long prec)
       double beta;
       if (e > 1000)
       {
-        nn = 0;
-        beta = log(pariK4 / (prec-2)) / LOG2 + e;
-        if (beta > 1.) beta += log(beta)/LOG2;
-        lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
+	nn = 0;
+	beta = log(pariK4 / (prec-2)) / LOG2 + e;
+	if (beta > 1.) beta += log(beta)/LOG2;
+	lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
       }
       else
       {
-        double alpha = sqrt( dnorm(ssig, st) );
-        beta = bit_accuracy_mul(prec,LOG2/(2*PI)) - alpha;
-        if (beta >= 0) nn = (long)(1+pariK2*beta); else nn = 0;
-        if (nn)
-          lim = (long)(1+PI*(alpha+nn));
-        else
-        {
-          beta = log( pariK4 * alpha / (prec-2) ) / LOG2;
-          if (beta > 1.) beta += log(beta)/LOG2;
-          lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
-        }
+	double alpha = sqrt( dnorm(ssig, st) );
+	beta = bit_accuracy_mul(prec,LOG2/(2*PI)) - alpha;
+	if (beta >= 0) nn = (long)(1+pariK2*beta); else nn = 0;
+	if (nn)
+	  lim = (long)(1+PI*(alpha+nn));
+	else
+	{
+	  beta = log( pariK4 * alpha / (prec-2) ) / LOG2;
+	  if (beta > 1.) beta += log(beta)/LOG2;
+	  lim = (long)((bit_accuracy(prec)>>1)/beta + 1);
+	}
       }
       nn++;
     }
@@ -1044,23 +1044,23 @@ cxgamma(GEN s0, int dolog, long prec)
     if (is_bigint(s0)) {
       for (i=1; i < nn; i++)
       {
-        y = mulri(y, addis(s0, i));
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
-          y = gerepileuptoleaf(av2, y);
-        }
+	y = mulri(y, addis(s0, i));
+	if (low_stack(avlim,stack_lim(av2,3)))
+	{
+	  if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
+	  y = gerepileuptoleaf(av2, y);
+	}
       }
     } else {
       ulong ss = itou(s0);
       for (i=1; i < nn; i++)
       {
-        y = mulru(y, ss + i);
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
-          y = gerepileuptoleaf(av2, y);
-        }
+	y = mulru(y, ss + i);
+	if (low_stack(avlim,stack_lim(av2,3)))
+	{
+	  if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
+	  y = gerepileuptoleaf(av2, y);
+	}
       }
     }
     if (dolog) y = logr_abs(y);
@@ -1072,8 +1072,8 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gmul(y, gaddgs(s,i));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
-        y = gerepileupto(av2, y);
+	if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
+	y = gerepileupto(av2, y);
       }
     }
     if (dolog) y = logr_abs(y);
@@ -1086,8 +1086,8 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gadd(y, glog(gaddgs(s,i), prec));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
-        y = gerepileupto(av2, y);
+	if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
+	y = gerepileupto(av2, y);
       }
     }
   }
@@ -1118,11 +1118,11 @@ cxgamma(GEN s0, int dolog, long prec)
        *     = y - log( sin(Pi s) / (sqrt(2Pi)/2) ) */
       y = gsub(y, glog(gdiv(gsin(gmul(pi,s0),prec), shiftr(sqrtpi2,-1)), prec));
       if (signe(z)) {
-        if (gsigne(imag_i(s)) < 0) togglesign(z);
-        if (typ(y) == t_COMPLEX)
-          gel(y,2) = gadd(gel(y,2), z);
-        else
-          y = gadd(y, pureimag(z));
+	if (gsigne(imag_i(s)) < 0) togglesign(z);
+	if (typ(y) == t_COMPLEX)
+	  gel(y,2) = gadd(gel(y,2), z);
+	else
+	  y = gadd(y, pureimag(z));
       }
       p1 = gneg(p1);
     }
@@ -1292,7 +1292,7 @@ gammap_Morita(long n, GEN p, long e)
     {
       p2 = gmulgs(p2, i);
       if ((i&0xFL) == 0xFL)
-        p2 = gerepileupto(ltop, p2);
+	p2 = gerepileupto(ltop, p2);
     }
   return gerepileupto(ltop, p2);
 }
@@ -1360,8 +1360,8 @@ ggamma(GEN x, long prec)
       z = gel(x,1); /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
-        pari_err(talker, "argument too large in ggamma");
-        return NULL; /* not reached */
+	pari_err(talker, "argument too large in ggamma");
+	return NULL; /* not reached */
       }
       return gammahs(m-1, prec);
 

@@ -85,7 +85,7 @@ mulCC(GEN x, GEN y)
     p1 = mulii(gel(x,1),gel(y,1));
     p2 = mulii(gel(x,2),gel(y,2));
     y = mulii(addii(gel(x,1),gel(x,2)),
-              addii(gel(y,1),gel(y,2)));
+	      addii(gel(y,1),gel(y,2)));
     x = addii(p1,p2); tetpil = avma;
     gel(z,1) = subii(p1,p2);
     gel(z,2) = subii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
@@ -274,23 +274,23 @@ cook_square(GEN P, long nP)
   }
   gel(r,0) = Q;
   gel(r,1) = gdivgs(gsub(gsub(gmulgs(gel(vm,2),9),gel(vm,3)),
-                     gmulgs(gel(vm,1),45)),
-                60);
+		     gmulgs(gel(vm,1),45)),
+		60);
   gel(r,2) = gdivgs(gadd(gadd(gmulgs(gel(vp,1),270),gmulgs(Q,-490)),
-                     gadd(gmulgs(gel(vp,2),-27),gmulgs(gel(vp,3),2))),
-                360);
+		     gadd(gmulgs(gel(vp,2),-27),gmulgs(gel(vp,3),2))),
+		360);
   gel(r,3) = gdivgs(gadd(gadd(gmulgs(gel(vm,1),13),gmulgs(gel(vm,2),-8)),
-                    gel(vm,3)),
-                48);
+		    gel(vm,3)),
+		48);
   gel(r,4) = gdivgs(gadd(gadd(gmulgs(Q,56),gmulgs(gel(vp,1),-39)),
-                     gsub(gmulgs(gel(vp,2),12),gel(vp,3))),
-                144);
+		     gsub(gmulgs(gel(vp,2),12),gel(vp,3))),
+		144);
   gel(r,5) = gdivgs(gsub(gadd(gmulgs(gel(vm,1),-5),gmulgs(gel(vm,2),4)),
-                     gel(vm,3)),
-                240);
+		     gel(vm,3)),
+		240);
   gel(r,6) = gdivgs(gadd(gadd(gmulgs(Q,-20),gmulgs(gel(vp,1),15)),
-                     gadd(gmulgs(gel(vp,2),-6),gel(vp,3))),
-                720);
+		     gadd(gmulgs(gel(vp,2),-6),gel(vp,3))),
+		720);
   q = cgetg(2*n+3,t_POL); q[1] = evalsigne(1)|evalvarn(0);
   t = q+2;
   for (i=0; i<=2*n; i++) gel(t,i) = gen_0;
@@ -631,7 +631,7 @@ logmax_modulus(GEN p, double tau)
     if (++i == M) break;
 
     bit = (long) ((double)k * log2(1./tau2) +
-                     (double)(nn-k)*log2(1./eps) + 3*log2((double)nn)) + 1;
+		     (double)(nn-k)*log2(1./eps) + 3*log2((double)nn)) + 1;
     homothetie_gauss(q, e, bit-(long)floor(dbllog2(gel(q,2+nn))+0.5));
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
@@ -945,7 +945,7 @@ abs_update(GEN x, double *mu) {
 
 static void
 parameters(GEN p, long *LMAX, double *mu, double *gamma,
-           int polreal, double param, double param2)
+	   int polreal, double param, double param2)
 {
   GEN q, pc, Omega, A, RU, prim, g, ONE,TWO;
   long n = degpol(p), bit, NN, K, i, j, Lmax;
@@ -979,8 +979,8 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
       GEN z = RU;
       for (j=1; j<n; j++)
       {
-        gel(pc,j) = gmul(gel(q,j),z);
-        z = gmul(z,RU); /* RU = prim^i, z=prim^(ij) */
+	gel(pc,j) = gmul(gel(q,j),z);
+	z = gmul(z,RU); /* RU = prim^i, z=prim^(ij) */
       }
       gel(pc,n) = gmul(gel(q,n),z);
     }
@@ -1051,27 +1051,27 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
     {
       if (i>0 && i<K-1)
       {
-        for (j=1; j<=k; j++)
-        {
-          gel(W,j) = gadd(gel(W,j), gshift(real_i(gmul(gel(A,j+1),gel(RU,j+1))),1));
-          gel(U,j) = gadd(gel(U,j), gshift(real_i(gmul(gel(B,j),gel(RU,j))),1));
-        }
+	for (j=1; j<=k; j++)
+	{
+	  gel(W,j) = gadd(gel(W,j), gshift(real_i(gmul(gel(A,j+1),gel(RU,j+1))),1));
+	  gel(U,j) = gadd(gel(U,j), gshift(real_i(gmul(gel(B,j),gel(RU,j))),1));
+	}
       }
       else
       {
-        for (j=1; j<=k; j++)
-        {
-          gel(W,j) = gadd(gel(W,j), real_i(gmul(gel(A,j+1),gel(RU,j+1))));
-          gel(U,j) = gadd(gel(U,j), real_i(gmul(gel(B,j),gel(RU,j))));
-        }
+	for (j=1; j<=k; j++)
+	{
+	  gel(W,j) = gadd(gel(W,j), real_i(gmul(gel(A,j+1),gel(RU,j+1))));
+	  gel(U,j) = gadd(gel(U,j), real_i(gmul(gel(B,j),gel(RU,j))));
+	}
       }
     }
     else
     {
       for (j=1; j<=k; j++)
       {
-        gel(W,j) = gadd(gel(W,j), gmul(gel(A,j+1),gel(RU,j+1)));
-        gel(U,j) = gadd(gel(U,j), gmul(gel(B,j),gel(RU,j)));
+	gel(W,j) = gadd(gel(W,j), gmul(gel(A,j+1),gel(RU,j+1)));
+	gel(U,j) = gadd(gel(U,j), gmul(gel(B,j),gel(RU,j)));
       }
     }
     prim2 = gmul(prim2,prim);
@@ -1149,7 +1149,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
 
     bit1 = -error + Sbit2;
     HH = refine_H(mygprec(FF,bit1), mygprec(GG,bit1), mygprec(HH,bit1),
-                  1-error, Sbit2);
+		  1-error, Sbit2);
     if (!HH) return 0; /* FAIL */
 
     bit1 = -error + Sbit;
@@ -1171,7 +1171,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bit, double gamma)
 where cd is the leading coefficient of p */
 static void
 split_fromU(GEN p, long k, double delta, long bit,
-            GEN *F, GEN *G, double param, double param2)
+	    GEN *F, GEN *G, double param, double param2)
 {
   GEN pp, FF, GG, H;
   long n = degpol(p), NN, bit2, Lmax;
@@ -1200,7 +1200,7 @@ split_fromU(GEN p, long k, double delta, long bit,
 
 static void
 optimize_split(GEN p, long k, double delta, long bit,
-            GEN *F, GEN *G, double param, double param2)
+	    GEN *F, GEN *G, double param, double param2)
 {
   long n = degpol(p);
   GEN FF, GG;
@@ -1332,7 +1332,7 @@ update_radius(long n, double *radii, double lrho, double *par, double *par2)
 /* apply the conformal mapping then split from U */
 static void
 conformal_mapping(double *radii, GEN ctr, GEN p, long k, long bit,
-                  double aux, GEN *F,GEN *G)
+		  double aux, GEN *F,GEN *G)
 {
   long bit2, n = degpol(p), i;
   pari_sp ltop = avma, av;
@@ -1523,7 +1523,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
   q = translate_pol(q,b); gel(q,n+1) = gen_0; eq = gexpo(q);
   k = 0;
   while (k <= n/2 && (- gexpo(gel(q,k+2)) > bit2 + 2*(n-k) + eq
-                      || gcmp0(gel(q,k+2)))) k++;
+		      || gcmp0(gel(q,k+2)))) k++;
   if (k > 0)
   {
     if (k > n/2) k = n/2;
@@ -1587,12 +1587,12 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
       lr = logmax_modulus(q,0.05);
       if (lr < LOG1_9)
       {
-        split_0_1(q, bit, F, G);
-        *F = polrecip(*F);
-        *G = polrecip(*G);
+	split_0_1(q, bit, F, G);
+	*F = polrecip(*F);
+	*G = polrecip(*G);
       }
       else
-        split_2(p,bit,NULL, 1.2837,F,G);
+	split_2(p,bit,NULL, 1.2837,F,G);
     }
   }
 }
@@ -1631,8 +1631,8 @@ root_error(long n, long k, GEN roots_pol, long pari_err, GEN shatzle)
     {
       if (i != k && cmprr(gel(d,i),epsbis) > 0)
       {
-        m--;
-        prod = mulrr(prod, subrr(gel(d,i),eps));
+	m--;
+	prod = mulrr(prod, subrr(gel(d,i),eps));
       }
     }
     eps2 = sqrtnr(mpdiv(shiftr(aux,2*m-2), prod), m);
@@ -1926,10 +1926,10 @@ roots_com(GEN q, long bit)
       x = n / v; l = degpol(q);
       for (i = v; i <= l; i++)
       {
-        t  = gel(q,i+2);
-        if (isexactzero(t)) continue;
-        y = (n - gexpo(t)) / i;
-        if (y < x) x = y;
+	t  = gel(q,i+2);
+	if (isexactzero(t)) continue;
+	y = (n - gexpo(t)) / i;
+	if (y < x) x = y;
       }
     }
     z = real_0_bit(x); l = v + lg(L);
@@ -1965,7 +1965,7 @@ isrealappr(GEN x, long e)
     case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
       for (i=lontyp[tx]; i<lx; i++)
-        if (! isrealappr(gel(x,i),e)) return 0;
+	if (! isrealappr(gel(x,i),e)) return 0;
       return 1;
     default: pari_err(typeer,"isrealappr"); return 0;
   }
@@ -1977,7 +1977,7 @@ isconj(GEN x, GEN y, long e)
 {
   pari_sp av = avma;
   long i= (gexpo( gsub(gel(x,1),gel(y,1)) ) < e
-        && gexpo( gadd(gel(x,2),gel(y,2)) ) < e);
+	&& gexpo( gadd(gel(x,2),gel(y,2)) ) < e);
   avma = av; return i;
 }
 
@@ -2030,8 +2030,8 @@ roots(GEN p, long l)
       p1 = gel(com,k); if (!p1) continue;
       if (isconj(c,p1,e))
       {
-        gel(res,++s) = tocomplex(p1,l);
-        com[k] = 0; break;
+	gel(res,++s) = tocomplex(p1,l);
+	com[k] = 0; break;
       }
     }
     if (k==n) pari_err(bugparier,"roots (conjugates)");

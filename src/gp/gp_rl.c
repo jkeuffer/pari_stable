@@ -220,19 +220,19 @@ pari_rl_forward_sexp(int count, int key)
     move_point = 1;	/* Need to move point if moving left. */
     lfail = 0;		/* Do not need to fail left movement yet. */
     while ( !is_keyword_char(rl_line_buffer[rl_point])
-            && !strchr("\"([{}])",rl_line_buffer[rl_point])
-            && !( (dir == 1)
-                  ? (rl_point >= rl_end)
-                  : (rl_point <= 0 && (lfail = 1))))
-        rl_point += dir;
+	    && !strchr("\"([{}])",rl_line_buffer[rl_point])
+	    && !( (dir == 1)
+		  ? (rl_point >= rl_end)
+		  : (rl_point <= 0 && (lfail = 1))))
+	rl_point += dir;
     if (lfail || !rl_line_buffer[rl_point]) goto fail;
 
     if (is_keyword_char(rl_line_buffer[rl_point]))
     {
       while ( is_keyword_char(rl_line_buffer[rl_point])
-              && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0))
-                  || (move_point = 0)))
-        rl_point += dir;
+	      && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0))
+		  || (move_point = 0)))
+	rl_point += dir;
       if (!deep) count--;
     }
     else if (strchr(paropen,rl_line_buffer[rl_point]))
@@ -245,7 +245,7 @@ pari_rl_forward_sexp(int count, int key)
     {
       if (deep == 0 && dir == 1)
       {
-        rl_point++; goto fail; /* Get out of pars. */
+	rl_point++; goto fail; /* Get out of pars. */
       }
       rl_point += dir;
       deep--; if (!deep) count--;
@@ -256,9 +256,9 @@ pari_rl_forward_sexp(int count, int key)
 
       rl_point += dir;
       while ( ((rl_line_buffer[rl_point] != '\"') || (bad = 0))
-              && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0))
-                  || (move_point = 0)) )
-        rl_point += dir;
+	      && (!((dir == 1) ? (rl_point >= rl_end) : (rl_point <= 0))
+		  || (move_point = 0)) )
+	rl_point += dir;
       if (bad) goto fail;
       rl_point += dir;	/* Skip the other delimiter */
       if (!deep) count--;
@@ -504,10 +504,10 @@ member_generator(const char *text, int state)
       ep = hash[hashpos];
     }
     else if (ep->name[0]=='_' && ep->name[1]=='.'
-             && !strncmp(ep->name+2,TEXT,len))
-        break;
+	     && !strncmp(ep->name+2,TEXT,len))
+	break;
     else
-        ep = ep->next;
+	ep = ep->next;
   current_ep = ep; ep = ep->next;
   return add_prefix(current_ep->name+2,text,junk);
 }
@@ -535,7 +535,7 @@ ext_help_generator(const char *text, int state)
   {
     for ( ; keyword_list[n]; n++)
       if (!strncmp(keyword_list[n],TEXT,len))
-        return add_prefix(keyword_list[n++], text, junk);
+	return add_prefix(keyword_list[n++], text, junk);
     key = 0; state = 0;
   }
   return command_generator(text, state);
@@ -618,12 +618,12 @@ pari_completion(char *text, int START, int END)
       return get_matches(-1, text, FILE_COMPLETION);
     case '?':
       if (rl_line_buffer[first+1] == '?')
-        return get_matches(-1, text, ext_help_generator);
+	return get_matches(-1, text, ext_help_generator);
       return get_matches(-1, text, command_generator);
   }
 
   while (start && rl_line_buffer[start] != '('
-               && rl_line_buffer[start] != ',') start--;
+	       && rl_line_buffer[start] != ',') start--;
   if (rl_line_buffer[start] == '(' && start)
   {
     int iend, j,k;
@@ -650,7 +650,7 @@ pari_completion(char *text, int START, int END)
     while (k > j && isspace((int)rl_line_buffer[k])) k--;
     /* If we are in empty parens, insert the default arguments */
     if ((readline_state & DO_ARGS_COMPLETE) && k == j
-         && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
+	 && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
 	 && (iend - i < (long)sizeof(buf))
 	 && ( strncpy(buf, rl_line_buffer + i, iend - i),
 	      buf[iend - i] = 0, 1)
@@ -667,17 +667,17 @@ pari_completion(char *text, int START, int END)
       while (is_keyword_char(*s)) s++;
       if (*s++ == '(')
       { /* function call: insert arguments */
-        char *e = s;
-        while (*e && *e != ')' && *e != '(') e++;
-        if (*e == ')')
-        { /* we just skipped over the arguments in short help text */
-          char *str = strncpy(gpmalloc(e-s + 1), s, e-s);
-          char **ret = (char**)gpmalloc(sizeof(char*)*2);
-          str[e-s] = 0;
-          ret[0] = str; ret[1] = NULL;
-          if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
-          return ret;
-        }
+	char *e = s;
+	while (*e && *e != ')' && *e != '(') e++;
+	if (*e == ')')
+	{ /* we just skipped over the arguments in short help text */
+	  char *str = strncpy(gpmalloc(e-s + 1), s, e-s);
+	  char **ret = (char**)gpmalloc(sizeof(char*)*2);
+	  str[e-s] = 0;
+	  ret[0] = str; ret[1] = NULL;
+	  if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
+	  return ret;
+	}
       }
 #endif
     }
@@ -686,7 +686,7 @@ pari_completion(char *text, int START, int END)
     if (!is_keyword_char(rl_line_buffer[i]))
     {
       if (rl_line_buffer[i] == '.')
-        return get_matches(-1, text, member_generator);
+	return get_matches(-1, text, member_generator);
       break;
     }
   return get_matches(END, text, command_generator);
@@ -702,7 +702,7 @@ rl_short_help(int count, int key)
   (void)key;
   /* func() with cursor on ')' following completion */
   if (off && rl_line_buffer[off-1] == '('
-          && !is_keyword_char(rl_line_buffer[off])) off--;
+	  && !is_keyword_char(rl_line_buffer[off])) off--;
 
   while (off && is_keyword_char(rl_line_buffer[off-1])) off--;
 
@@ -851,8 +851,8 @@ completion_word(long end)
     switch(rl_line_buffer[i])
     {
       case '"':
-        found_quote = found_quote? NULL: rl_line_buffer + i;
-        break;
+	found_quote = found_quote? NULL: rl_line_buffer + i;
+	break;
 
       case '\\': i++; break;
     }
@@ -973,8 +973,8 @@ get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
     { /* Multi-line input. Remove incomplete lines */
       int i = history_length;
       while (i > index) {
-        HIST_ENTRY *e = remove_history(--i);
-        gpfree(e->line); gpfree(e);
+	HIST_ENTRY *e = remove_history(--i);
+	gpfree(e->line); gpfree(e);
       }
       gp_add_history(s);
     }

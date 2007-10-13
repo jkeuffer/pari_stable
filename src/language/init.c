@@ -335,13 +335,13 @@ pari_daemon(void)
   switch(pid) {
       case -1: return 1; /* father, fork failed */
       case 0:
-        setsid(); /* son becomes process group leader */
-        if (fork()) exit(0); /* now son exits, also when fork fails */
-        break; /* grandson: its father is the son, which exited,
-                * hence father becomes 'init', that'll take care of it */
+	setsid(); /* son becomes process group leader */
+	if (fork()) exit(0); /* now son exits, also when fork fails */
+	break; /* grandson: its father is the son, which exited,
+		* hence father becomes 'init', that'll take care of it */
       default: /* father, fork succeeded */
-        waitpid(pid,NULL,0); /* wait for son to exit, immediate */
-        return 1;
+	waitpid(pid,NULL,0); /* wait for son to exit, immediate */
+	return 1;
   }
   /* grandson */
   return 0;
@@ -398,9 +398,9 @@ pari_sighandler(int sig)
       pariFILE *f = GP_DATA->pp->file;
       if (f && pari_outfile == f->file)
       {
-        pari_err(talker, "Broken Pipe, resetting file stack...");
-        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
-        pari_outfile = stdout; pari_fclose(f);
+	pari_err(talker, "Broken Pipe, resetting file stack...");
+	GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
+	pari_outfile = stdout; pari_fclose(f);
       }
       /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
       return; /* not reached */
@@ -438,14 +438,14 @@ init_hashtable(entree **table, long tblsz)
       EP = ep->next;
       switch(EpVALENCE(ep))
       {
-        case EpVAR: case EpINSTALL: /* keep this one */
-          if (last)
-            last->next = ep;
-          else
-            table[i] = ep;
-          last = ep; last->next = NULL;
-          break;
-        default: freeep(ep);
+	case EpVAR: case EpINSTALL: /* keep this one */
+	  if (last)
+	    last->next = ep;
+	  else
+	    table[i] = ep;
+	  last = ep; last->next = NULL;
+	  break;
+	default: freeep(ep);
       }
     }
   }
@@ -710,7 +710,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   grow_init(MODULES);    grow_append(MODULES, functions_basic);
   grow_init(OLDMODULES); grow_append(OLDMODULES, oldfonctions);
   pari_fill_hashtable(functions_hash,
-                      new_fun_set? functions_basic:oldfonctions);
+		      new_fun_set? functions_basic:oldfonctions);
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
@@ -848,10 +848,10 @@ recover(int flag)
       epnext = ep->next;
       switch(EpVALENCE(ep))
       {
-        case EpVAR:
-          while (pop_val_if_newer(ep,listloc)) /* empty */;
-          break;
-        case EpNEW: break;
+	case EpVAR:
+	  while (pop_val_if_newer(ep,listloc)) /* empty */;
+	  break;
+	case EpNEW: break;
       }
     }
   parser_reset();
@@ -1052,8 +1052,8 @@ pari_err(long numerr, ...)
       jmp_buf *e = trapped->penv;
       if (numerr == invmoder)
       {
-        (void)va_arg(ap, char*); /* junk 1st arg */
-        global_err_data = (void*)va_arg(ap, GEN);
+	(void)va_arg(ap, char*); /* junk 1st arg */
+	global_err_data = (void*)va_arg(ap, GEN);
       }
       longjmp(*e, numerr);
     }
@@ -1075,21 +1075,21 @@ pari_err(long numerr, ...)
     switch (numerr)
     {
       case obsoler:
-        errcontext(s,NULL,NULL);
-        ch1 = va_arg(ap,char *);
-        whatnow_new_syntax(ch1, va_arg(ap,int));
-        break;
+	errcontext(s,NULL,NULL);
+	ch1 = va_arg(ap,char *);
+	whatnow_new_syntax(ch1, va_arg(ap,int));
+	break;
 
       case openfiler:
-        sprintf(s+strlen(s), "%s file", va_arg(ap,char*));
-        ch1 = va_arg(ap,char *);
-        errcontext(s,ch1,ch1); break;
+	sprintf(s+strlen(s), "%s file", va_arg(ap,char*));
+	ch1 = va_arg(ap,char *);
+	errcontext(s,ch1,ch1); break;
 
       case talker2:
-        strcat(s,va_arg(ap, char*)); /* fall through */
+	strcat(s,va_arg(ap, char*)); /* fall through */
       default:
-        ch1 = va_arg(ap,char *);
-        errcontext(s,ch1,va_arg(ap,char *));
+	ch1 = va_arg(ap,char *);
+	errcontext(s,ch1,va_arg(ap,char *));
     }
   }
   else if (numerr == user)
@@ -1107,39 +1107,39 @@ pari_err(long numerr, ...)
     switch (numerr)
     {
       case talker: case siginter: case invmoder:
-        ch1=va_arg(ap, char*);
-        vpariputs(ch1,ap); pariputc('.'); break;
+	ch1=va_arg(ap, char*);
+	vpariputs(ch1,ap); pariputc('.'); break;
 
       case impl:
-        ch1=va_arg(ap, char*);
-        pariprintf(" %s is not yet implemented.",ch1); break;
+	ch1=va_arg(ap, char*);
+	pariprintf(" %s is not yet implemented.",ch1); break;
 
       case typeer: case mattype1:
       case accurer: case infprecer: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
-        pariprintf(" in %s.",va_arg(ap, char*)); break;
+	pariprintf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-        pariprintf(" %s, please report",va_arg(ap, char*)); break;
+	pariprintf(" %s, please report",va_arg(ap, char*)); break;
 
       case operi: case operf:
       {
-        char *f, *op = va_arg(ap, char*);
-        GEN x = va_arg(ap, GEN);
-        GEN y = va_arg(ap, GEN);
-             if (*op == '+') f = "addition";
-        else if (*op == '*') f = "multiplication";
-        else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
-        else if (*op == 'g') { op = ","; f = "gcd"; }
-        else { op = "-->"; f = "assignment"; }
-        pariprintf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
-        break;
+	char *f, *op = va_arg(ap, char*);
+	GEN x = va_arg(ap, GEN);
+	GEN y = va_arg(ap, GEN);
+	     if (*op == '+') f = "addition";
+	else if (*op == '*') f = "multiplication";
+	else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
+	else if (*op == 'g') { op = ","; f = "gcd"; }
+	else { op = "-->"; f = "assignment"; }
+	pariprintf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
+	break;
       }
 
       case primer2:
-        pariprintf("%lu.", va_arg(ap, ulong));
-        break;
+	pariprintf("%lu.", va_arg(ap, ulong));
+	break;
     }
   }
   term_color(c_NONE); va_end(ap);
@@ -1357,8 +1357,8 @@ gcopy_av(GEN x, GEN *AVMA)
     {
       case t_INT: return *AVMA = icopy_av(x, *AVMA);
       case t_LIST:
-        y = cgetg_copy_av(3, x, AVMA);
-        listassign(x, y); return y;
+	y = cgetg_copy_av(3, x, AVMA);
+	listassign(x, y); return y;
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     for (i=1; i<lx; i++) y[i] = x[i];
@@ -1423,15 +1423,15 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
       case t_INT: return *AVMA = icopy_av_canon(x, *AVMA);
       case t_LIST:
       {
-        GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
-        if (z) {
-          list_data(y) = gcopy_av0_canon(z, AVMA);
-          list_nmax(y) = lg(z)-1;
-        } else {
-          list_data(y) = NULL;
-          list_nmax(y) = 0;
-        }
-        return y;
+	GEN y = cgetg_copy_av(3, x, AVMA), z = list_data(x);
+	if (z) {
+	  list_data(y) = gcopy_av0_canon(z, AVMA);
+	  list_nmax(y) = lg(z)-1;
+	} else {
+	  list_data(y) = NULL;
+	  list_nmax(y) = 0;
+	}
+	return y;
       }
     }
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
@@ -1459,8 +1459,8 @@ taille0(GEN x)
       case t_INT: return lgefint(x);
       case t_LIST:
       {
-        GEN L = list_data(x);
-        return L? 3 + taille0(L): 3;
+	GEN L = list_data(x);
+	return L? 3 + taille0(L): 3;
       }
       default: return lg(x);
     }
@@ -1509,18 +1509,18 @@ gclone(GEN x)
     switch(tx)
     {
       case t_INT:
-        lx = lgefint(x);
-        y[0] = evaltyp(t_INT)|evallg(lx);
-        for (i=1; i<lx; i++) y[i] = x[i];
-        break;
+	lx = lgefint(x);
+	y[0] = evaltyp(t_INT)|evallg(lx);
+	for (i=1; i<lx; i++) y[i] = x[i];
+	break;
       case t_LIST:
-        y[0] = evaltyp(t_LIST)|evallg(3);
-        listassign(x, y);
-        break;
+	y[0] = evaltyp(t_LIST)|evallg(3);
+	listassign(x, y);
+	break;
       default:
-        lx = lg(x);
-        for (i=0; i<lx; i++) y[i] = x[i];
-        break;
+	lx = lg(x);
+	for (i=0; i<lx; i++) y[i] = x[i];
+	break;
     }
   }
   else
@@ -1545,8 +1545,8 @@ shiftaddress(GEN x, long dec)
       if (!x[i]) gel(x,i) = gen_0;
       else
       {
-        x[i] += dec;
-        shiftaddress(gel(x,i), dec);
+	x[i] += dec;
+	shiftaddress(gel(x,i), dec);
       }
     }
   }
@@ -1567,10 +1567,10 @@ shiftaddress_canon(GEN x, long dec)
     } else if (tx == t_LIST) {
       GEN Lx = list_data(x);
       if (Lx) {
-        pari_sp av = avma;
-        GEN L = (GEN)((long)Lx+dec);
-        shiftaddress_canon(L, dec);
-        list_data(x) = list_internal_copy(L, lg(L)); avma = av;
+	pari_sp av = avma;
+	GEN L = (GEN)((long)Lx+dec);
+	shiftaddress_canon(L, dec);
+	list_data(x) = list_internal_copy(L, lg(L)); avma = av;
       }
     }
   }
@@ -1581,8 +1581,8 @@ shiftaddress_canon(GEN x, long dec)
       if (!x[i]) gel(x,i) = gen_0;
       else
       {
-        x[i] += dec;
-        shiftaddress_canon(gel(x,i), dec);
+	x[i] += dec;
+	shiftaddress_canon(gel(x,i), dec);
       }
     }
   }
@@ -1762,7 +1762,7 @@ gerepileupto(pari_sp av, GEN q)
   tq = typ(q);
   if (!is_recursive_t(tq))
     return tq == t_INT? gerepileuptointfast(av,q):
-                        gerepileuptoleaffast(av,q);
+			gerepileuptoleaffast(av,q);
   /* The garbage is only empty when av==q. It's probably a mistake if
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by pushentryval and they can be in the
@@ -1859,7 +1859,7 @@ allocatemoremem(size_t newsize)
   {
     newsize = (top - bot) << 1;
     pari_warn(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
-                newsize, newsize/1048576.);
+		newsize, newsize/1048576.);
   }
   allocating_mem();
   return init_stack(newsize);
@@ -1946,9 +1946,9 @@ TIMER(pari_timer *T)
   struct tms t; times(&t);
   return _get_time(T, t.tms_utime,
 #ifdef _SC_CLK_TCK
-                      sysconf(_SC_CLK_TCK)
+		      sysconf(_SC_CLK_TCK)
 #else
-                      CLK_TCK
+		      CLK_TCK
 #endif
   );
 }

@@ -77,7 +77,7 @@ translate(char **src, char *s)
 }
 
 #define match2(s,c) if (*s != c) \
-                      pari_err(talker,"expected character: '%c' instead of",c);
+		      pari_err(talker,"expected character: '%c' instead of",c);
 
 /*  Read a "string" from src. Format then copy it, starting at s. Return
  *  pointer to char following the end of the input string */
@@ -291,17 +291,17 @@ commands(long n)
     {
       switch (EpVALENCE(ep))
       {
-        case EpNEW:
-        case EpVAR: continue;
+	case EpNEW:
+	case EpVAR: continue;
       }
       if ((n < 0 && ep->menu) || ep->menu == n)
       {
-        list[s] = ep->name;
-        if (++s >= size)
-        {
+	list[s] = ep->name;
+	if (++s >= size)
+	{
 	  size += LIST_LEN+1;
-          list = (char**) gprealloc(list, size*sizeof(char *));
-        }
+	  list = (char**) gprealloc(list, size*sizeof(char *));
+	}
       }
     }
   list[s] = NULL;
@@ -519,8 +519,8 @@ filter_quotes(char *s)
       case '"' : doubquote++;
     }
   str = (char*)gpmalloc(l + quote * (strlen(QUOTE)-1)
-                          + doubquote * (strlen(DOUBQUOTE)-1)
-                          + backquote * (strlen(BACKQUOTE)-1) + 1);
+			  + doubquote * (strlen(DOUBQUOTE)-1)
+			  + backquote * (strlen(BACKQUOTE)-1) + 1);
   t = str;
   for (i=0; i < l; i++)
     switch(s[i])
@@ -642,7 +642,7 @@ aide0(char *s, int flag)
       skip_space(t);
       if (*t == '(') {
 	t++; skip_space(t);
-        e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
+	e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
 	if (is_default(t)) { external_help(t, 2); return; }
       }
     }
@@ -731,8 +731,8 @@ what_readline(void)
   }
   s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
   (void)sprintf(s, "v%s %s%s", ver,
-            (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
-            extra);
+	    (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
+	    extra);
 #else
   s = "not compiled in";
 #endif
@@ -790,7 +790,7 @@ print_version(void)
   ver = what_readline();
   buf = stackmalloc(strlen(ver) + 64);
   (void)sprintf(buf, "(readline %s, extended help%s enabled)", ver,
-                has_ext_help()? "": " not");
+		has_ext_help()? "": " not");
   center(buf); avma = av;
 }
 
@@ -800,7 +800,7 @@ gp_head(void)
 #ifdef READLINE
   if (GP_DATA->flags & TEXMACS)
     printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
-           DATA_BEGIN, DATA_END);
+	   DATA_BEGIN, DATA_END);
 #endif
   print_version(); pariputs("\n");
   center("Copyright (C) 2000-2006 The PARI Group");
@@ -850,7 +850,7 @@ escape(char *tch)
     while (*s)
       if (*s++ == '=')
       {
-        char *f = NULL;
+	char *f = NULL;
 	long len = (s-tch) - 1;
 	if      (!strncmp(tch,"precision",len))    f = "realprecision";
 	else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
@@ -877,22 +877,22 @@ escape(char *tch)
       switch (c)
       {
 	case 'B':
-        { /* prettyprinter */
-          gp_data G = *GP_DATA; /* copy */
-          gp_hist   h = *(G.hist); /* copy */
-          pariout_t f = *(G.fmt);  /* copy */
+	{ /* prettyprinter */
+	  gp_data G = *GP_DATA; /* copy */
+	  gp_hist   h = *(G.hist); /* copy */
+	  pariout_t f = *(G.fmt);  /* copy */
 
-          G.hist = &h; h.total = 0; /* no hist number */
-          G.fmt  = &f; f.prettyp = f_PRETTY;
-          G.flags &= ~(TEST|TEXMACS);
-          G.lim_lines = 0;
-          gp_output(x, &G); break;
-        }
+	  G.hist = &h; h.total = 0; /* no hist number */
+	  G.fmt  = &f; f.prettyp = f_PRETTY;
+	  G.flags &= ~(TEST|TEXMACS);
+	  G.lim_lines = 0;
+	  gp_output(x, &G); break;
+	}
 	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
 	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
 	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
 	case 'x': voir(x, get_int(s, -1)); break;
-        case 'w':
+	case 'w':
 	  s = get_sep(s); if (!*s) s = current_logfile;
 	  write0(s, mkvec(x)); return;
       }
@@ -908,9 +908,9 @@ escape(char *tch)
     case 'g':
       switch (*s)
       {
-        case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
-        case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
-        default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
+	case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
+	case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
+	default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'h': print_functions_hash(s); break;
@@ -918,8 +918,8 @@ escape(char *tch)
       s = get_sep(s);
       if (*s)
       {
-        (void)sd_logfile(s,d_ACKNOWLEDGE);
-        if (pari_logfile) break;
+	(void)sd_logfile(s,d_ACKNOWLEDGE);
+	if (pari_logfile) break;
       }
       (void)sd_log(pari_logfile?"0":"1",d_ACKNOWLEDGE);
       break;
@@ -927,8 +927,8 @@ escape(char *tch)
     case 'p':
       switch (*s)
       {
-        case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
-        default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
+	case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
+	default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'q': gp_quit(); break;
@@ -937,20 +937,20 @@ escape(char *tch)
       switchin(s);
       if (file_is_binary(pari_infile))
       {
-        int vector;
-        GEN x = gpreadbin(s, &vector);
-        if (vector) /* many BIN_GEN */
-        {
-          long i, l = lg(x);
-          pari_warn(warner,"setting %ld history entries", l-1);
-          for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
-        }
+	int vector;
+	GEN x = gpreadbin(s, &vector);
+	if (vector) /* many BIN_GEN */
+	{
+	  long i, l = lg(x);
+	  pari_warn(warner,"setting %ld history entries", l-1);
+	  for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
+	}
       }
       break;
     case 's': etatpile(); break;
     case 't': gentypes(); break;
     case 'u':
-        print_all_user_fun();
+	print_all_user_fun();
       break;
     case 'v': print_version(); break;
     case 'y':
@@ -1118,11 +1118,11 @@ gprc_get(char *path)
       while (t > path && *t != '/') t--;
       if (*t == '/')
       {
-        long l = t - path + 1;
-        t = gpmalloc(l + 6);
-        strncpy(t, path, l);
-        strcpy(t+l, s); f = gprc_chk(t);
-        gpfree(t);
+	long l = t - path + 1;
+	t = gpmalloc(l + 6);
+	strncpy(t, path, l);
+	strcpy(t+l, s); f = gprc_chk(t);
+	gpfree(t);
       }
     }
     gpfree(str);
@@ -1203,12 +1203,12 @@ next_expr(char *t)
     switch ((c = *s++))
     {
       case '"':
-        if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
-        break;
+	if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
+	break;
       case '\0':
-        return "";
+	return "";
       default:
-        if (outer && c == ';') { s[-1] = 0; return s; }
+	if (outer && c == ';') { s[-1] = 0; return s; }
     }
   }
 }
@@ -1245,8 +1245,8 @@ gp_initrc(growarray A, char *path)
       if (NOT) z = !z;
       if (!*s)
       { /* make sure at least an expr follows the directive */
-        if (!get_line_from_file(NULL,&F,file)) break;
-        s = b->buf;
+	if (!get_line_from_file(NULL,&F,file)) break;
+	s = b->buf;
       }
       if (!z) continue; /* dump current line */
     }
@@ -1259,7 +1259,7 @@ gp_initrc(growarray A, char *path)
 	s += 4;
 	t = gpmalloc(strlen(s) + 1);
 	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
-        grow_append(A, t);
+	grow_append(A, t);
       }
       else
       { /* set default */
@@ -1321,8 +1321,8 @@ update_logfile(const char *prompt, const char *s)
   switch (logstyle) {
   case logstyle_TeX:
     fprintf(pari_logfile,
-            "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-            prompt,s);
+	    "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+	    prompt,s);
     break;
   case logstyle_plain:
     fprintf(pari_logfile, "%s%s\n",prompt,s);
@@ -1381,7 +1381,7 @@ is_interactive(void)
   ulong f = GP_DATA->flags;
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   return (pari_infile == stdin && !(f & TEXMACS)
-                          && (f & EMACS || isatty(fileno(stdin))));
+			  && (f & EMACS || isatty(fileno(stdin))));
 #else
   return (pari_infile == stdin && !(f & TEXMACS));
 #endif
@@ -1400,7 +1400,7 @@ gp_read_line(filtre_t *F, char *PROMPT)
 #ifdef READLINE
     if (GP_DATA->flags & USE_READLINE)
       res = get_line_from_readline(PROMPT? PROMPT: GP_DATA->prompt,
-                                   GP_DATA->prompt_cont, F);
+				   GP_DATA->prompt_cont, F);
     else
 #endif
     {
@@ -1460,12 +1460,12 @@ gp_main_loop(int ismain)
       recover(0);
       if (setjmp(GP_DATA->env))
       { /* recover from error */
-        char *s = (char*)global_err_data;
-        if (s && *s) fprintferr("%Z\n", readseq(s));
+	char *s = (char*)global_err_data;
+	if (s && *s) fprintferr("%Z\n", readseq(s));
 	avma = top; av = 0;
-        prune_history(H, tloc);
-        GP_DATA->fmt->prettyp = outtyp;
-        kill_all_buffers(b);
+	prune_history(H, tloc);
+	GP_DATA->fmt->prettyp = outtyp;
+	kill_all_buffers(b);
       }
     }
 
@@ -1703,34 +1703,34 @@ read_opt(growarray A, long argc, char **argv)
     switch(*t++)
     {
       case 'b': b = read_arg(&i,t,argc,argv);
-        pari_warn(warner, "buffersize is no longer used. -b ignored");
-        break;
+	pari_warn(warner, "buffersize is no longer used. -b ignored");
+	break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
 
       case 'e':
 	if (strncmp(t,"macs",4)) usage(argv[0]); /* obsolete */
-        GP_DATA->flags |= EMACS; break;
+	GP_DATA->flags |= EMACS; break;
       case 'q':
-        GP_DATA->flags |= QUIET; break;
+	GP_DATA->flags |= QUIET; break;
       case 't':
 	if (strncmp(t,"est",3)) usage(argv[0]); /* obsolete */
-        GP_DATA->flags |= TEST; /* fall through */
+	GP_DATA->flags |= TEST; /* fall through */
       case 'f':
 	initrc = 0; break;
       case '-':
-        if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
-        if (strcmp(t, "version") == 0) {
-          init_trivial_stack(); print_version();
-          gpfree((void*)bot); exit(0);
-        }
-        if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
-        if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
-        if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
-        if (strcmp(t, "quiet") == 0) { GP_DATA->flags |= QUIET; break; }
-        if (strcmp(t, "fast") == 0) { initrc = 0; break; }
-        if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
-        if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
+	if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
+	if (strcmp(t, "version") == 0) {
+	  init_trivial_stack(); print_version();
+	  gpfree((void*)bot); exit(0);
+	}
+	if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
+	if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
+	if (strcmp(t, "test") == 0) { GP_DATA->flags |= TEST; initrc = 0; break; }
+	if (strcmp(t, "quiet") == 0) { GP_DATA->flags |= QUIET; break; }
+	if (strcmp(t, "fast") == 0) { initrc = 0; break; }
+	if (strncmp(t, "primelimit",10) == 0) {p = read_arg_equal(&i,t+10,argc,argv); break; }
+	if (strncmp(t, "stacksize",9) == 0) {s = read_arg_equal(&i,t+9,argc,argv); break; }
        /* fall through */
       default:
 	usage(argv[0]);
@@ -1759,7 +1759,7 @@ read_opt(growarray A, long argc, char **argv)
 #ifdef WINCE
 int
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-        LPWSTR lpCmdLine, int nShowCmd)
+	LPWSTR lpCmdLine, int nShowCmd)
 {
   char **argv = NULL;
   int argc = 1;
@@ -1822,8 +1822,8 @@ main(int argc, char **argv)
     for (i = 0; i < A->n; i++) {
       if (setjmp(GP_DATA->env))
       {
-        fprintferr("... skipping file '%s'\n", A->v[i]);
-        i++; if (i == A->n) break;
+	fprintferr("... skipping file '%s'\n", A->v[i]);
+	i++; if (i == A->n) break;
       }
       (void)read0((char*)A->v[i]); gpfree(A->v[i]);
     }
@@ -1892,21 +1892,21 @@ tex2mail_output(GEN z, long n)
     strcpy(c_out , term_get_color(c_OUTPUT));
     if (*c_hist || *c_out)
       sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
-              c_hist, n, c_out);
+	      c_hist, n, c_out);
     else
       sprintf(s, "\\%%%ld = ", n);
     pariputs_opt(s);
     if (o_logfile) {
       switch (logstyle) {
       case logstyle_plain:
-        fprintf(o_logfile, "%%%ld = ", n);
-        break;
+	fprintf(o_logfile, "%%%ld = ", n);
+	break;
       case logstyle_color:
-        fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
-        break;
+	fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
+	break;
       case logstyle_TeX:
-        fprintf(o_logfile, "\\PARIout{%ld}", n);
-        break;
+	fprintf(o_logfile, "\\PARIout{%ld}", n);
+	break;
       }
     }
   }

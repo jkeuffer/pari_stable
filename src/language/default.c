@@ -44,10 +44,10 @@ get_sep(const char *t)
     switch(*s++ = *t++)
     {
       case '"':
-        if (outer || (s >= buf+2 && s[-2] != '\\')) outer = !outer;
-        break;
+	if (outer || (s >= buf+2 && s[-2] != '\\')) outer = !outer;
+	break;
       case '\0':
-        return buf;
+	return buf;
       case ';':
 	if (outer) { s[-1] = 0; return buf; } break;
     }
@@ -247,7 +247,7 @@ sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
     {
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
       (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
-                    s, Min, Max);
+		    s, Min, Max);
       pari_err(talker2, buf, v,v);
     }
     *ptn = n;
@@ -256,7 +256,7 @@ sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
 
 static GEN
 sd_ulong(const char *v, long flag, char *s, ulong *ptn, ulong Min, ulong Max,
-           char **msg)
+	   char **msg)
 {
   ulong n = *ptn;
   sd_ulong_init(v, s, ptn, Min, Max);
@@ -266,14 +266,14 @@ sd_ulong(const char *v, long flag, char *s, ulong *ptn, ulong Min, ulong Max,
       return utoi(*ptn);
     case d_ACKNOWLEDGE:
       if (!*v || *ptn != n) {
-        if (msg)
-        {
-          if (!*msg) msg++; /* single msg, always printed */
-          else       msg += *ptn; /* one per possible value */
-          pariprintf("   %s = %lu %s\n", s, *ptn, *msg);
-        }
-        else
-          pariprintf("   %s = %lu\n", s, *ptn);
+	if (msg)
+	{
+	  if (!*msg) msg++; /* single msg, always printed */
+	  else       msg += *ptn; /* one per possible value */
+	  pariprintf("   %s = %lu %s\n", s, *ptn, *msg);
+	}
+	else
+	  pariprintf("   %s = %lu\n", s, *ptn);
       }
       break;
   }
@@ -357,7 +357,7 @@ gp_get_color(char **st)
       char *a[3];
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
-        if (*s == ',') { *s = 0; a[++i] = s+1; }
+	if (*s == ',') { *s = 0; a[++i] = s+1; }
       if (*s != ']') pari_err(talker2,"expected character: ']'",s, *st);
       *s = 0; for (i++; i<3; i++) a[i] = "";
       /*    properties    |   color    | background */
@@ -404,19 +404,19 @@ sd_colors(char *v, long flag)
     {
       n = gp_colors[c];
       if (n == c_NONE)
-        sprintf(t,"no");
+	sprintf(t,"no");
       else
       {
-        decode_color(n,col);
-        if (n & (1<<12))
-        {
-          if (col[0])
-            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
-          else
-            sprintf(t,"%ld",col[1]);
-        }
-        else
-          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
+	decode_color(n,col);
+	if (n & (1<<12))
+	{
+	  if (col[0])
+	    sprintf(t,"[%ld,,%ld]",col[1],col[0]);
+	  else
+	    sprintf(t,"%ld",col[1]);
+	}
+	else
+	  sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
       }
       t += strlen(t);
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
@@ -914,12 +914,12 @@ sd_prettyprinter(char *v, long flag)
       if (cancel) f = NULL;
       else
       {
-        f = try_pipe(v, mf_OUT);
-        if (!f)
-        {
-          pari_warn(warner,"broken prettyprinter: '%s'",v);
-          return gnil;
-        }
+	f = try_pipe(v, mf_OUT);
+	if (!f)
+	{
+	  pari_warn(warner,"broken prettyprinter: '%s'",v);
+	  return gnil;
+	}
       }
       pari_fclose(pp->file);
       pp->file = f;

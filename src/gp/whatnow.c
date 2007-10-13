@@ -716,7 +716,7 @@ whatnow(char *s, int flag)
     {
       int m=0;
       do
-        def = (functions_oldgp[m++]).name;
+	def = (functions_oldgp[m++]).name;
       while (def && strcmp(def,s));
       n += m - 1;
     }

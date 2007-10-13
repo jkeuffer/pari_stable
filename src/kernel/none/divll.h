@@ -43,7 +43,7 @@ extern ulong hiremainder;
 ({ 									\
   ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;	        \
   ulong __k, __d;                                                       \
-                                                                        \
+									\
   __n1 = hiremainder; __n0 = n0; __d = d;                               \
   if (__n1 == 0)                                                        \
   { /* Only one division needed */                                      \
@@ -77,7 +77,7 @@ extern ulong hiremainder;
     {									\
       __q1--, __r1 += __d;						\
       if (__r1 >= __d) /* we didn't get carry when adding to __r1 */    \
-        if (__r1 < __m)	__q1--, __r1 += __d;				\
+	if (__r1 < __m)	__q1--, __r1 += __d;				\
     }									\
     __r1 -= __m;							\
     __LDIV(__r1, __d1, __q0, __r0);                                     \
@@ -87,7 +87,7 @@ extern ulong hiremainder;
     {									\
       __q0--, __r0 += __d;						\
       if (__r0 >= __d)			        			\
-        if (__r0 < __m)	__q0--, __r0 += __d;				\
+	if (__r0 < __m)	__q0--, __r0 += __d;				\
     }									\
     hiremainder = (__r0 - __m) >> __k;		                        \
     __q1 = __GLUE(__q1, __q0);                 				\
@@ -98,7 +98,7 @@ extern ulong hiremainder;
 #else /* __GNUC__ */
 
 INLINE long
-divll(ulong n0, ulong d) 							
+divll(ulong n0, ulong d)
 {
   ulong __d1, __d0, __q1, __q0, __r1, __r0, __m, __n1, __n0;
   ulong __k, __d;
@@ -135,9 +135,9 @@ divll(ulong n0, ulong d)
     __r1 = __GLUE(__r1, HIGHWORD(__n0));
     if (__r1 < __m)
       {
-        __q1--, __r1 += __d;
-        if (__r1 >= __d) /* we didn't get carry when adding to __r1 */
-          if (__r1 < __m) __q1--, __r1 += __d;
+	__q1--, __r1 += __d;
+	if (__r1 >= __d) /* we didn't get carry when adding to __r1 */
+	  if (__r1 < __m) __q1--, __r1 += __d;
       }
     __r1 -= __m;
     __LDIV(__r1, __d1, __q0, __r0);
@@ -145,9 +145,9 @@ divll(ulong n0, ulong d)
     __r0 = __GLUE(__r0, LOWWORD(__n0));
     if (__r0 < __m)
       {
-        __q0--, __r0 += __d;
-        if (__r0 >= __d)
-          if (__r0 < __m) __q0--, __r0 += __d;
+	__q0--, __r0 += __d;
+	if (__r0 >= __d)
+	  if (__r0 < __m) __q0--, __r0 += __d;
       }
     hiremainder = (__r0 - __m) >> __k;
     __q1 = __GLUE(__q1, __q0);

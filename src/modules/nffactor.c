@@ -294,9 +294,9 @@ nffactor(GEN nf,GEN pol)
       long e = 0;
       for(e = 1;; e++)
       {
-        q = RgXQX_divrem(quo,fact,T, ONLY_DIVIDES);
-        if (!q) break;
-        quo = q;
+	q = RgXQX_divrem(quo,fact,T, ONLY_DIVIDES);
+	if (!q) break;
+	quo = q;
       }
       ex[j] = e;
     }
@@ -462,8 +462,8 @@ ZXY_get_prec(GEN P)
     {
       for (j=2; j<lg(p); j++)
       {
-        z = lgefint(p[j]);
-        if (z > prec) prec = z;
+	z = lgefint(p[j]);
+	if (z > prec) prec = z;
       }
     }
   }
@@ -741,13 +741,13 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       t2 = typ(t2)!=t_INT? FpX_rem(t2, Tpk, pk): modii(t2, pk);
       if (lt)
       {
-        if (typ(t2)!=t_INT) {
-          t1 = FpX_red(gmul(ltdn, t1), pk);
-          t2 = FpX_red(gmul(lt2dn,t2), pk);
-        } else {
-          t1 = remii(mulii(ltdn, t1), pk);
-          t2 = remii(mulii(lt2dn,t2), pk);
-        }
+	if (typ(t2)!=t_INT) {
+	  t1 = FpX_red(gmul(ltdn, t1), pk);
+	  t2 = FpX_red(gmul(lt2dn,t2), pk);
+	} else {
+	  t1 = remii(mulii(ltdn, t1), pk);
+	  t2 = remii(mulii(lt2dn,t2), pk);
+	}
       }
       gel(trace1,i) = gclone( nf_bestlift(t1, NULL, T->L) );
       gel(trace2,i) = gclone( nf_bestlift(t2, NULL, T->L) ); avma = av;
@@ -785,43 +785,43 @@ nextK:
       /* d - 1 test */
       if (T1)
       {
-        t = get_trace(ind, T1);
-        if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
-        {
-          if (DEBUGLEVEL>6) fprintferr(".");
-          avma = av; goto NEXT;
-        }
+	t = get_trace(ind, T1);
+	if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
+	{
+	  if (DEBUGLEVEL>6) fprintferr(".");
+	  avma = av; goto NEXT;
+	}
       }
       /* d - 2 test */
       if (T2)
       {
-        t = get_trace(ind, T2);
-        if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
-        {
-          if (DEBUGLEVEL>3) fprintferr("|");
-          avma = av; goto NEXT;
-        }
+	t = get_trace(ind, T2);
+	if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Bhigh)
+	{
+	  if (DEBUGLEVEL>3) fprintferr("|");
+	  avma = av; goto NEXT;
+	}
       }
       avma = av;
       y = lt; /* full computation */
       for (i=1; i<=K; i++)
       {
-        GEN q = gel(famod, ind[i]);
-        if (y) q = gmul(y, q);
-        y = FqX_centermod(q, Tpk, pk, pks2);
+	GEN q = gel(famod, ind[i]);
+	if (y) q = gmul(y, q);
+	y = FqX_centermod(q, Tpk, pk, pks2);
       }
       y = nf_pol_lift(y, bound, T);
       if (!y)
       {
-        if (DEBUGLEVEL>3) fprintferr("@");
-        avma = av; goto NEXT;
+	if (DEBUGLEVEL>3) fprintferr("@");
+	avma = av; goto NEXT;
       }
       /* try out the new combination: y is the candidate factor */
       q = RgXQX_divrem(C2ltpol, y, nfpol, ONLY_DIVIDES);
       if (!q)
       {
-        if (DEBUGLEVEL>3) fprintferr("*");
-        avma = av; goto NEXT;
+	if (DEBUGLEVEL>3) fprintferr("*");
+	avma = av; goto NEXT;
       }
 
       /* found a factor */
@@ -835,14 +835,14 @@ nextK:
       pol = q;
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
-        if (j <= K && i == ind[j]) j++;
-        else
-        {
-          famod[k] = famod[i];
-          update_trace(T1, k, i);
-          update_trace(T2, k, i);
-          degpol[k] = degpol[i]; k++;
-        }
+	if (j <= K && i == ind[j]) j++;
+	else
+	{
+	  famod[k] = famod[i];
+	  update_trace(T1, k, i);
+	  update_trace(T2, k, i);
+	  degpol[k] = degpol[i]; k++;
+	}
       }
       lfamod -= K;
       if (lfamod < 2*K) goto END;
@@ -855,8 +855,8 @@ nextK:
       C2ltpol = C2lt? gmul(C2lt,pol): pol;
       if (DEBUGLEVEL > 2)
       {
-        fprintferr("\n"); msgTIMER(&ti, "to find factor %Z",y);
-        fprintferr("remaining modular factor(s): %ld\n", lfamod);
+	fprintferr("\n"); msgTIMER(&ti, "to find factor %Z",y);
+	fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
     }
@@ -867,8 +867,8 @@ NEXT:
       if (--i == 0) { K++; goto nextK; }
       if (++ind[i] <= lfamod - K + i)
       {
-        curdeg = degsofar[i-1] + degpol[ind[i]];
-        if (curdeg <= klim) break;
+	curdeg = degsofar[i-1] + degpol[ind[i]];
+	if (curdeg <= klim) break;
       }
     }
   }
@@ -922,7 +922,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
     pari_sp av = avma;
     if (DEBUGLEVEL)
       fprintferr("nf_LLL_cmbf: checking factor %ld (avma - bot = %lu)\n",
-                 i, avma - bot);
+		 i, avma - bot);
     y = chk_factors_get(lt, famod, gel(piv,i), Tpk, pk);
     if (DEBUGLEVEL>2) fprintferr("... mod p^k (avma - bot = %lu)\n", avma-bot);
 
@@ -1062,10 +1062,10 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
       long i, j;
       for (i=1; i<=d; i++)
       {
-        GEN s = gen_0;
-        for (j=1; j<=d; j++)
-          s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(BB,j)));
-        if (gcmp(s, smax) > 0) smax = s;
+	GEN s = gen_0;
+	for (j=1; j<=d; j++)
+	  s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(BB,j)));
+	if (gcmp(s, smax) > 0) smax = s;
       }
       GSmin = gerepileupto(av2, ginv(gmul2n(smax, 2)));
     }
@@ -1157,7 +1157,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     bmin = logint(ceil_safe(sqrtr(Btra)), gen_2, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
-                 r, tmax, bmin);
+		 r, tmax, bmin);
 
     /* compute Newton sums (possibly relifting first) */
     if (gcmp(GSmin, Btra) < 0)
@@ -1227,7 +1227,7 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+		 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = mkcol(QXQX_normalize(P,nfT)); break; }
     if (b > bmin)
     {
@@ -1256,7 +1256,7 @@ AGAIN:
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nf_LLL_cmbf");
       gerepileall(av, Tpk? 9: 8,
-                      &CM_L,&TT,&Tra,&famod,&pk,&GSmin,&PRK,&PRKinv,&Tpk);
+		      &CM_L,&TT,&Tra,&famod,&pk,&GSmin,&PRK,&PRKinv,&Tpk);
     }
   }
   if (DEBUGLEVEL>2)
@@ -1297,7 +1297,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 
 static GEN
 nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
-             long fl, nflift_t *L)
+	     long fl, nflift_t *L)
 {
   long Cltx_r[] = { evaltyp(t_POL)|_evallg(4), 0,0,0 };
   long i, m;
@@ -1339,7 +1339,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
 
 static long
 nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
-              GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
+	      GEN *lt, GEN *Fa, GEN *pr, GEN *Tp)
 {
   GEN nfpol = gel(nf,1), dk, bad;
   long maxf, n = degpol(nfpol), dpol = degpol(polbase), nbf = 0;
@@ -1381,18 +1381,18 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       list = gel(FpX_factor(nfpol, ap),1);
       if (maxf == 1)
       { /* deg.1 factors are best */
-        r = gel(list,1);
-        if (degpol(r) == 1) break;
+	r = gel(list,1);
+	if (degpol(r) == 1) break;
       }
       else
       { /* otherwise, pick factor of largish degree */
-        long i, dr;
-        for (i = lg(list)-1; i > 0; i--)
-        {
-          r = gel(list,i); dr = degpol(r);
-          if (dr <= maxf) break;
-        }
-        if (i > 0) break;
+	long i, dr;
+	for (i = lg(list)-1; i > 0; i--)
+	{
+	  r = gel(list,i); dr = degpol(r);
+	  if (dr <= maxf) break;
+	}
+	if (i > 0) break;
       }
       avma = av2;
     }
@@ -1412,7 +1412,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       if (!FqX_is_squarefree(red,aT,ap)) { avma = av2; continue; }
       q = gpowgs(ap, degpol(aT));
       anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
-               : FqX_split_by_degree(&fa, red, q, aT, ap);
+	       : FqX_split_by_degree(&fa, red, q, aT, ap);
     }
     if (fl == 2 && anbf < dpol) return anbf;
     if (anbf <= 1)
@@ -1422,7 +1422,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
 
     if (!nbf || anbf < nbf
-             || (anbf == nbf && cmpii(gel(apr,4), gel(*pr,4)) > 0))
+	     || (anbf == nbf && cmpii(gel(apr,4), gel(*pr,4)) > 0))
     {
       nbf = anbf;
       *pr = apr;
@@ -1432,7 +1432,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     else avma = av2;
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
-                 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
+		 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
     if (--ct <= 0) return nbf;
   }
 }
@@ -1471,8 +1471,8 @@ nfsqff(GEN nf, GEN pol, long fl)
       long l = lg(z);
       for (i = 1; i < l; i++)
       {
-        t = gel(z,i); if (degpol(t) > 1) break;
-        gel(z,i) = gneg(gdiv(gel(t,2), gel(t,3)));
+	t = gel(z,i); if (degpol(t) > 1) break;
+	gel(z,i) = gneg(gdiv(gel(t,2), gel(t,3)));
       }
       setlg(z, i);
       if (fl == 2 && i != l) { avma = av; return cgetg(1,t_VEC); }
@@ -1560,7 +1560,7 @@ nfrootsall_and_pr(GEN nf, GEN pol)
   GEN J1,J2, pr, T, z = nfsqff(checknf(nf), pol, 2);
   if (lg(z) == 1) return NULL;
   (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
-                      &J1, &J2, &pr, &T);
+		      &J1, &J2, &pr, &T);
   return mkvec2(z, pr);
 }
 

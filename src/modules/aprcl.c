@@ -261,8 +261,8 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
     while (tf--) {
       res = _sqr(res, R);
       if (low_stack(lim, stack_lim(av,1))) {
-        res = gerepilecopy(av, res);
-        if(DEBUGMEM>1) pari_warn(warnmem,"powpolmod: f = %ld",f);
+	res = gerepilecopy(av, res);
+	if(DEBUGMEM>1) pari_warn(warnmem,"powpolmod: f = %ld",f);
       }
     }
   }
@@ -632,8 +632,8 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
     jj = 1;
     for (i=2; i<pk; i++) /* vpa = { a^i, (i,p) = 1 } */
       if (i%p) {
-        GEN z = mulii((i%p==1) ? a2 : a, gel(vpa,jj));
-        gel(vpa,++jj) = centermodii(z , R->N, R->N2);
+	GEN z = mulii((i%p==1) ? a2 : a, gel(vpa,jj));
+	gel(vpa,++jj) = centermodii(z , R->N, R->N2);
       }
     if (!gcmp1( centermodii( mulii(a, gel(vpa,ph)), R->N, R->N2) )) return 0;
     p1 = cgetg(ph+1,t_MAT);
@@ -644,7 +644,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
     {
       p2 = cgetg(ph+1,t_COL); gel(p1,j) = p2;
       for (i=1; i<=ph; i++)
-        gel(p2,i) = centermodii(mulii(gel(vpa,i),gel(p3,i)), R->N, R->N2);
+	gel(p2,i) = centermodii(mulii(gel(vpa,i),gel(p3,i)), R->N, R->N2);
       p3 = p2;
     }
     C->matvite = p1;
@@ -1007,8 +1007,8 @@ aprcl(GEN N)
     fprintferr("Individual Fermat powerings:\n");
     for (i=2; i<lg(pC); i++)
       if (pC[i]) {
-        fprintferr("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
-        sc += pC[i]->ctsgt;
+	fprintferr("  %-3ld: %3ld\n", i, pC[i]->ctsgt);
+	sc += pC[i]->ctsgt;
       }
     fprintferr("Number of Fermat powerings = %lu\n",sc);
     fprintferr("Maximal number of nondeterministic steps = %lu\n",ctglob);

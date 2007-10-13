@@ -18,15 +18,15 @@ unsigned long _DLL_InitTerm(unsigned long modHandle, unsigned long flag)
 {
     switch (flag) {
     case 0:     /* INIT */
-        /* Save handle */
-        dllHandle = modHandle;
+	/* Save handle */
+	dllHandle = modHandle;
 	handle_found = 1;
-        return TRUE;
+	return TRUE;
 
     case 1:     /* TERM */
 	handle_found = 0;
-        dllHandle = (unsigned long)NULLHANDLE;
-        return TRUE;
+	dllHandle = (unsigned long)NULLHANDLE;
+	return TRUE;
     }
 
     return FALSE;
@@ -79,13 +79,13 @@ dlopen(char *path, int mode)
 		    return (void*)dllHandle;
 		rc = DosQueryModuleName(dllHandle, sizeof(dllname), dllname);
 		if (rc) {
-	            strcpy(fail, "can't find my DLL name by the handle");
+		    strcpy(fail, "can't find my DLL name by the handle");
 		    retcode = rc;
 		    return 0;
 		}
 		rc = DosLoadModule(fail, sizeof fail, dllname, &handle);
 		if (rc) {
-	            strcpy(fail, "can't load my own DLL");
+		    strcpy(fail, "can't load my own DLL");
 		    retcode = rc;
 		    return 0;
 		}
@@ -93,7 +93,7 @@ dlopen(char *path, int mode)
 		goto ret;
 	    }
 	    retcode = ERROR_MOD_NOT_FOUND;
-            strcpy(fail, "can't load from myself: compiled without -DDLOPEN_INITTERM");
+	    strcpy(fail, "can't load from myself: compiled without -DDLOPEN_INITTERM");
 	    return 0;
 	}
 	if ((rc = DosLoadModule(fail, sizeof fail, path, &handle)) == 0)

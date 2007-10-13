@@ -95,7 +95,7 @@ static int
 no_prec_pb(GEN x)
 {
   return (typ(x) != t_REAL || lg(x) >  3
-                           || expo(x) < BITS_IN_LONG/2);
+			   || expo(x) < BITS_IN_LONG/2);
 }
 /* zero x[1..k-1], fill mu */
 static int
@@ -292,8 +292,8 @@ lll_trivial(GEN x, long flag)
       case lll_KER: return matid(1);
       case lll_IM : return cgetg(1,t_MAT);
       default: y=cgetg(3,t_VEC);
-        gel(y,1) = matid(1);
-        gel(y,2) = cgetg(1,t_MAT); return y;
+	gel(y,1) = matid(1);
+	gel(y,2) = cgetg(1,t_MAT); return y;
     }
   }
   if (flag & lll_GRAM) flag ^= lll_GRAM; else x = NULL;
@@ -410,11 +410,11 @@ ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
     {
       gel(xk,k) = addii(gel(xk,k), gel(xl,k));
       for (i=1;i<lx;i++)
-        gcoeff(x,k,i) = gel(xk,i) = addii(gel(xk,i), gel(xl,i));
+	gcoeff(x,k,i) = gel(xk,i) = addii(gel(xk,i), gel(xl,i));
     } else {
       gel(xk,k) = subii(gel(xk,k), gel(xl,k));
       for (i=1;i<lx;i++)
-        gcoeff(x,k,i) = gel(xk,i) = subii(gel(xk,i), gel(xl,i));
+	gcoeff(x,k,i) = gel(xk,i) = subii(gel(xk,i), gel(xl,i));
     }
   } else { /* h[,k] += q* h[,l]. x[,k] += q * x[,l]. L[k,] += q* L[l,] */
     gel(xk,k) = addii(gel(xk,k), mulii(q,gel(xl,k)));
@@ -515,7 +515,7 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
 
 static int
 do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
-         int gram)
+	 int gram)
 {
   GEN la,la2,p1,Bk;
   long i, j, lx;
@@ -575,7 +575,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
       gcoeff(L,i,k-1) = diviiexact(mulii(la,gcoeff(L,i,k-1)), Bk);
     for (j=k+1; j<kmax; j++)
       for (i=j+1; i<=kmax; i++)
-        gcoeff(L,i,j) = diviiexact(mulii(p1,gcoeff(L,i,j)), Bk);
+	gcoeff(L,i,j) = diviiexact(mulii(p1,gcoeff(L,i,j)), Bk);
   }
   else
   {
@@ -637,11 +637,11 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
       pari_sp av = avma;
       u = gram? gcoeff(x,k,j): ZV_dotproduct(gel(x,k), gel(x,j));
       for (i=1; i<j; i++)
-        if (fl[i])
-        {
-          u = subii(mulii(gel(B,i+1), u), mulii(gcoeff(L,k,i), gcoeff(L,j,i)));
-          u = diviiexact(u, gel(B,i));
-        }
+	if (fl[i])
+	{
+	  u = subii(mulii(gel(B,i+1), u), mulii(gcoeff(L,k,i), gcoeff(L,j,i)));
+	  u = diviiexact(u, gel(B,i));
+	}
       gcoeff(L,k,j) = gerepileuptoint(av, u);
     }
   s = signe(u);
@@ -656,7 +656,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 /* x integer matrix. Beware: this function can return NULL */
 GEN
 lllint_marked(long *pMARKED, GEN x, long D, int gram,
-              GEN *pth, GEN *ptfl, GEN *ptB)
+	      GEN *pth, GEN *ptfl, GEN *ptB)
 {
   long lx = lg(x), hx, i, j, k, l, n, kmax, MARKED;
   pari_sp av, lim;
@@ -705,16 +705,16 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
     else
     {
       if (k != MARKED)
-        for (l=k-2; l; l--)
-        {
-          if (!gram) ZRED(k,l, x,h,L,gel(B,l+1),kmax);
-          else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
-          if (low_stack(lim, stack_lim(av,1)))
-          {
-            if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
-            gerepileall(av,h?4:3,&B,&L,&x,&h);
-          }
-        }
+	for (l=k-2; l; l--)
+	{
+	  if (!gram) ZRED(k,l, x,h,L,gel(B,l+1),kmax);
+	  else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
+	  if (low_stack(lim, stack_lim(av,1)))
+	  {
+	    if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
+	    gerepileall(av,h?4:3,&B,&L,&x,&h);
+	  }
+	}
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -874,7 +874,7 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
       gcoeff(L,i,k-1) = gdiv(gmul(la,gcoeff(L,i,k-1)), Bk);
     for (j=k+1; j<lx-1; j++)
       for (i=j+1; i<lx; i++)
-        gcoeff(L,i,j) = gdiv(gmul(p1,gcoeff(L,i,j)), Bk);
+	gcoeff(L,i,j) = gdiv(gmul(p1,gcoeff(L,i,j)), Bk);
   }
   else
   {
@@ -900,11 +900,11 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
       u = gcoeff(x,k,j); tu = typ(u);
       if (! is_extscalar_t(tu)) pari_err(typeer,"incrementalGSgen");
       for (i=1; i<j; i++)
-        if (fl[i])
-        {
-          u = gsub(gmul(gel(B,i+1),u), gmul(gcoeff(L,k,i),gcoeff(L,j,i)));
-          u = gdiv(u, gel(B,i));
-        }
+	if (fl[i])
+	{
+	  u = gsub(gmul(gel(B,i+1),u), gmul(gcoeff(L,k,i),gcoeff(L,j,i)));
+	  u = gdiv(u, gel(B,i));
+	}
       gcoeff(L,k,j) = u;
     }
   if (gcmp0(u)) B[k+1] = B[k];
@@ -944,7 +944,7 @@ lllgramallgen(GEN x, long flag)
     else
     {
       for (l=k-2; l>=1; l--)
-        if (REDgen(k, l, h, L, gel(B,l+1))) flc = 1;
+	if (REDgen(k, l, h, L, gel(B,l+1))) flc = 1;
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1095,13 +1095,13 @@ PRECPB:
 
     av1 = avma;
     if (mpcmp( mpmul(delta, gsqr(gcoeff(R, k-1,k-1))),
-               mpadd(gsqr(gcoeff(R,k-1,k)), gsqr(gcoeff(R, k,k)))) > 0)
+	       mpadd(gsqr(gcoeff(R,k-1,k)), gsqr(gcoeff(R, k,k)))) > 0)
     {
       if (DEBUGLEVEL>3 && k == kmax)
       {
-        GEN q = mpsub( mpmul(delta, gsqr(gcoeff(R, k-1,k-1))),
-                       gsqr(gcoeff(R,k-1,k)));
-        fprintferr(" (%ld)", gexpo(q) - gexpo(gsqr(gcoeff(R, k,k))));
+	GEN q = mpsub( mpmul(delta, gsqr(gcoeff(R, k-1,k-1))),
+		       gsqr(gcoeff(R,k-1,k)));
+	fprintferr(" (%ld)", gexpo(q) - gexpo(gsqr(gcoeff(R, k,k))));
       }
       lswap(X[k], X[k-1]);
       lswap(h[k], h[k-1]);
@@ -1141,12 +1141,12 @@ prec_col(GEN c, long M, long *pl, GEN *D)
     GEN x = gel(c,i);
     switch(typ(x)) {
       case t_REAL:
-        *D = NULL;
-        l = lg(x); if (l > *pl) *pl = l;
-        break;
+	*D = NULL;
+	l = lg(x); if (l > *pl) *pl = l;
+	break;
       case t_FRAC:
-        if (*D) *D = lcmii(*D, gel(x,2));
-        break;
+	if (*D) *D = lcmii(*D, gel(x,2));
+	break;
     }
   }
 }
@@ -1226,30 +1226,30 @@ PRECPB:
       if (flag == 2) return mkvec(h);
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
-        if (prec < PREC_THRESHOLD)
-          prec = (prec<<1)-2;
-        else
-          prec = (long)((prec-2) * 1.25 + 2);
-        if (isexact)
-        {
-          if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
-          if (!in_place) H = H? gmul(H, h): h;
-          xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
-          gerepileall(av, in_place? 1: 2, &xinit, &H);
-          x = mat_to_MP(xinit, prec);
-          h = matid(n);
-          retry = 1; /* never abort if x is exact */
-          count_max = min(count_max << 1, 512);
-          if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
-        }
-        else
-        {
-          if (DEBUGLEVEL) pari_warn(warnprec,"lllfp",prec);
-          x = gprec_w(xinit,prec);
-          x = gram? qf_base_change(x, h, 1): gmul(x, h);
-          gerepileall(av, 2, &h, &x);
-        }
-        kmax = 1; break;
+	if (prec < PREC_THRESHOLD)
+	  prec = (prec<<1)-2;
+	else
+	  prec = (long)((prec-2) * 1.25 + 2);
+	if (isexact)
+	{
+	  if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
+	  if (!in_place) H = H? gmul(H, h): h;
+	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+	  gerepileall(av, in_place? 1: 2, &xinit, &H);
+	  x = mat_to_MP(xinit, prec);
+	  h = matid(n);
+	  retry = 1; /* never abort if x is exact */
+	  count_max = min(count_max << 1, 512);
+	  if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
+	}
+	else
+	{
+	  if (DEBUGLEVEL) pari_warn(warnprec,"lllfp",prec);
+	  x = gprec_w(xinit,prec);
+	  x = gram? qf_base_change(x, h, 1): gmul(x, h);
+	  gerepileall(av, 2, &h, &x);
+	}
+	kmax = 1; break;
       } /* fall through */
     case 0: /* give up */
       if (DEBUGLEVEL>3) fprintferr("\n");
@@ -1282,7 +1282,7 @@ PRECPB:
       count = 0;
     }
     else if (isexact && prec > PREC_DEC_THRESHOLD && k == kmax-1
-                                                  && ++count > count_max)
+						  && ++count > count_max)
     { /* try to reduce precision */
       count = 0;
       prec = (prec+2) >> 1;
@@ -1301,7 +1301,7 @@ PRECPB:
       if (DEBUGLEVEL>3)
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld\n", kmax);
       for (k1=1; k1<=kmax; k1++)
-        if (!incrementalGS(x, L, B, k1)) goto PRECPB;
+	if (!incrementalGS(x, L, B, k1)) goto PRECPB;
     }
     if (k != MARKED)
     {
@@ -1321,42 +1321,42 @@ PRECPB:
     else
     {
       if (k != MARKED)
-        for (l=k-2; l; l--)
-        {
-          if (!gram) j = RED(k,l, x,h,L,KMAX);
-          else  j = RED_gram(k,l, x,h,L,KMAX);
-          if (!j) goto PRECPB;
-          if (low_stack(lim, stack_lim(av,1)))
-          {
-            if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1], kmax = %ld", kmax);
-            gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
-          }
-        }
+	for (l=k-2; l; l--)
+	{
+	  if (!gram) j = RED(k,l, x,h,L,KMAX);
+	  else  j = RED_gram(k,l, x,h,L,KMAX);
+	  if (!j) goto PRECPB;
+	  if (low_stack(lim, stack_lim(av,1)))
+	  {
+	    if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1], kmax = %ld", kmax);
+	    gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
+	  }
+	}
       if (++k > n)
       {
-        if (isexact)
-        {
-          if (exact_can_leave) { if (!in_place && H) h = gmul(H, h); break; }
+	if (isexact)
+	{
+	  if (exact_can_leave) { if (!in_place && H) h = gmul(H, h); break; }
 
-          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
-          if (!in_place) H = H? gmul(H, h): h;
-          xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+	  if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
+	  if (!in_place) H = H? gmul(H, h): h;
+	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 
-          prec = good_prec(xinit, kmax);
-          if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
-          x = mat_to_MP(xinit, prec);
-          h = matid(n);
-          exact_can_leave = 1;
-          k = 2; kmax = 1; continue;
-        }
-        else if (!gram && gel(Q,n-1) == gen_0)
-        {
-          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
-          j = Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
-          if (!j) goto PRECPB;
-          k = 2; continue;
-        }
-        break;
+	  prec = good_prec(xinit, kmax);
+	  if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
+	  x = mat_to_MP(xinit, prec);
+	  h = matid(n);
+	  exact_can_leave = 1;
+	  k = 2; kmax = 1; continue;
+	}
+	else if (!gram && gel(Q,n-1) == gen_0)
+	{
+	  if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
+	  j = Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
+	  if (!j) goto PRECPB;
+	  k = 2; continue;
+	}
+	break;
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1516,13 +1516,13 @@ lllintpartialall(GEN m, long flag)
       npass2++; progress = signe(q);
       if (progress)
       {/* Conceptually replace (v1, v2) by (v1 - q*v2, v2), where v1 and v2
-        * represent the reduced basis for the first two columns of the matrix.
-        * We do this by updating tm and the inner products. */
-        q = negi(q);
-        dot12new = addii(dot12, mulii(q, dot22));
-        dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
-        dot12 = dot12new;
-        gel(tm,1) = ZV_lincomb(gen_1,q, gel(tm,1),gel(tm,2));
+	* represent the reduced basis for the first two columns of the matrix.
+	* We do this by updating tm and the inner products. */
+	q = negi(q);
+	dot12new = addii(dot12, mulii(q, dot22));
+	dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
+	dot12 = dot12new;
+	gel(tm,1) = ZV_lincomb(gen_1,q, gel(tm,1),gel(tm,2));
       }
 
       /* Interchange the output vectors v1 and v2.  */
@@ -1530,7 +1530,7 @@ lllintpartialall(GEN m, long flag)
 
       /* Occasionally (including final pass) do garbage collection.  */
       if (npass2 % 8 == 0 || !progress)
-        gerepileall(av2, 4, &dot11,&dot12,&dot22,&tm);
+	gerepileall(av2, 4, &dot11,&dot12,&dot22,&tm);
     } /* while npass2 < 2 || progress */
 
     {
@@ -1540,39 +1540,39 @@ lllintpartialall(GEN m, long flag)
       mid = cgetg(ncol+1, t_MAT);
       for (i = 1; i <= 2; i++)
       {
-        if (tm1)
-        {
-          coeff(tm1,1,i) = coeff(tm,1,i);
-          coeff(tm1,2,i) = coeff(tm,2,i);
-        }
-        gel(mid,i) = ZV_lincomb(
-           gcoeff(tm,1,i),gcoeff(tm,2,i), gel(m,1),gel(m,2));
+	if (tm1)
+	{
+	  coeff(tm1,1,i) = coeff(tm,1,i);
+	  coeff(tm1,2,i) = coeff(tm,2,i);
+	}
+	gel(mid,i) = ZV_lincomb(
+	   gcoeff(tm,1,i),gcoeff(tm,2,i), gel(m,1),gel(m,2));
       }
       for (i = 3; i <= ncol; i++)
       {
-        GEN c = gel(m,i);
+	GEN c = gel(m,i);
 	GEN dot1i = ZV_dotproduct(gel(mid,1), c);
-        GEN dot2i = ZV_dotproduct(gel(mid,2), c);
+	GEN dot2i = ZV_dotproduct(gel(mid,2), c);
        /* ( dot11  dot12 ) (q1)   ( dot1i )
-        * ( dot12  dot22 ) (q2) = ( dot2i )
-        *
-        * Round -q1 and -q2 to nearest integer. Then compute
-        *   c - q1*mid[1] - q2*mid[2].
-        * This will be approximately orthogonal to the first two vectors in
-        * the new basis. */
+	* ( dot12  dot22 ) (q2) = ( dot2i )
+	*
+	* Round -q1 and -q2 to nearest integer. Then compute
+	*   c - q1*mid[1] - q2*mid[2].
+	* This will be approximately orthogonal to the first two vectors in
+	* the new basis. */
 	GEN q1neg = subii(mulii(dot12, dot2i), mulii(dot22, dot1i));
-        GEN q2neg = subii(mulii(dot12, dot1i), mulii(dot11, dot2i));
+	GEN q2neg = subii(mulii(dot12, dot1i), mulii(dot11, dot2i));
 
-        q1neg = diviiround(q1neg, det12);
-        q2neg = diviiround(q2neg, det12);
-        if (tm1)
-        {
-          gcoeff(tm1, 1, i) = gadd(mulii(q1neg, gcoeff(tm,1,1)),
-                                     mulii(q2neg, gcoeff(tm,1,2)));
-          gcoeff(tm1, 2, i) = gadd(mulii(q1neg, gcoeff(tm,2,1)),
-                                     mulii(q2neg, gcoeff(tm,2,2)));
-        }
-        gel(mid,i) = gadd(c, ZV_lincomb(q1neg,q2neg, gel(mid,1),gel(mid,2)));
+	q1neg = diviiround(q1neg, det12);
+	q2neg = diviiround(q2neg, det12);
+	if (tm1)
+	{
+	  gcoeff(tm1, 1, i) = gadd(mulii(q1neg, gcoeff(tm,1,1)),
+				     mulii(q2neg, gcoeff(tm,1,2)));
+	  gcoeff(tm1, 2, i) = gadd(mulii(q1neg, gcoeff(tm,2,1)),
+				     mulii(q2neg, gcoeff(tm,2,2)));
+	}
+	gel(mid,i) = gadd(c, ZV_lincomb(q1neg,q2neg, gel(mid,1),gel(mid,2)));
       } /* for i */
     } /* local block */
   }
@@ -1603,33 +1603,33 @@ lllintpartialall(GEN m, long flag)
       for (i=1; i <= ncol; i++)
       {
 	long ijdif;
-        for (ijdif=1; ijdif < ncol; ijdif++)
+	for (ijdif=1; ijdif < ncol; ijdif++)
 	{
-          long d, k1, k2;
-          GEN codi, q;
+	  long d, k1, k2;
+	  GEN codi, q;
 
-          j = i + ijdif; if (j > ncol) j -= ncol;
+	  j = i + ijdif; if (j > ncol) j -= ncol;
 	  /* let k1, resp. k2,  index of larger, resp. smaller, column */
-          if (cmpii(gcoeff(dot,i,i),
+	  if (cmpii(gcoeff(dot,i,i),
 		    gcoeff(dot,j,j)) > 0) { k1 = i; k2 = j; }
-          else                            { k1 = j; k2 = i; }
+	  else                            { k1 = j; k2 = i; }
 	  codi = gcoeff(dot,k2,k2);
-          q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gen_0;
-          if (!signe(q)) continue;
+	  q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gen_0;
+	  if (!signe(q)) continue;
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
-          reductions++; q = negi(q);
-          gel(tm2,k1) = ZV_lincomb(gen_1,q, gel(tm2,k1), gel(tm2,k2));
-          gel(dot,k1) = ZV_lincomb(gen_1,q, gel(dot,k1), gel(dot,k2));
-          gcoeff(dot, k1, k1) = addii(gcoeff(dot,k1,k1),
-                                      mulii(q, gcoeff(dot,k2,k1)));
-          for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
-        } /* for ijdif */
-        if (low_stack(lim, stack_lim(av3,2)))
+	  reductions++; q = negi(q);
+	  gel(tm2,k1) = ZV_lincomb(gen_1,q, gel(tm2,k1), gel(tm2,k2));
+	  gel(dot,k1) = ZV_lincomb(gen_1,q, gel(dot,k1), gel(dot,k2));
+	  gcoeff(dot, k1, k1) = addii(gcoeff(dot,k1,k1),
+				      mulii(q, gcoeff(dot,k2,k1)));
+	  for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
+	} /* for ijdif */
+	if (low_stack(lim, stack_lim(av3,2)))
 	{
-          if(DEBUGMEM>1) pari_warn(warnmem,"lllintpartialall");
+	  if(DEBUGMEM>1) pari_warn(warnmem,"lllintpartialall");
 	  gerepileall(av3, 2, &dot,&tm2);
-        }
+	}
       } /* for i */
       if (!reductions) break;
       e = 0;
@@ -1637,9 +1637,9 @@ lllintpartialall(GEN m, long flag)
       if (e == olde) break;
       if (DEBUGLEVEL>6)
       {
-        npass++;
+	npass++;
 	fprintferr("npass = %ld, red. last time = %ld, log_2(det) ~ %ld\n\n",
-	            npass, reductions, e);
+		    npass, reductions, e);
       }
     } /* for(;;)*/
 
@@ -1653,9 +1653,9 @@ lllintpartialall(GEN m, long flag)
 	if (cmpii(gcoeff(dot,s,s),gcoeff(dot,j,j)) > 0) s = j;
       if (i != s)
       { /* Exchange with proper column */
-        /* Only diagonal of dot is updated */
-        lswap(tm2[i], tm2[s]);
-        lswap(coeff(dot,i,i), coeff(dot,s,s));
+	/* Only diagonal of dot is updated */
+	lswap(tm2[i], tm2[s]);
+	lswap(coeff(dot,i,i), coeff(dot,s,s));
       }
     }
     i = 1;
@@ -1724,7 +1724,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
     t += d * delta + 1; delta = 0;
     while (t >= 0) {
       if (check_condition(beta, tau, rho, d, delta, t)) {
-        *pdelta = delta; *pt = t; return;
+	*pdelta = delta; *pt = t; return;
       }
       delta++; t -= d;
     }
@@ -1816,21 +1816,21 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     for (i = 1; i < delta; i++)
     {
       for (j = 0; j < d; j++,row++)
-        for (l = j + 1; l <= row; l++)
-          gcoeff(M, l, row) = mulii(Xpowers[l-1], gel(Q,l-j+1));
+	for (l = j + 1; l <= row; l++)
+	  gcoeff(M, l, row) = mulii(Xpowers[l-1], gel(Q,l-j+1));
       Q = RgX_mul(Q, P);
     }
     for (j = 0; j < t; row++, j++)
       for (l = j + 1; l <= row; l++)
-        gcoeff(M, l, row) = mulii(Xpowers[l-1], gel(Q,l-j+1));
+	gcoeff(M, l, row) = mulii(Xpowers[l-1], gel(Q,l-j+1));
 
     /* N-part */
     row = dim - t; N0 = N;
     while (row >= 1)
-    {	
+    {
       for (j = 0; j < d; j++,row--)
-        for (l = 1; l <= row; l++)
-          gcoeff(M, l, row) = mulii(gmael(M, row, l), N0);
+	for (l = 1; l <= row; l++)
+	  gcoeff(M, l, row) = mulii(gmael(M, row, l), N0);
       if (row >= 1) N0 = mulii(N0, N);
     }
     /* Z is the upper bound for the L^1 norm of the polynomial,
@@ -1889,8 +1889,8 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
-        for (l = 1; l < lg(sol) && !equalii(z, gel(sol,l)); l++) /*empty*/;
-        if (l == lg(sol)) sol = shallowconcat(sol, z);
+	for (l = 1; l < lg(sol) && !equalii(z, gel(sol,l)); l++) /*empty*/;
+	if (l == lg(sol)) sol = shallowconcat(sol, z);
       }
     }
     if (i < bnd) gel(R,2) = addii(gel(R,2), Z);
@@ -1908,7 +1908,7 @@ static int
 real_indep(GEN re, GEN im, long bitprec)
 {
   GEN p1 = gsub(gmul(gel(re,1),gel(im,2)),
-                gmul(gel(re,2),gel(im,1)));
+		gmul(gel(re,2),gel(im,1)));
   return (!gcmp0(p1) && gexpo(p1) > - bitprec);
 }
 
@@ -2012,8 +2012,8 @@ lindep(GEN x, long prec)
       if (qzer[j]) affrr(bn[j], m[i][j]);
       else
       {
-        gdivz(RgV_dotproduct(b[i],be[j]),bn[j], m[i][j]);
-        p2 = gsub(p2, gmul(m[i][j],be[j]));
+	gdivz(RgV_dotproduct(b[i],be[j]),bn[j], m[i][j]);
+	p2 = gsub(p2, gmul(m[i][j],be[j]));
       }
     for (j=1; j<=n; j++) affrr(gel(p2,j), gel(be[i],j));
     affrr(RgV_dotsquare(be[i]), bn[i]);
@@ -2046,9 +2046,9 @@ lindep(GEN x, long prec)
     for (j=1; j<i; j++)
       if (!qzer[j])
       {
-        p1 = mpadd(m[k][j], mulir(r,m[i][j]));
-        affrr(m[i][j], m[k][j]);
-        affrr(p1, m[i][j]);
+	p1 = mpadd(m[k][j], mulir(r,m[i][j]));
+	affrr(m[i][j], m[k][j]);
+	affrr(p1, m[i][j]);
       }
     c1 = addrr(bn[k], mulrr(gsqr(f),bn[i]));
     if (!quazero(c1))
@@ -2059,9 +2059,9 @@ lindep(GEN x, long prec)
       affrr(c1,        bn[i]); qzer[i] = 0;
       for (j=i+2; j<=n; j++)
       {
-        p1 = addrr(mulrr(m[j][k],c3), mulrr(m[j][i],c2));
-        subrrz(m[j][i],mulrr(f,m[j][k]), m[j][k]);
-        affrr(p1, m[j][i]);
+	p1 = addrr(mulrr(m[j][k],c3), mulrr(m[j][i],c2));
+	subrrz(m[j][i],mulrr(f,m[j][k]), m[j][k]);
+	affrr(p1, m[j][i]);
       }
     }
     else
@@ -2280,7 +2280,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
       setlg(U, lg(U)-1); /* remove last column */
       x = gmul(x, U);
       if (n == 2) /* x has a single component */
-        return gcmp0(gel(x,1))? gel(U,1): cgetg(1, t_COL);
+	return gcmp0(gel(x,1))? gel(U,1): cgetg(1, t_COL);
     }
     x = gel(extendedgcd(x),2);
     x = gel(x,1);
@@ -2395,10 +2395,10 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     if ((M->T->ct&0xff) == 0)
     {
       if (DEBUGLEVEL == 3)
-        fprintferr("time for ct = %ld : %ld\n",M->T->ct,timer());
+	fprintferr("time for ct = %ld : %ld\n",M->T->ct,timer());
       else
-        fprintferr("time [max,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",
-                   M->T->vmind, M->T->t12, M->T->t1234, M->T->reda, M->T->fin);
+	fprintferr("time [max,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",
+		   M->T->vmind, M->T->t12, M->T->t1234, M->T->reda, M->T->fin);
     }
   }
   return NULL; /* nothing interesting */
@@ -2554,9 +2554,9 @@ initializedoubles(pslqL2_M *Mbar, pslq_M *M, long prec)
       else      Mbar->A[i][j] = Mbar->B[i][j] = 0.;
       if (j < n)
       {
-        GEN h = gcoeff(M->H,i,j);
-        if (!gcmp0(h) && labs(gexpo(h)) > 0x3ff) return 0;
-        Mbar->H[i][j] = rtodbl(h);
+	GEN h = gcoeff(M->H,i,j);
+	if (!gcmp0(h) && labs(gexpo(h)) > 0x3ff) return 0;
+	Mbar->H[i][j] = rtodbl(h);
       }
     }
   return 1;
@@ -2709,16 +2709,16 @@ RESTART:
       {
 	tinvbar = 1.0 / sqrt(sqrd(Hbar[m][m]) + sqrd(Hbar[m][m+1]));
 	t1bar = tinvbar*Hbar[m][m];
-        t2bar = tinvbar*Hbar[m][m+1];
+	t2bar = tinvbar*Hbar[m][m+1];
 	if (DEBUGLEVEL>=4) T.t12 += timer();
 	for (i=m; i<=n; i++)
 	{
 	  t3bar = Hbar[i][m];
-          t4bar = Hbar[i][m+1];
+	  t4bar = Hbar[i][m+1];
 	  if (flreal)
-            Hbar[i][m] = t1bar*t3bar + t2bar*t4bar;
+	    Hbar[i][m] = t1bar*t3bar + t2bar*t4bar;
 	  else
-            Hbar[i][m] = conjd(t1bar)*t3bar + conjd(t2bar)*t4bar;
+	    Hbar[i][m] = conjd(t1bar)*t3bar + conjd(t2bar)*t4bar;
 	  Hbar[i][m+1] = t1bar*t4bar - t2bar*t3bar;
 	}
 	if (DEBUGLEVEL>=4) T.t1234 += timer();
@@ -2738,20 +2738,20 @@ RESTART:
 	  goto RESTART;
 	}
 	else
-        {
-          if (ctpro == 1) goto DOGEN;
-          storeprecdoubles(&Mbar, &Mbarst); /* restore */
-          if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(bugparier,"pslqL2");
+	{
+	  if (ctpro == 1) goto DOGEN;
+	  storeprecdoubles(&Mbar, &Mbarst); /* restore */
+	  if (! applybar(&M, &Mbar, Abargen,Bbargen)) pari_err(bugparier,"pslqL2");
 	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
-          goto RESTART;
-        }
+	  goto RESTART;
+	}
       }
     }
     else
     {
 DOGEN:
       if ((p1 = one_step_gen(&M, tabga, prec)))
-        return gerepilecopy(av, p1);
+	return gerepilecopy(av, p1);
     }
   }
 }
@@ -3101,13 +3101,13 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       if (k>1)
       {
-        long l = k-1;
+	long l = k-1;
 	z[l] = 0;
 	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
 	p = (double)x[k] + z[k];
 	y[l] = y[k] + p*p*v[k];
 	x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
-        k = l;
+	k = l;
       }
       for(;;)
       {
@@ -3123,9 +3123,9 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       if (flag == min_FIRST)
       {
-        gel(res,2) = gerepileupto(av, ZM_zc_mul(u,x));
-        av = avma;
-        gel(res,1) = gerepileupto(av, ground(dbltor(p))); return res;
+	gel(res,2) = gerepileupto(av, ZM_zc_mul(u,x));
+	av = avma;
+	gel(res,1) = gerepileupto(av, ground(dbltor(p))); return res;
       }
       if (p > maxnorm) maxnorm = p;
     }
@@ -3136,9 +3136,9 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (gcmp(gnorme,BORNE) >= 0) avma = av2;
       else
       {
-        BOUND=gtodouble(gnorme)+eps; s=0;
-        affii(gnorme,BORNE); avma = av1;
-        if (flag == min_PERF) invp = matid(maxrank);
+	BOUND=gtodouble(gnorme)+eps; s=0;
+	affii(gnorme,BORNE); avma = av1;
+	if (flag == min_PERF) invp = matid(maxrank);
       }
     }
     s++;
@@ -3146,19 +3146,19 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     switch(flag)
     {
       case min_ALL:
-        if (s > maxrank && stockall) /* overflow */
-        {
-          long maxranknew = maxrank << 1;
-          GEN Lnew = new_chunk(1 + maxranknew);
-          for (i=1; i<=maxrank; i++) Lnew[i] = L[i];
-          L = Lnew; maxrank = maxranknew;
-        }
-        if (s<=maxrank)
-        {
-          p1 = new_chunk(n+1); gel(L,s) = p1;
-          for (i=1; i<=n; i++) p1[i] = x[i];
-        }
-        break;
+	if (s > maxrank && stockall) /* overflow */
+	{
+	  long maxranknew = maxrank << 1;
+	  GEN Lnew = new_chunk(1 + maxranknew);
+	  for (i=1; i<=maxrank; i++) Lnew[i] = L[i];
+	  L = Lnew; maxrank = maxranknew;
+	}
+	if (s<=maxrank)
+	{
+	  p1 = new_chunk(n+1); gel(L,s) = p1;
+	  for (i=1; i<=n; i++) p1[i] = x[i];
+	}
+	break;
 
       case min_VECSMALL:
 	{
@@ -3176,29 +3176,29 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       case min_PERF:
       {
-        long I=1;
-        pari_sp av2=avma;
+	long I=1;
+	pari_sp av2=avma;
 
-        for (i=1; i<=n; i++)
-          for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
-        if (! addcolumntomatrix(V,invp,L))
-        {
-          if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
-          s--; avma=av2; continue;
-        }
+	for (i=1; i<=n; i++)
+	  for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
+	if (! addcolumntomatrix(V,invp,L))
+	{
+	  if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+	  s--; avma=av2; continue;
+	}
 
-        if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-        if (s == maxrank)
-        {
-          if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
-          avma=av0; return stoi(s);
-        }
+	if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
+	if (s == maxrank)
+	{
+	  if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
+	  avma=av0; return stoi(s);
+	}
 
-        if (low_stack(lim, stack_lim(av1,1)))
-        {
-          if(DEBUGMEM>1) pari_warn(warnmem,"minim0, rank>=%ld",s);
-          invp = gerepilecopy(av1, invp);
-        }
+	if (low_stack(lim, stack_lim(av1,1)))
+	{
+	  if(DEBUGMEM>1) pari_warn(warnmem,"minim0, rank>=%ld",s);
+	  invp = gerepilecopy(av1, invp);
+	}
       }
     }
   }
@@ -3345,49 +3345,49 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       int fl = 0;
       if (k > 1)
       {
-        k--;
-        av1 = avma; p1 = mpmul(gcoeff(q,k,k+1),gel(x,k+1));
+	k--;
+	av1 = avma; p1 = mpmul(gcoeff(q,k,k+1),gel(x,k+1));
 	for (j=k+2; j<N; j++)
 	  p1 = mpadd(p1, mpmul(gcoeff(q,k,j),gel(x,j)));
-        gel(z,k) = gerepileuptoleaf(av1,p1);
+	gel(z,k) = gerepileuptoleaf(av1,p1);
 
-        av1 = avma; p1 = gsqr(mpadd(gel(x,k+1),gel(z,k+1)));
-        p1 = mpadd(gel(y,k+1), mpmul(p1,gel(v,k+1)));
+	av1 = avma; p1 = gsqr(mpadd(gel(x,k+1),gel(z,k+1)));
+	p1 = mpadd(gel(y,k+1), mpmul(p1,gel(v,k+1)));
 	gel(y,k) = gerepileuptoleaf(av1, p1);
-        /* skip the [x_1,...,x_skipfirst,0,...,0] */
-        if ((k <= skipfirst && !signe(y[skipfirst]))
-         || mpcmp(borne1, gel(y,k)) < 0) fl = 1;
-        else
-          gel(x,k) = ground( mpneg(gel(z,k)) );
+	/* skip the [x_1,...,x_skipfirst,0,...,0] */
+	if ((k <= skipfirst && !signe(y[skipfirst]))
+	 || mpcmp(borne1, gel(y,k)) < 0) fl = 1;
+	else
+	  gel(x,k) = ground( mpneg(gel(z,k)) );
       }
       for(;; step(x,y,inc,k))
       {
 	if (!fl)
 	{
-          av1 = avma;
+	  av1 = avma;
 	  p1 = mpmul(gel(v,k), gsqr(mpadd(gel(x,k), gel(z,k))));
 	  i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
-          avma = av1; if (i <= 0) break;
+	  avma = av1; if (i <= 0) break;
 
-          step(x,y,inc,k);
+	  step(x,y,inc,k);
 
-          av1 = avma; /* same as above */
+	  av1 = avma; /* same as above */
 	  p1 = mpmul(gel(v,k), gsqr(mpadd(gel(x,k), gel(z,k))));
 	  i = mpcmp(mpsub(mpadd(p1,gel(y,k)), borne1), gmul2n(p1,-epsbit));
-          avma = av1; if (i <= 0) break;
+	  avma = av1; if (i <= 0) break;
 	}
-        fl = 0; inc[k] = 1;
-        if (++k > n) goto END;
+	fl = 0; inc[k] = 1;
+	if (++k > n) goto END;
       }
 
       if (low_stack(lim, stack_lim(av,2)))
       {
 	if(DEBUGMEM>1) pari_warn(warnmem,"smallvectors");
 	if (stockmax) S = clonefill(S, s, stockmax);
-        if (check) {
-          GEN dummy = cgetg(1, t_STR);
-          for (i=s+1; i<=stockmax; i++) gel(norms,i) = dummy;
-        }
+	if (check) {
+	  GEN dummy = cgetg(1, t_STR);
+	  for (i=s+1; i<=stockmax; i++) gel(norms,i) = dummy;
+	}
 	gerepileall(av,check?7:6,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
     }
@@ -3403,26 +3403,26 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
     {
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
-        if (!check(data,x)) { checkcnt++ ; continue; /* main */}
-        if (DEBUGLEVEL>4) fprintferr("New bound: %Z", norme1);
-        borne1 = mpadd(norme1, eps);
-        borne2 = mpmul(borne1, alpha);
-        s = 0; checkcnt = 0;
+	if (!check(data,x)) { checkcnt++ ; continue; /* main */}
+	if (DEBUGLEVEL>4) fprintferr("New bound: %Z", norme1);
+	borne1 = mpadd(norme1, eps);
+	borne2 = mpmul(borne1, alpha);
+	s = 0; checkcnt = 0;
       }
     }
     else
     {
       if (!BORNE) /* find minimal vectors */
       {
-        if (mpcmp(norme1, borne2) < 0)
-        {
-          borne1 = mpadd(norme1, eps);
-          borne2 = mpsub(norme1, eps);
-          s = 0;
-        }
+	if (mpcmp(norme1, borne2) < 0)
+	{
+	  borne1 = mpadd(norme1, eps);
+	  borne2 = mpsub(norme1, eps);
+	  s = 0;
+	}
       }
       else
-        if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
+	if (mpcmp(norme1,normax1) > 0) normax1 = norme1;
     }
 
     if (++s <= stockmax)
@@ -3431,49 +3431,49 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       gel(S,s) = shallowcopy(x);
       if (s == stockmax)
       { /* overflow */
-        long stockmaxnew= (stockall && (stockmax < 10000L || maxnum == -1))
-                          ? stockmax<<1 : stockmax;
-        GEN Snew = cgetg(stockmaxnew + 1, t_VEC);
-        if (check)
-        {
-          pari_sp av2 = avma;
-          GEN per = indexsort(norms);
-          if (DEBUGLEVEL) fprintferr("sorting...\n");
-          for (j = 0, i = 1; i <= s; i++)
-          { /* let N be the minimal norm so far for x satisfying 'check'. Keep
-             * all elements of norm N */
-            long k = per[i];
-            norme1 = gel(norms,k);
-            if (j  && mpcmp(norme1, borne1) > 0) break;
-            if (j  || check(data,gel(S,k)))
-            {
-              if (!j) borne1 = mpadd(norme1,eps);
-              Snew[++j] = S[k];
-            }
-          }
-          s = j; avma = av2;
-          if (s)
-          {
-            norme1 = gel(norms, per[i-1]);
-            borne1 = mpadd(norme1, eps);
-            borne2 = mpmul(borne1, alpha);
-            checkcnt = 0;
-          }
-        }
-        else
-        {
-          if (!stockall && BORNE) goto END;
-          for (i = 1; i <= s; i++) Snew[i] = S[i];
-        }
-        if (stockmax != stockmaxnew)
-        {
-          stockmax = stockmaxnew;
-          norms = cgetg(stockmax+1, t_VEC);
-          for (i = 1; i <= s; i++) gel(norms,i) = norme1;
-          Snew = clonefill(Snew, s, stockmax);
-          if (isclone(S)) gunclone(S);
-          S = Snew;
-        }
+	long stockmaxnew= (stockall && (stockmax < 10000L || maxnum == -1))
+			  ? stockmax<<1 : stockmax;
+	GEN Snew = cgetg(stockmaxnew + 1, t_VEC);
+	if (check)
+	{
+	  pari_sp av2 = avma;
+	  GEN per = indexsort(norms);
+	  if (DEBUGLEVEL) fprintferr("sorting...\n");
+	  for (j = 0, i = 1; i <= s; i++)
+	  { /* let N be the minimal norm so far for x satisfying 'check'. Keep
+	     * all elements of norm N */
+	    long k = per[i];
+	    norme1 = gel(norms,k);
+	    if (j  && mpcmp(norme1, borne1) > 0) break;
+	    if (j  || check(data,gel(S,k)))
+	    {
+	      if (!j) borne1 = mpadd(norme1,eps);
+	      Snew[++j] = S[k];
+	    }
+	  }
+	  s = j; avma = av2;
+	  if (s)
+	  {
+	    norme1 = gel(norms, per[i-1]);
+	    borne1 = mpadd(norme1, eps);
+	    borne2 = mpmul(borne1, alpha);
+	    checkcnt = 0;
+	  }
+	}
+	else
+	{
+	  if (!stockall && BORNE) goto END;
+	  for (i = 1; i <= s; i++) Snew[i] = S[i];
+	}
+	if (stockmax != stockmaxnew)
+	{
+	  stockmax = stockmaxnew;
+	  norms = cgetg(stockmax+1, t_VEC);
+	  for (i = 1; i <= s; i++) gel(norms,i) = norme1;
+	  Snew = clonefill(Snew, s, stockmax);
+	  if (isclone(S)) gunclone(S);
+	  S = Snew;
+	}
       }
     }
   }
@@ -3493,8 +3493,8 @@ END:
       if (j && mpcmp(norme1, borne1) > 0) break;
       if ((p = check(data,gel(S,t))))
       {
-        if (!j) borne1 = mpadd(norme1,eps);
-        j++; gel(pols,j) = p; alph[j]=S[t];
+	if (!j) borne1 = mpadd(norme1,eps);
+	j++; gel(pols,j) = p; alph[j]=S[t];
       }
     }
     setlg(pols,j+1);

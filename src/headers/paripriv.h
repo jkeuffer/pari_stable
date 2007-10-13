@@ -613,7 +613,7 @@ typedef struct GENbin {
   GEN x; /* binary copy of x */
   GEN base; /* base address of p->x */
   int canon; /* 1: t_INT in canonical (native kernel) form,
-                0: t_INT according to current kernel */
+		0: t_INT according to current kernel */
 } GENbin;
 #define GENbase(p) ((GEN)(p + 1))
 

@@ -335,8 +335,8 @@ shifti_spec(GEN x, long lx, long n)
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
-        ly--; avma = (pari_sp)(++y);
+	if (ly==3) { avma = (pari_sp)(y+3); return gen_0; }
+	ly--; avma = (pari_sp)(++y);
       }
     } else {
       for (i=2; i<ly; i++) y[i]=x[i];
@@ -661,8 +661,8 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] > y0) /* can't happen if i=0 */
       {
-        GEN y1 = y+1;
-        j = lr-i; r1[j] = subll(r1[j],y1[j]);
+	GEN y1 = y+1;
+	j = lr-i; r1[j] = subll(r1[j],y1[j]);
 	for (j--; j>0; j--) r1[j] = subllx(r1[j],y1[j]);
 	j=i; do r[--j]++; while (j && !r[j]);
       }
@@ -686,9 +686,9 @@ divrr(GEN x, GEN y)
     {
       if ((ulong)r1[1] < hiremainder)
       {
-        qp--;
-        j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
-        for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
+	qp--;
+	j = lr-i-(lr-i>=ly); r1[j] = addll(r1[j], y[j]);
+	for (j--; j>1; j--) r1[j] = addllx(r1[j], y[j]);
       }
       else
       {
@@ -696,8 +696,8 @@ divrr(GEN x, GEN y)
 	while (r1[1])
 	{
 	  qp++; if (!qp) { j=i; do r[--j]++; while (j && !r[j]); }
-          j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
-          for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
+	  j = lr-i-(lr-i>=ly); r1[j] = subll(r1[j],y[j]);
+	  for (j--; j>1; j--) r1[j] = subllx(r1[j],y[j]);
 	  r1[1] -= overflow;
 	}
       }
@@ -769,11 +769,11 @@ dvmdii(GEN x, GEN y, GEN *z)
     if (lz == 0)
     {
       for (i=2; i<lx; i++)
-        if (x[i] != y[i])
-        {
-          if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
-          goto TRIVIAL;
-        }
+	if (x[i] != y[i])
+	{
+	  if ((ulong)x[i] > (ulong)y[i]) goto DIVIDE;
+	  goto TRIVIAL;
+	}
       if (z == ONLY_REM) return gen_0;
       if (z) *z = gen_0;
       if (sx < 0) sy = -sy;
@@ -890,8 +890,8 @@ DIVIDE: /* quotient is non-zero */
       xd--;
       while (--lz) /* fill r[3..] */
       {
-        l = *xd >> sh;
-        *--rd = l | (*--xd << shl);
+	l = *xd >> sh;
+	*--rd = l | (*--xd << shl);
       }
       l = *xd >> sh;
       if (l) *--rd = l; else lr--;
@@ -919,8 +919,8 @@ DIVIDE: /* quotient is non-zero */
       xd--;
       while (--lz)
       {
-        l = *xd >> sh;
-        *--rd = l | (*--xd << shl);
+	l = *xd >> sh;
+	*--rd = l | (*--xd << shl);
       }
       l = *xd >> sh;
       if (l) *--rd = l; else lr--;
@@ -1068,13 +1068,13 @@ diviuexact_i(GEN x, ulong y)
       (void)mulll(q,y);
       if (hiremainder)
       {
-        if ((ulong)*x1 < hiremainder)
-        {
-          *x1 -= hiremainder;
-          do (*--x1)--; while ((ulong)*x1 == ULONG_MAX);
-        }
-        else
-          *x1 -= hiremainder;
+	if ((ulong)*x1 < hiremainder)
+	{
+	  *x1 -= hiremainder;
+	  do (*--x1)--; while ((ulong)*x1 == ULONG_MAX);
+	}
+	else
+	  *x1 -= hiremainder;
       }
     }
   }
@@ -1171,18 +1171,18 @@ diviiexact(GEN x, GEN y)
       register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
       for (; x0 >= xlim; x0--, y0--)
       {
-        *x0 = subll(*x0, addmul(q,*y0));
-        hiremainder += overflow;
+	*x0 = subll(*x0, addmul(q,*y0));
+	hiremainder += overflow;
       }
       if (hiremainder && limj != lx - lz)
       {
-        if ((ulong)*x0 < hiremainder)
-        {
-          *x0 -= hiremainder;
-          do (*--x0)--; while ((ulong)*x0 == ULONG_MAX);
-        }
-        else
-          *x0 -= hiremainder;
+	if ((ulong)*x0 < hiremainder)
+	{
+	  *x0 -= hiremainder;
+	  do (*--x0)--; while ((ulong)*x0 == ULONG_MAX);
+	}
+	else
+	  *x0 -= hiremainder;
       }
     }
   }

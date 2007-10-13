@@ -651,7 +651,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   } else { /* use squarings if degree(x) is large */
     for(i = 4; i < l+2; i++)
       gel(V,i) = (i&1)? FpXQ_sqr(gel(V, (i+1)>>1),T,p)
-                      : FpXQ_mul(gel(V, i-1),x,T,p);
+		      : FpXQ_mul(gel(V, i-1),x,T,p);
   }
   return V;
 }
@@ -812,7 +812,7 @@ FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zeta)
     FpX_muldata s;
     s.pol=T; s.p=p;
     return gen_Shanks_sqrtn(a,n,addis(powiu(p,degpol(T)),-1),zeta,
-        (void*)&s,&FpXQ_star);
+	(void*)&s,&FpXQ_star);
   }
 }
 

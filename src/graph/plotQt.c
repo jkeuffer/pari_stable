@@ -198,7 +198,7 @@ void Plotter::draw(QPainter *p){
   plotQt.st=&DrawString;
   plotQt.pl=&pari_plot;
   double xs = double(this->width()) / pari_plot.width,
-         ys = double(this->height()) / pari_plot.height;
+	 ys = double(this->height()) / pari_plot.height;
   gen_rectdraw0(&plotQt, (void *)&d, this->w, this->x, this->y,this->lw,xs,ys);
 }
 
@@ -230,10 +230,10 @@ void Plotter::resizeEvent( QResizeEvent *) { }
 void Plotter::keyPressEvent( QKeyEvent *e) {
 
     switch ( tolower( e->ascii())) {
-        case 's':
+	case 's':
 	    save();
 	    this->setCaption( "Pari QtPlot: " + *plotFile);
-            break;
+	    break;
     }
 }
 #endif
@@ -590,7 +590,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
 
     // launch Qt window
     int argc = 1; char *argv[] = { "gp", "-qws"}; // set argc = 2 for cross
-                                                  // development using qvfb
+						  // development using qvfb
 #ifdef __QPE__
     QPEApplication
 #else

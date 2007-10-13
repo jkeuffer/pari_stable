@@ -95,10 +95,10 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (issmall(n,&ki))
       {
 	k = labs(ki);
-        n = utoi(k);
+	n = utoi(k);
       } else {
-        i = precision(n);
-        if (i && i < precnew) n = gtofp(n,precnew);
+	i = precision(n);
+	if (i && i < precnew) n = gtofp(n,precnew);
       }
       z = gtofp(z,precnew);
       B = bit_accuracy_mul(prec, LOG2/2) / L;
@@ -115,8 +115,8 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     case t_POLMOD:
       y = cleanroots(gel(z,1), prec); lz = lg(y);
       for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = jbesselintern(n,t,flag,prec);
+	GEN t = poleval(gel(z,2), gel(y,i));
+	gel(y,i) = jbesselintern(n,t,flag,prec);
       }
       return gerepilecopy(av,y);
 
@@ -171,7 +171,7 @@ jbesselh(GEN n, GEN z, long prec)
     case t_REAL: case t_COMPLEX:
       if (gcmp0(z))
       {
-        av = avma;
+	av = avma;
 	p1 = gmul(gsqrt(gdiv(z,mppi(prec)),prec),gpowgs(z,k));
 	p1 = gdiv(p1, seq_umul(k+1, 2*k+1)); /* x k! / (2k+1)! */
 	return gerepileupto(av, gmul2n(p1,2*k));
@@ -191,13 +191,13 @@ jbesselh(GEN n, GEN z, long prec)
       avma = av;
       if (typ(p1) == t_COMPLEX)
       {
-        affr_fixlg(gel(p1,1), gel(res,1));
-        affr_fixlg(gel(p1,2), gel(res,2));
+	affr_fixlg(gel(p1,1), gel(res,1));
+	affr_fixlg(gel(p1,2), gel(res,2));
       }
       else
       {
-        res = cgetr(linit);
-        affr_fixlg(p1, res);
+	res = cgetr(linit);
+	affr_fixlg(p1, res);
       }
       return res;
 
@@ -210,8 +210,8 @@ jbesselh(GEN n, GEN z, long prec)
       av = avma;
       y = cleanroots(gel(z,1), prec); lz = lg(y);
       for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = jbesselh(n,t,prec);
+	GEN t = poleval(gel(z,2), gel(y,i));
+	gel(y,i) = jbesselh(n,t,prec);
       }
       return gerepilecopy(av, y);
 
@@ -404,35 +404,35 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       ex = gexpo(z);
       /* experimental */
       if (!flag && !gcmp0(n) && ex > bit_accuracy(prec)/16 + gexpo(n))
-        return kbessel1(n,z,prec);
+	return kbessel1(n,z,prec);
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
       if (L >= 1.3591409) {
-        long rab = (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
-        if (fl) rab *= 2;
-         precnew += 1 + rab;
+	long rab = (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
+	if (fl) rab *= 2;
+	 precnew += 1 + rab;
       }
       z = gtofp(z, precnew);
       if (issmall(n,&ki))
       {
-        GEN z2 = gmul2n(z, -1);
+	GEN z2 = gmul2n(z, -1);
 	k = labs(ki);
 	B = bit_accuracy_mul(prec,LOG2/2) / L;
 	if (fl) B += 0.367879;
-        lim = bessel_get_lim(B, L);
+	lim = bessel_get_lim(B, L);
 	p1 = gmul(gpowgs(z2,k), _kbessel1(k,z,flag,lim,precnew));
 	p2 = gadd(mpeuler(precnew), glog(z2,precnew));
 	p3 = jbesselintern(stoi(k),z,flag,precnew);
 	p2 = gsub(gmul2n(p1,-1),gmul(p2,p3));
 	p2 = gprec_wtrunc(p2, prec);
-        if (fl) {
-          if (k & 1) p2 = gneg(p2);
-        }
-        else
+	if (fl) {
+	  if (k & 1) p2 = gneg(p2);
+	}
+	else
 	{
-          p2 = gdiv(p2, Pi2n(-1,prec));
-          if (ki >= 0 || (k&1)==0) p2 = gneg(p2);
-        }
+	  p2 = gdiv(p2, Pi2n(-1,prec));
+	  if (ki >= 0 || (k&1)==0) p2 = gneg(p2);
+	}
 	return gerepilecopy(av, p2);
       }
 
@@ -441,22 +441,22 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       ex = gexpo(s);
       if (ex < 0)
       {
-        long rab = nbits2nlong(-ex);
-        if (fl) rab *= 2;
-        precnew += rab;
+	long rab = nbits2nlong(-ex);
+	if (fl) rab *= 2;
+	precnew += rab;
       }
       if (i && i < precnew) {
-        n = gtofp(n,precnew);
-        z = gtofp(z,precnew);
-        gsincos(gmul(n,mppi(precnew)), &s,&c,precnew);
+	n = gtofp(n,precnew);
+	z = gtofp(z,precnew);
+	gsincos(gmul(n,mppi(precnew)), &s,&c,precnew);
       }
 
       pp = jbesselintern(n,      z,flag,precnew);
       pm = jbesselintern(gneg(n),z,flag,precnew);
       if (fl)
-        p1 = gmul(gsub(pm,pp), Pi2n(-1,precnew));
+	p1 = gmul(gsub(pm,pp), Pi2n(-1,precnew));
       else
-        p1 = gsub(gmul(c,pp),pm);
+	p1 = gsub(gmul(c,pp),pm);
       p1 = gdiv(p1, s);
       return gerepilecopy(av, gprec_wtrunc(p1,prec));
 
@@ -468,8 +468,8 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
     case t_POLMOD:
       y = cleanroots(gel(z,1), prec); lz = lg(y);
       for (i=1; i<lz; i++) {
-        GEN t = poleval(gel(z,2), gel(y,i));
-        gel(y,i) = kbesselintern(n,t,flag,prec);
+	GEN t = poleval(gel(z,2), gel(y,i));
+	gel(y,i) = kbesselintern(n,t,flag,prec);
       }
       return gerepilecopy(av, y);
 
@@ -482,18 +482,18 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 	return gerepilecopy(av, _kbessel1(k,y,flag+2,lg(y)-2,prec));
       }
       if (!issmall(gmul2n(n,1),&ki))
-        pari_err(talker,"cannot give a power series result in k/n bessel function");
+	pari_err(talker,"cannot give a power series result in k/n bessel function");
       k = labs(ki); n = gmul2n(stoi(k),-1);
       fl2 = (k&3)==1;
       pm = jbesselintern(gneg(n),y,flag,prec);
       if (fl)
       {
-        pp = jbesselintern(n,y,flag,prec);
-        p2 = gpowgs(y,-k); if (fl2 == 0) p2 = gneg(p2);
-        p3 = gmul2n(diviiexact(mpfact(k + 1),mpfact((k + 1) >> 1)),-(k + 1));
-        p3 = gdivgs(gmul2n(gsqr(p3),1),k);
-        p2 = gmul(p2,p3);
-        p1 = gsub(pp,gmul(p2,pm));
+	pp = jbesselintern(n,y,flag,prec);
+	p2 = gpowgs(y,-k); if (fl2 == 0) p2 = gneg(p2);
+	p3 = gmul2n(diviiexact(mpfact(k + 1),mpfact((k + 1) >> 1)),-(k + 1));
+	p3 = gdivgs(gmul2n(gsqr(p3),1),k);
+	p2 = gmul(p2,p3);
+	p1 = gsub(pp,gmul(p2,pm));
       }
       else p1 = pm;
       return gerepileupto(av, fl2? gneg(p1): gcopy(p1));
@@ -586,7 +586,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);
 	if (gcmp0(p1) || gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1)))
-          break;
+	  break;
       }
       swap(e, u);
       swap(f, v);
@@ -847,27 +847,27 @@ veceint1(GEN C, GEN nmax, long prec)
       for (k=1;;)
       {
 	if (k > cd)
-        {
-          GEN z;
-          if (cd == 1)
-          {
-            My = subrr(minvn,C);
-            z = mulrr(My, gel(vdiff,cd));
-            Mx = mcn;
-          }
-          else
-          {
-            z = addrr(mulrr(Mx,gel(vdiff,cd-1)), mulrr(My, gel(vdiff,cd)));
-            Mx = addrr(Mx,mcn);
-          }
-          My = addrr(My,minvn);
-          vdiff = shallowconcat(vdiff, z);
-          cd++;
-        }
+	{
+	  GEN z;
+	  if (cd == 1)
+	  {
+	    My = subrr(minvn,C);
+	    z = mulrr(My, gel(vdiff,cd));
+	    Mx = mcn;
+	  }
+	  else
+	  {
+	    z = addrr(mulrr(Mx,gel(vdiff,cd-1)), mulrr(My, gel(vdiff,cd)));
+	    Mx = addrr(Mx,mcn);
+	  }
+	  My = addrr(My,minvn);
+	  vdiff = shallowconcat(vdiff, z);
+	  cd++;
+	}
 	p1 = mulrr(den, gel(vdiff,k));
-        if (expo(p1) < G) { affrr(F,gel(y,n)); break; }
+	if (expo(p1) < G) { affrr(F,gel(y,n)); break; }
 	F = addrr(F,p1); k++;
-        den = mulrs(divrs(den, -k), a);
+	den = mulrs(divrs(den, -k), a);
       }
     }
     avma=av1; n++; F0=gel(y,n); nmin -= 10;
@@ -968,7 +968,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       else
       {
 	p = 1;
-        n = dabs(s + 1, t) / (2*PI);
+	n = dabs(s + 1, t) / (2*PI);
       }
     }
     else
@@ -1122,8 +1122,8 @@ szeta_odd(long k, long prec)
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
-        gerepileall(av2,2, &z, &qn);
+	if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
+	gerepileall(av2,2, &z, &qn);
       }
     }
     setexpo(z, expo(z)+1);
@@ -1154,8 +1154,8 @@ szeta_odd(long k, long prec)
       qn=mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
-        gerepileall(av2,2, &z, &qn);
+	if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
+	gerepileall(av2,2, &z, &qn);
       }
     }
     setexpo(z, expo(z)+1);
@@ -1196,7 +1196,7 @@ szeta(long k, long prec)
   if ((k&1) == 0)
   {
     if (!OK_bern(k >> 1, prec)
-        && (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2)))
+	&& (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2)))
       y = ginv( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
     else
     {
@@ -1333,8 +1333,8 @@ czeta(GEN s0, long prec)
       tes = addrr(bernreal(i,prec), divrunu(u, i+1)); /* u / (i+1)(i+2) */
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
-        tes = gerepileuptoleaf(av2, tes);
+	if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
+	tes = gerepileuptoleaf(av2, tes);
       }
     }
     u = gmul(gmul(tes,invn2), gmul2n(mulii(s0, addsi(-1,s0)), -1));
@@ -1356,8 +1356,8 @@ czeta(GEN s0, long prec)
       tes = gadd(bernreal(i,prec), divgunu(gmul(s5,tes), i+1));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
-        gerepileall(av2,3, &tes,&s5,&s4);
+	if(DEBUGMEM>1) pari_warn(warnmem,"czeta");
+	gerepileall(av2,3, &tes,&s5,&s4);
       }
     }
     u = gmul(gmul(tes,invn2), gmul2n(s2, -1));
@@ -1371,7 +1371,7 @@ END:
   if (funeq)
   {
     y = gmul(gmul(y, ggamma(gprec_w(s,prec),prec)),
-             gpow(Pi2n(1,prec), gneg(s), prec));
+	     gpow(Pi2n(1,prec), gneg(s), prec));
     y = gmul2n(gmul(y, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
   }
   gaffect(y,res); avma = av; return res;
@@ -1713,8 +1713,8 @@ gzeta(GEN x, long prec)
     case t_INT:
       if (is_bigint(x))
       {
-        if (signe(x) > 0) return real_1(prec);
-        if (signe(x) < 0 && mod2(x) == 0) return real_0(prec);
+	if (signe(x) > 0) return real_1(prec);
+	if (signe(x) < 0 && mod2(x) == 0) return real_0(prec);
       }
       return szeta(itos(x),prec);
 
@@ -1940,10 +1940,10 @@ polylogP(long m, GEN x, long prec)
       p2 = gdivgs(gmul(p2,p1),k);
       if (!(k&1) || k==1)
       {
-        GEN u, t = polylog(m-k,x,l);
+	GEN u, t = polylog(m-k,x,l);
 	if (k!=1) u = gmul(p2, bern(k>>1));
 	else      u = gneg_i(gmul2n(p2,-1));
-        /* u = p2*B_k */
+	/* u = p2*B_k */
 	y = gadd(y, gmul(u, m2?real_i(t):imag_i(t)));
       }
     }
@@ -2153,8 +2153,8 @@ inteta(GEN q)
       setlg(ps, k);
       if (low_stack(lim, stack_lim(av,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"eta");
-        gerepileall(av, 3, &y, &qn, &ps);
+	if(DEBUGMEM>1) pari_warn(warnmem,"eta");
+	gerepileall(av, 3, &y, &qn, &ps);
       }
     }
   }
@@ -2177,13 +2177,13 @@ inteta(GEN q)
       y = gadd(y,p1); qn = gmul(qn,q); ps = gmul(p1,qn);
       y = gadd(y,ps);
       if (tx)
-        { if (gexpo(ps)-gexpo(y) < l) return y; }
+	{ if (gexpo(ps)-gexpo(y) < l) return y; }
       else
-        { if (valp(ps) >= l) return y; }
+	{ if (valp(ps) >= l) return y; }
       if (low_stack(lim, stack_lim(av,3)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"eta");
-        gerepileall(av, 3, &y, &qn, &ps);
+	if(DEBUGMEM>1) pari_warn(warnmem,"eta");
+	gerepileall(av, 3, &y, &qn, &ps);
       }
     }
   }
@@ -2220,10 +2220,10 @@ e12(ulong k, long prec)
       gel(z,2) = gmul2n(ginv(gel(z,1)), -2); break;
 
     case 2: gel(z,1) = sqrt32(prec);
-            gel(z,2) = real2n(-1, prec); break;
+	    gel(z,2) = real2n(-1, prec); break;
 
     case 3: gel(z,1) = ginv( gsqrt(gen_2, prec) );
-            gel(z,2) = mpcopy(gel(z,1)); break;
+	    gel(z,2) = mpcopy(gel(z,1)); break;
   }
   if (sPiov2) lswap(z[1], z[2]);
   if (sPi) togglesign(z[1]);
@@ -2391,7 +2391,7 @@ theta(GEN q, GEN z, long prec)
   if (signe(k))
   {
     y = gmul(y, gmul(powgi(q,sqri(k)),
-                     gexp(gmul(mulcxI(zold),shifti(k,1)), prec)));
+		     gexp(gmul(mulcxI(zold),shifti(k,1)), prec)));
     if (mod2(k)) y = gneg_i(y);
   }
   return gerepileupto(av, gmul(y, gmul2n(gsqrt(gsqrt(q,prec),prec),1)));

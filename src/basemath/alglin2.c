@@ -318,20 +318,20 @@ hess(GEN x)
       lswap(x[i], x[m]); p = ginv(p);
       for (i=m+1; i<lx; i++)
       {
-        p1 = gcoeff(x,i,m-1);
-        if (gcmp0(p1)) continue;
+	p1 = gcoeff(x,i,m-1);
+	if (gcmp0(p1)) continue;
 
-        p1 = gmul(p1,p); p2 = gneg_i(p1);
-        gcoeff(x,i,m-1) = gen_0;
-        for (j=m; j<lx; j++)
-          gcoeff(x,i,j) = gadd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
-        for (j=1; j<lx; j++)
-          gcoeff(x,j,m) = gadd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
+	p1 = gmul(p1,p); p2 = gneg_i(p1);
+	gcoeff(x,i,m-1) = gen_0;
+	for (j=m; j<lx; j++)
+	  gcoeff(x,i,j) = gadd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
+	for (j=1; j<lx; j++)
+	  gcoeff(x,j,m) = gadd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
-        x = gerepilecopy(av2, x);
+	if (DEBUGMEM>1) pari_warn(warnmem,"hess, m = %ld", m);
+	x = gerepilecopy(av2, x);
       }
       break;
     }
@@ -397,9 +397,9 @@ carberkowitz(GEN x, long v)
       gel(C,i+2) = gerepileupto(av, t);
       for (j = 1; j < r; j++)
       {
-        av = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
-        for (k = 2; k < r; k++) t = gadd(t, gmul(gcoeff(x,j,k), gel(S,k)));
-        gel(Q,j) = gerepileupto(av, t);
+	av = avma; t = gmul(gcoeff(x,j,1), gel(S,1));
+	for (k = 2; k < r; k++) t = gadd(t, gmul(gcoeff(x,j,k), gel(S,k)));
+	gel(Q,j) = gerepileupto(av, t);
       }
       for (j = 1; j < r; j++) gel(S,j) = gel(Q,j);
     }
@@ -623,7 +623,7 @@ gconj(GEN x)
       z = cgetg(4,t_QUAD);
       gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
-                                    : gadd(gel(x,2), gel(x,3));
+				    : gadd(gel(x,2), gel(x,3));
       gel(z,3) = gneg(gel(x,3));
       break;
 
@@ -638,9 +638,9 @@ gconj(GEN x)
       long d = degpol(X);
       if (d < 2) return gcopy(x);
       if (d == 2) {
-        z = cgetg(3, t_POLMOD);
-        gel(z,1) = gcopy(X);
-        gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
+	z = cgetg(3, t_POLMOD);
+	gel(z,1) = gcopy(X);
+	gel(z,2) = quad_polmod_conj(gel(x,2), X); return z;
       }
     }
     default:
@@ -671,7 +671,7 @@ conjvec(GEN x,long prec)
       if (lx == 1) break;
       s = lg(z[1]);
       for (i=2; i<lx; i++)
-        if (lg(z[i])!=s) pari_err(talker,"incompatible field degrees in conjvec");
+	if (lg(z[i])!=s) pari_err(talker,"incompatible field degrees in conjvec");
       break;
 
     case t_POLMOD:
@@ -684,7 +684,7 @@ conjvec(GEN x,long prec)
 	if (tx==t_INTMOD) p = gmael(y,i,1);
 	else
 	  if (!is_rational_t(tx))
-            pari_err(talker,"not a rational polynomial in conjvec");
+	    pari_err(talker,"not a rational polynomial in conjvec");
       }
       if (!p)
       {
@@ -876,19 +876,19 @@ gaussred(GEN a, long signature)
     {
       p = gcoeff(a,k,k); invp = ginv(p); /* != 0 */
       if (signature) { /* skip if (!signature): gsigne may fail ! */
-        if (gsigne(p) > 0) sp++; else sn++;
+	if (gsigne(p) > 0) sp++; else sn++;
       }
       r[k] = 0; t--;
       ak = gneg_i( row(a, k) );
       for (i=1; i<=n; i++)
 	gcoeff(a,k,i) = r[i]? gmul(gcoeff(a,k,i), invp): gen_0;
-	
+
       for (i=1; i<=n; i++) if (r[i])
       {
-        GEN c = gel(ak,i); /* - p * a[k,i] */
-        if (gcmp0(c)) continue;
+	GEN c = gel(ak,i); /* - p * a[k,i] */
+	if (gcmp0(c)) continue;
 	for (j=1; j<=n; j++) if (r[j])
-          gcoeff(a,i,j) = gadd(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
+	  gcoeff(a,i,j) = gadd(gcoeff(a,i,j), gmul(c,gcoeff(a,k,j)));
       }
       gcoeff(a,k,k) = p;
     }
@@ -899,44 +899,44 @@ gaussred(GEN a, long signature)
 	l=k+1; while (l<=n && (!r[l] || gcmp0(gcoeff(a,k,l)))) l++;
 	if (l > n) continue;
 
-        p = gcoeff(a,k,l); invp = ginv(p);
-        sp++; sn++;
-        r[k] = r[l] = 0; t -= 2;
-        ak = gneg_i( row(a, k) );
-        al = gneg_i( row(a, l) );
-        for (i=1; i<=n; i++) if (r[i])
-        {
-          gcoeff(a,k,i) = gmul(gcoeff(a,k,i), p);
-          gcoeff(a,l,i) = gmul(gcoeff(a,l,i), p);
-        } else {
-          gcoeff(a,k,i) = gen_0;
-          gcoeff(a,l,i) = gen_0;
-        }
+	p = gcoeff(a,k,l); invp = ginv(p);
+	sp++; sn++;
+	r[k] = r[l] = 0; t -= 2;
+	ak = gneg_i( row(a, k) );
+	al = gneg_i( row(a, l) );
+	for (i=1; i<=n; i++) if (r[i])
+	{
+	  gcoeff(a,k,i) = gmul(gcoeff(a,k,i), p);
+	  gcoeff(a,l,i) = gmul(gcoeff(a,l,i), p);
+	} else {
+	  gcoeff(a,k,i) = gen_0;
+	  gcoeff(a,l,i) = gen_0;
+	}
 
-        for (i=1; i<=n; i++) if (r[i])
-        { /* c = -a[k,i] * p, d = -a[l,i] * p; */
-          GEN c = gel(ak,i), d = gel(al,i);
-          for (j=1; j<=n; j++) if (r[j])
-            gcoeff(a,i,j) = gadd(gcoeff(a,i,j),
-                            gadd(gmul(gcoeff(a,l,j), c),
-                                 gmul(gcoeff(a,k,j), d)));
-        }
-        for (i=1; i<=n; i++) if (r[i])
-        {
-          GEN c = gcoeff(a,k,i), d = gcoeff(a,l,i);
-          gcoeff(a,k,i) = gadd(c, d);
-          gcoeff(a,l,i) = gsub(c, d);
-        }
-        gcoeff(a,k,l) = gen_1;
-        gcoeff(a,l,k) = gen_m1;
-        gcoeff(a,k,k) = gmul2n(p,-1);
-        gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
-        if (low_stack(lim, stack_lim(av1,1)))
-        {
-          if(DEBUGMEM>1) pari_warn(warnmem,"gaussred");
-          a = gerepilecopy(av1, a);
-        }
-        break;
+	for (i=1; i<=n; i++) if (r[i])
+	{ /* c = -a[k,i] * p, d = -a[l,i] * p; */
+	  GEN c = gel(ak,i), d = gel(al,i);
+	  for (j=1; j<=n; j++) if (r[j])
+	    gcoeff(a,i,j) = gadd(gcoeff(a,i,j),
+			    gadd(gmul(gcoeff(a,l,j), c),
+				 gmul(gcoeff(a,k,j), d)));
+	}
+	for (i=1; i<=n; i++) if (r[i])
+	{
+	  GEN c = gcoeff(a,k,i), d = gcoeff(a,l,i);
+	  gcoeff(a,k,i) = gadd(c, d);
+	  gcoeff(a,l,i) = gsub(c, d);
+	}
+	gcoeff(a,k,l) = gen_1;
+	gcoeff(a,l,k) = gen_m1;
+	gcoeff(a,k,k) = gmul2n(p,-1);
+	gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
+	if (low_stack(lim, stack_lim(av1,1)))
+	{
+	  if(DEBUGMEM>1) pari_warn(warnmem,"gaussred");
+	  a = gerepilecopy(av1, a);
+	}
+	break;
       }
       if (k > n) break;
     }
@@ -1246,8 +1246,8 @@ matrixqz3(GEN x)
     for (j1=1; j1<n; j1++)
       if (j1!=j)
       {
-        GEN t = gcoeff(x,k,j1);
-        if (!gcmp0(t)) gel(x,j1) = gsub(gel(x,j1),gmul(t,gel(x,j)));
+	GEN t = gcoeff(x,k,j1);
+	if (!gcmp0(t)) gel(x,j1) = gsub(gel(x,j1),gmul(t,gel(x,j)));
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {
@@ -1422,9 +1422,9 @@ ZV_lincomb1(GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = icopy(p1);
       else
       {
-        pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
-        p2 = mulii(v,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
+	pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
+	p2 = mulii(v,p2);
+	avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }
@@ -1438,9 +1438,9 @@ ZV_lincomb1(GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = icopy(p1);
       else
       {
-        pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
-        p2 = mulsi(w,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
+	pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2)); /*HACK*/
+	p2 = mulsi(w,p2);
+	avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }
@@ -1523,10 +1523,10 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
       else if (!signe(p2)) gel(A,i) = mulii(u,p1);
       else
       {
-        av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
-        p1 = mulii(u,p1);
-        p2 = mulii(v,p2);
-        avma = av; gel(A,i) = addii(p1,p2);
+	av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /* HACK */
+	p1 = mulii(u,p1);
+	p2 = mulii(v,p2);
+	avma = av; gel(A,i) = addii(p1,p2);
       }
     }
   }
@@ -1571,8 +1571,8 @@ hnf_special(GEN x, long remove)
       gel(x2,k) = gadd(gmul(u,p1), gmul(v, gel(x2,k)));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"hnf_special[1]. i=%ld",i);
-        gerepileall(av,2, &x,&x2);
+	if (DEBUGMEM>1) pari_warn(warnmem,"hnf_special[1]. i=%ld",i);
+	gerepileall(av,2, &x,&x2);
       }
     }
     p1 = gcoeff(x,i,def); s = signe(p1);
@@ -1580,14 +1580,14 @@ hnf_special(GEN x, long remove)
     {
       if (s < 0)
       {
-        gel(x,def) = gneg(gel(x,def)); p1 = gcoeff(x,i,def);
-        gel(x2,def)= gneg(gel(x2,def));
+	gel(x,def) = gneg(gel(x,def)); p1 = gcoeff(x,i,def);
+	gel(x2,def)= gneg(gel(x2,def));
       }
       for (j=def+1; j<co; j++)
       {
 	b = negi(gdivent(gcoeff(x,i,j),p1));
 	gel(x,j) = ZV_lincomb(gen_1,b, gel(x,j), gel(x,def));
-        gel(x2,j) = gadd(gel(x2,j), gmul(b, gel(x2,def)));
+	gel(x2,j) = gadd(gel(x2,j), gmul(b, gel(x2,def)));
       }
       def--;
     }
@@ -1604,8 +1604,8 @@ hnf_special(GEN x, long remove)
     for (i=1,j=1; j<co; j++)
       if (!gcmp0(gel(x,j)))
       {
-        x[i]  = x[j];
-        x2[i] = x2[j]; i++;
+	x[i]  = x[j];
+	x2[i] = x2[j]; i++;
       }
     setlg(x,i);
     setlg(x2,i);
@@ -1803,12 +1803,12 @@ elt_col(GEN Mk, GEN Mi, GEN q)
     if (signe(q) > 0)
     {
       for (j = lg(Mk)-1; j; j--)
-        if (signe(Mi[j])) gel(Mk,j) = addii(gel(Mk,j), gel(Mi,j));
+	if (signe(Mi[j])) gel(Mk,j) = addii(gel(Mk,j), gel(Mi,j));
     }
     else
     {
       for (j = lg(Mk)-1; j; j--)
-        if (signe(Mi[j])) gel(Mk,j) = subii(gel(Mk,j), gel(Mi,j));
+	if (signe(Mi[j])) gel(Mk,j) = subii(gel(Mk,j), gel(Mi,j));
     }
   }
   else
@@ -1879,21 +1879,21 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     {
       case 0: /* move zero lines between k0+1 and lk0 */
 	lk0++; lswap(perm[i], perm[lk0]);
-        i = lig; continue;
+	i = lig; continue;
 
       case 1: /* move trivial generator between lig+1 and li */
 	lswap(perm[i], perm[lig]);
-        if (T) lswap(T[n], T[col]);
+	if (T) lswap(T[n], T[col]);
 	lswap(mat[n], mat[col]); p = gel(mat,col);
 	if (p[perm[lig]] < 0) /* = -1 */
 	{ /* convert relation -g = 0 to g = 0 */
 	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
-          if (T)
-          {
-            p1 = gel(T,col);
-            for (i=1; ; i++) /* T is a permuted identity: single non-0 entry */
-              if (signe(gel(p1,i))) { gel(p1,i) = negi(gel(p1,i)); break; }
-          }
+	  if (T)
+	  {
+	    p1 = gel(T,col);
+	    for (i=1; ; i++) /* T is a permuted identity: single non-0 entry */
+	      if (signe(gel(p1,i))) { gel(p1,i) = negi(gel(p1,i)); break; }
+	  }
 	}
 	lig--; col--; i = lig; continue;
 
@@ -1931,10 +1931,10 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (t == 1) {
-        for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= p[perm[i]]);
+	for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= p[perm[i]]);
       }
       else { /* t = -1 */
-        for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] += p[perm[i]]);
+	for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] += p[perm[i]]);
       }
       if (T) elt_col(gel(T,j), gel(T,col), stoi(-t));
     }
@@ -1974,7 +1974,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       matj = gel(mat,j);
       if (! (t = matj[perm[lig]]) ) continue;
       if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
-        goto END2;
+	goto END2;
 
       for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= t*p[perm[i]]);
       vmax[j] = s;
@@ -2014,21 +2014,21 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       gel(Bj,i0) = gen_0;
       if (is_pm1(v))
       {
-        if (s > 0) /* v = 1 */
-        { for (h=1; h<i0; h++) gel(Bj,h) = subii(gel(Bj,h), gel(Bk,h)); }
-        else /* v = -1 */
-        { for (h=1; h<i0; h++) gel(Bj,h) = addii(gel(Bj,h), gel(Bk,h)); }
+	if (s > 0) /* v = 1 */
+	{ for (h=1; h<i0; h++) gel(Bj,h) = subii(gel(Bj,h), gel(Bk,h)); }
+	else /* v = -1 */
+	{ for (h=1; h<i0; h++) gel(Bj,h) = addii(gel(Bj,h), gel(Bk,h)); }
       }
       else {
-        for (h=1; h<i0; h++) gel(Bj,h) = subii(gel(Bj,h), mulii(v,gel(Bk,h)));
+	for (h=1; h<i0; h++) gel(Bj,h) = subii(gel(Bj,h), mulii(v,gel(Bk,h)));
       }
       if (T) elt_col(gel(T,j), gel(T,k), negi(v));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
-        for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
-        gerepileall(av, T? 2: 1, &matb, &T);
-        Bk = gel(matb,k);
+	if(DEBUGMEM>1) pari_warn(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
+	for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
+	gerepileall(av, T? 2: 1, &matb, &T);
+	Bk = gel(matb,k);
       }
     }
   }
@@ -2122,8 +2122,8 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       GEN MAT = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
-        MAT[j] = m0[j];
-        emb[j] = CC[j];
+	MAT[j] = m0[j];
+	emb[j] = CC[j];
       }
       H = hnfadd_i(H, perm, ptdep, ptB, &C, MAT, emb);
       if (a == L) break;
@@ -2384,10 +2384,10 @@ hnfmerge_get_1(GEN A, GEN B)
       if (lgefint(gcoeff(C,k,k)) > lb) gel(C,k) = FpC_red(gel(C,k), b);
       if (j > 4)
       {
-        GEN u = gel(U,k);
-        long h;
-        for (h=1; h<l; h++)
-          if (lgefint(u[h]) > lb) gel(u,h) = remii(gel(u,h), b);
+	GEN u = gel(U,k);
+	long h;
+	for (h=1; h<l; h++)
+	  if (lgefint(u[h]) > lb) gel(u,h) = remii(gel(u,h), b);
       }
     }
     if (j == 1)
@@ -2433,8 +2433,8 @@ hnf0(GEN A, int remove)
 
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. i=%ld",i);
-        A = gerepilecopy(av, A);
+	if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. i=%ld",i);
+	A = gerepilecopy(av, A);
       }
     }
     s = signe(gcoeff(A,i,def));
@@ -2478,10 +2478,10 @@ FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
   if (is_pm1(u)) {
     if (signe(u) > 0) {
       for (i = 1; i <= k; i++)
-        if (signe(z[i])) gel(z,i) = modii(gel(z,i), p);
+	if (signe(z[i])) gel(z,i) = modii(gel(z,i), p);
     } else {
       for (i = 1; i <= k; i++)
-        if (signe(z[i])) gel(z,i) = modii(negi(gel(z,i)), p);
+	if (signe(z[i])) gel(z,i) = modii(negi(gel(z,i)), p);
     }
   }
   else {
@@ -2539,12 +2539,12 @@ allhnfmod(GEN x, GEN dm, int flag)
       p2 = gel(x,k);
       for (k = 1; k < i; k++)
       {
-        if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), dm);
-        if (lgefint(p2[k]) > ldm) gel(p2,k) = remii(gel(p2,k), dm);
+	if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), dm);
+	if (lgefint(p2[k]) > ldm) gel(p2,k) = remii(gel(p2,k), dm);
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[1]. i=%ld",i);
+	if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[1]. i=%ld",i);
 	x = gerepilecopy(av, x);
       }
     }
@@ -2572,8 +2572,8 @@ allhnfmod(GEN x, GEN dm, int flag)
       gcoeff(x,i,i) = d;
       if (is_pm1(d))
       {
-        FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
-        continue;
+	FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
+	continue;
       }
       c = cgetg(li, t_COL);
       for (j = 1; j < i; j++) gel(c,j) = remii(gcoeff(x,j,i),d);
@@ -2583,16 +2583,16 @@ allhnfmod(GEN x, GEN dm, int flag)
       FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
       for (j = i - 1; j > ldef; j--)
       {
-        GEN a = gcoeff(x, j, li);
-        if (!signe(a)) continue;
-        ZV_elem(a, gcoeff(x,j,j), x, NULL, li,j);
-        FpV_red_part_ip(gel(x,li), dm, j-1);
-        FpV_red_part_ip(gel(x,j),  dm, j-1);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
-          x = gerepilecopy(av, x);
-        }
+	GEN a = gcoeff(x, j, li);
+	if (!signe(a)) continue;
+	ZV_elem(a, gcoeff(x,j,j), x, NULL, li,j);
+	FpV_red_part_ip(gel(x,li), dm, j-1);
+	FpV_red_part_ip(gel(x,j),  dm, j-1);
+	if (low_stack(lim, stack_lim(av,1)))
+	{
+	  if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
+	  x = gerepilecopy(av, x);
+	}
       }
     }
   }
@@ -2628,11 +2628,11 @@ allhnfmod(GEN x, GEN dm, int flag)
       p1 = ZV_lincomb(gen_1,b, gel(x,j), gel(x,i));
       gel(x,j) = p1;
       for (k=1; k<i; k++)
-        if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
+	if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
-        gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
+	if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
+	gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
       }
     }
   }
@@ -2709,19 +2709,19 @@ reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN lambda, GEN D)
     {
       if (signe(q) > 0)
       {
-        for (i=1; i<j; i++)
-          if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), gel(Lj,i));
+	for (i=1; i<j; i++)
+	  if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), gel(Lj,i));
       }
       else
       {
-        for (i=1; i<j; i++)
-          if (signe(Lj[i])) gel(Lk,i) = subii(gel(Lk,i), gel(Lj,i));
+	for (i=1; i<j; i++)
+	  if (signe(Lj[i])) gel(Lk,i) = subii(gel(Lk,i), gel(Lj,i));
       }
     }
     else
     {
       for (i=1; i<j; i++)
-        if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
+	if (signe(Lj[i])) gel(Lk,i) = addii(gel(Lk,i), mulii(q,gel(Lj,i)));
     }
   }
 }
@@ -2808,15 +2808,15 @@ hnflll_i(GEN A, GEN *ptB, int remove)
     {
       for (i=k-2; i; i--)
       {
-        long row0, row1;
-        reduce2(A,B,k,i,&row0,&row1,lambda,D);
-        if (low_stack(lim, stack_lim(av,3)))
-        {
-          GEN b = D-1;
-          if (DEBUGMEM) pari_warn(warnmem,"hnflll (reducing), i = %ld",i);
-          gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
-          D = b+1;
-        }
+	long row0, row1;
+	reduce2(A,B,k,i,&row0,&row1,lambda,D);
+	if (low_stack(lim, stack_lim(av,3)))
+	{
+	  GEN b = D-1;
+	  if (DEBUGMEM) pari_warn(warnmem,"hnflll (reducing), i = %ld",i);
+	  gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
+	  D = b+1;
+	}
       }
       k++;
     }
@@ -2962,19 +2962,19 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       d = gcoeff(A,t,j);
       if (signe(d) < 0)
       {
-        ZV_neg(gel(A,j));
-        if (U) ZV_neg(gel(U,j));
-        d = gcoeff(A,t,j);
+	ZV_neg(gel(A,j));
+	if (U) ZV_neg(gel(U,j));
+	d = gcoeff(A,t,j);
       }
       for (j1=1; j1<j; j1++)
       {
-        if (!l[j1]) continue;
-        q = truedivii(gcoeff(A,t,j1),d);
-        if (!signe(q)) continue;
+	if (!l[j1]) continue;
+	q = truedivii(gcoeff(A,t,j1),d);
+	if (!signe(q)) continue;
 
-        q = negi(q);
-        gel(A,j1) = ZV_lincomb(gen_1,q,gel(A,j1),gel(A,j));
-        if (U) gel(U,j1) = ZV_lincomb(gen_1,q,gel(U,j1),gel(U,j));
+	q = negi(q);
+	gel(A,j1) = ZV_lincomb(gen_1,q,gel(A,j1),gel(A,j));
+	if (U) gel(U,j1) = ZV_lincomb(gen_1,q,gel(U,j1),gel(U,j));
       }
     }
     t = m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
@@ -2983,26 +2983,26 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       p = gcoeff(A,t,k);
       for (i=t-1; i; i--)
       {
-        q = gcoeff(A,i,k);
+	q = gcoeff(A,i,k);
 	if (signe(q) && absi_cmp(p,q) > 0) { p = q; t = i; }
       }
       perm[++r] = l[k] = t; c[t] = k;
       if (signe(p) < 0)
       {
-        ZV_neg(gel(A,k));
-        if (U) ZV_neg(gel(U,k));
+	ZV_neg(gel(A,k));
+	if (U) ZV_neg(gel(U,k));
 	p = gcoeff(A,t,k);
       }
       /* p > 0 */
       for (j=1; j<k; j++)
       {
-        if (!l[j]) continue;
+	if (!l[j]) continue;
 	q = truedivii(gcoeff(A,t,j),p);
 	if (!signe(q)) continue;
 
-        q = negi(q);
-        gel(A,j) = ZV_lincomb(gen_1,q,gel(A,j),gel(A,k));
-        if (U) gel(U,j) = ZV_lincomb(gen_1,q,gel(U,j),gel(U,k));
+	q = negi(q);
+	gel(A,j) = ZV_lincomb(gen_1,q,gel(A,j),gel(A,k));
+	if (U) gel(U,j) = ZV_lincomb(gen_1,q,gel(U,j),gel(U,k));
       }
     }
     if (low_stack(lim, stack_lim(av1,1)))
@@ -3028,11 +3028,11 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
     for (t=1,k=r,j=1; j<=n; j++)
       if (l[j])
       {
-        u[k + n-r] = U[j];
-        gel(p,k--) = vecpermute(gel(A,j), perm);
+	u[k + n-r] = U[j];
+	gel(p,k--) = vecpermute(gel(A,j), perm);
       }
       else
-        u[t++] = U[j];
+	u[t++] = U[j];
     *ptU = u;
     *ptperm = perm;
     gerepileall(av, 3, &p, ptU, ptperm);
@@ -3084,17 +3084,17 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     {
       for (i=h[j]; i>li; i--)
       {
-        a = gcoeff(A,i,j);
+	a = gcoeff(A,i,j);
 	if (!signe(a)) continue;
 
-        k = c[i]; /* zero a = Aij  using  Aik */
-        ZV_elem(a,gcoeff(A,i,k), A,B,j,k);
-        ZM_reduce(A,B, i,k);
-        if (low_stack(lim, stack_lim(av1,1)))
-        {
-          if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[1], li = %ld", li);
-          gerepileall(av1, B? 2: 1, &A, &B);
-        }	
+	k = c[i]; /* zero a = Aij  using  Aik */
+	ZV_elem(a,gcoeff(A,i,k), A,B,j,k);
+	ZM_reduce(A,B, i,k);
+	if (low_stack(lim, stack_lim(av1,1)))
+	{
+	  if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[1], li = %ld", li);
+	  gerepileall(av1, B? 2: 1, &A, &B);
+	}
       }
       x = gcoeff(A,li,j); if (signe(x)) break;
       h[j] = li-1;
@@ -3119,7 +3119,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[2], li = %ld", li);
       gerepileall(av1, B? 2: 1, &A, &B);
-    }	
+    }
   }
   if (DEBUGLEVEL>5) fprintferr("\nhnfall, final phase: ");
   r--; /* first r cols are in the image the n-r (independent) last ones */
@@ -3134,9 +3134,9 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       ZM_reduce(A,B, i,k);
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[3], j = %ld", j);
-        gerepileall(av1, B? 2: 1, &A, &B);
-      }	
+	if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[3], j = %ld", j);
+	gerepileall(av1, B? 2: 1, &A, &B);
+      }
     }
   if (DEBUGLEVEL>5) fprintferr("\n");
   /* remove the first r columns */
@@ -3273,7 +3273,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   for (j=1; j<=n; j++)
     for (i=1; i<=m; i++)
       if (typ(gcoeff(x,i,j)) != t_INT)
-        pari_err(talker,"non integral matrix in smithall");
+	pari_err(talker,"non integral matrix in smithall");
 
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
@@ -3290,16 +3290,16 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     if (signe(mdet))
     {
       if (!V)
-        p1 = hnfmod(x,mdet);
+	p1 = hnfmod(x,mdet);
       else
       {
-        if (m == n)
-        {
-          p1 = hnfmod(x,mdet);
-          *ptV = gauss(x,p1);
-        }
-        else
-          p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
+	if (m == n)
+	{
+	  p1 = hnfmod(x,mdet);
+	  *ptV = gauss(x,p1);
+	}
+	else
+	  p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
       }
       mdet = dethnf_i(p1);
     }
@@ -3361,59 +3361,59 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       for (j=i-1; j>=1; j--)
       {
 	b = gcoeff(x,i,j); if (!signe(b)) continue;
-        a = gcoeff(x,i,i);
-        ZV_elem(b, a, x,V, j,i);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if (DEBUGMEM>1) pari_warn(warnmem,"[1]: smithall i = %ld", i);
-          snf_pile(av, &x,&U,&V);
-        }
+	a = gcoeff(x,i,i);
+	ZV_elem(b, a, x,V, j,i);
+	if (low_stack(lim, stack_lim(av,1)))
+	{
+	  if (DEBUGMEM>1) pari_warn(warnmem,"[1]: smithall i = %ld", i);
+	  snf_pile(av, &x,&U,&V);
+	}
       }
       if (DEBUGLEVEL>7) fprintferr("; ");
       for (j=i-1; j>=1; j--)
       {
-        GEN d;
+	GEN d;
 	b = gcoeff(x,j,i); if (!signe(b)) continue;
-        a = gcoeff(x,i,i);
-        d = bezout_step(&a, &b, &u, &v);
-        for (k = 1; k < i; k++)
-        {
-          GEN t = addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
-          gcoeff(x,j,k) = subii(mulii(a,gcoeff(x,j,k)),
-                                mulii(b,gcoeff(x,i,k)));
-          gcoeff(x,i,k) = t;
-        }
-        gcoeff(x,j,i) = gen_0;
-        gcoeff(x,i,i) = d;
-        if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if (DEBUGMEM>1) pari_warn(warnmem,"[2]: smithall, i = %ld", i);
-          snf_pile(av, &x,&U,&V);
-        }
-        c = 1;
+	a = gcoeff(x,i,i);
+	d = bezout_step(&a, &b, &u, &v);
+	for (k = 1; k < i; k++)
+	{
+	  GEN t = addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
+	  gcoeff(x,j,k) = subii(mulii(a,gcoeff(x,j,k)),
+				mulii(b,gcoeff(x,i,k)));
+	  gcoeff(x,i,k) = t;
+	}
+	gcoeff(x,j,i) = gen_0;
+	gcoeff(x,i,i) = d;
+	if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
+	if (low_stack(lim, stack_lim(av,1)))
+	{
+	  if (DEBUGMEM>1) pari_warn(warnmem,"[2]: smithall, i = %ld", i);
+	  snf_pile(av, &x,&U,&V);
+	}
+	c = 1;
       }
       if (!c)
       {
 	b = gcoeff(x,i,i); if (!signe(b) || is_pm1(b)) break;
 
-        for (k=1; k<i; k++)
-        {
-          for (j=1; j<i; j++)
-            if (signe(remii(gcoeff(x,k,j),b))) break;
-          if (j != i) break;
-        }
-        if (k == i) break;
+	for (k=1; k<i; k++)
+	{
+	  for (j=1; j<i; j++)
+	    if (signe(remii(gcoeff(x,k,j),b))) break;
+	  if (j != i) break;
+	}
+	if (k == i) break;
 
-        /* x[k,j] != 0 mod b */
-        for (j=1; j<=i; j++)
-          gcoeff(x,i,j) = addii(gcoeff(x,i,j),gcoeff(x,k,j));
-        if (U) gel(U,i) = gadd(gel(U,i),gel(U,k));
+	/* x[k,j] != 0 mod b */
+	for (j=1; j<=i; j++)
+	  gcoeff(x,i,j) = addii(gcoeff(x,i,j),gcoeff(x,k,j));
+	if (U) gel(U,i) = gadd(gel(U,i),gel(U,k));
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) pari_warn(warnmem,"[3]: smithall");
-        snf_pile(av, &x,&U,&V);
+	if (DEBUGMEM>1) pari_warn(warnmem,"[3]: smithall");
+	snf_pile(av, &x,&U,&V);
       }
     }
   }
@@ -3513,10 +3513,10 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
     { /* possible accuracy problem */
       GEN D = RgX_gcd_simple(a,b);
       if (degpol(D)) {
-        D = gdiv(D, leading_term(D));
-        a = RgX_div(a, D); b = RgX_div(b, D);
-        d = RgX_extgcd(a,b, pu,pv); /* retry now */
-        d = gmul(d, D);
+	D = gdiv(D, leading_term(D));
+	a = RgX_div(a, D); b = RgX_div(b, D);
+	d = RgX_extgcd(a,b, pu,pv); /* retry now */
+	d = gmul(d, D);
       }
     }
 #else
@@ -3553,59 +3553,59 @@ gsmithall(GEN x,long all)
       for (j=i-1; j>=1; j--)
       {
 	b = gcoeff(x,i,j); if (gcmp0(b)) continue;
-        a = gcoeff(x,i,i);
-        d = gbezout_step(&b, &a, &v, &u);
-        for (k = 1; k < i; k++)
-        {
-          GEN t = gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
-          gcoeff(x,k,j) = gsub(gmul(a,gcoeff(x,k,j)),gmul(b,gcoeff(x,k,i)));
-          gcoeff(x,k,i) = t;
-        }
-        gcoeff(x,i,j) = gen_0;
-        gcoeff(x,i,i) = d;
-        if (all) update(u,v,a,b,(GEN*)(V+i),(GEN*)(V+j));
+	a = gcoeff(x,i,i);
+	d = gbezout_step(&b, &a, &v, &u);
+	for (k = 1; k < i; k++)
+	{
+	  GEN t = gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
+	  gcoeff(x,k,j) = gsub(gmul(a,gcoeff(x,k,j)),gmul(b,gcoeff(x,k,i)));
+	  gcoeff(x,k,i) = t;
+	}
+	gcoeff(x,i,j) = gen_0;
+	gcoeff(x,i,i) = d;
+	if (all) update(u,v,a,b,(GEN*)(V+i),(GEN*)(V+j));
       }
       for (j=i-1; j>=1; j--)
       {
 	b = gcoeff(x,j,i); if (gcmp0(b)) continue;
-        a = gcoeff(x,i,i);
-        d = gbezout_step(&b, &a, &v, &u);
-        for (k = 1; k < i; k++)
-        {
-          GEN t = gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
-          gcoeff(x,j,k) = gsub(gmul(a,gcoeff(x,j,k)),gmul(b,gcoeff(x,i,k)));
-          gcoeff(x,i,k) = t;
-        }
-        gcoeff(x,j,i) = gen_0;
-        gcoeff(x,i,i) = d;
-        if (all) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
-        c = 1;
+	a = gcoeff(x,i,i);
+	d = gbezout_step(&b, &a, &v, &u);
+	for (k = 1; k < i; k++)
+	{
+	  GEN t = gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
+	  gcoeff(x,j,k) = gsub(gmul(a,gcoeff(x,j,k)),gmul(b,gcoeff(x,i,k)));
+	  gcoeff(x,i,k) = t;
+	}
+	gcoeff(x,j,i) = gen_0;
+	gcoeff(x,i,i) = d;
+	if (all) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
+	c = 1;
       }
       if (!c)
       {
 	b = gcoeff(x,i,i); if (degpol(b) <= 0) break;
 
-        for (k=1; k<i; k++)
-        {
-          for (j=1; j<i; j++)
-          {
-            GEN r = gmod(gcoeff(x,k,j), b);
-            if (signe(r) && (! isinexactreal(r) ||
-                   gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
-               ) break;
-          }
-          if (j != i) break;
-        }
-        if (k == i) break;
+	for (k=1; k<i; k++)
+	{
+	  for (j=1; j<i; j++)
+	  {
+	    GEN r = gmod(gcoeff(x,k,j), b);
+	    if (signe(r) && (! isinexactreal(r) ||
+		   gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
+	       ) break;
+	  }
+	  if (j != i) break;
+	}
+	if (k == i) break;
 
-        for (j=1; j<=i; j++)
-          gcoeff(x,i,j) = gadd(gcoeff(x,i,j),gcoeff(x,k,j));
-        if (all) gel(U,i) = gadd(gel(U,i),gel(U,k));
+	for (j=1; j<=i; j++)
+	  gcoeff(x,i,j) = gadd(gcoeff(x,i,j),gcoeff(x,k,j));
+	if (all) gel(U,i) = gadd(gel(U,i),gel(U,k));
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
 	if (DEBUGMEM>1) pari_warn(warnmem,"gsmithall");
-        gerepileall(av, all? 3: 1, &x, &U, &V);
+	gerepileall(av, all? 3: 1, &x, &U, &V);
       }
     }
   }
@@ -3616,15 +3616,15 @@ gsmithall(GEN x,long all)
     {
       GEN d = leading_term(T);
       while (gcmp0(d) || ( typ(d) == t_REAL && lg(d) == 3
-                           && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
-         T = normalizepol_i(T, lg(T)-1);
-         if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
-         d = leading_term(T);
+			   && gexpo(T) - expo(d) > (long)BITS_IN_LONG)) {
+	 T = normalizepol_i(T, lg(T)-1);
+	 if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
+	 d = leading_term(T);
       }
       if (!gcmp1(d))
       {
-        gcoeff(x,k,k) = gdiv(T,d);
-        if (all) gel(V,k) = gdiv(gel(V,k), d);
+	gcoeff(x,k,k) = gdiv(T,d);
+	if (all) gel(V,k) = gdiv(gel(V,k), d);
       }
     }
   }
@@ -3673,7 +3673,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     {
       GEN d = gel(D,i), d2 = shifti(d, 1);
       for (j = 1; j < lg(U); j++)
-        gcoeff(U,i,j) = centermodii(gcoeff(U,i,j), d, d2);
+	gcoeff(U,i,j) = centermodii(gcoeff(U,i,j), d, d2);
     }
     *newU = U;
   }
@@ -3685,7 +3685,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
       V = FpM_red(V, gel(D,1));
       Ui = gmul(H, V);
       for (i = 1; i < c; i++)
-        gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
+	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
       *newUi = reducemodHNF(Ui, H, NULL);
     }
   }

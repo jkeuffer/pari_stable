@@ -266,9 +266,9 @@ RgXY_swap(GEN x, long n, long w)
     p1[1] = evalsigne(1) | evalvarn(w);
     for (k=2; k<lx; k++)
       if (j < lg(x[k]))
-        gel(p1,k) = gmael(x,k,j);
+	gel(p1,k) = gmael(x,k,j);
       else
-        gel(p1,k) = gen_0;
+	gel(p1,k) = gen_0;
     gel(y,j) = normalizepol_i(p1,lx);
   }
   return normalizepol_i(y,ly);
@@ -344,7 +344,7 @@ RgX_mulXn(GEN x, long d)
   if (v >= d) return RgX_shift(x, -d);
   av = avma;
   z = gred_rfrac_simple( RgX_shift(x, -v),
-                         monomial(gen_1, d - v, varn(x)));
+			 monomial(gen_1, d - v, varn(x)));
   return gerepileupto(av, z);
 }
 
@@ -624,7 +624,7 @@ sqrpol(GEN x, long nx)
     p1=gen_0; av=avma; l=(i+1)>>1;
     for (j=0; j<l; j++)
       if (p2[j] && p2[i-j])
-        p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
+	p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
     p1 = gshift(p1,1);
     if ((i&1) == 0 && p2[i>>1])
       p1 = gadd(p1, gsqr(gel(x,i>>1)));
@@ -635,7 +635,7 @@ sqrpol(GEN x, long nx)
     p1=gen_0; av=avma; l=(i+1)>>1;
     for (j=i-nx+1; j<l; j++)
       if (p2[j] && p2[i-j])
-        p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
+	p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
     p1 = gshift(p1,1);
     if ((i&1) == 0 && p2[i>>1])
       p1 = gadd(p1, gsqr(gel(x,i>>1)));
@@ -780,7 +780,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   p2 = y_lead? f(p2,y_lead): gcopy(p2);
   if (isexactzero(p2))
     pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Z\nby %Z",
-             x-2, y);
+	     x-2, y);
   y = p1+2;
   gel(z,dz) = p2;
 
@@ -996,7 +996,7 @@ RgXQ_powers(GEN x, long l, GEN T)
   } else { /* use squarings if degree(x) is large */
     for(i = 4; i < l+2; i++)
       gel(V,i) = (i&1)? RgXQ_sqr(gel(V, (i+1)>>1),T)
-                      : RgXQ_mul(gel(V, i-1),x,T);
+		      : RgXQ_mul(gel(V, i-1),x,T);
   }
   return V;
 }

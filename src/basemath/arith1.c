@@ -262,9 +262,9 @@ znstar(GEN n)
       if (remii(gel(cyc,j),gel(cyc,i)) != gen_0)
       {
 	GEN u, v, d = bezout(gel(cyc,i),gel(cyc,j),&u,&v);
-        GEN q = diviiexact(gel(cyc,j),d);
+	GEN q = diviiexact(gel(cyc,j),d);
 	gel(cyc,j) = mulii(gel(cyc,i),q);
-        gel(cyc,i) = d;
+	gel(cyc,i) = d;
 	gel(gen,j) = gdiv(gel(gen,j), gel(gen,i));
 	gel(gen,i) = gmul(gel(gen,i), powgi(gel(gen,j), mulii(v,q)));
       }
@@ -369,7 +369,7 @@ Zp_issquare(GEN a, GEN p)
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
   return equaliu(p, 2)? umodiu(ap, 8) == 1
-                      : kronecker(ap,p) == 1;
+		      : kronecker(ap,p) == 1;
 }
 
 static long
@@ -479,15 +479,15 @@ gissquarerem(GEN x, GEN *pt)
       L = cgetg(l, t_VEC);
       for (i = 1; i < l; i++)
       {
-        GEN p = gel(P,i), t, b;
-        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-        if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
-        if (odd(v)) { avma = av; return gen_0; }
-        t = cvtop(b, gel(P,i), e - v);
-        if (gissquare(t) != gen_1) { avma = av; return gen_0; }
-        t = gtrunc(padic_sqrt(t));
-        if (v) t = mulii(t, gpowgs(p, v>>1));
-        gel(L,i) = mkintmod(t, gpowgs(p, e));
+	GEN p = gel(P,i), t, b;
+	long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+	if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+	if (odd(v)) { avma = av; return gen_0; }
+	t = cvtop(b, gel(P,i), e - v);
+	if (gissquare(t) != gen_1) { avma = av; return gen_0; }
+	t = gtrunc(padic_sqrt(t));
+	if (v) t = mulii(t, gpowgs(p, v>>1));
+	gel(L,i) = mkintmod(t, gpowgs(p, e));
       }
       *pt = gerepileupto(av, chinese1(L));
       return gen_1;
@@ -523,42 +523,42 @@ gissquare(GEN x)
       q = gel(x,1); v = vali(q);
       if (v) /* > 0 */
       {
-        long dv;
-        w = vali(a); dv = v - w;
-        if (dv > 0)
-        {
-          if (w & 1) { avma = av; return gen_0; }
-          if (dv >= 2)
-          {
-            b = w? shifti(a,-w): a;
-            if ((dv>=3 && mod8(b) != 1) ||
-                (dv==2 && mod4(b) != 1)) { avma = av; return gen_0; }
-          }
-        }
-        q = shifti(q, -v);
+	long dv;
+	w = vali(a); dv = v - w;
+	if (dv > 0)
+	{
+	  if (w & 1) { avma = av; return gen_0; }
+	  if (dv >= 2)
+	  {
+	    b = w? shifti(a,-w): a;
+	    if ((dv>=3 && mod8(b) != 1) ||
+		(dv==2 && mod4(b) != 1)) { avma = av; return gen_0; }
+	  }
+	}
+	q = shifti(q, -v);
       }
       /* q is now odd */
       i = kronecker(a,q);
       if (i < 0) { avma = av; return gen_0; }
       if (i==0)
       {
-        GEN d = gcdii(a,q);
-        p = gel(Z_factor(d),1); l = lg(p);
-        for (i=1; i<l; i++)
-        {
-          v = Z_pvalrem(a,gel(p,i),&p1);
-          w = Z_pvalrem(q,gel(p,i), &q);
-          if (v < w && (v&1 || kronecker(p1,gel(p,i)) == -1))
-            { avma = av; return gen_0; }
-        }
-        a = modii(a, q);
-        if (kronecker(a,q) == -1) { avma = av; return gen_0; }
+	GEN d = gcdii(a,q);
+	p = gel(Z_factor(d),1); l = lg(p);
+	for (i=1; i<l; i++)
+	{
+	  v = Z_pvalrem(a,gel(p,i),&p1);
+	  w = Z_pvalrem(q,gel(p,i), &q);
+	  if (v < w && (v&1 || kronecker(p1,gel(p,i)) == -1))
+	    { avma = av; return gen_0; }
+	}
+	a = modii(a, q);
+	if (kronecker(a,q) == -1) { avma = av; return gen_0; }
       }
       /* kro(a,q) = 1, q odd: need to factor q and check all p|q
        * (can't use product formula in case v_p(q) is even for some p) */
       p = gel(Z_factor(q),1); l = lg(p);
       for (i=1; i<l; i++)
-        if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
+	if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
       return gen_1;
     }
 
@@ -574,11 +574,11 @@ gissquare(GEN x)
       if (valp(x)&1) return gen_0;
       p = gel(x,2);
       if (!equaliu(p, 2))
-        return (kronecker(a,p)== -1)? gen_0: gen_1;
+	return (kronecker(a,p)== -1)? gen_0: gen_1;
 
       v = precp(x); /* here p=2, a is odd */
       if ((v>=3 && mod8(a) != 1 ) ||
-          (v==2 && mod4(a) != 1)) return gen_0;
+	  (v==2 && mod4(a) != 1)) return gen_0;
       return gen_1;
 
     case t_POL:
@@ -668,28 +668,28 @@ ispower(GEN x, GEN K, GEN *pt)
       if (!s) { if (pt) *pt = gen_0; return 1; }
       k = itou(K);
       if (s > 0) {
-        if (k == 2) return Z_issquarerem(x, pt);
-        if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
-        if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
-        if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
-        return is_kth_power(x, k, pt, NULL);
+	if (k == 2) return Z_issquarerem(x, pt);
+	if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
+	if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
+	if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
+	return is_kth_power(x, k, pt, NULL);
       } else {
-        if (!odd(k)) return 0;
-        if (ispower(absi(x), K, pt))
-        {
-          if (pt) *pt = negi(*pt);
-          return 1;
-        };
-        return 0;
+	if (!odd(k)) return 0;
+	if (ispower(absi(x), K, pt))
+	{
+	  if (pt) *pt = negi(*pt);
+	  return 1;
+	};
+	return 0;
       }
     case t_FRAC: {
       GEN a = gel(x,1), b = gel(x,2);
       if (pt) {
-        z = cgetg(3, t_FRAC);
-        if (ispower(a, K, &a) && ispower(b, K, &b)) {
-          *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
-        }
-        avma = (pari_sp)(z + 3); return 0;
+	z = cgetg(3, t_FRAC);
+	if (ispower(a, K, &a) && ispower(b, K, &b)) {
+	  *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
+	}
+	avma = (pari_sp)(z + 3); return 0;
       }
       return (ispower(a, K, NULL) && ispower(b, K, NULL));
     }
@@ -699,8 +699,8 @@ ispower(GEN x, GEN K, GEN *pt)
       pari_sp av;
       long i, l;
       if (!signe(a)) {
-        if (pt) *pt = gcopy(x);
-        return 1;
+	if (pt) *pt = gcopy(x);
+	return 1;
       }
       av = avma;
       L = Z_factor(q);
@@ -709,18 +709,18 @@ ispower(GEN x, GEN K, GEN *pt)
       L = cgetg(l, t_VEC);
       for (i = 1; i < l; i++)
       {
-        GEN p = gel(P,i), t, b;
-        long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
-        if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
-        if (!dvdui(v, K)) { avma = av; return 0; }
-        t = cvtop(b, gel(P,i), e - v);
-        if (!ispower(t, K, pt)) { avma = av; return 0; }
-        if (pt)
-        {
-          t = gtrunc(*pt);
-          if (v) t = mulii(t, gpowgs(p, v>>1));
-          gel(L,i) = mkintmod(t, gpowgs(p, e));
-        }
+	GEN p = gel(P,i), t, b;
+	long e = itos(gel(E,i)), v = Z_pvalrem(a, p, &b);
+	if (v >= e) { gel(L, i) = mkintmod(gen_0, gpowgs(p, e)); continue; }
+	if (!dvdui(v, K)) { avma = av; return 0; }
+	t = cvtop(b, gel(P,i), e - v);
+	if (!ispower(t, K, pt)) { avma = av; return 0; }
+	if (pt)
+	{
+	  t = gtrunc(*pt);
+	  if (v) t = mulii(t, gpowgs(p, v>>1));
+	  gel(L,i) = mkintmod(t, gpowgs(p, e));
+	}
       }
       if (pt) *pt = gerepileupto(av, chinese1(L));
       return 1;
@@ -736,11 +736,11 @@ ispower(GEN x, GEN K, GEN *pt)
     case t_RFRAC: {
       GEN a = gel(x,1), b = gel(x,2);
       if (pt) {
-        z = cgetg(3, t_RFRAC);
-        if (ispower(a, K, &a) && polispower(b, K, &b)) {
-          *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
-        }
-        avma = (pari_sp)(z + 3); return 0;
+	z = cgetg(3, t_RFRAC);
+	if (ispower(a, K, &a) && polispower(b, K, &b)) {
+	  *pt = z; gel(z,1) = a; gel(z,2) = b; return 1;
+	}
+	avma = (pari_sp)(z + 3); return 0;
       }
       return (ispower(a, K, NULL) && polispower(b, K, NULL));
     }
@@ -752,7 +752,7 @@ ispower(GEN x, GEN K, GEN *pt)
 
     case t_SER:
       if (signe(x) && (!dvdsi(valp(x), K) || !ispower(gel(x,2), K, NULL)))
-        return 0;
+	return 0;
       if (pt) *pt = gsqrtn(x, K, NULL, DEFAULTPREC);
       return 1;
 
@@ -784,7 +784,7 @@ gisanypower(GEN x, GEN *pty)
       p = P[i];
       e = E[i];
       for (j = 0; j < e; j++)
-        if (!is_kth_power(b, p, &b, NULL)) break;
+	if (!is_kth_power(b, p, &b, NULL)) break;
       if (j < e) k /= upowuu(p, e - j);
     }
     if (k == 1) { avma = av; return 0; }
@@ -1085,13 +1085,13 @@ hil(GEN x, GEN y, GEN p)
 	case t_REAL:
 	  return (signe(x)<0 && signe(y)<0)? -1: 1;
 	case t_INTMOD:
-          p = gel(y,1); if (equaliu(p,2)) err_at2();
+	  p = gel(y,1); if (equaliu(p,2)) err_at2();
 	  return hilii(x, gel(y,2), p);
 	case t_FRAC:
 	  z = hilii(x, mulii(gel(y,1),gel(y,2)), p);
 	  avma = av; return z;
 	case t_PADIC:
-          p = gel(y,2);
+	  p = gel(y,2);
 	  if (equaliu(p,2) && precp(y) <= 1) err_at2();
 	  p1 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
 	  z = hilii(x, p1, p); avma = av; return z;
@@ -1107,14 +1107,14 @@ hil(GEN x, GEN y, GEN p)
       p = gel(x,1); if (equaliu(p,2)) err_at2();
       switch(ty)
       {
-        case t_INTMOD:
-          if (!equalii(p, gel(y,1))) break;
-          return hilii(gel(x,2),gel(y,2),p);
-        case t_FRAC:
+	case t_INTMOD:
+	  if (!equalii(p, gel(y,1))) break;
+	  return hilii(gel(x,2),gel(y,2),p);
+	case t_FRAC:
 	  return hil(gel(x,2),y,p);
-        case t_PADIC:
-          if (!equalii(p, gel(y,2))) break;
-          return hil(gel(x,2),y,p);
+	case t_PADIC:
+	  if (!equalii(p, gel(y,2))) break;
+	  return hil(gel(x,2),y,p);
       }
       break;
 
@@ -1173,8 +1173,8 @@ Fl_sqrt(ulong a, ulong p)
       i = krouu(k, p);
       if (i >= 0)
       {
-        if (i) continue;
-        pari_err(talker,"composite modulus in Fl_sqrt: %lu",p);
+	if (i) continue;
+	pari_err(talker,"composite modulus in Fl_sqrt: %lu",p);
       }
       y = m = Fl_powu(k, q, p);
       for (i=1; i<e; i++)
@@ -1274,7 +1274,7 @@ sqrt_Cipolla(GEN a, GEN p)
   u = utoipos((ulong)t); v = gen_1; /* u+vX = t+X */
   y=mkvec2(u,v); data=mkvec4(a,p,n,u);
   y=leftright_pow_fold(y, shifti(p, -1), data,
-                sqrt_Cipolla_sqr,sqrt_Cipolla_msqr);
+		sqrt_Cipolla_sqr,sqrt_Cipolla_msqr);
 
   u=gel(y,1); v=gel(y,2);
 
@@ -1343,8 +1343,8 @@ Fp_sqrt(GEN a, GEN p)
       i = krosi(k,p);
       if (i >= 0)
       {
-        if (i) continue;
-        pari_err(talker,"composite modulus in Fp_sqrt: %Z",p);
+	if (i) continue;
+	pari_err(talker,"composite modulus in Fp_sqrt: %Z",p);
       }
       av1 = avma;
       y = m = Fp_pow(utoipos((ulong)k),q,p);
@@ -1448,7 +1448,7 @@ chinese(GEN x, GEN y)
       {
 	gel(z,1) = gcopy(gel(x,1));
 	gel(z,2) = chinese(gel(x,2),gel(y,2));
-        return z;
+	return z;
       }
       av=avma;
       d=gbezout(gel(x,1),gel(y,1),&u,&v);
@@ -1950,10 +1950,10 @@ znorder(GEN x, GEN o)
       long e = itos(gel(E,i));
 
       if (l == 2)
-        o = Zp_order(a, p, e, b);
+	o = Zp_order(a, p, e, b);
       else {
-        GEN pe = gpowgs(p,e);
-        o = lcmii(o, Zp_order(resii(a,pe), p, e, pe));
+	GEN pe = gpowgs(p,e);
+	o = lcmii(o, Zp_order(resii(a,pe), p, e, pe));
       }
     }
     return gerepileuptoint(av, o);
@@ -2047,9 +2047,9 @@ znlog(GEN x, GEN g)
       x = Rg_to_Fp(x, pk);
       if (equaliu(p, 2))
       {
-        if (k > 2) pari_err(talker, "not a primitive root in znlog");
-        avma = av;
-        return is_pm1(x)? gen_0: gen_1;
+	if (k > 2) pari_err(talker, "not a primitive root in znlog");
+	avma = av;
+	return is_pm1(x)? gen_0: gen_1;
       }
       g = gel(g,4);
       break;
@@ -2060,16 +2060,16 @@ znlog(GEN x, GEN g)
       e = mod4(pk);
       if (e == 0)
       {
-        if (!equaliu(pk, 4)) pari_err(talker, "not a primitive root in znlog");
-        x = Rg_to_Fp(x, pk);
-        avma = av;
-        return is_pm1(x)? gen_0: gen_1;
+	if (!equaliu(pk, 4)) pari_err(talker, "not a primitive root in znlog");
+	x = Rg_to_Fp(x, pk);
+	avma = av;
+	return is_pm1(x)? gen_0: gen_1;
       }
       g = gel(g,2);
       if (e == 2) {
-        if (equaliu(pk, 2)) return gen_0;
-        pk = shifti(pk, -1);
-        if (cmpii(g, pk) >= 0) g = subii(g, pk);
+	if (equaliu(pk, 2)) return gen_0;
+	pk = shifti(pk, -1);
+	if (cmpii(g, pk) >= 0) g = subii(g, pk);
       }
       x = Rg_to_Fp(x, pk);
       k = isanypower(pk, &p);
@@ -2333,19 +2333,19 @@ Qsfcont(GEN a, GEN b, GEN y, ulong k)
       c = subii(a, c);
       if (signe(c) < 0)
       { /* partial quotient too large */
-        c = addii(c, b);
-        if (signe(c) >= 0) i++; /* by 1 */
-        break;
+	c = addii(c, b);
+	if (signe(c) >= 0) i++; /* by 1 */
+	break;
       }
       if (cmpii(c, b) >= 0)
       { /* partial quotient too small */
-        c = subii(c, b);
-        if (cmpii(c, b) < 0) {
-          /* by 1. If next quotient is 1 in y, add 1 */
-          if (i < l && is_pm1(gel(y,i+1))) gel(z,i) = addis(q,1);
-          i++;
-        }
-        break;
+	c = subii(c, b);
+	if (cmpii(c, b) < 0) {
+	  /* by 1. If next quotient is 1 in y, add 1 */
+	  if (i < l && is_pm1(gel(y,i+1))) gel(z,i) = addis(q,1);
+	  i++;
+	}
+	break;
       }
       if ((i & 0xff) == 0) gerepileall(av, 2, &b, &c);
       a = b; b = c;
@@ -2402,18 +2402,18 @@ gboundcf(GEN x, long k)
     {
       case t_INT: return mkveccopy(x);
       case t_REAL:
-        av = avma; lx = lg(x);
-        e = bit_accuracy(lx)-1-expo(x);
-        if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
-        c = ishiftr_lg(x,lx,0);
-        y = int2n(e);
+	av = avma; lx = lg(x);
+	e = bit_accuracy(lx)-1-expo(x);
+	if (e < 0) pari_err(talker,"integral part not significant in gboundcf");
+	c = ishiftr_lg(x,lx,0);
+	y = int2n(e);
 	a = Qsfcont(c,y, NULL, k);
-        b = addsi(signe(x), c);
+	b = addsi(signe(x), c);
 	return gerepilecopy(av, Qsfcont(b,y, a, k));
 
       case t_FRAC:
-        av = avma;
-        return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
+	av = avma;
+	return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
     }
     pari_err(typeer,"gboundcf");
   }
@@ -2566,9 +2566,9 @@ bestappr_mod(GEN x, GEN A, GEN B)
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++)
       {
-        GEN t = bestappr_mod(gel(x,i),A,B);
-        if (!t) return NULL;
-        gel(y,i) = t;
+	GEN t = bestappr_mod(gel(x,i),A,B);
+	if (!t) return NULL;
+	gel(y,i) = t;
       }
       return y;
   }
@@ -2606,23 +2606,23 @@ bestappr(GEN x, GEN k)
 	if (gcmp0(x)) { p1 = p0; q1 = q0; break; }
 
 	x = ginv(x); /* > 1 */
-        a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
-        if (cmpii(a,k) > 0)
-        { /* next partial quotient will overflow limits */
-          GEN n, d;
-          a = divii(subii(k, q1), q0);
+	a = typ(x)==t_INT? x: divii(gel(x,1), gel(x,2));
+	if (cmpii(a,k) > 0)
+	{ /* next partial quotient will overflow limits */
+	  GEN n, d;
+	  a = divii(subii(k, q1), q0);
 	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-          /* compare |y-p0/q0|, |y-p1/q1| */
-          n = gel(y,1);
-          d = gel(y,2);
-          if (absi_cmp(mulii(q1, subii(mulii(q0,n), mulii(d,p0))),
-                       mulii(q0, subii(mulii(q1,n), mulii(d,p1)))) < 0)
-                       { p1 = p0; q1 = q0; }
-          break;
-        }
+	  q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+	  /* compare |y-p0/q0|, |y-p1/q1| */
+	  n = gel(y,1);
+	  d = gel(y,2);
+	  if (absi_cmp(mulii(q1, subii(mulii(q0,n), mulii(d,p0))),
+		       mulii(q0, subii(mulii(q1,n), mulii(d,p1)))) < 0)
+		       { p1 = p0; q1 = q0; }
+	  break;
+	}
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
       return gerepileupto(av, gdiv(p1,q1));
 
@@ -2639,20 +2639,20 @@ bestappr(GEN x, GEN k)
 	if (!signe(x)) { p1 = p0; q1 = q0; break; }
 
 	x = ginv(x); /* > 1 */
-        if (cmprr(x,kr) > 0)
-        { /* next partial quotient will overflow limits */
-          a = divii(subii(k, q1), q0);
+	if (cmprr(x,kr) > 0)
+	{ /* next partial quotient will overflow limits */
+	  a = divii(subii(k, q1), q0);
 	  p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-          q = addii(mulii(a,q0), q1); q1=q0; q0=q;
-          /* compare |y-p0/q0|, |y-p1/q1| */
-          if (absr_cmp(mpmul(q1, mpsub(mulir(q0,y), p0)),
-                       mpmul(q0, mpsub(mulir(q1,y), p1))) < 0)
-                       { p1 = p0; q1 = q0; }
-          break;
-        }
-        a = mptrunc(x); /* mptrunc(x) may raise precer */
+	  q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+	  /* compare |y-p0/q0|, |y-p1/q1| */
+	  if (absr_cmp(mpmul(q1, mpsub(mulir(q0,y), p0)),
+		       mpmul(q0, mpsub(mulir(q1,y), p1))) < 0)
+		       { p1 = p0; q1 = q0; }
+	  break;
+	}
+	a = mptrunc(x); /* mptrunc(x) may raise precer */
 	p = addii(mulii(a,p0), p1); p1=p0; p0=p;
-        q = addii(mulii(a,q0), q1); q1=q0; q0=q;
+	q = addii(mulii(a,q0), q1); q1=q0; q0=q;
       }
       return gerepileupto(av, gdiv(p1,q1));
    }
@@ -2852,11 +2852,11 @@ end_classno(GEN h, GEN hin, GEN forms, long lform)
     q = addsi(com,q);
     if (gcmp0(q))
     { /* f^(ih) != 1 for all 0 < i <= oldq. Happen if the original upper bound
-         for h was wrong */
+	 for h was wrong */
       long c;
       p1 = fh;
       for (c=1; ; c++, p1 = gmul(p1,fh))
-        if (gcmp1(gel(p1,1))) break;
+	if (gcmp1(gel(p1,1))) break;
       q = mulsi(-com, find_order(fh, utoipos((ulong)c)));
     }
     q = gerepileuptoint(av, q);
@@ -3029,18 +3029,18 @@ classno(GEN x)
       j2 = hash[j1];
       if (tabla[j2] == k && tablb[j2] == l)
       {
-        p1 = gmul(gpowgs(f,j2),fh);
-        if (equalii(gel(p1,1), a) && absi_equal(gel(p1,2), b))
-        { /* p1 = ftest or ftest^(-1), we are done */
-          if (signe(p1[2]) == signe(b)) com = -com;
-          h = addii(addis(h,j2), mulss(s,com));
-          gel(forms,0) = f;
-          for (i=1; i<lforms; i++)
-            gel(forms,i) = sqr_primeform(D, forms[i]);
-          h = end_classno(h,hin,forms,lforms);
-          h = mulii(h,Hf);
-          return gerepileuptoint(av, shifti(h, r2));
-        }
+	p1 = gmul(gpowgs(f,j2),fh);
+	if (equalii(gel(p1,1), a) && absi_equal(gel(p1,2), b))
+	{ /* p1 = ftest or ftest^(-1), we are done */
+	  if (signe(p1[2]) == signe(b)) com = -com;
+	  h = addii(addis(h,j2), mulss(s,com));
+	  gel(forms,0) = f;
+	  for (i=1; i<lforms; i++)
+	    gel(forms,i) = sqr_primeform(D, forms[i]);
+	  h = end_classno(h,hin,forms,lforms);
+	  h = mulii(h,Hf);
+	  return gerepileuptoint(av, shifti(h, r2));
+	}
       }
     }
     ftest = gmul(ftest,fg);

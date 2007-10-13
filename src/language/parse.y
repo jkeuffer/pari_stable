@@ -17,8 +17,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define YYSTYPE union token_value
 #define YYLTYPE struct node_loc
 #define YYLLOC_DEFAULT(Current, Rhs, N)     \
-        ((Current).start  = ((N)?(Rhs)[1].start:(Rhs)[0].end),  \
-         (Current).end    = (Rhs)[N].end)
+	((Current).start  = ((N)?(Rhs)[1].start:(Rhs)[0].end),  \
+	 (Current).end    = (Rhs)[N].end)
 #include "pari.h"
 #include "paripriv.h"
 #include "parse.h"
@@ -190,31 +190,31 @@ newintnode(struct node_loc *loc)
 %%
 
 sequnused: seq       {$$=$1;}
-         | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
+	 | seq error {$$=$1; pari_unused_chars=@1.end;YYABORT;}
 
 seq: /**/ %prec SEQ  { if(*lex<=pari_lex_start+2)
-                         @$.start=@$.end=pari_lex_start;
-                       $$=newnode(Fnoarg,-1,-1,&@$);}
+			 @$.start=@$.end=pari_lex_start;
+		       $$=newnode(Fnoarg,-1,-1,&@$);}
    | expr %prec SEQ  {$$=$1;}
    | seq ';'         {$$=$1;}
    | seq ';' expr    {$$=newnode(Fseq,$1,$3,&@$);}
 ;
 
 matrix_index: '[' expr ',' expr ']' {$$=newnode(Fmatrix,$2,$4,&@$);}
-            | '[' expr ']'          {$$=newnode(Fmatrix,$2,-1,&@$);}
-            | '[' expr ',' ']'      {$$=newnode(FmatrixL,$2,-1,&@$);}
-            | '[' ',' expr ']'      {$$=newnode(FmatrixR,$3,-1,&@$);}
+	    | '[' expr ']'          {$$=newnode(Fmatrix,$2,-1,&@$);}
+	    | '[' expr ',' ']'      {$$=newnode(FmatrixL,$2,-1,&@$);}
+	    | '[' ',' expr ']'      {$$=newnode(FmatrixR,$3,-1,&@$);}
 ;
 
 backticks: '`' {$$=1;}
-         | backticks '`' {$$=$1+1;}
+	 | backticks '`' {$$=$1+1;}
 ;
 
 expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | KREAL               {$$=newconst(CSTreal,&@$);}
     | '.'                 {$$=newconst(CSTreal,&@$);}
     | KINTEGER '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),
-                                                newintnode(&@1),&@$);}
+						newintnode(&@1),&@$);}
     | KSTRING       {$$=newconst(CSTstr,&@$);}
     | '\'' KENTRY   {$$=newconst(CSTquote,&@$);}
     | '%'           {$$=newopcall(OPhist,-1,-1,&@$);}
@@ -277,11 +277,11 @@ lvalue: KENTRY              {$$=newnode(Fentry,newconst(CSTentry,&@1),-1,&@$);}
 ;
 
 matrixelts: expr {$$=$1;}
-          | matrixelts ',' expr {$$=newnode(Fmatrixelts,$1,$3,&@$);}
+	  | matrixelts ',' expr {$$=newnode(Fmatrixelts,$1,$3,&@$);}
 ;
 
 matrixlines: matrixelts  ';' matrixelts {$$=newnode(Fmatrixlines,$1,$3,&@$);}
-           | matrixlines ';' matrixelts {$$=newnode(Fmatrixlines,$1,$3,&@$);}
+	   | matrixlines ';' matrixelts {$$=newnode(Fmatrixlines,$1,$3,&@$);}
 ;
 
 matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
@@ -293,7 +293,7 @@ matrix: '[' ']'             {$$=newnode(Fvec,-1,-1,&@$);}
 arg: seq        {$$=$1;}
    | '&' lvalue {$$=newnode(Frefarg,$2,-1,&@$);}
    | arg error  {if (!pari_once) { yyerrok; } pari_once=1;}  expr
-                     {pari_once=0; $$=newopcall(OPcat,$1,$4,&@$);}
+		     {pari_once=0; $$=newopcall(OPcat,$1,$4,&@$);}
 ;
 
 listarg: arg {$$=$1;}
@@ -310,7 +310,7 @@ memberid:
 ;
 
 definition: funcid   '=' seq %prec DEFFUNC {$$=newnode(Fdeffunc,$1,$3,&@$);}
-          | memberid '=' seq %prec DEFFUNC {$$=newnode(Fdeffunc,$1,$3,&@$);}
+	  | memberid '=' seq %prec DEFFUNC {$$=newnode(Fdeffunc,$1,$3,&@$);}
 ;
 
 %%
