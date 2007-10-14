@@ -1213,6 +1213,50 @@ MC_mul(GEN x, GEN y, long l, long lz)
   }
   return z;
 }
+/* set z = x+y and return 1 if x,y have the same sign
+ * set z = x-y and return 0 otherwise */
+static int
+did_add(GEN x, GEN y, GEN *z)
+{
+  long tx = typ(x), ty = typ(y);
+  if (tx == ty) switch(tx)
+  {
+    case t_INT: *z = addii(x,y); return 1;
+    case t_FRAC: *z = addfrac(x,y); return 1;
+    case t_REAL:
+      if (signe(x) == -signe(y))
+      { *z = subrr(x,y); return 0; }
+      else
+      { *z = addrr(x,y); return 1; }
+  }
+  if (tx == t_REAL) switch(ty)
+  {
+    case t_INT:
+      if (signe(x) == -signe(y))
+      { *z = subri(x,y); return 0; }
+      else
+      { *z = addri(x,y); return 1; }
+    case t_FRAC:
+      if (signe(x) == -signe(y[1]))
+      { *z = gsub(x,y); return 0; }
+      else
+      { *z = gadd(x,y); return 1; }
+  }
+  else if (ty == t_REAL) switch(tx)
+  {
+    case t_INT:
+      if (signe(x) == -signe(y))
+      { *z = subir(x,y); return 0; }
+      else
+      { *z = addir(x,y); return 1; }
+    case t_FRAC:
+      if (signe(x[1]) == -signe(y))
+      { *z = gsub(x,y); return 0; }
+      else
+      { *z = gadd(x,y); return 1; }
+  }
+  *z = gadd(x,y); return 1;
+}
 /* x,y COMPLEX */
 static GEN
 mulcc(GEN x, GEN y)
@@ -1221,20 +1265,48 @@ mulcc(GEN x, GEN y)
   GEN yr = gel(y,1), yi = gel(y,2);
   GEN p1, p2, p3, p4, z = cgetg(3,t_COMPLEX);
   pari_sp tetpil, av = avma;
-#if 1 /* 3M */
-  p1 = gmul(xr,yr);
-  p2 = gmul(xi,yi); p2 = gneg(p2);
-  p3 = gmul(gadd(xr,xi), gadd(yr,yi));
-  p4 = gadd(p2, gneg(p1));
-#else /* standard product */
-  p1 = gmul(xr,yr);
-  p2 = gmul(xi,yi); p2 = gneg(p2);
-  p3 = gmul(xr,yi);
-  p4 = gmul(xi,yr);
-#endif
+
+  /* 3M method avoiding catastrophic cancellation */
+  if (did_add(xr, xi, &p3))
+  {
+    if (did_add(yr, yi, &p4)) {
+    /* R = xr*yr - xi*yi
+     * I = (xr+xi)(yr+yi) - xr*yr - xi*yi */
+      p1 = gmul(xr,yr);
+      p2 = gmul(xi,yi); p2 = gneg(p2);
+      p3 = gmul(p3, p4);
+      p4 = gadd(p2, gneg(p1));
+    } else {
+    /* R = (xr + xi) * (yr - yi) + (xr * yi - xi * yr)
+     * I = xr*yi + xi*yr */
+      p1 = gmul(p3,p4);
+      p3 = gmul(xr,yi);
+      p4 = gmul(xi,yr);
+      p2 = gadd(p3, gneg(p4));
+    }
+  } else {
+    if (did_add(yr, yi, &p4)) {
+     /* R = (xr - xi) * (yr + yi) + (xi * yr - xr * yi)
+      * I = xr*yi +xi*yr */
+      p1 = gmul(p3,p4);
+      p3 = gmul(xr,yi);
+      p4 = gmul(xi,yr);
+      p2 = gadd(p4, gneg(p3));
+    } else {
+    /* R = xr*yr - xi*yi
+     * I = -(xr-xi)(yr-yi) + xr*yr + xi*yi */
+      p3 = gneg( gmul(p3, p4) );
+      p1 = gmul(xr,yr);
+      p2 = gmul(xi,yi);
+      p4 = gadd(p1, p2);
+      
+      p2 = gneg(p2);
+    }
+  }
   tetpil = avma;
   gel(z,1) = gadd(p1,p2);
   gel(z,2) = gadd(p3,p4);
+
   if (isexactzero(gel(z,2)))
   {
     cgiv(gel(z,2));
