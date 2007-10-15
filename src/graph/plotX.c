@@ -33,6 +33,9 @@ BEGINEXTERN
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
+#ifndef XK_c
+#  include <X11/keysym.h>
+#endif
 ENDEXTERN
 
 static Colormap PARI_Colormap;
