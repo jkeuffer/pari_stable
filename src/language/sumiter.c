@@ -25,10 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 forpari(GEN a, GEN b, GEN code)
 {
-  pari_sp av=avma, lim;
-
-  lim = stack_lim(av,1);
+  pari_sp ltop=avma, av, lim;
   b = gcopy(b); /* Kludge to work-around the a+(a=2) bug */
+  av=avma; lim = stack_lim(av,1);
   push_lex(a);
   while (gcmp(a,b) <= 0)
   {
@@ -41,7 +40,7 @@ forpari(GEN a, GEN b, GEN code)
     }
     set_lex(-1, a);
   }
-  pop_lex(); avma = av;
+  pop_lex(); avma = ltop;
 }
 
 void
