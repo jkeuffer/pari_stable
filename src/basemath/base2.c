@@ -1324,13 +1324,14 @@ composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
 static int
 update_phi(decomp_t *S, long *ptl, long flag)
 {
-  GEN PHI = NULL, prc, psc = S->psc, X = pol_x( varn(S->f) );
+  GEN PHI = NULL, prc, psc = S->psc, X = pol_x(varn(S->f));
+  GEN pdf = powiu(S->p, S->df);
   long k;
 
   if (!S->chi)
   {
     kill_cache(S);
-    S->chi = mycaract(S, S->f, S->phi, S->psf, powiu(S->p, S->df));
+    S->chi = mycaract(S, S->f, S->phi, S->psf, pdf);
     S->nu = get_nu(S->chi, S->p, ptl);
     if (*ptl > 1) return 0; /* we can get a decomposition */
   }
@@ -1342,9 +1343,9 @@ update_phi(decomp_t *S, long *ptl, long flag)
     if (!equalii(prc, S->psc)) break;
 
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
-    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
+    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc): S->phi;
     PHI = gadd(PHI, gmul(mului(k, S->p), X));
-    S->chi = mycaract(S, S->f, PHI, S->psf, powiu(S->p, S->df));
+    S->chi = mycaract(S, S->f, PHI, gmax(S->psf, S->psc), pdf);
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
