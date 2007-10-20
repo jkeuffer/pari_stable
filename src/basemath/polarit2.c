@@ -4506,11 +4506,22 @@ GEN ffgen(GEN T, long v)
   {
     ulong pp=p[2];
     long sv=evalvarn(v);
-    ff[1]=t_FF_Flxq;
-    gel(ff,2)=polx_Flx(sv);
-    gel(ff,3)=ZX_to_Flx(lift(T),pp);
-    mael(ff,3,1)=sv;
-    gel(ff,4)=icopy(p);
+    if (pp==2)
+    {
+      ff[1]=t_FF_F2xq;
+      gel(ff,2)=polx_F2x(sv);
+      gel(ff,3)=ZX_to_F2x(lift(T));
+      mael(ff,3,1)=sv;
+      gel(ff,4)=gen_2;
+    }
+    else
+    {
+      ff[1]=t_FF_Flxq;
+      gel(ff,2)=polx_Flx(sv);
+      gel(ff,3)=ZX_to_Flx(lift(T),pp);
+      mael(ff,3,1)=sv;
+      gel(ff,4)=icopy(p);
+    }
   }
   else
   {

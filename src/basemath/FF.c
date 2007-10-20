@@ -134,6 +134,9 @@ FF_zero(GEN x)
   case t_FF_FpXQ:
     r=zeropol(varn(T));
     break;
+  case t_FF_F2xq:
+    r=zero_F2x(T[1]);
+    break;
   default:
     r=zero_Flx(T[1]);
   }
@@ -149,6 +152,9 @@ FF_1(GEN x)
   {
   case t_FF_FpXQ:
     r=pol_1(varn(T));
+    break;
+  case t_FF_F2xq:
+    r=pol1_F2x(T[1]);
     break;
   default:
     r=pol1_Flx(T[1]);
@@ -175,6 +181,8 @@ FF_to_FpXQ(GEN x)
   {
   case t_FF_FpXQ:
     return gcopy(gel(x,2));
+  case t_FF_F2xq:
+    return F2x_to_ZX(gel(x,2));
   default:
     return Flx_to_ZX(gel(x,2));
   }
@@ -186,6 +194,8 @@ FF_to_FpXQ_i(GEN x)
   {
   case t_FF_FpXQ:
     return gel(x,2);
+  case t_FF_F2xq:
+    return F2x_to_ZX(gel(x,2));
   default:
     return Flx_to_ZX(gel(x,2));
   }
@@ -205,6 +215,9 @@ FF_add(GEN x, GEN y)
       r=gerepileupto(av,FpX_add(gel(x,2),gel(y,2),p));
       break;
     }
+  case t_FF_F2xq:
+    r=F2x_add(gel(x,2),gel(y,2));
+    break;
   default:
     r=Flx_add(gel(x,2),gel(y,2),pp);
   }
@@ -224,6 +237,9 @@ FF_Z_add(GEN x, GEN y)
       r=gerepileupto(av,FpX_Fp_add(gel(x,2),modii(y,p),p));
       break;
     }
+  case t_FF_F2xq:
+    r=mpodd(y)?F2x_1_add(gel(x,2)):vecsmall_copy(gel(x,2));
+    break;
   default:
     r=Flx_Fl_add(gel(x,2),umodiu(y,pp),pp);
   }
@@ -240,6 +256,9 @@ FF_neg(GEN x)
   case t_FF_FpXQ:
     r=FpX_neg(gel(x,2),p);
     break;
+  case t_FF_F2xq:
+    r=vecsmall_copy(gel(x,2));
+    break;
   default:
     r=Flx_neg(gel(x,2),pp);
   }
@@ -255,6 +274,9 @@ FF_neg_i(GEN x)
   {
   case t_FF_FpXQ:
     r=FpX_neg(gel(x,2),p);
+    break;
+  case t_FF_F2xq:
+    r=gel(x,2);
     break;
   default:
     r=Flx_neg(gel(x,2),pp);
@@ -276,6 +298,9 @@ FF_mul(GEN x, GEN y)
       r=gerepileupto(av,FpXQ_mul(gel(x,2),gel(y,2),T,p));
       break;
     }
+  case t_FF_F2xq:
+    r=F2xq_mul(gel(x,2),gel(y,2),T);
+    break;
   default:
     r=Flxq_mul(gel(x,2),gel(y,2),T,pp);
   }
@@ -295,6 +320,9 @@ FF_Z_mul(GEN x, GEN y)
       r=gerepileupto(av,FpX_Fp_mul(gel(x,2),modii(y,p),p));
       break;
     }
+  case t_FF_F2xq:
+    r=mpodd(y)?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
+    break;
   default:
     r=Flx_Fl_mul(gel(x,2),umodiu(y,pp),pp);
   }
@@ -311,6 +339,10 @@ FF_Z_Z_muldiv(GEN x, GEN a, GEN b)
   {
   case t_FF_FpXQ:
     r=gerepileupto(av,FpX_Fp_mul(gel(x,2),Fp_div(a,b,p),p));
+    break;
+  case t_FF_F2xq:
+    if (mpodd(b)==0) pari_err(gdiver);
+    r=mpodd(a)?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
     break;
   default:
     r=gerepileupto(av,Flx_Fl_mul(gel(x,2),Fl_div(umodiu(a,pp),umodiu(b,pp),pp),pp));
@@ -331,6 +363,9 @@ FF_sqr(GEN x)
       r=gerepileupto(av,FpXQ_sqr(gel(x,2),T,p));
       break;
     }
+  case t_FF_F2xq:
+    r=F2xq_sqr(gel(x,2),T);
+    break;
   default:
     r=Flxq_sqr(gel(x,2),T,pp);
   }
@@ -352,6 +387,10 @@ FF_mul2n(GEN x, long n)
       else p1=Fp_inv(remii(int2n(-n),p),p);
       r=gerepileupto(av,FpX_Fp_mul(gel(x,2),p1,p));
     }
+    break;
+  case t_FF_F2xq:
+    if (n<0) pari_err(gdiver);
+    r=n==0?vecsmall_copy(gel(x,2)):zero_Flx(mael(x,2,1));
     break;
   default:
     {
@@ -375,6 +414,9 @@ FF_inv(GEN x)
   case t_FF_FpXQ:
     r=gerepileupto(av,FpXQ_inv(gel(x,2),T,p));
     break;
+  case t_FF_F2xq:
+    r=F2xq_inv(gel(x,2),T);
+    break;
   default:
     r=Flxq_inv(gel(x,2),T,pp);
   }
@@ -393,6 +435,9 @@ FF_div(GEN x, GEN y)
   case t_FF_FpXQ:
     r=gerepileupto(av,FpXQ_div(gel(x,2),gel(y,2),T,p));
     break;
+  case t_FF_F2xq:
+    r=gerepileupto(av,F2xq_div(gel(x,2),gel(y,2),T));
+    break;
   default:
     r=gerepileupto(av,Flxq_div(gel(x,2),gel(y,2),T,pp));
   }
@@ -410,6 +455,10 @@ Z_FF_div(GEN n, GEN x)
   case t_FF_FpXQ:
     r=gerepileupto(av,FpX_Fp_mul(FpXQ_inv(gel(x,2),T,p),modii(n,p),p));
     break;
+  case t_FF_F2xq:
+    r=F2xq_inv(gel(x,2),T); /*Check for division by 0*/
+    if(!mpodd(n)) {avma=av; r=zero_Flx(mael(x,2,1));}
+    break;
   default:
     r=gerepileupto(av,Flx_Fl_mul(Flxq_inv(gel(x,2),T,pp),umodiu(n,pp),pp));
   }
@@ -425,6 +474,9 @@ FF_sqrtn(GEN x, GEN n, GEN *zetan)
   {
   case t_FF_FpXQ:
     r=FpXQ_sqrtn(gel(x,2),n,T,p,zetan);
+    break;
+  case t_FF_F2xq:
+    r=F2xq_sqrtn(gel(x,2),n,T,zetan);
     break;
   default:
     r=Flxq_sqrtn(gel(x,2),n,T,pp,zetan);
@@ -456,6 +508,9 @@ FF_pow(GEN x, GEN n)
    case t_FF_FpXQ:
      r = FpXQ_pow(gel(x,2), n, T, p);
      break;
+   case t_FF_F2xq:
+     r = F2xq_pow(gel(x,2), n, T);
+     break;
    default:
      r = Flxq_pow(gel(x,2), n, T, pp);
    }
@@ -472,6 +527,8 @@ FF_norm(GEN x)
   {
   case t_FF_FpXQ:
     return FpXQ_norm(gel(x,2),T,p);
+  case t_FF_F2xq:
+    return lgpol(gel(x,2))?gen_1:gen_0;
   default:
     return utoi(Flxq_norm(gel(x,2),T,pp));
   }
@@ -490,6 +547,9 @@ FF_trace(GEN x)
   case t_FF_FpXQ:
     r = quicktrace(gel(x,2), polsym(T, degpol(T)-1));
     break;
+  case t_FF_F2xq:
+    r = quicktrace(F2x_to_ZX(gel(x,2)), polsym(F2x_to_ZX(T), F2x_degree(T)-1));
+    break;
   default:
     r = quicktrace(Flx_to_ZX(gel(x,2)), polsym(Flx_to_ZX(T), degpol(T)-1));
   }
@@ -507,6 +567,9 @@ FF_charpoly(GEN x)
   {
   case t_FF_FpXQ:
     return gerepileupto(av,FpXQ_charpoly(gel(x,2), T, p));
+  case t_FF_F2xq:
+    return gerepileupto(av,Flx_to_ZX(Flxq_charpoly(F2x_to_Flx(gel(x,2)),
+                                                   F2x_to_Flx(T), 2UL)));
   default:
     return gerepileupto(av,Flx_to_ZX(Flxq_charpoly(gel(x,2), T, pp)));
   }
@@ -523,6 +586,9 @@ FF_minpoly(GEN x)
   {
   case t_FF_FpXQ:
     return gerepileupto(av,FpXQ_minpoly(gel(x,2), T, p));
+  case t_FF_F2xq:
+    return gerepileupto(av,Flx_to_ZX(Flxq_minpoly(F2x_to_Flx(gel(x,2)),
+                                                  F2x_to_Flx(T), 2UL)));
   default:
     return gerepileupto(av,Flx_to_ZX(Flxq_minpoly(gel(x,2), T, pp)));
   }
@@ -553,15 +619,19 @@ FF_log(GEN x, GEN g, GEN ord)
   GEN r, T, p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
-  if (!ord) ord = factor_pn_1(p,degpol(T));
-  else
-    if (!is_Z_factor(ord)) err(typeer, "FF_log");
+  if (ord && !is_Z_factor(ord)) err(typeer, "FF_log");
   switch(x[1])
   {
   case t_FF_FpXQ:
+    if (!ord) ord = factor_pn_1(p,degpol(T));
     r = FpXQ_log(gel(x,2), gel(g,2), ord, T, p);
     break;
+  case t_FF_F2xq:
+    if (!ord) ord = factor_pn_1(gen_2,F2x_degree(T));
+    r = F2xq_log(gel(x,2), gel(g,2), ord, T);
+    break;
   default:
+    if (!ord) ord = factor_pn_1(p,degpol(T));
     r = Flxq_log(gel(x,2), gel(g,2), ord, T, pp);
   }
   return gerepileuptoint(av, r);
@@ -574,13 +644,18 @@ FF_order(GEN x, GEN o)
   ulong pp;
   GEN r, T,p;
   _getFF(x,&T,&p,&pp);
-  if (!o) o = factor_pn_1(p,degpol(T));
   switch(x[1])
   {
   case t_FF_FpXQ:
+    if (!o) o = factor_pn_1(p,degpol(T));
     r = FpXQ_order(gel(x,2), o, T, p);
     break;
+  case t_FF_F2xq:
+    if (!o) o = factor_pn_1(gen_2,F2x_degree(T));
+    r = F2xq_order(gel(x,2), o, T);
+    break;
   default:
+    if (!o) o = factor_pn_1(p,degpol(T));
     r = Flxq_order(gel(x,2), o, T, pp);
   }
   if (!o) r = gerepileuptoint(av,r);
@@ -596,6 +671,9 @@ FF_primroot(GEN x, GEN *o)
   {
   case t_FF_FpXQ:
     r = gener_FpXQ(T, p, o);
+    break;
+  case t_FF_F2xq:
+    r = gener_F2xq(T, o);
     break;
   default:
     r = gener_Flxq(T, pp, o);
@@ -615,6 +693,9 @@ to_FF(GEN x, GEN ff)
     {
     case t_FF_FpXQ:
       r=x;
+      break;
+    case t_FF_F2xq:
+      r=ZX_to_F2x(x);
       break;
     default:
       r=ZX_to_Flx(x,pp);
@@ -676,7 +757,16 @@ FFX_factor(GEN P, GEN x)
   GEN r, T, p;
   pari_sp av=avma;
   _getFF(x,&T,&p,&pp);
-  if (x[1]) T=Flx_to_ZX(T);
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    break;
+  case t_FF_F2xq:
+    T=F2x_to_ZX(T);
+    break;
+  default:
+    T=Flx_to_ZX(T);
+  }
   r = FqX_factor(FFX_to_FqX(P, T,p), T,p);
   return to_FF_fact(gel(r,1),gel(r,2), x,av);
 }

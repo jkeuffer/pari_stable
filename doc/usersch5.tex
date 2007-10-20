@@ -2518,6 +2518,9 @@ underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized, as an
 \fun{GEN}{Flx_red}{GEN z, ulong p} converts from \kbd{zx} with
 non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
+\fun{int}{Flx_cmp1}{GEN x} returns 1 (true) if the \kbd{Flx x} is equal to~1,
+0~(false) otherwise.
+
 \fun{GEN}{Flx_add}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flx_Fl_add}{GEN y, ulong x, ulong p}
@@ -2741,6 +2744,74 @@ place (destroys~\kbd{x}).
 \subsec{\kbd{FlxqV}, \kbd{FlxqM}}. See \kbd{FqV}, \kbd{FqM} operations.
 
 \fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
+
+\subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
+representing a polynomial over $\F_2[X]$. Specifically
+\kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some
+variable $v$ and the coefficients are given by the bits of remaining
+words by increasing degree.
+
+\subsubsec{Basic operations}
+
+\fun{GEN}{Flx_to_F2x}{GEN x}
+
+\fun{GEN}{ZX_to_F2x}{GEN x}
+
+\fun{GEN}{F2x_to_Flx}{GEN x}
+
+\fun{GEN}{F2x_to_ZX}{GEN x}
+
+\fun{GEN}{zero_F2x}{long sv} returns a zero \kbd{F2x} in variable $v$.
+
+\fun{GEN}{pol1_F2x}{long sv} returns the \kbd{F2x} in variable $v$ constant to
+$1$.
+
+\fun{GEN}{polx_F2x}{long sv} returns the variable $v$ as degree~1~\kbd{F2x}.
+
+\fun{GEN}{random_F2x}{long d, long sv} returns a random \kbd{F2x}
+in variable \kbd{v}, of degree less than~\kbd{d}.
+
+\fun{long}{F2x_degree}{GEN x} returns the degree of the \kbd{F2x x}. The degree of $0$ is defined as $-1$.
+
+\fun{int}{F2x_cmp1}{GEN x}
+
+\fun{GEN}{F2x_1_add}{GEN y} returns \kbd{y+1} where \kbd{y} is a \kbd{Flx}.
+
+\fun{GEN}{F2x_add}{GEN x, GEN y}
+
+\fun{GEN}{F2x_mul}{GEN x, GEN y}
+
+\fun{GEN}{F2x_sqr}{GEN x}
+
+\fun{GEN}{F2x_divrem}{GEN x, GEN y, GEN *pr}
+
+\fun{GEN}{F2x_rem}{GEN x, GEN y}
+
+\fun{GEN}{F2x_extgcd}{GEN a, GEN b, GEN *ptu, GEN *ptv}
+
+\fun{GEN}{F2x_gcd}{GEN a, GEN b}
+
+\subsec{\kbd{F2xq}}. See \kbd{FpXQ} operations.
+
+\fun{GEN}{F2xq_mul}{GEN x, GEN y, GEN pol}
+
+\fun{GEN}{F2xq_sqr}{GEN x,GEN pol}
+
+\fun{GEN}{F2xq_div}{GEN x,GEN y,GEN T}
+
+\fun{GEN}{F2xq_inv}{GEN x, GEN T}
+
+\fun{GEN}{F2xq_invsafe}{GEN x, GEN T}
+
+\fun{GEN}{F2xq_pow}{GEN x, GEN n, GEN pol}
+
+\fun{GEN}{F2xq_log}{GEN a, GEN g, GEN ord, GEN T}
+
+\fun{GEN}{F2xq_order}{GEN a, GEN ord, GEN T}
+
+\fun{GEN}{F2xq_sqrtn}{GEN a, GEN n, GEN T, GEN *zeta}
+
+\fun{GEN}{gener_F2xq}{GEN T, GEN *po}
 
 \subsec{\kbd{QX}}.
 

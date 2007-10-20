@@ -19,6 +19,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
+/* F2x.c */
+
+GEN     F2x_1_add(GEN y);
+GEN     F2x_add(GEN x, GEN y);
+long    F2x_degree(GEN x);
+GEN     F2x_divrem(GEN x, GEN y, GEN *pr);
+GEN     F2x_extgcd(GEN a, GEN b, GEN *ptu, GEN *ptv);
+GEN     F2x_gcd(GEN a, GEN b);
+GEN     F2x_mul(GEN x, GEN y);
+GEN     F2x_rem(GEN x, GEN y);
+GEN     F2x_sqr(GEN x);
+GEN     F2x_to_Flx(GEN x);
+GEN     F2x_to_ZX(GEN x);
+GEN     F2xq_div(GEN x,GEN y,GEN T);
+GEN     F2xq_inv(GEN x, GEN T);
+GEN     F2xq_invsafe(GEN x, GEN T);
+GEN     F2xq_log(GEN a, GEN g, GEN ord, GEN T);
+GEN     F2xq_mul(GEN x, GEN y, GEN pol);
+GEN     F2xq_order(GEN a, GEN ord, GEN T);
+GEN     F2xq_pow(GEN x, GEN n, GEN pol);
+GEN     F2xq_sqr(GEN x,GEN pol);
+GEN     F2xq_sqrtn(GEN a, GEN n, GEN T, GEN *zeta);
+GEN     Flx_to_F2x(GEN x);
+GEN     ZX_to_F2x(GEN x);
+GEN     gener_F2xq(GEN T, GEN *po);
+GEN     polx_F2x(long sv);
+GEN     random_F2x(long d, long vs);
+
 /* Flx.c */
 
 GEN     Fl_to_Flx(ulong x, long sv);
@@ -34,6 +62,7 @@ GEN     Fly_to_FlxY(GEN B, long v);
 GEN     Flx_Fl_add(GEN y, ulong x, ulong p);
 GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
 GEN     Flx_add(GEN x, GEN y, ulong p);
+int     Flx_cmp1(GEN x);
 GEN     Flx_deflate(GEN x0, long d);
 GEN     Flx_deriv(GEN z, ulong p);
 GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem);

@@ -365,7 +365,7 @@ GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 
 /* Finite field */
 
-enum { t_FF_FpXQ = 0, t_FF_Flxq =1 };
+enum { t_FF_FpXQ = 0, t_FF_Flxq = 1, t_FF_F2xq = 2 };
 
 #include "parinf.h"
 

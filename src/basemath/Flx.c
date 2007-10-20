@@ -258,7 +258,7 @@ random_Flx(long d1, long vs, ulong p)
   return Flx_renormalize(y,d);
 }
 
-static int
+int
 Flx_cmp1(GEN x)
 {
   return degpol(x)==0 && x[2]==1;
