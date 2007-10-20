@@ -369,14 +369,6 @@ changelex(long vn, GEN x)
 }
 
 INLINE void
-zerolex(long vn)
-{
-  struct var_lex *v=var+s_var.n+vn;
-  v->flag  = PUSH_VAL;
-  v->value = gen_0;
-}
-
-INLINE void
 copylex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
@@ -881,8 +873,6 @@ closure_eval(GEN C)
     case OCgetarg:
 	if (gel(st,sp-1))
 	  copylex(operand,gel(st,sp-1));
-	else
-	  zerolex(operand);
 	sp--;
 	break;
     case OCdefaultarg:
