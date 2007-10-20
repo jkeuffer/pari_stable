@@ -112,6 +112,8 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
        t_COMPLEX * t_COMPLEX
    87- ix86, x86_64: missing earlyclobber constraint for addllx, subllx, divll
    88- ploth(,4) --> huge memory use for large plots
+   89- stirling(0,0,2) --> 0  [ should be 1, #690 ]
+
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

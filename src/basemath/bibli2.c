@@ -627,8 +627,9 @@ stirling2uu(ulong n, ulong m)
   GEN p1 = gen_0;
   GEN p2, bmk, kn, mkn;
   ulong k;
-  if (m==0 || m>n) return gen_0;
-  else if (m==0 || m==n) return gen_1;
+  if (n==0) return (m == 0)? gen_1: gen_0;
+  if (m>n) return gen_0;
+  if (m==n) return gen_1;
   for (k = 0; k <= ((m-1)>>1); ++k)
   {
     bmk = k ? diviuexact(mului(m-k+1, bmk), k) : gen_1;
@@ -654,7 +655,7 @@ stirling2uu(ulong n, ulong m)
 GEN
 stirling2(long n, long m)
 {
-  if ((n < 0) || (m < 0))
+  if (n < 0 || m < 0)
     pari_err(talker, "Negative arguments in stirling2(%ld,%ld)",n,m);
   return stirling2uu((ulong)n,(ulong)m);
 }
