@@ -439,6 +439,8 @@ GEN sd_factor_add_primes(char *v, long flag);
 GEN sd_factor_proven(char *v, long flag);
 GEN sd_filename(const char *v, long flag, char *s, char **f);
 GEN sd_format(const char *v, long flag);
+GEN sd_graphcolormap(char *v, long flag);
+GEN sd_graphcolors(char *v, long flag);
 GEN sd_help(char *v, long flag);
 GEN sd_histsize(const char *v, long flag);
 GEN sd_lines(const char *v, long flag);
