@@ -447,7 +447,10 @@ rectticks(PARI_plot *WW, long ne,
   dxy1 = max(dx, dy);
   dx /= WW->hunit;
   dy /= WW->vunit;
-  dxy = (long)sqrt(dx*dx + dy*dy);
+  if (dx > 1000 || dy > 1000)
+    dxy = 1000; /* avoid overflow */
+  else
+    dxy = (long)sqrt(dx*dx + dy*dy);
   nticks = (long) ((dxy + 2.5)/4);
   if (!nticks) return;
 
@@ -487,7 +490,7 @@ rectticks(PARI_plot *WW, long ne,
   }
   /* Where to position doubleticks, variants:
      small: each 5, double: each 10	(n===2 mod 3)
-     small: each 2, double: each 10	(n===1  mod 3)
+     small: each 2, double: each 10	(n===1 mod 3)
      small: each 1, double: each  5 */
   dn = (n % 3 == 2)? 2: 5;
   n1 = ((long)minl) % dn; /* unused if do_double = FALSE */
@@ -515,11 +518,11 @@ rectticks(PARI_plot *WW, long ne,
 
     if (flags & TICKS_CLOCKW) {
       RoLNx1(z) += dtx*l;
-      RoLNy1(z) -= dty*l;		/* y-coord runs down */
+      RoLNy1(z) -= dty*l; /* y-coord runs down */
     }
     if (flags & TICKS_ACLOCKW) {
       RoLNx2(z) -= dtx*l;
-      RoLNy2(z) += dty*l;		/* y-coord runs down */
+      RoLNy2(z) += dty*l; /* y-coord runs down */
     }
     RoType(z) = ROt_LN;
 
