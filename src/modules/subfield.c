@@ -883,10 +883,10 @@ subfields_poldata(GEN T, poldata *PD)
 }
 
 GEN
-subfields(GEN nf, GEN d0)
+subfields(GEN nf, long d)
 {
   pari_sp av = avma;
-  long N, v0, d = itos(d0);
+  long N, v0;
   GEN LSB, pol, G;
   poldata PD;
   primedata S;
@@ -988,7 +988,7 @@ subfieldsall(GEN nf)
 }
 
 GEN
-subfields0(GEN nf,GEN d)
+subfields0(GEN nf, long d)
 {
   return d? subfields(nf,d): subfieldsall(nf);
 }

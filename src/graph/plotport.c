@@ -253,6 +253,8 @@ initrect_gen(long ne, GEN x, GEN y, long flag)
     if (xd) xi = DTOL(xd*xi);
     if (yd) yi = DTOL(yd*yi);
   } else {
+    if (typ(x) != t_INT) pari_err(typeer, "initrect");
+    if (typ(y) != t_INT) pari_err(typeer, "initrect");
     xi = itos(x);
     yi = itos(y);
     if (!xi || !yi) PARI_get_plot(0);
