@@ -320,9 +320,9 @@ F2x_sqr(GEN x)
   z = cgetg(lz, t_VECSMALL); z[1]=x[1];
   for (j=2,jj=2;j<lx;j++,jj++)
   {
-    z[jj]=0;
     ulong x1=((ulong)x[j]&HIGHMASK)>>BITS_IN_HALFULONG;
     ulong x2=(ulong)x[j]&LOWMASK;
+    z[jj]=0;
     if (x2)
       for(i=0,ii=0;i<BITS_IN_HALFULONG;i+=4,ii+=8)
         z[jj]|=sq[(x2>>i)&15UL]<<ii;
