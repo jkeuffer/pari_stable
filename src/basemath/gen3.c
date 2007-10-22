@@ -1577,10 +1577,10 @@ deriv(GEN x, long v)
       bp = deriv(b, v);
       d = ggcd(bp, b);
       if (gcmp1(d)) {
-	d = gadd(gmul(b, deriv(a,v)), gmul(gneg_i(a), bp));
+        d = gadd(gmul(b, deriv(a,v)), gmul(gneg_i(a), bp));
         if (isexactzero(d)) return gerepileupto((pari_sp)(y+3), d);
-	gel(y,1) = gerepileupto(av, d);
-	gel(y,2) = gsqr(b); return y;
+        gel(y,1) = gerepileupto(av, d);
+        gel(y,2) = gsqr(b); return y;
       }
       b0 = gdivexact(b, d);
       bp = gdivexact(bp,d);
