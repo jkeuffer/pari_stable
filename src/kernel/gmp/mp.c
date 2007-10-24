@@ -37,10 +37,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *  (pityful attempt to beat GN code/comments rate)
  *  */
 
+#include <gmp.h>
 #include "pari.h"
 #include "paripriv.h"
 #include "../src/kernel/none/tune-gen.h"
-#include <gmp.h>
 
 /*We need PARI invmod renamed to invmod_pari*/
 #define INVMOD_PARI
