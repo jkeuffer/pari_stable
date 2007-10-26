@@ -1193,6 +1193,9 @@ powers, then \kbd{sqrtremi} is called.
 \fun{long}{Z_issquarerem}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
 \kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
 
+\fun{long}{uissquarerem}{ulong n, ulong *sqrtn} as \kbd{Z\_issquarerem},
+for an \kbd{ulong} operand \kbd{n}.
+
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
 
@@ -1201,12 +1204,6 @@ Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
 
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
 $0$ otherwise.
-
-\fun{long}{Z_issquarerem}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
-\kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
-
-\fun{long}{uissquarerem}{ulong n, ulong *sqrtn} as \kbd{Z\_issquarerem},
-for an \kbd{ulong} operand \kbd{n}.
 
 \fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 factorization process as soon as the unfactored part is smaller than \kbd{lim}.
@@ -4309,6 +4306,10 @@ the \typ{FFELT} \kbd{a}.
 
 \fun{GEN}{FF_sqrt}{GEN a} returns an \typ{FFELT} $b$ such that $a=b^2$ if
 it exist, where \kbd{a} is a \typ{FFELT}.
+
+\fun{long}{FF_issquarerem}{GEN x, GEN *pt} returns $1$ if \kbd{x} is a
+square, and $0$ otherwise. If \kbd{x} is indeed a square, set \kbd{pt} to its
+square root.
 
 \fun{GEN}{FF_sqrtn}{GEN a, GEN n, GEN *zetan} returns an \kbd{n}-th root of
 $\kbd{a}$ if it exist. If \kbd{zn} is non-\kbd{NULL} set it to a primitive

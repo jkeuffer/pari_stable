@@ -30,7 +30,6 @@ _getFF(GEN x, GEN *T, GEN *p, ulong *pp)
   *pp=mael(x,4,2);
 }
 
-
 INLINE GEN
 _initFF(GEN x, GEN *T, GEN *p, ulong *pp)
 {
@@ -496,6 +495,34 @@ GEN
 FF_sqrt(GEN x)
 {
   return FF_sqrtn(x,gen_2,NULL);
+}
+
+long
+FF_issquarerem(GEN x, GEN *pt)
+{
+  ulong pp;
+  GEN r, T, p, z; 
+  pari_sp av = avma;
+  _getFF(x, &T, &p, &pp);
+  if (pt) z = cgetg(5,t_FFELT);
+  switch(x[1])
+  {
+   case t_FF_FpXQ:
+     r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
+     if (!r) { avma = av; return 0; }
+     break;
+
+   case t_FF_Flxq:
+     r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
+     if (!r) { avma = av; return 0; }
+     break;
+
+   case t_FF_F2xq:
+     if (pt) { avma = av; *pt = FF_sqrt(x); }
+     return 1;
+  }
+  if (pt) { _mkFF(x,z,r); *pt = z; }
+  return 1;
 }
 
 GEN

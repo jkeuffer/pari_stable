@@ -493,6 +493,8 @@ gissquarerem(GEN x, GEN *pt)
       return gen_1;
     }
 
+    case t_FFELT: return FF_issquarerem(x, pt)? gen_1: gen_0;
+
     default: pari_err(typeer, "gissquarerem");
       return NULL; /* not reached */
   }
@@ -565,6 +567,8 @@ gissquare(GEN x)
     case t_FRAC:
       av=avma; l=Z_issquare(mulii(gel(x,1),gel(x,2)));
       avma=av; return l? gen_1: gen_0;
+
+    case t_FFELT: return FF_issquarerem(x, NULL)? gen_1: gen_0;
 
     case t_COMPLEX:
       return gen_1;

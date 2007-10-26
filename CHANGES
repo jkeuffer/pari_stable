@@ -203,6 +203,7 @@ BA 48- local and my can now appear anywhere in a program.
    56- global() now obsolete and scheduled for removal
 LGr57- 'make ctags' gctags-specific flags [ add #defines, typedefs ]
    58- prototype of nfsubfields [ 2nd argument GEN -> long ]
+   59- allow t_FFELT in issquare / issquarerem
 
   Added
     1- library functions expu, adduu, subuu
