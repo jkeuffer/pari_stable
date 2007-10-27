@@ -385,7 +385,7 @@ is_char_2(GEN x)
         b = gel(a,1);
         if (!mod2(b))
         {
-          if (!equaliu(b, 2)) pari_err(impl, "issquare mod %Z", b);
+          if (!equaliu(b, 2)) pari_err(impl, "issquare for this input");
           return 1;
         }
       case t_FFELT:
