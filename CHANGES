@@ -114,6 +114,7 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
    88- ploth(,4) --> huge memory use for large plots
    89- stirling(0,0,2) --> 0  [ should be 1, #690 ]
    90- deriv(x/(x+1),y) --> invalid t_RFRAC with exact 0 numerator [#687]
+   91- issquare(t_POL) assumed characteristic 0 [#549]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -204,6 +205,7 @@ BA 48- local and my can now appear anywhere in a program.
 LGr57- 'make ctags' gctags-specific flags [ add #defines, typedefs ]
    58- prototype of nfsubfields [ 2nd argument GEN -> long ]
    59- allow t_FFELT in issquare / issquarerem
+   60- sqrt(t_SER) now uses Newton iteration
 
   Added
     1- library functions expu, adduu, subuu

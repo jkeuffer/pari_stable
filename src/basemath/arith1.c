@@ -372,6 +372,35 @@ Zp_issquare(GEN a, GEN p)
 		      : kronecker(ap,p) == 1;
 }
 
+static int
+is_char_2(GEN x)
+{
+  long i, j, lx = lg(x);
+  for (i = 2; i < lx; i++)
+  {
+    GEN b, a = gel(x,i);
+    switch(typ(x[i]))
+    {
+      case t_INTMOD:
+        b = gel(a,1);
+        if (!mod2(b))
+        {
+          if (!equaliu(b, 2)) pari_err(impl, "issquare mod %Z", b);
+          return 1;
+        }
+      case t_FFELT:
+        if (equaliu(gel(a,4), 2)) return 1;
+
+      case t_POLMOD:
+        if (is_char_2(gel(a,1)) || is_char_2(gel(a,2))) return 1;
+      case t_POL:
+        for (j = 2; j < lg(a); j++)
+          if (is_char_2(gel(a,j))) return 1;
+    }
+  }
+  return 0;
+}
+
 static long
 polissquarerem(GEN x, GEN *pt)
 {
@@ -405,15 +434,37 @@ polissquarerem(GEN x, GEN *pt)
     if (!b) b = gsqrt(a,DEFAULTPREC);
     y = scalarpol(b, varn(x)); goto END;
   }
-  x = gdiv(x,a);
-  y = gtrunc(gsqrt(greffe(x,2+l,1),0));
-  if (!gequal(gsqr(y), x)) { avma = av; return 0; }
-  if (!pt) { avma = av; return 1; }
-
-  if (!gcmp1(a))
+  if (is_char_2(x))
   {
-    if (!b) b = gsqrt(a,DEFAULTPREC);
-    y = gmul(b, y);
+    long i, lx;
+    x = gmul(x, mkintmod(gen_1, gen_2));
+    lx = lg(x);
+    if ((lx-3) & 1) { avma = av; return 0; }
+    for (i = 3; i < lx; i+=2)
+      if (!gcmp0(gel(x,i))) { avma = av; return 0; }
+    if (pt) {
+      y = cgetg((lx+3) / 2, t_POL);
+      for (i = 2; i < lx; i+=2)
+        if (!gissquarerem(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
+      y[1] = evalsigne(1) | evalvarn(varn(x));
+      goto END;
+    } else {
+      for (i = 2; i < lx; i+=2)
+        if (!gissquare(gel(x,i))) { avma = av; return 0; }
+      avma = av; return 1;
+    }
+  }
+  else
+  {
+    x = gdiv(x,a);
+    y = gtrunc(gsqrt(greffe(x,2+l,1),0));
+    if (!gequal(gsqr(y), x)) { avma = av; return 0; }
+    if (!pt) { avma = av; return 1; }
+    if (!gcmp1(a))
+    {
+      if (!b) b = gsqrt(a,DEFAULTPREC);
+      y = gmul(b, y);
+    }
   }
 END:
   *pt = v? gerepilecopy(av, RgX_shift_shallow(y, v >> 1)): gerepileupto(av, y);

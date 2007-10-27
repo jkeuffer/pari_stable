@@ -1032,7 +1032,7 @@ inv_ser(GEN b)
 
   for (j = 3; j < l; j++) gel(x,j) = gen_0;
   gel(x,2) = ginv(gel(b,2));
-  a[1] = x[1] = evalvalp(0) | evalvarn(v) | evalsigne(1);
+  a[1] = x[1] = _evalvalp(0) | evalvarn(v) | evalsigne(1);
   E = Newton_exponents(l - 2);
   av2 = avma; lim = stack_lim(av2, 2);
   le = lg(E)-1;
@@ -1457,7 +1457,7 @@ recip(GEN x)
     mi = lx-1; while (mi>=3 && gcmp0(gel(x,mi))) mi--;
     u = cgetg(lx,t_SER);
     y = cgetg(lx,t_SER);
-    u[1] = y[1] = evalsigne(1) | evalvalp(1) | evalvarn(v);
+    u[1] = y[1] = evalsigne(1) | _evalvalp(1) | evalvarn(v);
     gel(u,2) = gel(y,2) = gen_1;
     if (lx > 3)
     {
@@ -1529,7 +1529,7 @@ derivser(GEN x)
   } else {
     if (lx == 3) return zeroser(vx, 0);
     lx--;
-    y = cgetg(lx,t_SER); y[1] = evalvalp(0) | evalvarn(vx);
+    y = cgetg(lx,t_SER); y[1] = _evalvalp(0) | evalvarn(vx);
     for (i=2; i<lx; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
   }
   return normalize(y);
@@ -2395,7 +2395,7 @@ scalarser(GEN x, long v, long prec)
 
   if (isexactzero(x)) return zeroser(v,0);
   l = prec + 2; y = cgetg(l, t_SER);
-  y[1] = evalsigne(1) | evalvalp(0) | evalvarn(v);
+  y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
 }

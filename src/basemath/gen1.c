@@ -1801,6 +1801,38 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
 }
 
 GEN
+sqr_ser_part(GEN x, long l1, long l2)
+{
+  long i, j, l;
+  pari_sp av;
+  GEN Z, z, p1, p2;
+  long mi;
+  if (l2 < l1) return zeroser(varn(x), 2*valp(x));
+  p2 = cgetg(l2+2, t_VECSMALL)+1; /* left on stack on exit */
+  Z = cgetg(l2-l1+3, t_SER);
+  Z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x));
+  z = Z + 2-l1;
+  x += 2; mi = 0;
+  for (i=0; i<l1; i++)
+  {
+    p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
+  }
+
+  for (i=l1; i<=l2; i++)
+  {
+    p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
+    p1=gen_0; av=avma; l=((i+1)>>1) - 1;
+    for (j=i-mi; j<=min(l,mi); j++)
+      if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
+    p1 = gshift(p1,1);
+    if ((i&1) == 0 && p2[i>>1])
+      p1 = gadd(p1, gsqr(gel(x,i>>1)));
+    gel(z,i) = gerepileupto(av,p1);
+  }
+  return Z;
+}
+
+GEN
 gsqr(GEN x)
 {
   long tx=typ(x), lx, i, j, l;
@@ -1894,28 +1926,8 @@ gsqr(GEN x)
     }
 
     case t_SER:
-    {
-      long mi;
-      lx = lg(x);
-      if (lx == 2) return zeroser(varn(x), 2*valp(x));
-      z = cgetg(lx, t_SER);
-      z[1] = evalvalp(2*valp(x)) | evalvarn(varn(x));
-      x += 2; z += 2; lx -= 3;
-      p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
-      mi = 0;
-      for (i=0; i<=lx; i++)
-      {
-	p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
-	p1=gen_0; av=avma; l=((i+1)>>1) - 1;
-	for (j=i-mi; j<=min(l,mi); j++)
-	  if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
-	p1 = gshift(p1,1);
-	if ((i&1) == 0 && p2[i>>1])
-	  p1 = gadd(p1, gsqr(gel(x,i>>1)));
-	gel(z,i) = gerepileupto(av,p1);
-      }
-      z -= 2; gpfree(p2); return normalize(z);
-    }
+      return normalize( sqr_ser_part(x, 0, lg(x)-3) );
+
     case t_RFRAC: z = cgetg(3,t_RFRAC);
       gel(z,1) = gsqr(gel(x,1));
       gel(z,2) = gsqr(gel(x,2)); return z;

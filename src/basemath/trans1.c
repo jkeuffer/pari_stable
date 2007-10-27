@@ -918,6 +918,38 @@ padic_sqrt(GEN x)
   gel(y,4) = z; return y;
 }
 
+static GEN
+sqrt_ser(GEN b, long prec)
+{
+  long e = valp(b), vx = varn(b), lx, i,j;
+  GEN a, x, E;
+
+  if (!signe(b)) return zeroser(vx, e>>1);
+  a = shallowcopy(b);
+  lx = lg(b); x = cgetg(lx, t_SER);
+  if (e & 1) pari_err(talker,"2 should divide valuation (= %ld) in sqrtn",2,e);
+  a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
+  if (!gissquarerem(gel(a,2), &gel(x,2))) gel(x,2) = gsqrt(gel(a,2), prec);
+  for (j = 3; j < lx; j++) gel(x,j) = gen_0;
+  setlg(x,3);
+  E = Newton_exponents(lx - 2);
+  
+  for (i = lg(E)-1; i > 1; i--)
+  {
+    long l1 = E[i-1], l2 = E[i];
+    GEN y, x2 = gmul2n(x,1);
+    setlg(a, l1 + 2);
+    setlg(x, l1 + 2);
+    y = sqr_ser_part(x, l2, l1-1) - l2;
+    for (j = l2+2; j < l1+2; j++) gel(y,j) = gsub(gel(y,j), gel(a,j));
+    y += l2; setvalp(y, l2);
+    y = gsub(x, gdiv(y, x2)); /* = gmul2n(gadd(x, gdiv(a,x)), -1); */
+    for (j = l2+2; j < l1+2; j++) x[j] = y[j];
+  }
+  x[1] = evalsigne(1) | evalvarn(vx) | _evalvalp(e >> 1);
+  return x;
+}
+
 GEN
 gsqrt(GEN x, long prec)
 {
@@ -961,7 +993,7 @@ gsqrt(GEN x, long prec)
 
     default:
       av = avma; if (!(y = toser_i(x))) break;
-      return gerepileupto(av, ser_powfrac(y, ghalf, prec));
+      return gerepilecopy(av, sqrt_ser(y, prec));
   }
   return transc(gsqrt,x,prec);
 }
