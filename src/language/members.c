@@ -143,6 +143,7 @@ member_pol(GEN x) /* polynomial */
       case typ_GAL: return gel(x,1);
     }
     if (typ(x)==t_POLMOD) return gel(x,2);
+    if (typ(x)==t_FFELT) return FF_to_FpXQ(x);
     if (typ(x)==t_VEC && lg(x) == 13) return gmael(x,11,1);
     member_err("pol");
   }
