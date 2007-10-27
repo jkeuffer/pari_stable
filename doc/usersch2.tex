@@ -278,6 +278,10 @@ on integer representatives belonging to $[0,m-1]$.
 Note that this type is available for convenience, not for speed: each
 elementary operation involves a reduction modulo $m$.
 
+If $a$ is a \typ{INTMOD}, the following member function is defined:
+
+\kbd{a.mod}: return the modulus.
+
 \subsec{Rational numbers}\sidx{rational number}
 (types \tet{t_FRAC}): all fractions are automatically reduced to lowest
 terms, so it is impossible to work with reducible fractions. To enter $n/m$
@@ -299,6 +303,10 @@ To create the field $\F_{2^8}$, write something like
 The element $g$ is the class of $X$ in the quotient field $\F_p[X]/(P(X))$.
 The second parameter to \tet{ffgen} is the name used to display $g$, so it is
 customary to use the name of a variable we will assign the generator to.
+If $f$ is a \typ{FFELT}, the following member function is defined:
+
+\kbd{f.pol}: return the polynomial (with reduced integers coefficients)
+expressing \kbd{f} in term of the field generator.
 
 \subsec{Complex numbers}\sidx{complex number} (type \tet{t_COMPLEX}): to
 enter $x+iy$, type \kbd{x + I*y} (\emph{not} \kbd{x+i*y}). The letter \tet{I}
@@ -370,6 +378,11 @@ the $p$-adic field $\Q_p$, or \idx{finite field}s.
 
 Note that this type is available for convenience, not for speed: each
 elementary operation involves a reduction modulo $y$.
+If $p$ is a \typ{POLMOD}, the following members functions are defined:
+
+\kbd{p.pol}: return a representative of the polynomial class of minimal degree.
+
+\kbd{p.mod}: return the modulus.
 
 \label{se:rempolmod}
 \misctitle{Important remark.}\sidx{variable (priority)}
