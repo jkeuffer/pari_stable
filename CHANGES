@@ -116,6 +116,7 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
    90- deriv(x/(x+1),y) --> invalid t_RFRAC with exact 0 numerator [#687]
    91- issquare(t_POL) assumed characteristic 0 [#549]
    92- sqrt(Mod(4,5) + x) --> error [ e.g. stack overflow ]
+   93- hyperu(0*I,1,1) --> forbidden assignment t_COMPLEX --> t_REAL.
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

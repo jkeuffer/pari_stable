@@ -1484,6 +1484,11 @@ gaffect(GEN x, GEN y)
       }
       break;
 
+    case t_COMPLEX:
+      if (!gcmp0(gel(x,2))) pari_err(operf,"",x,y);
+      gaffect(gel(x,1), y);
+      break;
+
     case t_PADIC:
       switch(ty)
       {
