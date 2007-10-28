@@ -186,7 +186,7 @@ newintnode(struct node_loc *loc)
 %type <val> lvalue
 %type <val> matrixelts matrixlines arg listarg definition
 %type <val> funcid funcder memberid
-%type <val> backticks
+%type <val> backticks history
 %%
 
 sequnused: seq       {$$=$1;}
@@ -210,6 +210,11 @@ backticks: '`' {$$=1;}
 	 | backticks '`' {$$=$1+1;}
 ;
 
+history: '%'           {$$=newopcall(OPhist,-1,-1,&@$);}
+       | '%' KINTEGER  {$$=newopcall(OPhist,newintnode(&@2),-1,&@$);}
+       | '%' backticks {$$=newopcall(OPhist,newnode(Fsmall,-$2,-1,&@$),-1,&@$);}
+;
+
 expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | KREAL               {$$=newconst(CSTreal,&@$);}
     | '.'                 {$$=newconst(CSTreal,&@$);}
@@ -217,9 +222,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
 						newintnode(&@1),&@$);}
     | KSTRING       {$$=newconst(CSTstr,&@$);}
     | '\'' KENTRY   {$$=newconst(CSTquote,&@$);}
-    | '%'           {$$=newopcall(OPhist,-1,-1,&@$);}
-    | '%' KINTEGER  {$$=newopcall(OPhist,newintnode(&@2),-1,&@$);}
-    | '%' backticks {$$=newopcall(OPhist,newnode(Fsmall,-$2,-1,&@$),-1,&@$);}
+    | history           {$$=$1;}
     | funcid            {$$=$1;}
     | funcder           {$$=$1;}
     | lvalue %prec LVAL	{$$=$1;}
