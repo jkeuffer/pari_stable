@@ -52,9 +52,15 @@ member_p(GEN x)
   long t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gmael(x,2,1);
-  x = get_primeid(x);
-  if (!x) member_err("p");
-  return gel(x,1);
+  switch(typ(x)) {
+    case t_VEC:
+      x = get_primeid(x);
+      return gel(x,1);
+    case t_PADIC:
+      return gel(x,2);
+  }
+  member_err("p");
+  return NULL;
 }
 
 GEN
@@ -162,6 +168,7 @@ member_mod(GEN x) /* modulus */
   switch(typ(x))
   {
     case t_INTMOD: case t_POLMOD: case t_QUAD: break;
+    case t_PADIC: return gel(x,3);
     default: member_err("mod");
   }
   return gel(x,1);

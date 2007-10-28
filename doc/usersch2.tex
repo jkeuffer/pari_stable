@@ -334,6 +334,12 @@ For example, you can type in the $7$-adic number
 
 \noindent exactly as shown, or equivalently as \kbd{905/7 + O(7\pow3)}.
 
+If $a$ is a \typ{PADIC}, the following member function is defined:
+
+\kbd{a.mod}: return the modulus $p^k$.
+
+\kbd{a.p}: return $p$.
+
 Note that this type is available for convenience, not for speed:
 internally, \typ{PADIC}s are stored as $p$-adic units modulo some $p^k$.
 Each elementary operation involves updating $p^k$ (multiplying or
