@@ -56,152 +56,152 @@ enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
 ulong
 parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg)
 {
-    ulong retval = 0;
-    char *etmplate = NULL;
+  ulong retval = 0;
+  char *etmplate = NULL;
 
-    if (flag & PARSEMNU_TEMPL_TERM_NL)
-	etmplate = strchr(tmplate, '\n');
-    if (!etmplate)
-	etmplate = tmplate + strlen(tmplate);
+  if (flag & PARSEMNU_TEMPL_TERM_NL)
+    etmplate = strchr(tmplate, '\n');
+  if (!etmplate)
+    etmplate = tmplate + strlen(tmplate);
 
-    if (failure)
-	*failure = NULL;
-    while (1) {
-	long numarg;
-	char *e, *id;
-	char *negated;			/* action found with 'no'-ID */
-	int negate;			/* Arg has 'no' prefix removed */
-	ulong l, action = 0, first = 1, singleton = 0;
-	char *buf, *inibuf;
-	static char b[80];
+  if (failure)
+    *failure = NULL;
+  while (1) {
+    long numarg;
+    char *e, *id;
+    char *negated;			/* action found with 'no'-ID */
+    int negate;			/* Arg has 'no' prefix removed */
+    ulong l, action = 0, first = 1, singleton = 0;
+    char *buf, *inibuf;
+    static char b[80];
 
-	if (flag & PARSEMNU_ARG_WHITESP)
-	    while (isspace((int)*arg)) arg++;
-	if (!*arg)
-	    break;
-	e = arg;
-	while (IS_ID(*e)) e++;
-	/* Now the ID is whatever is between arg and e. */
-	l = e - arg;
-	if (l >= sizeof(b))
-	    ERR("id too long in a stringified flag");
-	if (!l)				/* Garbage after whitespace? */
-	    ERR("a stringified flag does not start with an id");
-	strncpy(b, arg, l);
-	b[l] = 0;
-	arg = e;
-	e = inibuf = buf = b;
-	while (('0' <= *e) && (*e <= '9'))
-	    e++;
-	if (*e == 0)
-	    ERR("numeric id in a stringified flag");
-	negate = 0;
-	negated = NULL;
-      find:
-	id = tmplate;
-	while ((id = strstr(id, buf)) && id < etmplate) {
-	    if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
-		id += l;		/* False positive */
-		continue;
-	    }
-	    if ((id >= tmplate + 2) && (IS_ID(id[-1]))) {
-		char *s = id;
+    if (flag & PARSEMNU_ARG_WHITESP)
+      while (isspace((int)*arg)) arg++;
+    if (!*arg)
+      break;
+    e = arg;
+    while (IS_ID(*e)) e++;
+    /* Now the ID is whatever is between arg and e. */
+    l = e - arg;
+    if (l >= sizeof(b))
+      ERR("id too long in a stringified flag");
+    if (!l)				/* Garbage after whitespace? */
+      ERR("a stringified flag does not start with an id");
+    strncpy(b, arg, l);
+    b[l] = 0;
+    arg = e;
+    e = inibuf = buf = b;
+    while (('0' <= *e) && (*e <= '9'))
+      e++;
+    if (*e == 0)
+      ERR("numeric id in a stringified flag");
+    negate = 0;
+    negated = NULL;
+find:
+    id = tmplate;
+    while ((id = strstr(id, buf)) && id < etmplate) {
+      if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
+        id += l;		/* False positive */
+        continue;
+      }
+      if ((id >= tmplate + 2) && (IS_ID(id[-1]))) {
+        char *s = id;
 
-		if ( !negate && s >= tmplate+3
-		     && ((id[-1] == '_') || (id[-1] == '-')) )
-		    s--;
-		/* Check whether we are preceeded by "no" */
-		if ( negate		/* buf initially started with "no" */
-		     || (s < tmplate+2) || (s[-1] != 'o') || (s[-2] != 'n')
-		     || (s >= tmplate+3 && IS_ID(s[-3]))) {
-		    id += l;		/* False positive */
-		    continue;
-		}
-		/* Found noID in the template! */
-		id += l;
-		negated = id;
-		continue;		/* Try to find without 'no'. */
-	    }
-	    /* Found as is */
-	    id += l;
-	    break;
-	}
-	if ( !id && !negated && !negate
-	     && (l > 2) && buf[0] == 'n' && buf[1] == 'o' ) {
-	    /* Try to find the flag without the prefix "no". */
-	    buf += 2; l -= 2;
-	    if ((buf[0] == '_') || (buf[0] == '-')) { buf++; l--; }
-	    negate = 1;
-	    if (buf[0])
-		goto find;
-	}
-	if (!id && negated) {	/* Negated and AS_IS forms, prefer AS_IS */
-	    id = negated;	/* Otherwise, use negated form */
-	    negate = 1;
-	}
-	if (!id)
-	    ERR2("Unrecognized id '%s' in a stringified flag", inibuf);
-	if (singleton && !first)
-	    ERR("Singleton id non-single in a stringified flag");
-	if (id[0] == '=') {
-	    if (negate)
-		ERR("Cannot negate id=value in a stringified flag");
-	    if (!first)
-		ERR("Assign action should be first in a stringified flag");
-	    action = A_ACTION_ASSIGN;
-	    id++;
-	    if (id[0] == '=') {
-		singleton = 1;
-		id++;
-	    }
-	} else if (id[0] == '^') {
-	    if (id[1] != '~')
-		pari_err(talker, "Unrecognized action in a template");
-	    id += 2;
-	    if (negate)
-		action = A_ACTION_SET;
-	    else
-		action = A_ACTION_UNSET;
-	} else if (id[0] == '|') {
-	    id++;
-	    if (negate)
-		action = A_ACTION_UNSET;
-	    else
-		action = A_ACTION_SET;
-	}
-
-	e = id;
-
-	while ((*e >= '0' && *e <= '9')) e++;
-	while (isspace((int)*e))
-	    e++;
-	if (*e && (*e != ';') && (*e != ','))
-	    pari_err(talker, "Non-numeric argument of an action in a template");
-	numarg = atol(id);		/* Now it is safe to get it... */
-	switch (action) {
-	case A_ACTION_SET:
-	    retval |= numarg;
-	    break;
-	case A_ACTION_UNSET:
-	    retval &= ~numarg;
-	    break;
-	case A_ACTION_ASSIGN:
-	    retval = numarg;
-	    break;
-	default:
-	    ERR("error in parse_option_string");
-	}
-	first = 0;
-	if (flag & PARSEMNU_ARG_WHITESP)
-	    while (isspace((int)*arg))
-		arg++;
-	if (*arg && !(ispunct((int)*arg) && *arg != '-'))
-	    ERR("Junk after an id in a stringified flag");
-	/* Skip punctuation */
-	if (*arg)
-	    arg++;
+        if ( !negate && s >= tmplate+3
+            && ((id[-1] == '_') || (id[-1] == '-')) )
+          s--;
+        /* Check whether we are preceeded by "no" */
+        if ( negate		/* buf initially started with "no" */
+            || (s < tmplate+2) || (s[-1] != 'o') || (s[-2] != 'n')
+            || (s >= tmplate+3 && IS_ID(s[-3]))) {
+          id += l;		/* False positive */
+          continue;
+        }
+        /* Found noID in the template! */
+        id += l;
+        negated = id;
+        continue;		/* Try to find without 'no'. */
+      }
+      /* Found as is */
+      id += l;
+      break;
     }
-    return retval;
+    if ( !id && !negated && !negate
+        && (l > 2) && buf[0] == 'n' && buf[1] == 'o' ) {
+      /* Try to find the flag without the prefix "no". */
+      buf += 2; l -= 2;
+      if ((buf[0] == '_') || (buf[0] == '-')) { buf++; l--; }
+      negate = 1;
+      if (buf[0])
+        goto find;
+    }
+    if (!id && negated) {	/* Negated and AS_IS forms, prefer AS_IS */
+      id = negated;	/* Otherwise, use negated form */
+      negate = 1;
+    }
+    if (!id)
+      ERR2("Unrecognized id '%s' in a stringified flag", inibuf);
+    if (singleton && !first)
+      ERR("Singleton id non-single in a stringified flag");
+    if (id[0] == '=') {
+      if (negate)
+        ERR("Cannot negate id=value in a stringified flag");
+      if (!first)
+        ERR("Assign action should be first in a stringified flag");
+      action = A_ACTION_ASSIGN;
+      id++;
+      if (id[0] == '=') {
+        singleton = 1;
+        id++;
+      }
+    } else if (id[0] == '^') {
+      if (id[1] != '~')
+        pari_err(talker, "Unrecognized action in a template");
+      id += 2;
+      if (negate)
+        action = A_ACTION_SET;
+      else
+        action = A_ACTION_UNSET;
+    } else if (id[0] == '|') {
+      id++;
+      if (negate)
+        action = A_ACTION_UNSET;
+      else
+        action = A_ACTION_SET;
+    }
+
+    e = id;
+
+    while ((*e >= '0' && *e <= '9')) e++;
+    while (isspace((int)*e))
+      e++;
+    if (*e && (*e != ';') && (*e != ','))
+      pari_err(talker, "Non-numeric argument of an action in a template");
+    numarg = atol(id);		/* Now it is safe to get it... */
+    switch (action) {
+    case A_ACTION_SET:
+      retval |= numarg;
+      break;
+    case A_ACTION_UNSET:
+      retval &= ~numarg;
+      break;
+    case A_ACTION_ASSIGN:
+      retval = numarg;
+      break;
+    default:
+      ERR("error in parse_option_string");
+    }
+    first = 0;
+    if (flag & PARSEMNU_ARG_WHITESP)
+      while (isspace((int)*arg))
+        arg++;
+    if (*arg && !(ispunct((int)*arg) && *arg != '-'))
+      ERR("Junk after an id in a stringified flag");
+    /* Skip punctuation */
+    if (*arg)
+      arg++;
+  }
+  return retval;
 }
 
 #define HANDLE_FOREIGN(t)\
