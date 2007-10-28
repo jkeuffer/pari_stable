@@ -1271,7 +1271,7 @@ bnrisconductor(GEN arg0,GEN arg1,GEN arg2)
 }
 
 static GEN
-check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, char *s)
+check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
 {
   GEN h, D = NULL;
   if (H && gcmp0(H)) H = NULL;
@@ -1679,7 +1679,7 @@ get_classno(GEN t, GEN h)
 }
 
 static void
-chk_listBU(GEN L, char *s) {
+chk_listBU(GEN L, const char *s) {
   if (typ(L) != t_VEC) pari_err(typeer,s);
   if (lg(L) > 1) {
     GEN z = gel(L,1);

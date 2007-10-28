@@ -1377,7 +1377,7 @@ padic_to_Fl(GEN x, ulong Y) {
 }
 
 static void
-croak(char *s) {
+croak(const char *s) {
   pari_err(talker,"trying to overwrite a universal object in gaffect (%s)", s);
 }
 

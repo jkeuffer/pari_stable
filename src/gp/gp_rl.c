@@ -98,7 +98,7 @@ static int did_init_matched = 0;
 static entree *current_ep = NULL;
 
 static int
-change_state(char *msg, ulong flag, int count)
+change_state(const char *msg, ulong flag, int count)
 {
   int c = (readline_state & flag) != 0;
   ulong o_readline_state = readline_state;
@@ -283,7 +283,7 @@ static int
 add_paren(int end)
 {
   entree *ep;
-  char *s;
+  const char *s;
 
   if (end < 0 || rl_line_buffer[end] == '(')
     return 0; /* not from command_generator or already there */
@@ -303,7 +303,7 @@ add_paren(int end)
 }
 
 static void
-match_concat(char **matches, char *s)
+match_concat(char **matches, const char *s)
 {
   matches[0] = gprealloc(matches[0], strlen(matches[0])+strlen(s)+1);
   strcat(matches[0],s);
@@ -371,7 +371,7 @@ get_matches(int code, const char *text, GF f)
 static char *
 generator(void *list, const char *text, int *nn, int len, int typ)
 {
-  char *def = NULL, *name;
+  const char *def = NULL;
   int n = *nn;
 
   /* Return the next name which partially matches from list.*/
@@ -392,7 +392,7 @@ generator(void *list, const char *text, int *nn, int len, int typ)
   *nn = n;
   if (def)
   {
-    name = strcpy(gpmalloc(strlen(def)+1), def);
+    char *name = strcpy(gpmalloc(strlen(def)+1), def);
     return name;
   }
   return NULL; /* no names matched */
@@ -403,7 +403,7 @@ old_generator(const char *text,int state)
   static int n,len;
   static char *res;
 
-  if (!state) { res = "a"; n=0; len=strlen(text); }
+  if (!state) { res = (char*)"a"; n=0; len=strlen(text); }
   if (res)
   {
     res = generator((void *)oldfonctions,text,&n,len,ENTREE);
@@ -422,7 +422,7 @@ default_generator(const char *text,int state)
 }
 
 static char *
-add_prefix(char *name, const char *text, long junk)
+add_prefix(const char *name, const char *text, long junk)
 {
   char *s = strncpy(gpmalloc(strlen(name)+1+junk),text,junk);
   strcpy(s+junk,name); return s;
@@ -663,11 +663,11 @@ pari_completion(char *text, int START, int END)
 #  endif
       return NULL;
 #else
-      char *s = ep->help;
+      const char *s = ep->help;
       while (is_keyword_char(*s)) s++;
       if (*s++ == '(')
       { /* function call: insert arguments */
-	char *e = s;
+	const char *e = s;
 	while (*e && *e != ')' && *e != '(') e++;
 	if (*e == ')')
 	{ /* we just skipped over the arguments in short help text */
@@ -871,7 +871,7 @@ completion_word(long end)
 
 /* completion required, cursor on s + pos. Complete wrt strict left prefix */
 void
-texmacs_completion(char *s, long pos)
+texmacs_completion(const char *s, long pos)
 {
   char **matches, *text;
 
@@ -927,7 +927,8 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
   Buffer *b = F->buf;
   ulong used = *endp - b->buf;
   ulong left = b->len - used, l;
-  char *s, *t, *prompt = expand_prompt(first? IM->prompt: IM->prompt_cont, F);
+  const char *prompt = expand_prompt(first? IM->prompt: IM->prompt_cont, F);
+  char *s, *t;
 
   if (! (s = readline(color_prompt(prompt))) ) return NULL; /* EOF */
   gp_add_history(s); /* Makes a copy */
@@ -954,7 +955,7 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
  * Return 0: EOF
  *        1: got one line from readline or pari_infile */
 int
-get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
+get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
 {
   const int index = history_length;
   char *s;

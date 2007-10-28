@@ -20,14 +20,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*************************************************************************/
 BEGINEXTERN
 
-void aide(char *s, long flag);
-int  get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F);
+void aide(const char *s, long flag);
+int  get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F);
 void gp_output(GEN z, gp_data *G);
 void hit_return(void);
 void init_readline(void);
 void update_logfile(const char *prompt, const char *s);
-void texmacs_completion(char *s, long pos);
-char *color_prompt(char *prompt);
+void texmacs_completion(const char *s, long pos);
+const char *color_prompt(const char *prompt);
 void print_fun_list(char **list, long nbli);
 
 /* aide() */
@@ -37,7 +37,7 @@ void print_fun_list(char **list, long nbli);
 #define h_RL      4
 
 /* readline completions */
-extern char *keyword_list[];
+extern const char *keyword_list[];
 
 /* TeXmacs */
 #define DATA_BEGIN  ((char) 2)

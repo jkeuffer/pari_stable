@@ -303,7 +303,7 @@ allocgroup(long n, long card)
 #endif
 
 static pariFILE *
-galopen(char *pre, long n, long n1, long n2, long no)
+galopen(const char *pre, long n, long n1, long n2, long no)
 {
   pari_sp av = avma;
   char *s = stackmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1 + 3);

@@ -3045,7 +3045,7 @@ nfidealdet1(GEN nf, GEN a, GEN b)
 }
 
 static GEN
-get_order(GEN nf, GEN O, char *s)
+get_order(GEN nf, GEN O, const char *s)
 {
   if (typ(O) == t_POL)
     return rnfpseudobasis(nf, O);

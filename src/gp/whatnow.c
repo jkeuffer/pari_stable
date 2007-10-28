@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 typedef struct whatnow_t
 {
-  char *name, *oldarg, *newarg;
+  const char *name, *oldarg, *newarg;
 } whatnow_t;
 
 #define SAME NULL
@@ -679,7 +679,7 @@ _SAME
 };
 
 static int
-is_identifier(char *s)
+is_identifier(const char *s)
 {
   while (*s && is_keyword_char(*s)) s++;
   return *s? 0: 1;
@@ -692,10 +692,10 @@ is_identifier(char *s)
  * If flag < 0: -flag-1 is the index in whatnowlist
  */
 int
-whatnow(char *s, int flag)
+whatnow(const char *s, int flag)
 {
   int n;
-  char *def;
+  const char *def;
   whatnow_t wp;
   entree *ep;
 

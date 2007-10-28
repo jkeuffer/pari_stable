@@ -96,7 +96,7 @@ checkbnrgen(GEN bnr)
 }
 
 GEN
-check_units(GEN BNF, char *f)
+check_units(GEN BNF, const char *f)
 {
   GEN bnf = checkbnf(BNF), x = gel(bnf,8);
   if (lg(x) < 6 || lg(x[5]) != lg(bnf[3])) pari_err(talker,"missing units in %s", f);
@@ -135,12 +135,12 @@ _check_ZX(GEN x)
 }
 
 void
-check_ZX(GEN x, char *s)
+check_ZX(GEN x, const char *s)
 {
   if (! _check_ZX(x)) pari_err(talker,"polynomial not in Z[X] in %s",s);
 }
 void
-check_ZXY(GEN x, char *s)
+check_ZXY(GEN x, const char *s)
 {
   long k = lg(x)-1;
   for ( ; k>1; k--) {
@@ -155,7 +155,7 @@ check_ZXY(GEN x, char *s)
 }
 
 GEN
-checknfelt_mod(GEN nf, GEN x, char *s)
+checknfelt_mod(GEN nf, GEN x, const char *s)
 {
   if (!gequal(gel(x,1),gel(nf,1)))
     pari_err(talker,"incompatible modulus in %s:\n  mod = %Z,\n  nf  = %Z",

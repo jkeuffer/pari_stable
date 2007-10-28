@@ -1195,7 +1195,7 @@ trivial_relations(struct buch_quad *B, GEN mat, GEN C)
 }
 
 static void
-dbg_all(char *phase, long s, long n)
+dbg_all(const char *phase, long s, long n)
 {
   fprintferr("\nTime %s rel [#rel/#test = %ld/%ld]: %ld\n", phase,s,n,timer2());
 }

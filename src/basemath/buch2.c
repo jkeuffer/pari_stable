@@ -706,7 +706,7 @@ cleanarch(GEN x, long N, long prec)
 static GEN
 not_given(pari_sp av, long fl, long reason)
 {
-  char *s;
+  const char *s;
   switch(reason)
   {
     case fupb_LARGE: s="fundamental units too large"; break;
@@ -3029,7 +3029,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   double drc, LOGD, LOGD2;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
-  char *precpb = NULL;
+  const char *precpb = NULL;
   const long minsFB = 3;
   RELCACHE_t cache;
   FB_t F;

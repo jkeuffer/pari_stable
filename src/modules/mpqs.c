@@ -929,7 +929,7 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 /* determines a unique name for a file based on a short nickname
  * name is allocated on the stack */
 static char *
-mpqs_get_filename(char *dir, char *s)
+mpqs_get_filename(char *dir, const char *s)
 {
   char *buf = stackmalloc(strlen(dir) + strlen(s) + 2);
 #if defined(__EMX__) || defined(WINCE)

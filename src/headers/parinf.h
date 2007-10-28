@@ -139,7 +139,7 @@ GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);
 GEN    checkbnf_i(GEN bnf);
 GEN    checknf_i(GEN nf);
-void   check_ZKmodule(GEN x, char *s);
+void   check_ZKmodule(GEN x, const char *s);
 void   dbg_rel(long s, GEN col);
 GEN    element_mulidid(GEN nf, long i, long j);
 GEN    element_powid_mod_p(GEN nf, long I, GEN n, GEN p);

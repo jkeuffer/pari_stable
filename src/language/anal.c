@@ -54,7 +54,7 @@ enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
     } else pari_err(talker,reason,s); } STMT_END
 
 ulong
-parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg)
+parse_option_string(char *arg, char *tmplate, long flag, const char **failure, const char **failure_arg)
 {
   ulong retval = 0;
   char *etmplate = NULL;
@@ -232,10 +232,10 @@ gp_read_str(char *s)
 }
 
 static long
-check_proto(char *code)
+check_proto(const char *code)
 {
   long arity = 0;
-  char *s = code, *old;
+  const char *s = code, *old;
   if (*s == 'l' || *s == 'v' || *s == 'i') s++;
   while (*s && *s != '\n') switch (*s++)
   {
@@ -322,7 +322,7 @@ install(void *f, char *name, char *code)
     if (ep->valence != EpINSTALL)
       pari_err(talker,"[install] identifier '%s' already in use", name);
     pari_warn(warner, "[install] updating '%s' prototype; module not reloaded", name);
-    if (ep->code) gpfree(ep->code);
+    if (ep->code) gpfree((void*)ep->code);
   }
   else
   {
@@ -365,7 +365,7 @@ kill0(entree *ep)
 void
 addhelp(entree *ep, char *s)
 {
-  if (ep->help && !EpSTATIC(ep)) gpfree(ep->help);
+  if (ep->help && !EpSTATIC(ep)) gpfree((void*)ep->help);
   ep->help = pari_strdup(s);
 }
 
@@ -779,7 +779,7 @@ fetch_member(const char *s, long len)
   }
   if (ep) return ep;
   ep=installep(s-2,len+2,funhash);
-  ep->name[0]='_';
+  ((char*)ep->name)[0]='_';
   return ep;
 }
 
@@ -852,7 +852,7 @@ manage_var(long n, entree *ep)
 }
 
 entree *
-fetch_named_var(char *s)
+fetch_named_var(const char *s)
 {
   entree **funhash = functions_hash + hashvalue(s);
   entree *ep = findentry(s, strlen(s), *funhash);
@@ -870,7 +870,7 @@ fetch_named_var(char *s)
 }
 
 long
-fetch_user_var(char *s)
+fetch_user_var(const char *s)
 {
   return varn( initial_value(fetch_named_var(s)) );
 }
@@ -890,7 +890,7 @@ delete_named_var(entree *ep)
 }
 
 void
-name_var(long n, char *s)
+name_var(long n, const char *s)
 {
   entree *ep;
   char *u;
@@ -936,7 +936,7 @@ gpolvar(GEN x)
 static void
 fill_hashtable_single(entree **table, entree *ep)
 {
-  char *s = ep->name;
+  const char *s = ep->name;
   long n = hashvalue(s);
   EpSETSTATIC(ep);
   ep->next = table[n]; table[n] = ep;
@@ -979,7 +979,7 @@ do_alias(entree *ep)
 }
 
 void
-alias0(char *s, char *old)
+alias0(const char *s, const char *old)
 {
   entree *ep, *e;
   GEN x;

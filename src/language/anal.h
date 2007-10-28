@@ -54,8 +54,8 @@ long   did_break(void);
 
 const char*  get_origin(void);
 
-extern THREAD char *gp_function_name;
-extern int  (*whatnow_fun)(char *, int);
+extern THREAD const char *gp_function_name;
+extern int  (*whatnow_fun)(const char *, int);
 extern void (*sigint_fun)(void);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
@@ -112,7 +112,7 @@ extern ulong readline_state;
 #define DO_ARGS_COMPLETE	4
 
 typedef struct default_type {
-  char *name;
+  const char *name;
   void *fun;
 } default_type;
 extern default_type gp_default_list[];
@@ -126,14 +126,14 @@ extern default_type gp_default_list[];
 #define MAX_PROMPT_LEN 128
 
 /* general printing */
-void print_prefixed_text(char *s, char *prefix, char *str);
+void print_prefixed_text(const char *s, const char *prefix, const char *str);
 #define print_text(s) print_prefixed_text((s),NULL,NULL);
 
 /* GP output && output format */
 enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
 
 void error0(GEN g);
-void gpwritebin(char *s, GEN x);
+void gpwritebin(const char *s, GEN x);
 void print   (GEN g);
 void print0(GEN g, long flag);
 void print1  (GEN g);
@@ -148,19 +148,19 @@ GEN Strexpand(GEN g);
 GEN Strtex(GEN g);
 
 /* gp specific routines */
-void alias0(char *s, char *old);
+void alias0(const char *s, const char *old);
 void allocatemem0(GEN z);
 GEN  break0(long n);
-GEN  extern0(char *cmd);
+GEN  extern0(const char *cmd);
 void gp_quit(void);
 GEN  input0(void);
 void kill0(entree *ep);
 GEN  next0(long n);
-GEN  read0(char *s);
+GEN  read0(const char *s);
 GEN  return0(GEN x);
-void system0(char *cmd);
-GEN  trap0(char *e, GEN f, GEN r);
-int  whatnow(char *s, int silent);
+void system0(const char *cmd);
+GEN  trap0(const char *e, GEN f, GEN r);
+int  whatnow(const char *s, int silent);
 
 struct node_loc
 {

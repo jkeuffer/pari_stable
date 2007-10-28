@@ -47,7 +47,9 @@ static char *
 filtre0(filtre_t *F)
 {
   const int downcase = F->downcase;
-  char c, *s = F->s, *t;
+  const char *s = F->s;
+  char *t;
+  char c;
 
   if (!F->t) F->t = gpmalloc(strlen(s)+1);
   t = F->t;
@@ -154,7 +156,7 @@ END:
 #undef MULTI_LINE_COMMENT
 
 char *
-filtre(char *s, int downcase)
+filtre(const char *s, int downcase)
 {
   filtre_t T;
   T.s = s;    T.in_string = 0; T.more_input = 0;
@@ -538,7 +540,7 @@ decode_color(long n, long *c)
 #endif
 #define ESC  (0x1f & '[') /* C-[ = escape */
 
-char *
+const char *
 term_get_color(long n)
 {
   static char s[16];
@@ -715,15 +717,15 @@ lim_lines_output(GEN z, pariout_t *fmt, long n, long max)
 #define MAX_WORD_LEN 255
 
 static void
-_new_line(char *prefix)
+_new_line(const char *prefix)
 {
   pariputc('\n'); if (prefix) pariputs(prefix);
 }
 
 static long
-strlen_real(char *s)
+strlen_real(const char *s)
 {
-  char *t = s, *t0;
+  const char *t = s, *t0;
   long ctrl_len = 0;
   while (*t)
   {
@@ -744,7 +746,7 @@ strlen_real(char *s)
  * escape sequences and end the text with '\n'. If prefix is NULL, use ""
  */
 void
-print_prefixed_text(char *s, char *prefix, char *str)
+print_prefixed_text(const char *s, const char *prefix, const char *str)
 {
   long prelen = prefix? strlen_real(prefix): 0;
   long oldwlen=0, linelen=prelen, w = term_width();
@@ -1284,7 +1286,7 @@ eng_ord(long i)                        /* i > 0 assumed */
 const char *
 type_name(long t)
 {
-  char *s;
+  const char *s;
   switch(t)
   {
     case t_INT    : s="t_INT";     break;
@@ -1537,12 +1539,12 @@ void bruti(GEN g, pariout_t *T, int nosign);
 void sori(GEN g, pariout_t *T);
 void texi(GEN g, pariout_t *T, int nosign);
 
-static char *
+static const char *
 get_var(long v, char *buf)
 {
   entree *ep = varentries[v];
 
-  if (ep) return ep->name;
+  if (ep) return (char*)ep->name;
   if (v==MAXVARN) return "#";
   sprintf(buf,"#<%d>",(int)v); return buf;
 }
@@ -1560,7 +1562,8 @@ static char *
 get_texvar(long v, char *buf, unsigned int len)
 {
   entree *ep = varentries[v];
-  char *s, *t = buf, *e = buf + len - 1;
+  char *t = buf, *e = buf + len - 1;
+  const char *s;
 
   if (!ep) pari_err(talker, "this object uses debugging variables");
   s = ep->name;
@@ -2586,7 +2589,7 @@ static pariFILE *last_file = NULL;
 #endif
 
 pariFILE *
-newfile(FILE *f, char *name, int type)
+newfile(FILE *f, const char *name, int type)
 {
   pariFILE *file = (pariFILE*) gpmalloc(strlen(name) + 1 + sizeof(pariFILE));
   file->type = type;
@@ -2644,7 +2647,7 @@ pari_fclose(pariFILE *f)
 }
 
 static pariFILE *
-pari_open_file(FILE *f, char *s, char *mode)
+pari_open_file(FILE *f, const char *s, const char *mode)
 {
   if (!f) pari_err(talker, "could not open requested file %s", s);
   if (DEBUGFILES)
@@ -2653,7 +2656,7 @@ pari_open_file(FILE *f, char *s, char *mode)
 }
 
 pariFILE *
-pari_fopen(char *s, char *mode)
+pari_fopen(const char *s, const char *mode)
 {
   return pari_open_file(fopen(s, mode), s, mode);
 }
@@ -2661,7 +2664,7 @@ pari_fopen(char *s, char *mode)
 #ifdef UNIX
 /* open tmpfile s (a priori for writing) avoiding symlink attacks */
 pariFILE *
-pari_safefopen(char *s, char *mode)
+pari_safefopen(const char *s, const char *mode)
 {
   long fd = open(s, O_CREAT|O_EXCL|O_RDWR, S_IRUSR|S_IWUSR);
 
@@ -2670,14 +2673,14 @@ pari_safefopen(char *s, char *mode)
 }
 #else
 pariFILE *
-pari_safefopen(char *s, char *mode)
+pari_safefopen(const char *s, const char *mode)
 {
   return pari_fopen(s, mode);
 }
 #endif
 
 void
-pari_unlink(char *s)
+pari_unlink(const char *s)
 {
   if (unlink(s)) pari_warn(warner, "I/O: can\'t remove file %s", s);
   else if (DEBUGFILES)
@@ -2762,13 +2765,13 @@ ok_pipe(FILE *f)
 }
 
 pariFILE *
-try_pipe(char *cmd, int fl)
+try_pipe(const char *cmd, int fl)
 {
 #ifndef HAVE_PIPES
   pari_err(archer); return NULL;
 #else
   FILE *file;
-  char *f;
+  const char *f;
   VOLATILE int flag = fl;
 
 #  ifdef __EMX__
@@ -2840,7 +2843,7 @@ os_read(long fd, char ch[], long s)
 }
 
 long
-os_open(char *s, int mode)
+os_open(const char *s, int mode)
 {
   long fd;
 #ifdef WINCE
@@ -2857,7 +2860,7 @@ os_open(char *s, int mode)
 }
 
 char *
-os_getenv(char *s)
+os_getenv(const char *s)
 {
 #if defined(WINCE) || defined(macintosh)
   return NULL;
@@ -2877,7 +2880,7 @@ static char *last_filename = NULL;
 /* slow, but more portable than stat + S_I[FS]DIR */
 #  include <dirent.h>
 static int
-is_dir_opendir(char *name)
+is_dir_opendir(const char *name)
 {
   DIR *d = opendir(name);
   if (d) { (void)closedir(d); return 1; }
@@ -2888,7 +2891,7 @@ is_dir_opendir(char *name)
 #ifdef HAS_STAT
 #include <sys/stat.h>
 static int
-is_dir_stat(char *name)
+is_dir_stat(const char *name)
 {
   struct stat buf;
   if (stat(name, &buf)) return 0;
@@ -2897,7 +2900,7 @@ is_dir_stat(char *name)
 #endif
 
 int
-pari_is_dir(char *name)
+pari_is_dir(const char *name)
 {
 #ifdef HAS_STAT
   return is_dir_stat(name);
@@ -2984,7 +2987,7 @@ _expand_env(char *str)
     if (!s0)
     {
       pari_warn(warner,"undefined environment variable: %s",env);
-      s0 = "";
+      s0 = (char*)"";
     }
     l = strlen(s0);
     if (l)
@@ -3170,7 +3173,7 @@ switchin(const char *name0)
 static int is_magic_ok(FILE *f);
 
 void
-switchout(char *name)
+switchout(const char *name)
 {
   if (name)
   {
@@ -3239,7 +3242,7 @@ wrGEN(GEN x, FILE *f)
 }
 
 static void
-wrstr(char *s, FILE *f)
+wrstr(const char *s, FILE *f)
 {
   size_t L = strlen(s)+1;
   wr_long(L,f);
@@ -3264,7 +3267,7 @@ writeGEN(GEN x, FILE *f)
 }
 
 void
-writenamedGEN(GEN x, char *s, FILE *f)
+writenamedGEN(GEN x, const char *s, FILE *f)
 {
   fputc(NAM_GEN,f);
   wrstr(s, f);
@@ -3376,7 +3379,7 @@ file_is_binary(FILE *f)
 }
 
 void
-writebin(char *name, GEN x)
+writebin(const char *name, GEN x)
 {
   FILE *f = fopen(name,"r");
   int already = f? 1: 0;
@@ -3467,7 +3470,7 @@ wr_check(const char *s) {
 }
 
 static void wr_init(const char *s) { char *t=wr_check(s); switchout(t); gpfree(t);}
-void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
+void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
 
 #define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
 #define WR_NO() {pariflush(); switchout(NULL); }
@@ -3542,7 +3545,7 @@ unix_shell(void)
 
 /* check if s has rwx permissions for us */
 static int
-pari_is_rwx(char *s)
+pari_is_rwx(const char *s)
 {
 #if defined(UNIX) || defined (__EMX__)
   return access(s, R_OK | W_OK | X_OK) == 0;
@@ -3571,7 +3574,7 @@ pari_dir_exists(const char *s) { return 0; }
 #endif
 
 char *
-env_ok(char *s)
+env_ok(const char *s)
 {
   char *t = os_getenv(s);
   if (t && !pari_is_rwx(t))
@@ -3587,7 +3590,7 @@ env_ok(char *s)
   return t;
 }
 
-static char*
+static const char*
 pari_tmp_dir(void)
 {
   char *s;
@@ -3641,12 +3644,11 @@ swap_slash(char *s)
 }
 
 static char *
-init_unique(char *s)
+init_unique(const char *s)
 {
-  char *buf, *pre, suf[64];
+  const char *pre = pari_tmp_dir();
+  char *buf, suf[64];
   size_t lpre, lsuf;
-
-  pre = pari_tmp_dir();
 #ifdef UNIX
   sprintf(suf,".%ld.%ld", (long)getuid(), (long)getpid());
 #else
@@ -3669,7 +3671,7 @@ init_unique(char *s)
  * prepended. The name returned is gpmalloc'ed. It is DOS-safe
  * (s truncated to 8 chars) */
 char*
-pari_unique_filename(char *s)
+pari_unique_filename(const char *s)
 {
   char *buf = init_unique(s);
 
@@ -3684,7 +3686,7 @@ pari_unique_filename(char *s)
  * It is DOS-safe (truncated to 8 chars)
  */
 char*
-pari_unique_dir(char *s)
+pari_unique_dir(const char *s)
 {
   char *buf = init_unique(s);
   if (pari_dir_exists(buf) && !get_file(buf, pari_dir_exists))

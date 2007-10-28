@@ -150,7 +150,7 @@ PARI_ColorSetUp(Display *display, GEN colors)
 
 /* after fork(), we don't want the child to recover but to exit */
 static void
-exiterr(char *str)
+exiterr(const char *str)
 {
   term_color(c_ERR);
   fprintferr("\n  *** X fatal error: %s\n",str);

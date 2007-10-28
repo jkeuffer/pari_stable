@@ -17,7 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "opcode.h"
 
-THREAD char *gp_function_name=NULL;
+THREAD const char *gp_function_name=NULL;
 /********************************************************************/
 /*                                                                  */
 /*         break/next/return/allocatemem handling                   */
@@ -167,8 +167,8 @@ freeep(entree *ep)
     (*foreignFuncFree)(ep); /* function created by foreign interpreter */
 
   if (EpSTATIC(ep)) return; /* gp function loaded at init time */
-  if (ep->help) {gpfree(ep->help); ep->help=NULL;}
-  if (ep->code) {gpfree(ep->code); ep->code=NULL;}
+  if (ep->help) {gpfree((void*)ep->help); ep->help=NULL;}
+  if (ep->code) {gpfree((void*)ep->code); ep->code=NULL;}
   switch(EpVALENCE(ep))
   {
     case EpUSER:
@@ -1071,7 +1071,7 @@ calluser:
 	switch(ep->valence)
 	{
 	case EpUSER:
-	  gpfree(ep->code);
+	  gpfree((void*)ep->code);
 	  /*FIXME: the function might be in use...
 	    gunclone(ep->value);
 	  */

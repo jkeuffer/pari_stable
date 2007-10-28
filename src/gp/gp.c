@@ -296,7 +296,7 @@ commands(long n)
       }
       if ((n < 0 && ep->menu) || ep->menu == n)
       {
-	list[s] = ep->name;
+	list[s] = (char*)ep->name;
 	if (++s >= size)
 	{
 	  size += LIST_LEN+1;
@@ -310,7 +310,7 @@ commands(long n)
 }
 
 static void
-center(char *s)
+center(const char *s)
 {
   long i, l = strlen(s), pad = term_width() - l;
   char *buf, *u;
@@ -497,13 +497,13 @@ zk   : integral basis                                      nf, bnf, bnr\n");
 #define BACKQUOTE "_BACKQUOTE"
 
 static char *
-_cat(char *s, char *t)
+_cat(char *s, const char *t)
 {
   *s = 0; strcat(s,t); return s + strlen(t);
 }
 
 static char *
-filter_quotes(char *s)
+filter_quotes(const char *s)
 {
   int i, l = strlen(s);
   int quote = 0;
@@ -539,26 +539,28 @@ nl_read(char *s) { size_t l = strlen(s); return s[l-1] == '\n'; }
 #define nbof(a) sizeof(a) / sizeof(a[0])
 /* query external help program for s. num < 0 [keyword] or chapter number */
 static void
-external_help(char *s, int num)
+external_help(const char *s, int num)
 {
   long nbli = term_height()-3, li = 0;
-  char buf[256], ar[32], *str, *opt = "";
+  char buf[256], ar[32], *str;
+  const char *opt = "";
+  char *t;
   pariFILE *z;
   FILE *f;
 
   if (!GP_DATA->help || !*(GP_DATA->help))
     pari_err(talker,"no external help program");
-  s = filter_quotes(s);
-  str = gpmalloc(strlen(GP_DATA->help) + strlen(s) + 64);
+  t = filter_quotes(s);
+  str = gpmalloc(strlen(GP_DATA->help) + strlen(t) + 64);
   *ar = 0;
   if (num < 0)
     opt = "-k";
-  else if (s[strlen(s)-1] != '@')
+  else if (t[strlen(t)-1] != '@')
     sprintf(ar,"@%d",num);
-  sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,s,ar,SHELL_Q);
+  sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
   gpfree(str);
-  gpfree(s);
+  gpfree(t);
   while (fgets(buf, nbof(buf), f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;
@@ -568,7 +570,7 @@ external_help(char *s, int num)
   pari_fclose(z);
 }
 
-char *keyword_list[]={
+const char *keyword_list[]={
   "operator",
   "libpari",
   "member",
@@ -602,16 +604,16 @@ ok_external_help(char **s)
 
 /* don't mess readline display */
 static void
-aide_print(char *s1, char *s2) { pariprintf("%s: %s\n", s1, s2); }
+aide_print(const char *s1, const char *s2) { pariprintf("%s: %s\n", s1, s2); }
 
 static void
-aide0(char *s, int flag)
+aide0(const char *s0, int flag)
 {
   long n, long_help = flag & h_LONG;
   entree *ep,*ep1;
-  char *s1;
+  char *s1, *s;
 
-  s = get_sep(s);
+  s = get_sep(s0);
   if (isdigit((int)*s))
   {
     n = atoi(s);
@@ -663,8 +665,8 @@ aide0(char *s, int flag)
     return;
   }
 
-  ep1 = ep;  ep = do_alias(ep);
-  if (ep1 != ep) { pariprintf("%s is aliased to:\n\n",s); s = ep->name; }
+  ep1 = ep;  ep = do_alias(ep); s0 = s;
+  if (ep1 != ep) { pariprintf("%s is aliased to:\n\n",s0); s0 = ep->name; }
 
   switch(EpVALENCE(ep))
   {
@@ -691,7 +693,7 @@ aide0(char *s, int flag)
 }
 
 void
-aide(char *s, long flag)
+aide(const char *s, long flag)
 {
   if ((flag & h_RL) == 0)
   {
@@ -712,7 +714,8 @@ what_readline(void)
 {
   char *s;
 #ifdef READLINE
-  char *ver, *extra = stackmalloc(strlen(READLINE) + 32);
+  const char *ver;
+  char *extra = stackmalloc(strlen(READLINE) + 32);
 #  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
 #    ifdef FAKE_RL_LIBRARY_VERSION
   extern char *rl_library_version;
@@ -850,7 +853,7 @@ escape(char *tch)
     while (*s)
       if (*s++ == '=')
       {
-	char *f = NULL;
+	const char *f = NULL;
 	long len = (s-tch) - 1;
 	if      (!strncmp(tch,"precision",len))    f = "realprecision";
 	else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
@@ -975,16 +978,17 @@ gp_format_time(long flag)
   static long last = 0;
   long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
   char *s;
+  const char *pre;
 
   last = delay;
   switch(flag)
   {
-    case ti_REGULAR:   s = "time = "; break;
-    case ti_INTERRUPT: s = "user interrupt after "; break;
-    case ti_LAST:      s = "  ***   last result computed in "; break;
+    case ti_REGULAR:   pre = "time = "; break;
+    case ti_INTERRUPT: pre = "user interrupt after "; break;
+    case ti_LAST:      pre = "  ***   last result computed in "; break;
     default: return NULL;
   }
-  strcpy(buf,s); s = buf+strlen(s);
+  strcpy(buf,pre); s = buf+strlen(pre);
   strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
   if (delay >= 3600000)
   {
@@ -1050,13 +1054,13 @@ check_meta(char *buf)
 #  include <pwd.h>
 #endif
 
-static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
+static int get_line_from_file(const char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); pari_err(talker2,s,t,u); }
 
 /* LOCATE GPRC */
 
 /* return $HOME or the closest we can find */
-static char *
+static const char *
 get_home(int *free_it)
 {
   char *drv, *pth = os_getenv("HOME");
@@ -1078,7 +1082,7 @@ get_home(int *free_it)
 }
 
 static FILE *
-gprc_chk(char *s)
+gprc_chk(const char *s)
 {
   FILE *f = fopen(s, "r");
   if (f && !(GP_DATA->flags & QUIET)) fprintferr("Reading GPRC: %s ...", s);
@@ -1090,16 +1094,17 @@ static FILE *
 gprc_get(char *path)
 {
   FILE *f = NULL;
-  char *str, *s, c;
-  long l;
-  s = os_getenv("GPRC");
-  if (s) f = gprc_chk(s);
+  const char *gprc = os_getenv("GPRC");
+  if (gprc) f = gprc_chk(gprc);
   if (!f)
   {
     int free_it = 0;
-    s = get_home(&free_it); l = strlen(s); c = s[l-1];
-    str = strcpy(gpmalloc(l+7), s);
-    if (free_it) gpfree(s);
+    const char *home = get_home(&free_it);
+    char *str, *s, c;
+    long l;
+    l = strlen(home); c = home[l-1];
+    str = strcpy(gpmalloc(l+7), home);
+    if (free_it) gpfree((void*)home);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
 #ifdef UNIX
@@ -1206,7 +1211,7 @@ next_expr(char *t)
 	if (outer || (s >= t+2 && s[-2] != '\\')) outer = !outer;
 	break;
       case '\0':
-	return "";
+	return (char*)"";
       default:
 	if (outer && c == ';') { s[-1] = 0; return s; }
     }
@@ -1300,8 +1305,8 @@ brace_color(char *s, int c, int force)
 #endif
 }
 
-char *
-color_prompt(char *prompt)
+const char *
+color_prompt(const char *prompt)
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
@@ -1338,7 +1343,7 @@ update_logfile(const char *prompt, const char *s)
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
-get_line_from_file(char *PROMPT, filtre_t *F, FILE *file)
+get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
 {
   const int Texmacs_stdin = ((GP_DATA->flags & TEXMACS) && file == stdin);
   char *s;
@@ -1389,7 +1394,7 @@ is_interactive(void)
 
 /* return 0 if no line could be read (EOF) */
 static int
-gp_read_line(filtre_t *F, char *PROMPT)
+gp_read_line(filtre_t *F, const char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
   int res;
@@ -1601,14 +1606,14 @@ gp_exception_handler(long numerr)
 /*                                                                  */
 /********************************************************************/
 static void
-check_secure(char *s)
+check_secure(const char *s)
 {
   if (GP_DATA->flags & SECURE)
     pari_err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
 GEN
-read0(char *s)
+read0(const char *s)
 {
   switchin(s);
   if (file_is_binary(pari_infile)) {
@@ -1619,7 +1624,7 @@ read0(char *s)
 }
 
 GEN
-extern0(char *s)
+extern0(const char *s)
 {
   check_secure(s);
   pari_infile = try_pipe(s, mf_IN)->file;
@@ -1642,7 +1647,7 @@ input0(void)
 }
 
 void
-system0(char *s)
+system0(const char *s)
 {
 #if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
   check_secure(s); system(s);
@@ -1846,7 +1851,7 @@ main(int argc, char **argv)
 static void
 prettyp_wait(void)
 {
-  char *s = "                                                     \n";
+  const char *s = "                                                     \n";
   long i = 2000;
 
   pariputs("\n\n"); pariflush(); /* start translation */

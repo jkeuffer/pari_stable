@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 
 void
-check_quaddisc(GEN x, long *s, long *r, char *f)
+check_quaddisc(GEN x, long *s, long *r, const char *f)
 {
   if (typ(x) != t_INT) pari_err(arither1);
   *s = signe(x); if (!*s) pari_err(talker,"zero discriminant in %s", f);
@@ -30,13 +30,13 @@ check_quaddisc(GEN x, long *s, long *r, char *f)
   if (*r > 1) pari_err(talker, "discriminant not congruent to 0,1 mod 4 in %s", f);
 }
 void
-check_quaddisc_real(GEN x, long *r, char *f)
+check_quaddisc_real(GEN x, long *r, const char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
   if (sx < 0) pari_err(talker, "negative discriminant in %s", f);
 }
 void
-check_quaddisc_imag(GEN x, long *r, char *f)
+check_quaddisc_imag(GEN x, long *r, const char *f)
 {
   long sx; check_quaddisc(x, &sx, r, f);
   if (sx > 0) pari_err(talker, "positive discriminant in %s", f);

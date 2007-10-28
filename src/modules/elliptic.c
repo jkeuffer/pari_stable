@@ -1521,7 +1521,7 @@ localred_result(long f, long kod, long c, GEN v)
   gel(z,4) = stoi(c); return z;
 }
 static GEN
-localredbug(GEN p, char *s)
+localredbug(GEN p, const char *s)
 {
   if (BSW_psp(p)) pari_err(bugparier, s);
   pari_err(talker,"not a prime in localred");

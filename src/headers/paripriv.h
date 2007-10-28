@@ -396,7 +396,7 @@ void    grow_init(growarray A);
 void    grow_kill(growarray A);
 
 /* Interfaces (GP, etc.) */
-void  errcontext(char *msg, char *s, char *entry);
+void  errcontext(const char *msg, const char *s, const char *entry);
 GEN   geni(void);
 void* get_stack(double fraction, long min);
 void  init_graph(void);
@@ -412,11 +412,11 @@ void  print_all_user_fun(void);
 GEN   readbin(const char *name, FILE *f, int *vector);
 void  recover(int flag);
 void  term_color(long c);
-char *term_get_color(long c);
+const char *term_get_color(long c);
 int   term_height(void);
 int   term_width(void);
 void  var_make_safe(void);
-void  whatnow_new_syntax(char *f, long n);
+void  whatnow_new_syntax(const char *f, long n);
 /* gp_colors */
 void decode_color(long n, long *c);
 #define c_NONE 0xffffUL
@@ -428,29 +428,29 @@ enum { d_SILENT, d_ACKNOWLEDGE, d_INITRC, d_RETURN, d_EXISTS };
 extern ulong precreal;
 
 GEN sd_TeXstyle(const char *v, long flag);
-GEN sd_colors(char *v, long flag);
+GEN sd_colors(const char *v, long flag);
 GEN sd_compatible(const char *v, long flag);
-GEN sd_datadir(char *v, long flag);
+GEN sd_datadir(const char *v, long flag);
 GEN sd_debug(const char *v, long flag);
 GEN sd_debugfiles(const char *v, long flag);
 GEN sd_debugmem(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
-GEN sd_factor_add_primes(char *v, long flag);
-GEN sd_factor_proven(char *v, long flag);
-GEN sd_filename(const char *v, long flag, char *s, char **f);
+GEN sd_factor_add_primes(const char *v, long flag);
+GEN sd_factor_proven(const char *v, long flag);
+GEN sd_filename(const char *v, long flag, const char *s, char **f);
 GEN sd_format(const char *v, long flag);
-GEN sd_graphcolormap(char *v, long flag);
-GEN sd_graphcolors(char *v, long flag);
-GEN sd_help(char *v, long flag);
+GEN sd_graphcolormap(const char *v, long flag);
+GEN sd_graphcolors(const char *v, long flag);
+GEN sd_help(const char *v, long flag);
 GEN sd_histsize(const char *v, long flag);
 GEN sd_lines(const char *v, long flag);
 GEN sd_log(const char *v, long flag);
 GEN sd_logfile(const char *v, long flag);
-GEN sd_new_galois_format(char *v, long flag);
+GEN sd_new_galois_format(const char *v, long flag);
 GEN sd_output(const char *v, long flag);
 GEN sd_parisize(const char *v, long flag);
-GEN sd_path(char *v, long flag);
-GEN sd_prettyprinter(char *v, long flag);
+GEN sd_path(const char *v, long flag);
+GEN sd_prettyprinter(const char *v, long flag);
 GEN sd_primelimit(const char *v, long flag);
 GEN sd_prompt(const char *v, long flag);
 GEN sd_prompt_cont(const char *v, long flag);
@@ -525,12 +525,13 @@ void delete_buffer(Buffer *b);
 void fix_buffer(Buffer *b, long newlbuf);
 
 typedef struct {
-  char *s, *t, *end; /* source, target, last char read */
+  const char *s; /* source */
+  char *t, *end; /* target, last char read */
   int in_string, in_comment, more_input, wait_for_brace, downcase;
   Buffer *buf;
 } filtre_t;
 void init_filtre(filtre_t *F, Buffer *buf);
-char *filtre(char *s, int flag);
+char *filtre(const char *s, int flag);
 void check_filtre(filtre_t *F);
 
 gp_data *default_gp_data(void);
@@ -540,7 +541,7 @@ GEN  set_hist_entry(gp_hist *H, GEN x);
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);
 const char *pari_default_path(void);
-char *expand_prompt(char *prompt, filtre_t *F);
+const char *expand_prompt(const char *prompt, filtre_t *F);
 
 typedef struct input_method {
 /* mandatory */
@@ -548,7 +549,7 @@ typedef struct input_method {
   char * (*getline)(char**, int f, struct input_method*, filtre_t *F);
   int free; /* boolean: must we free the output of getline() ? */
 /* for interactive methods */
-  char *prompt, *prompt_cont;
+  const char *prompt, *prompt_cont;
 /* for non-interactive methods */
   FILE *file;
 } input_method;
@@ -623,7 +624,7 @@ GENbin* copy_bin(GEN x);
 GENbin* copy_bin_canon(GEN x);
 GEN bin_copy(GENbin *p);
 
-ulong parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg);
+ulong parse_option_string(char *arg, char *tmplate, long flag, const char **failure, const char **failure_arg);
 
 /* aprcl.c */
 
@@ -736,15 +737,15 @@ GEN     weipell0(GEN e, long prec, long PREC);
 GEN     Str0(GEN g, long flag);
 void    bruti(GEN g, pariout_t *T, int addsign);
 const char * eng_ord(long i);
-char *  env_ok(char *s);
+char *  env_ok(const char *s);
 void    matbruti(GEN g, pariout_t *T);
 pariFILE * pari_fopengz(char *s);
-int     pari_is_dir(char *name);
+int     pari_is_dir(const char *name);
 GEN     readobj(FILE *f, int *ptc);
 void    sori(GEN g, pariout_t *T);
 void    texi(GEN g, pariout_t *T, int addsign);
 void    writeGEN(GEN x, FILE *f);
-void    writenamedGEN(GEN x, char *s, FILE *f);
+void    writenamedGEN(GEN x, const char *s, FILE *f);
 
 /* eval.c */
 void allocating_mem(void);

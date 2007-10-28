@@ -29,12 +29,12 @@ typedef struct stackzone
 } stackzone;
 
 typedef struct entree {
-  char *name;
+  const char *name;
   ulong valence;
   void *value;
   long menu;
-  char *code;
-  char *help;
+  const char *code;
+  const char *help;
   void *pvalue;
   long arity;
   struct entree *next;
@@ -51,7 +51,7 @@ typedef struct PariOUT {
 typedef struct pariFILE {
   FILE *file;
   int type;
-  char *name;
+  const char *name;
   struct pariFILE* prev;
   struct pariFILE* next;
 } pariFILE;
@@ -78,7 +78,7 @@ extern pari_sp THREAD avma,bot,top;
 #define DISABLE_MEMUSED (size_t)-1
 extern size_t memused;
 extern byteptr diffptr;
-extern char    *errmessage[], *current_psfile, *pari_datadir;
+extern char *errmessage[], *current_psfile, *pari_datadir;
 
 #define is_universal_constant(x) ((GEN)(x) >= gen_0 && (GEN)(x) <= gi)
 

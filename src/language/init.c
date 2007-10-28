@@ -57,7 +57,7 @@ entree* (*foreignAutoload)(const char*, long len); /* Autoloader         */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
-int  (*whatnow_fun)(char *, int);
+int  (*whatnow_fun)(const char *, int);
 void (*sigint_fun)(void);
 
 typedef struct {
@@ -346,7 +346,7 @@ pari_daemon(void)
 static void
 pari_sighandler(int sig)
 {
-  char *msg;
+  const char *msg;
 #ifndef HAS_SIGACTION
   /*SYSV reset the signal handler in the handler*/
   (void)os_signal(sig,pari_sighandler);
@@ -461,7 +461,7 @@ pari_init_defaults(void)
   pari_logfile = NULL;
 
   pari_datadir = os_getenv("GP_DATA_DIR");
-  if (!pari_datadir) pari_datadir = GPDATADIR;
+  if (!pari_datadir) pari_datadir = (char*)GPDATADIR;
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
   next_bloc=0;
@@ -850,7 +850,7 @@ disable_dbg(long val)
  *   entry tells how much we can go back from s[0].
  */
 void
-errcontext(char *msg, char *s, char *entry)
+errcontext(const char *msg, const char *s, const char *entry)
 {
   long past = (s-entry);
   char str[STR_LEN + 2];
@@ -1093,7 +1093,7 @@ pari_err(long numerr, ...)
 
       case operi: case operf:
       {
-	char *f, *op = va_arg(ap, char*);
+        const char *f, *op = va_arg(ap, const char*);
 	GEN x = va_arg(ap, GEN);
 	GEN y = va_arg(ap, GEN);
 	     if (*op == '+') f = "addition";
@@ -1131,7 +1131,7 @@ pari_err(long numerr, ...)
 }
 
 void
-whatnow_new_syntax(char *f, long n)
+whatnow_new_syntax(const char *f, long n)
 {
   term_color(c_NONE);
   print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file");
@@ -1152,7 +1152,7 @@ kill_dft_handler(int numerr)
 
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
-trap0(char *e, GEN r, GEN f)
+trap0(const char *e, GEN r, GEN f)
 {
   long numerr = CATCH_ALL;
   GEN F;
@@ -1984,7 +1984,7 @@ long
 timer2(void)  { static THREAD pari_timer T; return TIMER(&T);}
 
 void
-msgTIMER(pari_timer *T, char *format, ...)
+msgTIMER(pari_timer *T, const char *format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
@@ -1996,7 +1996,7 @@ msgTIMER(pari_timer *T, char *format, ...)
 }
 
 void
-msgtimer(char *format, ...)
+msgtimer(const char *format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;

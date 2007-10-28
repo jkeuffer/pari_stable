@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)
 
 static void
-member_err(char *s)
+member_err(const char *s)
 {
   pari_err(typeer,s);
 }
@@ -251,11 +251,10 @@ member_roots(GEN x) /* roots */
 
 /* assume x output by get_bnf: ie a t_VEC with length 10 */
 static GEN
-check_RES(GEN x, char *s)
+check_RES(GEN x, const char *s)
 {
   GEN y = gel(x,8);
-  if (typ(y) != t_VEC || lg(y) < 4)
-    member_err(s);
+  if (typ(y) != t_VEC || lg(y) < 4) member_err(s);
   return y;
 }
 

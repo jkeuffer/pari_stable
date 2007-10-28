@@ -144,7 +144,7 @@ init_help(gp_data *D)
 {
   char *h = os_getenv("GPHELP");
 # ifdef GPHELP
-  if (!h) h = GPHELP;
+  if (!h) h = (char*)GPHELP;
 # endif
   if (h) h = pari_strdup(h);
   D->help = h;
@@ -161,7 +161,7 @@ init_fmt(gp_data *D)
   D->fmt = &DFLT_OUTPUT;
 }
 
-static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
+static const char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 static void
 init_pp(gp_data *D)
 {
@@ -198,7 +198,7 @@ setrealprecision(long n, long *prec)
 }
 
 static GEN
-sd_toggle(const char *v, long flag, char *s, int *ptn)
+sd_toggle(const char *v, long flag, const char *s, int *ptn)
 {
   int state = *ptn;
   if (*v)
@@ -225,7 +225,7 @@ sd_toggle(const char *v, long flag, char *s, int *ptn)
 }
 
 static GEN
-sd_gptoggle(const char *v, long flag, char *s, ulong FLAG)
+sd_gptoggle(const char *v, long flag, const char *s, ulong FLAG)
 {
   int n = (GP_DATA->flags & FLAG)? 1: 0, old = n;
   GEN z = sd_toggle(v, flag, s, &n);
@@ -238,7 +238,7 @@ sd_gptoggle(const char *v, long flag, char *s, ulong FLAG)
 }
 
 static void
-sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
+sd_ulong_init(const char *v, const char *s, ulong *ptn, ulong Min, ulong Max)
 {
   if (*v)
   {
@@ -255,8 +255,8 @@ sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
 }
 
 static GEN
-sd_ulong(const char *v, long flag, char *s, ulong *ptn, ulong Min, ulong Max,
-	   char **msg)
+sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong Max,
+	 const char **msg)
 {
   ulong n = *ptn;
   sd_ulong_init(v, s, ptn, Min, Max);
@@ -307,7 +307,7 @@ sd_realprecision(const char *v, long flag)
 GEN
 sd_seriesprecision(const char *v, long flag)
 {
-  char *msg[] = {NULL, "significant terms"};
+  const char *msg[] = {NULL, "significant terms"};
   return sd_ulong(v,flag,"seriesprecision",&precdl, 1,LGBITS,msg);
 }
 
@@ -354,7 +354,7 @@ gp_get_color(char **st)
   {
     if (*v == '[')
     {
-      char *a[3];
+      const char *a[3];
       long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
 	if (*s == ',') { *s = 0; a[++i] = s+1; }
@@ -375,12 +375,12 @@ gp_get_color(char **st)
 
 /* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
 GEN
-sd_colors(char *v, long flag)
+sd_colors(const char *v, long flag)
 {
   long c,l;
   if (*v && !(GP_DATA->flags & (EMACS|TEXMACS)))
   {
-    char *v0;
+    char *v0, *s;
     disable_color=1;
     l = strlen(v);
     if (l <= 2 && strncmp(v, "no", l) == 0)
@@ -391,9 +391,9 @@ sd_colors(char *v, long flag)
       v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
     if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
       v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
-    v0 = v = filtre(v, 0);
+    v0 = s = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
-      gp_colors[c] = gp_get_color(&v);
+      gp_colors[c] = gp_get_color(&s);
     gpfree(v0);
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
@@ -437,29 +437,29 @@ atocolor(const char *s)
 }
 
 GEN
-sd_graphcolormap(char *v, long flag)
+sd_graphcolormap(const char *v, long flag)
 {
-  char *p, *q, *ap[3];
+  char *p, *q;
   long i, j, l, a, s, *lp;
 
   if (*v)
   {
-    v = filtre(v, 0);
-    if (*v != '[' || v[strlen(v)-1] != ']')
-      pari_err(talker2, "incorrect value for graphcolormap", v, v);
-    for (s = 0, p = v+1, l = 2, a=0; *p; p++)
+    char *t = filtre(v, 0);
+    if (*t != '[' || t[strlen(t)-1] != ']')
+      pari_err(talker2, "incorrect value for graphcolormap", t, t);
+    for (s = 0, p = t+1, l = 2, a=0; *p; p++)
       if (*p == '[')
       {
 	a++;
 	while (*++p != ']')
 	  if (!*p || *p == '[')
-	    pari_err(talker2, "incorrect value for graphcolormap", p, v);
+	    pari_err(talker2, "incorrect value for graphcolormap", p, t);
       }
       else if (*p == '"')
       {
 	s += sizeof(long)+1;
 	while (*p && *++p != '"') s++;
-	if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, v);
+	if (!*p) pari_err(talker2, "incorrect value for graphcolormap", p, t);
 	s = (s+sizeof(long)-1) & ~(sizeof(long)-1);
       }
       else if (*p == ',')
@@ -469,7 +469,7 @@ sd_graphcolormap(char *v, long flag)
     if (pari_colormap) gpfree(pari_colormap);
     pari_colormap = (GEN)gpmalloc((l+4*a)*sizeof(long) + s);
     pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
-    for (p = v+1, i = 1, lp = pari_colormap+l; i < l; p++)
+    for (p = t+1, i = 1, lp = pari_colormap+l; i < l; p++)
       switch(*p)
       {
       case '"':
@@ -481,7 +481,8 @@ sd_graphcolormap(char *v, long flag)
 	strncpy(GSTR(lp), p, q-p+1);
 	lp += j; p = q;
 	break;
-      case '[':
+      case '[': {
+        const char *ap[3];
 	gel(pari_colormap, i) = lp;
 	lp[0] = evaltyp(t_VECSMALL)|evallg(4);
 	for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
@@ -491,7 +492,7 @@ sd_graphcolormap(char *v, long flag)
 	{
 	  char buf[100];
 	  sprintf(buf, "incorrect value for graphcolormap[%ld]: ", i);
-	  pari_err(talker2, buf, p, v);
+	  pari_err(talker2, buf, p, t);
 	}
 	*p = '\0';
 	lp[1] = atocolor(ap[0]);
@@ -499,14 +500,15 @@ sd_graphcolormap(char *v, long flag)
 	lp[3] = atocolor(ap[2]);
 	lp += 4;
 	break;
+      }
       case ',':
       case ']':
 	i++;
 	break;
       default:
-	pari_err(talker2, "incorrect value for graphcolormap", p, v);
+	pari_err(talker2, "incorrect value for graphcolormap", p, t);
       }
-    free(v);
+    free(t);
   }
   if (flag == d_RETURN || flag == d_ACKNOWLEDGE)
   {
@@ -528,21 +530,21 @@ sd_graphcolormap(char *v, long flag)
 }
 
 GEN
-sd_graphcolors(char *v, long flag)
+sd_graphcolors(const char *v, long flag)
 {
   long i, l;
   char *p;
 
   if (*v) {
-    v = filtre(v, 0);
-    for (p = v+1, l=2; *p != ']'; p++)
+    char *t = filtre(v, 0);
+    for (p = t+1, l=2; *p != ']'; p++)
       if (*p == ',') l++;
       else if (*p < '0' || *p > '9')
-	pari_err(talker2, "incorrect value for graphcolors", p, v);
-    if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, v);
+	pari_err(talker2, "incorrect value for graphcolors", p, t);
+    if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, t);
     if (pari_graphcolors) gpfree(pari_graphcolors);
     pari_graphcolors = cgetalloc(t_VECSMALL, l);
-    for (p = v+1, i=0; *p; p++)
+    for (p = t+1, i=0; *p; p++)
     {
       long n = 0;
       while (*p >= '0' && *p <= '9')
@@ -553,7 +555,7 @@ sd_graphcolors(char *v, long flag)
       }
       pari_graphcolors[++i] = n;
     }
-    free(v);
+    free(t);
   }
   switch(flag)
   {
@@ -568,7 +570,7 @@ sd_graphcolors(char *v, long flag)
 GEN
 sd_compatible(const char *v, long flag)
 {
-  char *msg[] = {
+  const char *msg[] = {
     "(no backward compatibility)",
     "(warn when using obsolete functions)",
     "(use old functions, don't ignore case)",
@@ -602,10 +604,10 @@ ulong readline_state = DO_ARGS_COMPLETE;
 GEN
 sd_rl(const char *v, long flag)
 {
-  static const char * const msg[] = {NULL,
+  const char *msg[] = {NULL,
 	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
   ulong o_readline_state = readline_state;
-  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
+  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, msg);
 
   if (o_readline_state != readline_state)
     (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", USE_READLINE);
@@ -691,14 +693,14 @@ open_logfile(const char *s) {
 GEN
 sd_log(const char *v, long flag)
 {
-  static const char * const msg[] = {
+  const char *msg[] = {
       "(off)",
       "(on)",
       "(on with colors)",
       "(TeX output)", NULL
   };
   ulong oldstyle = logstyle;
-  GEN res = sd_ulong(v,flag,"log", &logstyle, 0, 3, (char**)msg);
+  GEN res = sd_ulong(v,flag,"log", &logstyle, 0, 3, msg);
 
   if (!oldstyle != !logstyle)		/* Compare converts to boolean */
   { /* toggled LOG */
@@ -727,17 +729,17 @@ sd_log(const char *v, long flag)
 GEN
 sd_TeXstyle(const char *v, long flag)
 {
-  static const char * const msg[] = { NULL,
+  const char *msg[] = { NULL,
 	"(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
   ulong n = GP_DATA->fmt->TeXstyle;
-  GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, (char**)msg);
+  GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, msg);
   GP_DATA->fmt->TeXstyle = n; return z;
 }
 
 GEN
 sd_output(const char *v, long flag)
 {
-  char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
+  const char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
 		 "(external prettyprint)", NULL};
   ulong n = GP_DATA->fmt->prettyp;
   GEN z = sd_ulong(v,flag,"output", &n, 0,3,msg);
@@ -793,7 +795,7 @@ sd_timer(const char *v, long flag)
 { return sd_gptoggle(v,flag,"timer", CHRONO); }
 
 GEN
-sd_filename(const char *v, long flag, char *s, char **f)
+sd_filename(const char *v, long flag, const char *s, char **f)
 {
   if (*v)
   {
@@ -828,15 +830,15 @@ sd_logfile(const char *v, long flag)
 }
 
 GEN
-sd_factor_add_primes(char *v, long flag)
+sd_factor_add_primes(const char *v, long flag)
 { return sd_toggle(v,flag,"factor_add_primes", &factor_add_primes); }
 
 GEN
-sd_factor_proven(char *v, long flag)
+sd_factor_proven(const char *v, long flag)
 { return sd_toggle(v,flag,"factor_proven", &factor_proven); }
 
 GEN
-sd_new_galois_format(char *v, long flag)
+sd_new_galois_format(const char *v, long flag)
 { return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
 
 GEN
@@ -844,17 +846,17 @@ sd_psfile(const char *v, long flag)
 { return sd_filename(v, flag, "psfile", &current_psfile); }
 
 static void
-err_secure(char *d, char *v)
+err_secure(const char *d, const char *v)
 { pari_err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
 
 GEN
-sd_help(char *v, long flag)
+sd_help(const char *v, long flag)
 {
   const char *str;
   if (*v)
   {
     if (GP_DATA->flags & SECURE) err_secure("help",v);
-    if (GP_DATA->help) gpfree(GP_DATA->help);
+    if (GP_DATA->help) gpfree((void*)GP_DATA->help);
     GP_DATA->help = expand_tilde(v);
   }
   str = GP_DATA->help? GP_DATA->help: "none";
@@ -865,7 +867,7 @@ sd_help(char *v, long flag)
 }
 
 GEN
-sd_datadir(char *v, long flag)
+sd_datadir(const char *v, long flag)
 {
   const char *str;
   if (*v)
@@ -881,7 +883,7 @@ sd_datadir(char *v, long flag)
 }
 
 GEN
-sd_path(char *v, long flag)
+sd_path(const char *v, long flag)
 {
   gp_path *p = GP_DATA->path;
   if (*v)
@@ -898,7 +900,7 @@ sd_path(char *v, long flag)
 }
 
 GEN
-sd_prettyprinter(char *v, long flag)
+sd_prettyprinter(const char *v, long flag)
 {
   gp_pp *pp = GP_DATA->pp;
   if (*v && !(GP_DATA->flags & TEXMACS))
@@ -936,7 +938,7 @@ sd_prettyprinter(char *v, long flag)
 }
 
 static GEN
-sd_prompt_set(const char *v, long flag, char *how, char *p)
+sd_prompt_set(const char *v, long flag, const char *how, char *p)
 {
   if (*v)
   {
@@ -963,8 +965,8 @@ sd_prompt_cont(const char *v, long flag)
   return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont);
 }
 
-char *
-expand_prompt(char *prompt, filtre_t *F)
+const char *
+expand_prompt(const char *prompt, filtre_t *F)
 {
   static char buf[MAX_PROMPT_LEN];
   char *s = buf;
@@ -1039,10 +1041,10 @@ setdefault(const char *s, const char *v, long flag)
 }
 
 GEN
-gp_default(char *a, char *b) { return setdefault(a,b, d_RETURN); }
+gp_default(const char *a, const char *b) { return setdefault(a,b, d_RETURN); }
 
 GEN
-default0(char *a, char *b, long flag)
+default0(const char *a, const char *b, long flag)
 {
   (void)flag; /* compatibility: to be deleted someday */
   return setdefault(a,b, d_RETURN);
