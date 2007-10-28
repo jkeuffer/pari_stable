@@ -929,7 +929,7 @@ sqrt_ser(GEN b, long prec)
   lx = lg(b); x = cgetg(lx, t_SER);
   if (e & 1) pari_err(talker,"2 should divide valuation (= %ld) in sqrtn",2,e);
   a[1] = x[1] = evalsigne(1) | evalvarn(0) | _evalvalp(0);
-  if (!gissquarerem(gel(a,2), &gel(x,2))) gel(x,2) = gsqrt(gel(a,2), prec);
+  if (!gissquareall(gel(a,2), &gel(x,2))) gel(x,2) = gsqrt(gel(a,2), prec);
   for (j = 3; j < lx; j++) gel(x,j) = gen_0;
   setlg(x,3);
   E = Newton_exponents(lx - 2);

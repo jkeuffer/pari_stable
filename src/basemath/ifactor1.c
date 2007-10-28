@@ -329,7 +329,7 @@ u_IsLucasPsP(ulong n)
   {
     ulong c = b*b - 4; /* = 1 mod 4 */
     if (krouu(n % c, c) < 0) break;
-    if (i == 64 && uissquarerem(n, &c)) return 0; /* oo loop if N = m^2 */
+    if (i == 64 && uissquareall(n, &c)) return 0; /* oo loop if N = m^2 */
   }
   if (!m) return 0; /* neither 2^32-1 nor 2^64-1 are Lucas-pp */
   v = vals(m); m >>= v;
@@ -2270,7 +2270,7 @@ squfof(GEN n)
     }
     if (act1)
     {
-      if (uissquarerem((ulong)a1, (ulong*)&a))
+      if (uissquareall((ulong)a1, (ulong*)&a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
@@ -2312,7 +2312,7 @@ squfof(GEN n)
     }
     if (act2)
     {
-      if (uissquarerem((ulong)a2, (ulong*)&a))
+      if (uissquareall((ulong)a2, (ulong*)&a))
       { /* square form */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on second cycle\n"
@@ -2357,7 +2357,7 @@ squfof(GEN n)
 /*   Factoring engines like MPQS which ultimately rely on computing    */
 /*   gcd(N, x^2-y^2) to find a nontrivial factor of N can't split      */
 /*   N = p^k for an odd prime p, since (Z/p^k)^* is then cyclic. Here  */
-/*   is an analogue of Z_issquarerem() for 3rd, 5th and 7th powers.    */
+/*   is an analogue of Z_issquareall() for 3rd, 5th and 7th powers.    */
 /*   The general case is handled by is_kth_power                       */
 /*                                                                     */
 /***********************************************************************/
@@ -3336,7 +3336,7 @@ ifac_crack(GEN *partial, GEN *where)
   }
   /* crack squares.  Quite fast due to the initial square residue test */
   av = avma;
-  while (Z_issquarerem(VALUE(*where), &factor))
+  while (Z_issquareall(VALUE(*where), &factor))
   {
     if (DEBUGLEVEL >= 4)
       fprintferr("IFAC: found %Z =\n\t%Z ^2\n", **where, factor);
@@ -3350,7 +3350,7 @@ ifac_crack(GEN *partial, GEN *where)
     exponent = EXPON(*where);
     if (moebius_mode) return 0;	/* no need to carry on */
     exp1 = 2;
-  } /* while Z_issquarerem */
+  } /* while Z_issquareall */
 
   /* if our composite has become prime, bypass ifac_whoiswho() */
   if (exp1 > 1 && hint != 15 && ifac_isprime(*where)) return 0;
@@ -3479,7 +3479,7 @@ ifac_crack(GEN *partial, GEN *where)
     VALUE(*where) = VALUE(old); /* move cofactor pointer to lowest slot */
     VALUE(old) = factor; /* save factor */
   }
-  else pari_err(bugparier,"ifac_crack [Z_issquarerem miss]");
+  else pari_err(bugparier,"ifac_crack [Z_issquareall miss]");
   return 2;
 }
 

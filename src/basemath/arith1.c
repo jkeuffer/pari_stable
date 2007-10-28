@@ -321,9 +321,9 @@ carremod(ulong A)
     && carresmod11[A % 11UL]);
 }
 
-/* emulate Z_issquarerem on single-word integers */
+/* emulate Z_issquareall on single-word integers */
 long
-uissquarerem(ulong A, ulong *sqrtA)
+uissquareall(ulong A, ulong *sqrtA)
 {
   if (!A) { *sqrtA = 0; return 1; }
   if (carremod(A))
@@ -335,7 +335,7 @@ uissquarerem(ulong A, ulong *sqrtA)
 }
 
 long
-Z_issquarerem(GEN x, GEN *pt)
+Z_issquareall(GEN x, GEN *pt)
 {
   pari_sp av;
   GEN y, r;
@@ -348,7 +348,7 @@ Z_issquarerem(GEN x, GEN *pt)
   if (lgefint(x) == 3)
   {
     ulong a;
-    if (!uissquarerem((ulong)x[2], &a)) return 0;
+    if (!uissquareall((ulong)x[2], &a)) return 0;
     if (pt) *pt = utoipos(a);
     return 1;
   }
@@ -402,7 +402,7 @@ is_char_2(GEN x)
 }
 
 static long
-polissquarerem(GEN x, GEN *pt)
+polissquareall(GEN x, GEN *pt)
 {
   pari_sp av;
   long v, l = degpol(x);
@@ -424,8 +424,8 @@ polissquarerem(GEN x, GEN *pt)
   a = gel(x,2);
   switch (typ(a))
   {
-    case t_INT: y =  Z_issquarerem(a,&b)? gen_1: gen_0; break;
-    case t_POL: y = polissquarerem(a,&b)? gen_1: gen_0; break;
+    case t_INT: y =  Z_issquareall(a,&b)? gen_1: gen_0; break;
+    case t_POL: y = polissquareall(a,&b)? gen_1: gen_0; break;
     default: y = gissquare(a); b = NULL; break;
   }
   if (y == gen_0) { avma = av; return 0; }
@@ -445,7 +445,7 @@ polissquarerem(GEN x, GEN *pt)
     if (pt) {
       y = cgetg((lx+3) / 2, t_POL);
       for (i = 2; i < lx; i+=2)
-        if (!gissquarerem(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
+        if (!gissquareall(gel(x,i), &gel(y, (i+2)>>1))) { avma = av; return 0; }
       y[1] = evalsigne(1) | evalvarn(varn(x));
       goto END;
     } else {
@@ -472,7 +472,7 @@ END:
 }
 
 GEN
-gissquarerem(GEN x, GEN *pt)
+gissquareall(GEN x, GEN *pt)
 {
   long l, tx = typ(x);
   GEN F;
@@ -489,7 +489,7 @@ gissquarerem(GEN x, GEN *pt)
     for (i=1; i<l; i++)
     {
       GEN p = gen_0;
-      t = gissquarerem(gel(x,i),&p);
+      t = gissquareall(gel(x,i),&p);
       gel(y,i) = t;
       gel(z,i) = p;
     }
@@ -497,19 +497,19 @@ gissquarerem(GEN x, GEN *pt)
   }
   switch(tx)
   {
-    case t_INT: l = Z_issquarerem(x, pt); break;
+    case t_INT: l = Z_issquareall(x, pt); break;
     case t_FRAC: av = avma;
       F = cgetg(3, t_FRAC);
-      l = Z_issquarerem(gel(x,1), &gel(F,1));
-      if (l) l = Z_issquarerem(gel(x,2), &gel(F,2));
+      l = Z_issquareall(gel(x,1), &gel(F,1));
+      if (l) l = Z_issquareall(gel(x,2), &gel(F,2));
       if (!l) { avma = av; break; }
       *pt = F; break;
 
-    case t_POL: l = polissquarerem(x,pt); break;
+    case t_POL: l = polissquareall(x,pt); break;
     case t_RFRAC: av = avma;
       F = cgetg(3, t_RFRAC);
-      l = (gissquarerem(gel(x,1), &gel(F,1)) != gen_0);
-      if (l) l = polissquarerem(gel(x,2), &gel(F,2));
+      l = (gissquareall(gel(x,1), &gel(F,1)) != gen_0);
+      if (l) l = polissquareall(gel(x,2), &gel(F,2));
       if (!l) { avma = av; break; }
       *pt = F; break;
 
@@ -544,9 +544,9 @@ gissquarerem(GEN x, GEN *pt)
       return gen_1;
     }
 
-    case t_FFELT: return FF_issquarerem(x, pt)? gen_1: gen_0;
+    case t_FFELT: return FFissquareall(x, pt)? gen_1: gen_0;
 
-    default: pari_err(typeer, "gissquarerem");
+    default: pari_err(typeer, "gissquareall");
       return NULL; /* not reached */
   }
   return l? gen_1: gen_0;
@@ -619,7 +619,7 @@ gissquare(GEN x)
       av=avma; l=Z_issquare(mulii(gel(x,1),gel(x,2)));
       avma=av; return l? gen_1: gen_0;
 
-    case t_FFELT: return FF_issquarerem(x, NULL)? gen_1: gen_0;
+    case t_FFELT: return FFissquareall(x, NULL)? gen_1: gen_0;
 
     case t_COMPLEX:
       return gen_1;
@@ -637,7 +637,7 @@ gissquare(GEN x)
       return gen_1;
 
     case t_POL:
-      return polissquarerem(x,NULL)? gen_1: gen_0;
+      return polissquareall(x,NULL)? gen_1: gen_0;
 
     case t_SER:
       if (!signe(x)) return gen_1;
@@ -723,7 +723,7 @@ ispower(GEN x, GEN K, GEN *pt)
       if (!s) { if (pt) *pt = gen_0; return 1; }
       k = itou(K);
       if (s > 0) {
-	if (k == 2) return Z_issquarerem(x, pt);
+	if (k == 2) return Z_issquareall(x, pt);
 	if (k == 3) { mask = 1; return !!is_357_power(x, pt, &mask); }
 	if (k == 5) { mask = 2; return !!is_357_power(x, pt, &mask); }
 	if (k == 7) { mask = 4; return !!is_357_power(x, pt, &mask); }
@@ -870,7 +870,7 @@ isanypower(GEN x, GEN *pty)
   if (s < 0)
     x = absi(x);
   else
-    while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
+    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
   while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
   /* cut off at 4 bits not 1 which seems to be about optimum;  for primes
    * >> 10^3 the modular checks are no longer competitively fast */

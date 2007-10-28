@@ -1190,10 +1190,10 @@ is a fundamental discriminant, and $0$ otherwise.
 a square, and $0$ otherwise. This is tested first modulo small prime
 powers, then \kbd{sqrtremi} is called.
 
-\fun{long}{Z_issquarerem}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
+\fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
 \kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
 
-\fun{long}{uissquarerem}{ulong n, ulong *sqrtn} as \kbd{Z\_issquarerem},
+\fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
 for an \kbd{ulong} operand \kbd{n}.
 
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
@@ -4307,7 +4307,7 @@ the \typ{FFELT} \kbd{a}.
 \fun{GEN}{FF_sqrt}{GEN a} returns an \typ{FFELT} $b$ such that $a=b^2$ if
 it exist, where \kbd{a} is a \typ{FFELT}.
 
-\fun{long}{FF_issquarerem}{GEN x, GEN *pt} returns $1$ if \kbd{x} is a
+\fun{long}{FFissquareall}{GEN x, GEN *pt} returns $1$ if \kbd{x} is a
 square, and $0$ otherwise. If \kbd{x} is indeed a square, set \kbd{pt} to its
 square root.
 

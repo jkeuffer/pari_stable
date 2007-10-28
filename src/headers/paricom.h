@@ -377,7 +377,7 @@ enum manage_var_t {
 
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))
-#define Z_issquare(x) (Z_issquarerem((x),NULL))
+#define Z_issquare(x) (Z_issquareall((x),NULL))
 #define subres(x,y) (subresall((x),(y),NULL))
 #define ZX_factor(x) factpol((x),1)
 #define QX_factor(x) factpol((x),1)

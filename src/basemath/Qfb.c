@@ -1269,7 +1269,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   }
   a = subii(p, sqri(b));
   c = dvmdii(a, d, &r);
-  if (r != gen_0 || !Z_issquarerem(c, &c)) { avma = av; return 0; }
+  if (r != gen_0 || !Z_issquareall(c, &c)) { avma = av; return 0; }
   avma = av;
   *px = icopy(b);
   *py = icopy(c); return 1;
@@ -1320,7 +1320,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   }
   a = subii(px4, sqri(b));
   c = dvmdii(a, d, &r);
-  if (r != gen_0 || !Z_issquarerem(c, &c)) { avma = av; return 0; }
+  if (r != gen_0 || !Z_issquareall(c, &c)) { avma = av; return 0; }
   avma = av;
   *px = icopy(b);
   *py = icopy(c); return 1;

@@ -38,7 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define gmodulcp gmodulo
 #define forcecopy gcopy
 #define lseriesell elllseries
-#define gcarrecomplet gissquarerem
+#define uissquarerem uissquareall
+#define Z_issquarerem Z_issquareall
+#define gissquarerem gissquareall
+#define gcarrecomplet gissquareall
 #define gcarreparfait gissquare
 #define rnfhermitebasis rnfhnfbasis
 #define wf weberf

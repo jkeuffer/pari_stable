@@ -2701,7 +2701,7 @@ split(GEN N, GEN *e, GEN *res)
   long flag;
   GEN base;
   if (isprobableprime(N)) { *e = gen_1; return 1; }
-  if (Z_issquarerem(N, &base))
+  if (Z_issquareall(N, &base))
   { /* squares could cost us a lot of time */
     /* GN20050707: as used now, this is always called with res!=NULL */
     *res = base;

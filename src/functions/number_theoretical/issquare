@@ -1,6 +1,6 @@
 Function: issquare
 Section: number_theoretical
-C-Name: gissquarerem
+C-Name: gissquareall
 Prototype: GD&
 Help: issquare(x,{&n}): true(1) if x is a square, false(0) if not. If n is
  given puts the exact square root there if it was computed
@@ -9,7 +9,7 @@ Description:
  (mp):int	gissquare($1)
  (gen):gen	gissquare($1)
  (int, &int):bool	Z_issquarerem($1, &$2)
- (gen, &gen):gen	gissquarerem($1, &$2)
+ (gen, &gen):gen	gissquareall($1, &$2)
 Doc: true (1) if $x$ is a square, false (0)
  if not. What ``being a square'' means depends on the type of $x$: all
  \typ{COMPLEX} are squares, as well as all non-negative \typ{REAL}; for

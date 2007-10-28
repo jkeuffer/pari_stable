@@ -1451,7 +1451,7 @@ nfpolred(int part, nfbasic_t *T)
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = matid(n);
 
-  (void)Z_issquarerem(diviiexact(dxbest,T->dK), &(T->index));
+  (void)Z_issquareall(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);
   T->dx = dxbest;
   T->x  = xbest; return rev;

@@ -822,7 +822,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     ulong mask = 7, ex0 = 11;
     long ex, k = 1;
     av = avma;
-    while (Z_issquarerem(x, &y)) { k <<= 1; x = y; }
+    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
     while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
     /* stop when x^(1/k) < 2^14 */
     while ( (ex = is_odd_power(x, &y, &ex0, 15)) ) { k *= ex; x = y; }
