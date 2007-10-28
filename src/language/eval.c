@@ -539,557 +539,557 @@ closure_eval(GEN C)
     switch(opcode)
     {
     case OCpushlong:
-	st[sp++]=operand;
-	break;
+        st[sp++]=operand;
+        break;
     case OCpushgen:
-	gel(st,sp++)=gel(data,operand);
-	break;
+        gel(st,sp++)=gel(data,operand);
+        break;
     case OCpushreal:
-	gel(st,sp++)=strtor(GSTR(data[operand]),precreal);
-	break;
+        gel(st,sp++)=strtor(GSTR(data[operand]),precreal);
+        break;
     case OCpushstoi:
-	gel(st,sp++)=stoi(operand);
-	break;
+        gel(st,sp++)=stoi(operand);
+        break;
     case OCpushvar:
-	ep=(entree*)operand;
-	pari_var_create(ep);
-	gel(st,sp++)=(GEN)initial_value(ep);
-	break;
+        ep=(entree*)operand;
+        pari_var_create(ep);
+        gel(st,sp++)=(GEN)initial_value(ep);
+        break;
     case OCpushdyn:
-	ep=(entree*)operand;
-	switch(ep->valence)
-	{
-	case EpNEW:
-	  createvalue(ep);
-	case EpVAR: /*FALL THROUGH*/
-	  gel(st,sp++)=(GEN)ep->value;
-	  break;
-	default:
-	  gel(st,sp++)=0;
-	  goto calluser; /*Maybe it is a function*/
-	}
-	break;
+        ep=(entree*)operand;
+        switch(ep->valence)
+        {
+        case EpNEW:
+          createvalue(ep);
+        case EpVAR: /*FALL THROUGH*/
+          gel(st,sp++)=(GEN)ep->value;
+          break;
+        default:
+          gel(st,sp++)=0;
+          goto calluser; /*Maybe it is a function*/
+        }
+        break;
     case OCpushlex:
-	gel(st,sp++)=var[s_var.n+operand].value;
-	break;
+        gel(st,sp++)=var[s_var.n+operand].value;
+        break;
     case OCsimpleptrdyn:
-	{
-	  gp_pointer *g;
-	  if (rp==s_ptrs.n-1)
-	    stack_new(&s_ptrs);
-	  g = &ptrs[rp++];
-	  g->vn=0;
-	  g->ep = (entree*) operand;
-	  switch (g->ep->valence)
-	  {
-	  case EpNEW:
-	    createvalue(g->ep);
-	  case EpVAR: /*FALL THROUGH*/
-	    g->x = (GEN) g->ep->value;
-	    break;
-	  default:
-	    pari_err(varer1,"variable name expected",NULL,NULL);
-	  }
-	  gel(st,sp++) = (GEN)&(g->x);
-	  break;
-	}
+        {
+          gp_pointer *g;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          g->vn=0;
+          g->ep = (entree*) operand;
+          switch (g->ep->valence)
+          {
+          case EpNEW:
+            createvalue(g->ep);
+          case EpVAR: /*FALL THROUGH*/
+            g->x = (GEN) g->ep->value;
+            break;
+          default:
+            pari_err(varer1,"variable name expected",NULL,NULL);
+          }
+          gel(st,sp++) = (GEN)&(g->x);
+          break;
+        }
     case OCsimpleptrlex:
-	{
-	  gp_pointer *g;
-	  if (rp==s_ptrs.n-1)
-	    stack_new(&s_ptrs);
-	  g = &ptrs[rp++];
-	  g->vn=operand;
-	  g->ep=(entree *)0x1L;
-	  g->x = (GEN) var[s_var.n+operand].value;
-	  gel(st,sp++) = (GEN)&(g->x);
-	  break;
-	}
+        {
+          gp_pointer *g;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          g->vn=operand;
+          g->ep=(entree *)0x1L;
+          g->x = (GEN) var[s_var.n+operand].value;
+          gel(st,sp++) = (GEN)&(g->x);
+          break;
+        }
     case OCnewptrdyn:
-	{
-	  gp_pointer *g;
-	  matcomp *C;
-	  if (rp==s_ptrs.n-1)
-	    stack_new(&s_ptrs);
-	  g = &ptrs[rp++];
-	  ep = (entree*) operand;
-	  switch (ep->valence)
-	  {
-	  case EpNEW:
-	    createvalue(ep);
-	  case EpVAR: /*FALL THROUGH*/
-	    g->x = (GEN) ep->value;
-	    break;
-	  default:
-	    pari_err(varer1,"variable name expected",NULL,NULL);
-	  }
-	  g->x = (GEN) ep->value;
-	  g->vn=0;
-	  g->ep=NULL;
-	  C=&g->c;
-	  C->full_col = C->full_row = 0;
-	  C->parent   = (GEN)    g->x;
-	  C->ptcell   = (GEN *) &g->x;
-	  break;
-	}
+        {
+          gp_pointer *g;
+          matcomp *C;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          ep = (entree*) operand;
+          switch (ep->valence)
+          {
+          case EpNEW:
+            createvalue(ep);
+          case EpVAR: /*FALL THROUGH*/
+            g->x = (GEN) ep->value;
+            break;
+          default:
+            pari_err(varer1,"variable name expected",NULL,NULL);
+          }
+          g->x = (GEN) ep->value;
+          g->vn=0;
+          g->ep=NULL;
+          C=&g->c;
+          C->full_col = C->full_row = 0;
+          C->parent   = (GEN)    g->x;
+          C->ptcell   = (GEN *) &g->x;
+          break;
+        }
     case OCnewptrlex:
-	{
-	  gp_pointer *g;
-	  matcomp *C;
-	  if (rp==s_ptrs.n-1)
-	    stack_new(&s_ptrs);
-	  g = &ptrs[rp++];
-	  g->x = (GEN) var[s_var.n+operand].value;
-	  g->vn=0;
-	  g->ep=NULL;
-	  C=&g->c;
-	  C->full_col = C->full_row = 0;
-	  C->parent   = (GEN)    g->x;
-	  C->ptcell   = (GEN *) &g->x;
-	  break;
-	}
+        {
+          gp_pointer *g;
+          matcomp *C;
+          if (rp==s_ptrs.n-1)
+            stack_new(&s_ptrs);
+          g = &ptrs[rp++];
+          g->x = (GEN) var[s_var.n+operand].value;
+          g->vn=0;
+          g->ep=NULL;
+          C=&g->c;
+          C->full_col = C->full_row = 0;
+          C->parent   = (GEN)    g->x;
+          C->ptcell   = (GEN *) &g->x;
+          break;
+        }
     case OCpushptr:
-	{
-	  gp_pointer *g = &ptrs[rp-1];
-	  gel(st,sp++) = (GEN)&(g->x);
-	}
-	break;
+        {
+          gp_pointer *g = &ptrs[rp-1];
+          gel(st,sp++) = (GEN)&(g->x);
+        }
+        break;
     case OCendptr:
-	for(j=0;j<operand;j++)
-	{
-	  gp_pointer *g = &ptrs[--rp];
-	  if (g->ep)
-	  {
-	    if (g->vn)
-	      changelex(g->vn,g->x);
-	    else
-	      changevalue(g->ep, g->x);
-	  }
-	  else change_compo(&(g->c), g->x);
-	}
-	break;
+        for(j=0;j<operand;j++)
+        {
+          gp_pointer *g = &ptrs[--rp];
+          if (g->ep)
+          {
+            if (g->vn)
+              changelex(g->vn,g->x);
+            else
+              changevalue(g->ep, g->x);
+          }
+          else change_compo(&(g->c), g->x);
+        }
+        break;
     case OCstoredyn:
-	ep=(entree *)operand;
-	switch (ep->valence)
-	{
-	case EpNEW:
-	  createvalue(ep);
-	case EpVAR: /*FALL THROUGH*/
-	  changevalue(ep, gel(st,--sp));
-	  break;
-	default:
-	  pari_err(varer1,"variable name expected",NULL,NULL);
-	}
-	break;
+        ep=(entree *)operand;
+        switch (ep->valence)
+        {
+        case EpNEW:
+          createvalue(ep);
+        case EpVAR: /*FALL THROUGH*/
+          changevalue(ep, gel(st,--sp));
+          break;
+        default:
+          pari_err(varer1,"variable name expected",NULL,NULL);
+        }
+        break;
     case OCstorelex:
-	changelex(operand,gel(st,--sp));
-	break;
+        changelex(operand,gel(st,--sp));
+        break;
     case OCstackgen:
-	gmael(st,sp-2,operand)=copyupto(gel(st,sp-1),gel(st,sp-2));
-	sp--;
-	break;
+        gmael(st,sp-2,operand)=copyupto(gel(st,sp-1),gel(st,sp-2));
+        sp--;
+        break;
     case OCprecreal:
-	st[sp++]=precreal;
-	break;
+        st[sp++]=precreal;
+        break;
     case OCprecdl:
-	st[sp++]=precdl;
-	break;
+        st[sp++]=precdl;
+        break;
     case OCstoi:
-	gel(st,sp-1)=stoi(st[sp-1]);
-	break;
+        gel(st,sp-1)=stoi(st[sp-1]);
+        break;
     case OCitos:
-	st[sp-1]=gtos(gel(st,sp-1));
-	break;
+        st[sp-1]=gtos(gel(st,sp-1));
+        break;
     case OCtostr:
-	if (operand==1)
-	  st[sp-1] = (long) GSTR(GENtoGENstr(gel(st,sp-1)));
-	else
-	{
-	  GEN L=cgetg(operand+1,t_VEC);
-	  sp-=operand;
-	  for (j=1; j<=operand; j++)
-	    gel(L,j) = GENtoGENstr(gel(st,sp-1+j));
-	  st[sp++] = (long) GSTR(concat(L,NULL));
-	}
-	break;
+        if (operand==1)
+          st[sp-1] = (long) GSTR(GENtoGENstr(gel(st,sp-1)));
+        else
+        {
+          GEN L=cgetg(operand+1,t_VEC);
+          sp-=operand;
+          for (j=1; j<=operand; j++)
+            gel(L,j) = GENtoGENstr(gel(st,sp-1+j));
+          st[sp++] = (long) GSTR(concat(L,NULL));
+        }
+        break;
     case OCvarn:
-	st[sp-1] = closure_varn(gel(st,sp-1));
-	break;
+        st[sp-1] = closure_varn(gel(st,sp-1));
+        break;
     case OCcopy:
-	gel(st,sp-1) = gcopy(gel(st,sp-1));
-	break;
+        gel(st,sp-1) = gcopy(gel(st,sp-1));
+        break;
     case OCcopyifclone:
-	if (isclone(gel(st,sp-1)))
-	  gel(st,sp-1) = gcopy(gel(st,sp-1));
-	break;
+        if (isclone(gel(st,sp-1)))
+          gel(st,sp-1) = gcopy(gel(st,sp-1));
+        break;
     case OCcompo1:
-	{
-	  GEN  p=gel(st,sp-2);
-	  long c=st[sp-1];
-	  sp-=2;
-	  switch(typ(p))
-	  {
-	  case t_VEC: case t_COL:
-	    check_array_index(c, lg(p));
-	    closure_castgen(gel(p,c),operand);
-	    break;
-	  case t_LIST:
-	  {
-	    long lx;
-	    p = list_data(p); lx = p? lg(p): 1;
-	    check_array_index(c, lx);
-	    closure_castgen(gel(p,c),operand);
-	    break;
-	  }
-	  case t_VECSMALL:
-	    check_array_index(c,lg(p));
-	    closure_castlong(p[c],operand);
-	    break;
-	  default:
-	    pari_err(talker,"_[_]: not a vector");
-	    break;
-	  }
-	  break;
-	}
+        {
+          GEN  p=gel(st,sp-2);
+          long c=st[sp-1];
+          sp-=2;
+          switch(typ(p))
+          {
+          case t_VEC: case t_COL:
+            check_array_index(c, lg(p));
+            closure_castgen(gel(p,c),operand);
+            break;
+          case t_LIST:
+          {
+            long lx;
+            p = list_data(p); lx = p? lg(p): 1;
+            check_array_index(c, lx);
+            closure_castgen(gel(p,c),operand);
+            break;
+          }
+          case t_VECSMALL:
+            check_array_index(c,lg(p));
+            closure_castlong(p[c],operand);
+            break;
+          default:
+            pari_err(talker,"_[_]: not a vector");
+            break;
+          }
+          break;
+        }
     case OCcompo1ptr:
-	{
-	  long c=st[sp-1];
-	  gp_pointer *g = &ptrs[rp-1];
-	  matcomp *C=&g->c;
-	  GEN p;
-	  p=*C->ptcell;
-	  sp--;
-	  switch(typ(p))
-	  {
-	  case t_VEC: case t_COL: case t_VECSMALL:
-	    check_array_index(c, lg(p));
-	    C->ptcell = (GEN *) p+c;
-	    break;
-	  case t_LIST:
-	  {
-	    long lx;
-	    p = list_data(p); lx = p? lg(p): 1;
-	    check_array_index(c,lx);
-	    C->ptcell = (GEN *) p+c;
-	    break;
-	  }
-	  default:
-	    pari_err(talker,"_[_]: not a vector");
-	  }
-	  C->parent   = p;
-	  g->x = *(g->c.ptcell);
-	  break;
-	}
+        {
+          long c=st[sp-1];
+          gp_pointer *g = &ptrs[rp-1];
+          matcomp *C=&g->c;
+          GEN p;
+          p=*C->ptcell;
+          sp--;
+          switch(typ(p))
+          {
+          case t_VEC: case t_COL: case t_VECSMALL:
+            check_array_index(c, lg(p));
+            C->ptcell = (GEN *) p+c;
+            break;
+          case t_LIST:
+          {
+            long lx;
+            p = list_data(p); lx = p? lg(p): 1;
+            check_array_index(c,lx);
+            C->ptcell = (GEN *) p+c;
+            break;
+          }
+          default:
+            pari_err(talker,"_[_]: not a vector");
+          }
+          C->parent   = p;
+          g->x = *(g->c.ptcell);
+          break;
+        }
     case OCcompo2:
-	{
-	  GEN  p=gel(st,sp-3);
-	  long c=st[sp-2];
-	  long d=st[sp-1];
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[_,_]: not a matrix");
-	  check_array_index(d, lg(p));
-	  check_array_index(c, lg(p[d]));
-	  sp-=3;
-	  closure_castgen(gcoeff(p,c,d),operand);
-	  break;
-	}
+        {
+          GEN  p=gel(st,sp-3);
+          long c=st[sp-2];
+          long d=st[sp-1];
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[_,_]: not a matrix");
+          check_array_index(d, lg(p));
+          check_array_index(c, lg(p[d]));
+          sp-=3;
+          closure_castgen(gcoeff(p,c,d),operand);
+          break;
+        }
     case OCcompo2ptr:
-	{
-	  long c=st[sp-2];
-	  long d=st[sp-1];
-	  gp_pointer *g = &ptrs[rp-1];
-	  matcomp *C=&g->c;
-	  GEN p;
-	  p=*C->ptcell;
-	  sp-=2;
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[_,_]: not a matrix");
-	  check_array_index(d, lg(p));
-	  check_array_index(c, lg(p[d]));
-	  C->ptcell = (GEN *) gel(p,d)+c;
-	  C->parent   = p;
-	  g->x = *(g->c.ptcell);
-	  break;
-	}
+        {
+          long c=st[sp-2];
+          long d=st[sp-1];
+          gp_pointer *g = &ptrs[rp-1];
+          matcomp *C=&g->c;
+          GEN p;
+          p=*C->ptcell;
+          sp-=2;
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[_,_]: not a matrix");
+          check_array_index(d, lg(p));
+          check_array_index(c, lg(p[d]));
+          C->ptcell = (GEN *) gel(p,d)+c;
+          C->parent   = p;
+          g->x = *(g->c.ptcell);
+          break;
+        }
     case OCcompoC:
-	{
-	  GEN  p=gel(st,sp-2);
-	  long c=st[sp-1];
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[,_]: not a matrix");
-	  check_array_index(c, lg(p));
-	  sp--;
-	  gel(st,sp-1) = gel(p,c);
-	  break;
-	}
+        {
+          GEN  p=gel(st,sp-2);
+          long c=st[sp-1];
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[,_]: not a matrix");
+          check_array_index(c, lg(p));
+          sp--;
+          gel(st,sp-1) = gel(p,c);
+          break;
+        }
     case OCcompoCptr:
-	{
-	  long c=st[sp-1];
-	  gp_pointer *g = &ptrs[rp-1];
-	  matcomp *C=&g->c;
-	  GEN p;
-	  p=*C->ptcell;
-	  sp--;
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[,_]: not a matrix");
-	  check_array_index(c, lg(p));
-	  C->ptcell = (GEN *) p+c;
-	  C->full_col = c;
-	  C->parent   = p;
-	  g->x = *(g->c.ptcell);
-	  break;
-	}
+        {
+          long c=st[sp-1];
+          gp_pointer *g = &ptrs[rp-1];
+          matcomp *C=&g->c;
+          GEN p;
+          p=*C->ptcell;
+          sp--;
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[,_]: not a matrix");
+          check_array_index(c, lg(p));
+          C->ptcell = (GEN *) p+c;
+          C->full_col = c;
+          C->parent   = p;
+          g->x = *(g->c.ptcell);
+          break;
+        }
     case OCcompoL:
-	{
-	  GEN  p=gel(st,sp-2);
-	  long r=st[sp-1];
-	  sp--;
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[_,]: not a matrix");
-	  if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
-	  check_array_index(r,lg(p[1]));
-	  gel(st,sp-1) = row(p,r);
-	  break;
-	}
+        {
+          GEN  p=gel(st,sp-2);
+          long r=st[sp-1];
+          sp--;
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[_,]: not a matrix");
+          if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
+          check_array_index(r,lg(p[1]));
+          gel(st,sp-1) = row(p,r);
+          break;
+        }
     case OCcompoLptr:
-	{
-	  long r=st[sp-1];
-	  gp_pointer *g = &ptrs[rp-1];
-	  matcomp *C=&g->c;
-	  GEN p, p2;
-	  p=*C->ptcell;
-	  sp--;
-	  if (typ(p)!=t_MAT)
-	    pari_err(talker,"_[_,]: not a matrix");
-	  if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
-	  check_array_index(r,lg(p[1]));
-	  p2 = rowcopy(p,r);
-	  C->full_row = r; /* record row number */
-	  C->ptcell = &p2;
-	  C->parent   = p;
-	  g->x = *(g->c.ptcell);
-	  break;
-	}
+        {
+          long r=st[sp-1];
+          gp_pointer *g = &ptrs[rp-1];
+          matcomp *C=&g->c;
+          GEN p, p2;
+          p=*C->ptcell;
+          sp--;
+          if (typ(p)!=t_MAT)
+            pari_err(talker,"_[_,]: not a matrix");
+          if (lg(p)==1) pari_err(talker,"a 0x0 matrix has no elements");
+          check_array_index(r,lg(p[1]));
+          p2 = rowcopy(p,r);
+          C->full_row = r; /* record row number */
+          C->ptcell = &p2;
+          C->parent   = p;
+          g->x = *(g->c.ptcell);
+          break;
+        }
     case OCgetarg:
-	if (gel(st,sp-1))
-	  copylex(operand,gel(st,sp-1));
-	sp--;
-	break;
+        if (gel(st,sp-1))
+          copylex(operand,gel(st,sp-1));
+        sp--;
+        break;
     case OCdefaultarg:
-	ep=(entree *)operand;
-	if (gel(st,sp-2))
-	  copylex(operand,gel(st,sp-2));
-	else
-	{
-	  GEN z = closure_evalgen(gel(st,sp-1));
-	  if (!z) pari_err(talker,"break not allowed in function parameter");
-	  copylex(operand,z);
-	}
-	sp-=2;
-	break;
+        ep=(entree *)operand;
+        if (gel(st,sp-2))
+          copylex(operand,gel(st,sp-2));
+        else
+        {
+          GEN z = closure_evalgen(gel(st,sp-1));
+          if (!z) pari_err(talker,"break not allowed in function parameter");
+          copylex(operand,z);
+        }
+        sp-=2;
+        break;
     case OClocalvar:
-	ep=(entree *)operand;
-	j=stack_new(&s_lvars);
-	lvars[j]=ep;
-	nblvar++;
-	copyvalue(ep,gel(st,--sp));
-	break;
+        ep=(entree *)operand;
+        j=stack_new(&s_lvars);
+        lvars[j]=ep;
+        nblvar++;
+        copyvalue(ep,gel(st,--sp));
+        break;
     case OClocalvar0:
-	ep=(entree *)operand;
-	j=stack_new(&s_lvars);
-	lvars[j]=ep;
-	nblvar++;
-	zerovalue(ep);
-	break;
+        ep=(entree *)operand;
+        j=stack_new(&s_lvars);
+        lvars[j]=ep;
+        nblvar++;
+        zerovalue(ep);
+        break;
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
     case OCderivgen:
-	{
-	  entree *ep=(entree*)operand;
-	  GEN res;
-	  struct derivgenwrap_s c;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  c.f = (GEN (*) (ANYARG)) ep->value;
-	  c.x = (GEN*) st+sp;
-	  res = derivnum((void*)&c, derivgenwrap, gel(st,sp), precreal);
-	  gp_function_name=NULL;
-	  gel(st,sp++)=res;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          GEN res;
+          struct derivgenwrap_s c;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          c.f = (GEN (*) (ANYARG)) ep->value;
+          c.x = (GEN*) st+sp;
+          res = derivnum((void*)&c, derivgenwrap, gel(st,sp), precreal);
+          gp_function_name=NULL;
+          gel(st,sp++)=res;
+          break;
+        }
     case OCcallgen:
-	{
-	  entree *ep=(entree*)operand;
-	  GEN res;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  res = ((GEN (*)(ANYARG))ep->value)(ARGS);
-	  if (br_status) goto endeval;
-	  gp_function_name=NULL;
-	  gel(st,sp++)=res;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          GEN res;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          res = ((GEN (*)(ANYARG))ep->value)(ARGS);
+          if (br_status) goto endeval;
+          gp_function_name=NULL;
+          gel(st,sp++)=res;
+          break;
+        }
     case OCcallgen2:
-	{
-	  entree *ep=(entree*)operand;
-	  GEN res;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
-	  if (br_status) goto endeval;
-	  gp_function_name=NULL;
-	  gel(st,sp++)=res;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          GEN res;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          res = ((GEN (*)(GEN,GEN))ep->value)(gel(st,sp),gel(st,sp+1));
+          if (br_status) goto endeval;
+          gp_function_name=NULL;
+          gel(st,sp++)=res;
+          break;
+        }
     case OCcalllong:
-	{
-	  entree *ep=(entree*)operand;
-	  long res;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  res = ((long (*)(ANYARG))ep->value)(ARGS);
-	  if (br_status) goto endeval;
-	  gp_function_name=NULL;
-	  st[sp++] = res;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          long res;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          res = ((long (*)(ANYARG))ep->value)(ARGS);
+          if (br_status) goto endeval;
+          gp_function_name=NULL;
+          st[sp++] = res;
+          break;
+        }
     case OCcallint:
-	{
-	  entree *ep=(entree*)operand;
-	  long res;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  res = ((int (*)(ANYARG))ep->value)(ARGS);
-	  if (br_status) goto endeval;
-	  gp_function_name=NULL;
-	  st[sp++] = res;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          long res;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          res = ((int (*)(ANYARG))ep->value)(ARGS);
+          if (br_status) goto endeval;
+          gp_function_name=NULL;
+          st[sp++] = res;
+          break;
+        }
     case OCcallvoid:
-	{
-	  entree *ep=(entree*)operand;
-	  sp-=ep->arity;
-	  gp_function_name=ep->name;
-	  ((void (*)(ANYARG))ep->value)(ARGS);
-	  if (br_status) goto endeval;
-	  gp_function_name=NULL;
-	  break;
-	}
+        {
+          entree *ep=(entree*)operand;
+          sp-=ep->arity;
+          gp_function_name=ep->name;
+          ((void (*)(ANYARG))ep->value)(ARGS);
+          if (br_status) goto endeval;
+          gp_function_name=NULL;
+          break;
+        }
 #undef ARGS
     case OCderivuser:
-	{
-	  GEN z;
-	  long n=st[--sp];
-	  ep = (entree*) operand;
-	  if (ep->valence!=EpUSER)
-	  {
-	    if (ep->valence==EpNEW)
-	      pari_err(talker,"function '%s' not yet defined",ep->name);
-	    else
-	      pari_err(talker,"not a function in function call: %s",ep->name);
-	  }
-	  if (n>ep->arity)
-	    pari_err(talker,"Too many arguments for function '%s'",ep->name);
-	  for (j=n+1;j<=ep->arity;j++)
-	    gel(st,sp++)=0;
-	  z = derivnum((void*)ep, derivuserwrap, gel(st,sp-ep->arity), precreal);
-	  sp-=ep->arity;
-	  gel(st, sp++) = z;
-	  break;
-	}
+        {
+          GEN z;
+          long n=st[--sp];
+          ep = (entree*) operand;
+          if (ep->valence!=EpUSER)
+          {
+            if (ep->valence==EpNEW)
+              pari_err(talker,"function '%s' not yet defined",ep->name);
+            else
+              pari_err(talker,"not a function in function call: %s",ep->name);
+          }
+          if (n>ep->arity)
+            pari_err(talker,"Too many arguments for function '%s'",ep->name);
+          for (j=n+1;j<=ep->arity;j++)
+            gel(st,sp++)=0;
+          z = derivnum((void*)ep, derivuserwrap, gel(st,sp-ep->arity), precreal);
+          sp-=ep->arity;
+          gel(st, sp++) = z;
+          break;
+        }
     case OCcalluser:
 calluser:
-	{
-	  pari_sp ltop;
-	  long n=st[--sp];
-	  entree *ep = (entree*) operand;
-	  GEN z;
-	  if (ep->valence!=EpUSER)
-	  {
-	    int w;
-	    if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
-	      pari_err(obsoler, ep->name, w);
-	    else
-	    {
-	      if (ep->valence==EpNEW)
-		pari_err(talker,"function '%s' not yet defined",ep->name);
-	      else
-		pari_err(talker,"not a function in function call: %s",ep->name);
-	    }
-	  }
-	  if (n>ep->arity)
-	    pari_err(talker,"Too many arguments for function '%s'",ep->name);
-	  for (j=n+1;j<=ep->arity;j++)
-	    gel(st,sp++)=0;
+        {
+          pari_sp ltop;
+          long n=st[--sp];
+          entree *ep = (entree*) operand;
+          GEN z;
+          if (ep->valence!=EpUSER)
+          {
+            int w;
+            if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
+              pari_err(obsoler, ep->name, w);
+            else
+            {
+              if (ep->valence==EpNEW)
+                pari_err(talker,"function '%s' not yet defined",ep->name);
+              else
+                pari_err(talker,"not a function in function call: %s",ep->name);
+            }
+          }
+          if (n>ep->arity)
+            pari_err(talker,"Too many arguments for function '%s'",ep->name);
+          for (j=n+1;j<=ep->arity;j++)
+            gel(st,sp++)=0;
 #ifdef STACK_CHECK
-	  if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
-	    pari_err(talker, "deep recursion");
+          if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
+            pari_err(talker, "deep recursion");
 #endif
-	  ltop=avma;
-	  closure_eval((GEN) ep->value);
-	  if (br_status)
-	  {
-	    if (br_status!=br_RETURN)
-	      pari_err(talker, "break/next/allocatemem not allowed here");
-	    avma=ltop;
-	    sp-=ep->arity;
-	    z = br_res ? gcopy(br_res) : gnil;
-	    reset_break();
-	  }
-	  else
-	    z = gerepileupto(ltop, gel(st,--sp));
-	  gel(st, sp++) = z;
-	  break;
-	}
+          ltop=avma;
+          closure_eval((GEN) ep->value);
+          if (br_status)
+          {
+            if (br_status!=br_RETURN)
+              pari_err(talker, "break/next/allocatemem not allowed here");
+            avma=ltop;
+            sp-=ep->arity;
+            z = br_res ? gcopy(br_res) : gnil;
+            reset_break();
+          }
+          else
+            z = gerepileupto(ltop, gel(st,--sp));
+          gel(st, sp++) = z;
+          break;
+        }
     case OCnewframe:
-	stack_alloc(&s_var,operand);
-	s_var.n+=operand;
-	nbmvar+=operand;
-	for(j=1;j<=operand;j++)
-	{
-	  var[s_var.n-j].flag=PUSH_VAL;
-	  var[s_var.n-j].value=gen_0;
-	}
-	break;
+        stack_alloc(&s_var,operand);
+        s_var.n+=operand;
+        nbmvar+=operand;
+        for(j=1;j<=operand;j++)
+        {
+          var[s_var.n-j].flag=PUSH_VAL;
+          var[s_var.n-j].value=gen_0;
+        }
+        break;
     case OCvec:
-	gel(st,sp++)=cgetg(operand,t_VEC);
-	break;
+        gel(st,sp++)=cgetg(operand,t_VEC);
+        break;
     case OCcol:
-	gel(st,sp++)=cgetg(operand,t_COL);
-	break;
+        gel(st,sp++)=cgetg(operand,t_COL);
+        break;
     case OCmat:
-	{
-	  GEN z;
-	  long l=st[sp-1];
-	  z=cgetg(operand,t_MAT);
-	  for(j=1;j<operand;j++)
-	    gel(z,j) = cgetg(l,t_COL);
-	  gel(st,sp-1) = z;
-	}
-	break;
+        {
+          GEN z;
+          long l=st[sp-1];
+          z=cgetg(operand,t_MAT);
+          for(j=1;j<operand;j++)
+            gel(z,j) = cgetg(l,t_COL);
+          gel(st,sp-1) = z;
+        }
+        break;
     case OCdeffunc:
-	ep=(entree*)operand;
-	switch(ep->valence)
-	{
-	case EpUSER:
-	  gpfree((void*)ep->code);
-	  /*FIXME: the function might be in use...
-	    gunclone(ep->value);
-	  */
-	  break;
-	case EpNEW:
-	  ep->valence = EpUSER;
-	  break;
-	default:
-	  pari_err(talker,"function name expected");
-	}
-	ep->value = (void *) gclone(gel(st,sp-3));
-	ep->code  = pari_strdup(GSTR(gel(st,sp-2)));
-	ep->arity = st[sp-1];
-	sp-=3;
-	break;
+        ep=(entree*)operand;
+        switch(ep->valence)
+        {
+        case EpUSER:
+          gpfree((void*)ep->code);
+          /*FIXME: the function might be in use...
+            gunclone(ep->value);
+          */
+          break;
+        case EpNEW:
+          ep->valence = EpUSER;
+          break;
+        default:
+          pari_err(talker,"function name expected");
+        }
+        ep->value = (void *) gclone(gel(st,sp-3));
+        ep->code  = pari_strdup(GSTR(gel(st,sp-2)));
+        ep->arity = st[sp-1];
+        sp-=3;
+        break;
     case OCpop:
-	sp-=operand;
-	break;
+        sp-=operand;
+        break;
     }
   }
   if (0)
