@@ -22,6 +22,42 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /***************************************************************************
  **                                                                       **
+ **                           String constant expansion                   **
+ **                                                                       **
+ ***************************************************************************/
+
+static GEN
+strntoGENexp(const char *str, long len)
+{
+  GEN z = cgetg(1+nchar2nlong(len), t_STR);
+  char *s=GSTR(z);
+  const char *t=str+1;
+  while (t<=str+len)
+  {
+    while (*t == '\\')
+    {
+      switch(*++t)
+      {
+	case 'e':  *s='\033'; break; /* escape */
+	case 'n':  *s='\n'; break;
+	case 't':  *s='\t'; break;
+	default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
+      }
+      t++; s++;
+    }
+    if (*t == '"')
+    {
+      if (t[1] != '"') break;
+      t += 2; continue;
+    }
+    *s++ = *t++;
+  }
+  *s++=0;
+  return z;
+}
+
+/***************************************************************************
+ **                                                                       **
  **                           Byte-code compiler                          **
  **                                                                       **
  ***************************************************************************/
@@ -542,6 +578,7 @@ compilefunc(long n, int mode)
   long ret;
   char const *p,*q;
   char c;
+  const char *flags = NULL;
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
   long lnc=first_safe_arg(arg);
@@ -718,8 +755,28 @@ compilefunc(long n, int mode)
 	  compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
 	  j++;
 	  break;
-	case 'M':
-	case 'L':
+        case 'M':
+          if (tree[arg[j]].f!=Fsmall)
+          {
+            if (!flags) flags = ep->code;
+            flags = strchr(flags, '\n'); /* Skip to the following '\n' */
+            if (!flags)
+              pari_err(talker, "not enough flags in string function signature");
+            flags++;
+            if (tree[arg[j]].f==Fconst && tree[arg[j]].x==CSTstr)
+            {
+              GEN str=strntoGENexp(tree[arg[j]].str,tree[arg[j]].len);
+              op_push(OCpushlong, eval_mnemonic(str, flags));
+              j++;
+            } else
+            {
+              compilenode(arg[j++],Ggen,0);
+              op_push(OCpushlong,(long)flags);
+              op_push(OCcallgen2,(long)is_entry("_eval_mnemonic"));
+            }
+            break;
+          }
+        case 'L': /*Fall through*/
 	  compilenode(arg[j++],Gsmall,0);
 	  break;
 	case 'n':
@@ -957,36 +1014,6 @@ compilefunc(long n, int mode)
   }
   if (nbpointers) op_push(OCendptr,nbpointers);
   avma=ltop;
-}
-
-static GEN
-strntoGENexp(const char *str, long len)
-{
-  GEN z = cgetg(1+nchar2nlong(len), t_STR);
-  char *s=GSTR(z);
-  const char *t=str+1;
-  while (t<=str+len)
-  {
-    while (*t == '\\')
-    {
-      switch(*++t)
-      {
-	case 'e':  *s='\033'; break; /* escape */
-	case 'n':  *s='\n'; break;
-	case 't':  *s='\t'; break;
-	default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
-      }
-      t++; s++;
-    }
-    if (*t == '"')
-    {
-      if (t[1] != '"') break;
-      t += 2; continue;
-    }
-    *s++ = *t++;
-  }
-  *s++=0;
-  return z;
 }
 
 static void

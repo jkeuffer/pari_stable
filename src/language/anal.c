@@ -13,18 +13,18 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/*******************************************************************/
-/*                                                                 */
-/*                  SYNTACTICAL ANALYZER FOR GP                    */
-/*                                                                 */
-/*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
 #include "parse.h"
-/* Mnemonic codes parser:
- *
- * TEMPLATE is assumed to be ";"-separated list of items.  Each item
+
+/***************************************************************************
+ **                                                                       **
+ **                           Mnemonic codes parser                       **
+ **                                                                       **
+ ***************************************************************************/
+
+/* TEMPLATE is assumed to be ";"-separated list of items.  Each item
  * may have one of the following forms: id=value id==value id|value id&~value.
  * Each id consists of alphanum characters, dashes and underscores.
  * IDs are case-sensitive.
@@ -42,41 +42,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * this, and arg is not-negated. */
 
 enum { A_ACTION_ASSIGN, A_ACTION_SET, A_ACTION_UNSET };
-enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
 #define IS_ID(c)	(isalnum((int)c) || ((c) == '_') || ((c) == '-'))
-#define ERR(reason)	STMT_START {	\
-    if (failure && first) {		\
-	*failure = reason; *failure_arg = NULL; return 0;		\
-    } else pari_err(talker,reason); } STMT_END
-#define ERR2(reason,s)	STMT_START {	\
-    if (failure && first) {		\
-	*failure = reason; *failure_arg = s; return 0;		\
-    } else pari_err(talker,reason,s); } STMT_END
 
-ulong
-parse_option_string(char *arg, char *tmplate, long flag, const char **failure, const char **failure_arg)
+long
+eval_mnemonic(GEN str, const char *tmplate)
 {
+  pari_sp av=avma;
   ulong retval = 0;
-  char *etmplate = NULL;
+  const char *etmplate = NULL;
+  const char *arg;
 
-  if (flag & PARSEMNU_TEMPL_TERM_NL)
-    etmplate = strchr(tmplate, '\n');
+  if (typ(str)==t_INT) return itos(str);
+  if (typ(str)!=t_STR) pari_err(talker,"invalid flag");
+
+  arg=GSTR(str);
+  etmplate = strchr(tmplate, '\n');
   if (!etmplate)
     etmplate = tmplate + strlen(tmplate);
 
-  if (failure)
-    *failure = NULL;
-  while (1) {
+  while (1)
+  {
     long numarg;
-    char *e, *id;
-    char *negated;			/* action found with 'no'-ID */
+    const char *e, *id;
+    const char *negated;		/* action found with 'no'-ID */
     int negate;			/* Arg has 'no' prefix removed */
     ulong l, action = 0, first = 1, singleton = 0;
     char *buf, *inibuf;
     static char b[80];
 
-    if (flag & PARSEMNU_ARG_WHITESP)
-      while (isspace((int)*arg)) arg++;
+    while (isspace((int)*arg)) arg++;
     if (!*arg)
       break;
     e = arg;
@@ -84,9 +78,9 @@ parse_option_string(char *arg, char *tmplate, long flag, const char **failure, c
     /* Now the ID is whatever is between arg and e. */
     l = e - arg;
     if (l >= sizeof(b))
-      ERR("id too long in a stringified flag");
+      pari_err(talker,"id too long in a stringified flag");
     if (!l)				/* Garbage after whitespace? */
-      ERR("a stringified flag does not start with an id");
+      pari_err(talker,"a stringified flag does not start with an id");
     strncpy(b, arg, l);
     b[l] = 0;
     arg = e;
@@ -94,18 +88,20 @@ parse_option_string(char *arg, char *tmplate, long flag, const char **failure, c
     while (('0' <= *e) && (*e <= '9'))
       e++;
     if (*e == 0)
-      ERR("numeric id in a stringified flag");
+      pari_err(talker,"numeric id in a stringified flag");
     negate = 0;
     negated = NULL;
 find:
     id = tmplate;
-    while ((id = strstr(id, buf)) && id < etmplate) {
-      if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
+    while ((id = strstr(id, buf)) && id < etmplate)
+    {
+      if (IS_ID(id[l])) {	/* We do not allow abbreviations yet */
         id += l;		/* False positive */
         continue;
       }
-      if ((id >= tmplate + 2) && (IS_ID(id[-1]))) {
-        char *s = id;
+      if ((id >= tmplate + 2) && (IS_ID(id[-1])))
+      {
+        const char *s = id;
 
         if ( !negate && s >= tmplate+3
             && ((id[-1] == '_') || (id[-1] == '-')) )
@@ -135,19 +131,20 @@ find:
       if (buf[0])
         goto find;
     }
-    if (!id && negated) {	/* Negated and AS_IS forms, prefer AS_IS */
+    if (!id && negated)	/* Negated and AS_IS forms, prefer AS_IS */
+    {
       id = negated;	/* Otherwise, use negated form */
       negate = 1;
     }
     if (!id)
-      ERR2("Unrecognized id '%s' in a stringified flag", inibuf);
+      pari_err(talker,"Unrecognized id '%s' in a stringified flag", inibuf);
     if (singleton && !first)
-      ERR("Singleton id non-single in a stringified flag");
+      pari_err(talker,"Singleton id non-single in a stringified flag");
     if (id[0] == '=') {
       if (negate)
-        ERR("Cannot negate id=value in a stringified flag");
+        pari_err(talker,"Cannot negate id=value in a stringified flag");
       if (!first)
-        ERR("Assign action should be first in a stringified flag");
+        pari_err(talker,"Assign action should be first in a stringified flag");
       action = A_ACTION_ASSIGN;
       id++;
       if (id[0] == '=') {
@@ -189,21 +186,26 @@ find:
       retval = numarg;
       break;
     default:
-      ERR("error in parse_option_string");
+      pari_err(talker,"error in parse_option_string");
     }
     first = 0;
-    if (flag & PARSEMNU_ARG_WHITESP)
-      while (isspace((int)*arg))
-        arg++;
+    while (isspace((int)*arg))
+      arg++;
     if (*arg && !(ispunct((int)*arg) && *arg != '-'))
-      ERR("Junk after an id in a stringified flag");
+      pari_err(talker,"Junk after an id in a stringified flag");
     /* Skip punctuation */
     if (*arg)
       arg++;
   }
+  avma=av;
   return retval;
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                  SYNTACTICAL ANALYZER FOR GP                    */
+/*                                                                 */
+/*******************************************************************/
 #define HANDLE_FOREIGN(t)\
   if (foreignExprHandler && *t == foreignExprSwitch)\
     return (*foreignExprHandler)(t);

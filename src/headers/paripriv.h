@@ -624,8 +624,6 @@ GENbin* copy_bin(GEN x);
 GENbin* copy_bin_canon(GEN x);
 GEN bin_copy(GENbin *p);
 
-ulong parse_option_string(char *arg, char *tmplate, long flag, const char **failure, const char **failure_arg);
-
 /* aprcl.c */
 
 GEN     aprcl(GEN N);

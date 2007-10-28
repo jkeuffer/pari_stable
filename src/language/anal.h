@@ -183,6 +183,7 @@ GEN  pari_eval_str(char *lex, int strict);
 void parser_reset(void);
 void compiler_reset(void);
 GEN  gp_closure(long n);
+long eval_mnemonic(GEN str, const char *tmplate);
 
 INLINE GEN
 closure_evalnobrk(GEN code)
