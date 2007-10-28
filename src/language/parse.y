@@ -304,6 +304,7 @@ funcid: KENTRY '(' listarg ')' {$$=newnode(Ffunction,newconst(CSTentry,&@1),$3,&
 ;
 
 funcder: KENTRY KDER listarg ')' {$$=newnode(Fderfunc,newconst(CSTentry,&@1),$3,&@$);}
+;
 
 memberid:
      expr '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),$1,&@$);}
