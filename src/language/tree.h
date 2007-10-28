@@ -15,16 +15,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 
 typedef enum {Fseq,
-	      Fmatrix,FmatrixL,FmatrixR,
-	      Faffect,
-	      Ffacteurmat,
-	      Fmatrixelts,Fmatrixlines,
-	      Fmat,Fvec,Fnoarg,
-	      Flistarg,
-	      Frefarg,
-	      Fconst,Fsmall,
-	      Ftag,
-	      Fentry,Ffunction,Fderfunc,Fdeffunc,
+              Fmatrix,FmatrixL,FmatrixR,
+              Faffect,
+              Ffacteurmat,
+              Fmatrixelts,Fmatrixlines,
+              Fmat,Fvec,Fnoarg,
+              Flistarg,
+              Frefarg,
+              Fconst,Fsmall,
+              Ftag,
+              Fentry,Ffunction,Fderfunc,Fdeffunc,
 } Ffunc;
 
 #define Flastfunc  (Fdeffunc)
