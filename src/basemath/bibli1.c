@@ -3054,7 +3054,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   n--;
   a = mat_to_MP(a, DEFAULTPREC);
   r = qfgaussred_positive(a);
-  if (!r) err(precer, "minim0");
+  if (!r) pari_err(precer, "minim0");
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));

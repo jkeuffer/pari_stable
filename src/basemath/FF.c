@@ -501,10 +501,10 @@ long
 FF_issquarerem(GEN x, GEN *pt)
 {
   ulong pp;
-  GEN r, T, p, z; 
+  GEN r, T, p; 
   pari_sp av = avma;
   _getFF(x, &T, &p, &pp);
-  if (pt) z = cgetg(5,t_FFELT);
+  if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])
   {
    case t_FF_FpXQ:
@@ -517,11 +517,11 @@ FF_issquarerem(GEN x, GEN *pt)
      if (!r) { avma = av; return 0; }
      break;
 
-   case t_FF_F2xq:
+   default: /* case t_FF_F2xq: */
      if (pt) { avma = av; *pt = FF_sqrt(x); }
      return 1;
   }
-  if (pt) { _mkFF(x,z,r); *pt = z; }
+  if (pt) { _mkFF(x,*pt,r); }
   return 1;
 }
 
@@ -646,7 +646,7 @@ FF_log(GEN x, GEN g, GEN ord)
   GEN r, T, p;
   _getFF(x,&T,&p,&pp);
   _checkFF(x,g,"log");
-  if (ord && !is_Z_factor(ord)) err(typeer, "FF_log");
+  if (ord && !is_Z_factor(ord)) pari_err(typeer, "FF_log");
   switch(x[1])
   {
   case t_FF_FpXQ:
