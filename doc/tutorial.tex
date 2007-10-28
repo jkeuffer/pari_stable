@@ -2611,17 +2611,11 @@ field of $Q(x^2)$.  We can check that with
 
 PARI supports high and low-level graphing functions, on a variety of output
 devices: a special purpose window under standard graphical environments (the
-\kbd{X Windows} system, Mac OS X, MicroSoft Windows), a \kbd{PostScript} file
-ready for the printer, or a \kbd{gnuplot} output device (the last one
-is not available by default). These functions use a multitude of flags, which
+\kbd{X Windows} system, Mac OS X, MicroSoft Windows), or a \kbd{PostScript}
+file ready for the printer. These functions use a multitude of flags, which
 are mostly power-of-2. To simplify understanding we first give these flags
 symbolic names.
 \bprog
-  /* Generic flags: */
-  parametric = 1;  no_x_axis =  8;  no_lines   = 64;
-  recursive  = 2;  no_y_axis = 16;  points_too = 128;
-  norescale  = 4;  no_frame  = 32;  splines    = 256;
-
   /* Relative positioning of graphic objects: */
   nw       = 0;  se       = 4;  relative = 1;
   sw       = 2;  ne       = 6;
@@ -2654,13 +2648,13 @@ are calculated, which leads to wrong turning points in the graph. To fix
 this, one may use variable steps which are smaller where the function varies
 rapidly:
 \bprog
-  ploth(X = -2, 2, sin(X^7), recursive)
+  ploth(X = -2, 2, sin(X^7), "Recursive")
 @eprog\noindent
 The precision near the edges of the graph is much better now.
 However, the recursive plotting (named so since PARI subdivides intervals
 until the graph becomes almost straight) has its own pitfalls.  Try
 \bprog
-  ploth(X = -2, 2, sin(X*7), recursive)
+  ploth(X = -2, 2, sin(X*7), "Recursive")
 @eprog\noindent The graph looks correct far away, but it has a straight
 interval near the origin, and some sharp corners as well.  This happens
 because the graph is symmetric with respect to the origin, thus the middle 3
@@ -2672,7 +2666,7 @@ There are many ways to circumvent this.  Say, one can make the right limit
 2.1.  Or one can ask PARI for an initial subdivision into 16 points instead
 of default 15:
 \bprog
-  ploth(X = -2, 2, sin(X*7), recursive, 16)
+  ploth(X = -2, 2, sin(X*7), "Recursive", 16)
 @eprog\noindent
 All these arrangements break the symmetry of the initial subdivision, thus
 make the problem go away.  Eventually PARI will be able to better detect such
@@ -2688,12 +2682,12 @@ This can take quite some time.  (1000 is close to the default for many
 plotting devices, we want to specify it explicitly so that the result does
 not depend on the output device.)  Try the recursive plot:
 \bprog
-  ploth(t = 100, 110, real(zeta(0.5+I*t)), recursive)
+  ploth(t = 100, 110, real(zeta(0.5+I*t)), "Recursive")
 @eprog\noindent
 It takes approximately the same time.  Now try specifying fewer points,
 but make PARI approximate the data by a smooth curve:
 \bprog
-  ploth(t = 100, 110, real(zeta(0.5+I*t)), splines, 100)
+  ploth(t = 100, 110, real(zeta(0.5+I*t)), "Splines", 100)
 @eprog\noindent
 This takes much less time, and the output is practically the same.  How to
 compare these two outputs?  We will see it shortly.  Right now let us plot
@@ -2708,18 +2702,18 @@ Why did we define a function \kbd{f(t)}?  To avoid calculation of
 $\zeta({1\over2} + it)$ twice for the same value of t.  Similarly, we can
 plot parametric graphs:
 \bprog
-  ploth(t = 100, 110, f(t), parametric, 1000)
+  ploth(t = 100, 110, f(t), "Parametric", 1000)
 @eprog
 
 Again, one can speed up the calculation with
 \bprog
-  ploth(t = 100, 110, f(t), parametric+splines, 100)
+  ploth(t = 100, 110, f(t), "Parametric|Splines", 100)
 @eprog
 
 If your plotting device supports it, you may ask PARI to show the points
 in which it calculated your function:
 \bprog
-  ploth(t = 100, 110, f(t), parametric+splines+points_too, 100)
+  ploth(t = 100, 110, f(t), "Parametric|Splines|Points_too", 100)
 @eprog
 
 As you can see, the points are very dense on the graph.  To see some crude
@@ -2728,7 +2722,7 @@ decrease the number of points to 20, you can see that the approximation to
 the graph now misses zero.  Using splines, one can create reasonable graphs
 for larger values of t, say with
 \bprog
-  ploth(t = 10000, 10004, f(t), parametric+splines+points_too, 50)
+  ploth(t = 10000, 10004, f(t), "Parametric|Splines|Points_too", 50)
 @eprog
 
 How can we compare two graphs of the same function plotted by different
@@ -2764,7 +2758,7 @@ makes it an $0.88 \times 0.88$ subrectangle; so we create another rectangle
 graph the function in there:
 \bprog
   plotinit(3, 0.88, 0.88, relative)
-  plotrecth(3, X = -2, 2, sin(X^7), recursive)
+  plotrecth(3, X = -2, 2, sin(X^7), "Recursive")
 @eprog
 (nothing is output yet, these commands only fills the virtual drawing
 boards with PARI graphic objects). Finally, output rectangles 2 and 3 on
@@ -2794,7 +2788,7 @@ $y$-limits.
 Here is the complete program:
 \bprog
   plotinit(3, 0.88, 0.88, relative)
-  lims = plotrecth(3, X = -2, 2, sin(X^7), recursive)
+  lims = plotrecth(3, X = -2, 2, sin(X^7), "Recursive")
   \p 3          \\ @com $3$ significant digits for the bounding box are enough
   plotinit(2);      plotscale(2, 0,1, 0,1)
   plotmove(2, 0,0); plotbox(2, 1,1)
@@ -2828,9 +2822,9 @@ the first plotting.  Let us add another plotting with fewer
 points too:
 \bprog
   plotinit(0, 0.9,0.9, relative)
-  plotrecth(0, t=100,110, f(t), parametric, 300)
-  plotrecth(0, t=100,110, f(t), parametric+splines+points_too+norescale, 30);
-  plotrecth(0, t=100,110, f(t), parametric+splines+points_too+norescale, 20);
+  plotrecth(0, t=100,110, f(t), "Parametric", 300)
+  plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale", 30);
+  plotrecth(0, t=100,110, f(t), "Parametric|Splines|Points_too|no_Rescale", 20);
   plotdraw([0, 0.05,0.05], relative)
 @eprog
 
@@ -2846,15 +2840,15 @@ With these frills the script becomes:
   plotinit(0, 0.9,0.9, relative)
   plotpointtype(-1, 0)                \\@com set color of graph points
   plotpointsize(0, 0.4)               \\@com use tiny markers (if available)
-  plotrecth(0, t=100,110, f(t), parametric+no_lines, 300)
+  plotrecth(0, t=100,110, f(t), "Parametric|no_Lines", 300)
   plotpointsize(0, 1)                 \\@com normal-size markers
   plotlinetype(-1, 1)                 \\@com set color of graph lines
   plotpointtype(-1, 1)                \\@com set color of graph points
-  curve_only = norescale + no_frame + no_x_axis + no_y_axis
-  plotrecth(0, t=100,110,f(t), parametric+splines+points_too+curve_only, 30);
+  opts = "Parametric|Splines|Points_too|no_Rescale|no_Frame|no_X_axis|no_Y_axis";
+  plotrecth(0, t=100,110,f(t), opts, 30);
   plotlinetype(-1, 2)                 \\@com set color of graph lines
   plotpointtype(-1, 2)                \\@com set color of graph points
-  plotrecth(0, t=100,110,f(t), parametric+splines+points_too+curve_only, 20);
+  plotrecth(0, t=100,110,f(t), opts, 20);
   plotdraw([0, 0.05,0.05], relative)
 @eprog
 
@@ -2866,36 +2860,6 @@ quite a noticeable difference.
 
 Keep in mind that \kbd{plotlinetype}, \kbd{plotpointtype},
 \kbd{plotpointsize} may do nothing on some terminals.
-
-What if we
-want to create a high-resolution hard copy of the plot?  There may be several
-possible solutions.  First, the display output device may allow a
-high-resolution hard copy itself.  Say, PM display (with gnuplot output on
-OS/2) pretends that its resolution is $19500\times 12500$, thus the data
-PARI sends to it are already high-resolution, and printing is available
-through the menu bar.  Alternatively, with gnuplot output one can switch
-the output plotting device to many different hard copy devices:
-\kbd{plotfile("plot.tex")}, \kbd{plotterm("texdraw")}.
-After this all the plotting will go into file {\tt plot.tex} with whatever
-output conventions gnuplot format {\tt texdraw} provides.  To switch output
-back to normal, one needs to restore the initial plotting terminal, and
-restore the initial output file by doing \kbd{plotfile("-")}.
-
-One can combine PARI programming capabilities to produce multiple plots:
-\bprog
-  plotfile("manypl1.gif")       \\@com Avoid switching STDOUT to binary mode
-  plotterm("gif=300,200")
-  wpoints = plothsizes()[1]     \\@com $300 \times 200$ is advice only
-  {
-    for( k=1,6,
-      plotfile("manypl" k ".gif");
-      ploth(x = -1, 3, sin(x^k), , wpoints)
-    )
-  }
-@eprog
-
-\noindent This plots 6 graphs of $\sin x^k$, $k=1\dots 6$ into
-$300\times 200$ GIF files {\tt manypl1.gif}\dots {\tt manypl6.gif}.
 
 Additionally, one can ask PARI to output a plot into a PS file: just
 use the command \kbd{psdraw} instead of \kbd{plotdraw} in the above examples
@@ -2920,7 +2884,7 @@ only, \kbd{A} and \kbd{T}:
   plotinit(A);         plotscale(A, 0, 1, 0, 1)
 
   plotinit(T, 0.42, 0.42, relative);
-  plotrecth(T, x= -5, 5, sin(x), recursive)
+  plotrecth(T, x= -5, 5, sin(x), "Recursive")
   plotcopy(T, 2, 0.05, 0.05, relative + nw)
 
   plotmove(A, 0.05 + 0.42/2, 1 - 0.05/2)
@@ -2934,14 +2898,14 @@ only, \kbd{A} and \kbd{T}:
   plotstring(A,"Multigraph", center + vcenter)
 
   plotinit(T, 0.42, 0.42, relative);
-  plotrecth(T, x= -5, 5, [sin(3*x), cos(2*x)], parametric)
+  plotrecth(T, x= -5, 5, [sin(3*x), cos(2*x)], "Parametric")
   plotcopy(T, 2, 0.05, 0.05, relative + sw)
 
   plotmove(A, 0.05 + 0.42/2, 0.5)
   plotstring(A,"Parametric", center + vcenter)
 
   plotinit(T, 0.42, 0.42, relative);
-  plotrecth(T, x= -5, 5, [sin(x), cos(x), sin(3*x),cos(2*x)], parametric)
+  plotrecth(T, x= -5, 5, [sin(x), cos(x), sin(3*x),cos(2*x)], "Parametric")
   plotcopy(T, 2, 0.05, 0.05, relative + se)
 
   plotmove(A, 1 - 0.05 - 0.42/2, 0.5)
@@ -2990,8 +2954,8 @@ plot.
 First of all, we need to measure the height of the smaller rectangle:
 \bprog
   plotinit(3, 0.9, 0.9/1.2, 1);
-  curve_only = no_x_axis+no_y_axis+no_frame;
-  lims = plotrecth(3, x= -xlim, xlim, f(x), recursive+curve_only,16);
+  opts = "Recursive | no_X_axis|no_Y_axis|no_Frame";
+  lims = plotrecth(3, x= -xlim, xlim, f(x), opts,16);
   h = lims[4] - lims[3];
 @eprog\noindent
 Next step is to create a larger rectangle, and plot the Taylor polynomials
@@ -2999,14 +2963,14 @@ into the larger rectangle:
 \bprog
   plotinit(4, 0.9,0.9, relative);
   plotscale(4, lims[1], lims[2], lims[3] - h/10, lims[4] + h/10)
-  plotrecth(4, x = -xlim, xlim, subst(FARRAY,t,x), norescale);
+  plotrecth(4, x = -xlim, xlim, subst(FARRAY,t,x), "no_Rescale");
 @eprog
 
 Here comes the central command of this example:
 \bprog
   plotclip(4)
 @eprog\noindent
-What does it do?  The command \kbd{plotrecth(\dots, norescale)} scales the
+What does it do?  The command \kbd{plotrecth(\dots, "no_Rescale")} scales the
 graphs according to coordinate system in the rectangle, but it does not pay
 any other attention to the size of the rectangle.  Since \kbd{xlim} is 13,
 the Taylor polynomials take very large values in the interval

@@ -2,7 +2,7 @@ Function: plotrecth
 Class: highlevel
 Section: graphic
 C-Name: rectploth
-Prototype: LV=GGIpD0,L,D0,L,
+Prototype: LV=GGEpD0,M,D0,L,\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048; Complex|4096
 Help: plotrecth(w,X=a,b,expr,{flags=0},{n=0}): plot graph(s) for expr
  in rectwindow w, where expr is scalar for a single non-parametric plot, and
  a vector otherwise. If plotting is parametric, its length should be even and
