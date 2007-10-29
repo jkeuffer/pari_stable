@@ -569,7 +569,7 @@ cattovec(long n, long fnum)
 enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
 static void
-compilefunc(long n, int mode)
+compilefunc(entree *ep, long n, int mode)
 {
   pari_sp ltop=avma;
   long i,j;
@@ -584,7 +584,6 @@ compilefunc(long n, int mode)
   long lnc=first_safe_arg(arg);
   long nbpointers=0;
   long nb=lg(arg)-1, lev=0;
-  entree *ep = getfunc(n);
   entree *ev[8];
   if (EpVALENCE(ep)==EpVAR)
     pari_err(talker2,"not a function in function call",
@@ -605,9 +604,13 @@ compilefunc(long n, int mode)
     avma=ltop;
     return;
   }
-  if (is_func_named(x,"if") && mode==Gvoid)
+  if (tree[n].f==Faffect)
+  {
+    nb=2; lnc=2; arg=mkvecsmall2(x,y);
+  }
+  else if (is_func_named(x,"if") && mode==Gvoid)
     ep=is_entry("_void_if");
-  if (is_func_named(x,"my"))
+  else if (is_func_named(x,"my"))
   {
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
@@ -635,7 +638,7 @@ compilefunc(long n, int mode)
     avma=ltop;
     return;
   }
-  if (is_func_named(x,"local"))
+  else if (is_func_named(x,"local"))
   {
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
@@ -662,7 +665,7 @@ compilefunc(long n, int mode)
     return;
   }
   /*We generate dummy code for global() for backward compatibility*/
-  if (is_func_named(x,"global"))
+  else if (is_func_named(x,"global"))
   {
     pari_warn(warner,"global(...) is deprecated");
     if (tree[n].f==Fderfunc)
@@ -689,7 +692,7 @@ compilefunc(long n, int mode)
     avma=ltop;
     return;
   }
-  if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
+  else if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
   {
     long a;
     if (nb!=1) pari_err(talker2,"wrong number of arguments",
@@ -713,13 +716,13 @@ compilefunc(long n, int mode)
     avma=ltop;
     return;
   }
-  if (x==OPtrans && tree[y].f==Fvec)
+  else if (x==OPtrans && tree[y].f==Fvec)
   {
     avma=ltop;
     compilevec(y, mode, OCcol);
     return;
   }
-  if (x==OPcat)
+  else if (x==OPcat)
     pari_err(talker2,"expected character: ',' or ')' instead of",
 	tree[arg[1]].str+tree[arg[1]].len, get_origin());
   p=ep->code;
@@ -1059,12 +1062,7 @@ compilenode(long n, int mode, long flag)
       }
     }
     else
-    {
-      struct node_loc l;
-      l.start=tree[n].str;
-      l.end=tree[n].str+tree[n].len;
-      compilefunc(newopcall(OPstore,x,y,&l),mode);
-    }
+      compilefunc(is_entry("_=_"),n,mode);
     break;
   case Fconst:
     {
@@ -1153,7 +1151,7 @@ compilenode(long n, int mode, long flag)
     }
   case Fderfunc: /*Fall through*/
   case Ffunction:
-    compilefunc(n, mode);
+    compilefunc(getfunc(n),n,mode);
     return;
   case Fdeffunc:
     {
