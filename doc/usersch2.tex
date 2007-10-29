@@ -1496,66 +1496,68 @@ vector; \kbd{histlast(10)} returns the last $10$ history entries:
 
 \section{Errors and error recovery}
 
-\subsec{Errors}. There are two kind of errors: syntax errors, and errors
-produced by functions in the PARI library. Both kinds are fatal to your
-computation: \kbd{gp} will report the error, perform some cleanup (restore
-variables modified while evaluating the erroneous command, close open files,
-reclaim unused memory, etc.), and will output its usual prompt.
+\subsec{Errors}. Your input program is first compiled to some more efficient
+bytecode, then the latter is evaluated, calling appropriate functions from
+the PARI library. Accordingly, there are two kind of errors: syntax errors
+occuring during the compilation phase, and runtime errors produced by
+functions in the PARI library. Both kinds are fatal to your computation:
+\kbd{gp} will report the error, perform some cleanup (restore variables
+modified while evaluating the erroneous command, close open files, reclaim
+unused memory, etc.), and output its usual prompt.
 
-When reporting a syntax error, \kbd{gp} tries to give meaningful context by copying
-the sentence it was trying to read (whitespace and comments stripped
-out), indicating an error with a little caret like in
+When reporting a \emph{syntax error}, \kbd{gp} tries to give meaningful
+context by copying the sentence it was trying to read (whitespace and
+comments stripped out), indicating an error with a little caret like in
 \bprog
 ? factor(x^2 - 1
-  ***   expected character: ',' instead of: factor(x^2-1
-                                                        ^
-@eprog
-\noindent possibly enlarged to a full arrow given enough trailing context
+  ***   syntax error, unexpected $end, expecting ',' or ')': factor(x^2-1
+                                                                        ^-
+@eprog\noindent
+possibly enlarged to a full arrow given enough trailing context
+\bprog
+? if (isprime(p+, do_something_nice())
+  ***   syntax error, unexpected ',': if(isprime(p+,do_something_nice()))
+                                                   ^--------------------
+@eprog\noindent
+Error messages may be mysterious, because \kbd{gp} cannot guess what
+you were trying to do, and the error usually occurs once \kbd{gp} has been
+sidetracked. Let us have a look at the two messages above.
+
+The first error is a missing parenthesis, but from \kbd{gp}'s point of view,
+you might as well have intended to give further arguments to \kbd{factor}
+(this is possible and useful, see the description of the function). In fact
+\kbd{gp} expected either a closing parenthesis, or a second argument
+separated from the first by a comma. And this is exactly what the error
+message says: we reached the end  of the input (\kbd{\$end}) while expecting
+a \kbd{')'} or a \kbd{','}.
+
+The second error is a simple typo: \kbd{isprime(p+} instead of
+\kbd{isprime(p)}. What triggered the error was not the missing parenthesis,
+but the ill-formed addition \kbd{p+} without a second operand. This is
+detected when we read the ensuing comma, and \kbd{gp} stops at this point.
+
+\emph{Runtime errors} are more annoying because they occur at a point where
+meaningful context no longer exists:
 \bprog
 ? if (siN(x) < eps, do_something())
-  ***   expected character: '=' instead of: if(siN(x)<eps,do_something())
-                                                     ^--------------------
-@eprog
-\noindent
-Error messages will often be mysterious, because \kbd{gp} cannot guess what
-you were trying to do and the error usually occurs once \kbd{gp} has been
-sidetracked. Let's have a look at the two messages above.
+  ***   function 'siN' not yet defined.
+@eprog\noindent (no arrow!) The code is syntactically correct and compiled
+correctly, even though the \kbd{siN} function, a typo for \kbd{sin}, is not
+defined at this point. When trying to evaluate the bytecode, however, it
+turned out that \kbd{siN} was still undefined so we cannot evaluate the
+function call \kbd{siN(x)}. The original input lines are long lost at this
+point, however, so we cannot give any meaningful context.
 
-The first error is a missing parenthesis, but from \kbd{gp}'s point of view, you
-might as well have intended to give further arguments to \kbd{factor} (this is
-possible, and often useful, see the description of the function). Since
-\kbd{gp}
-did not see the closing parenthesis, it tried to read a second argument,
-first looking for the comma that would separate it form the first. The error
-occurred at this point. So \kbd{gp} tells you that it was expecting a comma and saw
-a blank.
-
-The second error is even weirder. It is a simple typo, \kbd{siN} instead of
-\kbd{sin} and \kbd{gp} tells us that is was expecting an equal sign a few
-characters later? What happens is this: \kbd{siN} is not a recognized
-identifier, but from the context, it looks like a function (it is followed by
-an open parenthesis), then we have an argument, then a closing parenthesis.
-Then if \kbd{siN} were a known function we would evaluate it; but it is not,
-so \kbd{gp} assumes that you were trying to \emph{define} it, as in
-\bprog
-? if (siN(x)=sin(x), ...)
-@eprog
-This is actually allowed (!) and defines the function \kbd{siN} as an alias for
-\kbd{sin}. As any expression a function definition has a value, which is $0$,
-hence the test is meaningful, and false, so nothing happens. (Admittedly this
-doesn't look like a useful syntax but it can be interesting in other contexts
-to let functions define other functions. Anyway, it is allowed by the
-language definition.)  So \kbd{gp} tells you in good faith that to correctly define
-a function, you need an equal sign between its name and its body.
-
-Error messages from the library will usually be clearer since, by
-definition, they answer a correctly worded query (otherwise \kbd{gp} would have
-protested first). Also they have more mathematical content, which should be
-easier to grasp than a parser's logic. For instance:
+Runtime errors from the library will usually be clearer since, by
+definition, they answer a correctly worded query where all terms have a
+proper definition (otherwise \kbd{gp} would have protested first). Also they
+have more mathematical content, which should be easier to grasp than a
+parser's logic. For instance:
 \bprog
 ? 1/0
-  ***   division by zero
-@eprog
+  *** _/_: division by zero
+@eprog\noindent telling us that a runtime error occured while evaluating the
+binary \kbd{/} operator (the \kbd{\_} are placeholders).
 
 \subsec{Error recovery}.\sidx{error recovery}\label{se:errorrec}
 
