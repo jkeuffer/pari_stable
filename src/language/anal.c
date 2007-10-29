@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * this, and arg is not-negated. */
 
 enum { A_ACTION_ASSIGN, A_ACTION_SET, A_ACTION_UNSET };
-#define IS_ID(c)	(isalnum((int)c) || ((c) == '_') || ((c) == '-'))
+#define IS_ID(c)        (isalnum((int)c) || ((c) == '_') || ((c) == '-'))
 
 long
 eval_mnemonic(GEN str, const char *tmplate)
@@ -64,8 +64,8 @@ eval_mnemonic(GEN str, const char *tmplate)
   {
     long numarg;
     const char *e, *id;
-    const char *negated;		/* action found with 'no'-ID */
-    int negate;			/* Arg has 'no' prefix removed */
+    const char *negated;                /* action found with 'no'-ID */
+    int negate;                 /* Arg has 'no' prefix removed */
     ulong l, action = 0, first = 1, singleton = 0;
     char *buf, *inibuf;
     static char b[80];
@@ -79,7 +79,7 @@ eval_mnemonic(GEN str, const char *tmplate)
     l = e - arg;
     if (l >= sizeof(b))
       pari_err(talker,"id too long in a stringified flag");
-    if (!l)				/* Garbage after whitespace? */
+    if (!l)                             /* Garbage after whitespace? */
       pari_err(talker,"a stringified flag does not start with an id");
     strncpy(b, arg, l);
     b[l] = 0;
@@ -95,8 +95,8 @@ find:
     id = tmplate;
     while ((id = strstr(id, buf)) && id < etmplate)
     {
-      if (IS_ID(id[l])) {	/* We do not allow abbreviations yet */
-        id += l;		/* False positive */
+      if (IS_ID(id[l])) {       /* We do not allow abbreviations yet */
+        id += l;                /* False positive */
         continue;
       }
       if ((id >= tmplate + 2) && (IS_ID(id[-1])))
@@ -107,16 +107,16 @@ find:
             && ((id[-1] == '_') || (id[-1] == '-')) )
           s--;
         /* Check whether we are preceeded by "no" */
-        if ( negate		/* buf initially started with "no" */
+        if ( negate             /* buf initially started with "no" */
             || (s < tmplate+2) || (s[-1] != 'o') || (s[-2] != 'n')
             || (s >= tmplate+3 && IS_ID(s[-3]))) {
-          id += l;		/* False positive */
+          id += l;              /* False positive */
           continue;
         }
         /* Found noID in the template! */
         id += l;
         negated = id;
-        continue;		/* Try to find without 'no'. */
+        continue;               /* Try to find without 'no'. */
       }
       /* Found as is */
       id += l;
@@ -131,9 +131,9 @@ find:
       if (buf[0])
         goto find;
     }
-    if (!id && negated)	/* Negated and AS_IS forms, prefer AS_IS */
+    if (!id && negated) /* Negated and AS_IS forms, prefer AS_IS */
     {
-      id = negated;	/* Otherwise, use negated form */
+      id = negated;     /* Otherwise, use negated form */
       negate = 1;
     }
     if (!id)
@@ -174,7 +174,7 @@ find:
       e++;
     if (*e && (*e != ';') && (*e != ','))
       pari_err(talker, "Non-numeric argument of an action in a template");
-    numarg = atol(id);		/* Now it is safe to get it... */
+    numarg = atol(id);          /* Now it is safe to get it... */
     switch (action) {
     case A_ACTION_SET:
       retval |= numarg;
@@ -261,10 +261,10 @@ check_proto(const char *code)
       break;
     case 'D':
       if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'E'
-		    || *s == 'V')
+                    || *s == 'V')
       {
-	if (*s != 'V') arity++;
-	s++; break;
+        if (*s != 'V') arity++;
+        s++; break;
       }
       old = s; while (*s != ',') s++;
       if (*s != ',') pari_err(talker2, "missing comma", old, code);
@@ -397,7 +397,7 @@ ulong
 u_pow10(int n)
 {
   const ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
-			1000000UL, 10000000UL, 100000000UL, 1000000000UL };
+                        1000000UL, 10000000UL, 100000000UL, 1000000000UL };
   return pw10[n];
 }
 
@@ -448,19 +448,19 @@ real_read(pari_sp av, const char **s, GEN y, long PREC)
       const char *old = ++*s;
       if (isalpha((int)**s))
       {
-	if (**s == 'E' || **s == 'e') {
-	  n = exponent(s);
-	  if (!signe(y)) { avma = av; return real_0_digits(n); }
-	  break;
-	}
-	--*s; return y; /* member */
+        if (**s == 'E' || **s == 'e') {
+          n = exponent(s);
+          if (!signe(y)) { avma = av; return real_0_digits(n); }
+          break;
+        }
+        --*s; return y; /* member */
       }
       y = int_read_more(y, s);
       n = old - *s;
       if (**s != 'E' && **s != 'e')
       {
-	if (!signe(y)) { avma = av; return real_0(PREC); }
-	break;
+        if (!signe(y)) { avma = av; return real_0(PREC); }
+        break;
       }
     }
     /* Fall through */
@@ -542,8 +542,8 @@ skipconstante(char **lex)
       skipexponent(lex);
       if (*lex == old)
       {
-	--*lex; /* member */
-	return KINTEGER;
+        --*lex; /* member */
+        return KINTEGER;
       }
       return KREAL;
     }
@@ -846,8 +846,8 @@ manage_var(long n, entree *ep)
       case manage_var_pop: return pari_var_pop((long)ep);
       case manage_var_delete: return delete_var();
       case manage_var_create:
-	pari_var_create(ep);
-	return varn(initial_value(ep));
+        pari_var_create(ep);
+        return varn(initial_value(ep));
   }
   pari_err(talker, "panic");
   return -1; /* not reached */
@@ -1130,8 +1130,8 @@ print_all_user_fun(void)
     for (ep = functions_hash[i]; ep; ep = ep->next)
       if (EpVALENCE(ep) == EpUSER)
       {
-	pariputc('{'); pariputs(ep->code);
-	pariputc('}'); pariputs("\n\n");
+        pariputc('{'); pariputs(ep->code);
+        pariputc('}'); pariputs("\n\n");
       }
 }
 

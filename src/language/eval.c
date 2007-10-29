@@ -123,7 +123,7 @@ typedef struct var_cell {
   GEN value; /* last value (not including current one, in ep->value) */
   char flag; /* status of _current_ ep->value: PUSH or COPY ? */
   long valence; /* valence of entree* associated to 'value', to be restored
-		    * by pop_val */
+                    * by pop_val */
 } var_cell;
 #define INITIAL NULL
 
@@ -140,7 +140,7 @@ new_val_cell(entree *ep, GEN x, char flag)
   /* beware: f(p) = Nv = 0
    *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
   ep->value = (flag == COPY_VAL)? gclone(x):
-				  (x && isclone(x))? gcopy(x): x;
+                                  (x && isclone(x))? gcopy(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
   ep->pvalue= (char*)v;
   ep->valence=EpVAR;
@@ -250,11 +250,11 @@ var_make_safe(void)
     for (ep = functions_hash[n]; ep; ep = ep->next)
       if (EpVALENCE(ep) == EpVAR)
       { /* make sure ep->value is a COPY */
-	var_cell *v = (var_cell*)ep->pvalue;
-	if (v && v->flag == PUSH_VAL) {
-	  GEN x = (GEN)ep->value;
-	  if (x) changevalue(ep, (GEN)ep->value); else pop_val(ep);
-	}
+        var_cell *v = (var_cell*)ep->pvalue;
+        if (v && v->flag == PUSH_VAL) {
+          GEN x = (GEN)ep->value;
+          if (x) changevalue(ep, (GEN)ep->value); else pop_val(ep);
+        }
       }
 }
 
@@ -374,7 +374,7 @@ copylex(long vn, GEN x)
   struct var_lex *v=var+s_var.n+vn;
   v->flag  = typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL;
   v->value = (v->flag == COPY_VAL)? gclone(x):
-				  (isclone(x))? gcopy(x): x;
+                                  (isclone(x))? gcopy(x): x;
 }
 
 INLINE void
@@ -1190,17 +1190,17 @@ closure_disassemble(GEN C)
     {
     case OCpushlong:
       if (operand==(long)gnil)
-	pariprintf("pushlong\tgnil\n");
+        pariprintf("pushlong\tgnil\n");
       else if (operand==(long)gen_m1)
-	pariprintf("pushlong\tgen_m1\n");
+        pariprintf("pushlong\tgen_m1\n");
       else if (operand==(long)gen_0)
-	pariprintf("pushlong\tgen_0\n");
+        pariprintf("pushlong\tgen_0\n");
       else if (operand==(long)gen_1)
-	pariprintf("pushlong\tgen_1\n");
+        pariprintf("pushlong\tgen_1\n");
       else if (operand==(long)gen_2)
-	pariprintf("pushlong\tgen_2\n");
+        pariprintf("pushlong\tgen_2\n");
       else
-	pariprintf("pushlong\t%ld\n",operand);
+        pariprintf("pushlong\t%ld\n",operand);
       break;
     case OCpushgen:
       pariprintf("pushgen\t\t%ld\n",operand);
