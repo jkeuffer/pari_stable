@@ -498,7 +498,7 @@ FF_sqrt(GEN x)
 }
 
 long
-FFissquareall(GEN x, GEN *pt)
+FF_issquareall(GEN x, GEN *pt)
 {
   ulong pp;
   GEN r, T, p; 
