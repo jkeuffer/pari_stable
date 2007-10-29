@@ -134,7 +134,7 @@ newconst(long x, struct node_loc *loc)
   return newnode(Fconst,x,-1,loc);
 }
 
-long
+static long
 newopcall(OPerator op, long x, long y, struct node_loc *loc)
 {
   if (y==-1)

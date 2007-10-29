@@ -45,7 +45,4 @@ typedef enum {OPor, OPand, OPeq, OPne, OPge, OPg, OPle, OPl, OPs, OPp, OPsl, OPs
 
 extern THREAD node *pari_tree;
 
-/*FIXME: newopcall should be static, but used by compile.c for Faffect*/
-long newopcall(OPerator op, long x, long y, struct node_loc *loc);
-
 ENDEXTERN
