@@ -512,14 +512,45 @@ FF_issquareall(GEN x, GEN *pt)
      if (!r) { avma = av; return 0; }
      break;
 
-   case t_FF_Flxq:
+   case t_FF_F2xq:
+     if (pt) { avma = av; *pt = FF_sqrt(x); }
+     return 1;
+
+   default: /* case t_FF_Flxq: */
      r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
      if (!r) { avma = av; return 0; }
      break;
+  }
+  if (pt) { _mkFF(x,*pt,r); }
+  return 1;
+}
 
-   default: /* case t_FF_F2xq: */
-     if (pt) { avma = av; *pt = FF_sqrt(x); }
-     return 1;
+long
+FF_ispower(GEN x, GEN K, GEN *pt)
+{
+  ulong pp;
+  GEN r, T, p; 
+  pari_sp av = avma;
+  if (!K) pari_err(talker,"missing exponent in FF_ispower");
+  _getFF(x, &T, &p, &pp);
+  if (pt) *pt = cgetg(5,t_FFELT);
+  switch(x[1])
+  {
+   case t_FF_FpXQ:
+     r = FpXQ_sqrtn(gel(x,2),K,T,p,NULL);
+     if (!r) { avma = av; return 0; }
+     break;
+
+   case t_FF_F2xq:
+     r=Flxq_sqrtn(F2x_to_Flx(gel(x,2)),K,F2x_to_Flx(T),pp,NULL);
+     if (!r) { avma = av; return 0; }
+     if (pt) r = gerepileuptoleaf(*pt, Flx_to_F2x(r)); 
+     break;
+
+   default: /* case t_FF_Flxq: */
+     r=Flxq_sqrtn(gel(x,2),K,T,pp,NULL);
+     if (!r) { avma = av; return 0; }
+     break;
   }
   if (pt) { _mkFF(x,*pt,r); }
   return 1;

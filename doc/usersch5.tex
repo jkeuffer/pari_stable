@@ -4311,6 +4311,10 @@ it exist, where \kbd{a} is a \typ{FFELT}.
 square, and $0$ otherwise. If \kbd{x} is indeed a square, set \kbd{pt} to its
 square root.
 
+\fun{long}{FF_ispower}{GEN x, GEN K, GEN *pt} Given $K$ a positive integer,
+returns $1$ if \kbd{x} is a $K$-th power, and $0$ otherwise. If \kbd{x} is
+indeed a $K$-th power, set \kbd{pt} to its $K$-th root.
+
 \fun{GEN}{FF_sqrtn}{GEN a, GEN n, GEN *zetan} returns an \kbd{n}-th root of
 $\kbd{a}$ if it exist. If \kbd{zn} is non-\kbd{NULL} set it to a primitive
 \kbd{n}-th root of the unity.

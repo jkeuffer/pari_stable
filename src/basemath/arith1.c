@@ -780,6 +780,9 @@ ispower(GEN x, GEN K, GEN *pt)
       if (pt) *pt = gerepileupto(av, chinese1(L));
       return 1;
     }
+    case t_FFELT: 
+      return FF_ispower(x, K, pt);
+
     case t_PADIC:
       z = padic_sqrtn(x, K, NULL);
       if (!z) return 0;
