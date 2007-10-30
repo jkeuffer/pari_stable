@@ -35,7 +35,8 @@ enum {
   t_MAT    =  19,
   t_LIST   =  20,
   t_STR    =  21,
-  t_VECSMALL= 22
+  t_VECSMALL= 22,
+  t_CLOSURE = 23
 };
 #define is_const_t(t) ((t) < t_POLMOD)
 #define is_extscalar_t(t) ((t) <= t_POL)

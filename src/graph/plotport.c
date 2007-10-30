@@ -108,7 +108,7 @@ todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
 
 static GEN
 READ_EXPR(GEN code, GEN x) {
-  if (typ(code)==t_POL || typ(code[1])==t_POL) return gsubst(code,0,x);
+  if (typ(code)!=t_CLOSURE) return gsubst(code,0,x);
   set_lex(-1, x); return closure_evalgen(code);
 }
 

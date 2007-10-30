@@ -67,7 +67,7 @@ Vecsmall([-1972095278, 1417909247, -213878183, 815482895, -989924416, -28085
 99837, -1039970767, 60357790, 272658424, 1813518504, -405967781, 74175307, -
 102997450, -281974336, -254214701, 127, 702552219])
 ? getstack
-40
+48
 ? if(3<2,print("bof"),print("ok"));
 ok
 ? kill(y);print(x+y);
@@ -78,6 +78,7 @@ x + y
 ? f=12
 12
 ? g(u)=if(u,,return(17));u+2
+(u)->if(u,,return(17));u+2
 ? g(2)
 4
 ? g(0)
@@ -134,7 +135,7 @@ og(p)/log(q))));
 3
 ? kill(addii)
 ? getheap
-[23, 3164]
+[25, 3262]
 ? print("Total time spent: ",gettime);
-Total time spent: 36
+Total time spent: 24
 ? \q

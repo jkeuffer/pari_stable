@@ -27,7 +27,7 @@ typedef enum {OCpushlong='A',OCpushgen,OCpushreal,OCpushstoi,OCpushvar,
               OCcompo1ptr,OCcompo2ptr,OCcompoCptr,OCcompoLptr,
               OCcalllong,OCcallgen,OCcallgen2,OCcallint,OCcallvoid,OCcalluser,
               OCderivgen,OCderivuser,
-              OCdeffunc,OCnewframe,
+              OCnewframe,OCsaveframe,
               OCpushdyn,OCstoredyn,OCnewptrdyn,OCsimpleptrdyn,
               OCpushlex,OCstorelex,OCnewptrlex,OCsimpleptrlex,
               OCgetarg,OCdefaultarg,OClocalvar,OClocalvar0} op_code;

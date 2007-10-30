@@ -171,10 +171,6 @@ freeep(entree *ep)
   if (ep->code) {gpfree((void*)ep->code); ep->code=NULL;}
   switch(EpVALENCE(ep))
   {
-    case EpUSER:
-      while (ep->pvalue!=INITIAL) pop_val(ep);
-      gunclone((GEN)ep->value); ep->value=NULL;
-      break;
     case EpVAR:
       while (ep->pvalue!=INITIAL) pop_val(ep);
       break;
@@ -445,15 +441,16 @@ static GEN
 derivuserwrap(GEN x, void* E)
 {
   pari_sp ltop;
-  entree *ep=(entree*)E;
+  GEN fun=(GEN)E;
   GEN z;
+  long arity=fun[1];
   long j;
   gel(st,sp)=x;
-  for (j=1;j<ep->arity;j++)
-    gel(st,sp+j)=gel(st,sp+j-ep->arity);
-  sp+=ep->arity;
+  for (j=1;j<arity;j++)
+    gel(st,sp+j)=gel(st,sp+j-arity);
+  sp+=arity;
   ltop=avma;
-  closure_eval((GEN) ep->value);
+  closure_eval(fun);
   if (br_status)
   {
     if (br_status!=br_RETURN)
@@ -518,12 +515,26 @@ closure_castlong(long z, long mode)
 static void
 closure_eval(GEN C)
 {
-  char *code=GSTR(gel(C,1))-1;
-  GEN oper=gel(C,2);
-  GEN data=gel(C,3);
+  char *code=GSTR(gel(C,2))-1;
+  GEN oper=gel(C,3);
+  GEN data=gel(C,4);
   long saved_sp=sp;
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
+  if (lg(C)==7)
+  {
+    GEN z=gel(C,6);
+    long l=lg(z)-1;
+    stack_alloc(&s_var,l);
+    s_var.n+=l;
+    nbmvar+=l;
+    for(j=1;j<=l;j++)
+    {
+      var[s_var.n-j].flag=PUSH_VAL;
+      var[s_var.n-j].value=gel(z,j);
+    }
+  }
+
   for(pc=1;pc<lg(oper);pc++)
   {
     op_code opcode=(op_code) code[pc];
@@ -565,8 +576,7 @@ closure_eval(GEN C)
           gel(st,sp++)=(GEN)ep->value;
           break;
         default:
-          gel(st,sp++)=0;
-          goto calluser; /*Maybe it is a function*/
+          pari_err(talker,"no such variable `%s'",ep->name);
         }
         break;
     case OCpushlex:
@@ -978,68 +988,67 @@ closure_eval(GEN C)
     case OCderivuser:
         {
           GEN z;
-          long n=st[--sp];
-          ep = (entree*) operand;
-          if (ep->valence!=EpUSER)
-          {
-            if (ep->valence==EpNEW)
-              pari_err(talker,"function '%s' not yet defined",ep->name);
-            else
-              pari_err(talker,"not a function in function call: %s",ep->name);
-          }
-          if (n>ep->arity)
-            pari_err(talker,"Too many arguments for function '%s'",ep->name);
-          for (j=n+1;j<=ep->arity;j++)
+          long n=operand;
+          long arity;
+          GEN fun = gel(st,sp-1-n);
+          if (typ(fun)!=t_CLOSURE)
+             pari_err(talker,"not a function in function call");
+          arity=fun[1];
+          if (n>arity)
+            pari_err(talker,"too many parameters in user-defined function call");
+          for (j=n+1;j<=arity;j++)
             gel(st,sp++)=0;
-          z = derivnum((void*)ep, derivuserwrap, gel(st,sp-ep->arity), precreal);
-          sp-=ep->arity;
+          z = derivnum((void*)fun, derivuserwrap, gel(st,sp-arity), precreal);
+          sp-=arity;
+          sp--;
           gel(st, sp++) = z;
           break;
         }
     case OCcalluser:
-calluser:
         {
           pari_sp ltop;
-          long n=st[--sp];
-          entree *ep = (entree*) operand;
+          long n=operand;
+          GEN fun = gel(st,sp-1-n);
+          long arity;
           GEN z;
-          if (ep->valence!=EpUSER)
+          if (typ(fun)!=t_CLOSURE)
           {
-            int w;
-            if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
-              pari_err(obsoler, ep->name, w);
-            else
+            if (typ(fun) == t_POL && lg(fun) == 4
+                && gel(fun,2)==gen_0 && gel(fun,3)==gen_1)
             {
-              if (ep->valence==EpNEW)
-                pari_err(talker,"function '%s' not yet defined",ep->name);
-              else
-                pari_err(talker,"not a function in function call: %s",ep->name);
+              int w;
+              ep = varentries[varn(fun)];
+              if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
+                pari_err(obsoler, ep->name, w);
             }
+            pari_err(talker,"not a function in function call");
           }
-          if (n>ep->arity)
-            pari_err(talker,"Too many arguments for function '%s'",ep->name);
-          for (j=n+1;j<=ep->arity;j++)
+          arity=fun[1];
+          if (n>arity)
+            pari_err(talker,"too many parameters in user-defined function call");
+          for (j=n+1;j<=arity;j++)
             gel(st,sp++)=0;
 #ifdef STACK_CHECK
           if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
             pari_err(talker, "deep recursion");
 #endif
           ltop=avma;
-          closure_eval((GEN) ep->value);
+          closure_eval(fun);
           if (br_status)
           {
             if (br_status!=br_RETURN)
               pari_err(talker, "break/next/allocatemem not allowed here");
             avma=ltop;
-            sp-=ep->arity;
+            sp-=arity;
             z = br_res ? gcopy(br_res) : gnil;
             reset_break();
           }
-          else
-            z = gerepileupto(ltop, gel(st,--sp));
-          gel(st, sp++) = z;
-          break;
-        }
+         else
+           z = gerepileupto(ltop, gel(st,--sp));
+         sp--;
+         gel(st, sp++) = z;
+         break;
+       }
     case OCnewframe:
         stack_alloc(&s_var,operand);
         s_var.n+=operand;
@@ -1050,6 +1059,19 @@ calluser:
           var[s_var.n-j].value=gen_0;
         }
         break;
+    case OCsaveframe:
+       {
+         GEN cl=gcopy(gel(st,sp-1));
+         if (lg(cl)==7)
+         {
+           GEN v=gel(cl,6);
+           long l=lg(v)-1;
+           for(j=1;j<=l;j++)
+             gel(v,j)=gcopy(var[s_var.n-j].value);
+         }
+         gel(st,sp-1) = cl;
+       }
+       break;
     case OCvec:
         gel(st,sp++)=cgetg(operand,t_VEC);
         break;
@@ -1065,27 +1087,6 @@ calluser:
             gel(z,j) = cgetg(l,t_COL);
           gel(st,sp-1) = z;
         }
-        break;
-    case OCdeffunc:
-        ep=(entree*)operand;
-        switch(ep->valence)
-        {
-        case EpUSER:
-          gpfree((void*)ep->code);
-          /*FIXME: the function might be in use...
-            gunclone(ep->value);
-          */
-          break;
-        case EpNEW:
-          ep->valence = EpUSER;
-          break;
-        default:
-          pari_err(talker,"function name expected");
-        }
-        ep->value = (void *) gclone(gel(st,sp-3));
-        ep->code  = pari_strdup(GSTR(gel(st,sp-2)));
-        ep->arity = st[sp-1];
-        sp-=3;
         break;
     case OCpop:
         sp-=operand;
@@ -1169,17 +1170,10 @@ closure_disassemble(GEN C)
   char * code;
   GEN oper;
   long i;
-  if (typ(C)==t_STR)
-  {
-    entree *ep=fetch_entry(GSTR(C),strlen(GSTR(C)));
-    if (ep->valence!=EpUSER)
-      pari_err(typeer,"disassemble");
-    C=(GEN)ep->value;
-  }
-  if (typ(C)!=t_VEC || lg(C)!=4 || typ(C[1])!=t_STR || typ(C[2])!=t_VECSMALL)
+  if (typ(C)!=t_CLOSURE)
     pari_err(typeer,"disassemble");
-  code=GSTR(gel(C,1))-1;
-  oper=gel(C,2);
+  code=GSTR(gel(C,2))-1;
+  oper=gel(C,3);
   for(i=1;i<lg(oper);i++)
   {
     op_code opcode=(op_code) code[i];
@@ -1340,12 +1334,10 @@ closure_disassemble(GEN C)
       pariprintf("callvoid\t%s\n",ep->name);
       break;
     case OCderivuser:
-      ep=(entree*)operand;
-      pariprintf("derivuser\t\t%s\n",ep->name);
+      pariprintf("derivuser\t%ld\n",operand);
       break;
     case OCcalluser:
-      ep=(entree*)operand;
-      pariprintf("calluser\t%s\n",ep->name);
+      pariprintf("calluser\t%ld\n",operand);
       break;
     case OCvec:
       pariprintf("vec\t\t%ld\n",operand);
@@ -1356,12 +1348,11 @@ closure_disassemble(GEN C)
     case OCmat:
       pariprintf("mat\t\t%ld\n",operand);
       break;
-    case OCdeffunc:
-      ep=(entree*)operand;
-      pariprintf("deffunc\t\t%s\n",ep->name);
-      break;
     case OCnewframe:
       pariprintf("newframe\t%ld\n",operand);
+      break;
+    case OCsaveframe:
+      pariprintf("saveframe\n");
       break;
     case OCpop:
       pariprintf("pop\t\t%ld\n",operand);

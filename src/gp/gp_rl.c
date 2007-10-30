@@ -288,7 +288,7 @@ add_paren(int end)
   if (end < 0 || rl_line_buffer[end] == '(')
     return 0; /* not from command_generator or already there */
   ep = do_alias(current_ep); /* current_ep set in command_generator */
-  if (EpVALENCE(ep) < EpUSER)
+  if (EpVALENCE(ep) < EpNEW)
   { /* is it a constant masked as a function (e.g Pi)? */
     s = ep->help; if (!s) return 1;
     while (is_keyword_char(*s)) s++;
@@ -296,7 +296,6 @@ add_paren(int end)
   }
   switch(EpVALENCE(ep))
   {
-    case EpUSER:
     case EpINSTALL: return 1;
   }
   return 0;

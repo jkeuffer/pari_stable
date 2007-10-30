@@ -113,34 +113,43 @@ compiler_reset(void)
 }
 
 static GEN
-getclosure(struct codepos *pos)
+getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
-  GEN cl=cgetg(4,t_VEC);
+  GEN cl=cgetg(nbmvar?7:6,t_CLOSURE);
   char *s;
   long i;
-  gel(cl,1) = cgetg(nchar2nlong(lop)+1, t_STR);
-  gel(cl,2) = cgetg(lop,  t_VECSMALL);
-  gel(cl,3) = cgetg(ldat, t_VEC);
-  s=GSTR(gel(cl,1))-1;
+  cl[1] = arity;
+  gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
+  gel(cl,3) = cgetg(lop,  t_VECSMALL);
+  gel(cl,4) = cgetg(ldat, t_VEC);
+  gel(cl,5) = text;
+  if (nbmvar) gel(cl,6) = zerovec(nbmvar);
+  s=GSTR(gel(cl,2))-1;
   for(i=1;i<lop;i++)
   {
     s[i] = opcode[i+pos->opcode-1];
-    mael(cl, 2, i) = operand[i+pos->opcode-1];
+    mael(cl, 3, i) = operand[i+pos->opcode-1];
   }
   s[i]=0;
   s_opcode.n=pos->opcode;
   s_operand.n=pos->opcode;
   for(i=1;i<ldat;i++)
   {
-    gmael(cl, 3, i) = gcopy(data[i+pos->data-1]);
+    gmael(cl, 4, i) = gcopy(data[i+pos->data-1]);
     gunclone(data[i+pos->data-1]);
   }
   s_data.n=pos->data;
   s_lvar.n=pos->localvars;
   offset=pos->offset;
   return cl;
+}
+
+static GEN
+getclosure(struct codepos *pos)
+{
+  return getfunction(pos,0,0,gen_0);
 }
 
 static void
@@ -318,6 +327,17 @@ getmvar(entree *ep)
       return localvars[i].type==Lmy?vn:0;
   }
   return 0;
+}
+
+static long
+numbmvar(void)
+{
+  long i;
+  long n=0;
+  for(i=s_lvar.n-1;i>=0;i--)
+    if(localvars[i].type==Lmy)
+      n++;
+  return n;
 }
 
 static entree *
@@ -565,6 +585,36 @@ cattovec(long n, long fnum)
   return stack;
 }
 
+static void
+compilecall(long n, op_code op, int mode)
+{
+  pari_sp ltop=avma;
+  long j;
+  long y=tree[n].y;
+  GEN arg=listtogen(y,Flistarg);
+  long nb=lg(arg)-1;
+  for (j=1;j<=nb;j++)
+    if (tree[arg[j]].f!=Fnoarg)
+      compilenode(arg[j], Ggen,0);
+    else
+      op_push(OCpushlong,0);
+  op_push(op, nb);
+  compilecast(n,Ggen,mode);
+  avma=ltop;
+  return;
+}
+
+static void
+compileuserfunc(entree *ep, long n, int mode)
+{
+  long vn=getmvar(ep);
+  if (vn)
+    op_push(OCpushlex,vn);
+  else
+    op_push(OCpushdyn,(long)ep);
+  compilecall(n, tree[n].f==Fderfunc ? OCderivuser:OCcalluser, mode);
+}
+
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
@@ -585,25 +635,6 @@ compilefunc(entree *ep, long n, int mode)
   long nbpointers=0;
   long nb=lg(arg)-1, lev=0;
   entree *ev[8];
-  if (EpVALENCE(ep)==EpVAR)
-    pari_err(talker2,"not a function in function call",
-        tree[n].str, get_origin());
-  if (EpVALENCE(ep)==EpUSER|| EpVALENCE(ep)==EpNEW)
-  {
-    for (j=1;j<=nb;j++)
-      if (tree[arg[j]].f!=Fnoarg)
-        compilenode(arg[j], Ggen,0);
-      else
-        op_push(OCpushlong,0);
-    op_push(OCpushlong, nb);
-    if (tree[n].f==Fderfunc)
-      op_push(OCderivuser, (long) ep);
-    else
-      op_push(OCcalluser, (long) ep);
-    compilecast(n,Ggen,mode);
-    avma=ltop;
-    return;
-  }
   if (tree[n].f==Faffect)
   {
     nb=2; lnc=2; arg=mkvecsmall2(x,y);
@@ -1151,28 +1182,31 @@ compilenode(long n, int mode, long flag)
     }
   case Fderfunc: /*Fall through*/
   case Ffunction:
-    compilefunc(getfunc(n),n,mode);
+    {
+      entree *ep=getfunc(n);
+      if (EpVALENCE(ep)==EpVAR || EpVALENCE(ep)==EpNEW)
+        compileuserfunc(ep,n,mode);
+      else
+        compilefunc(ep,n,mode);
+      return;
+    }
+  case Fcall:
+    compilenode(x,Ggen,0);
+    compilecall(n,OCcalluser,mode);
     return;
-  case Fdeffunc:
+  case Flambda:
     {
       pari_sp ltop=avma;
       struct codepos pos;
       long i;
-      GEN arg2=listtogen(tree[x].y,Flistarg);
-      entree *ep=getfunc(x);
+      GEN arg2=listtogen(x,Flistarg);
       long loc=y;
-      long arity=lg(arg2)-1;
+      long arity=lg(arg2)-1,nbmvar=numbmvar();
+      GEN text=cgetg(3,t_VEC);
+      gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
+      gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       if (loc>=0)
         while (tree[loc].f==Fseq) loc=tree[loc].x;
-      if (ep->valence!=EpNEW && ep->valence!=EpUSER)
-      {
-        if (ep->valence==EpVAR)
-          pari_err(talker2,"this is a variable",
-              tree[n].str,get_origin());
-        else
-          pari_err(talker2,"cannot redefine GP functions",
-              tree[n].str,get_origin());
-      }
       getcodepos(&pos);
       if (arity) op_push(OCnewframe,arity);
       for (i=1;i<=arity;i++)
@@ -1206,12 +1240,8 @@ compilenode(long n, int mode, long flag)
         compilenode(y,Ggen,FLreturn);
       else
         compilecast(n,Gvoid,Ggen);
-      op_push(OCpushgen, data_push(getclosure(&pos)));
-      op_push(OCpushgen, data_push(
-            strntoGENstr(tree[n].str,tree[n].len)));
-      op_push(OCpushlong, arity);
-      op_push(OCdeffunc, (long) ep);
-      compilecast(n,Gvoid,mode);
+      op_push(OCpushgen, data_push(getfunction(&pos,arity,nbmvar,text)));
+      if(nbmvar) op_push(OCsaveframe,0);
       avma=ltop;
       break;
     }

@@ -1198,7 +1198,7 @@ trap0(const char *e, GEN r, GEN f)
 /*                                                                 */
 /*******************************************************************/
 /* lontyp[tx] = 0 (non recursive type) or number of codewords for type tx */
-const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0 };
+const  long lontyp[] = { 0,0,0,1,1,2,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 0,0,0,2 };
 
 static GEN
 list_internal_copy(GEN z, long nmax)

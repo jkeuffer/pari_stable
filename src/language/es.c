@@ -1309,6 +1309,7 @@ type_name(long t)
     case t_LIST   : s="t_LIST";    break;
     case t_STR    : s="t_STR";     break;
     case t_VECSMALL:s="t_VECSMALL";break;
+    case t_CLOSURE: s="t_CLOSURE"; break;
     default: pari_err(talker,"unknown type %ld",t);
       s = NULL; /* not reached */
   }
@@ -1372,7 +1373,8 @@ dbg(GEN x, long nb, long bl)
   {
     pariprintf("(lmax=%ld):", list_nmax(x));
     x = list_data(x); lx = x? lg(x): 1;
-  }
+  } else if (tx == t_CLOSURE)
+    pariprintf("(arity=%ld):", x[1]);
   for (i=1; i<lx; i++) pariprintf(VOIR_STRING2,x[i]);
   bl+=2; pariputc('\n');
   switch(tx)
@@ -1430,6 +1432,17 @@ dbg(GEN x, long nb, long bl)
       {
 	blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
 	dbg(gel(x,i),nb,bl);
+      }
+      break;
+
+    case t_CLOSURE:
+      blancs(bl); pariputs("code = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pariputs("operand = "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pariputs("data = "); dbg(gel(x,4),nb,bl);
+      blancs(bl); pariputs("text = "); dbg(gel(x,5),nb,bl);
+      if (lg(x)==7)
+      {
+        blancs(bl); pariputs("frame = "); dbg(gel(x,6),nb,bl);
       }
       break;
 
@@ -2090,6 +2103,10 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
     case t_STR:
       quote_string(GSTR(g)); break;
 
+    case t_CLOSURE:
+      pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      break;
+
     case t_MAT:
     {
       void (*print)(GEN, pariout_t *, int);
@@ -2456,6 +2473,11 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs(GSTR(g)); break;
 #endif
     }
+
+    case t_CLOSURE:
+      pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      break;
+
     case t_MAT:
     {
       void (*print)(GEN, pariout_t *, int);

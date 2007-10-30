@@ -3152,6 +3152,9 @@ geval(GEN x)
     case t_RFRAC:
       av = avma;
       return gerepileupto(av, gdiv(geval(gel(x,1)), geval(gel(x,2))));
+    case t_CLOSURE:
+      if (x[1]) pari_err(impl,"eval on functions with parameters");
+      return closure_evalres(x);
   }
   pari_err(typeer,"geval");
   return NULL; /* not reached */
@@ -3167,7 +3170,7 @@ simplify_i(GEN x)
   {
     case t_INT: case t_REAL: case t_FRAC: case t_FFELT:
     case t_INTMOD: case t_PADIC: case t_QFR: case t_QFI:
-    case t_LIST: case t_STR: case t_VECSMALL:
+    case t_LIST: case t_STR: case t_VECSMALL: case t_CLOSURE:
       return x;
 
     case t_COMPLEX:

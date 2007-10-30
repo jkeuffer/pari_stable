@@ -390,6 +390,7 @@ gentypes(void)
   t_LIST   : list              [ code ] [ n ] [ nmax ][ vec ]\n\
   t_STR    : string            [ code ] [ man_1 ] ... [ man_k ]\n\
   t_VECSMALL: vec. small ints  [ code ] [ x_1 ] ... [ x_k ]\n\
+  t_CLOSURE: functions [ code ] [ arity ] [ code ] [ operand ] [ data ] [ text ]\n\
 \n");
 }
 
@@ -670,14 +671,16 @@ aide0(const char *s0, int flag)
 
   switch(EpVALENCE(ep))
   {
-    case EpUSER:
-      if (!ep->help || long_help) pariputs(ep->code);
-      if (!ep->help) return;
-      if (long_help) { pariputs("\n\n"); long_help=0; }
-      break;
-
     case EpVAR:
-      if (!ep->help) { aide_print(s, "user defined variable"); return; }
+      if (typ(ep->value)==t_CLOSURE)
+      {
+        GEN str=gel(ep->value,5);
+        if (!ep->help || long_help)
+          pariprintf("%s(%s)=%s",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
+        if (!ep->help) return;
+        if (long_help) { pariputs("\n\n"); long_help=0; }
+      }
+      else if (!ep->help) { aide_print(s, "user defined variable"); return; }
       long_help=0; break;
 
     case EpINSTALL:

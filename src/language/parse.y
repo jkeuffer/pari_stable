@@ -158,6 +158,14 @@ newintnode(struct node_loc *loc)
   return newconst(CSTint,loc);
 }
 
+static long
+newfunc(CSTtype t, struct node_loc *func, long args, long code,
+                   struct node_loc *loc)
+{
+  long name=newnode(Fentry,newconst(t,func),-1,func);
+  return newnode(Faffect,name,newnode(Flambda,args,code,loc),loc);
+}
+
 %}
 %name-prefix="pari_"
 %pure-parser
@@ -169,6 +177,7 @@ newintnode(struct node_loc *loc)
 %left KDER
 %left INT LVAL
 %left ';' ','
+%right KPARROW KARROW
 %right '=' KPE KSE KME KDE KDRE KEUCE KMODE KSRE KSLE
 %left '&' KAND '|' KOR
 %left KEQ KNE KGE '<' KLE '>'
@@ -181,6 +190,7 @@ newintnode(struct node_loc *loc)
 %left '!' '~' '[' '\''
 %left '.' MAT
 %token KPP KSS
+%left '('
 %left ':'
 %type <val> seq sequnused matrix matrix_index expr
 %type <val> lvalue
@@ -223,6 +233,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | KSTRING       {$$=newconst(CSTstr,&@$);}
     | '\'' KENTRY   {$$=newconst(CSTquote,&@$);}
     | history           {$$=$1;}
+    | expr '(' listarg ')'  {$$=newnode(Fcall,$1,$3,&@$);}
     | funcid            {$$=$1;}
     | funcder           {$$=$1;}
     | lvalue %prec LVAL	{$$=$1;}
@@ -274,7 +285,7 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | '(' expr ')' {$$=$2;}
 ;
 
-lvalue: KENTRY              {$$=newnode(Fentry,newconst(CSTentry,&@1),-1,&@$);}
+lvalue: KENTRY %prec LVAL   {$$=newnode(Fentry,newconst(CSTentry,&@1),-1,&@$);}
       | lvalue matrix_index {$$=newnode(Ffacteurmat,$1,$2,&@$);}
       | lvalue ':' KENTRY   {$$=newnode(Ftag,$1,newconst(CSTentry,&@2),&@$);}
 ;
@@ -313,8 +324,12 @@ memberid:
      expr '.' KENTRY {$$=newnode(Ffunction,newconst(CSTmember,&@3),$1,&@$);}
 ;
 
-definition: funcid   '=' seq %prec DEFFUNC {$$=newnode(Fdeffunc,$1,$3,&@$);}
-	  | memberid '=' seq %prec DEFFUNC {$$=newnode(Fdeffunc,$1,$3,&@$);}
+definition: KENTRY '(' listarg ')' '=' seq %prec DEFFUNC
+                                   {$$=newfunc(CSTentry,&@1,$3,$6,&@$);}
+          | expr '.' KENTRY '=' seq %prec DEFFUNC
+                                   {$$=newfunc(CSTmember,&@3,$1,$5,&@$);}
+          | lvalue KARROW seq              {$$=newnode(Flambda, $1,$3,&@$);}
+          | '(' listarg KPARROW seq        {$$=newnode(Flambda, $2,$4,&@$);}
 ;
 
 %%

@@ -639,6 +639,14 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     case '-':
       *lex+=2; yylloc->end = *lex; return KSE;
     }
+  if (**lex==')' && (*lex)[1]=='-' && (*lex)[2]=='>')
+  {
+    *lex+=3; yylloc->end = *lex; return KPARROW;
+  }
+  if (**lex=='-' && (*lex)[1]=='>')
+  {
+    *lex+=2; yylloc->end = *lex; return KARROW;
+  }
   if (**lex=='<' && (*lex)[1]=='>')
   {
     *lex+=2; yylloc->end = *lex; return KNE;
@@ -1128,9 +1136,11 @@ print_all_user_fun(void)
   int i;
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpUSER)
+      if (EpVALENCE(ep) == EpVAR && typ(ep->value)==t_CLOSURE)
       {
-        pariputc('{'); pariputs(ep->code);
+        GEN str=gel(ep->value,5);
+        pariputc('{');
+        pariprintf("%s(%s)=%s\n",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
         pariputc('}'); pariputs("\n\n");
       }
 }

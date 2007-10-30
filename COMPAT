@@ -38,6 +38,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     essentially useless is now a no-op, scheduled for removal.
   - PariEmacs is now distributed as a separate package, and is no longer
     included in the PARI distribution
+  - distinction between user functions and user variables has been removed.
+    As a consequence, calling a user function without parentheses no more
+    evaluate it.
 
 * Specific to the PARI library:
 ===============================
