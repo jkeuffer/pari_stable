@@ -5,16 +5,15 @@
 %
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU General Public License
-\chapter{Specific Use of the gp Calculator}
+\chapter{The gp Calculator}
 
 \section{Introduction}
 
 Originally, \tet{gp} was designed as a debugging device for the PARI system
-library, and not much thought had been given to making it user-friendly. The
-situation has changed, and \kbd{gp} is very useful as a stand-alone tool. The
-operations and functions available in PARI and \kbd{gp} are described in
-the next chapter. In the present one, we describe the specific use of the
-\kbd{gp} programmable calculator.
+library. Over the years, it has become a powerful user-friendly stand-alone
+calculator. The mathematical functions available in PARI and \kbd{gp} are
+described in the next chapter. In the present one, we describe the specific
+use of the \kbd{gp} programmable calculator.
 
 \emacs If you have GNU Emacs and use the PariEmacs package, you can work in a
 special Emacs shell, described in \secref{se:emacs}. Specific features of
@@ -33,15 +32,15 @@ startup. The ones starting with a minus sign are \emph{flags}, setting some
 internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults}
 below for a list and explanation of all defaults, there are many more than
 just those two. These defaults can be changed by adding parameters to the
-input line as above, or interactively during a \kbd{gp} session or in a
-preferences file (also known as \tet{gprc}).
+input line as above, or interactively during a \kbd{gp} session, or in a
+preferences file also known as \tet{gprc}.
 
-If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
-\secref{se:gprc}) can be found, \kbd{gp} then read its and execute the
-commands it contains. This provides an easy way to customize \kbd{gp}.
-The \var{files} argument is processed right after the \kbd{gprc}.
+If a \idx{preferences file} (to be discussed in \secref{se:gprc}) is
+found, \kbd{gp} then reads it and executes the commands it contains. This
+provides an easy way to customize \kbd{gp}. The \var{files} argument is
+processed right after the \kbd{gprc}.
 
-A copyright message then appears which includes the version number, and a lot
+A copyright banner then appears which includes the version number, and a lot
 of useful technical information. After the copyright, the computer writes the
 top-level help information, some initial defaults, and then waits after
 printing its prompt, which is '\kbd{?~}' by default . Whether extended
@@ -80,12 +79,11 @@ used to retrieve easily some information from complicated structures (you can
 define your own but they won't be shown here). We will soon describe these
 commands in more detail.
 
-As a general rule, under \kbd{gp}, commands starting with \b\ or with some
-other symbols like \kbd{?} or \kbd{\#}, are not computing commands, but are
-metacommands which allow you to exchange information with \kbd{gp}. The
-available metacommands can be divided into default setting commands
-(explained below) and simple commands (or keyboard shortcuts, to be dealt
-with in \secref{se:meta}).
+More generally, commands starting with the symbols \b\ or \kbd{?}, are not
+computing commands, but are metacommands which allow you to exchange
+information with \kbd{gp}. The available metacommands can be divided into
+default setting commands (explained below) and simple commands (or keyboard
+shortcuts, to be dealt with in \secref{se:meta}).
 
 \subsec{Input}
 
@@ -93,8 +91,9 @@ Just type in an instruction, e.g. \kbd{1 + 1}, or \kbd{Pi}. No action is
 undertaken until you hit the \kbd{<Return>} key. Then computation starts, and
 a result is eventually printed. To suppress printing of the result, end the
 expression with a \kbd{;} sign. Note that many systems use \kbd{;} to
-indicate end of input. Not so in \kbd{gp}: this will hide the result from you!
-(Which is certainly useful if it occupies several screens.)
+indicate end of input. Not so in \kbd{gp}: a final semi-column means the
+result should not be printed. (Which is certainly useful if it occupies
+several screens.)
 
 \subsec{Interrupt, Quit}
 
@@ -136,19 +135,41 @@ GP language and are simple shortcuts designed to alter gp's internal state
 (such as the working precision or general verbosity level), or speed up
 input/output. The evaluation proceeds itself in two phases: your input is
 first digested (byte-compiled) to a bytecode suitable for fast evaluation,
-in particular loop bodies are compiled only once but evaluated many times;
-then the bytecode is evaluated.
+in particular loop bodies are compiled only once but a priori evaluated many
+times; then the bytecode is evaluated.
 
 An \idx{expression}\sidx{expression sequence} is formed by combining
-constants, variables, operator symbols, functions (including user-defined
-functions) and control statements. It always has a value, which can be any
-PARI object. There is a distinction between lowercase and uppercase. Also,
+constants, variables, operator symbols, functions (in fact, variables can
+hold functions, so functions are just variables of an appropriate type) and
+control statements. An expression always has a value, which can be any PARI
+object:
+\bprog
+? 1 + 1
+%1 = 2          \\@com an ordinary integer
+? x
+%2 = x          \\@com a polynomial of degree 1 in the unknown \kbd{x}
+? print("Hello")
+Hello           \\@com \kbd{void} return value
+? f(x) = x^2
+%3 = (x)->x^2   \\@com a user function
+@eprog
+\noindent In the third example, \kbd{Hello} is printed as a side effect, but
+is not the return value. The \kbd{print} command is a \emph{procedure},
+which conceptually returns nothing. But in fact procedures return a special
+\kbd{void} object, meant to be ignored; in particular, it does not clutter
+the history (but evaluates to $0$ in a numeric context). The final example
+assigns to the variable \kbd{f} the function $x\mapsto x^2$, the alternative
+form \kbd{f = x->x\pow2} achieving the same effect; the return value of a
+function definition is, unsurprisingly, a function. 
+
+
+There is a distinction between lowercase and uppercase. Also,
 outside of character strings, blanks are completely ignored in the input to
 \kbd{gp}. An expression is evaluated using the conventions about operator
 priorities and left to right associativity.
 
 Several expressions are combined on a single line by separating them with
-semicolons ('\kbd{;}'). Such an expression sequence will be called simply a
+semicolons ('\kbd{;}'). Such an expression sequence will be called a
 \var{seq}. A \var{seq} also has a value, which is the value of the last
 expression in the sequence. Under \kbd{gp}, the value of the \var{seq}, and
 only this last value, becomes an history entry. The values of the other
@@ -160,9 +181,9 @@ with a semicolon \kbd{;}.
 \subsec{The gp history}.
 
 This is not to be confused with the history of your \emph{commands},
-maintained by readline. It only contains their non-void results, in sequence.
-Several inputs only act through side effects and produce a void result, for
-instance a \kbd{print} statement, a \kbd{for} loop, or a function definition.
+maintained by \kbd{readline}. It only contains their non-void results, in
+sequence. Several inputs only act through side effects and produce a void
+result, for instance a \kbd{print} statement or a \kbd{for} loop.
 
 The successive elements of the history array are called \kbd{\%1}, \kbd{\%2},
 \dots As a shortcut, the latest computed expression can also be
@@ -199,7 +220,7 @@ immediately followed by a newline. For example, you can type
 @eprog
 \noindent instead of typing \kbd{3 + 4}.
 
-The second one is a slight variation on the first, and is mostly useful when
+The second one is a variation on the first, and is mostly useful when
 defining a user function (see \secref{se:user_defined}): since an equal sign
 can never end a valid expression, \kbd{gp} disregards a newline immediately
 following an \kbd{=}.
@@ -211,15 +232,13 @@ following an \kbd{=}.
 
 The third one cannot be used everywhere, but is in general much more useful.
 It is the use of braces \kbd{\obr} and  \kbd{\cbr}.\sidx{brace characters}
-An opening brace (\kbd{\obr}) \emph{at the beginning of a line}
-(modulo spaces as usual) signals that you are typing a multi-line
-command, and newlines are ignored until you type a closing brace
-\kbd{\cbr}. There is an important, but easily obeyed, restriction:
-inside an open brace-close brace pair, all your input lines are
-concatenated, suppressing any newlines. Thus, all newlines should occur after
-a semicolon (\kbd{;}), a comma (\kbd{,}) or an operator (for clarity's sake,
-we don't recommend splitting an identifier over two lines in this way). For
-instance, the following program
+An opening brace (\kbd{\obr}) signals that you are typing a multi-line
+command, and newlines are ignored until you type a closing brace \kbd{\cbr}.
+There is an important, but easily obeyed, restriction: inside an open
+brace-close brace pair, all your input lines are concatenated, suppressing
+any newlines. Thus, all newlines should occur after a semicolon (\kbd{;}), a
+comma (\kbd{,}) or an operator (for clarity's sake, never split an identifier
+over two lines in this way). For instance, the following program
 \bprog
 {
   a = b
@@ -229,7 +248,13 @@ instance, the following program
 
 \noindent would silently produce garbage, since this is interpreted as
 \kbd{a=bb=c} which assigns the value of \kbd{c} to both \kbd{bb} and
-\kbd{a}.
+\kbd{a}. It should have been written
+\bprog
+{
+  a = b;
+  b = c;
+}
+@eprog
 
 \section{The PARI types}
 
@@ -292,20 +317,23 @@ Note that this type is available for convenience, not for speed: each
 elementary operation involves computing a gcd.
 
 \subsec{Finite field elements}\sidx{finite field element} (type \tet{t_FFELT}):
-first, you must create a irreducible polynomial defining your finite field. You
-can use \tet{ffinit} to compute it. Then you must create a generator of the
-finite field. This is done using the \tet{ffgen} function, in the following way.
-To create the field $\F_{2^8}$, write something like
+first, you must create a irreducible polynomial $T$ defining your finite
+field, for instance using \tet{ffinit}. Then the \tet{ffgen} function creates
+a generator of the finite field, namely the class of $X$ in $\F_p[X]/(T)$,
+from which you can build all other elements. For instance, to create the
+field $\F_{2^8}$, we write
 \bprog
-    P = ffinit(2,8);
-    g = ffgen(P,g);
+? T = ffinit(2, 8);
+? y = ffgen(T, y);
+? y^8
+%3 = y^6 + y^5 + y^4 + y^3 + y + 1
 @eprog\noindent
-The element $g$ is the class of $X$ in the quotient field $\F_p[X]/(P(X))$.
-The second parameter to \tet{ffgen} is the name used to display $g$, so it is
-customary to use the name of a variable we will assign the generator to.
-If $f$ is a \typ{FFELT}, the following member function is defined:
+The second (optional) parameter to \tet{ffgen} is the name used to display
+the result, so it is customary to use the name of the variable we assign the
+generator to. If $f$ is a \typ{FFELT}, the following member function is
+defined:
 
-\kbd{f.pol}: return the polynomial (with reduced integers coefficients)
+\kbd{f.pol}: returns the polynomial (with reduced integers coefficients)
 expressing \kbd{f} in term of the field generator.
 
 \subsec{Complex numbers}\sidx{complex number} (type \tet{t_COMPLEX}): to
@@ -334,11 +362,11 @@ For example, you can type in the $7$-adic number
 
 \noindent exactly as shown, or equivalently as \kbd{905/7 + O(7\pow3)}.
 
-If $a$ is a \typ{PADIC}, the following member function is defined:
+If $a$ is a \typ{PADIC}, the following member functions are defined:
 
-\kbd{a.mod}: return the modulus $p^k$.
+\kbd{a.mod}: returns the modulus $p^k$.
 
-\kbd{a.p}: return $p$.
+\kbd{a.p}: returns $p$.
 
 Note that this type is available for convenience, not for speed:
 internally, \typ{PADIC}s are stored as $p$-adic units modulo some $p^k$.
@@ -564,6 +592,16 @@ used to code in an efficient way vectors containing only small integers, such
 as permutations. Most \kbd{gp} functions will refuse to operate on these
 objects.
 
+\subsec{Functions} (type \tet{t_CLOSURE}): we will explain this at length
+in a later section. For the time being, suffices it to say that functions can
+be assigned to variables, as any other object, and the following
+equivalent basic forms are available to create new ones
+\bprog
+  f = (x,y) -> x^2 + y
+
+  f(x,y) = x^2 + y
+@eprog
+
 \subsec{Note on output formats}. A zero real number is printed in \kbd{e}
 format as $0.Exx$ where $xx$ is the (usually negative) \emph{decimal}
 exponent of the number (cf.~\secref{se:whatzero}). This allows the user to
@@ -741,25 +779,33 @@ and aborted as soon as the final truth value is known. Thus, for instance,
 will never produce an error since the second argument need not (and will not)
 be processed when the first is already zero (false).
 
-\misctitle{Remark:} For optimal efficiency, you should use the
-\kbd{++}, \kbd{--} and \var{op}\kbd{=} operators whenever possible:
+\misctitle{Remark:} Use the \var{op}\kbd{=} operators as often as possible
+since they make complex assignments more legible: one needs not parse
+complicated expressions twice to make sure they are indeed identical. Compare
 \bprog
-? a = 200000;
+v[i+j-1] = v[i+j-1] + 1    -->    v[i+j-1]++
+
+M[i,i+j] = M[i,i+j] * 2    -->    M[i,i-1] *= 2
+@eprog
+
+\misctitle{Remark:} Less important but still interesting. The
+\kbd{++}, \kbd{--} and \var{op}\kbd{=} operators are slightly more efficient:
+efficiency:
+\bprog
+? a = 10^6;
 ? i = 0; while(i<a, i=i+1)
-time = 4,919 ms.
-? i = 0; while(i<a, i+=1)
-time = 4,478 ms.
+time = 365 ms.
 ? i = 0; while(i<a, i++)
-time = 3,639 ms.
+time = 352ms.
 @eprog
 \noindent For the same reason, the shift operators should be preferred to
 multiplication:
 \bprog
-? a = 1<<20000;
+? a = 1<<(10^5);
 ? i = 1; while(i<a, i=i*2);
-time = 5,255 ms.
+time = 1,052 ms.
 ? i = 1; while(i<a, i<<=1);
-time = 988 ms.
+time = 617 ms.
 @eprog
 
 \section{Variables and symbolic expressions}\sidx{variable}
@@ -819,7 +865,7 @@ the following kind of problems:
   ? p = t^2 + 1; subst(p, t, 2)
   %1 = 5
   ? t = 2;
-  ? subst(p, t, 3)    \\ t is no longer free: evaluates to 2
+  ? subst(p, t, 3)    \\ t is no longer free: it evaluates to 2
     ***   variable name expected.
   ? subst(p, 't, 3)   \\ OK
   %3 = 10
@@ -843,24 +889,22 @@ x*y^0$, which is the same mathematical entity after all ?
 The answer is that variables are ordered implicitly by the interpreter:
 when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
 variable is registered as having a strictly lower priority than any variable in
-use at this point\footnote{**}{This is not strictly true: if an
-identifier is interpreted as a user function, no variable is registered. Also,
-the variable $x$ is predefined and always has the highest possible priority.}
-%
+use at this point\footnote{*}{This is not strictly true:
+the variable $x$ is predefined and always has the highest possible priority.}%
 . To see the ordering used by \kbd{gp} at any given time, type
 \kbd{variable()}.\kbdsidx{variable}
 
 Given such an ordering, multivariate polynomials are stored so that the
 variable with the highest priority is the main variable. And so on,
 recursively, until all variables are exhausted. A different storage pattern
-(which could only be obtained via library mode) would produce an invalid
-object, and eventually a disaster.
+(which could only be obtained via \kbd{libpari} programming and low-level
+constructors) would produce an invalid object, and eventually a disaster.
 
 In any case, if you are working with expressions involving several variables
 and want to have them ordered in a specific manner in the internal
 representation just described, the simplest is just to write down the
 variables one after the other under \kbd{gp} before starting any real computations.
-You could also define variables from your GPRC to have a consistent
+You could also define variables from your \tet{gprc} to have a consistent
 ordering of common variable names in all your \kbd{gp} sessions, e.g read in a file
 \kbd{variables.gp} containing
 \bprog
@@ -870,7 +914,7 @@ x;y;z;t;a;b;c;d;
 \misctitle{Important note:} PARI allows Euclidean division of multivariate
 polynomials, but assumes that the computation takes place in the fraction
 field of the coefficient ring (if it is not an integral domain, the result
-will a priori not make sense). This can be very tricky; for instance
+will a priori not make sense). This can become tricky; for instance
 assume $x$ has highest priority (which is always the case), then
 $y$:
 \bprog
@@ -963,10 +1007,12 @@ next discussion does not make sense to you.
 \subsec{Definitions}.
 
 A \emph{scope} is an enclosing context where names and values are associated.
-A user's function, the body of a loop, an individual command line, all define
-scopes; the whole program defines the \emph{global} scope. Variables are
-bound to values within a given scope. This is traditionnally implemented in
-two different ways:
+A user's function body, the body of a loop, an individual command line, all
+define scopes; the whole program defines the \emph{global} scope. The
+argument of \tet{eval} is evaluated in \emph{global} scope.
+
+Variables are bound to values within a given scope. This is traditionnally
+implemented in two different ways:
 
 \item\sidx{lexical scoping} lexical (or static) scoping: the binding makes
 sense within a given block of program text. The value is private to the block
@@ -980,7 +1026,7 @@ leaves the scope. Evaluating \kbd{x} in any context, possibly outside of the
 given block, always yields the top value on this dynamic stack.
 
 GP implements both lexical and dynamic scoping, using the keywords%
-\footnote{*}{The names are borrowed from Perl.}
+\footnote{*}{The names are borrowed from the \tet{Perl} scripting language.}
 \tet{my} (lexical) and \tet{local} (dynamic):
 \bprog
   x = 0;
@@ -993,12 +1039,12 @@ is unaffected by the introduction of a private variable of the same name in
 \kbd{g}. On the other hand, \kbd{h} returns 1; when it calls \kbd{f()}, the
 binding stack for the \kbd{x} identifier contains two items: the global
 binding to 0, and the binding to 1 introduced in \kbd{h}, which is still
-present on the stack since the control flow has not left \kbd{g} yet.
+present on the stack since the control flow has not left \kbd{h} yet.
 
 \subsec{Scoping rules}.
 
 Named parameters in a function definition, as well as all loop
-indices\footnote{**}{
+indices\footnote{*}{
 More generally, in all iterative constructs which use a variable name
 (\kbd{for}, \kbd{prod}, \kbd{sum}, \kbd{vector}, \kbd{matrix},
 \kbd{plot}, etc.) the given variable is lexically scoped to the construct's
@@ -1077,7 +1123,14 @@ are the same as before they were started.
 Note that lexical scoping has the unfortunate side effect of making break
 loops (see \secref{se:breakloop}) almost useless: break loops are run outside
 of the relevant scopes and are unable to access all lexically scoped
-variables.
+variables. Analogously, \tet{eval} becomes less powerful: since it is
+evaluated in global scope, it cannot access values of lexical variables:
+\bprog
+? x = 0; eval("x")
+%1 = 0
+? my(x = Pi); eval("x")
+%2 = 0    \\@com we see the global \kbd{x}, not the one scoped to this command line.
+@eprog
 
 Variables dynamically scoped using \kbd{local} should more appropriately be
 called \emph{temporary values} since they are in fact local to the function
@@ -1095,84 +1148,175 @@ want.
 \section{User defined functions}\sidx{user defined functions}
 \label{se:user_defined}
 
+The most important thing to understand about user-defined functions is
+that they are ordinary GP objects, bound to variables just like any
+other object. Those variables are subject to scoping rules as any other:
+while you can define all your functions in global scope, it is usually
+possible and cleaner to lexically scope your private helper functions to the
+block of text where they will be needed.
+
+Whenever gp meets a construction of the form \kbd{expr(\var{argument list})}
+and the expression \kbd{expr} evaluates to a function (an object of type
+\typ{CLOSURE}), the function is called with the proper arguments. In
+particular, constructions like \kbd{funcs[i](x)} are perfectly valid,
+assuming \kbd{funcs} is an array of functions.
+
 \subsec{Definition}.
-It is easy to define a new function in GP, which can then be used like any
-other function. The syntax is as follows:
+A user function is defined as follows:
 
-\kbd{name(}\var{list of formal variables}\kbd{) = %
-my(}\var{list of local variables, lexically scoped}\kbd{);}
-   \var{seq}
+  \kbd{(\var{list of formal variables}) -> \var{seq}}.
+  
+\noindent The list of formal variables is a comma-separated list of
+\emph{distinct} variable names and allowed to be empty. It there is a single
+formal variable, the parentheses are optional. This list corresponds to the
+list of parameters you will supply to your function when calling it.
 
-\noindent which looks better written on consecutive lines:
+In most cases you want to assign a function to a variable immediately, as in
+\bprog
+R = (x,y) -> sqrt( x^2+y^2 );
+sq = x -> x^2;  \\@com or equivalently \kbd{(x) -> x\pow2}
+@eprog\noindent
+but it is quite possible to define (a priori short-lived) anonymous functions.
+The trailing semi-colon prevents \kbd{gp} from printing the result of the
+evaluation, i.e. the function object. The construction
+
+  \kbd{f(\var{list of formal variables}) = \var{seq}}
+
+\noindent is available as an alias for 
+
+  \kbd{f = (\var{list of formal variables}) -> \var{seq}}
+
+\noindent Of course, the sequence \var{seq} can be arbitrarily complicated,
+in which case it will look better written on consecutive lines, with properly
+scoped variables:
 \bprogpart
-name($x_0$, $x_1$, @dots) =
+f($x_0$, $x_1$, @dots) =
 {
-  my($t_0$, $t_1$, @dots); \\ private variables, lexically scoped
+  my($t_0$, $t_1$, @dots); \\@com variables lexically scoped to the function body
   @dots
 }
 @eprog \noindent
 (the first newline is disregarded due to the preceding \kbd{=} sign, and the
-others because of the enclosing braces). The list of formal variables
-is comma-separated and allowed to be empty. The \tet{my} statements can be
-omitted, and can actually occur anywhere within the function body, scoping
-the variables to more restricted blocks than the whole function body; as
-usual \var{seq} is any expression sequence.
-
-\noindent \kbd{name} is the name given to the function and is subject to the
-same restrictions as variable names. In addition, variable names are not
-valid function names, you have to \kbd{kill} the variable first (the converse
-is true: function names can't be used as variables, see \secref{se:kill}).
-Previously used function names can be recycled: you are just redefining the
-function. The previous definition is lost of course.
-
-\noindent \var{list of formal variables} is the list of variables
-corresponding to those which you will actually use when calling your
-function. The number of actual parameters supplied when calling the function
-has to be less than the number of formal variables. Arguments are passed by
-value, not as variables: modifying a function's argument in the function
-body is allowed, but does not modify its value in the calling frame. In fact,
-a \emph{copy} of the actual parameter is assigned to the formal parameter
-when the function is called. Formal parameters are lexically scoped to the
+others because of the enclosing braces). The \tet{my} statements can actually
+occur anywhere within the function body, scoping the variables to more
+restricted blocks than the whole function body. Arguments are passed by
+value, not as variables: modifying a function's argument in the function body
+is allowed, but does not modify its value in the calling scope. In fact, a
+\emph{copy} of the actual parameter is assigned to the formal parameter when
+the function is called. Formal parameters are lexically scoped to the
 function body.
 
-An uninitialized formal variable is given an implicit default value of (the
-integer)~0. An equal (\kbd{=}) sign following a variable name in the function
-definition, followed by any expression, gives the variable an explicit
-default value. The said expression gets evaluated the moment the function is
-called, hence may involve the preceding function parameters (a default value
-for $x_i$ may involve $x_j$ for $j < i$). For instance
-\bprog
-foo(x, y=2, z=3) = print(x, ":", y, ":", z)
-@eprog
-\noindent defines a function which prints its arguments (at most three of
-them), separated by colons. This then follows the rules of default
-arguments generation as explained at the beginning of
-\secref{se:functions}.
-\bprog
-? foo(6,7)
-6:7:3
-? foo(,5)
-0:5:3
-? foo()
-0:2:3
-@eprog
-
-\noindent \var{list of local variables} is the list of additional temporary
-variables used in the function body. Note that if you omit some or all of
-these local variable declarations, the non-declared variables automatically
-become global variables, modifiable outside of the function, and this may
-have undesirable side-effects. On the other hand, in some cases it may also
-be what you want. See \secref{se:scope} for details. Local variables can
-be given a default value, just as the formal variables.
-
-\misctitle{Restrictions on variable use:} it is not allowed to use the same
-variable name for different parameters of your function. Or to use a given
-variable both as a formal parameter and a local variable in a given function.
-Hence
+It is not allowed to use the same variable name for different parameters of
+your function:
 \bprog
 ? f(x,x) = 1
   ***   user function f: variable x declared twice.
 @eprog
+
+Note that there is no distinction between variable and functions names: we
+have PARI objects (of type function or otherwise) and variables bound to
+them. There is nothing wrong with the following sequence of assignments:
+\bprog
+? f = 1
+%1 = 1;
+? f() = 1     \\@com a function with a constant value
+%2 = ()->1
+? f = x^2     \\@com \kbd{f} now holds a polynomial
+%3 = x^2
+? f(x) = x^2  \\@com \dots and now a polynomial function
+%4 = (x)->x^2
+@eprog\noindent
+Previously used names can be recycled: you are just redefining the variable.
+The previous definition is lost of course.
+
+
+Built-in function are a different matter since they are read-only (you cannot
+overwrite their default meaning), and they use features not available to user
+functions. In the present version \vers{}, it is not possible to assign a
+built-in function to a variable, nor to use a built-in function name
+to create an anonymous function: using \kbd{sin} will not work, you 
+must write \kbd{x -> sin(x)} explicitly.
+
+\subsec{Default arguments}
+
+The number of actual parameters supplied may be \emph{less} than the number
+of formal variables in the function definition. An uninitialized formal
+variable is given an implicit default value of (the integer)~0, i.e.
+after the definition
+\bprog
+  f(x, y) = ...
+@eprog\noindent
+you may call \kbd{f(1, 2)}, supplying values for the two formal 
+parameters, or \kbd{f(1)} (equivalent to \kbd{f(1,0)}), \kbd{f()} (equivalent
+to \kbd{f(0,0)}), or even \kbd{f(,1)} (equivalent to \kbd{f(0,1)}).
+More generally, the argument list is filled with user supplied values, in
+order. A comma or closing parenthesis, where a value should have been,
+signals to GP it should use a default value. When no input arguments are
+left, the defaults are used instead to fill in remaining formal parameters.
+
+Of course, you can change this default value to something more useful than
+$0$. In the function definition, you can append \kbd{=}\var{expr} to a formal
+parameter, to give that variable an explicit default value. The expression
+gets evaluated the moment the function is called, but currently may not
+involve the preceding function parameters. For instance, after
+\bprog
+f(x = 1, y = 2, z = 3) = ....
+@eprog\noindent
+typing in \kbd{f(6,4)} would give
+you \kbd{f(6,4,3)}. In the rare case when you want to set some far away
+argument, and leave the defaults in between as they stand, leave
+an ``empty argument'' trick: \kbd{f(6,,1)} would yield
+\kbd{f(6,2,1)}. Of course, \kbd{f()} by itself yields
+\kbd{f(1,2,3)} as was to be expected.
+
+%: a default value for $x_i$ may involve $x_j$ for $j < i$.
+More specifically,
+\bprog
+f(x, y=2, z=3) = print(x, ":", y, ":", z);
+@eprog
+\noindent defines a function which prints its arguments (at most three of
+them), separated by colons.
+\bprog
+? f(6,7)
+6:7:3
+? f(,5)
+0:5:3
+? f()
+0:2:3
+@eprog
+
+\subsec{Beware scopes!}
+Be extra careful with the scopes of variables. What is wrong with the
+following definition?
+\bprog
+FirstPrimeDiv(x) =
+{ my(p);
+  forprime(p=2, x, if (x%p == 0, break));
+  p
+}
+? FirstPrimeDiv(10)
+%1 = 0
+@eprog\noindent
+Well, the index $p$ in the \kbd{forprime} loop is lexically scoped to the
+loop and is not visible to the outside world. Hence, it does not survive the
+\kbd{break} statement. More precisely, at this point the loop index is
+restored to its preceding value, which is 0 (local variables are initialized
+to 0 by default). To sum up, the routine returns the $p$ declared local to
+it, not the one which was local to \kbd{forprime} and ran through consecutive
+prime numbers. Here is a corrected version:
+\bprog
+? FirstPrimeDiv(x) = forprime(p=2, x, if (x%p == 0, return(p)))
+@eprog
+
+\subsec{Use}. Once the function is defined, you can use it like any other
+function, see the example with \kbd{f} above. In addition, you can also
+recall its definition exactly as you do for predefined functions, that is by
+writing \kbd{?\var{name}}. This will print the list of arguments, as well as
+their default values, the text of \var{seq}, and a short help text if one was
+provided using the \kbd{addhelp} function (see \secref{se:addhelp}).
+Typing \b{u} will output the list of user-defined functions.
+One major difference with predefined functions is that you can never redefine
+the built-in functions, nor assign it to a variable.
 
 \misctitle{Note:} Lexically scoped variables were introduced in
 version~2.4.2. Before that, the formal parameters were dynamically scoped.
@@ -1186,18 +1330,6 @@ by
 f(x_orig) = local(x = x_orig)
 @eprog
 
-\subsec{Use}. Once the function is defined using the above syntax, you can
-use it like any other function, see the example with \kbd{fun} above. In
-addition, you can also recall its definition exactly as you do for predefined
-functions, that is by writing \kbd{?\var{name}}. This will print the list of
-arguments, as well as their default values, the text of \var{seq}, and a
-short help text if one was provided using the \kbd{addhelp} function (see
-\secref{se:addhelp}). One small difference to predefined functions is that
-you can never redefine the built-in functions, while you can redefine a
-user-defined function as many times as you want.
-
-Typing \b{u} will output the list of user-defined functions.
-
 An amusing example of a user-defined function is the following. It is
 intended to illustrate both the use of user-defined functions and the power
 of the \kbd{sumalt} function. Although the \idx{Riemann zeta-function} is
@@ -1206,15 +1338,14 @@ included in the standard functions, let us assume that this is not the case
 probably the simplest, but certainly not the most efficient, is as
 follows:\sidx{zeta function}
 \bprog
-zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
+ZETA(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 @eprog
 \noindent This gives reasonably good accuracy and speed as long as you are
 not too far from the domain of convergence. Try it for $s$ integral between
 $-5$ and $5$, say, or for $s=0.5+i*t$ where $t=14.134\dots$
-
 Note that \kbd{n} is automatically lexically scoped to the \kbd{sumalt}
-``loop'', and that it is unnecessary to add a \kbd{my(n)} declaration to the
-loop body.
+``loop'', so that it is unnecessary to add a \kbd{my(n)} declaration to the
+function body.
 
 \subsec{Recursive functions}. Recursive functions\sidx{recursion} can easily
 be written as long as one pays proper attention to variable scope. Here is an
@@ -1241,37 +1372,69 @@ The operating system automatically limits the \idx{recursion depth}:
 \bprog
 ? dive(n) = if (n, dive(n-1))
 ? dive(20000);
-  ***   deep recursion: if(n,dive(n-1))
-                        ^---------------
+  ***   deep recursion
 @eprog
 There is no way to increase the recursion limit (which may be different on
 your machine) from within \kbd{gp}. To increase it before launching \kbd{gp},
 you can use \tet{ulimit} or \tet{limit}, depending on your shell, and raise
 the process available stack space (increase \tet{stacksize}).
 
-\subsec{Function which take functions as parameters ?}
-Use the following trick (neat example due to Bill Daly):
-
+\subsec{Function which take functions as parameters ?} Very easy:
 \bprog
-calc(f, x_orig) = local(x=x_orig); eval( Str(f, "(x)") )
+? calc(f, x) = f(x)
+? calc(x->sin(x), Pi)
+%2 = -5.04870979 E-29
 @eprog
-\noindent If you call this with \kbd{calc("sin", 1)}, it will
-return $\sin(1)$ (evaluated!). Note that it is crucial to use \kbd{local}
-here, since \kbd{eval} evaluates its arguments in global scope. The simpler
+\noindent Note that we used an anonymous function here, since there was no
+reason to store \kbd{x->sin(x)} into a variable, just to immediately forget
+about it. The more natural \kbd{calc(sin, Pi)} does not work since typing in
+the name of a built-in function does not generate proper function objects
+(built-in function names are not bound to proper values as would be the case
+for user functions). On the other hand,
 \bprog
-calc(f, x) = eval( Str(f, "(x)") )
-@eprog
-would not work, since \kbd{x} is lexically scoped to the function body.
-Another approach is
+? g(x) = x^2
+? calc(g, Pi)
+@eprog\noindent works since \kbd{f} is a user function, not a built-in.
+Here is a variation:
 \bprog
-calc(f, x) = eval( Str(f, "(", x, ")") )
-@eprog
-
+? trigs = [x->cos(x), x->sin(x), x->tan(x)]; \\@com an array of functions
+? call(i, x) = trigs[i](x)
+@eprog\noindent
+evaluates the appropriate function on argument \kbd{x},
+provided $1\leq i\leq 3$. Finally, a more useful example:
+\bprog
+map(f, v) = vector(#v, i, f(v[i]))
+@eprog\noindent
+applies the function \kbd{f} to every element in the vector \kbd{v}.
 
 \subsec{Defining functions within a function ?}
+Defining a single function is easy:
+\bprog
+init(x) = add = y -> x+y;
+@eprog\noindent Basically, we are defining a global variable \kbd{add}
+whose value is the function \kbd{y->x+y}.
+\bprog
+? init(5);
+? add(2)
+%2 = 7
+@eprog\noindent
+A more refined approach is to
+avoid global variables and \emph{return} the function:
+\bprog
+init(x) = y -> x+y
+add = init(5)
+@eprog\noindent Then \kbd{add(2)} still returns 7, as expected! Of course,
+if \kbd{add} is in global scope, there is no gain, but we can
+lexically scope it to the place where it is useful:
+\bprog
+  my ( add = init(5) );
+@eprog
+
+How about multiple functions then ? We can use the last idea and return a
+vector of functions, but if we insist on global variables ?
 The first idea
 \bprog
-  init(x) = add(y) = x+y; mul(y) = x*y;
+init(x) = add(y) = x+y; mul(y) = x*y;
 @eprog
 \noindent does not work since in the construction \kbd{f() = }\var{seq}, the
 function body contains everything until the end of the expression. Hence
@@ -1279,30 +1442,17 @@ executing \kbd{init} defines the wrong function \kbd{add}. The way out is to
 use parentheses for grouping, to that enclosed subexpressions be
 evaluated independently:
 \bprog
-  init(x) = ( add(y) = x+y ); ( mul(y) = x*y );
-@eprog
-
-\subsec{Beware scopes!}
-Be extra careful with the scopes of variables. What is wrong with the
-following definition?
+? init(x) = ( add(y) = x+y ); ( mul(y) = x*y );
+? init(5);
+? add(2)
+%3 = 7
+? mul(3)
+%4 = 15
+@eprog\noindent This defines two global functions which have access to the
+lexical variables private to \kbd{init}! The following would work in exactly
+the same way:
 \bprog
-FirstPrimeDiv(x) =
-{ my(p);
-  forprime(p=2, x, if (x%p == 0, break));
-  p
-}
-? FirstPrimeDiv(10)
-%1 = 0
-@eprog\noindent
-Well, the index $p$ in the \kbd{forprime} loop is lexically scoped to the
-loop and is not visible to the outside world. Hence, it does not survive the
-\kbd{break} statement. More precisely, at this point the loop index is
-restored to its preceding value, which is 0 (local variables are initialized
-to 0 by default). To sum up, the routine returns the $p$ declared local to
-it, not the one which was local to \kbd{forprime} and ran through consecutive
-prime numbers. Here is a corrected version:
-\bprog
-? FirstPrimeDiv(x) = forprime(p=2, x, if (x%p == 0, return(p)))
+? init5() = my(x = 5); ( add(y) = x+y ); ( mul(y) = x*y );
 @eprog
 
 \section{Member functions}\sidx{member functions} \label{se:member}
