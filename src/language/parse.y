@@ -29,7 +29,7 @@ static THREAD int pari_once;
 static THREAD const char *pari_lex_start, *pari_unused_chars;
 static THREAD GEN pari_lasterror;
 
-static void pari_error(YYLTYPE *yylloc, char **lex, char *s)
+static void pari_error(YYLTYPE *yylloc, char **lex, const char *s)
 {
   if (pari_lasterror) cgiv(pari_lasterror);
   pari_lasterror=strtoGENstr(s);
