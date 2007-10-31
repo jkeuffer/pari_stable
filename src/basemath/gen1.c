@@ -398,21 +398,19 @@ addpp(GEN x, GEN y)
   gel(z,4) = icopy(u); return z;
 }
 
-/* return x + y, where x is t_INT or t_FRAC(N), y t_PADIC */
+/* return x + y, where y t_PADIC and x is a non-zero t_INT or t_FRAC */
 static GEN
 addQp(GEN x, GEN y)
 {
-  pari_sp av;
-  long tx,vy,py,d,r,e;
-  GEN z,q,p,p1,p2,mod,u;
+  pari_sp av = avma;
+  long tx,d,r,e, vy = valp(y), py = precp(y);
+  GEN z,q,p1,p2,mod,u, p = gel(y,2);
 
-  if (gcmp0(x)) return gcopy(y);
-
-  av = avma; p = gel(y,2); tx = typ(x);
+  tx = typ(x);
   e = (tx == t_INT)? Z_pvalrem(x,p,&p1)
 		   : Z_pvalrem(gel(x,1),p,&p1) -
 		     Z_pvalrem(gel(x,2),p,&p2);
-  vy = valp(y); d = vy - e; py = precp(y); r = d + py;
+  d = vy - e; r = d + py;
   if (r <= 0) { avma = av; return gcopy(y); }
   mod = gel(y,3);
   u   = gel(y,4);
@@ -806,7 +804,9 @@ gadd(GEN x, GEN y)
 	  gel(z,1) = gerepileuptoint((pari_sp)z, addii(gel(y,1), mulii(gel(y,2),x)));
 	  gel(z,2) = icopy(gel(y,2)); return z;
 	case t_COMPLEX: return addRc(x, y);
-	case t_PADIC: return addQp(x,y);
+	case t_PADIC:
+          if (!signe(x)) return gcopy(y);
+          return addQp(x,y);
 	case t_QUAD: return addRq(x, y);
 	case t_FFELT: return FF_Z_add(y,x);
       }
@@ -853,7 +853,9 @@ gadd(GEN x, GEN y)
       switch (ty)
       {
 	case t_COMPLEX: return addRc(x, y);
-	case t_PADIC: return addQp(x,y);
+	case t_PADIC:
+          if (!signe(x[1])) return gcopy(y);
+          return addQp(x,y);
 	case t_QUAD: return addRq(x, y);
       }
 
