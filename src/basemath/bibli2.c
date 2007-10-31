@@ -628,7 +628,7 @@ stirling2uu(ulong n, ulong m)
   GEN p2, bmk, kn, mkn;
   ulong k;
   if (n==0) return (m == 0)? gen_1: gen_0;
-  if (m>n) return gen_0;
+  if (m>n || m == 0) return gen_0;
   if (m==n) return gen_1;
   for (k = 0; k <= ((m-1)>>1); ++k)
   {
