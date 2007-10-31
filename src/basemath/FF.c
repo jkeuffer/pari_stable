@@ -544,7 +544,7 @@ FF_ispower(GEN x, GEN K, GEN *pt)
    case t_FF_F2xq:
      r=Flxq_sqrtn(F2x_to_Flx(gel(x,2)),K,F2x_to_Flx(T),pp,NULL);
      if (!r) { avma = av; return 0; }
-     if (pt) r = gerepileuptoleaf(*pt, Flx_to_F2x(r)); 
+     if (pt) r = gerepileuptoleaf((pari_sp)*pt, Flx_to_F2x(r)); 
      break;
 
    default: /* case t_FF_Flxq: */
