@@ -1157,8 +1157,8 @@ block of text where they will be needed.
 
 Whenever gp meets a construction of the form \kbd{expr(\var{argument list})}
 and the expression \kbd{expr} evaluates to a function (an object of type
-\typ{CLOSURE}), the function is called with the proper arguments. In
-particular, constructions like \kbd{funcs[i](x)} are perfectly valid,
+\typ{CLOSURE}), the function is called with the proper arguments. For
+instance, constructions like \kbd{funcs[i](x)} are perfectly valid,
 assuming \kbd{funcs} is an array of functions.
 
 \subsec{Definition}.
@@ -1185,6 +1185,13 @@ evaluation, i.e. the function object. The construction
 \noindent is available as an alias for 
 
   \kbd{f = (\var{list of formal variables}) -> \var{seq}}
+
+\noindent Using that syntax, it is not possible to define anonymous functions
+(obviously), and the above two examples become:
+\bprog
+R(x,y) = sqrt( x^2+y^2 );
+sq(x) = x^2;
+@eprog
 
 \noindent Of course, the sequence \var{seq} can be arbitrarily complicated,
 in which case it will look better written on consecutive lines, with properly
@@ -1213,11 +1220,12 @@ your function:
   ***   user function f: variable x declared twice.
 @eprog
 
-Note that there is no distinction between variable and functions names: we
-have PARI objects (of type function or otherwise) and variables bound to
-them. There is nothing wrong with the following sequence of assignments:
+Note that there is no distinction between variable and function names: we
+have PARI objects (functions of type \typ{CLOSURE}, or more mundane
+mathematical entities, like \typ{INT}, etc.) and variables bound to them.
+There is nothing wrong with the following sequence of assignments:
 \bprog
-? f = 1
+? f = 1       \\@com assigns the integer 1 to \kbd{f}
 %1 = 1;
 ? f() = 1     \\@com a function with a constant value
 %2 = ()->1
@@ -1226,16 +1234,17 @@ them. There is nothing wrong with the following sequence of assignments:
 ? f(x) = x^2  \\@com \dots and now a polynomial function
 %4 = (x)->x^2
 @eprog\noindent
-Previously used names can be recycled: you are just redefining the variable.
-The previous definition is lost of course.
+Previously used names can be recycled as above: you are just redefining the
+variable. The previous definition is lost of course.
 
-
-Built-in function are a different matter since they are read-only (you cannot
-overwrite their default meaning), and they use features not available to user
-functions. In the present version \vers{}, it is not possible to assign a
-built-in function to a variable, nor to use a built-in function name
-to create an anonymous function: using \kbd{sin} will not work, you 
-must write \kbd{x -> sin(x)} explicitly.
+\misctitle{Important technical note.} Built-in function are a different
+matter since they are read-only (you cannot overwrite their default meaning),
+and they use features not available to user functions. In the present version
+\vers{}, it is not possible to assign a built-in function to a variable, nor
+to use a built-in function name to create an anonymous function. For instance
+the built-in function name \kbd{sin} does not evaluate to a valid
+\typ{CLOSURE}; to define a function evaluating to the built-in
+\kbd{sin} function, you must write \kbd{x -> sin(x)} explicitly.
 
 \subsec{Default arguments}
 
