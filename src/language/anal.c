@@ -1141,7 +1141,6 @@ print_all_user_fun(int member)
   pari_sp av = avma;
   long iL = 0, lL = 1024;
   GEN L = cgetg(lL+1, t_VECSMALL);
-  char *arg, *seq;
   const char *f;
   entree *ep;
   int i;
@@ -1163,12 +1162,13 @@ print_all_user_fun(int member)
       }
       L[++iL] = (long)ep;
     }
-  setlg(L, iL+1);
   if (iL)
   {
+    setlg(L, iL+1);
     L = gen_sort(L, NULL, &cmp_epname);
     for (i = 1; i <= iL; i++)
     {
+      char *arg, *seq;
       GEN str;
       ep = (entree*)L[i];
       f = ep->name;
