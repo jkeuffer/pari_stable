@@ -18,7 +18,8 @@ Doc: numerical summation of the series \var{expr}, which should be an
  alternating series can sometimes be summed by this method, as well as series
  which are not exactly alternating (see for example
  \secref{se:user_defined}). It should be used to try and guess the value of
- an infinite sum.
+ an infinite sum. (However, see the example at the end of
+ \secref{se:userfundef}.)
  
  If the series already converges geometrically,
  \tet{suminf} is often a better choice:
