@@ -408,7 +408,7 @@ int   pari_kernel_init(void);
 int   pari_last_was_newline(void);
 void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
-void  print_all_user_fun(void);
+void  print_all_user_fun(int member);
 GEN   readbin(const char *name, FILE *f, int *vector);
 void  recover(int flag);
 void  term_color(long c);

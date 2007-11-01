@@ -956,7 +956,7 @@ escape(char *tch)
     case 's': etatpile(); break;
     case 't': gentypes(); break;
     case 'u':
-	print_all_user_fun();
+      print_all_user_fun((*s == 'm')? 1: 0);
       break;
     case 'v': print_version(); break;
     case 'y':

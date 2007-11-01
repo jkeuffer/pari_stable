@@ -1128,21 +1128,60 @@ GEN gshift_right(GEN x, long n) { return gshift(x,-n); }
 /**            PRINT USER FUNCTION AND MEMBER FUNCTION             **/
 /**                                                                **/
 /********************************************************************/
+static int
+cmp_epname(void *E, GEN e, GEN f)
+{
+  (void)E;
+  return strcmp(((entree*)e)->name, ((entree*)f)->name);
+}
 
 void
-print_all_user_fun(void)
+print_all_user_fun(int member)
 {
+  pari_sp av = avma;
+  long iL = 0, lL = 1024;
+  GEN L = cgetg(lL+1, t_VECSMALL);
+  char *arg, *seq;
+  const char *f;
   entree *ep;
   int i;
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpVAR && typ(ep->value)==t_CLOSURE)
+    {
+      int is_member;
+      if (EpVALENCE(ep) != EpVAR || typ(ep->value)!=t_CLOSURE) continue;
+      f = ep->name;
+      is_member = (f[0] == '_' && f[1] == '.');
+      if (member != is_member) continue;
+
+      if (iL >= lL)
       {
-        GEN str=gel(ep->value,5);
-        pariputc('{');
-        pariprintf("%s(%s)=%s\n",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
-        pariputc('}'); pariputs("\n\n");
+        GEN oL = L;
+        long j;
+        lL *= 2; L = cgetg(lL+1, t_VECSMALL);
+        for (j = 1; j <= iL; j++) gel(L,j) = gel(oL,j);
       }
+      L[++iL] = (long)ep;
+    }
+  setlg(L, iL+1);
+  if (iL)
+  {
+    L = gen_sort(L, NULL, &cmp_epname);
+    for (i = 1; i <= iL; i++)
+    {
+      GEN str;
+      ep = (entree*)L[i];
+      f = ep->name;
+      str = gel(ep->value,5);
+      arg = GSTR(gel(str,1));
+      seq = GSTR(gel(str,2));
+      if (member)
+        pariprintf("{%s.%s=%s\n}\n\n", arg, f+2, seq);
+      else
+        pariprintf("{%s(%s)=%s\n}\n\n", f, arg, seq);
+    }
+  }
+  avma = av;
 }
 
 /********************************************************************/
