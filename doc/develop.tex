@@ -73,7 +73,7 @@ enlarging \kbd{A} if necessary.
 This type holds closures and functions in compiled form, so is deeply
 linked to the internals of the GP compiler and evaluator.
 The length of this type can be $5$, $6$ or $7$ depending whether the
-object is an "inline closure", a "function" or a "true closure".
+object is an ``inline closure'', a ``function'' or a ``true closure''.
 
 A function is a regular GP function.
 
@@ -89,10 +89,9 @@ In the following example,
 f(a=Euler)=x->sin(x+a);
 g=f(Pi/2);
 plot(x=0,2*Pi,g(x))
-@eprog
-
-f is a function, g is a true closure and both "Euler" and "g(x)" are
-inline closures.
+@eprog\noindent
+\kbd{f} is a function, \kbd{g} is a true closure and both \kbd{Euler} and 
+\kbd{g(x)} are inline closures.
 
 This type has a second codeword \kbd{z[1]}, which is the arity of the
 function or closure. This is zero for inline closures.
@@ -143,7 +142,7 @@ the elements are \kbd{v[1]}, \dots, \kbd{v[l-1]}.
 \typ{LIST} is not considered a recursive type, i.e.
 \kbd{is\_recursive\_t(\typ{LIST})} is false. In most cases,
 e.g.~\kbd{gerepile}, this means that the list components are not inspected
-and a shallow copy of the malloced vector is made. \kbd{gcopy}, \kbd{gcone},
+and a shallow copy of the malloced vector is made. \kbd{gcopy}, \kbd{gclone},
 \kbd{copy\_bin\_canon} are exceptions, and make a full copy of the list.
 
 The main problem with lists is to avoid memory leaks; in the above setup,
