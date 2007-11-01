@@ -1200,13 +1200,10 @@ compilenode(long n, int mode, long flag)
       struct codepos pos;
       long i;
       GEN arg2=listtogen(x,Flistarg);
-      long loc=y;
       long arity=lg(arg2)-1,nbmvar=numbmvar();
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
-      if (loc>=0)
-        while (tree[loc].f==Fseq) loc=tree[loc].x;
       getcodepos(&pos);
       if (arity) op_push(OCnewframe,arity);
       for (i=1;i<=arity;i++)

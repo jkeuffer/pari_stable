@@ -886,7 +886,6 @@ closure_eval(GEN C)
       sp--;
       break;
     case OCdefaultarg:
-      ep=(entree *)operand;
       if (gel(st,sp-2))
         copylex(operand,gel(st,sp-2));
       else
