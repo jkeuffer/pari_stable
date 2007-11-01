@@ -117,14 +117,14 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
-  GEN cl=cgetg(nbmvar?7:6,t_CLOSURE);
+  GEN cl=cgetg(nbmvar?7:(text?6:5),t_CLOSURE);
   char *s;
   long i;
   cl[1] = arity;
   gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
   gel(cl,3) = cgetg(lop,  t_VECSMALL);
   gel(cl,4) = cgetg(ldat, t_VEC);
-  gel(cl,5) = text;
+  if (text) gel(cl,5) = text;
   if (nbmvar) gel(cl,6) = zerovec(nbmvar);
   s=GSTR(gel(cl,2))-1;
   for(i=1;i<lop;i++)
@@ -149,7 +149,7 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
 static GEN
 getclosure(struct codepos *pos)
 {
-  return getfunction(pos,0,0,gen_0);
+  return getfunction(pos,0,0,NULL);
 }
 
 static void

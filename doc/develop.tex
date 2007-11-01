@@ -69,6 +69,55 @@ enlarging \kbd{A} if necessary.
 
 \fun{void}{grow_kill}{growarray A} frees \kbd{A}
 
+\section{The type \typ{CLOSURE}}\kbdsidx{t_CLOSURE}\sidx{closure}
+This type holds closures and functions in compiled form, so is deeply
+linked to the internals of the GP compiler and evaluator.
+The length of this type can be $5$, $6$ or $7$ depending whether the
+object is an "inline closure", a "function" or a "true closure".
+
+A function is a regular GP function.
+
+A true closure is a GP function defined in a non-empty lexical context.
+
+An inline closure is a closure that appears in the code without
+the preceding \kbd{->} token. They are generally associated to the prototype
+code 'E' and 'I'. Inline closures can only exist as data of other closures,
+see below.
+
+In the following example,
+\bprog
+f(a=Euler)=x->sin(x+a);
+g=f(Pi/2);
+plot(x=0,2*Pi,g(x))
+@eprog
+
+f is a function, g is a true closure and both "Euler" and "g(x)" are
+inline closures.
+
+This type has a second codeword \kbd{z[1]}, which is the arity of the
+function or closure. This is zero for inline closures.
+
+\item \kbd{z[2]} points to a \typ{STR} which hold the opcodes.
+
+\item \kbd{z[3]} points to a \typ{VECSMALL} which hold the operands of the opcodes.
+
+\item \kbd{z[4]} points to a \typ{VEC} which hold to the data referenced by the
+\kbd{pushgen} opcodes, which can be \typ{CLOSURE}, and in particular
+inline closures.
+
+Additionnally, for functions and true closures,
+
+\item \kbd{z[5]} points to a \typ{VEC} with two components which are \typ{STR}.
+The first one displays the list of arguments of the closure without the
+enclosing parentheses, the second one the GP code of the function at the
+right of the \kbd{->} token. They are used to display the closure, either in
+implicit or explicit form.
+
+Additionnally, for true closure,
+
+\item \kbd{z[6]} points to a \typ{VEC} which hold the values of all lexical
+variables defined in the scope the closure was defined.
+
 \section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type need to go
 through various hoops to support GP's inconvenient memory model. Don't
 use \typ{LIST}s in pure library mode, reimplement ordinary lists! This

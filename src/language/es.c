@@ -2104,7 +2104,10 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       quote_string(GSTR(g)); break;
 
     case t_CLOSURE:
-      pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      if (lg(g)>=6)
+        pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      else
+        pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -2475,7 +2478,10 @@ texi(GEN g, pariout_t *T, int addsign)
     }
 
     case t_CLOSURE:
-      pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      if (lg(g)>=6)
+        pariprintf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      else
+        pariprintf("\\{\"%s\",%Z,%Z\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:

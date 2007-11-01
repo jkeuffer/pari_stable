@@ -1382,6 +1382,10 @@ polynomial arithmetic and linear algebra over small finite fields, etc.
 \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
 (\kbd{NULL}-terminated) string.
 
+\subsec{Type \typ{CLOSURE} (closure)}:\kbdsidx{t_CLOSURE}\sidx{closure}
+This type hold GP functions and closures, in compiled form. It is useless in
+library mode and subjet to change each time the GP language evolves. Hence we
+do not describe it here and refer to the Developer's Guide.
 
 \subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list}
 this type was introduced for specific \kbd{gp} use and is rather inefficient
