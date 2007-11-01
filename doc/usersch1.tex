@@ -16,11 +16,19 @@ topology or numerical analysis to physics.
 
 Although quite an amount of symbolic manipulation is possible, PARI does
 badly compared to systems like Axiom, Magma, Maple, Mathematica or Maxima, or
-Reduce on such tasks (e.g.~multivariate polynomials, formal integration,
-etc\dots). On the other hand, the three main advantages of the system are its
+Reduce on such tasks, e.g.~multivariate polynomials, formal integration,
+etc. On the other hand, the three main advantages of the system are its
 speed, the possibility of using directly data types which are familiar to
-mathematicians, and its extensive algebraic number theory module which has no
-equivalent in the above-mentioned systems.
+mathematicians, and its extensive algebraic number theory module (from
+the above-mentioned systems, only Magma provides similar features).
+
+Non-mathematical strong points include the possibility to program either 
+in high-level scripting languages or with the PARI library, a mature system
+(development started in the mid eighties) that was used to conduct and
+disseminate original mathematical research, while building a large user
+community (linked by helpful mailing lists and a tradition of great user
+support from the developers). And, of course, PARI/GP is Free Software,
+covered by GNU's General Public License.
 
 PARI is used in three different ways:
 
@@ -120,26 +128,24 @@ components (i.e.~the real and imaginary part) of such a ``complex number''
 can be of any type. The only sensible ones are integers (we are then in
 $\Z[i]$), rational numbers ($\Q[i]$), real numbers ($\R[i]=\C$), or even
 elements of $\Z/n\Z$ (in $(\Z/n\Z)[t]/(t^2+1)$), or $p$-adic numbers when
-$p\equiv 3 \mod 4$ ($\Q_{p}[i]$).
+$p\equiv 3 \mod 4$ ($\Q_{p}[i]$). This feature must not be used too rashly in
+library mode: for example you are in principle allowed to create objects
+which are ``complex numbers of complex numbers''. (This is not possible under
+\kbd{gp}.) But do not expect PARI to make sensible use of such objects: you
+will mainly get nonsense.
 
-This feature must not be used too rashly in library mode: for example you are
-in principle allowed to create objects which are ``complex numbers of complex
-numbers''. (This is not possible under \kbd{gp}.) But do not expect PARI to
-make sensible use of such objects: you will mainly get nonsense.
-
-On the other hand, one thing which \emph{is} allowed is to have components of
-different, but compatible, types. For example, taking again complex numbers,
-the real part could be of type integer, and the imaginary part of type
-rational. By compatible, we mean types which can be freely mixed in
-operations like $+$ or $\times$. For example if the real part is of type
-real, the imaginary part cannot be of type intmod (integers modulo a given
-number $n$).
+On the other hand, it \emph{is} allowed to have components of different, but
+compatible, types, which can be freely mixed in basic ring operations $+$ or
+$\times$. For example, taking again complex numbers, the real part could be
+an integer, and the imaginary part a rational number. On the other hand, if
+the real part is a real number, the imaginary part cannot be an integer
+modulo $n$ !
 
 Let us now describe the types. As explained above, they are built recursively
 from basic types which are as follows. We use the letter $T$ to designate any
 type; the symbolic names \typ{xxx} correspond to the internal representations
 of the types.\medskip
-\settabs\+xxx&typexxxxxxxxxxxx&xxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\cr
+\settabs\+xxxxxx&typexxxxxxxxxxxxx&xxxxxxxxxxxxx&xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\cr
 %
 \+&type \tet{t_INT}& $\Z$& Integers (with arbitrary
 precision)\sidx{integer}\cr
@@ -164,8 +170,8 @@ element}\cr
 \+&type \tet{t_QUAD}& $\Q[w]$& Quadratic Numbers (where
 $[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
 %
-\+&type \tet{t_POLMOD}& $T[X]/P(X)T[X]$& Polmods (polynomials modulo
-$P$)\varsidx{polmod}\cr
+\+&type \tet{t_POLMOD}& $T[X]/(P)$& Polmods (polynomials modulo
+$P\in T[X]$)\varsidx{polmod}\cr
 %
 \+&type \tet{t_POL}& $T[X]$& Polynomials \sidx{polynomial}\cr
 %
@@ -194,16 +200,12 @@ component. \sidx{scalar type} The first nine basic types, from \typ{INT} to
 coefficients of other more complicated objects. Type \typ{POLMOD} is used to
 define algebraic extensions of a base ring, and as such is a scalar type.
 
-The internal type \tet{t_VECSMALL}, holds vectors of small
-integers\sidx{vecsmall}, whose absolute value is bounded by $2^{31}$
-(resp.~$2^{63}$) on 32-bit, resp.~64-bit, machines. They are used internally
-to represent permutations, polynomials or matrices over a small finite field,
-etc.
-
-In addition, there exist types \tet{t_QFR} and \tet{t_QFI} for binary
-quadratic forms of respectively positive and negative
-discriminants,\sidx{binary quadratic form} which can be used in specific
-operations, but which may disappear in future versions.
+In addition, there exist types \tet{t_QFR} and \tet{t_QFI} for integral
+binary quadratic forms, and the internal type \tet{t_VECSMALL}. The latter
+holds vectors of small integers\sidx{vecsmall}, whose absolute value is
+bounded by $2^{31}$ (resp.~$2^{63}$) on 32-bit, resp.~64-bit, machines. They
+are used internally to represent permutations, polynomials or matrices over a
+small finite field, etc.
 
 Every PARI object (called \tet{GEN} in the sequel) belongs to one of these
 basic types. Let us have a closer look.
@@ -245,8 +247,8 @@ integer (resp.\ polynomial).
 
 Finally, $p$-adic numbers have three components: the prime $p$, the
 ``modulus'' $p^k$, and an approximation to the $p$-adic number. Here $\Z_p$
-is considered as the projective limit $\limproj \Z/p^k\Z$ (via its finite
-quotients), and $\Q_p$ as its field of fractions. Like real numbers, the
+is considered as the projective limit $\limproj \Z/p^k\Z$ via its finite
+quotients, and $\Q_p$ as its field of fractions. Like real numbers, the
 codewords contain an exponent, giving the $p$-adic valuation of the number,
 and also the information on the precision of the number, which is
 redundant with $p^k$, but is included for the sake of efficiency.
@@ -254,8 +256,8 @@ redundant with $p^k$, but is included for the sake of efficiency.
 \subsec{Finite field elements}: \sidx{finite field element}
 
 The exact internal format depends of the finite field size, but it includes
-the field characteristic $p$, an irreducible polynomial $T$ over $\F_p$
-defining the finite field $\F_p[X]/(T(X))$ and the element expressed as
+the field characteristic $p$, an irreducible polynomial $T\in\F_p[X]$
+defining the finite field $\F_p[X]/(T)$ and the element expressed as
 a polynomial in (the class of) $X$.
 
 \subsec{Complex numbers and quadratic numbers}: \sidx{complex
@@ -333,14 +335,12 @@ the right precision for the result. Even if it is working in calculator mode
 \kbd{gp} where there is a notion of \idx{default precision}, which is only
 used to convert exact types to inexact ones.
 
-In particular, this means that if an operation involves objects of
-different accuracies, some digits will be disregarded by PARI. It is a
-common source of errors to forget, for instance, that a real number is
-given as $r + 2^e \varepsilon$ where $r$ is a rational approximation, $e$ a
-binary exponent and $\varepsilon$ is a nondescript real number less than 1 in
-absolute value. Hence, any number less than $2^e$ may be treated as an exact
-zero:
-
+In particular, if an operation involves objects of different accuracies, some
+digits will be disregarded by PARI. It is a common source of errors to
+forget, for instance, that a real number is given as $r + 2^e \varepsilon$
+where $r$ is a rational approximation, $e$ a binary exponent and
+$\varepsilon$ is a nondescript real number less than 1 in absolute value.
+Hence, any number less than $2^e$ may be treated as an exact zero:
 \bprog
 ? 0.E-28 + 1.E-100
 %1 = 0.E-28
@@ -352,18 +352,15 @@ zero:
 
 The second principle is that PARI operations are in general quite permissive.
 For instance taking the exponential of a vector should not make sense.
-However, it frequently happens that a computation comes out with a result
-which is a vector with many components, and one wants to get the exponential
-of each one. This could easily be done either under \kbd{gp} or in library
-mode, but in fact PARI assumes that this is exactly what you want to do when
-you take the exponential of a vector, so no work is necessary. Most
-transcendental functions work in the same way (see Chapter 3 for details).
-
-An ambiguity would arise with square matrices. PARI always considers that you
-want to do componentwise function evaluation, hence to get for example the
-exponential of a square matrix you would need to use a function with a
-different name, \kbd{matexp} for instance. In the present version \vers, this
-is not implemented.
+However, it frequently happens that one wants to apply a given function
+to all elements in a vector. This is easily done using a simple loop,
+but in fact PARI assumes that this is exactly what you want to do when you
+apply a scalar function to a vector. Taking the exponential of a vector
+will do just that, so no work is necessary. Most transcendental functions
+work in the same way\footnote{*}{An ambiguity arises with square matrices.
+PARI always considers that you want to do componentwise function evaluation
+in this context, hence to get for example the standard exponential of a
+square matrix you would need to implement a different function.}.
 
 In the same spirit, when objects of different types are combined they
 are first automatically mapped to a suitable ring, where the computation
