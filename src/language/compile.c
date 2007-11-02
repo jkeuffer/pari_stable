@@ -645,12 +645,9 @@ compilefunc(entree *ep, long n, int mode)
   {
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
-    if (nb)
-    {
-      op_push(OCnewframe,nb);
-      for(i=1;i<=nb;i++)
-        var_push(NULL,Lmy);
-    }
+    if (nb) op_push(OCnewframe,nb);
+    for(i=1;i<=nb;i++)
+      var_push(NULL,Lmy);
     for (i=1;i<=nb;i++)
     {
       long a=arg[i];
@@ -1199,45 +1196,34 @@ compilenode(long n, int mode, long flag)
       pari_sp ltop=avma;
       struct codepos pos;
       long i;
-      GEN arg2=listtogen(x,Flistarg);
-      long arity=lg(arg2)-1,nbmvar=numbmvar();
+      GEN arg=listtogen(x,Flistarg);
+      long nb=lg(arg)-1,nbmvar=numbmvar();
       GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
-      if (arity) op_push(OCnewframe,arity);
-      for (i=1;i<=arity;i++)
+      if (nb) op_push(OCgetargs,nb);
+      for(i=1;i<=nb;i++)
+        var_push(NULL,Lmy);
+      for (i=1;i<=nb;i++)
       {
-        long a = arg2[lg(arg2)-i];
-        entree *en;
-        switch (tree[a].f)
+        long a=arg[i];
+        if (tree[a].f==Faffect)
         {
-        case Fentry: case Ftag:
-          en=getvar(a);
-          var_push(en,Lmy);
-          op_push(OCgetarg,-arity+i-1);
-          break;
-        case Faffect:
-          {
-            struct codepos lpos;
-            getcodepos(&lpos);
-            compilenode(tree[a].y,Ggen,0);
-            op_push(OCpushgen, data_push(getclosure(&lpos)));
-            en=getvar(tree[a].x);
-            var_push(en,Lmy);
-            op_push(OCdefaultarg,-arity+i-1);
-            break;
-          }
-        default:
-          pari_err(talker2,"invalid function definition",
-              tree[a].str,get_origin());
+          struct codepos lpos;
+          getcodepos(&lpos);
+          compilenode(tree[a].y,Ggen,0);
+          op_push(OCpushgen, data_push(getclosure(&lpos)));
+          op_push(OCdefaultarg,-nb+i-1);
+          a=tree[a].x;
         }
+        localvars[s_lvar.n-nb+i-1].ep=getvar(a);
       }
       if (y>=0 && tree[y].f!=Fnoarg)
         compilenode(y,Ggen,FLreturn);
       else
         compilecast(n,Gvoid,Ggen);
-      op_push(OCpushgen, data_push(getfunction(&pos,arity,nbmvar,text)));
+      op_push(OCpushgen, data_push(getfunction(&pos,nb,nbmvar,text)));
       if(nbmvar) op_push(OCsaveframe,0);
       avma=ltop;
       break;

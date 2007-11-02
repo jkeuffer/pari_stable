@@ -132,7 +132,7 @@ og(p)/log(q))));
 3
 ? kill(addii)
 ? getheap
-[25, 1762]
+[25, 1759]
 ? print("Total time spent: ",gettime);
 Total time spent: 16
 ? \q

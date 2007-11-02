@@ -114,7 +114,7 @@ allocating_mem(void)
  * functions for use in sumiter: we want a temporary ep->value, which is NOT
  * a clone (PUSH), to avoid unnecessary copies. */
 
-enum {PUSH_VAL = 0, COPY_VAL = 1};
+enum {PUSH_VAL = 0, COPY_VAL = 1, DEFAULT_VAL = 2};
 
 /* ep->args is the stack of old values (INITIAL if initial value, from
  * installep) */
@@ -880,21 +880,14 @@ closure_eval(GEN C)
         g->x = *(g->c.ptcell);
         break;
       }
-    case OCgetarg:
-      if (gel(st,sp-1))
-        copylex(operand,gel(st,sp-1));
-      sp--;
-      break;
     case OCdefaultarg:
-      if (gel(st,sp-2))
-        copylex(operand,gel(st,sp-2));
-      else
+      if (var[s_var.n+operand].flag==DEFAULT_VAL)
       {
         GEN z = closure_evalgen(gel(st,sp-1));
         if (!z) pari_err(talker,"break not allowed in function parameter");
         copylex(operand,z);
       }
-      sp-=2;
+      sp--;
       break;
     case OClocalvar:
       ep=(entree *)operand;
@@ -1069,6 +1062,22 @@ closure_eval(GEN C)
             gel(v,j)=gcopy(var[s_var.n-j].value);
         }
         gel(st,sp-1) = cl;
+      }
+      break;
+    case OCgetargs:
+      stack_alloc(&s_var,operand);
+      s_var.n+=operand;
+      nbmvar+=operand;
+      sp-=operand;
+      for (j=0;j<operand;j++)
+      {
+        if (gel(st,sp+j))
+          copylex(j-operand,gel(st,sp+j));
+        else
+        {
+          var[s_var.n+j-operand].flag=DEFAULT_VAL;
+          var[s_var.n+j-operand].value=gen_0;
+        }
       }
       break;
     case OCvec:
@@ -1294,8 +1303,8 @@ closure_disassemble(GEN C)
     case OCcompoLptr:
       pariprintf("compoLptr\n");
       break;
-    case OCgetarg:
-      pariprintf("getarg\t\t%ld\n",operand);
+    case OCgetargs:
+      pariprintf("getargs\t\t%ld\n",operand);
       break;
     case OCdefaultarg:
       pariprintf("defaultarg\t%ld\n",operand);
