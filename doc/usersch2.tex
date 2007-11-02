@@ -1364,19 +1364,18 @@ defaults are used instead to fill in remaining formal parameters.
 Of course, you can change these default values to something more useful than
 $0$. In the function definition, you can append \kbd{=}\var{expr} to a formal
 parameter, to give that variable an explicit default value. The expression
-gets evaluated the moment the function is called, but currently may not
-involve the preceding function parameters. For instance, after
+gets evaluated the moment the function is called, and may involve the
+preceding function parameters: a default value for $x_i$ may involve $x_j$
+for $j < i$. For instance, after
 \bprog
-f(x = 1, y = 2, z = 3) = ....
+f(x = 1, y = 2, z = y+1) = ....
 @eprog\noindent
-typing in \kbd{f(6,4)} would give
-you \kbd{f(6,4,3)}. In the rare case when you want to set some far away
-argument, and leave the defaults in between as they stand, use
-the ``empty argument'' trick: \kbd{f(6,,1)} would yield
-\kbd{f(6,2,1)}. Of course, \kbd{f()} by itself yields
-\kbd{f(1,2,3)} as was to be expected.
+typing in \kbd{f(3,4)} would give you \kbd{f(3,4,5)}. In the rare case when
+you want to set some far away argument, and leave the defaults in between as
+they stand, use the ``empty argument'' trick: \kbd{f(6,,1)} would yield
+\kbd{f(6,2,1)}. Of course, \kbd{f()} by itself yields \kbd{f(1,2,3)} as was
+to be expected.
 
-%: a default value for $x_i$ may involve $x_j$ for $j < i$.
 More specifically,
 \bprog
 f(x, y=2, z=3) = print(x, ":", y, ":", z);
@@ -1620,7 +1619,7 @@ x.j =
   if (type(x) != "t_VEC" || #x < 14, error("not an elliptic curve: " x));
   x[13]
 }
-@eprog\noindent As for uer functions, you can redefine your member functions
+@eprog\noindent As for user functions, you can redefine your member functions
 simply by typing new definitions. On the other hand, as a safety measure, you
 cannot redefine the built-in member functions, so attempting to redefine
 \kbd{x.j} as above would in fact produce an error; you would have to call it
@@ -1842,8 +1841,8 @@ The second error is a simple typo: \kbd{isprime(p+} instead of
 but the ill-formed addition \kbd{p+} without a second operand. This is
 detected when we read the ensuing comma, and \kbd{gp} stops at this point.
 
-\emph{Runtime errors} are more annoying because they occur at a point where
-meaningful context no longer exists:
+\emph{Runtime errors} from the evaluator are more annoying because they occur
+at a point where meaningful context no longer exists:
 \bprog
 ? if (siN(x) < eps, do_something())
   ***   function 'siN' not yet defined.
@@ -1856,14 +1855,15 @@ point, however, so we cannot give any meaningful context.
 
 Runtime errors from the library will usually be clearer since, by
 definition, they answer a correctly worded query where all terms have a
-proper definition (otherwise \kbd{gp} would have protested first). Also they
-have more mathematical content, which should be easier to grasp than a
+proper definition (otherwise the evaluator would have protested first). Also
+they have more mathematical content, which should be easier to grasp than a
 parser's logic. For instance:
 \bprog
 ? 1/0
   *** _/_: division by zero
 @eprog\noindent telling us that a runtime error occured while evaluating the
-binary \kbd{/} operator (the \kbd{\_} are placeholders).
+binary \kbd{/} operator (the \kbd{\_} surrounding the operator are
+placeholders).
 
 \subsec{Error recovery}.\sidx{error recovery}\label{se:errorrec}
 
@@ -2059,9 +2059,9 @@ and \kbd{BROKEN} if the installed function did not behave as expected.
 \section{Interfacing GP with other languages}
 \noindent
 The PARI library was meant to be interfaced with C programs. This specific
-use will be dealt with extensively in Chapter~4. Of course, \kbd{gp} itself
-provides a convenient  interpreter to execute rather intricate scripts (see
-\secref{se:programming}).
+use is dealt with extensively in the \emph{User's guide to the PARI library}.
+Of course, \kbd{gp} itself provides a convenient  interpreter to execute
+rather intricate scripts (see \secref{se:programming}).
 
 Scripts, when properly written, tend to be shorter and clearer than C
 programs, and are certainly easier to write, maintain or debug. You don't
@@ -2069,19 +2069,19 @@ need to deal with memory management, garbage collection, pointers,
 declarations, and so on. Because of their intrinsic simplicity, they are more
 robust as well. They are unfortunately somewhat slower. Thus their use will
 remain complementary: it is suggested that you test and debug your algorithms
-using scripts, before actually coding them in C for the sake of speed.
+using scripts, before actually coding them in C if speed is paramount.
 The GP2C compiler often eases this part.
 
-Note also that the \kbd{install} command enables you to concentrate on
-critical parts of your programs only (which can of course be written with the
-help of other libraries than PARI), and to efficiently import
-foreign functions for use under \kbd{gp} (see~\secref{se:install}).
+The \kbd{install} command (see~\secref{se:install}) efficiently imports
+foreign functions for use under \kbd{gp}, which can of course be written
+using other libraries than PARI. Thus you may code only critical parts
+of your program in C, and still maintain most of the program as a GP script.
 
-We are aware of four PARI-related public domain packages to embed PARI in
-other languages. We \emph{neither endorse nor support} any of them; you might
-want to give them a try if you are familiar with the languages they are based
-on. The first is the \tet{Math::Pari} Perl module (see any CPAN mirror),
-written by Ilya Zakharevich. The second is \tet{PariPython}%
+We are aware of four PARI-related Free Software packages to embed PARI in
+other languages. We \emph{neither endorse nor support} any of them, but you
+may want to give them a try if you are familiar with the languages they are
+based on. The first is the \tet{Math::Pari} Perl module (see any CPAN
+mirror), written by Ilya Zakharevich. The second is \tet{PariPython}%
 \footnote{*}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
 %
 by St\'efane Fermigier, which is no longer maintained. Starting from
@@ -2112,7 +2112,7 @@ is described in \secref{se:default}. The basic syntax is
 \kbd{default(\var{def}, \var{value})},
 
 \noindent which sets the default \var{def} to \var{value}. In interactive
-use, most of these can be abbreviated using historic \kbd{gp} metacommands
+use, most of these can be abbreviated using \kbd{gp} metacommands
 (mostly, starting with \b), which we shall describe in the next section.
 
 Here we will only describe the available defaults and how they are used. Just
@@ -2128,8 +2128,8 @@ there, so for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This
 is mostly useful to modify or set the defaults \kbd{primelimit} or
 \kbd{stacksize} which typically involve a lot of trailing zeroes.
 
-\misctitle{(somewhat technical) Note:} As we will see in \secref{se:strings},
-the second argument to \kbd{default} will be subject to string context
+\misctitle{(somewhat technical) Note:} As we saw in \secref{se:strings},
+the second argument to \kbd{default} is subject to string context
 expansion, which means you can use run-time values. In other words, something
 like
 \bprog
