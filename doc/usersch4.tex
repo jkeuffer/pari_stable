@@ -1264,7 +1264,7 @@ as for \typ{INTMOD}s, \kbd{z[1]} points to the modulus, and \kbd{z[2]}
 to a polynomial representing the class of~\kbd{z}. Both must be of type
 \typ{POL} in the same variable, satisfying the inequality $\deg \kbd{z[2]}
 < \deg \kbd{z[1]}$. However, \kbd{z[2]} is allowed to be a simplification
-of such a polynomial, e.g a scalar. This is tricky considering the
+of such a polynomial, e.g.~a scalar. This is tricky considering the
 hierarchical structure of the variables; in particular, a polynomial in
 variable of \emph{lesser} priority (see \secref{se:priority}) than the
 modulus variable is valid, since it is considered as the constant term of
@@ -1431,11 +1431,10 @@ representation is not symmetrical at all.
 
 Under \kbd{gp}, one needs not worry too much since the interpreter defines
 the variables as it sees them\footnote{*}{ The first time a given identifier
-is read by the GP parser (and is not immediately interpreted as a function) a
-new variable is created, and it is assigned a strictly lower priority than
-any variable in use at this point. On startup, before any user input has
-taken place, 'x' is defined in this way and has initially maximal priority
-(and variable number $0$).}
+is read by the GP parser a new variable is created, and it is assigned a
+strictly lower priority than any variable in use at this point. On startup,
+before any user input has taken place, 'x' is defined in this way and has
+initially maximal priority (and variable number $0$).}
 %
 and do the right thing with the polynomials produced (however, have a look at
 the remark in \secref{se:rempolmod}).
@@ -1464,22 +1463,21 @@ variables\sidx{variable (user)}''.
 \subsubsec{User variables}\sidx{variable (user)}: When the program starts,
 \kbd{x} is the only user variable (number~$0$). To define new ones, use
 
-\fun{long}{fetch_user_var}{char *$s$}
-
-\noindent which inspects the user variable named $s$ (creating it if needed),
-and returns its variable number.
+\fun{long}{fetch_user_var}{char *s}: inspects the user variable whose name is
+the string pointed to by \kbd{s}, creating it if needed, and returns its
+variable number.
 \bprog
 long v = fetch_user_var("y");
 GEN gy = pol_x(v);
 @eprog\noindent
-This function raises an error if $s$ is already registered as a function
-name.
+The function raises an exception if the name is already in use for an
+\tet{install}ed or built-in function, or an alias.
 
 \misctitle{Caveat}: you can use \tet{gp_read_str}
 (see~\secref{se:gp_read_str}) to execute a GP command and create GP
 variables on the fly as needed:
 \bprog
-GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x($v$), for some $v$ */
+GEN gy = gp_read_str("'y"); /*@Ccom returns \kbd{pol\_x}($v$), for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}
@@ -1487,9 +1485,9 @@ might work, but is dangerous, especially when programming functions to
 be used under \kbd{gp}. The latter reads the value of \kbd{y}, as
 \emph{currently} known by the \kbd{gp} interpreter, possibly creating it
 in the process. But if \kbd{y} has been modified by previous \kbd{gp}
-commands (e.g \kbd {y = 1}), then the value of \kbd{gy} is not what you
+commands (e.g.~\kbd {y = 1}), then the value of \kbd{gy} is not what you
 expected it to be and corresponds instead to the current value of the
-\kbd{gp} variable (e.g \kbd{gen\_1}).
+\kbd{gp} variable (e.g.~\kbd{gen\_1}).
 
 \fun{GEN}{fetch_var_value}{long v} returns a shallow copy of the current
 value of the variable numbered $v$. Returns \kbd{NULL} if that variable
@@ -1510,10 +1508,9 @@ This returns a variable number which is guaranteed to be unused by the
 library at the time you get it and as long as you do not delete it (we will
 see how to do that shortly). This has \emph{higher} priority than any
 temporary variable produced so far (\kbd{MAXVARN} is assumed to be the first
-such). This call updates all the aforementioned internal arrays. In
-particular, after the statement \kbd{v = fetch\_var()}, you can use
-\kbd{pol\_1[v]} and \kbd{pol\_x[v]}. The variables created in this way have no
-identifier assigned to them though, and they is printed as
+such). After the statement \kbd{v = fetch\_var()}, you can use
+\kbd{pol\_1(v)} and \kbd{pol\_x(v)}. The variables created in this way have no
+identifier assigned to them though, and are printed as
 \kbd{\#<\text{number}>}, except for \kbd{MAXVARN} which is printed
 as~\kbd{\#}. You can assign a name to a temporary variable, after creating
 it, by calling the function
@@ -1595,21 +1592,6 @@ evaluated. There is one technical exception: if \kbd{name} is a \emph{binary}
 file (from \tet{writebin}) containing more than one object, a \typ{VEC}
 containing them all is returned. This is because binary objects bypass the
 parser, hence reading them has no useful side effect.
-
-Once in a while, it may be necessary to evaluate a GP expression sequence
-involving a call to a function you have defined in~C. This is easy using
-\teb{install} which allows you to manipulate quite an arbitrary function (GP
-knows about pointers!). The syntax is
-
-\fun{void}{install}{void *f, char *name, char *code}
-
-\noindent where \kbd{f} is the (address of) the function (cast to the C type
-\kbd{void*}), \kbd{name} is the name by which you want to access your
-function from within your GP expressions, and \kbd{code} is a character
-string describing the function call prototype (see~\secref{se:gp.interface}
-for the precise description of prototype strings). In case the function
-returns a \kbd{GEN}, it must satisfy \kbd{gerepileupto} assumptions (see
-\secref{se:garbage}).
 
 \subsec{Output to string}.\sidx{output}
 
@@ -1853,10 +1835,10 @@ of linear.
 %
 As mentioned in the \kbd{COPYING} file, modified versions of the PARI package
 can be distributed under the conditions of the GNU General Public License. If
-you do modify PARI, however, it is certainly for a good reason, hence we
-would like to know about it, so that everyone can benefit from it. There is
-then a good chance that your improvements are incorporated into the next
-release.
+you do modify PARI, however, it is certainly for a good reason, and we
+would like to know about it, so that everyone can benefit from your changes.
+There is then a good chance that your improvements are incorporated into the
+next release.
 
 We classify changes to PARI into four rough classes, where changes of the
 first three types are almost certain to be accepted. The first type includes
@@ -1879,7 +1861,39 @@ efficiency.
 Finally the last type is to add new functions to PARI. We explain here how
 to do this, so that in particular the new function can be called from \kbd{gp}.
 
-\subsec{The calling interface from \kbd{gp}, parser codes}.
+\subsec{Coding guidelines}.\label{se:coding_guidelines}
+\noindent
+Code your function in a file of its own, using as a guide other functions
+in the PARI sources. One important thing to remember is to clean the stack
+before exiting your main function, since otherwise successive calls to
+the function clutters the stack with unnecessary garbage, and stack
+overflow occurs sooner. Also, if it returns a \kbd{GEN} and you want it
+to be accessible to \kbd{gp}, you have to make sure this \kbd{GEN} is
+suitable for \kbd{gerepileupto} (see \secref{se:garbage}).
+
+If error messages or warnings are to be generated in your function, use
+\kbd{pari\_err} and \kbd{pari\_warn} respectively.
+Recall that \kbd{pari\_err} does not return but ends with a \kbd{longjmp}
+statement. As well, instead of explicit \kbd{printf}~/ \kbd{fprintf}
+statements, use the following encapsulated variants:
+
+\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
+
+\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+
+\fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
+(this function is in fact much more versatile, see \secref{se:dbg_output}).
+
+Declare all public functions in an appropriate header file, if you
+want to access them from C. The other functions should be declared
+\kbd{static} in your file.
+
+Your function is now ready to be used in library mode after compilation and
+creation of the library. If possible, compile it as a shared library (see
+the \kbd{Makefile} coming with the \kbd{extgcd} example in the
+distribution). It is however still inaccessible from \kbd{gp}.\smallskip
+
+\subsec{Interlude: parser codes}.
 \label{se:gp.interface}
 A \idx{parser code} is a character string describing all the GP parser
 needs to know about the function prototype. It contains a sequence of the
@@ -1900,22 +1914,24 @@ input arguments they describe:
 \+& \kbd{L} & long {\rm (we implicitly identify \kbd{int} with \kbd{long})}\cr
 \+& \kbd{S} & symbol (i.e.~GP identifier name). Function expects a
 \kbd{*entree}\cr
-\+& \kbd{V} & variable (as \kbd{S}, but rejects symbols associated to
-functions)\cr
+\+& \kbd{V} & variable (as \kbd{S}, but rejects builtin function names)\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
-\+& \kbd{I} & string containing a sequence of GP statements (a \var{seq}), %
-to be processed by \kbd{gp\_read\_str}\cr
-\+&&(useful for control statements)\cr
 \+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
  args are copied as strings\cr
 \+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can
 be quoted using '\kbd{\bs}'\cr
 \+&&\quad Example: \kbd{aa"b\bs n)"c} yields the string \kbd{"aab\bs{n})c"}\cr
 \+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}\cr
-\+&& Unquoted components can be of any PARI type (converted following current
-output\cr
-\+&& format)\cr
+\+&& Unquoted components can be of any PARI type, converted to string following\cr
+\+&& current output format\cr
+\+& \kbd{I} & closure whose value is ignored, as in \kbd{for} loops,\cr
+\+&&\quad to be processed by \fun{void}{closure_evalvoid}{GEN C}\cr
+\+& \kbd{E} & closure whose value is used, as in \kbd{sum} loops,\cr
+\+&&\quad to be processed by \fun{void}{closure_evalgen}{GEN C}\cr
+
+\noindent A \tev{closure} is a GP function in compiled (bytecode) form. It 
+can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
 
 \noindent$\bullet$ Optional arguments:
 %
@@ -1950,7 +1966,7 @@ special syntaxes are available:
 
 \+&\kbd{DV}& optional \kbd{*entree}, send \kbd{NULL} if argument omitted.\cr
 
-\+&\kbd{DI}& optional \kbd{*char}, send \kbd{NULL} if argument omitted.\cr
+\+&\kbd{DI}& optional closure, send \kbd{NULL} if argument omitted.\cr
 
 \+&\kbd{Dn}& optional variable number, $-1$ if omitted.\cr
 
@@ -1986,72 +2002,41 @@ pointer).
 For instance, here is how you would code the following prototypes, which
 do not involve default values:
 \bprog
-GEN name(GEN x, GEN y, long prec)   ----> "GGp"
-void name(GEN x, GEN y, long prec)  ----> "vGGp"
-void name(GEN x, long y, long prec) ----> "vGLp"
-long name(GEN x)                    ----> "lG"
-int name(long x)                    ----> "iL"
+GEN f(GEN x, GEN y, long prec)   ----> "GGp"
+void f(GEN x, GEN y, long prec)  ----> "vGGp"
+void f(GEN x, long y, long prec) ----> "vGLp"
+long f(GEN x)                    ----> "lG"
+int f(long x)                    ----> "iL"
 @eprog\noindent
 If you want more examples, \kbd{gp} gives you easy access to the parser codes
 associated to all GP functions: just type \kbd{\b{h} \var{function}}. You
-can then compare with the C prototypes as they stand in the
-\kbd{paridecl.h}.
+can then compare with the C prototypes as they stand in \kbd{paridecl.h}.
 
 \misctitle{Remark}: If you need to implement complicated control statements
-(probably for some improved summation functions), you need to know about the
-\teb{entree} type, which is not documented. Check the comment
-at the end of \kbd{language/init.c} and the source code in
-\kbd{language/sumiter.c}.
-\smallskip
-
-\subsec{Coding guidelines}.
-\noindent
-Code your function in a file of its own, using as a guide other functions
-in the PARI sources. One important thing to remember is to clean the stack
-before exiting your main function, since otherwise successive calls to
-the function clutters the stack with unnecessary garbage, and stack
-overflow occurs sooner. Also, if it returns a \kbd{GEN} and you want it
-to be accessible to \kbd{gp}, you have to make sure this \kbd{GEN} is
-suitable for \kbd{gerepileupto} (see \secref{se:garbage}).
-
-If error messages or warnings are to be generated in your function, use
-\kbd{pari\_err} and \kbd{pari\_warn} respectively.
-Recall that \kbd{pari\_err} does not return but ends with a \kbd{longjmp}
-statement. As well, instead of explicit \kbd{printf}~/ \kbd{fprintf}
-statements, use the following encapsulated variants:
-
-\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
-
-\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
-
-\fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
-(this function is in fact much more versatile, see \secref{se:dbg_output}).
-
-Declare all public functions in an appropriate header file, if you
-want to access them from C. For example, if dynamic
-loading is not available, you may need to modify PARI to access these
-functions, so put them in \kbd{paridecl.h}. The other functions should
-be declared \kbd{static} in your file.
-
-Your function is now ready to be used in library mode after compilation and
-creation of the library. If possible, compile it as a shared library (see
-the \kbd{Makefile} coming with the \kbd{extgcd} example in the
-distribution). It is however still inaccessible from \kbd{gp}.\smallskip
+(probably for some improved summation functions), you need to know
+how the parser implements closures and lexicals and how the evaluator lets
+you deal with them (in particular the
+\tet{push_lex} and \tet{pop_lex} functions). None of this is documented.
+Check and adapt the source code in \kbd{language/sumiter.c} and
+\kbd{language/intnum.c}.
 
 \subsec{Integration with \kbd{gp} as a shared module}
 
-To tell \kbd{gp} about your function, you must do the following. First, find a
-name for it. It does not have to match the one used in library mode, but
-consistency is nice. It has to be a valid GP identifier, i.e.~use only
-alphabetic characters, digits and the underscore character (\kbd{\_}), the
-first character being alphabetic.
+In this section we assume that your Operating System is supported by
+\tet{install}. You have written a function in C following the guidelines is
+\secref{se:coding_guidelines}; in case the function returns a \kbd{GEN}, it
+must satisfy \kbd{gerepileupto} assumptions (see \secref{se:garbage}).
 
-Then figure out the correct \idx{parser code} corresponding to the
-function prototype, as explained above (\secref{se:gp.interface}).
+You then succeeded in building it as part of a shared library and want to
+finally tell \kbd{gp} about your function. First, find a name for it. It does
+not have to match the one used in library mode, but consistency is nice. It
+has to be a valid GP identifier, i.e.~use only alphabetic characters, digits
+and the underscore character (\kbd{\_}), the first character being
+alphabetic.
 
-Now, assuming your Operating System is supported by \tet{install},
-write a GP script like the following:
-
+Then figure out the correct \idx{parser code} corresponding to the function
+prototype, as explained in~\secref{se:gp.interface}) and write a GP script
+like the following:
 \bprog
 install(libname, code, gpname, library)
 addhelp(gpname, "some help text")
@@ -2061,39 +2046,24 @@ part is not mandatory, but very useful if you want others to use your
 module. \kbd{libname} is how the function is named in the library,
 usually the same name as one visible from C.
 
-Read that file from your \kbd{gp} session (from your \idx{preferences
-file} for instance, see \secref{se:gprc}), and that's it. You can now use
-the new function \var{gpname} under \kbd{gp}, and we would very much like
-to hear about it!
+Read that file from your \kbd{gp} session, for instance from your
+\idx{preferences file} for instance (\secref{se:gprc}), and that's it. You
+can now use the new function \var{gpname} under \kbd{gp}, and we would very
+much like to hear about it! \smallskip
 
-\subsec{Integration the hard way}
+There is a corresponding library interface for this functionnality, letting
+you expand the GP parser/evaluator available in the library with new
+functions from your C source code! You may then 
+evaluate a GP expression sequence involving calls to these new function.
 
-If \tet{install} is not available, things are more complicated: you have
-to hardcode your function in the \kbd{gp} binary (or install
-\idx{Linux}). Here is what needs to be done:
+\fun{entree *}{install}{void *f, char *gpname, char *code}
 
-You need to choose a section and add a file
-\kbd{functions/\var{section}/\var{gpname}}
-containing the following, keeping the notation above:
-\bprog
-Function:  @com\var{gpname}
-Section:   @com\var{section}
-C-Name:    @com\var{libname}
-Prototype: @com\var{code}
-Help:      @com\var{some help text}
-@eprog\noindent
-(If the help text does not fit on a single line, continuation lines must
-start by a whitespace character.) A GP2C-related \kbd{Description} field
-is also available to improve the code GP2C generates when compiling
-scripts involving your function. See the GP2C documentation for details.
+\noindent where \kbd{f} is the (address of the) function (cast to
+\kbd{void*}), \kbd{gpname} is the name by which you want to access your
+function from within your GP expressions, and \kbd{code} is as above.
 
-At this point you can recompile \kbd{gp}, which will first rebuild the
-functions database.
-
-\subsec{Example}.
-%
+\misctitle{Example}
 A complete description could look like this:
-
 \bprog
 {
   install(bnfinit0, "GD0,L,DGp", ClassGroupInit, "libpari.so");
@@ -2111,8 +2081,7 @@ the C prototype (from \kbd{paridecl.h}):
 %
 \bprog
   GEN bnfinit0(GEN P, long flag, GEN data, long prec)
-@eprog
-
+@eprog\noindent
 This function is in fact coded in \kbd{basemath/buch2.c}, and is in this case
 completely identical to the GP function \kbd{bnfinit} but \kbd{gp} does not
 need to know about this, only that it can be found somewhere in the shared
@@ -2125,7 +2094,40 @@ since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
 enables you to distinguish between a default value and actual input: the
 user could explicitly supply an empty vector!
 
-\misctitle{Note}: If \kbd{install} is not available, we have to add a file
+\subsec{Integration by patching \kbd{gp}}
+
+If \tet{install} is not available, and installing Linux or a BSD operating
+system is not an option (why?), you have to hardcode your function in the
+\kbd{gp} binary. Here is what needs to be done:
+
+\item Fetch the complete sources of the PARI distribution.
+
+\item Drop the function source code module in an appropriate directory
+(a priori \kbd{src/modules}), and declare all public functions
+in \kbd{src/headers/paridecl.h}.
+
+\item Choose a help section and add a file
+\kbd{src/functions/\var{section}/\var{gpname}}
+containing the following, keeping the notation above:
+\bprog
+Function:  @com\var{gpname}
+Section:   @com\var{section}
+C-Name:    @com\var{libname}
+Prototype: @com\var{code}
+Help:      @com\var{some help text}
+@eprog\noindent
+(If the help text does not fit on a single line, continuation lines must
+start by a whitespace character.) A GP2C-related \kbd{Description} field
+is also available to improve the code GP2C generates when compiling
+scripts involving your function. See the GP2C documentation for details.
+
+\item Launch \kbd{Configure}, which should pick up your C files and build an
+appropriate \kbd{Makefile}. At this point you can recompile \kbd{gp}, which
+will first rebuild the functions database.
+
+\misctitle{Example} We reuse the \kbd{ClassGroupInit} / \kbd{bnfinit0}
+from the preceding section. Since the C source code is already part
+of PARI, we only need to add a file
 
  \kbd{functions/number\_fields/ClassGroupInit}
 
@@ -2136,5 +2138,6 @@ Section: number_fields
 C-Name: bnfinit0
 Prototype: GD0,L,DGp
 Help: ClassGroupInit(P,{flag=0},{tech=[]}): this routine does @com\dots
-@eprog
+@eprog\noindent
+and recompile \kbd{gp}.
 \vfill\eject
