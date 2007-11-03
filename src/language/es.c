@@ -3529,19 +3529,31 @@ void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
 /*******************************************************************/
 /* history management function:
  *   p > 0, called from %p
- *   p <= 0, called from %` (p backquotes, possibly 0) */
+ *   p <= 0, called from %` (|p| backquotes, possibly 0) */
 GEN
 gp_history(gp_hist *H, long p, char *old, char *entry)
 {
+  ulong t = H->total, s = H->size;
   GEN z;
 
-  if (p <= 0) p += H->total; /* count |p| entries starting from last */
-  if ((ulong)p > H->total)
-    pari_err(talker2, "I can't see into the future", old, entry);
+  if (!t) pari_err(talker2, "The result history is empty", old, entry);
 
-  z = H->res[ (p-1) % H->size ];
-  if (!z || p <= 0 || p <= (long)(H->total - H->size))
-    pari_err(talker2, "I can't remember before the big bang", old, entry);
+  if (p <= 0) p += t; /* count |p| entries starting from last */
+  if (p <= 0 || p <= (long)(t - s) || (ulong)p > t)
+  {
+    char *str = stackmalloc(128);
+    long pmin = (long)(t - s) + 1;
+    if (pmin <= 0) pmin = 1;
+    sprintf(str, "History result %%%ld not available [%%%ld-%%%ld]", p,pmin,t);
+    pari_err(talker2, str, old, entry);
+  }
+  z = H->res[ (p-1) % s ];
+  if (!z)
+  {
+    char *str = stackmalloc(128);
+    sprintf(str, "History result %%%ld has been deleted (histsize changed)", p);
+    pari_err(talker2, str, old, entry);
+  }
   return z;
 }
 
