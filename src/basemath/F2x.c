@@ -339,7 +339,7 @@ F2x_addshiftip(GEN x, GEN y, ulong d)
 {
   ulong dl=d>>TWOPOTBITS_IN_LONG;
   ulong db=d&(BITS_IN_LONG-1UL);
-  ulong i;
+  long i;
   if (db)
   {
     ulong dc=BITS_IN_LONG-db;
