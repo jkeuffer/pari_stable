@@ -1439,10 +1439,13 @@ dbg(GEN x, long nb, long bl)
       blancs(bl); pariputs("code = "); dbg(gel(x,2),nb,bl);
       blancs(bl); pariputs("operand = "); dbg(gel(x,3),nb,bl);
       blancs(bl); pariputs("data = "); dbg(gel(x,4),nb,bl);
-      blancs(bl); pariputs("text = "); dbg(gel(x,5),nb,bl);
-      if (lg(x)==7)
+      if (lg(x)>=6)
       {
-        blancs(bl); pariputs("frame = "); dbg(gel(x,6),nb,bl);
+        blancs(bl); pariputs("text = "); dbg(gel(x,5),nb,bl);
+        if (lg(x)>=7)
+        {
+          blancs(bl); pariputs("frame = "); dbg(gel(x,6),nb,bl);
+        }
       }
       break;
 
@@ -2186,8 +2189,17 @@ sori(GEN g, pariout_t *T)
   switch (tg)
   {
     case t_REAL: wr_real(T,g,1); return;
+    case t_FFELT:
+      sori(FF_to_FpXQ_i(g),T);
+      return;
     case t_STR:
       quote_string(GSTR(g)); return;
+    case t_CLOSURE:
+      if (lg(g)>=6)
+        pariprintf("((%s)->%s)",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      else
+        pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+      return;
     case t_LIST:
       pariputs("List([");
       g = list_data(g);
@@ -2364,6 +2376,10 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("}{");
       texi(gel(g,2),T,1);
       pariputs("}"); break;
+
+    case t_FFELT:
+      bruti(FF_to_FpXQ_i(g),T,addsign);
+      break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
