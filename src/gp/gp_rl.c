@@ -436,6 +436,9 @@ init_prefix(const char *text, int *len, int *junk, char **TEXT)
   *junk = j;
   *len  = l - j;
 }
+static int
+is_internal(entree *ep) { return ep->menu >= 13; }
+
 /* Generator function for command completion.  STATE lets us know whether
  * to start from scratch; without any state (i.e. STATE == 0), then we
  * start at the top of the list. */
@@ -465,7 +468,7 @@ hashtable_generator(const char *text, int state, entree **hash)
       if (++hashpos >= functions_tblsz) return NULL; /* no names matched */
       ep = hash[hashpos];
     }
-    else if (strncmp(ep->name,TEXT,len))
+    else if (is_internal(ep) || strncmp(ep->name,TEXT,len))
       ep = ep->next;
     else
       break;

@@ -289,12 +289,14 @@ commands(long n)
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
     {
+      long m;
       switch (EpVALENCE(ep))
       {
 	case EpNEW:
 	case EpVAR: continue;
       }
-      if ((n < 0 && ep->menu) || ep->menu == n)
+      m = ep->menu;
+      if ((n < 0 && m && m < 13) || m == n)
       {
 	list[s] = (char*)ep->name;
 	if (++s >= size)
@@ -619,7 +621,7 @@ aide0(const char *s0, int flag)
   {
     n = atoi(s);
     if (n == 12) { community(); return; }
-    if (n < 0 || n > 14)
+    if (n < 0 || n > 15)
       pari_err(talker2,"no such section in help: ?",s,s);
     if (long_help) external_help(s,3); else commands(n);
     return;

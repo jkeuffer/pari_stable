@@ -1501,7 +1501,7 @@ print_functions_hash(const char *s)
   long m, n;
   entree *ep;
 
-  if (isalpha((int)*s))
+  if (is_keyword_char((int)*s))
   {
     ep = is_entry_intern(s,functions_hash,&n);
     if (!ep) pari_err(talker,"no such function");
