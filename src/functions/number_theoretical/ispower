@@ -19,3 +19,9 @@ Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
  
  If a third argument $\&n$ is given and $x$ is indeed a $k$-th power, sets
  $n$ to a $k$-th root of $x$.
+ 
+ \noindent For a \typ{FFELT} \kbd{x}, instead of omitting \kbd{k} (which is
+ not allowed for this type), it may be natural to set 
+ \bprog
+ k = (x.p ^ poldegree(x.pol) - 1) / fforder(x)
+ @eprog

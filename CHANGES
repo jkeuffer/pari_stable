@@ -257,7 +257,7 @@ LGr31- defaults graphcolormap, graphcolors [runtime-defined colormap for plots]
 LGr32- bit 4096 [ complex ] to ploth
    33- member function .p / .mod for t_PADIC
    34- same mnemonic flags to plotrecth as in ploth
-BA 35- member function .pol for t_FFELT
+BA 35- member function .pol and .p for t_FFELT
 BA 36- New type t_CLOSURE to store GP functions
 
   Removed

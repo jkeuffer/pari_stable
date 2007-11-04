@@ -58,6 +58,8 @@ member_p(GEN x)
       return gel(x,1);
     case t_PADIC:
       return gel(x,2);
+    case t_FFELT:
+      return gel(x,4);
   }
   member_err("p");
   return NULL;
