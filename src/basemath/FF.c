@@ -503,23 +503,38 @@ FF_issquareall(GEN x, GEN *pt)
   ulong pp;
   GEN r, T, p; 
   pari_sp av = avma;
+
+  if (FF_cmp0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
   if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])
   {
-   case t_FF_FpXQ:
-     r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
-     if (!r) { avma = av; return 0; }
-     break;
+  case t_FF_FpXQ:
+    if (!pt)
+    {
+      GEN m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
+      GEN z = constant_term( FpXQ_pow(gel(x,2), m, T, p) );
+      long res = kronecker(z, p) == 1;
+      avma = av; return res;
+    }
+    r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
+    if (!r) { avma = av; return 0; }
+    break;
 
-   case t_FF_F2xq:
-     if (pt) { avma = av; *pt = FF_sqrt(x); }
-     return 1;
+  case t_FF_F2xq:
+    if (pt) r = F2xq_sqrtn(gel(x,2),gen_2,T,NULL);
+    break;
 
-   default: /* case t_FF_Flxq: */
-     r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
-     if (!r) { avma = av; return 0; }
-     break;
+  default: /* case t_FF_Flxq: */
+    if (!pt)
+    {
+      GEN m = diviuexact(subis(gpowgs(p, degpol(T)), 1), pp - 1);
+      ulong z = Flxq_pow(gel(x,2), m, T, pp)[2];
+      avma = av; return krouu(z, pp) == 1;
+    }
+    r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
+    if (!r) { avma = av; return 0; }
+    break;
   }
   if (pt) { _mkFF(x,*pt,r); }
   return 1;
