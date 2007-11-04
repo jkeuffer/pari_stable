@@ -21,5 +21,5 @@ Doc: returns the default corresponding to keyword \var{key}. If \var{val} is
  expansion first). Typing \kbd{default()} (or \b{d}) yields the complete
  default list as well as their current values. See \secref{se:defaults} for a
  list of available defaults, and \secref{se:meta} for some shortcut
- alternatives. Note that the shortcut are meant for interactive use and
+ alternatives. Note that the shortcuts are meant for interactive use and
  usually display more information than \kbd{default}.
