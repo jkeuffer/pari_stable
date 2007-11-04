@@ -177,6 +177,50 @@ var_push(entree *ep, Ltype type)
   localvars[n].type = type;
 }
 
+static GEN
+pack_localvars(void)
+{
+  GEN pack=cgetg(3,t_VEC);
+  long i,l=s_lvar.n;
+  GEN t=cgetg(1+l,t_VECSMALL);
+  GEN e=cgetg(1+l,t_VECSMALL);
+  gel(pack,1)=t;
+  gel(pack,2)=e;
+  for(i=1;i<=l;i++)
+  {
+    t[i]=localvars[i-1].type;
+    e[i]=(long)localvars[i-1].ep;
+  }
+  return pack;
+}
+
+void
+localvars_unpack(GEN pack)
+{
+  GEN t=gel(pack,1);
+  GEN e=gel(pack,2);
+  long i;
+  for(i=1;i<lg(t);i++)
+    var_push((entree*)e[i],t[i]);
+}
+
+long
+localvars_find(GEN pack, entree *ep)
+{
+  GEN t=gel(pack,1);
+  GEN e=gel(pack,2);
+  long i;
+  long vn=0;
+  for(i=lg(e)-1;i>=1;i--)
+  {
+    if(t[i]==Lmy)
+      vn--;
+    if(e[i]==(long)ep)
+      return t[i]==Lmy?vn:0;
+  }
+  return 0;
+}
+
 enum FLflag {FLnocopy=1, FLreturn=2};
 
 static void compilenode(long n, int mode, long flag);
@@ -216,6 +260,7 @@ parseproto(char const **q, char *c)
       return PPdefaultmulti;
     }
     break;
+  case 'T':
   case 'p':
   case 'P':
   case 'f':
@@ -927,6 +972,9 @@ compilefunc(entree *ep, long n, int mode)
           break;
         case 'P':
           op_push(OCprecdl,0);
+          break;
+        case 'T':
+          op_push(OCpushgen,data_push(pack_localvars()));
           break;
         case 'f':
           {

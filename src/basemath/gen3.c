@@ -3114,7 +3114,7 @@ gnot(GEN x) { return gcmp0(x)? gen_1: gen_0; }
 /*******************************************************************/
 
 GEN
-geval(GEN x)
+geval_gp(GEN x, GEN t)
 {
   long lx, i, tx = typ(x);
   pari_sp av;
@@ -3124,26 +3124,28 @@ geval(GEN x)
   if (is_graphicvec_t(tx))
   {
     lx=lg(x); y=cgetg(lx, tx);
-    for (i=1; i<lx; i++) gel(y,i) = geval(gel(x,i));
+    for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
     return y;
   }
 
   switch(tx)
   {
     case t_STR:
+      if (t) localvars_unpack(t);
       return gp_read_str(GSTR(x));
 
     case t_POLMOD:
       av = avma;
-      return gerepileupto(av, gmodulo(geval(gel(x,2)), geval(gel(x,1))));
+      return gerepileupto(av, gmodulo(geval_gp(gel(x,2),t),
+                                      geval_gp(gel(x,1),t)));
 
     case t_POL:
       lx=lg(x); if (lx==2) return gen_0;
-      z = fetch_var_value(varn(x));
+      z = fetch_var_value(varn(x),t);
       if (!z) return gcopy(x);
-      av = avma; y = geval(gel(x,lx-1));
+      av = avma; y = geval_gp(gel(x,lx-1),t);
       for (i=lx-2; i>1; i--)
-	y = gadd(geval(gel(x,i)), gmul(z,y));
+	y = gadd(geval_gp(gel(x,i),t), gmul(z,y));
       return gerepileupto(av, y);
 
     case t_SER:
@@ -3151,13 +3153,20 @@ geval(GEN x)
 
     case t_RFRAC:
       av = avma;
-      return gerepileupto(av, gdiv(geval(gel(x,1)), geval(gel(x,2))));
+      return gerepileupto(av, gdiv(geval_gp(gel(x,1),t), geval_gp(gel(x,2),t)));
+
     case t_CLOSURE:
       if (x[1]) pari_err(impl,"eval on functions with parameters");
       return closure_evalres(x);
   }
   pari_err(typeer,"geval");
   return NULL; /* not reached */
+}
+
+GEN
+geval(GEN x)
+{
+  return geval_gp(x,NULL);
 }
 
 GEN

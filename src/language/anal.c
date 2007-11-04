@@ -248,6 +248,7 @@ check_proto(const char *code)
     case 'M':
     case 'P':
     case 'S':
+    case 'T':
     case 'f':
     case 'n':
     case 'p':
@@ -886,10 +887,15 @@ fetch_user_var(const char *s)
 }
 
 GEN
-fetch_var_value(long vx)
+fetch_var_value(long vx, GEN t)
 {
   entree *ep = varentries[vx];
-  return (ep && ep->value)? (GEN)ep->value: NULL;
+  long vn;
+  if (!ep) return NULL;
+  if (!t)  return ep->value;
+  vn=localvars_find(t,ep);
+  if (vn) return get_lex(vn);
+  return ep->value;
 }
 
 void

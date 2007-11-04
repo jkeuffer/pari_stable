@@ -350,7 +350,7 @@ long    delete_var(void);
 entree* fetch_named_var(const char *s);
 long    fetch_user_var(const char *s);
 long    fetch_var(void);
-GEN     fetch_var_value(long vx);
+GEN     fetch_var_value(long vx, GEN t);
 GEN     gp_read_str(char *t);
 entree* install(void *f, char *name, char *code);
 entree* is_entry(const char *s);
@@ -986,6 +986,11 @@ long    qpsolublenf(GEN bnf,GEN pol,GEN p);
 long    zpsoluble(GEN pol,GEN p);
 long    zpsolublenf(GEN bnf,GEN pol,GEN p);
 
+/* compile.c */
+
+void localvars_unpack(GEN pack);
+long localvars_find(GEN pack, entree *ep);
+
 /* default.c */
 
 GEN default0(const char *a, const char *b, long flag);
@@ -1300,6 +1305,7 @@ GEN     gdivmod(GEN x, GEN y, GEN *pr);
 GEN     gdivround(GEN x, GEN y);
 GEN     geq(GEN x, GEN y);
 GEN     geval(GEN x);
+GEN     geval_gp(GEN x, GEN t);
 GEN     gfloor(GEN x);
 GEN     gfloor2n(GEN x, long s);
 GEN     gfrac(GEN x);
