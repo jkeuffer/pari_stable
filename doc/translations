@@ -34,7 +34,6 @@ operator        @GP operators@2
 and             @&&@3
 or              @&&@3
 not             @&&@3
-t_INT           @Integers@2
 INT             @Integers@2
 integer         @Integers@2
 REAL            @Real numbers@2

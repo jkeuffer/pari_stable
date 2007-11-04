@@ -259,6 +259,7 @@ sub treat {
 
   if (!$apropos && $transl{$_}) { $_ = $transl{$_}; &choose_chap; }
   s/(\W)/\\$1/g;
+  s/_/\\\\_/g;
       ($pipe && open(DOC,"$pipe $docfile |"))
   || (!$pipe && open(DOC,"$docfile")) || die "Cannot open $docfile: $!";
   return &apropos($_) if ($apropos);

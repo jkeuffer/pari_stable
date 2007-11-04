@@ -2295,14 +2295,14 @@ being executed. This can be useful when reading a file with the \b{r} or
 test files used to check whether \kbd{gp} has been built correctly (see
 \b{e}).
 
-\subsec{factor\_add\_primes}\kbdsidx{factor_add_primes} (default \kbd{0}): if this is set, the integer
+\subsec{factor\_add\_primes} (default \kbd{0}):\kbdsidx{factor_add_primes} if this is set, the integer
 factorization machinery will call \kbd{addprimes} on primes
 factor that were difficult to find, so they are automatically tried first in
 other factorizations. If a routine is performing (or has performed) a
 factorization and is interrupted by an error or via Control-C, this lets you
 recover the prime factors already found.
 
-\subsec{factor\_proven}\kbdsidx{factor_proven} (default \kbd{0}): by
+\subsec{factor\_proven} (default \kbd{0}):\kbdsidx{factor_proven} by
 default, the factors output by the integer factorization machinery are
 only pseudo-primes, not proven primes. If this is
 set, a primality proof is done for each factor and all results depending on
