@@ -6,7 +6,7 @@ test(a)=
     x = polgalois(z);
     y = polgalois(poltschirnhaus( poltschirnhaus(z) ));
     print(x, x==y)
-  )
+  );
 }
 
 {

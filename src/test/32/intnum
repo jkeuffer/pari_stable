@@ -18,9 +18,9 @@
 ? tab=intfuncinit(t=[-oo,4.5],[oo,4.5],gamma(2+I*t)^3,1);
 ? intmellininvshort(2,4,tab)-A
 -3.072350108 E-97 + 0.E-101*I
-? f(x)=1/(exp(x)-1)-exp(-x)/x
+? f(x)=1/(exp(x)-1)-exp(-x)/x;
 ? F=truncate(f(t+O(t^7)));
-? g(x)=if(x>1e-18,f(x),subst(F,t,x))
+? g(x)=if(x>1e-18,f(x),subst(F,t,x));
 ? intnum(x=0,[oo,1],f(x))-Euler
 0.E-96
 ? intnum(x=0,[oo,1],g(x))-Euler
@@ -83,5 +83,5 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 48803
+Total time spent: 41202
 ? \q

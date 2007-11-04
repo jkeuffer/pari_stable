@@ -11,9 +11,9 @@ intlaplaceinv(x=100, 1, 1/x) - 1
 A = intmellininv(s=2,4, gamma(s)^3);
 tab = intfuncinit(t=[-oo, 4.5],[oo, 4.5], gamma(2+I*t)^3, 1);
 intmellininvshort(2,4,tab) - A
-f(x) = 1/(exp(x)-1) - exp(-x)/x
+f(x) = 1/(exp(x)-1) - exp(-x)/x;
 F = truncate( f(t + O(t^7)) );
-g(x) = if (x > 1e-18, f(x), subst(F,t,x))
+g(x) = if (x > 1e-18, f(x), subst(F,t,x));
 intnum(x = 0, [oo,1],  f(x)) - Euler
 intnum(x = 0, [oo,1],  g(x)) - Euler
 intnum(x = 0, 1,  1/sqrt(x)) - 2

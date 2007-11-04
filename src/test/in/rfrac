@@ -1,4 +1,4 @@
-prd(b)=prod(n=1,#b,a[n]^b[n])
+prd(b)=prod(n=1,#b,a[n]^b[n]);
 
 init(N) =
 { k = 1;
@@ -10,11 +10,11 @@ init(N) =
   for (i=1,#v, A = v[i];
     for (j=1,#v, B = v[j]; if ( A+B-A != B, error(A,"+",B))
     )
-  )
+  );
 }
 {doit2(i)=
   for (i=1,#v, A = v[i];
-    for (j=1,#v, B = v[j]; C = prd(w[i]-w[j]); if(A/B!=C, error(A,"/",B))))}
+    for (j=1,#v, B = v[j]; C = prd(w[i]-w[j]); if(A/B!=C, error(A,"/",B)))); }
 
 a=[a1,a2,a3,a4,a5,a6]; N = 4;
 init(N); doit(N); doit2(N);
@@ -22,7 +22,7 @@ init(N); doit(N); doit2(N);
 {doit3(i)=
   for (i=1,#v, A = v[i];
     for (j=1,#v, B = v[j]; D = A*C;
-      for (k=1,#v, C = v[k];  D - C)))}
+      for (k=1,#v, C = v[k];  D - C))); }
 a=[x,1+x,y,1+y];
 init(N); doit3(N);
 

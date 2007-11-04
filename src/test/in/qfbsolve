@@ -3,7 +3,7 @@ qfbeval(V,v)=
 {
   local(x,y);
   V=Vec(V);x=v[1];y=v[2];
-  V[1]*x^2+V[2]*x*y+V[3]*y^2
+  V[1]*x^2+V[2]*x*y+V[3]*y^2;
 }
 
 bqfb(N=10000)=
@@ -18,7 +18,7 @@ bqfb(N=10000)=
     until(Q!=0||Q2!=0,r=nextprime(random(30000));
       Q=qfbsolve(q,r);Q2=qfbsolve(q2,r));
     if(Q2==0||qfbeval(q2,Q2)!=r,print("qfbsolve(",q2,",",r,")!=",Q2);break);
-    if(Q==0||qfbeval(q,Q)!=r,print("qfbsolve(",q,",",r,")!=",Q);break))
+    if(Q==0||qfbeval(q,Q)!=r,print("qfbsolve(",q,",",r,")!=",Q);break));
 }
 bqfb();
 print("Total time spent: ",gettime);

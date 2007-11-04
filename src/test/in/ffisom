@@ -11,7 +11,7 @@ fptest(l,P,Q)=
 	local(C);
 	C=fpisom2(l,P,Q);
 	print(vector(length(C),i,if(subst(P,x,C[i])==0,0,error("fptest("a","l","P","Q")"))));
-	C
+	C;
 }
 print("-------------e=0--------------");
 fptest(13,Mod(1,13)*(x^4+2*x^2+2*x+1),Mod(1,13)*(x^4+2*x^3+2*x^2+1));
