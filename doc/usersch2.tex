@@ -1069,7 +1069,7 @@ functions, study the example in \secref{se:bewarescope} then come back.
 A \emph{scope} is an enclosing context where names and values are associated.
 A user's function body, the body of a loop, an individual command line, all
 define scopes; the whole program defines the \emph{global} scope. The
-argument of \tet{eval} is evaluated in \emph{global} scope.
+argument of \tet{eval} is evaluated in the enclosing scope.
 
 Variables are bound to values within a given scope. This is traditionnally
 implemented in two different ways:
@@ -1183,13 +1183,12 @@ are the same as before they were started.
 Note that lexical scoping has the unfortunate side effect of making break
 loops (see \secref{se:breakloop}) almost useless: break loops are run outside
 of the relevant scopes and are unable to access all lexically scoped
-variables. Analogously, \tet{eval} becomes less powerful: since it is
-evaluated in global scope, it cannot access values of lexical variables:
+variables. On the other hand, \tet{eval} is just as powerful as before: it is
+evaluated in the given scope, and can access values of lexical variables:
 \bprog
-? x = 0; eval("x")
-%1 = 0
-? my(x = Pi); eval("x")
-%2 = 0    \\@com we see the global \kbd{x}, not the one scoped to this command line.
+? x = 1;
+? my(x = 0); eval("x")
+%2 = 0    \\@com we see the local \kbd{x} scoped to this command line, not the global one
 @eprog
 
 Variables dynamically scoped using \kbd{local} should more appropriately be

@@ -15,6 +15,7 @@ Doc: replaces in $x$ the formal variables by the values that
  $x$ do not prevent its evaluation:
  \bprog
  ? eval("1a")
+   *** eval: Warning: unused characters: a.
  % 1 = 1
  @eprog
  
