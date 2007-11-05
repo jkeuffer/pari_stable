@@ -1371,6 +1371,16 @@ gen_sort_inplace(GEN x, void *E, int (*cmp)(void*,GEN,GEN), GEN *perm)
   }
 }
 
+static int
+closurecmp(void *data, GEN x, GEN y)
+{
+  pari_sp av = avma;
+  GEN z = closure_callgen2((GEN)data, x,y);
+  if (!z || typ(z) != t_INT)
+    pari_err(talker,"incorrect comparison function in vecsort");
+  avma = av; return signe(z);
+}
+
 #define cmp_IND 1
 #define cmp_LEX 2
 #define cmp_REV 4
@@ -1394,6 +1404,12 @@ vecsort0(GEN x, GEN k, long flag)
       case t_INT: k = mkvecsmall(itos(k)); break;
       case t_VEC: case t_COL: k = ZV_to_zv(k); break;
       case t_VECSMALL: break;
+      case t_CLOSURE:
+       if (k[1] < 2)
+         pari_err(talker,"incorrect comparison function in vecsort");
+       E = (void*)k;
+       CMP = &closurecmp;
+       goto END;
       default: pari_err(typeer,"vecsort");
     }
     lk = lg(k); l = 0;
@@ -1416,6 +1432,7 @@ vecsort0(GEN x, GEN k, long flag)
     E = (void*)((typ(x) == t_VECSMALL)? cmp_small: cmp);
     CMP = &cmp_nodata;
   }
+END:
   if (flag & cmp_UNIQ)
     x = flag & cmp_IND? gen_indexsort_uniq(x, E, CMP): gen_sort_uniq(x, E, CMP);
   else

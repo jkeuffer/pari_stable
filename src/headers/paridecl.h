@@ -1123,6 +1123,7 @@ void    writetex(const char *s, GEN g);
 /* eval.c */
 
 void    closure_disassemble(GEN n);
+GEN     closure_callgen2(GEN C, GEN x, GEN y);
 GEN     closure_evalgen(GEN code);
 GEN     closure_evalres(GEN code);
 void    closure_evalvoid(GEN code);

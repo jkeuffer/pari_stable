@@ -1151,6 +1151,30 @@ closure_evalvoid(GEN C)
     avma=ltop;
 }
 
+GEN
+closure_callgen2(GEN C, GEN x, GEN y)
+{
+  pari_sp ltop=avma;
+  GEN z;
+  long arity=C[1];
+  gel(st,sp++)=x;
+  gel(st,sp++)=y;
+  for(i=3; i<=arity; i++) st[sp++]=0;
+  closure_eval(C);
+  if (br_status)
+  {
+    if (br_status!=br_RETURN)
+      pari_err(talker, "break/next/allocatemem not allowed here");
+    avma=ltop;
+    sp-=arity;
+    z = br_res ? gcopy(br_res) : gnil;
+    reset_break();
+  }
+  else
+    z = gerepileupto(ltop, gel(st,--sp));
+  return z;
+}
+
 void
 closure_reset(void) {sp=0; rp=0;}
 

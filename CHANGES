@@ -259,6 +259,7 @@ LGr32- bit 4096 [ complex ] to ploth
    34- same mnemonic flags to plotrecth as in ploth
 BA 35- member function .pol and .p for t_FFELT
 BA 36- New type t_CLOSURE to store GP functions
+   37- Ability to use arbitrary compariso functions in vecsort()
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
