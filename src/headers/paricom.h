@@ -348,7 +348,7 @@ enum manage_var_t {
 
 #define zero_F2x(x)      (zero_Flx((x)))
 #define pol1_F2x(x)      (pol1_Flx((x)))
-#define F2x_cmp1(x)      (Flx_cmp1((x)))
+#define F2x_cmp1         Flx_cmp1
 
 #define FpX_renormalize   ZX_renormalize
 #define FpXX_renormalize  ZX_renormalize
