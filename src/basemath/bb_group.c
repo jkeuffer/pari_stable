@@ -254,8 +254,8 @@ gen_Shanks_sqrtl(GEN a, GEN l, GEN q,long e, GEN r, GEN y, GEN m,void *E, const 
  *
  * 1) If there is no solution, return NULL.
  *
- * 2) If there is a solution, there are exactly m of them [m = gcd(p-1,n)].
- * If zetan!=NULL, *zetan is set to a primitive mth root of unity so that
+ * 2) If there is a solution, there are exactly m of them [m = gcd(q-1,n)].
+ * If zetan!=NULL, *zetan is set to a primitive m-th root of unity so that
  * the set of solutions is { x*zetan^k; k=0..m-1 }
  */
 GEN
@@ -287,7 +287,7 @@ gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E, const struct bb_group
       if (zetan) z = grp->mul(E,z, grp->pow(E,y,powiu(l,e-j)));
       do
       {
-	if (!is_pm1(a) || signe(a)<0)
+	if (!grp->cmp1(a))
 	{
 	  a = gen_Shanks_sqrtl(a,l,q,e,r,y,zeta,E,grp);
 	  if (!a) { avma = ltop; return NULL;}
