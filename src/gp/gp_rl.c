@@ -296,6 +296,7 @@ add_paren(int end)
   }
   switch(EpVALENCE(ep))
   {
+    case EpVAR: return typ(ep->value) == t_CLOSURE;
     case EpINSTALL: return 1;
   }
   return 0;
