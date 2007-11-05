@@ -1156,7 +1156,7 @@ closure_callgen2(GEN C, GEN x, GEN y)
 {
   pari_sp ltop=avma;
   GEN z;
-  long arity=C[1];
+  long i, arity = C[1];
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=arity; i++) st[sp++]=0;
