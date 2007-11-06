@@ -74,13 +74,13 @@ pgener_Fl_local(ulong p, GEN L0)
 ulong
 pgener_Fl(ulong p) { return pgener_Fl_local(p, NULL); }
 
-/* L[i] = set of (p-1)/2l, l ODD prime divisor of l-1 (p=2 can be included,
+/* L[i] = set of (p-1)/2l, l ODD prime divisor of p-1 (l=2 can be included,
  * but wasteful) */
 int
 is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L)
 {
   long i, t = lgefint(x)==3? krosi(x[2], p): kronecker(x, p);
-  if (t >= 0) return 1;
+  if (t >= 0) return 0;
   for (i = lg(L)-1; i; i--) {
     GEN t = Fp_pow(x, gel(L,i), p);
     if (equalii(t, p_1) || is_pm1(t)) return 0;
