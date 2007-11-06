@@ -246,6 +246,7 @@ GEN     scalarcol_shallow(GEN x, long n);
 GEN     scalarmat(GEN x, long n);
 GEN     scalarmat_shallow(GEN x, long n);
 GEN     scalarmat_s(long x, long n);
+GEN     select0(GEN A, GEN f);
 GEN     gtomat(GEN x);
 GEN     gtrans(GEN x);
 GEN     shallowtrans(GEN x);

@@ -801,6 +801,41 @@ sum(GEN v, long a, long b)
   return p;
 }
 
+GEN
+select0(GEN A, GEN f)
+{
+  long i, l, nb = 0, t = typ(A);
+  GEN B, v;/* v left on stack for efficiency */
+  pari_sp av;
+  if (t == t_LIST)
+  {
+    GEN L;
+    A = list_data(A);
+    if (!A) return listcreate();
+    L = cgetg(3, t_LIST);
+    l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
+    for (i = 1; i < l; i++) {
+      if (! gcmp0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+      avma = av;
+    }
+    B = cgetg(nb+1, t_VEC);
+    for (i = 1; i <= nb; i++) gel(B, i) = gcopy(gel(A,v[i]));
+    list_nmax(L) = nb;
+    list_data(L) = B; return L;
+  }
+  else
+    if (!is_matvec_t(t)) pari_err(typeer,"select");
+
+  l = lg(A); v = cgetg(l, t_VECSMALL); av = avma;
+  for (i = 1; i < l; i++) {
+    if (! gcmp0( closure_callgen1(f, gel(A,i)) )) v[++nb] = i;
+    avma = av;
+  }
+  B = cgetg(nb+1, t);
+  for (i = 1; i <= nb; i++) gel(B, i) = gcopy(gel(A,v[i]));
+  return B;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                     SCALAR-MATRIX OPERATIONS                    */
