@@ -892,10 +892,10 @@ fetch_var_value(long vx, GEN t)
   entree *ep = varentries[vx];
   long vn;
   if (!ep) return NULL;
-  if (!t)  return ep->value;
+  if (!t)  return (GEN) ep->value;
   vn=localvars_find(t,ep);
   if (vn) return get_lex(vn);
-  return ep->value;
+  return (GEN) ep->value;
 }
 
 void

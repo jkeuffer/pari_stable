@@ -201,7 +201,7 @@ localvars_unpack(GEN pack)
   GEN e=gel(pack,2);
   long i;
   for(i=1;i<lg(t);i++)
-    var_push((entree*)e[i],t[i]);
+    var_push((entree*)e[i],(Ltype)t[i]);
 }
 
 long
