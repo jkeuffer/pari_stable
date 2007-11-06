@@ -1376,7 +1376,7 @@ closurecmp(void *data, GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN z = closure_callgen2((GEN)data, x,y);
-  if (!z || typ(z) != t_INT)
+  if (typ(z) != t_INT)
     pari_err(talker,"incorrect comparison function in vecsort");
   avma = av; return signe(z);
 }

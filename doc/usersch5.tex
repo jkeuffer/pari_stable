@@ -4398,6 +4398,47 @@ the number of previous one.
 rename a user variable: use \kbd{fetch\_named\_var} to get a user variable of
 the right name in the first place.
 
+\section{Handling closures}
+
+\fun{void}{closure_disassemble}{GEN C} print the \typ{CLOSURE} \kbd{C} in
+GP assembly format.
+
+\fun{GEN}{closure_callgen}{GEN C, long n, ...} evaluate the \typ{CLOSURE}
+\kbd{C} with the \kbd{n} arguments (of type \kbd{GEN}) following \kbd{n} in
+the function call. Assumes \kbd{C} has arity $\geq \kbd{n}$.
+
+\fun{GEN}{closure_callgenvec}{GEN C, GEN args} evaluate the \typ{CLOSURE}
+\kbd{C} with the arguments supplied in the vector \kbd{args}. Assumes \kbd{C}
+has arity $\geq \kbd{lg(args)-1}$.
+
+\fun{GEN}{closure_callgen1}{GEN C, GEN x} evaluate the \typ{CLOSURE}
+\kbd{C} with argument \kbd{x}. Assumes \kbd{C} has arity $\geq 1$.
+
+\fun{GEN}{closure_callgen2}{GEN C, GEN x, GEN y} evaluate the \typ{CLOSURE}
+\kbd{C} with argument \kbd{x}, \kbd{y}. Assumes \kbd{C} has arity $\geq 2$.
+
+The following technical functions are used to evaluate \emph{inline}
+closures, after pushing lexical arguments on the evaluator stack.
+
+\fun{GEN}{closure_evalgen}{GEN code}
+
+\fun{GEN}{closure_evalres}{GEN code}
+
+\fun{void}{closure_evalvoid}{GEN code}
+
+Various function used to manipulate and retrieve arguments on the evaluator
+stack:
+
+\fun{GEN}{get_lex}{long vn}
+
+\fun{void}{pop_lex}{void}
+
+\fun{void}{push_lex}{GEN a}
+
+\fun{void}{set_lex}{long vn, GEN x}
+
+\fun{void}{closure_reset}{void}
+
 \section{General Number Fields}
 
 \subsec{Number field types}

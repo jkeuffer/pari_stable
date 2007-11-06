@@ -1169,12 +1169,42 @@ closure_evalret(GEN C)
 }
 
 GEN
+closure_callgen(GEN C, long n, ...)
+{
+  va_list ap;
+  long i;
+  va_start(ap,n);
+  for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
+  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
+  va_end(ap);
+  return closure_evalret(C);
+}
+
+GEN
+closure_callgen1(GEN C, GEN x)
+{
+  long i;
+  gel(st,sp++)=x;
+  for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
+  return closure_evalret(C);
+}
+
+GEN
 closure_callgen2(GEN C, GEN x, GEN y)
 {
   long i;
   gel(st,sp++)=x;
   gel(st,sp++)=y;
-  for(i=3; i<=C[1]; i++) st[sp++]=0;
+  for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
+  return closure_evalret(C);
+}
+
+GEN
+closure_callgenvec(GEN C, GEN args)
+{
+  long i, l = lg(args);
+  for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
+  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   return closure_evalret(C);
 }
 
