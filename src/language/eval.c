@@ -991,7 +991,6 @@ closure_eval(GEN C)
         for (j=n+1;j<=arity;j++)
           gel(st,sp++)=0;
         z = derivnum((void*)fun, derivuserwrap, gel(st,sp-arity), precreal);
-        sp-=arity;
         sp--;
         gel(st, sp++) = z;
         break;
@@ -1031,7 +1030,6 @@ closure_eval(GEN C)
           if (br_status!=br_RETURN)
             pari_err(talker, "break/next/allocatemem not allowed here");
           avma=ltop;
-          sp-=arity;
           z = br_res ? gcopy(br_res) : gnil;
           reset_break();
         }
@@ -1104,7 +1102,7 @@ closure_eval(GEN C)
   if (0)
   {
 endeval:
-    sp = saved_sp;
+    sp = saved_sp-C[1];
     rp = saved_rp;
   }
   for(j=1;j<=nbmvar;j++)
