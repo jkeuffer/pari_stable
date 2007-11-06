@@ -260,7 +260,7 @@ parseproto(char const **q, char *c)
       return PPdefaultmulti;
     }
     break;
-  case 'T':
+  case 'C':
   case 'p':
   case 'P':
   case 'f':
@@ -973,7 +973,7 @@ compilefunc(entree *ep, long n, int mode)
         case 'P':
           op_push(OCprecdl,0);
           break;
-        case 'T':
+        case 'C':
           op_push(OCpushgen,data_push(pack_localvars()));
           break;
         case 'f':

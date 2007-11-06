@@ -1,7 +1,7 @@
 Function: eval
 Section: polynomials
 C-Name: geval_gp
-Prototype: GT
+Prototype: GC
 Help: eval(x): evaluation of x, replacing variables by their value
 Doc: replaces in $x$ the formal variables by the values that
  have been assigned to them after the creation of $x$. This is mainly useful

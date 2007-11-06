@@ -2057,6 +2057,7 @@ geni(void) { return gi; }
  *  L  long
  *  S  symbol (i.e GP function name) as a entree *
  *  V  lexical variable
+ *  C  lexical context
  *  n  variable number
  *  &  *GEN
  *  f  Fake *long (function requires it, but we don't use the resulting long)

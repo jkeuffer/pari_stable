@@ -242,13 +242,13 @@ check_proto(const char *code)
   while (*s && *s != '\n') switch (*s++)
   {
     case '&':
+    case 'C':
     case 'G':
     case 'I': case 'E':
     case 'L':
     case 'M':
     case 'P':
     case 'S':
-    case 'T':
     case 'f':
     case 'n':
     case 'p':
