@@ -2168,35 +2168,25 @@ struct galois_frobenius
   GEN psi;
 };
 
-/*Warning : the output of this function is not gerepileupto
- * compatible...*/
 static GEN
 galoisfindgroups(GEN lo, GEN sg, long f)
 {
   pari_sp ltop=avma;
-  GEN V,W;
   long i,j,k;
-  V=cgetg(lg(lo),t_VEC);
+  GEN V=cgetg(lg(lo),t_VEC);
   for(j=1,i=1;i<lg(lo);i++)
   {
     pari_sp av=avma;
-    GEN U;
-    W=cgetg(lg(lo[i]),t_VECSMALL);
+    GEN W=cgetg(lg(lo[i]),t_VECSMALL);
     for(k=1;k<lg(lo[i]);k++)
       W[k]=mael(lo,i,k)%f;
-    vecsmall_sort(W);
-    U=vecsmall_uniq(W);
-    if (gequal(U, sg))
-    {
-      cgiv(U);
+    W=vecsmall_uniq(W);
+    if (gequal(W, sg))
       V[j++]=lo[i];
-    }
-    else
-      avma=av;
+    avma=av;
   }
   setlg(V,j);
-  /*warning components of V point to W*/
-  return gerepileupto(ltop,V);
+  return gerepilecopy(ltop,V);
 }
 
 static long
