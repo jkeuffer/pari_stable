@@ -4182,15 +4182,15 @@ not assume that \kbd{v} is sorted.
 \fun{GEN}{vecsmall_uniq}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
 the vector of unique occurrences.
 
-\fun{GEN}{vecsmall_uniq_sorted}{GEN v} same as \kbd{vecsmall_uniq}, but assumes
+\fun{GEN}{vecsmall_uniq_sorted}{GEN v} same as \kbd{vecsmall\_uniq}, but assumes
  \kbd{v} sorted.
 
 \fun{long}{vecsmall_duplicate}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
 $0$ if there is no duplicates, or the index of the first duplicate
-(\kbd{vecsmall_duplicate([1,1])} returns $2$).
+(\kbd{vecsmall\_duplicate([1,1])} returns $2$).
 
 \fun{long}{vecsmall_duplicate_sorted}{GEN v} same as
-\kbd{vecsmall_duplicate}, but assume \kbd{v} sorted.
+\kbd{vecsmall\_duplicate}, but assume \kbd{v} sorted.
 
 \fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically.
 
