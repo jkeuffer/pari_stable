@@ -265,6 +265,7 @@ BA 36- New type t_CLOSURE to store GP functions
    38- library functions closure_callgen1, closure_callgen2, closure_callgen,
        closure_callgenvec.
    39- GP function map(), select()
+   40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

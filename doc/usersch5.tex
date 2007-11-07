@@ -2230,6 +2230,9 @@ $a^e=g$. If $e$ does not exists, the result is currently undefined.
 \fun{GEN}{Fp_FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} As
 \kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
 
+\fun{long}{FpXQ_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
+and $0$ otherwise.
+
 \fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
 \typ{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
 is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
@@ -2650,6 +2653,8 @@ returns the order of the \typ{Flxq} \kbd{a}.
 If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o} is a multiple of the
 order of \kbd{a}, either as a \typ{INT} or a factorization matrix.
 
+\fun{long}{Flxq_issquare}{GEN x, GEN T, ulong p} returns $1$ if $x$ is a square
+and $0$ otherwise.
 
 \fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ of exact
 order \kbd{ord} in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If
