@@ -498,46 +498,29 @@ FF_sqrt(GEN x)
 }
 
 long
-FF_issquareall(GEN x, GEN *pt)
+FF_issquare(GEN x)
 {
+  GEN T, p;
   ulong pp;
-  GEN r, T, p; 
-  pari_sp av = avma;
-
-  if (FF_cmp0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
-  if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])
   {
   case t_FF_FpXQ:
-    if (!pt)
-    {
-      GEN m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
-      GEN z = constant_term( FpXQ_pow(gel(x,2), m, T, p) );
-      long res = kronecker(z, p) == 1;
-      avma = av; return res;
-    }
-    r = FpXQ_sqrtn(gel(x,2),gen_2,T,p,NULL);
-    if (!r) { avma = av; return 0; }
-    break;
+    return FpXQ_issquare(gel(x,2), T, p);
 
   case t_FF_F2xq:
-    if (pt) r = F2xq_sqrtn(gel(x,2),gen_2,T,NULL);
-    break;
+    return 1;
 
   default: /* case t_FF_Flxq: */
-    if (!pt)
-    {
-      GEN m = diviuexact(subis(gpowgs(p, degpol(T)), 1), pp - 1);
-      ulong z = Flxq_pow(gel(x,2), m, T, pp)[2];
-      avma = av; return krouu(z, pp) == 1;
-    }
-    r=Flxq_sqrtn(gel(x,2),gen_2,T,pp,NULL);
-    if (!r) { avma = av; return 0; }
-    break;
+    return Flxq_issquare(gel(x,2), T, pp);
   }
-  if (pt) { _mkFF(x,*pt,r); }
-  return 1;
+}
+
+long
+FF_issquareall(GEN x, GEN *pt)
+{
+  if (!pt) return FF_issquare(x);
+  return FF_ispower(x, gen_2, pt);
 }
 
 long
@@ -547,6 +530,8 @@ FF_ispower(GEN x, GEN K, GEN *pt)
   GEN r, T, p; 
   pari_sp av = avma;
   if (!K) pari_err(talker,"missing exponent in FF_ispower");
+
+  if (FF_cmp0(x)) { if (pt) *pt = gcopy(x); return 1; }
   _getFF(x, &T, &p, &pp);
   if (pt) *pt = cgetg(5,t_FFELT);
   switch(x[1])
@@ -557,13 +542,12 @@ FF_ispower(GEN x, GEN K, GEN *pt)
      break;
 
    case t_FF_F2xq:
-     r=Flxq_sqrtn(F2x_to_Flx(gel(x,2)),K,F2x_to_Flx(T),pp,NULL);
+     r = F2xq_sqrtn(gel(x,2),K,T,NULL);
      if (!r) { avma = av; return 0; }
-     if (pt) r = gerepileuptoleaf((pari_sp)*pt, Flx_to_F2x(r)); 
      break;
 
    default: /* case t_FF_Flxq: */
-     r=Flxq_sqrtn(gel(x,2),K,T,pp,NULL);
+     r = Flxq_sqrtn(gel(x,2),K,T,pp,NULL);
      if (!r) { avma = av; return 0; }
      break;
   }

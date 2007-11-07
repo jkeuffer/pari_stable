@@ -656,6 +656,19 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   return V;
 }
 
+long
+FpXQ_issquare(GEN x, GEN T, GEN p)
+{
+  if (lg(x) == 2) return 1;
+  else {
+    pari_sp av = avma;
+    GEN m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
+    GEN z = constant_term( FpXQ_pow(x, m, T, p) );
+    long res = kronecker(z, p) == 1;
+    avma = av; return res;
+  }
+}
+
 GEN
 FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
 {
