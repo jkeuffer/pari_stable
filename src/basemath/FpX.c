@@ -656,17 +656,19 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   return V;
 }
 
+/* assume T irreducible mod p */
 long
 FpXQ_issquare(GEN x, GEN T, GEN p)
 {
-  if (lg(x) == 2) return 1;
-  else {
-    pari_sp av = avma;
-    GEN m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
-    GEN z = constant_term( FpXQ_pow(x, m, T, p) );
-    long res = kronecker(z, p) == 1;
-    avma = av; return res;
-  }
+  pari_sp av;
+  GEN m, z;
+  long res;
+  if (lg(x) == 2 || equalui(2, p)) return 1;
+  av = avma;
+  m = diviiexact(subis(gpowgs(p, degpol(T)), 1), subis(p,1));
+  z = constant_term( FpXQ_pow(x, m, T, p) );
+  res = kronecker(z, p) == 1;
+  avma = av; return res;
 }
 
 GEN

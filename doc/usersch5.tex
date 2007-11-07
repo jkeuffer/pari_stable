@@ -2225,23 +2225,24 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let \kbd{g} be of
 order \kbd{ord} in the finite field $\F_p[X]/(T)$. Return $e$ such that
-$a^e=g$. If $e$ does not exists, the result is currently undefined.
+$a^e=g$. If $e$ does not exists, the result is currently undefined. Assumes
+that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{Fp_FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} As
 \kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
 
 \fun{long}{FpXQ_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
-and $0$ otherwise.
+and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
 \typ{FpXQ} \kbd{a}. If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o}
 is a multiple of the order of \kbd{a}, either as a \typ{INT} or a
-factorization matrix.
+factorization matrix. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{FpXQ_sqrtn}{GEN x, GEN n, GEN T, GEN p, GEN *zn} returns an
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
 \kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
-primitive \kbd{n}-th root of the unity.
+primitive \kbd{n}-th root of the unity. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{Fq_add}{GEN x, GEN y, GEN T/*unused*/, GEN p}
 
@@ -2654,16 +2655,18 @@ If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o} is a multiple of the
 order of \kbd{a}, either as a \typ{INT} or a factorization matrix.
 
 \fun{long}{Flxq_issquare}{GEN x, GEN T, ulong p} returns $1$ if $x$ is a square
-and $0$ otherwise.
+and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ of exact
 order \kbd{ord} in the field $F_p[X]/(T)$. Return $e$ such that $a^e=g$. If
-$e$ does not exists, the result is currently undefined.
+$e$ does not exists, the result is currently undefined. Assumes that \kbd{T}
+is irreducible mod \kbd{p}.
 
 \fun{GEN}{Flxq_sqrtn}{GEN x, GEN n, GEN T, ulong p, GEN *zn} returns an
 \kbd{n}-th root of $\kbd{x}$.  Return \kbd{NULL} if \kbd{x} is not an
-\kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to a
-primitive \kbd{n}-th root of $1$.
+\kbd{n}-th power residue. Otherwise, if \kbd{zn} is non-\kbd{NULL} set it to
+a primitive \kbd{n}-th root of $1$. Assumes that \kbd{T} is irreducible mod
+\kbd{p}.
 
 \fun{GEN}{Flxq_charpoly}{GEN x, GEN T, ulong p} returns the characteristic
 polynomial of \kbd{x}

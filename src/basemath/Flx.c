@@ -1503,16 +1503,18 @@ Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
   return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
 }
 
+/* assume T irreducible mod p */
 long
 Flxq_issquare(GEN x, GEN T, ulong p)
 {
-  if (lg(x) == 2) return 1;
-  else {
-    pari_sp av = avma;
-    GEN m = diviuexact(subis(powuu(p, degpol(T)), 1), p - 1);
-    ulong z = Flxq_pow(x, m, T, p)[2];
-    avma = av; return krouu(z, p) == 1;
-  }
+  pari_sp av;
+  GEN m;
+  ulong z;
+  if (lg(x) == 2 || p == 2) return 1;
+  av = avma;
+  m = diviuexact(subis(powuu(p, degpol(T)), 1), p - 1);
+  z = Flxq_pow(x, m, T, p)[2];
+  avma = av; return krouu(z, p) == 1;
 }
 
 static GEN
