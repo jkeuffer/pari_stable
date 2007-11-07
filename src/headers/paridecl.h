@@ -1156,6 +1156,7 @@ int     FF_cmp_1(GEN x);
 GEN     FF_div(GEN a, GEN b);
 int     FF_equal(GEN a, GEN b);
 GEN     FF_inv(GEN a);
+long    FF_issquare(GEN x);
 long    FF_issquareall(GEN x, GEN *pt);
 long    FF_ispower(GEN x, GEN K, GEN *pt);
 GEN     FF_log(GEN a, GEN b, GEN o);
