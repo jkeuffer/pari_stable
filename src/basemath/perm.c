@@ -233,7 +233,7 @@ vecsmall_indexsort(GEN V)
 
 /* assume V sorted */
 GEN
-vecsmall_uniq(GEN V)
+vecsmall_uniq_sorted(GEN V)
 {
   GEN W;
   long i,j, l = lg(V);
@@ -244,6 +244,15 @@ vecsmall_uniq(GEN V)
     if (V[i] != W[j-1]) W[j++] = V[i];
   stackdummy((pari_sp)(W + l), (pari_sp)(W + j));
   setlg(W, j); return W;
+}
+
+GEN
+vecsmall_uniq(GEN V)
+{
+  pari_sp av=avma;
+  V=gcopy(V);
+  vecsmall_sort(V);
+  return gerepileupto(av, vecsmall_uniq_sorted(V));
 }
 
 int

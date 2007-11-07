@@ -1682,6 +1682,7 @@ void    vecsmall_sort(GEN V);
 GEN     vecsmall_to_col(GEN z);
 GEN     vecsmall_to_vec(GEN z);
 GEN     vecsmall_uniq(GEN V);
+GEN     vecsmall_uniq_sorted(GEN V);
 GEN     vecvecsmall_indexsort(GEN x);
 GEN     vecvecsmall_sort(GEN x);
 long    vecvecsmall_search(GEN x, GEN y, long flag);

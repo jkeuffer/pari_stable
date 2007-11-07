@@ -4176,10 +4176,13 @@ components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
 such that \kbd{v[$i$]} is equal to \kbd{x}. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
 
-\fun{GEN}{vecsmall_uniq}{GEN v} given a sorted \typ{VECSMALL} \kbd{v}, return
+\fun{GEN}{vecsmall_uniq}{GEN v} given a \typ{VECSMALL} \kbd{v}, return
 the vector of unique occurrences.
 
-\fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically
+\fun{GEN}{vecsmall_uniq_sorted}{GEN v} same as \kbd{vecsmall_uniq}, but assumes
+ \kbd{v} sorted.
+
+\fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically.
 
 \fun{int}{vecsmall_prefixcmp}{GEN x, GEN y} truncate the longest \typ{VECSMALL}
 to the length of the shortest and compares them lexicographically.

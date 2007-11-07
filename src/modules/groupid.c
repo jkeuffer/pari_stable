@@ -94,7 +94,6 @@ vecgroup_idxlist(GEN L, long order)
   for(i=1,j=1; j<=n; i++)
     if (group_order(gel(L,i))==order)
       V[j++]=group_ident(gel(L,i),NULL);
-  vecsmall_sort(V);
   return gerepileupto(ltop,vecsmall_uniq(V));
 }
 

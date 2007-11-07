@@ -219,6 +219,7 @@ BA 62- User functions are now regular variables holding values of type t_CLOSURE
    63- Output of \u is now sorted
    64- More explicit error messages in gp_history, e.g.
        ***   History result %10 not available [%1-%6]
+BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
 
   Added
     1- library functions expu, adduu, subuu
@@ -266,6 +267,7 @@ BA 36- New type t_CLOSURE to store GP functions
        closure_callgenvec.
    39- GP function map(), select()
    40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
+BA 41- library function vecsmall_uniq_sorted
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
