@@ -241,6 +241,7 @@ GEN     extract0(GEN x, GEN l1, GEN l2);
 GEN     gauss(GEN a, GEN b);
 GEN     gaussmodulo(GEN M, GEN D, GEN Y);
 GEN     gaussmodulo2(GEN M, GEN D, GEN Y);
+GEN     map0(GEN A, GEN f);
 GEN     scalarcol(GEN x, long n);
 GEN     scalarcol_shallow(GEN x, long n);
 GEN     scalarmat(GEN x, long n);

@@ -807,6 +807,7 @@ select0(GEN A, GEN f)
   long i, l, nb = 0, t = typ(A);
   GEN B, v;/* v left on stack for efficiency */
   pari_sp av;
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
   if (t == t_LIST)
   {
     GEN L;
@@ -833,6 +834,31 @@ select0(GEN A, GEN f)
   }
   B = cgetg(nb+1, t);
   for (i = 1; i <= nb; i++) gel(B, i) = gcopy(gel(A,v[i]));
+  return B;
+}
+
+GEN
+map0(GEN f, GEN A)
+{
+  long i, l, t = typ(A);
+  GEN B;
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
+  if (t == t_LIST)
+  {
+    GEN L;
+    A = list_data(A);
+    if (!A) return listcreate();
+    L = cgetg(3, t_LIST);
+    l = lg(A); B = cgetg(l, t_VEC);
+    for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
+    list_nmax(L) = l-1;
+    list_data(L) = B; return L;
+  }
+  else
+    if (!is_matvec_t(t)) pari_err(typeer,"select");
+
+  l = lg(A); B = cgetg(l, t);
+  for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
   return B;
 }
 
