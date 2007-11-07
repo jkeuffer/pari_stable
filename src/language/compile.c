@@ -457,6 +457,14 @@ first_safe_arg(GEN arg)
   return lnc;
 }
 
+static void
+checkdups(GEN arg, GEN vep)
+{
+  long l=vecsmall_duplicate(vep);
+  if (l!=0) pari_err(talker2, "variable declared twice",
+                              tree[arg[l]].str,get_origin());
+}
+
 static entree *
 getlvalue(long n)
 {
@@ -688,6 +696,7 @@ compilefunc(entree *ep, long n, int mode)
     ep=is_entry("_void_if");
   else if (is_func_named(x,"my"))
   {
+    GEN vep=cgetg_copy(lg(arg),arg);
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     if (nb) op_push(OCnewframe,nb);
@@ -705,14 +714,16 @@ compilefunc(entree *ep, long n, int mode)
         }
         a=tree[a].x;
       }
-      localvars[s_lvar.n-nb+i-1].ep=getvar(a);
+      vep[i]=(long)(localvars[s_lvar.n-nb+i-1].ep=getvar(a));
     }
+    checkdups(arg,vep);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;
   }
   else if (is_func_named(x,"local"))
   {
+    GEN vep=cgetg_copy(lg(arg),arg);
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
     for (i=1;i<=nb;i++)
@@ -729,10 +740,11 @@ compilefunc(entree *ep, long n, int mode)
         }
         a=tree[a].x;
       }
-      en=getvar(a);
-      op_push(op,(long)en);
+      vep[i] = (long) (en = getvar(a));
+      op_push(op,vep[i]);
       var_push(en,Llocal);
     }
+    checkdups(arg,vep);
     compilecast(n,Gvoid,mode);
     avma=ltop;
     return;
@@ -1247,6 +1259,7 @@ compilenode(long n, int mode, long flag)
       GEN arg=listtogen(x,Flistarg);
       long nb=lg(arg)-1,nbmvar=numbmvar();
       GEN text=cgetg(3,t_VEC);
+      GEN vep=cgetg_copy(lg(arg),arg);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
@@ -1265,8 +1278,9 @@ compilenode(long n, int mode, long flag)
           op_push(OCdefaultarg,-nb+i-1);
           a=tree[a].x;
         }
-        localvars[s_lvar.n-nb+i-1].ep=getvar(a);
+        vep[i]=(long)(localvars[s_lvar.n-nb+i-1].ep=getvar(a));
       }
+      checkdups(arg,vep);
       if (y>=0 && tree[y].f!=Fnoarg)
         compilenode(y,Ggen,FLreturn);
       else

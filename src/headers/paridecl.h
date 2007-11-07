@@ -1670,6 +1670,8 @@ GEN     vecsmall_append(GEN V, long s);
 long    vecsmall_coincidence(GEN u, GEN v);
 GEN     vecsmall_concat(GEN u, GEN v);
 GEN     vecsmall_copy(GEN x);
+long    vecsmall_duplicate(GEN x);
+long    vecsmall_duplicate_sorted(GEN x);
 GEN     vecsmall_indexsort(GEN V);
 long    vecsmall_isin(GEN v, long x);
 GEN     vecsmall_lengthen(GEN v, long n);

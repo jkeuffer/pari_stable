@@ -255,6 +255,30 @@ vecsmall_uniq(GEN V)
   return gerepileupto(av, vecsmall_uniq_sorted(V));
 }
 
+/* assume x sorted */
+long
+vecsmall_duplicate_sorted(GEN x)
+{
+  long i,k,l=lg(x);
+  if (l==1) return 0;
+  for (k=x[1],i=2; i<l; k=x[i++])
+    if (x[i] == k) return i;
+  return 0;
+}
+
+long
+vecsmall_duplicate(GEN x)
+{
+  pari_sp av=avma;
+  GEN p=vecsmall_indexsort(x);
+  long k,i,r=0,l=lg(x);
+  if (l==1) return 0;
+  for (k=x[p[1]],i=2; i<l; k=x[p[i++]])
+    if (x[p[i]] == k) { r=p[i]; break; }
+  avma=av;
+  return r;
+}
+
 int
 vecsmall_lexcmp(GEN x, GEN y)
 {
