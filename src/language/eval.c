@@ -426,7 +426,6 @@ pari_init_evaluator(void)
   stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
 }
 
-static void closure_eval(GEN C);
 
 INLINE GEN
 copyupto(GEN z, GEN t)
@@ -437,31 +436,33 @@ copyupto(GEN z, GEN t)
     return gcopy(z);
 }
 
+static void closure_eval(GEN C);
+
+INLINE GEN
+closure_return(GEN C)
+{
+  pari_sp ltop=avma;
+  closure_eval(C);
+  if (br_status)
+  {
+    if (br_res) return gerepilecopy(ltop, br_res);
+    if (br_status!=br_ALLOCMEM) avma=ltop;
+    return gnil;
+  }
+  return gerepileupto(ltop,gel(st,--sp));
+}
+
 static GEN
 derivuserwrap(GEN x, void* E)
 {
-  pari_sp ltop;
   GEN fun=(GEN)E;
-  GEN z;
   long arity=fun[1];
   long j;
   gel(st,sp)=x;
   for (j=1;j<arity;j++)
     gel(st,sp+j)=gel(st,sp+j-arity);
   sp+=arity;
-  ltop=avma;
-  closure_eval(fun);
-  if (br_status)
-  {
-    if (br_status!=br_RETURN)
-      pari_err(talker, "break/next/allocatemem not allowed here");
-    avma=ltop;
-    z = br_res ? gcopy(br_res) : gnil;
-    reset_break();
-  }
-  else
-    z = gerepileupto(ltop, gel(st,--sp));
-  return z;
+  return closure_return(fun);
 }
 
 INLINE long
@@ -997,7 +998,6 @@ closure_eval(GEN C)
       }
     case OCcalluser:
       {
-        pari_sp ltop;
         long n=operand;
         GEN fun = gel(st,sp-1-n);
         long arity;
@@ -1023,20 +1023,8 @@ closure_eval(GEN C)
         if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
           pari_err(talker, "deep recursion");
 #endif
-        ltop=avma;
-        closure_eval(fun);
-        if (br_status)
-        {
-          if (br_status!=br_RETURN)
-            pari_err(talker, "break/next/allocatemem not allowed here");
-          avma=ltop;
-          z = br_res ? gcopy(br_res) : gnil;
-          reset_break();
-        }
-        else
-          z = gerepileupto(ltop, gel(st,--sp));
-        sp--;
-        gel(st, sp++) = z;
+        z = closure_return(fun);
+        gel(st, sp-1) = z;
         break;
       }
     case OCnewframe:
@@ -1114,20 +1102,6 @@ endeval:
 }
 
 GEN
-closure_evalres(GEN C)
-{
-  pari_sp ltop=avma;
-  closure_eval(C);
-  if (br_status)
-  {
-    if (br_res) return gerepilecopy(ltop, br_res);
-    if (br_status!=br_ALLOCMEM) avma=ltop;
-    return NULL;
-  }
-  return gerepileupto(ltop,gel(st,--sp));
-}
-
-GEN
 closure_evalgen(GEN C)
 {
   pari_sp ltop=avma;
@@ -1149,23 +1123,10 @@ closure_evalvoid(GEN C)
     avma=ltop;
 }
 
-static GEN
-closure_evalret(GEN C)
+GEN
+closure_evalres(GEN C)
 {
-  pari_sp ltop=avma;
-  GEN z;
-  closure_eval(C);
-  if (br_status)
-  {
-    if (br_status!=br_RETURN)
-      pari_err(talker, "break/next/allocatemem not allowed here");
-    avma=ltop;
-    z = br_res ? gcopy(br_res) : gnil;
-    reset_break();
-  }
-  else
-    z = gerepileupto(ltop, gel(st,--sp));
-  return z;
+  return closure_return(C);
 }
 
 GEN
@@ -1177,7 +1138,7 @@ closure_callgen(GEN C, long n, ...)
   for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   va_end(ap);
-  return closure_evalret(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1186,7 +1147,7 @@ closure_callgen1(GEN C, GEN x)
   long i;
   gel(st,sp++)=x;
   for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_evalret(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1196,7 +1157,7 @@ closure_callgen2(GEN C, GEN x, GEN y)
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_evalret(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1205,7 +1166,7 @@ closure_callgenvec(GEN C, GEN args)
   long i, l = lg(args);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_evalret(C);
+  return closure_return(C);
 }
 
 void
