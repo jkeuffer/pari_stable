@@ -843,23 +843,30 @@ map0(GEN f, GEN A)
   long i, l, t = typ(A);
   GEN B;
   if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
-  if (t == t_LIST)
-  {
-    GEN L;
-    A = list_data(A);
-    if (!A) return listcreate();
-    L = cgetg(3, t_LIST);
-    l = lg(A); B = cgetg(l, t_VEC);
-    for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
-    list_nmax(L) = l-1;
-    list_data(L) = B; return L;
-  }
-  else
-    if (!is_matvec_t(t)) pari_err(typeer,"select");
+  switch(t) {
+    case t_LIST: {
+      GEN L;
+      A = list_data(A);
+      if (!A) return listcreate();
+      L = cgetg(3, t_LIST);
+      l = lg(A); B = cgetg(l, t_VEC);
+      for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
+      list_nmax(L) = l-1;
+      list_data(L) = B; return L;
+    }
+    case t_MAT:
+      l = lg(A); B = cgetg(l, t_MAT);
+      for (i = 1; i < l; i++) gel(B,i) = map0(f, gel(A,i));
+      return B;
 
-  l = lg(A); B = cgetg(l, t);
-  for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
-  return B;
+    case t_VEC: case t_COL:
+      l = lg(A); B = cgetg(l, t);
+      for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
+      return B;
+  }
+  pari_err(typeer,"select");
+  return NULL; /* not reached */
+
 }
 
 /*******************************************************************/

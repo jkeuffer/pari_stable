@@ -9,12 +9,16 @@ Doc: Given a vector, list or matrix \kbd{A} and a \typ{CLOSURE} \kbd{f},
  \bprog
  ? select(vector(50,i,i^2+1), x->isprime(x))
  %1 = [2, 5, 17, 37, 101, 197, 257, 401, 577, 677, 1297, 1601]
- @eprog\noindent returns the primes of the form $i^2+1$ for some $i\leq 50$.
- \bprog
  ? select(%, x->(x<100))
  %2 = [2, 5, 17, 37]
- @eprog\noindent
- and the elements less than 100 in the precseding result. Finally
+ @eprog\noindent returns the primes of the form $i^2+1$ for some $i\leq 50$,
+ then the elements less than 100 in the preceding result. The following
+ function lists the elements in $(\Z/N\Z)^*$:
+ \bprog
+ ? invertibles(N) = select(vector(N,i,i), x->gcd(x,N) == 1)
+ @eprog
+ 
+ \noindent Finally
  \bprog
  ? select(M, x->x)
  @eprog\noindent selects the non-0 entries in \kbd{M}. If the latter is a
