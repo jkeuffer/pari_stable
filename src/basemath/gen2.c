@@ -1870,7 +1870,7 @@ listinsert(GEN L, GEN x, long index)
   if (typ(L) != t_LIST) pari_err(typeer,"listinsert");
 
   z = list_data(L); l = z? lg(z): 1;
-  if (index <= 0 || index >= l) pari_err(talker,"bad index in listinsert");
+  if (index <= 0 || index > l) pari_err(talker,"bad index in listinsert");
   ensure_nb(L, l);
   z = list_data(L);
   for (i=l; i > index; i--) z[i] = z[i-1];
