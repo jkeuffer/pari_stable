@@ -1288,7 +1288,8 @@ lexically scoped to the function body. It is not allowed to use the same
 variable name for different parameters of your function:
 \bprog
 ? f(x,x) = 1
-  ***   user function f: variable x declared twice.
+  ***   variable declared twice: f(x,x)=1
+                                     ^----
 @eprog
 
 \misctitle{Finishing touch}.
