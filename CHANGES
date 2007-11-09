@@ -122,6 +122,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
    96- typo in znprimroot: wrong result for large moduli
        znprimroot(5*2^127+1) --> 2 [#696]
    97- ffgen(x*Mod(1,2)) --> x [ should be 0 ]
+   98- ffprimroot(ffgen((x+1)*Mod(1,2))) --> oo loop
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

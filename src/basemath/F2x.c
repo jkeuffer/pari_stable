@@ -578,10 +578,14 @@ GEN
 gener_F2xq(GEN T, GEN *po)
 {
   long i, j, vT = T[1], f = F2x_degree(T);
-  GEN g, L, L2, o, q = subis(powuu(2,f), 1);
   pari_sp av0 = avma, av;
-
-  L = cgetg(1, t_VECSMALL);
+  GEN g, L2, o, q;
+  
+  if (f == 1) {
+    if (po) *po = trivfact();
+    return pol1_F2x(vT);
+  }
+  q = subis(powuu(2,f), 1);
   o = factor_pn_1(gen_2,f);
   L2 = shallowcopy( gel(o, 1) );
   for (i = j = 1; i < lg(L2); i++)
