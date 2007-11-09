@@ -3686,7 +3686,7 @@ ellorder(GEN e, GEN z, GEN o)
   {
     pari_sp av = avma;
     if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
-    return gerepileuotoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
+    return gerepileuptoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
   }
   if (!is_rational_t(t)) pari_err(impl,"orderell for nonrational elliptic curves");
   return utoi( _orderell(e, z) );
