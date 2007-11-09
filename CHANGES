@@ -220,6 +220,8 @@ BA 62- User functions are now regular variables holding values of type t_CLOSURE
    64- More explicit error messages in gp_history, e.g.
        ***   History result %10 not available [%1-%6]
 BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
+   66- allow ellorder to handle curves over Fp, add an optional parameter to
+       indicate a multiple of the order as in znorder.
 
   Added
     1- library functions expu, adduu, subuu

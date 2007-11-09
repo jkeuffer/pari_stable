@@ -1032,6 +1032,7 @@ GEN     ellisoncurve(GEN e, GEN z);
 GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     ellminimalmodel(GEN E, GEN *ptv);
+GEN     ellorder(GEN e, GEN p, GEN o);
 long    ellrootno(GEN e, GEN p);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltaniyama(GEN e, long prec);

@@ -21,7 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-#define is_inf(z) (lg(z) < 3)
+static int
+is_inf(GEN z) { return lg(z) < 3; }
 
 void
 checkpt(GEN z)
@@ -3647,6 +3648,20 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   return r;
 }
 
+static GEN
+_addFp(void *E, GEN x, GEN y)
+{
+  return addell((GEN)E,x,y);
+}
+
+static GEN
+_powFp(void *E, GEN x, GEN n)
+{
+  return powell((GEN)E,x,n);
+}
+
+const static struct bb_group ellFp={_addFp,_powFp,NULL,NULL,is_inf};
+
 /* assume e is defined over Q (use Mazur's theorem) */
 static long
 _orderell(GEN e, GEN p)
@@ -3662,13 +3677,22 @@ _orderell(GEN e, GEN p)
   avma = av; return 0;
 }
 GEN
-orderell(GEN e, GEN p)
+ellorder(GEN e, GEN z, GEN o)
 {
+  GEN j = gel(e,13);
   long t;
-  checkell(e); checkpt(p); t = typ(e[13]);
+  checkell(e); checkpt(z); t = typ(j);
+  if (t == t_INTMOD)
+  {
+    pari_sp av = avma;
+    if (!o) { GEN p = gel(j,1); o = subii(addis(p,1), ellap(e,p)); }
+    return gerepileuotoint(av, gen_eltorder(z, o, (void*)e, &ellFp));
+  }
   if (!is_rational_t(t)) pari_err(impl,"orderell for nonrational elliptic curves");
-  return utoi( _orderell(e, p) );
+  return utoi( _orderell(e, z) );
 }
+GEN
+orderell(GEN e, GEN z) { return ellorder(e,z,NULL); }
 
 /* Using Lutz-Nagell */
 
