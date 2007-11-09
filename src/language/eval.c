@@ -519,6 +519,7 @@ closure_eval(GEN C)
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
   GEN data=gel(C,4);
+  long arity = C[1];
   long saved_sp=sp;
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
@@ -1090,7 +1091,7 @@ closure_eval(GEN C)
   if (0)
   {
 endeval:
-    sp = saved_sp-C[1];
+    sp = saved_sp - arity;
     rp = saved_rp;
   }
   for(j=1;j<=nbmvar;j++)
