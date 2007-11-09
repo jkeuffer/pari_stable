@@ -1,0 +1,43 @@
+allocatemem(50*10^6);
+{
+test(p,f) = setrand(1); a = ffgen(ffinit(p,f, 'a)); [
+a^2+3*a+1,
+a/(1+a),
+2*(a+1)/3,
+if (6*a, 5/6/(a+1)),
+if (6*a, 5/6*(a+1)),
+shiftmul(a+1,10),
+if (2*a, shiftmul(a+1,-10)),
+a^-1,
+-a,
+sqr(a),
+sqrt(a^(2^10)),
+sqrtn((a^2+a+1)^3,3),
+sqrtn((a^2+a+1)^3,3,&z),
+z,
+if (ispower(a,3), a^(2/3)),
+norm(a^2+1),
+trace(a),
+charpoly(a),
+minpoly(a),
+factor(x^6-a*x^3+1),
+if (2*a && 4*a^3+27, ellinit([0,0,0,a,1])),
+a/x,
+(x+a)/(x-a),
+b=ffprimroot(a),
+fforder(a),
+b^fflog(a,b)]; 
+}
+default(echo,1);
+
+test(2, 20)
+test(7, 7)
+test(precprime(2^32), 3)
+test(nextprime(2^32), 3)
+
+ffgen(x*Mod(1,2))
+ffprimroot(ffgen((x+1)*Mod(1,2)))
+
+getheap
+print("Total time spent: ",gettime);
+\q
