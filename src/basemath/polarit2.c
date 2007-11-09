@@ -4496,12 +4496,10 @@ GEN ffgen(GEN T, long v)
 {
   GEN ff=cgetg(5,t_FFELT);
   GEN p,junk;
-  long ljunk;
-  if (typ(T)!=t_POL || degpol(T)<1)
-    pari_err(typeer,"ffgen");
-  if (poltype(T,&p,&junk,&ljunk)!=t_INTMOD)
-    pari_err(typeer,"ffgen");
-  if (v<0) v=varn(T);
+  long ljunk, d = degpol(T);
+  if (typ(T) != t_POL || d < 1) pari_err(typeer,"ffgen");
+  if (poltype(T,&p,&junk,&ljunk)!=t_INTMOD) pari_err(typeer,"ffgen");
+  if (v<0) v = varn(T);
   if (lgefint(p)==3)
   {
     ulong pp=p[2];
@@ -4509,9 +4507,10 @@ GEN ffgen(GEN T, long v)
     if (pp==2)
     {
       ff[1]=t_FF_F2xq;
-      gel(ff,2)=polx_F2x(sv);
       gel(ff,3)=ZX_to_F2x(lift(T));
       mael(ff,3,1)=sv;
+      gel(ff,2)=polx_F2x(sv);
+      if (d == 1) gel(ff,2) = F2x_rem(gel(ff,2), gel(ff,3));
       gel(ff,4)=gen_2;
     }
     else
@@ -4520,6 +4519,7 @@ GEN ffgen(GEN T, long v)
       gel(ff,2)=polx_Flx(sv);
       gel(ff,3)=ZX_to_Flx(lift(T),pp);
       mael(ff,3,1)=sv;
+      if (d == 1) gel(ff,2) = Flx_rem(gel(ff,2), gel(ff,3), pp);
       gel(ff,4)=icopy(p);
     }
   }
@@ -4529,6 +4529,7 @@ GEN ffgen(GEN T, long v)
     gel(ff,2)=pol_x(v);
     gel(ff,3)=lift(T);
     setvarn(gel(ff,3),v);
+    if (d == 1) gel(ff,2) = FpX_rem(gel(ff,2), gel(ff,3), p);
     gel(ff,4)=icopy(p);
   }
   return ff;
