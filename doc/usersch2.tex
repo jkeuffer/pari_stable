@@ -1532,7 +1532,7 @@ the case for user functions). On the other hand,
 \bprog
 ? g(x) = x^2
 ? calc(g, Pi)
-@eprog\noindent works since \kbd{f} is a user function, not a built-in.
+@eprog\noindent works since \kbd{g} is a user function, not a built-in.
 Here is a variation:
 \bprog
 ? trigs = [x->cos(x), x->sin(x), x->tan(x)]; \\@com an array of functions
@@ -1541,9 +1541,11 @@ Here is a variation:
 evaluates the appropriate function on argument \kbd{x},
 provided $1\leq i\leq 3$. Finally, a more useful example:
 \bprog
-map(f, v) = vector(#v, i, f(v[i]))
+MAP(f, v) = vector(#v, i, f(v[i]))
 @eprog\noindent
 applies the function \kbd{f} to every element in the vector \kbd{v}.
+(The built-in function \kbd{map} is more powerful since it also applies to
+lists and matrices.)
 
 \subsec{Defining functions within a function ?}
 Defining a single function is easy:
@@ -1577,7 +1579,8 @@ init(x) = add(y) = x+y; mul(y) = x*y;
 @eprog
 \noindent does not work since in the construction \kbd{f() = }\var{seq}, the
 function body contains everything until the end of the expression. Hence
-executing \kbd{init} defines the wrong function \kbd{add}. The way out is to
+executing \kbd{init} defines the wrong function \kbd{add} (itself defining 
+a function \kbd{mul}). The way out is to
 use parentheses for grouping, to that enclosed subexpressions be
 evaluated independently:
 \bprog
@@ -1592,6 +1595,28 @@ lexical variables private to \kbd{init}! The following would work in exactly
 the same way:
 \bprog
 ? init5() = my(x = 5); ( add(y) = x+y ); ( mul(y) = x*y );
+@eprog
+
+\subsec{Closures as Objects?} Contrary to what you might think after the
+preceding examples, GP's closures may not be used to simulate true
+``objects'', with private and public parts and methods to access and
+manipulate them. In fact, closures indeed incorporate an existing context
+(they may access lexical variables that existed at the time of their
+definition), but then may not change it. More precisely, they access a copy,
+which they are welcome to change, but a further function call still accesses
+the original context, as it existed at the time the function was defined:
+\bprog
+init() =
+{ my(count = 0);
+  inc()=count++;
+  dec()=count--;
+}
+? inc()
+%1 = 1
+? inc()
+%2 = 1
+? inc()
+%3 = 1
 @eprog
 
 \section{Member functions}\sidx{member functions} \label{se:member}
@@ -1633,7 +1658,7 @@ of the form
   x.c = x[3];
 @eprog\noindent
 where \kbd{x} is a vector containing relevant data. There are at least
-3 alternative approaches to the above member functions: 1) hardcode
+three alternative approaches to the above member functions: 1) hardcode
 \kbd{x[1]}, etc. in the program text, 2) define constant global variables
 \kbd{AINDEX = 1}, \kbd{BINDEX = 2}  and hardcode \kbd{x[AINDEX]}, 3)
 user functions \kbd{a(x) = x[1]} and so on.
