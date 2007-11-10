@@ -445,9 +445,11 @@ closure_return(GEN C)
   closure_eval(C);
   if (br_status)
   {
-    if (br_res) return gerepilecopy(ltop, br_res);
+    GEN z;
     if (br_status!=br_ALLOCMEM) avma=ltop;
-    return gnil;
+    z=br_res?gcopy(br_res):gnil;
+    reset_break();
+    return z;
   }
   return gerepileupto(ltop,gel(st,--sp));
 }
@@ -516,10 +518,10 @@ closure_castlong(long z, long mode)
 static void
 closure_eval(GEN C)
 {
+  long arity = C[1];
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
   GEN data=gel(C,4);
-  long arity = C[1];
   long saved_sp=sp;
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
