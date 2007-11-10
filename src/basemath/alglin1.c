@@ -838,35 +838,43 @@ select0(GEN A, GEN f)
 }
 
 GEN
-map0(GEN f, GEN A)
+map0(GEN f, GEN x)
 {
-  long i, l, t = typ(A);
-  GEN B;
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "select");
-  switch(t) {
+  long i, lx, tx = typ(x);
+  GEN y;
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "map");
+  if (is_scalar_t(tx)) return closure_callgen1(f, x);
+  switch(tx) {
+    case t_POL:
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      return normalizepol_i(y, lx);
+    case t_SER:
+      y = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      return normalize(y);
     case t_LIST: {
       GEN L;
-      A = list_data(A);
-      if (!A) return listcreate();
+      x = list_data(x);
+      if (!x) return listcreate();
       L = cgetg(3, t_LIST);
-      l = lg(A); B = cgetg(l, t_VEC);
-      for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
-      list_nmax(L) = l-1;
-      list_data(L) = B; return L;
+      lx = lg(x); y = cgetg(lx, t_VEC);
+      for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      list_nmax(L) = lx-1;
+      list_data(L) = y; return L;
     }
     case t_MAT:
-      l = lg(A); B = cgetg(l, t_MAT);
-      for (i = 1; i < l; i++) gel(B,i) = map0(f, gel(A,i));
-      return B;
+      lx = lg(x); y = cgetg(lx, t_MAT);
+      for (i = 1; i < lx; i++) gel(y,i) = map0(f, gel(x,i));
+      return y;
 
     case t_VEC: case t_COL:
-      l = lg(A); B = cgetg(l, t);
-      for (i = 1; i < l; i++) gel(B,i) = closure_callgen1(f, gel(A,i));
-      return B;
+      lx = lg(x); y = cgetg(lx, tx);
+      for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
+      return y;
   }
-  pari_err(typeer,"select");
+  pari_err(typeer,"map");
   return NULL; /* not reached */
-
 }
 
 /*******************************************************************/

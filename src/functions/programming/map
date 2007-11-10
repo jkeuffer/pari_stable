@@ -3,9 +3,11 @@ Section: programming/specific
 C-Name: map0
 Prototype: GG
 Help: map(f, A): apply function f to each entry in A
-Doc: Given a vector or list \kbd{A} and a \typ{CLOSURE} \kbd{f},
- returns the elements $f(x)$ where $x$ runs through \kbd{A}. If \kbd{A} is a
- matrix, return the matrix whose entries are the $f(\kbd{A[i,j]})$.
+Doc: Apply the \typ{CLOSURE} \kbf{f} to the entries of \kbd{A}. If \kbd{A}
+ is a scalar, return \kbd{f(A)}. If \kbd{A} is a polynomial or power series,
+ apply \kbd{f} on all coefficients. If \kbd{A} is a vector or list, return
+ the elements $f(x)$ where $x$ runs through \kbd{A}. If \kbd{A} is a matrix,
+ return the matrix whose entries are the $f(\kbd{A[i,j]})$.
  \bprog
  ? map(x->x^2, [1,2,3,4])
  %1 = [1, 4, 9, 16]
@@ -14,4 +16,6 @@ Doc: Given a vector or list \kbd{A} and a \typ{CLOSURE} \kbd{f},
  [1 4]
 
  [9 16]
+ ? map(x->x^2, 4*x^2 + 3*x+ 2)
+ %3 = 16*x^2 + 9*x + 4
  @eprog
