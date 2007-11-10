@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: map0
 Prototype: GG
 Help: map(f, A): apply function f to each entry in A
-Doc: Apply the \typ{CLOSURE} \kbf{f} to the entries of \kbd{A}. If \kbd{A}
+Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  is a scalar, return \kbd{f(A)}. If \kbd{A} is a polynomial or power series,
  apply \kbd{f} on all coefficients. If \kbd{A} is a vector or list, return
  the elements $f(x)$ where $x$ runs through \kbd{A}. If \kbd{A} is a matrix,
