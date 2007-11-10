@@ -1,21 +1,21 @@
-Function: map
+Function: apply
 Section: programming/specific
-C-Name: map0
+C-Name: apply0
 Prototype: GG
-Help: map(f, A): apply function f to each entry in A
+Help: apply(f, A): apply function f to each entry in A
 Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  is a scalar, return \kbd{f(A)}. If \kbd{A} is a polynomial or power series,
  apply \kbd{f} on all coefficients. If \kbd{A} is a vector or list, return
  the elements $f(x)$ where $x$ runs through \kbd{A}. If \kbd{A} is a matrix,
  return the matrix whose entries are the $f(\kbd{A[i,j]})$.
  \bprog
- ? map(x->x^2, [1,2,3,4])
+ ? apply(x->x^2, [1,2,3,4])
  %1 = [1, 4, 9, 16]
- ? map(x->x^2, [1,2;3,4])
+ ? apply(x->x^2, [1,2;3,4])
  %2 =
  [1 4]
 
  [9 16]
- ? map(x->x^2, 4*x^2 + 3*x+ 2)
+ ? apply(x->x^2, 4*x^2 + 3*x+ 2)
  %3 = 16*x^2 + 9*x + 4
  @eprog

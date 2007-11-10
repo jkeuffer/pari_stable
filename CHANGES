@@ -272,7 +272,7 @@ BA 36- New type t_CLOSURE to store GP functions
    37- Ability to use arbitrary comparison functions in vecsort()
    38- library functions closure_callgen1, closure_callgen2, closure_callgen,
        closure_callgenvec.
-   39- GP function map(), select()
+   39- GP function apply(), select()
    40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
 BA 41- library function vecsmall_uniq_sorted
    42- bench 'ff'

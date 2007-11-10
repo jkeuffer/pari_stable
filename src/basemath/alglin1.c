@@ -838,11 +838,11 @@ select0(GEN A, GEN f)
 }
 
 GEN
-map0(GEN f, GEN x)
+apply0(GEN f, GEN x)
 {
   long i, lx, tx = typ(x);
   GEN y;
-  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "map");
+  if (typ(f) != t_CLOSURE || f[1] < 1) pari_err(typeer, "apply");
   if (is_scalar_t(tx)) return closure_callgen1(f, x);
   switch(tx) {
     case t_POL:
@@ -865,7 +865,7 @@ map0(GEN f, GEN x)
     }
     case t_MAT:
       lx = lg(x); y = cgetg(lx, t_MAT);
-      for (i = 1; i < lx; i++) gel(y,i) = map0(f, gel(x,i));
+      for (i = 1; i < lx; i++) gel(y,i) = apply0(f, gel(x,i));
       return y;
 
     case t_VEC: case t_COL:
@@ -873,7 +873,7 @@ map0(GEN f, GEN x)
       for (i = 1; i < lx; i++) gel(y,i) = closure_callgen1(f, gel(x,i));
       return y;
   }
-  pari_err(typeer,"map");
+  pari_err(typeer,"apply");
   return NULL; /* not reached */
 }
 
