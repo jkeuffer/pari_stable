@@ -853,6 +853,7 @@ int     cmp_ZV(GEN x, GEN y);
 GEN     convol(GEN x, GEN y);
 int     gen_cmp_RgX(void *data, GEN x, GEN y);
 GEN     polcyclo(long n, long v);
+GEN     polcyclo_eval(long n, GEN x);
 GEN     dirdiv(GEN x, GEN y);
 GEN     dirmul(GEN x, GEN y);
 GEN     gen_indexsort(GEN x, void *E, int (*cmp)(void*,GEN,GEN));

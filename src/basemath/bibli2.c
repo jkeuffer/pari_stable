@@ -198,37 +198,86 @@ pollegendre(long n, long v)
   return gerepileupto(av, gmul2n(p1,-n));
 }
 
+/* polcyclo(p) = X^(p-1) + ... + 1 */
+static GEN
+polcyclo_prime(long p, long v)
+{
+  GEN T = cgetg(p+2, t_POL);
+  long i;
+  T[1] = evalsigne(1) | evalvarn(v);
+  for (i = 2; i < p+2; i++) gel(T,i) = gen_1;
+  return T;
+}
+
 /* cyclotomic polynomial */
 GEN
 polcyclo(long n, long v)
 {
-  long d, q, m;
-  pari_sp av=avma, tetpil;
-  GEN yn,yd;
+  long s, q, i, l;
+  pari_sp av=avma;
+  GEN T, P;
 
   if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (v<0) v = 0;
-  yn = yd = pol_1(0);
-  for (d=1; d*d<=n; d++)
+  if (n == 1) return deg1pol_i(gen_1, gen_1, v);
+  P = gel(factoru(n), 1); l = lg(P);
+  s = P[1]; T = polcyclo_prime(s, v);
+  for (i = 2; i < l; i++)
+  { /* Phi_{np}(X) = Phi_n(X^p) / Phi_n(X) */
+    s *= P[i]; 
+    T = RgX_div(RgX_inflate(T, P[i]), T);
+  }
+  /* s = squarefree part of n */
+  q = n / s;
+  if (q == 1) return gerepileupto(av, T);
+  return gerepilecopy(av, RgX_inflate(T,q));
+}
+
+static int
+is_0(GEN x) { return typ(x) == t_INT && !signe(x); }
+static int
+is_1(GEN x) { return typ(x) == t_INT && signe(x) == 1 && is_pm1(x); }
+
+/* cyclotomic polynomial */
+GEN
+polcyclo_eval(long n, GEN x)
+{
+  pari_sp av= avma;
+  GEN P, md, xd, yn, yd;
+  long l, s, i, j, q, mu;
+
+  if (!x) return polcyclo(n, 0);
+  if (typ(x) == t_POL && lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)))
+    return polcyclo(n, varn(x));
+  if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
+  if (n == 1) return gsubgs(x, 1);
+  /* n >= 2 */
+  P = gel(factoru(n), 1); l = lg(P)-1;
+  s = P[1]; for (i = 2; i <= l; i++) s *= P[i];
+  q = n/s;
+  if (q != 1) { x = gpowgs(x, q); n = s; } /* replace n by squarefree part */
+  if (typ(x) == t_POL)
+    return gerepileupto(av, poleval(polcyclo(n,0), x));
+
+  xd = cgetg((1<<l) + 1, t_VEC); /* the x^d, where d | n */
+  md = cgetg((1<<l) + 1, t_VECSMALL); /* the mu(d), where d | n */
+  gel(xd, 1) = x;
+  md[1] = 1;
+  mu = odd(l)? -1: 1; /* mu(n) */
+  if (mu == 1) { yd = gen_1; yn = gsubgs(x,1); }
+  else         { yn = gen_1; yd = gsubgs(x,1); }
+  for (i = 1; i <= l; i++) /* compute Prod_{d|n} (x^d-1)^mu(n/d) */
   {
-    if (n%d) continue;
-    q = n/d;
-    m = mu(utoipos(q));
-    if (m)
-    { /* y *= (x^d - 1) */
-      if (m>0) yn = addmulXn(yn, gneg(yn), d);
-      else     yd = addmulXn(yd, gneg(yd), d);
-    }
-    if (q==d) break;
-    m = mu(utoipos(d));
-    if (m)
-    { /* y *= (x^q - 1) */
-      if (m>0) yn = addmulXn(yn, gneg(yn), q);
-      else     yd = addmulXn(yd, gneg(yd), q);
+    long ti = 1<<(i-1), p = P[i];
+    for (j = 1; j <= ti; j++) {
+      GEN X = gpowgs(gel(xd,j), p);
+      gel(xd,ti+j) = X;
+      md[ti+j] = -md[j];
+      if (mu == md[ti+j]) yn = gmul(yn, gsubgs(X,1));
+      else                yd = gmul(yd, gsubgs(X,1));
     }
   }
-  tetpil=avma; yn = gerepile(av,tetpil,RgX_div(yn,yd));
-  setvarn(yn,v); return yn;
+  return gerepileupto(av, gdiv(yn,yd));
 }
 
 /* compute prod (L*x +/- a[i]) */
