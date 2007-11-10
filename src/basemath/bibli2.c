@@ -69,6 +69,26 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
+static GEN
+polchebyshev1_eval(long n, GEN x)
+{
+  long k;
+  GEN x2, T0, T1;
+  pari_sp av;
+
+  if (n < 0) n = -n;
+  if (n==0) return gen_1;
+  if (n==1) return gcopy(x);
+  av = avma; x2 = gmul2n(x,1);
+  T0 = gen_1;
+  T1 = x;
+  for (k = 2; k <= n; k++) {
+    GEN t = T1;
+    T1 = gadd(gmul(x2, T1), gneg_i(T0));
+    T0 = t;
+  }
+  return gerepileupto(av, T1);
+}
 
 /* Chebychev  polynomial of the second kind U(n,x): the coefficient in front of
  * x^(n-2*m) is (-1)^m * 2^(n-2m)*(n-m)!/m!/(n-2m)!  for m=0,1,...,n/2 */
@@ -115,6 +135,30 @@ polchebyshev2(long n, long v)
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
+static GEN
+polchebyshev2_eval(long n, GEN x)
+{
+  long k, neg = 0;
+  GEN x2, T0, T1;
+  pari_sp av;
+
+  if (n < 0) {
+    if (n == -1) return gen_0;
+    neg = 1; n = -n-2;
+  }
+  if (n==0) return neg ? gen_m1: gen_1;
+
+  av = avma; x2 = gmul2n(x,1);
+  T0 = gen_1;
+  T1 = x2;
+  for (k = 2; k <= n; k++) {
+    GEN t = T1;
+    T1 = gadd(gmul(x2, T1), gneg_i(T0));
+    T0 = t;
+  }
+  if (neg) T1 = gneg(T1);
+  return gerepileupto(av, T1);
+}
 
 GEN
 polchebyshev(long n, long kind, long v)
@@ -127,9 +171,22 @@ polchebyshev(long n, long kind, long v)
   }
   return NULL; /* not reached */
 }
+GEN
+polchebyshev_eval(long n, long kind, GEN x)
+{
+  if (!x) return polchebyshev(n, kind, 0);
+  switch (kind)
+  {
+    case 1: return polchebyshev1_eval(n, x);
+    case 2: return polchebyshev2_eval(n, x);
+    default: pari_err(flagerr, "polchebyshev");
+  }
+  return NULL; /* not reached */
+}
 
-/* Hermite polynomial H(n,x):  The coefficient in front of x^(n-2*m)
- * is (-1)^m * n! * 2^(n-2m)/m!/(n-2m)!  for m=0,1,...,n/2.. */
+/* Hermite polynomial H(n,x):  H(n+1) = 2x H(n) - 2n H(n-1)
+ * The coefficient in front of x^(n-2*m) is
+ * (-1)^m * n! * 2^(n-2m)/m!/(n-2m)!  for m=0,1,...,n/2.. */
 GEN
 polhermite(long n, long v)
 {
@@ -166,6 +223,28 @@ polhermite(long n, long v)
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
+GEN
+polhermite_eval(long n, GEN x)
+{
+  pari_sp av;
+  long k;
+  GEN x2, T0, T1;
+
+  if (!x) return polhermite(n, 0);
+  if (n==0) return gen_1;
+
+  av = avma; x2 = gmul2n(x,1); 
+  T0 = gen_1;
+  T1 = x2;
+  for (k = 2; k <= n; k++) {
+    GEN t = T1;
+    T1 = gadd(gmul(x2, T1), gneg_i(gmulsg((k-1)<<1,T0)));
+    T0 = t;
+  }
+  return gerepileupto(av, T1);
+
+
+}
 
 /* Legendre polynomial */
 /* L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1) */
@@ -174,7 +253,7 @@ pollegendre(long n, long v)
 {
   long m;
   pari_sp av, lim;
-  GEN p0, p1, p2;
+  GEN p0, p1;
 
   if (v<0) v = 0;
   /* pollegendre(-n) = pollegendre(n-1) */
@@ -186,8 +265,35 @@ pollegendre(long n, long v)
   p1=gmul2n(pol_x(v),1);
   for (m=1; m<n; m++)
   {
-    p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
+    GEN p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
     setvarn(p2,v);
+    p0 = p1; p1 = gdivgs(p2,m+1);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"pollegendre");
+      gerepileall(av, 2, &p0, &p1);
+    }
+  }
+  return gerepileupto(av, gmul2n(p1,-n));
+}
+GEN
+pollegendre_eval(long n, GEN x)
+{
+  long m;
+  pari_sp av, lim;
+  GEN p0, p1;
+
+  if (!x) return pollegendre(n, 0);
+  /* pollegendre(-n) = pollegendre(n-1) */
+  if (n < 0) n = -n-1;
+  if (n==0) return gen_1;
+  if (n==1) return gcopy(x);
+
+  p0=gen_1; av=avma; lim=stack_lim(av,2);
+  p1=gmul2n(x,1);
+  for (m=1; m<n; m++)
+  {
+    GEN p2 = gadd(gmul(x,gmulsg(4*m+2,p1)), gmulsg(-4*m,p0));
     p0 = p1; p1 = gdivgs(p2,m+1);
     if (low_stack(lim, stack_lim(av,2)))
     {

@@ -225,7 +225,8 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
    66- allow ellorder to handle curves over Fp, add an optional parameter to
        indicate a multiple of the order as in znorder.
    67- allow polcyclo(n, a) for an arbitrary a [ had to be a variable ] +
-       major speedups: polcyclo(10^6) 5min -> 16ms
+       major speedups: polcyclo(10^6) 5min -> 16ms. Similarly for polchebyshev,
+       pollegendre and polhermite
 
   Added
     1- library functions expu, adduu, subuu

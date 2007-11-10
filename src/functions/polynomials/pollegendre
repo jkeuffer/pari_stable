@@ -1,7 +1,18 @@
 Function: pollegendre
 Section: polynomials
-C-Name: pollegendre
-Prototype: LDn
-Help: pollegendre(n,{v=x}): legendre polynomial of degree n (n C-integer),
- in variable v
-Doc: creates the $n^{\text{th}}$ \idx{Legendre polynomial}, in variable $v$.
+C-Name: pollegendre_eval
+Prototype: LDG
+Help: pollegendre(n,{a='x}): legendre polynomial of degree n evaluated at a
+Doc: $n^{\text{th}}$ \idx{Legendre polynomial} evaluated at $a$ (\kbd{'x} by
+ default). Even though the end result has coefficients in $\Z[1/2]$, the
+ routine assumes further that $n!$ is invertible in the base ring, i.e.
+ \bprog
+ ? pollegendre(10, Mod(2,5))
+  *** pollegendre: impossible inverse modulo: Mod(0, 5).
+ ? pollegendre(10, 2+O(5^3))
+ %2 = 3 + O(5)
+ @eprog\noindent As seen above, $p$-adics to a high enough precision should
+ enable you to bypass this restriction.
+
+Variant: The variant \fun{GEN}{pollegendre}{long n, long v} returns the $n$-th
+ Legendre polynomial in variable $v$.
