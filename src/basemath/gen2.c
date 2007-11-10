@@ -1890,6 +1890,7 @@ listpop(GEN L, long index)
   z = list_data(L);
   if (!z) pari_err(talker,"empty list in listpop");
   l = lg(z)-1;
+  if (!l) pari_err(talker,"empty list in listpop");
 
   if (!index || index > l) index = l;
   killbloc( gel(z, index) );
