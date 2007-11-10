@@ -244,10 +244,11 @@ polcyclo_eval(long n, GEN x)
 {
   pari_sp av= avma;
   GEN P, md, xd, yn, yd;
-  long l, s, i, j, q, mu;
+  long l, s, i, j, q, mu, tx;
 
   if (!x) return polcyclo(n, 0);
-  if (typ(x) == t_POL && lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)))
+  tx = typ(x);
+  if (tx == t_POL && lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)))
     return polcyclo(n, varn(x));
   if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (n == 1) return gsubgs(x, 1);
@@ -256,7 +257,7 @@ polcyclo_eval(long n, GEN x)
   s = P[1]; for (i = 2; i <= l; i++) s *= P[i];
   q = n/s;
   if (q != 1) { x = gpowgs(x, q); n = s; } /* replace n by squarefree part */
-  if (typ(x) == t_POL)
+  if (tx == t_POL || tx == t_MAT || lg(x) > n)
     return gerepileupto(av, poleval(polcyclo(n,0), x));
 
   xd = cgetg((1<<l) + 1, t_VEC); /* the x^d, where d | n */

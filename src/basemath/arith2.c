@@ -1007,10 +1007,10 @@ factor_pn_1(GEN p, long n)
       GEN f=factor_Aurifeuille(p,d[i]);
       B = Z_factor(f);
       A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
-      B = Z_factor(diviiexact(poleval(polcyclo(d[i],0), p), f));
+      B = Z_factor(diviiexact(polcyclo_eval(d[i],p), f));
     }
     else
-      B = Z_factor(poleval(polcyclo(d[i],0), p));
+      B = Z_factor(polcyclo_eval(d[i],p));
     A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
   }
   return gerepilecopy(av, A);
