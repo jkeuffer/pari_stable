@@ -715,7 +715,8 @@ ispower(GEN x, GEN K, GEN *pt)
   GEN z;
 
   if (!K) return gisanypower(x, pt);
-  if (typ(K) != t_INT || signe(K) <= 0) pari_err(typeer, "ispower");
+  if (typ(K) != t_INT) pari_err(typeer, "ispower");
+  if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Z in ispower",K);
   if (is_pm1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
