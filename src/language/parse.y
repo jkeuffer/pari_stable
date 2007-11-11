@@ -176,8 +176,8 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
 %left SEQ DEFFUNC
 %left KDER
 %left INT LVAL
-%left ';' ','
 %right KPARROW KARROW
+%left ';' ','
 %right '=' KPE KSE KME KDE KDRE KEUCE KMODE KSRE KSLE
 %left '&' KAND '|' KOR
 %left KEQ KNE KGE '<' KLE '>'
