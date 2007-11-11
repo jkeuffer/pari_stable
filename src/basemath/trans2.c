@@ -195,7 +195,14 @@ gasin(GEN x, long prec)
       if (gcmp0(y)) return gerepilecopy(av, y);
       /* lg(y) > 2*/
       if (valp(y) < 0) pari_err(negexper,"gasin");
-      p1 = gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec));
+      p1 = gsubsg(1,gsqr(y));
+      if (gcmp0(p1))
+      {
+        GEN t = Pi2n(-1,prec);
+        if (gsigne(gel(y,2)) < 0) setsigne(t, -1);
+        return scalarser(t, varn(y), valp(p1)>>1);
+      }
+      p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1,varn(y));
       if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
       return gerepileupto(av, a);
@@ -543,8 +550,14 @@ gash(GEN x, long prec)
       av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gerepilecopy(av, y);
       if (valp(y) < 0) pari_err(negexper,"gash");
-
-      p1 = gdiv(derivser(y), gsqrt(gaddsg(1,gsqr(y)),prec));
+      p1 = gaddsg(1,gsqr(y));
+      if (gcmp0(p1))
+      {
+        GEN t = PiI2n(-1,prec);
+        if ( gsigne(imag_i(gel(y,2))) < 0 ) setsigne(gel(t,2), -1);
+        return scalarser(t, varn(y), valp(p1)>>1);
+      }
+      p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1,varn(y));
       if (!valp(y)) a = gadd(a, gash(gel(y,2),prec));
       return gerepileupto(av, a);
@@ -607,7 +620,9 @@ gach(GEN x, long prec)
 	if (!v) return gerepilecopy(av, y);
 	return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
-      p1 = gdiv(derivser(y), gsqrt(gsubgs(gsqr(y),1),prec));
+      p1 = gsubgs(gsqr(y),1);
+      if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
+      p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1, varn(y));
       if (v)
 	p1 = PiI2n(-1, prec); /* I Pi/2 */
