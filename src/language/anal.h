@@ -184,15 +184,6 @@ void compiler_reset(void);
 GEN  gp_closure(long n);
 long eval_mnemonic(GEN str, const char *tmplate);
 
-INLINE GEN
-closure_evalnobrk(GEN code)
-{
-  GEN r=closure_evalgen(code);
-  if(!r)
-    pari_err(talker, "break not allowed here");
-  return r;
-}
-
 typedef struct
 {
   long offset;

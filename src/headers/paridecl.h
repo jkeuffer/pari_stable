@@ -1132,13 +1132,14 @@ void    writetex(const char *s, GEN g);
 /* eval.c */
 
 void    closure_disassemble(GEN n);
-GEN     closure_callgen(GEN C, long n, ...);
 GEN     closure_callgen1(GEN C, GEN x);
 GEN     closure_callgen2(GEN C, GEN x, GEN y);
+GEN     closure_callgenall(GEN C, long n, ...);
 GEN     closure_callgenvec(GEN C, GEN args);
-GEN     closure_evalgen(GEN code);
-GEN     closure_evalres(GEN code);
-void    closure_evalvoid(GEN code);
+GEN     closure_evalgen(GEN C);
+GEN     closure_evalnobrk(GEN C);
+GEN     closure_evalres(GEN C);
+void    closure_evalvoid(GEN C);
 void    closure_reset(void);
 void    freeep(entree *ep);
 GEN     get_lex(long vn);

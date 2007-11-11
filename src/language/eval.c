@@ -446,7 +446,8 @@ closure_return(GEN C)
   if (br_status)
   {
     GEN z;
-    if (br_status!=br_ALLOCMEM) avma=ltop;
+    if (br_status==br_ALLOCMEM) return gnil;
+    avma=ltop;
     z=br_res?gcopy(br_res):gnil;
     reset_break();
     return z;
@@ -1027,6 +1028,7 @@ closure_eval(GEN C)
           pari_err(talker, "deep recursion");
 #endif
         z = closure_return(fun);
+        if (br_status) goto endeval;
         gel(st, sp-1) = z;
         break;
       }
@@ -1117,6 +1119,15 @@ closure_evalgen(GEN C)
   return gerepileupto(ltop,gel(st,--sp));
 }
 
+GEN
+closure_evalnobrk(GEN C)
+{
+  pari_sp ltop=avma;
+  closure_eval(C);
+  if (br_status) pari_err(talker, "break not allowed here");
+  return gerepileupto(ltop,gel(st,--sp));
+}
+
 void
 closure_evalvoid(GEN C)
 {
@@ -1132,16 +1143,13 @@ closure_evalres(GEN C)
   return closure_return(C);
 }
 
-GEN
-closure_callgen(GEN C, long n, ...)
+INLINE GEN
+closure_call_noalloc(GEN C)
 {
-  va_list ap;
-  long i;
-  va_start(ap,n);
-  for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
-  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
-  va_end(ap);
-  return closure_return(C);
+  GEN z=closure_return(C);
+  if (br_status==br_ALLOCMEM)
+    pari_err(talker,"can't allow allocatemem() there");
+  return z;
 }
 
 GEN
@@ -1150,7 +1158,7 @@ closure_callgen1(GEN C, GEN x)
   long i;
   gel(st,sp++)=x;
   for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_call_noalloc(C);
 }
 
 GEN
@@ -1160,7 +1168,7 @@ closure_callgen2(GEN C, GEN x, GEN y)
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_call_noalloc(C);
 }
 
 GEN
@@ -1169,7 +1177,19 @@ closure_callgenvec(GEN C, GEN args)
   long i, l = lg(args);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_call_noalloc(C);
+}
+
+GEN
+closure_callgenall(GEN C, long n, ...)
+{
+  va_list ap;
+  long i;
+  va_start(ap,n);
+  for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
+  for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
+  va_end(ap);
+  return closure_call_noalloc(C);
 }
 
 void
