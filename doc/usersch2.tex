@@ -1432,7 +1432,7 @@ programming mistake this time: \kbd{sumalt} is a
 rigorously justified for a given function, in particular our $\zeta(s)$
 formula. Indeed, Peter Borwein (\emph{An efficient algorithm for the Riemann
 zeta function}, CMS Conf.~Proc.~{\bf 27} (2000), pp.~29--34) proved that the
-fomula used in \kbd{sumalt} with $n$ terms computes $(1-2^{1-s})\zeta(s)$
+formula used in \kbd{sumalt} with $n$ terms computes $(1-2^{1-s})\zeta(s)$
 with a relative error of the order of $(3+\sqrt{8})^{-n}|\Gamma(s)|^{-1}$.},
 providing very good convergence acceleration; in effect, we are computating
 the analytic continuation of our original function. To convince ourselves
@@ -1541,10 +1541,10 @@ Here is a variation:
 evaluates the appropriate function on argument \kbd{x},
 provided $1\leq i\leq 3$. Finally, a more useful example:
 \bprog
-MAP(f, v) = vector(#v, i, f(v[i]))
+APPLY(f, v) = vector(#v, i, f(v[i]))
 @eprog\noindent
 applies the function \kbd{f} to every element in the vector \kbd{v}.
-(The built-in function \kbd{map} is more powerful since it also applies to
+(The built-in function \kbd{apply} is more powerful since it also applies to
 lists and matrices.)
 
 \subsec{Defining functions within a function ?}
