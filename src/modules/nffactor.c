@@ -269,7 +269,7 @@ nffactor(GEN nf,GEN pol)
 
   A = fix_relative_pol(nf,pol,0);
   if (degpol(nf[1]) == 1)
-    return gerepileupto(av, ZX_factor(simplify(pol)));
+    return gerepileupto(av, ZX_factor(simplify(lift_intern(A))));
 
   A = Q_primpart( lift_intern(A) );
   g = nfgcd(A, derivpol(A), T, gel(nf,4));
