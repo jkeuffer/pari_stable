@@ -40,6 +40,8 @@ ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
+GEN pari_colormap = NULL, pari_graphcolors = NULL;
+
 entree  **varentries;
 
 THREAD pari_sp bot, top, avma;

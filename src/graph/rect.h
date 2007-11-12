@@ -249,7 +249,6 @@ extern long  rectline_itype;
 
 /* plotport.c */
 typedef long (*col_counter)[ROt_MAX];
-extern GEN pari_colormap, pari_graphcolors;
 
 void  initrect(long ne, long x, long y);
 void  initrect_gen(long ne, GEN x, GEN y, long flag);

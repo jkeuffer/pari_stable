@@ -421,6 +421,7 @@ void  whatnow_new_syntax(const char *f, long n);
 void decode_color(long n, long *c);
 #define c_NONE 0xffffUL
 enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
+extern GEN pari_colormap, pari_graphcolors;
 
 /* defaults */
 #define is_default(s) setdefault((s),"",d_EXISTS) == gen_1

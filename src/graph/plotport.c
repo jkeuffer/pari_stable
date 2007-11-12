@@ -32,8 +32,6 @@ PARI_plot *pari_plot_engine = &pari_plot;
 long  rectpoint_itype = 0;
 long  rectline_itype  = 0;
 
-GEN pari_colormap = NULL, pari_graphcolors = NULL;
-
 #define STRINGRECT (NUMRECT-2)
 #define DRAWRECT (NUMRECT-1)
 
