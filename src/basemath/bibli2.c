@@ -252,21 +252,35 @@ GEN
 polhermite_eval(long n, GEN x)
 {
   pari_sp av;
-  long k;
-  GEN x2, T0, T1;
+  long m;
+  GEN a, x2, T;
 
   if (!x) return polhermite(n, 0);
+  if (typ(x) == t_POL && is_X(x)) return polhermite(n, varn(x));
   if (n==0) return gen_1;
 
-  av = avma; x2 = gmul2n(x,1); 
-  T0 = gen_1;
-  T1 = x2;
-  for (k = 2; k <= n; k++) {
-    GEN t = T1;
-    T1 = gadd(gmul(x2, T1), gneg_i(gmulsg((k-1)<<1,T0)));
-    T0 = t;
-  }
-  return gerepileupto(av, T1);
+  av = avma; x2 = gsqr(x);
+  T = a = int2n(n);
+  if (n < SQRTVERYBIGINT)
+    for (m=1; 2*m<= n; m++)
+    {
+      T = gmul(T, x2);
+      av = avma;
+      a = diviuexact(muliu(a, (n-2*m+2)*(n-2*m+1)), 4*m);
+      togglesign(a);
+      T = gadd(T, a);
+    }
+  else
+    for (m=1; 2*m<= n; m++)
+    {
+      T = gmul(T, x2);
+      av = avma;
+      a = diviuexact(muliu(muliu(a, n-2*m+2), n-2*m+1), 4*m);
+      togglesign(a);
+      T = gadd(T, a);
+    }
+  if (odd(n)) T = gmul(T,x);
+  return gerepileupto(av, T);
 }
 
 /* Legendre polynomial
@@ -322,6 +336,7 @@ pollegendre_eval(long n, GEN x)
   GEN T, a, x2;
 
   if (!x) return pollegendre(n, 0);
+  if (typ(x) == t_POL && is_X(x)) return pollegendre(n, varn(x));
   /* pollegendre(-n) = pollegendre(n-1) */
   if (n < 0) n = -n-1;
   if (n==0) return gen_1;
