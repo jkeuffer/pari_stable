@@ -60,8 +60,8 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
     {
       av = avma;
       a = diviuexact(muliu(a, l*(l-1)), 4*k*(n-k));
-      togglesign(a);
-      gel(r--,0) = gerepileuptoint(av, a);
+      togglesign(a); a = gerepileuptoint(av, a);
+      gel(r--,0) = a;
       gel(r--,0) = gen_0;
     }
   else
@@ -70,8 +70,8 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
       av = avma;
       a = muliu(muliu(a, l), l-1);
       a = diviuexact(diviuexact(a, 4*k), n-k);
-      togglesign(a);
-      gel(r--,0) = gerepileuptoint(av, a);
+      togglesign(a); a = gerepileuptoint(av, a);
+      gel(r--,0) = a;
       gel(r--,0) = gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
@@ -267,18 +267,19 @@ polhermite_eval(long n, GEN x)
     T0 = t;
   }
   return gerepileupto(av, T1);
-
-
 }
 
-/* Legendre polynomial */
-/* L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1) */
+/* Legendre polynomial
+ * L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1)
+ * L(n) = 2^-n sum_{k=0}^{n/2} a_k x^(n-2k)
+ *   where a_k = (-1)^k (2n-2k)! / k! (n-k)! (n-2k)! is an integer
+ *   and a_0 = binom(2n,n), a_k / a_{k-1} = - (n-2k+1)(n-2k+2) / 2k (2n-2k+1) */
 GEN
 pollegendre(long n, long v)
 {
-  long m;
-  pari_sp av, lim;
-  GEN p0, p1;
+  long k, l;
+  pari_sp av;
+  GEN a, r, q;
 
   if (v<0) v = 0;
   /* pollegendre(-n) = pollegendre(n-1) */
@@ -286,27 +287,39 @@ pollegendre(long n, long v)
   if (n==0) return pol_1(v);
   if (n==1) return pol_x(v);
 
-  p0=pol_1(v); av=avma; lim=stack_lim(av,2);
-  p1=gmul2n(pol_x(v),1);
-  for (m=1; m<n; m++)
-  {
-    GEN p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
-    setvarn(p2,v);
-    p0 = p1; p1 = gdivgs(p2,m+1);
-    if (low_stack(lim, stack_lim(av,2)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"pollegendre");
-      gerepileall(av, 2, &p0, &p1);
+  av = avma;
+  q = cgetg(n+3, t_POL); r = q + n+2;
+  gel(r--,0) = a = binomialuu(n<<1,n);
+  gel(r--,0) = gen_0;
+  if (n < SQRTVERYBIGINT)
+    for (k=1,l=n; l>1; k++,l-=2)
+    { /* l = n-2*k+2 */
+      av = avma;
+      a = diviuexact(muliu(a, l*(l-1)), 2*k*(n+l-1));
+      togglesign(a); a = gerepileuptoint(av, a);
+      gel(r--,0) = a;
+      gel(r--,0) = gen_0;
     }
-  }
-  return gerepileupto(av, gmul2n(p1,-n));
+  else
+    for (k=1,l=n; l>1; k++,l-=2)
+    { /* l = n-2*k+2 */
+      av = avma;
+      a = muliu(muliu(a, l), l-1);
+      a = diviuexact(diviuexact(a, 2*k), n+l-1);
+      togglesign(a); a = gerepileuptoint(av, a);
+      gel(r--,0) = a;
+      gel(r--,0) = gen_0;
+    }
+  q[1] = evalsigne(1) | evalvarn(v);
+  return gerepileupto(av, gmul2n(q,-n));
 }
+
 GEN
 pollegendre_eval(long n, GEN x)
 {
-  long m;
-  pari_sp av, lim;
-  GEN p0, p1;
+  long k, l;
+  pari_sp av;
+  GEN T, a, x2;
 
   if (!x) return pollegendre(n, 0);
   /* pollegendre(-n) = pollegendre(n-1) */
@@ -314,19 +327,29 @@ pollegendre_eval(long n, GEN x)
   if (n==0) return gen_1;
   if (n==1) return gcopy(x);
 
-  p0=gen_1; av=avma; lim=stack_lim(av,2);
-  p1=gmul2n(x,1);
-  for (m=1; m<n; m++)
-  {
-    GEN p2 = gadd(gmul(x,gmulsg(4*m+2,p1)), gmulsg(-4*m,p0));
-    p0 = p1; p1 = gdivgs(p2,m+1);
-    if (low_stack(lim, stack_lim(av,2)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"pollegendre");
-      gerepileall(av, 2, &p0, &p1);
+  av = avma; x2 = gsqr(x);
+  T = a = binomialuu(n<<1,n);
+  if (n < SQRTVERYBIGINT)
+    for (k=1,l=n; l>1; k++,l-=2)
+    { /* l = n-2*k+2 */
+      T = gmul(T, x2);
+      av = avma;
+      a = diviuexact(muliu(a, l*(l-1)), 2*k*(n+l-1));
+      togglesign(a); a = gerepileuptoint(av, a);
+      T = gadd(T, a);
     }
-  }
-  return gerepileupto(av, gmul2n(p1,-n));
+  else
+    for (k=1,l=n; l>1; k++,l-=2)
+    { /* l = n-2*k+2 */
+      T = gmul(T, x2);
+      av = avma;
+      a = muliu(muliu(a, l), l-1);
+      a = diviuexact(diviuexact(a, 2*k), n+l-1);
+      togglesign(a); a = gerepileuptoint(av, a);
+      T = gadd(T, a);
+    }
+  if (odd(n)) T = gmul(T,x);
+  return gerepileupto(av, gmul2n(T,-n));
 }
 
 /* polcyclo(p) = X^(p-1) + ... + 1 */
