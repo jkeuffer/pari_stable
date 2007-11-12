@@ -1,5 +1,5 @@
 Function: _^_
-Help: _^_
+Help: x^y: compute x to the power y
 Section: symbolic_operators
 C-Name: gpow
 Prototype: GGp
@@ -19,3 +19,9 @@ Description:
  (real, int):real	powgi($1, $2)
  (gen, int):gen		powgi($1, $2)
  (gen, gen):gen:prec	gpow($1, $2, prec)
+
+Function: _^s
+Help: return x^n where n is a small integer
+Section: programming/internals
+C-Name: gpowgs
+Prototype: GL

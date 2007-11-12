@@ -807,6 +807,8 @@ compilefunc(entree *ep, long n, int mode)
     compilevec(y, mode, OCcol);
     return;
   }
+  else if (x==OPpow && nb==2 && tree[arg[2]].f==Fsmall)
+    ep=is_entry("_^s");
   else if (x==OPcat)
     pari_err(talker2,"expected character: ',' or ')' instead of",
         tree[arg[1]].str+tree[arg[1]].len, get_origin());
