@@ -15,6 +15,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
+
+static int
+is_0(GEN x) { return typ(x) == t_INT && !signe(x); }
+static int
+is_1(GEN x) { return typ(x) == t_INT && signe(x) == 1 && is_pm1(x); }
+static int
+is_X(GEN x) { return lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)); }
+
 /*******************************************************************/
 /**                                                               **/
 /**                      SPECIAL POLYNOMIALS                      **/
@@ -191,6 +199,7 @@ GEN
 polchebyshev_eval(long n, long kind, GEN x)
 {
   if (!x) return polchebyshev(n, kind, 0);
+  if (typ(x) == t_POL && is_X(x)) return polchebyshev(n, kind, varn(x));
   switch (kind)
   {
     case 1: return polchebyshev1_eval(n, x);
@@ -355,11 +364,6 @@ polcyclo(long n, long v)
   return gerepilecopy(av, RgX_inflate(T,q));
 }
 
-static int
-is_0(GEN x) { return typ(x) == t_INT && !signe(x); }
-static int
-is_1(GEN x) { return typ(x) == t_INT && signe(x) == 1 && is_pm1(x); }
-
 /* cyclotomic polynomial */
 GEN
 polcyclo_eval(long n, GEN x)
@@ -370,8 +374,7 @@ polcyclo_eval(long n, GEN x)
 
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
-  if (tx == t_POL && lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)))
-    return polcyclo(n, varn(x));
+  if (tx == t_POL && is_X(x)) return polcyclo(n, varn(x));
   if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (n == 1) return gsubgs(x, 1);
   /* n >= 2 */
