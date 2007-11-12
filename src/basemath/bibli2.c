@@ -69,25 +69,33 @@ polchebyshev1(long n, long v) /* Assume 4*n < LONG_MAX */
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
+static void
+polchebyshev1_eval_aux(long n, GEN x, GEN *pt1, GEN *pt2)
+{
+  GEN t1, t2, b;
+  if (n == 1) { *pt1 = gen_1; *pt2 = x; return; }
+  if (n == 0) { *pt1 = x; *pt2 = gen_1; return; }
+  polchebyshev1_eval_aux((n+1) >> 1, x, &t1, &t2);
+  b = gadd(gmul(gmul2n(t1,1), t2), gneg(x));
+  if (odd(n)) { *pt1 = gadd(gmul2n(gsqr(t1), 1), gen_m1); *pt2 = b; }
+  else        { *pt1 = b; *pt2 = gadd(gmul2n(gsqr(t2), 1), gen_m1); }
+}
 static GEN
 polchebyshev1_eval(long n, GEN x)
 {
-  long k;
-  GEN x2, T0, T1;
+  GEN t1, t2;
+  long i, v;
   pari_sp av;
 
   if (n < 0) n = -n;
   if (n==0) return gen_1;
   if (n==1) return gcopy(x);
-  av = avma; x2 = gmul2n(x,1);
-  T0 = gen_1;
-  T1 = x;
-  for (k = 2; k <= n; k++) {
-    GEN t = T1;
-    T1 = gadd(gmul(x2, T1), gneg_i(T0));
-    T0 = t;
-  }
-  return gerepileupto(av, T1);
+  av = avma; 
+  v = u_lvalrem(n, 2, (ulong*)&n);
+  polchebyshev1_eval_aux((n+1)>>1, x, &t1, &t2);
+  if (n != 1) t2 = gadd(gmul(gmul2n(t1,1), t2), gneg(x));
+  for (i = 1; i <= v; i++) t2 = gadd(gmul2n(gsqr(t2), 1), gen_m1);
+  return gerepileupto(av, t2);
 }
 
 /* Chebychev  polynomial of the second kind U(n,x): the coefficient in front of
@@ -135,11 +143,23 @@ polchebyshev2(long n, long v)
   q[1] = evalsigne(1) | evalvarn(v);
   return q;
 }
+static void
+polchebyshev2_eval_aux(long n, GEN x, GEN *pu1, GEN *pu2)
+{
+  GEN u1, u2, u, mu1;
+  if (n == 1) { *pu1 = gen_1; *pu2 = gmul2n(x,1); return; }
+  if (n == 0) { *pu1 = gen_0; *pu2 = gen_1; return; }
+  polchebyshev2_eval_aux(n >> 1, x, &u1, &u2);
+  mu1 = gneg(u1);
+  u = gmul(gadd(u2,u1), gadd(u2,mu1));
+  if (odd(n)) { *pu1 = u; *pu2 = gmul(gmul2n(u2,1), gadd(gmul(x,u2), mu1)); }
+  else        { *pu2 = u; *pu1 = gmul(gmul2n(u1,1), gadd(u2, gmul(x,mu1))); }
+}
 static GEN
 polchebyshev2_eval(long n, GEN x)
 {
-  long k, neg = 0;
-  GEN x2, T0, T1;
+  GEN u1, u2, mu1;
+  long neg = 0;
   pari_sp av;
 
   if (n < 0) {
@@ -147,17 +167,13 @@ polchebyshev2_eval(long n, GEN x)
     neg = 1; n = -n-2;
   }
   if (n==0) return neg ? gen_m1: gen_1;
-
-  av = avma; x2 = gmul2n(x,1);
-  T0 = gen_1;
-  T1 = x2;
-  for (k = 2; k <= n; k++) {
-    GEN t = T1;
-    T1 = gadd(gmul(x2, T1), gneg_i(T0));
-    T0 = t;
-  }
-  if (neg) T1 = gneg(T1);
-  return gerepileupto(av, T1);
+  av = avma; 
+  polchebyshev2_eval_aux(n>>1, x, &u1, &u2);
+  mu1 = gneg(u1);
+  if (odd(n)) u2 = gmul(gmul2n(u2,1), gadd(gmul(x,u2), mu1));
+  else        u2 = gmul(gadd(u2,u1), gadd(u2,mu1));
+  if (neg) u2 = gneg(u2);
+  return gerepileupto(av, u2);
 }
 
 GEN
