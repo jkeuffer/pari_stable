@@ -296,6 +296,19 @@ parseproto(char const **q, char *c)
   *q=p+1;
   return PPstd;
 }
+
+/* return type for GP functions */
+enum ret_type { RET_GEN, RET_INT, RET_LONG, RET_VOID };
+
+static enum ret_type
+get_ret_type(const char **p)
+{
+  if (**p == 'v') { (*p)++; return RET_VOID; }
+  else if (**p == 'i') { (*p)++; return RET_INT;  }
+  else if (**p == 'l') { (*p)++; return RET_LONG; }
+  else return RET_GEN;
+}
+
 /*supported types:
  * type: Gsmall, Ggen, Gvoid, Gvec
  * mode: Gsmall, Ggen, Gvar, Gvoid
@@ -668,9 +681,6 @@ compileuserfunc(entree *ep, long n, int mode)
   compilecall(n, tree[n].f==Fderfunc ? OCderivuser:OCcalluser, mode);
 }
 
-/* return type for GP functions */
-enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
-
 static void
 compilefunc(entree *ep, long n, int mode)
 {
@@ -678,7 +688,7 @@ compilefunc(entree *ep, long n, int mode)
   long i,j;
   long x=tree[n].x;
   long y=tree[n].y;
-  long ret;
+  enum ret_type ret;
   char const *p,*q;
   char c;
   const char *flags = NULL;
@@ -815,10 +825,7 @@ compilefunc(entree *ep, long n, int mode)
   p=ep->code;
   if (!ep->value)
     pari_err(talker2,"unknown function",tree[n].str, get_origin());
-  if (*p == 'v') { ret = RET_VOID; p++; }
-  else if (*p == 'i') { ret = RET_INT;  p++; }
-  else if (*p == 'l') { ret = RET_LONG; p++; }
-  else ret = RET_GEN;
+  ret=get_ret_type(&p);
   if (tree[n].f==Fderfunc && (ret!=RET_GEN || *p!='G'))
     pari_err(talker2,"can't derive this",tree[n].str,get_origin());
   i=0; j=1;
