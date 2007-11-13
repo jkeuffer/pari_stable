@@ -789,27 +789,17 @@ compilefunc(entree *ep, long n, int mode)
   }
   else if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
   {
-    long a;
     if (nb!=1) pari_err(talker2,"wrong number of arguments",
         tree[n].str+tree[n].len-1, get_origin());
     if (tree[n].f==Fderfunc)
       pari_err(talker2,"can't derive this",tree[n].str,get_origin());
-    a = arg[1];
-    if (tree[a].f!=Ffunction || tree[a].x!=OPpow)
+    ep=is_entry("O(_^_)");
+    if (tree[arg[1]].f==Ffunction && tree[arg[1]].x==OPpow)
     {
-      compilenode(a,Ggen,FLnocopy);
-      op_push(OCpushlong,1);
+      arg = listtogen(tree[arg[1]].y,Flistarg);
+      nb  = lg(arg)-1;
+      lnc = first_safe_arg(arg);
     }
-    else
-    {
-      long y=tree[a].y;
-      compilenode(tree[y].x,Ggen,0);
-      compilenode(tree[y].y,Gsmall,0);
-    }
-    op_push(OCcallgen2,(long)ep);
-    compilecast(n,Ggen,mode);
-    avma=ltop;
-    return;
   }
   else if (x==OPtrans && tree[y].f==Fvec)
   {
