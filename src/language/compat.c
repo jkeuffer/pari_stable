@@ -162,6 +162,7 @@ entree oldfonctions[]={
 {"_\\=_",0,(void*)gdivente,13,"&G","x\\\\=y:"},
 {"_\\_",0,(void*)gdivent,13,"GG","x\\\\y: Euclidean quotient of x and y"},
 {"_^_",0,(void*)gpow,13,"GGp","_^_"},
+{"_^s",0,(void*)gpowgs,13,"GL","_^s"},
 {"__",0,NULL,13,NULL,"__"},
 {"_void_if",0,(void*)ifpari_void,11,"vGDIDI","internal variant of if() that does not return a value."},
 {"_||_",0,(void*)orpari,13,"GE","x||y:"},
