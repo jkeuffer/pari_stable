@@ -246,7 +246,7 @@ CPLUSPLUS  = g++
 
 FLTKDIR    = "$FLTKDIR"
 
-TOPLDDYN   = -L"$TOP/$objdir" \$(RLLIBS)
+TOPLDDYN   = "$TOP/$objdir"
 # Description system
 DESC          = pari.desc
 DESC_HELP_GEN = $desc/gen_proto $desc/PARI/822.pm
@@ -335,10 +335,10 @@ install-include:
 
 install-bin: install-bin-$dft
 
-install-bin-dyn: gp-dyn
+install-bin-dyn: gp-dyn install-lib-dyn
 	-mkdir -p \$(BINDIR)
 	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
+	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(LDDYN) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
 	$postconfig \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
@@ -441,7 +441,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
-	\$(INSTALL_PROGRAM) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBDIR)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE)
 install-lib-dyn-link: install-lib-dyn-base
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
@@ -496,12 +496,12 @@ EOT
 
 gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) -L\$(TOPLDDYN) \$(RLLIBS) \$(LDDYN) \$(PLOTLIBS) \$(LIBS) \$(DL_LIBS)
 	$postconfig gp-dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
 	-\$(RM) \$(LIBPARI_DYN)
-	\$(DLLD_IGNORE)\$(DLLD) -o \$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE)
+	\$(DLLD_IGNORE)\$(DLLD) -o \$(TOPLDDYN)/\$(LIBPARI_DYN) \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS) \$(GMPLIBS) \$(EXPORT_FILE)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SO)"; then \
 	  \$(RM) \$(LIBPARI_SO);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SO); fi

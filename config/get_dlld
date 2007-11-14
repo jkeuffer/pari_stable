@@ -65,7 +65,7 @@ if test -n "$DLLD"; then
   else # DLLD != GNU ld
     case "$osname" in
       aix)     DLLDFLAGS='-r' ;;
-      darwin)  DLLD=; DLLDFLAGS='-dylib -flat_namespace -undefined suppress' ;;
+      darwin)  DLLDFLAGS='-flat_namespace -undefined suppress' ;;
       freebsd) DLLDFLAGS='-Bshareable -x' ;;
       hpux)    DLLDFLAGS='-b' ;;
       irix)    DLLDFLAGS='-shared -elf -no_unresolved -all' ;;
@@ -89,7 +89,11 @@ if test -n "$DLLD"; then
       sparc*) extra='-mimpure-text';;
       *) extra=;;
     esac
-    DLLDFLAGS="-shared $extra \$(CFLAGS) \$(DLCFLAGS) $DLLDFLAGS"
+    case "$osname" in
+      darwin) shared=-dynamiclib;;
+      *) shared=-shared;;
+    esac
+    DLLDFLAGS="$shared $extra \$(CFLAGS) \$(DLCFLAGS) $DLLDFLAGS"
   fi
   case "$osname" in
 # Beware: will run through 'eval' [ hence ${...} instead of \$(...) ]
