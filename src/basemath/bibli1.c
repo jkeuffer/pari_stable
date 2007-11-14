@@ -3074,7 +3074,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     p = gtodouble(BORNE);
     maxnorm = 0.;
   }
-  BOUND = p + eps;
+  BOUND = p * (1 + eps);
   if (BOUND == p) pari_err(precer, "minim0");
 
   switch(flag)
@@ -3136,7 +3136,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (gcmp(gnorme,BORNE) >= 0) avma = av2;
       else
       {
-	BOUND=gtodouble(gnorme)+eps; s=0;
+	BOUND=gtodouble(gnorme)*(1+eps); s=0;
 	affii(gnorme,BORNE); avma = av1;
 	if (flag == min_PERF) invp = matid(maxrank);
       }

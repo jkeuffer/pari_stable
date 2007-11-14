@@ -125,6 +125,8 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
    97- ffgen(x*Mod(1,2)) --> x [ should be 0 ]
    98- ffprimroot(ffgen((x+1)*Mod(1,2))) --> oo loop
    99- nffactor(nfinit(y),x^2+Mod(1,y)) --> SEGV [#699]
+  100- "precision error in minim0" on qfminim(G, norml2(M[,1]), 100)
+       from tutorial
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
