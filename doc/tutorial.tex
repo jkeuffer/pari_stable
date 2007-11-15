@@ -93,7 +93,7 @@ the following:
   1./ 7
   1 / 7.
   1./ 7.
-  1 / 7 + 0.@com etc \dots
+  1 / 7 + 0.
 @eprog\noindent
 Immediately a number of decimals of this fraction appear, 28 on most systems,
 38 on the others, and the repeating pattern is $142857$. The reason is that
@@ -327,7 +327,7 @@ example and type
 \bprog
   (1 + x)^(-3) + O(x^16)
   (1 + x)^(-3) * (1 + O(x^16))
-  (1 + x + O(x^16))^(-3)@com, etc \dots
+  (1 + x + O(x^16))^(-3)
 @eprog\noindent
 (Not on this example, but there is a difference between the first $2$
 methods. Do you spot it?) Better yet, use the series constructor which
@@ -537,6 +537,7 @@ by a \kbd{v = vector(5)} command. Another useful way to create vectors
 and matrices is to extract them from larger ones, using \kbd{vecextract}.
 For instance, if \kbd{h} is the $20\times 20$ Hilbert matrix as above,
 \bprog
+  h = mathilbert(20);
   vecextract(h, "11..20", "11..20")
 @eprog\noindent is its lower right quadrant.
 
@@ -545,14 +546,16 @@ linked to number theory. People not interested in number theory can skip
 ahead.
 
 The first is the type ``integer--modulo''. Let us see an example. Type
-\kbd{n = 10\pow 15 + 3}. We want to know whether this number is prime or not. Of
-course we could make use of the built-in facilities of PARI, but let us do
-otherwise. We first trial divide by the built-in table of primes. We slightly
-cheat here and use a variant of the function \kbd{factor} which does exactly
-this. So type \kbd{factor(n, 200000)}. The last argument tells \kbd{factor}
-to trial divide up to the given bound and stop at this point. Set it to 0 to
-trial divide by the full set of built-in primes, which goes up to $500000$ by
-default.
+\bprog
+  n = 10^15 + 3
+@eprog
+We want to know whether this number is prime or not. Of course we could make
+use of the built-in facilities of PARI, but let us do otherwise. We first
+trial divide by the built-in table of primes. We slightly cheat here and use
+a variant of the function \kbd{factor} which does exactly this. So type
+\kbd{factor(n, 200000)}. The last argument tells \kbd{factor} to trial divide
+up to the given bound and stop at this point. Set it to 0 to trial divide by
+the full set of built-in primes, which goes up to $500000$ by default.
 
 As for all factoring function, the result is a 2 column matrix: the first
 column gives the primes and the second their exponents. Here we get a single
@@ -808,6 +811,7 @@ mathilbert(20)}, we may compute
 in $\Z/101\Z$ and the $p$-adic ring $\Z_{101}$ (to $100$ words of accuracy)
 respectively. Let \kbd{H = 1/h} the inverse of \kbd{h}:
 \bprog
+  H = 1/h;  \\ @com integral
   L = vecextract( primes(10000), "-50.." );  \\ @com extract the last 50 elements
   v = vector(#L, i, matdet(H * Mod(1,L[i])));
   centerlift( chinese(v) )
@@ -829,7 +833,7 @@ have in fact a basis. What is the structure of the finite abelian group
 $\Z^{20}/\Lambda$? Type \kbd{matsnf(H)}. Wow, 20 cyclic factors.
 
 
-There's a triangular basis for $\Lambda$ (triangular when expressed in
+There is a triangular basis for $\Lambda$ (triangular when expressed in
 the canonical basis), perhaps it looks better than our initial one? Type
 \kbd{mathnf(H)}. Hum. This is taking ages. Ah, the documentation says that
 \kbd{mathnf} is fast for tiny matrices but should never be used for matrices
@@ -842,16 +846,19 @@ canonical basis to the new one; of course it has determinant $\pm 1$. Try
 
 Can we do better? Perhaps, but then we'd better drop the requirement that
 the basis be triangular, since the latter is essentially canonical. Type
-\kbd{M = H * qflll(H)}: its column give an LLL-reduced basis for $\Lambda$. (Of
-course, \kbd{qflll(H)} itself gives the base change matrix.) The LLL
-algorithm outputs a nice basis for a lattice given by an arbitrary basis,
-where nice means the basis vectors are almost orthogonal and short, with
-precise guarantees on their relations to the shortest vectors. Not really
-spectacular on this example, though.
-
-Let us try something else, there should be an integer relation between the
-components of \kbd{u = [log(15), log(5), log(3)]}. So input \kbd{u} then type
 \bprog
+  M = H * qflll(H)
+@eprog
+Its column give an LLL-reduced basis for $\Lambda$ (\kbd{qflll(H)} itself
+gives the base change matrix). The LLL algorithm outputs a nice basis for a
+lattice given by an arbitrary basis, where nice means the basis vectors are
+almost orthogonal and short, with precise guarantees on their relations to
+the shortest vectors. Not really spectacular on this example, though.
+
+Let us try something else, there should be an integer relation between 
+$\log 3$, $\log 5$ and $\log 15$. How to detect it?
+\bprog
+  u = [log(15), log(5), log(3)];
   m = matid(3); m[3,] = round(u * 10^25);
   v = qflll(m)[,1] \\@com first vector of the LLL-reduced basis
   u * v
@@ -859,7 +866,7 @@ components of \kbd{u = [log(15), log(5), log(3)]}. So input \kbd{u} then type
 Pretty close. In fact, \kbd{lindep} automates this kind of search for integer
 relations, using more sophisticated algorithms like PSLQ.
 
-Let's come back to $\Lambda$ above, and our LLL basis in \kbd{M}. Type
+Let us come back to $\Lambda$ above, and our LLL basis in \kbd{M}. Type
 \bprog
   G = M~*M  \\@com Gram matrix
   m = qfminim(G, norml2(M[,1]), 100)
@@ -1333,7 +1340,11 @@ That's because a lot of data will be needed repeatedly, and it's much more
 convenient to have it ready once and for all. Here, this is done with the
 function \kbd{ellinit}.
 
-So type \kbd{e0 = ellinit([6,-3,9,-16,-14])}. This computes a number of things
+So type
+\bprog
+  e0 = ellinit([6,-3,9,-16,-14])
+@eprog
+This computes a number of things
 about the elliptic curve defined by the affine equation
 %
 $$ y^2+6xy+9y = x^3-3x^2-16x-14\enspace. $$
@@ -1341,39 +1352,51 @@ $$ y^2+6xy+9y = x^3-3x^2-16x-14\enspace. $$
 It is not that clear what all these funny numbers mean, except that we
 recognize the first few of them as the coefficients we just input. To
 retrieve meaningful information from such complicated objects (and number
-fields will be much worse), you are advised to use the so-called \emph{member
+fields will be much worse), one uses so-called \emph{member
 functions}. Type \kbd{?.} to get a complete list. Whenever \kbd{ell} appears
 in the right hand side, we can apply the corresponding function to an object
 output by \kbd{ellinit}. (I'm sure you know how the other \kbd{init} functions
 will be called now, don't you? Oh, by the way, neither \kbd{clgpinit} nor
 \kbd{pridinit} exist.)
 
-  Let's try it. The discriminant \kbd{e.disc} is equal to 37, hence
+  Let's try it. The discriminant \kbd{e0.disc} is equal to 37, hence
 the conductor of the curve is 37. Of course in general it is not so
 trivial. In fact, although the equation of the curve is clearly
 minimal (since the discriminant is $12$th-power-free), it is not in
-standard reduced form, so type \kbd{e = ellminimalmodel(e0)}, which
+standard reduced form, so type 
+\bprog
+  e = ellminimalmodel(e0)
+@eprog\noindent which
 gives the \kbd{ell} structure associated with the standard model,
 exactly as if we had used \kbd{ellinit} on a reduced equation. For
-some related data, type \kbd{gr = ellglobalred(e0)}. The first
+some related data, type
+\bprog 
+  gr = ellglobalred(e0)
+@eprog\noindent The first
 component \kbd{gr[1]} tells us that the conductor is 37 as we already
 knew.  The second component is a 4-component vector which allows us to
 get the minimal equation: in fact \kbd{e} is \kbd{ellchangecurve(e0,
-gr[2])}. You can for the moment ignore the third component \kbd{gr[3]}
-(for the impatient reader, this is the product of the local Tamagawa
-numbers, $c_p$).
+gr[2])}. You can for the moment ignore the third component \kbd{gr[3]}.
+(For the impatient reader, this is the product of the local Tamagawa
+numbers, $c_p$.)
 
-Type \kbd{q0=[-2,2]}.  This is a point on \kbd{e0}, as you may check
-by typing \kbd{ellisoncurve(e0, q0)}.  To transfer this point onto
-\kbd{e}, type \kbd{q=ellchangepoint(q0,gr[2])}, and then
-check with \kbd{ellisoncurve(e, q)}.  Note that \kbd{ellchangepoint()}
-is unusual among the elliptic curve functions in that it does not take
-an \kbd{ell} structure as its first argument: in \kbd{gp}, points do
-not ``know'' which curve they are on, but to move a point from one
-model to another we only need to know the coordinates of the point and
-the transformation data here stored in \kbd{gr[2]}.  Also, the point
-at infinity is represented as \kbd{[0]} on all elliptic curves; this is
-the identity for the group law.
+Type
+\bprog
+  q0 = [-2,2]
+  ellisoncurve(e0, q0)
+  q = ellchangepoint(q0,gr[2])
+  ellisoncurve(e, q)
+@eprog\noindent
+The point \kbd{q0} is on the curve, as checked by \kbd{ellisoncurve}, and we
+transfered it onto the minimal model \kbd{e}, using \kbd{ellchangepoint} and
+the change of variable computed above. Note that \kbd{ellchangepoint()} is
+unusual among the elliptic curve functions in that it does not take an
+\kbd{ell} structure as its first argument: in \kbd{gp}, points do not
+``know'' which curve they are on, but to move a point from one model to
+another we only need to know the coordinates of the point and the
+transformation data here stored in \kbd{gr[2]}.  Also, the point at infinity
+is represented as \kbd{[0]} on all elliptic curves; this is the identity for
+the group law.
 
 Here, \kbd{q=[0,0]} obviously lies on \kbd{e}, which has equation
 $y^2+y = x^3-x$.  Let us now play a little with points on \kbd{e}.
@@ -1386,17 +1409,21 @@ double is obtained either as \kbd{ellpow(e,q,2)} or as
 
 Now \kbd{q} may be a torsion point. Type \kbd{ellheight(e, q)}, which
 computes the canonical Neron-Tate height of \kbd{q}. Note that
-\kbd{ellheight} assumes that \kbd{e} is \emph{minimal}!
+\kbd{ellheight} assumes that \kbd{e} is \emph{minimal}! (Which it is.)
 This is non-zero, hence \kbd{q} is not torsion. To see this even better,
 type
-
-\kbd{for(k = 1, 20, print(ellpow(e, q, k)))}
-
+\bprog
+  for(k = 1, 20, print(ellpow(e, q, k)))
+@eprog
 \noindent and we see the characteristic parabolic explosion of the size of
-the points. As a further check, type
-\kbd{ellheight(e, ellpow(e, q,20)) / ellheight(e, q)}. We indeed find
-$400=20^2$ as it should be. You can also type \kbd{ellorder(e, q)} which
-returns 0, telling you that \kbd{q} is non-torsion.
+the points. (And another proof that \kbd{q} is not torsion, assuming Mazur's
+bound on the size of the rational torsion.) We could can also type
+\kbd{ellorder(e, q)} which returns 0, telling us yet again that \kbd{q} is
+non-torsion. As a consistency check, type
+\bprog
+  ellheight(e, ellpow(e, q,20)) / ellheight(e, q)
+@eprog
+We indeed find $400=20^2$ as it should be.
 
 Notice how (almost) all those \kbd{ell}--prefixed functions take our
 elliptic curve as a first argument? This will be true with number
@@ -1439,7 +1466,7 @@ function and type (for instance in \kbd{points.gp} which you can read in with
 \kbd{\b{r} points} as we saw before)
 \bprog
   {
-    v = listcreate(1000);
+    v = List();
     for (x = -3, 1000,
       s = ellordinate(e,x);
       if (#s, listput(v, [x,s[1]]))  \\ @com if \kbd{\#s != 0}
@@ -1470,16 +1497,24 @@ the rank of this curve must be large. Let's try and put some order into
 this. Note that we work only with the integral points, but in general
 rational points should also be considered.
 
-Type \kbd{hv = ellheight(e, Vec(v))}. (We convert the list to a vector
-because \typ{LIST}s are not accepted as input by most functions. They must be
-converted to a standard vector type first.) This gives the vector of
-canonical heights. Let us order the points according to their height. For
-this, type
+Type
 \bprog
-  iv = vecsort(hv,, 1);    \\@com indirect sorting
-  hv = vecextract(hv,     iv);
-  v  = vecextract(Vec(v), iv);
+  v = Vec(v);  \\@com convert to a vector
+  hv = ellheight(e, v)
+@eprog\noindent (We convert the list to a vector because \typ{LIST}s are not
+accepted as input by most mathematical functions. They must be converted to a
+standard vector type first.) This gives the vector of canonical heights. Let
+us order the points according to their height. For this, type
+\bprog
+  perm = vecsort(vector(#v,i,i), (a,b) -> hv[a]>hv[b]);
+  v = vecextract(v, perm)
 @eprog\noindent
+Note how we input a non-obvious comparison function to \kbd{vecsort}, using
+an inline anonymous function: we sort the integers between $1$ and the number
+of points we have declaring that $a > b$ if and only if the height of the
+$a$-th point is larger than the height of the $b$-th. The result is a
+permutation which we apply to \kbd{v} using \kbd{vecextract}.
+
 It seems reasonable to take the numbers with smallest height as
 possible generators of the Mordell-Weil group. Let's try the first
 four: type
@@ -1494,18 +1529,21 @@ coefficients are (close to) integers. Typing \kbd{elladd(e,
 v[1],v[3])} does indeed show that it is equal to \kbd{v[4]}.
 
 Taking any other four points, we would in fact always find a
-dependency.  Let's find them all. Type \kbd{vp = [v[1],v[2],v[3]]\til;
-m = ellheightmatrix(e,vp); matdet(m)}. This is now clearly non-zero so
-the first 3 points are linearly independent, showing that the rank of
-the curve is at least equal to 3 (it is in fact equal to 3, and
-\kbd{e} is the curve of smallest conductor having rank 3). We would
-like to see whether the other points are dependent. For this, we use
-the function \kbd{ellbil}. Indeed, if \kbd{Q} is some point which is
-dependent on \kbd{v[1],v[2]} and \kbd{v[3]}, then
-\kbd{matsolve(m, ellbil(e, vp,Q))} will by definition give the coefficients
-of the dependence relation. If these coefficients are close to integers, then
-there is a dependency, otherwise not.  This is safer than using the
-\kbd{matker} function. Thus, type
+dependency.  Let's find them all. Type
+\bprog
+  vp = [v[1],v[2],v[3]]~;
+  m = ellheightmatrix(e,vp);
+  matdet(m)
+@eprog\noindent This is now clearly non-zero so the first 3 points are
+linearly independent, showing that the rank of the curve is at least equal to
+3. (It is in fact equal to 3, and \kbd{e} is the curve of smallest conductor
+having rank 3.) We would like to see whether the other points are dependent.
+For this, we use the function \kbd{ellbil}. Indeed, if \kbd{Q} is some point
+which is dependent on \kbd{v[1],v[2]} and \kbd{v[3]}, then \kbd{matsolve(m,
+ellbil(e, vp,Q))} will by definition give the coefficients of the dependence
+relation. If these coefficients are close to integers, then there is a
+dependency, otherwise not.  This is safer than using the \kbd{matker}
+function. Thus, type
 \bprog
   w = vector(#v, k, matsolve(m, ellbil(e, vp,v[k])))
 @eprog\noindent
@@ -1550,13 +1588,18 @@ Type \kbd{f = x * Ser(ellan(e, 30))}. This gives a power series which
 is the Fourier expansion of a modular form of weight 2 for $\Gamma_0(5077)$.
 (This has been proved directly, but also follows from Wiles's result since
 \kbd{e} is semi-stable.) In fact, to find the modular parametrization of the
-curve, type \kbd{modul = elltaniyama(e)}, then \kbd{u=modul[1]; v=modul[2];}.
-Type
+curve, type
+\bprog
+  modul = elltaniyama(e)
+  u = modul[1];
+  v = modul[2];
+@eprog\noindent
+We can check in various ways that this indeed parametrizes the curve:
 \bprog
   (v^2 + v) - (u^3 - 7*u + 6)
 @eprog\noindent
-to see that this indeed parametrizes the curve.  You can also check
-that \kbd{ellisoncurve(e,modul)} returns~$1$.
+is close to $0$ for instance, or simply that \kbd{ellisoncurve(e,modul)}
+returns~$1$.
 
 Now type \kbd{x * u' / (2*v + 1)}, and we see that this is equal to the
 modular form \kbd{f} found above; the quote \kbd{'} tells \kbd{gp} to take the
@@ -1765,10 +1808,8 @@ by Shanks and Lenstra.
 
 To create such forms, one uses the same function as for definite ones, but
 you can add a fourth (optional) argument to initialize the distance:
-\bprog
-  q = Qfb(a, b, c, d)
-@eprog\noindent
-If the discriminant of \kbd{poldisc(q)} is negative, \kbd{d} is silently
+\kbd{q = Qfb($a$, $b$, $c$, $d$)}.
+If the discriminant of \kbd{poldisc(q)} is negative, $d$ is silently
 discarded. If you omit it, this component is set to \kbd{0.} (i.e.~a real
 zero to the current precision).
 
@@ -1776,12 +1817,12 @@ Again these forms can be multiplied, divided, powered, and they can be
 reduced using \kbd{qfbred}. This function is in fact a succession of
 elementary reduction steps corresponding essentially to a continued fraction
 expansion, and a single one of these steps can be achieved by adding an
-(optional) flag to the arguments of using this function. Since handling the
-fourth component $d$ usually involves computing logarithms, the same flag may
-be used to ignore the fourth component. Finally, it is sometimes useful to
-operate on forms of positive discriminant without performing any reduction
-(this is useless in the negative case), the functions \kbd{qfbcompraw} and
-\kbd{qfbpowraw} do exactly that.
+(optional) flag to the arguments of \kbd{qfbred}. Since handling the
+fourth component $d$ usually involves computing expensive logarithms, the
+same flag may be used to ignore the fourth component. Finally, it is
+sometimes useful to operate on forms of positive discriminant without
+performing any reduction (this is useless in the negative case), the
+functions \kbd{qfbcompraw} and \kbd{qfbpowraw} do exactly that.
 
 Again, the function \kbd{qfbprimeform} gives a prime form, but the form which
 is given corresponds to an ideal of prime norm which is usually not reduced.
@@ -1798,14 +1839,18 @@ much larger range.
 
 Let us see examples of all this at work and learn some little known number
 theory at the same time. First of all, type
-\kbd{d = 3 * 3299; qfbclassno(d)}. We see that the class number is 3 (we know
+\bprog
+  d = 3 * 3299; qfbclassno(d)
+@eprog\noindent We see that the class number is 3. (We know
 in advance that it must be divisible by 3 from the \kbd{d = -3299} case above
-and Scholz's theorem). Let us create a form by typing
-\kbd{f = qfbred(qfbprimeform(d,2), 2)} (the last 2 tells \kbd{qfbred} to
-ignore the archimedean component). This gives us a prime ideal of norm
-equal to 2. Is this ideal principal? Well, one way to check this, which is
-not the most efficient but will suffice for now, is to look at the complete
-cycle of reduced forms equivalent to \kbd{f}. Type
+and Scholz's mirror theorem.) Let us create a form by typing
+\bprog
+  f = qfbred(qfbprimeform(d,2), 2)
+@eprog\noindent 
+(the last 2 tells \kbd{qfbred} to ignore the archimedean component). This
+gives us a prime ideal of norm equal to 2. Is this ideal principal? Well, one
+way to check this, which is not the most efficient but will suffice for now,
+is to look at the complete cycle of reduced forms equivalent to \kbd{f}. Type
 \bprog
  g = f; for(i=1,20, g = qfbred(g, 3); print(g))
 @eprog\noindent
@@ -1816,22 +1861,30 @@ corresponding to \kbd{f} is not principal.
 
 Since the class number is equal to 3, we know however that \kbd{f\pow 3} will
 be a principal ideal $\alpha\Z_K$. How do we find $\alpha$? For this, type
-\kbd{f3 = qfbpowraw(f, 3)}. This computes the cube of \kbd{f}, without
+\bprog
+  f3 = qfbpowraw(f, 3)
+@eprog
+This computes the cube of \kbd{f}, without
 reducing it. Hence it corresponds to an ideal of norm equal to $8=2^3$, so we
 already know that the norm of $\alpha$ is equal to $\pm8$. We need more
 information, and this will be given by the fourth component of the form.
 Reduce your form until you reach the unit form (you will have to type
-\kbd{qfbred(\%,~1)} exactly 6 times).
-
-Extract the Archimedean component by typing \kbd{c = component(\%, 4)}. By
-definition of this distance, we know that
+\kbd{qfbred(\%,~1)} exactly 6 times), then extract the Archimedean component,
+say $c$. By definition of this distance, we know that
 $${\alpha\over{\sigma(\alpha)}}=\pm e^{2c},$$
-where $\sigma$ denotes real conjugation in our quadratic field. Thus, if we
-type
+where $\sigma$ denotes real conjugation in our quadratic field. This can be
+automated:
+\bprog
+  q = f3;
+  while(abs(component(q,1)) != 1, print(q); q = qfbred(q, 1))
+  c = component(q,4);
+@eprog\noindent
+Thus, if we type
 \bprog
   a = sqrt(8 * exp(2*c))
+  sa = 8 / a
 @eprog\noindent
-and then \kbd{sa = 8 / a}, we know that up to sign, \kbd{a} and \kbd{sa} are
+we know that up to sign, \kbd{a} and \kbd{sa} are
 numerical approximations of $\alpha$ and $\sigma(\alpha)$. Of course,
 $\alpha$ can always be chosen to be positive, and a quick numerical check
 shows that the difference of \kbd{a} and \kbd{sa} is close to an integer, and
@@ -1851,17 +1904,17 @@ by solving a system of 2 linear equations in 2 variables. (Exercise: now that
 we have $\alpha$, check that it is indeed a generator of the ideal
 corresponding to the form \kbd{f3}.)
 
-\medskip Let us now play a little with cycles. Set \kbd{D = 10\pow 7 + 1},
-then type
+\medskip Let us now play a little with cycles. Type
 \bprog
-  quadclassunit(D,,[1,6])
+  D = 10^7 + 1
+  quadclassunit(D)
 @eprog\noindent
 We get as a result a 5-component vector, which tells us that (under GRH) the
 class number is equal to 1, and the regulator is approximately
 equal to $2641.5$. You may certify this with
 \bprog
   bnf = bnfinit(x^2 - D, 1);  \\ @com insist on finding fundamental unit
-  bnfcertify(f);
+  bnfcertify(bnf);
 @eprog\noindent
 although it's a little inefficient. Indeed \kbd{bnfcertify} needs the
 fundamental unit which is so large that \kbd{bnfinit} will have a hard time
@@ -1950,18 +2003,23 @@ $\Z[x]/(T)$ in the maximal order $\Z_K$ is, well,
   sqrtint(poldisc(nf.pol) / nf.disc)
 @eprog\noindent
 Anyway, that's $3087$, we don't want to work with such a badly skewed
-polynomial!
-
-So, type \kbd{P = polred(T)}. We see from the third component that the
+polynomial! So, we type
+\bprog
+  P = polred(T)
+@eprog\noindent
+We see from the third component that the
 polynomial $x^4-x^3-21x^2+17x+133$ defines the same field with much smaller
-coefficients, so type \kbd{A = P[3]}. The \kbd{polred} function usually gives
-a simpler polynomial, and also sometimes some information on the existence of
-subfields. For example in this case, the second component of \kbd{polred}
-tells us that the field defined by $x^2-x+1=0$, i.e.~the field generated by
-the cube roots of unity, is a subfield of~$K$. Note this is incidental
-information and that the list of subfields found in this way is usually far
-from complete. To get the complete list, one uses \kbd{nfsubfields} (we'll
-do that later on).
+coefficients, so type
+\bprog
+  A = P[3]
+@eprog
+The \kbd{polred} function usually gives a simpler polynomial, and also
+sometimes some information on the existence of subfields. For example in this
+case, the second component of \kbd{polred} tells us that the field defined by
+$x^2-x+1=0$, i.e.~the field generated by the cube roots of unity, is a subfield
+of~$K$. Note this is incidental information and that the list of subfields
+found in this way is usually far from complete. To get the complete list, one
+uses \kbd{nfsubfields} (we shall do that later on).
 
   Type \kbd{poldisc(A)}, this is much better, but maybe not optimal yet
 (the index is still $7$). Type \kbd{polredabs(A)} (the \kbd{abs} stands for
@@ -1973,13 +2031,19 @@ be small, but not necessarily minimal). In fact, had you typed
 polynomial defining the same field (i.e.~one with small index) before
 proceeding.
 
-  It's not too late, let's redefine our number field: \kbd{NF = nfinit(nf, 3)}.
+  It's not too late, let's redefine our number field: 
+\bprog
+  NF = nfinit(nf, 3)
+@eprog\noindent
 The output is a two-component vector. The first component is the new
-\kbd{nf} (type \kbd{nf = NF[1];}). If you type \kbd{nf.pol}, you notice that \kbd{gp}
-indeed replaced your bad polynomial \kbd{T} by a much better one, which
-happens to be \kbd{A}. (Small wonder, \kbd{nfinit} internally called
-\kbd{polredabs}!) The second component enables you to switch conveniently to
-our new polynomial.
+\kbd{nf}: type
+\bprog
+  nf = NF[1];
+@eprog\noindent
+If you type \kbd{nf.pol}, you notice that \kbd{gp} indeed replaced your bad
+polynomial \kbd{T} by a much better one, which happens to be \kbd{A}. (Small
+wonder, \kbd{nfinit} internally called \kbd{polredabs}.) The second component
+enables you to switch conveniently to our new polynomial.
 
 Namely, call $\theta$ a root of our initial polynomial \kbd{T}, and $\alpha$
 a root of the one that \kbd{polred} has found, namely \kbd{A}. These are
@@ -2094,21 +2158,26 @@ get the minimal polynomial from this? Find a simpler expression for \kbd{u}.
   Now let's work on the field itself. The \kbd{nfinit} command already
 gave us some information. The field is totally complex (its signature
 \kbd{nf.sign} is $[0,2]$), its discriminant \kbd{nf.disc} is $18981$ and
-$(1,\alpha, \alpha^2, {1\over7}\alpha^3+{2\over7}\alpha^2+{6\over7}\alpha)$
-is an integral basis (\kbd{nf.zk}). The Galois group of its Galois closure
-can be obtained by typing \kbd{polgalois(A)}. The answer ($[8,-1,1]$) shows
-that it is equal to $D_4$, the dihedral group with 8 elements, i.e.~the group
-of symmetries of a square.
+\kbd{nf.zk} is an integral basis. The Galois group of its Galois closure
+can be obtained by typing \kbd{polgalois(A)}. The answer (\kbd{[8,-1,1]}, or
+\kbd{[8,-1,1,"D(4)"]} if the \kbd{galdata} package is installed) shows that
+it is equal to $D_4$, the dihedral group with 8 elements, i.e.~the group of
+symmetries of a square.
 
 This implies that the field is ``partially Galois'', i.e.~that there exists
 at least one non-trivial field isomorphism which fixes $K$, exactly one in
 this case. Type \kbd{nfgaloisconj(nf)}. The result tells us that, apart from
-the trivial automorphism, the map $\alpha \mapsto
-{1\over7}(-\alpha^3+5\alpha^2+\alpha-49)$ is the only field automorphism.
-If we type \kbd{s = Mod(\%[2], A); charpoly(s)}, we obtain \kbd{A} once
-again.
+the trivial automorphism, the map 
+$$\alpha \mapsto {1\over7}(-\alpha^3+5\alpha^2+\alpha-49)$$
+is the only field automorphism.
+\bprog
+  nfgaloisconj(nf);
+  s = Mod(%[2], A)
+  charpoly(s)
+@eprog\noindent
+and we obtain \kbd{A} once again.
 
-Let's check that \kbd{s} is of order 2: \kbd{subst(lift(s), x, s)}. It is. We
+Let us check that \kbd{s} is of order 2: \kbd{subst(lift(s), x, s)}. It is. We
 may express it as a matrix:
 \bprog
   w = Vec( matid(4) ) \\@com canonical basis
@@ -2230,7 +2299,11 @@ is the most difficult case to treat.
 The result is a vector with 4 components, showing that 7 is totally split in
 the field $K$ into prime ideals of norm 7 (you can check:
 \kbd{idealnorm(nf,P[1])}). Let us take one of these ideals, say the first, so
-type \kbd{pr = P[1]}. We obtain its inertia and residue degree as \kbd{pr.e}
+type
+\bprog
+  pr = P[1]
+@eprog
+We obtain its inertia and residue degree as \kbd{pr.e}
 and \kbd{pr.f}, and its two generators as \kbd{pr.gen}. One of them is
 $\kbd{pr.p} = 7$, and the other is guaranteed to have valuation $1$ at
 \kbd{pr}. What is the Hermite Normal Form of this ideal? No problem:
@@ -2253,13 +2326,17 @@ other ideals above 7, we can type
 and we see that the valuation at \kbd{pr} is equal to 3, while the others are
 equal to zero. We could see this as well from \kbd{idealfactor(nf, pr3)}.
 
-Let us now ``idelize'' \kbd{pr3} by typing \kbd{id3 = [pr3, [0,0]]}.
-(We need $r_1+r_2=2$ components for the second vector.) Then type
-\kbd{r1 = idealred(nf, id3)}. We get a new ideal which is equivalent to the
-first (modulo the principal ideals). The Archimedean component is non-trivial
-and gives the distance from the reduced ideal to the original one (see H. Cohen
-\emph{A Course in Computational Algebraic Number Theory}, GTM {\bf 138} for
-details, especially Sections 5.8.4 and 6.5). Now, just for fun type
+Let us now ``idelize'' \kbd{pr3} by typing
+\bprog
+   id3 = [pr3, [0,0]]
+   r1 = idealred(nf, id3)
+@eprog
+(We need $r_1+r_2=2$ components for the second vector.) The new ideal
+\kbd{r1} is equivalent to \kbd{id3} (modulo the principal ideals). The
+Archimedean component is non-trivial and gives the distance from the reduced
+ideal to the original one (see H. Cohen \emph{A Course in Computational
+Algebraic Number Theory}, GTM {\bf 138} for details, especially Sections 5.8.4
+and 6.5). Now, just for fun type
 \bprog
   r = r1; for(i=1,3, r = idealred(nf,r,[1,5]); print(r))
 @eprog\noindent
@@ -2273,9 +2350,13 @@ Archimedean information:
 @eprog\noindent
 The vector \kbd{v} contains by definition the four complex embeddings of the
 unit. We may obtain the characteristic polynomial of the unit as
-\kbd{ach = prod(i=1, \#v, x-v[i])}; since its coefficients should be very close
-to integer, we might as well round it \kbd{ch = round(ach)}. But in fact, we
-get directly the representation of the unit on the integral basis by typing
+\bprog
+  ach = prod(i=1, #v, x-v[i])
+  ch = round(ach)
+@eprog\noindent
+Since the coefficients of \kbd{ach} should be very close to integer, we rounded
+it above. We can also get directly the representation of the unit on the
+integral basis by typing
 \bprog
   ro = concat(nf.roots, conj(nf.roots));
   m = matrix( 4,4, i,j, subst(nf.zk[j], x, ro[i]) )
@@ -2292,9 +2373,11 @@ and we obtain \kbd{ch} again. (Whose constant coefficient is $1$, hence
 $u$ is indeed a unit.)
 
 There is of course no reason for $u$ to be a fundamental unit. Let us see if
-it is a square. Type \kbd{f1 = factor(subst(ch, x, x\pow 2))}. We see that
-\kbd{ch(x\pow2)} is a product of 2 polynomials of degree 4, hence $u$ is
-a square. (Why?) We now want to find its square root.
+it is a square. Type 
+\bprog
+  f1 = factor(subst(ch, x, x^2))
+@eprog\noindent We see that \kbd{ch(x\pow2)} is a product of 2 polynomials of
+degree 4, hence $u$ is a square. (Why?) We now want to find its square root.
 
 We may use embeddings as above. For this we need to take the square root of
 each element of the vector \kbd{v}, hence introduce sign ambiguities. Let's
@@ -2306,9 +2389,9 @@ last remaining sign change must be performed. Type \kbd{v[1] = -v[1]; v[3] =
 time the components are close to integers so we are done, after typing
 \kbd{u2 = round(\%)}.
 
-Another method which avoids sign ambiguities is as follows. Type
+A better method which avoids sign ambiguities is as follows. Type
 \bprog
-  r = f1[1,1] % (x^2 - nfbasistoalg(nf,u))
+  r = f1[1,1] % (x^2 - nfbasistoalg(subst(nf,x,y),u))
 @eprog\noindent
 to find the remainder of the characteristic polynomial of \kbd{u2} divided by
 \kbd{x\pow 2 - $u$}. This is a polynomial of degree 1 in \kbd{x}, with polmod
@@ -2316,15 +2399,21 @@ coefficients, and we know that \kbd{u2}, being a root of both polynomials,
 is the root of \kbd{r}, hence can be obtained by typing
 \bprog
   u2 = -polcoeff(r,0) / polcoeff(r,1)
-@eprog
+@eprog\noindent There is an important technicality in the above: why did we
+need to \kbd{subst(nf,x,y)} ? The reason is that data related to \kbd{nf}
+is given in terms of the variable \kbd{x}, seen modulo \kbd{nf.pol}; but we
+need \kbd{x} as a free variable for our polynomial divisions. Hence the
+substitution of \kbd{x} by \kbd{y} in our \kbd{nf} data.
 
   A last method is to use \kbd{nffactor(nf, y\pow 2 + u)}. Except that this
-won't work as is since the main variable of the polynomial to be factored
-must have \emph{higher} priority than the number field variable. This won't
-be possible here since \kbd{nf} was defined using the variable \kbd{x} which
-has the highest possible priority. So we need to substitute variables around:
+won't work for the same technical reason as above: the main variable of the
+polynomial to be factored must have \emph{higher} priority than the number
+field variable. This won't be possible here since \kbd{nf} was defined using
+the variable \kbd{x} which has the highest possible priority. So we need to
+substitute variables around:
 \bprog
-  nffactor(subst(nf,x,y), x^2 + subst(lift(u),x,y))
+  NF = subst(nf,x,y);
+  nffactor(NF, x^2 - nfbasistoalg(NF,u))
 @eprog
 \smallskip
 
@@ -2357,37 +2446,29 @@ number field with all its invariants (including class group and units), and
 enough technical data to solve discrete logarithm problems in the class and
 unit groups.
 
-First type \kbd{setrand(1)}: this resets the random seed (to make sure we get
-the exact same results). Now type
+First type \kbd{setrand(1)}: this resets the random seed (to make sure we
+and you get the exact same results). Now type
 \bprog
- bnf = bnfinit(A);
+  bnf = bnfinit(NF);
 @eprog\noindent
-where \kbd{A} is the same polynomial as before. You don't want to see the
-output clutter a number of screens so don't forget the semi-colon. (Well
-if you want to, it's about three screenful in this case, but may require
-several MegaBytes for larger degrees.) A word of warning: both the \kbd{bnf}
-and all results obtained from it are \emph{conditional} at this point; the
-\kbd{bnf} will need to be certified before the following statements become
-actual theorems. An intermediate possibility is to type something like
-\bprog
-  bnf = bnfinit(A,, [0.3, 12])
-@eprog\noindent
-(The double comma is not a typo.) What is important here is the $12$ at the
-end. In this case, the \kbd{bnf} is correct \emph{provided} the ideals
-of norm less than $12\log^2(|\kbd{bnf.disc}|)$ generate the class group.
-This is actually a theorem of Bach, \emph{provided} the Generalized Riemann
-Hypothesis is true. So, the above command will not be much slower than the
-original one, and will at least guarantee further results under GRH.
+where \kbd{NF} is the same number field as before. You do not want to see the
+output clutter a number of screens so don't forget the semi-colon. (Well if
+you insist, it is about three screenful in this case, but may require several
+MegaBytes for larger degrees.) Note that \kbd{NF} is now expressed in terms
+of the variable \kbd{y}, to avoid later problems variable priorities.
+
+A word of warning: both the \kbd{bnf} and all results obtained from it are
+\emph{conditional} on a Riemann Hypothesis at this point; the \kbd{bnf} must
+be certified before the following statements become actual theorems.
 \smallskip
 
 Member functions are still available for \kbd{bnf} structures. So, let's try
 them: \kbd{bnf.pol} gives \kbd{A}, \kbd{bnf.sign}, \kbd{bnf.disc},
 \kbd{bnf.zk}, ok nothing really exciting. In fact, an \kbd{nf} is included
-in the \kbd{bnf} structure, and we could have typed \kbd{bnfinit(NF)}
-directly to avoid recomputing the same things twice: \kbd{bnf.nf} should be
-exactly identical to \kbd{NF}. Thus, all functions which took an \kbd{nf} as
-first argument, will equally accept a \kbd{bnf} (and a \kbd{bnr} as well
-which contains even more data).
+in the \kbd{bnf} structure: \kbd{bnf.nf} should be identical to
+\kbd{NF}. Thus, all functions which took an \kbd{nf} as first argument, will
+equally accept a \kbd{bnf} (and a \kbd{bnr} as well which contains even more
+data).
 
 Anyway, new members are available now: \kbd{bnf.no} tells us the class number
 is 4, \kbd{bnf.cyc} that it's cyclic (of order 4 but that we already knew),
@@ -2478,8 +2559,9 @@ initialize a Buchmann Number Ray, or \kbd{bnr}, structure, associated to a
 ${\goth f} = 7\Z_K$. (See the manual for how to include infinite places in
 the modulus.) Since $K$ will now become a base field over which we want to
 build relative extensions, the associated \kbd{bnf} needs to have variables
-of lower priority than the polynomials defining the extensions. We already
-know how to arrange this: \kbd{bnf = subst(bnf, x, y);} Then type
+of lower priority than the polynomials defining the extensions. Fortunately,
+we already took care that, but it would have been easy to deal with the
+problem now (as easy as \kbd{bnf = subst(bnf, x, y)}). Then type
 \bprog
   bnr = bnrinit(bnf, 7, 1);
   bnr.cyc
@@ -2573,10 +2655,9 @@ $$x^4+1=(x^2-\sqrt{-2}\*x-1)(x^2+\sqrt{-2}\*x-1)$$
 
 For our second example, let us take the field $K$ defined by the polynomial
 \bprog
-P = x^18 - 3*x^15 + 115*x^12 + 104*x^9 + 511*x^6 + 196*x^3 + 343
-@eprog\noindent
-
-As above, we type \kbd {G = galoisinit(P);} since \kbd{galoisinit} succeeds,
+  P = x^18 - 3*x^15 + 115*x^12 + 104*x^9 + 511*x^6 + 196*x^3 + 343;
+  G = galoisinit(P);
+@eprog\noindent Since \kbd{galoisinit} succeeds,
 the extension $K/\Q$ is Galois. This time \kbd{galoisisabelian(G)} return
 $0$, so the extension is not abelian, however we can still put a name on the
 underlying abstract group. Use \kbd{galoisidentify(G)}, which return $[18,
@@ -2693,9 +2774,10 @@ This takes much less time, and the output is practically the same.  How to
 compare these two outputs?  We will see it shortly.  Right now let us plot
 both real and complex parts of $\zeta$ on the same graph:
 \bprog
-  f(t) = z=zeta(0.5+I*t); [real(z),imag(z)]
+  f(t) = my(z = zeta(0.5+I*t)); [real(z),imag(z)];
   ploth(t = 100, 110, f(t), , 1000)
-@eprog
+@eprog\noindent (Note the use of the temporary variable \kbd{z}; \kbd{my}
+declares it local to the function's body.)
 
 Note how one half of the roots of the real and imaginary parts coincide.
 Why did we define a function \kbd{f(t)}?  To avoid calculation of
@@ -2942,7 +3024,7 @@ some useful shortcuts
 \bprog
   xlim = 13;  ordlim = 25;  f(x) = sin(x);
   default(seriesprecision,ordlim)
-  farray(t) = vector((ordlim+1)/2, k, truncate( f(1.*t + O(t^(2*k+1)) )))
+  farray(t) = vector((ordlim+1)/2, k, truncate( f(1.*t + O(t^(2*k+1)) )));
   FARRAY = farray('t);  \\@com\kbd{'t} to make sure \kbd{t} is a free variable
 @eprog\noindent
 \kbd{farray(x)} returns a vector of Taylor polynomials for $f(x)$, which we
