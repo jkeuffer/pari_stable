@@ -127,6 +127,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
    99- nffactor(nfinit(y),x^2+Mod(1,y)) --> SEGV [#699]
   100- "precision error in minim0" on qfminim(G, norml2(M[,1]), 100)
        from tutorial
+  101- nffactor(nfinit(y^2+1),(2*x+1)*x*(x+1)) --> SEGV [#702]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

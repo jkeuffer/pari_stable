@@ -237,8 +237,10 @@ nf_pol_lift(GEN pol, GEN bound, nfcmbf_t *T)
   x[1] = pol[1];
   for (i=2; i<l; i++)
   {
-    gel(x,i) = nf_bestlift_to_pol(gel(pol,i), bound, T->L);
-    if (!x[i]) return NULL;
+    GEN t = nf_bestlift_to_pol(gel(pol,i), bound, T->L);
+    if (!t) return NULL;
+    if (typ(t) == t_POL && lg(t) == 3) t = gel(t,2);
+    gel(x,i) = t;
   }
   return x;
 }
