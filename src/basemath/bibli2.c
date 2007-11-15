@@ -1608,9 +1608,10 @@ vecsort0(GEN x, GEN k, long flag)
   if (flag < 0 || flag > (cmp_REV|cmp_LEX|cmp_IND|cmp_UNIQ))
     pari_err(flagerr,"vecsort");
   if (k) {
-    long i, j, l, lk, tx = typ(x), lx = lg(x);
+    long i, j, l, lk, tx, lx;
     struct veccmp_s v;
 
+    init_sort(&x, &tx, &lx);
     if (! is_matvec_t(tx)) pari_err(typeer,"vecsort");
     switch(typ(k))
     {
