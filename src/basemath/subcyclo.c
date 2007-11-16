@@ -801,51 +801,84 @@ polsubcyclo(long n, long d, long v)
   }
 }
 
-/* Let z a primitive n-th root of 1, p prime, n > 1, p | n, such that
- * Aurifeuillian factorization of Phi_n(p) exists ( z.p is a square in Q(z) ).
- * Let g the Gauss sum
+struct aurifeuille_t {
+  GEN z, le; 
+  ulong l;
+  long e;
+};
+
+/* Let z a primitive n-th root of 1, n > 1, A an integer such that
+ * Aurifeuillian factorization of Phi_n(A) exists ( z.A is a square in Q(z) ).
+ * Let G(p) the Gauss sum mod p prime:
  *      sum_x (x|p) z^(xn/p) for p odd,  i - 1 for p = 2 [ i := z^(n/4) ]
  * We have N(-1) = Nz = 1 (n != 1,2), and
- *      g^2 = (-1|p) p for p odd,  g^2 = -2i for p = 2
- * p = 1(4), n odd  : z^2 is a primitive root
- *   Phi_n(p) = N(p - z^2) = N(g - z) N(g + z)
+ *      G^2 = (-1|p) p for p odd,  G^2 = -2i for p = 2
+ * In particular, for odd A, (-1|A) A = g^2 is a square. If A = prod p^{e_p},
+ * sigma_j(g) = \prod_p (sigma_j G(p)))^e_p = \prod_p (j|p)^e_p g = (j|A) g
+ * n odd  : z^2 is a primitive root, A = g^2
+ *   Phi_n(A) = N(A - z^2) = N(g - z) N(g + z)
  *
- * p = 3(4), n = 2 (4) : -z^2 is a primitive root
- *   Phi_n(p) = N(p - (-z^2)) = N(g - z) N(g + z)  [ N(-1) = 1 ]
+ * n = 2 (4) : -z^2 is a primitive root, -A = g^2
+ *   Phi_n(A) = N(A - (-z^2)) = N(g^2 - z^2)  [ N(-1) = 1 ]
+ *                            = N(g - z) N(g + z) 
  *
- * p = 2, n = 4 (8) : i z^2 primitive root
- *   Phi_n(2) = N(2 - i z^2) = N(-2i -  z^2) = N(g - z) N(g + z) */
-GEN
-factor_Aurifeuille(GEN p, long n)
+ * n = 4 (8) : i z^2 primitive root, -Ai = g^2
+ *   Phi_n(A) = N(A - i z^2) = N(-Ai -  z^2) = N(g - z) N(g + z)
+ * sigma_j(g) / g =  (j|A)  if j = 1 (4)
+ *                  (-j|A)i if j = 3 (4)
+ *   */
+static GEN
+factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
 {
-  pari_sp ltop = avma;
-  long e, l, j;
-  long phi_n = phiu(n);
-  GEN bound = ceil_safe(gpowgs(addrs(gsqrt(p,3),1),phi_n));
-  GEN zl = polsubcyclo_start(n, 0, 0, bound, &e, &l);
-  GEN f, a, b, le = gel(zl,1), z = gel(zl,2), s = z;
+  GEN z = S->z, le = S->le;
+  GEN f, a, b, s = z;
+  long j, e = S->e;
+  ulong l = S->l;
 
   if ((n & 7) == 4)
-  { /* p = 2 */
+  { /* A^* even, A^* = squarefree kernel of A */
     long m = n>>2;
     GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
-    switch (m&7)
-    {
-      case 1: case 3: a = addsi(-1,i); b = subsi(-1,i); break;
-      case 5: case 7: a = subsi(1,i);  b = addsi(1,i); break;
-    }
     a = addis(i, -1); b = subsi(-1,i);
-    f = subii(a, s);
-    for (j=3;j<n;j+=2)
-    {
-      s = Fp_mul(z2, s, le);
-      if (ugcd(j,m)==1)
-	f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
+    if (equalis(A, 2))
+    { /* important special case, split for efficiency */
+      f = subii(a, s);
+      for (j=3;j<n;j+=2)
+      {
+        s = Fp_mul(z2, s, le);
+        if (ugcd(j,m)==1)
+          f = Fp_mul(f, subii((j & 3) == 1? a: b, s), le);
+      }
+    }
+    else
+    { /* -Ai = 2^(2*) (-2i) B */
+      long v = vali(A);
+      GEN ma, mb, B = shifti(A, -v), gl = utoipos(l);
+      GEN g = padicsqrtlift(B, Fp_sqrt(B,gl), gl, e);
+      a = modii(shifti(mulii(a, g), v>>1), le);
+      ma = negi(a);
+      b = Fp_mul(a, i, le);
+      mb = negi(b);
+
+      f = subii(a, s);
+      for (j=3;j<n;j+=2)
+      {
+        s = Fp_mul(z2, s, le); /* z^j */
+        if (ugcd(j,m)==1)
+        {
+          GEN t;
+          if ((j & 3) == 1) 
+            t = (krosi(j, B)  < 0)? ma: a;
+          else
+            t = (krosi(-j, B) < 0)? mb: b;
+          f = Fp_mul(f, subii(t, s), le);
+        }
+      }
     }
   }
   else if ((n & 3) == 2)
-  { /* p = 3 (mod 4) */
-    GEN pstar = negi(p), z2 = Fp_sqr(z,le);
+  { /* A^* = 3 (mod 4) */
+    GEN pstar = negi(A), z2 = Fp_sqr(z,le);
     ulong g = Fl_sqrt(umodiu(pstar,l), l);
     long m = n>>1;
     a = padicsqrtlift(pstar, utoipos(g), utoipos(l), e);
@@ -855,22 +888,83 @@ factor_Aurifeuille(GEN p, long n)
     {
       s = Fp_mul(z2,s,le);
       if (ugcd(j,m)==1)
-	f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+	f = Fp_mul(f, subii(krosi(j,A)==1? a: b, s), le);
     }
   }
   else
-  { /* p = 1 (mod 4) */
-    ulong g = Fl_sqrt(umodiu(p,l), l);
-    a = padicsqrtlift(p, utoipos(g), utoipos(l), e);
+  { /* A^* = 1 (mod 4) */
+    ulong g = Fl_sqrt(umodiu(A,l), l);
+    a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
     f = subii(a, s);
     for(j=2;j<n;j++)
     {
       s = Fp_mul(z,s,le);
       if (ugcd(j,n)==1)
-	f = Fp_mul(f, subii(krosi(j,p)==1? a: b, s), le);
+	f = Fp_mul(f, subii(krosi(j,A)==1? a: b, s), le);
     }
   }
-  return gerepileuptoint(ltop, f);
+  return f;
 }
 
+static void
+Aurifeuille_init(GEN a, long n, struct aurifeuille_t *S)
+{
+  GEN bound = ceil_safe(gpowgs(addrs(gsqrt(a,3),1), phiu(n)));
+  GEN zl = polsubcyclo_start(n, 0, 0, bound, &(S->e), (long*)&(S->l));
+  S->le = gel(zl,1);
+  S->z  = gel(zl,2);
+}
+
+GEN
+factor_Aurifeuille_prime(GEN p, long n)
+{
+  pari_sp av = avma;
+  struct aurifeuille_t S;
+  Aurifeuille_init(p, n, &S);
+  return gerepileuptoint(av, factor_Aurifeuille_aux(p,n, &S));
+}
+
+/* an algebraic factor of Phi_d(a), a != 0 */
+GEN
+factor_Aurifeuille(GEN a, long d)
+{
+  pari_sp av = avma;
+  GEN fd, P, A;
+  long i, lP, va = vali(a), a4;
+  struct aurifeuille_t S;
+
+  if (d <= 2) pari_err(talker, "degree <= 2 in factor_Aurifeuille");
+  if (odd(d))
+  {
+    if (odd(va)) return gen_1;
+    A = va? shifti(a, -va): a;
+    a4 = mod4(A); if (signe(a) < 0) a4 = 4 - a4;
+    if (a4 != 1) { avma = av; return gen_1; }
+  }
+  else if ((d & 3) == 2)
+  {
+    if (odd(va)) return gen_1;
+    A = va? shifti(a, -va): a;
+    a4 = mod4(A); if (signe(a) < 0) a4 = 4 - a4;
+    if (a4 != 3) { avma = av; return gen_1; }
+  }
+  else if ((d & 7) == 4)
+  {
+    if ((va & 1) == 0) return gen_1;
+    A = shifti(a, -va);
+  }
+  fd = factoru(d); P = gel(fd,1); lP = lg(P);
+  for (i = 1; i < lP; i++)
+    (void)Z_lvalrem(A, P[i], &A);
+  if (signe(A) < 0)
+  { /* negate in place if possible */
+    if (A == a) A = icopy(A);
+    setsigne(A,1);
+  }
+  if (!Z_issquare(A)) { avma = av; return gen_1; }
+
+  A = signe(a) < 0? absi(a): a;
+  Aurifeuille_init(A, d, &S);
+  return gerepileuptoint(av, factor_Aurifeuille_aux(a, d, &S));
+}

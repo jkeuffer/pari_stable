@@ -989,7 +989,7 @@ factoru_pow(ulong n)
   avma = lbot; return gerepileupto(ltop,f);
 }
 
-/* factor p^n - 1 */
+/* factor p^n - 1, assuming p prime */
 GEN
 factor_pn_1(GEN p, long n)
 {
@@ -1004,7 +1004,7 @@ factor_pn_1(GEN p, long n)
        ((pp&3)==3 && (d[i]&3)==2) ||
        (pp==2 && (d[i]&7)==4)))
     {
-      GEN f=factor_Aurifeuille(p,d[i]);
+      GEN f=factor_Aurifeuille_prime(p,d[i]);
       B = Z_factor(f);
       A = merge_factor(A, B, (void*)&cmpii, cmp_nodata);
       B = Z_factor(diviiexact(polcyclo_eval(d[i],p), f));

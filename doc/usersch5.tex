@@ -1768,7 +1768,15 @@ is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
 and the $p^{v_p(n)}$.
 
 \fun{GEN}{factor_pn_1}{GEN p, long n} returns the factorization of $p^n-1$,
-where $p$ and $n$ are positive integers.
+where $p$ is prime and $n$ is a positive integer.
+
+\fun{GEN}{factor_Aurifeuille_prime}{GEN p, long n} an Aurifeuillian factor
+of $\phi_n(p)$, assuming $p$ prime and an Aurifeuillian factor exists
+($p \zeta_n$ is a square in $\Q(\zeta_n)$).
+
+\fun{GEN}{factor_Aurifeuille}{GEN a, long d} an Aurifeuillian factor of
+$\phi_n(a)$, assuming $a$ is a non-zero integer and $n > 2$. Returns $1$
+if no Aurifeuillian factor exists.
 
 \fun{GEN}{gcdii}{GEN x, GEN y}, returns the GCD of the \typ{INT}s \kbd{x} and
 \kbd{y}.
