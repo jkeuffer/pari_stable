@@ -827,8 +827,9 @@ struct aurifeuille_t {
  * sigma_j(g) / g =  (j|A)  if j = 1 (4)
  *                  (-j|A)i if j = 3 (4)
  *   */
+/* factor Phi_n(A), Astar squarefree kernel of A */
 static GEN
-factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
+factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
 {
   GEN z = S->z, le = S->le;
   GEN f, a, b, s = z;
@@ -860,6 +861,7 @@ factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
       b = Fp_mul(a, i, le);
       mb = negi(b);
 
+      Astar >>= 1;
       f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
@@ -868,9 +870,9 @@ factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
         {
           GEN t;
           if ((j & 3) == 1) 
-            t = (krosi(j, B)  < 0)? ma: a;
+            t = (kross(j, Astar)  < 0)? ma: a;
           else
-            t = (krosi(-j, B) < 0)? mb: b;
+            t = (kross(-j, Astar) < 0)? mb: b;
           f = Fp_mul(f, subii(t, s), le);
         }
       }
@@ -888,7 +890,7 @@ factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
     {
       s = Fp_mul(z2,s,le);
       if (ugcd(j,m)==1)
-	f = Fp_mul(f, subii(krosi(j,A)==1? a: b, s), le);
+	f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
     }
   }
   else
@@ -901,7 +903,7 @@ factor_Aurifeuille_aux(GEN A, long n, struct aurifeuille_t *S)
     {
       s = Fp_mul(z,s,le);
       if (ugcd(j,n)==1)
-	f = Fp_mul(f, subii(krosi(j,A)==1? a: b, s), le);
+	f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
     }
   }
   return f;
@@ -922,7 +924,7 @@ factor_Aurifeuille_prime(GEN p, long n)
   pari_sp av = avma;
   struct aurifeuille_t S;
   Aurifeuille_init(p, n, &S);
-  return gerepileuptoint(av, factor_Aurifeuille_aux(p,n, &S));
+  return gerepileuptoint(av, factor_Aurifeuille_aux(p, itos(p), n, &S));
 }
 
 /* an algebraic factor of Phi_d(a), a != 0 */
@@ -931,7 +933,7 @@ factor_Aurifeuille(GEN a, long d)
 {
   pari_sp av = avma;
   GEN fd, P, A;
-  long i, lP, va = vali(a), a4;
+  long i, lP, va = vali(a), sa = signe(a), a4, astar;
   struct aurifeuille_t S;
 
   if (d <= 2) pari_err(talker, "degree <= 2 in factor_Aurifeuille");
@@ -939,14 +941,14 @@ factor_Aurifeuille(GEN a, long d)
   {
     if (odd(va)) return gen_1;
     A = va? shifti(a, -va): a;
-    a4 = mod4(A); if (signe(a) < 0) a4 = 4 - a4;
+    a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
     if (a4 != 1) { avma = av; return gen_1; }
   }
   else if ((d & 3) == 2)
   {
     if (odd(va)) return gen_1;
     A = va? shifti(a, -va): a;
-    a4 = mod4(A); if (signe(a) < 0) a4 = 4 - a4;
+    a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
     if (a4 != 3) { avma = av; return gen_1; }
   }
   else if ((d & 7) == 4)
@@ -955,16 +957,17 @@ factor_Aurifeuille(GEN a, long d)
     A = shifti(a, -va);
   }
   fd = factoru(d); P = gel(fd,1); lP = lg(P);
+  astar = sa;
   for (i = 1; i < lP; i++)
-    (void)Z_lvalrem(A, P[i], &A);
-  if (signe(A) < 0)
+    if (odd( (Z_lvalrem(A, P[i], &A)) ) ) astar *= P[i];
+  if (sa < 0)
   { /* negate in place if possible */
     if (A == a) A = icopy(A);
     setsigne(A,1);
   }
   if (!Z_issquare(A)) { avma = av; return gen_1; }
 
-  A = signe(a) < 0? absi(a): a;
+  A = sa < 0? absi(a): a;
   Aurifeuille_init(A, d, &S);
-  return gerepileuptoint(av, factor_Aurifeuille_aux(a, d, &S));
+  return gerepileuptoint(av, factor_Aurifeuille_aux(a, astar, d, &S));
 }
