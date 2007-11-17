@@ -1612,6 +1612,7 @@ vecsort0(GEN x, GEN k, long flag)
     struct veccmp_s v;
 
     init_sort(&x, &tx, &lx);
+    if (!x) return flag & cmp_IND? cgetg(1, t_VECSMALL): listcreate();
     if (! is_matvec_t(tx)) pari_err(typeer,"vecsort");
     switch(typ(k))
     {
