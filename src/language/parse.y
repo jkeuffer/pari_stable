@@ -60,12 +60,12 @@ pari_init_parser(void)
 }
 
 static void
-unused_chars(const char *lex, const char *c, int strict)
+unused_chars(const char *lex, const char *ccc, int strict)
 {
   pari_sp ltop=avma;
   long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
   char *s;
-  if (strict) pari_err(talker2,"unused characters", lex, c);
+  if (strict) compile_err("unused characters", lex);
   if ((long)strlen(lex) > n)
   {
     s = stackmalloc(n + 1);
@@ -79,8 +79,17 @@ unused_chars(const char *lex, const char *c, int strict)
   ltop=avma;
 }
 
-const char*
-get_origin(void) { return pari_lex_start; }
+void
+compile_err(const char *msg, const char *str)
+{
+  pari_err(talker2, msg, str, pari_lex_start);
+}
+
+void
+compile_varer1(const char *str)
+{
+  pari_err(varer1, str, pari_lex_start);
+}
 
 void
 parser_reset(void)
@@ -104,7 +113,7 @@ pari_eval_str(char *lex, int strict)
     if (pari_unused_chars)
       unused_chars(pari_unused_chars,pari_lex_start,strict);
     else
-      pari_err(talker2,GSTR(pari_lasterror),lex-1,pari_lex_start);
+      compile_err(GSTR(pari_lasterror),lex-1);
   }
   avma=ltop;
   code=gp_closure(s_node.n-1);

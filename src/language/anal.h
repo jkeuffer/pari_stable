@@ -52,7 +52,8 @@ long   is_keyword_char(char c);
 void   reset_break(void);
 long   did_break(void);
 
-const char*  get_origin(void);
+void compile_err(const char *msg, const char *str);
+void compile_varer1(const char *str);
 
 extern THREAD const char *gp_function_name;
 extern int  (*whatnow_fun)(const char *, int);

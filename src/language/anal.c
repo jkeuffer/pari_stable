@@ -591,7 +591,7 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
     ++*lex;
     skipstring(lex);
     if (!**lex)
-      pari_err(talker2,"run-away string",*lex-1,get_origin());
+      compile_err("run-away string",*lex-1);
     ++*lex;
     yylloc->end=*lex;
     return KSTRING;

@@ -322,8 +322,7 @@ compilecast(long n, int type, int mode)
   case Gsmall:
     if (type==Ggen)        op_push(OCitos,0);
     else if (type==Gvoid)  op_push(OCpushlong,0);
-    else pari_err(talker2,"this should be a small integer",
-             tree[n].str, get_origin());
+    else compile_err("this should be a small integer",tree[n].str);
     break;
   case Ggen:
     if (type==Gsmall)      op_push(OCstoi,0);
@@ -334,7 +333,7 @@ compilecast(long n, int type, int mode)
     break;
   case Gvar:
     if (type==Ggen)        op_push(OCvarn,0);
-    else pari_err(varer1, tree[n].str, get_origin());
+    else compile_varer1(tree[n].str);
      break;
   default:
     pari_err(bugparier,"compilecast, type unknown %ld",mode);
@@ -358,7 +357,7 @@ getentry(long n)
   while (tree[n].f==Ftag)
     n=tree[n].x;
   if (tree[n].f!=Fentry)
-    pari_err(talker2,"variable name expected",tree[n].str, get_origin());
+    compile_varer1(tree[n].str);
   return get_entree(n);
 }
 
@@ -368,7 +367,7 @@ getvar(long n)
 {
   entree *ep = getentry(n);
   if (EpSTATIC(do_alias(ep)))
-    pari_err(talker2,"variable name expected",tree[n].str, get_origin());
+    compile_varer1(tree[n].str);
   return ep;
 }
 
@@ -474,8 +473,7 @@ static void
 checkdups(GEN arg, GEN vep)
 {
   long l=vecsmall_duplicate(vep);
-  if (l!=0) pari_err(talker2, "variable declared twice",
-                              tree[arg[l]].str,get_origin());
+  if (l!=0) compile_err("variable declared twice",tree[arg[l]].str);
 }
 
 static entree *
@@ -603,8 +601,7 @@ compilemat(long n, long mode)
       op_push(OCmat,lgcol);
     }
     else if (l!=lgcol)
-      pari_err(talker2,"matrix must be rectangular",
-          tree[line[i]].str,get_origin());
+      compile_err("matrix must be rectangular",tree[line[i]].str);
     k=i;
     for(j=1;j<lgcol;j++)
     {
@@ -632,13 +629,11 @@ cattovec(long n, long fnum)
     x=tree[xy].x;
     y=tree[xy].y;
     if (tree[y].f==Fnoarg)
-      pari_err(talker2,"unexpected character: ",
-               tree[y].str, get_origin());
+      compile_err("unexpected character: ", tree[y].str);
     i++;
   }
   if (tree[x].f==Fnoarg)
-    pari_err(talker2,"unexpected character: ",
-             tree[x].str, get_origin());
+    compile_err("unexpected character: ", tree[x].str);
   nb=i+1;
   stack=cgetg(nb+1,t_VECSMALL);
   for(x=n;i>0;i--)
@@ -708,7 +703,7 @@ compilefunc(entree *ep, long n, int mode)
   {
     GEN vep=cgetg_copy(lg(arg),arg);
     if (tree[n].f==Fderfunc)
-      pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+      compile_err("can't derive this",tree[n].str);
     if (nb) op_push(OCnewframe,nb);
     for(i=1;i<=nb;i++)
       var_push(NULL,Lmy);
@@ -735,7 +730,7 @@ compilefunc(entree *ep, long n, int mode)
   {
     GEN vep=cgetg_copy(lg(arg),arg);
     if (tree[n].f==Fderfunc)
-      pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+      compile_err("can't derive this",tree[n].str);
     for (i=1;i<=nb;i++)
     {
       entree *en;
@@ -764,7 +759,7 @@ compilefunc(entree *ep, long n, int mode)
   {
     pari_warn(warner,"global(...) is deprecated");
     if (tree[n].f==Fderfunc)
-      pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+      compile_err("can't derive this",tree[n].str);
     for (i=1;i<=nb;i++)
     {
       long a=arg[i];
@@ -789,10 +784,10 @@ compilefunc(entree *ep, long n, int mode)
   }
   else if (is_func_named(x,"O") || (compatible==OLDALL && is_func_named(x,"o")))
   {
-    if (nb!=1) pari_err(talker2,"wrong number of arguments",
-        tree[n].str+tree[n].len-1, get_origin());
+    if (nb!=1)
+      compile_err("wrong number of arguments", tree[n].str+tree[n].len-1);
     if (tree[n].f==Fderfunc)
-      pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+      compile_err("can't derive this",tree[n].str);
     ep=is_entry("O(_^_)");
     if (tree[arg[1]].f==Ffunction && tree[arg[1]].x==OPpow)
     {
@@ -810,14 +805,14 @@ compilefunc(entree *ep, long n, int mode)
   else if (x==OPpow && nb==2 && tree[arg[2]].f==Fsmall)
     ep=is_entry("_^s");
   else if (x==OPcat)
-    pari_err(talker2,"expected character: ',' or ')' instead of",
-        tree[arg[1]].str+tree[arg[1]].len, get_origin());
+    compile_err("expected character: ',' or ')' instead of",
+        tree[arg[1]].str+tree[arg[1]].len);
   p=ep->code;
   if (!ep->value)
-    pari_err(talker2,"unknown function",tree[n].str, get_origin());
+    compile_err("unknown function",tree[n].str);
   ret=get_ret_type(&p);
   if (tree[n].f==Fderfunc && (ret!=RET_GEN || *p!='G'))
-    pari_err(talker2,"can't derive this",tree[n].str,get_origin());
+    compile_err("can't derive this",tree[n].str);
   i=0; j=1;
   if (*p)
   {
@@ -830,12 +825,9 @@ compilefunc(entree *ep, long n, int mode)
       switch(mod)
       {
       case PPstd:
-        if (j>nb)
-          pari_err(talker2,"too few arguments",
-              tree[n].str+tree[n].len-1, get_origin());
+        if (j>nb) compile_err("too few arguments", tree[n].str+tree[n].len-1);
         if (tree[arg[j]].f==Fnoarg && c!='I' && c!='E')
-          pari_err(talker2,"missing mandatory argument",
-              tree[arg[j]].str, get_origin());
+          compile_err("missing mandatory argument", tree[arg[j]].str);
         switch(c)
         {
         case 'G':
@@ -876,8 +868,7 @@ compilefunc(entree *ep, long n, int mode)
             if (c=='&')
             {
               if (tree[a].f!=Frefarg)
-                pari_err(talker2,"expected character: '&'",
-                    tree[a].str, get_origin());
+                compile_err("expected character: '&'", tree[a].str);
               a=tree[a].x;
             }
             ep=getlvalue(a);
@@ -912,8 +903,7 @@ compilefunc(entree *ep, long n, int mode)
             for(i=0;i<lev;i++)
             {
               if (!ev[i])
-                pari_err(talker2,"missing variable name",
-                    tree[a].str-1, get_origin());
+                compile_err("missing variable name", tree[a].str-1);
               var_push(ev[i],Lmy);
             }
             if (tree[a].f==Fnoarg)
@@ -939,8 +929,8 @@ compilefunc(entree *ep, long n, int mode)
             long x=tree[arg[j]].x;
             long y=tree[arg[j]].y;
             if (tree[arg[j]].f!=Faffect)
-              pari_err(talker2,"expected character: '=' instead of",
-                  tree[arg[j]].str+tree[arg[j]].len, get_origin());
+              compile_err("expected character: '=' instead of",
+                  tree[arg[j]].str+tree[arg[j]].len);
             ev[lev++] = getvar(x);
             compilenode(y,Ggen,0);
             i++; j++;
@@ -1077,7 +1067,7 @@ compilefunc(entree *ep, long n, int mode)
     }
   }
   if (j<=nb)
-    pari_err(talker2,"too many arguments",tree[arg[j]].str,get_origin());
+    compile_err("too many arguments",tree[arg[j]].str);
   switch (ret)
   {
   case RET_GEN:
@@ -1157,12 +1147,10 @@ compilenode(long n, int mode, long flag)
       if (tree[n].x!=CSTquote)
       {
         if (mode==Gvoid) return;
-        if (mode==Gvar)
-          pari_err(varer1,tree[n].str,get_origin());
+        if (mode==Gvar) compile_varer1(tree[n].str);
       }
       if (mode==Gsmall)
-        pari_err(talker2,"this should be a small integer",
-            tree[n].str,get_origin());
+        compile_err("this should be a small integer", tree[n].str);
       switch(tree[n].x)
       {
       case CSTreal:
@@ -1178,9 +1166,7 @@ compilenode(long n, int mode, long flag)
       case CSTquote:
         {
           entree *ep = fetch_entry(tree[n].str+1,tree[n].len-1);
-          if (EpSTATIC(ep))
-            pari_err(talker2,"variable name expected",
-                tree[n].str+1,get_origin());
+          if (EpSTATIC(ep)) compile_varer1(tree[n].str+1);
           op_push(OCpushvar, (long)ep);
           compilecast(n,Ggen, mode);
           break;
