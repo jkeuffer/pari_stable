@@ -24,8 +24,6 @@ const char *errmessage[]=
 
 /* caracer1 */
   "unexpected character",
-/* paramer1 */
-  "unknown function or error in formal parameters",
 /* varer1 */
   "variable name expected",
 /* obsoler */
