@@ -419,6 +419,15 @@ polcyclo_eval(long n, GEN x)
   P = gel(factoru(n), 1); l = lg(P)-1;
   s = P[1]; for (i = 2; i <= l; i++) s *= P[i];
   q = n/s;
+  if (tx == t_INT && is_pm1(x))
+  {
+    avma = av;
+    if (signe(x) > 0 || !odd(q)) return l == 1? utoipos(P[1]): gen_1;
+    /* return Phi_s(-1) */
+    if (n == 2) return gen_0;
+    if (!odd(n) && l == 2) return utoipos(P[2]);
+    return gen_1;
+  }
   if (q != 1) { x = gpowgs(x, q); n = s; } /* replace n by squarefree part */
   if (tx == t_POL || tx == t_MAT || lg(x) > n)
     return gerepileupto(av, poleval(polcyclo(n,0), x));
