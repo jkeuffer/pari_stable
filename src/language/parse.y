@@ -60,22 +60,20 @@ pari_init_parser(void)
 }
 
 static void
-unused_chars(const char *lex, const char *ccc, int strict)
+unused_chars(const char *lex, int strict)
 {
   pari_sp ltop=avma;
   long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
-  char *s;
   if (strict) compile_err("unused characters", lex);
   if ((long)strlen(lex) > n)
-  {
-    s = stackmalloc(n + 1);
+  { 
+    char *t = stackmalloc(n + 1);
     n -= 5;
-    (void)strncpy(s,lex, n);
-    strcpy(s + n, "[+++]");
+    (void)strncpy(t,lex, n);
+    strcpy(t + n, "[+++]");
+    lex = t;
   }
-  else
-    s = (char *)lex;
-  pari_warn(warner, "unused characters: %s", s);
+  pari_warn(warner, "unused characters: %s", lex);
   ltop=avma;
 }
 
@@ -111,7 +109,7 @@ pari_eval_str(char *lex, int strict)
   if (pari_parse(&lex))
   {
     if (pari_unused_chars)
-      unused_chars(pari_unused_chars,pari_lex_start,strict);
+      unused_chars(pari_unused_chars,strict);
     else
       compile_err(GSTR(pari_lasterror),lex-1);
   }
