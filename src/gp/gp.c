@@ -965,7 +965,7 @@ escape(char *tch)
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
       (void)sd_simplify(s,d_ACKNOWLEDGE); break;
-    default: pari_err(caracer1,tch,tch-1);
+    default: pari_err(talker2,"unexpected character", tch,tch-1);
   }
 }
 

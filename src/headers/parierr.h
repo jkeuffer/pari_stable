@@ -18,7 +18,6 @@ enum {
 
 /* Always catched up to this point */
 
-  caracer1,
   varer1, obsoler, openfiler, talker2,
 
 /* NO CONTEXT now */

@@ -22,8 +22,6 @@ const char *errmessage[]=
 
 /* Always catched up to this point */
 
-/* caracer1 */
-  "unexpected character",
 /* varer1 */
   "variable name expected",
 /* obsoler */
