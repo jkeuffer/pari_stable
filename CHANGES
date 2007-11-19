@@ -298,6 +298,7 @@ BA 41- library function vecsmall_uniq_sorted
     9- the emacs/ directory: PariEmacs is now distributed separately.
    10- obsolete functions ellap0, apell2
    11- obsolete header file pariport.h
+   12- obsolete error codes paramer1, valencer1, accurer
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

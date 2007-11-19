@@ -45,8 +45,6 @@ const char *errmessage[]=
   "Warning: increasing prec",
 /* warnfile */
   "Warning: failed to",
-/* accurer */
-  "accuracy problems",
 /* bugparier */
   "bug in",
 /* impl */
@@ -87,11 +85,6 @@ const char *errmessage[]=
   "non invertible matrix in gauss",
 /* mattype1 */
   "not a square matrix",
-
-  /*  ANAL.C  */
-
-/* valencer1 */
-  "unknown identifier valence, please report",
 
   /*  ARITH.C  */
 

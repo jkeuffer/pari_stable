@@ -24,7 +24,7 @@ enum {
 /* NO CONTEXT now */
 
   talker, flagerr, warner, warnprec, warnfile,
-  accurer, bugparier, impl, archer, warnmem, precer,
+  bugparier, impl, archer, warnmem, precer,
 
   siginter, typeer, consister, user,
 
@@ -37,10 +37,6 @@ enum {
 /* alglin.c */
 
   matinv1, mattype1,
-
-/* anal.c   */
-
-  valencer1,
 
 /* arith.c  */
 

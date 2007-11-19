@@ -1085,7 +1085,7 @@ pari_err(long numerr, ...)
 	pariprintf(" %s is not yet implemented.",ch1); break;
 
       case typeer: case mattype1:
-      case accurer: case infprecer: case negexper:
+      case infprecer: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
 	pariprintf(" in %s.",va_arg(ap, char*)); break;
@@ -1162,7 +1162,6 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver")) numerr = gdiver;
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
-  else if (!strcmp(e,"accurer")) numerr = accurer;
   else if (!strcmp(e,"archer")) numerr = archer;
   else if (!strcmp(e,"siginter")) numerr = siginter;
   else if (!strcmp(e,"talker")) numerr = talker;
