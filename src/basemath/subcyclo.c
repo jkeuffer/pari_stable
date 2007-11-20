@@ -936,9 +936,14 @@ factor_Aurifeuille(GEN a, long d)
   long i, lP, va = vali(a), sa = signe(a), a4, astar;
   struct aurifeuille_t S;
 
-  if (d <= 2) pari_err(talker, "degree <= 2 in factor_Aurifeuille");
+  if (d <= 0) pari_err(talker,"non-positive degree in factor_Aurifeuille");
   if (odd(d))
   {
+    if (d == 1)
+    {
+      if (!Z_issquareall(a, &A)) return gen_1;
+      return gerepileuptoint(av, addis(A,1));
+    }
     if (odd(va)) return gen_1;
     A = va? shifti(a, -va): a;
     a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
@@ -946,6 +951,12 @@ factor_Aurifeuille(GEN a, long d)
   }
   else if ((d & 3) == 2)
   {
+    if (d == 2)
+    {
+      a = negi(a);
+      if (!Z_issquareall(a, &A)) { avma = av; return gen_1; }
+      return gerepileuptoint(av, addis(A,1));
+    }
     if (odd(va)) return gen_1;
     A = va? shifti(a, -va): a;
     a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
