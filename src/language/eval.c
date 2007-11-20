@@ -519,11 +519,11 @@ closure_castlong(long z, long mode)
 static void
 closure_eval(GEN C)
 {
-  long arity = C[1];
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
   GEN data=gel(C,4);
-  long saved_sp=sp;
+  long loper=lg(oper);
+  long saved_sp=sp-C[1];
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
   if (lg(C)==7)
@@ -540,7 +540,7 @@ closure_eval(GEN C)
     }
   }
 
-  for(pc=1;pc<lg(oper);pc++)
+  for(pc=1;pc<loper;pc++)
   {
     op_code opcode=(op_code) code[pc];
     long operand=oper[pc];
@@ -1095,7 +1095,7 @@ closure_eval(GEN C)
   if (0)
   {
 endeval:
-    sp = saved_sp - arity;
+    sp = saved_sp;
     rp = saved_rp;
   }
   for(j=1;j<=nbmvar;j++)
