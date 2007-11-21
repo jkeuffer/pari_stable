@@ -248,7 +248,7 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
   const long efin = lg(taba)-1, lv = R->lv;
   GEN L, res = jac, pol2 = _sqr(res, R);
   long f;
-  pari_sp av, lim;
+  pari_sp av0 = avma, av, lim;
 
   L = cgetg(lv+1, t_VEC); gel(L,1) = res;
   for (f=2; f<=lv; f++) gel(L,f) = _mul(gel(L,f-1), pol2, R);
@@ -266,12 +266,13 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
       }
     }
   }
-  return res;
+  return gerepilecopy(av0, res);
 }
 
 static GEN
 _powpolmodsimple(Cache *C, Red *R, GEN jac)
 {
+  pari_sp av = avma;
   GEN w = mulmat_pol(C->matvite, jac);
   long j, ph = lg(w);
 
@@ -279,6 +280,7 @@ _powpolmodsimple(Cache *C, Red *R, GEN jac)
   for (j=1; j<ph; j++)
     gel(w,j) = _powpolmod(C, centermodii(gel(w,j), R->N, R->N2), R, &sqrmod);
   w = centermod_i( gmul(C->matinvvite, w), R->N, R->N2 );
+  w = gerepileupto(av, w);
   return RgV_to_RgX(w, 0);
 }
 
@@ -334,6 +336,7 @@ e(ulong t, GEN *globfa)
     /* d runs through the divisors of t */
     if (uisprime(++d))
     {
+      if (d > 5000000) return gen_0;
       if (d != 2) appendL(Primes, (GEN)d);
       s = muliu(s, upowuu(d, 1 + u_lval(t,d)));
     }
@@ -870,6 +873,7 @@ step4d(Cache *C, Red *R, ulong q)
 static long
 step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
 {
+  pari_sp av;
   ulong ct = 1, q;
   long pk, k, fl = -1;
   byteptr d = diffptr+2;
@@ -889,13 +893,14 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
     }
 
     if (!filltabs(C, Cp, R, p, pk, ltab)) return 0;
-    R->C = C->cyc;
+    av = avma; R->C = C->cyc;
     if (p >= 3)      fl = step4a(C,R, q,p,k, NULL);
     else if (k >= 3) fl = step4b(C,R, q,k);
     else if (k == 2) fl = step4c(C,R, q);
     else             fl = step4d(C,R, q);
     if (fl == -1) return (long)(-q);
     if (fl == 1) return ct;
+    avma = av;
     ct++;
    repeat:
     NEXT_PRIME_VIADIFF(q,d);

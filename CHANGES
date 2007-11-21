@@ -128,6 +128,8 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   100- "precision error in minim0" on qfminim(G, norml2(M[,1]), 100)
        from tutorial
   101- nffactor(nfinit(y^2+1),(2*x+1)*x*(x+1)) --> SEGV [#702]
+  102- isprime((6^2176+1)/(6^128+1)) --> length (lg) overflow [#697]
+       [ analogous problems for any large integer ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
