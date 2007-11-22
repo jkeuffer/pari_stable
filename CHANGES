@@ -132,6 +132,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
        [ analogous problems for any large integer ]
   103- various problems related to allocatemem() [ + document quirks ]
        Remove the br_ALOCATEMEM construct and end allocatemem0() by a longjmp
+  104- missing GC in det_simple_gauss() [ matdet for inexact inputs ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

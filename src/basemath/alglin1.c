@@ -3589,11 +3589,11 @@ det0(GEN a,long flag)
 static GEN
 det_simple_gauss(GEN a, int inexact)
 {
-  pari_sp av, av1;
-  long i,j,k,s, nbco = lg(a)-1;
-  GEN x,p;
+  pari_sp av = avma, lim = stack_lim(av,1);
+  long i,j,k, s = 1, nbco = lg(a)-1;
+  GEN p, x = gen_1;
 
-  av=avma; s=1; x=gen_1; a=shallowcopy(a);
+  a = shallowcopy(a);
   for (i=1; i<nbco; i++)
   {
     p=gcoeff(a,i,i); k=i;
@@ -3625,16 +3625,22 @@ det_simple_gauss(GEN a, int inexact)
     for (k=i+1; k<=nbco; k++)
     {
       GEN m = gcoeff(a,i,k);
-      if (!gcmp0(m))
+      if (gcmp0(m)) continue;
+
+      m = gneg_i(gdiv(m,p));
+      for (j=i+1; j<=nbco; j++)
       {
-	m = gneg_i(gdiv(m,p));
-	for (j=i+1; j<=nbco; j++)
-	  gcoeff(a,j,k) = gadd(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
+        gcoeff(a,j,k) = gadd(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
+          gerepileall(av,2, &a,&x); p = gcoeff(a,i,i);
+        }
       }
     }
   }
   if (s<0) x = gneg_i(x);
-  av1=avma; return gerepile(av,av1,gmul(x,gcoeff(a,nbco,nbco)));
+  return gerepileupto(av, gmul(x,gcoeff(a,nbco,nbco)));
 }
 
 GEN
