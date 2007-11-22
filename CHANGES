@@ -105,7 +105,7 @@ MA 80- [Linux-PPC] missing -fPIC in DLCFLAGS
        but could in fact remain the same ]
    82- quadregulator(y) -> SEGV [#674]
    83- acos(x^0) -> division by 0 [ instead of O(x^8), at \ps 16 ]
-       Analogously, acosh(x^0), asin(x^0), asinh(I+O(x) --> division by 0
+       Analogously, acosh(x^0), asin(x^0), asinh(I+O(x)) --> division by 0
    84- dilog(-1) [ more generally polylog of < 0 t_REALs ] should have
        0 imaginary part
    85- problems with  [ build/install ] directory names containing spaces
@@ -130,6 +130,8 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   101- nffactor(nfinit(y^2+1),(2*x+1)*x*(x+1)) --> SEGV [#702]
   102- isprime((6^2176+1)/(6^128+1)) --> length (lg) overflow [#697]
        [ analogous problems for any large integer ]
+  103- various problems related to allocatemem() [ + document quirks ]
+       Remove the br_ALOCATEMEM construct and end allocatemem0() by a longjmp
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

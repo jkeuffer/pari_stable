@@ -25,7 +25,7 @@ THREAD const char *gp_function_name=NULL;
 /********************************************************************/
 
 static THREAD long br_status, br_count;
-enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM };
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
 static THREAD GEN br_res=NULL;
 
 long
@@ -38,7 +38,6 @@ loop_break(void)
       return 1;
     case br_BREAK : if (! --br_count) br_status = br_NONE; /* fall through */
     case br_RETURN: return 1;
-    case br_ALLOCMEM: pari_err(talker,"can't allow allocatemem() in loops");
     case br_NEXT: br_status = br_NONE; /* fall through */
   }
   return 0;
@@ -96,12 +95,7 @@ allocatemem0(GEN z)
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
   (void)allocatemoremem(newsize);
-}
-
-void
-allocating_mem(void)
-{
-  br_status = br_ALLOCMEM;
+  longjmp(GP_DATA->env,1);
 }
 
 /*******************************************************************/
@@ -446,7 +440,6 @@ closure_return(GEN C)
   if (br_status)
   {
     GEN z;
-    if (br_status==br_ALLOCMEM) return gnil;
     avma=ltop;
     z=br_res?gcopy(br_res):gnil;
     reset_break();
@@ -1111,11 +1104,7 @@ closure_evalgen(GEN C)
 {
   pari_sp ltop=avma;
   closure_eval(C);
-  if (br_status)
-  {
-    if (br_status!=br_ALLOCMEM) avma=ltop;
-    return NULL;
-  }
+  if (br_status) { avma=ltop; return NULL; }
   return gerepileupto(ltop,gel(st,--sp));
 }
 
@@ -1133,8 +1122,7 @@ closure_evalvoid(GEN C)
 {
   pari_sp ltop=avma;
   closure_eval(C);
-  if (br_status!=br_ALLOCMEM)
-    avma=ltop;
+  avma=ltop;
 }
 
 GEN
@@ -1143,22 +1131,13 @@ closure_evalres(GEN C)
   return closure_return(C);
 }
 
-INLINE GEN
-closure_call_noalloc(GEN C)
-{
-  GEN z=closure_return(C);
-  if (br_status==br_ALLOCMEM)
-    pari_err(talker,"can't allow allocatemem() there");
-  return z;
-}
-
 GEN
 closure_callgen1(GEN C, GEN x)
 {
   long i;
   gel(st,sp++)=x;
   for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_call_noalloc(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1168,7 +1147,7 @@ closure_callgen2(GEN C, GEN x, GEN y)
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_call_noalloc(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1177,7 +1156,7 @@ closure_callgenvec(GEN C, GEN args)
   long i, l = lg(args);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_call_noalloc(C);
+  return closure_return(C);
 }
 
 GEN
@@ -1189,7 +1168,7 @@ closure_callgenall(GEN C, long n, ...)
   for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   va_end(ap);
-  return closure_call_noalloc(C);
+  return closure_return(C);
 }
 
 void

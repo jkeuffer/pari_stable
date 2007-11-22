@@ -1824,14 +1824,14 @@ gerepile(pari_sp av, pari_sp tetpil, GEN q)
 long
 allocatemoremem(size_t newsize)
 {
+  size_t s;
   if (!newsize)
   {
     newsize = (top - bot) << 1;
-    pari_warn(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
-		newsize, newsize/1048576.);
   }
-  allocating_mem();
-  return init_stack(newsize);
+  s = init_stack(newsize);
+  pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
+  return s;
 }
 
 /* alternate stack management routine */

@@ -1453,8 +1453,8 @@ static GEN
 gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
-  VOLATILE GEN z = gnil;
-  VOLATILE pari_sp av = top - avma;
+  GEN z = gnil;
+  pari_sp av = avma;
   Buffer *b = new_buffer();
   filtre_t F;
 
@@ -1469,10 +1469,10 @@ gp_main_loop(int ismain)
       outtyp = GP_DATA->fmt->prettyp;
       recover(0);
       if (setjmp(GP_DATA->env))
-      { /* recover from error */
+      { /* recover from error or allocatemem */
 	char *s = (char*)global_err_data;
 	if (s && *s) fprintferr("%Z\n", readseq(s));
-	avma = top; av = 0;
+	avma = av = top;
 	prune_history(H, tloc);
 	GP_DATA->fmt->prettyp = outtyp;
 	kill_all_buffers(b);
@@ -1494,7 +1494,7 @@ gp_main_loop(int ismain)
 #endif
       TIMERstart(GP_DATA->T);
     }
-    avma = top - av;
+    avma = av;
     pari_set_last_newline(1);
     z = pari_eval_str(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;

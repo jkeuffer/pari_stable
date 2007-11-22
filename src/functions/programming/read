@@ -15,3 +15,7 @@ Doc: reads in the file
  If a GP \tet{binary file} is read using this command (see
  \secref{se:writebin}), the file is loaded and the last object in the file
  is returned.
+
+ In case the file you read in contains an \tet{allocatemem} statement (to be
+ generally avoided), you should leave \kbd{read} instructions by themselves,
+ and not part of larger instruction sequences.

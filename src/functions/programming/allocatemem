@@ -7,15 +7,29 @@ Help: allocatemem({s=0}): allocates a new stack of s bytes. doubles the
 Doc: this very special operation
  allows the user to change the stack size \emph{after} initialization. $x$
  must be a non-negative integer. If $x \neq 0$, a new stack of size
- $16*\ceil{x/16}$ bytes is allocated, all the PARI data on the old stack is
- moved to the new one, and the old stack is discarded. If $x=0$, the size of
- the new stack is twice the size of the old one.
+ $16*\ceil{x/16}$ bytes is allocated. If $x=0$, the size of
+ the new stack is twice the size of the old one. The old stack is discarded.
  
- Although it is a function, \kbd{allocatemem} cannot be used in loop-like
- constructs, or as part of a larger expression sequence, e.g 
- \kbd{allocatemem(); something\_else()}. The former attempt will raise an
- error; in the latter the rest of the sequence following \kbd{allocatemem()}
- will be silently discarded. The technical reason is that this routine
- moves the stack, so temporary objects created during the current expression
- evaluation will not be correct anymore. (In particular byte-compiled
- expressions, which are allocated on the stack.)
+ \misctitle{Warning.} This function should be typed at the \kbd{gp} prompt in
+ interactive usage, or left by itself at the start of batch files.
+ It cannot be used meaningfully in loop-like constructs, or as part of a
+ larger expression sequence, e.g
+ \bprog
+    allocatemem(); x = 1;   \\@com This will not set \kbd{x}!
+ @eprog\noindent
+ In fact, all loops are immediately exited, user functions terminated, and
+ the rest of the sequence following \kbd{allocatemem()} is silently
+ discarded, as well as all pending sequences of instructions. We just go on
+ reading the next instruction sequence from the file we're in (or from the
+ user). In particular, we have the following possibly unexpected behaviour: in
+ \bprog
+    read("file.gp"); x = 1
+ @eprog\noindent were \kbd{file.gp} contains an \kbd{allocatemem} statement,
+ the \kbd{x = 1} is never executed, since all pending instructions in the
+ current sequence are discarded.
+ 
+ The technical reason is that this routine moves the stack, so temporary
+ objects created during the current expression evaluation are not correct
+ anymore. (In particular byte-compiled expressions, which are allocated on
+ the stack.) To avoid accessing obsolete pointers to the old stack, this
+ routine ends by a \kbd{longjmp}.
