@@ -46,7 +46,7 @@ entree  **varentries;
 
 THREAD pari_sp bot, top, avma;
 size_t memused;
-void    *global_err_data;
+void    *global_err_data = NULL;
 
 static growarray MODULES, OLDMODULES;
 const long functions_tblsz = 135; /* size of functions_hash */
