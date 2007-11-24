@@ -638,10 +638,25 @@ add_rfrac(GEN x, GEN y)
   pari_sp tetpil;
 
   delta = ggcd(x2,y2);
-  if (gcmp1(delta))
+  if (degpol(delta) == 0)
   { /* numerator is non-zero */
-    gel(z,1) = gerepileupto((pari_sp)z, gadd(gmul(x1,y2), gmul(y1,x2)));
-    gel(z,2) = gmul(x2, y2); return z;
+    delta = gel(delta,2);
+    if (gcmp1(delta))
+    {
+      gel(z,1) = gerepileupto((pari_sp)z, gadd(gmul(x1,y2), gmul(y1,x2)));
+      gel(z,2) = gmul(x2, y2);
+    }
+    else
+    {
+      GEN a = gdiv(x2, delta);
+      GEN b = gdiv(y2, delta);
+      x1 = gmul(x1,b);
+      y1 = gmul(y1,a); tetpil = avma;
+      gel(z,1) = gadd(x1, y1);
+      gel(z,2) = gmul(a, y2);
+      gerepilecoeffssp((pari_sp)z,tetpil,z+1,2);
+    }
+    return z;
   }
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
@@ -651,7 +666,6 @@ add_rfrac(GEN x, GEN y)
   p1 = poldivrem(n, delta, &r); /* we want gcd(n,delta) */
   if (gcmp0(r))
   {
-    cgiv(r);
     if (lg(d) == 3) /* "constant" denominator */
     {
       d = gel(d,2);
@@ -660,8 +674,9 @@ add_rfrac(GEN x, GEN y)
       else p1 = gdiv(p1, d);
       return gerepileupto((pari_sp)(z+3), p1);
     }
-    gel(z,1) = p1; gel(z,2) = d;
-    gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
+    gel(z,1) = p1;
+    gel(z,2) = d;
+    gerepilecoeffs((pari_sp)z,z+1,2); return z;
   }
   p1 = ggcd(delta, r);
   if (gcmp1(p1))
