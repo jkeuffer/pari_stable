@@ -786,11 +786,10 @@ static void
 print_version(void)
 {
   pari_sp av = avma;
-  char *buf, *ver;
+  char *buf, *ver = what_cc();
 
   center(PARIVERSION);
   center(PARIINFO);
-  ver = what_cc();
   buf = stackmalloc(strlen(__DATE__) +  32 + (ver? strlen(ver): 0));
   if (ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
   else     (void)sprintf(buf, "compiled: %s", __DATE__);
