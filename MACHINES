@@ -88,6 +88,7 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86_64 in 64bit mode
+Core2Duo    3400MHz  Linux-2.6.20-16 gcc-4.1.2       134     136  2.3.2     RN
 AMD Opteron 2400MHz  Linux-2.6.12-1  gcc-4.0.1       198     204  2.2.11    PZ
 AMD Opteron 2200MHz  Linux-2.6.11-6  gcc-3.4.3       206     221  2.3.0     
 AMD Opteron 2000MHz  Linux-2.4.22    gcc-3.3.2       290     290  2.2.8     
@@ -406,6 +407,7 @@ Contributors:
   OT = Olivier Thibault
   PZ = Paul Zimmermann
   QL = Qing Liu
+  RN = Reed Nessler
   SC = Scott Chadde
   SH = Steve Harding
   SHo= Steve Holmes
