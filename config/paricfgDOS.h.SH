@@ -14,21 +14,15 @@ cat > $file << EOT
 #define DL_DFLT_NAME "libpari.dll"
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
-#ifdef __cplusplus
-#  define PARIINFO_PRE "C++"
-#else
-#  define PARIINFO_PRE ""
-#endif
 #if defined(__EMX__)
-#  define PARIINFO_POST "ix86 running EMX (ix86 kernel) 32-bit version"
+#  define PARIINFO "ix86 running EMX (ix86 kernel) 32-bit version"
 #endif
 #if defined(WINCE)
-#  define PARIINFO_POST "Windows CE 32-bit version"
+#  define PARIINFO "Windows CE 32-bit version"
 #endif
-#if !defined(PARIINFO_POST)
-#  define PARIINFO_POST "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
+#if !defined(PARIINFO)
+#  define PARIINFO "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
 #endif
-#define PARIINFO PARIINFO_PRE/**/PARIINFO_POST
 #define PARI_VERSION_CODE `expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
 #define PARI_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #define PARI_VERSION_SHIFT 8

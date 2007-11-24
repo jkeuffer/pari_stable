@@ -34,11 +34,7 @@ cat >> $file << EOT
 #define SHELL_Q '\\$shell_q'
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
-#ifdef __cplusplus
-# define PARIINFO "C++ ${pretty}${debuginfo}"
-#else
-# define PARIINFO "${pretty}${debuginfo}"
-#endif
+#define PARIINFO "${pretty}${debuginfo}"
 #define PARI_VERSION_CODE `expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
 #define PARI_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #define PARI_VERSION_SHIFT 8
@@ -79,9 +75,7 @@ fi
 
 if test -n "$readline"; then
   cat >> $file <<EOT
-/*  Use GNU readline library
- *  This is incompatible with SUN commandtools (not with shelltools).
- */
+/*  Use GNU readline library */
 #define READLINE "$readline_version"
 EOT
   if test -n "$rl_appendchar"; then

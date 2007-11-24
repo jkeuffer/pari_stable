@@ -269,7 +269,7 @@ lib-sta: \$(LIBPARI_STA)
 lib-dyn: \$(LIBPARI_DYN)
 
 paricfg.h: ../CHANGES
-	@-sh $cfg/setversion
+	-sh $cfg/setversion
 
 \$(LIBPARI_STA): $add_funclist \$(OBJS)
 	-\$(RM) \$@

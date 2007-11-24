@@ -4,7 +4,8 @@ TOP=..
 cfg=$TOP/config
 if test ! -d $cfg/CVS; then exit 0; fi
 f=paricfg.h
-mv $f $f.old
+rm -f $f.old
+cp $f $f.old
 . $cfg/get_head
 . $cfg/version # need $TOP
 v="GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
