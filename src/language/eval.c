@@ -1132,13 +1132,20 @@ closure_evalres(GEN C)
   return closure_return(C);
 }
 
+INLINE GEN
+closure_returnupto(GEN C)
+{
+  pari_sp av=avma;
+  return copyupto(closure_return(C),(GEN)av);
+}
+
 GEN
 closure_callgen1(GEN C, GEN x)
 {
   long i;
   gel(st,sp++)=x;
   for(i=2; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_returnupto(C);
 }
 
 GEN
@@ -1148,7 +1155,7 @@ closure_callgen2(GEN C, GEN x, GEN y)
   gel(st,sp++)=x;
   gel(st,sp++)=y;
   for(i=3; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_returnupto(C);
 }
 
 GEN
@@ -1157,7 +1164,7 @@ closure_callgenvec(GEN C, GEN args)
   long i, l = lg(args);
   for (i = 1; i < l;   i++) gel(st,sp++) = gel(args,i);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
-  return closure_return(C);
+  return closure_returnupto(C);
 }
 
 GEN
@@ -1169,7 +1176,7 @@ closure_callgenall(GEN C, long n, ...)
   for (i = 1; i <=n;   i++) gel(st,sp++) = va_arg(ap, GEN);
   for(      ; i<=C[1]; i++) gel(st,sp++) = NULL;
   va_end(ap);
-  return closure_return(C);
+  return closure_returnupto(C);
 }
 
 void
