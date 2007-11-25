@@ -292,8 +292,10 @@ commands(long n)
       long m;
       switch (EpVALENCE(ep))
       {
-	case EpNEW:
-	case EpVAR: continue;
+	case EpVAR:
+          if (typ(ep->value) == t_CLOSURE) break;
+          /* fall through */
+	case EpNEW: continue;
       }
       m = ep->menu;
       if ((n < 0 && m && m < 13) || m == n)
@@ -400,7 +402,7 @@ static void
 menu_commands(void)
 {
   pariputs("Help topics: for a list of relevant subtopics, type ?n for n in\n\
-  0: user-defined identifiers (variable, alias, function)\n\
+  0: user-defined functions (aliases, installed and user functions)\n\
   1: Standard monadic or dyadic OPERATORS\n\
   2: CONVERSIONS and similar elementary functions\n\
   3: TRANSCENDENTAL functions\n\
