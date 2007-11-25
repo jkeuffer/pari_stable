@@ -935,7 +935,7 @@ gpolvar(GEN x)
     for (v = 0; v < n; v++)
     {
       entree *ep = varentries[v];
-      if (ep) gel(z,k++) = (GEN)initial_value(ep);
+      if (ep && ep->name[0] != '_') gel(z,k++) = (GEN)initial_value(ep);
     }
     if (k <= n) {
       setlg(z,k);
