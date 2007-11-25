@@ -570,8 +570,11 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
 static GEN
 add_rfrac_scal(GEN y, GEN x)
 {
-  pari_sp av = avma;
-  GEN n = gadd(gmul(x, gel(y,2)), gel(y,1));
+  pari_sp av;
+  GEN n;
+
+  if (typ(x) == t_INT && !signe(x)) return gcopy(y); /* frequent special case */
+  av = avma; n = gadd(gmul(x, gel(y,2)), gel(y,1));
   return gerepileupto(av, gred_rfrac_simple(n, gel(y,2)));
 }
 
