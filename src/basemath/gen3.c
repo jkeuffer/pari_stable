@@ -1304,7 +1304,7 @@ gsubst(GEN x, long v, GEN y)
 	}
 	/* general case */
 	av = avma; X = pol_x(vx);
-	av2 = avma; lim = stack_lim(av2,2);
+	av2 = avma; lim = stack_lim(av2,1);
         z = gsubst(gel(x,lx-1),v,y);
 	for (i=lx-2; i>=2; i--)
         {
@@ -1335,12 +1335,12 @@ gsubst(GEN x, long v, GEN y)
       {
 	if (lx == 2) return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
 	av = avma; X = pol_x(vx);
-	av2 = avma; lim = stack_lim(av2,2);
+	av2 = avma; lim = stack_lim(av2,1);
 	z = gadd(gsubst(gel(x,lx-1),v,y), zeroser(vx,1));
 	for (i = lx-2; i>=2; i--)
         {
           z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
-          if (low_stack(lim, stack_lim(av,1)))
+          if (low_stack(lim, stack_lim(av2,1)))
           {
             if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
             z = gerepileupto(av2, z);
@@ -1358,7 +1358,7 @@ gsubst(GEN x, long v, GEN y)
 	  if (lx == 2) return zeroser(vy, ey*ex);
 	  if (vy != vx)
 	  {
-	    av = avma; lim = stack_lim(av,2); z = gel(x,lx-1);
+	    av = avma; lim = stack_lim(av,1); z = gel(x,lx-1);
 	    
 	    for (i=lx-2; i>=2; i--)
             {
