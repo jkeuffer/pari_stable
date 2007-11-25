@@ -95,6 +95,7 @@ allocatemem0(GEN z)
     if (signe(z) < 0) pari_err(talker,"negative size in allocatemem");
   }
   (void)allocatemoremem(newsize);
+  global_err_data = NULL;
   longjmp(GP_DATA->env,1);
 }
 
