@@ -516,8 +516,17 @@ you may also use the functions \kbd{Pol} or \kbd{Polrev}:
 %2 = x^2 + 2*x + 3
 ? Polrev([1,2,3], x)
 %3 = 3*x^2 + 2*x + 1
-@eprog\noindent Polynomials are always printed as \emph{univariate}
-polynomials, with monomials sorted by degreasing degree:
+@eprog\noindent The latter two are much more efficient constructors than an
+explicit summation (the latter is quadratic in the degree, the former linear):
+\bprog
+? for (i=1, 10^4, Polrev( vector(100, i,i) ) )
+time = 124ms
+
+? for (i=1, 10^4, sum(i = 1, 100, (i+1) * x^i) )
+time = 3,985ms
+@eprog\noindent
+Polynomials are always printed as \emph{univariate} polynomials, with
+monomials sorted by degreasing degree:
 \bprog
 ? (x+y+1)^2
 %1 = x^2 + (2*y + 2)*x + (y^2 + 2*y + 1)
