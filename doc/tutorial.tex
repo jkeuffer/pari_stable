@@ -42,9 +42,10 @@ So you are sitting in front of your workstation (or terminal, or PC\dots),
 and you type \kbd{gp} to get the program started (or click on the relevant
 icon, or select some menu item). It says hello in its particular manner, and
 then waits for you after its \kbd{prompt}, initially \kbd{?} (or something
-like {\bf gp}~\kbd{>}).
-
-Type \kbd{2 + 2}. What happens? Maybe not what you expect. First of all, of
+like {\bf gp}~\kbd{>}). Type
+\bprog
+  2 + 2
+@eprog\noindent What happens? Maybe not what you expect. First of all, of
 course, you should tell \kbd{gp} that your input is finished, and this is
 done by hitting the \kbd{Return} (or \kbd{Newline}, or \kbd{Enter}) key. If
 you do exactly this, you will get the expected answer. However some of you
@@ -55,9 +56,10 @@ In that case, you will simply see \kbd{gp} answering you with a smug
 expression, i.e.~a new prompt and no answer!  This is because a semicolon at
 the end of a line tells \kbd{gp} not to print the result (it is still stored
 in the result history). You will certainly want to use this feature if the
-output is several pages long.
-
-Try \kbd{27 * 37}. Wow! even multiplication works. Actually, maybe those
+output is several pages long. Try
+\bprog
+  27 * 37
+@eprog\noindent Wow! even multiplication works. Actually, maybe those
 spaces are not necessary after all. Let's try \kbd{27*37}. Seems to be ok. We
 will still insert them in this document since it makes things easier to read,
 but as \kbd{gp} does not care about them, you don't have to type them all.
