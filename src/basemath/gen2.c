@@ -303,8 +303,8 @@ gcmp0(GEN x)
     case t_INT: case t_REAL: case t_POL: case t_SER:
       return !signe(x);
 
-    case t_INTMOD: case t_POLMOD:
-      return gcmp0(gel(x,2));
+    case t_INTMOD:
+      return !signe(gel(x,2));
 
     case t_FFELT:
       return FF_cmp0(x);
@@ -334,6 +334,9 @@ gcmp0(GEN x)
 
     case t_QUAD:
       return gcmp0(gel(x,2)) && gcmp0(gel(x,3));
+
+    case t_POLMOD:
+      return gcmp0(gel(x,2));
 
     case t_RFRAC:
       return gcmp0(gel(x,1));

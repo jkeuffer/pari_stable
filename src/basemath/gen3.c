@@ -405,12 +405,14 @@ isexactzero(GEN g)
   {
     case t_INT:
       return !signe(g);
-    case t_INTMOD: case t_POLMOD:
-      return isexactzero(gel(g,2));
+    case t_INTMOD:
+      return !signe(gel(g,2));
     case t_COMPLEX:
       return isexactzero(gel(g,1)) && isexactzero(gel(g,2));
     case t_QUAD:
       return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
+    case t_POLMOD:
+      return isexactzero(gel(g,2));
     case t_POL: return lg(g) == 2;
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
@@ -1255,7 +1257,7 @@ gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
   long l, vx, vy, e, ex, ey, i, j, k, jb;
-  pari_sp av, lim;
+  pari_sp av, av2, lim;
   GEN X, t, p1, p2, z;
 
   if (ty==t_MAT)
@@ -1301,8 +1303,18 @@ gsubst(GEN x, long v, GEN y)
 	  return normalizepol_i(z,lx);
 	}
 	/* general case */
-	av = avma; X = pol_x(vx); z = gsubst(gel(x,lx-1),v,y);
-	for (i=lx-2; i>=2; i--) z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
+	av = avma; X = pol_x(vx);
+	av2 = avma; lim = stack_lim(av2,2);
+        z = gsubst(gel(x,lx-1),v,y);
+	for (i=lx-2; i>=2; i--)
+        {
+          z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
+          if (low_stack(lim, stack_lim(av,1)))
+          {
+            if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
+            z = gerepileupto(av2, z);
+          }
+        }
 	return gerepileupto(av,z);
       }
       /* v <= vx */
@@ -1323,8 +1335,17 @@ gsubst(GEN x, long v, GEN y)
       {
 	if (lx == 2) return (ty==t_MAT)? scalarmat(x,ly-1): gcopy(x);
 	av = avma; X = pol_x(vx);
+	av2 = avma; lim = stack_lim(av2,2);
 	z = gadd(gsubst(gel(x,lx-1),v,y), zeroser(vx,1));
-	for (i = lx-2; i>=2; i--) z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
+	for (i = lx-2; i>=2; i--)
+        {
+          z = gadd(gmul(z,X), gsubst(gel(x,i),v,y));
+          if (low_stack(lim, stack_lim(av,1)))
+          {
+            if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
+            z = gerepileupto(av2, z);
+          }
+        }
 	if (ex) z = gmul(z, monomial(gen_1,ex,vx));
 	return gerepileupto(av, z);
       }
@@ -1337,8 +1358,17 @@ gsubst(GEN x, long v, GEN y)
 	  if (lx == 2) return zeroser(vy, ey*ex);
 	  if (vy != vx)
 	  {
-	    av = avma; z = gel(x,lx-1);
-	    for (i=lx-2; i>=2; i--) z = gadd(gmul(y,z), gel(x,i));
+	    av = avma; lim = stack_lim(av,2); z = gel(x,lx-1);
+	    
+	    for (i=lx-2; i>=2; i--)
+            {
+              z = gadd(gmul(y,z), gel(x,i));
+              if (low_stack(lim, stack_lim(av,1)))
+              {
+                if(DEBUGMEM>1) pari_warn(warnmem,"gsubst (i = %ld)", i);
+                z = gerepileupto(av, z);
+              }
+            }
 	    if (ex) z = gmul(z, gpowgs(y,ex));
 	    return gerepileupto(av,z);
 	  }
