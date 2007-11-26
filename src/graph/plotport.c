@@ -1106,6 +1106,15 @@ rectclip(long rect)
 /**                        HI-RES PLOT                             **/
 /**                                                                **/
 /********************************************************************/
+void
+Printx(dblPointList *f)
+{
+  long i;
+  printf("x: [%0.5g,%0.5g], y: [%0.5g,%0.5g]\n",
+         f->xsml, f->xbig, f->ysml, f->ybig);
+  for (i = 0; i < f->nb; i++) printf("%0.5g ", f->d[i]);
+  printf("\n");
+}
 
 static void
 Appendx(dblPointList *f, dblPointList *l,double x)
@@ -1266,15 +1275,15 @@ param_recursion(dblPointList *pl,GEN code,GEN tleft,double xleft,
   if (typ(p1)==t_VEC)
   {
     if (lg(p1) == 2)
+    { /* cplx */
+      p1 = gel(p1,1);
+      xx = gtodouble(real_i(p1));
+      yy = gtodouble(imag_i(p1));
+    }
+    else
     {
       xx = gtodouble(gel(p1,1));
       yy = gtodouble(gel(p1,2));
-    }
-    else /* cplx */
-    {
-      p1=gel(p1,1);
-      xx = gtodouble(greal(p1));
-      yy = gtodouble(gimag(p1));
     }
   }
   else
@@ -1352,9 +1361,9 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     {
       if (cplx)
       {
-	GEN z=(typ(t) == t_VEC) ? gel(t,1) : t;
-	xbig = xsml = gtodouble(greal(z));
-	ybig = ysml = gtodouble(gimag(z));
+	GEN z = (typ(t) == t_VEC)? gel(t,1): t;
+	xbig = xsml = gtodouble(real_i(z));
+	ybig = ysml = gtodouble(imag_i(z));
       }
       else
       {
@@ -1365,9 +1374,9 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       {
 	if (cplx)
 	{
-	  GEN z=gel(t,i);
-	  fx = gtodouble(greal(z));
-	  fy = gtodouble(gimag(z));
+	  GEN z = gel(t,i);
+	  fx = gtodouble(real_i(z));
+	  fy = gtodouble(imag_i(z));
 	}
 	else
 	{
@@ -1410,8 +1419,8 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
       if (cplx)
       {
 	if (typ(t)==t_VEC) t = gel(t, 1);
-	xleft = gtodouble(greal(t));
-	yleft = gtodouble(gimag(t));
+	xleft = gtodouble(real_i(t));
+	yleft = gtodouble(imag_i(t));
       }
       else
       {
@@ -1431,14 +1440,11 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 	    t = gel(t, 1);
 	  }
 	  switch(typ(t)) {
-	    case t_INT:	case t_REAL:	case t_FRAC:	case t_COMPLEX:
-	      break;
-	    default:
-	      pari_err(talker,"inconsistent data in rectplothin");
-	      break;
+	    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: break;
+	    default: pari_err(talker,"inconsistent data in rectplothin");
 	  }
-	  xright = gtodouble(greal(t));
-	  yright = gtodouble(gimag(t));
+	  xright = gtodouble(real_i(t));
+	  yright = gtodouble(imag_i(t));
 	}
 	else
 	{
@@ -1503,11 +1509,8 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 	else /* cplx */
 	{
 	  switch(typ(t)) {
-	    case t_INT:	case t_REAL:	case t_FRAC:	case t_COMPLEX:
-	      break;
-	    default:
-	      pari_err(talker,"inconsistent data in rectplothin");
-	      break;
+	    case t_INT:	case t_REAL: case t_FRAC: case t_COMPLEX: break;
+	    default: pari_err(talker,"inconsistent data in rectplothin");
 	  }
 	}
 	k = 0;
@@ -1519,13 +1522,13 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 	  else /* cplx */
 	    z = t;
 	  if (cplx)
-	    c=gtodouble(greal(z));
+	    c=gtodouble(real_i(z));
 	  else
 	    c=gtodouble(z);
 	  Appendx(&pl[0], &pl[k++],c);
 
 	  if (cplx)
-	    c=gtodouble(gimag(z));
+	    c=gtodouble(imag_i(z));
 	  else
 	  {
 	    j++;
@@ -1552,14 +1555,12 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 }
 
 /* Uses highlevel plotting functions to implement splines as
-   a low-level plotting function.
-   Most probably one does not need to make varn==0 into pure variable,
-   since plotting functions should take care of this. */
+   a low-level plotting function. */
 static void
 rectsplines(long ne, double *x, double *y, long lx, long flag)
 {
   long i, j;
-  pari_sp oldavma = avma;
+  pari_sp av0 = avma;
   GEN X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
   GEN tas, pol3;
 
@@ -1596,7 +1597,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 	       2); /* Start with 3 points */
     avma = av;
   }
-  avma = oldavma;
+  avma = av0;
 }
 
 /* Plot a dblPointList. Complete with axes, bounding box, etc.
@@ -1736,19 +1737,19 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
       rectlinetype(drawrect, rectpoint_itype + ltype); /* Graphs */
       rectpointtype(drawrect,rectpoint_itype + ltype); /* Graphs */
       rectpoints0(drawrect,x.d,y.d,nbpoints);
+      if (!(flags & PLOT_POINTS_LINES)) continue;
     }
-    if ((flags & PLOT_POINTS_LINES) || !(flags & PLOT_POINTS)) {
-      if (flags & PLOT_SPLINES) {
-	/* rectsplines will call us back with ltype == 0 */
-	int old = rectline_itype;
 
-	rectline_itype = rectline_itype + ltype;
-	rectsplines(drawrect,x.d,y.d,nbpoints,flags);
-	rectline_itype = old;
-      } else {
-	rectlinetype(drawrect, rectline_itype + ltype); /* Graphs */
-	rectlines0(drawrect,x.d,y.d,nbpoints,0);
-      }
+    if (flags & PLOT_SPLINES) {
+      /* rectsplines will call us back with ltype == 0 */
+      int old = rectline_itype;
+
+      rectline_itype = rectline_itype + ltype;
+      rectsplines(drawrect,x.d,y.d,nbpoints,flags);
+      rectline_itype = old;
+    } else {
+      rectlinetype(drawrect, rectline_itype + ltype); /* Graphs */
+      rectlines0(drawrect,x.d,y.d,nbpoints,0);
     }
   }
   for (i--; i>=0; i--) gpfree(data[i].d);
