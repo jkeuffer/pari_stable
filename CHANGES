@@ -135,6 +135,8 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   104- missing GC in det_simple_gauss() [ matdet for inexact inputs ]
   105- rare stack corruption in add_rfrac [#700]
   106- add missing GC in gsubst
+  107- polred([pol, b]) computed unnecessary but possibly expensive
+       invariants of pol [ e.g. disc, index ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

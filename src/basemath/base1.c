@@ -1429,9 +1429,6 @@ nfpolred(int part, nfbasic_t *T)
   FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
   if (degpol(x) == 1) { T->x = gsub(pol_x(v),gen_1); return gen_1; }
-
-  if (!dx) dx = mulii(T->dK, sqri(T->index));
-
   O.ind    = 0;
   O.indmax = part? min(n,3): n;
   O.xbest  = NULL;
@@ -1482,8 +1479,6 @@ get_nfindex(GEN bas)
   }
   if (i <= n)
   { /* not triangular after all */
-    bas = vecslice(bas, i, n);
-    n = n-i+1;
     bas = Q_remove_denom(bas, &d);
     if (!d) { avma = av; return D; }
     mat = RgXV_to_RgM(bas, n);
@@ -1491,6 +1486,22 @@ get_nfindex(GEN bas)
     D = mulii(D,d);
   }
   return gerepileuptoint(av, D);
+}
+
+/* monic integral polynomial + integer basis */
+static int
+is_polbas(GEN x)
+{
+  return (typ(x) == t_VEC && lg(x)==3
+	  && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]));
+}
+
+void
+nfbasic_add_disc(nfbasic_t *T)
+{
+  if (!T->index) T->index = get_nfindex(T->bas);
+  if (!T->dx) T->dx = ZX_disc(T->x);
+  if (!T->dK) T->dK = diviiexact(T->dx, sqri(T->index));
 }
 
 void
@@ -1511,18 +1522,13 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     if (DEBUGLEVEL) msgtimer("round4");
     r1 = sturm(x);
   }
-  else if (typ(x) == t_VEC && lg(x)==3
-	   && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]))
+  else if (is_polbas(x))
   { /* monic integral polynomial + integer basis */
-    GEN mat;
     bas = gel(x,2); x = gel(x,1);
-    if (typ(bas) == t_MAT)
-      { mat = bas; bas = RgM_to_RgXV(mat,varn(x)); }
-    else
-	mat = RgXV_to_RgM(bas, lg(bas)-1);
-    index = get_nfindex(bas);
-    dx = ZX_disc(x);
-    dK = diviiexact(dx, sqri(index));
+    if (typ(bas) == t_MAT) bas = RgM_to_RgXV(bas,varn(x));
+    index = NULL;
+    dx = NULL;
+    dK = NULL;
     r1 = sturm(x);
   }
   else
@@ -1532,7 +1538,8 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     dK    = gel(nf,3);
     index = gel(nf,4);
     bas   = gel(nf,7);
-    r1 = nf_get_r1(nf); dx = NULL;
+    dx = NULL;
+    r1 = nf_get_r1(nf);
   }
 
   T->x     = x;
@@ -1557,6 +1564,7 @@ initalg_i(GEN x, long flag, long prec)
   nfbasic_t T;
 
   nfbasic_init(x, flag, NULL, &T);
+  nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
   set_LLL_basis(&T, &ro);
 
   if (T.lead && !(flag & (nf_RED|nf_PARTRED)))

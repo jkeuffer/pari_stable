@@ -15,11 +15,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 typedef struct {
   GEN x; /* defining polynomial (monic, integral) */
-  GEN dK; /* disc(K) */
-  GEN index; /* [O_K : Z[X]/(x)] */
   GEN bas;  /* Z-basis of O_K (t_VEC of t_POL) */
   long r1; /* number of real places of K */
 /* possibly NULL = irrelevant or not computed */
+  GEN dK; /* disc(K) */
+  GEN index; /* [O_K : Z[X]/(x)] */
   GEN lead; /* leading coeff of initial polynomial defining K if non monic */
   GEN dx;   /* disc(x) */
   GEN basden; /* [nums(bas), dens(bas)] */
