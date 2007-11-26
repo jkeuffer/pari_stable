@@ -2405,20 +2405,31 @@ GEN
 gisirreducible(GEN x)
 {
   long tx = typ(x), l, i;
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN y;
 
   if (is_matvec_t(tx))
   {
-    l=lg(x); y=cgetg(l,tx);
+    l = lg(x); y = cgetg(l,tx);
     for (i=1; i<l; i++) gel(y,i) = gisirreducible(gel(x,i));
     return y;
   }
   if (is_intreal_t(tx) || tx == t_FRAC) return gen_0;
   if (tx!=t_POL) pari_err(notpoler,"gisirreducible");
-  l=lg(x); if (l<=3) return gen_0;
-  y=factor(x); avma=av;
+  l = lg(x); if (l<=3) return gen_0;
+  y = factor(x); avma = av;
   return (lg(gcoeff(y,1,1))==l)?gen_1:gen_0;
+}
+
+long
+ZX_isirreducible(GEN x)
+{
+  pari_sp av = avma;
+  long l = lg(x);
+  GEN y;
+  if (l <= 3) return 0;
+  y = gel(ZX_factor(x), 1); avma = av;
+  return (lg(y) == 2);
 }
 
 /*******************************************************************/

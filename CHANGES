@@ -246,7 +246,7 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
     2- library functions divisorsu, factor_pn_1 (using cyclotomic factors and
        Aurifeuille), merge_factor
     3- library function divru, dbllog2r
-    4- library function ZX_gcd
+    4- library function ZX_gcd, ZX_isirreducible
     5- library function gtos
     6- library function pari_daemon
     7- library function Fp_sqr, padicsqrtlift

@@ -464,8 +464,7 @@ polgalois(GEN x, long prec)
   if (n>11) pari_err(impl,"galois of degree higher than 11");
   x = primpart(x);
   check_ZX(x, "galois");
-  if (gisirreducible(x) != gen_1)
-    pari_err(impl,"galois of reducible polynomial");
+  if (!ZX_isirreducible(x)) pari_err(impl,"galois of reducible polynomial");
 
   if (n<4)
   {
@@ -1506,7 +1505,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   if (typ(x) == t_POL)
   {
     check_ZX(x, "nfinit");
-    if (gisirreducible(x) == gen_0) pari_err(redpoler, "nfinit");
+    if (!ZX_isirreducible(x)) pari_err(redpoler, "nfinit");
     x = pol_to_monic(x, &(T->lead));
     bas = allbase(x, flag, &dx, &dK, &index, &fa);
     if (DEBUGLEVEL) msgtimer("round4");

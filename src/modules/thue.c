@@ -26,21 +26,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static int
 checktnf(GEN tnf)
 {
-  long n, R, S, T;
-  if (typ(tnf)!=t_VEC || (lg(tnf)!=8 && lg(tnf)!=3)) return 0;
+  long l = lg(tnf);
+  if (typ(tnf)!=t_VEC || (l!=8 && l!=3)) return 0;
   if (typ(tnf[1]) != t_POL) return 0;
-  if (lg(tnf) != 8) return 1; /* S=0 */
+  if (l != 8) return 1; /* S=0 */
 
-  n = degpol(tnf[1]);
-  if (n <= 2) pari_err(talker,"invalid polynomial in thue (need n>2)");
-  S = sturm(gel(tnf,1)); T = (n-S)>>1; R = S+T-1;
   (void)checkbnf(gel(tnf,2));
-  if (typ(tnf[3]) != t_COL || lg(tnf[3]) != n+1) return 0;
-  if (typ(tnf[4]) != t_COL || lg(tnf[4]) != R+1) return 0;
-  if (typ(tnf[5]) != t_MAT || lg(tnf[5])!=R+1 || lg(gmael(tnf,5,1)) != n+1) return 0;
-  if (typ(tnf[6]) != t_MAT || lg(tnf[6])!=R+1 || lg(gmael(tnf,6,1)) != R+1) return 0;
-  if (typ(tnf[7]) != t_VEC || lg(tnf[7]) != 8) return 0;
-  return 1;
+  return (typ(tnf[3]) == t_COL
+       && typ(tnf[4]) == t_COL
+       && typ(tnf[5]) == t_MAT
+       && typ(tnf[6]) == t_MAT
+       && typ(tnf[7]) == t_VEC);
 }
 
 static GEN
@@ -589,6 +585,7 @@ thueinit(GEN pol, long flag, long prec)
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
   if (typ(pol)!=t_POL) pari_err(notpoler,"thueinit");
   if (degpol(pol) <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
+  check_ZX(pol, "thueinit");
 
   s = sturm(pol);
   if (s)
@@ -620,7 +617,7 @@ thueinit(GEN pol, long flag, long prec)
   else
   {
     GEN c0 = gen_1, ro = roots(pol, DEFAULTPREC);
-    if (!gisirreducible(pol)) pari_err(redpoler,"thueinit");
+    if (!ZX_isirreducible(pol)) pari_err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i(gel(ro,k)));
     c0 = ginv( mpabs(c0) );
     tnf = mkvec2(pol, c0);

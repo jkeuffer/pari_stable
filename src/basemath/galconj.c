@@ -59,8 +59,8 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   n = degpol(x);
   if (n <= 0)
     return cgetg(1, t_VEC);
-  if (gisirreducible(x) == gen_0)
-    pari_err(redpoler, "galoisconj2pol");
+  check_ZX(x, "galoisconj2pol");
+  if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
   polr = roots(x, prec);
   p1 = gel(polr,1);
   nbauto = 1;
