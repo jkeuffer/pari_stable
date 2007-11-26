@@ -1,29 +1,29 @@
 rho1(n)=
-{ local(x = 2,y = 5);
+{ my(x = 2,y = 5);
 
   while(gcd(y-x,n) == 1,
     x = (x^2+1)%n;
     y = (y^2+1)%n; y = (y^2+1)%n
   );
-  gcd(n, y-x)
+  gcd(n, y-x);
 }
 
 rho2(n)=
-{ local(m = rho1(n));
+{ my(m = rho1(n));
 
   if (isprime(m), print(m), rho2(m));
   if (isprime(n/m), print(n/m), rho2(n/m));
 }
 
 rho(n)=
-{ local(m = factor(n,0));
+{ my(m = factor(n,0));
 
   print(m); m = m[,1]; n = m[#m];
   if (!isprime(n), rho2(n));
 }
 
 rhobrent(n)=
-{ local(x,y,x1,k,l,p,c,g);
+{ my(x,y,x1,k,l,p,c,g);
   
   x1 = x = y = 2;
   k = l = p = 1;
@@ -49,5 +49,5 @@ rhobrent(n)=
     g = gcd(x1-y,n)
   );
   if (g==n, error("algorithm fails"));
-  g
+  g;
 }

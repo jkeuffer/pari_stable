@@ -19,7 +19,7 @@
 
 cl(d,cc) =
 {
-  local(q0,sd,t,c, s = 0, q = 1);
+  my(q0,sd,t,c, s = 0, q = 1);
 
   if (!isfundamental(-d), error("Discriminant not fundamental"));
   if (!cc, cc = 5);
@@ -31,5 +31,5 @@ cl(d,cc) =
   );
   if (d==3, s *= 3);
   if (d==4, s *= 2);
-  -2*s
+  -2*s;
 }

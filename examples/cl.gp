@@ -1,14 +1,14 @@
 rgcd(a,b)=
-{ local(r);
+{ my(r);
 
   a = abs(a);
   b = abs(b);
   while (b > 0.01, r=a%b; a=b; b=r);
-  a
+  a;
 }
 
 f(a,b)=
-{ local(j,n,l,mv,u,vreg,cp,p);
+{ my(j,n,l,mv,u,vreg,cp,p);
 
   n = abs( norm(a + b*t) );
   mv = vectorv(li);
@@ -32,13 +32,13 @@ f(a,b)=
   mreg = concat(mreg, log(vreg));
   m = concat(m,mv);
   areg = concat(areg, a+b*t);
-  print1("(" res++ ": " a "," b ")")
+  print1("(" res++ ": " a "," b ")");
 }
 
 global(km,clh,R,nf,areg);
 
 clareg(pol, plim=19, lima=50, extra=5)=
-{ local(e,t,r,coreg,lireg,r1,ind,fa,li,co,res,a,b,m,mh,ms,mhs,mreg,mregh);
+{ my(e,t,r,coreg,lireg,r1,ind,fa,li,co,res,a,b,m,mh,ms,mhs,mreg,mregh);
 
   nf=nfinit(pol); pol=nf.pol;
   t=Mod(x,pol);
@@ -106,11 +106,11 @@ clareg(pol, plim=19, lima=50, extra=5)=
       )
     )
   );
-  print("regulator = " R)
+  print("regulator = " R);
 }
 
 check(lim=200) =
-{ local(r1,r2,pol,z,Res,fa);
+{ my(r1,r2,pol,z,Res,fa);
 
   r1=nf.sign[1];
   r2=nf.sign[2]; pol=nf.pol;
@@ -120,7 +120,7 @@ check(lim=200) =
     fa = factormod(pol,q,1)[,1];
     Res *= (q-1)/q / prod(i=1, #fa, 1 - q^(-fa[i]))
   );
-  z * clh * R / Res 
+  z * clh * R / Res;
 }
 
-fu() = vector(#km, k, factorback(concat(areg, km[,k])))
+fu() = vector(#km, k, factorback(concat(areg, km[,k])));

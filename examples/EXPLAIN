@@ -73,12 +73,12 @@ given here is a crude implementation, which prints out some intermediate
 information as it goes along. The final result is some factor of the number
 to be factored.
 
--- taylor.gp: Given a user function f (e.g defined by f(x) = sin(x)), defines
-a function
+-- taylor.gp: the function
 
-   plot_taylor(xmin,xmax, ordlim, first,step)
+   plot_taylor(f,xmin,xmax, ordlim, first,step)
 
-which plots f together with its Taylor polynomials T_i (truncated series
-expansion of order i) in the interval [xmin,xmax]; i goes from first to
-ordlim in increments of steps. Sensible default values are provided for all
-arguments (written by Ilya Zakharevich).
+plots the Taylor polynomials T_i (truncated series expansion of order i)
+of the function f in the interval [xmin,xmax]; i goes from first to ordlim in
+increments of steps. Sensible default values are provided for all arguments
+(adapted from an original idea by Ilya Zakharevich). A few examples are
+provided, together with a simple colormap generator
