@@ -1409,7 +1409,7 @@ gen_sortspec_uniq(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
       if (s < 0) {
 	s = cmp(E,gel(v,2),gel(v,3));
 	if (s < 0) return mkvecsmall3(1,2,3);
-	else if (s == 0) mkvecsmall2(1,2);
+	else if (s == 0) return mkvecsmall2(1,2);
 	s = cmp(E,gel(v,1),gel(v,3));
 	if      (s < 0) return mkvecsmall3(1,3,2);
 	else if (s > 0) return mkvecsmall3(3,1,2);
