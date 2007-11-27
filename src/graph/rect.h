@@ -266,6 +266,7 @@ void  postdraw_flag(GEN list, long flag);
 GEN   postploth(GEN a,GEN b,GEN code,long prec,long flag,long numpoints);
 GEN   postploth2(GEN a,GEN b,GEN code,long prec,long numpoints);
 GEN   postplothraw(GEN listx, GEN listy, long flag);
+void  Printx(dblPointList *f);
 void  rectbox(long ne, GEN gx2, GEN gy2);
 void  rectcolor(long ne, long color);
 void  rectcopy(long source, long dest, long xoff, long yoff);
