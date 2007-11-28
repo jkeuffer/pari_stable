@@ -983,17 +983,19 @@ See also the discrete summation methods below, sharing the prefix \kbd{sum}.
 \section{Plotting functions}
 
   Although plotting is not even a side purpose of PARI, a number of plotting
-functions are provided. Moreover, a lot of people suggested ideas or submitted
-patches for this section of the code. Among these, special thanks go to
-Klaus-Peter Nischke who suggested the recursive plotting and the
-forking/resizing stuff under X11, and Ilya Zakharevich who undertook a
-complete rewrite of the graphic code, so that most of it is now
-platform-independent and should be easy to port or expand. There are three
-types of graphic functions.
+functions are provided. Moreover, a lot of people
+\footnote{*}{Among these, special thanks go to Klaus-Peter Nischke who
+suggested the recursive plotting and forking/resizing stuff the graphical
+window, and Ilya Zakharevich who rewrote the graphic code from scratch
+implementing many new primitives (splines, clipping). Nils Skoruppa and Bill
+Allombert wrote the \tet{Qt} and \tet{fltk} graphic drivers respectively.}
+suggested ideas or submitted patches for this section of the code. There are
+three types of graphic functions.
 
-\subsec{High-level plotting functions} (all the functions starting with \kbd{ploth}) in which the user has little to
-do but explain what type of plot he wants, and whose syntax is similar to the
-one used in the preceding section.
+\subsec{High-level plotting functions} (all the functions starting with
+\kbd{ploth}) in which the user has little to do but explain what type of plot
+he wants, and whose syntax is similar to the one used in the preceding
+section.
 
 \subsec{Low-level plotting functions} (called \var{rectplot} functions,
 sharing the prefix \kbd{plot}), where every drawing primitive (point, line,
@@ -1009,55 +1011,48 @@ to the window, and its current value can be obtained using the function
 
 A number of primitive graphic objects (called \var{rect} objects) can then
 be drawn in these windows, using a default color associated to that window
-(which can be changed under X11, using the \kbd{plotcolor} function, black
-otherwise) and only the part of the object which is inside the window will be
-drawn, with the exception of polygons and strings which are drawn entirely.
-The ones sharing the prefix \kbd{plotr} draw relatively to the current
-position of the virtual cursor, the others use absolute coordinates. Those
-having the prefix \kbd{plotrecth} put in the rectwindow a large batch of rect
-objects corresponding to the output of the related \kbd{ploth} function.
+(which can be changed using the \kbd{plotcolor} function) and only the part
+of the object which is inside the window will be drawn, with the exception of
+polygons and strings which are drawn entirely. The ones sharing the prefix
+\kbd{plotr} draw relatively to the current position of the virtual cursor,
+the others use absolute coordinates. Those having the prefix \kbd{plotrecth}
+put in the rectwindow a large batch of rect objects corresponding to the
+output of the related \kbd{ploth} function.
 
-   Finally, the actual physical drawing is done using the function
-\kbd{plotdraw}. The rectwindows are preserved so that further drawings
-using the same windows at different positions or different windows can be
-done without extra work. To erase a window (and free the corresponding
-memory), use the function \kbd{plotkill}. It is not possible to partially
-erase a window. Erase it completely, initialize it again and then fill it with
-the graphic objects that you want to keep.
+   Finally, the actual physical drawing is done using \kbd{plotdraw}. The
+rectwindows are preserved so that further drawings using the same windows at
+different positions or different windows can be done without extra work. To
+erase a window, use \kbd{plotkill}. It is not possible to partially erase a
+window: erase it completely, initialize it again, then fill it with the
+graphic objects that you want to keep.
 
-   In addition to initializing the window, you may use a scaled
-window to avoid unnecessary conversions. For this, use the function
-\kbd{plotscale} below. As long as this function is not called, the scaling is
-simply the number of pixels, the origin being at the upper left and the
-$y$-coordinates going downwards.
+   In addition to initializing the window, you may use a scaled window to
+avoid unnecessary conversions. For this, use \kbd{plotscale}. As long as this
+function is not called, the scaling is simply the number of pixels, the
+origin being at the upper left and the $y$-coordinates going downwards.
 
-   Note that in the present version \vers\ all plotting functions (both low
-and high level) are written for the X11-window system (hence also for GUI's
-based on X11 such as Openwindows and Motif) only, though little code
-remains which is actually platform-dependent. It is also possible to compile
-\kbd{gp} with either of the Qt or FLTK graphical libraries. A
-Suntools/Sunview, Macintosh, and an Atari/Gem port were provided for previous
-versions, but are now obsolete.
-
-   Under X11, the physical window (opened by \kbd{plotdraw} or any of the
-\kbd{ploth*} functions) is completely separated from \kbd{gp} (technically, a
+   Plotting functions are platform independant, but a number of graphical
+drivers are available for screen output: X11-windows (hence also for GUI's
+based on X11 such as Openwindows and Motif), and the Qt and FLTK graphical
+libraries. The physical window opened by \kbd{plotdraw} or any of the
+\kbd{ploth*} functions is completely separated from \kbd{gp} (technically, a
 \kbd{fork} is done, and the non-graphical memory is immediately freed in the
 child process), which means you can go on working in the current \kbd{gp}
-session, without having to kill the window first. Under X11, this window can
-be closed, enlarged or reduced using the standard window manager functions.
-No zooming procedure is implemented though (yet).
+session, without having to kill the window first. This window can be closed,
+enlarged or reduced using the standard window manager functions. No zooming
+procedure is implemented though (yet).
 
 \subsec{Functions for PostScript output:} in the same way that \kbd{printtex} allows you to have a \TeX\ output
 corresponding to printed results, the functions starting with \kbd{ps} allow
-you to have \tet{PostScript} output of the plots. This will not be absolutely
-identical with the screen output, but will be sufficiently close. Note that
-you can use PostScript output even if you do not have the plotting routines
-enabled. The PostScript output is written in a file whose name is derived from
-the \tet{psfile} default (\kbd{./pari.ps} if you did not tamper with it). Each
+you to have \tet{PostScript} output of the plots. This will not be identical
+with the screen output, but sufficiently close. Note that you can use
+PostScript output even if you do not have the plotting routines enabled. The
+PostScript output is written in a file whose name is derived from the
+\tet{psfile} default (\kbd{./pari.ps} if you did not tamper with it). Each
 time a new PostScript output is asked for, the PostScript output is appended
-to that file. Hence you probably want to remove this file, or change the value
-of \kbd{psfile}, in between plots. On the other hand, in this manner, as many
-plots as desired can be kept in a single file. \smallskip
+to that file. Hence you probably want to remove this file, or change the
+value of \kbd{psfile}, in between plots. On the other hand, in this manner,
+as many plots as desired can be kept in a single file. \smallskip
 
 \subsec{And library mode ?} \emph{None of the graphic functions are available
 within the PARI library, you must be under \kbd{gp} to use them}. The reason

@@ -2870,11 +2870,11 @@ $\zeta({1\over2} + it)$ twice for the same value of t.  Similarly, we can
 plot parametric graphs:
 \bprog
   ploth(t = 100, 110, f(t), "Parametric", 1000)
-@eprog
-
-Again, one can speed up the calculation with
+@eprog\noindent In that case (parametric plot of the real and imaginary parts
+of a complex function), we can also use directly
 \bprog
-  ploth(t = 100, 110, f(t), "Parametric|Splines", 100)
+  ploth(t = 100, 110, zeta(0.5+I*t), "Complex", 1000)
+  ploth(t = 100, 110, zeta(0.5+I*t), "Complex|Splines", 100)
 @eprog
 
 If your plotting device supports it, you may ask PARI to show the points

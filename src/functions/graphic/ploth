@@ -40,14 +40,12 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  then drawn.
  
  For instance:
- 
- \kbd{ploth(X=0,2*Pi,[sin(X),cos(X)],1)} will draw a circle.
- 
- \kbd{ploth(X=0,2*Pi,[sin(X),cos(X)])} will draw two entwined sinusoidal
- curves.
- 
- \kbd{ploth(X=0,2*Pi,[X,X,sin(X),cos(X)],1)} will draw a circle and the line
- $y=x$.
+ \bprog
+ ploth(X=0,2*Pi,[sin(X),cos(X)], "Parametric") 
+ ploth(X=0,2*Pi,[sin(X),cos(X)])
+ ploth(X=0,2*Pi,[X,X,sin(X),cos(X)], "Parametric")
+ @eprog\noindent draw successively a circle, two entwined sinusoidal curves
+ and a circle cut by the line $y=x$.
  
  \item $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
  only \emph{one} curve can be drawn at a time, i.e.~\var{expr} must be either a
@@ -57,14 +55,16 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  from the segment joining them, draw this as a local approximation to the
  curve. Otherwise, add the middle point to the reference points. This is
  fast, and usually more precise than usual plot. Compare the results of
- $$\kbd{ploth(X=-1,1,sin(1/X),2)}\quad
- \text{and}\quad\kbd{ploth(X=-1,1,sin(1/X))}$$
+ \bprog
+ ploth(X=-1,1, sin(1/X), "Recursive")
+ ploth(X=-1,1, sin(1/X))
+ @eprog\noindent
  for instance. But beware that if you are extremely unlucky, or choose too few
  reference points, you may draw some nice polygon bearing little resemblance
  to the original curve. For instance you should \emph{never} plot recursively
  an odd function in a symmetric interval around 0. Try
  \bprog
- ploth(x = -20, 20, sin(x), 2)
+ ploth(x = -20, 20, sin(x), "Recursive")
  @eprog\noindent
  to see why. Hence, it's usually a good idea to try and plot the same curve
  with slightly different parameters.
@@ -106,12 +106,9 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  
  \item $4096 = \kbd{Complex}$: is a parametric plot but where each member of
  \kbd{expr} is considered a complex number encoding the two coordinates of a
- point.
-
- For instance:
-  
- \kbd{ploth(X=0,2*Pi,exp(I*X),4096)} will draw a circle.
-  
- \kbd{ploth(X=0,2*Pi,[(1+I)*X,exp(I*X)],4096)} will draw a circle and the line
+ point. For instance:
+ \bprog
+ ploth(X=0,2*Pi,exp(I*X), "Complex")
+ ploth(X=0,2*Pi,[(1+I)*X,exp(I*X)], "Complex")
+ @eprog\noindent will draw respectively a circle and a circle cut by the line
  $y=x$.
-

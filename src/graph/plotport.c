@@ -1329,12 +1329,12 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   else
     nbpoints = testpoints;
 
-  sig=gcmp(b,a); if (!sig) return 0;
+  sig = gcmp(b,a); if (!sig) return 0;
   if (sig<0) swap(a, b);
   dx = divru(gtofp(gsub(b,a),prec), testpoints-1);
 
   x = gtofp(a, prec);
-  if (code) push_lex(x);
+  if (typ(code) == t_CLOSURE) push_lex(x);
   av2=avma; t=READ_EXPR(code,x); tx=typ(t);
   if (!is_matvec_t(tx) && !cplx)
   {
@@ -1347,15 +1347,16 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   }
   else
   {
-    if (tx != t_VEC && !cplx) pari_err(talker,"not a row vector in ploth");
-    if (cplx && tx != t_VEC)
-      nl=1;
-    else
-      nl=lg(t)-1;
-    if (!nl) { avma=av; return 0; }
-    single_c=0;
-    if (param && !cplx) nc=nl/2; else { nc=nl; if (!cplx) nl++; }
+    if (tx != t_VEC) {
+      if (!cplx) pari_err(talker,"not a row vector in ploth");
+      nc = nl = 1;
+    } else {
+      nl = lg(t)-1;
+      if (!nl) { avma=av; return 0; }
+      if (param && !cplx) nc=nl/2; else { nc=nl; if (!cplx) nl++; }
+    }
     if (recur && nc > 1) pari_err(talker,"multi-curves cannot be plot recursively");
+    single_c=0;
 
     if (param)
     {
@@ -1397,11 +1398,11 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   pl=(dblPointList*) gpmalloc((cplx?2*nl:nl)*sizeof(dblPointList));
   for (i = 0; i < nl; i++)
   {
-    pl[i].d = (double*) gpmalloc((nbpoints+1)*sizeof(dblPointList));
+    pl[i].d = (double*) gpmalloc((nbpoints+1)*sizeof(double));
     pl[i].nb=0;
     if (cplx)
     {
-      pl[i+nl].d = (double*) gpmalloc((nbpoints+1)*sizeof(dblPointList));
+      pl[i+nl].d = (double*) gpmalloc((nbpoints+1)*sizeof(double));
       pl[i+nl].nb=0;
     }
   }
@@ -1440,11 +1441,14 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
 	    t = gel(t, 1);
 	  }
 	  switch(typ(t)) {
-	    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX: break;
+	    case t_INT: case t_REAL: case t_FRAC:
+              xright = gtodouble(t);
+              yright = 0.; break;
+            case t_COMPLEX:
+              xright = gtodouble(gel(t,1));
+              yright = gtodouble(gel(t,2)); break;
 	    default: pari_err(talker,"inconsistent data in rectplothin");
 	  }
-	  xright = gtodouble(real_i(t));
-	  yright = gtodouble(imag_i(t));
 	}
 	else
 	{
@@ -1487,70 +1491,62 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
   else /* non-recursive plot */
   {
     if (single_c)
-      for (i=0; i<testpoints; i++)
+      for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
 	t = READ_EXPR(code,x);
-	pl[0].d[i]=gtodouble(x);
-	Appendy(&pl[0],&pl[1],gtodouble(t));
-	addrrz(x,dx,x); avma=av2;
+	pl[0].d[i] = gtodouble(x);
+	Appendy(&pl[0],&pl[1], gtodouble(t));
       }
     else if (param)
     {
-      long k;
-      double c;
-
-      for (i=0; i<testpoints; i++)
+      for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
+        long k;
 	t = READ_EXPR(code,x);
-	if (typ(t) == t_VEC)
-	{
-	  if (lg(t)!=nl+1) pari_err(talker,"inconsistent data in rectplothin");
-	}
-	else /* cplx */
-	{
+	if (typ(t) != t_VEC)
+	{ /* cplx */
 	  switch(typ(t)) {
-	    case t_INT:	case t_REAL: case t_FRAC: case t_COMPLEX: break;
-	    default: pari_err(talker,"inconsistent data in rectplothin");
+	    case t_INT:	case t_REAL: case t_FRAC:
+              Appendx(&pl[0], &pl[0], gtodouble(t));
+              Appendy(&pl[0], &pl[1], 0.);
+              continue;
+            
+            case t_COMPLEX:
+              Appendx(&pl[0], &pl[0], gtodouble(gel(t,1)));
+              Appendy(&pl[0], &pl[1], gtodouble(gel(t,2)));
+              continue;
 	  }
+          pari_err(talker,"inconsistent data in rectplothin");
+          return NULL; /* not reached */
 	}
+        if (lg(t)!=nl+1) pari_err(talker,"inconsistent data in rectplothin");
 	k = 0;
-	for (j=1; j<=nl; j++)
-	{
-	  GEN z;
-	  if (typ(t) == t_VEC)
-	    z = gel(t,j);
-	  else /* cplx */
-	    z = t;
-	  if (cplx)
-	    c=gtodouble(real_i(z));
-	  else
-	    c=gtodouble(z);
-	  Appendx(&pl[0], &pl[k++],c);
-
-	  if (cplx)
-	    c=gtodouble(imag_i(z));
-	  else
-	  {
-	    j++;
-	    c=gtodouble(gel(t,j));
-	  }
-	  Appendy(&pl[0], &pl[k++],c);
-	 }
-	addrrz(x,dx,x); avma=av2;
+        if (cplx)
+          for (j=1; j<=nl; j++)
+          {
+            GEN z = gel(t,j);
+            Appendx(&pl[0], &pl[k++], gtodouble(real_i(z)));
+            Appendy(&pl[0], &pl[k++], gtodouble(imag_i(z)));
+          }
+        else
+          for (j=1; j<=nl; j++)
+          {
+            Appendx(&pl[0], &pl[k++], gtodouble(gel(t,j))); j++;
+            Appendy(&pl[0], &pl[k++], gtodouble(gel(t,j)));
+          }
       }
     }
     else /* plothmult */
-      for (i=0; i<testpoints; i++)
+      for (i=0; i<testpoints; i++, affrr(addrr(x,dx), x), avma = av2)
       {
 	t = READ_EXPR(code,x);
 	if (lg(t) != nl) pari_err(talker,"inconsistent data in rectplothin");
-	pl[0].d[i]=gtodouble(x);
-	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(t,j))); }
-	addrrz(x,dx,x); avma=av2;
+	pl[0].d[i] = gtodouble(x);
+	for (j=1; j<nl; j++) Appendy(&pl[0],&pl[j], gtodouble(gel(t,j)));
       }
   }
-  pl[0].nb=nc;
-  if (code) pop_lex();
+  pl[0].nb = nc;
+  if (typ(code) == t_CLOSURE) pop_lex();
   avma = av; return pl;
 }
 
@@ -1563,15 +1559,16 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   pari_sp av0 = avma;
   GEN X = pol_x(0), xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
   GEN tas, pol3;
+  long param = flag & PLOT_PARAMETRIC;
 
   if (lx < 4) pari_err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
     gel(xa,i) = dbltor(x[i-1]);
     gel(ya,i) = dbltor(y[i-1]);
   }
-  if (flag & (PLOT_PARAMETRIC|PLOT_COMPLEX)) {
+  if (param) {
     tas = new_chunk(4);
-    for (j = 1; j <= 4; j++) gel(tas,j-1) = stoi(j);
+    for (j = 1; j <= 4; j++) gel(tas,j-1) = utoipos(j);
     pol3 = cgetg(3, t_VEC);
   }
   else
@@ -1580,21 +1577,18 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
     pari_sp av = avma;
 
     xa++; ya++;
-    if (flag & (PLOT_PARAMETRIC|PLOT_COMPLEX)) {
+    if (param) {
       gel(pol3,1) = polint_i(tas, xa, X, 4, NULL);
       gel(pol3,2) = polint_i(tas, ya, X, 4, NULL);
     } else {
       pol3 = polint_i(xa, ya, X, 4, NULL);
       tas = xa;
     }
-    rectploth(ne,
-	       i==0 ? gel(tas,0) : gel(tas,1),
-	       i==lx-4 ? gel(tas,3) : gel(tas,2),
-	       pol3, DEFAULTPREC,
-	       PLOT_RECURSIVE | PLOT_NO_RESCALE | PLOT_NO_FRAME
-		 | PLOT_NO_AXE_Y | PLOT_NO_AXE_X |
-		 (flag & (PLOT_PARAMETRIC|PLOT_COMPLEX)),
-	       2); /* Start with 3 points */
+    /* Start with 3 points */
+    rectploth(ne, i==   0 ? gel(tas,0) : gel(tas,1),
+	          i==lx-4 ? gel(tas,3) : gel(tas,2), pol3,
+                  DEFAULTPREC, PLOT_RECURSIVE | PLOT_NO_RESCALE
+                  | PLOT_NO_FRAME | PLOT_NO_AXE_Y | PLOT_NO_AXE_X | param, 2);
     avma = av;
   }
   avma = av0;
@@ -1627,11 +1621,14 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   dblPointList y,x;
   double xsml,xbig,ysml,ybig,tmp;
   long ltype, max_graphcolors;
-  pari_sp ltop=avma;
+  long param = flags & (PLOT_PARAMETRIC|PLOT_COMPLEX);
+  pari_sp ltop = avma;
   long i,nc,nbpoints, w[2], wx[2], wy[2];
 
-  w[0]=stringrect; w[1]=drawrect;
   if (!data) return cgetg(1,t_VEC);
+
+  w[0] = stringrect;
+  w[1] = drawrect;
   x = data[0]; nc = x.nb;
   xsml = x.xsml; xbig = x.xbig;
   ysml = x.ysml; ybig = x.ybig;
@@ -1725,12 +1722,16 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     rectline0(drawrect,xbig,0.0,0);
   }
 
-  i = (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX))? 0: 1;
+  if (param) {
+    i = 0;
+    flags |= PLOT_PARAMETRIC;
+    flags &= (~PLOT_COMPLEX); /* turn COMPLEX to PARAMETRIC*/
+  } else i = 1;
   max_graphcolors = lg(pari_graphcolors)-1;
   for (ltype = 0; ltype < nc; ltype++)
   {
     current_color[drawrect] = pari_graphcolors[1+(ltype%max_graphcolors)];
-    if (flags & (PLOT_PARAMETRIC|PLOT_COMPLEX)) x = data[i++];
+    if (param) x = data[i++];
 
     y = data[i++]; nbpoints = y.nb;
     if (flags & (PLOT_POINTS_LINES|PLOT_POINTS)) {
