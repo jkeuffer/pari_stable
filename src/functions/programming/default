@@ -16,6 +16,12 @@ Description:
  ("debugmem",small):small:parens           DEBUGMEM = $2
  ("debugfiles"):small                      DEBUGFILES
  ("debugfiles",small):small:parens         DEBUGFILES = $2
+ ("factor_add_primes"):small               factor_add_primes
+ ("factor_add_primes",small):small         factor_add_primes = $2
+ ("factor_proven"):small                   factor_proven
+ ("factor_proven",small):small             factor_proven = $2
+ ("new_galois_format"):small               new_galois_format
+ ("new_galois_format",small):small         new_galois_format = $2
 Doc: returns the default corresponding to keyword \var{key}. If \var{val} is
  present, sets the default to \var{val} first (which is subject to string
  expansion first). Typing \kbd{default()} (or \b{d}) yields the complete
