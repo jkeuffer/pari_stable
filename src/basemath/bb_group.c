@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+#undef pow /* AIX: pow(a,b) is a macro, wrongly expanded on grp->pow(a,b,c) */
 
 /***********************************************************************/
 /**                                                                   **/

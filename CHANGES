@@ -137,6 +137,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   106- add missing GC in gsubst
   107- polred([pol, b]) computed unnecessary but possibly expensive
        invariants of pol [ e.g. disc, index ]
+  108- compilation failed on AIX [ YYSIZE_T, pow ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

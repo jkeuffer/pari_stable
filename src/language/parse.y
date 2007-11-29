@@ -13,6 +13,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+#define YYSIZE_T size_t
 #define YYERROR_VERBOSE 1
 #define YYSTYPE union token_value
 #define YYLTYPE struct node_loc
