@@ -587,12 +587,10 @@ term_width_intern(void)
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_col;
   }
 #endif
-#ifdef UNIX
   {
     char *str;
-    if ((str = getenv("COLUMNS"))) return atoi(str);
+    if ((str = os_getenv("COLUMNS"))) return atoi(str);
   }
-#endif
 #ifdef __EMX__
   {
     int scrsize[2];
@@ -613,12 +611,10 @@ term_height_intern(void)
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_row;
   }
 #endif
-#ifdef UNIX
   {
     char *str;
-    if ((str = getenv("LINES"))) return atoi(str);
+    if ((str = os_getenv("LINES"))) return atoi(str);
   }
-#endif
 #ifdef __EMX__
   {
     int scrsize[2];
@@ -3001,9 +2997,6 @@ _expand_tilde(const char *s)
 static char *
 _expand_env(char *str)
 {
-#if defined(WINCE) || defined(macintosh)
-  return str;
-#else
   long i, l, len = 0, xlen = 16, xnum = 0;
   char *s = str, *s0 = s, *env;
   char **x = (char **)gpmalloc(xlen * sizeof(char*));
@@ -3027,7 +3020,7 @@ _expand_env(char *str)
     while (is_keyword_char(*s)) s++;
     l = s - s0;
     env = strncpy(gpmalloc(l+1), s0, l); env[l] = 0;
-    s0 = getenv(env);
+    s0 = os_getenv(env);
     if (!s0)
     {
       pari_warn(warner,"undefined environment variable: %s",env);
@@ -3051,7 +3044,6 @@ _expand_env(char *str)
   s = gpmalloc(len+1); *s = 0;
   for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); gpfree(x[i]); }
   gpfree(str); gpfree(x); return s;
-#endif
 }
 
 char *
@@ -3588,14 +3580,13 @@ static int
 unix_shell(void)
 {
   char *base, *sh = getenv("EMXSHELL");
-  if (sh == NULL) sh = getenv("COMSPEC");
-  if (sh == NULL) return 0;
-  base = _getname (sh);
-  if (stricmp (base, "cmd.exe") == 0 || stricmp (base, "4os2.exe") == 0
-      || stricmp (base, "command.com") == 0
-      || stricmp (base, "4dos.com") == 0)
-    return 0;
-  return 1;
+  if (!sh) {
+    sh = getenv("COMSPEC");
+    if (!sh) return 0;
+  }
+  base = _getname(sh);
+  return (stricmp (base, "cmd.exe") && stricmp (base, "4os2.exe")
+       && stricmp (base, "command.com") && stricmp (base, "4dos.com"));
 }
 #endif
 
