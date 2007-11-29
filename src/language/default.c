@@ -935,13 +935,7 @@ sd_prettyprinter(const char *v, long flag)
 static GEN
 sd_prompt_set(const char *v, long flag, const char *how, char *p)
 {
-  if (*v)
-  {
-    strncpy(p,v,MAX_PROMPT_LEN);
-#ifdef macintosh
-    strcat(p,"\n");
-#endif
-  }
+  if (*v) strncpy(p,v,MAX_PROMPT_LEN);
   if (flag == d_RETURN) return strtoGENstr(p);
   if (flag == d_ACKNOWLEDGE)
     pariprintf("   prompt%s = \"%s\"\n", how, p);

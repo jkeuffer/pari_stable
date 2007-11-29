@@ -292,6 +292,7 @@ BA 36- New type t_CLOSURE to store GP functions
    40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
 BA 41- library function vecsmall_uniq_sorted
    42- bench 'ff'
+   43- has_getenv.c
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk
@@ -310,6 +311,7 @@ BA 41- library function vecsmall_uniq_sorted
    10- obsolete functions ellap0, apell2
    11- obsolete header file pariport.h
    12- obsolete error codes paramer1, valencer1, accurer, caracer1
+   13- removed obsolete system-specific #ifdefs (macintosh, alliant)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.1 (released 28/03/2007):

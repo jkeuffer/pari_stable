@@ -157,6 +157,10 @@ case $has_waitpid in
 yes) echo '#define HAS_WAITPID' >> $file;;
 esac
 
+case $has_getenv in
+yes) echo '#define HAS_GETENV' >> $file;;
+esac
+
 case $has_setsid in
 yes) echo '#define HAS_SETSID' >> $file;;
 esac

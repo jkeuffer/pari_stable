@@ -17,15 +17,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define __GENPARI__
 #include "paricfg.h"
 
-#ifdef macintosh
-#  include <Types.h>
-#  include <StdLib.h>
-#else
-#  include <stdlib.h>   /* malloc, free, atoi */
-#  ifdef UNIX
-#    define _INCLUDE_POSIX_SOURCE /* for HPUX */
-#    include <sys/types.h> /* size_t */
-#  endif
+#include <stdlib.h>   /* malloc, free, atoi */
+#ifdef UNIX
+#  define _INCLUDE_POSIX_SOURCE /* for HPUX */
+#  include <sys/types.h> /* size_t */
 #endif
 
 #ifdef WINCE
@@ -42,22 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  include <unistd.h>
 #endif
 #include <math.h>
-#ifdef alliant
-/* string.h */
-#  undef strcpy
-#  undef strlen
-#  undef strncpy
-/* math.h */
-#  undef atan
-#  undef cos
-#  undef exp
-#  undef fabs
-#  undef log
-#  undef sin
-#  undef sqrt
-#else /* ! alliant */
-#  include <memory.h>
-#endif
+#include <memory.h>
 #include <ctype.h>
 
 #ifdef WINCE

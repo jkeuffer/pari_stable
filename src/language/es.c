@@ -2902,10 +2902,10 @@ os_open(const char *s, int mode)
 char *
 os_getenv(const char *s)
 {
-#if defined(WINCE) || defined(macintosh)
-  return NULL;
-#else
+#ifdef HAS_GETENV
   return getenv(s);
+#else
+  return NULL;
 #endif
 }
 

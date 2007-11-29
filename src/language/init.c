@@ -1957,13 +1957,6 @@ TIMER(pari_timer *T)
 {
   return _get_time(T, GetTickCount(), 1000);
 }
-#elif defined(macintosh)
-# include <Events.h>
-long
-TIMER(pari_timer *T)
-{
-  return _get_time(T, TickCount(), 60);
-}
 #else
 
 # include <time.h>
