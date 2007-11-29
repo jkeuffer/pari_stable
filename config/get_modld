@@ -20,7 +20,7 @@ darwin) MODLD=$CC;
        -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`;;
 esac;
 
-modules_build=`echo "$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$includedir %s.c \
+modules_build=`echo "$CC -c -o %s.o $CFLAGS $DLCFLAGS -I\"$includedir\" %s.c \
 && $MODLD -o %s.so $MODLDFLAGS %s.o $EXTRAMODLDFLAGS" | \
                sed -e 's!\$(CFLAGS)'"!$CFLAGS!g" \
                    -e 's!\$(DLCFLAGS)'"!$DLCFLAGS!g"`
