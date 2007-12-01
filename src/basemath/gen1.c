@@ -502,7 +502,7 @@ add_pol_scal(GEN y, GEN x, long vy)
   long i, ly = lg(y);
   GEN z;
   if (ly <= 3) {
-    if (ly == 2) return isexactzero(x)? zeropol(vy): scalarpol(x,vy);
+    if (ly == 2) return scalarpol(x,vy);
     z = cgetg(3, t_POL); z[1] = y[1];
     gel(z,2) = gadd(x,gel(y,2));
     if (gcmp0(gel(z,2))) {
