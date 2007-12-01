@@ -1020,13 +1020,16 @@ gtoset(GEN x)
   tx = typ(x); lx = lg(x);
   if (!is_vec_t(tx))
   {
-    if (tx != t_LIST)
-      { y=cgetg(2,t_VEC); gel(y,1) = GENtocanonicalstr(x); return y; }
+    if (tx != t_LIST) {
+      y = cgetg(2,t_VEC);
+      gel(y,1) = gerepileupto(av, GENtocanonicalstr(simplify_i(x)));
+      return y;
+    }
     x = list_data(x); lx = x? lg(x): 1;
   }
   if (lx==1) return cgetg(1,t_VEC);
   av=avma; y=cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(gel(x,i));
+  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
   y = sort(y);
   c=1;
   for (i=2; i<lx; i++)
@@ -1083,7 +1086,7 @@ setsearch(GEN x, GEN y, long flag)
 {
   pari_sp av = avma;
   long res;
-  if (typ(y) != t_STR) y = GENtocanonicalstr(y);
+  if (typ(y) != t_STR) y = GENtocanonicalstr(simplify_i(y));
   res=gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
   avma=av;
   return res;

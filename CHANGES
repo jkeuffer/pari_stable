@@ -243,6 +243,7 @@ BA 65- vecsmall_uniq(v) no longer assumes that v is sorted
        major speedups: polcyclo(10^6) 5min -> 16ms. Similarly for polchebyshev,
        pollegendre and polhermite
    68- ?0 listed all "user-defined identifiers". Restrict to "functions"
+   69- use simplify in setsearch() and Set() [#707]
 
   Added
     1- library functions expu, adduu, subuu
