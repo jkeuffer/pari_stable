@@ -1729,7 +1729,7 @@ isfactor(GEN g)
       return 0;
     case t_POL: deja = 0; sig = 1;
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull(gel(g,i)))
+	if (!isnull_for_pol(gel(g,i)))
 	{
 	  if (deja) return 0;
 	  sig=isfactor(gel(g,i)); deja=1;

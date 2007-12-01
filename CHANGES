@@ -138,6 +138,10 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   107- polred([pol, b]) computed unnecessary but possibly expensive
        invariants of pol [ e.g. disc, index ]
   108- compilation failed on AIX [ YYSIZE_T, pow ]
+  109- ? Mod(1,2)*x + Mod(1,2)*y
+       %1 = Mod(1, 2)*x + (Mod(1, 2)*y) \\ extra parentheses in constant term
+       ? % + 0*z
+       %2 = Mod(1, 2)*x + Mod(1, 2)*y
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
