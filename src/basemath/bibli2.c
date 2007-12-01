@@ -1004,51 +1004,6 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
   return polint_i(xa? xa+1: xa,ya+1,x,lx-1,ptdy);
 }
 
-/***********************************************************************/
-/*                                                                     */
-/*                          SET OPERATIONS                             */
-/*                                                                     */
-/***********************************************************************/
-GEN
-gtoset(GEN x)
-{
-  pari_sp av;
-  long i,c,tx,lx;
-  GEN y;
-
-  if (!x) return cgetg(1, t_VEC);
-  tx = typ(x); lx = lg(x);
-  if (!is_vec_t(tx))
-  {
-    if (tx != t_LIST) {
-      y = cgetg(2,t_VEC);
-      gel(y,1) = gerepileupto(av, GENtocanonicalstr(simplify_i(x)));
-      return y;
-    }
-    x = list_data(x); lx = x? lg(x): 1;
-  }
-  if (lx==1) return cgetg(1,t_VEC);
-  av=avma; y=cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
-  y = sort(y);
-  c=1;
-  for (i=2; i<lx; i++)
-    if (!gequal(gel(y,i), gel(y,c))) y[++c] = y[i];
-  setlg(y,c+1); return gerepilecopy(av,y);
-}
-
-long
-setisset(GEN x)
-{
-  long lx,i;
-
-  if (typ(x)!=t_VEC) return 0;
-  lx=lg(x)-1; if (!lx) return 1;
-  for (i=1; i<lx; i++)
-    if (typ(x[i]) != t_STR || gcmp(gel(x,i+1),gel(x,i))<=0) return 0;
-  return typ(x[i]) == t_STR;
-}
-
 /* looks if y belongs to the set x and returns the index if yes, 0 if no */
 long
 gen_search(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
@@ -1081,16 +1036,6 @@ cmp_nodata(void *data, GEN x, GEN y)
   return cmp(x,y);
 }
 
-long
-setsearch(GEN x, GEN y, long flag)
-{
-  pari_sp av = avma;
-  long res;
-  if (typ(y) != t_STR) y = GENtocanonicalstr(simplify_i(y));
-  res=gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
-  avma=av;
-  return res;
-}
 long
 ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 
@@ -1832,4 +1777,56 @@ merge_factor_i(GEN f, GEN g)
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
   return sort_factor(concat_factor(f,g), (void*)&cmpii, &cmp_nodata);
+}
+
+/***********************************************************************/
+/*                                                                     */
+/*                          SET OPERATIONS                             */
+/*                                                                     */
+/***********************************************************************/
+GEN
+gtoset(GEN x)
+{
+  pari_sp av;
+  long i, tx, lx;
+  GEN y;
+
+  if (!x) return cgetg(1, t_VEC);
+  tx = typ(x); lx = lg(x);
+  if (!is_vec_t(tx))
+  {
+    if (tx != t_LIST) {
+      y = cgetg(2,t_VEC); av = avma;
+      gel(y,1) = gerepileupto(av, GENtocanonicalstr(simplify_i(x)));
+      return y;
+    }
+    x = list_data(x); lx = x? lg(x): 1;
+  }
+  if (lx==1) return cgetg(1,t_VEC);
+  av = avma; y = cgetg(lx,t_VEC);
+  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
+  y = vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
+  return gerepilecopy(av,y);
+}
+
+long
+setisset(GEN x)
+{
+  long i, lx = lg(x)-1;
+
+  if (typ(x)!=t_VEC) return 0;
+  if (!lx) return 1;
+  for (i=1; i<lx; i++)
+    if (typ(x[i]) != t_STR || gcmp(gel(x,i+1),gel(x,i)) <= 0) return 0;
+  return typ(x[i]) == t_STR;
+}
+
+long
+setsearch(GEN x, GEN y, long flag)
+{
+  pari_sp av = avma;
+  long res;
+  if (typ(y) != t_STR) y = GENtocanonicalstr(simplify_i(y));
+  res = gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
+  avma = av; return res;
 }
