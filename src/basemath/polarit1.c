@@ -2013,7 +2013,7 @@ factorpadic4(GEN f,GEN p,long prec)
   y = ZX_monic_factorpadic(f, p, pr);
   P = gel(y,1); l = lg(P);
   if (lead)
-    for (i=1; i<l; i++) gel(P,i) = primpart( RgX_unscale(gel(P,i), lead) );
+    for (i=1; i<l; i++) gel(P,i) = Q_primpart( RgX_unscale(gel(P,i), lead) );
   ppow = powiu(p,prec);
   for (i=1; i<l; i++)
   {
@@ -2154,16 +2154,18 @@ polfnf(GEN a, GEN T)
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
-  A = lift(fix_relative_pol(T,a,0));
-  P = content(A); if (!gcmp1(P)) A = gdiv(A, P);
-  T = primpart(T);
+  A = primpart( lift_intern(fix_relative_pol(T,a,0)) );
+  T = Q_primpart(T);
   tmonic = is_pm1(leading_term(T));
 
   dent = tmonic? indexpartial(T, NULL): ZX_disc(T);
   unt = mkpolmod(gen_1,T);
   G = nfgcd(A,derivpol(A), T, dent);
   sqfree = gcmp1(G);
-  u = sqfree? A: RgXQX_div(A, G, T);
+  if (sqfree)
+    u = A;
+  else
+    u = Q_primpart( RgXQX_div(A, G, T) );
   k = 0; n = ZX_ZXY_rnfequation(T, u, &k);
   if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
   if (!sqfree)
@@ -2172,7 +2174,7 @@ polfnf(GEN a, GEN T)
     G = ZX_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
-  fa = ZX_DDF(n,0); lx = lg(fa);
+  fa = ZX_DDF(Q_primpart(n),0); lx = lg(fa);
   P = cgetg(lx,t_COL);
   E = cgetg(lx,t_COL);
   if (lx == 2)
@@ -2185,7 +2187,7 @@ polfnf(GEN a, GEN T)
   for (i=lx-1; i>0; i--)
   {
     GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
-    if (!tmonic) F = primpart(F);
+    if (!tmonic) F = Q_primpart(F);
     F = nfgcd(u, F, T, dent);
     if (typ(F) != t_POL || degpol(F) == 0)
       pari_err(talker,"reducible modulus in factornf");
