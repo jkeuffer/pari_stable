@@ -142,8 +142,11 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
        %1 = Mod(1, 2)*x + (Mod(1, 2)*y) \\ extra parentheses in constant term
        ? % + 0*z
        %2 = Mod(1, 2)*x + Mod(1, 2)*y
-  110- factor(x^5+(-a+2)*x^4-a*x^3+(3*a-6)*x^2+(5*a-10)*x+(2*a-5), a^2-5) 
+  110- factornf(x^5+(-a+2)*x^4-a*x^3+(3*a-6)*x^2+(5*a-10)*x+(2*a-5), a^2-5) 
        --> SEGV  [ not squarefree -> denominators creeping in ] [#708]
+  111- problems with isexactzero and t_INTMODs. Mod(0,2)*x*1. -> 0,
+       Pol(Mod(0,2))+2 -> 2, (2+0*I)+I*Mod(0,4)->Mod(2,4), Mod(0,2)/x -> 0
+       Use isrationalzero instead.
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

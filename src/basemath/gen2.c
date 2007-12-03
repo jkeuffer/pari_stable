@@ -743,7 +743,7 @@ ggval(GEN x, GEN p)
   pari_sp av, limit;
   GEN p1, p2;
 
-  if (isexactzero(x)) return LONG_MAX;
+  if (isrationalzero(x)) return LONG_MAX;
   if (is_const_t(tx) && tp==t_POL) return 0;
   if (tp == t_INT && (!signe(p) || is_pm1(p)))
     pari_err(talker, "forbidden divisor %Z in ggval", p);
@@ -805,7 +805,7 @@ ggval(GEN x, GEN p)
       }
       else
 	if (tp != t_INT) break;
-      i=2; while (isexactzero(gel(x,i))) i++;
+      i=2; while (isrationalzero(gel(x,i))) i++;
       return minval(x,p,i,lg(x));
 
     case t_SER:
@@ -1565,7 +1565,7 @@ ctop(GEN x, GEN p, long d)
 {
   pari_sp av = avma;
   GEN z, u = gel(x,1), v = gel(x,2);
-  if (isexactzero(v)) return cvtop(u, p, d);
+  if (isrationalzero(v)) return cvtop(u, p, d);
   z = padic_sqrt(cvtop(gen_m1, p, d - ggval(v, p))); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
@@ -1725,23 +1725,34 @@ GEN
 normalize(GEN x)
 {
   long i, lx = lg(x);
-  GEN y;
+  GEN y, z;
 
   if (typ(x) != t_SER) pari_err(typeer,"normalize");
   if (lx==2) { setsigne(x,0); return x; }
   for (i=2; i<lx; i++)
-    if (! isexactzero(gel(x,i)))
-    {
-      i -= 2; y = x + i; lx -= i;
-      /* don't swap the following two lines! [valp/varn corrupted] */
-      y[1] = evalsigne(1) | evalvalp(valp(x)+i) | evalvarn(varn(x));
-      y[0] = evaltyp(t_SER) | evallg(lx);
-      stackdummy((pari_sp)y, (pari_sp)x);
-      for (i = 2; i < lx; i++)
-	if (!gcmp0(gel(y, i))) return y;
-      setsigne(y, 0); return y;
-    }
-  return zeroser(varn(x),lx-2+valp(x));
+    if (! isrationalzero(gel(x,i))) break;
+  if (i == lx) return zeroser(varn(x),lx-2+valp(x));
+  z = gel(x,i);
+  while (i<lx && isexactzero(gel(x,i))) i++;
+  if (i == lx)
+  {
+    i -= 3; y = x + i;
+    stackdummy((pari_sp)y, (pari_sp)x);
+    gel(y,2) = z;
+    y[1] = evalsigne(0) | evalvalp(valp(x)+i) | evalvarn(varn(x));
+    y[0] = evaltyp(t_SER) | evallg(3);
+    return y;
+  }
+
+  i -= 2; y = x + i; lx -= i;
+  /* don't swap the following two lines! [valp/varn corrupted] */
+  y[1] = evalsigne(1) | evalvalp(valp(x)+i) | evalvarn(varn(x));
+  y[0] = evaltyp(t_SER) | evallg(lx);
+  
+  stackdummy((pari_sp)y, (pari_sp)x);
+  for (i = 2; i < lx; i++)
+    if (!gcmp0(gel(y, i))) return y;
+  setsigne(y, 0); return y;
 }
 
 GEN
@@ -1758,8 +1769,26 @@ GEN
 normalizepol_i(GEN x, long lx)
 {
   long i;
+  GEN z;
   for (i = lx-1; i>1; i--)
+    if (! isrationalzero(gel(x,i))) break;
+  if (i == 1)
+  { /* Pol(0) */
+    stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + 2));
+    x[0] = evaltyp(t_POL)|evallg(2);
+    setsigne(x,0); return x;
+  }
+  /* not a rational 0, to be kept iff all other coeffs are exact 0s */
+  z = gel(x,i);
+  for (; i>1; i--)
     if (! isexactzero(gel(x,i))) break;
+  if (i == 1)
+  { /* e.g. Pol(Mod(0,2)) */
+    stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + 3));
+    x[0] = evaltyp(t_POL)|evallg(3);
+    setsigne(x,0); gel(x,2) = z; return x;
+  }
+  
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1);
   for (; i>1; i--)

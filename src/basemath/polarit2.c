@@ -2602,8 +2602,8 @@ ggcd(GEN x, GEN y)
   }
   if (tx>ty) { swap(x,y); lswap(tx,ty); }
   /* tx <= ty */
-  if (isexactzero(x)) return zero_gcd(y, ty);
-  if (isexactzero(y)) return zero_gcd(x, tx);
+  if (isrationalzero(x)) return zero_gcd(y, ty);
+  if (isrationalzero(y)) return zero_gcd(x, tx);
   if (is_const_t(tx))
   {
     if (ty == tx) switch(tx)
@@ -2620,7 +2620,12 @@ ggcd(GEN x, GEN y)
 	else
 	{
 	  av = avma; p1 = gcdii(gel(z,1),gel(x,2));
-	  if (!is_pm1(p1)) p1 = gerepileuptoint(av, gcdii(p1,gel(y,2)));
+	  if (!is_pm1(p1))
+          {
+            p1 = gcdii(p1,gel(y,2));
+            if (equalii(p1, gel(z,1))) { cgiv(p1); p1 = gen_0; }
+            else p1 = gerepileuptoint(av, p1);
+          }
 	  gel(z,2) = p1;
 	}
 	return z;
@@ -2660,7 +2665,12 @@ ggcd(GEN x, GEN y)
 	  case t_INTMOD: z = cgetg(3,t_INTMOD);
 	    gel(z,1) = gcopy(gel(y,1)); av = avma;
 	    p1 = gcdii(gel(y,1),gel(y,2));
-	    if (!is_pm1(p1)) p1 = gerepileuptoint(av, gcdii(x,p1));
+	    if (!is_pm1(p1)) {
+              p1 = gcdii(x,p1);
+              if (equalii(p1, gel(z,1))) { cgiv(p1); p1 = gen_0; } 
+              else
+                p1 = gerepileuptoint(av, p1);
+            }
 	    gel(z,2) = p1; return z;
 
 	  case t_FRAC:

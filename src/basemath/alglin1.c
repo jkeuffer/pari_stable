@@ -2095,7 +2095,7 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
     }
   }
   p = gel(x,k);
-  r = gel(x0,k); if (isexactzero(r)) r = x0;
+  r = gel(x0,k); if (isrationalzero(r)) r = x0;
   return approx_0(p, r)? i: k;
 }
 

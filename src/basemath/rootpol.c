@@ -1919,7 +1919,7 @@ roots_com(GEN q, long bit)
     GEN M, z, t = gel(q,2);
     long i, x, y, l, n;
 
-    if (isexactzero(t)) x = -bit;
+    if (isrationalzero(t)) x = -bit;
     else
     {
       n = gexpo(t);
@@ -1927,7 +1927,7 @@ roots_com(GEN q, long bit)
       for (i = v; i <= l; i++)
       {
 	t  = gel(q,i+2);
-	if (isexactzero(t)) continue;
+	if (isrationalzero(t)) continue;
 	y = (n - gexpo(t)) / i;
 	if (y < x) x = y;
       }

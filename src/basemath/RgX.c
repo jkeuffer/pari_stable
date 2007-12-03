@@ -458,7 +458,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
   p1 = gpmalloc(ny);
   for (i=0; i<ny; i++)
   {
-    p1[i] = !isexactzero(gel(y,i));
+    p1[i] = !isrationalzero(gel(y,i));
     gel(z,i) = mulpol_limb(x+i,y,p1,0,i+1);
   }
   for (  ; i<nx; i++) gel(z,i) = mulpol_limb(x+i,y,p1,0,ny);
@@ -568,8 +568,8 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
   long n0, n0a, i, v = 0;
   pari_sp av;
 
-  while (na && isexactzero(gel(a,0))) { a++; na--; v++; }
-  while (nb && isexactzero(gel(b,0))) { b++; nb--; v++; }
+  while (na && isrationalzero(gel(a,0))) { a++; na--; v++; }
+  while (nb && isrationalzero(gel(b,0))) { b++; nb--; v++; }
   if (na < nb) swapspec(a,b, na,nb);
   if (!nb) return zeropol(0);
 
@@ -578,7 +578,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
-  while (n0a && isexactzero(gel(a,n0a-1))) n0a--;
+  while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
 
   if (nb > n0)
   {
@@ -586,7 +586,7 @@ RgX_mulspec(GEN a, GEN b, long na, long nb)
     long n0b;
 
     nb -= n0; b0 = b+n0; n0b = n0;
-    while (n0b && isexactzero(gel(b,n0b-1))) n0b--;
+    while (n0b && isrationalzero(gel(b,n0b-1))) n0b--;
     c = RgX_mulspec(a,b,n0a,n0b);
     c0 = RgX_mulspec(a0,b0, na,nb);
 
@@ -620,7 +620,7 @@ sqrpol(GEN x, long nx)
   p2 = gpmalloc(nx);
   for (i=0; i<nx; i++)
   {
-    p2[i] = !isexactzero(gel(x,i));
+    p2[i] = !isrationalzero(gel(x,i));
     p1=gen_0; av=avma; l=(i+1)>>1;
     for (j=0; j<l; j++)
       if (p2[j] && p2[i-j])
@@ -651,12 +651,12 @@ RgX_sqrspec(GEN a, long na)
   long n0, n0a, i, v = 0;
   pari_sp av;
 
-  while (na && isexactzero(gel(a,0))) { a++; na--; v += 2; }
+  while (na && isrationalzero(gel(a,0))) { a++; na--; v += 2; }
   if (v) (void)cgetg(v, t_VECSMALL);
   if (na<RgX_SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
   i = (na>>1); n0 = na-i; na = i;
   av = avma; a0 = a+n0; n0a = n0;
-  while (n0a && isexactzero(gel(a,n0a-1))) n0a--;
+  while (n0a && isrationalzero(gel(a,n0a-1))) n0a--;
 
   c = RgX_sqrspec(a,n0a);
   c0 = RgX_sqrspec(a0,na);
@@ -770,7 +770,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     p2 = gel(y,i);
     /* gneg to avoid gsub's later on */
-    gel(p1,i) = isexactzero(p2)? NULL: gneg(p2);
+    gel(p1,i) = isrationalzero(p2)? NULL: gneg(p2);
   }
   avy = avma;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
@@ -791,7 +791,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
     if (y_lead) p1 = f(p1,y_lead);
 
-    if (isexactzero(p1)) { avma=av1; p1 = gen_0; }
+    if (isrationalzero(p1)) { avma=av1; p1 = gen_0; }
     else
       p1 = avma==av1? gcopy(p1): gerepileupto(av1,p1);
     gel(z,i-dy) = p1;
@@ -939,7 +939,7 @@ GEN
 RgX_Rg_mul(GEN y, GEN x) {
   long i, ly;
   GEN z;
-  if (isexactzero(x)) return zeropol(varn(y));
+  if (isrationalzero(x)) return zeropol(varn(y));
   ly = lg(y);
   z = cgetg(ly,t_POL); z[1] = y[1];
   if (ly == 2) return z;

@@ -269,7 +269,7 @@ gred_rfrac2_i(GEN n, GEN d)
   long tn, td, v;
 
   n = simplify_i(n);
-  if (isexactzero(n)) return gcopy(n);
+  if (isrationalzero(n)) return gcopy(n);
   d = simplify_i(d);
   td = typ(d);
   if (td!=t_POL || varncmp(varn(d), gvar(n)) > 0) return gdiv(n,d);
@@ -501,16 +501,7 @@ add_pol_scal(GEN y, GEN x, long vy)
 {
   long i, ly = lg(y);
   GEN z;
-  if (ly <= 3) {
-    if (ly == 2) return scalarpol(x,vy);
-    z = cgetg(3, t_POL); z[1] = y[1];
-    gel(z,2) = gadd(x,gel(y,2));
-    if (gcmp0(gel(z,2))) {
-      if (isexactzero(gel(z,2))) { avma = (pari_sp)(z+3); return zeropol(vy); }
-      setsigne(z, 0);
-    }
-    return z;
-  }
+  if (ly <= 3) return scalarpol(ly == 2? x: gadd(x, gel(y,2)), vy);
   z = cgetg(ly,t_POL); z[1] = y[1];
   gel(z,2) = gadd(x,gel(y,2));
   for (i = 3; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
@@ -523,9 +514,9 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
 {
   long i, j, ly;
   pari_sp av;
-  GEN z;
+  GEN z, t;
 
-  if (isexactzero(x)) return gcopy(y);
+  if (isrationalzero(x)) return gcopy(y);
   ly = lg(y);
   if (l < 3-ly) return gcopy(y);
   if (l < 0)
@@ -543,24 +534,35 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
     gel(z,2) = gcopy(x);
     for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
     for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-    if (gcmp0(x)) return NORMALIZE_i(z, l+2, ly);
+    if (gcmp0(x)) return normalize(z);
     return z;
   }
-  /* l = 0, !isexactzero(x) */
+  /* l = 0, !isrationalzero(x) */
   if (ly==2) return zeroser(vy, 0); /* 1 + O(1) --> O(1) */
 
   av = avma; z = cgetg(ly,t_SER);
   x = gadd(x, gel(y,2));
-  if (!isexactzero(x))
+  if (!isrationalzero(x))
   {
     z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
     gel(z,2) = x;
     for (i=3; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
-    if (gcmp0(x)) return NORMALIZE_i(z, 3, ly);
+    if (gcmp0(x)) return normalize(z);
     return z;
   }
-  avma = av; /* first coeff is 0 */
-  i = 3; while (i < ly && isexactzero(gel(y,i))) i++;
+  avma = av; /* first coeff is rational 0 */
+  i = 3;
+  while (i<ly && isrationalzero(gel(y,i))) i++;
+  if (i == ly) return zeroser(vy, ly-1);
+  t = gel(y,i);
+  while (i<ly && isexactzero(gel(y,i))) i++;
+  if (i == ly)
+  {
+    z = cgetg(3, t_SER);
+    z[1] = evalsigne(0) | _evalvalp(i-2) | evalvarn(vy);
+    gel(z,2) = gcopy(t); return gerepileupto(av, z);
+  }
+
   i -= 2; ly -= i; y += i;
   z = cgetg(ly,t_SER); z[1] = evalvalp(i) | evalvarn(vy);
   for (j = 2; j < ly; j++) gel(z,j) = gcopy(gel(y,j));
@@ -590,7 +592,7 @@ add_scal(GEN y, GEN x, long ty, long vy)
     case t_RFRAC: return add_rfrac_scal(y, x);
     case t_VEC: case t_COL:
       tx = typ(x);
-      if (!is_matvec_t(tx) && isexactzero(x)) return gcopy(y);
+      if (!is_matvec_t(tx) && isrationalzero(x)) return gcopy(y);
       break;
   }
   pari_err(operf,"+",x,y);
@@ -719,7 +721,7 @@ gadd(GEN x, GEN y)
     case t_FRAC: return addfrac(x,y);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
       gel(z,2) = gadd(gel(x,2),gel(y,2));
-      if (isexactzero(gel(z,2)))
+      if (isrationalzero(gel(z,2)))
       {
 	avma = (pari_sp)(z+3);
 	return gadd(gel(x,1),gel(y,1));
@@ -893,7 +895,7 @@ gadd(GEN x, GEN y)
   /* tx < ty, !is_const_t(y) */
   if (ty == t_MAT) {
     if (is_matvec_t(tx)) pari_err(operf,"+",x,y);
-    if (isexactzero(x)) return gcopy(y);
+    if (isrationalzero(x)) return gcopy(y);
     return RgM_Rg_add(y, x);
   }
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
@@ -1022,7 +1024,7 @@ static GEN
 mul_ser_scal(GEN y, GEN x) {
   long ly, i;
   GEN z;
-  if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
+  if (isrationalzero(x)) return zeropol(varn(y));
   ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
   for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return normalize(z);
@@ -1210,7 +1212,7 @@ VC_mul(GEN x, GEN y, long l)
   for (i=1; i<l; i++)
   {
     GEN c = gel(y,i);
-    if (!isexactzeroscalar(c)) z = gadd(z, gmul(gel(x,i), c));
+    if (!isrationalzeroscalar(c)) z = gadd(z, gmul(gel(x,i), c));
   }
   return gerepileupto(av,z);
 }
@@ -1227,7 +1229,7 @@ MC_mul(GEN x, GEN y, long l, long lz)
     for (j=1; j<l; j++)
     {
       GEN c = gel(y,j);
-      if (!isexactzeroscalar(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
+      if (!isrationalzeroscalar(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
     }
     gel(z,i) = gerepileupto(av,t);
   }
@@ -1327,7 +1329,7 @@ mulcc(GEN x, GEN y)
   gel(z,1) = gadd(p1,p2);
   gel(z,2) = gadd(p3,p4);
 
-  if (isexactzero(gel(z,2)))
+  if (isrationalzero(gel(z,2)))
   {
     cgiv(gel(z,2));
     return gerepileupto((pari_sp)(z+3), gel(z,1));
@@ -1384,7 +1386,7 @@ mulcxI(GEN x)
     case t_INT: case t_REAL: case t_FRAC:
       return mkcomplex(gen_0, x);
     case t_COMPLEX:
-      if (isexactzero(gel(x,1))) return gneg(gel(x,2));
+      if (isrationalzero(gel(x,1))) return gneg(gel(x,2));
       z = cgetg(3,t_COMPLEX);
       gel(z,1) = gneg(gel(x,2));
       z[2] = x[1]; return z;
@@ -1401,7 +1403,7 @@ mulcxmI(GEN x)
     case t_INT: case t_REAL: case t_FRAC:
       return mkcomplex(gen_0, gneg(x));
     case t_COMPLEX:
-      if (isexactzero(gel(x,1))) return gel(x,2);
+      if (isrationalzero(gel(x,1))) return gel(x,2);
       z = cgetg(3,t_COMPLEX);
       z[1] = x[2];
       gel(z,2) = gneg(gel(x,1)); return z;
@@ -1492,8 +1494,8 @@ gmul(GEN x, GEN y)
       mix = miy = 0;
       for (i=0; i<=lx; i++)
       {
-	p2[i] = !isexactzero(gel(y,i)); if (p2[i]) miy = i;
-	if (!isexactzero(gel(x,i))) mix = i;
+	p2[i] = !isrationalzero(gel(y,i)); if (p2[i]) miy = i;
+	if (!isrationalzero(gel(x,i))) mix = i;
 	p1 = gen_0; av = avma;
 	for (j=i-mix; j<=min(i,miy); j++)
 	  if (p2[j]) p1 = gadd(p1, gmul(gel(y,j),gel(x,i-j)));
@@ -1835,12 +1837,12 @@ sqr_ser_part(GEN x, long l1, long l2)
   x += 2; mi = 0;
   for (i=0; i<l1; i++)
   {
-    p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
+    p2[i] = !isrationalzero(gel(x,i)); if (p2[i]) mi = i;
   }
 
   for (i=l1; i<=l2; i++)
   {
-    p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
+    p2[i] = !isrationalzero(gel(x,i)); if (p2[i]) mi = i;
     p1=gen_0; av=avma; l=((i+1)>>1) - 1;
     for (j=i-mi; j<=min(l,mi); j++)
       if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
@@ -1874,7 +1876,7 @@ gsqr(GEN x)
 	gel(z,2) = sqri(gel(x,2)); return z;
 
       case t_COMPLEX:
-	if (isexactzero(gel(x,1))) {
+	if (isrationalzero(gel(x,1))) {
 	  av = avma;
 	  return gerepileupto(av, gneg(gsqr(gel(x,2))));
 	}
@@ -2023,7 +2025,7 @@ div_scal_pol(GEN x, GEN y) {
   long ly = lg(y);
   pari_sp av;
   if (ly == 3) return gdiv(x,gel(y,2));
-  if (isexactzero(x)) return zeropol(varn(y));
+  if (isrationalzero(x)) return zeropol(varn(y));
   av = avma;
   return gerepileupto(av, gred_rfrac_simple(x,y));
 }
@@ -2075,7 +2077,7 @@ div_ser(GEN x, GEN y, long vx)
   for (i=3; i<lx; i++)
   {
     p1 = gel(y,i);
-    if (isexactzero(p1)) p2[i] = 0;
+    if (isrationalzero(p1)) p2[i] = 0;
     else
     {
       av = avma; gel(p2,i) = gclone(gneg_i(p1));
@@ -2201,7 +2203,6 @@ gdiv(GEN x, GEN y)
       }
       if (!signe(y)) pari_err(gdiver);
       if (lg(y) == 3) return RgX_Rg_div(x,gel(y,2));
-      if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
 
     case t_SER:

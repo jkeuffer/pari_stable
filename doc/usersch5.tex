@@ -3558,10 +3558,11 @@ means that \kbd{x - y} was successfully computed and that
 \subsubsec{Comparison with a small integer}
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
-to~0, and 0~(false) otherwise. Note that many PARI functions return \kbd{gen\_0}
-when they are aware that the result they return is an exact zero, so it is
-almost always faster to test for pointer equality first, and call
-\kbd{isexactzero} (or \kbd{gcmp0}) only when the first test fails.
+to~0 (including \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false) otherwise.
+
+\fun{int}{isrationalzero}{GEN x} returns 1 (true) if \kbd{x} is equal
+to an integer~0 (excluding \typ{INTMOD}s like \kbd{Mod(0,2)}), and 0~(false)
+otherwise.
 
 \fun{int}{is_pm1}{GEN x}. This quick and dirty macro assumes that \kbd{x} is
 a non-zero \typ{INT}. Under these assumptions, it returns 1 (true) if \kbd{x}
@@ -3602,9 +3603,9 @@ the \kbd{long}~\kbd{s}, 0~otherwise.
 
 \subsubsec{Other related boolean functions}
 
-\fun{int}{isexactzeroscalar}{GEN g} equivalent to, but faster than,
+\fun{int}{isrationalzeroscalar}{GEN g} equivalent to, but faster than,
 \bprog
-  is_scalar_t(typ(x)) && isexactzero(x)
+  is_scalar_t(typ(x)) && isrationalzero(x)
 @eprog
 
 \fun{int}{isinexact}{GEN x} returns 1 (true) if \kbd{x} has an inexact

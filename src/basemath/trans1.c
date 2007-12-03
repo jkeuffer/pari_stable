@@ -689,7 +689,7 @@ ser_pow(GEN x, GEN n, long prec)
     X = x+2;
     Y = y+2;
 
-    d = mi = lx-3; while (mi>=1 && isexactzero(gel(X,mi))) mi--;
+    d = mi = lx-3; while (mi>=1 && isrationalzero(gel(X,mi))) mi--;
     gel(Y,0) = gen_1;
     for (i=1; i<=d; i++)
     {
@@ -968,7 +968,7 @@ gsqrt(GEN x, long prec)
       gel(y,2) = p1; return y;
 
     case t_COMPLEX:
-      if (isexactzero(gel(x,2))) return gsqrt(gel(x,1), prec);
+      if (isrationalzero(gel(x,2))) return gsqrt(gel(x,1), prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
       p1 = gsqr(gel(x,1));
@@ -1547,7 +1547,7 @@ serexp(GEN x, long prec)
   if (ex)
   {
     ly = lx+ex; y = cgetg(ly,t_SER);
-    mi = lx-1; while (mi>=3 && isexactzero(gel(x,mi))) mi--;
+    mi = lx-1; while (mi>=3 && isrationalzero(gel(x,mi))) mi--;
     mi += ex-2;
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
@@ -2363,7 +2363,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
 
       ly = lx+2*ex;
-      mi = lx-1; while (mi>=3 && isexactzero(gel(y,mi))) mi--;
+      mi = lx-1; while (mi>=3 && isrationalzero(gel(y,mi))) mi--;
       mi += ex-2;
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;

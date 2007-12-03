@@ -1319,9 +1319,9 @@ instance). By convention, the degree of $0$ is~$-1$.
 \misctitle{Important remark}. A zero polynomial can be characterized by the
 fact that its sign is~0. However, its length may be greater than 2, meaning
 that all the coefficients of the polynomial are equal to zero, but the
-leading term \kbd{z[lg(z)-1]} is an inexact zero. More precisely,
+leading term \kbd{z[lg(z)-1]} is not an exact integer zero. More precisely,
 \kbd{gcmp0(x)} is true for all coefficients \kbd{x} of the polynomial,
-an \kbd{isexactzero(x)} is false for the leading coefficient. The same
+and \kbd{isrationalzero(x)} is false for the leading coefficient. The same
 remark applies to \typ{SER}s.
 
 \subsec{Type \typ{SER} (power series)}:\kbdsidx{t_SER}\sidx{power series}
@@ -1335,9 +1335,9 @@ power series.
 
 The coefficients \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to
 the coefficients of \kbd{z} in ascending order. As for polynomials
-(see remark there), the sign of a \typ{SER} is $0$ if and only if the
-leading coefficient of the series is an inexact $0$. (It cannot be an
-exact $0$.)
+(see remark there), the sign of a \typ{SER} is $0$ if and only all
+its coefficients are equal to $0$. (The leading coefficient cannot be an
+integer $0$.)
 
 Note that the exponent of a power series can be negative, i.e.~we are
 then dealing with a Laurent series (with a finite number of negative

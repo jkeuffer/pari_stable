@@ -379,20 +379,16 @@ isinexact(GEN x)
 }
 
 int
-isexactzeroscalar(GEN g)
+isrationalzeroscalar(GEN g)
 {
   switch (typ(g))
   {
     case t_INT:
       return !signe(g);
-    case t_INTMOD: case t_POLMOD:
-      return isexactzeroscalar(gel(g,2));
-    case t_FRAC: case t_RFRAC:
-      return isexactzeroscalar(gel(g,1));
     case t_COMPLEX:
-      return isexactzeroscalar(gel(g,1)) && isexactzeroscalar(gel(g,2));
+      return isrationalzeroscalar(gel(g,1)) && isrationalzeroscalar(gel(g,2));
     case t_QUAD:
-      return isexactzeroscalar(gel(g,2)) && isexactzeroscalar(gel(g,3));
+      return isrationalzeroscalar(gel(g,2)) && isrationalzeroscalar(gel(g,3));
   }
   return 0;
 }
@@ -417,6 +413,29 @@ isexactzero(GEN g)
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
 	if (!isexactzero(gel(g,i))) return 0;
+      return 1;
+  }
+  return 0;
+}
+
+int
+isrationalzero(GEN g)
+{
+  long i;
+  switch (typ(g))
+  {
+    case t_INT:
+      return !signe(g);
+    case t_COMPLEX:
+      return isrationalzero(gel(g,1)) && isrationalzero(gel(g,2));
+    case t_QUAD:
+      return isrationalzero(gel(g,2)) && isrationalzero(gel(g,3));
+    case t_POLMOD:
+      return isrationalzero(gel(g,2));
+    case t_POL: return lg(g) == 2;
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(g)-1; i; i--)
+	if (!isrationalzero(gel(g,i))) return 0;
       return 1;
   }
   return 0;
@@ -1410,8 +1429,9 @@ gsubst(GEN x, long v, GEN y)
 	  if (!p2) return gerepilecopy(av,z);
 	  return gerepileupto(av, gmul(z,p2));
 
-	case t_POL: case t_RFRAC:
-	  if (isexactzero(y)) return scalarser(gel(x,2),v,lx-2);
+	case t_POL:
+	  if (lg(y) == 2) return scalarser(gel(x,2),v,lx-2);
+        case t_RFRAC:
 	  vy = gvar(y); e = gval(y,vy);
 	  if (e <= 0)
 	    pari_err(talker,"non positive valuation in a series substitution");
@@ -2332,7 +2352,7 @@ GEN
 scalarpol(GEN x, long v)
 {
   GEN y;
-  if (isexactzero(x)) return zeropol(v);
+  if (isrationalzero(x)) return zeropol(v);
   y = cgetg(3,t_POL);
   y[1] = gcmp0(x)? evalvarn(v)
 		 : evalvarn(v) | evalsigne(1);
@@ -2362,11 +2382,10 @@ deg1pol_i(GEN x1, GEN x0,long v)
 static GEN
 _gtopoly(GEN x, long v, int reverse)
 {
-  long tx=typ(x),lx,i,j;
+  long tx = typ(x), lx, i, j;
   GEN y;
 
   if (v<0) v = 0;
-  if (isexactzero(x)) return zeropol(v);
   if (is_scalar_t(tx)) return scalarpol(x,v);
   switch(tx)
   {
@@ -2390,19 +2409,42 @@ _gtopoly(GEN x, long v, int reverse)
       if (varncmp(gvar(x), v) <= 0)
 	pari_err(talker,"variable must have higher priority in gtopoly");
       if (reverse)
-      {
-	while (lx-- && isexactzero(gel(x,lx)));
-	i = lx+2; y = cgetg(i,t_POL);
-	y[1] = gcmp0(x)? 0: evalsigne(1);
+      { /* cf normalizepol_i */
+        for (i = lx-1; i>0; i--)
+          if (! isrationalzero(gel(x,i))) break;
+        if (i == 0) return zeropol(v);
+        /* not a rational 0, to be kept iff all other coeffs are exact 0s */
+        y = gel(x,i);
+        for (; i>0; i--)
+          if (! isexactzero(gel(x,i))) break;
+        if (i == 0) return scalarpol(y, v);
+
+        for (j = i; j>0; j--)
+          if (! gcmp0(gel(x,j))) break;
+        i += 2;
+	y = cgetg(i,t_POL);
+	y[1] = evalvarn(v) | evalsigne((j == 0)? 0: 1);
 	for (j=2; j<i; j++) gel(y,j) = gcopy(gel(x,j-1));
+        return y;
       }
       else
       {
-	i=1; j=lx; while (lx-- && isexactzero(gel(x,i++)));
-	i = lx+2; y = cgetg(i,t_POL);
-	y[1] = gcmp0(x)? 0: evalsigne(1);
-	lx = j-1;
-	for (j=2; j<i; j++) gel(y,j) = gcopy(gel(x,lx--));
+        for (i = 1; i<lx; i++)
+          if (! isrationalzero(gel(x,i))) break;
+        if (i == lx) return zeropol(v);
+        /* not a rational 0, to be kept iff all other coeffs are exact 0s */
+        y = gel(x,i);
+        for (; i<lx; i++)
+          if (! isexactzero(gel(x,i))) break;
+        if (i == lx) return scalarpol(y, v);
+
+        for (j = i; j<lx; j++)
+          if (! gcmp0(gel(x,j))) break;
+        i = lx-i+2;
+	y = cgetg(i, t_POL);
+	y[1] = evalvarn(v) | evalsigne((j == lx)? 0: 1);
+	for (j=2; j<i; j++) gel(y,j) = gcopy(gel(x,--lx));
+        return y;
       }
       break;
     default: pari_err(typeer,"gtopoly");
@@ -2423,9 +2465,15 @@ scalarser(GEN x, long v, long prec)
   long i, l;
   GEN y;
 
-  if (isexactzero(x)) return zeroser(v,0);
+  if (isrationalzero(x)) return zeroser(v,0);
+  if (isexactzero(x))
+  {
+    y = cgetg(3, t_SER);
+    y[1] = evalsigne(0) | _evalvalp(0) | evalvarn(v);
+    gel(y,2) = gcopy(x); return y;
+  }
   l = prec + 2; y = cgetg(l, t_SER);
-  y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(v);
+  y[1] = evalsigne(gcmp0(x)? 0: 1) | _evalvalp(0) | evalvarn(v);
   gel(y,2) = gcopy(x); for (i=3; i<l; i++) gel(y,i) = gen_0;
   return y;
 }
@@ -2514,11 +2562,22 @@ _gtoser(GEN x, long v, long prec)
       if (varncmp(gvar(x), v) < 0)
 	pari_err(talker,"main variable must have higher priority in gtoser");
       lx = lg(x); if (tx == t_QFR) lx--;
-      i = 1; while (i<lx && isexactzero(gel(x,i))) i++;
+      for (i=1; i < lx; i++)
+        if (!isrationalzero(gel(x,i))) break;
       if (i == lx) return zeroser(v, lx-1);
+      y = gel(x,i);
+      for (; i<lx; i++)
+        if (!isexactzero(gel(x,i))) break;
+      if (i == lx)
+      {
+        GEN z = cgetg(3, t_SER);
+        z[1] = evalsigne(0) | _evalvalp(i-2) | evalvarn(v);
+        gel(z,2) = gcopy(y); return z;
+      }
+
       lx -= i-2; x += i-2;
       y = cgetg(lx,t_SER);
-      y[1] = evalsigne(1) | evalvalp(i-1) | evalvarn(v);
+      y[1] = evalsigne(1) | _evalvalp(i-1) | evalvarn(v);
       for (j=2; j<lx; j++) gel(y,j) = gcopy(gel(x,j));
       break;
 
@@ -3213,11 +3272,11 @@ simplify_i(GEN x)
       return x;
 
     case t_COMPLEX:
-      if (isexactzero(gel(x,2))) return gel(x,1);
+      if (isrationalzero(gel(x,2))) return gel(x,1);
       return x;
 
     case t_QUAD:
-      if (isexactzero(gel(x,3))) return gel(x,2);
+      if (isrationalzero(gel(x,3))) return gel(x,2);
       return x;
 
     case t_POLMOD: y = cgetg(3,t_POLMOD);
