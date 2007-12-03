@@ -1040,20 +1040,7 @@ long
 ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 
 GEN
-ZV_sort_uniq(GEN L)
-{
-  long i, c, l = lg(L);
-  pari_sp av = avma;
-  GEN perm;
-
-  if (l < 2) return cgetg(1, typ(L));
-  perm = gen_indexsort(L, (void*)&cmpii, &cmp_nodata);
-  L = vecpermute(L, perm);
-  c = 1;
-  for (i = 2; i < l; i++)
-    if (!equalii(gel(L,i), gel(L,c))) L[++c] = L[i];
-  setlg(L, c+1); return gerepilecopy(av, L);
-}
+ZV_sort_uniq(GEN L) { return gen_sort_uniq(L, (void*)&cmpii, &cmp_nodata); }
 
 /***********************************************************************/
 /*                                                                     */
