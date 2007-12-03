@@ -309,9 +309,6 @@ gcmp0(GEN x)
     case t_FFELT:
       return FF_cmp0(x);
 
-    case t_FRAC:
-      return 0;
-
     case t_COMPLEX:
      /* is 0 iff norm(x) would be 0 (can happen with Re(x) and Im(x) != 0
       * only if Re(x) and Im(x) are of type t_REAL). See mp.c:addrr().
