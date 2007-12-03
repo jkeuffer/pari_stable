@@ -1454,8 +1454,8 @@ static GEN
 gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
-  GEN z = gnil;
-  pari_sp av = avma;
+  VOLATILE GEN z = gnil;
+  VOLATILE pari_sp av = avma;
   Buffer *b = new_buffer();
   filtre_t F;
 
