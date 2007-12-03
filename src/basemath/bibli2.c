@@ -1055,69 +1055,6 @@ ZV_sort_uniq(GEN L)
   setlg(L, c+1); return gerepilecopy(av, L);
 }
 
-#if 0
-GEN
-gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN))
-{
-  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(talker,"not a set in setunion");
-
-}
-#endif
-
-GEN
-setunion(GEN x, GEN y)
-{
-  pari_sp av=avma, tetpil;
-  GEN z;
-
-  if (typ(x) != t_VEC || typ(y) != t_VEC) pari_err(talker,"not a set in setunion");
-  z=shallowconcat(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
-}
-
-GEN
-setintersect(GEN x, GEN y)
-{
-  long i, lx, c;
-  pari_sp av=avma;
-  GEN z;
-
-  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setintersect");
-  lx=lg(x); z=cgetg(lx,t_VEC); c=1;
-  for (i=1; i<lx; i++)
-    if (setsearch(y, gel(x,i), 0)) z[c++] = x[i];
-  setlg(z,c); return gerepilecopy(av,z);
-}
-
-GEN
-gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
-{
-  pari_sp ltop=avma;
-  long find;
-  long i,j,k;
-  GEN  diff=cgetg(lg(set1),t_VEC);
-  for(i=1,j=1,k=1; i < lg(set1); i++)
-  {
-    for(find=0; j < lg(set2); j++)
-    {
-      int s=cmp(gel(set1,i),gel(set2,j));
-      if (s<0)  break ;
-      if (s>0)  continue;
-      find=1;
-    }
-    if (!find)
-      diff[k++]=set1[i];
-  }
-  setlg(diff,k);
-  return gerepilecopy(ltop,diff);
-}
-
-GEN
-setminus(GEN x, GEN y)
-{
-  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setminus");
-  return gen_setminus(x,y,gcmp);
-}
-
 /***********************************************************************/
 /*                                                                     */
 /*               OPERATIONS ON DIRICHLET SERIES                        */
@@ -1784,11 +1721,20 @@ merge_factor_i(GEN f, GEN g)
 /*                          SET OPERATIONS                             */
 /*                                                                     */
 /***********************************************************************/
+static GEN
+vectoset(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx,t_VEC);
+  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
+  return vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
+}
+
 GEN
 gtoset(GEN x)
 {
   pari_sp av;
-  long i, tx, lx;
+  long tx, lx;
   GEN y;
 
   if (!x) return cgetg(1, t_VEC);
@@ -1803,22 +1749,21 @@ gtoset(GEN x)
     x = list_data(x); lx = x? lg(x): 1;
   }
   if (lx==1) return cgetg(1,t_VEC);
-  av = avma; y = cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
-  y = vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
-  return gerepilecopy(av,y);
+  av = avma; return gerepilecopy(av, vectoset(x));
 }
 
 long
 setisset(GEN x)
 {
-  long i, lx = lg(x)-1;
+  long i, lx = lg(x);
 
-  if (typ(x)!=t_VEC) return 0;
-  if (!lx) return 1;
+  if (typ(x) != t_VEC) return 0;
+  if (lx == 1) return 1;
   for (i=1; i<lx; i++)
-    if (typ(x[i]) != t_STR || gcmp(gel(x,i+1),gel(x,i)) <= 0) return 0;
-  return typ(x[i]) == t_STR;
+    if (typ(x[i]) != t_STR) return 0;
+  for (i=1; i<lx-1; i++)
+    if (strcmp(GSTR(gel(x,i+1)), GSTR(gel(x,i))) <= 0) return 0;
+  return 1;
 }
 
 long
@@ -1830,3 +1775,55 @@ setsearch(GEN x, GEN y, long flag)
   res = gen_search(x,y,flag,(void*)gcmp,cmp_nodata);
   avma = av; return res;
 }
+
+GEN
+setunion(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  if (typ(x) != t_VEC || typ(y) != t_VEC)
+    pari_err(talker,"not a set in setunion");
+  return gerepilecopy(av, vectoset(shallowconcat(x,y)));
+}
+
+GEN
+setintersect(GEN x, GEN y)
+{
+  long i, c = 1, lx = lg(x);
+  pari_sp av = avma;
+  GEN z = cgetg(lx,t_VEC);
+
+  if (!setisset(x) || !setisset(y))
+    pari_err(talker,"not a set in setintersect");
+  for (i=1; i<lx; i++)
+    if (gen_search(y, gel(x,i), 0, (void*)gcmp, cmp_nodata)) z[c++] = x[i];
+  setlg(z,c); return gerepilecopy(av,z);
+}
+
+GEN
+gen_setminus(GEN A, GEN B, int (*cmp)(GEN,GEN))
+{
+  pari_sp ltop = avma;
+  long i, j, k, find;
+  GEN  diff = cgetg(lg(A),t_VEC);
+  for(i=j=k=1; i < lg(A); i++)
+  {
+    for(find=0; j < lg(B); j++)
+    {
+      int s = cmp(gel(A,i),gel(B,j));
+      if (s < 0)  break ;
+      if (s > 0)  continue;
+      find=1;
+    }
+    if (!find) diff[k++] = A[i];
+  }
+  setlg(diff,k);
+  return gerepilecopy(ltop,diff);
+}
+
+GEN
+setminus(GEN x, GEN y)
+{
+  if (!setisset(x) || !setisset(y)) pari_err(talker,"not a set in setminus");
+  return gen_setminus(x,y,gcmp);
+}
+
