@@ -301,7 +301,7 @@ BA 36- New type t_CLOSURE to store GP functions
    39- GP function apply(), select()
    40- library functions FF_issquare, FpXQ_issquare, Flxq_issquare
 BA 41- library function vecsmall_uniq_sorted
-   42- bench 'ff'
+   42- bench 'ff', 'exact0'
    43- has_getenv.c
 
   Removed
