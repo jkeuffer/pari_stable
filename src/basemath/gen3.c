@@ -396,7 +396,7 @@ isrationalzeroscalar(GEN g)
 int
 isexactzero(GEN g)
 {
-  long i;
+  long i, lx;
   switch (typ(g))
   {
     case t_INT:
@@ -409,7 +409,11 @@ isexactzero(GEN g)
       return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
     case t_POLMOD:
       return isexactzero(gel(g,2));
-    case t_POL: return lg(g) == 2;
+    case t_POL: 
+      lx = lg(g); /* cater for Mod(0,2)*x^0 */
+      return lx == 2 || (lx == 3 && isexactzero(gel(g,2)));
+    case t_RFRAC:      
+      return isexactzero(gel(g,1)); /* may occur: Mod(0,2)/x */
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
 	if (!isexactzero(gel(g,i))) return 0;
