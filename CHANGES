@@ -303,6 +303,7 @@ BA 36- New type t_CLOSURE to store GP functions
 BA 41- library function vecsmall_uniq_sorted
    42- bench 'ff', 'exact0'
    43- has_getenv.c
+   44- library function FpX_oneroot
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

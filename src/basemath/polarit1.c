@@ -340,6 +340,57 @@ FpX_roots_i(GEN f, GEN p)
   }
   return sort(y);
 }
+static GEN
+FpX_oneroot_i(GEN f, GEN p)
+{
+  long da, db;
+  GEN pol, pol0, a, b, q = shifti(p,-1);
+
+  if (ZX_valuation(f, NULL)) return gen_0;
+  da = degpol(f);
+  if (da == 1) return subii(p, gel(f,2));
+  if (da == 2) return FpX_quad_root(f, p, 1);
+
+  /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
+  b = FpXQ_pow(pol_x(varn(f)),q, f,p);
+  if (lg(b) < 3) pari_err(talker,"not a prime in rootmod");
+  b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
+  a = FpX_gcd(f,b, p);
+  b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
+  b = FpX_gcd(f,b, p);
+  da = degpol(a);
+  db = degpol(b);
+  if (!da)
+  {
+    if (!db) return NULL;
+    a = b;
+  }
+  else
+    if (db && db < da) a = b;
+  a = FpX_normalize(a,p);
+  pol = gadd(pol_x(varn(f)), gen_1); pol0 = constant_term(pol);
+  for(;;)
+  { /* cf FpX_split_Berlekamp */
+    da = degpol(a);
+    if (da==1)
+      return subii(p, gel(a,2));
+    if (da==2)
+      return FpX_quad_root(a, p, 0);
+    for (pol0[2]=1; ; pol0[2]++)
+    {
+      b = ZX_Z_add(FpXQ_pow(pol,q, a,p), gen_m1); /* pol^(p-1)/2 - 1 */
+      b = FpX_gcd(a,b, p); db = degpol(b);
+      if (db && db < da)
+      {
+        b = FpX_normalize(b, p);
+        a = (db <= (da >> 1))? b: FpX_div(a,b, p);
+        break;
+      }
+      if (pol0[2] == 100 && !BSW_psp(p))
+	pari_err(talker, "not a prime in polrootsmod");
+    }
+  }
+}
 
 static GEN
 FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
@@ -354,6 +405,25 @@ FpX_roots(GEN f, GEN p) {
     case 0: avma = av; return cgetg(1, t_COL);
   }
   return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
+}
+GEN
+FpX_oneroot(GEN f, GEN p) {
+  pari_sp av = avma;
+  long q = mod2BIL(p);
+  GEN F = FpX_factmod_init(f,p);
+  switch(degpol(F))
+  {
+    case -1: pari_err(zeropoler,"factmod");
+    case 0: avma = av; return cgetg(1, t_VEC);
+  }
+  if (!odd(q))
+  {
+    F = root_mod_even(F,q); avma = av;
+    return (lg(F) == 1)? NULL: gel(F,1);
+  }
+  F = FpX_oneroot_i(F, p);
+  if (!F) { avma = av; return NULL; }
+  return gerepileuptoint(av, F);
 }
 
 GEN

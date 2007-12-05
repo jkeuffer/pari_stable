@@ -1707,6 +1707,7 @@ long    FpX_is_totally_split(GEN f, GEN p);
 GEN     FpX_factor(GEN f, GEN p);
 long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
+GEN     FpX_oneroot(GEN f, GEN p);
 GEN     FpX_roots(GEN f, GEN p);
 GEN     FqX_deriv(GEN f, GEN T, GEN p);
 GEN     FqX_factor(GEN x, GEN T, GEN p);
