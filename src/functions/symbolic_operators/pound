@@ -6,5 +6,5 @@ Help: #x: number of non code words in x, number of characters for a string
 Description: 
  (vecsmall):lg	lg($1)
  (vec):lg	lg($1)
- (pol):small:parens	lg($1)-2
+ (pol):small	lgpol($1)
  (gen):small	glength($1)
