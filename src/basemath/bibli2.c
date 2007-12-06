@@ -16,13 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-static int
-is_0(GEN x) { return typ(x) == t_INT && !signe(x); }
-static int
-is_1(GEN x) { return typ(x) == t_INT && signe(x) == 1 && is_pm1(x); }
-static int
-is_X(GEN x) { return lg(x) == 4 && is_0(gel(x,2)) && is_1(gel(x,3)); }
-
 /*******************************************************************/
 /**                                                               **/
 /**                      SPECIAL POLYNOMIALS                      **/
@@ -199,7 +192,7 @@ GEN
 polchebyshev_eval(long n, long kind, GEN x)
 {
   if (!x) return polchebyshev(n, kind, 0);
-  if (typ(x) == t_POL && is_X(x)) return polchebyshev(n, kind, varn(x));
+  if (gcmpX(x)) return polchebyshev(n, kind, varn(x));
   switch (kind)
   {
     case 1: return polchebyshev1_eval(n, x);
@@ -256,7 +249,7 @@ polhermite_eval(long n, GEN x)
   GEN a, x2, T;
 
   if (!x) return polhermite(n, 0);
-  if (typ(x) == t_POL && is_X(x)) return polhermite(n, varn(x));
+  if (gcmpX(x)) return polhermite(n, varn(x));
   if (n==0) return gen_1;
 
   av = avma; x2 = gsqr(x);
@@ -336,7 +329,7 @@ pollegendre_eval(long n, GEN x)
   GEN T, a, x2;
 
   if (!x) return pollegendre(n, 0);
-  if (typ(x) == t_POL && is_X(x)) return pollegendre(n, varn(x));
+  if (gcmpX(x)) return pollegendre(n, varn(x));
   /* pollegendre(-n) = pollegendre(n-1) */
   if (n < 0) n = -n-1;
   if (n==0) return gen_1;
@@ -412,7 +405,7 @@ polcyclo_eval(long n, GEN x)
 
   if (!x) return polcyclo(n, 0);
   tx = typ(x);
-  if (tx == t_POL && is_X(x)) return polcyclo(n, varn(x));
+  if (gcmpX(x)) return polcyclo(n, varn(x));
   if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (n == 1) return gsubgs(x, 1);
   /* n >= 2 */

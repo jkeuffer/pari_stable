@@ -3547,6 +3547,10 @@ the sign ($-1$, 0 or 1) of $\kbd{x}-\kbd{y}$).
 \fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
 lexicographic ordering.
 
+\fun{int}{gcmpX}{GEN x} return 1 (true) if \kbd{x} is a variable
+(monomial of degree $1$ with \typ{INT} coefficients equal to $1$ and $0$),
+and $0$ otherwise
+
 \fun{long}{gequal}{GEN x, GEN y} returns 1 (true) if \kbd{x} is equal
 to~\kbd{y}, 0~otherwise. A priori, this makes sense only if \kbd{x} and
 \kbd{y} have the same type, in which case they are recursively compared

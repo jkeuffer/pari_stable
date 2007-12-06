@@ -1246,6 +1246,7 @@ int     gcmp(GEN x, GEN y);
 int     gcmpsg(long x, GEN y);
 int     gcmp0(GEN x);
 int     gcmp1(GEN x);
+int     gcmpX(GEN x);
 int     gcmp_1(GEN x);
 GEN     gcvtop(GEN x, GEN p, long r);
 int     gequal(GEN x, GEN y);

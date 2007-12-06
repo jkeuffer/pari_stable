@@ -147,6 +147,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   111- problems with isexactzero and t_INTMODs. Mod(0,2)*x*1. -> 0,
        Pol(Mod(0,2))+2 -> 2, (2+0*I)+I*Mod(0,4)->Mod(2,4), Mod(0,2)/x -> 0
        Use isrationalzero instead.
+  112- substvec(x^2, [x^2], [y]) --> y^2  [ should be an error ]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
@@ -304,6 +305,7 @@ BA 41- library function vecsmall_uniq_sorted
    42- bench 'ff', 'exact0'
    43- has_getenv.c
    44- library function FpX_oneroot
+   45- library function gcmpX
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

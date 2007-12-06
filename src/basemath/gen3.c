@@ -1474,8 +1474,7 @@ gsubstvec(GEN e, GEN v, GEN r)
   for(i=1;i<l;i++)
   {
     GEN T = gel(v,i);
-    if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
-      pari_err(talker,"not a variable in substvec");
+    if (!gcmpX(T)) pari_err(talker,"not a variable in substvec (%Z)", T);
     w[i]=varn(T);
     z[i]=fetch_var();
   }
