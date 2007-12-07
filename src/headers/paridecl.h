@@ -910,6 +910,9 @@ long    tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN));
 GEN     vecbinome(long n);
 GEN     vecsort(GEN x, GEN k);
 GEN     vecsort0(GEN x, GEN k, long flag);
+long    ZV_search(GEN x, GEN y);
+GEN     ZV_sort(GEN L);
+GEN     ZV_sort_uniq(GEN L);
 
 /* buch1.c */
 

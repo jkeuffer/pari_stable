@@ -306,6 +306,7 @@ BA 41- library function vecsmall_uniq_sorted
    43- has_getenv.c
    44- library function FpX_oneroot
    45- library function gcmpX
+   46- library functions ZV_sort, ZV_sort_uniq, ZV_search
 
   Removed
     1- obsolete function kbessel2 (now static). Removed optional flag in besselk

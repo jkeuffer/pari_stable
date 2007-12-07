@@ -1035,6 +1035,9 @@ ZV_search(GEN x, GEN y) { return tablesearch(x, y, cmpii); }
 GEN
 ZV_sort_uniq(GEN L) { return gen_sort_uniq(L, (void*)&cmpii, &cmp_nodata); }
 
+GEN
+ZV_sort(GEN L) { return gen_sort(L, (void*)&cmpii, &cmp_nodata); }
+
 /***********************************************************************/
 /*                                                                     */
 /*               OPERATIONS ON DIRICHLET SERIES                        */

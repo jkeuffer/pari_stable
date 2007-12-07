@@ -694,12 +694,6 @@ GEN     plindep(GEN x);
 GEN     pslq(GEN x);
 GEN     pslqL2(GEN x);
 
-/* bibli2.c */
-
-GEN     gen_vecsort(GEN x, GEN k, long flag);
-long    ZV_search(GEN x, GEN y);
-GEN     ZV_sort_uniq(GEN L);
-
 /* buch1.c */
 
 GEN     buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec);

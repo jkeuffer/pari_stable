@@ -3728,6 +3728,14 @@ sorted with respect to the comparison function \kbd{cmp} (see
 the latter factorization are preserved, e.g. when merging the factorization
 of $2$ and $1/2$, the result is $2^0$.
 
+\fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
+
+\fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
+entries.
+
+\fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
+\kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
+
 \fun{long}{gen_search}{GEN v, GEN y, long flag, void *data, int
 (*cmp)(void*,GEN,GEN)}. Let \kbd{v} be a vector sorted according to
 \kbd{cmp(data,a,b)}; look for an index $i$ such that  \kbd{v[$i$]}
