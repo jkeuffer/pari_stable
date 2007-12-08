@@ -3137,14 +3137,13 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 	if (!c[t]) /* no pivot on that line yet */
 	{
 	  piv=gcoeff(x,t,k);
-	  if (signe(piv))
-	  {
-	    gcoeff(x,t,k) = gen_0;
-	    for (i=k+1; i<=n; i++)
-	      gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
-	    if (low_stack(lim, stack_lim(av,1)))
-	      gerepile_gauss(x,k,t,av,j,c);
-	  }
+	  if (!signe(piv)) continue;
+
+          gcoeff(x,t,k) = gen_0;
+          for (i=k+1; i<=n; i++)
+            gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
+          if (low_stack(lim, stack_lim(av,1)))
+            gerepile_gauss(x,k,t,av,j,c);
 	}
       for (i=k; i<=n; i++) gcoeff(x,j,i) = gen_0; /* dummy */
     }
