@@ -983,10 +983,10 @@ closure_eval(GEN C)
         long arity;
         GEN fun = gel(st,sp-1-n);
         if (typ(fun)!=t_CLOSURE)
-          pari_err(talker,"not a function in function call");
+          pari_err(talker,"not a function in numerical derivation");
         arity=fun[1];
         if (n>arity)
-          pari_err(talker,"too many parameters in user-defined function call");
+          pari_err(talker,"too many parameters in numerical derivation");
         for (j=n+1;j<=arity;j++)
           gel(st,sp++)=0;
         z = derivnum((void*)fun, derivuserwrap, gel(st,sp-arity), precreal);
@@ -1009,6 +1009,8 @@ closure_eval(GEN C)
             ep = varentries[varn(fun)];
             if (whatnow_fun && (w = whatnow_fun(ep->name,1)))
               pari_err(obsoler, ep->name, w);
+            else
+              pari_err(talker,"not a function: `%s'",ep->name);
           }
           pari_err(talker,"not a function in function call");
         }
