@@ -463,27 +463,35 @@ static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 
 /* Functions giving information on the factorisation. */
 
-/*TODO: merge with FpXQ_powers */
 /* u in Z[X], return kernel of (Frob - Id) over Fp[X] / u */
 GEN
 FpX_Berlekamp_ker(GEN u, GEN p)
 {
+  pari_sp ltop=avma;
   long j,N = degpol(u);
-  GEN v,w,Q,p1;
-  Q = cgetg(N+1,t_MAT); gel(Q,1) = zerocol(N);
-  w = v = FpXQ_pow(pol_x(varn(u)),p,u,p);
-  for (j=2; j<=N; j++)
-  {
-    p1 = RgX_to_RgV(w, N);
-    gel(p1,j) = addis(gel(p1,j), -1);
-    gel(Q,j) = p1;
-    if (j < N)
-    {
-      pari_sp av = avma; /*FpXQ_mul is not stack clean*/
-      w = gerepileupto(av, FpXQ_mul(w, v, u, p));
-    }
-  }
-  return FpM_ker(Q,p);
+  GEN XP = FpXQ_pow(pol_x(varn(u)),p,u,p);
+  GEN Q  = FpXQ_matrix_pow(XP,N,N,u,p);
+  for (j=1; j<=N; j++)
+    gcoeff(Q,j,j) = Fp_sub(gcoeff(Q,j,j), gen_1, p);
+  return gerepileupto(ltop, FpM_ker(Q,p));
+}
+
+GEN
+Flx_Berlekamp_ker(GEN u, ulong l)
+{
+  pari_sp ltop=avma;
+  long j,N = degpol(u);
+  GEN Q, XP;
+  pari_timer T;
+  TIMERstart(&T);
+  XP = Flxq_pow(polx_Flx(u[1]),utoipos(l),u,l);
+  Q  = Flxq_matrix_pow(XP,N,N,u,l);
+  for (j=1; j<=N; j++)
+    coeff(Q,j,j) = Fl_sub(coeff(Q,j,j),1,l);
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
+  Q = Flm_ker_sp(Q,l,0);
+  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
+  return gerepileupto(ltop,Q);
 }
 
 GEN
@@ -512,33 +520,6 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   p1 = FqM_ker(Q,T,p);
   if (DEBUGLEVEL>=4) msgTIMER(&Ti, "Berlekamp_ker");
   return gerepileupto(ltop,p1);
-}
-
-GEN
-Flx_Berlekamp_ker(GEN u, ulong p)
-{
-  pari_sp ltop=avma;
-  long j,N = degpol(u);
-  GEN v,w,Q,p1;
-  pari_timer T;
-  TIMERstart(&T);
-  Q = cgetg(N+1,t_VEC); gel(Q,1) = const_vecsmall(N,0);
-  w = v = Flxq_pow(polx_Flx(u[1]), utoipos(p), u, p);
-  for (j=2; j<=N; j++)
-  {
-    p1 = Flx_to_Flv(w, N);
-    p1[j] = Fl_sub((ulong)p1[j], 1, p);
-    gel(Q,j) = p1;
-    if (j < N)
-    {
-      pari_sp av = avma; /*Flxq_mul is not stack clean*/
-      w = gerepileupto(av, Flxq_mul(w, v, u, p));
-    }
-  }
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"Berlekamp matrix");
-  Q=Flm_ker_sp(Q,p,0);
-  if(DEBUGLEVEL>=9) msgTIMER(&T,"kernel");
-  return gerepileupto(ltop,Q);
 }
 
 GEN
