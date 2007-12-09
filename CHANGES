@@ -150,6 +150,7 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
   112- substvec(x^2, [x^2], [y]) --> y^2  [ should be an error ]
   113- typo in FpM_gauss_pivot: FpM_rank, FpM_image, FpM_suppl, FpM_indexrank
        much slower than they should be. Analogous problem in FqM_gauss_pivot.
+BA114- missing GP2C descriptions for Pol and Polrev.
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
