@@ -3109,15 +3109,29 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
   *rr=r; return d;
 }
 
+static GEN
+malloc_copy(GEN d, long n)
+{
+  GEN D = (GEN)gpmalloc((n+1)*sizeof(long));
+  long i;
+  for (i = 0; i <= n; i++) D[i] = d[i];
+  return D;
+}
+
 static void
 FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
 {
   pari_sp av,lim;
   GEN c,d,piv;
-  long i,j,k,r,t,n,m;
+  long i,j,k,r,t,m, n=lg(x)-1;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"FpM_gauss_pivot");
-  n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
+  if (!n) { *dd=NULL; *rr=0; return; }
+  if (lgefint(p) == 3)
+  {
+    ulong pp = (ulong)p[2];
+    *dd = Flm_gauss_pivot(ZM_to_Flm(x, pp), pp, rr);
+    *dd = malloc_copy(*dd, n); return;
+  }
 
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
@@ -3184,18 +3198,18 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
       for (i=k+1; i<=n; i++)
 	gcoeff(x,j,i) = Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
-	if (!c[t]) /* no pivot on that line yet */
-	{
-	  piv=gcoeff(x,t,k);
-	  if (signe(piv))
-	  {
-	    gcoeff(x,t,k) = gen_0;
-	    for (i=k+1; i<=n; i++)
-	      gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(piv,gcoeff(x,j,i)));
-	    if (low_stack(lim, stack_lim(av,1)))
-	      gerepile_gauss(x,k,t,av,j,c);
-	  }
-	}
+      {
+        if (c[t]) continue; /* already a pivot on that line */
+
+        piv = Fq_red(gcoeff(x,t,k), T,p);
+        if (!signe(piv)) continue;
+
+        gcoeff(x,t,k) = gen_0;
+        for (i=k+1; i<=n; i++)
+          gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(piv,gcoeff(x,j,i)));
+        if (low_stack(lim, stack_lim(av,1)))
+          gerepile_gauss(x,k,t,av,j,c);
+      }
       for (i=k; i<=n; i++) gcoeff(x,j,i) = gen_0; /* dummy */
     }
   }
