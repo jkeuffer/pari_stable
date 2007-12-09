@@ -6,10 +6,10 @@ Help: factor(x,{lim}): factorization of x. lim is optional and can be set
  whenever x is of (possibly recursive) rational type. If lim is set return
  partial factorization, using primes up to lim (up to primelimit if lim=0)
 Description: 
- (int, ?-1):gen        Z_factor($1)
- (gen, ?-1):gen        factor($1)
- (int, 0):gen          smallfact($1)
- (gen, small):gen      factor0($1, $2)
+ (int, ?-1):vec        Z_factor($1)
+ (gen, ?-1):vec        factor($1)
+ (int, 0):vec          smallfact($1)
+ (gen, small):vec      factor0($1, $2)
 Doc: general factorization function.
  If $x$ is of type integer, rational, polynomial or rational function, the
  result is a two-column matrix, the first column being the irreducibles
