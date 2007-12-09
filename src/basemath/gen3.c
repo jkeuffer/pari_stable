@@ -360,7 +360,8 @@ isinexact(GEN x)
   {
     case t_REAL: case t_PADIC: case t_SER:
       return 1;
-    case t_INT: case t_INTMOD: case t_FRAC: case t_QFR: case t_QFI:
+    case t_INT: case t_INTMOD: case t_FFELT: case t_FRAC:
+    case t_QFR: case t_QFI:
       return 0;
     case t_COMPLEX: case t_QUAD: case t_RFRAC: case t_POLMOD:
       return isinexact(gel(x,1)) || isinexact(gel(x,2));
@@ -405,6 +406,8 @@ isexactzero(GEN g)
       return !signe(gel(g,2));
     case t_COMPLEX:
       return isexactzero(gel(g,1)) && isexactzero(gel(g,2));
+    case t_FFELT:
+      return FF_cmp0(g);
     case t_QUAD:
       return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
     case t_POLMOD:
