@@ -414,7 +414,7 @@ FpX_oneroot(GEN f, GEN p) {
   switch(degpol(F))
   {
     case -1: pari_err(zeropoler,"factmod");
-    case 0: avma = av; return cgetg(1, t_VEC);
+    case 0: avma = av; return NULL;
   }
   if (!odd(q))
   {
