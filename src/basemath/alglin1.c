@@ -2632,21 +2632,14 @@ Flm_indexrank(GEN x, ulong p)
   return res;
 }
 
-/* if p != NULL, assume x integral and compute rank over Fp */
+/* n = dim x, r = dim Ker(x), d from gauss_pivot */
 static GEN
-indexrank0(GEN x, GEN p)
+indexrank0(long n, long r, GEN d)
 {
-  pari_sp av = avma;
-  long i,j,n,r;
-  GEN res,d,p1,p2;
+  GEN p1, p2, res = cgetg(3,t_VEC);
+  long i, j;
 
-  /* yield r = dim ker(x) */
-  FpM_gauss_pivot(x,p,&d,&r);
-
-  /* now r = dim Im(x) */
-  n = lg(x)-1; r = n - r;
-
-  avma=av; res=cgetg(3,t_VEC);
+  r = n - r; /* now r = dim Im(x) */
   p1 = cgetg(r+1,t_VECSMALL); gel(res,1) = p1;
   p2 = cgetg(r+1,t_VECSMALL); gel(res,2) = p2;
   if (d)
@@ -2660,10 +2653,22 @@ indexrank0(GEN x, GEN p)
 }
 
 GEN
-indexrank(GEN x) { return indexrank0(x,NULL); }
+indexrank(GEN x) { 
+  pari_sp av = avma;
+  long r;
+  GEN d;
+  gauss_pivot(x,&d,&r); avma = av;
+  return indexrank0(lg(x)-1, r, d);
+}
 
 GEN
-FpM_indexrank(GEN x, GEN p) { return indexrank0(x,p); }
+FpM_indexrank(GEN x, GEN p) {
+  pari_sp av = avma;
+  long r;
+  GEN d;
+  FpM_gauss_pivot(x,p,&d,&r); avma = av;
+  return indexrank0(lg(x)-1, r, d);
+}
 
 /*******************************************************************/
 /*                                                                 */
@@ -3111,7 +3116,6 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   GEN c,d,piv;
   long i,j,k,r,t,n,m;
 
-  if (!p) { gauss_pivot(x,dd,rr); return; }
   if (typ(x)!=t_MAT) pari_err(typeer,"FpM_gauss_pivot");
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
