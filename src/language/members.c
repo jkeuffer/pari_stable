@@ -59,7 +59,7 @@ member_p(GEN x)
     case t_PADIC:
       return gel(x,2);
     case t_FFELT:
-      return gel(x,4);
+      return FF_p_i(x);
   }
   member_err("p");
   return NULL;
@@ -171,6 +171,7 @@ member_mod(GEN x) /* modulus */
   {
     case t_INTMOD: case t_POLMOD: case t_QUAD: break;
     case t_PADIC: return gel(x,3);
+    case t_FFELT: return FF_mod(x);
     default: member_err("mod");
   }
   return gel(x,1);

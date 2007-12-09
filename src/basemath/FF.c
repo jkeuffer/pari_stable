@@ -174,6 +174,20 @@ FF_p_i(GEN x)
 }
 
 GEN
+FF_mod(GEN x)
+{
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    return gcopy(gel(x,3));
+  case t_FF_F2xq:
+    return F2x_to_ZX(gel(x,3));
+  default:
+    return Flx_to_ZX(gel(x,3));
+  }
+}
+
+GEN
 FF_to_FpXQ(GEN x)
 {
   switch(x[1])
@@ -186,6 +200,7 @@ FF_to_FpXQ(GEN x)
     return Flx_to_ZX(gel(x,2));
   }
 }
+
 GEN
 FF_to_FpXQ_i(GEN x)
 {

@@ -4276,10 +4276,13 @@ functions class \kbd{FpXQ} and/or \kbd{Flxq} as appropriate.
 
 \fun{GEN}{FF_p_i}{GEN a} shallow version of \kbd{FF\_p}.
 
+\fun{GEN}{FF_mod}{GEN a} returns the polynomial (with reduced \typ{INT}
+coefficients) defining the finite field, in the variable used to display $a$.
+
 \fun{GEN}{FF_to_FpXQ}{GEN a} converts the \typ{FFELT} \kbd{a} to a polynomial
-$P$ with \typ{INT} coefficients such that $a=P(g)$ where $g$ is the generator
-of the finite field returned by \kbd{ffgen}, in the variable used to display
-$g$.
+$P$ with reduced \typ{INT} coefficients such that $a=P(g)$ where $g$ is the
+generator of the finite field returned by \kbd{ffgen}, in the variable used to
+display $g$.
 
 \fun{GEN}{FF_to_FpXQ_i}{GEN a} shallow version of \kbd{FF\_to\_FpXQ}.
 
