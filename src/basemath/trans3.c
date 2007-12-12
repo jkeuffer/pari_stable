@@ -2025,7 +2025,7 @@ upper_half(GEN x, long *prec)
   long tx = typ(x), l;
   if (tx == t_QUAD) { x = quadtoc(x, *prec); tx = typ(x); }
   if (tx != t_COMPLEX || gsigne(gel(x,2)) <= 0)
-    pari_err(talker,"argument must belong to upper half-plane");
+    pari_err(talker,"argument '%Z' does not belong to upper half-plane", x);
   l = precision(x); if (l) *prec = l;
   return x;
 }
