@@ -876,6 +876,10 @@ GEN     ffinit_rand(GEN p, long n);
 byteptr init_modular(ulong *p);
 GEN     polint_triv(GEN xa, GEN ya);
 
+/* print_tree.c */
+
+void    print_tree(FILE *f_out, long n, int xml);
+
 /* rootpol.c */
 
 GEN     FFT(GEN x, GEN Omega);

@@ -1,0 +1,12 @@
+Function: printf
+Class: basic
+Section: programming/specific
+C-Name: printf0
+Prototype: vss*
+Help: print(format,{GEN}*): outputs its string arguments (using format, with possible %Z specifications) ending without
+ a newline
+Description:
+  (str,?gen,...):void  pariprintf("format\n"${2 format_args})
+Doc: outputs its arguments, separated by commas, in formated way, ending with a newline.
+ %\syn{NO}
+

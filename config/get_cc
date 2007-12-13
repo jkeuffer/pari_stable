@@ -170,7 +170,7 @@ fi
 case "$optimization" in
   full)      suffix=;     cflags="$OPTFLAGS $cflags";;
   profiling) suffix=.prf; cflags="$PRFFLAGS $cflags";;
-  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $cflags";;
+  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 -D__TREE__ $DBGFLAGS $cflags";;
 esac
 
 CFLAGS="$cflags $CFLAGS $CPPFLAGS"
