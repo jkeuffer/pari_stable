@@ -97,7 +97,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pariold.h"
 
 /* Common global variables: */
-extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
+extern ulong DEBUGTREE, DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern THREAD GEN  bernzone,gpi,geuler;
 extern GEN   primetab;
 extern GEN   gen_m1,gen_1,gen_2,ghalf,gi,gen_0,gnil;

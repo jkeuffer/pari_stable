@@ -113,7 +113,7 @@ compiler_reset(void)
 }
 
 static GEN
-getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
+getfunction(struct codepos *pos, long arity, long nbmvar, GEN text) /* creation of t_CLOSURE !!!! */
 {
   long lop =s_opcode.n+1-pos->opcode;
   long ldat=s_data.n+1-pos->data;
@@ -121,23 +121,23 @@ getfunction(struct codepos *pos, long arity, long nbmvar, GEN text)
   char *s;
   long i;
   cl[1] = arity;
-  gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR);
-  gel(cl,3) = cgetg(lop,  t_VECSMALL);
-  gel(cl,4) = cgetg(ldat, t_VEC);
-  if (text) gel(cl,5) = text;
-  if (nbmvar) gel(cl,6) = zerovec(nbmvar);
+  gel(cl,2) = cgetg(nchar2nlong(lop)+1, t_STR); /* the code receiver */
+  gel(cl,3) = cgetg(lop,  t_VECSMALL); /* the operands receiver */
+  gel(cl,4) = cgetg(ldat, t_VEC); /* the data receiver */
+  if (text) gel(cl,5) = text; /* the text */
+  if (nbmvar) gel(cl,6) = zerovec(nbmvar); /* the variables */
   s=GSTR(gel(cl,2))-1;
   for(i=1;i<lop;i++)
   {
-    s[i] = opcode[i+pos->opcode-1];
-    mael(cl, 3, i) = operand[i+pos->opcode-1];
+    s[i] = opcode[i+pos->opcode-1]; /* the code */
+    mael(cl, 3, i) = operand[i+pos->opcode-1]; /* the operands */
   }
   s[i]=0;
   s_opcode.n=pos->opcode;
   s_operand.n=pos->opcode;
   for(i=1;i<ldat;i++)
   {
-    gmael(cl, 4, i) = gcopy(data[i+pos->data-1]);
+    gmael(cl, 4, i) = gcopy(data[i+pos->data-1]); /* the data */
     gunclone(data[i+pos->data-1]);
   }
   s_data.n=pos->data;
@@ -344,6 +344,11 @@ static entree *
 get_entree(long n)
 {
   long x=tree[n].x;
+#ifdef __TREE__
+  if (DEBUGTREE >= 3) {
+    fprintf(stderr, "get_entree:L=%ld ->`%.*s'\n", tree[x].len, tree[x].len, tree[x].str);
+  }
+#endif
   if (tree[x].x==CSTmember)
     return fetch_member(tree[x].str, tree[x].len);
   else
@@ -371,6 +376,7 @@ getvar(long n)
   return ep;
 }
 
+/* given an "entree", try to find in localvars if there is a variable matching the "entree", and return a negative number giving the count of MY variables that will be in "var" of eval.c after this variable, this will be the offset of OCpushlex */
 static long
 getmvar(entree *ep)
 {
@@ -669,10 +675,11 @@ static void
 compileuserfunc(entree *ep, long n, int mode)
 {
   long vn=getmvar(ep);
-  if (vn)
+  if (vn) { /* here vn is negative, offset for pushlex if the "var" table of eval.c */
     op_push(OCpushlex,vn);
-  else
+  } else {
     op_push(OCpushdyn,(long)ep);
+  };
   compilecall(n, tree[n].f==Fderfunc ? OCderivuser:OCcalluser, mode);
 }
 
@@ -817,6 +824,11 @@ compilefunc(entree *ep, long n, int mode)
   if (*p)
   {
     q=p;
+#ifdef __TREE__
+    if (DEBUGTREE >= 2) {
+      fprintf(stderr, "compilefunc(%.*s):proto==`%s'\n", tree[x].len, tree[x].str, p);
+    }
+#endif
     while((mod=parseproto(&p,&c))!=PPend)
     {
       if (j<=nb && tree[arg[j]].f!=Fnoarg
@@ -830,11 +842,11 @@ compilefunc(entree *ep, long n, int mode)
           compile_err("missing mandatory argument", tree[arg[j]].str);
         switch(c)
         {
-        case 'G':
+        case 'G': /* GEN */
           compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
           j++;
           break;
-        case 'M':
+        case 'M': /* not documented, FIXME, for mnemonics; see src/functions/graphic/ploth */
           if (tree[arg[j]].f!=Fsmall)
           {
             if (!flags) flags = ep->code;
@@ -855,13 +867,13 @@ compilefunc(entree *ep, long n, int mode)
             }
             break;
           }
-        case 'L': /*Fall through*/
+        case 'L': /*Fall through*/ /* long */
           compilenode(arg[j++],Gsmall,0);
           break;
-        case 'n':
+        case 'n': /* variable number */
           compilenode(arg[j++],Gvar,0);
           break;
-        case '&': case '*':
+        case '&': case '*': /* *GEN */
           {
             long vn, a=arg[j++];
             entree *ep;
@@ -892,8 +904,8 @@ compilefunc(entree *ep, long n, int mode)
             nbpointers++;
             break;
           }
-        case 'I':
-        case 'E':
+        case 'I': /* string containing a sequence of GP statements to be processed by gp_read_str, for control statements e.g. */
+        case 'E': /* idem, with return value */
           {
             struct codepos pos;
             long a=arg[j++];
@@ -913,12 +925,12 @@ compilefunc(entree *ep, long n, int mode)
             op_push(OCpushgen, data_push(getclosure(&pos)));
             break;
           }
-        case 'V':
+        case 'V': /* symbol, i.e. a GP identifier name, except functions */
           {
             ev[lev++] = getvar(arg[j++]);
             break;
           }
-        case 'S':
+        case 'S': /* symbol, i.e. a GP identifier name */
           {
             entree *ep = getentry(arg[j++]);
             op_push(OCpushlong, (long)ep);
@@ -936,7 +948,7 @@ compilefunc(entree *ep, long n, int mode)
             i++; j++;
           }
           break;
-        case 'r':
+        case 'r': /* raw input, string without quotes */
           {
             long a=arg[j++];
             if (tree[a].f==Fentry)
@@ -951,7 +963,7 @@ compilefunc(entree *ep, long n, int mode)
             }
             break;
           }
-        case 's':
+        case 's': /* expanded string */
           {
             GEN g = cattovec(arg[j++], OPcat);
             long l, nb = lg(g)-1;
@@ -961,7 +973,7 @@ compilefunc(entree *ep, long n, int mode)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -974,7 +986,7 @@ compilefunc(entree *ep, long n, int mode)
         case 'P':
           op_push(OCprecdl,0);
           break;
-        case 'C':
+        case 'C': /* not documented, FIXME */
           op_push(OCpushgen,data_push(pack_localvars()));
           break;
         case 'f':
@@ -1003,7 +1015,7 @@ compilefunc(entree *ep, long n, int mode)
           ev[lev++] = NULL;
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1027,7 +1039,7 @@ compilefunc(entree *ep, long n, int mode)
             pari_err(impl,"prototype not supported");
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1055,7 +1067,7 @@ compilefunc(entree *ep, long n, int mode)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c*' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1127,7 +1139,7 @@ compilenode(long n, int mode, long flag)
         op_push(OCstorelex,vn);
       else
         op_push(OCstoredyn,(long)ep);
-      if (mode!=Gvoid)
+      if (mode!=Gvoid) /* there must remain the stored value on the stack; storelex/storedyn pop computed value from the stack */
       {
         if (vn)
           op_push(OCpushlex,vn);
@@ -1201,7 +1213,7 @@ compilenode(long n, int mode, long flag)
   case Frefarg:
     pari_err(talker,"unexpected &");
     break;
-  case Fentry:
+  case Fentry: /* an identifier : get its value */
     {
       entree *ep=getentry(n);
       long vn=getmvar(ep);
@@ -1241,8 +1253,8 @@ compilenode(long n, int mode, long flag)
       pari_sp ltop=avma;
       struct codepos pos;
       long i;
-      GEN arg=listtogen(x,Flistarg);
-      long nb=lg(arg)-1,nbmvar=numbmvar();
+      GEN arg=listtogen(x,Flistarg); /* arg is a VECSMALL of node numbers in tree */
+      long nb=lg(arg)-1,nbmvar=numbmvar(); /* number of arguments-1, number of MY variables in localvars */
       GEN text=cgetg(3,t_VEC);
       GEN vep=cgetg_copy(lg(arg),arg);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
@@ -1284,12 +1296,17 @@ compilenode(long n, int mode, long flag)
   default:
     pari_err(bugparier,"compilenode");
   }
-}
+} /* compilefunc */
 
 GEN
 gp_closure(long n)
 {
   struct codepos pos={0,0,0,-1};
+#ifdef __TREE__
+  if (DEBUGTREE >= 2) {
+    print_tree(stderr, n, 0);
+  };
+#endif
   compilenode(n,Ggen,FLreturn);
   return getclosure(&pos);
 }

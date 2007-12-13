@@ -29,6 +29,12 @@ forpari(GEN a, GEN b, GEN code)
   b = gcopy(b); /* Kludge to work-around the a+(a=2) bug */
   av=avma; lim = stack_lim(av,1);
   push_lex(a);
+#ifdef  __TREE__
+  if (DEBUGTREE >= 3) {
+    fprintf(stderr, "\nfor:code::\n");
+    closure_disassemble(code);
+  };
+#endif
   while (gcmp(a,b) <= 0)
   {
     closure_evalvoid(code); if (loop_break()) break;

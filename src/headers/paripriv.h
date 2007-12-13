@@ -434,6 +434,7 @@ GEN sd_datadir(const char *v, long flag);
 GEN sd_debug(const char *v, long flag);
 GEN sd_debugfiles(const char *v, long flag);
 GEN sd_debugmem(const char *v, long flag);
+GEN sd_debugtree(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
 GEN sd_factor_add_primes(const char *v, long flag);
 GEN sd_factor_proven(const char *v, long flag);
