@@ -109,7 +109,7 @@ allocatemem0(GEN z)
  * functions for use in sumiter: we want a temporary ep->value, which is NOT
  * a clone (PUSH), to avoid unnecessary copies. */
 
-enum {PUSH_VAL = 0, COPY_VAL = 1, DEFAULT_VAL = 2}; /* PUSH_VAL : for(n=1,10^8,...) */
+enum {PUSH_VAL = 0, COPY_VAL = 1, DEFAULT_VAL = 2};
 
 /* ep->args is the stack of old values (INITIAL if initial value, from
  * installep) */
@@ -214,25 +214,11 @@ void
 changevalue(entree *ep, GEN x)
 {
   var_cell *v = (var_cell*) ep->pvalue;
-#ifdef __TREE__
-  if (DEBUGTREE >= 3) {
-    fprintf(stderr, "changevalue:ep==`%s', val==%lx\n", ep->name, (long)x);
-  }
-#endif
-  if (v == INITIAL) {
-    new_val_cell(ep, x, COPY_VAL);
-  } else {
-    x = gclone(x); /* beware: killbloc may destroy old x, FIXME %%%% */
-    if (v->flag == COPY_VAL) {
-#ifdef __TREE__
-    if (DEBUGTREE >= 3) {
-      fprintf(stderr, "changevalue:old-val==%lx\n", (long)ep->value);
-    }
-#endif
-      killbloc((GEN)ep->value);
-    } else {
-      v->flag = COPY_VAL;
-    }
+  if (v == INITIAL) new_val_cell(ep, x, COPY_VAL);
+  else
+  {
+    x = gclone(x); /* beware: killbloc may destroy old x */
+    if (v->flag == COPY_VAL) killbloc((GEN)ep->value); else v->flag = COPY_VAL;
     ep->value = (void*)x;
   }
 }
@@ -318,12 +304,6 @@ change_compo(matcomp *c, GEN res)
   GEN p = c->parent, *pt = c->ptcell;
   long i, t;
 
-#ifdef __TREE__
-  if (DEBUGTREE >= 3) {
-    fprintf(stderr, "change_compo:typ(p==c->parent)==%ld, c==%lx, pt(GEN*:c->ptcell)==%lx, *pt(GEN)==%lx, res==%lx\n", typ(p), (long)c, (long)pt, (long)*pt, (long)res);
-  }
-#endif
-
   if (typ(p) == t_VECSMALL)
   {
     if (typ(res) != t_INT || is_bigint(res))
@@ -346,7 +326,7 @@ change_compo(matcomp *c, GEN res)
     if (t != t_COL || lg(res) != lg(*pt))
       pari_err(talker,"incorrect type or length in matrix assignment");
 
-  res = gclone(res); /* copy into heap, performs a gpmalloc */
+  res = gclone(res);
   killbloc(*pt);
   *pt = res;
 }
@@ -379,14 +359,11 @@ changelex(long vn, GEN x)
   v->value = x;
 }
 
-/*
-If container then clone else if clone then push (to save clone against removes by evaluations; only stack is safe)
-*/
 INLINE void
 copylex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
-  v->flag  = typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL; /* for t_LIST and t_STR ??? FIXME */
+  v->flag  = typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL;
   v->value = (v->flag == COPY_VAL)? gclone(x):
                                   (isclone(x))? gcopy(x): x;
 }
@@ -460,20 +437,6 @@ INLINE GEN
 closure_return(GEN C)
 {
   pari_sp ltop=avma;
-#ifdef __TREE__
-  if (DEBUGTREE >= 3) {
-/*-- C must have a special structure : 0: type, 1: arity, 2: GEN code, 3: GEN oper list of operands, 4: GEN data; [opt. 5 ???, 6 : new frame into this GEN ] */
-    fprintf(stderr, "exported name :");
-    output(C);
-    fprintf(stderr, "code :");
-    output(gel(C,2)); /* code */
-    fprintf(stderr, "operands :");
-    output(gel(C,3)); /* operands */
-    fprintf(stderr, "data :");
-    output(gel(C,4)); /* data */
-    closure_disassemble(C);
-  }
-#endif
   closure_eval(C);
   if (br_status)
   {
@@ -548,7 +511,7 @@ closure_castlong(long z, long mode)
 }
 
 static void
-closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2: GEN code, 3: GEN oper list of operands, 4: GEN data; [opt. 5 ???, 6 : new frame of variables into this GEN ] */
+closure_eval(GEN C)
 {
   char *code=GSTR(gel(C,2))-1;
   GEN oper=gel(C,3);
@@ -587,11 +550,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
     {
     case OCpushlong:
       st[sp++]=operand;
-#ifdef __TREE__
-      if (DEBUGTREE >= 3) {
-        fprintf(stderr, "pushlong STACK++ -> %lx\n", operand);
-      }
-#endif
       break;
     case OCpushgen:
       gel(st,sp++)=gel(data,operand);
@@ -601,11 +559,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
       break;
     case OCpushstoi:
       gel(st,sp++)=stoi(operand);
-#ifdef __TREE__
-      if (DEBUGTREE >= 3) {
-        fprintf(stderr, "stoi STACK++ -> %lx\n", (long)gel(st,sp-1));
-      }
-#endif
       break;
     case OCpushvar:
       ep=(entree*)operand;
@@ -620,12 +573,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         createvalue(ep);
       case EpVAR: /*FALL THROUGH*/
         gel(st,sp++)=(GEN)ep->value;
-#ifdef __TREE__
-        if (DEBUGTREE >= 2) {
-          fprintf(stderr, "pushdyn %lx(%s)\n", (long)(GEN)ep->value, ep->name);
-          voir((GEN)ep->value, -1);
-        }
-#endif
         break;
       default:
         pari_err(talker,"no such variable `%s'",ep->name);
@@ -674,11 +621,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         if (rp==s_ptrs.n-1)
           stack_new(&s_ptrs);
         g = &ptrs[rp++];
-#ifdef __TREE__
-        if (DEBUGTREE >= 3) {
-          fprintf(stderr, "newptrdyn:PTRS++ g==%lx\n", (long)g);
-        }
-#endif
         ep = (entree*) operand;
         switch (ep->valence)
         {
@@ -719,22 +661,12 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
       {
         gp_pointer *g = &ptrs[rp-1];
         gel(st,sp++) = (GEN)&(g->x);
-#ifdef __TREE__
-        if (DEBUGTREE >= 3) {
-          fprintf(stderr, "pushptr STACK++ pointer towards g(%lx)->x::%lx\n", (long)g, (long)&(g->x));
-        }
-#endif
       }
       break;
     case OCendptr:
       for(j=0;j<operand;j++)
       {
         gp_pointer *g = &ptrs[--rp];
-#ifdef __TREE__
-        if (DEBUGTREE >= 3) {
-          fprintf(stderr, "endptr(%ld) PTRS-- g==%lx, &(g->x)==%lx g->x==%lx\n", j, (long)g, (long)&g->x, (long)g->x);
-        }
-#endif
         if (g->ep)
         {
           if (g->vn)
@@ -767,30 +699,21 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
       break;
     case OCprecreal:
       st[sp++]=precreal;
-#ifdef __TREE__
-      if (DEBUGTREE >= 3) {
-        fprintf(stderr, "precreal STACK++ -> %ld\n", precreal);
-      }
-#endif
       break;
     case OCprecdl:
       st[sp++]=precdl;
       break;
     case OCstoi:
       gel(st,sp-1)=stoi(st[sp-1]);
-#ifdef __TREE__
-      if (DEBUGTREE >= 3) {
-        fprintf(stderr, "stoi STACK -> %lx\n", (long)gel(st,sp-1));
-      }
-#endif
       break;
     case OCitos:
       st[sp-1]=gtos(gel(st,sp-1));
       break;
     case OCtostr:
-      if (operand==1) {
-        st[sp-1] = (long) GSTR(GENtoGENstr(gel(st,sp-1))); /* Create a GEN, to copy volatile (?) data, then points a string on it */
-      } else {
+      if (operand==1)
+        st[sp-1] = (long) GSTR(GENtoGENstr(gel(st,sp-1)));
+      else
+      {
         GEN L=cgetg(operand+1,t_VEC);
         sp-=operand;
         for (j=1; j<=operand; j++)
@@ -845,11 +768,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         GEN p;
         p=*C->ptcell;
         sp--;
-#ifdef __TREE__
-        if (DEBUGTREE >= 3) {
-          fprintf(stderr, "compo1ptr:typ(p)==%ld, g==%lx\n", typ(p), (long)g);
-        }
-#endif
         switch(typ(p))
         {
         case t_VEC: case t_COL: case t_VECSMALL:
@@ -1005,7 +923,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         GEN res;
         sp-=ep->arity;
         gp_function_name=ep->name;
-        res = ((GEN (*)(ANYARG))ep->value)(ARGS); /* CORE-I of PARI/GP */
+        res = ((GEN (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
         gp_function_name=NULL;
         gel(st,sp++)=res;
@@ -1052,16 +970,6 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         entree *ep=(entree*)operand;
         sp-=ep->arity;
         gp_function_name=ep->name;
-#ifdef __MAINTENANCE__
-        { int ii;
-          fprintf(stderr, "<>closure_eval/OCcallvoid:arity==%ld\n", ep->arity);
-          for (ii = 0; ii < ep->arity; ii++) {
-            fprintf(stderr, "%d->[[[", ii);
-            output(gel(st,sp+ii));
-            fprintf(stderr, "]]]\n");
-          }
-        }
-#endif
         ((void (*)(ANYARG))ep->value)(ARGS);
         if (br_status) goto endeval;
         gp_function_name=NULL;
@@ -1075,7 +983,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         long arity;
         GEN fun = gel(st,sp-1-n);
         if (typ(fun)!=t_CLOSURE)
-          pari_err(talker,"eval.c/OCderivuser:not a function in numerical derivation");
+          pari_err(talker,"not a function in numerical derivation");
         arity=fun[1];
         if (n>arity)
           pari_err(talker,"too many parameters in numerical derivation");
@@ -1104,7 +1012,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
             else
               pari_err(talker,"not a function: `%s'",ep->name);
           }
-          pari_err(talker,"eval.c/OCcalluser:not a function in function call %d", typ(fun));
+          pari_err(talker,"not a function in function call");
         }
         arity=fun[1];
         if (n>arity)
@@ -1115,7 +1023,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
         if (PARI_stack_limit && (void*) &z <= PARI_stack_limit)
           pari_err(talker, "deep recursion");
 #endif
-        z = closure_return(fun); /* fun IS A CLOSURE; recursive call to closure_eval, and then grepileupto */ /* CORE-II of PARI/GP */
+        z = closure_return(fun);
         if (br_status) goto endeval;
         gel(st, sp-1) = z;
         break;
@@ -1132,7 +1040,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
       break;
     case OCsaveframe:
       {
-        GEN cl=gcopy(gel(st,sp-1)); /* must be a closure */
+        GEN cl=gcopy(gel(st,sp-1));
         if (lg(cl)==7)
         {
           GEN v=gel(cl,6);
@@ -1151,7 +1059,7 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
       for (j=0;j<operand;j++)
       {
         if (gel(st,sp+j))
-          copylex(j-operand,gel(st,sp+j)); /* executes in general a gclone or a gcopy of argument, even if argument is IN %%%% */
+          copylex(j-operand,gel(st,sp+j));
         else
         {
           var[s_var.n+j-operand].flag=DEFAULT_VAL;
@@ -1178,23 +1086,18 @@ closure_eval(GEN C) /*-- C must have a special structure : 0: type, 1: arity, 2:
     case OCpop:
       sp-=operand;
       break;
-    } /* switch opcode */
-#ifdef __TREE__
-    if (DEBUGTREE >= 2) {
-      fprintf(stderr, "closure_eval:opcode==%c, sp==%ld, rp==%ld, s_var.n==%ld\n", (char)opcode, sp, rp, s_var.n);
     }
-#endif
   }
   if (0)
   {
-endeval: /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Jump into a structure; to mask it for correct terminations */
+endeval:
     sp = saved_sp;
     rp = saved_rp;
   }
-  for(j=1;j<=nbmvar;j++) /* "my" variables */
+  for(j=1;j<=nbmvar;j++)
     freelex(-j);
   s_var.n-=nbmvar;
-  for(j=1;j<=nblvar;j++) /* "local" variables */
+  for(j=1;j<=nblvar;j++)
     pop_val(lvars[s_lvars.n-j]);
   s_lvars.n-=nblvar;
 }
@@ -1299,29 +1202,22 @@ disassemble_cast(long mode)
   }
 }
 
-static THREAD int level = 0;
-
 void
 closure_disassemble(GEN C)
 {
   char * code;
   GEN oper;
   long i;
-  GEN data;
   if (typ(C)!=t_CLOSURE)
     pari_err(typeer,"disassemble");
   code=GSTR(gel(C,2))-1;
   oper=gel(C,3);
-  data=gel(C,4);
   for(i=1;i<lg(oper);i++)
-  { int ii;
+  {
     op_code opcode=(op_code) code[i];
     long operand=oper[i];
     entree *ep;
-    for (ii = 0; ii < level; ii++) {
-      pariprintf("  ");
-    }
-    pariprintf("%05ld\t%c\t",i,(char)opcode);
+    pariprintf("%05ld\t",i);
     switch(opcode)
     {
     case OCpushlong:
@@ -1339,20 +1235,10 @@ closure_disassemble(GEN C)
         pariprintf("pushlong\t%ld\n",operand);
       break;
     case OCpushgen:
-      pariprintf("pushgen\t\tdata[%ld](t=%ld):",operand,typ(gel(data,operand)));
-      if (typ(gel(data,operand)) == t_CLOSURE) {
-        level += 1;
-        pariprintf("\nINSIDE CODE at level %d\n", level);
-        closure_disassemble(gel(data,operand));
-        pariprintf("OUTSIDE CODE at level %d\n", level);
-        level -= 1;
-      } else {
-        output(gel(data,operand));
-      }
+      pariprintf("pushgen\t\t%ld\n",operand);
       break;
     case OCpushreal:
-      pariprintf("pushreal\tdata[%ld](t=%ld):",operand,typ(gel(data,operand)));
-      output(gel(data,operand));
+      pariprintf("pushreal\t%ld\n",operand);
       break;
     case OCpushstoi:
       pariprintf("pushstoi\t%ld\n",operand);
@@ -1363,16 +1249,7 @@ closure_disassemble(GEN C)
       break;
     case OCpushdyn:
       ep=(entree*)operand;
-      pariprintf("pushdyn\t\t%s::",ep->name);
-      {
-        GEN what=(GEN)ep->value;
-        if (what) {
-          pariprintf(" t=%d, ", typ(what));
-          output(what);
-        } else {
-          pariprintf(" NULL\n");
-        }
-      }
+      pariprintf("pushdyn\t\t%s\n",ep->name);
       break;
     case OCpushlex:
       pariprintf("pushlex\t\t%ld\n",operand);
@@ -1433,13 +1310,13 @@ closure_disassemble(GEN C)
       pariprintf("copyifclone\n");
       break;
     case OCcompo1:
-      pariprintf("compo1\t\treturns %s\n",disassemble_cast(operand));
+      pariprintf("compo1\t\t%s\n",disassemble_cast(operand));
       break;
     case OCcompo1ptr:
       pariprintf("compo1ptr\n");
       break;
     case OCcompo2:
-      pariprintf("compo2\t\treturns %s\n",disassemble_cast(operand));
+      pariprintf("compo2\t\t%s\n",disassemble_cast(operand));
       break;
     case OCcompo2ptr:
       pariprintf("compo2ptr\n");
@@ -1498,7 +1375,7 @@ closure_disassemble(GEN C)
       pariprintf("derivuser\t%ld\n",operand);
       break;
     case OCcalluser:
-      pariprintf("calluser\tstack[-%ld] with %ld arguments\n",operand,operand);
+      pariprintf("calluser\t%ld\n",operand);
       break;
     case OCvec:
       pariprintf("vec\t\t%ld\n",operand);

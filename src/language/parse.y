@@ -119,11 +119,6 @@ pari_eval_str(char *lex, int strict)
   parser_reset();
   compiler_reset();
   reset_break();
-#ifdef __TREE__
-  if (DEBUGTREE >= 2) {
-    closure_disassemble(code);
-  };
-#endif
   res=closure_evalres(code);
   if (!res) return gnil;
   return res;

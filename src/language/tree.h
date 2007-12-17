@@ -27,29 +27,6 @@ typedef enum {Fseq,
               Fentry,Fcall,Ffunction,Fderfunc,Flambda
 } Ffunc;
 
-static THREAD const char *FFs[] = {
-  "Fseq",               /* sequential chaining of two exprs */
-  "Fmatrix",            /* creation of index for an element of a matrix or of a vector */
-  "FmatrixL",           /* creation of index for a "left" of a matrix, taking columns */
-  "FmatrixR",           /* creation of index for a "right" of a matrix, taking rows */
-  "Faffect",            /* affectation or creation of a closure */
-  "Ffacteurmat",        /* taking a part of a matrix */
-  "Fmatrixelts",        /* catenation of exprs to create a line of a matrix */
-  "Fmatrixlines",       /* catenation of lines to create a column of matrix */
-  "Fmat",               /* creation of a matrix */
-  "Fvec",               /* creation of a vector */
-  "Fnoarg",             /* void node */
-  "Flistarg",           /* catenation of arguments of a function */
-  "Frefarg",            /* & lvalue : argument by reference */
-  "Fconst",             /* constant : CST str, quote, int, real, member, entry */
-  "Fsmall",             /* small integer constant */
-  "Ftag",               /* typecast for gp2c */
-  "Fentry",             /* identifier */
-  "Fcall",              /* call of a closure function */
-  "Ffunction",          /* declaration of a function */
-  "Fderfunc",           /* declaration of a derivative */
-  "Flambda"};           /* creation of a closure function */
-
 #define Flastfunc  (Fdeffunc)
 #define FneedENTRY (Fconst)
 

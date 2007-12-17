@@ -919,7 +919,6 @@ escape(char *tch)
       {
 	case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
 	case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
-	case 't': (void)sd_debugtree(++s,d_ACKNOWLEDGE); break;
 	default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
       }
       break;

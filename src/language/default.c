@@ -618,10 +618,6 @@ sd_debugfiles(const char *v, long flag)
 { return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
 GEN
-sd_debugtree(const char *v, long flag)
-{ return sd_ulong(v,flag,"debugtree",&DEBUGTREE, 0,20,NULL); }
-
-GEN
 sd_debugmem(const char *v, long flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 

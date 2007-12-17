@@ -1,4 +1,4 @@
-  /* $Id$
+/* $Id$
 
 Copyright (C) 2000  The PARI group.
 
@@ -63,11 +63,11 @@ filtre0(filtre_t *F)
       *t++ = c; /* copy verbatim */
       switch(c)
       {
-        case '\\': /* in strings, \ is the escape character */
-          if (*s) *t++ = *s++;
-          break;
+	case '\\': /* in strings, \ is the escape character */
+	  if (*s) *t++ = *s++;
+	  break;
 
-        case '"': F->in_string = 0;
+	case '"': F->in_string = 0;
       }
       continue;
     }
@@ -76,19 +76,19 @@ filtre0(filtre_t *F)
     { /* look for comment's end */
       if (F->in_comment == MULTI_LINE_COMMENT)
       {
-        while (c != '*' || *s != '/')
-        {
-          if (!*s)
-          {
-            if (!F->more_input) F->more_input = 1;
-            goto END;
-          }
-          c = *s++;
-        }
-        s++;
+	while (c != '*' || *s != '/')
+	{
+	  if (!*s)
+	  {
+	    if (!F->more_input) F->more_input = 1;
+	    goto END;
+	  }
+	  c = *s++;
+	}
+	s++;
       }
       else
-        while (c != '\n' && *s) c = *s++;
+	while (c != '\n' && *s) c = *s++;
       F->in_comment = 0;
       continue;
     }
@@ -101,43 +101,43 @@ filtre0(filtre_t *F)
     switch(c)
     {
       case '/':
-        if (*s == '*') { t--; F->in_comment = MULTI_LINE_COMMENT; }
-        break;
+	if (*s == '*') { t--; F->in_comment = MULTI_LINE_COMMENT; }
+	break;
 
       case '\\':
-        if (!*s) {
-          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
-          t--;
-          if (!F->more_input) F->more_input = 1;
-          goto END;
-        }
-        if (*s == '\r') s++; /* DOS */
-        if (*s == '\n') {
-          if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
-          t--; s++;
-          if (!*s)
-          {
-            if (!F->more_input) F->more_input = 1;
-            goto END;
-          }
-        } /* skip \<CR> */
-        break;
+	if (!*s) {
+	  if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+	  t--;
+	  if (!F->more_input) F->more_input = 1;
+	  goto END;
+	}
+	if (*s == '\r') s++; /* DOS */
+	if (*s == '\n') {
+	  if (t-2 >= F->t && t[-2] == '?') break; /* '?\' */
+	  t--; s++;
+	  if (!*s)
+	  {
+	    if (!F->more_input) F->more_input = 1;
+	    goto END;
+	  }
+	} /* skip \<CR> */
+	break;
 
       case '"': F->in_string = 1;
-        break;
+	break;
 
       case LBRACE:
-        t--;
-        if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
-        F->more_input = 2;
-        F->wait_for_brace = 1;
-        break;
+	t--;
+	if (F->wait_for_brace) pari_err(impl,"embedded braces (in parser)");
+	F->more_input = 2;
+	F->wait_for_brace = 1;
+	break;
 
       case RBRACE:
-        if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
-        F->more_input = 0; t--;
-        F->wait_for_brace = 0;
-        break;
+	if (!F->wait_for_brace) pari_err(talker,"unexpected closing brace");
+	F->more_input = 0; t--;
+	F->wait_for_brace = 0;
+	break;
     }
   }
 
@@ -332,7 +332,7 @@ input_loop(filtre_t *F, input_method *IM)
   {
     F->s = to_read;
     F->t = s;
-    (void)filtre0(F); /* pre-processing of line, read by previous call to IM->getline */
+    (void)filtre0(F);
     if (IM->free) gpfree(to_read);
     if (! F->more_input) break;
 
@@ -449,7 +449,7 @@ printGEN(GEN x, pariout_t *T)
 
 /* format is standard printf format, except %Z is a GEN */
 void
-vpariputs(const char* format, va_list args) /* OLD VERSION OLD VERSION OLD VERSION OLD VERSION OLD VERSION */
+vpariputs(const char* format, va_list args)
 {
   long nb = 0, bufsize = 1023;
   const char *f = format;
@@ -465,23 +465,19 @@ vpariputs(const char* format, va_list args) /* OLD VERSION OLD VERSION OLD VERSI
       if (f[1] != 'Z') { *s++ = *f++; *s++ = *f++; }
       else
       {
-        strcpy(s,"\003%020ld\003"); /* brace with unprobable characters */
-        nb++; s += 8; f += 2; /* skip %Z */
+	strcpy(s,"\003%020ld\003"); /* brace with unprobable characters */
+	nb++; s += 8; f += 2; /* skip %Z */
       }
     }
   }
   *s = 0;
 #ifdef HAS_VSNPRINTF
-  for(;;) /* loop to find a buffer size long enough */
+  for(;;)
   {
     int l;
     buf = gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
-    if (l < 0) {
-      l = bufsize<<1;
-    } else if (l < bufsize) {
-      break;
-    };
+    if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
     gpfree(buf); bufsize = l + 1;
   }
   buf[bufsize-1] = 0; /* just in case */
@@ -498,996 +494,15 @@ vpariputs(const char* format, va_list args) /* OLD VERSION OLD VERSION OLD VERSI
     {
       if (*t == '\003' && t[21] == '\003')
       {
-        *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariputs(s); printGEN((GEN)atol(t+1), &T);
-        t += 22; s = t;
-        if (!--nb) break;
+	*t = 0; t[21] = 0; /* remove the bracing chars */
+	pariputs(s); printGEN((GEN)atol(t+1), &T);
+	t += 22; s = t;
+	if (!--nb) break;
       }
       else t++;
     }
   }
   pariputs(s); gpfree(buf); gpfree(str);
-}
-
-/* e binary exponent, return exponent in base ten */
-static long
-ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
-
-static void
-bzeros(char *buffer, int mxl, long nb) {
-  int len = strlen(buffer);
-  if (len + nb > mxl) {
-    pari_err(talker, "buffer overflow in bzeros %d > %d", len + nb, mxl);
-  };
-  while (nb-- > 0) {
-    strcat(buffer, "0");
-  };
-}
-
-static void
-zeros(long nb)  { while (nb-- > 0) pariputc('0'); }
-
-/* # of decimal digits, assume l > 0 */
-static long
-numdig(ulong l)
-{
-  if (l < 100000)
-  {
-    if (l < 100)    return (l < 10)? 1: 2;
-    if (l < 10000)  return (l < 1000)? 3: 4;
-    return 5;
-  }
-  if (l < 10000000)   return (l < 1000000)? 6: 7;
-  if (l < 1000000000) return (l < 100000000)? 8: 9;
-  return 10;
-}
-
-static void
-round_up(ulong *resd, ulong n, ulong *res)
-{
-  *resd += n;
-  while (*resd >= 1000000000UL && resd < res) { *resd++ = 0; *resd += 1; }
-}
-
-static void
-copart(char *s, ulong x, long start)
-{
-  char *p = s + start;
-  while (p > s)
-  {
-    ulong q = x/10;
-    *--p = (x - q*10) + '0';
-    x = q;
-  }
-}
-
-/* sss.ttt, assume 'point' < strlen(s) */
-static void
-wr2_dec(char *buffer, int mxl, char *s, long point, int width_frac)
-{
-  if (buffer) {
-    int len = strlen(buffer);
-    if (len + point + 1 > mxl) {
-      pari_err(talker, "buffer overflow in wr2_dec/1 %d > %d", len + point + 1, mxl);
-    };
-    strncat(buffer, s, point); /* integer part */
-    strcat(buffer, ".");
-    len += point + 1;
-    if (width_frac) {
-      if (len + width_frac > mxl) {
-        pari_err(talker, "buffer overflow in wr2_dec/2 %d > %d", len + width_frac, mxl);
-      };
-      strncat(buffer, s + point, width_frac);
-    } else {
-      if (len + strlen(s) - point > mxl) {
-        pari_err(talker, "buffer overflow in wr2_dec/3 %d > %d", len + strlen(s) - point, mxl);
-      };
-      strcat(buffer, s + point);
-    };
-  } else {
-    char *t = s + point, save = *t;
-    *t = 0;    pariputs(s); pariputc('.'); /* integer part */
-    *t = save; pariputs(t);
-  };
-}
-
-#define sp(T) STMT_START { if ((T)->sp) pariputc(' '); } STMT_END
-
-/* a.bbb En*/
-static void
-wr2_exp(char *buffer, int mxl, pariout_t *T, char *s, long n)
-{
-  if (buffer) {
-    char work[256];
-    wr2_dec(buffer, mxl, s, 1, 0);
-    if (T->sp) {
-      if (strlen(buffer) + 1 > mxl) {
-        pari_err(talker, "buffer overflow in wr2_exp/1 %d > %d", strlen(buffer) + 1, mxl);
-      };
-      strcat(buffer, " ");
-    };
-    sprintf(work, "E%ld", n);
-    if (strlen(buffer) + strlen(work) > mxl) {
-      pari_err(talker, "buffer overflow in wr2_exp/2 %d > %d", strlen(buffer) + strlen(work), mxl);
-    };
-    strcat(buffer + strlen(buffer), work);
-  } else {
-    wr2_dec(NULL, 0, s, 1, 0); sp(T); pariprintf("E%ld", n);
-  };
-}
-
-/* assume x != 0 and print |x| in floating point format */
-static void
-wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_frac) /* f_format : boolean : fixed or not */
-{
-  long beta, l, ldec, dec0, decdig, d, dif, lx = lg(x), wanted_dec = T->sigd;
-  GEN z;
-  ulong *res, *resd;
-  char *s, *t;
-/*
-  wanted_dec : required significant digits
-  decdig : real number of significant digits
-  dif/1 : number of bits available for integer part of x
-  beta : exponent in base 10 of integer part of x
-  dif/2 : virtual position of . in ``s'' (the string integer_part.fractionnary_part)
-*/
-
-
-  if (wanted_dec > 0)
-  { /* reduce precision if possible */
-    l = ndec2prec(wanted_dec); /* 'wanted_dec' digits -> pari precision in words for that */
-    if (lx > l) lx = l; /* truncature, no rounding FIXME %%%% */
-  }
-  dif =  bit_accuracy(lx) - expo(x); /* (lx-2)*2^64 - expo(x); expo being in basis 2 */
-  if (dif <= 0) f_format = 0; /* write in E format */
-  beta = ex10(dif);
-  if (beta)
-  { /* z = |x| 10^beta */
-    if (beta > 0)
-      z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1)); /* 10^b = 5^b * 2^b, 2^b goes into exponent */
-    else
-      z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
-    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
-  }
-  else z = mpabs(x);
-
-  /* |x| ~ z / 10^beta, z in N */
-  z = gcvtoi(z, &l); /* nearest integer (truncation); l is junk */
-  res = convi(z, &ldec); /* basis 2^BITS_IN_LONG -> basis 10^9 (sizeof(32-bits word)); res is an array of long, POINTING AFTER IT, length==ldec */
-  resd = res - 1; /* leading word */
-  dec0 = numdig(*resd);
-  decdig = 9 * (ldec-1) + dec0; /* number of significant decimal digits in z */
-
-  /* Round properly; leading word may overflow to 10^9 after rounding */
-  if (wanted_dec < 0 || decdig < wanted_dec)
-    wanted_dec = decdig;
-  else if (wanted_dec < dec0) /* ==> 0 < wanted_dec < 9 */
-  {
-    ulong p10 = u_pow10(dec0 - wanted_dec);
-    if (*resd % p10 >= (p10>>1)) *resd += p10; /* round up */
-  }
-  else if (wanted_dec < decdig)
-  {
-    l = wanted_dec - dec0; /* skip leading word */
-    d = l % 9;
-    resd -= l / 9;
-    if (d)
-    { /* cut resd[-1] to first d digits when printing */
-      ulong p10 = u_pow10(9 - d), r = *--resd % p10;
-      if (r >= (p10>>1)) round_up(resd, p10, res);
-    } else {
-      if ((ulong)resd[-1] >= 500000000UL) round_up(resd, 1, res);
-    }
-  }
-
-  s = t = (char*)new_chunk(nchar2nlong(decdig + 1)); /* no memory leak, as the caller cleans the stack  */
-  res--;
-  if (*res)
-  {
-    d = numdig(*res); /* number of decimal digit, 1..9 */
-    copart(t, *res, d); t += d; /* filling of t with value *res on d digits */
-  }
-  else /* overflow when rounding */
-  {
-    d = 10;
-    *t++ = '1';
-    copart(t, 0, 9); t += 9;
-  }
-  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
-  l = ldec;
-  while (--l > 0) { copart(t, *--res, 9); t += 9; } /* this is the master loop, writing mantissa from chunks in [0..10^9[ */
-  s[wanted_dec] = 0;
-
-  dif = decdig - beta; /* virtual position of . in s */
-  if (buffer) {
-    if (!f_format || dif > wanted_dec) { /* integer_part exceeds wanted_dec */
-      if (width_frac) {
-#if 0
-        fprintf(stderr, "<>dif==%ld, width_frac==%d, s==`%s'\n", dif, width_frac, s);
-#endif
-        if (dif + width_frac + 1 < strlen(s)) {
-          s[dif + width_frac] = 0; /* %%%% */
-          wr2_exp(buffer, mxl, T, s, dif-1);
-        } else {
-          wr2_exp(buffer, mxl, T, s, dif-1);
-        };
-      } else {
-        wr2_exp(buffer, mxl, T, s, dif-1);
-      };
-    } else if (dif > 0) { /* f_format, write integer_part.fractionary_part */
-      wr2_dec(buffer, mxl, s, dif, width_frac);
-    } else { /* f_format, fractionary part must be written */
-      if (strlen(buffer) + 2 > mxl) {
-        pari_err(talker, "buffer overflow in wr2_float/1 %d > %d", strlen(buffer) + 2, mxl);
-      };
-      strcat(buffer, "0.");
-      if (width_frac) {
-        if (width_frac < -dif) {
-          bzeros(buffer, mxl, width_frac);
-        } else {
-          bzeros(buffer, mxl, -dif);
-          if (strlen(buffer) + width_frac + dif > mxl) {
-            pari_err(talker, "buffer overflow in wr2_float/2 %d > %d", strlen(buffer) + width_frac + dif, mxl);
-          };
-          strncat(buffer, s, width_frac + dif);
-        };
-      } else { /* no given precision */
-        bzeros(buffer, mxl, -dif);
-        if (strlen(buffer) + strlen(s) > mxl) {
-          pari_err(talker, "buffer overflow in wr2_float/3 %d > %d", strlen(buffer) + strlen(s), mxl);
-        };
-        strcat(buffer, s);
-      };
-    }
-  } else { /* on a file */
-    if (!f_format || dif > wanted_dec) wr2_exp(NULL, 0, T, s, dif-1);
-    else if (dif > 0) wr2_dec(NULL, 0, s, dif, 0);
-    else { pariputs("0."); zeros(-dif); pariputs(s); }
-  };
-}
-
-/* Write real number x.
- * format: e (exponential), f (floating point), g (as f unless x too small)
- *   if format is not one of the above act as e.
- * sigd: number of sigd to print (all if <0).
- */
-static void
-wr2_real(char *buffer, int mxl, pariout_t *T, GEN x, int width_frac, int addsign)
-{
-  pari_sp av;
-  long sx = signe(x), ex = expo(x);
-
-  if (!sx) { /* real 0 */
-    if (T->format == 'f') {
-      long d, dec = T->sigd;
-      if (dec < 0)
-      {
-        d = (long)(-ex * L2SL10);
-        dec = (d <= 0)? 0: d;
-      }
-      if (buffer) {
-        if (strlen(buffer) + 2 > mxl) {
-          pari_err(talker, "buffer overflow in wr2_real/1 %d > %d", strlen(buffer) + 2, mxl);
-        };
-        strcat(buffer, "0."); bzeros(buffer, mxl, dec);
-      } else {
-        pariputs("0."); zeros(dec);
-      };
-    } else {
-      if (buffer) {
-        char work[256];
-        sprintf(work, "0.E%ld", ex10(ex) + 1);
-        if (strlen(buffer) + strlen(work) > mxl) {
-          pari_err(talker, "buffer overflow in wr2_real/2 %d > %d", strlen(buffer) + strlen(work), mxl);
-        };
-        strcat(buffer, work);
-      } else {
-        pariprintf("0.E%ld", ex10(ex) + 1);
-      };
-      return;
-    } /* string for a zero */
-  };
-
-  if (sx < 0) {
-    if (buffer) {
-      strcat(buffer, "-"); /* print sign if needed */
-    } else {
-      if (addsign) pariputc('-'); /* print sign if needed */
-    };
-  };
-
-  av = avma;
-  if (buffer) {
-    wr2_float(buffer, mxl, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', width_frac);
-  } else {
-    wr2_float(NULL, 9, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', 0);
-  };
-  avma = av;
-}
-/* $Id$ */
-/*
-** Copyright (C) 1998-2002 Martin Roesch <roesch@sourcefire.com>
-**
-** This program is free software; you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation; either version 2 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software
-** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
-
-/*
-** This file contains various routines which we shamelessly steal from other
-** opensource products :-P (I love code reuseability idea)
-**                      fygrave@tigerteam.net
-*/
-
-/* Modifications for format %Z: R.Butel IMB/CNRS 2007/12/03 */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-/*
-**  -- counted versions of printf
-**
-**      These versions have been grabbed off the net.  They have been
-**      cleaned up to compile properly and support for .precision and
-**      %lx has been added.
-*/
-
-/**************************************************************
- * Original:
- * Patrick Powell Tue Apr 11 09:48:21 PDT 1995
- * A bombproof version of doprnt (sm_dopr) included.
- * Sigh.  This sort of thing is always nasty do deal with.  Note that
- * the version here does not include floating point...
- *
- * snprintf() is used instead of sprintf() as it does limit checks
- * for string length.  This covers a nasty loophole.
- *
- * The other functions are there to prevent NULL pointers from
- * causing nast effects.
- **************************************************************/
-
-/*
- * sm_dopr(): poor man's version of doprintf
- */
-
-static void fmtstr (const char *value, int ljust, int len, int zpad, int maxwidth);
-static void fmtnum (long lvalue, GEN value, int base, int dosign, int ljust, int len, int zpad);
-static void dostr ( const char * , int );
-static void dopr_outch ( int c );
-
-static THREAD const char *DoprEnd; /* ending of the output buffer */
-static THREAD int SnprfOverflow; /* counts number of overflows out of the output buffer */
-static THREAD char *z_output; /* the current writing place in the output buffer */
-
-static void
-string_out(const char *plus)
-{
-  int ii;
-  for (ii = 0; ii < strlen(plus); ii++) {
-    dopr_outch( plus[ii] ); /* évite l'overflow ou les compte */
-  };
-}
-
-static THREAD const char *saved_format = NULL;
-
-static long
-v_l_get_arg(GEN arg_vector, int nbmx, int *index)
-{
-  long res = 0;
-  if (*index >= nbmx) {
-    pari_err(talker, "missing GEN(int) arg %d for printf format==`%s'", *index, saved_format);
-  } else {
-    GEN take = gel(arg_vector, *index++);
-    res = gtolong(take);
-  };
-  return res;
-} /* v_l_get_arg */
-
-static GEN
-v_get_arg(GEN arg_vector, int nbmx, int *index, const char *caller)
-{
-  GEN res = NULL;
-/*  fprintf(stderr, "index==%d, nbmx=%d (%s)\n", *index, nbmx, caller); */
-/*  output(arg_vector); */
-  if (*index >= nbmx) {
-    pari_err(talker, "missing GEN arg %d for printf format==`%s'", *index, saved_format);
-  } else {
-    res = gel(arg_vector, (*index)++);
-  };
-  return res;
-} /* v_get_arg */
-
-static void
-v_set_arg(va_list args, GEN *arg_vector, int *nbmx)
-{
-  *arg_vector = va_arg(args, GEN);
-/*    output(*arg_vector); */
-  *nbmx = lg( *arg_vector );
-}
-
-static void
-sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list args )
-{
-    int ch;
-    GEN gvalue, gtry;
-    int longflag  = 0;
-    int shortflag  = 0;
-    int pointflag = 0;
-    int maxwidth  = 0;
-    char *strvalue;
-    long lvalue;
-    int ljust;
-    int len;
-    int zpad;
-    SnprfOverflow = 0;
-    GEN arg_vector = NULL;
-    int index = 1;
-    int nbmx = 0;
-    int mxlb;
-    pariout_t Tcopy;
-    const char *recall = NULL;
-    int to_free;
-    char *plus;
-
-    saved_format = format;
-
-    while((ch = *format++) != '\0') {
-#if 0
-        fprintf(stderr, "<>ch/1==%c\n", ch);
-#endif
-        switch(ch) {
-            case '%':
-                ljust = len = zpad = maxwidth = 0;
-                shortflag = longflag = pointflag = 0;
-                recall = format - 1; /* '%' was skipped */
-nextch:
-                ch = *format++;
-#if 0
-                fprintf(stderr, "<>ch/2==%c\n", ch);
-#endif
-                switch(ch) {
-                    case 0:
-                        dostr( "**end of format**" , 0);
-                        return;
-/*
-------------------------------------------------------------------------
-                                                          -- flags
-------------------------------------------------------------------------
--- can be : +, -, 0, #, space
--- c.f. http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274...
-*/
-                    case '-':
-                        ljust = 1;
-                        goto nextch;
-                    case '+':
-                        goto nextch;
-                    case '0': /* set zero padding if len not set */
-                        if(len==0) {
-                            if (!pointflag) {
-                                zpad = '0';
-                            };
-                        };
-                        if(pointflag) {
-                            maxwidth = maxwidth*10 + ch - '0';
-                        } else {
-                            len = len*10 + ch - '0';
-                        };
-                        goto nextch;
-/*
-------------------------------------------------------------------------
-                                             -- maxwidth or precision
-------------------------------------------------------------------------
-*/
-                    case '1':
-                    case '2':
-                    case '3':
-                    case '4':
-                    case '5':
-                    case '6':
-                    case '7':
-                    case '8':
-                    case '9':
-                        if(pointflag) {
-                            maxwidth = maxwidth*10 + ch - '0';
-                        } else {
-                            len = len*10 + ch - '0';
-                        };
-                        goto nextch;
-                    case '*':
-                        if (pointflag) {
-                            if (is_a_list) {
-                                maxwidth = va_arg(args, int);
-                            } else {
-                                if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                                maxwidth = (int )v_l_get_arg(arg_vector, nbmx, &index);
-                            };
-                        } else {
-                            if (is_a_list) {
-                                len = va_arg(args, int);
-                            } else {
-                                if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                                len = (int )v_l_get_arg(arg_vector, nbmx, &index);
-                            };
-                        };
-                        goto nextch;
-                    case '.':
-                        if (pointflag) {
-                            dostr( "**already in point part**" , 0);
-                        };
-                        pointflag = 1;
-                        goto nextch;
-/*
-------------------------------------------------------------------------
-                                             -- length modifiers
-------------------------------------------------------------------------
--- can be : hh, h, l, ll, j, z, t, L
--- c.f. http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274...
-*/
-                    case 'l':
-                        longflag = 1;
-                        goto nextch;
-                    case 'h':
-                        shortflag = 1; /* dummy, as va_arg promotes short into int */
-                        goto nextch;
-/*
-------------------------------------------------------------------------
-                                             -- conversions
-------------------------------------------------------------------------
-*/
-                    case 'u':
-                    case 'U':
-                        if (is_a_list) {
-                            if(longflag) {
-                                lvalue = va_arg( args, long );
-                            } else {
-                                lvalue = va_arg( args, int );
-                            };
-                            fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "U");
-                            fmtnum( 0, gvalue, 10,0, ljust, len, zpad );
-                        };
-                        break;
-                    case 'o':
-                    case 'O':
-                        if (is_a_list) {
-                            if(longflag) {
-                                lvalue = va_arg( args, long );
-                            } else {
-                                lvalue = va_arg( args, int );
-                            };
-                            fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "O");
-                            fmtnum( 0, gvalue, 8,0, ljust, len, zpad );
-                        };
-                        break;
-                    case 'd':
-                    case 'D':
-                        if (is_a_list) {
-                            if(longflag) {
-                                lvalue = va_arg( args, long );
-                            } else {
-                                lvalue = va_arg( args, int );
-                            };
-                            fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "D");
-                            fmtnum( 0, gvalue, 10,1, ljust, len, zpad );
-                        };
-                        break;
-                    case 'x':
-                        if (is_a_list) {
-                            if(longflag) {
-                                lvalue = va_arg( args, long );
-                            } else {
-                                lvalue = va_arg( args, int );
-                            };
-                            fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "x");
-                            fmtnum( 0, gvalue, 16,0, ljust, len, zpad );
-                        };
-                        break;
-                    case 'X':
-                        if (is_a_list) {
-                            if(longflag) {
-                                lvalue = va_arg( args, long );
-                            } else {
-                                lvalue = va_arg( args, int );
-                            };
-                            fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "X");
-                            fmtnum( 0, gvalue,-16,0, ljust, len, zpad );
-                        };
-                        break;
-                    case 'Z': //-- %Z IS HERE
-                        if (is_a_list) {
-                            gvalue = va_arg( args, GEN );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "Z");
-                        };
-                        if (len || maxwidth) {
-                            /*_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp) */
-                            /* char format; e,f,g */
-                            /* long fieldw; field width */
-                            /* long sigd;   -1 (all) or number of significant digits printed */
-                            /* int sp;      0 = suppress whitespace from output */
-                            /* int prettyp; output style: raw, prettyprint, etc */
-                            /* int TeXstyle; */
-                            _initout(&Tcopy,tolower(ch),len,1,maxwidth, f_RAW);
-                            plus = GENtostr0(gvalue, &Tcopy, &gen_output);
-                        } else {
-                            plus = GENtostr(gvalue);
-                        }
-                        string_out(plus);
-                        free(plus);
-                        plus = NULL;
-                        break;
-                    case 's':
-                        if (is_a_list) {
-                            strvalue = va_arg( args, char * );
-                            to_free = 0;
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "s");
-                            strvalue = GENtostr(gvalue);
-                            to_free = 1;
-                        };
-                        if(maxwidth > 0 || !pointflag) {
-                            if(pointflag && len > maxwidth)
-                                len = maxwidth; /* Adjust padding */
-                            fmtstr( strvalue,ljust,len,zpad, maxwidth);
-                        }
-                        if (to_free) {
-                            gpfree(strvalue);
-                        };
-                        break;
-                    case 'c':
-                        if (is_a_list) {
-                            ch = va_arg( args, int );
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
-                            strvalue = GENtostr(gvalue);
-                            ch = strvalue[0];
-                            gpfree(strvalue);
-                        };
-                        dopr_outch( ch );
-                        break;
-
-                    case '%':
-                        dopr_outch( ch );
-                        continue;
-                    case 'g':
-                    case 'G':
-                    case 'e':
-                    case 'E':
-                    case 'f':
-                        if (is_a_list) {
-                            char work[256];
-                            char subfmt[256];
-                            const char *str;
-                            strncpy(subfmt, recall, format - recall);
-                            subfmt[format - recall] = '\0'; /* format has been incremented after reading of current ch */
-#if 0
-                            fprintf(stderr, "<>subfmt==`%s'\n", subfmt);
-#endif
-                            double dvalue = va_arg( args, double );
-                            sprintf(work, subfmt, dvalue);
-                            str = &work[0];
-                            while(*str ) dopr_outch(*str++);
-                        } else {
-                            if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                            gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
-                            Tcopy = *T;
-                            if (len) {
-                                mxlb = len;
-                            } else {
-                                if (Tcopy.sigd >= 0) {
-                                    mxlb = Tcopy.sigd;
-                                } else { /* total precision */
-                                    if (typ(gvalue) == t_REAL) {
-                                        mxlb = prec2ndec(lg(gvalue));
-                                    } else {
-/*                                    dostr("infinite precision required for output"); */
-                                        pari_err(infprecer, "output");
-                                        mxlb = 0;
-                                    };
-                                };
-                            };
-                            mxlb += 1 + 20; /* 20 : margin for erroneous outputs FIXME and for exponent */
-                            gtry = gtofp(gvalue, ndec2prec(mxlb));
-                            if (typ(gtry) == t_REAL) {
-                                char *buffer = stackmalloc(mxlb);
-                                if (len) Tcopy.sigd = len-1;
-                                Tcopy.format = tolower(ch);
-                                *buffer = 0;
-                                wr2_real(buffer, mxlb, &Tcopy, gtry, maxwidth, 0);
-                                string_out(buffer);
-                            } else { /* default Format %Z; %%%% one can do better for vectors of reals for example */
-                                pari_err(talker, "impossible conversion to t_REAL, use %%Z format instead");
-                            };
-                        };
-                        break;
-                    case 'p':
-                        pari_err(talker, "pointer conversion (not in standard) %c in format `%s'", ch, saved_format);
-                        break;
-                    default:
-                        pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, saved_format);
-                } /* second switch on ch */
-                break;
-            default:
-                dopr_outch( ch );
-                break;
-        } /* first switch on ch */
-    } /* while loop on ch */
-    *z_output = 0;
-}
-
-static void
-fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth )
-{
-    int padlen, strlen;     /* amount to pad */
-
-    if(value == 0) {
-        value = "<NULL>";
-    }
-    for(strlen = 0; value[strlen]; ++ strlen); /* strlen */
-    if(strlen > maxwidth && maxwidth)
-        strlen = maxwidth;
-    padlen = len - strlen;
-    if(padlen < 0) padlen = 0;
-    if(ljust) padlen = -padlen;
-    while(padlen > 0)
-    {
-        dopr_outch( ' ' );
-        --padlen;
-    }
-    dostr( value, maxwidth );
-    while(padlen < 0)
-    {
-        dopr_outch( ' ' );
-        ++padlen;
-    }
-}
-
-static void
-fmtnum(  long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zpad )
-{
-    int signvalue = 0;
-    char *convert;
-    long place = 0, mxl;
-    int padlen = 0; /* amount to pad */
-    int caps = 0;
-    GEN uvalue = NULL;
-    unsigned long ulnvalue = 0;
-    int factor;
-    pari_sp av, avma = 0;
-
-    if (gvalue) {
-        av = avma;
-        gvalue = gfloor(gvalue);
-        if (typ(gvalue) != t_INT) {
-            dostr("Error : argument is not of type t_INT", 0);
-            avma = av;
-            return;
-        }
-    };
-
-    /* DEBUGP(("value 0x%x, base %d, dosign %d, ljust %d, len %d, zpad %d\n",
-        value, base, dosign, ljust, len, zpad )); */
-    if (gvalue) {
-        uvalue = icopy(gvalue);
-        if(dosign) {
-            if(signe(gvalue) < 0) {
-                signvalue = '-';
-                setsigne(uvalue,1); /* i.e. = gmul(gvalue, gen_m1); chg_sign = gneg, negi, togglesign */
-            }
-        }
-    } else {
-        ulnvalue = lvalue;
-        if(dosign) {
-            if(lvalue < 0) {
-                signvalue = '-';
-                ulnvalue = - lvalue;
-            }
-        }
-    };
-    if(base < 0) {
-        caps = 1;
-        base = -base;
-    }
-    if (base >= 10) {
-      factor = 1;
-    } else {
-      factor = 2; /* base 8 < base 10 */
-    };
-    if (gvalue) {
-        long vz = sizedigit(gvalue) + 1;
-        mxl = vz * factor + 10;
-    } else {
-        double vz = log(lvalue) / log(10);
-        mxl = (int)vz * factor + 1;
-    };
-    convert = (char *)gpmalloc(mxl);
-    if (!convert) {
-        dostr("Error : argument is not too long", 0);
-        return;
-    };
-    if (gvalue) {
-        if (base == 8) {
-            pari_err(impl, "conversion to octal");
-        };
-        if (base == 10) {
-            long len, i, cnt;
-            ulong *larray = convi(uvalue, &len);
-            larray -= len;
-            for (i = 0; i < len; i++) {
-                cnt = 0;
-                ulnvalue = larray[i];
-                do {
-                    if (place >= mxl) { 
-                        pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-                    };
-                    convert[place++] = '0' + ulnvalue%10;
-                    ulnvalue = ulnvalue / 10;
-                    cnt++;
-                } while (ulnvalue);
-                if (i + 1 < len) {
-                    for (;cnt<9;cnt++) {
-                        if (place >= mxl) { 
-                            pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-                        };
-                        convert[place++] = '0';
-                    };
-                };
-            };
-        } else if (base == 16) {
-            long i;
-            short jj;
-            long len = lgefint(uvalue);
-            GEN up = int_MSW(uvalue);
-            for (i=2; i<len; i++) {
-                ulong ucp;
-                ucp = (ulong)*up;
-                for (jj = 0; jj < BITS_IN_LONG / 4; jj++) {
-#if 0
-                    fprintf(stderr, "<>i=%ld, jj=%hd, ucp==%lu\n", i, jj, ucp);
-#endif
-                    unsigned char cv = ucp & 0xF;
-                    if (place >= mxl) { 
-                        pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-                    };
-                    convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef") [cv];
-                    ucp >>= 4;
-                    if (ucp == 0 && i == 2) {
-                        break;
-                    };
-                };
-                up    = int_precW(up);
-            };
-        } else {
-            pari_err(talker, "conversion to base %d not available", base);
-        }
-    } else {
-        do {
-            convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef") [ulnvalue % (unsigned)base  ];
-            ulnvalue = (ulnvalue / (unsigned)base );
-        } while(ulnvalue);
-
-    };
-    convert[place] = '\0';
-    padlen = len - place;
-    if(padlen < 0) padlen = 0;
-    if(ljust) padlen = -padlen;
-    /* DEBUGP(( "str '%s', place %d, sign %c, padlen %d\n",
-        convert,place,signvalue,padlen)); */
-    if(zpad && padlen > 0) {
-        if(signvalue) {
-            dopr_outch( signvalue );
-            --padlen;
-            signvalue = 0;
-        }
-        while(padlen > 0) {
-            dopr_outch( zpad );
-            --padlen;
-        }
-    }
-    while(padlen > 0) {
-        dopr_outch( ' ' );
-        --padlen;
-    }
-    if(signvalue) dopr_outch( signvalue );
-    while(place > 0) dopr_outch( convert[--place] );
-    while(padlen < 0) {
-        dopr_outch( ' ' );
-        ++padlen;
-    }
-    gpfree(convert);
-    convert = NULL;
-    if (gvalue) {
-      avma = av;
-    };
-}
-
-static void
-dostr( const char *str , int cut)
-{
-    if(cut) {
-        while(*str && cut-- > 0) dopr_outch(*str++);
-    } else {
-        while(*str) dopr_outch(*str++);
-    }
-}
-
-static void
-dopr_outch( c )
-int c;
-{
-    if(DoprEnd == 0 || z_output < DoprEnd)
-        *z_output++ = c;
-    else
-        SnprfOverflow++;
-}
-
-/* format is standard printf format, except %Z is a GEN; C call */
-GEN
-v3pariputs(const char* format, int is_a_list, int return_string, ...)
-{
-  char *s = NULL;
-  long bsiz = 1023;
-  va_list args;
-  GEN res = NULL;
-
-  for(;;) {
-    va_start(args,return_string);
-    s = gprealloc(s, bsiz + 1);
-    z_output = s;
-    DoprEnd = s + bsiz;
-    sm_dopr(GP_DATA->fmt, s, format, is_a_list, args );
-    if (SnprfOverflow == 0) {
-      break;
-    };
-    if (SnprfOverflow < bsiz) {
-      bsiz <<= 1;
-    } else {
-      bsiz += SnprfOverflow + 10;
-    };
-    s = gprealloc(s, bsiz + 1);
-  };
-  va_end(args);
-  if (return_string) {
-    res = strtoGENstr(s);
-  } else {
-    pariputs(s);
-  };
-  gpfree(s);
-  return res;
-} /* v3pariputs */
-
-GEN
-v2pariputs(const char* format, int return_string, GEN args) /* Pari/GP call */
-{
-  return v3pariputs(format, 0, return_string, args);
 }
 
 void
@@ -1743,8 +758,8 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
       linelen += oldwlen;
       if (linelen >= w)
       {
-        _new_line(prefix);
-        linelen = oldwlen + prelen;
+	_new_line(prefix);
+	linelen = oldwlen + prelen;
       }
       pariputs(oldword); *u++ = ' '; *u = 0;
       /* u-word = strlen(word) */
@@ -1793,7 +808,7 @@ typedef struct outString {
   char *string;
   ulong len,size;
 } outString;
-static outString *OutStr, *ErrStr = NULL; /* %%%%%% THREAD ? */
+static outString *OutStr, *ErrStr = NULL;
 
 #define STEPSIZE 1024
 #define check_output_length(str,l) { \
@@ -1998,9 +1013,40 @@ Strchr(GEN g)
 #define putsigne(x) pariputs((x>0)? " + " : " - ")
 #define sp_sign_sp(T,x) ((T)->sp? putsigne(x): putsigne_nosp(x))
 #define comma_sp(T)     ((T)->sp? pariputs(", "): pariputc(','))
+#define sp(T) STMT_START { if ((T)->sp) pariputc(' '); } STMT_END
+
+/* # of decimal digits, assume l > 0 */
+static long
+numdig(ulong l)
+{
+  if (l < 100000)
+  {
+    if (l < 100)    return (l < 10)? 1: 2;
+    if (l < 10000)  return (l < 1000)? 3: 4;
+    return 5;
+  }
+  if (l < 10000000)   return (l < 1000000)? 6: 7;
+  if (l < 1000000000) return (l < 100000000)? 8: 9;
+  return 10;
+}
 
 static void
 blancs(long nb) { while (nb-- > 0) pariputc(' '); }
+
+static void
+zeros(long nb)  { while (nb-- > 0) pariputc('0'); }
+
+static void
+copart(char *s, ulong x, long start)
+{
+  char *p = s + start;
+  while (p > s)
+  {
+    ulong q = x/10;
+    *--p = (x - q*10) + '0';
+    x = q;
+  }
+}
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
 static char *
@@ -2068,6 +1114,111 @@ wr_vecsmall(pariout_t *T, GEN g)
 /**                        WRITE A REAL NUMBER                     **/
 /**                                                                **/
 /********************************************************************/
+/* e binary exponent, return exponent in base ten */
+static long
+ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
+
+/* sss.ttt, assume 'point' < strlen(s) */
+static void
+wr_dec(char *s, long point)
+{
+  char *t = s + point, save = *t;
+  *t = 0;    pariputs(s); pariputc('.'); /* integer part */
+  *t = save; pariputs(t);
+}
+/* a.bbb En*/
+static void
+wr_exp(pariout_t *T, char *s, long n)
+{
+  wr_dec(s, 1); sp(T); pariprintf("E%ld", n);
+}
+
+static void
+round_up(ulong *resd, ulong n, ulong *res)
+{
+  *resd += n;
+  while (*resd >= 1000000000UL && resd < res) { *resd++ = 0; *resd += 1; }
+}
+
+/* assume x != 0 and print |x| in floating point format */
+static void
+wr_float(pariout_t *T, GEN x, int f_format)
+{
+  long beta, l, ldec, dec0, decdig, d, dif, lx = lg(x), dec = T->sigd;
+  GEN z;
+  ulong *res, *resd;
+  char *s, *t;
+
+  if (dec > 0)
+  { /* reduce precision if possible */
+    l = ndec2prec(dec);
+    if (lx > l) lx = l;
+  }
+  dif =  bit_accuracy(lx) - expo(x);
+  if (dif <= 0) f_format = 0; /* write in E format */
+  beta = ex10(dif);
+  if (beta)
+  { /* z = x 10^beta */
+    if (beta > 0)
+      z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
+    else
+      z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
+    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
+  }
+  else z = mpabs(x);
+
+  /* x ~ z / 10^beta, z in N */
+  z = gcvtoi(z, &l); /* l is junk */
+  res = convi(z, &ldec);
+  resd = res - 1; /* leading word */
+  dec0 = numdig(*resd);
+  decdig = 9 * (ldec-1) + dec0; /* number of significant decimal digits in z */
+
+  /* Round properly; leading word may overflow to 10^9 after rounding */
+  if (dec < 0 || decdig < dec)
+    dec = decdig;
+  else if (dec < dec0) /* ==> 0 < dec < 9 */
+  {
+    ulong p10 = u_pow10(dec0 - dec);
+    if (*resd % p10 >= (p10>>1)) *resd += p10; /* round up */
+  }
+  else if (dec < decdig)
+  {
+    l = dec - dec0; /* skip leading word */
+    d = l % 9;
+    resd -= l / 9;
+    if (d)
+    { /* cut resd[-1] to first d digits when printing */
+      ulong p10 = u_pow10(9 - d), r = *--resd % p10;
+      if (r >= (p10>>1)) round_up(resd, p10, res);
+    } else {
+      if ((ulong)resd[-1] >= 500000000UL) round_up(resd, 1, res);
+    }
+  }
+
+  s = t = (char*)new_chunk(nchar2nlong(decdig + 1));
+  res--;
+  if (*res)
+  {
+    d = numdig(*res);
+    copart(t, *res, d); t += d;
+  }
+  else /* overflow when rounding */
+  {
+    d = 10;
+    *t++ = '1';
+    copart(t, 0, 9); t += 9;
+  }
+  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
+  l = ldec;
+  while (--l > 0) { copart(t, *--res, 9); t += 9; }
+  s[dec] = 0;
+
+  dif = decdig - beta; /* # of decimal digits in integer part */
+  if (!f_format || dif > dec) wr_exp(T,s, dif-1);
+  else if (dif > 0) wr_dec(s, dif);
+  else { pariputs("0."); zeros(-dif); pariputs(s); }
+}
 
 /* Write real number x.
  * format: e (exponential), f (floating point), g (as f unless x too small)
@@ -2077,7 +1228,29 @@ wr_vecsmall(pariout_t *T, GEN g)
 static void
 wr_real(pariout_t *T, GEN x, int addsign)
 {
-  wr2_real(NULL, 0, T, x, 0, addsign);
+  pari_sp av;
+  long sx = signe(x), ex = expo(x);
+
+  if (!sx) /* real 0 */
+  {
+    if (T->format == 'f')
+    {
+      long d, dec = T->sigd;
+      if (dec < 0)
+      {
+	d = (long)(-ex * L2SL10);
+	dec = (d <= 0)? 0: d;
+      }
+      pariputs("0."); zeros(dec);
+    }
+    else
+      pariprintf("0.E%ld", ex10(ex) + 1);
+    return;
+  }
+  if (addsign && sx < 0) pariputc('-'); /* print sign if needed */
+  av = avma;
+  wr_float(T,x, (T->format == 'g' && ex >= -32) || T->format == 'f');
+  avma = av;
 }
 
 /********************************************************************/
@@ -2191,7 +1364,7 @@ dbg(GEN x, long nb, long bl)
     pariprintf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
     pariprintf("(%c,varn=%ld,prec=%ld,valp=%ld):",
-               vsigne(x), varn(x), lgpol(x), valp(x));
+	       vsigne(x), varn(x), lgpol(x), valp(x));
   else if (tx == t_LIST)
   {
     pariprintf("(lmax=%ld):", list_nmax(x));
@@ -2228,7 +1401,7 @@ dbg(GEN x, long nb, long bl)
 
     case t_PADIC:
       blancs(bl);
-                  pariputs("  p : "); dbg(gel(x,2),nb,bl);
+		  pariputs("  p : "); dbg(gel(x,2),nb,bl);
       blancs(bl); pariputs("p^l : "); dbg(gel(x,3),nb,bl);
       blancs(bl); pariputs("  I : "); dbg(gel(x,4),nb,bl);
       break;
@@ -2243,8 +1416,8 @@ dbg(GEN x, long nb, long bl)
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
-        blancs(bl); pariprintf("coef of degree %ld = ",e);
-        e++; dbg(gel(x,i),nb,bl);
+	blancs(bl); pariprintf("coef of degree %ld = ",e);
+	e++; dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -2253,8 +1426,8 @@ dbg(GEN x, long nb, long bl)
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       for (i=1; i<lx; i++)
       {
-        blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
-        dbg(gel(x,i),nb,bl);
+	blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
+	dbg(gel(x,i),nb,bl);
       }
       break;
 
@@ -2278,21 +1451,21 @@ dbg(GEN x, long nb, long bl)
       if (lx == 1) return;
       if (typ(c) == t_VECSMALL)
       {
-        for (i = 1; i < lx; i++)
-        {
-          blancs(bl); pariprintf("%ld%s column = ",i,eng_ord(i));
-          dbg(gel(x,i),nb,bl);
-        }
+	for (i = 1; i < lx; i++)
+	{
+	  blancs(bl); pariprintf("%ld%s column = ",i,eng_ord(i));
+	  dbg(gel(x,i),nb,bl);
+	}
       }
       else
       {
-        dx = lg(c);
-        for (i=1; i<dx; i++)
-          for (j=1; j<lx; j++)
-          {
-            blancs(bl); pariprintf("mat(%ld,%ld) = ",i,j);
-            dbg(gcoeff(x,i,j),nb,bl);
-          }
+	dx = lg(c);
+	for (i=1; i<dx; i++)
+	  for (j=1; j<lx; j++)
+	  {
+	    blancs(bl); pariprintf("mat(%ld,%ld) = ",i,j);
+	    dbg(gcoeff(x,i,j),nb,bl);
+	  }
       }
     }
   }
@@ -2306,7 +1479,7 @@ print_entree(entree *ep, long hash)
 {
   pariprintf(" %s ",ep->name); pariprintf(VOIR_STRING1,(ulong)ep);
   pariprintf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
-            hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
+	    hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
     pariprintf("   next = %s ",(ep->next)->name);
@@ -2348,7 +1521,7 @@ print_functions_hash(const char *s)
     {
       pariprintf("*** hashcode = %lu\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
-        print_entree(ep,n);
+	print_entree(ep,n);
     }
     return;
   }
@@ -2424,19 +1597,19 @@ get_texvar(long v, char *buf, unsigned int len)
     do_append(&t, '[', e, seen - 1);
     while (1) {
       if (*s == '_')
-        seen1++, s++;
+	seen1++, s++;
       else {
-        if (seen1) {
-          do_append(&t, ']', e, (seen >= seen1 ? seen1 : seen) - 1);
-          do_append(&t, ',', e, 1);
-          do_append(&t, '[', e, seen1 - 1);
-          if (seen1 > seen)
-            seen = seen1;
-          seen1 = 0;
-        }
-        if (*s == 0)
-          break;
-        do_append(&t, *s++, e, 1);
+	if (seen1) {
+	  do_append(&t, ']', e, (seen >= seen1 ? seen1 : seen) - 1);
+	  do_append(&t, ',', e, 1);
+	  do_append(&t, '[', e, seen1 - 1);
+	  if (seen1 > seen)
+	    seen = seen1;
+	  seen1 = 0;
+	}
+	if (*s == 0)
+	  break;
+	do_append(&t, *s++, e, 1);
       }
     }
     do_append(&t, ']', e, seen - 1);
@@ -2458,24 +1631,24 @@ etatpile(void)
   l = (top-bot)/sizeof(long);
   r = 100.0*nu/l;
   pariprintf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
-            top, bot, avma);
+	    top, bot, avma);
 
   pariprintf(" Used :                         %ld  long words  (%ld K)\n",
-            nu, nu/1024*sizeof(long));
+	    nu, nu/1024*sizeof(long));
 
   pariprintf(" Available :                    %ld  long words  (%ld K)\n",
-           (l-nu), (l-nu)/1024*sizeof(long));
+	   (l-nu), (l-nu)/1024*sizeof(long));
 
   pariprintf(" Occupation of the PARI stack : %6.2f percent\n",r);
 
   adr = getheap();
   pariprintf(" %ld objects on heap occupy %ld long words\n\n",
-            itos(gel(adr,1)), itos(gel(adr,2)));
+	    itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
   u = pari_var_next();
   s = MAXVARN - pari_var_next_temp();
   pariprintf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
-             u+s, u, s, MAXVARN);
+	     u+s, u, s, MAXVARN);
 }
 
 #define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))
@@ -2501,7 +1674,7 @@ isnull(GEN g)
       return isnull(gel(g,2));
     case t_POL:
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull(gel(g,i))) return 0;
+	if (!isnull(gel(g,i))) return 0;
       return 1;
   }
   return 0;
@@ -2525,7 +1698,7 @@ isone(GEN g)
     case t_POL:
       if (!signe(g)) return 0;
       for (i=lg(g)-1; i>2; i--)
-        if (!isnull(gel(g,i))) return 0;
+	if (!isnull(gel(g,i))) return 0;
       return isone(gel(g,2));
   }
   return 0;
@@ -2556,15 +1729,15 @@ isfactor(GEN g)
       return 0;
     case t_POL: deja = 0; sig = 1;
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull_for_pol(gel(g,i)))
-        {
-          if (deja) return 0;
-          sig=isfactor(gel(g,i)); deja=1;
-        }
+	if (!isnull_for_pol(gel(g,i)))
+	{
+	  if (deja) return 0;
+	  sig=isfactor(gel(g,i)); deja=1;
+	}
       return sig? sig: 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull(gel(g,i))) return 0;
+	if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -2584,17 +1757,17 @@ isdenom(GEN g)
 
     case t_POL: deja = 0;
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull(gel(g,i)))
-        {
-          if (deja) return 0;
-          if (i==2) return isdenom(gel(g,2));
-          if (!isone(gel(g,i))) return 0;
-          deja=1;
-        }
+	if (!isnull(gel(g,i)))
+	{
+	  if (deja) return 0;
+	  if (i==2) return isdenom(gel(g,2));
+	  if (!isone(gel(g,i))) return 0;
+	  deja=1;
+	}
       return 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull(gel(g,i))) return 0;
+	if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -2838,8 +2011,8 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
-        wr_lead_monome(T,b,v,1,addsign);
-        return;
+	wr_lead_monome(T,b,v,1,addsign);
+	return;
       }
       bruti(a,T,addsign);
       if (!isnull(b)) wr_monome(T,b,v,1);
@@ -2851,8 +2024,8 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       wr_lead_monome(T,gel(g,i),v,i,addsign);
       while (i--)
       {
-        a = gel(g,i);
-        if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
+	a = gel(g,i);
+	if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
       }
       break;
 
@@ -2860,14 +2033,14 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g -= i-2;
-        wr_lead_monome(T,gel(g,i),v,i,addsign);
-        while (++i < l)
-        {
-          a = gel(g,i);
-          if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
-        }
-        sp_sign_sp(T,1);
+	l = i + lgpol(g); g -= i-2;
+	wr_lead_monome(T,gel(g,i),v,i,addsign);
+	while (++i < l)
+	{
+	  a = gel(g,i);
+	  if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
+	}
+	sp_sign_sp(T,1);
       }
       pariputs("O("); monome(v,i); pariputc(')'); break;
 
@@ -2880,17 +2053,17 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
-        g = dvmdii(g,p,&a);
-        if (signe(a))
-        {
-          if (!i || !is_pm1(a))
-          {
-            wr_int_sign(a, 1); if (i) pariputc('*');
-          }
-          if (i) VpowE(ev,i);
-          sp_sign_sp(T,1);
-        }
-        if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
+	g = dvmdii(g,p,&a);
+	if (signe(a))
+	{
+	  if (!i || !is_pm1(a))
+	  {
+	    wr_int_sign(a, 1); if (i) pariputc('*');
+	  }
+	  if (i) VpowE(ev,i);
+	  sp_sign_sp(T,1);
+	}
+	if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       pariputs("O("); VpowE(ev,i); pariputc(')');
       gpfree(ev); break;
@@ -2908,8 +2081,8 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       pariputc('['); l = lg(g);
       for (i=1; i<l; i++)
       {
-        bruti(gel(g,i),T,1);
-        if (i<l-1) comma_sp(T);
+	bruti(gel(g,i),T,1);
+	if (i<l-1) comma_sp(T);
       }
       pariputc(']'); if (tg==t_COL) pariputc('~');
       break;
@@ -2921,8 +2094,8 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       l = g? lg(g): 1;
       for (i=1; i<l; i++)
       {
-        bruti(gel(g,i),T,1);
-        if (i<l-1) comma_sp(T);
+	bruti(gel(g,i),T,1);
+	if (i<l-1) comma_sp(T);
       }
       pariputs("])"); break;
 
@@ -2943,24 +2116,24 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       l = lg(g[1]);
       if (l==1)
       {
-        pariprintf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
-        return;
+	pariprintf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
+	return;
       }
       print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
       if (l==2)
       {
-        pariputs(new_fun_set? "Mat(": "mat(");
-        if (r == 2) { print(gcoeff(g,1,1),T,1); pariputc(')'); return; }
+	pariputs(new_fun_set? "Mat(": "mat(");
+	if (r == 2) { print(gcoeff(g,1,1),T,1); pariputc(')'); return; }
       }
       pariputc('[');
       for (i=1; i<l; i++)
       {
-        for (j=1; j<r; j++)
-        {
-          print(gcoeff(g,i,j),T,1);
-          if (j<r-1) comma_sp(T);
-        }
-        if (i<l-1) { pariputc(';'); sp(T); }
+	for (j=1; j<r; j++)
+	{
+	  print(gcoeff(g,i,j),T,1);
+	  if (j<r-1) comma_sp(T);
+	}
+	if (i<l-1) { pariputc(';'); sp(T); }
       }
       pariputc(']'); if (l==2) pariputc(')');
       break;
@@ -3029,7 +2202,7 @@ sori(GEN g, pariout_t *T)
       l = g? lg(g): 1;
       for (i=1; i<l; i++)
       {
-        sori(gel(g,i), T); if (i < l-1) pariputs(", ");
+	sori(gel(g,i), T); if (i < l-1) pariputs(", ");
       }
       pariputs(")\n"); return;
   }
@@ -3064,16 +2237,16 @@ sori(GEN g, pariout_t *T)
       g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
-        g = dvmdii(g,p,&a);
-        if (signe(a))
-        {
-          if (!i || !is_pm1(a))
-          {
-            wr_int(T,a,1); pariputc(i? '*': ' ');
-          }
-          if (i) { VpowE(ev,i); pariputc(' '); }
-          pariputs("+ ");
-        }
+	g = dvmdii(g,p,&a);
+	if (signe(a))
+	{
+	  if (!i || !is_pm1(a))
+	  {
+	    wr_int(T,a,1); pariputc(i? '*': ' ');
+	  }
+	  if (i) { VpowE(ev,i); pariputc(' '); }
+	  pariputs("+ ");
+	}
       }
       pariputs("O(");
       if (!i) pariputs(" 1)"); else VpowE(ev,i);
@@ -3087,7 +2260,7 @@ sori(GEN g, pariout_t *T)
       sor_lead_monome(T,gel(g,i),v,i);
       while (i--)
       {
-        a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
+	a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
       }
       break;
 
@@ -3095,13 +2268,13 @@ sori(GEN g, pariout_t *T)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g -= i-2;
-        sor_lead_monome(T,gel(g,i),v,i);
-        while (++i < l)
-        {
-          a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
-        }
-        pariputs(" + ");
+	l = i + lgpol(g); g -= i-2;
+	sor_lead_monome(T,gel(g,i),v,i);
+	while (++i < l)
+	{
+	  a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
+	}
+	pariputs(" + ");
       }
       pariputs("O(");
       if (!i) pariputs(" 1)"); else monome(v,i);
@@ -3121,7 +2294,7 @@ sori(GEN g, pariout_t *T)
     case t_VEC: pariputc('[');
       for (i=1; i<lg(g); i++)
       {
-        sori(gel(g,i),T); if (i<lg(g)-1) pariputs(", ");
+	sori(gel(g,i),T); if (i<lg(g)-1) pariputs(", ");
       }
       pariputc(']'); break;
     case t_VECSMALL: wr_vecsmall(T,g); break;
@@ -3131,7 +2304,7 @@ sori(GEN g, pariout_t *T)
       pariputc('\n');
       for (i=1; i<lg(g); i++)
       {
-        pariputc('['); sori(gel(g,i),T); pariputs("]\n");
+	pariputc('['); sori(gel(g,i),T); pariputs("]\n");
       }
       break;
 
@@ -3145,12 +2318,12 @@ sori(GEN g, pariout_t *T)
       print = (typ(g[1]) == t_VECSMALL)? sors: sori;
       for (i=1; i<l; i++)
       {
-        pariputc('[');
-        for (j=1; j<lx; j++)
-        {
-          print(gcoeff(g,i,j),T); if (j<lx-1) pariputc(' ');
-        }
-        pariputs("]\n"); if (i<l-1) pariputc('\n');
+	pariputc('[');
+	for (j=1; j<lx; j++)
+	{
+	  print(gcoeff(g,i,j),T); if (j<lx-1) pariputc(' ');
+	}
+	pariputs("]\n"); if (i<l-1) pariputc('\n');
       }
       break;
     }
@@ -3208,8 +2381,8 @@ texi(GEN g, pariout_t *T, int addsign)
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
-        wr_lead_texnome(T,b,v,1,addsign);
-        break;
+	wr_lead_texnome(T,b,v,1,addsign);
+	break;
       }
       texi(a,T,addsign);
       if (!isnull(b)) wr_texnome(T,b,v,1);
@@ -3221,8 +2394,8 @@ texi(GEN g, pariout_t *T, int addsign)
       wr_lead_texnome(T,gel(g,i),v,i,addsign);
       while (i--)
       {
-        a = gel(g,i);
-        if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
+	a = gel(g,i);
+	if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
       }
       break;
 
@@ -3230,14 +2403,14 @@ texi(GEN g, pariout_t *T, int addsign)
       i = valp(g);
       if (lgpol(g))
       { /* hack: we want g[i] = coeff of degree i. */
-        l = i + lgpol(g); g -= i-2;
-        wr_lead_texnome(T,gel(g,i),v,i,addsign);
-        while (++i < l)
-        {
-          a = gel(g,i);
-          if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
-        }
-        pariputs("+ ");
+	l = i + lgpol(g); g -= i-2;
+	wr_lead_texnome(T,gel(g,i),v,i,addsign);
+	while (++i < l)
+	{
+	  a = gel(g,i);
+	  if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
+	}
+	pariputs("+ ");
       }
       pariputs("O("); texnome(v,i); pariputc(')'); break;
 
@@ -3249,16 +2422,16 @@ texi(GEN g, pariout_t *T, int addsign)
       g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
-        g = dvmdii(g,p,&a);
-        if (signe(a))
-        {
-          if (!i || !is_pm1(a))
-          {
-            wr_int_sign(a, 1); if (i) pariputs("\\cdot");
-          }
-          if (i) texVpowE(ev,i);
-          pariputc('+');
-        }
+	g = dvmdii(g,p,&a);
+	if (signe(a))
+	{
+	  if (!i || !is_pm1(a))
+	  {
+	    wr_int_sign(a, 1); if (i) pariputs("\\cdot");
+	  }
+	  if (i) texVpowE(ev,i);
+	  pariputc('+');
+	}
       }
       pariputs("O("); texVpowE(ev,i); pariputc(')');
       gpfree(ev); break;
@@ -3268,7 +2441,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-        texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
+	texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -3278,7 +2451,7 @@ texi(GEN g, pariout_t *T, int addsign)
       l = g? lg(g): 1;
       for (i=1; i<l; i++)
       {
-        texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
+	texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -3286,7 +2459,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-        texi(gel(g,i),T,1); pariputs("\\cr\n");
+	texi(gel(g,i),T,1); pariputs("\\cr\n");
       }
       pariputc('}'); break;
 
@@ -3294,21 +2467,21 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-        pariprintf("%ld", g[i]);
-        if (i < l-1) pariputc('&');
+	pariprintf("%ld", g[i]);
+	if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
     case t_STR:
     {
 #if 0 /* This makes it impossible to print reliably. What it I want to
-         printtex("$$", x, "$$") ? */
+	 printtex("$$", x, "$$") ? */
       char *s = GSTR(g);
       pariputs("\\hbox{");
       while (*s) {
-        if (strchr("\\{}$_^%#&~", *s)) pariputc('\\');
-        pariputc(*s);
-        if (strchr("^~", *s++)) pariputs("{}");
+	if (strchr("\\{}$_^%#&~", *s)) pariputc('\\');
+	pariputc(*s);
+	if (strchr("^~", *s++)) pariputs("{}");
       }
       pariputc('}'); break;
 #else
@@ -3330,16 +2503,16 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{\n "); r = lg(g);
       if (r>1)
       {
-        print = (typ(g[1]) == t_VECSMALL)? prints: texi;
-        l = lg(g[1]);
-        for (i=1; i<l; i++)
-        {
-          for (j=1; j<r; j++)
-          {
-            print(gcoeff(g,i,j),T,1); if (j<r-1) pariputc('&');
-          }
-          pariputs("\\cr\n ");
-        }
+	print = (typ(g[1]) == t_VECSMALL)? prints: texi;
+	l = lg(g[1]);
+	for (i=1; i<l; i++)
+	{
+	  for (j=1; j<r; j++)
+	  {
+	    print(gcoeff(g,i,j),T,1); if (j<r-1) pariputc('&');
+	  }
+	  pariputs("\\cr\n ");
+	}
       }
       pariputc('}'); break;
     }
@@ -3581,7 +2754,7 @@ popinfile(void)
   {
     if (f->type & mf_IN) break;
     pari_warn(warner, "I/O: leaked file descriptor (%d): %s",
-                f->type, f->name);
+		f->type, f->name);
     pari_fclose(f);
   }
   last_tmp_file = f; if (!last_tmp_file) return -1;
@@ -3942,7 +3115,7 @@ pari_get_infile(char *name, FILE *file)
 
   if (l > 2 && (!strncmp(end-1,".Z",2)
 #ifdef GNUZCAT
-             || !strncmp(end-2,".gz",3)
+	     || !strncmp(end-2,".gz",3)
 #endif
   ))
   { /* compressed file (compress or gzip) */
@@ -4044,7 +3217,7 @@ switchout(const char *name)
     if (f)
     {
       if (is_magic_ok(f))
-        pari_err(talker,"%s is a GP binary file. Please use writebin", name);
+	pari_err(talker,"%s is a GP binary file. Please use writebin", name);
       fclose(f);
     }
     f = fopen(name, "a");
@@ -4218,7 +3391,7 @@ check_magic(const char *name, FILE *f)
     pari_err(talker, "%s is not a GP binary file",name);
   if (!is_sizeoflong_ok(f))
     pari_err(talker, "%s not written for a %ld bit architecture",
-               name, sizeof(long)*8);
+	       name, sizeof(long)*8);
   if (!is_long_ok(f, ENDIAN_CHECK))
     pari_err(talker, "unexpected endianness in %s",name);
   if (!is_long_ok(f, BINARY_VERSION))
@@ -4287,7 +3460,7 @@ readbin(const char *name, FILE *f, int *vector)
     if (x && cx == BIN_GEN) z = z? shallowconcat(z, mkvec(x)): mkvec(x);
     if (DEBUGLEVEL)
       pari_warn(warner,"%ld unnamed objects read. Returning then in a vector",
-          lg(z)-1);
+	  lg(z)-1);
     x = gerepilecopy(av, z);
     *vector = 1;
   }
@@ -4309,54 +3482,6 @@ print0(GEN g, long flag)
   long i, l = lg(g);
   T.prettyp = flag;
   for (i = 1; i < l; i++) printGEN(gel(g,i), &T);
-}
-
-void
-printf0(GEN gfmt, GEN args) /* the GP wrapper */
-{
-  const char *format = (char *)(gfmt);
-
-#if 0
-  v3pariputs("<>test, %ld %8.3g %s %Z\n", 1, 0, 1, 3.14159, "coucou", args);
-#endif
-  (void)v2pariputs(format,0,args); /* v2pariputs wrappes v3pariputs just transforming a GEN arg into a va_list and saying that is not a real va_list ! */
-}
-
-GEN
-Strprintf(GEN gfmt, GEN args) /* the GP wrapper */
-{
-  const char *format = (char *)(gfmt);
-
-  return v2pariputs(format,1,args); /* v2pariputs interfaces v3pariputs just transforming a GEN arg into a va_list and saying that is not a real va_list ! */
-}
-
-void
-printf1(GEN gfmt, va_list args) /* the va_list version of printf0 */
-{
-  const char *format = (const char *)(gfmt);
-
-  v3pariputs(format,1,0,args);
-}
-
-GEN
-Strprintf1(GEN gfmt, va_list args) /* the va_list version of Strprintf */
-{
-  const char *format = (const char *)(gfmt);
-
-  return v3pariputs(format,1,1,args);
-}
-
-void
-fprintf1(struct pariFILE *tfile, GEN gfmt, va_list args) /* the va_list version of fprintf0 (fprintf0 not yet available FIXME) */
-{
-  const char *format = (const char *)(gfmt);
-  pari_sp ltop = avma;
-
-  GEN res = v3pariputs(format,1,1,args);
-
-  fputs(GSTR(res), tfile->file);
-
-  avma = ltop;
 }
 
 #define PR_NL() {pariputc('\n'); pariflush(); }
@@ -4560,7 +3685,7 @@ swap_slash(char *s)
     {
       char *t;
       for (t=s; *t; t++)
-        if (*t == '/') *t = '\\';
+	if (*t == '/') *t = '\\';
     }
 #endif
 }

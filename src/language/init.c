@@ -36,7 +36,7 @@ FILE    *pari_outfile, *pari_errfile, *pari_logfile, *pari_infile;
 char    *current_logfile, *current_psfile, *pari_datadir;
 long    gp_colors[c_LAST];
 int     disable_color;
-ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, DEBUGTREE;
+ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM;
 ulong   compatible, precreal, precdl, logstyle;
 gp_data *GP_DATA;
 
@@ -148,11 +148,6 @@ gclone_refc(GEN x) { ++bl_refc(x); }
 void
 gunclone(GEN x)
 {
-#ifdef __TREE__
-  if (DEBUGTREE >= 3) {
-    fprintf(stderr, "gunclone %lx refc=%ld\n", (long)x, bl_refc(x));
-  };
-#endif
   if (--bl_refc(x) > 0) return;
   BLOCK_SIGINT(
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
@@ -266,9 +261,6 @@ void
 gpfree(void *pointer)
 {
   BLOCK_SIGINT(
-#if 0
-    fprintf(stderr, "<>gpfree %lx\n", (long)pointer);
-#endif
   free(pointer);
   )
 }
@@ -283,9 +275,6 @@ gpmalloc(size_t size)
     tmp = (char*)malloc(size);
     )
     if (!tmp) pari_err(memer);
-#if 0
-    fprintf(stderr, "<>gpmalloc %lx(%lu==X%lx)\n", (long)tmp, size, size);
-#endif
     return tmp;
   }
   if (DEBUGMEM) pari_warn(warner,"mallocing NULL object");
@@ -465,7 +454,7 @@ pari_init_defaults(void)
 
   precdl = 16;
   compatible = NONE;
-  DEBUGTREE = DEBUGFILES = DEBUGLEVEL = DEBUGMEM = 0;
+  DEBUGFILES = DEBUGLEVEL = DEBUGMEM = 0;
   disable_color = 1;
   logstyle = logstyle_none;
 
@@ -1484,11 +1473,6 @@ gclone(GEN x)
 {
   long i,lx,tx = typ(x), t = taille(x);
   GEN y = newbloc(t);
-#ifdef __TREE__
-  if (DEBUGTREE >= 3) {
-    fprintf(stderr, "gclone %lx -> %lx\n", (long)x, (long)y);
-  };
-#endif
   if (!is_recursive_t(tx))
   {
     switch(tx)

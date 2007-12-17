@@ -434,7 +434,6 @@ GEN sd_datadir(const char *v, long flag);
 GEN sd_debug(const char *v, long flag);
 GEN sd_debugfiles(const char *v, long flag);
 GEN sd_debugmem(const char *v, long flag);
-GEN sd_debugtree(const char *v, long flag);
 GEN sd_echo(const char *v, long flag);
 GEN sd_factor_add_primes(const char *v, long flag);
 GEN sd_factor_proven(const char *v, long flag);
@@ -876,10 +875,6 @@ GEN     ffinit_Artin_Shreier(GEN ip, long l);
 GEN     ffinit_rand(GEN p, long n);
 byteptr init_modular(ulong *p);
 GEN     polint_triv(GEN xa, GEN ya);
-
-/* print_tree.c */
-
-void    print_tree(FILE *f_out, long n, int xml);
 
 /* rootpol.c */
 
