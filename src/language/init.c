@@ -1141,8 +1141,6 @@ whatnow_new_syntax(const char *f, long n)
   (void)whatnow_fun(f, -n);
 }
 
-#define BREAK_LOOP (GEN) 0x1L
-
 static void
 kill_dft_handler(int numerr)
 {
@@ -1185,10 +1183,7 @@ trap0(const char *e, GEN r, GEN f)
  /* will execute F (break loop if F = NULL), then jump to 'env' */
   if (numerr == CATCH_ALL) numerr = noer;
   kill_dft_handler(numerr);
-  if (!F)
-    dft_handler[numerr] = BREAK_LOOP;
-  else
-    dft_handler[numerr] = gclone(F);
+  dft_handler[numerr] = F? gclone(F): BREAK_LOOP;
   return gnil;
 }
 

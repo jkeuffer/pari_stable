@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                       */
 /*************************************************************************/
 BEGINEXTERN
+#define BREAK_LOOP (GEN) 0x1L
 
 /* GP control structures */
 GEN gp_eval(GEN x, void *dat);

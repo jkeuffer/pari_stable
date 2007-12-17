@@ -152,6 +152,8 @@ BA 94- fix compilation problem with g++-4.2 and GMP.
        much slower than they should be. Analogous problem in FqM_gauss_pivot.
 BA114- missing GP2C descriptions for Pol and Polrev.
 BA115- zero FFELTs were not considered as exact zeros [#710]
+  116- rare SEGV in gp when recovering from error (dereferencing 
+       global_err_data equal to BREAK_LOOP)
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode

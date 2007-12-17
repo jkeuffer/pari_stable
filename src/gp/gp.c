@@ -1582,13 +1582,12 @@ break_loop(long numerr)
   pop_buffer(); return go_on;
 }
 
-#define BREAK_LOOP (GEN) 0x1L
-
 int
 gp_exception_handler(long numerr)
 {
   GEN s = (GEN)global_err_data;
   if (!s) return 0;
+  global_err_data = NULL;
   if (s!=BREAK_LOOP)
   {
     /* prevent infinite recursion in case s raises an exception */
