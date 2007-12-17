@@ -34,10 +34,6 @@ typedef ulong *uGEN;
 /* */
 #define both_odd(x,y) ((x)&(y)&1)
 
-/* t_LIST */
-#define list_nmax(x) ((GEN)x)[1]
-#define list_data(x) ((GEN*)x)[2]
-
 /* FIXME: obsolete */
 GEN Mod0(GEN x, GEN y,long flag);
 
