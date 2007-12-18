@@ -32,7 +32,7 @@ esac
 
 # if DLLD is defined at this point, respect it, even if do_dll=no
 if test $do_dll = yes -a -z "$DLLD"; then
-  if test -n "$__gnuc__" -o "$osname" = solaris; then
+  if test -n "$__gnuc__" -o "$osname" = "solaris"; then
     DLLD="$CC"
   else
     DLLD=$ld # don't take risks
