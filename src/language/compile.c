@@ -961,7 +961,7 @@ compilefunc(entree *ep, long n, int mode)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1003,7 +1003,7 @@ compilefunc(entree *ep, long n, int mode)
           ev[lev++] = NULL;
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1027,7 +1027,7 @@ compilefunc(entree *ep, long n, int mode)
             pari_err(impl,"prototype not supported");
           break;
         default:
-          pari_err(talker,"Unknown prototype code `%c' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
@@ -1055,7 +1055,7 @@ compilefunc(entree *ep, long n, int mode)
             break;
           }
         default:
-          pari_err(talker,"Unknown prototype code `%c*' for `%*s'",c,
+          pari_err(talker,"Unknown prototype code `%c*' for `%.*s'",c,
               tree[x].len, tree[x].str);
         }
         break;
