@@ -10,13 +10,22 @@ Help: vecsort(x,{cmp},{flag=0}): sorts the vector of vectors (or matrix) x in
  lexicographic order, 4: use descending instead of ascending order, 8: remove
  duplicate entries
 Description: 
- (vec):vec	sort($1)
- (vec, gen):vec	vecsort0($1, $2, 0)
- (vec, , 0):vec	sort($1)
- (vec, , 1):vec	indexsort($1)
- (vec, , 2):vec	lexsort($1)
- (vec, , small):vec	vecsort0($1, NULL, $3)
- (vec, gen, small):vec	vecsort0($1, $2, $3)
+ (vecsmall,?gen):vecsmall       vecsort0($1, $2, 0)
+ (vecsmall,?gen,small):vecsmall vecsort0($1, $2, $3)
+ (vec, , ?0):vec                sort($1)
+ (vec, , 1):vecsmall            indexsort($1)
+ (vec, , 2):vec                 lexsort($1)
+ (vec, gen):vec                 vecsort0($1, $2, 0)
+ (vec, ?gen, 1):vecsmall        vecsort0($1, $2, 1)
+ (vec, ?gen, 3):vecsmall        vecsort0($1, $2, 3)
+ (vec, ?gen, 5):vecsmall        vecsort0($1, $2, 5)
+ (vec, ?gen, 7):vecsmall        vecsort0($1, $2, 7)
+ (vec, ?gen, 9):vecsmall        vecsort0($1, $2, 9)
+ (vec, ?gen, 11):vecsmall       vecsort0($1, $2, 11)
+ (vec, ?gen, 13):vecsmall       vecsort0($1, $2, 13)
+ (vec, ?gen, 15):vecsmall       vecsort0($1, $2, 15)
+ (vec, ?gen, #small):vec        vecsort0($1, $2, $3)
+ (vec, ?gen, small):gen         vecsort0($1, $2, $3)
 Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  $x$ must be a vector, and its components integers, reals, or fractions.
  
