@@ -1365,53 +1365,59 @@ static void
 init_sort(GEN *x, long *tx, long *lx)
 {
   *tx = typ(*x);
-  if (*tx != t_LIST) {
-    if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
-    *lx = lg(*x);
-  } else {
+  if (*tx == t_LIST) {
     *x = list_data(*x);
     *lx = *x? lg(*x): 1;
-    *tx = t_VEC;
+  } else {
+    if (!is_matvec_t(*tx) && *tx != t_VECSMALL) pari_err(typeer,"gen_sort");
+    *lx = lg(*x);
   }
+}
+
+/* (x o y)[1..lx-1], destroy y */
+INLINE GEN
+sort_extract(GEN x, GEN y, long tx, long lx)
+{
+  long i;
+  switch(tx)
+  {
+    case t_VECSMALL:
+      for (i=1; i<lx; i++) y[i] = x[y[i]];
+      break;
+    case t_LIST:
+      settyp(y,t_VEC);
+      for (i=1; i<lx; i++) gel(y,i) = gel(x,y[i]);
+      return gtolist(y);
+    default:
+      settyp(y,tx);
+      for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
+  }
+  return y;
 }
 
 /* Sort the vector x, using cmp to compare entries. */
 GEN
 gen_sort_uniq(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
 {
-  long tx, lx, i;
+  long tx, lx;
   GEN y;
 
   init_sort(&x, &tx, &lx);
-  if (lx==1) return cgetg(1, tx);
+  if (lx==1) return tx == t_LIST? listcreate(): cgetg(1, tx);
   y = gen_sortspec_uniq(x,lx-1,E,cmp);
-  lx = lg(y);
-  if (tx == t_VECSMALL)
-    for (i=1; i<lx; i++) y[i] = x[y[i]];
-  else {
-    settyp(y,tx);
-    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
-  }
-  return y;
+  return sort_extract(x, y, tx, lg(y)); /* lg(y) <= lx */
 }
-
 /* Sort the vector x, using cmp to compare entries. */
 GEN
 gen_sort(GEN x, void *E, int (*cmp)(void*,GEN,GEN))
 {
-  long tx, lx, i;
+  long tx, lx;
   GEN y;
 
   init_sort(&x, &tx, &lx);
-  if (lx==1) return cgetg(1, tx);
+  if (lx==1) return tx == t_LIST? listcreate(): cgetg(1, tx);
   y = gen_sortspec(x,lx-1,E,cmp);
-  if (tx == t_VECSMALL)
-    for (i=1; i<lx; i++) y[i] = x[y[i]];
-  else {
-    settyp(y,tx);
-    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
-  }
-  return y;
+  return sort_extract(x, y, tx, lx);
 }
 /* indirect sort: return the permutation that would sort x */
 GEN
@@ -1487,10 +1493,20 @@ vecsort0(GEN x, GEN k, long flag)
   if (k) {
     long i, j, l, lk, tx, lx;
     struct veccmp_s v;
+    GEN y;
 
-    init_sort(&x, &tx, &lx);
-    if (!x) return flag & cmp_IND? cgetg(1, t_VECSMALL): listcreate();
-    if (! is_matvec_t(tx)) pari_err(typeer,"vecsort");
+    /* cf init_sort */
+    tx = typ(x);
+    if (tx == t_LIST) {
+      y = list_data(x);
+      if (!y || (lx = lg(y)) == 1)
+        return flag & cmp_IND? cgetg(1, t_VECSMALL): listcreate();
+    } else {
+      if (!is_matvec_t(tx)) pari_err(typeer,"vecsort");
+      y = x; lx = lg(y);
+      if (lx == 1)
+        return flag & cmp_IND? cgetg(1, t_VECSMALL): cgetg(1, tx);
+    }
     switch(typ(k))
     {
       case t_INT: k = mkvecsmall(itos(k)); break;
@@ -1512,9 +1528,9 @@ vecsort0(GEN x, GEN k, long flag)
     }
     for (j=1; j<lx; j++)
     {
-      long t = typ(x[j]);
-      if (! is_vec_t(t)) pari_err(typeer,"vecsort");
-      if (lg(gel(x,j)) <= l) pari_err(talker,"index too large in vecsort");
+      GEN c = gel(y,j);
+      long t = typ(c); if (! is_vec_t(t)) pari_err(typeer,"vecsort");
+      if (lg(c) <= l) pari_err(talker,"index too large in vecsort");
     }
     v.cmp = cmp;
     v.k = k;
@@ -1530,8 +1546,10 @@ END:
   else
     x = flag & cmp_IND? gen_indexsort(x, E, CMP): gen_sort(x, E, CMP);
   if (flag & cmp_REV) { /* reverse order */
-    long j, lx = lg(x);
-    for (j=1; j<=(lx-1)>>1; j++) lswap(x[j], x[lx-j]);
+    long j, lx;
+    GEN y = (typ(x) == t_LIST)? list_data(x): x;
+    lx = lg(y);
+    for (j=1; j<=(lx-1)>>1; j++) lswap(y[j], y[lx-j]);
   }
   return x;
 }
