@@ -1829,13 +1829,13 @@ main(int argc, char **argv)
     FILE *l = pari_logfile;
     VOLATILE long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
-    for (i = 0; i < A->n; i++) {
+    for (i = 0; i < A->n;  gpfree(A->v[i]),i++) {
       if (setjmp(GP_DATA->env))
       {
 	fprintferr("... skipping file '%s'\n", A->v[i]);
-	i++; if (i == A->n) break;
+	avma = top; continue;
       }
-      (void)read0((char*)A->v[i]); gpfree(A->v[i]);
+      (void)read0((char*)A->v[i]);
     }
     GP_DATA->flags = f; pari_logfile = l;
   }

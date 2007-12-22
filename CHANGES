@@ -155,6 +155,8 @@ BA115- zero FFELTs were not considered as exact zeros [#710]
   116- rare SEGV in gp when recovering from error (dereferencing 
        global_err_data equal to BREAK_LOOP)
   117- vecsort(t_LIST) returned a t_VEC
+  118- gp "huge file" + stack overflow --> stack overflow in next 
+       interactive command (+ minor memoryleak) [#712]
 
   Changed
 BA  1- The combined GP parser/evaluator has been replaced by a bytecode
