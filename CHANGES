@@ -1,7 +1,7 @@
 # $Id$
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
-Done for version 2.4.2 (released ??/??/2006):
+Done for version 2.4.2 (released 22/12/2007):
 
   Fixed
     1- divrs(0., negative integer) had the wrong exponent
