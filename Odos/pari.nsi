@@ -1,5 +1,5 @@
 !include "MUI.nsh"
-Name "PARI 2.4.1 (ALPHA)"
+Name "PARI 2.4.2 (ALPHA)"
 !define dll "libpari-gmp-2.4.dll"
 !define objdir "..\Ocygwin-i686-gmp"
 
@@ -37,7 +37,7 @@ Section "pari (required)" SecCopy
   File "..\misc\tex2mail"
   File "${objdir}\${dll}"
   File "\cygwin\bin\cygcrypt-0.dll"
-  File "\cygwin\bin\cygfltknox-0.dll"
+  File "\cygwin\bin\cygfltknox-1.1.dll"
   File "\cygwin\bin\cygiconv-2.dll"
   File "\cygwin\bin\cygintl-8.dll"
   File "\cygwin\bin\cygncurses-8.dll"
