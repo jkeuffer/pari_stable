@@ -5,7 +5,7 @@ VersionMajor='2'
 VersionMinor='4'
 
 # Patch level
-patch='2'
+patch='3'
 
 # Status: alpha, beta, released, development
 status=development
