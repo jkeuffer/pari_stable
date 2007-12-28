@@ -145,7 +145,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   grow_init(A);
   for (c->n = 0; s <= send; c->n++)
   {
-    char *u = gpmalloc(strlen(s) + 1);
+    char *u = (char*)gpmalloc(strlen(s) + 1);
     skip_space(s);
     if (*s == '"') s = readstring(s, u);
     else
@@ -556,7 +556,7 @@ external_help(const char *s, int num)
   if (!GP_DATA->help || !*(GP_DATA->help))
     pari_err(talker,"no external help program");
   t = filter_quotes(s);
-  str = gpmalloc(strlen(GP_DATA->help) + strlen(t) + 64);
+  str = (char*)gpmalloc(strlen(GP_DATA->help) + strlen(t) + 64);
   *ar = 0;
   if (num < 0)
     opt = "-k";
@@ -1074,7 +1074,7 @@ get_home(int *free_it)
   if ((drv = os_getenv("HOMEDRIVE"))
    && (pth = os_getenv("HOMEPATH")))
   { /* looks like WinNT */
-    char *buf = gpmalloc(strlen(pth) + strlen(drv) + 1);
+    char *buf = (char*)gpmalloc(strlen(pth) + strlen(drv) + 1);
     sprintf(buf, "%s%s",drv,pth);
     *free_it = 1; return buf;
   }
@@ -1109,7 +1109,7 @@ gprc_get(char *path)
     char *str, *s, c;
     long l;
     l = strlen(home); c = home[l-1];
-    str = strcpy(gpmalloc(l+7), home);
+    str = strcpy((char*)gpmalloc(l+7), home);
     if (free_it) gpfree((void*)home);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
@@ -1130,7 +1130,7 @@ gprc_get(char *path)
       if (*t == '/')
       {
 	long l = t - path + 1;
-	t = gpmalloc(l + 6);
+	t = (char*)gpmalloc(l + 6);
 	strncpy(t, path, l);
 	strcpy(t+l, s); f = gprc_chk(t);
 	gpfree(t);
@@ -1268,7 +1268,7 @@ gp_initrc(growarray A, char *path)
       if (!strncmp(s,"read",4) && (s[4] == ' ' || s[4] == '\t' || s[4] == '"'))
       { /* read file */
 	s += 4;
-	t = gpmalloc(strlen(s) + 1);
+	t = (char*)gpmalloc(strlen(s) + 1);
 	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
 	grow_append(A, t);
       }

@@ -349,7 +349,7 @@ matches_for_emacs(const char *text, char **matches)
     gpfree(matches);
   }
   matches = (char **) gpmalloc(2*sizeof(char *));
-  matches[0] = gpmalloc(2); sprintf(matches[0],"_");
+  matches[0] = (char*)gpmalloc(2); sprintf(matches[0],"_");
   matches[1] = NULL; printf("@E_N_D"); pariflush();
   return matches;
 }
@@ -392,7 +392,7 @@ generator(void *list, const char *text, int *nn, int len, int typ)
   *nn = n;
   if (def)
   {
-    char *name = strcpy(gpmalloc(strlen(def)+1), def);
+    char *name = strcpy((char*)gpmalloc(strlen(def)+1), def);
     return name;
   }
   return NULL; /* no names matched */
@@ -424,7 +424,7 @@ default_generator(const char *text,int state)
 static char *
 add_prefix(const char *name, const char *text, long junk)
 {
-  char *s = strncpy(gpmalloc(strlen(name)+1+junk),text,junk);
+  char *s = strncpy((char*)gpmalloc(strlen(name)+1+junk),text,junk);
   strcpy(s+junk,name); return s;
 }
 static void
@@ -583,7 +583,7 @@ add_space(int start)
   rl_completion_append_character = '\0';
 #  endif
   m = (char**)gpmalloc(2 * sizeof(char*));
-  m[0] = gpmalloc(1); *(m[0]) = 0;
+  m[0] = (char*)gpmalloc(1); *(m[0]) = 0;
   m[1] = NULL; return m;
 #endif
 }
@@ -674,7 +674,7 @@ pari_completion(char *text, int START, int END)
 	while (*e && *e != ')' && *e != '(') e++;
 	if (*e == ')')
 	{ /* we just skipped over the arguments in short help text */
-	  char *str = strncpy(gpmalloc(e-s + 1), s, e-s);
+	  char *str = strncpy((char*)gpmalloc(e-s + 1), s, e-s);
 	  char **ret = (char**)gpmalloc(sizeof(char*)*2);
 	  str[e-s] = 0;
 	  ret[0] = str; ret[1] = NULL;
@@ -824,7 +824,7 @@ static void
 print_escape_string(char *s)
 {
   long l = strlen(s);
-  char *t, *t0 = gpmalloc(l * 3 + 3);
+  char *t, *t0 = (char*)gpmalloc(l * 3 + 3);
 
   t = t0; *t++ = '"';
   for ( ;*s; *t++ = *s++)
@@ -889,7 +889,7 @@ texmacs_completion(const char *s, long pos)
   if (matches)
   {
     long i, prelen = (rl_line_buffer+pos) - text;
-    char *t = gpmalloc(prelen+1);
+    char *t = (char*)gpmalloc(prelen+1);
     strncpy(t, text, prelen); t[prelen] = 0; /* prefix */
     printf(" ");
     print_escape_string(t); gpfree(t);
@@ -940,7 +940,7 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
    * { print("a
    *   b"); }
    * and conforms with the other input methods anyway. */
-  t = gpmalloc(l + 1);
+  t = (char*)gpmalloc(l + 1);
   strncpy(t, s, l-1);
   t[l-1] = '\n';
   t[l]   = 0; /* equivalent to sprintf(t,"%s\n", s) */

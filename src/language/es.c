@@ -51,7 +51,7 @@ filtre0(filtre_t *F)
   char *t;
   char c;
 
-  if (!F->t) F->t = gpmalloc(strlen(s)+1);
+  if (!F->t) F->t = (char*)gpmalloc(strlen(s)+1);
   t = F->t;
 
   if (F->more_input == 1) F->more_input = 0;
@@ -185,7 +185,7 @@ new_buffer(void)
 {
   Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
   b->len = 1024;
-  b->buf = gpmalloc(b->len);
+  b->buf = (char*)gpmalloc(b->len);
   return b;
 }
 /* delete */
@@ -456,7 +456,7 @@ vpariputs(const char* format, va_list args)
   char *buf, *str, *s, *t;
 
   /* replace each %Z (2 chars) by braced address format (8 chars) */
-  s = str = gpmalloc(strlen(format)*4 + 1);
+  s = str = (char*)gpmalloc(strlen(format)*4 + 1);
   while (*f)
   {
     if (*f != '%') *s++ = *f++;
@@ -475,14 +475,14 @@ vpariputs(const char* format, va_list args)
   for(;;)
   {
     int l;
-    buf = gpmalloc(bufsize);
+    buf = (char*)gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
     if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
     gpfree(buf); bufsize = l + 1;
   }
   buf[bufsize-1] = 0; /* just in case */
 #else
-  buf = gpmalloc(bufsize);
+  buf = (char*)gpmalloc(bufsize);
   (void)vsprintf(buf,str,args); /* pray it does fit */
 #endif
   t = s = buf;
@@ -857,14 +857,14 @@ char *
 pari_strdup(const char *s)
 {
   long n = strlen(s)+1;
-  char *t = gpmalloc(n);
+  char *t = (char*)gpmalloc(n);
   memcpy(t,s,n); return t;
 }
 
 char *
 pari_strndup(const char *s, long n)
 {
-  char *t = gpmalloc(n+1);
+  char *t = (char*)gpmalloc(n+1);
   memcpy(t,s,n); t[n] = 0; return t;
 }
 
@@ -923,7 +923,7 @@ pGENtostr(GEN g, long flag) {
     Ll[i] = strlen(s);
     tlen += Ll[i];
   }
-  t2 = t = gpmalloc(tlen + 1);
+  t2 = t = (char*)gpmalloc(tlen + 1);
   *t = 0;
   for (i = 1; i < l; i++)
   {
@@ -2991,13 +2991,13 @@ _expand_tilde(const char *s)
   {
     char *tmp;
     while (*u && *u != '/') u++;
-    len = u-s; tmp = gpmalloc(len+1);
+    len = u-s; tmp = (char*)gpmalloc(len+1);
     (void)strncpy(tmp,s,len);
     tmp[len] = 0;
     p = getpwnam(tmp); free(tmp);
   }
   if (!p) pari_err(talker2,"unknown user ",s,s-1);
-  ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
+  ret = (char*)gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
   sprintf(ret,"%s%s",p->pw_dir,u); return ret;
 #endif
 }
@@ -3017,7 +3017,7 @@ _expand_env(char *str)
     l = s - s0;
     if (l)
     {
-      s0 = strncpy(gpmalloc(l+1), s0, l); s0[l] = 0;
+      s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
       x[xnum++] = s0; len += l;
     }
     if (xnum > xlen - 3) /* need room for possibly two more elts */
@@ -3029,7 +3029,7 @@ _expand_env(char *str)
     s0 = ++s; /* skip $ */
     while (is_keyword_char(*s)) s++;
     l = s - s0;
-    env = strncpy(gpmalloc(l+1), s0, l); env[l] = 0;
+    env = strncpy((char*)gpmalloc(l+1), s0, l); env[l] = 0;
     s0 = os_getenv(env);
     if (!s0)
     {
@@ -3039,7 +3039,7 @@ _expand_env(char *str)
     l = strlen(s0);
     if (l)
     {
-      s0 = strncpy(gpmalloc(l+1), s0, l); s0[l] = 0;
+      s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
       x[xnum++] = s0; len += l;
     }
     gpfree(env); s0 = s;
@@ -3047,11 +3047,11 @@ _expand_env(char *str)
   l = s - s0;
   if (l)
   {
-    s0 = strncpy(gpmalloc(l+1), s0, l); s0[l] = 0;
+    s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
     x[xnum++] = s0; len += l;
   }
 
-  s = gpmalloc(len+1); *s = 0;
+  s = (char*)gpmalloc(len+1); *s = 0;
   for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); gpfree(x[i]); }
   gpfree(str); gpfree(x); return s;
 }
@@ -3208,7 +3208,7 @@ switchin(const char *name0)
     char **tmp = GP_DATA->path->dirs;
     for ( ; *tmp; tmp++)
     { /* make room for '/' and '\0', try_name frees it */
-      s = gpmalloc(2 + strlen(*tmp) + strlen(name));
+      s = (char*)gpmalloc(2 + strlen(*tmp) + strlen(name));
       sprintf(s,"%s/%s",*tmp,name);
       if (try_name(s)) return;
     }
@@ -3301,7 +3301,7 @@ rdstr(FILE *f)
   size_t L = (size_t)rd_long(f);
   char *s;
   if (!L) return NULL;
-  s = gpmalloc(L);
+  s = (char*)gpmalloc(L);
   _cfread(s, L, f); return s;
 }
 

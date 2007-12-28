@@ -208,8 +208,8 @@ mpqs_FB_ctor(mpqs_handle_t *h)
   long size_FB_chunk = (h->size_of_FB + 3) * sizeof(mpqs_FB_entry_t);
   /* like FB, except this one does not have a sentinel slot at the end */
   long size_IAH_chunk = (h->size_of_FB + 2) * sizeof(mpqs_inv_A_H_t);
-  char *fbp = gpmalloc(size_FB_chunk + 64);
-  char *iahp = gpmalloc(size_IAH_chunk + 64);
+  char *fbp = (char*)gpmalloc(size_FB_chunk + 64);
+  char *iahp = (char*)gpmalloc(size_IAH_chunk + 64);
   long fbl, iahl;
 
   h->FB_chunk = (void *)fbp;

@@ -117,7 +117,7 @@ GEN
 ellcondfile(long f)
 {
   long n=f/1000;
-  char *s = gpmalloc(strlen(pari_datadir) + 13 + 20 + 3);
+  char *s = (char*)gpmalloc(strlen(pari_datadir) + 13 + 20 + 3);
   pariFILE *F;
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);

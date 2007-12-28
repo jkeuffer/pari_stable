@@ -5,6 +5,9 @@ Done for version 2.4.3 (released ??/??/2008):
   Fixed
     1- \h m-n no longer worked
   Changed
+    1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
+  Added
+    1- library function gpcalloc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
 

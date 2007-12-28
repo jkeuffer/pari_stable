@@ -455,7 +455,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
 
   lz = nx+ny+1; nz = lz-2;
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
-  p1 = gpmalloc(ny);
+  p1 = (char*)gpmalloc(ny);
   for (i=0; i<ny; i++)
   {
     p1[i] = !isrationalzero(gel(y,i));
@@ -617,7 +617,7 @@ sqrpol(GEN x, long nx)
   if (!nx) return zeropol(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz,t_POL) + 2;
-  p2 = gpmalloc(nx);
+  p2 = (char*)gpmalloc(nx);
   for (i=0; i<nx; i++)
   {
     p2[i] = !isrationalzero(gel(x,i));

@@ -265,7 +265,7 @@ gpfree(void *pointer)
   )
 }
 
-char*
+void*
 gpmalloc(size_t size)
 {
   if (size)
@@ -281,7 +281,7 @@ gpmalloc(size_t size)
   return NULL;
 }
 
-char*
+void*
 gprealloc(void *pointer, size_t size)
 {
   char *tmp;
@@ -292,6 +292,13 @@ gprealloc(void *pointer, size_t size)
   )
   if (!tmp) pari_err(memer);
   return tmp;
+}
+
+void*
+gpcalloc(size_t size)
+{
+  void *t = gpmalloc(size);
+  memset(t, 0, size); return t;
 }
 
 GEN
@@ -860,7 +867,7 @@ errcontext(const char *msg, const char *s, const char *entry)
 
   if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
 
-  t = buf = gpmalloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
+  t = buf = (char*)gpmalloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
   sprintf(t,"%s: ", msg);
   if (past <= 0) past = 0;
   else
@@ -874,7 +881,7 @@ errcontext(const char *msg, const char *s, const char *entry)
 
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
-  pre = gpmalloc(2 * 16 + 1);
+  pre = (char*)gpmalloc(2 * 16 + 1);
   strcpy(pre, term_get_color(c_ERR));
   strcat(pre, "  ***   ");
   print_prefixed_text(buf, pre, str);
