@@ -2,12 +2,17 @@
 Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
 
 Done for version 2.4.3 (released ??/??/2008):
+
   Fixed
     1- \h m-n no longer worked
+BA  2- some error messages displayed internal token names (e.g for '1)
+
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
+
   Added
     1- library function gpcalloc
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
 
