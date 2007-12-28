@@ -718,26 +718,22 @@ chartoGENstr(char c)
 /**                   HASH TABLE MANIPULATIONS                     **/
 /**                                                                **/
 /********************************************************************/
-
 /* return hashing value for identifier s */
-static long
+static ulong
 hashvalue(const char *s)
 {
-  long n = 0;
-  while (*s) { n = (n<<1) ^ *s; s++; }
-  if (n < 0) n = -n;
+  ulong n = 0, c;
+  while ( (c = (ulong)*s++) ) n = (n<<1) ^ c;
   return n % functions_tblsz;
 }
 
-static long
-hashvalue_raw(const char *s, long len, long n)
+static ulong
+hashvalue_raw(const char *s, long len, ulong n)
 {
   long i;
-  for(i=0;i<len;i++) { n = (n<<1) ^ *s; s++; }
-  if (n < 0) n = -n;
+  for(i=0; i<len; i++) { n = (n<<1) ^ *s; s++; }
   return n % functions_tblsz;
 }
-
 
 /* Looking for entry in hashtable. ep1 is the cell's first element */
 static entree *
