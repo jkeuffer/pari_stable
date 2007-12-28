@@ -1478,11 +1478,11 @@ static void
 print_entree(entree *ep, long hash)
 {
   pariprintf(" %s ",ep->name); pariprintf(VOIR_STRING1,(ulong)ep);
-  pariprintf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
-	    hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
+  pariprintf(":\n   hash = %3ld, menu = %2ld, code = %-10s",
+	    hash, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
-    pariprintf("   next = %s ",(ep->next)->name);
+    pariprintf("next = %s ",(ep->next)->name);
     pariprintf(VOIR_STRING1,(ulong)(ep->next));
   }
   pariputs("\n");
@@ -1494,15 +1494,9 @@ print_entree(entree *ep, long hash)
 void
 print_functions_hash(const char *s)
 {
-  long m, n;
+  long m, n, Max, Total;
   entree *ep;
 
-  if (is_keyword_char((int)*s))
-  {
-    ep = is_entry_intern(s,functions_hash,&n);
-    if (!ep) pari_err(talker,"no such function");
-    print_entree(ep,n); return;
-  }
   if (isdigit((int)*s) || *s == '$')
   {
     m = functions_tblsz-1; n = atol(s);
@@ -1525,6 +1519,12 @@ print_functions_hash(const char *s)
     }
     return;
   }
+  if (is_keyword_char((int)*s))
+  {
+    ep = is_entry_intern(s,functions_hash,&n);
+    if (!ep) pari_err(talker,"no such function");
+    print_entree(ep,n); return;
+  }
   if (*s=='-')
   {
     for (n=0; n<functions_tblsz; n++)
@@ -1536,9 +1536,19 @@ print_functions_hash(const char *s)
     }
     pariputc('\n'); return;
   }
+  Max = Total = 0;
   for (n=0; n<functions_tblsz; n++)
+  {
+    long cnt = 0;
     for (ep=functions_hash[n]; ep; ep=ep->next)
+    {
       print_entree(ep,n);
+      cnt++;
+    }
+    Total += cnt;
+    if (cnt > Max) Max = cnt;
+  }
+  pariprintf("Total: %ld, max: %ld\n", Total, Max);
 }
 
 /********************************************************************/
