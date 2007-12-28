@@ -200,7 +200,7 @@ void
 fix_buffer(Buffer *b, long newlbuf)
 {
   b->len = newlbuf;
-  b->buf = gprealloc(b->buf, b->len);
+  b->buf = (char*)gprealloc((void*)b->buf, b->len);
 }
 
 static int
@@ -815,7 +815,7 @@ static outString *OutStr, *ErrStr = NULL;
   const ulong s = str->size; \
   if (str->len + l >= s) { \
     str->size = s + l + STEPSIZE; \
-    str->string = gprealloc(str->string, str->size); \
+    str->string = (char*)gprealloc((void*)str->string, str->size); \
   } \
 }
 
