@@ -186,8 +186,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
 static mpqs_handle_t *
 mpqs_handle_ctor(GEN N)
 {
-  mpqs_handle_t *h = (mpqs_handle_t *) gpmalloc(sizeof(mpqs_handle_t));
-  memset((void *)h, 0, sizeof(mpqs_handle_t));
+  mpqs_handle_t *h = (mpqs_handle_t *) gpcalloc(sizeof(mpqs_handle_t));
   h->N = N;
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: created handle @0x%p\n", (void *)h);
@@ -282,12 +281,9 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
   /* histograms to be used only when kN isn't very small */
   if (h->size_of_FB > MPQS_MIN_SIZE_FB_FOR_HISTO) {
     h->do_histograms = 1;
-    h->histo_full = (long *) gpmalloc(128 * sizeof(long));
-    h->histo_lprl = (long *) gpmalloc(128 * sizeof(long));
-    h->histo_drop = (long *) gpmalloc(128 * sizeof(long));
-    memset((void *)(h->histo_full), 0, 128 * sizeof(long));
-    memset((void *)(h->histo_lprl), 0, 128 * sizeof(long));
-    memset((void *)(h->histo_drop), 0, 128 * sizeof(long));
+    h->histo_full = (long *) gpcalloc(128 * sizeof(long));
+    h->histo_lprl = (long *) gpcalloc(128 * sizeof(long));
+    h->histo_drop = (long *) gpcalloc(128 * sizeof(long));
   }
 #endif
 }
@@ -301,8 +297,7 @@ mpqs_poly_ctor(mpqs_handle_t *h)
   mpqs_int32_t i;
   long size_per = h->omega_A * sizeof(mpqs_per_A_prime_t);
 
-  h->per_A_pr = (mpqs_per_A_prime_t *) gpmalloc(size_per);
-  memset((void *)(h->per_A_pr), 0, size_per);
+  h->per_A_pr = (mpqs_per_A_prime_t *) gpcalloc(size_per);
   /* Sizing:  A is the product of omega_A primes, each well below word
    * size.
    * |B| is bounded by (omega_A + 4) * A, so can have at most one word

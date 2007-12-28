@@ -126,8 +126,7 @@ init_hist(gp_data *D, size_t l, ulong total)
   gp_hist *H = D->hist;
   H->total = total;
   H->size = l;
-  H->res = (GEN *) gpmalloc(l * sizeof(GEN));
-  memset(H->res,0, l * sizeof(GEN));
+  H->res = (GEN *) gpcalloc(l * sizeof(GEN));
 }
 
 static void

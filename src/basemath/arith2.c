@@ -115,9 +115,8 @@ static byteptr
 initprimes1(ulong size, long *lenp, long *lastp)
 {
   long k;
-  byteptr q, r, s, fin, p = (byteptr) gpmalloc(size+2);
+  byteptr q, r, s, p = (byteptr)gpcalloc(size+2), fin = p + size;
 
-  memset(p, 0, size + 2); fin = p + size;
   for (r=q=p,k=1; r<=fin; )
   {
     do { r+=k; k+=2; r+=k; } while (*++q);
