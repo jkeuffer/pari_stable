@@ -948,8 +948,7 @@ gpolvar(GEN x)
 static void
 fill_hashtable_single(entree **table, entree *ep)
 {
-  const char *s = ep->name;
-  long n = hashvalue(s);
+  long n = hashvalue(ep->name);
   EpSETSTATIC(ep);
   ep->next = table[n]; table[n] = ep;
   if (ep->code) ep->arity=check_proto(ep->code);
@@ -972,8 +971,6 @@ pari_add_module(entree *ep)
 {
   pari_fill_hashtable(functions_hash, ep);
 }
-
-
 
 /********************************************************************/
 /**                                                                **/
@@ -1222,4 +1219,3 @@ long stack_new(gp2c_stack *s)
   stack_alloc(s, 1);
   return s->n++;
 }
-
