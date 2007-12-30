@@ -58,6 +58,22 @@ typedef struct pariFILE {
 /* pariFILE.type */
 enum { mf_IN  = 1, mf_PIPE = 2, mf_FALSE = 4, mf_OUT = 8, mf_PERM = 16 };
 
+/* hashtables */
+typedef struct hashentry {
+  void *key, *val;
+  ulong hash; /* hash(key) */
+  struct hashentry *next;
+} hashentry;
+
+typedef struct hashtable {
+  ulong len; /* table length */
+  hashentry **table; /* the table */
+  ulong nb, maxnb; /* number of entries stored and max nb before enlarging */
+  ulong pindex; /* prime index */
+  ulong (*hash) (void *k); /* hash function */
+  int (*eq) (void *k1, void *k2); /* equality test */
+} hashtable;
+
 /* Common global variables: */
 
 extern PariOUT *pariOut, *pariErr;

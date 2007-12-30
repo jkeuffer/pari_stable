@@ -250,6 +250,7 @@ extern long  rectline_itype;
 /* plotport.c */
 typedef long (*col_counter)[ROt_MAX];
 
+void  color_to_rgb(GEN c, int *r, int *g, int *b);
 void  initrect(long ne, long x, long y);
 void  initrect_gen(long ne, GEN x, GEN y, long flag);
 void  killrect(long ne);

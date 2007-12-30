@@ -2372,13 +2372,13 @@ contain at least 3 entries: the first 3 colors are used for background,
 frame/ticks and axes respectively. All colors in the colormap may be freely
 used in \tet{plotcolor} calls.
 
-A color is either given as in the default by character strings (see
-the standard \kbd{rgb.txt} file in X11 distributions), or by an RGB code (a
-vector with 3 integer entries between 0 and 255). For instance \kbd{[250,
-235, 215]} and \kbd{"antique white"} represent the same color. RGB codes are
-a little cryptic but more portable: some graphic drivers may not be able to
-understand all symbolic names (currently \kbd{fltk}: unrecognized color names
-behave as "white").
+A color is either given as in the default by character strings or by an RGB
+code. For valid character strings, see the standard \kbd{rgb.txt} file in X11
+distributions, where we restrict to lowercase letters and remove all
+whitespace from color names. An RGB code is a vector with 3 integer entries
+between 0 and 255. For instance \kbd{[250, 235, 215]} and \kbd{"antique
+white"} represent the same color. RGB codes are a little cryptic but often
+easier to generate.
 
 \subsecidx{graphcolors} (default: \kbd{[4,5]}) Entries in the
 \tet{graphcolormap} that will be used to plot multi-curves. The successive

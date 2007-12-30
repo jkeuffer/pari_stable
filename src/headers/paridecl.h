@@ -1413,6 +1413,17 @@ GEN     u2toi(ulong a, ulong b);
 
 long    group_ident(GEN G, GEN S);
 
+/* hash.c */
+
+hashtable *hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*));
+void hash_insert(hashtable *h, void *k, void *v);
+hashentry *hash_search(hashtable *h, void *k);
+hashentry *hash_remove(hashtable *h, void *k);
+void hash_destroy(hashtable *h);
+ulong hash_str(const char *str);
+ulong hash_str2(const char *s);
+ulong hash_GEN(GEN x);
+
 /* ifactor1.c */
 
 long    BSW_psp(GEN N);

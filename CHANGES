@@ -6,12 +6,14 @@ Done for version 2.4.3 (released ??/??/2008):
   Fixed
     1- \h m-n no longer worked
 BA  2- some error messages displayed internal token names (e.g for '1)
+    3- named colors in 'graphcolormap' were not portable across graphic drivers
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
 
   Added
     1- library function gpcalloc
+    2- [libpari] public generic hashtables
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

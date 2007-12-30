@@ -54,108 +54,6 @@ rgb_color(int R, int G, int B)
   return fl_color_cube(R*FL_NUM_RED/256, G*FL_NUM_GREEN/256, B*FL_NUM_BLUE/256);
 }
 
-static Fl_Color
-parse_real_color(const char *s)
-{
-  switch(s[0])
-  {
-    case 'b':
-      if (!strcasecmp(s, "black"))
-	return FL_BLACK;
-      else if (!strcasecmp(s, "blue"))
-	return FL_BLUE;
-      break;
-    case 'c':
-      if (!strcasecmp(s, "cyan"))
-	return FL_CYAN;
-      break;
-    case 'd':
-      if (!strcasecmp(s, "dark1"))
-       return FL_DARK1;
-      else if (!strcasecmp(s, "dark2"))
-       return FL_DARK2;
-      else if (!strcasecmp(s, "dark3"))
-       return FL_DARK3;
-      else if (!strcasecmp(s, "dark_blue")    || !strcasecmp(s, "dark blue"))
-       return FL_DARK_BLUE;
-      else if (!strcasecmp(s, "dark_cyan")    || !strcasecmp(s, "dark cyan"))
-       return FL_DARK_CYAN;
-      else if (!strcasecmp(s, "dark_green")   || !strcasecmp(s, "dark green"))
-       return FL_DARK_GREEN;
-      else if (!strcasecmp(s, "dark_magenta") || !strcasecmp(s, "dark magenta"))
-       return FL_DARK_MAGENTA;
-      else if (!strcasecmp(s, "dark_red")     || !strcasecmp(s, "dark red"))
-       return FL_DARK_RED;
-      else if (!strcasecmp(s, "dark_yellow")  || !strcasecmp(s, "dark yellow"))
-       return FL_DARK_YELLOW;
-      break;
-    case 'g':
-      if (!strcasecmp(s, "gray") || !strcasecmp(s, "grey"))
-	return rgb_color( 127, 127, 127);
-      else if (!strcasecmp(s, "gainsboro"))
-	return rgb_color( 220, 220, 220);
-      if (!strcasecmp(s, "gray0") || !strcasecmp(s, "grey0"))
-       return FL_GRAY0;
-      else if (!strcasecmp(s, "green"))
-       return FL_GREEN;
-      break;
-    case 'l':
-      if (!strcasecmp(s, "light1"))
-       return FL_LIGHT1;
-      else if (!strcasecmp(s, "light2"))
-       return FL_LIGHT2;
-      else if (!strcasecmp(s, "light3"))
-       return FL_LIGHT3;
-      break;
-    case 'm':
-      if (!strcasecmp(s, "magenta"))
-       return FL_MAGENTA;
-      break;
-    case 'r':
-      if (!strcasecmp(s, "red"))
-       return FL_RED;
-      break;
-    case 'v':
-      if (!strcasecmp(s, "violetred"))
-       return rgb_color( 208,  32, 144);
-      break;
-    case 'w':
-      if (!strcasecmp(s, "white"))
-       return FL_WHITE;
-      break;
-    case 'y':
-      if (!strcasecmp(s, "yellow"))
-       return FL_YELLOW;
-      break;
-  }
-  /* Everything unknown is white */
-  pari_warn(warner,"color %s: unknown", s);
-  return FL_WHITE;
-}
-
-static Fl_Color
-parse_color(const char *s)
-{
-  int dk = !strncasecmp(s, "dark", 4);
-  int lt = !strncasecmp(s, "light", 5);
-  Fl_Color res = parse_real_color(s);
-
-  if (res == FL_WHITE && (dk || lt))
-  {
-    if (dk)
-      s += 4;
-    else
-      s += 5;
-    while (*s == ' ' || *s == '\t' || *s == '_')
-      s++;
-    if (dk)
-      return fl_darker(parse_real_color(s));
-    else
-      return fl_lighter(parse_real_color(s));
-  }
-  return res;
-}
-
 Plotter::Plotter( long *w, long *x, long *y, long lw,
 	     const char* name)
 	: Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
@@ -168,16 +66,9 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color = (Fl_Color*)gpmalloc(numcolors*sizeof(Fl_Color));
     for (i = 1; i < lg(pari_colormap); i++)
     {
-	GEN c = gel(pari_colormap, i);
-	switch(typ(c))
-	{
-	case t_STR:
-	  color[i-1]=parse_color(GSTR(c));
-	  break;
-	case t_VECSMALL:
-	  color[i-1]=rgb_color(c[1], c[2], c[3]);
-	  break;
-	}
+      int r, g, b;
+      color_to_rgb(gel(pari_colormap,i), &r, &g, &b);
+      color[i-1] = rgb_color(r, g, b);
     }
 }
 

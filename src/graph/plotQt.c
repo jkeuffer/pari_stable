@@ -106,16 +106,9 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color = (QColor*)gpmalloc(numcolors*sizeof(QColor));
     for (i = 1; i < lg(pari_colormap); i++)
     {
-	GEN c = gel(pari_colormap,i);
-	switch(typ(c))
-	{
-	case t_STR:
-	  color[i-1] = QColor(GSTR(c));
-	  break;
-	case t_VECSMALL:
-	  color[i-1] = QColor(c[1], c[2], c[3]);
-	  break;
-	}
+      int r, g, b;
+      color_to_rgb(gel(pari_colormap,i), &r, &g, &b);
+      color[i-1] = QColor(r, g, b);
     }
 }
 

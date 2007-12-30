@@ -127,24 +127,15 @@ PARI_ColorSetUp(Display *display, GEN colors)
   PARI_ExactColors = (XColor *) gpmalloc((n+1) * sizeof(XColor));
   for (i=0; i<n; i++)
   {
-    GEN c = gel(colors, i+1);
-    switch(typ(c))
-    {
-    case t_STR:
-      if (!XAllocNamedColor(display, PARI_Colormap, GSTR(c),
-                            &PARI_Colors[i], &PARI_ExactColors[i]))
-        pari_err(talker, "cannot allocate color %s", GSTR(c));
-      break;
-    case t_VECSMALL:
-      PARI_ExactColors[i].red   = c[1]*65535/255;
-      PARI_ExactColors[i].green = c[2]*65535/255;
-      PARI_ExactColors[i].blue  = c[3]*65535/255;
-      PARI_ExactColors[i].flags = DoRed | DoGreen | DoBlue;
-      memcpy(&PARI_Colors[i],&PARI_ExactColors[i],sizeof(PARI_ExactColors[i]));
-      if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
-        pari_err(talker, "cannot allocate color %Z", c);
-      break;
-    }
+    int r, g, b;
+    color_to_rgb(gel(pari_colormap,i+1), &r, &g, &b);
+    PARI_ExactColors[i].red   = r*65535/255;
+    PARI_ExactColors[i].green = g*65535/255;
+    PARI_ExactColors[i].blue  = b*65535/255;
+    PARI_ExactColors[i].flags = DoRed | DoGreen | DoBlue;
+    memcpy(&PARI_Colors[i],&PARI_ExactColors[i],sizeof(PARI_ExactColors[i]));
+    if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
+      pari_err(talker, "cannot allocate color %ld", i);
   }
 }
 
