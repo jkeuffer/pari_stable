@@ -2975,6 +2975,7 @@ init_Fq_i(GEN p, long n, long v)
   GEN P;
   if (n <= 0) pari_err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) pari_err(typeer, "ffinit");
+  if (signe(p) <= 0) pari_err(talker,"%Z is not a prime", p);
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);
   /*If easy case, use polcyclo*/
