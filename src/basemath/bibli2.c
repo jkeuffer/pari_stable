@@ -1727,6 +1727,7 @@ vectoset(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx,t_VEC);
+  if (lx == 1) return y;
   for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(simplify_i(gel(x,i)));
   return vecpermute(y, gen_sortspec_uniq(y, lx-1, (void*)&gcmp, cmp_nodata));
 }
