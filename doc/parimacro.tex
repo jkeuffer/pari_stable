@@ -449,4 +449,8 @@ but WITHOUT ANY WARRANTY WHATSOEVER.
 % comments
 \def\Ccom{\begingroup\unverb\Ccomstart}
 \def\Ccomstart#1*/{\rm#1\endgroup*/}
+
+\ifPDF
+  \input pdfmacs.tex
+\fi
 \catcode`\@=12
