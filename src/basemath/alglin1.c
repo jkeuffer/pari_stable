@@ -337,7 +337,7 @@ catmanySTR(GEN y1, GEN y2)
   GEN z, y;
   char *s, *S = (char*)avma;
   pari_sp av = avma;
-  new_chunk(1); *--S = 0;
+  (void)new_chunk(1); *--S = 0;
   for (y = y2; y >= y1; y--)
   {
     char *c = GSTR( gel(y,0) );

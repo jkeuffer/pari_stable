@@ -585,7 +585,7 @@ closure_eval(GEN C)
       {
         gp_pointer *g;
         if (rp==s_ptrs.n-1)
-          stack_new(&s_ptrs);
+          (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         g->vn=0;
         g->ep = (entree*) operand;
@@ -606,7 +606,7 @@ closure_eval(GEN C)
       {
         gp_pointer *g;
         if (rp==s_ptrs.n-1)
-          stack_new(&s_ptrs);
+          (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         g->vn=operand;
         g->ep=(entree *)0x1L;
@@ -619,7 +619,7 @@ closure_eval(GEN C)
         gp_pointer *g;
         matcomp *C;
         if (rp==s_ptrs.n-1)
-          stack_new(&s_ptrs);
+          (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         ep = (entree*) operand;
         switch (ep->valence)
@@ -646,7 +646,7 @@ closure_eval(GEN C)
         gp_pointer *g;
         matcomp *C;
         if (rp==s_ptrs.n-1)
-          stack_new(&s_ptrs);
+          (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         g->x = (GEN) var[s_var.n+operand].value;
         g->vn=0;

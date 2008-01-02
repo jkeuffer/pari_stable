@@ -332,12 +332,12 @@ pari_daemon(void)
   switch(pid) {
       case -1: return 1; /* father, fork failed */
       case 0:
-	setsid(); /* son becomes process group leader */
+	(void)setsid(); /* son becomes process group leader */
 	if (fork()) exit(0); /* now son exits, also when fork fails */
 	break; /* grandson: its father is the son, which exited,
 		* hence father becomes 'init', that'll take care of it */
       default: /* father, fork succeeded */
-	waitpid(pid,NULL,0); /* wait for son to exit, immediate */
+	(void)waitpid(pid,NULL,0); /* wait for son to exit, immediate */
 	return 1;
   }
   /* grandson */
@@ -474,8 +474,8 @@ pari_init_defaults(void)
   if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 
   next_bloc=0;
-  sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
-  sd_graphcolors("[4, 5]", d_SILENT);
+  (void)sd_graphcolormap("[\"white\",\"black\",\"blue\",\"violetred\",\"red\",\"green\",\"grey\",\"gainsboro\"]", d_SILENT);
+  (void)sd_graphcolors("[4, 5]", d_SILENT);
 }
 
 /* pari stack is a priori not available. Don't use it */

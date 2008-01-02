@@ -566,7 +566,7 @@ FF_ispower(GEN x, GEN K, GEN *pt)
      if (!r) { avma = av; return 0; }
      break;
   }
-  if (pt) { _mkFF(x,*pt,r); }
+  if (pt) { (void)_mkFF(x,*pt,r); }
   return 1;
 }
 
