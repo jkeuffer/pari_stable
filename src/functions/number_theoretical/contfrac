@@ -7,16 +7,17 @@ Help: contfrac(x,{b},{nmax}): continued fraction expansion of x (x
  is the vector of numerators of the continued fraction, and nmax is a bound
  for the number of terms in the continued fraction expansion
 Doc: returns the row vector whose components are the partial quotients of the
- \idx{continued fraction} expansion of $x$. That is a result
- $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n\dots)$. The
+ \idx{continued fraction} expansion of $x$. In other words, a result
+ $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n)$. The
  output is normalized so that $a_n \neq 1$ (unless we also have $n = 0$).
  
  The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
  number, the expansion stops at the last significant partial quotient if
  $nmax$ is omitted. $x$ can also be a rational function or a power series.
  
- If a vector $b$ is supplied, the numerators will be equal to the coefficients
- of $b$ (instead of all equal to $1$ as above). The length of the result is
+ If a vector $b$ is supplied, the numerators are equal to the coefficients
+ of $b$, instead of all equal to $1$ as above; more precisely, $x \approx
+ (1/b_0)(a_0+b_1/(a_1+\dots+b_n/a_n))$. The length of the result is
  then equal to the length of $b$, unless a partial remainder is encountered
  which is equal to zero, in which case the expansion stops. In the case of
  real numbers, the stopping criterion is thus different from the one mentioned
