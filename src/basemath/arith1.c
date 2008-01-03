@@ -2500,10 +2500,10 @@ sfcont2(GEN b, GEN x, long k)
 
   if (k)
   {
-    if (k>=lb) pari_err(talker,"list of numerators too short in sfcontf2");
+    if (k >= lb) pari_err(talker,"list of numerators too short in sfcontf2");
     lb = k+1;
   }
-  y=cgetg(lb,t_VEC);
+  y = cgetg(lb,t_VEC);
   if (lb==1) return y;
   if (is_scalar_t(tx))
   {
@@ -2512,17 +2512,18 @@ sfcont2(GEN b, GEN x, long k)
   else if (tx == t_SER) x = ser2rfrac_i(x);
 
   if (!gcmp1(gel(b,1))) x = gmul(gel(b,1),x);
-  i = 2; gel(y,1) = gfloor(x); p1 = gsub(x,gel(y,1));
-  for (  ; i<lb && !gcmp0(p1); i++)
+  gel(y,1) = gfloor(x);
+  p1 = gsub(x, gel(y,1));
+  for (i = 2 ; i < lb && !gcmp0(p1); i++)
   {
     x = gdiv(gel(b,i),p1);
     if (tx == t_REAL)
     {
       long e = expo(x);
-      if (e>0 && nbits2prec(e+1) > lg(x)) break;
+      if (e > 0 && nbits2prec(e+1) > lg(x)) break;
     }
     gel(y,i) = gfloor(x);
-    p1 = gsub(x,gel(y,i));
+    p1 = gsub(x, gel(y,i));
   }
   setlg(y,i);
   return gerepilecopy(av,y);
@@ -2542,21 +2543,15 @@ gcf2(GEN b, GEN x)
 }
 
 GEN
-contfrac0(GEN x, GEN b, long flag)
+contfrac0(GEN x, GEN b, long nmax)
 {
-  long lb, tb, i;
-  GEN y;
+  long tb;
 
-  if (!b) return gboundcf(x,flag);
+  if (!b) return gboundcf(x,nmax);
   tb = typ(b);
   if (tb == t_INT) return gboundcf(x,itos(b));
-  if (! is_matvec_t(tb)) pari_err(typeer,"contfrac0");
-
-  lb = lg(b); if (lb==1) return cgetg(1,t_VEC);
-  if (tb != t_MAT) return sfcont2(b,x,flag);
-  if (lg(b[1])==1) return gboundcf(x,flag);
-  y = cgetg(lb, t_VEC); for (i=1; i<lb; i++) gel(y,i) = gmael(b,i,1);
-  x = sfcont2(y,x,flag); return x;
+  if (! is_vec_t(tb)) pari_err(typeer,"contfrac0");
+  return sfcont2(b,x,nmax);
 }
 
 GEN

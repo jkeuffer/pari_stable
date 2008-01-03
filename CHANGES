@@ -11,6 +11,7 @@ BA  2- some error messages displayed internal token names (e.g for '1)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
+    2- contfrac(x, b): no longer allow (undocumented) type t_MAT for b
 
   Added
     1- library function gpcalloc
