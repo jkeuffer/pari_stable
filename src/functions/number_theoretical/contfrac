@@ -17,14 +17,16 @@ Doc: returns the row vector whose components are the partial quotients of the
  
  If a vector $b$ is supplied, the numerators are equal to the coefficients
  of $b$, instead of all equal to $1$ as above; more precisely, $x \approx
- (1/b_0)(a_0+b_1/(a_1+\dots+b_n/a_n))$. The length of the result is
- then equal to the length of $b$, unless a partial remainder is encountered
- which is equal to zero, in which case the expansion stops. In the case of
- real numbers, the stopping criterion is thus different from the one mentioned
- above since, if $b$ is too long, some partial quotients may not be
- significant.
- 
- If $b$ is an integer, \var{nmax} is ignored and the command is understood as
- \kbd{contfrac($x, , b$)}.
+ (1/b_0)(a_0+b_1/(a_1+\dots+b_n/a_n))$; for a numerical continued fraction
+ ($x$ real), the $a_i$ are integers, as large as possible; if $x$ is a
+ rational function, they are polynomials with $\deg a_i = \deg b_i + 1$.
+
+ The length of the result is then equal to the length of $b$, unless the next
+ partial quotient cannot be reliably computed, in which case the expansion
+ stops. This happens when a partial remainder is equal to zero (or too small
+ compared to the available significant digits for $x$ a \typ{REAL}).
+
+ \misctitle{Obsolete hack} (don't use this): If $b$ is an integer, \var{nmax}
+ is ignored and the command is understood as \kbd{contfrac($x,, b$)}.
 Variant: Also available are \fun{GEN}{gboundcf}{GEN x, long nmax} and
  \fun{GEN}{gcf}{GEN x}.
