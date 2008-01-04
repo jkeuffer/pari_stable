@@ -2,7 +2,7 @@
 use PARI::822;
 
 open(IN, $ARGV[0]) || die "cannot find $ARGV[0]";
-for (<IN>) { s/^\d+ \d+ //; PARI::822::read(\%funcs,$_,1) }
+for (<IN>) { s/^\d+\s+\d+\s+//; PARI::822::read(\%funcs,$_,1) }
 
 for (keys %funcs)
 {
