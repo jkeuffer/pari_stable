@@ -70,11 +70,11 @@ sub read
 		chomp $line;
                 if ($invars && $line =~ /^\s/)
                 {
-                        $line =~ s/^\s+//;
+                        $line =~ s/^\s//;
                         $value.= ($last_was_void?"\n\n$line":"\n$line");
                         $last_was_void = 0; next;
                 }
-                $last_was_void = ($line eq '');
+                $last_was_void = ($line =~ /^\s*$/);
                 next if ($last_was_void);
 
                 $store->() if ($invars);
