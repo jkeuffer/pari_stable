@@ -448,14 +448,7 @@ arg_is_safe(long a)
   case Fmatrix:
     return arg_is_safe(tree[a].x) && arg_is_safe(tree[a].y);
   case Fentry:
-    {
-      entree *ep=get_entree(a);
-      long i;
-      for (i=s_lvar.n-1; i>=0; i--)
-        if (localvars[i].ep==ep)
-          return 1;
-      return 0;
-    }
+    return 1;
   default:
     return 0;
   }
