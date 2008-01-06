@@ -467,7 +467,7 @@ closure_varn(GEN x)
 {
   if (typ(x) != t_POL || lg(x) != 4 ||
       !gcmp0(gel(x,2)) || !gcmp1(gel(x,3)))
-    pari_err(varer1,"variable name expected",NULL,NULL);
+    pari_err(varer1,NULL,NULL);
   return varn(x);
 }
 
@@ -504,7 +504,7 @@ closure_castlong(long z, long mode)
     gel(st,sp++)=stoi(z);
     break;
   case Gvar:
-    pari_err(varer1,"variable name expected",NULL,NULL);
+    pari_err(varer1,NULL,NULL);
   default:
     pari_err(bugparier,"closure_castlong, type unknown");
   }
@@ -597,7 +597,7 @@ closure_eval(GEN C)
           g->x = (GEN) g->ep->value;
           break;
         default:
-          pari_err(varer1,"variable name expected",NULL,NULL);
+          pari_err(varer1,NULL,NULL);
         }
         gel(st,sp++) = (GEN)&(g->x);
         break;
@@ -630,9 +630,8 @@ closure_eval(GEN C)
           g->x = (GEN) ep->value;
           break;
         default:
-          pari_err(varer1,"variable name expected",NULL,NULL);
+          pari_err(varer1,NULL,NULL);
         }
-        g->x = (GEN) ep->value;
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -687,7 +686,7 @@ closure_eval(GEN C)
         changevalue(ep, gel(st,--sp));
         break;
       default:
-        pari_err(varer1,"variable name expected",NULL,NULL);
+        pari_err(varer1,NULL,NULL);
       }
       break;
     case OCstorelex:
