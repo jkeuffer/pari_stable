@@ -920,24 +920,24 @@ GEN
 matid(long n) { return matid_intern(n, gen_1, gen_0); }
 
 static void
-fill_scalcol(GEN y, GEN t, GEN _0, long n)
+fill_scalcol(GEN y, GEN t, long n)
 {
   long i;
   if (n < 0) pari_err(talker,"negative size in fill_scalcol");
   if (n) {
     gel(y,1) = t;
-    for (i=2; i<=n; i++) gel(y,i) = _0;
+    for (i=2; i<=n; i++) gel(y,i) = gen_0;
   }
 }
 GEN
 scalarcol(GEN x, long n) {
   GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, gcopy(x), gen_0, n); return y;
+  fill_scalcol(y, gcopy(x), n); return y;
 }
 GEN
 scalarcol_shallow(GEN x, long n) {
   GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, x, gen_0, n); return y;
+  fill_scalcol(y, x, n); return y;
 }
 
 GEN
