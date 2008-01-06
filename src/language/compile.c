@@ -1237,8 +1237,8 @@ compilenode(long n, int mode, long flag)
       long i;
       GEN arg=listtogen(x,Flistarg);
       long nb=lg(arg)-1,nbmvar=numbmvar();
-      GEN text=cgetg(3,t_VEC);
       GEN vep=cgetg_copy(lg(arg),arg);
+      GEN text=cgetg(3,t_VEC);
       gel(text,1)=strntoGENstr(tree[x].str,tree[x].len);
       gel(text,2)=strntoGENstr(tree[y].str,tree[y].len);
       getcodepos(&pos);
