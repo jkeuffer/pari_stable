@@ -3344,7 +3344,7 @@ all columns. To fully allocate a matrix initialized with zero entries,
 use \kbd{zeromatcopy}.
 
 \fun{GEN}{zeromatcopy}{long m, long n} creates a \typ{MAT} with \kbd{m} x
-\kbd{n} components set to \kbd{gen\_0}. Note that
+\kbd{n} components set to \kbd{gen\_0}.
 
 \fun{GEN}{matid}{long n} identity matrix in dimension \kbd{n} (with
 components \kbd{gen\_1} and\kbd{gen\_0}).
@@ -3668,7 +3668,7 @@ compatibility only and should not be used:
 \subsubsec{Basic sort}
 
 \fun{GEN}{sort}{GEN x} sorts the vector \kbd{x} in ascending order using a
-mergesort algorithm, and \kbd{gcmp} as the undelying comparison routine
+mergesort algorithm, and \kbd{gcmp} as the underlying comparison routine
 (returns the sorted vector). This routine copies all components of $x$, use
 \kbd{gen\_sort\_inplace} for a more memory-efficient function.
 
@@ -4175,7 +4175,7 @@ components.
 \fun{GEN}{vec_lengthen}{GEN v, long n} lengthens the vector \kbd{v}
 to \kbd{n} components. The extra components are not initialized.
 
-\subsec{Function to handle \typ{VECSMALL}}
+\subsec{Functions to handle \typ{VECSMALL}}
 
 Theses functions handle \typ{VECSMALL} as an abstract container type
 of small signed integers. No specific meaning is attached to the content.

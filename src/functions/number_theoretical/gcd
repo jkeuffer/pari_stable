@@ -31,5 +31,8 @@ Doc: creates the greatest common divisor of $x$ and $y$. $x$ and $y$ can be
  
  \item general polynomials: use the \idx{subresultant algorithm} if
  coefficient explosion is likely (exact, non modular, coefficients).
+
+ If you also need the $u$ and $v$ such that $x*u + y*v = \gcd(x,y)$,
+ use the \tet{bezout} function.
 Variant: Also available are \fun{GEN}{ggcd}{GEN x, GEN y}, if \kbd{y} is not
  \kbd{NULL}, and \fun{GEN}{content}{GEN x}, if $\kbd{y} = \kbd{NULL}$.

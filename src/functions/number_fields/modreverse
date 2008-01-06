@@ -2,7 +2,7 @@ Function: modreverse
 Section: number_fields
 C-Name: polymodrecip
 Prototype: G
-Help: modreverse(a): reverse polymod of the polmod a, if it exists
+Help: modreverse(a): reverse polmod of the polmod a, if it exists
 Doc: $a$ being a polmod $A(X)$ modulo $T(X)$, finds
  the ``reverse polmod'' $B(X)$ modulo $Q(X)$, where $Q$ is the minimal
  polynomial of $a$, which must be equal to the degree of $T$, and such that if

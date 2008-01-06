@@ -22,3 +22,6 @@ Doc: resultant of the two
  faster than the default if the coefficient ring is complicated (e.g
  multivariate polynomials or huge coefficients), and slightly slower
  otherwise.
+
+ If you also need the $u$ and $v$ such that $x*u + y*v = res(x,y)$,
+ use the \tet{bezoutres} function.
