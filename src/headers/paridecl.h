@@ -999,8 +999,8 @@ long    zpsolublenf(GEN bnf,GEN pol,GEN p);
 
 /* compile.c */
 
-void localvars_unpack(GEN pack);
 long localvars_find(GEN pack, entree *ep);
+void localvars_unpack(GEN pack);
 
 /* default.c */
 
