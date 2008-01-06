@@ -74,7 +74,7 @@ static THREAD gp2c_stack s_opcode, s_operand, s_data, s_lvar;
 static THREAD char *opcode;
 static THREAD long *operand;
 static THREAD GEN *data;
-static THREAD long offset=-1;
+static THREAD long offset;
 static THREAD struct vars_s *localvars;
 
 void
@@ -84,6 +84,7 @@ pari_init_compiler(void)
   stack_init(&s_operand,sizeof(*operand),(void **)&operand);
   stack_init(&s_data,sizeof(*data),(void **)&data);
   stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
+  offset=-1;
 }
 
 struct codepos
@@ -1282,7 +1283,8 @@ compilenode(long n, int mode, long flag)
 GEN
 gp_closure(long n)
 {
-  struct codepos pos={0,0,0,-1};
+  struct codepos pos;
+  getcodepos(&pos);
   compilenode(n,Ggen,FLreturn);
   return getclosure(&pos);
 }
