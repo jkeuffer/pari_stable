@@ -563,11 +563,11 @@ compilevec(long n, long mode, op_code op)
   long x=tree[n].x;
   long i;
   GEN arg=listtogen(x,Fmatrixelts);
-  long l=lg(arg),lnc=first_safe_arg(arg);
+  long l=lg(arg);
   op_push(op,l);
   for (i=1;i<l;i++)
   {
-    compilenode(arg[i],Ggen,i>=lnc?FLnocopy:0);
+    compilenode(arg[i],Ggen,FLnocopy);
     op_push(OCstackgen,i);
   }
   avma=ltop;
