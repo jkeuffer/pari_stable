@@ -12,6 +12,7 @@ DE  5- [Solaris] pari.desc won't compile [#715]
     6- 822.pm broke the formatting of inline program examples
     7- memory leaks in pari_close_opts [ freeep(), parser stacks, some
        defaults... ]. FIXME: calls to getpwuid introduce (small) leaks
+    8- ZV_Z_mul might not reset clonebit.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

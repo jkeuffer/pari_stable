@@ -1403,7 +1403,7 @@ ZV_Z_mul(GEN X, GEN c)
   }
   else /* c = 0 should be exceedingly rare */
     { for (i=1; i<m; i++) gel(A,i) = mulii(c,gel(X,i)); }
-  A[0] = X[0]; return A;
+  A[0] = X[0] & ~CLONEBIT; return A;
 }
 
 /* X + v Y */
