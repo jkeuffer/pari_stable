@@ -13,6 +13,8 @@ DE  5- [Solaris] pari.desc won't compile [#715]
     7- memory leaks in pari_close_opts [ freeep(), parser stacks, some
        defaults... ]. FIXME: calls to getpwuid introduce (small) leaks
     8- ZV_Z_mul might not reset clonebit.
+    9- nfeltreducemodpr --> gerepile errors [#716]. Also SEGV for residue 
+       degre > 1 (when p does not divide the index)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -21,6 +23,7 @@ DE  5- [Solaris] pari.desc won't compile [#715]
   Added
     1- library function gpcalloc
     2- [libpari] public generic hashtables
+    2- library function FpM_FpC_mul_to_RgX
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

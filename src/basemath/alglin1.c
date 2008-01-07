@@ -2770,11 +2770,22 @@ FpV_dotsquare(GEN x, GEN p)
   return gerepileuptoint(av, p?modii(p1,p):p1);
 }
 
+/* x[i,]*y */
+static GEN
+ZM_ZC_mul_coeff(GEN x, GEN y, long lx, long i)
+{
+  GEN c = mulii(gcoeff(x,i,1),gel(y,1));
+  long k;
+  for (k = 2; k < lx; k++)
+    c = addii(c, mulii(gcoeff(x,i,k),gel(y,k)));
+  return c;
+}
+
 /*If p is NULL no reduction is performed.*/
 GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)
 {
-  long i,k,l,lx=lg(x), ly=lg(y);
+  long i,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (lx != ly) pari_err(operi,"* [mod p]",x,y);
   if (lx==1) return cgetg(1,t_COL);
@@ -2783,10 +2794,43 @@ FpM_FpC_mul(GEN x, GEN y, GEN p)
   for (i=1; i<l; i++)
   {
     pari_sp av = avma;
-    GEN p1 = mulii(gcoeff(x,i,1),gel(y,1));
-    for (k = 2; k < lx; k++)
-      p1 = addii(p1, mulii(gcoeff(x,i,k),gel(y,k)));
+    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
     gel(z,i) = gerepileuptoint(av, p?modii(p1,p):p1);
+  }
+  return z;
+}
+
+/* RgV_to_RgX(FpM_FpC_mul(x,y,p), v), p != NULL, memory clean */
+GEN
+FpM_FpC_mul_to_RgX(GEN x, GEN y, GEN p, long v)
+{
+  long i,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (lx != ly) pari_err(operi,"* [mod p]",x,y);
+  if (lx==1) return zeropol(v);
+  l = lg(x[1]);
+  z = new_chunk(l+1);
+  for (i=l-1; i; i--)
+  {
+    pari_sp av = avma;
+    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
+    p1 = modii(p1, p);
+    if (signe(p1))
+    {
+      if (i != l-1) stackdummy((pari_sp)(z + l+1), (pari_sp)(z + i+2));
+      gel(z,i+1) = gerepileuptoint(av, p1);
+      break;
+    }
+    avma = av;
+  }
+  if (!i) { avma = (pari_sp)(z + l+1); return zeropol(v); }
+  z[0] = evaltyp(t_POL) | evallg(i+2);
+  z[1] = evalsigne(1) | evalvarn(v);
+  for (; i; i--)
+  {
+    pari_sp av = avma;
+    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
+    gel(z,i+1) = gerepileuptoint(av, modii(p1,p));
   }
   return z;
 }

@@ -203,6 +203,7 @@ GEN     FlxqM_ker(GEN x, GEN T, ulong p);
 GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpC_mul(GEN x, GEN y, GEN p);
+GEN     FpM_FpC_mul_to_RgX(GEN x, GEN y, GEN p, long v);
 GEN     FpM_deplin(GEN x, GEN p);
 GEN     FpM_gauss(GEN a, GEN b, GEN p);
 GEN     FpM_image(GEN x, GEN p);

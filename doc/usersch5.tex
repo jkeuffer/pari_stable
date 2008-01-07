@@ -2467,6 +2467,9 @@ and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
 
+\fun{GEN}{FpM_FpC_mul_to_RgX}{GEN x, GEN y, GEN p, long v} memory clean
+version of \kbd{RgV\_to\_RgX(FpM\_FpC\_mul(x,y,p), v)}.
+
 \fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
 (seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
 assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain

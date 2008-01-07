@@ -217,7 +217,6 @@ GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
 GEN  close_modinvertible(GEN x, GEN y);
 GEN  colreducemodHNF(GEN x, GEN y, GEN *Q);
-GEN  col_to_ff(GEN x, long v);
 
 /* famat */
 GEN factorback_i(GEN fa, GEN e, GEN nf, int red);

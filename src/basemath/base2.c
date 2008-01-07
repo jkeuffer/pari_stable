@@ -2325,36 +2325,13 @@ zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
 GEN
 zk_to_ff(GEN x, GEN modpr)
 {
-  GEN pr = gel(modpr,mpr_PR);
-  GEN p = gel(pr,1);
-  GEN y = gmul(gel(modpr,mpr_FFP), x);
-  if (lg(modpr) == SMALLMODPR) return modii(y,p);
-  y = FpC_red(y, p);
-  return col_to_ff(y, varn(modpr[mpr_T]));
+  GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
+  GEN ffproj = gel(modpr,mpr_FFP);
+  if (lg(modpr) == SMALLMODPR) return FpV_dotproduct(ffproj,x, p);
+  return FpM_FpC_mul_to_RgX(ffproj,x, p, varn(modpr[mpr_T]));
 }
 
 /* REDUCTION Modulo a prime ideal */
-
-/* assume x in t_COL form, v_pr(x) >= 0 */
-static GEN
-kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
-{
-  GEN den;
-  long v;
-  x = Q_remove_denom(x, &den);
-  if (!den) return x;
-
-  v = Z_pvalrem(den, p, &den);
-  if (v)
-  {
-    GEN tau = modpr_TAU(modpr);
-    if (!tau) pari_err(talker,"modpr initialized for integers only!");
-    x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
-    x = gdivexact(x, gpowgs(p, v));
-  }
-  if (!is_pm1(den)) { den = resii(den, p); x = gmul(x, Fp_inv(den, p)); }
-  return FpC_red(x, p);
-}
 
 /* x integral, reduce mod prh in HNF */
 GEN
@@ -2378,69 +2355,60 @@ nfreducemodpr_i(GEN x, GEN prh)
   gel(x,1) = remii(gel(x,1), p); return x;
 }
 
+/* nf a true nf */
+static GEN
+Rg_to_ff(GEN nf, GEN x, GEN modpr)
+{
+  GEN den, pr = gel(modpr,mpr_PR), p = gel(pr,1);
+  long tx = typ(x);
+
+  if (tx == t_POLMOD) { x = gel(x,2); tx = typ(x); }
+  switch(tx)
+  {
+    case t_INT: return modii(x, p);
+    case t_FRAC: return Rg_to_Fp(x, p);
+    case t_POL:
+      if (lg(x) == 3) return Rg_to_Fp(gel(x,2), p);
+      x = Q_remove_denom(x, &den);
+      x = poltobasis(nf, x);
+      break;
+    case t_COL:
+      x = Q_remove_denom(x, &den);
+      if (lg(x) == lg(gel(nf,7))) break;
+    default: pari_err(typeer,"Rg_to_ff");
+  }
+  if (den)
+  {
+    long v = Z_pvalrem(den, p, &den);
+    if (v)
+    {
+      GEN tau = modpr_TAU(modpr);
+      if (!tau) pari_err(talker,"modpr initialized for integers only!");
+      x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
+      x = gdivexact(x, gpowgs(p, v));
+    }
+    if (!is_pm1(den)) x = ZV_Z_mul(x, Fp_inv(den, p));
+    x = FpC_red(x, p);
+  }
+  return zk_to_ff(x, modpr);
+}
+
 GEN
 nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  GEN pr, p;
-
+  GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
   nf = checknf(nf);
   checkmodpr(modpr);
-  pr = gel(modpr,mpr_PR);
-  p = gel(pr,1);
-  /* cf algtobasis_i */
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      return scalarcol_shallow(Rg_to_Fp(x,p), degpol( gel(nf,1) ));
-    case t_POLMOD:
-      x = gel(x,2);
-      if (typ(x) != t_POL) return scalarcol_shallow(Rg_to_Fp(x,p), degpol(gel(nf,1)));
-      /* fall through */
-    case t_POL:
-    {
-      GEN d, pv;
-      long v;
-
-      x = poltobasis(nf, Q_remove_denom(x, &d));
-      if (d) {
-	v = Z_pvalrem(d, p, &d);
-	pv = gpowgs(p, v+1);
-	d = Fp_inv(resii(d, pv), pv);
-	x = gmul(x, d);
-      } else pv = p;
-      x = FpC_red(x, pv);
-    }
-
-    case t_COL:
-      if (lg(x) == lg(gel(nf,7))) break;
-    default: pari_err(typeer,"algtobasis_i");
-  }
-  x = kill_denom(x, nf, p, modpr);
-  x = ff_to_nf(zk_to_ff(x,modpr), modpr);
-  return gerepileupto(av, FpC_red(algtobasis_i(nf,x), p));
+  x = algtobasis_i(nf, ff_to_nf(Rg_to_ff(nf,x,modpr), modpr));
+  return gerepileupto(av, FpC_red(x, p));
 }
 
 GEN
 nf_to_ff(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  GEN pr = gel(modpr,mpr_PR);
-  GEN p = gel(pr,1);
-  long t = typ(x);
-
-  if (t == t_POLMOD) { x = gel(x,2); t = typ(x); }
-  nf = checknf(nf);
-  switch(t)
-  {
-    case t_INT: return modii(x, p);
-    case t_FRAC: return Rg_to_Fp(x, p);
-    case t_POL: x = poltobasis(nf, x); break;
-    case t_COL: break;
-    default: pari_err(typeer,"nf_to_ff");
-  }
-  x = kill_denom(x, nf, p, modpr);
-  return gerepilecopy(av, zk_to_ff(x, modpr));
+  return gerepileupto(av, Rg_to_ff(checknf(nf), x, modpr));
 }
 
 GEN

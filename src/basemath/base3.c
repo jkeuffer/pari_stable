@@ -685,6 +685,8 @@ GEN
 poltobasis(GEN nf, GEN x)
 {
   GEN P = gel(nf,1);
+  if (varn(x) != varn(P))
+    pari_err(talker, "incompatible variables in poltobasis");
   if (degpol(x) >= degpol(P)) x = RgX_rem(x,P);
   return mulmat_pol(gel(nf,8), x);
 }

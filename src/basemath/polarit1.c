@@ -1086,20 +1086,6 @@ factcantor(GEN f, GEN p) { return factcantor0(f,p,0); }
 GEN
 simplefactmod(GEN f, GEN p) { return factcantor0(f,p,1); }
 
-GEN
-col_to_ff(GEN x, long v)
-{
-  long i, k = lg(x);
-  GEN p;
-
-  while (--k && gcmp0(gel(x,k)));
-  if (k <= 1) return k? gel(x,1): gen_0;
-  i = k+2; p = cgetg(i,t_POL);
-  p[1] = evalsigne(1) | evalvarn(v);
-  x--; for (k=2; k<i; k++) p[k] = x[k];
-  return p;
-}
-
 /* set x <-- x + c*y mod p */
 /* x is not required to be normalized.*/
 static void
