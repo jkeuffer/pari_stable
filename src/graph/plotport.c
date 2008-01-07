@@ -25,7 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void postdraw0(long *w, long *x, long *y, long lw, long scale);
 static void PARI_get_psplot(void);
 
+/* no need for THREAD: OK to share this */
+static hashtable *rgb_colors = NULL;
+
+/* no need for THREAD: gp-specific */
 static long current_color[NUMRECT];
+
 PariRect **rectgraph = NULL;
 PARI_plot pari_plot, pari_psplot;
 PARI_plot *pari_plot_engine = &pari_plot;
@@ -217,7 +222,11 @@ free_graph(void)
     gpfree((void *)e);
   }
   gpfree((void *)rectgraph);
-  rectgraph = 0;
+  if (rgb_colors)
+  {
+    free((void*)rgb_colors->table);
+    free((void*)rgb_colors);
+  }
 }
 
 static PariRect *
@@ -2875,12 +2884,11 @@ static hashentry col_list[] = {
 static void
 colorname_to_rgb(const char *s, int *r, int *g, int *b)
 {
-  static hashtable *colors = NULL;
   hashentry *ep;
   long rgb;
 
-  if (!colors) colors = hashstr_import_static(col_list, 1000);
-  ep = hash_search(colors, (void*)s);
+  if (!rgb_colors) rgb_colors = hashstr_import_static(col_list, 1000);
+  ep = hash_search(rgb_colors, (void*)s);
   if (!ep) pari_err(talker, "unknown color %s", s);
   rgb = (long)ep->val;
   *b = rgb & 0xff; rgb >>= 8;
