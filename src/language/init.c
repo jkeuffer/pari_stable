@@ -742,6 +742,8 @@ pari_close_opts(ulong init_opts)
   free(current_psfile);
   grow_kill(MODULES);
   grow_kill(OLDMODULES);
+  if (pari_colormap) free(pari_colormap);
+  if (pari_graphcolors) free(pari_graphcolors);
   if (pari_datadir) free(pari_datadir);
   if (init_opts&INIT_DFTm)
   { /* delete GP_DATA */

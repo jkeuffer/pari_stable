@@ -2621,6 +2621,10 @@ fprintferr(const char* format, ...)
 /*******************************************************************/
 /**                            FILES                              **/
 /*******************************************************************/
+/* to cache '~' expansion */
+static char *homedir = NULL;
+/* last file read successfully from try_name() */
+static char *last_filename = NULL;
 /* stack of temporary files (includes all infiles + some output) */
 static pariFILE *last_tmp_file = NULL;
 /* stack of "permanent" (output) files */
@@ -2793,6 +2797,9 @@ killallfiles(int leaving)
   {
     popinfile(); /* look for leaks */
     kill_file_stack(&last_file);
+    if (last_filename) gpfree(last_filename);
+    if (homedir) gpfree(homedir);
+    if (pari_logfile) { fclose(pari_logfile); pari_logfile = NULL; }
   }
   kill_file_stack(&last_tmp_file);
   pari_infile = stdin;
@@ -2924,8 +2931,6 @@ os_getenv(const char *s)
 /**                   GP STANDARD INPUT AND OUTPUT                **/
 /**                                                               **/
 /*******************************************************************/
-static char *last_filename = NULL;
-
 #ifdef HAS_OPENDIR
 /* slow, but more portable than stat + S_I[FS]DIR */
 #  include <dirent.h>
@@ -2972,33 +2977,45 @@ _expand_tilde(const char *s)
 #else
   struct passwd *p;
   const char *u;
-  char *ret;
+  char *ret, *dir = NULL, *user = NULL;
   int len;
 
   if (*s != '~') return pari_strdup(s);
   s++; u = s; /* skip ~ */
   if (!*s || *s == '/')
   {
-    p = getpwuid(geteuid());
-    if (!p)
-    { /* host badly configured, don't kill session on startup
-       * (when expanding path) */
-      pari_warn(warner,"can't expand ~");
-      return pari_strdup(s);
+    if (homedir) dir = homedir;
+    else
+    {
+      p = getpwuid(geteuid());
+      if (p)
+      {
+        dir = p->pw_dir;
+        homedir = pari_strdup(dir);
+      }
     }
   }
   else
   {
-    char *tmp;
     while (*u && *u != '/') u++;
-    len = u-s; tmp = (char*)gpmalloc(len+1);
-    (void)strncpy(tmp,s,len);
-    tmp[len] = 0;
-    p = getpwnam(tmp); free(tmp);
+    len = u-s; user = (char*)gpmalloc(len+1);
+    (void)strncpy(user,s,len);
+    user[len] = 0;
+    p = getpwnam(user);
+    if (p) dir = p->pw_dir;
   }
-  if (!p) pari_err(talker2,"unknown user ",s,s-1);
-  ret = (char*)gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
-  sprintf(ret,"%s%s",p->pw_dir,u); return ret;
+  if (!dir)
+  { /* don't kill session on startup (when expanding path) */
+    pari_warn(warner,"can't expand ~%s", user? user: "");
+    ret =  pari_strdup(s);
+  }
+  else
+  {
+    ret = (char*)gpmalloc(strlen(dir) + strlen(u) + 1);
+    sprintf(ret,"%s%s",dir,u);
+  }
+  if (user) free(user);
+  return ret;
 #endif
 }
 
