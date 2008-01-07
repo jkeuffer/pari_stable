@@ -420,7 +420,14 @@ pari_init_evaluator(void)
   stack_init(&s_var,sizeof(*var),(void**)&var);
   stack_init(&s_lvars,sizeof(*lvars),(void**)&lvars);
 }
-
+void
+pari_close_evaluator(void)
+{
+  stack_delete(&s_st);
+  stack_delete(&s_ptrs);
+  stack_delete(&s_var);
+  stack_delete(&s_lvars);
+}
 
 INLINE GEN
 copyupto(GEN z, GEN t)

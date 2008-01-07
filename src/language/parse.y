@@ -59,6 +59,8 @@ pari_init_parser(void)
   }
   avma=ltop;
 }
+void
+pari_close_parser(void) { stack_delete(&s_node); }
 
 static void
 unused_chars(const char *lex, int strict)

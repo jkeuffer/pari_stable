@@ -727,6 +727,9 @@ pari_close_opts(ulong init_opts)
   free((void*)varentries);
   free((void*)primetab);
   free((void*)universal_constants);
+  pari_close_parser();
+  pari_close_compiler();
+  pari_close_evaluator();
 
   while (cur_bloc) gunclone(cur_bloc);
   killallfiles(1);

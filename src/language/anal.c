@@ -1195,7 +1195,8 @@ stack_base(gp2c_stack *s)
   return (void **) ((char *)s+s->offset);
 }
 
-void stack_init(gp2c_stack *s, size_t size, void **data)
+void
+stack_init(gp2c_stack *s, size_t size, void **data)
 {
   s->offset=(char *)data-(char *)s;
   *data=NULL;
@@ -1204,18 +1205,30 @@ void stack_init(gp2c_stack *s, size_t size, void **data)
   s->size=size;
 }
 
-void stack_alloc(gp2c_stack *s, long nb)
+void
+stack_alloc(gp2c_stack *s, long nb)
 {
-  void **sdat=(void **)((char *)s+s->offset);
-  if (s->n+nb <= s->alloc)
-    return;
-  while (s->n+nb > s->alloc)
-    s->alloc=s->alloc?s->alloc<<1:1;
+  void **sdat = stack_base(s);
+  if (s->n+nb <= s->alloc) return;
+  if (!s->alloc)
+    s->alloc = nb;
+  else
+  {
+    while (s->n+nb > s->alloc) s->alloc <<= 1;
+  }
   *sdat=gprealloc(*sdat,s->alloc*s->size);
 }
 
-long stack_new(gp2c_stack *s)
+long
+stack_new(gp2c_stack *s)
 {
   stack_alloc(s, 1);
   return s->n++;
+}
+
+void
+stack_delete(gp2c_stack *s)
+{
+  void **sdat = stack_base(s);
+  if (*sdat) free(*sdat);
 }

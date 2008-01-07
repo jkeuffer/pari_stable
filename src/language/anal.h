@@ -177,6 +177,9 @@ int pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex);
 int pari_parse(char **lex);
 entree* fetch_entry(const char *s, long len);
 entree* fetch_member(const char *s, long len);
+void pari_close_parser(void);
+void pari_close_compiler(void);
+void pari_close_evaluator(void);
 void pari_init_parser(void);
 void pari_init_compiler(void);
 void pari_init_evaluator(void);
@@ -198,5 +201,6 @@ void **stack_base(gp2c_stack *s);
 void stack_alloc(gp2c_stack *s, long nb);
 void stack_init(gp2c_stack *s, size_t size, void **data);
 long stack_new(gp2c_stack *s);
+void stack_delete(gp2c_stack *s);
 
 ENDEXTERN

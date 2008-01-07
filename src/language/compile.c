@@ -86,6 +86,14 @@ pari_init_compiler(void)
   stack_init(&s_lvar,sizeof(*localvars),(void **)&localvars);
   offset=-1;
 }
+void
+pari_close_compiler(void)
+{
+  stack_delete(&s_opcode);
+  stack_delete(&s_operand);
+  stack_delete(&s_data);
+  stack_delete(&s_lvar);
+}
 
 struct codepos
 {
