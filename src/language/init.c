@@ -70,11 +70,12 @@ typedef struct {
 static THREAD stack *err_catch_stack;
 static THREAD GEN *dft_handler;
 
-#define BLOCK_SIGINT(code)           \
+#define BLOCK_SIGINT_START           \
 {                                    \
   int block=PARI_SIGINT_block;       \
-  PARI_SIGINT_block = 1;             \
-  code                               \
+  PARI_SIGINT_block = 1;
+
+#define BLOCK_SIGINT_END             \
   PARI_SIGINT_block = block;         \
   if (!block && PARI_SIGINT_pending) \
   {                                  \
@@ -149,7 +150,7 @@ void
 gunclone(GEN x)
 {
   if (--bl_refc(x) > 0) return;
-  BLOCK_SIGINT(
+  BLOCK_SIGINT_START;
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
   else
   {
@@ -160,7 +161,7 @@ gunclone(GEN x)
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
   free((void*)bl_base(x)); /* gpfree not needed: we already block */
-  )
+  BLOCK_SIGINT_END;
 #ifdef DEBUG
   fprintferr("- %ld\n", NUM--);
 #endif
@@ -260,9 +261,9 @@ static void pari_sighandler(int sig);
 void
 gpfree(void *pointer)
 {
-  BLOCK_SIGINT(
+  BLOCK_SIGINT_START;
   free(pointer);
-  )
+  BLOCK_SIGINT_END;
 }
 
 void*
@@ -271,9 +272,9 @@ gpmalloc(size_t size)
   if (size)
   {
     char *tmp;
-    BLOCK_SIGINT(
+    BLOCK_SIGINT_START;
     tmp = (char*)malloc(size);
-    )
+    BLOCK_SIGINT_END;
     if (!tmp) pari_err(memer);
     return tmp;
   }
@@ -286,10 +287,10 @@ gprealloc(void *pointer, size_t size)
 {
   char *tmp;
 
-  BLOCK_SIGINT(
+  BLOCK_SIGINT_START;
   if (!pointer) tmp = (char *) malloc(size);
   else tmp = (char *) realloc(pointer,size);
-  )
+  BLOCK_SIGINT_END;
   if (!tmp) pari_err(memer);
   return tmp;
 }
@@ -598,9 +599,8 @@ init_stack(size_t size)
   }
   /* NOT gpmalloc, memer would be deadly */
 
-  BLOCK_SIGINT(
+  BLOCK_SIGINT_START;
   bot = (pari_sp)malloc(s);
-  )
   if (!bot)
     for (s = old;; s>>=1)
     {
@@ -609,6 +609,7 @@ init_stack(size_t size)
       bot = (pari_sp)malloc(s);
       if (bot) break;
     }
+  BLOCK_SIGINT_END;
   avma = top = bot+s;
   memused = 0; return s;
 }
@@ -705,65 +706,49 @@ pari_init(size_t parisize, ulong maxprime)
   pari_init_opts(parisize, maxprime, INIT_JMPm | INIT_SIGm | INIT_DFTm);
 }
 
-static void
-delete_hist(gp_hist *h)
-{
-  if (h->res) gpfree((void*)h->res);
-}
-static void
-delete_pp(gp_pp *p)
-{
-  if (p->cmd) gpfree((void*)p->cmd);
-}
-static void
-delete_path(gp_path *p)
-{
-  delete_dirs(p);
-  gpfree((void*)p->PATH);
-}
-
-static void
-free_gp_data(gp_data *D)
-{
-  delete_hist(D->hist);
-  delete_path(D->path);
-  delete_pp(D->pp);
-  if (D->help) gpfree((void*)D->help);
-}
-
-static void
-kill_hashlist(entree *ep)
-{
-  entree *EP;
-  for (; ep; ep = EP) { EP = ep->next; freeep(ep); }
-}
-
 void
 pari_close_opts(ulong init_opts)
 {
   long i;
 
+  BLOCK_SIGINT_START;
   if ((init_opts&INIT_SIGm)) pari_sig_init(SIG_DFL);
 
   while (delete_var()) /* empty */;
-  for (i = 0; i < functions_tblsz; i++) kill_hashlist(functions_hash[i]);
-  gpfree((void*)varentries);
-  gpfree((void*)primetab);
-  gpfree((void*)universal_constants);
+  for (i = 0; i < functions_tblsz; i++) 
+  {
+    entree *ep = functions_hash[i];
+    while (ep) {
+      entree *epn = ep->next;
+      if (!EpSTATIC(ep)) { freeep(ep); free(ep); }
+      ep = epn;
+    }
+  }
+  free((void*)varentries);
+  free((void*)primetab);
+  free((void*)universal_constants);
 
   while (cur_bloc) gunclone(cur_bloc);
   killallfiles(1);
-  gpfree((void*)functions_hash);
-  gpfree((void*)funct_old_hash);
-  gpfree((void*)dft_handler);
-  gpfree((void*)bot);
-  gpfree((void*)diffptr);
-  gpfree(current_logfile);
-  gpfree(current_psfile);
+  free((void*)functions_hash);
+  free((void*)funct_old_hash);
+  free((void*)dft_handler);
+  free((void*)bot);
+  free((void*)diffptr);
+  free(current_logfile);
+  free(current_psfile);
   grow_kill(MODULES);
   grow_kill(OLDMODULES);
-  if (pari_datadir) gpfree(pari_datadir);
-  if ((init_opts&INIT_DFTm)) free_gp_data(GP_DATA);
+  if (pari_datadir) free(pari_datadir);
+  if (init_opts&INIT_DFTm)
+  { /* delete GP_DATA */
+    if (GP_DATA->hist->res) free((void*)GP_DATA->hist->res);
+    if (GP_DATA->pp->cmd) free((void*)GP_DATA->pp->cmd);
+    if (GP_DATA->help) free((void*)GP_DATA->help);
+    delete_dirs(GP_DATA->path);
+    free((void*)GP_DATA->path->PATH);
+  }
+  BLOCK_SIGINT_END;
 }
 
 void

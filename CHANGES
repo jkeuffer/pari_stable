@@ -10,6 +10,7 @@ BA  2- some error messages displayed internal token names (e.g for '1)
     4- setunion(Set(),Set()) -> SEGV [#714]
 DE  5- [Solaris] pari.desc won't compile [#715]
     6- 822.pm broke the formatting of inline program examples
+    7- memory leak after freeep() in pari_close_opts
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
