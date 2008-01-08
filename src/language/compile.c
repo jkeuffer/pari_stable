@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static GEN
 strntoGENexp(const char *str, long len)
 {
-  GEN z = cgetg(1+nchar2nlong(len), t_STR);
+  GEN z = cgetg(1+nchar2nlong(len-1), t_STR);
   char *s=GSTR(z);
   const char *t=str+1;
   while (t<=str+len)
