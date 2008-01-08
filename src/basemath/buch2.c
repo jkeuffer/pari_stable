@@ -70,10 +70,9 @@ static const long SFB_MAX = 3;
 static const long RANDOM_BITS = 4;
 static const long MAXRELSUP = 50;
 
-/* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
- * HACK: MAX_FACTOR_LEN never checked, we assume default value is enough
- * (since elts have small norm) */
-static THREAD long primfact[500], exprimfact[500];
+typedef struct FACT {
+    long pr, ex;
+} FACT;
 
 /* a factor base contains only non-inert primes
  * KC = # of P in factor base (p <= n, NP <= n2)
@@ -535,15 +534,16 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
 
 /*  SMOOTH IDEALS */
 static void
-store(long i, long e)
+store(long i, long e, FACT *fact)
 {
-  primfact[++primfact[0]] = i; /* index */
-  exprimfact[primfact[0]] = e; /* exponent */
+  ++fact[0].pr;
+  fact[fact[0].pr].pr = i; /* index */
+  fact[fact[0].pr].ex = e; /* exponent */
 }
 
 /* divide out x by all P|p, where x as in can_factor().  k = v_p(Nx) */
 static int
-divide_p_elt(FB_t *F, long p, long k, GEN nf, GEN m)
+divide_p_elt(FB_t *F, long p, long k, GEN nf, GEN m, FACT *fact)
 {
   GEN P, LP = F->LV[p];
   long j, v, l = lg(LP), ip = F->iLP[p];
@@ -552,14 +552,14 @@ divide_p_elt(FB_t *F, long p, long k, GEN nf, GEN m)
     P = gel(LP,j);
     v = int_elt_val(nf, m, gel(P,1), gel(P,5), NULL); /* v_P(m) */
     if (!v) continue;
-    store(ip + j, v); /* v = v_P(m) > 0 */
+    store(ip + j, v, fact); /* v = v_P(m) > 0 */
     k -= v * itos(gel(P,4));
     if (!k) return 1;
   }
   return 0;
 }
 static int
-divide_p_id(FB_t *F, long p, long k, GEN nf, GEN I)
+divide_p_id(FB_t *F, long p, long k, GEN nf, GEN I, FACT *fact)
 {
   GEN P, LP = F->LV[p];
   long j, v, l = lg(LP), ip = F->iLP[p];
@@ -568,14 +568,14 @@ divide_p_id(FB_t *F, long p, long k, GEN nf, GEN I)
     P = gel(LP,j);
     v = idealval(nf,I, P);
     if (!v) continue;
-    store(ip + j, v); /* v = v_P(I) > 0 */
+    store(ip + j, v, fact); /* v = v_P(I) > 0 */
     k -= v * itos(gel(P,4));
     if (!k) return 1;
   }
   return 0;
 }
 static int
-divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
+divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 {
   GEN P, LP = F->LV[p];
   long j, v, l = lg(LP), ip = F->iLP[p];
@@ -586,7 +586,7 @@ divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
     if (!v) continue;
     v -= idealval(nf,I, P);
     if (!v) continue;
-    store(ip + j, v); /* v = v_P(m / I) > 0 */
+    store(ip + j, v, fact); /* v = v_P(m / I) > 0 */
     k -= v * itos(gel(P,4));
     if (!k) return 1;
   }
@@ -615,11 +615,11 @@ smooth_int(FB_t *F, GEN *N, GEN *ex)
 }
 
 static int
-divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
+divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
 {
-  if (!m) return divide_p_id (F,p,k,nf,I);
-  if (!I) return divide_p_elt(F,p,k,nf,m);
-  return divide_p_quo(F,p,k,nf,I,m);
+  if (!m) return divide_p_id (F,p,k,nf,I,fact);
+  if (!I) return divide_p_elt(F,p,k,nf,m,fact);
+  return divide_p_quo(F,p,k,nf,I,m,fact);
 }
 
 /* Let x = m if I == NULL,
@@ -627,25 +627,25 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
  *         m/I otherwise.
  * Can we factor the integral ideal x ? N = Norm x > 0 [DESTROYED] */
 static long
-can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N)
+can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 {
   GEN ex;
   long i;
-  primfact[0] = 0;
+  fact[0].pr = 0;
   if (is_pm1(N)) return 1;
   if (!smooth_int(F, &N, &ex)) return 0;
   for (i=1; i<=ex[0]; i++)
-    if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m)) return 0;
-  return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m);
+    if (ex[i] && !divide_p(F, F->FB[i], ex[i], nf, I, m, fact)) return 0;
+  return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m, fact);
 }
 
 /* can we factor m/I ? [m in I from pseudomin] */
 static long
-factorgen(FB_t *F, GEN nf, GEN I, GEN m)
+factorgen(FB_t *F, GEN nf, GEN I, GEN m, FACT *fact)
 {
   GEN Nm = absi( subres(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
   GEN N  = diviiexact(Nm, dethnf_i(I)); /* N(m / I) */
-  return can_factor(F, nf, I, m, N);
+  return can_factor(F, nf, I, m, N, fact);
 }
 
 /*  FUNDAMENTAL UNITS */
@@ -977,11 +977,11 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
 
 /* add v^e to factorization */
 static void
-add_to_fact(long v, long e)
+add_to_fact(long v, long e, FACT *fact)
 {
-  long i, l = primfact[0];
-  for (i=1; i<=l && primfact[i] < v; i++)/*empty*/;
-  if (i <= l && primfact[i] == v) exprimfact[i] += e; else store(v, e);
+  long i, l = fact[0].pr;
+  for (i=1; i<=l && fact[i].pr < v; i++)/*empty*/;
+  if (i <= l && fact[i].pr == v) fact[i].ex += e; else store(v, e, fact);
 }
 
 /* L (small) list of primes above the same p including pr. Return pr index */
@@ -1005,18 +1005,18 @@ Vbase_to_FB(FB_t *F, GEN pr)
 
 /* return famat y (principal ideal) such that y / x is smooth [wrt Vbase] */
 static GEN
-SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
+SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 {
   GEN vdir, id, z, ex, y, x0;
   long nbtest_lim, nbtest, bou, i, ru, lgsub;
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
   /* try without reduction if x is small */
-  if (flag && can_factor(F, nf, x, NULL, dethnf_i(x))) return NULL;
+  if (flag && can_factor(F, nf, x, NULL, dethnf_i(x), fact)) return NULL;
 
   /* if reduction fails (y scalar), do not retry can_factor */
   y = idealred_elt(nf,x);
-  if ((!flag || !RgV_isscalar(y)) && factorgen(F, nf, x, y)) return y;
+  if ((!flag || !RgV_isscalar(y)) && factorgen(F, nf, x, y, fact)) return y;
 
   /* reduce in various directions */
   ru = lg(nf[6]);
@@ -1026,7 +1026,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
   {
     vdir[i] = 10;
     y = ideallllred_elt(nf,x,vdir);
-    if (factorgen(F, nf, x, y)) return y;
+    if (factorgen(F, nf, x, y, fact)) return y;
     vdir[i] = 0;
   }
 
@@ -1057,10 +1057,10 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
     for (bou=1; bou<ru; bou++)
     {
       y = ideallllred_elt(nf, gel(id,1), vdir);
-      if (factorgen(F, nf, gel(id,1), y))
+      if (factorgen(F, nf, gel(id,1), y, fact))
       {
 	for (i=1; i<lgsub; i++)
-	  if (ex[i]) add_to_fact(Vbase_to_FB(F,gel(Vbase,i)), ex[i]);
+	  if (ex[i]) add_to_fact(Vbase_to_FB(F,gel(Vbase,i)), ex[i], fact);
 	return famat_mul(gel(id,2), y);
       }
       for (i=1; i<ru; i++) vdir[i] = 0;
@@ -1083,26 +1083,24 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
 
 /* return principal y such that y / x is smooth. Store factorization of latter*/
 static GEN
-split_ideal(GEN nf, GEN x, GEN Vbase)
+split_ideal(GEN nf, FB_t *F, GEN x, GEN Vbase, GEN L, FACT *fact)
 {
-  FB_t F;
-  GEN L = recover_partFB(&F, Vbase, lg(x)-1);
-  GEN y = SPLIT(&F, nf, x, Vbase);
-  long p,j, i, l = lg(F.FB);
+  GEN y = SPLIT(F, nf, x, Vbase, fact);
+  long p,j, i, l = lg(F->FB);
 
   p = j = 0; /* -Wall */
-  for (i=1; i<=primfact[0]; i++)
+  for (i=1; i<=fact[0].pr; i++)
   { /* decode index C = ip+j --> (p,j) */
-    long q,k,t, C = primfact[i];
+    long q,k,t, C = fact[i].pr;
     for (t=1; t<l; t++)
     {
-      q = F.FB[t];
-      k = C - F.iLP[q];
+      q = F->FB[t];
+      k = C - F->iLP[q];
       if (k <= 0) break;
       p = q;
       j = k;
     }
-    gel(primfact,i) = gmael(L, p, j);
+    fact[i].pr = gel(L, p)[j];
   }
   return y;
 }
@@ -1128,6 +1126,7 @@ testprimes(GEN bnf, ulong bound)
   pari_sp av0 = avma, av;
   ulong p, pmax;
   long i, nbideal, k;
+  FACT *fact;
   GEN f, dK, p1, Vbase, vP, fb, nf = checknf(bnf);
   byteptr d = diffptr + 1;
   FB_t F;
@@ -1149,6 +1148,7 @@ testprimes(GEN bnf, ulong bound)
   pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
+  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
   for (av=avma, p=2; p < bound; avma=av)
   {
     if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
@@ -1170,7 +1170,7 @@ testprimes(GEN bnf, ulong bound)
       else if (DEBUGLEVEL>1)
 	fprintferr("    is %Z\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
-	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase);
+	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase, fact);
     }
     NEXT_PRIME_VIADIFF(p, d);
   }
@@ -1348,6 +1348,10 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   GEN WB_C    = gel(bnf,4);
   GEN nf      = gel(bnf,7);
   GEN clg2    = gel(bnf,9);
+  FB_t F;
+  GEN Vbase = get_Vbase(bnf);
+  GEN L = recover_partFB(&F, Vbase, lg(x)-1);
+  FACT *fact;
   int old_format = (typ(clg2[2]) == t_MAT);
 
   U = gel(clg2,1); if (old_format) U = ginv(U);
@@ -1358,15 +1362,16 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* factor x */
   x = Q_primitive_part(x, &xc);
-  xar = split_ideal(nf,x,get_Vbase(bnf));
+  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
+  xar = split_ideal(nf, &F, x, Vbase, L, fact);
   lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
   lB = lg(B)-1; Bex = const_vecsmall(lB, 0);
-  for (i=1; i<=primfact[0]; i++)
+  for (i=1; i<=fact[0].pr; i++)
   {
-    long k = primfact[i];
+    long k = fact[i].pr;
     long l = k - lW;
-    if (l <= 0) Wex[k] = exprimfact[i];
-    else        Bex[l] = exprimfact[i];
+    if (l <= 0) Wex[k] = fact[i].ex;
+    else        Bex[l] = fact[i].ex;
   }
 
   /* x = -g_W Wex - g_B Bex + [xar]  | x = g_W Wex + g_B Bex if xar = NULL
@@ -1795,11 +1800,11 @@ powFB_fill(RELCACHE_t *cache, GEN M)
 }
 
 static void
-set_fact(REL_t *rel, FB_t *F)
+set_fact(REL_t *rel, FB_t *F, FACT *fact)
 {
   long i;
-  GEN c = rel->R = col_0(F->KC); rel->nz = primfact[1];
-  for (i=1; i<=primfact[0]; i++) c[primfact[i]] = exprimfact[i];
+  GEN c = rel->R = col_0(F->KC); rel->nz = fact[1].pr;
+  for (i=1; i<=fact[0].pr; i++) c[fact[i].pr] = fact[i].ex;
 }
 
 /* If V depends linearly from the columns of the matrix, return 0.
@@ -1882,7 +1887,7 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
 
 static void
 small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
-	   double LOGD, double LIMC2)
+	   double LOGD, double LIMC2, FACT *fact)
 {
   const long BMULT = 8;
   const ulong mod_p = 27449UL;
@@ -1992,14 +1997,14 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	    if (e < 0)
 	    {
 	      setsigne(Nx, 1);
-	      if (can_factor(F, nf, NULL, gx, Nx)) break;
+	      if (can_factor(F, nf, NULL, gx, Nx, fact)) break;
 	    }
 	    if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
 	  }
 	}
 	x[1]--;
       }
-      set_fact(++rel, F);
+      set_fact(++rel, F, fact);
       /* make sure we get maximal rank first, then allow all relations */
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
 				&& ! addcolumn_mod(rel->R,invp,L, mod_p))
@@ -2071,7 +2076,7 @@ remove_content(GEN I)
 }
 
 static int
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 {
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
@@ -2117,13 +2122,13 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
       m = pseudomin(ideal, gel(F->vecG,j));
-      if (!factorgen(F,nf,ideal,m))
+      if (!factorgen(F,nf,ideal,m,fact))
       {
 	if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
 	continue;
       }
       /* can factor ideal, record relation */
-      set_fact(++rel, F); rel->R[jid]++;
+      set_fact(++rel, F, fact); rel->R[jid]++;
       for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] += ex[i];
       if (already_known(cache, rel))
       { /* forget it */
@@ -2151,7 +2156,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
 
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf)
+be_honest(FB_t *F, GEN nf, FACT *fact)
 {
   GEN P, ideal, m;
   long ex, i, j, J, k, iz, nbtest, ru;
@@ -2188,7 +2193,7 @@ be_honest(FB_t *F, GEN nf)
 	for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
 	  m = pseudomin(ideal, gel(F->vecG,k));
-	  if (factorgen(F,nf,ideal,m)) break;
+	  if (factorgen(F,nf,ideal,m,fact)) break;
 	}
 	avma = av2; if (k < ru) break;
 	if (++nbtest > 50)
@@ -3033,6 +3038,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   RELCACHE_t cache;
   FB_t F;
   GRHcheck_t G, *GRHcheck = &G;
+  FACT *fact;
 
   nf = *pnf; *pnf = NULL;
   N = degpol(nf[1]);
@@ -3073,13 +3079,17 @@ START:
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
   Res = FBgen(&F, nf, N, LIMC2, LIMC, GRHcheck);
+  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
   if (!subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = shallowcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
-  if (nbrelpid > 0) { small_norm(&cache,&F,nf,nbrelpid,LOGD,LIMC2); avma=av2; }
+  if (nbrelpid > 0) {
+    small_norm(&cache, &F, nf, nbrelpid, LOGD, LIMC2, fact);
+    avma = av2;
+  }
 
   /* Random relations */
   W = L_jid = NULL;
@@ -3101,7 +3111,7 @@ MORE:
       jid = nreldep = 0;
     }
     if (F.newpow) powFBgen(&F, &cache, nf);
-    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, L_jid, &jid)) goto START;
+    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, L_jid, &jid, fact)) goto START;
     L_jid = NULL;
   }
   if (precpb)
@@ -3184,7 +3194,7 @@ PRECPB:
       if (!subFB_change(&F, nf, L_jid)) goto START;
       powFBgen(&F, NULL, nf);
     }
-    if (!be_honest(&F, nf)) goto START;
+    if (!be_honest(&F, nf, fact)) goto START;
   }
   F.KCZ2 = 0; /* be honest only once */
 
