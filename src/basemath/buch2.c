@@ -2594,12 +2594,11 @@ static GEN
 get_regulator(GEN mun)
 {
   pari_sp av = avma;
-  GEN A;
+  GEN R;
 
-  if (lg(mun)==1) return gen_1;
-  A = gtrans( real_i(mun) );
-  setlg(A, lg(A)-1);
-  return gerepileupto(av, gabs(det(A), 0));
+  if (lg(mun) == 1) return gen_1;
+  R = det( rowslice(real_i(mun), 1, lg(mun[1])-2) );
+  setsigne(R, 1); return gerepileupto(av, R);
 }
 
 /* return corrected archimedian components for elts of x (vector)
