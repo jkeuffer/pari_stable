@@ -4057,9 +4057,6 @@ manipulate subvectors or submatrices but, like the accessors above, none of
 them are suitable for \tet{gerepileupto}. Worse, there are no type
 verification, nor bound checking, so use at your own risk.
 
-\misctitle{Note.} In the function names below, $i$ stands for \emph{interval}
-and $p$ for \emph{permutation}.
-
 \fun{GEN}{shallowcopy}{GEN x} returns a \typ{GEN} whose components are the
 components of $x$ (no copy is made). The result may now be used to compute in
 place without destroying $x$. This is essentially equivalent to
@@ -4080,6 +4077,11 @@ copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
 copying components, i.~e.,~it returns a \kbd{GEN} whose components are
 (physically) the components of $x$ and $y$.
 
+\fun{GEN}{shallowextract}{GEN x, GEN y} extract components
+of the vector or matrix $x$ according to the selection parameter $y$.
+This is the shallow analog of \kbd{extract0(x, y, NULL)}, see \tet{vecextract}.
+\kbdsidx{extract0}
+
 \fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
 and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
 empty matrix. See \tet{shallowconcat}.
@@ -4092,7 +4094,8 @@ row of \typ{MAT}~$A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
 \leq j_2$.
 
 \fun{GEN}{rowcopy}{GEN A, long i} return the row $A[i,]$ of
-the~\typ{MAT}~$A$.
+the~\typ{MAT}~$A$. This function is memory clean and suitable for
+\kbd{gerepileupto}. See \kbd{row} for the shallow equivalent.
 
 \fun{GEN}{rowslice}{GEN A, long i1, long i2} return the \typ{MAT}
 formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1

@@ -677,7 +677,7 @@ rowselect_p(GEN A, GEN B, GEN p, long init)
 }
 
 GEN
-extract(GEN x, GEN L)
+shallowextract(GEN x, GEN L)
 {
   long i,j, tl = typ(L), tx = typ(x), lx = lg(x);
   GEN y;
@@ -688,7 +688,7 @@ extract(GEN x, GEN L)
     long k, l, ix, iy, maxj;
     GEN Ld;
     if (!signe(L)) return cgetg(1,tx);
-    y = (GEN) gpmalloc(lx*sizeof(long));
+    y = new_chunk(lx);
     l = lgefint(L)-1; ix = iy = 1;
     maxj = BITS_IN_LONG - bfffo(*int_MSW(L));
     if ((l-2) * BITS_IN_LONG + maxj >= lx)
@@ -705,7 +705,7 @@ extract(GEN x, GEN L)
 	if (B & 1) y[iy++] = x[ix];
     }
     y[0] = evaltyp(tx) | evallg(iy);
-    x = gcopy(y); gpfree(y); return x;
+    return y;
   }
   if (tl==t_STR)
   {
@@ -713,20 +713,20 @@ extract(GEN x, GEN L)
     long first, last, cmpl;
     if (! get_range(s, &first, &last, &cmpl, lx))
       pari_err(talker, "incorrect range in extract");
-    if (lx == 1) return gcopy(x);
+    if (lx == 1) return cgetg(1,tx);
     if (cmpl)
     {
       if (first <= last)
       {
 	y = cgetg(lx - (last - first + 1),tx);
-	for (j=1; j<first; j++) gel(y,j) = gcopy(gel(x,j));
-	for (i=last+1; i<lx; i++,j++) gel(y,j) = gcopy(gel(x,i));
+	for (j=1; j<first; j++) gel(y,j) = gel(x,j);
+	for (i=last+1; i<lx; i++,j++) gel(y,j) = gel(x,i);
       }
       else
       {
 	y = cgetg(lx - (first - last + 1),tx);
-	for (j=1,i=lx-1; i>first; i--,j++) gel(y,j) = gcopy(gel(x,i));
-	for (i=last-1; i>0; i--,j++) gel(y,j) = gcopy(gel(x,i));
+	for (j=1,i=lx-1; i>first; i--,j++) gel(y,j) = gel(x,i);
+	for (i=last-1; i>0; i--,j++) gel(y,j) = gel(x,i);
       }
     }
     else
@@ -734,12 +734,12 @@ extract(GEN x, GEN L)
       if (first <= last)
       {
 	y = cgetg(last-first+2,tx);
-	for (i=first,j=1; i<=last; i++,j++) gel(y,j) = gcopy(gel(x,i));
+	for (i=first,j=1; i<=last; i++,j++) gel(y,j) = gel(x,i);
       }
       else
       {
 	y = cgetg(first-last+2,tx);
-	for (i=first,j=1; i>=last; i--,j++) gel(y,j) = gcopy(gel(x,i));
+	for (i=first,j=1; i>=last; i--,j++) gel(y,j) = gel(x,i);
       }
     }
     return y;
@@ -752,7 +752,7 @@ extract(GEN x, GEN L)
     {
       j = itos(gel(L,i));
       if (j>=lx || j<=0) pari_err(talker,"no such component in vecextract");
-      gel(y,i) = gcopy(gel(x,j));
+      gel(y,i) = gel(x,j);
     }
     return y;
   }
@@ -763,7 +763,7 @@ extract(GEN x, GEN L)
     {
       j = L[i];
       if (j>=lx || j<=0) pari_err(talker,"no such component in vecextract");
-      gel(y,i) = gcopy(gel(x,j));
+      gel(y,i) = gel(x,j);
     }
     return y;
   }
@@ -772,20 +772,26 @@ extract(GEN x, GEN L)
 }
 
 GEN
-matextract(GEN x, GEN l1, GEN l2)
-{
-  pari_sp av = avma, tetpil;
-
-  if (typ(x)!=t_MAT) pari_err(typeer,"matextract");
-  x = extract(shallowtrans(extract(x,l2)),l1); tetpil=avma;
-  return gerepile(av,tetpil, gtrans(x));
-}
-
-GEN
 extract0(GEN x, GEN l1, GEN l2)
 {
-  if (! l2) return extract(x,l1);
-  return matextract(x,l1,l2);
+  pari_sp av = avma, av2;
+  GEN y;
+  if (! l2)
+  {
+    y = shallowextract(x, l1);
+    if (lg(y) == 1) return y;
+    av2 = avma;
+    y = gcopy(y);
+  }
+  else
+  {
+    if (typ(x) != t_MAT) pari_err(typeer,"extract");
+    y = shallowextract( shallowtrans( shallowextract(x,l2) ), l1 );
+    av2 = avma;
+    y = gtrans(y);
+  }
+  stackdummy(av, av2);
+  return y;
 }
 
 /* v[a] + ... + v[b] */
