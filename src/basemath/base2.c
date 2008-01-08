@@ -460,7 +460,8 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
     b=ordmax(cf,gel(w1,i),mf,&db);
     a=gmul(db,a); b=gmul(da,b);
     da=mulii(db,da);
-    at=gtrans(a); bt=gtrans(b);
+    at=shallowtrans(a);
+    bt=shallowtrans(b);
     for (r=n; r; r--)
       for (s=r; s; s--)
 	while (signe(gcoeff(bt,s,r)))

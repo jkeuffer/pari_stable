@@ -777,7 +777,7 @@ matextract(GEN x, GEN l1, GEN l2)
   pari_sp av = avma, tetpil;
 
   if (typ(x)!=t_MAT) pari_err(typeer,"matextract");
-  x = extract(gtrans(extract(x,l2)),l1); tetpil=avma;
+  x = extract(shallowtrans(extract(x,l2)),l1); tetpil=avma;
   return gerepile(av,tetpil, gtrans(x));
 }
 
