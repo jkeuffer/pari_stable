@@ -23,7 +23,7 @@ DE  5- [Solaris] pari.desc won't compile [#715]
   Added
     1- library function gpcalloc
     2- [libpari] public generic hashtables
-    2- library function FpM_FpC_mul_to_RgX
+    2- library function FpM_FpC_mul_FpX
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

@@ -2802,7 +2802,7 @@ FpM_FpC_mul(GEN x, GEN y, GEN p)
 
 /* RgV_to_RgX(FpM_FpC_mul(x,y,p), v), p != NULL, memory clean */
 GEN
-FpM_FpC_mul_to_RgX(GEN x, GEN y, GEN p, long v)
+FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
 {
   long i,l,lx=lg(x), ly=lg(y);
   GEN z;

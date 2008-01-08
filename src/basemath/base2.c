@@ -2328,7 +2328,7 @@ zk_to_ff(GEN x, GEN modpr)
   GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
   GEN ffproj = gel(modpr,mpr_FFP);
   if (lg(modpr) == SMALLMODPR) return FpV_dotproduct(ffproj,x, p);
-  return FpM_FpC_mul_to_RgX(ffproj,x, p, varn(modpr[mpr_T]));
+  return FpM_FpC_mul_FpX(ffproj,x, p, varn(modpr[mpr_T]));
 }
 
 /* REDUCTION Modulo a prime ideal */
