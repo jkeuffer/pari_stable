@@ -1646,8 +1646,8 @@ another file, use
 
 \fun{void}{switchout}{char *name} where \kbd{name} is a character string
 giving the name of the file you are going to use; the output is
-\emph{appended} at the end of the file. To close the file and revert to the
-previous output stream, call \kbd{switchout(NULL)}.
+\emph{appended} at the end of the file. To close the file and revert to
+outputting to \kbd{stdout}, call \kbd{switchout(NULL)}.
 
 Similarly, errors are sent to the stream \tet{pari_errfile} (\tet{stderr} by
 default), and input is done on the stream \tet{pari_infile}, which you can
