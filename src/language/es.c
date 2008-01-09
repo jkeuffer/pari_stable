@@ -2932,7 +2932,7 @@ os_getenv(const char *s)
 /**                                                               **/
 /*******************************************************************/
 #ifdef HAS_OPENDIR
-/* slow, but more portable than stat + S_I[FS]DIR */
+/* slow, but more portable than stat + S_ISDIR */
 #  include <dirent.h>
 static int
 is_dir_opendir(const char *name)
@@ -2950,10 +2950,11 @@ is_dir_stat(const char *name)
 {
   struct stat buf;
   if (stat(name, &buf)) return 0;
-  return (buf.st_mode & S_IFDIR);
+  return S_ISDIR(buf.st_mode);
 }
 #endif
 
+/* Does name point to a directory? */
 int
 pari_is_dir(const char *name)
 {
@@ -2965,6 +2966,20 @@ pari_is_dir(const char *name)
 #  else
   return 0;
 #  endif
+#endif
+}
+
+/* Does name point to a regular file? */
+/* If unknown, assume that it is indeed regular. */
+int
+pari_is_file(const char *name)
+{
+#ifdef HAS_STAT
+  struct stat buf;
+  if (stat(name, &buf)) return 1;
+  return S_ISREG(buf.st_mode);
+#else
+  return 1;
 #endif
 }
 
@@ -3240,13 +3255,21 @@ switchout(const char *name)
 {
   if (name)
   {
-    FILE *f = fopen(name, "r");
-    if (f)
+    FILE* f;
+
+    /* Only do the read-check for ordinary files
+     * (to avoid blocking on pipes for example). */
+    if (pari_is_file(name))
     {
-      if (is_magic_ok(f))
-	pari_err(talker,"%s is a GP binary file. Please use writebin", name);
-      fclose(f);
+      f = fopen(name, "r");
+      if (f)
+      {
+        if (is_magic_ok(f))
+	  pari_err(talker,"%s is a GP binary file. Please use writebin", name);
+        fclose(f);
+      }
     }
+
     f = fopen(name, "a");
     if (!f) pari_err(openfiler,"output",name);
     pari_outfile = f;

@@ -732,6 +732,7 @@ char *  env_ok(const char *s);
 void    matbruti(GEN g, pariout_t *T);
 pariFILE * pari_fopengz(char *s);
 int     pari_is_dir(const char *name);
+int     pari_is_file(const char *name);
 GEN     readobj(FILE *f, int *ptc);
 void    sori(GEN g, pariout_t *T);
 void    texi(GEN g, pariout_t *T, int addsign);
