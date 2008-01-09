@@ -3532,14 +3532,33 @@ wr_check(const char *s) {
   return t;
 }
 
-static void wr_init(const char *s) { char *t=wr_check(s); switchout(t); gpfree(t);}
-void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
+/* Store last_was_newline before writing to restore it after writing. */
+static int wr_last_was_newline;
 
-#define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
-#define WR_NO() {pariflush(); switchout(NULL); }
+/* Start writing to file s */
+static void wr_init(const char *s)
+{
+  char *t=wr_check(s);
+  switchout(t);
+  gpfree(t);
+  wr_last_was_newline = pari_last_was_newline();
+}
+
+/* End writing to file s, go back to stdout */
+static void wr_finish()
+{
+  pariflush();
+  switchout(NULL);
+  pari_set_last_newline(wr_last_was_newline);
+}
+
+#define WR_NL() pariputc('\n'); wr_finish()
+#define WR_NO() wr_finish()
 void write0  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
 void writetex(const char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
 void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
+
+void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
 
 /*******************************************************************/
 /**                                                               **/

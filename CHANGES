@@ -15,6 +15,7 @@ DE  5- [Solaris] pari.desc won't compile [#715]
     8- ZV_Z_mul might not reset clonebit.
     9- nfeltreducemodpr --> gerepile errors [#716]. Also SEGV for residue 
        degre > 1 (when p does not divide the index)
+JD 10- write1("/dev/null", foo);1 --> extra newline
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
