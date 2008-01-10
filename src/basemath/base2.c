@@ -2398,9 +2398,10 @@ GEN
 nfreducemodpr(GEN nf, GEN x, GEN modpr)
 {
   pari_sp av = avma;
-  GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
+  GEN pr, p;
   nf = checknf(nf);
   checkmodpr(modpr);
+  pr = gel(modpr,mpr_PR); p = gel(pr,1);
   x = algtobasis_i(nf, ff_to_nf(Rg_to_ff(nf,x,modpr), modpr));
   return gerepileupto(av, FpC_red(x, p));
 }
