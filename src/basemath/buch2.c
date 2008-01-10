@@ -1148,7 +1148,7 @@ testprimes(GEN bnf, ulong bound)
   pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
-  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
+  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   for (av=avma, p=2; p < bound; avma=av)
   {
     if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
@@ -1362,7 +1362,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* factor x */
   x = Q_primitive_part(x, &xc);
-  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
+  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   xar = split_ideal(nf, &F, x, Vbase, L, fact);
   lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
   lB = lg(B)-1; Bex = const_vecsmall(lB, 0);
@@ -3079,7 +3079,7 @@ START:
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
   Res = FBgen(&F, nf, N, LIMC2, LIMC, GRHcheck);
-  fact = (FACT*)stackmalloc((F.KCZ+1)*sizeof(FACT));
+  fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
   if (!Res) goto START;
   GRHcheck = NULL;
   if (!subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
