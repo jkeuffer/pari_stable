@@ -156,7 +156,7 @@ nfroots(GEN nf,GEN pol)
     A = gneg_i(gdiv(gel(pol,2),gel(pol,3)));
     return gerepilecopy(av, mkvec( basistoalg(nf,A) ));
   }
-  A = fix_relative_pol(nf,pol,0);
+  A = fix_relative_pol(T,pol,0);
   A = Q_primpart( lift_intern(A) );
   if (DEBUGLEVEL>3) fprintferr("test if polynomial is square-free\n");
   g = nfgcd(A, derivpol(A), T, gel(nf,4));
@@ -269,8 +269,8 @@ nffactor(GEN nf,GEN pol)
     return rep;
   }
 
-  A = fix_relative_pol(nf,pol,0);
-  if (degpol(nf[1]) == 1)
+  A = fix_relative_pol(T,pol,0);
+  if (degpol(T) == 1)
     return gerepileupto(av, ZX_factor(simplify(lift_intern(A))));
 
   A = Q_primpart( lift_intern(A) );
@@ -1577,7 +1577,7 @@ rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
 
   nf=checknf(nf); vnf = varn(nf[1]);
   if (v<0) v = 0;
-  T = fix_relative_pol(nf,T,1);
+  T = fix_relative_pol(gel(nf,1),T,1);
   if (typ(alpha) == t_POLMOD) alpha = gel(alpha, 2);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
     return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), degpol(T)));

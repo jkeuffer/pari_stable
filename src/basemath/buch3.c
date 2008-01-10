@@ -1406,7 +1406,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
   nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
-  polrel = fix_relative_pol(nf,polrel,1);
+  polrel = fix_relative_pol(gel(nf,1),polrel,1);
   if (typ(polrel)!=t_POL) pari_err(typeer,"rnfnormgroup");
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
@@ -1535,7 +1535,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   pol2 = RgX_rescale(polrel, Q_denom(p1));
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
 
-  pol2 = fix_relative_pol(nf, pol2, 1);
+  pol2 = fix_relative_pol(gel(nf,1), pol2, 1);
   module = mkvec2(gel(rnfdiscf(nf, pol2),1),
 		  const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);

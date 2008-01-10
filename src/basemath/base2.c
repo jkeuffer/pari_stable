@@ -2796,30 +2796,31 @@ check_pol(GEN x, long v)
   }
 }
 
+/* check whether pol is a polynomials with coeffs in the number field defined
+ * by the absolute equation Tnf(y) = 0 */
 GEN
-fix_relative_pol(GEN nf, GEN x, int chk_lead)
+fix_relative_pol(GEN Tnf, GEN pol, int chk_lead)
 {
-  GEN xnf = (typ(nf) == t_POL)? nf: gel(nf,1);
-  long i, vnf = varn(xnf), lx = lg(x);
-  if (typ(x) != t_POL || varncmp(varn(x), vnf) >= 0)
+  long i, vnf = varn(Tnf), lx = lg(pol);
+  if (typ(pol) != t_POL || varncmp(varn(pol), vnf) >= 0)
     pari_err(talker,"incorrect polynomial in rnf function");
-  x = shallowcopy(x);
+  pol = shallowcopy(pol);
   for (i=2; i<lx; i++)
-    switch(typ(x[i]))
+    switch(typ(pol[i]))
     {
       case t_INT: case t_FRAC: break;
       case t_POL:
-	check_pol(gel(x,i), vnf);
-	gel(x,i) = gmodulo(gel(x,i), xnf); break;
+	check_pol(gel(pol,i), vnf);
+	gel(pol,i) = gmodulo(gel(pol,i), Tnf); break;
       case t_POLMOD:
-	if (!gequal(gmael(x,i,1), xnf)) pari_err(consister,"rnf function");
+	if (!gequal(gmael(pol,i,1), Tnf)) pari_err(consister,"rnf function");
 	break;
       default: pari_err(typeer, "rnf function");
     }
 
-  if (chk_lead && !gcmp1(leading_term(x)))
+  if (chk_lead && !gcmp1(leading_term(pol)))
     pari_err(impl,"non-monic relative polynomials");
-  return x;
+  return pol;
 }
 
 /* determinant of the trace pairing */
@@ -2854,7 +2855,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
   GEN p1, A, nfT, P, id, I, z, d, D, disc;
 
   nf = checknf(nf); nfT = gel(nf,1);
-  pol = fix_relative_pol(nf,pol,1);
+  pol = fix_relative_pol(nfT,pol,1);
   N = degpol(nfT);
   n = degpol(pol);
   disc = discsr(pol); pol = lift(pol);
