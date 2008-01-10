@@ -957,9 +957,21 @@ compilefunc(entree *ep, long n, int mode)
           {
             GEN g = cattovec(arg[j++], OPcat);
             long l, nb = lg(g)-1;
-            for(l=1; l<=nb; l++)
-              compilenode(g[l], Ggen,0);
-            op_push(OCtostr, nb);
+            if (nb==1)
+            {
+              compilenode(g[1], Ggen,0);
+              op_push(OCtostr, 1);
+            } else
+            {
+              op_push(OCvec, nb+1);
+              for(l=1; l<=nb; l++)
+              {
+                compilenode(g[l], Ggen,0);
+                op_push(OCstackgen,l);
+              }
+              op_push(OCcallgen,(long)is_entry("Str"));
+              op_push(OCtostr, 1);
+            }
             break;
           }
         default:

@@ -716,17 +716,13 @@ closure_eval(GEN C)
       st[sp-1]=gtos(gel(st,sp-1));
       break;
     case OCtostr:
-      if (operand==1)
-        st[sp-1] = (long) GSTR(GENtoGENstr(gel(st,sp-1)));
-      else
-      {
-        GEN L=cgetg(operand+1,t_VEC);
-        sp-=operand;
-        for (j=1; j<=operand; j++)
-          gel(L,j) = GENtoGENstr(gel(st,sp-1+j));
-        st[sp++] = (long) GSTR(concat(L,NULL));
-      }
+    {
+      GEN z=gel(st,sp-1);
+      if (typ(z)!=t_STR)
+        z = GENtoGENstr(z);
+      st[sp-1] = (long) GSTR(z);
       break;
+    }
     case OCvarn:
       st[sp-1] = closure_varn(gel(st,sp-1));
       break;
