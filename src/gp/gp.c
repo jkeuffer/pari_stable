@@ -676,7 +676,7 @@ aide0(const char *s0, int flag)
   switch(EpVALENCE(ep))
   {
     case EpVAR:
-      if (typ(ep->value)==t_CLOSURE)
+      if (typ(ep->value)==t_CLOSURE && typ(gel(ep->value,5))==t_VEC)
       {
         GEN str=gel(ep->value,5);
         if (!ep->help || long_help)

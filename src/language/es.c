@@ -2114,7 +2114,12 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_CLOSURE:
       if (lg(g)>=6)
-        pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      {
+        if (typ(g[5])==t_STR)
+          pariputs(GSTR(gel(g,5)));
+        else
+          pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      }
       else
         pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
@@ -2202,7 +2207,12 @@ sori(GEN g, pariout_t *T)
       quote_string(GSTR(g)); return;
     case t_CLOSURE:
       if (lg(g)>=6)
-        pariprintf("((%s)->%s)",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      {
+        if (typ(g[5])==t_STR)
+          pariputs(GSTR(gel(g,5)));
+        else
+          pariprintf("((%s)->%s)",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      }
       else
         pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       return;
@@ -2501,7 +2511,12 @@ texi(GEN g, pariout_t *T, int addsign)
 
     case t_CLOSURE:
       if (lg(g)>=6)
-        pariprintf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      {
+        if (typ(g[5])==t_STR)
+          pariputs(GSTR(gel(g,5)));
+        else
+          pariprintf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+      }
       else
         pariprintf("\\{\"%s\",%Z,%Z\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;

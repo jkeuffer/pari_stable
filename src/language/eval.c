@@ -472,6 +472,7 @@ derivuserwrap(GEN x, void* E)
 INLINE long
 closure_varn(GEN x)
 {
+  if (!x) return -1;
   if (typ(x) != t_POL || lg(x) != 4 ||
       !gcmp0(gel(x,2)) || !gcmp1(gel(x,3)))
     pari_err(varer1,NULL,NULL);
@@ -713,18 +714,18 @@ closure_eval(GEN C)
       gel(st,sp-1)=stoi(st[sp-1]);
       break;
     case OCitos:
-      st[sp-1]=gtos(gel(st,sp-1));
+      st[sp+operand]=gtos(gel(st,sp+operand));
       break;
     case OCtostr:
     {
-      GEN z=gel(st,sp-1);
+      GEN z=gel(st,sp+operand);
       if (typ(z)!=t_STR)
         z = GENtoGENstr(z);
-      st[sp-1] = (long) GSTR(z);
+      st[sp+operand] = (long) GSTR(z);
       break;
     }
     case OCvarn:
-      st[sp-1] = closure_varn(gel(st,sp-1));
+      st[sp+operand] = closure_varn(gel(st,sp+operand));
       break;
     case OCcopy:
       gel(st,sp-1) = gcopy(gel(st,sp-1));
@@ -1069,6 +1070,23 @@ closure_eval(GEN C)
         }
       }
       break;
+    case OCcheckargs:
+      for (j=sp-1;operand;operand>>=1UL,j--)
+        if ((operand&1L) && gel(st,j)==NULL)
+          pari_err(talker,"missing mandatory argument");
+      break;
+    case OCcheckargs0:
+      for (j=sp-1;operand;operand>>=1UL,j--)
+        if ((operand&1L) && gel(st,j))
+          pari_err(talker,"argument type not implemented");
+      break;
+    case OCdefaultitos:
+      sp--;
+      if (st[sp+operand])
+        st[sp+operand]=gtos(gel(st,sp+operand));
+      else
+        st[sp+operand]=st[sp];
+      break;
     case OCvec:
       gel(st,sp++)=cgetg(operand,t_VEC);
       break;
@@ -1297,13 +1315,13 @@ closure_disassemble(GEN C)
       pariprintf("stoi\n");
       break;
     case OCitos:
-      pariprintf("itos\n");
+      pariprintf("itos\t\t%ld\n",operand);
       break;
     case OCtostr:
       pariprintf("tostr\t\t%ld\n",operand);
       break;
     case OCvarn:
-      pariprintf("varn\n");
+      pariprintf("varn\t\t%ld\n",operand);
       break;
     case OCcopy:
       pariprintf("copy\n");
@@ -1334,6 +1352,15 @@ closure_disassemble(GEN C)
       break;
     case OCcompoLptr:
       pariprintf("compoLptr\n");
+      break;
+    case OCcheckargs:
+      pariprintf("checkargs\t0x%lx\n",operand);
+      break;
+    case OCcheckargs0:
+      pariprintf("checkargs0\t0x%lx\n",operand);
+      break;
+    case OCdefaultitos:
+      pariprintf("defaultitos\t%ld\n",operand);
       break;
     case OCgetargs:
       pariprintf("getargs\t\t%ld\n",operand);

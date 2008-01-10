@@ -22,6 +22,7 @@ JD 12- read() would block on pipes
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
     2- contfrac(x, b): no longer allow (undocumented) type t_MAT for b
+    3- builtin-in GP functions can now be used as closures.
 
   Added
     1- library function gpcalloc

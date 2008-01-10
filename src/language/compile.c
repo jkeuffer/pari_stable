@@ -329,7 +329,7 @@ compilecast(long n, int type, int mode)
   switch (mode)
   {
   case Gsmall:
-    if (type==Ggen)        op_push(OCitos,0);
+    if (type==Ggen)        op_push(OCitos,-1);
     else if (type==Gvoid)  op_push(OCpushlong,0);
     else compile_err("this should be a small integer",tree[n].str);
     break;
@@ -341,7 +341,7 @@ compilecast(long n, int type, int mode)
     op_push(OCpop, 1);
     break;
   case Gvar:
-    if (type==Ggen)        op_push(OCvarn,0);
+    if (type==Ggen)        op_push(OCvarn,-1);
     else compile_varer1(tree[n].str);
      break;
   default:
@@ -944,12 +944,12 @@ compilefunc(entree *ep, long n, int mode)
             if (tree[a].f==Fentry)
             {
               op_push(OCpushgen, data_push(strntoGENstr(tree[tree[a].x].str,tree[tree[a].x].len)));
-              op_push(OCtostr, 1);
+              op_push(OCtostr, -1);
             }
             else
             {
               compilenode(a,Ggen,FLnocopy);
-              op_push(OCtostr, 1);
+              op_push(OCtostr, -1);
             }
             break;
           }
@@ -960,7 +960,7 @@ compilefunc(entree *ep, long n, int mode)
             if (nb==1)
             {
               compilenode(g[1], Ggen,0);
-              op_push(OCtostr, 1);
+              op_push(OCtostr, -1);
             } else
             {
               op_push(OCvec, nb+1);
@@ -970,7 +970,7 @@ compilefunc(entree *ep, long n, int mode)
                 op_push(OCstackgen,l);
               }
               op_push(OCcallgen,(long)is_entry("Str"));
-              op_push(OCtostr, 1);
+              op_push(OCtostr, -1);
             }
             break;
           }
@@ -1005,7 +1005,6 @@ compilefunc(entree *ep, long n, int mode)
         {
         case 'G':
         case '&':
-        case 'r':
         case 'E':
         case 'I':
           op_push(OCpushlong,0);
@@ -1107,6 +1106,201 @@ compilefunc(entree *ep, long n, int mode)
     break;
   }
   if (nbpointers) op_push(OCendptr,nbpointers);
+  avma=ltop;
+}
+
+GEN
+genclosure(entree *ep)
+{
+  struct codepos pos;
+  long nb=0;
+  const char *code=ep->code,*p,*q;
+  char c;
+  long index=ep->arity;
+  long arity=0, maskarg=0, maskarg0=0, stop=0;
+  PPproto mod;
+  enum ret_type ret=get_ret_type(&code);
+  p=code;
+  while((mod=parseproto(&p,&c))!=PPend)
+  {
+    if (mod==PPauto)
+      stop=1;
+    else
+    {
+      if (stop) return NULL;
+      if (c=='V') continue;
+      maskarg<<=1; maskarg0<<=1; arity++;
+      switch(mod)
+      {
+      case PPstd:
+        maskarg|=1L;
+        break;
+      case PPdefault:
+        switch(c)
+        {
+        case '&':
+        case 'E':
+        case 'I':
+          maskarg0|=1L;
+          break;
+        }
+        break;
+      default:
+        break;
+      }
+    }
+  }
+  if (*code==0 || (EpSTATIC(ep) && maskarg==0))
+    return gen_0;
+  getcodepos(&pos);
+  if (maskarg)  op_push(OCcheckargs,maskarg);
+  if (maskarg0) op_push(OCcheckargs0,maskarg0);
+  p=code;
+  while((mod=parseproto(&p,&c))!=PPend)
+  {
+    switch(mod)
+    {
+    case PPauto:
+      switch(c)
+      {
+      case 'p':
+        op_push(OCprecreal,0);
+        break;
+      case 'P':
+        op_push(OCprecdl,0);
+        break;
+      case 'C':
+        break;
+        op_push(OCpushgen,data_push(pack_localvars()));
+        break;
+      case 'f':
+        {
+          static long foo;
+          op_push(OCpushlong,(long)&foo);
+          break;
+        }
+      }
+    default:
+      break;
+    }
+  }
+  q = p = code;
+  while((mod=parseproto(&p,&c))!=PPend)
+  {
+    switch(mod)
+    {
+    case PPstd:
+      switch(c)
+      {
+      case 'G':
+        break;
+      case 'M':
+      case 'L':
+        op_push(OCitos,-index);
+        break;
+      case 'n':
+        op_push(OCvarn,-index);
+        break;
+      case '&': case '*':
+      case 'I':
+      case 'E':
+      case 'V':
+      case 'S':
+      case '=':
+        return NULL;
+      case 'r':
+      case 's':
+        op_push(OCtostr,-index);
+        break;
+      }
+      break;
+    case PPauto:
+      break;
+    case PPdefault:
+      switch(c)
+      {
+      case 'G':
+      case '&':
+      case 'E':
+      case 'I':
+      case 'V':
+        break;
+      case 'n':
+        op_push(OCvarn,-index);
+        break;
+      default:
+        pari_err(talker,"Unknown prototype code `%c' for `%s'",c,ep->name);
+      }
+      break;
+    case PPdefaultmulti:
+      switch(c)
+      {
+      case 'M':
+      case 'L':
+        op_push(OCpushlong,strtol(q+1,NULL,10));
+        op_push(OCdefaultitos,-index);
+        break;
+      case 'r':
+      case 's':
+        op_push(OCtostr,-index);
+        break;
+      default:
+        pari_err(talker,"Unknown prototype code `%c' for `%s'",c,ep->name);
+      }
+      break;
+    case PPstar:
+      switch(c)
+      {
+      case 's':
+        return NULL;
+      default:
+        pari_err(talker,"Unknown prototype code `%c*' for `%s'",c,ep->name);
+      }
+      break;
+    default:
+       return NULL;
+    }
+    index--;
+    q = p;
+  }
+  switch (ret)
+  {
+  case RET_GEN:
+    if (ep->arity==2)
+      op_push(OCcallgen2, (long) ep);
+    else
+      op_push(OCcallgen, (long) ep);
+    break;
+  case RET_INT:
+    op_push(OCcallint, (long) ep);
+    op_push(OCstoi,0);
+    break;
+  case RET_LONG:
+    op_push(OCcalllong, (long) ep);
+    op_push(OCstoi,0);
+    break;
+  case RET_VOID:
+    op_push(OCcallvoid, (long) ep);
+    op_push(OCpushlong, (long) gnil);
+    break;
+  }
+  return getfunction(&pos,nb+arity,0,strtoGENstr(ep->name));
+}
+
+static void
+closurefunc(entree *ep, long n, long mode)
+{
+  pari_sp ltop=avma;
+  GEN C;
+  if (!ep->value) compile_err("unknown function",tree[n].str);
+  C = genclosure(ep);
+  if (!C) compile_err("sorry, closure not implemented",tree[n].str);
+  if (C==gen_0)
+  {
+    compilefunc(getfunc(n),n,mode);
+    return;
+  }
+  op_push(OCpushgen, data_push(C));
   avma=ltop;
 }
 
@@ -1225,16 +1419,17 @@ compilenode(long n, int mode, long flag)
         if (flag&FLreturn)
           op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
-        break;
       }
-      else if (!EpSTATIC(do_alias(ep)))
+      else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
         op_push(OCpushdyn,(long)ep);
         if (flag&FLreturn)
           op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
-        break;
       }
+      else
+        closurefunc(ep,n,mode);
+      break;
     }
   case Fderfunc: /*Fall through*/
   case Ffunction:
