@@ -370,7 +370,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       rel->R[ rel->nz ] = j;
       for (k = 2; k < j; k++) m = element_mul(nf, m, gel(alg,k));
       rel->m = gclone(m);
-      rel->ex= NULL;
+      rel->ex = NULL;
       rel->pow = New;
       cache->last = rel;
     }
