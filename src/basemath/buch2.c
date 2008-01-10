@@ -970,6 +970,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
     iLP[p]= ip; ip += lg(L[p])-1;
   }
   F->KCZ = i;
+  F->KC = ip;
   F->FB = FB; setlg(FB, i+1);
   F->LV = (GEN*)LV;
   F->iLP= iLP; return L;
