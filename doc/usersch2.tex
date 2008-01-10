@@ -1341,18 +1341,32 @@ There is nothing wrong with the following sequence of assignments:
 %3 = x^2
 ? f(x) = x^2  \\@com \dots and now a polynomial function
 %4 = (x)->x^2
+? g(fun) = fun(Pi);\\@com a function taking a function as argument
+? g(cos)
+%6 = -1.000000000000000000000000000
+
 @eprog\noindent
 Previously used names can be recycled as above: you are just redefining the
 variable. The previous definition is lost of course.
 
-\misctitle{Important technical note.} Built-in function are a different
-matter since they are read-only (you cannot overwrite their default meaning),
-and they use features not available to user functions. In the present version
-\vers{}, it is not possible to assign a built-in function to a variable, nor
-to use a built-in function name to create an anonymous function. For instance
-the built-in function name \kbd{sin} does not evaluate to a valid
-\typ{CLOSURE}; to define a function evaluating to the built-in
-\kbd{sin} function, you must write \kbd{x -> sin(x)} explicitly.
+\misctitle{Important technical note.} Built-in functions are a special case
+since they are read-only (you cannot overwrite their default meaning),
+and they use features not available to user functions, in particular pointer
+arguments. In the present version \vers{}, it is possible to assign a built-in
+function to a variable, or to use a built-in function name to create an
+anonymous function, but some special argument combinations may not be
+available:
+\bprog
+? issquare(9, &e)
+%1 = 1
+? e
+%2 = 3
+? g = issquare;
+? g(9)
+%4 = 1
+? g(9, &e)  \\@com pointers are not implemented for user functions
+  ***   unexpected &.
+@eprog
 
 \subsec{Function call, Default arguments}
 
@@ -1535,26 +1549,20 @@ the process available stack space (increase \tet{stacksize}).
 \subsec{Function which take functions as parameters ?} Very easy:
 \bprog
 ? calc(f, x) = f(x)
-? calc(x->sin(x), Pi)
+? calc(sin, Pi)
 %2 = -5.04870979 E-29
+? g(x) = x^2;
+? calc(g, 3)
+%4 = 9
 @eprog
-\noindent Note that we used an anonymous function here, since there was no
-reason to store \kbd{x->sin(x)} into a variable, just to immediately forget
-about it. The more natural \kbd{calc(sin, Pi)} does not work since typing in
-the name of a built-in function does not generate proper function objects
-(built-in function names are not bound to proper \typ{CLOSURE}s as would be
-the case for user functions). On the other hand,
+\noindent If we do not need \kbd{g} elsewhere, we should use an anonymous
+function here, \kbd{calc(x->x^2, 3)}. Here is a variation:
 \bprog
-? g(x) = x^2
-? calc(g, Pi)
-@eprog\noindent works since \kbd{g} is a user function, not a built-in.
-Here is a variation:
-\bprog
-? trigs = [x->cos(x), x->sin(x), x->tan(x)]; \\@com an array of functions
-? call(i, x) = trigs[i](x)
+? funs = [cos, sin, tan, x->x^3+1]; \\@com an array of functions
+? call(i, x) = funs[i](x)
 @eprog\noindent
 evaluates the appropriate function on argument \kbd{x},
-provided $1\leq i\leq 3$. Finally, a more useful example:
+provided $1\leq i\leq 4$. Finally, a more useful example:
 \bprog
 APPLY(f, v) = vector(#v, i, f(v[i]))
 @eprog\noindent
