@@ -18,6 +18,8 @@ DE  5- [Solaris] pari.desc won't compile [#715]
 JD 10- write1("/dev/null", foo);1 --> extra newline
 JD 11- is_dir_stat() gave incorrect results on special files (pipes,...)
 JD 12- read() would block on pipes
+   13- nfeltreducemodpr used different canonical representatives than all other
+       modpr routines [#719]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -32,6 +34,8 @@ JD 12- read() would block on pipes
 
   Removed
     1- obsolete library functions extract and matextract
+    2- obsolete library function elementinv_modpr
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

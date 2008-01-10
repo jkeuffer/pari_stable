@@ -719,7 +719,6 @@ GEN     zsigns(GEN nf,GEN alpha);
 /* base4.c */
 
 GEN     element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr);
-GEN     element_invmodpr(GEN nf, GEN y, GEN modpr);
 GEN     element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_mulvec(GEN nf, GEN x, GEN v);
 GEN     element_powmodpr(GEN nf, GEN x, GEN k, GEN modpr);
