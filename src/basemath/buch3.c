@@ -1490,14 +1490,14 @@ rnf_is_abelian(GEN nf, GEN pol)
   eq = rnfequation2(nf,pol);
   C =   shallowcopy(gel(eq,1)); setvarn(C, v);
   a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
-  nfL = initalg_i(C, nf_PARTIALFACT, DEFAULTPREC);
-  z = nfrootsall_and_pr(nfL, liftpol(pol, a));
+  z = nfrootsall_and_pr(C, liftpol(pol, a));
   if (!z) return 0;
   ro = gel(z,1); l = lg(ro)-1;
   /* small groups are abelian, as are groups of prime order */
   if (l < 6 || uisprime(l)) return 1;
 
   pr = gel(z,2);
+  nfL = gel(z,3);
   modpr = nf_to_ff_init(nfL, &pr, &T, &pp);
   p = itou(pp);
   k = umodiu(gel(eq,3), p);

@@ -16,4 +16,12 @@ Doc: factorization of the univariate
  ? nffactor(nf, x^2 + y); \\@com OK
  ? nffactor(nf, x^2 + Mod(y, y^2+1)); \\ @com OK
  ? nffactor(nf, x^2 + Mod(z, z^2+1)); \\ @com WRONG
- @eprog
+ @eprog\noindent It is possible to input a defining polynomial for \var{nf}
+ instead, but this is in general less efficient since parts of an \kbd{nf}
+ structure will be computed internally. This is useful in two situations: when
+ you don't need the \kbd{nf}, or when you can't compute its discriminant due
+ to integer factorization difficulties. In the latter case, \tet{addprimes} is
+ a possibility but a dangerous one: factors will probably be missed if the
+ (true) field discriminant and an \kbd{addprimes} entry are strictly divisible
+ by some prime. If you have such an unsafe \var{nf}, it is safer to input
+ \kbd{nf.pol}.

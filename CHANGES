@@ -20,11 +20,18 @@ JD 11- is_dir_stat() gave incorrect results on special files (pipes,...)
 JD 12- read() would block on pipes
    13- nfeltreducemodpr used different canonical representatives than all other
        modpr routines [#719]
+   14- rnfconductor(,,1) did not recognize some abelian extensions [#718]
+       (when the discriminant of a defining polynomial for the absolute number
+       field could not be factored). Related to Changed-4.
+   15- polgalois could confuse S_11 and F_110(11) if a certain polynomial
+       discriminant could not be fully factored. Related to Changed-4.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
     2- contfrac(x, b): no longer allow (undocumented) type t_MAT for b
     3- builtin-in GP functions can now be used as closures.
+    4- allow nffactor(t_POL, t_POL), nfroots(t_POL, t_POL) [ necessary when
+       nf.disc could not be factored and addprimes() would have to be used ]
 
   Added
     1- library function gpcalloc
