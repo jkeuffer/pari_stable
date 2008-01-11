@@ -20,9 +20,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * The following lines are necessary for level0.c and level1.c */
 
 #if !defined(INLINE)
-GEN    const_col(long n, GEN x)
-GEN    const_vec(long n, GEN x)
-GEN    const_vecsmall(long n, long c)
+GEN    const_col(long n, GEN x);
+GEN    const_vec(long n, GEN x);
+GEN    const_vecsmall(long n, long c);
 GEN    mkcol(GEN x);
 GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
@@ -160,7 +160,7 @@ GEN    remis(GEN x, long y);
 GEN    remsi(long x, GEN y);
 GEN    remss(long x, long y);
 GEN    rtor(GEN x, long prec);
-long   sdivsi(long x, GEN y)
+long   sdivsi(long x, GEN y);
 long   sdivsi_rem(long x, GEN y, long *rem);
 long   sdivss_rem(long x, long y, long *rem);
 void   shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
