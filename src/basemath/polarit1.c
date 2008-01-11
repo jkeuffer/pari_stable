@@ -744,8 +744,7 @@ GEN
 trivfact(void)
 {
   GEN y = cgetg(3,t_MAT);
-  gel(y,1) = cgetg(1,t_COL);
-  gel(y,2) = cgetg(1,t_COL); return y;
+  gel(y,1) = gel(y,2) = cgetg(1,t_COL); return y;
 }
 
 /* polynomial in variable v, whose coeffs are the digits of m in base p */

@@ -1951,7 +1951,7 @@ zsimp(GEN bid, GEN embunit)
 static GEN
 zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
 {
-  long i, l1, l2, nbgen, c;
+  long l1, l2, nbgen;
   pari_sp av = avma;
   GEN fa, U, U1, U2, cyc1, cyc2, u1u2, D;
 
@@ -1971,8 +1971,7 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
   }
   else
   {
-    c = lg(U1)+lg(U2)-1; U = cgetg(c,t_MAT);
-    for (i=1; i<c; i++) gel(U,i) = cgetg(1,t_COL);
+    U = zeromat(0, lg(U1)+lg(U2)-2);
     D = cgetg(1,t_MAT);
   }
   return gerepilecopy(av, mkvec4(
