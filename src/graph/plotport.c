@@ -227,6 +227,8 @@ free_graph(void)
     free((void*)rgb_colors->table);
     free((void*)rgb_colors);
   }
+  if (pari_colormap) free(pari_colormap);
+  if (pari_graphcolors) free(pari_graphcolors);
 }
 
 static PariRect *
