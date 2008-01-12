@@ -1955,6 +1955,10 @@ compatible dimensions).
 \fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
 have compatible dimensions).
 
+\fun{GEN}{ZM_ZC_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
+by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
+dimensions).
+
 \fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
 is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
 return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
