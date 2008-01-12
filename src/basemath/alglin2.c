@@ -1278,34 +1278,6 @@ intersect(GEN x, GEN y)
 /**		   HERMITE NORMAL FORM REDUCTION	     **/
 /**							     **/
 /**************************************************************/
-/* negate in place, except universal constants */
-static void
-mynegi(GEN *px)
-{
-  GEN x = *px;
-  long s = signe(x);
-
-  if (!s) *px = gen_0;
-  else if (is_pm1(x)) *px = (s > 0)? gen_m1: gen_1;
-  else if (x == gen_2) *px = utoineg(2);
-  else setsigne(x,-s);
-}
-void
-ZV_neg_ip(GEN M)
-{
-  long i;
-  for (i = lg(M)-1; i; i--) mynegi(&gel(M,i));
-}
-
-GEN
-zv_neg(GEN x)
-{
-  long i, lx=lg(x);
-  GEN y=cgetg_copy(lx,x);
-  for (i=1; i<lx; i++) y[i] = -x[i];
-  return y;
-}
-
 GEN
 mathnf0(GEN x, long flag)
 {
@@ -1324,11 +1296,10 @@ static GEN
 init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
 {
   if (typ(x) != t_MAT) pari_err(typeer,"mathnf");
-  *co=lg(x); if (*co==1) return NULL; /* empty matrix */
-  *li=lg(x[1]); *denx=denom(x); *av=avma;
+  *co = lg(x); if (*co==1) return NULL; /* empty matrix */
+  *li = lg(x[1]); *denx = Q_denom(x); *av=avma;
 
-  if (gcmp1(*denx)) /* no denominator */
-    { *denx = NULL; return shallowcopy(x); }
+  if (is_pm1(*denx)) { *denx = NULL; return shallowcopy(x); }
   return Q_muli_to_int(x, *denx);
 }
 
@@ -1373,18 +1344,19 @@ ZV_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_COL);
-  for (i=1; i<lx; i++) gel(y,i) = signe(x[i])? icopy(gel(x,i)): gen_0;
+  for (i=1; i<lx; i++) 
+  {
+    GEN c = gel(x,i);
+    gel(y,i) = lgefint(c) == 2? gen_0: icopy(c);
+  }
   return y;
 }
-
 GEN
 ZM_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_MAT);
-
-  for (i=1; i<lx; i++)
-    gel(y,i) = ZV_copy(gel(x,i));
+  for (i=1; i<lx; i++) gel(y,i) = ZV_copy(gel(x,i));
   return y;
 }
 
@@ -1404,6 +1376,44 @@ ZV_Z_mul(GEN X, GEN c)
   else /* c = 0 should be exceedingly rare */
     { for (i=1; i<m; i++) gel(A,i) = mulii(c,gel(X,i)); }
   A[0] = X[0] & ~CLONEBIT; return A;
+}
+
+/* negate in place, except universal constants */
+static void
+negi_ip(GEN *px)
+{
+  if      (*px == gen_1)  *px = gen_m1;
+  else if (*px == gen_m1) *px = gen_1;
+  else if (*px == gen_2)  *px = utoineg(2); 
+  else togglesign(*px);
+}
+void
+ZV_togglesign(GEN M)
+{
+  long i;
+  for (i = lg(M)-1; i; i--) negi_ip(&gel(M,i));
+}
+void
+ZV_neg_inplace(GEN M)
+{
+  long i;
+  for (i = lg(M)-1; i; i--) gel(M,i) = negi(gel(M,i));
+}
+GEN
+ZV_neg(GEN M)
+{
+  long i, l = lg(M);
+  GEN N = cgetg_copy(l, M);
+  for (i = l-1; i ; i--) gel(N,i) = negi(gel(M,i));
+  return N;
+}
+GEN
+zv_neg(GEN M)
+{
+  long i, l = lg(M);
+  GEN N = cgetg_copy(l, M);
+  for (i=l-1; i; i--) N[i] = -M[i];
+  return N;
 }
 
 /* X + v Y */
@@ -1467,22 +1477,47 @@ ZV_lincomb_1(GEN v, GEN X, GEN Y)
   }
   return A;
 }
-GEN
-ZV_add(GEN x, GEN y)
+static GEN
+ZV_add_i(GEN x, GEN y, long lx)
 {
-  long i, lx = lg(x);
   GEN A = cgetg(lx, t_COL);
+  long i;
   for (i=1; i<lx; i++) gel(A,i) = addii(gel(x,i), gel(y,i));
   return A;
 }
 GEN
-ZV_sub(GEN x, GEN y)
+ZV_add(GEN x, GEN y) { return ZV_add_i(x, y, lg(x)); }
+GEN
+ZV_sub_i(GEN x, GEN y, long lx)
 {
-  long i, lx = lg(x);
+  long i;
   GEN A = cgetg(lx, t_COL);
   for (i=1; i<lx; i++) gel(A,i) = subii(gel(x,i), gel(y,i));
   return A;
 }
+GEN
+ZV_sub(GEN x, GEN y) { return ZV_add_i(x, y, lg(x)); }
+GEN
+ZM_add(GEN x, GEN y)
+{
+  long lx = lg(x), l, j;
+  GEN z;
+  if (lx == 1) return cgetg(1, t_MAT);
+  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  for (j = 1; j < lx; j++) gel(z,j) = ZV_add_i(gel(x,j), gel(y,j), l);
+  return z;
+}
+GEN
+ZM_sub(GEN x, GEN y)
+{
+  long lx = lg(x), l, j;
+  GEN z;
+  if (lx == 1) return cgetg(1, t_MAT);
+  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  for (j = 1; j < lx; j++) gel(z,j) = ZV_sub_i(gel(x,j), gel(y,j), l);
+  return z;
+}
+
 /* X,Y columns; u,v scalars; everybody is integral. return A = u*X + v*Y
  * Not memory clean if (u,v) = (1,0) or (0,1) */
 GEN
@@ -1500,7 +1535,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
     {
       if (su != sv) A = ZV_sub(X, Y);
       else          A = ZV_add(X, Y);
-      if (su < 0) ZV_neg_ip(A);
+      if (su < 0) ZV_togglesign(A); /* in place but was created above */
     }
     else
     {
@@ -1923,7 +1958,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      if (T) ZV_neg_ip(gel(T,col));
+      if (T) ZV_togglesign(gel(T,col));
     }
     for (j=1; j<col; j++)
     {
@@ -1966,7 +2001,7 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      if (T) ZV_neg_ip(gel(T,col));
+      if (T) ZV_togglesign(gel(T,col));
     }
     for (j=1; j<col; j++)
     {
@@ -2280,13 +2315,6 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
 }
 
-static void
-ZV_neg(GEN x)
-{
-  long i, lx = lg(x);
-  for (i=1; i<lx ; i++) gel(x,i) = negi(gel(x,i));
-}
-
 /* zero aj = Aij (!= 0)  using  ak = Aik (maybe 0), via linear combination of
  * A[j] and A[k] of determinant 1. If U != NULL, likewise update its columns */
 static void
@@ -2337,8 +2365,8 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
   GEN d = gcoeff(A,i,j0);
   if (signe(d) < 0)
   {
-    ZV_neg(gel(A,j0));
-    if (U) ZV_neg(gel(U,j0));
+    ZV_neg_inplace(gel(A,j0));
+    if (U) ZV_togglesign(gel(U,j0));
     d = gcoeff(A,i,j0);
   }
   for (j=j0+1; j<lA; j++)
@@ -2440,7 +2468,7 @@ hnf0(GEN A, int remove)
     s = signe(gcoeff(A,i,def));
     if (s)
     {
-      if (s < 0) ZV_neg(gel(A,def));
+      if (s < 0) ZV_neg_inplace(gel(A,def));
       ZM_reduce(A, NULL, i,def);
       def--;
     }
@@ -2657,8 +2685,8 @@ Minus(long j, GEN lambda)
 {
   long k, n = lg(lambda);
 
-  for (k=1  ; k<j; k++) mynegi(&gcoeff(lambda,k,j));
-  for (k=j+1; k<n; k++) mynegi(&gcoeff(lambda,j,k));
+  for (k=1  ; k<j; k++) negi_ip(&gcoeff(lambda,k,j));
+  for (k=j+1; k<n; k++) negi_ip(&gcoeff(lambda,j,k));
 }
 
 /* index of first non-zero entry */
@@ -2677,7 +2705,7 @@ findi_normalize(GEN Aj, GEN B, long j, GEN lambda)
   long r = findi(Aj);
   if (r && signe(Aj[r]) < 0)
   {
-    ZV_neg_ip(Aj); if (B) ZV_neg_ip(gel(B,j));
+    ZV_togglesign(Aj); if (B) ZV_togglesign(gel(B,j));
     Minus(j,lambda);
   }
   return r;
@@ -2701,7 +2729,7 @@ reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN lambda, GEN D)
   if (signe(q))
   {
     GEN Lk = gel(lambda,k), Lj = gel(lambda,j);
-    mynegi(&q);
+    negi_ip(&q);
     if (*row0) elt_col(gel(A,k),gel(A,j),q);
     if (B) elt_col(gel(B,k),gel(B,j),q);
     gel(Lk,j) = addii(gel(Lk,j), mulii(q,gel(D,j)));
@@ -2779,7 +2807,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
 
   if (typ(A) != t_MAT) pari_err(typeer,"hnflll");
   n = lg(A);
-  A = ZM_copy(fix_rows(A));
+  A = ZM_copy(fix_rows(A)); /* ZM_copy for in place findi_normalize() */
   B = ptB? matid(n-1): NULL;
   D = const_vec(n, gen_1) + 1;
   lambda = zeromatcopy(n-1,n-1);
@@ -2869,7 +2897,7 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
   if (signe(q))
   {
     GEN Lk = gel(lambda,k), Lj = gel(lambda,j);
-    mynegi(&q);
+    negi_ip(&q);
     gel(A,k) = addii(gel(A,k), mulii(q,gel(A,j)));
     elt_col(gel(B,k),gel(B,j),q);
     gel(Lk,j) = addii(gel(Lk,j), mulii(q,gel(D,j)));
@@ -2920,8 +2948,8 @@ extendedgcd(GEN A)
   }
   if (signe(A[n-1]) < 0)
   {
-    mynegi(&gel(A,n-1));
-    ZV_neg_ip(gel(B,n-1));
+    negi_ip(&gel(A,n-1));
+    ZV_togglesign(gel(B,n-1));
   }
   return gerepilecopy(av, mkvec2(gel(A,n-1), B));
 }
@@ -2962,8 +2990,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       d = gcoeff(A,t,j);
       if (signe(d) < 0)
       {
-	ZV_neg(gel(A,j));
-	if (U) ZV_neg(gel(U,j));
+	ZV_neg_inplace(gel(A,j));
+	if (U) ZV_togglesign(gel(U,j));
 	d = gcoeff(A,t,j);
       }
       for (j1=1; j1<j; j1++)
@@ -2989,8 +3017,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       perm[++r] = l[k] = t; c[t] = k;
       if (signe(p) < 0)
       {
-	ZV_neg(gel(A,k));
-	if (U) ZV_neg(gel(U,k));
+	ZV_neg_inplace(gel(A,k));
+	if (U) ZV_togglesign(gel(U,k));
 	p = gcoeff(A,t,k);
       }
       /* p > 0 */
@@ -3060,7 +3088,7 @@ hnfperm(GEN A)
 GEN
 hnfall_i(GEN A, GEN *ptB, long remove)
 {
-  GEN B,c,h,x,p,a;
+  GEN B,c,h,x,a;
   pari_sp av = avma, av1, lim;
   long m,n,r,i,j,k,li;
 
@@ -3107,12 +3135,10 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       if (B) lswap(B[j], B[r]);
       h[j]=h[r]; h[r]=li; c[li]=r;
     }
-    p = gcoeff(A,li,r);
-    if (signe(p) < 0)
+    if (signe(gcoeff(A,li,r)) < 0)
     {
-      ZV_neg(gel(A,r));
-      if (B) ZV_neg(gel(B,r));
-      p = gcoeff(A,li,r);
+      ZV_neg_inplace(gel(A,r));
+      if (B) ZV_togglesign(gel(B,r));
     }
     ZM_reduce(A,B, li,r);
     if (low_stack(lim, stack_lim(av1,1)))

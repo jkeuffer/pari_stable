@@ -38,6 +38,8 @@ JD 12- read() would block on pipes
     2- [libpari] public generic hashtables
     3- library function FpM_FpC_mul_FpX
     4- library function shallowextract
+    5- library functions ZC_Z_mul, ZC_ZV_mul, ZM_copy, ZM_add, ZM_mul,
+       ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
 
   Removed
     1- obsolete library functions extract and matextract

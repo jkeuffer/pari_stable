@@ -286,17 +286,28 @@ GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
 GEN     zv_neg(GEN x);
+GEN     ZC_Z_mul(GEN x, GEN y);
 
 /* alglin2.c */
 
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
-GEN     ZM_to_zm(GEN z);
+GEN     ZC_ZV_mul(GEN x, GEN y);
+GEN     ZM_copy(GEN x);
 int     ZM_ishnf(GEN x);
+GEN     ZM_add(GEN x, GEN y);
+GEN     ZM_mul(GEN x, GEN y);
+GEN     ZM_sub(GEN x, GEN y);
+GEN     ZM_to_zm(GEN z);
+GEN     ZM_ZC_mul(GEN x, GEN y);
 GEN     ZV_add(GEN x, GEN y);
+GEN     ZV_copy(GEN x);
+GEN     ZV_neg(GEN M);
+void    ZV_neg_inplace(GEN M);
 GEN     ZV_sub(GEN x, GEN y);
 GEN     ZV_to_nv(GEN z);
+void    ZV_togglesign(GEN M);
 GEN     adj(GEN x);
 GEN     assmat(GEN x);
 GEN     caract(GEN x, long v);

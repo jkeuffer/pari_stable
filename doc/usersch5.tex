@@ -324,6 +324,8 @@ If \kbd{x} is a \typ{INT} or \typ{REAL}, \kbd{s} must be equal to $-1$, 0
 or~1, and if \kbd{x} is a \typ{POL} or \typ{SER}, \kbd{s} must be equal to 0
 or~1.
 
+\fun{void}{togglesign}{GEN x} sets the $s$ sign of~\kbd{x} to $-s$, in place.
+
 \fun{void}{setexpo}{GEN x, long s} sets the binary exponent of the
 \typ{REAL}~\kbd{x} to \kbd{s}. The value \kbd{s} must be a 24-bit signed
 number.
@@ -1921,7 +1923,37 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 
 \fun{GEN}{ZV_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
 
+\fun{GEN}{ZV_copy}{GEN x} returns a copy of \kbd{x}.
+
+\fun{GEN}{ZV_neg}{GEN x} returns $-\kbd{x}$.
+
+\fun{void}{ZV_neg_inplace}{GEN x} negates \kbd{x} in place, by replacing
+each component by its opposite. If you want to save even more memory by
+avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
+
+\fun{void}{ZV_togglesign}{GEN x} negates \kbd{x} in place, by toggling the
+sign of its integer components. Universal constants \kbd{gen\_1}, \kbd{gen\_m1}
+and \kbd{gen\_2} are handled specially and will not be corrupted.
+
+\fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \typ{INT}~\kbd{y}.
+
+\fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
+assumed to have compatible dimensions).
+
 \subsubsec{\kbd{ZM}}
+
+\fun{GEN}{ZM_copy}{GEN x} returns a copy of \kbd{x}.
+
+\fun{GEN}{ZM_add}{GEN x, GEN y} returns $\kbd{x} + \kbd{y}$ (assumed to have
+compatible dimensions).
+
+\fun{GEN}{ZM_sub}{GEN x, GEN y} returns $\kbd{x} - \kbd{y}$ (assumed to have
+compatible dimensions).
+
+\fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
+have compatible dimensions).
 
 \fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
 is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
@@ -2476,7 +2508,7 @@ assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
 an \kbd{Fp}.
 
 \fun{GEN}{FpV_dotproduct}{GEN x,GEN y,GEN p} scalar product of
-$x$ and $y$.
+$x$ and $y$ (assumed to have the same length).
 
 \fun{GEN}{FpV_dotsquare}{GEN x, GEN p} scalar product of $x$ with itself.
 has \typ{INT} entries.
@@ -2743,7 +2775,12 @@ occur).
 
 \subsec{\kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM} operations.
 
-\fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p}
+\fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
+(assumed to have compatible dimensions).
+
+\fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
+(assumed to have compatible dimensions).
+
 
 \fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
@@ -2759,8 +2796,6 @@ occur).
 place (destroys~\kbd{x}).
 
 \fun{long}{Flm_rank}{GEN x, ulong p}
-
-\fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flm_transpose}{GEN x}
 

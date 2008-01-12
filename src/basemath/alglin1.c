@@ -2682,44 +2682,145 @@ FpM_indexrank(GEN x, GEN p) {
 /*                                                                 */
 /*******************************************************************/
 
-/*Not stack clean*/
 GEN
 FpC_Fp_mul(GEN x, GEN y, GEN p)
 {
-  long i, l=lg(x);
-  GEN z=cgetg(l, t_COL);
-  for (i=1;i<l;i++)
-    gel(z,i)=Fp_mul(gel(x,i),y,p);
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_COL);
+  for (i=1;i<l;i++) gel(z,i) = Fp_mul(gel(x,i),y,p);
+  return z;
+}
+GEN
+ZC_Z_mul(GEN x, GEN y)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_COL);
+  for (i=1;i<l;i++) gel(z,i) = mulii(gel(x,i),y);
   return z;
 }
 
-/*If p is NULL no reduction is performed.*/
+/* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
+static GEN
+ZMrow_ZC_mul(GEN x, GEN y, long lx, long i)
+{
+  GEN c = mulii(gcoeff(x,i,1), gel(y,1));
+  long k;
+  for (k = 2; k < lx; k++) c = addii(c, mulii(gcoeff(x,i,k), gel(y,k)));
+  return c;
+}
+static ulong
+Flmrow_Flc_mul_SMALL(GEN x, GEN y, ulong p, long lx, long i)
+{
+  ulong c = ucoeff(x,i,1) * y[1];
+  long k;
+  for (k = 2; k < lx; k++) {
+    c += ucoeff(x,i,k) * y[k];
+    if (c & HIGHBIT) c %= p;
+  }
+  return c % p;
+}
+static ulong
+Flmrow_Flc_mul(GEN x, GEN y, ulong p, long lx, long i)
+{
+  ulong c = Fl_mul(ucoeff(x,i,1), y[1], p);
+  long k;
+  for (k = 2; k < lx; k++)
+    c = Fl_add(c, Fl_mul(ucoeff(x,i,k), y[k], p), p);
+  return c;
+}
+
+/* return x * y, 1 < lx = lg(x), l = lg(x[1]) */
+static GEN
+ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
+{
+  GEN z = cgetg(l,t_COL);
+  long i; 
+  for (i = 1; i < l; i++)
+  {
+    pari_sp av = avma;
+    GEN c = ZMrow_ZC_mul(x, y, lx, i);
+    gel(z,i) = gerepileuptoint(av, c);
+  }
+  return z;
+}
+static GEN
+FpM_FpC_mul_i(GEN x, GEN y, long lx, long l, GEN p)
+{
+  GEN z = cgetg(l,t_COL);
+  long i; 
+  for (i = 1; i < l; i++)
+  {
+    pari_sp av = avma;
+    GEN c = ZMrow_ZC_mul(x, y, lx, i);
+    gel(z,i) = gerepileuptoint(av, modii(c,p));
+  }
+  return z;
+}
+static GEN
+Flm_Flc_mul_i_SMALL(GEN x, GEN y, long lx, long l, ulong p)
+{
+  GEN z = cgetg(l,t_VECSMALL);
+  long i;
+  for (i = 1; i < l; i++) z[i] = Flmrow_Flc_mul_SMALL(x, y, p, lx, i);
+  return z;
+}
+static GEN
+Flm_Flc_mul_i(GEN x, GEN y, long lx, long l, ulong p)
+{
+  GEN z = cgetg(l,t_VECSMALL);
+  long i;
+  for (i=1; i<l; i++) z[i] = Flmrow_Flc_mul(x, y, p, lx, i);
+  return z;
+}
+
+GEN
+ZM_mul(GEN x, GEN y)
+{
+  long j, l, lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
+  if (lx==1) return zeromat(0, ly-1);
+  l = lg(x[1]); z = cgetg(ly,t_MAT);
+  for (j=1; j<ly; j++) gel(z,j) = ZM_ZC_mul_i(x, gel(y,j), lx, l);
+  return z;
+}
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
+{
+  long j, l, lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
+  if (lx==1) return zeromat(0, ly-1);
+  l = lg(x[1]); z = cgetg(ly,t_MAT);
+  for (j=1; j<ly; j++) gel(z,j) = FpM_FpC_mul_i(x, gel(y,j), lx, l, p);
+  return z;
+}
+GEN
+Flm_mul(GEN x, GEN y, ulong p)
 {
   long i,j,l,lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  if (lx != lg(y[1])) pari_err(operi,"*",x,y);
-  if (lx==1) return zeromat(0, ly-1);
-  l=lg(x[1]); z=cgetg(ly,t_MAT);
-  for (j=1; j<ly; j++)
+  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
+  z = cgetg(ly,t_MAT);
+  if (lx==1)
   {
-    gel(z,j) = cgetg(l,t_COL);
-    for (i=1; i<l; i++)
-    {
-      pari_sp av = avma;
-      GEN p1 = mulii(gcoeff(x,i,1),gcoeff(y,1,j));
-      long k;
-      for (k=2; k<lx; k++)
-	p1 = addii(p1, mulii(gcoeff(x,i,k),gcoeff(y,k,j)));
-      gcoeff(z,i,j) = gerepileuptoint(av, p?modii(p1,p):p1);
-    }
+    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
+    return z;
+  }
+  l = lg(x[1]);
+  if (SMALL_ULONG(p)) {
+    for (j=1; j<ly; j++)
+      gel(z,j) = Flm_Flc_mul_i_SMALL(x, gel(y,j), lx, l, p);
+  } else {
+    for (j=1; j<ly; j++)
+      gel(z,j) = Flm_Flc_mul_i(x, gel(y,j), lx, l, p);
   }
   return z;
 }
 
-/*If p is NULL no reduction is performed.*/
 /*Multiple a column vector by a line vector to make a matrix*/
 GEN
 FpC_FpV_mul(GEN x, GEN y, GEN p)
@@ -2727,94 +2828,94 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
   long i,j, lx=lg(x), ly=lg(y);
   GEN z;
   if (ly==1) return cgetg(1,t_MAT);
-  z=cgetg(ly,t_MAT);
-  for (j=1; j<ly; j++)
+  z = cgetg(ly,t_MAT);
+  for (j=1; j < ly; j++)
   {
     gel(z,j) = cgetg(lx,t_COL);
-    for (i=1; i<lx; i++)
-    {
-      pari_sp av = avma;
-      GEN p1 = mulii(gel(x,i),gel(y,j));
-      gcoeff(z,i,j) = p? gerepileuptoint(av,modii(p1,p)): p1;
-    }
+    for (i=1; i<lx; i++) gcoeff(z,i,j) = Fp_mul(gel(x,i),gel(y,j), p);
+  }
+  return z;
+}
+GEN
+ZC_ZV_mul(GEN x, GEN y)
+{
+  long i,j, lx=lg(x), ly=lg(y);
+  GEN z;
+  if (ly==1) return cgetg(1,t_MAT);
+  z = cgetg(ly,t_MAT);
+  for (j=1; j < ly; j++)
+  {
+    gel(z,j) = cgetg(lx,t_COL);
+    for (i=1; i<lx; i++) gcoeff(z,i,j) = mulii(gel(x,i),gel(y,j));
   }
   return z;
 }
 
-/*If p is NULL no reduction is performed.
- *Multiply a line vector by a column and return a scalar (t_INT).
- */
+/* Multiply a line vector by a column and return a scalar (t_INT) */
 GEN
 FpV_dotproduct(GEN x, GEN y, GEN p)
 {
-  pari_sp av = avma;
-  long i;
-  long lx=lg(x), ly=lg(y);
-  GEN p1;
-  if (lx != ly) pari_err(operi,"* [mod p]",x,y);
+  long i, lx = lg(x);
+  pari_sp av;
+  GEN c;
+  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx == 1) return gen_0;
-  p1 = mulii(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++)
-    p1 = addii(p1, mulii(gel(x,i),gel(y,i)));
-  return gerepileuptoint(av, p?modii(p1,p):p1);
+  av = avma; c = mulii(gel(x,1),gel(y,1));
+  for (i=2; i<lx; i++) c = addii(c, mulii(gel(x,i),gel(y,i)));
+  return gerepileuptoint(av, modii(c,p));
 }
 GEN
 FpV_dotsquare(GEN x, GEN p)
 {
-  pari_sp av = avma;
   long i, lx = lg(x);
-  GEN p1;
+  pari_sp av;
+  GEN c;
   if (lx == 1) return gen_0;
-  p1 = sqri(gel(x,1));
-  for (i=2; i<lx; i++)
-    p1 = addii(p1, sqri(gel(x,i)));
-  return gerepileuptoint(av, p?modii(p1,p):p1);
+  av = avma; c = sqri(gel(x,1));
+  for (i=2; i<lx; i++) c = addii(c, sqri(gel(x,i)));
+  return gerepileuptoint(av, modii(c,p));
 }
 
-/* x[i,]*y */
-static GEN
-ZM_ZC_mul_coeff(GEN x, GEN y, long lx, long i)
+GEN
+ZM_ZC_mul(GEN x, GEN y)
 {
-  GEN c = mulii(gcoeff(x,i,1),gel(y,1));
-  long k;
-  for (k = 2; k < lx; k++)
-    c = addii(c, mulii(gcoeff(x,i,k),gel(y,k)));
-  return c;
+  long lx = lg(x);
+  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
+  return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lg(x[1]));
 }
-
-/*If p is NULL no reduction is performed.*/
 GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)
 {
-  long i,l,lx=lg(x), ly=lg(y);
-  GEN z;
-  if (lx != ly) pari_err(operi,"* [mod p]",x,y);
-  if (lx==1) return cgetg(1,t_COL);
-  l = lg(x[1]);
-  z = cgetg(l,t_COL);
-  for (i=1; i<l; i++)
-  {
-    pari_sp av = avma;
-    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
-    gel(z,i) = gerepileuptoint(av, p?modii(p1,p):p1);
-  }
-  return z;
+  long lx = lg(x);
+  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
+  return lx==1? cgetg(1,t_COL): FpM_FpC_mul_i(x, y, lx, lg(x[1]), p);
 }
-
+GEN
+Flm_Flc_mul(GEN x, GEN y, ulong p)
+{
+  long l, lx = lg(x);
+  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
+  if (lx==1) return cgetg(1,t_VECSMALL);
+  l = lg(x[1]);
+  if (SMALL_ULONG(p))
+    return Flm_Flc_mul_i_SMALL(x, y, lx, l, p);
+  else
+    return Flm_Flc_mul_i(x, y, lx, l, p);
+}
 /* RgV_to_RgX(FpM_FpC_mul(x,y,p), v), p != NULL, memory clean */
 GEN
 FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
 {
-  long i,l,lx=lg(x), ly=lg(y);
+  long i, l, lx = lg(x);
   GEN z;
-  if (lx != ly) pari_err(operi,"* [mod p]",x,y);
+  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
   if (lx==1) return zeropol(v);
   l = lg(x[1]);
   z = new_chunk(l+1);
   for (i=l-1; i; i--)
   {
     pari_sp av = avma;
-    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
+    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
     p1 = modii(p1, p);
     if (signe(p1))
     {
@@ -2830,91 +2931,8 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
   for (; i; i--)
   {
     pari_sp av = avma;
-    GEN p1 = ZM_ZC_mul_coeff(x,y,lx,i);
+    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
     gel(z,i+1) = gerepileuptoint(av, modii(p1,p));
-  }
-  return z;
-}
-
-GEN
-Flm_mul(GEN x, GEN y, ulong p)
-{
-  long i,j,l,lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  if (lx != lg(y[1])) pari_err(operi,"* [mod p]",x,y);
-  z=cgetg(ly,t_MAT);
-  if (lx==1)
-  {
-    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
-    return z;
-  }
-  l=lg(x[1]);
-  for (j=1; j<ly; j++)
-  {
-    long k;
-    gel(z,j) = cgetg(l,t_VECSMALL);
-    if (SMALL_ULONG(p))
-    {
-      for (i=1; i<l; i++)
-      {
-	ulong p1 = 0;
-	for (k=1; k<lx; k++)
-	{
-	  p1 += ucoeff(x,i,k) * ucoeff(y,k,j);
-	  if (p1 & HIGHBIT) p1 %= p;
-	}
-	ucoeff(z,i,j) = p1 % p;
-      }
-    }
-    else
-    {
-      for (i=1; i<l; i++)
-      {
-	ulong p1 = 0;
-	for (k=1; k<lx; k++)
-	  p1 = Fl_add(p1,Fl_mul(ucoeff(x,i,k), ucoeff(y,k,j),p),p);
-	ucoeff(z,i,j) = p1;
-      }
-    }
-  }
-  return z;
-}
-
-GEN
-Flm_Flc_mul(GEN x, GEN y, ulong p)
-{
-  long i,k,l,lx=lg(x), ly=lg(y);
-  GEN z;
-  if (lx != ly) pari_err(operi,"* [mod p]",x,y);
-  if (lx==1) return cgetg(1,t_VECSMALL);
-  l = lg(x[1]);
-  z = cgetg(l,t_VECSMALL);
-  if (SMALL_ULONG(p))
-  {
-    for (i=1; i<l; i++)
-    {
-      ulong p1 = 0;
-      for (k=1; k<lx; k++)
-      {
-	p1 += ucoeff(x,i,k) * y[k];
-	if (p1 & HIGHBIT) p1 %= p;
-      }
-      z[i] = p1 % p;
-    }
-  }
-  else
-  {
-    for (i=1; i<l; i++)
-    {
-      ulong p1 = 0;
-      for (k=1; k<lx; k++)
-      {
-	ulong t = Fl_mul(ucoeff(x,i,k), y[k], p);
-	p1 = Fl_add(p1, t, p);
-      }
-      z[i] = p1;
-    }
   }
   return z;
 }

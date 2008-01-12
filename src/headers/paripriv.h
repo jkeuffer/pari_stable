@@ -209,7 +209,6 @@ void rowselect_p(GEN A, GEN B, GEN p, long init);
 GEN  split_realimag(GEN x, long r1, long r2);
 GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
-GEN  ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 GEN  vec_setconst(GEN v, GEN x);
 
 GEN  GS_norms(GEN B, long prec);
@@ -598,10 +597,8 @@ void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 /* alglin2.c */
 
 GEN     Frobeniusform(GEN V, long n);
-GEN     ZM_copy(GEN x);
 GEN     ZV_Z_mul(GEN X, GEN c);
-GEN     ZV_copy(GEN x);
-void    ZV_neg_ip(GEN M);
+GEN     ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 GEN     hnf0(GEN A, int remove);
 GEN     hnf_special(GEN x, long remove);
 GEN     hnfall0(GEN A, long remove);
