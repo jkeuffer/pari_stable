@@ -25,6 +25,8 @@ JD 12- read() would block on pipes
        field could not be factored). Related to Changed-4.
    15- polgalois could confuse S_11 and F_110(11) if a certain polynomial
        discriminant could not be fully factored. Related to Changed-4.
+   16- a = 0./x; a+a --> 0.
+
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

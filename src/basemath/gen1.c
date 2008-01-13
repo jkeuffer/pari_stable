@@ -638,9 +638,9 @@ addfrac(GEN x, GEN y)
 static GEN
 add_rfrac(GEN x, GEN y)
 {
+  pari_sp tetpil, av = avma;
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_RFRAC);
   GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
-  pari_sp tetpil;
 
   delta = ggcd(x2,y2);
   if (degpol(delta) == 0)
@@ -666,10 +666,14 @@ add_rfrac(GEN x, GEN y)
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
   n = gadd(gmul(x1,y2), gmul(y1,x2));
-  if (gcmp0(n)) return gerepileupto((pari_sp)(z+3), n);
+  if (gcmp0(n))
+  {
+    if (isrationalzero(n)) return gerepileupto(av, n);
+    return gerepilecopy(av, mkrfrac(n, gmul(delta, gmul(x2,y2))));
+  }
   tetpil = avma; d = gmul(x2, y2);
   p1 = poldivrem(n, delta, &r); /* we want gcd(n,delta) */
-  if (gcmp0(r))
+  if (isexactzero(r))
   {
     if (lg(d) == 3) /* "constant" denominator */
     {
@@ -677,7 +681,7 @@ add_rfrac(GEN x, GEN y)
 	   if (gcmp_1(d)) p1 = gneg(p1);
       else if (gcmp1(d))  p1 = gcopy(p1);
       else p1 = gdiv(p1, d);
-      return gerepileupto((pari_sp)(z+3), p1);
+      return gerepileupto(av, p1);
     }
     gel(z,1) = p1;
     gel(z,2) = d;
