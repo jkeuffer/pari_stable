@@ -566,17 +566,18 @@ closure_eval(GEN C)
         g = &ptrs[rp++];
         g->vn=0;
         g->ep = (entree*) operand;
+        g->x  = cgetg(2,t_VECSMALL);
         switch (g->ep->valence)
         {
         case EpNEW:
           createvalue(g->ep);
         case EpVAR: /*FALL THROUGH*/
-          g->x = (GEN) g->ep->value;
+          gel(g->x,1) = (GEN) g->ep->value;
           break;
         default:
           pari_err(varer1,NULL,NULL);
         }
-        gel(st,sp++) = (GEN)&(g->x);
+        gel(st,sp++) = (GEN)&(gel(g->x,1));
         break;
       }
     case OCsimpleptrlex:
@@ -587,8 +588,9 @@ closure_eval(GEN C)
         g = &ptrs[rp++];
         g->vn=operand;
         g->ep=(entree *)0x1L;
-        g->x = (GEN) var[s_var.n+operand].value;
-        gel(st,sp++) = (GEN)&(g->x);
+        g->x = cgetg(2,t_VECSMALL);
+        gel(g->x, 1) = (GEN) var[s_var.n+operand].value;
+        gel(st,sp++) = (GEN)&(gel(g->x, 1));
         break;
       }
     case OCnewptrdyn:
@@ -604,7 +606,8 @@ closure_eval(GEN C)
         case EpNEW:
           createvalue(ep);
         case EpVAR: /*FALL THROUGH*/
-          g->x = (GEN) ep->value;
+          g->x = cgetg(2,t_VECSMALL);
+          gel(g->x,1) = ep->value;
           break;
         default:
           pari_err(varer1,NULL,NULL);
@@ -613,8 +616,8 @@ closure_eval(GEN C)
         g->ep=NULL;
         C=&g->c;
         C->full_col = C->full_row = 0;
-        C->parent   = (GEN)    g->x;
-        C->ptcell   = (GEN *) &g->x;
+        C->parent   = gel(g->x,1);
+        C->ptcell   = &gel(g->x,1);
         break;
       }
     case OCnewptrlex:
@@ -624,19 +627,20 @@ closure_eval(GEN C)
         if (rp==s_ptrs.n-1)
           (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
-        g->x = (GEN) var[s_var.n+operand].value;
+        g->x = cgetg(2,t_VECSMALL);
+        gel(g->x,1) = (GEN) var[s_var.n+operand].value;
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
         C->full_col = C->full_row = 0;
-        C->parent   = (GEN)    g->x;
-        C->ptcell   = (GEN *) &g->x;
+        C->parent   = (GEN)   gel(g->x,1);
+        C->ptcell   = (GEN *) &gel(g->x,1);
         break;
       }
     case OCpushptr:
       {
         gp_pointer *g = &ptrs[rp-1];
-        gel(st,sp++) = (GEN)&(g->x);
+        gel(st,sp++) = (GEN)&gel(g->x,1);
       }
       break;
     case OCendptr:
@@ -646,11 +650,11 @@ closure_eval(GEN C)
         if (g->ep)
         {
           if (g->vn)
-            changelex(g->vn,g->x);
+            changelex(g->vn,gel(g->x,1));
           else
-            changevalue(g->ep, g->x);
+            changevalue(g->ep, gel(g->x,1));
         }
-        else change_compo(&(g->c), g->x);
+        else change_compo(&(g->c), gel(g->x,1));
       }
       break;
     case OCstoredyn:
@@ -758,7 +762,7 @@ closure_eval(GEN C)
           pari_err(talker,"_[_]: not a vector");
         }
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        gel(g->x,1) = *(g->c.ptcell);
         break;
       }
     case OCcompo2:
@@ -789,7 +793,7 @@ closure_eval(GEN C)
         check_array_index(c, lg(p[d]));
         C->ptcell = (GEN *) gel(p,d)+c;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        gel(g->x,1) = *(g->c.ptcell);
         break;
       }
     case OCcompoC:
@@ -817,7 +821,7 @@ closure_eval(GEN C)
         C->ptcell = (GEN *) p+c;
         C->full_col = c;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        gel(g->x,1) = *(g->c.ptcell);
         break;
       }
     case OCcompoL:
@@ -848,7 +852,7 @@ closure_eval(GEN C)
         C->full_row = r; /* record row number */
         C->ptcell = &p2;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        gel(g->x,1) = *(g->c.ptcell);
         break;
       }
     case OCdefaultarg:
