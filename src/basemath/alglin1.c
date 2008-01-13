@@ -1839,7 +1839,7 @@ ZM_inv(GEN M, GEN dM)
   pari_sp av2, av = avma, lim = stack_lim(av,1);
   GEN Hp,q,H;
   ulong p,dMp;
-  byteptr d = diffptr;
+  byteptr d;
   long lM = lg(M), stable = 0;
 
   if (lM == 1) return cgetg(1,t_MAT);
@@ -1847,8 +1847,8 @@ ZM_inv(GEN M, GEN dM)
 
   av2 = avma;
   H = NULL;
-  d += 3000; /* 27449 = prime(3000) */
-  for(p = 27449; ; )
+  d = init_modular(&p);
+  for(;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     dMp = umodiu(dM,p);

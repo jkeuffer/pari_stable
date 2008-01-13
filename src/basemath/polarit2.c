@@ -4473,8 +4473,8 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     long dM=0, dR;
     GEN M, dsol;
     GEN R, ax, bo;
-    byteptr primepointer;
-    for (p = 27449, primepointer = diffptr + 3000; ; )
+    byteptr primepointer = init_modular(&p);
+    for (;;)
     {
       NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
       /*Discard primes dividing disc(T) or lc(PQ) */
