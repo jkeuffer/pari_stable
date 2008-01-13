@@ -1227,3 +1227,23 @@ derivnum0(GEN a, GEN code, long prec)
   EXPR_WRAP(code, derivnum (EXPR_ARG,a,prec));
 }
 
+struct deriv_data
+{
+  GEN code;
+  GEN args;
+};
+
+static GEN deriv_eval(GEN x, void *E)
+{
+ struct deriv_data *data=(struct deriv_data *)E;
+ gel(data->args,1)=x;
+ return closure_callgenvec(data->code, data->args);
+}
+
+GEN
+derivnum1(GEN code, GEN args, long prec)
+{
+  struct deriv_data E;
+  E.code=code; E.args=args;
+  return derivnum((void*)&E, deriv_eval, gel(args,1), prec);
+}

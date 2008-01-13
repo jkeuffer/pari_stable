@@ -1599,7 +1599,7 @@ deriv(GEN x, long v)
   GEN y;
 
   tx = typ(x); if (is_const_t(tx)) return gen_0;
-  if (v < 0) v = gvar9(x);
+  if (v < 0 && tx!=t_CLOSURE) v = gvar9(x);
   switch(tx)
   {
     case t_POLMOD:
@@ -1652,6 +1652,9 @@ deriv(GEN x, long v)
     case t_VEC: case t_COL: case t_MAT: lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);
       return y;
+
+    case t_CLOSURE:
+      if (v==-1) return closure_deriv(x);
   }
   pari_err(typeer,"deriv");
   return NULL; /* not reached */

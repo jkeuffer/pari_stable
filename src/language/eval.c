@@ -249,24 +249,6 @@ var_make_safe(void)
       }
 }
 
-struct derivgenwrap_s
-{
-  GEN (*f)(ANYARG);
-  GEN *x;
-};
-
-static GEN
-derivgenwrap(GEN x, void* E)
-{
-  struct derivgenwrap_s *c=(struct derivgenwrap_s *) E;
-  GEN z = c->f(x,c->x[1],c->x[2],c->x[3],c->x[4],c->x[5],c->x[6],c->x[7]);
-  if (!z)
-    /*This cannot actually happen since no functions returning NULL
-     *take a GEN as first parameter*/
-    pari_err(talker, "break not allowed here");
-  return z;
-}
-
 static void
 check_array_index(long c, long max)
 {
@@ -454,19 +436,6 @@ closure_return(GEN C)
     return z;
   }
   return gerepileupto(ltop,gel(st,--sp));
-}
-
-static GEN
-derivuserwrap(GEN x, void* E)
-{
-  GEN fun=(GEN)E;
-  long arity=fun[1];
-  long j;
-  gel(st,sp)=x;
-  for (j=1;j<arity;j++)
-    gel(st,sp+j)=gel(st,sp+j-arity);
-  sp+=arity;
-  return closure_return(fun);
 }
 
 INLINE long
@@ -906,20 +875,6 @@ closure_eval(GEN C)
       zerovalue(ep);
       break;
 #define ARGS st[sp],st[sp+1],st[sp+2],st[sp+3],st[sp+4],st[sp+5],st[sp+6],st[sp+7]
-    case OCderivgen:
-      {
-        entree *ep=(entree*)operand;
-        GEN res;
-        struct derivgenwrap_s c;
-        sp-=ep->arity;
-        gp_function_name=ep->name;
-        c.f = (GEN (*) (ANYARG)) ep->value;
-        c.x = (GEN*) st+sp;
-        res = derivnum((void*)&c, derivgenwrap, gel(st,sp), precreal);
-        gp_function_name=NULL;
-        gel(st,sp++)=res;
-        break;
-      }
     case OCcallgen:
       {
         entree *ep=(entree*)operand;
@@ -979,24 +934,6 @@ closure_eval(GEN C)
         break;
       }
 #undef ARGS
-    case OCderivuser:
-      {
-        GEN z;
-        long n=operand;
-        long arity;
-        GEN fun = gel(st,sp-1-n);
-        if (typ(fun)!=t_CLOSURE)
-          pari_err(talker,"not a function in numerical derivation");
-        arity=fun[1];
-        if (n>arity)
-          pari_err(talker,"too many parameters in numerical derivation");
-        for (j=n+1;j<=arity;j++)
-          gel(st,sp++)=0;
-        z = derivnum((void*)fun, derivuserwrap, gel(st,sp-arity), precreal);
-        sp--;
-        gel(st, sp++) = z;
-        break;
-      }
     case OCcalluser:
       {
         long n=operand;
@@ -1376,10 +1313,6 @@ closure_disassemble(GEN C)
       ep=(entree*)operand;
       pariprintf("localvar0\t%s\n",ep->name);
       break;
-    case OCderivgen:
-      ep=(entree*)operand;
-      pariprintf("derivgen\t\t%s\n",ep->name);
-      break;
     case OCcallgen:
       ep=(entree*)operand;
       pariprintf("callgen\t\t%s\n",ep->name);
@@ -1399,9 +1332,6 @@ closure_disassemble(GEN C)
     case OCcallvoid:
       ep=(entree*)operand;
       pariprintf("callvoid\t%s\n",ep->name);
-      break;
-    case OCderivuser:
-      pariprintf("derivuser\t%ld\n",operand);
       break;
     case OCcalluser:
       pariprintf("calluser\t%ld\n",operand);

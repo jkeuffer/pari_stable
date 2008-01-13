@@ -19,3 +19,11 @@ Doc: numerical derivation of \var{expr} with respect to $X$ at $X=a$.
  which would not work in library mode.
  
  \synt{derivnum}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
+
+Function: _derivnum
+Section: programming/internals
+C-Name: derivnum1
+Prototype: GGp
+Help: _derivnum(closure,[args]) numerical derivation of closure with respect to
+ the first variable at (args).
+

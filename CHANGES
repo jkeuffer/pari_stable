@@ -44,7 +44,7 @@ JD 12- read() would block on pipes
     4- library function shallowextract
     5- library functions ZC_Z_mul, ZC_ZV_mul, ZM_copy, ZM_add, ZM_mul,
        ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
-
+BA  6- handle numerical derivation as an operation on closure.
   Removed
     1- obsolete library functions extract and matextract
     2- obsolete library function elementinv_modpr

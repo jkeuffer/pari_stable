@@ -24,7 +24,7 @@ typedef enum {Fseq,
               Frefarg,
               Fconst,Fsmall,
               Ftag,
-              Fentry,Fcall,Ffunction,Fderfunc,Flambda
+              Fentry,Fcall,Ffunction,Flambda
 } Ffunc;
 
 #define Flastfunc  (Fdeffunc)

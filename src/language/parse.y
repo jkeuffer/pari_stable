@@ -181,7 +181,6 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
 %pure-parser
 %parse-param {char **lex}
 %lex-param {char **lex}
-%token KDER  "'("
 %token KPARROW ")->"
 %token KARROW "->"
 %token KPE   "+="
@@ -230,7 +229,7 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
 %type <val> seq sequnused matrix matrix_index expr
 %type <val> lvalue
 %type <val> matrixelts matrixlines arg listarg definition
-%type <val> funcid funcder memberid
+%type <val> funcid memberid
 %type <val> backticks history
 %%
 
@@ -270,7 +269,6 @@ expr: KINTEGER %prec INT  {$$=newintnode(&@1);}
     | history           {$$=$1;}
     | expr '(' listarg ')'  {$$=newnode(Fcall,$1,$3,&@$);}
     | funcid            {$$=$1;}
-    | funcder           {$$=$1;}
     | lvalue %prec LVAL	{$$=$1;}
     | matrix            {$$=$1;}
     | definition        {$$=$1;}
@@ -350,9 +348,6 @@ listarg: arg {$$=$1;}
 ;
 
 funcid: KENTRY '(' listarg ')' {$$=newnode(Ffunction,newconst(CSTentry,&@1),$3,&@$);}
-;
-
-funcder: KENTRY "'(" listarg ')' {$$=newnode(Fderfunc,newconst(CSTentry,&@1),$3,&@$);}
 ;
 
 memberid:

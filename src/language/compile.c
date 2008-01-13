@@ -649,7 +649,7 @@ cattovec(long n, long fnum)
 }
 
 static void
-compilecall(long n, op_code op, int mode)
+compilecall(long n, int mode)
 {
   pari_sp ltop=avma;
   long j;
@@ -661,7 +661,7 @@ compilecall(long n, op_code op, int mode)
       compilenode(arg[j], Ggen,0);
     else
       op_push(OCpushlong,0);
-  op_push(op, nb);
+  op_push(OCcalluser, nb);
   compilecast(n,Ggen,mode);
   avma=ltop;
   return;
@@ -675,7 +675,7 @@ compileuserfunc(entree *ep, long n, int mode)
     op_push(OCpushlex,vn);
   else
     op_push(OCpushdyn,(long)ep);
-  compilecall(n, tree[n].f==Fderfunc ? OCderivuser:OCcalluser, mode);
+  compilecall(n, mode);
 }
 
 static void
@@ -704,8 +704,6 @@ compilefunc(entree *ep, long n, int mode)
   else if (is_func_named(x,"my"))
   {
     GEN vep=cgetg_copy(lg(arg),arg);
-    if (tree[n].f==Fderfunc)
-      compile_err("can't derive this",tree[n].str);
     if (nb) op_push(OCnewframe,nb);
     for(i=1;i<=nb;i++)
       var_push(NULL,Lmy);
@@ -731,8 +729,6 @@ compilefunc(entree *ep, long n, int mode)
   else if (is_func_named(x,"local"))
   {
     GEN vep=cgetg_copy(lg(arg),arg);
-    if (tree[n].f==Fderfunc)
-      compile_err("can't derive this",tree[n].str);
     for (i=1;i<=nb;i++)
     {
       entree *en;
@@ -760,8 +756,6 @@ compilefunc(entree *ep, long n, int mode)
   else if (is_func_named(x,"global"))
   {
     pari_warn(warner,"global(...) is deprecated");
-    if (tree[n].f==Fderfunc)
-      compile_err("can't derive this",tree[n].str);
     for (i=1;i<=nb;i++)
     {
       long a=arg[i];
@@ -788,8 +782,6 @@ compilefunc(entree *ep, long n, int mode)
   {
     if (nb!=1)
       compile_err("wrong number of arguments", tree[n].str+tree[n].len-1);
-    if (tree[n].f==Fderfunc)
-      compile_err("can't derive this",tree[n].str);
     ep=is_entry("O(_^_)");
     if (tree[arg[1]].f==Ffunction && tree[arg[1]].x==OPpow)
     {
@@ -813,8 +805,6 @@ compilefunc(entree *ep, long n, int mode)
   if (!ep->value)
     compile_err("unknown function",tree[n].str);
   ret=get_ret_type(&p);
-  if (tree[n].f==Fderfunc && (ret!=RET_GEN || *p!='G'))
-    compile_err("can't derive this",tree[n].str);
   i=0; j=1;
   if (*p)
   {
@@ -1084,9 +1074,7 @@ compilefunc(entree *ep, long n, int mode)
   switch (ret)
   {
   case RET_GEN:
-    if (tree[n].f==Fderfunc)
-      op_push(OCderivgen, (long) ep);
-    else if (ep->arity==2)
+    if (ep->arity==2)
       op_push(OCcallgen2, (long) ep);
     else
       op_push(OCcallgen, (long) ep);
@@ -1431,7 +1419,6 @@ compilenode(long n, int mode, long flag)
         closurefunc(ep,n,mode);
       break;
     }
-  case Fderfunc: /*Fall through*/
   case Ffunction:
     {
       entree *ep=getfunc(n);
@@ -1443,7 +1430,7 @@ compilenode(long n, int mode, long flag)
     }
   case Fcall:
     compilenode(x,Ggen,0);
-    compilecall(n,OCcalluser,mode);
+    compilecall(n,mode);
     return;
   case Flambda:
     {
@@ -1504,3 +1491,37 @@ gp_closure(long n)
   return getclosure(&pos);
 }
 
+GEN closure_deriv(GEN G)
+{
+  pari_sp ltop=avma;
+  long i;
+  struct codepos pos;
+  GEN text;
+  long arity=G[1];
+  getcodepos(&pos);
+  op_push(OCgetargs, arity);
+  op_push(OCpushgen,data_push(G));
+  op_push(OCvec,arity+1);
+  for (i=1;i<=arity;i++)
+  {
+    op_push(OCpushlex,i-arity-1);
+    op_push(OCstackgen,i);
+  }
+  op_push(OCprecreal,0);
+  op_push(OCcallgen,(long)is_entry("_derivnum"));
+  if (typ(gel(G,5))==t_STR)
+  {
+    char *code=GSTR(gel(G,5));
+    text = cgetg(1+nchar2nlong(2+strlen(code)),t_STR);
+    sprintf(GSTR(text),"%s'",code);
+  }
+  else
+  {
+    char *code=GSTR(gmael(G,5,2));
+    text = cgetg(3, t_VEC);
+    gel(text,1) = gcopy(gmael(G,5,1));
+    gel(text,2) = cgetg(1+nchar2nlong(4+strlen(code)),t_STR);
+    sprintf(GSTR(gel(text,2)),"(%s)'",code);
+  }
+  return gerepilecopy(ltop, getfunction(&pos,arity,0,text));
+}

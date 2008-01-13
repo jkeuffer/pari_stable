@@ -652,10 +652,6 @@ pari_lex(union token_value *yylval, struct node_loc *yylloc, char **lex)
   {
     *lex+=2; yylloc->end = *lex; return KNE;
   }
-  if (**lex=='\'' && (*lex)[1]=='(')
-  {
-    *lex+=2; yylloc->end = *lex; return KDER;
-  }
   if (**lex=='\\' && (*lex)[1]=='/')
     switch((*lex)[2])
     {
