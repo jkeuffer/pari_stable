@@ -1496,7 +1496,7 @@ ZV_sub_i(GEN x, GEN y, long lx)
   return A;
 }
 GEN
-ZV_sub(GEN x, GEN y) { return ZV_add_i(x, y, lg(x)); }
+ZV_sub(GEN x, GEN y) { return ZV_sub_i(x, y, lg(x)); }
 GEN
 ZM_add(GEN x, GEN y)
 {
