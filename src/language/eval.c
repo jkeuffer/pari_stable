@@ -357,6 +357,18 @@ freelex(long vn)
   if (v->flag == COPY_VAL) killbloc(v->value);
 }
 
+INLINE void
+restore_vars(long nbmvar, long nblvar)
+{
+  long j;
+  for(j=1;j<=nbmvar;j++)
+    freelex(-j);
+  s_var.n-=nbmvar;
+  for(j=1;j<=nblvar;j++)
+    pop_val(lvars[s_lvars.n-j]);
+  s_lvars.n-=nblvar;
+}
+
 void
 push_lex(GEN a)
 {
@@ -1055,12 +1067,7 @@ endeval:
     sp = saved_sp;
     rp = saved_rp;
   }
-  for(j=1;j<=nbmvar;j++)
-    freelex(-j);
-  s_var.n-=nbmvar;
-  for(j=1;j<=nblvar;j++)
-    pop_val(lvars[s_lvars.n-j]);
-  s_lvars.n-=nblvar;
+  restore_vars(nbmvar, nblvar);
 }
 
 GEN
@@ -1070,6 +1077,29 @@ closure_evalgen(GEN C)
   closure_eval(C);
   if (br_status) { avma=ltop; return NULL; }
   return gerepileupto(ltop,gel(st,--sp));
+}
+
+GEN
+closure_trapgen(long numerr, GEN C)
+{
+  pari_sp av=avma;
+  long saved_sp=sp;
+  long saved_rp=rp;
+  long saved_mvar=s_var.n;
+  long saved_lvar=s_lvars.n;
+  VOLATILE GEN x;
+  CATCH(numerr) { x = NULL; }
+  TRY { x = closure_evalgen(C); } ENDCATCH;
+  if (!x)
+  {
+    long nbmvar=s_var.n-saved_mvar;
+    long nblvar=s_lvars.n-saved_lvar;
+    sp=saved_sp;
+    rp=saved_rp;
+    restore_vars(nbmvar, nblvar);
+    avma=av;
+  }
+  return x;
 }
 
 GEN

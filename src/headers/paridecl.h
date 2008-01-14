@@ -1157,6 +1157,7 @@ GEN     closure_evalnobrk(GEN C);
 GEN     closure_evalres(GEN C);
 void    closure_evalvoid(GEN C);
 void    closure_reset(void);
+GEN     closure_trapgen(long numerr, GEN C);
 void    freeep(entree *ep);
 GEN     get_lex(long vn);
 long    loop_break(void);
