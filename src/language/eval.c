@@ -224,11 +224,16 @@ changevalue(entree *ep, GEN x)
 }
 
 INLINE void
-createvalue(entree *ep)
+checkvalue(entree *ep)
 {
-  pari_var_create(ep);
-  ep->valence = EpVAR;
-  ep->value = initial_value(ep);
+  if (ep->valence==EpNEW)
+  {
+    pari_var_create(ep);
+    ep->valence = EpVAR;
+    ep->value = initial_value(ep);
+  }
+  else if (ep->valence!=EpVAR)
+    pari_err(varer1,NULL,NULL);
 }
 
 /* make GP variables safe for avma = top */
@@ -556,16 +561,8 @@ closure_eval(GEN C)
       break;
     case OCpushdyn:
       ep=(entree*)operand;
-      switch(ep->valence)
-      {
-      case EpNEW:
-        createvalue(ep);
-      case EpVAR: /*FALL THROUGH*/
-        gel(st,sp++)=(GEN)ep->value;
-        break;
-      default:
-        pari_err(talker,"no such variable `%s'",ep->name);
-      }
+      checkvalue(ep);
+      gel(st,sp++)=(GEN)ep->value;
       break;
     case OCpushlex:
       gel(st,sp++)=var[s_var.n+operand].value;
@@ -579,16 +576,8 @@ closure_eval(GEN C)
         g->vn=0;
         g->ep = (entree*) operand;
         g->x  = cgetg(2,t_VECSMALL);
-        switch (g->ep->valence)
-        {
-        case EpNEW:
-          createvalue(g->ep);
-        case EpVAR: /*FALL THROUGH*/
-          gel(g->x,1) = (GEN) g->ep->value;
-          break;
-        default:
-          pari_err(varer1,NULL,NULL);
-        }
+        checkvalue(g->ep);
+        gel(g->x,1) = (GEN) g->ep->value;
         gel(st,sp++) = (GEN)&(gel(g->x,1));
         break;
       }
@@ -613,17 +602,9 @@ closure_eval(GEN C)
           (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         ep = (entree*) operand;
-        switch (ep->valence)
-        {
-        case EpNEW:
-          createvalue(ep);
-        case EpVAR: /*FALL THROUGH*/
-          g->x = cgetg(2,t_VECSMALL);
-          gel(g->x,1) = ep->value;
-          break;
-        default:
-          pari_err(varer1,NULL,NULL);
-        }
+        checkvalue(ep);
+        g->x = cgetg(2,t_VECSMALL);
+        gel(g->x,1) = ep->value;
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -671,16 +652,8 @@ closure_eval(GEN C)
       break;
     case OCstoredyn:
       ep=(entree *)operand;
-      switch (ep->valence)
-      {
-      case EpNEW:
-        createvalue(ep);
-      case EpVAR: /*FALL THROUGH*/
-        changevalue(ep, gel(st,--sp));
-        break;
-      default:
-        pari_err(varer1,NULL,NULL);
-      }
+      checkvalue(ep);
+      changevalue(ep, gel(st,--sp));
       break;
     case OCstorelex:
       changelex(operand,gel(st,--sp));
