@@ -604,7 +604,7 @@ closure_eval(GEN C)
         ep = (entree*) operand;
         checkvalue(ep);
         g->x = cgetg(2,t_VECSMALL);
-        gel(g->x,1) = ep->value;
+        gel(g->x,1) = (GEN) ep->value;
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
