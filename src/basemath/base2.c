@@ -1694,7 +1694,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   if (!ramif || is_uniformizer(u, q, S)) return u;
 
   /* P/p ramified, u in P^2, not in Q for all other Q|p */
-  Mv = eltmul_get_table(nf, unnf_minus_x(u));
+  Mv = eltimul_get_table(nf, unnf_minus_x(u));
   l = lg(P);
   for (i=1; i<l; i++)
   {
@@ -1746,7 +1746,7 @@ static GEN
 anti_uniformizer(GEN nf, GEN p, GEN u)
 {
   pari_sp av = avma;
-  GEN mat = eltmul_get_table(nf, u);
+  GEN mat = eltimul_get_table(nf, u);
   return gerepileupto(av, FpM_deplin(mat,p));
 }
 
@@ -1903,7 +1903,7 @@ _primedec(GEN nf, GEN p)
     if (!beta) errprime(p);
     beta = FpC_red(poltobasis(nf,beta), p);
 
-    mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
+    mulbeta = FpM_red(eltimul_get_table(nf, beta), p);
     p1 = shallowconcat(mulbeta, Ip);
     /* Fp-base of ideal (Ip, beta) in ZK/p */
     gel(h,1) = FpM_image(p1, p);
@@ -1933,7 +1933,7 @@ _primedec(GEN nf, GEN p)
       long n;
 
       a = FpM_FpC_mul(M2,v, p);
-      mula = FpM_red(eltmul_get_table(nf, a), p);
+      mula = FpM_red(eltimul_get_table(nf, a), p);
       mul2 = FpM_mul(Mi2, FpM_mul(mula,M2, p), p);
       R = FpX_roots(pol_min(mul2,p), p); /* totally split mod p */
 
@@ -2011,7 +2011,7 @@ anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), z;
   z = FpC_red(special_anti_uniformizer(nf, pr), p);
-  z = hnfmodid(eltmul_get_table(nf, z), p);
+  z = hnfmodid(eltimul_get_table(nf, z), p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
 }

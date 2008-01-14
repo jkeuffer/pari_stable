@@ -1224,7 +1224,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   dA = dA? diviiexact(absdK, dA): absdK;
   A = hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
-  gel(MDI,2) = eltmul_get_table(nf, gel(MDI,2));
+  gel(MDI,2) = eltimul_get_table(nf, gel(MDI,2));
   gel(mat,7) = MDI;
   if (is_pm1(T->index))
     D = idealhermite_aux(nf, ZX_deriv(x));

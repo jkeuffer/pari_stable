@@ -504,7 +504,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     for (m = 1; m <= k; m++)
     {
       GEN t = gel(LP,m);
-      gel(t,5) = eltmul_get_table(nf, gel(t,5));
+      gel(t,5) = eltimul_get_table(nf, gel(t,5));
     }
     if (f == l)
       setisclone(LP); /* flag it: all prime divisors in FB */

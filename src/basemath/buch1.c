@@ -578,7 +578,7 @@ getallrootsof1(GEN bnf)
 		  scalarcol_shallow(gen_1, N));
   }
   tu = poltobasis(nf, gmael3(bnf,8,4,2));
-  T = eltmul_get_table(nf, tu);
+  T = eltimul_get_table(nf, tu);
   u = cgetg(n+1, t_VEC); gel(u,1) = tu;
   for (i=2; i <= n; i++) gel(u,i) = gmul(T, gel(u,i-1));
   return u;

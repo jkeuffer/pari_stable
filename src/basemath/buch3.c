@@ -247,7 +247,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     pr = gel(listpr,i);
     gel(vecpi,i)    = NULL; /* to be computed if needed */
     gel(vecpinvpi,i) = NULL; /* to be computed if needed */
-    gel(vectau,i) = eltmul_get_table(nf, gel(pr,5));
+    gel(vectau,i) = eltimul_get_table(nf, gel(pr,5));
   }
 
   l = lg(basecl);

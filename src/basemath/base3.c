@@ -560,10 +560,9 @@ eltimul_get_table(GEN nf, GEN x)
 long
 int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 {
-  long i,k,w, N = degpol(nf[1]);
-  GEN r,a,y,mul;
+  long i, k, w, N = degpol(nf[1]);
+  GEN r, a, y, mul = eltimul_get_table(nf, b);
 
-  mul = (typ(b) == t_MAT)? b: eltmul_get_table(nf, b);
   y = cgetg(N+1, t_COL); /* will hold the new x */
   x = shallowcopy(x);
   for(w=0;; w++)
@@ -1311,7 +1310,7 @@ static GEN
 makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN v, GEN gen)
 {
   long i, lx = lg(gen);
-  GEN y = cgetg(lx,t_VEC), mv = eltmul_get_table(nf, v);
+  GEN y = cgetg(lx,t_VEC), mv = eltimul_get_table(nf, v);
   for (i=1; i<lx; i++) gel(y,i) = makeprimetoideal(UV,u,mv, gel(gen,i));
   return y;
 }
@@ -1350,7 +1349,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   {
     GEN uv = idealaddtoone(nf,pre, idealdivpowprime(nf,x,pr,ep));
     u = gel(uv,1);
-    v = gel(uv,2); v = eltmul_get_table(nf, v);
+    v = gel(uv,2); v = eltimul_get_table(nf, v);
     g0 = makeprimetoideal(x,u,v,g);
   }
 
@@ -1958,7 +1957,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
     u = gel(uv,1);
     v = gel(uv,2);
     gen = shallowconcat(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
-		   makeprimetoidealvec(nf,x,v,u, gel(G2,3)));
+		        makeprimetoidealvec(nf,x,v,u, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, gel(f1,2));

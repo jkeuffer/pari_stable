@@ -81,7 +81,7 @@ idealtyp(GEN *ideal, GEN *arch)
 static GEN
 prime_to_ideal_aux(GEN nf, GEN vp)
 {
-  GEN m = eltmul_get_table(nf, gel(vp,2));
+  GEN m = eltimul_get_table(nf, gel(vp,2));
   return hnfmodid(m, gel(vp,1));
 }
 
@@ -128,7 +128,7 @@ idealhermite_aux(GEN nf, GEN x)
     x = algtobasis_i(nf, x);
     if (RgV_isscalar(x)) return scalarmat(Q_abs(gel(x,1)), lg(x)-1);
     x = Q_primitive_part(x, &cx);
-    x = eltmul_get_table(nf, x);
+    x = eltimul_get_table(nf, x);
   } else {
     long N = degpol(nf[1]), nx = lg(x)-1;
     if (lg(x[1]) != N+1) pari_err(typeer,"idealhermite");
@@ -456,7 +456,7 @@ get_random_a(GEN nf, GEN x, GEN xZ)
   {
     GEN t, y;
     av1 = avma;
-    y = eltmul_get_table(nf, gel(x,i));
+    y = eltimul_get_table(nf, gel(x,i));
     t = FpM_red(y, xZ);
     if (gcmp0(t)) { avma = av1; continue; }
     if (ok_elt(x,xZ, t)) return gel(x,i);
@@ -1302,7 +1302,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   long i, l = lg(g);
   GEN prkZ,cx,x,u, p = gel(pr,1), b = gel(pr,5);
   GEN vden = gen_0;
-  GEN mul = eltmul_get_table(nf, b);
+  GEN mul = eltimul_get_table(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prkZ = gcoeff(prk, 1,1);
@@ -1751,7 +1751,7 @@ idealpow(GEN nf, GEN x, GEN n)
 	x = Q_primitive_part(x, &cx);
 	a=ideal_two_elt(nf,x); alpha=gel(a,2); a=gel(a,1);
 	alpha = element_pow(nf,alpha,n1);
-	m = eltmul_get_table(nf, alpha);
+	m = eltimul_get_table(nf, alpha);
 	x = hnfmodid(m, powgi(a,n1));
 	if (s<0) x = hnfideal_inv(nf,x);
 	if (cx) x = gmul(x, powgi(cx,n));
