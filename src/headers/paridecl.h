@@ -1923,6 +1923,7 @@ GEN     ZX_neg(GEN x);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_sub(GEN x, GEN y);
+GEN     ZXV_Z_mul(GEN y, GEN x);
 long    brent_kung_optpow(long d, long n);
 GEN     ffinit(GEN p, long n, long v);
 GEN     from_Kronecker(GEN z, GEN pol);

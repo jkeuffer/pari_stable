@@ -77,11 +77,9 @@ ZX_sub(GEN x,GEN y)
 GEN
 ZX_neg(GEN x)
 {
-  long i,d=lg(x);
-  GEN y;
-  y=cgetg(d,t_POL); y[1]=x[1];
-  for(i=2;i<d;i++)
-    gel(y,i) = negi(gel(x,i));
+  long i, l = lg(x);
+  GEN y = cgetg(l,t_POL);
+  y[1] = x[1]; for(i=2; i<l; i++) gel(y,i) = negi(gel(x,i));
   return y;
 }
 
@@ -92,12 +90,9 @@ ZX_Z_add(GEN y, GEN x)
   long lz, i;
   if (!signe(y))
     return scalarpol(x,varn(y));
-  lz=lg(y);
-  z=cgetg(lz,t_POL);
-  z[1]=y[1];
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = addii(gel(y,2),x);
-  for(i=3;i<lz;i++)
-    gel(z,i) = icopy(gel(y,i));
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
   if (lz==3) z = ZX_renormalize(z,lz);
   return z;
 }
@@ -108,13 +103,19 @@ GEN
 ZX_Z_mul(GEN y,GEN x)
 {
   GEN z;
-  long i;
-  if (!signe(x))
-    return zeropol(varn(y));
-  z=cgetg(lg(y),t_POL);
-  z[1]=y[1];
-  for(i=2;i<lg(y);i++)
-    gel(z,i) = mulii(gel(y,i),x);
+  long i, l;
+  if (!signe(x)) return zeropol(varn(y));
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = mulii(gel(y,i),x);
+  return z;
+}
+
+GEN
+ZXV_Z_mul(GEN y, GEN x)
+{
+  long i, l = lg(y);
+  GEN z = cgetg_copy(l, y);
+  for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
   return z;
 }
 

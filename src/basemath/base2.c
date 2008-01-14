@@ -113,8 +113,8 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
 	gcoeff(M,j,j) = mulii(gcoeff(a,j,j),gcoeff(b,j,j));
       }
       /* could reduce mod M(j,j) but not worth it: usually close to da*db */
-      for (  ; j<=n;     j++) gel(M,j) = gmul(db, gel(a,j));
-      for (  ; j<=2*n-k; j++) gel(M,j) = gmul(da, gel(b,j+k-n));
+      for (  ; j<=n;     j++) gel(M,j) = ZV_Z_mul(gel(a,j), db);
+      for (  ; j<=2*n-k; j++) gel(M,j) = ZV_Z_mul(gel(b,j+k-n), da);
       da = mulii(da,db);
       a = hnfmodid(M, da);
     }
@@ -678,7 +678,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   long dk;
 
   h = FpX_div(f,g,p);
-  k = gdivexact(gadd(f, gneg_i(gmul(g,h))), p);
+  k = gdivexact(ZX_sub(f, ZX_mul(g,h)), p);
   k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
   dk = degpol(k);
@@ -897,7 +897,7 @@ Decomp(decomp_t *S, long flag)
   { /* E <-- E^2(3-2E) mod p^2k, with E = e/de */
     GEN D;
     pk = sqri(pk); k <<= 1;
-    e = gmul(gsqr(e), gsub(mului(3,de), gmul2n(e,1)));
+    e = ZX_mul(ZX_sqr(e), gsub(mului(3,de), gmul2n(e,1)));
     de= mulii(de, sqri(de));
     D = mulii(pk, de);
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
@@ -928,20 +928,19 @@ Decomp(decomp_t *S, long flag)
     ib2 = get_partial_order_as_pols(p,f2, &d2); n2 = lg(ib2)-1; n = n1+n2;
     i = cmpii(d1, d2);
     if (i < 0) {
-      ib1 = gmul(ib1, diviiexact(d2, d1));
+      ib1 = ZXV_Z_mul(ib1, diviiexact(d2, d1));
       d1 = d2;
     }
-    else if (i > 0) {
-      ib2 = gmul(ib2, diviiexact(d1, d2));
-    }
+    else if (i > 0)
+      ib2 = ZXV_Z_mul(ib2, diviiexact(d1, d2));
     D = mulii(d1, D);
     fred = centermod(S->f, D);
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      gel(res,i) = FpX_center(FpX_rem(gmul(gel(ib1,i),e), fred, D), D);
+      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib1,i),e), fred, D), D);
     e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
-      gel(res,i) = FpX_center(FpX_rem(gmul(gel(ib2,i),e), fred, D), D);
+      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D);
     res = RgXV_to_RgM(res, n);
     return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
   }
@@ -980,7 +979,7 @@ redelt_i(GEN a, GEN N, GEN p, GEN *pda)
     }
     else
       *pda = NULL;
-    if (!is_pm1(z)) a = gmul(a, Fp_inv(z, N));
+    if (!is_pm1(z)) a = ZX_Z_mul(a, Fp_inv(z, N));
   }
   return centermod(a, N);
 }
@@ -1240,7 +1239,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
 
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc): S->phi;
-    PHI = gadd(PHI, gmul(mului(k, S->p), X));
+    PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
     S->chi = mycaract(S, S->f, PHI, gmax(S->psf, S->psc), pdf);
   }
   psc = mulii(sqri(prc), S->p);
@@ -1321,7 +1320,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
     }
     if (S->Dinvnu) Dg = mulii(Dg, powiu(S->Dinvnu, er));
     q = mulii(S->p, Dg);
-    g = gmul(g, FpXQ_pow(S->invnu, stoi(er), S->chi, q));
+    g = ZX_mul(g, FpXQ_pow(S->invnu, stoi(er), S->chi, q));
     g = FpX_rem(g, S->chi, q);
     update_den(&g, &Dg, NULL);
     g = centermod(g, mulii(S->p, Dg));
@@ -1686,7 +1685,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
 
   u = FpM_invimage(shallowconcat(P, V), col_ei(N,1), p);
   setlg(u, lg(P));
-  u = centermod(gmul(P, u), p);
+  u = centermod(ZM_ZC_mul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
   if (signe(u[1]) <= 0) /* make sure u[1] in ]-p,p] */
     gel(u,1) = addii(gel(u,1), p); /* try u + p */
@@ -1699,7 +1698,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   l = lg(P);
   for (i=1; i<l; i++)
   {
-    x = centermod(gadd(u, gmul(Mv, gel(P,i))), p);
+    x = centermod(ZV_add(u, ZM_ZC_mul(Mv, gel(P,i))), p);
     if (is_uniformizer(x, q, S)) return x;
   }
   errprime(p);
@@ -1881,7 +1880,7 @@ _primedec(GEN nf, GEN p)
 
   g = FpXV_prod(F, p);
   h = FpX_div(T,g,p);
-  f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
+  f = FpX_red(gdivexact(ZX_sub(ZX_mul(g,h), T), p), p);
 
   N = degpol(T);
   L = cgetg(N+1,t_VEC); iL = 1;
@@ -2892,17 +2891,19 @@ nfidealdet1(GEN nf, GEN a, GEN b)
   GEN x,p1,res,u,v,da,db;
 
   a = idealinv(nf,a);
-  da = denom(a); if (!gcmp1(da)) a = gmul(da,a);
-  db = denom(b); if (!gcmp1(db)) b = gmul(db,b);
+  a = Q_remove_denom(a, &da);
+  b = Q_remove_denom(b, &db);
   x = idealcoprime(nf,a,b);
   p1 = idealaddtoone(nf, idealmul(nf,x,a), b);
   u = gel(p1,1);
   v = gel(p1,2);
+  if (da) x = gmul(x,da);
+  if (db) v = gdiv(v,db);
 
   res = cgetg(5,t_VEC);
-  gel(res,1) = gmul(x,da);
-  gel(res,2) = gdiv(v,db);
-  gel(res,3) = negi(db);
+  gel(res,1) = x;
+  gel(res,2) = v;
+  gel(res,3) = db ? negi(db): gen_m1;
   gel(res,4) = element_div(nf, u, gel(res,1));
   return gerepilecopy(av,res);
 }
