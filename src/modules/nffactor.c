@@ -140,9 +140,11 @@ get_den(GEN *nf, GEN T)
   GEN den = gen_1;
   if (!*nf)      
   {
-    GEN fa, P, q;
+    GEN fa, P, q, D;
     *nf = initalg_i(T, nf_PARTIALFACT, DEFAULTPREC);
-    fa = smallfact(gel(*nf,3));
+    D = gel(*nf, 3);
+    if (is_pm1(D)) return gen_1;
+    fa = smallfact(D);
     P = gel(fa,1); q = gel(P, lg(P)-1);
     if (!BSW_psp(q)) den = q; /* *nf[3] may be incorrect */
   }
