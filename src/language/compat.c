@@ -187,7 +187,7 @@ entree oldfonctions[]={
 {"arg",1,(void*)garg,3,"Gp","arg(x)=argument of x,such that -pi<arg(x)<=pi"},
 {"asin",1,(void*)gasin,3,"Gp","asin(x)=inverse sine of x"},
 {"asinh",1,(void*)gash,3,"Gp","asinh(x)=inverse hyperbolic sine of x"},
-{"assmat",1,(void*)assmat,8,"G","assmat(x)=associated matrix to polynomial x"},
+{"assmat",1,(void*)matcompanion,8,"G","matcompanion(x)=associated matrix to polynomial x"},
 {"atan",1,(void*)gatan,3,"Gp","atan(x)=inverse tangent of x"},
 {"atanh",1,(void*)gath,3,"Gp","atanh(x)=inverse hyperbolic tangent of x"},
 {"basis",13,(void*)base,6,"Gf","basis(x)=integral basis of the field Q[a], where a is a root of the polynomial x, using the round 4 algorithm"},

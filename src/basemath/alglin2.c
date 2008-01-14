@@ -713,35 +713,25 @@ conjvec(GEN x,long prec)
 /*                            TRACES                               */
 /*                                                                 */
 /*******************************************************************/
-
 GEN
-assmat(GEN x)
+matcompanion(GEN x)
 {
-  long lx,i,j;
-  GEN y,p1,p2;
+  long n = degpol(x), j;
+  GEN y, c;
 
-  if (typ(x)!=t_POL) pari_err(notpoler,"assmat");
-  if (gcmp0(x)) pari_err(zeropoler,"assmat");
+  if (typ(x)!=t_POL) pari_err(notpoler,"matcompanion");
+  if (n == 0) return cgetg(1, t_MAT);
+  if (gcmp0(x)) pari_err(zeropoler,"matcompanion");
 
-  lx=lg(x)-2; y=cgetg(lx,t_MAT);
-  if (lx == 1) return y;
-  for (i=1; i<lx-1; i++)
-  {
-    p1=cgetg(lx,t_COL); gel(y,i) = p1;
-    for (j=1; j<lx; j++) gel(p1,j) = (j==(i+1))? gen_1: gen_0;
-  }
-  p1=cgetg(lx,t_COL); gel(y,i) = p1;
-  if (gcmp1(gel(x,lx+1)))
-    for (j=1; j<lx; j++)
-      gel(p1,j) = gneg(gel(x,j+1));
+  y = cgetg(n+1,t_MAT);
+  for (j=1; j < n; j++) gel(y,j) = col_ei(n, j+1);
+  c = cgetg(n+1,t_COL); gel(y,n) = c;
+  if (gcmp1(gel(x, n+2)))
+    for (j=1; j<=n; j++) gel(c,j) = gneg(gel(x,j+1));
   else
   {
-    pari_sp av = avma;
-    p2 = gclone(gneg(gel(x,lx+1)));
-    avma = av;
-    for (j=1; j<lx; j++)
-      gel(p1,j) = gdiv(gel(x,j+1),p2);
-    gunclone(p2);
+    GEN d = gneg(gel(x,n+2)); /* left on stack */
+    for (j=1; j<=n; j++) gel(c,j) = gdiv(gel(x,j+1), d);
   }
   return y;
 }
@@ -1344,7 +1334,7 @@ ZV_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_COL);
-  for (i=1; i<lx; i++) 
+  for (i=1; i<lx; i++)
   {
     GEN c = gel(x,i);
     gel(y,i) = lgefint(c) == 2? gen_0: icopy(c);
@@ -1384,7 +1374,7 @@ negi_ip(GEN *px)
 {
   if      (*px == gen_1)  *px = gen_m1;
   else if (*px == gen_m1) *px = gen_1;
-  else if (*px == gen_2)  *px = utoineg(2); 
+  else if (*px == gen_2)  *px = utoineg(2);
   else togglesign(*px);
 }
 void

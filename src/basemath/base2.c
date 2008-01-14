@@ -44,19 +44,19 @@ allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
 /*                            ROUND 2                              */
 /*                                                                 */
 /*******************************************************************/
-/* companion matrix of unitary polynomial x */
+/* transpose of companion matrix of unitary polynomial x, cf matcompanion */
 static GEN
-companion(GEN x) /* cf assmat */
+companion(GEN x)
 {
-  long i,j,l;
-  GEN y;
+  long j, l = degpol(x);
+  GEN c, y = cgetg(l+1,t_MAT);
 
-  l=degpol(x)+1; y=cgetg(l,t_MAT);
-  for (j=1; j<l; j++)
+  c = zerocol(l); gel(c,l) = gneg(gel(x,2));
+  gel(y,1) = c;
+  for (j=2; j<=l; j++)
   {
-    gel(y,j) = cgetg(l,t_COL);
-    for (i=1; i<l-1; i++) gcoeff(y,i,j)=(i+1==j)? gen_1: gen_0;
-    gcoeff(y,i,j) = gneg(gel(x,j+1));
+    c = col_ei(l, j-1); gel(c,l) = gneg(gel(x,j+1));
+    gel(y,j) = c;
   }
   return y;
 }

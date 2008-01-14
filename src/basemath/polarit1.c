@@ -3186,7 +3186,7 @@ zrhqr(GEN a, long prec)
   long i, prec2, n = degpol(a), ex = -bit_accuracy(prec);
   GEN aa, b, rt, rr, x, dx, y, newval, oldval;
 
-  rt = hqr(balanc(assmat(a)));
+  rt = hqr(balanc(matcompanion(a)));
   prec2 = 2*prec; /* polishing the roots */
   aa = gprec_w(a, prec2);
   b = derivpol(aa); rr = cgetg(n+1,t_COL);

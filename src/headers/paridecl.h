@@ -310,7 +310,7 @@ GEN     ZV_sub(GEN x, GEN y);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
 GEN     adj(GEN x);
-GEN     assmat(GEN x);
+GEN     matcompanion(GEN x);
 GEN     caract(GEN x, long v);
 GEN     caract2(GEN p, GEN x, long v);
 GEN     caradj(GEN x, long v, GEN *py);

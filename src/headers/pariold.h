@@ -167,7 +167,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define larg    (long)garg
 #define lash    (long)gash
 #define lasin   (long)gasin
-#define lassmat (long)assmat
+#define lassmat (long)matcompanion
 #define latan   (long)gatan
 #define lath    (long)gath
 #define lbezout (long)bezout
