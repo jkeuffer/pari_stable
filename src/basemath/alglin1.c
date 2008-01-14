@@ -2703,9 +2703,13 @@ ZC_Z_mul(GEN x, GEN y)
 static GEN
 ZMrow_ZC_mul(GEN x, GEN y, long lx, long i)
 {
-  GEN c = mulii(gcoeff(x,i,1), gel(y,1));
+  GEN c = mulii(gcoeff(x,i,1), gel(y,1)), ZERO = gen_0;
   long k;
-  for (k = 2; k < lx; k++) c = addii(c, mulii(gcoeff(x,i,k), gel(y,k)));
+  for (k = 2; k < lx; k++)
+  {
+    GEN t = mulii(gcoeff(x,i,k), gel(y,k));
+    if (t != ZERO) c = addii(c, t);
+  }
   return c;
 }
 static ulong
