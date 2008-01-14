@@ -298,6 +298,7 @@ GEN     ZM_copy(GEN x);
 int     ZM_ishnf(GEN x);
 GEN     ZM_add(GEN x, GEN y);
 GEN     ZM_mul(GEN x, GEN y);
+GEN     ZM_pow(GEN x, GEN n);
 GEN     ZM_sub(GEN x, GEN y);
 GEN     ZM_to_zm(GEN z);
 GEN     ZM_ZC_mul(GEN x, GEN y);

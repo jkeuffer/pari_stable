@@ -1959,6 +1959,9 @@ have compatible dimensions).
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions).
 
+\fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
+is a square \kbd{ZM} and $\kbd{n}\geq 0$.
+
 \fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
 is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
 return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the

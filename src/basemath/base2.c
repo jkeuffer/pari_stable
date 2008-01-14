@@ -61,60 +61,18 @@ companion(GEN x) /* cf assmat */
   return y;
 }
 
-/* assume x, y are square integer matrices of same dim. Multiply them */
 static GEN
-mulmati(GEN x, GEN y)
-{
-  pari_sp av;
-  long n = lg(x),i,j,k;
-  GEN z = cgetg(n,t_MAT),p1,p2;
-
-  for (j=1; j<n; j++)
-  {
-    gel(z,j) = cgetg(n,t_COL);
-    for (i=1; i<n; i++)
-    {
-      p1=gen_0; av=avma;
-      for (k=1; k<n; k++)
-      {
-	p2=mulii(gcoeff(x,i,k),gcoeff(y,k,j));
-	if (p2 != gen_0) p1=addii(p1,p2);
-      }
-      gcoeff(z,i,j) = gerepileupto(av,p1);
-    }
-  }
-  return z;
-}
-
+_ZM_mul(void *data /*ignored*/, GEN x, GEN y)
+{ (void)data; return ZM_mul(x,y); }
 static GEN
-_mulmati(void *data /*ignored*/, GEN x, GEN y) {
-  (void)data; return mulmati(x,y);
-}
-static GEN
-_sqrmati(void *data /*ignored*/, GEN x) {
-  (void)data; return mulmati(x,x);
-}
-
-static GEN
-powmati(GEN x, GEN n)
+_ZM_sqr(void *data /*ignored*/, GEN x)
+{ (void)data; return ZM_mul(x,x); }
+GEN
+ZM_pow(GEN x, GEN n)
 {
   pari_sp av = avma;
-  GEN y = leftright_pow(x, n, NULL, &_sqrmati, &_mulmati);
-  return gerepileupto(av,y);
-}
-
-static GEN
-rtran(GEN v, GEN w, GEN q)
-{
-  pari_sp av,tetpil;
-  GEN p1;
-
-  if (signe(q))
-  {
-    av=avma; p1=gneg(gmul(q,w)); tetpil=avma;
-    return gerepile(av,tetpil,gadd(v,p1));
-  }
-  return v;
+  if (!signe(n)) return matid(lg(x)-1);
+  return gerepileupto(av, leftright_pow(x, n, NULL, &_ZM_sqr, &_ZM_mul));
 }
 
 /* return (v - qw) mod m (only compute entries k0,..,n)
@@ -299,7 +257,7 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
 	  }
 	  gcoeff(T,j,k) = centermodii(p1, ppdd, ppddo2);
 	}
-      p1 = mulmati(m, mulmati(T,b));
+      p1 = ZM_mul(m, ZM_mul(T,b));
       for (j=1; j<=n; j++)
 	for (k=1; k<=n; k++)
 	  gcoeff(p1,j,k) = centermodii(diviiexact(gcoeff(p1,j,k),dd),pp,ppo2);
@@ -327,7 +285,7 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
 	  for (i=1; i<=n; i++) gcoeff(T,i,j) = gel(v,i);
 	}
       }
-      t = powmati(T, hard_case_exponent);
+      t = ZM_pow(T, hard_case_exponent);
     }
     else
     {
@@ -349,6 +307,7 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
       t = T;
     }
 
+    setlg(T2, 2*n+1);
     if (pps)
     {
       long ps = p[2];
@@ -370,16 +329,17 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
 	}
       rowred(T2,pp);
     }
+    setlg(T2, n+1);
     jp=matinv(T2,p);
     if (pps)
     {
       for (k=1; k<=n; k++)
       {
 	pari_sp av1=avma;
-	t = mulmati(mulmati(jp,w[k]), T2);
+	t = ZM_mul(ZM_mul(jp,w[k]), T2);
 	for (h=i=1; i<=n; i++)
-	  for (j=1; j<=n; j++)
-	    { coeff(Tn,k,h) = itos(diviiexact(gcoeff(t,i,j), p)) % pps; h++; }
+	  for (j=1; j<=n; j++,h++)
+	    coeff(Tn,k,h) = itos(diviiexact(gcoeff(t,i,j), p)) % pps;
 	avma=av1;
       }
       avma = av0;
@@ -389,10 +349,10 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
     {
       for (k=1; k<=n; k++)
       {
-	t = mulmati(mulmati(jp,w[k]), T2);
+	t = ZM_mul(ZM_mul(jp,w[k]), T2);
 	for (h=i=1; i<=n; i++)
-	  for (j=1; j<=n; j++)
-	    { gcoeff(Tn,k,h) = diviiexact(gcoeff(t,i,j), p); h++; }
+	  for (j=1; j<=n; j++,h++)
+	    gcoeff(Tn,k,h) = diviiexact(gcoeff(t,i,j), p);
       }
       rowred(Tn,pp);
     }
@@ -400,7 +360,7 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
       index = mulii(index,gcoeff(Tn,i,i));
     if (gcmp1(index)) break;
 
-    m = mulmati(matinv(Tn,index), m);
+    m = ZM_mul(matinv(Tn,index), m);
     hh = delta = mulii(index,delta);
     for (i=1; i<=n; i++)
       for (j=1; j<=n; j++) hh = gcdii(gcoeff(m,i,j),hh);
@@ -448,7 +408,7 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
   n = degpol(f); h = lg(w1)-1;
   cf = cgetg(n+1,t_VEC);
   gel(cf,2) = companion(f);
-  for (i=3; i<=n; i++) gel(cf,i) = mulmati(gel(cf,2), gel(cf,i-1));
+  for (i=3; i<=n; i++) gel(cf,i) = ZM_mul(gel(cf,2), gel(cf,i-1));
 
   a=matid(n); da=gen_1;
   for (i=1; i<=h; i++)
@@ -466,12 +426,12 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
       for (s=r; s; s--)
 	while (signe(gcoeff(bt,s,r)))
 	{
-	  q=diviiround(gcoeff(at,s,s),gcoeff(bt,s,r));
-	  pro=rtran(gel(at,s),gel(bt,r),q);
+	  q = diviiround(gcoeff(at,s,s),gcoeff(bt,s,r));
+	  pro = ZV_lincomb(gen_1,negi(q), gel(at,s),gel(bt,r));
 	  for (t=s-1; t; t--)
 	  {
-	    q=diviiround(gcoeff(at,t,s),gcoeff(at,t,t));
-	    pro=rtran(pro,gel(at,t),q);
+	    q = diviiround(gcoeff(at,t,s),gcoeff(at,t,t));
+	    pro = ZV_lincomb(gen_1,negi(q), pro,gel(at,t));
 	  }
 	  at[s]=bt[r]; gel(bt,r) = pro;
 	}
@@ -481,8 +441,8 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
       {
 	while (signe(gcoeff(at,j,k)))
 	{
-	  q=diviiround(gcoeff(at,j,j),gcoeff(at,j,k));
-	  pro=rtran(gel(at,j),gel(at,k),q);
+	  q = diviiround(gcoeff(at,j,j),gcoeff(at,j,k));
+	  pro = ZV_lincomb(gen_1, negi(q), gel(at,j),gel(at,k));
 	  at[j]=at[k]; gel(at,k) = pro;
 	}
       }
@@ -490,8 +450,8 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
 	for (k=1; k<=j; k++) gcoeff(at,k,j) = negi(gcoeff(at,k,j));
       for (k=j+1; k<=n; k++)
       {
-	q=diviiround(gcoeff(at,j,k),gcoeff(at,j,j));
-	gel(at,k) = rtran(gel(at,k),gel(at,j),q);
+	q = diviiround(gcoeff(at,j,k),gcoeff(at,j,j));
+	gel(at,k) = ZV_lincomb(gen_1, negi(q), gel(at,k),gel(at,j));
       }
     }
     for (j=2; j<=n; j++)
