@@ -664,6 +664,8 @@ GEN     rnfdet0(GEN nf, GEN x, GEN y);
 /* base3.c */
 
 void    check_nfelt(GEN x, GEN *den);
+GEN     eltimul_get_table(GEN nf, GEN x);
+GEN     elementi_mulid(GEN nf, GEN x, long i);
 
 /* base4.c */
 

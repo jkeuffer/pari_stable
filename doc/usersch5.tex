@@ -1935,8 +1935,8 @@ avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
 sign of its integer components. Universal constants \kbd{gen\_1}, \kbd{gen\_m1}
 and \kbd{gen\_2} are handled specially and will not be corrupted.
 
-\fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC}~\kbd{x}
-(seen as a column vector) by the \typ{INT}~\kbd{y}.
+\fun{GEN}{ZV_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
+(which can be a column or row vector) by the \typ{INT}~\kbd{y}.
 
 \fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
@@ -1952,8 +1952,13 @@ compatible dimensions).
 \fun{GEN}{ZM_sub}{GEN x, GEN y} returns $\kbd{x} - \kbd{y}$ (assumed to have
 compatible dimensions).
 
+\fun{GEN}{ZM_neg}{GEN x} returns $-\kbd{x}$.
+
 \fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
 have compatible dimensions).
+
+\fun{GEN}{ZM_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
+by the \typ{INT}~\kbd{y}.
 
 \fun{GEN}{ZM_ZC_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible

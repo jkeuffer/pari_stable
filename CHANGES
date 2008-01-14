@@ -44,9 +44,9 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
     2- [libpari] public generic hashtables
     3- library function FpM_FpC_mul_FpX
     4- library function shallowextract
-    5- library functions ZC_Z_mul, ZC_ZV_mul, ZM_copy, ZM_add, ZM_mul, ZM_pow
+    5- library functions ZC_ZV_mul, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
        ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
-       ZXV_Z_mul
+       ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul
 BA  6- handle numerical derivation as an operation on closure.
 
   Removed

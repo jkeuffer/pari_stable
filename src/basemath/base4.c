@@ -527,10 +527,10 @@ mat_ideal_two_elt(GEN nf, GEN x)
       pi0 = idealapprfact_i(nf, idealfactor(nf,A0), 1);
       pi1 = get_random_a(nf, A1, a1);
       (void)bezout(a0, a1, &v0,&v1);
-      u0 = gmul(a0, v0);
-      u1 = gmul(a1, v1);
-      t = gmul(pi0, u1); gel(t,1) = gadd(gel(t,1), u0);
-      u = gmul(pi1, u0); gel(u,1) = gadd(gel(u,1), u1);
+      u0 = mulii(a0, v0);
+      u1 = mulii(a1, v1);
+      t = ZV_Z_mul(pi0, u1); gel(t,1) = addii(gel(t,1), u0);
+      u = ZV_Z_mul(pi1, u0); gel(u,1) = addii(gel(u,1), u1);
       a = element_muli(nf, centermod(u, xZ), centermod(t, xZ));
     }
   }
@@ -901,7 +901,7 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
   if (gcmp0(u)) u = gel(idealhermite_aux(nf,x),1);
   p2 = zarchstar(nf, idealmul(nf,x,y), archp);
   p2 = gel(p2,2); nba = 0;
-  p1 = gmul(gel(p2,3), zsigne(nf,u,archp));
+  p1 = ZM_ZC_mul(gel(p2,3), zsigne(nf,u,archp));
   for (i = 1; i < lg(p1); i++)
   {
     GEN t = gel(p1,i);
@@ -945,6 +945,7 @@ ideleaddone(GEN nf, GEN x, GEN y)
   return addone(ideleaddone_i,nf,x,y);
 }
 
+/* assume elements of list are integral ideals */
 GEN
 idealaddmultoone(GEN nf, GEN list)
 {
@@ -971,36 +972,28 @@ idealaddmultoone(GEN nf, GEN list)
     if (perm[i] == 1) break;
   U = gel(U,(l-2)*N + i); /* z U = 1 */
   for (i=1; i<l; i++)
-    gel(L,i) = gmul(gel(L,i), vecslice(U, (i-1)*N + 1, i*N));
+    gel(L,i) = ZM_ZC_mul(gel(L,i), vecslice(U, (i-1)*N + 1, i*N));
   return gerepilecopy(av, L);
 }
 
 /* multiplication */
 
 /* x integral ideal (without archimedean component) in HNF form
- * y = [a,alpha] corresponds to the ideal aZ_K+alpha Z_K (a is a
- * rational integer). Multiply them
- */
+ * y = [a,alpha] corresponds to the integral ideal aZ_K+alpha Z_K, a in Z,
+ * alpha a ZV or a ZM (multiplication table). Multiply them */
 static GEN
 idealmulspec(GEN nf, GEN x, GEN y)
 {
-  long i, N=lg(x)-1;
-  GEN m, mod, a = gel(y,1), alpha = gel(y,2);
+  long i, N = lg(x)-1;
+  GEN m, a = gel(y,1), alpha = gel(y,2);
 
-  if (isnfscalar(alpha))
-    return gmul(gcdii(a, gel(alpha,1)),x);
+  if (isnfscalar(alpha)) return ZM_Z_mul(x, gcdii(a, gel(alpha,1)));
+  if (typ(alpha) != t_MAT) alpha = eltimul_get_table(nf, alpha);
+  
   m = cgetg((N<<1)+1,t_MAT);
-  if (typ(alpha) == t_MAT)
-  {
-    for (i=1; i<=N; i++) gel(m,i) = gmul(alpha,gel(x,i));
-  }
-  else
-  {
-    for (i=1; i<=N; i++) gel(m,i) = element_muli(nf,alpha,gel(x,i));
-  }
-  mod = mulii(a, gcoeff(x,1,1));
-  for (i=1; i<=N; i++) gel(m,i+N) = gmul(a,gel(x,i));
-  return hnfmodid(m,mod);
+  for (i=1; i<=N; i++) gel(m,i) = ZM_ZC_mul(alpha,gel(x,i));
+  for (i=1; i<=N; i++) gel(m,i+N) = ZV_Z_mul(gel(x,i), a);
+  return hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
@@ -1178,7 +1171,7 @@ famat_pow(GEN f, GEN n)
   if (typ(f) != t_MAT) return to_famat_all(f,n);
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
-  gel(h,2) = gmul(gel(f,2),n);
+  gel(h,2) = ZV_Z_mul(gel(f,2),n);
   return h;
 }
 
@@ -1321,7 +1314,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     {
       long k = Z_pvalrem(cx, p, &u);
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
-	x = gmul(x, Fp_inv(u, prkZ));
+	x = ZV_Z_mul(x, Fp_inv(u, prkZ));
       if (k)
 	vden = addii(vden, mului(k, gel(e,i)));
     }
@@ -1497,7 +1490,7 @@ idealmul(GEN nf, GEN x, GEN y)
 	case id_PRIME:
 	{
 	  GEN mx = eltmul_get_table(nf, x);
-	  GEN mpi= eltmul_get_table(nf, gel(y,2));
+	  GEN mpi= eltimul_get_table(nf, gel(y,2));
 	  p1 = shallowconcat(gmul(mx,gel(y,1)), gmul(mx,mpi));
 	  p1 = idealmat_to_hnf(nf, p1);
 	  break;
@@ -1936,8 +1929,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   dx = mul_content(dx,dy);
   z = kerint(shallowconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
-  z = gmul(x,z);
-  z = hnfmodid(z, lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
+  z = hnfmodid(ZM_mul(x,z), lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
   if (dx) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
@@ -2186,7 +2178,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN listpr)
   fZ = gcoeff(f,1,1);
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
-  t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
+  t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = ZV_Z_mul(L,t);
   if (equalii(d, d2)) return L;
 
   d1 = diviiexact(d, d2);
@@ -2239,8 +2231,8 @@ unif_mod_fZ(GEN pr, GEN F)
     if (!gcmp1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
-    t = gmul(v, t); /* return u + vt */
-    gel(t,1) = addii(gel(t,1), u);
+    t = ZV_Z_mul(t, v);
+    gel(t,1) = addii(gel(t,1), u); /* return u + vt */
   }
   return t;
 }

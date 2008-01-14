@@ -2690,14 +2690,6 @@ FpC_Fp_mul(GEN x, GEN y, GEN p)
   for (i=1;i<l;i++) gel(z,i) = Fp_mul(gel(x,i),y,p);
   return z;
 }
-GEN
-ZC_Z_mul(GEN x, GEN y)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_COL);
-  for (i=1;i<l;i++) gel(z,i) = mulii(gel(x,i),y);
-  return z;
-}
 
 /* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
 static GEN

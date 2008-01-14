@@ -1350,22 +1350,36 @@ ZM_copy(GEN x)
   return y;
 }
 
-/* return c * X. Not memory clean if c = 1 */
+/* Return c * X */
 GEN
 ZV_Z_mul(GEN X, GEN c)
 {
-  long i,m = lg(X);
-  GEN A = new_chunk(m);
-  if (signe(c) && is_pm1(c))
+  long i, l;
+  GEN A;
+  if (!signe(c)) return typ(X) == t_VEC? zerovec(lg(X)-1): zerocol(lg(X)-1);
+  if (is_pm1(c)) return (signe(c) > 0)? ZV_copy(X): ZV_neg(X);
+  l = lg(X); A = cgetg_copy(l, X);
+  for (i=1; i<l; i++) gel(A,i) = mulii(c,gel(X,i));
+  return A;
+}
+/* Return y * X */
+GEN
+ZM_Z_mul(GEN X, GEN y)
+{
+  long i, j, h, l = lg(X);
+  GEN A;
+  if (l == 1) return cgetg(1, t_MAT);
+  h = lg(X[1]);
+  if (!signe(y)) return zeromat(h-1, l-1);
+  if (is_pm1(y)) return (signe(y) > 0)? ZM_copy(X): ZM_neg(X);
+  A = cgetg_copy(l, X);
+  for (j = 1; j < l; j++)
   {
-    if (signe(c) > 0)
-      { for (i=1; i<m; i++) A[i] = X[i]; }
-    else
-      { for (i=1; i<m; i++) gel(A,i) = negi(gel(X,i)); }
+    GEN a = cgetg(h, t_COL), x = gel(X, j);
+    for (i = 1; i < h; i++) gel(a,i) = mulii(y, gel(x,i));
+    gel(A,j) = a;
   }
-  else /* c = 0 should be exceedingly rare */
-    { for (i=1; i<m; i++) gel(A,i) = mulii(c,gel(X,i)); }
-  A[0] = X[0] & ~CLONEBIT; return A;
+  return A;
 }
 
 /* negate in place, except universal constants */
@@ -1404,6 +1418,14 @@ zv_neg(GEN M)
   GEN N = cgetg_copy(l, M);
   for (i=l-1; i; i--) N[i] = -M[i];
   return N;
+}
+GEN
+ZM_neg(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_MAT);
+  for (i=1; i<lx; i++) gel(y,i) = ZV_neg(gel(x,i));
+  return y;
 }
 
 /* X + v Y */
@@ -1508,8 +1530,7 @@ ZM_sub(GEN x, GEN y)
   return z;
 }
 
-/* X,Y columns; u,v scalars; everybody is integral. return A = u*X + v*Y
- * Not memory clean if (u,v) = (1,0) or (0,1) */
+/* X,Y compatible ZV; u,v in Z. Returns A = u*X + v*Y */
 GEN
 ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {

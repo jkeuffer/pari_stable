@@ -205,7 +205,12 @@ element_muli(GEN nf, GEN x, GEN y)
   long i, j, k, N, tx = typ(x), ty = typ(y);
   GEN s, v, tab = get_tab(nf, &N);
 
-  if (tx == t_INT) { return ty == t_INT? scalarcol(mulii(x,y), N): gmul(x, y); }
+  if (tx == t_INT)
+  {
+    if (ty == t_INT) return scalarcol(mulii(x,y), N);
+    if (ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
+    return ZV_Z_mul(x, y);
+  }
   if (tx != t_COL || lg(x) != N+1
    || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
   v = cgetg(N+1,t_COL);
@@ -478,6 +483,30 @@ element_mulid(GEN nf, GEN x, long i)
   }
   return v;
 }
+/* as element_mulid, assume x a ZV of correct length */
+GEN
+elementi_mulid(GEN nf, GEN x, long i)
+{
+  long j, k, N;
+  GEN v, tab;
+
+  if (i==1) return ZV_copy(x);
+  tab = get_tab(nf, &N);
+  tab += (i-1)*N;
+  v = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++)
+  {
+    pari_sp av = avma;
+    GEN s = gen_0;
+    for (j=1; j<=N; j++)
+    {
+      GEN c = gcoeff(tab,k,j);
+      if (signe(c)) s = addii(s, _mulii(c, gel(x,j)));
+    }
+    gel(v,k) = gerepileuptoint(av, s);
+  }
+  return v;
+}
 
 /* table of multiplication by wi in ZK = Z[w1,..., wN] */
 GEN
@@ -501,9 +530,25 @@ eltmul_get_table(GEN nf, GEN x)
     long i, N = degpol(nf[1]);
     GEN mul = cgetg(N+1,t_MAT);
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return scalarmat(gel(x,1), N);
+    if (RgV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
     gel(mul,1) = x; /* assume w_1 = 1 */
     for (i=2; i<=N; i++) gel(mul,i) = element_mulid(nf,x,i);
+    return mul;
+  }
+}
+/* as eltmul_get_table, x integral */
+GEN
+eltimul_get_table(GEN nf, GEN x)
+{
+  if (typ(x) == t_MAT) return x;
+  else
+  {
+    long i, N = degpol(nf[1]);
+    GEN mul = cgetg(N+1,t_MAT);
+    x = algtobasis_i(nf, x);
+    if (RgV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
+    gel(mul,1) = x; /* assume w_1 = 1 */
+    for (i=2; i<=N; i++) gel(mul,i) = elementi_mulid(nf,x,i);
     return mul;
   }
 }
@@ -981,7 +1026,7 @@ lllreducemodmatrix(GEN x,GEN y)
   return reducemodinvertible(x, lllint_ip(y,4));
 }
 
-/* Reduce column x modulo y in HNF */
+/* Reduce ZC x modulo ZM y in HNF */
 GEN
 colreducemodHNF(GEN x, GEN y, GEN *Q)
 {
@@ -994,7 +1039,7 @@ colreducemodHNF(GEN x, GEN y, GEN *Q)
   {
     q = negi(diviiround(gel(x,i), gcoeff(y,i,i)));
     if (Q) gel(*Q, i) = q;
-    if (signe(q)) x = gadd(x, gmul(q, gel(y,i)));
+    if (signe(q)) x = ZV_lincomb(gen_1, q, x, gel(y,i));
   }
   return x;
 }
@@ -1054,8 +1099,8 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
 
   archp = arch_to_perm(gel(idele,2));
   s = zsigne(nf, y, archp);
-  if (x) s = gadd(s, zsigne(nf, x, archp));
-  s = gmul(gel(sarch,3), s);
+  if (x) s = ZV_add(s, zsigne(nf, x, archp));
+  s = ZM_ZC_mul(gel(sarch,3), s);
   for (i=1; i<nba; i++)
     if (mpodd(gel(s,i))) y = element_mul(nf,y,gel(gen,i));
   return y;
@@ -1173,16 +1218,16 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
 static GEN
 zidealij(GEN x, GEN y, GEN *U)
 {
-  GEN G, p1, cyc;
+  GEN G, cyc;
   long j, N;
 
   /* x^(-1) y = relations between the 1 + x_i (HNF) */
   cyc = smithrel(hnf_gauss(x, y), U, &G);
-  N = lg(cyc); G = gmul(x,G); settyp(G, t_VEC); /* new generators */
+  N = lg(cyc); G = ZM_mul(x,G); settyp(G, t_VEC); /* new generators */
   for (j=1; j<N; j++)
   {
-    p1 = gel(G,j);
-    gel(p1,1) = addsi(1, gel(p1,1)); /* 1 + g_j */
+    GEN c = gel(G,j);
+    gel(c,1) = addsi(1, gel(c,1)); /* 1 + g_j */
   }
   if (U) *U = gmul(*U, ginv(x));
   return mkvec2(cyc, G);
@@ -1259,7 +1304,7 @@ detcyc(GEN cyc, long *L)
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
 {
-  return nfreducemodideal_i(gadd(u, gmul(mv,x)), UV);
+  return nfreducemodideal_i(ZV_add(u, ZM_ZC_mul(mv,x)), UV);
 }
 
 static GEN
@@ -1856,7 +1901,7 @@ zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
     y = zlog(nf, x, sgn, &S);
   }
 END:
-  y = gmul(gel(bid,5), y);
+  y = ZM_ZC_mul(gel(bid,5), y);
   return gerepileupto(av, vecmodii(y, cyc));
 }
 GEN
@@ -1900,8 +1945,8 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 		 &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
-    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecslice(U, 1, l1-1),   U1);
-    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecslice(U, l1, nbgen), U2);
+    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): ZM_mul(vecslice(U, 1, l1-1),   U1);
+    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): ZM_mul(vecslice(U, l1, nbgen), U2);
     U = shallowconcat(U1, U2);
   }
   else
@@ -1924,58 +1969,11 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   return gerepilecopy(av,y);
 }
 
-/* bid1 = for module m1 (without arch. part), arch = archimedean part.
- * Output: bid [[m1,arch],[h,[cyc],[gen]],idealfact,[liste],U] for m1.arch */
-static GEN
-join_bid_arch(GEN nf, GEN bid1, GEN arch)
-{
-  pari_sp av = avma;
-  long i, lx1;
-  GEN f1, G1, fa1, lists1, U;
-  GEN lists, cyc, y, u1 = NULL, x, sarch, gen;
-
-  checkbid(bid1);
-  f1 = gel(bid1,1); G1 = gel(bid1,2); fa1 = gel(bid1,3);
-  x = gel(f1,1);
-  sarch = zarchstar(nf, x, arch);
-  lists1 = gel(bid1,4); lx1 = lg(lists1);
-  lists = cgetg(lx1,t_VEC);
-  for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
-  gel(lists,i) = sarch;
-
-  gen = (lg(G1)>3)? gen_1: NULL;
-  cyc = diagonal_i(shallowconcat(gel(G1,2), gel(sarch,1)));
-  cyc = smithrel(cyc, &U, gen? &u1: NULL);
-  if (gen) gen = shallowconcat(gel(G1,3), gel(sarch,2));
-  y = cgetg(6,t_VEC);
-  gel(y,1) = mkvec2(x, arch);
-  gel(y,3) = fa1;
-  gel(y,4) = lists;
-  gel(y,5) = U;
-  add_clgp(nf, u1, cyc, gen, y);
-  return gerepilecopy(av,y);
-}
-
-#if 0 /* could be useful somewhere else */
-/* z <- ( z | f(v[i])_{i=1..#v} )*/
-void
-concatmap(GEN *pz, GEN v, GEN (*f)(void*,GEN), void *data)
-{
-  long i, nz, lv = lg(v);
-  GEN z, Z, Zt;
-  if (lv == 1) return;
-  z = *pz; nz = lg(z)-1;
-  Z = cgetg(lv + nz, typ(z));
-  for (i = 1; i <=nz; i++) Z[i] = z[i];
-  Zt = Z + nz;
-  for (i = 1; i < lv; i++) gel(Zt,i) = f(data, gel(v,i));
-  *pz = Z;
-}
-#endif
-
 typedef struct _ideal_data {
   GEN nf, emb, L, pr, prL, arch, sgnU;
 } ideal_data;
+
+/* z <- ( z | f(v[i])_{i=1..#v} ) */
 static void
 concat_join(GEN *pz, GEN v, GEN (*f)(ideal_data*,GEN), ideal_data *data)
 {
@@ -2030,8 +2028,8 @@ zlog_unitsarch(GEN sgnU, GEN bid)
 {
   GEN U, liste = gel(bid,4), arch = gmael(bid,1,2);
   long i;
-  U = gmul(gmael(liste, lg(liste)-1, 3),
-	   rowpermute(sgnU, arch_to_perm(arch)));
+  U = ZM_ZC_mul(gmael(liste, lg(liste)-1, 3),
+	        rowpermute(sgnU, arch_to_perm(arch)));
   for (i = 1; i < lg(U); i++) (void)F2V_red_ip(gel(U,i));
   return U;
 }
@@ -2113,7 +2111,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
     long l = lg(s);
     for (j = 1; j < l; j++) {
       GEN v = gel(s,j), bid = gel(v,1);
-      gel(v,2) = gmul(gel(bid,5), gel(v,2));
+      gel(v,2) = ZM_mul(gel(bid,5), gel(v,2));
     }
   }
   return gerepilecopy(av0, z);
@@ -2134,6 +2132,37 @@ ideallistunitgen(GEN nf,long bound) { return Ideallist(nf,bound,3); }
 GEN
 ideallist(GEN bnf,long bound) { return Ideallist(bnf,bound,4); }
 
+/* bid1 = for module m1 (without arch. part), arch = archimedean part.
+ * Output: bid [[m1,arch],[h,[cyc],[gen]],idealfact,[liste],U] for m1.arch */
+static GEN
+join_bid_arch(GEN nf, GEN bid1, GEN arch)
+{
+  pari_sp av = avma;
+  long i, lx1;
+  GEN f1, G1, fa1, lists1, U;
+  GEN lists, cyc, y, u1 = NULL, x, sarch, gen;
+
+  checkbid(bid1);
+  f1 = gel(bid1,1); G1 = gel(bid1,2); fa1 = gel(bid1,3);
+  x = gel(f1,1);
+  sarch = zarchstar(nf, x, arch);
+  lists1 = gel(bid1,4); lx1 = lg(lists1);
+  lists = cgetg(lx1,t_VEC);
+  for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
+  gel(lists,i) = sarch;
+
+  gen = (lg(G1)>3)? gen_1: NULL;
+  cyc = diagonal_i(shallowconcat(gel(G1,2), gel(sarch,1)));
+  cyc = smithrel(cyc, &U, gen? &u1: NULL);
+  if (gen) gen = shallowconcat(gel(G1,3), gel(sarch,2));
+  y = cgetg(6,t_VEC);
+  gel(y,1) = mkvec2(x, arch);
+  gel(y,3) = fa1;
+  gel(y,4) = lists;
+  gel(y,5) = U;
+  add_clgp(nf, u1, cyc, gen, y);
+  return gerepilecopy(av,y);
+}
 static GEN
 join_arch(ideal_data *D, GEN x) {
   return join_bid_arch(D->nf, x, D->arch);
@@ -2141,7 +2170,7 @@ join_arch(ideal_data *D, GEN x) {
 static GEN
 join_archunit(ideal_data *D, GEN x) {
   GEN bid = join_arch(D, gel(x,1)), U = gel(x,2);
-  U = gmul(gel(bid,5), vconcat(U, zlog_unitsarch(D->sgnU, bid)));
+  U = ZM_mul(gel(bid,5), vconcat(U, zlog_unitsarch(D->sgnU, bid)));
   return mkvec2(bid, U);
 }
 

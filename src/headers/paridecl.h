@@ -286,7 +286,6 @@ GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
 GEN     zv_neg(GEN x);
-GEN     ZC_Z_mul(GEN x, GEN y);
 
 /* alglin2.c */
 
@@ -298,9 +297,11 @@ GEN     ZM_copy(GEN x);
 int     ZM_ishnf(GEN x);
 GEN     ZM_add(GEN x, GEN y);
 GEN     ZM_mul(GEN x, GEN y);
+GEN     ZM_neg(GEN x);
 GEN     ZM_pow(GEN x, GEN n);
 GEN     ZM_sub(GEN x, GEN y);
 GEN     ZM_to_zm(GEN z);
+GEN     ZM_Z_mul(GEN X, GEN c);
 GEN     ZM_ZC_mul(GEN x, GEN y);
 GEN     ZV_add(GEN x, GEN y);
 GEN     ZV_copy(GEN x);
@@ -309,6 +310,7 @@ void    ZV_neg_inplace(GEN M);
 GEN     ZV_sub(GEN x, GEN y);
 GEN     ZV_to_nv(GEN z);
 void    ZV_togglesign(GEN M);
+GEN     ZV_Z_mul(GEN X, GEN c);
 GEN     adj(GEN x);
 GEN     matcompanion(GEN x);
 GEN     caract(GEN x, long v);
