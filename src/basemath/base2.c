@@ -39,6 +39,117 @@ allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
 
+static int
+fnz(GEN x,long j)
+{
+  long i;
+  for (i=1; i<j; i++)
+    if (signe(x[i])) return 0;
+  return 1;
+}
+/* return list u[i], 2 by 2 coprime with the same prime divisors as ab */
+static GEN
+get_coprimes(GEN a, GEN b)
+{
+  long i, k = 1;
+  GEN u = cgetg(3, t_COL);
+  gel(u,1) = a;
+  gel(u,2) = b;
+  /* u1,..., uk 2 by 2 coprime */
+  while (k+1 < lg(u))
+  {
+    GEN d, c = gel(u,k+1);
+    if (is_pm1(c)) { k++; continue; }
+    for (i=1; i<=k; i++)
+    {
+      if (is_pm1(u[i])) continue;
+      d = gcdii(c, gel(u,i));
+      if (d == gen_1) continue;
+      c = diviiexact(c, d);
+      gel(u,i) = diviiexact(gel(u,i), d);
+      u = shallowconcat(u, d);
+    }
+    gel(u,++k) = c;
+  }
+  for (i = k = 1; i < lg(u); i++)
+    if (!is_pm1(u[i])) u[k++] = u[i];
+  setlg(u, k); return u;
+}
+/* allow p = -1 from factorizations */
+static long
+safe_Z_pvalrem(GEN x, GEN p, GEN *z)
+{
+  if (signe(p) < 0) { *z = absi(x); return 1; }
+  return Z_pvalrem(x, p, z);
+}
+static GEN
+allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
+                    GEN *dK, GEN *index, GEN *ptw)
+{
+  GEN a = NULL, da = NULL;
+  long n = degpol(f), lw = lg(w1), i, j, k;
+  for (i=1; i<lw; i++)
+  {
+    GEN M, db, b = gel(ordmax,i);
+    if (b == gen_1) continue;
+    db = gen_1;
+    for (j=1; j<=n; j++)
+    {
+      GEN t = denom(gcoeff(b,j,j));
+      if (absi_cmp(t,db) > 0) db = t;
+    }
+    if (db == gen_1) continue;
+
+    /* db = denom(b), (da,db) = 1. Compute da Im(b) + db Im(a) */
+    b = Q_muli_to_int(b,db);
+    if (!da) { da = db; a = b; }
+    else
+    { /* optimization: easy as long as both matrix are diagonal */
+      j=2; while (j<=n && fnz(gel(a,j),j) && fnz(gel(b,j),j)) j++;
+      k = j-1; M = cgetg(2*n-k+1,t_MAT);
+      for (j=1; j<=k; j++)
+      {
+	gel(M,j) = gel(a,j);
+	gcoeff(M,j,j) = mulii(gcoeff(a,j,j),gcoeff(b,j,j));
+      }
+      /* could reduce mod M(j,j) but not worth it: usually close to da*db */
+      for (  ; j<=n;     j++) gel(M,j) = gmul(db, gel(a,j));
+      for (  ; j<=2*n-k; j++) gel(M,j) = gmul(da, gel(b,j+k-n));
+      da = mulii(da,db);
+      a = hnfmodid(M, da);
+    }
+    if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
+  }
+  if (da)
+  {
+    *index = diviiexact(da, gcoeff(a,1,1));
+    for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
+    a = gdiv(hnfcenter_ip(a), da);
+  }
+  else
+  {
+    *index = gen_1;
+    a = matid(n);
+  }
+  *dK = diviiexact(dx, sqri(*index));
+
+  if (ptw)
+  {
+    long lfa = 1;
+    GEN W1, W2, D = *dK;
+    W1 = cgetg(lw, t_COL);
+    W2 = cgetg(lw, t_COL);
+    for (j=1; j<lw; j++)
+    {
+      k = safe_Z_pvalrem(D, gel(w1,j), &D);
+      if (k) { gel(W1,lfa) = gel(w1,j); gel(W2,lfa) = utoipos(k); lfa++; }
+    }
+    setlg(W1, lfa);
+    setlg(W2, lfa); *ptw = mkmat2(W1,W2);
+  }
+  return RgM_to_RgXV(a, varn(f));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                            ROUND 2                              */
@@ -180,7 +291,7 @@ static GEN
 matinv(GEN x, GEN d)
 {
   pari_sp av,av1;
-  long i,j,k, n = lg(x[1]); /* Warning: lg(x) from ordmax is bogus */
+  long i,j,k, n = lg(x);
   GEN y,h;
 
   y = matid(n-1);
@@ -203,7 +314,7 @@ matinv(GEN x, GEN d)
 }
 
 static GEN
-ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
+maxord2(GEN cf, GEN p, long epsilon)
 {
   long sp,i,n=lg(cf)-1;
   pari_sp av=avma, av2,limit;
@@ -331,6 +442,7 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
     }
     setlg(T2, n+1);
     jp=matinv(T2,p);
+    setlg(Tn, n*n+1);
     if (pps)
     {
       for (k=1; k<=n; k++)
@@ -356,29 +468,23 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
       }
       rowred(Tn,pp);
     }
-    for (index=gen_1,i=1; i<=n; i++)
-      index = mulii(index,gcoeff(Tn,i,i));
-    if (gcmp1(index)) break;
+    setlg(Tn, n+1);
+    index = dethnf_i(Tn);
+    if (is_pm1(index)) break;
 
     m = ZM_mul(matinv(Tn,index), m);
-    hh = delta = mulii(index,delta);
-    for (i=1; i<=n; i++)
-      for (j=1; j<=n; j++) hh = gcdii(gcoeff(m,i,j),hh);
-    if (!is_pm1(hh))
-    {
-      m = gdiv(m,hh);
-      delta = diviiexact(delta,hh);
-    }
+    m = Q_primitive_part(m, &hh);
+    delta = mulii(index,delta);
+    if (hh) delta = diviiexact(delta,hh);
     epsilon -= 2 * Z_pval(index,p);
     if (epsilon < 2) break;
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"ordmax");
+      if(DEBUGMEM>1) pari_warn(warnmem,"maxord2");
       gerepileall(av2, 2, &m, &delta);
     }
   }
-  gerepileall(av, 2, &m, &delta);
-  *ptdelta = delta; return m;
+  return gerepileupto(av, gdiv(hnfmodid(shallowtrans(m), delta), delta));
 }
 
 /* Input:
@@ -395,90 +501,27 @@ ordmax(GEN cf, GEN p, long epsilon, GEN *ptdelta)
  *  2) discriminant of K (in *y).
  */
 static GEN
-allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
+allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  GEN w,w1,w2,a,pro,at,bt,b,da,db,q, cf,*gptr[2];
-  pari_sp av=avma,tetpil;
-  long n,h,j,i,k,r,s,t,mf;
+  GEN ordmax = cgetg(1, t_VEC), w,w1,w2,cf;
+  long n, h, i;
 
   w = ptw? *ptw: NULL;
   allbase_check_args(f,flag,dx, &w);
   w1 = gel(w,1);
-  w2 = gel(w,2);
+  w2 = vec_to_vecsmall(gel(w,2));
   n = degpol(f); h = lg(w1)-1;
   cf = cgetg(n+1,t_VEC);
   gel(cf,2) = companion(f);
   for (i=3; i<=n; i++) gel(cf,i) = ZM_mul(gel(cf,2), gel(cf,i-1));
 
-  a=matid(n); da=gen_1;
   for (i=1; i<=h; i++)
   {
-    pari_sp av1 = avma;
-    mf=itos(gel(w2,i)); if (mf==1) continue;
-    if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
-
-    b=ordmax(cf,gel(w1,i),mf,&db);
-    a=gmul(db,a); b=gmul(da,b);
-    da=mulii(db,da);
-    at=shallowtrans(a);
-    bt=shallowtrans(b);
-    for (r=n; r; r--)
-      for (s=r; s; s--)
-	while (signe(gcoeff(bt,s,r)))
-	{
-	  q = diviiround(gcoeff(at,s,s),gcoeff(bt,s,r));
-	  pro = ZV_lincomb(gen_1,negi(q), gel(at,s),gel(bt,r));
-	  for (t=s-1; t; t--)
-	  {
-	    q = diviiround(gcoeff(at,t,s),gcoeff(at,t,t));
-	    pro = ZV_lincomb(gen_1,negi(q), pro,gel(at,t));
-	  }
-	  at[s]=bt[r]; gel(bt,r) = pro;
-	}
-    for (j=n; j; j--)
-    {
-      for (k=1; k<j; k++)
-      {
-	while (signe(gcoeff(at,j,k)))
-	{
-	  q = diviiround(gcoeff(at,j,j),gcoeff(at,j,k));
-	  pro = ZV_lincomb(gen_1, negi(q), gel(at,j),gel(at,k));
-	  at[j]=at[k]; gel(at,k) = pro;
-	}
-      }
-      if (signe(gcoeff(at,j,j))<0)
-	for (k=1; k<=j; k++) gcoeff(at,k,j) = negi(gcoeff(at,k,j));
-      for (k=j+1; k<=n; k++)
-      {
-	q = diviiround(gcoeff(at,j,k),gcoeff(at,j,j));
-	gel(at,k) = ZV_lincomb(gen_1, negi(q), gel(at,k),gel(at,j));
-      }
-    }
-    for (j=2; j<=n; j++)
-      if (equalii(gcoeff(at,j,j), gcoeff(at,j-1,j-1)))
-      {
-	gcoeff(at,1,j)= gen_0;
-	for (k=2; k<=j; k++) gcoeff(at,k,j) = gcoeff(at,k-1,j-1);
-      }
-    tetpil=avma; a=gtrans(at);
-    {
-      da = icopy(da); gptr[0]=&a; gptr[1]=&da;
-      gerepilemanysp(av1,tetpil,gptr,2);
-    }
+    if (w2[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
+    if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
+    ordmax = shallowconcat(ordmax, mkvec( maxord2(cf,gel(w1,i),w2[i]) ));
   }
-  *dK = *dx;
-  for (j=1; j<=n; j++)
-    *dK = diviiexact(mulii(*dK,sqri(gcoeff(a,j,j))), sqri(da));
-  tetpil=avma; *dK = icopy(*dK);
-  at=cgetg(n+1,t_VEC);
-  for (k=1; k<=n; k++)
-  {
-    q=cgetg(k+2,t_POL); q[1] = f[1]; gel(at,k) = q;
-    for (j=1; j<=k; j++) gel(q,j+1) = gdiv(gcoeff(a,k,j),da);
-  }
-  gptr[0] = &at; gptr[1] = dK;
-  gerepilemanysp(av,tetpil,gptr,2);
-  return at;
+  return allbase_from_ordmax(ordmax, w1, f, *dx, dK, index, ptw);
 }
 
 GEN
@@ -496,52 +539,6 @@ GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 
-static int
-fnz(GEN x,long j)
-{
-  long i;
-  for (i=1; i<j; i++)
-    if (signe(x[i])) return 0;
-  return 1;
-}
-
-/* return list u[i], 2 by 2 coprime with the same prime divisors as ab */
-static GEN
-get_coprimes(GEN a, GEN b)
-{
-  long i, k = 1;
-  GEN u = cgetg(3, t_COL);
-  gel(u,1) = a;
-  gel(u,2) = b;
-  /* u1,..., uk 2 by 2 coprime */
-  while (k+1 < lg(u))
-  {
-    GEN d, c = gel(u,k+1);
-    if (is_pm1(c)) { k++; continue; }
-    for (i=1; i<=k; i++)
-    {
-      if (is_pm1(u[i])) continue;
-      d = gcdii(c, gel(u,i));
-      if (d == gen_1) continue;
-      c = diviiexact(c, d);
-      gel(u,i) = diviiexact(gel(u,i), d);
-      u = shallowconcat(u, d);
-    }
-    gel(u,++k) = c;
-  }
-  for (i = k = 1; i < lg(u); i++)
-    if (!is_pm1(u[i])) u[k++] = u[i];
-  setlg(u, k); return u;
-}
-
-/* allow p = -1 from factorizations */
-static long
-safe_Z_pvalrem(GEN x, GEN p, GEN *z)
-{
-  if (signe(p) < 0) { *z = absi(x); return 1; }
-  return Z_pvalrem(x, p, z);
-}
-
 /* return integer basis. Set dK = disc(K), dx = disc(f), w (possibly partial)
  * factorization of dK. *ptw can be set by the caller, in which case it is
  * taken to be the factorization of disc(f), then overwritten
@@ -549,16 +546,16 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
 GEN
 allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  VOLATILE GEN w1, w2, a, da, ordmax;
-  VOLATILE long n, lw, i, j, k, l;
+  VOLATILE GEN w1, w2, ordmax;
+  VOLATILE long lw, i, k;
   GEN w;
 
-  if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,ptw);
+  if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,index,ptw);
   w = ptw? *ptw: NULL;
   allbase_check_args(f, flag, dx, &w);
   w1 = gel(w,1);
   w2 = vec_to_vecsmall(gel(w,2));
-  n = degpol(f); lw = lg(w1);
+  lw = lg(w1);
   ordmax = cgetg(1, t_VEC);
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
@@ -567,13 +564,13 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
-      GEN p = gcdii(gel(x,1), gel(x,2));
-      GEN N, u;
+      GEN N, u, p = gcdii(gel(x,1), gel(x,2));
+      long l;
       if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Z", x);
 
       u = get_coprimes(p, diviiexact(gel(x,1),p));
-      l = lg(u);
       /* no small factors, but often a prime power */
+      l = lg(u);
       for (k = 1; k < l; k++) gel(u,k) = gcoeff(auxdecomp(gel(u,k), 2),1,1);
 
       w1[i] = u[1];
@@ -588,69 +585,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       ordmax = shallowconcat(ordmax, mkvec( maxord(gel(w1,i),f,w2[i]) ));
     } ENDCATCH;
   }
-
-  a = NULL; /* gcc -Wall */
-  da = NULL;
-  for (i=1; i<lw; i++)
-  {
-    GEN M, db, b = gel(ordmax,i);
-    if (b == gen_1) continue;
-    db = gen_1;
-    for (j=1; j<=n; j++)
-    {
-      GEN t = denom(gcoeff(b,j,j));
-      if (absi_cmp(t,db) > 0) db = t;
-    }
-    if (db == gen_1) continue;
-
-    /* db = denom(b), (da,db) = 1. Compute da Im(b) + db Im(a) */
-    b = Q_muli_to_int(b,db);
-    if (!da) { da = db; a = b; }
-    else
-    { /* optimization: easy as long as both matrix are diagonal */
-      j=2; while (j<=n && fnz(gel(a,j),j) && fnz(gel(b,j),j)) j++;
-      k = j-1; M = cgetg(2*n-k+1,t_MAT);
-      for (j=1; j<=k; j++)
-      {
-	gel(M,j) = gel(a,j);
-	gcoeff(M,j,j) = mulii(gcoeff(a,j,j),gcoeff(b,j,j));
-      }
-      /* could reduce mod M(j,j) but not worth it: usually close to da*db */
-      for (  ; j<=n;     j++) gel(M,j) = gmul(db, gel(a,j));
-      for (  ; j<=2*n-k; j++) gel(M,j) = gmul(da, gel(b,j+k-n));
-      da = mulii(da,db);
-      a = hnfmodid(M, da);
-    }
-    if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
-  }
-  if (da)
-  {
-    *index = diviiexact(da, gcoeff(a,1,1));
-    for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
-    a = gdiv(hnfcenter_ip(a), da);
-  }
-  else
-  {
-    *index = gen_1;
-    a = matid(n);
-  }
-  *dK = diviiexact(*dx, sqri(*index));
-
-  if (ptw)
-  {
-    long lfa = 1;
-    GEN W1, W2, D = *dK;
-    W1 = cgetg(lw, t_COL);
-    W2 = cgetg(lw, t_COL);
-    for (j=1; j<lw; j++)
-    {
-      k = safe_Z_pvalrem(D, gel(w1,j), &D);
-      if (k) { gel(W1,lfa) = gel(w1,j); gel(W2,lfa) = utoipos(k); lfa++; }
-    }
-    setlg(W1, lfa);
-    setlg(W2, lfa); *ptw = mkmat2(W1,W2);
-  }
-  return RgM_to_RgXV(a, varn(f));
+  return allbase_from_ordmax(ordmax, w1, f, *dx, dK, index, ptw);
 }
 
 static GEN
