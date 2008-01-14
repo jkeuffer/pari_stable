@@ -209,7 +209,7 @@ element_muli(GEN nf, GEN x, GEN y)
   {
     if (ty == t_INT) return scalarcol(mulii(x,y), N);
     if (ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
-    return ZV_Z_mul(x, y);
+    return ZV_Z_mul(y, x);
   }
   if (tx != t_COL || lg(x) != N+1
    || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
