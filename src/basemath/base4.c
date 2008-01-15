@@ -842,7 +842,7 @@ idealadd(GEN nf, GEN x, GEN y)
     x = Q_muli_to_int(x, dz);
     y = Q_muli_to_int(y, dz);
   }
-  if (RgV_isscalar(gel(x,1)) && RgV_isscalar(gel(y,1)))
+  if (ZV_isscalar(gel(x,1)) && ZV_isscalar(gel(y,1)))
   {
     p1 = gcdii(gcoeff(x,1,1), gcoeff(y,1,1));
     modid = 1;
@@ -1074,7 +1074,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
     for (i=1; i<=rx; i++)
       for (j=1; j<=ry; j++)
 	gel(m, (i-1)*ry+j) = element_muli(nf,gel(x,i),gel(y,j));
-    if (RgV_isscalar(gel(x,1)) && RgV_isscalar(gel(y,1)))
+    if (ZV_isscalar(gel(x,1)) && ZV_isscalar(gel(y,1)))
       y = hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
     else
       y = hnfmod(m, detint(m));
@@ -2029,7 +2029,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   I = Q_primitive_part(I, &c1);
   y = ideallllred_elt(nf, I, vdir);
 
-  if (RgV_isscalar(y))
+  if (ZV_isscalar(y))
   { /* already reduced */
     if (!aI) return gerepilecopy(av, I);
     y = NULL; goto END;
@@ -2056,7 +2056,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   J = Q_primitive_part(J, &c);
  /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
-  if (RgV_isscalar(gel(I,1))) {
+  if (ZV_isscalar(gel(I,1))) {
     b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
     I = hnfmodid(J,b);
   } else {

@@ -546,7 +546,7 @@ eltimul_get_table(GEN nf, GEN x)
     long i, N = degpol(nf[1]);
     GEN mul = cgetg(N+1,t_MAT);
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
+    if (ZV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
     gel(mul,1) = x; /* assume w_1 = 1 */
     for (i=2; i<=N; i++) gel(mul,i) = elementi_mulid(nf,x,i);
     return mul;

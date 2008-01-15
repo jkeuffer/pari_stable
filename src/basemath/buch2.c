@@ -1017,7 +1017,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 
   /* if reduction fails (y scalar), do not retry can_factor */
   y = idealred_elt(nf,x);
-  if ((!flag || !RgV_isscalar(y)) && factorgen(F, nf, x, y, fact)) return y;
+  if ((!flag || !ZV_isscalar(y)) && factorgen(F, nf, x, y, fact)) return y;
 
   /* reduce in various directions */
   ru = lg(nf[6]);
@@ -1988,7 +1988,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	if (ccontent(x)==1) /* primitive */
 	{
 	  gx = ZM_zc_mul(IDEAL,x);
-	  if (!RgV_isscalar(gx))
+	  if (!ZV_isscalar(gx))
 	  {
 	    GEN Nx, xembed = gmul(M, gx);
 	    long e;
@@ -2046,7 +2046,7 @@ pseudomin(GEN I, GEN G)
 {
   GEN m, u = lll(gmul(G, I), DEFAULTPREC);
   m = ZM_ZC_mul(I, gel(u,1));
-  if (RgV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
+  if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
