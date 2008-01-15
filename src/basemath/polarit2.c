@@ -759,7 +759,7 @@ nextK:
       {
 	GEN q = constant_term(gel(famod,ind[i]));
 	if (y) q = mulii(y, q);
-	y = centermod_i(q, pa, pas2);
+	y = centermodii(q, pa, pas2);
       }
       if (!signe(y) || remii(constant_term(lcpol), y) != gen_0)
       {

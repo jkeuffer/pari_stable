@@ -986,7 +986,7 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
   y = gmul(proj, x);
   if (!T) return centermodii(y, pk, pks2);
   y = RgV_to_RgX(y, varn(T));
-  return centermod_i(FpX_rem(y, T, pk), pk, pks2);
+  return FpX_center(FpX_rem(y, T, pk), pk, pks2);
 }
 
 /* Assume P in nfX form [ unifpol(,t_COL) ], lc(P) != 0 mod p.
