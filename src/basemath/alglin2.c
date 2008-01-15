@@ -1510,7 +1510,7 @@ ZV_add_i(GEN x, GEN y, long lx)
 }
 GEN
 ZV_add(GEN x, GEN y) { return ZV_add_i(x, y, lg(x)); }
-GEN
+static GEN
 ZV_sub_i(GEN x, GEN y, long lx)
 {
   long i;
