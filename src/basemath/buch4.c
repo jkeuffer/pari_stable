@@ -518,19 +518,19 @@ bnfsunit(GEN bnf,GEN S,long prec)
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
    }
     den = dethnf_i(H); H = ZM_inv(H,den);
-    A = shallowconcat(H, gneg(gmul(H,B))); /* top part of inverse * den */
+    A = shallowconcat(H, ZM_neg(ZM_mul(H,B))); /* top part of inverse * den */
     /* HNF in split form perm + (H B) [0 Id missing] */
     gel(res,1) = sunit;
     gel(res,2) = mkvec3(perm,A,den);
   }
 
   /* S-regulator */
-  sreg = gmul(sreg,card);
+  sreg = mpmul(sreg,card);
   for (i=1; i<ls; i++)
   {
     GEN p = gel(S,i);
     if (typ(p) == t_VEC) p = gel(p,1);
-    sreg = gmul(sreg,glog(p,prec));
+    sreg = mpmul(sreg,glog(p,prec));
   }
   gel(res,4) = sreg;
   return gerepilecopy(ltop,res);
@@ -563,18 +563,16 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
     v[i] = (remii(N, gel(P,1)) == gen_0)? element_val(nf,xb,P): 0;
   }
   /* here, x = S v */
-  p1 = cgetg(ls, t_COL);
-  for (i=1; i<ls; i++) gel(p1,i) = stoi(v[perm[i]]); /* p1 = v o perm */
-  v = gmul(HB, p1);
+  p1 = vecpermute(v, perm);
+  v = ZM_zc_mul(HB, p1);
   for (i=1; i<=cH; i++)
   {
-    GEN w = gdiv(gel(v,i), den);
-    if (typ(w) != t_INT) return NULL;
+    GEN r, w = dvmdii(gel(v,i), den, &r);
+    if (r != gen_0) return NULL;
     gel(v,i) = w;
   }
-  p1 += cH;
-  p1[0] = evaltyp(t_COL) | evallg(lB);
-  v = shallowconcat(v, p1); /* append bottom of p1 (= [0 Id] part) */
+  p1 += cH; p1[0] = evaltyp(t_VECSMALL) | evallg(lB);
+  v = shallowconcat(v, zv_to_ZV(p1)); /* append bottom of p1 (= [0 Id] part) */
 
   gen = gel(bnfS,1);
   xp = cgetg(1, t_MAT);

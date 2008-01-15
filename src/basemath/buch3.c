@@ -53,7 +53,7 @@ buchnarrow(GEN bnf)
   for (j=1; j<=ngen; j++)
   {
     GEN z = zsign_from_logarch(gel(GD,j), invpi, archp);
-    gel(logs,j) = F2V_red_ip( gmul(v, z) );
+    gel(logs,j) = F2V_red_ip( ZM_ZC_mul(v, z) );
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */
@@ -328,7 +328,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     if (mulI)
     {
       G = element_muli(nf, G, mulI);
-      G = colreducemodHNF(G, gmul(f, dmulI), NULL);
+      G = colreducemodHNF(G, ZM_Z_mul(f, dmulI), NULL);
     }
     G = set_sign_mod_idele(nf,A,G,module,sarch);
     I = idealmul(nf,I,G);
@@ -353,7 +353,10 @@ get_dataunit(GEN bnf, GEN bid)
   zlog_S S; init_zlog_bid(&S, bid);
   D = zsignunits(bnf, S.archp, 1); l = lg(D);
   for (i = 1; i < l; i++)
-    gel(D,i) = vecmodii(gmul(S.U, zlog(nf, gel(U,i),gel(D,i), &S)), cyc);
+  {
+    GEN v = zlog(nf, gel(U,i),gel(D,i), &S);
+    gel(D,i) = vecmodii(ZM_ZC_mul(S.U, v), cyc);
+  }
   return shallowconcat(D, diagonal_i(cyc));
 }
 
@@ -454,14 +457,14 @@ Buchray(GEN bnf,GEN module,long flag)
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
   u1 = lllint_ip(u1,100);
-  u2 = gmul(reducemodinvertible(u2,u1), ginv(H));
+  u2 = gmul(reducemodinvertible(u2,u1), ginv(H)); /* NOT integral */
   y = cgetg(7,t_VEC);
   gel(y,1) = bnf;
   gel(y,2) = bid;
   gel(y,3) = El;
   gel(y,4) = U;
   gel(y,5) = clg;
-  gel(y,6) = mkvec2(u2,u1);
+  gel(y,6) = mkvec2(u2,u1); /* [QM, ZM] */
   return gerepilecopy(av,y);
 }
 
@@ -551,7 +554,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = arch_mul(to_famat_all(gel(El,i), negi(gel(ep,i))), beta);
-  p1 = gmul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
+  p1 = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
@@ -589,11 +592,10 @@ GEN
 minkowski_bound(GEN D, long N, long r2, long prec)
 {
   pari_sp av = avma;
-  GEN p1;
-  p1 = gdiv(mpfactr(N,prec), powuu(N,N));
-  p1 = gmul(p1, gpowgs(gdivsg(4,mppi(prec)), r2));
-  p1 = gmul(p1, gsqrt(absi(D),prec));
-  return gerepileupto(av, p1);
+  GEN c = divrr(mpfactr(N,prec), powuu(N,N));
+  if (r2) c = mulrr(c, gpowgs(gdivsg(4,mppi(prec)), r2));
+  c = mulrr(c, gsqrt(absi(D),prec));
+  return gerepileuptoleaf(av, c);
 }
 
 /* DK = |dK| */
@@ -640,7 +642,7 @@ zimmertbound(long N,long R2,GEN DK)
 {/*20*/28.1285704, 27.4021674, 26.6807314, 25.9645140, 25.2537867, 24.5488420,
        23.8499943, 23.1575823, 22.4719720, 21.7935548, 21.1227537}
     };
-    w = gmul(dbltor(exp(-c[N-2][R2])), gsqrt(DK,DEFAULTPREC));
+    w = mulrr(dbltor(exp(-c[N-2][R2])), gsqrt(DK,DEFAULTPREC));
   }
   else
   {
@@ -672,7 +674,7 @@ hermiteconstant(long n)
   av = avma;
   h  = gpowgs(divsr(2,mppi(DEFAULTPREC)), n);
   h1 = gsqr(ggamma(gdivgs(utoipos(n+4),2),DEFAULTPREC));
-  return gerepileupto(av, gmul(h,h1));
+  return gerepileuptoleaf(av, mulrr(h,h1));
 }
 
 /* 1 if L (= nf != Q) primitive for sure, 0 if MAYBE imprimitive (may have a
@@ -767,7 +769,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
   const long prec = MEDDEFAULTPREC;
   long n, i, j, k, s, *x, r1, cnt = 0;
   pari_sp av = avma;
-  GEN u,r,a,M;
+  GEN u, r, M;
   double p, norme, normin, normax;
   double **q,*v,*y,*z;
   double eps=0.000001, BOUND = BORNE * 1.00001;
@@ -781,18 +783,17 @@ minimforunits(GEN nf, long BORNE, GEN w)
   r1 = nf_get_r1(nf); n = degpol(nf[1]);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(gmael(nf,5,1), prec);
-  a = gmul(gmael(nf,5,2), real_1(prec));
-  r = Q_from_QR(a, prec);
+  r = Q_from_QR(gmael(nf,5,2), prec);
   for (j=1; j<=n; j++)
   {
-    v[j] = rtodbl(gcoeff(r,j,j));
-    for (i=1; i<j; i++) q[i][j] = rtodbl(gcoeff(r,i,j));
+    v[j] = gtodouble(gcoeff(r,j,j));
+    for (i=1; i<j; i++) q[i][j] = gtodouble(gcoeff(r,i,j));
   }
   normax = 0.; normin = (double)BOUND;
   s=0; k=n; y[n]=z[n]=0;
   x[n] = (long)(sqrt(BOUND/v[n]));
 
-  for(;;)
+  for(;;x[1]--)
   {
     do
     {
@@ -800,9 +801,9 @@ minimforunits(GEN nf, long BORNE, GEN w)
       {
 	long l = k-1;
 	z[l] = 0;
-	for (j=k; j<=n; j++) z[l] = z[l]+q[l][j]*x[j];
+	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
 	p = (double)x[k] + z[k];
-	y[l] = y[k]+p*p*v[k];
+	y[l] = y[k] + p*p*v[k];
 	x[l] = (long)floor(sqrt((BOUND-y[l])/v[l])-z[l]);
 	k = l;
       }
@@ -828,7 +829,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
     }
-    x[k]--;
+   
   }
   if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
   avma = av; u = cgetg(4,t_VEC);
@@ -862,7 +863,7 @@ compute_M0(GEN M_star,long N)
   vx = fetch_var(); X = pol_x(vx);
 
   M0 = NULL; m1 = N/3;
-  for (n1=1; n1<=m1; n1++)
+  for (n1=1; n1<=m1; n1++) /* 1 <= n1 <= n2 <= n3 < N */
   {
     m2 = (N-n1)>>1;
     for (n2=n1; n2<=m2; n2++)
@@ -887,11 +888,11 @@ compute_M0(GEN M_star,long N)
       else if (n1==n2 || n2==n3)
       { /* n3 > N/3 >= n1 */
 	long k = N - 2*n2;
-	p2 = gsub(M_star, gmulgs(X,n2));
+	p2 = deg1pol_i(stoi(-n2), M_star, vx); /* M* - n2 X */
 	p3 = gmul(powuu(k,k),
-		  gpowgs(gsubgs(gmul(M_star,p2),k*k),n2));
-	pol = gsub(p3, gmul(gmul(powuu(n2,n2),gpowgs(X,n2)),
-			    gpowgs(p2, N-n2)));
+		  gpowgs(gsubgs(RgX_Rg_mul(p2, M_star), k*k), n2));
+	pol = gsub(p3, RgX_mul(monomial(powuu(n2,n2), n2, vx),
+                               gpowgs(p2, N-n2)));
 	r = roots(pol, DEFAULTPREC); lr = lg(r);
 	for (i=1; i<lr; i++)
 	{
@@ -1218,7 +1219,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
   GEN H2, Delta = diagonal_i(gmael(bnr2,5,2)); /* SNF structure of Cl_n */
 
   if (!H) return Delta;
-  H2 = gmul(bnrGetSurj(bnr, bnr2), H);
+  H2 = ZM_mul(bnrGetSurj(bnr, bnr2), H);
   return hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
 }
 
@@ -1304,12 +1305,11 @@ ideallog_to_bnr(GEN bnr, GEN z)
     if (lz == 1) return zerocol(lg(U[1]) - 1); /* lU != 1 */
     U = vecslice(U, lU-lz+1, lU-1); /* remove Cl(K) part */
   }
-  z = gmul(U, z);
-  if (col)
+  if (col) {
+    z = ZM_ZC_mul(U, z);
     z = vecmodii(z, divray);
-  else
-  {
-    l = lg(z);
+  } else {
+    z = ZM_mul(U, z); l = lg(z);
     for (j = 1; j < l; j++) gel(z,j) = vecmodii(gel(z,j), divray);
   }
   return z;
@@ -1940,12 +1940,24 @@ bigcgetvec(long N)
   gel(v,nv) = cgetg(vext1(N)+1,t_VEC); return v;
 }
 
+/* a zsimp is [fa, cyc, U, v] 
+ * fa: vecsmall factorisation,
+ * cyc: ZV (abelian group)
+ * U: ZM (base change)
+ * v: ZV (log of units) */
 static GEN
 zsimp(GEN bid, GEN embunit)
 {
   GEN empty = cgetg(1, t_VECSMALL);
-  return mkvec4(mkmat2(empty,empty), gmael(bid,2,2),
-		gel(bid,5), embunit);
+  return mkvec4(mkmat2(empty,empty), gmael(bid,2,2), gel(bid,5), embunit);
+}
+
+/* fa a vecsmall factorization, append p^e */
+static GEN
+fasmall_append(GEN fa, long p, long e)
+{
+  GEN P = gel(fa,1), E = gel(fa,2);
+  return mkmat2(vecsmall_append(P,p), vecsmall_append(E,e));
 }
 
 static GEN
@@ -1953,36 +1965,31 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
 {
   long l1, l2, nbgen;
   pari_sp av = avma;
-  GEN fa, U, U1, U2, cyc1, cyc2, u1u2, D;
+  GEN fa, U, U1, U2, cyc1, cyc2, cyc;
 
   fa = gel(b,1);
-  U1 = gel(b,3);   cyc1 = gel(b,2);      l1 = lg(cyc1);
+  U1 = gel(b,3);   cyc1 = gel(b,2);       l1 = lg(cyc1);
   U2 = gel(bid,5); cyc2 = gmael(bid,2,2); l2 = lg(cyc2);
   nbgen = l1+l2-2;
   if (nbgen)
   {
-    u1u2 = matsnf0(diagonal_i(shallowconcat(cyc1,cyc2)), 1 | 4); /* all && clean */
+    GEN u1u2 = matsnf0(diagonal_i(shallowconcat(cyc1,cyc2)), 1|4); /* all && clean */
+    cyc = mattodiagonal_i( gel(u1u2,3) );
     U = gel(u1u2,1);
-    D = gel(u1u2,3);
     U = shallowconcat(
-      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecslice(U, 1,   l1-1), U1),
-      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecslice(U, l1, nbgen), U2)
+      l1==1   ? zeromat(nbgen, lg(U1)-1): ZM_mul(vecslice(U, 1,   l1-1), U1),
+      l1>nbgen? zeromat(nbgen, lg(U2)-1): ZM_mul(vecslice(U, l1, nbgen), U2)
     );
   }
   else
   {
     U = zeromat(0, lg(U1)+lg(U2)-2);
-    D = cgetg(1,t_MAT);
+    cyc = cgetg(1,t_VEC);
   }
-  return gerepilecopy(av, mkvec4(
-    mkmat2(vecsmall_append(gel(fa,1), prcode),
-	   vecsmall_append(gel(fa,2), e)),
-    mattodiagonal_i(D),
-    U,
-    vconcat(gel(b,4),embunit)
-  ));
+  fa = fasmall_append(fa, prcode, e);
+  return gerepilecopy(av, mkvec4(fa, cyc, U, vconcat(gel(b,4),embunit)));
 }
-
+/* B a zsimp */
 static GEN
 bnrclassnointern(GEN B, GEN h)
 {
@@ -1990,10 +1997,9 @@ bnrclassnointern(GEN B, GEN h)
   GEN b, m, qm, L = cgetg(lx,t_VEC);
   for (j=1; j<lx; j++)
   {
-    b = gel(B,j); qm = gmul(gel(b,3),gel(b,4));
-    m = shallowconcat(qm, diagonal_i(gel(b,2)));
-    gel(L,j) = mkvec2(gel(b,1),
-		      mkvecsmall( itou( mulii(h, dethnf_i(hnf(m))) ) ));
+    b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
+    m = hnf( shallowconcat(qm, diagonal_i(gel(b,2))) );
+    gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, dethnf_i(m)) ) ));
   }
   return L;
 }
@@ -2011,12 +2017,11 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
   L = cgetg(lx,t_VEC); nbarch = 1<<r1;
   for (j=1; j<lx; j++)
   {
-    b = gel(B,j); qm = gmul(gel(b,3),gel(b,4));
+    b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
     cyc = gel(b,2); nc = lg(cyc)-1;
     /* [ qm   cyc 0 ]
      * [ matU  0  2 ] */
-    m = shallowconcat(vconcat(qm, matU),
-		 diagonal_i(shallowconcat(cyc, _2)));
+    m = shallowconcat(vconcat(qm, matU), diagonal_i(shallowconcat(cyc, _2)));
     m = hnf(m); mm = shallowcopy(m);
     H = cgetg(nbarch+1,t_VECSMALL);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);

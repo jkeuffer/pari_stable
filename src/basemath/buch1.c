@@ -580,7 +580,7 @@ getallrootsof1(GEN bnf)
   tu = poltobasis(nf, gmael3(bnf,8,4,2));
   T = eltimul_get_table(nf, tu);
   u = cgetg(n+1, t_VEC); gel(u,1) = tu;
-  for (i=2; i <= n; i++) gel(u,i) = gmul(T, gel(u,i-1));
+  for (i=2; i <= n; i++) gel(u,i) = ZM_mul(T, gel(u,i-1));
   return u;
 }
 

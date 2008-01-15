@@ -3118,6 +3118,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     }
     while (k > 1);
     if (! x[1] && y[1]<=eps) break;
+
     p = (double)x[1] + z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
     if (maxnorm >= 0)
     {

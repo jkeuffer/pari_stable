@@ -880,7 +880,7 @@ get_norm_fact_primes(GEN gen, GEN ex, GEN C, GEN *pd)
     if ((s = signe(ex[i])))
     {
       P = gel(gen,i); e = gel(ex,i); p = gel(P,1);
-      N = gmul(N, powgi(p, mulii(gel(P,4), e)));
+      N = mulii(N, powgi(p, mulii(gel(P,4), e)));
       if (s < 0)
       {
 	e = gceil(gdiv(negi(e), gel(P,3)));
@@ -890,7 +890,7 @@ get_norm_fact_primes(GEN gen, GEN ex, GEN C, GEN *pd)
   if (C)
   {
     P = C; p = gel(P,1);
-    N = gmul(N, powgi(p, gel(P,4)));
+    N = mulii(N, powgi(p, gel(P,4)));
   }
   *pd = d; return N;
 }
@@ -1240,7 +1240,7 @@ get_Garch(GEN nf, GEN gen, GEN clg2, long prec)
     if (!gequal(g,J))
     {
       z = idealinv(nf,z); J = gel(z,1);
-      J = gmul(J,denom(J));
+      J = Q_remove_denom(J, NULL);
       if (!gequal(g,J))
       {
 	z = ideallllred(nf,z,NULL,prec); J = gel(z,1);
@@ -1380,12 +1380,12 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
    * since g_W B + g_B = [C_B] */
   if (xar)
   {
-    A = gsub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
+    A = ZV_sub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
     Bex = zv_neg(Bex);
   }
   else
-    A = gsub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
-  Q = gmul(U, A);
+    A = ZV_sub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
+  Q = ZM_ZC_mul(U, A);
   for (i=1; i<=c; i++)
     gel(Q,i) = truedvmdii(gel(Q,i), gel(cyc,i), (GEN*)(ex+i));
   if ((flag & nf_GEN_IF_PRINCIPAL))
@@ -1398,7 +1398,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   {
     GEN Garch, V = gel(clg2,2);
     Bex = zc_to_ZC(Bex);
-    p1 = c? shallowconcat(gmul(V,Q), Bex): Bex;
+    p1 = c? shallowconcat(ZM_ZC_mul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)
     {
@@ -1739,7 +1739,7 @@ static GEN
 red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
   GEN u = lll(gmul(G0, *ideal), DEFAULTPREC);
-  *ideal = gmul(*ideal,u); /* approximate LLL reduction */
+  *ideal = ZM_mul(*ideal,u); /* approximate LLL reduction */
   return Q_from_QR(gmul(G, *ideal), prec);
 }
 
@@ -2045,8 +2045,8 @@ static GEN
 pseudomin(GEN I, GEN G)
 {
   GEN m, u = lll(gmul(G, I), DEFAULTPREC);
-  m = gmul(I, gel(u,1));
-  if (RgV_isscalar(m) && lg(u) > 2) m = gmul(I, gel(u,2));
+  m = ZM_ZC_mul(I, gel(u,1));
+  if (RgV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -2327,7 +2327,7 @@ inverse_if_smaller(GEN nf, GEN I, long prec)
 
   J = gel(I,1);
   dmin = dethnf_i(J); I1 = idealinv(nf,I);
-  J = gel(I1,1); J = gmul(J,denom(J)); gel(I1,1) = J;
+  J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
   d = dethnf_i(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
   I1 = ideallllred(nf,I1,NULL,prec);
@@ -2341,7 +2341,7 @@ static void
 neg_row(GEN U, long i)
 {
   GEN c = U + lg(U)-1;
-  for (; c>U; c--) gcoeff(c,i,0) = gneg(gcoeff(c,i,0));
+  for (; c>U; c--) gcoeff(c,i,0) = negi(gcoeff(c,i,0));
 }
 
 static void
@@ -2398,8 +2398,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
     J = inverse_if_smaller(nf0, I, prec);
     if (J != I)
     { /* update wrt P */
-      neg_row(Y ,j); gel(V,j) = gneg(gel(V,j));
-      neg_row(Ur,j); gel(X,j) = gneg(gel(X,j));
+      neg_row(Y ,j); gel(V,j) = ZV_neg(gel(V,j));
+      neg_row(Ur,j); gel(X,j) = ZV_neg(gel(X,j));
     }
     G[j] = J[1]; /* generator, order cyc[j] */
     gel(Ga,j) = gneg(famat_to_arch(nf, gel(J,2), prec));
@@ -2409,11 +2409,11 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   /* G D =: [GD] = g (UiP + W XP) D + [Ga]D = g W (VP + XP D) + [Ga]D
    * NB: DP = PD and Ui D = W V. gW is given by (first lo0-1 cols of) C
    */
-  GD = gadd(act_arch(gadd(V, gmul(X,D)), C),
+  GD = gadd(act_arch(ZM_add(V, ZM_mul(X,D)), C),
 	    act_arch(D, Ga));
   /* -[ga] = [GD]PY + G PU - g = [GD]PY + [Ga] PU + gW XP PU
 			       = gW (XP PUr + VP PY) + [Ga]PUr */
-  ga = gadd(act_arch(gadd(gmul(X,Ur), gmul(V,Y)), C),
+  ga = gadd(act_arch(ZM_add(ZM_mul(X,Ur), ZM_mul(V,Y)), C),
 	    act_arch(Ur, Ga));
   ga = gneg(ga);
   /* TODO: could (LLL)reduce ga and GD mod units ? */
@@ -3210,7 +3210,7 @@ PRECPB:
     }
     /* arch. components of fund. units */
     H = hnflll_i(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
-    U = gmul(U, lll(H, DEFAULTPREC));
+    U = ZM_mul(U, lll(H, DEFAULTPREC));
     B = gmul(A, U);
     A = cleanarch(B, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
