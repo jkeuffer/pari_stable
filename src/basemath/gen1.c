@@ -635,72 +635,49 @@ addfrac(GEN x, GEN y)
   gel(z,2) = icopy(d); return z;
 }
 
+/* assume x2, y2 are t_POLs in the same variable */
 static GEN
 add_rfrac(GEN x, GEN y)
 {
-  pari_sp tetpil, av = avma;
+  pari_sp av = avma;
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_RFRAC);
   GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
 
-  delta = ggcd(x2,y2);
-  if (degpol(delta) == 0)
-  { /* numerator is non-zero */
-    delta = gel(delta,2);
-    if (gcmp1(delta))
-    {
-      gel(z,1) = gerepileupto((pari_sp)z, gadd(gmul(x1,y2), gmul(y1,x2)));
-      gel(z,2) = gmul(x2, y2);
-    }
-    else
-    {
-      GEN a = gdiv(x2, delta);
-      GEN b = gdiv(y2, delta);
-      x1 = gmul(x1,b);
-      y1 = gmul(y1,a); tetpil = avma;
-      gel(z,1) = gadd(x1, y1);
-      gel(z,2) = gmul(a, y2);
-      gerepilecoeffssp((pari_sp)z,tetpil,z+1,2);
-    }
-    return z;
+  delta = srgcd(x2,y2);
+  if (!degpol(delta))
+  {
+    n = simplify_i( gadd(gmul(x1,y2), gmul(y1,x2)) );
+    d = gmul(x2, y2);
+    return gerepileupto(av, gred_rfrac_simple(n, d));
   }
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
   n = gadd(gmul(x1,y2), gmul(y1,x2));
-  if (gcmp0(n))
+  if (!signe(n))
   {
+    n = simplify_i(n);
     if (isrationalzero(n)) return gerepileupto(av, n);
-    return gerepilecopy(av, mkrfrac(n, gmul(delta, gmul(x2,y2))));
+    return gerepilecopy(av, mkrfrac(n, gmul(gel(x,2),y2)));
   }
-  tetpil = avma; d = gmul(x2, y2);
-  p1 = poldivrem(n, delta, &r); /* we want gcd(n,delta) */
+  if (degpol(n) == 0)
+    return gerepileupto(av, gred_rfrac_simple(gel(n,2), gmul(gel(x,2),y2)));
+  p1 = RgX_divrem(n, delta, &r); /* we want gcd(n,delta) */
   if (isexactzero(r))
   {
-    if (lg(d) == 3) /* "constant" denominator */
-    {
-      d = gel(d,2);
-	   if (gcmp_1(d)) p1 = gneg(p1);
-      else if (gcmp1(d))  p1 = gcopy(p1);
-      else p1 = gdiv(p1, d);
-      return gerepileupto(av, p1);
-    }
-    gel(z,1) = p1;
-    gel(z,2) = d;
-    gerepilecoeffs((pari_sp)z,z+1,2); return z;
+    d = gmul(x2, y2);
+    /* "constant" denominator ? */
+    z = lg(d) == 3? gdiv(p1, gel(d,2)): gred_rfrac_simple(p1, d);
+    return gerepileupto(av, z);
   }
-  p1 = ggcd(delta, r);
-  if (gcmp1(p1))
+  p1 = srgcd(delta, r);
+  if (degpol(p1))
   {
-    tetpil = avma;
-    gel(z,1) = gcopy(n);
+    n = gdeuc(n,p1);
+    d = gmul(gmul(x2,y2), gdeuc(delta, p1));
   }
   else
-  {
-    delta = gdeuc(delta, p1);
-    tetpil = avma;
-    gel(z,1) = gdeuc(n,p1);
-  }
-  gel(z,2) = gmul(d,delta);
-  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
+    d = gmul(gel(x,2), y2);
+  return gerepileupto(av, gred_rfrac_simple(n, d));
 }
 
 GEN
