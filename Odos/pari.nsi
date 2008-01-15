@@ -1,9 +1,10 @@
 !include "MUI.nsh"
 Name "PARI 2.4.2 (ALPHA)"
 !define dll "libpari-gmp-2.4.dll"
-!define objdir "..\Ocygwin-i686-gmp"
 
 ;--No need to modify things below --
+!define top ".."
+!define objdir "${top}\Ocygwin-i686-gmp"
 AutoCloseWindow false
 
 OutFile "Pari.exe"
@@ -13,7 +14,7 @@ InstallDirRegKey HKLM "Software\PARI" ""
 !define MUI_ABORTWARNING
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\COPYING"
+!insertmacro MUI_PAGE_LICENSE "${top}\COPYING"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -34,7 +35,7 @@ Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
   File /oname=gp.exe "${objdir}\gp-dyn.exe"
   File "makegprc"
-  File "..\misc\tex2mail"
+  File "${top}\misc\tex2mail"
   File "${objdir}\${dll}"
   File "\cygwin\bin\cygcrypt-0.dll"
   File "\cygwin\bin\cygfltknox-1.1.dll"
@@ -60,28 +61,28 @@ SectionEnd
 
 Section "Galois files" SecGAL
   SetOutPath "$INSTDIR\galdata"
-  File "..\data\galdata\*"
+  File "${top}\data\galdata\*"
 SectionEnd
 
 Section "documentation" SecDOC
   SetOutPath "$INSTDIR"
-  File "..\doc\gphelp"
+  File "${top}\doc\gphelp"
   SetOutPath $INSTDIR\doc
   File "acro.exe"
-  File "..\doc\translations"
-  File "..\doc\*.tex"
-  File "..\doc\*.pdf"
+  File "${top}\doc\translations"
+  File "${top}\doc\*.tex"
+  File "${top}\doc\*.pdf"
 SectionEnd
 
 Section "examples" SecEX
   SetOutPath "$INSTDIR"
-  File "..\doc\gphelp"
+  File "${top}\doc\gphelp"
   SetOutPath $INSTDIR\examples
-  File "..\examples\EXPLAIN"
-  File "..\examples\Inputrc"
-  File "..\examples\*.gp"
-  File "..\examples\*.c"
-  File "..\examples\Makefile.cygwin-i686"
+  File "${top}\examples\EXPLAIN"
+  File "${top}\examples\Inputrc"
+  File "${top}\examples\*.gp"
+  File "${top}\examples\*.c"
+  File "${top}\examples\Makefile.cygwin-i686"
 SectionEnd
 
 Function .onInstSuccess
