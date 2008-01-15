@@ -1617,6 +1617,10 @@ non-negative residue).
 \fun{GEN}{Fp_sub}{GEN a, GEN b, GEN m} returns the difference of \kbd{a} and
 \kbd{b} modulo \kbd{m} (smallest non-negative residue).
 
+\fun{GEN}{Fp_center}{GEN a, GEN p, GEN pov2} assuming \kbd{a} is between
+$0$ and $\kbd{p} - 1$ and \kbd{pov2} is \kbd{shifti(p,-1)}, returns the
+representative of \kbd{a} in the symmetric residue system.
+
 \fun{GEN}{Fp_mul}{GEN a, GEN b, GEN m} returns the product of \kbd{a} by
 \kbd{b} modulo \kbd{m} (smallest non-negative residue).
 
@@ -2137,8 +2141,8 @@ $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
 coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
 \fun{GEN}{FpX_center}{GEN z, GEN p} returns the polynomial whose coefficient
-belong to the symmetric residue system (clean version of \kbd{centermod},
-which assumes the coefficients already belong to $[0,\kbd{p}-1]$).
+belong to the symmetric residue system (clean version of \kbd{centermod}).
+Assumes the coefficients already belong to $[0,\kbd{p}-1]$).
 
 \subsubsec{Miscellaneous operations}
 
@@ -2496,6 +2500,12 @@ Mod(1,p))}, hence a \typ{VEC}
 
 \fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpM}.
+
+\fun{GEN}{FpV_center}{GEN z, GEN p, GEN pov2} returns a vector (of the same
+type as \kbd{z}) whose entries are the \kbd{Fp\_center(gel(z,i))}.
+
+\fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
+entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.
 
 \fun{GEN}{FpC_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \typ{INT}~\kbd{y} and reduce modulo \kbd{p} to

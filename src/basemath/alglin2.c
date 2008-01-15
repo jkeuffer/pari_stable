@@ -427,13 +427,22 @@ carberkowitz(GEN x, long v)
 /*******************************************************************/
 GEN
 cxnorm(GEN x) { return gadd(gsqr(gel(x,1)), gsqr(gel(x,2))); }
+/* q t_QUAD */
 GEN
-quadnorm(GEN x)
+quadnorm(GEN q)
 {
-  GEN u = gel(x,3), v = gel(x,2);
-  GEN X = gel(x,1), b = gel(X,3), c = gel(X,2);
-  GEN z = signe(b)? gmul(v, gadd(u,v)): gsqr(v);
-  return gadd(z, gmul(c, gsqr(u)));
+  GEN X = gel(q,1), b = gel(X,3), c = gel(X,2);
+  GEN z, u = gel(q,3), v = gel(q,2);
+  if (typ(u) == t_INT && typ(v) == t_INT) /* generic case */
+  {
+    z = signe(b)? mulii(v, addii(u,v)): sqri(v);
+    return addii(z, mulii(c, sqri(u)));
+  }
+  else
+  {
+    z = signe(b)? gmul(v, gadd(u,v)): gsqr(v);
+    return gadd(z, gmul(c, gsqr(u)));
+  }
 }
 
 GEN
@@ -1061,7 +1070,7 @@ matrixqz(GEN x, GEN p)
 {
   pari_sp av = avma, av1, lim;
   long i,j,j1,m,n,nfact;
-  GEN p1,p2,p3;
+  GEN P, p1, p2;
 
   if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   n = lg(x)-1; if (!n) return gcopy(x);
@@ -1084,30 +1093,32 @@ matrixqz(GEN x, GEN p)
 
   if (!p || gcmp0(p))
   {
-    av1 = avma;
+    pari_sp av2 = avma;
     p1 = shallowtrans(x); setlg(p1,n+1);
     p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
     if (!signe(p2)) p2 = detint(x);
-    if (gcmp1(p2)) { avma = av1; return gcopy(x); }
+    if (gcmp1(p2)) { avma = av2; return ZM_copy(x); }
   }
   else
     p2 = p;
-  p1 = gel(Z_factor(p2),1);
-  nfact = lg(p1)-1;
+  P = gel(Z_factor(p2),1);
+  nfact = lg(P)-1;
   av1 = avma; lim = stack_lim(av1,1);
   for (i=1; i<=nfact; i++)
   {
-    p = gel(p1,i);
+    GEN pov2;
+    p = gel(P,i); pov2 = shifti(p, -1);
     for(;;)
     {
-      p2 = FpM_ker(x, p);
-      if (lg(p2)==1) break;
+      GEN N, M = FpM_ker(x, p);
+      if (lg(M)==1) break;
 
-      p2 = centermod(p2,p); p3 = gdiv(gmul(x,p2), p);
-      for (j=1; j<lg(p2); j++)
+      M = FpM_center(M, p, pov2);
+      N = gdivexact(ZM_mul(x,M), p);
+      for (j=1; j<lg(M); j++)
       {
-	j1=n; while (gcmp0(gcoeff(p2,j1,j))) j1--;
-	x[j1] = p3[j];
+	j1=n; while (!signe(gcoeff(M,j1,j))) j1--;
+	gel(x,j1) = gel(N,j);
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
@@ -1730,7 +1741,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
    * are dependent from the ones in matgen) */
   zc = col - lnz; /* # of 0 columns, correspond to units */
-  if (nlze) { dep = gmul(dep,U); dep += zc; }
+  if (nlze) { dep = ZM_mul(dep,U); dep += zc; }
 
   diagH1 = new_chunk(lnz+1); /* diagH1[i] = 0 iff H[i,i] != 1 (set later) */
 
@@ -2084,7 +2095,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
 
   nlze = lk0 - k0;  /* # of 0 rows */
   lnz = lig-nlze+1; /* 1 + # of non-0 rows (!= 0...0 1 0 ... 0) */
-  if (T) matt = gmul(matt,T); /* update top rows */
+  if (T) matt = ZM_mul(matt,T); /* update top rows */
   extramat = cgetg(col+1,t_MAT); /* = new C minus the 0 rows */
   for (j=1; j<=col; j++)
   {
@@ -2441,7 +2452,7 @@ hnfmerge_get_1(GEN A, GEN B)
     if (signe(t) && is_pm1(t)) break;
   }
   if (j >= l) pari_err(talker, "non coprime ideals in hnfmerge");
-  return gerepileupto(av, gmul(A,gel(U,1)));
+  return gerepileupto(av, ZM_ZC_mul(A,gel(U,1)));
 
 }
 
@@ -2617,7 +2628,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       c = cgetg(li, t_COL);
       for (j = 1; j < i; j++) gel(c,j) = remii(gcoeff(x,j,i),d);
       for (     ; j <li; j++) gel(c,j) = gen_0;
-      if (!equalii(dm, d)) c = gmul(c, diviiexact(dm, d));
+      if (!equalii(dm, d)) c = ZV_Z_mul(c, diviiexact(dm, d));
       gel(x,li) = c;
       FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
       for (j = i - 1; j > ldef; j--)
@@ -3362,7 +3373,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     {
       x = smithall(shallowtrans(x), ptV, ptU); /* ptV, ptU swapped! */
       if (typ(x) == t_MAT && n != m) x = shallowtrans(x);
-      if (V) V = gmul(V, shallowtrans(*ptV));
+      if (V) V = ZM_mul(V, shallowtrans(*ptV));
       if (U) U = *ptU; /* TRANSPOSE */
     }
     else /* 0 matrix */
@@ -3384,7 +3395,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (V) V = vecpermute(V, p1);
 
   p1 = hnfmod(x, mdet);
-  if (V) V = gmul(V, gauss(x,p1));
+  if (V) V = ZM_mul(V, gauss(x,p1));
   x = p1;
 
   if (DEBUGLEVEL>7) fprintferr("starting SNF loop");
@@ -3720,7 +3731,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     { /* Ui = ZM_inv(U, gen_1); setlg(Ui, c); */
       setlg(V, c);
       V = FpM_red(V, gel(D,1));
-      Ui = gmul(H, V);
+      Ui = ZM_mul(H, V);
       for (i = 1; i < c; i++)
 	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
       *newUi = reducemodHNF(Ui, H, NULL);

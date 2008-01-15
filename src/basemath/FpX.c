@@ -54,15 +54,12 @@ FpX_normalize(GEN z, GEN p)
 }
 
 GEN
-FpX_center(GEN T,GEN mod)
+FpX_center(GEN T,GEN p)
 {
-  long i, l=lg(T);
-  GEN mod2=shifti(mod,-1);
-  GEN P=cgetg(l,t_POL);
-  P[1]=T[1];
-  for(i=2;i<l;i++)
-    gel(P,i) = cmpii(gel(T,i),mod2)<=0? icopy(gel(T,i)): subii(gel(T,i),mod);
-  return P;
+  long i, l = lg(T);
+  GEN p2 = shifti(p,-1), P = cgetg(l,t_POL);
+  for(i=2; i<l; i++) gel(P,i) = Fp_center(gel(T,i), p, p2);
+  P[1] = T[1]; return P;
 }
 
 GEN

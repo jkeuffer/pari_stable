@@ -87,6 +87,7 @@ ulong  Fl_mul(ulong a, ulong b, ulong p);
 ulong  Fl_neg(ulong x, ulong p);
 ulong  Fl_sqr(ulong a, ulong p);
 ulong  Fl_sub(ulong a, ulong b, ulong p);
+GEN    Fp_center(GEN u, GEN p, GEN ps2);
 int    dvdii(GEN x, GEN y);
 int    dvdiiz(GEN x, GEN y, GEN z);
 int    dvdis(GEN x, long y);
@@ -1286,6 +1287,12 @@ Fl_sub(ulong a, ulong b, ulong p)
 /* centerlift(u mod p) */
 INLINE long
 Fl_center(ulong u, ulong p, ulong ps2) { return (long) (u > ps2)? u - p: u; }
+
+/* assume 0 <= u < p and ps2 = p>>1 */
+INLINE GEN
+Fp_center(GEN u, GEN p, GEN ps2) {
+  return absi_cmp(u,ps2)<=0? icopy(u): subii(u,p);
+}
 
 INLINE ulong
 Fl_mul(ulong a, ulong b, ulong p)

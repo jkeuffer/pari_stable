@@ -1493,6 +1493,14 @@ FpV_red(GEN z, GEN p)
   for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
   return x;
 }
+GEN
+FpV_center(GEN z, GEN p, GEN pov2)
+{
+  long i,l = lg(z);
+  GEN x = cgetg_copy(l, z);
+  for (i=1; i<l; i++) gel(x,i) = Fp_center(gel(z,i),p, pov2);
+  return x;
+}
 
 /* z in Mat m,n(Z), return lift(z * Mod(1,p)) */
 GEN
@@ -1503,6 +1511,16 @@ FpM_red(GEN z, GEN p)
   for (i=1; i<l; i++) gel(x,i) = FpC_red(gel(z,i), p);
   return x;
 }
+GEN
+FpM_center(GEN z, GEN p, GEN pov2)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = FpV_center(gel(z,i), p, pov2);
+  return x;
+}
+
+
 GEN
 FqX_normalize(GEN z, GEN T, GEN p)
 {
