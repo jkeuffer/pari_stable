@@ -253,8 +253,7 @@ znstar(GEN n)
   {
     GEN q = gel(mod,i), a = gel(gen,i);
     z = Fp_inv(q, diviiexact(n,q));
-    a = addii(a, mulii(mulii(subsi(1,a),z),q));
-    gel(gen,i) = gmodulo(a, n);
+    gel(gen,i) = addii(a, mulii(mulii(subsi(1,a),z),q));
   }
 
   for (i=sizeh; i>=2; i--)
@@ -265,12 +264,12 @@ znstar(GEN n)
 	GEN q = diviiexact(gel(cyc,j),d);
 	gel(cyc,j) = mulii(gel(cyc,i),q);
 	gel(cyc,i) = d;
-	gel(gen,j) = gdiv(gel(gen,j), gel(gen,i));
-	gel(gen,i) = gmul(gel(gen,i), powgi(gel(gen,j), mulii(v,q)));
+	gel(gen,j) = Fp_div(gel(gen,j), gel(gen,i), n);
+	gel(gen,i) = Fp_mul(gel(gen,i), Fp_pow(gel(gen,j), mulii(v,q), n), n);
       }
   setlg(cyc, sizeh+1); z = detcyc(cyc, &i);
   setlg(cyc,i);
-  setlg(gen,i); return gerepilecopy(av, mkvec3(z,cyc,gen));
+  setlg(gen,i); return gerepilecopy(av, mkvec3(z, cyc, FpV_to_mod(gen,n)));
 }
 
 /*********************************************************************/
@@ -2264,14 +2263,15 @@ quaddisc(GEN x)
 {
   const pari_sp av = avma;
   long i,r,tx=typ(x);
-  GEN p1,p2,f,s;
+  GEN P,E,f,s;
 
   if (!is_rational_t(tx)) pari_err(arither1);
-  f=factor(x); p1=gel(f,1); p2=gel(f,2);
-  s = gen_1;
-  for (i=1; i<lg(p1); i++)
-    if (odd(mael(p2,i,2))) s = gmul(s,gel(p1,i));
-  r=mod4(s); if (gsigne(x)<0) r=4-r;
+  f = factor(x);
+  P = gel(f,1);
+  E = gel(f,2); s = gen_1;
+  for (i=1; i<lg(P); i++)
+    if (odd(mael(E,i,2))) s = mulii(s,gel(P,i));
+  r = mod4(s); if (gsigne(x) < 0) r = 4-r;
   if (r>1) s = shifti(s,2);
   return gerepileuptoint(av, s);
 }
