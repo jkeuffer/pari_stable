@@ -1876,7 +1876,7 @@ ZM_inv(GEN M, GEN dM)
       q = qp;
     }
     if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);
-    if (stable && RgM_isscalar(gmul(M, H), dM)) break; /* DONE */
+    if (stable && RgM_isscalar(ZM_mul(M, H), dM)) break; /* DONE */
 
     if (low_stack(lim, stack_lim(av,2)))
     {
@@ -3865,7 +3865,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     p1 = gel(U,j); setlg(p1,lM);
     gel(u2,j) = p1;
   }
-  x = lllreducemodmatrix(gmul(u2,Y), u1);
+  x = lllreducemodmatrix(ZM_ZC_mul(u2,Y), u1);
   if (!ptu1) x = gerepileupto(av, x);
   else
   {
