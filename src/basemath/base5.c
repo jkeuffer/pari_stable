@@ -75,88 +75,12 @@ eltreltoabs(GEN rnfeq, GEN x)
   return gerepileupto(av, s);
 }
 
-#if 0
-static GEN
-rnfmakematrices(GEN rnf)
-{
-  long i, j, k, n, ru, vnf;
-  GEN nf, pol, sym, ro, w, ronf, z, vecM, T;
-
-  pol = gel(rnf,1); n = degpol(pol); sym = polsym(pol, n-1);
-  ro  = gel(rnf,6);
-  w   = gel(rnf,7); w = gel(w,1);
-  nf  = gel(rnf,10); vnf = varn(nf[1]);
-  T = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++)
-  {
-    GEN c = cgetg(n+1,t_COL); gel(T,j) = c;
-    for (i=1; i<=n; i++)
-    {
-      GEN d = grem(gmul(gel(w,i),gel(w,j)), pol);
-      gel(c,i) = lift_if_rational( quicktrace(d, sym) );
-    }
-  }
-  w = lift(w); ru = lg(ro)-1; ronf = gel(nf,6);
-  vecM = cgetg(ru+1,t_VEC);
-  for (k=1; k<=ru; k++)
-  {
-    GEN rok = gel(ro,k), M = cgetg(n+1,t_MAT);
-    long l = lg(rok);
-    gel(vecM,k) = M;
-    for (j=1; j<=n; j++)
-    {
-      GEN a, c = cgetg(l,t_COL); gel(M,j) = c;
-      a = gsubst(gel(w,j), vnf, gel(ronf,k));
-      for (i=1; i<l; i++) gel(c,i) = poleval(a, gel(rok,i));
-    }
-  }
-
-  z = cgetg(8,t_VEC);
-  gel(z,1) = vecM;
-  gel(z,4) = T;
-  /* dummies */
-  gel(z,2) = cgetg(1, t_VEC);
-  gel(z,3) = cgetg(1, t_VEC);
-  gel(z,5) = cgetg(1,t_MAT);
-  gel(z,6) = cgetg(1,t_MAT);
-  gel(z,7) = cgetg(1,t_MAT); return z;
-}
-
-static GEN
-rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
-{
-  long r1, r2, j, v = varn(nf[1]), n = degpol(pol);
-  GEN s, r, ro;
-
-  nf_get_sign(nf, &r1, &r2);
-  s = cgetg(r1+r2+1,t_VEC);
-  r = cgetg(r1+r2+1,t_VEC);
-  ro = gel(nf,6); pol = lift(pol);
-  for (j=1; j<=r1; j++)
-  {
-    long r1j = 0;
-    ro = roots(gsubst(pol,v,gel(ro,j)), prec);
-    while (r1j<n && gcmp0(imag_i(gel(ro,r1j+1)))) r1j++;
-    gel(s,j) = mkvec2s(r1j, (n-r1j)>>1);
-    gel(r,j) = get_roots(ro, r1j, 0);
-  }
-  for (; j<=r1+r2; j++)
-  {
-    ro = roots(gsubst(pol,v,gel(ro,j)), prec);
-    gel(s,j) = mkvec2s(0, n);
-    gel(r,j) = ro;
-  }
-  *pts = s; return r;
-}
-
-#else /* dummies */
 static GEN rnfmakematrices(GEN rnf) { (void)rnf; return cgetg(1, t_VEC); }
 static GEN
 rnf_roots(GEN nf, GEN pol, long prec, GEN *pts) {
   (void)nf; (void)pol; (void)prec;
   *pts = cgetg(1,t_VEC); return cgetg(1, t_VEC);
 }
-#endif
 
 static GEN
 modulereltoabs(GEN rnf, GEN x)
