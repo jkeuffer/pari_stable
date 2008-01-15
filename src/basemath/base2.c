@@ -775,7 +775,7 @@ update_den(GEN *e, GEN *de, GEN *pp)
 static GEN
 compmod(GEN f, GEN g, GEN T, GEN p)
 {
-  GEN D = NULL, z, df, dg, q;
+  GEN D = NULL, Dp, z, df, dg, q;
   f = Q_remove_denom(f, &df);
   g = Q_remove_denom(g, &dg);
   if (df) D = df;
@@ -785,7 +785,8 @@ compmod(GEN f, GEN g, GEN T, GEN p)
   z = FpX_FpXQ_compo(f, g, T, q);
   if (!D) return z;
   update_den(&z, &D, NULL);
-  return gdiv( FpX_center(z, mulii(D,p)), D );
+  Dp = mulii(D,p);
+  return gdiv( FpX_center(z, Dp, shifti(Dp,-1)), D );
 }
 
 static GEN
@@ -841,7 +842,7 @@ QpX_mod(GEN e, GEN f, GEN pk)
   e = Q_remove_denom(e, &d);
   mod = d? mulii(pk,d): pk;
   e = FpX_rem(e, centermod(f, mod), mod);
-  e = FpX_center(e, mod);
+  e = FpX_center(e, mod, shifti(mod,-1));
   if (d) e = gdiv(e, d);
   return e;
 }
@@ -912,7 +913,7 @@ Decomp(decomp_t *S, long flag)
   fred = centermod(fred, pr);
   f1   = centermod(f1,   pr);
   f2 = FpX_div(fred,f1, pr);
-  f2 = FpX_center(f2, pr);
+  f2 = FpX_center(f2, pr, shifti(pr,-1));
 
   if (DEBUGLEVEL>5)
     fprintferr("  leaving Decomp: f1 = %Z\nf2 = %Z\ne = %Z\nde= %Z\n", f1,f2,e,de);
@@ -922,7 +923,7 @@ Decomp(decomp_t *S, long flag)
 			 ZX_monic_factorpadic(f2, p, flag));
   else
   {
-    GEN D = de, d1, d2, ib1, ib2;
+    GEN D = de, Dov2, d1, d2, ib1, ib2;
     long n, n1, n2, i;
     ib1 = get_partial_order_as_pols(p,f1, &d1); n1 = lg(ib1)-1;
     ib2 = get_partial_order_as_pols(p,f2, &d2); n2 = lg(ib2)-1; n = n1+n2;
@@ -933,14 +934,14 @@ Decomp(decomp_t *S, long flag)
     }
     else if (i > 0)
       ib2 = ZXV_Z_mul(ib2, diviiexact(d1, d2));
-    D = mulii(d1, D);
+    D = mulii(d1, D); Dov2 = shifti(D,-1);
     fred = centermod(S->f, D);
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib1,i),e), fred, D), D);
+      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib1,i),e), fred, D), D, Dov2);
     e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
-      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D);
+      gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D, Dov2);
     res = RgXV_to_RgM(res, n);
     return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
   }
@@ -1782,7 +1783,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
     t = poltobasis(nf, FpX_div(T,u,p));
     t = centermod(t, p);
-    u = FpX_center(u, p);
+    u = FpX_center(u, p, shifti(p,-1));
     if (e == 1)
     {
       norm_S S;

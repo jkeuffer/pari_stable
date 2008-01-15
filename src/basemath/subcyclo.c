@@ -734,7 +734,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   le=gel(zl,1);
   L=polsubcyclo_orbits(n,H,O,powz,le);
   T=FpV_roots_to_pol(L,le,v);
-  T=FpX_center(T,le);
+  T=FpX_center(T,le,shifti(le,-1));
   return gerepileupto(ltop,gscycloconductor(T,n,flag));
 }
 
@@ -774,7 +774,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   if (DEBUGLEVEL >= 6) msgtimer("polsubcyclo_cyclic");
   T=FpV_roots_to_pol(L,le,v);
   if (DEBUGLEVEL >= 6) msgtimer("roots_to_pol");
-  return gerepileupto(ltop, FpX_center(T,le));
+  return gerepileupto(ltop, FpX_center(T,le,shifti(le,-1)));
 }
 
 GEN

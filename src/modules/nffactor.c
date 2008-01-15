@@ -313,13 +313,13 @@ nffactor(GEN nf,GEN pol)
   if (degpol(g))
   { /* not squarefree */
     pari_sp av1;
-    GEN ex;
+    GEN E;
     long l, j;
     g = QXQX_normalize(g, T);
     A = RgXQX_div(A,g, T);
 
     y = nfsqff(nf,A,0, den); l = lg(y);
-    ex = cgetg(l, t_VECSMALL); /* will be left on stack */
+    E = cgetg(l, t_VECSMALL); /* will be left on stack */
     av1 = avma;
     for (j=l-1; j>=1; j--)
     {
@@ -331,10 +331,10 @@ nffactor(GEN nf,GEN pol)
 	if (!q) break;
 	quo = q;
       }
-      ex[j] = e;
+      E[j] = e;
     }
     avma = av1; y = gerepileupto(av, y);
-    ex = zc_to_ZC(ex);
+    ex = zc_to_ZC(E);
   }
   else
   {
@@ -706,7 +706,7 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
     if (typ(c) == t_INT)
       c = centermodii(c, pk, pks2);
     else
-      c = FpX_center(c, pk);
+      c = FpX_center(c, pk, pks2);
     gel(y,i) = c;
   }
   return y;

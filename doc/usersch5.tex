@@ -2140,9 +2140,9 @@ This function is not memory-clean, but nevertheless suitable for
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
 coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
-\fun{GEN}{FpX_center}{GEN z, GEN p} returns the polynomial whose coefficient
-belong to the symmetric residue system (clean version of \kbd{centermod}).
-Assumes the coefficients already belong to $[0,\kbd{p}-1]$).
+\fun{GEN}{FpX_center}{GEN z, GEN p, GEN pov2} returns the polynomial whose
+coefficient belong to the symmetric residue system. Assumes the coefficients
+already belong to $[0,\kbd{p}-1]$) and \kbd{pov2} is \kbd{shifti(p,-1)}.
 
 \subsubsec{Miscellaneous operations}
 

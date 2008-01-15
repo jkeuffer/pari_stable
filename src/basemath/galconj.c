@@ -690,7 +690,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 	u = v;
 	for (j = 1; j < m; j++)
 	  u = ZX_add(u, gmael(C,SG[pf[j]],j));
-	u = FpX_center(FpX_red(u, gl->Q), gl->Q);
+	u = FpX_center(FpX_red(u, gl->Q), gl->Q, shifti(gl->Q,-1));
 	if (poltopermtest(u, gl, frob))
 	{
 	  if (DEBUGLEVEL >= 4 )
@@ -1177,7 +1177,7 @@ fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
   const long step=3;
   long n=lg(W)-1;
   long m=1<<((n-1)<<1);
-  GEN sym=cgetg(n+1,t_VECSMALL);
+  GEN sym=cgetg(n+1,t_VECSMALL), modov2 = shifti(mod,-1);
   for (j=1;j<n;j++) sym[j]=step;
   sym[n]=0;
   if (DEBUGLEVEL>=4) fprintferr("FixedField: Weight: %Z\n",W);
@@ -1191,7 +1191,7 @@ fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
     if (DEBUGLEVEL>=6) fprintferr("FixedField: Sym: %Z\n",sym);
     L=sympol_eval(sym,NS);
     if (!vec_is1to1(FpC_red(L,l))) continue;
-    P=FpX_center(FpV_roots_to_pol(L,mod,v),mod);
+    P=FpX_center(FpV_roots_to_pol(L,mod,v),mod,modov2);
     if (!p || FpX_is_squarefree(P,p))
       return mkvec3(mkvec2(sym,W),L,P);
     avma=av;
@@ -1907,7 +1907,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   for (i = 1; i < d ; i++)
     res = ZX_add(res, ZX_Z_mul(gel(liftpow,i), gel(u,i + 2)));
   res = FpX_red(res, gl->Q);
-  res = FpX_center(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q);
+  res = FpX_center(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q, shifti(gl->Q,-1));
   if (DEBUGLEVEL >= 6)
     msgtimer("s4test()");
   bl = poltopermtest(res, gl, phi);
@@ -2193,7 +2193,7 @@ static long
 galoisfrobeniustest(GEN aut, struct galois_lift *gl, GEN frob)
 {
   pari_sp ltop = avma;
-  GEN tlift = FpX_center(FpX_Fp_mul(aut,gl->den,gl->Q), gl->Q);
+  GEN tlift = FpX_center(FpX_Fp_mul(aut,gl->den,gl->Q), gl->Q, shifti(gl->Q,-1));
   long res = poltopermtest(tlift, gl, frob);
   avma = ltop;
   return res;

@@ -1001,7 +1001,7 @@ static GEN
 chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 {
   long i, r;
-  GEN pol = P, list, piv, y, ltpol, lt;
+  GEN pol = P, list, piv, y, ltpol, lt, paov2;
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
@@ -1012,11 +1012,12 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
   lt = absi(leading_term(pol));
   if (is_pm1(lt)) lt = NULL;
   ltpol = lt? gmul(lt, pol): pol;
+  paov2 = shifti(pa,-1);
   for (i = 1;;)
   {
     if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
     y = chk_factors_get(lt, famod, gel(piv,i), NULL, pa);
-    y = FpX_center(y, pa);
+    y = FpX_center(y, pa, paov2);
     if (! (pol = polidivis(ltpol,y,bound)) ) return NULL;
     if (lt) y = Q_primpart(y);
     gel(list,i) = y;

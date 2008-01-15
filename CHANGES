@@ -39,6 +39,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
     5- removed undocumented interface FpM_mul(x,y,NULL), and analogously for
        FpV_dotproduct, FpV_dotsquare, FpM_FpC_mul
     6- [libary] rename assmat -> matcompanion
+    7- prototype of FpX_center [ add one argument ]
 
   Added
     1- library function gpcalloc
