@@ -1233,7 +1233,7 @@ PRECPB:
 	if (isexact)
 	{
 	  if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
-	  if (!in_place) H = H? gmul(H, h): h;
+	  if (!in_place) H = H? ZM_mul(H, h): h;
 	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 	  gerepileall(av, in_place? 1: 2, &xinit, &H);
 	  x = mat_to_MP(xinit, prec);
@@ -1287,7 +1287,7 @@ PRECPB:
       count = 0;
       prec = (prec+2) >> 1;
       if (DEBUGLEVEL>3) fprintferr("\n...LLL reducing precision to %ld\n",prec);
-      if (!in_place) H = H? gmul(H, h): h;
+      if (!in_place) H = H? ZM_mul(H, h): h;
       xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
       gerepileall(av, in_place? 4: 5,&B,&L,&Q,&xinit, &H);
       x = mat_to_MP(xinit, prec);
@@ -1336,10 +1336,10 @@ PRECPB:
       {
 	if (isexact)
 	{
-	  if (exact_can_leave) { if (!in_place && H) h = gmul(H, h); break; }
+	  if (exact_can_leave) { if (!in_place && H) h = ZM_mul(H, h); break; }
 
 	  if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
-	  if (!in_place) H = H? gmul(H, h): h;
+	  if (!in_place) H = H? ZM_mul(H, h): h;
 	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 
 	  prec = good_prec(xinit, kmax);
@@ -1666,7 +1666,7 @@ lllintpartialall(GEN m, long flag)
       tm2[0] = evaltyp(t_MAT)|evallg(ncol - i);
     }
   } /* local block */
-  return gerepileupto(av, gmul(tm1? tm1: mid, tm2));
+  return gerepileupto(av, ZM_mul(tm1? tm1: mid, tm2));
 }
 
 GEN
@@ -1796,11 +1796,10 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     /* TODO: In case of failure do not recompute the full vector */
     Xpowers = (GEN*)new_chunk(dim + 1);
     Xpowers[0] = gen_1;
-    for (j = 1; j <= dim; j++) Xpowers[j] = gmul(Xpowers[j-1], X);
+    for (j = 1; j <= dim; j++) Xpowers[j] = mulii(Xpowers[j-1], X);
 
     /* TODO: in case of failure, use the part of the matrix already computed */
-    M = cgetg(dim + 1, t_MAT);
-    for (j = 1; j <= dim; j++) gel(M,j) = zerocol(dim);
+    M = zeromatcopy(dim,dim);
 
     /* Rows of M correspond to the polynomials
      * N^delta, N^delta Xi, ... N^delta (Xi)^d-1,
@@ -1818,7 +1817,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
       for (j = 0; j < d; j++,row++)
 	for (l = j + 1; l <= row; l++)
 	  gcoeff(M, l, row) = mulii(Xpowers[l-1], gel(Q,l-j+1));
-      Q = RgX_mul(Q, P);
+      Q = ZX_mul(Q, P);
     }
     for (j = 0; j < t; row++, j++)
       for (l = j + 1; l <= row; l++)
@@ -1847,9 +1846,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     sh = lllint_fp_ip(M, 4);
     /* Take the first vector if it is non constant */
     short_pol = gel(sh,1);
-    for (j = 2; j <= dim; j++)
-      if (signe(gel(short_pol, j))) break;
-    if (j > dim) short_pol = gel(sh, 2);
+    if (ZV_isscalar(short_pol)) short_pol = gel(sh, 2);
 
     nsp = gen_0;
     for (j = 1; j <= dim; j++) nsp = addii(nsp, absi(gel(short_pol,j)));
@@ -2232,7 +2229,7 @@ maxnorml2(pslq_M *M)
   {
     s = gen_0;
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
-    ma = gmax(ma, s);
+    if (gcmp(ma,s) < 0) ma = s;
   }
   return sqrtr(gmul(ma, real_1(DEFAULTPREC)));
 }
@@ -3569,7 +3566,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   rinvtrans = gmul(rinvtrans, v);
   v = ZM_inv(shallowtrans(v),gen_1);
   r = gmul(r,v);
-  u = u? gmul(u,v): v;
+  u = u? ZM_mul(u,v): v;
 
   l = lg(r);
   vnorm = cgetg(l,t_VEC);
@@ -3596,5 +3593,5 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   z = cgetg(4,t_VEC);
   gel(z,1) = gcopy(gel(res,1));
   gel(z,2) = gcopy(gel(res,2));
-  gel(z,3) = gmul(u, gel(res,3)); return gerepileupto(av,z);
+  gel(z,3) = ZM_mul(u, gel(res,3)); return gerepileupto(av,z);
 }

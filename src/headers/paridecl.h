@@ -227,6 +227,7 @@ long    RgM_isidentity(GEN x);
 long    RgM_isscalar(GEN x, GEN s);
 long    RgV_isscalar(GEN x);
 GEN     ZM_inv(GEN M, GEN dM);
+long    ZV_isscalar(GEN x);
 void    appendL(GEN x, GEN t);
 GEN     apply0(GEN A, GEN f);
 GEN     cget1(long l, long t);
