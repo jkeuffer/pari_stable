@@ -75,13 +75,6 @@ eltreltoabs(GEN rnfeq, GEN x)
   return gerepileupto(av, s);
 }
 
-static GEN rnfmakematrices(GEN rnf) { (void)rnf; return cgetg(1, t_VEC); }
-static GEN
-rnf_roots(GEN nf, GEN pol, long prec, GEN *pts) {
-  (void)nf; (void)pol; (void)prec;
-  *pts = cgetg(1,t_VEC); return cgetg(1, t_VEC);
-}
-
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
@@ -194,16 +187,17 @@ rnfinitalg(GEN nf, GEN pol, long prec)
 
   rnf = cgetg(13, t_VEC);
   gel(rnf,1) = pol;
+  gel(rnf,2) = cgetg(1, t_VEC); /* dummy */
   gel(rnf,3) = delta;
   gel(rnf,4) = f;
-  gel(rnf,6) = rnf_roots(nf, pol, prec, (GEN*)rnf+2);
+  gel(rnf,5) = cgetg(1, t_VEC); /* dummy */
+  gel(rnf,6) = cgetg(1, t_VEC); /* dummy */
   gel(rnf,7) = bas;
   gel(rnf,8) = lift_if_rational( invmat(B) );
   gel(rnf,9) = cgetg(1,t_VEC); /* dummy */
   gel(rnf,10) = nf;
   gel(rnf,11) = rnfequation2(nf,pol);
   gel(rnf,12) = gen_0;
-  gel(rnf,5) = rnfmakematrices(rnf);
   return gerepilecopy(av, rnf);
 }
 
@@ -559,7 +553,7 @@ rnfequation0(GEN A, GEN B, long flall)
   C = rnfequation_i(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   { /* a,b,c root of A,B,C = compositum, c = b + k a */
-    GEN a = gmul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), C));/* inv is costly !*/
+    GEN a = RgX_mul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), C));/* inv is costly !*/
     a = gneg_i(RgX_rem(a, C));
     C = mkvec3(C, mkpolmod(a, C), stoi(k));
   }
@@ -668,7 +662,7 @@ findmin(GEN nf, GEN x, GEN muf)
       m = lllintern(gmul(G, x), 4, 1, 0);
       if (!m) pari_err(precer,"rnflllgram");
     }
-    x = gmul(x, m);
+    x = ZM_mul(x, m);
     y = gmul(M, x);
   }
   m = gauss_realimag(y, muf);
@@ -1015,8 +1009,8 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   {
     GEN rel, eq = rnfequation2(nf,relpol);
     a   = gel(eq,3);
-    rel = poleval(relpol,
-		  deg1pol_i(gen_1, mkpolmod(gmul(negi(a), pol_x(varn(T))),T), v));
+    rel = deg1pol_i(gen_1, mkpolmod(deg1pol_i(negi(a),gen_0,varn(T)), T), v);
+    rel = poleval(relpol, rel);
 
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
