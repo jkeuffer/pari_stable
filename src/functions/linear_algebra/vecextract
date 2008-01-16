@@ -3,8 +3,7 @@ Section: linear_algebra
 C-Name: extract0
 Prototype: GGDG
 Description:
- (vec,gen):vec extract0($1, $2, NULL)
- (vec,gen,gen):vec  extract0($1, $2, $3)
+ (vec,gen,?gen):vec  extract0($1, $2, $3)
 Help: vecextract(x,y,{z}): extraction of the components of the matrix or
  vector x according to y and z. If z is omitted, y represents columns, otherwise
  y corresponds to rows and z to columns. y and z can be vectors (of indices),
