@@ -51,6 +51,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
        ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar
 BA  6- handle numerical derivation as an operation on closure.
     7- Fp_center, FpM_center, FpV_center
+RB  8- GP functions printf, Sprintf
 
   Removed
     1- obsolete library functions extract and matextract
