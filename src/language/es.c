@@ -1308,41 +1308,40 @@ nextch:
               double dvalue = va_arg( args, double );
               sprintf(work, subfmt, dvalue);
               str = &work[0];
-              while (*str ) dopr_outch(*str++);
+              while (*str) dopr_outch(*str++);
             } else {
+              char *buffer;
+              pari_sp av = avma;
               if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
               gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
               Tcopy = *T;
               if (len) {
                 mxlb = len;
               } else {
-                if (Tcopy.sigd >= 0) {
+                if (Tcopy.sigd >= 0)
                   mxlb = Tcopy.sigd;
-                } else { /* total precision */
-                  if (typ(gvalue) == t_REAL) {
-                    mxlb = prec2ndec(lg(gvalue));
-                  } else {
-                    pari_err(infprecer, "output");
-                    mxlb = 0;
-                  }
+                else { /* total precision */
+                  if (typ(gvalue) != t_REAL) pari_err(infprecer, "output");
+                  mxlb = prec2ndec(lg(gvalue));
                 }
               }
-              mxlb += 1 + 20; /* 20 : margin for erroneous outputs FIXME and for exponent */
+              /* 20 : margin for erroneous outputs FIXME and for exponent */
+              mxlb += 1 + 20;
               gtry = gtofp(gvalue, ndec2prec(mxlb));
-              if (typ(gtry) == t_REAL) {
-                char *buffer = stackmalloc(mxlb);
-                if (len) Tcopy.sigd = len-1;
-                Tcopy.format = tolower(ch);
-                *buffer = 0;
-                wr2_real(buffer, mxlb, &Tcopy, gtry, maxwidth, 0);
-                dostr(buffer,0);
-              } else { /* default Format %Z; %%%% one can do better for vectors of reals for example */
-                pari_err(talker, "impossible conversion to t_REAL, use %%Z format instead");
-              }
+              if (typ(gtry) != t_REAL)
+                pari_err(talker, "impossible conversion to t_REAL: %Z", gtry);
+
+              if (len) Tcopy.sigd = len-1;
+              Tcopy.format = tolower(ch);
+              buffer = stackmalloc(mxlb);
+              *buffer = 0;
+              wr2_real(buffer, mxlb, &Tcopy, gtry, maxwidth, 0);
+              dostr(buffer,0);
+              avma = av;
             }
             break;
           case 'p':
-            pari_err(talker, "pointer conversion (not in standard) %c in format `%s'", ch, saved_format);
+            pari_err(talker, "pointer conversion %c in format `%s'", ch, saved_format);
             break;
           default:
             pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, saved_format);
