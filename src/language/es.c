@@ -478,11 +478,10 @@ vpariputs(const char* format, va_list args)
     int l;
     buf = (char*)gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
-    if (l < 0) {
+    if (l < 0)
       l = bufsize<<1;
-    } else if (l < bufsize) {
+    else if (l < bufsize)
       break;
-    }
     gpfree(buf); bufsize = l + 1;
   }
   buf[bufsize-1] = 0; /* just in case */
@@ -495,8 +494,8 @@ vpariputs(const char* format, va_list args)
   {
     pariout_t T = *(GP_DATA->fmt); /* copy */
     T.prettyp = f_RAW;
-  for(;;)
-  {
+    for(;;)
+    {
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
