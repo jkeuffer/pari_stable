@@ -3,10 +3,18 @@ Class: basic
 Section: programming/specific
 C-Name: printf0
 Prototype: vss*
-Help: print(format,{GEN}*): outputs its string arguments (using format, with possible %Z specifications) ending without
- a newline
+Help: printf(fmt,{GEN}*): prints its arguments according to the format fmt
 Description:
   (str,?gen,...):void  printf1("format\n"${2 format_args})
-Doc: outputs its arguments, separated by commas, in formated way, ending with a newline.
+Doc: prints its arguments according to the format fmt. The format consists
+ of ordinary characters (not \%), printed unchanged, and conversions
+ specifications (\% plus all symbols up to the first conversion specifier),
+ which fetch one argument from the list and prints it according to the
+ conversion specification. More precisely, a conversion specification
+ consists in a \%, one or more optional flags (among \kbd{\#}, \kbd{0},
+ \kbd{-}, \kbd{+}, ' '), an optional decimal digit string specifying a
+ minimal field width, an optional precision in the form of a period
+ ('\kbd{.}') followed by a decimal digit string, and the conversion specifier
+ (among d, i, o, u, x, X, e, E, f, F, g, G, s, Z or \%)
  %\syn{NO}
 

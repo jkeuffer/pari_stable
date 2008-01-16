@@ -3,9 +3,12 @@ Class: basic
 Section: programming/specific
 C-Name: Strprintf
 Prototype: ss*
-Help: Strprintf(format,{x}*): returns a string as the output of its string arguments (using format, with possible %Z specifications) ending without a newline
+Help: Strprintf(fmt,{x}*): returns a string built from the remaining
+ arguments according to the format fmt.
 Description:
   (str,?gen,...):void  Strprintf1("format\n"${2 format_args})
-Doc: returns a string as the output of its arguments, separated by commas, in formated way, ending with a newline.
+Doc: returns a string built from the remaining arguments according to the
+ format fmt. The format consists of ordinary characters (not \%), printed
+ unchanged, and conversions specifications. See \kbd{printf}.
  %\syn{NO}
 
