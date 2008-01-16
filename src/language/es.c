@@ -991,26 +991,21 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
       GEN up = int_LSW(uvalue);
       char temp[isze+1];
       for (i=2; i<len; i++) {
-        ulong ucp;
+        ulong ucp = (ulong)*up;
         short rpl;
-        ucp = (ulong)*up;
         for (jj = 0, rpl=0; jj < isze; jj++) {
 #if 0
           fprintf(stderr, "<>i=%ld, jj=%hd, ucp==%lu\n", i, jj, ucp);
 #endif
           unsigned char cv = ucp & 0xF;
-          if (place >= mxl) { 
+          if (place >= mxl)
             pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-          }
           temp[rpl++] = (caps? "0123456789ABCDEF":"0123456789abcdef") [cv];
           ucp >>= 4;
-          if (ucp == 0 && i == 2) {
-            break;
-          }
+          if (ucp == 0 && i == 2) break;
         } /* loop on hexa digits in word */
-        for (jj = 0; jj < rpl; jj++) {
-         convert[place + rpl - 1 - jj] = temp[jj];
-        }
+        for (jj = 0; jj < rpl; jj++)
+          convert[place + rpl - 1 - jj] = temp[jj];
         place += rpl;
         up  = int_nextW(up);
       }
