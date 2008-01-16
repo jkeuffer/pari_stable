@@ -564,10 +564,10 @@ copart(char *s, ulong x, long start)
 
 /* sss.ttt, assume 'point' < strlen(s) */
 static void
-wr_dec(char *buffer, int mxl, char *s, long point, int width_frac)
+wr_dec(char *buffer, size_t mxl, char *s, long point, int width_frac)
 {
   if (buffer) {
-    int len = strlen(buffer) + point + 1;
+    size_t len = strlen(buffer) + point + 1;
     if (len > mxl)
       pari_err(talker, "buffer overflow in wr_dec/1 %d > %d", len, mxl);
     strncat(buffer, s, point); /* integer part */
@@ -592,7 +592,7 @@ wr_dec(char *buffer, int mxl, char *s, long point, int width_frac)
 
 /* a.bbb En*/
 static void
-wr_exp(char *buffer, int mxl, pariout_t *T, char *s, long n)
+wr_exp(char *buffer, size_t mxl, pariout_t *T, char *s, long n)
 {
   if (buffer) {
     char work[256];
@@ -617,7 +617,7 @@ wr_exp(char *buffer, int mxl, pariout_t *T, char *s, long n)
 
 /* assume x != 0 and print |x| in floating point format */
 static void
-wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_frac) /* f_format : boolean : fixed or not */
+wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_frac) /* f_format : boolean : fixed or not */
 {
   long exponent, beta, l, ldec, dec0, decdig, d, dif, df2, lx = lg(x), wanted_dec = T->sigd;
   GEN z;
@@ -747,7 +747,7 @@ wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_fr
 #ifdef PB
         fprintf(stderr, "<>df2(position of .)==%ld, width_frac==%d, to_round=%ld, s==`%s'\n", df2, width_frac, to_round, s);
 #endif
-        if (to_round > 0 && to_round < strlen(s)) {
+        if (to_round > 0 && (ulong)to_round < strlen(s)) {
           s[to_round] = 0;
           wr_exp(buffer, mxl, T, s, df2-1);
         } else {
@@ -760,7 +760,7 @@ wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_fr
       wr_dec(buffer, mxl, s, df2, width_frac);
     } else { /* f_format, fractionary part must be written */
       if (strlen(buffer) + 2 > mxl) {
-        pari_err(talker, "buffer overflow in wr2_float/1 %d > %d", strlen(buffer) + 2, mxl);
+        pari_err(talker, "buffer overflow in wr_float/1 %d > %d", strlen(buffer) + 2, mxl);
       }
       strcat(buffer, "0.");
       if (width_frac) {
@@ -769,14 +769,14 @@ wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_fr
         } else {
           bzeros(buffer, mxl, -df2);
           if (strlen(buffer) + width_frac + df2 > mxl) {
-            pari_err(talker, "buffer overflow in wr2_float/2 %d > %d", strlen(buffer) + width_frac + df2, mxl);
+            pari_err(talker, "buffer overflow in wr_float/2 %d > %d", strlen(buffer) + width_frac + df2, mxl);
           }
           strncat(buffer, s, width_frac + df2);
         }
       } else { /* no given precision */
         bzeros(buffer, mxl, -df2);
         if (strlen(buffer) + strlen(s) > mxl) {
-          pari_err(talker, "buffer overflow in wr2_float/3 %d > %d", strlen(buffer) + strlen(s), mxl);
+          pari_err(talker, "buffer overflow in wr_float/3 %d > %d", strlen(buffer) + strlen(s), mxl);
         }
         strcat(buffer, s);
       }
@@ -786,7 +786,7 @@ wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_fr
     else if (df2 > 0) wr_dec(NULL, 0, s, df2, 0);
     else { pariputs("0."); zeros(-df2); pariputs(s); }
   }
-} /* wr2_float */
+} /* wr_float */
 
 /* Write real number x.
  * format: e (exponential), f (floating point), g (as f unless x too small)
@@ -794,7 +794,7 @@ wr2_float(char *buffer, int mxl, pariout_t *T, GEN x, int f_format, int width_fr
  * sigd: number of sigd to print (all if <0).
  */
 static void
-wr2_real(char *buffer, int mxl, pariout_t *T, GEN x, int width_frac, int addsign)
+wr2_real(char *buffer, size_t mxl, pariout_t *T, GEN x, int width_frac, int addsign)
 {
   pari_sp av;
   long sx = signe(x), ex = expo(x);
@@ -840,9 +840,9 @@ wr2_real(char *buffer, int mxl, pariout_t *T, GEN x, int width_frac, int addsign
 
   av = avma;
   if (buffer) {
-    wr2_float(buffer, mxl, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', width_frac);
+    wr_float(buffer, mxl, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', width_frac);
   } else {
-    wr2_float(NULL, 9, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', 0);
+    wr_float(NULL, 9, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', 0);
   }
   avma = av;
 } /* wr2_real */
@@ -1089,7 +1089,7 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
   GEN arg_vector = NULL;
   int index = 1;
   int nbmx = 0;
-  int mxlb;
+  size_t mxlb;
   pariout_t Tcopy;
   const char *recall = NULL;
   int to_free;
@@ -1410,7 +1410,7 @@ v3pariputs(const char* format, int is_a_list, int return_string, ...)
 
   for(;;) {
     va_start(args,return_string);
-    s = gprealloc(s, bsiz + 1);
+    s = (char*)gprealloc(s, bsiz + 1);
     z_output = s;
     DoprEnd = s + bsiz;
     sm_dopr(GP_DATA->fmt, s, format, is_a_list, args );
@@ -1422,7 +1422,7 @@ v3pariputs(const char* format, int is_a_list, int return_string, ...)
     } else {
       bsiz += SnprfOverflow + 10;
     }
-    s = gprealloc(s, bsiz + 1);
+    s = (char*)gprealloc(s, bsiz + 1);
   }
   va_end(args);
   if (return_string) {
