@@ -591,12 +591,12 @@ wr_dec(char *buffer, size_t mxl, char *s, long point, int width_frac)
 
 /* a.bbb En*/
 static void
-wr_exp(char *buffer, size_t mxl, pariout_t *T, char *s, long n)
+wr_exp(char *buffer, size_t mxl, int sp, char *s, long n)
 {
   if (buffer) {
     char work[256];
     wr_dec(buffer, mxl, s, 1, 0);
-    if (T->sp) {
+    if (sp) {
       if (strlen(buffer) + 1 > mxl) {
         pari_err(talker, "buffer overflow in wr_exp/1 %d > %d", strlen(buffer) + 1, mxl);
       }
@@ -609,16 +609,16 @@ wr_exp(char *buffer, size_t mxl, pariout_t *T, char *s, long n)
     strcat(buffer + strlen(buffer), work);
   } else {
     wr_dec(NULL, 0, s, 1, 0);
-    if (T->sp) pariputc(' ');
+    if (sp) pariputc(' ');
     pariprintf("E%ld", n);
   }
 }
 
 /* assume x != 0 and print |x| in floating point format */
 static void
-wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_frac) /* f_format : boolean : fixed or not */
+wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec, int f_format, int width_frac) /* f_format : boolean : fixed or not */
 {
-  long exponent, beta, l, ldec, dec0, decdig, d, dif, df2, lx = lg(x), wanted_dec = T->sigd;
+  long exponent, beta, l, ldec, dec0, decdig, d, dif, df2, lx = lg(x);
   GEN z;
   ulong *res, *resd;
   char *s, *t;
@@ -748,12 +748,12 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
 #endif
         if (to_round > 0 && (ulong)to_round < strlen(s)) {
           s[to_round] = 0;
-          wr_exp(buffer, mxl, T, s, df2-1);
+          wr_exp(buffer, mxl, sp, s, df2-1);
         } else {
-          wr_exp(buffer, mxl, T, s, df2-1);
+          wr_exp(buffer, mxl, sp, s, df2-1);
         }
       } else {
-        wr_exp(buffer, mxl, T, s, df2-1);
+        wr_exp(buffer, mxl, sp, s, df2-1);
       }
     } else if (df2 > 0) { /* f_format, write integer_part.fractionary_part */
       wr_dec(buffer, mxl, s, df2, width_frac);
@@ -781,7 +781,7 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
       }
     }
   } else { /* on a file */
-    if (!f_format) wr_exp(NULL, 0, T, s, df2-1);
+    if (!f_format) wr_exp(NULL, 0, sp, s, df2-1);
     else if (df2 > 0) wr_dec(NULL, 0, s, df2, 0);
     else { pariputs("0."); zeros(-df2); pariputs(s); }
   }
@@ -793,14 +793,14 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
  * sigd: number of sigd to print (all if <0).
  */
 static void
-wr2_real(char *buffer, size_t mxl, pariout_t *T, GEN x, int width_frac, int addsign)
+wr2_real(char *buffer, size_t mxl, GEN x, int sp, char format, long sigd, int width_frac, int addsign)
 {
   pari_sp av;
   long sx = signe(x), ex = expo(x);
 
   if (!sx) { /* real 0 */
-    if (T->format == 'f') {
-      long d, dec = T->sigd;
+    if (format == 'f') {
+      long d, dec = sigd;
       if (dec < 0)
       {
         d = (long)(-ex * L2SL10);
@@ -839,12 +839,12 @@ wr2_real(char *buffer, size_t mxl, pariout_t *T, GEN x, int width_frac, int adds
 
   av = avma;
   if (buffer) {
-    wr_float(buffer, mxl, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', width_frac);
+    wr_float(buffer, mxl, x, sp, sigd, (format == 'g' && ex >= -32) || format == 'f', width_frac);
   } else {
-    wr_float(NULL, 9, T,x, (T->format == 'g' && ex >= -32) || T->format == 'f', 0);
+    wr_float(NULL, 9, x, sp, sigd, (format == 'g' && ex >= -32) || format == 'f', 0);
   }
   avma = av;
-} /* wr2_real */
+}
 
 /* This vsnprintf implementation is adapted from snprintf.c to be found at
  *
@@ -1050,7 +1050,6 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
   int index = 1;
   int nbmx = 0;
   size_t mxlb;
-  pariout_t Tcopy;
   const char *recall = NULL;
   int to_free;
   char *plus;
@@ -1240,13 +1239,13 @@ nextch:
               gvalue = v_get_arg(arg_vector, nbmx, &index, "Z");
             }
             if (len || maxwidth) {
+              pariout_t Tcopy;
               /*_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp) */
               /* char format; e,f,g */
               /* long fieldw; field width */
               /* long sigd;  -1 (all) or number of significant digits printed */
               /* int sp;   0 = suppress whitespace from output */
               /* int prettyp; output style: raw, prettyprint, etc */
-              /* int TeXstyle; */
               _initout(&Tcopy,tolower(ch),len,1,maxwidth, f_RAW);
               plus = GENtostr0(gvalue, &Tcopy, &gen_output);
             } else {
@@ -1312,14 +1311,14 @@ nextch:
             } else {
               char *buffer;
               pari_sp av = avma;
+              long sigd = T->sigd;
               if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
               gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
-              Tcopy = *T;
               if (len) {
                 mxlb = len;
               } else {
-                if (Tcopy.sigd >= 0)
-                  mxlb = Tcopy.sigd;
+                if (sigd >= 0)
+                  mxlb = sigd;
                 else { /* total precision */
                   if (typ(gvalue) != t_REAL) pari_err(infprecer, "output");
                   mxlb = prec2ndec(lg(gvalue));
@@ -1331,11 +1330,10 @@ nextch:
               if (typ(gtry) != t_REAL)
                 pari_err(talker, "impossible conversion to t_REAL: %Z", gtry);
 
-              if (len) Tcopy.sigd = len-1;
-              Tcopy.format = tolower(ch);
+              if (len) sigd = len-1;
               buffer = stackmalloc(mxlb);
               *buffer = 0;
-              wr2_real(buffer, mxlb, &Tcopy, gtry, maxwidth, 0);
+              wr2_real(buffer, mxlb, gtry, T->sp, tolower(ch), sigd, maxwidth, 0);
               dostr(buffer,0);
               avma = av;
             }
@@ -1977,7 +1975,7 @@ wr_vecsmall(pariout_t *T, GEN g)
 static void
 wr_real(pariout_t *T, GEN x, int addsign)
 {
-  wr2_real(NULL, 0, T, x, 0, addsign);
+  wr2_real(NULL, 0, x, T->sp, T->format, T->sigd, 0, addsign);
 }
 
 /********************************************************************/
