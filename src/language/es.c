@@ -665,7 +665,7 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
 
   if (width_frac && beta > width_frac) {
 #ifdef PB
-    fprintf(stderr, "<>rounding for fractionnary part\n");
+    fprintferr("<>rounding for fractionnary part\n");
 #endif
     delta = beta - width_frac;
     beta = width_frac;
@@ -674,7 +674,7 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
   }
   if (decdig > wanted_dec && wanted_dec > 0) {
 #ifdef PB
-    fprintf(stderr, "<>rounding for total len\n");
+    fprintferr("<>rounding for total len\n");
 #endif
     if (to_round) {
       to_round = min(to_round, wanted_dec);
@@ -685,11 +685,11 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
   }
 
 #ifdef PB
-  fprintf(stderr, "\nLe grand jeu, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
+  fprintferr("\nLe grand jeu, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
   for (l = 1; l <= ldec; l++) {
-    fprintf(stderr, "%ld ", res[-l]);
+    fprintferr("%ld ", res[-l]);
   }
-  fprintf(stderr, "\n");
+  fprintferr("\n");
 #endif
 
   if (to_round) {
@@ -703,14 +703,14 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
       ulong p10 = u_pow10(9-d), r = *--resd % p10;
       if (r >= (p10>>1)) {
 #ifdef PB
-        fprintf(stderr, "case/1 w=%ld d=%ld p10=%ld r=%ld\n", l/9, d, p10, r);
+        fprintferr("case/1 w=%ld d=%ld p10=%ld r=%ld\n", l/9, d, p10, r);
 #endif
         round_up(resd, p10, res);
       }
     } else {
       if ((ulong)resd[-1] >= 500000000UL) {
 #ifdef PB
-        fprintf(stderr, "case/2 w=%ld\n", l/9);
+        fprintferr("case/2 w=%ld\n", l/9);
 #endif
         round_up(resd, 1, res);
       }
@@ -736,7 +736,7 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
     s[min(decdig,wanted_dec)] = 0;
   }
 #ifdef PB
-  fprintf(stderr, "<>s==`%s' len=%ld decdig==%ld\n", s, strlen(s), decdig);
+  fprintferr("<>s==`%s' len=%ld decdig==%ld\n", s, strlen(s), decdig);
 #endif
 
   df2 = decdig - exponent; /* virtual position of . in s; positive or negative, and 10'power+1 */
@@ -744,7 +744,7 @@ wr_float(char *buffer, size_t mxl, pariout_t *T, GEN x, int f_format, int width_
     if (!f_format) { /* floating format : e, or g, or f when integer_part exceeds wanted_dec FIXME (g should be f when possible) */
       if (width_frac) {
 #ifdef PB
-        fprintf(stderr, "<>df2(position of .)==%ld, width_frac==%d, to_round=%ld, s==`%s'\n", df2, width_frac, to_round, s);
+        fprintferr("<>df2(position of .)==%ld, width_frac==%d, to_round=%ld, s==`%s'\n", df2, width_frac, to_round, s);
 #endif
         if (to_round > 0 && (ulong)to_round < strlen(s)) {
           s[to_round] = 0;
@@ -912,12 +912,10 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   int factor;
   pari_sp av = avma;
 
-  if (gvalue) {
-    av = avma; gvalue = gfloor(gvalue);
-    if (typ(gvalue) != t_INT) {
-      dostr("Error : argument is not of type t_INT", 0);
-      avma = av; return;
-    }
+  if (gvalue && typ(gvalue) != t_INT) {
+    gvalue = gfloor(gvalue);
+    if (typ(gvalue) != t_INT)
+      pari_err(talker, "not a t_INT in integer format conversion: %Z", gvalue);
   }
 
   /* DEBUGP(("value 0x%x, base %d, dosign %d, ljust %d, len %d, zpad %d\n",
@@ -1019,15 +1017,11 @@ v_l_get_arg(GEN arg_vector, int nbmx, int *index)
 static GEN
 v_get_arg(GEN arg_vector, int nbmx, int *index, const char *caller)
 {
-  GEN res = NULL;
-/*  fprintf(stderr, "index==%d, nbmx=%d (%s)\n", *index, nbmx, caller); */
+/*  fprintferr("index==%d, nbmx=%d (%s)\n", *index, nbmx, caller); */
 /*  output(arg_vector); */
-  if (*index >= nbmx) {
+  if (*index >= nbmx)
     pari_err(talker, "missing GEN arg %d for printf format==`%s'", *index, saved_format);
-  } else {
-    res = gel(arg_vector, (*index)++);
-  }
-  return res;
+  return gel(arg_vector, (*index)++);
 } /* v_get_arg */
 
 static void
@@ -1066,7 +1060,7 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
 
   while ((ch = *format++) != '\0') {
 #if 0
-    fprintf(stderr, "<>ch/1==%c\n", ch);
+    fprintferr("<>ch/1==%c\n", ch);
 #endif
     switch(ch) {
       case '%':
@@ -1076,12 +1070,11 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
 nextch:
         ch = *format++;
 #if 0
-        fprintf(stderr, "<>ch/2==%c\n", ch);
+        fprintferr("<>ch/2==%c\n", ch);
 #endif
         switch(ch) {
           case 0:
-            dostr( "**end of format**" , 0);
-            return;
+            pari_err(talker, "printf: end of format");
 /*
 ------------------------------------------------------------------------
                              -- flags
@@ -1144,9 +1137,8 @@ nextch:
             }
             goto nextch;
           case '.':
-            if (pointflag) {
-              dostr( "**already in point part**" , 0);
-            }
+            if (pointflag)
+              pari_err(talker, "printf: two '.' in conversion specifiation");
             pointflag = 1;
             goto nextch;
 /*
@@ -1311,7 +1303,7 @@ nextch:
               strncpy(subfmt, recall, format - recall);
               subfmt[format - recall] = '\0'; /* format has been incremented after reading of current ch */
 #if 0
-              fprintf(stderr, "<>subfmt==`%s'\n", subfmt);
+              fprintferr("<>subfmt==`%s'\n", subfmt);
 #endif
               double dvalue = va_arg( args, double );
               sprintf(work, subfmt, dvalue);
@@ -1330,7 +1322,6 @@ nextch:
                   if (typ(gvalue) == t_REAL) {
                     mxlb = prec2ndec(lg(gvalue));
                   } else {
-/*                  dostr("infinite precision required for output"); */
                     pari_err(infprecer, "output");
                     mxlb = 0;
                   }
