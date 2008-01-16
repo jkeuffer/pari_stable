@@ -46,11 +46,11 @@ Description:
  (real):negbool        !signe($1)
  (mp):negbool          !signe($1)
  (pol):negbool         !signe($1)
-  
+ 
  (bool):small_int
  (typ):small_int 
  (small):small_int 
-  
+ 
  (bool):small
  (typ):small 
  (small_int):small
@@ -117,7 +117,7 @@ Description:
  (typ):str type_name($1)
  
  (#str):typ  ${1 str_format}
-  
+ 
  (bnf):nf:parens       gel($1, 7)
  (gen):nf
  (bnr):bnf:parens      gel($1, 1)
