@@ -132,7 +132,7 @@
 3309431808302492895087313521101191124546218312241301713223117215210051730192
 4058849195801312549213512806000001
 31 in base 16 == 1f
-%X for medium : 25BCBF2D631000016329F1C35CA4BFB11D
+%X for medium : 1D6329F1C35CA4BFB125BCBF2D63100001
 %10s for "chaine" :     chaine
 %.4s for "chaine" : chai
 %s for 1 : 1
@@ -166,4 +166,4 @@
 '.
   *** printf: impossible conversion to t_REAL, use %Z format instead.
   *** printf: incorrect type in gtofp.
-Total time spent: 0
+Total time spent: 16

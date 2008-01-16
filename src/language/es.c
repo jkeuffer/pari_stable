@@ -924,25 +924,12 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
     value, base, dosign, ljust, len, zpad )); */
   if (gvalue) {
     uvalue = icopy(gvalue);
-    if (dosign) {
-      if (signe(gvalue) < 0) {
-        signvalue = '-';
-        setsigne(uvalue,1); /* i.e. = gmul(gvalue, gen_m1); chg_sign = gneg, negi, togglesign */
-      }
-    }
+    if (dosign && signe(gvalue) < 0) { signvalue = '-'; setsigne(uvalue,1); }
   } else {
     ulnvalue = lvalue;
-    if (dosign) {
-      if (lvalue < 0) {
-        signvalue = '-';
-        ulnvalue = - lvalue;
-      }
-    }
+    if (dosign && lvalue < 0) { signvalue = '-'; ulnvalue = - lvalue; }
   }
-  if (base < 0) {
-    caps = 1;
-    base = -base;
-  }
+  if (base < 0) { caps = 1; base = -base; }
   if (base >= 10) {
    factor = 1;
   } else {
@@ -966,56 +953,36 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
         cnt = 0;
         ulnvalue = larray[i];
         do {
-          if (place >= mxl) { 
-            pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-          }
           convert[place++] = '0' + ulnvalue%10;
           ulnvalue = ulnvalue / 10;
           cnt++;
         } while (ulnvalue);
-        if (i + 1 < len) {
-          for (;cnt<9;cnt++) {
-            if (place >= mxl) { 
-              pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-            }
-            convert[place++] = '0';
- }
-        }
+        if (i + 1 < len)
+          for (;cnt<9;cnt++) convert[place++] = '0';
       }
     } else if (base == 16) {
-      long i;
-      short jj;
-#define   isze BITS_IN_LONG / 4
-      long len = lgefint(uvalue);
+      long i, len = lgefint(uvalue);
       GEN up = int_LSW(uvalue);
-      char temp[isze+1];
       for (i=2; i<len; i++) {
         ulong ucp = (ulong)*up;
-        short rpl;
-        for (jj = 0, rpl=0; jj < isze; jj++) {
-#if 0
-          fprintf(stderr, "<>i=%ld, jj=%hd, ucp==%lu\n", i, jj, ucp);
-#endif
+        long j, rpl;
+        for (j=0, rpl=0; j < BITS_IN_LONG/4; j++) {
           unsigned char cv = ucp & 0xF;
-          if (place >= mxl)
-            pari_err(talker, "ALG-ERREUR place %ld >= mxl %ld, format==%s, output==%s", place, mxl, saved_format, convert);
-          temp[rpl++] = (caps? "0123456789ABCDEF":"0123456789abcdef") [cv];
+          if (cv == 0 && i == len-1) continue;
+          convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[cv];
           ucp >>= 4;
           if (ucp == 0 && i == 2) break;
-        } /* loop on hexa digits in word */
-        for (jj = 0; jj < rpl; jj++)
-          convert[place + rpl - 1 - jj] = temp[jj];
+        }
         place += rpl;
         up  = int_nextW(up);
-      }
-#undef   isze
+      } /* loop on hex digits in word */
     } else {
       pari_err(talker, "conversion to base %d not available", base);
     }
   } else {
     do {
-      convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef") [ulnvalue % (unsigned)base ];
-      ulnvalue = (ulnvalue / (unsigned)base );
+      convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[ulnvalue % (unsigned)base ];
+      ulnvalue /= (unsigned)base;
     } while (ulnvalue);
 
   }

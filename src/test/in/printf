@@ -13,7 +13,7 @@ printf("%%ld for very big : %ld\n", 7^10000)
 
 /* x conversions */
 
-printf("31 base 16 == %x\n", 31)
+printf("31 in base 16 == %x\n", 31)
 printf("%%X for medium : %X\n", 10^40+10^20+1)
 
 /* s conversion */
