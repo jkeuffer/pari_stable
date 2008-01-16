@@ -3,7 +3,7 @@ Class: basic
 Section: programming/specific
 C-Name: printf0
 Prototype: vss*
-Help: printf(fmt,{GEN}*): prints its arguments according to the format fmt
+Help: printf(fmt,{x}*): prints its arguments according to the format fmt
 Description:
   (str,?gen,...):void  printf1("format\n"${2 format_args})
 Doc: prints its arguments according to the format fmt. The format consists
