@@ -561,32 +561,49 @@ copart(char *s, ulong x, long start)
   }
 }
 
+/* FIXME: to the eventually deleted */
+#define PB
+#undef PB
+
+/* FIXME: to be deleted */
+static THREAD const char *saved_format = NULL;
+
 /* sss.ttt, assume 'point' < strlen(s) */
 static void
 wr_dec(char *buffer, size_t mxl, char *s, long point, int width_frac)
 {
+
   if (buffer) {
     size_t len = strlen(buffer) + point + 1;
     if (len > mxl)
       pari_err(talker, "buffer overflow in wr_dec/1 %d > %d", len, mxl);
     strncat(buffer, s, point); /* integer part */
+    buffer[len-1] = 0;
     strcat(buffer, ".");
+/*OFF    len += point + 1; */
     if (width_frac) {
       if (len + width_frac > mxl) {
         pari_err(talker, "buffer overflow in wr_dec/2 %d > %d", len + width_frac, mxl);
       }
       strncat(buffer, s + point, width_frac);
+      buffer[len + width_frac] = 0;
     } else {
       if (len + strlen(s) - point > mxl) {
         pari_err(talker, "buffer overflow in wr_dec/3 %d > %d", len + strlen(s) - point, mxl);
       }
+      if (point < strlen(s)) {
       strcat(buffer, s + point);
+      } else {
+        if (strlen(s) == 0)
+          pari_warn(warner, "there is nothing to output for this format `%s'", saved_format);
+      }
     }
   } else {
     char *t = s + point, save = *t;
     *t = 0;    pariputs(s); pariputc('.'); /* integer part */
     *t = save; pariputs(t);
   }
+
 }
 
 /* a.bbb En*/
@@ -634,6 +651,10 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   df2 : virtual position of . in ``s'' (the string integer_part.fractionnary_part)
 */
 
+#ifdef PB
+  fprintferr("wr_float buffer.in==`%s' f_format==%d\n", buffer, f_format);
+#endif
+
   if (wanted_dec > 0)
   { /* reduce precision if possible */
     l = ndec2prec(wanted_dec); /* 'wanted_dec' digits -> pari precision in words for that */
@@ -659,10 +680,6 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   dec0 = numdig(*resd);
   decdig = 9 * (ldec-1) + dec0; /* number of significant decimal digits in z */
 
-/* FIXME: to the eventually deleted */
-#define PB
-#undef PB
-
   exponent = beta;
 
   if (width_frac && beta > width_frac) {
@@ -687,7 +704,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   }
 
 #ifdef PB
-  fprintferr("\nLe grand jeu, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
+  fprintferr("\nFull output, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
   for (l = 1; l <= ldec; l++) {
     fprintferr("%ld ", res[-l]);
   }
@@ -737,11 +754,12 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   } else {
     s[min(decdig,wanted_dec)] = 0;
   }
+  df2 = decdig - exponent; /* virtual position of . in s; positive or negative, and 10'power+1 */
 #ifdef PB
-  fprintferr("<>s==`%s' len=%ld decdig==%ld\n", s, strlen(s), decdig);
+  fprintferr("<>s==`%s' len=%ld decdig==%ld, exponent==%ld, f_format==%d, df2==%d\n", s, strlen(s), decdig, exponent, f_format, df2);
+  fprintferr("wr_float buffer.inter==`%s' f_format==%d\n", buffer, f_format);
 #endif
 
-  df2 = decdig - exponent; /* virtual position of . in s; positive or negative, and 10'power+1 */
   if (buffer) { /* writing into a buffer */
     if (!f_format) { /* floating format : e, or g, or f when integer_part exceeds wanted_dec FIXME (g should be f when possible) */
       if (width_frac) {
@@ -802,6 +820,10 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wi
   char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
   int f_format;
 
+#ifdef PB
+  fprintferr("wr2_real buffer.in==`%s' format==`%c'\n", buffer, format);
+#endif
+
   if (!sx) { /* real 0 */
     if (format == 'f') {
       long d, dec = sigd;
@@ -833,6 +855,10 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wi
     } /* string for a zero */
   }
 
+#ifdef PB
+  fprintferr("wr2_real buffer.inter==`%s' format==`%c'\n", buffer, format);
+#endif
+
   if (sx < 0) {
     if (buffer) {
       strcat(buffer, "-"); /* print sign if needed */
@@ -840,6 +866,10 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wi
       if (addsign) pariputc('-'); /* print sign if needed */
     }
   }
+
+#ifdef PB
+  fprintferr("wr2_real buffer.before==`%s' format==`%c'\n", buffer, format);
+#endif
 
   av = avma;
   f_format = (format == 'g' && ex >= -32) || format == 'f';
@@ -861,9 +891,6 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wi
 static THREAD const char *DoprEnd; /* ending of the output buffer */
 static THREAD int SnprfOverflow; /* counts number of overflows out of the output buffer */
 static THREAD char *z_output; /* the current writing place in the output buffer */
-
-/* FIXME: to be deleted */
-static THREAD const char *saved_format = NULL;
 
 static void
 dopr_outch(int c)
@@ -943,7 +970,6 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   }
   convert = (char *)stackmalloc(mxl);
   if (gvalue) {
-    if (base == 8) pari_err(impl, "conversion to octal");
     if (base == 10) {
       long len, i, cnt;
       ulong *larray = convi(uvalue, &len);
@@ -964,21 +990,57 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
       GEN up = int_LSW(uvalue);
       for (i=2; i<len; i++) {
         ulong ucp = (ulong)*up;
-        long j, rpl;
-        for (j=0, rpl=0; j < BITS_IN_LONG/4; j++) {
+        long j;
+        for (j=0; j < BITS_IN_LONG/4; j++) {
           unsigned char cv = ucp & 0xF;
-          if (cv == 0 && i == len-1) continue;
           convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[cv];
           ucp >>= 4;
-          if (ucp == 0 && i == 2) break;
+          if (ucp == 0 && i+1 == len) break;
         }
-        place += rpl;
         up  = int_nextW(up);
       } /* loop on hex digits in word */
+    } else if (base == 8) {
+      long i, len = lgefint(uvalue);
+      GEN up = int_LSW(uvalue);
+      unsigned long rem = 0;
+      int shift = 0;
+      int mask[3] = {0, 1, 3};
+      int stop = BITS_IN_LONG/3;
+      long ldispo = BITS_IN_LONG;
+      for (i=2; i<len; i++) {
+        ulong ucp = (ulong)*up;
+        long j;
+        if (shift) { /* 0, 1 or 2 */
+          unsigned char cv = ((ucp & mask[shift]) <<(3-shift)) + rem;
+          if (cv > 7) pari_err(talker, "ALG-ERROR cv==%d", cv);
+          convert[place++] = "01234567"[cv];
+          ucp >>= shift;
+          ldispo -= shift;
+        };
+        shift = (shift + 3 - BITS_IN_LONG % 3) % 3;
+        for (j=0; j < stop; j++) {
+          unsigned char cv = ucp & 0x7;
+          if (ucp == 0 && i+1 == len) {
+            rem = 0;
+            break;
+          };
+          convert[place++] = "01234567"[cv];
+          ucp >>= 3;
+          rem = ucp;
+          ldispo -= 3;
+          if (ldispo < 3) break;
+        }
+        up  = int_nextW(up);
+        ldispo = BITS_IN_LONG;
+      } /* loop on hex digits in word */
+      if (rem) {
+        if (rem > 7) pari_err(talker, "ALG-ERROR rem==%lu", rem);
+        convert[place++] = "01234567"[rem];
+      }
     } else {
       pari_err(talker, "conversion to base %d not available", base);
     }
-  } else {
+  } else { /* not a gvalue, thus a standard integer */
     do {
       convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[ulnvalue % (unsigned)base ];
       ulnvalue /= (unsigned)base;
@@ -1034,6 +1096,19 @@ v_set_arg(va_list args, GEN *arg_vector, int *nbmx)
 }
 
 static void
+print_header(int blank, int plus, int sharp)
+{
+  if (sharp) {
+    dopr_outch('0');
+    dopr_outch('x');
+  } else if (plus) {
+    dopr_outch('+');
+  } else if (blank) {
+    dopr_outch(' ');
+  };
+}
+
+static void
 sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list args )
 {
   int ch;
@@ -1042,6 +1117,9 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
   int shortflag = 0;
   int pointflag = 0;
   int maxwidth = 0;
+  int print_a_plus;
+  int print_a_blank;
+  int with_sharp;
   char *strvalue;
   long lvalue;
   int ljust;
@@ -1067,6 +1145,9 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
         ljust = len = zpad = maxwidth = 0;
         shortflag = longflag = pointflag = 0;
         recall = format - 1; /* '%' was skipped */
+        print_a_plus = 0;
+        print_a_blank = 0;
+        with_sharp = 0;
 nextch:
         ch = *format++;
 #if 0
@@ -1086,6 +1167,13 @@ nextch:
             ljust = 1;
             goto nextch;
           case '+':
+            print_a_plus = 1;
+            goto nextch;
+          case '#':
+            with_sharp = 1;
+            goto nextch;
+          case ' ':
+            print_a_blank = 1;
             goto nextch;
           case '0': /* set zero padding if len not set */
             if (len==0) {
@@ -1138,7 +1226,7 @@ nextch:
             goto nextch;
           case '.':
             if (pointflag)
-              pari_err(talker, "printf: two '.' in conversion specifiation");
+                          pari_err(talker, "printf: two '.' in conversion specification");
             pointflag = 1;
             goto nextch;
 /*
@@ -1161,6 +1249,7 @@ nextch:
 */
           case 'u':
           case 'U':
+            print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
               if (longflag) {
                 lvalue = va_arg( args, long );
@@ -1176,6 +1265,7 @@ nextch:
             break;
           case 'o':
           case 'O':
+            print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
               if (longflag) {
                 lvalue = va_arg( args, long );
@@ -1191,6 +1281,7 @@ nextch:
             break;
           case 'd':
           case 'D':
+            print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
               if (longflag) {
                 lvalue = va_arg( args, long );
@@ -1204,7 +1295,23 @@ nextch:
               fmtnum( 0, gvalue, 10,1, ljust, len, zpad );
             }
             break;
+          case 'p':
+            print_header(print_a_blank, print_a_plus, 1);
+            if (is_a_list) {
+              if(longflag) {
+                lvalue = va_arg( args, long );
+              } else {
+                lvalue = va_arg( args, int );
+              }
+              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
+            } else {
+              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
+              gvalue = v_get_arg(arg_vector, nbmx, &index, "x");
+              fmtnum( 0, gvalue, 16,0, ljust, len, zpad );
+            }
+            break;
           case 'x':
+            print_header(print_a_blank, print_a_plus, with_sharp);
             if (is_a_list) {
               if (longflag) {
                 lvalue = va_arg( args, long );
@@ -1219,6 +1326,7 @@ nextch:
             }
             break;
           case 'X':
+            print_header(print_a_blank, print_a_plus, with_sharp);
             if (is_a_list) {
               if (longflag) {
                 lvalue = va_arg( args, long );
@@ -1296,6 +1404,7 @@ nextch:
           case 'e':
           case 'E':
           case 'f':
+            print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
               char work[256];
               char subfmt[256];
@@ -1338,9 +1447,6 @@ nextch:
               dostr(buffer,0);
               avma = av;
             }
-            break;
-          case 'p':
-            pari_err(talker, "pointer conversion %c in format `%s'", ch, saved_format);
             break;
           default:
             pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, saved_format);
