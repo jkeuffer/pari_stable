@@ -140,10 +140,10 @@
 00000000000000000]
 %10f for Pi : 3.14159265
 %20.10f for 2.7 : 2.7000000000
-%+20.10f for 2.7 : 2.7000000000
+%+20.10f for 2.7 : +2.7000000000
 %-20.10f for 2.7 : 2.7000000000
 %20.10e for 2.7 : 2.7000000000 e0
-%+20.10E for 2.7 : 2.7000000000 E0
+%+20.10E for 2.7 : +2.7000000000 E0
 %-20.10e for 2.7 : 2.7000000000 e0
 %-20.10E for ii : 1.000000000000000000 E100
 %e for 1+0*I : 1.0000000000000000000000000000000000000 E0
@@ -168,4 +168,4 @@
   *** printf: missing GEN arg 1 for printf format==`%d missing argument to format
 '.
   *** printf: incorrect type in gtofp.
-Total time spent: 20
+Total time spent: 24
