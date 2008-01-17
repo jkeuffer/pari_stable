@@ -941,7 +941,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   pari_sp av = avma;
 
   if (gvalue && typ(gvalue) != t_INT) {
-    gvalue = gfloor(gvalue);
+    gvalue = gfloor( simplify_i(gvalue) );
     if (typ(gvalue) != t_INT)
       pari_err(talker, "not a t_INT in integer format conversion: %Z", gvalue);
   }
@@ -1436,7 +1436,7 @@ nextch:
               }
               /* 20 : margin for erroneous outputs FIXME and for exponent */
               mxlb += 1 + 20;
-              gtry = gtofp(gvalue, ndec2prec(mxlb));
+              gtry = gtofp(simplify_i(gvalue), ndec2prec(mxlb));
               if (typ(gtry) != t_REAL)
                 pari_err(talker, "impossible conversion to t_REAL: %Z", gtry);
 
