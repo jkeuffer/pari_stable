@@ -14,9 +14,13 @@ status=development
 soname_num=$patch
 
 patchlevel_verbose=
-if test -d "$TOP/CVS"; then
+if test -d "$TOP/.svn"; then
+ status="$status svn-"`svnversion`
+ patchlevel_verbose="[ $status ]"
+else if test -d "$TOP/CVS"; then
  status="$status CHANGES-"`$head 1 "$TOP/CHANGES" | awk '{print $4}'`
  patchlevel_verbose="[ $status ]"
+  fi
 fi
 
 version=$VersionMajor.$VersionMinor
