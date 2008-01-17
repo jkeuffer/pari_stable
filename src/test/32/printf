@@ -146,6 +146,7 @@
 %+20.10e for 2.7 : 2.7000000000 E0
 %-20.10e for 2.7 : 2.7000000000 E0
 %-20.10e for ii : 1.000000000000000000 E100
+%e for 1+0*I : 1.0000000000000000000000000000000000000 E0
 %8.3g for 3.14159 : 3.142
 %-20.10g for 4/3 : 1.3333333333
 %20.13e for 4/3 : 1.3333333333333 E0
@@ -164,6 +165,5 @@
 '.
   *** printf: missing GEN arg 1 for printf format==`%d missing argument to format
 '.
-  *** printf: impossible conversion to t_REAL: 1.0000000000000000000000000000000000000 + 0.E-67*I.
   *** printf: incorrect type in gtofp.
 Total time spent: 24
