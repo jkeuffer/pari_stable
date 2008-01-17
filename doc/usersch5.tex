@@ -1946,6 +1946,17 @@ and \kbd{gen\_2} are handled specially and will not be corrupted.
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
 
+\fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
+
+\fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
+entries.
+
+\fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
+\kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
+
+\fun{GEN}{ZV_indexsort}{GEN L} returns the permutation which, applied to the
+\kbd{ZV} $L$, would sort the vector. The result is a \typ{VECSMALL}.
+
 \subsubsec{\kbd{ZM}}
 
 \fun{GEN}{ZM_copy}{GEN x} returns a copy of \kbd{x}.
@@ -3792,14 +3803,6 @@ sorted with respect to the comparison function \kbd{cmp} (see
 \tet{sort_factor}), returns the factorization of $X * Y$. Zero exponents in
 the latter factorization are preserved, e.g. when merging the factorization
 of $2$ and $1/2$, the result is $2^0$.
-
-\fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
-
-\fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
-entries.
-
-\fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
-\kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
 
 \fun{long}{gen_search}{GEN v, GEN y, long flag, void *data, int
 (*cmp)(void*,GEN,GEN)}. Let \kbd{v} be a vector sorted according to

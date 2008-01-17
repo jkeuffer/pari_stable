@@ -54,6 +54,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
 BA  6- handle numerical derivation as an operation on closure.
     7- Fp_center, FpM_center, FpV_center
 RB  8- GP functions printf, Strprintf
+BA  9- library function ZV_indexsort
 
   Removed
     1- obsolete library functions extract and matextract
