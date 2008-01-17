@@ -2274,7 +2274,7 @@ print_functions_hash(const char *s)
     Total += cnt;
     if (cnt > Max) Max = cnt;
   }
-  pariprintf("Total: %ld, max: %ld\n", Total, Max);
+  pariprintf("Total: %ld, Max: %ld\n", Total, Max);
 }
 
 /********************************************************************/
