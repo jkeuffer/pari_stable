@@ -1,1 +1,18 @@
-lift(quadray(-4,31))
+\p38
+gettime;
+Q(D,f) = lift(quadray(D,f));
+Q(-4,31)
+Q(-11,2)
+Q(-15,3)
+Q(-179,2)
+Q(-2276,2)
+Q(-251,2)
+Q(-300003,1)
+Q(-35,2)
+Q(-3628843,1)
+Q(-4,31)
+Q(-40,1)
+Q(-51,3)
+quadhilbert(-15)
+print("Total time spent: ",gettime);
+\q
