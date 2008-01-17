@@ -164,6 +164,6 @@
 '.
   *** printf: missing GEN arg 1 for printf format==`%d missing argument to format
 '.
-  *** printf: impossible conversion to t_REAL, use %Z format instead.
+  *** printf: impossible conversion to t_REAL: 1.0000000000000000000000000000000000000 + 0.E-67*I.
   *** printf: incorrect type in gtofp.
-Total time spent: 16
+Total time spent: 24

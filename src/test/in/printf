@@ -39,6 +39,7 @@ printf("%%20.10e for 2.7 : %20.10e\n", 2.7)
 printf("%%+20.10e for 2.7 : %+20.10e\n", 2.7)
 printf("%%-20.10e for 2.7 : %-20.10e\n", 2.7)
 printf("%%-20.10e for ii : %-20.10e\n", ii)
+printf("%%e for 1+0*I : %e\n", 1+0*I)
 
 /* g conversion */
 
@@ -62,8 +63,6 @@ printf("%%100.50Z for 3.5 : %100.50Z", 3.5)
 printf("%missing argument to format\n") /* ERROR : %m is not a valid format */
 
 printf("%d missing argument to format\n") /* ERROR : missing argument(s) to format */
-
-printf("%%e for 1+0*I : %e\n", 1+0*I) /* ERROR : infinite precision */
 
 printf("%%-20.10g for aa : %-20.10g\n", aa) /* ERROR : aa is not a t_REAL */
 
