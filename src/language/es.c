@@ -591,7 +591,7 @@ wr_dec(char *buffer, size_t mxl, char *s, long point, int width_frac)
 
 /* a.bbb En*/
 static void
-wr_exp(char *buffer, size_t mxl, int sp, char *s, long n)
+wr_exp(char *buffer, size_t mxl, int sp, char *s, long n, char exp_char)
 {
   if (buffer) {
     char work[256];
@@ -602,7 +602,7 @@ wr_exp(char *buffer, size_t mxl, int sp, char *s, long n)
       }
       strcat(buffer, " ");
     }
-    sprintf(work, "E%ld", n);
+    sprintf(work, "%c%ld", exp_char, n);
     if (strlen(buffer) + strlen(work) > mxl) {
       pari_err(talker, "buffer overflow in wr_exp/2 %d > %d", strlen(buffer) + strlen(work), mxl);
     }
@@ -610,13 +610,15 @@ wr_exp(char *buffer, size_t mxl, int sp, char *s, long n)
   } else {
     wr_dec(NULL, 0, s, 1, 0);
     if (sp) pariputc(' ');
-    pariprintf("E%ld", n);
+    pariprintf("%c%ld", exp_char, n);
   }
 }
 
 /* assume x != 0 and print |x| in floating point format */
+/* f_format : boolean (fixed or not) */
 static void
-wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec, int f_format, int width_frac) /* f_format : boolean : fixed or not */
+wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
+         int f_format, char exp_char, int width_frac)
 {
   long exponent, beta, l, ldec, dec0, decdig, d, dif, df2, lx = lg(x);
   GEN z;
@@ -748,12 +750,12 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec, int f_format,
 #endif
         if (to_round > 0 && (ulong)to_round < strlen(s)) {
           s[to_round] = 0;
-          wr_exp(buffer, mxl, sp, s, df2-1);
+          wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
         } else {
-          wr_exp(buffer, mxl, sp, s, df2-1);
+          wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
         }
       } else {
-        wr_exp(buffer, mxl, sp, s, df2-1);
+        wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
       }
     } else if (df2 > 0) { /* f_format, write integer_part.fractionary_part */
       wr_dec(buffer, mxl, s, df2, width_frac);
@@ -781,7 +783,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec, int f_format,
       }
     }
   } else { /* on a file */
-    if (!f_format) wr_exp(NULL, 0, sp, s, df2-1);
+    if (!f_format) wr_exp(NULL, 0, sp, s, df2-1, exp_char);
     else if (df2 > 0) wr_dec(NULL, 0, s, df2, 0);
     else { pariputs("0."); zeros(-df2); pariputs(s); }
   }
@@ -793,10 +795,12 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec, int f_format,
  * sigd: number of sigd to print (all if <0).
  */
 static void
-wr2_real(char *buffer, size_t mxl, GEN x, int sp, char format, long sigd, int width_frac, int addsign)
+wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int width_frac, int addsign)
 {
   pari_sp av;
   long sx = signe(x), ex = expo(x);
+  char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
+  int f_format;
 
   if (!sx) { /* real 0 */
     if (format == 'f') {
@@ -817,13 +821,13 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char format, long sigd, int wi
     } else {
       if (buffer) {
         char work[256];
-        sprintf(work, "0.E%ld", ex10(ex) + 1);
+        sprintf(work, "0.%c%ld", exp_char, ex10(ex) + 1);
         if (strlen(buffer) + strlen(work) > mxl) {
           pari_err(talker, "buffer overflow in wr2_real/2 %d > %d", strlen(buffer) + strlen(work), mxl);
         }
         strcat(buffer, work);
       } else {
-        pariprintf("0.E%ld", ex10(ex) + 1);
+        pariprintf("0.%c%ld", exp_char, ex10(ex) + 1);
       }
       return;
     } /* string for a zero */
@@ -838,11 +842,8 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char format, long sigd, int wi
   }
 
   av = avma;
-  if (buffer) {
-    wr_float(buffer, mxl, x, sp, sigd, (format == 'g' && ex >= -32) || format == 'f', width_frac);
-  } else {
-    wr_float(NULL, 9, x, sp, sigd, (format == 'g' && ex >= -32) || format == 'f', 0);
-  }
+  f_format = (format == 'g' && ex >= -32) || format == 'f';
+  wr_float(buffer, mxl, x, sp, sigd, f_format, exp_char, buffer? width_frac: 0);
   avma = av;
 }
 
@@ -1333,7 +1334,7 @@ nextch:
               if (len) sigd = len-1;
               buffer = stackmalloc(mxlb);
               *buffer = 0;
-              wr2_real(buffer, mxlb, gtry, T->sp, tolower(ch), sigd, maxwidth, 0);
+              wr2_real(buffer, mxlb, gtry, T->sp, ch, sigd, maxwidth, 0);
               dostr(buffer,0);
               avma = av;
             }
@@ -1975,7 +1976,7 @@ wr_vecsmall(pariout_t *T, GEN g)
 static void
 wr_real(pariout_t *T, GEN x, int addsign)
 {
-  wr2_real(NULL, 0, x, T->sp, T->format, T->sigd, 0, addsign);
+  wr2_real(NULL, 0, x, T->sp, toupper(T->format), T->sigd, 0, addsign);
 }
 
 /********************************************************************/
