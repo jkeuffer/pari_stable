@@ -572,7 +572,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
     gel(v,i) = w;
   }
   p1 += cH; p1[0] = evaltyp(t_VECSMALL) | evallg(lB);
-  v = shallowconcat(v, zv_to_ZV(p1)); /* append bottom of p1 (= [0 Id] part) */
+  v = shallowconcat(v, zc_to_ZC(p1)); /* append bottom of p1 (= [0 Id] part) */
 
   gen = gel(bnfS,1);
   xp = cgetg(1, t_MAT);
