@@ -42,6 +42,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
     6- [libary] rename assmat -> matcompanion
     7- prototype of FpX_center [ add one argument ]
 BA  8- [svn/CVS] number development snapshots according to repository version
+    9- delete CVS.txt and replace it with README-subversion.txt
 
   Added
     1- library function gpcalloc
@@ -59,7 +60,6 @@ BA  9- library function ZV_indexsort
   Removed
     1- obsolete library functions extract and matextract
     2- obsolete library function elementinv_modpr
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
