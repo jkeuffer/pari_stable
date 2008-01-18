@@ -1294,12 +1294,9 @@ mathnf0(GEN x, long flag)
 }
 
 static GEN
-init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
+init_hnf(GEN x, GEN *denx, pari_sp *av)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"mathnf");
-  *co = lg(x); if (*co==1) return NULL; /* empty matrix */
-  *li = lg(x[1]); *denx = Q_denom(x); *av=avma;
-
+  *denx = Q_denom(x); *av = avma;
   if (is_pm1(*denx)) { *denx = NULL; return shallowcopy(x); }
   return Q_muli_to_int(x, *denx);
 }
@@ -1598,13 +1595,15 @@ hnf_special(GEN x, long remove)
   long s,li,co,i,j,k,def,ldef;
   GEN p1,u,v,d,denx,a,b, x2,res;
 
-  if (typ(x) != t_VEC || lg(x) !=3) pari_err(typeer,"hnf_special");
-  res = cgetg(3,t_VEC);
-  av0 = avma;
+  if (typ(x) != t_VEC || lg(x) != 3) pari_err(typeer,"hnf_special");
+  if (typ(x) != t_MAT) pari_err(typeer,"mathnf");
   x2 = gel(x,2);
   x  = gel(x,1);
-  x = init_hnf(x,&denx,&co,&li,&av);
-  if (!x) return cgetg(1,t_MAT);
+  co = lg(x); if (co == 1) return gcopy(x);
+  li = lg(x[1]);
+
+  res = cgetg(3,t_VEC); av0 = avma;
+  x = init_hnf(x,&denx,&av);
 
   lim = stack_lim(av,1);
   def=co-1; ldef=(li>co)? li-co: 0;
@@ -2465,8 +2464,10 @@ hnf0(GEN A, int remove)
   GEN denx, a;
 
   if (typ(A) == t_VEC) return hnf_special(A,remove);
-  A = init_hnf(A,&denx,&co,&li,&av);
-  if (!A) return cgetg(1,t_MAT);
+  if (typ(A) != t_MAT) pari_err(typeer,"mathnf");
+  co = lg(A); if (co == 1) return cgetg(1,t_MAT);
+  A = init_hnf(A,&denx,&av);
+  li = lg(A[1]);
 
   lim = stack_lim(av,1);
   def=co-1; ldef=(li>co)? li-co: 0;
