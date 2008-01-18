@@ -22,6 +22,7 @@ factor(17!+1)
 factor(100!+1,0)
 factor(40!+1,100000)
 factorback(factor(12354545545))
+factor(230873846780665851254064061325864374115500032^6)
 factorcantor(x^11+1,7)
 centerlift(lift(factorff(x^3+x^2+x-1,3,t^3+t^2+t-1)))
 10!
