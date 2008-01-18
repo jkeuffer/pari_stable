@@ -1409,12 +1409,12 @@ nextch:
               char work[256];
               char subfmt[256];
               const char *str;
+              double dvalue = va_arg( args, double );
               strncpy(subfmt, recall, format - recall);
               subfmt[format - recall] = '\0'; /* format has been incremented after reading of current ch */
 #if 0
               fprintferr("<>subfmt==`%s'\n", subfmt);
 #endif
-              double dvalue = va_arg( args, double );
               sprintf(work, subfmt, dvalue);
               str = &work[0];
               while (*str) dopr_outch(*str++);
