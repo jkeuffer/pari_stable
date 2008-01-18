@@ -1395,7 +1395,7 @@ compilenode(long n, int mode, long flag)
     compilemat(n, mode);
     return;
   case Frefarg:
-    pari_err(talker,"unexpected &");
+    compile_err("unexpected &",tree[n].str);
     break;
   case Fentry:
     {
