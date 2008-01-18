@@ -41,6 +41,13 @@ This file lists the incompatible changes between Version 2.x and older versions
   - distinction between user functions and user variables has been removed.
     As a consequence, calling a user function without parentheses no more
     evaluate it.
+  - syntax errors are no longer trap-ped, only runtime errors are. First,
+    error trapping and compile-time errors are best left unrelated. Second,
+    since the code is first byte-compiled, then evaluated, it made no sense
+    trapping a syntax error that would necessarily occur in the first
+    milliseconds after inputing the command to the interpreter. (Not so
+    in the old evaluator which could notice syntax errors very late, and one
+    was happy to be able to still salvage something when it bombed.)
 
 * Specific to the PARI library:
 ===============================

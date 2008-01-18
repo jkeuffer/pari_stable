@@ -1943,19 +1943,19 @@ different modes we now describe.
 
 \subsec{Break loop}.\label{se:breakloop}
 
-A \tev{break loop} is a special debugging mode that you enter whenever an
-error occurs, freezing the \kbd{gp} state, and preventing cleanup until you get out
-of the loop. Any error: syntax error, library error, user error (from
-\tet{error}), even user interrupts like \kbd{C-c} (Control-C). When a break
-loop starts, a prompt is issued (\kbd{break>}). You can type in a \kbd{gp} command,
-which is evaluated when you hit the \kbd{<Return>} key, and the result is
-printed as during the main \kbd{gp} loop, except that no history of results
-is kept.
-Then the break loop prompt reappears and you can type further commands as
-long as you do not exit the loop. If you are using readline, the history of
-commands is kept, and line editing is available as usual. If you type in a
-command that results in an error, you are sent back to the break loop prompt
-(errors do \var{not} terminate the loop).
+A \tev{break loop} is a special debugging mode that you enter whenever a
+runtime error occurs, freezing the \kbd{gp} state, and preventing cleanup
+until you get out of the loop. By runtime error, we mean an error from
+the library, a user error (from \tet{error}), or user interrupts like
+\kbd{C-c} (Control-C), but \emph{not} syntax errors. When a break loop
+starts, a prompt is issued (\kbd{break>}). You can type in a \kbd{gp}
+command, which is evaluated when you hit the \kbd{<Return>} key, and the
+result is printed as during the main \kbd{gp} loop, except that no history of
+results is kept. Then the break loop prompt reappears and you can type
+further commands as long as you do not exit the loop. If you are using
+readline, the history of commands is kept, and line editing is available as
+usual. If you type in a command that results in an error, you are sent back
+to the break loop prompt (errors do \var{not} terminate the loop).
 
 To get out of a break loop, you can use \tet{next}, \tet{break},
 \tet{return}, or \kbd{C-d} (\kbd{EOF}), any of which will let \kbd{gp} perform its
@@ -1982,7 +1982,8 @@ explained above. A break loop looks like this:
 break>
 @eprog
 \noindent So the standard error message\footnote{*}{Unfortunately, we
-can never have context here since the code if first compiled into bytecode,
+can never have context for runtime errors since the code was first
+successfully compiled into bytecode,
 then run. When the error occurs, we have nothing but the bytecode at our
 disposal, which is not easy to understand.} is printed first.
 The
@@ -2010,9 +2011,9 @@ v
 Since loop indices are automatically lexically scoped, they no longer exist
 when the break loop is run.
 
-\misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type
-\kbd{trap()} (or include it in a script) to start trapping errors in this
-way. By default, you will be sent back to the prompt.
+\misctitle{Important Note:} upon startup, this mechanism is \emph{off}, a
+runtime error will send you back to the prompt. Type \kbd{trap()} (or include
+it in a script) to start trapping errors in this way.
 
 \misctitle{Technical Note:} When you enter a break loop due to a PARI stack
 overflow, the PARI stack is reset so that you can run commands (otherwise the
@@ -2020,10 +2021,10 @@ stack would immediately overflow again). Still, as explained above, you do
 not lose the value of any \kbd{gp} variable in the process.
 
 \subsec{Error handlers}. The break loop described above is a (sophisticated)
-example of an \tev{error handler}: a function that is executed whenever an
-error occurs, supposedly to try and recover. The break loop is quite a
-satisfactory error handler, but it may not be adequate for some purposes, for
-instance when \kbd{gp} runs in non-interactive mode, detached from a
+example of an \tev{error handler}: a function that is executed whenever a
+runtime error occurs, supposedly to try and recover. The break loop is quite
+a satisfactory error handler, but it may not be adequate for some purposes,
+for instance when \kbd{gp} runs in non-interactive mode, detached from a
 terminal.
 
 So, you can define a different error handler, to be used in place of the
@@ -2036,9 +2037,10 @@ end.) For instance:
 \noindent After that, whenever an error occurs, the list of all user
 variables is printed, and they are all saved in binary format in file
 \kbd{crash}, ready for inspection. Of course break loops are no longer
-available: the new handler has replaced the default one. Besides user-defined
-handlers as above, there are two special handlers you can use in \kbd{trap},
-which are
+available: the new handler has replaced the default one.
+
+Besides user-defined handlers as above, there are two special handlers you
+can use in \kbd{trap}, which are
 
 $\bullet$ \kbd{trap(, "")} (do-nothing handler): to disable the trapping
 mechanism and let errors propagate, which is the default situation on
@@ -2071,7 +2073,8 @@ seen being the first to spring.
 \subsec{Trapping specific exceptions}. We have not yet seen the use of the
 first argument of trap, which has been omitted in all previous examples. It
 simply indicates that only errors of a specific type should be intercepted,
-to be chosen among
+see the documentation of \tet{trap} for the complete list. For instance, we
+have
 
 \kbd{gdiver}: division by 0
 

@@ -2,14 +2,14 @@ Function: trap
 Section: programming/specific
 C-Name: trap0
 Prototype: D"",r,DEDE
-Help: trap({e}, {rec}, {seq}): try to execute seq, trapping error e (all
+Help: trap({e}, {rec}, {seq}): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
  is the result of the command. When seq is omitted, define rec as a default
  handler for error e (a break loop will be started if rec omitted). If rec
  is the empty string "" pop out the last default handler
 Doc: tries to
- evaluate \var{seq}, trapping error $e$, that is effectively preventing it
- from aborting computations in the usual way; the recovery sequence
+ evaluate \var{seq}, trapping runtime error $e$, that is effectively preventing
+ it from aborting computations in the usual way; the recovery sequence
  \var{rec} is executed if the error occurs and the evaluation of \var{rec}
  becomes the result of the command. If $e$ is omitted, all exceptions are
  trapped. Note in particular that hitting \kbd{\pow C} (Control-C) raises an
