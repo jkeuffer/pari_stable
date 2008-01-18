@@ -267,7 +267,7 @@ check_proto(const char *code)
         if (*s != 'V') arity++;
         s++; break;
       }
-      old = s; while (*s != ',') s++;
+      old = s; while (*s && *s != ',') s++;
       if (*s != ',') pari_err(talker2, "missing comma", old, code);
       break;
     case 'V':
