@@ -17,11 +17,6 @@ const char *errmessage[]=
 {
 /* force error into non-0 */
   "",
-/* cant_deflate */
-  "can't deflate",
-
-/* Always catched up to this point */
-
 /* varer1 */
   "variable name expected",
 /* obsoler */

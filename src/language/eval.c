@@ -224,6 +224,9 @@ changevalue(entree *ep, GEN x)
 }
 
 INLINE void
+err_var() { pari_err(talker, "variable name expected"); }
+
+INLINE void
 checkvalue(entree *ep)
 {
   if (ep->valence==EpNEW)
@@ -233,7 +236,7 @@ checkvalue(entree *ep)
     ep->value = initial_value(ep);
   }
   else if (ep->valence!=EpVAR)
-    pari_err(varer1,NULL,NULL);
+    err_var();
 }
 
 /* make GP variables safe for avma = top */
@@ -459,9 +462,7 @@ INLINE long
 closure_varn(GEN x)
 {
   if (!x) return -1;
-  if (typ(x) != t_POL || lg(x) != 4 ||
-      !gcmp0(gel(x,2)) || !gcmp1(gel(x,3)))
-    pari_err(varer1,NULL,NULL);
+  if (!gcmpX(x)) err_var();
   return varn(x);
 }
 
@@ -498,7 +499,7 @@ closure_castlong(long z, long mode)
     gel(st,sp++)=stoi(z);
     break;
   case Gvar:
-    pari_err(varer1,NULL,NULL);
+    err_var();
   default:
     pari_err(bugparier,"closure_castlong, type unknown");
   }

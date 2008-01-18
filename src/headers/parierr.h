@@ -14,11 +14,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum {
-  cant_deflate = 1,	/* Force errors into non-0 */
-
-/* Always catched up to this point */
-
-  varer1, obsoler, openfiler, talker2,
+/* Force errors into non-0 */
+  varer1 = 1, obsoler, openfiler, talker2,
 
 /* NO CONTEXT now */
 

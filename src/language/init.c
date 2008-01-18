@@ -998,6 +998,8 @@ pari_warn(long numerr, ...)
   flusherr();
 }
 
+#define HAS_CONTEXT(num) (num < talker)
+
 void
 pari_err(long numerr, ...)
 {
@@ -1009,7 +1011,7 @@ pari_err(long numerr, ...)
   if (is_warn(numerr)) pari_err(talker,"use pari_warn for warnings");
 
   global_err_data = NULL;
-  if (err_catch_stack)
+  if (err_catch_stack && !HAS_CONTEXT(numerr))
   {
     cell *trapped = NULL;
     if ( (trapped = err_seek(numerr)) )
@@ -1023,18 +1025,14 @@ pari_err(long numerr, ...)
       longjmp(*e, numerr);
     }
   }
+  /* make sure pari_err msg starts at the beginning of line */
+  if (!pari_last_was_newline()) pariputc('\n');
+  pariOut->flush();
+  pariErr->flush();
+  pariOut = pariErr;
+  term_color(c_ERR);
 
-  if (!pari_last_was_newline())
-    pariputc('\n'); /* make sure pari_err msg starts at the beginning of line */
-  pariflush(); pariOut = pariErr;
-  pariflush(); term_color(c_ERR);
-
-  if (numerr <= cant_deflate)
-  {
-    sprintf(s, "uncaught error: %ld", numerr);
-    pari_err(bugparier, s);
-  }
-  else if (numerr < talker)
+  if (HAS_CONTEXT(numerr))
   {
     strcpy(s, errmessage[numerr]);
     switch (numerr)
@@ -1116,7 +1114,7 @@ pari_err(long numerr, ...)
   }
   pariOut = out;
   gp_function_name=NULL;
-  if (default_exception_handler)
+  if (default_exception_handler && !HAS_CONTEXT(numerr))
   {
     if (dft_handler[numerr])
       global_err_data = (void *) dft_handler[numerr];

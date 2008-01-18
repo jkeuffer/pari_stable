@@ -1444,6 +1444,7 @@ checkdeflate(GEN x)
   return (long)d;
 }
 
+/* return NULL if substitution fails */
 GEN
 gdeflate(GEN x, long v, long d)
 {
@@ -1458,7 +1459,11 @@ gdeflate(GEN x, long v, long d)
     if (varncmp(vx, v) < 0)
     {
       lx = lg(x); z = cgetg(lx, tx); z[1] = x[1];
-      for (i=2; i<lx; i++) gel(z,i) = gdeflate(gel(x,i),v,d);
+      for (i=2; i<lx; i++) 
+      {
+        gel(z,i) = gdeflate(gel(x,i),v,d);
+        if (!z[i]) return NULL;
+      }
       return z;
     }
     if (varncmp(vx, v) > 0) return gcopy(x);
@@ -1476,20 +1481,24 @@ gdeflate(GEN x, long v, long d)
       y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
       setvalp(y, V/d); return gerepilecopy(av, y);
     }
-    if (checkdeflate(x) % d != 0) pari_err(cant_deflate);
+    if (checkdeflate(x) % d != 0) return NULL;
     return gerepilecopy(av, RgX_deflate(x,d));
   }
   if (tx == t_RFRAC)
   {
     z = cgetg(3, t_RFRAC);
-    gel(z,1) = gdeflate(gel(x,1),v,d);
-    gel(z,2) = gdeflate(gel(x,2),v,d);
+    gel(z,1) = gdeflate(gel(x,1),v,d); if (!z[1]) return NULL;
+    gel(z,2) = gdeflate(gel(x,2),v,d); if (!z[2]) return NULL;
     return z;
   }
   if (is_matvec_t(tx))
   {
     lx = lg(x); z = cgetg(lx, tx);
-    for (i=1; i<lx; i++) gel(z,i) = gdeflate(gel(x,i),v,d);
+    for (i=1; i<lx; i++) 
+    {
+      gel(z,i) = gdeflate(gel(x,i),v,d);
+      if (!z[i]) return NULL;
+    }
     return z;
   }
   pari_err(typeer,"gdeflate");

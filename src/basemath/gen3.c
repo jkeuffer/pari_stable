@@ -1260,22 +1260,15 @@ gsubst_expr(GEN pol, GEN from, GEN to)
 GEN
 gsubstpol(GEN x, GEN T, GEN y)
 {
-  pari_sp av;
-  long d, v;
-  GEN deflated;
-
-  if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
-    return gsubst_expr(x,T,y);
-  d = degpol(T); v = varn(T);
-  if (d == 1) return gsubst(x, v, y);
-  av = avma;
-  CATCH(cant_deflate) {
+  if (typ(T) == t_POL && ismonome(T) && gcmp1(leading_term(T)))
+  {
+    long d = degpol(T), v = varn(T);
+    pari_sp av = avma;
+    GEN deflated = d == 1? x: gdeflate(x, v, d);
+    if (deflated) return gerepileupto(av, gsubst(deflated, v, y));
     avma = av;
-    return gsubst_expr(x,T,y);
-  } TRY {
-    deflated = gdeflate(x, v, d);
-  } ENDCATCH
-  return gerepilecopy(av, gsubst(deflated, v, y));
+  }
+  return gsubst_expr(x,T,y);
 }
 
 GEN
