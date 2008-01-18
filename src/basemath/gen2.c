@@ -885,6 +885,8 @@ Z_pvalrem_DC(GEN x, GEN q, GEN *py)
   *py = z; return v + 2;
 }
 
+const long VAL_DC_THRESHOLD = 16;
+
 long
 Z_lval(GEN x, ulong p)
 {
@@ -899,9 +901,11 @@ Z_lval(GEN x, ulong p)
     GEN q = diviu_rem(x, p, &r);
     if (r) break;
     vx++; x = q;
-    if (vx == 32) {
+    if (vx == VAL_DC_THRESHOLD) {
       if (p == 1) pari_err(talker, "p = 1 in Z_lvalrem");
-      vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break;
+      vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
+      q = diviu_rem(x, p, &r); if (!r) vx++;
+      break;
     }
   }
   avma = av; return vx;
@@ -926,9 +930,11 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     GEN q = diviu_rem(x, p, &r);
     if (r) break;
     vx++; x = q;
-    if (vx == 32) {
+    if (vx == VAL_DC_THRESHOLD) {
       if (p == 1) pari_err(talker, "p = 1 in Z_lvalrem");
-      vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break;
+      vx += Z_pvalrem_DC(x, utoipos(p), &x) << 1;
+      q = diviu_rem(x, p, &r); if (!r) { vx++; x = q; }
+      break;
     }
   }
   avma = av; *py = icopy(x); setsigne(*py, sx); return vx;
@@ -958,34 +964,29 @@ u_lvalrem_stop(ulong *n, ulong p, int *stop)
 long
 Z_lvalrem_stop(GEN n, ulong p, int *stop)
 {
+  pari_sp av;
   long v = 0;
-  if (lgefint(n) == 3)
+  ulong r;
+  GEN N, q;
+
+  if (lgefint(n) == 3) return u_lvalrem_stop((ulong*)&n[2], p, stop);
+  av = avma; q = diviu_rem(n, p, &r);
+  if (!r)
   {
-    ulong N = (ulong)n[2], q = N / p, r = N % p; /* gcc makes a single div */
-    if (!r)
-    {
-      do { v++; N = q; q = N / p; r = N % p; } while (!r);
-      affui(N, n);
-    }
-    *stop = q <= p;
+    do {
+      v++; N = q;
+      if (v == VAL_DC_THRESHOLD)
+      {
+        v += Z_pvalrem_DC(N,sqru(p),&N) << 1;
+        q = diviu_rem(N, p, &r); if (!r) { v++; N = q; }
+        break;
+      }
+      q = diviu_rem(N, p, &r);
+    } while (!r);
+    affii(N, n);
   }
-  else
-  {
-    pari_sp av = avma;
-    ulong r;
-    GEN N, q = diviu_rem(n, p, &r);
-    if (!r)
-    {
-      do {
-	v++; N = q;
-	if (v == 32) { v = 32 + Z_pvalrem_DC(N, utoipos(p), &N); break; }
-	q = diviu_rem(N, p, &r);
-      } while (!r);
-      affii(N, n);
-    }
-    *stop = isless_iu(q,p); avma = av;
-  }
-  return v;
+  *stop = isless_iu(q,p);
+  avma = av; return v;
 }
 
 /* x is a non-zero integer, |p| > 1 */

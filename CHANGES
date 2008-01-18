@@ -30,6 +30,7 @@ BA 17- [from 2.4.2] use of pointers in recursive expressions [#717]
 BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
    19- simplifications missed when adding t_RFRAC [#721]
    20- gtofp(1 + 0*I) should not return 1. + 0.*I but 1.
+   21- factor(500501^36): impossible assignment I-->S
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
