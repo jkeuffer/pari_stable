@@ -2341,12 +2341,15 @@ being executed. This can be useful when reading a file with the \b{r} or
 test files used to check whether \kbd{gp} has been built correctly (see
 \b{e}).
 
-\subsec{factor\_add\_primes} (default \kbd{0}):\kbdsidx{factor_add_primes} if this is set, the integer
-factorization machinery will call \kbd{addprimes} on primes
-factor that were difficult to find, so they are automatically tried first in
-other factorizations. If a routine is performing (or has performed) a
-factorization and is interrupted by an error or via Control-C, this lets you
-recover the prime factors already found.
+\subsec{factor\_add\_primes} (default \kbd{0}):\kbdsidx{factor_add_primes} if
+set, the integer factorization machinery calls \tet{addprimes} on primes
+factor that were difficult to find (larger than $2^24$), so they are
+automatically tried first in other factorizations. If a routine is performing
+(or has performed) a factorization and is interrupted by an error or via
+Control-C, this lets you recover the prime factors already found. The
+downside is that a huge \kbd{addprimes} table unrelated to the current
+computations will slow down arithmetic functions relying on integer
+factorization; one should then empty the table using \tet{removeprimes}.
 
 \subsec{factor\_proven} (default \kbd{0}):\kbdsidx{factor_proven} by
 default, the factors output by the integer factorization machinery are
