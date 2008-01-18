@@ -41,7 +41,7 @@ strntoGENexp(const char *str, long len)
         case 'e':  *s='\033'; break; /* escape */
         case 'n':  *s='\n'; break;
         case 't':  *s='\t'; break;
-        default:   *s=*t; if (!*t) pari_err(talker,"unfinished string");
+        default:   *s=*t; if (!*t) compile_err("unfinished string",str);
       }
       t++; s++;
     }
@@ -237,7 +237,7 @@ static void compilenode(long n, int mode, long flag);
 typedef enum {PPend,PPstd,PPdefault,PPdefaultmulti,PPstar,PPauto} PPproto;
 
 static PPproto
-parseproto(char const **q, char *c)
+parseproto(char const **q, char *c, const char *str)
 {
   char  const *p=*q;
   long i;
@@ -250,7 +250,7 @@ parseproto(char const **q, char *c)
     switch(p[1])
     {
     case 0:
-      pari_err(talker,"incomplete prototype");
+      compile_err("function has incomplete prototype",str);
     case 'G':
     case '&':
     case 'V':
@@ -263,7 +263,7 @@ parseproto(char const **q, char *c)
     default:
       for(i=0;*p && i<2;p++) i+=*p==',';
       if (i<2)
-        pari_err(talker,"incomplete prototype");
+        compile_err("function has incomplete prototype",str);
       *c=p[-2];
       *q=p;
       return PPdefaultmulti;
@@ -284,7 +284,7 @@ parseproto(char const **q, char *c)
     if (p[1]=='=')
     {
       if (p[2]!='G')
-        pari_err(impl,"prototype not supported");
+        compile_err("function prototype is not supported",str);
       *c='=';
       p+=2;
     }
@@ -809,7 +809,7 @@ compilefunc(entree *ep, long n, int mode)
   if (*p)
   {
     q=p;
-    while((mod=parseproto(&p,&c))!=PPend)
+    while((mod=parseproto(&p,&c,tree[n].str))!=PPend)
     {
       if (j<=nb && tree[arg[j]].f!=Fnoarg
           && (mod==PPdefault || mod==PPdefaultmulti))
@@ -832,7 +832,8 @@ compilefunc(entree *ep, long n, int mode)
             if (!flags) flags = ep->code;
             flags = strchr(flags, '\n'); /* Skip to the following '\n' */
             if (!flags)
-              pari_err(talker, "not enough flags in string function signature");
+              compile_err("missing flag in string function signature",
+                           tree[n].str);
             flags++;
             if (tree[arg[j]].f==Fconst && tree[arg[j]].x==CSTstr)
             {
@@ -1027,7 +1028,7 @@ compilefunc(entree *ep, long n, int mode)
           if (q[1]=='"' && q[2]=='"')
             op_push(OCpushlong,(long)"");
           else
-            pari_err(impl,"prototype not supported");
+            compile_err("function prototype not supported",tree[n].str);
           break;
         default:
           pari_err(talker,"Unknown prototype code `%c' for `%.*s'",c,
@@ -1109,7 +1110,7 @@ genclosure(entree *ep)
   PPproto mod;
   enum ret_type ret=get_ret_type(&code);
   p=code;
-  while((mod=parseproto(&p,&c))!=PPend)
+  while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
     if (mod==PPauto)
       stop=1;
@@ -1144,7 +1145,7 @@ genclosure(entree *ep)
   if (maskarg)  op_push(OCcheckargs,maskarg);
   if (maskarg0) op_push(OCcheckargs0,maskarg0);
   p=code;
-  while((mod=parseproto(&p,&c))!=PPend)
+  while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
     switch(mod)
     {
@@ -1173,7 +1174,7 @@ genclosure(entree *ep)
     }
   }
   q = p = code;
-  while((mod=parseproto(&p,&c))!=PPend)
+  while ((mod=parseproto(&p,&c,NULL))!=PPend)
   {
     switch(mod)
     {
