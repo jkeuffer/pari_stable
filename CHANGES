@@ -31,6 +31,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
    19- simplifications missed when adding t_RFRAC [#721]
    20- gtofp(1 + 0*I) should not return 1. + 0.*I but 1.
    21- factor(500501^36): impossible assignment I-->S
+   22- quadray(-7,6) [or other "impossible conductors"] --> oo loop [#725]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -45,6 +46,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
 BA  8- [svn/CVS] number development snapshots according to repository version
     9- delete CVS.txt and replace it with README-subversion
    10- syntax errors are no longer trapped
+   11- quadray no longer allows an (optional) 3rd argument
 
   Added
     1- library function gpcalloc

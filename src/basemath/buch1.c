@@ -234,6 +234,61 @@ quadhilbert(GEN D, GEN flag, long prec)
 		     : quadhilbertimag(D,flag);
 }
 
+/* return a vector of all roots of 1 in bnf [not necessarily quadratic] */
+static GEN
+getallrootsof1(GEN bnf)
+{
+  GEN T, u, nf = checknf(bnf), tu;
+  long i, n = itos(gmael3(bnf,8,4,1));
+
+  if (n == 2) {
+    long N = degpol(gel(nf,1));
+    return mkvec2(scalarcol_shallow(gen_m1, N),
+		  scalarcol_shallow(gen_1, N));
+  }
+  tu = poltobasis(nf, gmael3(bnf,8,4,2));
+  T = eltimul_get_table(nf, tu);
+  u = cgetg(n+1, t_VEC); gel(u,1) = tu;
+  for (i=2; i <= n; i++) gel(u,i) = ZM_ZC_mul(T, gel(u,i-1));
+  return u;
+}
+/* assume bnr has the right conductor */
+static GEN
+get_lambda(GEN bnr)
+{
+  GEN bnf = gel(bnr,1), nf = gel(bnf,7), pol = gel(nf,1), f = gmael3(bnr,2,1,1);
+  GEN labas, lamodf, u;
+  long a, b, f2, i, lu, v = varn(pol);
+
+  f2 = 2 * itos(gcoeff(f,1,1));
+  u = getallrootsof1(bnf); lu = lg(u);
+  for (i=1; i<lu; i++)
+    gel(u,i) = colreducemodHNF(gel(u,i), f, NULL); /* roots of 1, mod f */
+  if (DEBUGLEVEL>1)
+    fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
+  for (a=0; a<f2; a++)
+    for (b=0; b<f2; b++)
+    {
+      GEN la = deg1pol_i(stoi(a), stoi(b), v); /* ax + b */
+      if (umodiu(gnorm(mkpolmod(la, pol)), f2) != 1) continue;
+      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
+
+      labas = poltobasis(nf, la);
+      lamodf = colreducemodHNF(labas, f, NULL);
+      for (i=1; i<lu; i++)
+	if (gequal(lamodf, gel(u,i))) break;
+      if (i < lu) continue; /* la = unit mod f */
+      if (DEBUGLEVEL)
+      {
+	if (DEBUGLEVEL>1) fprintferr("\n");
+	fprintferr("lambda = %Z\n",la);
+      }
+      return labas;
+    }
+  pari_err(bugparier,"get_lambda");
+  return NULL;
+}
+
 #define to_approx(nf,a) (gel(gmul(gmael((nf),5,1), (a)),1))
 /* Z-basis for a (over C) */
 static GEN
@@ -301,11 +356,12 @@ findbezk(GEN nf, GEN x)
   GEN a,b, M = gmael(nf,5,1), u = gcoeff(M,1,2);
   long ea, eb;
 
-  b = grndtoi(gdiv(imag_i(x), imag_i(u)), &eb);
-  a = grndtoi(real_i(gsub(x, gmul(b,u))), &ea);
-  if (ea > -20 || eb > -20) return NULL;
-  if (!signe(b)) return a;
-  return coltoalg(nf, mkcol2(a,b));
+  /* u t_COMPLEX generator of nf.zk, write x ~ a + b u, a,b in Z */
+  b = grndtoi(mpdiv(imag_i(x), gel(u,2)), &eb);
+  if (eb > -20) return NULL;
+  a = grndtoi(mpsub(real_i(x), mpmul(b,gel(u,1))), &ea);
+  if (ea > -20) return NULL;
+  return signe(b)? coltoalg(nf, mkcol2(a,b)): a;
 }
 
 static GEN
@@ -385,11 +441,11 @@ computeth2(GEN om, GEN la, long prec)
 /* Computes P_2(X)=polynomial in Z_K[X] closest to prod_gc(X-th2(gc)) where
    the product is over the ray class group bnr.*/
 static GEN
-computeP2(GEN bnr, GEN la, long prec)
+computeP2(GEN bnr, long prec)
 {
   long clrayno, i, first = 1;
   pari_sp av=avma, av2;
-  GEN listray,P0,P,f,lanum, nf = checknf(bnr);
+  GEN listray,P0,P,f,lanum, la = get_lambda(bnr), nf = checknf(bnr);
 
   f = gmael3(bnr,2,1,1);
   la = algtobasis_i(nf,la);
@@ -519,17 +575,17 @@ isZ(GEN I)
 
 /* Treat special cases directly. return NULL if not special case */
 static GEN
-treatspecialsigma(GEN nf, GEN gf)
+treatspecialsigma(GEN bnr)
 {
-  GEN p1, p2, tryf, D = gel(nf,3);
-  long Ds, fl, i = isZ(gf);
+  GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = gel(nf,3), p1, p2, tryf;
+  long Ds, fl, i = isZ(f);
 
-  if (i == 1) return quadhilbertimag(gel(nf,3), NULL); /* f = 1 ? */
+  if (i == 1) return quadhilbertimag(gel(nf,3), NULL); /* f = 1 */
 
   if (equaliu(D,3))
   {
     if (i == 4 || i == 5 || i == 7) return polcyclo(i,0);
-    if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
+    if (!equaliu(gcoeff(f,1,1),9) || !equaliu(content(f),3)) return NULL;
     p1 = gel(nfroots(nf, mkpoln(3,gen_1,gen_1,gen_1)),1); /* f = P_3^3 */
     return gadd(monomial(gen_1,3,0), p1); /* x^3+j */
   }
@@ -550,11 +606,11 @@ treatspecialsigma(GEN nf, GEN gf)
     return NULL;
   }
 
-  p1 = gcoeff(gf,1,1); /* integer > 0 */
-  p2 = gcoeff(gf,2,2);
+  p1 = gcoeff(f,1,1); /* integer > 0 */
+  p2 = gcoeff(f,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
-    if (Ds % 16 != 8 || !equaliu(Q_content(gf),2)) return NULL;
+    if (Ds % 16 != 8 || !equaliu(Q_content(f),2)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
@@ -565,79 +621,12 @@ treatspecialsigma(GEN nf, GEN gf)
   return compocyclo(nf,i,2);
 }
 
-/* return a vector of all roots of 1 in bnf [not necessarily quadratic] */
-static GEN
-getallrootsof1(GEN bnf)
-{
-  GEN T, u, nf = checknf(bnf), tu;
-  long i, n = itos(gmael3(bnf,8,4,1));
-
-  if (n == 2) {
-    long N = degpol(gel(nf,1));
-    return mkvec2(scalarcol_shallow(gen_m1, N),
-		  scalarcol_shallow(gen_1, N));
-  }
-  tu = poltobasis(nf, gmael3(bnf,8,4,2));
-  T = eltimul_get_table(nf, tu);
-  u = cgetg(n+1, t_VEC); gel(u,1) = tu;
-  for (i=2; i <= n; i++) gel(u,i) = ZM_ZC_mul(T, gel(u,i-1));
-  return u;
-}
-
-static GEN
-get_lambda(GEN bnr)
-{
-  GEN allf, bnf, nf, pol, f, la, P, labas, lamodf, u;
-  long a, b, f2, i, lu, v;
-
-  allf = conductor(bnr,NULL,2);
-  bnr = gel(allf,2);
-  f = gmael(allf,1,1);
-  bnf= gel(bnr,1);
-  nf = gel(bnf,7);
-  pol= gel(nf,1); v = varn(pol);
-  P = treatspecialsigma(nf,f);
-  if (P) return P;
-
-  f2 = 2 * itos(gcoeff(f,1,1));
-  u = getallrootsof1(bnf); lu = lg(u);
-  for (i=1; i<lu; i++)
-    gel(u,i) = colreducemodHNF(gel(u,i), f, NULL); /* roots of 1, mod f */
-  if (DEBUGLEVEL>1)
-    fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
-  for (a=0; a<f2; a++)
-    for (b=0; b<f2; b++)
-    {
-      la = deg1pol_i(stoi(a), stoi(b), v); /* ax + b */
-      if (umodiu(gnorm(mkpolmod(la, pol)), f2) != 1) continue;
-      if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
-
-      labas = poltobasis(nf, la);
-      lamodf = colreducemodHNF(labas, f, NULL);
-      for (i=1; i<lu; i++)
-	if (gequal(lamodf, gel(u,i))) break;
-      if (i < lu) continue; /* la = unit mod f */
-      if (DEBUGLEVEL)
-      {
-	if (DEBUGLEVEL>1) fprintferr("\n");
-	fprintferr("lambda = %Z\n",la);
-      }
-      return labas;
-    }
-  pari_err(bugparier,"get_lambda");
-  return NULL;
-}
-
 GEN
-quadray(GEN D, GEN f, GEN flag, long prec)
+quadray(GEN D, GEN f, long prec)
 {
   GEN bnr, y, pol, bnf;
   pari_sp av = avma;
 
-  if (flag)
-  {
-    if (typ(flag) != t_VEC || lg(flag)!=3) pari_err(flagerr,"quadray");
-  }
   if (typ(D) == t_INT)
   {
     long v = gvar(f);
@@ -660,10 +649,9 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     y = bnrstark(bnr,NULL,prec);
   else
   {
-    if (!flag) flag = get_lambda(bnr);
-    if (typ(flag) == t_POL) y = flag; /* special case */
-    else
-      y = computeP2(bnr,flag,prec);
+    bnr = gel(conductor(bnr,NULL,2), 2);
+    y = treatspecialsigma(bnr);
+    if (!y) y = computeP2(bnr, prec);
   }
   return gerepileupto(av, y);
 }

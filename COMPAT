@@ -48,6 +48,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     milliseconds after inputing the command to the interpreter. (Not so
     in the old evaluator which could notice syntax errors very late, and one
     was happy to be able to still salvage something when it bombed.)
+  - quadray no longer allows an (optional) 3rd argument: was not properly
+    documented, broke the symmetry between real / imaginary case (was ignored
+    if D > 0), complicated the code, and was rather useless in any case.
 
 * Specific to the PARI library:
 ===============================
