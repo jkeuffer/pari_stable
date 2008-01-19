@@ -644,7 +644,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   long to_round = 0; /* when not null, number of remaining digits */
   long delta;
 /*
-  wanted_dec : required number of significant digits
+  wanted_dec : required number of significant digits or < 0 (all known digits)
   decdig : number of significant digits in x
   dif : number of bits available for integer part of x
   beta : exponent in base 10 of integer part of x
@@ -678,7 +678,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   res = convi(z, &ldec); /* basis 2^BITS_IN_LONG -> basis 10^9 (sizeof(32-bits word)); res is an array of long, POINTING AFTER IT, length==ldec */
   resd = res - 1; /* leading word */
   dec0 = numdig(*resd);
-  decdig = 9 * (ldec-1) + dec0; /* number of significant decimal digits in z */
+  decdig = 9 * (ldec-1) + dec0; /* > 0, # of significant decimal digits in z */
 
   exponent = beta;
 
@@ -691,15 +691,13 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     decdig -= delta;
     to_round = decdig;
   }
-  if (decdig > wanted_dec && wanted_dec > 0) {
+  if (wanted_dec < 0)
+    wanted_dec = decdig;
+  else if (decdig > wanted_dec) {
 #ifdef PB
     fprintferr("<>rounding for total len\n");
 #endif
-    if (to_round) {
-      to_round = min(to_round, wanted_dec);
-    } else {
-      to_round = wanted_dec;
-    }
+    if (!to_round || to_round > wanted_dec) to_round = wanted_dec;
     decdig = wanted_dec;
   }
 
