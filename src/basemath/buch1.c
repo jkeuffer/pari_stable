@@ -638,19 +638,21 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   {
     if (typ(flag) != t_VEC || lg(flag)!=3) pari_err(flagerr,"quadray");
   }
-  if (typ(D) != t_INT)
+  if (typ(D) == t_INT)
+  {
+    long v = gvar(f);
+    if (!isfundamental(D))
+      pari_err(talker,"quadray needs a fundamental discriminant");
+    if (v == NO_VARIABLE) v = fetch_user_var("y");
+    pol = quadpoly0(D, v);
+    bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
+  }
+  else
   {
     bnf = checkbnf(D);
     if (degpol(gmael(bnf,7,1)) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = gmael(bnf,7,3);
-  }
-  else
-  {
-    if (!isfundamental(D))
-      pari_err(talker,"quadray needs a fundamental discriminant");
-    pol = quadpoly0(D, fetch_user_var("y"));
-    bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
   }
   bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x(0); }
