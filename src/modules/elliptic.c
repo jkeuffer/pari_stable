@@ -92,15 +92,7 @@ d_ellLHS(GEN e, GEN z)
 }
 
 static GEN
-ell_to_small(GEN E)
-{
-  long i;
-  GEN e;
-  if (lg(E) <= 14) return E;
-  e = cgetg(14,t_VEC);
-  for (i = 1; i < 14; i++) e[i] = E[i];
-  return e;
-}
+ell_to_small(GEN E) { return (lg(E) <= 14)? E: vecslice(E, 1, 13); }
 
 static void
 smallinitell0(GEN x, GEN y)
@@ -1855,11 +1847,10 @@ ellintegralmodel(GEN e)
   /* a = [a1, a2, a3, a4, a6] */
   l = lg(L);
   if (l == 1) return NULL;
-  L = sort(L);
-  for (k = i = 2; i < l; i++)
-    if (!equalii(gel(L,i), gel(L,i-1))) L[k++] = L[i];
+  L = ZV_sort_uniq(L);
+  l = lg(L);
 
-  l = k; u = gen_1;
+  u = gen_1;
   for (k = 1; k < l; k++)
   {
     GEN p = gel(L,k);
