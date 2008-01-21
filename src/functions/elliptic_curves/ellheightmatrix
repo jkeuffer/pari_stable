@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: mathell
 Prototype: GGp
 Help: ellheightmatrix(E,x): gives the height matrix for vector of points x
- on elliptic curve E using theta functions
+ on elliptic curve E, assume to be a minimal model.
 Doc: 
  $x$ being a vector of points, this
  function outputs the Gram matrix of $x$ with respect to the N\'eron-Tate
