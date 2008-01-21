@@ -514,14 +514,12 @@ static long
 ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
 
 static void
-bzeros(char *buffer, int mxl, long nb) {
-  int len = strlen(buffer);
-  if (len + nb > mxl) {
-    pari_err(talker, "buffer overflow in bzeros %d > %d", len + nb, mxl);
-  }
-  while (nb-- > 0) {
-    strcat(buffer, "0");
-  }
+bzeros(char **buffer, size_t *mxl, long nb) {
+  char *b = *buffer;
+  *mxl -= nb;
+  if (0 > *mxl) pari_err(talker, "buffer overflow in bzeros");
+  while (nb-- > 0) *b++ = '0';
+  *b = 0; *buffer = b;
 }
 
 static void
@@ -561,49 +559,60 @@ copart(char *s, ulong x, long start)
   }
 }
 
-/* FIXME: to the eventually deleted */
+/********************************************************************/
+/**                                                                **/
+/**                        WRITE A REAL NUMBER                     **/
+/**                                                                **/
+/********************************************************************/
+/* 19 digits (if 64 bits, at most 2^60-1) + 1 sign */
+static const long MAX_EXPO_LEN = 20;
+
+/* FIXME: to be eventually deleted */
 #define PB
 #undef PB
-
 /* FIXME: to be deleted */
 static THREAD const char *saved_format = NULL;
+/* FIXME: to be deleted */
+static void
+chk_buf(size_t l, size_t mxl)
+{
+  if (l > mxl)
+    pari_err(talker, "buffer overflow in wr_real %d > %d", l, mxl);
+}
 
 /* sss.ttt, assume 'point' < strlen(s) */
 static void
-wr_dec(char *buffer, size_t mxl, char *s, long point, int width_frac)
+wr_dec(char **BUFFER, size_t *MXL, char *s, long point, int width_frac)
 {
-
-  if (buffer) {
-    size_t len = strlen(buffer) + point + 1;
-    if (len > mxl)
-      pari_err(talker, "buffer overflow in wr_dec/1 %d > %d", len, mxl);
-    strncat(buffer, s, point); /* integer part */
-    buffer[len-1] = 0;
-    strcat(buffer, ".");
-/*OFF    len += point + 1; */
-    if (width_frac) {
-      if (len + width_frac > mxl) {
-        pari_err(talker, "buffer overflow in wr_dec/2 %d > %d", len + width_frac, mxl);
-      }
-      strncat(buffer, s + point, width_frac);
-      buffer[len + width_frac] = 0;
-    } else {
-      if (len + strlen(s) - point > mxl) {
-        pari_err(talker, "buffer overflow in wr_dec/3 %d > %d", len + strlen(s) - point, mxl);
-      }
-      if (point < strlen(s)) {
-      strcat(buffer, s + point);
-      } else {
-        if (strlen(s) == 0)
-          pari_warn(warner, "there is nothing to output for this format `%s'", saved_format);
-      }
+  if (BUFFER) {
+    size_t ls, len = point + 1, mxl = *MXL;
+    char *buffer = *BUFFER;
+    chk_buf(len, mxl);
+    if (*s)
+    {
+      strncpy(buffer, s, point); /* integer part */
+      buffer += point; s += point; mxl -= point;
     }
+    *buffer++ = '.'; mxl--;
+    *buffer = 0;
+    ls = strlen(s);
+    if (width_frac) {
+      chk_buf(width_frac, mxl);
+      if (ls > width_frac) ls = width_frac;
+      strncpy(buffer, s, width_frac);
+    } else {
+      chk_buf(ls, mxl);
+      strcpy(buffer, s);
+    }
+    buffer += ls; mxl -= ls;
+    *buffer = 0;
+    *MXL = mxl;
+    *BUFFER = buffer;
   } else {
     char *t = s + point, save = *t;
     *t = 0;    pariputs(s); pariputc('.'); /* integer part */
     *t = save; pariputs(t);
   }
-
 }
 
 /* a.bbb En*/
@@ -611,19 +620,10 @@ static void
 wr_exp(char *buffer, size_t mxl, int sp, char *s, long n, char exp_char)
 {
   if (buffer) {
-    char work[256];
-    wr_dec(buffer, mxl, s, 1, 0);
-    if (sp) {
-      if (strlen(buffer) + 1 > mxl) {
-        pari_err(talker, "buffer overflow in wr_exp/1 %d > %d", strlen(buffer) + 1, mxl);
-      }
-      strcat(buffer, " ");
-    }
-    sprintf(work, "%c%ld", exp_char, n);
-    if (strlen(buffer) + strlen(work) > mxl) {
-      pari_err(talker, "buffer overflow in wr_exp/2 %d > %d", strlen(buffer) + strlen(work), mxl);
-    }
-    strcat(buffer + strlen(buffer), work);
+    wr_dec(&buffer, &mxl, s, 1, 0);
+    if (sp) { chk_buf(1,mxl); strcpy(buffer, " "); buffer++; mxl--; }
+    chk_buf(MAX_EXPO_LEN, mxl);
+    sprintf(buffer, "%c%ld", exp_char, n);
   } else {
     wr_dec(NULL, 0, s, 1, 0);
     if (sp) pariputc(' ');
@@ -631,50 +631,48 @@ wr_exp(char *buffer, size_t mxl, int sp, char *s, long n, char exp_char)
   }
 }
 
-/* assume x != 0 and print |x| in floating point format */
-/* f_format : boolean (fixed or not) */
+/* assume x != 0 and print |x| in floating point format.
+ * Allocate freely: the caller must clean the stack.
+ * f_format : boolean (fixed or not)
+ * wanted_dec : required number of printed digits or < 0 (all known digits) */
 static void
 wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
          int f_format, char exp_char, int width_frac)
 {
-  long exponent, beta, l, ldec, dec0, decdig, d, dif, df2, lx = lg(x);
+  long exponent, beta, l, ls, ldec, dec0, decdig, d, dif, df2, lx = lg(x);
   GEN z;
   ulong *res, *resd;
   char *s, *t;
   long to_round = 0; /* when not null, number of remaining digits */
-  long delta;
 /*
-  wanted_dec : required number of significant digits or < 0 (all known digits)
   decdig : number of significant digits in x
   dif : number of bits available for integer part of x
   beta : exponent in base 10 of integer part of x
-  df2 : virtual position of . in ``s'' (the string integer_part.fractionnary_part)
+  df2 : virtual position of . in 's' (the string integer_part.fractionnary_part)
 */
-
-#ifdef PB
-  fprintferr("wr_float buffer.in==`%s' f_format==%d\n", buffer, f_format);
-#endif
-
   if (wanted_dec > 0)
   { /* reduce precision if possible */
-    l = ndec2prec(wanted_dec); /* 'wanted_dec' digits -> pari precision in words for that */
-    if (lx > l) lx = l; /* truncature with guard, no rounding */
+    long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
+    if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  dif =  bit_accuracy(lx) - expo(x); /* (lx-2)*2^64 - expo(x); expo being in basis 2 */
+  dif =  bit_accuracy(lx) - expo(x);
   if (dif <= 0) f_format = 0; /* write in E format */
   beta = ex10(dif);
   if (beta)
-  { /* z = |x| 10^beta */
+  { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
-      z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1)); /* 10^b = 5^b * 2^b, 2^b goes into exponent */
+      z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
     else
       z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
     z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
   }
-  else z = mpabs(x); /* should be truncated at lx+1 words; FIXME? */
+  else
+  {
+    z = rtor(x, lx); setsigne(z, 1);
+  }
 
-  /* |x| ~ z / 10^beta, z in N */
-  z = gcvtoi(z, &l); /* nearest integer (truncation); l is junk */
+  /* |x| ~ z / 10^beta, z positive integer */
+  z = gcvtoi(z, &l); /* floor; l is junk */
   res = convi(z, &ldec); /* basis 2^BITS_IN_LONG -> basis 10^9 (sizeof(32-bits word)); res is an array of long, POINTING AFTER IT, length==ldec */
   resd = res - 1; /* leading word */
   dec0 = numdig(*resd);
@@ -683,13 +681,13 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   exponent = beta;
 
   if (width_frac && beta > width_frac) {
+    long delta = beta - width_frac;
 #ifdef PB
-    fprintferr("<>rounding for fractionnary part\n");
+    fprintferr("<>rounding for fractional part\n");
 #endif
-    delta = beta - width_frac;
     beta = width_frac;
     decdig -= delta;
-    to_round = decdig;
+    to_round = decdig; /* > 0 */
   }
   if (wanted_dec < 0)
     wanted_dec = decdig;
@@ -700,21 +698,18 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     if (!to_round || to_round > wanted_dec) to_round = wanted_dec;
     decdig = wanted_dec;
   }
+  /* now 0 < decdig <= wanted_dec */
 
 #ifdef PB
   fprintferr("\nFull output, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
-  for (l = 1; l <= ldec; l++) {
-    fprintferr("%ld ", res[-l]);
-  }
+  for (l = 1; l <= ldec; l++) fprintferr("%ld ", res[-l]);
   fprintferr("\n");
 #endif
 
   if (to_round) {
     l = to_round - dec0;
     d = l % 9;
-    if (l < 0) {
-      resd++;
-    }
+    if (l < 0) { resd++; if (d < 0) d += 9; }
     resd -= l / 9; /* from MSW to LSW */
     if (d) { /* cut resd[-1] to first d digits when printing */
       ulong p10 = u_pow10(9-d), r = *--resd % p10;
@@ -734,7 +729,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     }
   }
 
-  s = t = (char*)new_chunk(nchar2nlong(decdig + 1)); /* no memory leak, as the caller cleans the stack  */
+  s = t = (char*)new_chunk(nchar2nlong(decdig + 1));
   res--;
   if (*res) {
     d = numdig(*res); /* number of decimal digit, 1..9 */
@@ -744,58 +739,38 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     *t++ = '1';
     copart(t, 0, 9); t += 9;
   }
-  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
+  decdig = 9*(ldec-1) + d; /* recompute: d may be 1 more */
   l = ldec;
-  while (--l > 0) { copart(t, *--res, 9); t += 9; } /* this is the master loop, writing mantissa in s from chunks in [0..10^9[ */
-  if (to_round) {
-    s[to_round] = 0;
-  } else {
-    s[min(decdig,wanted_dec)] = 0;
-  }
+  /* master loop, writing mantissa in s from chunks in [0..10^9[ */
+  while (--l > 0) { copart(t, *--res, 9); t += 9; }
+  ls = to_round? to_round: min(decdig, wanted_dec);
+  s[ls] = 0; /* ls = strlen(s) */
   df2 = decdig - exponent; /* virtual position of . in s; positive or negative, and 10'power+1 */
 #ifdef PB
-  fprintferr("<>s==`%s' len=%ld decdig==%ld, exponent==%ld, f_format==%d, df2==%d\n", s, strlen(s), decdig, exponent, f_format, df2);
-  fprintferr("wr_float buffer.inter==`%s' f_format==%d\n", buffer, f_format);
+  fprintferr("<>s==`%s' len=%ld decdig==%ld, exponent==%ld, f_format==%d, df2==%d\n", s, ls, decdig, exponent, f_format, df2);
 #endif
 
   if (buffer) { /* writing into a buffer */
     if (!f_format) { /* floating format : e, or g, or f when integer_part exceeds wanted_dec FIXME (g should be f when possible) */
+      wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
+    } else if (df2 > 0) /* f_format, write integer_part.fractionary_part */
+      wr_dec(&buffer, &mxl, s, df2, width_frac);
+    else { /* f_format, df2 <= 0, fractional part must be written */
+      chk_buf(2, mxl);
+      strcpy(buffer, "0."); buffer += 2; mxl -= 2;
       if (width_frac) {
-#ifdef PB
-        fprintferr("<>df2(position of .)==%ld, width_frac==%d, to_round=%ld, s==`%s'\n", df2, width_frac, to_round, s);
-#endif
-        if (to_round > 0 && (ulong)to_round < strlen(s)) {
-          s[to_round] = 0;
-          wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
-        } else {
-          wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
-        }
-      } else {
-        wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
-      }
-    } else if (df2 > 0) { /* f_format, write integer_part.fractionary_part */
-      wr_dec(buffer, mxl, s, df2, width_frac);
-    } else { /* f_format, fractionary part must be written */
-      if (strlen(buffer) + 2 > mxl) {
-        pari_err(talker, "buffer overflow in wr_float/1 %d > %d", strlen(buffer) + 2, mxl);
-      }
-      strcat(buffer, "0.");
-      if (width_frac) {
-        if (width_frac < -df2) {
-          bzeros(buffer, mxl, width_frac);
-        } else {
-          bzeros(buffer, mxl, -df2);
-          if (strlen(buffer) + width_frac + df2 > mxl) {
-            pari_err(talker, "buffer overflow in wr_float/2 %d > %d", strlen(buffer) + width_frac + df2, mxl);
-          }
-          strncat(buffer, s, width_frac + df2);
+        if (width_frac < -df2)
+          bzeros(&buffer, &mxl, width_frac);
+        else { /* -df2 >= width_frac >= 0 */
+          bzeros(&buffer, &mxl, -df2);
+          chk_buf(width_frac + df2, mxl);
+          if (ls > width_frac + df2) s[width_frac + df2] = 0;
+          strcpy(buffer, s);
         }
       } else { /* no given precision */
-        bzeros(buffer, mxl, -df2);
-        if (strlen(buffer) + strlen(s) > mxl) {
-          pari_err(talker, "buffer overflow in wr_float/3 %d > %d", strlen(buffer) + strlen(s), mxl);
-        }
-        strcat(buffer, s);
+        bzeros(&buffer, &mxl, -df2);
+        chk_buf(ls, mxl);
+        strcpy(buffer, s);
       }
     }
   } else { /* on a file */
@@ -811,16 +786,12 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
  * sigd: number of sigd to print (all if <0).
  */
 static void
-wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int width_frac, int addsign)
+wr_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int width_frac, int addsign)
 {
   pari_sp av;
   long sx = signe(x), ex = expo(x);
   char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
   int f_format;
-
-#ifdef PB
-  fprintferr("wr2_real buffer.in==`%s' format==`%c'\n", buffer, format);
-#endif
 
   if (!sx) { /* real 0 */
     if (format == 'f') {
@@ -831,46 +802,32 @@ wr2_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wi
         dec = (d <= 0)? 0: d;
       }
       if (buffer) {
-        if (strlen(buffer) + 2 > mxl) {
-          pari_err(talker, "buffer overflow in wr2_real/1 %d > %d", strlen(buffer) + 2, mxl);
-        }
-        strcat(buffer, "0."); bzeros(buffer, mxl, dec);
+        chk_buf(2, mxl);
+        strcpy(buffer, "0."); buffer += 2; mxl -= 2;
+        bzeros(&buffer, &mxl, dec);
       } else {
         pariputs("0."); zeros(dec);
       }
     } else {
+      ex = ex10(ex) + 1;
       if (buffer) {
-        char work[256];
-        sprintf(work, "0.%c%ld", exp_char, ex10(ex) + 1);
-        if (strlen(buffer) + strlen(work) > mxl) {
-          pari_err(talker, "buffer overflow in wr2_real/2 %d > %d", strlen(buffer) + strlen(work), mxl);
-        }
-        strcat(buffer, work);
-      } else {
-        pariprintf("0.%c%ld", exp_char, ex10(ex) + 1);
-      }
-      return;
-    } /* string for a zero */
-  }
-
-#ifdef PB
-  fprintferr("wr2_real buffer.inter==`%s' format==`%c'\n", buffer, format);
-#endif
-
-  if (sx < 0) {
-    if (buffer) {
-      strcat(buffer, "-"); /* print sign if needed */
-    } else {
-      if (addsign) pariputc('-'); /* print sign if needed */
+        chk_buf(3+MAX_EXPO_LEN, mxl);
+        sprintf(buffer, "0.%c%ld", exp_char, ex);
+      } else
+        pariprintf("0.%c%ld", exp_char, ex);
     }
+    return;
+  } /* string for a zero */
+
+  if (sx < 0) { /* print sign if needed */
+    if (buffer)
+    { *buffer++ = '-'; mxl--; *buffer = 0; }
+    else
+      if (addsign) pariputc('-');
   }
 
-#ifdef PB
-  fprintferr("wr2_real buffer.before==`%s' format==`%c'\n", buffer, format);
-#endif
-
-  av = avma;
   f_format = (format == 'g' && ex >= -32) || format == 'f';
+  av = avma;
   wr_float(buffer, mxl, x, sp, sigd, f_format, exp_char, buffer? width_frac: 0);
   avma = av;
 }
@@ -1110,7 +1067,7 @@ static void
 sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list args )
 {
   int ch;
-  GEN gvalue, gtry;
+  GEN gvalue;
   int longflag = 0;
   int shortflag = 0;
   int pointflag = 0;
@@ -1355,9 +1312,8 @@ nextch:
               /* int prettyp; output style: raw, prettyprint, etc */
               _initout(&Tcopy,tolower(ch),len,1,maxwidth, f_RAW);
               plus = GENtostr0(gvalue, &Tcopy, &gen_output);
-            } else {
+            } else
               plus = GENtostr(gvalue);
-            }
             dostr(plus,0);
             free(plus);
             plus = NULL;
@@ -1417,31 +1373,30 @@ nextch:
               str = &work[0];
               while (*str) dopr_outch(*str++);
             } else {
-              char *buffer;
+              long sigd = T->sigd, prec = 0;
               pari_sp av = avma;
-              long sigd = T->sigd;
+              char *buffer;
               if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
               gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
-              if (len) {
-                mxlb = len;
-              } else {
-                if (sigd >= 0)
-                  mxlb = sigd;
-                else { /* total precision */
-                  if (typ(gvalue) != t_REAL) pari_err(infprecer, "output");
-                  mxlb = prec2ndec(lg(gvalue));
-                }
+              gvalue = simplify_i(gvalue);
+              if (len)
+              { mxlb = len; sigd = len-1; }
+              else if (sigd >= 0)
+                mxlb = sigd;
+              else { /* total precision */
+                if (typ(gvalue) != t_REAL) pari_err(infprecer, "output");
+                prec = lg(gvalue); mxlb = prec2ndec(prec);
               }
-              /* 20 : margin for erroneous outputs FIXME and for exponent */
-              mxlb += 1 + 20;
-              gtry = gtofp(simplify_i(gvalue), ndec2prec(mxlb));
-              if (typ(gtry) != t_REAL)
-                pari_err(talker, "impossible conversion to t_REAL: %Z", gtry);
-
-              if (len) sigd = len-1;
+              if (!prec) {
+                prec = ndec2prec(mxlb);
+                gvalue = gtofp(gvalue, prec);
+                if (typ(gvalue) != t_REAL)
+                  pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
+              }
+              mxlb += 2 + MAX_EXPO_LEN + 1; /* " E" + exponent + trailing \0 */
               buffer = stackmalloc(mxlb);
               *buffer = 0;
-              wr2_real(buffer, mxlb, gtry, T->sp, ch, sigd, maxwidth, 0);
+              wr_real(buffer, mxlb, gvalue, T->sp, ch, sigd, maxwidth, 0);
               dostr(buffer,0);
               avma = av;
             }
@@ -2065,22 +2020,6 @@ wr_vecsmall(pariout_t *T, GEN g)
     if (i<l-1) comma_sp(T);
   }
   pariputs("])");
-}
-/********************************************************************/
-/**                                                                **/
-/**                        WRITE A REAL NUMBER                     **/
-/**                                                                **/
-/********************************************************************/
-
-/* Write real number x.
- * format: e (exponential), f (floating point), g (as f unless x too small)
- *   if format is not one of the above act as e.
- * sigd: number of sigd to print (all if <0).
- */
-static void
-wr_real(pariout_t *T, GEN x, int addsign)
-{
-  wr2_real(NULL, 0, x, T->sp, toupper(T->format), T->sigd, 0, addsign);
 }
 
 /********************************************************************/
@@ -2826,7 +2765,9 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
   switch(tg)
   {
     case t_INT: wr_int_sign(g, addsign?signe(g):1); break;
-    case t_REAL: wr_real(T,g,addsign); break;
+    case t_REAL:
+      wr_real(NULL, 0, g, T->sp, toupper(T->format), T->sigd, 0, addsign);
+      break;
 
     case t_INTMOD: case t_POLMOD:
       pariputs(new_fun_set? "Mod(": "mod(");
@@ -3029,23 +2970,10 @@ sori(GEN g, pariout_t *T)
   if (tg != t_MAT && tg != t_COL) T->fieldw = 0;
   switch (tg)
   {
-    case t_REAL: wr_real(T,g,1); return;
+    case t_REAL: case t_STR: case t_CLOSURE:
+      bruti_intern(g, T, 1); return;
     case t_FFELT:
-      sori(FF_to_FpXQ_i(g),T);
-      return;
-    case t_STR:
-      quote_string(GSTR(g)); return;
-    case t_CLOSURE:
-      if (lg(g)>=6)
-      {
-        if (typ(g[5])==t_STR)
-          pariputs(GSTR(gel(g,5)));
-        else
-          pariprintf("((%s)->%s)",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
-      }
-      else
-        pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
-      return;
+      sori(FF_to_FpXQ_i(g),T); return;
     case t_LIST:
       pariputs("List([");
       g = list_data(g);
@@ -3054,7 +2982,7 @@ sori(GEN g, pariout_t *T)
       {
 	sori(gel(g,i), T); if (i < l-1) pariputs(", ");
       }
-      pariputs(")\n"); return;
+      pariputs("])\n"); return;
   }
   close_paren = 0;
   if (!is_graphicvec_t(tg))
