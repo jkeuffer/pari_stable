@@ -165,7 +165,7 @@
 %100.50Z for 3.5 : 3.50000000000000000000000000000000000000 E0
   *** printf: invalid conversion or specification m in format `%missing argument to format
 '.
-  *** printf: missing GEN arg 1 for printf format==`%d missing argument to format
+  *** printf: missing arg 1 for printf format '%d missing argument to format
 '.
   *** printf: incorrect type in gtofp.
-Total time spent: 24
+Total time spent: 12
