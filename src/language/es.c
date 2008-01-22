@@ -778,7 +778,7 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     else if (df2 > 0) wr_dec(NULL, 0, s, df2, 0);
     else { pariputs("0."); zeros(-df2); pariputs(s); }
   }
-} /* wr_float */
+}
 
 /* Write real number x.
  * format: e (exponential), f (floating point), g (as f unless x too small)
@@ -795,10 +795,10 @@ wr_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int wid
 
   if (!sx) { /* real 0 */
     if (format == 'f') {
-      long d, dec = sigd;
+      long dec = sigd;
       if (dec < 0)
       {
-        d = (long)(-ex * L2SL10);
+        long d = (long)(-ex * L2SL10);
         dec = (d <= 0)? 0: d;
       }
       if (buffer) {
@@ -850,7 +850,7 @@ static THREAD char *z_output; /* the current writing place in the output buffer 
 static void
 dopr_outch(int c)
 {
-  if (DoprEnd == 0 || z_output < DoprEnd)
+  if (z_output < DoprEnd)
     *z_output++ = c;
   else
     SnprfOverflow++;
@@ -872,14 +872,14 @@ fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth )
 {
   int padlen, strlen; /* amount to pad */
 
-  for(strlen = 0; value[strlen]; ++ strlen); /* strlen */
-  if (strlen > maxwidth && maxwidth) strlen = maxwidth;
+  for(strlen = 0; value[strlen]; ++strlen) /* empty */;
+  if (maxwidth && strlen > maxwidth) strlen = maxwidth;
   padlen = len - strlen;
   if (padlen < 0) padlen = 0;
   if (ljust) padlen = -padlen;
-  while (padlen > 0) { dopr_outch( ' ' ); --padlen; }
-  dostr( value, maxwidth );
-  while (padlen < 0) { dopr_outch( ' ' ); ++padlen; }
+  while (padlen > 0) { dopr_outch(' '); --padlen; }
+  dostr(value, maxwidth);
+  while (padlen < 0) { dopr_outch(' '); ++padlen; }
 }
 
 static void
@@ -911,17 +911,16 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
     if (dosign && lvalue < 0) { signvalue = '-'; ulnvalue = - lvalue; }
   }
   if (base < 0) { caps = 1; base = -base; }
-  if (base >= 10) {
+  if (base >= 10)
    factor = 1;
-  } else {
+  else
    factor = 2; /* base 8 < base 10 */
-  }
   if (gvalue) {
     long vz = sizedigit(gvalue) + 1;
     mxl = vz * factor + 10;
   } else {
     double vz = log(lvalue) / log(10);
-    mxl = (int)vz * factor + 1;
+    mxl = (long)vz * factor + 1;
   }
   convert = (char *)stackmalloc(mxl);
   if (gvalue) {
@@ -975,10 +974,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
         shift = (shift + 3 - BITS_IN_LONG % 3) % 3;
         for (j=0; j < stop; j++) {
           unsigned char cv = ucp & 0x7;
-          if (ucp == 0 && i+1 == len) {
-            rem = 0;
-            break;
-          };
+          if (ucp == 0 && i+1 == len) { rem = 0; break; };
           convert[place++] = "01234567"[cv];
           ucp >>= 3;
           rem = ucp;
@@ -1000,7 +996,6 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
       convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[ulnvalue % (unsigned)base ];
       ulnvalue /= (unsigned)base;
     } while (ulnvalue);
-
   }
   convert[place] = '\0';
   padlen = len - place;
@@ -1009,92 +1004,57 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   /* DEBUGP(( "str '%s', place %d, sign %c, padlen %d\n",
     convert,place,signvalue,padlen)); */
   if (zpad && padlen > 0) {
-    if (signvalue) { dopr_outch( signvalue ); --padlen; signvalue = 0; }
-    while (padlen > 0) { dopr_outch( zpad ); --padlen; }
+    if (signvalue) { dopr_outch(signvalue); --padlen; signvalue = 0; }
+    while (padlen > 0) { dopr_outch(zpad); --padlen; }
   }
-  while (padlen > 0) { dopr_outch( ' ' ); --padlen; }
-  if (signvalue) dopr_outch( signvalue );
-  while (place > 0) dopr_outch( convert[--place] );
-  while (padlen < 0) { dopr_outch( ' ' ); ++padlen; }
+  while (padlen > 0) { dopr_outch(' '); --padlen; }
+  if (signvalue) dopr_outch(signvalue);
+  while (place > 0) dopr_outch(convert[--place]);
+  while (padlen < 0) { dopr_outch(' '); ++padlen; }
   avma = av;
 }
 
-static long
-v_l_get_arg(GEN arg_vector, int nbmx, int *index)
-{
-  long res = 0;
-  if (*index >= nbmx) {
-    pari_err(talker, "missing GEN(int) arg %d for printf format==`%s'", *index, saved_format);
-  } else {
-    GEN take = gel(arg_vector, *index++);
-    res = gtolong(take);
-  }
-  return res;
-} /* v_l_get_arg */
-
 static GEN
-v_get_arg(GEN arg_vector, int nbmx, int *index, const char *caller)
+v_get_arg(GEN arg_vector, int nbmx, int *index)
 {
-/*  fprintferr("index==%d, nbmx=%d (%s)\n", *index, nbmx, caller); */
-/*  output(arg_vector); */
   if (*index >= nbmx)
-    pari_err(talker, "missing GEN arg %d for printf format==`%s'", *index, saved_format);
+    pari_err(talker, "missing arg %d for printf format '%s'", *index, saved_format);
   return gel(arg_vector, (*index)++);
-} /* v_get_arg */
-
-static void
-v_set_arg(va_list args, GEN *arg_vector, int *nbmx)
-{
-  *arg_vector = va_arg(args, GEN);
-/*    output(*arg_vector); */
-  *nbmx = lg( *arg_vector );
 }
 
 static void
 print_header(int blank, int plus, int sharp)
 {
-  if (sharp) {
-    dopr_outch('0');
-    dopr_outch('x');
-  } else if (plus) {
-    dopr_outch('+');
-  } else if (blank) {
-    dopr_outch(' ');
-  };
+  if (sharp) { dopr_outch('0'); dopr_outch('x'); }
+  else if (plus) dopr_outch('+');
+  else if (blank) dopr_outch(' ');
 }
 
 static void
-sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list args )
+sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
+        va_list args)
 {
   int ch;
-  GEN gvalue;
-  int longflag = 0;
-  int shortflag = 0;
-  int pointflag = 0;
-  int maxwidth = 0;
-  int print_a_plus;
-  int print_a_blank;
-  int with_sharp;
+  int longflag = 0, shortflag = 0, pointflag = 0, maxwidth = 0;
+  int print_a_plus, print_a_blank, with_sharp;
   char *strvalue;
   long lvalue;
-  int ljust;
-  int len;
-  int zpad;
-  GEN arg_vector = NULL;
+  int ljust, len, zpad;
+  GEN gvalue, arg_vector = NULL;
   int index = 1;
   int nbmx = 0;
   size_t mxlb;
   const char *recall = NULL;
-  int to_free;
-  char *plus;
 
   SnprfOverflow = 0;
   saved_format = format;
+  if (!is_a_list)
+  {
+    arg_vector = va_arg(args, GEN);
+    nbmx = lg(arg_vector);
+  }
 
   while ((ch = *format++) != '\0') {
-#if 0
-    fprintferr("<>ch/1==%c\n", ch);
-#endif
     switch(ch) {
       case '%':
         ljust = len = zpad = maxwidth = 0;
@@ -1105,9 +1065,6 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list, va_list a
         with_sharp = 0;
 nextch:
         ch = *format++;
-#if 0
-        fprintferr("<>ch/2==%c\n", ch);
-#endif
         switch(ch) {
           case 0:
             pari_err(talker, "printf: end of format");
@@ -1131,16 +1088,11 @@ nextch:
             print_a_blank = 1;
             goto nextch;
           case '0': /* set zero padding if len not set */
-            if (len==0) {
-              if (!pointflag) {
-                zpad = '0';
-              }
-            }
-            if (pointflag) {
+            if (len==0 && !pointflag) zpad = '0';
+            if (pointflag)
               maxwidth = maxwidth*10 + ch - '0';
-            } else {
+            else
               len = len*10 + ch - '0';
-            }
             goto nextch;
 /*
 ------------------------------------------------------------------------
@@ -1156,32 +1108,27 @@ nextch:
           case '7':
           case '8':
           case '9':
-            if (pointflag) {
+            if (pointflag)
               maxwidth = maxwidth*10 + ch - '0';
-            } else {
+            else
               len = len*10 + ch - '0';
-            }
             goto nextch;
           case '*':
             if (pointflag) {
-              if (is_a_list) {
+              if (is_a_list)
                 maxwidth = va_arg(args, int);
-              } else {
-                if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                maxwidth = (int )v_l_get_arg(arg_vector, nbmx, &index);
-              }
+              else
+                maxwidth = (int)gtolong( v_get_arg(arg_vector, nbmx, &index) );
             } else {
-              if (is_a_list) {
+              if (is_a_list)
                 len = va_arg(args, int);
-              } else {
-                if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-                len = (int )v_l_get_arg(arg_vector, nbmx, &index);
-              }
+              else
+                len = (int)gtolong( v_get_arg(arg_vector, nbmx, &index) );
             }
             goto nextch;
           case '.':
             if (pointflag)
-                          pari_err(talker, "printf: two '.' in conversion specification");
+              pari_err(talker, "printf: two '.' in conversion specification");
             pointflag = 1;
             goto nextch;
 /*
@@ -1206,102 +1153,60 @@ nextch:
           case 'U':
             print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
-              if (longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+              gvalue = NULL;
             } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "U");
-              fmtnum( 0, gvalue, 10,0, ljust, len, zpad );
+              lvalue = 0;
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
             }
+            fmtnum(lvalue, gvalue, 10,0, ljust, len, zpad );
             break;
           case 'o':
           case 'O':
             print_header(print_a_blank, print_a_plus, 0);
-            if (is_a_list) {
-              if (longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "O");
-              fmtnum( 0, gvalue, 8,0, ljust, len, zpad );
-            }
+            lvalue = 0; gvalue = NULL;
+            if (is_a_list)
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            else
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
+            fmtnum(lvalue, gvalue, 8,0, ljust, len, zpad);
             break;
           case 'd':
           case 'D':
             print_header(print_a_blank, print_a_plus, 0);
-            if (is_a_list) {
-              if (longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "D");
-              fmtnum( 0, gvalue, 10,1, ljust, len, zpad );
-            }
+            lvalue = 0; gvalue = NULL;
+            if (is_a_list)
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            else
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
+            fmtnum(lvalue, gvalue, 10,1, ljust, len, zpad);
             break;
-          case 'p':
-            print_header(print_a_blank, print_a_plus, 1);
-            if (is_a_list) {
-              if(longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "x");
-              fmtnum( 0, gvalue, 16,0, ljust, len, zpad );
-            }
-            break;
+          case 'p': with_sharp = 1; /* fall through */
           case 'x':
             print_header(print_a_blank, print_a_plus, with_sharp);
-            if (is_a_list) {
-              if (longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "x");
-              fmtnum( 0, gvalue, 16,0, ljust, len, zpad );
-            }
+            lvalue = 0; gvalue = NULL;
+            if (is_a_list)
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            else
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
+            fmtnum(lvalue, gvalue, 16,0, ljust, len, zpad);
             break;
           case 'X':
             print_header(print_a_blank, print_a_plus, with_sharp);
-            if (is_a_list) {
-              if (longflag) {
-                lvalue = va_arg( args, long );
-              } else {
-                lvalue = va_arg( args, int );
-              }
-              fmtnum( lvalue, NULL, 10,0, ljust, len, zpad );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "X");
-              fmtnum( 0, gvalue,-16,0, ljust, len, zpad );
-            }
+            lvalue = 0; gvalue = NULL;
+            if (is_a_list)
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            else
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
+            fmtnum(lvalue, gvalue,-16,0, ljust, len, zpad );
             break;
           case 'Z': //-- %Z IS HERE
-            if (is_a_list) {
-              gvalue = va_arg( args, GEN );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "Z");
-            }
+          {
+            char *plus;
+            if (is_a_list)
+              gvalue = va_arg(args, GEN);
+            else
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
             if (len || maxwidth) {
               pariout_t Tcopy;
               /*_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp) */
@@ -1314,44 +1219,41 @@ nextch:
               plus = GENtostr0(gvalue, &Tcopy, &gen_output);
             } else
               plus = GENtostr(gvalue);
-            dostr(plus,0);
-            free(plus);
-            plus = NULL;
+            dostr(plus,0); free(plus);
             break;
+          }
           case 's':
+          {
+            int to_free;
             if (is_a_list) {
-              strvalue = va_arg( args, char * );
+              strvalue = va_arg(args, char *);
               to_free = 0;
             } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "s");
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
               strvalue = GENtostr(gvalue);
               to_free = 1;
             }
             if (maxwidth > 0 || !pointflag) {
               if (pointflag && len > maxwidth)
                 len = maxwidth; /* Adjust padding */
-              fmtstr( strvalue,ljust,len,zpad, maxwidth);
+              fmtstr(strvalue, ljust, len, zpad, maxwidth);
             }
-            if (to_free) {
-              gpfree(strvalue);
-            }
+            if (to_free) gpfree(strvalue);
             break;
+          }
           case 'c':
-            if (is_a_list) {
-              ch = va_arg( args, int );
-            } else {
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
+            if (is_a_list) ch = va_arg(args, int);
+            else {
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
               strvalue = GENtostr(gvalue);
               ch = strvalue[0];
               gpfree(strvalue);
             }
-            dopr_outch( ch );
+            dopr_outch(ch);
             break;
 
           case '%':
-            dopr_outch( ch );
+            dopr_outch(ch);
             continue;
           case 'g':
           case 'G':
@@ -1360,15 +1262,11 @@ nextch:
           case 'f':
             print_header(print_a_blank, print_a_plus, 0);
             if (is_a_list) {
-              char work[256];
-              char subfmt[256];
+              char work[256], subfmt[256];
               const char *str;
-              double dvalue = va_arg( args, double );
+              double dvalue = va_arg(args, double);
               strncpy(subfmt, recall, format - recall);
-              subfmt[format - recall] = '\0'; /* format has been incremented after reading of current ch */
-#if 0
-              fprintferr("<>subfmt==`%s'\n", subfmt);
-#endif
+              subfmt[format - recall] = 0;
               sprintf(work, subfmt, dvalue);
               str = &work[0];
               while (*str) dopr_outch(*str++);
@@ -1376,8 +1274,7 @@ nextch:
               long sigd = T->sigd, prec = 0;
               pari_sp av = avma;
               char *buffer;
-              if (! arg_vector) v_set_arg(args, &arg_vector, &nbmx);
-              gvalue = v_get_arg(arg_vector, nbmx, &index, "c");
+              gvalue = v_get_arg(arg_vector, nbmx, &index);
               gvalue = simplify_i(gvalue);
               if (len)
               { mxlb = len; sigd = len-1; }
@@ -1406,7 +1303,7 @@ nextch:
         } /* second switch on ch */
         break;
       default:
-        dopr_outch( ch );
+        dopr_outch(ch);
         break;
     } /* first switch on ch */
   } /* while loop on ch */
@@ -1427,26 +1324,19 @@ v3pariputs(const char* format, int is_a_list, int return_string, ...)
     s = (char*)gprealloc(s, bsiz + 1);
     z_output = s;
     DoprEnd = s + bsiz;
-    sm_dopr(GP_DATA->fmt, s, format, is_a_list, args );
-    if (SnprfOverflow == 0) {
-      break;
-    }
-    if (SnprfOverflow < bsiz) {
+    sm_dopr(GP_DATA->fmt, s, format, is_a_list, args);
+    if (SnprfOverflow == 0) break;
+    if (SnprfOverflow < bsiz)
       bsiz <<= 1;
-    } else {
+    else
       bsiz += SnprfOverflow + 10;
-    }
     s = (char*)gprealloc(s, bsiz + 1);
   }
   va_end(args);
-  if (return_string) {
-    res = strtoGENstr(s);
-  } else {
-    pariputs(s);
-  }
+  if (return_string) res = strtoGENstr(s); else pariputs(s);
   gpfree(s);
   return res;
-} /* v3pariputs */
+}
 
 void
 pariprintf(const char *format, ...)
