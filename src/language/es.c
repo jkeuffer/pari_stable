@@ -1023,10 +1023,9 @@ v_get_arg(GEN arg_vector, int nbmx, int *index)
 }
 
 static void
-print_header(int blank, int plus, int sharp)
+print_header(int blank, int plus)
 {
-  if (sharp) { dopr_outch('0'); dopr_outch('x'); }
-  else if (plus) dopr_outch('+');
+       if (plus) dopr_outch('+');
   else if (blank) dopr_outch(' ');
 }
 
@@ -1151,7 +1150,7 @@ nextch:
 */
           case 'u':
           case 'U':
-            print_header(print_a_blank, print_a_plus, 0);
+            print_header(print_a_blank, print_a_plus);
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
@@ -1163,7 +1162,7 @@ nextch:
             break;
           case 'o':
           case 'O':
-            print_header(print_a_blank, print_a_plus, 0);
+            print_header(print_a_blank, print_a_plus);
             lvalue = 0; gvalue = NULL;
             if (is_a_list)
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
@@ -1173,7 +1172,7 @@ nextch:
             break;
           case 'd':
           case 'D':
-            print_header(print_a_blank, print_a_plus, 0);
+            print_header(print_a_blank, print_a_plus);
             lvalue = 0; gvalue = NULL;
             if (is_a_list)
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
@@ -1183,7 +1182,8 @@ nextch:
             break;
           case 'p': with_sharp = 1; /* fall through */
           case 'x':
-            print_header(print_a_blank, print_a_plus, with_sharp);
+            if (with_sharp) { dopr_outch('0'); dopr_outch('x'); }
+            else print_header(print_a_blank, print_a_plus);
             lvalue = 0; gvalue = NULL;
             if (is_a_list)
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
@@ -1192,7 +1192,8 @@ nextch:
             fmtnum(lvalue, gvalue, 16,0, ljust, len, zpad);
             break;
           case 'X':
-            print_header(print_a_blank, print_a_plus, with_sharp);
+            if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
+            else print_header(print_a_blank, print_a_plus, with_sharp);
             lvalue = 0; gvalue = NULL;
             if (is_a_list)
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
@@ -1260,7 +1261,7 @@ nextch:
           case 'e':
           case 'E':
           case 'f':
-            print_header(print_a_blank, print_a_plus, 0);
+            print_header(print_a_blank, print_a_plus);
             if (is_a_list) {
               char work[256], subfmt[256];
               const char *str;
