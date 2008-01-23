@@ -33,6 +33,8 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
    21- factor(500501^36): impossible assignment I-->S
    22- quadray(-7,6) [or other "impossible conductors"] --> oo loop [#725]
    23- acosh([Pol(1)]) -> gerepile error [#728]
+   24- rnf functions sometimes do not reduce their output when relative
+       extension has degree 1 [#727]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
