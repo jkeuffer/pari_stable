@@ -1,6 +1,7 @@
 PARI/GP was originally written (1987) in the Laboratoire A2X, Universite
 Bordeaux 1 (France) by Christian Batut, Dominique Bernardi, Henri Cohen
-and Michel Olivier. It is maintained by Karim Belabas since 1995.
+and Michel Olivier. Maintained by Karim Belabas (Bordeaux, Bonn, Orsay),
+between 1995 and 2001, by Bill Allombert and Karim Belabas since 2002.
 
 A great number of people have contributed code through the successive
 stages which eventually resulted in the present version of PARI/GP.
@@ -9,27 +10,53 @@ bugs or suggesting improvements, Igor Schein foremost among them.
 
 We would like to thank them all here.
 
-Major code contributors (large modules written from scratch):
+Current lead developpers:
 
-  Bill Allombert
-  Christian Batut
-  Karim Belabas
-  Dominique Bernardi
-  Henri Cohen
-  Francisco Diaz y Diaz
-  Yves Eichenlaub
-  Xavier Gourdon
-  Louis Granboulan
-  Bruno Haible
-  Guillaume Hanrot
-  Pascal Letard
-  Gerhard Niklasch
-  Michel Olivier
-  Thomas Papanikolaou
-  Xavier Roblot
-  Denis Simon
-  Emmanuel Tollis
-  Ilya Zakharevitch
+  Bill Allombert (Montpellier)
+  Karim Belabas (Bordeaux)
+
+Major contributors (large modules written or rewritten from scratch):
+
+  Bill Allombert: GP2C, the GP parser, extension of the GP language
+    (my, closures) GMP kernel, modular kernel, ffinit, galois* routines,
+    subcyclo, black-box groups, the elldata and galdata package, PARI
+    description system, FLTK support, Bug tracking system, administration of
+    the pari.math.u-bordeaux.fr machine, the http://pari.math.u-bordeaux.fr
+    website
+  Christian Batut: 68k multiprecision kernel, Linear algebra, lattices
+  Karim Belabas: current project leader, native multiprecision kernel, modular
+    kernel, polynomial arithmetic, polynomial factorization (finite fields,
+    number fields), LLL, primality and compositeness tests, number fields,
+    polgalois and the galdata package, transcendental functions, install(),
+    extension of the GP language (next/break/return, local, op=, default()),
+    gphelp, Configure, readline, man pages, documentation layout, reference card
+    and user's manuals, the FAQ, the http://pari.math.u-bordeaux.fr website
+    the PARI resource pages.
+  Dominique Bernardi: the original gp, ECM, elliptic curves
+  Henri Cohen: original designer and project leader, native multiprecision
+    kernel, arithmetic functions, LLL, transcendental functions, number fields,
+    elliptic curves
+  Francisco Diaz y Diaz: number fields (class groups, units)
+  Yves Eichenlaub: original polgalois implementation
+  Xavier Gourdon: polroots, initial Karatsuba/Toom Cook/fft implementations
+  Louis Granboulan: breakup of monolithic PARI into modules, first GMP
+    kernel, first Configure
+  Bruno Haible: micro assembly implementations, DOS/Windows support
+  Guillaume Hanrot: thue, zncoppersmith
+  Pascal Letard: basic number field (round2, initial round4)
+  Jean-François Mestre: elliptic curves
+  Gerhard Niklasch: binary powering, integer extended gcd and rational
+    reconstruction, primality and compositeness test, integer factorization,
+    documentation layout, AIX and Solaris support, first PARI web site.
+  Michel Olivier: 68k multiprecision kernel, number fields, original polgalois
+    and nfsubfields implementation
+  Thomas Papanikolaou: MPQS integration, Pari-Lidia project
+  Xavier Roblot: MPQS integration, Stark, original nffactor
+  Denis Simon: norm equations, S-units, Hilbert symbols
+  Emmanuel Tollis: primedec, zetak
+  Ilya Zakharevitch: initprimes, gphelp, tex2mail, major cleanup of the
+    graphics and GP parser code, gnuplot support, readline support,
+    OS/2 support, DOS/EMX support
 
 Other contributors: the 2 or 3 letter code refer to the CHANGES file. Please,
 kindly remind us if you have been forgotten!
