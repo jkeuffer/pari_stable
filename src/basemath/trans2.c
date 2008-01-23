@@ -621,7 +621,7 @@ gach(GEN x, long prec)
 	return gerepileupto(av, gadd(y, PiI2n(-1, prec)));
       }
       p1 = gsubgs(gsqr(y),1);
-      if (gcmp0(p1)) return zeroser(varn(y), valp(p1)>>1);
+      if (gcmp0(p1)) { avma = av; return zeroser(varn(y), valp(p1)>>1); }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1, varn(y));
       if (v)
