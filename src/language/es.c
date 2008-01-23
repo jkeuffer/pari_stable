@@ -882,6 +882,9 @@ fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth )
   while (padlen < 0) { dopr_outch(' '); ++padlen; }
 }
 
+/* abs(base) is 8, 10, 16. If base < 0, some "alternate" form
+ * -- print hex in uppercase
+ * -- prefix octal with 0 */
 static void
 fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zpad)
 {
@@ -889,43 +892,44 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   char *convert;
   long place = 0, mxl;
   int padlen = 0; /* amount to pad */
-  int caps = 0;
+  int caps;
   GEN uvalue = NULL;
   unsigned long ulnvalue = 0;
   int factor;
   pari_sp av = avma;
 
-  if (gvalue && typ(gvalue) != t_INT) {
-    gvalue = gfloor( simplify_i(gvalue) );
-    if (typ(gvalue) != t_INT)
-      pari_err(talker, "not a t_INT in integer format conversion: %Z", gvalue);
-  }
-
   /* DEBUGP(("value 0x%x, base %d, dosign %d, ljust %d, len %d, zpad %d\n",
     value, base, dosign, ljust, len, zpad )); */
-  if (gvalue) {
-    uvalue = icopy(gvalue);
-    if (dosign && signe(gvalue) < 0) { signvalue = '-'; setsigne(uvalue,1); }
-  } else {
-    ulnvalue = lvalue;
-    if (dosign && lvalue < 0) { signvalue = '-'; ulnvalue = - lvalue; }
-  }
-  if (base < 0) { caps = 1; base = -base; }
+  if (base > 0) caps = 0; else { caps = 1; base = -base; }
   if (base >= 10)
    factor = 1;
   else
    factor = 2; /* base 8 < base 10 */
-  if (gvalue) {
-    long vz = sizedigit(gvalue) + 1;
+
+  if (gvalue)
+  {
+    long vz;
+    if (typ(gvalue) != t_INT) {
+      gvalue = gfloor( simplify_i(gvalue) );
+      if (typ(gvalue) != t_INT)
+        pari_err(talker,"not a t_INT in integer format conversion: %Z", gvalue);
+    }
+    uvalue = icopy(gvalue);
+    if (dosign && signe(gvalue) < 0) { signvalue = '-'; setsigne(uvalue,1); }
+    vz = sizedigit(gvalue) + 1;
     mxl = vz * factor + 10;
   } else {
-    double vz = log(lvalue) / log(10);
+    double vz;
+    ulnvalue = lvalue;
+    if (dosign && lvalue < 0) { signvalue = '-'; ulnvalue = - lvalue; }
+    vz = log(lvalue) / log(10);
     mxl = (long)vz * factor + 1;
   }
+
   convert = (char *)stackmalloc(mxl);
   if (gvalue) {
     if (base == 10) {
-      long len, i, cnt;
+      long i, len, cnt;
       ulong *larray = convi(uvalue, &len);
       larray -= len;
       for (i = 0; i < len; i++) {
@@ -942,7 +946,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
     } else if (base == 16) {
       long i, len = lgefint(uvalue);
       GEN up = int_LSW(uvalue);
-      for (i=2; i<len; i++) {
+      for (i = 2; i < len; i++, up = int_nextW(up)) {
         ulong ucp = (ulong)*up;
         long j;
         for (j=0; j < BITS_IN_LONG/4; j++) {
@@ -951,45 +955,34 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
           ucp >>= 4;
           if (ucp == 0 && i+1 == len) break;
         }
-        up  = int_nextW(up);
       } /* loop on hex digits in word */
     } else if (base == 8) {
       long i, len = lgefint(uvalue);
       GEN up = int_LSW(uvalue);
-      unsigned long rem = 0;
+      ulong rem = 0;
       int shift = 0;
       int mask[3] = {0, 1, 3};
-      int stop = BITS_IN_LONG/3;
-      long ldispo = BITS_IN_LONG;
-      for (i=2; i<len; i++) {
+      for (i = 2; i < len; i++, up = int_nextW(up)) {
         ulong ucp = (ulong)*up;
-        long j;
+        long j, ldispo = BITS_IN_LONG;
         if (shift) { /* 0, 1 or 2 */
           unsigned char cv = ((ucp & mask[shift]) <<(3-shift)) + rem;
-          if (cv > 7) pari_err(talker, "ALG-ERROR cv==%d", cv);
           convert[place++] = "01234567"[cv];
           ucp >>= shift;
           ldispo -= shift;
         };
         shift = (shift + 3 - BITS_IN_LONG % 3) % 3;
-        for (j=0; j < stop; j++) {
+        for (j=0; j < BITS_IN_LONG/3; j++) {
           unsigned char cv = ucp & 0x7;
           if (ucp == 0 && i+1 == len) { rem = 0; break; };
           convert[place++] = "01234567"[cv];
           ucp >>= 3;
-          rem = ucp;
           ldispo -= 3;
+          rem = ucp;
           if (ldispo < 3) break;
         }
-        up  = int_nextW(up);
-        ldispo = BITS_IN_LONG;
       } /* loop on hex digits in word */
-      if (rem) {
-        if (rem > 7) pari_err(talker, "ALG-ERROR rem==%lu", rem);
-        convert[place++] = "01234567"[rem];
-      }
-    } else {
-      pari_err(talker, "conversion to base %d not available", base);
+      if (rem) convert[place++] = "01234567"[rem];
     }
   } else { /* not a gvalue, thus a standard integer */
     do {
@@ -1007,9 +1000,16 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
     if (signvalue) { dopr_outch(signvalue); --padlen; signvalue = 0; }
     while (padlen > 0) { dopr_outch(zpad); --padlen; }
   }
-  while (padlen > 0) { dopr_outch(' '); --padlen; }
+  else
+    while (padlen > 0) { dopr_outch(' '); --padlen; }
   if (signvalue) dopr_outch(signvalue);
-  while (place > 0) dopr_outch(convert[--place]);
+  if (!place) /* no digit: 0 */
+    dopr_outch('0');
+  else
+  {
+    if (caps && base == 8) dopr_outch('0');
+    while (place > 0) dopr_outch(convert[--place]);
+  }
   while (padlen < 0) { dopr_outch(' '); ++padlen; }
   avma = av;
 }
@@ -1169,7 +1169,7 @@ nextch:
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
             else
               gvalue = v_get_arg(arg_vector, nbmx, &index);
-            fmtnum(lvalue, gvalue, 8,0, ljust, len, zpad);
+            fmtnum(lvalue, gvalue, with_sharp? -8: 8,0, ljust, len, zpad);
             break;
           case 'd':
           case 'D':
