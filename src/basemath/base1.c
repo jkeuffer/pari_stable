@@ -2368,7 +2368,10 @@ initzeta(GEN pol, long prec)
 
   /*************** residue & constants ***************/
   nfz = cgetg(10,t_VEC);
-  if (!bnf || nfgetprec(bnf) < prec ) bnf = bnfinit0(pol, 2, NULL, prec);
+  if (bnf && nfgetprec(bnf) >= prec)
+    bnf = gcopy(bnf);
+  else
+    bnf = bnfinit0(pol, 2, NULL, prec);
   prec = (prec<<1) - 2;
   Pi = mppi(prec); racpi = sqrtr(Pi);
 
