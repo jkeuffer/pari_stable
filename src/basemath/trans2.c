@@ -200,7 +200,7 @@ gasin(GEN x, long prec)
       {
         GEN t = Pi2n(-1,prec);
         if (gsigne(gel(y,2)) < 0) setsigne(t, -1);
-        return scalarser(t, varn(y), valp(p1)>>1);
+        return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1,varn(y));
@@ -555,7 +555,7 @@ gash(GEN x, long prec)
       {
         GEN t = PiI2n(-1,prec);
         if ( gsigne(imag_i(gel(y,2))) < 0 ) setsigne(gel(t,2), -1);
-        return scalarser(t, varn(y), valp(p1)>>1);
+        return gerepileupto(av, scalarser(t, varn(y), valp(p1)>>1));
       }
       p1 = gdiv(derivser(y), gsqrt(p1,prec));
       a = integ(p1,varn(y));
