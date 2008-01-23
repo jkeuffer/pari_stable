@@ -1193,7 +1193,7 @@ nextch:
             break;
           case 'X':
             if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
-            else print_header(print_a_blank, print_a_plus, with_sharp);
+            else print_header(print_a_blank, print_a_plus);
             lvalue = 0; gvalue = NULL;
             if (is_a_list)
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
