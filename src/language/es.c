@@ -4212,12 +4212,13 @@ GEN
 Strprintf1(GEN gfmt, va_list args) /* the va_list version of Strprintf */
 { return v3pariputs((const char *)gfmt,1,1,args); }
 
+/* the va_list version of fprintf0 (FIXME: fprintf0 not yet available) */
 void
-fprintf1(struct pariFILE *tfile, GEN gfmt, va_list args) /* the va_list version of fprintf0 (fprintf0 not yet available FIXME) */
+fprintf1(FILE *file, GEN gfmt, va_list args)
 {
   pari_sp ltop = avma;
   GEN res = v3pariputs((const char *)gfmt,1,1,args);
-  fputs(GSTR(res), tfile->file);
+  fputs(GSTR(res), file);
   avma = ltop;
 }
 
