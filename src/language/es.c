@@ -656,7 +656,6 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
   dif =  bit_accuracy(lx) - expo(x);
-  if (dif <= 0) f_format = 0; /* write in E format */
   beta = ex10(dif);
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
@@ -745,7 +744,8 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
   while (--l > 0) { copart(t, *--res, 9); t += 9; }
   ls = to_round? to_round: min(decdig, wanted_dec);
   s[ls] = 0; /* ls = strlen(s) */
-  df2 = decdig - exponent; /* virtual position of . in s; positive or negative, and 10'power+1 */
+  df2 = decdig - exponent; /* position of . in s; < 0 or > 0 */
+  if (df2 > ls) f_format = 0; /* write in E format */
 #ifdef PB
   fprintferr("<>s==`%s' len=%ld decdig==%ld, exponent==%ld, f_format==%d, df2==%d\n", s, ls, decdig, exponent, f_format, df2);
 #endif
