@@ -582,7 +582,7 @@ chk_buf(size_t l, size_t mxl)
 
 /* sss.ttt, assume 'point' < strlen(s) */
 static void
-wr_dec(char **BUFFER, size_t *MXL, char *s, long point, int width_frac)
+wr_dec(char **BUFFER, size_t *MXL, char *s, long point, size_t width_frac)
 {
   if (BUFFER) {
     size_t ls, len = point + 1, mxl = *MXL;
