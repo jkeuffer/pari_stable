@@ -868,7 +868,7 @@ dostr(const char *str, int cut)
 }
 
 static void
-fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth )
+fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth)
 {
   int padlen, strlen; /* amount to pad */
 
@@ -899,7 +899,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   pari_sp av = avma;
 
   /* DEBUGP(("value 0x%x, base %d, dosign %d, ljust %d, len %d, zpad %d\n",
-    value, base, dosign, ljust, len, zpad )); */
+    value, base, dosign, ljust, len, zpad)); */
   if (base > 0) caps = 0; else { caps = 1; base = -base; }
   if (base >= 10)
    factor = 1;
@@ -1158,7 +1158,7 @@ nextch:
               lvalue = 0;
               gvalue = v_get_arg(arg_vector, nbmx, &index);
             }
-            fmtnum(lvalue, gvalue, 10,0, ljust, len, zpad );
+            fmtnum(lvalue, gvalue, 10,0, ljust, len, zpad);
             break;
           case 'o':
           case 'O':
@@ -1199,7 +1199,7 @@ nextch:
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
             else
               gvalue = v_get_arg(arg_vector, nbmx, &index);
-            fmtnum(lvalue, gvalue,-16,0, ljust, len, zpad );
+            fmtnum(lvalue, gvalue,-16,0, ljust, len, zpad);
             break;
           case 'Z': //-- %Z IS HERE
           {
@@ -2451,7 +2451,7 @@ isdenom(GEN g)
 static void
 texexpo(long e)
 {
-  if (e !=1 ) {
+  if (e != 1) {
     if (e >= 0 && e < 10)
       pariprintf("^%ld",e);
     else
@@ -2461,7 +2461,7 @@ texexpo(long e)
 static void
 wrexpo(long e)
 {
-  if (e!=1) pariprintf("^%ld",e);
+  if (e != 1) pariprintf("^%ld",e);
 }
 
 /* v^e */
@@ -2475,7 +2475,7 @@ monome(const char *v, long e)
 static void
 texnome(const char *v, long e)
 {
-  if (e) texVpowE(v,e); else pariputc('1');
+  if (e) texVpowE(v, e); else pariputc('1');
 }
 
 /* ( a ) */
