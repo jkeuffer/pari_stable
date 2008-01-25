@@ -868,7 +868,7 @@ dostr(const char *str, int cut)
 }
 
 static void
-fmtstr(const char *value, int ljust, int len, int zpad, int maxwidth)
+fmtstr(const char *value, int ljust, int len, int maxwidth)
 {
   int padlen, strlen; /* amount to pad */
 
@@ -894,7 +894,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   int padlen = 0; /* amount to pad */
   int caps;
   GEN uvalue = NULL;
-  unsigned long ulnvalue = 0;
+  ulong ulnvalue = 0;
   int factor;
   pari_sp av = avma;
 
@@ -997,12 +997,14 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
   /* DEBUGP(( "str '%s', place %d, sign %c, padlen %d\n",
     convert,place,signvalue,padlen)); */
   if (zpad && padlen > 0) {
-    if (signvalue) { dopr_outch(signvalue); --padlen; signvalue = 0; }
-    while (padlen > 0) { dopr_outch(zpad); --padlen; }
+    if (signvalue) { dopr_outch('-'); --padlen; }
+    while (padlen > 0) { dopr_outch('0'); --padlen; }
   }
   else
+  {
     while (padlen > 0) { dopr_outch(' '); --padlen; }
-  if (signvalue) dopr_outch(signvalue);
+    if (signvalue) dopr_outch('-');
+  }
   if (!place) /* no digit: 0 */
     dopr_outch('0');
   else
@@ -1034,7 +1036,7 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
         va_list args)
 {
   int ch;
-  int longflag = 0, shortflag = 0, pointflag = 0, maxwidth = 0;
+  int longflag = 0, pointflag = 0, maxwidth = 0;
   int print_a_plus, print_a_blank, with_sharp;
   char *strvalue;
   long lvalue;
@@ -1057,11 +1059,9 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
     switch(ch) {
       case '%':
         ljust = len = zpad = maxwidth = 0;
-        shortflag = longflag = pointflag = 0;
+        longflag = pointflag = 0;
         recall = format - 1; /* '%' was skipped */
-        print_a_plus = 0;
-        print_a_blank = 0;
-        with_sharp = 0;
+        print_a_plus = print_a_blank = with_sharp = 0;
 nextch:
         ch = *format++;
         switch(ch) {
@@ -1086,13 +1086,12 @@ nextch:
           case ' ':
             print_a_blank = 1;
             goto nextch;
-          case '0': /* set zero padding if len not set */
-            if (len==0 && !pointflag) zpad = '0';
-            if (pointflag)
-              maxwidth = maxwidth*10 + ch - '0';
-            else
-              len = len*10 + ch - '0';
-            goto nextch;
+          case '0':
+            /* appears as a flag: set zero padding */
+            if (len==0 && !pointflag) { zpad = '0'; goto nextch; }
+
+            /* else part of a field width or precision */
+            /* fall through */
 /*
 ------------------------------------------------------------------------
                        -- maxwidth or precision
@@ -1112,6 +1111,7 @@ nextch:
             else
               len = len*10 + ch - '0';
             goto nextch;
+
           case '*':
             if (pointflag) {
               if (is_a_list)
@@ -1141,7 +1141,7 @@ nextch:
             longflag = 1;
             goto nextch;
           case 'h':
-            shortflag = 1; /* dummy, as va_arg promotes short into int */
+            /* dummy, as va_arg promotes short into int */
             goto nextch;
 /*
 ------------------------------------------------------------------------
@@ -1150,7 +1150,7 @@ nextch:
 */
           case 'u':
           case 'U':
-            print_header(print_a_blank, print_a_plus);
+            print_header(0, print_a_plus);
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
@@ -1163,42 +1163,50 @@ nextch:
           case 'o':
           case 'O':
             print_header(print_a_blank, print_a_plus);
-            lvalue = 0; gvalue = NULL;
-            if (is_a_list)
+            if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
-            else
+              gvalue = NULL;
+            } else {
+              lvalue = 0;
               gvalue = v_get_arg(arg_vector, nbmx, &index);
+            }
             fmtnum(lvalue, gvalue, with_sharp? -8: 8,0, ljust, len, zpad);
             break;
           case 'd':
           case 'D':
             print_header(print_a_blank, print_a_plus);
-            lvalue = 0; gvalue = NULL;
-            if (is_a_list)
+            if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
-            else
+              gvalue = NULL;
+            } else {
+              lvalue = 0;
               gvalue = v_get_arg(arg_vector, nbmx, &index);
+            }
             fmtnum(lvalue, gvalue, 10,1, ljust, len, zpad);
             break;
           case 'p': with_sharp = 1; /* fall through */
           case 'x':
             if (with_sharp) { dopr_outch('0'); dopr_outch('x'); }
             else print_header(print_a_blank, print_a_plus);
-            lvalue = 0; gvalue = NULL;
-            if (is_a_list)
+            if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
-            else
+              gvalue = NULL;
+            } else {
+              lvalue = 0;
               gvalue = v_get_arg(arg_vector, nbmx, &index);
+            }
             fmtnum(lvalue, gvalue, 16,0, ljust, len, zpad);
             break;
           case 'X':
             if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
             else print_header(print_a_blank, print_a_plus);
-            lvalue = 0; gvalue = NULL;
-            if (is_a_list)
+            if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
-            else
+              gvalue = NULL;
+            } else {
               gvalue = v_get_arg(arg_vector, nbmx, &index);
+              lvalue = 0;
+            }
             fmtnum(lvalue, gvalue,-16,0, ljust, len, zpad);
             break;
           case 'Z': //-- %Z IS HERE
@@ -1235,9 +1243,8 @@ nextch:
               to_free = 1;
             }
             if (maxwidth > 0 || !pointflag) {
-              if (pointflag && len > maxwidth)
-                len = maxwidth; /* Adjust padding */
-              fmtstr(strvalue, ljust, len, zpad, maxwidth);
+              if (maxwidth > 0 && len > maxwidth) len = maxwidth;
+              fmtstr(strvalue, ljust, len, maxwidth);
             }
             if (to_free) gpfree(strvalue);
             break;
@@ -1291,7 +1298,7 @@ nextch:
                 if (typ(gvalue) != t_REAL)
                   pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
               }
-              mxlb += 2 + MAX_EXPO_LEN + 1; /* " E" + exponent + trailing \0 */
+              mxlb += 1+2+MAX_EXPO_LEN+1; /* '.', " E", exponent, trailing \0 */
               buffer = stackmalloc(mxlb);
               *buffer = 0;
               wr_real(buffer, mxlb, gvalue, T->sp, ch, sigd, maxwidth, 0);
