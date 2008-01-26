@@ -51,6 +51,8 @@ BA  8- [svn/CVS] number development snapshots according to repository version
     9- delete CVS.txt and replace it with README-subversion
    10- syntax errors are no longer trapped
    11- quadray no longer allows an (optional) 3rd argument
+   12- 'format' was updated after each 'realprecision' change. Don't update
+       if 'format' is Xm.-1 (show all significant digits).
 
   Added
     1- library function gpcalloc

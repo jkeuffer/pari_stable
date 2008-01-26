@@ -284,18 +284,22 @@ sd_realprecision(const char *v, long flag)
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
   {
-    ulong newnb = fmt->sigd;
+    ulong newnb = fmt->sigd, prec;
     sd_ulong_init(v, "realprecision", &newnb, 1, prec2ndec(LGBITS));
     if (fmt->sigd == (long)newnb) return gnil;
-    fmt->sigd = newnb;
-    precreal = (ulong)ndec2prec(newnb);
+    if (fmt->sigd >= 0) fmt->sigd = newnb;
+    prec = (ulong)ndec2prec(newnb);
+    if (prec == precreal) return gnil;
+    precreal = prec;
   }
   if (flag == d_RETURN) return stoi(fmt->sigd);
   if (flag == d_ACKNOWLEDGE)
   {
     long n = prec2ndec(precreal);
     pariprintf("   realprecision = %ld significant digits", n);
-    if (n != fmt->sigd)
+    if (fmt->sigd < 0)
+      pariputs(" (all digits displayed)");
+    else if (n != fmt->sigd)
       pariprintf(" (%ld digits displayed)", fmt->sigd);
     pariputc('\n');
   }
