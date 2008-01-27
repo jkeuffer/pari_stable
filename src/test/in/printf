@@ -1,4 +1,4 @@
-\p38
+default(realprecision,38);
 aa=[1.0,2.0]
 bb=2.5
 str="chaine"

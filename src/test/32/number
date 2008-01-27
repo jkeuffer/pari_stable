@@ -1,4 +1,3 @@
-   realprecision = 38 significant digits
    echo = 1 (on)
 ? gettime;addprimes([nextprime(10^9),nextprime(10^10)])
 [1000000007, 10000000019]
@@ -269,7 +268,7 @@ x^2 - x + 3
 [768, [12, 4, 4, 2, 2], [Mod(67, 3120), Mod(2341, 3120), Mod(1847, 3120), Mo
 d(391, 3120), Mod(2081, 3120)]]
 ? getheap
-[87, 2720]
+[88, 2727]
 ? print("Total time spent: ",gettime);
-Total time spent: 64
+Total time spent: 60
 ? \q

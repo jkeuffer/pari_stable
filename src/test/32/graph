@@ -1,4 +1,3 @@
-   realprecision = 38 significant digits
    echo = 1 (on)
 ? gettime;plotinit(0,500,500)
 ? plotmove(0,0,0);plotbox(0,500,500)
@@ -62,7 +61,7 @@
 ? plotmove(0,200,200);plotstring(0,"(0,0)")
 ? psdraw([0,10,10])
 ? getheap
-[9, 151]
+[10, 158]
 ? print("Total time spent: ",gettime);
-Total time spent: 14
+Total time spent: 8
 ? \q

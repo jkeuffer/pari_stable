@@ -1,4 +1,4 @@
-\p 38
+default(realprecision,38);
 \e
 setrand(1); bnf=bnfinit(x^2+105);
 vector(1000, i, bnfisintnorm(bnf,i))

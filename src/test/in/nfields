@@ -1,4 +1,4 @@
-\p 38
+default(realprecision,38);
 \e
 \\ Initialisations diverses
 gettime; nfpol=x^5-5*x^3+5*x+25

@@ -1,3 +1,4 @@
+default(realprecision,38);
 gettime;
 allocatemem(20*10^6)
 setrand(1);rnfkummer(bnrinit(bnfinit(y^4+12*y^3+15*y^2+15*y-15,1),1,1),0)

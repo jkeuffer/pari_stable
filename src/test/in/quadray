@@ -1,4 +1,4 @@
-\p38
+default(realprecision,38);
 gettime;
 Q(D,f) = lift(quadray(D,f));
 Q(-4,31)

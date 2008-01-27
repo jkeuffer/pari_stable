@@ -1,4 +1,4 @@
-\p 38
+default(realprecision,38);
 \e
 gettime; apol=x^3+5*x+1
 deriv((x+y)^5,y)

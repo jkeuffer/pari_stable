@@ -1,4 +1,4 @@
-\p 38
+default(realprecision,38);
 \e
 gettime; algdep(2*cos(2*Pi/13),6)
 algdep(2*cos(2*Pi/13),6,15)
