@@ -152,9 +152,9 @@ static void
 init_fmt(gp_data *D)
 {
 #ifdef LONG_IS_64BIT
-  static pariout_t DFLT_OUTPUT = { 'g', 0, 38, 1, f_PRETTYMAT, 0 };
+  static pariout_t DFLT_OUTPUT = { 'g', 38, 1, f_PRETTYMAT, 0 };
 #else
-  static pariout_t DFLT_OUTPUT = { 'g', 0, 28, 1, f_PRETTYMAT, 0 };
+  static pariout_t DFLT_OUTPUT = { 'g', 28, 1, f_PRETTYMAT, 0 };
 #endif
   D->fmt = &DFLT_OUTPUT;
 }
@@ -325,7 +325,7 @@ sd_format(const char *v, long flag)
     fmt->format = c; v++;
 
     if (isdigit((int)*v))
-      { fmt->fieldw=atol(v); while (isdigit((int)*v)) v++; }
+      { while (isdigit((int)*v)) v++; } /* FIXME: skip obsolete field width */
     if (*v++ == '.')
     {
       if (*v == '-') fmt->sigd = -1;
@@ -336,11 +336,11 @@ sd_format(const char *v, long flag)
   if (flag == d_RETURN)
   {
     char *s = stackmalloc(64);
-    (void)sprintf(s, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
+    (void)sprintf(s, "%c.%ld", fmt->format, fmt->sigd);
     return strtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
+    pariprintf("   format = %c.%ld\n", fmt->format, fmt->sigd);
   return gnil;
 }
 

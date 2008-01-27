@@ -429,12 +429,11 @@ void
 flusherr(void) { pariErr->flush(); }
 
 static void
-_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
+_initout(pariout_t *T, char f, long sigd, long sp, int prettyp)
 {
   T->format = f;
   T->sigd = sigd;
   T->sp = sp;
-  T->fieldw = fieldw;
   T->prettyp = prettyp;
 }
 
@@ -1686,7 +1685,6 @@ GENtoTeXstr(GEN x) {
   pariout_t T = *(GP_DATA->fmt);
 
   T.prettyp = f_TEX;
-  T.fieldw = 0;
   return GENtostr0(x, &T, &gen_output);
 }
 
@@ -1821,18 +1819,14 @@ wr_int_sign(GEN x, int sx)
   pariputs( itostr_sign(x, sx, &l) ); avma = av;
 }
 
-/* write integer. T->fieldw: field width (pad with ' ') */
+/* write integer */
 static void
-wr_int(pariout_t *T, GEN x, int addsign)
+wr_int(GEN x, int addsign)
 {
   long sx = signe(x), l;
   pari_sp av = avma;
-  char *s;
-
-  if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  s = itostr_sign(x, addsign?sx:1, &l);
-  blancs(T->fieldw - l);
-  pariputs(s); avma = av;
+  if (!sx) { pariputc('0'); return; }
+  pariputs( itostr_sign(x, addsign?sx:1, &l) ); avma = av;
 }
 
 static void
@@ -2796,8 +2790,7 @@ sori(GEN g, pariout_t *T)
   const char *v;
   char buf[32];
 
-  if (tg == t_INT) { wr_int(T,g,1); return; }
-  if (tg != t_MAT && tg != t_COL) T->fieldw = 0;
+  if (tg == t_INT) { wr_int(g,1); return; }
   switch (tg)
   {
     case t_REAL: case t_STR: case t_CLOSURE:
@@ -2828,8 +2821,8 @@ sori(GEN g, pariout_t *T)
       sori(a,T); pariputs(" mod "); sori(b,T); break;
 
     case t_FRAC:
-      a=gel(g,1); wr_int(T,a,0); pariputs(" /");
-      b=gel(g,2); wr_int(T,b,0); break;
+      a=gel(g,1); wr_int(a,0); pariputs(" /");
+      b=gel(g,2); wr_int(b,0); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
       a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
@@ -2850,7 +2843,7 @@ sori(GEN g, pariout_t *T)
 	{
 	  if (!i || !is_pm1(a))
 	  {
-	    wr_int(T,a,1); pariputc(i? '*': ' ');
+	    wr_int(a,1); pariputc(i? '*': ' ');
 	  }
 	  if (i) { VpowE(ev,i); pariputc(' '); }
 	  pariputs("+ ");
@@ -3157,35 +3150,35 @@ gen_output(GEN x, pariout_t *T)
 void
 brute(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,0,0, f_RAW);
+  pariout_t T; _initout(&T,f,d,0,f_RAW);
   gen_output(g, &T);
 }
 
 void
 bruteall(GEN g, char f, long d, long sp)
 {
-  pariout_t T; _initout(&T,f,d,sp,0, f_RAW);
+  pariout_t T; _initout(&T,f,d,sp,f_RAW);
   gen_output(g, &T);
 }
 
 void
 matbrute(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,1,0, f_PRETTYMAT);
+  pariout_t T; _initout(&T,f,d,1,f_PRETTYMAT);
   gen_output(g, &T);
 }
 
 void
-sor(GEN g, char f, long d, long c)
+sor(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,1,c, f_PRETTYOLD);
+  pariout_t T; _initout(&T,f,d,1,f_PRETTYOLD);
   gen_output(g, &T);
 }
 
 void
 texe(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,0,0, f_TEX);
+  pariout_t T; _initout(&T,f,d,0,f_TEX);
   gen_output(g, &T);
 }
 

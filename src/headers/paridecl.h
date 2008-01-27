@@ -1139,7 +1139,7 @@ void    printf1(GEN format, va_list args);
 void    printp(GEN g);
 void    printp1(GEN g);
 void    printtex(GEN g);
-void    sor(GEN g, char fo, long dd, long chmp);
+void    sor(GEN g, char fo, long dd);
 char*   stack_strdup(const char *s);
 GEN     Strprintf(GEN format, GEN args);
 GEN     Strprintf1(GEN gfmt, va_list args);

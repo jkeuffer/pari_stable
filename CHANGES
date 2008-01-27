@@ -54,6 +54,9 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    12- 'format' was updated after each 'realprecision' change. Don't update
        if 'format' is Xm.-1 (show all significant digits).
    13- the algorithm used to round t_REAL for output
+   14- the "minimum field width" component of the 'format' default is now
+       ignored (was used only for integers in 'prettyprint' output mode and
+       defaulted to 0 [no effect]). Use printf !
 
   Added
     1- library function gpcalloc

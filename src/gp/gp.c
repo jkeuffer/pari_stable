@@ -899,7 +899,7 @@ escape(char *tch)
 	}
 	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
 	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
-	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
+	case 'b': sor     (x, GP_DATA->fmt->format, -1); break;
 	case 'x': voir(x, get_int(s, -1)); break;
 	case 'w':
 	  s = get_sep(s); if (!*s) s = current_logfile;
@@ -1950,7 +1950,6 @@ texmacs_output(GEN z, long n)
   char *sz;
 
   T.prettyp = f_TEX;
-  T.fieldw = 0;
   sz = GENtostr0(z, &T, &gen_output);
   printf("%clatex:", DATA_BEGIN);
   if (n) printf("\\magenta\\%%%ld = ", n);

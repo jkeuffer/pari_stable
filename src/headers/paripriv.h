@@ -484,7 +484,6 @@ typedef struct {
 /* for output */
 typedef struct {
   char format; /* e,f,g */
-  long fieldw; /* 0 (ignored) or field width */
   long sigd;   /* -1 (all) or number of significant digits printed */
   int sp;      /* 0 = suppress whitespace from output */
   int prettyp; /* output style: raw, prettyprint, etc */

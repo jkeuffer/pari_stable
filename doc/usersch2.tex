@@ -2362,9 +2362,9 @@ integer factorization are fully proven. This flag does not affect partial
 factorization when it is explicitely requested. Note that if affects all
 other factorizations, and will in general lead to significant slowdowns.
 
-\subsecidx{format} (default \kbd{"g0.28"} and \kbd{"g0.38"} on 32-bit and
-64-bit machines, respectively): of the form x$m.n$, where x is a letter in
-$\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},
+\subsecidx{format} (default \kbd{"g.28"} and \kbd{"g.38"} on 32-bit and
+64-bit machines, respectively): of the form x$.n$, where x is a letter in
+$\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$ is an integer. If x is \kbd{f},
 real numbers will be printed in \idx{fixed floating point format} with no
 explicit exponent (e.g.~\kbd{0.000033}), unless their integer part is not
 defined (not enough significant digits); if the letter is \kbd{e}, they
@@ -2376,9 +2376,8 @@ they are printed in \kbd{e} format.\label{se:format}
 
 The number $n$ is the number of significant digits printed for real
 numbers, except if $n<0$ where all the significant digits will be printed
-(initial default 28, or 38 for 64-bit machines), and the number $m$ is the
-number of characters to be used for printing integers, but is ignored if
-equal to 0 (which is the default). This is a feeble attempt at formatting.
+(initial default 28, or 38 for 64-bit machines). For more powerful formatting
+possibilities, see \tet{printf} and \tet{Strprintf}.
 
 \subsecidx{graphcolormap} (default value: \kbd{["white", "black", "blue",
 "violetred", "red", "green", "grey", "gainsboro"]}) A vector of colors, to be
