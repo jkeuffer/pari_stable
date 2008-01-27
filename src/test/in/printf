@@ -26,6 +26,13 @@ printf("%%*.*s for \"string\" : %*.*s\n", 10,2, str)
 
 printf("%%s for 1 : %s\n", 1)
 printf("%%s for aa : %s\n", aa) /* same as %Z */
+printf("%%s for 4/3 : %s\n", 4/3)
+printf("%%s inter %%.2s %%4.2f for aa, bb, aa : %4s inter %.2s %4.2f\n", aa, bb, aa)
+
+Strprintf("%%s inter %%.2s %%4.2f for aa, bb, aa : %4s inter %.2s %4.2f\n", aa, bb, aa)
+
+printf("%%10.5s for 3.5 : %10.5s", 3.5)
+
 
 /* f conversion */
 
@@ -51,16 +58,6 @@ printf("%%8.3g for ii     : %8.3g\n", ii)
 printf("%%-20.10g for 4/3 : %-20.10g|\n", 4/3)
 printf("%%20.13e for 4/3  : %20.13e|\n", 4/3)
 printf("%%e for 4/3       : %e|\n", 4/3)
-
-/* Z conversion */
-
-printf("%%Z for 4/3 : %Z\n", 4/3)
-
-printf("%%Z inter %%Z %%Z for aa, bb, aa : %Z inter %Z %Z\n", aa, bb, aa)
-
-Strprintf("%%Z inter %%Z %%Z for aa, bb, aa : %Z inter %Z %Z", aa, bb, aa)
-
-printf("%%100.50Z for 3.5 : %100.50Z", 3.5)
 
 /* error tests */
 

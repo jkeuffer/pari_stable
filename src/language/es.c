@@ -1040,8 +1040,8 @@ static void
 sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
         va_list args)
 {
-  int longflag = 0, pointflag = 0, print_a_plus, print_a_blank, with_sharp;
-  int ch, ljust, len, maxwidth, zpad;
+  int GENflag = 0, longflag = 0, pointflag = 0;
+  int print_a_plus, print_a_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
   char *strvalue;
   long lvalue;
   int index = 1;
@@ -1056,7 +1056,7 @@ sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
       case '%':
         ljust = zpad = 0;
         len = maxwidth = -1;
-        longflag = pointflag = 0;
+        GENflag = longflag = pointflag = 0;
         recall = format - 1; /* '%' was skipped */
         print_a_plus = print_a_blank = with_sharp = 0;
 nextch:
@@ -1123,101 +1123,76 @@ nextch:
           case 'l':
             longflag = 1;
             goto nextch;
+          case 'Z':
+            GENflag = 1;
+            goto nextch;
           case 'h': /* dummy: va_arg promotes short into int */
             goto nextch;
 /*------------------------------------------------------------------------
                        -- conversions
 ------------------------------------------------------------------------*/
           case 'u': /* not a signed conversion: print_a_(blank|plus) ignored */
-            if (is_a_list) {
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
-              gvalue = NULL;
-            } else {
-              lvalue = 0;
-              gvalue = v_get_arg(arg_vector, &index);
-            }
+#define get_num_arg() \
+  if (is_a_list) { \
+    if (GENflag) { \
+      lvalue = 0; \
+      gvalue = va_arg(args, GEN); \
+    } else { \
+      lvalue = longflag? va_arg(args, long): va_arg(args, int); \
+      gvalue = NULL; \
+    } \
+  } else { \
+    lvalue = 0; \
+    gvalue = v_get_arg(arg_vector, &index); \
+  }
+            get_num_arg();
             fmtnum(lvalue, gvalue, 10, -1, ljust, len, zpad);
             break;
           case 'o': /* not a signed conversion: print_a_(blank|plus) ignored */
-            if (is_a_list) {
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
-              gvalue = NULL;
-            } else {
-              lvalue = 0;
-              gvalue = v_get_arg(arg_vector, &index);
-            }
+            get_num_arg();
             fmtnum(lvalue, gvalue, with_sharp? -8: 8, -1, ljust, len, zpad);
             break;
           case 'd':
           case 'i':
-            if (is_a_list) {
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
-              gvalue = NULL;
-            } else {
-              lvalue = 0;
-              gvalue = v_get_arg(arg_vector, &index);
-            }
+            get_num_arg();
             fmtnum(lvalue, gvalue, 10,
                    dosign(print_a_blank, print_a_plus), ljust, len, zpad);
             break;
           case 'p':
             dopr_outch('0'); dopr_outch('x');
             if (is_a_list)
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            {
+              if (GENflag)
+                lvalue = (long)va_arg(args, GEN);
+              else
+                lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            }
             else
               lvalue = (long)v_get_arg(arg_vector, &index);
             fmtnum(lvalue, NULL, 16, -1, ljust, len, zpad);
             break;
           case 'x': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (with_sharp) { dopr_outch('0'); dopr_outch('x'); }
-            if (is_a_list) {
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
-              gvalue = NULL;
-            } else {
-              lvalue = 0;
-              gvalue = v_get_arg(arg_vector, &index);
-            }
+            get_num_arg();
             fmtnum(lvalue, gvalue, 16, -1, ljust, len, zpad);
             break;
           case 'X': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
-            if (is_a_list) {
-              lvalue = longflag? va_arg(args, long): va_arg(args, int);
-              gvalue = NULL;
-            } else {
-              gvalue = v_get_arg(arg_vector, &index);
-              lvalue = 0;
-            }
+            get_num_arg();
             fmtnum(lvalue, gvalue,-16, -1, ljust, len, zpad);
             break;
-          case 'Z': //-- %Z IS HERE. FIXME.
-          {
-            char *plus;
-            if (is_a_list)
-              gvalue = va_arg(args, GEN);
-            else
-              gvalue = v_get_arg(arg_vector, &index);
-            if (len >= 0 || maxwidth >= 0) {
-              pariout_t Tcopy;
-              /*_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp) */
-              /* char format; e,f,g */
-              /* long fieldw; field width */
-              /* long sigd;  -1 (all) or number of significant digits printed */
-              /* int sp;   0 = suppress whitespace from output */
-              /* int prettyp; output style: raw, prettyprint, etc */
-              _initout(&Tcopy,tolower(ch),len,1,maxwidth, f_RAW);
-              plus = GENtostr0(gvalue, &Tcopy, &gen_output);
-            } else
-              plus = GENtostr(gvalue);
-            dostr(plus); free(plus);
-            break;
-          }
           case 's':
           {
             int to_free;
             if (is_a_list) {
-              strvalue = va_arg(args, char *);
-              to_free = 0;
+              if (GENflag) {
+                gvalue = va_arg(args, GEN);
+                strvalue = GENtostr(gvalue);
+                to_free = 1;
+              } else {
+                strvalue = va_arg(args, char *);
+                to_free = 0;
+              }
             } else {
               gvalue = v_get_arg(arg_vector, &index);
               strvalue = GENtostr(gvalue);
@@ -1228,8 +1203,12 @@ nextch:
             break;
           }
           case 'c':
-            if (is_a_list) ch = va_arg(args, int);
-            else {
+            if (is_a_list) {
+              if (GENflag)
+                ch = (int)gtolong( va_arg(args,GEN) );
+              else
+                ch = va_arg(args, int);
+            } else {
               gvalue = v_get_arg(arg_vector, &index);
               ch = (int)gtolong(gvalue);
             }
@@ -1244,29 +1223,37 @@ nextch:
           case 'e':
           case 'E':
           case 'f':
+          {
+            long sigd = 0;
+
             if (is_a_list) {
-              char work[256], subfmt[256];
-              double dvalue = va_arg(args, double);
-
-              strncpy(subfmt, recall, format - recall);
-              subfmt[format - recall] = 0;
-              sprintf(work, subfmt, dvalue);
-            } else {
-              long sigd = prec2ndec(precreal);
-
-              gvalue = v_get_arg(arg_vector, &index);
-              gvalue = simplify_i(gvalue);
-              if (maxwidth >= 0) switch(tolower(ch))
+              if (!GENflag)
               {
-                case 'e': sigd = maxwidth+1; maxwidth = -1; break;
-                case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
-                case 'g': sigd = maxwidth; maxwidth = -1; break;
-              }
-              fmtreal(gvalue, T->sp, dosign(print_a_blank, print_a_plus), ch,
-                      sigd, maxwidth, ljust, len, zpad);
+                char work[256], subfmt[256];
+                double dvalue = va_arg(args, double);
 
+                strncpy(subfmt, recall, format - recall);
+                subfmt[format - recall] = 0;
+                sprintf(work, subfmt, dvalue);
+                break;
+              }
+              gvalue = va_arg(args, GEN);
+            } else
+              gvalue = v_get_arg(arg_vector, &index);
+
+            gvalue = simplify_i(gvalue);
+            if (maxwidth < 0)
+              sigd = prec2ndec(precreal);
+            else switch(tolower(ch))
+            {
+              case 'e': sigd = maxwidth+1; maxwidth = -1; break;
+              case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
+              case 'g': sigd = maxwidth; maxwidth = -1; break;
             }
+            fmtreal(gvalue, T->sp, dosign(print_a_blank, print_a_plus), ch,
+                    sigd, maxwidth, ljust, len, zpad);
             break;
+          }
           default:
             pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, saved_format);
         } /* second switch on ch */
