@@ -1,7 +1,7 @@
 default(realprecision,38);
 aa=[1.0,2.0]
 bb=2.5
-str="chaine"
+str="string"
 ii=10^100+1
 
 /* d conversions */
@@ -18,8 +18,9 @@ printf("%%X for medium : %X\n", 10^40+10^20+1)
 
 /* s conversion */
 
-printf("%%10s for \"chaine\" : %10s\n", str)
-printf("%%.4s for \"chaine\" : %.4s\n", str)
+printf("%%10s for \"string\" : %10s\n", str)
+printf("%%.4s for \"string\" : %.4s\n", str)
+printf("%%*.*s for \"string\" : %*.*s\n", 10,2, str)
 
 /* s conversion again (%s <=> %Z) */
 
@@ -32,6 +33,7 @@ printf("%%10f for Pi     : %.10f|\n", Pi)
 printf("%%20.10f for 2.7 : %20.10f|\n", 2.7)
 printf("%%+20.10f for 2.7: %+20.10f|\n", 2.7)
 printf("%%-20.10f for 2.7: %-20.10f|\n", 2.7)
+printf("%%-*.*f for 2.7: %-*.*f|\n", 20, 10, 2.7)
 
 /* e conversion */
 

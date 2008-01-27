@@ -1122,12 +1122,7 @@ nextch:
               strvalue = GENtostr(gvalue);
               to_free = 1;
             }
-            if (!pointflag)
-              fmtstr(strvalue, ljust, len, maxwidth);
-            else if (maxwidth > 0 ) {
-              if (len > maxwidth) len = maxwidth;
-              fmtstr(strvalue, ljust, len, maxwidth);
-            }
+            fmtstr(strvalue, ljust, len, maxwidth);
             if (to_free) gpfree(strvalue);
             break;
           }
