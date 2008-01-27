@@ -513,17 +513,8 @@ vpariputs(const char* format, va_list args)
 static long
 ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
 
-static void
-bzeros(char **buffer, size_t *mxl, long nb) {
-  char *b = *buffer;
-  *mxl -= nb;
-  if (0 > *mxl) pari_err(talker, "buffer overflow in bzeros");
-  while (nb-- > 0) *b++ = '0';
-  *b = 0; *buffer = b;
-}
-
-static void
-zeros(long nb)  { while (nb-- > 0) pariputc('0'); }
+static char *
+zeros(char *b, long nb) { while (nb-- > 0) *b++ = '0'; *b = 0; return b; }
 
 /* # of decimal digits, assume l > 0 */
 static long
@@ -541,13 +532,6 @@ numdig(ulong l)
 }
 
 static void
-round_up(ulong *resd, ulong n, ulong *res)
-{
-  *resd += n;
-  while (*resd >= 1000000000UL && resd < res) { *resd++ = 0; *resd += 1; }
-}
-
-static void
 copart(char *s, ulong x, long start)
 {
   char *p = s + start;
@@ -557,6 +541,21 @@ copart(char *s, ulong x, long start)
     *--p = (x - q*10) + '0';
     x = q;
   }
+}
+
+/* convert abs(x) != 0 to str. Prepend '-' if (sx < 0) */
+static char *
+itostr_sign(GEN x, int sx, long *len)
+{
+  long l, d;
+  ulong *res = convi(x, &l);
+  char *s = (char*)new_chunk(nchar2nlong(l*9 + (sx<0) + 1)), *t = s;
+
+  if (sx < 0) *t++ = '-';
+  d = numdig(*--res);
+  copart(t, *res, d); t += d;
+  while (--l > 0) { copart(t, *--res, 9); t += 9; }
+  *t = 0; *len = t - s; return s;
 }
 
 /********************************************************************/
@@ -572,91 +571,82 @@ static const long MAX_EXPO_LEN = 20;
 #undef PB
 /* FIXME: to be deleted */
 static THREAD const char *saved_format = NULL;
-/* FIXME: to be deleted */
-static void
-chk_buf(size_t l, size_t mxl)
-{
-  if (l > mxl)
-    pari_err(talker, "buffer overflow in wr_real %d > %d", l, mxl);
-}
 
-/* sss.ttt, assume 'point' < strlen(s) */
-static void
-wr_dec(char **BUFFER, size_t *MXL, char *s, long point, size_t width_frac)
+/* sss.ttt, assume 'point' < ls = strlen(s) */
+static char *
+wr_dec(char *buf, char *s, size_t ls, long point)
 {
-  if (BUFFER) {
-    size_t ls, len = point + 1, mxl = *MXL;
-    char *buffer = *BUFFER;
-    chk_buf(len, mxl);
-    if (*s)
-    {
-      strncpy(buffer, s, point); /* integer part */
-      buffer += point; s += point; mxl -= point;
-    }
-    *buffer++ = '.'; mxl--;
-    *buffer = 0;
-    ls = strlen(s);
-    if (width_frac) {
-      chk_buf(width_frac, mxl);
-      if (ls > width_frac) ls = width_frac;
-      strncpy(buffer, s, width_frac);
-    } else {
-      chk_buf(ls, mxl);
-      strcpy(buffer, s);
-    }
-    buffer += ls; mxl -= ls;
-    *buffer = 0;
-    *MXL = mxl;
-    *BUFFER = buffer;
-  } else {
-    char *t = s + point, save = *t;
-    *t = 0;    pariputs(s); pariputc('.'); /* integer part */
-    *t = save; pariputs(t);
+  if (ls)
+  {
+    strncpy(buf, s, point); /* integer part */
+    buf += point;
+    s   += point;
+    ls  -= point;
   }
+  *buf++ = '.';
+  strcpy(buf, s);
+  buf += ls; *buf = 0; return buf;
 }
 
-/* a.bbb En*/
-static void
-wr_exp(char *buffer, size_t mxl, int sp, char *s, long n, char exp_char)
+static char *
+zerotostr() 
 {
-  if (buffer) {
-    wr_dec(&buffer, &mxl, s, 1, 0);
-    if (sp) { chk_buf(1,mxl); strcpy(buffer, " "); buffer++; mxl--; }
-    chk_buf(MAX_EXPO_LEN, mxl);
-    sprintf(buffer, "%c%ld", exp_char, n);
-  } else {
-    wr_dec(NULL, 0, s, 1, 0);
-    if (sp) pariputc(' ');
-    pariprintf("%c%ld", exp_char, n);
-  }
+  char *s = (char*)new_chunk(1);
+  s[0] = '0';
+  s[1] = 0; return s;
 }
 
-/* assume x != 0 and print |x| in floating point format.
- * Allocate freely: the caller must clean the stack.
- * f_format : boolean (fixed or not)
- * wanted_dec : required number of printed digits or < 0 (all known digits) */
-static void
-wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
-         int f_format, char exp_char, int width_frac)
+/* Return t_REAL |x| in floating point format.
+ * Allocate freely, the caller must clean the stack.
+ *   FORMAT: E/e (exponential), f (floating point), G/g
+ *   wanted_dec: number of significant digits to print (all if < 0).
+ *   width_frac: number of digits in fractional part (< 0 if unset) */
+static char *
+absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 {
-  long exponent, beta, l, ls, ldec, dec0, decdig, d, dif, df2, lx = lg(x);
+  const char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
+  long sx = signe(x), ex = expo(x);
+  char *s, *buf, *buf0;
+  long beta, ls, df2, lx;
   GEN z;
-  ulong *res, *resd;
-  char *s, *t;
-  long to_round = 0; /* when not null, number of remaining digits */
-/*
-  decdig : number of significant digits in x
-  dif : number of bits available for integer part of x
-  beta : exponent in base 10 of integer part of x
-  df2 : virtual position of . in 's' (the string integer_part.fractionnary_part)
-*/
-  if (wanted_dec > 0)
+
+  if (!sx) { /* real 0 */
+    if (format == 'f') {
+      long dec;
+      if (width_frac == 0) return zerotostr();
+      if (width_frac > 0)
+        dec = width_frac;
+      else
+      {
+        dec = wanted_dec;
+        if (dec < 0) dec = (ex >= 0)? 0: (long)(-ex * L2SL10);
+      }
+      buf0 = buf = stackmalloc(dec + 3);
+      *buf++ = '0';
+      *buf++ = '.';
+      (void)zeros(buf, dec);
+    } else {
+      buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);
+      *buf++ = '0';
+      *buf++ = '.';
+      *buf++ = exp_char;
+      sprintf(buf, "%ld", ex10(ex) + 1);
+    }
+    return buf0;
+  } /* string for a zero */
+
+  /* x != 0 */
+  lx = lg(x);
+  if (wanted_dec >= 0)
   { /* reduce precision if possible */
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  dif =  bit_accuracy(lx) - expo(x);
-  beta = ex10(dif);
+  if (width_frac >= 0)
+    beta = width_frac;
+  else
+    beta = ex10( bit_accuracy(lx) - expo(x) );
+
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
@@ -666,170 +656,49 @@ wr_float(char *buffer, size_t mxl, GEN x, int sp, long wanted_dec,
     z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
   }
   else
-  {
-    z = rtor(x, lx); setsigne(z, 1);
-  }
+    z = x;
+  z = grndtoi(z, &ls); /* round; ls is junk */
+  s = itostr_sign(z, 1, &ls);
 
-  /* |x| ~ z / 10^beta, z positive integer */
-  z = gcvtoi(z, &l); /* floor; l is junk */
-  res = convi(z, &ldec); /* basis 2^BITS_IN_LONG -> basis 10^9 (sizeof(32-bits word)); res is an array of long, POINTING AFTER IT, length==ldec */
-  resd = res - 1; /* leading word */
-  dec0 = numdig(*resd);
-  decdig = 9 * (ldec-1) + dec0; /* > 0, # of significant decimal digits in z */
-
-  exponent = beta;
-
-  if (width_frac && beta > width_frac) {
-    long delta = beta - width_frac;
-#ifdef PB
-    fprintferr("<>rounding for fractional part\n");
-#endif
-    beta = width_frac;
-    decdig -= delta;
-    to_round = decdig; /* > 0 */
-  }
   if (wanted_dec < 0)
-    wanted_dec = decdig;
-  else if (decdig > wanted_dec) {
-#ifdef PB
-    fprintferr("<>rounding for total len\n");
-#endif
-    if (!to_round || to_round > wanted_dec) to_round = wanted_dec;
-    decdig = wanted_dec;
-  }
-  /* now 0 < decdig <= wanted_dec */
-
-#ifdef PB
-  fprintferr("\nFull output, to_round==%ld, dec0==%ld, wanted_dec==%ld, decdig==%ld\n", to_round, dec0, wanted_dec, decdig);
-  for (l = 1; l <= ldec; l++) fprintferr("%ld ", res[-l]);
-  fprintferr("\n");
-#endif
-
-  if (to_round) {
-    l = to_round - dec0;
-    d = l % 9;
-    if (l < 0) { resd++; if (d < 0) d += 9; }
-    resd -= l / 9; /* from MSW to LSW */
-    if (d) { /* cut resd[-1] to first d digits when printing */
-      ulong p10 = u_pow10(9-d), r = *--resd % p10;
-      if (r >= (p10>>1)) {
-#ifdef PB
-        fprintferr("case/1 w=%ld d=%ld p10=%ld r=%ld\n", l/9, d, p10, r);
-#endif
-        round_up(resd, p10, res);
-      }
-    } else {
-      if ((ulong)resd[-1] >= 500000000UL) {
-#ifdef PB
-        fprintferr("case/2 w=%ld\n", l/9);
-#endif
-        round_up(resd, 1, res);
-      }
-    }
-  }
-
-  s = t = (char*)new_chunk(nchar2nlong(decdig + 1));
-  res--;
-  if (*res) {
-    d = numdig(*res); /* number of decimal digit, 1..9 */
-    copart(t, *res, d); t += d; /* filling of t and thus s with value *res on d digits */
-  } else { /* overflow when rounding */
-    d = 10;
-    *t++ = '1';
-    copart(t, 0, 9); t += 9;
-  }
-  decdig = 9*(ldec-1) + d; /* recompute: d may be 1 more */
-  l = ldec;
-  /* master loop, writing mantissa in s from chunks in [0..10^9[ */
-  while (--l > 0) { copart(t, *--res, 9); t += 9; }
-  ls = to_round? to_round: min(decdig, wanted_dec);
-  s[ls] = 0; /* ls = strlen(s) */
-  df2 = decdig - exponent; /* position of . in s; < 0 or > 0 */
-  if (df2 > ls) f_format = 0; /* write in E format */
-#ifdef PB
-  fprintferr("<>s==`%s' len=%ld decdig==%ld, exponent==%ld, f_format==%d, df2==%d\n", s, ls, decdig, exponent, f_format, df2);
-#endif
-
-  if (buffer) { /* writing into a buffer */
-    if (!f_format) { /* floating format : e, or g, or f when integer_part exceeds wanted_dec FIXME (g should be f when possible) */
-      wr_exp(buffer, mxl, sp, s, df2-1, exp_char);
-    } else if (df2 > 0) /* f_format, write integer_part.fractionary_part */
-      wr_dec(&buffer, &mxl, s, df2, width_frac);
-    else { /* f_format, df2 <= 0, fractional part must be written */
-      chk_buf(2, mxl);
-      strcpy(buffer, "0."); buffer += 2; mxl -= 2;
-      if (width_frac) {
-        if (width_frac < -df2)
-          bzeros(&buffer, &mxl, width_frac);
-        else { /* -df2 >= width_frac >= 0 */
-          bzeros(&buffer, &mxl, -df2);
-          chk_buf(width_frac + df2, mxl);
-          if (ls > width_frac + df2) s[width_frac + df2] = 0;
-          strcpy(buffer, s);
-        }
-      } else { /* no given precision */
-        bzeros(&buffer, &mxl, -df2);
-        chk_buf(ls, mxl);
-        strcpy(buffer, s);
-      }
-    }
-  } else { /* on a file */
-    if (!f_format) wr_exp(NULL, 0, sp, s, df2-1, exp_char);
-    else if (df2 > 0) wr_dec(NULL, 0, s, df2, 0);
-    else { pariputs("0."); zeros(-df2); pariputs(s); }
-  }
-}
-
-/* Write real number x.
- * format: e (exponential), f (floating point), g (as f unless x too small)
- *   if format is not one of the above act as e.
- * sigd: number of sigd to print (all if <0).
- */
-static void
-wr_real(char *buffer, size_t mxl, GEN x, int sp, char FORMAT, long sigd, int width_frac, int addsign)
-{
-  pari_sp av;
-  long sx = signe(x), ex = expo(x);
-  char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
-  int f_format;
-
-  if (!sx) { /* real 0 */
-    if (format == 'f') {
-      long dec = sigd;
-      if (dec < 0)
+    wanted_dec = ls;
+  else if (width_frac < 0 && ls > wanted_dec)
+  {
+    beta -= ls - wanted_dec;
+    ls = wanted_dec;
+    if (s[ls] >= '5') /* round up */
+    {
+      long i;
+      for (i = ls-1; i >= 0; s[i--] = '0')
       {
-        long d = (long)(-ex * L2SL10);
-        dec = (d <= 0)? 0: d;
+        s[i]++;
+        if (s[i] <= '9') break;
       }
-      if (buffer) {
-        chk_buf(2, mxl);
-        strcpy(buffer, "0."); buffer += 2; mxl -= 2;
-        bzeros(&buffer, &mxl, dec);
-      } else {
-        pariputs("0."); zeros(dec);
-      }
-    } else {
-      ex = ex10(ex) + 1;
-      if (buffer) {
-        chk_buf(3+MAX_EXPO_LEN, mxl);
-        sprintf(buffer, "0.%c%ld", exp_char, ex);
-      } else
-        pariprintf("0.%c%ld", exp_char, ex);
+      if (i < 0) { s[0] = '1'; beta--; }
     }
-    return;
-  } /* string for a zero */
-
-  if (sx < 0) { /* print sign if needed */
-    if (buffer)
-    { *buffer++ = '-'; mxl--; *buffer = 0; }
-    else
-      if (addsign) pariputc('-');
+    s[ls] = 0;
   }
 
-  f_format = (format == 'g' && ex >= -32) || format == 'f';
-  av = avma;
-  wr_float(buffer, mxl, x, sp, sigd, f_format, exp_char, buffer? width_frac: 0);
-  avma = av;
+  /* '.', " E", exponent, trailing \0 */
+  buf0 = buf = stackmalloc( ls + 1+2+MAX_EXPO_LEN+1 );
+  df2 = ls - beta; /* position of . in s; < 0 or > 0 */
+  if (width_frac < 0 &&
+     (beta < 0 || format == 'e' || (format == 'g' && ex < -32)))
+  { /* e format */
+    buf = wr_dec(buf, s, ls, 1);
+    if (sp) *buf++ = ' ';
+    *buf++ = exp_char;
+    sprintf(buf, "%ld", df2-1);
+  }
+  else if (df2 > 0) /* f format, write integer_part.fractional_part */
+    (void)wr_dec(buf, s, ls, df2);
+  else { /* f format, df2 <= 0, fractional part must be written */
+    *buf++ = '0';
+    *buf++ = '.';
+    buf = zeros(buf, -df2);
+    strcpy(buf, s);
+  }
+  return buf0;
 }
 
 /* This vsnprintf implementation is adapted from snprintf.c to be found at
@@ -858,48 +727,71 @@ dopr_outch(int c)
 
 /* print chars 1 by 1 to prevent overflow and count them */
 static void
-dostr(const char *str, int cut)
+dostr(const char *str)
 {
-  if (cut) {
+  while (*str) dopr_outch(*str++);
+}
+static void
+dostrcut(const char *str, int cut)
+{
+  if (cut < 0) dostr(str);
+  else {
     while (*str && cut-- > 0) dopr_outch(*str++);
-  } else {
-    while (*str) dopr_outch(*str++);
   }
 }
 
+/* lbuf = strlen(buf), len < 0: unset */
 static void
-fmtstr(const char *value, int ljust, int len, int maxwidth)
+outpad(const char *buf, long lbuf, int sign, long ljust, long len, long zpad)
 {
-  int padlen, strlen; /* amount to pad */
+  long padlen = len - lbuf;
+  if (padlen < 0) padlen = 0;
+  if (ljust) padlen = -padlen;
+  if (zpad && padlen > 0) {
+    if (sign) { dopr_outch(sign); --padlen; }
+    while (padlen > 0) { dopr_outch('0'); --padlen; }
+  }
+  else
+  {
+    if (sign) --padlen;
+    while (padlen > 0) { dopr_outch(' '); --padlen; }
+    if (sign) dopr_outch(sign);
+  }
+  dostr(buf);
+  while (padlen < 0) { dopr_outch(' '); ++padlen; }
+}
 
-  for(strlen = 0; value[strlen]; ++strlen) /* empty */;
-  if (maxwidth && strlen > maxwidth) strlen = maxwidth;
-  padlen = len - strlen;
+/* len < 0 or maxwidth < 0: unset */
+static void
+fmtstr(const char *buf, int ljust, int len, int maxwidth)
+{
+  int padlen, lbuf = strlen(buf);
+
+  if (maxwidth >= 0 && lbuf > maxwidth) lbuf = maxwidth;
+
+  padlen = len - lbuf;
   if (padlen < 0) padlen = 0;
   if (ljust) padlen = -padlen;
   while (padlen > 0) { dopr_outch(' '); --padlen; }
-  dostr(value, maxwidth);
+  dostrcut(buf, maxwidth);
   while (padlen < 0) { dopr_outch(' '); ++padlen; }
 }
 
 /* abs(base) is 8, 10, 16. If base < 0, some "alternate" form
  * -- print hex in uppercase
- * -- prefix octal with 0 */
+ * -- prefix octal with 0
+ * signvalue = -1: unsigned, otherwise ' ' or '+' */
 static void
-fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zpad)
+fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
+       int ljust, int len, int zpad)
 {
-  int signvalue = 0;
-  char *convert;
-  long place = 0, mxl;
-  int padlen = 0; /* amount to pad */
-  int caps;
+  int caps, factor;
+  char *buf0, *buf;
+  long lbuf, mxl;
   GEN uvalue = NULL;
-  ulong ulnvalue = 0;
-  int factor;
+  ulong ulvalue = 0;
   pari_sp av = avma;
 
-  /* DEBUGP(("value 0x%x, base %d, dosign %d, ljust %d, len %d, zpad %d\n",
-    value, base, dosign, ljust, len, zpad)); */
   if (base > 0) caps = 0; else { caps = 1; base = -base; }
   if (base >= 10)
    factor = 1;
@@ -908,157 +800,161 @@ fmtnum(long lvalue, GEN gvalue, int base, int dosign, int ljust, int len, int zp
 
   if (gvalue)
   {
-    long vz;
+    long vz, s;
     if (typ(gvalue) != t_INT) {
       gvalue = gfloor( simplify_i(gvalue) );
       if (typ(gvalue) != t_INT)
         pari_err(talker,"not a t_INT in integer format conversion: %Z", gvalue);
     }
-    uvalue = icopy(gvalue);
-    if (dosign && signe(gvalue) < 0) { signvalue = '-'; setsigne(uvalue,1); }
+    s = signe(gvalue);
+    if (!s) { lbuf = 1; buf = zerotostr(); goto END; }
+
+    uvalue = gvalue;
+    if (signvalue < 0)
+    {
+      if (s < 0) uvalue = addii(int2n(bit_accuracy(lgefint(gvalue))), gvalue);
+      signvalue = 0;
+    }
+    else
+    {
+      if (s < 0) { signvalue = '-'; uvalue = absi(uvalue); }
+    }
     vz = sizedigit(gvalue) + 1;
     mxl = vz * factor + 10;
   } else {
     double vz;
-    ulnvalue = lvalue;
-    if (dosign && lvalue < 0) { signvalue = '-'; ulnvalue = - lvalue; }
-    vz = log(lvalue) / log(10);
+    ulvalue = lvalue;
+    if (signvalue < 0)
+      signvalue = 0;
+    else
+      if (lvalue < 0) { signvalue = '-'; ulvalue = - lvalue; }
+    vz = log(ulvalue) / log(10);
     mxl = (long)vz * factor + 1;
   }
 
-  convert = (char *)stackmalloc(mxl);
+  buf0 = buf = stackmalloc(mxl) + mxl; /* fill from the right */
+  *--buf = 0; /* trailing \0 */
   if (gvalue) {
     if (base == 10) {
-      long i, len, cnt;
-      ulong *larray = convi(uvalue, &len);
-      larray -= len;
-      for (i = 0; i < len; i++) {
+      long i, l, cnt;
+      ulong *larray = convi(uvalue, &l);
+      larray -= l;
+      for (i = 0; i < l; i++) {
         cnt = 0;
-        ulnvalue = larray[i];
+        ulvalue = larray[i];
         do {
-          convert[place++] = '0' + ulnvalue%10;
-          ulnvalue = ulnvalue / 10;
+          *--buf = '0' + ulvalue%10;
+          ulvalue = ulvalue / 10;
           cnt++;
-        } while (ulnvalue);
-        if (i + 1 < len)
-          for (;cnt<9;cnt++) convert[place++] = '0';
+        } while (ulvalue);
+        if (i + 1 < l)
+          for (;cnt<9;cnt++) *--buf = '0';
       }
     } else if (base == 16) {
-      long i, len = lgefint(uvalue);
+      long i, l = lgefint(uvalue);
       GEN up = int_LSW(uvalue);
-      for (i = 2; i < len; i++, up = int_nextW(up)) {
+      for (i = 2; i < l; i++, up = int_nextW(up)) {
         ulong ucp = (ulong)*up;
         long j;
         for (j=0; j < BITS_IN_LONG/4; j++) {
           unsigned char cv = ucp & 0xF;
-          convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[cv];
+          *--buf = (caps? "0123456789ABCDEF":"0123456789abcdef")[cv];
           ucp >>= 4;
-          if (ucp == 0 && i+1 == len) break;
+          if (ucp == 0 && i+1 == l) break;
         }
       } /* loop on hex digits in word */
     } else if (base == 8) {
-      long i, len = lgefint(uvalue);
+      long i, l = lgefint(uvalue);
       GEN up = int_LSW(uvalue);
       ulong rem = 0;
       int shift = 0;
       int mask[3] = {0, 1, 3};
-      for (i = 2; i < len; i++, up = int_nextW(up)) {
+      for (i = 2; i < l; i++, up = int_nextW(up)) {
         ulong ucp = (ulong)*up;
         long j, ldispo = BITS_IN_LONG;
         if (shift) { /* 0, 1 or 2 */
           unsigned char cv = ((ucp & mask[shift]) <<(3-shift)) + rem;
-          convert[place++] = "01234567"[cv];
+          *--buf = "01234567"[cv];
           ucp >>= shift;
           ldispo -= shift;
         };
         shift = (shift + 3 - BITS_IN_LONG % 3) % 3;
         for (j=0; j < BITS_IN_LONG/3; j++) {
           unsigned char cv = ucp & 0x7;
-          if (ucp == 0 && i+1 == len) { rem = 0; break; };
-          convert[place++] = "01234567"[cv];
+          if (ucp == 0 && i+1 == l) { rem = 0; break; };
+          *--buf = "01234567"[cv];
           ucp >>= 3;
           ldispo -= 3;
           rem = ucp;
           if (ldispo < 3) break;
         }
       } /* loop on hex digits in word */
-      if (rem) convert[place++] = "01234567"[rem];
+      if (rem) *--buf = "01234567"[rem];
     }
   } else { /* not a gvalue, thus a standard integer */
     do {
-      convert[place++] = (caps? "0123456789ABCDEF":"0123456789abcdef")[ulnvalue % (unsigned)base ];
-      ulnvalue /= (unsigned)base;
-    } while (ulnvalue);
+      *--buf = (caps? "0123456789ABCDEF":"0123456789abcdef")[ulvalue % (unsigned)base ];
+      ulvalue /= (unsigned)base;
+    } while (ulvalue);
   }
-  convert[place] = '\0';
-  padlen = len - place;
-  if (padlen < 0) padlen = 0;
-  if (ljust) padlen = -padlen;
-  /* DEBUGP(( "str '%s', place %d, sign %c, padlen %d\n",
-    convert,place,signvalue,padlen)); */
-  if (zpad && padlen > 0) {
-    if (signvalue) { dopr_outch('-'); --padlen; }
-    while (padlen > 0) { dopr_outch('0'); --padlen; }
-  }
-  else
-  {
-    while (padlen > 0) { dopr_outch(' '); --padlen; }
-    if (signvalue) dopr_outch('-');
-  }
-  if (!place) /* no digit: 0 */
-    dopr_outch('0');
-  else
-  {
-    if (caps && base == 8) dopr_outch('0');
-    while (place > 0) dopr_outch(convert[--place]);
-  }
-  while (padlen < 0) { dopr_outch(' '); ++padlen; }
+  /* leading 0 if octal and alternate # form */
+  if (caps && base == 8) *--buf = '0';
+  lbuf = (buf0 - buf) - 1;
+END:
+  outpad(buf, lbuf, signvalue, ljust, len, zpad);
   avma = av;
 }
 
 static GEN
-v_get_arg(GEN arg_vector, int nbmx, int *index)
+v_get_arg(GEN arg_vector, int *index)
 {
-  if (*index >= nbmx)
+  if (*index >= lg(arg_vector))
     pari_err(talker, "missing arg %d for printf format '%s'", *index, saved_format);
   return gel(arg_vector, (*index)++);
 }
 
-static void
-print_header(int blank, int plus)
+static int
+dosign(int blank, int plus)
 {
-       if (plus) dopr_outch('+');
-  else if (blank) dopr_outch(' ');
+  if (plus) return('+');
+  if (blank) return(' ');
+  return 0;
 }
 
+/* x * 10 + 'digit whose char value is ch'. Do not check for overflow */
+static int
+shift_add(int x, int ch)
+{
+  if (x < 0) /* was unset */
+    x = ch - '0';
+  else
+    x = x*10 + ch - '0';
+  return x;
+}
+
+/* format handling "inspired" by the standard draf at 
+-- http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274ff
+Some conversions not implemented */
 static void
 sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
         va_list args)
 {
-  int ch;
-  int longflag = 0, pointflag = 0, maxwidth = 0;
-  int print_a_plus, print_a_blank, with_sharp;
+  int longflag = 0, pointflag = 0, print_a_plus, print_a_blank, with_sharp;
+  int ch, ljust, len, maxwidth, zpad;
   char *strvalue;
   long lvalue;
-  int ljust, len, zpad;
-  GEN gvalue, arg_vector = NULL;
   int index = 1;
-  int nbmx = 0;
-  size_t mxlb;
+  GEN gvalue, arg_vector = is_a_list? NULL: va_arg(args, GEN);
   const char *recall = NULL;
 
   SnprfOverflow = 0;
   saved_format = format;
-  if (!is_a_list)
-  {
-    arg_vector = va_arg(args, GEN);
-    nbmx = lg(arg_vector);
-  }
 
   while ((ch = *format++) != '\0') {
     switch(ch) {
       case '%':
-        ljust = len = zpad = maxwidth = 0;
+        ljust = zpad = 0;
+        len = maxwidth = -1;
         longflag = pointflag = 0;
         recall = format - 1; /* '%' was skipped */
         print_a_plus = print_a_blank = with_sharp = 0;
@@ -1067,13 +963,9 @@ nextch:
         switch(ch) {
           case 0:
             pari_err(talker, "printf: end of format");
-/*
-------------------------------------------------------------------------
+/*------------------------------------------------------------------------
                              -- flags
-------------------------------------------------------------------------
--- can be : +, -, 0, #, space
--- c.f. http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274...
-*/
+------------------------------------------------------------------------*/
           case '-':
             ljust = 1;
             goto nextch;
@@ -1088,15 +980,13 @@ nextch:
             goto nextch;
           case '0':
             /* appears as a flag: set zero padding */
-            if (len==0 && !pointflag) { zpad = '0'; goto nextch; }
+            if (len < 0 && !pointflag) { zpad = '0'; goto nextch; }
 
             /* else part of a field width or precision */
             /* fall through */
-/*
-------------------------------------------------------------------------
+/*------------------------------------------------------------------------
                        -- maxwidth or precision
-------------------------------------------------------------------------
-*/
+------------------------------------------------------------------------*/
           case '1':
           case '2':
           case '3':
@@ -1107,116 +997,106 @@ nextch:
           case '8':
           case '9':
             if (pointflag)
-              maxwidth = maxwidth*10 + ch - '0';
+              maxwidth = shift_add(maxwidth, ch);
             else
-              len = len*10 + ch - '0';
+              len = shift_add(len, ch);
             goto nextch;
 
           case '*':
-            if (pointflag) {
-              if (is_a_list)
-                maxwidth = va_arg(args, int);
-              else
-                maxwidth = (int)gtolong( v_get_arg(arg_vector, nbmx, &index) );
-            } else {
-              if (is_a_list)
-                len = va_arg(args, int);
-              else
-                len = (int)gtolong( v_get_arg(arg_vector, nbmx, &index) );
-            }
+          {
+            int *t = pointflag? &maxwidth: &len;
+            if (is_a_list)
+              *t = va_arg(args, int);
+            else
+              *t = (int)gtolong( v_get_arg(arg_vector, &index) );
             goto nextch;
+          }
           case '.':
             if (pointflag)
               pari_err(talker, "printf: two '.' in conversion specification");
             pointflag = 1;
             goto nextch;
-/*
-------------------------------------------------------------------------
+/*------------------------------------------------------------------------
                        -- length modifiers
-------------------------------------------------------------------------
--- can be : hh, h, l, ll, j, z, t, L
--- c.f. http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274...
-*/
+------------------------------------------------------------------------*/
           case 'l':
             longflag = 1;
             goto nextch;
-          case 'h':
-            /* dummy, as va_arg promotes short into int */
+          case 'h': /* dummy: va_arg promotes short into int */
             goto nextch;
-/*
-------------------------------------------------------------------------
+/*------------------------------------------------------------------------
                        -- conversions
-------------------------------------------------------------------------
-*/
-          case 'u':
-          case 'U':
-            print_header(0, print_a_plus);
+------------------------------------------------------------------------*/
+          case 'u': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
             } else {
               lvalue = 0;
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
             }
-            fmtnum(lvalue, gvalue, 10,0, ljust, len, zpad);
+            fmtnum(lvalue, gvalue, 10, -1, ljust, len, zpad);
             break;
-          case 'o':
-          case 'O':
-            print_header(print_a_blank, print_a_plus);
+          case 'o': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
             } else {
               lvalue = 0;
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
             }
-            fmtnum(lvalue, gvalue, with_sharp? -8: 8,0, ljust, len, zpad);
+            fmtnum(lvalue, gvalue, with_sharp? -8: 8, -1, ljust, len, zpad);
             break;
           case 'd':
-          case 'D':
-            print_header(print_a_blank, print_a_plus);
+          case 'i':
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
             } else {
               lvalue = 0;
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
             }
-            fmtnum(lvalue, gvalue, 10,1, ljust, len, zpad);
+            fmtnum(lvalue, gvalue, 10,
+                   dosign(print_a_blank, print_a_plus), ljust, len, zpad);
             break;
-          case 'p': with_sharp = 1; /* fall through */
-          case 'x':
+          case 'p':
+            dopr_outch('0'); dopr_outch('x');
+            if (is_a_list)
+              lvalue = longflag? va_arg(args, long): va_arg(args, int);
+            else
+              lvalue = (long)v_get_arg(arg_vector, &index);
+            fmtnum(lvalue, NULL, 16, -1, ljust, len, zpad);
+            break;
+          case 'x': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (with_sharp) { dopr_outch('0'); dopr_outch('x'); }
-            else print_header(print_a_blank, print_a_plus);
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
             } else {
               lvalue = 0;
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
             }
-            fmtnum(lvalue, gvalue, 16,0, ljust, len, zpad);
+            fmtnum(lvalue, gvalue, 16, -1, ljust, len, zpad);
             break;
-          case 'X':
+          case 'X': /* not a signed conversion: print_a_(blank|plus) ignored */
             if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
-            else print_header(print_a_blank, print_a_plus);
             if (is_a_list) {
               lvalue = longflag? va_arg(args, long): va_arg(args, int);
               gvalue = NULL;
             } else {
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
               lvalue = 0;
             }
-            fmtnum(lvalue, gvalue,-16,0, ljust, len, zpad);
+            fmtnum(lvalue, gvalue,-16, -1, ljust, len, zpad);
             break;
-          case 'Z': //-- %Z IS HERE
+          case 'Z': //-- %Z IS HERE. FIXME.
           {
             char *plus;
             if (is_a_list)
               gvalue = va_arg(args, GEN);
             else
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
-            if (len || maxwidth) {
+              gvalue = v_get_arg(arg_vector, &index);
+            if (len >= 0 || maxwidth >= 0) {
               pariout_t Tcopy;
               /*_initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp) */
               /* char format; e,f,g */
@@ -1228,7 +1108,7 @@ nextch:
               plus = GENtostr0(gvalue, &Tcopy, &gen_output);
             } else
               plus = GENtostr(gvalue);
-            dostr(plus,0); free(plus);
+            dostr(plus); free(plus);
             break;
           }
           case 's':
@@ -1238,12 +1118,14 @@ nextch:
               strvalue = va_arg(args, char *);
               to_free = 0;
             } else {
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+              gvalue = v_get_arg(arg_vector, &index);
               strvalue = GENtostr(gvalue);
               to_free = 1;
             }
-            if (maxwidth > 0 || !pointflag) {
-              if (maxwidth > 0 && len > maxwidth) len = maxwidth;
+            if (!pointflag)
+              fmtstr(strvalue, ljust, len, maxwidth);
+            else if (maxwidth > 0 ) {
+              if (len > maxwidth) len = maxwidth;
               fmtstr(strvalue, ljust, len, maxwidth);
             }
             if (to_free) gpfree(strvalue);
@@ -1252,10 +1134,8 @@ nextch:
           case 'c':
             if (is_a_list) ch = va_arg(args, int);
             else {
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
-              strvalue = GENtostr(gvalue);
-              ch = strvalue[0];
-              gpfree(strvalue);
+              gvalue = v_get_arg(arg_vector, &index);
+              ch = (int)gtolong(gvalue);
             }
             dopr_outch(ch);
             break;
@@ -1268,41 +1148,40 @@ nextch:
           case 'e':
           case 'E':
           case 'f':
-            print_header(print_a_blank, print_a_plus);
             if (is_a_list) {
               char work[256], subfmt[256];
-              const char *str;
               double dvalue = va_arg(args, double);
+
               strncpy(subfmt, recall, format - recall);
               subfmt[format - recall] = 0;
               sprintf(work, subfmt, dvalue);
-              str = &work[0];
-              while (*str) dopr_outch(*str++);
             } else {
-              long sigd = T->sigd, prec = 0;
               pari_sp av = avma;
+              long sigd = prec2ndec(precreal);
+              int signvalue;
               char *buffer;
-              gvalue = v_get_arg(arg_vector, nbmx, &index);
+
+              gvalue = v_get_arg(arg_vector, &index);
               gvalue = simplify_i(gvalue);
-              if (len)
-              { mxlb = len; sigd = len-1; }
-              else if (sigd >= 0)
-                mxlb = sigd;
-              else { /* total precision */
-                if (typ(gvalue) != t_REAL) pari_err(infprecer, "output");
-                prec = lg(gvalue); mxlb = prec2ndec(prec);
+              if (maxwidth >= 0) switch(tolower(ch))
+              {
+                case 'e': sigd = maxwidth+1; maxwidth = -1; break;
+                case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
+                case 'g': sigd = maxwidth; maxwidth = -1; break;
               }
-              if (!prec) {
-                prec = ndec2prec(mxlb);
-                gvalue = gtofp(gvalue, prec);
+
+              if (typ(gvalue) != t_REAL)
+              {
+                gvalue = gtofp(gvalue, ndec2prec(sigd));
                 if (typ(gvalue) != t_REAL)
                   pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
               }
-              mxlb += 1+2+MAX_EXPO_LEN+1; /* '.', " E", exponent, trailing \0 */
-              buffer = stackmalloc(mxlb);
-              *buffer = 0;
-              wr_real(buffer, mxlb, gvalue, T->sp, ch, sigd, maxwidth, 0);
-              dostr(buffer,0);
+              buffer = absrtostr(gvalue, T->sp, ch, sigd, maxwidth);
+              if (signe(gvalue) < 0)
+                signvalue = '-';
+              else
+                signvalue = dosign(print_a_blank, print_a_plus);
+              outpad(buffer, strlen(buffer), signvalue, ljust, len, zpad);
               avma = av;
             }
             break;
@@ -1858,31 +1737,10 @@ Strchr(GEN g)
 static void
 blancs(long nb) { while (nb-- > 0) pariputc(' '); }
 
-/* convert abs(x) != 0 to str. Prepend '-' if (minus) */
-static char *
-itostr_sign(GEN x, int sx)
-{
-  long l, d;
-  ulong *res = convi(x, &l);
-  char *s = (char*)new_chunk(nchar2nlong(l*9 + (sx<0) + 1)), *t = s;
-
-  if (sx<0) *t++ = '-';
-  d = numdig(*--res);
-  copart(t, *res, d); t += d;
-  while (--l > 0) { copart(t, *--res, 9); t += 9; }
-  *t = 0; return s;
-}
-
 char *
 itostr(GEN x) {
-  long sx = signe(x);
-  if (!sx)
-  {
-    char *s = (char*)new_chunk(1);
-    s[0] = '0';
-    s[1] = 0; return s;
-  }
-  return itostr_sign(x, sx);
+  long sx = signe(x), l;
+  return sx? itostr_sign(x, sx, &l): zerotostr();
 }
 
 /* x != 0 integer, write abs(x). Prepend '-' if (minus) */
@@ -1890,20 +1748,21 @@ static void
 wr_int_sign(GEN x, int sx)
 {
   pari_sp av = avma;
-  pariputs( itostr_sign(x, sx) ); avma = av;
+  long l;
+  pariputs( itostr_sign(x, sx, &l) ); avma = av;
 }
 
 /* write integer. T->fieldw: field width (pad with ' ') */
 static void
 wr_int(pariout_t *T, GEN x, int addsign)
 {
-  long sx = signe(x);
+  long sx = signe(x), l;
   pari_sp av = avma;
   char *s;
 
   if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  s = itostr_sign(x, addsign?sx:1);
-  blancs( T->fieldw - strlen(s) );
+  s = itostr_sign(x, addsign?sx:1, &l);
+  blancs(T->fieldw - l);
   pariputs(s); avma = av;
 }
 
@@ -2664,8 +2523,12 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
   {
     case t_INT: wr_int_sign(g, addsign?signe(g):1); break;
     case t_REAL:
-      wr_real(NULL, 0, g, T->sp, toupper(T->format), T->sigd, 0, addsign);
-      break;
+    {
+      pari_sp av = avma;
+      if (addsign && signe(g) < 0) pariputc('-');
+      pariputs( absrtostr(g, T->sp, toupper(T->format), T->sigd, -1) );
+      avma = av; break;
+    }
 
     case t_INTMOD: case t_POLMOD:
       pariputs(new_fun_set? "Mod(": "mod(");

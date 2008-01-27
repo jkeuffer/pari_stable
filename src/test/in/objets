@@ -30,7 +30,6 @@ lex([1,3],[1,3,5])
 max(2,3)
 min(2,3)
 Mod(-12,7)
-Mod(10873,49649)^-1
 norm(1+I)
 norm(Mod(x+5,x^3+x+1))
 numerator((x+1)/(x-1))
@@ -58,6 +57,7 @@ O(x^12)
 padicno=(5/3)*127+O(127^5)
 padicprec(padicno,127)
 length(divisors(1000))
+Mod(10873,49649)^-1
 getheap
 print("Total time spent: ",gettime);
 \q

@@ -28,27 +28,27 @@ printf("%%s for aa : %s\n", aa) /* same as %Z */
 
 /* f conversion */
 
-printf("%%10f for Pi : %10f\n", Pi)
-printf("%%20.10f for 2.7 : %20.10f\n", 2.7)
-printf("%%+20.10f for 2.7 : %+20.10f\n", 2.7)
-printf("%%-20.10f for 2.7 : %-20.10f\n", 2.7)
+printf("%%10f for Pi     : %.10f|\n", Pi)
+printf("%%20.10f for 2.7 : %20.10f|\n", 2.7)
+printf("%%+20.10f for 2.7: %+20.10f|\n", 2.7)
+printf("%%-20.10f for 2.7: %-20.10f|\n", 2.7)
 
 /* e conversion */
 
-printf("%%20.10e for 2.7 : %20.10e\n", 2.7)
-printf("%%+20.10E for 2.7 : %+20.10E\n", 2.7)
-printf("%%-20.10e for 2.7 : %-20.10e\n", 2.7)
-printf("%%-20.10E for ii : %-20.10E\n", ii)
-printf("%%e for 1+0*I : %E\n", 1+0*I)
+printf("%%20.10e for 2.7 : %20.10e|\n", 2.7)
+printf("%%+20.10E for 2.7: %+20.10E|\n", 2.7)
+printf("%%-20.10e for 2.7: %-20.10e|\n", 2.7)
+printf("%%-20.10E for ii : %-20.10E|\n", ii)
+printf("%%e for 1+0*I    : %E\n", 1+0*I)
 
 /* g conversion */
 
-printf("%%8.3g for 3.14159 : %8.3g\n", 3.14159)
-printf("%%8.3G for ii : %8.3G\n", ii)
-printf("%%8.3g for ii : %8.3g\n", ii)
-printf("%%-20.10g for 4/3 : %-20.10g\n", 4/3)
-printf("%%20.13e for 4/3 : %20.13e\n", 4/3)
-printf("%%e for 4/3 : %e\n", 4/3)
+printf("%%8.3g for 3.14159: %8.3g\n", 3.14159)
+printf("%%8.3G for ii     : %8.3G\n", ii)
+printf("%%8.3g for ii     : %8.3g\n", ii)
+printf("%%-20.10g for 4/3 : %-20.10g|\n", 4/3)
+printf("%%20.13e for 4/3  : %20.13e|\n", 4/3)
+printf("%%e for 4/3       : %e|\n", 4/3)
 
 /* Z conversion */
 
@@ -67,6 +67,12 @@ printf("%missing argument to format\n") /* ERROR : %m is not a valid format */
 printf("%d missing argument to format\n") /* ERROR : missing argument(s) to format */
 
 printf("%%-20.10g for aa : %-20.10g\n", aa) /* ERROR : aa is not a t_REAL */
+
+\\regression tests
+
+10^38 + 1.
+
+printf("%.100f",1.)
 
 print("Total time spent: ",gettime);
 \q

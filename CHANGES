@@ -53,6 +53,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    11- quadray no longer allows an (optional) 3rd argument
    12- 'format' was updated after each 'realprecision' change. Don't update
        if 'format' is Xm.-1 (show all significant digits).
+   13- the algorithm used to round t_REAL for output
 
   Added
     1- library function gpcalloc
