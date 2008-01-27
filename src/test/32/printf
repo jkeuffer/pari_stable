@@ -168,8 +168,8 @@
 '.
   *** printf: missing arg 1 for printf format '%d missing argument to format
 '.
-  *** printf: incorrect type in gtofp.
+%-20.10g for aa : [1.000000000         ,2.000000000         ]
 1.0000000000000000000000000000000000000 E38
 0.99999999999999999999999999999999999999770976478687585326332384035105970783
 05024613172747796087832576
-Total time spent: 24
+Total time spent: 20

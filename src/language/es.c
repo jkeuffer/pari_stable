@@ -785,23 +785,60 @@ static void
 fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
        int ljust, int len, int zpad)
 {
-  int caps, factor;
+  int caps;
   char *buf0, *buf;
   long lbuf, mxl;
   GEN uvalue = NULL;
   ulong ulvalue = 0;
   pari_sp av = avma;
 
-  if (base > 0) caps = 0; else { caps = 1; base = -base; }
-  if (base >= 10)
-   factor = 1;
-  else
-   factor = 2; /* base 8 < base 10 */
-
   if (gvalue)
   {
     long vz, s;
     if (typ(gvalue) != t_INT) {
+      long i, j, h, l = lg(gvalue);
+      switch(typ(gvalue))
+      {
+        case t_VEC:
+          dopr_outch('[');
+          for (i = 1; i < l; i++)
+          {
+            fmtnum(0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
+            if (i < l-1) dopr_outch(',');
+          }
+          dopr_outch(']');
+          return;
+        case t_COL:
+          dopr_outch('[');
+          for (i = 1; i < l; i++)
+          {
+            fmtnum(0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
+            if (i < l-1) dopr_outch(',');
+          }
+          dopr_outch(']');
+          dopr_outch('~');
+          return;
+        case t_MAT:
+          if (l == 1)
+            dostr("[;]");
+          else
+          {
+            h = lg(gvalue[1]);
+            for (i=1; i<l; i++)
+            {
+              dopr_outch('[');
+              for (j=1; j<h; j++)
+              {
+                fmtnum(0, gcoeff(gvalue,i,j), base, signvalue, ljust,len,zpad);
+                if (j<h-1) dopr_outch(' ');
+              }
+              dopr_outch(']');
+              dopr_outch('\n');
+              if (i<l-1) dopr_outch('\n');
+            }
+          }
+          return;
+      }
       gvalue = gfloor( simplify_i(gvalue) );
       if (typ(gvalue) != t_INT)
         pari_err(talker,"not a t_INT in integer format conversion: %Z", gvalue);
@@ -820,7 +857,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
       if (s < 0) { signvalue = '-'; uvalue = absi(uvalue); }
     }
     vz = sizedigit(gvalue) + 1;
-    mxl = vz * factor + 10;
+    mxl = vz * 2 + 10; /* 2 needed for octal, 1 is enough otherwise */
   } else {
     double vz;
     ulvalue = lvalue;
@@ -829,8 +866,9 @@ fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
     else
       if (lvalue < 0) { signvalue = '-'; ulvalue = - lvalue; }
     vz = log(ulvalue) / log(10);
-    mxl = (long)vz * factor + 1;
+    mxl = (long)vz * 2 + 1;
   }
+  if (base > 0) caps = 0; else { caps = 1; base = -base; }
 
   buf0 = buf = stackmalloc(mxl) + mxl; /* fill from the right */
   *--buf = 0; /* trailing \0 */
@@ -932,6 +970,69 @@ shift_add(int x, int ch)
   return x;
 }
 
+static void
+fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
+        long sigd, int maxwidth, int ljust, int len, int zpad)
+{
+  pari_sp av = avma;
+  char *buf;
+  if (typ(gvalue) != t_REAL)
+  {
+    long i, j, h, l = lg(gvalue);
+    switch(typ(gvalue))
+    {
+      case t_VEC:
+        dopr_outch('[');
+        for (i = 1; i < l; i++)
+        {
+          fmtreal(gel(gvalue,i), space, signvalue, FORMAT, sigd,
+                  maxwidth, ljust,len,zpad);
+          if (i < l-1) dopr_outch(',');
+        }
+        dopr_outch(']');
+        return;
+      case t_COL:
+        dopr_outch('[');
+        for (i = 1; i < l; i++)
+        {
+          fmtreal(gel(gvalue,i), space, signvalue, FORMAT, sigd,
+                  maxwidth, ljust,len,zpad);
+          if (i < l-1) dopr_outch(',');
+        }
+        dopr_outch(']');
+        dopr_outch('~');
+        return;
+      case t_MAT:
+        if (l == 1)
+          dostr("[;]");
+        else
+        {
+          h = lg(gvalue[1]);
+          for (i=1; i<l; i++)
+          {
+            dopr_outch('[');
+            for (j=1; j<h; j++)
+            {
+              fmtreal(gcoeff(gvalue,i,j), space, signvalue, FORMAT, sigd,
+                      maxwidth, ljust,len,zpad);
+              if (j<h-1) dopr_outch(' ');
+            }
+            dopr_outch(']');
+            dopr_outch('\n');
+            if (i<l-1) dopr_outch('\n');
+          }
+        }
+        return;
+    }
+    gvalue = gtofp(gvalue, ndec2prec(sigd));
+    if (typ(gvalue) != t_REAL)
+      pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
+  }
+  buf = absrtostr(gvalue, space, FORMAT, sigd, maxwidth);
+  if (signe(gvalue) < 0) signvalue = '-';
+  outpad(buf, strlen(buf), signvalue, ljust, len, zpad);
+  avma = av;
+}
 /* format handling "inspired" by the standard draf at 
 -- http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274ff
 Some conversions not implemented */
@@ -1151,10 +1252,7 @@ nextch:
               subfmt[format - recall] = 0;
               sprintf(work, subfmt, dvalue);
             } else {
-              pari_sp av = avma;
               long sigd = prec2ndec(precreal);
-              int signvalue;
-              char *buffer;
 
               gvalue = v_get_arg(arg_vector, &index);
               gvalue = simplify_i(gvalue);
@@ -1164,20 +1262,9 @@ nextch:
                 case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
                 case 'g': sigd = maxwidth; maxwidth = -1; break;
               }
+              fmtreal(gvalue, T->sp, dosign(print_a_blank, print_a_plus), ch,
+                      sigd, maxwidth, ljust, len, zpad);
 
-              if (typ(gvalue) != t_REAL)
-              {
-                gvalue = gtofp(gvalue, ndec2prec(sigd));
-                if (typ(gvalue) != t_REAL)
-                  pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
-              }
-              buffer = absrtostr(gvalue, T->sp, ch, sigd, maxwidth);
-              if (signe(gvalue) < 0)
-                signvalue = '-';
-              else
-                signvalue = dosign(print_a_blank, print_a_plus);
-              outpad(buffer, strlen(buffer), signvalue, ljust, len, zpad);
-              avma = av;
             }
             break;
           default:

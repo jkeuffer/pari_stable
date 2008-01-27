@@ -142,6 +142,17 @@ Doc: This function is based on the C standard library command of the same name.
  100000  \\@com don't truncate fields whose length is larger than the minimum width
  ? printf("%.2f  |%06.2f|", Pi,Pi)
  3.14  |  3.14|
+ @eprog\noindent All numerical conversions apply recursively to the entries
+ of vectors and matrices:
+ \bprog
+ ? printf("%4d", [1,2,3]);
+ [   1,   2,   3]
+ ? printf("%5.2f", mathilbert(3));
+ [ 1.00  0.50  0.33]
+
+ [ 0.50  0.33  0.25]
+
+ [ 0.33  0.25  0.20]
  @eprog
  
  %\syn{NO}
