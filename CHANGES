@@ -36,6 +36,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
    24- rnf functions sometimes do not reduce their output when relative
        extension has degree 1 [#727]
    25- zetakinit(bnfinit(...)) -> gerepile error
+   26- zeta(1-2^31 or 1-2^63) -> SEGV [#730]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

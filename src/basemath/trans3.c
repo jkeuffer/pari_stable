@@ -1017,6 +1017,7 @@ inv_szeta_euler(long n, double lba, long prec)
   double A = n / (LOG2*BITS_IN_LONG), D;
   ulong p, lim;
 
+  if (n > bit_accuracy(prec)) return real_1(prec);
   if (!lba) lba = bit_accuracy_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (ulong)ceil(D);
@@ -1052,7 +1053,7 @@ bernreal_using_zeta(long n, GEN iz, long prec)
 
   if (!iz) iz = inv_szeta_euler(n, 0., l);
   z = divrr(mpfactr(n, l), mulrr(gpowgs(Pi2n(1, l), n), iz));
-  setexpo(z, expo(z) + 1); /* 2 * n! / ((2Pi)^n zeta(n)) */
+  setexpo(z, expo(z) + 1); /* 2 * n! * zeta(n) / (2Pi)^n */
   if ((n & 3) == 0) setsigne(z, -1);
   return z;
 }
@@ -1189,8 +1190,10 @@ szeta(long k, long prec)
   if (k < 0)
   {
     if ((k&1) == 0) return gen_0;
-    y = single_bern(1-k, prec); togglesign(y);
-    return gerepileuptoleaf(av, divru(y, 1-k));
+    k = 1-k;
+    if (k < 0) pari_err(talker, "arg %ld too small in zeta", k);
+    y = single_bern(k, prec); togglesign(y);
+    return gerepileuptoleaf(av, divru(y, k));
   }
   if (k > bit_accuracy(prec)+1) return real_1(prec);
   if ((k&1) == 0)
