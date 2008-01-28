@@ -630,22 +630,28 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 
   /* x != 0 */
   lx = lg(x);
+  if (width_frac >= 0)
+    beta = width_frac;
+  else
+    beta = ex10( bit_accuracy(lx) - expo(x) );
   if (wanted_dec >= 0)
   { /* reduce precision if possible */
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  if (width_frac >= 0)
-    beta = width_frac;
-  else
-    beta = ex10( bit_accuracy(lx) - expo(x) );
 
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
+    {
+      if (beta > 4e9) lx++;
       z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
+    }
     else
+    {
+      if (beta < -4e9) lx++;
       z = divrr(x, rpowuu(5UL, (ulong)-beta, lx+1));
+    }
     z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
   }
   else
