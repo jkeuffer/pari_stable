@@ -565,9 +565,6 @@ itostr_sign(GEN x, int sx, long *len)
 /* 19 digits (if 64 bits, at most 2^60-1) + 1 sign */
 static const long MAX_EXPO_LEN = 20;
 
-/* FIXME: to be eventually deleted */
-#define PB
-#undef PB
 /* FIXME: to be deleted */
 static THREAD const char *saved_format = NULL;
 
