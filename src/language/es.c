@@ -429,15 +429,6 @@ void
 flusherr(void) { pariErr->flush(); }
 
 static void
-_initout(pariout_t *T, char f, long sigd, long sp, int prettyp)
-{
-  T->format = f;
-  T->sigd = sigd;
-  T->sp = sp;
-  T->prettyp = prettyp;
-}
-
-static void
 printGEN(GEN x, pariout_t *T)
 {
   if (typ(x)==t_STR)
@@ -447,16 +438,16 @@ printGEN(GEN x, pariout_t *T)
 }
 
 /* FIXME: OLD VERSION */
-/* format is standard printf format, except %Z is a GEN */
+/* fmt is standard printf format, except %Z is a GEN */
 void
-vpariputs(const char* format, va_list args)
+vpariputs(const char* fmt, va_list args)
 {
   long nb = 0, bufsize = 1023;
-  const char *f = format;
+  const char *f = fmt;
   char *buf, *str, *s, *t;
 
   /* replace each %Z (2 chars) by braced address format (8 chars) */
-  s = str = (char*)gpmalloc(strlen(format)*4 + 1);
+  s = str = (char*)gpmalloc(strlen(fmt)*4 + 1);
   while (*f)
   {
     if (*f != '%') *s++ = *f++;
@@ -530,15 +521,21 @@ numdig(ulong l)
   return 10;
 }
 
+/* let ndig <= 9, x < 10^ndig, write in p[-ndig..-1] the decimal digits of x */
 static void
-copart(char *s, ulong x, long start)
+utodec(char *p, ulong x, long ndig)
 {
-  char *p = s + start;
-  while (p > s)
+  switch(ndig)
   {
-    ulong q = x/10;
-    *--p = (x - q*10) + '0';
-    x = q;
+    case 9: *--p = x % 10 + '0'; x = x/10;
+    case 8: *--p = x % 10 + '0'; x = x/10;
+    case 7: *--p = x % 10 + '0'; x = x/10;
+    case 6: *--p = x % 10 + '0'; x = x/10;
+    case 5: *--p = x % 10 + '0'; x = x/10;
+    case 4: *--p = x % 10 + '0'; x = x/10;
+    case 3: *--p = x % 10 + '0'; x = x/10;
+    case 2: *--p = x % 10 + '0'; x = x/10;
+    case 1: *--p = x % 10 + '0'; x = x/10;
   }
 }
 
@@ -548,12 +545,12 @@ itostr_sign(GEN x, int sx, long *len)
 {
   long l, d;
   ulong *res = convi(x, &l);
-  char *s = (char*)new_chunk(nchar2nlong(l*9 + (sx<0) + 1)), *t = s;
+  /* l 9-digits words (< 10^9) + (optional) sign + \0 */
+  char *s = (char*)new_chunk(nchar2nlong(l*9 + 1 + 1)), *t = s;
 
   if (sx < 0) *t++ = '-';
-  d = numdig(*--res);
-  copart(t, *res, d); t += d;
-  while (--l > 0) { copart(t, *--res, 9); t += 9; }
+  d = numdig(*--res); t += d; utodec(t, *res, d);
+  while (--l > 0) { t += 9; utodec(t, *--res, 9); }
   *t = 0; *len = t - s; return s;
 }
 
@@ -743,16 +740,20 @@ outpad(const char *buf, long lbuf, int sign, long ljust, long len, long zpad)
   long padlen = len - lbuf;
   if (padlen < 0) padlen = 0;
   if (ljust) padlen = -padlen;
-  if (zpad && padlen > 0) {
-    if (sign) { dopr_outch(sign); --padlen; }
-    while (padlen > 0) { dopr_outch('0'); --padlen; }
-  }
-  else
+  if (padlen > 0)
   {
-    if (sign) --padlen;
-    while (padlen > 0) { dopr_outch(' '); --padlen; }
+    if (zpad) {
+      if (sign) { dopr_outch(sign); --padlen; }
+      while (padlen > 0) { dopr_outch('0'); --padlen; }
+    }
+    else
+    {
+      if (sign) --padlen;
+      while (padlen > 0) { dopr_outch(' '); --padlen; }
+      if (sign) dopr_outch(sign);
+    }
+  } else
     if (sign) dopr_outch(sign);
-  }
   dostr(buf);
   while (padlen < 0) { dopr_outch(' '); ++padlen; }
 }
@@ -1029,34 +1030,34 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
   outpad(buf, strlen(buf), signvalue, ljust, len, zpad);
   avma = av;
 }
-/* format handling "inspired" by the standard draf at 
+/* format handling "inspired" by the standard draft at 
 -- http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274ff
-Some conversions not implemented */
+ * fmt is a standard printf format, except 'Z' is a "length modifier"
+ * allowing GEN arguments. Use either the arg_vector or (if NULL) the va_list */
 static void
-sm_dopr(pariout_t *T, char *buffer, const char *format, int is_a_list,
-        va_list args)
+sm_dopr(pariout_t *T, const char *fmt, GEN arg_vector, va_list args)
 {
   int GENflag = 0, longflag = 0, pointflag = 0;
   int print_a_plus, print_a_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
   char *strvalue;
   long lvalue;
   int index = 1;
-  GEN gvalue, arg_vector = is_a_list? NULL: va_arg(args, GEN);
+  GEN gvalue;
   const char *recall = NULL;
 
   SnprfOverflow = 0;
-  saved_format = format;
+  saved_format = fmt;
 
-  while ((ch = *format++) != '\0') {
+  while ((ch = *fmt++) != '\0') {
     switch(ch) {
       case '%':
         ljust = zpad = 0;
         len = maxwidth = -1;
         GENflag = longflag = pointflag = 0;
-        recall = format - 1; /* '%' was skipped */
+        recall = fmt - 1; /* '%' was skipped */
         print_a_plus = print_a_blank = with_sharp = 0;
 nextch:
-        ch = *format++;
+        ch = *fmt++;
         switch(ch) {
           case 0:
             pari_err(talker, "printf: end of format");
@@ -1102,10 +1103,10 @@ nextch:
           case '*':
           {
             int *t = pointflag? &maxwidth: &len;
-            if (is_a_list)
-              *t = va_arg(args, int);
-            else
+            if (arg_vector)
               *t = (int)gtolong( v_get_arg(arg_vector, &index) );
+            else
+              *t = va_arg(args, int);
             goto nextch;
           }
           case '.':
@@ -1129,7 +1130,10 @@ nextch:
 ------------------------------------------------------------------------*/
           case 'u': /* not a signed conversion: print_a_(blank|plus) ignored */
 #define get_num_arg() \
-  if (is_a_list) { \
+  if (arg_vector) { \
+    lvalue = 0; \
+    gvalue = v_get_arg(arg_vector, &index); \
+  } else { \
     if (GENflag) { \
       lvalue = 0; \
       gvalue = va_arg(args, GEN); \
@@ -1137,9 +1141,6 @@ nextch:
       lvalue = longflag? va_arg(args, long): va_arg(args, int); \
       gvalue = NULL; \
     } \
-  } else { \
-    lvalue = 0; \
-    gvalue = v_get_arg(arg_vector, &index); \
   }
             get_num_arg();
             fmtnum(lvalue, gvalue, 10, -1, ljust, len, zpad);
@@ -1156,15 +1157,10 @@ nextch:
             break;
           case 'p':
             dopr_outch('0'); dopr_outch('x');
-            if (is_a_list)
-            {
-              if (GENflag)
-                lvalue = (long)va_arg(args, GEN);
-              else
-                lvalue = longflag? va_arg(args, long): va_arg(args, int);
-            }
-            else
+            if (arg_vector)
               lvalue = (long)v_get_arg(arg_vector, &index);
+            else
+              lvalue = (long)va_arg(args, void*);
             fmtnum(lvalue, NULL, 16, -1, ljust, len, zpad);
             break;
           case 'x': /* not a signed conversion: print_a_(blank|plus) ignored */
@@ -1180,7 +1176,11 @@ nextch:
           case 's':
           {
             int to_free;
-            if (is_a_list) {
+            if (arg_vector) {
+              gvalue = v_get_arg(arg_vector, &index);
+              strvalue = GENtostr(gvalue);
+              to_free = 1;
+            } else {
               if (GENflag) {
                 gvalue = va_arg(args, GEN);
                 strvalue = GENtostr(gvalue);
@@ -1189,24 +1189,20 @@ nextch:
                 strvalue = va_arg(args, char *);
                 to_free = 0;
               }
-            } else {
-              gvalue = v_get_arg(arg_vector, &index);
-              strvalue = GENtostr(gvalue);
-              to_free = 1;
             }
             fmtstr(strvalue, ljust, len, maxwidth);
             if (to_free) gpfree(strvalue);
             break;
           }
           case 'c':
-            if (is_a_list) {
+            if (arg_vector) {
+              gvalue = v_get_arg(arg_vector, &index);
+              ch = (int)gtolong(gvalue);
+            } else {
               if (GENflag)
                 ch = (int)gtolong( va_arg(args,GEN) );
               else
                 ch = va_arg(args, int);
-            } else {
-              gvalue = v_get_arg(arg_vector, &index);
-              ch = (int)gtolong(gvalue);
             }
             dopr_outch(ch);
             break;
@@ -1222,21 +1218,21 @@ nextch:
           {
             long sigd = 0;
 
-            if (is_a_list) {
+            if (arg_vector)
+              gvalue = v_get_arg(arg_vector, &index);
+            else {
               if (!GENflag)
               {
                 char work[256], subfmt[256];
                 double dvalue = va_arg(args, double);
 
-                strncpy(subfmt, recall, format - recall);
-                subfmt[format - recall] = 0;
+                strncpy(subfmt, recall, fmt - recall);
+                subfmt[fmt - recall] = 0;
                 sprintf(work, subfmt, dvalue);
                 break;
               }
               gvalue = va_arg(args, GEN);
-            } else
-              gvalue = v_get_arg(arg_vector, &index);
-
+            }
             gvalue = simplify_i(gvalue);
             if (maxwidth < 0)
               sigd = prec2ndec(precreal);
@@ -1262,40 +1258,12 @@ nextch:
   *z_output = 0;
 }
 
-/* format is standard printf format, except %Z is a GEN; C call */
-static GEN
-v3pariputs(const char* format, int is_a_list, int return_string, ...)
-{
-  char *s = NULL;
-  long bsiz = 1023;
-  va_list args;
-  GEN res = NULL;
-
-  for(;;) {
-    va_start(args,return_string);
-    s = (char*)gprealloc(s, bsiz + 1);
-    z_output = s;
-    DoprEnd = s + bsiz;
-    sm_dopr(GP_DATA->fmt, s, format, is_a_list, args);
-    if (SnprfOverflow == 0) break;
-    if (SnprfOverflow < bsiz)
-      bsiz <<= 1;
-    else
-      bsiz += SnprfOverflow + 10;
-    s = (char*)gprealloc(s, bsiz + 1);
-  }
-  va_end(args);
-  if (return_string) res = strtoGENstr(s); else pariputs(s);
-  gpfree(s);
-  return res;
-}
-
 void
-pariprintf(const char *format, ...)
+pariprintf(const char *fmt, ...)
 {
   va_list args;
 
-  va_start(args,format); vpariputs(format,args);
+  va_start(args,fmt); vpariputs(fmt,args);
   va_end(args);
 }
 
@@ -1807,7 +1775,7 @@ itostr(GEN x) {
   return sx? itostr_sign(x, sx, &l): zerotostr();
 }
 
-/* x != 0 integer, write abs(x). Prepend '-' if (minus) */
+/* x != 0 integer, write abs(x). Prepend '-' if (sx < 0) */
 static void
 wr_int_sign(GEN x, int sx)
 {
@@ -3127,6 +3095,14 @@ texi(GEN g, pariout_t *T, int addsign)
 /**                        USER OUTPUT FUNCTIONS                  **/
 /**                                                               **/
 /*******************************************************************/
+static void
+_initout(pariout_t *T, char f, long sigd, long sp, int prettyp)
+{
+  T->format = f;
+  T->sigd = sigd;
+  T->sp = sp;
+  T->prettyp = prettyp;
+}
 
 void
 gen_output(GEN x, pariout_t *T)
@@ -3148,13 +3124,6 @@ void
 brute(GEN g, char f, long d)
 {
   pariout_t T; _initout(&T,f,d,0,f_RAW);
-  gen_output(g, &T);
-}
-
-void
-bruteall(GEN g, char f, long d, long sp)
-{
-  pariout_t T; _initout(&T,f,d,sp,f_RAW);
   gen_output(g, &T);
 }
 
@@ -3202,12 +3171,12 @@ bruterr(GEN x,char format,long sigd)
 }
 
 void
-fprintferr(const char* format, ...)
+fprintferr(const char* fmt, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
-  va_start(args, format); vpariputs(format,args);
+  va_start(args, fmt); vpariputs(fmt,args);
   va_end(args); pariOut = out;
 }
 
@@ -4126,31 +4095,50 @@ print0(GEN g, long flag)
   for (i = 1; i < l; i++) printGEN(gel(g,i), &T);
 }
 
+/* FIXME: I see no portable way to convert a vector of arguments to a va_list,
+ * or to pass a va_list to a function that will traverse it multiple times
+ * (va_copy not always available). Hence the ugly #define to avoid code
+ * duplication. Second ugliness: no portable way to return a value from a
+ * macro (not using gcc extensions), so put result in 'char *s' */
+#define SM_DOPR(fmt, arg_vector) \
+  char *s; \
+  long __bsiz = 1023; \
+  for(s = NULL;;) { /* run at most twice */ \
+    va_list __args; va_start(__args, fmt); \
+    z_output = s = (char*)gprealloc(s, __bsiz + 1); \
+    DoprEnd = s + __bsiz; \
+    sm_dopr(GP_DATA->fmt, fmt, arg_vector, __args); \
+    if (SnprfOverflow == 0) break; \
+    __bsiz += SnprfOverflow; \
+    va_end(__args); }
+
+/* dummy needed to pass a (empty!) va_list to sm_dopr */
+static char *
+dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
+{ SM_DOPR(fmt, arg_vector); return s; }
+
 void
 printf0(GEN gfmt, GEN args)
-{ (void)v3pariputs((const char*)gfmt,0,0,args); }
+{ char *s = dopr_arg_vector(args, (const char*)gfmt); 
+  pariputs(s); free(s); }
 
 GEN
 Strprintf(GEN gfmt, GEN args)
-{ return v3pariputs((const char *)gfmt,0,1,args); }
+{ char *s = dopr_arg_vector(args, (const char *)gfmt);
+  GEN z = strtoGENstr(s); free(s); return z; }
 
 void
-printf1(GEN gfmt, va_list args) /* the va_list version of printf0 */
-{ (void)v3pariputs((const char *)gfmt,1,0,args); }
+printf1(const char *fmt, ...) /* variadic version of printf0 */
+{ SM_DOPR(fmt, NULL); pariputs(s); free(s); }
 
 GEN
-Strprintf1(GEN gfmt, va_list args) /* the va_list version of Strprintf */
-{ return v3pariputs((const char *)gfmt,1,1,args); }
+Strprintf1(const char *fmt, ...) /* variadic version of Strprintf */
+{ GEN z; SM_DOPR(fmt, NULL); z = strtoGENstr(s); free(s); return z; }
 
-/* the va_list version of fprintf0 (FIXME: fprintf0 not yet available) */
+/* variadic version of fprintf0. FIXME: fprintf0 not yet available */
 void
-fprintf1(FILE *file, GEN gfmt, va_list args)
-{
-  pari_sp ltop = avma;
-  GEN res = v3pariputs((const char *)gfmt,1,1,args);
-  fputs(GSTR(res), file);
-  avma = ltop;
-}
+fprintf1(FILE *file, const char *fmt, ...)
+{ SM_DOPR(fmt, NULL); fputs(s, file); free(s); }
 
 #define PR_NL() {pariputc('\n'); pariflush(); }
 #define PR_NO() pariflush()

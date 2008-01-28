@@ -76,6 +76,7 @@ BA  9- library function ZV_indexsort
     2- obsolete library function elementinv_modpr
     3- obsolete README.DOS and README.WIN
     4- cant_deflate error code
+    5- obsolete library function bruteall()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
