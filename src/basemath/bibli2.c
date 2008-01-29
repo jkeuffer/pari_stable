@@ -1785,9 +1785,27 @@ GEN
 setunion(GEN x, GEN y)
 {
   pari_sp av = avma;
+  long i, j, k, lx = lg(x), ly = lg(y);
+  GEN z = cgetg(lx + ly - 1, t_VEC);
   if (typ(x) != t_VEC || typ(y) != t_VEC)
     pari_err(talker,"not a set in setunion");
-  return gerepilecopy(av, vectoset(shallowconcat(x,y)));
+  i = j = k = 1;
+  while (i<lx && j<ly)
+  {
+    int s = gcmp(gel(x,i), gel(y,j));
+    if (s < 0)
+      z[k++] = x[i++];
+    else if (s > 0)
+      z[k++] = y[j++];
+    else {
+      z[k++] = x[i++];
+      j++;
+    }
+  }
+  while (i<lx) z[k++] = x[i++];
+  while (j<ly) z[k++] = y[j++];
+  setlg(z, k);
+  return gerepilecopy(av, z);
 }
 
 GEN
