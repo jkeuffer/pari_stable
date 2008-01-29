@@ -5,4 +5,4 @@ Description:
  (small):small	                %ld
  (#str):void	                $%1
  (str):str	                %s
- (gen):gen	                %Z
+ (gen):gen	                %Zs
