@@ -490,7 +490,7 @@ typedef struct {
   int TeXstyle;
 } pariout_t;
 
-char *GENtostr0(GEN x, pariout_t *T, void (*do_out)(GEN, pariout_t*));
+char *GENtostr0(GEN x, pariout_t *T);
 void lim_lines_output(GEN z, pariout_t *fmt, long n, long max);
 void gen_output(GEN x, pariout_t *T);
 
@@ -725,16 +725,12 @@ GEN     weipell0(GEN e, long prec, long PREC);
 /* es.c */
 
 GEN     Str0(GEN g, long flag);
-void    bruti(GEN g, pariout_t *T, int addsign);
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
-void    matbruti(GEN g, pariout_t *T);
 pariFILE * pari_fopengz(char *s);
 int     pari_is_dir(const char *name);
 int     pari_is_file(const char *name);
 GEN     readobj(FILE *f, int *ptc);
-void    sori(GEN g, pariout_t *T);
-void    texi(GEN g, pariout_t *T, int addsign);
 void    writeGEN(GEN x, FILE *f);
 void    writenamedGEN(GEN x, const char *s, FILE *f);
 

@@ -1946,11 +1946,7 @@ tex2mail_output(GEN z, long n)
 static void
 texmacs_output(GEN z, long n)
 {
-  pariout_t T = *(GP_DATA->fmt); /* copy */
-  char *sz;
-
-  T.prettyp = f_TEX;
-  sz = GENtostr0(z, &T, &gen_output);
+  char *sz = GENtoTeXstr(z);
   printf("%clatex:", DATA_BEGIN);
   if (n) printf("\\magenta\\%%%ld = ", n);
   printf("$\\blue %s$%c", sz,DATA_END);
