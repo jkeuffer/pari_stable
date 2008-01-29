@@ -659,6 +659,7 @@ static THREAD size_t DoprSize; /* size of the dopr_outch buffer */
 static void
 dopr_outch(int c)
 {
+  *z_output++ = c;
   if (z_output == DoprEnd)
   {
     DoprBuffer = (char*)gprealloc((void*)DoprBuffer, DoprSize << 1);
@@ -666,7 +667,6 @@ dopr_outch(int c)
     DoprSize <<= 1;
     DoprEnd = DoprBuffer + DoprSize;
   }
-  *z_output++ = c;
 }
 
 static void
@@ -2713,10 +2713,10 @@ sori(GEN g, pariout_t *T)
       }
       pariputs("])\n"); return;
   }
-  close_paren = 0;
-  if (!is_graphicvec_t(tg))
+  if (is_graphicvec_t(tg)) close_paren = 0;
+  else
   {
-    if (tg == t_FRAC && gsigne(g) < 0) pariputc('-');
+    if (tg == t_FRAC && signe(g[1]) < 0) pariputc('-');
     pariputc('('); close_paren = 1;
   }
   switch(tg)
