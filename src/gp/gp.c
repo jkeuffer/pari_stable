@@ -1472,7 +1472,7 @@ gp_main_loop(int ismain)
       if (setjmp(GP_DATA->env))
       { /* recover from error or allocatemem */
 	char *s = (char*)global_err_data;
-	if (s && *s) fprintferr("%Z\n", readseq(s));
+	if (s && *s) fprintferr("%Zs\n", readseq(s));
 	avma = av = top;
 	prune_history(H, tloc);
 	GP_DATA->fmt->prettyp = outtyp;
@@ -1597,7 +1597,7 @@ gp_exception_handler(long numerr)
     else
     {
       recovering = 1;
-      fprintferr("\n%Z\n", closure_evalgen(s));
+      fprintferr("\n%Zs\n", closure_evalgen(s));
       recovering = 0; return 0;
     }
   }

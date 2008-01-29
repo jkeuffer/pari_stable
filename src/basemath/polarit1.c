@@ -879,7 +879,7 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
   long i, dx = degpol(x);
   pari_sp av = avma, lim = stack_lim(av, 1);
   GEN x0 = x+2, z = gel(x0,0);
-  if (dx < 0) pari_err(talker, "zero polynomial in FpXQ_pow. %Z not prime", p);
+  if (dx < 0) pari_err(talker, "zero polynomial in FpXQ_pow. %Zs not prime", p);
   for (i = 1; i <= dx; i++)
   {
     GEN d, c = gel(x0,i); /* assume coeffs in [0, p-1] */
@@ -3205,6 +3205,6 @@ zrhqr(GEN a, long prec)
     if (DEBUGLEVEL>3) fprintferr("%ld ",i);
     gel(rr,i) = gtofp(y, prec);
   }
-  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Z",rr); flusherr(); }
+  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Zs",rr); flusherr(); }
   return gerepilecopy(av, rr);
 }

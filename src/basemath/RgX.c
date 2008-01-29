@@ -779,7 +779,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   p2 = gel(x,dx);
   p2 = y_lead? f(p2,y_lead): gcopy(p2);
   if (isexactzero(p2))
-    pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Z\nby %Z",
+    pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Zs\nby %Zs",
 	     x-2, y);
   y = p1+2;
   gel(z,dz) = p2;

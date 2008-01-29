@@ -47,6 +47,6 @@ main(void)
   pthread_join(th1,(void*)&F1); /* Wait for termination, get the results */
   pthread_join(th2,(void*)&F2);
   pthread_join(th3,(void*)&D);
-  pariprintf("F1=%Z\nF2=%Z\nlog(D)=%Z\n", F1, F2, glog(D,3));
+  pariprintf("F1=%Zs\nF2=%Zs\nlog(D)=%Zs\n", F1, F2, glog(D,3));
   return 0;
 }

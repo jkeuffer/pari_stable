@@ -118,7 +118,7 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
       da = mulii(da,db);
       a = hnfmodid(M, da);
     }
-    if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
+    if (DEBUGLEVEL>5) fprintferr("Result for prime %Zs is:\n%Zs\n",w1[i],b);
   }
   if (da)
   {
@@ -518,7 +518,7 @@ allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   for (i=1; i<=h; i++)
   {
     if (w2[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
-    if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
+    if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n",w1[i],w2[i]);
     ordmax = shallowconcat(ordmax, mkvec( maxord2(cf,gel(w1,i),w2[i]) ));
   }
   return allbase_from_ordmax(ordmax, w1, f, *dx, dK, index, ptw);
@@ -566,7 +566,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       GEN x = (GEN)global_err_data;
       GEN N, u, p = gcdii(gel(x,1), gel(x,2));
       long l;
-      if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Z", x);
+      if (DEBUGLEVEL) pari_warn(warner,"impossible inverse: %Zs", x);
 
       u = get_coprimes(p, diviiexact(gel(x,1),p));
       /* no small factors, but often a prime power */
@@ -581,7 +581,7 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       lw = lg(w1);
       for ( ; k < lw; k++) w2[k] = Z_pvalrem(N, gel(w1,k), &N);
     } RETRY {
-      if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
+      if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n",w1[i],w2[i]);
       ordmax = shallowconcat(ordmax, mkvec( maxord(gel(w1,i),f,w2[i]) ));
     } ENDCATCH;
   }
@@ -685,7 +685,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   if (DEBUGLEVEL>2)
   {
     fprintferr("  dedek: gcd has degree %ld\n", dk);
-    if (DEBUGLEVEL>5) fprintferr("initial parameters p=%Z,\n  f=%Z\n",p,f);
+    if (DEBUGLEVEL>5) fprintferr("initial parameters p=%Zs,\n  f=%Zs\n",p,f);
   }
   if (2*dk >= mf-1) return FpX_div(f,k,p);
   return dk? NULL: f;
@@ -798,8 +798,8 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   if (n == 1) return scalarmat(gen_1, 1);
   if (DEBUGLEVEL>5)
   {
-    fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
-    fprintferr("  f = %Z,\n  a = %Z\n",f,a);
+    fprintferr("  entering Dedekind Basis with parameters p=%Zs\n",p);
+    fprintferr("  f = %Zs,\n  a = %Zs\n",f,a);
   }
   ha = pd = powiu(p,mf/2); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
@@ -820,7 +820,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     gel(b,i) = RgX_to_RgV(ha,n);
   }
   b = hnfmodid(b,pd);
-  if (DEBUGLEVEL>5) fprintferr("  new order: %Z\n",b);
+  if (DEBUGLEVEL>5) fprintferr("  new order: %Zs\n",b);
   return gdiv(b, pd);
 }
 
@@ -877,11 +877,11 @@ Decomp(decomp_t *S, long flag)
   if (DEBUGLEVEL>2)
   {
     fprintferr("  entering Decomp");
-    if (DEBUGLEVEL>5) fprintferr(", parameters: %Z^%ld\n  f = %Z",p, r, S->f);
+    if (DEBUGLEVEL>5) fprintferr(", parameters: %Zs^%ld\n  f = %Zs",p, r, S->f);
     fprintferr("\n");
   }
   if (!FpX_valrem(S->chi, S->nu, p, &b1))
-    pari_err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
+    pari_err(talker, "bug in Decomp (not a factor), is p = %Zs a prime?", p);
   b2 = FpX_div(S->chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
@@ -916,7 +916,7 @@ Decomp(decomp_t *S, long flag)
   f2 = FpX_center(f2, pr, shifti(pr,-1));
 
   if (DEBUGLEVEL>5)
-    fprintferr("  leaving Decomp: f1 = %Z\nf2 = %Z\ne = %Z\nde= %Z\n", f1,f2,e,de);
+    fprintferr("  leaving Decomp: f1 = %Zs\nf2 = %Zs\ne = %Zs\nde= %Zs\n", f1,f2,e,de);
 
   if (flag)
     return concat_factor(ZX_monic_factorpadic(f1, p, flag),
@@ -1114,7 +1114,7 @@ manage_cache(decomp_t *S, GEN f, GEN pp)
   if (!(S->precns) || gcmp(S->precns, p1) < 0)
   {
     if (DEBUGLEVEL>4)
-      fprintferr("  Precision for cached Newton sums: %Z -> %Z\n",
+      fprintferr("  Precision for cached Newton sums: %Zs -> %Zs\n",
 		 S->precns? S->precns: gen_0, p1);
     S->ns = polsymmodp(f, p1);
     S->precns = p1;
@@ -1343,7 +1343,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
   chib = chig = NULL; /* -Wall */
   for (;;)
   { /* beta tends to a factor of chi */
-    if (DEBUGLEVEL>4) fprintferr("  beta = %Z\n", beta);
+    if (DEBUGLEVEL>4) fprintferr("  beta = %Zs\n", beta);
 
     R = modii(ZX_resultant(beta, S->chi), S->pmf);
     if (signe(R))
@@ -1397,7 +1397,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     /* nug irreducible mod p */
     w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(w[1]) != 1)
-      pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
+      pari_err(talker, "no root in nilord. Is p = %Zs a prime?", S->p);
 
     for (i = 1; i < lg(w); i++)
     { /* Look for a root delt of nug in Fp[phi] such that vp(gamma - delta) > 0
@@ -1437,7 +1437,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
       }
     }
     if (i == lg(w))
-      pari_err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
+      pari_err(talker, "no root in nilord. Is p = %Zs a prime?", S->p);
 
     if (eq) delt = gmul(delt, powiu(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));
@@ -1465,8 +1465,8 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     fprintferr("  entering Nilord");
     if (DEBUGLEVEL>4)
     {
-      fprintferr(" with parameters: %Z^%ld\n", p, S->df);
-      fprintferr("  fx = %Z, gx = %Z", S->f, S->nu);
+      fprintferr(" with parameters: %Zs^%ld\n", p, S->df);
+      fprintferr("  fx = %Zs, gx = %Zs", S->f, S->nu);
     }
     fprintferr("\n");
   }
@@ -1578,9 +1578,9 @@ indexpartial(GEN P, GEN DP)
       q = powiu(p, (odd(E) && !BSW_psp(p))? e+1: e);
     else if (e >= 2)
     {
-      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z^%ld ",p,E);
+      if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Zs^%ld ",p,E);
       q = fast_respm(P, dP, p, e);
-      if(DEBUGLEVEL>=5) { fprintferr("--> %Z : ",q); msgTIMER(&T,""); }
+      if(DEBUGLEVEL>=5) { fprintferr("--> %Zs : ",q); msgTIMER(&T,""); }
     }
     res = mulii(res, q);
   }
@@ -1668,7 +1668,7 @@ get_LV(GEN nf, GEN L, GEN p, long N)
 }
 
 static void
-errprime(GEN p) { pari_err(talker, "primedec: %Z is not prime", p); }
+errprime(GEN p) { pari_err(talker, "primedec: %Zs is not prime", p); }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
@@ -2551,7 +2551,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   GEN q, q1, p, T, modpr, W, I, MW, C, p1;
   GEN Tauinv, Tau, prhinv, pip, nfT, id, rnfId;
 
-  if (DEBUGLEVEL>1) fprintferr(" treating %Z\n",pr);
+  if (DEBUGLEVEL>1) fprintferr(" treating %Zs\n",pr);
   modpr = nf_to_ff_init(nf,&pr,&T,&p);
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc);
   if (!p1) { avma = av; return NULL; }
@@ -2666,7 +2666,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 	gel(W,j) = element_mulvec(nf, gel(Tauinv,j), gel(W,j));
 	gel(I,j) = idealmul(nf,       gel(Tau,j),    gel(I,j) );
       }
-    if (DEBUGLEVEL>3) fprintferr(" new order:\n%Z\n%Z\n", W, I);
+    if (DEBUGLEVEL>3) fprintferr(" new order:\n%Zs\n%Zs\n", W, I);
     if (sep <= 3 || gequal(I,I0)) break;
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
@@ -2762,7 +2762,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
   {
     fprintferr("Ideals to consider:\n");
     for (i=1; i < l; i++)
-      if (ep[i]>1) fprintferr("%Z^%ld\n",P[i],ep[i]);
+      if (ep[i]>1) fprintferr("%Zs^%ld\n",P[i],ep[i]);
     flusherr();
   }
   id = matid(N); z = NULL;
@@ -3078,10 +3078,10 @@ polcompositum0(GEN A, GEN B, long flall)
   v = varn(A);
   if (varn(B) != v) pari_err(talker,"not the same variable in compositum");
   A = Q_primpart(A); check_ZX(A,"compositum");
-  if (!ZX_is_squarefree(A)) pari_err(talker,"compositum: %Z inseparable", A);
+  if (!ZX_is_squarefree(A)) pari_err(talker,"compositum: %Zs inseparable", A);
   if (!same) {
     B = Q_primpart(B); check_ZX(B,"compositum");
-    if (!ZX_is_squarefree(B)) pari_err(talker,"compositum: %Z inseparable", B);
+    if (!ZX_is_squarefree(B)) pari_err(talker,"compositum: %Zs inseparable", B);
   }
 
   D = NULL; /* -Wall */

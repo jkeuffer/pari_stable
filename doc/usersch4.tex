@@ -1596,32 +1596,34 @@ file (from \tet{writebin}) containing more than one object, a \typ{VEC}
 containing them all is returned. This is because binary objects bypass the
 parser, hence reading them has no useful side effect.
 
-\subsec{Output to string}.\sidx{output}
-
-The following functions convert a PARI \kbd{GEN} to a \kbd{malloc}'ed ASCII
-string, which you should \kbd{free} after use.
-
-\fun{char*}{GENtostr}{GEN x}, using the current default output format
-(\kbd{prettymat} by default).
-
-\fun{char*}{GENtoTeXstr}{GEN x}, suitable for inclusion in a \TeX\ file.
-
 \subsec{Output to screen or file}.\sidx{output}
 
 General output functions return nothing but print a character string as a
-side effect. The most versatile such function is
+side effect. Low level routines are available:
 
-\fun{void}{pariprintf}{const char *format, ...}
+\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
 
-\noindent where \kbd{format} is a character string similar to the one
-\kbd{printf} uses. In there, \kbd{\%} characters have a special meaning, and
-describe how to print the remaining operands to
-\kbd{pariprintf}. In addition to the standard format types (see \kbd{man
-printf}), you can use
-\kbd{\%Z} to denote a \kbd{GEN} object\footnote{*}{We would have liked to
-pick \kbd{\%G} but it was already in use!}. For instance we can write:
+\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+
+\noindent But the most versatile such function is
+
+\fun{void}{pariprintf}{const char *fmt, ...}
+
+\noindent where \kbd{fmt} is a character string similar to the one
+\tet{printf} uses. In there, \kbd{\%} characters have a special meaning, and
+describe how to print the remaining operands. In addition to the standard
+format types (see \tet{printf}), you can use the \emph{length modifier}~\kbd{Z}
+to specify that an argument is a \kbd{GEN}. For instance, the following are
+valid conversions for a \kbd{GEN} argument
 \bprog
-    pariprintf("x[%d] = %Z is not invertible!\n", i, gel(x,i));
+    %Zs     @com convert to \kbd{char*} (will print an arbitrary \kbd{GEN})
+    %Z.10s  @com convert to \kbd{char*}, truncated to 10 chars
+    %Z.2f   @com convert to floating point format with 2 decimals
+    %Z4d    @com convert to integer, field width at least 4
+@eprog
+For instance we can write:
+\bprog
+    pariprintf("x[%d] = %Zs is not invertible!\n", i, gel(x,i));
 @eprog\noindent
 Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf and
 this would insert the value of its $i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
@@ -1636,16 +1638,26 @@ flush such buffers at times, using
 \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by a newline and a
 buffer flush. This is more or less equivalent to
 \bprog
-    pariprintf("%Z\n", x);
+    pariprintf("%Zs\n", x);
     pariflush();
 @eprog
 
-\misctitle{Remark}. All such output is done on the stream \tet{pari_outfile},
-which is initialized to \tet{stdout}. To direct your default output to
-another file, use
+These functions write on (PARI's idea of) standard output. It is also possible
+to write to an arbitrary \kbd{FILE*}:
 
-\fun{void}{switchout}{char *name} where \kbd{name} is a character string
-giving the name of the file you are going to use; the output is
+\fun{void}{parifprintf}{FILE *file, const char *fmt, ...}
+
+Note that we have \tet{va_list} analogs of the functions seen so far:
+
+\fun{void}{parivprintf}{const char *fmt, va_list ap}
+
+\fun{void}{parivfprintf}{FILE *file, const char *fmt, va_list ap}
+
+\misctitle{Remark}. The \tet{pariprintf} output is done on the stream
+\tet{pari_outfile}, which is initialized to \tet{stdout}. You can change PARI's idea of its standard output, redirecting it to another file, using
+
+\fun{void}{switchout}{const char *name} where \kbd{name} is a character string
+giving the name of the file you want to write to; the output is
 \emph{appended} at the end of the file. To close the file and revert to
 outputting to \kbd{stdout}, call \kbd{switchout(NULL)}.
 
@@ -1661,6 +1673,22 @@ the \teb{pariOut}~/ \teb{pariErr} global variables which are pointers to
 structs of pointer to functions. If you intend to use these, this
 probably means you are rewriting \kbd{gp}. In that case, have a look at the
 code in \kbd{language/es.c} (\kbd{init80()} or \kbd{GENtostr()} come to mind).
+
+\subsec{Output to string}.\sidx{output}
+
+The following functions convert a PARI \kbd{GEN} to a \kbd{malloc}'ed ASCII
+string, which you should \kbd{free} after use.
+
+\fun{char*}{GENtostr}{GEN x}, using the current default output format
+(\kbd{prettymat} by default).
+
+\fun{char*}{GENtoTeXstr}{GEN x}, suitable for inclusion in a \TeX\ file.
+
+\fun{char}{*parisprintf}{const char *fmt, ...} produces a string from the
+remaining arguments, according to the PARI format \kbd{fmt} (see \tet{printf}).
+
+\fun{char}{*parivsprintf}{const char *fmt, va_list ap} the \tet{va_list}
+analog.
 
 \subsec{Errors}.\sidx{error}\kbdsidx{talker}
 
@@ -1680,7 +1708,7 @@ also use it in the more versatile guise
 where \kbd{format} describes the format to use to write the remaining
 operands, as in the \tet{pariprintf} function. For instance:
 \bprog
-  pari_err(talker, "x[%d] = %Z is not invertible!", i, gel(x,i));
+  pari_err(talker, "x[%d] = %Zs is not invertible!", i, gel(x,i));
 @eprog\noindent
 The simple syntax seen above is
 just a special case with a constant format and no remaining arguments.
@@ -1709,8 +1737,8 @@ the requested message and go on. The basic example is
 @eprog\noindent
 which is the exact equivalent of \kbd{pari\_err(talker,...)} except that
 you certainly do not want to stop the program at this point, just inform the
-user that something important has occurred (in particular, this output would be
-suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not).
+user that something important has occurred; in particular, this output would be
+suitably highlighted under \kbd{gp}, whereas a simple \kbd{printf} would not.
 
 The valid \emph{warning} keywords are \tet{warner} (general), \tet{warnprec}
 (increasing precision), \tet{warnmem} (garbage collecting) and \tet{warnfile}
@@ -1723,7 +1751,7 @@ The valid \emph{warning} keywords are \tet{warner} (general), \tet{warnprec}
 
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
 
-For debugging output, you can use \kbd{printf} and the standard output
+For debugging output, you can use the standard output
 functions, \tet{output} and \tet{pariprintf} mainly. Corresponding to the
 \kbd{gp} metacommand \kbd{\b x}, you can also output the \idx{hexadecimal
 tree} associated to an object:
@@ -1793,7 +1821,7 @@ or
   TIMERstart(&T);
   for (i = 1; i < 10; i++) {
     ...
-    msgTIMER(&T, "for i = %ld (L[i] = %Z)", i, L[i]);
+    msgTIMER(&T, "for i = %ld (L[i] = %Zs)", i, L[i]);
   }
 @eprog
 
@@ -1883,6 +1911,10 @@ statements, use the following encapsulated variants:
 \fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
 
 \fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+
+\fun{void}{pariprintf}{const char *fmt, ...}: write following arguments to the
+output stream, according to the conversion specifications in format \kbd{fmt}
+(see \tet{printf}).
 
 \fun{void}{fprintferr}{char *s}: write \kbd{s} to the error stream
 (this function is in fact much more versatile, see \secref{se:dbg_output}).

@@ -441,7 +441,7 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   l=utoipos(n+1);e=1;
   while(!isprime(l)) { l=addis(l,n); e++; }
   if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: prime l=%Z\n",l);
+    fprintferr("Subcyclo: prime l=%Zs\n",l);
   av=avma;
   if (!borne)
   {
@@ -452,7 +452,7 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     borne=mulii(binomial(utoipos(d),i),powuu(o,i));
   }
   if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: borne=%Z\n",borne);
+    fprintferr("Subcyclo: borne=%Zs\n",borne);
   val=logint(shifti(borne,2),l,NULL);
   avma=av;
   if (DEBUGLEVEL >= 4)
@@ -722,7 +722,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (DEBUGLEVEL >= 1)
     msgtimer("znstar_cosets");
   if (DEBUGLEVEL >= 6)
-    fprintferr("Subcyclo: orbits=%Z\n",O);
+    fprintferr("Subcyclo: orbits=%Zs\n",O);
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
   av=avma;

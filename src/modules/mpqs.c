@@ -129,12 +129,12 @@ mpqs_set_parameters(mpqs_handle_t *h)
    * that the current sizing parameters for 90 or more digits are based
    * on 100% theory and 0% practice. */
   if (i >= 79)
-    pari_warn(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
+    pari_warn(warner, "MPQS: factoring this number will take %s hours:\nN = %Zs",
 	i >= 86 ? "many": "several", h->N);
 
   if (DEBUGLEVEL >= 5)
   {
-    fprintferr("MPQS: kN = %Z\n", h->kN);
+    fprintferr("MPQS: kN = %Zs\n", h->kN);
     fprintferr("MPQS: kN has %ld decimal digits\n", h->digit_size_kN);
   }
 
@@ -1365,9 +1365,9 @@ check_root(mpqs_handle_t *h, long p, long start)
   if (smodis(addii(h->C, mului(z, addii(h->B, mului(z, h->A)))), p))
   {
     fprintferr("MPQS: p = %ld\n", p);
-    fprintferr("MPQS: A = %Z\n", h->A);
-    fprintferr("MPQS: B = %Z\n", h->B);
-    fprintferr("MPQS: C = %Z\n", h->C);
+    fprintferr("MPQS: A = %Zs\n", h->A);
+    fprintferr("MPQS: B = %Zs\n", h->B);
+    fprintferr("MPQS: C = %Zs\n", h->C);
     fprintferr("MPQS: z = %ld\n", z);
     pari_err(bugparier, "MPQS: self_init: found wrong polynomial");
   }
@@ -1820,7 +1820,7 @@ mpqs_self_init(mpqs_handle_t *h)
   if (MPQS_DEBUGLEVEL >= 6)
   {
     /* must happen before resetting avma, because of the absi() */
-    fprintferr("MPQS: chose Q_%ld(x) = %Z x^2 %c %Z x + C\n",
+    fprintferr("MPQS: chose Q_%ld(x) = %Zs x^2 %c %Zs x + C\n",
 	       (long) h->index_j, h->A,
 	       signe(h->B) < 0? '-': '+', absi(h->B));
   }
@@ -2154,7 +2154,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
       }
       p = FB[pi].fbe_p;
 #ifdef MPQS_DEBUG_CANDIDATE_EVALUATION
-      fprintferr("MPQS DEBUG: Qx=%Z p=%ld\n", Qx, (long)p);
+      fprintferr("MPQS DEBUG: Qx=%Zs p=%ld\n", Qx, (long)p);
 #endif
       /* otherwise p might still divide the current adjusted Qx. Try it... */
       /* XXX break out of loop when remaining Qx is 1.  Or rather, suppress
@@ -2194,9 +2194,9 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
-	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
-	  fprintferr("\tQx_2 = %Z\n", Qx_2);
-	  fprintferr("\t rhs = %Z\n", rhs);
+	  fprintferr("MPQS: %Zs @ %Zs :%s\n", Y, Qx, relations);
+	  fprintferr("\tQx_2 = %Zs\n", Qx_2);
+	  fprintferr("\t rhs = %Zs\n", rhs);
 	  pari_err(talker, "MPQS: wrong full relation found!!");
 	}
 	else
@@ -2231,9 +2231,9 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
-	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
-	  fprintferr("\tQx_2 = %Z\n", Qx_2);
-	  fprintferr("\t rhs = %Z\n", rhs);
+	  fprintferr("MPQS: %Zs @ %Zs :%s\n", Y, Qx, relations);
+	  fprintferr("\tQx_2 = %Zs\n", Qx_2);
+	  fprintferr("\t rhs = %Zs\n", rhs);
 	  pari_err(talker, "MPQS: wrong large prime relation found!!");
 	}
 	else
@@ -2986,7 +2986,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 	NULL;           /* base of power or suspected prime --
 				   mark as `unknown' */
     if (DEBUGLEVEL >= 6)
-      fprintferr("\tpackaging %ld: %Z ^%ld (%s)\n", i, res[i],
+      fprintferr("\tpackaging %ld: %Zs ^%ld (%s)\n", i, res[i],
 		 itos(gel(new_res,j-2)), (F == gen_0 ? "comp." : "unknown"));
   }
   return gerepileupto(av, new_res);
@@ -3058,7 +3058,7 @@ mpqs_i(mpqs_handle_t *handle)
   if (DEBUGLEVEL >= 4)
   {
     (void)timer2();
-    fprintferr("MPQS: number to factor N = %Z\n", N);
+    fprintferr("MPQS: number to factor N = %Zs\n", N);
   }
 
   handle->digit_size_N = decimal_len(N);
@@ -3295,7 +3295,7 @@ mpqs_i(mpqs_handle_t *handle)
 	{
 	  fprintferr("\nMPQS: split N whilst combining, time = %ld ms\n",
 		     timer2());
-	  fprintferr("MPQS: found factor = %Z\n", fact);
+	  fprintferr("MPQS: found factor = %Zs\n", fact);
 	}
 	pari_fclose(pLPNEW);
 	pari_fclose(pFNEW);
@@ -3419,7 +3419,7 @@ mpqs_i(mpqs_handle_t *handle)
       if (DEBUGLEVEL >= 4)
       {
 	fprintferr("\nMPQS: time in Gauss and gcds = %ld ms\n", timer2());
-	if (typ(fact) == t_INT) fprintferr("MPQS: found factor = %Z\n", fact);
+	if (typ(fact) == t_INT) fprintferr("MPQS: found factor = %Zs\n", fact);
 	else
 	{
 	  long j, nf = (lg(fact)-1)/3;
@@ -3427,7 +3427,7 @@ mpqs_i(mpqs_handle_t *handle)
 	    /* GN20050707: Changed the arrangement of the two factors,
 	     * to match the debug diagnostics in mpqs_solve_linear_system()
 	     * above */
-	    fprintferr("MPQS: found factors = %Z\n\tand %Z\n",
+	    fprintferr("MPQS: found factors = %Zs\n\tand %Zs\n",
 			fact[1], fact[4]);
 	  else
 	  {
@@ -3436,7 +3436,7 @@ mpqs_i(mpqs_handle_t *handle)
 	     * above */
 	    fprintferr("MPQS: found %ld factors =\n", nf);
 	    for (j=1; j<=nf; j++)
-	      fprintferr("\t%Z%s\n", fact[3*j-2], (j<nf ? "," : ""));
+	      fprintferr("\t%Zs%s\n", fact[3*j-2], (j<nf ? "," : ""));
 	  }
 	}
       }

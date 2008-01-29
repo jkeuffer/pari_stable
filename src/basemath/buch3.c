@@ -732,7 +732,7 @@ regulatorbound(GEN bnf)
   p1 = gsqr(glog(gdiv(dK,c1),DEFAULTPREC));
   p1 = divru(gmul2n(gpowgs(divru(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
-  if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
+  if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Zs\n",p1);
   return gmax(p1, dbltor(0.2));
 }
 
@@ -880,7 +880,7 @@ compute_M0(GEN M_star,long N)
 	M0_pro=gmul2n(mulsr(m1,addrr(gsqr(logr_abs(v)),gsqr(logr_abs(w)))), -2);
 	if (DEBUGLEVEL>2)
 	{
-	  fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+	  fprintferr("[ %ld, %ld, %ld ]: %Zs\n",n1,n2,n3,gprec_w(M0_pro,3));
 	  flusherr();
 	}
 	if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
@@ -914,7 +914,7 @@ compute_M0(GEN M_star,long N)
 	  M0_pro = gmul2n(addrr(p6, mulsr(k, gsqr(logr_abs(w)))),-2);
 	  if (DEBUGLEVEL>2)
 	  {
-	    fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+	    fprintferr("[ %ld, %ld, %ld ]: %Zs\n",n1,n2,n3,gprec_w(M0_pro,3));
 	    flusherr();
 	  }
 	  if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
@@ -972,7 +972,7 @@ compute_M0(GEN M_star,long N)
 	      M0_pro = gmul2n(M0_pro,-2);
 	      if (DEBUGLEVEL>2)
 	      {
-	       fprintferr("[ %ld, %ld, %ld ]: %Z\n",n1,n2,n3,gprec_w(M0_pro,3));
+	       fprintferr("[ %ld, %ld, %ld ]: %Zs\n",n1,n2,n3,gprec_w(M0_pro,3));
 	       flusherr();
 	      }
 	      if (!M0 || gcmp(M0_pro,M0) < 0) M0 = M0_pro;
@@ -1014,24 +1014,24 @@ lowerboundforregulator_i(GEN bnf)
   bound = gel(vecminim,3);
   if (DEBUGLEVEL>1)
   {
-    fprintferr("M* = %Z\n", bound);
+    fprintferr("M* = %Zs\n", bound);
     if (DEBUGLEVEL>2)
     {
       pol = gaddgs(gsub(monomial(gen_1,N,0),monomial(bound,1,0)),N-1);
       p1 = roots(pol,DEFAULTPREC);
       y= real_i(gel(p1, 2 + (N&1)));
       M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);
-      fprintferr("pol = %Z\n",pol);
-      fprintferr("old method: y = %Z, M0 = %Z\n",y,gprec_w(M0,3));
+      fprintferr("pol = %Zs\n",pol);
+      fprintferr("old method: y = %Zs, M0 = %Zs\n",y,gprec_w(M0,3));
     }
   }
   M0 = compute_M0(bound, N);
-  if (DEBUGLEVEL>1) { fprintferr("M0 = %Z\n",gprec_w(M0,3)); flusherr(); }
+  if (DEBUGLEVEL>1) { fprintferr("M0 = %Zs\n",gprec_w(M0,3)); flusherr(); }
   M = gmul2n(gdivgs(gdiv(gpowgs(M0,RU),hermiteconstant(RU)),N),R2);
   if (gcmp(M, dbltor(0.04)) < 0) return NULL;
   M = gsqrt(M,DEFAULTPREC);
   if (DEBUGLEVEL>1)
-    fprintferr("(lower bound for regulator) M = %Z\n",gprec_w(M,3));
+    fprintferr("(lower bound for regulator) M = %Zs\n",gprec_w(M,3));
   return M;
 }
 
@@ -1086,9 +1086,9 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
       }
       if (DEBUGLEVEL>3)
       {
-	if (i==1) fprintferr("       generator of (Zk/Q)^*: %Z\n", g);
-	fprintferr("       prime ideal Q: %Z\n",Q);
-	fprintferr("       column #%ld of the matrix log(b_j/Q): %Z\n",
+	if (i==1) fprintferr("       generator of (Zk/Q)^*: %Zs\n", g);
+	fprintferr("       prime ideal Q: %Zs\n",Q);
+	fprintferr("       column #%ld of the matrix log(b_j/Q): %Zs\n",
 		   nbcol, newcol);
       }
       mat1 = shallowconcat(mat,newcol); ra = rank(mat1);
@@ -1122,7 +1122,7 @@ check_prime(ulong p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN bad)
   }
   for (i=1; i<lf; i++) beta[b++] = fu[i];
   setlg(beta, b); /* beta = [cycgen[i] if p|cyc[i], tu if p|w, fu] */
-  if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Z\n",beta); flusherr();}
+  if (DEBUGLEVEL>3) {fprintferr("     Beta list = %Zs\n",beta); flusherr();}
   primecertify(bnf,beta,p,bad); avma = av;
 }
 

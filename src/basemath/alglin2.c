@@ -1729,9 +1729,9 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     fprintferr("Entering hnffinal:\n");
     if (DEBUGLEVEL>6)
     {
-      if (nlze) fprintferr("dep = %Z\n",dep);
-      fprintferr("mit = %Z\n",matgen);
-      fprintferr("B = %Z\n",B);
+      if (nlze) fprintferr("dep = %Zs\n",dep);
+      fprintferr("mit = %Zs\n",matgen);
+      fprintferr("B = %Zs\n",B);
     }
   }
   /* H: lnz x lnz [disregarding initial 0 cols], U: col x col */
@@ -1828,8 +1828,8 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     fprintferr("Leaving hnffinal\n");
     if (DEBUGLEVEL>6)
     {
-      if (nlze) fprintferr("dep = %Z\n",depnew);
-      fprintferr("mit = %Z\nB = %Z\nC = %Z\n", Hnew, Bnew, C);
+      if (nlze) fprintferr("dep = %Zs\n",depnew);
+      fprintferr("mit = %Zs\nB = %Zs\nC = %Zs\n", Hnew, Bnew, C);
     }
   }
   *ptdep = depnew;
@@ -1843,9 +1843,9 @@ p_mat(GEN mat, GEN perm, long k)
 {
   pari_sp av = avma;
   perm = vecslice(perm, k+1, lg(perm)-1);
-  fprintferr("Permutation: %Z\n",perm);
+  fprintferr("Permutation: %Zs\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Z\n", zm_to_ZM( rowpermute(mat, perm) ));
+    fprintferr("matgen = %Zs\n", zm_to_ZM( rowpermute(mat, perm) ));
   avma = av;
 }
 
@@ -2322,7 +2322,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   if (DEBUGLEVEL)
   {
     msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
-    if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
+    if (DEBUGLEVEL>7) fprintferr("H = %Zs\nC = %Zs\n",H,*ptC);
   }
   return H;
 }

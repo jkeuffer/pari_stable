@@ -663,7 +663,7 @@ removeprime(GEN prime)
       gunclone(gel(primetab,i)); primetab[i]=0;
       cleanprimetab(); break;
     }
-  if (!i) pari_err(talker,"prime %Z is not in primetable", prime);
+  if (!i) pari_err(talker,"prime %Zs is not in primetable", prime);
   return primetab;
 }
 
@@ -829,7 +829,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     avma = av; STOREi(n, k);
     if (DEBUGLEVEL >= 2) {
       pari_warn(warner, "IFAC: untested integer declared prime");
-      fprintferr("\t%Z\n", n);
+      fprintferr("\t%Zs\n", n);
     }
     return aux_end(n,nb);
   }
@@ -864,11 +864,11 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
   else
   {
     GEN q = powgi(gel(here,0),gel(here,1)); /* primary factor found.*/
-    if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Z\n",q);
+    if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Zs\n",q);
     N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
   }
   affii(N, gel(state,1)); /* affect()ed to state[1] to preserve stack. */
-  if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
+  if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: remaining %Zs\n",state[1]);
   /* check the stopping criterion, then restore stack */
   res = cmpii(gel(state,1),gel(state,2)) <= 0;
   avma = ltop; return res;

@@ -471,8 +471,8 @@ nf_factor_bound(GEN nf, GEN polbase)
   GEN b = nf_Beauzamy_bound(nf, polbase);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("Mignotte bound: %Z\n",a);
-    fprintferr("Beauzamy bound: %Z\n",b);
+    fprintferr("Mignotte bound: %Zs\n",a);
+    fprintferr("Beauzamy bound: %Zs\n",b);
   }
   return gerepileupto(av, gmin(a, b));
 }
@@ -796,7 +796,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Z combinations\n", K,binomial(utoipos(lfamod), K));
+    fprintferr("\n### K = %d, %Zs combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   i = 1; curdeg = degpol[ind[1]];
   for(;;)
@@ -885,7 +885,7 @@ nextK:
       C2ltpol = C2lt? gmul(C2lt,pol): pol;
       if (DEBUGLEVEL > 2)
       {
-	fprintferr("\n"); msgTIMER(&ti, "to find factor %Z",y);
+	fprintferr("\n"); msgTIMER(&ti, "to find factor %Zs",y);
 	fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
@@ -942,7 +942,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
-  if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
+  if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Zs\n",piv);
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_COL);
@@ -1102,7 +1102,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     if (gcmp(GSmin, C) >= 0) break;
   }
   if (DEBUGLEVEL>2)
-    fprintferr("for this exponent, GSmin = %Z\nTime reduction: %ld\n",
+    fprintferr("for this exponent, GSmin = %Zs\nTime reduction: %ld\n",
       GSmin, TIMER(&ti));
   L->k = a;
   L->den = L->pk = pk;
@@ -1458,7 +1458,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
     else avma = av2;
     if (DEBUGLEVEL>3)
-      fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
+      fprintferr("%3ld %s at prime\n  %Zs\nTime: %ld\n",
 		 anbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
     if (--ct <= 0) return nbf;
   }
@@ -1520,7 +1520,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
   if (DEBUGLEVEL>2) {
     msgTIMER(&ti, "choice of a prime ideal");
-    fprintferr("Prime ideal chosen: %Z\n", pr);
+    fprintferr("Prime ideal chosen: %Zs\n", pr);
   }
 
   pol = simplify_i(lift(polmod));
@@ -1539,9 +1539,9 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 
   if (DEBUGLEVEL>2) {
     msgTIMER(&ti, "bound computation");
-    fprintferr("  1) T_2 bound for %s: %Z\n", fl?"root":"factor", C0);
-    fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Z\n", T.ZC);
-    fprintferr("  3) Final bound: %Z\n", T.bound);
+    fprintferr("  1) T_2 bound for %s: %Zs\n", fl?"root":"factor", C0);
+    fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Zs\n", T.ZC);
+    fprintferr("  3) Final bound: %Zs\n", T.bound);
   }
 
   L.p = gel(pr,1);
@@ -1571,7 +1571,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     gen_sort_inplace(rep, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
     T.fact  = gerepilecopy(av2, rep);
   }
-  if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Zs", pr);
   T.pr = pr;
   T.L  = &L;
   T.polbase = polbase;

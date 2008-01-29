@@ -981,11 +981,11 @@ pari_warn(long numerr, ...)
   {
     case warnmem: case warner:
       pariputc(' '); ch1=va_arg(ap, char*);
-      vpariputs(ch1,ap); pariputs(".\n");
+      parivprintf(ch1,ap); pariputs(".\n");
       break;
 
     case warnprec:
-      vpariputs(" in %s; new prec = %ld\n",ap);
+      parivprintf(" in %s; new prec = %ld\n",ap);
       break;
 
     case warnfile:
@@ -1071,7 +1071,7 @@ pari_err(long numerr, ...)
     {
       case talker: case siginter: case invmoder:
 	ch1=va_arg(ap, char*);
-	vpariputs(ch1,ap); pariputc('.'); break;
+	parivprintf(ch1,ap); pariputc('.'); break;
 
       case impl:
 	ch1=va_arg(ap, char*);
@@ -1733,7 +1733,7 @@ dochk_gerepileupto(GEN av, GEN x)
   if (!isonstack(x)) return 1;
   if (x > av)
   {
-    pari_warn(warner,"bad object %Z",x);
+    pari_warn(warner,"bad object %Zs",x);
     return 0;
   }
   tx = typ(x);
@@ -1743,7 +1743,7 @@ dochk_gerepileupto(GEN av, GEN x)
   for (i=lontyp[tx]; i<lx; i++)
     if (!dochk_gerepileupto(av, gel(x,i)))
     {
-      pari_warn(warner,"bad component %ld in object %Z",i,x);
+      pari_warn(warner,"bad component %ld in object %Zs",i,x);
       return 0;
     }
   return 1;
@@ -1763,17 +1763,17 @@ dbg_gerepile(pari_sp av)
     const long tx = typ(x), lx = lg(x);
     GEN a;
 
-    pariprintf(" [%ld] %Z:", x - (GEN)avma, x);
+    pariprintf(" [%ld] %Zs:", x - (GEN)avma, x);
     if (! is_recursive_t(tx)) { pariputc('\n'); x += lx; continue; }
     a = x + lontyp[tx]; x += lx;
-    for (  ; a < x; a++) pariprintf("  %Z,", *a);
+    for (  ; a < x; a++) pariprintf("  %Zs,", *a);
     pariprintf("\n");
   }
 }
 void
 dbg_gerepileupto(GEN q)
 {
-  fprintferr("%Z:\n", q);
+  fprintferr("%Zs:\n", q);
   dbg_gerepile((pari_sp) (q+lg(q)));
 }
 
@@ -1967,7 +1967,7 @@ msgTIMER(pari_timer *T, const char *format, ...)
   PariOUT *out = pariOut; pariOut = pariErr;
 
   pariputs("Time "); va_start(args, format);
-  vpariputs(format,args); va_end(args);
+  parivprintf(format,args); va_end(args);
   pariprintf(": %ld\n", TIMER(T)); pariflush();
   pariOut = out;
 }
@@ -1979,7 +1979,7 @@ msgtimer(const char *format, ...)
   PariOUT *out = pariOut; pariOut = pariErr;
 
   pariputs("Time "); va_start(args, format);
-  vpariputs(format,args); va_end(args);
+  parivprintf(format,args); va_end(args);
   pariprintf(": %ld\n", timer2()); pariflush();
   pariOut = out;
 }

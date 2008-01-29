@@ -191,7 +191,7 @@ appendL(GEN x, GEN t)
 static void
 err_cat(GEN x, GEN y)
 {
-  pari_err(talker,"impossible concatenation: %s %Z . %s %Z",
+  pari_err(talker,"impossible concatenation: %s %Zs . %s %Zs",
       type_name(typ(x)), matsize(x), type_name(typ(y)), matsize(y));
 }
 

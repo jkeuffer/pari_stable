@@ -61,18 +61,18 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 
   if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) pari_err(arither1);
   if (signe(bmax) <= 0)
-    pari_err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Z\n", bmax);
+    pari_err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Zs\n", bmax);
   if (signe(amax) < 0)
-    pari_err(talker, "ratilft: amax must be >= 0, found\n\tamax=%Z\n", amax);
+    pari_err(talker, "ratilft: amax must be >= 0, found\n\tamax=%Zs\n", amax);
   /* check 2*amax*bmax < m */
   if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-    pari_err(talker, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Z\n\tbmax=%Z\n\tm=%Z\n", amax,bmax,m);
+    pari_err(talker, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Zs\n\tbmax=%Zs\n\tm=%Zs\n", amax,bmax,m);
   /* we _could_ silently replace x with modii(x,m) instead of the following,
    * but let's leave this up to the caller
    */
   avma = av; s = signe(x);
   if (s < 0 || cmpii(x,m) >= 0)
-    pari_err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Z\n\tm=%Z\n", x,m);
+    pari_err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Zs\n\tm=%Zs\n", x,m);
 
   /* special cases x=0 and/or amax=0 */
   if (s == 0)
@@ -297,8 +297,8 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
      * Recompute vmax...
      */
 #ifdef DEBUG_RATLIFT
-    fprintferr("rl-fs: d,d1=%Z,%Z\n", d, d1);
-    fprintferr("rl-fs: v,v1=%Z,%Z\n", v, v1);
+    fprintferr("rl-fs: d,d1=%Zs,%Zs\n", d, d1);
+    fprintferr("rl-fs: v,v1=%Zs,%Zs\n", v, v1);
 #endif
     r = addii(v,v1);
     lr = lb - lgefint(r);

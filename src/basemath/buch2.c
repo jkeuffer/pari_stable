@@ -335,7 +335,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   GEN Id2, Alg, Ord;
   powFB_t *old = F->pow, *New;
 
-  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Z\n",F->subFB);
+  if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Zs\n",F->subFB);
   F->pow = New = (powFB_t*) gpmalloc(sizeof(powFB_t));
   Id2 = cgetg(n, t_VEC);
   Alg = cgetg(n, t_VEC);
@@ -524,7 +524,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
       fprintferr("########## FACTORBASE ##########\n\n");
       fprintferr("KC2=%ld, KC=%ld, KCZ=%ld, KCZ2=%ld\n",
 		  ip, F->KC, F->KCZ, F->KCZ2);
-      for (i=1; i<=F->KCZ; i++) fprintferr("++ LV[%ld] = %Z",i,F->LV[F->FB[i]]);
+      for (i=1; i<=F->KCZ; i++) fprintferr("++ LV[%ld] = %Zs",i,F->LV[F->FB[i]]);
     }
     msgtimer("factor base");
   }
@@ -1140,9 +1140,9 @@ testprimes(GEN bnf, ulong bound)
   if (!gcmp1(f))
   {
     GEN D = gmael(nf,5,5);
-    if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Z\n",D);
+    if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Zs\n",D);
     p1 = isprincipalall(bnf, D, nf_FORCE);
-    if (DEBUGLEVEL>1) fprintferr("     is %Z\n", p1);
+    if (DEBUGLEVEL>1) fprintferr("     is %Zs\n", p1);
   }
   /* sort factorbase for tablesearch */
   fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
@@ -1160,7 +1160,7 @@ testprimes(GEN bnf, ulong bound)
     for (i=1; i<nbideal; i++)
     {
       GEN P = gel(vP,i);
-      if (DEBUGLEVEL>1) fprintferr("  Testing P = %Z\n",P);
+      if (DEBUGLEVEL>1) fprintferr("  Testing P = %Zs\n",P);
       if (cmpiu(pr_norm(P), bound) >= 0)
       {
 	if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
@@ -1169,7 +1169,7 @@ testprimes(GEN bnf, ulong bound)
       if (p <= pmax && (k = tablesearch(fb, P, &cmp_prime_ideal)))
       { if (DEBUGLEVEL>1) fprintferr("    #%ld in factor base\n",k); }
       else if (DEBUGLEVEL>1)
-	fprintferr("    is %Z\n", isprincipal(bnf,P));
+	fprintferr("    is %Zs\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
 	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase, fact);
     }
@@ -1821,10 +1821,10 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
 
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Z\n",V);
-    fprintferr("vector in new basis = %Z\n",a);
-    fprintferr("list = %Z\n",L);
-    fprintferr("base change =\n%Z\n", invp);
+    fprintferr("adding vector = %Zs\n",V);
+    fprintferr("vector in new basis = %Zs\n",a);
+    fprintferr("list = %Zs\n",L);
+    fprintferr("base change =\n%Zs\n", invp);
   }
   k = 1; while (k<n && (L[k] || !a[k])) k++;
   if (k == n) { avma = av; return 0; }
@@ -1925,7 +1925,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 
     ideal = gel(F->LP,noideal);
     if (DEBUGLEVEL>1)
-      fprintferr("\n*** Ideal no %ld: [%Z, %Z, %Z, %Z]\n",
+      fprintferr("\n*** Ideal no %ld: [%Zs, %Zs, %Zs, %Zs]\n",
 		 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
 #if 1 /* slower but seems to find more relations this way... */
     IDEAL = lllint_ip(prime_to_ideal(nf,ideal), 4);
@@ -2047,7 +2047,7 @@ pseudomin(GEN I, GEN G)
   GEN m, u = lll(gmul(G, I), DEFAULTPREC);
   m = ZM_ZC_mul(I, gel(u,1));
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
-  if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
+  if (DEBUGLEVEL>5) fprintferr("\nm = %Zs\n",m);
   return m;
 }
 
@@ -2087,7 +2087,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
     fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
-    if (L_jid) fprintferr("looking hard for %Z\n",L_jid);
+    if (L_jid) fprintferr("looking hard for %Zs\n",L_jid);
   }
   for (av = avma;;)
   {
@@ -2199,7 +2199,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 	avma = av2; if (k < ru) break;
 	if (++nbtest > 50)
 	{
-	  pari_warn(warner,"be_honest() failure on prime %Z\n", P[j]);
+	  pari_warn(warner,"be_honest() failure on prime %Zs\n", P[j]);
 	  return 0;
 	}
       }
@@ -2298,7 +2298,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   den = Q_denom(lambda);
   if (gcmp(den,D) > 0)
   {
-    if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,
+    if (DEBUGLEVEL) fprintferr("D = %Zs\nden = %Zs\n",D,
 		    lgefint(den) <= DEFAULTPREC? den: itor(den,3));
     return fupb_PRECI;
   }
@@ -2311,7 +2311,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   if (DEBUGLEVEL)
   {
     msgtimer("bestappr/regulator");
-    fprintferr("\n#### Tentative regulator : %Z\n", gprec_w(R,3));
+    fprintferr("\n#### Tentative regulator : %Zs\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
   if (c < 0.55) { avma = av; return fupb_BACH; }
@@ -3063,7 +3063,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
 	      gmul2n(gpowgs(mppi(DEFAULTPREC), R2), R1+R2));
-  if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Z\n",R1,R2, D);
+  if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Zs\n",R1,R2, D);
   av = avma; cache.base = NULL; F.subFB = NULL;
   cbach /= 2;
   init_GRHcheck(GRHcheck, N, R1, LOGD);
@@ -3175,7 +3175,7 @@ PRECPB:
   if (!lambda) { precpb = "bestappr"; goto PRECPB; }
 
   h = dethnf_i(W);
-  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Z\n", h);
+  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Zs\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
   switch (compute_R(lambda, divir(h,z), &L, &R))

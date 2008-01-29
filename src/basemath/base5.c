@@ -1017,12 +1017,12 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     if (DEBUGLEVEL>1)
     {
       msgtimer("absolute basis");
-      fprintferr("original absolute generator: %Z\n", gel(eq,1));
+      fprintferr("original absolute generator: %Zs\n", gel(eq,1));
     }
   }
   red = polredabs0(bas, fl);
   pol = gel(red,1);
-  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
+  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Zs\n",pol);
   if (flag & nf_ABSOLUTE)
   {
     if (flag & nf_ADDZK) pol = mkvec2(pol, gel(red,2));

@@ -437,68 +437,6 @@ printGEN(GEN x, pariout_t *T)
     gen_output(x, T);
 }
 
-/* FIXME: OLD VERSION */
-/* fmt is standard printf format, except %Z is a GEN */
-void
-vpariputs(const char* fmt, va_list args)
-{
-  long nb = 0, bufsize = 1023;
-  const char *f = fmt;
-  char *buf, *str, *s, *t;
-
-  /* replace each %Z (2 chars) by braced address format (8 chars) */
-  s = str = (char*)gpmalloc(strlen(fmt)*4 + 1);
-  while (*f)
-  {
-    if (*f != '%') *s++ = *f++;
-    else
-    {
-      if (f[1] != 'Z') { *s++ = *f++; *s++ = *f++; }
-      else
-      {
-	strcpy(s,"\003%020ld\003"); /* brace with unprobable characters */
-	nb++; s += 8; f += 2; /* skip %Z */
-      }
-    }
-  }
-  *s = 0;
-#ifdef HAS_VSNPRINTF
-  for(;;) /* loop to find a buffer size long enough */
-  {
-    int l;
-    buf = (char*)gpmalloc(bufsize);
-    l = vsnprintf(buf,bufsize,str,args);
-    if (l < 0)
-      l = bufsize<<1;
-    else if (l < bufsize)
-      break;
-    gpfree(buf); bufsize = l + 1;
-  }
-  buf[bufsize-1] = 0; /* just in case */
-#else
-  buf = (char*)gpmalloc(bufsize);
-  (void)vsprintf(buf,str,args); /* pray it does fit */
-#endif
-  t = s = buf;
-  if (nb)
-  {
-    pariout_t T = *(GP_DATA->fmt); /* copy */
-    T.prettyp = f_RAW;
-    for(;;)
-    {
-      if (*t == '\003' && t[21] == '\003')
-      {
-        *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariputs(s); printGEN((GEN)atol(t+1), &T);
-        t += 22; s = t;
-        if (!--nb) break;
-      }
-      else t++;
-    }
-  }
-  pariputs(s); gpfree(buf); gpfree(str);
-}
-
 /* e binary exponent, return exponent in base ten */
 static long
 ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
@@ -630,15 +568,15 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 
   /* x != 0 */
   lx = lg(x);
-  if (width_frac >= 0)
-    beta = width_frac;
-  else
-    beta = ex10( bit_accuracy(lx) - expo(x) );
   if (wanted_dec >= 0)
   { /* reduce precision if possible */
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
+  if (width_frac >= 0)
+    beta = width_frac;
+  else
+    beta = ex10(bit_accuracy(lx) - ex);
 
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
@@ -657,6 +595,8 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
   else
     z = x;
   z = grndtoi(z, &ls); /* round; ls is junk */
+  if (!signe(z))
+    return absrtostr(realzero(ex), sp, FORMAT, wanted_dec, width_frac);
   s = itostr_sign(z, 1, &ls);
 
   if (wanted_dec < 0)
@@ -709,19 +649,32 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
  * was itself adapted from an original version by Patrick Powell.
 */
 
-/* Modifications for format %Z: R.Butel IMB/CNRS 2007/12/03 */
+/* Modifications for format %Zs: R.Butel IMB/CNRS 2007/12/03 */
 
 static THREAD const char *DoprEnd; /* ending of the output buffer */
-static THREAD int SnprfOverflow; /* counts number of overflows out of the output buffer */
+static THREAD char *DoprBuffer; /* start of the output buffer */
 static THREAD char *z_output; /* the current writing place in the output buffer */
+static THREAD size_t DoprSize; /* size of the dopr_outch buffer */
 
 static void
 dopr_outch(int c)
 {
-  if (z_output < DoprEnd)
-    *z_output++ = c;
-  else
-    SnprfOverflow++;
+  if (z_output == DoprEnd)
+  {
+    DoprBuffer = (char*)gprealloc((void*)DoprBuffer, DoprSize << 1);
+    z_output = DoprBuffer + DoprSize;
+    DoprSize <<= 1;
+    DoprEnd = DoprBuffer + DoprSize;
+  }
+  *z_output++ = c;
+}
+
+static void
+dopr_init()
+{
+  DoprSize = 1024;
+  DoprBuffer = z_output = (char*)gpmalloc(DoprSize);
+  DoprEnd = DoprBuffer + DoprSize;
 }
 
 /* print chars 1 by 1 to prevent overflow and count them */
@@ -844,7 +797,7 @@ fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
       }
       gvalue = gfloor( simplify_i(gvalue) );
       if (typ(gvalue) != t_INT)
-        pari_err(talker,"not a t_INT in integer format conversion: %Z", gvalue);
+        pari_err(talker,"not a t_INT in integer format conversion: %Zs", gvalue);
     }
     s = signe(gvalue);
     if (!s) { lbuf = 1; buf = zerotostr(); goto END; }
@@ -1029,7 +982,7 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
     }
     gvalue = gtofp(gvalue, ndec2prec(sigd));
     if (typ(gvalue) != t_REAL)
-      pari_err(talker,"impossible conversion to t_REAL: %Z",gvalue);
+      pari_err(talker,"impossible conversion to t_REAL: %Zs",gvalue);
   }
   buf = absrtostr(gvalue, space, FORMAT, sigd, maxwidth);
   if (signe(gvalue) < 0) signvalue = '-';
@@ -1040,7 +993,7 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
 -- http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf pages 274ff
  * fmt is a standard printf format, except 'Z' is a "length modifier"
  * allowing GEN arguments. Use either the arg_vector or (if NULL) the va_list */
-static void
+static char *
 sm_dopr(pariout_t *T, const char *fmt, GEN arg_vector, va_list args)
 {
   int GENflag = 0, longflag = 0, pointflag = 0;
@@ -1051,7 +1004,7 @@ sm_dopr(pariout_t *T, const char *fmt, GEN arg_vector, va_list args)
   GEN gvalue;
   const char *recall = NULL;
 
-  SnprfOverflow = 0;
+  dopr_init();
   saved_format = fmt;
 
   while ((ch = *fmt++) != '\0') {
@@ -1227,17 +1180,10 @@ nextch:
             if (arg_vector)
               gvalue = v_get_arg(arg_vector, &index);
             else {
-              if (!GENflag)
-              {
-                char work[256], subfmt[256];
-                double dvalue = va_arg(args, double);
-
-                strncpy(subfmt, recall, fmt - recall);
-                subfmt[fmt - recall] = 0;
-                sprintf(work, subfmt, dvalue);
-                break;
-              }
-              gvalue = va_arg(args, GEN);
+              if (GENflag)
+                gvalue = va_arg(args, GEN);
+              else
+                gvalue = dbltor( va_arg(args, double) );
             }
             gvalue = simplify_i(gvalue);
             if (maxwidth < 0)
@@ -1262,15 +1208,7 @@ nextch:
     } /* first switch on ch */
   } /* while loop on ch */
   *z_output = 0;
-}
-
-void
-pariprintf(const char *fmt, ...)
-{
-  va_list args;
-
-  va_start(args,fmt); vpariputs(fmt,args);
-  va_end(args);
+  return DoprBuffer;
 }
 
 /* start printing in "color" c */
@@ -2687,7 +2625,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
           pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pariprintf("{\"%s\",%Z,%Z}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pariprintf("{\"%s\",%Zs,%Zs}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -3070,7 +3008,7 @@ texi(GEN g, pariout_t *T, int addsign)
           pariprintf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pariprintf("\\{\"%s\",%Z,%Z\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pariprintf("\\{\"%s\",%Zs,%Zs\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -3182,7 +3120,7 @@ fprintferr(const char* fmt, ...)
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
-  va_start(args, fmt); vpariputs(fmt,args);
+  va_start(args, fmt); parivprintf(fmt,args);
   va_end(args); pariOut = out;
 }
 
@@ -4101,50 +4039,64 @@ print0(GEN g, long flag)
   for (i = 1; i < l; i++) printGEN(gel(g,i), &T);
 }
 
-/* FIXME: I see no portable way to convert a vector of arguments to a va_list,
- * or to pass a va_list to a function that will traverse it multiple times
- * (va_copy not always available). Hence the ugly #define to avoid code
- * duplication. Second ugliness: no portable way to return a value from a
- * macro (not using gcc extensions), so put result in 'char *s' */
-#define SM_DOPR(fmt, arg_vector) \
-  char *s; \
-  long __bsiz = 1023; \
-  for(s = NULL;;) { /* run at most twice */ \
-    va_list __args; va_start(__args, fmt); \
-    z_output = s = (char*)gprealloc(s, __bsiz + 1); \
-    DoprEnd = s + __bsiz; \
-    sm_dopr(GP_DATA->fmt, fmt, arg_vector, __args); \
-    if (SnprfOverflow == 0) break; \
-    __bsiz += SnprfOverflow; \
-    va_end(__args); }
-
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
 static char *
 dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
-{ SM_DOPR(fmt, arg_vector); return s; }
-
+{
+  va_list ap;
+  char *s;
+  va_start(ap, fmt);
+  s = sm_dopr(GP_DATA->fmt, fmt, arg_vector, ap);
+  va_end(ap); return s;
+}
+/* GP only */
 void
 printf0(GEN gfmt, GEN args)
 { char *s = dopr_arg_vector(args, (const char*)gfmt); 
   pariputs(s); free(s); }
-
+/* GP only */
 GEN
 Strprintf(GEN gfmt, GEN args)
 { char *s = dopr_arg_vector(args, (const char *)gfmt);
   GEN z = strtoGENstr(s); free(s); return z; }
 
+void 
+parivprintf(const char *fmt, va_list ap)
+{
+  char *s = sm_dopr(GP_DATA->fmt, fmt, NULL, ap);
+  pariputs(s); free(s);
+}
 void
-printf1(const char *fmt, ...) /* variadic version of printf0 */
-{ SM_DOPR(fmt, NULL); pariputs(s); free(s); }
+pariprintf(const char *fmt, ...) /* variadic version of printf0 */
+{
+  va_list args; va_start(args,fmt);
+  parivprintf(fmt,args); va_end(args);
+}
 
-GEN
-Strprintf1(const char *fmt, ...) /* variadic version of Strprintf */
-{ GEN z; SM_DOPR(fmt, NULL); z = strtoGENstr(s); free(s); return z; }
+char *
+parivsprintf(const char *fmt, va_list ap)
+{ return sm_dopr(GP_DATA->fmt, fmt, NULL, ap); }
+char *
+parisprintf(const char *fmt, ...) /* variadic version of Strprintf */
+{
+  char *s;
+  va_list ap; va_start(ap, fmt);
+  s = parivsprintf(fmt, ap); va_end(ap); return s;
+}
 
 /* variadic version of fprintf0. FIXME: fprintf0 not yet available */
 void
-fprintf1(FILE *file, const char *fmt, ...)
-{ SM_DOPR(fmt, NULL); fputs(s, file); free(s); }
+parivfprintf(FILE *file, const char *fmt, va_list ap)
+{
+  char *s = sm_dopr(GP_DATA->fmt, fmt, NULL, ap);
+  fputs(s, file); free(s);
+}
+void
+parifprintf(FILE *file, const char *fmt, ...)
+{
+  va_list ap; va_start(ap, fmt);
+  parivfprintf(file, fmt, ap); va_end(ap);
+}
 
 #define PR_NL() {pariputc('\n'); pariflush(); }
 #define PR_NO() pariflush()

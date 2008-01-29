@@ -526,7 +526,7 @@ sd_graphcolormap(const char *v, long flag)
 	gel(cols, i) = vecsmall_to_vec(c);
     }
     if (flag == d_RETURN) return cols;
-    pariprintf("   graphcolormap = %Z\n", cols);
+    pariprintf("   graphcolormap = %Zs\n", cols);
   }
   return gnil;
 }
@@ -564,7 +564,7 @@ sd_graphcolors(const char *v, long flag)
   case d_RETURN:
     return vecsmall_to_vec(pari_graphcolors);
   case d_ACKNOWLEDGE:
-    pariprintf("   graphcolors = %Z\n", vecsmall_to_vec(pari_graphcolors));
+    pariprintf("   graphcolors = %Zs\n", vecsmall_to_vec(pari_graphcolors));
   }
   return gnil;
 }

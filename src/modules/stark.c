@@ -589,7 +589,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	    gel(p2,3) = InitQuotient(D);
 	    gel(p2,4) = InitQuotient(ImC);
 	    if (DEBUGLEVEL>1)
-	      fprintferr("\nTrying modulus = %Z and subgroup = %Z\n",
+	      fprintferr("\nTrying modulus = %Zs and subgroup = %Zs\n",
 			 gmael(bnrm, 2, 1), D);
 	    cpl = CplxModulus(p2, &pr, prec);
 	    if (oldcpl < 0 || cpl < oldcpl)
@@ -616,7 +616,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   }
 END:
   if (DEBUGLEVEL>1)
-    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",
+    fprintferr("No, we're done!\nModulus = %Zs and subgroup = %Zs\n",
 	       gmael3(rep, 1, 2, 1), gel(rep,2));
   gel(rep,5) = InitChar(gel(rep,1), gel(rep,5), *newprec);
   return gerepilecopy(av, rep);
@@ -1329,7 +1329,7 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
   diff = ch_diff(dtcr); lg = lg(diff) - 1;
   if (!lg) return;
 
-  if (DEBUGLEVEL>2) fprintferr("diff(CHI) = %Z", diff);
+  if (DEBUGLEVEL>2) fprintferr("diff(CHI) = %Zs", diff);
   bnrc =  ch_bnr(dtcr);
   init_CHI_alg(&C, ch_CHI0(dtcr));
 
@@ -1902,7 +1902,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     long cf = md + (j%2? j/2: -j/2);
     GEN t, bound = shifti(binomial(utoipos(cl), cf), cl-cf);
 
-    if (DEBUGLEVEL>1) fprintferr("RecCoeff (cf = %ld, B = %Z)\n", cf, bound);
+    if (DEBUGLEVEL>1) fprintferr("RecCoeff (cf = %ld, B = %Zs)\n", cf, bound);
     d.beta = real_i( gel(pol,cf+2) );
     d.B    = bound;
     if (! (t = RecCoeff2(nf, &d, prec)) ) return NULL;
@@ -2439,7 +2439,7 @@ LABDOUB:
     }
     gel(veczeta,i) = gdivgs(z, den);
   }
-  if (DEBUGLEVEL>1) fprintferr("zetavalues = %Z\n", veczeta);
+  if (DEBUGLEVEL>1) fprintferr("zetavalues = %Zs\n", veczeta);
 
   if (DEBUGLEVEL>1 && !flag)
     fprintferr("Checking the square-root of the Stark unit...\n");
@@ -2449,7 +2449,7 @@ LABDOUB:
   polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
   if (DEBUGLEVEL)
   {
-    if (DEBUGLEVEL>1) fprintferr("polrelnum = %Z\n", polrelnum);
+    if (DEBUGLEVEL>1) fprintferr("polrelnum = %Zs\n", polrelnum);
     msgtimer("Compute %s", (flag)? "quickpol": "polrelnum");
   }
 
@@ -2468,7 +2468,7 @@ LABDOUB:
     polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
     if (DEBUGLEVEL)
     {
-      if (DEBUGLEVEL>1) fprintferr("polrelnum = %Z\n", polrelnum);
+      if (DEBUGLEVEL>1) fprintferr("polrelnum = %Zs\n", polrelnum);
       msgtimer("Compute polrelnum");
     }
     /* try to recognize this polynomial */
@@ -2498,7 +2498,7 @@ LABDOUB:
     goto LABDOUB;
   }
 
-  if (DEBUGLEVEL>1) fprintferr("polrel = %Z\n", polrel);
+  if (DEBUGLEVEL>1) fprintferr("polrel = %Zs\n", polrel);
   if (DEBUGLEVEL) msgtimer("Recpolnum");
 
   return gerepilecopy(av, polrel);
