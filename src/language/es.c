@@ -428,15 +428,6 @@ pariflush(void) { pariOut->flush(); }
 void
 flusherr(void) { pariErr->flush(); }
 
-static void
-printGEN(GEN x, pariout_t *T)
-{
-  if (typ(x)==t_STR)
-    pariputs(GSTR(x)); /* text surrounded by "" otherwise */
-  else
-    gen_output(x, T);
-}
-
 /* e binary exponent, return exponent in base ten */
 static long
 ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
@@ -3858,6 +3849,15 @@ readbin(const char *name, FILE *f, int *vector)
 /**                             GP I/O                            **/
 /**                                                               **/
 /*******************************************************************/
+static void
+printGEN(GEN x, pariout_t *T)
+{
+  if (typ(x)==t_STR)
+    pariputs(GSTR(x)); /* text surrounded by "" otherwise */
+  else
+    gen_output(x, T);
+}
+
 /* print a vector of GENs */
 void
 print0(GEN g, long flag)
@@ -3952,19 +3952,19 @@ wr_check(const char *s) {
 static int wr_last_was_newline;
 
 /* Start writing to file s */
-static void wr_init(const char *s)
+static void
+wr_init(const char *s)
 {
-  char *t=wr_check(s);
-  switchout(t);
-  gpfree(t);
+  char *t = wr_check(s);
+  switchout(t); gpfree(t);
   wr_last_was_newline = pari_last_was_newline();
 }
 
 /* End writing to file s, go back to stdout */
-static void wr_finish()
+static void
+wr_finish()
 {
-  pariflush();
-  switchout(NULL);
+  pariflush(); switchout(NULL);
   pari_set_last_newline(wr_last_was_newline);
 }
 
