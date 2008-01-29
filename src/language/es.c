@@ -1599,6 +1599,12 @@ GENtoTeXstr(GEN x) {
   return GENtostr0(x, &T);
 }
 
+static char *
+GENtostr1(GEN x, pariout_t *T)
+{
+  return (typ(x) == t_STR)? pari_strdup(GSTR(x)): GENtostr0(x, T);
+}
+
 /* see print0(). Returns gpmalloc()ed string */
 char *
 pGENtostr(GEN g, long flag) {
@@ -1610,13 +1616,13 @@ pGENtostr(GEN g, long flag) {
 
   T.prettyp = flag;
   /* frequent special case */
-  if (l == 2) return GENtostr0(gel(g,1), &T);
+  if (l == 2) return GENtostr1(gel(g,1), &T);
 
   Ls = cgetg(l, t_VEC);
   Ll = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++)
   {
-    char *s = GENtostr0(gel(g,i), &T);
+    char *s = GENtostr1(gel(g,i), &T);
     gel(Ls,i) = (GEN)s;
     Ll[i] = strlen(s);
     tlen += Ll[i];
