@@ -2674,7 +2674,7 @@ matbruti(GEN g, pariout_t *T)
 
   if (typ(g) != t_MAT) { bruti(g,T,1); return; }
 
-  r=lg(g); if (r==1 || lg(g[1])==1) { pariputs("[;]\n"); return; }
+  r=lg(g); if (r==1 || lg(g[1])==1) { pariputs("[;]"); return; }
   l = lg(g[1]); pariputc('\n');
   print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
   for (i=1; i<l; i++)
