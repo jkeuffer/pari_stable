@@ -1505,7 +1505,7 @@ typedef struct outString {
   char *string;
   ulong len,size;
 } outString;
-static outString *OutStr, *ErrStr = NULL; /* %%%%%% THREAD ? */
+static outString *OutStr; /* %%%%%% THREAD ? */
 
 #define STEPSIZE 1024
 #define check_output_length(str,l) { \
@@ -1522,8 +1522,6 @@ static outString *OutStr, *ErrStr = NULL; /* %%%%%% THREAD ? */
 }
 static void
 outstr_putc(char c) { str_putc(OutStr, c); }
-static void
-errstr_putc(char c) { str_putc(ErrStr, c); }
 
 #define str_puts(str, s) {\
   const long len=strlen(s); \
@@ -1533,13 +1531,10 @@ errstr_putc(char c) { str_putc(ErrStr, c); }
 }
 static void
 outstr_puts(const char *s) { str_puts(OutStr, s); }
-static void
-errstr_puts(const char *s) { str_puts(ErrStr, s); }
 
 static void
 outstr_flush(void) { /* empty */ }
 PariOUT pariOut2Str = {outstr_putc, outstr_puts, outstr_flush, NULL};
-PariOUT pariErr2Str = {errstr_putc, errstr_puts, outstr_flush, NULL};
 #undef STEPSIZE
 
 char *
@@ -1738,14 +1733,16 @@ wr_int(GEN x, int addsign)
   pariputs( itostr_sign(x, addsign?sx:1, &l) ); avma = av;
 }
 
+#define myprintf(fmt, arg) {char _s[128]; sprintf(_s,fmt,arg); pariputs(_s);}
+
 static void
 wr_vecsmall(pariout_t *T, GEN g)
 {
-  long i,l;
+  long i, l;
   pariputs("Vecsmall(["); l = lg(g);
   for (i=1; i<l; i++)
   {
-    pariprintf("%ld", g[i]);
+    myprintf("%ld", g[i]);
     if (i<l-1) comma_sp(T);
   }
   pariputs("])");
@@ -1835,11 +1832,11 @@ dbg(GEN x, long nb, long bl)
   if (!x) { pariputs("NULL\n"); return; }
   tx = typ(x);
   if (tx == t_INT && x == gen_0) { pariputs("gen_0\n"); return; }
-  pariprintf(VOIR_STRING1,(ulong)x);
+  myprintf(VOIR_STRING1,(ulong)x);
 
   lx = lg(x);
   pariprintf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
-  pariprintf(VOIR_STRING2,x[0]);
+  myprintf(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
@@ -1852,7 +1849,7 @@ dbg(GEN x, long nb, long bl)
     else if (tx == t_REAL)
       pariprintf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb < 0) nb = lx;
-    for (i=1; i < nb; i++) pariprintf(VOIR_STRING2,x[i]);
+    for (i=1; i < nb; i++) myprintf(VOIR_STRING2,x[i]);
     pariputc('\n'); return;
   }
 
@@ -2291,15 +2288,15 @@ texexpo(long e)
 {
   if (e != 1) {
     if (e >= 0 && e < 10)
-      pariprintf("^%ld",e);
+    { myprintf("^%ld",e); }
     else
-      pariprintf("^{%ld}",e);
+      myprintf("^{%ld}",e);
   }
 }
 static void
 wrexpo(long e)
 {
-  if (e != 1) pariprintf("^%ld",e);
+  if (e != 1) myprintf("^%ld",e);
 }
 
 /* v^e */
@@ -2436,13 +2433,13 @@ static void
 prints(GEN g, pariout_t *T, int addsign)
 {
   (void)T; (void)addsign;
-  pariprintf("%ld", (long)g);
+  myprintf("%ld", (long)g);
 }
 static void
 sors(GEN g, pariout_t *T)
 {
   (void)T;
-  pariprintf("%ld", (long)g);
+  myprintf("%ld", (long)g);
 }
 
 static void
@@ -2635,7 +2632,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       l = lg(g[1]);
       if (l==1)
       {
-	pariprintf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
+	myprintf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
 	return;
       }
       print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
@@ -2658,7 +2655,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       break;
     }
 
-    default: pariprintf(VOIR_STRING2,*g);
+    default: myprintf(VOIR_STRING2,*g);
   }
 }
 
@@ -2837,7 +2834,7 @@ sori(GEN g, pariout_t *T)
       }
       break;
     }
-    default: pariprintf(VOIR_STRING2,*g);
+    default: myprintf(VOIR_STRING2,*g);
   }
   if (close_paren) pariputc(')');
 }
@@ -2977,7 +2974,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	pariprintf("%ld", g[i]);
+	myprintf("%ld", g[i]);
 	if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
