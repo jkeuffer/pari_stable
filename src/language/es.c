@@ -1509,7 +1509,6 @@ static outString *OutStr; /* %%%%%% THREAD ? */
 
 static void bruti(GEN g, pariout_t *T, outString *S, int addsign);
 static void matbruti(GEN g, pariout_t *T, outString *S);
-static void sori(GEN g, pariout_t *T, outString *S);
 static void texi(GEN g, pariout_t *T, outString *S, int addsign);
 
 static void
@@ -1578,9 +1577,9 @@ GENtostr0(GEN x, pariout_t *T)
   str_init(&S);
   switch(T->prettyp)
   {
-    case f_PRETTYMAT: matbruti(x, T, &S); break;
     case f_PRETTY:
-    case f_PRETTYOLD: sori(x, T, &S); break;
+    case f_PRETTYOLD:
+    case f_PRETTYMAT: matbruti(x, T, &S); break;
     case f_RAW      : bruti(x, T, &S, 1); break;
     case f_TEX      : texi(x, T, &S, 1); break;
   }
@@ -1718,18 +1717,6 @@ str_absint(outString *S, GEN x)
   pari_sp av = avma;
   long l;
   str_puts(S, itostr_sign(x, 1, &l)); avma = av;
-}
-
-/* write t_INT x to S */
-static void
-str_int(outString *S, GEN x, int addsign)
-{
-  long sx = signe(x);
-  if (!sx) str_putc(S, '0');
-  else {
-    if (addsign && sx < 0) str_putc(S, '-');
-    str_absint(S, x);
-  }
 }
 
 #define str_printf1(S, fmt, arg) {\
@@ -2420,19 +2407,6 @@ wr_texnome(pariout_t *T, outString *S, GEN a, const char *v, long d)
     times_texnome(S, v, d);
   }
 }
-static void
-sor_monome(pariout_t *T, outString *S, GEN a, const char *v, long d)
-{
-  long sig = isone(a);
-  if (sig) {
-    putsigne(S,sig); monome(S,v,d);
-  } else {
-    sig = isfactor(a);
-    if (sig) { putsigne(S,sig); if (sig < 0) a = gneg(a); }
-    else str_puts(S, " + ");
-    sori(a,T,S); if (d) { str_putc(S, ' '); monome(S,v,d);}
-  }
-}
 
 static void
 wr_lead_monome(pariout_t *T, outString *S, GEN a,const char *v, long d, int addsign)
@@ -2460,29 +2434,11 @@ wr_lead_texnome(pariout_t *T, outString *S, GEN a,const char *v, long d, int add
     times_texnome(S, v, d);
   }
 }
-static void
-sor_lead_monome(pariout_t *T, outString *S, GEN a, const char *v, long d)
-{
-  long sig = isone(a);
-  if (sig) {
-    if (sig < 0) str_putc(S, '-');
-    monome(S,v,d);
-  } else {
-    sori(a,T,S);
-    if (d) { str_putc(S, ' '); monome(S,v,d); }
-  }
-}
 
 static void
 prints(GEN g, pariout_t *T, outString *S, int addsign)
 {
   (void)T; (void)addsign;
-  str_long(S, (long)g);
-}
-static void
-sors(GEN g, pariout_t *T, outString *S)
-{
-  (void)T;
   str_long(S, (long)g);
 }
 
@@ -2739,158 +2695,6 @@ matbruti(GEN g, pariout_t *T, outString *S)
   }
 }
 
-static void
-sori(GEN g, pariout_t *T, outString *S)
-{
-  long tg=typ(g), i,j,r,l,close_paren;
-  GEN a,b;
-  const char *v;
-  char buf[32];
-
-  switch (tg)
-  {
-    case t_INT:
-      str_int(S,g,1); return;
-    case t_REAL: case t_STR: case t_CLOSURE:
-      bruti_intern(g, T, S, 1); return;
-    case t_FFELT:
-      sori(FF_to_FpXQ_i(g),T, S); return;
-    case t_LIST:
-      str_puts(S, "List([");
-      g = list_data(g);
-      l = g? lg(g): 1;
-      for (i=1; i<l; i++)
-      {
-	sori(gel(g,i), T, S); if (i < l-1) str_puts(S, ", ");
-      }
-      str_puts(S, "])\n"); return;
-  }
-  if (is_graphicvec_t(tg)) close_paren = 0;
-  else
-  {
-    if (tg == t_FRAC && signe(g[1]) < 0) str_putc(S, '-');
-    str_putc(S, '('); close_paren = 1;
-  }
-  switch(tg)
-  {
-    case t_INTMOD: case t_POLMOD:
-      a = gel(g,2); b = gel(g,1);
-      if (tg == t_INTMOD && signe(a) < 0) a = addii(a,b);
-      sori(a,T, S); str_puts(S, " mod "); sori(b,T, S); break;
-
-    case t_FRAC:
-      a=gel(g,1); str_int(S,a,0); str_puts(S, " /");
-      b=gel(g,2); str_int(S,b,0); break;
-
-    case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
-      a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
-      if (isnull(a)) { sor_lead_monome(T,S,b,v,1); break; }
-      sori(a,T, S); if (!isnull(b)) sor_monome(T,S,b,v,1);
-      break;
-
-    case t_PADIC:
-    {
-      GEN p = gel(g,2);
-      char *ev;
-      i = valp(g); l = precp(g)+i;
-      g = gel(g,4); ev = GENtostr(p);
-      for (; i<l; i++)
-      {
-	g = dvmdii(g,p,&a);
-	if (signe(a))
-	{
-	  if (!i || !is_pm1(a))
-	  {
-	    str_int(S,a,1); str_putc(S, i? '*': ' ');
-	  }
-	  if (i) { VpowE(S, ev,i); str_putc(S, ' '); }
-	  str_puts(S, "+ ");
-	}
-      }
-      str_puts(S, "O(");
-      if (!i) str_puts(S, " 1)"); else VpowE(S, ev,i);
-      str_putc(S, ')'); gpfree(ev); break;
-    }
-
-    case t_POL:
-      if (!signe(g)) { str_putc(S, '0'); break; }
-      v = get_var(varn(g),buf);
-      i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
-      sor_lead_monome(T,S,gel(g,i),v,i);
-      while (i--)
-      {
-	a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,S,a,v,i);
-      }
-      break;
-
-    case t_SER: v = get_var(varn(g),buf);
-      i = valp(g);
-      if (lgpol(g))
-      { /* hack: we want g[i] = coeff of degree i. */
-	l = i + lgpol(g); g -= i-2;
-	sor_lead_monome(T,S,gel(g,i),v,i);
-	while (++i < l)
-	{
-	  a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,S,a,v,i);
-	}
-	str_puts(S, " + ");
-      }
-      str_puts(S, "O(");
-      if (!i) str_puts(S, " 1)"); else monome(S,v,i);
-      str_putc(S, ')'); break;
-
-    case t_RFRAC:
-      sori(gel(g,1),T, S); str_puts(S, " / "); sori(gel(g,2),T, S);
-      break;
-
-    case t_QFR: case t_QFI: str_putc(S, '{');
-      sori(gel(g,1),T, S); str_puts(S, ", ");
-      sori(gel(g,2),T, S); str_puts(S, ", ");
-      sori(gel(g,3),T, S);
-      if (tg == t_QFR) { str_puts(S, ", "); sori(gel(g,4),T, S); }
-      str_puts(S, "}\n"); break;
-
-    case t_VEC: str_putc(S, '[');
-      for (i=1; i<lg(g); i++)
-      {
-	sori(gel(g,i),T, S); if (i<lg(g)-1) str_puts(S, ", ");
-      }
-      str_putc(S, ']'); break;
-    case t_VECSMALL: wr_vecsmall(T,S,g); break;
-
-    case t_COL:
-      if (lg(g)==1) { str_puts(S, "[]\n"); return; }
-      str_putc(S, '\n');
-      for (i=1; i<lg(g); i++)
-      {
-	str_putc(S, '['); sori(gel(g,i),T,S); str_puts(S, "]\n");
-      }
-      break;
-
-    case t_MAT:
-    {
-      void (*print)(GEN, pariout_t *, outString *);
-      long lx = lg(g);
-
-      if (lx==1 || lg(g[1]) == 1) { str_puts(S, "[;]\n"); return; }
-      l = lg(g[1]); str_putc(S, '\n');
-      print = (typ(g[1]) == t_VECSMALL)? sors: sori;
-      for (i=1; i<l; i++)
-      {
-	str_putc(S, '[');
-	for (j=1; j<lx; j++)
-	{
-	  print(gcoeff(g,i,j),T,S); if (j<lx-1) str_putc(S, ' ');
-	}
-	str_puts(S, "]\n"); if (i<l-1) str_putc(S, '\n');
-      }
-      break;
-    }
-    default: str_printf1(S,VOIR_STRING2,*g);
-  }
-  if (close_paren) str_putc(S, ')');
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                           TeX OUTPUT                           **/
@@ -3101,13 +2905,6 @@ void
 matbrute(GEN g, char f, long d)
 {
   pariout_t T; _initout(&T,f,d,1,f_PRETTYMAT);
-  gen_output(g, &T);
-}
-
-void
-sor(GEN g, char f, long d)
-{
-  pariout_t T; _initout(&T,f,d,1,f_PRETTYOLD);
   gen_output(g, &T);
 }
 

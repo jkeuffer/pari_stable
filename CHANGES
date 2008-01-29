@@ -60,6 +60,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        defaulted to 0 [no effect]). Use printf !
    15- %Z is no longer a valid conversion specification for PARI formats,
        since Z is now handled as a length modifier. Use %Zs instead.
+   16- remove the (ugly) prettyprint engine ('output' = 2), render as matbrute.
 
   Added
     1- library function gpcalloc
