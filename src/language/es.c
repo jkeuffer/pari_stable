@@ -402,18 +402,16 @@ initout(int initerr)
 
 static int last_was_newline = 0;
 
+static void
+set_last_newline(char c) { last_was_newline = (c == '\n'); }
+
 void
-pariputc(char c) {
-  last_was_newline = (c == '\n');
-  pariOut->putch(c);
-}
+pariputc(char c) { set_last_newline(c); pariOut->putch(c); }
 
 void
 pariputs(const char *s) {
-  if (*s) {
-    last_was_newline = s[strlen(s)-1] == '\n';
-    pariOut->puts(s);
-  } else
+  if (*s) {  set_last_newline(s[strlen(s)-1]); pariOut->puts(s); }
+  else
     last_was_newline = 0;
 }
 
@@ -1257,7 +1255,6 @@ term_get_color(long n)
 /**                  PRINTING BASED ON SCREEN WIDTH                **/
 /**                                                                **/
 /********************************************************************/
-static int col_index, lin_index, max_width, max_lin;
 #undef larg /* problems with SCO Unix headers (ioctl_arg) */
 #ifdef HAS_TIOCGWINSZ
 #  include <sys/termios.h>
@@ -1329,71 +1326,52 @@ term_height(void)
   return (n>1)? n: DFT_TERM_HEIGHT;
 }
 
-#define MAX_WIDTH 76
+static int col_index;
+
 /* output string wrapped after MAX_WIDTH characters (for gp -test) */
 static void
 putc80(char c)
 {
+  const int MAX_WIDTH = 76;
   if (c == '\n') col_index = 0;
   else if (col_index == MAX_WIDTH) { normalOutC('\n'); col_index = 1; }
   else col_index++;
   normalOutC(c);
 }
-#undef MAX_WIDTH
 static void
-puts80(const char *s)
-{
-  while (*s) putc80(*s++);
-}
+puts80(const char *s) { while (*s) putc80(*s++); }
+
 PariOUT pariOut80= {putc80, puts80, normalOutF, NULL};
 
 void
-init80col(long n) { col_index = n; pariOut = &pariOut80; }
+init80col() { col_index = 0; pariOut = &pariOut80; }
 
-/* output stopped after max_line have been printed (for default(lines,)) */
-static void
-putc_lim_lines(char c)
-{
-  if (lin_index > max_lin) return;
-  if (lin_index == max_lin)
-    if (c == '\n' || col_index >= max_width-5)
-    {
-      normalOutS(term_get_color(c_ERR));
-      normalOutS("[+++]"); lin_index++; return;
-    }
-  if (c == '\n')
-  {
-    col_index = -1; lin_index++;
-  }
-  else if (col_index == max_width)
-  {
-    col_index =  0; lin_index++;
-  }
-  col_index++; normalOutC(c);
-}
-static void
-puts_lim_lines(const char *s)
-{
-  long i,len;
-  if (lin_index > max_lin) return;
-  len = strlen(s);
-  for(i=0; i<len; i++) putc_lim_lines(s[i]);
-}
-
-PariOUT pariOut_lim_lines= {putc_lim_lines, puts_lim_lines, normalOutF, NULL};
-
-/* n = length of prefix already printed (print up to max lines) */
+/* output stopped after max_line have been printed, for default(lines,).
+ * n = length of prefix already printed (print up to max_lin lines) */
 void
-lim_lines_output(GEN z, pariout_t *fmt, long n, long max)
+lim_lines_output(char *s, long n, long max_lin)
 {
-  PariOUT *tmp = pariOut;
-  max_width = term_width();
-  max_lin = max;
-  lin_index = 1;
-  col_index = n;
-  pariOut = &pariOut_lim_lines;
-  gen_output(z, fmt);
-  pariOut = tmp;
+  long lin, col, width;
+  char c;
+  if (!*s) return;
+  width = term_width();
+  lin = 1;
+  col = n;
+
+  if (lin > max_lin) return;
+  while ( (c = *s++) )
+  {
+    if (lin >= max_lin)
+      if (c == '\n' || col >= width-5)
+      {
+        normalOutS(term_get_color(c_ERR));
+        normalOutS("[+++]"); return;
+      }
+    if (c == '\n')         { col = -1; lin++; }
+    else if (col == width) { col =  0; lin++; }
+    last_was_newline = (c == '\n');
+    col++; normalOutC(c);
+  }
 }
 
 #define is_blank_or_null(c) (!(c) || is_blank(c))

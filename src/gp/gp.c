@@ -1747,7 +1747,7 @@ read_opt(growarray A, long argc, char **argv)
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  if (GP_DATA->flags & TEST) init80col(0);
+  if (GP_DATA->flags & TEST) init80col();
   if (initrc)
   {
     gp_initrc(A, argv[0]);
@@ -1896,16 +1896,19 @@ tex2mail_output(GEN z, long n)
   /* history number */
   if (n)
   {
-    char s[128], c_hist[16], c_out[16];
-
+    char c_hist[16], c_out[16];
     strcpy(c_hist, term_get_color(c_HIST));
     strcpy(c_out , term_get_color(c_OUTPUT));
-    if (*c_hist || *c_out)
-      sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
-	      c_hist, n, c_out);
-    else
-      sprintf(s, "\\%%%ld = ", n);
-    pariputs_opt(s);
+    if (!(GP_DATA->flags & QUIET))
+    {
+      char s[128];
+      if (*c_hist || *c_out)
+        sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
+                c_hist, n, c_out);
+      else
+        sprintf(s, "\\%%%ld = ", n);
+      pariputs(s);
+    }
     if (o_logfile) {
       switch (logstyle) {
       case logstyle_plain:
@@ -1927,7 +1930,6 @@ tex2mail_output(GEN z, long n)
   prettyp_wait();
   if (o_logfile) {
     pari_outfile = o_logfile;
-    /* XXXX Maybe it is better to output in another format? */
     if (logstyle == logstyle_TeX) {
       T.TeXstyle |= TEXSTYLE_BREAK;
       gen_output(z, &T);
@@ -1958,21 +1960,27 @@ static void
 normal_output(GEN z, long n)
 {
   long l = 0;
+  char *s;
   /* history number */
   if (n)
   {
-    char s[64];
-    term_color(c_HIST);
-    sprintf(s, "%%%ld = ", n);
-    pariputs_opt(s);
-    l = strlen(s);
+    char buf[64];
+    if (!(GP_DATA->flags & QUIET))
+    {
+      term_color(c_HIST);
+      sprintf(buf, "%%%ld = ", n);
+      pariputs(buf);
+      l = strlen(buf);
+    }
   }
   /* output */
   term_color(c_OUTPUT);
+  s = GENtostr0(z, GP_DATA->fmt);
   if (GP_DATA->lim_lines)
-    lim_lines_output(z, GP_DATA->fmt, l, GP_DATA->lim_lines);
+    lim_lines_output(s, l, GP_DATA->lim_lines);
   else
-    gen_output(z, GP_DATA->fmt);
+    pariputs(s);
+  free(s);
   term_color(c_NONE); pariputc('\n');
 }
 
@@ -1980,7 +1988,7 @@ void
 gp_output(GEN z, gp_data *G)
 {
   if (G->flags & TEST) {
-    init80col(0);
+    init80col();
     gen_output(z, G->fmt); pariputc('\n');
   }
   else if (G->flags & TEXMACS)
