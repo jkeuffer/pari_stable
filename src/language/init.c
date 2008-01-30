@@ -1109,8 +1109,11 @@ pari_err(long numerr, ...)
   if (numerr==errpile)
   {
     size_t d = top - bot;
-    fprintferr("\n  current stack size: %lu (%.3f Mbytes)\n", d, d/1048576.);
-    fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
+    char buf[256];
+    /* don't use pariprintf: it needs the PARI stack for %.3f conversion */
+    sprintf(buf, "\n  current stack size: %lu (%.3f Mbytes)\n", (ulong)d, d/1048576.);
+    pariErr->puts(buf);
+    pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
   gp_function_name=NULL;
