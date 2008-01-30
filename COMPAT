@@ -56,6 +56,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     defaulted to 0 [no effect]). Use printf !
   - removed the fieldw "minimum field width" field from the undocumented
     pariout_t struct
+  - remove obsolete "prettyprint" support: printp / printp1 now act as
+    print/print1
 
 * Specific to the PARI library:
 ===============================
