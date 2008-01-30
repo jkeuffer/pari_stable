@@ -195,9 +195,6 @@ Misc:
 5  write an analog of the 'echo' default which would print code as it is
    _executed_, not as it is read
 
-5  add a printf command: simple interface to pariputsf allowing only %Z
-   conversion characters  (see related entry in LIBRARY DESIGN section)
-
 5  remove limitation to 8 arguments for static functions (argvec[9])
    [ how to do this ??? ]
 
