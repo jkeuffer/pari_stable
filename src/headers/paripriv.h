@@ -724,7 +724,6 @@ GEN     weipell0(GEN e, long prec, long PREC);
 
 /* es.c */
 
-GEN     Str0(GEN g, long flag);
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
 pariFILE * pari_fopengz(char *s);
