@@ -35,7 +35,7 @@
           |                "        "                              x     |
           |                 "_     "                                x    |
 -0.999555 |...................x__x".................................."x__x
-          -5                                                             5
+          -5.000000                                                5.000000
 ? plotpoints(0,225,334)
 ? plotpoints(0,vector(10,k,10*k),vector(10,k,5*k*k))
 ? psdraw([0,20,20])
@@ -63,5 +63,5 @@
 ? getheap
 [9, 137]
 ? print("Total time spent: ",gettime);
-Total time spent: 10
+Total time spent: 12
 ? \q
