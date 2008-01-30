@@ -1577,13 +1577,13 @@ char *
 pGENtostr(GEN g, long flag) { return pGENtostr_fun(g, get_fun(flag)); }
 
 static GEN
-Str0(GEN g, OUT_FUN out) {
+Str_fun(GEN g, OUT_FUN out) {
   char *t = pGENtostr_fun(g, out);
   GEN z = strtoGENstr(t);
   pari_free(t); return z;
 }
-GEN Str(GEN g)    { return Str0(g, &bruti); }
-GEN Strtex(GEN g) { return Str0(g, &texi); }
+GEN Str(GEN g)    { return Str_fun(g, &bruti); }
+GEN Strtex(GEN g) { return Str_fun(g, &texi); }
 GEN
 Strexpand(GEN g) {
   char *s = pGENtostr_fun(g, &bruti), *t = expand_tilde(s);
