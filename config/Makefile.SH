@@ -408,6 +408,14 @@ install-doc::
 	-\$(INSTALL_DATA) $doc/refcard.dvi  \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/refcard.ps   \$(DOCDIR)
 
+install-docpdf::
+	-mkdir -p \$(BINDIR) \$(DOCDIR)
+	-cd $doc; \$(MAKE) docpdf
+	-\$(INSTALL_DATA) $doc/libpari.pdf  \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/users.pdf    \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/tutorial.pdf \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/refcard.pdf  \$(DOCDIR)
+
 install-examples:
 	-mkdir -p \$(EXDIR)
 	-\$(INSTALL_DATA) $ex/EXPLAIN     \$(EXDIR)
