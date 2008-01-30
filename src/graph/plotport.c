@@ -168,20 +168,20 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
     if (0<=jnew && jnew<=JSCR) scr[i][jnew] = PICT(j);
     jpre = jnew;
   }
-  pariputc('\n');
-  pariprintf("%s ", dsprintf9(ybig, buf));
-  for (i=1; i<=ISCR; i++) pariputc(scr[i][JSCR]);
-  pariputc('\n');
+  pari_putc('\n');
+  pari_printf("%s ", dsprintf9(ybig, buf));
+  for (i=1; i<=ISCR; i++) pari_putc(scr[i][JSCR]);
+  pari_putc('\n');
   for (j=(JSCR-1); j>=2; j--)
   {
-    pariputs("          ");
-    for (i=1; i<=ISCR; i++) pariputc(scr[i][j]);
-    pariputc('\n');
+    pari_puts("          ");
+    for (i=1; i<=ISCR; i++) pari_putc(scr[i][j]);
+    pari_putc('\n');
   }
-  pariprintf("%s ", dsprintf9(ysml, buf));
-  for (i=1; i<=ISCR; i++)  pariputc(scr[i][1]);
-  pariputc('\n');
-  pariprintf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
+  pari_printf("%s ", dsprintf9(ysml, buf));
+  for (i=1; i<=ISCR; i++)  pari_putc(scr[i][1]);
+  pari_putc('\n');
+  pari_printf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
   pop_lex();
 }
 
@@ -195,10 +195,10 @@ init_graph(void)
 {
   long n;
 
-  rectgraph = (PariRect**) gpmalloc(sizeof(PariRect*)*NUMRECT);
+  rectgraph = (PariRect**) pari_malloc(sizeof(PariRect*)*NUMRECT);
   for (n=0; n<NUMRECT; n++)
   {
-    PariRect *e = (PariRect*) gpmalloc(sizeof(PariRect));
+    PariRect *e = (PariRect*) pari_malloc(sizeof(PariRect));
 
     e->head = e->tail = NULL;
     e->sizex = e->sizey = 0;
@@ -219,9 +219,9 @@ free_graph(void)
     PariRect *e=rectgraph[i];
 
     if (RHead(e)) killrect(i);
-    gpfree((void *)e);
+    pari_free((void *)e);
   }
-  gpfree((void *)rectgraph);
+  pari_free((void *)rectgraph);
   if (rgb_colors)
   {
     free((void*)rgb_colors->table);
@@ -290,7 +290,7 @@ initrect(long ne, long x, long y)
   if (x<=1 || y<=1) pari_err(talker,"incorrect dimensions in initrect");
   e = check_rect(ne); if (RHead(e)) killrect(ne);
 
-  z = (RectObj*) gpmalloc(sizeof(RectObj));
+  z = (RectObj*) pari_malloc(sizeof(RectObj));
   RoType(z) = ROt_NULL;
   Rchain(e, z);
   RXsize(e) = x; RXcursor(e) = 0;
@@ -331,7 +331,7 @@ static void
 rectmove0(long ne, double x, double y, long relative)
 {
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj1P));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj1P));
 
   if (relative) { RXcursor(e) += x; RYcursor(e) += y; }
   else          { RXcursor(e) = x; RYcursor(e) = y; }
@@ -357,7 +357,7 @@ void
 rectpoint0(long ne, double x, double y,long relative) /* code = ROt_MV/ROt_PT */
 {
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj1P));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj1P));
 
   if (relative) { RXcursor(e) += x; RYcursor(e) += y; }
   else          { RXcursor(e) = x; RYcursor(e) = y; }
@@ -396,7 +396,7 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
 {
   double dx,dy,dxy,xmin,xmax,ymin,ymax,x1,y1,x2,y2;
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj2P));
   const double c = 1 + 1e-10;
 
   x1 = RXcursor(e)*RXscale(e) + RXshift(e);
@@ -520,7 +520,7 @@ rectticks(PARI_plot *WW, long ne,
   dtx = WW->hunit * dy/dxy * (y2 > y1 ? 1 : -1);	/* y-coord runs down */
   dty = WW->vunit * dx/dxy * (x2 > x1 ? 1 : -1);
   for (n = 0; n < nticks; n++) {
-    RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+    RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj2P));
     double lunit = WW->hunit > 1 ? 1.5 : 2;
     double l = (do_double && (n + n1) % dn == 0) ? lunit: 1;
 
@@ -562,7 +562,7 @@ rectbox0(long ne, double gx2, double gy2, long relative)
   double x1,y1,x2,y2,xmin,ymin,xmax,ymax;
   double xx,yy;
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj2P));
 
   x1 = RXcursor(e)*RXscale(e) + RXshift(e);
   y1 = RYcursor(e)*RYscale(e) + RYshift(e);
@@ -598,12 +598,12 @@ static void
 freeobj(RectObj *z) {
   switch(RoType(z)) {
     case ROt_MP: case ROt_ML:
-      gpfree(RoMPxs(z));
-      gpfree(RoMPys(z)); break;
+      pari_free(RoMPxs(z));
+      pari_free(RoMPys(z)); break;
     case ROt_ST:
-      gpfree(RoSTs(z)); break;
+      pari_free(RoSTs(z)); break;
   }
-  gpfree(z);
+  pari_free(z);
 }
 
 
@@ -629,10 +629,10 @@ rectpoints0(long ne, double *listx, double *listy, long lx) /* code = ROt_MP */
   double *ptx, *pty, x, y;
   long i, cp=0;
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjMP));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObjMP));
 
-  RoMPxs(z) = ptx = (double*) gpmalloc(lx*sizeof(double));
-  RoMPys(z) = pty = (double*) gpmalloc(lx*sizeof(double));
+  RoMPxs(z) = ptx = (double*) pari_malloc(lx*sizeof(double));
+  RoMPys(z) = pty = (double*) pari_malloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
     x = RXscale(e)*listx[i] + RXshift(e);
@@ -661,15 +661,15 @@ rectpoints(long ne, GEN listx, GEN listy)
   if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectpoints");
   lx--; if (!lx) return;
 
-  px = (double*) gpmalloc(lx*sizeof(double)); listx++;
-  py = (double*) gpmalloc(lx*sizeof(double)); listy++;
+  px = (double*) pari_malloc(lx*sizeof(double)); listx++;
+  py = (double*) pari_malloc(lx*sizeof(double)); listy++;
   for (i=0; i<lx; i++)
   {
     px[i] = gtodouble(gel(listx,i));
     py[i] = gtodouble(gel(listy,i));
   }
   rectpoints0(ne,px,py,lx);
-  gpfree(px); gpfree(py);
+  pari_free(px); pari_free(py);
 }
 
 void
@@ -678,11 +678,11 @@ rectlines0(long ne, double *x, double *y, long lx, long flag) /* code = ROt_ML *
   long i,I;
   double *ptx,*pty;
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObj2P));
 
   I = flag ? lx+1 : lx;
-  ptx = (double*) gpmalloc(I*sizeof(double));
-  pty = (double*) gpmalloc(I*sizeof(double));
+  ptx = (double*) pari_malloc(I*sizeof(double));
+  pty = (double*) pari_malloc(I*sizeof(double));
   for (i=0; i<lx; i++)
   {
     ptx[i] = RXscale(e)*x[i] + RXshift(e);
@@ -714,15 +714,15 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) pari_err(typeer,"rectlines");
   lx--; if (!lx) return;
 
-  x = (double*) gpmalloc(lx*sizeof(double));
-  y = (double*) gpmalloc(lx*sizeof(double));
+  x = (double*) pari_malloc(lx*sizeof(double));
+  y = (double*) pari_malloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
     x[i] = gtodouble(gel(listx,i+1));
     y[i] = gtodouble(gel(listy,i+1));
   }
   rectlines0(ne,x,y,lx,flag);
-  gpfree(x); gpfree(y);
+  pari_free(x); pari_free(y);
 }
 
 static void
@@ -742,9 +742,9 @@ void
 rectstring3(long ne, char *str, long dir) /* code = ROt_ST */
 {
   PariRect *e = check_rect_init(ne);
-  RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjST));
+  RectObj *z = (RectObj*) pari_malloc(sizeof(RectObjST));
   long l = strlen(str);
-  char *s = (char *) gpmalloc(l+1);
+  char *s = (char *) pari_malloc(l+1);
 
   strcpy(s,str);
   RoType(z) = ROt_ST;
@@ -764,7 +764,7 @@ rectpointtype(long ne, long type) /* code = ROt_PTT */
    rectpoint_itype = type;
  } else {
    PariRect *e = check_rect_init(ne);
-   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPN));
+   RectObj *z = (RectObj*) pari_malloc(sizeof(RectObjPN));
 
    RoType(z) = ROt_PTT;
    RoPTTpen(z) = type;
@@ -780,7 +780,7 @@ rectpointsize(long ne, GEN size) /* code = ROt_PTS */
  if (ne == -1) { /*do nothing*/ }
  else {
    PariRect *e = check_rect_init(ne);
-   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPS));
+   RectObj *z = (RectObj*) pari_malloc(sizeof(RectObjPS));
 
    RoType(z) = ROt_PTS;
    RoPTSsize(z) = gtodouble(size);
@@ -795,7 +795,7 @@ rectlinetype(long ne, long type)
    rectline_itype = type;
  } else {
    PariRect *e = check_rect_init(ne);
-   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPN));
+   RectObj *z = (RectObj*) pari_malloc(sizeof(RectObjPN));
 
    RoType(z) = ROt_LNT;
    RoLNTpen(z) = type;
@@ -853,23 +853,23 @@ rectcopy(long source, long dest, long xoff, long yoff)
     switch(RoType(R))
     {
       case ROt_PT:
-	next = (RectObj*) gpmalloc(sizeof(RectObj1P));
+	next = (RectObj*) pari_malloc(sizeof(RectObj1P));
 	memcpy(next,R,sizeof(RectObj1P));
 	RoPTx(next) += xoff; RoPTy(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_LN: case ROt_BX:
-	next = (RectObj*) gpmalloc(sizeof(RectObj2P));
+	next = (RectObj*) pari_malloc(sizeof(RectObj2P));
 	memcpy(next,R,sizeof(RectObj2P));
 	RoLNx1(next) += xoff; RoLNy1(next) += yoff;
 	RoLNx2(next) += xoff; RoLNy2(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_MP: case ROt_ML:
-	next = (RectObj*) gpmalloc(sizeof(RectObjMP));
+	next = (RectObj*) pari_malloc(sizeof(RectObjMP));
 	memcpy(next,R,sizeof(RectObjMP));
-	RoMPxs(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
-	RoMPys(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
+	RoMPxs(next) = (double*) pari_malloc(sizeof(double)*RoMPcnt(next));
+	RoMPys(next) = (double*) pari_malloc(sizeof(double)*RoMPcnt(next));
 	memcpy(RoMPxs(next),RoMPxs(R),sizeof(double)*RoMPcnt(next));
 	memcpy(RoMPys(next),RoMPys(R),sizeof(double)*RoMPcnt(next));
 	for (i=0; i<RoMPcnt(next); i++)
@@ -879,15 +879,15 @@ rectcopy(long source, long dest, long xoff, long yoff)
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_ST:
-	next = (RectObj*) gpmalloc(sizeof(RectObjST));
+	next = (RectObj*) pari_malloc(sizeof(RectObjST));
 	memcpy(next,R,sizeof(RectObjMP));
-	RoSTs(next) = (char*) gpmalloc(RoSTl(R)+1);
+	RoSTs(next) = (char*) pari_malloc(RoSTl(R)+1);
 	memcpy(RoSTs(next),RoSTs(R),RoSTl(R)+1);
 	RoSTx(next) += xoff; RoSTy(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_PTT: case ROt_LNT: case ROt_PTS:
-	next = (RectObj*) gpmalloc(sizeof(RectObjPN));
+	next = (RectObj*) pari_malloc(sizeof(RectObjPN));
 	memcpy(next,R,sizeof(RectObjPN));
 	RoNext(tail) = next; tail = next;
 	break;
@@ -1069,11 +1069,11 @@ rectclip(long rect)
 	    if (rc & CLIPLINE_CLIP_2) had_hole = 1, RoMLcnt(R) = t+1;
 	    continue;
 	  }
-	  /* Is not continuous, automatically R is not gpfree()ed.  */
+	  /* Is not continuous, automatically R is not pari_free()ed.  */
 	  t++;
 	  RoMLcnt(R) = t;
 	  if (rc & CLIPLINE_CLIP_2) { /* Needs separate entry */
-	    RectObj *n = (RectObj*) gpmalloc(sizeof(RectObj2P));
+	    RectObj *n = (RectObj*) pari_malloc(sizeof(RectObj2P));
 
 	    RoType(n) = ROt_LN;
 	    RoCol(n) = RoCol(R);
@@ -1087,12 +1087,12 @@ rectclip(long rect)
 	    prevp = &RoNext(n);
 	  }
 	  if (f + 1 < c) {		/* Are other lines */
-	    RectObj *n = (RectObj*) gpmalloc(sizeof(RectObjMP));
+	    RectObj *n = (RectObj*) pari_malloc(sizeof(RectObjMP));
 	    RoType(n) = ROt_ML;
 	    RoCol(n) = RoCol(R);
 	    RoMLcnt(n) = c - f;
-	    RoMLxs(n) = (double*) gpmalloc(sizeof(double)*(c - f));
-	    RoMLys(n) = (double*) gpmalloc(sizeof(double)*(c - f));
+	    RoMLxs(n) = (double*) pari_malloc(sizeof(double)*(c - f));
+	    RoMLys(n) = (double*) pari_malloc(sizeof(double)*(c - f));
 	    memcpy(RoMPxs(n),RoMPxs(R) + f, sizeof(double)*(c - f));
 	    memcpy(RoMPys(n),RoMPys(R) + f, sizeof(double)*(c - f));
 	    RoMPxs(n)[0] = oxn;
@@ -1161,7 +1161,7 @@ gtodblList(GEN data, long flags)
 
   if (nl == 1 && !cplx) pari_err(talker,"single vector in gtodblList");
   /* Allocate memory, then convert coord. to double */
-  l = (dblPointList*) gpmalloc((cplx ? 2*nl:nl)*sizeof(dblPointList));
+  l = (dblPointList*) pari_malloc((cplx ? 2*nl:nl)*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
   {
     u = i+1;
@@ -1179,8 +1179,8 @@ gtodblList(GEN data, long flags)
     }
 
     lx--;
-    l[i].d = (double*) gpmalloc(lx*sizeof(double));
-    l[u].d = (double*) gpmalloc(lx*sizeof(double));
+    l[i].d = (double*) pari_malloc(lx*sizeof(double));
+    l[u].d = (double*) pari_malloc(lx*sizeof(double));
     for (j=0; j<lx; j=v)
     {
       v = j+1;
@@ -1205,7 +1205,7 @@ gtodblList(GEN data, long flags)
     l[0].nb = nl/2;
     for (i=0; i < l[0].nb; i+=2)
       if (l[i+1].nb) break;
-    if (i >= l[0].nb) { gpfree(l); return NULL; }
+    if (i >= l[0].nb) { pari_free(l); return NULL; }
     xsml = xbig = l[i  ].d[0];
     ysml = ybig = l[i+1].d[0];
 
@@ -1224,7 +1224,7 @@ gtodblList(GEN data, long flags)
   }
   else
   {
-    if (!l[0].nb) { gpfree(l); return NULL; }
+    if (!l[0].nb) { pari_free(l); return NULL; }
     l[0].nb = nl-1;
 
     xsml = xbig = l[0].d[0];
@@ -1406,14 +1406,14 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
     }
   }
 
-  pl=(dblPointList*) gpmalloc((cplx?2*nl:nl)*sizeof(dblPointList));
+  pl=(dblPointList*) pari_malloc((cplx?2*nl:nl)*sizeof(dblPointList));
   for (i = 0; i < nl; i++)
   {
-    pl[i].d = (double*) gpmalloc((nbpoints+1)*sizeof(double));
+    pl[i].d = (double*) pari_malloc((nbpoints+1)*sizeof(double));
     pl[i].nb=0;
     if (cplx)
     {
-      pl[i+nl].d = (double*) gpmalloc((nbpoints+1)*sizeof(double));
+      pl[i+nl].d = (double*) pari_malloc((nbpoints+1)*sizeof(double));
       pl[i+nl].nb=0;
     }
   }
@@ -1764,8 +1764,8 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
       rectlines0(drawrect,x.d,y.d,nbpoints,0);
     }
   }
-  for (i--; i>=0; i--) gpfree(data[i].d);
-  gpfree(data);
+  for (i--; i>=0; i--) pari_free(data[i].d);
+  pari_free(data);
 
   if (WW)
   {
@@ -1965,9 +1965,9 @@ gendraw(GEN list, long ps, long flag)
   n = lg(list)-1; if (!n) return;
   if (n%3) pari_err(talker,"incorrect number of components in rectdraw");
   n = n/3;
-  w = (long*)gpmalloc(n*sizeof(long));
-  x = (long*)gpmalloc(n*sizeof(long));
-  y = (long*)gpmalloc(n*sizeof(long));
+  w = (long*)pari_malloc(n*sizeof(long));
+  x = (long*)pari_malloc(n*sizeof(long));
+  y = (long*)pari_malloc(n*sizeof(long));
   if (flag)
     PARI_get_plot(0);
   for (i=0; i<n; i++)
@@ -1989,7 +1989,7 @@ gendraw(GEN list, long ps, long flag)
     w[i] = ne;
   }
   if (ps) postdraw0(w,x,y,n,flag); else rectdraw0(w,x,y,n);
-  gpfree(x); gpfree(y); gpfree(w);
+  pari_free(x); pari_free(y); pari_free(w);
 }
 
 void
@@ -2145,7 +2145,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
 	  double *pty = RoMPys(R);
 	  long     nb = RoMPcnt(R);
 	  struct plot_points *points =
-	    (struct plot_points *) gpmalloc(sizeof(*points)*nb);
+	    (struct plot_points *) pari_malloc(sizeof(*points)*nb);
 	  for(j=0;j<nb;j++)
 	  {
 	    points[j].x = DTOL((ptx[j]+x0)*xs);
@@ -2153,7 +2153,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
 	  }
 	  eng->sc(data,RoCol(R));
 	  eng->mp(data, nb, points);
-	  gpfree(points);
+	  pari_free(points);
 	  break;
 	}
       case ROt_ML:
@@ -2162,7 +2162,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
 	  double *pty = RoMLys(R);
 	  long     nb = RoMLcnt(R);
 	  struct plot_points *points =
-	    (struct plot_points *) gpmalloc(sizeof(*points)*nb);
+	    (struct plot_points *) pari_malloc(sizeof(*points)*nb);
 	  for(j=0;j<nb;j++)
 	  {
 	    points[j].x = DTOL((ptx[j]+x0)*xs);
@@ -2170,7 +2170,7 @@ gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long 
 	  }
 	  eng->sc(data,RoCol(R));
 	  eng->ml(data, nb, points);
-	  gpfree(points);
+	  pari_free(points);
 	  break;
 	}
       case ROt_ST:

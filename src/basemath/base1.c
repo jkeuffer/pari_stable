@@ -2280,7 +2280,7 @@ dirzetak0(GEN nf, long N0)
     }
     avma = av;
   }
-  gpfree(c2); return c;
+  pari_free(c2); return c;
 }
 
 GEN
@@ -2294,7 +2294,7 @@ dirzetak(GEN nf, GEN b)
   nf = checknf(nf);
   n = itos_or_0(b); if (!n) pari_err(talker,"too many terms in dirzetak");
   c = dirzetak0(nf, n);
-  z = vecsmall_to_vec(c); gpfree(c); return z;
+  z = vecsmall_to_vec(c); pari_free(c); return z;
 }
 
 GEN
@@ -2550,8 +2550,8 @@ initzeta(GEN pol, long prec)
   }
   gel(nfz,4) = C;
   if (DEBUGLEVEL>1) msgtimer("Cik");
-  gpfree((void*)zone); gpfree((void*)zone1); gpfree((void*)zone0);
-  gpfree((void*)coef); return nfz;
+  pari_free((void*)zone); pari_free((void*)zone1); pari_free((void*)zone0);
+  pari_free((void*)coef); return nfz;
 }
 
 GEN

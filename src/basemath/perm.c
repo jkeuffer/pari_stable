@@ -1249,7 +1249,7 @@ group_export_MAGMA(GEN G)
     char *t = GENtostr( vecsmall_to_vec(gel(g,i)) );
     if (i > 1) gel(s,k++) = comma;
     gel(s,k++) = strtoGENstr(t);
-    gpfree(t);
+    pari_free(t);
   }
   gel(s,k++) = strtoGENstr(">");
   s = concat(s, NULL);

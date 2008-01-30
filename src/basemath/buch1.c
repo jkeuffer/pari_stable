@@ -918,7 +918,7 @@ largeprime(struct buch_quad *B, long q, long *ex, long np, long nrho)
   {
     if (!pt)
     {
-      pt = (long*) gpmalloc((l+3) * sizeof(long));
+      pt = (long*) pari_malloc((l+3) * sizeof(long));
       *pt++ = nrho; /* nrho = pt[-3] */
       *pt++ = np;   /* np   = pt[-2] */
       *pt++ = q;    /* q    = pt[-1] */
@@ -941,7 +941,7 @@ clearhash(long **hash)
   for (i=0; i<HASHT; i++) {
     for (pt = hash[i]; pt; ) {
       void *z = (void*)(pt - 3);
-      pt = (long*) pt[0]; gpfree(z);
+      pt = (long*) pt[0]; pari_free(z);
     }
     hash[i] = NULL;
   }

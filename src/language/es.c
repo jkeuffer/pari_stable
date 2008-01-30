@@ -27,10 +27,10 @@ hit_return(void)
 {
   int c;
   if (GP_DATA->flags & (EMACS|TEXMACS)) return;
-  pariputs("---- (type RETURN to continue) ----");
+  pari_puts("---- (type RETURN to continue) ----");
   /* if called from a readline callback, may be in a funny TTY mode,  */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
-  pariputc('\n');
+  pari_putc('\n');
 }
 
 /********************************************************************/
@@ -51,7 +51,7 @@ filtre0(filtre_t *F)
   char *t;
   char c;
 
-  if (!F->t) F->t = (char*)gpmalloc(strlen(s)+1);
+  if (!F->t) F->t = (char*)pari_malloc(strlen(s)+1);
   t = F->t;
 
   if (F->more_input == 1) F->more_input = 0;
@@ -183,9 +183,9 @@ init_filtre(filtre_t *F, Buffer *buf)
 Buffer *
 new_buffer(void)
 {
-  Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
+  Buffer *b = (Buffer*) pari_malloc(sizeof(Buffer));
   b->len = 1024;
-  b->buf = (char*)gpmalloc(b->len);
+  b->buf = (char*)pari_malloc(b->len);
   return b;
 }
 /* delete */
@@ -193,14 +193,14 @@ void
 delete_buffer(Buffer *b)
 {
   if (!b) return;
-  gpfree((void*)b->buf); gpfree((void*)b);
+  pari_free((void*)b->buf); pari_free((void*)b);
 }
 /* resize */
 void
 fix_buffer(Buffer *b, long newlbuf)
 {
   b->len = newlbuf;
-  b->buf = (char*)gprealloc((void*)b->buf, b->len);
+  b->buf = (char*)pari_realloc((void*)b->buf, b->len);
 }
 
 static int
@@ -333,7 +333,7 @@ input_loop(filtre_t *F, input_method *IM)
     F->s = to_read;
     F->t = s;
     (void)filtre0(F); /* pre-processing of line, read by previous call to IM->getline */
-    if (IM->free) gpfree(to_read);
+    if (IM->free) pari_free(to_read);
     if (! F->more_input) break;
 
     /* read continuation line */
@@ -406,13 +406,11 @@ static void
 set_last_newline(char c) { last_was_newline = (c == '\n'); }
 
 void
-pariputc(char c) { set_last_newline(c); pariOut->putch(c); }
+pari_putc(char c) { set_last_newline(c); pariOut->putch(c); }
 
 void
-pariputs(const char *s) {
+pari_puts(const char *s) {
   if (*s) {  set_last_newline(s[strlen(s)-1]); pariOut->puts(s); }
-  else
-    last_was_newline = 0;
 }
 
 int
@@ -421,7 +419,7 @@ void
 pari_set_last_newline(int last) { last_was_newline = last; }
 
 void
-pariflush(void) { pariOut->flush(); }
+pari_flush(void) { pariOut->flush(); }
 
 void
 flusherr(void) { pariErr->flush(); }
@@ -650,7 +648,7 @@ str_putc(outString *S, char c) {
   if (S->cur == S->end)
   {
     size_t l = S->size << 1;
-    S->string = (char*)gprealloc((void*)S->string, l);
+    S->string = (char*)pari_realloc((void*)S->string, l);
     S->cur = S->string + S->size;
     S->end = S->string + l;
     S->size = l;
@@ -660,7 +658,7 @@ static void
 str_init(outString *S)
 {
   S->size = 1024;
-  S->string = S->cur = (char*)gpmalloc(S->size);
+  S->string = S->cur = (char*)pari_malloc(S->size);
   S->end = S->string + S->size;
 }
 static void 
@@ -1144,7 +1142,7 @@ nextch:
               }
             }
             fmtstr(S, strvalue, ljust, len, maxwidth);
-            if (tofree) gpfree(strvalue);
+            if (tofree) pari_free(strvalue);
             break;
           }
           case 'c':
@@ -1213,7 +1211,7 @@ term_color(long c)
   FILE *o_logfile = pari_logfile;
 
   if (logstyle != logstyle_color) pari_logfile = 0; /* Ugly hack */
-  /* _not_ pariputs, because of last_was_newline */
+  /* _not_ pari_puts, because of last_was_newline */
   pariOut->puts(term_get_color(c));
   pari_logfile = o_logfile;
 }
@@ -1386,7 +1384,7 @@ lim_lines_output(char *s, long n, long max_lin)
 static void
 _new_line(const char *prefix)
 {
-  pariputc('\n'); if (prefix) pariputs(prefix);
+  pari_putc('\n'); if (prefix) pari_puts(prefix);
 }
 
 static long
@@ -1419,7 +1417,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
   long oldwlen=0, linelen=prelen, w = term_width();
   char word[MAX_WORD_LEN+1], oldword[MAX_WORD_LEN+1], *u=word;
 
-  if (prefix) pariputs(prefix);
+  if (prefix) pari_puts(prefix);
   oldword[0]='\0';
   while ((*u++ = *s++))
   {
@@ -1432,7 +1430,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
 	_new_line(prefix);
 	linelen = oldwlen + prelen;
       }
-      pariputs(oldword); *u++ = ' '; *u = 0;
+      pari_puts(oldword); *u++ = ' '; *u = 0;
       /* u-word = strlen(word) */
       oldwlen = str ? strlen_real(word): u - word;
       if (*s) { strcpy(oldword,word);  u = word; }
@@ -1447,7 +1445,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     { *(u-2) = 0; oldwlen--; }
   linelen += oldwlen;
   if (linelen >= w) { _new_line(prefix); linelen = prelen + oldwlen; }
-  pariputs(word);
+  pari_puts(word);
   if (str)
   {
     long i,len = strlen_real(str);
@@ -1458,15 +1456,15 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
       if (space) { str++; len--; space = 0; }
     }
     term_color(c_OUTPUT);
-    pariputs(str); if (!len || str[len-1] != '\n') pariputc('\n');
+    pari_puts(str); if (!len || str[len-1] != '\n') pari_putc('\n');
     if (space) { linelen++; len--; }
     term_color(c_ERR);
-    for (i=0; i<linelen; i++) pariputc(' ');
-    pariputc('^');
-    for (i=0; i<len; i++) pariputc('-');
+    for (i=0; i<linelen; i++) pari_putc(' ');
+    pari_putc('^');
+    for (i=0; i<len; i++) pari_putc('-');
   }
   else
-    pariputc('\n');
+    pari_putc('\n');
 }
 
 /********************************************************************/
@@ -1490,14 +1488,14 @@ char *
 pari_strdup(const char *s)
 {
   long n = strlen(s)+1;
-  char *t = (char*)gpmalloc(n);
+  char *t = (char*)pari_malloc(n);
   memcpy(t,s,n); return t;
 }
 
 char *
 pari_strndup(const char *s, long n)
 {
-  char *t = (char*)gpmalloc(n+1);
+  char *t = (char*)pari_malloc(n+1);
   memcpy(t,s,n); t[n] = 0; return t;
 }
 
@@ -1525,7 +1523,7 @@ GENtostr0(GEN x, pariout_t *T)
 char *
 GENtostr(GEN x) { return GENtostr0(x, NULL); }
 
-/* Returns gpmalloc()ed string */
+/* Returns pari_malloc()ed string */
 char *
 GENtoTeXstr(GEN x) {
   pariout_t T = *(GP_DATA->fmt);
@@ -1540,7 +1538,7 @@ GENtostr1(GEN x, pariout_t *T)
   return (typ(x) == t_STR)? pari_strdup(GSTR(x)): GENtostr0(x, T);
 }
 
-/* see print0(). Returns gpmalloc()ed string */
+/* see print0(). Returns pari_malloc()ed string */
 char *
 pGENtostr(GEN g, long flag) {
   pariout_t T = *(GP_DATA->fmt);
@@ -1562,20 +1560,20 @@ pGENtostr(GEN g, long flag) {
     Ll[i] = strlen(s);
     tlen += Ll[i];
   }
-  t2 = t = (char*)gpmalloc(tlen + 1);
+  t2 = t = (char*)pari_malloc(tlen + 1);
   *t = 0;
   for (i = 1; i < l; i++)
   {
     strcpy(t2, (char*)Ls[i]);
     t2 += Ll[i];
-    gpfree((void*)Ls[i]);
+    pari_free((void*)Ls[i]);
   }
   avma = av; return t;
 }
 GEN Str0(GEN g, long flag) {
   char *t = pGENtostr(g, flag);
   GEN z = strtoGENstr(t);
-  gpfree(t); return z;
+  pari_free(t); return z;
 }
 GEN Str(GEN g)    { return Str0(g, f_RAW); }
 GEN Strtex(GEN g) { return Str0(g, f_TEX); }
@@ -1583,7 +1581,7 @@ GEN
 Strexpand(GEN g) {
   char *s = pGENtostr(g, f_RAW), *t = expand_tilde(s);
   GEN z = strtoGENstr(t);
-  gpfree(t); gpfree(s); return z;
+  pari_free(t); pari_free(s); return z;
 }
 
 GEN
@@ -1594,7 +1592,7 @@ GENtoGENstr(GEN x)
   GEN z;
   T.prettyp = f_RAW;
   s = GENtostr0(x, &T);
-  z = strtoGENstr(s); gpfree(s); return z;
+  z = strtoGENstr(s); pari_free(s); return z;
 }
 
 GEN
@@ -1606,7 +1604,7 @@ GENtocanonicalstr(GEN x)
   T.prettyp = f_RAW;
   T.sp = 0;
   s = GENtostr0(x, &T);
-  z = strtoGENstr(s); gpfree(s); return z;
+  z = strtoGENstr(s); pari_free(s); return z;
 }
 
 static char
@@ -1669,7 +1667,7 @@ str_absint(outString *S, GEN x)
 #define sp_sign_sp(T,S, x) ((T)->sp? putsigne(S,x): putsigne_nosp(S,x))
 #define comma_sp(T,S)     ((T)->sp? str_puts(S, ", "): str_putc(S, ','))
 
-#define myprintf(fmt, arg) {char _s[128]; sprintf(_s,fmt,arg); pariputs(_s);}
+#define myprintf(fmt, arg) {char _s[128]; sprintf(_s,fmt,arg); pari_puts(_s);}
 
 /* print e to S (more efficient than sprintf) */
 static void
@@ -1778,7 +1776,7 @@ vsigne(GEN x)
 }
 
 static void
-blancs(long nb) { while (nb-- > 0) pariputc(' '); }
+blancs(long nb) { while (nb-- > 0) pari_putc(' '); }
 
 #ifndef LONG_IS_64BIT
 #  define VOIR_STRING1 "[&=%08lx] "
@@ -1794,89 +1792,89 @@ dbg(GEN x, long nb, long bl)
 {
   long tx,i,j,e,dx,lx;
 
-  if (!x) { pariputs("NULL\n"); return; }
+  if (!x) { pari_puts("NULL\n"); return; }
   tx = typ(x);
-  if (tx == t_INT && x == gen_0) { pariputs("gen_0\n"); return; }
+  if (tx == t_INT && x == gen_0) { pari_puts("gen_0\n"); return; }
   myprintf(VOIR_STRING1,(ulong)x);
 
   lx = lg(x);
-  pariprintf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
+  pari_printf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   myprintf(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
-      pariputs("chars:");
+      pari_puts("chars:");
     else if (tx == t_INT)
     {
       lx = lgefint(x);
-      pariprintf("(%c,lgefint=%ld):", vsigne(x), lx);
+      pari_printf("(%c,lgefint=%ld):", vsigne(x), lx);
     }
     else if (tx == t_REAL)
-      pariprintf("(%c,expo=%ld):", vsigne(x), expo(x));
+      pari_printf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb < 0) nb = lx;
     for (i=1; i < nb; i++) myprintf(VOIR_STRING2,x[i]);
-    pariputc('\n'); return;
+    pari_putc('\n'); return;
   }
 
   if (tx == t_PADIC)
-    pariprintf("(precp=%ld,valp=%ld):", precp(x), valp(x));
+    pari_printf("(precp=%ld,valp=%ld):", precp(x), valp(x));
   else if (tx == t_POL)
-    pariprintf("(%c,varn=%ld):", vsigne(x), varn(x));
+    pari_printf("(%c,varn=%ld):", vsigne(x), varn(x));
   else if (tx == t_SER)
-    pariprintf("(%c,varn=%ld,prec=%ld,valp=%ld):",
+    pari_printf("(%c,varn=%ld,prec=%ld,valp=%ld):",
 	       vsigne(x), varn(x), lgpol(x), valp(x));
   else if (tx == t_LIST)
   {
-    pariprintf("(lmax=%ld):", list_nmax(x));
+    pari_printf("(lmax=%ld):", list_nmax(x));
     x = list_data(x); lx = x? lg(x): 1;
   } else if (tx == t_CLOSURE)
-    pariprintf("(arity=%ld):", x[1]);
-  for (i=1; i<lx; i++) pariprintf(VOIR_STRING2,x[i]);
-  bl+=2; pariputc('\n');
+    pari_printf("(arity=%ld):", x[1]);
+  for (i=1; i<lx; i++) pari_printf(VOIR_STRING2,x[i]);
+  bl+=2; pari_putc('\n');
   switch(tx)
   {
     case t_INTMOD: case t_POLMOD:
     {
       const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
       blancs(bl);
-      pariputs("mod = "); dbg(gel(x,1),nb,bl);
-      blancs(bl); pariputs(s);        dbg(gel(x,2),nb,bl);
+      pari_puts("mod = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pari_puts(s);        dbg(gel(x,2),nb,bl);
       break;
     }
     case t_FRAC: case t_RFRAC:
-      blancs(bl); pariputs("num = "); dbg(gel(x,1),nb,bl);
-      blancs(bl); pariputs("den = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("num = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pari_puts("den = "); dbg(gel(x,2),nb,bl);
       break;
 
     case t_FFELT:
-      blancs(bl); pariputs("pol = "); dbg(gel(x,2),nb,bl);
-      blancs(bl); pariputs("mod = "); dbg(gel(x,3),nb,bl);
-      blancs(bl); pariputs("p   = "); dbg(gel(x,4),nb,bl);
+      blancs(bl); pari_puts("pol = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("mod = "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pari_puts("p   = "); dbg(gel(x,4),nb,bl);
       break;
 
     case t_COMPLEX:
-      blancs(bl); pariputs("real = "); dbg(gel(x,1),nb,bl);
-      blancs(bl); pariputs("imag = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("real = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pari_puts("imag = "); dbg(gel(x,2),nb,bl);
       break;
 
     case t_PADIC:
       blancs(bl);
-		  pariputs("  p : "); dbg(gel(x,2),nb,bl);
-      blancs(bl); pariputs("p^l : "); dbg(gel(x,3),nb,bl);
-      blancs(bl); pariputs("  I : "); dbg(gel(x,4),nb,bl);
+		  pari_puts("  p : "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("p^l : "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pari_puts("  I : "); dbg(gel(x,4),nb,bl);
       break;
 
     case t_QUAD:
-      blancs(bl); pariputs("pol = ");  dbg(gel(x,1),nb,bl);
-      blancs(bl); pariputs("real = "); dbg(gel(x,2),nb,bl);
-      blancs(bl); pariputs("imag = "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pari_puts("pol = ");  dbg(gel(x,1),nb,bl);
+      blancs(bl); pari_puts("real = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("imag = "); dbg(gel(x,3),nb,bl);
       break;
 
     case t_POL: case t_SER:
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
-	blancs(bl); pariprintf("coef of degree %ld = ",e);
+	blancs(bl); pari_printf("coef of degree %ld = ",e);
 	e++; dbg(gel(x,i),nb,bl);
       }
       break;
@@ -1886,21 +1884,21 @@ dbg(GEN x, long nb, long bl)
     case t_QFR: case t_QFI: case t_VEC: case t_COL:
       for (i=1; i<lx; i++)
       {
-	blancs(bl); pariprintf("%ld%s component = ",i,eng_ord(i));
+	blancs(bl); pari_printf("%ld%s component = ",i,eng_ord(i));
 	dbg(gel(x,i),nb,bl);
       }
       break;
 
     case t_CLOSURE:
-      blancs(bl); pariputs("code = "); dbg(gel(x,2),nb,bl);
-      blancs(bl); pariputs("operand = "); dbg(gel(x,3),nb,bl);
-      blancs(bl); pariputs("data = "); dbg(gel(x,4),nb,bl);
+      blancs(bl); pari_puts("code = "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("operand = "); dbg(gel(x,3),nb,bl);
+      blancs(bl); pari_puts("data = "); dbg(gel(x,4),nb,bl);
       if (lg(x)>=6)
       {
-        blancs(bl); pariputs("text = "); dbg(gel(x,5),nb,bl);
+        blancs(bl); pari_puts("text = "); dbg(gel(x,5),nb,bl);
         if (lg(x)>=7)
         {
-          blancs(bl); pariputs("frame = "); dbg(gel(x,6),nb,bl);
+          blancs(bl); pari_puts("frame = "); dbg(gel(x,6),nb,bl);
         }
       }
       break;
@@ -1913,7 +1911,7 @@ dbg(GEN x, long nb, long bl)
       {
 	for (i = 1; i < lx; i++)
 	{
-	  blancs(bl); pariprintf("%ld%s column = ",i,eng_ord(i));
+	  blancs(bl); pari_printf("%ld%s column = ",i,eng_ord(i));
 	  dbg(gel(x,i),nb,bl);
 	}
       }
@@ -1923,7 +1921,7 @@ dbg(GEN x, long nb, long bl)
 	for (i=1; i<dx; i++)
 	  for (j=1; j<lx; j++)
 	  {
-	    blancs(bl); pariprintf("mat(%ld,%ld) = ",i,j);
+	    blancs(bl); pari_printf("mat(%ld,%ld) = ",i,j);
 	    dbg(gcoeff(x,i,j),nb,bl);
 	  }
       }
@@ -1937,15 +1935,15 @@ dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 static void
 print_entree(entree *ep, long hash)
 {
-  pariprintf(" %s ",ep->name); pariprintf(VOIR_STRING1,(ulong)ep);
-  pariprintf(":\n   hash = %3ld, menu = %2ld, code = %-10s",
+  pari_printf(" %s ",ep->name); pari_printf(VOIR_STRING1,(ulong)ep);
+  pari_printf(":\n   hash = %3ld, menu = %2ld, code = %-10s",
 	    hash, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
-    pariprintf("next = %s ",(ep->next)->name);
-    pariprintf(VOIR_STRING1,(ulong)(ep->next));
+    pari_printf("next = %s ",(ep->next)->name);
+    pari_printf(VOIR_STRING1,(ulong)(ep->next));
   }
-  pariputs("\n");
+  pari_puts("\n");
 }
 
 /* s = digit n : list of entrees in functions_hash[n] (s = $: last entry)
@@ -1973,7 +1971,7 @@ print_functions_hash(const char *s)
 
     for(; n<=m; n++)
     {
-      pariprintf("*** hashcode = %lu\n",n);
+      pari_printf("*** hashcode = %lu\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
 	print_entree(ep,n);
     }
@@ -1991,10 +1989,10 @@ print_functions_hash(const char *s)
     {
       m=0;
       for (ep=functions_hash[n]; ep; ep=ep->next) m++;
-      pariprintf("%3ld:%3ld ",n,m);
-      if (n%9 == 8) pariputc('\n');
+      pari_printf("%3ld:%3ld ",n,m);
+      if (n%9 == 8) pari_putc('\n');
     }
-    pariputc('\n'); return;
+    pari_putc('\n'); return;
   }
   Max = Total = 0;
   for (n=0; n<functions_tblsz; n++)
@@ -2008,7 +2006,7 @@ print_functions_hash(const char *s)
     Total += cnt;
     if (cnt > Max) Max = cnt;
   }
-  pariprintf("Total: %ld, Max: %ld\n", Total, Max);
+  pari_printf("Total: %ld, Max: %ld\n", Total, Max);
 }
 
 /********************************************************************/
@@ -2095,24 +2093,24 @@ etatpile(void)
   nu = (top-avma)/sizeof(long);
   l = (top-bot)/sizeof(long);
   r = 100.0*nu/l;
-  pariprintf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
+  pari_printf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
 	    top, bot, avma);
 
-  pariprintf(" Used :                         %ld  long words  (%ld K)\n",
+  pari_printf(" Used :                         %ld  long words  (%ld K)\n",
 	    nu, nu/1024*sizeof(long));
 
-  pariprintf(" Available :                    %ld  long words  (%ld K)\n",
+  pari_printf(" Available :                    %ld  long words  (%ld K)\n",
 	   (l-nu), (l-nu)/1024*sizeof(long));
 
-  pariprintf(" Occupation of the PARI stack : %6.2f percent\n",r);
+  pari_printf(" Occupation of the PARI stack : %6.2f percent\n",r);
 
   adr = getheap();
-  pariprintf(" %ld objects on heap occupy %ld long words\n\n",
+  pari_printf(" %ld objects on heap occupy %ld long words\n\n",
 	    itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
   u = pari_var_next();
   s = MAXVARN - pari_var_next_temp();
-  pariprintf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
+  pari_printf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
 	     u+s, u, s, MAXVARN);
 }
 
@@ -2520,7 +2518,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
 	if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
       str_puts(S, "O("); VpowE(S, ev,i); str_putc(S, ')');
-      gpfree(ev); break;
+      pari_free(ev); break;
     }
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
@@ -2562,10 +2560,10 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         if (typ(g[5])==t_STR)
           str_puts(S, GSTR(gel(g,5)));
         else
-          pariprintf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+          pari_printf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pariprintf("{\"%s\",%Zs,%Zs}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pari_printf("{\"%s\",%Zs,%Zs}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -2738,7 +2736,7 @@ texi(GEN g, pariout_t *T, outString *S, int addsign)
 	}
       }
       str_puts(S, "O("); texVpowE(S, ev,i); str_putc(S, ')');
-      gpfree(ev); break;
+      pari_free(ev); break;
     }
 
     case t_VEC:
@@ -2785,10 +2783,10 @@ texi(GEN g, pariout_t *T, outString *S, int addsign)
         if (typ(g[5])==t_STR)
           str_puts(S, GSTR(gel(g,5)));
         else
-          pariprintf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+          pari_printf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pariprintf("\\{\"%s\",%Zs,%Zs\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pari_printf("\\{\"%s\",%Zs,%Zs\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -2832,7 +2830,7 @@ void
 gen_output(GEN x, pariout_t *T)
 {
   char *s = GENtostr0(x, T);
-  pariputs(s); free(s);
+  pari_puts(s); free(s);
 }
 
 void
@@ -2862,13 +2860,13 @@ outbrute(GEN g) { brute(g,'g',-1); }
 void
 output(GEN x)
 {
-  outbrute(x); pariputc('\n'); pariflush();
+  outbrute(x); pari_putc('\n'); pari_flush();
 }
 
 void
 outmat(GEN x)
 {
-  matbrute(x,'g',-1); pariputc('\n'); pariflush();
+  matbrute(x,'g',-1); pari_putc('\n'); pari_flush();
 }
 
 void
@@ -2884,7 +2882,7 @@ fprintferr(const char* fmt, ...)
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
-  va_start(args, fmt); parivprintf(fmt,args);
+  va_start(args, fmt); pari_vprintf(fmt,args);
   va_end(args); pariOut = out;
 }
 
@@ -2915,7 +2913,7 @@ static pariFILE *last_file = NULL;
 pariFILE *
 newfile(FILE *f, const char *name, int type)
 {
-  pariFILE *file = (pariFILE*) gpmalloc(strlen(name) + 1 + sizeof(pariFILE));
+  pariFILE *file = (pariFILE*) pari_malloc(strlen(name) + 1 + sizeof(pariFILE));
   file->type = type;
   file->name = strcpy((char*)(file+1), name);
   file->file = f;
@@ -2957,7 +2955,7 @@ pari_kill_file(pariFILE *f)
 #endif
   if (DEBUGFILES)
     fprintferr("I/O: closing file %s (code %d) \n",f->name,f->type);
-  gpfree(f);
+  pari_free(f);
 }
 
 void
@@ -3067,8 +3065,8 @@ killallfiles(int leaving)
   {
     popinfile(); /* look for leaks */
     kill_file_stack(&last_file);
-    if (last_filename) gpfree(last_filename);
-    if (homedir) gpfree(homedir);
+    if (last_filename) pari_free(last_filename);
+    if (homedir) pari_free(homedir);
     if (pari_logfile) { fclose(pari_logfile); pari_logfile = NULL; }
   }
   kill_file_stack(&last_tmp_file);
@@ -3111,7 +3109,7 @@ try_pipe(const char *cmd, int fl)
     s = stackmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
     file = system(s)? NULL: fopen(f,"r");
-    flag |= mf_FALSE; gpfree(f); avma = av;
+    flag |= mf_FALSE; pari_free(f); avma = av;
   }
   else
 #  endif
@@ -3283,7 +3281,7 @@ _expand_tilde(const char *s)
   else
   {
     while (*u && *u != '/') u++;
-    len = u-s; user = (char*)gpmalloc(len+1);
+    len = u-s; user = (char*)pari_malloc(len+1);
     (void)strncpy(user,s,len);
     user[len] = 0;
     p = getpwnam(user);
@@ -3296,7 +3294,7 @@ _expand_tilde(const char *s)
   }
   else
   {
-    ret = (char*)gpmalloc(strlen(dir) + strlen(u) + 1);
+    ret = (char*)pari_malloc(strlen(dir) + strlen(u) + 1);
     sprintf(ret,"%s%s",dir,u);
   }
   if (user) free(user);
@@ -3311,7 +3309,7 @@ _expand_env(char *str)
 {
   long i, l, len = 0, xlen = 16, xnum = 0;
   char *s = str, *s0 = s, *env;
-  char **x = (char **)gpmalloc(xlen * sizeof(char*));
+  char **x = (char **)pari_malloc(xlen * sizeof(char*));
 
   while (*s)
   {
@@ -3319,19 +3317,19 @@ _expand_env(char *str)
     l = s - s0;
     if (l)
     {
-      s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
+      s0 = strncpy((char*)pari_malloc(l+1), s0, l); s0[l] = 0;
       x[xnum++] = s0; len += l;
     }
     if (xnum > xlen - 3) /* need room for possibly two more elts */
     {
       xlen <<= 1;
-      x = (char **)gprealloc((void*)x, xlen * sizeof(char*));
+      x = (char **)pari_realloc((void*)x, xlen * sizeof(char*));
     }
 
     s0 = ++s; /* skip $ */
     while (is_keyword_char(*s)) s++;
     l = s - s0;
-    env = strncpy((char*)gpmalloc(l+1), s0, l); env[l] = 0;
+    env = strncpy((char*)pari_malloc(l+1), s0, l); env[l] = 0;
     s0 = os_getenv(env);
     if (!s0)
     {
@@ -3341,21 +3339,21 @@ _expand_env(char *str)
     l = strlen(s0);
     if (l)
     {
-      s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
+      s0 = strncpy((char*)pari_malloc(l+1), s0, l); s0[l] = 0;
       x[xnum++] = s0; len += l;
     }
-    gpfree(env); s0 = s;
+    pari_free(env); s0 = s;
   }
   l = s - s0;
   if (l)
   {
-    s0 = strncpy((char*)gpmalloc(l+1), s0, l); s0[l] = 0;
+    s0 = strncpy((char*)pari_malloc(l+1), s0, l); s0[l] = 0;
     x[xnum++] = s0; len += l;
   }
 
-  s = (char*)gpmalloc(len+1); *s = 0;
-  for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); gpfree(x[i]); }
-  gpfree(str); gpfree(x); return s;
+  s = (char*)pari_malloc(len+1); *s = 0;
+  for (i = 0; i < xnum; i++) { (void)strcat(s, x[i]); pari_free(x[i]); }
+  pari_free(str); pari_free(x); return s;
 }
 
 char *
@@ -3371,8 +3369,8 @@ delete_dirs(gp_path *p)
   if (v)
   {
     p->dirs = NULL; /* in case of error */
-    for (dirs = v; *dirs; dirs++) gpfree(*dirs);
-    gpfree(v);
+    for (dirs = v; *dirs; dirs++) pari_free(*dirs);
+    pari_free(v);
   }
 }
 
@@ -3403,7 +3401,7 @@ gp_expand_path(gp_path *p)
   v = pari_strdup(v);
   for (s=v; *s; s++)
     if (*s == PATH_SEPARATOR) { *s = 0; n++; }
-  dirs = (char**) gpmalloc((n + 2)*sizeof(char *));
+  dirs = (char**) pari_malloc((n + 2)*sizeof(char *));
 
   for (s=v, i=0; i<=n; i++)
   {
@@ -3412,7 +3410,7 @@ gp_expand_path(gp_path *p)
     dirs[i] = expand_tilde(s);
     s = end + 1; /* next path component */
   }
-  gpfree((void*)v);
+  pari_free((void*)v);
   dirs[i] = NULL; p->dirs = dirs;
 }
 
@@ -3478,12 +3476,12 @@ try_name(char *name)
   {
     if (! last_tmp_file)
     {  /* empty file stack, record this name */
-      if (last_filename) gpfree(last_filename);
+      if (last_filename) pari_free(last_filename);
       last_filename = pari_strdup(s);
     }
     file = pari_infile = pari_get_infile(s,file)->file;
   }
-  gpfree(name); avma = av;
+  pari_free(name); avma = av;
   return file;
 }
 
@@ -3510,7 +3508,7 @@ switchin(const char *name0)
     char **tmp = GP_DATA->path->dirs;
     for ( ; *tmp; tmp++)
     { /* make room for '/' and '\0', try_name frees it */
-      s = (char*)gpmalloc(2 + strlen(*tmp) + strlen(name));
+      s = (char*)pari_malloc(2 + strlen(*tmp) + strlen(name));
       sprintf(s,"%s/%s",*tmp,name);
       if (try_name(s)) return;
     }
@@ -3593,7 +3591,7 @@ wrGEN(GEN x, FILE *f)
     wr_long((long)p->base,f);
     _lfwrite(GENbase(p), L,f);
   }
-  gpfree((void*)p);
+  pari_free((void*)p);
 }
 
 static void
@@ -3610,7 +3608,7 @@ rdstr(FILE *f)
   size_t L = (size_t)rd_long(f);
   char *s;
   if (!L) return NULL;
-  s = (char*)gpmalloc(L);
+  s = (char*)pari_malloc(L);
   _cfread(s, L, f); return s;
 }
 
@@ -3637,7 +3635,7 @@ rdGEN(FILE *f)
   GENbin *p;
 
   if (!L) return gen_0;
-  p = (GENbin*)gpmalloc(sizeof(GENbin) + L*sizeof(long));
+  p = (GENbin*)pari_malloc(sizeof(GENbin) + L*sizeof(long));
   p->len  = L;
   p->x    = (GEN)rd_long(f);
   p->base = (GEN)rd_long(f);
@@ -3797,7 +3795,7 @@ static void
 printGEN(GEN x, pariout_t *T)
 {
   if (typ(x)==t_STR)
-    pariputs(GSTR(x)); /* text surrounded by "" otherwise */
+    pari_puts(GSTR(x)); /* text surrounded by "" otherwise */
   else
     gen_output(x, T);
 }
@@ -3826,7 +3824,7 @@ dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
 void
 printf0(GEN gfmt, GEN args)
 { char *s = dopr_arg_vector(args, (const char*)gfmt); 
-  pariputs(s); free(s); }
+  pari_puts(s); free(s); }
 /* GP only */
 GEN
 Strprintf(GEN gfmt, GEN args)
@@ -3834,45 +3832,45 @@ Strprintf(GEN gfmt, GEN args)
   GEN z = strtoGENstr(s); free(s); return z; }
 
 void 
-parivprintf(const char *fmt, va_list ap)
+pari_vprintf(const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
-  pariputs(s); free(s);
+  pari_puts(s); free(s);
 }
 void
-pariprintf(const char *fmt, ...) /* variadic version of printf0 */
+pari_printf(const char *fmt, ...) /* variadic version of printf0 */
 {
   va_list args; va_start(args,fmt);
-  parivprintf(fmt,args); va_end(args);
+  pari_vprintf(fmt,args); va_end(args);
 }
 
 char *
-parivsprintf(const char *fmt, va_list ap)
+pari_vsprintf(const char *fmt, va_list ap)
 { return sm_dopr(fmt, NULL, ap); }
 char *
-parisprintf(const char *fmt, ...) /* variadic version of Strprintf */
+pari_sprintf(const char *fmt, ...) /* variadic version of Strprintf */
 {
   char *s;
   va_list ap; va_start(ap, fmt);
-  s = parivsprintf(fmt, ap); va_end(ap); return s;
+  s = pari_vsprintf(fmt, ap); va_end(ap); return s;
 }
 
 /* variadic version of fprintf0. FIXME: fprintf0 not yet available */
 void
-parivfprintf(FILE *file, const char *fmt, va_list ap)
+pari_vfprintf(FILE *file, const char *fmt, va_list ap)
 {
   char *s = sm_dopr(fmt, NULL, ap);
   fputs(s, file); free(s);
 }
 void
-parifprintf(FILE *file, const char *fmt, ...)
+pari_fprintf(FILE *file, const char *fmt, ...)
 {
   va_list ap; va_start(ap, fmt);
-  parivfprintf(file, fmt, ap); va_end(ap);
+  pari_vfprintf(file, fmt, ap); va_end(ap);
 }
 
-#define PR_NL() {pariputc('\n'); pariflush(); }
-#define PR_NO() pariflush()
+#define PR_NL() {pari_putc('\n'); pari_flush(); }
+#define PR_NO() pari_flush()
 void print   (GEN g) { print0(g, f_RAW);       PR_NL(); }
 void printp  (GEN g) { print0(g, f_PRETTYOLD); PR_NL(); }
 void printtex(GEN g) { print0(g, f_TEX);       PR_NL(); }
@@ -3900,7 +3898,7 @@ static void
 wr_init(const char *s)
 {
   char *t = wr_check(s);
-  switchout(t); gpfree(t);
+  switchout(t); pari_free(t);
   wr_last_was_newline = pari_last_was_newline();
 }
 
@@ -3908,18 +3906,18 @@ wr_init(const char *s)
 static void
 wr_finish()
 {
-  pariflush(); switchout(NULL);
+  pari_flush(); switchout(NULL);
   pari_set_last_newline(wr_last_was_newline);
 }
 
-#define WR_NL() pariputc('\n'); wr_finish()
+#define WR_NL() pari_putc('\n'); wr_finish()
 #define WR_NO() wr_finish()
 
 void write0  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
 void writetex(const char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
 void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
 
-void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); gpfree(t);}
+void gpwritebin(const char *s, GEN x) { char *t=wr_check(s); writebin(t, x); pari_free(t);}
 
 /*******************************************************************/
 /**                                                               **/
@@ -4111,7 +4109,7 @@ init_unique(const char *s)
   lsuf = strlen(suf);
   lpre = strlen(pre);
   /* room for prefix + '/' + s + suffix '\0' */
-  buf = (char*) gpmalloc(lpre + 1 + 8 + lsuf + 1);
+  buf = (char*) pari_malloc(lpre + 1 + 8 + lsuf + 1);
   strcpy(buf, pre);
   if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
   swap_slash(buf);
@@ -4122,7 +4120,7 @@ init_unique(const char *s)
 
 /* Return a "unique filename" built from the string s, possibly the user id
  * and the process pid (on Unix systems). A "temporary" directory name is
- * prepended. The name returned is gpmalloc'ed. It is DOS-safe
+ * prepended. The name returned is pari_malloc'ed. It is DOS-safe
  * (s truncated to 8 chars) */
 char*
 pari_unique_filename(const char *s)
@@ -4136,7 +4134,7 @@ pari_unique_filename(const char *s)
 
 /* Create a "unique directory" and return its name built from the string
  * s, the user id and process pid (on Unix systems). A "temporary"
- * directory name is prepended. The name returned is gpmalloc'ed.
+ * directory name is prepended. The name returned is pari_malloc'ed.
  * It is DOS-safe (truncated to 8 chars)
  */
 char*

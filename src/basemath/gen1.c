@@ -912,7 +912,7 @@ gadd(GEN x, GEN y)
 	  if (i < 3) return gcopy(y);
 
 	  p1 = greffe(x,i,0); y = gadd(p1,y);
-	  gpfree(p1); return y;
+	  pari_free(p1); return y;
 
 	case t_RFRAC: return add_rfrac_scal(y, x);
       }
@@ -1471,7 +1471,7 @@ gmul(GEN x, GEN y)
 	return gerepilecopy((pari_sp)(z + lx), z);
       }
       x += 2; y += 2; z += 2; lx -= 3;
-      p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
+      p2 = (GEN)pari_malloc((lx+1)*sizeof(long));
       mix = miy = 0;
       for (i=0; i<=lx; i++)
       {
@@ -1483,7 +1483,7 @@ gmul(GEN x, GEN y)
 	gel(z,i) = gerepileupto(av,p1);
       }
       z -= 2; /* back to normalcy */
-      gpfree(p2); return normalize(z);
+      pari_free(p2); return normalize(z);
     }
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);
@@ -1722,7 +1722,7 @@ gmul(GEN x, GEN y)
 	  /* take advantage of x = t^n ! */
 	  if (degpol(x)) {
 	    p1 = greffe(x,lg(y),0);
-	    p2 = gmul(p1,y); gpfree(p1);
+	    p2 = gmul(p1,y); pari_free(p1);
 	  } else
 	    p2 = mul_ser_scal(y, gel(x,2));
 	  setvalp(p2, valp(p2) + vn);
@@ -2015,11 +2015,11 @@ div_scal_ser(GEN x, GEN y) { /* TODO: improve */
   GEN z;
   long ly, i;
   if (gcmp0(x)) { pari_sp av=avma; return gerepileupto(av, gmul(x, ginv(y))); }
-  ly = lg(y); z = (GEN)gpmalloc(ly*sizeof(long));
+  ly = lg(y); z = (GEN)pari_malloc(ly*sizeof(long));
   z[0] = evaltyp(t_SER) | evallg(ly);
   z[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
   gel(z,2) = x; for (i=3; i<ly; i++) gel(z,i) = gen_0;
-  y = gdiv(z,y); gpfree(z); return y;
+  y = gdiv(z,y); pari_free(z); return y;
 }
 static GEN
 div_scal_T(GEN x, GEN y, long ty) {
@@ -2054,7 +2054,7 @@ div_ser(GEN x, GEN y, long vx)
     }
   }
   if (ly < lx) lx = ly;
-  p2 = (GEN)gpmalloc(lx*sizeof(long));
+  p2 = (GEN)pari_malloc(lx*sizeof(long));
   for (i=3; i<lx; i++)
   {
     p1 = gel(y,i);
@@ -2080,7 +2080,7 @@ div_ser(GEN x, GEN y, long vx)
   }
   for (i=3; i<lx; i++)
     if (p2[i]) gunclone(gel(p2,i));
-  gpfree(p2); return normalize(z);
+  pari_free(p2); return normalize(z);
 }
 /* x,y compatible PADIC */
 static GEN
@@ -2456,7 +2456,7 @@ gdiv(GEN x, GEN y)
 	    return zeroser(vx, polvaluation(x,NULL) - valp(y));
 	  p1 = greffe(x,lg(y),0);
 	  p2 = div_ser(p1, y, vx);
-	  gpfree(p1); return p2;
+	  pari_free(p1); return p2;
 
 	case t_RFRAC:
 	{
@@ -2477,7 +2477,7 @@ gdiv(GEN x, GEN y)
 	    return zeroser(vx, valp(x) - polvaluation(y,NULL));
 	  p1 = greffe(y,lg(x),0);
 	  p2 = div_ser(x, p1, vx);
-	  gpfree(p1); return p2;
+	  pari_free(p1); return p2;
 	case t_RFRAC:
 	  av = avma;
 	  return gerepileupto(av, gdiv(gmul(x,gel(y,2)), gel(y,1)));

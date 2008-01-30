@@ -56,11 +56,11 @@ hash_link(hashtable *h, hashentry *e)
 hashtable *
 hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*))
 {
-  hashtable *h = (hashtable*)gpmalloc(sizeof(hashtable));
+  hashtable *h = (hashtable*)pari_malloc(sizeof(hashtable));
   int i = get_prime_index(minsize);
   ulong len = hashprimes[i];
 
-  h->table = (hashentry**)gpcalloc(len * sizeof(hashentry*));
+  h->table = (hashentry**)pari_calloc(len * sizeof(hashentry*));
   h->pindex = i;
   h->nb = 0;
   h->hash = hash;
@@ -71,13 +71,13 @@ hash_create(ulong minsize, ulong (*hash)(void*), int (*eq)(void*,void*))
 void
 hash_insert(hashtable *h, void *k, void *v)
 {
-  hashentry *e = (hashentry*) gpmalloc(sizeof(hashentry));
+  hashentry *e = (hashentry*) pari_malloc(sizeof(hashentry));
   ulong index;
 
   if (++(h->nb) > h->maxnb && h->pindex < hashprimes_len-1)
   { /* double table size */
     ulong i, newlen = hashprimes[++(h->pindex)];
-    hashentry *E, **newtable = (hashentry**)gpcalloc(newlen*sizeof(hashentry*));
+    hashentry *E, **newtable = (hashentry**)pari_calloc(newlen*sizeof(hashentry*));
     for (i = 0; i < h->len; i++)
       while ( (E = h->table[i]) )
       {
@@ -155,10 +155,10 @@ hashstr_dbg(hashtable *h)
     ulong m=0;
     for (e=table[n]; e; e=e->next) m++;
     Total += m; if (Max < m) Max = m;
-    pariprintf("%4ld:%2ld ",n,m);
-    if (n%9 == 8) pariputc('\n');
+    pari_printf("%4ld:%2ld ",n,m);
+    if (n%9 == 8) pari_putc('\n');
   }
-  pariprintf("\nTotal = %ld, Max = %ld\n", Total, Max);
+  pari_printf("\nTotal = %ld, Max = %ld\n", Total, Max);
 }
 
 /********************************************************************/

@@ -101,7 +101,7 @@ static void
 addcell(sublist_t *S, GEN H)
 {
   long *pt,i,j, k = 0, n = lg(H)-1;
-  slist *cell = (slist*) gpmalloc(sizeof(slist) + n*(n+1)/2 * sizeof(long));
+  slist *cell = (slist*) pari_malloc(sizeof(slist) + n*(n+1)/2 * sizeof(long));
 
   S->list->next = cell; cell->data = pt = (long*) (cell + 1);
   for (j=1; j<=n; j++)
@@ -579,7 +579,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   if (!cyc) pari_err(typeer,"subgrouplist");
   n = lg(cyc)-1; /* not necessarily = N */
 
-  S.list = sublist = (slist*) gpmalloc(sizeof(slist));
+  S.list = sublist = (slist*) pari_malloc(sizeof(slist));
   S.hnfgroup = diagonal_i(cyc);
   S.gen = gen;
   S.count = 0;
@@ -597,7 +597,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   z = cgetg(nbsub+1,t_VEC);
   for (ii=1; ii<=nbsub; ii++)
   {
-    list = sublist; sublist = list->next; gpfree(list);
+    list = sublist; sublist = list->next; pari_free(list);
     H = cgetg(N+1,t_MAT); gel(z,ii) = H; k=0;
     for (j=1; j<=n; j++)
     {
@@ -607,7 +607,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     }
     for (   ; j<=N; j++) gel(H,j) = col_ei(N, j);
   }
-  gpfree(sublist); return z;
+  pari_free(sublist); return z;
 }
 
 GEN

@@ -15,6 +15,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define gpmalloc pari_malloc
+#define gprealloc pari_realloc
+#define gpfree pari_free
+#define pariprintf pari_printf
+#define pariputc pari_putc
+#define pariputs pari_puts
+#define pariflush pari_flush
 #define ellap0(e,p,flag) apell(e,p)
 #define apell2(e,p) apell(e,p)
 #define apell ellap

@@ -82,7 +82,7 @@ static void DrawRectangle(void *data, long x, long y, long w, long h)
 static void DrawPoints(void *data, long nb, struct plot_points *p)
 {
   struct data_x *dx = (struct data_x *) data;
-  XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+  XPoint *xp=(XPoint*)pari_malloc(sizeof(xp)*nb);
   long i;
   for (i=0;i<nb;i++)
   {
@@ -90,13 +90,13 @@ static void DrawPoints(void *data, long nb, struct plot_points *p)
     xp[i].y=p[i].y;
   }
   XDrawPoints(dx->display,dx->win,dx->gc, xp, nb, 0);
-  gpfree(xp);
+  pari_free(xp);
 }
 
 static void DrawLines(void *data, long nb, struct plot_points *p)
 {
   struct data_x *dx = (struct data_x *) data;
-  XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+  XPoint *xp=(XPoint*)pari_malloc(sizeof(xp)*nb);
   long i;
   for (i=0;i<nb;i++)
   {
@@ -104,7 +104,7 @@ static void DrawLines(void *data, long nb, struct plot_points *p)
     xp[i].y=p[i].y;
   }
   XDrawLines(dx->display,dx->win,dx->gc, xp, nb, 0);
-  gpfree(xp);
+  pari_free(xp);
 }
 
 static void DrawString(void *data, long x, long y, char *text, long numtext)
@@ -123,8 +123,8 @@ PARI_ColorSetUp(Display *display, GEN colors)
   init_done=1;
 
   PARI_Colormap = DefaultColormap(display, 0);
-  PARI_Colors = (XColor *) gpmalloc((n+1) * sizeof(XColor));
-  PARI_ExactColors = (XColor *) gpmalloc((n+1) * sizeof(XColor));
+  PARI_Colors = (XColor *) pari_malloc((n+1) * sizeof(XColor));
+  PARI_ExactColors = (XColor *) pari_malloc((n+1) * sizeof(XColor));
   for (i=0; i<n; i++)
   {
     int r, g, b;

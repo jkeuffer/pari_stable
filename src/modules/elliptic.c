@@ -2802,7 +2802,7 @@ ellap2(GEN e, ulong p)
     if (!s) s = 1;
     if (!table)
     {
-      table = (multiple *) gpmalloc((s+1) * sizeof(multiple));
+      table = (multiple *) pari_malloc((s+1) * sizeof(multiple));
       F = f;
     }
     s_powell(&F, &f, B, cp4, p);
@@ -2856,7 +2856,7 @@ FOUND:
     h = sclosest_lift(A, B, p2p);
     avma = av; if (!i) break;
   }
-  if (table) gpfree(table);
+  if (table) pari_free(table);
   return stoi(KRO==1? p1p-h: h-p1p);
 }
 

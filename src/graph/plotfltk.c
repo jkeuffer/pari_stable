@@ -63,7 +63,7 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
 
     this->my_w=w; this->my_x=x; this->my_y=y; this->my_lw=lw;
     numcolors = lg(pari_colormap)-1;
-    color = (Fl_Color*)gpmalloc(numcolors*sizeof(Fl_Color));
+    color = (Fl_Color*)pari_malloc(numcolors*sizeof(Fl_Color));
     for (i = 1; i < lg(pari_colormap); i++)
     {
       int r, g, b;

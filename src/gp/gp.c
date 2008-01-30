@@ -145,7 +145,7 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
   grow_init(A);
   for (c->n = 0; s <= send; c->n++)
   {
-    char *u = (char*)gpmalloc(strlen(s) + 1);
+    char *u = (char*)pari_malloc(strlen(s) + 1);
     skip_space(s);
     if (*s == '"') s = readstring(s, u);
     else
@@ -162,8 +162,8 @@ parse_texmacs_command(tm_cmd *c, const char *ch)
 static void
 free_cmd(tm_cmd *c)
 {
-  while (c->n--) gpfree((void*)c->v[c->n]);
-  gpfree((void*)c->v);
+  while (c->n--) pari_free((void*)c->v[c->n]);
+  pari_free((void*)c->v);
 }
 
 static void
@@ -261,20 +261,20 @@ print_fun_list(char **list, long nbli)
   if (nbcol * maxlen == w) nbcol--;
   if (!nbcol) nbcol = 1;
 
-  pariputc('\n'); i=0;
+  pari_putc('\n'); i=0;
   for (l=list; *l; l++)
   {
-    pariputs(*l); i++;
+    pari_puts(*l); i++;
     if (i >= nbcol)
     {
-      i=0; pariputc('\n');
+      i=0; pari_putc('\n');
       if (nbli && j++ > nbli) { j = 0; hit_return(); }
       continue;
     }
     len = maxlen - strlen(*l);
-    while (len--) pariputc(' ');
+    while (len--) pari_putc(' ');
   }
-  if (i) pariputc('\n');
+  if (i) pari_putc('\n');
 }
 
 static void
@@ -284,7 +284,7 @@ commands(long n)
   size_t size = LIST_LEN, s = 0;
   long i;
   entree *ep;
-  char **list = (char **) gpmalloc((size+1)*sizeof(char *));
+  char **list = (char **) pari_malloc((size+1)*sizeof(char *));
 
   for (i = 0; i < functions_tblsz; i++)
     for (ep = functions_hash[i]; ep; ep = ep->next)
@@ -304,13 +304,13 @@ commands(long n)
 	if (++s >= size)
 	{
 	  size += LIST_LEN+1;
-	  list = (char**) gprealloc(list, size*sizeof(char *));
+	  list = (char**) pari_realloc(list, size*sizeof(char *));
 	}
       }
     }
   list[s] = NULL;
   print_fun_list(list, term_height()-4);
-  gpfree(list);
+  pari_free(list);
 }
 
 static void
@@ -320,11 +320,11 @@ center(const char *s)
   char *buf, *u;
 
   if (pad<0) pad=0; else pad >>= 1;
-  u = buf = (char*)gpmalloc(l + pad + 2);
+  u = buf = (char*)pari_malloc(l + pad + 2);
   for (i=0; i<pad; i++) *u++ = ' ';
   while (*s) *u++ = *s++;
   *u++ = '\n'; *u = 0;
-  pariputs(buf); gpfree(buf);
+  pari_puts(buf); pari_free(buf);
 }
 
 static void
@@ -359,7 +359,7 @@ download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'",
 GPDATADIR);
   print_text(s); avma = av;
 
-  pariputs("\nThree mailing lists are devoted to PARI:\n\
+  pari_puts("\nThree mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
   - pari-dev for everything related to the development of PARI, including\n\
     suggestions, technical questions, bug reports and patch submissions.\n\
@@ -372,7 +372,7 @@ authors directly by email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
 static void
 gentypes(void)
 {
-  pariputs("List of the PARI types:\n\
+  pari_puts("List of the PARI types:\n\
   t_INT    : long integers     [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_REAL   : long real numbers [ cod1 ] [ cod2 ] [ man_1 ] ... [ man_k ]\n\
   t_INTMOD : integermods       [ code ] [ mod  ] [ integer ]\n\
@@ -401,7 +401,7 @@ gentypes(void)
 static void
 menu_commands(void)
 {
-  pariputs("Help topics: for a list of relevant subtopics, type ?n for n in\n\
+  pari_puts("Help topics: for a list of relevant subtopics, type ?n for n in\n\
   0: user-defined functions (aliases, installed and user functions)\n\
   1: Standard monadic or dyadic OPERATORS\n\
   2: CONVERSIONS and similar elementary functions\n\
@@ -420,7 +420,7 @@ Also:\n\
   ? functionname (short on-line help)\n\
   ?\\             (keyboard shortcuts)\n\
   ?.             (member functions)\n");
-  if (has_ext_help()) pariputs("\
+  if (has_ext_help()) pari_puts("\
 Extended help (if available):\n\
   ??             (opens the full user's manual in a dvi previewer)\n\
   ??  tutorial / refcard / libpari (tutorial/reference card/libpari manual)\n\
@@ -431,7 +431,7 @@ Extended help (if available):\n\
 static void
 slash_commands(void)
 {
-  pariputs("#       : enable/disable timer\n\
+  pari_puts("#       : enable/disable timer\n\
 ##      : print time for last result\n\
 \\\\      : comment up to end of line\n\
 \\a {n}  : print result in raw format (readable by PARI)\n\
@@ -464,7 +464,7 @@ slash_commands(void)
 static void
 member_commands(void)
 {
-  pariputs("\
+  pari_puts("\
 Member functions, followed by relevant objects\n\n\
 a1-a6, b2-b8, c4-c6 : coeff. of the curve.            ell\n\
 area : area                                           ell\n\
@@ -480,7 +480,7 @@ gen  : generators                    bid, prid, clgp,          bnf, bnr\n\
 index: index                                               nf, bnf, bnr\n\
 j    : j-invariant                                    ell\n");
 /* split: some compilers can't handle long constant strings */
-  pariputs("\
+  pari_puts("\
 mod  : modulus                       bid,                           bnr\n\
 nf   : number field                                            bnf, bnr\n\
 no   : number of elements            bid,       clgp,          bnf, bnr\n\
@@ -523,7 +523,7 @@ filter_quotes(const char *s)
       case '`' : backquote++; break;
       case '"' : doubquote++;
     }
-  str = (char*)gpmalloc(l + quote * (strlen(QUOTE)-1)
+  str = (char*)pari_malloc(l + quote * (strlen(QUOTE)-1)
 			  + doubquote * (strlen(DOUBQUOTE)-1)
 			  + backquote * (strlen(BACKQUOTE)-1) + 1);
   t = str;
@@ -556,7 +556,7 @@ external_help(const char *s, int num)
   if (!GP_DATA->help || !*(GP_DATA->help))
     pari_err(talker,"no external help program");
   t = filter_quotes(s);
-  str = (char*)gpmalloc(strlen(GP_DATA->help) + strlen(t) + 64);
+  str = (char*)pari_malloc(strlen(GP_DATA->help) + strlen(t) + 64);
   *ar = 0;
   if (num < 0)
     opt = "-k";
@@ -564,12 +564,12 @@ external_help(const char *s, int num)
     sprintf(ar,"@%d",num);
   sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,t,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
-  gpfree(str);
-  gpfree(t);
+  pari_free(str);
+  pari_free(t);
   while (fgets(buf, nbof(buf), f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;
-    pariputs(buf);
+    pari_puts(buf);
     if (nl_read(buf) && ++li > nbli) { hit_return(); li = 0; }
   }
   pari_fclose(z);
@@ -609,7 +609,7 @@ ok_external_help(char **s)
 
 /* don't mess readline display */
 static void
-aide_print(const char *s1, const char *s2) { pariprintf("%s: %s\n", s1, s2); }
+aide_print(const char *s1, const char *s2) { pari_printf("%s: %s\n", s1, s2); }
 
 static void
 aide0(const char *s0, int flag)
@@ -671,7 +671,7 @@ aide0(const char *s0, int flag)
   }
 
   ep1 = ep;  ep = do_alias(ep); s0 = s;
-  if (ep1 != ep) { pariprintf("%s is aliased to:\n\n",s0); s0 = ep->name; }
+  if (ep1 != ep) { pari_printf("%s is aliased to:\n\n",s0); s0 = ep->name; }
 
   switch(EpVALENCE(ep))
   {
@@ -680,9 +680,9 @@ aide0(const char *s0, int flag)
       {
         GEN str=gel(ep->value,5);
         if (!ep->help || long_help)
-          pariprintf("%s(%s)=%s",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
+          pari_printf("%s(%s)=%s",ep->name,GSTR(gel(str,1)),GSTR(gel(str,2)));
         if (!ep->help) return;
-        if (long_help) { pariputs("\n\n"); long_help=0; }
+        if (long_help) { pari_puts("\n\n"); long_help=0; }
       }
       else if (!ep->help) { aide_print(s, "user defined variable"); return; }
       long_help=0; break;
@@ -708,7 +708,7 @@ aide(const char *s, long flag)
     if (*s == '?') { flag |= h_APROPOS; s++; }
   }
   term_color(c_HELP); aide0(s,flag); term_color(c_NONE);
-  if ((flag & h_RL) == 0) pariputc('\n');
+  if ((flag & h_RL) == 0) pari_putc('\n');
 }
 
 /********************************************************************/
@@ -758,7 +758,7 @@ print_shortversion(void)
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
   minor = n & mask; n >>= PARI_VERSION_SHIFT;
   major = n;
-  pariprintf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
+  pari_printf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
 }
 
 static char *
@@ -811,14 +811,14 @@ gp_head(void)
     printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
 	   DATA_BEGIN, DATA_END);
 #endif
-  print_version(); pariputs("\n");
+  print_version(); pari_puts("\n");
   center("Copyright (C) 2000-2008 The PARI Group");
   print_text("\nPARI/GP is free software, covered by the GNU General Public \
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
-  pariputs("\n\
+  pari_puts("\n\
 Type ? for help, \\q to quit.\n\
 Type ?12 for how to get moral (and possibly technical) support.\n\n");
-  pariprintf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
+  pari_printf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
 }
 
 /********************************************************************/
@@ -826,7 +826,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 /**                         METACOMMANDS                           **/
 /**                                                                **/
 /********************************************************************/
-#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
+#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pari_puts(s)
 
 void
 gp_quit(void)
@@ -905,7 +905,7 @@ escape(char *tch)
 	  s = get_sep(s); if (!*s) s = current_logfile;
 	  write0(s, mkvec(x)); return;
       }
-      pariputc('\n'); return;
+      pari_putc('\n'); return;
     }
 
     case 'c': commands(-1); break;
@@ -1029,7 +1029,7 @@ chron(char *s)
   { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
     if (*s == '#') s++;
     if (*s) return 0;
-    pariputs(gp_format_time(ti_LAST));
+    pari_puts(gp_format_time(ti_LAST));
   }
   else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
   return 1;
@@ -1074,7 +1074,7 @@ get_home(int *free_it)
   if ((drv = os_getenv("HOMEDRIVE"))
    && (pth = os_getenv("HOMEPATH")))
   { /* looks like WinNT */
-    char *buf = (char*)gpmalloc(strlen(pth) + strlen(drv) + 1);
+    char *buf = (char*)pari_malloc(strlen(pth) + strlen(drv) + 1);
     sprintf(buf, "%s%s",drv,pth);
     *free_it = 1; return buf;
   }
@@ -1109,8 +1109,8 @@ gprc_get(char *path)
     char *str, *s, c;
     long l;
     l = strlen(home); c = home[l-1];
-    str = strcpy((char*)gpmalloc(l+7), home);
-    if (free_it) gpfree((void*)home);
+    str = strcpy((char*)pari_malloc(l+7), home);
+    if (free_it) pari_free((void*)home);
     s = str + l;
     if (c != '/' && c != '\\') *s++ = '/';
 #ifdef UNIX
@@ -1130,13 +1130,13 @@ gprc_get(char *path)
       if (*t == '/')
       {
 	long l = t - path + 1;
-	t = (char*)gpmalloc(l + 6);
+	t = (char*)pari_malloc(l + 6);
 	strncpy(t, path, l);
 	strcpy(t+l, s); f = gprc_chk(t);
-	gpfree(t);
+	pari_free(t);
       }
     }
-    gpfree(str);
+    pari_free(str);
   }
   return f;
 }
@@ -1268,7 +1268,7 @@ gp_initrc(growarray A, char *path)
       if (!strncmp(s,"read",4) && (s[4] == ' ' || s[4] == '\t' || s[4] == '"'))
       { /* read file */
 	s += 4;
-	t = (char*)gpmalloc(strlen(s) + 1);
+	t = (char*)pari_malloc(strlen(s) + 1);
 	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
 	grow_append(A, t);
       }
@@ -1370,10 +1370,10 @@ get_line_from_file(const char *PROMPT, filtre_t *F, FILE *file)
   if (*s && PROMPT) /* don't echo if from gprc */
   {
     if (GP_DATA->flags & ECHO)
-      { pariputs(PROMPT); pariputs(s); pariputc('\n'); }
+      { pari_puts(PROMPT); pari_puts(s); pari_putc('\n'); }
     else if (pari_logfile)
       update_logfile(PROMPT, s);
-    pariflush();
+    pari_flush();
   }
   if (GP_DATA->flags & TEXMACS)
   {
@@ -1416,10 +1416,10 @@ gp_read_line(filtre_t *F, const char *PROMPT)
 #endif
     {
       if (!PROMPT) PROMPT = color_prompt( expand_prompt(GP_DATA->prompt, F) );
-      pariputs(PROMPT);
+      pari_puts(PROMPT);
       res = get_line_from_file(PROMPT,F,pari_infile);
     }
-    if (!disable_color) { term_color(c_NONE); pariflush(); }
+    if (!disable_color) { term_color(c_NONE); pari_flush(); }
   }
   else
     res = get_line_from_file(DFT_PROMPT,F,pari_infile);
@@ -1500,10 +1500,10 @@ gp_main_loop(int ismain)
     z = pari_eval_str(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
 
-    if (!pari_last_was_newline()) pariputc('\n');
+    if (!pari_last_was_newline()) pari_putc('\n');
 
     if (GP_DATA->flags & CHRONO)
-      pariputs(gp_format_time(ti_REGULAR));
+      pari_puts(gp_format_time(ti_REGULAR));
     else
       (void)gp_format_time(ti_NOPRINT);
     if (z == gnil) continue;
@@ -1548,16 +1548,16 @@ break_loop(long numerr)
   oldinfile = pari_infile;
   init_filtre(&F, b);
 
-  term_color(c_ERR); pariputc('\n');
+  term_color(c_ERR); pari_putc('\n');
   errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (numerr == siginter)
-    pariputs("[type <Return> in empty line to continue]\n");
+    pari_puts("[type <Return> in empty line to continue]\n");
   pari_infile = stdin;
   for(;;)
   {
     GEN x;
-    if (setjmp(b->env)) pariputc('\n');
+    if (setjmp(b->env)) pari_putc('\n');
     if (! gp_read_line(&F, BREAK_LOOP_PROMPT))
     {
       if (popinfile()) break;
@@ -1576,7 +1576,7 @@ break_loop(long numerr)
     if (x == gnil || is_silent(b->buf)) continue;
 
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
-    term_color(c_NONE); pariputc('\n');
+    term_color(c_NONE); pari_putc('\n');
   }
   b = NULL; pari_infile = oldinfile;
   pop_buffer(); return go_on;
@@ -1691,7 +1691,7 @@ static void
 init_trivial_stack(void)
 {
   const size_t s = 2048;
-  bot = (pari_sp)gpmalloc(s);
+  bot = (pari_sp)pari_malloc(s);
   avma = top = bot + s;
 }
 
@@ -1732,7 +1732,7 @@ read_opt(growarray A, long argc, char **argv)
 	if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
 	if (strcmp(t, "version") == 0) {
 	  init_trivial_stack(); print_version();
-	  gpfree((void*)bot); exit(0);
+	  pari_free((void*)bot); exit(0);
 	}
 	if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
 	if (strcmp(t, "emacs") == 0) { GP_DATA->flags |= EMACS; break; }
@@ -1829,7 +1829,7 @@ main(int argc, char **argv)
     FILE *l = pari_logfile;
     VOLATILE long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
-    for (i = 0; i < A->n;  gpfree(A->v[i]),i++) {
+    for (i = 0; i < A->n;  pari_free(A->v[i]),i++) {
       if (setjmp(GP_DATA->env))
       {
 	fprintferr("... skipping file '%s'\n", A->v[i]);
@@ -1859,9 +1859,9 @@ prettyp_wait(void)
   const char *s = "                                                     \n";
   long i = 2000;
 
-  pariputs("\n\n"); pariflush(); /* start translation */
-  while (--i) pariputs(s);
-  pariputs("\n"); pariflush();
+  pari_puts("\n\n"); pari_flush(); /* start translation */
+  while (--i) pari_puts(s);
+  pari_puts("\n"); pari_flush();
 }
 
 /* initialise external prettyprinter (tex2mail) */
@@ -1873,7 +1873,7 @@ prettyp_init(void)
   if (pp->file || (pp->file = try_pipe(pp->cmd, mf_OUT))) return 1;
 
   pari_warn(warner,"broken prettyprinter: '%s'",pp->cmd);
-  gpfree(pp->cmd); pp->cmd = NULL; return 0;
+  pari_free(pp->cmd); pp->cmd = NULL; return 0;
 }
 
 /* n = history number. if n = 0 no history */
@@ -1888,7 +1888,7 @@ tex2mail_output(GEN z, long n)
 
   /* Emit first: there may be lines before the prompt */
   if (n) term_color(c_OUTPUT);
-  pariflush();
+  pari_flush();
   pari_outfile = GP_DATA->pp->file->file;
   T.prettyp = f_TEX;
   pari_logfile = NULL;
@@ -1907,7 +1907,7 @@ tex2mail_output(GEN z, long n)
                 c_hist, n, c_out);
       else
         sprintf(s, "\\%%%ld = ", n);
-      pariputs(s);
+      pari_puts(s);
     }
     if (o_logfile) {
       switch (logstyle) {
@@ -1933,10 +1933,10 @@ tex2mail_output(GEN z, long n)
     if (logstyle == logstyle_TeX) {
       T.TeXstyle |= TEXSTYLE_BREAK;
       gen_output(z, &T);
-      pariputc('%');
+      pari_putc('%');
     } else
 	outbrute(z);
-    pariputc('\n'); pariflush();
+    pari_putc('\n'); pari_flush();
   }
   pari_logfile = o_logfile;
   pari_outfile = o_out;
@@ -1952,7 +1952,7 @@ texmacs_output(GEN z, long n)
   printf("%clatex:", DATA_BEGIN);
   if (n) printf("\\magenta\\%%%ld = ", n);
   printf("$\\blue %s$%c", sz,DATA_END);
-  gpfree(sz); fflush(stdout);
+  pari_free(sz); fflush(stdout);
 }
 
     /* REGULAR */
@@ -1969,7 +1969,7 @@ normal_output(GEN z, long n)
     {
       term_color(c_HIST);
       sprintf(buf, "%%%ld = ", n);
-      pariputs(buf);
+      pari_puts(buf);
       l = strlen(buf);
     }
   }
@@ -1979,9 +1979,9 @@ normal_output(GEN z, long n)
   if (GP_DATA->lim_lines)
     lim_lines_output(s, l, GP_DATA->lim_lines);
   else
-    pariputs(s);
+    pari_puts(s);
   free(s);
-  term_color(c_NONE); pariputc('\n');
+  term_color(c_NONE); pari_putc('\n');
 }
 
 void
@@ -1989,11 +1989,11 @@ gp_output(GEN z, gp_data *G)
 {
   if (G->flags & TEST) {
     init80col();
-    gen_output(z, G->fmt); pariputc('\n');
+    gen_output(z, G->fmt); pari_putc('\n');
   }
   else if (G->flags & TEXMACS)
     texmacs_output(z, G->hist->total);
   else if (G->fmt->prettyp != f_PRETTY || !tex2mail_output(z, G->hist->total))
     normal_output(z, G->hist->total);
-  pariflush();
+  pari_flush();
 }

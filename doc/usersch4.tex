@@ -250,21 +250,21 @@ You should make use of the PARI stack as much as possible, and avoid
 allocating objects using the customary functions. If you do, you should
 use, or at least have a very close look at, the following wrappers:
 
-\fun{void*}{gpmalloc}{size_t size} calls \kbd{malloc} to allocate
+\fun{void*}{pari_malloc}{size_t size} calls \kbd{malloc} to allocate
 \kbd{size} bytes and returns a pointer to the allocated memory. If the
 request fails, an error is raised. The \kbd{SIGINT} signal is blocked until
 \kbd{malloc} returns, to avoid leaving the system stack in an inconsistent
 state.
 
-\fun{void*}{gprealloc}{void* ptr, size_t size} as \kbd{gpmalloc} but calls
-\kbd{realloc} instead of \kbd{malloc}.
+\fun{void*}{pari_realloc}{void* ptr, size_t size} as \kbd{pari_malloc} but
+calls \kbd{realloc} instead of \kbd{malloc}.
 
-\fun{void*}{gpcalloc}{size_t size} as \kbd{gpmalloc}, setting the
+\fun{void*}{pari_calloc}{size_t size} as \kbd{pari_malloc}, setting the
 memory to zero.
 
-\fun{void}{gpfree}{void* ptr} calls \kbd{free} to liberate the memory space
+\fun{void}{pari_free}{void* ptr} calls \kbd{free} to liberate the memory space
 pointed to by \kbd{ptr}, which must have been allocated by \kbd{malloc}
-(\kbd{gpmalloc}) or \kbd{realloc} (\kbd{gprealloc}). The \kbd{SIGINT} signal
+(\kbd{pari_malloc}) or \kbd{realloc} (\kbd{pari_realloc}). The \kbd{SIGINT} signal
 is blocked until \kbd{free} returns.
 
 If you use the standard \kbd{libc} functions instead of our wrappers, then
@@ -1596,99 +1596,116 @@ file (from \tet{writebin}) containing more than one object, a \typ{VEC}
 containing them all is returned. This is because binary objects bypass the
 parser, hence reading them has no useful side effect.
 
-\subsec{Output to screen or file}.\sidx{output}
+\subsec{Output to screen or file, output to string}.\sidx{output}
 
 General output functions return nothing but print a character string as a
-side effect. Low level routines are available:
+side effect. Low level routines are available to write on PARI output stream
+\tet{pari_outfile} (\tet{stdout} by default):
 
-\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
+\fun{void}{pari_putc}{char c}: write character \kbd{c} to the output stream.
 
-\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+\fun{void}{pari_puts}{char *s}: write \kbd{s} to the output stream.
 
-\noindent But the most versatile such function is
+\fun{void}{pari_flush}{}: flush output stream; most streams are buffered by
+default, this command makes sure that all charaters output so are actually
+written.
 
-\fun{void}{pariprintf}{const char *fmt, ...}
-
-\noindent where \kbd{fmt} is a character string similar to the one
+\fun{void}{pari_printf}{const char *fmt, ...}: the most versatile such
+function. \kbd{fmt} is a character string similar to the one
 \tet{printf} uses. In there, \kbd{\%} characters have a special meaning, and
 describe how to print the remaining operands. In addition to the standard
-format types (see \tet{printf}), you can use the \emph{length modifier}~\kbd{Z}
-to specify that an argument is a \kbd{GEN}. For instance, the following are
-valid conversions for a \kbd{GEN} argument
+format types (see the GP function \tet{printf}), you can use the \emph{length
+modifier}~\kbd{Z} to specify that an argument is a \kbd{GEN}. For instance,
+the following are valid conversions for a \kbd{GEN} argument
 \bprog
     %Zs     @com convert to \kbd{char*} (will print an arbitrary \kbd{GEN})
     %Z.10s  @com convert to \kbd{char*}, truncated to 10 chars
     %Z.2f   @com convert to floating point format with 2 decimals
     %Z4d    @com convert to integer, field width at least 4
-@eprog
-For instance we can write:
-\bprog
-    pariprintf("x[%d] = %Zs is not invertible!\n", i, gel(x,i));
+
+    pari_printf("x[%d] = %Zs is not invertible!\n", i, gel(x,i));
 @eprog\noindent
-Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf and
-this would insert the value of its $i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
+Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf 
+(presumably a vector, or a polynomial) and this would insert the value of its
+$i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
 
-Note that \kbd{stdout} is usually buffered; it may be desirable to explicitly
-flush such buffers at times, using
-
-\fun{void}{pariflush}{}: flush output stream.
-
-\noindent A simple variant to \kbd{pariprintf} is
+\noindent A simple variant to \kbd{pari\_printf} is
 
 \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by a newline and a
 buffer flush. This is more or less equivalent to
 \bprog
-    pariprintf("%Zs\n", x);
-    pariflush();
+    pari_printf("%Zs\n", x);
+    pari_flush();
 @eprog
 
-These functions write on (PARI's idea of) standard output. It is also possible
-to write to an arbitrary \kbd{FILE*}:
+These functions write on (PARI's idea of) standard output, and must be used
+if you want your functions to interact nicely with \kbd{gp}. In most
+programs, this is not a concern and it is more flexible to write to an
+explicit \kbd{FILE*}, or to recover a character string:
 
-\fun{void}{parifprintf}{FILE *file, const char *fmt, ...}
+\fun{void}{pari_fprintf}{FILE *file, const char *fmt, ...} writes the
+remaining arguments to stream \kbd{file} according to the format
+specification \kbd{fmt}.
 
-Note that we have \tet{va_list} analogs of the functions seen so far:
+\fun{char *}{pari_sprintf}{const char *fmt, ...} produces a string from the
+remaining arguments, according to the PARI format \kbd{fmt} (see \tet{printf}).
+This is the \kbd{libpari} equivalent of \tet{Strprintf}, and returns a
+\kbd{malloc}'ed string, which must be freed by the caller. Note that contrary
+to the analogous \tet{sprintf} in the \kbd{libc} you do not provide a buffer
+(leading to all kinds of buffer overflow concerns); the function provided is
+actually closer to the GNU extension \kbd{asprintf}, although the latter has
+a different interface.
 
-\fun{void}{parivprintf}{const char *fmt, va_list ap}
-
-\fun{void}{parivfprintf}{FILE *file, const char *fmt, va_list ap}
-
-\misctitle{Remark}. The \tet{pariprintf} output is done on the stream
-\tet{pari_outfile}, which is initialized to \tet{stdout}. You can change PARI's idea of its standard output, redirecting it to another file, using
-
-\fun{void}{switchout}{const char *name} where \kbd{name} is a character string
-giving the name of the file you want to write to; the output is
-\emph{appended} at the end of the file. To close the file and revert to
-outputting to \kbd{stdout}, call \kbd{switchout(NULL)}.
-
-Similarly, errors are sent to the stream \tet{pari_errfile} (\tet{stderr} by
-default), and input is done on the stream \tet{pari_infile}, which you can
-change using
-
-\fun{void}{switchin}{const char *name}, analogous to \tet{switchout} for
-\var{in}-files.
-
-\misctitle{Advanced remark}. All output is done according to the values of
-the \teb{pariOut}~/ \teb{pariErr} global variables which are pointers to
-structs of pointer to functions. If you intend to use these, this
-probably means you are rewriting \kbd{gp}. In that case, have a look at the
-code in \kbd{language/es.c} (\kbd{init80()} or \kbd{GENtostr()} come to mind).
-
-\subsec{Output to string}.\sidx{output}
-
-The following functions convert a PARI \kbd{GEN} to a \kbd{malloc}'ed ASCII
-string, which you should \kbd{free} after use.
+Simple variants of \kbd{pari\_sprintf} convert a \kbd{GEN} to a
+\kbd{malloc}'ed ASCII string, which you must still \kbd{free} after use: 
 
 \fun{char*}{GENtostr}{GEN x}, using the current default output format
 (\kbd{prettymat} by default).
 
 \fun{char*}{GENtoTeXstr}{GEN x}, suitable for inclusion in a \TeX\ file.
 
-\fun{char}{*parisprintf}{const char *fmt, ...} produces a string from the
-remaining arguments, according to the PARI format \kbd{fmt} (see \tet{printf}).
 
-\fun{char}{*parivsprintf}{const char *fmt, va_list ap} the \tet{va_list}
-analog.
+Note that we have \tet{va_list} analogs of the functions of \kbd{printf} type
+seen so far:
+
+\fun{void}{pari_vprintf}{const char *fmt, va_list ap}
+
+\fun{void}{pari_vfprintf}{FILE *file, const char *fmt, va_list ap}
+
+\fun{char *}{pari_vsprintf}{const char *fmt, va_list ap}
+
+\misctitle{Advanced remark}. The functions \tet{pari_putc}, \tet{pari_puts},
+\tet{pari_flush}, \tet{pari_printf} output according to the values of the
+\teb{pariOut}~/ \teb{pariErr} global variables which provides a global
+output context, i.e.~ a set of low-level functions to actually interact with
+a ``stream''.
+
+By default, we have \kbd{pariOut = defaultOut}, the output ``stream'' is an
+actual \kbd{FILE*}, \tet{pari_outfile}, initialized to \tet{stdout}, and
+the low-level printing functions are actually the standard \kbd{putc} /
+\kbd{puts}, plus some magic to handle a logfile if one is open. If you intend
+to change \kbd{pariOut}, diverting output in non-trivial ways, this probably
+means you are rewriting \kbd{gp}. In that case, have a look at the code in
+\kbd{language/es.c} (\kbd{pariOut80} comes to mind).
+
+Still keeping the default output context \kbd{defaultOut}, you can change
+PARI's standard output, redirecting \tet{pari_outfile} to another file, using
+
+\fun{void}{switchout}{const char *name} where \kbd{name} is a character string
+giving the name of the file you want to write to; the output is
+\emph{appended} at the end of the file. To close the file and revert to
+outputting to \kbd{stdout}, call \kbd{switchout(NULL)}.
+
+Similarly, by default, \kbd{pariErr = defaultErr} and errors are sent to the
+stream \tet{pari_errfile} (\tet{stderr} by default). Finally, input is read
+from the stream \tet{pari_infile}, which you can change using
+
+\fun{void}{switchin}{const char *name}, analogous to \tet{switchout} for
+\var{in}-files.
+
+Note that these functions are quite complicated, maintaining stacks of files
+in allow smooth error recovery and \kbd{gp} interaction. You will be better
+off not using them.
 
 \subsec{Errors}.\sidx{error}\kbdsidx{talker}
 
@@ -1706,7 +1723,7 @@ also use it in the more versatile guise
   pari_err(talker, format, ...);
 @eprog\noindent
 where \kbd{format} describes the format to use to write the remaining
-operands, as in the \tet{pariprintf} function. For instance:
+operands, as in the \tet{pari_printf} function. For instance:
 \bprog
   pari_err(talker, "x[%d] = %Zs is not invertible!", i, gel(x,i));
 @eprog\noindent
@@ -1752,7 +1769,7 @@ The valid \emph{warning} keywords are \tet{warner} (general), \tet{warnprec}
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
 
 For debugging output, you can use the standard output
-functions, \tet{output} and \tet{pariprintf} mainly. Corresponding to the
+functions, \tet{output} and \tet{pari_printf} mainly. Corresponding to the
 \kbd{gp} metacommand \kbd{\b x}, you can also output the \idx{hexadecimal
 tree} associated to an object:
 
@@ -1908,11 +1925,11 @@ Recall that \kbd{pari\_err} does not return but ends with a \kbd{longjmp}
 statement. As well, instead of explicit \kbd{printf}~/ \kbd{fprintf}
 statements, use the following encapsulated variants:
 
-\fun{void}{pariputc}{char c}: write character \kbd{c} to the output stream.
+\fun{void}{pari_putc}{char c}: write character \kbd{c} to the output stream.
 
-\fun{void}{pariputs}{char *s}: write \kbd{s} to the output stream.
+\fun{void}{pari_puts}{char *s}: write \kbd{s} to the output stream.
 
-\fun{void}{pariprintf}{const char *fmt, ...}: write following arguments to the
+\fun{void}{pari_printf}{const char *fmt, ...}: write following arguments to the
 output stream, according to the conversion specifications in format \kbd{fmt}
 (see \tet{printf}).
 

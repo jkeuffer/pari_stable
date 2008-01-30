@@ -2512,7 +2512,7 @@ dprintvec(double *V, long m)
   long i;
   fprintferr("[");
   for (i=1; i<m; i++) fprintferr("%15.15e, ",V[i]);
-  fprintferr("%15.15e]\n",V[m]); pariflush();
+  fprintferr("%15.15e]\n",V[m]); pari_flush();
 }
 
 static void
@@ -2526,7 +2526,7 @@ dprintmat(double **M, long r, long c)
     fprintferr("%15.15e;\n ",M[i][c]);
   }
   for (j=1; j<c; j++) fprintferr("%15.15e, ",M[r][j]);
-  fprintferr("%15.15e]\n",M[r][c]); pariflush();
+  fprintferr("%15.15e]\n",M[r][c]); pari_flush();
 }
 #endif
 

@@ -455,7 +455,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
 
   lz = nx+ny+1; nz = lz-2;
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
-  p1 = (char*)gpmalloc(ny);
+  p1 = (char*)pari_malloc(ny);
   for (i=0; i<ny; i++)
   {
     p1[i] = !isrationalzero(gel(y,i));
@@ -463,7 +463,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
   }
   for (  ; i<nx; i++) gel(z,i) = mulpol_limb(x+i,y,p1,0,ny);
   for (  ; i<nz; i++) gel(z,i) = mulpol_limb(x+i,y,p1,i-nx+1,ny);
-  gpfree(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
+  pari_free(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
 }
 
 /* return (x * X^d) + y. Assume d > 0, y != 0 */
@@ -617,7 +617,7 @@ sqrpol(GEN x, long nx)
   if (!nx) return zeropol(0);
   lz = (nx << 1) + 1, nz = lz-2;
   z = cgetg(lz,t_POL) + 2;
-  p2 = (char*)gpmalloc(nx);
+  p2 = (char*)pari_malloc(nx);
   for (i=0; i<nx; i++)
   {
     p2[i] = !isrationalzero(gel(x,i));
@@ -641,7 +641,7 @@ sqrpol(GEN x, long nx)
       p1 = gadd(p1, gsqr(gel(x,i>>1)));
     gel(z,i) = gerepileupto(av,p1);
   }
-  gpfree(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
+  pari_free(p2); z -= 2; z[1]=0; return normalizepol_i(z,lz);
 }
 
 GEN

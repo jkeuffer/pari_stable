@@ -134,8 +134,8 @@ strconcat(GEN x, GEN y)
   x = cgetg(l + 1, t_STR); str = GSTR(x);
   strcpy(str,   sx);
   strcpy(str+lx,sy);
-  if (flx) gpfree(sx);
-  if (fly) gpfree(sy);
+  if (flx) pari_free(sx);
+  if (fly) pari_free(sy);
   return x;
 }
 
@@ -2333,7 +2333,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
   x = shallowcopy(x0);
   m=lg(x[1])-1; r=0;
   c = const_vecsmall(m, 0);
-  d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
+  d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
     j = get_pivot(gel(x,k), gel(x0,k), c, 1);
@@ -2410,14 +2410,14 @@ image(GEN x)
   gauss_pivot(x,&d,&r);
 
   /* r = dim ker(x) */
-  if (!r) { avma=av; if (d) gpfree(d); return gcopy(x); }
+  if (!r) { avma=av; if (d) pari_free(d); return gcopy(x); }
 
   /* r = dim Im(x) */
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
     if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  gpfree(d); return y;
+  pari_free(d); return y;
 }
 
 GEN
@@ -2431,7 +2431,7 @@ imagecompl(GEN x)
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
     if (!d[i]) gel(y,j++) = utoipos(i);
-  if (d) gpfree(d); return y;
+  if (d) pari_free(d); return y;
 }
 
 /* for hnfspec: imagecompl(trans(x)) + image(trans(x)) */
@@ -2448,7 +2448,7 @@ imagecomplspec(GEN x, long *nlze)
   for (i=j=1, k=r+1; i<l; i++)
     if (d[i]) y[k++]=i; else y[j++]=i;
   *nlze = r;
-  if (d) gpfree(d); return y;
+  if (d) pari_free(d); return y;
 }
 
 static GEN
@@ -2511,7 +2511,7 @@ get_suppl(GEN x, GEN d, long r)
   rx = lg(x)-1;
   if (!rx) pari_err(talker,"empty matrix in suppl");
   n = lg(x[1])-1;
-  if (rx == n && r == 0) { gpfree(d); return gcopy(x); }
+  if (rx == n && r == 0) { pari_free(d); return gcopy(x); }
   y = cgetg(n+1, t_MAT);
   av = avma;
   c = const_vecsmall(n,0);
@@ -2533,7 +2533,7 @@ get_suppl(GEN x, GEN d, long r)
     gel(y,j) = gcopy(gel(y,j));
   for (   ; j<=n; j++)
     gel(y,j) = col_ei(n, y[j]);
-  gpfree(d); return y;
+  pari_free(d); return y;
 }
 
 /* x is an n x k matrix, rank(x) = k <= n. Return an invertible n x n matrix
@@ -2616,7 +2616,7 @@ rank(GEN x)
   gauss_pivot(x,&d,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; if (d) gpfree(d);
+  avma=av; if (d) pari_free(d);
   return lg(x)-1 - r;
 }
 
@@ -2660,7 +2660,7 @@ indexrank0(long n, long r, GEN d)
   {
     for (i=0,j=1; j<=n; j++)
       if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    gpfree(d);
+    pari_free(d);
     qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
   }
   return res;
@@ -3179,7 +3179,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 static GEN
 malloc_copy(GEN d, long n)
 {
-  GEN D = (GEN)gpmalloc((n+1)*sizeof(long));
+  GEN D = (GEN)pari_malloc((n+1)*sizeof(long));
   long i;
   for (i = 0; i <= n; i++) D[i] = d[i];
   return D;
@@ -3203,7 +3203,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
   c = const_vecsmall(m, 0);
-  d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
+  d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -3249,7 +3249,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
   m=lg(x[1])-1; r=0;
   x=shallowcopy(x);
   c = const_vecsmall(m, 0);
-  d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
+  d=(GEN)pari_malloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
     for (j=1; j<=m; j++)
@@ -3293,14 +3293,14 @@ FpM_image(GEN x, GEN p)
   FpM_gauss_pivot(x,p,&d,&r);
 
   /* r = dim ker(x) */
-  if (!r) { avma=av; if (d) gpfree(d); return gcopy(x); }
+  if (!r) { avma=av; if (d) pari_free(d); return gcopy(x); }
 
   /* r = dim Im(x) */
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
     if (d[k]) gel(y,j++) = gcopy(gel(x,k));
-  gpfree(d); return y;
+  pari_free(d); return y;
 }
 
 long
@@ -3313,7 +3313,7 @@ FpM_rank(GEN x, GEN p)
   FpM_gauss_pivot(x,p,&d,&r);
   /* yield r = dim ker(x) */
 
-  avma=av; if (d) gpfree(d);
+  avma=av; if (d) pari_free(d);
   return lg(x)-1 - r;
 }
 

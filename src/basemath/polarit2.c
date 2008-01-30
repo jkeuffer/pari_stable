@@ -4359,7 +4359,7 @@ newtonpoly(GEN x, GEN p)
   if (typ(x)!=t_POL) pari_err(typeer,"newtonpoly");
   n=degpol(x); if (n<=0) { y=cgetg(1,t_VEC); return y; }
   y = cgetg(n+1,t_VEC); x += 2; /* now x[i] = term of degree i */
-  vval = (long *) gpmalloc(sizeof(long)*(n+1));
+  vval = (long *) pari_malloc(sizeof(long)*(n+1));
   for (a=0; a<=n; a++) vval[a] = ggval(gel(x,a),p);
   for (a=0, ind=1; a<n; a++)
   {
@@ -4378,7 +4378,7 @@ newtonpoly(GEN x, GEN p)
     }
     while (ind<=b) { affsi(u1,num); gel(y,ind++) = gdivgs(num,u2); }
   }
-  gpfree(vval); return y;
+  pari_free(vval); return y;
 }
 
 static GEN

@@ -126,7 +126,7 @@ init_hist(gp_data *D, size_t l, ulong total)
   gp_hist *H = D->hist;
   H->total = total;
   H->size = l;
-  H->res = (GEN *) gpcalloc(l * sizeof(GEN));
+  H->res = (GEN *) pari_calloc(l * sizeof(GEN));
 }
 
 static void
@@ -215,8 +215,8 @@ sd_toggle(const char *v, long flag, const char *s, int *ptn)
   {
     case d_RETURN: return utoi(state);
     case d_ACKNOWLEDGE:
-      if (state) pariprintf("   %s = 1 (on)\n", s);
-      else       pariprintf("   %s = 0 (off)\n", s);
+      if (state) pari_printf("   %s = 1 (on)\n", s);
+      else       pari_printf("   %s = 0 (off)\n", s);
       break;
   }
   return gnil;
@@ -268,10 +268,10 @@ sd_ulong(const char *v, long flag, const char *s, ulong *ptn, ulong Min, ulong M
 	{
 	  if (!*msg) msg++; /* single msg, always printed */
 	  else       msg += *ptn; /* one per possible value */
-	  pariprintf("   %s = %lu %s\n", s, *ptn, *msg);
+	  pari_printf("   %s = %lu %s\n", s, *ptn, *msg);
 	}
 	else
-	  pariprintf("   %s = %lu\n", s, *ptn);
+	  pari_printf("   %s = %lu\n", s, *ptn);
       }
       break;
   }
@@ -296,12 +296,12 @@ sd_realprecision(const char *v, long flag)
   if (flag == d_ACKNOWLEDGE)
   {
     long n = prec2ndec(precreal);
-    pariprintf("   realprecision = %ld significant digits", n);
+    pari_printf("   realprecision = %ld significant digits", n);
     if (fmt->sigd < 0)
-      pariputs(" (all digits displayed)");
+      pari_puts(" (all digits displayed)");
     else if (n != fmt->sigd)
-      pariprintf(" (%ld digits displayed)", fmt->sigd);
-    pariputc('\n');
+      pari_printf(" (%ld digits displayed)", fmt->sigd);
+    pari_putc('\n');
   }
   return gnil;
 }
@@ -340,7 +340,7 @@ sd_format(const char *v, long flag)
     return strtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   format = %c.%ld\n", fmt->format, fmt->sigd);
+    pari_printf("   format = %c.%ld\n", fmt->format, fmt->sigd);
   return gnil;
 }
 
@@ -396,7 +396,7 @@ sd_colors(const char *v, long flag)
     v0 = s = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&s);
-    gpfree(v0);
+    pari_free(v0);
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
@@ -424,7 +424,7 @@ sd_colors(const char *v, long flag)
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
     }
     if (flag==d_RETURN) return strtoGENstr(s);
-    pariprintf("   colors = \"%s\"\n",s);
+    pari_printf("   colors = \"%s\"\n",s);
   }
   return gnil;
 }
@@ -468,8 +468,8 @@ sd_graphcolormap(const char *v, long flag)
 	l++;
     if (l < 4)
       pari_err(talker, "too few colors (< 4) in graphcolormap");
-    if (pari_colormap) gpfree(pari_colormap);
-    pari_colormap = (GEN)gpmalloc((l+4*a)*sizeof(long) + s);
+    if (pari_colormap) pari_free(pari_colormap);
+    pari_colormap = (GEN)pari_malloc((l+4*a)*sizeof(long) + s);
     pari_colormap[0] = evaltyp(t_VEC)|evallg(l);
     for (p = t+1, i = 1, lp = pari_colormap+l; i < l; p++)
       switch(*p)
@@ -526,7 +526,7 @@ sd_graphcolormap(const char *v, long flag)
 	gel(cols, i) = vecsmall_to_vec(c);
     }
     if (flag == d_RETURN) return cols;
-    pariprintf("   graphcolormap = %Zs\n", cols);
+    pari_printf("   graphcolormap = %Zs\n", cols);
   }
   return gnil;
 }
@@ -544,7 +544,7 @@ sd_graphcolors(const char *v, long flag)
       else if (*p < '0' || *p > '9')
 	pari_err(talker2, "incorrect value for graphcolors", p, t);
     if (*++p) pari_err(talker2, "incorrect value for graphcolors", p, t);
-    if (pari_graphcolors) gpfree(pari_graphcolors);
+    if (pari_graphcolors) pari_free(pari_graphcolors);
     pari_graphcolors = cgetalloc(t_VECSMALL, l);
     for (p = t+1, i=0; *p; p++)
     {
@@ -564,7 +564,7 @@ sd_graphcolors(const char *v, long flag)
   case d_RETURN:
     return vecsmall_to_vec(pari_graphcolors);
   case d_ACKNOWLEDGE:
-    pariprintf("   graphcolors = %Zs\n", vecsmall_to_vec(pari_graphcolors));
+    pari_printf("   graphcolors = %Zs\n", vecsmall_to_vec(pari_graphcolors));
   }
   return gnil;
 }
@@ -668,7 +668,7 @@ sd_histsize(const char *v, long flag)
       gunclone(resG[g]);
       if (!g) g = sG;
     }
-    gpfree((void*)resG);
+    pari_free((void*)resG);
   }
   return r;
 }
@@ -709,7 +709,7 @@ sd_log(const char *v, long flag)
     if (oldstyle)
     { /* close log */
       if (flag == d_ACKNOWLEDGE)
-	pariprintf("   [logfile was \"%s\"]\n", current_logfile);
+	pari_printf("   [logfile was \"%s\"]\n", current_logfile);
       fclose(pari_logfile); pari_logfile = NULL;
     }
     else
@@ -773,7 +773,7 @@ sd_primelimit(const char *v, long flag)
     if (flag != d_INITRC)
     {
       byteptr ptr = initprimes(n);
-      gpfree(diffptr); diffptr = ptr;
+      pari_free(diffptr); diffptr = ptr;
     }
     GP_DATA->primelimit = n;
   }
@@ -802,16 +802,16 @@ sd_filename(const char *v, long flag, const char *s, char **f)
     char *ev = expand_tilde(v);
     l = strlen(ev) + 256;
     str = (char *) malloc(l);
-    do_strftime(ev,str, l-1); gpfree(ev);
+    do_strftime(ev,str, l-1); pari_free(ev);
     if (GP_DATA->flags & SECURE)
     {
       fprintferr("[secure mode]: about to change %s to '%s'. OK ? (^C if not)\n",s, str);
       hit_return();
     }
-    *f = pari_strdup(str); gpfree(str); gpfree(old);
+    *f = pari_strdup(str); pari_free(str); pari_free(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f);
-  if (flag == d_ACKNOWLEDGE) pariprintf("   %s = \"%s\"\n",s,*f);
+  if (flag == d_ACKNOWLEDGE) pari_printf("   %s = \"%s\"\n",s,*f);
   return gnil;
 }
 
@@ -854,13 +854,13 @@ sd_help(const char *v, long flag)
   if (*v)
   {
     if (GP_DATA->flags & SECURE) err_secure("help",v);
-    if (GP_DATA->help) gpfree((void*)GP_DATA->help);
+    if (GP_DATA->help) pari_free((void*)GP_DATA->help);
     GP_DATA->help = expand_tilde(v);
   }
   str = GP_DATA->help? GP_DATA->help: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   help = \"%s\"\n", str);
+    pari_printf("   help = \"%s\"\n", str);
   return gnil;
 }
 
@@ -870,13 +870,13 @@ sd_datadir(const char *v, long flag)
   const char *str;
   if (*v)
   {
-    if (pari_datadir) gpfree(pari_datadir);
+    if (pari_datadir) pari_free(pari_datadir);
     pari_datadir = expand_tilde(v);
   }
   str = pari_datadir? pari_datadir: "none";
   if (flag == d_RETURN) return strtoGENstr(str);
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   datadir = \"%s\"\n", str);
+    pari_printf("   datadir = \"%s\"\n", str);
   return gnil;
 }
 
@@ -886,14 +886,14 @@ sd_path(const char *v, long flag)
   gp_path *p = GP_DATA->path;
   if (*v)
   {
-    gpfree((void*)p->PATH);
+    pari_free((void*)p->PATH);
     p->PATH = pari_strdup(v);
     if (flag == d_INITRC) return gnil;
     gp_expand_path(p);
   }
   if (flag == d_RETURN) return strtoGENstr(p->PATH);
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   path = \"%s\"\n",p->PATH);
+    pari_printf("   path = \"%s\"\n",p->PATH);
   return gnil;
 }
 
@@ -925,13 +925,13 @@ sd_prettyprinter(const char *v, long flag)
       pp->file = f;
     }
     pp->cmd = cancel? NULL: pari_strdup(v);
-    if (old) gpfree(old);
+    if (old) pari_free(old);
     if (flag == d_INITRC) return gnil;
   }
   if (flag == d_RETURN)
     return strtoGENstr(pp->cmd? pp->cmd: "");
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
+    pari_printf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
 }
 
@@ -941,7 +941,7 @@ sd_prompt_set(const char *v, long flag, const char *how, char *p)
   if (*v) strncpy(p,v,MAX_PROMPT_LEN);
   if (flag == d_RETURN) return strtoGENstr(p);
   if (flag == d_ACKNOWLEDGE)
-    pariprintf("   prompt%s = \"%s\"\n", how, p);
+    pari_printf("   prompt%s = \"%s\"\n", how, p);
   return gnil;
 }
 

@@ -140,13 +140,13 @@ delete_cache(RELCACHE_t *M)
   REL_t *rel;
   for (rel = M->base+1; rel <= M->last; rel++)
   {
-    gpfree((void*)rel->R);
+    pari_free((void*)rel->R);
     if (!rel->m) continue;
     gunclone(rel->m);
     if (!rel->ex) continue;
     gunclone(rel->ex);
   }
-  gpfree((void*)M->base); M->base = NULL;
+  pari_free((void*)M->base); M->base = NULL;
 }
 
 static void
@@ -160,7 +160,7 @@ delete_FB(FB_t *F)
     gunclone(S->alg);
     gunclone(S->ord);
     if (S->arc) gunclone(S->arc);
-    S = S->prev; gpfree((void*)T);
+    S = S->prev; pari_free((void*)T);
   }
   gunclone(F->subFB);
 }
@@ -179,7 +179,7 @@ reallocate(RELCACHE_t *M, long len)
 {
   REL_t *old = M->base;
   M->len = len;
-  M->base = (REL_t*)gprealloc((void*)old, (len+1) * sizeof(REL_t));
+  M->base = (REL_t*)pari_realloc((void*)old, (len+1) * sizeof(REL_t));
   if (old)
   {
     size_t last = M->last - old, chk = M->chk - old, end = M->end - old;
@@ -336,7 +336,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   powFB_t *old = F->pow, *New;
 
   if (DEBUGLEVEL) fprintferr("Computing powers for subFB: %Zs\n",F->subFB);
-  F->pow = New = (powFB_t*) gpmalloc(sizeof(powFB_t));
+  F->pow = New = (powFB_t*) pari_malloc(sizeof(powFB_t));
   Id2 = cgetg(n, t_VEC);
   Alg = cgetg(n, t_VEC);
   Ord = cgetg(n, t_VECSMALL);
@@ -2010,7 +2010,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
 				&& ! addcolumn_mod(rel->R,invp,L, mod_p))
       { /* Q-dependent from previous ones: forget it */
-	gpfree((void*)rel->R); rel--;
+	pari_free((void*)rel->R); rel--;
 	if (DEBUGLEVEL>1) fprintferr("*");
 	if (++dependent > maxtry_DEP) break;
 	continue;
@@ -2134,7 +2134,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       if (already_known(cache, rel))
       { /* forget it */
 	if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
-	gpfree((void*)rel->R); rel--;
+	pari_free((void*)rel->R); rel--;
 	if (++cptzer > MAXRELSUP)
 	{
 	  if (L_jid) { cptzer = 0; L_jid = NULL; break; } /* second chance */

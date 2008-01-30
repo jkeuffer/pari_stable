@@ -305,7 +305,7 @@ add_paren(int end)
 static void
 match_concat(char **matches, const char *s)
 {
-  matches[0] = (char*)gprealloc((void*)matches[0],
+  matches[0] = (char*)pari_realloc((void*)matches[0],
                                 strlen(matches[0])+strlen(s)+1);
   strcat(matches[0],s);
 }
@@ -346,12 +346,12 @@ matches_for_emacs(const char *text, char **matches)
    /* we don't want readline to do anything, but insert some junk
     * which will be erased by emacs.
     */
-    for (i=0; matches[i]; i++) gpfree(matches[i]);
-    gpfree(matches);
+    for (i=0; matches[i]; i++) pari_free(matches[i]);
+    pari_free(matches);
   }
-  matches = (char **) gpmalloc(2*sizeof(char *));
-  matches[0] = (char*)gpmalloc(2); sprintf(matches[0],"_");
-  matches[1] = NULL; printf("@E_N_D"); pariflush();
+  matches = (char **) pari_malloc(2*sizeof(char *));
+  matches[0] = (char*)pari_malloc(2); sprintf(matches[0],"_");
+  matches[1] = NULL; printf("@E_N_D"); pari_flush();
   return matches;
 }
 
@@ -393,7 +393,7 @@ generator(void *list, const char *text, int *nn, int len, int typ)
   *nn = n;
   if (def)
   {
-    char *name = strcpy((char*)gpmalloc(strlen(def)+1), def);
+    char *name = strcpy((char*)pari_malloc(strlen(def)+1), def);
     return name;
   }
   return NULL; /* no names matched */
@@ -425,7 +425,7 @@ default_generator(const char *text,int state)
 static char *
 add_prefix(const char *name, const char *text, long junk)
 {
-  char *s = strncpy((char*)gpmalloc(strlen(name)+1+junk),text,junk);
+  char *s = strncpy((char*)pari_malloc(strlen(name)+1+junk),text,junk);
   strcpy(s+junk,name); return s;
 }
 static void
@@ -583,8 +583,8 @@ add_space(int start)
 #  ifdef HAS_COMPLETION_APPEND_CHAR
   rl_completion_append_character = '\0';
 #  endif
-  m = (char**)gpmalloc(2 * sizeof(char*));
-  m[0] = (char*)gpmalloc(1); *(m[0]) = 0;
+  m = (char**)pari_malloc(2 * sizeof(char*));
+  m[0] = (char*)pari_malloc(1); *(m[0]) = 0;
   m[1] = NULL; return m;
 #endif
 }
@@ -675,8 +675,8 @@ pari_completion(char *text, int START, int END)
 	while (*e && *e != ')' && *e != '(') e++;
 	if (*e == ')')
 	{ /* we just skipped over the arguments in short help text */
-	  char *str = strncpy((char*)gpmalloc(e-s + 1), s, e-s);
-	  char **ret = (char**)gpmalloc(sizeof(char*)*2);
+	  char *str = strncpy((char*)pari_malloc(e-s + 1), s, e-s);
+	  char **ret = (char**)pari_malloc(sizeof(char*)*2);
 	  str[e-s] = 0;
 	  ret[0] = str; ret[1] = NULL;
 	  if (GP_DATA->flags & EMACS) ret = matches_for_emacs("",ret);
@@ -825,7 +825,7 @@ static void
 print_escape_string(char *s)
 {
   long l = strlen(s);
-  char *t, *t0 = (char*)gpmalloc(l * 3 + 3);
+  char *t, *t0 = (char*)pari_malloc(l * 3 + 3);
 
   t = t0; *t++ = '"';
   for ( ;*s; *t++ = *s++)
@@ -839,7 +839,7 @@ print_escape_string(char *s)
       case '"': *t++ = '\\'; continue;
     }
   *t++ = '"';
-  *t++ = 0; printf(t0); gpfree(t0);
+  *t++ = 0; printf(t0); pari_free(t0);
 }
 
 static char *
@@ -879,7 +879,7 @@ texmacs_completion(const char *s, long pos)
 {
   char **matches, *text;
 
-  if (rl_line_buffer) gpfree(rl_line_buffer);
+  if (rl_line_buffer) pari_free(rl_line_buffer);
   rl_line_buffer = pari_strdup(s);
   text = completion_word(pos);
   /* text = start of expression we complete */
@@ -890,17 +890,17 @@ texmacs_completion(const char *s, long pos)
   if (matches)
   {
     long i, prelen = (rl_line_buffer+pos) - text;
-    char *t = (char*)gpmalloc(prelen+1);
+    char *t = (char*)pari_malloc(prelen+1);
     strncpy(t, text, prelen); t[prelen] = 0; /* prefix */
     printf(" ");
-    print_escape_string(t); gpfree(t);
+    print_escape_string(t); pari_free(t);
     for (i = matches[1]? 1: 0; matches[i]; i++)
     {
       printf(" ");
       print_escape_string(matches[i] + prelen);
-      gpfree(matches[i]);
+      pari_free(matches[i]);
     }
-    gpfree(matches);
+    pari_free(matches);
   }
   printf(")%c", DATA_END);
   fflush(stdout);
@@ -941,7 +941,7 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
    * { print("a
    *   b"); }
    * and conforms with the other input methods anyway. */
-  t = (char*)gpmalloc(l + 1);
+  t = (char*)pari_malloc(l + 1);
   strncpy(t, s, l-1);
   t[l-1] = '\n';
   t[l]   = 0; /* equivalent to sprintf(t,"%s\n", s) */
@@ -969,7 +969,7 @@ get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
   IM.prompt_cont = prompt_cont;
   IM.getline = &gprl_input;
   IM.free = 1;
-  if (! input_loop(F,&IM)) { pariputs("\n"); return 0; }
+  if (! input_loop(F,&IM)) { pari_puts("\n"); return 0; }
 
   s = F->buf->buf;
   if (*s)
@@ -979,7 +979,7 @@ get_line_from_readline(const char *prompt, const char *prompt_cont, filtre_t *F)
       int i = history_length;
       while (i > index) {
 	HIST_ENTRY *e = remove_history(--i);
-	gpfree(e->line); gpfree(e);
+	pari_free(e->line); pari_free(e);
       }
       gp_add_history(s);
     }

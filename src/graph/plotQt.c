@@ -103,7 +103,7 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     this->setBackgroundColor( color[0]);
     this->setFont( font);
     numcolors = lg(pari_colormap)-1;
-    color = (QColor*)gpmalloc(numcolors*sizeof(QColor));
+    color = (QColor*)pari_malloc(numcolors*sizeof(QColor));
     for (i = 1; i < lg(pari_colormap); i++)
     {
       int r, g, b;

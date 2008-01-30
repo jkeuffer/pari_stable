@@ -62,6 +62,10 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        since Z is now handled as a length modifier. Use %Zs instead.
    16- remove the (ugly) prettyprint engine ('output' = 2), render as matbrute.
        printp / printp1 now act as print/print1
+   17- pariprintf renamed to pari_printf, %Z conversion disappeared (use %Zs)
+   18- rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush ->
+       pari_flush, gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
+       gpfree -> pari_free
 
   Added
     1- library function gpcalloc
@@ -75,8 +79,8 @@ BA  6- handle numerical derivation as an operation on closure.
     7- Fp_center, FpM_center, FpV_center
 RB  8- GP functions printf, Strprintf
 BA  9- library function ZV_indexsort
-   10- library functions pariprintf, parifprintf, parisprintf, parivfprintf,
-       parivprintf, parivsprintf
+   10- library functions pari_printf, pari_fprintf, pari_sprintf, pari_vfprintf,
+       pari_vprintf, pari_vsprintf
 
   Removed
     1- obsolete library functions extract and matextract

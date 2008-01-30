@@ -1114,11 +1114,11 @@ static int**
 InitMatAn(long n, long deg, long flag)
 {
   long i, j;
-  int *a, **A = (int**)gpmalloc((n+1)*sizeof(int*));
+  int *a, **A = (int**)pari_malloc((n+1)*sizeof(int*));
   A[0] = NULL;
   for (i = 1; i <= n; i++)
   {
-    a = (int*)gpmalloc(deg*sizeof(int));
+    a = (int*)pari_malloc(deg*sizeof(int));
     A[i] = a; a[0] = (i == 1 || flag);
     for (j = 1; j < deg; j++) a[j] = 0;
   }
@@ -1130,8 +1130,8 @@ FreeMat(int **A, long n)
 {
   long i;
   for (i = 0; i <= n; i++)
-    if (A[i]) gpfree((void*)A[i]);
-  gpfree((void*)A);
+    if (A[i]) pari_free((void*)A[i]);
+  pari_free((void*)A);
 }
 
 /* initialize Coeff reduction */
@@ -1143,12 +1143,12 @@ InitReduction(GEN CHI, long deg)
   int **A;
   GEN d, polmod, pol;
 
-  A   = (int**)gpmalloc(deg*sizeof(int*));
+  A   = (int**)pari_malloc(deg*sizeof(int*));
   d   = gel(CHI,3);
   pol = polcyclo(itos(d), 0);
   for (j = 0; j < deg; j++)
   {
-    A[j] = (int*)gpmalloc(deg*sizeof(int));
+    A[j] = (int*)pari_malloc(deg*sizeof(int));
     polmod = gmodulo(monomial(gen_1, deg+j, 0), pol);
     Polmod2Coeff(A[j], polmod, deg);
   }

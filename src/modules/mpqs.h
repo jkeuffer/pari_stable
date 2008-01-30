@@ -264,7 +264,7 @@ typedef struct mpqs_inv_A_H {
  * wanting to keep the most frequently used stuff near the beginning. */
 
 typedef struct mpqs_handle {
-  /* pointers into gpmalloc()d memory which must be freed at the end: */
+  /* pointers into pari_malloc()d memory which must be freed at the end: */
   unsigned char *sieve_array;   /* 0-based, representing [-M,M-1] */
   unsigned char *sieve_array_end; /* points at sieve_array[M-1] */
   mpqs_FB_entry_t *FB;          /* (aligned) FB array itself */
@@ -289,7 +289,7 @@ typedef struct mpqs_handle {
   /* histogram feedback */
   unsigned char do_histograms;  /* (boolean) enable histogram updating */
   unsigned char done_histograms; /* histos have been eval'd for feedback */
-  /* more gpmalloc()d memory here: */
+  /* more pari_malloc()d memory here: */
   long *histo_full;             /* distribution of full rels from sieve */
   long *histo_lprl;             /* - of LP rels from sieve */
   long *histo_drop;             /* - of useless candidates */

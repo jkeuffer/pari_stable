@@ -140,7 +140,7 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = (PERM)gpmalloc((n1+1) * sizeof(IND));
+  PERM s3 = (PERM)pari_malloc((n1+1) * sizeof(IND));
   for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
   s3[0] = (IND)n1; return s3;
 }
@@ -278,7 +278,7 @@ static PERM *
 alloc_pobj(long n, long m)
 {
   long i;
-  PERM *g = (PERM*) gpmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
+  PERM *g = (PERM*) pari_malloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
   PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
@@ -2423,11 +2423,11 @@ isin_G_H(buildroot *BR, long n1, long n2)
 
   init_isin(n1,n2, &tau, &ss, &s0, &R);
   ww = check_isin(BR, &R, tau, ss);
-  gpfree(ss); gpfree(tau); if (R.a) gpfree(R.a);
+  pari_free(ss); pari_free(tau); if (R.a) pari_free(R.a);
   if (ww)
   {
     long z[NMAX+1], i , j, l = lg(BR->r);
-    s0 = permmul(ww, s0); gpfree(ww);
+    s0 = permmul(ww, s0); pari_free(ww);
     if (DEBUGLEVEL)
     {
       fprintferr("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
@@ -2440,7 +2440,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
       for (j=1; j<=N; j++) p1[j] = z[j];
     }
-    gpfree(s0); return n2;
+    pari_free(s0); return n2;
   }
   if (DEBUGLEVEL)
   {

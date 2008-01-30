@@ -115,7 +115,7 @@ static byteptr
 initprimes1(ulong size, long *lenp, long *lastp)
 {
   long k;
-  byteptr q, r, s, p = (byteptr)gpcalloc(size+2), fin = p + size;
+  byteptr q, r, s, p = (byteptr)pari_calloc(size+2), fin = p + size;
 
   for (r=q=p,k=1; r<=fin; )
   {
@@ -132,7 +132,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
   *r++ = 0;
   *lenp = r - p;
   *lastp = ((s - p) << 1) + 1;
-  return (byteptr) gprealloc(p,r-p);
+  return (byteptr) pari_realloc(p,r-p);
 }
 
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
@@ -490,12 +490,12 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
      distribution of gaps with the average log(n), we are safe up to
      circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
   size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
-  p1 = (byteptr) gpmalloc(size);
+  p1 = (byteptr) pari_malloc(size);
   rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
   {
     byteptr p2 = initprimes0(rootnum, &psize, &last); /* recursive call */
-    memcpy(p1, p2, psize); gpfree(p2);
+    memcpy(p1, p2, psize); pari_free(p2);
   }
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
@@ -507,7 +507,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
-    p = (byteptr) gpmalloc(asize + 1);
+    p = (byteptr) pari_malloc(asize + 1);
   else
     p = (byteptr) bot;
   fin = p + asize;              /* the 0 sentinel goes at fin. */
@@ -557,8 +557,8 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   *curdiff++ = 0;               /* sentinel */
   *lenp = curdiff - p1;
   *lastp = last;
-  if (alloced) gpfree(p);
-  return (byteptr) gprealloc(p1, *lenp);
+  if (alloced) pari_free(p);
+  return (byteptr) pari_realloc(p1, *lenp);
 }
 #if 0 /* not yet... GN */
 /* The diffptr table will contain at least 6548 entries (up to and including
@@ -645,7 +645,7 @@ addprimes(GEN p)
       gunclone(n); primetab[i] = 0;
     }
   }
-  primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long));
+  primetab = (GEN) pari_realloc(primetab, (lp+1)*sizeof(long));
   gel(primetab,i) = gclone(p); setlg(primetab, lp+1);
   if (k > 1) { cleanprimetab(); setlg(L,k); (void)addprimes(L); }
   avma = av; return primetab;

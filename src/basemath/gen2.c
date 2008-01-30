@@ -245,7 +245,7 @@ greffe(GEN x, long l, long use_stack)
   if (use_stack) y = cgetg(l,t_SER);
   else
   {
-    y = (GEN) gpmalloc(l*sizeof(long));
+    y = (GEN) pari_malloc(l*sizeof(long));
     y[0] = evaltyp(t_SER) | evallg(l);
   }
   y[1] = x[1]; setvalp(y, i);
@@ -1839,14 +1839,14 @@ ensure_nb(GEN L, long l)
   {
     nmax <<= 1;
     if (l > nmax) nmax = l;
-    v = (GEN)gprealloc(list_data(L), (nmax+1) * sizeof(long));
+    v = (GEN)pari_realloc(list_data(L), (nmax+1) * sizeof(long));
   }
   else /* unallocated */
   {
     nmax = 32;
     if (list_data(L))
       pari_err(talker, "store list in variable before appending elements");
-    v = (GEN)gpmalloc((nmax+1) * sizeof(long));
+    v = (GEN)pari_malloc((nmax+1) * sizeof(long));
     v[0] = evaltyp(t_VEC) | evallg(1);
   }
   list_data(L) = v;
@@ -1862,7 +1862,7 @@ listkill(GEN L)
     GEN v = list_data(L);
     long i, l = lg(v);
     for (i=1; i<l; i++) killbloc(gel(v,i));
-    gpfree(v);
+    pari_free(v);
     list_nmax(L) = 0;
     list_data(L) = NULL;
   }
@@ -1987,7 +1987,7 @@ listconcat(GEN A, GEN B)
   lx = l1-1 + lg(L2);
   z = cgetg(3, t_LIST);
   list_nmax(z) = lx-1;
-  list_data(z) = L = (GEN)gpmalloc(lx * sizeof(long));
+  list_data(z) = L = (GEN)pari_malloc(lx * sizeof(long));
   L2 -= l1-1;
   for (i=1; i<l1; i++) gel(L,i) = gclone(gel(L1,i));
   for (   ; i<lx; i++) gel(L,i) = gclone(gel(L2,i));

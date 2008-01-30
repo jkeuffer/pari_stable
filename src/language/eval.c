@@ -126,7 +126,7 @@ typedef struct var_cell {
 static void
 new_val_cell(entree *ep, GEN x, char flag)
 {
-  var_cell *v = (var_cell*) gpmalloc(sizeof(var_cell));
+  var_cell *v = (var_cell*) pari_malloc(sizeof(var_cell));
   v->value  = (GEN)ep->value;
   v->prev   = (var_cell*) ep->pvalue;
   v->flag   = flag;
@@ -152,7 +152,7 @@ pop_val(entree *ep)
   ep->value  = v->value;
   ep->pvalue = (char*) v->prev;
   ep->valence=v->valence;
-  gpfree((void*)v);
+  pari_free((void*)v);
 }
 
 void
@@ -162,8 +162,8 @@ freeep(entree *ep)
     (*foreignFuncFree)(ep); /* function created by foreign interpreter */
 
   if (EpSTATIC(ep)) return; /* gp function loaded at init time */
-  if (ep->help) {gpfree((void*)ep->help); ep->help=NULL;}
-  if (ep->code) {gpfree((void*)ep->code); ep->code=NULL;}
+  if (ep->help) {pari_free((void*)ep->help); ep->help=NULL;}
+  if (ep->code) {pari_free((void*)ep->code); ep->code=NULL;}
   switch(EpVALENCE(ep))
   {
     case EpVAR:
@@ -182,7 +182,7 @@ copyvalue(entree *ep, GEN x) {
 INLINE void
 zerovalue (entree *ep)
 {
-  var_cell *v = (var_cell*) gpmalloc(sizeof(var_cell));
+  var_cell *v = (var_cell*) pari_malloc(sizeof(var_cell));
   v->value  = (GEN)ep->value;
   v->prev   = (var_cell*) ep->pvalue;
   v->flag   = PUSH_VAL;
@@ -205,7 +205,7 @@ pop_val_if_newer(entree *ep, long loc)
   ep->value = v->value;
   ep->pvalue= (char*) v->prev;
   ep->valence=v->valence;
-  gpfree((void*)v); return 1;
+  pari_free((void*)v); return 1;
 }
 
 /* set new value of ep directly to val (COPY), do not save last value unless
@@ -1182,185 +1182,185 @@ closure_disassemble(GEN C)
     op_code opcode=(op_code) code[i];
     long operand=oper[i];
     entree *ep;
-    pariprintf("%05ld\t",i);
+    pari_printf("%05ld\t",i);
     switch(opcode)
     {
     case OCpushlong:
       if (operand==(long)gnil)
-        pariprintf("pushlong\tgnil\n");
+        pari_printf("pushlong\tgnil\n");
       else if (operand==(long)gen_m1)
-        pariprintf("pushlong\tgen_m1\n");
+        pari_printf("pushlong\tgen_m1\n");
       else if (operand==(long)gen_0)
-        pariprintf("pushlong\tgen_0\n");
+        pari_printf("pushlong\tgen_0\n");
       else if (operand==(long)gen_1)
-        pariprintf("pushlong\tgen_1\n");
+        pari_printf("pushlong\tgen_1\n");
       else if (operand==(long)gen_2)
-        pariprintf("pushlong\tgen_2\n");
+        pari_printf("pushlong\tgen_2\n");
       else
-        pariprintf("pushlong\t%ld\n",operand);
+        pari_printf("pushlong\t%ld\n",operand);
       break;
     case OCpushgen:
-      pariprintf("pushgen\t\t%ld\n",operand);
+      pari_printf("pushgen\t\t%ld\n",operand);
       break;
     case OCpushreal:
-      pariprintf("pushreal\t%ld\n",operand);
+      pari_printf("pushreal\t%ld\n",operand);
       break;
     case OCpushstoi:
-      pariprintf("pushstoi\t%ld\n",operand);
+      pari_printf("pushstoi\t%ld\n",operand);
       break;
     case OCpushvar:
       ep=(entree*)operand;
-      pariprintf("pushvar\t%s\n",ep->name);
+      pari_printf("pushvar\t%s\n",ep->name);
       break;
     case OCpushdyn:
       ep=(entree*)operand;
-      pariprintf("pushdyn\t\t%s\n",ep->name);
+      pari_printf("pushdyn\t\t%s\n",ep->name);
       break;
     case OCpushlex:
-      pariprintf("pushlex\t\t%ld\n",operand);
+      pari_printf("pushlex\t\t%ld\n",operand);
       break;
     case OCstoredyn:
       ep=(entree *)operand;
-      pariprintf("storedyn\t%s\n",ep->name);
+      pari_printf("storedyn\t%s\n",ep->name);
       break;
     case OCstorelex:
-      pariprintf("storelex\t%ld\n",operand);
+      pari_printf("storelex\t%ld\n",operand);
       break;
     case OCsimpleptrdyn:
       ep=(entree*)operand;
-      pariprintf("simpleptrdyn\t%s\n",ep->name);
+      pari_printf("simpleptrdyn\t%s\n",ep->name);
       break;
     case OCsimpleptrlex:
       ep=(entree*)operand;
-      pariprintf("simpleptrlex\t%ld\n",operand);
+      pari_printf("simpleptrlex\t%ld\n",operand);
       break;
     case OCnewptrdyn:
       ep=(entree*)operand;
-      pariprintf("newptrdyn\t%s\n",ep->name);
+      pari_printf("newptrdyn\t%s\n",ep->name);
       break;
     case OCnewptrlex:
-      pariprintf("newptrlex\t%ld\n",operand);
+      pari_printf("newptrlex\t%ld\n",operand);
       break;
     case OCpushptr:
-      pariprintf("pushptr\n");
+      pari_printf("pushptr\n");
       break;
     case OCstackgen:
-      pariprintf("stackgen\t%ld\n",operand);
+      pari_printf("stackgen\t%ld\n",operand);
       break;
     case OCendptr:
-      pariprintf("endptr\t\t%ld\n",operand);
+      pari_printf("endptr\t\t%ld\n",operand);
       break;
     case OCprecreal:
-      pariprintf("precreal\n");
+      pari_printf("precreal\n");
       break;
     case OCprecdl:
-      pariprintf("precdl\n");
+      pari_printf("precdl\n");
       break;
     case OCstoi:
-      pariprintf("stoi\n");
+      pari_printf("stoi\n");
       break;
     case OCitos:
-      pariprintf("itos\t\t%ld\n",operand);
+      pari_printf("itos\t\t%ld\n",operand);
       break;
     case OCtostr:
-      pariprintf("tostr\t\t%ld\n",operand);
+      pari_printf("tostr\t\t%ld\n",operand);
       break;
     case OCvarn:
-      pariprintf("varn\t\t%ld\n",operand);
+      pari_printf("varn\t\t%ld\n",operand);
       break;
     case OCcopy:
-      pariprintf("copy\n");
+      pari_printf("copy\n");
       break;
     case OCcopyifclone:
-      pariprintf("copyifclone\n");
+      pari_printf("copyifclone\n");
       break;
     case OCcompo1:
-      pariprintf("compo1\t\t%s\n",disassemble_cast(operand));
+      pari_printf("compo1\t\t%s\n",disassemble_cast(operand));
       break;
     case OCcompo1ptr:
-      pariprintf("compo1ptr\n");
+      pari_printf("compo1ptr\n");
       break;
     case OCcompo2:
-      pariprintf("compo2\t\t%s\n",disassemble_cast(operand));
+      pari_printf("compo2\t\t%s\n",disassemble_cast(operand));
       break;
     case OCcompo2ptr:
-      pariprintf("compo2ptr\n");
+      pari_printf("compo2ptr\n");
       break;
     case OCcompoC:
-      pariprintf("compoC\n");
+      pari_printf("compoC\n");
       break;
     case OCcompoCptr:
-      pariprintf("compoCptr\n");
+      pari_printf("compoCptr\n");
       break;
     case OCcompoL:
-      pariprintf("compoL\n");
+      pari_printf("compoL\n");
       break;
     case OCcompoLptr:
-      pariprintf("compoLptr\n");
+      pari_printf("compoLptr\n");
       break;
     case OCcheckargs:
-      pariprintf("checkargs\t0x%lx\n",operand);
+      pari_printf("checkargs\t0x%lx\n",operand);
       break;
     case OCcheckargs0:
-      pariprintf("checkargs0\t0x%lx\n",operand);
+      pari_printf("checkargs0\t0x%lx\n",operand);
       break;
     case OCdefaultitos:
-      pariprintf("defaultitos\t%ld\n",operand);
+      pari_printf("defaultitos\t%ld\n",operand);
       break;
     case OCgetargs:
-      pariprintf("getargs\t\t%ld\n",operand);
+      pari_printf("getargs\t\t%ld\n",operand);
       break;
     case OCdefaultarg:
-      pariprintf("defaultarg\t%ld\n",operand);
+      pari_printf("defaultarg\t%ld\n",operand);
       break;
     case OClocalvar:
       ep=(entree*)operand;
-      pariprintf("localvar\t%s\n",ep->name);
+      pari_printf("localvar\t%s\n",ep->name);
       break;
     case OClocalvar0:
       ep=(entree*)operand;
-      pariprintf("localvar0\t%s\n",ep->name);
+      pari_printf("localvar0\t%s\n",ep->name);
       break;
     case OCcallgen:
       ep=(entree*)operand;
-      pariprintf("callgen\t\t%s\n",ep->name);
+      pari_printf("callgen\t\t%s\n",ep->name);
       break;
     case OCcallgen2:
       ep=(entree*)operand;
-      pariprintf("callgen2\t%s\n",ep->name);
+      pari_printf("callgen2\t%s\n",ep->name);
       break;
     case OCcalllong:
       ep=(entree*)operand;
-      pariprintf("calllong\t%s\n",ep->name);
+      pari_printf("calllong\t%s\n",ep->name);
       break;
     case OCcallint:
       ep=(entree*)operand;
-      pariprintf("callint\t\t%s\n",ep->name);
+      pari_printf("callint\t\t%s\n",ep->name);
       break;
     case OCcallvoid:
       ep=(entree*)operand;
-      pariprintf("callvoid\t%s\n",ep->name);
+      pari_printf("callvoid\t%s\n",ep->name);
       break;
     case OCcalluser:
-      pariprintf("calluser\t%ld\n",operand);
+      pari_printf("calluser\t%ld\n",operand);
       break;
     case OCvec:
-      pariprintf("vec\t\t%ld\n",operand);
+      pari_printf("vec\t\t%ld\n",operand);
       break;
     case OCcol:
-      pariprintf("col\t\t%ld\n",operand);
+      pari_printf("col\t\t%ld\n",operand);
       break;
     case OCmat:
-      pariprintf("mat\t\t%ld\n",operand);
+      pari_printf("mat\t\t%ld\n",operand);
       break;
     case OCnewframe:
-      pariprintf("newframe\t%ld\n",operand);
+      pari_printf("newframe\t%ld\n",operand);
       break;
     case OCsaveframe:
-      pariprintf("saveframe\n");
+      pari_printf("saveframe\n");
       break;
     case OCpop:
-      pariprintf("pop\t\t%ld\n",operand);
+      pari_printf("pop\t\t%ld\n",operand);
       break;
     }
   }

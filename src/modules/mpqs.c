@@ -186,7 +186,7 @@ mpqs_set_parameters(mpqs_handle_t *h)
 static mpqs_handle_t *
 mpqs_handle_ctor(GEN N)
 {
-  mpqs_handle_t *h = (mpqs_handle_t *) gpcalloc(sizeof(mpqs_handle_t));
+  mpqs_handle_t *h = (mpqs_handle_t *) pari_calloc(sizeof(mpqs_handle_t));
   h->N = N;
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: created handle @0x%p\n", (void *)h);
@@ -207,8 +207,8 @@ mpqs_FB_ctor(mpqs_handle_t *h)
   long size_FB_chunk = (h->size_of_FB + 3) * sizeof(mpqs_FB_entry_t);
   /* like FB, except this one does not have a sentinel slot at the end */
   long size_IAH_chunk = (h->size_of_FB + 2) * sizeof(mpqs_inv_A_H_t);
-  char *fbp = (char*)gpmalloc(size_FB_chunk + 64);
-  char *iahp = (char*)gpmalloc(size_IAH_chunk + 64);
+  char *fbp = (char*)pari_malloc(size_FB_chunk + 64);
+  char *iahp = (char*)pari_malloc(size_IAH_chunk + 64);
   long fbl, iahl;
 
   h->FB_chunk = (void *)fbp;
@@ -241,7 +241,7 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
   mpqs_int32_t size_of_FB = h->size_of_FB;
 
   h->sieve_array =
-    (unsigned char *) gpmalloc(size * sizeof(unsigned char));
+    (unsigned char *) pari_malloc(size * sizeof(unsigned char));
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: sieve_array allocated @0x%p\n",
 	     (void *)h->sieve_array);
@@ -251,7 +251,7 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
   h->sieve_array_end[1] = 255; /* sentinel */
 
   h->candidates =
-    (long *) gpmalloc(MPQS_CANDIDATE_ARRAY_SIZE * sizeof(long));
+    (long *) pari_malloc(MPQS_CANDIDATE_ARRAY_SIZE * sizeof(long));
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("MPQS DEBUG: candidates table allocated @0x%p\n",
 	     (void *)h->candidates);
@@ -273,17 +273,17 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
   /* whereas mpqs_self_init() uses size_of_FB+1, we just use the size as
    * it is, not counting FB[1], to start off the following estimate */
   if (size_of_FB > 60) size_of_FB = 60;
-  h->relations = (char *) gpmalloc((8 + size_of_FB * 9) * sizeof(char));
+  h->relations = (char *) pari_malloc((8 + size_of_FB * 9) * sizeof(char));
   /* and for tracking which primes occur in the current relation: */
-  h->relaprimes = (long *) gpmalloc((size_of_FB << 1) * sizeof(long));
+  h->relaprimes = (long *) pari_malloc((size_of_FB << 1) * sizeof(long));
 
 #ifdef MPQS_USE_HISTOGRAMS
   /* histograms to be used only when kN isn't very small */
   if (h->size_of_FB > MPQS_MIN_SIZE_FB_FOR_HISTO) {
     h->do_histograms = 1;
-    h->histo_full = (long *) gpcalloc(128 * sizeof(long));
-    h->histo_lprl = (long *) gpcalloc(128 * sizeof(long));
-    h->histo_drop = (long *) gpcalloc(128 * sizeof(long));
+    h->histo_full = (long *) pari_calloc(128 * sizeof(long));
+    h->histo_lprl = (long *) pari_calloc(128 * sizeof(long));
+    h->histo_drop = (long *) pari_calloc(128 * sizeof(long));
   }
 #endif
 }
@@ -297,7 +297,7 @@ mpqs_poly_ctor(mpqs_handle_t *h)
   mpqs_int32_t i;
   long size_per = h->omega_A * sizeof(mpqs_per_A_prime_t);
 
-  h->per_A_pr = (mpqs_per_A_prime_t *) gpcalloc(size_per);
+  h->per_A_pr = (mpqs_per_A_prime_t *) pari_calloc(size_per);
   /* Sizing:  A is the product of omega_A primes, each well below word
    * size.
    * |B| is bounded by (omega_A + 4) * A, so can have at most one word
@@ -324,7 +324,7 @@ mpqs_poly_ctor(mpqs_handle_t *h)
 static void
 mpqs_handle_dtor(mpqs_handle_t *h)
 {
-#define myfree(x) if(x) gpfree((void*)x)
+#define myfree(x) if(x) pari_free((void*)x)
   myfree((h->per_A_pr));
   myfree((h->relaprimes));
   myfree(h->relations);
@@ -490,7 +490,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   {
     /* not large enough - must use our own then */
     long newsize = 3 * mpqs_find_maxprime(size);
-    if (mpqs_use_our_diffptr) gpfree((void *) mpqs_diffptr);
+    if (mpqs_use_our_diffptr) pari_free((void *) mpqs_diffptr);
     if (DEBUGLEVEL >= 2)
       fprintferr("MPQS: precomputing auxiliary primes up to %ld\n", newsize);
     /* the following three assignments must happen in this order, to
@@ -990,13 +990,13 @@ mpqs_sort_lp_file(char *filename)
   pTMP = pari_fopen(filename, READ);
   TMP = pTMP->file;
   /* get first buffer and read first line, if any, into it */
-  buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+  buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
   cur_line = buf;
   bufspace = MPQS_STRING_LENGTH;
 
   if (fgets(cur_line, bufspace, TMP) == NULL)
   { /* file empty */
-    gpfree(buf); pari_fclose(pTMP);
+    pari_free(buf); pari_fclose(pTMP);
     avma = av; return 0;
   }
   /* enter first buffer into buflist */
@@ -1024,15 +1024,15 @@ mpqs_sort_lp_file(char *filename)
     {
       if (MPQS_DEBUGLEVEL >= 7)
 	fprintferr("MQPS: short of space -- another buffer for sorting\n");
-      buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+      buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
       cur_line = buf;
       bufspace = MPQS_STRING_LENGTH;
-      if (fgets(cur_line, bufspace, TMP) == NULL) { gpfree(buf); break; }
+      if (fgets(cur_line, bufspace, TMP) == NULL) { pari_free(buf); break; }
 
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
       { /* need another buflist block */
-	next_buflist = (char**) gpmalloc(buflist_size * sizeof(char*));
+	next_buflist = (char**) pari_malloc(buflist_size * sizeof(char*));
 	*next_buflist = (char*)buflist_head; /* link */
 	buflist_head = next_buflist;
 	buflist = buflist_head + 1;
@@ -1053,11 +1053,11 @@ mpqs_sort_lp_file(char *filename)
       size_t lg1;
       if (MPQS_DEBUGLEVEL >= 7)
 	fprintferr("MQPS: line wrap -- another buffer for sorting\n");
-      buf = (char*) gpmalloc(MPQS_STRING_LENGTH * sizeof(char));
+      buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
       /* remember buffer for later deallocation */
       if (buflist - buflist_head >= buflist_size)
       { /* need another buflist block */
-	next_buflist = (char**)gpmalloc(buflist_size * sizeof(char*));
+	next_buflist = (char**)pari_malloc(buflist_size * sizeof(char*));
 	*next_buflist = (char*)buflist_head; /* link */
 	buflist_head = next_buflist;
 	buflist = buflist_head + 1;
@@ -1104,11 +1104,11 @@ mpqs_sort_lp_file(char *filename)
   while (*--buflist)
   {
     if (buflist != buflist_head) /* not a linkage pointer */
-      gpfree((void*) *buflist);   /* free a buffer */
+      pari_free((void*) *buflist);   /* free a buffer */
     else
     { /* linkage pointer */
       next_buflist = (char**)(*buflist);
-      gpfree((void*)buflist_head); /* free a buflist block */
+      pari_free((void*)buflist_head); /* free a buflist block */
       buflist_head = next_buflist;
       buflist = buflist_head + buflist_size;
     }
@@ -2490,10 +2490,10 @@ F2_create_matrix(long rows, long cols)
   F2_matrix m;
   long i, j, words = cols / MPQS_GAUSS_BITS;
   if (cols % MPQS_GAUSS_BITS) words++;
-  m = (F2_row *) gpmalloc(rows * sizeof(F2_row));
+  m = (F2_row *) pari_malloc(rows * sizeof(F2_row));
   for (i = 0; i < rows; i++)
   {
-    m[i] = (ulong *) gpmalloc(words * sizeof(ulong));
+    m[i] = (ulong *) pari_malloc(words * sizeof(ulong));
     for (j = 0; j < words; j++) m[i][j] = 0UL;
   }
   return m;
@@ -2503,8 +2503,8 @@ static void
 F2_destroy_matrix(F2_matrix m, long rows)
 {
   long i;
-  for (i = 0; i < rows; i++) gpfree(m[i]);
-  gpfree(m);
+  for (i = 0; i < rows; i++) pari_free(m[i]);
+  pari_free(m);
 }
 
 static ulong
@@ -2734,7 +2734,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   long done, rank;
   char buf[MPQS_STRING_LENGTH];
 
-  fpos = (long *) gpmalloc(rel * sizeof(long));
+  fpos = (long *) pari_malloc(rel * sizeof(long));
 
   m = F2_read_matrix(FREL, h->size_of_FB+1, rel, fpos);
   if (DEBUGLEVEL >= 7)
@@ -2765,7 +2765,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
       pari_warn(warner, "MPQS: no solutions found from linear system solver");
     F2_destroy_matrix(m, h->size_of_FB+1);
     F2_destroy_matrix(ker_m, rel);
-    gpfree(fpos); /* ei not yet allocated */
+    pari_free(fpos); /* ei not yet allocated */
     avma = av; return NULL; /* no factors found */
   }
 
@@ -2788,7 +2788,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
   for (i=2*res_size; i; i--) res[i] = 0;
   res_next = res_last = 1;
 
-  ei = (long *) gpmalloc((h->size_of_FB + 2) * sizeof(long));
+  ei = (long *) pari_malloc((h->size_of_FB + 2) * sizeof(long));
 
   for (i = 0; i < H_cols; i++)
   { /* loop over kernel basis */
@@ -2963,7 +2963,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, pariFILE *pFREL, long rel)
 
   F2_destroy_matrix(m, h->size_of_FB+1);
   F2_destroy_matrix(ker_m, rel);
-  gpfree(ei); gpfree(fpos);
+  pari_free(ei); pari_free(fpos);
   if (res_next < 3) { avma = av; return NULL; } /* no factors found */
 
   /* normal case:  convert internal format to ifac format as described in
@@ -3094,7 +3094,7 @@ mpqs_i(mpqs_handle_t *handle)
   FB = mpqs_create_FB(handle, &p);
   if (p)
   {
-    /* gpfree(FB); */
+    /* pari_free(FB); */
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: found factor = %ld whilst creating factor base\n", p);
     avma = av; return utoipos(p);
@@ -3178,7 +3178,7 @@ mpqs_i(mpqs_handle_t *handle)
       pari_unlink(FNEW_str);\
       pari_unlink(LPREL_str);\
       pari_unlink(LPNEW_str);\
-      pari_unlink(COMB_str); rmdir(dir); gpfree(dir);
+      pari_unlink(COMB_str); rmdir(dir); pari_free(dir);
 
   pFREL = pari_fopen(FREL_str,  WRITE); pari_fclose(pFREL);
   pLPREL = pari_fopen(LPREL_str,  WRITE); pari_fclose(pLPREL);

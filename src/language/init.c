@@ -87,7 +87,7 @@ static THREAD GEN *dft_handler;
 void
 push_stack(stack **pts, void *a)
 {
-  stack *v = (stack*) gpmalloc(sizeof(stack));
+  stack *v = (stack*) pari_malloc(sizeof(stack));
   v->value = a;
   v->prev  = *pts; *pts = v;
 }
@@ -99,7 +99,7 @@ pop_stack(stack **pts)
   void *a;
   if (!s) return NULL; /* initial value */
   v = s->prev; *pts = v;
-  a = s->value; gpfree((void*)s);
+  a = s->value; pari_free((void*)s);
   return a;
 }
 
@@ -124,7 +124,7 @@ static THREAD long NUM = 0;
 GEN
 newbloc(long n)
 {
-  long *x = (long *) gpmalloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
+  long *x = (long *) pari_malloc((n + BL_HEAD)*sizeof(long)) + BL_HEAD;
 
   bl_refc(x) = 1;
   bl_next(x) = 0; /* the NULL address */
@@ -160,7 +160,7 @@ gunclone(GEN x)
   if (bl_prev(x)) bl_next(bl_prev(x)) = bl_next(x);
   if (DEBUGMEM > 2)
     fprintferr("killing bloc (no %ld): %08lx\n", bl_num(x), x);
-  free((void*)bl_base(x)); /* gpfree not needed: we already block */
+  free((void*)bl_base(x)); /* pari_free not needed: we already block */
   BLOCK_SIGINT_END;
 #ifdef DEBUG
   fprintferr("- %ld\n", NUM--);
@@ -183,7 +183,7 @@ killbloc(GEN x)
     case t_LIST:
       v = list_data(x); lx = v? lg(v): 1;
       for (i=1;i<lx;i++) killbloc(gel(v,i));
-      gpfree(v); break;
+      pari_free(v); break;
   }
   if (isclone(x)) gunclone(x);
 }
@@ -259,7 +259,7 @@ static GEN universal_constants;
 static void pari_sighandler(int sig);
 
 void
-gpfree(void *pointer)
+pari_free(void *pointer)
 {
   BLOCK_SIGINT_START;
   free(pointer);
@@ -267,7 +267,7 @@ gpfree(void *pointer)
 }
 
 void*
-gpmalloc(size_t size)
+pari_malloc(size_t size)
 {
   if (size)
   {
@@ -283,7 +283,7 @@ gpmalloc(size_t size)
 }
 
 void*
-gprealloc(void *pointer, size_t size)
+pari_realloc(void *pointer, size_t size)
 {
   char *tmp;
 
@@ -296,16 +296,16 @@ gprealloc(void *pointer, size_t size)
 }
 
 void*
-gpcalloc(size_t size)
+pari_calloc(size_t size)
 {
-  void *t = gpmalloc(size);
+  void *t = pari_malloc(size);
   memset(t, 0, size); return t;
 }
 
 GEN
 cgetalloc(long t, size_t l)
 {
-  GEN x = (GEN)gpmalloc(l * sizeof(long));
+  GEN x = (GEN)pari_malloc(l * sizeof(long));
   x[0] = evaltyp(t) | evallg(l); return x;
 }
 
@@ -486,7 +486,7 @@ grow_append(growarray A, void *e)
   if (A->n == A->len-1)
   {
     A->len <<= 1;
-    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
+    A->v = (void**)pari_realloc(A->v, A->len * sizeof(void*));
   }
   A->v[A->n++] = e;
 }
@@ -497,7 +497,7 @@ grow_copy(growarray A, growarray B)
   if (!A) { grow_init(B); return; }
   B->len = A->len;
   B->n = A->n;
-  B->v = (void**)gpmalloc(B->len * sizeof(void*));
+  B->v = (void**)pari_malloc(B->len * sizeof(void*));
   for (i = 0; i < A->n; i++) B->v[i] = A->v[i];
 }
 void
@@ -505,10 +505,10 @@ grow_init(growarray A)
 {
   A->len = 4;
   A->n   = 0;
-  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
+  A->v   = (void**)pari_malloc(A->len * sizeof(void*));
 }
 void
-grow_kill(growarray A) { gpfree(A->v); }
+grow_kill(growarray A) { pari_free(A->v); }
 
 /* Load modules in A in hashtable hash. */
 static int
@@ -555,7 +555,7 @@ static void
 init_universal_constants(void)
 {
   /* 2 (gnil) + 2 (gen_0) + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (half) + 3 (gi) */
-  GEN p = universal_constants = (long*) gpmalloc(19*sizeof(long));
+  GEN p = universal_constants = (long*) pari_malloc(19*sizeof(long));
   gen_0 = p; p+=2; gnil = p; p+=2;
   gen_0[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
   gen_0[1] = gnil[1] = evallgefint(2);
@@ -595,9 +595,9 @@ init_stack(size_t size)
   if (bot)
   {
     old = top - bot;
-    gpfree((void*)bot);
+    pari_free((void*)bot);
   }
-  /* NOT gpmalloc, memer would be deadly */
+  /* NOT pari_malloc, memer would be deadly */
 
   BLOCK_SIGINT_START;
   bot = (pari_sp)malloc(s);
@@ -616,7 +616,7 @@ init_stack(size_t size)
 
 static entree **
 init_fun_hash(void) {
-  entree **H = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
+  entree **H = (entree **) pari_malloc(sizeof(entree*)*functions_tblsz);
   long i;
   for (i = 0; i < functions_tblsz; i++) H[i] = NULL;
   return H;
@@ -641,7 +641,7 @@ pari_thread_init(size_t parisize)
 void
 pari_thread_close(void)
 {
-  gpfree((void *)bot);
+  pari_free((void *)bot);
   pari_close_floats();
 }
 
@@ -673,11 +673,11 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_compiler();
   pari_init_evaluator();
 
-  varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
+  varentries = (entree**) pari_malloc((MAXVARN+1)*sizeof(entree*));
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
 
-  primetab = (GEN) gpmalloc(1 * sizeof(long));
+  primetab = (GEN) pari_malloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
   funct_old_hash = init_fun_hash();
@@ -692,7 +692,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
 
   whatnow_fun = NULL;
   sigint_fun = dflt_sigint_fun;
-  dft_handler = (GEN*) gpmalloc((noer + 1) *sizeof(GEN));
+  dft_handler = (GEN*) pari_malloc((noer + 1) *sizeof(GEN));
   reset_traps();
   default_exception_handler = NULL;
 
@@ -855,7 +855,7 @@ errcontext(const char *msg, const char *s, const char *entry)
 
   if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
 
-  t = buf = (char*)gpmalloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
+  t = buf = (char*)pari_malloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
   sprintf(t,"%s: ", msg);
   if (past <= 0) past = 0;
   else
@@ -869,11 +869,11 @@ errcontext(const char *msg, const char *s, const char *entry)
 
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
-  pre = (char*)gpmalloc(2 * 16 + 1);
+  pre = (char*)pari_malloc(2 * 16 + 1);
   strcpy(pre, term_get_color(c_ERR));
   strcat(pre, "  ***   ");
   print_prefixed_text(buf, pre, str);
-  gpfree(buf); gpfree(pre);
+  pari_free(buf); pari_free(pre);
 }
 
 void *
@@ -884,7 +884,7 @@ err_catch(long errnum, jmp_buf *penv)
   if (errnum == memer) pari_err(talker, "can't trap memory errors");
   if (errnum == CATCH_ALL) errnum = noer;
   if (errnum > noer) pari_err(talker, "no such error number: %ld", errnum);
-  v = (cell*)gpmalloc(sizeof(cell));
+  v = (cell*)pari_malloc(sizeof(cell));
   v->penv  = penv;
   v->flag = errnum;
   push_stack(&err_catch_stack, (void*)v);
@@ -895,7 +895,7 @@ static void
 pop_catch_cell(stack **s)
 {
   cell *c = (cell*)pop_stack(s);
-  if (c) gpfree(c);
+  if (c) pari_free(c);
 }
 
 /* reset traps younger than v (included).
@@ -969,28 +969,28 @@ pari_warn(long numerr, ...)
   va_start(ap,numerr);
 
   if (!pari_last_was_newline())
-    pariputc('\n'); /* make sure pari_err msg starts at the beginning of line */
-  pariflush(); pariOut = pariErr;
-  pariflush(); term_color(c_ERR);
+    pari_putc('\n'); /* make sure pari_err msg starts at the beginning of line */
+  pari_flush(); pariOut = pariErr;
+  pari_flush(); term_color(c_ERR);
 
   if (gp_function_name)
-    pariprintf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+    pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
   else
-    pariprintf("  ***   %s", errmessage[numerr]);
+    pari_printf("  ***   %s", errmessage[numerr]);
   switch (numerr)
   {
     case warnmem: case warner:
-      pariputc(' '); ch1=va_arg(ap, char*);
-      parivprintf(ch1,ap); pariputs(".\n");
+      pari_putc(' '); ch1=va_arg(ap, char*);
+      pari_vprintf(ch1,ap); pari_puts(".\n");
       break;
 
     case warnprec:
-      parivprintf(" in %s; new prec = %ld\n",ap);
+      pari_vprintf(" in %s; new prec = %ld\n",ap);
       break;
 
     case warnfile:
       ch1=va_arg(ap, char*);
-      pariprintf(" %s: %s\n", ch1, va_arg(ap, char*));
+      pari_printf(" %s: %s\n", ch1, va_arg(ap, char*));
       break;
   }
   term_color(c_NONE); va_end(ap);
@@ -1026,7 +1026,7 @@ pari_err(long numerr, ...)
     }
   }
   /* make sure pari_err msg starts at the beginning of line */
-  if (!pari_last_was_newline()) pariputc('\n');
+  if (!pari_last_was_newline()) pari_putc('\n');
   pariOut->flush();
   pariErr->flush();
   pariOut = pariErr;
@@ -1058,33 +1058,33 @@ pari_err(long numerr, ...)
   else if (numerr == user)
   {
     GEN g = va_arg(ap, GEN);
-    pariprintf("  ###   user error: ");
+    pari_printf("  ###   user error: ");
     print0(g, f_RAW);
   }
   else
   {
     if (gp_function_name)
-      pariprintf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+      pari_printf("  *** %s: %s", gp_function_name, errmessage[numerr]);
     else
-      pariprintf("  ***   %s", errmessage[numerr]);
+      pari_printf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
       case talker: case siginter: case invmoder:
 	ch1=va_arg(ap, char*);
-	parivprintf(ch1,ap); pariputc('.'); break;
+	pari_vprintf(ch1,ap); pari_putc('.'); break;
 
       case impl:
 	ch1=va_arg(ap, char*);
-	pariprintf(" %s is not yet implemented.",ch1); break;
+	pari_printf(" %s is not yet implemented.",ch1); break;
 
       case typeer: case mattype1:
       case infprecer: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
-	pariprintf(" in %s.",va_arg(ap, char*)); break;
+	pari_printf(" in %s.",va_arg(ap, char*)); break;
 
       case bugparier:
-	pariprintf(" %s, please report",va_arg(ap, char*)); break;
+	pari_printf(" %s, please report",va_arg(ap, char*)); break;
 
       case operi: case operf:
       {
@@ -1096,12 +1096,12 @@ pari_err(long numerr, ...)
 	else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
 	else if (*op == 'g') { op = ","; f = "gcd"; }
 	else { op = "-->"; f = "assignment"; }
-	pariprintf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
+	pari_printf(" %s %s %s %s.",f,type_name(typ(x)),op,type_name(typ(y)));
 	break;
       }
 
       case primer2:
-	pariprintf("%lu.", va_arg(ap, ulong));
+	pari_printf("%lu.", va_arg(ap, ulong));
 	break;
     }
   }
@@ -1110,7 +1110,7 @@ pari_err(long numerr, ...)
   {
     size_t d = top - bot;
     char buf[256];
-    /* don't use pariprintf: it needs the PARI stack for %.3f conversion */
+    /* don't use pari_printf: it needs the PARI stack for %.3f conversion */
     sprintf(buf, "\n  current stack size: %lu (%.3f Mbytes)\n", (ulong)d, d/1048576.);
     pariErr->puts(buf);
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
@@ -1133,7 +1133,7 @@ whatnow_new_syntax(const char *f, long n)
 {
   term_color(c_NONE);
   print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file");
-  pariputc('\n');
+  pari_putc('\n');
   (void)whatnow_fun(f, -n);
 }
 
@@ -1194,7 +1194,7 @@ list_internal_copy(GEN z, long nmax)
   GEN a;
   if (!z) return NULL;
   l = lg(z);
-  a = (GEN)gpmalloc((nmax+1) * sizeof(long));
+  a = (GEN)pari_malloc((nmax+1) * sizeof(long));
   for (i = 1; i < l; i++) gel(a,i) = gclone( gel(z,i) );
   a[0] = z[0]; return a;
 }
@@ -1548,7 +1548,7 @@ GENbin*
 copy_bin(GEN x)
 {
   long t = taille0_nolist(x);
-  GENbin *p = (GENbin*)gpmalloc(sizeof(GENbin) + t*sizeof(long));
+  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
   GEN AVMA = GENbase(p) + t;
   p->canon = 0;
   p->len = t;
@@ -1561,7 +1561,7 @@ GENbin*
 copy_bin_canon(GEN x)
 {
   long t = taille0(x);
-  GENbin *p = (GENbin*)gpmalloc(sizeof(GENbin) + t*sizeof(long));
+  GENbin *p = (GENbin*)pari_malloc(sizeof(GENbin) + t*sizeof(long));
   GEN AVMA = GENbase(p) + t;
   p->canon = 1;
   p->len = t;
@@ -1576,7 +1576,7 @@ bin_copy(GENbin *p)
   GEN x, y, base;
   long dx, len;
 
-  x   = p->x; if (!x) { gpfree(p); return gen_0; }
+  x   = p->x; if (!x) { pari_free(p); return gen_0; }
   len = p->len;
   base= p->base; dx = x - base;
   y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
@@ -1585,7 +1585,7 @@ bin_copy(GENbin *p)
     shiftaddress_canon(y, (y-x)*sizeof(long));
   else
     shiftaddress(y, (y-x)*sizeof(long));
-  gpfree(p); return y;
+  pari_free(p); return y;
 }
 
 /*******************************************************************/
@@ -1607,26 +1607,26 @@ gerepilecopy(pari_sp av, GEN x)
 void
 gerepilemany(pari_sp av, GEN* gptr[], int n)
 {
-  GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
+  GENbin **l = (GENbin**)pari_malloc(n*sizeof(GENbin*));
   int i;
   for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
   avma = av;
   for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
-  gpfree(l);
+  pari_free(l);
 }
 
 void
 gerepileall(pari_sp av, int n, ...)
 {
-  GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
-  GEN **gptr  = (GEN**)  gpmalloc(n*sizeof(GEN*));
+  GENbin **l = (GENbin**)pari_malloc(n*sizeof(GENbin*));
+  GEN **gptr  = (GEN**)  pari_malloc(n*sizeof(GEN*));
   int i;
   va_list a; va_start(a, n);
 
   for (i=0; i<n; i++) { gptr[i] = va_arg(a,GEN*); l[i] = copy_bin(*(gptr[i])); }
   avma = av;
   for (--i; i>=0; i--) *(gptr[i]) = bin_copy(l[i]);
-  gpfree(l); gpfree(gptr);
+  pari_free(l); pari_free(gptr);
 }
 
 void
@@ -1766,11 +1766,11 @@ dbg_gerepile(pari_sp av)
     const long tx = typ(x), lx = lg(x);
     GEN a;
 
-    pariprintf(" [%ld] %Zs:", x - (GEN)avma, x);
-    if (! is_recursive_t(tx)) { pariputc('\n'); x += lx; continue; }
+    pari_printf(" [%ld] %Zs:", x - (GEN)avma, x);
+    if (! is_recursive_t(tx)) { pari_putc('\n'); x += lx; continue; }
     a = x + lontyp[tx]; x += lx;
-    for (  ; a < x; a++) pariprintf("  %Zs,", *a);
-    pariprintf("\n");
+    for (  ; a < x; a++) pari_printf("  %Zs,", *a);
+    pari_printf("\n");
   }
 }
 void
@@ -1827,7 +1827,7 @@ switch_stack(stackzone *z, long n)
   if (!z)
   { /* create parallel stack */
     size_t size = n*sizeof(long) + sizeof(stackzone);
-    z = (stackzone*) gpmalloc(size);
+    z = (stackzone*) pari_malloc(size);
     z->zonetop = ((pari_sp)z) + size;
     return z;
   }
@@ -1969,9 +1969,9 @@ msgTIMER(pari_timer *T, const char *format, ...)
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
-  pariputs("Time "); va_start(args, format);
-  parivprintf(format,args); va_end(args);
-  pariprintf(": %ld\n", TIMER(T)); pariflush();
+  pari_puts("Time "); va_start(args, format);
+  pari_vprintf(format,args); va_end(args);
+  pari_printf(": %ld\n", TIMER(T)); pari_flush();
   pariOut = out;
 }
 
@@ -1981,9 +1981,9 @@ msgtimer(const char *format, ...)
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
-  pariputs("Time "); va_start(args, format);
-  parivprintf(format,args); va_end(args);
-  pariprintf(": %ld\n", timer2()); pariflush();
+  pari_puts("Time "); va_start(args, format);
+  pari_vprintf(format,args); va_end(args);
+  pari_printf(": %ld\n", timer2()); pari_flush();
   pariOut = out;
 }
 

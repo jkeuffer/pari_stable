@@ -230,7 +230,7 @@ gp_read_str(char *s)
 {
   char *t = filtre(s, (compatible == OLDALL));
   GEN x = readseq(t);
-  gpfree(t); return x;
+  pari_free(t); return x;
 }
 
 static long
@@ -296,7 +296,7 @@ static entree *
 installep(const char *name, long len, entree **table)
 {
   const long add = 4*sizeof(long);
-  entree *ep = (entree *) gpmalloc(sizeof(entree) + add + len+1);
+  entree *ep = (entree *) pari_malloc(sizeof(entree) + add + len+1);
   entree *ep1 = initial_value(ep);
   char *u = (char *) ep1 + add;
 
@@ -325,7 +325,7 @@ install(void *f, char *name, char *code)
     if (ep->valence != EpINSTALL)
       pari_err(talker,"[install] identifier '%s' already in use", name);
     pari_warn(warner, "[install] updating '%s' prototype; module not reloaded", name);
-    if (ep->code) gpfree((void*)ep->code);
+    if (ep->code) pari_free((void*)ep->code);
   }
   else
   {
@@ -368,7 +368,7 @@ kill0(entree *ep)
 void
 addhelp(entree *ep, char *s)
 {
-  if (ep->help && !EpSTATIC(ep)) gpfree((void*)ep->help);
+  if (ep->help && !EpSTATIC(ep)) pari_free((void*)ep->help);
   ep->help = pari_strdup(s);
 }
 
@@ -908,12 +908,12 @@ name_var(long n, const char *s)
   if (n > (long)MAXVARN)
     pari_err(talker, "variable number too big");
 
-  ep = (entree*)gpmalloc(sizeof(entree) + strlen(s) + 1);
+  ep = (entree*)pari_malloc(sizeof(entree) + strlen(s) + 1);
   u = (char *)initial_value(ep);
   ep->valence = EpVAR;
   ep->name = u; strcpy(u,s);
   ep->value = gen_0; /* in case geval is called */
-  if (varentries[n]) gpfree(varentries[n]);
+  if (varentries[n]) pari_free(varentries[n]);
   varentries[n] = ep;
 }
 
@@ -1171,9 +1171,9 @@ print_all_user_fun(int member)
       arg = GSTR(gel(str,1));
       seq = GSTR(gel(str,2));
       if (member)
-        pariprintf("{%s.%s=%s\n}\n\n", arg, f+2, seq);
+        pari_printf("{%s.%s=%s\n}\n\n", arg, f+2, seq);
       else
-        pariprintf("{%s(%s)=%s\n}\n\n", f, arg, seq);
+        pari_printf("{%s(%s)=%s\n}\n\n", f, arg, seq);
     }
   }
   avma = av;
@@ -1212,7 +1212,7 @@ stack_alloc(gp2c_stack *s, long nb)
   {
     while (s->n+nb > s->alloc) s->alloc <<= 1;
   }
-  *sdat=gprealloc(*sdat,s->alloc*s->size);
+  *sdat=pari_realloc(*sdat,s->alloc*s->size);
 }
 
 long
