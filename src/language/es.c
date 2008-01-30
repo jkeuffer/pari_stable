@@ -489,9 +489,6 @@ itostr_sign(GEN x, int sx, long *len)
 /* 19 digits (if 64 bits, at most 2^60-1) + 1 sign */
 static const long MAX_EXPO_LEN = 20;
 
-/* FIXME: to be deleted */
-static THREAD const char *saved_format = NULL;
-
 /* sss.ttt, assume 'point' < ls = strlen(s) */
 static char *
 wr_dec(char *buf, char *s, size_t ls, long point)
@@ -640,50 +637,47 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 
 /* Modifications for format %Zs: R.Butel IMB/CNRS 2007/12/03 */
 
-static THREAD const char *DoprEnd; /* ending of the output buffer */
-static THREAD char *DoprBuffer; /* start of the output buffer */
-static THREAD char *z_output; /* the current writing place in the output buffer */
-static THREAD size_t DoprSize; /* size of the dopr_outch buffer */
+typedef struct outString {
+  char *string; /* start of the output buffer */
+  char *end;    /* end of the output buffer */
+  char *cur;   /* current writing place in the output buffer */
+  size_t size; /* buffer size */
+} outString;
 
 static void
-dopr_outch(int c)
-{
-  *z_output++ = c;
-  if (z_output == DoprEnd)
+str_putc(outString *S, char c) {
+  *S->cur++ = c;
+  if (S->cur == S->end)
   {
-    DoprBuffer = (char*)gprealloc((void*)DoprBuffer, DoprSize << 1);
-    z_output = DoprBuffer + DoprSize;
-    DoprSize <<= 1;
-    DoprEnd = DoprBuffer + DoprSize;
+    size_t l = S->size << 1;
+    S->string = (char*)gprealloc((void*)S->string, l);
+    S->cur = S->string + S->size;
+    S->end = S->string + l;
+    S->size = l;
   }
 }
+static void
+str_init(outString *S)
+{
+  S->size = 1024;
+  S->string = S->cur = (char*)gpmalloc(S->size);
+  S->end = S->string + S->size;
+}
+static void 
+str_puts(outString *S, const char *s) { while (*s) str_putc(S, *s++); }
 
 static void
-dopr_init()
+str_putscut(outString *S, const char *str, int cut)
 {
-  DoprSize = 1024;
-  DoprBuffer = z_output = (char*)gpmalloc(DoprSize);
-  DoprEnd = DoprBuffer + DoprSize;
-}
-
-/* print chars 1 by 1 to prevent overflow and count them */
-static void
-dostr(const char *str)
-{
-  while (*str) dopr_outch(*str++);
-}
-static void
-dostrcut(const char *str, int cut)
-{
-  if (cut < 0) dostr(str);
+  if (cut < 0) str_puts(S, str);
   else {
-    while (*str && cut-- > 0) dopr_outch(*str++);
+    while (*str && cut-- > 0) str_putc(S, *str++);
   }
 }
 
 /* lbuf = strlen(buf), len < 0: unset */
 static void
-outpad(const char *buf, long lbuf, int sign, long ljust, long len, long zpad)
+outpad(outString *S, const char *buf, long lbuf, int sign, long ljust, long len, long zpad)
 {
   long padlen = len - lbuf;
   if (padlen < 0) padlen = 0;
@@ -691,24 +685,24 @@ outpad(const char *buf, long lbuf, int sign, long ljust, long len, long zpad)
   if (padlen > 0)
   {
     if (zpad) {
-      if (sign) { dopr_outch(sign); --padlen; }
-      while (padlen > 0) { dopr_outch('0'); --padlen; }
+      if (sign) { str_putc(S, sign); --padlen; }
+      while (padlen > 0) { str_putc(S, '0'); --padlen; }
     }
     else
     {
       if (sign) --padlen;
-      while (padlen > 0) { dopr_outch(' '); --padlen; }
-      if (sign) dopr_outch(sign);
+      while (padlen > 0) { str_putc(S, ' '); --padlen; }
+      if (sign) str_putc(S, sign);
     }
   } else
-    if (sign) dopr_outch(sign);
-  dostr(buf);
-  while (padlen < 0) { dopr_outch(' '); ++padlen; }
+    if (sign) str_putc(S, sign);
+  str_puts(S, buf);
+  while (padlen < 0) { str_putc(S, ' '); ++padlen; }
 }
 
 /* len < 0 or maxwidth < 0: unset */
 static void
-fmtstr(const char *buf, int ljust, int len, int maxwidth)
+fmtstr(outString *S, const char *buf, int ljust, int len, int maxwidth)
 {
   int padlen, lbuf = strlen(buf);
 
@@ -717,9 +711,9 @@ fmtstr(const char *buf, int ljust, int len, int maxwidth)
   padlen = len - lbuf;
   if (padlen < 0) padlen = 0;
   if (ljust) padlen = -padlen;
-  while (padlen > 0) { dopr_outch(' '); --padlen; }
-  dostrcut(buf, maxwidth);
-  while (padlen < 0) { dopr_outch(' '); ++padlen; }
+  while (padlen > 0) { str_putc(S, ' '); --padlen; }
+  str_putscut(S, buf, maxwidth);
+  while (padlen < 0) { str_putc(S, ' '); ++padlen; }
 }
 
 /* abs(base) is 8, 10, 16. If base < 0, some "alternate" form
@@ -727,7 +721,7 @@ fmtstr(const char *buf, int ljust, int len, int maxwidth)
  * -- prefix octal with 0
  * signvalue = -1: unsigned, otherwise ' ' or '+' */
 static void
-fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
+fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
        int ljust, int len, int zpad)
 {
   int caps;
@@ -745,41 +739,41 @@ fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
       switch(typ(gvalue))
       {
         case t_VEC:
-          dopr_outch('[');
+          str_putc(S, '[');
           for (i = 1; i < l; i++)
           {
-            fmtnum(0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
-            if (i < l-1) dopr_outch(',');
+            fmtnum(S, 0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
+            if (i < l-1) str_putc(S, ',');
           }
-          dopr_outch(']');
+          str_putc(S, ']');
           return;
         case t_COL:
-          dopr_outch('[');
+          str_putc(S, '[');
           for (i = 1; i < l; i++)
           {
-            fmtnum(0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
-            if (i < l-1) dopr_outch(',');
+            fmtnum(S, 0, gel(gvalue,i), base, signvalue, ljust,len,zpad);
+            if (i < l-1) str_putc(S, ',');
           }
-          dopr_outch(']');
-          dopr_outch('~');
+          str_putc(S, ']');
+          str_putc(S, '~');
           return;
         case t_MAT:
           if (l == 1)
-            dostr("[;]");
+            str_puts(S, "[;]");
           else
           {
             h = lg(gvalue[1]);
             for (i=1; i<l; i++)
             {
-              dopr_outch('[');
+              str_putc(S, '[');
               for (j=1; j<h; j++)
               {
-                fmtnum(0, gcoeff(gvalue,i,j), base, signvalue, ljust,len,zpad);
-                if (j<h-1) dopr_outch(' ');
+                fmtnum(S, 0, gcoeff(gvalue,i,j), base, signvalue, ljust,len,zpad);
+                if (j<h-1) str_putc(S, ' ');
               }
-              dopr_outch(']');
-              dopr_outch('\n');
-              if (i<l-1) dopr_outch('\n');
+              str_putc(S, ']');
+              str_putc(S, '\n');
+              if (i<l-1) str_putc(S, '\n');
             }
           }
           return;
@@ -884,15 +878,15 @@ fmtnum(long lvalue, GEN gvalue, int base, int signvalue,
   if (caps && base == 8) *--buf = '0';
   lbuf = (buf0 - buf) - 1;
 END:
-  outpad(buf, lbuf, signvalue, ljust, len, zpad);
+  outpad(S, buf, lbuf, signvalue, ljust, len, zpad);
   avma = av;
 }
 
 static GEN
-v_get_arg(GEN arg_vector, int *index)
+v_get_arg(GEN arg_vector, int *index, const char *save_fmt)
 {
   if (*index >= lg(arg_vector))
-    pari_err(talker, "missing arg %d for printf format '%s'", *index, saved_format);
+    pari_err(talker, "missing arg %d for printf format '%s'", *index, save_fmt);
   return gel(arg_vector, (*index)++);
 }
 
@@ -916,7 +910,7 @@ shift_add(int x, int ch)
 }
 
 static void
-fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
+fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         long sigd, int maxwidth, int ljust, int len, int zpad)
 {
   pari_sp av = avma;
@@ -927,44 +921,44 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
     switch(typ(gvalue))
     {
       case t_VEC:
-        dopr_outch('[');
+        str_putc(S, '[');
         for (i = 1; i < l; i++)
         {
-          fmtreal(gel(gvalue,i), space, signvalue, FORMAT, sigd,
+          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, sigd,
                   maxwidth, ljust,len,zpad);
-          if (i < l-1) dopr_outch(',');
+          if (i < l-1) str_putc(S, ',');
         }
-        dopr_outch(']');
+        str_putc(S, ']');
         return;
       case t_COL:
-        dopr_outch('[');
+        str_putc(S, '[');
         for (i = 1; i < l; i++)
         {
-          fmtreal(gel(gvalue,i), space, signvalue, FORMAT, sigd,
+          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, sigd,
                   maxwidth, ljust,len,zpad);
-          if (i < l-1) dopr_outch(',');
+          if (i < l-1) str_putc(S, ',');
         }
-        dopr_outch(']');
-        dopr_outch('~');
+        str_putc(S, ']');
+        str_putc(S, '~');
         return;
       case t_MAT:
         if (l == 1)
-          dostr("[;]");
+          str_puts(S, "[;]");
         else
         {
           h = lg(gvalue[1]);
           for (i=1; i<l; i++)
           {
-            dopr_outch('[');
+            str_putc(S, '[');
             for (j=1; j<h; j++)
             {
-              fmtreal(gcoeff(gvalue,i,j), space, signvalue, FORMAT, sigd,
+              fmtreal(S, gcoeff(gvalue,i,j), space, signvalue, FORMAT, sigd,
                       maxwidth, ljust,len,zpad);
-              if (j<h-1) dopr_outch(' ');
+              if (j<h-1) str_putc(S, ' ');
             }
-            dopr_outch(']');
-            dopr_outch('\n');
-            if (i<l-1) dopr_outch('\n');
+            str_putc(S, ']');
+            str_putc(S, '\n');
+            if (i<l-1) str_putc(S, '\n');
           }
         }
         return;
@@ -975,7 +969,7 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
   }
   buf = absrtostr(gvalue, space, FORMAT, sigd, maxwidth);
   if (signe(gvalue) < 0) signvalue = '-';
-  outpad(buf, strlen(buf), signvalue, ljust, len, zpad);
+  outpad(S, buf, strlen(buf), signvalue, ljust, len, zpad);
   avma = av;
 }
 /* format handling "inspired" by the standard draft at 
@@ -987,16 +981,15 @@ sm_dopr(const char *fmt, GEN arg_vector, va_list args)
 {
   int GENflag = 0, longflag = 0, pointflag = 0;
   int print_a_plus, print_a_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
-  char *strvalue;
   long lvalue;
   int index = 1;
   GEN gvalue;
-  const char *recall = NULL;
+  const char *recall = NULL, *save_fmt = fmt;
   pariout_t T = *(GP_DATA->fmt); /* copy */
   T.prettyp = f_RAW;
+  outString __S, *S = &__S;
 
-  dopr_init();
-  saved_format = fmt;
+  str_init(S);
 
   while ((ch = *fmt++) != '\0') {
     switch(ch) {
@@ -1054,7 +1047,7 @@ nextch:
           {
             int *t = pointflag? &maxwidth: &len;
             if (arg_vector)
-              *t = (int)gtolong( v_get_arg(arg_vector, &index) );
+              *t = (int)gtolong( v_get_arg(arg_vector, &index, save_fmt) );
             else
               *t = va_arg(args, int);
             goto nextch;
@@ -1082,7 +1075,7 @@ nextch:
 #define get_num_arg() \
   if (arg_vector) { \
     lvalue = 0; \
-    gvalue = v_get_arg(arg_vector, &index); \
+    gvalue = v_get_arg(arg_vector, &index, save_fmt); \
   } else { \
     if (GENflag) { \
       lvalue = 0; \
@@ -1093,60 +1086,70 @@ nextch:
     } \
   }
             get_num_arg();
-            fmtnum(lvalue, gvalue, 10, -1, ljust, len, zpad);
+            fmtnum(S, lvalue, gvalue, 10, -1, ljust, len, zpad);
             break;
           case 'o': /* not a signed conversion: print_a_(blank|plus) ignored */
             get_num_arg();
-            fmtnum(lvalue, gvalue, with_sharp? -8: 8, -1, ljust, len, zpad);
+            fmtnum(S, lvalue, gvalue, with_sharp? -8: 8, -1, ljust, len, zpad);
             break;
           case 'd':
           case 'i':
             get_num_arg();
-            fmtnum(lvalue, gvalue, 10,
+            fmtnum(S, lvalue, gvalue, 10,
                    dosign(print_a_blank, print_a_plus), ljust, len, zpad);
             break;
           case 'p':
-            dopr_outch('0'); dopr_outch('x');
+            str_putc(S, '0'); str_putc(S, 'x');
             if (arg_vector)
-              lvalue = (long)v_get_arg(arg_vector, &index);
+              lvalue = (long)v_get_arg(arg_vector, &index, save_fmt);
             else
               lvalue = (long)va_arg(args, void*);
-            fmtnum(lvalue, NULL, 16, -1, ljust, len, zpad);
+            fmtnum(S, lvalue, NULL, 16, -1, ljust, len, zpad);
             break;
           case 'x': /* not a signed conversion: print_a_(blank|plus) ignored */
-            if (with_sharp) { dopr_outch('0'); dopr_outch('x'); }
+            if (with_sharp) { str_putc(S, '0'); str_putc(S, 'x'); }
             get_num_arg();
-            fmtnum(lvalue, gvalue, 16, -1, ljust, len, zpad);
+            fmtnum(S, lvalue, gvalue, 16, -1, ljust, len, zpad);
             break;
           case 'X': /* not a signed conversion: print_a_(blank|plus) ignored */
-            if (with_sharp) { dopr_outch('0'); dopr_outch('X'); }
+            if (with_sharp) { str_putc(S, '0'); str_putc(S, 'X'); }
             get_num_arg();
-            fmtnum(lvalue, gvalue,-16, -1, ljust, len, zpad);
+            fmtnum(S, lvalue, gvalue,-16, -1, ljust, len, zpad);
             break;
           case 's':
           {
-            int to_free;
+            char *strvalue;
+            int tofree = 0;
+
             if (arg_vector) {
-              gvalue = v_get_arg(arg_vector, &index);
-              strvalue = GENtostr0(gvalue, &T);
-              to_free = 1;
+              gvalue = v_get_arg(arg_vector, &index, save_fmt);
+              strvalue = NULL;
             } else {
               if (GENflag) {
                 gvalue = va_arg(args, GEN);
-                strvalue = GENtostr0(gvalue, &T);
-                to_free = 1;
+                strvalue = NULL;
               } else {
+                gvalue = NULL;
                 strvalue = va_arg(args, char *);
-                to_free = 0;
               }
             }
-            fmtstr(strvalue, ljust, len, maxwidth);
-            if (to_free) gpfree(strvalue);
+            if (gvalue)
+            {
+              if (typ(gvalue) == t_STR)
+                strvalue = GSTR(gvalue);
+              else
+              {
+                strvalue = GENtostr0(gvalue, &T);
+                tofree = 1;
+              }
+            }
+            fmtstr(S, strvalue, ljust, len, maxwidth);
+            if (tofree) gpfree(strvalue);
             break;
           }
           case 'c':
             if (arg_vector) {
-              gvalue = v_get_arg(arg_vector, &index);
+              gvalue = v_get_arg(arg_vector, &index, save_fmt);
               ch = (int)gtolong(gvalue);
             } else {
               if (GENflag)
@@ -1154,11 +1157,11 @@ nextch:
               else
                 ch = va_arg(args, int);
             }
-            dopr_outch(ch);
+            str_putc(S, ch);
             break;
 
           case '%':
-            dopr_outch(ch);
+            str_putc(S, ch);
             continue;
           case 'g':
           case 'G':
@@ -1169,7 +1172,7 @@ nextch:
             long sigd = 0;
 
             if (arg_vector)
-              gvalue = v_get_arg(arg_vector, &index);
+              gvalue = v_get_arg(arg_vector, &index, save_fmt);
             else {
               if (GENflag)
                 gvalue = va_arg(args, GEN);
@@ -1185,21 +1188,21 @@ nextch:
               case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
               case 'g': sigd = maxwidth; maxwidth = -1; break;
             }
-            fmtreal(gvalue, T.sp, dosign(print_a_blank, print_a_plus), ch,
+            fmtreal(S, gvalue, T.sp, dosign(print_a_blank, print_a_plus), ch,
                     sigd, maxwidth, ljust, len, zpad);
             break;
           }
           default:
-            pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, saved_format);
+            pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, save_fmt);
         } /* second switch on ch */
         break;
       default:
-        dopr_outch(ch);
+        str_putc(S, ch);
         break;
     } /* first switch on ch */
   } /* while loop on ch */
-  *z_output = 0;
-  return DoprBuffer;
+  *S->cur = 0;
+  return S->string;
 }
 
 /* start printing in "color" c */
@@ -1471,48 +1474,9 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
 /**                    GEN <---> CHARACTER STRINGS                 **/
 /**                                                                **/
 /********************************************************************/
-
-typedef struct outString {
-  char *string, *end, *cur;
-  size_t size;
-} outString;
-static outString *OutStr; /* %%%%%% THREAD ? */
-
 static void bruti(GEN g, pariout_t *T, outString *S, int addsign);
 static void matbruti(GEN g, pariout_t *T, outString *S);
 static void texi(GEN g, pariout_t *T, outString *S, int addsign);
-
-static void
-str_putc(outString *S, char c) {
-  *S->cur++ = c;
-  if (S->cur == S->end)
-  {
-    size_t l = S->size << 1;
-    S->string = (char*)gprealloc((void*)S->string, l);
-    S->cur = S->string + S->size;
-    S->end = S->string + l;
-    S->size = l;
-  }
-}
-static void
-str_init(outString *S)
-{
-  S->size = 1024;
-  S->string = S->cur = (char*)gpmalloc(S->size);
-  S->end = S->string + S->size;
-}
-static void 
-str_puts(outString *S, const char *s) { while (*s) str_putc(S, *s++); }
-
-static void
-outstr_putc(char c) { str_putc(OutStr, c); }
-static void
-outstr_puts(const char *s) { str_puts(OutStr, s); }
-
-static void
-outstr_flush(void) { /* empty */ }
-PariOUT pariOut2Str = {outstr_putc, outstr_puts, outstr_flush, NULL};
-#undef STEPSIZE
 
 char *
 stack_strdup(const char *s)
