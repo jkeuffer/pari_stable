@@ -983,7 +983,7 @@ fmtreal(GEN gvalue, int space, int signvalue, int FORMAT,
  * fmt is a standard printf format, except 'Z' is a "length modifier"
  * allowing GEN arguments. Use either the arg_vector or (if NULL) the va_list */
 static char *
-sm_dopr(pariout_t *T, const char *fmt, GEN arg_vector, va_list args)
+sm_dopr(const char *fmt, GEN arg_vector, va_list args)
 {
   int GENflag = 0, longflag = 0, pointflag = 0;
   int print_a_plus, print_a_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
@@ -992,6 +992,8 @@ sm_dopr(pariout_t *T, const char *fmt, GEN arg_vector, va_list args)
   int index = 1;
   GEN gvalue;
   const char *recall = NULL;
+  pariout_t T = *(GP_DATA->fmt); /* copy */
+  T.prettyp = f_RAW;
 
   dopr_init();
   saved_format = fmt;
@@ -1126,12 +1128,12 @@ nextch:
             int to_free;
             if (arg_vector) {
               gvalue = v_get_arg(arg_vector, &index);
-              strvalue = GENtostr(gvalue);
+              strvalue = GENtostr0(gvalue, &T);
               to_free = 1;
             } else {
               if (GENflag) {
                 gvalue = va_arg(args, GEN);
-                strvalue = GENtostr(gvalue);
+                strvalue = GENtostr0(gvalue, &T);
                 to_free = 1;
               } else {
                 strvalue = va_arg(args, char *);
@@ -1183,7 +1185,7 @@ nextch:
               case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
               case 'g': sigd = maxwidth; maxwidth = -1; break;
             }
-            fmtreal(gvalue, T->sp, dosign(print_a_blank, print_a_plus), ch,
+            fmtreal(gvalue, T.sp, dosign(print_a_blank, print_a_plus), ch,
                     sigd, maxwidth, ljust, len, zpad);
             break;
           }
@@ -3853,7 +3855,7 @@ dopr_arg_vector(GEN arg_vector, const char* fmt, ...)
   va_list ap;
   char *s;
   va_start(ap, fmt);
-  s = sm_dopr(GP_DATA->fmt, fmt, arg_vector, ap);
+  s = sm_dopr(fmt, arg_vector, ap);
   va_end(ap); return s;
 }
 /* GP only */
@@ -3870,7 +3872,7 @@ Strprintf(GEN gfmt, GEN args)
 void 
 parivprintf(const char *fmt, va_list ap)
 {
-  char *s = sm_dopr(GP_DATA->fmt, fmt, NULL, ap);
+  char *s = sm_dopr(fmt, NULL, ap);
   pariputs(s); free(s);
 }
 void
@@ -3882,7 +3884,7 @@ pariprintf(const char *fmt, ...) /* variadic version of printf0 */
 
 char *
 parivsprintf(const char *fmt, va_list ap)
-{ return sm_dopr(GP_DATA->fmt, fmt, NULL, ap); }
+{ return sm_dopr(fmt, NULL, ap); }
 char *
 parisprintf(const char *fmt, ...) /* variadic version of Strprintf */
 {
@@ -3895,7 +3897,7 @@ parisprintf(const char *fmt, ...) /* variadic version of Strprintf */
 void
 parivfprintf(FILE *file, const char *fmt, va_list ap)
 {
-  char *s = sm_dopr(GP_DATA->fmt, fmt, NULL, ap);
+  char *s = sm_dopr(fmt, NULL, ap);
   fputs(s, file); free(s);
 }
 void
