@@ -1377,12 +1377,11 @@ lim_lines_output(char *s, long n, long max_lin)
   }
 }
 
-#define is_blank_or_null(c) (!(c) || is_blank(c))
 #define is_blank(c) ((c) == ' ' || (c) == '\n')
 #define MAX_WORD_LEN 255
 
 static void
-_new_line(const char *prefix)
+new_line(const char *prefix)
 {
   pari_putc('\n'); if (prefix) pari_puts(prefix);
 }
@@ -1414,37 +1413,35 @@ void
 print_prefixed_text(const char *s, const char *prefix, const char *str)
 {
   long prelen = prefix? strlen_real(prefix): 0;
-  long oldwlen=0, linelen=prelen, w = term_width();
-  char word[MAX_WORD_LEN+1], oldword[MAX_WORD_LEN+1], *u=word;
+  long oldwlen=0, linelen=prelen, w = term_width(), ls = strlen(s);
+  char *word, *oldword, *u;
+
+  u = word= stackmalloc(ls + 3);
+  oldword = stackmalloc(ls + 3);
 
   if (prefix) pari_puts(prefix);
   oldword[0]='\0';
-  while ((*u++ = *s++))
-  {
-    if (is_blank_or_null(*s))
+  while ( (*u++ = *s++) )
+    if (!*s || is_blank(*s))
     {
       while (is_blank(*s)) s++;
       linelen += oldwlen;
-      if (linelen >= w)
-      {
-	_new_line(prefix);
-	linelen = oldwlen + prelen;
-      }
+      if (linelen >= w) { new_line(prefix); linelen = oldwlen + prelen; }
       pari_puts(oldword); *u++ = ' '; *u = 0;
       /* u-word = strlen(word) */
       oldwlen = str ? strlen_real(word): u - word;
       if (*s) { strcpy(oldword,word);  u = word; }
     }
-  }
+  u--;
   if (!str)
   { /* add final period if needed */
-    u--; while (u > word && is_blank_or_null(*u)) u--;
+    while (u > word && is_blank(*u)) u--;
     if (u >= word && isalnum((int)*u)) { u[1] = '.'; u[2] = 0; }
   }
   else
-    { *(u-2) = 0; oldwlen--; }
+    { u[-1] = 0; oldwlen--; }
   linelen += oldwlen;
-  if (linelen >= w) { _new_line(prefix); linelen = prelen + oldwlen; }
+  if (linelen >= w) { new_line(prefix); linelen = prelen + oldwlen; }
   pari_puts(word);
   if (str)
   {
@@ -1452,7 +1449,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     int space = (*str == ' ' && str[1]);
     if (linelen + len >= w)
     {
-      _new_line(prefix); linelen = prelen;
+      new_line(prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
     }
     term_color(c_OUTPUT);
