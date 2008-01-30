@@ -256,15 +256,15 @@ request fails, an error is raised. The \kbd{SIGINT} signal is blocked until
 \kbd{malloc} returns, to avoid leaving the system stack in an inconsistent
 state.
 
-\fun{void*}{pari_realloc}{void* ptr, size_t size} as \kbd{pari_malloc} but
+\fun{void*}{pari_realloc}{void* ptr, size_t size} as \tet{pari_malloc} but
 calls \kbd{realloc} instead of \kbd{malloc}.
 
-\fun{void*}{pari_calloc}{size_t size} as \kbd{pari_malloc}, setting the
+\fun{void*}{pari_calloc}{size_t size} as \tet{pari_malloc}, setting the
 memory to zero.
 
 \fun{void}{pari_free}{void* ptr} calls \kbd{free} to liberate the memory space
 pointed to by \kbd{ptr}, which must have been allocated by \kbd{malloc}
-(\kbd{pari_malloc}) or \kbd{realloc} (\kbd{pari_realloc}). The \kbd{SIGINT} signal
+(\tet{pari_malloc}) or \kbd{realloc} (\tet{pari_realloc}). The \kbd{SIGINT} signal
 is blocked until \kbd{free} returns.
 
 If you use the standard \kbd{libc} functions instead of our wrappers, then
