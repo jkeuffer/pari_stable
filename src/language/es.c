@@ -1658,16 +1658,10 @@ str_absint(outString *S, GEN x)
   str_puts(S, itostr_sign(x, 1, &l)); avma = av;
 }
 
-#define str_printf1(S, fmt, arg) {\
-  char _s[128]; sprintf(_s,fmt,arg); str_puts(S, _s);\
-}
-
 #define putsigne_nosp(S, x) str_putc(S, (x>0)? '+' : '-')
 #define putsigne(S, x) str_puts(S, (x>0)? " + " : " - ")
 #define sp_sign_sp(T,S, x) ((T)->sp? putsigne(S,x): putsigne_nosp(S,x))
 #define comma_sp(T,S)     ((T)->sp? str_puts(S, ", "): str_putc(S, ','))
-
-#define myprintf(fmt, arg) {char _s[128]; sprintf(_s,fmt,arg); pari_puts(_s);}
 
 /* print e to S (more efficient than sprintf) */
 static void
@@ -1778,13 +1772,15 @@ vsigne(GEN x)
 static void
 blancs(long nb) { while (nb-- > 0) pari_putc(' '); }
 
-#ifndef LONG_IS_64BIT
-#  define VOIR_STRING1 "[&=%08lx] "
-#  define VOIR_STRING2 "%08lx  "
-#else
-#  define VOIR_STRING1 "[&=%016lx] "
-#  define VOIR_STRING2 "%016lx  "
-#endif
+/* write an "address" */
+static void
+str_addr(outString *S, ulong x)
+{ char s[128]; sprintf(s,"%0*lx", BITS_IN_LONG/4, x); str_puts(S, s); }
+static void
+dbg_addr(ulong x) { pari_printf("[&=%0*lx] ", BITS_IN_LONG/4, x); }
+/* write a "word" */
+static void
+dbg_word(ulong x) { pari_printf("%0*lx ", BITS_IN_LONG/4, x); }
 
 /* bl: indent level */
 static void
@@ -1795,11 +1791,11 @@ dbg(GEN x, long nb, long bl)
   if (!x) { pari_puts("NULL\n"); return; }
   tx = typ(x);
   if (tx == t_INT && x == gen_0) { pari_puts("gen_0\n"); return; }
-  myprintf(VOIR_STRING1,(ulong)x);
+  dbg_addr((ulong)x);
 
   lx = lg(x);
   pari_printf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
-  myprintf(VOIR_STRING2,x[0]);
+  dbg_word(x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (tx == t_STR)
@@ -1812,7 +1808,7 @@ dbg(GEN x, long nb, long bl)
     else if (tx == t_REAL)
       pari_printf("(%c,expo=%ld):", vsigne(x), expo(x));
     if (nb < 0) nb = lx;
-    for (i=1; i < nb; i++) myprintf(VOIR_STRING2,x[i]);
+    for (i=1; i < nb; i++) dbg_word(x[i]);
     pari_putc('\n'); return;
   }
 
@@ -1829,15 +1825,14 @@ dbg(GEN x, long nb, long bl)
     x = list_data(x); lx = x? lg(x): 1;
   } else if (tx == t_CLOSURE)
     pari_printf("(arity=%ld):", x[1]);
-  for (i=1; i<lx; i++) pari_printf(VOIR_STRING2,x[i]);
+  for (i=1; i<lx; i++) dbg_word(x[i]);
   bl+=2; pari_putc('\n');
   switch(tx)
   {
     case t_INTMOD: case t_POLMOD:
     {
       const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
-      blancs(bl);
-      pari_puts("mod = "); dbg(gel(x,1),nb,bl);
+      blancs(bl); pari_puts("mod = "); dbg(gel(x,1),nb,bl);
       blancs(bl); pari_puts(s);        dbg(gel(x,2),nb,bl);
       break;
     }
@@ -1858,8 +1853,7 @@ dbg(GEN x, long nb, long bl)
       break;
 
     case t_PADIC:
-      blancs(bl);
-		  pari_puts("  p : "); dbg(gel(x,2),nb,bl);
+      blancs(bl); pari_puts("  p : "); dbg(gel(x,2),nb,bl);
       blancs(bl); pari_puts("p^l : "); dbg(gel(x,3),nb,bl);
       blancs(bl); pari_puts("  I : "); dbg(gel(x,4),nb,bl);
       break;
@@ -1935,13 +1929,13 @@ dbgGEN(GEN x, long nb) { dbg(x,nb,0); }
 static void
 print_entree(entree *ep, long hash)
 {
-  pari_printf(" %s ",ep->name); pari_printf(VOIR_STRING1,(ulong)ep);
+  pari_printf(" %s ",ep->name); dbg_addr((ulong)ep);
   pari_printf(":\n   hash = %3ld, menu = %2ld, code = %-10s",
 	    hash, ep->menu, ep->code? ep->code: "NULL");
   if (ep->next)
   {
     pari_printf("next = %s ",(ep->next)->name);
-    pari_printf(VOIR_STRING1,(ulong)(ep->next));
+    dbg_addr((ulong)ep->next);
   }
   pari_puts("\n");
 }
@@ -2601,7 +2595,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
       break;
     }
 
-    default: str_printf1(S,VOIR_STRING2,*g);
+    default: str_addr(S, *g);
   }
 }
 
