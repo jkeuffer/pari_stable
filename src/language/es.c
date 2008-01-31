@@ -1431,7 +1431,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
   oldword = stackmalloc(ls + 3);
 
   if (prefix) pari_puts(prefix);
-  oldword[0]='\0';
+  *oldword = 0;
   while ( (*u++ = *s++) )
     if (!*s || is_blank(*s))
     {
@@ -1450,7 +1450,7 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     if (u >= word && isalnum((int)*u)) { u[1] = '.'; u[2] = 0; }
   }
   else
-    { *u = 0; oldwlen--; }
+    { if (u >= word) *u = 0; oldwlen--; }
   linelen += oldwlen;
   if (linelen >= w) { new_line(prefix); linelen = prelen + oldwlen; }
   pari_puts(word);
