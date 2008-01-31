@@ -1443,14 +1443,14 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
       oldwlen = str ? strlen_real(word): u - word;
       if (*s) { strcpy(oldword,word);  u = word; }
     }
-  u--;
+  u -= 2; /* last non-null char in word */
   if (!str)
   { /* add final period if needed */
     while (u > word && is_blank(*u)) u--;
     if (u >= word && isalnum((int)*u)) { u[1] = '.'; u[2] = 0; }
   }
   else
-    { u[-1] = 0; oldwlen--; }
+    { *u = 0; oldwlen--; }
   linelen += oldwlen;
   if (linelen >= w) { new_line(prefix); linelen = prelen + oldwlen; }
   pari_puts(word);
