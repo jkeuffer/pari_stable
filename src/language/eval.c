@@ -349,13 +349,24 @@ changelex(long vn, GEN x)
   v->value = x;
 }
 
+INLINE GEN
+copylex(long vn)
+{
+  struct var_lex *v = var+s_var.n+vn;
+  if (v->flag!=COPY_VAL)
+  {
+    v->flag  = COPY_VAL;
+    v->value = gclone(v->value);
+  }
+  return v->value;
+}
+
 INLINE void
-copylex(long vn, GEN x)
+pushlex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
-  v->flag  = typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL;
-  v->value = (v->flag == COPY_VAL)? gclone(x):
-                                  (isclone(x))? gcopy(x): x;
+  v->flag  = PUSH_VAL;
+  v->value = (isclone(x))? gcopy(x): x;
 }
 
 INLINE void
@@ -622,7 +633,7 @@ closure_eval(GEN C)
           (void)stack_new(&s_ptrs);
         g = &ptrs[rp++];
         g->x = cgetg(2,t_VECSMALL);
-        gel(g->x,1) = (GEN) var[s_var.n+operand].value;
+        gel(g->x,1) = copylex(operand);
         g->vn=0;
         g->ep=NULL;
         C=&g->c;
@@ -846,7 +857,7 @@ closure_eval(GEN C)
       {
         GEN z = closure_evalgen(gel(st,sp-1));
         if (!z) pari_err(talker,"break not allowed in function parameter");
-        copylex(operand,z);
+        pushlex(operand,z);
       }
       sp--;
       break;
@@ -989,7 +1000,7 @@ closure_eval(GEN C)
       for (j=0;j<operand;j++)
       {
         if (gel(st,sp+j))
-          copylex(j-operand,gel(st,sp+j));
+          pushlex(j-operand,gel(st,sp+j));
         else
         {
           var[s_var.n+j-operand].flag=DEFAULT_VAL;
