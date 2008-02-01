@@ -690,35 +690,42 @@ following equivalent basic forms are available to create new ones
 
 \section{GP operators}\label{se:operators}
 
-\noindent Loosely speaking, an \idx{operator} is a function (usually
-associated to basic arithmetic operations) whose name contains only
-non-alphanumeric characters. In practice, most of these are simple functions,
-which take arguments, and return a value; assignment operators also have side
-effects. Each of these has some fixed and unchangeable priority, which means
-that, in a given expression, the operations with the highest priority is
-performed first. Operations at the same priority level are performed in the
-order they were written, i.e.~from left to right. Anything enclosed between
-parenthesis is considered a complete subexpression, and is resolved
-independently of the surrounding context. For instance, assuming that
-\var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are standard binary operators with
-increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow} for instance),
+\noindent Loosely speaking, an \idx{operator} is a function, usually
+associated to basic arithmetic operations, whose name contains only
+non-alphanumeric characters. For instance \kbd{+} or \kbd{-}, but also
+\kbd{=} or \kbd{+=}, or even \kbd{[ ]} (the selection operator). As all
+functions, operators take arguments, and return a value; \emph{assignment}
+operators also have side effects, besides returning a value (they change the
+value of some variable).
+
+Each operator has a fixed and unchangeable priority, which means that, in
+a given expression, the operations with the highest priority is performed
+first. Operations at the same priority level are performed in the order they
+were written, i.e.~from left to right. Anything enclosed between parenthesis
+is considered a complete subexpression, and is resolved independently of the
+surrounding context. For instance, assuming that \var{op}$_1$, \var{op}$_2$,
+\var{op}$_3$ are standard binary operators with increasing priorities (think
+of \kbd{+}, \kbd{*}, \kbd{\pow} for instance),
 $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
 equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
 (x~\var{op}_3~y)).$$
 
-GP contains quite a lot of different operators, some of them unary (having only
-one argument), some binary, plus special selection operators. Unary operators
-are defined for either prefix (preceding their single argument: \var{op}~$x$)
-or postfix (following the argument: $x$~\var{op}) position, never both (some
-are syntactically correct in both positions, but with different meanings).
-Binary operators all use the syntax $x$~\var{op}~$y$. Most of them are well
-known, some are borrowed from C~syntax, and a few are specific to GP. Beware
-that some GP operators may differ slightly from their C counterparts. For
-instance, GP's postfix \kbd{++} returns the \emph{new} value, like the prefix
-\kbd{++} of~C, and the binary shifts \kbd{<<}, \kbd{>>} have a priority which
-is different from (higher than) that of their C counterparts. When in doubt,
-just surround everything by parentheses. (Besides, your code will be
-more legible.)
+GP contains many different operators, either unary (having only
+one argument) or binary, plus a few special selection operators. Unary
+operators are defined as either \emph{prefix}  or \emph{postfix}, meaning
+that they respectively precede (\var{op}~$x$) and follow ($x$~\var{op}) their
+single argument. Some symbols are syntactically correct in both positions,
+like \kbd{!}, but then represent different operators: the \kbd{!} symbol
+represents the negation and factorial operators in prefix and postfix position
+respectively. Binary operators all use the syntax $x$~\var{op}~$y$. Most of
+them are standard (\kbd{+}, \kbd{=}), some are borrowed from the C language
+(\kbd{++}, \kbd{<<}, \kbd{+=}), and a few are specific to GP (\kbd{\bs/},
+\kbd{\#}). Beware that some GP operators differ slightly from their C
+counterparts. For instance, GP's postfix \kbd{++} returns the \emph{new}
+value, like the prefix \kbd{++} of~C, and the binary shifts \kbd{<<},
+\kbd{>>} have a priority which is different from (higher than) that of their
+C counterparts. When in doubt, just surround everything by parentheses;
+besides, your code will be more legible.
 
 \noindent Here is the complete list in order of decreasing \idx{priority},
 binary unless mentioned otherwise:
