@@ -311,11 +311,13 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
-	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
+	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* $exec
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
+cleantune:
+	-\$(RM) tune tune-sta tune.o
 
-clean: cleanobj cleantest cleandesc
+clean: cleanobj cleantune cleantest cleandesc
 
 # sleep 3 to avoid problems with NFS and slightly out of synch
 # fileserver/host. We are recompiling everything anyway.
