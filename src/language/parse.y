@@ -216,8 +216,7 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
 %left '&' "&&" '|' "||"
 %left "==" "!=" '>' ">=" '<' "<="
 %left '+' '-'
-%left ">>" "<<"
-%left '%' "\\/" '\\' '/' '*'
+%left '%' "\\/" '\\' '/' '*' ">>" "<<"
 %left SIGN
 %right '^'
 %left '#'

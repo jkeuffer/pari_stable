@@ -37,6 +37,7 @@ BA 18- [from 2.4.2] trap() did not restore evaluator states [#722]
        extension has degree 1 [#727]
    25- zetakinit(bnfinit(...)) -> gerepile error
    26- zeta(1-2^31 or 1-2^63) -> SEGV [#730]
+BA 27- priority of << had become lower than priority of * (should be =)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
