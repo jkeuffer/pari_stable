@@ -700,12 +700,18 @@ value of some variable).
 
 Each operator has a fixed and unchangeable priority, which means that, in
 a given expression, the operations with the highest priority is performed
-first. Operations at the same priority level are performed in the order they
-were written, i.e.~from left to right. Anything enclosed between parenthesis
-is considered a complete subexpression, and is resolved independently of the
-surrounding context. For instance, assuming that \var{op}$_1$, \var{op}$_2$,
-\var{op}$_3$ are standard binary operators with increasing priorities (think
-of \kbd{+}, \kbd{*}, \kbd{\pow} for instance),
+first. Unless mentionned otherwise, operators at the same priority level are
+left-associative (performed from left to right), unless they are assignments,
+in which case they are right-associative. For instance,
+\bprog
+  a + b + c    -->   (a + b) + c
+  a = b = c    -->   a = (b = c)
+@eprog\noindent
+Anything enclosed between parenthesis is considered a complete subexpression,
+and is resolved independently of the surrounding context. For instance,
+assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are standard binary
+operators with increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow}
+for instance),
 $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
 equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
 (x~\var{op}_3~y)).$$
@@ -730,8 +736,17 @@ besides, your code will be more legible.
 \noindent Here is the complete list in order of decreasing \idx{priority},
 binary unless mentioned otherwise:
 
-\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut} \point{Priority
-10}
+\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
+\point{Priority 12}
+\kbd{->}: \kbd{(\var{vars})->\var{expr}} returns a function object (of type
+\typ{CLOSURE}).
+
+\point{Priority 11}
+\kbd{;}: 
+
+\kbd{,}: 
+
+\point{Priority 10}
 %
 \kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$
 to $x$, then returns the new value of $x$. This corresponds to the C
@@ -772,24 +787,22 @@ result is not modifiable).
 
 \point{Priority 6}
 %
-\kbd{'} (unary, prefix): quote its argument (a variable name) without
-evaluating it.
-\bprog
-? a = x + 1; x = 1;
-? subst(a,x,1)
-  ***   variable name expected: subst(a,x,1)
-                                        ^---
-? subst(a,'x,1)
-%1 = 2
-@eprog
-%
-\kbd{\pow}: powering.
+\kbd{\pow}: powering. This operator is right associative:
+\kbd{2 \pow 3\pow 4} is understood as \kbd{2 \pow (3\pow 4)}.
 
-\kbd{'} (unary, postfix): derivative with respect to the main variable. If
-$f$ is a (GP or user) function, $f'(x)$ is allowed. If $x$ is a scalar, the
-operator performs \idx{numerical derivation}, defined as $(f(x+\varepsilon) -
-f(x-\varepsilon)) / 2\varepsilon$ for a suitably small epsilon depending on
-current precision. It behaves as $(f(x))'$ otherwise.
+\kbd{'} (unary, postfix): derivative with respect to the main variable.
+If $f$ is a function (a \typ{CLOSURE}), $f'$ is allowed and defines a new
+function, which will perform \idx{numerical derivation} when evaluated
+at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
+2\varepsilon$ for a suitably small epsilon depending on current precision.
+\bprog
+? (x^2 + y*x+y^2)'  \\@com derivation with respect to main variable \kbd{x}
+%1 = 2*x + y
+? SIN = cos'
+%2 = cos'
+? SIN(Pi/6)         \\@com numerical derivation
+%3 = -0.5000000000000000000000000000
+@eprog
 
 \strut\kbd{\til} (unary, postfix): vector/matrix transpose.
 
@@ -856,6 +869,10 @@ and aborted as soon as the final truth value is known. Thus, for instance,
 @eprog\noindent
 will never produce an error since the second argument need not (and will not)
 be processed when the first is already zero (false).
+
+\point{Priority -1}
+%
+\kbd{:}
 
 \misctitle{Remark:} Use the \var{op}\kbd{=} operators as often as possible
 since they make complex assignments more legible: one needs not parse
