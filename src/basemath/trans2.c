@@ -22,6 +22,47 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+GEN
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
+{
+  GEN s, p1;
+  long l;
+  if (typ(*s0)==t_COMPLEX && gcmp0(gel(*s0,2))) *s0 = gel(*s0,1);
+  s = *s0;
+  l = precision(s); if (!l) l = *prec;
+  if (l < 3) l = 3;
+  *res = cgetc(l); *av = avma;
+  if (typ(s) == t_COMPLEX)
+  { /* s = sig + i t */
+    s = ctofp(s, l+1);
+    *sig = gel(s,1);
+  }
+  else /* real number */
+  {
+    *sig = s = gtofp(s, l+1);
+    p1 = floorr(s);
+    if (!signe(subri(s,p1))) *s0 = p1;
+  }
+  *prec = l; return s;
+}
+
+GEN
+affc_fixlg(GEN x, GEN res)
+{
+  if (typ(x) == t_COMPLEX)
+  {
+    affr_fixlg(gel(x,1), gel(res,1));
+    affr_fixlg(gel(x,2), gel(res,2));
+  }
+  else
+  {
+    avma = (pari_sp)(res+3);
+    res = cgetr(lg(gel(res,1)));
+    affr_fixlg(x, res);
+  }
+  return res;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                          ARCTANGENT                            **/
@@ -924,31 +965,6 @@ dabs(double s, double t) { return sqrt( s*s + t*t ); }
 double
 dnorm(double s, double t) { return s*s + t*t; }
 
-GEN
-trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
-{
-  GEN s, p1;
-  long l;
-  if (typ(*s0)==t_COMPLEX && gcmp0(gel(*s0,2))) *s0 = gel(*s0,1);
-  s = *s0;
-  l = precision(s); if (!l) l = *prec;
-  if (l < 3) l = 3;
-
-  if (typ(s) == t_COMPLEX)
-  { /* s = sig + i t */
-    *res = cgetc(l); *av = avma;
-    s = ctofp(s, l+1); *sig = gel(s,1);
-  }
-  else /* real number */
-  {
-    *res = cgetr(l); *av = avma;
-    *sig = s = gtofp(s, l+1);
-    p1 = floorr(s);
-    if (!signe(subri(s,p1))) *s0 = p1;
-  }
-  *prec = l; return s;
-}
-
 #if 0
 /* x, z t_REAL. Compute unique x in ]-z,z] congruent to x mod 2z */
 static GEN
@@ -1158,14 +1174,7 @@ cxgamma(GEN s0, int dolog, long prec)
       y = gdiv(sqrtpi2, y);
     y = gmul(gexp(p1, prec), y);
   }
-  if (typ(y) == t_REAL) affr_fixlg(y, res);
-  else
-  {
-    if (typ(res) == t_REAL) return gerepileupto(av, y);
-    affr_fixlg(gel(y,1), gel(res,1));
-    affr_fixlg(gel(y,2), gel(res,2));
-  }
-  avma = av; return res;
+  avma = av; return affc_fixlg(y, res);
 }
 
 /* Gamma((m+1) / 2) */
@@ -1505,13 +1514,7 @@ cxpsi(GEN s0, long prec)
     GEN pi = mppi(prec);
     z = gadd(z, gmul(pi, gcotan(gmul(pi,s), prec)));
   }
-  if (typ(z) == t_REAL) affr_fixlg(z, res);
-  else
-  {
-    affr_fixlg(gel(z,1), gel(res,1));
-    affr_fixlg(gel(z,2), gel(res,2));
-  }
-  avma = av; return res;
+  avma = av; return affc_fixlg(z, res);
 }
 
 GEN

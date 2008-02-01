@@ -188,18 +188,7 @@ jbesselh(GEN n, GEN z, long prec)
       z = gadd(z, real_0(prec));
       if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
       p1 = gmul(_jbesselh(k,z,prec), gsqrt(gdiv(z,Pi2n(-1,prec)),prec));
-      avma = av;
-      if (typ(p1) == t_COMPLEX)
-      {
-	affr_fixlg(gel(p1,1), gel(res,1));
-	affr_fixlg(gel(p1,2), gel(res,2));
-      }
-      else
-      {
-	res = cgetr(linit);
-	affr_fixlg(p1, res);
-      }
-      return res;
+      avma = av; return affc_fixlg(p1, res);
 
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
@@ -1377,7 +1366,7 @@ END:
 	     gpow(Pi2n(1,prec), gneg(s), prec));
     y = gmul2n(gmul(y, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
   }
-  gaffect(y,res); avma = av; return res;
+  avma = av; return affc_fixlg(y,res);
 }
 
 /* return P mod x^n where P is polynomial in x */
@@ -1789,21 +1778,25 @@ polylog(long m, GEN x, long prec)
 {
   long l, e, i, G, sx;
   pari_sp av, av1, limpile;
-  GEN X, Xn, z, p1, p2, y;
+  GEN X, Xn, z, p1, p2, y, res;
 
-  if (m<0) pari_err(talker,"negative index in polylog");
+  if (m < 0) pari_err(talker,"negative index in polylog");
   if (!m) return mkfrac(gen_m1,gen_2);
   if (gcmp0(x)) return gcopy(x);
-  av = avma;
   if (m==1)
+  {
+    av = avma;
     return gerepileupto(av, gneg(glog(gsub(gen_1,x), prec)));
+  }
 
-  l = precision(x);
-  if (!l) { l=prec; x=gmul(x, real_1(l)); }
-  e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
+  l = precision(x); if (!l) l = prec;
+  av = avma; res = cgetc(l);
+  x = gtofp(x, l+1);
+  e = gexpo(gnorm(x));
+  if (!e || e== -1) return cxpolylog(m,x,prec);
   X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
-  av1=avma; limpile=stack_lim(av1,1);
+  av1 = avma; limpile = stack_lim(av1,1);
   y = Xn = X;
   for (i=2; ; i++)
   {
@@ -1817,7 +1810,7 @@ polylog(long m, GEN x, long prec)
       gerepileall(av1,2, &y, &Xn);
     }
   }
-  if (e < 0) return gerepileupto(av, y);
+  if (e < 0) { avma = av; return affc_fixlg(y, res); }
 
   sx = gsigne(imag_i(x));
   if (!sx)
@@ -1850,7 +1843,8 @@ polylog(long m, GEN x, long prec)
     p1 = gadd(gmul2n(p1,1), gmul(z,gpowgs(logx,m-1)));
     if (typ(x) == t_REAL && signe(x) < 0) p1 = real_i(p1);
   }
-  return gerepileupto(av, gadd(y,p1));
+  y = gadd(y,p1);
+  avma = av; return affc_fixlg(y, res);
 }
 
 GEN
