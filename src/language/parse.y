@@ -208,7 +208,6 @@ newfunc(CSTtype t, struct node_loc *func, long args, long code,
 %token KENTRY "variable name"
 %token KSTRING "character string"
 %left SEQ DEFFUNC
-%left "'("
 %left INT LVAL
 %right ")->" "->"
 %left ';' ','
