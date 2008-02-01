@@ -791,12 +791,12 @@ result is not modifiable).
 \kbd{2 \pow 3\pow 4} is understood as \kbd{2 \pow (3\pow 4)}.
 
 \kbd{'} (unary, postfix): derivative with respect to the main variable.
-If $f$ is a function (a \typ{CLOSURE}), $f'$ is allowed and defines a new
+If $f$ is a function (\typ{CLOSURE}), $f'$ is allowed and defines a new
 function, which will perform \idx{numerical derivation} when evaluated
 at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 2\varepsilon$ for a suitably small epsilon depending on current precision.
 \bprog
-? (x^2 + y*x+y^2)'  \\@com derivation with respect to main variable \kbd{x}
+? (x^2 + y*x + y^2)'  \\@com derivation with respect to main variable \kbd{x}
 %1 = 2*x + y
 ? SIN = cos'
 %2 = cos'
@@ -827,7 +827,7 @@ equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 %
 \kbd{*}: multiplication.
 
-\kbd{/}: exact division (\kbd{3/2}=$3/2$, not $1.5$).
+\kbd{/}: exact division (\kbd{3/2} yields $3/2$, not $1.5$).
 
 \kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
 qy + r$, then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$. If $x$ and $y$
