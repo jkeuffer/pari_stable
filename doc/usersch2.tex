@@ -513,23 +513,44 @@ If the main variables are the same, it is allowed to mix \typ{POL} and
 \subsec{Polynomials}\sidx{polynomial}\label{se:pol}
 (\tet{t_POL}): type the polynomial in a natural way, not
 forgetting to put a ``$*$'' between a coefficient and a formal variable;
-you may also use the functions \kbd{Pol} or \kbd{Polrev}:
 \bprog
 ? 1 + 2*x + 3*x^2
 %1 = 3*x^2 + 2*x + 1
-? Pol([1,2,3], x)
-%2 = x^2 + 2*x + 3
-? Polrev([1,2,3], x)
-%3 = 3*x^2 + 2*x + 1
+@eprog\noindent
+This assumes that \kbd{x} is still a ''free variable''.
+\bprog
+? x = 1; 1 + 2*x + 3*x^2
+%2 = 6
+@eprog\noindent
+generates an integer, not a polynomial! It is good practice to never assign
+values to polynomial variables to avoid the above problem, but a foolproof
+construction is available using \kbd{'x} instead of~\kbd{x}: \kbd{'x}
+is a constant evaluating to the free variable with name \kbd{x},
+independently of the current value of~\kbd{x}.
+\bprog
+? x = 1; 1 + 2*'x + 3*'x^2
+%3 = 1 + 2*x + 3*x^2
+? x = 'x; 1 + 2*x + 3*x^2
+%4 = 1 + 2*x + 3*x^2
+@eprog\noindent
+You may also use the functions \kbd{Pol} or \kbd{Polrev}:
+\bprog
+? Pol([1,2,3])         \\@com \kbd{Pol} creates a polynomial in \kbd{x} by default
+%1 = x^2 + 2*x + 3
+? Polrev([1,2,3])
+%2 = 3*x^2 + 2*x + 1
+? Pol([1,2,3], 'y)     \\@com we use \kbd{'y}, safer than \kbd{y}
+%3 = y^2 + 2*y + 3
 @eprog\noindent The latter two are much more efficient constructors than an
 explicit summation (the latter is quadratic in the degree, the former linear):
 \bprog
 ? for (i=1, 10^4, Polrev( vector(100, i,i) ) )
 time = 124ms
 
-? for (i=1, 10^4, sum(i = 1, 100, (i+1) * x^i) )
+? for (i=1, 10^4, sum(i = 1, 100, (i+1) * 'x^i) )
 time = 3,985ms
-@eprog\noindent
+@eprog
+
 Polynomials are always printed as \emph{univariate} polynomials, with
 monomials sorted by degreasing degree:
 \bprog
@@ -546,7 +567,9 @@ Typing \kbd{O(X\pow $k$)}, where $k$ is an integer, yields an $X$-adic $0$ of
 accuracy~$k$, representing any power series in \kbd{X} whose valuation is
 $\geq k$. Of course, \kbd{X} can be replaced by any other variable name! To
 input a general non-0 power series, type in a polynomial or rational
-function (in \kbd{X}, say), and add \kbd{O(X\pow $k$)} to it.
+function (in \kbd{X}, say), and add \kbd{O(X\pow $k$)} to it. The discussion
+in the \typ{POL} section about variables remains valid; a constructor
+\tet{Ser} replaces \tet{Pol} and \tet{Polrev}.
 
 \misctitle{Caveat.} Power series with inexact coefficients sometimes have a
 non-intuitive behaviour: if $k$ significant terms are requested, an inexact
@@ -695,23 +718,27 @@ associated to basic arithmetic operations, whose name contains only
 non-alphanumeric characters. For instance \kbd{+} or \kbd{-}, but also
 \kbd{=} or \kbd{+=}, or even \kbd{[ ]} (the selection operator). As all
 functions, operators take arguments, and return a value; \emph{assignment}
-operators also have side effects, besides returning a value (they change the
-value of some variable).
+operators also have side effects: besides returning a value, they change the
+value of some variable.
 
 Each operator has a fixed and unchangeable priority, which means that, in
 a given expression, the operations with the highest priority is performed
 first. Unless mentionned otherwise, operators at the same priority level are
 left-associative (performed from left to right), unless they are assignments,
-in which case they are right-associative. For instance,
+in which case they are right-associative. Anything enclosed between
+parenthesis is considered a complete subexpression, and is resolved
+recursively, independently of the surrounding context. For instance,
 \bprog
-  a + b + c    -->   (a + b) + c
-  a = b = c    -->   a = (b = c)
+  a + b + c    -->   (a + b) + c     \\@com left-associative
+  a = b = c    -->   a = (b = c)     \\@com right-associative
 @eprog\noindent
-Anything enclosed between parenthesis is considered a complete subexpression,
-and is resolved independently of the surrounding context. For instance,
-assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are standard binary
-operators with increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow}
-for instance),
+For instance, assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are
+standard binary operators with increasing priorities (think of \kbd{+},
+\kbd{*}, \kbd{\pow} for instance),
+$$ x~\var{op}_1~y~\var{op}_1~z~\var{op}_1~x  $$ is
+equivalent to
+$$ ((x~\var{op}_1~y)~\var{op}_1~z)~\var{op}_1~x,$$
+(left-associativity) and
 $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
 equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
 (x~\var{op}_3~y)).$$
@@ -722,59 +749,47 @@ operators are defined as either \emph{prefix}  or \emph{postfix}, meaning
 that they respectively precede (\var{op}~$x$) and follow ($x$~\var{op}) their
 single argument. Some symbols are syntactically correct in both positions,
 like \kbd{!}, but then represent different operators: the \kbd{!} symbol
-represents the negation and factorial operators in prefix and postfix position
-respectively. Binary operators all use the syntax $x$~\var{op}~$y$. Most of
-them are standard (\kbd{+}, \kbd{=}), some are borrowed from the C language
-(\kbd{++}, \kbd{<<}, \kbd{+=}), and a few are specific to GP (\kbd{\bs/},
-\kbd{\#}). Beware that some GP operators differ slightly from their C
-counterparts. For instance, GP's postfix \kbd{++} returns the \emph{new}
-value, like the prefix \kbd{++} of~C, and the binary shifts \kbd{<<},
-\kbd{>>} have a priority which is different from (higher than) that of their
-C counterparts. When in doubt, just surround everything by parentheses;
-besides, your code will be more legible.
+represents the negation and factorial operators when in prefix and postfix
+position respectively. Binary operators all use the (infix) syntax
+$x$~\var{op}~$y$. Most of them are standard (\kbd{+}, \kbd{\%}), some are
+borrowed from the C language (\kbd{++}, \kbd{<<}), and a few are
+specific to GP (\kbd{\bs}, \kbd{\#}). Beware that some GP operators differ
+slightly from their C counterparts. For instance, GP's postfix \kbd{++}
+returns the \emph{new} value, like the prefix \kbd{++} of~C, and the binary
+shifts \kbd{<<}, \kbd{>>} have a priority which is different from (higher
+than) that of their C counterparts. When in doubt, just surround everything
+by parentheses; besides, your code will be more legible.
 
-\noindent Here is the complete list in order of decreasing \idx{priority},
-binary unless mentioned otherwise:
+\noindent Here is the list of available operators, ordered by decreasing
+\idx{priority}, binary and left-associative unless mentioned otherwise. An
+expression is an \tev{lvalue} if something can be assigned to it. (The name
+comes from left-value, to the left of a \kbd{=} operator; e.g.
+\kbd{x}, or \kbd{v[1]} are lvalues, but \kbd{x + 1} is not.)
 
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 12}
-\kbd{->}: \kbd{(\var{vars})->\var{expr}} returns a function object (of type
-\typ{CLOSURE}).
-
 \point{Priority 11}
-\kbd{;}: 
-
-\kbd{,}: 
+\kbd{->}: \kbd{(\var{vars})->\var{expr}} returns a function object, of type
+\typ{CLOSURE}.
 
 \point{Priority 10}
 %
-\kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$
-to $x$, then returns the new value of $x$. This corresponds to the C
-statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
-\kbd{$x$--} does the same with $x-1$.
+\kbd{++} and \kbd{--} (unary, postfix): if $x$ is an \tet{lvalue},
+\kbd{$x$++} assigns the value $x+1$ to $x$, then returns the new value of
+$x$. This corresponds to the C statement \kbd{++$x$} (there is no prefix
+\kbd{++} operator in GP). \kbd{$x$--} does the same with $x-1$. These
+operators are not associative, i.e. \kbd{x++++} is invalid, since
+\kbd{x++} is not an lvalue.
 
 \point{Priority 9}
 %
-\kbd{\var{op}=}, where \var{op} is any simple binary operator (i.e.~a binary
-operator with no side effects, i.e.~one of those defined below) which is not
-a boolean operator (comparison or logical). \kbd{x~\var{op}=~$y$} assigns
-$(\kbd{x}~\var{op}~y)$ to~\kbd{x}, and returns the new value of~\kbd{x}.
-This is \emph{not} a reference to the \idx{variable}~\kbd{x}, i.e.~an
-\kbd{lvalue}; thus
-\bprog
-  (x += 2) = 3
-@eprog\noindent
-is invalid.
+\kbd{=} and \kbd{\var{op}=}, where \var{op} is any simple binary operator
+among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
+\kbd{<<}, or
+\kbd{>>}. These special unary, postfix operators, following an \emph{lvalue},
+create a \emph{prefix} unary operator which will gobble the next argument and
+use it to assign a new value to the left hand-side. (See below.)
 
-\point{Priority 8}
 %
-\kbd{=} is the assignment operator. The result of \kbd{x~=~$y$} is the value
-of the expression~$y$, which is also assigned to the variable~\kbd{x}. This
-is \emph{not} the equality test operator; a statement like \kbd{x~=~1} is
-always true (i.e.~non-zero), and sets \kbd{x} to~1. The right hand side of
-the assignment operator is evaluated before the left hand side. If the left
-hand side cannot be modified, raise an error.
-
 \point{Priority 7} \kbd{[ ]} is the selection operator. \kbd{$x$[$i$]}
 returns the $i$-th component of vector $x$; \kbd{$x[$i$,$j$]$},
 \kbd{$x[,$j$]$} and \kbd{$x$[$i$,]} respectively return the entry of
@@ -784,6 +799,10 @@ selections, it assigns its right hand side to the selected component. E.g
 \kbd{x[1][1] = 0} is valid; but beware that \kbd{(x[1])[1] = 0} is not
 (because the parentheses force the complete evaluation of \kbd{x[1]}, and the
 result is not modifiable).
+
+\kbd{( )} is the function call operator. If $f$ is a closure and \var{args}
+is a comma-separated list of arguments (possibly empty),
+$f\kbd{(\var{args})}$ evaluates $f$ on those arguments.
 
 \point{Priority 6}
 %
@@ -802,6 +821,8 @@ at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 %2 = cos'
 ? SIN(Pi/6)         \\@com numerical derivation
 %3 = -0.5000000000000000000000000000
+? cos'(Pi/6)        \\@com works directly: no need for the intermediate \kbd{SIN}
+%4 = -0.5000000000000000000000000000
 @eprog
 
 \strut\kbd{\til} (unary, postfix): vector/matrix transpose.
@@ -864,15 +885,68 @@ returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
 \var{or} and \var{and} operations is evaluated from left to right,
 and aborted as soon as the final truth value is known. Thus, for instance,
 \bprog
-  x && test(1/x)
+  x == 0 || test(1/x)
+@eprog\noindent
+will never produce an error since \kbd{test(1/x)} is not even evaluated
+when the first test is true (hence the final truth value is true). Similarly
+\bprog
   type(p) == "t_INT" && isprime(p)
 @eprog\noindent
-will never produce an error since the second argument need not (and will not)
-be processed when the first is already zero (false).
+does not evaluate \kbd{isprime(p)} if \kbd{p} is not an integer.
 
 \point{Priority -1}
 %
-\kbd{:}
+\kbd{:} as in \kbd{x:small} is used to indicate to the GP2C compiler that the
+variable on the left-hand side always contains objects of the type specified
+on the right hand-side (here, a small integer) in order to produce more
+efficient or more readable C code. This is ignored by GP.
+
+\point{Priority -2}
+
+\var{lvalue} \kbd{=} is the assignment operator created by the postfix \kbd{=}
+operator (of priority 9) applied to \var{lvalue}. The result of \kbd{x~=~$y$}
+is the value of the expression~$y$, which is also assigned to the
+variable~\kbd{x}. This is \emph{not} the equality test operator; a statement
+like \kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1. The
+right hand side of the assignment operator is evaluated before the left hand
+side. If the left hand side is not an lvalue, raise an error. This assignment
+operator is right-associative.
+
+\leavevmode
+\var{lvalue}\kbd{\var{op}=}, where \var{op} is any simple binary operator
+among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
+\kbd{<<}, or
+\kbd{>>}. This is the assignment operator created by the postfix
+\kbd{\var{op}=} operator applied to \var{lvalue}.
+
+The expression \kbd{x~\var{op}=~$y$} assigns $(\kbd{x}~\var{op}~y)$
+to~\kbd{x}, and returns the new value of~\kbd{x}. This is \emph{not} a
+reference to the \idx{variable}~\kbd{x}, i.e.~an \tev{lvalue}; thus
+\bprog
+  (x += 2) = 3
+@eprog\noindent
+is invalid. These assignment operators are right-associative:
+\bprog
+  ? x = 'x; x += x *= 2
+  %1 = 3*x
+@eprog
+
+\misctitle{Remark:} The assignment operators are split in two unary
+operators, one prefix, the other postfix, where one would expect a simple
+binary operator. This is because, in an expression like \kbd{x = y},
+the \kbd{=} has very high priority on the left, and very low on the right.
+We want the following interpretation
+\bprog
+  x = 1 + 1   --->   x = (1 + 1)
+  1 + x = 1   --->   1 + (x = 1)
+@eprog\noindent and there is no way to assign relative priorities to
+\emph{binary} operators \kbd{+} and \kbd{=} yielding the above behaviour.
+With our convention, it works:
+\bprog
+  x = 1 + 1   --->   (x =) (1 + 1)
+  1 + x = 1   --->   1 + ((x =) 1)
+@eprog\noindent where \kbd{(x = )} is the unary prefix operator assigning its
+argument to \kbd{x}.
 
 \misctitle{Remark:} Use the \var{op}\kbd{=} operators as often as possible
 since they make complex assignments more legible: one needs not parse
