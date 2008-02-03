@@ -732,13 +732,9 @@ recursively, independently of the surrounding context. For instance,
   a + b + c    -->   (a + b) + c     \\@com left-associative
   a = b = c    -->   a = (b = c)     \\@com right-associative
 @eprog\noindent
-For instance, assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are
-standard binary operators with increasing priorities (think of \kbd{+},
-\kbd{*}, \kbd{\pow} for instance),
-$$ x~\var{op}_1~y~\var{op}_1~z~\var{op}_1~x  $$ is
-equivalent to
-$$ ((x~\var{op}_1~y)~\var{op}_1~z)~\var{op}_1~x,$$
-(left-associativity) and
+Assuming that \var{op}$_1$, \var{op}$_2$, \var{op}$_3$ are
+binary operators with increasing priorities (think of \kbd{+},
+\kbd{*}, \kbd{\pow}),
 $$ x~\var{op}_1~y~\var{op}_2~z~\var{op}_2~x~\var{op}_3~y $$ is
 equivalent to $$ x~\var{op}_1~((y~\var{op}_2~z)~\var{op}_2~
 (x~\var{op}_3~y)).$$
@@ -751,7 +747,9 @@ single argument. Some symbols are syntactically correct in both positions,
 like \kbd{!}, but then represent different operators: the \kbd{!} symbol
 represents the negation and factorial operators when in prefix and postfix
 position respectively. Binary operators all use the (infix) syntax
-$x$~\var{op}~$y$. Most of them are standard (\kbd{+}, \kbd{\%}), some are
+$x$~\var{op}~$y$.
+
+Most operators are standard (\kbd{+}, \kbd{\%}, \kbd{=}), some are
 borrowed from the C language (\kbd{++}, \kbd{<<}), and a few are
 specific to GP (\kbd{\bs}, \kbd{\#}). Beware that some GP operators differ
 slightly from their C counterparts. For instance, GP's postfix \kbd{++}
@@ -767,18 +765,9 @@ comes from left-value, to the left of a \kbd{=} operator; e.g.
 \kbd{x}, or \kbd{v[1]} are lvalues, but \kbd{x + 1} is not.)
 
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 15}
-%
-\kbd{=} and \kbd{\var{op}=}, where \var{op} is any simple binary operator
-among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
-\kbd{<<}, or
-\kbd{>>}. These special unary, postfix operators, following an \emph{lvalue},
-create a \emph{prefix} unary operator which will gobble the next argument and
-use it to assign a new value to the left hand-side. (See below.)
-
 \point{Priority 14}
 %
-\kbd{:} as in \kbd{x:small} is used to indicate to the GP2C compiler that the
+\kbd{:} as in \kbd{x:small}, is used to indicate to the GP2C compiler that the
 variable on the left-hand side always contains objects of the type specified
 on the right hand-side (here, a small integer) in order to produce more
 efficient or more readable C code. This is ignored by GP.
@@ -793,21 +782,18 @@ $f\kbd{(\var{args})}$ evaluates $f$ on those arguments.
 %
 \kbd{++} and \kbd{--} (unary, postfix): if $x$ is an \tet{lvalue},
 \kbd{$x$++} assigns the value $x+1$ to $x$, then returns the new value of
-$x$. This corresponds to the C statement \kbd{++$x$} (there is no prefix
-\kbd{++} operator in GP). \kbd{$x$--} does the same with $x-1$. These
+$x$. This corresponds to the C statement \kbd{++$x$}: there is no prefix
+\kbd{++} operator in GP. \kbd{$x$--} does the same with $x-1$. These
 operators are not associative, i.e. \kbd{x++++} is invalid, since
 \kbd{x++} is not an lvalue.
 
 \point{Priority 11}
 %
-
 \kbd{.}\var{member} (unary, postfix): \kbd{$x$.\var{member}} extracts
 \var{member} from structure $x$ (see~\secref{se:member}).
 
-\point{Priority 10}
-%
 \kbd{[ ]} is the selection operator. \kbd{$x$[$i$]} returns the $i$-th
-component of vector $x$; \kbd{$x[$i$,$j$]$}, \kbd{$x[,$j$]$} and
+component of vector $x$; \kbd{$x$[$i$,$j$]}, \kbd{$x$[,$j$]} and
 \kbd{$x$[$i$,]} respectively return the entry of coordinates $(i,j)$, the
 $j$-th column, and the $i$-th row of matrix $x$. If the assignment operator
 (\kbd{=}) immediately follows a sequence of selections, it assigns its right
@@ -815,6 +801,8 @@ hand side to the selected component. E.g \kbd{x[1][1] = 0} is valid; but
 beware that \kbd{(x[1])[1] = 0} is not (because the parentheses force the
 complete evaluation of \kbd{x[1]}, and the result is not modifiable).
 
+\point{Priority 10}
+%
 \kbd{'} (unary, postfix): derivative with respect to the main variable.
 If $f$ is a function (\typ{CLOSURE}), $f'$ is allowed and defines a new
 function, which will perform \idx{numerical derivation} when evaluated
@@ -839,11 +827,11 @@ at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 
 \point{Priority 9}
-
+%
 \kbd{\#} (unary, prefix): cardinality; \kbd{\#$x$} returns \kbd{length($x$)}.
 
 \point{Priority 8}
-
+%
 \kbd{\pow}: powering. This operator is right associative:
 \kbd{2 \pow 3\pow 4} is understood as \kbd{2 \pow (3\pow 4)}.
 
@@ -904,25 +892,34 @@ does not evaluate \kbd{isprime(p)} if \kbd{p} is not an integer.
 
 \point{Priority 2}
 %
-\var{lvalue} \kbd{=} is the assignment operator created by the postfix \kbd{=}
-operator (of priority 9) applied to \var{lvalue}. The result of \kbd{x~=~$y$}
-is the value of the expression~$y$, which is also assigned to the
-variable~\kbd{x}. This is \emph{not} the equality test operator; a statement
-like \kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1. The
-right hand side of the assignment operator is evaluated before the left hand
-side. If the left hand side is not an lvalue, raise an error. This assignment
-operator is right-associative.
+\kbd{=} (assignment, \var{lvalue} \kbd{=} \var{expr}). The result of
+\kbd{x~=~$y$} is the value of the expression~$y$, which is also assigned to
+the variable~\kbd{x}. This assignment operator is right-associative. This is
+\emph{not} the equality test operator; a statement like \kbd{x~=~1} is always
+true (i.e.~non-zero), and sets \kbd{x} to~1; the equality test would be
+\kbd{x == 1}. The right hand side of the assignment operator is evaluated
+before the left hand side.
 
+It is crucial that the left hand-side be an \var{lvalue} there, it avoids
+ambiguities in expressions like \kbd{1 + x = 1}. The latter evaluates as
+\kbd{1 + (x = 1)}, not as \kbd{(1 + x) = 1}, even though the priority of
+\kbd{=} is lower than the priority of \kbd{+} : \kbd{1 + x} is not an lvalue.
+
+If the expression cannot be parsed in a way where the left hand side is an
+lvalue, raise an error.
+\bprog
+? x + 1 = 1
+  ***   unused characters: x+1=1
+                              ^--
+@eprog
 \leavevmode
-\var{lvalue}\kbd{\var{op}=}, where \var{op} is any simple binary operator
+\kbd{\var{op}=}, where \var{op} is any binary operator
 among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
 \kbd{<<}, or
-\kbd{>>}. This is the assignment operator created by the postfix
-\kbd{\var{op}=} operator applied to \var{lvalue}.
-
+\kbd{>>} (composed assignment \var{lvalue} \var{op}\kbd{=} \var{expr}).
 The expression \kbd{x~\var{op}=~$y$} assigns $(\kbd{x}~\var{op}~y)$
-to~\kbd{x}, and returns the new value of~\kbd{x}. This is \emph{not} a
-reference to the \idx{variable}~\kbd{x}, i.e.~an \tev{lvalue}; thus
+to~\kbd{x}, and returns the new value of~\kbd{x}. The result is \emph{not}
+an \tev{lvalue}; thus
 \bprog
   (x += 2) = 3
 @eprog\noindent
@@ -935,24 +932,6 @@ is invalid. These assignment operators are right-associative:
 \point{Priority 0}
 \kbd{->} (function definition): \kbd{(\var{vars})->\var{expr}} returns a
 function object, of type \typ{CLOSURE}.
-
-
-\misctitle{Remark:} The assignment operators are split in two unary
-operators, one prefix, the other postfix, where one would expect a simple
-binary operator. This is because, in an expression like \kbd{x = y},
-the \kbd{=} has very high priority on the left, and very low on the right.
-We want the following interpretation
-\bprog
-  x = 1 + 1   --->   x = (1 + 1)
-  1 + x = 1   --->   1 + (x = 1)
-@eprog\noindent and there is no way to assign relative priorities to
-\emph{binary} operators \kbd{+} and \kbd{=} yielding the above behaviour.
-With our convention, it works:
-\bprog
-  x = 1 + 1   --->   (x =) (1 + 1)
-  1 + x = 1   --->   1 + ((x =) 1)
-@eprog\noindent where \kbd{(x = )} is the unary prefix operator assigning its
-argument to \kbd{x}.
 
 \misctitle{Remark:} Use the \var{op}\kbd{=} operators as often as possible
 since they make complex assignments more legible: one needs not parse
