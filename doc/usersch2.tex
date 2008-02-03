@@ -767,16 +767,7 @@ comes from left-value, to the left of a \kbd{=} operator; e.g.
 \kbd{x}, or \kbd{v[1]} are lvalues, but \kbd{x + 1} is not.)
 
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 10}
-%
-\kbd{++} and \kbd{--} (unary, postfix): if $x$ is an \tet{lvalue},
-\kbd{$x$++} assigns the value $x+1$ to $x$, then returns the new value of
-$x$. This corresponds to the C statement \kbd{++$x$} (there is no prefix
-\kbd{++} operator in GP). \kbd{$x$--} does the same with $x-1$. These
-operators are not associative, i.e. \kbd{x++++} is invalid, since
-\kbd{x++} is not an lvalue.
-
-\point{Priority 9}
+\point{Priority 15}
 %
 \kbd{=} and \kbd{\var{op}=}, where \var{op} is any simple binary operator
 among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
@@ -785,25 +776,44 @@ among \kbd{+}, \kbd{-}, \kbd{*}, \kbd{\%}, \kbd{/}, \kbd{\bs}, \kbd{\bs/},
 create a \emph{prefix} unary operator which will gobble the next argument and
 use it to assign a new value to the left hand-side. (See below.)
 
+\point{Priority 14}
 %
-\point{Priority 7} \kbd{[ ]} is the selection operator. \kbd{$x$[$i$]}
-returns the $i$-th component of vector $x$; \kbd{$x[$i$,$j$]$},
-\kbd{$x[,$j$]$} and \kbd{$x$[$i$,]} respectively return the entry of
-coordinates $(i,j)$, the $j$-th column, and the $i$-th row of matrix $x$. If
-the assignment operator (\kbd{=}) immediately follows a sequence of
-selections, it assigns its right hand side to the selected component. E.g
-\kbd{x[1][1] = 0} is valid; but beware that \kbd{(x[1])[1] = 0} is not
-(because the parentheses force the complete evaluation of \kbd{x[1]}, and the
-result is not modifiable).
+\kbd{:} as in \kbd{x:small} is used to indicate to the GP2C compiler that the
+variable on the left-hand side always contains objects of the type specified
+on the right hand-side (here, a small integer) in order to produce more
+efficient or more readable C code. This is ignored by GP.
 
+%
+\point{Priority 13}
 \kbd{( )} is the function call operator. If $f$ is a closure and \var{args}
 is a comma-separated list of arguments (possibly empty),
 $f\kbd{(\var{args})}$ evaluates $f$ on those arguments.
 
-\point{Priority 6}
+\point{Priority 12}
 %
-\kbd{\pow}: powering. This operator is right associative:
-\kbd{2 \pow 3\pow 4} is understood as \kbd{2 \pow (3\pow 4)}.
+\kbd{++} and \kbd{--} (unary, postfix): if $x$ is an \tet{lvalue},
+\kbd{$x$++} assigns the value $x+1$ to $x$, then returns the new value of
+$x$. This corresponds to the C statement \kbd{++$x$} (there is no prefix
+\kbd{++} operator in GP). \kbd{$x$--} does the same with $x-1$. These
+operators are not associative, i.e. \kbd{x++++} is invalid, since
+\kbd{x++} is not an lvalue.
+
+\point{Priority 11}
+%
+
+\kbd{.}\var{member} (unary, postfix): \kbd{$x$.\var{member}} extracts
+\var{member} from structure $x$ (see~\secref{se:member}).
+
+\point{Priority 10}
+%
+\kbd{[ ]} is the selection operator. \kbd{$x$[$i$]} returns the $i$-th
+component of vector $x$; \kbd{$x[$i$,$j$]$}, \kbd{$x[,$j$]$} and
+\kbd{$x$[$i$,]} respectively return the entry of coordinates $(i,j)$, the
+$j$-th column, and the $i$-th row of matrix $x$. If the assignment operator
+(\kbd{=}) immediately follows a sequence of selections, it assigns its right
+hand side to the selected component. E.g \kbd{x[1][1] = 0} is valid; but
+beware that \kbd{(x[1])[1] = 0} is not (because the parentheses force the
+complete evaluation of \kbd{x[1]}, and the result is not modifiable).
 
 \kbd{'} (unary, postfix): derivative with respect to the main variable.
 If $f$ is a function (\typ{CLOSURE}), $f'$ is allowed and defines a new
@@ -825,22 +835,24 @@ at a scalar $x$; this is defined as $(f(x+\varepsilon) - f(x-\varepsilon)) /
 
 \kbd{!} (unary, postfix): factorial. $x\kbd{!}=x(x-1)\cdots 1$.
 
-\kbd{.}\var{member} (unary, postfix): \kbd{$x$.\var{member}} extracts
-\var{member} from structure $x$ (see~\secref{se:member}).
-
-\point{Priority 5}
-%
 \kbd{!} (unary, prefix): logical \var{not}. \kbd{!$x$} return $1$ if $x$ is
 equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 
+\point{Priority 9}
+
 \kbd{\#} (unary, prefix): cardinality; \kbd{\#$x$} returns \kbd{length($x$)}.
 
-\point{Priority 4}
+\point{Priority 8}
+
+\kbd{\pow}: powering. This operator is right associative:
+\kbd{2 \pow 3\pow 4} is understood as \kbd{2 \pow (3\pow 4)}.
+
+\point{Priority 7}
 %
 \kbd{+}, \kbd{-} (unary, prefix): \kbd{-} toggles the sign of its argument,
 \kbd{+} has no effect whatsoever.
 
-\point{Priority 3}
+\point{Priority 6}
 %
 \kbd{*}: multiplication.
 
@@ -859,11 +871,11 @@ $+\infty$ when the exact quotient would be a half-integer).
 \kbd{x<<n}$~=~x * 2^n$ if $n>0$, and $\kbd{truncate}(x 2^{-n})$ otherwise.
 Right shift is defined by \kbd{x>>n}$~=~$\kbd{x<<(-n)}.
 
-\point{Priority 2}
+\point{Priority 5}
 %
 \kbd{+}, \kbd{-}: addition/subtraction.
 
-\point{Priority 1}
+\point{Priority 4}
 %
 \kbd{<}, \kbd{>}, \kbd{<=}, \kbd{>=}: the usual comparison operators,
 returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
@@ -873,7 +885,7 @@ returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
 
 \kbd{==}: test for (exact) equality.
 
-\point{Priority 0}
+\point{Priority 3}
 %
 \kbd{\&}, \kbd{\&\&}: logical \var{and}.
 
@@ -890,14 +902,7 @@ when the first test is true (hence the final truth value is true). Similarly
 @eprog\noindent
 does not evaluate \kbd{isprime(p)} if \kbd{p} is not an integer.
 
-\point{Priority -1}
-%
-\kbd{:} as in \kbd{x:small} is used to indicate to the GP2C compiler that the
-variable on the left-hand side always contains objects of the type specified
-on the right hand-side (here, a small integer) in order to produce more
-efficient or more readable C code. This is ignored by GP.
-
-\point{Priority -2}
+\point{Priority 2}
 %
 \var{lvalue} \kbd{=} is the assignment operator created by the postfix \kbd{=}
 operator (of priority 9) applied to \var{lvalue}. The result of \kbd{x~=~$y$}
@@ -927,7 +932,7 @@ is invalid. These assignment operators are right-associative:
   %1 = 3*x
 @eprog
 
-\point{Priority -3}
+\point{Priority 0}
 \kbd{->} (function definition): \kbd{(\var{vars})->\var{expr}} returns a
 function object, of type \typ{CLOSURE}.
 
