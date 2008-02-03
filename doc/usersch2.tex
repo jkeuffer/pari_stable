@@ -767,10 +767,6 @@ comes from left-value, to the left of a \kbd{=} operator; e.g.
 \kbd{x}, or \kbd{v[1]} are lvalues, but \kbd{x + 1} is not.)
 
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
-\point{Priority 11}
-\kbd{->}: \kbd{(\var{vars})->\var{expr}} returns a function object, of type
-\typ{CLOSURE}.
-
 \point{Priority 10}
 %
 \kbd{++} and \kbd{--} (unary, postfix): if $x$ is an \tet{lvalue},
@@ -902,7 +898,7 @@ on the right hand-side (here, a small integer) in order to produce more
 efficient or more readable C code. This is ignored by GP.
 
 \point{Priority -2}
-
+%
 \var{lvalue} \kbd{=} is the assignment operator created by the postfix \kbd{=}
 operator (of priority 9) applied to \var{lvalue}. The result of \kbd{x~=~$y$}
 is the value of the expression~$y$, which is also assigned to the
@@ -930,6 +926,11 @@ is invalid. These assignment operators are right-associative:
   ? x = 'x; x += x *= 2
   %1 = 3*x
 @eprog
+
+\point{Priority -3}
+\kbd{->} (function definition): \kbd{(\var{vars})->\var{expr}} returns a
+function object, of type \typ{CLOSURE}.
+
 
 \misctitle{Remark:} The assignment operators are split in two unary
 operators, one prefix, the other postfix, where one would expect a simple
