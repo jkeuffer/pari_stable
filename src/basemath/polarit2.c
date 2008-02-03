@@ -2192,10 +2192,10 @@ leftright_pow_u_fold(GEN x, ulong n, void *data, GEN  (*sqr)(void*,GEN),
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
-      y = gerepilecopy(av, y);
+      y = gerepileupto(av, y);
     }
   }
-  return y;
+  return gerepileupto(av, y);
 }
 
 
@@ -2224,10 +2224,10 @@ leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
 	if (low_stack(lim, stack_lim(av,1)))
 	{
 	  if (DEBUGMEM>1) pari_warn(warnmem,"leftright_pow");
-	  y = gerepilecopy(av, y);
+	  y = gerepileupto(av, y);
 	}
       }
-      if (--i == 0) return y;
+      if (--i == 0) return gerepileupto(av, y);
       nd=int_precW(nd);
       m = *nd; j = BITS_IN_LONG;
     }
