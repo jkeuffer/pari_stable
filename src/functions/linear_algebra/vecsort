@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: vecsort0
 Prototype: GDGD0,L,
 Help: vecsort(x,{cmp},{flag=0}): sorts the vector of vectors (or matrix) x in
- ascending order, according to the comparison fonction cmp, if not omitted.
+ ascending order, according to the comparison function cmp, if not omitted.
  (If cmp is an integer, sort according to the value of the k-th component
  of each entry.) Binary digits of flag (if present) mean: 1: indirect sorting,
  return the permutation instead of the permuted vector, 2: sort using
