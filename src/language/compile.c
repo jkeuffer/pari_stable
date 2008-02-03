@@ -306,6 +306,14 @@ parseproto(char const **q, char *c, const char *str)
   return PPstd;
 }
 
+static long
+detag(long n)
+{
+  while (tree[n].f==Ftag)
+    n=tree[n].x;
+  return n;
+}
+
 /* return type for GP functions */
 enum ret_type { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
@@ -363,8 +371,7 @@ get_entree(long n)
 static entree *
 getentry(long n)
 {
-  while (tree[n].f==Ftag)
-    n=tree[n].x;
+  n = detag(n);
   if (tree[n].f!=Fentry)
     compile_varer1(tree[n].str);
   return get_entree(n);
@@ -423,8 +430,7 @@ is_func_named(long x, const char *s)
 INLINE int
 is_node_zero(long n)
 {
-  while (tree[n].f==Ftag)
-    n=tree[n].x;
+  n = detag(n);
   return (tree[n].f==Fsmall && tree[n].x==0);
 }
 
@@ -481,7 +487,7 @@ checkdups(GEN arg, GEN vep)
 static entree *
 getlvalue(long n)
 {
-  while (tree[n].f==Ffacteurmat)
+  while (tree[n].f==Ffacteurmat || tree[n].f==Ftag)
     n=tree[n].x;
   return getvar(n);
 }
@@ -489,6 +495,7 @@ getlvalue(long n)
 static void
 compilelvalue(long n)
 {
+  n = detag(n);
   if (tree[n].f==Fentry)
     return;
   else
@@ -864,6 +871,7 @@ compilefunc(entree *ep, long n, int mode)
                 compile_err("expected character: '&'", tree[a].str);
               a=tree[a].x;
             }
+            a=detag(a);
             ep=getlvalue(a);
             vn=getmvar(ep);
             if (tree[a].f==Fentry)
@@ -1315,6 +1323,7 @@ compilenode(long n, int mode, long flag)
       op_push(OCcopy,0);
     break;
   case Faffect:
+    x = detag(x);
     if (tree[x].f==Fentry)
     {
       entree *ep=getvar(x);
