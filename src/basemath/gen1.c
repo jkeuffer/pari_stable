@@ -2071,11 +2071,8 @@ div_ser(GEN x, GEN y, long vx)
   for (i=3; i<lx; i++)
   {
     av = avma; p1 = gel(x,i);
-    for (j=2; j<i; j++)
-    {
-      l = i-j+2;
+    for (j=2, l=i; j<i; j++, l--)
       if (p2[l]) p1 = gadd(p1, gmul(gel(z,j), gel(p2,l)));
-    }
     gel(z,i) = gerepileupto(av, gdiv(p1, y_lead));
   }
   for (i=3; i<lx; i++)
