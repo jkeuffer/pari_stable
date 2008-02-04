@@ -932,7 +932,7 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     vx++; x = q;
     if (vx == VAL_DC_THRESHOLD) {
       if (p == 1) pari_err(talker, "p = 1 in Z_lvalrem");
-      vx += Z_pvalrem_DC(x, utoipos(p), &x) << 1;
+      vx += Z_pvalrem_DC(x, sqru(p), &x) << 1;
       q = diviu_rem(x, p, &r); if (!r) { vx++; x = q; }
       break;
     }
