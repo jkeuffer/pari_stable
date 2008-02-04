@@ -1241,27 +1241,30 @@ GEN
 czeta(GEN s0, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, unr;
-  GEN sim, *tab, tabn;
+  GEN sim, *tab, tabn, funeq_factor = NULL;
   ulong p, sqn;
   long i, nn, lim, lim2, ct;
-  pari_sp av, av2 = avma, avlim;
-  int funeq = 0;
+  pari_sp av0 = avma, av, av2, avlim;
   byteptr d;
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-  if (gcmp0(s)) { y = mkfrac(gen_m1,gen_2); goto END; }
-  if (gexpo(gsub(s, gen_1)) < -5 ||
-      (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
+  if (gcmp0(s)) { avma = av0; y = real2n(-1, prec); setsigne(y,-1); return y; }
+  u = gsubgs(s, 1); /* temp */
+  if (gexpo(u) < -5 || (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
-    if (typ(s0) == t_INT)
-    {
-      i = itos(s0); avma = av2;
-      return szeta(i, prec);
-    }
-    funeq = 1; s = gsub(gen_1, s); sig = real_i(s);
+    GEN t;
+    if (typ(s0) == t_INT) { i = itos(s0); avma = av0; return szeta(i, prec); }
+    s = gneg(u); sig = real_i(s);
+
+    /* Gamma(s) (2Pi)^-s 2 cos(Pi s/2) */
+    t = gmul(ggamma(gprec_w(s,prec),prec), gpow(Pi2n(1,prec), gneg(s), prec));
+    funeq_factor = gmul2n(gmul(t, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
   }
-  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { y = gen_1; goto END; }
+  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { /* zeta(s) = 1 */
+    if (!funeq_factor) { avma = av0; return real_1(prec); }
+    return gerepileupto(av0, funeq_factor);
+  }
   optim_zeta(s, prec, &lim, &nn);
   maxprime_check((ulong)nn);
   prec++; unr = real_1(prec); /* one extra word of precision */
@@ -1305,7 +1308,7 @@ czeta(GEN s0, long prec)
   for (i=ct; i > 1; i--)
   {
     long j;
-    pari_sp av2 = avma;
+    av2 = avma;
     for (j=tabn[i]+1; j<=tabn[i-1]; j++)
       sim = gadd(sim, n_s(2*j+1, tab));
     sim = gerepileupto(av2, sim);
@@ -1358,14 +1361,7 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
   /* y += tes n^(-s) / (s-1) */
   y = gadd(y, gmul(tes, gdiv(a, gsub(s, unr))));
-
-END:
-  if (funeq)
-  {
-    y = gmul(gmul(y, ggamma(gprec_w(s,prec),prec)),
-	     gpow(Pi2n(1,prec), gneg(s), prec));
-    y = gmul2n(gmul(y, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
-  }
+  if (funeq_factor) y = gmul(y, funeq_factor);
   avma = av; return affc_fixlg(y,res);
 }
 
