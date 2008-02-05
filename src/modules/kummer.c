@@ -1088,10 +1088,14 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 	P = compute_polrel(nfz, &T, be, g, ell);
 	P = lift_if_rational(P);
 	if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Zs\n", P);
-	H = rnfnormgroup(bnr, P);
 	if (!all) {
+          H = rnfnormgroup(bnr, P);
 	  if (gequal(subgroup, H)) return P; /* DONE */
 	} else {
+          GEN P0 = lift(P);
+          GEN g = nfgcd(P0, derivpol(P0), polnf, gel(nf,4));
+          if (degpol(g)) continue;
+          H = rnfnormgroup(bnr, P);
 	  if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
 	}
 	res = shallowconcat(res, P);
