@@ -829,7 +829,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 #define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pari_puts(s)
 
 void
-gp_quit(void)
+gp_quit(long exitcode)
 {
   free_graph();
   pari_close();
@@ -837,7 +837,7 @@ gp_quit(void)
   term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
   if (GP_DATA->flags & TEXMACS) tm_end_output();
-  exit(0);
+  exit(exitcode);
 }
 
 static GEN
@@ -940,7 +940,7 @@ escape(char *tch)
 	default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
       }
       break;
-    case 'q': gp_quit(); break;
+    case 'q': gp_quit(0); break;
     case 'r':
       s = get_sep(s);
       switchin(s);
@@ -1482,7 +1482,7 @@ gp_main_loop(int ismain)
 
     if (! gp_read_line(&F, NULL))
     {
-      if (popinfile()) gp_quit();
+      if (popinfile()) gp_quit(0);
       if (ismain) continue;
       pop_buffer(); return z;
     }
@@ -1646,7 +1646,7 @@ input0(void)
   init_filtre(&F, b);
   push_stack(&bufstack, (void*)b);
   while (! get_line_from_file(DFT_INPROMPT,&F,pari_infile))
-    if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
+    if (popinfile()) { fprintferr("no input ???"); gp_quit(1); }
   x = readseq(b->buf);
   pop_buffer(); return x;
 }
@@ -1841,7 +1841,7 @@ main(int argc, char **argv)
   }
   grow_kill(A);
   (void)gp_main_loop(1);
-  gp_quit(); return 0; /* not reached */
+  gp_quit(0); return 0; /* not reached */
 }
 
 /*******************************************************************/

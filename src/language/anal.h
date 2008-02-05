@@ -153,7 +153,7 @@ void alias0(const char *s, const char *old);
 void allocatemem0(GEN z);
 GEN  break0(long n);
 GEN  extern0(const char *cmd);
-void gp_quit(void);
+void gp_quit(long exitcode);
 GEN  input0(void);
 void kill0(entree *ep);
 GEN  next0(long n);

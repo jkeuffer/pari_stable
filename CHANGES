@@ -85,6 +85,7 @@ BA  9- library function ZV_indexsort
    10- library functions pari_printf, pari_fprintf, pari_sprintf, pari_vfprintf,
        pari_vprintf, pari_vsprintf
 BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
+JD 12- add an optional argument to quit()
 
   Removed
     1- obsolete library functions extract and matextract
