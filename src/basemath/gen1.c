@@ -2055,16 +2055,13 @@ div_ser(GEN x, GEN y, long vx)
   }
   if (ly < lx) lx = ly;
   p2 = (GEN)pari_malloc(lx*sizeof(long));
+  av = avma;
   for (i=3; i<lx; i++)
   {
     p1 = gel(y,i);
-    if (isrationalzero(p1)) p2[i] = 0;
-    else
-    {
-      av = avma; gel(p2,i) = gclone(gneg_i(p1));
-      avma = av;
-    }
+    gel(p2,i) = isrationalzero(p1)? NULL: gclone(gneg_i(p1));
   }
+  avma = av;
   z = cgetg(lx,t_SER);
   z[1] = evalvalp(l) | evalvarn(vx) | evalsigne(1);
   gel(z,2) = gdiv(gel(x,2), y_lead);
