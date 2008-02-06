@@ -181,7 +181,11 @@ plot(GEN a, GEN b, GEN code, GEN ysmlu,GEN ybigu, long prec)
   pari_printf("%s ", dsprintf9(ysml, buf));
   for (i=1; i<=ISCR; i++)  pari_putc(scr[i][1]);
   pari_putc('\n');
-  pari_printf("%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
+  {
+    char line[10 + 32 + 32 + ISCR - 9];
+    sprintf(line, "%10s%-9.7g%*.7g\n"," ",todbl(a),ISCR-9,todbl(b));
+    pari_printf(line);
+  }
   pop_lex();
 }
 
