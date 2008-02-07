@@ -2422,10 +2422,11 @@ FqX_roots_i(GEN f, GEN T, GEN p)
   return roots_from_deg1(FqX_split_roots(R, T, p, NULL));
 }
 GEN
-FqX_roots(GEN f, GEN T, GEN p)
+FqX_roots(GEN x, GEN T, GEN p)
 {
   pari_sp av = avma;
-  return gerepileupto(av, FqX_roots_i(f, T, p));
+  if (!T) return FpX_roots(x, p);
+  return gerepileupto(av, FqX_roots_i(x, T, p));
 }
 
 static long
