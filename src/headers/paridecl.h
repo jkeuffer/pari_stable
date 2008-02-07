@@ -1747,7 +1747,7 @@ GEN     FpX_degfact(GEN f, GEN p);
 long    FpX_is_irred(GEN f, GEN p);
 long    FpX_is_totally_split(GEN f, GEN p);
 GEN     FpX_factor(GEN f, GEN p);
-GEN     FpX_factorff(GEN P, GEN p, GEN T)
+GEN     FpX_factorff(GEN P, GEN p, GEN T);
 long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
 GEN     FpX_oneroot(GEN f, GEN p);
