@@ -232,16 +232,9 @@ cycle_power_to_perm(GEN perm,GEN cy,long l)
 static GEN
 im_block_by_perm(GEN D,GEN perm)
 {
-  long i,j,lb,lcy;
-  GEN Dn,cy,p1;
-
-  lb=lg(D); Dn=cgetg(lb,t_VEC);
-  for (i=1; i<lb; i++)
-  {
-    cy=gel(D,i); lcy=lg(cy);
-    gel(Dn,i) = cgetg(lcy,t_VECSMALL); p1=gel(Dn,i);
-    for (j=1; j<lcy; j++) p1[j] = perm[cy[j]];
-  }
+  long i, lb = lg(D); 
+  GEN Dn = cgetg(lb,t_VEC);
+  for (i=1; i<lb; i++) gel(Dn,i) = vecpermute(perm, gel(D,i));
   return Dn;
 }
 
@@ -966,14 +959,15 @@ subfieldsall(GEN nf)
   dg = divisors(utoipos(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Zs\n",pol);
 
-  LSB = _subfield(pol, pol_x(0));
+  
+  LSB = _subfield(pol_x(0), gen_0);
   if (ld > 2)
   {
     B.PD = &PD;
     B.S  = &S;
     B.N  = N;
     choose_prime(&S, PD.pol, PD.dis);
-    for (i=2; i<ld; i++)
+    for (i=ld-1; i>1; i--)
     {
       B.size  = itos(gel(dg,i));
       B.d = N / B.size;
@@ -982,7 +976,7 @@ subfieldsall(GEN nf)
     }
     (void)delete_var(); /* from choose_prime */
   }
-  LSB = shallowconcat(LSB, _subfield(pol_x(0), pol));
+  LSB = shallowconcat(LSB, _subfield(pol, pol_x(0)));
   if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
   return fix_var(gerepilecopy(av, LSB), v0);
 }
