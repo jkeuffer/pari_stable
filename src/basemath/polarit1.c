@@ -312,7 +312,7 @@ FpX_roots_i(GEN f, GEN p)
   db = degpol(b); n += da + db; setlg(y, n+1);
   if (db) gel(y,j)    = FpX_normalize(b,p);
   if (da) gel(y,j+db) = FpX_normalize(a,p);
-  pol = gadd(pol_x(varn(f)), gen_1); pol0 = constant_term(pol);
+  pol = deg1pol(gen_1, gen_1, varn(f)); pol0 = constant_term(pol);
   while (j <= n)
   { /* cf FpX_split_Berlekamp */
     a = gel(y,j); da = degpol(a);
@@ -368,7 +368,7 @@ FpX_oneroot_i(GEN f, GEN p)
   else
     if (db && db < da) a = b;
   a = FpX_normalize(a,p);
-  pol = gadd(pol_x(varn(f)), gen_1); pol0 = constant_term(pol);
+  pol = deg1pol(gen_1, gen_1, varn(f)); pol0 = constant_term(pol);
   for(;;)
   { /* cf FpX_split_Berlekamp */
     da = degpol(a);
@@ -805,7 +805,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
     {
       w0 = w = FpXQ_pow(pol_x(v), utoi(m-1), *t, gen_2); m += 2;
       for (l=1; l<d; l++)
-	w = gadd(w0, spec_FpXQ_pow(w, p, S));
+	w = ZX_add(w0, spec_FpXQ_pow(w, p, S));
     }
     else
     {
@@ -884,8 +884,8 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
   {
     GEN d, c = gel(x0,i); /* assume coeffs in [0, p-1] */
     if (!signe(c)) continue;
-    d = gel(S,i); if (!gcmp1(c)) d = gmul(c,d);
-    z = gadd(z, d);
+    d = gel(S,i); if (!gcmp1(c)) d = ZX_Z_mul(d, c);
+    z = typ(z) == t_INT? ZX_Z_add(d,z): ZX_add(d,z);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"spec_FpXQ_pow");
@@ -987,7 +987,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
       {
 	if (!flag) pd = mulii(pd,pp);
 	v = spec_FpXQ_pow(v, pp, S);
-	g = FpX_gcd(gadd(v, gneg(pol_x(vf))), u, pp);
+	g = FpX_gcd(ZX_sub(v, pol_x(vf)), u, pp);
 	dg = degpol(g);
 	if (dg <= 0) continue;
 
@@ -1490,7 +1490,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
   for (j=i=1; i<lg(R); i++)
   {
     GEN u = ZX_Zp_root(f, gel(R,i), p, prec-1);
-    for (k=1; k<lg(u); k++) gel(z,j++) = gadd(a, gmul(p, gel(u,k)));
+    for (k=1; k<lg(u); k++) gel(z,j++) = addii(a, mulii(p, gel(u,k)));
   }
   setlg(z,j); return z;
 }
