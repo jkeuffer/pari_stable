@@ -2449,9 +2449,14 @@ $\F_p[X]/(T)$. Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 \kbd{FpX\_factor}. Assumes \kbd{p} is prime and \kbd{T} irreducible
 in $\F_p[X]$.
 
+\fun{GEN}{FpX_factorff}{GEN P, GEN p, GEN T}. Assumes \kbd{p} prime
+and \kbd{T} irreducible in $\F_p[X]$. Factor the \kbd{FpX} \kbd{P} 
+over the finite field $\F_p[Y]/(T(Y))$. See \kbd{FpX\_factorff\_irred}
+if \kbd{P} is known to be irreducible of $\F_p$.
+
 \fun{GEN}{FpX_factorff_irred}{GEN P, GEN T, GEN p}. Assumes \kbd{p} prime
-and \kbd{T} irreducible in $\F_p[X]$. \kbd{P} being an \emph{irreducible}
-\kbd{FpX}, factors it over the finite field $\F_p[Y]/(T(Y))$ and returns the
+and \kbd{T} irreducible in $\F_p[X]$. Factors the \emph{irreducible}
+\kbd{FpX} \kbd{P} over the finite field $\F_p[Y]/(T(Y))$ and returns the
 vector of irreducible \kbd{FqX}s factors (the exponents, being all equal to
 $1$, are not included).
 

@@ -2460,27 +2460,32 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
 }
 
 /* not memory-clean */
-/* TODO: provide a public and clean FpX_factorff */
 static GEN
-FpX_factorff(GEN P,GEN l, GEN Q)
+FpX_factorff_i(GEN P, GEN p, GEN T)
 {
-  GEN V,E, F = FpX_factor(P,l);
-  long lfact = 1, nmax = lgpol(P), n = lg(gel(F,1));
-  long i;
+  GEN V, E, F = FpX_factor(P,p);
+  long i, lfact = 1, nmax = lgpol(P), n = lg(gel(F,1));
+
   V = cgetg(nmax,t_VEC);
   E = cgetg(nmax,t_VECSMALL);
   for(i=1;i<n;i++)
   {
-    GEN R = FpX_factorff_irred(gmael(F,1,i),Q,l);
+    GEN R = FpX_factorff_irred(gmael(F,1,i),T,p), e = gmael(F,2,i);
     long j, r = lg(R);
-    for (j=1;j<r;j++)
+    for (j=1; j<r; j++,lfact++)
     {
-      V[lfact] = R[j];
-      E[lfact] = mael(F,2,i); lfact++;
+      gel(V,lfact) = gel(R,j);
+      gel(E,lfact) = e;
     }
   }
   setlg(V,lfact);
   setlg(E,lfact); return sort_factor_pol(mkvec2(V,E), cmp_RgX);
+}
+GEN
+FpX_factorff(GEN P, GEN p, GEN T)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, FpX_factorff_i(P, p, T));
 }
 
 static GEN
@@ -2493,7 +2498,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   d = degpol(f); if (!d) return trivfact();
   T = FpX_normalize(T, p);
   f = FqX_normalize(f, T, p);
-  if (isabsolutepol(f)) return FpX_factorff(simplify_i(f), p, T);
+  if (isabsolutepol(f)) return FpX_factorff_i(simplify_i(f), p, T);
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
