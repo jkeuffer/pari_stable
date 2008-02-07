@@ -1757,6 +1757,7 @@ GEN     FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 long    FqX_is_squarefree(GEN P, GEN T, GEN p);
 long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
+GEN     FqX_roots(GEN f, GEN T, GEN p);
 GEN     ZX_deriv(GEN x);
 GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);

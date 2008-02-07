@@ -2442,6 +2442,9 @@ of degree \kbd{n} over $\F_p$, in variable \kbd{v}.
 
 \fun{long}{FqX_is_squarefree}{GEN P, GEN T, GEN p}
 
+\fun{GEN}{FqX_roots}{GEN x, GEN T, GEN p} return the roots of \kbd{x} in 
+$\F_p[X]/(T)$. Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
+
 \fun{GEN}{FqX_factor}{GEN x, GEN T, GEN p} same output convention as
 \kbd{FpX\_factor}. Assumes \kbd{p} is prime and \kbd{T} irreducible
 in $\F_p[X]$.

@@ -1784,6 +1784,8 @@ getprec(GEN x, long *pprec, GEN *pp)
   else
     for (i = lg(x)-1; i>1; i--) scalar_getprec(gel(x,i), pprec, pp);
 }
+
+static GEN FqX_roots_i(GEN f, GEN T, GEN p);
 static GEN
 ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
 {
@@ -1798,20 +1800,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
   f = lift_intern(poleval(f, deg1pol_i(p, mkpolmod(a,T), varn(f))));
   f = gdiv(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
-
-#if 1 /* TODO: need a public FqX_roots */
-  lR = FqX_split_deg1(&R, FqX_red(f, T, p), powiu(p, degpol(T)), T, p) + 1;
-  R = roots_from_deg1(FqX_split_roots(R, T, p, NULL));
-#else
-  R = FqX_factor(FqX_red(f, T, p), T, p);
-  R = gel(R,1); lR = lg(R);
-  for (i=1; i<lR; i++)
-  {
-    GEN u = gel(R,i); if (degpol(u) > 1) break;
-    gel(R,i) = gneg(gel(u,2));
-  }
-  lR = i; /* "truncate" R to the deg 1 factors, demoted to roots above */
-#endif
+  R = FqX_roots_i(FqX_red(f,T,p), T, p); lR = lg(R);
   for(j=i=1; i<lR; i++)
   {
     GEN u = ZXY_ZpQ_root(f, gel(R,i), T, p, prec-1);
@@ -2424,6 +2413,19 @@ FqX_split_all(GEN z, GEN T, GEN p)
   for (i = 2; i < l; i++)
     rep = shallowconcat(rep, FqX_split_equal(gel(z,i), S, T, p));
   return rep;
+}
+static GEN
+FqX_roots_i(GEN f, GEN T, GEN p)
+{
+  GEN R;
+  (void)FqX_split_deg1(&R, f, powiu(p, degpol(T)), T, p);
+  return roots_from_deg1(FqX_split_roots(R, T, p, NULL));
+}
+GEN
+FqX_roots(GEN f, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, FqX_roots_i(f, T, p));
 }
 
 static long
