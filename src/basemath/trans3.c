@@ -1179,8 +1179,10 @@ szeta(long k, long prec)
   if (k < 0)
   {
     if ((k&1) == 0) return gen_0;
+    /* the one value such that k < 0 and 1 - k < 0, due to overflow */
+    if ((ulong)k == (HIGHBIT | 1))
+      pari_err(talker, "too large negative arg %ld in zeta", k);
     k = 1-k;
-    if (k < 0) pari_err(talker, "arg %ld too small in zeta", k);
     y = single_bern(k, prec); togglesign(y);
     return gerepileuptoleaf(av, divru(y, k));
   }
