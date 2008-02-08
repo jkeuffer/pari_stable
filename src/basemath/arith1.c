@@ -2512,18 +2512,23 @@ sfcont2(GEN b, GEN x, long k)
   else if (tx == t_SER) x = ser2rfrac_i(x);
 
   if (!gcmp1(gel(b,1))) x = gmul(gel(b,1),x);
-  gel(y,1) = gfloor(x);
-  p1 = gsub(x, gel(y,1));
-  for (i = 2 ; i < lb && !gcmp0(p1); i++)
+  for (i = 1;;)
   {
-    x = gdiv(gel(b,i),p1);
     if (tx == t_REAL)
     {
       long e = expo(x);
       if (e > 0 && nbits2prec(e+1) > lg(x)) break;
+      gel(y,i) = floorr(x);
+      p1 = subri(x, gel(y,i));
     }
-    gel(y,i) = gfloor(x);
-    p1 = gsub(x, gel(y,i));
+    else
+    {
+      gel(y,i) = gfloor(x);
+      p1 = gsub(x, gel(y,i));
+    }
+    if (++i >= lb) break;
+    if (gcmp0(p1)) break;
+    x = gdiv(gel(b,i),p1);
   }
   setlg(y,i);
   return gerepilecopy(av,y);
@@ -2653,7 +2658,8 @@ bestappr(GEN x, GEN k)
     case t_FRAC:
       if (cmpii(gel(x,2),k) <= 0) { avma = av; return gcopy(x); }
       y = x;
-      p1 = gen_1; a = p0 = gfloor(x); q1 = gen_0; q0 = gen_1;
+      p1 = gen_1; a = p0 = truedivii(gel(x,1), gel(x,2)); /* = floor(x) */
+      q1 = gen_0; q0 = gen_1;
       while (cmpii(q0,k) <= 0)
       {
 	x = gsub(x,a); /* 0 <= x < 1 */
