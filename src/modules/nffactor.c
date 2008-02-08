@@ -229,16 +229,16 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *L)
   if (t != t_INT)
   {
     if (t == t_POL) elt = mulmat_pol(L->tozk, elt);
-    u = gmul(L->iprk,elt);
+    u = ZM_ZC_mul(L->iprk,elt);
     for (i=1; i<l; i++) gel(u,i) = diviiround(gel(u,i), L->den);
   }
   else
   {
-    u = gmul(elt, gel(L->iprk,1));
+    u = ZV_Z_mul(gel(L->iprk,1), elt);
     for (i=1; i<l; i++) gel(u,i) = diviiround(gel(u,i), L->den);
     elt = scalarcol(elt, l-1);
   }
-  u = gsub(elt, gmul(L->prk, u));
+  u = ZV_sub(elt, ZM_ZC_mul(L->prk, u));
   if (bound && gcmp(QuickNormL2(u,DEFAULTPREC), bound) > 0) u = NULL;
   return u;
 }
@@ -458,9 +458,9 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
     }
   }
   lt = leading_term(polbase);
-  s = gmul(s, muliu(sqri(lt), n));
+  s = mulri(s, muliu(sqri(lt), n));
   C = powrshalf(stor(3,DEFAULTPREC), 3 + 2*d); /* 3^{3/2 + d} */
-  return gdiv(gmul(C, s), gmulsg(d, mppi(DEFAULTPREC)));
+  return divrr(mulrr(C, s), mulsr(d, mppi(DEFAULTPREC)));
 }
 
 static GEN
@@ -663,7 +663,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
 
   invd = ginv(itor(L->den, DEFAULTPREC));
 
-  T->dPinvS = gmul(L->iprk, S);
+  T->dPinvS = ZM_mul(L->iprk, S);
   l = lg(S);
   h = lg(T->dPinvS[1]);
   T->PinvSdbl = (double**)cgetg(l, t_MAT);
@@ -772,11 +772,11 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       if (lt)
       {
 	if (typ(t2)!=t_INT) {
-	  t1 = FpX_red(gmul(ltdn, t1), pk);
-	  t2 = FpX_red(gmul(lt2dn,t2), pk);
+	  t1 = FpX_Fp_mul(t1, ltdn, pk);
+	  t2 = FpX_Fp_mul(t2, lt2dn, pk);
 	} else {
-	  t1 = remii(mulii(ltdn, t1), pk);
-	  t2 = remii(mulii(lt2dn,t2), pk);
+	  t1 = Fp_mul(t1, ltdn, pk);
+	  t2 = Fp_mul(t2, lt2dn, pk);
 	}
       }
       gel(trace1,i) = gclone( nf_bestlift(t1, NULL, T->L) );
@@ -983,8 +983,12 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
 {
   GEN y;
   if (typ(x) != t_COL) return centermodii(x, pk, pks2);
-  y = gmul(proj, x);
-  if (!T) return centermodii(y, pk, pks2);
+  if (!T)
+  {
+    y = ZV_dotproduct(proj, x);
+    return centermodii(y, pk, pks2);
+  }
+  y = ZM_ZC_mul(proj, x);
   y = RgV_to_RgX(y, varn(T));
   return FpX_center(FpX_rem(y, T, pk), pk, pks2);
 }
@@ -1015,8 +1019,7 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
-  if (typ(C) != t_REAL) C = gmul(C, real_1(DEFAULTPREC));
-  setlg(C, DEFAULTPREC);
+   C = gtofp(C,DEFAULTPREC); 
   t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr)));
 }
@@ -1050,7 +1053,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
     L->Tpk = gel(z,1);
     proj = get_proj_modT(L->topow, L->Tpk, L->pk);
     if (L->topowden)
-      proj = FpM_red(gmul(Fp_inv(L->topowden, L->pk), proj), L->pk);
+      proj = FpM_red(ZM_Z_mul(Fp_inv(L->topowden, L->pk), proj), L->pk);
     L->ZqProj = proj;
   }
   else
@@ -1124,11 +1127,11 @@ get_V(GEN Tra, GEN M_L, GEN PRK, GEN PRKinv, GEN pk, long *eT2)
   for (i = 1; i < l; i++)
   { /* cf nf_bestlift(Tra * c) */
     pari_sp av = avma, av2;
-    GEN v, T2 = gmul(Tra, gel(M_L,i));
+    GEN v, T2 = ZM_ZC_mul(Tra, gel(M_L,i));
 
-    v = gdivround(gmul(PRKinv, T2), pk); /* small */
+    v = gdivround(ZM_ZC_mul(PRKinv, T2), pk); /* small */
     av2 = avma;
-    T2 = gsub(T2, gmul(PRK, v));
+    T2 = ZV_sub(T2, ZM_ZC_mul(PRK, v));
     e = gexpo(T2); if (e > *eT2) *eT2 = e;
     avma = av2;
     gel(V,i) = gerepileupto(av, v); /* small */
@@ -1243,7 +1246,7 @@ AGAIN:
     q = int2n(b);
     P1 = gdivround(PRK, q);
     S1 = gdivround(Tra, q);
-    T2 = gsub(gmul(S1, M_L), gmul(P1, VV));
+    T2 = ZM_sub(ZM_mul(S1, M_L), ZM_mul(P1, VV));
     m = vconcat( CM_L, T2 );
     if (first)
     {
