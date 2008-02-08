@@ -1428,7 +1428,7 @@ nfpolred(int part, nfbasic_t *T)
   ok_pol_t O;
   FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
-  if (degpol(x) == 1) { T->x = gsub(pol_x(v),gen_1); return gen_1; }
+  if (degpol(x) == 1) { T->x = deg1pol_i(gen_1, gen_m1, v); return gen_1; }
   O.ind    = 0;
   O.indmax = part? min(n,3): n;
   O.xbest  = NULL;
@@ -2103,8 +2103,8 @@ polredabs0(GEN x, long flag)
   if (degpol(x) == 1)
   {
     u = NULL;
-    y = mkvec(pol_x(vx));
-    a = mkvec(gsub(gel(y,1), gel(x,2)));
+    y = mkvec( pol_x(vx) );
+    a = mkvec( deg1pol_i(gen_1, negi(gel(x,2)), vx) );
   }
   else
   {
@@ -2418,18 +2418,20 @@ initzeta(GEN pol, long prec)
   ck_even = cgetg(R,t_VEC); ck_odd = cgetg(r2+2,t_VEC);
   for (k=1; k<R; k++)
   {
-    GEN t = gmul(gel(zet,k), gadd(gr2, gmul2n(gr1,-k)));
-    if (k&1) t = gneg(t);
+    GEN t = mulri(gel(zet,k), addis(shifti(gr2, k), r1));
+    setexpo(t, expo(t)-k);
+    if (k&1) togglesign(t);
     gel(ck_even,k) = t;
   }
   gru = utoipos(r);
   for (k = 1; k <= r2+1; k++)
   {
-    GEN t = gmul(gel(zet,k), gsub(gru, gmul2n(gr1,-k)));
-    if (k&1) t = gneg(t);
-    gel(ck_odd,k) = gadd(gru, t);
+    GEN t = mulri(gel(zet,k), subis(shifti(gru,k), r1));
+    setexpo(t, expo(t)-k);
+    if (k&1) togglesign(t);
+    gel(ck_odd,k) = addsr(r, t);
   }
-  gel(ck_odd,1) = gsub(gel(ck_odd,1), mulsr(r1, mplog2(prec)));
+  if (r1) gel(ck_odd,1) = subrr(gel(ck_odd,1), mulsr(r1, mplog2(prec)));
   serie_even = cgetg(r+3,t_SER);
   serie_odd = cgetg(r2+3,t_SER);
   serie_even[1] = serie_odd[1] = evalsigne(1)+evalvalp(1);
@@ -2535,6 +2537,7 @@ initzeta(GEN pol, long prec)
 	  if (i > 1) p2 = mpmul(p2, gel(tabcstni,n));
 	  p1 = p1? mpadd(p1,p2): p2;
 	}
+      togglesign(p1);
       gcoeff(C,i,k) = gerepileuptoleaf(av2,p1);
       av2 = avma;
     }
@@ -2620,8 +2623,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 	for (k=1; k<=ru; k++)
 	{
 	  GEN c = gcoeff(C,i,k);
-	  var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
-	  var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
+	  var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
+	  var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val, 2);
 	valm = addis(valm,2);
@@ -2657,14 +2660,14 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
 	  for (k=1; k<=ru; k++)
 	  {
 	    GEN c = gcoeff(C,i,k);
-	    var1 = gsub(var1,gdiv(c,valk)); valk = mulii(val,valk);
+	    var1 = mpadd(var1,mpdiv(c,valk)); valk = mulii(val,valk);
 	  }
 	else
 	for (k=1; k<=ru; k++)
 	{
 	    GEN c = gcoeff(C,i,k);
-	    var1 = gsub(var1,gdiv(c,valk )); valk  = mulii(val,valk);
-	    var1 = gsub(var1,gdiv(c,valkm)); valkm = mulii(valm,valkm);
+	    var1 = mpadd(var1,mpdiv(c,valk )); valk  = mulii(val,valk);
+	    var1 = mpadd(var1,mpdiv(c,valkm)); valkm = mulii(valm,valkm);
 	}
 	val  = addis(val,1);
 	valm = addis(valm,1);
@@ -2713,8 +2716,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
       for (k=1; k<=ru; k++)
       {
 	GEN c = gcoeff(C,i,k);
-	var1 = gsub(var1,gdiv(c,valk )); valk  = gmul(val, valk);
-	var1 = gsub(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
+	var1 = gadd(var1,gdiv(c,valk )); valk  = gmul(val, valk);
+	var1 = gadd(var1,gdiv(c,valkm)); valkm = gmul(valm,valkm);
       }
       if (r2)
       {
