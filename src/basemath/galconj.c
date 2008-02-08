@@ -170,13 +170,11 @@ vandermondeinverseprep(GEN L)
   V = cgetg(n, t_VEC);
   for (i = 1; i < n; i++)
   {
-    pari_sp ltop=avma;
-    GEN W=cgetg(n,t_VEC);
+    pari_sp ltop = avma;
+    GEN W = cgetg(n-1,t_VEC);
+    long k = 1;
     for (j = 1; j < n; j++)
-      if (i==j)
-	gel(W,j) = gen_1;
-      else
-	gel(W,j) = gsub(gel(L,i),gel(L,j));
+      if (i != j) gel(W, k++) = gsub(gel(L,i),gel(L,j));
     gel(V,i) = gerepileupto(ltop,divide_conquer_prod(W,&gmul));
   }
   return V;
