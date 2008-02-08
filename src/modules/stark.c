@@ -337,19 +337,17 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
 static GEN
 ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
 {
-  long i, nbm;
+  long i, l;
   pari_sp av = avma;
   GEN Mrm, genm, Mrq, mgq, P;
 
   Mrm  = diagonal_i(gmael(bnrm, 5, 2));
   Mrq  = diagonal_i(gel(dtQ,2));
-  genm = gmael(bnrm, 5, 3);
-  nbm  = lg(genm) - 1;
+  genm = gmael(bnrm, 5, 3); l  = lg(genm);
   mgq  = gel(dtQ,3);
-
-  P = cgetg(nbm + 1, t_MAT);
-  for (i = 1; i <= nbm; i++)
-    gel(P,i) = gmul(mgq, isprincipalray(bnrn, gel(genm,i)));
+  P = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+    gel(P,i) = ZM_ZC_mul(mgq, isprincipalray(bnrn, gel(genm,i)));
 
   return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq));
 }
@@ -367,11 +365,11 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
 
   Mr = diagonal_i(gmael(bnr, 5, 2));
   D = smithall(hnf_gauss(C, Mr), &U, NULL);
-  T = gmul(C,ginv(U));
+  T = ZM_mul(C,ginv(U));
   subgrp  = subgrouplist(D, mkvec(gen_2));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
-    gel(subgrp,i) = hnf(shallowconcat(gmul(T, gel(subgrp,i)), Mr));
+    gel(subgrp,i) = hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
 
   disable_dbg(-1);
   return gerepilecopy(av, subgrp);
@@ -422,7 +420,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     mpr[2] = mod[2];
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
-    M = gmul(bnrGetSurj(bnr, bnrpr), subgroup);
+    M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
     subpr = hnf(shallowconcat(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
@@ -430,7 +428,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
 
   /* f = order of [pr] in bnrpr/subpr */
   dtQ  = InitQuotient(subpr);
-  p1   = gmul(gel(dtQ,3), isprincipalray(bnrpr, pr));
+  p1   = ZM_ZC_mul(gel(dtQ,3), isprincipalray(bnrpr, pr));
   cycQ = gel(dtQ,2);
   f  = itos( Order(cycQ, p1) );
   avma = av;
@@ -500,7 +498,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   rep = NULL;
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = expi( powgi(gmul(gel(nf,3), det(f)), gmul2n(gmael(bnr, 5, 1), 3)) );
+  rb = expi( powgi(mulii(gel(nf,3), dethnf_i(f)), gmul2n(gmael(bnr,5,1), 3)) );
 
   bpr = divcond(bnr);
   nbp = lg(bpr) - 1;
@@ -889,14 +887,14 @@ ComputeAChi(GEN dtcr, long *r, long flag, long prec)
     p1  = ComputeImagebyChar(chi, isprincipalray(bnrc, pr));
 
     if (flag)
-      B = gsub(gen_1, gdiv(p1, pr_norm(pr)));
+      B = gsubsg(1, gdiv(p1, pr_norm(pr)));
     else if (gcmp1(p1))
     {
       B = glog(pr_norm(pr), prec);
       (*r)++;
     }
     else
-      B = gsub(gen_1, p1);
+      B = gsubsg(1, p1);
     A = gmul(A, B);
   }
   return A;
@@ -964,7 +962,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 
     if (!olddtcr)
     {
-      ch_C(dtcr) = gmul(C, gsqrt(det(gel(cond,1)), prec2));
+      ch_C(dtcr) = gmul(C, gsqrt(dethnf_i(gel(cond,1)), prec2));
       ch_4(dtcr) = _data4(gel(cond,2),r1,r2);
       ch_cond(dtcr) = gel(cond,1);
       if (gequal(cond,modul))
@@ -1721,7 +1719,7 @@ GetValue1(GEN bnr, long flag, long prec)
   R = gmael(bnf, 8, 2);
   w = gmael3(bnf, 8, 4, 1);
 
-  c = gneg_i(gdiv(gmul(h, R), w));
+  c = gneg_i(gdiv(mpmul(h, R), w));
   r = r1 + r2 - 1;
 
   if (flag)
@@ -1998,9 +1996,9 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 
     p = L[i]; ray1 = gel(R->L11ray,i); /* use pr1 pr2 = (p) */
     if (condZ == 1)
-      ray2 = gneg(ray1);
+      ray2 = ZV_neg(ray1);
     else
-      ray2 = gsub(gel(R->rayZ, p%condZ),  ray1);
+      ray2 = ZV_sub(gel(R->rayZ, p%condZ),  ray1);
     chi11 = EvalChar(&C, ray1);
     chi12 = EvalChar(&C, ray2);
 
@@ -2308,32 +2306,24 @@ GenusField(GEN bnf)
 {
   long hk, c, l;
   pari_sp av = avma;
-  GEN disc, x2, pol, div, d;
+  GEN disc, pol, div, d;
 
   hk   = itos(gmael3(bnf, 8, 1, 1));
   disc = gmael(bnf, 7, 3);
-  x2   = monomial(gen_1, 2, 0); /* x^2 */
 
   if (mod4(disc) == 0) disc = shifti(disc, -2);
   div = divisors(disc);
-  l = 0;
   pol = NULL;
-
-  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gen_1 */
+  for (c = 2, l = 0; l < hk; c++) /* skip c = 1 : div[1] = gen_1 */
   {
     d = gel(div,c);
     if (mod4(d) == 1)
     {
-      GEN t = gsub(x2, d);
-      if (!pol)
-	pol = t;
-      else
-	pol = gel(compositum(pol, t),1);
-
+      GEN t = mkpoln(3, gen_1, gen_0, negi(d)); /* x^2 - d */
+      pol = pol? gel(compositum(pol, t),1): t;
       l = degpol(pol);
     }
   }
-
   return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
 }
 
@@ -2361,7 +2351,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
-  h  = itos(det(gel(data,2))) >> 1;
+  h  = itos(dethnf_i(gel(data,2))) >> 1;
 
 LABDOUB:
   av = avma;
