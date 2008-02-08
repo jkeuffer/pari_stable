@@ -42,8 +42,8 @@ checktnf(GEN tnf)
 static GEN
 distoZ(GEN z)
 {
-  GEN p1 = gfrac(z);
-  return gmin(p1, gsub(gen_1,p1));
+  GEN t = gfrac(z);
+  return gmin(t, gsubsg(1,t));
 }
 
 /* Compensates rounding errors for computation/display of the constants.
