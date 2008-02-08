@@ -292,11 +292,7 @@ nftyp(GEN x)
 /* exchange elements i and j in vector x */
 static GEN
 transroot(GEN x, int i, int j)
-{
-  long k;
-  x = shallowcopy(x);
-  k=x[i]; x[i]=x[j]; x[j]=k; return x;
-}
+{ x = shallowcopy(x); swap(gel(x,i), gel(x,j)); return x; }
 
 GEN
 tschirnhaus(GEN x)
@@ -556,7 +552,7 @@ polgalois(GEN x, long prec)
 	  p3=gen_0;
 	  for (i=1; i<=5; i++)
 	  {
-	    j = i+1; if (j>5) j -= 5;
+	    j = (i == 5)? 1: i+1;
 	    p3 = gadd(p3,gmul(gmul(gel(p2,i),gel(p2,j)),
 			      gsub(gel(p2,j),gel(p2,i))));
 	  }
