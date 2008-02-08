@@ -1071,7 +1071,7 @@ trueE(GEN tau, long k, long prec)
   for(;; n++)
   { /* compute y := sum_{n>0} n^(k-1) q^n / (1-q^n) */
     qn = gmul(q,qn);
-    p1 = gdiv(gmul(powuu(n,k-1),qn), gsub(gen_1,qn));
+    p1 = gdiv(gmul(powuu(n,k-1),qn), gsubsg(1,qn));
     if (gcmp0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
@@ -1191,7 +1191,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   pi2 = Pi2n(1, prec);
   q = expIxy(pi2, T->Tau, prec);
   u = expIxy(pi2, z, prec);
-  u1= gsub(gen_1,u); u2 = gsqr(u1);
+  u1= gsubsg(1,u); u2 = gsqr(u1);
   y = gadd(mkfrac(gen_1, utoipos(12)), gdiv(u,u2));
   if (flall) yp = gdiv(gadd(gen_1,u), gmul(u1,u2));
   toadd = (long)ceil(9.065*gtodouble(imag_i(z)));
@@ -1202,12 +1202,12 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     GEN qnu,qnu1,qnu2,qnu3,qnu4;
 
     qnu = gmul(qn,u);     /* q^n u */
-    qnu1 = gsub(gen_1,qnu); /* 1 - q^n u */
+    qnu1 = gsubsg(1,qnu); /* 1 - q^n u */
     qnu2 = gsqr(qnu1);    /* (1 - q^n u)^2 */
     qnu3 = gsub(qn,u);    /* q^n - u */
     qnu4 = gsqr(qnu3);    /* (q^n - u)^2 */
     p1 = gsub(gmul(u, gadd(ginv(qnu2),ginv(qnu4))),
-	      gmul2n(ginv(gsqr(gsub(gen_1,qn))), 1));
+	      gmul2n(ginv(gsqr(gsubsg(1,qn))), 1));
     y = gadd(y, gmul(qn,p1));
     if (flall)
     {
@@ -1268,7 +1268,7 @@ ellzeta(GEN om, GEN z, long prec)
   /* y += sum q^n ( u/(u*q^n - 1) + 1/(u - q^n) ) */
   for (qn = q;;)
   {
-    GEN p1 = gadd(gdiv(u,gsub(gmul(qn,u),gen_1)), ginv(gsub(u,qn)));
+    GEN p1 = gadd(gdiv(u,gsubgs(gmul(qn,u),1)), ginv(gsub(u,qn)));
     y = gadd(y, gmul(qn,p1));
     qn = gmul(q,qn);
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
@@ -2438,7 +2438,7 @@ _fix(GEN x, long k)
 static GEN
 closest_lift(GEN a, GEN b, GEN h)
 {
-  return addii(a, mulii(b, diviiround(gsub(h,a), b)));
+  return addii(a, mulii(b, diviiround(subii(h,a), b)));
 }
 
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
@@ -3255,7 +3255,7 @@ hells(GEN e, GEN x, long prec)
     /* 4 + b2 t + 2b4 t^2 + b6 t^3 */
     w = gmul(t, gaddsg(4, gmul(t, gadd(b2, gmul(t, gadd(b42, gmul(t, b6)))))));
     /* 1 - (b4 t^2 + 2b6 t^3 + b8 t^4) */
-    z = gsub(gen_1, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t, b8))))));
+    z = gsubsg(1, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t, b8))))));
     mu = gadd(mu, gmul2n(glog(z,prec), -n));
     t = gdiv(w, z);
   }
@@ -3688,7 +3688,7 @@ orderell(GEN e, GEN z) { return ellorder(e,z,NULL); }
 /* Using Lutz-Nagell */
 
 /* p in Z[X] of degree 3. Return vector of x/4, x integral root of p */
-GEN
+static GEN
 ratroot(GEN p)
 {
   GEN L, a, ld;
@@ -3755,7 +3755,7 @@ nagelllutz(GEN e)
   for (t2=t,j=1; j<lg(ld); j++)
   {
     GEN d = gel(ld,j);
-    lr = ratroot(gsub(pol, shifti(sqri(d), 6)));
+    lr = ratroot(ZX_Z_sub(pol, shifti(sqri(d), 6)));
     for (i=1; i<lg(lr); i++)
     {
       GEN x = gel(lr,i), y = gmul2n(gadd(d, gneg(ellLHS0(e,x))), -1);

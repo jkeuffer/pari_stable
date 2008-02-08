@@ -1930,6 +1930,7 @@ GEN     Z_ZX_sub(GEN x, GEN y);
 GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_Z_add(GEN y,GEN x);
 GEN     ZX_Z_mul(GEN y,GEN x);
+GEN     ZX_Z_sub(GEN y, GEN x);
 GEN     ZX_ZXY_rnfequation(GEN A, GEN B0, long *lambda);
 GEN     ZX_add(GEN x, GEN y);
 GEN     ZX_caract(GEN A, GEN B, long v);

@@ -98,6 +98,26 @@ ZX_Z_add(GEN y, GEN x)
 }
 
 GEN
+ZX_Z_sub(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+  { /* scalarpol(negi(x), v) */
+    long v = varn(y);
+    if (!signe(x)) return zeropol(v);
+    z = cgetg(3,t_POL);
+    z[1] = evalvarn(v) | evalsigne(1);
+    gel(z,2) = negi(x); return z;
+  }
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
 Z_ZX_sub(GEN x, GEN y)
 {
   GEN z;

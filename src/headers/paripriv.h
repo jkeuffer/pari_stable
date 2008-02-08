@@ -720,7 +720,6 @@ GEN     CM_CardEFp(GEN E, GEN p);
 GEN     CM_ellap(GEN E, GEN p);
 void    checkpt(GEN z);
 GEN     multi_invmod(GEN x, GEN p);
-GEN     ratroot(GEN p);
 GEN     weipell0(GEN e, long prec, long PREC);
 
 /* es.c */
