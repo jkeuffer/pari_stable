@@ -582,21 +582,19 @@ static GEN
 Mignotte_bound(GEN S)
 {
   long i, d = degpol(S);
-  GEN lS, C, binlS, bin, N2, p1;
+  GEN C, N2, t, binlS, lS = leading_term(S), bin = vecbinome(d-1);
 
   N2 = sqrtr(QuickNormL2(S,DEFAULTPREC));
-  binlS = bin = vecbinome(d-1);
-  lS = leading_term(S);
-  if (!is_pm1(lS)) binlS = gmul(lS, bin);
+  binlS = is_pm1(lS)? bin: gmul(lS, bin);
 
   /* i = 0 */
   C = gel(binlS,1);
   /* i = d */
-  p1 = N2; if (gcmp(C, p1) < 0) C = p1;
+  t = N2; if (gcmp(C, t) < 0) C = t;
   for (i = 1; i < d; i++)
   {
-    p1 = gadd(gmul(gel(bin,i), N2), gel(binlS,i+1));
-    if (gcmp(C, p1) < 0) C = p1;
+    t = addri(mulir(gel(bin,i), N2), gel(binlS,i+1));
+    if (mpcmp(C, t) < 0) C = t;
   }
   return C;
 }
@@ -616,11 +614,11 @@ Beauzamy_bound(GEN S)
     GEN c = gel(S,i+2);
     if (gcmp0(c)) continue;
     /* s += P_i^2 / binomial(d,i) */
-    s = addrr(s, gdiv(itor(sqri(c), prec), gel(bin,i+1)));
+    s = addrr(s, divri(itor(sqri(c), prec), gel(bin,i+1)));
   }
   /* s = [S]_2^2 */
   C = powrshalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
-  C = gdiv(gmul(C, s), gmulsg(4*d, mppi(prec)));
+  C = divrr(mulrr(C, s), mulsr(4*d, mppi(prec)));
   lS = absi(leading_term(S));
   return mulir(lS, sqrtr(C));
 }
@@ -638,21 +636,6 @@ factor_bound(GEN S)
   }
   return gerepileupto(av, ceil_safe(gmin(a, b)));
 }
-
-#if 0
-/* all factors have coeffs less than the bound */
-static GEN
-all_factor_bound(GEN x)
-{
-  long i, n = degpol(x);
-  GEN t, z = gen_0;
-  for (i=2; i<=n+2; i++) z = addii(z, sqri(gel(x,i)));
-  t = absi(gel(x,n+2));
-  z = addii(t, addsi(1, sqrti(z)));
-  z = mulii(z, binomial(stoi(n-1), n>>1));
-  return shifti(mulii(t,z),1);
-}
-#endif
 
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim and divisible by hint
@@ -4508,14 +4491,14 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       }
 
       ax = muliu(Fp_inv(utoipos(p), mod), p);
-      M = gadd(R, gmul(ax, gsub(M, R)));
+      M = ZM_add(R, ZM_Z_mul(ZM_sub(M, R), ax));
       mod = muliu(mod, p);
       M = FpM_red(M, mod);
       /* I suspect it must be better to take amax > bmax*/
       bo = sqrti(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
       sol = RgM_to_RgXX(sol,x,y);
-      dsol = primpart(sol);
+      dsol = Q_primpart(sol);
       if (gcmp0(pseudorem_i(P, dsol, nf))
        && gcmp0(pseudorem_i(Q, dsol, nf))) break;
     }
