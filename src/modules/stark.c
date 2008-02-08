@@ -1771,35 +1771,31 @@ chk_reccoeff(void *data, GEN x)
 static GEN
 RecCoeff3(GEN nf, RC_data *d, long prec)
 {
-  GEN A, M, nB, cand, p1, B2, C2, tB, beta2, BIG, nf2, Bd;
+  GEN A, M, nB, cand, p1, B2, C2, tB, beta2, nf2, Bd;
   GEN beta = d->beta, B = d->B;
-  long N = d->N, v = d->v, e;
+  long N = d->N, v = d->v, e, BIG;
   long i, j, k, l, ct = 0, prec2;
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, NULL, 0 };
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
-  /* FIXME: why a power of 10 ? Use a power of 2. */
-  BIG = powuu(10, max(8, -(d->G >> 1)));
-  tB  = sqrtnr(gmul2n(itor(BIG,DEFAULTPREC), -N), N-1);
-  Bd    = grndtoi(gmin(B, tB), &e);
+  BIG = max(32, -(d->G << 1));
+  tB  = sqrtnr(real2n(BIG-N,DEFAULTPREC), N-1);
+  Bd  = grndtoi(gmin(B, tB), &e);
   if (e > 0) return NULL; /* failure */
   Bd = addis(Bd, 1);
   prec2 = BIGDEFAULTPREC + divsBIL( expi(Bd) );
   prec2 = max((prec << 1) - 2, prec2);
-  nf2   = nfnewprec_shallow(nf, prec2);
-  beta2 = gprec_w(beta, prec2);
+  B2 = sqri(Bd);
+  C2 = shifti(B2, BIG<<1);
 
 LABrcf: ct++;
-  B2 = sqri(Bd);
-  C2 = mulii(B2, sqri(BIG));
-
-  M = gmael(nf2, 5, 1);
-  d->M = M;
+  beta2 = gprec_w(beta, prec2);
+  nf2 = nfnewprec_shallow(nf, prec2);
+  d->M = M = gmael(nf2, 5, 1);
 
   A = cgetg(N+2, t_MAT);
-  for (i = 1; i <= N+1; i++)
-    gel(A,i) = cgetg(N+2, t_COL);
+  for (i = 1; i <= N+1; i++) gel(A,i) = cgetg(N+2, t_COL);
 
   gcoeff(A, 1, 1) = gadd(gmul(C2, gsqr(beta2)), B2);
   for (j = 2; j <= N+1; j++)
@@ -1808,7 +1804,7 @@ LABrcf: ct++;
     gcoeff(A, 1, j) = gcoeff(A, j, 1) = p1;
   }
   for (i = 2; i <= N+1; i++)
-    for (j = 2; j <= N+1; j++)
+    for (j = i; j <= N+1; j++)
     {
       p1 = gen_0;
       for (k = 1; k <= N; k++)
@@ -1827,18 +1823,14 @@ LABrcf: ct++;
   if (!cand)
   {
     if (ct > 3) return NULL;
-
     prec2 = (prec2 << 1) - 2;
     if (DEBUGLEVEL>1) pari_warn(warnprec,"RecCoeff", prec2);
-    nf2 = nfnewprec_shallow(nf2, prec2);
-    beta2 = gprec_w(beta2, prec2);
     goto LABrcf;
   }
 
-  cand = gel(cand,1);
-  l = lg(cand) - 1;
-
-  if (l == 1) return coltoalg(nf, gel(cand,1));
+  cand = gel(cand,1); l = lg(cand) - 1;
+  if (l == 1)
+    return coltoalg(nf, gel(cand,1));
 
   if (DEBUGLEVEL>1) fprintferr("RecCoeff3: no solution found!\n");
   return NULL;
