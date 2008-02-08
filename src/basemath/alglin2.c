@@ -2302,7 +2302,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
     GEN A = vecslice(C, col+1, co);
     GEN c = rowslicepermute(extramat, perm, lig+1, li);
     extraC   = gsub(extraC, typ(A)==t_MAT? RgM_zm_mul(A, c): RgV_zm_mul(A,c));
-    extratop = gsub(extratop, ZM_zm_mul(B, c));
+    extratop = ZM_sub(extratop, ZM_zm_mul(B, c));
   }
 
   extramat = shallowconcat(extratop, vconcat(dep, H));
