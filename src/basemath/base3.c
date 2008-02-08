@@ -974,7 +974,7 @@ zsigne(GEN nf,GEN x,GEN arch)
     {
       GEN g = gel(x,1), e = gel(x,2), z = vec_setconst(V, gen_0);
       for (i=1; i<lg(g); i++)
-	if (mpodd(gel(e,i))) z = gadd(z, zsigne(nf,gel(g,i),archp));
+	if (mpodd(gel(e,i))) z = ZV_add(z, zsigne(nf,gel(g,i),archp));
       for (i=1; i<l; i++) gel(V,i) = mpodd(gel(z,i))? gen_1: gen_0;
       avma = av; return V;
     }
@@ -1514,7 +1514,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
-      if (mod2(t)) *psigne = *psigne? gadd(*psigne, gel(s,i)): gel(s,i);
+      if (mod2(t)) *psigne = *psigne? ZV_add(*psigne, gel(s,i)): gel(s,i);
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
     }
   }
@@ -1528,7 +1528,7 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
   long i;
   if (!sgn) return;
   y = y0 + lg(y0);
-  s = gmul(gmael(lists, lg(lists)-1, 3), sgn);
+  s = ZM_ZC_mul(gmael(lists, lg(lists)-1, 3), sgn);
   for (i = lg(s)-1; i > 0; i--) gel(--y,0) = mpodd(gel(s,i))? gen_1: gen_0;
 }
 

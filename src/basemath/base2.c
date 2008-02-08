@@ -1241,7 +1241,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
     PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc): S->phi;
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
-    S->chi = mycaract(S, S->f, PHI, gmax(S->psf, S->psc), pdf);
+    S->chi = mycaract(S, S->f, PHI, S->psc, pdf);
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
@@ -2151,8 +2151,8 @@ modprinit(GEN nf, GEN pr, int zk)
       deg = clcm(deg1,deg2);
       if (deg == deg1) continue;
       if (deg == deg2) { deg1 = deg2; u = u2; continue; }
-      u = gadd(u, u2);
-      while (ffdegree(u, frob, p) < deg) u = gadd(u, u2);
+      u = ZV_add(u, u2);
+      while (ffdegree(u, frob, p) < deg) u = ZV_add(u, u2);
       deg1 = deg;
     }
     v = lift_to_zk(u,c,N);
