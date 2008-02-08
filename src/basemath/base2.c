@@ -898,7 +898,7 @@ Decomp(decomp_t *S, long flag)
   { /* E <-- E^2(3-2E) mod p^2k, with E = e/de */
     GEN D;
     pk = sqri(pk); k <<= 1;
-    e = ZX_mul(ZX_sqr(e), gsub(mului(3,de), gmul2n(e,1)));
+    e = ZX_mul(ZX_sqr(e), Z_ZX_sub(mului(3,de), gmul2n(e,1)));
     de= mulii(de, sqri(de));
     D = mulii(pk, de);
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
@@ -909,7 +909,7 @@ Decomp(decomp_t *S, long flag)
   fred = centermod(S->f, ph);
   e    = centermod(e, ph);
 
-  f1 = gcdpm(fred, gsub(de, e), ph); /* p-adic gcd(f, 1-e) */
+  f1 = gcdpm(fred, Z_ZX_sub(de, e), ph); /* p-adic gcd(f, 1-e) */
   fred = centermod(fred, pr);
   f1   = centermod(f1,   pr);
   f2 = FpX_div(fred,f1, pr);
@@ -939,7 +939,7 @@ Decomp(decomp_t *S, long flag)
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
       gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib1,i),e), fred, D), D, Dov2);
-    e = gsub(de, e); ib2 -= n1;
+    e = Z_ZX_sub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
       gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D, Dov2);
     res = RgXV_to_RgM(res, n);

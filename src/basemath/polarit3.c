@@ -97,6 +97,20 @@ ZX_Z_add(GEN y, GEN x)
   return z;
 }
 
+GEN
+Z_ZX_sub(GEN x, GEN y)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(x, gel(y,2));
+  for(i=3; i<lz; i++) gel(z,i) = negi(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
 /*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
 
 GEN

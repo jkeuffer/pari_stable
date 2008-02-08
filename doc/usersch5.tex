@@ -2008,9 +2008,13 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
-\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the polynomial \kbd{x}.
+\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the
+\kbd{ZX}~\kbd{x}.
 
-\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the polynomial \kbd{x} by the integer \kbd{y}.
+\fun{GEN}{Z_ZX_sub}{GEN x,GEN y} subtracts the \kbd{ZX} \kbd{y} to the
+integer \kbd{x}.
+
+\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the \kbd{ZX} \kbd{x} by the integer \kbd{y}.
 
 \fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x} 
 by the integer \kbd{y}.
