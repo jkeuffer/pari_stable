@@ -1053,7 +1053,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
     L->Tpk = gel(z,1);
     proj = get_proj_modT(L->topow, L->Tpk, L->pk);
     if (L->topowden)
-      proj = FpM_red(ZM_Z_mul(Fp_inv(L->topowden, L->pk), proj), L->pk);
+      proj = FpM_red(ZM_Z_mul(proj, Fp_inv(L->topowden, L->pk)), L->pk);
     L->ZqProj = proj;
   }
   else
