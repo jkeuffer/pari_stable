@@ -145,9 +145,7 @@ FlxM_to_ZXM(GEN z)
 /**          Conversion to Flx                                        **/
 /**                                                                   **/
 /***********************************************************************/
-
-/*sv is a evalvarn()*/
-/*zero_Flx=zero_zx*/
+/* = zero_zx, sv is a evalvarn()*/
 GEN
 zero_Flx(long sv)
 {
@@ -156,18 +154,14 @@ zero_Flx(long sv)
 }
 
 /* pol1_Flx=pol1_zx*/
-
 GEN
 pol1_Flx(long sv) { return mkvecsmall2(sv, 1); }
 
 /* polx_Flx=polx_zx*/
-
 GEN
 polx_Flx(long sv) { return mkvecsmall3(sv, 0, 1); }
 
-/* Take an integer and return a scalar polynomial mod p,
- * with evalvarn=vs */
-
+/* Take an integer and return a scalar polynomial mod p,  with evalvarn=vs */
 GEN
 Fl_to_Flx(ulong x, long sv)
 {
@@ -217,8 +211,7 @@ ZM_to_Flm(GEN x, ulong p)
 /**          Basic operation on Flx                                   **/
 /**                                                                   **/
 /***********************************************************************/
-/*Similar to normalizepol, in place*/
-/*FIXME: should be zx_renormalize*/
+/* = zx_renormalize. Similar to normalizepol, in place */
 GEN
 Flx_renormalize(GEN /*in place*/ x, long lx)
 {
