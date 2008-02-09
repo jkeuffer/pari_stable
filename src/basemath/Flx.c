@@ -391,10 +391,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
   return z;
 }
 
-/*
- * Return a*x^n
- */
-
+/* Return a*x^n, assuming n >= 0 */
 GEN
 Flx_shift(GEN a, long n)
 {

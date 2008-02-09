@@ -2685,7 +2685,8 @@ $\kbd{T}(0) \neq 0$.
 \fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX\_renormalize}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by $\kbd{x}^n$.
+\fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by
+$\kbd{x}^n$, assuming $n\geq 0$.
 
 \fun{long}{Flx_valuation}{GEN x} returns the valuation of \kbd{x}, i.e. the
 multiplicity of the $0$ root.
@@ -2726,7 +2727,7 @@ returning an \kbd{Flx} in variable $v$.
 \fun{GEN}{polx_zx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
 
 \fun{GEN}{zx_shift}{GEN T, long n} returns \kbd{T}
-multiplied by $\kbd{x}^n$.
+multiplied by $\kbd{x}^n$, assuming $n\geq 0$.
 
 \subsec{\kbd{Flxq}}. See \kbd{FpXQ} operations.
 
