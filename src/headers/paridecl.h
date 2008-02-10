@@ -1860,6 +1860,7 @@ GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
+long    zv_content(GEN x);
 long    ZX_isirreducible(GEN x);
 
 /* polarit3.c */

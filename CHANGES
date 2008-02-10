@@ -88,7 +88,7 @@ BA  9- library function ZV_indexsort
 BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
 JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
-   14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize
+   14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
 
   Removed
     1- obsolete library functions extract and matextract

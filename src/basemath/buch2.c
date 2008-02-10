@@ -125,15 +125,6 @@ typedef struct RELCACHE_t {
   size_t len; /* number of rels pre-allocated in base */
 } RELCACHE_t;
 
-/* x a t_VECSMALL */
-static long
-ccontent(GEN x)
-{
-  long i, l = lg(x), s = labs(x[1]);
-  for (i=2; i<l && s!=1; i++) s = cgcd(x[i],s);
-  return s;
-}
-
 static void
 delete_cache(RELCACHE_t *M)
 {
@@ -1985,7 +1976,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 
 	/* element complete */
 	if (y[1]<=1e-6) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
-	if (ccontent(x)==1) /* primitive */
+	if (zv_content(x)==1) /* primitive */
 	{
 	  gx = ZM_zc_mul(IDEAL,x);
 	  if (!ZV_isscalar(gx))

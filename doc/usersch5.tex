@@ -3208,6 +3208,8 @@ array) to (normalized) polynomial in variable $v$.
 \fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
 occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 
+\fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
+
 \fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
 identity matrix.
 
