@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ellap0(e,p,flag) apell(e,p)
 #define apell2(e,p) apell(e,p)
 #define apell ellap
-#define cgcd cgcd
 #define gscalsmat scalarmat_s
 #define sqred qfgaussred
 #define signat qfsign
