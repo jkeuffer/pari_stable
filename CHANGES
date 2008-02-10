@@ -70,6 +70,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    18- rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush ->
        pari_flush, gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
        gpfree -> pari_free
+   19- check for small prime divisors in ispower [ large speedup ]
 
   Added
     1- library function gpcalloc
@@ -89,6 +90,7 @@ BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
 JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
    14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
+   15- 'ispower' bench
 
   Removed
     1- obsolete library functions extract and matextract

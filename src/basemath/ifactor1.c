@@ -385,7 +385,7 @@ iu_coprime(GEN N, ulong u)
 static int
 uu_coprime(ulong n, ulong u)
 {
-  return (n == 1 || gcduodd(n, u) == 1);
+  return gcduodd(n, u) == 1;
 }
 
 /* Fl_BSW_psp */
@@ -2569,53 +2569,59 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
   return 0;
 }
 
-/* p not necessarily prime */
+/* Is x a n-th power ?
+ * if d = NULL, n not necessarily prime, otherwise, n prime and d the
+ * corresponding diffptr to go on looping over primes.
+ * If pt != NULL, it receives the n-th root */
 ulong
-is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
+is_kth_power(GEN x, ulong n, GEN *pt, byteptr d)
 {
   int init = 0;
-  long j, k;
-  ulong q, prkmodq, residue, elt;
+  long j;
+  ulong q, residue;
   GEN y;
   byteptr d0;
   pari_sp av = avma;
 
   if (d)
   {
-    q = p; d0 = d;
+    q = n; d0 = d;
   }
   else
   {
     q = 0; d0 = diffptr;
-    maxprime_check(p);
-    while (q < p) NEXT_PRIME_VIADIFF(q,d0);
+    maxprime_check(n);
+    while (q < n) NEXT_PRIME_VIADIFF(q,d0);
   }
-  /* for modular checks, use small primes q congruent 1 mod curexp */
-  /* #checks is tunable, for small p we can afford to do more than 5 */
-  for (j = (p<40 ? 7 : p<80 ? 5 : p<250 ? 4 : 3); j > 0; j--)
+  /* q smallest prime >= n */
+
+  /* Modular checks, use small primes q congruent 1 mod n */
+  /* A non n-th powers nevertheless passes the test with proba 1 / n^#checks,
+   * we want this < 1e-6 ~ exp(13.8).
+   * n = 17886697 is smallest such that the prime q = 1 mod n is > 2^32 */
+  j = (long)(13.8 / log((double)n));
+  if (j < 1 && n < 17886697) j = 1;
+  for (; j > 0; j--)
   {
     do
     {
       if (*d0) NEXT_PRIME_VIADIFF(q,d0);
       else {
-	if (init) q += p; else { init = 1; q += (p + 1 - q % p); }
-	while (!uisprime(q)) { q += p; }
+	if (init) q += n; else { init = 1; q += (n + 1 - q % n); }
+	while (!uisprime(q)) { q += n; }
 	break;
       }
-    } while (q % p != 1);
+    } while (q % n != 1);
+    /* q a prime = 1 mod n */
     if (DEBUGLEVEL>4) fprintferr("\tchecking modulo %ld\n", q);
-    /* XXX give up if q is too large, huh? */
     residue = umodiu(x, q);
-    if (residue == 0) continue;
-    /* find a generator of the subgroup of index curexp in (Z/qZ)^* */
-    prkmodq = elt = Fl_powu(pgener_Fl(q), p, q);
-    /* see whether our residue is in the subgroup */
-    for (k = (q - 1)/p; k > 0; k--)
+    if (residue == 0)
     {
-      if (elt == residue) break;
-      elt = Fl_mul(elt, prkmodq, q);
+      if (Z_lvalrem(x, q, &y) % n) { avma = av; return 0; }
+      continue;
     }
-    if (!k) /* not found */
+    /* n-th power mod q ? */
+    if (Fl_powu(residue, (q-1)/n, q) != 1)
     {
       if (DEBUGLEVEL>5) fprintferr("\t- ruled out\n");
       avma = av; return 0;
@@ -2625,8 +2631,8 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
 
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
   /* go to the horse's mouth... */
-  y = mpround( sqrtnr(itor(x, nbits2prec((expi(x)+16*p)/p)), p) );
-  if (!equalii(powiu(y, p), x)) {
+  y = mpround( sqrtnr(itor(x, nbits2prec((expi(x)+16*n)/n)), n) );
+  if (!equalii(powiu(y, n), x)) {
     if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
     avma = av; return 0;
   }

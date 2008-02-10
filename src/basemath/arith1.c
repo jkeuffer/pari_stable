@@ -860,46 +860,116 @@ long
 isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long ex, k = 1, s = signe(x);
-  GEN logx, y;
+  long ex, v, i, j, l, k, s = signe(x);
+  GEN logx, y, fa, P, E, Pe, Ee;
   byteptr d = diffptr;
-  ulong mask = 7, p = 0, ex0 = 11, e2;
+  ulong mask, p = 0, ex0 = 11, e = 0, e2;
 
   if (typ(x) != t_INT) pari_err(typeer, "isanypower");
-  if (absi_cmp(x, gen_2) < 0) {
-    if (pty) *pty = icopy(x);
-    return 0; /* -1,0,1 */
-  }
-  if (s < 0)
-    x = absi(x);
-  else
-    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
-  while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
-  /* cut off at 4 bits not 1 which seems to be about optimum;  for primes
-   * >> 10^3 the modular checks are no longer competitively fast */
-  while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
-  if (DEBUGLEVEL>4) fprintferr("isanypower: now k=%ld, x=%Zs\n", k, x);
-  do
-  {
-    if (*d) NEXT_PRIME_VIADIFF(p,d);
-    else { p = itou( nextprime(utoipos(p + 1)) ); }
-  } while (p < ex0);
+  if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
-  e2 = expi(x) + 1;
-  logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
-  while (p < e2)
+  x = absi(x); /* Z_lvalrem_stop assigns to x */
+  k = 1;
+  P = cgetg(t_VECSMALL, 26 + 1);
+  E = cgetg(t_VECSMALL, 26 + 1);
+  /* trial division */
+  for(l = 1;;)
   {
-    if (pow_check(p, &x, &logx, &k)) {
-      e2 = expi(x) + 1;
-      continue; /* success, retry same p */
+    int stop;
+    NEXT_PRIME_VIADIFF(p,d);
+    if (p > 102) break;
+
+    v = Z_lvalrem_stop(x, p, &stop);
+    if (v)
+    {
+      P[l] = p;
+      E[l] = v; l++;
+      e = cgcd(e, v); if (e == 1) goto END;
     }
-    if (*d) NEXT_PRIME_VIADIFF(p, d);
-    else p = itou( nextprime(utoipos(p + 1)) );
+    if (stop) { if (is_pm1(x)) k = e; goto END; }
   }
-  if (!pty) avma = av;
+
+  if (e)
+  { /* Bingo. Result divides e */
+    long v3, v5, v7, le;
+    ulong e2 = e;
+    v = u_lvalrem(e2, 2, &e2);
+    if (v && s > 0)
+    {
+      for (i = 0; i < v; i++)
+      {
+        if (!Z_issquareall(x, &y)) break;
+        k <<= 1; x = y;
+      }
+    }
+    v3 = u_lvalrem(e2, 3, &e2); if (v3) mask = 1; 
+    v5 = u_lvalrem(e2, 5, &e2); if (v5) mask |= 2; 
+    v7 = u_lvalrem(e2, 7, &e2); if (v7) mask |= 4; 
+    while ( (ex = is_357_power(x, &y, &mask)) ) {
+      x = y;
+      switch(ex)
+      {
+        case 3: k *= 3; if (--v3 == 0) mask &= ~1; break;
+        case 5: k *= 5; if (--v5 == 0) mask &= ~2; break;
+        case 7: k *= 7; if (--v7 == 0) mask &= ~4; break;
+      }
+    }
+
+    if (e2 == 1) goto END;
+    fa = factoru(e2);
+    Pe = gel(fa,1); le = lg(Pe);
+    Ee = gel(fa,2);
+    for (i = 1; i < le; i++)
+    {
+      p = Pe[i];
+      for (j = 0; j < Ee[i]; j++)
+      {
+        if (!is_kth_power(x, p, &y, NULL)) break;
+        k *= p; x = y;
+      }
+    }
+  }
+  else
+  { /* any prime divisor of x is > 102 */
+    const double LOG2_103 = 6.6865; /* lower bound for log_2(103) */
+
+    while (Z_issquareall(x, &y)) { k <<= 1; x = y; }
+    mask = 7;
+    while ( (ex = is_357_power(x, &y, &mask)) ) { k *= ex; x = y; }
+    /* cut off at 4 bits which seems to be about optimum;  for primes
+     * >> 10^3 the modular checks are no longer competitively fast */
+    while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
+    if (DEBUGLEVEL>4) fprintferr("isanypower: now k=%ld, x=%Zs\n", k, x);
+    do
+    {
+      if (*d) NEXT_PRIME_VIADIFF(p,d);
+      else { p = itou( nextprime(utoipos(p + 1)) ); }
+    } while (p < ex0);
+
+    /* upper bound for log(x) / log(103) */
+    e2 = (long)((expi(x) + 1) / LOG2_103);
+    logx = logr_abs( itor(x, DEFAULTPREC + (lg(x)-2) / p) );
+    while (p < e2)
+    {
+      if (pow_check(p, &x, &logx, &k)) {
+        e2 = (long)((expi(x) + 1) / LOG2_103);
+        continue; /* if success, retry same p */
+      }
+      if (*d) NEXT_PRIME_VIADIFF(p, d);
+      else p = itou( nextprime(utoipos(p + 1)) );
+    }
+  }
+END:
+  if (!pty || k == 1) avma = av;
   else
   {
-    if (s < 0) x = negi(x);
+    if (e)
+    { /* add missing small factors */
+      y = powuu(P[1], E[1] / k);
+      for (i = 2; i < l; i++) y = mulii(y, powuu(P[i], E[i] / k));
+      x = is_pm1(x)? y: mulii(x,y);
+    }
+    if (s < 0) togglesign(x);
     *pty = gerepilecopy(av, x);
   }
   return k == 1? 0: k;
