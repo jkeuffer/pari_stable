@@ -188,7 +188,7 @@ gener(GEN m)
     gel(z,2) = gerepileuptoint(av, x); return z;
   }
   e = isanypower(m, &p);
-  gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(p)); return z;
+  gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(m)); return z;
 }
 
 GEN
