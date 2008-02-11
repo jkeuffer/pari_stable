@@ -189,6 +189,8 @@ GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 
 /* alglin1.c */
 
+GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
+GEN     Flc_Fl_div(GEN x, ulong y, ulong p);
 GEN     Flm_Flc_mul(GEN x, GEN y, ulong p);
 GEN     Flm_deplin(GEN x, ulong p);
 GEN     Flm_gauss(GEN a, GEN b, ulong p);
@@ -200,6 +202,9 @@ GEN     Flm_mul(GEN x, GEN y, ulong p);
 long    Flm_rank(GEN x, ulong p);
 GEN     Flm_transpose(GEN x);
 GEN     FlxqM_ker(GEN x, GEN T, ulong p);
+GEN     Flv_add(GEN x, GEN y, ulong p);
+ulong   Flv_dotproduct(GEN x, GEN y, ulong p);
+GEN     Flv_sub(GEN x, GEN y, ulong p);
 GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpC_mul(GEN x, GEN y, GEN p);
@@ -286,6 +291,9 @@ GEN     vconcat(GEN A, GEN B);
 GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
+GEN     zero_Flm(long m, long n);
+GEN     zero_Flv(long n);
+GEN     zm_row(GEN A, long x0);
 GEN     zv_neg(GEN x);
 
 /* alglin2.c */
@@ -1860,6 +1868,7 @@ GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
+int     zv_cmp0(GEN V);
 long    zv_content(GEN x);
 long    ZX_isirreducible(GEN x);
 

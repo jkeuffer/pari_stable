@@ -1436,6 +1436,15 @@ ZM_neg(GEN x)
   return y;
 }
 
+int
+zv_cmp0(GEN V)
+{
+  long i, l = lg(V);
+  for (i = 1; i < l; i++)
+    if (V[i]) return 0;
+  return 1;
+}
+
 /* X + v Y */
 static GEN
 ZV_lincomb1(GEN v, GEN X, GEN Y)

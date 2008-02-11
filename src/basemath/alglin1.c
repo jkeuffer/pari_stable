@@ -156,17 +156,18 @@ concatsp3(GEN x, GEN y, GEN z)
 GEN
 vconcat(GEN A, GEN B)
 {
-  long la,ha,hb,hc,i,j;
-  GEN M,a,b,c;
+  long la, ha, hb, hc, i, j, T;
+  GEN M, a, b, c;
 
   if (!A) return B;
   if (!B) return A;
   la = lg(A); if (la==1) return A;
+  T = typ(A[1]); /* t_COL or t_VECSMALL */
   ha = lg(A[1]); M = cgetg(la,t_MAT);
   hb = lg(B[1]); hc = ha+hb-1;
   for (j=1; j<la; j++)
   {
-    c = cgetg(hc,t_COL); gel(M, j) = c;
+    c = cgetg(hc, T); gel(M, j) = c;
     a = gel(A,j);
     b = gel(B,j);
     for (i=1; i<ha; i++) *++c = *++a;
@@ -619,6 +620,14 @@ row(GEN A, long x0)
   long i, lB = lg(A);
   GEN B  = cgetg(lB, t_VEC);
   for (i=1; i<lB; i++) gel(B, i) = gcoeff(A, x0, i);
+  return B;
+}
+GEN
+zm_row(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_VECSMALL);
+  for (i=1; i<lB; i++) B[i] = ucoeff(A, x0, i);
   return B;
 }
 /* A[x0,] */
@@ -1678,6 +1687,23 @@ matid_Flm(long n)
 }
 
 GEN
+zero_Flv(long n)
+{
+  GEN y = cgetg(n+1,t_VECSMALL);
+  long i; for (i=1; i<=n; i++) y[i] = 0;
+  return y;
+}
+/* matrix(m, n) */
+GEN
+zero_Flm(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  GEN v = zero_Flv(m);
+  long i; for (i=1; i<=n; i++) gel(y,i) = v;
+  return y;
+}
+
+GEN
 Flm_gauss(GEN a, GEN b, ulong p) {
   return Flm_gauss_sp(shallowcopy(a), shallowcopy(b), p);
 }
@@ -2698,6 +2724,19 @@ FpC_Fp_mul(GEN x, GEN y, GEN p)
   for (i=1;i<l;i++) gel(z,i) = Fp_mul(gel(x,i),y,p);
   return z;
 }
+GEN
+Flc_Fl_mul(GEN x, ulong y, ulong p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  for (i=1;i<l;i++) z[i] = Fl_mul(x[i], y, p);
+  return z;
+}
+GEN
+Flc_Fl_div(GEN x, ulong y, ulong p)
+{
+  return Flc_Fl_mul(x, Fl_inv(y, p), p);
+}
 
 /* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
 static GEN
@@ -2825,6 +2864,23 @@ Flm_mul(GEN x, GEN y, ulong p)
   return z;
 }
 
+GEN
+Flv_add(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
+  return z;
+}
+GEN
+Flv_sub(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) z[i] = Fl_sub(x[i], y[i], p);
+  return z;
+}
+
 /*Multiple a column vector by a line vector to make a matrix*/
 GEN
 FpC_FpV_mul(GEN x, GEN y, GEN p)
@@ -2878,6 +2934,16 @@ FpV_dotsquare(GEN x, GEN p)
   av = avma; c = sqri(gel(x,1));
   for (i=2; i<lx; i++) c = addii(c, sqri(gel(x,i)));
   return gerepileuptoint(av, modii(c,p));
+}
+ulong
+Flv_dotproduct(GEN x, GEN y, ulong p)
+{
+  long i, lx = lg(x);
+  ulong c;
+  if (lx == 1) return 0;
+  c = Fl_mul(x[1], y[1], p);
+  for (i=2; i<lx; i++) c = Fl_add(c, Fl_mul(x[i], y[i], p), p);
+  return c;
 }
 
 GEN
