@@ -171,7 +171,7 @@ rectdraw0(long *w, long *x, long *y, long lw)
   struct plot_eng plotX;
   struct data_x dx;
   double xs = 1, ys = 1;
-  int screen;
+  int screen, keystate;
   Display *display;
   GC gc;
   Window win;
@@ -255,14 +255,16 @@ EXIT:
 	XCloseDisplay(display); exit(0);
 
       case KeyRelease:
+	/* Mod4 == Super on "std" Linux */
+	keystate = event.xkey.state & (ShiftMask|ControlMask|Mod1Mask|Mod4Mask);
 	switch (XKeycodeToKeysym(display, event.xkey.keycode, 0))
 	{
 	case XK_q:
-	  if (!event.xkey.state || event.xkey.state == ControlMask)
+	  if (!keystate || keystate == ControlMask)
 	    goto EXIT;
 	  break;
 	case XK_c:
-	  if (event.xkey.state == ControlMask)
+	  if (keystate == ControlMask)
 	    goto EXIT;
 	  break;
 	}
