@@ -1234,7 +1234,7 @@ GEN
 gsubst_expr(GEN pol, GEN from, GEN to)
 {
   pari_sp av = avma;
-  long v = fetch_var();		/* XXX Need fetch_var_low_priority() */
+  long v = fetch_var(); /* FIXME: Need fetch_var_low_priority() */
   GEN tmp;
 
   from = simplify_i(from);

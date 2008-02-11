@@ -224,7 +224,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
 #ifndef SLOW2_IN_ROOTS
   /* SLOW2_IN_ROOTS below 3: some slowdown starts to be noticable
    * when things fit into the cache on Sparc.
-   * XXX The choice of 2.6 gives a slowdown of 1-2% on UltraSparcII,
+   * The choice of 2.6 gives a slowdown of 1-2% on UltraSparcII,
    * but makes calculations for "maximum" of 436273009 (not applicable anymore)
    * fit into 256K cache (still common for some architectures).
    *

@@ -44,13 +44,9 @@
 /* following must be in range of the cand_multipliers table below */
 #define MPQS_MULTIPLIER_SEARCH_DEPTH 5 /* how many primes to inspect per k */
 
-/* XXX this comment is now totally off base...
- * `large primes' must be smaller than
- *   max(MPQS_LP_BOUND, largest_FB_p) * MPQS_LP_FACTOR
- * - increased this with the idea of capping it at about 2^30
- * (XX but see comment in mpqs() where we actually use this: we take the
- * min, not the max)
- */
+/* `large primes' must be smaller than
+ *   min(MPQS_LP_BOUND, largest_FB_p) * MPQS_LP_FACTOR
+ * - increased this with the idea of capping it at about 2^30 */
 #define MPQS_LP_BOUND              12500000 /* works for 32 and 64bit */
 
 /* see mpqs_locate_A_range() for an explanation of the following.  I had
@@ -125,9 +121,10 @@ typedef union mpqs_FB_entry {
   char __pad[MPQS_FB_ENTRY_PAD];
   struct {
     mpqs_int32_t __p;           /* the prime p */
-    /* XX following two are not yet used: */
+    /* Following two are not yet used: */
     float __flogp;              /* its logarithm as a 4-byte float */
     mpqs_invp_t __invp;         /* 1/p mod 2^64 or 2^BITS_IN_LONG */
+
     mpqs_int32_t __start1;      /* representatives of the two APs mod p */
     mpqs_int32_t __start2;
     mpqs_uint32_t __sqrt_kN;    /* sqrt(kN) mod p */
@@ -147,7 +144,7 @@ typedef union mpqs_FB_entry {
 #define fbe_flags       __entry.__flags
 
 /* --- flag bits for fbe_flags: */
-/* XXX TODO! */
+/* TODO */
 
 #define MPQS_FBE_CLEAR       0x0 /* no flags */
 
@@ -245,13 +242,13 @@ typedef struct mqps_per_A_prime {
  * sizing restriction: at most 17 prime factors for A;  thus i will range
  * from 0 to at most 15.)  This wastes a little memory for smaller N but
  * makes it easier for compilers to generate efficient code. */
-/* XX At present, memory locality vis-a-vis accesses to this array is good
- * XX in the slow (new A) branch of mpqs_self_init(), but poor in the fast
- * XX (same A, new B) branch, which now loops over the outer array index,
- * XX reading just one field of each inner array each time through the FB
- * XX loop.  This doesn't really harm, but will improve one day when we do
- * XX segmented sieve arrays with the associated segmented FB-range accesses.
- */
+
+/* NOTE: At present, memory locality vis-a-vis accesses to this array is good
+ * in the slow (new A) branch of mpqs_self_init(), but poor in the fast
+ * (same A, new B) branch, which now loops over the outer array index,
+ * reading just one field of each inner array each time through the FB
+ * loop.  This doesn't really harm, but will improve one day when we do
+ * segmented sieve arrays with the associated segmented FB-range accesses. */
 #define MPQS_MAX_OMEGA_A 17
 typedef struct mpqs_inv_A_H {
   mpqs_uint32_t _i[MPQS_MAX_OMEGA_A - 1];
@@ -311,7 +308,7 @@ typedef struct mpqs_handle {
   mpqs_uint32_t bin_index;      /* bit pattern for selecting primes for A */
   mpqs_uint32_t index_i;        /* running count of A's */
   mpqs_uint32_t index_j;        /* B's ordinal number in A's cohort */
-  /* XXX one more to follow here... */
+  /* TODO: one more to follow here... */
 
   /* further sizing parameters: */
   mpqs_int32_t target_no_rels;  /* target number of full relations */
@@ -322,9 +319,9 @@ typedef struct mpqs_handle {
   mpqs_int32_t first_sort_point; /* when to sort and combine */
   mpqs_int32_t sort_pt_interval; /* (in units of 1/1000) */
 
-  /* XXX subscripts determining where to pick primes for A... */
+  /* subscripts determining where to pick primes for A... */
 
-  /* XX lp_bound might have to be mpqs_int64_t ? or mpqs_invp_t ? */
+  /* FIXME: lp_bound might have to be mpqs_int64_t ? or mpqs_invp_t ? */
   long lp_bound;                /* cutoff for Large Primes */
   long digit_size_N;
   long digit_size_kN;
@@ -333,9 +330,9 @@ typedef struct mpqs_handle {
   double dkN;                   /* - double prec. approximation of kN */
   double l2sqrtkN;              /* ~log2(sqrt(kN)) */
   double l2M;                   /* ~log2(M) (cf. below) */
-  /* XX need an index2_FB here to remember where to start picking primes */
+  /* TODO: need an index2_FB here to remember where to start picking primes */
 
-  /* XX put statistics here or keep them as local variables in mpqs() ? */
+  /* Put statistics here ? Currently keep them as local variables in mpqs() */
 
   /* bookkeeping pointers to containers of aligned memory chunks: */
   void *FB_chunk;               /* (unaligned) chunk containing the FB */

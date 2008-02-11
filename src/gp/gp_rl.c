@@ -800,8 +800,9 @@ init_readline(void)
   KSbind("[11~", rl_short_help,  emacs_meta_keymap); /* f1, xterm */
   KSbind("OP",   rl_short_help,  vi_movement_keymap); /* f1, vt100 */
   KSbind("[11~", rl_short_help,  vi_movement_keymap); /* f1, xterm */
-  /* XTerm may signal start/end of paste by eming F200/F201 */
-  /* XXXX For vi mode something more intelligent is needed - to switch to the
+  /* XTerm may signal start/end of paste by emitting F200/F201
+   * TODO: check to what extent this patch has been applied */
+  /* FIXME: For vi mode something more intelligent is needed - to switch to the
      insert mode - and back when restoring. */
   KSbind("[200~", pari_rl_matched_insert_suspend,  emacs_meta_keymap);  /* pre-paste xterm */
   KSbind("[200~", pari_rl_matched_insert_suspend,  vi_movement_keymap); /* pre-paste xterm */

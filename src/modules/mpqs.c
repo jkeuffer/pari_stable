@@ -314,7 +314,7 @@ mpqs_poly_ctor(mpqs_handle_t *h)
     h->per_A_pr[i]._H = cgeti(h->omega_A + 2);
   /* the handle starts out all zero, so in particular bin_index and index_i
    * are initially 0.
-   * XX index_j currently initialized in mqps() but this is going to
+   * TODO: index_j currently initialized in mqps() but this is going to
    * change. */
 }
 
@@ -342,7 +342,7 @@ mpqs_handle_dtor(mpqs_handle_t *h)
   myfree(h);
 }
 
-/* XX todo - relationsdb handle */
+/* TODO: relationsdb handle */
 
 /*********************************************************************/
 /**                                                                 **/
@@ -467,8 +467,9 @@ mpqs_count_primes(void)
  * our own because we don't want to pull out PARI's array under our caller
  * if someone was in the middle of using it while calling us. (But note
  * that this makes ourselves non-reentrant.) */
-/* XX convert (everything!) to new FB entry format */
-/* XX also fill in a number of other FB entry fields */
+/* TODO: convert (everything!) to new FB entry format */
+/* TODO: also fill in a number of other FB entry fields */
+
 /* returns the FB array pointer for convenience */
 static mpqs_FB_entry_t *
 mpqs_create_FB(mpqs_handle_t *h, ulong *f)
@@ -612,15 +613,15 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
  *               );
  * and we used to use this with a constant threshold of 128. */
 
-/* XX We also used to divide log_multiplier by an extra factor 2, and in
- * XX compensation we were multiplying by 2 when the fbe_logp fields were
- * XX being filled in, making all those bytes even.  Tradeoff: the extra
- * XX bit of precision is helpful, but interferes with a possible sieving
- * XX optimization  (artifically shift right the logp's of primes in A,
- * XX and just run over both arithmetical progressions  (which coincide in
- * XX this case)  instead of skipping the second one, to avoid the conditional
- * XX branch in the mpqs_sieve() loops).  We could still do this, but might
- * XX lose a little bit accuracy for those primes.  Probably no big deal... */
+/* NOTE: We used to divide log_multiplier by an extra factor 2, and in
+ * compensation we were multiplying by 2 when the fbe_logp fields were being
+ * filled in, making all those bytes even.  Tradeoff: the extra bit of
+ * precision is helpful, but interferes with a possible sieving optimization
+ * (artifically shift right the logp's of primes in A, and just run over both
+ * arithmetical progressions  (which coincide in this case)  instead of
+ * skipping the second one, to avoid the conditional branch in the
+ * mpqs_sieve() loops).  We could still do this, but might lose a little bit
+ * accuracy for those primes.  Probably no big deal. */
 static void
 mpqs_set_sieve_threshold(mpqs_handle_t *h)
 {
@@ -800,7 +801,7 @@ mpqs_print_histo(mpqs_handle_t *h)
  *   MPQS_HISTO_LPREL_BASEFLOW times the number of useless candidates.  This
  *   one will be capable of lowering the current threshold  (but never below
  *   128).
- * XXX For Double Large Prime mode, this will need to be seriously reworked.
+ * FIXME: For Double Large Prime mode, this will need to be seriously reworked.
  */
 
 /* This function returns 1 when it actually did something and decided on a
@@ -879,8 +880,6 @@ mpqs_eval_histograms(mpqs_handle_t *h)
 
   if (MPQS_DEBUGLEVEL >= 5)
   {
-    /* XX in the long run, histo printing to be limited to *very* high
-     * XX debug levels, not 5 */
     mpqs_print_histo(h);
     if (th_full >= 0)
       fprintferr("MPQS: threshold estimate for full rels: %d\n",
@@ -1559,7 +1558,6 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
     {
       while ((h->bin_index & (room_mask | 0x3)) == 0)
 	mpqs_increment(&h->bin_index);
-      /* XX a slightly simpler increment algorithm would suffice here */
     }
     /* ok so did we fall off the edge on the left? */
     if ((h->bin_index & room_mask) != 0)
@@ -1638,7 +1636,6 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
  * updated.   */
 /* A and B are kept on the PARI stack in preallocated GENs.  So is C when
  * we're compiled for debugging. */
-/* XX total_no_of_primes_for_A to go away */
 static void
 mpqs_self_init(mpqs_handle_t *h)
 {
@@ -1661,24 +1658,29 @@ mpqs_self_init(mpqs_handle_t *h)
 #ifdef MPQS_DEBUG_AVMA
   fprintferr("MPQS DEBUG: enter self init, avma = 0x%lX\n", (ulong)avma);
 #endif
+
+  /* when all of the B's have already been used, choose new A ;
+     this is indicated by setting index_j to 0 */
+  if (++h->index_j == (mpqs_uint32_t)h->no_B)
+  {
+    h->index_j = 0;
+    h->index_i++; /* count finished A's */
+  }
+
   if (h->index_j == 0)
   /* "mpqs_self_init_A()" */
   { /* compute first polynomial with new A */
     if (!mpqs_si_choose_primes(h))
     {
-      /* this means we ran out of room towards small primes, and index2_FB
-       * was raised.  Check that we're still ok in that direction before
-       * re-trying the operation, which then is guaranteed to succeed.
-       * The invariant we maintain towards the top end is that
-       * h->size_of_FB - h->index2_FB >= 3, but note that our size_of_FB
-       * is one larger. */
-      if (size_of_FB - h->index2_FB < 4)
-      {
-	/* "throw the exception up to caller." We set bin_index to an
-	 * impossible value and return.  Errm... it has already been set
-	 * by mpqs_si_choose_primes() to the impossible value 0. */
-	return;
-      }
+      /* We ran out of room towards small primes, and index2_FB was raised.
+       * Check that we're still ok in that direction before re-trying the
+       * operation, which then is guaranteed to succeed. The invariant we
+       * maintain towards the top end is that h->size_of_FB - h->index2_FB >= 3,
+       * but note that our size_of_FB is one larger. */
+
+      /* "throw exception up to caller." ( bin_index set to impossible value
+       * 0 by mpqs_si_choose_primes() */
+      if (size_of_FB - h->index2_FB < 4) return;
       (void) mpqs_si_choose_primes(h);
     }
     /* assert: bin_index and per_A_pr are now populated with consistent
@@ -1695,8 +1697,8 @@ mpqs_self_init(mpqs_handle_t *h)
 
     /* Compute H[i], 0 <= i < omega_A.  Also compute the initial
      * B = sum(v_i*H[i]), by taking all v_i = +1 */
-    /* XX following needs to be changed later for segmented FB and sieve
-     * XX interval, where we'll want to precompute several B's. */
+    /* TODO: following needs to be changed later for segmented FB and sieve
+     * interval, where we'll want to precompute several B's. */
     p2 = NULL;
     for (i = 0; i < h->omega_A; i++)
     {
@@ -1853,26 +1855,20 @@ mpqs_self_init(mpqs_handle_t *h)
 /*********************************************************************/
 
 /* Main sieving routine:
- *
- * XXX purge the following obsolescent comment...
- * FB: pointer to an array which holds the factor base
- * log_FB: pointer to an array which holds the approximations for
- *        the logarithms of the factor base
- * start_1, start_2: arrays for starting points for different FB elements
- * sieve_array: points to a sieve array
- * sieve_array_end: points to the end of the sieve array
- * M: size of the sieving interval
+ * p4 = 4*p (used for loop unrolling)
+ * log_p: approximation for log(p)
+ * begin: points to a sieve array
+ * end: points to the end of the sieve array
  * starting_sieving_index: marks the first FB element used for sieving */
 INLINE void
 mpqs_sieve_p(unsigned char *begin, unsigned char *end,
 	     long p4, long p, unsigned char log_p)
 {
   register unsigned char *e = end - p4;
-  /* XX I unrolled this loop some 5 or 6 years ago, but these days I tend
-   * XX to believe it's better to let the compiler worry about *this* kind
-   * XX of optimization, based on its built-in knowledge of whatever useful
-   * XX tricks the machine instruction set architecture may be offering
-   * XX ("speculative loads" being the buzzword). --GN */
+  /* Loop unrolled some time ago. It might be better to let the compiler worry
+   * about *this* kind of optimization, based on its knowledge of whatever
+   * useful tricks the machine instruction set architecture is offering
+   * ("speculative loads" being the buzzword). --GN */
   while (e - begin >= 0) /* signed comparison */
   {
     (*begin) += log_p, begin += p;
@@ -1887,25 +1883,23 @@ mpqs_sieve_p(unsigned char *begin, unsigned char *end,
 static void
 mpqs_sieve(mpqs_handle_t *h)
 {
-  long p, start1, start2, l = h->index1_FB;
-  unsigned char log_p;
+  long p, l = h->index1_FB;
   mpqs_FB_entry_t *ptr_FB;
   unsigned char *sieve_array = h->sieve_array;
   unsigned char *sieve_array_end = h->sieve_array_end;
 
   for (ptr_FB = &(h->FB[l]); (p = ptr_FB->fbe_p) != 0; ptr_FB++, l++)
   {
-    /* XX get rid of redundant local variables */
-    log_p = ptr_FB->fbe_logval;
-    start1 = ptr_FB->fbe_start1;
-    start2 = ptr_FB->fbe_start2;
+    unsigned char log_p = ptr_FB->fbe_logval;
+    long start1 = ptr_FB->fbe_start1;
+    long start2 = ptr_FB->fbe_start2;
 
     /* sieve with FB[l] from start_1[l] */
     /* if start1 != start2 sieve with FB[l] from start_2[l] */
-    /* XX maybe it is more efficient not to have a conditional branch in
-     * XX the present loop body, and instead to right-shift log_p one bit
-     * XX based on a flag bit telling us that we're on a one-root prime?
-     * XX And instead roll the two invocations of mpqs_sieve_p into one. */
+    /* Maybe it is more efficient not to have a conditional branch in
+     * the present loop body, and instead to right-shift log_p one bit
+     * based on a flag bit telling us that we're on a one-root prime?
+     * And instead roll the two invocations of mpqs_sieve_p into one. */
     mpqs_sieve_p(sieve_array + start1, sieve_array_end, p << 2, p, log_p);
     if (start1 != start2)
       mpqs_sieve_p(sieve_array + start2, sieve_array_end, p << 2, p, log_p);
@@ -1922,8 +1916,8 @@ static long
 mpqs_eval_sieve(mpqs_handle_t *h)
 {
   long x = 0, count = 0, M_2 = h->M << 1;
-  /* XX Todo: replace the following by an auto-adjusting threshold driven
-   * XX by histogram yield measurements */
+  /* TODO: replace the following by an auto-adjusting threshold driven
+   * by histogram yield measurements */
   unsigned char th = h->sieve_threshold;
   unsigned char *sieve_array = h->sieve_array;
   long *candidates = h->candidates;
@@ -1949,15 +1943,7 @@ mpqs_eval_sieve(mpqs_handle_t *h)
 /**                                                                 **/
 /*********************************************************************/
 
-
-
-/* Main relation routine:
- *
- * XXX fix obsolescent comment...
- * FB: pointer to an array which holds the factor base
- * start_1, start_2: arrays for starting points for different FB elements
- * M: size of the sieving interval */
-
+/* Main relation routine */
 static void
 mpqs_add_factor(char **last, ulong ei, ulong pi) {
   sprintf(*last, " %lu %lu", ei, pi);
@@ -2054,7 +2040,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
      * but it will be caught if such an LP relation is ever combined with
      * another. */
 
-    /* XXX Qx cannot possibly vanish here. */
+    /* Qx cannot possibly vanish here */
     if (!signe(Qx)) { PRINT_IF_VERBOSE("<+>"); continue; }
     else if (signe(Qx) < 0) {
       setsigne(Qx, 1);
@@ -2157,12 +2143,12 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
       fprintferr("MPQS DEBUG: Qx=%Zs p=%ld\n", Qx, (long)p);
 #endif
       /* otherwise p might still divide the current adjusted Qx. Try it... */
-      /* XXX break out of loop when remaining Qx is 1.  Or rather, suppress
+      /* NOTE: break out of loop when remaining Qx is 1 ?  Or rather, suppress
        * the trial divisions, since we still need to write our string.
-       * Actually instead of testing for 1, test whether Qx is smaller than
-       * p;  cf Karim's mail from 20050124.  If it is, without being 1,
-       * then it has a common factor with k.  But those factors are soon
-       * going to have disappeared before we get here.  However, inserting
+       * Actually instead of testing for 1, test whether Qx is smaller than p;
+       * cf Karim's mail from 20050124.  If it is, without being 1, then it has
+       * a common factor with k.  But those factors are soon going to have
+       * disappeared before we get here.  However, inserting
        * an explicit if (!is_pm1(Qx)) here did not help any. */
       Qx_div_p = divis_rem(Qx, p, &remd_p);
       while (remd_p == 0) {
@@ -3014,18 +3000,14 @@ static GEN
 mpqs_i(mpqs_handle_t *handle)
 {
   GEN N = handle->N, fact; /* will in the end hold our factor(s) */
-
-  /* XXX fix type! */
   mpqs_int32_t size_of_FB; /* size of the factor base */
   mpqs_FB_entry_t *FB; /* factor base */
-
   mpqs_int32_t M;               /* sieve interval size [-M, M] */
-
 
   /* local loop / auxiliary vars */
   ulong p;
 
-  /* XX already exists in the handle, keep for convenience */
+  /* already exists in the handle, keep for convenience */
   long lp_bound;                /* size limit for large primes */
   long lp_scale;                /* ...relative to largest FB prime */
 
@@ -3051,7 +3033,6 @@ mpqs_i(mpqs_handle_t *handle)
 /* END: global variables to disappear as soon as possible */
 
 /******************************/
-
 
   pari_sp av = avma;
 
@@ -3094,7 +3075,6 @@ mpqs_i(mpqs_handle_t *handle)
   FB = mpqs_create_FB(handle, &p);
   if (p)
   {
-    /* pari_free(FB); */
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: found factor = %ld whilst creating factor base\n", p);
     avma = av; return utoipos(p);
@@ -3102,9 +3082,6 @@ mpqs_i(mpqs_handle_t *handle)
   mpqs_sieve_array_ctor(handle);
   mpqs_poly_ctor(handle);
 
-  /* XXX commentary above said that we were taking the max here, but we have
-   * always been taking the min - huh?! Thus cutting off LPs at 10^7 even
-   * when the largest FB prime was bigger than 1.5E6. */
   lp_bound = handle->largest_FB_p;
   if (lp_bound > MPQS_LP_BOUND) lp_bound = MPQS_LP_BOUND;
   /* don't allow large primes to have room for two factors both bigger than
@@ -3187,19 +3164,7 @@ mpqs_i(mpqs_handle_t *handle)
 
   for(;;)
   { /* FNEW and LPNEW are open for writing */
-    /* XXX the incrementing and stepping logic here really belongs into
-     * XXX mpqs_self_init(), too */
     iterations++;
-    /* when all of the B's have already been used, choose new A ;
-       this is indicated by setting index_j to 0 */
-    if (handle->index_j == (mpqs_uint32_t)(handle->no_B - 1))
-    {
-      handle->index_j = 0;
-      handle->index_i++;        /* count finished A's */
-    }
-    else
-      handle->index_j++;
-
     /* self initialization: compute polynomial and its zeros */
     mpqs_self_init(handle);
     if (handle->bin_index == 0)
@@ -3265,12 +3230,6 @@ mpqs_i(mpqs_handle_t *handle)
 		   sort_interval/10.);
       flusherr();
     }
-
-#ifdef MPQS_USE_HISTOGRAMS
-    /* XXX following to go away when we're done debugging... */
-    if (DEBUGLEVEL >= 6)
-      mpqs_print_histo(handle);
-#endif
 
     /* sort LPNEW and merge it into LPREL, diverting combinables into COMB */
     pari_fclose(pLPNEW);
@@ -3385,9 +3344,6 @@ mpqs_i(mpqs_handle_t *handle)
 		   net_yield);
 	fprintferr("MPQS:            %4.3g full relations per 100 polynomials\n",
 		   (total_full_relations * 100.) / iterations);
-	/* XX also say something about avg cands per poly, huh?
-	 * XX And for that matter, about the number of polynomials used
-	 * XX so far. */
 	fprintferr("MPQS: %4.1f%% of the polynomials yielded no candidates\n",
 		   vain_iterations/10.);
 	fprintferr("MPQS: next sort point at %3.1f%%\n", sort_interval/10.);
