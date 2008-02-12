@@ -92,7 +92,7 @@ JD 12- add an optional argument to quit()
    14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
    15- 'ispower' bench
    16- library functions Flc_Fl_mul, Flc_Fl_div, Flv_add, Flv_dotproduct,
-       Flv_sub, zero_Flm, zero_Flv, zm_row, zv_cmp0
+       Flv_sub, zero_Flm, zero_zm, zero_Flv, zero_zv, row_Flm, row_zm, zv_cmp0
 
   Removed
     1- obsolete library functions extract and matextract

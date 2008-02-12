@@ -39,29 +39,25 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 shallowtrans(GEN x)
 {
-  long i,j,lx,dx, tx=typ(x);
+  long i, dx, lx, tx = typ(x);
   GEN y;
 
   if (! is_matvec_t(tx)) pari_err(typeer,"shallowtrans");
   switch(tx)
   {
     case t_VEC:
-      y=shallowcopy(x); settyp(y,t_COL); break;
+      y = shallowcopy(x); settyp(y,t_COL); break;
 
     case t_COL:
-      y=shallowcopy(x); settyp(y,t_VEC); break;
+      y = shallowcopy(x); settyp(y,t_VEC); break;
 
     case t_MAT:
-      lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx=lg(x[1]); y=cgetg(dx,tx);
-      for (i=1; i<dx; i++)
-      {
-	GEN c = cgetg(lx,t_COL); gel(y, i) = c;
-	for (j=1; j<lx; j++) gel(c, j) = gcoeff(x,i,j);
-      }
+      lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
+      dx = lg(x[1]); y = cgetg(dx,tx);
+      for (i = 1; i < dx; i++) gel(y,i) = row(x,i);
       break;
 
-    default: y=x; break;
+    default: y = x; break;
   }
   return y;
 }
@@ -69,48 +65,38 @@ shallowtrans(GEN x)
 GEN
 gtrans(GEN x)
 {
-  long i,j,lx,dx, tx=typ(x);
+  long i, dx, lx, tx = typ(x);
   GEN y;
 
   if (! is_matvec_t(tx)) pari_err(typeer,"gtrans");
   switch(tx)
   {
     case t_VEC:
-      y=gcopy(x); settyp(y,t_COL); break;
+      y = gcopy(x); settyp(y,t_COL); break;
 
     case t_COL:
-      y=gcopy(x); settyp(y,t_VEC); break;
+      y = gcopy(x); settyp(y,t_VEC); break;
 
     case t_MAT:
-      lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      dx=lg(x[1]); y=cgetg(dx,tx);
-      for (i=1; i<dx; i++)
-      {
-	GEN c = cgetg(lx,t_COL); gel(y, i) = c;
-	for (j=1; j<lx; j++) gel(c, j) = gcopy(gcoeff(x,i,j));
-      }
+      lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
+      dx = lg(x[1]); y = cgetg(dx,tx);
+      for (i = 1; i < dx; i++) gel(y,i) = rowcopy(x,i);
       break;
 
-    default: y=gcopy(x); break;
+    default: y = gcopy(x); break;
   }
   return y;
 }
 
-/* Flm_transpose == zm_transpose */
-
+/* == zm_transpose */
 GEN
 Flm_transpose(GEN x)
 {
-  long i,j;
+  long i, dx, lx = lg(x);
   GEN y;
-  long dx, lx=lg(x);
-  if (lx==1) return cgetg(1,t_MAT);
-  dx=lg(x[1]); y=cgetg(dx,t_MAT);
-  for (i=1; i<dx; i++)
-  {
-    GEN c = cgetg(lx,t_VECSMALL); gel(y, i) = c;
-    for (j=1; j<lx; j++) c[j] = coeff(x,i,j);
-  }
+  if (lx == 1) return cgetg(1,t_MAT);
+  dx = lg(x[1]); y = cgetg(dx,t_MAT);
+  for (i=1; i<dx; i++) gel(y,i) = row_Flm(x,i);
   return y;
 }
 
@@ -623,7 +609,7 @@ row(GEN A, long x0)
   return B;
 }
 GEN
-zm_row(GEN A, long x0)
+row_Flm(GEN A, long x0)
 {
   long i, lB = lg(A);
   GEN B  = cgetg(lB, t_VECSMALL);
@@ -1683,23 +1669,6 @@ matid_Flm(long n)
   long i;
   if (n < 0) pari_err(talker,"negative size in matid_Flm");
   for (i=1; i<=n; i++) { gel(y,i) = const_vecsmall(n, 0); ucoeff(y, i,i) = 1; }
-  return y;
-}
-
-GEN
-zero_Flv(long n)
-{
-  GEN y = cgetg(n+1,t_VECSMALL);
-  long i; for (i=1; i<=n; i++) y[i] = 0;
-  return y;
-}
-/* matrix(m, n) */
-GEN
-zero_Flm(long m, long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  GEN v = zero_Flv(m);
-  long i; for (i=1; i<=n; i++) gel(y,i) = v;
   return y;
 }
 

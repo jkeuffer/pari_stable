@@ -187,6 +187,9 @@ GEN    utoineg(ulong x);
 GEN    utoipos(ulong x);
 GEN    utor(ulong s, long prec);
 long   vali(GEN x);
+GEN    zero_Flm(long m, long n);
+GEN    zero_Flv(long n);
+GEN    zero_Flx(long sv);
 GEN    zerocol(long n);
 GEN    zeromat(long m, long n);
 GEN    zeromatcopy(long m, long n);
@@ -489,6 +492,30 @@ zeromat(long m, long n)
   long i; for (i=1; i<=n; i++) gel(y,i) = v;
   return y;
 }
+/* = zero_zx, sv is a evalvarn()*/
+INLINE GEN
+zero_Flx(long sv)
+{
+  GEN x = cgetg(2, t_VECSMALL);
+  x[1] = sv; return x;
+}
+INLINE GEN
+zero_Flv(long n)
+{
+  GEN y = cgetg(n+1,t_VECSMALL);
+  long i; for (i=1; i<=n; i++) y[i] = 0;
+  return y;
+}
+/* matrix(m, n) */
+INLINE GEN
+zero_Flm(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  GEN v = zero_Flv(m);
+  long i; for (i=1; i<=n; i++) gel(y,i) = v;
+  return y;
+}
+
 /* matrix(m, n) */
 INLINE GEN
 zeromatcopy(long m, long n)

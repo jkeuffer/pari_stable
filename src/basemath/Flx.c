@@ -145,14 +145,6 @@ FlxM_to_ZXM(GEN z)
 /**          Conversion to Flx                                        **/
 /**                                                                   **/
 /***********************************************************************/
-/* = zero_zx, sv is a evalvarn()*/
-GEN
-zero_Flx(long sv)
-{
-  GEN x = cgetg(2, t_VECSMALL);
-  x[1] = sv; return x;
-}
-
 /* pol1_Flx=pol1_zx*/
 GEN
 pol1_Flx(long sv) { return mkvecsmall2(sv, 1); }

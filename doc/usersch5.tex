@@ -2854,7 +2854,7 @@ all columns.
 \fun{GEN}{zero_Flv}{long n} creates a \kbd{Flv} with \kbd{n} components set to
 $0$.
 
-\fun{GEN}{zm_row}{GEN A, long x0} return $A[i,]$, the $i$-th row of the
+\fun{GEN}{row_Flm}{GEN A, long x0} return $A[i,]$, the $i$-th row of the
 \kbd{Flm} (or \kbd{zm}) $A$.
 
 \fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
@@ -3245,7 +3245,13 @@ identity matrix.
 
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
-\fun{GEN}{zm_transpose}{GEN x}
+\fun{GEN}{zm_transpose}{GEN x} as \kbd{Flm\_transpose}.
+
+\fun{GEN}{zero_zm}{long m, long n} as \kbd{zero\_Flm}.
+
+\fun{GEN}{zero_zv}{long n} as \kbd{zero\_Flv}.
+
+\fun{GEN}{row_zm}{GEN A, long x0} as \kbd{row\_Flm}.
 
 \fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as
 \kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial

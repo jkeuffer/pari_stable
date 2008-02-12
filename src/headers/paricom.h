@@ -370,6 +370,8 @@ enum manage_var_t {
 #define zx_to_zv(x,y)  (Flx_to_Flv((x),(y)))
 #define zv_to_zx(x,y)  (Flv_to_Flx((x),(y)))
 #define zm_to_zxV(x,y) (Flm_to_FlxV((x),(y)))
+#define zero_zm(x)     (zero_Flm((x)))
+#define zero_zv(x)     (zero_Flv((x)))
 #define zero_zx(x)     (zero_Flx((x)))
 #define polx_zx(x)     (polx_Flx((x)))
 #define zx_shift(x,y)  (Flx_shift((x),(y)))

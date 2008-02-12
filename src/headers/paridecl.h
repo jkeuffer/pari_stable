@@ -140,7 +140,6 @@ GEN     gener_Flxq(GEN T, ulong p, GEN *o);
 GEN     pol1_Flx(long sv);
 GEN     polx_Flx(long sv);
 GEN     random_Flx(long d1, long v, ulong p);
-GEN     zero_Flx(long sv);
 
 /* FpX.c */
 
@@ -291,9 +290,7 @@ GEN     vconcat(GEN A, GEN B);
 GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
-GEN     zero_Flm(long m, long n);
-GEN     zero_Flv(long n);
-GEN     zm_row(GEN A, long x0);
+GEN     row_Flm(GEN A, long x0);
 GEN     zv_neg(GEN x);
 
 /* alglin2.c */
