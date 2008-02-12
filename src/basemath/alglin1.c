@@ -34,6 +34,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                         TRANSPOSE                               */
 /*                                                                 */
 /*******************************************************************/
+/* A[x0,]~ */
+static GEN
+row_transpose(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_COL);
+  for (i=1; i<lB; i++) gel(B, i) = gcoeff(A, x0, i);
+  return B;
+}
+static GEN
+row_transposecopy(GEN A, long x0)
+{
+  long i, lB = lg(A);
+  GEN B  = cgetg(lB, t_COL);
+  for (i=1; i<lB; i++) gel(B, i) = gcopy(gcoeff(A, x0, i));
+  return B;
+}
+
 
 /* No copy*/
 GEN
@@ -54,7 +72,7 @@ shallowtrans(GEN x)
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
       dx = lg(x[1]); y = cgetg(dx,tx);
-      for (i = 1; i < dx; i++) gel(y,i) = row(x,i);
+      for (i = 1; i < dx; i++) gel(y,i) = row_transpose(x,i);
       break;
 
     default: y = x; break;
@@ -80,7 +98,7 @@ gtrans(GEN x)
     case t_MAT:
       lx = lg(x); if (lx==1) return cgetg(1,t_MAT);
       dx = lg(x[1]); y = cgetg(dx,tx);
-      for (i = 1; i < dx; i++) gel(y,i) = rowcopy(x,i);
+      for (i = 1; i < dx; i++) gel(y,i) = row_transposecopy(x,i);
       break;
 
     default: y = gcopy(x); break;
