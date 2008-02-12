@@ -1670,7 +1670,7 @@ ZM_inv(GEN M, GEN dM)
     dMp = umodiu(dM,p);
     if (!dMp) continue;
     Hp = Flm_inv_sp(ZM_to_Flm(M,p), p);
-    if (dMp != 1) Hp = Flm_Fl_mul_inplace(Hp, dMp, p);
+    if (dMp != 1) Flm_Fl_mul_inplace(Hp, dMp, p);
 
     if (!H)
     {

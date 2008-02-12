@@ -190,18 +190,21 @@ GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 /* FpV.c */
 
 GEN     Flc_Fl_div(GEN x, ulong y, ulong p);
+void    Flc_Fl_div_inplace(GEN x, ulong y, ulong p);
 GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
-GEN     Flc_Fl_mul_inplace(GEN x, ulong y, ulong p);
+void    Flc_Fl_mul_inplace(GEN x, ulong y, ulong p);
 GEN     Flm_Fl_mul(GEN y, ulong x, ulong p);
-GEN     Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
+void    Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
 GEN     Flm_Flc_mul(GEN x, GEN y, ulong p);
 GEN     Flm_copy(GEN x);
 GEN     Flm_mul(GEN x, GEN y, ulong p);
 GEN     Flm_transpose(GEN x);
 GEN     Flv_add(GEN x, GEN y, ulong p);
+void    Flv_add_inplace(GEN x, GEN y, ulong p);
 GEN     Flv_copy(GEN x);
 ulong   Flv_dotproduct(GEN x, GEN y, ulong p);
 GEN     Flv_sub(GEN x, GEN y, ulong p);
+void    Flv_sub_inplace(GEN x, GEN y, ulong p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_red(GEN z, GEN p);

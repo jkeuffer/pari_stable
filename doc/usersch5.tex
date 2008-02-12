@@ -2843,21 +2843,30 @@ occur).
 \fun{GEN}{Flm_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flm}
 \kbd{x} by \kbd{y}.
 
-\fun{GEN}{Flm_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+\fun{void}{Flm_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
 the \kbd{Flm} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
 \fun{GEN}{Flc_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flv}
 \kbd{x} by \kbd{y}.
 
-\fun{GEN}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+\fun{void}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
 the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
 \fun{GEN}{Flc_Fl_div}{GEN x, ulong y, ulong p} divides the \kbd{Flv}
 \kbd{x} by \kbd{y}.
 
+\fun{void}{Flc_Fl_div_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flv} \kbd{x} by $\kbd{x}/\kbd{y}$.
+
 \fun{GEN}{Flv_add}{GEN x, GEN y, ulong p} adds two \kbd{Flv}.
 
+\fun{void}{Flv_add_inplace}{GEN x, GEN y, ulong p} replaces
+$x$ by $x+y$.
+
 \fun{GEN}{Flv_sub}{GEN x, GEN y, ulong p} subtracts \kbd{y} to \kbd{x}.
+
+\fun{void}{Flv_sub_inplace}{GEN x, GEN y, ulong p} replaces
+$x$ by $x-y$.
 
 \fun{ulong}{Flv_dotproduct}{GEN x, GEN y, ulong p} returns the scalar product
 of \kbd{x} and \kbd{y}

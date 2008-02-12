@@ -54,18 +54,22 @@ Flc_Fl_div(GEN x, ulong y, ulong p)
 {
   return Flc_Fl_mul(x, Fl_inv(y, p), p);
 }
+void
+Flc_Fl_div_inplace(GEN x, ulong y, ulong p)
+{
+  return Flc_Fl_mul_inplace(x, Fl_inv(y, p), p);
+}
 
 /* x *= y */
-GEN
+void
 Flc_Fl_mul_inplace(GEN x, ulong y, ulong p)
 {
   long i, l = lg(x);
   for (i=1;i<l;i++) x[i] = Fl_mul(x[i], y, p);
-  return x;
 }
 
 /* set y *= x */
-GEN
+void
 Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
 {
   long i, j, m = lg(y[1]), l = lg(y);
@@ -75,7 +79,6 @@ Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
   else
     for(j=1; j<l; j++)
       for(i=1; i<m; i++) ucoeff(y,i,j) = (ucoeff(y,i,j) * x) % p;
-  return y;
 }
 /* set y = x * y */
 GEN
@@ -251,6 +254,18 @@ Flv_sub(GEN x, GEN y, ulong p)
   GEN z = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++) z[i] = Fl_sub(x[i], y[i], p);
   return z;
+}
+void
+Flv_add_inplace(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
+}
+void
+Flv_sub_inplace(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  for (i = 1; i < l; i++) x[i] = Fl_sub(x[i], y[i], p);
 }
 
 /*Multiple a column vector by a line vector to make a matrix*/

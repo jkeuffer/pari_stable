@@ -95,6 +95,7 @@ JD 12- add an optional argument to quit()
        Flv_sub, zero_Flm, zero_zm, zero_Flv, zero_zv, row_Flm, row_zm, zv_cmp0
        RgM_isdiagonal, zm_copy, zv_copy, Flm_mul, Flm_copy, Flv_copy,
        Flm_Fl_mul, Flm_Fl_mul_inplace, Flv_Fl_mul_inplace, ZV_lincomb
+       Flc_Fl_div_inplace, Flc_Fl_mul_inplace, Flv_add_inplace, Flv_sub_inplace
    17- RgV.c, FpV.c
 
   Removed
