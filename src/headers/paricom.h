@@ -379,6 +379,7 @@ enum manage_var_t {
 #define zm_transpose(x) (Flm_transpose((x)))
 #define zm_copy(x)     (Flm_copy((x)))
 #define zv_copy(x)     (Flv_copy((x)))
+#define row_zm(x,i)    (row_Flm((x),(i)))
 
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))
