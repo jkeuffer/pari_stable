@@ -88,18 +88,6 @@ gtrans(GEN x)
   return y;
 }
 
-/* == zm_transpose */
-GEN
-Flm_transpose(GEN x)
-{
-  long i, dx, lx = lg(x);
-  GEN y;
-  if (lx == 1) return cgetg(1,t_MAT);
-  dx = lg(x[1]); y = cgetg(dx,t_MAT);
-  for (i=1; i<dx; i++) gel(y,i) = row_Flm(x,i);
-  return y;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                    CONCATENATION & EXTRACTION                   */
@@ -883,64 +871,6 @@ apply0(GEN f, GEN x)
 /*                     SCALAR-MATRIX OPERATIONS                    */
 /*                                                                 */
 /*******************************************************************/
-
-/* fill the square nxn matrix equal to t*Id */
-static void
-fill_scalmat(GEN y, GEN t, GEN _0, long n)
-{
-  long i;
-  if (n < 0) pari_err(talker,"negative size in fill_scalmat");
-  for (i = 1; i <= n; i++)
-  {
-    gel(y,i) = const_col(n, _0);
-    gcoeff(y,i,i) = t;
-  }
-}
-
-GEN
-scalarmat(GEN x, long n) {
-  GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, gcopy(x), gen_0, n); return y;
-}
-GEN
-scalarmat_shallow(GEN x, long n) {
-  GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, x, gen_0, n); return y;
-}
-GEN
-scalarmat_s(long x, long n) {
-  GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, stoi(x), gen_0, n); return y;
-}
-GEN
-matid_intern(long n, GEN _1, GEN _0) {
-  GEN y = cgetg(n+1, t_MAT);
-  fill_scalmat(y, _1, _0, n); return y;
-}
-GEN
-matid(long n) { return matid_intern(n, gen_1, gen_0); }
-
-static void
-fill_scalcol(GEN y, GEN t, long n)
-{
-  long i;
-  if (n < 0) pari_err(talker,"negative size in fill_scalcol");
-  if (n) {
-    gel(y,1) = t;
-    for (i=2; i<=n; i++) gel(y,i) = gen_0;
-  }
-}
-GEN
-scalarcol(GEN x, long n) {
-  GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, gcopy(x), n); return y;
-}
-GEN
-scalarcol_shallow(GEN x, long n) {
-  GEN y = cgetg(n+1,t_COL);
-  fill_scalcol(y, x, n); return y;
-}
-
 GEN
 gtomat(GEN x)
 {
@@ -997,81 +927,6 @@ gtomat(GEN x)
   return y;
 }
 
-long
-RgV_isscalar(GEN x)
-{
-  long lx = lg(x),i;
-  for (i=2; i<lx; i++)
-    if (!gcmp0(gel(x, i))) return 0;
-  return 1;
-}
-long
-ZV_isscalar(GEN x)
-{
-  long lx = lg(x),i;
-  for (i=2; i<lx; i++)
-    if (signe(gel(x, i))) return 0;
-  return 1;
-}
-
-long
-RgM_isscalar(GEN x, GEN s)
-{
-  long nco,i,j;
-
-  if (typ(x)!=t_MAT) pari_err(typeer,"isdiagonal");
-  nco=lg(x)-1; if (!nco) return 1;
-  if (nco != lg(x[1])-1) return 0;
-  if (!s) s = gcoeff(x,1,1);
-
-  for (j=1; j<=nco; j++)
-  {
-    GEN col = gel(x,j);
-    for (i=1; i<=nco; i++)
-      if (i == j)
-      {
-	if (!gequal(gel(col,i),s)) return 0;
-      }
-      else if (!gcmp0(gel(col,i))) return 0;
-  }
-  return 1;
-}
-
-long
-RgM_isidentity(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (j=1; j<lx; j++)
-  {
-    GEN c = gel(x,j);
-    for (i=1; i<j; )
-      if (!gcmp0(gel(c,i++))) return 0;
-    /* i = j */
-      if (!gcmp1(gel(c,i++))) return 0;
-    for (   ; i<lx; )
-      if (!gcmp0(gel(c,i++))) return 0;
-  }
-  return 1;
-}
-
-long
-isdiagonal(GEN x)
-{
-  long nco,i,j;
-
-  if (typ(x)!=t_MAT) pari_err(typeer,"isdiagonal");
-  nco=lg(x)-1; if (!nco) return 1;
-  if (nco != lg(x[1])-1) return 0;
-
-  for (j=1; j<=nco; j++)
-  {
-    GEN col = gel(x,j);
-    for (i=1; i<=nco; i++)
-      if (i!=j && !gcmp0(gel(col,i))) return 0;
-  }
-  return 1;
-}
-
 /* create the diagonal matrix, whose diagonal is given by x */
 GEN
 diagonal(GEN x)
@@ -1082,7 +937,7 @@ diagonal(GEN x)
   if (! is_matvec_t(tx)) return scalarmat(x,1);
   if (tx==t_MAT)
   {
-    if (isdiagonal(x)) return gcopy(x);
+    if (RgM_isdiagonal(x)) return gcopy(x);
     pari_err(talker,"incorrect object in diagonal");
   }
   lx=lg(x); y=cgetg(lx,t_MAT);
@@ -1163,49 +1018,6 @@ mattodiagonal(GEN m)
   if (typ(m)!=t_MAT) pari_err(typeer,"mattodiagonal");
   for (i=1; i<lx; i++) gel(y,i) = gcopy(gcoeff(m,i,i));
   return y;
-}
-
-/*******************************************************************/
-/*                                                                 */
-/*                    ADDITION SCALAR + MATRIX                     */
-/*                                                                 */
-/*******************************************************************/
-
-/* x square matrix, y scalar; create the square matrix x + y*Id */
-GEN
-RgM_Rg_add(GEN x, GEN y)
-{
-  long l = lg(x), i, j;
-  GEN z = cgetg(l,t_MAT);
-
-  if (l==1) return z;
-  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
-  z = cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-  {
-    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
-    gel(z,i) = zi;
-    for (j=1; j<l; j++)
-      gel(zi,j) = i==j? gadd(y,gel(xi,j)): gcopy(gel(xi,j));
-  }
-  return z;
-}
-GEN
-RgM_Rg_add_shallow(GEN x, GEN y)
-{
-  long l = lg(x), i, j;
-  GEN z = cgetg(l,t_MAT);
-
-  if (l==1) return z;
-  if (typ(x) != t_MAT || l != lg(x[1])) pari_err(mattype1,"RgM_Rg_add");
-  for (i=1; i<l; i++)
-  {
-    GEN zi = cgetg(l,t_COL), xi = gel(x,i);
-    gel(z,i) = zi;
-    for (j=1; j<l; j++) gel(zi,j) = gel(xi,j);
-    gel(zi,i) = gadd(gel(zi,i), y);
-  }
-  return z;
 }
 
 /*******************************************************************/
@@ -1815,25 +1627,8 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
-
 GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
-
-/* set y = x * y */
-GEN
-Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
-{
-  long i, j, m = lg(y[1]), l = lg(y);
-  if (HIGHWORD(x | p))
-    for(j=1; j<l; j++)
-      for(i=1; i<m; i++)
-	ucoeff(y,i,j) = Fl_mul(ucoeff(y,i,j), x, p);
-  else
-    for(j=1; j<l; j++)
-      for(i=1; i<m; i++)
-	ucoeff(y,i,j) = (ucoeff(y,i,j) * x) % p;
-  return y;
-}
 
 /* M integral, dM such that M' = dM M^-1 is integral [e.g det(M)]. Return M' */
 GEN
@@ -2382,18 +2177,10 @@ ker0(GEN x, GEN a)
   }
   return gerepile(av,tetpil,y);
 }
-
 GEN
-ker(GEN x) /* Programme pour types exacts */
-{
-  return ker0(x,NULL);
-}
-
+ker(GEN x) { return ker0(x,NULL); }
 GEN
-matker0(GEN x,long flag)
-{
-  return flag? keri(x): ker(x);
-}
+matker0(GEN x,long flag) { return flag? keri(x): ker(x); }
 
 GEN
 image(GEN x)
@@ -2685,297 +2472,6 @@ FpM_indexrank(GEN x, GEN p) {
 /*                                                                 */
 /*******************************************************************/
 
-GEN
-FpC_Fp_mul(GEN x, GEN y, GEN p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_COL);
-  for (i=1;i<l;i++) gel(z,i) = Fp_mul(gel(x,i),y,p);
-  return z;
-}
-GEN
-Flc_Fl_mul(GEN x, ulong y, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i=1;i<l;i++) z[i] = Fl_mul(x[i], y, p);
-  return z;
-}
-GEN
-Flc_Fl_div(GEN x, ulong y, ulong p)
-{
-  return Flc_Fl_mul(x, Fl_inv(y, p), p);
-}
-
-/* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
-static GEN
-ZMrow_ZC_mul(GEN x, GEN y, long lx, long i)
-{
-  GEN c = mulii(gcoeff(x,i,1), gel(y,1)), ZERO = gen_0;
-  long k;
-  for (k = 2; k < lx; k++)
-  {
-    GEN t = mulii(gcoeff(x,i,k), gel(y,k));
-    if (t != ZERO) c = addii(c, t);
-  }
-  return c;
-}
-static ulong
-Flmrow_Flc_mul_SMALL(GEN x, GEN y, ulong p, long lx, long i)
-{
-  ulong c = ucoeff(x,i,1) * y[1];
-  long k;
-  for (k = 2; k < lx; k++) {
-    c += ucoeff(x,i,k) * y[k];
-    if (c & HIGHBIT) c %= p;
-  }
-  return c % p;
-}
-static ulong
-Flmrow_Flc_mul(GEN x, GEN y, ulong p, long lx, long i)
-{
-  ulong c = Fl_mul(ucoeff(x,i,1), y[1], p);
-  long k;
-  for (k = 2; k < lx; k++)
-    c = Fl_add(c, Fl_mul(ucoeff(x,i,k), y[k], p), p);
-  return c;
-}
-
-/* return x * y, 1 < lx = lg(x), l = lg(x[1]) */
-static GEN
-ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
-{
-  GEN z = cgetg(l,t_COL);
-  long i; 
-  for (i = 1; i < l; i++)
-  {
-    pari_sp av = avma;
-    GEN c = ZMrow_ZC_mul(x, y, lx, i);
-    gel(z,i) = gerepileuptoint(av, c);
-  }
-  return z;
-}
-static GEN
-FpM_FpC_mul_i(GEN x, GEN y, long lx, long l, GEN p)
-{
-  GEN z = cgetg(l,t_COL);
-  long i; 
-  for (i = 1; i < l; i++)
-  {
-    pari_sp av = avma;
-    GEN c = ZMrow_ZC_mul(x, y, lx, i);
-    gel(z,i) = gerepileuptoint(av, modii(c,p));
-  }
-  return z;
-}
-static GEN
-Flm_Flc_mul_i_SMALL(GEN x, GEN y, long lx, long l, ulong p)
-{
-  GEN z = cgetg(l,t_VECSMALL);
-  long i;
-  for (i = 1; i < l; i++) z[i] = Flmrow_Flc_mul_SMALL(x, y, p, lx, i);
-  return z;
-}
-static GEN
-Flm_Flc_mul_i(GEN x, GEN y, long lx, long l, ulong p)
-{
-  GEN z = cgetg(l,t_VECSMALL);
-  long i;
-  for (i=1; i<l; i++) z[i] = Flmrow_Flc_mul(x, y, p, lx, i);
-  return z;
-}
-
-GEN
-ZM_mul(GEN x, GEN y)
-{
-  long j, l, lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
-  if (lx==1) return zeromat(0, ly-1);
-  l = lg(x[1]); z = cgetg(ly,t_MAT);
-  for (j=1; j<ly; j++) gel(z,j) = ZM_ZC_mul_i(x, gel(y,j), lx, l);
-  return z;
-}
-GEN
-FpM_mul(GEN x, GEN y, GEN p)
-{
-  long j, l, lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
-  if (lx==1) return zeromat(0, ly-1);
-  l = lg(x[1]); z = cgetg(ly,t_MAT);
-  for (j=1; j<ly; j++) gel(z,j) = FpM_FpC_mul_i(x, gel(y,j), lx, l, p);
-  return z;
-}
-GEN
-Flm_mul(GEN x, GEN y, ulong p)
-{
-  long i,j,l,lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  /* if (lx != lg(y[1])) pari_err(operi,"*",x,y); */
-  z = cgetg(ly,t_MAT);
-  if (lx==1)
-  {
-    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
-    return z;
-  }
-  l = lg(x[1]);
-  if (SMALL_ULONG(p)) {
-    for (j=1; j<ly; j++)
-      gel(z,j) = Flm_Flc_mul_i_SMALL(x, gel(y,j), lx, l, p);
-  } else {
-    for (j=1; j<ly; j++)
-      gel(z,j) = Flm_Flc_mul_i(x, gel(y,j), lx, l, p);
-  }
-  return z;
-}
-
-GEN
-Flv_add(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
-  return z;
-}
-GEN
-Flv_sub(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = Fl_sub(x[i], y[i], p);
-  return z;
-}
-
-/*Multiple a column vector by a line vector to make a matrix*/
-GEN
-FpC_FpV_mul(GEN x, GEN y, GEN p)
-{
-  long i,j, lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  z = cgetg(ly,t_MAT);
-  for (j=1; j < ly; j++)
-  {
-    gel(z,j) = cgetg(lx,t_COL);
-    for (i=1; i<lx; i++) gcoeff(z,i,j) = Fp_mul(gel(x,i),gel(y,j), p);
-  }
-  return z;
-}
-GEN
-ZC_ZV_mul(GEN x, GEN y)
-{
-  long i,j, lx=lg(x), ly=lg(y);
-  GEN z;
-  if (ly==1) return cgetg(1,t_MAT);
-  z = cgetg(ly,t_MAT);
-  for (j=1; j < ly; j++)
-  {
-    gel(z,j) = cgetg(lx,t_COL);
-    for (i=1; i<lx; i++) gcoeff(z,i,j) = mulii(gel(x,i),gel(y,j));
-  }
-  return z;
-}
-
-/* Multiply a line vector by a column and return a scalar (t_INT) */
-GEN
-FpV_dotproduct(GEN x, GEN y, GEN p)
-{
-  long i, lx = lg(x);
-  pari_sp av;
-  GEN c;
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  if (lx == 1) return gen_0;
-  av = avma; c = mulii(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++) c = addii(c, mulii(gel(x,i),gel(y,i)));
-  return gerepileuptoint(av, modii(c,p));
-}
-GEN
-FpV_dotsquare(GEN x, GEN p)
-{
-  long i, lx = lg(x);
-  pari_sp av;
-  GEN c;
-  if (lx == 1) return gen_0;
-  av = avma; c = sqri(gel(x,1));
-  for (i=2; i<lx; i++) c = addii(c, sqri(gel(x,i)));
-  return gerepileuptoint(av, modii(c,p));
-}
-ulong
-Flv_dotproduct(GEN x, GEN y, ulong p)
-{
-  long i, lx = lg(x);
-  ulong c;
-  if (lx == 1) return 0;
-  c = Fl_mul(x[1], y[1], p);
-  for (i=2; i<lx; i++) c = Fl_add(c, Fl_mul(x[i], y[i], p), p);
-  return c;
-}
-
-GEN
-ZM_ZC_mul(GEN x, GEN y)
-{
-  long lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lg(x[1]));
-}
-GEN
-FpM_FpC_mul(GEN x, GEN y, GEN p)
-{
-  long lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  return lx==1? cgetg(1,t_COL): FpM_FpC_mul_i(x, y, lx, lg(x[1]), p);
-}
-GEN
-Flm_Flc_mul(GEN x, GEN y, ulong p)
-{
-  long l, lx = lg(x);
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  if (lx==1) return cgetg(1,t_VECSMALL);
-  l = lg(x[1]);
-  if (SMALL_ULONG(p))
-    return Flm_Flc_mul_i_SMALL(x, y, lx, l, p);
-  else
-    return Flm_Flc_mul_i(x, y, lx, l, p);
-}
-/* RgV_to_RgX(FpM_FpC_mul(x,y,p), v), p != NULL, memory clean */
-GEN
-FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
-{
-  long i, l, lx = lg(x);
-  GEN z;
-  /* if (lx != lg(y)) pari_err(operi,"*",x,y); */
-  if (lx==1) return zeropol(v);
-  l = lg(x[1]);
-  z = new_chunk(l+1);
-  for (i=l-1; i; i--)
-  {
-    pari_sp av = avma;
-    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
-    p1 = modii(p1, p);
-    if (signe(p1))
-    {
-      if (i != l-1) stackdummy((pari_sp)(z + l+1), (pari_sp)(z + i+2));
-      gel(z,i+1) = gerepileuptoint(av, p1);
-      break;
-    }
-    avma = av;
-  }
-  if (!i) { avma = (pari_sp)(z + l+1); return zeropol(v); }
-  z[0] = evaltyp(t_POL) | evallg(i+2);
-  z[1] = evalsigne(1) | evalvarn(v);
-  for (; i; i--)
-  {
-    pari_sp av = avma;
-    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
-    gel(z,i+1) = gerepileuptoint(av, modii(p1,p));
-  }
-  return z;
-}
-
 /* in place, destroy x */
 GEN
 Flm_ker_sp(GEN x, ulong p, long deplin)
@@ -3161,9 +2657,9 @@ GEN
 FpM_deplin(GEN x, GEN p) { return FpM_ker_i(x, p, 1); }
 /* not memory clean */
 GEN
-Flm_ker(GEN x, ulong p) { return Flm_ker_sp(gcopy(x), p, 0); }
+Flm_ker(GEN x, ulong p) { return Flm_ker_sp(Flm_copy(x), p, 0); }
 GEN
-Flm_deplin(GEN x, ulong p) { return Flm_ker_sp(gcopy(x), p, 1); }
+Flm_deplin(GEN x, ulong p) { return Flm_ker_sp(Flm_copy(x), p, 1); }
 
 static GEN
 Flm_gauss_pivot(GEN x, ulong p, long *rr)
@@ -3394,7 +2890,7 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
   return gerepileupto(av,res);
 }
 
-/* Calcule l'image reciproque de v par m */
+/* inverse image of v by m */
 GEN
 FpM_invimage(GEN m, GEN v, GEN p)
 {

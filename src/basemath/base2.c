@@ -172,20 +172,6 @@ companion(GEN x)
   return y;
 }
 
-static GEN
-_ZM_mul(void *data /*ignored*/, GEN x, GEN y)
-{ (void)data; return ZM_mul(x,y); }
-static GEN
-_ZM_sqr(void *data /*ignored*/, GEN x)
-{ (void)data; return ZM_mul(x,x); }
-GEN
-ZM_pow(GEN x, GEN n)
-{
-  pari_sp av = avma;
-  if (!signe(n)) return matid(lg(x)-1);
-  return gerepileupto(av, leftright_pow(x, n, NULL, &_ZM_sqr, &_ZM_mul));
-}
-
 /* return (v - qw) mod m (only compute entries k0,..,n)
  * v and w are expected to have entries smaller than m */
 static GEN

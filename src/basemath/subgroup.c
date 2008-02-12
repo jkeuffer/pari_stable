@@ -524,7 +524,7 @@ get_snf(GEN x, long *N)
   switch(typ(x))
   {
     case t_MAT:
-      if (!isdiagonal(x)) return NULL;
+      if (!RgM_isdiagonal(x)) return NULL;
       cyc = mattodiagonal_i(x); break;
     case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = gel(x,2);
     case t_COL: cyc = shallowcopy(x); break;

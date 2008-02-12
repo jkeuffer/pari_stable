@@ -44,6 +44,14 @@ FpX_red(GEN z, GEN p)
   for (i=2; i<l; i++) gel(x,i) = modii(gel(z,i),p);
   x[1] = z[1]; return FpX_renormalize(x,l);
 }
+GEN
+FpXV_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = FpX_red(gel(z,i), p);
+  return x;
+}
 
 GEN
 FpX_normalize(GEN z, GEN p)

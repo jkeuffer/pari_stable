@@ -26,65 +26,6 @@ RgX_is_rational(GEN x)
     if (!is_rational(gel(x,i))) return 0;
   return 1;
 }
-
-/********************************************************************/
-/**                                                                **/
-/**                        LINEAR ALGEBRA                          **/
-/**                                                                **/
-/********************************************************************/
-
-/* x non-empty t_MAT, y a compatible zc (dimension > 0). */
-static GEN
-RgM_zc_mul_i(GEN x, GEN y, long c, long l)
-{
-  long i, j;
-  pari_sp av;
-  GEN z = cgetg(l,t_COL), s;
-
-  for (i=1; i<l; i++)
-  {
-    av = avma; s = gmulgs(gcoeff(x,i,1),y[1]);
-    for (j=2; j<c; j++)
-       if (y[j]) s = gadd(s, gmulgs(gcoeff(x,i,j),y[j]));
-    gel(z,i) = gerepileupto(av,s);
-  }
-  return z;
-}
-GEN
-RgM_zc_mul(GEN x, GEN y) { return RgM_zc_mul_i(x,y, lg(x), lg(x[1])); }
-
-/* x t_MAT, y a compatible zm (dimension > 0). */
-GEN
-RgM_zm_mul(GEN x, GEN y)
-{
-  long j, c, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_MAT);
-  if (l == 1) return z;
-  c = lg(x[1]);
-  for (j = 1; j < ly; j++) gel(z,j) = RgM_zc_mul_i(x, gel(y,j), l,c);
-  return z;
-}
-static GEN
-RgV_zc_mul_i(GEN x, GEN y, long l)
-{
-  long i;
-  GEN z = gen_0;
-  pari_sp av = avma;
-  for (i = 1; i < l; i++) z = gadd(z, gmulgs(gel(x,i), y[i]));
-  return gerepileupto(av, z);
-}
-GEN
-RgV_zc_mul(GEN x, GEN y) { return RgV_zc_mul_i(x, y, lg(x)); }
-
-GEN
-RgV_zm_mul(GEN x, GEN y)
-{
-  long j, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_VEC);
-  for (j = 1; j < ly; j++) gel(z,j) = RgV_zc_mul_i(x, gel(y,j), l);
-  return z;
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                         COMPOSITION                            **/
@@ -156,6 +97,36 @@ RgX_rescale(GEN P, GEN h)
     hi = gmul(hi,h);
   }
   Q[1] = P[1]; return Q;
+}
+
+/* A(X^d) --> A(X) */
+GEN
+RgX_deflate(GEN x0, long d)
+{
+  GEN z, y, x;
+  long i,id, dy, dx = degpol(x0);
+  if (d <= 1) return x0;
+  if (dx < 0) return zeropol(varn(x0));
+  dy = dx/d;
+  y = cgetg(dy+3, t_POL); y[1] = x0[1];
+  z = y + 2;
+  x = x0+ 2;
+  for (i=id=0; i<=dy; i++,id+=d) z[i] = x[id];
+  return y;
+}
+
+/* return x0(X^d) */
+GEN
+RgX_inflate(GEN x0, long d)
+{
+  long i, id, dy, dx = degpol(x0);
+  GEN x = x0 + 2, z, y;
+  dy = dx*d;
+  y = cgetg(dy+3, t_POL); y[1] = x0[1];
+  z = y + 2;
+  for (i=0; i<=dy; i++) gel(z,i) = gen_0;
+  for (i=id=0; i<=dx; i++,id+=d) z[id] = x[i];
+  return y;
 }
 
 /********************************************************************/
@@ -1029,3 +1000,147 @@ RgXQ_norm(GEN x, GEN T)
   return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                                ZX                               */
+/*                                                                 */
+/*******************************************************************/
+
+/*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
+GEN
+ZX_renormalize(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (signe(gel(x,i))) break;
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + (i+1)));
+  setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
+GEN
+ZX_add(GEN x, GEN y)
+{
+  long lx,ly,i;
+  GEN z;
+  lx = lg(x); ly = lg(y); if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) gel(z,i) = addii(gel(x,i),gel(y,i));
+  for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
+  if (lx == ly) z = ZX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  return z;
+}
+
+GEN
+ZX_sub(GEN x,GEN y)
+{
+  long i, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (lx >= ly)
+  {
+    z = cgetg(lx,t_POL); z[1] = x[1];
+    for (i=2; i<ly; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
+    if (lx == ly)
+    {
+      z = ZX_renormalize(z, lx);
+      if (!lgpol(z)) { avma = (pari_sp)(z + lx); z = zeropol(varn(x)); }
+    }
+    else
+      for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
+  }
+  else
+  {
+    z = cgetg(ly,t_POL); z[1] = y[1];
+    for (i=2; i<lx; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
+    for (   ; i<ly; i++) gel(z,i) = negi(gel(y,i));
+  }
+  return z;
+}
+
+GEN
+ZX_neg(GEN x)
+{
+  long i, l = lg(x);
+  GEN y = cgetg(l,t_POL);
+  y[1] = x[1]; for(i=2; i<l; i++) gel(y,i) = negi(gel(x,i));
+  return y;
+}
+
+GEN
+ZX_Z_add(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = addii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
+ZX_Z_sub(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+  { /* scalarpol(negi(x), v) */
+    long v = varn(y);
+    if (!signe(x)) return zeropol(v);
+    z = cgetg(3,t_POL);
+    z[1] = evalvarn(v) | evalsigne(1);
+    gel(z,2) = negi(x); return z;
+  }
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
+Z_ZX_sub(GEN x, GEN y)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(x, gel(y,2));
+  for(i=3; i<lz; i++) gel(z,i) = negi(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+/*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
+
+GEN
+ZX_Z_mul(GEN y,GEN x)
+{
+  GEN z;
+  long i, l;
+  if (!signe(x)) return zeropol(varn(y));
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = mulii(gel(y,i),x);
+  return z;
+}
+
+GEN
+ZXV_Z_mul(GEN y, GEN x)
+{
+  long i, l = lg(y);
+  GEN z = cgetg_copy(l, y);
+  for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
+  return z;
+}
+
+GEN
+zx_to_ZX(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = stoi(z[i]);
+  x[1] = evalsigne(l-2!=0)| z[1]; return x;
+}

@@ -1402,22 +1402,6 @@ DDF(GEN a, long hint, int fl)
   return gerepilecopy(av, z);
 }
 
-/* A(X^d) --> A(X) */
-GEN
-RgX_deflate(GEN x0, long d)
-{
-  GEN z, y, x;
-  long i,id, dy, dx = degpol(x0);
-  if (d <= 1) return x0;
-  if (dx < 0) return zeropol(varn(x0));
-  dy = dx/d;
-  y = cgetg(dy+3, t_POL); y[1] = x0[1];
-  z = y + 2;
-  x = x0+ 2;
-  for (i=id=0; i<=dy; i++,id+=d) z[i] = x[id];
-  return y;
-}
-
 long
 checkdeflate(GEN x)
 {
@@ -1442,7 +1426,7 @@ gdeflate(GEN x, long v, long d)
     if (varncmp(vx, v) < 0)
     {
       lx = lg(x); z = cgetg(lx, tx); z[1] = x[1];
-      for (i=2; i<lx; i++) 
+      for (i=2; i<lx; i++)
       {
         gel(z,i) = gdeflate(gel(x,i),v,d);
         if (!z[i]) return NULL;
@@ -1477,7 +1461,7 @@ gdeflate(GEN x, long v, long d)
   if (is_matvec_t(tx))
   {
     lx = lg(x); z = cgetg(lx, tx);
-    for (i=1; i<lx; i++) 
+    for (i=1; i<lx; i++)
     {
       gel(z,i) = gdeflate(gel(x,i),v,d);
       if (!z[i]) return NULL;
@@ -1494,20 +1478,6 @@ poldeflate(GEN x, long *m)
 {
   *m = checkdeflate(x);
   return RgX_deflate(x, *m);
-}
-
-/* return x0(X^d) */
-GEN
-RgX_inflate(GEN x0, long d)
-{
-  long i, id, dy, dx = degpol(x0);
-  GEN x = x0 + 2, z, y;
-  dy = dx*d;
-  y = cgetg(dy+3, t_POL); y[1] = x0[1];
-  z = y + 2;
-  for (i=0; i<=dy; i++) gel(z,i) = gen_0;
-  for (i=id=0; i<=dx; i++,id+=d) z[id] = x[i];
-  return y;
 }
 
 /* Distinct Degree Factorization (deflating first)
@@ -2660,7 +2630,7 @@ ggcd(GEN x, GEN y)
 	    p1 = gcdii(gel(y,1),gel(y,2));
 	    if (!is_pm1(p1)) {
               p1 = gcdii(x,p1);
-              if (equalii(p1, gel(z,1))) { cgiv(p1); p1 = gen_0; } 
+              if (equalii(p1, gel(z,1))) { cgiv(p1); p1 = gen_0; }
               else
                 p1 = gerepileuptoint(av, p1);
             }
@@ -4307,7 +4277,6 @@ vecbezoutres(GEN x, GEN y)
   return z;
 }
 
-
 /*******************************************************************/
 /*                                                                 */
 /*                    GENERIC (modular) INVERSE                    */
@@ -4514,7 +4483,8 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   return gerepilecopy(ltop, sol);
 }
 
-GEN ffgen(GEN T, long v)
+GEN
+ffgen(GEN T, long v)
 {
   GEN ff=cgetg(5,t_FFELT);
   GEN p,junk;
@@ -4557,24 +4527,26 @@ GEN ffgen(GEN T, long v)
   return ff;
 }
 
-GEN fforder(GEN x, GEN o)
+GEN
+fforder(GEN x, GEN o)
 {
   if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT && !is_Z_factor(o)))
     pari_err(typeer,"fforder");
   return FF_order(x,o);
 }
 
-GEN ffprimroot(GEN x, GEN *o)
+GEN
+ffprimroot(GEN x, GEN *o)
 {
   if (typ(x)!=t_FFELT)
     pari_err(typeer,"ffprimroot");
   return FF_primroot(x, o);
 }
 
-GEN fflog(GEN x, GEN g, GEN o)
+GEN
+fflog(GEN x, GEN g, GEN o)
 {
   if (typ(x)!=t_FFELT || typ(g)!=t_FFELT)
     pari_err(typeer,"fflog");
   return FF_log(x,g,o);
 }
-

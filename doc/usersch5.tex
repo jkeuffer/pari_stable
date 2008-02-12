@@ -1942,6 +1942,9 @@ and \kbd{gen\_2} are handled specially and will not be corrupted.
 \fun{GEN}{ZV_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
 (which can be a column or row vector) by the \typ{INT}~\kbd{y}.
 
+\fun{GEN}{ZV_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
+$u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC}.
+
 \fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
@@ -2830,11 +2833,24 @@ occur).
 
 \subsec{\kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM} operations.
 
+\fun{GEN}{Flv_copy}{GEN x} returns a copy of \kbd{x}.
+
+\fun{GEN}{Flm_copy}{GEN x} returns a copy of \kbd{x}.
+
 \fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
 (assumed to have compatible dimensions).
 
+\fun{GEN}{Flm_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flm}
+\kbd{x} by \kbd{y}.
+
+\fun{GEN}{Flm_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flm} \kbd{x} by $\kbd{x}*\kbd{y}$.
+
 \fun{GEN}{Flc_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flv}
 \kbd{x} by \kbd{y}.
+
+\fun{GEN}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
 \fun{GEN}{Flc_Fl_div}{GEN x, ulong y, ulong p} divides the \kbd{Flv}
 \kbd{x} by \kbd{y}.
@@ -3246,6 +3262,10 @@ identity matrix.
 \fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
 
 \fun{GEN}{zm_transpose}{GEN x} as \kbd{Flm\_transpose}.
+
+\fun{GEN}{zm_copy}{GEN x} as \kbd{Flm\_copy}.
+
+\fun{GEN}{zv_copy}{GEN x} as \kbd{Flv\_copy}.
 
 \fun{GEN}{zero_zm}{long m, long n} as \kbd{zero\_Flm}.
 
@@ -4773,6 +4793,9 @@ whether $x$ is an arbitrary scalar matrix.
 
 \fun{long}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
 identity matrix, and 0 otherwise.
+
+\fun{long}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
+diagonal matrix, and 0 otherwise.
 
 \fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
