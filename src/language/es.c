@@ -516,10 +516,14 @@ wr_dec(char *buf, char *s, size_t ls, long point)
     buf += point;
     s   += point;
     ls  -= point;
+    if (ls)
+    {
+      *buf++ = '.';
+      strcpy(buf, s);
+      buf += ls;
+    }
   }
-  *buf++ = '.';
-  strcpy(buf, s);
-  buf += ls; *buf = 0; return buf;
+  *buf = 0; return buf;
 }
 
 static char *
@@ -530,44 +534,52 @@ zerotostr()
   s[1] = 0; return s;
 }
 
+/* write a real 0 of exponent ex */
+static char *
+abs0tostr(long ex, char format, char exp_char, long wanted_dec, long width_frac)
+{
+  char *buf, *buf0;
+
+  if (format == 'f') {
+    long dec;
+    if (width_frac == 0) return zerotostr();
+    if (width_frac > 0)
+      dec = width_frac;
+    else
+    {
+      dec = wanted_dec;
+      if (dec < 0) dec = (ex >= 0)? 0: (long)(-ex * L2SL10);
+    }
+    buf0 = buf = stackmalloc(dec + 3);
+    *buf++ = '0';
+    *buf++ = '.';
+    (void)zeros(buf, dec);
+  } else {
+    buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);
+    *buf++ = '0';
+    *buf++ = '.';
+    *buf++ = exp_char;
+    sprintf(buf, "%ld", ex10(ex) + 1);
+  }
+  return buf0;
+}
+
 /* Return t_REAL |x| in floating point format.
  * Allocate freely, the caller must clean the stack.
  *   FORMAT: E/e (exponential), f (floating point), G/g
  *   wanted_dec: number of significant digits to print (all if < 0).
- *   width_frac: number of digits in fractional part (< 0 if unset) */
+ *   width_frac: number of digits in fractional part (< 0 if unset), 
+ *     _must_ be unset in style e and g */
 static char *
 absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 {
   const char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
   long sx = signe(x), ex = expo(x);
   char *s, *buf, *buf0;
-  long beta, ls, df2, lx;
+  long beta, ls, point, lx;
   GEN z;
 
-  if (!sx) { /* real 0 */
-    if (format == 'f') {
-      long dec;
-      if (width_frac == 0) return zerotostr();
-      if (width_frac > 0)
-        dec = width_frac;
-      else
-      {
-        dec = wanted_dec;
-        if (dec < 0) dec = (ex >= 0)? 0: (long)(-ex * L2SL10);
-      }
-      buf0 = buf = stackmalloc(dec + 3);
-      *buf++ = '0';
-      *buf++ = '.';
-      (void)zeros(buf, dec);
-    } else {
-      buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);
-      *buf++ = '0';
-      *buf++ = '.';
-      *buf++ = exp_char;
-      sprintf(buf, "%ld", ex10(ex) + 1);
-    }
-    return buf0;
-  } /* string for a zero */
+  if (!sx) return abs0tostr(ex, format, exp_char, wanted_dec, width_frac);
 
   /* x != 0 */
   lx = lg(x);
@@ -576,7 +588,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  if (width_frac >= 0)
+  if (width_frac >= 0) /* style f */
     beta = width_frac;
   else
     beta = ex10(bit_accuracy(lx) - ex);
@@ -598,10 +610,9 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
   else
     z = x;
   z = grndtoi(z, &ls); /* round; ls is junk */
-  if (!signe(z))
-    return absrtostr(realzero(ex), sp, FORMAT, wanted_dec, width_frac);
-  s = itostr_sign(z, 1, &ls);
+  if (!signe(z)) return abs0tostr(ex, format, exp_char, wanted_dec, width_frac);
 
+  s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
   if (wanted_dec < 0)
     wanted_dec = ls;
   else if (width_frac < 0 && ls > wanted_dec)
@@ -623,21 +634,21 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
 
   /* '.', " E", exponent, trailing \0 */
   buf0 = buf = stackmalloc( ls + 1+2+MAX_EXPO_LEN+1 );
-  df2 = ls - beta; /* position of . in s; < 0 or > 0 */
+  point = ls - beta; /* position of . in s; < 0 or > 0 */
   if (width_frac < 0 &&
      (beta < 0 || format == 'e' || (format == 'g' && ex < -32)))
   { /* e format */
     buf = wr_dec(buf, s, ls, 1);
     if (sp) *buf++ = ' ';
     *buf++ = exp_char;
-    sprintf(buf, "%ld", df2-1);
+    sprintf(buf, "%ld", point-1);
   }
-  else if (df2 > 0) /* f format, write integer_part.fractional_part */
-    (void)wr_dec(buf, s, ls, df2);
-  else { /* f format, df2 <= 0, fractional part must be written */
+  else if (point > 0) /* f format, write integer_part.fractional_part */
+    (void)wr_dec(buf, s, ls, point);
+  else { /* f format, point <= 0, fractional part must be written */
     *buf++ = '0';
     *buf++ = '.';
-    buf = zeros(buf, -df2);
+    buf = zeros(buf, -point);
     strcpy(buf, s);
   }
   return buf0;
@@ -1062,16 +1073,24 @@ nextch:
           }
           case '.':
             if (pointflag)
-              pari_err(talker, "printf: two '.' in conversion specification");
+              pari_err(talker, "two '.' in conversion specification");
             pointflag = 1;
             goto nextch;
 /*------------------------------------------------------------------------
                        -- length modifiers
 ------------------------------------------------------------------------*/
           case 'l':
+            if (GENflag)
+              pari_err(talker, "Z/l length modifiers in the same conversion");
+            if (longflag)
+              pari_err(impl, "ll length modifier in printf");
             longflag = 1;
             goto nextch;
           case 'Z':
+            if (longflag)
+              pari_err(talker, "Z/l length modifiers in the same conversion");
+            if (GENflag)
+              pari_err(talker, "'Z' length modifier appears twice");
             GENflag = 1;
             goto nextch;
           case 'h': /* dummy: va_arg promotes short into int */
@@ -1180,21 +1199,20 @@ nextch:
             long sigd = 0;
 
             if (arg_vector)
-              gvalue = v_get_arg(arg_vector, &index, save_fmt);
+              gvalue = simplify_i( v_get_arg(arg_vector, &index, save_fmt) );
             else {
               if (GENflag)
-                gvalue = va_arg(args, GEN);
+                gvalue = simplify_i( va_arg(args, GEN) );
               else
                 gvalue = dbltor( va_arg(args, double) );
             }
-            gvalue = simplify_i(gvalue);
             if (maxwidth < 0)
               sigd = prec2ndec(precreal);
             else switch(tolower(ch))
             {
               case 'e': sigd = maxwidth+1; maxwidth = -1; break;
               case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
-              case 'g': sigd = maxwidth; maxwidth = -1; break;
+              case 'g': sigd = maxwidth? maxwidth: 1; maxwidth = -1; break;
             }
             fmtreal(S, gvalue, GP_DATA->fmt->sp,
                     dosign(print_a_blank, print_a_plus), ch,

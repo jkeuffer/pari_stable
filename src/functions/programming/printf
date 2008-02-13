@@ -97,18 +97,22 @@ Doc: This function is based on the C standard library command of the same name.
  \kbd{[ -]d.ddd e[ -]dd}, where there is one digit before the decimal point,
  and the number of digits after it is equal to the precision; if the
  precision is missing, use the current \kbd{realprecision} for the total
- number of printed digits.
+ number of printed digits. If the precision is explicitly 0, no decimal-point
+ character appears. 
 
  \item \kbd{f}: The (real) argument is converted in the style
  \kbd{[ -]ddd.ddd}, where the number of digits after the decimal point
  is equal to the precision; if the precision is missing, use the current 
- \kbd{realprecision} for the total number of printed digits.
+ \kbd{realprecision} for the total number of printed digits. If the precision
+ is explicitly 0, no decimal-point character appears. If a decimal point
+ appears, at least one digit appears before it.
 
  \item \kbd{g}, \kbd{G}: The (real) argument is converted in style
  \kbd{e} or \kbd{f} (or \kbd{E} or \kbd{F} for \kbd{G} conversions)
  \kbd{[ -]ddd.ddd}, where the total number of digits printed
  is equal to the precision; if the precision is missing, use the current 
- \kbd{realprecision}. Style \kbd{e} is used when
+ \kbd{realprecision}. If the precision is explicitly 0, it is treated as 1.
+ Style \kbd{e} is used when
  the binary exponent is $< -32$, to print \kbd{0.}, or when the integer
  part cannot be decided given the known significant digits, and the \kbd{f}
  format otherwise.
@@ -159,5 +163,26 @@ Doc: This function is based on the C standard library command of the same name.
 
  [ 0.33  0.25  0.20]
  @eprog
+ \misctitle{Technical note:} our implementation of \tet{printf} slightly
+ deviates from the C89 standard in a few places: 
+
+ \item whenever a precision is missing, the current \kbd{realprecision} is
+ used to determine the number of printed digits, instead of a hardcoded 6
+ decimals.
+
+ \item in conversion style \kbd{e}, we do not impose that the
+ exponent has at least two digits.
+
+ \item in conversion \kbd{g}, we do not remove trailing zeros from the
+  fractional part of the result; nor a trailing decimal point.
+
+ \item in conversion style \kbd{f}, we switch to style \kbd{e} if the
+ exponent is greater or equal to the precision.
+
+ \item we do not support conversion \kbd{F} as an alias for \kbd{f}.
+
+ \item in conversion \kbd{g} and \kbd{G}, the rule to decide whether we print
+ in style \kbd{f} or \kbd{e} is different from the standard (C89 says: a
+ decimal exponent less than $-4$ or greater or equal to the precision).
  
  %\syn{NO}
