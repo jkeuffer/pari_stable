@@ -2272,7 +2272,6 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   gel(P,1) = u; return P;
 }
 
-
 /* assume n = deg(u) > 1, X over FqX */
 /* return S = [ X^q, X^2q, ... X^(n-1)q ] mod u (in Fq[X]) in Kronecker form */
 static GEN

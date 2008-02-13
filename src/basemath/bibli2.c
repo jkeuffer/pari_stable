@@ -91,7 +91,7 @@ polchebyshev1_eval(long n, GEN x)
   if (n < 0) n = -n;
   if (n==0) return gen_1;
   if (n==1) return gcopy(x);
-  av = avma; 
+  av = avma;
   v = u_lvalrem(n, 2, (ulong*)&n);
   polchebyshev1_eval_aux((n+1)>>1, x, &t1, &t2);
   if (n != 1) t2 = gadd(gmul(gmul2n(t1,1), t2), gneg(x));
@@ -168,7 +168,7 @@ polchebyshev2_eval(long n, GEN x)
     neg = 1; n = -n-2;
   }
   if (n==0) return neg ? gen_m1: gen_1;
-  av = avma; 
+  av = avma;
   polchebyshev2_eval_aux(n>>1, x, &u1, &u2);
   mu1 = gneg(u1);
   if (odd(n)) u2 = gmul(gmul2n(u2,1), gadd(gmul(x,u2), mu1));
@@ -386,7 +386,7 @@ polcyclo(long n, long v)
   s = P[1]; T = polcyclo_prime(s, v);
   for (i = 2; i < l; i++)
   { /* Phi_{np}(X) = Phi_n(X^p) / Phi_n(X) */
-    s *= P[i]; 
+    s *= P[i];
     T = RgX_div(RgX_inflate(T, P[i]), T);
   }
   /* s = squarefree part of n */

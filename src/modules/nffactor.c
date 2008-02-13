@@ -219,7 +219,7 @@ static GEN
 get_den(GEN *nf, GEN T)
 {
   GEN den = gen_1;
-  if (!*nf)      
+  if (!*nf)
   {
     GEN fa, P, q, D;
     *nf = initalg_i(T, nf_PARTIALFACT, DEFAULTPREC);
@@ -1100,7 +1100,7 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
-   C = gtofp(C,DEFAULTPREC); 
+   C = gtofp(C,DEFAULTPREC);
   t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr)));
 }

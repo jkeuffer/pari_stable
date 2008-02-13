@@ -1685,7 +1685,7 @@ init(x) = add(y) = x+y; mul(y) = x*y;
 @eprog
 \noindent does not work since in the construction \kbd{f() = }\var{seq}, the
 function body contains everything until the end of the expression. Hence
-executing \kbd{init} defines the wrong function \kbd{add} (itself defining 
+executing \kbd{init} defines the wrong function \kbd{add} (itself defining
 a function \kbd{mul}). The way out is to
 use parentheses for grouping, to that enclosed subexpressions be
 evaluated independently:

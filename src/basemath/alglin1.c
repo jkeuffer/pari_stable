@@ -2467,7 +2467,7 @@ indexrank0(long n, long r, GEN d)
 }
 
 GEN
-indexrank(GEN x) { 
+indexrank(GEN x) {
   pari_sp av = avma;
   long r;
   GEN d;

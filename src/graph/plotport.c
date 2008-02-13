@@ -1525,7 +1525,7 @@ rectplothin(GEN a, GEN b, GEN code, long prec, ulong flags,
               Appendx(&pl[0], &pl[0], gtodouble(t));
               Appendy(&pl[0], &pl[1], 0.);
               continue;
-            
+
             case t_COMPLEX:
               Appendx(&pl[0], &pl[0], gtodouble(gel(t,1)));
               Appendy(&pl[0], &pl[1], gtodouble(gel(t,2)));

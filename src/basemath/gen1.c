@@ -1302,7 +1302,7 @@ mulcc(GEN x, GEN y)
       p1 = gmul(xr,yr);
       p2 = gmul(xi,yi);
       p4 = gadd(p1, p2);
-      
+
       p2 = gneg(p2);
     }
   }

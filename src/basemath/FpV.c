@@ -138,7 +138,7 @@ static GEN
 ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
 {
   GEN z = cgetg(l,t_COL);
-  long i; 
+  long i;
   for (i = 1; i < l; i++)
   {
     pari_sp av = avma;
@@ -151,7 +151,7 @@ static GEN
 FpM_FpC_mul_i(GEN x, GEN y, long lx, long l, GEN p)
 {
   GEN z = cgetg(l,t_COL);
-  long i; 
+  long i;
   for (i = 1; i < l; i++)
   {
     pari_sp av = avma;
@@ -440,7 +440,7 @@ ZM_sub(GEN x, GEN y)
   z = cgetg(lx, t_MAT); l = lg(x[1]);
   for (j = 1; j < lx; j++) gel(z,j) = ZV_sub_i(gel(x,j), gel(y,j), l);
   return z;
-} 
+}
 
 GEN
 FpC_add(GEN x, GEN y, GEN p)

@@ -780,7 +780,7 @@ ispower(GEN x, GEN K, GEN *pt)
       if (pt) *pt = gerepileupto(av, chinese1(L));
       return 1;
     }
-    case t_FFELT: 
+    case t_FFELT:
       return FF_ispower(x, K, pt);
 
     case t_PADIC:
@@ -902,9 +902,9 @@ isanypower(GEN x, GEN *pty)
         k <<= 1; x = y;
       }
     }
-    v3 = u_lvalrem(e2, 3, &e2); if (v3) mask = 1; 
-    v5 = u_lvalrem(e2, 5, &e2); if (v5) mask |= 2; 
-    v7 = u_lvalrem(e2, 7, &e2); if (v7) mask |= 4; 
+    v3 = u_lvalrem(e2, 3, &e2); if (v3) mask = 1;
+    v5 = u_lvalrem(e2, 5, &e2); if (v5) mask |= 2;
+    v7 = u_lvalrem(e2, 7, &e2); if (v7) mask |= 4;
     while ( (ex = is_357_power(x, &y, &mask)) ) {
       x = y;
       switch(ex)

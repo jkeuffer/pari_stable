@@ -580,7 +580,7 @@ gener_F2xq(GEN T, GEN *po)
   long i, j, vT = T[1], f = F2x_degree(T);
   pari_sp av0 = avma, av;
   GEN g, L2, o, q;
-  
+
   if (f == 1) {
     if (po) *po = trivfact();
     return pol1_F2x(vT);

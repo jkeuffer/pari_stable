@@ -412,10 +412,10 @@ isexactzero(GEN g)
       return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
     case t_POLMOD:
       return isexactzero(gel(g,2));
-    case t_POL: 
+    case t_POL:
       lx = lg(g); /* cater for Mod(0,2)*x^0 */
       return lx == 2 || (lx == 3 && isexactzero(gel(g,2)));
-    case t_RFRAC:      
+    case t_RFRAC:
       return isexactzero(gel(g,1)); /* may occur: Mod(0,2)/x */
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
@@ -1378,7 +1378,7 @@ gsubst(GEN x, long v, GEN y)
 	  if (vy != vx)
 	  {
 	    av = avma; lim = stack_lim(av,1); z = gel(x,lx-1);
-	    
+	
 	    for (i=lx-2; i>=2; i--)
             {
               z = gadd(gmul(y,z), gel(x,i));

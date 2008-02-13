@@ -871,7 +871,7 @@ lattice given by an arbitrary basis, where nice means the basis vectors are
 almost orthogonal and short, with precise guarantees on their relations to
 the shortest vectors. Not really spectacular on this example, though.
 
-Let us try something else, there should be an integer relation between 
+Let us try something else, there should be an integer relation between
 $\log 3$, $\log 5$ and $\log 15$. How to detect it?
 \bprog
   u = [log(15), log(5), log(3)];
@@ -1306,7 +1306,7 @@ Now type
 @eprog\noindent The polynomial \kbd{pol} factors over $\Q$ (or $\Z$) as a
 product of two factors, and the primes dividing its discriminant are
 $11$, $23$ and $37$. We also created a function \kbd{fun(p)} which factors
-\kbd{pol} over $\Q_p$ to $p$-adic precision 10. Type 
+\kbd{pol} over $\Q_p$ to $p$-adic precision 10. Type
 \bprog
   fun(5)
   fun(11)
@@ -1346,12 +1346,12 @@ lower priority than the variables of polynomials whose coefficients are taken
 in that base field. Have a look at the section on \emph{Variable priorities}
 in the user's manual (see ``The GP programming language'').
 
-Similarly, type 
+Similarly, type
 \bprog
   pol3 = x^4 - 4*x^2 + 16
   fn = lift( factornf(pol3, t^2 + 1) )
 @eprog\noindent and we get the factorization of the polynomial \kbd{pol3}
-over the number field defined by $t^2+1$, i.e.~over $\Q(i)$. Without the 
+over the number field defined by $t^2+1$, i.e.~over $\Q(i)$. Without the
 \kbd{lift}, the result would involve number field elements as \typ{POLMOD}s
 of the form \kbd{Mod(1+t, t\pow2+1)}, which are more explicit but much less
 readable.
@@ -1427,7 +1427,7 @@ program? No problem. Type instead
 @eprog\noindent and now this works like a charm. The pattern in the first
 result is clear; the pattern is less clear in the second result, but
 nonetheless there is one. Of course, it now remains to prove it (see Antwerp
-III or your resident modular forms guru). 
+III or your resident modular forms guru).
 
 \section{Working with Elliptic Curves}
 
@@ -1460,14 +1460,14 @@ will be called now, don't you? Oh, by the way, neither \kbd{clgpinit} nor
 the conductor of the curve is 37. Of course in general it is not so
 trivial. In fact, although the equation of the curve is clearly
 minimal (since the discriminant is $12$th-power-free), it is not in
-standard reduced form, so type 
+standard reduced form, so type
 \bprog
   e = ellminimalmodel(e0)
 @eprog\noindent which
 gives the \kbd{ell} structure associated with the standard model,
 exactly as if we had used \kbd{ellinit} on a reduced equation. For
 some related data, type
-\bprog 
+\bprog
   gr = ellglobalred(e0)
 @eprog\noindent The first
 component \kbd{gr[1]} tells us that the conductor is 37 as we already
@@ -1929,7 +1929,7 @@ in advance that it must be divisible by 3 from the \kbd{d = -3299} case above
 and Scholz's mirror theorem.) Let us create a form by typing
 \bprog
   f = qfbred(qfbprimeform(d,2), 2)
-@eprog\noindent 
+@eprog\noindent
 (the last 2 tells \kbd{qfbred} to ignore the archimedean component). This
 gives us a prime ideal of norm equal to 2. Is this ideal principal? Well, one
 way to check this, which is not the most efficient but will suffice for now,
@@ -2114,7 +2114,7 @@ be small, but not necessarily minimal). In fact, had you typed
 polynomial defining the same field (i.e.~one with small index) before
 proceeding.
 
-  It's not too late, let's redefine our number field: 
+  It's not too late, let's redefine our number field:
 \bprog
   NF = nfinit(nf, 3)
 @eprog\noindent
@@ -2250,7 +2250,7 @@ symmetries of a square.
 This implies that the field is ``partially Galois'', i.e.~that there exists
 at least one non-trivial field isomorphism which fixes $K$, exactly one in
 this case. Type \kbd{nfgaloisconj(nf)}. The result tells us that, apart from
-the trivial automorphism, the map 
+the trivial automorphism, the map
 $$\alpha \mapsto {1\over7}(-\alpha^3+5\alpha^2+\alpha-49)$$
 is the only field automorphism.
 \bprog
@@ -2456,7 +2456,7 @@ and we obtain \kbd{ch} again. (Whose constant coefficient is $1$, hence
 $u$ is indeed a unit.)
 
 There is of course no reason for $u$ to be a fundamental unit. Let us see if
-it is a square. Type 
+it is a square. Type
 \bprog
   f1 = factor(subst(ch, x, x^2))
 @eprog\noindent We see that \kbd{ch(x\pow2)} is a product of 2 polynomials of

@@ -1625,7 +1625,7 @@ the following are valid conversions for a \kbd{GEN} argument
 
     pari_printf("x[%d] = %Zs is not invertible!\n", i, gel(x,i));
 @eprog\noindent
-Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf 
+Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf
 (presumably a vector, or a polynomial) and this would insert the value of its
 $i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
 
@@ -1657,7 +1657,7 @@ actually closer to the GNU extension \kbd{asprintf}, although the latter has
 a different interface.
 
 Simple variants of \kbd{pari\_sprintf} convert a \kbd{GEN} to a
-\kbd{malloc}'ed ASCII string, which you must still \kbd{free} after use: 
+\kbd{malloc}'ed ASCII string, which you must still \kbd{free} after use:
 
 \fun{char*}{GENtostr}{GEN x}, using the current default output format
 (\kbd{prettymat} by default).
@@ -1982,7 +1982,7 @@ be quoted using '\kbd{\bs}'\cr
 \+& \kbd{E} & closure whose value is used, as in \kbd{sum} loops,\cr
 \+&&\quad to be processed by \fun{void}{closure_evalgen}{GEN C}\cr
 
-\noindent A \tev{closure} is a GP function in compiled (bytecode) form. It 
+\noindent A \tev{closure} is a GP function in compiled (bytecode) form. It
 can be efficiently evaluated using the \kbd{closure\_eval}$xxx$ functions.
 
 \noindent$\bullet$ Optional arguments:
@@ -2105,7 +2105,7 @@ much like to hear about it! \smallskip
 
 There is a corresponding library interface for this functionnality, letting
 you expand the GP parser/evaluator available in the library with new
-functions from your C source code! You may then 
+functions from your C source code! You may then
 evaluate a GP expression sequence involving calls to these new function.
 
 \fun{entree *}{install}{void *f, char *gpname, char *code}

@@ -989,7 +989,7 @@ idealmulspec(GEN nf, GEN x, GEN y)
 
   if (isnfscalar(alpha)) return ZM_Z_mul(x, gcdii(a, gel(alpha,1)));
   if (typ(alpha) != t_MAT) alpha = eltimul_get_table(nf, alpha);
-  
+
   m = cgetg((N<<1)+1,t_MAT);
   for (i=1; i<=N; i++) gel(m,i) = ZM_ZC_mul(alpha,gel(x,i));
   for (i=1; i<=N; i++) gel(m,i+N) = ZV_Z_mul(gel(x,i), a);

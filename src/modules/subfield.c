@@ -232,7 +232,7 @@ cycle_power_to_perm(GEN perm,GEN cy,long l)
 static GEN
 im_block_by_perm(GEN D,GEN perm)
 {
-  long i, lb = lg(D); 
+  long i, lb = lg(D);
   GEN Dn = cgetg(lb,t_VEC);
   for (i=1; i<lb; i++) gel(Dn,i) = vecpermute(perm, gel(D,i));
   return Dn;
@@ -959,7 +959,7 @@ subfieldsall(GEN nf)
   dg = divisors(utoipos(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Zs\n",pol);
 
-  
+
   LSB = _subfield(pol_x(0), gen_0);
   if (ld > 2)
   {

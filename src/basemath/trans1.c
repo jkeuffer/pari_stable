@@ -934,7 +934,7 @@ sqrt_ser(GEN b, long prec)
   for (j = 3; j < lx; j++) gel(x,j) = gen_0;
   setlg(x,3);
   E = Newton_exponents(lx - 2);
-  
+
   for (i = lg(E)-1; i > 1; i--)
   {
     long l1 = E[i-1], l2 = E[i];

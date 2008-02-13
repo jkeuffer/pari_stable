@@ -542,7 +542,7 @@ long
 FF_ispower(GEN x, GEN K, GEN *pt)
 {
   ulong pp;
-  GEN r, T, p; 
+  GEN r, T, p;
   pari_sp av = avma;
   if (!K) pari_err(talker,"missing exponent in FF_ispower");
 

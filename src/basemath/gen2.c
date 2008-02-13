@@ -1754,7 +1754,7 @@ normalize(GEN x)
   /* don't swap the following two lines! [valp/varn corrupted] */
   y[1] = evalsigne(1) | evalvalp(valp(x)+i) | evalvarn(varn(x));
   y[0] = evaltyp(t_SER) | evallg(lx);
-  
+
   stackdummy((pari_sp)y, (pari_sp)x);
   for (i = 2; i < lx; i++)
     if (!gcmp0(gel(y, i))) return y;
@@ -1794,7 +1794,7 @@ normalizepol_i(GEN x, long lx)
     x[0] = evaltyp(t_POL)|evallg(3);
     setsigne(x,0); gel(x,2) = z; return x;
   }
-  
+
   stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
   setlg(x, i+1);
   for (; i>1; i--)

@@ -829,7 +829,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
     }
-   
+
   }
   if (DEBUGLEVEL>=2){ fprintferr("\n"); flusherr(); }
   avma = av; u = cgetg(4,t_VEC);
@@ -1940,7 +1940,7 @@ bigcgetvec(long N)
   gel(v,nv) = cgetg(vext1(N)+1,t_VEC); return v;
 }
 
-/* a zsimp is [fa, cyc, U, v] 
+/* a zsimp is [fa, cyc, U, v]
  * fa: vecsmall factorisation,
  * cyc: ZV (abelian group)
  * U: ZM (base change)
