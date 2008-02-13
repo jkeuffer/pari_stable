@@ -1613,8 +1613,8 @@ nfrootsQ(GEN x)
 #define typ1(x) (x >> tsh)
 #define typ2(x) (x & ((1<<tsh)-1))
 
-static long
-poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
+long
+RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
   long t[16];
   long tx = typ(x), lx, i, j, s, pa = LONG_MAX;
@@ -1719,7 +1719,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	{
 	  GEN pbis = NULL, polbis = NULL;
 	  long pabis;
-	  switch(poltype(gel(p1,j),&pbis,&polbis,&pabis))
+	  switch(RgX_type(gel(p1,j),&pbis,&polbis,&pabis))
 	  {
 	    case t_INT: t[12]=1; break;
 	    case t_INTMOD: t[13]=1; break;
@@ -2013,7 +2013,7 @@ factor(GEN x)
       return gerepilecopy(av, merge_factor_i(p1,p2));
 
     case t_POL:
-      tx=poltype(x,&p,&pol,&pa);
+      tx=RgX_type(x,&p,&pol,&pa);
       switch(tx)
       {
 	case 0: pari_err(impl,"factor for general polynomials");
@@ -3366,9 +3366,9 @@ revpol(GEN x)
   return y;
 }
 
-/* assume dx >= dy, y non constant, mod either NULL or a t_POL. */
-static GEN
-pseudorem_i(GEN x, GEN y, GEN mod)
+/* assume dx >= dy, y non constant, T either NULL or a t_POL. */
+GEN
+RgXQX_pseudorem(GEN x, GEN y, GEN T)
 {
   long vx = varn(x), dx, dy, dz, i, lx, p;
   pari_sp av = avma, av2, lim;
@@ -3384,18 +3384,18 @@ pseudorem_i(GEN x, GEN y, GEN mod)
     for (i=1; i<=dy; i++)
     {
       gel(x,i) = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
-      if (mod) gel(x,i) = RgX_rem(gel(x,i), mod);
+      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
     }
     for (   ; i<=dx; i++)
     {
       gel(x,i) = gmul(gel(y,0), gel(x,i));
-      if (mod) gel(x,i) = RgX_rem(gel(x,i), mod);
+      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
     }
     do { x++; dx--; } while (dx >= 0 && gcmp0(gel(x,0)));
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_pseudorem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs(av2,x,dx+1);
     }
   }
@@ -3407,30 +3407,30 @@ pseudorem_i(GEN x, GEN y, GEN mod)
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = gel(y,0);
-    if (mod)
+    if (T)
     { /* assume p fairly small */
       for (i=1; i<p; i++)
-	t = RgX_rem(gmul(t, gel(y,0)), mod);
+	t = RgX_rem(gmul(t, gel(y,0)), T);
     }
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
     {
       gel(x,i) = gmul(gel(x,i), t);
-      if (mod) gel(x,i) = RgX_rem(gel(x,i), mod);
+      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
     }
-    if (!mod) return gerepileupto(av, x);
+    if (!T) return gerepileupto(av, x);
   }
   return gerepilecopy(av, x);
 }
 
 GEN
-pseudorem(GEN x, GEN y) { return pseudorem_i(x,y, NULL); }
+RgX_pseudorem(GEN x, GEN y) { return RgXQX_pseudorem(x,y, NULL); }
 
 /* assume dx >= dy, y non constant
  * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
 GEN
-pseudodiv(GEN x, GEN y, GEN *ptr)
+RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
 {
   long vx = varn(x), dx, dy, dz, i, iz, lx, lz, p;
   pari_sp av = avma, av2, lim;
@@ -3459,7 +3459,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"pseudodiv dx = %ld >= %ld",dx,dy);
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgX_pseudodivrem dx = %ld >= %ld",dx,dy);
       gerepilecoeffs2(av2,x,dx+1, z,iz);
     }
   }
@@ -3509,7 +3509,7 @@ subresall(GEN u, GEN v, GEN *sol)
   g = h = gen_1; av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
-    r = pseudorem(u,v); dr = lg(r);
+    r = RgX_pseudorem(u,v); dr = lg(r);
     if (dr == 2)
     {
       if (sol) { avma = (pari_sp)(r+2); *sol=gerepileupto(av,v); } else avma = av;
@@ -3592,7 +3592,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    GEN r, q = pseudodiv(u,v, &r);
+    GEN r, q = RgX_pseudodivrem(u,v, &r);
     long du, dv, degq, dr = lg(r);
     if (dr == 2) { *U = *V = gen_0; avma = av; return gen_0; }
 
@@ -3696,7 +3696,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    GEN r, q = pseudodiv(u,v, &r);
+    GEN r, q = RgX_pseudodivrem(u,v, &r);
     long du, dv, degq, dr = lg(r);
     if (dr == 2) break;
 
@@ -3834,7 +3834,7 @@ resultantducos(GEN P, GEN Q)
     av2 = avma; lim = stack_lim(av2,1);
     s = gpowgs(leading_term(Q),delta);
     Z = Q;
-    Q = pseudorem(P, gneg(Q));
+    Q = RgX_pseudorem(P, gneg(Q));
     P = Z;
     while(degpol(Q) > 0)
     {
@@ -4004,7 +4004,7 @@ srgcd(GEN x, GEN y)
     u=gdiv(x,p1); v=gdiv(y,p2); g=h=gen_1;
     for(;;)
     {
-      GEN r = pseudorem(u,v);
+      GEN r = RgX_pseudorem(u,v);
       long degq, du, dv, dr=lg(r);
 
       if (dr <= 3)
@@ -4164,7 +4164,7 @@ sturmpart(GEN x, GEN a, GEN b)
   }
   for(;;)
   {
-    GEN p1, r = pseudorem(u,v);
+    GEN p1, r = RgX_pseudorem(u,v);
     long du=lg(u), dv=lg(v), dr=lg(r), degq=du-dv;
 
     if (dr<=2) pari_err(talker,"not a squarefree polynomial in sturm");
@@ -4400,153 +4400,4 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
     gel(Q,j) = a;
   }
   return Q;
-}
-
-/* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
- *
- * We essentially follow M. Encarnacion "On a modular Algorithm for computing
- * GCDs of polynomials over number fields" (ISSAC'94).
- *
- * We procede as follows
- *  1:compute the gcd modulo primes discarding bad primes as they are detected.
- *  2:reconstruct the result via matratlift, stoping as soon as we get weird
- *    denominators.
- *  3:if matratlift succeeds, try the full division.
- * Suppose accuracy is insufficient to get the result right: matratlift will
- * rarely succeed, and even if it does the polynomial we get has sensible
- * coefficients, so the full division will not be too costly.
- *
- * FIXME: Handle rational coefficient for P and Q.
- * If not NULL, den must a a multiple of the denominator of the gcd,
- * for example the discriminant of nf.
- *
- * NOTE: if nf is not irreducible, nfgcd may loop forever, esp. if gcd | nf */
-GEN
-nfgcd(GEN P, GEN Q, GEN nf, GEN den)
-{
-  pari_sp ltop = avma;
-  GEN sol, mod = NULL;
-  long x = varn(P);
-  long y = varn(nf);
-  long d = degpol(nf);
-  GEN lP, lQ;
-  if (!signe(P) || !signe(Q)) return zeropol(x);
-  /*Compute denominators*/
-  if (!den) den = ZX_disc(nf);
-  lP = leading_term(P);
-  lQ = leading_term(Q);
-  if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
-    den = mulii(den, gcdii(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
-  { /*Modular GCD*/
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    ulong p;
-    long dM=0, dR;
-    GEN M, dsol;
-    GEN R, ax, bo;
-    byteptr primepointer = init_modular(&p);
-    for (;;)
-    {
-      NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
-      /*Discard primes dividing disc(T) or lc(PQ) */
-      if (!smodis(den, p)) continue;
-      if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
-      /*Discard primes when modular gcd does not exist*/
-      if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,y),
-			     ZXX_to_FlxX(Q,p,y),
-			     ZX_to_Flx(nf,p), p)) == NULL) continue;
-      dR = degpol(R);
-      if (dR == 0) return scalarpol(gen_1, x);
-      if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
-
-      R = RgXX_to_RgM(FlxX_to_ZXX(R), d);
-      /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-      if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-      {
-	if (DEBUGMEM>1) pari_warn(warnmem,"nfgcd");
-	gerepileall(btop, 2, &M, &mod);
-      }
-
-      ax = muliu(Fp_inv(utoipos(p), mod), p);
-      M = ZM_add(R, ZM_Z_mul(ZM_sub(M, R), ax));
-      mod = muliu(mod, p);
-      M = FpM_red(M, mod);
-      /* I suspect it must be better to take amax > bmax*/
-      bo = sqrti(shifti(mod, -1));
-      if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
-      sol = RgM_to_RgXX(sol,x,y);
-      dsol = Q_primpart(sol);
-      if (gcmp0(pseudorem_i(P, dsol, nf))
-       && gcmp0(pseudorem_i(Q, dsol, nf))) break;
-    }
-  }
-  return gerepilecopy(ltop, sol);
-}
-
-GEN
-ffgen(GEN T, long v)
-{
-  GEN ff=cgetg(5,t_FFELT);
-  GEN p,junk;
-  long ljunk, d = degpol(T);
-  if (typ(T) != t_POL || d < 1) pari_err(typeer,"ffgen");
-  if (poltype(T,&p,&junk,&ljunk)!=t_INTMOD) pari_err(typeer,"ffgen");
-  if (v<0) v = varn(T);
-  if (lgefint(p)==3)
-  {
-    ulong pp=p[2];
-    long sv=evalvarn(v);
-    if (pp==2)
-    {
-      ff[1]=t_FF_F2xq;
-      gel(ff,3)=ZX_to_F2x(lift(T));
-      mael(ff,3,1)=sv;
-      gel(ff,2)=polx_F2x(sv);
-      if (d == 1) gel(ff,2) = F2x_rem(gel(ff,2), gel(ff,3));
-      gel(ff,4)=gen_2;
-    }
-    else
-    {
-      ff[1]=t_FF_Flxq;
-      gel(ff,2)=polx_Flx(sv);
-      gel(ff,3)=ZX_to_Flx(lift(T),pp);
-      mael(ff,3,1)=sv;
-      if (d == 1) gel(ff,2) = Flx_rem(gel(ff,2), gel(ff,3), pp);
-      gel(ff,4)=icopy(p);
-    }
-  }
-  else
-  {
-    ff[1]=t_FF_FpXQ;
-    gel(ff,2)=pol_x(v);
-    gel(ff,3)=lift(T);
-    setvarn(gel(ff,3),v);
-    if (d == 1) gel(ff,2) = FpX_rem(gel(ff,2), gel(ff,3), p);
-    gel(ff,4)=icopy(p);
-  }
-  return ff;
-}
-
-GEN
-fforder(GEN x, GEN o)
-{
-  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT && !is_Z_factor(o)))
-    pari_err(typeer,"fforder");
-  return FF_order(x,o);
-}
-
-GEN
-ffprimroot(GEN x, GEN *o)
-{
-  if (typ(x)!=t_FFELT)
-    pari_err(typeer,"ffprimroot");
-  return FF_primroot(x, o);
-}
-
-GEN
-fflog(GEN x, GEN g, GEN o)
-{
-  if (typ(x)!=t_FFELT || typ(g)!=t_FFELT)
-    pari_err(typeer,"fflog");
-  return FF_log(x,g,o);
 }

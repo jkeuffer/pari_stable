@@ -299,6 +299,7 @@ GEN  quad_polmod_conj(GEN x, GEN y);
 GEN  quad_polmod_norm(GEN x, GEN y);
 
 /* Polynomials */
+long RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 /* a) Arithmetic/conversions */
 GEN  addmulXn(GEN x, GEN y, long d);
 GEN  addshiftpol(GEN x, GEN y, long d);
@@ -839,7 +840,7 @@ long    checkdeflate(GEN x);
 void    factor_quad(GEN x, GEN res, long *ptcnt);
 GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow) (void *, GEN, GEN), void *data);
 long    logint(GEN B, GEN y, GEN *ptq);
-GEN     pseudodiv(GEN x, GEN y, GEN *ptr);
+GEN     RgX_pseudodivrem(GEN x, GEN y, GEN *ptr);
 long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);
 

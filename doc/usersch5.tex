@@ -3017,7 +3017,17 @@ $\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$. Return its square (as a true
 quotient of the \kbd{RgX}~\kbd{A} by $(X - \kbd{a})$, and sets \kbd{r} to the
 remainder $\kbd{A}(\kbd{a})$.
 
-\fun{GEN}{RgX_rem}{GEN x, GEN y, GEN *r}
+\fun{GEN}{RgX_rem}{GEN x, GEN y}
+
+\fun{GEN}{RgX_pseudodivrem}{GEN x, GEN y, GEN *ptr} compute a pseudo-quotient
+$q$ and pseudo-remainder $r$ such that $\kbd{lc}(y)^{\deg(x) - \deg(y) + 1}x
+= qy + r$. Return $q$ and set \kbd{*ptr} to $r$.
+
+\fun{GEN}{RgX_pseudorem}{GEN x, GEN y} return the pseudo-remainder
+in the pseudo-division of $x$ by $y$.
+
+\fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the pseudo-remainder
+in the pseudo-division of $x$ by $y$ over $R[X]/(T)$.
 
 \fun{GEN}{RgX_mulXn}{GEN x, long n} returns $\kbd{x} * t^n$. This may
 be a \typ{FRAC} if $n < 0$ and the valuation of \kbd{x} is not large
