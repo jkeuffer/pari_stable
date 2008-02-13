@@ -90,7 +90,7 @@ BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
 JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
    14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
-   15- 'ispower' bench
+   15- 'ispower', 'nffactor' bench
    16- library functions Flc_Fl_mul, Flc_Fl_div, Flv_add, Flv_dotproduct,
        Flv_sub, zero_Flm, zero_zm, zero_Flv, zero_zv, row_Flm, row_zm, zv_cmp0
        RgM_isdiagonal, zm_copy, zv_copy, Flm_mul, Flm_copy, Flv_copy,
