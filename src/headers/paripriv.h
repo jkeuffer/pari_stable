@@ -310,7 +310,6 @@ GEN  mulmat_pol(GEN A, GEN x);
 long polegal_spec(GEN x, GEN y);
 GEN  polrecip_i(GEN x);
 GEN  pol_to_monic(GEN pol, GEN *lead);
-GEN  revpol(GEN x);
 GEN  ser2pol_i(GEN x, long lx);
 GEN  ser2rfrac_i(GEN x);
 GEN  shiftpol_i(GEN x, long v);
@@ -840,7 +839,6 @@ long    checkdeflate(GEN x);
 void    factor_quad(GEN x, GEN res, long *ptcnt);
 GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow) (void *, GEN, GEN), void *data);
 long    logint(GEN B, GEN y, GEN *ptq);
-GEN     RgX_pseudodivrem(GEN x, GEN y, GEN *ptr);
 long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);
 
