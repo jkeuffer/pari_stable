@@ -1923,6 +1923,9 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 
 \subsubsec{\kbd{ZV}}
 
+\fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
+the same length (lexicographic order).
+
 \fun{GEN}{ZV_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{ZV_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
@@ -3920,7 +3923,7 @@ use \kbd{gen\_sort(x, (void*)cmp, cmp\_nodata)}.
 
 Here are a few basic comparison functions, to be used with \kbd{cmp\_nodata}:
 
-\fun{int}{cmp_ZV}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
+\fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
 the same length (lexicographic order).
 
 \fun{int}{cmp_RgX}{GEN x, GEN y} compare two polynomials, which we assume

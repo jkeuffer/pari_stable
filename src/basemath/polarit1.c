@@ -523,18 +523,6 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 }
 
 GEN
-ZX_deriv(GEN x)
-{
-  long i,lx = lg(x)-1;
-  GEN y;
-
-  if (lx<3) return zeropol(varn(x));
-  y = cgetg(lx,t_POL);
-  for (i=2; i<lx ; i++) gel(y,i) = mului(i-1,gel(x,i+1));
-  y[1] = x[1]; return y;
-}
-
-GEN
 FqX_deriv(GEN f, /*unused*/GEN T, GEN p) {
   (void)T; return FpXX_red(derivpol(f), p);
 }

@@ -1601,7 +1601,7 @@ tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 
 /* assume lg(x) = lg(y), x,y in Z^n */
 int
-cmp_ZV(GEN x, GEN y)
+ZV_cmp(GEN x, GEN y)
 {
   long fl,i, lx = lg(x);
   for (i=1; i<lx; i++)
@@ -1616,7 +1616,7 @@ cmp_prime_over_p(GEN x, GEN y)
   GEN fx = gel(x,4), fy = gel(y,4);
   long k = fx[2] - fy[2]; /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
-	  : cmp_ZV(gel(x,2), gel(y,2));
+	  : ZV_cmp(gel(x,2), gel(y,2));
 }
 
 int

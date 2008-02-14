@@ -74,6 +74,39 @@ RgV_zm_mul(GEN x, GEN y)
   return z;
 }
 
+/* scalar product x.x */
+GEN
+RgV_dotsquare(GEN x)
+{
+  long i, lx;
+  pari_sp av;
+  GEN z;
+  lx = lg(x);
+  if (lx == 1) return gen_0;
+  av = avma;
+  z = gsqr(gel(x,1));
+  for (i=2; i<lx; i++)
+    z = gadd(z, gsqr(gel(x,i)));
+  return gerepileupto(av,z);
+}
+
+/* scalar product x.y */
+GEN
+RgV_dotproduct(GEN x,GEN y)
+{
+  long i, lx;
+  pari_sp av;
+  GEN z;
+  if (x == y) return RgV_dotsquare(x);
+  lx = lg(x);
+  if (lx == 1) return gen_0;
+  av = avma;
+  z = gmul(gel(x,1),gel(y,1));
+  for (i=2; i<lx; i++)
+    z = gadd(z, gmul(gel(x,i),gel(y,i)));
+  return gerepileupto(av,z);
+}
+
 /*                    ADDITION SCALAR + MATRIX                     */
 /* x square matrix, y scalar; create the square matrix x + y*Id */
 GEN
@@ -175,6 +208,14 @@ scalarcol_shallow(GEN x, long n) {
 }
 
 long
+RgV_isscalar(GEN x)
+{
+  long lx = lg(x),i;
+  for (i=2; i<lx; i++)
+    if (!gcmp0(gel(x, i))) return 0;
+  return 1;
+}
+long
 RgM_isscalar(GEN x, GEN s)
 {
   long i, j, lx = lg(x);
@@ -252,17 +293,4 @@ RgM_ishnf(GEN x)
       if (!gcmp0(gcoeff(x,i,j))) return 0;
   }
   return (gsigne(gcoeff(x,1,1)) > 0);
-}
-/* same x is known to be integral */
-int
-ZM_ishnf(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (i=2; i<lx; i++)
-  {
-    if (signe(gcoeff(x,i,i)) <= 0) return 0;
-    for (j=1; j<i; j++)
-      if (signe(gcoeff(x,i,j))) return 0;
-  }
-  return (signe(gcoeff(x,1,1)) > 0);
 }

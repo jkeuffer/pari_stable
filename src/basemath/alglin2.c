@@ -1302,8 +1302,8 @@ init_hnf(GEN x, GEN *denx, pari_sp *av)
 }
 
 /* negate in place, except universal constants */
-static void
-negi_ip(GEN *px)
+void
+togglesign_safe(GEN *px)
 {
   if      (*px == gen_1)  *px = gen_m1;
   else if (*px == gen_m1) *px = gen_1;
@@ -1314,7 +1314,7 @@ void
 ZV_togglesign(GEN M)
 {
   long i;
-  for (i = lg(M)-1; i; i--) negi_ip(&gel(M,i));
+  for (i = lg(M)-1; i; i--) togglesign_safe(&gel(M,i));
 }
 
 /* x = [A,U], nbcol(A) = nbcol(U), A integral. Return [AV, UV], with AV HNF */
@@ -2410,8 +2410,8 @@ Minus(long j, GEN lambda)
 {
   long k, n = lg(lambda);
 
-  for (k=1  ; k<j; k++) negi_ip(&gcoeff(lambda,k,j));
-  for (k=j+1; k<n; k++) negi_ip(&gcoeff(lambda,j,k));
+  for (k=1  ; k<j; k++) togglesign_safe(&gcoeff(lambda,k,j));
+  for (k=j+1; k<n; k++) togglesign_safe(&gcoeff(lambda,j,k));
 }
 
 /* index of first non-zero entry */
@@ -2454,7 +2454,7 @@ reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN lambda, GEN D)
   if (signe(q))
   {
     GEN Lk = gel(lambda,k), Lj = gel(lambda,j);
-    negi_ip(&q);
+    togglesign_safe(&q);
     if (*row0) elt_col(gel(A,k),gel(A,j),q);
     if (B) elt_col(gel(B,k),gel(B,j),q);
     gel(Lk,j) = addii(gel(Lk,j), mulii(q,gel(D,j)));
@@ -2622,7 +2622,7 @@ reduce1(GEN A, GEN B, long k, long j, GEN lambda, GEN D)
   if (signe(q))
   {
     GEN Lk = gel(lambda,k), Lj = gel(lambda,j);
-    negi_ip(&q);
+    togglesign_safe(&q);
     gel(A,k) = addii(gel(A,k), mulii(q,gel(A,j)));
     elt_col(gel(B,k),gel(B,j),q);
     gel(Lk,j) = addii(gel(Lk,j), mulii(q,gel(D,j)));
@@ -2673,7 +2673,7 @@ extendedgcd(GEN A)
   }
   if (signe(A[n-1]) < 0)
   {
-    negi_ip(&gel(A,n-1));
+    togglesign_safe(&gel(A,n-1));
     ZV_togglesign(gel(B,n-1));
   }
   return gerepilecopy(av, mkvec2(gel(A,n-1), B));

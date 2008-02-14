@@ -179,25 +179,6 @@ ZX_to_Flx(GEN x, ulong p)
   return Flx_renormalize(a,lx);
 }
 
-GEN
-ZV_to_Flv(GEN x, ulong p)
-{
-  long i, n = lg(x);
-  GEN y = cgetg(n,t_VECSMALL);
-  for (i=1; i<n; i++) y[i] = umodiu(gel(x,i), p);
-  return y;
-}
-
-GEN
-ZM_to_Flm(GEN x, ulong p)
-{
-  long j,n = lg(x);
-  GEN y = cgetg(n,t_MAT);
-  if (n == 1) return y;
-  for (j=1; j<n; j++) gel(y,j) = ZV_to_Flv(gel(x,j), p);
-  return y;
-}
-
 /***********************************************************************/
 /**                                                                   **/
 /**          Basic operation on Flx                                   **/

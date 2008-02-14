@@ -24,70 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* default quality ratio for LLL: 99/100 */
 #define LLLDFT 100
 
-/* scalar product x.x */
-GEN
-RgV_dotsquare(GEN x)
-{
-  long i, lx;
-  pari_sp av;
-  GEN z;
-  lx = lg(x);
-  if (lx == 1) return gen_0;
-  av = avma;
-  z = gsqr(gel(x,1));
-  for (i=2; i<lx; i++)
-    z = gadd(z, gsqr(gel(x,i)));
-  return gerepileupto(av,z);
-}
-
-/* scalar product x.y */
-GEN
-RgV_dotproduct(GEN x,GEN y)
-{
-  long i, lx;
-  pari_sp av;
-  GEN z;
-  if (x == y) return RgV_dotsquare(x);
-  lx = lg(x);
-  if (lx == 1) return gen_0;
-  av = avma;
-  z = gmul(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++)
-    z = gadd(z, gmul(gel(x,i),gel(y,i)));
-  return gerepileupto(av,z);
-}
-
-GEN
-ZV_dotsquare(GEN x)
-{
-  long i, lx;
-  pari_sp av;
-  GEN z;
-  lx = lg(x);
-  if (lx == 1) return gen_0;
-  av = avma;
-  z = sqri(gel(x,1));
-  for (i=2; i<lx; i++)
-    z = addii(z, sqri(gel(x,i)));
-  return gerepileuptoint(av,z);
-}
-
-GEN
-ZV_dotproduct(GEN x,GEN y)
-{
-  long i, lx;
-  pari_sp av;
-  GEN z;
-  if (x == y) return ZV_dotsquare(x);
-  lx = lg(x);
-  if (lx == 1) return gen_0;
-  av = avma;
-  z = mulii(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++)
-    z = addii(z, mulii(gel(x,i),gel(y,i)));
-  return gerepileuptoint(av,z);
-}
-
 /********************************************************************/
 /**             QR Factorization via Householder matrices          **/
 /********************************************************************/
@@ -2894,42 +2830,6 @@ kerint(GEN x)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-/* x non-empty ZM, y a compatible zc (dimension > 0). */
-static GEN
-ZM_zc_mul_i(GEN x, GEN y, long c, long l)
-{
-  long i, j;
-  pari_sp av;
-  GEN z = cgetg(l,t_COL), s;
-
-  for (i=1; i<l; i++)
-  {
-    av = avma; s = mulis(gcoeff(x,i,1),y[1]);
-    for (j=2; j<c; j++)
-      if (y[j]) s = addii(s, mulis(gcoeff(x,i,j),y[j]));
-    gel(z,i) = gerepileuptoint(av,s);
-  }
-  return z;
-}
-GEN
-ZM_zc_mul(GEN x, GEN y) {
-  long l = lg(x);
-  if (l == 1) return cgetg(1, t_COL);
-  return ZM_zc_mul_i(x,y, l, lg(x[1]));
-}
-
-/* x ZM, y a compatible zm (dimension > 0). */
-GEN
-ZM_zm_mul(GEN x, GEN y)
-{
-  long j, c, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_MAT);
-  if (l == 1) return z;
-  c = lg(x[1]);
-  for (j = 1; j < ly; j++) gel(z,j) = ZM_zc_mul_i(x, gel(y,j), l,c);
-  return z;
-}
-
 void
 minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
 {

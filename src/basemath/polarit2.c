@@ -3289,14 +3289,6 @@ Q_mul_to_int(GEN x, GEN c)
   return NULL; /* not reached */
 }
 
-long
-zv_content(GEN x)
-{
-  long i, l = lg(x), s = labs(x[1]);
-  for (i=2; i<l && s!=1; i++) s = cgcd(x[i],s);
-  return s;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                           SUBRESULTANT                          */

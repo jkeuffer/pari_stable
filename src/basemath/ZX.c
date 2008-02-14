@@ -1,0 +1,175 @@
+/* $Id: ZX.c 9634 2008-02-12 14:48:34Z kb $
+
+Copyright (C) 2007  The PARI group.
+
+This file is part of the PARI/GP package.
+
+PARI/GP is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY WHATSOEVER.
+
+Check the License for details. You should have received a copy of it, along
+with the package; see the file 'COPYING'. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+
+#include "pari.h"
+#include "paripriv.h"
+
+/*******************************************************************/
+/*                                                                 */
+/*                                ZX                               */
+/*                                                                 */
+/*******************************************************************/
+
+/*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
+GEN
+ZX_renormalize(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (signe(gel(x,i))) break;
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + (i+1)));
+  setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
+GEN
+ZX_add(GEN x, GEN y)
+{
+  long lx,ly,i;
+  GEN z;
+  lx = lg(x); ly = lg(y); if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) gel(z,i) = addii(gel(x,i),gel(y,i));
+  for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
+  if (lx == ly) z = ZX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  return z;
+}
+
+GEN
+ZX_sub(GEN x,GEN y)
+{
+  long i, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (lx >= ly)
+  {
+    z = cgetg(lx,t_POL); z[1] = x[1];
+    for (i=2; i<ly; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
+    if (lx == ly)
+    {
+      z = ZX_renormalize(z, lx);
+      if (!lgpol(z)) { avma = (pari_sp)(z + lx); z = zeropol(varn(x)); }
+    }
+    else
+      for (   ; i<lx; i++) gel(z,i) = icopy(gel(x,i));
+  }
+  else
+  {
+    z = cgetg(ly,t_POL); z[1] = y[1];
+    for (i=2; i<lx; i++) gel(z,i) = subii(gel(x,i),gel(y,i));
+    for (   ; i<ly; i++) gel(z,i) = negi(gel(y,i));
+  }
+  return z;
+}
+
+GEN
+ZX_neg(GEN x)
+{
+  long i, l = lg(x);
+  GEN y = cgetg(l,t_POL);
+  y[1] = x[1]; for(i=2; i<l; i++) gel(y,i) = negi(gel(x,i));
+  return y;
+}
+
+GEN
+ZX_Z_add(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = addii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
+ZX_Z_sub(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+  { /* scalarpol(negi(x), v) */
+    long v = varn(y);
+    if (!signe(x)) return zeropol(v);
+    z = cgetg(3,t_POL);
+    z[1] = evalvarn(v) | evalsigne(1);
+    gel(z,2) = negi(x); return z;
+  }
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(gel(y,2),x);
+  for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
+Z_ZX_sub(GEN x, GEN y)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  gel(z,2) = subii(x, gel(y,2));
+  for(i=3; i<lz; i++) gel(z,i) = negi(gel(y,i));
+  if (lz==3) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+/*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
+
+GEN
+ZX_Z_mul(GEN y,GEN x)
+{
+  GEN z;
+  long i, l;
+  if (!signe(x)) return zeropol(varn(y));
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = mulii(gel(y,i),x);
+  return z;
+}
+
+GEN
+ZXV_Z_mul(GEN y, GEN x)
+{
+  long i, l = lg(y);
+  GEN z = cgetg_copy(l, y);
+  for(i=1; i<l; i++) gel(z,i) = ZX_Z_mul(gel(y,i), x);
+  return z;
+}
+
+GEN
+zx_to_ZX(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = stoi(z[i]);
+  x[1] = evalsigne(l-2!=0)| z[1]; return x;
+}
+
+GEN
+ZX_deriv(GEN x)
+{
+  long i,lx = lg(x)-1;
+  GEN y;
+
+  if (lx<3) return zeropol(varn(x));
+  y = cgetg(lx,t_POL);
+  for (i=2; i<lx ; i++) gel(y,i) = mului(i-1,gel(x,i+1));
+  y[1] = x[1]; return y;
+}
+
