@@ -491,7 +491,6 @@ typedef struct {
   int TeXstyle;
 } pariout_t;
 
-char *GENtostr0(GEN x, pariout_t *T);
 void lim_lines_output(char *s, long n, long max);
 void gen_output(GEN x, pariout_t *T);
 

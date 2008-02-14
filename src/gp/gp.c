@@ -1975,7 +1975,7 @@ normal_output(GEN z, long n)
   }
   /* output */
   term_color(c_OUTPUT);
-  s = GENtostr0(z, GP_DATA->fmt);
+  s = GENtostr(z);
   if (GP_DATA->lim_lines)
     lim_lines_output(s, l, GP_DATA->lim_lines);
   else

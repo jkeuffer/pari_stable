@@ -1538,15 +1538,10 @@ GENtostr_fun(GEN x, pariout_t *T, OUT_FUN out) {
   avma = av; return S.string;
 }
 char *
-GENtostr0(GEN x, pariout_t *T)
-{
-  if (!T) T = GP_DATA->fmt;
+GENtostr(GEN x) {
+  pariout_t *T = GP_DATA->fmt;
   return GENtostr_fun(x, T, get_fun(T->prettyp));
 }
-
-char *
-GENtostr(GEN x) { return GENtostr0(x, NULL); }
-
 char *
 GENtoTeXstr(GEN x) { return GENtostr_fun(x, GP_DATA->fmt, &texi); }
 
