@@ -4181,7 +4181,7 @@ newtonpoly(GEN x, GEN p)
   long *vval, num[] = {evaltyp(t_INT) | _evallg(3), 0, 0};
 
   if (typ(x)!=t_POL) pari_err(typeer,"newtonpoly");
-  n=degpol(x); if (n<=0) { y=cgetg(1,t_VEC); return y; }
+  n=degpol(x); if (n<=0) return cgetg(1,t_VEC);
   y = cgetg(n+1,t_VEC); x += 2; /* now x[i] = term of degree i */
   vval = (long *) pari_malloc(sizeof(long)*(n+1));
   for (a=0; a<=n; a++) vval[a] = ggval(gel(x,a),p);
