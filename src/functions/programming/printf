@@ -6,7 +6,7 @@ Prototype: vss*
 Help: printf(fmt,{x}*): prints its arguments according to the format fmt
 Description:
   (str,?gen,...):void  printf1("format\n"${2 format_args})
-Doc: This function is based on the C standard library command of the same name.
+Doc: This function is based on the C library command of the same name.
  It prints its arguments according to the format \var{fmt}, which specifies how
  subsequent arguments are converted for output. The format is a
  character string composed of zero or more directives:
@@ -18,9 +18,9 @@ Doc: This function is based on the C standard library command of the same name.
  specification.
  
  More precisely, a conversion specification consists in a \kbd{\%}, one or more
- optional flags (among \kbd{\#}, \kbd{0}, \kbd{-}, \kbd{+}, ' '), an optional
+ optional flags (among \kbd{\#}, \kbd{0}, \kbd{-}, \kbd{+}, ` '), an optional
  decimal digit string specifying a minimal field width, an optional precision
- in the form of a period ('\kbd{.}') followed by a decimal digit string, and
+ in the form of a period (`\kbd{.}') followed by a decimal digit string, and
  the conversion specifier (among \kbd{d},\kbd{i}, \kbd{o}, \kbd{u},
  \kbd{x},\kbd{X}, \kbd{p}, \kbd{e},\kbd{E}, \kbd{f}, \kbd{g},\kbd{G}, \kbd{s}).
 
@@ -52,7 +52,7 @@ Doc: This function is based on the C standard library command of the same name.
  blanks, rather than on the left with blanks or zeros. A \kbd{-} overrides a
  \kbd{0} if both are given.
 
- \item \kbd{' '} (a space): A blank is left before a positive number
+ \item \kbd{` '} (a space): A blank is left before a positive number
  produced by a signed conversion.
 
  \item \kbd{+}: A sign (+ or -) is placed before a number produced by a
@@ -68,7 +68,7 @@ Doc: This function is based on the C standard library command of the same name.
  field width is given in the next argument.
 
  \misctitle{The precision.} An optional precision in the form of a period
- ('\kbd{.}') followed by a decimal digit string. This gives
+ (`\kbd{.}') followed by a decimal digit string. This gives
  the number of digits to appear after the radix character for \kbd{e},
  \kbd{E}, \kbd{f}, and \kbd{F} conversions, the maximum number of significant
  digits for \kbd{g} and \kbd{G} conversions, and the maximum number of
@@ -76,8 +76,9 @@ Doc: This function is based on the C standard library command of the same name.
  Instead of a decimal digit string, one may write \kbd{*} to specify that the
  field width is given in the next argument.
 
- \misctitle{The length modifier.} This is ignored under gp, but necessary for
- \kbd{libpari} programming. Description given here for completeness:
+ \misctitle{The length modifier.} This is ignored under \kbd{gp}, but
+ necessary for \kbd{libpari} programming. Description given here for
+ completeness:
 
  \item \kbd{l}: argument is a \kbd{long} integer.
 
@@ -98,7 +99,8 @@ Doc: This function is based on the C standard library command of the same name.
  and the number of digits after it is equal to the precision; if the
  precision is missing, use the current \kbd{realprecision} for the total
  number of printed digits. If the precision is explicitly 0, no decimal-point
- character appears. 
+ character appears. An \kbd{E} conversion uses the letter \kbd{E} rather
+ than \kbd{e} to introduce the exponent.
 
  \item \kbd{f}: The (real) argument is converted in the style
  \kbd{[ -]ddd.ddd}, where the number of digits after the decimal point
@@ -128,6 +130,8 @@ Doc: This function is based on the C standard library command of the same name.
 
  \item \kbd{\%}: A \kbd{\%} is written. No argument is converted. The complete
  conversion specification is \kbd{\%\%}.
+
+ \noindent Examples:
 
  \bprog
  ? printf("floor: %d, field width 3: %3d, with sign: %+3d\n", Pi, 1, 2);
@@ -163,26 +167,24 @@ Doc: This function is based on the C standard library command of the same name.
 
  [ 0.33  0.25  0.20]
  @eprog
- \misctitle{Technical note:} our implementation of \tet{printf} slightly
- deviates from the C89 standard in a few places: 
+ \misctitle{Technical note:} our implementation of \tet{printf} 
+ deviates from the C89 and C99 standards in a few places: 
 
  \item whenever a precision is missing, the current \kbd{realprecision} is
- used to determine the number of printed digits, instead of a hardcoded 6
- decimals.
+ used to determine the number of printed digits (C89: use 6 decimals).
 
  \item in conversion style \kbd{e}, we do not impose that the
- exponent has at least two digits.
-
- \item in conversion \kbd{g}, we do not remove trailing zeros from the
-  fractional part of the result; nor a trailing decimal point.
+ exponent has at least two digits; we never write a \kbd{+} sign in the
+ exponent; 0 is printed in a special way, always as \kbd{0.E\var{exp}}.
 
  \item in conversion style \kbd{f}, we switch to style \kbd{e} if the
- exponent is greater or equal to the precision.
+ exponent is greater or equal to the precision. We do not support conversion
+ \kbd{F} as an alias for \kbd{f}.
 
- \item we do not support conversion \kbd{F} as an alias for \kbd{f}.
+ \item in conversion \kbd{g} and \kbd{G}, we do not remove trailing zeros
+  from the fractional part of the result; nor a trailing decimal point.
+ The rule to decide whether we print in style \kbd{e} or \kbd{f} is different
+ from the standard (C89 says: a decimal exponent less than $-4$ or greater or
+ equal to the precision).
 
- \item in conversion \kbd{g} and \kbd{G}, the rule to decide whether we print
- in style \kbd{f} or \kbd{e} is different from the standard (C89 says: a
- decimal exponent less than $-4$ or greater or equal to the precision).
- 
  %\syn{NO}
