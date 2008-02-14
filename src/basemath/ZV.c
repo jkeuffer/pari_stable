@@ -96,6 +96,32 @@ ZM_ZC_mul(GEN x, GEN y)
   return lx==1? cgetg(1,t_COL): ZM_ZC_mul_i(x, y, lx, lg(x[1]));
 }
 
+/* assume lx > 1 is lg(x) = lg(y) */
+static GEN
+ZV_dotproduct_i(GEN x, GEN y, long lx)
+{
+  pari_sp av = avma;
+  GEN c = mulii(gel(x,1), gel(y,1));
+  long i;
+  for (i = 2; i < lx; i++)
+  {
+    GEN t = mulii(gel(x,i), gel(y,i));
+    if (t != gen_0) c = addii(c, t);
+  }
+  return gerepileuptoint(av, c);
+}
+
+GEN
+ZV_ZM_mul(GEN x, GEN y)
+{
+  long i, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (lx == 1) return zerovec(ly-1);
+  z = cgetg(ly, t_VEC);
+  for (i = 1; i < ly; i++) gel(z,i) = ZV_dotproduct_i(x, gel(y,i), lx);
+  return z;
+}
+
 GEN
 ZC_ZV_mul(GEN x, GEN y)
 {
@@ -127,15 +153,11 @@ ZV_dotsquare(GEN x)
 GEN
 ZV_dotproduct(GEN x,GEN y)
 {
-  long i, lx;
-  pari_sp av;
-  GEN z;
+  long lx;
   if (x == y) return ZV_dotsquare(x);
   lx = lg(x);
   if (lx == 1) return gen_0;
-  av = avma; z = mulii(gel(x,1),gel(y,1));
-  for (i=2; i<lx; i++) z = addii(z, mulii(gel(x,i),gel(y,i)));
-  return gerepileuptoint(av,z);
+  return ZV_dotproduct_i(x, y, lx);
 }
 
 static GEN
@@ -499,4 +521,20 @@ zv_content(GEN x)
   long i, l = lg(x), s = labs(x[1]);
   for (i=2; i<l && s!=1; i++) s = cgcd(x[i],s);
   return s;
+}
+GEN
+ZV_content(GEN x)
+{
+  long i, l = lg(x);
+  pari_sp av = avma;
+  GEN c;
+  if (l == 1) return gen_1;
+  if (l == 2) return absi(gel(x,1));
+  c = gel(x,1);
+  for (i = 2; i < l; i++)
+  {
+    c = gcdii(c, gel(x,i));
+    if (is_pm1(c)) { avma = av; return gen_1; }
+  }
+  return gerepileuptoint(av, c);
 }

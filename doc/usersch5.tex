@@ -1957,6 +1957,9 @@ $u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
 
+\fun{GEN}{ZV_content}{GEN v} returns the GCD of all the components
+of~\kbd{x}.
+
 \fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
 Returns a vector with the same type as $L$.
 
@@ -1990,6 +1993,9 @@ by the \typ{INT}~\kbd{y}.
 \fun{GEN}{ZM_ZC_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions).
+
+\fun{GEN}{ZV_ZM_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
+by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
 
 \fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
 is a square \kbd{ZM} and $\kbd{n}\geq 0$.
@@ -4081,7 +4087,7 @@ $u\kbd{x}+v\kbd{y}=\gcd(\kbd{x},\kbd{y})$ into \kbd{*u} and~\kbd{*v}.
 and~\kbd{y}, and puts (the addresses of) objects $u$ and~$v$ such that
 $u\kbd{x}+v\kbd{y}=\text{Res}(\kbd{x},\kbd{y})$ into \kbd{*U} and~\kbd{*V}.
 
-\fun{GEN}{content}{GEN x} creates the GCD of all the components of~\kbd{x}.
+\fun{GEN}{content}{GEN x} returns the GCD of all the components of~\kbd{x}.
 
 \fun{GEN}{primitive_part}{GEN x, GEN *c} sets \kbd{c} to \kbd{content(x)}
 and returns the primitive part \kbd{x} / \kbd{c}. A trivial content is set to

@@ -218,23 +218,27 @@ get_chic(GEN chi, GEN D)
    chi(id) = z ^ sum(c_i * a_i) where
      a_i= log(id) on the generators of bnr
      z  = exp(2i * Pi / d) */
+/* U is NULL or a ZM */
 static GEN
 get_Char(GEN chi, GEN initc, GEN U, long prec)
 {
-  GEN d, ch = cgetg(4, t_VEC), chic = get_chic(chi, gel(initc,2));
-  if (U) chic = gmul(chic, U);
-  chic = Q_primitive_part(chic, &d);
-  if (d) {
-    GEN t = gdiv(gel(initc,1), d);
-    d = denom(t);
-    if (!is_pm1(d)) chic = gmul(d, chic);
-    d = numer(t);
-  } else
-    d = gel(initc,1);
-
-  gel(ch,1) = chic;
-  gel(ch,2) = InitRU(d, prec);
-  gel(ch,3) = d; return ch;
+  GEN d, chic = get_chic(chi, gel(initc,2));
+  if (U) chic = ZV_ZM_mul(chic, U);
+  d = ZV_content(chic);
+  if (is_pm1(d)) d = gel(initc,1); 
+  else
+  {
+    GEN t = gred_frac2(gel(initc,1), d);
+    chic = gdivexact(chic, d);
+    if (typ(t) == t_INT)
+      d = t;
+    else
+    {
+      d = gel(t,1);
+      chic = gmul(gel(t,2), chic);
+    }
+  }
+  return mkvec3(chic, InitRU(d, prec), d);
 }
 
 /* prime divisors of conductor */
@@ -1055,7 +1059,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   N     =  degpol(gel(nf,1));
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
-  C = sqrtr(gdiv(absi(dk), gpowgs(mppi(prec2), N)));
+  C = sqrtr(divir(absi(dk), gpowgs(mppi(prec2), N)));
 
   l = lg(dataCR);
   for (j = 1; j < l; j++)
@@ -2586,7 +2590,7 @@ START:
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
-    pari_err (warnprec, "quadhilbertreal", prec);
+    pari_warn(warnprec, "quadhilbertreal", prec);
   } TRY {
     /* find the modulus defining N */
     bnr  = buchrayinitgen(bnf, gen_1);
