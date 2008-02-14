@@ -157,7 +157,7 @@ ZM_pow(GEN x, GEN n)
 /**                                                                **/
 /********************************************************************/
 static GEN
-ZV_add_i(GEN x, GEN y, long lx)
+ZC_add_i(GEN x, GEN y, long lx)
 {
   GEN A = cgetg(lx, t_COL);
   long i;
@@ -165,10 +165,10 @@ ZV_add_i(GEN x, GEN y, long lx)
   return A;
 }
 GEN
-ZV_add(GEN x, GEN y) { return ZV_add_i(x, y, lg(x)); }
+ZC_add(GEN x, GEN y) { return ZC_add_i(x, y, lg(x)); }
 
 static GEN
-ZV_sub_i(GEN x, GEN y, long lx)
+ZC_sub_i(GEN x, GEN y, long lx)
 {
   long i;
   GEN A = cgetg(lx, t_COL);
@@ -176,7 +176,7 @@ ZV_sub_i(GEN x, GEN y, long lx)
   return A;
 }
 GEN
-ZV_sub(GEN x, GEN y) { return ZV_sub_i(x, y, lg(x)); }
+ZC_sub(GEN x, GEN y) { return ZC_sub_i(x, y, lg(x)); }
 
 GEN
 ZM_add(GEN x, GEN y)
@@ -185,7 +185,7 @@ ZM_add(GEN x, GEN y)
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
   z = cgetg(lx, t_MAT); l = lg(x[1]);
-  for (j = 1; j < lx; j++) gel(z,j) = ZV_add_i(gel(x,j), gel(y,j), l);
+  for (j = 1; j < lx; j++) gel(z,j) = ZC_add_i(gel(x,j), gel(y,j), l);
   return z;
 }
 GEN
@@ -195,7 +195,7 @@ ZM_sub(GEN x, GEN y)
   GEN z;
   if (lx == 1) return cgetg(1, t_MAT);
   z = cgetg(lx, t_MAT); l = lg(x[1]);
-  for (j = 1; j < lx; j++) gel(z,j) = ZV_sub_i(gel(x,j), gel(y,j), l);
+  for (j = 1; j < lx; j++) gel(z,j) = ZC_sub_i(gel(x,j), gel(y,j), l);
   return z;
 }
 /********************************************************************/
@@ -205,12 +205,12 @@ ZM_sub(GEN x, GEN y)
 /********************************************************************/
 /* Return c * X */
 GEN
-ZV_Z_mul(GEN X, GEN c)
+ZC_Z_mul(GEN X, GEN c)
 {
   long i, l;
   GEN A;
-  if (!signe(c)) return typ(X) == t_VEC? zerovec(lg(X)-1): zerocol(lg(X)-1);
-  if (is_pm1(c)) return (signe(c) > 0)? ZV_copy(X): ZV_neg(X);
+  if (!signe(c)) return zerocol(lg(X)-1);
+  if (is_pm1(c)) return (signe(c) > 0)? ZC_copy(X): ZC_neg(X);
   l = lg(X); A = cgetg_copy(l, X);
   for (i=1; i<l; i++) gel(A,i) = mulii(c,gel(X,i));
   return A;
@@ -297,20 +297,20 @@ ZV_lincomb_1(GEN v, GEN X, GEN Y)
 }
 /* X,Y compatible ZV; u,v in Z. Returns A = u*X + v*Y */
 GEN
-ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
+ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {
   pari_sp av;
   long i, lx, m, su, sv;
   GEN p1, p2, A;
 
-  su = signe(u); if (!su) return ZV_Z_mul(Y, v);
-  sv = signe(v); if (!sv) return ZV_Z_mul(X, u);
+  su = signe(u); if (!su) return ZC_Z_mul(Y, v);
+  sv = signe(v); if (!sv) return ZC_Z_mul(X, u);
   if (is_pm1(v))
   {
     if (is_pm1(u))
     {
-      if (su != sv) A = ZV_sub(X, Y);
-      else          A = ZV_add(X, Y);
+      if (su != sv) A = ZC_sub(X, Y);
+      else          A = ZC_add(X, Y);
       if (su < 0) ZV_togglesign(A); /* in place but was created above */
     }
     else
@@ -383,7 +383,7 @@ ZM_to_zm(GEN z)
 /**                                                                **/
 /********************************************************************/
 GEN
-ZV_copy(GEN x)
+ZC_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_COL);
@@ -408,7 +408,7 @@ ZM_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++) gel(y,i) = ZV_copy(gel(x,i));
+  for (i=1; i<lx; i++) gel(y,i) = ZC_copy(gel(x,i));
   return y;
 }
 GEN
@@ -427,7 +427,7 @@ ZV_neg_inplace(GEN M)
   for (i = lg(M)-1; i; i--) gel(M,i) = negi(gel(M,i));
 }
 GEN
-ZV_neg(GEN M)
+ZC_neg(GEN M)
 {
   long i, l = lg(M);
   GEN N = cgetg_copy(l, M);
@@ -447,7 +447,7 @@ ZM_neg(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++) gel(y,i) = ZV_neg(gel(x,i));
+  for (i=1; i<lx; i++) gel(y,i) = ZC_neg(gel(x,i));
   return y;
 }
 

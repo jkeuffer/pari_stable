@@ -529,8 +529,8 @@ mat_ideal_two_elt(GEN nf, GEN x)
       (void)bezout(a0, a1, &v0,&v1);
       u0 = mulii(a0, v0);
       u1 = mulii(a1, v1);
-      t = ZV_Z_mul(pi0, u1); gel(t,1) = addii(gel(t,1), u0);
-      u = ZV_Z_mul(pi1, u0); gel(u,1) = addii(gel(u,1), u1);
+      t = ZC_Z_mul(pi0, u1); gel(t,1) = addii(gel(t,1), u0);
+      u = ZC_Z_mul(pi1, u0); gel(u,1) = addii(gel(u,1), u1);
       a = element_muli(nf, centermod(u, xZ), centermod(t, xZ));
     }
   }
@@ -992,7 +992,7 @@ idealmulspec(GEN nf, GEN x, GEN y)
 
   m = cgetg((N<<1)+1,t_MAT);
   for (i=1; i<=N; i++) gel(m,i) = ZM_ZC_mul(alpha,gel(x,i));
-  for (i=1; i<=N; i++) gel(m,i+N) = ZV_Z_mul(gel(x,i), a);
+  for (i=1; i<=N; i++) gel(m,i+N) = ZC_Z_mul(gel(x,i), a);
   return hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
@@ -1171,7 +1171,7 @@ famat_pow(GEN f, GEN n)
   if (typ(f) != t_MAT) return to_famat_all(f,n);
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
-  gel(h,2) = ZV_Z_mul(gel(f,2),n);
+  gel(h,2) = ZC_Z_mul(gel(f,2),n);
   return h;
 }
 
@@ -1314,7 +1314,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     {
       long k = Z_pvalrem(cx, p, &u);
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
-	x = ZV_Z_mul(x, Fp_inv(u, prkZ));
+	x = ZC_Z_mul(x, Fp_inv(u, prkZ));
       if (k)
 	vden = addii(vden, mului(k, gel(e,i)));
     }
@@ -2178,7 +2178,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN listpr)
   fZ = gcoeff(f,1,1);
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
-  t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = ZV_Z_mul(L,t);
+  t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = ZC_Z_mul(L,t);
   if (equalii(d, d2)) return L;
 
   d1 = diviiexact(d, d2);
@@ -2231,7 +2231,7 @@ unif_mod_fZ(GEN pr, GEN F)
     if (!gcmp1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
-    t = ZV_Z_mul(t, v);
+    t = ZC_Z_mul(t, v);
     gel(t,1) = addii(gel(t,1), u); /* return u + vt */
   }
   return t;

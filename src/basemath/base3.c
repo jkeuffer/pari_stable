@@ -209,7 +209,7 @@ element_muli(GEN nf, GEN x, GEN y)
   {
     if (ty == t_INT) return scalarcol(mulii(x,y), N);
     if (ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
-    return ZV_Z_mul(y, x);
+    return ZC_Z_mul(y, x);
   }
   if (tx != t_COL || lg(x) != N+1
    || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
@@ -490,7 +490,7 @@ elementi_mulid(GEN nf, GEN x, long i)
   long j, k, N;
   GEN v, tab;
 
-  if (i==1) return ZV_copy(x);
+  if (i==1) return ZC_copy(x);
   tab = get_tab(nf, &N);
   tab += (i-1)*N;
   v = cgetg(N+1,t_COL);
@@ -974,7 +974,7 @@ zsigne(GEN nf,GEN x,GEN arch)
     {
       GEN g = gel(x,1), e = gel(x,2), z = vec_setconst(V, gen_0);
       for (i=1; i<lg(g); i++)
-	if (mpodd(gel(e,i))) z = ZV_add(z, zsigne(nf,gel(g,i),archp));
+	if (mpodd(gel(e,i))) z = ZC_add(z, zsigne(nf,gel(g,i),archp));
       for (i=1; i<l; i++) gel(V,i) = mpodd(gel(z,i))? gen_1: gen_0;
       avma = av; return V;
     }
@@ -1038,7 +1038,7 @@ colreducemodHNF(GEN x, GEN y, GEN *Q)
   {
     q = negi(diviiround(gel(x,i), gcoeff(y,i,i)));
     if (Q) gel(*Q, i) = q;
-    if (signe(q)) x = ZV_lincomb(gen_1, q, x, gel(y,i));
+    if (signe(q)) x = ZC_lincomb(gen_1, q, x, gel(y,i));
   }
   return x;
 }
@@ -1098,7 +1098,7 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
 
   archp = arch_to_perm(gel(idele,2));
   s = zsigne(nf, y, archp);
-  if (x) s = ZV_add(s, zsigne(nf, x, archp));
+  if (x) s = ZC_add(s, zsigne(nf, x, archp));
   s = ZM_ZC_mul(gel(sarch,3), s);
   for (i=1; i<nba; i++)
     if (mpodd(gel(s,i))) y = element_mul(nf,y,gel(gen,i));
@@ -1303,7 +1303,7 @@ detcyc(GEN cyc, long *L)
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
 {
-  return nfreducemodideal_i(ZV_add(u, ZM_ZC_mul(mv,x)), UV);
+  return nfreducemodideal_i(ZC_add(u, ZM_ZC_mul(mv,x)), UV);
 }
 
 static GEN
@@ -1514,7 +1514,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
-      if (mod2(t)) *psigne = *psigne? ZV_add(*psigne, gel(s,i)): gel(s,i);
+      if (mod2(t)) *psigne = *psigne? ZC_add(*psigne, gel(s,i)): gel(s,i);
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
     }
   }

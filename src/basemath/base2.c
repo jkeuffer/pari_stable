@@ -113,8 +113,8 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
 	gcoeff(M,j,j) = mulii(gcoeff(a,j,j),gcoeff(b,j,j));
       }
       /* could reduce mod M(j,j) but not worth it: usually close to da*db */
-      for (  ; j<=n;     j++) gel(M,j) = ZV_Z_mul(gel(a,j), db);
-      for (  ; j<=2*n-k; j++) gel(M,j) = ZV_Z_mul(gel(b,j+k-n), da);
+      for (  ; j<=n;     j++) gel(M,j) = ZC_Z_mul(gel(a,j), db);
+      for (  ; j<=2*n-k; j++) gel(M,j) = ZC_Z_mul(gel(b,j+k-n), da);
       da = mulii(da,db);
       a = hnfmodid(M, da);
     }
@@ -1685,7 +1685,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   l = lg(P);
   for (i=1; i<l; i++)
   {
-    x = centermod(ZV_add(u, ZM_ZC_mul(Mv, gel(P,i))), p);
+    x = centermod(ZC_add(u, ZM_ZC_mul(Mv, gel(P,i))), p);
     if (is_uniformizer(x, q, S)) return x;
   }
   errprime(p);
@@ -2137,8 +2137,8 @@ modprinit(GEN nf, GEN pr, int zk)
       deg = clcm(deg1,deg2);
       if (deg == deg1) continue;
       if (deg == deg2) { deg1 = deg2; u = u2; continue; }
-      u = ZV_add(u, u2);
-      while (ffdegree(u, frob, p) < deg) u = ZV_add(u, u2);
+      u = ZC_add(u, u2);
+      while (ffdegree(u, frob, p) < deg) u = ZC_add(u, u2);
       deg1 = deg;
     }
     v = lift_to_zk(u,c,N);
@@ -2269,7 +2269,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
       x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
       x = gdivexact(x, gpowgs(p, v));
     }
-    if (!is_pm1(den)) x = ZV_Z_mul(x, Fp_inv(den, p));
+    if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
     x = FpC_red(x, p);
   }
   return zk_to_ff(x, modpr);

@@ -468,10 +468,10 @@ FpV_red(GEN z, GEN p)
   return x;
 }
 GEN
-FpV_center(GEN z, GEN p, GEN pov2)
+FpC_center(GEN z, GEN p, GEN pov2)
 {
   long i,l = lg(z);
-  GEN x = cgetg_copy(l, z);
+  GEN x = cgetg(l, t_COL);
   for (i=1; i<l; i++) gel(x,i) = Fp_center(gel(z,i),p, pov2);
   return x;
 }
@@ -490,7 +490,7 @@ FpM_center(GEN z, GEN p, GEN pov2)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = FpV_center(gel(z,i), p, pov2);
+  for (i=1; i<l; i++) gel(x,i) = FpC_center(gel(z,i), p, pov2);
   return x;
 }
 

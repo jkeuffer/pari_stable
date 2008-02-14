@@ -1868,7 +1868,11 @@ $\deg(z) < \deg \kbd{T}$.
 
   \kbd{C}: vector (\typ{VEC} or \typ{COL}), treated as a column vector
   (independently of the actual type). The difference with \kbd{V} is purely
-  semantic.
+  semantic: if the result is a vector, it will be of type \typ{COL} unless
+  mentioned otherwise. For instance the function \kbd{ZC_add} receives two
+  integral vectors (\typ{COL} or \typ{VEC}, possibly different types) of the
+  same length and returns a \typ{COL} whose entries are the sums of the input
+  coefficients.
 
   \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
   entries
@@ -1926,11 +1930,11 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 \fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
 the same length (lexicographic order).
 
-\fun{GEN}{ZV_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
+\fun{GEN}{ZC_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
 
-\fun{GEN}{ZV_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
+\fun{GEN}{ZC_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
 
-\fun{GEN}{ZV_copy}{GEN x} returns a copy of \kbd{x}.
+\fun{GEN}{ZC_copy}{GEN x} returns a (\typ{COL}) copy of \kbd{x}.
 
 \fun{GEN}{ZV_neg}{GEN x} returns $-\kbd{x}$.
 
@@ -1942,20 +1946,22 @@ avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
 sign of its integer components. Universal constants \kbd{gen\_1}, \kbd{gen\_m1}
 and \kbd{gen\_2} are handled specially and will not be corrupted.
 
-\fun{GEN}{ZV_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
-(which can be a column or row vector) by the \typ{INT}~\kbd{y}.
+\fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC} or \kbd{ZV}~\kbd{x}
+(which can be a column or row vector) by the \typ{INT}~\kbd{y}, returning a
+\kbd{ZC}.
 
-\fun{GEN}{ZV_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
-$u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC}.
+\fun{GEN}{ZC_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
+$u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
 
 \fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
 
 \fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
+Returns a vector with the same type as $L$.
 
 \fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
-entries.
+entries. Returns a vector with the same type as $L$.
 
 \fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
 \kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
@@ -2535,8 +2541,8 @@ Mod(1,p))}, hence a \typ{VEC}
 \fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpM}.
 
-\fun{GEN}{FpV_center}{GEN z, GEN p, GEN pov2} returns a vector (of the same
-type as \kbd{z}) whose entries are the \kbd{Fp\_center(gel(z,i))}.
+\fun{GEN}{FpC_center}{GEN z, GEN p, GEN pov2} returns a \typ{COL} whose
+entries are the \kbd{Fp\_center(gel(z,i))}.
 
 \fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
 entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.

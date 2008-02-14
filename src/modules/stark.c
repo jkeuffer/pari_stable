@@ -1996,9 +1996,9 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 
     p = L[i]; ray1 = gel(R->L11ray,i); /* use pr1 pr2 = (p) */
     if (condZ == 1)
-      ray2 = ZV_neg(ray1);
+      ray2 = ZC_neg(ray1);
     else
-      ray2 = ZV_sub(gel(R->rayZ, p%condZ),  ray1);
+      ray2 = ZC_sub(gel(R->rayZ, p%condZ),  ray1);
     chi11 = EvalChar(&C, ray1);
     chi12 = EvalChar(&C, ray2);
 

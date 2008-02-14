@@ -1350,8 +1350,8 @@ hnf_special(GEN x, long remove)
       b = gcoeff(x,i,k); d = bezout(a,b,&u,&v);
       if (!is_pm1(d)) { a = diviiexact(a,d); b = diviiexact(b,d); }
       p1 = gel(x,j); b = negi(b);
-      gel(x,j) = ZV_lincomb(a,b, gel(x,k), p1);
-      gel(x,k) = ZV_lincomb(u,v, p1, gel(x,k));
+      gel(x,j) = ZC_lincomb(a,b, gel(x,k), p1);
+      gel(x,k) = ZC_lincomb(u,v, p1, gel(x,k));
       p1 = gel(x2,j);
       gel(x2,j) = gadd(gmul(a, gel(x2,k)), gmul(b,p1));
       gel(x2,k) = gadd(gmul(u,p1), gmul(v, gel(x2,k)));
@@ -1372,7 +1372,7 @@ hnf_special(GEN x, long remove)
       for (j=def+1; j<co; j++)
       {
 	b = negi(gdivent(gcoeff(x,i,j),p1));
-	gel(x,j) = ZV_lincomb(gen_1,b, gel(x,j), gel(x,def));
+	gel(x,j) = ZC_lincomb(gen_1,b, gel(x,j), gel(x,def));
 	gel(x2,j) = gadd(gel(x2,j), gmul(b, gel(x2,def)));
       }
       def--;
@@ -2051,18 +2051,18 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   if (!signe(u))
   { /* ak | aj */
     p1 = negi(diviiexact(aj,ak));
-    gel(A,j) = ZV_lincomb(gen_1, p1, gel(A,j), gel(A,k));
+    gel(A,j) = ZC_lincomb(gen_1, p1, gel(A,j), gel(A,k));
     if (U)
-      gel(U,j) = ZV_lincomb(gen_1, p1, gel(U,j), gel(U,k));
+      gel(U,j) = ZC_lincomb(gen_1, p1, gel(U,j), gel(U,k));
     return;
   }
   if (!signe(v))
   { /* aj | ak */
     p1 = negi(diviiexact(ak,aj));
-    gel(A,k) = ZV_lincomb(gen_1, p1, gel(A,k), gel(A,j));
+    gel(A,k) = ZC_lincomb(gen_1, p1, gel(A,k), gel(A,j));
     lswap(A[j], A[k]);
     if (U) {
-      gel(U,k) = ZV_lincomb(gen_1, p1, gel(U,k), gel(U,j));
+      gel(U,k) = ZC_lincomb(gen_1, p1, gel(U,k), gel(U,j));
       lswap(U[j], U[k]);
     }
     return;
@@ -2070,13 +2070,13 @@ ZV_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
 
   if (!is_pm1(d)) { aj = diviiexact(aj, d); ak = diviiexact(ak, d); }
   p1 = gel(A,k); aj = negi(aj);
-  gel(A,k) = ZV_lincomb(u,v, gel(A,j),p1);
-  gel(A,j) = ZV_lincomb(aj,ak, p1,gel(A,j));
+  gel(A,k) = ZC_lincomb(u,v, gel(A,j),p1);
+  gel(A,j) = ZC_lincomb(aj,ak, p1,gel(A,j));
   if (U)
   {
     p1 = gel(U,k);
-    gel(U,k) = ZV_lincomb(u,v, gel(U,j),p1);
-    gel(U,j) = ZV_lincomb(aj,ak, p1,gel(U,j));
+    gel(U,k) = ZC_lincomb(u,v, gel(U,j),p1);
+    gel(U,j) = ZC_lincomb(aj,ak, p1,gel(U,j));
   }
 }
 
@@ -2098,9 +2098,9 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     if (!signe(q)) continue;
 
     q = negi(q);
-    gel(A,j) = ZV_lincomb(gen_1,q, gel(A,j), gel(A,j0));
+    gel(A,j) = ZC_lincomb(gen_1,q, gel(A,j), gel(A,j0));
     if (U)
-      gel(U,j) = ZV_lincomb(gen_1,q, gel(U,j), gel(U,j0));
+      gel(U,j) = ZC_lincomb(gen_1,q, gel(U,j), gel(U,j0));
   }
 }
 
@@ -2147,7 +2147,7 @@ hnfmerge_get_1(GEN A, GEN B)
     {
       GEN u,v;
       t = bezout(b, gcoeff(C,1,1), &u, &v); /* >= 0 */
-      if (signe(v) && !gcmp1(v)) gel(U,1) = ZV_Z_mul(gel(U,1), v);
+      if (signe(v) && !gcmp1(v)) gel(U,1) = ZC_Z_mul(gel(U,1), v);
       gcoeff(C,1,1) = t;
     }
     if (signe(t) && is_pm1(t)) break;
@@ -2331,7 +2331,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       c = cgetg(li, t_COL);
       for (j = 1; j < i; j++) gel(c,j) = remii(gcoeff(x,j,i),d);
       for (     ; j <li; j++) gel(c,j) = gen_0;
-      if (!equalii(dm, d)) c = ZV_Z_mul(c, diviiexact(dm, d));
+      if (!equalii(dm, d)) c = ZC_Z_mul(c, diviiexact(dm, d));
       gel(x,li) = c;
       FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
       for (j = i - 1; j > ldef; j--)
@@ -2378,7 +2378,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     for (j = i+1; j < li; j++)
     {
       b = negi(truedivii(gcoeff(x,i,j), diag));
-      p1 = ZV_lincomb(gen_1,b, gel(x,j), gel(x,i));
+      p1 = ZC_lincomb(gen_1,b, gel(x,j), gel(x,i));
       gel(x,j) = p1;
       for (k=1; k<i; k++)
 	if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
@@ -2726,8 +2726,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
 	if (!signe(q)) continue;
 
 	q = negi(q);
-	gel(A,j1) = ZV_lincomb(gen_1,q,gel(A,j1),gel(A,j));
-	if (U) gel(U,j1) = ZV_lincomb(gen_1,q,gel(U,j1),gel(U,j));
+	gel(A,j1) = ZC_lincomb(gen_1,q,gel(A,j1),gel(A,j));
+	if (U) gel(U,j1) = ZC_lincomb(gen_1,q,gel(U,j1),gel(U,j));
       }
     }
     t = m; while (t && (c[t] || !signe(gcoeff(A,t,k)))) t--;
@@ -2754,8 +2754,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
 	if (!signe(q)) continue;
 
 	q = negi(q);
-	gel(A,j) = ZV_lincomb(gen_1,q,gel(A,j),gel(A,k));
-	if (U) gel(U,j) = ZV_lincomb(gen_1,q,gel(U,j),gel(U,k));
+	gel(A,j) = ZC_lincomb(gen_1,q,gel(A,j),gel(A,k));
+	if (U) gel(U,j) = ZC_lincomb(gen_1,q,gel(U,j),gel(U,k));
       }
     }
     if (low_stack(lim, stack_lim(av1,1)))

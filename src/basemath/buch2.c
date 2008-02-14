@@ -1371,11 +1371,11 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
    * since g_W B + g_B = [C_B] */
   if (xar)
   {
-    A = ZV_sub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
+    A = ZC_sub(ZM_zc_mul(B,Bex), zc_to_ZC(Wex));
     Bex = zv_neg(Bex);
   }
   else
-    A = ZV_sub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
+    A = ZC_sub(zc_to_ZC(Wex), ZM_zc_mul(B,Bex));
   Q = ZM_ZC_mul(U, A);
   for (i=1; i<=c; i++)
     gel(Q,i) = truedvmdii(gel(Q,i), gel(cyc,i), (GEN*)(ex+i));
@@ -2389,8 +2389,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
     J = inverse_if_smaller(nf0, I, prec);
     if (J != I)
     { /* update wrt P */
-      neg_row(Y ,j); gel(V,j) = ZV_neg(gel(V,j));
-      neg_row(Ur,j); gel(X,j) = ZV_neg(gel(X,j));
+      neg_row(Y ,j); gel(V,j) = ZC_neg(gel(V,j));
+      neg_row(Ur,j); gel(X,j) = ZC_neg(gel(X,j));
     }
     G[j] = J[1]; /* generator, order cyc[j] */
     gel(Ga,j) = gneg(famat_to_arch(nf, gel(J,2), prec));

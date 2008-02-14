@@ -315,11 +315,11 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *L)
   }
   else
   {
-    u = ZV_Z_mul(gel(L->iprk,1), elt);
+    u = ZC_Z_mul(gel(L->iprk,1), elt);
     for (i=1; i<l; i++) gel(u,i) = diviiround(gel(u,i), L->den);
     elt = scalarcol(elt, l-1);
   }
-  u = ZV_sub(elt, ZM_ZC_mul(L->prk, u));
+  u = ZC_sub(elt, ZM_ZC_mul(L->prk, u));
   if (bound && gcmp(QuickNormL2(u,DEFAULTPREC), bound) > 0) u = NULL;
   return u;
 }
@@ -1212,7 +1212,7 @@ get_V(GEN Tra, GEN M_L, GEN PRK, GEN PRKinv, GEN pk, long *eT2)
 
     v = gdivround(ZM_ZC_mul(PRKinv, T2), pk); /* small */
     av2 = avma;
-    T2 = ZV_sub(T2, ZM_ZC_mul(PRK, v));
+    T2 = ZC_sub(T2, ZM_ZC_mul(PRK, v));
     e = gexpo(T2); if (e > *eT2) *eT2 = e;
     avma = av2;
     gel(V,i) = gerepileupto(av, v); /* small */
