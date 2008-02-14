@@ -3925,7 +3925,7 @@ poldisc0(GEN x, long v)
       if (gcmp0(x)) return gen_0;
       av = avma; i = 0;
       if (v >= 0 && v != varn(x)) x = fix_pol(x,v, &i);
-      p1 = subres(x, derivpol(x));
+      p1 = subres(x, RgX_deriv(x));
       p2 = leading_term(x); if (!gcmp1(p2)) p1 = gdiv(p1,p2);
       if (degpol(x) & 2) p1 = gneg(p1);
       if (i) p1 = gsubst(p1, MAXVARN, pol_x(0));
@@ -3953,27 +3953,25 @@ GEN
 discsr(GEN x) { return poldisc0(x, -1); }
 
 GEN
-reduceddiscsmith(GEN pol)
+reduceddiscsmith(GEN x)
 {
-  long i, j, n;
+  long j, n = degpol(x);
   pari_sp av = avma;
-  GEN polp, p1, m;
+  GEN xp, M;
 
-  if (typ(pol)!=t_POL) pari_err(typeer,"reduceddiscsmith");
-  n=degpol(pol);
+  if (typ(x) != t_POL) pari_err(typeer,"reduceddiscsmith");
   if (n<=0) pari_err(constpoler,"reduceddiscsmith");
-  check_ZX(pol,"poldiscreduced");
-  if (!gcmp1(gel(pol,n+2)))
+  check_ZX(x,"poldiscreduced");
+  if (!gcmp1(gel(x,n+2)))
     pari_err(talker,"non-monic polynomial in poldiscreduced");
-  polp = derivpol(pol);
-  m=cgetg(n+1,t_MAT);
+  M = cgetg(n+1,t_MAT);
+  xp = RgX_deriv(x);
   for (j=1; j<=n; j++)
   {
-    p1=cgetg(n+1,t_COL); gel(m,j) = p1;
-    for (i=1; i<=n; i++) gel(p1,i) = truecoeff(polp,i-1);
-    if (j<n) polp = grem(RgX_shift_shallow(polp, 1), pol);
+    gel(M,j) = RgX_to_RgV(xp, n);
+    if (j<n) xp = RgX_rem(RgX_shift_shallow(xp, 1), x);
   }
-  return gerepileupto(av, smith(m));
+  return gerepileupto(av, smith(M));
 }
 
 /***********************************************************************/
@@ -4008,8 +4006,8 @@ sturmpart(GEN x, GEN a, GEN b)
     s = b? gsigne(poleval(x,b)):  sl;
     avma = av; return (s == t)? 0: 1;
   }
-  u=gdiv(x,content(x)); v=derivpol(x);
-  v=gdiv(v,content(v));
+  u = primpart(x);
+  v = primpart(RgX_deriv(x));
   g=gen_1; h=gen_1;
   s = b? gsigne(poleval(u,b)): sl;
   t = a? gsigne(poleval(u,a)): ((lg(u)&1)? sl: -sl);

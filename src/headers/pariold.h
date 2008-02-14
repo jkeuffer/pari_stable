@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define derivpol RgX_deriv
 #define gpmalloc pari_malloc
 #define gprealloc pari_realloc
 #define gpfree pari_free

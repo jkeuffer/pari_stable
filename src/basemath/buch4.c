@@ -33,7 +33,7 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
   if (Zp_issquare(gx,p)) { avma = av; return 1; }
 
   la = Z_pval(gx, p);
-  gpx = poleval(derivpol(pol), x);
+  gpx = poleval(RgX_deriv(pol), x);
   mu = gcmp0(gpx)? LONG_MAX: Z_pval(gpx,p);
   avma = av;
 
@@ -52,7 +52,7 @@ lemma7(GEN pol,long nu,GEN x)
   gx = poleval(pol, x);
   if (Zp_issquare(gx,gen_2)) return 1;
 
-  gpx = poleval(derivpol(pol), x);
+  gpx = poleval(RgX_deriv(pol), x);
   lambda = Z_lvalrem(gx, 2, &oddgx);
   mu = gcmp0(gpx)? LONG_MAX: vali(gpx);
   mnl = mu+nu-lambda;
@@ -186,7 +186,7 @@ lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
   if (psquarenf(nf,gx,pr)) return 1;
   lambda = element_val(nf,gx,pr);
 
-  gpx = poleval(derivpol(pol), x);
+  gpx = poleval(RgX_deriv(pol), x);
   mu = gcmp0(gpx)? LONG_MAX: idealval(nf,gpx,pr);
   if (lambda > mu<<1) return 1;
 
@@ -204,7 +204,7 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
   if (psquare2nf(nf,gx,pr,zinit)) return 1;
   lambda = element_val(nf,gx,pr);
 
-  gpx = poleval(derivpol(pol), x);
+  gpx = poleval(RgX_deriv(pol), x);
   mu = gcmp0(gpx)? LONG_MAX: idealval(nf,gpx,pr);
   if (lambda > (mu<<1)) return 1;
 

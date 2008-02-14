@@ -72,6 +72,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        gpfree -> pari_free
    19- check for small prime divisors in ispower [ large speedup ]
    20- rename cmp_ZV -> ZV_cmp
+   21- rename derivpol -> RgX_deriv
 
   Added
     1- library function gpcalloc

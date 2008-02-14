@@ -3050,6 +3050,9 @@ and $\kbd{x} \bs t^{-n}$ otherwise.
 \fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
 shallow (coefficients are not copied).
 
+\fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
+its main variable.
+
 \fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
 where $n\geq 0$. Shallow function.
 
@@ -4192,9 +4195,6 @@ returns \kbd{"\typ{INT}"}. The return value is read-only.
 \section{Further type specific functions}
 
 \subsec{Polynomial and power series}
-
-\fun{GEN}{derivpol}{GEN x} returns the derivative of the \typ{POL} \kbd{x}
-with respect to its main variable.
 
 \fun{GEN}{derivser}{GEN x} returns the derivative of the \typ{SER} \kbd{x}
 with respect to its main variable.

@@ -511,7 +511,7 @@ int
 nfissquarefree(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  GEN g, y = derivpol(x);
+  GEN g, y = RgX_deriv(x);
   if (RgX_is_rational(x))
     g = QX_gcd(x, y);
   else
@@ -923,7 +923,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
     newpol = Q_primpart(newpol);
 
-    p1 = nfgcd(newpol, derivpol(newpol), nfpol, gel(nf,4));
+    p1 = nfgcd(newpol, RgX_deriv(newpol), nfpol, gel(nf,4));
     if (degpol(p1) > 0) newpol = RgXQX_div(newpol, p1, nfpol);
     p1 = leading_term(newpol);
     if (typ(p1) != t_POL) p1 = scalarpol(p1, varn(nfpol));

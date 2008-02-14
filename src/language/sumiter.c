@@ -922,7 +922,7 @@ polzagreel(long n, long m, long prec)
   g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
   {
-    if (j) g = derivpol(g);
+    if (j) g = RgX_deriv(g);
     if (j || !(m&1))
     {
       h = cgetg(n+3,t_POL);

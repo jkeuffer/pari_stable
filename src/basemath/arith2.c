@@ -1160,7 +1160,7 @@ issquarefree(GEN x)
     case t_INT: return Z_issquarefree(x);
     case t_POL:
       if (!signe(x)) return 0;
-      av = avma; d = ggcd(x, derivpol(x));
+      av = avma; d = ggcd(x, RgX_deriv(x));
       avma = av; return (lg(d) == 3);
     default: pari_err(typeer,"issquarefree");
       return 0; /* not reached */

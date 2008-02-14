@@ -524,7 +524,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 
 GEN
 FqX_deriv(GEN f, /*unused*/GEN T, GEN p) {
-  (void)T; return FpXX_red(derivpol(f), p);
+  (void)T; return FpXX_red(RgX_deriv(f), p);
 }
 
 /* product of terms of degree 1 in factorization of f */
@@ -1631,7 +1631,7 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
   nb=hensel_lift_accel(e, &mask);
   fr = FpXQX_red(f, T, q);
   a = Fq_red(a, T, q);
-  W = FqX_eval(derivpol(fr), a, T, q);
+  W = FqX_eval(RgX_deriv(fr), a, T, q);
   W = Fq_inv(W,T,q);
   for(i=0;i<nb;i++)
   {
@@ -1640,7 +1640,7 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
     fr = FpXQX_red(f,T,q);
     if (i)
     {
-      W = Fq_red(gmul(Wr,FqX_eval(derivpol(fr),a,T,qold)), T, qold);
+      W = Fq_red(gmul(Wr,FqX_eval(RgX_deriv(fr),a,T,qold)), T, qold);
       W = Fq_red(gmul(Wr, gadd(gen_2, gneg(W))), T, qold);
     }
     Wr = W;
@@ -1813,7 +1813,7 @@ padicappr(GEN f, GEN a)
   }
   if (typ(f)!=t_POL) pari_err(notpoler,"padicappr");
   if (gcmp0(f)) pari_err(zeropoler,"padicappr");
-  z = ggcd(f, derivpol(f));
+  z = ggcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
   p = NULL; prec = LONG_MAX;
@@ -2173,7 +2173,7 @@ polfnf(GEN a, GEN T)
 
   dent = tmonic? indexpartial(T, NULL): ZX_disc(T);
   unt = mkpolmod(gen_1,T);
-  G = nfgcd(A,derivpol(A), T, dent);
+  G = nfgcd(A,RgX_deriv(A), T, dent);
   sqfree = gcmp1(G);
   if (sqfree)
     u = A;
@@ -2637,7 +2637,7 @@ rootsold(GEN x, long prec)
   p12 = cgetg(5,t_POL); p12[1] = x[1];
   gel(p12,4) = gen_1;
 
-  xd0 = derivpol(pax); pa = pax;
+  xd0 = RgX_deriv(pax); pa = pax;
   pq = NULL; /* for lint */
   if (exact) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq = RgX_div(pax,pp); }
   else{ pp = gen_1; h = 0; }
@@ -2647,7 +2647,7 @@ rootsold(GEN x, long prec)
     m++;
     if (h)
     {
-      pa = pp; pb = pq; pp = ggcd(pa,derivpol(pa)); h = degpol(pp);
+      pa = pp; pb = pq; pp = ggcd(pa,RgX_deriv(pa)); h = degpol(pp);
       pq = h? RgX_div(pa,pp): pa;
       ps = RgX_div(pb,pq);
     }
@@ -2656,7 +2656,7 @@ rootsold(GEN x, long prec)
 
     /* roots of exact order m */
     e = gexpo(ps) - gexpo(leading_term(ps));
-    if (e < 0) e = 0; if (ps!=pax) xd0 = derivpol(ps);
+    if (e < 0) e = 0; if (ps!=pax) xd0 = RgX_deriv(ps);
     xdabs = cgetg(deg+2,t_POL); xdabs[1] = xd0[1];
     for (i=2; i<deg+2; i++)
     {
@@ -2767,7 +2767,7 @@ rootsold(GEN x, long prec)
 	  xc = gerepileupto(av0, RgX_div(xc,p11));
 	}
       }
-      xd = derivpol(xc); av2 = avma;
+      xd = RgX_deriv(xc); av2 = avma;
     }
     k += deg*m;
   }
@@ -3184,7 +3184,7 @@ zrhqr(GEN a, long prec)
   rt = hqr(balanc(matcompanion(a)));
   prec2 = 2*prec; /* polishing the roots */
   aa = gprec_w(a, prec2);
-  b = derivpol(aa); rr = cgetg(n+1,t_COL);
+  b = RgX_deriv(aa); rr = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
   {
     x = gprec_w(gel(rt,i), prec2);

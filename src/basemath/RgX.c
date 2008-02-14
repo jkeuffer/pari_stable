@@ -347,6 +347,17 @@ RgXQX_red(GEN P, GEN T)
   return normalizepol_i(Q, l);
 }
 
+GEN
+RgX_deriv(GEN x)
+{
+  long i,lx = lg(x)-1;
+  GEN y;
+
+  if (lx<3) return zeropol(varn(x));
+  y = cgetg(lx,t_POL); gel(y,2) = gcopy(gel(x,3));
+  for (i=3; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
+  y[1] = x[1]; return normalizepol_i(y,i);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                  KARATSUBA (for polynomials)                    */

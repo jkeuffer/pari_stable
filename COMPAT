@@ -109,6 +109,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush -> pari_flush
   - rename gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
     gpfree -> pari_free
+  - rename derivpol -> RgX_deriv
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -427,7 +427,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
 
   T   = gel(DATA,1); rt = brent_kung_optpow(degpol(T), 2);
   maxp= gel(DATA,7);
-  gp = derivpol(g); av = avma;
+  gp = RgX_deriv(g); av = avma;
   w0 = chinese_retrieve_pol(DATA, S, listdelta);
   w0_Q = centermod(gmul(w0,den), p);
   h0 = FpXQ_inv(FpX_FpXQ_compo(gp,w0, T,p), T,p); /* = 1/g'(w0) mod (T,p) */

@@ -258,7 +258,7 @@ easymin(GEN x, long v)
     return NULL;
   R=easychar(x, v, NULL);
   if (!R) return R;
-  dR=derivpol(R);
+  dR=RgX_deriv(R);
   if (!lgpol(dR)) {avma=ltop; return NULL;}
   G=srgcd(R,dR);
   G=gdiv(G,leading_term(G));

@@ -270,7 +270,7 @@ nfroots(GEN nf,GEN pol)
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
-  g = nfgcd(A, derivpol(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
+  g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
 
   if (degpol(g))
   { /* not squarefree */
@@ -386,7 +386,7 @@ nffactor(GEN nf,GEN pol)
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
-  g = nfgcd(A, derivpol(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
+  g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
 
   A = Q_primpart( QXQX_normalize(A, T) );
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");

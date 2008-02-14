@@ -1554,18 +1554,6 @@ recip(GEN x)
 /*                                                                 */
 /*******************************************************************/
 GEN
-derivpol(GEN x)
-{
-  long i,lx = lg(x)-1;
-  GEN y;
-
-  if (lx<3) return zeropol(varn(x));
-  y = cgetg(lx,t_POL); gel(y,2) = gcopy(gel(x,3));
-  for (i=3; i<lx ; i++) gel(y,i) = gmulsg(i-1,gel(x,i+1));
-  y[1] = x[1]; return normalizepol_i(y,i);
-}
-
-GEN
 derivser(GEN x)
 {
   long i, vx = varn(x), e = valp(x), lx = lg(x);
@@ -1604,7 +1592,7 @@ deriv(GEN x, long v)
     case t_POL:
       vx = varn(x);
       if (varncmp(vx, v) > 0) return gen_0;
-      if (varncmp(vx, v) == 0) return derivpol(x);
+      if (varncmp(vx, v) == 0) return RgX_deriv(x);
       lx = lg(x); y = cgetg(lx,t_POL);
       y[1] = x[1];
       for (i=2; i<lx; i++) gel(y,i) = deriv(gel(x,i),v);

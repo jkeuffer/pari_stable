@@ -1015,7 +1015,7 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
 
   K = NN/Lmax; if (polreal) K = K/2+1;
   q = mygprec(p,bit);
-  qd = derivpol(q);
+  qd = RgX_deriv(q);
 
   A = cgetg(Lmax+1,t_VEC); A++;
   B = cgetg(Lmax+1,t_VEC); B++;
