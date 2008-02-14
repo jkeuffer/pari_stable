@@ -65,9 +65,7 @@ _mkFF_i(GEN x, GEN z, GEN r)
   return z;
 }
 
-
 /* Return true if x and y are defined in the same field */
-
 int
 FF_samefield(GEN x, GEN y)
 {
@@ -179,7 +177,7 @@ FF_mod(GEN x)
   switch(x[1])
   {
   case t_FF_FpXQ:
-    return gcopy(gel(x,3));
+    return ZX_copy(gel(x,3));
   case t_FF_F2xq:
     return F2x_to_ZX(gel(x,3));
   default:
@@ -193,7 +191,7 @@ FF_to_FpXQ(GEN x)
   switch(x[1])
   {
   case t_FF_FpXQ:
-    return gcopy(gel(x,2));
+    return ZX_copy(gel(x,2));
   case t_FF_F2xq:
     return F2x_to_ZX(gel(x,2));
   default:
@@ -841,4 +839,70 @@ FFX_factor(GEN P, GEN x)
   }
   r = FqX_factor(FFX_to_FqX(P, T,p), T,p);
   return to_FF_fact(gel(r,1),gel(r,2), x,av);
+}
+
+GEN
+ffgen(GEN T, long v)
+{
+  GEN ff=cgetg(5,t_FFELT);
+  GEN p,junk;
+  long ljunk, d = degpol(T);
+  if (typ(T) != t_POL || d < 1) pari_err(typeer,"ffgen");
+  if (RgX_type(T,&p,&junk,&ljunk)!=t_INTMOD) pari_err(typeer,"ffgen");
+  if (v<0) v = varn(T);
+  if (lgefint(p)==3)
+  {
+    ulong pp=p[2];
+    long sv=evalvarn(v);
+    if (pp==2)
+    {
+      ff[1]=t_FF_F2xq;
+      gel(ff,3)=ZX_to_F2x(lift(T));
+      mael(ff,3,1)=sv;
+      gel(ff,2)=polx_F2x(sv);
+      if (d == 1) gel(ff,2) = F2x_rem(gel(ff,2), gel(ff,3));
+      gel(ff,4)=gen_2;
+    }
+    else
+    {
+      ff[1]=t_FF_Flxq;
+      gel(ff,2)=polx_Flx(sv);
+      gel(ff,3)=ZX_to_Flx(lift(T),pp);
+      mael(ff,3,1)=sv;
+      if (d == 1) gel(ff,2) = Flx_rem(gel(ff,2), gel(ff,3), pp);
+      gel(ff,4)=icopy(p);
+    }
+  }
+  else
+  {
+    ff[1]=t_FF_FpXQ;
+    gel(ff,2)=pol_x(v);
+    gel(ff,3)=lift(T);
+    setvarn(gel(ff,3),v);
+    if (d == 1) gel(ff,2) = FpX_rem(gel(ff,2), gel(ff,3), p);
+    gel(ff,4)=icopy(p);
+  }
+  return ff;
+}
+
+GEN
+fforder(GEN x, GEN o)
+{
+  if (typ(x)!=t_FFELT || (o && typ(o)!=t_INT && !is_Z_factor(o)))
+    pari_err(typeer,"fforder");
+  return FF_order(x,o);
+}
+
+GEN
+ffprimroot(GEN x, GEN *o)
+{
+  if (typ(x)!=t_FFELT) pari_err(typeer,"ffprimroot");
+  return FF_primroot(x,o);
+}
+
+GEN
+fflog(GEN x, GEN g, GEN o)
+{
+  if (typ(x)!=t_FFELT || typ(g)!=t_FFELT) pari_err(typeer,"fflog");
+  return FF_log(x,g,o);
 }

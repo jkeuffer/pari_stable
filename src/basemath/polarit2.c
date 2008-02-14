@@ -2576,7 +2576,7 @@ ggcd(GEN x, GEN y)
 
       case t_INTMOD: z=cgetg(3,t_INTMOD);
 	if (equalii(gel(x,1),gel(y,1)))
-	  gel(z,1) = gcopy(gel(x,1));
+	  gel(z,1) = icopy(gel(x,1));
 	else
 	  gel(z,1) = gcdii(gel(x,1),gel(y,1));
 	if (gcmp1(gel(z,1))) gel(z,2) = gen_0;
@@ -2626,7 +2626,7 @@ ggcd(GEN x, GEN y)
 	switch(ty)
 	{
 	  case t_INTMOD: z = cgetg(3,t_INTMOD);
-	    gel(z,1) = gcopy(gel(y,1)); av = avma;
+	    gel(z,1) = icopy(gel(y,1)); av = avma;
 	    p1 = gcdii(gel(y,1),gel(y,2));
 	    if (!is_pm1(p1)) {
               p1 = gcdii(x,p1);

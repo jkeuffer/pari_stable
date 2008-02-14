@@ -99,7 +99,7 @@ JD 12- add an optional argument to quit()
        Flc_Fl_div_inplace, Flc_Fl_mul_inplace, Flv_add_inplace, Flv_sub_inplace
    17- RgV.c, FpV.c, ZX.c, ZV.c
    18- library functions RgX_pseudorem, RgX_pseudodivrem, RgXQX_pseudorem,
-       RgX_reverse
+       RgX_reverse, ZX_copy
 
   Removed
     1- obsolete library functions extract and matextract

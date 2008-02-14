@@ -1419,7 +1419,7 @@ ZXV_to_ZpXQV(GEN z, GEN T, GEN p, long prec)
 {
   long i, l = lg(z);
   GEN Z = cgetg(l, typ(z)), q = powiu(p, prec);
-  T = gcopy(T);
+  T = ZX_copy(T);
   for (i=1; i<lg(z); i++) gel(Z,i) = mkpolmod(ZX_to_ZpX(gel(z,i),p,q,prec),T);
   return Z;
 }

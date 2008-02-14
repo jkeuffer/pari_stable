@@ -81,6 +81,19 @@ ZX_neg(GEN x)
   y[1] = x[1]; for(i=2; i<l; i++) gel(y,i) = negi(gel(x,i));
   return y;
 }
+GEN
+ZX_copy(GEN x)
+{
+  long i, l = lg(x);
+  GEN y = cgetg(l, t_POL);
+  y[1] = x[1];
+  for (i=2; i<l; i++)
+  {
+    GEN c = gel(x,i);
+    gel(y,i) = lgefint(c) == 2? gen_0: icopy(c);
+  }
+  return y;
+}
 
 GEN
 ZX_Z_add(GEN y, GEN x)

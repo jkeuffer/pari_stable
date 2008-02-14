@@ -197,7 +197,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
       *pr = zeropol(vx);
     }
     av0 = avma; z = FpX_normalize(x, p);
-    if (z==x) return gcopy(z);
+    if (z==x) return ZX_copy(z);
     else return gerepileupto(av0, z);
   }
   av0 = avma; dz = dx-dy;
@@ -618,7 +618,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 
   if (!signe(n)) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
-    return (signe(n) < 0)? FpXQ_inv(x,pol,p): gcopy(x);
+    return (signe(n) < 0)? FpXQ_inv(x,pol,p): ZX_copy(x);
   av = avma;
   if (!is_bigint(p))
   {
@@ -644,7 +644,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   GEN V=cgetg(l+2,t_VEC);
   long i;
   gel(V,1) = pol_1(varn(T)); if (l==0) return V;
-  gel(V,2) = gcopy(x);       if (l==1) return V;
+  gel(V,2) = ZX_copy(x);       if (l==1) return V;
   if (lgefint(p) == 3) {
     long pp = p[2];
     return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
@@ -852,8 +852,8 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   pari_sp ltop=avma;
   long v=varn(T);
   GEN R;
-  T = gcopy(T); setvarn(T, MAXVARN);
-  x = gcopy(x); setvarn(x, MAXVARN);
+  T = shallowcopy(T); setvarn(T, MAXVARN);
+  x = shallowcopy(x); setvarn(x, MAXVARN);
   R = FpX_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
