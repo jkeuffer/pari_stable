@@ -623,10 +623,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
     {
       long i;
       for (i = ls-1; i >= 0; s[i--] = '0')
-      {
-        s[i]++;
-        if (s[i] <= '9') break;
-      }
+        if (++s[i] <= '9') break;
       if (i < 0) { s[0] = '1'; beta--; }
     }
     s[ls] = 0;
