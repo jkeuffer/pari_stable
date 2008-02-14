@@ -15,7 +15,7 @@ Doc:
  valuation of a vector, complex or quadratic number is the minimum of the
  component valuations.
  
- If $x=0$, the result is \kbd{VERYBIGINT} ($2^{31}-1$ for 32-bit machines or
+ If $x=0$, the result is \tet{LONG_MAX} ($2^{31}-1$ for 32-bit machines or
  $2^{63}-1$ for 64-bit machines) if $x$ is an exact object. If $x$ is a
  $p$-adic numbers or power series, the result is the exponent of the zero.
  Any other type combinations gives an error.
