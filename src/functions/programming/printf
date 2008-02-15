@@ -171,7 +171,8 @@ Doc: This function is based on the C library command of the same name.
  deviates from the C89 and C99 standards in a few places: 
 
  \item whenever a precision is missing, the current \kbd{realprecision} is
- used to determine the number of printed digits (C89: use 6 decimals).
+ used to determine the number of printed digits (C89: use 6 decimals after
+ the radix character).
 
  \item in conversion style \kbd{e}, we do not impose that the
  exponent has at least two digits; we never write a \kbd{+} sign in the
