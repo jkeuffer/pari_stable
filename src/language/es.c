@@ -927,13 +927,34 @@ shift_add(int x, int ch)
   return x;
 }
 
+static long
+get_sigd(GEN gvalue, char ch, int *maxwidth)
+{
+  long sigd;
+  if (*maxwidth < 0) return prec2ndec(precreal);
+  switch(ch)
+  {
+    case 'E':
+    case 'e': sigd = *maxwidth+1; *maxwidth = -1; break;
+    case 'F':
+    case 'f': sigd = ex10(gexpo(gvalue)) + 1 + *maxwidth; break;
+    /* 'g', 'G' */
+    default : sigd = *maxwidth? *maxwidth: 1; *maxwidth = -1; break;
+  }
+  return sigd;
+}
+
 static void
 fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
-        long sigd, int maxwidth, int ljust, int len, int zpad)
+        int maxwidth, int ljust, int len, int zpad)
 {
   pari_sp av = avma;
+  long sigd;
   char *buf;
-  if (typ(gvalue) != t_REAL)
+
+  if (typ(gvalue) == t_REAL)
+    sigd = get_sigd(gvalue, FORMAT, &maxwidth);
+  else
   {
     long i, j, h, l = lg(gvalue);
     switch(typ(gvalue))
@@ -942,8 +963,8 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         str_putc(S, '[');
         for (i = 1; i < l; i++)
         {
-          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, sigd,
-                  maxwidth, ljust,len,zpad);
+          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, maxwidth,
+                  ljust,len,zpad);
           if (i < l-1) str_putc(S, ',');
         }
         str_putc(S, ']');
@@ -952,8 +973,8 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         str_putc(S, '[');
         for (i = 1; i < l; i++)
         {
-          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, sigd,
-                  maxwidth, ljust,len,zpad);
+          fmtreal(S, gel(gvalue,i), space, signvalue, FORMAT, maxwidth,
+                  ljust,len,zpad);
           if (i < l-1) str_putc(S, ',');
         }
         str_putc(S, ']');
@@ -970,8 +991,8 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
             str_putc(S, '[');
             for (j=1; j<h; j++)
             {
-              fmtreal(S, gcoeff(gvalue,i,j), space, signvalue, FORMAT, sigd,
-                      maxwidth, ljust,len,zpad);
+              fmtreal(S, gcoeff(gvalue,i,j), space, signvalue, FORMAT, maxwidth,
+                      ljust,len,zpad);
               if (j<h-1) str_putc(S, ' ');
             }
             str_putc(S, ']');
@@ -981,6 +1002,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         }
         return;
     }
+    sigd = get_sigd(gvalue, FORMAT, &maxwidth);
     gvalue = gtofp(gvalue, ndec2prec(sigd));
     if (typ(gvalue) != t_REAL)
       pari_err(talker,"impossible conversion to t_REAL: %Zs",gvalue);
@@ -998,7 +1020,7 @@ static char *
 sm_dopr(const char *fmt, GEN arg_vector, va_list args)
 {
   int GENflag = 0, longflag = 0, pointflag = 0;
-  int print_a_plus, print_a_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
+  int print_plus, print_blank, with_sharp, ch, ljust, len, maxwidth, zpad;
   long lvalue;
   int index = 1;
   GEN gvalue;
@@ -1014,7 +1036,7 @@ sm_dopr(const char *fmt, GEN arg_vector, va_list args)
         len = maxwidth = -1;
         GENflag = longflag = pointflag = 0;
         recall = fmt - 1; /* '%' was skipped */
-        print_a_plus = print_a_blank = with_sharp = 0;
+        print_plus = print_blank = with_sharp = 0;
 nextch:
         ch = *fmt++;
         switch(ch) {
@@ -1027,13 +1049,13 @@ nextch:
             ljust = 1;
             goto nextch;
           case '+':
-            print_a_plus = 1;
+            print_plus = 1;
             goto nextch;
           case '#':
             with_sharp = 1;
             goto nextch;
           case ' ':
-            print_a_blank = 1;
+            print_blank = 1;
             goto nextch;
           case '0':
             /* appears as a flag: set zero padding */
@@ -1095,7 +1117,7 @@ nextch:
 /*------------------------------------------------------------------------
                        -- conversions
 ------------------------------------------------------------------------*/
-          case 'u': /* not a signed conversion: print_a_(blank|plus) ignored */
+          case 'u': /* not a signed conversion: print_(blank|plus) ignored */
 #define get_num_arg() \
   if (arg_vector) { \
     lvalue = 0; \
@@ -1112,7 +1134,7 @@ nextch:
             get_num_arg();
             fmtnum(S, lvalue, gvalue, 10, -1, ljust, len, zpad);
             break;
-          case 'o': /* not a signed conversion: print_a_(blank|plus) ignored */
+          case 'o': /* not a signed conversion: print_(blank|plus) ignored */
             get_num_arg();
             fmtnum(S, lvalue, gvalue, with_sharp? -8: 8, -1, ljust, len, zpad);
             break;
@@ -1120,7 +1142,7 @@ nextch:
           case 'i':
             get_num_arg();
             fmtnum(S, lvalue, gvalue, 10,
-                   dosign(print_a_blank, print_a_plus), ljust, len, zpad);
+                   dosign(print_blank, print_plus), ljust, len, zpad);
             break;
           case 'p':
             str_putc(S, '0'); str_putc(S, 'x');
@@ -1130,12 +1152,12 @@ nextch:
               lvalue = (long)va_arg(args, void*);
             fmtnum(S, lvalue, NULL, 16, -1, ljust, len, zpad);
             break;
-          case 'x': /* not a signed conversion: print_a_(blank|plus) ignored */
+          case 'x': /* not a signed conversion: print_(blank|plus) ignored */
             if (with_sharp) { str_putc(S, '0'); str_putc(S, 'x'); }
             get_num_arg();
             fmtnum(S, lvalue, gvalue, 16, -1, ljust, len, zpad);
             break;
-          case 'X': /* not a signed conversion: print_a_(blank|plus) ignored */
+          case 'X': /* not a signed conversion: print_(blank|plus) ignored */
             if (with_sharp) { str_putc(S, '0'); str_putc(S, 'X'); }
             get_num_arg();
             fmtnum(S, lvalue, gvalue,-16, -1, ljust, len, zpad);
@@ -1192,9 +1214,8 @@ nextch:
           case 'e':
           case 'E':
           case 'f':
+          case 'F':
           {
-            long sigd = 0;
-
             if (arg_vector)
               gvalue = simplify_i( v_get_arg(arg_vector, &index, save_fmt) );
             else {
@@ -1203,17 +1224,8 @@ nextch:
               else
                 gvalue = dbltor( va_arg(args, double) );
             }
-            if (maxwidth < 0)
-              sigd = prec2ndec(precreal);
-            else switch(tolower(ch))
-            {
-              case 'e': sigd = maxwidth+1; maxwidth = -1; break;
-              case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
-              case 'g': sigd = maxwidth? maxwidth: 1; maxwidth = -1; break;
-            }
-            fmtreal(S, gvalue, GP_DATA->fmt->sp,
-                    dosign(print_a_blank, print_a_plus), ch,
-                    sigd, maxwidth, ljust, len, zpad);
+            fmtreal(S, gvalue, GP_DATA->fmt->sp, dosign(print_blank,print_plus),
+                    ch, maxwidth, ljust, len, zpad);
             break;
           }
           default:

@@ -42,6 +42,7 @@ Doc: This function is based on the C library command of the same name.
  \kbd{e},
  \kbd{E},
  \kbd{f},
+ \kbd{F},
  \kbd{g}, and
  \kbd{G} conversions, the value is padded on the left with zeros rather than
  blanks. (If the \kbd{0} and \kbd{-} flags both appear, the \kbd{0} flag is
@@ -102,7 +103,7 @@ Doc: This function is based on the C library command of the same name.
  character appears. An \kbd{E} conversion uses the letter \kbd{E} rather
  than \kbd{e} to introduce the exponent.
 
- \item \kbd{f}: The (real) argument is converted in the style
+ \item \kbd{f}, \kbd{F}: The (real) argument is converted in the style
  \kbd{[ -]ddd.ddd}, where the number of digits after the decimal point
  is equal to the precision; if the precision is missing, use the current 
  \kbd{realprecision} for the total number of printed digits. If the precision
@@ -179,8 +180,7 @@ Doc: This function is based on the C library command of the same name.
  exponent; 0 is printed in a special way, always as \kbd{0.E\var{exp}}.
 
  \item in conversion style \kbd{f}, we switch to style \kbd{e} if the
- exponent is greater or equal to the precision. We do not support conversion
- \kbd{F} as an alias for \kbd{f}.
+ exponent is greater or equal to the precision.
 
  \item in conversion \kbd{g} and \kbd{G}, we do not remove trailing zeros
   from the fractional part of the result; nor a trailing decimal point;
