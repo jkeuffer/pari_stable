@@ -597,15 +597,16 @@ init_stack(size_t size)
     old = top - bot;
     pari_free((void*)bot);
   }
-  /* NOT pari_malloc, memer would be deadly */
-
   BLOCK_SIGINT_START;
-  bot = (pari_sp)malloc(s);
+  bot = (pari_sp)malloc(s); /* NOT pari_malloc, memer would be deadly */
   if (!bot)
     for (s = old;; s>>=1)
     {
+      char buf[128];
       if (!s) pari_err(memer); /* no way out. Die */
-      pari_warn(warner,"not enough memory, new stack %lu",s);
+      /* must use sprintf: pari stack is currently dead */
+      sprintf(buf, "not enough memory, new stack %lu", (ulong)s);
+      pari_warn(warner, buf, s);
       bot = (pari_sp)malloc(s);
       if (bot) break;
     }
@@ -1811,10 +1812,7 @@ long
 allocatemoremem(size_t newsize)
 {
   size_t s;
-  if (!newsize)
-  {
-    newsize = (top - bot) << 1;
-  }
+  if (!newsize) newsize = (top - bot) << 1;
   s = init_stack(newsize);
   pari_warn(warner,"new stack size = %lu (%.3f Mbytes)", s, s/1048576.);
   return s;
