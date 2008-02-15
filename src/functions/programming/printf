@@ -182,9 +182,6 @@ Doc: This function is based on the C library command of the same name.
  \kbd{F} as an alias for \kbd{f}.
 
  \item in conversion \kbd{g} and \kbd{G}, we do not remove trailing zeros
-  from the fractional part of the result; nor a trailing decimal point.
- The rule to decide whether we print in style \kbd{e} or \kbd{f} is different
- from the standard (C89 says: a decimal exponent less than $-4$ or greater or
- equal to the precision).
-
+  from the fractional part of the result; nor a trailing decimal point;
+  0 is printed in a special way, always as \kbd{0.E\var{exp}}.
  %\syn{NO}

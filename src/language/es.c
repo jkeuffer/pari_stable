@@ -633,7 +633,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
   buf0 = buf = stackmalloc( ls + 1+2+MAX_EXPO_LEN+1 );
   point = ls - beta; /* position of . in s; < 0 or > 0 */
   if (width_frac < 0 &&
-     (beta < 0 || format == 'e' || (format == 'g' && ex < -32)))
+     (beta < 0 || format == 'e' || (format == 'g' && point-1 < -4)))
   { /* e format */
     buf = wr_dec(buf, s, ls, 1);
     if (sp) *buf++ = ' ';

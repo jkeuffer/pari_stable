@@ -73,6 +73,9 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    19- check for small prime divisors in ispower [ large speedup ]
    20- rename cmp_ZV -> ZV_cmp
    21- rename derivpol -> RgX_deriv
+   22- the conversion style 'g' of the 'format' default now printfs in style
+       'f' if the decimal exponent is < -4 ( was: if the binary exponent
+       is < -32 ), in order to conform to standard printf specifications.
 
   Added
     1- library function gpcalloc
