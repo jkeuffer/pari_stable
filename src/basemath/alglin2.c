@@ -2825,8 +2825,8 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     return cgetg(1,t_MAT);
   }
   m = lg(A[1])-1;
-  c = cgetg(m+1,t_VECSMALL); for (i=1; i<=m; i++) c[i]=0;
-  h = cgetg(n+1,t_VECSMALL); for (j=1; j<=n; j++) h[j]=m;
+  c = const_vecsmall(m, 0);
+  h = const_vecsmall(n, m);
   av1 = avma; lim = stack_lim(av1,1);
   A = shallowcopy(A);
   B = ptB? matid(n): NULL;
@@ -2878,11 +2878,9 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     for (i=h[j]; i; i--)
     {
       a = gcoeff(A,i,j);
-      if (!signe(a)) continue;
-
       k = c[i];
-      ZV_elem(a,gcoeff(A,i,k), A,B, j,k);
-      ZM_reduce(A,B, i,k);
+      if (signe(a)) ZV_elem(a,gcoeff(A,i,k), A,B, j,k);
+      ZM_reduce(A,B, i,k); /* ensure non-negative entries, even if a = 0 */
       if (low_stack(lim, stack_lim(av1,1)))
       {
 	if (DEBUGMEM>1) pari_warn(warnmem,"hnfall[3], j = %ld", j);

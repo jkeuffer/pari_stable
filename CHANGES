@@ -41,6 +41,7 @@ BA 27- priority of << had become lower than priority of * (should be =)
    28- last digit of polylogs was wrong
 BA 29- missing GC in the leftrightpow functions
    30- bnr=bnrinit(bnfinit(y^2-229,1),5,1); rnfkummer(bnr,,3) --> oo loop
+   41- mathnf(a,1) could have negative entries if non-trivial kernel [#741]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
