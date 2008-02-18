@@ -986,7 +986,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-#if 0 /* use undocumented GMP interface */
+#if 1 /* use undocumented GMP interface */
 static void
 GEN2mpz(mpz_t X, GEN x)
 {
