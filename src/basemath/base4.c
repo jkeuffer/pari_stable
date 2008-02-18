@@ -113,7 +113,7 @@ idealmat_to_hnf(GEN nf, GEN x)
 
   x = Q_primitive_part(x, &cx);
   if (nx < N) x = vec_mulid(nf, x, nx, N);
-  x = hnfmod(x, detint(x));
+  x = hnfmod(x, ZM_detmult(x));
   return cx? gmul(x,cx): x;
 }
 
@@ -137,7 +137,7 @@ idealhermite_aux(GEN nf, GEN x)
     x = Q_primitive_part(x, &cx);
     if (nx < N) x = vec_mulid(nf, x, nx, N);
   }
-  x = hnfmod(x, detint(x));
+  x = hnfmod(x, ZM_detmult(x));
   return cx? gmul(x, cx): x;
 }
 
@@ -849,7 +849,7 @@ idealadd(GEN nf, GEN x, GEN y)
   }
   else
   {
-    p1 = gcdii(detint(x), detint(y));
+    p1 = gcdii(ZM_detmult(x), ZM_detmult(y));
     modid = 0;
   }
   if (gcmp1(p1))
@@ -1077,7 +1077,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
     if (ZV_isscalar(gel(x,1)) && ZV_isscalar(gel(y,1)))
       y = hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
     else
-      y = hnfmod(m, detint(m));
+      y = hnfmod(m, ZM_detmult(m));
   }
   else
   {
@@ -2060,7 +2060,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
     I = hnfmodid(J,b);
   } else {
-    b = detint(J);
+    b = ZM_detmult(J);
     I = hnfmod(J,b);
   }
   if (!aI) return gerepileupto(av, I);

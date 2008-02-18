@@ -585,7 +585,7 @@ thueinit(GEN pol, long flag, long prec)
   if (checktnf(pol)) { bnf = checkbnf(gel(pol,2)); pol = gel(pol,1); }
   if (typ(pol)!=t_POL) pari_err(notpoler,"thueinit");
   if (degpol(pol) <= 2) pari_err(talker,"invalid polynomial in thue (need deg>2)");
-  check_ZX(pol, "thueinit");
+  RgX_check_ZX(pol, "thueinit");
 
   s = sturm(pol);
   if (s)

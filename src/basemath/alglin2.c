@@ -1096,7 +1096,7 @@ matrixqz(GEN x, GEN p)
     pari_sp av2 = avma;
     p1 = shallowtrans(x); setlg(p1,n+1);
     p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
-    if (!signe(p2)) p2 = detint(x);
+    if (!signe(p2)) p2 = ZM_detmult(x);
     if (gcmp1(p2)) { avma = av2; return ZM_copy(x); }
   }
   else
@@ -3035,7 +3035,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   }
   else
   {
-    mdet = detint(x);
+    mdet = ZM_detmult(x);
     if (signe(mdet))
     {
       if (!V)

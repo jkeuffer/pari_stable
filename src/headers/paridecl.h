@@ -297,6 +297,8 @@ int     is_rational(GEN x);
 
 /* ZV.c */
 
+void    RgV_check_ZV(GEN A, const char *s);
+void    RgM_check_ZM(GEN A, const char *s);
 GEN     ZC_ZV_mul(GEN x, GEN y);
 GEN     ZM_ZC_mul(GEN x, GEN y);
 GEN     ZM_Z_mul(GEN X, GEN c);
@@ -333,6 +335,8 @@ GEN     zv_neg(GEN x);
 
 /* ZX.c */
 
+void    RgX_check_ZX(GEN x, const char *s);
+void    RgX_check_ZXY(GEN x, const char *s);
 GEN     ZXV_Z_mul(GEN y, GEN x);
 GEN     ZX_Z_add(GEN y,GEN x);
 GEN     ZX_Z_mul(GEN y,GEN x);
@@ -370,6 +374,7 @@ GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     FqM_suppl(GEN x, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
+GEN     ZM_detmult(GEN A);
 GEN     ZM_inv(GEN M, GEN dM);
 void    appendL(GEN x, GEN t);
 GEN     apply0(GEN A, GEN f);
@@ -687,8 +692,6 @@ GEN     Z_factor(GEN n);
 /* base1.c */
 
 GEN     T2_from_embed(GEN x, long r1);
-void    check_ZX(GEN x, const char *s);
-void    check_ZXY(GEN x, const char *s);
 GEN     check_units(GEN x, const char *f);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);

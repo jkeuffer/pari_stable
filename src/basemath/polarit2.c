@@ -3961,7 +3961,7 @@ reduceddiscsmith(GEN x)
 
   if (typ(x) != t_POL) pari_err(typeer,"reduceddiscsmith");
   if (n<=0) pari_err(constpoler,"reduceddiscsmith");
-  check_ZX(x,"poldiscreduced");
+  RgX_check_ZX(x,"poldiscreduced");
   if (!gcmp1(gel(x,n+2)))
     pari_err(talker,"non-monic polynomial in poldiscreduced");
   M = cgetg(n+1,t_MAT);

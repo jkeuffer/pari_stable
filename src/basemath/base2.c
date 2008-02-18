@@ -601,7 +601,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 
   if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis");
   if (!degpol(x0)) pari_err(zeropoler,"nfbasis");
-  check_ZX(x0, "nfbasis");
+  RgX_check_ZX(x0, "nfbasis");
 
   x = pol_to_monic(x0, &lead);
   if (fa && gcmp0(fa)) fa = NULL; /* compatibility. NULL is the proper arg */
@@ -3063,10 +3063,10 @@ polcompositum0(GEN A, GEN B, long flall)
   if (degpol(A)<=0 || degpol(B)<=0) pari_err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) pari_err(talker,"not the same variable in compositum");
-  A = Q_primpart(A); check_ZX(A,"compositum");
+  A = Q_primpart(A); RgX_check_ZX(A,"compositum");
   if (!ZX_is_squarefree(A)) pari_err(talker,"compositum: %Zs inseparable", A);
   if (!same) {
-    B = Q_primpart(B); check_ZX(B,"compositum");
+    B = Q_primpart(B); RgX_check_ZX(B,"compositum");
     if (!ZX_is_squarefree(B)) pari_err(talker,"compositum: %Zs inseparable", B);
   }
 

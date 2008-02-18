@@ -107,7 +107,8 @@ JD 12- add an optional argument to quit()
        ZV_content, ZV_ZM_mul
    17- RgV.c, FpV.c, ZX.c, ZV.c
    18- library functions RgX_pseudorem, RgX_pseudodivrem, RgXQX_pseudorem,
-       RgX_reverse, ZX_copy
+       RgX_reverse, ZX_copy, RgX_check_ZX, RgX_check_ZXY, RgM_check_ZM,
+       RgV_check_ZV, ZM_detmult
 
   Removed
     1- obsolete library functions extract and matextract

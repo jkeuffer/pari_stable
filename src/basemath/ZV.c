@@ -16,6 +16,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+static int
+check_ZV(GEN x, long l)
+{
+  long i;
+  for (i=1; i<l; i++)
+    if (typ(gel(x,i)) != t_INT) return 0;
+  return 1;
+}
+void
+RgV_check_ZV(GEN A, const char *s)
+{
+  if (!check_ZV(A, lg(A)))
+    pari_err(talker,"not an integer vector in %s",s);
+}
+void
+RgM_check_ZM(GEN A, const char *s)
+{
+  long n = lg(A);
+  if (n != 1)
+  {
+    long j, m = lg(A[1]);
+    for (j=1; j<n; j++)
+      if (!check_ZV(gel(A,j), m))
+        pari_err(talker,"not an integer matrix in %s",s);
+  }
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                           MULTIPLICATION                       **/

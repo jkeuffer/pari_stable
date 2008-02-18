@@ -59,7 +59,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   n = degpol(x);
   if (n <= 0)
     return cgetg(1, t_VEC);
-  check_ZX(x, "galoisconj2pol");
+  RgX_check_ZX(x, "galoisconj2pol");
   if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
   polr = roots(x, prec);
   p1 = gel(polr,1);
@@ -2705,7 +2705,7 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   n = degpol(T);
   if (n <= 0) pari_err(constpoler, "galoisconj4");
-  check_ZX(T, "galoisconj4");
+  RgX_check_ZX(T, "galoisconj4");
   if (!gcmp1(gel(T,n + 2)))
     pari_err(talker, "non-monic polynomial in galoisconj4");
   n = degpol(T);

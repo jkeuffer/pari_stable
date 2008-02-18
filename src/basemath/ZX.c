@@ -21,6 +21,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                ZX                               */
 /*                                                                 */
 /*******************************************************************/
+static int
+_check_ZX(GEN x)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--)
+    if (typ(x[k])!=t_INT) return 0;
+  return 1;
+}
+
+void
+RgX_check_ZX(GEN x, const char *s)
+{
+  if (! _check_ZX(x)) pari_err(talker,"polynomial not in Z[X] in %s",s);
+}
+void
+RgX_check_ZXY(GEN x, const char *s)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--) {
+    GEN t = gel(x,k);
+    switch(typ(t)) {
+      case t_INT: break;
+      case t_POL: if (_check_ZX(t)) break;
+      /* fall through */
+      default: pari_err(talker,"polynomial not in Z[X,Y] in %s",s);
+    }
+  }
+}
 
 /*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
 GEN

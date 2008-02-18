@@ -1047,7 +1047,7 @@ colreducemodHNF(GEN x, GEN y, GEN *Q)
 GEN
 reducemodmatrix(GEN x, GEN y)
 {
-  return reducemodHNF(x, hnfmod(y,detint(y)), NULL);
+  return reducemodHNF(x, hnfmod(y, ZM_detmult(y)), NULL);
 }
 
 /* x = y Q + R */

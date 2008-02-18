@@ -529,9 +529,9 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
   B = fix_relative_pol(A,B,1); lB = lg(B);
   if (lA<=3 || lB<=3) pari_err(constpoler,"rnfequation");
 
-  check_ZX(A,"rnfequation");
+  RgX_check_ZX(A,"rnfequation");
   B = primpart(lift_intern(B));
-  check_ZXY(B,"rnfequation");
+  RgX_check_ZXY(B,"rnfequation");
   for (k=2; k<lB; k++)
     if (lg(B[k]) >= lA) gel(B,k) = grem(gel(B,k),A);
 

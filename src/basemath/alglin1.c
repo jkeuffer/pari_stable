@@ -1711,20 +1711,20 @@ QM_inv(GEN M, GEN dM)
 GEN
 detint(GEN A)
 {
-  pari_sp av, av1, lim;
+  if (typ(A) != t_MAT) pari_err(typeer,"detint");
+  RgM_check_ZM(A, "detint");
+  return ZM_detmult(A);
+}
+GEN
+ZM_detmult(GEN A)
+{
+  pari_sp av1, av = avma, lim = stack_lim(av,1);
   GEN B, c, v, piv;
-  long rg, i, j, k, m, n;
+  long rg, i, j, k, m, n = lg(A) - 1;
 
-  if (typ(A)!=t_MAT) pari_err(typeer,"detint");
-  n = lg(A) - 1; if (!n) return gen_1;
+  if (!n) return gen_1;
   m = lg(A[1]) - 1;
-  for (k=1; k<=n; k++)
-    for (j=1; j<=m; j++)
-      if (typ(gcoeff(A,j,k)) != t_INT)
-	pari_err(talker,"not an integer matrix in detint");
-
   if (n < m) return gen_0;
-  av = avma; lim = stack_lim(av,1);
   c = const_vecsmall(m, 0);
   av1 = avma;
   B = zeromatcopy(m,m);
