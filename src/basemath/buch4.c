@@ -475,11 +475,11 @@ bnfsunit(GEN bnf,GEN S,long prec)
   card = gen_1;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
-    GEN U, D = smithall(H, &U, NULL);
+    GEN u, D = smithall(H, &u, NULL);
     D = mattodiagonal_i(D);
     card = detcyc(D, &i);
     setlg(D,i);
-    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gen_1);
+    p1=cgetg(i,t_VEC); pow=ZM_inv(u,gen_1);
     for(i--; i; i--)
       gel(p1,i) = factorback_i(gen, gel(pow,i), nf, 1);
     gel(res,5) = mkvec3(card,D,p1);
@@ -796,7 +796,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   aux = zerocol(lg(A)-1); gel(aux,itu) = w;
   gel(M,L) = aux;
-  H = hnfall_i(M, &U, 0);
+  H = hnfall_i(M, &U, 2);
   Y = gmul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
   setlg(Y, L);

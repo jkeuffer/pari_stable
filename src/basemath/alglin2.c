@@ -1214,7 +1214,7 @@ matrixqz_aux(GEN A)
       A = gerepilecopy(av,A);
     }
   }
-  return m > 100? hnfall_i(A,NULL,1): hnf(A);
+  return hnf(A);
 }
 
 GEN
@@ -2159,55 +2159,54 @@ hnfmerge_get_1(GEN A, GEN B)
 
 /* remove: throw away lin.dep.columns */
 GEN
-hnf0(GEN A, int remove)
+hnf_i(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
-  long s,li,co,i,j,k,def,ldef;
+  long s, m, n, i, j, k, li, def, ldef;
   GEN denx, a;
 
   if (typ(A) == t_VEC) return hnf_special(A,remove);
   if (typ(A) != t_MAT) pari_err(typeer,"mathnf");
-  co = lg(A); if (co == 1) return cgetg(1,t_MAT);
+  n = lg(A)-1; if (!n) return cgetg(1,t_MAT);
   A = init_hnf(A,&denx,&av);
-  li = lg(A[1]);
+  m = lg(A[1])-1;
 
   lim = stack_lim(av,1);
-  def=co-1; ldef=(li>co)? li-co: 0;
-  for (i=li-1; i>ldef; i--)
+  def = n; ldef = (m>n)? m-n: 0;
+  for (li=m; li>ldef; li--)
   {
     for (j=def-1; j; j--)
     {
-      a = gcoeff(A,i,j);
+      a = gcoeff(A,li,j);
       if (!signe(a)) continue;
 
       /* zero a = Aij  using  b = Aik */
       k = (j==1)? def: j-1;
-      ZV_elem(a,gcoeff(A,i,k), A,NULL, j,k);
-
+      ZV_elem(a,gcoeff(A,li,k), A,NULL, j,k);
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. i=%ld",i);
+	if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. li=%ld",li);
 	A = gerepilecopy(av, A);
       }
     }
-    s = signe(gcoeff(A,i,def));
+    s = signe(gcoeff(A,li,def));
     if (s)
     {
       if (s < 0) ZV_neg_inplace(gel(A,def));
-      ZM_reduce(A, NULL, i,def);
+      ZM_reduce(A, NULL, li,def);
       def--;
     }
     else
       if (ldef) ldef--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"hnf[2]. i=%ld",i);
+      if (DEBUGMEM>1) pari_warn(warnmem,"hnf[2]. li=%ld",li);
       A = gerepilecopy(av, A);
     }
   }
   if (remove)
   {                            /* remove null columns */
-    for (i=1,j=1; j<co; j++)
+    for (i=1,j=1; j<=n; j++)
       if (!gcmp0(gel(A,j))) A[i++] = A[j];
     setlg(A,i);
   }
@@ -2216,7 +2215,7 @@ hnf0(GEN A, int remove)
 }
 
 GEN
-hnf(GEN x) { return hnf0(x,1); }
+hnf(GEN x) { return lg(x) > 8? hnfall_i(x, NULL, 1): hnf_i(x, 1); }
 
 static GEN
 ZC_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
@@ -2254,17 +2253,17 @@ FpV_red_part_ip(GEN z, GEN p, long k)
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
-  pari_sp av, lim;
+  pari_sp av0 = avma, av, lim;
   const int modid = (flag & hnf_MODID);
   long li, co, i, j, k, def, ldef, ldm;
-  GEN a, b, p1, p2, u, v;
+  GEN a, b, p1, p2, u, v, dm2;
 
   if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
   if (!signe(dm)) return hnf(x);
   if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
-  li = lg(x[1]);
+  li = lg(x[1]); dm2 = shifti(dm, -1);
   av = avma; lim = stack_lim(av,1);
   x = shallowcopy(x);
 
@@ -2278,22 +2277,22 @@ allhnfmod(GEN x, GEN dm, int flag)
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
-    gcoeff(x,i,def) = remii(gcoeff(x,i,def), dm);
+    gcoeff(x,i,def) = centermodii(gcoeff(x,i,def), dm,dm2);
     for (j = def-1; j; j--)
     {
-      gcoeff(x,i,j) = remii(gcoeff(x,i,j), dm);
+      gcoeff(x,i,j) = centermodii(gcoeff(x,i,j), dm,dm2);
       a = gcoeff(x,i,j);
       if (!signe(a)) continue;
 
       k = (j==1)? def: j-1;
-      gcoeff(x,i,k) = remii(gcoeff(x,i,k), dm);
+      gcoeff(x,i,k) = centermodii(gcoeff(x,i,k), dm,dm2);
       ZV_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = gel(x,j);
       p2 = gel(x,k);
       for (k = 1; k < i; k++)
       {
-	if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), dm);
-	if (lgefint(p2[k]) > ldm) gel(p2,k) = remii(gel(p2,k), dm);
+	if (lgefint(p1[k]) > ldm) gel(p1,k) = centermodii(gel(p1,k), dm,dm2);
+	if (lgefint(p2[k]) > ldm) gel(p2,k) = centermodii(gel(p2,k), dm,dm2);
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -2389,7 +2388,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       }
     }
   }
-  return gerepilecopy(av, x);
+  return gerepilecopy(av0, x);
 }
 
 GEN
@@ -2809,16 +2808,18 @@ hnfperm(GEN A)
   gel(y,3) = vecsmall_to_vec(perm); return y;
 }
 
-/* Hermite Normal Form */
+/* Hermite Normal Form, with base change matrix if ptB != NULL.
+ * If 'remove' = 1, remove 0 columns (do NOT update *ptB accordingly)
+ * If 'remove' = 2, remove 0 columns and update *ptB accordingly */
 GEN
 hnfall_i(GEN A, GEN *ptB, long remove)
 {
-  GEN B,c,h,x,a;
   pari_sp av = avma, av1, lim;
-  long m,n,r,i,j,k,li;
+  long m, n, r, i, j, k, li;
+  GEN B, c, h, a;
 
   if (typ(A)!=t_MAT) pari_err(typeer,"hnfall");
-  n=lg(A)-1;
+  n = lg(A)-1;
   if (!n)
   {
     if (ptB) *ptB = cgetg(1,t_MAT);
@@ -2849,7 +2850,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
 	  gerepileall(av1, B? 2: 1, &A, &B);
 	}
       }
-      x = gcoeff(A,li,j); if (signe(x)) break;
+      if (signe( gcoeff(A,li,j) )) break;
       h[j] = li-1;
     }
     if (j == r) continue;
@@ -2858,7 +2859,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     {
       lswap(A[j], A[r]);
       if (B) lswap(B[j], B[r]);
-      h[j]=h[r]; h[r]=li; c[li]=r;
+      h[j] = h[r]; h[r] = li; c[li] = r;
     }
     if (signe(gcoeff(A,li,r)) < 0)
     {
@@ -2872,6 +2873,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       gerepileall(av1, B? 2: 1, &A, &B);
     }
   }
+
   if (DEBUGLEVEL>5) fprintferr("\nhnfall, final phase: ");
   r--; /* first r cols are in the image the n-r (independent) last ones */
   for (j=1; j<=r; j++)
@@ -2889,22 +2891,21 @@ hnfall_i(GEN A, GEN *ptB, long remove)
     }
   if (DEBUGLEVEL>5) fprintferr("\n");
   /* remove the first r columns */
-  if (remove) { A += r; A[0] = evaltyp(t_MAT) | evallg(n-r+1); }
+  if (remove) {
+    A += r; A[0] = evaltyp(t_MAT) | evallg(n-r+1);
+    if (B && remove == 2) { B += r; B[0] = A[0]; }
+  }
   gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
   return A;
 }
 
 GEN
-hnfall0(GEN A, long remove)
-{
+hnfall(GEN A) {
   GEN B, z = cgetg(3, t_VEC);
-  gel(z,1) = hnfall_i(A, &B, remove);
+  gel(z,1) = hnfall_i(A, &B, 1);
   gel(z,2) = B; return z;
 }
-
-GEN
-hnfall(GEN x) {return hnfall0(x,1);}
 
 /***************************************************************/
 /**							      **/

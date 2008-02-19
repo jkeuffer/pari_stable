@@ -928,16 +928,10 @@ root_bound(GEN P0)
   return y;
 }
 
-static GEN
-ZM_HNFimage(GEN x)
-{
-  return (lg(x) > 50)? hnflll_i(x, NULL, 1): hnfall_i(x, NULL, 1);
-}
-
 GEN
 special_pivot(GEN x)
 {
-  GEN t, H = ZM_HNFimage(x);
+  GEN t, H = hnf(x);
   long i,j, l = lg(H), h = lg(H[1]);
   for (i=1; i<h; i++)
   {
@@ -1188,7 +1182,7 @@ AGAIN:
     if (lg(CM_Lp) != lg(CM_L))
     {
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
-      CM_L = ZM_HNFimage(CM_L);
+      CM_L = hnf(CM_L);
     }
 
     if (i <= r && i*rec < n0)

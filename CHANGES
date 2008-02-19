@@ -79,6 +79,8 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        is < -32 ), in order to conform to standard printf specifications.
    23- [GMP kernel] enable GMP exact division
    24- matdetint: use less memory + faster finish
+   25- change the default algorithm for mathnf(a) [ much faster ], flag 0 is
+       no longer deprecated
 
   Added
     1- library function gpcalloc

@@ -595,9 +595,8 @@ void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 /* alglin2.c */
 
 GEN     Frobeniusform(GEN V, long n);
-GEN     hnf0(GEN A, int remove);
+GEN     hnf_i(GEN A, int remove);
 GEN     hnf_special(GEN x, long remove);
-GEN     hnfall0(GEN A, long remove);
 
 /* anal.c */
 

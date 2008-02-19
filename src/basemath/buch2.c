@@ -2294,7 +2294,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     return fupb_PRECI;
   }
   L = Q_muli_to_int(lambda, den);
-  H = hnfall_i(L, NULL, 1); r = lg(H)-1;
+  H = hnf(L); r = lg(H)-1;
 
   /* tentative regulator */
   R = gmul(*ptkR, gdiv(ZM_det_triangular(H), powiu(den, r)));
@@ -2894,7 +2894,7 @@ extract_full_lattice(GEN x)
   if (l < 200) return NULL; /* not worth it */
 
   v = cget1(l, t_VECSMALL);
-  H = hnfall_i(x, NULL, 1);
+  H = hnf(x);
   h = cgetg(1, t_MAT);
   dj = 1;
   for (j = 1; j < l; )
@@ -2904,7 +2904,7 @@ extract_full_lattice(GEN x)
 
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
     setlg(v, lv + dj);
-    h2 = hnfall_i(vecpermute(x, v), NULL, 1);
+    h2 = hnf(vecpermute(x, v));
     if (gequal(h, h2))
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
