@@ -1073,7 +1073,7 @@ listznstarelts(long m, long p)
   {
     pari_sp av;
     av = avma;
-    card = phi / itos(dethnf_i(gel(lss,i)));
+    card = phi / itos(ZM_det_triangular(gel(lss,i)));
     avma = av;
     if (p % card == 0)
       gel(res,k++) = znstar_hnf_elts(zns,gel(lss,i));

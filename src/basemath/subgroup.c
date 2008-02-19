@@ -503,7 +503,7 @@ subgroup_engine(subgp_iter *T)
     {
       indexsubq = cgetg(lsubq,t_VEC);
       for (i=1; i<lsubq; i++)
-	gel(indexsubq,i) = dethnf_i(gel(T->subq,i));
+	gel(indexsubq,i) = ZM_det_triangular(gel(T->subq,i));
     }
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++)

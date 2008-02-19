@@ -1931,6 +1931,9 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 or \typ{COL} raise an error if it is not a \kbd{ZV} ($s$ should point to the
 name of the caller).
 
+\fun{int}{ZV_cmp0}{GEN x} returns 1 if all entries of the \kbd{ZV} $x$ are
+zero, and $0$ otherwise.
+
 \fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
 the same length (lexicographic order).
 
@@ -2019,6 +2022,20 @@ determinant of \kbd{M} is computed and used instead.
 
 \fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
 still assume that $M'$ has integer coefficients.
+
+\fun{GEN}{ZC_hnfremdiv}{GEN x, GEN y, GEN *Q} assuming $y$ is an
+invertible \kbd{ZM} in HNF and $x$ is a \kbd{ZC}, returns the \kbd{ZC} $R$
+equal to $x$ mod $y$ (whose $i$-th entry belongs to $[-y_{i,i}, y_{i,i}]$).
+Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
+itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
+$x = yQ + R$.
+
+\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q}; $x$ is a \kbd{ZM} and we
+reduce each column using \kbd{ZC\_hnfremdiv}. If $Q$ is not \kbd{NULL},
+set it to the \kbd{ZM} such that $x = yQ + R$.
+
+\fun{GEN}{ZM_det_triangular}{GEN x} returns the product of the diagonal
+entries of $x$ (its determinant if it is indeed triangular).
 
 \fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is square upper triangular with
 positive diagonal coefficients. Assumes $x$ is a \kbd{ZM} (has integer

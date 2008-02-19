@@ -1776,7 +1776,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     {
       if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Zs\n", M);
       fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(Z));
-      fprintferr("expected shvector bitsize: %ld\n", expi(dethnf_i(M))/dim);
+      fprintferr("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
     }
 
     sh = lllint_fp_ip(M, 4);

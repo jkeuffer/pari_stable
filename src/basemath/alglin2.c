@@ -3030,7 +3030,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   x = shallowcopy(x);
   if (m == n && ZM_ishnf(x))
   {
-    mdet = dethnf_i(x);
+    mdet = ZM_det_triangular(x);
     if (V) *ptV = matid(n);
   }
   else
@@ -3050,7 +3050,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
 	else
 	  p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
       }
-      mdet = dethnf_i(p1);
+      mdet = ZM_det_triangular(p1);
     }
     else
       p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
@@ -3435,7 +3435,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
       Ui = ZM_mul(H, V);
       for (i = 1; i < c; i++)
 	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
-      *newUi = reducemodHNF(Ui, H, NULL);
+      *newUi = ZM_hnfremdiv(Ui, H, NULL);
     }
   }
   return D;

@@ -506,24 +506,14 @@ itostr_sign(GEN x, int sx, long *len)
 /* 19 digits (if 64 bits, at most 2^60-1) + 1 sign */
 static const long MAX_EXPO_LEN = 20;
 
-/* sss.ttt, assume 'point' < ls = strlen(s) */
-static char *
-wr_dec(char *buf, char *s, size_t ls, long point)
+/* write z to buf, inserting '.' at 'point', 0 < point < strlen(z) */
+static void
+wr_dec(char *buf, char *z, long point)
 {
-  if (ls)
-  {
-    strncpy(buf, s, point); /* integer part */
-    buf += point;
-    s   += point;
-    ls  -= point;
-    if (ls)
-    {
-      *buf++ = '.';
-      strcpy(buf, s);
-      buf += ls;
-    }
-  }
-  *buf = 0; return buf;
+  char *s = buf + point;
+  strncpy(buf, z, point); /* integer part */
+  *s++ = '.'; z += point;
+  while ( (*s++ = *z++) ) /* empty */;
 }
 
 static char *
@@ -534,26 +524,29 @@ zerotostr()
   s[1] = 0; return s;
 }
 
+/* write a real 0 of exponent ex in format f */
+static char *
+real0tostr_width_frac(long width_frac)
+{
+  char *buf, *s;
+  if (width_frac == 0) return zerotostr();
+  buf = s = stackmalloc(width_frac + 3);
+  *s++ = '0';
+  *s++ = '.';
+  (void)zeros(s, width_frac);
+  return buf;
+}
+
 /* write a real 0 of exponent ex */
 static char *
-abs0tostr(long ex, char format, char exp_char, long wanted_dec, long width_frac)
+real0tostr(long ex, char format, char exp_char, long wanted_dec)
 {
   char *buf, *buf0;
 
   if (format == 'f') {
-    long dec;
-    if (width_frac == 0) return zerotostr();
-    if (width_frac > 0)
-      dec = width_frac;
-    else
-    {
-      dec = wanted_dec;
-      if (dec < 0) dec = (ex >= 0)? 0: (long)(-ex * L2SL10);
-    }
-    buf0 = buf = stackmalloc(dec + 3);
-    *buf++ = '0';
-    *buf++ = '.';
-    (void)zeros(buf, dec);
+    long width_frac = wanted_dec;
+    if (width_frac < 0) width_frac = (ex >= 0)? 0: (long)(-ex * L2SL10);
+    return real0tostr_width_frac(width_frac);
   } else {
     buf0 = buf = stackmalloc(3 + MAX_EXPO_LEN + 1);
     *buf++ = '0';
@@ -564,22 +557,63 @@ abs0tostr(long ex, char format, char exp_char, long wanted_dec, long width_frac)
   return buf0;
 }
 
-/* Return t_REAL |x| in floating point format.
- * Allocate freely, the caller must clean the stack.
- *   FORMAT: E/e (exponential), f (floating point), G/g
- *   wanted_dec: number of significant digits to print (all if < 0).
- *   width_frac: number of digits in fractional part (< 0 if unset), 
- *     _must_ be unset in style e and g */
+/* format f, width_frac >= 0: number of digits in fractional part, */
 static char *
-absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
+absrtostr_width_frac(GEN x, int width_frac)
 {
-  const char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
-  long sx = signe(x), ex = expo(x);
+  long beta, ls, point, lx, sx = signe(x);
   char *s, *buf, *buf0;
-  long beta, ls, point, lx;
   GEN z;
 
-  if (!sx) return abs0tostr(ex, format, exp_char, wanted_dec, width_frac);
+  if (!sx) return real0tostr_width_frac(width_frac);
+
+  /* x != 0 */
+  lx = lg(x);
+  beta = width_frac;
+  if (beta) /* >= 0 */
+  { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
+    if (beta > 4e9) lx++;
+    z = mulrr(x, rpowuu(5UL, (ulong)beta, lx+1));
+    z[1] = evalsigne(1) | evalexpo(expo(z) + beta);
+  }
+  else
+    z = mpabs(x);
+  z = grndtoi(z, &ls); /* round; ls is junk */
+  if (!signe(z)) return real0tostr_width_frac(width_frac);
+
+  s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
+  /* '.', trailing \0 */
+  buf0 = buf = stackmalloc( ls + 1+1 );
+  point = ls - beta; /* position of . in s; <= ls, may be < 0 */
+  if (point > 0) /* write integer_part.fractional_part */
+  {
+    if (ls == point)
+      strcpy(buf, s); /* no '.' */
+    else
+      wr_dec(buf, s, point);
+  } else { /* point <= 0, fractional part must be written */
+    *buf++ = '0';
+    *buf++ = '.';
+    buf = zeros(buf, -point);
+    strcpy(buf, s);
+  }
+  return buf0;
+}
+
+/* Return t_REAL |x| in floating point format.
+ * Allocate freely, the caller must clean the stack.
+ *   FORMAT: E/e (exponential), F/f (floating point), G/g
+ *   wanted_dec: number of significant digits to print (all if < 0).
+ */
+static char *
+absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
+{
+  const char format = tolower(FORMAT), exp_char = (format == FORMAT)? 'e': 'E';
+  long beta, ls, point, lx, sx = signe(x), ex = expo(x);
+  char *s, *buf, *buf0;
+  GEN z;
+
+  if (!sx) return real0tostr(ex, format, exp_char, wanted_dec);
 
   /* x != 0 */
   lx = lg(x);
@@ -588,11 +622,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
     long w = ndec2prec(wanted_dec); /* digits -> pari precision in words */
     if (lx > w) lx = w; /* truncature with guard, no rounding */
   }
-  if (width_frac >= 0) /* style f */
-    beta = width_frac;
-  else
-    beta = ex10(bit_accuracy(lx) - ex);
-
+  beta = ex10(bit_accuracy(lx) - ex);
   if (beta)
   { /* z = |x| 10^beta, 10^b = 5^b * 2^b, 2^b goes into exponent */
     if (beta > 0)
@@ -610,12 +640,12 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
   else
     z = x;
   z = grndtoi(z, &ls); /* round; ls is junk */
-  if (!signe(z)) return abs0tostr(ex, format, exp_char, wanted_dec, width_frac);
+  if (!signe(z)) return real0tostr(ex, format, exp_char, wanted_dec);
 
   s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
   if (wanted_dec < 0)
     wanted_dec = ls;
-  else if (width_frac < 0 && ls > wanted_dec)
+  else if (ls > wanted_dec)
   {
     beta -= ls - wanted_dec;
     ls = wanted_dec;
@@ -632,33 +662,32 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec, int width_frac)
   /* '.', " E", exponent, trailing \0 */
   buf0 = buf = stackmalloc( ls + 1+2+MAX_EXPO_LEN+1 );
   point = ls - beta; /* position of . in s; < 0 or > 0 */
-  if (width_frac < 0 &&
-     (beta < 0 || format == 'e' || (format == 'g' && point-1 < -4)))
+  if (beta <= 0 || format == 'e' || (format == 'g' && point-1 < -4))
   { /* e format */
-    buf = wr_dec(buf, s, ls, 1);
+    wr_dec(buf, s, 1); buf += ls + 1;
     if (sp) *buf++ = ' ';
     *buf++ = exp_char;
     sprintf(buf, "%ld", point-1);
-  }
-  else if (point > 0) /* f format, write integer_part.fractional_part */
-    (void)wr_dec(buf, s, ls, point);
-  else { /* f format, point <= 0, fractional part must be written */
-    *buf++ = '0';
-    *buf++ = '.';
-    buf = zeros(buf, -point);
-    strcpy(buf, s);
+  } else { /* f format */
+    if (point > 0) /* write integer_part.fractional_part */
+      wr_dec(buf, s, point); /* point < ls since beta > 0 */
+    else { /* point <= 0, write fractional part */
+      *buf++ = '0';
+      *buf++ = '.';
+      buf = zeros(buf, -point);
+      strcpy(buf, s);
+    }
   }
   return buf0;
 }
 
-/* This vsnprintf implementation is adapted from snprintf.c to be found at
+/* vsnprintf implementation rewritten from snprintf.c to be found at
  *
  * http://www.nersc.gov/~scottc/misc/docs/snort-2.1.1-RC1/snprintf_8c-source.html
  * The original code was
  *   Copyright (C) 1998-2002 Martin Roesch <roesch@sourcefire.com>
  * available under the terms of the GNU GPL version 2 or later. It
- * was itself adapted from an original version by Patrick Powell.
-*/
+ * was itself adapted from an original version by Patrick Powell. */
 
 /* Modifications for format %Zs: R.Butel IMB/CNRS 2007/12/03 */
 
@@ -928,18 +957,18 @@ shift_add(int x, int ch)
 }
 
 static long
-get_sigd(GEN gvalue, char ch, int *maxwidth)
+get_sigd(GEN gvalue, char ch, int maxwidth)
 {
   long sigd;
-  if (*maxwidth < 0) return prec2ndec(precreal);
+  if (maxwidth < 0) return prec2ndec(precreal);
   switch(ch)
   {
     case 'E':
-    case 'e': sigd = *maxwidth+1; *maxwidth = -1; break;
+    case 'e': sigd = maxwidth+1; break;
     case 'F':
-    case 'f': sigd = ex10(gexpo(gvalue)) + 1 + *maxwidth; break;
+    case 'f': sigd = ex10(gexpo(gvalue)) + 1 + maxwidth; break;
     /* 'g', 'G' */
-    default : sigd = *maxwidth? *maxwidth: 1; *maxwidth = -1; break;
+    default : sigd = maxwidth? maxwidth: 1; break;
   }
   return sigd;
 }
@@ -953,7 +982,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
   char *buf;
 
   if (typ(gvalue) == t_REAL)
-    sigd = get_sigd(gvalue, FORMAT, &maxwidth);
+    sigd = get_sigd(gvalue, FORMAT, maxwidth);
   else
   {
     long i, j, h, l = lg(gvalue);
@@ -1002,12 +1031,15 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
         }
         return;
     }
-    sigd = get_sigd(gvalue, FORMAT, &maxwidth);
+    sigd = get_sigd(gvalue, FORMAT, maxwidth);
     gvalue = gtofp(gvalue, ndec2prec(sigd));
     if (typ(gvalue) != t_REAL)
       pari_err(talker,"impossible conversion to t_REAL: %Zs",gvalue);
   }
-  buf = absrtostr(gvalue, space, FORMAT, sigd, maxwidth);
+  if ((FORMAT == 'f' || FORMAT == 'F') && maxwidth >= 0)
+    buf = absrtostr_width_frac(gvalue, maxwidth);
+  else
+    buf = absrtostr(gvalue, space, FORMAT, sigd);
   if (signe(gvalue) < 0) signvalue = '-';
   outpad(S, buf, strlen(buf), signvalue, ljust, len, zpad);
   avma = av;
@@ -2451,7 +2483,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
     {
       pari_sp av = avma;
       if (addsign && signe(g) < 0) str_putc(S, '-');
-      str_puts(S,  absrtostr(g, T->sp, toupper(T->format), T->sigd, -1) );
+      str_puts(S, absrtostr(g, T->sp, toupper(T->format), T->sigd) );
       avma = av; break;
     }
 

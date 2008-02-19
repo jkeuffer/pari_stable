@@ -455,7 +455,7 @@ maxord2(GEN cf, GEN p, long epsilon)
       rowred(Tn,pp);
     }
     setlg(Tn, n+1);
-    index = dethnf_i(Tn);
+    index = ZM_det_triangular(Tn);
     if (is_pm1(index)) break;
 
     m = ZM_mul(matinv(Tn,index), m);

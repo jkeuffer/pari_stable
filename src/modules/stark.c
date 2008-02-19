@@ -313,7 +313,7 @@ InitQuotient(GEN C)
 {
   GEN z, U, D = smithall(C, &U, NULL);
   z = cgetg(5, t_VEC);
-  gel(z,1) = dethnf_i(D);
+  gel(z,1) = ZM_det_triangular(D);
   gel(z,2) = mattodiagonal_i(D);
   gel(z,3) = U;
   gel(z,4) = C; return z;
@@ -427,7 +427,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
     subpr = hnf(shallowconcat(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
-    e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
+    e = itos( diviiexact(ZM_det_triangular(subgroup), ZM_det_triangular(subpr)) );
   }
 
   /* f = order of [pr] in bnrpr/subpr */
@@ -502,7 +502,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   rep = NULL;
 
   /* if cpl < rb, it is not necessary to try another modulus */
-  rb = expi( powgi(mulii(gel(nf,3), dethnf_i(f)), gmul2n(gmael(bnr,5,1), 3)) );
+  rb = expi( powgi(mulii(gel(nf,3), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
 
   bpr = divcond(bnr);
   nbp = lg(bpr) - 1;
@@ -966,7 +966,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 
     if (!olddtcr)
     {
-      ch_C(dtcr) = gmul(C, gsqrt(dethnf_i(gel(cond,1)), prec2));
+      ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(gel(cond,1)), prec2));
       ch_4(dtcr) = _data4(gel(cond,2),r1,r2);
       ch_cond(dtcr) = gel(cond,1);
       if (gequal(cond,modul))
@@ -1065,7 +1065,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   for (j = 1; j < l; j++)
   {
     GEN dtcr = gel(dataCR,j);
-    ch_C(dtcr) = gmul(C, gsqrt(dethnf_i(ch_cond(dtcr)), prec2));
+    ch_C(dtcr) = gmul(C, gsqrt(ZM_det_triangular(ch_cond(dtcr)), prec2));
 
     gmael(ch_bnr(dtcr), 1, 7) = nf;
 
@@ -2355,7 +2355,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
-  h  = itos(dethnf_i(gel(data,2))) >> 1;
+  h  = itos(ZM_det_triangular(gel(data,2))) >> 1;
 
 LABDOUB:
   av = avma;
@@ -2661,7 +2661,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   p1     = conductor(bnr, subgrp, 2);
   bnr    = gel(p1,2); Mcyc = diagonal_i(gmael(bnr, 5, 2));
   subgrp = gel(p1,3);
-  if (gcmp1( dethnf_i(subgrp) )) { avma = av; return pol_x(0); }
+  if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))
@@ -2735,7 +2735,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (! (subgp = get_subgroup(subgp,Mcyc)) )
     pari_err(talker, "incorrect subgroup in bnrL1");
 
-  cl = itou( dethnf_i(subgp) );
+  cl = itou( ZM_det_triangular(subgp) );
   Qt = InitQuotient(subgp);
 
   /* compute all characters */

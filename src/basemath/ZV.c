@@ -502,6 +502,50 @@ ZM_neg(GEN x)
 
 /********************************************************************/
 /**                                                                **/
+/**                        "DIVISION" mod HNF                      **/
+/**                                                                **/
+/********************************************************************/
+/* Reduce ZC x modulo ZM y in HNF, may return x itself (not a copy) */
+GEN
+ZC_hnfremdiv(GEN x, GEN y, GEN *Q)
+{
+  long i, l = lg(x);
+  GEN q;
+
+  if (Q) *Q = cgetg(l,t_COL);
+  if (l == 1) return cgetg(1,t_COL);
+  for (i = l-1; i>0; i--)
+  {
+    q = negi(diviiround(gel(x,i), gcoeff(y,i,i)));
+    if (Q) gel(*Q, i) = q;
+    if (signe(q)) x = ZC_lincomb(gen_1, q, x, gel(y,i));
+  }
+  return x;
+}
+
+/* x = y Q + R, may return some columns of x (not copies) */
+GEN
+ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
+{
+  long lx = lg(x), i;
+  GEN R = cgetg(lx, t_MAT);
+  if (Q)
+  {
+    GEN q = cgetg(lx, t_MAT); *Q = q;
+    for (i=1; i<lx; i++) gel(R,i) = ZC_hnfremdiv(gel(x,i),y,(GEN*)(q+i));
+  }
+  else
+    for (i=1; i<lx; i++)
+    {
+      pari_sp av = avma;
+      gel(R,i) = gerepileupto(av, ZC_hnfremdiv(gel(x,i),y,NULL));
+    }
+  return R;
+}
+
+
+/********************************************************************/
+/**                                                                **/
 /**                               TESTS                            **/
 /**                                                                **/
 /********************************************************************/
@@ -511,6 +555,15 @@ zv_cmp0(GEN V)
   long i, l = lg(V);
   for (i = 1; i < l; i++)
     if (V[i]) return 0;
+  return 1;
+}
+
+int
+ZV_cmp0(GEN V)
+{
+  long i, l = lg(V);
+  for (i = 1; i < l; i++)
+    if (signe(V[i])) return 0;
   return 1;
 }
 
@@ -564,4 +617,17 @@ ZV_content(GEN x)
     if (is_pm1(c)) { avma = av; return gen_1; }
   }
   return gerepileuptoint(av, c);
+}
+
+GEN
+ZM_det_triangular(GEN mat)
+{
+  pari_sp av;
+  long i,l = lg(mat);
+  GEN s;
+
+  if (l<3) return l<2? gen_1: icopy(gcoeff(mat,1,1));
+  av = avma; s = gcoeff(mat,1,1);
+  for (i=2; i<l; i++) s = mulii(s,gcoeff(mat,i,i));
+  return gerepileuptoint(av,s);
 }

@@ -328,7 +328,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     if (mulI)
     {
       G = element_muli(nf, G, mulI);
-      G = colreducemodHNF(G, ZM_Z_mul(f, dmulI), NULL);
+      G = ZC_hnfremdiv(G, ZM_Z_mul(f, dmulI), NULL);
     }
     G = set_sign_mod_idele(nf,A,G,module,sarch);
     I = idealmul(nf,I,G);
@@ -515,7 +515,7 @@ bnrclassno(GEN bnf,GEN ideal)
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
-  return gerepileuptoint(av, mulii(h, dethnf_i(hnf(D))));
+  return gerepileuptoint(av, mulii(h, ZM_det_triangular(hnf(D))));
 }
 
 GEN
@@ -1281,7 +1281,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
     D = diagonal_i(gmael(bnr,5,2));
     H = hnf(H);
     if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
-    h = dethnf_i(H);
+    h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
   }
   if (!H && !triv_is_NULL) H = D? D: diagonal_i(gmael(bnr,5,2));
@@ -1414,7 +1414,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   group = diagonal_i(FpC_red(gel(raycl,2), greldeg));
   for (i=1; i<lg(group); i++)
     if (!signe(gcoeff(group,i,i))) gcoeff(group,i,i) = greldeg;
-  detgroup = dethnf_i(group);
+  detgroup = ZM_det_triangular(group);
   k = cmpiu(detgroup,reldeg);
   if (k < 0)
     pari_err(talker,"not an Abelian extension in rnfnormgroup?");
@@ -1462,7 +1462,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
       /* pr^f = N P, P | pr, hence is in norm group */
       col = gmulsg(f, bnrisprincipal(bnr,pr,0));
       group = hnf(shallowconcat(group, col));
-      detgroup = dethnf_i(group);
+      detgroup = ZM_det_triangular(group);
       k = cmpiu(detgroup,reldeg);
       if (k < 0) pari_err(talker,"not an Abelian extension in rnfnormgroup");
       if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
@@ -1568,7 +1568,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   P     = S.P;
   e     = S.e; l = lg(e);
   dlk = flrel? idealpow(nf,ideal,clhray)
-	     : powgi(dethnf_i(ideal),clhray);
+	     : powgi(ZM_det_triangular(ideal),clhray);
   for (k = 1; k < l; k++)
   {
     GEN pr = gel(P,k), sum = gen_0;
@@ -1577,7 +1577,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
     {
       GEN z = bnr_log_gen_pr(bnr, &S, nf, j, k);
       H = hnf(shallowconcat(H, z));
-      clhss = dethnf_i(H);
+      clhss = ZM_det_triangular(H);
       if (flcond && j==ep && equalii(clhss,clhray)) { avma = av; return gen_0; }
       if (is_pm1(clhss)) { sum = addis(sum, j); break; }
       sum = addii(sum, clhss);
@@ -1675,7 +1675,7 @@ get_classno(GEN t, GEN h)
 {
   GEN bid = gel(t,1), cyc = gmael(bid,2,2);
   GEN m = shallowconcat(gel(t,2), diagonal_i(cyc));
-  return mulii(h, dethnf_i(hnf(m)));
+  return mulii(h, ZM_det_triangular(hnf(m)));
 }
 
 static void
@@ -1999,7 +1999,7 @@ bnrclassnointern(GEN B, GEN h)
   {
     b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
     m = hnf( shallowconcat(qm, diagonal_i(gel(b,2))) );
-    gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, dethnf_i(m)) ) ));
+    gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, ZM_det_triangular(m)) ) ));
   }
   return L;
 }
@@ -2032,7 +2032,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
 	if (kk&1) rowsel[nba++] = nc + jj;
       setlg(rowsel, nba);
       rowselect_p(m, mm, rowsel, nc+1);
-      H[k+1] = itou( mulii(h, dethnf_i(hnf(mm))) );
+      H[k+1] = itou( mulii(h, ZM_det_triangular(hnf(mm))) );
     }
     gel(L,j) = mkvec2(gel(b,1), H);
   }
@@ -2304,7 +2304,7 @@ subgroupcond(GEN bnr, GEN indexbound)
   l = lg(li);
   /* sort by increasing index */
   lidet = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(lidet,i) = dethnf_i(gel(li,i));
+  for (i=1; i<l; i++) gel(lidet,i) = ZM_det_triangular(gel(li,i));
   perm = indexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
   for (i=1; i<l; i++) li[i] = p1[perm[l-i]];
   return gerepilecopy(av,li);

@@ -263,7 +263,7 @@ get_lambda(GEN bnr)
   f2 = 2 * itos(gcoeff(f,1,1));
   u = getallrootsof1(bnf); lu = lg(u);
   for (i=1; i<lu; i++)
-    gel(u,i) = colreducemodHNF(gel(u,i), f, NULL); /* roots of 1, mod f */
+    gel(u,i) = ZC_hnfremdiv(gel(u,i), f, NULL); /* roots of 1, mod f */
   if (DEBUGLEVEL>1)
     fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
   for (a=0; a<f2; a++)
@@ -274,7 +274,7 @@ get_lambda(GEN bnr)
       if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 
       labas = poltobasis(nf, la);
-      lamodf = colreducemodHNF(labas, f, NULL);
+      lamodf = ZC_hnfremdiv(labas, f, NULL);
       for (i=1; i<lu; i++)
 	if (gequal(lamodf, gel(u,i))) break;
       if (i < lu) continue; /* la = unit mod f */
@@ -1664,7 +1664,7 @@ MORE:
     goto MORE;
   }
 
-  h = dethnf_i(W);
+  h = ZM_det_triangular(W);
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Zs\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */

@@ -1319,7 +1319,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 	vden = addii(vden, mului(k, gel(e,i)));
     }
     (void)int_elt_val(nf, x, p, mul, &x);
-    gel(newg,i) = colreducemodHNF(x, prk, NULL);
+    gel(newg,i) = ZC_hnfremdiv(x, prk, NULL);
   }
   if (vden == gen_0) setlg(newg, l);
   else
@@ -1542,7 +1542,7 @@ idealnorm(GEN nf, GEN x)
       x = gnorm(basistoalg(nf,x)); break;
     default:
       if (lg(x) != lg(nf[1])-2) x = idealhermite_aux(nf,x);
-      x = dethnf(x);
+      x = RgM_det_triangular(x);
   }
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));

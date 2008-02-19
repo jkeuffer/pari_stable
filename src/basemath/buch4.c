@@ -517,7 +517,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
       GEN v = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i),fl);
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
    }
-    den = dethnf_i(H); H = ZM_inv(H,den);
+    den = ZM_det_triangular(H); H = ZM_inv(H,den);
     A = shallowconcat(H, ZM_neg(ZM_mul(H,B))); /* top part of inverse * den */
     /* HNF in split form perm + (H B) [0 Id missing] */
     gel(res,1) = sunit;

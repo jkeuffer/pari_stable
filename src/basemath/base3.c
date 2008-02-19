@@ -1025,66 +1025,6 @@ lllreducemodmatrix(GEN x,GEN y)
   return reducemodinvertible(x, lllint_ip(y,4));
 }
 
-/* Reduce ZC x modulo ZM y in HNF */
-GEN
-colreducemodHNF(GEN x, GEN y, GEN *Q)
-{
-  long i, l = lg(x);
-  GEN q;
-
-  if (Q) *Q = cgetg(l,t_COL);
-  if (l == 1) return cgetg(1,t_COL);
-  for (i = l-1; i>0; i--)
-  {
-    q = negi(diviiround(gel(x,i), gcoeff(y,i,i)));
-    if (Q) gel(*Q, i) = q;
-    if (signe(q)) x = ZC_lincomb(gen_1, q, x, gel(y,i));
-  }
-  return x;
-}
-
-/* for internal use...Reduce matrix x modulo matrix y */
-GEN
-reducemodmatrix(GEN x, GEN y)
-{
-  return reducemodHNF(x, hnfmod(y, ZM_detmult(y)), NULL);
-}
-
-/* x = y Q + R */
-GEN
-reducemodHNF(GEN x, GEN y, GEN *Q)
-{
-  long lx = lg(x), i;
-  GEN R = cgetg(lx, t_MAT);
-  if (Q)
-  {
-    GEN q = cgetg(lx, t_MAT); *Q = q;
-    for (i=1; i<lx; i++) gel(R,i) = colreducemodHNF(gel(x,i),y,(GEN*)(q+i));
-  }
-  else
-    for (i=1; i<lx; i++)
-    {
-      pari_sp av = avma;
-      gel(R,i) = gerepileupto(av, colreducemodHNF(gel(x,i),y,NULL));
-    }
-  return R;
-}
-
-/* For internal use. Reduce x modulo ideal (assumed non-zero, in HNF). We
- * want a non-zero result */
-GEN
-nfreducemodideal_i(GEN x0,GEN ideal)
-{
-  GEN x = colreducemodHNF(x0, ideal, NULL);
-  if (gcmp0(x)) return gel(ideal,1);
-  return x == x0? gcopy(x) : x;
-}
-GEN
-nfreducemodideal(GEN nf,GEN x0,GEN ideal)
-{
-  return nfreducemodideal_i(x0, idealhermite(nf,ideal));
-}
-
 /* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = idele[2].
  * If x == NULL, make y >> 0 at sarch */
 GEN
@@ -1103,21 +1043,6 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   for (i=1; i<nba; i++)
     if (mpodd(gel(s,i))) y = element_mul(nf,y,gel(gen,i));
   return y;
-}
-
-/* compute elt = x mod idele, with sign(elt) = sign(x) at arch */
-GEN
-nfreducemodidele(GEN nf,GEN x,GEN idele,GEN sarch)
-{
-  GEN y;
-
-  if (gcmp0(x)) return gcopy(x);
-  if (!sarch || typ(idele)!=t_VEC || lg(idele)!=3)
-    return nfreducemodideal(nf,x,idele);
-
-  y = nfreducemodideal(nf,x,gel(idele,1));
-  y = set_sign_mod_idele(nf, x, y, idele, sarch);
-  return (gexpo(y) > gexpo(x))? x: y;
 }
 
 /* given an element x in Z_K and an integral ideal y with x, y coprime,
@@ -1140,16 +1065,16 @@ element_invmodideal(GEN nf, GEN x, GEN y)
       return NULL; /* not reached */
   }
   a = element_div(nf, hnfmerge_get_1(xh, yh), x);
-  return gerepilecopy(av, nfreducemodideal_i(a, yh));
+  return gerepileupto(av, ZC_hnfremdiv(a, yh, NULL));
 }
 
 static GEN
 element_sqrmodideal(GEN nf, GEN x, GEN id) {
-  return nfreducemodideal_i(element_sqr(nf,x),id);
+  return ZC_hnfremdiv(element_sqr(nf,x), id, NULL);
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? nfreducemodideal_i(element_mul(nf,x,y),id): algtobasis_i(nf, y);
+  return x? ZC_hnfremdiv(element_mul(nf,x,y), id, NULL): algtobasis_i(nf, y);
 }
 /* assume k >= 0, ideal in HNF */
 GEN
@@ -1254,33 +1179,8 @@ nf_log(GEN nf, GEN a, GEN g, GEN pr)
   return gerepileuptoint(av, Fq_FpXQ_log(A,G,ord,T,p));
 }
 
-GEN
-dethnf(GEN mat)
-{
-  long i,l = lg(mat);
-  pari_sp av;
-  GEN s;
-
-  if (l<3) return l<2? gen_1: icopy(gcoeff(mat,1,1));
-  av = avma; s = gcoeff(mat,1,1);
-  for (i=2; i<l; i++) s = gmul(s,gcoeff(mat,i,i));
-  return av==avma? gcopy(s): gerepileupto(av,s);
-}
-
-GEN
-dethnf_i(GEN mat)
-{
-  pari_sp av;
-  long i,l = lg(mat);
-  GEN s;
-
-  if (l<3) return l<2? gen_1: icopy(gcoeff(mat,1,1));
-  av = avma; s = gcoeff(mat,1,1);
-  for (i=2; i<l; i++) s = mulii(s,gcoeff(mat,i,i));
-  return gerepileuptoint(av,s);
-}
-
-/* as above with cyc = diagonal(Smith Normal Form) */
+/* Product of cyc entries, with cyc = diagonal(Smith Normal Form), assumed != 0.
+ * Set L to the index of the last non-trivial (!= 1) entry */
 GEN
 detcyc(GEN cyc, long *L)
 {
@@ -1303,7 +1203,7 @@ detcyc(GEN cyc, long *L)
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
 {
-  return nfreducemodideal_i(ZC_add(u, ZM_ZC_mul(mv,x)), UV);
+  return ZC_hnfremdiv(ZC_add(u, ZM_ZC_mul(mv,x)), UV, NULL);
 }
 
 static GEN

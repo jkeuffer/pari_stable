@@ -104,18 +104,20 @@ JD 12- add an optional argument to quit()
        RgM_isdiagonal, zm_copy, zv_copy, Flm_mul, Flm_copy, Flv_copy,
        Flm_Fl_mul, Flm_Fl_mul_inplace, Flv_Fl_mul_inplace, ZV_lincomb
        Flc_Fl_div_inplace, Flc_Fl_mul_inplace, Flv_add_inplace, Flv_sub_inplace
-       ZV_content, ZV_ZM_mul
+       ZV_content, ZV_ZM_mul, ZV_cmp0, ZM_hnfremdiv, ZC_hnfremdiv
    17- RgV.c, FpV.c, ZX.c, ZV.c
    18- library functions RgX_pseudorem, RgX_pseudodivrem, RgXQX_pseudorem,
        RgX_reverse, ZX_copy, RgX_check_ZX, RgX_check_ZXY, RgM_check_ZM,
-       RgV_check_ZV, ZM_detmult
+       RgV_check_ZV, ZM_detmult, RgM_det_trianguar, ZM_det_triangular
 
   Removed
     1- obsolete library functions extract and matextract
     2- obsolete library function elementinv_modpr
     3- obsolete README.DOS and README.WIN
     4- cant_deflate error code
-    5- obsolete library function bruteall()
+    5- obsolete library function bruteall
+    6- obsolete library function reducemodmatrix, nfreducemodidele,
+       nfreducemodideal, nfreducemodideal_i
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

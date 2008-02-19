@@ -153,7 +153,7 @@ static GEN
 makenorms(GEN rnf)
 {
   GEN f = gel(rnf,4);
-  return typ(f) == t_INT? gen_1: dethnf(f);
+  return typ(f) == t_INT? gen_1: RgM_det_triangular(f);
 }
 
 #define NFABS 1
@@ -383,8 +383,8 @@ prodidnorm(GEN I)
   long i, l = lg(I);
   GEN z;
   if (l == 1) return gen_1;
-  z = dethnf(gel(I,1));
-  for (i=2; i<l; i++) z = gmul(z, dethnf(gel(I,i)));
+  z = RgM_det_triangular(gel(I,1));
+  for (i=2; i<l; i++) z = gmul(z, RgM_det_triangular(gel(I,i)));
   return z;
 }
 

@@ -294,3 +294,17 @@ RgM_ishnf(GEN x)
   }
   return (gsigne(gcoeff(x,1,1)) > 0);
 }
+
+GEN
+RgM_det_triangular(GEN mat)
+{
+  long i,l = lg(mat);
+  pari_sp av;
+  GEN s;
+
+  if (l<3) return l<2? gen_1: gcopy(gcoeff(mat,1,1));
+  av = avma; s = gcoeff(mat,1,1);
+  for (i=2; i<l; i++) s = gmul(s,gcoeff(mat,i,i));
+  return av==avma? gcopy(s): gerepileupto(av,s);
+}
+

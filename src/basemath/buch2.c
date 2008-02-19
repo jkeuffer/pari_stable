@@ -635,7 +635,7 @@ static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN m, FACT *fact)
 {
   GEN Nm = absi( subres(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
-  GEN N  = diviiexact(Nm, dethnf_i(I)); /* N(m / I) */
+  GEN N  = diviiexact(Nm, ZM_det_triangular(I)); /* N(m / I) */
   return can_factor(F, nf, I, m, N, fact);
 }
 
@@ -896,7 +896,7 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
   for (i=1; i<c; i++)
     if (signe(ex[i]))
     {
-      I = gel(gen,i); e = gel(ex,i); n = dethnf_i(I);
+      I = gel(gen,i); e = gel(ex,i); n = ZM_det_triangular(I);
       ne = powgi(n,e);
       de = equalii(n, gcoeff(I,1,1))? ne: powgi(gcoeff(I,1,1), e);
       N = mulii(N, ne);
@@ -1004,7 +1004,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
   /* try without reduction if x is small */
-  if (flag && can_factor(F, nf, x, NULL, dethnf_i(x), fact)) return NULL;
+  if (flag && can_factor(F, nf, x, NULL, ZM_det_triangular(x), fact)) return NULL;
 
   /* if reduction fails (y scalar), do not retry can_factor */
   y = idealred_elt(nf,x);
@@ -1408,7 +1408,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   if (xar) col = gadd(col, famat_to_arch(nf, xar, prec));
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
-  Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
+  Q = gdiv(ZM_det_triangular(x), get_norm_fact(gen, ex, &d));
   col = isprincipalarch(bnf, col, Q, gen_1, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
   if (!col && !gcmp0(ex))
@@ -2297,7 +2297,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   H = hnfall_i(L, NULL, 1); r = lg(H)-1;
 
   /* tentative regulator */
-  R = gmul(*ptkR, gdiv(dethnf_i(H), powiu(den, r)));
+  R = gmul(*ptkR, gdiv(ZM_det_triangular(H), powiu(den, r)));
   c = gtodouble(gmul(R,z)); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
@@ -2317,13 +2317,13 @@ inverse_if_smaller(GEN nf, GEN I, long prec)
   GEN J, d, dmin, I1;
 
   J = gel(I,1);
-  dmin = dethnf_i(J); I1 = idealinv(nf,I);
+  dmin = ZM_det_triangular(J); I1 = idealinv(nf,I);
   J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
-  d = dethnf_i(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
+  d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
   I1 = ideallllred(nf,I1,NULL,prec);
   J = gel(I1,1);
-  d = dethnf_i(J); if (cmpii(d,dmin) < 0) I=I1;
+  d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) I=I1;
   return I;
 }
 
@@ -2361,8 +2361,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   * 1) gain is negligible (avoid computing z^0 if lo < lo0)
   * 2) when computing ga, the products XU and VY use the original matrices
   */
-  Ur  = reducemodHNF(U, D, &Y);
-  Uir = reducemodHNF(Ui,W, &X);
+  Ur  = ZM_hnfremdiv(U, D, &Y);
+  Uir = ZM_hnfremdiv(Ui,W, &X);
  /* [x] = logarithmic embedding of x (arch. component)
   * NB: z = idealred(I) --> I = y z[1], with [y] = - z[2]
   * P invertible diagonal matrix (\pm 1) which is only implicitly defined
@@ -2419,7 +2419,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       setlg(G,lo); setlg(Ga,lo); setlg(GD,lo); break;
     }
   }
-  *ptclg1 = mkvec3(dethnf_i(W), cyc, G);
+  *ptclg1 = mkvec3(ZM_det_triangular(W), cyc, G);
   *ptclg2 = mkvec3(Ur, ga,GD);
   if (DEBUGLEVEL) msgtimer("classgroup generators");
 }
@@ -2486,7 +2486,7 @@ makecycgen(GEN bnf)
   {
     if (cmpiu(gel(cyc,i), 5) < 0)
     {
-      GEN N = dethnf_i(gel(gen,i));
+      GEN N = ZM_det_triangular(gel(gen,i));
       y = isprincipalarch(bnf,gel(GD,i), N, gel(cyc,i), gen_1, &e);
       if (y && !fact_ok(nf,y,NULL,gen,gel(D,i))) y = NULL;
       if (y) { gel(h,i) = to_famat_all(y,gen_1); continue; }
@@ -3165,7 +3165,7 @@ PRECPB:
   }
   if (!lambda) { precpb = "bestappr"; goto PRECPB; }
 
-  h = dethnf_i(W);
+  h = ZM_det_triangular(W);
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Zs\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
