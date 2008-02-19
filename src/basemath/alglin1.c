@@ -1750,7 +1750,10 @@ ZM_detmult(GEN A)
 
     if (++rg >= m) { /* full rank; mostly done */
       GEN det = gel(v,t); /* last on stack */
-      if (++k <= n) {
+      if (++k > n)
+        det = absi(det);
+      else
+      {
         /* improve further; at this point c[i] is set for all i != t */
         gcoeff(B,t,t) = piv; v = centermod(gel(B,t), det);
         av1 = avma; lim = stack_lim(av1,1);
