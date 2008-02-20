@@ -4940,7 +4940,7 @@ either return a diagonal matrix (as in \kbd{ZM\_snfall}, \kbd{returnvec} is 0)
 or a vector of elementary divisors (as in \kbd{ZM\_snf}, \kbd{returnvec} is 1) .
 
 \fun{void}{ZM_snfclean}{GEN d, GEN U, GEN V} assuming $d$, $U$, $V$ come
-from \kbd{d = ZM_snfall(x, \&U, \&V)}, where $U$ or $V$ may be \kbd{NULL},
+from \kbd{d = ZM\_snfall(x, \&U, \&V)}, where $U$ or $V$ may be \kbd{NULL},
 cleans up the output in place. This means that elementary divisors equal to 1
 are deleted and $U$, $V$ are updated. The output is not suitable for
 \kbd{gerepileupto}.
