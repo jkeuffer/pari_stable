@@ -459,9 +459,9 @@ GuessQi(GEN b, GEN c, GEN *eps)
   GEN Q, Lat, C = int2n(33);
 
   Lat = matid(3);
-  gmael(Lat,1,3) = C;
-  gmael(Lat,2,3) = ground(gmul(C,b));
-  gmael(Lat,3,3) = ground(gmul(C,c));
+  gcoeff(Lat,3,1) = C;
+  gcoeff(Lat,3,2) = ground(gmul(C,b));
+  gcoeff(Lat,3,3) = ground(gmul(C,c));
 
   Q = gel(lllint(Lat),1);
   if (gcmp0(gel(Q,3))) return NULL; /* FAIL */
