@@ -82,7 +82,7 @@ static GEN
 prime_to_ideal_aux(GEN nf, GEN vp)
 {
   GEN m = eltimul_get_table(nf, gel(vp,2));
-  return hnfmodid(m, gel(vp,1));
+  return ZM_hnfmodid(m, gel(vp,1));
 }
 
 /* vp = [a,x,...], a in Z. Return (a,x)  [HACK: vp need not be prime] */
@@ -102,7 +102,7 @@ vec_mulid(GEN nf, GEN x, long nx, long N)
     for (j=1; j<=N; j++) gel(m, k++) = element_mulid(nf, gel(x,i),j);
   return m;
 }
-/* x = ideal in matrix form. Put it in hnf. */
+/* x = ideal in matrix form. Put it in ZM_hnf. */
 static GEN
 idealmat_to_hnf(GEN nf, GEN x)
 {
@@ -113,7 +113,7 @@ idealmat_to_hnf(GEN nf, GEN x)
 
   x = Q_primitive_part(x, &cx);
   if (nx < N) x = vec_mulid(nf, x, nx, N);
-  x = hnfmod(x, ZM_detmult(x));
+  x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? gmul(x,cx): x;
 }
 
@@ -137,7 +137,7 @@ idealhermite_aux(GEN nf, GEN x)
     x = Q_primitive_part(x, &cx);
     if (nx < N) x = vec_mulid(nf, x, nx, N);
   }
-  x = hnfmod(x, ZM_detmult(x));
+  x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? gmul(x, cx): x;
 }
 
@@ -413,7 +413,7 @@ static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
   pari_sp av = avma;
-  int r = gequal(x, hnfmodid(y, xZ));
+  int r = ZM_equal(x, ZM_hnfmodid(y, xZ));
   avma = av; return r;
 }
 
@@ -522,8 +522,8 @@ mat_ideal_two_elt(GEN nf, GEN x)
     {
       GEN A0, A1, a0, u0, u1, v0, v1, pi0, pi1, t, u;
       a0 = diviiexact(xZ, a1);
-      A0 = hnfmodid(x, a0); /* smooth part of x */
-      A1 = hnfmodid(x, a1); /* cofactor */
+      A0 = ZM_hnfmodid(x, a0); /* smooth part of x */
+      A1 = ZM_hnfmodid(x, a1); /* cofactor */
       pi0 = idealapprfact_i(nf, idealfactor(nf,A0), 1);
       pi1 = get_random_a(nf, A1, a1);
       (void)bezout(a0, a1, &v0,&v1);
@@ -860,7 +860,7 @@ idealadd(GEN nf, GEN x, GEN y)
     gunclone(dz); return z;
   }
   z = shallowconcat(x,y);
-  z = modid? hnfmodid(z,p1): hnfmod(z, p1);
+  z = modid? ZM_hnfmodid(z,p1): ZM_hnfmod(z, p1);
   if (dz) z = gdiv(z,dz);
   return gerepileupto(av,z);
 }
@@ -991,9 +991,9 @@ idealmulspec(GEN nf, GEN x, GEN y)
   if (typ(alpha) != t_MAT) alpha = eltimul_get_table(nf, alpha);
 
   m = cgetg((N<<1)+1,t_MAT);
-  for (i=1; i<=N; i++) gel(m,i) = ZM_ZC_mul(alpha,gel(x,i));
+  for (i=1; i<=N; i++) gel(m,i)   = ZM_ZC_mul(alpha,gel(x,i));
   for (i=1; i<=N; i++) gel(m,i+N) = ZC_Z_mul(gel(x,i), a);
-  return hnfmodid(m, mulii(a, gcoeff(x,1,1)));
+  return ZM_hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
@@ -1075,9 +1075,9 @@ idealmat_mul(GEN nf, GEN x, GEN y)
       for (j=1; j<=ry; j++)
 	gel(m, (i-1)*ry+j) = element_muli(nf,gel(x,i),gel(y,j));
     if (ZV_isscalar(gel(x,1)) && ZV_isscalar(gel(y,1)))
-      y = hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
+      y = ZM_hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
     else
-      y = hnfmod(m, ZM_detmult(m));
+      y = ZM_hnfmod(m, ZM_detmult(m));
   }
   else
   {
@@ -1571,7 +1571,7 @@ hnfideal_inv(GEN nf, GEN I)
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
   dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
-  dual = hnfmodid(dual, IZ);
+  dual = ZM_hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);
 }
@@ -1752,7 +1752,7 @@ idealpow(GEN nf, GEN x, GEN n)
 	a=ideal_two_elt(nf,x); alpha=gel(a,2); a=gel(a,1);
 	alpha = element_pow(nf,alpha,n1);
 	m = eltimul_get_table(nf, alpha);
-	x = hnfmodid(m, powgi(a,n1));
+	x = ZM_hnfmodid(m, powgi(a,n1));
 	if (s<0) x = hnfideal_inv(nf,x);
 	if (cx) x = gmul(x, powgi(cx,n));
     }
@@ -1901,12 +1901,12 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   }
   /* Replace x/y  by  x+(Nx/Nz) / y+(Ny/Nz) */
   x = idealhermite_aux(nf, x);
-  x = hnfmodid(x, diviiexact(Nx,Nz));
+  x = ZM_hnfmodid(x, diviiexact(Nx,Nz));
   /* y reduced to unit ideal ? */
   if (Nz == Ny) return gerepileupto(av, x);
 
   y = idealhermite_aux(nf, y);
-  y = hnfmodid(y, diviiexact(Ny,Nz));
+  y = ZM_hnfmodid(y, diviiexact(Ny,Nz));
   y = hnfideal_inv(nf,y);
   return gerepileupto(av, idealmat_mul(nf,x,y));
 }
@@ -1929,7 +1929,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   dx = mul_content(dx,dy);
   z = kerint(shallowconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
-  z = hnfmodid(ZM_mul(x,z), lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
+  z = ZM_hnfmodid(ZM_mul(x,z), lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
   if (dx) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
@@ -2058,10 +2058,10 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
   if (ZV_isscalar(gel(I,1))) {
     b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
-    I = hnfmodid(J,b);
+    I = ZM_hnfmodid(J,b);
   } else {
     b = ZM_detmult(J);
-    I = hnfmod(J,b);
+    I = ZM_hnfmod(J,b);
   }
   if (!aI) return gerepileupto(av, I);
 
@@ -2139,13 +2139,13 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
 
 #if 0 /*1) via many gcds. Expensive ! */
   GEN f = idealprodprime(nf, listpr);
-  f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
+  f = ZM_hnfmodid(f, x); /* first gcd is less expensive since x in Z */
   x = scalarmat(x, N);
   for (;;)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
     x = idealdivexact(nf, x, f);
-    f = hnfmodid(shallowconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
+    f = ZM_hnfmodid(shallowconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
   }
   x2 = x;
 #else /*2) from prime decomposition */

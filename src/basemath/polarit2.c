@@ -931,7 +931,7 @@ root_bound(GEN P0)
 GEN
 special_pivot(GEN x)
 {
-  GEN t, H = hnf(x);
+  GEN t, H = ZM_hnf(x);
   long i,j, l = lg(H), h = lg(H[1]);
   for (i=1; i<h; i++)
   {
@@ -1182,7 +1182,7 @@ AGAIN:
     if (lg(CM_Lp) != lg(CM_L))
     {
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
-      CM_L = hnf(CM_L);
+      CM_L = ZM_hnf(CM_L);
     }
 
     if (i <= r && i*rec < n0)
@@ -3959,13 +3959,13 @@ reduceddiscsmith(GEN x)
   if (!gcmp1(gel(x,n+2)))
     pari_err(talker,"non-monic polynomial in poldiscreduced");
   M = cgetg(n+1,t_MAT);
-  xp = RgX_deriv(x);
+  xp = ZX_deriv(x);
   for (j=1; j<=n; j++)
   {
     gel(M,j) = RgX_to_RgV(xp, n);
     if (j<n) xp = RgX_rem(RgX_shift_shallow(xp, 1), x);
   }
-  return gerepileupto(av, smith(M));
+  return gerepileupto(av, ZM_snf(M));
 }
 
 /***********************************************************************/

@@ -471,12 +471,11 @@ bnfsunit(GEN bnf,GEN S,long prec)
   M = shallowconcat(M, diagonal_i(gel(classgp,2)));
 
   /* S class group */
-  H = hnfall_i(M, &U, 1);
+  H = ZM_hnfall(M, &U, 1);
   card = gen_1;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
-    GEN u, D = smithall(H, &u, NULL);
-    D = mattodiagonal_i(D);
+    GEN u, D = ZM_snfall_i(H, &u, NULL, 1);
     card = detcyc(D, &i);
     setlg(D,i);
     p1=cgetg(i,t_VEC); pow=ZM_inv(u,gen_1);
@@ -796,7 +795,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   aux = zerocol(lg(A)-1); gel(aux,itu) = w;
   gel(M,L) = aux;
-  H = hnfall_i(M, &U, 2);
+  H = ZM_hnfall(M, &U, 2);
   Y = gmul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
   setlg(Y, L);

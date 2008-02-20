@@ -116,7 +116,7 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
       for (  ; j<=n;     j++) gel(M,j) = ZC_Z_mul(gel(a,j), db);
       for (  ; j<=2*n-k; j++) gel(M,j) = ZC_Z_mul(gel(b,j+k-n), da);
       da = mulii(da,db);
-      a = hnfmodid(M, da);
+      a = ZM_hnfmodid(M, da);
     }
     if (DEBUGLEVEL>5) fprintferr("Result for prime %Zs is:\n%Zs\n",w1[i],b);
   }
@@ -470,7 +470,7 @@ maxord2(GEN cf, GEN p, long epsilon)
       gerepileall(av2, 2, &m, &delta);
     }
   }
-  return gerepileupto(av, gdiv(hnfmodid(shallowtrans(m), delta), delta));
+  return gerepileupto(av, gdiv(ZM_hnfmodid(shallowtrans(m), delta), delta));
 }
 
 /* Input:
@@ -715,7 +715,7 @@ sylpm(GEN f1, GEN f2, GEN pm)
     if (j == n) break;
     h = FpX_rem(RgX_shift_shallow(h, 1), f1, pm);
   }
-  return hnfmodidpart(a, pm);
+  return ZM_hnfmodidpart(a, pm);
 }
 
 /* polynomial gcd mod p^m (assumes f1 monic) */
@@ -805,7 +805,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     }
     gel(b,i) = RgX_to_RgV(ha,n);
   }
-  b = hnfmodid(b,pd);
+  b = ZM_hnfmodid(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Zs\n",b);
   return gdiv(b, pd);
 }
@@ -929,7 +929,7 @@ Decomp(decomp_t *S, long flag)
     for (   ; i<=n; i++)
       gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D, Dov2);
     res = RgXV_to_RgM(res, n);
-    return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
+    return gdiv(ZM_hnfmodid(res,D), D); /* normalized integral basis */
   }
 }
 
@@ -1998,7 +1998,7 @@ anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), z;
   z = FpC_red(special_anti_uniformizer(nf, pr), p);
-  z = hnfmodid(eltimul_get_table(nf, z), p);
+  z = ZM_hnfmodid(eltimul_get_table(nf, z), p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
 }

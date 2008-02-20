@@ -114,7 +114,7 @@ static void
 list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
-  GEN H = hnf(shallowconcat(S->hnfgroup,x));
+  GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
   if (S->gen)
   { /* test conductor */
     long i, l = lg(S->gen);

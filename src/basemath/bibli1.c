@@ -2722,7 +2722,7 @@ plindep(GEN x)
     gel(c,1) = gel(x,i+1);
     gel(m,i) = c;
   }
-  m = lllintpartial_ip( hnfmodid(m, pn) );
+  m = lllintpartial_ip( ZM_hnfmodid(m, pn) );
   m = lllint_fp_ip(m, 100);
   return gerepilecopy(av, gel(m,1));
 }

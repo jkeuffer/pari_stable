@@ -1189,7 +1189,7 @@ matrixqz_aux(GEN A)
 
   n = lg(A);
   if (n == 1) return cgetg(1,t_MAT);
-  if (n == 2) return hnf(A); /* 1 col, maybe 0 */
+  if (n == 2) return ZM_hnf(A); /* 1 col, maybe 0 */
   m = lg(A[1]);
   for (i=1; i<m; i++)
   {
@@ -1214,7 +1214,7 @@ matrixqz_aux(GEN A)
       A = gerepilecopy(av,A);
     }
   }
-  return hnf(A);
+  return ZM_hnf(A);
 }
 
 GEN
@@ -1282,23 +1282,17 @@ intersect(GEN x, GEN y)
 GEN
 mathnf0(GEN x, long flag)
 {
+  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
+  RgM_check_ZM(x, "mathnf0");
   switch(flag)
   {
-    case 0: return hnf(x);
+    case 0: return ZM_hnf(x);
     case 1: return hnfall(x);
     case 3: return hnfperm(x);
     case 4: return hnflll(x);
     default: pari_err(flagerr,"mathnf");
   }
   return NULL; /* not reached */
-}
-
-static GEN
-init_hnf(GEN x, GEN *denx, pari_sp *av)
-{
-  *denx = Q_denom(x); *av = avma;
-  if (is_pm1(*denx)) { *denx = NULL; return shallowcopy(x); }
-  return Q_muli_to_int(x, *denx);
 }
 
 /* negate in place, except universal constants */
@@ -1321,20 +1315,18 @@ ZV_togglesign(GEN M)
 GEN
 hnf_special(GEN x, long remove)
 {
-  pari_sp av0,av,tetpil,lim;
-  long s,li,co,i,j,k,def,ldef;
-  GEN p1,u,v,d,denx,a,b, x2,res;
+  pari_sp lim, av = avma;
+  long s, li, co, i, j, k, def, ldef;
+  GEN p1, u, v, d, a, b, x2;
 
   if (typ(x) != t_VEC || lg(x) != 3) pari_err(typeer,"hnf_special");
   if (typ(x) != t_MAT) pari_err(typeer,"mathnf");
   x2 = gel(x,2);
   x  = gel(x,1);
-  co = lg(x); if (co == 1) return gcopy(x);
+  co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]);
 
-  res = cgetg(3,t_VEC); av0 = avma;
-  x = init_hnf(x,&denx,&av);
-
+  x = shallowcopy(x);
   lim = stack_lim(av,1);
   def=co-1; ldef=(li>co)? li-co: 0;
   if (lg(x2) != co) pari_err(talker,"incompatible matrices in hnf_special");
@@ -1386,9 +1378,9 @@ hnf_special(GEN x, long remove)
     }
   }
   if (remove)
-  {                            /* remove null columns */
+  { /* remove null columns */
     for (i=1,j=1; j<co; j++)
-      if (!gcmp0(gel(x,j)))
+      if (!ZV_cmp0(gel(x,j)))
       {
 	x[i]  = x[j];
 	x2[i] = x2[j]; i++;
@@ -1396,16 +1388,7 @@ hnf_special(GEN x, long remove)
     setlg(x,i);
     setlg(x2,i);
   }
-  tetpil=avma;
-  x = denx? gdiv(x,denx): ZM_copy(x);
-  x2 = gcopy(x2);
-  {
-    GEN *gptr[2]; gptr[0]=&x; gptr[1]=&x2;
-    gerepilemanysp(av0,tetpil,gptr,2);
-  }
-  gel(res,1) = x;
-  gel(res,2) = x2;
-  return res;
+  return gerepilecopy(av, mkvec2(x, x2));
 }
 
 /*******************************************************************/
@@ -1465,7 +1448,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     }
   }
   /* H: lnz x lnz [disregarding initial 0 cols], U: col x col */
-  H = hnflll_i(matgen, &U, 0);
+  H = ZM_hnflll(matgen, &U, 0);
   H += (lg(H)-1 - lnz); H[0] = evaltyp(t_MAT) | evallg(lnz+1);
   /* Only keep the part above the H (above the 0s is 0 since the dep rows
    * are dependent from the ones in matgen) */
@@ -1961,7 +1944,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 TOOLARGE:
   if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
     pari_err(impl,"mathnfspec with large entries");
-  x = hnf(x); lx = lg(x); j = ly; k = 0;
+  x = ZM_hnf(x); lx = lg(x); j = ly; k = 0;
   for (i=1; i<ly; i++)
   {
     if (gcmp1(gcoeff(x,i,i + lx-ly)))
@@ -2163,12 +2146,11 @@ hnf_i(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
   long s, m, n, i, j, k, li, def, ldef;
-  GEN denx, a;
+  GEN a;
 
   if (typ(A) == t_VEC) return hnf_special(A,remove);
-  if (typ(A) != t_MAT) pari_err(typeer,"mathnf");
   n = lg(A)-1; if (!n) return cgetg(1,t_MAT);
-  A = init_hnf(A,&denx,&av);
+  av = avma; A = shallowcopy(A);
   m = lg(A[1])-1;
 
   lim = stack_lim(av,1);
@@ -2185,7 +2167,7 @@ hnf_i(GEN A, int remove)
       ZV_elem(a,gcoeff(A,li,k), A,NULL, j,k);
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"hnf[1]. li=%ld",li);
+	if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnf[1]. li=%ld",li);
 	A = gerepilecopy(av, A);
       }
     }
@@ -2200,7 +2182,7 @@ hnf_i(GEN A, int remove)
       if (ldef) ldef--;
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) pari_warn(warnmem,"hnf[2]. li=%ld",li);
+      if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnf[2]. li=%ld",li);
       A = gerepilecopy(av, A);
     }
   }
@@ -2210,12 +2192,11 @@ hnf_i(GEN A, int remove)
       if (!gcmp0(gel(A,j))) A[i++] = A[j];
     setlg(A,i);
   }
-  A = denx? gdiv(A,denx): ZM_copy(A);
-  return gerepileupto(av0, A);
+  return gerepileupto(av0, ZM_copy(A));
 }
 
 GEN
-hnf(GEN x) { return lg(x) > 8? hnfall_i(x, NULL, 1): hnf_i(x, 1); }
+ZM_hnf(GEN x) { return lg(x) > 8? ZM_hnfall(x, NULL, 1): hnf_i(x, 1); }
 
 static GEN
 ZC_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
@@ -2248,19 +2229,17 @@ FpV_red_part_ip(GEN z, GEN p, long k)
   for (i = 1; i <= k; i++) gel(z,i) = modii(gel(z,i), p);
 }
 /* dm = multiple of diag element (usually detint(x))
- * flag & MODID: reduce mod dm * matid [ otherwise as above ].
- * flag & PART: don't reduce once diagonal is known; */
+ * flag & hnf_MODID: reduce mod dm * matid [ otherwise as above ].
+ * flag & hnf_PART: don't reduce once diagonal is known; */
+
+/* x a ZM, dm a t_INT */
 static GEN
-allhnfmod(GEN x, GEN dm, int flag)
+ZM_hnfmod_i(GEN x, GEN dm, int flag)
 {
   pari_sp av0 = avma, av, lim;
   const int modid = (flag & hnf_MODID);
   long li, co, i, j, k, def, ldef, ldm;
   GEN a, b, p1, p2, u, v, dm2;
-
-  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
-  if (!signe(dm)) return hnf(x);
-  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
 
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]); dm2 = shifti(dm, -1);
@@ -2271,7 +2250,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (li > co)
   {
     ldef = li - co;
-    if (!modid) pari_err(talker,"nb lines > nb columns in hnfmod");
+    if (!modid) pari_err(talker,"nb lines > nb columns in ZM_hnfmod");
   }
   /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
   ldm = lgefint(dm);
@@ -2296,7 +2275,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[1]. i=%ld",i);
+	if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[1]. i=%ld",i);
 	x = gerepilecopy(av, x);
       }
     }
@@ -2342,7 +2321,7 @@ allhnfmod(GEN x, GEN dm, int flag)
 	FpV_red_part_ip(gel(x,j),  dm, j-1);
 	if (low_stack(lim, stack_lim(av,1)))
 	{
-	  if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
+	  if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[2]. i=%ld", i);
 	  x = gerepilecopy(av, x);
 	}
       }
@@ -2383,20 +2362,32 @@ allhnfmod(GEN x, GEN dm, int flag)
 	if (lgefint(p1[k]) > ldm) gel(p1,k) = remii(gel(p1,k), gel(dm,i));
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"allhnfmod[2]. i=%ld", i);
+	if (DEBUGMEM>1) pari_warn(warnmem,"ZM_hnfmod[3]. i=%ld", i);
 	gerepileall(av, 2, &x, &dm); diag = gcoeff(x,i,i);
       }
     }
   }
   return gerepilecopy(av0, x);
 }
+GEN
+ZM_hnfmod(GEN x, GEN d) { return ZM_hnfmod_i(x,d,0); }
+GEN
+ZM_hnfmodid(GEN x, GEN d) { return ZM_hnfmod_i(x,d,hnf_MODID); }
+GEN
+ZM_hnfmodidpart(GEN x, GEN d) { return ZM_hnfmod_i(x, d, hnf_MODID|hnf_PART); }
 
+static GEN
+allhnfmod(GEN x, GEN dm, int flag)
+{
+  if (typ(dm)!=t_INT) pari_err(typeer,"allhnfmod");
+  if (typ(x)!=t_MAT) pari_err(typeer,"allhnfmod");
+  RgM_check_ZM(x, "allhnfmod");
+  return signe(dm)? ZM_hnfmod_i(x, dm, flag): ZM_hnf(x);
+}
 GEN
-hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, 0); }
+hnfmod(GEN x, GEN d) { return allhnfmod(x, d, 0); }
 GEN
-hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
-GEN
-hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_PART); }
+hnfmodid(GEN x, GEN d) { return allhnfmod(x, d, hnf_MODID); }
 
 /***********************************************************************/
 /*                                                                     */
@@ -2521,21 +2512,31 @@ fix_rows(GEN A)
   return B;
 }
 
+/* remove the first r columns */
+static void
+remove_0cols(long r, GEN *pA, GEN *pB, long remove)
+{
+  GEN A = *pA, B = *pB;
+  long l = lg(A);
+  A += r; A[0] = evaltyp(t_MAT) | evallg(l-r);
+  if (B && remove == 2) { B += r; B[0] = A[0]; }
+  *pA = A; *pB = B;
+}
+
 GEN
-hnflll_i(GEN A, GEN *ptB, int remove)
+ZM_hnflll(GEN A, GEN *ptB, int remove)
 {
   pari_sp av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  long do_swap,i,n,k;
+  long do_swap, i, n, k, kmax;
   GEN z, B, lambda, D;
 
-  if (typ(A) != t_MAT) pari_err(typeer,"hnflll");
   n = lg(A);
   A = ZM_copy(fix_rows(A)); /* ZM_copy for in place findi_normalize() */
   B = ptB? matid(n-1): NULL;
   D = const_vec(n, gen_1) + 1;
   lambda = zeromatcopy(n-1,n-1);
-  k = 2;
+  k = kmax = 2;
   while (k < n)
   {
     long row0, row1;
@@ -2565,17 +2566,17 @@ hnflll_i(GEN A, GEN *ptB, int remove)
 	if (low_stack(lim, stack_lim(av,3)))
 	{
 	  GEN b = D-1;
-	  if (DEBUGMEM) pari_warn(warnmem,"hnflll (reducing), i = %ld",i);
+	  if (DEBUGMEM) pari_warn(warnmem,"hnflll (reducing), kmax = %ld",kmax);
 	  gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
 	  D = b+1;
 	}
       }
-      k++;
+      if (++k > kmax) kmax = k;
     }
     if (low_stack(lim, stack_lim(av,3)))
     {
       GEN b = D-1;
-      if (DEBUGMEM) pari_warn(warnmem,"hnflll, k = %ld / %ld",k,n-1);
+      if (DEBUGMEM) pari_warn(warnmem,"hnflll, kmax = %ld / %ld",kmax,n-1);
       gerepileall(av, B? 4: 3, &A, &lambda, &b, &B);
       D = b+1;
     }
@@ -2586,9 +2587,8 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   if (remove)
   {
     for (i = 1; i < n; i++)
-      if (findi(gel(A,i))) break;
-    i--;
-    A += i; A[0] = evaltyp(t_MAT) | evallg(n-i);
+      if (!ZV_cmp0(gel(A,i))) break;
+    remove_0cols(i-1, &A, &B, remove);
   }
   gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
@@ -2596,11 +2596,13 @@ hnflll_i(GEN A, GEN *ptB, int remove)
 }
 
 GEN
-hnflll(GEN A)
+hnflll(GEN x)
 {
-  GEN B, z = cgetg(3, t_VEC);
-  gel(z,1) = hnflll_i(A, &B, 0);
-  gel(z,2) = B; return z;
+  GEN U, z = cgetg(3, t_VEC);
+  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
+  RgM_check_ZM(x, "mathnf0");
+  gel(z,1) = ZM_hnflll(x, &U, 0);
+  gel(z,2) = U; return z;
 }
 
 /* Variation on HNFLLL: Extended GCD */
@@ -2686,7 +2688,6 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
   pari_sp av = avma, av1, lim;
   long r, t, i, j, j1, k, m, n;
 
-  if (typ(A) != t_MAT) pari_err(typeer,"hnfperm");
   n = lg(A)-1;
   if (!n)
   {
@@ -2812,13 +2813,12 @@ hnfperm(GEN A)
  * If 'remove' = 1, remove 0 columns (do NOT update *ptB accordingly)
  * If 'remove' = 2, remove 0 columns and update *ptB accordingly */
 GEN
-hnfall_i(GEN A, GEN *ptB, long remove)
+ZM_hnfall(GEN A, GEN *ptB, long remove)
 {
   pari_sp av = avma, av1, lim;
   long m, n, r, i, j, k, li;
   GEN B, c, h, a;
 
-  if (typ(A)!=t_MAT) pari_err(typeer,"hnfall");
   n = lg(A)-1;
   if (!n)
   {
@@ -2890,22 +2890,23 @@ hnfall_i(GEN A, GEN *ptB, long remove)
       }
     }
   if (DEBUGLEVEL>5) fprintferr("\n");
-  /* remove the first r columns */
-  if (remove) {
-    A += r; A[0] = evaltyp(t_MAT) | evallg(n-r+1);
-    if (B && remove == 2) { B += r; B[0] = A[0]; }
-  }
+  if (remove) remove_0cols(r, &A, &B, remove);
   gerepileall(av, B? 2: 1, &A, &B);
   if (B) *ptB = B;
   return A;
 }
 
 GEN
-hnfall(GEN A) {
-  GEN B, z = cgetg(3, t_VEC);
-  gel(z,1) = hnfall_i(A, &B, 1);
-  gel(z,2) = B; return z;
+hnfall(GEN x)
+{
+  GEN z = cgetg(3, t_VEC);
+  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
+  RgM_check_ZM(x, "hnfall");
+  gel(z,1) = ZM_hnfall(x, (GEN*)(z+2), 1);
+  return z;
 }
+GEN
+hnf(GEN x) { return mathnf0(x,0); }
 
 /***************************************************************/
 /**							      **/
@@ -3005,25 +3006,20 @@ negcmpii(void *E, GEN x, GEN y) { (void)E; return -cmpii(x,y); }
 /* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
  * to that D = UXV */
 GEN
-smithall(GEN x, GEN *ptU, GEN *ptV)
+ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
 {
   pari_sp av0 = avma, av, lim = stack_lim(av0,1);
   long i, j, k, m0, m, n0, n;
   GEN p1, u, v, U, V, V0, mdet, ys, perm = NULL;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"smithall");
   n0 = n = lg(x)-1;
   if (!n) {
     if (ptU) *ptU = cgetg(1,t_MAT);
     if (ptV) *ptV = cgetg(1,t_MAT);
-    return cgetg(1,(ptV||ptU)?t_MAT:t_VEC);
+    return cgetg(1, return_vec? t_VEC: t_MAT);
   }
   av = avma;
   m0 = m = lg(x[1])-1;
-  for (j=1; j<=n; j++)
-    for (i=1; i<=m; i++)
-      if (typ(gcoeff(x,i,j)) != t_INT)
-	pari_err(talker,"non integral matrix in smithall");
 
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
@@ -3040,12 +3036,12 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     if (signe(mdet))
     {
       if (!V)
-	p1 = hnfmod(x,mdet);
+	p1 = ZM_hnfmod(x,mdet);
       else
       {
 	if (m == n)
 	{
-	  p1 = hnfmod(x,mdet);
+	  p1 = ZM_hnfmod(x,mdet);
 	  *ptV = gauss(x,p1);
 	}
 	else
@@ -3073,7 +3069,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   {
     if (n)
     {
-      x = smithall(shallowtrans(x), ptV, ptU); /* ptV, ptU swapped! */
+      x = ZM_snfall_i(shallowtrans(x), ptV, ptU, return_vec); /* swap ptV,ptU */
       if (typ(x) == t_MAT && n != m) x = shallowtrans(x);
       if (V) V = ZM_mul(V, shallowtrans(*ptV));
       if (U) U = *ptU; /* TRANSPOSE */
@@ -3096,7 +3092,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (U) U = vecpermute(U, p1);
   if (V) V = vecpermute(V, p1);
 
-  p1 = hnfmod(x, mdet);
+  p1 = ZM_hnfmod(x, mdet);
   if (V) V = ZM_mul(V, gauss(x,p1));
   x = p1;
 
@@ -3115,7 +3111,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
 	ZV_elem(b, a, x,V, j,i);
 	if (low_stack(lim, stack_lim(av,1)))
 	{
-	  if (DEBUGMEM>1) pari_warn(warnmem,"[1]: smithall i = %ld", i);
+	  if (DEBUGMEM>1) pari_warn(warnmem,"[1]: ZM_snfall i = %ld", i);
 	  snf_pile(av, &x,&U,&V);
 	}
       }
@@ -3138,7 +3134,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
 	if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
 	if (low_stack(lim, stack_lim(av,1)))
 	{
-	  if (DEBUGMEM>1) pari_warn(warnmem,"[2]: smithall, i = %ld", i);
+	  if (DEBUGMEM>1) pari_warn(warnmem,"[2]: ZM_snfall, i = %ld", i);
 	  snf_pile(av, &x,&U,&V);
 	}
 	c = 1;
@@ -3162,7 +3158,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"[3]: smithall");
+	if (DEBUGMEM>1) pari_warn(warnmem,"[3]: ZM_snfall");
 	snf_pile(av, &x,&U,&V);
       }
     }
@@ -3175,17 +3171,16 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       gcoeff(x,k,k) = negi(gcoeff(x,k,k));
     }
 THEEND:
-  if (!U && !V)
+  if (return_vec)
   {
+    long l = lg(x)-1;
     if (typ(x) == t_MAT) x = mattodiagonal_i(x);
-    m = lg(x)-1;
-    if (m0 > m) x = shallowconcat(zerovec(m0-m), x);
-    return gerepilecopy(av0, x);
+    if (m0 > l) x = shallowconcat(zerovec(m0-l), x);
   }
 
   if (V0)
   {
-    x = shallowconcat(zeromat(m,n0-n), x);
+    if (!return_vec) x = shallowconcat(zeromat(m,n0-n), x);
     if (V) V = shallowconcat(V0, V);
   }
   if (U)
@@ -3198,16 +3193,42 @@ THEEND:
   if (ptV) *ptV = V;
   return x;
 }
+GEN
+ZM_snfall(GEN x, GEN *U, GEN *V) { return ZM_snfall_i(x, U, V, 0); }
+GEN
+ZM_snf(GEN x) { return ZM_snfall_i(x, NULL,NULL, 1); }
 
 GEN
-smith(GEN x) { return smithall(x, NULL,NULL); }
-
+smith(GEN x) {
+  if (typ(x)!=t_MAT) pari_err(typeer,"smith");
+  RgM_check_ZM(x, "smith");
+  return ZM_snfall_i(x, NULL,NULL, 1);
+}
 GEN
-smith2(GEN x)
+smithall(GEN x)
 {
   GEN z = cgetg(4, t_VEC);
-  gel(z,3) = smithall(x, (GEN*)(z+1),(GEN*)(z+2));
+  if (typ(x)!=t_MAT) pari_err(typeer,"smithall");
+  RgM_check_ZM(x, "smithall");
+  gel(z,3) = ZM_snfall_i(x, (GEN*)(z+1),(GEN*)(z+2), 0);
   return z;
+}
+
+void
+ZM_snfclean(GEN d, GEN u, GEN v)
+{
+  long i, c, l = lg(d);
+
+  if (typ(d) == t_VEC)
+    for (c=1; c<l; c++) { GEN t = gel(d,c); if (is_pm1(t)) break; }
+  else
+  {
+    for (c=1; c<l; c++) { GEN t = gcoeff(d,c,c); if (is_pm1(t)) break; }
+    if (c < l) for (i = 1; i < c; i++) setlg(gel(d,i), c);
+  }
+  setlg(d, c);
+  if (u) for (i=1; i<l; i++) setlg(gel(u,i), c);
+  if (v) setlg(v, c);
 }
 
 /* Assume z was computed by [g]smithall(). Remove the 1s on the diagonal */
@@ -3231,10 +3252,10 @@ smithclean(GEN z)
     if (gcmp1(gcoeff(d,c,c))) break;
 
   y=cgetg(4,t_VEC);
-  gel(y,1) = (p1 = cgetg(l,t_MAT));
+  gel(y,1) = p1 = cgetg(l,t_MAT);
   for (i=1; i<l; i++) gel(p1,i) = gcopy_i(gel(u,i), c);
   gel(y,2) = gcopy_i(v, c);
-  gel(y,3) = (p1 = cgetg(c,t_MAT));
+  gel(y,3) = p1 = cgetg(c,t_MAT);
   for (i=1; i<c; i++)
   {
     GEN p2 = cgetg(c,t_COL); gel(p1,i) = p2;
@@ -3281,7 +3302,7 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
 }
 
 static GEN
-gsmithall(GEN x,long all)
+gsmithall_i(GEN x,long all)
 {
   pari_sp av, lim;
   long i, j, k, n;
@@ -3388,17 +3409,17 @@ matsnf0(GEN x,long flag)
   pari_sp av = avma;
   if (flag > 7) pari_err(flagerr,"matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
-  if (flag & 2) x = flag&1 ? gsmith2(x): gsmith(x);
-  else          x = flag&1 ?  smith2(x):  smith(x);
+  if (flag & 2) x = flag&1 ? gsmithall(x): gsmith(x);
+  else          x = flag&1 ?  smithall(x):  smith(x);
   if (flag & 4) x = gerepileupto(av, smithclean(x));
   return x;
 }
 
 GEN
-gsmith(GEN x) { return gsmithall(x,0); }
+gsmith(GEN x) { return gsmithall_i(x,0); }
 
 GEN
-gsmith2(GEN x) { return gsmithall(x,1); }
+gsmithall(GEN x) { return gsmithall_i(x,1); }
 
 /* H relation matrix among row of generators g in HNF.  Let URV = D its SNF,
  * newU R newV = newD its clean SNF (no 1 in Dnew). Return the diagonal of
@@ -3408,18 +3429,14 @@ gsmith2(GEN x) { return gsmithall(x,1); }
 GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
 {
-  GEN U, V, Ui, D = smithall(H, &U, newUi? &V: NULL);
-  long i, j, c, l = lg(D);
+  GEN D = ZM_snfall_i(H, newU, newUi, 1);
+  long i, j, l;
 
-  for (c=1; c<l; c++)
-  {
-    GEN t = gcoeff(D,c,c);
-    if (is_pm1(t)) break;
-  }
-  setlg(D, c); D = mattodiagonal_i(D);
+  ZM_snfclean(D, newU? *newU: NULL, newUi? *newUi: NULL);
+  l = lg(D);
   if (newU) {
-    U = rowslice(U, 1, c-1);
-    for (i = 1; i < c; i++)
+    GEN U = *newU;
+    for (i = 1; i < l; i++)
     {
       GEN d = gel(D,i), d2 = shifti(d, 1);
       for (j = 1; j < lg(U); j++)
@@ -3428,13 +3445,11 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     *newU = U;
   }
   if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
-    if (c == 1) *newUi = cgetg(1, t_MAT);
-    else
-    { /* Ui = ZM_inv(U, gen_1); setlg(Ui, c); */
-      setlg(V, c);
-      V = FpM_red(V, gel(D,1));
-      Ui = ZM_mul(H, V);
-      for (i = 1; i < c; i++)
+    if (l > 1)
+    { /* Ui = ZM_inv(U, gen_1); setlg(Ui, l); */
+      GEN V = FpM_red(*newUi, gel(D,1));
+      GEN Ui = ZM_mul(H, V);
+      for (i = 1; i < l; i++)
 	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
       *newUi = ZM_hnfremdiv(Ui, H, NULL);
     }

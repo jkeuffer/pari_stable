@@ -2294,7 +2294,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     return fupb_PRECI;
   }
   L = Q_muli_to_int(lambda, den);
-  H = hnf(L); r = lg(H)-1;
+  H = ZM_hnf(L); r = lg(H)-1;
 
   /* tentative regulator */
   R = gmul(*ptkR, gdiv(ZM_det_triangular(H), powiu(den, r)));
@@ -2352,7 +2352,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
 
   if (DEBUGLEVEL)
     { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
-  D = smithall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
+  D = ZM_snfall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
   Ui = ginv(U);
   lo0 = lo = lg(D);
  /* we could set lo = lg(cyc) and truncate all matrices below
@@ -2894,7 +2894,7 @@ extract_full_lattice(GEN x)
   if (l < 200) return NULL; /* not worth it */
 
   v = cget1(l, t_VECSMALL);
-  H = hnf(x);
+  H = ZM_hnf(x);
   h = cgetg(1, t_MAT);
   dj = 1;
   for (j = 1; j < l; )
@@ -2904,7 +2904,7 @@ extract_full_lattice(GEN x)
 
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
     setlg(v, lv + dj);
-    h2 = hnf(vecpermute(x, v));
+    h2 = ZM_hnf(vecpermute(x, v));
     if (gequal(h, h2))
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
@@ -3200,7 +3200,7 @@ PRECPB:
       L = vecpermute(L, v);
     }
     /* arch. components of fund. units */
-    H = hnflll_i(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
+    H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
     U = ZM_mul(U, lll(H, DEFAULTPREC));
     B = gmul(A, U);
     A = cleanarch(B, N, PRECREG);

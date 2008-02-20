@@ -135,7 +135,7 @@ makenfabs(GEN rnf)
   M = modulereltoabs(rnf, gel(rnf,7));
   n = lg(M)-1;
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
-  if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
+  if (d) M = gdiv(hnfcenter_ip(ZM_hnfmodid(M, d)), d);
   else   M = matid(n);
 
   gel(NF,1) = pol;
@@ -485,7 +485,7 @@ rnfidealtwoelement(GEN rnf, GEN x)
   NF = check_and_build_nfabs(rnf);
   y = rnfidealreltoabs(rnf,x);
   y = algtobasis(NF, y); settyp(y, t_MAT);
-  y = ideal_two_elt(NF, hnf(y));
+  y = ideal_two_elt(NF, ZM_hnf(y));
   z = rnfelementabstorel(rnf, gmul(gel(NF,7), gel(y,2)));
   return gerepilecopy(av, mkvec2(gel(y,1), z));
 }
@@ -977,7 +977,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     }
   }
   B = Q_remove_denom(B, &den);
-  if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = matid(m);
+  if (den) { B = ZM_hnfmodid(B, den); B = gdiv(B, den); } else B = matid(m);
   return gerepilecopy(av, mkvec2(polabs, B));
 }
 

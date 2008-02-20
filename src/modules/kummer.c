@@ -286,7 +286,7 @@ tauoffamat(GEN x, tau_s *tau)
 static GEN
 tauofideal(GEN nfz, GEN id, tau_s *tau)
 {
-  return hnfmodid(gmul(tau->zk, id), gcoeff(id, 1,1));
+  return ZM_hnfmodid(gmul(tau->zk, id), gcoeff(id, 1,1));
 }
 
 static int
@@ -690,9 +690,9 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     gel(P,j) = isprincipalray(bnr, g);
   }
-  (void)hnfall_i(shallowconcat(P, subgroup), &U, 1);
+  (void)ZM_hnfall(shallowconcat(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
-  return hnfmodid(shallowconcat(U, diagonal_i(raycycz)), gel(raycycz,1));
+  return ZM_hnfmodid(shallowconcat(U, diagonal_i(raycycz)), gel(raycycz,1));
 }
 
 static GEN

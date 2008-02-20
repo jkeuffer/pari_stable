@@ -1189,7 +1189,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   A = Q_primitive_part(TI, &dA);
   gel(mat,6) = A; /* primitive part of codifferent, dA its content */
   dA = dA? diviiexact(absdK, dA): absdK;
-  A = hnfmodid(A, dA);
+  A = ZM_hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
   gel(MDI,2) = eltimul_get_table(nf, gel(MDI,2));
   gel(mat,7) = MDI;
@@ -1211,7 +1211,7 @@ hnffromLLL(GEN nf)
   x = RgXV_to_RgM(gel(nf,7), degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
-  return gauss(hnfmodid(x, d), x);
+  return gauss(ZM_hnfmodid(x, d), x);
 }
 
 static GEN
@@ -1412,7 +1412,7 @@ nfpolred(int part, nfbasic_t *T)
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, xbest);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
-  if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = matid(n);
+  mat = d? gdiv(ZM_hnfmodid(mat,d), d): matid(n);
 
   (void)Z_issquareall(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);

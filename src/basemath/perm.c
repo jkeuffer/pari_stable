@@ -1139,7 +1139,7 @@ group_abelianSNF(GEN G, GEN L)
   pari_sp ltop = avma;
   GEN H = group_abelianHNF(G,L);
   if (!H) return NULL;
-  return gerepileupto(ltop, smithclean( smith(H) ));
+  return gerepileupto(ltop, smithclean( ZM_snf(H) ));
 }
 
 GEN

@@ -1674,7 +1674,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
       gcoeff(h,cp,cp) = gen_2;
     }
     /* assert(cp == nbgen) */
-    h = hnfall_i(h,NULL,0);
+    h = ZM_hnfall(h,NULL,0);
     cyc = smithrel(h, &U, add_gen? &u1: NULL);
   }
   else

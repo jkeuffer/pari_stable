@@ -1864,13 +1864,13 @@ padicff2(GEN nf,GEN p,long k)
   {
     GEN P = gel(dec_p,i);
     long e = itos(gel(P,3)), ef = e * itos(gel(P,4));
-    D = smithall(idealpows(nf,P, k*e), &U, NULL);
+    D = ZM_snfall_i(idealpows(nf,P, k*e), &U, NULL, 1);
     Ui= ginv(U); setlg(Ui, ef+1); /* cf smithrel */
     U = rowslice(U, 1, ef);
     mat = gmul(U, gmul(mulx, Ui));
     gel(fa,i) = caradj(mat,0,NULL);
   }
-  pk = gcoeff(D,1,1); /* = p^k */
+  pk = gel(D,1); /* = p^k */
   z = cgetg(l,t_COL); pk = icopy(pk);
   for (i=1; i<l; i++)
     gel(z,i) = ZX_to_ZpX_normalized(gel(fa,i),p,pk,k);

@@ -272,7 +272,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   initc = init_get_chic(gmael(bnr, 5, 2));
   Mrc   = diagonal_i(gmael(bnrc, 5, 2));
   M = bnrGetSurj(bnr, bnrc);
-  (void)hnfall_i(shallowconcat(M, Mrc), &U, 1);
+  (void)ZM_hnfall(shallowconcat(M, Mrc), &U, 1);
   l = lg(M);
   U = rowslice(vecslice(U, l, lg(U)-1), 1, l-1);
   return gerepilecopy(av, get_Char(chi, initc, U, prec));
@@ -311,10 +311,10 @@ static GEN AllStark(GEN data, GEN nf, long flag, long prec);
 static GEN
 InitQuotient(GEN C)
 {
-  GEN z, U, D = smithall(C, &U, NULL);
-  z = cgetg(5, t_VEC);
-  gel(z,1) = ZM_det_triangular(D);
-  gel(z,2) = mattodiagonal_i(D);
+  GEN z = cgetg(5, t_VEC), U, D = ZM_snfall_i(C, &U, NULL, 1);
+  long junk;
+  gel(z,1) = detcyc(D, &junk);
+  gel(z,2) = D;
   gel(z,3) = U;
   gel(z,4) = C; return z;
 }
@@ -328,11 +328,11 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
   long nbA = lg(DA)-1, rk;
   GEN U;
 
-  rk = nbA + lg(DB) - lg(hnfall_i(shallowconcat(P, DB), &U, 1));
+  rk = nbA + lg(DB) - lg(ZM_hnfall(shallowconcat(P, DB), &U, 1));
   U = vecslice(U, 1,rk);
   U = rowslice(U, 1,nbA);
   if (!gcmp0(DA)) U = shallowconcat(U, DA);
-  return gerepileupto(av, hnf(U));
+  return gerepileupto(av, ZM_hnf(U));
 }
 
 /* Let m and n be two moduli such that n|m and let C be a congruence
@@ -368,12 +368,12 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   disable_dbg(0);
 
   Mr = diagonal_i(gmael(bnr, 5, 2));
-  D = smithall(hnf_gauss(C, Mr), &U, NULL);
+  D = ZM_snfall_i(hnf_gauss(C, Mr), &U, NULL, 1);
   T = ZM_mul(C,ginv(U));
   subgrp  = subgrouplist(D, mkvec(gen_2));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
-    gel(subgrp,i) = hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
+    gel(subgrp,i) = ZM_hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
 
   disable_dbg(-1);
   return gerepilecopy(av, subgrp);
@@ -425,7 +425,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
     M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
-    subpr = hnf(shallowconcat(M, diagonal_i(cycpr)));
+    subpr = ZM_hnf(shallowconcat(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(ZM_det_triangular(subgroup), ZM_det_triangular(subpr)) );
   }
@@ -2630,7 +2630,7 @@ static GEN
 get_subgroup(GEN subgp, GEN cyc)
 {
   if (!subgp || gcmp0(subgp)) return cyc;
-  subgp = hnf(subgp);
+  subgp = ZM_hnf(subgp);
   return hnfdivide(subgp, cyc)? subgp: NULL;
 }
 
@@ -2684,7 +2684,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     {
       GEN t = gel(M,i);
       if (is_pm1(cyc[i])) continue;
-      M[i] = Mcyc[i]; H = hnf(shallowconcat(M, Mcyc));
+      M[i] = Mcyc[i]; H = ZM_hnf(shallowconcat(M, Mcyc));
       gel(M,i) = t;
       gel(vec,j++) = bnrstark(bnr, H, prec);
     }

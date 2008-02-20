@@ -12,5 +12,5 @@ Doc: if $x$ is a (not necessarily square) matrix of
  
  If the rank of $x$ is equal to its number of rows, the result is a square
  matrix. In general, the columns of the result form a basis of the lattice
- spanned by the columns of $x$. This is much faster than \kbd{mathnf} when $d$
- is known.
+ spanned by the columns of $x$. Even when $d$ is known, this is in general
+ slower than \kbd{mathnf} but uses much less memory.

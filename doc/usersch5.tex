@@ -1937,6 +1937,9 @@ zero, and $0$ otherwise.
 \fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
 the same length (lexicographic order).
 
+\fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal
+and $0$ otherwise.
+
 \fun{GEN}{ZC_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{ZC_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
@@ -1986,6 +1989,9 @@ raise an error if it is not a \kbd{ZM} ($s$ should point to the name of the
 caller).
 
 \fun{GEN}{ZM_copy}{GEN x} returns a copy of \kbd{x}.
+
+\fun{int}{ZM_equal}{GEN A, GEN B} returns $1$ if the two \kbd{ZM} are equal
+and $0$ otherwise.
 
 \fun{GEN}{ZM_add}{GEN x, GEN y} returns $\kbd{x} + \kbd{y}$ (assumed to have
 compatible dimensions).
@@ -4831,8 +4837,8 @@ corresponding number field type. I.e. one cannot call
 
 \fun{GEN}{RgV_dotproduct}{GEN x,GEN y} returns the scalar product of $x$ and $y$
 
-\fun{GEN}{ZV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$ and $y$
-have \typ{INT} entries.
+\fun{GEN}{ZV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$
+and $y$ have \typ{INT} entries.
 
 \fun{GEN}{RgV_dotsquare}{GEN x} returns the scala product of $x$ with itself.
 
@@ -4877,6 +4883,94 @@ diagonal matrix, and 0 otherwise.
 \fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
+
+\subsec{Linear algebra over $\Z$}
+
+\fun{GEN}{ZM_hnf}{GEN x} returns the Hermite Normal Form of the \kbd{ZM} $x$ (removing $0$
+columns), using the \tet{ZM_hnfall} algorithm. If you want the true HNF, use
+\kbd{ZM\_hnfall(x, NULL, 0)}.
+
+\fun{GEN}{ZM_hnfmod}{GEN x, GEN d} returns the HNF of the \kbd{ZM} $x$
+(removing $0$ columns), assuming the \typ{INT} $d$ is a multiple of the
+determinant of $x$. This is usually faster than \tet{ZM_hnf} (and uses less
+memory) if the dimension is large, $> 50$ say.
+
+\fun{GEN}{ZM_hnfmodid}{GEN x, GEN d} returns the HNF of the matrix $(x \mid d
+\text{Id})$ (removing $0$ columns), for a \kbd{ZM} $x$ and a \typ{INT} $d$.
+
+\fun{GEN}{ZM_hnfmodidpart}{GEN x, GEN d} as \tet{ZM_hnfmodid}, but return as
+soon as the diagonal is known, saving time. Hence the entries to the right of
+the pivots need not be reduced, i.e.~they may be large or negative.
+
+\fun{GEN}{ZM_hnfall}{GEN x, GEN *U, long remove} returns the HNF $H$ of the
+\kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such that
+$x U = H$. If $\kbd{remove} = 0$, $H$ is the true HNF, including $0$
+columns; if $\kbd{remove} = 1$, delete the $0$ columns from $H$ but do not
+update $U$ accordingly (so that the integer kernel may still be recovered):
+we no longer have $x U = H$;
+if $\kbd{remove} = 2$, remove $0$ columns from $H$ and update $U$ so that
+$x U = H$. The matrix $U$ is square and invertible unless $\kbd{remove} = 2$.
+
+This routine uses a naive algorithm which is potentially exponential in the
+dimension but is fast in practice, although it may require lots of memory;
+the base change matrix $U$ may be very large (when the kernel is large).
+
+\fun{GEN}{ZM_hnflll}{GEN x, GEN *U, int remove} returns the HNF $H$ of the
+\kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such that $x
+U = H$. The meaning of \kbd{remove} is the same as in \tet{ZM_hnfall}.
+
+This routine uses the LLL variant of Havas, Majewski and Mathews, which is
+polynomial time, but rather slow in practice because it uses an exact LLL
+over the integers instead of a floating point variant; it uses polynomial
+space but lots of memory is needed for large dimensions, say larger than 300.
+On the other hand, the base change matrix $U$ is essentially optimally small
+with respect to the $L_2$ norm.
+
+\fun{GEN}{ZM_snf}{GEN x} returns the Smith Normal Form (vector of
+elementary divisors) of the \kbd{ZM} $x$.
+
+\fun{GEN}{ZM_snfall}{GEN x, GEN *U, GEN *V} returns
+\kbd{ZM\_smith(x)} and sets $U$ and $V$ to unimodular matrices such that $U\,
+x\, V = D$ (diagonal matrix of elementary divisors). Either (or both) $U$ or
+$V$ may be \kbd{NULL} in which case the corresponding matrix is not computed.
+
+\fun{GEN}{ZM_snfall_i}{GEN x, GEN *U, GEN *V, int returnvec} same as
+\kbd{ZM\_snfall}, except that, depending on the value of \kbd{returnvec}, we
+either return a diagonal matrix (as in \kbd{ZM\_snfall}, \kbd{returnvec} is 0)
+or a vector of elementary divisors (as in \kbd{ZM\_snf}, \kbd{returnvec} is 1) .
+
+\fun{void}{ZM_snfclean}{GEN d, GEN U, GEN V} assuming $d$, $U$, $V$ come
+from \kbd{d = ZM_snfall(x, \&U, \&V)}, where $U$ or $V$ may be \kbd{NULL},
+cleans up the output in place. This means that elementary divisors equal to 1
+are deleted and $U$, $V$ are updated. The output is not suitable for
+\kbd{gerepileupto}.
+
+The following routines are simple wrappers around the above ones and are
+normally useless in library mode:
+
+\fun{GEN}{hnf}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls \tet{ZM_hnf}.
+Normally useless in library mode.
+
+\fun{GEN}{hnfmod}{GEN x, GEN d} checks whether $x$ is a \kbd{ZM}, then calls
+\tet{ZM_hnfmod}. Normally useless in library mode.
+
+\fun{GEN}{hnfmodid}{GEN x,GEN d} checks whether $x$ is a \kbd{ZM}, then calls
+\tet{ZM_hnfmodid}. Normally useless in library mode.
+
+\fun{GEN}{hnfall}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
+\kbd{ZM\_hnfall(x, \&U, 1)} and returns $[H, U]$. Normally useless in library
+mode.
+
+\fun{GEN}{hnflll}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
+\kbd{ZM\_hnflll(x, \&U, 1)} and returns $[H, U]$. Normally useless in library
+mode.
+
+\fun{GEN}{smith}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
+\kbd{ZM\_smith}. Normally useless in library mode.
+
+\fun{GEN}{smithall}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
+\kbd{ZM\_smithall(x, \&U, \&V)} and returns $[U,V,D]$. Normally useless in
+library mode.
 
 \subsec{Transcendental functions}
 

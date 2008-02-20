@@ -419,7 +419,7 @@ Buchray(GEN bnf,GEN module,long flag)
 
   cycgen = check_and_build_cycgen(bnf);
   /* (log(Units)|D) * u = (0 | H) */
-  H = hnfall_i( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
+  H = ZM_hnfall( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
   logs = cgetg(ngen+1, t_MAT);
   /* FIXME: cycgen[j] is not necessarily coprime to bid, but it is made coprime
    * in famat_zlog using canonical uniformizers [from bid data]: no need to
@@ -441,7 +441,7 @@ Buchray(GEN bnf,GEN module,long flag)
     vconcat(diagonal_i(cyc), gneg_i(logs)),
     vconcat(zeromat(ngen, Ri), H)
   );
-  met = smithrel(hnf(h), &U, add_gen? &u1: NULL);
+  met = smithrel(ZM_hnf(h), &U, add_gen? &u1: NULL);
   clg = cgetg(add_gen? 4: 3, t_VEC);
   gel(clg,1) = detcyc(met, &j);
   gel(clg,2) = met;
@@ -515,7 +515,7 @@ bnrclassno(GEN bnf,GEN ideal)
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
-  return gerepileuptoint(av, mulii(h, ZM_det_triangular(hnf(D))));
+  return gerepileuptoint(av, mulii(h, ZM_det_triangular(ZM_hnf(D))));
 }
 
 GEN
@@ -1220,7 +1220,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
 
   if (!H) return Delta;
   H2 = ZM_mul(bnrGetSurj(bnr, bnr2), H);
-  return hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
+  return ZM_hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
 }
 
 static GEN
@@ -1279,7 +1279,7 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, const char *s)
   if (H)
   {
     D = diagonal_i(gmael(bnr,5,2));
-    H = hnf(H);
+    H = ZM_hnf(H);
     if (!hnfdivide(H, D)) pari_err(talker,"incorrect subgroup in %s", s);
     h = ZM_det_triangular(H);
     if (equalii(h, *clhray)) H = NULL; else *clhray = h;
@@ -1461,7 +1461,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
       /* pr^f = N P, P | pr, hence is in norm group */
       col = gmulsg(f, bnrisprincipal(bnr,pr,0));
-      group = hnf(shallowconcat(group, col));
+      group = ZM_hnf(shallowconcat(group, col));
       detgroup = ZM_det_triangular(group);
       k = cmpiu(detgroup,reldeg);
       if (k < 0) pari_err(talker,"not an Abelian extension in rnfnormgroup");
@@ -1576,7 +1576,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
     for (j = ep; j > 0; j--)
     {
       GEN z = bnr_log_gen_pr(bnr, &S, nf, j, k);
-      H = hnf(shallowconcat(H, z));
+      H = ZM_hnf(shallowconcat(H, z));
       clhss = ZM_det_triangular(H);
       if (flcond && j==ep && equalii(clhss,clhray)) { avma = av; return gen_0; }
       if (is_pm1(clhss)) { sum = addis(sum, j); break; }
@@ -1654,7 +1654,7 @@ KerChar(GEN chi, GEN cyc)
     gel(m,i) = mkcol(mulii(gel(chi,i), diviiexact(d1, gel(cyc,i))));
   }
   gel(m,i) = mkcol(d1);
-  (void)hnfall_i(m, &U, 1);
+  (void)ZM_hnfall(m, &U, 1);
   for (i = 1; i < l; i++) setlg(U[i], l);
   setlg(U,l); return U;
 }
@@ -1675,7 +1675,7 @@ get_classno(GEN t, GEN h)
 {
   GEN bid = gel(t,1), cyc = gmael(bid,2,2);
   GEN m = shallowconcat(gel(t,2), diagonal_i(cyc));
-  return mulii(h, ZM_det_triangular(hnf(m)));
+  return mulii(h, ZM_det_triangular(ZM_hnf(m)));
 }
 
 static void
@@ -1998,7 +1998,7 @@ bnrclassnointern(GEN B, GEN h)
   for (j=1; j<lx; j++)
   {
     b = gel(B,j); qm = ZM_mul(gel(b,3),gel(b,4));
-    m = hnf( shallowconcat(qm, diagonal_i(gel(b,2))) );
+    m = ZM_hnf( shallowconcat(qm, diagonal_i(gel(b,2))) );
     gel(L,j) = mkvec2(gel(b,1), mkvecsmall( itou( mulii(h, ZM_det_triangular(m)) ) ));
   }
   return L;
@@ -2022,7 +2022,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
     /* [ qm   cyc 0 ]
      * [ matU  0  2 ] */
     m = shallowconcat(vconcat(qm, matU), diagonal_i(shallowconcat(cyc, _2)));
-    m = hnf(m); mm = shallowcopy(m);
+    m = ZM_hnf(m); mm = shallowcopy(m);
     H = cgetg(nbarch+1,t_VECSMALL);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
     for (k = 0; k < nbarch; k++)
@@ -2032,7 +2032,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
 	if (kk&1) rowsel[nba++] = nc + jj;
       setlg(rowsel, nba);
       rowselect_p(m, mm, rowsel, nc+1);
-      H[k+1] = itou( mulii(h, ZM_det_triangular(hnf(mm))) );
+      H[k+1] = itou( mulii(h, ZM_det_triangular(ZM_hnf(mm))) );
     }
     gel(L,j) = mkvec2(gel(b,1), H);
   }

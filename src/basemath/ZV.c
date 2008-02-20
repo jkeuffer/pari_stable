@@ -567,6 +567,34 @@ ZV_cmp0(GEN V)
   return 1;
 }
 
+static int
+ZV_equal_lg(GEN V, GEN W, long l)
+{
+  long i;
+  for (i = 1; i < l; i++)
+    if (!equalii(gel(V,i), gel(W,i))) return 0;
+  return 1;
+}
+int
+ZV_equal(GEN V, GEN W)
+{
+  long l = lg(V);
+  if (lg(W) != l) return 0;
+  return ZV_equal_lg(V, W, l);
+}
+int
+ZM_equal(GEN A, GEN B)
+{
+  long i, m, l = lg(A);
+  if (lg(B) != l) return 0;
+  if (l == 1) return 1;
+  m = lg(A[1]);
+  if (lg(B[1]) != m) return 0;
+  for (i = 1; i < l; i++)
+    if (!ZV_equal_lg(gel(A,i), gel(B,i), m)) return 0;
+  return 1;
+}
+
 long
 ZV_isscalar(GEN x)
 {
