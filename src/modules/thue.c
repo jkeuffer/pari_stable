@@ -329,7 +329,7 @@ errnum(GEN x, GEN d)
 static int
 CF_1stPass(GEN *B0, GEN kappa, baker_s *BS)
 {
-  GEN q, ql, qd, l0, denbound = mulri(*B0, kappa);
+  GEN a, b, q, ql, qd, l0, denbound = mulri(*B0, kappa);
 
   if (gcmp(gmul(dbltor(0.1),gsqr(denbound)), ginv(BS->errdelta)) > 0)
     return -1;
@@ -341,42 +341,48 @@ CF_1stPass(GEN *B0, GEN kappa, baker_s *BS)
   l0 = subrr(ql, addrr(mulrr(qd, *B0), divri(dbltor(0.1),kappa)));
   if (signe(l0) <= 0) return 0;
 
-  if (BS->r > 1)
-    *B0 = divrr(mplog(divrr(mulir(q,BS->c15), l0)), BS->c13);
-  else
-  {
-    l0 = mulrr(l0,Pi2n(1, DEFAULTPREC));
-    *B0 = divrr(mplog(divrr(mulir(q,BS->c11), l0)), BS->c10);
+  if (BS->r > 1) {
+    a = BS->c15; b = BS->c13;
   }
+  else {
+    a = BS->c11; b = BS->c10;
+    l0 = mulrr(l0, Pi2n(1, DEFAULTPREC));
+  }
+  *B0 = divrr(mplog(divrr(mulir(q,a), l0)), b);
   if (DEBUGLEVEL>1) fprintferr("    B0 -> %Zs\n",*B0);
   return 1;
+}
+
+static void
+get_B0Bx(baker_s *BS, GEN l0, GEN *B0, GEN *Bx)
+{
+  GEN t = divrr(mulir(BS->Ind, BS->c15), l0);
+  *B0 = divrr(mulir(BS->Ind, mplog(t)), BS->c13);
+  *Bx = gpow(mulsr(2,t), ginv(utoipos(BS->deg)), DEFAULTPREC);
 }
 
 static int
 LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
 {
-  GEN B0 = *pB0, Bx = *pBx, lllmat, C, l0, l1, delta, lambda, triv;
+  GEN B0 = *pB0, Bx = *pBx, lllmat, C, l0, l1, triv;
   long e;
-
-  delta = BS -> delta;
-  lambda = BS -> lambda;
 
   C = grndtoi(mulir(mulii(BS->Ind, kappa),
 		    gpow(B0, dbltor(2.2), DEFAULTPREC)), &e);
 
   if (DEBUGLEVEL > 1) fprintferr("C (bitsize) : %d\n", expi(C));
   lllmat = matid(3);
-  if (gcmp(B0, BS -> Ind) > 0)
+  if (cmpri(B0, BS->Ind) > 0)
   {
-    gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS -> Ind), &e);
+    gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS->Ind), &e);
     triv = mulsr(2, gsqr(B0));
   }
   else
-    triv = addir(gsqr(BS -> Ind), gsqr(B0));
+    triv = addir(sqri(BS->Ind), gsqr(B0));
 
-  gcoeff(lllmat, 3, 1) = ground(gneg(gmul(C, lambda)));
-  gcoeff(lllmat, 3, 2) = ground(gneg(gmul(C, delta)));
-  gcoeff(lllmat, 3,3) = C;
+  gcoeff(lllmat, 3, 1) = ground(gneg(gmul(C, BS->lambda)));
+  gcoeff(lllmat, 3, 2) = ground(gneg(gmul(C, BS->delta)));
+  gcoeff(lllmat, 3, 3) = C;
   lllmat = gmul(lllmat, lllint(lllmat));
 
   l0 = gnorml2(gel(lllmat,1));
@@ -387,18 +393,14 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   l0 = divri(subrr(sqrtr(l0), l1), C);
 
   if (signe(l0) <= 0) return 0;
-  B0 = gmul(gdiv(BS->Ind, BS->c13),
-	    mplog(gdiv(gmul(BS->Ind, BS->c15), l0)));
-  Bx = gpow(gdiv(mulsr(2, gmul(BS->Ind, BS->c15)), l0),
-	    ginv(utoipos(BS->deg)), DEFAULTPREC);
 
+  get_B0Bx(BS, l0, &B0, &Bx);
   if (DEBUGLEVEL>=2)
-    {
-      fprintferr("LLL_First_Pass successful !!\n");
-      fprintferr("B0 -> %Zs\n", B0);
-      fprintferr("x <= %Zs\n", Bx);
-    }
-
+  {
+    fprintferr("LLL_First_Pass successful\n");
+    fprintferr("B0 -> %Zs\n", B0);
+    fprintferr("x <= %Zs\n", Bx);
+  }
   *pB0 = B0; *pBx = Bx; return 1;
 }
 
@@ -728,7 +730,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 	if (DEBUGLEVEL>1) fprintferr("LLL failed. Increasing kappa\n");
       }
 
-      /* TO COMPLETE */
+      /* FIXME: TO BE COMPLETED */
       if (cf == 10)
       { /* Semirational or totally rational case */
 	GEN Q, ep, q, l0, denbound;
@@ -742,11 +744,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 	l0 = divri(subrr(errnum(BS->delta, q), ep), absi(gel(Q,3)));
 	if (signe(l0) <= 0) break;
 
-	B0 = divrr(mulir(BS->Ind, mplog(divrr(mulir(BS->Ind, BS->c15), l0))),
-		   BS->c13);
-	Bx = gpow(gdiv(mulsr(2, gmul(BS->Ind, BS->c15)), l0),
-		  ginv(utoipos(BS->deg)), DEFAULTPREC);
-
+        get_B0Bx(BS, l0, &B0, &Bx);
 	if (DEBUGLEVEL>1)
 	  fprintferr("Semirat. reduction: B0 -> %Zs x <= %Zs\n",B0, Bx);
       }
