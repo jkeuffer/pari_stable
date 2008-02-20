@@ -2596,6 +2596,18 @@ entries are the \kbd{Fp\_center(gel(z,i))}.
 \fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
 entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.
 
+\fun{GEN}{FpC_add}{GEN x, GEN y, GEN p} adds the \kbd{ZC} $x$ and $y$
+and reduce modulo $p$ to obtain an \kbd{FpC}.
+
+\fun{GEN}{FpV_add}{GEN x, GEN y, GEN p} same as \kbd{FpC\_add}, returning and
+\kbd{FpV}.
+
+\fun{GEN}{FpC_sub}{GEN x, GEN y, GEN p} subtracts the \kbd{ZC} $y$ to 
+the \kbd{ZC} $x$ and reduce modulo $p$ to obtain an \kbd{FpC}.
+
+\fun{GEN}{FpV_sub}{GEN x, GEN y, GEN p} same as \kbd{FpC\_sub}, returning and
+\kbd{FpV}.
+
 \fun{GEN}{FpC_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \typ{INT}~\kbd{y} and reduce modulo \kbd{p} to
 obtain an \kbd{FpC}.
