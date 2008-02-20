@@ -195,7 +195,6 @@ GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 /* LLL */
 GEN lllint_fp_ip(GEN x, long D);
 GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
-GEN lllint_marked(long *M, GEN x, long D, int g, GEN *h, GEN *f, GEN *B);
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
 GEN qfgaussred_positive(GEN a);
@@ -595,8 +594,9 @@ void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 /* alglin2.c */
 
 GEN     Frobeniusform(GEN V, long n);
-GEN     hnf_i(GEN A, int remove);
+GEN     hnf0(GEN A, int remove);
 GEN     hnf_special(GEN x, long remove);
+GEN     hnfall0(GEN A, long remove);
 
 /* anal.c */
 
@@ -680,7 +680,6 @@ GEN     hnfcenter_ip(GEN M);
 /* bibli1.c */
 
 GEN     lll_scaled(long MARKED, GEN X0, long D);
-GEN     lllall(GEN x, long D, int gram, long flag);
 GEN     lllintpartialall(GEN m, long flag);
 GEN     plindep(GEN x);
 GEN     pslq(GEN x);

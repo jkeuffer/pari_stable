@@ -1189,7 +1189,11 @@ matrixqz_aux(GEN A)
 
   n = lg(A);
   if (n == 1) return cgetg(1,t_MAT);
-  if (n == 2) return ZM_hnf(A); /* 1 col, maybe 0 */
+  if (n == 2) { 
+    A = Q_primpart(A);
+    if (ZV_cmp0(A)) A = cgetg(1,t_MAT);
+    return A;
+  }
   m = lg(A[1]);
   for (i=1; i<m; i++)
   {

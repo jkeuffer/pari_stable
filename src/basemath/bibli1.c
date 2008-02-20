@@ -590,15 +590,14 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 }
 
 /* x integer matrix. Beware: this function can return NULL */
-GEN
+static GEN
 lllint_marked(long *pMARKED, GEN x, long D, int gram,
 	      GEN *pth, GEN *ptfl, GEN *ptB)
 {
-  long lx = lg(x), hx, i, j, k, l, n, kmax, MARKED;
+  long lx = lg(x), hx, j, k, l, n, kmax, MARKED;
   pari_sp av, lim;
   GEN B,L,h,fl;
 
-  if (typ(x) != t_MAT) pari_err(typeer,"lllint");
   fl = cgetg(lx,t_VECSMALL);
   if (ptfl) *ptfl = fl;
   n = lx-1; if (n <= 1) return NULL;
@@ -609,12 +608,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   av = avma; lim = stack_lim(av,1); x = shallowcopy(x);
   B = scalarcol_shallow(gen_1, lx);
   L = cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++)
-  {
-    for (i=1; i<hx; i++)
-      if (typ(gcoeff(x,i,j)) != t_INT) pari_err(typeer,"lllint_marked");
-    fl[j] = 0; gel(L,j) = zerocol(n);
-  }
+  for (j=1; j<lx; j++) { fl[j] = 0; gel(L,j) = zerocol(n); }
   h = pth? matid(n): NULL;
   ZincrementalGS(x, L, B, 1, fl, gram);
   kmax = 1;
@@ -667,40 +661,42 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   return h? h: x;
 }
 
-/* Beware: this function can return NULL (dim x <= 1) */
+/* Assume x a ZM. Beware: this function can return NULL (dim x <= 1) */
 GEN
 lllint_i(GEN x, long D, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 {
   return lllint_marked(NULL, x,D,gram,pth,ptfl,ptB);
 }
 
-/* return x * lllint(x). No garbage collection */
+/* Assume x a ZM. Return x * lllint(x). No garbage collection */
 GEN
 lllint_ip(GEN x, long D)
 {
   GEN fl, h = lllint_i(x, D, 0, NULL, &fl, NULL);
-  if (!h) return x;
-  return lll_finish(h, fl, lll_IM);
+  return h? lll_finish(h, fl, lll_IM): x;
 }
 
-GEN
+static GEN
+lllall_i(GEN x, long D, int gram, long flag)
+{
+  GEN fl, h;
+  if (typ(x) != t_MAT) pari_err(typeer, "lllall");
+  RgM_check_ZM(x, "lllall");
+  (void)lllint_i(x, D, gram, &h, &fl, NULL);
+  return h? lll_finish(h,fl,flag): lll_trivial(x,flag);
+}
+static GEN
 lllall(GEN x, long D, int gram, long flag)
 {
   pari_sp av = avma;
-  GEN fl, junk, h = lllint_i(x, D, gram, &junk, &fl, NULL);
-  if (!h) return lll_trivial(x,flag);
-  return gerepilecopy(av, lll_finish(h,fl,flag));
+  return gerepilecopy(av, lllall_i(x,D,gram,flag));
 }
-
 GEN
 lllint(GEN x) { return lllall(x,LLLDFT,0, lll_IM); }
-
 GEN
 lllkerim(GEN x) { return lllall(x,LLLDFT,0, lll_ALL); }
-
 GEN
 lllgramint(GEN x) { return lllall(x,LLLDFT,1, lll_IM | lll_GRAM); }
-
 GEN
 lllgramkerim(GEN x) { return lllall(x,LLLDFT,1, lll_ALL | lll_GRAM); }
 
@@ -1130,7 +1126,11 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   av = avma; lim = stack_lim(av,1);
   if (k == 2)
   {
-    if (!prec) return lllint_marked(pMARKED, x, D, gram, &h, NULL, NULL);
+    if (!prec)
+    {
+      RgM_check_ZM(x, "lllint_marked");
+      return lllint_marked(pMARKED, x, D, gram, &h, NULL, NULL);
+    }
     x = mat_to_MP(x, prec);
     isexact = 1;
   }
@@ -2818,9 +2818,7 @@ GEN
 kerint(GEN x)
 {
   pari_sp av = avma;
-  GEN fl, junk, h = lllint_i(x, 0, 0, &junk, &fl, NULL);
-  if (h) h = lll_finish(h,fl, lll_KER);
-  else   h = lll_trivial(x, lll_KER);
+  GEN h = lllall_i(x, 0,0, lll_KER);
   if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
   return gerepilecopy(av, lllint_ip(h, 100));
 }
