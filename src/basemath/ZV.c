@@ -538,7 +538,7 @@ ZM_hnfremdiv(GEN x, GEN y, GEN *Q)
     for (i=1; i<lx; i++)
     {
       pari_sp av = avma;
-      gel(R,i) = gerepileupto(av, ZC_hnfremdiv(gel(x,i),y,NULL));
+      gel(R,i) = gerepileupto(av, ZC_hnfrem(gel(x,i),y));
     }
   return R;
 }
@@ -592,6 +592,15 @@ ZM_equal(GEN A, GEN B)
   if (lg(B[1]) != m) return 0;
   for (i = 1; i < l; i++)
     if (!ZV_equal_lg(gel(A,i), gel(B,i), m)) return 0;
+  return 1;
+}
+int
+zv_equal(GEN V, GEN W)
+{
+  long i, l = lg(V);
+  if (lg(W) != l) return 0;
+  for (i = 1; i < l; i++)
+    if (V[i] != W[i]) return 0;
   return 1;
 }
 

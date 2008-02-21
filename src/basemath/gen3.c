@@ -216,7 +216,7 @@ padicprec(GEN x, GEN p)
       return Z_pval(gel(x,1),p);
 
     case t_PADIC:
-      if (!gequal(gel(x,2),p))
+      if (!equalii(gel(x,2),p))
 	pari_err(talker,"not the same prime in padicprec");
       return precp(x)+valp(x);
 

@@ -282,7 +282,7 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
     }
     if (i == lv) return 0;
   }
-  if (gequal(F->subFB, yes))
+  if (zv_equal(F->subFB, yes))
   {
     if (chg != sfb_UNSUITABLE) F->sfb_chg = 0;
   }
@@ -1228,14 +1228,14 @@ get_Garch(GEN nf, GEN gen, GEN clg2, long prec)
   {
     g = gel(gen,i);
     z = gel(clorig,i); J = gel(z,1);
-    if (!gequal(g,J))
+    if (!ZM_equal(g,J))
     {
       z = idealinv(nf,z); J = gel(z,1);
       J = Q_remove_denom(J, NULL);
-      if (!gequal(g,J))
+      if (!ZM_equal(g,J))
       {
 	z = ideallllred(nf,z,NULL,prec); J = gel(z,1);
-	if (!gequal(g,J))
+	if (!ZM_equal(g,J))
 	  pari_err(bugparier,"isprincipal (incompatible bnf generators)");
       }
     }
@@ -1326,7 +1326,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, gel(g,i), gel(e,i)));
   if (typ(z) != t_MAT) z = idealhermite(nf,z);
   if (typ(y) != t_MAT) y = idealhermite(nf,y);
-  i = gequal(y, z); avma = av; return i;
+  i = ZM_equal(y, z); avma = av; return i;
 }
 
 /* assume x in HNF. cf class_group_gen for notations */
@@ -2905,7 +2905,7 @@ extract_full_lattice(GEN x)
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
     setlg(v, lv + dj);
     h2 = ZM_hnf(vecpermute(x, v));
-    if (gequal(h, h2))
+    if (ZM_equal(h, h2))
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
       j += dj;
@@ -2920,7 +2920,7 @@ extract_full_lattice(GEN x)
     }
     else
     { /* this column should be kept */
-      if (gequal(h2, H)) break;
+      if (ZM_equal(h2, H)) break;
       h = h2; j++;
     }
   }

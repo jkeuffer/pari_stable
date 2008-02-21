@@ -1065,16 +1065,16 @@ element_invmodideal(GEN nf, GEN x, GEN y)
       return NULL; /* not reached */
   }
   a = element_div(nf, hnfmerge_get_1(xh, yh), x);
-  return gerepileupto(av, ZC_hnfremdiv(a, yh, NULL));
+  return gerepileupto(av, ZC_hnfrem(a, yh));
 }
 
 static GEN
 element_sqrmodideal(GEN nf, GEN x, GEN id) {
-  return ZC_hnfremdiv(element_sqr(nf,x), id, NULL);
+  return ZC_hnfrem(element_sqr(nf,x), id);
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? ZC_hnfremdiv(element_mul(nf,x,y), id, NULL): algtobasis_i(nf, y);
+  return x? ZC_hnfrem(element_mul(nf,x,y), id): algtobasis_i(nf, y);
 }
 /* assume k >= 0, ideal in HNF */
 GEN
@@ -1202,9 +1202,7 @@ detcyc(GEN cyc, long *L)
  * mv = multiplication table by v */
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
-{
-  return ZC_hnfremdiv(ZC_add(u, ZM_ZC_mul(mv,x)), UV, NULL);
-}
+{ return ZC_hnfrem(ZC_add(u, ZM_ZC_mul(mv,x)), UV); }
 
 static GEN
 makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN v, GEN gen)

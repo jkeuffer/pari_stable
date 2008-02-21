@@ -345,6 +345,8 @@ enum manage_var_t {
 #define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
 #define FpV_FpC_mul(x,y,p) FpV_dotproduct((x),(y),(p))
 #define F2x_div(x,y)     (F2x_divrem((x),(y), NULL))
+#define ZC_hnfrem(x,y)   (ZC_hnfremdiv((x),(y),NULL))
+#define ZM_hnfrem(x,y)   (ZM_hnfremdiv((x),(y),NULL))
 
 #define zero_F2x(x)      (zero_Flx((x)))
 #define pol1_F2x(x)      (pol1_Flx((x)))

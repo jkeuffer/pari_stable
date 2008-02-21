@@ -328,7 +328,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     if (mulI)
     {
       G = element_muli(nf, G, mulI);
-      G = ZC_hnfremdiv(G, ZM_Z_mul(f, dmulI), NULL);
+      G = ZC_hnfrem(G, ZM_Z_mul(f, dmulI));
     }
     G = set_sign_mod_idele(nf,A,G,module,sarch);
     I = idealmul(nf,I,G);
@@ -1374,7 +1374,7 @@ conductor(GEN bnr, GEN H0, long all)
   for (j = k = 1; k < l; k++)
     if (archp[k]) archp[j++] = archp[k];
   setlg(archp, j);
-  ideal = gequal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
+  ideal = ZV_equal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   mod = mkvec2(ideal, perm_to_arch(nf, archp));
   if (!all) return gerepilecopy(av, mod);
 
@@ -1721,16 +1721,6 @@ Lbnrclassno(GEN L, GEN fac)
     if (gequal(gmael(L,i,1),fac)) return gmael(L,i,2);
   pari_err(bugparier,"Lbnrclassno");
   return NULL; /* not reached */
-}
-
-/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
-long
-RgV_isin(GEN v, GEN x)
-{
-  long i, l = lg(v);
-  for (i = 1; i < l; i++)
-    if (gequal(gel(v,i), x)) return i;
-  return 0;
 }
 
 static GEN

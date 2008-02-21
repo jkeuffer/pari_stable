@@ -766,8 +766,8 @@ nfiso0(GEN a, GEN b, long fliso)
   {
     if (fliso)
     {
-      if (!gequal(gel(nfa,2),gel(nfb,2))
-       || !gequal(gel(nfa,3),gel(nfb,3))) return gen_0;
+      if (!ZV_equal(gel(nfa,2),gel(nfb,2))
+       || !equalii(gel(nfa,3),gel(nfb,3))) return gen_0;
     }
     else
       if (!dvdii(gel(nfb,3), powiu(gel(nfa,3),n/m))) return gen_0;

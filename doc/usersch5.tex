@@ -1942,7 +1942,8 @@ zero, and $0$ otherwise.
 the same length (lexicographic order).
 
 \fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal
-and $0$ otherwise.
+and $0$ otherwise. A \typ{COL} and a \typ{VEC} with the same entries are
+declared equal.
 
 \fun{GEN}{ZC_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
 
@@ -2046,6 +2047,10 @@ $x = yQ + R$.
 reduce each column using \kbd{ZC\_hnfremdiv}. If $Q$ is not \kbd{NULL},
 set it to the \kbd{ZM} such that $x = yQ + R$.
 
+\fun{GEN}{ZC_hnfrem}{GEN x, GEN y} alias for \kbd{ZC\_hnfremdiv(x,y,NULL)}.
+
+\fun{GEN}{ZM_hnfrem}{GEN x, GEN y} alias for \kbd{ZM\_hnfremdiv(x,y,NULL)}.
+
 \fun{GEN}{ZM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
 
@@ -2070,6 +2075,9 @@ raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
+
+\fun{int}{ZX_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZX} are equal
+and $0$ otherwise.
 
 \fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
@@ -3354,6 +3362,9 @@ occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 \fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
 
 \fun{int}{zv_cmp0}{GEN x} returns 1 if all entries of the \kbd{zv} $x$ are $0$,
+and $0$ otherwise.
+
+\fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
 and $0$ otherwise.
 
 \fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$

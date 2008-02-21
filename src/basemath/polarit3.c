@@ -91,7 +91,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
       a = gel(x,2); ta = typ(a);
       if (is_const_t(ta)) return Rg_to_Fp(a, p);
       b = RgX_to_FpX(b, p); if (varn(b) != v) break;
-      a = RgX_to_FpX(a, p); if (gequal(b,T)) return a;
+      a = RgX_to_FpX(a, p); if (ZX_equal(b,T)) return a;
       return FpX_rem(a, T, p);
     case t_POL:
       if (varn(x) != v) break;

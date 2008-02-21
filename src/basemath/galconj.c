@@ -2169,19 +2169,17 @@ struct galois_frobenius
 static GEN
 galoisfindgroups(GEN lo, GEN sg, long f)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop = avma;
   long i,j,k;
-  GEN V=cgetg(lg(lo),t_VEC);
-  for(j=1,i=1;i<lg(lo);i++)
+  GEN V = cgetg(lg(lo),t_VEC);
+  for(j=1,i=1; i<lg(lo); i++)
   {
-    pari_sp av=avma;
-    GEN W=cgetg(lg(lo[i]),t_VECSMALL);
-    for(k=1;k<lg(lo[i]);k++)
-      W[k]=mael(lo,i,k)%f;
-    W=vecsmall_uniq(W);
-    if (gequal(W, sg))
-      V[j++]=lo[i];
-    avma=av;
+    pari_sp av = avma;
+    GEN W = cgetg(lg(lo[i]),t_VECSMALL);
+    for (k=1; k<lg(lo[i]); k++) W[k] = mael(lo,i,k)%f;
+    W = vecsmall_uniq(W);
+    if (zv_equal(W, sg)) V[j++] = lo[i];
+    avma = av;
   }
   setlg(V,j);
   return gerepilecopy(ltop,V);
@@ -2419,10 +2417,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     tau = FpX_gcd(Pp, tau,ip);
     tau = FpX_normalize(tau, ip);
     for (g = 1; g <= gp; g++)
-      if (gequal(tau, gel(Pmod,g)))
-	break;
-    if (g == lg(Pmod))
-      return NULL;
+      if (ZX_equal(tau, gel(Pmod,g))) break;
+    if (g == lg(Pmod)) return NULL;
     Pg[1]=g;
   }
   else
@@ -2431,8 +2427,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     struct galois_borne Pgb;
     long j;
     galoisanalysis(P, &Pga, 0);
-    if (Pga.deg == 0)
-      return NULL;		/* Avoid computing the discriminant */
+    if (Pga.deg == 0) return NULL; /* Avoid computing the discriminant */
     Pgb.l = gb->l;
     Pden = galoisborne(P, NULL, &Pgb);
     Pladicabs=Pgb.ladicabs;
@@ -2457,10 +2452,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       tau = FpX_gcd(Pp, tau,ip);
       tau = FpX_normalize(tau, ip);
       for (g = 1; g < lg(Pmod); g++)
-	if (gequal(tau, gel(Pmod,g)))
-	  break;
-      if (g == lg(Pmod))
-	return NULL;
+	if (ZX_equal(tau, gel(Pmod,g))) break;
+      if (g == lg(Pmod)) return NULL;
       avma=btop;
       Pg[j]=g;
     }

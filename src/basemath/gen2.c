@@ -433,7 +433,7 @@ gcmp_1(GEN x)
       return gcmp_1(gel(x,2)) && gcmp0(gel(x,3));
 
     case t_PADIC:
-      av=avma; y=gequal(addsi(1,gel(x,4)), gel(x,3)); avma=av; return y;
+      av=avma; y=equalii(addsi(1,gel(x,4)), gel(x,3)); avma=av; return y;
 
     case t_POLMOD:
       av=avma; p1=gadd(gen_1,gel(x,2));
@@ -653,14 +653,10 @@ gequal(GEN x, GEN y)
 
       case t_STR:
 	return !strcmp(GSTR(x),GSTR(y));
-
       case t_VEC: case t_COL: case t_MAT:
 	return vecegal(x,y);
       case t_VECSMALL:
-	if (MASK(x[0]) != MASK(y[0])) return 0;
-	for (i = lg(x)-1; i; i--)
-	  if (x[i] != y[i]) return 0;
-	return 1;
+        return zv_equal(x,y);
     }
   (void)&av; /* emulate volatile */
   av = avma; i = gegal_try(x, y);
@@ -771,7 +767,7 @@ ggval(GEN x, GEN p)
       return ratval(x, p);
 
     case t_PADIC:
-      if (!gequal(p,gel(x,2))) break;
+      if (!equalii(p,gel(x,2))) break;
       return valp(x);
 
     case t_POLMOD:

@@ -116,7 +116,7 @@ init_CHI_C(CHI_t *c, GEN CHI) {
   init_CHI(c,CHI, gel(CHI,2));
 }
 
-/* Compute the conjugate character */
+/* Compute the conjugate character [ZV] */
 static GEN
 ConjChar(GEN chi, GEN cyc)
 {
@@ -849,7 +849,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 /********************************************************************/
 /*               3rd part: initialize the characters                */
 /********************************************************************/
-
+/* returns a ZV */
 static GEN
 LiftChar(GEN cyc, GEN Mat, GEN chi, GEN D)
 {
@@ -1029,7 +1029,7 @@ get_listCR(GEN bnr, GEN dtQ)
     lchi = LiftChar(Mr, Surj, gel(vecchi,i), MrD);
 
     for (j = 1; j < tnc; j++)
-      if (gequal(lchi, gel(allCR,j))) break;
+      if (ZV_equal(lchi, gel(allCR,j))) break;
     if (j != tnc) continue;
 
     cond = bnrconductorofchar(bnr, lchi);
@@ -2753,7 +2753,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 
     a = i;
     for (j = 1; j <= nc; j++)
-      if (gequal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
+      if (ZV_equal(gmael(listCR, j, 1), clchi)) { a = -j; break; }
 
     if (a > 0)
     {

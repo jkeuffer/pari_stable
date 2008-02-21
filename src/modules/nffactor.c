@@ -1351,7 +1351,7 @@ AGAIN:
     if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
 
     i = lg(CM_L) - 1;
-    if (i == r && gequal(CM_L, oldCM_L))
+    if (i == r && ZM_equal(CM_L, oldCM_L))
     {
       CM_L = oldCM_L;
       avma = av2; continue;

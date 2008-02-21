@@ -99,26 +99,27 @@ FF_cmp1(GEN x)
   }
 }
 
+static int
+Fp_cmp_1(GEN x, GEN p)
+{
+  pari_sp av = avma;
+  int b = equalii(x, addis(p,-1));
+  avma = av; return b;
+}
+
 int
 FF_cmp_1(GEN x)
 {
   ulong pp;
-  GEN T, p;
-  int b;
+  GEN T, p, y = gel(x,2);
   _getFF(x,&T,&p,&pp);
   switch(x[1])
   {
   case t_FF_FpXQ:
-    {
-      pari_sp ltop=avma;
-      b=gequal(gel(x,2),addis(p,-1));
-      avma=ltop;
-      break;
-    }
+    return (degpol(y) == 0 && Fp_cmp_1(gel(y,2), p));
   default:
-    b=(degpol(gel(x,2))==0 && (ulong)mael(x,2,2)==pp-1);
+    return (degpol(y) == 0 && (ulong)y[2] == pp-1);
   }
-  return b;
 }
 
 GEN

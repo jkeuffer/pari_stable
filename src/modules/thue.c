@@ -411,7 +411,7 @@ new_sol(GEN z, GEN S)
 {
   long i, l = lg(S);
   for (i=1; i<l; i++)
-    if (gequal(z,gel(S,i))) return 0;
+    if (ZV_equal(z,gel(S,i))) return 0;
   return 1;
 }
 
@@ -428,7 +428,7 @@ check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
   if (gcmp0(y))
   { if (equalii(powiu(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
   else
-  { if (gequal(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
+  { if (equalii(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
 }
 
 /* Check whether a potential solution is a true solution. Return 0 if
@@ -532,10 +532,10 @@ SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
 
   if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
   /* x = 0 first */
-  Y = ground( absisqrtn(rhs, n, prec) );
-  if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  Y = roundr( absisqrtn(rhs, n, prec) );
+  if (equalii(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
   Y = negi(Y);
-  if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  if (equalii(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
 
   /* x != 0 */
   P = cgetg(lg(poly), t_POL); P[1] = poly[1];

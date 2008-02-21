@@ -249,10 +249,9 @@ vecsmall_uniq_sorted(GEN V)
 GEN
 vecsmall_uniq(GEN V)
 {
-  pari_sp av=avma;
-  V=gcopy(V);
-  vecsmall_sort(V);
-  return gerepileupto(av, vecsmall_uniq_sorted(V));
+  pari_sp av = avma;
+  V = zv_copy(V); vecsmall_sort(V);
+  return gerepileuptoleaf(av, vecsmall_uniq_sorted(V));
 }
 
 /* assume x sorted */
@@ -680,7 +679,7 @@ int
 perm_commute(GEN p, GEN q)
 {
   pari_sp ltop = avma;
-  int r = gequal(perm_mul(p,q), perm_mul(q,p));
+  int r = zv_equal(perm_mul(p,q), perm_mul(q,p));
   avma = ltop; return r;
 }
 
@@ -924,7 +923,7 @@ group_perm_normalize(GEN N, GEN g)
 {
   pari_sp ltop = avma;
   long r = gequal(vecvecsmall_sort(group_leftcoset(N, g)),
-		vecvecsmall_sort(group_rightcoset(N, g)));
+		  vecvecsmall_sort(group_rightcoset(N, g)));
   avma = ltop; return r;
 }
 
@@ -1013,7 +1012,7 @@ group_subgroups(GEN G)
       GEN t = gel(gen,2); /*t=(1,3)(2,4)*/
       GEN u = gel(gen,3);
       GEN v = gel(gen,4), st = perm_mul(s,t), w, u2;
-      if (gequal(perm_conj(u,s), t)) /*u=(2,3,4)*/
+      if (zv_equal(perm_conj(u,s), t)) /*u=(2,3,4)*/
 	u2 = perm_mul(u,u);
       else
       {
@@ -1032,10 +1031,10 @@ group_subgroups(GEN G)
       else
       {
 	w = v;
-	if (!gequal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
+	if (!zv_equal(perm_mul(w,w), s)) /*w=(1,4,2,3)*/
 	{
 	  w = perm_conj(u,w);
-	  if (!gequal(perm_mul(w,w), s)) w = perm_conj(u,w);
+	  if (!zv_equal(perm_mul(w,w), s)) w = perm_conj(u,w);
 	}
 	v = perm_mul(w,t); /*v=(1,2)*/
       }
@@ -1116,7 +1115,7 @@ group_abelianHNF(GEN G, GEN S)
     gel(M,i) = C;
     P = perm_pow(gel(g,i), o[i]);
     for(j=1; j<lg(S); j++)
-      if (gequal(P, gel(S,j))) break;
+      if (zv_equal(P, gel(S,j))) break;
     avma = av;
     if (j==lg(S)) pari_err(talker,"wrong argument in galoisisabelian");
     j--;

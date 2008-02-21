@@ -3446,7 +3446,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
       GEN Ui = ZM_mul(H, V);
       for (i = 1; i < l; i++)
 	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
-      *newUi = ZM_hnfremdiv(Ui, H, NULL);
+      *newUi = ZM_hnfrem(Ui, H);
     }
   }
   return D;

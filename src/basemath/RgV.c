@@ -281,6 +281,16 @@ isdiagonal(GEN x)
   return RgM_isdiagonal(x);
 }
 
+/* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */
+long
+RgV_isin(GEN v, GEN x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+    if (gequal(gel(v,i), x)) return i;
+  return 0;
+}
+
 /* check whether x is upper trinagular with positive diagonal coeffs */
 int
 RgM_ishnf(GEN x)

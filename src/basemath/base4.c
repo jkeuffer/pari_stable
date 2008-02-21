@@ -730,7 +730,7 @@ idealval(GEN nf, GEN ix, GEN P)
   p = gel(P,1);
   if (tx == id_PRIME) {
     if (!equalii(p, gel(ix,1))) return 0;
-    return (gequal(gel(P,2), gel(ix,2))
+    return (ZV_equal(gel(P,2), gel(ix,2))
 	 || element_val(nf, gel(ix,2), P))? 1: 0;
   }
   nf = checknf(nf);
@@ -1319,7 +1319,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 	vden = addii(vden, mului(k, gel(e,i)));
     }
     (void)int_elt_val(nf, x, p, mul, &x);
-    gel(newg,i) = ZC_hnfremdiv(x, prk, NULL);
+    gel(newg,i) = ZC_hnfrem(x, prk);
   }
   if (vden == gen_0) setlg(newg, l);
   else

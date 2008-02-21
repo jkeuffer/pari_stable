@@ -1215,16 +1215,14 @@ qfbrealsolvep(GEN Q, GEN p)
   gel(P,2) = negi(gel(P,2));
   P2 = redrealsl2(P);
   btop = avma; st_lim = stack_lim(btop, 1);
-  while (!gequal(gel(M,1), gel(P1,1)) && !gequal(gel(M,1), gel(P2,1)))
+  while (!ZV_equal(gel(M,1), gel(P1,1)) && !ZV_equal(gel(M,1), gel(P2,1)))
   {
     M = redrealsl2step(M);
-    if (gequal(gel(M,1), gel(N,1))) { avma = ltop; return gen_0; }
+    if (ZV_equal(gel(M,1), gel(N,1))) { avma = ltop; return gen_0; }
     if (low_stack(st_lim, stack_lim(btop, 1))) M = gerepileupto(btop, M);
   }
-  if (gequal(gel(M,1),gel(P1,1)))
-    return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),gel(P1,2)));
-  else
-    return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),gel(P2,2)));
+  N = ZV_equal(gel(M,1),gel(P1,1))? gel(P1,2): gel(P2,2);
+  return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),N));
 }
 
 GEN
