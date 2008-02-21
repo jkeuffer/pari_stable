@@ -114,6 +114,8 @@ JD 12- add an optional argument to quit()
        RgV_check_ZV, ZM_detmult, RgM_det_trianguar, ZM_det_triangular
        ZM_equal, ZV_equal, ZM_hnf, ZM_hnfall, ZM_hnflll, ZM_hnfmod,
        ZM_hnfmodid, ZM_hnfmodidpart, ZM_snfclean, ZM_snf, ZM_snfall, ZM_snfall_i
+       togglesign_safe
+   19- universal constant gen_m2, for symmetry
 
   Removed
     1- obsolete library functions extract and matextract

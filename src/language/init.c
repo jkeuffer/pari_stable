@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
-GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, gi;
+GEN     gnil, gen_0, gen_1, gen_m1, gen_2, gen_m2, ghalf, gi;
 THREAD GEN     gpi, geuler, bernzone;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
@@ -554,8 +554,10 @@ reset_traps(void)
 static void
 init_universal_constants(void)
 {
-  /* 2 (gnil) + 2 (gen_0) + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (half) + 3 (gi) */
-  GEN p = universal_constants = (long*) pari_malloc(19*sizeof(long));
+  /* 2 (gnil) + 2 (gen_0)
+   * + 3 (gen_1) + 3 (gen_m1) + 3 (gen_2) + 3 (gen_m2)
+   * + 3 (half) + 3 (gi) */
+  GEN p = universal_constants = (long*) pari_malloc(22*sizeof(long));
   gen_0 = p; p+=2; gnil = p; p+=2;
   gen_0[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
   gen_0[1] = gnil[1] = evallgefint(2);
@@ -570,6 +572,11 @@ init_universal_constants(void)
   gen_m1[0] = evaltyp(t_INT) | evallg(3);
   gen_m1[1] = evalsigne(-1) | evallgefint(3);
   gen_m1[2] = 1;
+
+  gen_m2 = p; p+=3;
+  gen_m2[0] = evaltyp(t_INT) | evallg(3);
+  gen_m2[1] = evalsigne(-1) | evallgefint(3);
+  gen_m2[2] = 2;
 
   ghalf = p; p+=3; gi = p; p+=3;
   ghalf[0] = evaltyp(t_FRAC) | evallg(3);

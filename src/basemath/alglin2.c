@@ -1305,7 +1305,8 @@ togglesign_safe(GEN *px)
 {
   if      (*px == gen_1)  *px = gen_m1;
   else if (*px == gen_m1) *px = gen_1;
-  else if (*px == gen_2)  *px = utoineg(2);
+  else if (*px == gen_2)  *px = gen_m2;
+  else if (*px == gen_m2) *px = gen_2;
   else togglesign(*px);
 }
 void

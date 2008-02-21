@@ -1402,9 +1402,10 @@ gaffect(GEN x, GEN y)
       if (!is_universal_constant(y)) { affii(x,y); return; }
       /* y = gen_0, gnil, gen_1 or gen_2 */
       if (y==gen_0)  croak("gen_0");
-      if (y==gen_1)  croak("gen_1)");
-      if (y==gen_m1) croak("gen_m1)");
-      if (y==gen_2)  croak("gen_2)");
+      if (y==gen_1)  croak("gen_1");
+      if (y==gen_m1) croak("gen_m1");
+      if (y==gen_m2) croak("gen_m2");
+      if (y==gen_2)  croak("gen_2");
       croak("gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:

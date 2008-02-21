@@ -326,6 +326,10 @@ or~1.
 
 \fun{void}{togglesign}{GEN x} sets the $s$ sign of~\kbd{x} to $-s$, in place.
 
+\fun{void}{togglesign_safe}{GEN *x} sets the $s$ sign of~\kbd{*x} to $-s$, in
+place, unless \kbd{*x} is one of the іnteger universal constants in which case
+replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen_m1}).
+
 \fun{void}{setexpo}{GEN x, long s} sets the binary exponent of the
 \typ{REAL}~\kbd{x} to \kbd{s}. The value \kbd{s} must be a 24-bit signed
 number.
@@ -1954,8 +1958,9 @@ same, \typ{COL} or \typ{COL}). If you want to save even more memory by
 avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
 
 \fun{void}{ZV_togglesign}{GEN x} negates \kbd{x} in place, by toggling the
-sign of its integer components. Universal constants \kbd{gen\_1}, \kbd{gen\_m1}
-and \kbd{gen\_2} are handled specially and will not be corrupted.
+sign of its integer components. Universal constants \kbd{gen\_1},
+\kbd{gen\_m1}, \kbd{gen\_2} and \kbd{gen\_m2} are handled specially and will
+not be corrupted. (We use \tet{togglesign_safe}.)
 
 \fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC} or \kbd{ZV}~\kbd{x}
 (which can be a column or row vector) by the \typ{INT}~\kbd{y}, returning a
