@@ -1743,7 +1743,8 @@ ZM_detmult(GEN A)
       vi = mulii(piv, gcoeff(A,i,k));
       for (j=1; j<=m; j++)
         if (c[j]) vi = addii(vi, mulii(gcoeff(B,j,i),gcoeff(A,j,k)));
-      gel(v,i) = gerepileuptoint(av2, vi); if (!t && signe(vi)) t = i;
+      if (!t && signe(vi)) t = i;
+      gel(v,i) = gerepileuptoint(av2, vi);
     }
     if (!t) continue;
     /* at this point c[t] = 0 */
