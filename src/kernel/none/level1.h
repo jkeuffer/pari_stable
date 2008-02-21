@@ -180,6 +180,7 @@ GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
 GEN    subuu(ulong x, ulong y);
+void   togglesign_safe(GEN *px);
 ulong  udivui_rem(ulong x, GEN y, ulong *rem);
 ulong  umodui(ulong x, GEN y);
 GEN    utoi(ulong x);
@@ -584,6 +585,17 @@ mpneg(GEN x)
 {
   const GEN y=mpcopy(x);
   setsigne(y,-signe(x)); return y;
+}
+/* negate in place, except universal constants */
+
+INLINE void
+togglesign_safe(GEN *px)
+{
+  if      (*px == gen_1)  *px = gen_m1;
+  else if (*px == gen_m1) *px = gen_1;
+  else if (*px == gen_2)  *px = gen_m2;
+  else if (*px == gen_m2) *px = gen_2;
+  else togglesign(*px);
 }
 
 INLINE GEN

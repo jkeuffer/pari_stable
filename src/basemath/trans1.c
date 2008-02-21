@@ -2325,10 +2325,10 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1), &u,&v, prec);
-      affr_fixlg(mulrr(v1,u),       gel(ps,1));
-      affr_fixlg(mulrr(u1,v),       gel(ps,2));
-      affr_fixlg(mulrr(v1,v),       gel(pc,1));
-      affr_fixlg(mulrr(mpneg(u1),u),gel(pc,2)); return;
+      affr_fixlg(mulrr(v1,u), gel(ps,1));
+      affr_fixlg(mulrr(u1,v), gel(ps,2));
+      affr_fixlg(mulrr(v1,v), gel(pc,1));
+      affr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2)); return;
 
     case t_QUAD:
       av = avma; gsincos(quadtoc(x, prec), s, c, prec);
