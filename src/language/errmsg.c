@@ -21,10 +21,11 @@ const char *errmessage[]=
   "variable name expected",
 /* obsoler */
   "obsolete function",
-/* openfiler */
-  "error opening ",
 /* talker2 */
   "",
+
+/* openfiler */
+  "error opening ",
 
 /* NO CONTEXT NOW */
 

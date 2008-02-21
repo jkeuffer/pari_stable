@@ -1007,6 +1007,7 @@ pari_warn(long numerr, ...)
 }
 
 #define HAS_CONTEXT(num) (num < talker)
+#define SYNTAX_ERROR(num) (num < openfiler)
 
 void
 pari_err(long numerr, ...)
@@ -1019,7 +1020,7 @@ pari_err(long numerr, ...)
   if (is_warn(numerr)) pari_err(talker,"use pari_warn for warnings");
 
   global_err_data = NULL;
-  if (err_catch_stack && !HAS_CONTEXT(numerr))
+  if (err_catch_stack && !SYNTAX_ERROR(numerr))
   {
     cell *trapped = NULL;
     if ( (trapped = err_seek(numerr)) )
@@ -1125,7 +1126,7 @@ pari_err(long numerr, ...)
   }
   pariOut = out;
   gp_function_name=NULL;
-  if (default_exception_handler && !HAS_CONTEXT(numerr))
+  if (default_exception_handler && !SYNTAX_ERROR(numerr))
   {
     if (dft_handler[numerr])
       global_err_data = (void *) dft_handler[numerr];
