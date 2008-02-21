@@ -511,23 +511,16 @@ lift_if_rational(GEN x)
 
 /* A column vector representing a subgroup of prime index */
 static GEN
-grptocol(GEN subgroup)
+grptocol(GEN H)
 {
-  long i, j, l = lg(subgroup);
+  long i, j, l = lg(H);
   GEN col = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++)
   {
-    ulong ell = itou( gcoeff(subgroup, i, i) );
-    if (ell == 1)
-      col[i] = 0;
-    else
-    {
-      col[i] = ell-1;
-      break;
-    }
+    ulong ell = itou( gcoeff(H,i,i) );
+    if (ell == 1) col[i] = 0; else { col[i] = ell-1; break; }
   }
-  for (j=i; ++j < l; )
-    col[j] = itou( gcoeff(subgroup, i, j) );
+  for (j=i; ++j < l; ) col[j] = itou( gcoeff(H,i,j) );
   return col;
 }
 
@@ -623,6 +616,20 @@ fix_kernel(GEN K, GEN M, GEN vecMsup, long lW, long ell)
   return gerepilecopy(av, K);
 }
 
+static GEN
+Flm_init(long m, long n)
+{
+  GEN M = cgetg(n+1, t_MAT);
+  long i; for (i = 1; i <= n; i++) gel(M,i) = cgetg(m+1, t_VECSMALL);
+  return M;
+}
+static void
+Flv_fill(GEN v, GEN y)
+{
+  long i, l = lg(y);
+  for (i = 1; i < l; i++) v[i] = y[i];
+}
+
 /* if all!=0, give all equations of degree 'all'. Assume bnr modulus is the
  * conductor */
 static GEN
@@ -706,8 +713,8 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   if (all < 0)
   {
     ncyc = dK;
-    mat = zero_Flm(lg(M), ncyc);
-    if (all == -1) matgrp = zero_Flm(lg(gmael(bnr,5,2)) - 1, ncyc+1);
+    mat = Flm_init(dK, ncyc);
+    if (all == -1) matgrp = Flm_init(lg(gmael(bnr,5,2)), ncyc+1);
     rk = 0;
   }
   xell = monomial(gen_1, ell, 0);
@@ -723,54 +730,45 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
         GEN be, P=NULL, X;
         if (all < 0)
         {
-          gel(mat, rk+1) = y;
+          Flv_fill(gel(mat, rk+1), y);
+          setlg(mat, rk+2);
           if (Flm_rank(mat, ell) <= rk) continue;
         }
 FOUND:  X = Flm_Flc_mul(K, y, ell);
         if (ok_congruence(X, ell, lW, vecMsup) && ok_sign(X, msign, arch))
         {/* be satisfies all congruences, x^ell - be is irreducible, signature
           * and relative discriminant are correct */
-          if (all < 0) gel(mat, ++rk) = gclone(y);
+          if (all < 0) rk++;
           be = compute_beta(X, vecWB, gell, bnf);
           be = lift_if_rational(coltoalg(nf, be));
           if (all == -1)
           {
             pari_sp av2 = avma;
-            GEN Kgrp, colgrp;
-            long dKgrp;
-            colgrp = grptocol(rnfnormgroup(bnr, gsub(xell, be)));
+            GEN Kgrp, colgrp = grptocol(rnfnormgroup(bnr, gsub(xell, be)));
             if (ell != 2)
             {
               if (rk == 1) be1 = be;
               else
               { /* Compute the pesky scalar */
-                GEN K2, mat2 = cgetg(4, t_MAT);
-                gel(mat2, 1) = gel(matgrp, 1);
-                gel(mat2, 2) = colgrp;
-                gel(mat2, 3) = grptocol(rnfnormgroup(bnr,
-                                          gsub(xell, gmul(be1, be))));
-                K2 = Flm_ker(mat2, ell);
+                GEN K2, C = cgetg(4, t_MAT);
+                gel(C,1) = gel(matgrp,1);
+                gel(C,2) = colgrp;
+                gel(C,3) = grptocol(rnfnormgroup(bnr, gsub(xell, gmul(be1,be))));
+                K2 = Flm_ker(C, ell);
                 if (lg(K2) != 2) pari_err(bugparier, "linear algebra");
                 K2 = gel(K2,1);
                 if (K2[1] != K2[2])
                   Flc_Fl_mul_inplace(colgrp, Fl_div(K2[2],K2[1],ell), ell);
               }
             }
-            gel(matgrp, rk) = gclone(colgrp);
-            setlg(matgrp, rk+2);
+            Flv_fill(gel(matgrp,rk), colgrp);
+            setlg(matgrp, rk+1);
             Kgrp = Flm_ker(matgrp, ell);
-            setlg(matgrp, ncyc+2);
-            dKgrp = lg(Kgrp)-1;
-            if (dKgrp /* == 1 */)
+            if (lg(Kgrp) == 2)
             {
-              setlg(gel(Kgrp, 1), rk+1);
-              setlg(mat, rk+1);
-              y = gel(Flm_mul(mat, Kgrp, ell), 1);
-              setlg(mat, ncyc+1);
-              all = 0;
-              for (i = 1; i <= rk; i++) gunclone(gel(mat, i));
-              for (i = 1; i <= rk; i++) gunclone(gel(matgrp, i));
-              goto FOUND;
+              setlg(gel(Kgrp,1), rk+1);
+              y = Flm_Flc_mul(mat, gel(Kgrp,1), ell);
+              all = 0; goto FOUND;
             }
             avma = av2;
           }
@@ -785,7 +783,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
               avma = av; continue;
             }
           }
-          if (all < 0 && rk == ncyc) goto DONE2;
+          if (all < 0 && rk == ncyc) return res;
           if (firstpass) break;
         }
         else avma = av;
@@ -793,18 +791,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
       y[dK--] = 0;
     }
   } while (firstpass--);
-  if (all)
-  {
-    if (all<0)
-    {
-DONE2:
-      for (i=1;i<=rk;i++) gunclone(gel(mat, i));
-      if (all == -1)
-	for (i=1;i<=rk;i++) gunclone(gel(matgrp, i));
-    }
-    return res;
-  }
-  return gen_0;
+  return all? res: gen_0;
 }
 
 /* alg. 5.3.11 (return only discrete log mod ell) */
