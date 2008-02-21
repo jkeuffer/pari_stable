@@ -844,7 +844,7 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
 static GEN
 RUgen(long N, long bit)
 {
-  if (N == 2) return mpneg(real_1(nbits2prec(bit)));
+  if (N == 2) return real_m1(nbits2prec(bit));
   if (N == 4) return gi;
   return exp_Ir(divru(Pi2n(1, nbits2prec(bit)), N));
 }
