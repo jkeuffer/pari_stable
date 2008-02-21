@@ -1946,10 +1946,11 @@ and $0$ otherwise.
 
 \fun{GEN}{ZC_copy}{GEN x} returns a (\typ{COL}) copy of \kbd{x}.
 
-\fun{GEN}{ZV_neg}{GEN x} returns $-\kbd{x}$.
+\fun{GEN}{ZC_neg}{GEN x} returns $-\kbd{x}$ as a \typ{COL}.
 
-\fun{void}{ZV_neg_inplace}{GEN x} negates \kbd{x} in place, by replacing
-each component by its opposite. If you want to save even more memory by
+\fun{void}{ZV_neg_inplace}{GEN x} negates the \kbd{ZV} \kbd{x} in place, by
+replacing each component by its opposite (the type of \kbd{x} remains the
+same, \typ{COL} or \typ{COL}). If you want to save even more memory by
 avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
 
 \fun{void}{ZV_togglesign}{GEN x} negates \kbd{x} in place, by toggling the

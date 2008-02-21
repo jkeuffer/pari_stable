@@ -260,7 +260,7 @@ ZC_Z_mul(GEN X, GEN c)
   GEN A;
   if (!signe(c)) return zerocol(lg(X)-1);
   if (is_pm1(c)) return (signe(c) > 0)? ZC_copy(X): ZC_neg(X);
-  l = lg(X); A = cgetg_copy(l, X);
+  l = lg(X); A = cgetg(l, t_COL);
   for (i=1; i<l; i++) gel(A,i) = mulii(c,gel(X,i));
   return A;
 }
@@ -479,7 +479,7 @@ GEN
 ZC_neg(GEN M)
 {
   long i, l = lg(M);
-  GEN N = cgetg_copy(l, M);
+  GEN N = cgetg(l, t_COL);
   for (i = l-1; i ; i--) gel(N,i) = negi(gel(M,i));
   return N;
 }
