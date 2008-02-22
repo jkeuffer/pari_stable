@@ -116,6 +116,7 @@ JD 12- add an optional argument to quit()
        ZM_hnfmodid, ZM_hnfmodidpart, ZM_snfclean, ZM_snf, ZM_snfall, ZM_snfall_i
        togglesign_safe, ZX_equal, zv_equal, ZC_hnfrem, ZM_hnfrem
    19- universal constant gen_m2, for symmetry
+   20- GP function version() [ current version number ]
 
   Removed
     1- obsolete library functions extract and matextract

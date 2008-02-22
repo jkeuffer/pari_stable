@@ -1612,6 +1612,7 @@ void    pari_free(void *pointer);
 void*   pari_calloc(size_t size);
 void*   pari_malloc(size_t bytes);
 void*   pari_realloc(void *pointer,size_t size);
+GEN     pari_version(void);
 void    gunclone(GEN x);
 void    killbloc(GEN x);
 GEN     listcopy(GEN x);
