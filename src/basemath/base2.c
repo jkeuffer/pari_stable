@@ -1969,7 +1969,7 @@ ffdegree(GEN x, GEN frob, GEN p)
   for (d=1; d < f; d++)
   {
     y = FpM_FpC_mul(frob, y, p);
-    if (ZM_equal(y, x)) break;
+    if (ZV_equal(y, x)) break;
   }
   avma = av; return d;
 }
