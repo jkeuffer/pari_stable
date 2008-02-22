@@ -842,7 +842,8 @@ subfields_of_given_degree(blockdata *B)
   if (DEBUGLEVEL) fprintferr("\n* Look for subfields of degree %ld\n\n", B->d);
   B->DATA = NULL; compute_data(B);
   L = calc_block(B, B->S->Z, cgetg(1,t_VEC), NULL);
-  if (DEBUGLEVEL>9) fprintferr("\nSubfields of degree %ld: %Zs\n", B->d, L);
+  if (DEBUGLEVEL>9)
+    fprintferr("\nSubfields of degree %ld: %Zs\n", B->d, L? L: cgetg(1,t_VEC));
   if (isclone(B->DATA)) gunclone(B->DATA);
   avma = av; return L;
 }
