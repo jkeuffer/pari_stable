@@ -126,7 +126,11 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
     x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return scalarmat(Q_abs(gel(x,1)), lg(x)-1);
+    if (RgV_isscalar(x))
+    {
+      z = gel(x,1);
+      return gcmp0(z)? cgetg(1, t_MAT): scalarmat(Q_abs(z), lg(x)-1);
+    }
     x = Q_primitive_part(x, &cx);
     x = eltimul_get_table(nf, x);
   } else {
@@ -1467,7 +1471,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   long t = typ(x);
   if (t == t_POL || t == t_POLMOD) x = algtobasis(nf,x);
   if (isnfscalar(x)) x = gel(x,1);
-  if (typ(x) != t_COL) return gmul(Q_abs(x), v);
+  if (typ(x) != t_COL) return gcmp0(x)? cgetg(1,t_MAT): gmul(Q_abs(x), v);
   return idealmat_to_hnf(nf, element_mulvec(nf, x, v));
 }
 
