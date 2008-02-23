@@ -536,6 +536,15 @@ eltmul_get_table(GEN nf, GEN x)
     return mul;
   }
 }
+static GEN
+ZC_mul_get_table(GEN nf, GEN x)
+{
+  long i, l = lg(x);
+  GEN mul = cgetg(l,t_MAT);
+  gel(mul,1) = x; /* assume w_1 = 1 */
+  for (i=2; i<l; i++) gel(mul,i) = elementi_mulid(nf,x,i);
+  return mul;
+}
 /* as eltmul_get_table, x integral */
 GEN
 eltimul_get_table(GEN nf, GEN x)
@@ -543,13 +552,9 @@ eltimul_get_table(GEN nf, GEN x)
   if (typ(x) == t_MAT) return x;
   else
   {
-    long i, N = degpol(nf[1]);
-    GEN mul = cgetg(N+1,t_MAT);
     x = algtobasis_i(nf, x);
-    if (ZV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
-    gel(mul,1) = x; /* assume w_1 = 1 */
-    for (i=2; i<=N; i++) gel(mul,i) = elementi_mulid(nf,x,i);
-    return mul;
+    if (ZV_isscalar(x)) return scalarmat_shallow(gel(x,1), lg(x)-1);
+    return ZC_mul_get_table(nf, x);
   }
 }
 
@@ -1247,7 +1252,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   {
     GEN uv = idealaddtoone(nf,pre, idealdivpowprime(nf,x,pr,ep));
     u = gel(uv,1);
-    v = gel(uv,2); v = eltimul_get_table(nf, v);
+    v = eltimul_get_table(nf, gel(uv,2));
     g0 = makeprimetoideal(x,u,v,g);
   }
 
