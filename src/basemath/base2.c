@@ -1728,15 +1728,6 @@ init_norm(norm_S *S, GEN nf, GEN p)
   }
 }
 
-/* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
-static GEN
-anti_uniformizer(GEN nf, GEN p, GEN u)
-{
-  pari_sp av = avma;
-  GEN mat = eltimul_get_table(nf, u);
-  return gerepileupto(av, FpM_deplin(mat,p));
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
@@ -1824,9 +1815,7 @@ static GEN
 pol_min(GEN mul, GEN p)
 {
   pari_sp av = avma;
-  GEN z, pow = get_powers(mul, p);
-  z = FpM_deplin(pow, p);
-  if (!z) errprime(p);
+  GEN z = FpM_deplin(get_powers(mul, p), p);
   return gerepilecopy(av, RgV_to_RgX(z,0));
 }
 
@@ -1839,7 +1828,8 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
   u = uniformizer(nf, S, P, V, p, ramif);
-  t = anti_uniformizer(nf,p,u); if (!t) errprime(p);
+  /* P = (p,u) prime. t is an anti-uniformizer: Z_K + t/p Z_K = P^(-1) */
+  t = FpM_deplin(eltimul_get_table(nf, u), p);
   e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
   f = degpol(nf[1]) - (lg(P)-1);
   return mk_pr(p,u,e,f,t);
@@ -1989,7 +1979,7 @@ GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), e = gel(pr,3);
-  return gdivexact(element_pow(nf,gel(pr,5),e), powiu(p, e[2]-1));
+  return gdivexact(element_pow(nf,gel(pr,5), e), powiu(p, itou(e)-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
