@@ -2627,11 +2627,17 @@ START:
 }
 
 static GEN
-get_subgroup(GEN subgp, GEN cyc)
+get_subgroup(GEN subgp, GEN cyc, char *s)
 {
   if (!subgp || gcmp0(subgp)) return cyc;
-  subgp = ZM_hnf(subgp);
-  return hnfdivide(subgp, cyc)? subgp: NULL;
+  if (typ(subgp) == t_MAT)
+  {
+    RgM_check_ZM(subgp, s);
+    subgp = ZM_hnf(subgp);
+    if (hnfdivide(subgp, cyc)) return subgp;
+  }
+  pari_err(talker,"incorrect subgroup in %s", s);
+  return NULL;
 }
 
 GEN
@@ -2651,11 +2657,8 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* check the bnf */
   if (!varn(nf[1])) pari_err(talker, "main variable in bnrstark must not be x");
   if (nf_get_r2(nf)) pari_err(talker, "base field not totally real in bnrstark");
-
-  /* check the subgrp */
   Mcyc = diagonal_i(gmael(bnr, 5, 2));
-  if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
-    pari_err(talker, "incorrect subgrp in bnrstark");
+  subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
   /* compute bnr(conductor) */
   p1     = conductor(bnr, subgrp, 2);
@@ -2730,10 +2733,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (!(flag & 2)) bnr = gel(conductor(bnr, NULL, 2),2);
   cyc  = gmael(bnr, 5, 2);
   Mcyc = diagonal_i(cyc);
-
-  /* check the subgroup */
-  if (! (subgp = get_subgroup(subgp,Mcyc)) )
-    pari_err(talker, "incorrect subgroup in bnrL1");
+  subgp = get_subgroup(subgp,Mcyc,"bnrL1");
 
   cl = itou( ZM_det_triangular(subgp) );
   Qt = InitQuotient(subgp);
