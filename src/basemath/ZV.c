@@ -43,6 +43,19 @@ RgM_check_ZM(GEN A, const char *s)
   }
 }
 
+long
+ZM_max_lg(GEN x)
+{
+  long i, j, prec = 0, lx = lg(x);
+
+  for (j=1; j<lx; j++)
+  {
+    GEN c = gel(x,j);
+    for (i=1; i<lx; i++) { long l = lgefint(c[i]); if (l > prec) prec = l; }
+  }
+  return prec;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                           MULTIPLICATION                       **/

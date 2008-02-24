@@ -558,54 +558,6 @@ nf_factor_bound(GEN nf, GEN polbase)
   return gerepileupto(av, gmin(a, b));
 }
 
-static long
-ZXY_get_prec(GEN P)
-{
-  long i, j, z, prec = 0;
-  for (i=2; i<lg(P); i++)
-  {
-    GEN p = gel(P,i);
-    if (typ(p) == t_INT)
-    {
-      z = lgefint(p);
-      if (z > prec) prec = z;
-    }
-    else
-    {
-      for (j=2; j<lg(p); j++)
-      {
-	z = lgefint(p[j]);
-	if (z > prec) prec = z;
-      }
-    }
-  }
-  return prec + 1;
-}
-
-long
-ZM_get_prec(GEN x)
-{
-  long i, j, l, k = 2, lx = lg(x);
-
-  for (j=1; j<lx; j++)
-  {
-    GEN c = gel(x,j);
-    for (i=1; i<lx; i++) { l = lgefint(c[i]); if (l > k) k = l; }
-  }
-  return k;
-}
-long
-ZX_get_prec(GEN x)
-{
-  long j, l, k = 2, lx = lg(x);
-
-  for (j=2; j<lx; j++)
-  {
-    l = lgefint(x[j]); if (l > k) k = l;
-  }
-  return k;
-}
-
 /* return Bs: if r a root of sigma_i(P), |r| < Bs[i] */
 static GEN
 nf_root_bounds(GEN P, GEN T)
@@ -617,7 +569,7 @@ nf_root_bounds(GEN P, GEN T)
   T = get_nfpol(T, &nf);
 
   P = Q_primpart(P);
-  prec = ZXY_get_prec(P);
+  prec = ZXY_max_lg(P) + 1;
   l = lg(P);
   if (nf && nfgetprec(nf) >= prec)
     R = gel(nf,6);
@@ -647,7 +599,7 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
   long prec;
 
   T = get_nfpol(T, &nf);
-  prec = ZX_get_prec(T) + ZM_get_prec(tozk);
+  prec = ZX_max_lg(T) + ZM_max_lg(tozk);
   (void)initgaloisborne(T, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
   if (nf) M = gmul(tozk, M);

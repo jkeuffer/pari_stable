@@ -329,7 +329,6 @@ GEN  polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN  polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 GEN  ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 GEN  ZX_disc_all(GEN,ulong);
-long ZX_get_prec(GEN x);
 GEN  ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 GEN  ZX_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 GEN  RgXQ_u_pow(GEN x, ulong n, GEN T);
@@ -799,7 +798,6 @@ void    pari_init_defaults(void);
 
 /* nffactor.c */
 
-long    ZM_get_prec(GEN x);
 int     nfissplit(GEN nf, GEN x);
 
 /* perm.c */

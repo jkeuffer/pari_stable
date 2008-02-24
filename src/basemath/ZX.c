@@ -50,6 +50,27 @@ RgX_check_ZXY(GEN x, const char *s)
   }
 }
 
+long
+ZXY_max_lg(GEN x)
+{
+  long i, prec = 0, lx = lg(x);
+  for (i=2; i<lx; i++)
+  {
+    GEN p = gel(x,i);
+    long l = (typ(p) == t_INT)? lgefint(p): ZX_max_lg(p);
+    if (l > prec) prec = l;
+  }
+  return prec;
+}
+long
+ZX_max_lg(GEN x)
+{
+  long i, prec = 0, lx = lg(x);
+
+  for (i=2; i<lx; i++) { long l = lgefint(x[i]); if (l > prec) prec = l; }
+  return prec;
+}
+
 /*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
 GEN
 ZX_renormalize(GEN x, long lx)

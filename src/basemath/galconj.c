@@ -291,7 +291,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
   GEN L, M, prep, den;
   pari_timer ti;
 
-  prec = ZX_get_prec(T);
+  prec = ZX_max_lg(T);
   den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
   if (DEBUGLEVEL>=4) TIMERstart(&ti);
