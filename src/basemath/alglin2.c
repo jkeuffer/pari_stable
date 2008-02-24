@@ -2389,6 +2389,7 @@ GEN
 ZM_hnfcenter(GEN M)
 {
   long i, j, k, N = lg(M)-1;
+  pari_sp av = avma, lim = stack_lim(av,1);
 
   for (j=N-1; j>0; j--) /* skip last line */
   {
@@ -2407,6 +2408,11 @@ ZM_hnfcenter(GEN M)
       }
       else
         for (i = 1; i <= j; i++) gel(Mk,i) = subii(gel(Mk,i), mulii(q,gel(Mj,i)));
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM) pari_warn(warnmem,"ZM_hnfcenter, j = %ld",j);
+        M = gerepilecopy(av, M);
+      }
     }
   }
   return M;
