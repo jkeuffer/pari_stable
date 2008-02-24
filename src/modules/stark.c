@@ -2627,7 +2627,7 @@ START:
 }
 
 static GEN
-get_subgroup(GEN subgp, GEN cyc, char *s)
+get_subgroup(GEN subgp, GEN cyc, const char *s)
 {
   if (!subgp || gcmp0(subgp)) return cyc;
   if (typ(subgp) == t_MAT)
