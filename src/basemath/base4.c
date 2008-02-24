@@ -93,13 +93,14 @@ prime_to_ideal(GEN nf, GEN vp)
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
 
+/* x integral ideal in t_MAT form, nx columns */
 static GEN
 vec_mulid(GEN nf, GEN x, long nx, long N)
 {
   GEN m = cgetg(nx*N + 1, t_MAT);
   long i, j, k;
   for (i=k=1; i<=nx; i++)
-    for (j=1; j<=N; j++) gel(m, k++) = element_mulid(nf, gel(x,i),j);
+    for (j=1; j<=N; j++) gel(m, k++) = elementi_mulid(nf, gel(x,i),j);
   return m;
 }
 /* x = ideal in matrix form. Put it in ZM_hnf. */
@@ -965,8 +966,14 @@ idealaddmultoone(GEN nf, GEN list)
   for (i=1; i<l; i++)
   {
     GEN I = gel(list,i);
-    if (typ(I) != t_MAT || lg(I) == 1 || lg(I) != lg(I[1]))
-      I = idealhermite_aux(nf,I);
+    if (typ(I) != t_MAT) I = idealhermite_aux(nf,I);
+    if (lg(I) == 1)
+      I = zeromat(N,N);
+    else
+    {
+      RgM_check_ZM(I,"idealaddmultoone");
+      if (lg(gel(I,1)) != N+1) I = idealhermite_aux(nf,I);
+    }
     gel(L,i) = I; z = shallowconcat(z, I);
   }
   H = hnfperm_i(z, &U, &perm);
