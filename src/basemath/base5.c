@@ -172,7 +172,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
   long vpol;
-  GEN rnf, delta, bas, D,d,f, B;
+  GEN rnf, bas, D,d,f, B;
 
   if (typ(pol)!=t_POL) pari_err(notpoler,"rnfinitalg");
   nf = checknf(nf); vpol = varn(pol);
@@ -183,12 +183,11 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   bas = rnfallbase(nf,pol, &D,&d, &f);
   B = matbasistoalg(nf,gel(bas,1));
   gel(bas,1) = lift_if_rational( RgM_to_RgXV(B,vpol) );
-  delta = mkvec2(D, d);
 
   rnf = cgetg(13, t_VEC);
   gel(rnf,1) = pol;
   gel(rnf,2) = cgetg(1, t_VEC); /* dummy */
-  gel(rnf,3) = delta;
+  gel(rnf,3) = mkvec2(D, d);
   gel(rnf,4) = f;
   gel(rnf,5) = cgetg(1, t_VEC); /* dummy */
   gel(rnf,6) = cgetg(1, t_VEC); /* dummy */
