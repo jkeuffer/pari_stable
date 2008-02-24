@@ -445,6 +445,7 @@ GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
 GEN     ZM_hnf(GEN x);
 GEN     ZM_hnfall(GEN A, GEN *ptB, long remove);
+GEN     ZM_hnfcenter(GEN M);
 GEN     ZM_hnflll(GEN A, GEN *ptB, int remove);
 GEN     ZM_hnfmod(GEN x, GEN d);
 GEN     ZM_hnfmodid(GEN x, GEN d);

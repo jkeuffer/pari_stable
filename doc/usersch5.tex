@@ -4955,6 +4955,10 @@ space but lots of memory is needed for large dimensions, say larger than 300.
 On the other hand, the base change matrix $U$ is essentially optimally small
 with respect to the $L_2$ norm.
 
+\fun{GEN}{ZM_hnfcenter}{GEN M}. Given a \kbd{ZM} in HNF $M$, update it in
+place so that non-diagonal entries belong to a system of \emph{centered}
+residues. Not suitable for gerepile.
+
 \fun{GEN}{ZM_snf}{GEN x} returns the Smith Normal Form (vector of
 elementary divisors) of the \kbd{ZM} $x$.
 

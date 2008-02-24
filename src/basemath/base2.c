@@ -124,7 +124,7 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
   {
     *index = diviiexact(da, gcoeff(a,1,1));
     for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
-    a = gdiv(hnfcenter_ip(a), da);
+    a = gdiv(ZM_hnfcenter(a), da);
   }
   else
   {

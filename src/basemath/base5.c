@@ -102,27 +102,6 @@ modulereltoabs(GEN rnf, GEN x)
   return M;
 }
 
-GEN
-hnfcenter_ip(GEN M)
-{
-  long i, j, k, N = lg(M)-1;
-  GEN a, Mj, Mk;
-
-  for (j=N-1; j>0; j--)
-  {
-    Mj = gel(M,j); a = gel(Mj,j);
-    if (cmpiu(a, 2) <= 0) continue;
-    a = shifti(a, -1);
-    for (k = j+1; k <= N; k++)
-    {
-      Mk = gel(M,k);
-      if (cmpii(gel(Mk,j),a) > 0)
-	for (i = 1; i <= j; i++) gel(Mk,i) = subii(gel(Mk,i), gel(Mj,i));
-    }
-  }
-  return M;
-}
-
 static GEN
 makenfabs(GEN rnf)
 {
@@ -135,7 +114,7 @@ makenfabs(GEN rnf)
   M = modulereltoabs(rnf, gel(rnf,7));
   n = lg(M)-1;
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
-  if (d) M = gdiv(hnfcenter_ip(ZM_hnfmodid(M, d)), d);
+  if (d) M = gdiv(ZM_hnfcenter(ZM_hnfmodid(M, d)), d);
   else   M = matid(n);
 
   gel(NF,1) = pol;

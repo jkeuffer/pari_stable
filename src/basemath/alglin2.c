@@ -2384,6 +2384,34 @@ hnfmod(GEN x, GEN d) { return allhnfmod(x, d, 0); }
 GEN
 hnfmodid(GEN x, GEN d) { return allhnfmod(x, d, hnf_MODID); }
 
+/* M a ZM in HNF. Normalize with *centered* residues */
+GEN
+ZM_hnfcenter(GEN M)
+{
+  long i, j, k, N = lg(M)-1;
+
+  for (j=N-1; j>0; j--) /* skip last line */
+  {
+    GEN Mj = gel(M,j), a = gel(Mj,j);
+    for (k = j+1; k <= N; k++)
+    {
+      GEN Mk = gel(M,k), q = diviiround(gel(Mk,j), a);
+      long s = signe(q);
+      if (!s) continue;
+      if (is_pm1(q))
+      {
+        if (s < 0)
+          for (i = 1; i <= j; i++) gel(Mk,i) = addii(gel(Mk,i), gel(Mj,i));
+        else
+          for (i = 1; i <= j; i++) gel(Mk,i) = subii(gel(Mk,i), gel(Mj,i));
+      }
+      else
+        for (i = 1; i <= j; i++) gel(Mk,i) = subii(gel(Mk,i), mulii(q,gel(Mj,i)));
+    }
+  }
+  return M;
+}
+
 /***********************************************************************/
 /*                                                                     */
 /*                 HNFLLL (Havas, Majewski, Mathews)                   */
