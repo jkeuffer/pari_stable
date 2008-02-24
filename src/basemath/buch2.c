@@ -2205,12 +2205,6 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
   F->KCZ = KCZ0; avma = av; return 1;
 }
 
-int
-trunc_error(GEN x)
-{
-  return typ(x)==t_REAL && signe(x) && nbits2prec( expo(x) )  > lg(x);
-}
-
 /* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
 compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)

@@ -700,7 +700,6 @@ GEN     extract_full_lattice(GEN x);
 GEN     init_red_mod_units(GEN bnf, long prec);
 GEN     isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe);
 GEN     red_mod_units(GEN col, GEN z, long prec);
-int     trunc_error(GEN x);
 
 /* buch3.c */
 
