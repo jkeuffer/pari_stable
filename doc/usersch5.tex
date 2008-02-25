@@ -4892,6 +4892,9 @@ and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
 \fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
 fewer copies.
 
+\fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
+entries of $x$ (its determinant if it is indeed triangular).
+
 The following routines check whether matrices or vectors have a special
 shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This may make a
 difference when components are inexact.)
