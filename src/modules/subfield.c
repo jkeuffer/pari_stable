@@ -168,11 +168,23 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
 	ngcd = ugcd(ngcd, n[j]);
       }
     if (dk % ngcd) continue;
-    T = (1<<lpn) - 1;
-    if (lpn == r) T--; /* done already */
-    if (!lpn) lpn = 1;
-    for (t = 0; t < T; t++)
-    { /* loop through all subsets of [1..lpn] */
+    T = 1<<lpn;
+    if (lpn == r-2)
+    {
+      T--; /* done already above --> print_block_system */
+      if (!T) continue;
+    }
+
+    if (dk == n[1])
+    { /* empty subset, t = 0. Split out for clarity */
+      Zp[1] = Z[1]; setlg(Zp, 2);
+      for (u=1,j=2; j<r; j++) Zpp[u++] = Z[j];
+      setlg(Zpp, u);
+      SB = calc_block(B, Zpp, Yp, SB);
+    }
+
+    for (t = 1; t < T; t++)
+    { /* loop through all non-empty subsets of [1..lpn] */
       for (nn=n[1],tp=t, u=1; u<=lpn; u++,tp>>=1)
       {
 	if (tp&1) { nn += pn[u]; e[u] = 1; } else e[u] = 0;

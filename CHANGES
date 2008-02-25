@@ -43,6 +43,7 @@ BA 29- missing GC in the leftrightpow functions
    30- bnr=bnrinit(bnfinit(y^2-229,1),5,1); rnfkummer(bnr,,3) --> oo loop
    41- mathnf(a,1) could have negative entries if non-trivial kernel [#741]
    42- [Configure -pg] some variables not written to pari.cfg
+   43- missing ѕubfields in nfsubfields [#744]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
