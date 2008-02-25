@@ -27,3 +27,4 @@ Doc:
  
  If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be an
  \var{sell}.
+Variant: Also available is \fun{GEN}{elltors}{GEN E} for \kbd{elltors(E, 0)}.

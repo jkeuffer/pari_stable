@@ -658,7 +658,7 @@ entree oldfonctions[]={
 {"thetanullk",21,(void*)thetanullk,3,"GLp","thetanullk(q,k)=k'th derivative at z=0 of theta(q,z)"},
 {"threetotwo",0,(void*)suppressed,6,"GGGG","threetotwo(nf,a,b,c)=returns a 3-component vector [d,e,U] such that U is a unimodular 3x3 matrix with algebraic integer coefficients such that [a,b,c]*U=[0,d,e]"},
 {"threetotwo2",0,(void*)suppressed,6,"GGGG","threetotwo2(nf,a,b,c)=returns a 3-component vector [d,e,U] such that U is a unimodular 3x3 matrix with algebraic integer coefficients such that [a,b,c]*U=[0,d,e]"},
-{"torsell",1,(void*)torsell,5,"Gp","torsell(e)=torsion subgroup of elliptic curve e: order, structure, generators"},
+{"torsell",1,(void*)elltors,5,"Gp","torsell(e)=torsion subgroup of elliptic curve e: order, structure, generators"},
 {"trace",1,(void*)gtrace,8,"G","trace(x)=trace of x"},
 {"trans",1,(void*)gtrans,8,"G","trans(x)=x~=transpose of x"},
 {"trunc",1,(void*)gtrunc,2,"G","trunc(x)=truncation of x;when x is a power series,take away the O(X^)"},

@@ -3774,18 +3774,18 @@ nagelllutz(GEN e)
     w2 = mkvec( utoipos(t) );
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t) break;
-    if (k>t) pari_err(bugparier,"torsell (bug1)");
+    if (k>t) pari_err(bugparier,"elltors (bug1)");
 
     w3 = mkvec( gel(r,k) );
   }
   else
   {
-    if (t&3) pari_err(bugparier,"torsell (bug2)");
+    if (t&3) pari_err(bugparier,"elltors (bug2)");
     t2 = t>>1;
     w2 = mkvec2(utoipos(t2), gen_2);
     for (k=2; k<=t; k++)
       if (_orderell(e,gel(r,k)) == t2) break;
-    if (k>t) pari_err(bugparier,"torsell (bug3)");
+    if (k>t) pari_err(bugparier,"elltors (bug3)");
 
     p1 = powell(e,gel(r,k),utoipos(t>>2));
     k2 = (!is_inf(p1) && gequal(gel(r,2),p1))? 3: 2;
@@ -3853,7 +3853,7 @@ torspnt(GEN E, GEN w, long n, long prec)
 }
 
 GEN
-torsell(GEN e)
+elltors(GEN e)
 {
   long B, i, ord, pr, prec, k = 1;
   pari_sp av=avma;
@@ -3869,7 +3869,7 @@ torsell(GEN e)
   pr = DEFAULTPREC + ((lgefint(gel(e,12))-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = gel(e,15);
   prec = precision(w1);
-  if (prec < pr) pari_err(precer, "torsell");
+  if (prec < pr) pari_err(precer, "elltors");
   if (pr < prec) { prec = pr; e = gprec_w(e, pr); w1 = gel(e,15); }
   if (v) gel(v,1) = ginv(gel(v,1));
   w22 = gmul2n(gel(e,16),-1);
@@ -3966,9 +3966,9 @@ elltors0(GEN e, long flag)
 {
   switch(flag)
   {
-    case 0: return torsell(e);
+    case 0: return elltors(e);
     case 1: return nagelllutz(e);
-    default: pari_err(flagerr,"torsell");
+    default: pari_err(flagerr,"elltors");
   }
   return NULL; /* not reached */
 }

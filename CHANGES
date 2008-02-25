@@ -82,6 +82,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    25- change the default algorithm for mathnf(a) [ much faster ], flag 0 is
        no longer deprecated
    26- rename smith2 -> smithall, gsmith2 -> gsmithall
+   27- rename torsell -> elltors and document it
 
   Added
     1- library function gpcalloc

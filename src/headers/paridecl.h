@@ -1198,7 +1198,7 @@ GEN     pointell(GEN e, GEN z, long prec);
 GEN     powell(GEN e, GEN z, GEN n);
 GEN     smallinitell(GEN x);
 GEN     subell(GEN e, GEN z1, GEN z2);
-GEN     torsell(GEN e);
+GEN     elltors(GEN e);
 GEN     weipell(GEN e, long precdl);
 GEN     zell(GEN e, GEN z, long prec);
 
