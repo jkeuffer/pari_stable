@@ -127,6 +127,7 @@ JD 12- add an optional argument to quit()
     5- obsolete library function bruteall
     6- obsolete library function reducemodmatrix, nfreducemodidele,
        nfreducemodideal, nfreducemodideal_i
+    7- useless undocumented library function gkrogs (use krois)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

@@ -617,7 +617,6 @@ GEN     gispseudoprime(GEN x, long flag);
 GEN     gispsp(GEN x);
 GEN     gissquareall(GEN x, GEN *pt);
 GEN     gissquare(GEN x);
-GEN     gkrogs(GEN x, long y);
 GEN     gkronecker(GEN x, GEN y);
 GEN     gmillerrabin(GEN n, long k);
 GEN     gnextprime(GEN n);

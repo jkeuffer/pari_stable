@@ -1055,9 +1055,6 @@ kronecker(GEN x, GEN y)
   avma = av; return krouu_s(yu, xu, s);
 }
 
-GEN
-gkrogs(GEN x, long y) { return map_proto_lGL(krois,x,y); }
-
 long
 krois(GEN x, long y)
 {
