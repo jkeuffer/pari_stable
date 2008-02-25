@@ -985,7 +985,7 @@ END:
 #define gome(t) (ome(mod2BIL(t)))
 
 /* assume y odd, return kronecker(x,y) * s */
-long
+static long
 krouu_s(ulong x, ulong y, long s)
 {
   ulong x1 = x, y1 = y, z;

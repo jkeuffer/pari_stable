@@ -593,9 +593,7 @@ void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 /* alglin2.c */
 
 GEN     Frobeniusform(GEN V, long n);
-GEN     hnf0(GEN A, int remove);
 GEN     hnf_special(GEN x, long remove);
-GEN     hnfall0(GEN A, long remove);
 
 /* anal.c */
 
@@ -622,7 +620,6 @@ GEN     aprcl(GEN N);
 GEN     Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C);
 GEN     bestappr_mod(GEN x, GEN A, GEN B);
 long    hilii(GEN x, GEN y, GEN p);
-long    krouu_s(ulong x, ulong y, long s);
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
 int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 
