@@ -57,7 +57,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   va = varn(polabs);
   if (varncmp(gvar(x), va) > 0) x = scalarpol(x,va);
   /* Mod(X - k alpha, polabs(X)), alpha root of the polynomial defining base */
-  teta = deg1pol_i(gen_1, gmulsg(-k,alpha), va);
+  teta = gadd(pol_x(va), gmulsg(-k,alpha));
   s = gen_0;
   for (i=lg(x)-1; i>1; i--)
   {
@@ -97,7 +97,7 @@ modulereltoabs(GEN rnf, GEN x)
     {
       GEN c, z = Q_primitive_part(gmul(basnf,gel(id,j)), &c);
       z = RgX_rem(gmul(w, RgX_rem(z,polabs)), polabs);
-      c = mul_content(c, c0); if (c) z = RgX_Rg_mul(c, z);
+      c = mul_content(c, c0); if (c) z = RgX_Rg_mul(z, c);
       gel(M,k++) = z;
     }
   }
