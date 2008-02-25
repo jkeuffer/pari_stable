@@ -206,19 +206,16 @@ find:
 /*                  SYNTACTICAL ANALYZER FOR GP                    */
 /*                                                                 */
 /*******************************************************************/
-#define HANDLE_FOREIGN(t)\
-  if (foreignExprHandler && *t == foreignExprSwitch)\
-    return (*foreignExprHandler)(t);
-
 GEN
 readseq(char *t)
 {
   pari_sp av = top - avma;
   GEN z;
 
-  HANDLE_FOREIGN(t);
+  if (foreignExprHandler && *t == foreignExprSwitch)
+    return (*foreignExprHandler)(t);
 
-  z=pari_eval_str(t,0);
+  z = pari_eval_str(t,0);
   av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   if (isclone(z)) { avma = av; return gcopy(z); }
   return gerepileupto(av, z);
