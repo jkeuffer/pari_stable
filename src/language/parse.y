@@ -65,19 +65,12 @@ pari_close_parser(void) { stack_delete(&s_node); }
 static void
 unused_chars(const char *lex, int strict)
 {
-  pari_sp ltop=avma;
   long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
   if (strict) compile_err("unused characters", lex);
-  if ((long)strlen(lex) > n)
-  { 
-    char *t = stackmalloc(n + 1);
-    n -= 5;
-    (void)strncpy(t,lex, n);
-    strcpy(t + n, "[+++]");
-    lex = t;
-  }
-  pari_warn(warner, "unused characters: %s", lex);
-  ltop=avma;
+  if ((long)strlen(lex) > n) /* at most 2 lines */
+    pari_warn(warner, "unused characters: %.*s[+++]", n-5, lex);
+  else
+    pari_warn(warner, "unused characters: %s", lex);
 }
 
 void
