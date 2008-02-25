@@ -57,7 +57,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   va = varn(polabs);
   if (varncmp(gvar(x), va) > 0) x = scalarpol(x,va);
   /* Mod(X - k alpha, polabs(X)), alpha root of the polynomial defining base */
-  teta = gadd(pol_x(va), gmulsg(-k,alpha));
+  teta = deg1pol_i(gen_1, gmulsg(-k,alpha), va);
   s = gen_0;
   for (i=lg(x)-1; i>1; i--)
   {
@@ -75,31 +75,33 @@ eltreltoabs(GEN rnfeq, GEN x)
   return gerepileupto(av, s);
 }
 
+/* x a t_VEC of rnf elements in 'alg' form */
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
-  GEN w = gel(x,1), I = gel(x,2), nf = gel(rnf,10), rnfeq = gel(rnf,11);
+  GEN W = gel(x,1), I = gel(x,2), nf = gel(rnf,10), rnfeq = gel(rnf,11);
   GEN M, basnf, cobasnf, T = gel(nf,1), polabs = gel(rnfeq,1);
-  long i, j, k, n = lg(w)-1, m = degpol(T);
+  long i, j, k, n = lg(W)-1, m = degpol(T);
 
   M = cgetg(n*m+1, t_VEC);
   basnf = lift_intern( gsubst(gel(nf,7), varn(T), gel(rnfeq,2)) );
   basnf = Q_primitive_part(basnf, &cobasnf); /* remove denom. --> faster */
   for (k=i=1; i<=n; i++)
   {
-    GEN c0, om = gel(w,i), id = gel(I,i);
+    GEN c0, w = gel(W,i), id = gel(I,i);
 
-    om = Q_primitive_part(eltreltoabs(rnfeq, om), &c0);
+    if (lg(id) == 1) continue;
+    w = Q_primitive_part(eltreltoabs(rnfeq,w), &c0);
     c0 = mul_content(c0, cobasnf);
     for (j=1; j<=m; j++)
     {
       GEN c, z = Q_primitive_part(gmul(basnf,gel(id,j)), &c);
-      z = RgX_rem(gmul(om, RgX_rem(z,polabs)), polabs);
-      c = mul_content(c, c0); if (c) z = gmul(c, z);
+      z = RgX_rem(gmul(w, RgX_rem(z,polabs)), polabs);
+      c = mul_content(c, c0); if (c) z = RgX_Rg_mul(c, z);
       gel(M,k++) = z;
     }
   }
-  return M;
+  setlg(M, k); return M;
 }
 
 static GEN
@@ -112,7 +114,7 @@ makenfabs(GEN rnf)
   nf = gel(rnf,10);
 
   M = modulereltoabs(rnf, gel(rnf,7));
-  n = lg(M)-1;
+  n = degpol(pol);
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
   if (d) M = gdiv(ZM_hnfcenter(ZM_hnfmodid(M, d)), d);
   else   M = matid(n);
@@ -440,16 +442,16 @@ rnfidealup(GEN rnf,GEN x)
 {
   pari_sp av = avma;
   long i, n;
-  GEN nf, bas, bas2, I, z;
+  GEN nf, bas, bas2, I;
 
   checkrnf(rnf); nf = gel(rnf,10);
   n = degpol(rnf[1]);
   bas = gel(rnf,7); bas2 = gel(bas,2);
 
-  (void)idealtyp(&x, &z); /* z is junk */
-  I = cgetg(n+1,t_VEC); z = mkvec2(gel(bas,1), I);
+  (void)idealtyp(&x, &I); /* I is junk */
+  I = cgetg(n+1,t_VEC);
   for (i=1; i<=n; i++) gel(I,i) = idealmul(nf,x,gel(bas2,i));
-  return gerepilecopy(av, modulereltoabs(rnf, z));
+  return gerepilecopy(av, modulereltoabs(rnf, mkvec2(gel(bas,1), I)));
 }
 
 /* x a relative HNF ---> vector of 2 generators (relative polymods) */
