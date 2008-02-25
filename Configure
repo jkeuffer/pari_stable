@@ -56,7 +56,7 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 . ./get_cc            # $_cc_list (includes 'optimization'), extraflag
 . ./get_double_format # doubleformat, sizeof_long
 . ./get_kernel        # asmarch, pretty
-. ./get_dlcflags      # DLCFLAGS, update CFLAGS
+. ./get_dlcflags      # _dl_list, DLCFLAGS, update CFLAGS
 . ./get_ld   # $_ld_list
 . ./get_dlld # $_dlld_list
 . ./get_perl # $_perl_list
@@ -66,21 +66,9 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 # Looking for libraries: gmp, X11, fltk, Qt, readline
 echo Checking for optional libraries and headers...
 . ./get_libpth # initialize
-if test -n "$kernel"; then # kernel explicitly provided
-  case "$kernlvl1" in
-    none) with_gmp=;;
-    gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
-  esac
-fi
-if test -n "$with_gmp" -o "$fastread" != yes; then
-  . ./get_gmp  # $_gmp_list
-fi
-if test "$optimization" != profiling; then
-  . ./get_graphic_lib # $_graphic_list
-  . ./get_readline # $_readline_list (includes 'readline')
-else
-  which_graphic_lib=none  
-fi
+. ./get_gmp  # $_gmp_list
+. ./get_graphic_lib # $_graphic_list
+. ./get_readline # $_readline_list (includes 'readline')
 #############################################################################
 case $kernlvl1 in
 gmp) libpari_base=pari-gmp;;
@@ -110,7 +98,7 @@ esac
 rm -f gmon.out # created by Configure -pg
 
 ####################### CONFIGURE - SPIT ####################################
-. ./get_tests #test_basic, test_extra, top_test_extra, top_dotest_extra
+. ./get_tests #_test_list
 # Now spit out the results
 cat << EOT
 ==========================================================================

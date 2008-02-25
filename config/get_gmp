@@ -1,3 +1,13 @@
+if test -n "$kernel"; then # kernel explicitly provided
+  case "$kernlvl1" in
+    none) with_gmp=;;
+    gmp) if test -z "$with_gmp"; then with_gmp=yes; fi ;;
+  esac
+fi
+if test -z "$with_gmp" -a "$fastread" = yes; then
+  without_gmp=yes
+fi
+
 _gmp_list="gmp GMPLIBS GMPINCLUDE"
 gmp=
 if test -n "$with_gmp"; then

@@ -1,3 +1,7 @@
+if test "$optimization" = profiling; then
+  without_readline=yes
+fi
+
 #exported variables
 _readline_list="readline readline_version readline_enabledp CPPF_defined \
 rl_library_version rl_fake_library_version rl_history
