@@ -28,17 +28,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 4  ellpointtoz over Q_p makes no difference between P and -P (corrected over
    C by a cheap trick)
 
-3  mathnfmod([1,2;2,0]/3,2) --> SEGV: easy to fix locally. But the
-   documentations specifies that the input must be integral and almost all
-   routines can be broken (SEGV) by forging clever enough invalid inputs.
-
-   PARI is not strongly typed, and thorough type checking is expensive if
-   repeated over and over again on the same objects. Adding more quick
-   specialized checks in each routine is not the solution: it will simply be a
-   little harder to break, at the expense of unmaintainable code. A solution
-   would be to allow dynamic GEN typing that would store type information once
-   it's computed. How useful would this be ?
-
 3  some functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
@@ -81,7 +70,7 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************  MISCELLANEOUS    ****************************
 
-5  write more benches (specialized ones) 
+3  write more specialized benches
 
 2  switch to autoconf
 
@@ -93,13 +82,9 @@ Kernel:
 
 5  implement Mulders/Hanrot-Zimmermann Karatsuba short product t_REAL * t_REAL
 
-4  support standard rounding modes in floating point operations
-
 4  benchmark / profile basic functions and see what needs to be done
 
 4  inline level0 routines should operate on _limbs_, not on words.
-
-4  use divide & conquer approach in string / integer conversions
 
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 
@@ -108,6 +93,9 @@ Kernel:
 2  add support for different multiprecision kernels (a la LiDIA)
 
 0  check NaN in dbltor and related routines
+   [ not worth it ]
+
+0  support standard rounding modes in floating point operations
    [ not worth it ]
 
 Misc:
@@ -119,8 +107,7 @@ Misc:
 
 4  rnfkummer (non-prime degree)
 
-4  nfsubfields [use known subfields to discard blocs right away] (current uses
-   far too much memory)
+3  nfsubfields [use known subfields to discard blocs right away]
 
 3  PSLQ (algdep(x,n, -3)) is very slow, PSLQ Level2 (algdep(x,n, -4)) is even
    slower and very unreliable. Until somebody fixes this, use LLL.
@@ -202,10 +189,6 @@ Misc:
    in large intervals, sieve out multiple of small primes there, then use
    isprime() on the rest]
 
-3  changevar with explicit (incomplete) permutation. E.g
-   changevar(p, [x,y], [a,b]) for x -> a, y -> b
-   add a flag to substitute in succession or in parallel (e.g if a involves y)
-
 3  possibility to save and load a session (variables, functions, defaults)
 
 3  a type t_FILE [current: stream re-opened/flushed/closed after every single
@@ -224,5 +207,5 @@ Misc:
 
 2  write a GP scripts profiler
 
-0  a script to translate "legacy" GP code into something using GP2 function
-   names [ was never requested, and GP2 was released in 1997 ]
+0  a script to translate legacy GP code into GP2
+   [ was never requested; GP2 was released in 1997 ]
