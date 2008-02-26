@@ -1052,8 +1052,9 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
-   C = gtofp(C,DEFAULTPREC);
-  t = rtodbl(mplog(gmul2n(divru(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
+  C = gtofp(C,DEFAULTPREC);
+  /* (1/2)log (4C/d) + (d-1)(log 3/2 sqrt(gamma)) */
+  t = rtodbl(mplog(gmul2n(divru(C,d), 2))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr)));
 }
 
