@@ -111,7 +111,7 @@ JD 12- add an optional argument to quit()
    17- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
    Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
    Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
-   Flv_sub, Flv_sub_inplace, FpV_inv, FpXQ_inv, RgM_check_ZM,
+   Flv_sub, Flv_sub_inplace, FpV_inv, FpXQ_inv, FqV_inv, RgM_check_ZM,
    RgM_det_trianguar, RgM_isdiagonal, RgV_check_ZV, RgXQX_pseudorem,
    RgX_check_ZX, RgX_check_ZXY, RgX_pseudodivrem, RgX_pseudorem, RgX_reverse,
    ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,

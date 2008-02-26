@@ -558,19 +558,19 @@ FpV_inv(GEN x, GEN p)
   gel(y,1) = u; return y;
 }
 GEN
-FpXQV_inv(GEN x, GEN T, GEN p)
+FqV_inv(GEN x, GEN T, GEN p)
 {
   long i, lx = lg(x);
   GEN u, y = cgetg(lx, t_VEC);
 
   gel(y,1) = gel(x,1);
-  for (i=2; i<lx; i++) gel(y,i) = FpXQ_mul(gel(y,i-1), gel(x,i), T,p);
+  for (i=2; i<lx; i++) gel(y,i) = Fq_mul(gel(y,i-1), gel(x,i), T,p);
 
-  u = FpXQ_inv(gel(y,--i), T,p);
+  u = Fq_inv(gel(y,--i), T,p);
   for ( ; i > 1; i--)
   {
-    gel(y,i) = FpXQ_mul(u, gel(y,i-1), T,p);
-    u = FpXQ_mul(u, gel(x,i), T,p); /* u = 1 / (x[1] ... x[i-1]) */
+    gel(y,i) = Fq_mul(u, gel(y,i-1), T,p);
+    u = Fq_mul(u, gel(x,i), T,p); /* u = 1 / (x[1] ... x[i-1]) */
   }
   gel(y,1) = u; return y;
 }
