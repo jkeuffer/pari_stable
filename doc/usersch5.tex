@@ -1648,6 +1648,12 @@ modulo \kbd{p} (smallest non-negative residue).
 \fun{GEN}{Fp_invsafe}{GEN a, GEN m} as \kbd{Fp\_inv}, but return
 \kbd{NULL} if \kbd{a} is not invertible.
 
+\fun{GEN}{FpV_inv}{GEN x, GEN m} $x$ being a vector of \typ{INT}s, return
+the vector of inverses of the $x[i]$ mod $m$. The routine uses Montgomery's
+trick, and involves a single inversion mod $m$, plus $3(N-1)$ multiplications
+for $N$ entries. The routine is not stack-clean: $2N$ integers mod $m$
+are left on stack, besides the $N$ in the result.
+
 \fun{GEN}{Fp_div}{GEN a, GEN b, GEN m} returns the quotient of \kbd{a} by
 \kbd{b} modulo \kbd{m} (smallest non-negative residue). Raise an error if
 \kbd{b} is not invertible.
@@ -2390,6 +2396,12 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
 \fun{GEN}{FpXQ_invsafe}{GEN x,GEN T,GEN p}, as \kbd{FpXQ\_inv}, returning
 \kbd{NULL} if \kbd{x} is not invertible.
+
+\fun{GEN}{FpXQV_inv}{GEN x, GEN T, GEN p} $x$ being a vector of \typ{FpXQ}s,
+return the vector of inverses of the $x[i]$. The routine uses Montgomery's
+trick, and involves a single inversion , plus $3(N-1)$ multiplications for
+$N$ entries. The routine is not stack-clean: $2N$ \kbd{FpXQ} are left on
+stack, besides the $N$ in the result.
 
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 

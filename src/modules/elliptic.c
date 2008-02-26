@@ -2294,26 +2294,6 @@ ap_jacobi(GEN e, ulong p)
   }
 }
 
-/* invert all elements of x mod p using Montgomery's trick */
-GEN
-multi_invmod(GEN x, GEN p)
-{
-  long i, lx = lg(x);
-  GEN u,y = cgetg(lx, t_VEC);
-
-  y[1] = x[1];
-  for (i=2; i<lx; i++)
-    gel(y,i) = remii(mulii(gel(y,i-1), gel(x,i)), p);
-
-  u = Fp_inv(gel(y,--i), p);
-  for ( ; i > 1; i--)
-  {
-    gel(y,i) = remii(mulii(u, gel(y,i-1)), p);
-    u = remii(mulii(u, gel(x,i)), p); /* u = 1 / (x[1] ... x[i-1]) */
-  }
-  gel(y,1) = u; return y;
-}
-
 static GEN
 addsell(GEN e, GEN z1, GEN z2, GEN p)
 {
@@ -2547,7 +2527,7 @@ ellap1(GEN e, GEN p)
 	  h = addii(h, mului(k,B)); goto FOUND;
 	}
       }
-      v = multi_invmod(u, p);
+      v = FpV_inv(u, p);
       maxj = (i-1 + nb <= s)? nb: s % nb;
       for (j=1; j<=maxj; j++,i++) /* adding nb.F (part 2) */
       {
@@ -2634,7 +2614,7 @@ ellap1(GEN e, GEN p)
 	    save = fg[1]; fg[1] = P[1];
 	  }
 	}
-	v = multi_invmod(u, p);
+	v = FpV_inv(u, p);
 	for (j=1; j<=nb; j++)
 	  addsell_part2(cp4, gel(pts,j),fg,p, gel(v,j));
 	if (i == nb) { fg[1] = save; }

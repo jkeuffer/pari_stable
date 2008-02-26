@@ -142,6 +142,7 @@ GEN     random_Flx(long d1, long v, ulong p);
 /* FpX.c */
 
 GEN     Fp_FpXQ_log(GEN a, GEN g, GEN ord, GEN T, GEN p);
+GEN     FpV_inv(GEN x, GEN p);
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 GEN     FpX_Fp_add(GEN x, GEN y, GEN p);
 GEN     FpX_Fp_add_shallow(GEN y,GEN x,GEN p);
@@ -182,6 +183,7 @@ GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
 GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
+GEN     FpXQV_inv(GEN x, GEN T, GEN p);
 GEN     FpXV_prod(GEN V, GEN p);
 GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 

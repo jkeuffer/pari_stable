@@ -539,6 +539,42 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
+/* invert all elements of x mod p using Montgomery's trick. Not stack-clean. */
+GEN
+FpV_inv(GEN x, GEN p)
+{
+  long i, lx = lg(x);
+  GEN u, y = cgetg(lx, t_VEC);
+
+  gel(y,1) = gel(x,1);
+  for (i=2; i<lx; i++) gel(y,i) = Fp_mul(gel(y,i-1), gel(x,i), p);
+
+  u = Fp_inv(gel(y,--i), p);
+  for ( ; i > 1; i--)
+  {
+    gel(y,i) = Fp_mul(u, gel(y,i-1), p);
+    u = Fp_mul(u, gel(x,i), p); /* u = 1 / (x[1] ... x[i-1]) */
+  }
+  gel(y,1) = u; return y;
+}
+GEN
+FpXQV_inv(GEN x, GEN T, GEN p)
+{
+  long i, lx = lg(x);
+  GEN u, y = cgetg(lx, t_VEC);
+
+  gel(y,1) = gel(x,1);
+  for (i=2; i<lx; i++) gel(y,i) = FpXQ_mul(gel(y,i-1), gel(x,i), T,p);
+
+  u = FpXQ_inv(gel(y,--i), T,p);
+  for ( ; i > 1; i--)
+  {
+    gel(y,i) = FpXQ_mul(u, gel(y,i-1), T,p);
+    u = FpXQ_mul(u, gel(x,i), T,p); /* u = 1 / (x[1] ... x[i-1]) */
+  }
+  gel(y,1) = u; return y;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                              FpXQ                                 **/

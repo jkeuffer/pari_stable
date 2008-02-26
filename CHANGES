@@ -107,22 +107,21 @@ JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
    14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
    15- 'ispower', 'nffactor', 'subfields' bench
-   16- library functions Flc_Fl_mul, Flc_Fl_div, Flv_add, Flv_dotproduct,
-       Flv_sub, zero_Flm, zero_zm, zero_Flv, zero_zv, row_Flm, row_zm, zv_cmp0
-       RgM_isdiagonal, zm_copy, zv_copy, Flm_mul, Flm_copy, Flv_copy,
-       Flm_Fl_mul, Flm_Fl_mul_inplace, Flv_Fl_mul_inplace, ZV_lincomb
-       Flc_Fl_div_inplace, Flc_Fl_mul_inplace, Flv_add_inplace, Flv_sub_inplace
-       ZV_content, ZV_ZM_mul, ZV_cmp0, ZM_hnfremdiv, ZC_hnfremdiv
-   17- RgV.c, FpV.c, ZX.c, ZV.c
-   18- library functions RgX_pseudorem, RgX_pseudodivrem, RgXQX_pseudorem,
-       RgX_reverse, ZX_copy, RgX_check_ZX, RgX_check_ZXY, RgM_check_ZM,
-       RgV_check_ZV, ZM_detmult, RgM_det_trianguar, ZM_det_triangular
-       ZM_equal, ZV_equal, ZM_hnf, ZM_hnfall, ZM_hnflll, ZM_hnfmod,
-       ZM_hnfmodid, ZM_hnfmodidpart, ZM_snfclean, ZM_snf, ZM_snfall, ZM_snfall_i
-       togglesign_safe, ZX_equal, zv_equal, ZC_hnfrem, ZM_hnfrem, ZM_hnfcenter
-       ZX_max_lg, ZXY_max_lg, ZM_max_lg
-   19- universal constant gen_m2, for symmetry
-   20- GP function version() [ current version number ]
+   16- RgV.c, FpV.c, ZX.c, ZV.c
+   17- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
+   Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
+   Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
+   Flv_sub, Flv_sub_inplace, FpV_inv, FpXQ_inv, RgM_check_ZM,
+   RgM_det_trianguar, RgM_isdiagonal, RgV_check_ZV, RgXQX_pseudorem,
+   RgX_check_ZX, RgX_check_ZXY, RgX_pseudodivrem, RgX_pseudorem, RgX_reverse,
+   ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
+   ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid, ZM_hnfmodidpart,
+   ZM_hnfrem, ZM_hnfremdiv, ZM_max_lg, ZM_snf, ZM_snfall, ZM_snfall_i,
+   ZM_snfclean, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal, ZV_lincomb,
+   ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm, togglesign_safe,
+   zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0, zv_copy, zv_equal
+   18- universal constant gen_m2, for symmetry
+   19- GP function version() [ current version number ]
 
   Removed
     1- obsolete library functions extract and matextract
