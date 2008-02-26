@@ -43,12 +43,15 @@ get_sep(const char *t)
     switch(*s++ = *t++)
     {
       case '"':
-	if (outer || (s >= buf+2 && s[-2] != '\\')) outer = !outer;
-	break;
+	outer = !outer; break;
       case '\0':
 	return buf;
       case ';':
-	if (outer) { s[-1] = 0; return buf; } break;
+	if (outer) { s[-1] = 0; return buf; }
+        break;
+      case '\\': /* gobble next char */
+        if (s == lim) break;
+        if (! (*s++ = *t++) ) return buf;
     }
     if (s == lim)
       pari_err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);

@@ -607,6 +607,18 @@ ok_external_help(char **s)
   return 0;
 }
 
+static void
+cut_trailing_garbage(char *s)
+{
+  char c;
+  while ( (c = *s++) )
+  {
+    if (c == '\\' && ! *s++) return; /* gobble next char, return if none. */
+    else
+      if (!is_keyword_char(c)) { s[-1] = 0; return; }
+  }
+}
+
 /* don't mess readline display */
 static void
 aide_print(const char *s1, const char *s2) { pari_printf("%s: %s\n", s1, s2); }
@@ -616,20 +628,24 @@ aide0(const char *s0, int flag)
 {
   long n, long_help = flag & h_LONG;
   entree *ep,*ep1;
-  char *s1, *s;
+  char *s;
 
   s = get_sep(s0);
   if (isdigit((int)*s))
   {
     n = atoi(s);
-    if (n == 12) { community(); return; }
-    if (n < 0 || n > 15)
-      pari_err(talker2,"no such section in help: ?",s,s);
-    if (long_help) external_help(s,3); else commands(n);
+    if (n < 0 || n > 15) pari_err(talker2,"no such section in help: ?",s,s);
+    if (n == 12)
+      community(); 
+    else if (long_help)
+      external_help(s,3);
+    else
+      commands(n);
     return;
   }
-  /* Get meaningful entry on \ps 5 */
-  if (*s == '\\') { s1 = s+1; skip_alpha(s1); *s1 = '\0';}
+  /* Get meaningful answer on '\ps 5' (e.g. from <F1>) */
+  if (*s == '\\') { char *t = s+1; skip_alpha(t); *t = '\0'; }
+  if (isalpha(*s)) cut_trailing_garbage(s);
 
   if (flag & h_APROPOS) { external_help(s,-1); return; }
   if (long_help && (n = ok_external_help(&s))) { external_help(s,n); return; }

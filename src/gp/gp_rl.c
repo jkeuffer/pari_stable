@@ -700,41 +700,22 @@ pari_completion(char *text, int START, int END)
 static int
 rl_short_help(int count, int key)
 {
-  int flag = (count < 0 || rl_last_func == rl_short_help)? h_RL|h_LONG: h_RL;
-  int off = rl_point;
+  int flag = h_RL;
+  char *s = rl_line_buffer + rl_point;
 
   (void)key;
-  /* func() with cursor on ')' following completion */
-  if (off && rl_line_buffer[off-1] == '('
-	  && !is_keyword_char(rl_line_buffer[off])) off--;
+  /* func() with cursor on ')', e.g. following completion */
+  if (s > rl_line_buffer && *s == ')' && s[-1] == '(') s--;
+  while (s > rl_line_buffer && is_keyword_char(s[-1])) s--;
+  /* check for '\c' */
+  if (s > rl_line_buffer && s[-1] == '\\') s--;
 
-  while (off && is_keyword_char(rl_line_buffer[off-1])) off--;
-
-  /* Check for \c type situation.  Could check for leading whitespace too... */
-  if (off == 1 && rl_line_buffer[off-1] == '\\') off--;
-  if (off >= 8) { /* Check for default(whatever) */
-    int t = off - 1;
-
-    while (t >= 7 && isspace((int)rl_line_buffer[t])) t--;
-    if (rl_line_buffer[t--] == '(') {
-      while (t >= 6 && isspace((int)rl_line_buffer[t])) t--;
-      t -= 6;
-      if (t >= 0
-	  && strncmp(rl_line_buffer + t, "default", 7) == 0
-	  && (t == 0 || !is_keyword_char(rl_line_buffer[t-1])))
-	off = t;
-    }
-  }
-  rl_print_aide(rl_line_buffer + off, flag);
-  return 0;
+  if (count < 0 || rl_last_func == rl_short_help) flag |= h_LONG;
+  rl_print_aide(s, flag); return 0;
 }
 
 static int
-rl_long_help(int count, int key)
-{
-  (void)count;
-  return rl_short_help(-1,key);
-}
+rl_long_help(int count, int key) { (void)count; return rl_short_help(-1,key); }
 
 void
 init_readline(void)
