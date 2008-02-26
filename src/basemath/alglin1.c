@@ -1077,10 +1077,9 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
     gel(u,n) = gerepileuptoint(av, diviiexact(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
     {
-      av = avma; m = mulii(negi(gel(b,i)),t);
-      for (j=i+1; j<=n; j++)
-	m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
-      gel(u,i) = gerepileuptoint(av, diviiexact(negi(m), gcoeff(A,i,i)));
+      av = avma; m = mulii(gel(b,i),t);
+      for (j=i+1; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+      gel(u,i) = gerepileuptoint(av, diviiexact(m, gcoeff(A,i,i)));
     }
   }
   return c;
@@ -1105,12 +1104,11 @@ hnfdivide(GEN A, GEN B)
     if (r != gen_0) { avma = av; return 0; }
     for (i=k-1; i>0; i--)
     {
-      m = negi(gel(b,i));
-      for (j=i+1; j<=k; j++)
-	m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+      m = gel(b,i);
+      for (j=i+1; j<=k; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
       m = dvmdii(m, gcoeff(A,i,i), &r);
       if (r != gen_0) { avma = av; return 0; }
-      gel(u,i) = negi(m);
+      gel(u,i) = m;
     }
   }
   avma = av; return 1;
@@ -1135,32 +1133,31 @@ hnf_invimage(GEN A, GEN b)
   {
     av2 = avma;
     if (typ(b[i]) != t_INT) pari_err(typeer,"hnf_invimage");
-    m = negi(gel(b,i));
-    for (j=i+1; j<=n; j++)
-      m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+    m = gel(b,i);
+    for (j=i+1; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
     m = dvmdii(m, gcoeff(A,i,i), &r);
     if (r != gen_0) { avma = av; return NULL; }
-    gel(u,i) = gerepileuptoint(av2, negi(m));
+    gel(u,i) = gerepileuptoint(av2, m);
   }
   return u;
 }
 
 /* A upper HNF, B integral matrix or column. Return A^(-1) B if integral,
- * NULL otherwise. Not memory clean */
+ * NULL otherwise */
 GEN
 hnf_gauss(GEN A, GEN B)
 {
+  pari_sp av;
   long i, l;
   GEN C;
 
   if (typ(B) == t_COL) return hnf_invimage(A, B);
-  l = lg(B);
-  C = cgetg(l, t_MAT);
+  av = avma; l = lg(B); C = cgetg(l, t_MAT);
   for (i = 1; i < l; i++)
-  {
-    gel(C,i) = hnf_invimage(A, gel(B,i));
-    if (!C[i]) return NULL;
-  }
+    if ( (gel(C,i) = hnf_invimage(A, gel(B,i))) == NULL)
+    {
+      avma = av; return NULL;
+    }
   return C;
 }
 
@@ -1193,8 +1190,7 @@ Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
   {
     pari_sp av = avma;
     m = gel(b,i);
-    for (j=i+1; j<=li; j++)
-      m = subii(m, mulii(gcoeff(a,i,j), gel(u,j)));
+    for (j=i+1; j<=li; j++) m = subii(m, mulii(gcoeff(a,i,j), gel(u,j)));
     m = remii(m, p);
     gel(u,i) = gerepileuptoint(av, remii(mulii(m, Fp_inv(gcoeff(a,i,i), p)), p));
   }
