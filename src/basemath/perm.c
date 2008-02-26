@@ -129,7 +129,6 @@ vecsmall_shorten(GEN v, long n)
   GEN V = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) V[i] = v[i];
   return V;
-
 }
 
 GEN
