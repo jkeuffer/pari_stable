@@ -2112,6 +2112,33 @@ FpX_FpXY_resultant(GEN a, GEN b, GEN p)
   return FpV_polint(x,y, p, vX);
 }
 
+GEN
+FpX_direct_compositum(GEN A, GEN B, GEN p)
+{
+  GEN a, b, x;
+  a = shallowcopy(A); setvarn(a, MAXVARN);
+  b = shallowcopy(B); setvarn(b, MAXVARN);
+  x = deg1pol_i(gen_1, pol_x(MAXVARN), 0); /* x + y */
+  return FpX_FpXY_resultant(a, poleval(b,x),p);
+}
+
+/* 0, 1, -1, 2, -2, ... */
+#define next_lambda(a) (a>0 ? -a : 1-a)
+GEN
+FpX_compositum(GEN A, GEN B, GEN p)
+{
+  GEN a, b;
+  long k;
+  a = shallowcopy(A); setvarn(a, MAXVARN);
+  b = shallowcopy(B); setvarn(b, MAXVARN);
+  for (k = 1;; k = next_lambda(k))
+  {
+    GEN x = deg1pol_i(gen_1, gmulsg(k, pol_x(MAXVARN)), 0); /* x + k y */
+    GEN C = FpX_FpXY_resultant(a, poleval(b,x),p);
+    if (FpX_is_squarefree(C, p)) return C;
+  }
+}
+
 /* check that theta(maxprime) - theta(27448) >= 2^bound */
 /* NB: theta(27449) ~ 27225.387, theta(x) > 0.98 x for x>7481
  * (Schoenfeld, 1976 for x > 1155901 + direct calculations) */
@@ -2122,9 +2149,6 @@ check_theta(ulong bound) {
 /* 27449 = prime(3000) */
 byteptr
 init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
-
-/* 0, 1, -1, 2, -2, ... */
-#define next_lambda(a) (a>0 ? -a : 1-a)
 
 /* Assume A in Z[X], B in Q[X][Y], and Res_X(A, B) in Z[Y].
  * If lambda = NULL, return Res_Y(A,B).
@@ -2636,103 +2660,71 @@ QXQ_inv(GEN A0, GEN B0)
   return gerepileupto(av, gdiv(U,D));
 }
 
+/************************************************************************
+ *                                                                      *
+ *                   IRREDUCIBLE POLYNOMIAL / Fp                        *
+ *                                                                      *
+ ************************************************************************/
+
 /* irreducible (unitary) polynomial of degree n over Fp */
 GEN
 ffinit_rand(GEN p,long n)
 {
-  pari_sp av = avma;
-  GEN pol;
-
-  for(;; avma = av)
-  {
-    pol = gadd(monomial(gen_1, n, 0), random_FpX(n-1,0, p));
-    if (FpX_is_irred(pol, p)) break;
+  for(;;) {
+    pari_sp av = avma;
+    GEN pol = ZX_add(monomial(gen_1, n, 0), random_FpX(n-1,0, p));
+    if (FpX_is_irred(pol, p)) return pol;
+    avma = av;
   }
-  return pol;
-}
-
-GEN
-FpX_direct_compositum(GEN A, GEN B, GEN p)
-{
-  GEN C,a,b,x;
-  a = shallowcopy(A); setvarn(a, MAXVARN);
-  b = shallowcopy(B); setvarn(b, MAXVARN);
-  x = gadd(pol_x(0), pol_x(MAXVARN));
-  C = FpX_FpXY_resultant(a, poleval(b,x),p);
-  return C;
-}
-
-GEN
-FpX_compositum(GEN A, GEN B, GEN p)
-{
-  GEN C, a,b;
-  long k;
-
-  a = shallowcopy(A); setvarn(a, MAXVARN);
-  b = shallowcopy(B); setvarn(b, MAXVARN);
-  for (k = 1;; k = next_lambda(k))
-  {
-    GEN x = gadd(pol_x(0), gmulsg(k, pol_x(MAXVARN)));
-    C = FpX_FpXY_resultant(a, poleval(b,x),p);
-    if (FpX_is_squarefree(C, p)) break;
-  }
-  return C;
 }
 
 /* return an extension of degree 2^l of F_2, assume l > 0
- * using Adleman-Lenstra Algorithm.
  * Not stack clean. */
 static GEN
 f2init(long l)
 {
   long i;
-  GEN q, T, S;
+  GEN Q, T, S;
 
   if (l == 1) return polcyclo(3, MAXVARN);
 
-  S = mkpoln(4, gen_1,gen_1,gen_0,gen_0); /* #(#^2 + #) */
+  S = mkpoln(4, gen_1,gen_1,gen_0,gen_0); /* y(y^2 + y) */
   setvarn(S, MAXVARN);
-  q = mkpoln(3, gen_1,gen_1, S); /* X^2 + X + #(#^2+#) */
+  Q = mkpoln(3, gen_1,gen_1, S); /* x^2 + x + y(y^2+y) */
 
-  /* x^4+x+1, irred over F_2, minimal polynomial of a root of q */
+  /* x^4+x+1, irred over F_2, minimal polynomial of a root of Q */
   T = mkpoln(5, gen_1,gen_0,gen_0,gen_1,gen_1);
   for (i=2; i<l; i++)
-  { /* q = X^2 + X + a(#) irred. over K = F2[#] / (T(#))
-     * ==> X^2 + X + a(#) b irred. over K for any root b of q
-     * ==> X^2 + X + (b^2+b)b */
-    setvarn(T, MAXVARN);
-    T = FpX_FpXY_resultant(T, q, gen_2);
-    /* T = minimal polynomial of b over F2 */
+  { /* Q = x^2 + x + a(y) irred. over K = F2[y] / (T(y))
+     * ==> x^2 + x + a(y) b irred. over K for any root b of Q
+     * ==> x^2 + x + (b^2+b)b */
+    setvarn(T,MAXVARN);
+    T = FpX_FpXY_resultant(T, Q, gen_2); /* = minpoly of b over F2 */
   }
   return T;
 }
 
 /* return an extension of degree p^l of F_p, assume l > 0
- * using Adleman-Lenstra Algorithm, see below.
  * Not stack clean. */
 GEN
 ffinit_Artin_Shreier(GEN ip, long l)
 {
-  long i;
-  long p=itos(ip);
-  GEN xp,yp,y2pm1;
-  GEN P, Q;
-  xp=monomial(gen_1,p,0);
-  P = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0));
-  if (l == 1) return P;
+  long i, p = itos(ip);
+  GEN T, Q, xp = monomial(gen_1,p,0); /* x^p */
+  T = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0)); /* x^p - x - 1 */
+  if (l == 1) return T;
 
-  yp=monomial(gen_1,p,MAXVARN);
-  y2pm1=monomial(gen_1,2*p-1,MAXVARN);
-  Q = gsub(ZX_sub(xp, pol_x(0)), ZX_sub(y2pm1, yp));
+  Q = ZX_sub(monomial(gen_1,2*p-1,MAXVARN), monomial(gen_1,p,MAXVARN));
+  Q = gsub(xp, deg1pol_i(gen_1, Q, 0)); /* x^p - x - (y^(2p-1)-y^p) */
   for (i = 2; i <= l; ++i)
   {
-    setvarn(P,MAXVARN);
-    P = FpX_FpXY_resultant(P, Q, ip);
+    setvarn(T,MAXVARN);
+    T = FpX_FpXY_resultant(T, Q, ip);
   }
-  return P;
+  return T;
 }
 
-/*Check if polsubcyclo(n,l,0) is irreducible modulo p*/
+/* check if polsubcyclo(n,l,0) is irreducible modulo p */
 static long
 fpinit_check(GEN p, long n, long l)
 {
@@ -2744,30 +2736,25 @@ fpinit_check(GEN p, long n, long l)
 
 /* let k=2 if p%4==1, and k=4 else and assume k*p does not divide l.
  * Return an irreducible polynomial of degree l over F_p.
- * This a variant of an algorithm of Adleman and Lenstra
- * "Finding irreducible polynomials over finite fields",
- * ACM, 1986 (5)  350--355
- * Not stack clean.
- */
+ * Variant of Adleman and Lenstra "Finding irreducible polynomials over
+ * finite fields", ACM, 1986 (5) 350--355.
+ * Not stack clean */
 static GEN
 fpinit(GEN p, long l)
 {
-  ulong n = 1+l, k = 1;
-  while (!fpinit_check(p,n,l)) { n += l; k++; }
-  if (DEBUGLEVEL>=4)
-    fprintferr("FFInit: using polsubcyclo(%ld, %ld)\n",n,l);
+  ulong n = 1+l;
+  while (!fpinit_check(p,n,l)) n += l;
+  if (DEBUGLEVEL>=4) fprintferr("FFInit: using polsubcyclo(%ld, %ld)\n",n,l);
   return FpX_red(polsubcyclo(n,l,0),p);
 }
 
 static GEN
 ffinit_fact(GEN p, long n)
 {
-  GEN F = gel(factoru_pow(n),3);
-  GEN P; /* pol */
+  GEN P, F = gel(factoru_pow(n),3);
   long i;
-  /* If n is even, then F[1] is 2^bfffo(n)*/
   if (!odd(n) && equaliu(p, 2))
-    P = f2init(vals(n));
+    P = f2init(vals(n)); /* if n is even, F[1] = 2^vals(n)*/
   else
     P = fpinit(p, F[1]);
   for (i = 2; i < lg(F); ++i)
@@ -2781,15 +2768,15 @@ ffinit_nofact(GEN p, long n)
   GEN P, Q = NULL;
   if (lgefint(p)==3)
   {
-    ulong lp = p[2], q;
-    long v = u_lvalrem(n,lp,&q);
+    ulong pp = p[2], q;
+    long v = u_lvalrem(n,pp,&q);
     if (v>0)
     {
-      if (lp==2) Q = f2init(v);
-      else       Q = fpinit(p,n/q);
+      Q = (pp == 2)? f2init(v): fpinit(p,n/q);
       n = q;
     }
   }
+  /* n coprime to p */
   if (n==1) P = Q;
   else
   {
@@ -2808,7 +2795,6 @@ init_Fq_i(GEN p, long n, long v)
   if (signe(p) <= 0) pari_err(talker,"%Zs is not a prime", p);
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);
-  /*If easy case, use polcyclo*/
   if (fpinit_check(p, n+1, n)) return polcyclo(n+1, v);
   if (lgefint(p)-2 <= expu(n))
     P = ffinit_fact(p,n);
