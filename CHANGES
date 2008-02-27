@@ -46,6 +46,7 @@ BA 29- missing GC in the leftrightpow functions
    43- missing ѕubfields in nfsubfields [#744]
    44- [readline] <F1> or <M-h> would fail on 'fun()'. Delete trailing
        garbage in help routine.
+   45- modular matrix inversion routines used O(n^2) inversions instead of O(n)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

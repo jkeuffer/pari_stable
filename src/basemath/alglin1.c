@@ -1161,68 +1161,66 @@ hnf_gauss(GEN A, GEN B)
   return C;
 }
 
-GEN
-gauss_get_col(GEN a, GEN b, GEN p, long li)
+static GEN
+get_col(GEN a, GEN b, GEN p, long li)
 {
-  GEN m, u=cgetg(li+1,t_COL);
-  long i,j;
+  GEN u = cgetg(li+1,t_COL);
+  long i, j;
 
   gel(u,li) = gdiv(gel(b,li), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = gneg_i(gel(b,i));
+    GEN m = gneg_i(gel(b,i));
     for (j=i+1; j<=li; j++) m = gadd(m, gmul(gcoeff(a,i,j), gel(u,j)));
     gel(u,i) = gerepileupto(av, gdiv(gneg_i(m), gcoeff(a,i,i)));
   }
   return u;
 }
-
 static GEN
-Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
+Fp_get_col(GEN a, GEN b, long li, GEN p)
 {
-  GEN m, u=cgetg(li+1,t_COL);
-  long i,j;
+  GEN u = cgetg(li+1,t_COL);
+  long i, j;
 
-  gel(u,li) = remii(mulii(gel(b,li), invpiv), p);
+  gel(u,li) = Fp_mul(gel(b,li), gcoeff(a,li,li), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = gel(b,i);
+    GEN m = gel(b,i);
     for (j=i+1; j<=li; j++) m = subii(m, mulii(gcoeff(a,i,j), gel(u,j)));
     m = remii(m, p);
-    gel(u,i) = gerepileuptoint(av, remii(mulii(m, Fp_inv(gcoeff(a,i,i), p)), p));
+    gel(u,i) = gerepileuptoint(av, modii(mulii(m, gcoeff(a,i,i)), p));
   }
   return u;
 }
 static GEN
-Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
+Fq_get_col(GEN a, GEN b, long li, GEN T, GEN p)
 {
-  GEN m, u=cgetg(li+1,t_COL);
-  long i,j;
+  GEN u = cgetg(li+1,t_COL);
+  long i, j;
 
-  gel(u,li) = Fq_mul(gel(b,li), invpiv, T,p);
+  gel(u,li) = Fq_mul(gel(b,li), gcoeff(a,li,li), T,p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = gel(b,i);
+    GEN m = gel(b,i);
     for (j=i+1; j<=li; j++)
       m = Fq_sub(m, Fq_mul(gcoeff(a,i,j), gel(u,j), T, p), NULL,p);
     m = Fq_red(m, T,p);
-    gel(u,i) = gerepileupto(av, Fq_mul(m, Fq_inv(gcoeff(a,i,i), T,p), T,p));
+    gel(u,i) = gerepileupto(av, Fq_mul(m, gcoeff(a,i,i), T,p));
   }
   return u;
 }
-
-/* assume 0 <= a[i,j], b[i], invpiv < p */
+/* assume 0 <= a[i,j] < p */
 static uGEN
-Fl_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)
+Fl_get_col_OK(GEN a, uGEN b, long li, ulong p)
 {
   uGEN u = (uGEN)cgetg(li+1,t_VECSMALL);
   ulong m = b[li] % p;
   long i,j;
 
-  u[li] = (m * invpiv) % p;
+  u[li] = (m * ucoeff(a,li,li)) % p;
   for (i = li-1; i > 0; i--)
   {
     m = p - b[i]%p;
@@ -1231,25 +1229,25 @@ Fl_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)
       m += ucoeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
     }
     m %= p;
-    if (m) m = ((p-m) * Fl_inv(ucoeff(a,i,i), p)) % p;
+    if (m) m = ((p-m) * ucoeff(a,i,i)) % p;
     u[i] = m;
   }
   return u;
 }
 static uGEN
-Fl_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
+Fl_get_col(GEN a, uGEN b, long li, ulong p)
 {
   uGEN u = (uGEN)cgetg(li+1,t_VECSMALL);
   ulong m = b[li] % p;
   long i,j;
 
-  u[li] = Fl_mul(m, invpiv, p);
+  u[li] = Fl_mul(m, ucoeff(a,li,li), p);
   for (i=li-1; i>0; i--)
   {
-    m = p - b[i]%p;
+    m = b[i]%p;
     for (j = i+1; j <= li; j++)
-      m = Fl_add(m, Fl_mul(ucoeff(a,i,j), u[j], p), p);
-    if (m) m = Fl_mul(p-m, Fl_inv(ucoeff(a,i,i), p), p);
+      m = Fl_sub(m, Fl_mul(ucoeff(a,i,j), u[j], p), p);
+    if (m) m = Fl_mul(m, ucoeff(a,i,i), p);
     u[i] = m;
   }
   return u;
@@ -1349,7 +1347,7 @@ gauss_intern(GEN a, GEN b)
   pari_sp av = avma, lim = stack_lim(av,1);
   long i, j, k, li, bco, aco;
   int inexact, iscol;
-  GEN p,m,u;
+  GEN p, u;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
   a = shallowcopy(a);
@@ -1389,7 +1387,7 @@ gauss_intern(GEN a, GEN b)
 
     for (k=i+1; k<=li; k++)
     {
-      m = gcoeff(a,k,i);
+      GEN m = gcoeff(a,k,i);
       if (!gcmp0(m))
       {
 	m = gneg_i(gdiv(m,p));
@@ -1406,7 +1404,7 @@ gauss_intern(GEN a, GEN b)
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++) gel(u,j) = gauss_get_col(a,gel(b,j),p,aco);
+  for (j=1; j<=bco; j++) gel(u,j) = get_col(a,gel(b,j),p,aco);
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
@@ -1422,9 +1420,9 @@ gauss(GEN a, GEN b)
 static GEN
 Flm_gauss_sp(GEN a, GEN b, ulong p)
 {
-  long iscol, i, j, k, li, bco, aco = lg(a)-1;
-  ulong invpiv, m;
-  const int OK_ulong = SMALL_ULONG(p);
+  long i, j, k, li, bco, aco = lg(a)-1;
+  const int OK_ulong = 0;
+  int iscol;
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
@@ -1432,45 +1430,39 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   bco = lg(b)-1;
   iscol = (typ(b)!=t_MAT);
   if (iscol) b = mkmat(b);
-  invpiv = 0; /* -Wall */
   for (i=1; i<=aco; i++)
   {
-    /* k is the line where we find the pivot */
-    if (OK_ulong) /* Fl_gauss_get_col wants 0 <= a[i,j] < p for all i,j */
-      for (k = 1; k < i; k++) ucoeff(a,k,i) %= p;
+    ulong minvpiv;
+    /* Fl_get_col wants 0 <= a[i,j] < p for all i,j */
+    if (OK_ulong) for (k = 1; k < i; k++) ucoeff(a,k,i) %= p;
     for (k = i; k <= li; k++)
     {
       ulong piv = ( ucoeff(a,k,i) %= p );
-      if (piv) { invpiv = Fl_inv(piv, p); break; }
+      if (piv) { ucoeff(a,k,i) = Fl_inv(piv, p); break; }
     }
+    /* found a pivot on line k */
     if (k > li) return NULL;
-
-    /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
-    {
+    { /* swap lines so that k = i */
       for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
       for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
     if (i == aco) break;
 
+    minvpiv = p - ucoeff(a,i,i); /* - 1/piv mod p */
     for (k=i+1; k<=li; k++)
     {
-      m = ( ucoeff(a,k,i) %= p );
+      ulong m = ( ucoeff(a,k,i) %= p );
       if (!m) continue;
 
-      m = p - Fl_mul(m, invpiv, p); /* - 1/piv mod p */
-      if (m == 1)
-      {
+      m = Fl_mul(m, minvpiv, p);
+      if (m == 1) {
 	for (j=i+1; j<=aco; j++) _Fl_add((uGEN)a[j],k,i, p);
 	for (j=1;   j<=bco; j++) _Fl_add((uGEN)b[j],k,i, p);
-      }
-      else if (OK_ulong)
-      {
+      } else if (OK_ulong) {
 	for (j=i+1; j<=aco; j++) _Fl_addmul_OK((uGEN)a[j],k,i,m, p);
 	for (j=1;   j<=bco; j++) _Fl_addmul_OK((uGEN)b[j],k,i,m, p);
-      }
-      else
-      {
+      } else {
 	for (j=i+1; j<=aco; j++) _Fl_addmul((uGEN)a[j],k,i,m, p);
 	for (j=1;   j<=bco; j++) _Fl_addmul((uGEN)b[j],k,i,m, p);
       }
@@ -1478,11 +1470,9 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   }
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
-    for (j=1; j<=bco; j++)
-      ugel(u,j) = Fl_gauss_get_col_OK(a,(uGEN)b[j], invpiv, aco, p);
+    for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col_OK(a,(uGEN)b[j], aco,p);
   else
-    for (j=1; j<=bco; j++)
-      ugel(u,j) = Fl_gauss_get_col(a,(uGEN)b[j], invpiv, aco, p);
+    for (j=1; j<=bco; j++) ugel(u,j) = Fl_get_col(a,(uGEN)b[j], aco,p);
   return iscol? gel(u,1): u;
 }
 
@@ -1515,7 +1505,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   pari_sp av = avma, lim;
   long i, j, k, li, bco, aco;
   int iscol;
-  GEN invpiv, m, u;
+  GEN u;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
   if (lgefint(p) == 3)
@@ -1530,39 +1520,33 @@ FpM_gauss(GEN a, GEN b, GEN p)
   lim = stack_lim(av,1);
   a = shallowcopy(a);
   bco = lg(b)-1;
-  invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
   {
     GEN minvpiv;
-    /* k is the line where we find the pivot */
     for (k = i; k <= li; k++)
     {
       GEN piv = remii(gcoeff(a,k,i), p);
-      gcoeff(a,k,i) = piv;
-      if (signe(piv)) { invpiv  = Fp_inv(piv, p); break; }
+      if (signe(piv)) { gcoeff(a,k,i) = Fp_inv(piv, p); break; }
+      gcoeff(a,k,i) = gen_0;
     }
+    /* found a pivot on line k */
     if (k > li) return NULL;
-
-    /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
-    {
+    { /* swap lines so that k = i */
       for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
       for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
     if (i == aco) break;
 
-    minvpiv = negi(invpiv);
+    minvpiv = negi(gcoeff(a,i,i)); /* -1/piv mod p */
     for (k=i+1; k<=li; k++)
     {
-      gcoeff(a,k,i) = remii(gcoeff(a,k,i), p);
-      m = gcoeff(a,k,i); gcoeff(a,k,i) = gen_0;
-      if (signe(m))
-      {
+      GEN m = remii(gcoeff(a,k,i), p); gcoeff(a,k,i) = gen_0;
+      if (!signe(m)) continue;
 
-	m = remii(mulii(m, minvpiv), p); /* -1/piv mod p */
-	for (j=i+1; j<=aco; j++) _Fp_addmul(gel(a,j),k,i,m, p);
-	for (j=1  ; j<=bco; j++) _Fp_addmul(gel(b,j),k,i,m, p);
-      }
+      m = Fp_mul(m, minvpiv, p);
+      for (j=i+1; j<=aco; j++) _Fp_addmul(gel(a,j),k,i,m, p);
+      for (j=1  ; j<=bco; j++) _Fp_addmul(gel(b,j),k,i,m, p);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1573,17 +1557,16 @@ FpM_gauss(GEN a, GEN b, GEN p)
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++)
-    gel(u,j) = Fp_gauss_get_col(a, gel(b,j), invpiv, aco, p);
+  for (j=1; j<=bco; j++) gel(u,j) = Fp_get_col(a, gel(b,j), aco, p);
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 {
   pari_sp  av = avma, lim;
-  long i,j,k,li,bco, aco = lg(a)-1;
+  long i, j, k, li, bco, aco = lg(a)-1;
   int iscol;
-  GEN invpiv, m, u;
+  GEN u;
 
   if (!T) return FpM_gauss(a,b,p);
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
@@ -1591,36 +1574,33 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   lim = stack_lim(av,1);
   a = shallowcopy(a);
   bco = lg(b)-1;
-  invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
   {
-    /* k is the line where we find the pivot */
+    GEN minvpiv;
     for (k = i; k <= li; k++)
     {
       GEN piv = Fq_red(gcoeff(a,k,i), T,p);
-      gcoeff(a,k,i) = piv;
-      if (signe(piv)) { invpiv = Fq_inv(piv,T,p); break; }
+      if (signe(piv)) { gcoeff(a,k,i) = Fq_inv(piv,T,p); break; }
+      gcoeff(a,k,i) = gen_0;
     }
+    /* found a pivot on line k */
     if (k > li) return NULL;
-
-    /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
-    {
+    { /* swap lines so that k = i */
       for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
       for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
     if (i == aco) break;
 
+    minvpiv = Fq_neg(gcoeff(a,i,i), T, p); /* -1/piv mod p */
     for (k=i+1; k<=li; k++)
     {
-      gcoeff(a,k,i) = Fq_red(gcoeff(a,k,i), T,p);
-      m = gcoeff(a,k,i); gcoeff(a,k,i) = gen_0;
-      if (signe(m))
-      {
-	m = Fq_neg(Fq_mul(m, invpiv, T,p), T, p);
-	for (j=i+1; j<=aco; j++) _Fq_addmul(gel(a,j),k,i,m, T,p);
-	for (j=1;   j<=bco; j++) _Fq_addmul(gel(b,j),k,i,m, T,p);
-      }
+      GEN m = Fq_red(gcoeff(a,k,i), T,p); gcoeff(a,k,i) = gen_0;
+      if (!signe(m)) continue;
+
+      m = Fq_mul(m, minvpiv, T,p);
+      for (j=i+1; j<=aco; j++) _Fq_addmul(gel(a,j),k,i,m, T,p);
+      for (j=1;   j<=bco; j++) _Fq_addmul(gel(b,j),k,i,m, T,p);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1631,8 +1611,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++)
-    gel(u,j) = Fq_gauss_get_col(a, gel(b,j), invpiv, aco, T, p);
+  for (j=1; j<=bco; j++) gel(u,j) = Fq_get_col(a, gel(b,j), aco, T, p);
   return gerepilecopy(av, iscol? gel(u,1): u);
 }
 

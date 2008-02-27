@@ -585,7 +585,6 @@ GEN     sqcomprealraw(GEN x);
 
 /* alglin1.c */
 
-GEN     gauss_get_col(GEN a, GEN b, GEN p, long li);
 GEN     gauss_intern(GEN a, GEN b);
 GEN     matid_intern(long n,GEN myun,GEN myzero);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
