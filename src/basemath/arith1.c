@@ -2023,7 +2023,7 @@ Fl_order(ulong a, ulong o, ulong p)
   E = gel(m,2);
   for (i = lg(P)-1; i; i--)
   {
-    ulong l=P[i], e=E[i], t = o / upowuu(l,e), y = Fl_powu(a, t, l);
+    ulong l=P[i], e=E[i], t = o / upowuu(l,e), y = Fl_powu(a, t, p);
     if (y == 1) o = t;
     else {
       for (j = 1; j < e; j++) { y = Fl_powu(y, l, p); if (y == 1) break; }
