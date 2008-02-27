@@ -2256,10 +2256,9 @@ ellrootno(GEN e, GEN p)
 /********************************************************************/
 
 /* compute a_2 */
-static GEN
+static long
 a2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
-  pari_sp av = avma;
   ulong a1 = Rg_to_Fl(gel(e,1), 2);
   ulong a2 = Rg_to_Fl(gel(e,2), 2);
   ulong a3 = Rg_to_Fl(gel(e,3), 2);
@@ -2270,10 +2269,10 @@ a2(GEN e)
   else if (!a6) N += 2; /* x = 0, y arbitrary */
   if ((a3 ^ a1) == 0) N++; /* x = 1, y = 0 or 1 */
   else if (a2 ^ a4 ^ a6) N += 2; /* x = 1, y arbitrary */
-  avma = av; return stoi(3 - N);
+  return 3 - N;
 }
 /* a_p using Jacobi sums */
-static GEN
+static long
 ap_jacobi(GEN e, ulong p)
 {
   if (p == 2) return a2(e);
@@ -2281,8 +2280,8 @@ ap_jacobi(GEN e, ulong p)
   {
     ulong i;
     ulong e6 = Rg_to_Fl(gel(e,6), p);
-    ulong e8 = Rg_to_Fl(gel(e,8), p);
     ulong e72= Rg_to_Fl(gel(e,7), p) << 1;
+    ulong e8 = Rg_to_Fl(gel(e,8), p);
     long s = krouu(e8, p) + krouu((e8 + e72 + e6 + 4) % p, p); /* i = 0,1 */
     if (p < 757UL)
       for (i=2; i<p; i++)
@@ -2290,7 +2289,7 @@ ap_jacobi(GEN e, ulong p)
     else
       for (i=2; i<p; i++)
 	s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
-    return stoi(-s);
+    return -s;
   }
 }
 
@@ -2725,16 +2724,15 @@ typedef struct
 static int
 compare_multiples(multiple *a, multiple *b) { return a->x - b->x; }
 
-
 static long
 sclosest_lift(long A, long B, ulong p2p)
 {
   return A + B * (((ulong)(p2p + B - (A << 1))) / (B << 1));
 }
 
-/* assume e has good reduction at p. Should use Montgomery.
+/* assume p > 99 and e has good reduction at p. Should use Montgomery.
  * See ellap1() */
-static GEN
+static long
 ellap2(GEN e, ulong p)
 {
   sellpt f, fh, fg, ftest, F;
@@ -2742,10 +2740,7 @@ ellap2(GEN e, ulong p)
   long pordmin,A,B;
   long i, s, KRO, KROold, l, r, m;
   pari_sp av;
-  multiple *table;
-
-  if (p < 99) return ap_jacobi(e,(ulong)p);
-  table = NULL;
+  multiple *table = NULL;
 
   av = avma;
   c4 = Rg_to_Fl(gdivgs(gel(e,10),  -48), p);
@@ -2837,7 +2832,7 @@ FOUND:
     avma = av; if (!i) break;
   }
   if (table) pari_free(table);
-  return stoi(KRO==1? p1p-h: h-p1p);
+  return KRO==1? p1p-h: h-p1p;
 }
 
 /** ellap from CM (original code contributed by Mark Watkins) **/
@@ -2940,14 +2935,12 @@ ap_bad_red(GEN e, GEN p)
 static GEN
 u2tonegi(ulong a, ulong b) { GEN z = u2toi(a,b); setsigne(z, -1); return z; }
 
-GEN
+static GEN
 CM_ellap(GEN E, GEN p)
 {
   pari_sp av = avma;
   GEN C4E, C6E, jn, jd, a, t, u;
 
-  if (cmpiu(p, 99) < 0) return ap_jacobi(E, itou(p));
-  if (!signe(Rg_to_Fp(gel(E,12), p))) { avma = av; return ap_bad_red(E,p); }
 #define CHECK(CM,J,C6B) a = ec_ap_cm(J,C6B,C6E,CM,jd,jn,p); if (a) goto DONE;
   C4E = Rg_to_Fp(gel(E,10), p);
   if (!signe(C4E)) { a = ap_j0(E,p); goto DONE;}
@@ -2975,11 +2968,20 @@ DONE:
   return gerepileuptoint(av, icopy(a));
 }
 
+static GEN
+easy_ap(GEN E, GEN p)
+{
+  pari_sp av = avma;
+  if (!signe(Rg_to_Fp(gel(E,12), p))) { avma = av; return ap_bad_red(E,p); }
+  if (cmpiu(p, 99) < 0) { avma = av; return stoi(ap_jacobi(E, itou(p))); }
+  return CM_ellap(E, p);
+}
+
 /* for ellsea() */
 GEN
 CM_CardEFp(GEN E, GEN p)
 {
-  GEN ap = CM_ellap(E, p);
+  GEN ap = easy_ap(E, p);
   return ap? subii(addis(p,1), ap): gen_0;
 }
 
@@ -2989,10 +2991,21 @@ ellap(GEN e, GEN p)
   GEN a;
   checkell(e);
   if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
-  a = CM_ellap(e, p); if (a) return a;
+  if ( (a = easy_ap(e, p)) ) return a;
+  return (cmpiu(p, 0x3fffffff) > 0)? ellap1(e, p): stoi(ellap2(e, itou(p)));
+}
 
-  if (cmpiu(p, 0x3fffffff) > 0) return ellap1(e, p);
-  return ellap2(e, itou(p));
+/* assume e has good reduction mod p */
+static long
+ellap_small_goodred(GEN E, ulong p)
+{
+  pari_sp av;
+  GEN a;
+  if (p < 99) return ap_jacobi(E, p);
+  av = avma; a = CM_ellap(E, utoipos(p));
+  avma = av; if (a) return itos(a);
+  if (p > 0x3fffffff) { a = ellap1(E, utoipos(p)); avma = av; return itos(a); }
+  return ellap2(E, p);
 }
 
 static void
@@ -3008,7 +3021,6 @@ GEN
 anell(GEN e, long n0)
 {
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
-  long P[3] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong p, m, SQRTn, n = (ulong)n0;
   GEN an, D, c6;
 
@@ -3028,32 +3040,31 @@ anell(GEN e, long n0)
     if (!umodiu(D,p)) /* bad reduction, p | D */
       switch (tab[p&3] * krois(c6,p)) /* (-c6/p) */
       {
-	case -1:  /* non deployee */
+	case -1: /* non deployee */
 	  for (m=p; m<=n; m+=p)
 	    if (an[m/p]) gel(an,m) = negi(gel(an,m/p));
 	  continue;
-	case 0:   /* additive */
+	case 0: /* additive */
 	  for (m=p; m<=n; m+=p) gel(an,m) = gen_0;
 	  continue;
-	case 1:   /* deployee */
+	case 1: /* deployee */
 	  for (m=p; m<=n; m+=p)
-	    if (an[m/p]) gel(an,m) = gel(an,m/p);
+            if (an[m/p]) gel(an,m) = gel(an,m/p);
 	  continue;
       }
     else /* good reduction */
     {
-      GEN ap;
-      P[2] = p; ap = ellap(e, P);
+      long ap = ellap_small_goodred(e, p);
 
       if (p <= SQRTn) {
 	ulong pk, oldpk = 1;
 	for (pk=p; pk <= n; oldpk=pk, pk *= p)
 	{
-	  if (pk == p) gel(an,pk) = ap;
+	  if (pk == p) gel(an,pk) = stoi(ap);
 	  else
 	  {
 	    pari_sp av = avma;
-	    GEN u = mulii(ap, gel(an,oldpk));
+	    GEN u = mulsi(ap, gel(an,oldpk));
 	    GEN v = mului(p, gel(an,oldpk/p));
 	    gel(an,pk) = gerepileuptoint(av, subii(u,v));
 	  }
@@ -3061,9 +3072,9 @@ anell(GEN e, long n0)
 	    if (an[m] && m%p) gel(an,m*pk) = mulii(gel(an,m), gel(an,pk));
 	}
       } else {
-	gel(an,p) = ap;
+	gel(an,p) = stoi(ap);
 	for (m = n/p; m > 1; m--)
-	  if (an[m]) gel(an,m*p) = mulii(gel(an,m), ap);
+	  if (an[m]) gel(an,m*p) = mulsi(ap, gel(an,m));
       }
     }
   }
@@ -3785,24 +3796,23 @@ nagelllutz(GEN e)
 static long
 torsbound(GEN e)
 {
-  long m, b, bold, prime = 2;
+  long m, b, bold, p = 2;
   pari_sp av = avma;
-  byteptr p = diffptr;
+  byteptr diff = diffptr+1;
   GEN D = gel(e,12);
   long n = bit_accuracy(lgefint(D)) >> 3;
   /* n = number of primes to try ~ 1 prime every 8 bits in D */
   b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
-  m = 0; p++;
+  m = 0;
   while (m < n)
   {
-    NEXT_PRIME_VIADIFF_CHECK(prime,p);
-    if (umodiu(D, prime))
-    {
-      b = ugcd(b, prime+1 - itos(ellap2(e, (ulong)prime)));
-      avma = av;
-      if (b == 1) break;
-      if (b == bold) m++; else { bold = b; m = 0; }
-    }
+    NEXT_PRIME_VIADIFF_CHECK(p,diff);
+    if (!umodiu(D, p)) continue;
+
+    b = ugcd(b, p+1 - ellap_small_goodred(e, p));
+    avma = av;
+    if (b == 1) break;
+    if (b == bold) m++; else { bold = b; m = 0; }
   }
   return b;
 }
