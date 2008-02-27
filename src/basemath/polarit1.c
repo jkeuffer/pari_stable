@@ -1140,7 +1140,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     }
     else
     {
-      GEN pol = scalarpol(randomi(p), vu);
+      GEN pol = scalar_ZX_shallow(randomi(p), vu);
       for (i=2; i<=d; i++)
 	pol = ZX_add(pol, ZX_Z_mul(gel(vker,i), randomi(p)));
       polt = FpX_red(pol,p);

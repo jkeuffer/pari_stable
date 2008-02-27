@@ -1901,7 +1901,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
     avma=ltop;
     return 0;
   }
-  res = scalarpol(gel(u,2),varn(u));
+  res = scalar_ZX_shallow(gel(u,2),varn(u));
   for (i = 1; i < d ; i++)
     res = ZX_add(res, ZX_Z_mul(gel(liftpow,i), gel(u,i + 2)));
   res = FpX_red(res, gl->Q);

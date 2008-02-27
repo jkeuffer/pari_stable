@@ -89,7 +89,7 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
 {
   long i, lz = lg(y);
   GEN z;
-  if (lz == 2) return scalarpol(x,varn(y));
+  if (lz == 2) return scalar_ZX(x,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = Fp_add(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
@@ -102,7 +102,7 @@ FpX_Fp_add_shallow(GEN y,GEN x,GEN p)
 {
   long i, lz = lg(y);
   GEN z;
-  if (lz == 2) return scalarpol(x,varn(y));
+  if (lz == 2) return scalar_ZX_shallow(x,varn(y));
   z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = Fp_add(gel(y,2),x, p);
   if (lz == 3) z = FpX_renormalize(z,lz);
@@ -361,7 +361,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     a = FpX_red(x, p);
     b = FpX_red(y, p);
     d = a; d1 = b;
-    v = zeropol(vx); v1 = scalarpol(gen_1,vx);
+    v = zeropol(vx); v1 = scalar_ZX_shallow(gen_1,vx);
     while (signe(d1))
     {
       q = FpX_divrem(d,d1,p, &r);

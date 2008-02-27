@@ -108,7 +108,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 			     ZXX_to_FlxX(Q,p,y),
 			     ZX_to_Flx(nf,p), p)) == NULL) continue;
       dR = degpol(R);
-      if (dR == 0) return scalarpol(gen_1, x);
+      if (dR == 0) return pol_1(x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
       R = RgXX_to_RgM(FlxX_to_ZXX(R), d);

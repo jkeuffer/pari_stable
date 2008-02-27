@@ -115,7 +115,7 @@ polchebyshev2(long n, long v)
     if (n == -1) return zeropol(v);
     neg = 1; n = -n-2;
   }
-  if (n==0) return neg ? scalarpol(gen_m1, v): pol_1(v);
+  if (n==0) return neg ? scalar_ZX_shallow(gen_m1, v): pol_1(v);
 
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n);

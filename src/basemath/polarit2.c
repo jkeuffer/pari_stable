@@ -521,7 +521,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
     {
       if (typ(p2) != t_INT)
 	pari_err(talker, "not an integral factorization in polhensellift");
-      gel(p1,i) = scalarpol(p2, varn(pol));
+      gel(p1,i) = scalar_ZX_shallow(p2, varn(pol));
     }
   }
 

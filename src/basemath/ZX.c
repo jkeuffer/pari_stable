@@ -169,8 +169,7 @@ ZX_Z_add(GEN y, GEN x)
 {
   GEN z;
   long lz, i;
-  if (!signe(y))
-    return scalarpol(x,varn(y));
+  if (!signe(y)) return scalar_ZX(x,varn(y));
   lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = addii(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = icopy(gel(y,i));
@@ -203,8 +202,7 @@ Z_ZX_sub(GEN x, GEN y)
 {
   GEN z;
   long lz, i;
-  if (!signe(y))
-    return scalarpol(x,varn(y));
+  if (!signe(y)) return scalar_ZX(x,varn(y));
   lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = subii(x, gel(y,2));
   for(i=3; i<lz; i++) gel(z,i) = negi(gel(y,i));

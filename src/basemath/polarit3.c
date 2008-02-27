@@ -905,7 +905,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   long lV=lg(V);
   GEN  PV=RgX_to_RgV(P, lgpol(P));
   M=cgetg(l+1,t_VEC);
-  gel(M,1) = scalarpol(poleval(P,gen_1),v);
+  gel(M,1) = scalar_ZX_shallow(FpX_eval(P,gen_1,p),v);
   gel(M,2) = FpXV_FpC_mul(V,PV,p);
   btop=avma;
   gptr[0]=&Mi;
