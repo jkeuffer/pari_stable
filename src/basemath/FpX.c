@@ -146,25 +146,13 @@ FpX_sub(GEN x,GEN y,GEN p)
 }
 
 GEN
-FpX_mul(GEN x,GEN y,GEN p)
-{
-  GEN z = ZX_mul(x, y);
-  return FpX_red(z, p);
-}
+FpX_mul(GEN x,GEN y,GEN p) { return FpX_red(ZX_mul(x, y), p); }
 
 GEN
-FpX_sqr(GEN x,GEN p)
-{
-  GEN z = ZX_sqr(x);
-  return FpX_red(z, p);
-}
+FpX_sqr(GEN x,GEN p) { return FpX_red(ZX_sqr(x), p); }
 
 GEN
-FpX_Fp_mul(GEN x,GEN y,GEN p)
-{
-  GEN z = ZX_Z_mul(x,y);
-  return FpX_red(z, p);
-}
+FpX_Fp_mul(GEN x,GEN y,GEN p) { return FpX_red(ZX_Z_mul(x,y), p); }
 
 GEN
 FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
@@ -404,11 +392,7 @@ FpX_rescale(GEN P, GEN h, GEN p)
 }
 
 GEN
-FpX_deriv(GEN x, GEN p)
-{
-   GEN z = ZX_deriv(x);
-   return FpX_red(z, p);
-}
+FpX_deriv(GEN x, GEN p) { return FpX_red(ZX_deriv(x), p); }
 
 long
 FpX_is_squarefree(GEN f, GEN p)
