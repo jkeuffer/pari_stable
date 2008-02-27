@@ -145,6 +145,26 @@ ZX_copy(GEN x)
 }
 
 GEN
+scalar_ZX(GEN x, long v)
+{
+  GEN z;
+  if (!signe(x)) return zeropol(v);
+  z = cgetg(3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = icopy(x); return z;
+}
+
+GEN
+scalar_ZX_shallow(GEN x, long v)
+{
+  GEN z;
+  if (!signe(x)) return zeropol(v);
+  z = cgetg(3, t_POL);
+  z[1] = evalsigne(1) | evalvarn(v);
+  gel(z,2) = x; return z;
+}
+
+GEN
 ZX_Z_add(GEN y, GEN x)
 {
   GEN z;

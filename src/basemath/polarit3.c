@@ -82,7 +82,7 @@ Rg_to_FpXQ(GEN x, GEN T, GEN p)
   if (is_const_t(tx))
   {
     if (tx == t_FFELT) return FF_to_FpXQ(x);
-    return scalarpol(Rg_to_Fp(x, p), v);
+    return scalar_ZX(Rg_to_Fp(x, p), v);
   }
   switch(tx)
   {
@@ -1814,45 +1814,68 @@ Flv_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
   gel(C1,1) = (P1? P1: zero_Flx(0));
 }
 
-/* b a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
+/* Q a vector of polynomials representing B in Fp[X][Y], evaluate at X = x,
  * Return 0 in case of degree drop. */
 static GEN
-FlxY_evalx_drop(GEN b, ulong x, ulong p)
+FlxY_evalx_drop(GEN Q, ulong x, ulong p)
 {
   GEN z;
-  long i, lb = lg(b);
-  ulong leadz = Flx_eval(leading_term(b), x, p);
-  long vs=mael(b,2,1);
+  long i, lb = lg(Q);
+  ulong leadz = Flx_eval(leading_term(Q), x, p);
+  long vs=mael(Q,2,1);
   if (!leadz) return zero_Flx(vs);
 
   z = cgetg(lb, t_VECSMALL); z[1] = vs;
-  for (i=2; i<lb-1; i++) z[i] = Flx_eval(gel(b,i), x, p);
+  for (i=2; i<lb-1; i++) z[i] = Flx_eval(gel(Q,i), x, p);
   z[i] = leadz; return z;
 }
 
 /* as above, but don't care about degree drop */
 static GEN
-FlxY_evalx(GEN b, ulong x, ulong p)
+FlxY_evalx(GEN Q, ulong x, ulong p)
 {
   GEN z;
-  long i, lb = lg(b);
-  z = cgetg(lb,t_VECSMALL); z[1]=mael(b,2,1);
-
-  for (i=2; i<lb; i++) z[i] = Flx_eval(gel(b,i), x, p);
-  z = Flx_renormalize(z, lb);
-  return z;
+  long i, lb = lg(Q);
+  z = cgetg(lb,t_VECSMALL); z[1]=mael(Q,2,1);
+  for (i=2; i<lb; i++) z[i] = Flx_eval(gel(Q,i), x, p);
+  return Flx_renormalize(z, lb);
 }
 
-static GEN
-FpXY_evalx(GEN b, GEN x, GEN p)
+/* Q an FpXY (t_POL with FpX coeffs), evaluate at X = x */
+GEN
+FpXY_evalx(GEN Q, GEN x, GEN p)
 {
+  long i, lb = lg(Q);
   GEN z;
-  long i, lb = lg(b);
-  z = cgetg(lb, t_POL);
-  z[1] = b[1];
-  for (i=2; i<lb; i++)
-    gel(z,i) = FpX_eval(gel(b,i), x, p);
+  z = cgetg(lb, t_POL); z[1] = Q[1];
+  for (i=2; i<lb; i++) 
+  {
+    GEN q = gel(Q,i);
+    gel(z,i) = typ(q) == t_INT? q: FpX_eval(q, x, p);
+  }
   return FpX_renormalize(z, lb);
+}
+/* Q an FpXY, evaluate at Y = y */
+GEN
+FpXY_evaly(GEN Q, GEN y, GEN p, long vx)
+{
+  pari_sp av = avma;
+  long i, lb = lg(Q);
+  GEN z;
+  if (lb == 2) return zeropol(vx);
+  z = gel(Q, lb-1);
+  if (lb == 3 || !signe(y)) return typ(z)==t_INT? scalar_ZX(z, vx): ZX_copy(z);
+
+  if (typ(z) == t_INT) z = scalar_ZX_shallow(z, vx);
+  for (i=lb-2; i>=2; i--) z = Fq_add(gel(Q,i), FpX_Fp_mul(z, y, p), NULL, p);
+  return gerepileupto(av, z);
+}
+/* Q an FpXY, evaluate at (X,Y) = (x,y) */
+GEN
+FpXY_eval(GEN Q, GEN y, GEN x, GEN p)
+{
+  pari_sp av = avma;
+  return gerepileuptoint(av, FpX_eval(FpXY_evalx(Q, x, p), y, p));
 }
 
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
@@ -2304,7 +2327,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
     case t_POL: dB = degpol(B); if (dB > 0) break;
       B = dB? gel(B,2): gen_0; /* fall through */
     default:
-      if (lambda) { B = scalarpol(B,varn(A)); dB = 0; break;}
+      if (lambda) { B = scalar_ZX_shallow(B,varn(A)); dB = 0; break;}
       return gerepileupto(av, gpowgs(gsub(pol_x(v), B), degpol(A)));
   }
   delvar = 0;

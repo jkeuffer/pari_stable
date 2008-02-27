@@ -123,6 +123,8 @@ JD 12- add an optional argument to quit()
    zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0, zv_copy, zv_equal
    18- universal constant gen_m2, for symmetry
    19- GP function version() [ current version number ]
+   20- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
+   FpXY_evaly
 
   Removed
     1- obsolete library functions extract and matextract

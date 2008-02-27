@@ -2082,6 +2082,13 @@ raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 
 \fun{GEN}{ZX_copy}{GEN x,GEN p} returns a copy of \kbd{x}.
 
+\fun{GEN}{scalar_ZX}{GEN x, long v} returns the constant \kbd{ZX} in variable
+$v$ equal to the \typ{INT} $x$.
+
+\fun{GEN}{scalar_ZX_shallow}{GEN x, long v} returns the constant \kbd{ZX} in
+variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for 
+\kbd{gerepile} and friends.
+
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
@@ -2277,6 +2284,18 @@ work with any non-zero \typ{INT} but is not efficient in this case).
 
 \fun{GEN}{FpX_eval}{GEN x, GEN y, GEN p} evaluates the \kbd{FpX}~\kbd{x}
 at the \kbd{Fp}~\kbd{y}. The result is an~\kbd{Fp}.
+
+\fun{GEN}{FpXY_eval}{GEN Q, GEN y, GEN x, GEN p} $Q$ an \kbd{FpXY}, i.e.~a
+\typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
+$\F_p[X][Y]$. Returns the \kbd{Fp} $Q(x,y)$.
+
+\fun{GEN}{FpXY_evalx}{GEN Q, GEN x, GEN p} $Q$ an \kbd{FpXY}, i.e.~a
+\typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
+$\F_p[X][Y]$. Returns the \kbd{FpY} $Q(x,Y)$.
+
+\fun{GEN}{FpXY_evaly}{GEN Q, GEN y, GEN p, long vy} $Q$ an \kbd{FpXY}, i.e.~a
+\typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
+$\F_p[X][Y]$. Returns the \kbd{FpX} $Q(X,y)$.
 
 \fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a line vector
 of\kbd{FpX} by a column vector of \kbd{Fp} (scalar product). The result is

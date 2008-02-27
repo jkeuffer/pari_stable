@@ -363,6 +363,8 @@ GEN     ZX_neg(GEN x);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_sub(GEN x, GEN y);
 GEN     Z_ZX_sub(GEN x, GEN y);
+GEN     scalar_ZX(GEN x, long v);
+GEN     scalar_ZX_shallow(GEN x, long v);
 GEN     zx_to_ZX(GEN z);
 
 /* alglin1.c */
@@ -2005,6 +2007,9 @@ GEN     FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 GEN     FpXV_FpC_mul(GEN V, GEN W, GEN p);
 GEN     FpXX_add(GEN x, GEN y, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
+GEN     FpXY_eval(GEN Q, GEN y, GEN x, GEN p);
+GEN     FpXY_evalx(GEN Q, GEN x, GEN p);
+GEN     FpXY_evaly(GEN Q, GEN y, GEN p, long vy);
 GEN     FpX_FpXY_resultant(GEN a, GEN b0, GEN p);
 GEN     Fq_inv(GEN x, GEN T, GEN p);
 GEN     Fq_invsafe(GEN x, GEN T, GEN p);
