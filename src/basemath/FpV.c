@@ -18,21 +18,131 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /********************************************************************/
 /**                                                                **/
+/**                           REDUCTION                            **/
+/**                                                                **/
+/********************************************************************/
+/* z in Z^n, return lift(Col(z) * Mod(1,p)) */
+GEN
+FpC_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
+  return x;
+}
+
+/* z in Z^n, return lift(Vec(z) * Mod(1,p)) */
+GEN
+FpV_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
+  return x;
+}
+GEN
+FpC_center(GEN z, GEN p, GEN pov2)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(x,i) = Fp_center(gel(z,i),p, pov2);
+  return x;
+}
+
+/* z in Mat m,n(Z), return lift(z * Mod(1,p)) */
+GEN
+FpM_red(GEN z, GEN p)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = FpC_red(gel(z,i), p);
+  return x;
+}
+GEN
+FpM_center(GEN z, GEN p, GEN pov2)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) gel(x,i) = FpC_center(gel(z,i), p, pov2);
+  return x;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                           ADD, SUB                             **/
+/**                                                                **/
+/********************************************************************/
+GEN
+FpC_add(GEN x, GEN y, GEN p)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  for (i = 1; i < lx; i++) gel(z, i) = Fp_add(gel(x, i), gel(y, i), p);
+  return z;
+}
+GEN
+FpV_add(GEN x, GEN y, GEN p)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_VEC);
+  for (i = 1; i < lx; i++) gel(z, i) = Fp_add(gel(x, i), gel(y, i), p);
+  return z;
+}
+
+GEN
+Flv_add(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
+  return z;
+}
+
+void
+Flv_add_inplace(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
+}
+
+GEN
+FpC_sub(GEN x, GEN y, GEN p)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  for (i = 1; i < lx; i++) gel(z, i) = Fp_sub(gel(x, i), gel(y, i), p);
+  return z;
+}
+GEN
+FpV_sub(GEN x, GEN y, GEN p)
+{
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_VEC);
+  for (i = 1; i < lx; i++) gel(z, i) = Fp_sub(gel(x, i), gel(y, i), p);
+  return z;
+}
+
+GEN
+Flv_sub(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_VECSMALL);
+  for (i = 1; i < l; i++) z[i] = Fl_sub(x[i], y[i], p);
+  return z;
+}
+
+void
+Flv_sub_inplace(GEN x, GEN y, ulong p)
+{
+  long i, l = lg(x);
+  for (i = 1; i < l; i++) x[i] = Fl_sub(x[i], y[i], p);
+}
+
+/********************************************************************/
+/**                                                                **/
 /**                           MULTIPLICATION                       **/
 /**                                                                **/
 /********************************************************************/
-/* == zm_transpose */
-GEN
-Flm_transpose(GEN x)
-{
-  long i, dx, lx = lg(x);
-  GEN y;
-  if (lx == 1) return cgetg(1,t_MAT);
-  dx = lg(x[1]); y = cgetg(dx,t_MAT);
-  for (i=1; i<dx; i++) gel(y,i) = row_Flm(x,i);
-  return y;
-}
-
 GEN
 FpC_Fp_mul(GEN x, GEN y, GEN p)
 {
@@ -199,35 +309,6 @@ Flm_mul(GEN x, GEN y, ulong p)
   return z;
 }
 
-GEN
-Flv_add(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = Fl_add(x[i], y[i], p);
-  return z;
-}
-GEN
-Flv_sub(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  GEN z = cgetg(l, t_VECSMALL);
-  for (i = 1; i < l; i++) z[i] = Fl_sub(x[i], y[i], p);
-  return z;
-}
-void
-Flv_add_inplace(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
-}
-void
-Flv_sub_inplace(GEN x, GEN y, ulong p)
-{
-  long i, l = lg(x);
-  for (i = 1; i < l; i++) x[i] = Fl_sub(x[i], y[i], p);
-}
-
 /*Multiple a column vector by a line vector to make a matrix*/
 GEN
 FpC_FpV_mul(GEN x, GEN y, GEN p)
@@ -335,41 +416,20 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
 
 /********************************************************************/
 /**                                                                **/
-/**                           ADD, SUB                             **/
+/**                           TRANSPOSITION                        **/
 /**                                                                **/
 /********************************************************************/
-GEN
-FpC_add(GEN x, GEN y, GEN p)
-{
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, t_COL);
-  for (i = 1; i < lx; i++) gel(z, i) = Fp_add(gel(x, i), gel(y, i), p);
-  return z;
-}
-GEN
-FpV_add(GEN x, GEN y, GEN p)
-{
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, t_VEC);
-  for (i = 1; i < lx; i++) gel(z, i) = Fp_add(gel(x, i), gel(y, i), p);
-  return z;
-}
 
+/* == zm_transpose */
 GEN
-FpC_sub(GEN x, GEN y, GEN p)
+Flm_transpose(GEN x)
 {
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, t_COL);
-  for (i = 1; i < lx; i++) gel(z, i) = Fp_sub(gel(x, i), gel(y, i), p);
-  return z;
-}
-GEN
-FpV_sub(GEN x, GEN y, GEN p)
-{
-  long i, lx = lg(x);
-  GEN z = cgetg(lx, t_VEC);
-  for (i = 1; i < lx; i++) gel(z, i) = Fp_sub(gel(x, i), gel(y, i), p);
-  return z;
+  long i, dx, lx = lg(x);
+  GEN y;
+  if (lx == 1) return cgetg(1,t_MAT);
+  dx = lg(x[1]); y = cgetg(dx,t_MAT);
+  for (i=1; i<dx; i++) gel(y,i) = row_Flm(x,i);
+  return y;
 }
 
 /********************************************************************/
@@ -443,54 +503,4 @@ FpM_to_mod(GEN z, GEN p)
   return x;
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                           REDUCTION                            **/
-/**                                                                **/
-/********************************************************************/
-/* z in Z^n, return lift(Col(z) * Mod(1,p)) */
-GEN
-FpC_red(GEN z, GEN p)
-{
-  long i,l = lg(z);
-  GEN x = cgetg(l, t_COL);
-  for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
-  return x;
-}
-
-/* z in Z^n, return lift(Vec(z) * Mod(1,p)) */
-GEN
-FpV_red(GEN z, GEN p)
-{
-  long i,l = lg(z);
-  GEN x = cgetg(l, t_VEC);
-  for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
-  return x;
-}
-GEN
-FpC_center(GEN z, GEN p, GEN pov2)
-{
-  long i,l = lg(z);
-  GEN x = cgetg(l, t_COL);
-  for (i=1; i<l; i++) gel(x,i) = Fp_center(gel(z,i),p, pov2);
-  return x;
-}
-
-/* z in Mat m,n(Z), return lift(z * Mod(1,p)) */
-GEN
-FpM_red(GEN z, GEN p)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = FpC_red(gel(z,i), p);
-  return x;
-}
-GEN
-FpM_center(GEN z, GEN p, GEN pov2)
-{
-  long i, l = lg(z);
-  GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = FpC_center(gel(z,i), p, pov2);
-  return x;
-}
 
