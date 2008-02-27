@@ -148,15 +148,15 @@ RgX_to_FqX(GEN x, GEN T, GEN p)
   return normalizepol_i(z, l);
 }
 
+/* lg(V) > 1 */
 GEN
 FpXV_FpC_mul(GEN V, GEN W, GEN p)
 {
-  pari_sp ltop=avma;
-  long i;
+  pari_sp av = avma;
+  long i, l = lg(V);
   GEN z = ZX_Z_mul(gel(V,1),gel(W,1));
-  for(i=2;i<lg(V);i++)
-    z=ZX_add(z,ZX_Z_mul(gel(V,i),gel(W,i)));
-  return gerepileupto(ltop,FpX_red(z,p));
+  for(i=2; i<l; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i),gel(W,i)));
+  return gerepileupto(av, FpX_red(z,p));
 }
 
 #if 0
@@ -193,69 +193,63 @@ brent_kung_optpow(long d, long n)
 }
 
 /*Close to FpXV_FpC_mul*/
-
 static GEN
-spec_compo_powers(GEN P, GEN V, long a, long n)
+spec_compo_powers(GEN P, GEN V, long a, long n, GEN p)
 {
+  GEN z = scalar_ZX_shallow(gel(P,2+a), varn(P)); /* V[1] = 1 */
   long i;
-  GEN z;
-  z = scalarpol(gel(P,2+a),varn(P));
-  for(i=1;i<=n;i++)
-    z=ZX_add(z,ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
-  return z;
+  for (i=1; i<=n; i++) z = ZX_add(z, ZX_Z_mul(gel(V,i+1),gel(P,2+a+i)));
+  return FpX_red(z, p);
 }
-/*Try to implement algorithm in Brent & Kung (Fast algorithms for
- *manipulating formal power series, JACM 25:581-595, 1978)
 
- V must be as output by FpXQ_powers.
- For optimal performance, l (of FpXQ_powers) must be as output by
- brent_kung_optpow
- */
-
+/* Brent & Kung
+ * (Fast algorithms for manipulating formal power series, JACM 25:581-595, 1978)
+ *
+ * V as output by FpXQ_powers(x,l,T,p). For optimal performance, l is as given
+ * by brent_kung_optpow */
 GEN
 FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
 {
-  pari_sp ltop=avma;
-  long l=lg(V)-1;
-  GEN z,u;
-  long d=degpol(P),cnt=0;
-  if (d==-1) return zeropol(varn(T));
-  if (d<l)
+  pari_sp av = avma;
+  long l = lg(V)-1, d = degpol(P);
+  GEN z, u;
+
+  if (d < 0) return zeropol(varn(T));
+  if (d < l)
   {
-    z=spec_compo_powers(P,V,0,d);
-    return gerepileupto(ltop,FpX_red(z,p));
+    z = spec_compo_powers(P,V,0,d,p);
+    return gerepileupto(av, z);
   }
-  if (l<=1)
-    pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
-  z=spec_compo_powers(P,V,d-l+1,l-1);
-  d-=l;
-  while(d>=l-1)
+  if (l<=1) pari_err(talker,"powers is only [] or [1] in FpX_FpXQV_compo");
+  d -= l;
+  z = spec_compo_powers(P,V,d+1,l-1,p);
+  while (d >= l-1)
   {
-    u=spec_compo_powers(P,V,d-l+2,l-2);
-    z=ZX_add(u,FpXQ_mul(z,gel(V,l),T,p));
-    d-=l-1;
-    cnt++;
+    d -= l-1;
+    u = spec_compo_powers(P,V,d+1,l-2,p);
+    z = FpX_add(u, FpXQ_mul(z,gel(V,l),T,p), p);
   }
-  u=spec_compo_powers(P,V,0,d);
-  z=ZX_add(u,FpXQ_mul(z,gel(V,d+2),T,p));
-  cnt++;
-  if (DEBUGLEVEL>=8) fprintferr("FpX_FpXQV_compo: %d FpXQ_mul [%d]\n",cnt,l-1);
-  return gerepileupto(ltop,FpX_red(z,p));
+  u = spec_compo_powers(P,V,0,d,p);
+  z = FpX_add(u, FpXQ_mul(z,gel(V,d+2),T,p), p);
+  if (DEBUGLEVEL>=8)
+  {
+    long cnt = 1 + (degpol(P) - l) / (l-1);
+    fprintferr("FpX_FpXQV_compo: %ld FpXQ_mul [%ld]\n", cnt, l-1);
+  }
+  return gerepileupto(av, z);
 }
 
-/* T in Z[X] and  x in Z/pZ[X]/(pol)
- * return lift(lift(subst(T,variable(T),Mod(x*Mod(1,p),pol*Mod(1,p)))));
- */
+/* Q in Z[X] and x in Fp[X]/(T). Return a lift of Q(x) */
 GEN
-FpX_FpXQ_compo(GEN T,GEN x,GEN pol,GEN p)
+FpX_FpXQ_compo(GEN Q, GEN x, GEN T, GEN p)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   GEN z;
-  long d=degpol(T),rtd;
-  if (!signe(T)) return zeropol(varn(T));
+  long d = degpol(Q), rtd;
+  if (d < 0) return zeropol(varn(Q));
   rtd = (long) sqrt((double)d);
-  z = FpX_FpXQV_compo(T,FpXQ_powers(x,rtd,pol,p),pol,p);
-  return gerepileupto(ltop,z);
+  z = FpX_FpXQV_compo(Q, FpXQ_powers(x,rtd,T,p), T,p);
+  return gerepileupto(av, z);
 }
 
 GEN
