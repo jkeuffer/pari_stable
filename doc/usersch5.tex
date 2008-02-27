@@ -835,6 +835,10 @@ positive representative of $x^n$ modulo $m$.
 modulo \kbd{p} (smallest positive representative). Assumes \kbd{p} to be
 prime, and \kbd{x} to be a square modulo \kbd{p}.
 
+\fun{ulong}{Fl_order}{ulong a, ulong o, ulong p} returns the order of the
+\typ{Fp} \kbd{a}. It is assumed that \kbd{o} is a multiple of the order of
+\kbd{a}, $0$ being allowed (no non-trivial information).
+
 \fun{ulong}{random_Fl}{ulong p} returns a pseudo-random integer uniformly
 distributed in $0, 1, \dots p-1$.
 
@@ -2297,9 +2301,9 @@ $\F_p[X][Y]$. Returns the \kbd{FpY} $Q(x,Y)$.
 \typ{POL} with \kbd{Fp} or \kbd{FpX} coefficients representing an element of
 $\F_p[X][Y]$. Returns the \kbd{FpX} $Q(X,y)$.
 
-\fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a line vector
-of\kbd{FpX} by a column vector of \kbd{Fp} (scalar product). The result is
-an~\kbd{FpX}.
+\fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a non-empty line
+vector of\kbd{FpX} by a column vector of \kbd{Fp} of compatible dimensions.
+The result is an~\kbd{FpX}.
 
 \fun{GEN}{FpXV_prod}{GEN V, GEN p}, \kbd{V} being a vector of \kbd{FpX},
 returns their product.

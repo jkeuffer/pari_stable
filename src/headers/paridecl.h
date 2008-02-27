@@ -571,6 +571,7 @@ GEN     sqcompreal(GEN x);
 
 /* arith1.c */
 
+ulong   Fl_order(ulong a, ulong o, ulong p);
 ulong   Fl_powu(ulong x, ulong n, ulong p);
 ulong   Fl_sqrt(ulong a, ulong p);
 GEN     Fp_add(GEN a, GEN b, GEN m);

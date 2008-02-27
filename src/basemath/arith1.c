@@ -1912,12 +1912,12 @@ Fp_pows(GEN A, long k, GEN N)
 }
 
 static GEN
-_Flmul(void *data, GEN x, GEN y)
-{ return (GEN)Fl_mul((ulong)x,(ulong)y,(ulong)data); }
+_Fl_mul(void *E, GEN x, GEN y)
+{ return (GEN)Fl_mul((ulong)x,(ulong)y,(ulong)E); }
 
 static GEN
-_Flsqr(void *data, GEN x)
-{ return (GEN)Fl_sqr((ulong)x,(ulong)data); }
+_Fl_sqr(void *E, GEN x)
+{ return (GEN)Fl_sqr((ulong)x,(ulong)E); }
 
 /* A^k mod N */
 GEN
@@ -1945,7 +1945,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */
     pari_warn(warner, "large exponent in Mod(a,N)^n: reduce n mod phi(N)");
-    return utoi( (ulong)leftright_pow((GEN)a, k, (void*)n, &_Flsqr, &_Flmul) );
+    return utoi((ulong)leftright_pow((GEN)a, k, (void*)n, &_Fl_sqr, &_Fl_mul));
   }
 
   if (s < 0) y = Fp_inv(A,N);
@@ -1996,22 +1996,13 @@ Fp_pow(GEN A, GEN k, GEN N)
 }
 
 static GEN
-_Fp_mul(void *E, GEN x, GEN y)
-{
-  return Fp_mul(x,y,(GEN)E);
-}
+_Fp_mul(void *E, GEN x, GEN y) { return Fp_mul(x,y,(GEN)E); }
 
 static GEN
-_Fp_pow(void *E, GEN x, GEN n)
-{
-  return Fp_pow(x,n,(GEN)E);
-}
+_Fp_pow(void *E, GEN x, GEN n) { return Fp_pow(x,n,(GEN)E); }
 
 static GEN
-_Fp_rand(void *E)
-{
-  return addis(randomi(subis((GEN)E,1)),1);
-}
+_Fp_rand(void *E) { return addis(randomi(subis((GEN)E,1)),1); }
 
 const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,cmpii,gcmp1};
 
@@ -2020,10 +2011,36 @@ const static struct bb_group Fp_star={_Fp_mul,_Fp_pow,_Fp_rand,cmpii,gcmp1};
 /**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/
 /**                                                                 **/
 /*********************************************************************/
-
-GEN
-Fp_order(GEN a, GEN o, GEN p)
+ulong
+Fl_order(ulong a, ulong o, ulong p)
 {
+  pari_sp av = avma;
+  GEN m, P, E;
+  long i, j;
+  if (!o) o = p-1;
+  m = factoru(o);
+  P = gel(m,1);
+  E = gel(m,2);
+  for (i = lg(P)-1; i; i--)
+  {
+    ulong l=P[i], e=E[i], t = o / upowuu(l,e), y = Fl_powu(a, t, l);
+    if (y == 1) o = t;
+    else {
+      for (j = 1; j < e; j++) { y = Fl_powu(y, l, p); if (y == 1) break; }
+      o = t *  upowuu(l, j);
+    }
+  }
+  avma = av; return o;
+}
+
+/*Find the exact order of a assuming a^o==1*/
+GEN
+Fp_order(GEN a, GEN o, GEN p) {
+  if (lgefint(p) == 3 && typ(o) == t_INT)
+  {
+    ulong q = p[2];
+    return utoi( Fl_order(umodiu(a, q), umodiu(o, q-1), q) );
+  }
   return gen_eltorder(a, o, (void*)p, &Fp_star);
 }
 
@@ -2095,8 +2112,6 @@ order(GEN x) { return znorder(x, NULL); }
 /**               DISCRETE LOGARITHM  in  (Z/nZ)*  i                **/
 /**                                                                 **/
 /*********************************************************************/
-
-
 static GEN
 _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
 {
@@ -2110,8 +2125,7 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
     ord = (typ(ord)==t_MAT) ? factorback(ord,NULL) : ord;
     return gerepileupto(av, shifti(ord,-1));
   }
-  avma = av;
-  return NULL;
+  avma = av; return NULL;
 }
 
 GEN
@@ -2166,15 +2180,12 @@ znlog(GEN x, GEN g)
   switch (typ(g))
   {
     case t_PADIC: {
-      pk = gel(g,3);
-      k = precp(g);
-      p = gel(g,2);
-      x = Rg_to_Fp(x, pk);
+      pk = gel(g,3); k = precp(g);
+      p = gel(g,2); x = Rg_to_Fp(x, pk);
       if (equaliu(p, 2))
       {
 	if (k > 2) pari_err(talker, "not a primitive root in znlog");
-	avma = av;
-	return is_pm1(x)? gen_0: gen_1;
+	avma = av; return is_pm1(x)? gen_0: gen_1;
       }
       g = gel(g,4);
       break;
@@ -2187,8 +2198,7 @@ znlog(GEN x, GEN g)
       {
 	if (!equaliu(pk, 4)) pari_err(talker, "not a primitive root in znlog");
 	x = Rg_to_Fp(x, pk);
-	avma = av;
-	return is_pm1(x)? gen_0: gen_1;
+	avma = av; return is_pm1(x)? gen_0: gen_1;
       }
       g = gel(g,2);
       if (e == 2) {
@@ -2213,8 +2223,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
   a = modii(a,p);
   if (!signe(a))
   {
-    if (zeta)
-      *zeta=gen_1;
+    if (zeta) *zeta = gen_1;
     return gen_0;
   }
   return gen_Shanks_sqrtn(a,n,addis(p,-1),zeta,(void*)p,&Fp_star);

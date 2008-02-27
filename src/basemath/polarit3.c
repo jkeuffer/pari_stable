@@ -2732,19 +2732,14 @@ ffinit_Artin_Shreier(GEN ip, long l)
   return P;
 }
 
-
 /*Check if polsubcyclo(n,l,0) is irreducible modulo p*/
 static long
 fpinit_check(GEN p, long n, long l)
 {
-  pari_sp ltop=avma;
-  long q,o;
+  ulong q;
   if (!uisprime(n)) return 0;
-  q = smodis(p,n);
-  if (!q) {avma=ltop; return 0;}
-  o = itos(order(mkintmodu(q,n)));
-  avma = ltop;
-  return ( cgcd((n-1)/o,l) == 1 );
+  q = umodiu(p,n); if (!q) return 0;
+  return cgcd((n-1)/Fl_order(q, n-1, n), l) == 1;
 }
 
 /* let k=2 if p%4==1, and k=4 else and assume k*p does not divide l.
@@ -2814,7 +2809,7 @@ init_Fq_i(GEN p, long n, long v)
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);
   /*If easy case, use polcyclo*/
-  if (fpinit_check(p, n + 1, n)) return polcyclo(n + 1, v);
+  if (fpinit_check(p, n+1, n)) return polcyclo(n+1, v);
   if (lgefint(p)-2 <= expu(n))
     P = ffinit_fact(p,n);
   else
