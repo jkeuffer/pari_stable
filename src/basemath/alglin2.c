@@ -2135,8 +2135,8 @@ hnfmerge_get_1(GEN A, GEN B)
 
 }
 
-/* remove: throw away lin.dep.columns */
-GEN
+/* Inefficient compared to hnfall. 'remove' = throw away lin.dep columns */
+static GEN
 hnf_i(GEN A, int remove)
 {
   pari_sp av0 = avma, av, lim;
@@ -2182,9 +2182,9 @@ hnf_i(GEN A, int remove)
     }
   }
   if (remove)
-  {                            /* remove null columns */
+  { /* remove 0 columns */
     for (i=1,j=1; j<=n; j++)
-      if (!gcmp0(gel(A,j))) A[i++] = A[j];
+      if (!ZV_cmp0(gel(A,j))) A[i++] = A[j];
     setlg(A,i);
   }
   return gerepileupto(av0, ZM_copy(A));
