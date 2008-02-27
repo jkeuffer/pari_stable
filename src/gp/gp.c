@@ -916,7 +916,7 @@ escape(char *tch)
 	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
 	case 'b': /* fall through */
 	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
-	case 'x': voir(x, get_int(s, -1)); break;
+	case 'x': dbgGEN(x, get_int(s, -1)); break;
 	case 'w':
 	  s = get_sep(s); if (!*s) s = current_logfile;
 	  write0(s, mkvec(x)); return;

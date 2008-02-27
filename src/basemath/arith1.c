@@ -2043,7 +2043,7 @@ Zp_order(GEN a, GEN p, long e, GEN pe)
       a = Fp_sqr(a, pe);
     }
   } else {
-    ap = (e == 1)? a: resii(a,p);
+    ap = (e == 1)? a: remii(a,p);
     op = Fp_order(ap, subis(p,1), p);
     if (e == 1) return op;
     a = Fp_pow(a, op, pe); /* 1 mod p */
@@ -2078,7 +2078,7 @@ znorder(GEN x, GEN o)
 	o = Zp_order(a, p, e, b);
       else {
 	GEN pe = gpowgs(p,e);
-	o = lcmii(o, Zp_order(resii(a,pe), p, e, pe));
+	o = lcmii(o, Zp_order(remii(a,pe), p, e, pe));
       }
     }
     return gerepileuptoint(av, o);

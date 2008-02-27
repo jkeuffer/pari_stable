@@ -1,6 +1,6 @@
 Function: ellap
 Section: elliptic_curves
-C-Name: apell
+C-Name: ellap
 Prototype: GG
 Help: ellap(E,p): computes a_p for the elliptic curve E using
  Shanks-Mestre's method (and Jacobi symbols for p small). Assume the equation

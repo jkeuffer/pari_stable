@@ -1292,7 +1292,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
             continue;
           } else {
             GEN P0 = Q_primpart(lift(P));
-            GEN g = nfgcd(P0, derivpol(P0), polnf, gel(nf,4));
+            GEN g = nfgcd(P0, RgX_deriv(P0), polnf, gel(nf,4));
             if (degpol(g)) continue;
             H = rnfnormgroup(bnr, P);
             if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
