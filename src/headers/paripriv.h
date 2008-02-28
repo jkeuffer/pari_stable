@@ -720,7 +720,6 @@ void    writenamedGEN(GEN x, const char *s, FILE *f);
 /* galconj.c */
 
 GEN     fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod);
-GEN     fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, long x, long y);
 GEN     fixedfieldinclusion(GEN O, GEN PL);
 GEN     fixedfieldorbits(GEN O, GEN L);
 GEN     fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v);

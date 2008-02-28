@@ -211,7 +211,7 @@ Flm_Fl_mul(GEN y, ulong x, ulong p)
 
 /* x[i,]*y. Assume lx > 1 and 0 < i < lg(x[1]) */
 static GEN
-ZMrow_ZC_mul(GEN x, GEN y, long lx, long i)
+ZMrow_ZC_mul_i(GEN x, GEN y, long lx, long i)
 {
   GEN c = mulii(gcoeff(x,i,1), gel(y,1)), ZERO = gen_0;
   long k;
@@ -251,7 +251,7 @@ FpM_FpC_mul_i(GEN x, GEN y, long lx, long l, GEN p)
   for (i = 1; i < l; i++)
   {
     pari_sp av = avma;
-    GEN c = ZMrow_ZC_mul(x, y, lx, i);
+    GEN c = ZMrow_ZC_mul_i(x, y, lx, i);
     gel(z,i) = gerepileuptoint(av, modii(c,p));
   }
   return z;
@@ -392,7 +392,7 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
   for (i=l-1; i; i--)
   {
     pari_sp av = avma;
-    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
+    GEN p1 = ZMrow_ZC_mul_i(x,y,lx,i);
     p1 = modii(p1, p);
     if (signe(p1))
     {
@@ -408,7 +408,7 @@ FpM_FpC_mul_FpX(GEN x, GEN y, GEN p, long v)
   for (; i; i--)
   {
     pari_sp av = avma;
-    GEN p1 = ZMrow_ZC_mul(x,y,lx,i);
+    GEN p1 = ZMrow_ZC_mul_i(x,y,lx,i);
     gel(z,i+1) = gerepileuptoint(av, modii(p1,p));
   }
   return z;

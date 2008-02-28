@@ -97,23 +97,33 @@ ZM_zm_mul(GEN x, GEN y)
   return z;
 }
 
+/* x[i,]*y. Assume lg(x) > 1 and 0 < i < lg(x[1]) */
+static GEN
+ZMrow_ZC_mul_i(GEN x, GEN y, long i, long lx)
+{
+  pari_sp av = avma;
+  GEN c = mulii(gcoeff(x,i,1), gel(y,1)), ZERO = gen_0;
+  long k;
+  for (k = 2; k < lx; k++)
+  {
+    GEN t = mulii(gcoeff(x,i,k), gel(y,k));
+    if (t != ZERO) c = addii(c, t);
+  }
+  return gerepileuptoint(av, c);
+}
+GEN
+ZMrow_ZC_mul(GEN x, GEN y, long i)
+{
+  return ZMrow_ZC_mul_i(x, y, i, lg(x));
+}
+
 /* return x * y, 1 < lx = lg(x), l = lg(x[1]) */
 static GEN
 ZM_ZC_mul_i(GEN x, GEN y, long lx, long l)
 {
-  GEN z = cgetg(l,t_COL), ZERO = gen_0;
-  long i, k;
-  for (i = 1; i < l; i++)
-  {
-    pari_sp av = avma;
-    GEN c = mulii(gcoeff(x,i,1), gel(y,1)); /* cf. ZMrow_ZC_mul */
-    for (k = 2; k < lx; k++)
-    {
-      GEN t = mulii(gcoeff(x,i,k), gel(y,k));
-      if (t != ZERO) c = addii(c, t);
-    }
-    gel(z,i) = gerepileuptoint(av, c);
-  }
+  GEN z = cgetg(l,t_COL);
+  long i;
+  for (i = 1; i < l; i++) gel(z,i) = ZMrow_ZC_mul_i(x, y, i, lx);
   return z;
 }
 GEN

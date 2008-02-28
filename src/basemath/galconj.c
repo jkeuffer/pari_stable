@@ -1013,7 +1013,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 	    GEN nb=addis(mulss(l2,N1),l1);
 	    msgtimer("testpermutation(%Zs)", nb);
 	    if (DEBUGLEVEL >= 2 && hop)
-	      fprintferr("GaloisConj:%d hop sur %Zs iterations\n", hop, nb);
+	      fprintferr("GaloisConj:%d hop over %Zs iterations\n", hop, nb);
 	  }
 	  avma = av;
 	  return pf;
@@ -1027,7 +1027,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   {
     msgtimer("testpermutation(%Zs)", NN);
     if (DEBUGLEVEL >= 2 && hop)
-      fprintferr("GaloisConj:%d hop sur %Zs iterations\n", hop, NN);
+      fprintferr("GaloisConj:%d hop over %Zs iterations\n", hop, NN);
   }
   avma = avm;
   return NULL;
@@ -1280,63 +1280,35 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   return M;
 }
 
-/* Compute the polynomial associated to a vector of conjugates*/
+/* Polynomial associated to a vector of conjugates. Not stack clean */
 static GEN
-vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
+vectopol(GEN v, GEN M, GEN den , GEN mod, GEN mod2, long x)
 {
-  long n = lg(v), i, k;
-  pari_sp av;
-  GEN z = cgetg(n+1,t_POL),p1,mod2;
-  av=avma;
-  mod2=gclone(shifti(mod,-1));/*clone*/
-  avma=av;
+  long l = lg(v)+1, i;
+  GEN z = cgetg(l,t_POL);
   z[1] = evalsigne(1)|evalvarn(x);
-  for (i=2; i<=n; i++)
-  {
-    p1=gen_0; av=avma;
-    for (k=1; k<n; k++)
-      p1 = addii(p1, mulii(gcoeff(M,i-1,k),gel(v,k)));
-    p1 = centermodii(p1, mod, mod2);
-    gel(z,i) = gerepileupto(av, gdiv(p1,den));
-  }
-  gunclone(mod2);/*unclone*/
-  return normalizepol_i(z,n+1);
+  for (i=2; i<l; i++)
+    gel(z,i) = gdiv(centermodii(ZMrow_ZC_mul(M,v,i-1), mod, mod2), den);
+  return normalizepol_i(z, l);
 }
 
-/* Compute the polynomial associate to a permuatation of the roots*/
+/* Polynomial associate to a permutation of the roots. Not stack clean */
 static GEN
-permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
+permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, GEN mod2, long x)
 {
-  long n = lg(L), i, k;
-  pari_sp av;
-  GEN z = cgetg(n+1,t_POL),p1,mod2;
-  if (lg(p) != n) pari_err(talker,"incorrect permutation in permtopol");
-  av=avma;
-  mod2=gclone(shifti(mod,-1)); /*clone*/
-  avma=av;
-  z[1] = evalsigne(1)|evalvarn(x);
-  for (i=2; i<=n; i++)
-  {
-    p1=gen_0; av=avma;
-    for (k=1; k<n; k++)
-      p1 = addii(p1, mulii(gcoeff(M,i-1,k), gel(L,p[k])));
-    p1 = centermodii(p1, mod, mod2);
-    gel(z,i) = gerepileupto(av, gdiv(p1,den));
-  }
-  gunclone(mod2); /*unclone*/
-  return normalizepol_i(z,n+1);
+  if (lg(p) != lg(L)) pari_err(talker,"incorrect permutation in permtopol");
+  return vectopol(vecpermute(L,p), M, den, mod, mod2, x);
 }
 
 static GEN
-galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
+galoisgrouptopol(GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
 {
-  GEN aut = cgetg(lg(res), t_COL);
+  GEN mod2 = shifti(mod,-1), aut = cgetg(lg(res), t_COL);
   long i;
   for (i = 1; i < lg(res); i++)
   {
-    if (DEBUGLEVEL>=6)
-      fprintferr("%d ",i);
-    gel(aut,i) = permtopol(gel(res,i), L, M, den, mod, v);
+    if (DEBUGLEVEL>=6) fprintferr("%d ",i);
+    gel(aut,i) = permtopol(gel(res,i), L, M, den, mod, mod2, v);
   }
   return aut;
 }
@@ -1700,11 +1672,11 @@ a4galoisgen(GEN T, struct galois_test *td)
   {
     avma = ltop;
     if (DEBUGLEVEL >= 1 && hop)
-      fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
+      fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
     return gen_0;
   }
   if (DEBUGLEVEL >= 1 && hop)
-    fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
+    fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
   /* N = itos(gdiv(mpfact(n >> 1), mpfact(n >> 2))) >> 1; */
   N = 60;
   if (DEBUGLEVEL >= 4)
@@ -1787,7 +1759,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     return gen_0;
   }
   if (DEBUGLEVEL >= 1 && hop)
-    fprintferr("A4GaloisConj: %ld hop sur %ld iterations\n", hop, N);
+    fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:tau=%Zs \n", pfu);
   avma = av2;
@@ -1840,7 +1812,7 @@ a4galoisgen(GEN T, struct galois_test *td)
       {
 	avma = av;
 	if (DEBUGLEVEL >= 1)
-	  fprintferr("A4GaloisConj:%ld hop sur %d iterations max\n",
+	  fprintferr("A4GaloisConj:%ld hop over %d iterations max\n",
 		     hop, 10395 + 68);
 	return res;
       }
@@ -2379,7 +2351,7 @@ static GEN
 galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GEN Pg)
 {
   pari_sp ltop=avma;
-  GEN     P, PL, Pden, PM, Pp, Pladicabs;
+  GEN     P, PL, Pden, PM, Pp;
   GEN     tau, PG;
   long    g,gp;
   long    x=varn(Tp);
@@ -2408,12 +2380,13 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
   {
     struct galois_analysis Pga;
     struct galois_borne Pgb;
+    GEN mod, mod2;
     long j;
     galoisanalysis(P, &Pga, 0);
     if (Pga.deg == 0) return NULL; /* Avoid computing the discriminant */
     Pgb.l = gb->l;
     Pden = galoisborne(P, NULL, &Pgb);
-    Pladicabs=Pgb.ladicabs;
+    
     if (Pgb.valabs > gb->valabs)
     {
       if (DEBUGLEVEL>=4)
@@ -2425,11 +2398,12 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       PL = FpC_red(PL, Pgb.ladicabs);
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
+    mod = Pgb.ladicabs; mod2 = shifti(mod, -1);
     if (PG == gen_0) return NULL;
     for (j = 1; j < lg(PG[1]); j++)
     {
       pari_sp btop=avma;
-      tau = permtopol(gmael(PG,1,j), PL, PM, Pden, Pladicabs, x);
+      tau = permtopol(gmael(PG,1,j), PL, PM, Pden, mod, mod2, x);
       tau = RgX_to_FpX(tau, ip);
       tau = FpX_FpXQ_compo(gel(Pmod,gp), tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
@@ -2539,7 +2513,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   Tmod=gf.Tmod;
   O = perm_cycles(frob);
   deg=lg(O[1])-1;
-  sigma = permtopol(frob, L, M, den, gb->ladicabs, x);
+  sigma = permtopol(frob, L, M, den, gb->ladicabs, shifti(gb->ladicabs,-1), x);
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:Orbite:%Zs\n", O);
   if (deg == n)			/* Cyclique */
@@ -2784,7 +2758,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
     long card = numberofconjugates(T, G == gen_0? 2: itos(G));
     if (card != 1) return nf? galoisconj(nf): galoisconj2pol(T, card, prec);
   }
-  if (flag != 4) pari_err(flagerr, "nfgaloisconj");
+  else if (flag != 4) pari_err(flagerr, "nfgaloisconj");
   G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T));
   return G;
 }
@@ -2795,15 +2769,11 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
 long
 isomborne(GEN P, GEN den, GEN p)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   struct galois_borne gb;
-  gb.l=p;
-  (void)galoisborne(P,den,&gb);
-  avma=ltop;
-  return gb.valsol;
+  gb.l = p; (void)galoisborne(P,den,&gb);
+  avma = av; return gb.valsol;
 }
-
-
 
 /******************************************************************************/
 /* Galois theory related algorithms                                           */
@@ -2833,93 +2803,78 @@ galoisinit0(GEN nf, GEN den)
   return G;
 }
 
-GEN
-galoispermtopol(GEN gal, GEN perm)
+static GEN
+galoispermtopol_i(GEN gal, GEN perm, GEN mod, GEN mod2)
 {
-  GEN     v;
-  long    t = typ(perm), i;
-  gal = checkgal(gal);
+  long t = typ(perm), i;
+  GEN v;
   switch (t)
   {
   case t_VECSMALL:
-    return permtopol(perm, gel(gal,3), gel(gal,4), gel(gal,5),
-		     gmael(gal,2,3), varn(gel(gal,1)));
-  case t_VEC:
-  case t_COL:
-  case t_MAT:
+  {
+    long v = varn(gel(gal,1));
+    return permtopol(perm, gel(gal,3), gel(gal,4), gel(gal,5), mod, mod2, v);
+  }
+  case t_VEC: case t_COL: case t_MAT:
     v = cgetg(lg(perm), t);
     for (i = 1; i < lg(v); i++)
-      gel(v,i) = galoispermtopol(gal, gel(perm,i));
+      gel(v,i) = galoispermtopol_i(gal, gel(perm,i), mod, mod2);
     return v;
   }
   pari_err(typeer, "galoispermtopol");
-  return NULL;			/* not reached */
+  return NULL; /* not reached */
 }
 
+GEN
+galoispermtopol(GEN gal, GEN perm)
+{
+  pari_sp av = avma;
+  GEN mod, mod2;
+  gal = checkgal(gal);
+  mod = gmael(gal,2,3);
+  mod2 = shifti(mod,-1);
+  return gerepilecopy(av, galoispermtopol_i(gal, perm, mod, mod2));
+}
 
 GEN
 galoiscosets(GEN O, GEN perm)
 {
-  long i,j,k,u;
-  long o = lg(O)-1, f = lg(O[1])-1;
-  GEN C = cgetg(lg(O),t_VECSMALL);
-  pari_sp av=avma;
-  GEN RC=cgetg(lg(perm),t_VECSMALL);
-  for(i=1;i<lg(RC);i++)
-    RC[i]=0;
-  u=mael(O,1,1);
-  for(i=1,j=1;j<=o;i++)
+  long i, j, k, u, f, l = lg(O);
+  GEN RC, C = cgetg(l,t_VECSMALL), o = gel(O,1);
+  pari_sp av = avma;
+  f = lg(o); u = o[1]; RC = const_vecsmall(lg(perm)-1, 0);
+  for(i=1,j=1; j<l; i++)
   {
-    if (RC[mael(perm,i,u)])
-      continue;
-    for(k=1;k<=f;k++)
-      RC[mael(perm,i,mael(O,1,k))]=1;
-    C[j++]=i;
+    GEN p = gel(perm,i);
+    if (RC[ p[u] ]) continue;
+    for(k=1; k<f; k++) RC[ p[ o[k] ] ] = 1;
+    C[j++] = i;
   }
-  avma=av;
-  return C;
+  avma = av; return C;
 }
 
-GEN
-fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
-		 long x,long y)
+static GEN
+fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, GEN mod2,
+                 long x,long y)
 {
-  pari_sp ltop=avma;
-  GEN     F,G,V,res,cosets;
-  long    i, j, k;
-  F=cgetg(lg(O[1])+1,t_COL);
-  gel(F, lg(O[1])) = gen_1;
-  G=cgetg(lg(O),t_VEC);
-  for (i = 1; i < lg(O); i++)
-  {
-    GEN Li = cgetg(lg(O[i]),t_VEC);
-    for (j = 1; j < lg(O[i]); j++)
-      Li[j] = L[mael(O,i,j)];
-    gel(G,i) = FpV_roots_to_pol(Li,mod,x);
-  }
+  pari_sp ltop = avma;
+  long i, j, k, l = lg(O), lo = lg(O[1]);
+  GEN V, res, cosets = galoiscosets(O,perm), F = cgetg(lo+1,t_COL);
 
-  cosets=galoiscosets(O,perm);
+  gel(F, lo) = gen_1;
   if (DEBUGLEVEL>=4) fprintferr("GaloisFixedField:cosets=%Zs \n",cosets);
-  V=cgetg(lg(O),t_COL);
   if (DEBUGLEVEL>=6) fprintferr("GaloisFixedField:den=%Zs mod=%Zs \n",den,mod);
-  res=cgetg(lg(O),t_VEC);
-  for (i = 1; i < lg(O); i++)
+  V = cgetg(l,t_COL); res = cgetg(l,t_VEC);
+  for (i = 1; i < l; i++)
   {
-    pari_sp av=avma;
-    long ii,jj;
-    GEN G=cgetg(lg(O),t_VEC);
-    for (ii = 1; ii < lg(O); ii++)
+    pari_sp av = avma;
+    GEN G = cgetg(l,t_VEC), Lp = vecpermute(L, gel(perm, cosets[i]));
+    for (k = 1; k < l; k++)
+      gel(G,k) = FpV_roots_to_pol(vecpermute(Lp, gel(O,k)), mod, x);
+    for (j = 1; j < lo; j++)
     {
-      GEN Li = cgetg(lg(O[ii]),t_VEC);
-      for (jj = 1; jj < lg(O[ii]); jj++)
-	Li[jj] = L[mael(perm,cosets[i],mael(O,ii,jj))];
-      gel(G,ii) = FpV_roots_to_pol(Li,mod,x);
-    }
-    for (j = 1; j < lg(O[1]); j++)
-    {
-      for(k = 1; k < lg(O); k++)
-	V[k]=mael(G,k,j+1);
-      gel(F,j) = vectopol(V, M, den, mod, y);
+      for(k = 1; k < l; k++) V[k] = mael(G,k,j+1);
+      gel(F,j) = vectopol(V, M, den, mod, mod2, y);
     }
     gel(res,i) = gerepileupto(av,gtopolyrev(F,x));
   }
@@ -2937,13 +2892,13 @@ GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
   pari_sp lbot, ltop = avma;
-  GEN L, P, S, PL, O, res, mod;
+  GEN L, P, S, PL, O, res, mod, mod2;
   long x, n, i;
+  if (flag<0 || flag>2) pari_err(flagerr, "galoisfixedfield");
   gal = checkgal(gal);
   x = varn(gel(gal,1));
-  L = gel(gal,3); n=lg(L)-1;
+  L = gel(gal,3); n = lg(L)-1;
   mod = gmael(gal,2,3);
-  if (flag<0 || flag>2) pari_err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
   {
     for (i = 1; i < lg(perm); i++) chk_perm(gel(perm,i), n);
@@ -2958,56 +2913,43 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   {
     GEN OL= fixedfieldorbits(O,L);
     GEN V = fixedfieldsympol(OL, mod, gmael(gal,2,1), NULL, x);
-    P=gel(V,3);
-    PL=gel(V,2);
+    PL= gel(V,2);
+    P = gel(V,3);
   }
-  if (flag==1)
-    return gerepileupto(ltop,P);
+  if (flag==1) return gerepileupto(ltop,P);
+  mod2 = shifti(mod,-1);
   S = fixedfieldinclusion(O, PL);
-  S = vectopol(S, gel(gal,4), gel(gal,5), mod, x);
+  S = vectopol(S, gel(gal,4), gel(gal,5), mod, mod2, x);
   if (flag==0)
-  {
-    lbot = avma;
-    res = cgetg(3, t_VEC);
-    gel(res,1) = gcopy(P);
-    gel(res,2) = gmodulo(S, gel(gal,1));
-    return gerepile(ltop, lbot, res);
-  }
+  { lbot = avma; res = cgetg(3, t_VEC); }
   else
   {
-    GEN PM,Pden;
+    GEN PM, Pden;
+    struct galois_borne Pgb;
+    long val = itos(gmael(gal,2,2));
+    Pgb.l = gmael(gal,2,1);
+    Pden = galoisborne(P, NULL, &Pgb);
+    if (Pgb.valabs > val)
     {
-      struct galois_borne Pgb;
-      long val=itos(gmael(gal,2,2));
-      Pgb.l = gmael(gal,2,1);
-      Pden = galoisborne(P, NULL, &Pgb);
-      if (Pgb.valabs > val)
-      {
-	if (DEBUGLEVEL>=4)
-	  fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
-	      ,Pgb.valabs-val);
-	PL = ZpX_liftroots(P,PL,Pgb.l,Pgb.valabs);
-	L = ZpX_liftroots(gel(gal,1),L,Pgb.l,Pgb.valabs);
-	mod = Pgb.ladicabs;
-      }
+      if (DEBUGLEVEL>=4)
+        fprintferr("GaloisConj:increase p-adic prec by %ld.\n", Pgb.valabs-val);
+      PL = ZpX_liftroots(P, PL, Pgb.l, Pgb.valabs);
+      L = ZpX_liftroots(gel(gal,1), L, Pgb.l, Pgb.valabs);
+      mod = Pgb.ladicabs;
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
-    lbot = avma;
-    if (y==-1)
-      y = fetch_user_var("y");
-    if (y<=x)
-      pari_err(talker,"priority of optional variable too high in galoisfixedfield");
-    res = cgetg(4, t_VEC);
-    gel(res,1) = gcopy(P);
-    gel(res,2) = gmodulo(S, gel(gal,1));
-    gel(res,3) = fixedfieldfactor(L,O,gel(gal,6),
-	PM,Pden,mod,x,y);
-    return gerepile(ltop, lbot, res);
+    if (y < 0) y = fetch_user_var("y");
+    if (y <= x)
+      pari_err(talker,"variable priority too high in galoisfixedfield");
+    lbot = avma; res = cgetg(4, t_VEC);
+    gel(res,3) = fixedfieldfactor(L,O,gel(gal,6), PM,Pden,mod,mod2,x,y);
   }
+  gel(res,1) = gcopy(P);
+  gel(res,2) = gmodulo(S, gel(gal,1));
+  return gerepile(ltop, lbot, res);
 }
-/* gal being a galois group output the underlying wss group.
- */
 
+/* gal a galois group output the underlying wss group */
 GEN
 galois_group(GEN gal) { return mkvec2(gel(gal,7), gel(gal,8)); }
 

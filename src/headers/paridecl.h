@@ -325,6 +325,7 @@ GEN     ZM_to_Flm(GEN x, ulong p);
 GEN     ZM_to_zm(GEN z);
 GEN     ZM_zc_mul(GEN x, GEN y);
 GEN     ZM_zm_mul(GEN x, GEN y);
+GEN     ZMrow_ZC_mul(GEN x, GEN y, long i);
 GEN     ZV_ZM_mul(GEN x, GEN y);
 GEN     ZV_content(GEN x);
 GEN     ZV_dotproduct(GEN x,GEN y);
