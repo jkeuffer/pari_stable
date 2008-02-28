@@ -129,6 +129,7 @@ JD 12- add an optional argument to quit()
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
    21- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
+   numberofconjugates
 
   Removed
     1- obsolete library functions extract and matextract

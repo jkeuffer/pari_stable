@@ -71,3 +71,10 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  polL = x^4 - y*x^3 - 3*x^2 + y*x + 1;
  rnfgaloisconj(K, polL)             \\ K-automorphisms of L
  @eprog
+
+Variant:
+ \fun{long}{numberofconjugates}{GEN T, long pinit} returns a quick
+ multiple for the number of  $\Q$-automorphism of the (integral, monic)
+ \typ{POL} $T$, from modular factorizations, starting from prime \kbd{pinit}
+ (you can set it to $2$). This upper bounds almost always coincides with the
+ number of conjugates.
