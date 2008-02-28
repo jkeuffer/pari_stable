@@ -1816,6 +1816,7 @@ void    bitvec_clear(GEN bitvec, long b);
 void    bitvec_set(GEN bitvec, long b);
 GEN     bitvec_shorten(GEN bitvec, long n);
 long    bitvec_test(GEN bitvec, long b);
+long    bitvec_test_set(GEN bitvec, long b);
 GEN     cyclicgroup(GEN g, long s);
 GEN     cyclicperm(long l, long d);
 GEN     cyc_pow(GEN cyc, long exp);
