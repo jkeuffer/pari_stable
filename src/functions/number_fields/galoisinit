@@ -1,6 +1,6 @@
 Function: galoisinit
 Section: number_fields
-C-Name: galoisinit
+C-Name: galoisinit0
 Prototype: GDG
 Help: galoisinit(pol,{den}): pol being a polynomial or a number field as
  output by nfinit defining a Galois extension of Q, compute the Galois group
@@ -13,7 +13,8 @@ Doc: computes the Galois group
  Galois extension $K/\Q$ where $K$ is the number field defined by
  $\var{pol}$ (monic irreducible polynomial in $\Z[X]$ or
  a number field as output by \tet{nfinit}). The extension $K/\Q$ must be
- Galois with Galois group ``weakly'' super-solvable (see \tet{nfgaloisconj})
+ Galois with Galois group ``weakly'' super-solvable (see \tet{nfgaloisconj});
+ raises an exception otherwise.
  
  This is a prerequisite for most of the \kbd{galois}$xxx$ routines. For
  instance:
@@ -81,3 +82,5 @@ Doc: computes the Galois group
  -- $x=g_1^{e_1}g_2^{e_2}\ldots g_n^{e_n}$
  
  If present $den$ must be a suitable value for $\var{gal}[5]$.
+Variant: \fun{GEN}{galoisinit}{GEN nf, GEN den} returns \kbd{NULL} on failure
+ instead of raising an exception.

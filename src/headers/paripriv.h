@@ -724,7 +724,6 @@ GEN     fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, long x
 GEN     fixedfieldinclusion(GEN O, GEN PL);
 GEN     fixedfieldorbits(GEN O, GEN L);
 GEN     fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v);
-GEN     galoisconj2pol(GEN x, long nbmax, long prec);
 GEN     galoiscosets(GEN O, GEN perm);
 long    intheadlong(GEN x, GEN mod);
 long    isomborne(GEN P, GEN den, GEN p);

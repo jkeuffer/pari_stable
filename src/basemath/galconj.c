@@ -20,11 +20,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                           GALOIS CONJUGATES        		        **/
 /**									**/
 /*************************************************************************/
-
 GEN
 galoisconj(GEN nf)
 {
-  GEN     x, y, z;
+  GEN x, y, z;
   long i, lz, v;
   pari_sp av = avma;
   nf = checknf(nf);
@@ -37,30 +36,29 @@ galoisconj(GEN nf)
     x = shallowcopy(x);
     setvarn(x, 0);
   }
-  z = nfroots(nf, x);
-  lz = lg(z);
+  z = nfroots(nf, x); lz = lg(z);
   y = cgetg(lz, t_COL);
   for (i = 1; i < lz; i++)
   {
-    GEN     p1 = lift(gel(z,i));
-    setvarn(p1, v);
-    gel(y,i) = p1;
+    GEN t = lift(gel(z,i));
+    setvarn(t, v);
+    gel(y,i) = t;
   }
   return gerepileupto(av, y);
 }
 
-/* nbmax: maximum number of possible conjugates */
-GEN
+/* nbmax: bound for the number of conjugates */
+static GEN
 galoisconj2pol(GEN x, long nbmax, long prec)
 {
   long i, n, v, nbauto;
   pari_sp av = avma;
-  GEN     y, w, polr, p1, p2;
+  GEN y, w, polr, p1, p2;
   n = degpol(x);
-  if (n <= 0)
-    return cgetg(1, t_VEC);
+  if (n <= 0) return cgetg(1, t_VEC);
   RgX_check_ZX(x, "galoisconj2pol");
   if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
+
   polr = roots(x, prec);
   p1 = gel(polr,1);
   nbauto = 1;
@@ -88,21 +86,22 @@ galoisconj2pol(GEN x, long nbmax, long prec)
       }
     }
   }
+  if (nbauto < nbmax)
+    pari_warn(warner, "conjugates list may be incomplete in nfgaloisconj");
   setlg(y, 1 + nbauto);
   return gerepileupto(av, gen_sort(y, (void*)&gcmp, &gen_cmp_RgX));
 }
 
-GEN
-galoisconj2(GEN nf, long nbmax, long prec)
+static GEN
+galoisconj2(GEN nf, long prec)
 {
-  long i, j, n, r1, ru, nbauto;
+  long i, j, n, r1, ru, nbauto, nbmax;
   pari_sp av = avma;
-  GEN     x, y, w, polr, p1, p2;
-  if (typ(nf) == t_POL)
-    return galoisconj2pol(nf, nbmax, prec);
-  nf = checknf(nf);
-  x = gel(nf,1);
-  n = degpol(x);
+  GEN T = get_nfpol(nf,&nf), y, w, polr, p1, p2;
+
+  nbmax = numberofconjugates(T, 2);
+  if (!nf) return galoisconj2pol(nf, nbmax, prec);
+  n = degpol(T);
   if (n <= 0)
     return cgetg(1, t_VEC);
   r1 = nf_get_r1(nf);
@@ -126,7 +125,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
   for (i = 1; i <= n; i++)
     w[i] = coeff(p2, 1, i);
   y = cgetg(nbmax + 1, t_COL);
-  gel(y,1) = pol_x(varn(x));
+  gel(y,1) = pol_x(varn(T));
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
     w[n + 1] = polr[i];
@@ -136,7 +135,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
       setlg(p1, n + 1);
       settyp(p1, t_COL);
       p2 = gdiv(coltoliftalg(nf, p1), negi(gel(p1,n + 1)));
-      if (gdvd(poleval(x, p2), x))
+      if (gdvd(poleval(T, p2), T))
       {
 	gel(y,++nbauto) = p2;
 	if (DEBUGLEVEL > 1)
@@ -2682,27 +2681,26 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 
 /* T: polynomial or nf, den multiple of common denominator of solutions or
  * NULL (unknown). If T is nf, and den unknown, use den = denom(nf.zk) */
-GEN
+static GEN
 galoisconj4(GEN T, GEN den, long flag)
 {
   pari_sp ltop = avma;
-  GEN     G, L, M, res, aut, grp=NULL;/*keep gcc happy on the wall*/
+  GEN nf, G, L, M, aut;
   struct galois_analysis ga;
   struct galois_borne gb;
-  long    n, i, j, k;
-  if (typ(T) != t_POL)
+  long n;
+
+  T = get_nfpol(T, &nf); n = degpol(T);
+  if (nf)
+  { if (!den) den = Q_denom(gel(T,7)); }
+  else
   {
-    T = checknf(T);
-    if (!den) den = Q_denom(gel(T,7));
-    T = gel(T,1);
+    if (n <= 0) pari_err(constpoler, "galoisconj4");
+    RgX_check_ZX(T, "galoisconj4");
+    if (!gcmp1(gel(T,n+2)))
+      pari_err(talker, "non-monic polynomial in galoisconj4");
   }
-  n = degpol(T);
-  if (n <= 0) pari_err(constpoler, "galoisconj4");
-  RgX_check_ZX(T, "galoisconj4");
-  if (!gcmp1(gel(T,n + 2)))
-    pari_err(talker, "non-monic polynomial in galoisconj4");
-  n = degpol(T);
-  if (n == 1)			/* Too easy! */
+  if (n == 1)
   {
     if (!flag) { G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); return G;}
     ga.l = 3;
@@ -2711,11 +2709,8 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   else
     galoisanalysis(T, &ga, 1);
-  if (ga.deg == 0)
-  {
-    avma = ltop;
-    return utoipos(ga.p); /* Avoid computing the discriminant */
-  }
+  if (ga.deg == 0) { avma = ltop; return utoipos(ga.p); }
+
   if (den)
   {
     if (typ(den) != t_INT)
@@ -2725,14 +2720,11 @@ galoisconj4(GEN T, GEN den, long flag)
   gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) (void)timer2();
   den = galoisborne(T, den, &gb);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("galoisborne()");
+  if (DEBUGLEVEL >= 1) msgtimer("galoisborne()");
   L = rootpadicfast(T, gb.l, gb.valabs);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("rootpadicfast()");
+  if (DEBUGLEVEL >= 1) msgtimer("rootpadicfast()");
   M = vandermondeinversemod(L, T, den, gb.ladicabs);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("vandermondeinversemod()");
+  if (DEBUGLEVEL >= 1) msgtimer("vandermondeinversemod()");
   if (n == 1)
   {
     G = cgetg(3, t_VEC);
@@ -2741,152 +2733,85 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   else
     G = galoisgen(T, L, M, den, &gb, &ga);
-  if (DEBUGLEVEL >= 6)
-    fprintferr("GaloisConj:%Zs\n", G);
-  if (G == gen_0)
-  {
-    avma = ltop;
-    return gen_0;
-  }
+  if (DEBUGLEVEL >= 6) fprintferr("GaloisConj:%Zs\n", G);
+  if (G == gen_0) { avma = ltop; return gen_0; }
   if (DEBUGLEVEL >= 1) (void)timer2();
   if (flag)
   {
-    grp = cgetg(9, t_VEC);
-    gel(grp,1) = gcopy(T);
-    gel(grp,2) = cgetg(4,t_VEC); /*Make K.B. happy(8 components)*/
-    gmael(grp,2,1) = stoi(ga.l);
-    gmael(grp,2,2) = stoi(gb.valabs);
-    gmael(grp,2,3) = icopy(gb.ladicabs);
-    gel(grp,3) = gcopy(L);
-    gel(grp,4) = gcopy(M);
-    gel(grp,5) = gcopy(den);
+    GEN grp = cgetg(9, t_VEC);
+    gel(grp,1) = ZX_copy(T);
+    gel(grp,2) = mkvec3(utoipos(ga.l), utoipos(gb.valabs), icopy(gb.ladicabs));
+    gel(grp,3) = ZC_copy(L);
+    gel(grp,4) = ZM_copy(M);
+    gel(grp,5) = icopy(den);
+    gel(grp,6) = group_elts(G,n);
     gel(grp,7) = gcopy(gel(G,1));
-    gel(grp,8) = gcopy(gel(G,2));
+    gel(grp,8) = gcopy(gel(G,2)); return gerepileupto(ltop, grp);
   }
-  res = cgetg(n + 1, t_VEC);
-  gel(res,1) = perm_identity(n);
-  k = 1;
-  for (i = 1; i < lg(G[1]); i++)
-  {
-    long  c = k * (mael(G,2,i) - 1);
-    for (j = 1; j <= c; j++)	/* I like it */
-      gel(res,++k) = perm_mul(gel(res,j), gmael(G,1,i));
-  }
-  if (flag)
-  {
-    gel(grp,6) = res;
-    return gerepileupto(ltop, grp);
-  }
-  aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
-  if (DEBUGLEVEL >= 1)
-    msgtimer("Computation of polynomials");
+  aut = galoisgrouptopol(group_elts(G, n),L,M,den,gb.ladicsol, varn(T));
+  if (DEBUGLEVEL >= 1) msgtimer("Computation of polynomials");
   return gerepileupto(ltop, gen_sort(aut, (void*)&gcmp, &gen_cmp_RgX));
 }
 
-/* Heuristic computation of #Aut(T), pdepart first prime to be tested */
+/* Heuristic computation of #Aut(T), pinit = first prime to be tested */
 long
-numberofconjugates(GEN T, long pdepart)
+numberofconjugates(GEN T, long pinit)
 {
-  pari_sp ltop2, ltop = avma;
-  long    n, p, nbmax, nbtest;
-  long    card;
-  byteptr primepointer;
-  long    i;
-  GEN     L;
-  n = degpol(T);
-  card = sturm(T);
-  card = ugcd(card, n - card);
-  nbmax = (n<<1) + 1;
-  if (nbmax < 20) nbmax=20;
-  nbtest = 0;
-  L = cgetg(n + 1, t_VECSMALL);
-  ltop2 = avma;
-  for (p = 0, primepointer = diffptr; nbtest < nbmax && card > 1;)
+  pari_sp av = avma;
+  long p, c, nbtest = 0, n = degpol(T), nbmax = (n < 10)? 20: (n<<1) + 1;
+  byteptr diff;
+ 
+  c = sturm(T); c = ugcd(c, n - c);
+  p = init_primepointer(pinit, 0, &diff);
+  for (; nbtest < nbmax && c > 1; avma = av)
   {
-    long    s;
-    long    isram;
-    GEN     S;
-
-    NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
-    if (p < pdepart) continue;
-    S = FpX_degfact(T, utoipos(p));
-    isram = 0;
-    for (i = 1; i < lg(S[2]) && !isram; i++)
-      if (mael(S,2,i) != 1) isram = 1;
-    if (!isram)
-    {
-      for (i = 1; i <= n; i++) L[i] = 0;
-      for (i = 1; i < lg(S[1]) && !isram; i++) L[ mael(S,1,i) ]++;
-      s = L[1];
-      for (i = 2; i <= n; i++) s = ugcd(s, L[i] * i);
-      card = ugcd(s, card);
+    GEN L, Tp = ZX_to_Flx(T,p);
+    long i, nb;
+    if (Flx_is_squarefree(Tp, p))
+    { /* unramified */
+      L = Flx_nbfact_by_degree(Tp, &nb, p); /* L[i] = #factors of degree i */
+      c = ugcd(c, L[1]);
+      for (i = 2; i <= n; i++) 
+        if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
+      nbtest++;
+      if (DEBUGLEVEL >= 6)
+        fprintferr("NumberOfConjugates [%ld]:c=%ld,p=%ld\n", nbtest,c,p);
     }
-    if (DEBUGLEVEL >= 6)
-      fprintferr("NumberOfConjugates:Nbtest=%ld,card=%ld,p=%ld\n", nbtest,
-		 card, p);
-    nbtest++;
-    avma = ltop2;
+    NEXT_PRIME_VIADIFF_CHECK(p,diff);
   }
-  if (DEBUGLEVEL >= 2)
-    fprintferr("NumberOfConjugates:card=%ld,p=%ld\n", card, p);
-  avma = ltop;
-  return card;
+  if (DEBUGLEVEL >= 2) fprintferr("NumberOfConjugates:c=%ld,p=%ld\n", c, p);
+  avma = av; return c;
 }
 
 GEN
 galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
-  pari_sp ltop;
-  GEN     G, T;
-  long    card;
-  if (typ(nf) != t_POL)
-  {
-    nf = checknf(nf);
-    T = gel(nf,1);
-  }
-  else
-    T = nf;
+  pari_sp av;
+  GEN G, T;
+  long card;
   switch (flag)
   {
   case 0:
-    ltop = avma;
+    av = avma;
     G = galoisconj4(nf, d, 0);
-    if (typ(G) != t_INT)	/* Success */
-      return G;
-    else
-    {
-      card = numberofconjugates(T, G == gen_0 ? 2 : itos(G));
-      avma = ltop;
-      if (card != 1)
-      {
-	if (typ(nf) == t_POL)
-	{
-	  G = galoisconj2pol(nf, card, prec);
-	  if (lg(G) <= card)
-	    pari_warn(warner, "conjugates list may be incomplete in nfgaloisconj");
-	  return G;
-	}
-	else
-	  return galoisconj(nf);
-      }
-    }
-    break;			/* Failure */
-  case 1:
-    return galoisconj(nf);
-  case 2:
-    return galoisconj2(nf, degpol(T), prec);
+    if (typ(G) != t_INT) return G; /* Success */
+
+    T = get_nfpol(nf, &nf); avma = av;
+    card = numberofconjugates(T, G == gen_0? 2: itos(G));
+    if (card == 1) break;
+    return nf? galoisconj(nf): galoisconj2pol(T, card, prec);
+  case 1: return galoisconj(nf);
+  case 2: return galoisconj2(nf, prec);
   case 4:
     G = galoisconj4(nf, d, 0);
-    if (typ(G) != t_INT) return G;
-    break;			/* Failure */
+    if (typ(G) != t_INT) return G; /* Success */
+    break;
   default:
     pari_err(flagerr, "nfgaloisconj");
   }
   G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T));
-  return G; /* Failure */
+  return G;
 }
-
-
 
 /******************************************************************************/
 /* Isomorphism between number fields                                          */
@@ -2920,8 +2845,15 @@ GEN
 galoisinit(GEN nf, GEN den)
 {
   GEN G = galoisconj4(nf, den, 1);
-  if (typ(G) == t_INT)
-    pari_err(talker, "field not Galois or Galois group not weakly super solvable");
+  return (typ(G) == t_INT)? NULL: G;
+}
+
+GEN
+galoisinit0(GEN nf, GEN den)
+{
+  GEN G = galoisinit(nf, den);
+  if (!G)
+    pari_err(talker, "field not Galois or group not weakly super solvable");
   return G;
 }
 

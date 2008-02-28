@@ -88,6 +88,8 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        no longer deprecated
    26- rename smith2 -> smithall, gsmith2 -> gsmithall
    27- rename torsell -> elltors and document it
+   28- library function galoisinit now returns NULL on failure (used to raise
+       an exception)
 
   Added
     1- library function gpcalloc
@@ -125,6 +127,7 @@ JD 12- add an optional argument to quit()
    19- GP function version() [ current version number ]
    20- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
+   21- library function galoisinit0
 
   Removed
     1- obsolete library functions extract and matextract

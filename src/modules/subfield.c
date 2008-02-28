@@ -907,8 +907,8 @@ subfields(GEN nf, long d)
   if (d < 1 || d > N || N % d) return cgetg(1,t_VEC);
 
   /* much easier if nf is Galois (WSS) */
-  G = galoisconj4(nf? nf: pol, NULL, 1);
-  if (typ(G) != t_INT)
+  G = galoisinit(nf? nf: pol, NULL);
+  if (G)
   { /* Bingo */
     GEN L = galoissubgroups(G), F;
     long k,i, l = lg(L), o = N/d;
@@ -952,8 +952,8 @@ subfieldsall(GEN nf)
   blockdata B;
 
   /* much easier if nf is Galois (WSS) */
-  G = galoisconj4(nf, NULL, 1);
-  if (typ(G) != t_INT)
+  G = galoisinit(nf, NULL);
+  if (G)
   {
     GEN L, S, p;
     long l;
