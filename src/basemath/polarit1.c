@@ -664,35 +664,44 @@ Flx_Frobenius(GEN u, ulong p)
 }
 
 /* z must be squarefree mod p*/
-long
-Flx_nbfact(GEN z, ulong p)
+GEN
+Flx_nbfact_by_degree(GEN z, long *nb, ulong p)
 {
-  long lgg, nfacp = 0, d = 0, e = degpol(z);
+  long lgg, d = 0, e = degpol(z);
+  GEN D = const_vecsmall(e, 0);
+  pari_sp av = avma;
   GEN g, w, MP = Flx_Frobenius(z, p), PolX = polx_Flx(z[1]);
 
-  w = PolX;
+  w = PolX; *nb = 0;
   while (d < (e>>1))
   { /* here e = degpol(z) */
     d++;
     w = Flm_Flx_mul(MP, w, p); /* w^p mod (z,p) */
     g = Flx_gcd(z, Flx_sub(w, PolX, p), p);
-    lgg = degpol(g);
-    if (!lgg) continue;
+    lgg = degpol(g); if (!lgg) continue;
 
     e -= lgg;
-    nfacp += lgg/d;
-    if (DEBUGLEVEL>5)
-      fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
+    D[d] = lgg/d; *nb += D[d];
+    if (DEBUGLEVEL>5) fprintferr("   %3ld fact. of degree %3ld\n", D[d], d);
     if (!e) break;
     z = Flx_div(z, g, p);
     w = Flx_rem(w, z, p);
   }
   if (e)
   {
-    if (DEBUGLEVEL>5) fprintferr("   %3ld factor of degree %3ld\n",1,e);
-    nfacp++;
+    if (DEBUGLEVEL>5) fprintferr("   %3ld fact. of degree %3ld\n",1,e);
+    D[e] = 1; (*nb)++;
   }
-  return nfacp;
+  avma = av; return D;
+}
+
+/* z must be squarefree mod p*/
+long
+Flx_nbfact(GEN z, ulong p)
+{
+  pari_sp av = avma;
+  long nb; (void)Flx_nbfact_by_degree(z, &nb, p);
+  avma = av; return nb;
 }
 
 long

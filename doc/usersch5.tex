@@ -2845,6 +2845,12 @@ form $Q(X^d)$, return $Q$.
 
 \fun{long}{Flx_nbfact}{GEN z, ulong p}, as \kbd{FpX\_nbfact}.
 
+\fun{GEN}{Flx_nbfact_by_degree}{GEN z, long *nb, ulong p} Assume
+that the \kbd{Flx} $z$ is squarefree mod the prime $p$. Set \kbd{nb}
+
+\fun{long}{FpX_nbfact}{GEN f, GEN p}, assuming the \kbd{FpX}~f is squarefree,
+returns the number of its irreducible factors. Assumes that \kbd{p} is prime.
+
 \fun{long}{Flx_nbroots}{GEN f, ulong p}, as \kbd{FpX\_nbroots}.
 
 \fun{GEN}{Flv_polint}{GEN x, GEN y, ulong p, long sv} as \kbd{FpV\_polint},
