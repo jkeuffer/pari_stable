@@ -2717,7 +2717,7 @@ numberofconjugates(GEN T, long pinit)
 {
   pari_sp av = avma;
   long p, c, nbtest = 0, n = degpol(T), nbmax = (n < 10)? 20: (n<<1) + 1;
-  byteptr diff;
+  byteptr diff = diffptr;
  
   c = sturm(T); c = ugcd(c, n - c);
   p = init_primepointer(pinit, 0, &diff);
