@@ -1798,7 +1798,6 @@ long    vals(ulong x);
 GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-int     nfisgalois(GEN nf, GEN x);
 GEN     nfroots(GEN nf,GEN pol);
 GEN     rnfcharpoly(GEN nf, GEN T, GEN alpha, long v);
 GEN     unifpol(GEN nf,GEN pol,long flag);

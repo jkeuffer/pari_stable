@@ -293,14 +293,6 @@ nfissplit(GEN nf, GEN x)
   avma = av; return l != 1;
 }
 
-/* nf = K[y] / (P) [P irreducible / K]. Is nf Galois over K ? */
-int
-nfisgalois(GEN nf, GEN P)
-{
-  if (typ(P) != t_POL) pari_err(typeer, "nfissplit");
-  return degpol(P) <= 2 || nfissplit(nf, P);
-}
-
 /* return a minimal lift of elt modulo id */
 static GEN
 nf_bestlift(GEN elt, GEN bound, nflift_t *L)

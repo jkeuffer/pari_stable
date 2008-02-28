@@ -657,28 +657,20 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   drel = degpol(relpol);
   if (varncmp(varn(relpol), vbas) >= 0)
     pari_err(talker,"main variable must be of higher priority in rnfisnorminit");
+  if (drel <= 2) galois = 1;
 
   rnfeq = NULL; /* no reltoabs needed */
-  if (degpol(nf[1]) == 1)
-  { /* over Q */
-    polabs = lift(relpol);
-    k = gen_0;
-  }
-  else
-  {
-    if (galois == 2 && drel > 2)
-    { /* needs reltoabs */
-      rnfeq = rnfequation2(bnf, relpol);
-      polabs = gel(rnfeq,1);
-      gel(rnfeq,2) = lift_intern(gel(rnfeq,2));
-      k = gel(rnfeq,3);
-    }
-    else
-    {
-      long sk;
-      polabs = rnfequation_i(bnf, relpol, &sk, NULL);
-      k = stoi(sk);
-    }
+  if (degpol(nf[1]) == 1) { /* over Q */
+    polabs = lift(relpol); k = gen_0;
+  } else if (galois == 2) { /* needs reltoabs */
+    rnfeq = rnfequation2(bnf, relpol);
+    polabs = gel(rnfeq,1);
+    gel(rnfeq,2) = lift_intern(gel(rnfeq,2));
+    k = gel(rnfeq,3);
+  } else {
+    long sk;
+    polabs = rnfequation_i(bnf, relpol, &sk, NULL);
+    k = stoi(sk);
   }
   if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nf_get_prec(nf));
   if (!nfabs) nfabs = checknf(bnfabs);
@@ -687,7 +679,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   if (galois == 2)
   {
     GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
-    galois = nfisgalois(gsubst(nfabs, varn(nfabs[1]), pol_x(vbas)), P);
+    galois = nfissplit(gsubst(nfabs, varn(nfabs[1]), pol_x(vbas)), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
