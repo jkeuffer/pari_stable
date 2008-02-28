@@ -580,6 +580,7 @@ GEN     Fp_inv(GEN a, GEN m);
 GEN     Fp_invsafe(GEN a, GEN m);
 GEN     Fp_log(GEN a, GEN g, GEN ord, GEN p);
 GEN     Fp_mul(GEN a, GEN b, GEN m);
+GEN     Fp_mulu(GEN a, ulong b, GEN m);
 GEN     Fp_neg(GEN b, GEN m);
 GEN     Fp_order(GEN a, GEN o, GEN p);
 GEN     Fp_pow(GEN a, GEN n, GEN m);

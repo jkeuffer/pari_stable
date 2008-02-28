@@ -1696,6 +1696,23 @@ Fp_mul(GEN a, GEN b, GEN m)
 }
 
 GEN
+Fp_mulu(GEN a, ulong b, GEN m)
+{
+  long l = lgefint(m);
+  if (l == 3)
+  {
+    ulong mm = m[2];
+    return utoi( Fl_mul(umodiu(a, mm), b, mm) );
+  } else {
+    pari_sp av = avma;
+    GEN p; /*HACK: assume modii use <=lg(p)+(lg(m)<<1) space*/
+    (void)new_chunk(lg(a)+1+(l<<1));
+    p = muliu(a,b);
+    avma = av; return modii(p,m);
+  }
+}
+
+GEN
 Fp_sqr(GEN a, GEN m)
 {
   pari_sp av=avma;
