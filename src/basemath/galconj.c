@@ -2692,7 +2692,7 @@ galoisconj4(GEN T, GEN den, long flag)
 
   T = get_nfpol(T, &nf); n = degpol(T);
   if (nf)
-  { if (!den) den = Q_denom(gel(T,7)); }
+  { if (!den) den = Q_denom(gel(nf,7)); }
   else
   {
     if (n <= 0) pari_err(constpoler, "galoisconj4");
