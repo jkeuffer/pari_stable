@@ -123,7 +123,7 @@ JD 12- add an optional argument to quit()
    ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
-   zv_copy, zv_equal
+   zv_copy, zv_equal, bitvec_test_set
    18- universal constant gen_m2, for symmetry
    19- GP function version() [ current version number ]
    20- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,

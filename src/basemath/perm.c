@@ -385,6 +385,14 @@ bitvec_test(GEN bitvec, long b)
   return (bitvec[1+q]>>r) & 1L;
 }
 
+long
+bitvec_test_set(GEN bitvec, long b)
+{
+  long r, q = dvmdsBIL(b, &r);
+  if ((bitvec[1+q]>>r) & 1L) return 1;
+  bitvec[1+q] |= 1L<<r; return 0;
+}
+
 void
 bitvec_set(GEN bitvec, long b)
 {
@@ -503,37 +511,26 @@ perm_conj(GEN s, GEN t)
 static GEN
 vecperm_orbits_i(GEN v, long n)
 {
-  long mj = 1, j, k, l, m, o, p, flag;
-  GEN bit, cycle, cy;
-  cycle = cgetg(n+1, t_VEC);
-  bit = bitvec_alloc(n);
+  long mj = 1, k, l, m, o, p;
+  GEN cy, cycle = cgetg(n+1, t_VEC), bit = bitvec_alloc(n);
   for (k = 1, l = 1; k <= n;)
   {
     for (  ; bitvec_test(bit,mj); mj++) /*empty*/;
     cy = cgetg(n+1, t_VECSMALL);
-    m = 1;
-    k++;
-    cy[m++] = mj;
+    m = 1; k++; cy[m++] = mj;
     bitvec_set(bit, mj++);
-    do
+    for(;;)
     {
-      flag = 0;
+      int flag = 0;
       for (o = 1; o < lg(v); o++)
 	for (p = 1; p < m; p++)	/* m increases! */
 	{
-	  j = mael(v,o,cy[p]);
-	  if (!bitvec_test(bit,j))
-	  {
-	    flag = 1;
-	    bitvec_set(bit,j);
-	    k++;
-	    cy[m++] = j;
-	  }
+	  long j = mael(v,o,cy[p]);
+	  if (!bitvec_test_set(bit,j)) { flag = 1; k++; cy[m++] = j; }
 	}
+      if (!flag) break;
     }
-    while (flag);
-    setlg(cy, m);
-    gel(cycle,l++) = cy;
+    setlg(cy, m); gel(cycle,l++) = cy;
   }
   setlg(cycle, l); return cycle;
 }
