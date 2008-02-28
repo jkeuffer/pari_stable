@@ -105,4 +105,10 @@ all pointers into the old table will become invalid.
 PARI currently guarantees that the first 6547 primes, up to and including
 65557, are present in the table, even if you set \kbd{maxprime} to zero.
 in the \kbd{pari\_init} call.
+
+\fun{ulong}{init_primepointer}{ulong a, ulong p, byteptr *ptr}
+assume \kbd{*ptr} is inside of a \kbd{diffptr} containing the succesive
+differences between primes, and $p$ is the current prime (up to \kbd{*ptr}
+excluded). Returns return the smallest prime $\geq a$, and update \kbd{ptr}.
+
 \vfill\eject

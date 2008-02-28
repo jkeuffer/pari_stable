@@ -581,6 +581,19 @@ maxprime_check(ulong c)
   if (_maxprime < c) pari_err(primer2, c);
 }
 
+/* assume ptr is the address of a diffptr containing the succesive
+ * differences between primes, and p = current prime (up to *ptr excluded)
+ * return smallest prime >= a, update ptr */
+ulong
+init_primepointer(ulong a, ulong p, byteptr *ptr)
+{
+  byteptr diff = *ptr;
+  if (a <= 0) a = 2;
+  maxprime_check((ulong)a);
+  while (a > p) NEXT_PRIME_VIADIFF(p,diff);
+  *ptr = diff; return p;
+}
+
 byteptr
 initprimes(ulong maxnum)
 {

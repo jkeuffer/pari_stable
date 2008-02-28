@@ -696,6 +696,7 @@ GEN     gphi(GEN n);
 GEN     gsumdiv(GEN n);
 GEN     gsumdivk(GEN n,long k);
 byteptr initprimes(ulong maxnum);
+ulong   init_primepointer(ulong a, ulong p, byteptr *ptr);
 long    issquarefree(GEN x);
 ulong   maxprime(void);
 void    maxprime_check(ulong c);

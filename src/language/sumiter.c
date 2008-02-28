@@ -113,19 +113,6 @@ forstep(GEN a, GEN b, GEN s, GEN code)
   pop_lex(); avma = av0;
 }
 
-/* assume ptr is the address of a diffptr containing the succesive
- * differences between primes, and c = current prime (up to *p excluded)
- * return smallest prime >= a, update ptr */
-static ulong
-sinitp(ulong a, ulong c, byteptr *ptr)
-{
-  byteptr p = *ptr;
-  if (a <= 0) a = 2;
-  maxprime_check((ulong)a);
-  while (a > c) NEXT_PRIME_VIADIFF(c,p);
-  *ptr = p; return c;
-}
-
 /* value changed during the loop, replace by the first prime whose
    value is strictly larger than new value */
 static void
@@ -138,11 +125,11 @@ update_p(byteptr *ptr, ulong prime[])
   if (lgefint(z) > 3) { prime[2] = ULONG_MAX; /* = infinity */ return; }
   a += itou(z); c = prime[2];
   if (c < a)
-    prime[2] = sinitp(a, c, ptr); /* increased */
+    prime[2] = init_primepointer(a, c, ptr); /* increased */
   else if (c > a)
   { /* lowered, reset p */
     *ptr = diffptr;
-    prime[2] = sinitp(a, 0, ptr);
+    prime[2] = init_primepointer(a, 0, ptr);
   }
   set_lex(-1,(GEN)prime);
 }
@@ -165,7 +152,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;
   maxprime_check(*b);
-  *p = sinitp(*a, 0, &d); return d;
+  *p = init_primepointer(*a, 0, &d); return d;
 }
 
 void
