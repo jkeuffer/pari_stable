@@ -2772,26 +2772,19 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
   pari_sp av = avma;
   GEN G, T;
-  long card;
-  switch (flag)
+
+  if (flag == 1) return galoisconj(nf);
+  if (flag == 2) return galoisconj2(nf, prec);
+  G = galoisconj4(nf, d, 0);
+  if (typ(G) != t_INT) return G; /* Success */
+
+  T = get_nfpol(nf, &nf); avma = av;
+  if (flag == 0)
   {
-  case 0:
-    G = galoisconj4(nf, d, 0);
-    if (typ(G) != t_INT) return G; /* Success */
-    T = get_nfpol(nf, &nf); avma = av;
-    card = numberofconjugates(T, G == gen_0? 2: itos(G));
-    if (card == 1) break;
-    return nf? galoisconj(nf): galoisconj2pol(T, card, prec);
-  case 1: return galoisconj(nf);
-  case 2: return galoisconj2(nf, prec);
-  case 4:
-    G = galoisconj4(nf, d, 0);
-    if (typ(G) != t_INT) return G; /* Success */
-    T = get_nfpol(nf, &nf); avma = av;
-    break;
-  default:
-    pari_err(flagerr, "nfgaloisconj");
+    long card = numberofconjugates(T, G == gen_0? 2: itos(G));
+    if (card != 1) return nf? galoisconj(nf): galoisconj2pol(T, card, prec);
   }
+  if (flag != 4) pari_err(flagerr, "nfgaloisconj");
   G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T));
   return G;
 }
@@ -2933,32 +2926,35 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
   return gerepileupto(ltop,res);
 }
 
+static void
+chk_perm(GEN perm, long n)
+{
+  if (typ(perm) != t_VECSMALL || lg(perm)!=n+1)
+    pari_err(typeer, "galoisfixedfield");
+}
+
 GEN
 galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
   pari_sp lbot, ltop = avma;
-  GEN     L, P, S, PL, O, res, mod;
-  long    x, n, i;
+  GEN L, P, S, PL, O, res, mod;
+  long x, n, i;
   gal = checkgal(gal);
   x = varn(gel(gal,1));
   L = gel(gal,3); n=lg(L)-1;
   mod = gmael(gal,2,3);
-  if (flag<0 || flag>2)
-    pari_err(flagerr, "galoisfixedfield");
+  if (flag<0 || flag>2) pari_err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
   {
-    for (i = 1; i < lg(perm); i++)
-      if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
-	pari_err(typeer, "galoisfixedfield");
+    for (i = 1; i < lg(perm); i++) chk_perm(gel(perm,i), n);
     O = vecperm_orbits(perm, n);
   }
-  else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
-  {
-    pari_err(typeer, "galoisfixedfield");
-    return NULL; /* not reached */
-  }
   else
+  {
+    chk_perm(perm, n);
     O = perm_cycles(perm);
+  }
+
   {
     GEN OL= fixedfieldorbits(O,L);
     GEN V = fixedfieldsympol(OL, mod, gmael(gal,2,1), NULL, x);
@@ -3018,63 +3014,61 @@ galois_group(GEN gal) { return mkvec2(gel(gal,7), gel(gal,8)); }
 GEN
 checkgroup(GEN g, GEN *S)
 {
-  if (typ(g)==t_VEC && lg(g)==3 && typ(g[1])==t_VEC && typ(g[2])==t_VECSMALL)
-  {
-    *S = NULL;
-    return g;
-  }
+  if (typ(g)==t_VEC && lg(g)==3
+      && typ(g[1])==t_VEC
+      && typ(g[2])==t_VECSMALL) { *S = NULL; return g; }
   g  = checkgal(g);
-  *S = gel(g,6);
-  return galois_group(g);
+  *S = gel(g,6); return galois_group(g);
 }
 
 GEN
 galoisisabelian(GEN gal, long flag)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  if (!group_isabelian(G)) {avma=ltop;return gen_0;}
-  if (flag==1) {avma=ltop;return gen_1;}
-  if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,S));
-  if (flag) pari_err(flagerr,"galoisisabelian");
-  return gerepileupto(ltop, group_abelianHNF(G,S));
+  if (!group_isabelian(G)) return gen_0;
+  switch(flag)
+  {
+    case 0: return gerepileupto(av, group_abelianHNF(G,S));
+    case 1: return gen_1;
+    case 2: return gerepileupto(av, group_abelianSNF(G,S));
+    default: pari_err(flagerr,"galoisisabelian");
+  }
+  return NULL; /* not reached */
 }
 
 GEN
 galoissubgroups(GEN gal)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  return gerepileupto(ltop, group_subgroups(G));
+  return gerepileupto(av, group_subgroups(G));
 }
 
 GEN
 galoissubfields(GEN G, long flag, long v)
 {
-  pari_sp ltop=avma;
-  long i;
+  pari_sp av = avma;
   GEN L = galoissubgroups(G);
-  long l2 = lg(L);
-  GEN p3 = cgetg(l2, t_VEC);
-  for (i = 1; i < l2; ++i)
-    gel(p3,i) = galoisfixedfield(G, gmael(L,i,1), flag, v);
-  return gerepileupto(ltop,p3);
+  long i, l = lg(L);
+  GEN S = cgetg(l, t_VEC);
+  for (i = 1; i < l; ++i) gel(S,i) = galoisfixedfield(G, gmael(L,i,1), flag, v);
+  return gerepileupto(av, S);
 }
 
 GEN
 galoisexport(GEN gal, long format)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  return gerepileupto(ltop, group_export(G,format));
+  return gerepileupto(av, group_export(G,format));
 }
 
 GEN
 galoisidentify(GEN gal)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   GEN S, G = checkgroup(gal,&S);
-  long idx = group_ident(G,S);
-  long card = group_order(G);
-  avma = ltop; return mkvec2s(card, idx);
+  long idx = group_ident(G,S), card = group_order(G);
+  avma = av; return mkvec2s(card, idx);
 }
