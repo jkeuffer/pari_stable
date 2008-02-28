@@ -63,6 +63,7 @@ RgX_unscale(GEN P, GEN h)
   long i, l = lg(P);
   GEN hi = gen_1, Q = cgetg(l, t_POL);
   Q[1] = P[1];
+  if (l == 2) return Q;
   gel(Q,2) = gcopy(gel(P,2));
   for (i=3; i<l; i++)
   {
