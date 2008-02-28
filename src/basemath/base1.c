@@ -755,12 +755,10 @@ nfiso0(GEN a, GEN b, long fliso)
   b = get_nfpol(b, &nfb); 
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsiso0"); }
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
-  m=degpol(a);
-  n=degpol(b); if (m<=0 || n<=0) pari_err(constpoler,"nfiso or nfincl");
-  if (fliso)
-    { if (n!=m) return gen_0; }
-  else
-    { if (n%m) return gen_0; }
+  m = degpol(a);
+  n = degpol(b); if (m<=0 || n<=0) pari_err(constpoler,"nfiso or nfincl");
+  if (fliso) { if (n!=m) return gen_0; }
+  else       { if (n%m) return gen_0; }
 
   if (nfb) lb = NULL; else b = pol_to_monic(b,&lb);
   if (nfa) la = NULL; else a = pol_to_monic(a,&la);
@@ -782,7 +780,7 @@ nfiso0(GEN a, GEN b, long fliso)
     {
       if (gissquare(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }
     }
-    else
+    else if (expi(da) < 150) /* too expensive otherwise */
     {
       long q=n/m;
       GEN fa=Z_factor(da), ex=gel(fa,2);
