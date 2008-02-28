@@ -2106,7 +2106,7 @@ END:
 
     default:
       if (y) {
-	if (prec <= 0) prec = nfgetprec(nf);
+	if (prec <= 0) prec = nf_get_prec(nf);
 	y = gneg_i(get_arch(nf,y,prec));
       }
       break;

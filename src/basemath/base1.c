@@ -750,8 +750,10 @@ nfiso0(GEN a, GEN b, long fliso)
   long n,m,i,vb,lx;
   GEN nfa, nfb, p1, y, la, lb;
 
-  a = primpart(get_nfpol(a, &nfa)); RgX_check_ZX(a, "nsiso0");
-  b = primpart(get_nfpol(b, &nfb)); RgX_check_ZX(b, "nsiso0");
+  a = get_nfpol(a, &nfa);
+  if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsiso0"); }
+  b = get_nfpol(b, &nfb); 
+  if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsiso0"); }
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
   m=degpol(a);
   n=degpol(b); if (m<=0 || n<=0) pari_err(constpoler,"nfiso or nfincl");
@@ -842,6 +844,24 @@ get_roots(GEN x,long r1,long prec)
   for (i=1; i<=r1; i++) gel(roo,i) = real_i(gel(roo,i));
   for (   ; i<=ru; i++) roo[i] = roo[(i<<1)-r1];
   roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
+}
+
+GEN
+nf_get_roots(GEN nf)
+{
+  long i, j, n, r1, r2;
+  GEN ro = gel(nf,6), v;
+  nf_get_sign(nf, &r1,&r2);
+  n = r1 + (r2<<1);
+  v = cgetg(n+1, t_VEC);
+  for (i = 1; i <= r1; i++) gel(v,i) = gel(ro,i);
+  for (j = i; j <= n; i++)
+  {
+    GEN z = gel(ro,i);
+    gel(v,j++) = z;
+    gel(v,j++) = mkcomplex(gel(z,1), gneg(gel(z,2)));
+  }
+  return v;
 }
 
 /* For internal use. compute trace(x mod pol), sym=polsym(pol,deg(pol)-1) */
@@ -1582,7 +1602,7 @@ nfinit0(GEN x, long flag,long prec)
 
 /* assume x a bnr/bnf/nf */
 long
-nfgetprec(GEN x)
+nf_get_prec(GEN x)
 {
   GEN nf = checknf(x), ro = gel(nf,6);
   return (typ(ro)==t_VEC)? precision(gel(ro,1)): DEFAULTPREC;
@@ -2170,7 +2190,7 @@ rootsof1(GEN nf)
   nf = checknf(nf);
   if ( nf_get_r1(nf) ) return trivroots(nf);
 
-  N = degpol(nf[1]); prec = nfgetprec(nf);
+  N = degpol(nf[1]); prec = nf_get_prec(nf);
   for (;;)
   {
     GEN R = R_from_QR(gmael(nf,5,2), prec);
@@ -2335,7 +2355,7 @@ initzeta(GEN pol, long prec)
 
   /*************** residue & constants ***************/
   nfz = cgetg(10,t_VEC);
-  if (bnf && nfgetprec(bnf) >= prec)
+  if (bnf && nf_get_prec(bnf) >= prec)
     bnf = gcopy(bnf);
   else
     bnf = bnfinit0(pol, 2, NULL, prec);

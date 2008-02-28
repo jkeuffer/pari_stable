@@ -65,8 +65,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
   w = cgetg(n + 2, t_VEC);
   gel(w,1) = gen_1;
-  for (i = 2; i <= n; i++)
-    gel(w,i) = gmul(p1, gel(w,i - 1));
+  for (i = 2; i <= n; i++) gel(w,i) = gmul(p1, gel(w,i-1));
   v = varn(x);
   y = cgetg(nbmax + 1, t_COL);
   gel(y,1) = pol_x(v);
@@ -74,10 +73,10 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   {
     w[n + 1] = polr[i];
     p1 = lindep2(w, prec);
-    if (signe(p1[n + 1]))
+    if (signe(p1[n+1]))
     {
-      setlg(p1, n + 1);
-      p2 = gdiv(gtopolyrev(p1, v), negi(gel(p1,n + 1)));
+      setlg(p1, n+1);
+      p2 = gdiv(RgV_to_RgX(p1, v), negi(gel(p1,n+1)));
       if (gdvd(poleval(x, p2), x))
       {
 	gel(y,++nbauto) = p2;
@@ -95,46 +94,31 @@ galoisconj2pol(GEN x, long nbmax, long prec)
 static GEN
 galoisconj2(GEN nf, long prec)
 {
-  long i, j, n, r1, ru, nbauto, nbmax;
+  long i, n, nbauto, nbmax;
   pari_sp av = avma;
   GEN T = get_nfpol(nf,&nf), y, w, polr, p1, p2;
 
   nbmax = numberofconjugates(T, 2);
   if (!nf) return galoisconj2pol(nf, nbmax, prec);
   n = degpol(T);
-  if (n <= 0)
-    return cgetg(1, t_VEC);
-  r1 = nf_get_r1(nf);
-  p1 = gel(nf,6);
-  prec = precision(gel(p1,1));
+  if (n <= 0) return cgetg(1, t_VEC);
   /* accuracy in decimal digits */
-  prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
-  ru = (n + r1) >> 1;
-  nbauto = 1;
-  polr = cgetg(n + 1, t_VEC);
-  for (i = 1; i <= r1; i++)
-    polr[i] = p1[i];
-  for (j = i; i <= ru; i++)
-  {
-    GEN z = gel(p1,i);
-    gel(polr,j++) = z;
-    gel(polr,j++) = gconj(z);
-  }
-  p2 = gmael(nf, 5, 1);
-  w = cgetg(n + 2, t_VEC);
-  for (i = 1; i <= n; i++)
-    w[i] = coeff(p2, 1, i);
   y = cgetg(nbmax + 1, t_COL);
   gel(y,1) = pol_x(varn(T));
+  prec = (long)bit_accuracy_mul(nf_get_prec(nf), L2SL10 * 0.75);
+  nbauto = 1;
+  polr = nf_get_roots(nf);
+  p2 = gmael(nf, 5, 1);
+  w = cgetg(n + 2, t_VEC);
+  for (i = 1; i <= n; i++) w[i] = coeff(p2, 1, i);
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
-    w[n + 1] = polr[i];
+    w[n+1] = polr[i];
     p1 = lindep2(w, prec);
-    if (signe(p1[n + 1]))
+    if (signe(p1[n+1]))
     {
-      setlg(p1, n + 1);
-      settyp(p1, t_COL);
-      p2 = gdiv(coltoliftalg(nf, p1), negi(gel(p1,n + 1)));
+      p1[0] = evallg(n+1) | evaltyp(t_COL);
+      p2 = gdiv(coltoliftalg(nf, p1), negi(gel(p1, n+1)));
       if (gdvd(poleval(T, p2), T))
       {
 	gel(y,++nbauto) = p2;
@@ -2786,16 +2770,14 @@ numberofconjugates(GEN T, long pinit)
 GEN
 galoisconj0(GEN nf, long flag, GEN d, long prec)
 {
-  pari_sp av;
+  pari_sp av = avma;
   GEN G, T;
   long card;
   switch (flag)
   {
   case 0:
-    av = avma;
     G = galoisconj4(nf, d, 0);
     if (typ(G) != t_INT) return G; /* Success */
-
     T = get_nfpol(nf, &nf); avma = av;
     card = numberofconjugates(T, G == gen_0? 2: itos(G));
     if (card == 1) break;
@@ -2805,6 +2787,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   case 4:
     G = galoisconj4(nf, d, 0);
     if (typ(G) != t_INT) return G; /* Success */
+    T = get_nfpol(nf, &nf); avma = av;
     break;
   default:
     pari_err(flagerr, "nfgaloisconj");

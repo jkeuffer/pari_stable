@@ -1621,7 +1621,7 @@ isunit(GEN bnf,GEN x)
   logunit = shallowconcat(logunit, v);
   /* ex = fundamental units exponents */
   rlog = real_i(logunit);
-  prec = nfgetprec(nf);
+  prec = nf_get_prec(nf);
   for (i=1;;)
   {
     GEN rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
@@ -1630,7 +1630,7 @@ isunit(GEN bnf,GEN x)
       GEN logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
       {
-	long p = 2 + max(1, (nfgetprec(nf)-2) / 2);
+	long p = 2 + max(1, (nf_get_prec(nf)-2) / 2);
 	if (typ(logN) != t_REAL || gprecision(rx) > p)
 	  { avma = av; return cgetg(1,t_COL); } /* not a precision problem */
 	rx = NULL;
@@ -1887,7 +1887,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
   long nbsmallnorm, nbfact, j, k, noideal = F->KC, precbound;
-  long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
+  long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nf_get_prec(nf);
   GEN x, gx, r, M = gmael(nf,5,1), G = gmael(nf,5,2);
   GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
@@ -3242,7 +3242,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   if (DEBUGLEVEL) (void)timer2();
   P = get_nfpol(P, &nf);
   if (nf)
-    PRECREG = nfgetprec(nf);
+    PRECREG = nf_get_prec(nf);
   else
   {
     PRECREG = max(prec, MEDDEFAULTPREC);

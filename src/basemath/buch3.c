@@ -99,7 +99,7 @@ compute_fact(GEN nf, GEN u1, GEN gen)
   long prec,i,j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
 
   basecl = cgetg(l,t_VEC);
-  prec = nfgetprec(nf);
+  prec = nf_get_prec(nf);
   G = cgetg(3,t_VEC);
   gel(G,2) = cgetg(1,t_MAT);
 

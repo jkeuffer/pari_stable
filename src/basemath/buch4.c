@@ -680,7 +680,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
       k = stoi(sk);
     }
   }
-  if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
+  if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nf_get_prec(nf));
   if (!nfabs) nfabs = checknf(bnfabs);
 
   if (galois < 0 || galois > 2) pari_err(flagerr, "rnfisnorminit");

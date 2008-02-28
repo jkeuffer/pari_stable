@@ -104,7 +104,7 @@ logarch2arch(GEN x, long r1, long prec)
 static GEN
 reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
 {
-  long i,k,n,ru,r1, prec = nfgetprec(bnfz);
+  long i,k,n,ru,r1, prec = nf_get_prec(bnfz);
   GEN z,p1,p2,nmax,c, nf = checknf(bnfz);
 
   r1 = nf_get_r1(nf);
@@ -183,7 +183,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
 static GEN
 reducebeta(GEN bnfz, GEN be, GEN ell)
 {
-  long j,ru, prec = nfgetprec(bnfz);
+  long j,ru, prec = nf_get_prec(bnfz);
   GEN emb,z,u,matunit, nf = checknf(bnfz);
 
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Zs\n",be);
@@ -682,7 +682,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
 
   prec = DEFAULTPREC +
     nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(gmael(nf,5,1)))));
-  if (nfgetprec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
+  if (nf_get_prec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
   msign = ZM_to_zm( zsigns(nf, vecWB) );
   arch = ZV_to_zv(arch);
 
