@@ -307,7 +307,7 @@ struct galois_lift
 
 static GEN
 makeLden(GEN L,GEN den, struct galois_borne *gb)
-{ return FpC_Fp_mul(L, den, gp->ladicsol); }
+{ return FpC_Fp_mul(L, den, gb->ladicsol); }
 
 /* Initialize the structure galois_lift */
 
