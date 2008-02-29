@@ -908,7 +908,7 @@ subfields(GEN nf, long d)
 
   /* much easier if nf is Galois (WSS) */
   G = galoisinit(nf? nf: pol, NULL);
-  if (G)
+  if (G != gen_0)
   { /* Bingo */
     GEN L = galoissubgroups(G), F;
     long k,i, l = lg(L), o = N/d;
@@ -953,7 +953,7 @@ subfieldsall(GEN nf)
 
   /* much easier if nf is Galois (WSS) */
   G = galoisinit(nf, NULL);
-  if (G)
+  if (G != gen_0)
   {
     GEN L, S, p;
     long l;

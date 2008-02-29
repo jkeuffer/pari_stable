@@ -2424,16 +2424,7 @@ GEN
 galoisinit(GEN nf, GEN den)
 {
   GEN G = galoisconj4(nf, den, 1);
-  return (typ(G) == t_INT)? NULL: G;
-}
-
-GEN
-galoisinit0(GEN nf, GEN den)
-{
-  GEN G = galoisinit(nf, den);
-  if (!G)
-    pari_err(talker, "field not Galois or group not weakly super solvable");
-  return G;
+  return (typ(G) == t_INT)? gen_0: G;
 }
 
 static GEN
