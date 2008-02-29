@@ -38,8 +38,7 @@ vec_isconst(GEN v)
   long i, l=lg(v);
   if (l==1) return 1;
   for(i=2;i<l;i++)
-    if (!gequal(gel(v,i), gel(v,1)))
-      return 0;
+    if (!gequal(gel(v,i), gel(v,1))) return 0;
   return 1;
 }
 
@@ -55,8 +54,7 @@ vec_is1to1(GEN v)
   long l=lg(v);
   for (i=1; i<l; i++)
     for(j=i+1; j<l; j++)
-      if (gequal(gel(v,i), gel(v,j)))
-	return 0;
+      if (gequal(gel(v,i), gel(v,j))) return 0;
   return 1;
 }
 

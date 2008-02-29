@@ -170,8 +170,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   pari_sp ltop = avma;
   long i, n = lg(L)-1;
   GEN M, P;
-  if (!prep)
-    prep = vandermondeinverseprep(L);
+  if (!prep) prep = vandermondeinverseprep(L);
   M = cgetg(n+1, t_MAT);
   for (i = 1; i <= n; i++)
   {
@@ -183,34 +182,25 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
 
 struct galois_borne
 {
-  GEN     l;
-  long    valsol;
-  long    valabs;
-  GEN     bornesol;
-  GEN     ladicsol;
-  GEN     ladicabs;
-  GEN     lbornesol;
+  GEN  l;
+  long valsol;
+  long valabs;
+  GEN  bornesol;
+  GEN  ladicsol;
+  GEN  ladicabs;
+  GEN  lbornesol;
 };
 
 /* Compute bound for the coefficients of automorphisms */
-
 GEN
 initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
 {
-  long i, n = degpol(T);
-  GEN L, z, prep, den;
+  GEN L, prep, den;
   pari_timer ti;
 
   if (DEBUGLEVEL>=4) (void)TIMER(&ti);
-  L = roots(T, prec);
+  L = cleanroots(T, prec);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"roots");
-  for (i = 1; i <= n; i++)
-  {
-    z = gel(L,i);
-    if (signe(z[2])) break;
-    L[i] = z[1];
-  }
-  if (DEBUGLEVEL>=4) (void)TIMER(&ti);
   prep = vandermondeinverseprep(L);
   if (!dn)
   {
@@ -241,8 +231,7 @@ matrixnorm(GEN M, long prec)
   for (i = 1; i < n; i++)
   {
     GEN z = gabs(gcoeff(M,i,1), prec);
-    for (j = 2; j < n; j++)
-      z = gadd(z, gabs(gcoeff(M,i,j), prec));
+    for (j = 2; j < n; j++) z = gadd(z, gabs(gcoeff(M,i,j), prec));
     if (gcmp(z, B) > 0) B = z;
   }
   return B;
@@ -305,29 +294,20 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb)
 
 struct galois_lift
 {
-  GEN     T;
-  GEN     den;
-  GEN     p;
-  GEN     L;
-  GEN     Lden;
-  long    e;
-  GEN     Q;
-  GEN     TQ;
+  GEN  T;
+  GEN  den;
+  GEN  p;
+  GEN  L;
+  GEN  Lden;
+  long e;
+  GEN  Q;
+  GEN  TQ;
   struct galois_borne *gb;
 };
 
 static GEN
 makeLden(GEN L,GEN den, struct galois_borne *gb)
-{
-  pari_sp ltop=avma;
-  long i,l=lg(L);
-  GEN Lden=cgetg(l,t_VEC);
-  for (i=1;i<l;i++)
-    gel(Lden,i) = mulii(gel(L,i),den);
-  for (i=1;i<l;i++)
-    gel(Lden,i) = modii(gel(Lden,i),gb->ladicsol);
-  return gerepileupto(ltop,Lden);
-}
+{ return FpC_Fp_mul(L, den, gp->ladicsol); }
 
 /* Initialize the structure galois_lift */
 
@@ -356,37 +336,28 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
 static int
 poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 {
-  pari_sp ltop;
-  GEN     fx, fp;
-  long     i, j,ll;
-  for (i = 2; i< lg(f); i++)
-    if (cmpii(gel(f,i),gl->gb->bornesol)>0
-	&& cmpii(gel(f,i),gl->gb->lbornesol)<0)
+  pari_sp av;
+  GEN fx, fp, B = gl->gb->bornesol, lB = gl->gb->lbornesol;
+  long i, j, ll;
+  for (i = 2; i < lg(f); i++)
+    if (cmpii(gel(f,i),B) > 0 && cmpii(gel(f,i),lB) < 0)
     {
-      if (DEBUGLEVEL>=4)
-	fprintferr("GaloisConj: Solution too large, discard it.\n");
-      if (DEBUGLEVEL>=8)
-	fprintferr("f=%Zs\n borne=%Zs\n l-borne=%Zs\n",f,gl->gb->bornesol,gl->gb->lbornesol);
+      if (DEBUGLEVEL>=4) fprintferr("GaloisConj: Solution too large.\n");
+      if (DEBUGLEVEL>=8) fprintferr("f=%Zs\n borne=%Zs\n l-borne=%Zs\n",f,B,lB);
       return 0;
     }
   ll = lg(gl->L);
-  fp = const_vecsmall(ll-1, 1);
-  ltop = avma;
+  fp = const_vecsmall(ll-1, 1); /* left on stack */
+  av = avma;
   for (i = 1; i < ll; i++)
   {
     fx = FpX_eval(f, gel(gl->L,i), gl->gb->ladicsol);
     for (j = 1; j < ll; j++)
     {
-      if (fp[j] && equalii(fx, gel(gl->Lden,j)))
-      {
-	pf[i] = j;
-	fp[j] = 0;
-	break;
-      }
+      if (fp[j] && equalii(fx, gel(gl->Lden,j))) { pf[i]=j; fp[j]=0; break; }
     }
-    if (j == ll)
-      return 0;
-    avma = ltop;
+    if (j == ll) return 0;
+    avma = av;
   }
   return 1;
 }
@@ -417,13 +388,10 @@ static GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
   pari_sp ltop, lbot;
-  long rt;
-  GEN     Q=gl->T, p=gl->p;
-  long    e=gl->e, level=1;
-  GEN     q, qold, qm1, qm1old;
-  GEN     W, Pr, Qr, Sr, Wr = gen_0, Qrold, Spow;
-  long    i,nb,mask;
-  GEN    *gptr[2];
+  GEN Q = gl->T, p = gl->p, q, qold, qm1, qm1old;
+  GEN W, Pr, Qr, Sr, Wr = gen_0, Qrold, Spow;
+  long e=gl->e, level=1, rt, i, nb, mask;
+  GEN *gptr[2];
   if (DEBUGLEVEL == 1) (void)timer2();
   rt = brent_kung_optpow(degpol(Q),1);
   q = p; qm1 = gen_1; /*during the run, we have p*qm1=q*/
@@ -438,11 +406,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   gptr[1] = &Wr;
   for (i=0; i<nb;i++)
   {
-    if (DEBUGLEVEL>=2)
-    {
-      level=(level<<1)-((mask>>i)&1);
-      (void)timer2();
-    }
+    if (DEBUGLEVEL>=2) { level=(level<<1)-((mask>>i)&1); (void)timer2(); }
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     Pr = FpX_red(P, q);
@@ -465,67 +429,59 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     Wr = gcopy(Wr);
     S = FpX_red(S, q);
     gerepilemanysp(ltop, lbot, gptr, 2);
-    if (i && i<nb-1 && frob && monoratlift(S,q,qm1old,gl,frob))
-      return NULL;
+    if (i && i<nb-1 && frob && monoratlift(S,q,qm1old,gl,frob)) return NULL;
     qold = q; qm1old=qm1; Qrold = Qr;
-    if (DEBUGLEVEL >= 2)
-      msgtimer("MonomorphismLift: lift to prec %d",level);
+    if (DEBUGLEVEL >= 2) msgtimer("MonomorphismLift: lift to prec %d",level);
   }
-  if (DEBUGLEVEL == 1)
-    msgtimer("monomorphismlift()");
+  if (DEBUGLEVEL == 1) msgtimer("monomorphismlift()");
   return S;
 }
-/*
- * Let T be a polynomial in \ZZ[X] , p a prime number, S\in\FF_p[X]/(T) so
- * that T(S)=0 [p,T] Lift S in S_0 so that T(S_0)=0 [T,p^e]
- * Unclean stack.
- */
+
+/* Let T be a polynomial in Z[X] , p a prime number, S in Fp[X]/(T) so
+ * that T(S)=0 [p,T]. Lift S in S_0 so that T(S_0)=0 [T,p^e]
+ * Unclean stack */
 static GEN
 automorphismlift(GEN S, struct galois_lift *gl, GEN frob)
 {
-  return  monomorphismratlift(gl->T, S, gl, frob);
+  return monomorphismratlift(gl->T, S, gl, frob);
 }
 
-/*
- * Let P be a polynomial in \ZZ[X] , p a prime number, S\in\FF_p[X]/(Q) so
- * that T(S)=0 [p,T] Lift S in S_0 so that T(S_0)=0 [Q,p^e]
- * Unclean stack.
- */
+/* Let P be a polynomial in Z[X] , p a prime number, S in Fp[X]/(Q) so
+ * that T(S)=0 [p,T]. Lift S in S_0 so that T(S_0)=0 [Q,p^e]
+ * Unclean stack */
 
 GEN
 monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
 {
   struct galois_lift gl;
-  gl.T=Q;
-  gl.p=p;
-  gl.e=e;
+  gl.T = Q;
+  gl.p = p;
+  gl.e = e;
   return monomorphismratlift(P,S,&gl,NULL);
 }
 
 struct galois_testlift
 {
-  long    n;
-  long    f;
-  long    g;
-  GEN     bezoutcoeff;
-  GEN     pauto;
-  GEN     C;
-  GEN     Cd;
+  long n;
+  long f;
+  long g;
+  GEN  bezoutcoeff;
+  GEN  pauto;
+  GEN  C;
+  GEN  Cd;
 };
 static GEN
 galoisdolift(struct galois_lift *gl, GEN frob)
 {
-  pari_sp ltop=avma;
-  long v = varn(gl->T);
+  pari_sp av = avma;
   GEN Tp = FpX_red(gl->T, gl->p);
-  GEN S = FpXQ_pow(pol_x(v),gl->p, Tp,gl->p);
-  GEN plift = automorphismlift(S, gl, frob);
-  return gerepileupto(ltop,plift);
+  GEN S = FpXQ_pow(pol_x(varn(Tp)), gl->p, Tp, gl->p);
+  return gerepileupto(av, automorphismlift(S, gl, frob));
 }
 
 static void
-inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
-    struct galois_testlift *gt)
+inittestlift(GEN plift, GEN Tmod, struct galois_lift *gl,
+             struct galois_testlift *gt)
 {
   long v = varn(gl->T);
   gt->n = lg(gl->L) - 1;
@@ -538,8 +494,7 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   if (gt->f > 2)
   {
     pari_sp av = avma, ltop;
-    long i;
-    long nautpow=brent_kung_optpow(gt->n-1,gt->f-2);
+    long i, nautpow = brent_kung_optpow(gt->n-1,gt->f-2);
     GEN autpow;
     if (DEBUGLEVEL >= 1) (void)timer2();
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
@@ -552,48 +507,46 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   }
 }
 
-/* We should have 0<=x<mod. */
 /* Explanation of the intheadlong technique:
- * Let B be a bound B, M a modulo M>B*2^BITS_IN_LONG,
- * 0<=a_i<M for i=1,...,n.
- * We want to test if it exists k,l, |k| < B, such that sum a_i = k +l*M
- * The trick is to write a_i*2^BITS_IN_LONG/M=b_i+c_i with b_i integer
- * and 0<=c_i<1. We get sum b_i+c_i = k*2^BITS_IN_LONG/M +l*2^BITS_IN_LONG
- * so sum b_i -l*2^BITS_IN_LONG=k*2^BITS_IN_LONG/M -sum c_i
- * We have -1<k*2^BITS_IN_LONG/M<1, 0<=c_i<1 so
- * so -n-1 < sum b_i -l*2^BITS_IN_LONG<1 so
- * n<=sum b_i -l*2^BITS_IN_LONG<=0
- * So we compute z=sum b_i [2^BITS_IN_LONG] and check if 0<=-z<=n.
- */
+ * Let C be a bound, B = BITS_IN_LONG, M > C*2^B a modulus and 0 <= a_i < M for
+ * i=1,...,n where n < 2^B. We want to test if there exist k,l, |k| < C < M/2^B,
+ * such that sum a_i = k + l*M
+ * We write a_i*2^B/M = b_i+c_i with b_i integer and 0<=c_i<1, so that
+ *   sum b_i - l*2^B = k*2^B/M - sum c_i
+ * Since -1 < k*2^B/M < 1 and 0<=c_i<1, it follows that
+ *   -n-1 < sum b_i - l*2^B < 1  i.e.  -n <= sum b_i -l*2^B <= 0
+ * So we compute z = - sum b_i [mod 2^B] and check if 0 <= z <= n. */
 
-long intheadlong(GEN x, GEN mod)
+/* Assume 0 <= x < mod. */
+long
+intheadlong(GEN x, GEN mod)
 {
-  pari_sp ltop=avma;
-  long res= (long) itou(divii(shifti(x,BITS_IN_LONG),mod));
-  avma=ltop;
-  return res;
+  pari_sp av = avma;
+  long res = (long) itou(divii(shifti(x,BITS_IN_LONG),mod));
+  avma = av; return res;
 }
-
-GEN matheadlong(GEN W, GEN mod)
+static GEN
+vecheadlong(GEN W, GEN mod)
 {
-  long i,j;
-  GEN V=cgetg(lg(W),t_MAT);
-  for(i=1;i<lg(W);i++)
-  {
-    gel(V,i) = cgetg(lg(W[i]),t_VECSMALL);
-    for(j=1;j<lg(W[i]);j++)
-      mael(V,i,j)=intheadlong(gmael(W,i,j),mod);
-  }
+  long i, l = lg(W);
+  GEN V = cgetg(l, t_VECSMALL);
+  for(i=1; i<l; i++) V[i] = intheadlong(gel(W,i), mod);
   return V;
 }
-
-long polheadlong(GEN P, long n, GEN mod)
+GEN
+matheadlong(GEN W, GEN mod)
 {
-  return (lg(P)>n+2)?intheadlong(gel(P,n+2),mod):0;
+  long i, l = lg(W);
+  GEN V = cgetg(l,t_MAT);
+  for(i=1; i<l; i++) gel(V,i) = vecheadlong(gel(W,i), mod);
+  return V;
 }
-/*
- *
- */
+long
+polheadlong(GEN P, long n, GEN mod)
+{
+  return (lg(P)>n+2)? intheadlong(gel(P,n+2),mod): 0;
+}
+
 static long
 frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 		 struct galois_testlift *gt, GEN frob)
@@ -674,16 +627,14 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 	u = FpX_center(FpX_red(u, gl->Q), gl->Q, shifti(gl->Q,-1));
 	if (poltopermtest(u, gl, frob))
 	{
-	  if (DEBUGLEVEL >= 4 )
+	  if (DEBUGLEVEL >= 4)
 	  {
 	    msgtimer("");
 	    fprintferr("GaloisConj: %d hops on %Zs tests\n",hop,addis(mulss(Ni,N1),i));
 	  }
-	  avma = ltop2;
-	  return 1;
+	  avma = ltop2; return 1;
 	}
-	else if (DEBUGLEVEL >= 4 )
-	  fprintferr("M");
+	if (DEBUGLEVEL >= 4) fprintferr("M");
       }
       else hop++;
     }
@@ -741,17 +692,13 @@ struct galois_test
   GEN     PV, TM;
   GEN     L, M;
 };
-/* Compute the test matrix for the n-th line  of V */
+/* Compute the test matrix for the n-th line of V. Clone. */
 static GEN
 Vmatrix(long n, struct galois_test *td)
 {
-  pari_sp ltop = avma;
-  GEN     V;
-  long    i;
-  V = cgetg(lg(td->L), t_VEC);
-  for (i = 1; i < lg(V); i++) gel(V,i) = gmael(td->M,i,n);
-  V = FpC_FpV_mul(td->L, V, td->ladic);
-  return gerepileupto(ltop, V);
+  pari_sp av = avma;
+  GEN m = gclone( FpC_FpV_mul(td->L, row(td->M,n), td->ladic) );
+  avma = av; return m;
 }
 
 /*
@@ -760,32 +707,23 @@ Vmatrix(long n, struct galois_test *td)
 static void
 inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
 {
-  pari_sp ltop;
-  long i, n = lg(L) - 1;
-  if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:Start Init Test\n");
-  td->order = cgetg(n + 1, t_VECSMALL);
-  for (i = 1; i <= n - 2; i++)
-    td->order[i] = i + 2;
+  long i, n = lg(L)-1;
+  if (DEBUGLEVEL >= 8) fprintferr("GaloisConj:Start Init Test\n");
+  td->order = cgetg(n+1, t_VECSMALL);
+  for (i = 1; i <= n-2; i++) td->order[i] = i+2;
   for (; i <= n; i++)
     td->order[i] = i - n + 2;
-  td->borne = borne;ltop = avma;
+  td->borne = borne;
   td->lborne = subii(ladic, borne);
   td->ladic = ladic;
   td->L = L;
   td->M = M;
-  td->PV = cgetg(n + 1, t_VECSMALL);
-  for (i = 1; i <= n; i++)
-    td->PV[i] = 0;
-  ltop = avma;
-  gel(td->PV, td->order[n]) = gclone(Vmatrix(td->order[n], td));
-  avma = ltop;
+  td->PV = const_vecsmall(n, 0);
+  gel(td->PV, td->order[n]) = Vmatrix(td->order[n], td);
   td->TM = shallowtrans(M);
   settyp(td->TM, t_VEC);
-  for (i = 1; i < lg(td->TM); i++)
-    settyp(td->TM[i], t_VEC);
-  if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:End Init Test\n");
+  for (i = 1; i < lg(td->TM); i++) settyp(td->TM[i], t_VEC);
+  if (DEBUGLEVEL >= 8) fprintferr("GaloisConj:End Init Test\n");
 }
 
 /* Free clones stored inside galois_test */
@@ -794,94 +732,73 @@ freetest(struct galois_test *td)
 {
   long i;
   for (i = 1; i < lg(td->PV); i++)
-    if (td->PV[i])
-    {
-      gunclone(gel(td->PV,i));
-      td->PV[i] = 0;
-    }
+    if (td->PV[i]) { gunclone(gel(td->PV,i)); td->PV[i] = 0; }
 }
 
-/*
- * Check if the integer P seen as a p-adic number is close from an integer less
- * than td->borne in absolute value.
- */
+/* Check if the integer P seen as a p-adic number is close to an integer less
+ * than td->borne in absolute value */
 static long
 padicisint(GEN P, struct galois_test *td)
 {
   pari_sp ltop = avma;
   GEN U  = modii(P, td->ladic);
   long r = cmpii(U, td->borne) <= 0 || cmpii(U, td->lborne) >= 0;
-  avma = ltop;
-  return r;
+  avma = ltop; return r;
 }
 
-/*
- * Check if the permutation pf is valid according to td.
- * If not, update td to make subsequent test faster (hopefully).
- */
+/* Check if the permutation pf is valid according to td.
+ * If not, update td to make subsequent test faster (hopefully) */
 static long
 galois_test_perm(struct galois_test *td, GEN pf)
 {
   pari_sp av = avma;
-  GEN     P, V;
   long i, j, n = lg(td->L) - 1;
-  P = perm_mul(td->L, pf);
+  GEN V, P = perm_mul(td->L, pf);
   for (i = 1; i < n; i++)
   {
-    long    ord;
-    GEN     PW;
-    ord = td->order[i];
-    PW = gel(td->PV, ord);
+    long ord = td->order[i];
+    GEN PW = gel(td->PV, ord);
     if (PW)
     {
       V = gmael(PW,1,pf[1]);
-      for (j = 2; j <= n; j++)
-	V = addii(V, gmael(PW,j,pf[j]));
+      for (j = 2; j <= n; j++) V = addii(V, gmael(PW,j,pf[j]));
+      if (!padicisint(V, td)) break;
     }
     else
-      V = centermod(FpV_dotproduct(gel(td->TM,ord), P, td->ladic), td->ladic);
-    if (!padicisint(V, td))
-      break;
+    {
+      V = FpV_dotproduct(gel(td->TM,ord), P, td->ladic);
+      if (!padicisint(V, td)) {
+        gel(td->PV, ord) = Vmatrix(ord, td);
+        if (DEBUGLEVEL >= 4) fprintferr("M");
+        break;
+      }
+    }
   }
-  if (i == n)
-  {
-    avma = av;
-    return 1;
-  }
-  if (!td->PV[td->order[i]])
-  {
-    gel(td->PV, td->order[i]) = gclone(Vmatrix(td->order[i], td));
-    if (DEBUGLEVEL >= 4)
-      fprintferr("M");
-  }
-  if (DEBUGLEVEL >= 4)
-    fprintferr("%d.", i);
+  if (i == n) { avma = av; return 1; }
+  if (DEBUGLEVEL >= 4) fprintferr("%d.", i);
   if (i > 1)
   {
-    long    z;
-    z = td->order[i];
-    for (j = i; j > 1; j--)
-      td->order[j] = td->order[j - 1];
+    long z = td->order[i];
+    for (j = i; j > 1; j--) td->order[j] = td->order[j-1];
     td->order[1] = z;
-    if (DEBUGLEVEL >= 8)
-      fprintferr("%Zs", td->order);
+    if (DEBUGLEVEL >= 8) fprintferr("%Zs", td->order);
   }
-  avma = av;
-  return 0;
+  avma = av; return 0;
 }
 /*Compute a*b/c when a*b will overflow*/
-static long muldiv(long a,long b,long c)
+static long
+muldiv(long a,long b,long c)
 {
   return (long)((double)a*(double)b/c);
 }
 
-/* F = cycle decomposition of sigma, B = cycle decomposition of cl(tau).
+/* F = cycle decomposition of sigma,
+ * B = cycle decomposition of cl(tau).
  * Check all permutations pf who can possibly correspond to tau, such that
  * tau*sigma*tau^-1 = sigma^s and tau^d = sigma^t, where d = ord cl(tau)
- * x: vector of choices, G: vector allowing linear access to elts of F.
- * Choices multiple of e are not changed.
- * */
-
+ * x: vector of choices,
+ * G: vector allowing linear access to elts of F.
+ * Choices multiple of e are not changed. */
 static GEN
 testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 		struct galois_test *td)
@@ -891,136 +808,97 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   long V, i, j, cx, hop = 0, start = 0;
   GEN pf, ar, G, W, NN, NQ;
   if (DEBUGLEVEL >= 1) (void)timer2();
-  a = lg(F) - 1;
-  b = lg(F[1]) - 1;
-  c = lg(B) - 1;
-  d = lg(B[1]) - 1;
+  a = lg(F) - 1; b = lg(F[1]) - 1;
+  c = lg(B) - 1; d = lg(B[1]) - 1;
   n = a * b;
   s = (b + s) % b;
-  pf = cgetg(n + 1, t_VECSMALL);
+  pf = cgetg(n+1, t_VECSMALL);
   av = avma;
-  ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
-  G  = cgetg(a + 1, t_VECSMALL);
+  ar = cgetg(a+2, t_VECSMALL); ar[a+1]=0;
+  G  = cgetg(a+1, t_VECSMALL);
   W  = matheadlong(gel(td->PV, td->order[n]), td->ladic);
-  for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
+  for (cx=1, i=1, j=1; cx <= a; cx++, i++)
   {
     gel(G,cx) = gel(F, coeff(B,i,j));
-    if (i == d)
-    {
-      i = 0;
-      j++;
-    }
+    if (i == d) { i = 0; j++; }
   }
-  NN = divis(powuu(b, c * (d - d/e)),cut);
-  if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisConj:I will try %Zs permutations\n", NN);
-  N1=1000000;
-  NQ=divis_rem(NN,N1,&R1);
+  NN = divis(powuu(b, c * (d - d/e)), cut);
+  if (DEBUGLEVEL>=4) fprintferr("GaloisConj:I will try %Zs permutations\n", NN);
+  N1 = 1000000;
+  NQ = divis_rem(NN,N1,&R1);
   if (cmpiu(NQ,100000000)>0)
   {
-    avma=avm;
+    avma = avm;
     pari_warn(warner,"Combinatorics too hard : would need %Zs tests!\n I'll skip it but you will get a partial result...",NN);
     return perm_identity(n);
   }
-  N2=itos(NQ);
+  N2 = itos(NQ);
   for (l2 = 0; l2 <= N2; l2++)
   {
     long nbiter = (l2<N2) ? N1: R1;
-    if (DEBUGLEVEL >= 2 && N2)
-      fprintferr("%d%% ", muldiv(l2,100,N2));
+    if (DEBUGLEVEL >= 2 && N2) fprintferr("%d%% ", muldiv(l2,100,N2));
     for (l1 = 0; l1 < nbiter; l1++)
     {
       if (start)
       {
 	for (i = 1, j = e; i < a;)
 	{
-	  if ((++(x[i])) != b)
-	    break;
+	  if ((++(x[i])) != b) break;
 	  x[i++] = 0;
 	  if (i == j) { i++; j += e; }
 	}
       }
-      else {start=1; i = a - 1;}
-      /* p5 = (p1 % d) - 1 */
-      for (p1 = i + 1, p5 = p1 % d - 1 ; p1 >= 1; p1--, p5--)
+      else { start=1; i = a - 1; }
+      /* intheadlong test: overflow in + is OK, we compute mod 2^BIL */
+      for (p1 = i+1, p5 = p1%d - 1 ; p1 >= 1; p1--, p5--) /* p5 = (p1%d) - 1 */
       {
-	if (p5 == - 1)
-	{
-	  p5 = d - 1;
-	  p6 = p1 + 1 - d;
-	}
-	else
-	  p6 = p1 + 1;
-	p4 = p5 ? x[p1 - 1] : 0;
+	if (p5 == - 1) { p5 = d - 1; p6 = p1 + 1 - d; } else p6 = p1 + 1;
+	p4 = p5 ? x[p1-1] : 0;
 	V = 0;
-	for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+	for (p2 = 1+p4, p3 = 1 + x[p1]; p2 <= b; p2++)
 	{
 	  V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
-	  p3 += s;
-	  if (p3 > b)
-	    p3 -= b;
+	  p3 += s; if (p3 > b) p3 -= b;
 	}
-	p3 = 1 + x[p1] - s;
-	if (p3 <= 0)
-	  p3 += b;
+	p3 = 1 + x[p1] - s; if (p3 <= 0) p3 += b;
 	for (p2 = p4; p2 >= 1; p2--)
 	{
 	  V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
-	  p3 -= s;
-	  if (p3 <= 0)
-	    p3 += b;
+	  p3 -= s; if (p3 <= 0) p3 += b;
 	}
 	ar[p1] = ar[p1+1] + V;
       }
-
-      if (-(ulong)ar[1]<=(ulong)n)
+      if (-(ulong)ar[1] > (ulong)n) continue;
+      
+      /* intheadlong succeeds. Full computation */
+      for (p1=1, p5=d; p1 <= a; p1++, p5++)
       {
-	for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
-	{
-	  if (p5 == d)
-	  {
-	    p5 = 0;
-	    p4 = 0;
-	  }
-	  else
-	    p4 = x[p1 - 1];
-	  if (p5 == d - 1)
-	    p6 = p1 + 1 - d;
-	  else
-	    p6 = p1 + 1;
-	  for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
-	  {
-	    pf[mael(G,p1,p2)] = mael(G,p6,p3);
-	    p3 += s;
-	    if (p3 > b)
-	      p3 -= b;
-	  }
-	  p3 = 1 + x[p1] - s;
-	  if (p3 <= 0)
-	    p3 += b;
-	  for (p2 = p4; p2 >= 1; p2--)
-	  {
-	    pf[mael(G,p1,p2)] = mael(G,p6,p3);
-	    p3 -= s;
-	    if (p3 <= 0)
-	      p3 += b;
-	  }
-	}
-	if (galois_test_perm(td, pf))
-	{
-	  if (DEBUGLEVEL >= 1)
-	  {
-	    GEN nb=addis(mulss(l2,N1),l1);
-	    msgtimer("testpermutation(%Zs)", nb);
-	    if (DEBUGLEVEL >= 2 && hop)
-	      fprintferr("GaloisConj:%d hop over %Zs iterations\n", hop, nb);
-	  }
-	  avma = av;
-	  return pf;
-	}
-	else
-	  hop++;
+        if (p5 == d) { p5 = 0; p4 = 0; } else p4 = x[p1-1];
+        if (p5 == d-1) p6 = p1+1-d; else p6 = p1+1;
+        for (p2 = 1+p4, p3 = 1 + x[p1]; p2 <= b; p2++)
+        {
+          pf[mael(G,p1,p2)] = mael(G,p6,p3);
+          p3 += s; if (p3 > b) p3 -= b;
+        }
+        p3 = 1 + x[p1] - s; if (p3 <= 0) p3 += b;
+        for (p2 = p4; p2 >= 1; p2--)
+        {
+          pf[mael(G,p1,p2)] = mael(G,p6,p3);
+          p3 -= s; if (p3 <= 0) p3 += b;
+        }
       }
+      if (galois_test_perm(td, pf))
+      {
+        if (DEBUGLEVEL >= 1)
+        {
+          GEN nb = addis(mulss(l2,N1),l1);
+          msgtimer("testpermutation(%Zs)", nb);
+          if (DEBUGLEVEL >= 2 && hop)
+            fprintferr("GaloisConj:%d hop over %Zs iterations\n", hop, nb);
+        }
+        avma = av; return pf;
+      }
+      hop++;
     }
   }
   if (DEBUGLEVEL >= 1)
@@ -1029,11 +907,10 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
     if (DEBUGLEVEL >= 2 && hop)
       fprintferr("GaloisConj:%d hop over %Zs iterations\n", hop, NN);
   }
-  avma = avm;
-  return NULL;
+  avma = avm; return NULL;
 }
 
-/* List of subgroups of (\ZZ/m\ZZ)^* whose order divide p, and return the list
+/* List of subgroups of (Z/mZ)^* whose order divide p, and return the list
  * of their elements */
 GEN
 listznstarelts(long m, long p)
@@ -1050,12 +927,11 @@ listznstarelts(long m, long p)
   zn = znstar(stoi(m));
   phi = itos(gel(zn,1));
   zns = znstar_small(zn);
-  lss = subgrouplist(gel(zn,2), NULL);
+  lss = subgrouplist(gel(zn,2), stoi(p));
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
-    pari_sp av;
-    av = avma;
+    pari_sp av = avma;
     card = phi / itos(ZM_det_triangular(gel(lss,i)));
     avma = av;
     if (p % card == 0)
@@ -1064,31 +940,25 @@ listznstarelts(long m, long p)
   setlg(res,k);
   return gerepileupto(ltop,gen_sort(res, (void*)&pari_compare_lg, &cmp_nodata));
 }
+
 /* A sympol is a symmetric polynomial
  *
  * Currently sympol are couple of t_VECSMALL [v,w]
- * v[1]...v[k], w[1]...w[k]  represent the polynomial
- * sum(i=1,k,v[i]*s_w[i]) where s_i(X_1,...,X_n)=sum(j=1,n,X_j^i)
- */
+ * v[1]...v[k], w[1]...w[k]  represent the polynomial sum(i=1,k,v[i]*s_w[i])
+ * where s_i(X_1,...,X_n) = sum(j=1,n,X_j^i) */
 
 /*Return s_e*/
-
 static GEN
 sympol_eval_newtonsum(long e, GEN O, GEN mod)
 {
-  long f,g;
-  long i,j;
-  GEN PL;
-  f=lg(O)-1;
-  g=lg(O[1])-1;
-  PL=cgetg(lg(O), t_COL);
-  for(i=1; i<=f; i++)
+  long f = lg(O), g = lg(O[1]), i, j;
+  GEN PL = cgetg(f, t_COL);
+  for(i=1; i<f; i++)
   {
-    pari_sp ltop=avma;
-    GEN s=gen_0;
-    for(j=1; j<=g; j++)
-      s=addii(s,Fp_powu(gmael(O,i,j),(ulong) e,mod));
-    gel(PL,i) = gerepileupto(ltop,modii(s,mod));
+    pari_sp av = avma;
+    GEN s = gen_0;
+    for(j=1; j<g; j++) s = addii(s, Fp_powu(gmael(O,i,j), (ulong)e, mod));
+    gel(PL,i) = gerepileuptoint(av, resii(s,mod));
   }
   return PL;
 }
@@ -1096,135 +966,113 @@ sympol_eval_newtonsum(long e, GEN O, GEN mod)
 GEN
 sympol_eval(GEN v, GEN NS)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   long i;
-  GEN S=gen_0;
-  for(i=1;i<lg(v);i++)
-    if (v[i]) S=gadd(S,gmulsg(v[i],gel(NS,i)));
-  return gerepileupto(ltop, S);
+  GEN S = gen_0;
+  for (i=1; i<lg(v); i++)
+    if (v[i]) S = gadd(S, gmulsg(v[i], gel(NS,i)));
+  return gerepileupto(av, S);
 }
 
-/*
- * Let sigma be an automorphism of L (as a polynomial with rational coefs)
+/* Let sigma be an automorphism of L (as a polynomial with rational coefs)
  * Let 'sym' be a symmetric polynomial defining alpha in L.
- * We have alpha=sym(x,sigma(x),,,sigma^(g-1)(x))
- * Compute alpha mod p.
- */
-
+ * We have alpha = sym(x,sigma(x),,,sigma^(g-1)(x)). Compute alpha mod p */
 GEN
 sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
 {
   pari_sp ltop=avma;
-  long i, j, npows;
-  GEN  s, f, pows;
-  GEN v=gel(sym,1), w=gel(sym,2);
+  long i, j, npows = brent_kung_optpow(degpol(Tp)-1, g-1);
+  GEN s, f, pows, v = zv_to_ZV(gel(sym,1)), w = zv_to_ZV(gel(sym,2));
   sigma = RgX_to_FpX(sigma, p);
-  f=pol_x(varn(sigma));
-  s=zeropol(varn(sigma));
-  for(j=1; j<lg(v); j++)
-    s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(w[j]),Tp,p),stoi(v[j]),p),p);
-  npows = brent_kung_optpow(lg(Tp)-4,g-1);
   pows  = FpXQ_powers(sigma,npows,Tp,p);
-  for(i=2; i<=g;i++)
+  f = pol_x(varn(sigma));
+  s = zeropol(varn(sigma));
+  for(i=1; i<=g;i++)
   {
-    f=FpX_FpXQV_compo(f,pows,Tp,p);
+    if (i > 1) f = FpX_FpXQV_compo(f,pows,Tp,p);
     for(j=1; j<lg(v); j++)
-      s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(w[j]),Tp,p),stoi(v[j]),p),p);
+      s = FpX_add(s, FpX_Fp_mul(FpXQ_pow(f,gel(w,j),Tp,p),gel(v,j),p),p);
   }
   return gerepileupto(ltop, s);
 }
 
 /* Let Sp be as computed with sympol_aut_evalmod
  * Let Tmod be the factorisation of T mod p.
- * Return the factorisation of the minimal polynomial of S
- * mod p w.r.t. Tmod.
- */
-
+ * Return the factorisation of the minimal polynomial of S mod p w.r.t. Tmod */
 GEN
 fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
 {
-  long i;
-  long l=lg(Tmod);
-  GEN F=cgetg(l,t_VEC);
-  for(i=1;i<l;i++)
-    gel(F,i) = FpXQ_minpoly(FpX_rem(Sp,gel(Tmod,i),p), gel(Tmod,i),p);
+  long i, l = lg(Tmod);
+  GEN F = cgetg(l,t_VEC);
+  for(i=1; i<l; i++)
+  {
+    GEN Ti = gel(Tmod,i);
+    gel(F,i) = FpXQ_minpoly(FpX_rem(Sp,Ti,p), Ti,p);
+  }
   return F;
 }
 
 static GEN
 fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
 {
-  long i,j;
   const long step=3;
-  long n=lg(W)-1;
-  long m=1<<((n-1)<<1);
-  GEN sym=cgetg(n+1,t_VECSMALL), modov2 = shifti(mod,-1);
-  for (j=1;j<n;j++) sym[j]=step;
-  sym[n]=0;
+  long i, j, n = lg(W)-1, m = 1<<((n-1)<<1);
+  GEN sym = cgetg(n+1,t_VECSMALL), mod2 = shifti(mod,-1);
+  for (j=1;j<n;j++) sym[j] = step;
+  sym[n] = 0;
   if (DEBUGLEVEL>=4) fprintferr("FixedField: Weight: %Zs\n",W);
-  for (i=0;i<m;i++)
+  for (i=0; i<m; i++)
   {
-    pari_sp av=avma;
-    GEN L,P;
-    for (j=1;sym[j]==step;j++)
-      sym[j]=0;
+    pari_sp av = avma;
+    GEN L, P;
+    for (j=1; sym[j]==step; j++) sym[j]=0;
     sym[j]++;
     if (DEBUGLEVEL>=6) fprintferr("FixedField: Sym: %Zs\n",sym);
-    L=sympol_eval(sym,NS);
+    L = sympol_eval(sym,NS);
     if (!vec_is1to1(FpC_red(L,l))) continue;
-    P=FpX_center(FpV_roots_to_pol(L,mod,v),mod,modov2);
-    if (!p || FpX_is_squarefree(P,p))
-      return mkvec3(mkvec2(sym,W),L,P);
-    avma=av;
+    P = FpX_center(FpV_roots_to_pol(L,mod,v),mod,mod2);
+    if (!p || FpX_is_squarefree(P,p)) return mkvec3(mkvec2(sym,W),L,P);
+    avma = av;
   }
   return NULL;
 }
 
 /*Check whether the line of NS are pair-wise distinct.*/
-
 static long
 sympol_is1to1_lg(GEN NS, long n)
 {
-  long i,j,k;
-  long l=lg(NS[1]);
-  for (i=1;i<l;i++)
-    for(j=i+1;j<l;j++)
+  long i, j, k, l = lg(NS[1]);
+  for (i=1; i<l; i++)
+    for(j=i+1; j<l; j++)
     {
-      for(k=1;k<n;k++)
-	if (!equalii(gmael(NS,k,j),gmael(NS,k,i)))
-	  break;
-      if (k>=n)
-	return 0;
+      for(k=1; k<n; k++)
+	if (!equalii(gmael(NS,k,j),gmael(NS,k,i))) break;
+      if (k>=n) return 0;
     }
   return 1;
 }
 
 /* Let O a set of orbits of roots (see fixedfieldorbits) modulo mod,
- * l and p two prime number, l dividing mod
- * Return a vector [sym,s,P] where:
- * s is a sympol, s is the set of images of S on O and
- * P is the polynomial with roots s.
- */
-
+ * l | mod and p two prime numbers. Return a vector [sym,s,P] where:
+ * sym is a sympol, s is the set of images of sym on O and
+ * P is the polynomial with roots s. */
 GEN
 fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 {
   pari_sp ltop=avma;
   const long n=(BITS_IN_LONG>>1)-1;
-  GEN NS=cgetg(n+1,t_MAT);
-  GEN sym=NULL, W=cgetg(n+1,t_VECSMALL);
+  GEN NS = cgetg(n+1,t_MAT), sym = NULL, W = cgetg(n+1,t_VECSMALL);
   long i, e=1;
   if (DEBUGLEVEL>=4)
     fprintferr("FixedField: Size: %ldx%ld\n",lg(O)-1,lg(O[1])-1);
-  for(i=1;!sym && i<=n; i++)
+  for (i=1; !sym && i<=n; i++)
   {
     GEN L = sympol_eval_newtonsum(e++, O, mod);
     if (lg(O)>2)
-      while (vec_isconst(L))
-	L = sympol_eval_newtonsum(e++, O, mod);
+      while (vec_isconst(L)) L = sympol_eval_newtonsum(e++, O, mod);
     W[i] = e-1; gel(NS,i) = L;
     if (sympol_is1to1_lg(NS,i+1))
-      sym=fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
+      sym = fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
   if (!sym) pari_err(talker,"p too small in fixedfieldsympol");
   if (DEBUGLEVEL>=2) fprintferr("FixedField: Found: %Zs\n",gel(sym,1));
@@ -1232,9 +1080,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 }
 
 /* Let O a set of orbits as indices and L the corresponding roots.
- * Return the set of orbits as roots.
- */
-
+ * Return the set of orbits as roots. */
 GEN
 fixedfieldorbits(GEN O, GEN L)
 {
@@ -1247,26 +1093,26 @@ fixedfieldorbits(GEN O, GEN L)
 GEN
 fixedfieldinclusion(GEN O, GEN PL)
 {
-  GEN S = cgetg((lg(O) - 1) * (lg(O[1]) - 1) + 1, t_COL);
-  long i, j;
-  for (i = 1; i < lg(O); i++)
-    for (j = 1; j < lg(O[i]); j++)
-      S[mael(O,i,j)] = PL[i];
+  long i, j, f = lg(O)-1, g = lg(O[1])-1;
+  GEN S = cgetg(f*g + 1, t_COL);
+  for (i = 1; i <= f; i++)
+  {
+    GEN Oi = gel(O,i);
+    for (j = 1; j <= g; j++) S[ Oi[j] ] = PL[i];
+  }
   return S;
 }
 
-/*Usually mod is bigger than than den so there is no need to reduce it.*/
+/*Usually mod > den so there is no need to reduce it.*/
 GEN
 vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
 {
   pari_sp av;
-  long i, n = lg(L);
-  long x = varn(T);
-  GEN M, P, Tp;
-  M = cgetg(n, t_MAT);
-  av=avma;
+  long i, n = lg(L), x = varn(T);
+  GEN P, Tp, M = cgetg(n, t_MAT);
+  av = avma;
   Tp = gclone(FpX_deriv(T,mod)); /*clone*/
-  avma=av;
+  avma = av;
   for (i = 1; i < n; i++)
   {
     GEN z;
@@ -1317,11 +1163,11 @@ galoisgrouptopol(GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
 enum ga_code {ga_all_normal=1,ga_ext_2=2,ga_non_wss=4};
 struct galois_analysis
 {
-  long    p; /* prime to be lifted */
-  long    deg; /* degree of the lift */
-  long    ord;
-  long    l; /* l: prime number such that T is totally split mod l */
-  long    p4;
+  long p; /* prime to be lifted */
+  long deg; /* degree of the lift */
+  long ord;
+  long l; /* l: prime number such that T is totally split mod l */
+  long p4;
   enum ga_code group;
   byteptr primepointer; /* allow computing the primes following p */
 };
@@ -1535,96 +1381,60 @@ static GEN
 a4galoisgen(GEN T, struct galois_test *td)
 {
   pari_sp ltop = avma, av, av2;
-  long    i, j, k;
-  long    n;
-  long    N, hop = 0;
-  GEN     O, ar, mt;
-  GEN     t, u;
-  GEN     res, orb, ry;
-  GEN     pft, pfu, pfv;
-  n = degpol(T);
+  long i, j, k, N, hop = 0, n = degpol(T);
+  GEN O,O1,O2,O3,O4, ar, mt, t, u, res, orb, pft, pfu, pfv;
+
   res = cgetg(3, t_VEC);
-  ry = cgetg(4, t_VEC);
-  gel(res,1) = ry;
-  pft = cgetg(n + 1, t_VECSMALL);
-  pfu = cgetg(n + 1, t_VECSMALL);
-  pfv = cgetg(n + 1, t_VECSMALL);
-  gel(ry,1) = pft;
-  gel(ry,2) = pfu;
-  gel(ry,3) = pfv;
-  ry = cgetg(4, t_VECSMALL);
-  ry[1] = 2;
-  ry[2] = 2;
-  ry[3] = 3;
-  gel(res,2) = ry;
+  pft = cgetg(n+1, t_VECSMALL);
+  pfu = cgetg(n+1, t_VECSMALL);
+  pfv = cgetg(n+1, t_VECSMALL);
+  gel(res,1) = mkvec3(pft,pfu,pfv);
+  gel(res,2) = mkvecsmall3(2,2,3);
   av = avma;
   ar = cgetg(n+1, t_VEC);
   for (i = 1; i <= n; i++) gel(ar,i) = cgeti(1 + lg(td->ladic));
-  mt = gel(td->PV,td->order[n]);
-  t = cgetg(n + 1, t_VECSMALL) + 1;	/* Sorry for this hack */
-  u = cgetg(n + 1, t_VECSMALL) + 1;	/* too lazy to correct */
+  mt = gel(td->PV, td->order[n]);
+  t = cgetg(n+1, t_VECSMALL) + 1; /* Sorry for this hack */
+  u = cgetg(n+1, t_VECSMALL) + 1; /* too lazy to correct */
   av2 = avma;
   /* N = itos(gdiv(mpfact(n), mpfact(n >> 1))) >> (n >> 1); */
   /* n = 2k = 12; N = (2k)! / (k! * 2^k) = 10395 */
   N = 10395;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:I will test %ld permutations\n", N);
-  for (i = 0; i < n; i++) t[i] = i + 1;
+  if (DEBUGLEVEL>=4) fprintferr("A4GaloisConj:will test %ld permutations\n", N);
+  for (i = 0; i < n; i++) t[i] = i+1;
   for (i = 0; i < N; i++)
   {
-    GEN     g;
-    long     a, x, y;
+    GEN g;
+    long a, x, y;
     if (i == 0)
     {
-      affsi(0, gel(ar,(n - 2) >> 1));
-      for (k = n - 2; k > 2; k -= 2)
-	addiiz(gel(ar,k >> 1), addii(gmael(mt,k + 1,k + 2), gmael(mt,k + 2,k + 1)),
+      affsi(0, gel(ar, (n-2) >> 1));
+      for (k = n-2; k > 2; k -= 2)
+	addiiz(gel(ar,k >> 1), addii(gmael(mt,k+1,k+2), gmael(mt,k+2,k+1)),
 	       gel(ar,(k >> 1) - 1));
     }
     else
     {
-      x = i;
-      y = 1;
-      do
-      {
-	y += 2;
-	a = x%y;
-	x = x/y;
-      }
-      while (!a);
+      x = i; y = 1;
+      do { y += 2; a = x%y; x = x/y; } while (!a);
       switch (y)
       {
       case 3:
-	if (a == 1)
-	{ lswap(t[1], t[2]); }
-	else
-	{ lswap(t[0], t[2]); }
+	if (a == 1) { lswap(t[1], t[2]); } else { lswap(t[0], t[2]); }
 	break;
       case 5:
-	x = t[0];
-	t[0] = t[2];
-	t[2] = t[1];
-	t[1] = x;
+	x = t[0]; t[0] = t[2]; t[2] = t[1]; t[1] = x;
 	lswap(t[4], t[4-a]);
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 7:
-	x = t[0];
-	t[0] = t[4];
-	t[4] = t[3];
-	t[3] = t[1];
-	t[1] = t[2];
-	t[2] = x;
+	x = t[0]; t[0] = t[4]; t[4] = t[3]; t[3] = t[1]; t[1] = t[2]; t[2] = x;
 	lswap(t[6], t[6-a]);
 	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
 	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 9:
-	x = t[0];
-	t[0] = t[6];
-	t[6] = t[5];
-	t[5] = t[3];
-	t[3] = x;
+	x = t[0]; t[0] = t[6]; t[6] = t[5]; t[5] = t[3]; t[3] = x;
 	lswap(t[1], t[4]);
 	lswap(t[8], t[8-a]);
 	addiiz(gel(ar,4), addii(gmael(mt,t[8],t[9]), gmael(mt,t[9],t[8])), gel(ar,3));
@@ -1633,22 +1443,18 @@ a4galoisgen(GEN T, struct galois_test *td)
 	break;
       default:
 	y--;
-	x = t[0];
-	t[0] = t[2];
-	t[2] = t[1];
-	t[1] = x;
+	x = t[0]; t[0] = t[2]; t[2] = t[1]; t[1] = x;
 	for (k = 4; k < y; k += 2)
 	{
 	  long j;
 	  x = t[k];
-	  for (j = k; j > 0; j--)
-	    t[j] = t[j - 1];
+	  for (j = k; j > 0; j--) t[j] = t[j-1];
 	  t[0] = x;
 	}
 	lswap(t[y], t[y-a]);
 	for (k = y; k > 2; k -= 2)
 	  addiiz(gel(ar,k >> 1),
-		addii(gmael(mt,t[k],t[k + 1]), gmael(mt,t[k + 1],t[k])),
+		addii(gmael(mt,t[k],t[k+1]), gmael(mt,t[k+1],t[k])),
 		gel(ar,(k >> 1) - 1));
       }
     }
@@ -1658,29 +1464,20 @@ a4galoisgen(GEN T, struct galois_test *td)
     {
       for (k = 0; k < n; k += 2)
       {
-	pft[t[k]] = t[k + 1];
-	pft[t[k + 1]] = t[k];
+	pft[t[k]] = t[k+1];
+	pft[t[k+1]] = t[k];
       }
-      if (galois_test_perm(td, pft))
-	break;
-      else
-	hop++;
+      if (galois_test_perm(td, pft)) break;
+      hop++;
     }
     avma = av2;
   }
-  if (i == N)
-  {
-    avma = ltop;
-    if (DEBUGLEVEL >= 1 && hop)
-      fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
-    return gen_0;
-  }
   if (DEBUGLEVEL >= 1 && hop)
     fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
+  if (i == N) { avma = ltop; return gen_0; }
   /* N = itos(gdiv(mpfact(n >> 1), mpfact(n >> 2))) >> 1; */
   N = 60;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:sigma=%Zs \n", pft);
+  if (DEBUGLEVEL >= 4) fprintferr("A4GaloisConj:sigma=%Zs \n", pft);
   for (i = 0; i < N; i++)
   {
     GEN g;
@@ -1689,23 +1486,16 @@ a4galoisgen(GEN T, struct galois_test *td)
     {
       for (k = 0; k < n; k += 4)
       {
-	u[k + 3] = t[k + 3];
-	u[k + 2] = t[k + 1];
-	u[k + 1] = t[k + 2];
-	u[k] = t[k];
+	u[k+3] = t[k+3];
+	u[k+2] = t[k+1];
+	u[k+1] = t[k+2];
+	u[k]   = t[k];
       }
     }
     else
     {
-      x = i;
-      y = -2;
-      do
-      {
-	y += 4;
-	a = x%y;
-	x = x/y;
-      }
-      while (!a);
+      x = i; y = -2;
+      do { y += 4; a = x%y; x = x/y; } while (!a);
       lswap(u[0],u[2]);
       switch (y)
       {
@@ -1728,8 +1518,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	u[4] = u[1];
 	u[1] = u[0];
 	u[0] = x;
-	if (a >= 3)
-	  a += 2;
+	if (a >= 3) a += 2;
 	a = 8 - a;
 	lswap(u[10],u[a]);
 	lswap(u[8],u[a-2]);
@@ -1738,76 +1527,58 @@ a4galoisgen(GEN T, struct galois_test *td)
     }
     g = gen_0;
     for (k = 0; k < n; k += 2)
-      g = addii(g, addii(gmael(mt,u[k],u[k + 1]), gmael(mt,u[k + 1],u[k])));
+      g = addii(g, addii(gmael(mt,u[k],u[k+1]), gmael(mt,u[k+1],u[k])));
     if (padicisint(g, td))
     {
       for (k = 0; k < n; k += 2)
       {
-	pfu[u[k]] = u[k + 1];
-	pfu[u[k + 1]] = u[k];
+	pfu[u[k]] = u[k+1];
+	pfu[u[k+1]] = u[k];
       }
-      if (galois_test_perm(td, pfu))
-	break;
-      else
-	hop++;
+      if (galois_test_perm(td, pfu)) break;
+      hop++;
     }
     avma = av2;
   }
-  if (i == N)
-  {
-    avma = ltop;
-    return gen_0;
-  }
+  if (i == N) { avma = ltop; return gen_0; }
   if (DEBUGLEVEL >= 1 && hop)
     fprintferr("A4GaloisConj: %ld hop over %ld iterations\n", hop, N);
-  if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:tau=%Zs \n", pfu);
+  if (DEBUGLEVEL >= 4) fprintferr("A4GaloisConj:tau=%Zs \n", pfu);
   avma = av2;
-  orb = cgetg(3, t_VEC);
-  gel(orb,1) = pft;
-  gel(orb,2) = pfu;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("A4GaloisConj:orb=%Zs \n", orb);
+  orb = mkvec2(pft,pfu);
   O = vecperm_orbits(orb, 12);
-  if (DEBUGLEVEL >= 4)
+  if (DEBUGLEVEL >= 4) {
+    fprintferr("A4GaloisConj:orb=%Zs\n", orb);
     fprintferr("A4GaloisConj:O=%Zs \n", O);
+  }
   av2 = avma;
+  O1 = gel(O,1); O2 = gel(O,2); O3 = gel(O,3); O4 = gel(O,4);
   for (j = 0; j < 2; j++)
   {
-    pfv[mael(O,1,1)] = mael(O,2,1);
-    pfv[mael(O,1,2)] = mael(O,2,3 + j);
-    pfv[mael(O,1,3)] = mael(O,2,4 - (j << 1));
-    pfv[mael(O,1,4)] = mael(O,2,2 + j);
+    pfv[O1[1]] = O2[1];
+    pfv[O1[2]] = O2[3+j];
+    pfv[O1[3]] = O2[4 - (j << 1)];
+    pfv[O1[4]] = O2[2+j];
     for (i = 0; i < 4; i++)
     {
       GEN g;
       switch (i)
       {
-      case 0:
-	break;
-      case 1:
-	lswap(mael(O,3,1), mael(O,3,2));
-	lswap(mael(O,3,3), mael(O,3,4));
-	break;
-      case 2:
-	lswap(mael(O,3,1), mael(O,3,4));
-	lswap(mael(O,3,2), mael(O,3,3));
-	break;
-      case 3:
-	lswap(mael(O,3,1), mael(O,3,2));
-	lswap(mael(O,3,3), mael(O,3,4));
+      case 0: break;
+      case 1: lswap(O3[1], O3[2]); lswap(O3[3], O3[4]); break;
+      case 2: lswap(O3[1], O3[4]); lswap(O3[2], O3[3]); break;
+      case 3: lswap(O3[1], O3[2]); lswap(O3[3], O3[4]); break;
       }
-      pfv[mael(O,2,1)] = mael(O,3,1);
-      pfv[mael(O,2,3 + j)] = mael(O,3,4 - j);
-      pfv[mael(O,2,4 - (j << 1))] = mael(O,3,2 + (j << 1));
-      pfv[mael(O,2,2 + j)] = mael(O,3,3 - j);
-      pfv[mael(O,3,1)] = mael(O,1,1);
-      pfv[mael(O,3,4 - j)] = mael(O,1,2);
-      pfv[mael(O,3,2 + (j << 1))] = mael(O,1,3);
-      pfv[mael(O,3,3 - j)] = mael(O,1,4);
+      pfv[O2[1]]          = O3[1];
+      pfv[O2[3+j]]        = O3[4-j];
+      pfv[O2[4 - (j<<1)]] = O3[2 + (j<<1)];
+      pfv[O2[2+j]]        = O3[3-j];
+      pfv[O3[1]]          = O1[1];
+      pfv[O3[4-j]]        = O1[2];
+      pfv[O3[2 + (j<<1)]] = O1[3];
+      pfv[O3[3-j]]        = O1[4];
       g = gen_0;
-      for (k = 1; k <= n; k++)
-	g = addii(g, gmael(mt,k,pfv[k]));
+      for (k = 1; k <= n; k++) g = addii(g, gmael(mt,k,pfv[k]));
       if (padicisint(g, td) && galois_test_perm(td, pfv))
       {
 	avma = av;
@@ -1816,104 +1587,92 @@ a4galoisgen(GEN T, struct galois_test *td)
 		     hop, 10395 + 68);
 	return res;
       }
-      else
-	hop++;
-      avma = av2;
+      hop++; avma = av2;
     }
   }
-  /* Echec? */
-  avma = ltop;
-  return gen_0;
+  avma = ltop; return gen_0; /* Fail */
 }
 
 /* Groupe S4 */
 static void
 s4makelift(GEN u, struct galois_lift *gl, GEN liftpow)
 {
+  GEN s = automorphismlift(u, gl, NULL);
   long i;
-  gel(liftpow,1) = automorphismlift(u, gl, NULL);
+  gel(liftpow,1) = s;
   for (i = 2; i < lg(liftpow); i++)
-    gel(liftpow,i) = FpXQ_mul(gel(liftpow,i - 1), gel(liftpow,1),gl->TQ,gl->Q);
+    gel(liftpow,i) = FpXQ_mul(gel(liftpow,i-1), s, gl->TQ, gl->Q);
 }
 static long
 s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN res;
   long bl,i,d = lg(u)-2;
   if (DEBUGLEVEL >= 6) (void)timer2();
-  if ( !d ) return 0;
-  res=gel(u,2);
+  if (!d) return 0;
+  res = gel(u,2);
   for (i = 1; i < d; i++)
   {
     if (lg(liftpow[i])>2)
-      res=addii(res,mulii(gmael(liftpow,i,2), gel(u,i + 2)));
+      res = addii(res, mulii(gmael(liftpow,i,2), gel(u,i+2)));
   }
-  res=modii(mulii(res,gl->den),gl->Q);
+  res = Fp_mul(res, gl->den, gl->Q);
   if (cmpii(res,gl->gb->bornesol)>0
-      && cmpii(res,subii(gl->Q,gl->gb->bornesol))<0)
-  {
-    avma=ltop;
-    return 0;
-  }
+      && cmpii(res,subii(gl->Q,gl->gb->bornesol))<0) { avma = av; return 0; }
   res = scalar_ZX_shallow(gel(u,2),varn(u));
   for (i = 1; i < d ; i++)
-    res = ZX_add(res, ZX_Z_mul(gel(liftpow,i), gel(u,i + 2)));
+    res = ZX_add(res, ZX_Z_mul(gel(liftpow,i), gel(u,i+2)));
   res = FpX_red(res, gl->Q);
   res = FpX_center(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q, shifti(gl->Q,-1));
-  if (DEBUGLEVEL >= 6)
-    msgtimer("s4test()");
+  if (DEBUGLEVEL >= 6) msgtimer("s4test()");
   bl = poltopermtest(res, gl, phi);
-  avma=ltop;
-  return bl;
+  avma = av; return bl;
 }
+
+static GEN
+aux(long a, long b, GEN T, GEN M, GEN p, GEN *pu)
+{
+  *pu = FpX_mul(gel(T,b), gel(T,a),p);
+  return FpX_chinese_coprime(gmael(M,a,b), gmael(M,b,a),
+                             gel(T,b), gel(T,a), *pu, p);
+}
+
 static GEN
 s4releveauto(GEN misom,GEN Tmod,GEN Tp,GEN p,long a1,long a2,long a3,long a4,long a5,long a6)
 {
-  pari_sp ltop=avma;
-  GEN u1,u2,u3,u4,u5;
-  GEN pu1,pu2,pu3,pu4;
-  pu1=FpX_mul( gel(Tmod,a2), gel(Tmod,a1),p);
-  u1 = FpX_chinese_coprime(gmael(misom,a1,a2),gmael(misom,a2,a1),
-			 gel(Tmod,a2), gel(Tmod,a1),pu1,p);
-  pu2=FpX_mul( gel(Tmod,a4), gel(Tmod,a3),p);
-  u2 = FpX_chinese_coprime(gmael(misom,a3,a4),gmael(misom,a4,a3),
-			 gel(Tmod,a4), gel(Tmod,a3),pu2,p);
-  pu3=FpX_mul( gel(Tmod,a6), gel(Tmod,a5),p);
-  u3 = FpX_chinese_coprime(gmael(misom,a5,a6),gmael(misom,a6,a5),
-			 gel(Tmod,a6), gel(Tmod,a5),pu3,p);
-  pu4=FpX_mul(pu1,pu2,p);
+  pari_sp av = avma;
+  GEN u4,u5;
+  GEN pu1, pu2, pu3, pu4;
+  GEN u1 = aux(a1, a2, Tmod, misom, p, &pu1);
+  GEN u2 = aux(a3, a4, Tmod, misom, p, &pu2);
+  GEN u3 = aux(a5, a6, Tmod, misom, p, &pu3);
+  pu4 = FpX_mul(pu1,pu2,p);
   u4 = FpX_chinese_coprime(u1,u2,pu1,pu2,pu4,p);
   u5 = FpX_chinese_coprime(u4,u3,pu4,pu3,Tp,p);
-  return gerepileupto(ltop,u5);
+  return gerepileupto(av, u5);
+}
+static GEN
+lincomb(GEN A, GEN B, GEN pauto, long j)
+{
+  long k = (-j) & 3;
+  if (j == k) return ZX_mul(ZX_add(A,B), gel(pauto, j+1));
+  return ZX_add(ZX_mul(A, gel(pauto, j+1)), ZX_mul(B, gel(pauto, k+1)));
 }
 static GEN
 s4galoisgen(struct galois_lift *gl)
 {
   struct galois_testlift gt;
   pari_sp av, ltop2, ltop = avma;
-  GEN     Tmod, isom, isominv, misom;
   long i, j;
-  GEN     sg;
-  GEN     sigma, tau, phi;
-  GEN     res, ry;
-  GEN     pj;
-  GEN     p,Q,TQ,Tp;
-  GEN     bezoutcoeff, pauto, liftpow, aut;
+  GEN sigma, tau, phi, res, r1,r2,r3,r4, pj, p = gl->p, Q = gl->Q, TQ = gl->TQ;
+  GEN sg, Tp, Tmod, isom, isominv, misom, Bcoeff, pauto, liftpow, aut;
 
-  p = gl->p;
-  Q = gl->Q;
-  res = cgetg(3, t_VEC);
-  ry  = cgetg(5, t_VEC);
-  gel(res,1) = ry;
-  for (i = 1; i < lg(ry); i++)
-    gel(ry,i) = cgetg(lg(gl->L), t_VECSMALL);
-  ry = cgetg(5, t_VECSMALL);
-  gel(res,2) = ry;
-  ry[1] = 2;
-  ry[2] = 2;
-  ry[3] = 3;
-  ry[4] = 2;
+  r1 = cgetg(lg(gl->L), t_VECSMALL);
+  r2 = cgetg(lg(gl->L), t_VECSMALL);
+  r3 = cgetg(lg(gl->L), t_VECSMALL);
+  r4 = cgetg(lg(gl->L), t_VECSMALL);
+  res = mkvec2(mkvec4(r1,r2,r3,r4), mkvecsmall4(2,2,3,2));
   ltop2 = avma;
   sg = perm_identity(6);
   pj = const_vecsmall(6, 0);
@@ -1921,14 +1680,13 @@ s4galoisgen(struct galois_lift *gl)
   tau = cgetg(lg(gl->L), t_VECSMALL);
   phi = cgetg(lg(gl->L), t_VECSMALL);
   Tp = FpX_red(gl->T,p);
-  TQ = gl->TQ;
   Tmod = gel(FpX_factor(Tp,p), 1);
-  isom = cgetg(lg(Tmod), t_VEC);
+  isom    = cgetg(lg(Tmod), t_VEC);
   isominv = cgetg(lg(Tmod), t_VEC);
-  misom = cgetg(lg(Tmod), t_MAT);
-  aut=galoisdolift(gl, NULL);
-  inittestlift(aut,Tmod, gl, &gt);
-  bezoutcoeff = gt.bezoutcoeff;
+  misom   = cgetg(lg(Tmod), t_MAT);
+  aut = galoisdolift(gl, NULL);
+  inittestlift(aut, Tmod, gl, &gt);
+  Bcoeff = gt.bezoutcoeff;
   pauto = gt.pauto;
   for (i = 1; i < lg(isom); i++)
   {
@@ -1945,128 +1703,95 @@ s4galoisgen(struct galois_lift *gl)
  				        gel(Tmod,j),p);
   liftpow = cgetg(24, t_VEC);
   av = avma;
-  for (i = 0; i < 3; i++)
+  for (i = 0; i < 3; i++, avma = av)
   {
-    pari_sp av2, avm1, avm2;
-    GEN u;
+    pari_sp av1, av2, av3;
+    GEN u, u1, u2, u3;
     long j1, j2, j3;
-    GEN u1, u2, u3;
     if (i)
     {
-      if (i == 1)
-      { lswap(sg[2],sg[3]); }
-      else
-      { lswap(sg[1],sg[3]); }
+      if (i == 1) { lswap(sg[2],sg[3]); }
+      else        { lswap(sg[1],sg[3]); }
     }
-    u=s4releveauto(misom,Tmod,Tp,p,sg[1],sg[2],sg[3],sg[4],sg[5],sg[6]);
+    u = s4releveauto(misom,Tmod,Tp,p,sg[1],sg[2],sg[3],sg[4],sg[5],sg[6]);
     s4makelift(u, gl, liftpow);
-    av2 = avma;
-    for (j1 = 0; j1 < 4; j1++)
+    av1 = avma;
+    for (j1 = 0; j1 < 4; j1++, avma = av1)
     {
-      u1 = ZX_add(ZX_mul(gel(bezoutcoeff, sg[5]), gel(pauto,1 + j1)),
-		  ZX_mul(gel(bezoutcoeff, sg[6]), gel(pauto, ((-j1) & 3) + 1)));
-      u1 = FpX_rem(u1, TQ, Q);
-      avm1 = avma;
-      for (j2 = 0; j2 < 4; j2++)
+      u1 = lincomb(gel(Bcoeff,sg[5]),gel(Bcoeff,sg[6]), pauto,j1);
+      u1 = FpX_rem(u1, TQ, Q); av2 = avma;
+      for (j2 = 0; j2 < 4; j2++, avma = av2)
       {
-	u2 = ZX_add(ZX_mul(gel(bezoutcoeff,sg[3]), gel(pauto,1 + j2)),
-		    ZX_mul(gel(bezoutcoeff,sg[4]), gel(pauto,((-j2) & 3) + 1)));
-
-	u2 = FpX_rem(ZX_add(u1, u2), TQ,Q);
-	avm2 = avma;
-	for (j3 = 0; j3 < 4; j3++)
+        u2 = lincomb(gel(Bcoeff,sg[3]),gel(Bcoeff,sg[4]), pauto,j2);
+	u2 = FpX_rem(ZX_add(u1, u2), TQ,Q); av3 = avma;
+	for (j3 = 0; j3 < 4; j3++, avma = av3)
 	{
-	  u3 = ZX_add(ZX_mul(gel(bezoutcoeff,sg[1]), gel(pauto,1 + j3)),
-		      ZX_mul(gel(bezoutcoeff,sg[2]), gel(pauto,((-j3) & 3)+1)));
+          u3 = lincomb(gel(Bcoeff,sg[1]),gel(Bcoeff,sg[2]), pauto,j3);
 	  u3 = FpX_rem(ZX_add(u2, u3), TQ,Q);
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/4:%d/4:%d/4:%Zs\n",
-		       i, j1,j2, j3, sg);
+		       i,j1,j2,j3, sg);
 	  if (s4test(u3, liftpow, gl, sigma))
 	  {
 	    pj[1] = j3;
 	    pj[2] = j2;
-	    pj[3] = j1;
-	    goto suites4;
+	    pj[3] = j1; goto suites4;
 	  }
-	  avma = avm2;
 	}
-	avma = avm1;
       }
-      avma = av2;
     }
-    avma = av;
   }
-  avma = ltop;
-  return gen_0;
+  avma = ltop; return gen_0;
 suites4:
-  if (DEBUGLEVEL >= 4)
-    fprintferr("S4GaloisConj:sigma=%Zs\n", sigma);
-  if (DEBUGLEVEL >= 4)
-    fprintferr("S4GaloisConj:pj=%Zs\n", pj);
+  if (DEBUGLEVEL >= 4) fprintferr("S4GaloisConj:sigma=%Zs\n", sigma);
+  if (DEBUGLEVEL >= 4) fprintferr("S4GaloisConj:pj=%Zs\n", pj);
   avma = av;
   for (j = 1; j <= 3; j++)
   {
-    pari_sp av2;
-    GEN     u;
+    pari_sp av2, av3;
+    GEN u;
     long w, l, z;
     z = sg[1]; sg[1] = sg[3]; sg[3] = sg[5]; sg[5] = z;
     z = sg[2]; sg[2] = sg[4]; sg[4] = sg[6]; sg[6] = z;
     z = pj[1]; pj[1] = pj[2]; pj[2] = pj[3]; pj[3] = z;
-    for (l = 0; l < 2; l++)
+    for (l = 0; l < 2; l++, avma = av)
     {
-      u=s4releveauto(misom,Tmod,Tp,p,sg[1],sg[3],sg[2],sg[4],sg[5],sg[6]);
+      u = s4releveauto(misom,Tmod,Tp,p,sg[1],sg[3],sg[2],sg[4],sg[5],sg[6]);
       s4makelift(u, gl, liftpow);
       av2 = avma;
-      for (w = 0; w < 4; w += 2)
+      for (w = 0; w < 4; w += 2, avma = av2)
       {
-	pari_sp av3;
-	GEN     uu;
+	GEN uu;
 	pj[6] = (w + pj[3]) & 3;
-	uu =ZX_add(ZX_mul(gel(bezoutcoeff,sg[5]), gel(pauto,(pj[6] & 3) + 1)),
-		   ZX_mul(gel(bezoutcoeff,sg[6]), gel(pauto,((-pj[6])&3)+ 1)));
+	uu = lincomb(gel(Bcoeff,sg[5]),gel(Bcoeff,sg[6]), pauto, pj[6]);
 	uu = FpX_rem(uu, TQ, Q);
 	av3 = avma;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < 4; i++, avma = av3)
 	{
-	  GEN     u;
+	  GEN u;
 	  pj[4] = i;
 	  pj[5] = (i + pj[2] - pj[1]) & 3;
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/2:%d/2:%d/4:%Zs:%Zs\n",
-		       j - 1, w >> 1, l, i, sg, pj);
-	  u = ZX_add(uu, ZX_mul(gel(pauto,(pj[4] & 3) + 1),
-				gel(bezoutcoeff,sg[1])));
-	  u = ZX_add(u,  ZX_mul(gel(pauto,((-pj[4]) & 3) + 1),
-				gel(bezoutcoeff,sg[3])));
-	  u = ZX_add(u,  ZX_mul(gel(pauto,(pj[5] & 3) + 1),
-				gel(bezoutcoeff,sg[2])));
-	  u = ZX_add(u,  ZX_mul(gel(pauto,((-pj[5]) & 3) + 1),
-				gel(bezoutcoeff,sg[4])));
-	  u = FpX_rem(u, TQ, Q);
-	  if (s4test(u, liftpow, gl, tau))
-	    goto suites4_2;
-	  avma = av3;
+		       j-1, w >> 1, l, i, sg, pj);
+          u = ZX_add(lincomb(gel(Bcoeff,sg[1]),gel(Bcoeff,sg[3]), pauto,pj[4]),
+                     lincomb(gel(Bcoeff,sg[2]),gel(Bcoeff,sg[4]), pauto,pj[5]));
+	  u = FpX_rem(ZX_add(uu,u), TQ, Q);
+	  if (s4test(u, liftpow, gl, tau)) goto suites4_2;
 	}
-	avma = av2;
       }
-      z = sg[4];
-      sg[4] = sg[3];
-      sg[3] = z;
+      lswap(sg[3], sg[4]);
       pj[2] = (-pj[2]) & 3;
-      avma = av;
     }
   }
-  avma = ltop;
-  return gen_0;
+  avma = ltop; return gen_0;
 suites4_2:
   avma = av;
   {
-    long abc, abcdef;
-    GEN     u;
+    long abc = (pj[1] + pj[2] + pj[3]) & 3;
+    long abcdef = ((abc + pj[4] + pj[5] - pj[6]) & 3) >> 1;
+    GEN u;
     pari_sp av2;
-    abc = (pj[1] + pj[2] + pj[3]) & 3;
-    abcdef = (((abc + pj[4] + pj[5] - pj[6]) & 3) >> 1);
     u = s4releveauto(misom,Tmod,Tp,p,sg[1],sg[4],sg[2],sg[5],sg[3],sg[6]);
     s4makelift(u, gl, liftpow);
     av2 = avma;
@@ -2074,44 +1799,29 @@ suites4_2:
     {
       long h, g, i;
       h = j & 3;
-      g = abcdef + ((j & 4) >> 1);
-      i = h + abc - g;
-      u = ZX_mul(gel(pauto,(g & 3) + 1),
-		   gel(bezoutcoeff,sg[1]));
-      u = ZX_add(u, ZX_mul(gel(pauto,((-g) & 3) + 1),
-			   gel(bezoutcoeff,sg[4])));
-      u = ZX_add(u, ZX_mul(gel(pauto,(h & 3) + 1),
-			   gel(bezoutcoeff,sg[2])));
-      u = ZX_add(u, ZX_mul(gel(pauto,((-h) & 3) + 1),
-			   gel(bezoutcoeff,sg[5])));
-      u = ZX_add(u, ZX_mul(gel(pauto,(i & 3) + 1),
-			   gel(bezoutcoeff,sg[3])));
-      u = ZX_add(u, ZX_mul(gel(pauto,((-i) & 3) + 1),
-			   gel(bezoutcoeff,sg[6])));
+      g = (abcdef + ((j & 4) >> 1)) & 3;
+      i = (h + abc - g) & 3;
+      u = ZX_add(   lincomb(gel(Bcoeff,sg[1]), gel(Bcoeff,sg[4]), pauto, g),
+                    lincomb(gel(Bcoeff,sg[2]), gel(Bcoeff,sg[5]), pauto, h));
+      u = ZX_add(u, lincomb(gel(Bcoeff,sg[3]), gel(Bcoeff,sg[6]), pauto, i));
       u = FpX_rem(u, TQ, Q);
       if (DEBUGLEVEL >= 4)
-	fprintferr("S4GaloisConj:Testing %d/8 %d:%d:%d\n",
-		   j, g & 3, h & 3, i & 3);
-      if (s4test(u, liftpow, gl, phi))
-	break;
+	fprintferr("S4GaloisConj:Testing %d/8 %d:%d:%d\n", j,g,h,i);
+      if (s4test(u, liftpow, gl, phi)) break;
       avma = av2;
     }
   }
-  if (j == 8)
-  {
-    avma = ltop;
-    return gen_0;
-  }
+  if (j == 8) { avma = ltop; return gen_0; }
   for (i = 1; i < lg(gl->L); i++)
   {
-    mael3(res,1,1,i) = sigma[tau[i]];
-    mael3(res,1,2,i) = phi[sigma[tau[phi[i]]]];
-    mael3(res,1,3,i) = phi[sigma[i]];
-    mael3(res,1,4,i) = sigma[i];
+    r1[i] = sigma[tau[i]];
+    r2[i] = phi[sigma[tau[phi[i]]]];
+    r3[i] = phi[sigma[i]];
+    r4[i] = sigma[i];
   }
-  avma = ltop2;
-  return res;
+  avma = ltop2; return res;
 }
+
 struct galois_frobenius
 {
   long p;
@@ -2125,29 +1835,27 @@ static GEN
 galoisfindgroups(GEN lo, GEN sg, long f)
 {
   pari_sp ltop = avma;
-  long i,j,k;
-  GEN V = cgetg(lg(lo),t_VEC);
+  long i, j, k;
+  GEN V = cgetg(lg(lo), t_VEC);
   for(j=1,i=1; i<lg(lo); i++)
   {
     pari_sp av = avma;
-    GEN W = cgetg(lg(lo[i]),t_VECSMALL);
-    for (k=1; k<lg(lo[i]); k++) W[k] = mael(lo,i,k)%f;
+    GEN loi = gel(lo,i), W = cgetg(lg(loi),t_VECSMALL);
+    for (k=1; k<lg(loi); k++) W[k] = loi[k] % f;
     W = vecsmall_uniq(W);
-    if (zv_equal(W, sg)) V[j++] = lo[i];
+    if (zv_equal(W, sg)) gel(V,j++) = loi;
     avma = av;
   }
-  setlg(V,j);
-  return gerepilecopy(ltop,V);
+  setlg(V,j); return gerepilecopy(ltop,V);
 }
 
 static long
 galoisfrobeniustest(GEN aut, struct galois_lift *gl, GEN frob)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN tlift = FpX_center(FpX_Fp_mul(aut,gl->den,gl->Q), gl->Q, shifti(gl->Q,-1));
   long res = poltopermtest(tlift, gl, frob);
-  avma = ltop;
-  return res;
+  avma = av; return res;
 }
 
 static GEN
@@ -2155,10 +1863,8 @@ galoismakepsi(long g, GEN sg, GEN pf)
 {
   GEN psi=cgetg(g+1,t_VECSMALL);
   long i;
-  for (i = 1; i < g; i++)
-    psi[i] = sg[pf[i]];
-  psi[g]=sg[1];
-  return psi;
+  for (i = 1; i < g; i++) psi[i] = sg[pf[i]];
+  psi[g] = sg[1]; return psi;
 }
 
 static GEN
@@ -2168,111 +1874,86 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   pari_sp ltop=avma, av2;
   struct galois_testlift gt;
   struct galois_lift gl;
-  GEN res;
-  long i,j,k;
-  long n=lg(L)-1, deg=1, g=lg(gf->Tmod)-1;
-  GEN F,Fp,Fe;
-  GEN ip = utoipos(gf->p), aut, frob;
+  long i, j, k, n = lg(L)-1, deg = 1, g = lg(gf->Tmod)-1;
+  GEN F,Fp,Fe, aut, frob, ip = utoipos(gf->p), res = cgetg(lg(L), t_VECSMALL);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:p=%ld deg=%ld fp=%ld\n", gf->p, deg, gf->fp);
-  res = cgetg(lg(L), t_VECSMALL);
   gf->psi = const_vecsmall(g,1);
-  av2=avma;
+  av2 = avma;
   initlift(T, den, ip, L, Lden, gb, &gl);
   aut = galoisdolift(&gl, res);
   if (!aut || galoisfrobeniustest(aut,&gl,res))
   {
-    avma=av2;
-    gf->deg = gf->fp;
-    return res;
+    avma = av2; gf->deg = gf->fp; return res;
   }
   inittestlift(aut,gf->Tmod, &gl, &gt);
   gt.C = cgetg(gf->fp+1,t_VEC);
   for (i = 1; i <= gf->fp; i++) gel(gt.C,i) = const_vecsmall(gt.g, 0);
-  gt.Cd=gcopy(gt.C);
+  gt.Cd = gcopy(gt.C);
 
   F =factoru(gf->fp);
-  Fp=gel(F,1);
-  Fe=gel(F,2);
+  Fp = gel(F,1);
+  Fe = gel(F,2);
   frob = cgetg(lg(L), t_VECSMALL);
   for(k=lg(Fp)-1;k>=1;k--)
   {
     pari_sp btop=avma;
-    GEN psi=NULL,fres=NULL,sg;
-    long el=gf->fp, dg=1, dgf=1;
-    long e,pr;
-    sg=perm_identity(1);
-    for(e=1;e<=Fe[k];e++)
+    GEN psi=NULL, fres=NULL, sg = perm_identity(1);
+    long el=gf->fp, dg=1, dgf=1, e, pr;
+    for(e=1; e<=Fe[k]; e++)
     {
+      GEN lo, pf;
       long l;
-      GEN lo;
-      GEN pf;
       dg *= Fp[k]; el /= Fp[k];
-      if ( DEBUGLEVEL>=4 )
-	fprintferr("Trying degre %d.\n",dg);
+      if (DEBUGLEVEL>=4) fprintferr("Trying degre %d.\n",dg);
       if (galoisfrobeniustest(gel(gt.pauto,el+1),&gl,frob))
       {
-	dgf = dg;
 	psi = const_vecsmall(g,1);
-	fres= gcopy(frob);
-	continue;
+	dgf = dg; fres= gcopy(frob); continue;
       }
       disable_dbg(0);
       lo = listznstarelts(dg, n / gf->fp);
       disable_dbg(-1);
-      if (e!=1)
-	lo = galoisfindgroups(lo, sg, dgf);
-      if (DEBUGLEVEL >= 4)
-	fprintferr("Galoisconj:Subgroups list:%Zs\n", lo);
+      if (e!=1) lo = galoisfindgroups(lo, sg, dgf);
+      if (DEBUGLEVEL>=4) fprintferr("Galoisconj:Subgroups list:%Zs\n", lo);
       for (l = 1; l < lg(lo); l++)
-	if ( lg(lo[l])>2 &&
-	    frobeniusliftall(gel(lo,l), el, &pf, &gl, &gt, frob))
+	if (lg(lo[l])>2 && frobeniusliftall(gel(lo,l), el, &pf,&gl,&gt, frob))
 	{
 	  sg  = gcopy(gel(lo,l));
 	  psi = galoismakepsi(g,sg,pf);
-	  dgf = dg;
-	  fres=gcopy(frob);
-	  break;
+	  dgf = dg; fres=gcopy(frob); break;
 	}
-      if ( l == lg(lo) )
-	break;
+      if (l == lg(lo)) break;
     }
-    if (dgf==1) { avma=btop; continue; }
-    pr=deg*dgf;
-    if (deg==1)
+    if (dgf == 1) { avma = btop; continue; }
+    pr = deg*dgf;
+    if (deg == 1)
     {
       for(i=1;i<lg(res);i++) res[i]=fres[i];
       for(i=1;i<lg(psi);i++) gf->psi[i]=psi[i];
     }
     else
     {
-      GEN cp=perm_mul(res,fres);
-      for(i=1;i<lg(res);i++) res[i]=cp[i];
-      for(i=1;i<lg(psi);i++) gf->psi[i]=(dgf*gf->psi[i]+deg*psi[i])%pr;
+      GEN cp = perm_mul(res,fres);
+      for(i=1;i<lg(res);i++) res[i] = cp[i];
+      for(i=1;i<lg(psi);i++) gf->psi[i] = (dgf*gf->psi[i] + deg*psi[i]) % pr;
     }
-    deg=pr;
-    avma=btop;
+    deg = pr; avma = btop;
   }
   for (i = 1; i <= gf->fp; i++)
     for (j = 1; j <= gt.g; j++)
       if (mael(gt.C,i,j)) gunclone(gmael(gt.C,i,j));
   if (DEBUGLEVEL>=4 && res)
     fprintferr("Best lift: %d\n",deg);
-  if (deg==1)
-  {
-    avma=ltop;
-    return NULL;
-  }
+  if (deg==1) { avma = ltop; return NULL; }
   else
   {
-    /*We need to normalise result so that psi[g]=1*/
-    long im=Fl_inv(gf->psi[g],deg);
-    GEN cp=perm_pow(res, im);
-    for(i=1;i<lg(res);i++) res[i]=cp[i];
-    for(i=1;i<lg(gf->psi);i++) gf->psi[i] = Fl_mul(im,gf->psi[i],deg);
-    avma=av2;
-    gf->deg=deg;
-    return res;
+    /* Normalize result so that psi[g]=1 */
+    long im = Fl_inv(gf->psi[g], deg);
+    GEN cp = perm_pow(res, im);
+    for(i=1;i<lg(res);i++) res[i] = cp[i];
+    for(i=1;i<lg(gf->psi);i++) gf->psi[i] = Fl_mul(im, gf->psi[i], deg);
+    avma = av2; gf->deg = deg; return res;
   }
 }
 
@@ -2281,65 +1962,43 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
   pari_sp lbot, ltop=avma;
-  long Try=0;
-  long n = degpol(T), deg, gmask;
+  long Try=0, n = degpol(T), deg, gmask;
   byteptr primepointer = ga->primepointer;
-  GEN Lden,frob;
-  Lden=makeLden(L,den,gb);
-  gf->deg=ga->deg;gf->p=ga->p; deg=ga->deg;
-  gmask=(ga->group&ga_ext_2)?3:1;
+  GEN frob, Lden = makeLden(L,den,gb);
+  deg = gf->deg = ga->deg; gf->p = ga->p;
+  gmask = (ga->group&ga_ext_2)? 3: 1;
   for (;;)
   {
     pari_sp av = avma;
-    long    isram;
-    long    i;
-    GEN     ip,Tmod;
-    ip = utoipos(gf->p);
-    Tmod = FpX_factor(T,ip);
-    isram = 0;
-    for (i = 1; i < lg(Tmod[2]) && !isram; i++)
-      if (mael(Tmod,2,i)!=1)
-	isram = 1;
-    if (isram == 0)
+    GEN Tp = ZX_to_Flx(T, gf->p);
+    if (Flx_is_squarefree(Tp, gf->p))
     {
-      gf->fp = degpol(gmael(Tmod,1,1));
-      for (i = 2; i < lg(Tmod[1]); i++)
-	if (degpol(gmael(Tmod,1,i)) != gf->fp)
-	{
-	  avma = ltop;
-	  return NULL;		/* Not Galois polynomial */
-	}
-      lbot=avma;
-      gf->Tmod=gcopy(gel(Tmod,1));
+      GEN Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
+      long i;
+      gf->fp = degpol(gel(Ti,1));
+      for (i = 2; i < lg(Ti); i++)
+        if (degpol(gel(Ti,i)) != gf->fp) { avma = ltop; return NULL; } /* not Galois */
+      lbot = avma;
+      gf->Tmod = gcopy(Ti);
       if ( ((gmask&1) && gf->fp % deg == 0) || ((gmask&2) && gf->fp % 2== 0) )
       {
-	frob=galoisfrobeniuslift(T, den, L, Lden, gf, gb);
-	if (frob)
-	{
-	  GEN *gptr[3];
-	  gptr[0]=&gf->Tmod;
-	  gptr[1]=&gf->psi;
-	  gptr[2]=&frob;
-	  gerepilemanysp(ltop,lbot,gptr,3);
-	  return frob;
-	}
-	if ((ga->group&ga_all_normal) && gf->fp % deg == 0)
-	  gmask&=~1;
-	/*The first prime degree is always divisible by deg, so we don't
-	 * have to worry about ext_2 being used before regular supersolvable*/
-	if (!gmask)
-	{
-	  avma = ltop;
-	  return NULL;
-	}
-	Try++;
-	if ( (ga->group&ga_non_wss) && Try > n )
-	  pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
+        frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
+        if (frob)
+        {
+          GEN *gptr[3]; gptr[0]=&gf->Tmod; gptr[1]=&gf->psi; gptr[2]=&frob;
+          gerepilemanysp(ltop,lbot,gptr,3); return frob;
+        }
+        if ((ga->group&ga_all_normal) && gf->fp % deg == 0) gmask &= ~1;
+        /*The first prime degree is always divisible by deg, so we don't
+         * have to worry about ext_2 being used before regular supersolvable*/
+        if (!gmask) { avma = ltop; return NULL; }
+        Try++;
+        if ((ga->group&ga_non_wss) && Try > n)
+          pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
       }
     }
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
-    if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:next p=%ld\n", gf->p);
+    if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:next p=%ld\n", gf->p);
     avma = av;
   }
 }
@@ -2418,12 +2077,9 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
   return gerepilecopy(ltop,PG);
 }
 
-/* Let
- * sigma^m=1
- * tau*sigma*tau^-1=sigma^s.
- * Compute n so that
- * (sigma*tau)^e=sigma^n*tau^e
- * We have n=sum_{k=0}^{e-1} s^k mod m.
+/* Let sigma^m=1,  tau*sigma*tau^-1=sigma^s.
+ * Compute n so that (sigma*tau)^e = sigma^n*tau^e
+ * We have n = sum_{k=0}^{e-1} s^k mod m.
  * so n*(1-s) = 1-s^e mod m
  * Unfortunately (1-s) might not invertible mod m.
  */
@@ -2445,8 +2101,7 @@ wpow(long s, long m, long e, long n)
   long si = s;
   long i;
   w[1] = 1;
-  for(i=2; i<=n; i++)
-    w[i] = w[i-1]*e;
+  for(i=2; i<=n; i++) w[i] = w[i-1]*e;
   for(i=n; i>=1; i--)
   {
     si = Fl_powu(si,e,m);
@@ -2462,30 +2117,21 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   struct galois_test td;
   struct galois_frobenius gf;
   pari_sp lbot, ltop2, ltop = avma;
-  long    n, p, deg, x;
-  long    i, j;
-  GEN     Lden, sigma;
-  GEN     Tmod, res, pf = gen_0, ip;
-  GEN     frob;
-  GEN     O;
-  GEN     PG, Pg;
-  n = degpol(T);
-  if (!ga->deg)
-    return gen_0;
+  long p, deg, x, i, j, n = degpol(T);
+  GEN Lden, sigma, Tmod, res, pf, ip, frob, O, PG, Pg;
+
+  if (!ga->deg) return gen_0;
   x = varn(T);
-  if (DEBUGLEVEL >= 9)
-    fprintferr("GaloisConj:denominator:%Zs\n", den);
-  if (n == 12 && ga->ord==3)	/* A4 is very probable,so test it first */
-  {
+  if (DEBUGLEVEL >= 9) fprintferr("GaloisConj:denominator:%Zs\n", den);
+  if (n == 12 && ga->ord==3)
+  { /* A4 is very probable: test it first */
     pari_sp av = avma;
-    if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:Testing A4 first\n");
+    if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:Testing A4 first\n");
     inittest(L, M, gb->bornesol, gb->ladicsol, &td);
     lbot = avma;
     PG = a4galoisgen(T, &td);
     freetest(&td);
-    if (PG != gen_0)
-      return gerepile(ltop, lbot, PG);
+    if (PG != gen_0) return gerepile(ltop, lbot, PG);
     avma = av;
   }
   if (n == 24 && ga->ord==3)	/* S4 is very probable,so test it first */
@@ -2557,41 +2203,31 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   ltop2 = avma;
   for (j = 1; j < lg(PG[1]); j++)
   {
-    long sr;
-    long k;
+    long sr, k;
     GEN  X  = cgetg(lg(O), t_VECSMALL);
     GEN  oX = cgetg(lg(O), t_VECSMALL);
     GEN  gj = gmael(PG,1,j);
     long s  = gf.psi[Pg[j]];
     GEN  B  = perm_cycles(gj);
     long oj = lg(B[1]) - 1;
-    GEN  F  = factoru_pow(oj);
+    GEN  F  = factoru(oj);
     GEN  Fp = gel(F,1);
     GEN  Fe = gel(F,2);
-    GEN  Fc = gel(F,3);
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj: G[%d]=%Zs of relative order %d\n", j, gj, oj);
     B = perm_cycles(gmael(PG,1,j));
     pf = perm_identity(n);
     for (k=lg(Fp)-1; k>=1; k--)
     {
-      long f;
-      long dg = 1, el = oj;
-      long osel = 1;
-      long p  = Fp[k];
-      long e  = Fe[k];
-      long op = oj/Fc[k];
-      long a=0;
-      GEN  pf1 = NULL, w, wg;
-      GEN  Be = cgetg(e+1,t_VEC);
+      long f, dg = 1, el = oj, osel = 1, a = 0;
+      long p  = Fp[k], e  = Fe[k], op = oj / upowuu(p,e);
+      GEN  pf1 = NULL, w, wg, Be = cgetg(e+1,t_VEC);
       gel(Be,e) = cyc_pow(B, op);
-      for(i=e-1; i>=1; i--)
-	gel(Be,i) = cyc_pow(gel(Be,i+1), p);
+      for(i=e-1; i>=1; i--) gel(Be,i) = cyc_pow(gel(Be,i+1), p);
       w = wpow(Fl_powu(s,op,deg),deg,p,e);
       wg = cgetg(e+2,t_VECSMALL);
       wg[e+1] = deg;
-      for (i=e; i>=1; i--)
-	wg[i]=ugcd(wg[i+1], w[i]);
+      for (i=e; i>=1; i--) wg[i] = ugcd(wg[i+1], w[i]);
       for (i=1; i<lg(O); i++) oX[i] = 0;
       for (f=1; f<=e; f++)
       {
@@ -2600,8 +2236,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	long t;
 	dg *= p; el /= p;
 	sel = Fl_powu(s,el,deg);
-	if (DEBUGLEVEL >= 6)
-	  fprintferr("GaloisConj: B=%Zs\n", Bel);
+	if (DEBUGLEVEL >= 6) fprintferr("GaloisConj: B=%Zs\n", Bel);
 	sr  = cgcd(stpow(sel,p,deg),deg);
 	if (DEBUGLEVEL >= 6)
 	  fprintferr("GaloisConj: exp %d: s=%ld [%ld] a=%ld w=%ld wg=%ld sr=%ld\n",
@@ -2618,8 +2253,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 		st = (t + st*osel)%deg;
 	      }
 	    pf1 = testpermutation(O, Bel, X, sel, p, sr, &td);
-	    if (pf1)
-	      break;
+	    if (pf1) break;
 	  }
 	if (!pf1) { freetest(&td); avma = ltop; return gen_0; }
 	for (i=1; i<lg(O); i++) oX[i] = X[i];
@@ -2631,8 +2265,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     gmael(res,2,j+1) = gmael(PG,2,j);
     avma = ltop2;
   }
-  if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisConj:Fini!\n");
+  if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:Fini!\n");
   freetest(&td);
   return gerepile(ltop, lbot, res);
 }
