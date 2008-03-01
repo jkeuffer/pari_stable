@@ -871,10 +871,10 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   avma = avm; return NULL;
 }
 
-/* List of subgroups of (Z/mZ)^* whose order divide p, and return the list
+/* List of subgroups of (Z/mZ)^* whose order divide o, and return the list
  * of their elements */
 GEN
-listznstarelts(long m, long p)
+listznstarelts(long m, long o)
 {
   pari_sp ltop = avma;
   GEN zn, zns, lss, res;
@@ -888,14 +888,14 @@ listznstarelts(long m, long p)
   zn = znstar(stoi(m));
   phi = itos(gel(zn,1));
   zns = znstar_small(zn);
-  lss = subgrouplist(gel(zn,2), stoi(p));
+  res = subgrouplist(gel(zn,2), stoi(o));
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
     pari_sp av = avma;
     card = phi / itos(ZM_det_triangular(gel(lss,i)));
     avma = av;
-    if (p % card == 0)
+    if (o % card == 0)
       gel(res,k++) = znstar_hnf_elts(zns,gel(lss,i));
   }
   setlg(res,k);
@@ -1128,7 +1128,7 @@ notgalois(long p, struct galois_analysis *ga)
   ga->deg = 0;
 }
 
-#define numberof(x) (sizeof(x) / sizeof((x)[0]))
+#define numberof(x) (long)(sizeof(x) / sizeof((x)[0]))
 
 /*Gather information about the group*/
 static long
@@ -1787,8 +1787,11 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
   inittestlift(aut,gf->Tmod, &gl, &gt);
   gt.C = cgetg(gf->fp+1,t_VEC);
-  for (i = 1; i <= gf->fp; i++) gel(gt.C,i) = const_vecsmall(gt.g, 0);
-  gt.Cd = gcopy(gt.C);
+  gt.Cd= cgetg(gf->fp+1,t_VEC);
+  for (i = 1; i <= gf->fp; i++) {
+    gel(gt.C,i)  = const_vecsmall(gt.g, 0);
+    gel(gt.Cd,i) = const_vecsmall(gt.g, 0);
+  }
 
   F =factoru(gf->fp);
   Fp = gel(F,1);
@@ -1808,7 +1811,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       if (galoisfrobeniustest(gel(gt.pauto,el+1),&gl,frob))
       {
 	psi = const_vecsmall(g,1);
-	dgf = dg; fres= gcopy(frob); continue;
+	dgf = dg; fres = gcopy(frob); continue;
       }
       disable_dbg(0);
       lo = listznstarelts(dg, n / gf->fp);
@@ -1820,7 +1823,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
 	{
 	  sg  = gcopy(gel(lo,l));
 	  psi = galoismakepsi(g,sg,pf);
-	  dgf = dg; fres=gcopy(frob); break;
+	  dgf = dg; fres = gcopy(frob); break;
 	}
       if (l == lg(lo)) break;
     }
@@ -1855,45 +1858,42 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
 }
 
+/* return NULL if not Galois */
 static GEN
 galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
-  pari_sp lbot, ltop=avma;
-  long Try=0, n = degpol(T), deg, gmask;
+  pari_sp ltop = avma;
+  long Try = 0, n = degpol(T), deg, gmask = (ga->group&ga_ext_2)? 3: 1;
   byteptr primepointer = ga->primepointer;
   GEN frob, Lden = makeLden(L,den,gb);
   deg = gf->deg = ga->deg; gf->p = ga->p;
-  gmask = (ga->group&ga_ext_2)? 3: 1;
   for (;;)
   {
-    pari_sp av = avma;
+    pari_sp lbot, av = avma;
     GEN Tp = ZX_to_Flx(T, gf->p);
     if (Flx_is_squarefree(Tp, gf->p))
     {
       GEN Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
-      long i;
-      gf->fp = degpol(gel(Ti,1));
-      for (i = 2; i < lg(Ti); i++)
-        if (degpol(gel(Ti,i)) != gf->fp) { avma = ltop; return NULL; } /* not Galois */
-      lbot = avma;
-      gf->Tmod = gcopy(Ti);
-      if ( ((gmask&1) && gf->fp % deg == 0) || ((gmask&2) && gf->fp % 2== 0) )
+      long nb = lg(Ti)-1, d = degpol(gel(Ti,1));
+      if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
+      if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) continue;
+      gf->fp = d;
+      gf->Tmod = Ti; lbot = avma;
+      frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
+      if (frob)
       {
-        frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
-        if (frob)
-        {
-          GEN *gptr[3]; gptr[0]=&gf->Tmod; gptr[1]=&gf->psi; gptr[2]=&frob;
-          gerepilemanysp(ltop,lbot,gptr,3); return frob;
-        }
-        if ((ga->group&ga_all_normal) && gf->fp % deg == 0) gmask &= ~1;
-        /*The first prime degree is always divisible by deg, so we don't
-         * have to worry about ext_2 being used before regular supersolvable*/
-        if (!gmask) { avma = ltop; return NULL; }
-        Try++;
-        if ((ga->group&ga_non_wss) && Try > n)
-          pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
+        GEN *gptr[3];
+        gf->Tmod = gcopy(Ti);
+        gptr[0]=&gf->Tmod; gptr[1]=&gf->psi; gptr[2]=&frob;
+        gerepilemanysp(ltop,lbot,gptr,3); return frob;
       }
+      if ((ga->group&ga_all_normal) && d % deg == 0) gmask &= ~1;
+      /*The first prime degree is always divisible by deg, so we don't
+       * have to worry about ext_2 being used before regular supersolvable*/
+      if (!gmask) { avma = ltop; return NULL; }
+      if ((ga->group&ga_non_wss) && ++Try > n)
+        pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
     }
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
     if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:next p=%ld\n", gf->p);
