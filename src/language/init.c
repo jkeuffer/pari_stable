@@ -644,6 +644,7 @@ pari_thread_init(size_t parisize)
 {
   (void)init_stack(parisize);
   pari_init_floats();
+  pari_init_seadata();
 }
 
 void
@@ -651,6 +652,7 @@ pari_thread_close(void)
 {
   pari_free((void *)bot);
   pari_close_floats();
+  pari_close_seadata();
 }
 
 /* initialize PARI data. Initialize [new|old]fun to NULL for default set. */
@@ -684,6 +686,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   varentries = (entree**) pari_malloc((MAXVARN+1)*sizeof(entree*));
   for (u=0; u <= MAXVARN; u++) varentries[u] = NULL;
   pari_init_floats();
+  pari_init_seadata();
 
   primetab = (GEN) pari_malloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);

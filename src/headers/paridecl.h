@@ -1215,6 +1215,12 @@ GEN     elltors(GEN e);
 GEN     weipell(GEN e, long precdl);
 GEN     zell(GEN e, GEN z, long prec);
 
+/* ellsea.c */
+
+GEN     ellsea(GEN E, GEN p, long early_abort);
+void    pari_close_seadata(void);
+void    pari_init_seadata(void);
+
 /* es.c */
 
 GEN     GENtocanonicalstr(GEN x);

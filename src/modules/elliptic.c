@@ -2989,10 +2989,14 @@ GEN
 ellap(GEN e, GEN p)
 {
   GEN a;
+  long lp;
   checkell(e);
   if (typ(p)!=t_INT || signe(p) <= 0) pari_err(talker,"not a prime in ellap");
   if ( (a = easy_ap(e, p)) ) return a;
-  return (cmpiu(p, 0x3fffffff) > 0)? ellap1(e, p): stoi(ellap2(e, itou(p)));
+  lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
+  if (lp < 31) return stoi(ellap2(e, itou(p)));
+  if (lp < 63) return ellap1(e, p);
+  return ellsea(e, p, 0);
 }
 
 /* assume e has good reduction mod p */
