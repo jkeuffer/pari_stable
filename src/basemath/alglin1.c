@@ -258,7 +258,7 @@ shallowconcat(GEN x, GEN y)
 	  if (ly>=3) break;
 	  return (ly==1)? x: shallowconcat(x,gel(y,1));
 	case t_MAT:
-	  z=cgetg(ly,ty); if (lx != ly) break;
+	  z=cgetg(ly,t_MAT); if (lx != ly) break;
 	  for (i=1; i<ly; i++) gel(z,i) = shallowconcat(gel(x,i),gel(y,i));
 	  return z;
       }
@@ -273,7 +273,7 @@ shallowconcat(GEN x, GEN y)
 	  return (ly==1)? x: shallowconcat(x, gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,ty); gel(z,1) = x;
+	  z=cgetg(ly+1,t_MAT); gel(z,1) = x;
 	  for (i=2; i<=ly; i++) z[i]=y[i-1];
 	  return z;
       }
@@ -283,12 +283,12 @@ shallowconcat(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  z=cgetg(lx,tx); if (ly != lx) break;
+	  z=cgetg(lx, t_MAT); if (ly != lx) break;
 	  for (i=1; i<lx; i++) gel(z,i) = shallowconcat(gel(x,i), gel(y,i));
 	  return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,tx); gel(z,lx) = y;
+	  z=cgetg(lx+1,t_MAT); gel(z,lx) = y;
 	  for (i=1; i<lx; i++) z[i]=x[i];
 	  return z;
       }
@@ -373,50 +373,56 @@ catmany(GEN y1, GEN y2, long t)
 }
 
 GEN
-concat(GEN x, GEN y)
+shallowconcat1(GEN x)
 {
-  long tx = typ(x), lx,ty,ly,i;
-  GEN z,p1;
+  pari_sp av = avma;
+  long istart = 1, cat = 0, tx = typ(x), lx, t, i;
+  GEN z, y = NULL;
 
-  if (!y)
-  {
-    pari_sp av = avma;
-    ulong cat = 0;
-    long t, istart;
-    GEN c, z;
+  if      (tx == t_VEC) lx = lg(x);
+  else if (tx == t_LIST)
+  { x = list_data(x); lx = x ? lg(x): 1; }
+  else
+  { pari_err(typeer,"concat"); return NULL; /* not reached */ }
+  if (lx==1) pari_err(talker,"trying to concat elements of an empty vector");
 
-    if (tx == t_LIST)
-    { x = list_data(x); lx = x ? lg(x): 1; }
-    else if (tx == t_VEC)
-      lx = lg(x);
-    else
-    {
-      pari_err(typeer,"concat");
-      return NULL; /* not reached */
-    }
-    if (lx==1) pari_err(talker,"trying to concat elements of an empty vector");
-    c = gel(x,1); t = typ(c);
-    if (!is_matvec_t(t) && t != t_VECSMALL && t != t_STR) t = 0;
-    istart = 1; y = NULL;
-    for (i = 2; i<lx; i++) {
-      long tc;
-      c = gel(x,i); tc = typ(c);
-      if (tc == t) continue;
-      z = catmany(x + istart, x + i-1, t);
-      /* z = last "homogeneous vector" object seen, y = previous one */
-      if (!y) y = z;
-      else {
-	y = shallowconcat(y, z); z = NULL; cat++;
-	if ((cat & 0xf) == 0) y = gerepileuptoleaf(av, y);
-      }
-      t = (is_matvec_t(tc) || tc == t_VECSMALL || tc == t_STR)? tc: 0;
-      istart = i;
-    }
+  t = typ( gel(x,1) );
+  if (!is_matvec_t(t) && t != t_VECSMALL && t != t_STR) t = 0;
+  for (i = 2; i<lx; i++) {
+    GEN c = gel(x,i); 
+    long tc = typ(c);
+    if (tc == t) continue;
     z = catmany(x + istart, x + i-1, t);
     /* z = last "homogeneous vector" object seen, y = previous one */
-    if (y) { y = shallowconcat(y, z); z = NULL; } else y = z;
-    return gerepilecopy(av,y);
+    if (!y) y = z;
+    else {
+      y = shallowconcat(y, z); z = NULL;
+      if (++cat == 16) { cat = 0; y = gerepileuptoleaf(av, y); }
+    }
+    t = (is_matvec_t(tc) || tc == t_VECSMALL || tc == t_STR)? tc: 0;
+    istart = i;
   }
+  z = catmany(x + istart, x + i-1, t);
+  /* z = last "homogeneous vector" object seen, y = previous one */
+  if (y) z = shallowconcat(y, z);
+  return z;
+}
+
+GEN
+concat1(GEN x)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, shallowconcat1(x));
+}
+
+GEN
+concat(GEN x, GEN y)
+{
+  long tx, lx,ty,ly,i;
+  GEN z,p1;
+
+  if (!y) return concat1(x);
+  tx = typ(x);
   ty = typ(y);
   if (tx==t_STR  || ty==t_STR)  return strconcat(x,y);
   if (tx==t_LIST || ty==t_LIST) return listconcat(x,y);
@@ -488,7 +494,7 @@ concat(GEN x, GEN y)
 	  if (ly>=3) break;
 	  return (ly==1)? gcopy(x): concat(x,gel(y,1));
 	case t_MAT:
-	  z=cgetg(ly,ty); if (lx != ly) break;
+	  z=cgetg(ly,t_MAT); if (lx != ly) break;
 	  for (i=1; i<ly; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
 	  return z;
       }
@@ -503,7 +509,7 @@ concat(GEN x, GEN y)
 	  return (ly==1)? gcopy(x): concat(x,gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,ty); gel(z,1) = gcopy(x);
+	  z=cgetg(ly+1,t_MAT); gel(z,1) = gcopy(x);
 	  for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
 	  return z;
       }
@@ -513,12 +519,12 @@ concat(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  z=cgetg(lx,tx); if (ly != lx) break;
+	  z=cgetg(lx,t_MAT); if (ly != lx) break;
 	  for (i=1; i<lx; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
 	  return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,tx); gel(z,lx) = gcopy(y);
+	  z=cgetg(lx+1,t_MAT); gel(z,lx) = gcopy(y);
 	  for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
 	  return z;
       }

@@ -55,3 +55,4 @@ Doc: concatenation of $x$ and $y$. If $x$ or $y$ is
  
  [1 2 3 4]
  @eprog
+Variant: \fun{GEN}{concat1}{GEN x} is a shortcut for \kbd{concat(x,NULL)}.
