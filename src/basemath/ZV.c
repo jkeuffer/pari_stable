@@ -691,3 +691,26 @@ ZM_det_triangular(GEN mat)
   for (i=2; i<l; i++) s = mulii(s,gcoeff(mat,i,i));
   return gerepileuptoint(av,s);
 }
+
+/* assumes no overflow */
+long
+zv_prod(GEN v)
+{
+  long n, i, l = lg(v);
+  if (l == 1) return 1;
+  n = v[1]; for (i = 2; i < l; i++) n *= v[i];
+  return n;
+}
+GEN
+ZV_prod(GEN v)
+{
+  pari_sp av = avma;
+  long i, l = lg(v);
+  GEN n;
+  if (l == 1) return gen_1;
+  if (l > 7) return gerepileuptoint(av, divide_conquer_prod(v, mulii));
+  n = gel(v,1);
+  if (l == 2) return icopy(n);
+  for (i = 2; i < l; i++) n = mulii(n, gel(v,i));
+  return gerepileuptoint(av, n);
+}

@@ -1987,7 +1987,10 @@ $u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
 
-\fun{GEN}{ZV_content}{GEN v} returns the GCD of all the components
+\fun{GEN}{ZV_content}{GEN x} returns the GCD of all the components
+of~\kbd{x}.
+
+\fun{GEN}{ZV_prod}{GEN x} returns the product of all the components
 of~\kbd{x}.
 
 \fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
@@ -3421,6 +3424,9 @@ array) to (normalized) polynomial in variable $v$.
 occurs in the fringe case where an entry is equal to $2^{\B-1}$.
 
 \fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
+
+\fun{long}{zv_prod}{GEN x} returns the product of all the components
+of~\kbd{x} (assumes no overflow occurs).
 
 \fun{int}{zv_cmp0}{GEN x} returns 1 if all entries of the \kbd{zv} $x$ are $0$,
 and $0$ otherwise.

@@ -709,12 +709,10 @@ perm_relorder(GEN p, GEN S)
 GEN
 perm_generate(GEN S, GEN H, long o)
 {
-  long i, k, n = lg(H)-1;
+  long i, n = lg(H)-1;
   GEN L = cgetg(1+n*o, t_VEC);
-  for(i=1; i<=n; i++)
-    gel(L,i) = vecsmall_copy(gel(H,i));
-  for(k=n+1; k <= n*o; ++k)
-    gel(L,k) = perm_mul(gel(L,k-n), S);
+  for(i=1; i<=n;     i++) gel(L,i) = vecsmall_copy(gel(H,i));
+  for(   ; i <= n*o; i++) gel(L,i) = perm_mul(gel(L,i-n), S);
   return L;
 }
 
@@ -722,10 +720,7 @@ perm_generate(GEN S, GEN H, long o)
 long
 group_order(GEN G)
 {
-  GEN ord = gel(G,2);
-  long i, card = 1;
-  for (i = 1; i < lg(ord); i++) card *= ord[i];
-  return card;
+  return zv_prod(gel(G,2));
 }
 
 /* G being a subgroup of S_n, output n */

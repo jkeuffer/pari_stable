@@ -876,9 +876,9 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 GEN
 listznstarelts(long m, long o)
 {
-  pari_sp ltop = avma;
-  GEN zn, zns, lss, res;
-  long k, card, i, phi;
+  pari_sp av = avma;
+  GEN D, L, zn, zns, res;
+  long i, phi, l;
   if (m == 2)
   {
     res = cgetg(2, t_VEC);
@@ -887,19 +887,15 @@ listznstarelts(long m, long o)
   }
   zn = znstar(stoi(m));
   phi = itos(gel(zn,1));
+  o = ugcd(o, phi); /* do we impose this on input ? */
   zns = znstar_small(zn);
-  res = subgrouplist(gel(zn,2), stoi(o));
-  res = cgetg(lg(lss), t_VEC);
-  for (k = 1, i = lg(lss) - 1; i >= 1; i--)
-  {
-    pari_sp av = avma;
-    card = phi / itos(ZM_det_triangular(gel(lss,i)));
-    avma = av;
-    if (o % card == 0)
-      gel(res,k++) = znstar_hnf_elts(zns,gel(lss,i));
-  }
-  setlg(res,k);
-  return gerepileupto(ltop,gen_sort(res, (void*)&pari_compare_lg, &cmp_nodata));
+  D = divisorsu(phi / o); l = lg(D);
+  L = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++) /* exact index */
+    gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(D[i])));
+  L = shallowconcat1(L); l = lg(L);
+  for (i = 1; i < l; i++) gel(L,i) = znstar_hnf_elts(zns, gel(L,i));
+  return gerepileupto(av, gen_sort(L, (void*)&pari_compare_lg, &cmp_nodata));
 }
 
 /* A sympol is a symmetric polynomial
