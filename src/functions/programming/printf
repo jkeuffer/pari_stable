@@ -4,8 +4,6 @@ Section: programming/specific
 C-Name: printf0
 Prototype: vss*
 Help: printf(fmt,{x}*): prints its arguments according to the format fmt
-Description:
-  (str,?gen,...):void  printf1("format\n"${2 format_args})
 Doc: This function is based on the C library command of the same name.
  It prints its arguments according to the format \var{fmt}, which specifies how
  subsequent arguments are converted for output. The format is a
