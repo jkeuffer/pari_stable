@@ -115,9 +115,8 @@ znstar_generate(long n, GEN V)
 {
   pari_sp av = avma;
   GEN gen = cgetg(lg(V),t_VECSMALL);
-  GEN ord = cgetg(lg(V),t_VECSMALL);
+  GEN ord = cgetg(lg(V),t_VECSMALL), res = mkvec2(gen,ord);
   GEN bits = znstar_partial_bits(n,NULL,0);
-  GEN res = mkvec3(gen,ord,bits);
   long i, r = 0;
   for(i=1; i<lg(V); i++)
   {
@@ -131,8 +130,7 @@ znstar_generate(long n, GEN V)
     cgiv(bits); bits = znstar_partial_bits(n,res,r);
   }
   setlg(gen,r+1);
-  setlg(ord,r+1);
-  return gerepilecopy(av, res);
+  setlg(ord,r+1); return gerepilecopy(av, res);
 }
 
 /* Return the lists of element of H.
