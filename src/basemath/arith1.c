@@ -2033,14 +2033,14 @@ Fl_order(ulong a, ulong o, ulong p)
 {
   pari_sp av = avma;
   GEN m, P, E;
-  long i, j;
+  long i;
   if (!o) o = p-1;
   m = factoru(o);
   P = gel(m,1);
   E = gel(m,2);
   for (i = lg(P)-1; i; i--)
   {
-    ulong l=P[i], e=E[i], t = o / upowuu(l,e), y = Fl_powu(a, t, p);
+    ulong j, l=P[i], e=E[i], t = o / upowuu(l,e), y = Fl_powu(a, t, p);
     if (y == 1) o = t;
     else {
       for (j = 1; j < e; j++) { y = Fl_powu(y, l, p); if (y == 1) break; }
