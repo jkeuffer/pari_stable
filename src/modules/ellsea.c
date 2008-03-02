@@ -47,15 +47,15 @@ pari_close_seadata(void)
    if (modular_eqn) gunclone(modular_eqn);
 }
 
-static void
+static int
 get_seadata(void)
 {
   char *s = pari_sprintf("%s/seadata/sea0", pari_datadir);
-  pariFILE *F = pari_fopen(s,"r");
-  if (!F) pari_err(talker,"Data for SEA not available");
-  modular_eqn = gclone(gp_readvec_stream(F->file));
-  pari_fclose(F); 
+  pariFILE *F = pari_fopengz(s);
   free(s);
+  if (!F) return 0;
+  modular_eqn = gclone(gp_readvec_stream(F->file));
+  pari_fclose(F); return 1;
 }
 
 /*Builds the modular equation corresponding to the vector list */
@@ -1440,7 +1440,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   long get_extra_l;
   GEN  a4 = lift(gmul(gmodulsg(-27, p), gel(E, 10)));
   GEN  a6 = lift(gmul(gmodulsg(-54, p), gel(E, 11)));
-  if (!modular_eqn) get_seadata();
+  if (!modular_eqn && !get_seadata()) return NULL;
   lg_mod = lg(modular_eqn);
   /*First compute the trace modulo 2 */
   if (FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p) > 0)

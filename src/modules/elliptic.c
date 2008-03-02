@@ -2995,8 +2995,8 @@ ellap(GEN e, GEN p)
   if ( (a = easy_ap(e, p)) ) return a;
   lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
   if (lp < 31) return stoi(ellap2(e, itou(p)));
-  if (lp < 63) return ellap1(e, p);
-  return ellsea(e, p, 0);
+  if (lp >= 63) { a = ellsea(e, p, 0); if (a) return a; }
+  return ellap1(e, p);
 }
 
 /* assume e has good reduction mod p */

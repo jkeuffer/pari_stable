@@ -3491,13 +3491,20 @@ pari_get_infile(char *name, FILE *file)
   return newfile(file, name, mf_IN);
 }
 
-/* input s must have 'alloc size' >= strlen(s) + 3 (to append .gz) */
 pariFILE *
 pari_fopengz(char *s)
 {
+  pari_sp av = avma;
   FILE *f = fopen(s, "r");
-  if (!f) { (void)sprintf(s + strlen(s), ".gz"); f = fopen(s, "r"); }
-  return f ? pari_get_infile(s, f): NULL;
+  pariFILE *pf;
+  if (!f) { 
+    long l = strlen(s);
+    char *sorig = s;
+    s = stackmalloc(l + 3 + 1);
+    strcpy(s, sorig); (void)sprintf(s + l, ".gz"); f = fopen(s, "r");
+  }
+  pf = f ? pari_get_infile(s, f): NULL;
+  avma = av; return pf;
 }
 
 static FILE*
