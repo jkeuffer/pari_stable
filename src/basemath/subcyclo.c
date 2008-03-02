@@ -130,7 +130,7 @@ znstar_generate(long n, GEN V)
     cgiv(bits); bits = znstar_partial_bits(n,res,r);
   }
   setlg(gen,r+1);
-  setlg(ord,r+1); return gerepilecopy(av, res);
+  setlg(ord,r+1); return gerepilecopy(av, mkvec3(gen,ord,bits));
 }
 
 /* Return the lists of element of H.
@@ -587,7 +587,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       if (lg(N)==7) N = bnr_to_znstar(N,&complex);
       if (lg(N)==4)
       {
-        GEN gen = gel(Z,3);
+        GEN gen = gel(N,3);
 	Z = N;
 	if (typ(gen)!=t_VEC) pari_err(typeer,"galoissubcyclo");
 	if (lg(gen) == 1) n = 1;
