@@ -55,7 +55,16 @@ pgener_Fl_local(ulong p, GEN L0)
   const ulong q = p_1 >>1;
   long i, x, k ;
   GEN L;
-  if (p == 2) return 1;
+  if (p <= 19)
+  { /* quick trivial cases */
+    switch(p)
+    {
+      case 2:  return 1;
+      case 7:
+      case 17: return 3;
+      default: return 2;
+    }
+  }
 
   if (!L0) {
     ulong t;
@@ -192,35 +201,34 @@ gener(GEN m)
 }
 
 GEN
-znstar(GEN n)
+znstar(GEN N)
 {
-  GEN z, P, E, cyc, gen, mod;
+  GEN res = cgetg(4,t_VEC), z, P, E, cyc, gen, mod;
   long i, j, nbp, sizeh;
   pari_sp av;
 
-  if (typ(n) != t_INT) pari_err(arither1);
-  if (!signe(n))
+  if (typ(N) != t_INT) pari_err(arither1);
+  if (!signe(N))
   {
-    z = cgetg(4,t_VEC);
-    gel(z,1) = gen_2;
-    gel(z,2) = mkvec(gen_2);
-    gel(z,3) = mkvec(gen_m1); return z;
+    gel(res,1) = gen_2;
+    gel(res,2) = mkvec(gen_2);
+    gel(res,3) = mkvec(gen_m1); return res;
   }
-  if (cmpiu(n,2) <= 0)
+  if (cmpiu(N,2) <= 0)
   {
-    z = cgetg(4,t_VEC);
-    gel(z,1) = gen_1;
-    gel(z,2) = cgetg(1,t_VEC);
-    gel(z,3) = cgetg(1,t_VEC); return z;
+    gel(res,1) = gen_1;
+    gel(res,2) = cgetg(1,t_VEC);
+    gel(res,3) = cgetg(1,t_VEC); return res;
   }
-  av = avma; if (signe(n) < 0) n = negi(n);
-  z = Z_factor(n);
+  N = absi(N); /* copy needed: will be part of res (mkintmod) */
+  av = avma;
+  z = Z_factor(N);
   P = gel(z,1);
   E = gel(z,2); nbp = lg(P)-1;
   cyc = cgetg(nbp+2,t_VEC);
   gen = cgetg(nbp+2,t_VEC);
   mod = cgetg(nbp+2,t_VEC);
-  switch(mod8(n))
+  switch(mod8(N))
   {
     case 0: {
       long v2 = itos(gel(E,1));
@@ -249,27 +257,54 @@ znstar(GEN n)
     gel(gen,i) = e > 1? pgener_Zp(p): pgener_Fp(p);
     gel(mod,i) = Q;
   }
-  for (i=1; i<=sizeh; i++)
-  {
-    GEN q = gel(mod,i), a = gel(gen,i);
-    z = Fp_inv(q, diviiexact(n,q));
-    gel(gen,i) = addii(a, mulii(mulii(subsi(1,a),z),q));
-  }
+  setlg(gen, sizeh+1);
+  setlg(cyc, sizeh+1);
+  if (nbp > 1)
+    for (i=1; i<=sizeh; i++)
+    {
+      GEN Q = gel(mod,i), g = gel(gen,i), qinv = Fp_inv(Q, diviiexact(N,Q));
+      g = addii(g, mulii(mulii(subsi(1,g),qinv),Q));
+      gel(gen,i) = modii(g, N);
+    }
 
+  /*The cyc[i] are > 1. They remain so in the loop*/
   for (i=sizeh; i>=2; i--)
-    for (j=i-1; j>=1; j--)
-      if (remii(gel(cyc,j),gel(cyc,i)) != gen_0)
-      {
-	GEN u, v, d = bezout(gel(cyc,i),gel(cyc,j),&u,&v);
-	GEN q = diviiexact(gel(cyc,j),d);
-	gel(cyc,j) = mulii(gel(cyc,i),q);
-	gel(cyc,i) = d;
-	gel(gen,j) = Fp_div(gel(gen,j), gel(gen,i), n);
-	gel(gen,i) = Fp_mul(gel(gen,i), Fp_pow(gel(gen,j), mulii(v,q), n), n);
+  {
+    GEN ci = gel(cyc,i), gi = gel(gen,i);
+    for (j=i-1; j>=1; j--) /* we want cyc[i] | cyc[j] */
+    {
+      GEN cj = gel(cyc,j), gj, qj, v, d;
+
+      d = bezout(ci,cj,NULL,&v); /* > 1 */
+      if (absi_equal(ci, d)) continue; /* ci | cj */
+      if (absi_equal(cj, d)) { /* cj | ci */
+        swap(gel(gen,j),gel(gen,i)); gi = gel(gen,i);
+        swap(gel(cyc,j),gel(cyc,i)); ci = gel(cyc,i); continue;
       }
-  setlg(cyc, sizeh+1); z = detcyc(cyc, &i);
-  setlg(cyc,i);
-  setlg(gen,i); return gerepilecopy(av, mkvec3(z, cyc, FpV_to_mod(gen,n)));
+
+      gj = gel(gen,j);
+      qj = diviiexact(cj,d);
+      gel(cyc,j) = mulii(ci,qj);
+      gel(cyc,i) = d;
+      /* [1,v*cj/d; 0,1]*[1,0;-1,1]*diag(cj,ci)*[ci/d,-v; cj/d,u]
+       * = diag(lcm,gcd), with u ci + v cj = d */
+
+      /* (gj, gi) *= [1,0; -1,1]^-1 */
+      gj = Fp_mul(gj, gi, N); /* order ci*qj = lcm(ci,cj) */
+      /* (gj,gi) *= [1,v*qj; 0,1]^-1 */
+      togglesign_safe(&v);
+      if (signe(v) < 0) v = modii(v,ci); /* >= 0 to avoid inversions */
+      gi = Fp_mul(gi, Fp_pow(gj, mulii(qj, v), N), N);
+      gel(gen,i) = gi;
+      gel(gen,j) = gj;
+      ci = d; if (equaliu(ci, 2)) break;
+    }
+  }
+  gerepileall(av, 2, &cyc, &gen);
+  gel(res,1) = ZV_prod(cyc);
+  gel(res,2) = cyc;
+  for (i = 1; i <= sizeh; i++) gel(gen,i) = mkintmod(gel(gen,i), N);
+  gel(res,3) = gen; return res;
 }
 
 /*********************************************************************/
