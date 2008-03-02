@@ -1008,7 +1008,7 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
     tr = find_trace_Atkin(ell, r, p);
     kt = 1;
     break;
-  case MTpathological:
+  default: /* case MTpathological: */
     if (DEBUGLEVEL)
       fprintferr("Pathological.\n");
     avma = ltop; return NULL;
