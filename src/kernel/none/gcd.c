@@ -187,7 +187,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     {
       if (xu == 0) *pu = gen_0; /* can happen when b divides a */
       else if (xu == 1) *pu = sa < 0 ? gen_m1 : gen_1;
-      else if (xu == 2) *pu = sa < 0 ? negi(gen_2) : gen_2;
+      else if (xu == 2) *pu = sa < 0 ? gen_m2 : gen_2;
       else
       {
 	*pu = cgeti(3);
@@ -198,7 +198,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pv)
     {
       if (xv == 1) *pv = sb < 0 ? gen_m1 : gen_1;
-      else if (xv == 2) *pv = sb < 0 ? negi(gen_2) : gen_2;
+      else if (xv == 2) *pv = sb < 0 ? gen_m2 : gen_2;
       else
       {
 	*pv = cgeti(3);
