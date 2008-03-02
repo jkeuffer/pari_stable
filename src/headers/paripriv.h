@@ -706,6 +706,11 @@ GEN     CM_CardEFp(GEN E, GEN p);
 void    checkpt(GEN z);
 GEN     weipell0(GEN e, long prec, long PREC);
 
+/* ellsea.c */
+
+void    pari_close_seadata(void);
+void    pari_init_seadata(void);
+
 /* es.c */
 
 const char * eng_ord(long i);
