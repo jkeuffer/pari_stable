@@ -52,6 +52,7 @@ entree *is_entry_intern(const char *s, entree **table, long *hash);
 long   is_keyword_char(char c);
 void   reset_break(void);
 long   did_break(void);
+void   pari_fill_hashtable(entree **table, entree *ep);
 
 void compile_err(const char *msg, const char *str);
 void compile_varer1(const char *str);

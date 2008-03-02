@@ -1643,7 +1643,6 @@ void    pari_add_module(entree *ep);
 void    pari_close(void);
 void    pari_close_opts(ulong init_opts);
 void    pari_err(long numerr, ...);
-void    pari_fill_hashtable(entree **table, entree *ep);
 int     pari_daemon(void);
 void    pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts);
 void    pari_init(size_t parisize, ulong maxprime);
