@@ -3031,9 +3031,15 @@ pari_open_file(FILE *f, const char *s, const char *mode)
 }
 
 pariFILE *
-pari_fopen(const char *s, const char *mode)
+pari_fopen_or_fail(const char *s, const char *mode)
 {
   return pari_open_file(fopen(s, mode), s, mode);
+}
+pariFILE *
+pari_fopen(const char *s, const char *mode)
+{
+  FILE *f = fopen(s, mode);
+  return f? pari_open_file(f, s, mode): NULL;
 }
 
 #ifdef UNIX
@@ -3050,7 +3056,7 @@ pari_safefopen(const char *s, const char *mode)
 pariFILE *
 pari_safefopen(const char *s, const char *mode)
 {
-  return pari_fopen(s, mode);
+  return pari_fopen_or_fail(s, mode);
 }
 #endif
 

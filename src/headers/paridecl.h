@@ -1261,6 +1261,7 @@ void    output(GEN x);
 char*   pGENtostr(GEN g, long flag);
 void    pari_fclose(pariFILE *f);
 pariFILE*   pari_fopen(const char *s, const char *mode);
+pariFILE*   pari_fopen_or_fail(const char *s, const char *mode);
 void    pari_fprintf(FILE *file, const char *fmt, ...);
 void    pari_printf(const char *fmt, ...);
 pariFILE*   pari_safefopen(const char *s, const char *mode);

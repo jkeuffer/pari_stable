@@ -986,7 +986,7 @@ mpqs_sort_lp_file(char *filename)
    * upgrades to handling even larger numbers (and factor bases and thus
    * relations files).  It costs one comparison per buffer allocation. --GN */
 
-  pTMP = pari_fopen(filename, READ);
+  pTMP = pari_fopen_or_fail(filename, READ);
   TMP = pTMP->file;
   /* get first buffer and read first line, if any, into it */
   buf = (char*) pari_malloc(MPQS_STRING_LENGTH * sizeof(char));
@@ -1083,7 +1083,7 @@ mpqs_sort_lp_file(char *filename)
   qsort(sort_table, i, sizeof(char*), mpqs_relations_cmp);
 
   /* copy results back to the original file, skipping exact duplicates */
-  pTMP = pari_fopen(filename, WRITE);
+  pTMP = pari_fopen_or_fail(filename, WRITE);
   old_s = sort_table[0];
   pari_fputs(sort_table[0], pTMP);
   count = 1;
@@ -1330,9 +1330,9 @@ mpqs_mergesort_lp_file0(FILE *LPREL, FILE *LPNEW, pariFILE *pCOMB,
 static long
 mpqs_mergesort_lp_file(char *REL_str, char *NEW_str, char *TMP_str, pariFILE *pCOMB)
 {
-  pariFILE *pREL = pari_fopen(REL_str, READ);
-  pariFILE *pNEW = pari_fopen(NEW_str, READ);
-  pariFILE *pTMP = pari_fopen(TMP_str, WRITE);
+  pariFILE *pREL = pari_fopen_or_fail(REL_str, READ);
+  pariFILE *pNEW = pari_fopen_or_fail(NEW_str, READ);
+  pariFILE *pTMP = pari_fopen_or_fail(TMP_str, WRITE);
   long tp;
 
   tp = mpqs_mergesort_lp_file0(pREL->file, pNEW->file, pCOMB, pTMP);
@@ -3157,10 +3157,10 @@ mpqs_i(mpqs_handle_t *handle)
       pari_unlink(LPNEW_str);\
       pari_unlink(COMB_str); rmdir(dir); pari_free(dir);
 
-  pFREL = pari_fopen(FREL_str,  WRITE); pari_fclose(pFREL);
-  pLPREL = pari_fopen(LPREL_str,  WRITE); pari_fclose(pLPREL);
-  pFNEW = pari_fopen(FNEW_str,  WRITE);
-  pLPNEW= pari_fopen(LPNEW_str, WRITE);
+  pFREL = pari_fopen_or_fail(FREL_str,  WRITE); pari_fclose(pFREL);
+  pLPREL = pari_fopen_or_fail(LPREL_str,  WRITE); pari_fclose(pLPREL);
+  pFNEW = pari_fopen_or_fail(FNEW_str,  WRITE);
+  pLPNEW= pari_fopen_or_fail(LPNEW_str, WRITE);
 
   for(;;)
   { /* FNEW and LPNEW are open for writing */
@@ -3234,17 +3234,17 @@ mpqs_i(mpqs_handle_t *handle)
     /* sort LPNEW and merge it into LPREL, diverting combinables into COMB */
     pari_fclose(pLPNEW);
     (void)mpqs_sort_lp_file(LPNEW_str);
-    pCOMB = pari_fopen(COMB_str, WRITE);
+    pCOMB = pari_fopen_or_fail(COMB_str, WRITE);
     tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, TMP_str, pCOMB);
     pari_fclose(pCOMB);
-    pLPNEW = pari_fopen(LPNEW_str, WRITE);
+    pLPNEW = pari_fopen_or_fail(LPNEW_str, WRITE);
 
     /* combine whatever there is to be combined */
     tfc = 0;
     if (tp > 0)
     {
       /* build full relations out of large prime relations */
-      pCOMB = pari_fopen(COMB_str, READ);
+      pCOMB = pari_fopen_or_fail(COMB_str, READ);
       tfc = mpqs_combine_large_primes(handle, pCOMB->file, pFNEW, &fact);
       pari_fclose(pCOMB);
       /* now FREL, LPREL are closed and FNEW, LPNEW are still open */
@@ -3352,7 +3352,7 @@ mpqs_i(mpqs_handle_t *handle)
 
     if (percentage < 1000)
     {
-      pFNEW = pari_fopen(FNEW_str, WRITE);
+      pFNEW = pari_fopen_or_fail(FNEW_str, WRITE);
       /* LPNEW and FNEW are again open for writing */
       continue; /* main loop */
     }
@@ -3366,7 +3366,7 @@ mpqs_i(mpqs_handle_t *handle)
     if (DEBUGLEVEL >= 4)
       fprintferr("\nMPQS: starting Gauss over F_2 on %ld relations\n",
 		 total_full_relations);
-    pFREL = pari_fopen(FREL_str, READ);
+    pFREL = pari_fopen_or_fail(FREL_str, READ);
     fact = mpqs_solve_linear_system(handle, pFREL, total_full_relations);
     pari_fclose(pFREL);
 
@@ -3419,7 +3419,7 @@ mpqs_i(mpqs_handle_t *handle)
 	pari_fclose(pLPNEW);
 	unlink_all(); avma = av; return NULL;
       }
-      pFNEW = pari_fopen(FNEW_str, WRITE);
+      pFNEW = pari_fopen_or_fail(FNEW_str, WRITE);
     }
   } /* main loop */
 }
