@@ -265,10 +265,10 @@ x^2 - x + 3
 89 3
 97 5
 ? znstar(3120)
-[768, [12, 4, 4, 2, 2], [Mod(67, 3120), Mod(2341, 3120), Mod(1847, 3120), Mo
-d(391, 3120), Mod(2081, 3120)]]
+[768, [12, 4, 4, 2, 2], [Mod(2641, 3120), Mod(2341, 3120), Mod(2497, 3120), 
+Mod(391, 3120), Mod(2081, 3120)]]
 ? getheap
 [87, 2687]
 ? print("Total time spent: ",gettime);
-Total time spent: 44
+Total time spent: 41
 ? \q
