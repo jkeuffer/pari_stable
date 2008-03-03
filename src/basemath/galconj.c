@@ -891,11 +891,11 @@ listznstarelts(long m, long o)
   zns = znstar_small(zn);
   D = divisorsu(phi / o); l = lg(D);
   L = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) /* exact index */
-    gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(D[i])));
+  for (i = 1; i < l; i++) /* by *decreasing* exact index */
+    gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(D[l-1-i])));
   L = shallowconcat1(L); l = lg(L);
   for (i = 1; i < l; i++) gel(L,i) = znstar_hnf_elts(zns, gel(L,i));
-  return gerepileupto(av, gen_sort(L, (void*)&pari_compare_lg, &cmp_nodata));
+  return gerepilecopy(av, L);
 }
 
 /* A sympol is a symmetric polynomial

@@ -1225,15 +1225,9 @@ polymodrecip(GEN x)
 /**                          MERGESORT                             **/
 /**                                                                **/
 /********************************************************************/
-
 #define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
-
-int
-pari_compare_lg(GEN x, GEN y) { return icmp(lg(x),lg(y)); }
-
 static int
 cmp_small(GEN x, GEN y) { return icmp((long)x,(long)y); }
-
 #undef icmp
 
 struct veccmp_s

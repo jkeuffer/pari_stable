@@ -1030,7 +1030,6 @@ GEN     matqpascal(long n, GEN q);
 GEN     merge_factor(GEN fx, GEN fy, void *data, int (*cmp)(void *,GEN,GEN));
 GEN     modreverse_i(GEN a, GEN T);
 GEN     numtoperm(long n, GEN x);
-int     pari_compare_lg(GEN a,GEN b);
 GEN     permtonum(GEN x);
 GEN     polhermite(long n, long v);
 GEN     polhermite_eval(long n, GEN x);
