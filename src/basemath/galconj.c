@@ -346,7 +346,7 @@ makeLden(GEN L,GEN den, struct galois_borne *gb)
 static void
 initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct galois_lift *gl)
 {
-  pari_sp av = avma;;
+  pari_sp av = avma;
   long e;
   gl->gb = gb;
   gl->T = T;
