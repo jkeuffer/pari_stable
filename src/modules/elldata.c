@@ -27,8 +27,7 @@ strtoclass(const char *s)
   long c=0;
   while (*s && *s<='9') s++;
   if (!*s) return -1;
-  while ('a'<=*s && *s<='z')
-    c=26*c+*(s++)-'a';
+  while ('a'<=*s && *s<='z') c = 26*c + *(s++)-'a';
   return c;
 }
 
@@ -36,8 +35,7 @@ strtoclass(const char *s)
  * f to the conductor, (100)
  * c to the isogeny class (in base 26), ("a" or 0)
  * i to the curve index (2).
- * return 0 if garbage is found at the end.
- */
+ * return 0 if garbage is found at the end. */
 static int
 ellparsename(const char *s, long *f, long *c, long *i)
 {
@@ -68,20 +66,11 @@ ellrecode(long x)
   GEN str;
   char *s;
   long d = 0, n = x;
-  do
-  {
-    d++;
-    n/=26;
-  } while(n);
+  do { d++; n /= 26; } while (n);
   str = cgetg(nchar2nlong(d+1)+1, t_STR);
-  s = GSTR(str);
-  s[d] = 0;
+  s = GSTR(str); s[d] = 0;
   n = x;
-  do
-  {
-    s[--d] = n%26 + 'a';
-    n/=26;
-  } while(n);
+  do { s[--d] = n%26 + 'a'; n /= 26; } while (n);
   return str;
 }
 
@@ -102,59 +91,56 @@ ellconvertname(GEN n)
       pari_err(talker,"Incorrect vector in ellconvertname");
     else
     {
-      pari_sp ltop=avma;
-      GEN f=gel(n, 1), c=gel(n, 2), s=gel(n, 3);
-      if (typ(f)!=t_INT && typ(c)!=t_INT && typ(s)!=t_INT)
+      pari_sp av = avma;
+      GEN f=gel(n,1), c=gel(n,2), s=gel(n,3);
+      if (typ(f)!=t_INT || typ(c)!=t_INT || typ(s)!=t_INT)
 	pari_err(typeer,"ellconvertname");
-      return gerepileupto(ltop, concat(concat(f,ellrecode(itos(c))),s));
+      return gerepilecopy(av, shallowconcat1(mkvec3(f, ellrecode(itos(c)), s)));
     }
   }
   pari_err(typeer,"ellconvertname");
   return NULL; /*Not reached*/
 }
 
-GEN
+static GEN
 ellcondfile(long f)
 {
-  long n=f/1000;
-  char *s = (char*)pari_malloc(strlen(pari_datadir) + 13 + 20 + 3);
+  pari_sp av = avma;
+  long n = f / 1000;
+  char *s = stackmalloc(strlen(pari_datadir) + 12 + 20 + 1);
   pariFILE *F;
   GEN V;
   sprintf(s, "%s/elldata/ell%ld", pari_datadir, n);
-  F = pari_fopengz(s);
-  if (!F)
-    pari_err(talker,"Elliptic curves files not available for conductor %ld\n"
-	       "[missing %s]",f,s);
+  F = pari_fopengz(s); avma = av;
+  if (!F) pari_err(talker,"Missing elldata for conductor %ld\n[need %s]",f,s);
   V = gp_read_stream(F->file);
-  if (!V || typ(V)!=t_VEC )
-    pari_err(talker,"Elliptic files %s not compatible\n",s);
-  pari_fclose(F); pari_free(s); return V;
-}
-
-GEN
-ellcondlist(long f)
-{
-  pari_sp ltop=avma;
-  GEN  V=ellcondfile(f);
-  long i;
-  for (i=1; i<lg(V); i++)
-    if (cmpis(gmael(V,i,1), f)>=0)
-      break;
-  if (i==lg(V) || !equalis(gmael(V,i,1), f))
-  {
-    avma=ltop;
-    return cgetg(1,t_VEC);
-  }
-  return gerepilecopy(ltop, vecslice(gel(V,i),2, lg(gel(V,i))-1));
+  if (!V || typ(V)!=t_VEC ) pari_err(talker,"Incompatible elldata file %s\n",s);
+  pari_fclose(F); return V;
 }
 
 static GEN
-ellsearchbyname(GEN V, GEN name)
+ellcondlist(long f)
+{
+  GEN  v, V = ellcondfile(f);
+  long i, cmp;
+  for (i=1; i<lg(V); i++)
+  {
+    cmp  = cmpis(gmael(V,i,1), f);
+    if (cmp >= 0) break;
+  }
+  if (cmp) return cgetg(1,t_VEC);
+  v = gel(V,i); return vecslice(v,2, lg(v)-1);
+}
+
+static GEN
+ellsearchbyname(GEN V, char *name)
 {
   long j;
   for (j=1; j<lg(V); j++)
-    if (gequal(gmael(V,j,1), name))
-      return gel(V,j);
+  {
+    GEN v = gel(V,j);
+    if (!strcmp(GSTR(gel(v,1)), name)) return v;
+  }
   pari_err(talker,"No such elliptic curve");
   return NULL;
 }
@@ -165,39 +151,31 @@ ellsearchbyclass(GEN V, long c)
   long i,j,n;
   GEN res;
   for (n=0,j=1; j<lg(V); j++)
-    if (strtoclass(GSTR(gmael(V,j,1)))==c)
-      n++;
-  res=cgetg(n+1,t_VEC);
+    if (strtoclass(GSTR(gmael(V,j,1)))==c) n++;
+  res = cgetg(n+1,t_VEC);
   for (i=1,j=1; j<lg(V); j++)
-    if (strtoclass(GSTR(gmael(V,j,1)))==c)
-      res[i++]=V[j];
+    if (strtoclass(GSTR(gmael(V,j,1)))==c) res[i++] = V[j];
   return res;
 }
 
 GEN
 ellsearch(GEN A)
 {
-  pari_sp ltop=avma;
+  pari_sp av = avma;
   long f, c, i;
   GEN V;
-  if (typ(A)==t_INT)
-  {
-    f=itos(A);
-    c=-1;
-    i=-1;
-  } else if (typ(A)==t_STR) {
+  if      (typ(A)==t_INT) { f = itos(A); c = i = -1; }
+  else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
       pari_err(talker,"Incorrect curve name in ellsearch");
   } else {
     pari_err(typeer,"ellsearch");
     return NULL;
   }
-  V=ellcondlist(f);
-  if (c<0)
-    return V;
-  if (i<0)
-    return gerepilecopy(ltop, ellsearchbyclass(V,c));
-  return gerepilecopy(ltop, ellsearchbyname(V,A));
+  V = ellcondlist(f);
+  if (c >= 0)
+    V = (i < 0)? ellsearchbyclass(V,c): ellsearchbyname(V, GSTR(A));
+  return gerepilecopy(av, V);
 }
 
 GEN
@@ -207,9 +185,8 @@ ellsearchcurve(GEN name)
   long f, c, i;
   if (!ellparsename(GSTR(name),&f,&c,&i))
     pari_err(talker,"Incorrect curve name in ellsearch");
-  if (f<0 || c<0 || i<0)
-    pari_err(talker,"Incomplete curve name in ellsearch");
-  return gerepilecopy(ltop, ellsearchbyname(ellcondlist(f), name));
+  if (f<0 || c<0 || i<0) pari_err(talker,"Incomplete curve name in ellsearch");
+  return gerepilecopy(ltop, ellsearchbyname(ellcondlist(f), GSTR(name)));
 }
 
 GEN

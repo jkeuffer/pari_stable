@@ -1164,8 +1164,6 @@ long setrealprecision(long n, long *prec);
 
 /* elldata.c */
 
-GEN     ellcondfile(long f);
-GEN     ellcondlist(long f);
 GEN     ellconvertname(GEN s);
 GEN     ellgenerators(GEN E);
 GEN     ellidentify(GEN E);
