@@ -5240,10 +5240,48 @@ function and seems to be generally inferior to \kbd{hash\_str}.
 
 \section{Character strings}
 
-\fun{char*}{pari_strdup}{const char *s}
+\fun{char*}{pari_strdup}{const char *s} returns a malloc'ed copy of $s$
+(uses \kbd{pari\_malloc}).
 
-\fun{char*}{pari_strndup}{const char *s, long n}
+\fun{char*}{pari_strndup}{const char *s, long n} returns a malloc'ed copy of
+at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
+$n$, only $n$ characters are copied and a terminal null byte is added.
 
+\fun{char}{*stack_strdup}{const char *s} returns a copy of $s$, allocated
+on the PARI stack (uses \kbd{stackmalloc}).
+
+
+\fun{GEN}{strtoGENstr}{const char *s} returns a \typ{STR} with content $s$.
+
+\fun{GEN}{strntoGENstr}{const char *s, long n}
+returns a \typ{STR} containing the first $n$ characters of $s$.
+
+\fun{GEN}{chartoGENstr}{char c} returns a \typ{STR} containing the character
+$c$.
+
+\fun{GEN}{GENtoGENstr}{GEN x} returns a \typ{STR} containing the printed
+form of $x$ (in \tet{raw} format). This is often easier to use that
+\tet{GENtostr} (which returns a malloc-ed \kbd{char*}) since there is no need
+to free the string after use.
+
+\fun{GEN}{GENtoGENstr_nospace}{GEN x} as \kbd{GENtoGENstr}, removing all
+spaces from the output.
+
+\fun{char*}{RgV_to_str}{GEN g, long flag} $g$ being a vector of \kbd{GEN}s,
+returns a malloc'ed string, the concatenation of the \kbd{GENtostr} applied
+to its elements, except that \typ{STR} are printed without enclosing quotes.
+\kbd{flag} determines the output format: \tet{f_RAW}, \tet{f_PRETTYMAT}
+or \tet{f_TEX}.
+
+\fun{GEN}{Str}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
+but returns a \typ{STR}, not a malloced string.
+
+\fun{GEN}{Strtex}{GEN g} as \tet{RgV_to_str} with output format \tet{f_TEX},
+but returns a \typ{STR}, not a malloced string.
+
+\fun{GEN}{Strexpand}{GEN g} as \tet{RgV_to_str} with output format \tet{f_RAW},
+performing tilde and environment expansion on the result. Returns a
+\typ{STR}, not a malloced string.
 
 \section{Files}
 

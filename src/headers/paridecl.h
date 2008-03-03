@@ -1219,7 +1219,7 @@ GEN     ellsea(GEN E, GEN p, long early_abort);
 
 /* es.c */
 
-GEN     GENtocanonicalstr(GEN x);
+GEN     GENtoGENstr_nospace(GEN x);
 GEN     GENtoGENstr(GEN x);
 char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);
@@ -1251,7 +1251,7 @@ void    outbeaut(GEN x);
 void    outbrute(GEN x);
 void    outmat(GEN x);
 void    output(GEN x);
-char*   pGENtostr(GEN g, long flag);
+char*   RgV_to_str(GEN g, long flag);
 void    pari_fclose(pariFILE *f);
 void    pari_flush(void);
 pariFILE* pari_fopen(const char *s, const char *mode);

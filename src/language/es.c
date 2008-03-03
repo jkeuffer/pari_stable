@@ -1598,7 +1598,7 @@ GENtostr1(GEN x, OUT_FUN out)
 
 /* see print0(). Returns pari_malloc()ed string */
 static char *
-pGENtostr_fun(GEN g, OUT_FUN out) {
+RgV_to_str_fun(GEN g, OUT_FUN out) {
   pari_sp av = avma;
   char *t, *t2;
   long i, tlen = 0, l = lg(g);
@@ -1628,11 +1628,11 @@ pGENtostr_fun(GEN g, OUT_FUN out) {
 }
 
 char *
-pGENtostr(GEN g, long flag) { return pGENtostr_fun(g, get_fun(flag)); }
+RgV_to_str(GEN g, long flag) { return RgV_to_str_fun(g, get_fun(flag)); }
 
 static GEN
 Str_fun(GEN g, OUT_FUN out) {
-  char *t = pGENtostr_fun(g, out);
+  char *t = RgV_to_str_fun(g, out);
   GEN z = strtoGENstr(t);
   pari_free(t); return z;
 }
@@ -1640,7 +1640,7 @@ GEN Str(GEN g)    { return Str_fun(g, &bruti); }
 GEN Strtex(GEN g) { return Str_fun(g, &texi); }
 GEN
 Strexpand(GEN g) {
-  char *s = pGENtostr_fun(g, &bruti), *t = expand_tilde(s);
+  char *s = RgV_to_str_fun(g, &bruti), *t = expand_tilde(s);
   GEN z = strtoGENstr(t);
   pari_free(t); pari_free(s); return z;
 }
@@ -1653,7 +1653,7 @@ GENtoGENstr(GEN x)
 }
 
 GEN
-GENtocanonicalstr(GEN x)
+GENtoGENstr_nospace(GEN x)
 {
   pariout_t T = *(GP_DATA->fmt);
   char *s;
@@ -3859,22 +3859,20 @@ readbin(const char *name, FILE *f, int *vector)
 /**                             GP I/O                            **/
 /**                                                               **/
 /*******************************************************************/
-static void
-printGEN(GEN x, OUT_FUN out)
-{
-  if (typ(x)==t_STR)
-    pari_puts(GSTR(x)); /* text surrounded by "" otherwise */
-  else
-    gen_output_fun(x, GP_DATA->fmt, out);
-}
-
 /* print a vector of GENs */
 void
 print0(GEN g, long flag)
 {
   OUT_FUN out = get_fun(flag);
   long i, l = lg(g);
-  for (i = 1; i < l; i++) printGEN(gel(g,i), out);
+  for (i = 1; i < l; i++)
+  {
+    GEN x = gel(g,i);
+    if (typ(x)==t_STR)
+      pari_puts(GSTR(x)); /* text surrounded by "" otherwise */
+    else
+      gen_output_fun(x, GP_DATA->fmt, out);
+  }
 }
 
 /* dummy needed to pass a (empty!) va_list to sm_dopr */
