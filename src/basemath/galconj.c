@@ -872,13 +872,13 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 }
 
 /* List of subgroups of (Z/mZ)^* whose order divide o, and return the list
- * of their elements */
+ * of their elements, sorted by increasing order */
 GEN
 listznstarelts(long m, long o)
 {
   pari_sp av = avma;
-  GEN D, L, zn, zns, res;
-  long i, phi, l;
+  GEN L, zn, zns, res;
+  long i, phi, ind, l;
   if (m == 2)
   {
     res = cgetg(2, t_VEC);
@@ -889,10 +889,10 @@ listznstarelts(long m, long o)
   phi = itos(gel(zn,1));
   o = ugcd(o, phi); /* do we impose this on input ? */
   zns = znstar_small(zn);
-  D = divisorsu(phi / o); l = lg(D);
-  L = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) /* by *decreasing* exact index */
-    gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(D[l-1-i])));
+  ind = phi/o;
+  L = cgetg(o+1, t_VEC);
+  for (i=1,ind = phi; ind; ind -= phi/o, i++) /* by *decreasing* exact index */
+    gel(L,i) = subgrouplist(gel(zn,2), mkvec(utoipos(ind)));
   L = shallowconcat1(L); l = lg(L);
   for (i = 1; i < l; i++) gel(L,i) = znstar_hnf_elts(zns, gel(L,i));
   return gerepilecopy(av, L);
