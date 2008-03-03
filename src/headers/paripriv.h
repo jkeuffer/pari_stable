@@ -715,6 +715,7 @@ void    pari_init_seadata(void);
 
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
+void    killallfiles(int check);
 pariFILE * pari_fopengz(char *s);
 int     pari_is_dir(const char *name);
 int     pari_is_file(const char *name);

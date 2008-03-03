@@ -1243,8 +1243,6 @@ GEN     gp_read_stream(FILE *f);
 GEN     gp_readvec_file(char *s);
 GEN     gp_readvec_stream(FILE *f);
 char*   itostr(GEN x);
-void    killallfiles(int check);
-int     killfile(pariFILE *f);
 void    matbrute(GEN g, char format, long dec);
 pariFILE* newfile(FILE *f, const char *name, int type);
 void    os_close(long fd);
