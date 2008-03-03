@@ -2246,11 +2246,13 @@ numberofconjugates(GEN T, long pinit)
       L = Flx_nbfact_by_degree(Tp, &nb, p); /* L[i] = #factors of degree i */
       if (L[n/nb] == nb) {
         if (c == n && nbtest > 10) break; /* probably Galois */
-        continue;
       }
-      c = ugcd(c, L[1]);
-      for (i = 2; i <= n; i++) 
-        if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
+      else
+      {
+        c = ugcd(c, L[1]);
+        for (i = 2; i <= n; i++) 
+          if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
+      }
       if (DEBUGLEVEL >= 6)
         fprintferr("NumberOfConjugates [%ld]:c=%ld,p=%ld\n", nbtest,c,p);
     }
