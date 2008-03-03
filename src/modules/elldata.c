@@ -122,13 +122,15 @@ static GEN
 ellcondlist(long f)
 {
   GEN  v, V = ellcondfile(f);
-  long i, cmp;
+  long i;
   for (i=1; i<lg(V); i++)
   {
-    cmp  = cmpis(gmael(V,i,1), f);
-    if (cmp >= 0) break;
+    int cmp  = cmpis(gmael(V,i,1), f);
+    if (cmp >= 0) {
+      if (cmp == 0) break;
+      return cgetg(1,t_VEC);
+    }
   }
-  if (cmp) return cgetg(1,t_VEC);
   v = gel(V,i); return vecslice(v,2, lg(v)-1);
 }
 
