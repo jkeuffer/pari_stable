@@ -744,14 +744,12 @@ amount of memory they occupy in long words.
 The Level 0 kernel simulates basic operations of the 68020 processor on which
 PARI was originally implemented. They need ``global'' \kbd{ulong} variables
 \kbd{overflow} (which will contain only 0 or 1) and \kbd{hiremainder} to
-function properly. However, for certain architectures these are replaced with
-local variables for efficiency; and the `functions' mentioned below are
-really chunks of inlined assembler code. So, a routine using one of these
-lowest-level functions where the description mentions either
-\kbd{hiremainder} or \kbd{overflow} must declare the corresponding
+function properly. A routine using one of these lowest-level functions
+where the description mentions either \kbd{hiremainder} or \kbd{overflow}
+must declare the corresponding
 \bprog
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
+  LOCAL_HIREMAINDER;  /* provides 'hiremainder' */
+  LOCAL_OVERFLOW;     /* provides 'overflow' */
 @eprog\noindent
 in a declaration block. Variables \kbd{hiremainder} and \kbd{overflow} then
 become available in the enclosing block. For instance a loop over the powers
@@ -763,7 +761,10 @@ of an \kbd{ulong}~\kbd{p} protected from overflows could read
    ...
    pk = mulll(pk, p); if (hiremainder) break;
  }
-@eprog
+@eprog\noindent
+For most architectures, the functions mentioned below are really chunks of
+inlined assembler code, and the above 'global' variables are actually
+local register values.
 
 \fun{ulong}{addll}{ulong x, ulong y} adds \kbd{x} and \kbd{y}, returns the
 lower \B\ bits and puts the carry bit into \kbd{overflow}.
@@ -803,6 +804,8 @@ so that no overflow may occur. Let $m \geq 1$ be the modulus; all operands
 representing classes modulo $m$ are assumed to belong to $[0,m-1]$. The
 result may be wrong for a number of reasons otherwise: it may not be reduced,
 overflow can occur, etc.
+
+\fun{in}{odd}{ulong x} returns 1 if $x$ is odd, and 0 otherwise.
 
 \fun{ulong}{Fl_add}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
