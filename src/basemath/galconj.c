@@ -99,7 +99,7 @@ galoisconj2(GEN nf, long prec)
   GEN T = get_nfpol(nf,&nf), y, w, polr, p1, p2;
 
   nbmax = numberofconjugates(T, 2);
-  if (!nf) return galoisconj2pol(nf, nbmax, prec);
+  if (!nf) return galoisconj2pol(T, nbmax, prec);
   n = degpol(T);
   if (n <= 0) return cgetg(1, t_VEC);
   /* accuracy in decimal digits */
@@ -1867,30 +1867,31 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
   for (;;)
   {
     pari_sp lbot, av = avma;
-    GEN Tp = ZX_to_Flx(T, gf->p);
-    if (Flx_is_squarefree(Tp, gf->p))
+    GEN Ti, Tp = ZX_to_Flx(T, gf->p);
+    long nb, d;
+    if (!Flx_is_squarefree(Tp, gf->p)) goto nextp;
+
+    Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
+    nb = lg(Ti)-1; d = degpol(gel(Ti,1));
+    if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
+    if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) goto nextp;
+    gf->fp = d;
+    gf->Tmod = Ti; lbot = avma;
+    frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
+    if (frob)
     {
-      GEN Ti = gel(FpX_factor(Flx_to_ZX(Tp), utoipos(gf->p)), 1);
-      long nb = lg(Ti)-1, d = degpol(gel(Ti,1));
-      if (nb > 1 && degpol(gel(Ti,nb)) != d) { avma = ltop; return NULL; }
-      if (((gmask&1)==0 || d % deg) && ((gmask&2)==0 || odd(d))) continue;
-      gf->fp = d;
-      gf->Tmod = Ti; lbot = avma;
-      frob = galoisfrobeniuslift(T, den, L, Lden, gf, gb);
-      if (frob)
-      {
-        GEN *gptr[3];
-        gf->Tmod = gcopy(Ti);
-        gptr[0]=&gf->Tmod; gptr[1]=&gf->psi; gptr[2]=&frob;
-        gerepilemanysp(ltop,lbot,gptr,3); return frob;
-      }
-      if ((ga->group&ga_all_normal) && d % deg == 0) gmask &= ~1;
-      /*The first prime degree is always divisible by deg, so we don't
-       * have to worry about ext_2 being used before regular supersolvable*/
-      if (!gmask) { avma = ltop; return NULL; }
-      if ((ga->group&ga_non_wss) && ++Try > n)
-        pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
+      GEN *gptr[3];
+      gf->Tmod = gcopy(Ti);
+      gptr[0]=&gf->Tmod; gptr[1]=&gf->psi; gptr[2]=&frob;
+      gerepilemanysp(ltop,lbot,gptr,3); return frob;
     }
+    if ((ga->group&ga_all_normal) && d % deg == 0) gmask &= ~1;
+    /*The first prime degree is always divisible by deg, so we don't
+     * have to worry about ext_2 being used before regular supersolvable*/
+    if (!gmask) { avma = ltop; return NULL; }
+    if ((ga->group&ga_non_wss) && ++Try > n)
+      pari_warn(warner, "galoisconj _may_ hang up for this polynomial");
+nextp:
     NEXT_PRIME_VIADIFF_CHECK(gf->p, primepointer);
     if (DEBUGLEVEL >= 4) fprintferr("GaloisConj:next p=%ld\n", gf->p);
     avma = av;
