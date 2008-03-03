@@ -16,8 +16,7 @@ Doc: complex roots of the polynomial
  is guaranteed to converge and to give the roots to the required accuracy.
  
  If $\fl=1$, use a variant of the Newton-Raphson method, which is \emph{not}
- guaranteed to converge, not to give accurate results, but is often rather
- fast. If you get the messages ``too many iterations in roots'' or ``INTERNAL
- ERROR: incorrect result in roots'', use the default algorithm. This used to
- be the default root-finding function in PARI until version 1.39.06.
+ guaranteed to converge, nor to give accurate results, but is rather
+ fast when it does. If you get the messages ``too many iterations in roots''
+ or ``INTERNAL ERROR: incorrect result in roots'', use the default algorithm.
 Variant: Also available is \fun{GEN}{roots}{GEN x, long prec}.
