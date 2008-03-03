@@ -1044,23 +1044,19 @@ group_subgroups(GEN G)
   }
   C = group_quotient(G,H);
   Q = quotient_group(C,G);
-  M = group_subgroups(Q);
-  lM = lg(M);
+  M = group_subgroups(Q); lM = lg(M);
   /* sg1 is the list of subgroups containing H*/
   sg1 = cgetg(lM, t_VEC);
-  for (i = 1; i < lM; ++i)
-    gel(sg1,i) = quotient_subgroup_lift(C,H,gel(M,i));
+  for (i = 1; i < lM; ++i) gel(sg1,i) = quotient_subgroup_lift(C,H,gel(M,i));
   /*sg2 is a list of lists of subgroups not intersecting with H*/
   sg2 = cgetg(lM, t_VEC);
   /* Loop over all subgroups of G/H */
-  for (j = 1; j < lM; ++j)
-    gel(sg2,j) = liftsubgroup(C, H, gel(M,j));
-  p1 = concat(sg1, concat(sg2,NULL));
+  for (j = 1; j < lM; ++j) gel(sg2,j) = liftsubgroup(C, H, gel(M,j));
+  p1 = concat(sg1, shallowconcat1(sg2));
   if (sg3)
   {
     p1 = concat(p1, sg3);
-    /*Fixup to avoid the D4 subgroups of S4 to be in non supersolvable format*/
-    if (n==5)
+    if (n==5) /*ensure that the D4 subgroups of S4 are in supersolvable format*/
       for(j = 3; j <= 5; j++)
       {
 	GEN c = gmael(p1,j,1);
@@ -1218,13 +1214,13 @@ group_export_GAP(GEN G)
     gel(s,k++) = perm_to_GAP(gel(g,i));
   }
   gel(s,k++) = strtoGENstr(")");
-  return gerepileuptoleaf(ltop, concat(s, NULL));
+  return gerepilecopy(av1, shallowconcat1(s));
 }
 
 GEN
 group_export_MAGMA(GEN G)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN s, comma, g = gel(G,1);
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
@@ -1240,8 +1236,7 @@ group_export_MAGMA(GEN G)
     pari_free(t);
   }
   gel(s,k++) = strtoGENstr(">");
-  s = concat(s, NULL);
-  return gerepileuptoleaf(ltop,s);
+  return gerepilecopy(av1, shallowconcat1(s));
 }
 
 GEN
