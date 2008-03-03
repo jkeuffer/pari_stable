@@ -1201,7 +1201,7 @@ groupelts_abelian_group(GEN S)
 GEN
 group_export_GAP(GEN G)
 {
-  pari_sp ltop = avma;
+  pari_sp av = avma;
   GEN s, comma, g = gel(G,1);
   long i, k, l = lg(g);
   if (l == 1) return strtoGENstr("Group(())");
@@ -1214,7 +1214,7 @@ group_export_GAP(GEN G)
     gel(s,k++) = perm_to_GAP(gel(g,i));
   }
   gel(s,k++) = strtoGENstr(")");
-  return gerepilecopy(av1, shallowconcat1(s));
+  return gerepilecopy(av, shallowconcat1(s));
 }
 
 GEN
@@ -1236,7 +1236,7 @@ group_export_MAGMA(GEN G)
     pari_free(t);
   }
   gel(s,k++) = strtoGENstr(">");
-  return gerepilecopy(av1, shallowconcat1(s));
+  return gerepilecopy(av, shallowconcat1(s));
 }
 
 GEN
