@@ -716,10 +716,10 @@ void    pari_init_seadata(void);
 const char * eng_ord(long i);
 char *  env_ok(const char *s);
 void    killallfiles(int check);
-pariFILE * pari_fopengz(char *s);
-int     pari_is_dir(const char *name);
-int     pari_is_file(const char *name);
+pariFILE* newfile(FILE *f, const char *name, int type);
+int     popinfile(void);
 GEN     readobj(FILE *f, int *ptc);
+pariFILE* try_pipe(const char *cmd, int flag);
 void    writeGEN(GEN x, FILE *f);
 void    writenamedGEN(GEN x, const char *s, FILE *f);
 

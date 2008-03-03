@@ -5237,4 +5237,75 @@ function and seems to be generally inferior to \kbd{hash\_str}.
 
 \fun{ulong}{hash_GEN}{GEN x}
 
+
+\section{Character strings}
+
+\fun{char*}{pari_strdup}{const char *s}
+
+\fun{char*}{pari_strndup}{const char *s, long n}
+
+
+\section{Files}
+
+The following routines are trivial wrappers around system functions
+(possibly around one of several functions depending on availability).
+They are usually integrated within PARI's diagnostics system, printing
+messages if \kbd{DEBUGFILES} is high enough.
+
+\fun{int}{pari_is_dir}{const char *name} returns $1$ if \kbd{name} points to
+a directory, $0$ otherwise.
+
+\fun{int}{pari_is_file}{const char *name} returns $1$ if \kbd{name} points to
+a directory, $0$ otherwise.
+
+\fun{int}{file_is_binary}{FILE *f} returns $1$ if the file $f$ is a binary
+file (in the \tet{writebin} sense), $0$ otherwise.
+
+\fun{void}{pari_unlink}{const char *s} deletes the file named $s$. Warn
+if the operation fails.
+
+\subsec{pariFILE}
+
+PARI maintains a linked list of open files, to reclaim ressources
+(file descriptors) on error or interrupts. The corresponding data structure
+is a \kbd{pariFILE}, which is a wrapper around a standard \kbd{FILE*},
+containing further the file name, its type (regular file, pipe, input or
+output file, etc.). The following functions create and manipulate this
+structure; they are integrated within PARI's diagnostics system, printing
+messages if \kbd{DEBUGFILES} is high enough.
+
+\fun{pariFILE*}{pari_fopen}{const char *s, const char *mode} wrapper
+around \kbd{fopen(s, mode)}, return \kbd{NULL} on faіlure.
+
+\fun{pariFILE*}{pari_fopen_or_fail}{const char *s, const char *mode}
+wrapper around \kbd{fopen(s, mode)}; error on failure.
+
+\fun{pariFILE*}{pari_fopengz}{const char *s} opens the file whose name is
+$s$,  and associates a (read-only) \kbd{pariFILE} with it. If $s$ is a
+compressed file (\kbd{.gz} suffix), it is uncompressed on the fly.
+If $s$ cannot be opened, also try to open \kbd{$s$.gz}. Returns \kbd{NULL}
+on failure.
+
+\fun{void}{pari_fclose}{pariFILE *f} closes
+the underlying file descriptor and deletes the \kbd{pariFILE} struct.
+
+\fun{pariFILE*}{pari_safefopen}{const char *s, const char *mode}
+creates a \emph{new} file $s$ (a priori for writing) with \kbd{600}
+permissions. Error if the file already exists. To avoid symlink attacks,
+a symbolic link exists, regardless of where it points to.
+
+\subsec{Temporary files}
+
+PARI has its own idea of the system temp directory derived from from an
+environment variable (\kbd{\$GPTMPDIR}, else \kbd{\$TMPDIR}), or the first
+writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
+
+\fun{char*}{pari_unique_dir}{const char *s} creates a ``unique directory''
+and return its name built from the string $s$, the user id and process pid
+(on Unix systems). This directory is itself located in 
+
+The name returned is pari_malloc'ed.
+
+\fun{char*}{pari_unique_filename}{const char *s}
+
 \vfill\eject

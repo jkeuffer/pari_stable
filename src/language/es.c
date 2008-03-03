@@ -3083,10 +3083,10 @@ check_filtre(filtre_t *T)
   }
 }
 
-/* Remove one INFILE from the stack. Reset pari_infile (to the most recent pari_infile)
+/* Remove one INFILE from the stack. Reset pari_infile (to the most recent
+ * infile)
  * Return -1, if we're trying to pop out stdin itself; 0 otherwise
- * Check for leaked file handlers (temporary files)
- */
+ * Check for leaked file handlers (temporary files) */
 int
 popinfile(void)
 {
@@ -3094,8 +3094,7 @@ popinfile(void)
   for (f = last_tmp_file; f; f = f->prev)
   {
     if (f->type & mf_IN) break;
-    pari_warn(warner, "I/O: leaked file descriptor (%d): %s",
-		f->type, f->name);
+    pari_warn(warner, "I/O: leaked file descriptor (%d): %s", f->type, f->name);
     pari_fclose(f);
   }
   last_tmp_file = f; if (!last_tmp_file) return -1;
@@ -3476,11 +3475,11 @@ gp_expand_path(gp_path *p)
 /* name is a malloc'ed (existing) filename. Accept it as new pari_infile
  * (unzip if needed). */
 static pariFILE *
-pari_get_infile(char *name, FILE *file)
+pari_get_infile(const char *name, FILE *file)
 {
 #ifdef ZCAT
   long l = strlen(name);
-  char *end = name + l-1;
+  const char *end = name + l-1;
 
   if (l > 2 && (!strncmp(end-1,".Z",2)
 #ifdef GNUZCAT
@@ -3498,18 +3497,21 @@ pari_get_infile(char *name, FILE *file)
 }
 
 pariFILE *
-pari_fopengz(char *s)
+pari_fopengz(const char *s)
 {
   pari_sp av = avma;
+  char *name;
+  long l;
   FILE *f = fopen(s, "r");
   pariFILE *pf;
-  if (!f) { 
-    long l = strlen(s);
-    char *sorig = s;
-    s = stackmalloc(l + 3 + 1);
-    strcpy(s, sorig); (void)sprintf(s + l, ".gz"); f = fopen(s, "r");
-  }
-  pf = f ? pari_get_infile(s, f): NULL;
+
+  if (f) return pari_get_infile(s, f);
+
+  l = strlen(s);
+  name = stackmalloc(l + 3 + 1);
+  strcpy(name, s); (void)sprintf(name + l, ".gz");
+  f = fopen(name, "r");
+  pf = f ? pari_get_infile(name, f): NULL;
   avma = av; return pf;
 }
 
@@ -4200,8 +4202,7 @@ pari_unique_filename(const char *s)
 /* Create a "unique directory" and return its name built from the string
  * s, the user id and process pid (on Unix systems). A "temporary"
  * directory name is prepended. The name returned is pari_malloc'ed.
- * It is DOS-safe (truncated to 8 chars)
- */
+ * It is DOS-safe (truncated to 8 chars) */
 char*
 pari_unique_dir(const char *s)
 {
