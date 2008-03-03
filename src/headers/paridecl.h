@@ -1926,8 +1926,6 @@ GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootmod2(GEN f, GEN p);
 GEN     rootpadic(GEN f, GEN p, long r);
 GEN     rootpadicfast(GEN f, GEN p, long e);
-GEN     roots2(GEN pol,long PREC);
-GEN     rootsold(GEN x, long l);
 GEN     simplefactmod(GEN f, GEN p);
 
 /* polarit2.c */
