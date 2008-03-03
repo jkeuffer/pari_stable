@@ -7,7 +7,7 @@ Help: denominator(x): denominator of x (or lowest common denominator in case
 Doc: 
  denominator of $x$. The meaning of this
  is clear when $x$ is a rational number or function. If $x$ is an integer
- or a polynomial, it is treated as a rational number of function,
+ or a polynomial, it is treated as a rational number or function,
  respectively, and the result is equal to $1$. For polynomials, you
  probably want to use 
  \bprog
