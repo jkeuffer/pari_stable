@@ -23,20 +23,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 galoisconj(GEN nf)
 {
-  GEN x, y, z;
+  GEN x = get_nfpol(nf, &nf), y, z;
   long i, lz, v;
   pari_sp av = avma;
-  nf = checknf(nf);
-  x = gel(nf,1);
   v = varn(x);
   if (v == 0)
-    nf = gsubst(nf, 0, pol_x(MAXVARN));
+  {
+    if (nf) y = gsubst(nf, 0, pol_x(MAXVARN));
+    else { y = shallowcopy(x); setvarn(y, MAXVARN); }
+  }
   else
   {
-    x = shallowcopy(x);
-    setvarn(x, 0);
+    y = x;
+    x = shallowcopy(x); setvarn(x, 0);
   }
-  z = nfroots(nf, x); lz = lg(z);
+  z = nfroots(y, x); lz = lg(z);
   y = cgetg(lz, t_COL);
   for (i = 1; i < lz; i++)
   {
@@ -49,9 +50,9 @@ galoisconj(GEN nf)
 
 /* nbmax: bound for the number of conjugates */
 static GEN
-galoisconj2pol(GEN x, long nbmax, long prec)
+galoisconj2pol(GEN x, long prec)
 {
-  long i, n, v, nbauto;
+  long i, n, v, nbauto, nbmax;
   pari_sp av = avma;
   GEN y, w, polr, p1, p2;
   n = degpol(x);
@@ -59,10 +60,12 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   RgX_check_ZX(x, "galoisconj2pol");
   if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
 
+  nbmax = numberofconjugates(x, 2);
   polr = roots(x, prec);
   p1 = gel(polr,1);
-  nbauto = 1;
+  /* accuracy in decimal digits */
   prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
+  nbauto = 1;
   w = cgetg(n + 2, t_VEC);
   gel(w,1) = gen_1;
   for (i = 2; i <= n; i++) gel(w,i) = gmul(p1, gel(w,i-1));
@@ -71,17 +74,16 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   gel(y,1) = pol_x(v);
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
-    w[n + 1] = polr[i];
+    gel(w,n+1) = gel(polr,i);
     p1 = lindep2(w, prec);
     if (signe(p1[n+1]))
     {
-      setlg(p1, n+1);
+      p1[0] = evallg(n+1) | evaltyp(t_COL);
       p2 = gdiv(RgV_to_RgX(p1, v), negi(gel(p1,n+1)));
       if (gdvd(poleval(x, p2), x))
       {
 	gel(y,++nbauto) = p2;
-	if (DEBUGLEVEL > 1)
-	  fprintferr("conjugate %ld: %Zs\n", i, y[nbauto]);
+	if (DEBUGLEVEL > 1) fprintferr("conjugate %ld: %Zs\n", i, y[nbauto]);
       }
     }
   }
@@ -98,13 +100,13 @@ galoisconj2(GEN nf, long prec)
   pari_sp av = avma;
   GEN T = get_nfpol(nf,&nf), y, w, polr, p1, p2;
 
-  nbmax = numberofconjugates(T, 2);
-  if (!nf) return galoisconj2pol(T, nbmax, prec);
+  if (!nf) return galoisconj2pol(T, prec);
   n = degpol(T);
   if (n <= 0) return cgetg(1, t_VEC);
-  /* accuracy in decimal digits */
+  nbmax = numberofconjugates(T, 2);
   y = cgetg(nbmax + 1, t_COL);
   gel(y,1) = pol_x(varn(T));
+  /* accuracy in decimal digits */
   prec = (long)bit_accuracy_mul(nf_get_prec(nf), L2SL10 * 0.75);
   nbauto = 1;
   polr = nf_get_roots(nf);
@@ -113,7 +115,7 @@ galoisconj2(GEN nf, long prec)
   for (i = 1; i <= n; i++) w[i] = coeff(p2, 1, i);
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
-    w[n+1] = polr[i];
+    gel(w,n+1) = gel(polr,i);
     p1 = lindep2(w, prec);
     if (signe(p1[n+1]))
     {
@@ -122,11 +124,12 @@ galoisconj2(GEN nf, long prec)
       if (gdvd(poleval(T, p2), T))
       {
 	gel(y,++nbauto) = p2;
-	if (DEBUGLEVEL > 1)
-	  fprintferr("conjugate %ld: %Zs\n", i, y[nbauto]);
+	if (DEBUGLEVEL > 1) fprintferr("conjugate %ld: %Zs\n", i, y[nbauto]);
       }
     }
   }
+  if (nbauto < nbmax)
+    pari_warn(warner, "conjugates list may be incomplete in nfgaloisconj");
   setlg(y, 1 + nbauto);
   return gerepileupto(av, gen_sort(y, (void*)&gcmp, &gen_cmp_RgX));
 }
@@ -2269,20 +2272,21 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   pari_sp av = avma;
   GEN G, T;
 
-  if (flag == 1) return galoisconj(nf);
-  if (flag == 2) return galoisconj2(nf, prec);
-  G = galoisconj4(nf, d, 0);
-  if (typ(G) != t_INT) return G; /* Success */
-
-  T = get_nfpol(nf, &nf); avma = av;
-  if (flag == 0)
+  switch(flag)
   {
-    long card = numberofconjugates(T, G == gen_0? 2: itos(G));
-    if (card != 1) return nf? galoisconj(nf): galoisconj2pol(T, card, prec);
+    case 1: return galoisconj(nf);
+    case 2: return galoisconj2(nf, prec);
+    case 4:
+    case 0:
+      G = galoisconj4(nf, d, 0);
+      if (typ(G) != t_INT) return G; /* Success */
+      avma = av;
+      if (flag == 0) return galoisconj(nf);
+      T = get_nfpol(nf, &nf);
+      G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T)); return G;
   }
-  else if (flag != 4) pari_err(flagerr, "nfgaloisconj");
-  G = cgetg(2, t_COL); gel(G,1) = pol_x(varn(T));
-  return G;
+  pari_err(flagerr, "nfgaloisconj");
+  return NULL; /*not reached*/
 }
 
 /******************************************************************************/

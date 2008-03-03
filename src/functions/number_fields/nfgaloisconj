@@ -7,31 +7,24 @@ Help: nfgaloisconj(nf,{flag=0},{d}): list of conjugates of a root of the
  default), meaning 0: use combination of flag 4 and 1, always complete; 1:
  use nfroots; 2 : use complex numbers, LLL on integral basis (not always
  complete); 4: use Allombert's algorithm, complete if the field is Galois of
- degree <= 35 (see manual for detail). nf can be simply a polynomial with
- flag 0,2 and 4, meaning: 0: use combination of flag 4 and 2, not always
- complete (but a warning is issued when the list is not proven complete); 2 &
- 4: same meaning and restrictions. Note that only flag 4 can be applied to
- fields of large degrees (approx. >= 20)
+ degree <= 35 (see manual for details). nf can be simply a polynomial.
 Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  conjugates of a root $r$ of the non-constant polynomial $x=\var{nf}[1]$
  expressed as polynomials in $r$. This also makes sense when the number field
  is not \idx{Galois} since some conjugates may lie in the field.
- 
- $\var{nf}$ can simply be a polynomial if $\fl\neq 1$.
+ $\var{nf}$ can simply be a polynomial.
   
- If no flags or $\fl=0$, if $\var{nf}$ is a number field use a
- combination of flag $4$ and $1$ and the result is always complete,
- else use a combination of flag $4$ and $2$ and the result is subject
- to the restriction of $\fl=2$, but a warning is issued when it is not
- proven complete.
+ If no flags or $\fl=0$, use a combination of flag $4$ and $1$ and the result
+ is always complete,
  
- If $\fl=1$, use \kbd{nfroots} (require a number field).
+ If $\fl=1$, use \kbd{nfroots}.
  
- If $\fl=2$, use complex approximations to the roots and an integral
+ If $\fl=2$ (OBSOLETE), use complex approximations to the roots and an integral
  \idx{LLL}. The result is not guaranteed to be complete: some
- conjugates may be missing (no warning issued), especially so if the
- corresponding polynomial has a huge index. In that case, increasing
- the default precision may help.
+ conjugates may be missing (a warning is issued if the result is not proved
+ complete), especially so if the corresponding polynomial has a huge index,
+ and increasing the default precision may help. This variant is slow and
+ unreliable: don't use it.
  
  If $\fl=4$, use Allombert's algorithm and permutation testing. If the
  field is Galois with weakly super-solvable Galois group, return
