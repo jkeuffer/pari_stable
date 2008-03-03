@@ -2432,7 +2432,7 @@ Flm_indexrank(GEN x, ulong p)
   {
     for (i=0,j=1; j<=n; j++)
       if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
+    vecsmall_sort(p1);
   }
   return res;
 }
@@ -2451,8 +2451,7 @@ indexrank0(long n, long r, GEN d)
   {
     for (i=0,j=1; j<=n; j++)
       if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
-    pari_free(d);
-    qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
+    vecsmall_sort(p1); pari_free(d);
   }
   return res;
 }

@@ -1231,9 +1231,6 @@ polymodrecip(GEN x)
 int
 pari_compare_lg(GEN x, GEN y) { return icmp(lg(x),lg(y)); }
 
-int
-pari_compare_long(long *a,long *b) { return icmp(*a,*b); }
-
 static int
 cmp_small(GEN x, GEN y) { return icmp((long)x,(long)y); }
 
