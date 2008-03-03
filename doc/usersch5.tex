@@ -5247,7 +5247,7 @@ function and seems to be generally inferior to \kbd{hash\_str}.
 at most $n$ chars from $s$ (uses \kbd{pari\_malloc}). If $s$ is longer than
 $n$, only $n$ characters are copied and a terminal null byte is added.
 
-\fun{char}{*stack_strdup}{const char *s} returns a copy of $s$, allocated
+\fun{char*}{stack_strdup}{const char *s} returns a copy of $s$, allocated
 on the PARI stack (uses \kbd{stackmalloc}).
 
 
