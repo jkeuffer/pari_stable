@@ -111,23 +111,23 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
   f  = cgetg(N+1, t_VEC);
   f2 = cgetg(N+1, t_VEC); /*f2[m]=f[m]^2 */
   ff = cgetg(N+1, t_VEC); /*ff[m]=f[m]*f[m-2] */
-  rhs = FpX_rem(mkpoln(4, gen_1, gen_0, a4, a6),h ,p);
+  rhs = FpX_rem(mkpoln(4, gen_1, gen_0, a4, a6), h, p);
   inv2y = FpXQ_inv(FpX_Fp_mul(rhs, gen_2, p), h, p);
   gel(f, 2) = scalarpol(gen_2,0);
   gel(f2, 2) = FpX_Fp_mul(rhs, utoi(4), p);
   a42 = Fp_sqr(a4, p);
   gel(f, 3) = FpX_rem(mkpoln(5, utoi(3), gen_0, Fp_mul(utoi(6), a4, p), 
-                        Fp_mul(utoi(12), a6, p), Fp_neg(a42, p)),h,p);
+                        Fp_mul(utoi(12), a6, p), Fp_neg(a42, p)), h, p);
   if (n == 3) return gerepileupto(ltop, gel(f, 3));
   gel(f, 4) = FpX_rem(FpX_Fp_mul(mkpoln(7, gen_1, gen_0,
     Fp_mul(utoi(5), a4, p), Fp_mul(utoi(20), a6, p),
-    Fp_mul(a42,subis(p,5),p), Fp_mul(Fp_mul(a4, a6, p), subis(p,4),p),
-    Fp_sub(Fp_mul(Fp_sqr(a6,p), subis(p,8), p), Fp_mul(a4,a42, p), p)),
-                                 utoi(4),p),h,p);
+    Fp_mul(a42,subis(p,5), p), Fp_mul(Fp_mul(a4, a6, p), subis(p,4), p),
+    Fp_sub(Fp_mul(Fp_sqr(a6, p), subis(p,8), p), Fp_mul(a4,a42, p), p)),
+                                 utoi(4), p), h, p);
   if (n == 4) return gerepileupto(ltop, gel(f, 4));
   gel(f2, 3) = FpXQ_sqr(gel(f, 3), h, p);
   gel(ff, 3) = gel(f, 3);
-  gel(ff, 4) = FpX_Fp_mul(FpXQ_mul(rhs, gel(f, 4),h,p), gen_2, p);
+  gel(ff, 4) = FpX_Fp_mul(FpXQ_mul(rhs, gel(f, 4), h, p), gen_2, p);
   gel(f, 5)  = FpX_sub(FpXQ_mul(gel(ff, 4), gel(f2, 2), h, p), 
                       FpXQ_mul(gel(ff, 3), gel(f2, 3), h, p), p);
   if (n == 5) return gerepileupto(ltop, gel(f, 5));
@@ -138,7 +138,7 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
   for (m = 3; m <= l; m++)
   {
     gel(f, 2*m) = FpXQ_mul(
-                      FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m-1),h,p),
+                      FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m-1), h, p),
                               FpXQ_mul(gel(ff, m), gel(f2, m+1), h, p), p),
                       inv2y, h, p);
     gel(f2, 2*m) = FpXQ_mul(rhs, FpXQ_sqr(gel(f, 2*m), h, p), h, p);
@@ -157,7 +157,7 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
     res = FpXQ_mul(
                FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m-1), h, p),
                        FpXQ_mul(gel(ff, m), gel(f2, m+1), h, p), p),
-               inv2y, h ,p);
+               inv2y, h, p);
   return gerepileupto(ltop, res);
 }
 
@@ -207,8 +207,8 @@ static GEN
 find_numerator_isogeny(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, GEN h, GEN p, long precS)
 {
   pari_sp ltop = avma;
-  GEN WEb = gmul(compute_W(Eba4, Eba6, p, varn(h), precS), gmodulsg(1,p));
-  GEN WEc = gmul(compute_W(Eca4, Eca6, p, varn(h), precS), gmodulsg(1,p));
+  GEN WEb = gmul(compute_W(Eba4, Eba6, p, varn(h), precS), gmodulsg(1, p));
+  GEN WEc = gmul(compute_W(Eca4, Eca6, p, varn(h), precS), gmodulsg(1, p));
   GEN den = poleval(h, WEb);
   return gerepileupto(ltop, find_transformation(gmul(gsqr(den), WEc), WEb));
 }
@@ -364,7 +364,8 @@ eigen_elldbl(void *E, GEN P)
   else
   {
     GEN lambda = FpXQ_div(FpX_Fp_add(FpX_Fp_mul(FpXQ_sqr(x,h,p),utoi(3),p), Edat->a4, p), FpXQ_mul(FpX_Fp_mul(y, gen_2, p), Edat->RHS, h, p), h, p);
-    GEN C = FpX_sub(FpXQ_mul(FpXQ_sqr(lambda,h,p), Edat->RHS, h,p), FpX_Fp_mul(x, gen_2, p), p);
+    GEN C = FpX_sub(FpXQ_mul(FpXQ_sqr(lambda, h, p), Edat->RHS, h, p),
+                    FpX_Fp_mul(x, gen_2, p), p);
     GEN res = mkvec2(C, FpX_sub(FpXQ_mul(lambda, FpX_sub(x, C, p), h, p), y, p));
     return gerepilecopy(ltop, res);
   }
@@ -574,7 +575,7 @@ compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong
   GEN E6E4  = Fp_div(E6, E4, p); 
   GEN u11 = Fp_mul(Fp_neg(gprime, p), dxxgj, p);
   GEN u12 = Fp_mul(Fp_mul(Fp_mulu(j, 2*q, p), dxJgj, p), E6E4, p);
-  GEN u13 = Fp_mul(Fp_mul(Fp_div(E62, Fp_mul(gprime, E42, p), p), j, p), sqrs(q),p);
+  GEN u13 = Fp_mul(Fp_mul(Fp_div(E62, Fp_mul(gprime, E42, p), p), j, p), sqrs(q), p);
   GEN u14 = Fp_add(pJ, Fp_mul(j, dJJgj, p), p);
   GEN u15 = Fp_mulu(Fp_sub(Fp_div(E6E4, utoi(3), p), Fp_div(E42, Fp_mulu(E6, 2, p), p), p), q, p);
   GEN u1 = Fp_add(Fp_div(Fp_sub(Fp_add(u11, u12, p), 
@@ -627,12 +628,12 @@ find_isogenous_from_Atkin(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   {
     GEN jt = gel(Roots, k);
     GEN pxstar = FpX_eval(Dxg, jt, p);
-    GEN dxstar = Fp_mul(pxstar, g ,p);
+    GEN dxstar = Fp_mul(pxstar, g, p);
     GEN pJstar = FpX_eval(DJg, jt, p);
     GEN dJstar = Fp_mul(Fp_mulu(jt, q, p), pJstar, p);
     GEN u = Fp_mul(Fp_mul(dxstar, dJ, p), E6, p);
     GEN v = Fp_mul(Fp_mul(dJstar, dx, p), E4, p);
-    GEN E4t = Fp_div(Fp_mul(Fp_sqr(u, p), jt, p), Fp_mul(Fp_sqr(v, p), Fp_sub(jt, utoi(1728),p), p), p);
+    GEN E4t = Fp_div(Fp_mul(Fp_sqr(u, p), jt, p), Fp_mul(Fp_sqr(v, p), Fp_sub(jt, utoi(1728), p), p), p);
     GEN E6t = Fp_div(Fp_mul(u, E4t, p), v, p);
     GEN u2 = compute_u(gprime, Dxxg, DxJg, DJJg, jt, pJstar, pxstar, q, E4t, E6t, p);
     GEN pp1 = Fp_mulu(Fp_sub(u1, u2, p), 3*q, p);
@@ -670,7 +671,7 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   GEN Dxg = FpXY_evaly(Dx, g, p, vJ);
   GEN px  = FpX_eval(Dxg, j, p);
   GEN dx  = Fp_mul(g, px, p);
-  GEN DJg = FpXY_evaly(DJ, g,p, vJ);
+  GEN DJg = FpXY_evaly(DJ, g, p, vJ);
   GEN pJ  = FpX_eval(DJg, j, p);
   GEN dJ  = Fp_mul(j, pJ, p);
   GEN Dxx = deriv(Dx, vx);
