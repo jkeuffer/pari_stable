@@ -89,8 +89,8 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        no longer deprecated
    26- rename smith2 -> smithall, gsmith2 -> gsmithall
    27- rename torsell -> elltors and document it
-   28- library function galoisinit now returns NULL on failure (used to raise
-       an exception)
+   28- library/GP function galoisinit() now returns NULL/0 on failure
+       (used to raise an exception)
    29- allow nfgaloisconj(t_POL, 1) [ cf C-4 ], never resort to nfgaloisconj(,2)
        [ slow, unreliable ] with default flag = 0
 
