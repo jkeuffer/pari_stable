@@ -1442,7 +1442,7 @@ lim_lines_output(char *s, long n, long max_lin)
       }
     if (c == '\n')         { col = -1; lin++; }
     else if (col == width) { col =  0; lin++; }
-    last_was_newline = (c == '\n');
+    set_last_newline(c);
     col++; normalOutC(c);
   }
 }

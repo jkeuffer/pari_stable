@@ -1504,15 +1504,15 @@ gp_main_loop(int ismain)
     }
     if (check_meta(b->buf)) continue;
 
+    avma = av;
     if (ismain)
     {
 #if defined(_WIN32) || defined(__CYGWIN32__)
       win32ctrlc = 0;
 #endif
       TIMERstart(GP_DATA->T);
+      pari_set_last_newline(1);
     }
-    avma = av;
-    pari_set_last_newline(1);
     z = pari_eval_str(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
 
