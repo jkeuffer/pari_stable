@@ -14,4 +14,8 @@ Doc: $p$-adic factorization
  algorithm of \idx{Zassenhaus}.
  
  If $\fl=1$, use an algorithm due to \idx{Buchmann} and \idx{Lenstra}, which is
- usually less efficient.
+ much less efficient.
+Variant:
+ \fun{GEN}{factorpadic}{GEN f,GEN p, long r} corresponds to the default
+ $\fl=0$.
+

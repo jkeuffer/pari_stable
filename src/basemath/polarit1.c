@@ -1920,7 +1920,7 @@ padic_trivfact(GEN x, GEN p, long r)
 		mkcol(gen_1));
 }
 
-GEN
+static GEN
 factorpadic2(GEN f, GEN p, long prec)
 {
   pari_sp av = avma;
@@ -2017,7 +2017,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
 }
 
 GEN
-factorpadic4(GEN f,GEN p,long prec)
+factorpadic(GEN f,GEN p,long prec)
 {
   pari_sp av = avma;
   GEN y, P, ppow, lead, lt;
@@ -2052,7 +2052,7 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 {
   switch(flag)
   {
-     case 0: return factorpadic4(f,p,r);
+     case 0: return factorpadic(f,p,r);
      case 1: return factorpadic2(f,p,r);
      default: pari_err(flagerr,"factorpadic");
   }

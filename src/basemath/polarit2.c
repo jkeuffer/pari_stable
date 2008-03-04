@@ -2039,7 +2039,7 @@ factor(GEN x)
 	  gel(y,1) = gerepile(av,tetpil,p2);
 	  gel(y,2) = const_col(lx-1, gen_1); return y;
 
-	case t_PADIC: return factorpadic4(x,p,pa);
+	case t_PADIC: return factorpadic(x,p,pa);
 
 	case t_FFELT: return FFX_factor(x,pol);
 
