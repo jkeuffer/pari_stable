@@ -642,7 +642,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       }
       else hop++;
     }
-    if (DEBUGLEVEL >= 4 && i % (N1/20) == 0)
+    if (DEBUGLEVEL >= 4 && i % max(N1/20, 1) == 0)
       msgtimer("GaloisConj:Testing %Zs", addis(mulss(Ni,N1),i));
     avma = av;
     if (i == N1-1)
