@@ -1548,7 +1548,29 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     get_extra_l = 1;
     bound_champ = gdiv(bound, gel(tr, 2));
-    champ = champion(compile_atkin, nb_atkin);
+    if (DEBUGLEVEL>=2)
+      fprintferr("Running champion on %ld primes", nb_atkin);
+    if (nb_atkin > 20)
+    {
+      GEN cat;
+      GEN v = cgetg(nb_atkin+1,t_VECSMALL);
+      for(i = 1; i <= nb_atkin; i++)
+        v[i] = lg(gmael(compile_atkin, i, 2))-1;
+      v = vecsmall_indexsort(v);
+      if (DEBUGLEVEL>=2)
+      {
+        fprintferr(", forgetting prime(s) ");
+        for(i=21; i<=nb_atkin; i++)
+          fprintferr("%Zs(%ld) ",gmael(compile_atkin, v[i],3),lg(gmael(compile_atkin, v[i], 2))-1);
+      }
+      v = vecsmall_shorten(v, 20);
+      vecsmall_sort(v);
+      cat = shallowextract(compile_atkin, v);
+      champ = champion(cat, 20);
+    }
+    else
+      champ = champion(compile_atkin, nb_atkin);
+    if (DEBUGLEVEL>=2) fprintferr(".\n");
     best_champ = gel(champ, lg(champ) - 1);
     for (i = 1; i < lg(champ); i++)
     {
@@ -1574,6 +1596,9 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     cat = shallowextract(compile_atkin, bits);
     nb_atkin = lg(cat)-1;
     for (i=1; i<=nb_atkin; i++) gel(compile_atkin, i) = gel(cat, i);
+    if (DEBUGLEVEL>=2)
+      fprintferr("Keeping %ld primes, %Zs remaining possibilities.\n",
+                 nb_atkin, gel(best_champ, 2));
     if (nb >= lg_mod-1 && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
     {
       if (DEBUGLEVEL)
@@ -1584,7 +1609,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       gerepileall(btop, 6, &tr, &compile_atkin, &bound_bsgs, &bound_champ, &champ, &best_champ);
   }
   if (DEBUGLEVEL)
-    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Zs possibilities for the trace\n", gel(best_champ, 2));
+    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Zs possibilities for the trace.\n", gel(best_champ, 2));
   res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
   return gerepileupto(ltop, subii(addis(p, 1), res));
 }
