@@ -1188,7 +1188,7 @@ cost(GEN ell, GEN cost_vec)
   {
     long z = cost_vec[P[i]];
     if (!z) { avma = ltop; return NULL; }
-    res = gmulgs(res, z);
+    res = mulis(res, z);
   }
   return gerepileupto(ltop,res);
 }
@@ -1346,9 +1346,9 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   div = mulii(truedivii(dec_inf, Mb), Mb);
   for (i = 1; i < lg(baby); i++)
   {
-    gel(baby, i) = gadd(gel(baby, i), div);
+    gel(baby, i) = addii(gel(baby, i), div);
     if (gcmp(gel(baby, i), dec_inf) < 0)
-      gel(baby, i) = gadd(gel(baby, i), Mb);
+      gel(baby, i) = addii(gel(baby, i), Mb);
   }
   baby = sort(baby);
   gerepileall(av2, 5, &baby, &Mb, &giant, &Mg, &Sg);
@@ -1412,7 +1412,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
   /* error if i = #giant ==> no match */
   if (i==lg(giant)-1)
     pari_err(bugparier,"match_and_sort");
-  card = gsub(subii(subii(addis(p, 1), u), mulii(mulii(Sg, Mu), Mb)), gmul(Mu, gadd(gmul(gel(giant, r), Mb), gmul(Mg, gel(baby, s)))));
+  card = subii(subii(subii(addis(p, 1), u), mulii(mulii(Sg, Mu), Mb)), mulii(Mu, addii(mulii(gel(giant, r), Mb), mulii(Mg, gel(baby, s)))));
   card = mkvec2(card, addii(card, mulii(mulii(mulsi(2, Mu), Mb), gel(giant, r))));
   return gerepileupto(ltop, choose_card(card, a4, a6, p));
 }
@@ -1497,7 +1497,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       /* else compute possible values for the trace using Atkin method. */
       gel(compile_atkin, ++nb_atkin) = mkvec3(ellkt, trace_mod, ell);
     /*We can now increase the product with this prime and go to the next prime */
-    product = gmul(product, ellkt);
+    product = mulii(product, ellkt);
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &product);
   }
@@ -1513,7 +1513,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   growth_factor = dbltor(1.26);
   p9 = gen_1;
   for (i = 1; i <= nb_atkin; i++)
-    p9 = gmul(p9, gmael(compile_atkin, i, 1));
+    p9 = mulii(p9, gmael(compile_atkin, i, 1));
   p11 = prod_lgatkin(compile_atkin, nb_atkin);
   best_champ = mkvec2(p9, p11);
   /*If the number of possible traces is too large, we treat a new prime */
