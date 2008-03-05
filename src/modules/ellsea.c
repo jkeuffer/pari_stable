@@ -1120,18 +1120,16 @@ static GEN
 find_pt_aff(GEN a4, GEN a6, GEN p)
 {
   pari_sp ltop = avma;
-  pari_sp btop = avma;
-  GEN x, rhs, p1;
+  GEN x, y, rhs;
   do
   {
-    avma= btop;
+    avma= ltop;
     x   = genrand(p); /*  x^3+a4*x+a6 = x*(x^2+a4)+a6  */
     rhs = Fp_add(Fp_mul(x, Fp_add(Fp_sqr(x, p), a4, p), p), a6, p);
   } while (kronecker(rhs, p)<0);
-  p1 = cgetg(3, t_VEC);
-  gel(p1, 1) = icopy(x);
-  gel(p1, 2) = Fp_sqrt(rhs, p);
-  return gerepileupto(ltop, p1);
+  y = Fp_sqrt(rhs, p);
+  if (!y) pari_err(talker,"not a prime number");
+  return gerepilecopy(ltop, mkvec2(x,y));
 }
 
 /* E has order o[1], ..., or o[#o], draw random points until all solutions
