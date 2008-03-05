@@ -1187,7 +1187,6 @@ cost(GEN ell, GEN cost_vec)
   for (i = 1; i < lg(P); i++)
   {
     long z = cost_vec[P[i]];
-    if (!z) { avma = ltop; return NULL; }
     res = mulis(res, z);
   }
   return gerepileupto(ltop,res);
@@ -1229,18 +1228,16 @@ champion(GEN compile_atkin, long k)
       else
         b = mulii(gmael(compile_atkin, j, 1), gel(Bp, i2++));
       costb = cost(b, cost_vec);
-      if (costb)
-        while (cmpii(costb, cost(gel(B, i), cost_vec)) < 0)
-          --i;
+      while (cmpii(costb, cost(gel(B, i), cost_vec)) < 0)
+        --i;
       gel(B, ++i) = b;
     }
     for (  ;i2 <= n; i2++)
     {
       b = mulii(gmael(compile_atkin, j, 1), gel(Bp, i2));
       costb = cost(b, cost_vec);
-      if (costb)
-        while (cmpii(costb, cost(gel(B, i), cost_vec)) < 0)
-          --i;
+      while (cmpii(costb, cost(gel(B, i), cost_vec)) < 0)
+        --i;
       gel(B, ++i) = b;
     }
     n = i;
@@ -1256,11 +1253,8 @@ champion(GEN compile_atkin, long k)
   for (i = 1, n = 1; i <= two_k; i++)
     if (gcmpgs(gel(B, i), 1) > 0)
     {
-      GEN p9 = cgetg(3, t_VEC);
       GEN b = cost(gel(B, i), cost_vec);
-      gel(p9, 1) = gcopy(gel(B, i));
-      gel(p9, 2) = b?b:strtoGENstr("inf");
-      gel(res, n++) = p9;
+      gel(res, n++) = mkvec2copy(gel(B, i), b);
     }
   return gerepileupto(ltop, res);
 }
