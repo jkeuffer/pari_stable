@@ -980,12 +980,12 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
   {
   case MTElkies:
     if (DEBUGLEVEL)
-      fprintferr("Elkies.\t ");
+      fprintferr("Elkies.\t");
     tr = find_trace_Elkies_power(a4, a6, ell, k, meqn, meqntype, g, cgetg(1, t_VEC), p, EARLY_ABORT);
     if (!tr) { avma=ltop; return NULL; }
     break;
   case MTone_root:
-    if (DEBUGLEVEL) fprintferr("One root.\t ");
+    if (DEBUGLEVEL) fprintferr("One root.\t");
     tr = find_trace_one_root(ell, p);
     kt = 1;
     if (ell < BOUND_ONE_ROOT)
@@ -993,19 +993,16 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
       tr = find_trace_Elkies_power(a4, a6, ell, 1, meqn, meqntype, g, tr, p, EARLY_ABORT);
       if (!tr) { avma=ltop; return NULL; }
     }
-    else
-      if (DEBUGLEVEL)
-        fprintferr("Compute possible values for the trace\n");
     break;
   case MTroots:
     if (DEBUGLEVEL)
-      fprintferr("l+1 roots.\t Compute possible values for the trace\n");
+      fprintferr("l+1 roots\t");
     tr = find_trace_lp1_roots(ell, p);
     kt = 2;
     break;
   case MTAtkin:
     if (DEBUGLEVEL)
-      fprintferr("Atkin.\t Compute possible values for the trace\n");
+      fprintferr("Atkin.\t");
     tr = find_trace_Atkin(ell, r, p);
     kt = 1;
     break;
@@ -1014,6 +1011,8 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
       fprintferr("Pathological.\n");
     avma = ltop; return NULL;
   }
+  if (DEBUGLEVEL && mt!=MTElkies && (mt!= MTone_root || lg(tr)==3))
+    fprintferr("%ld possible value(s) for the trace\n",lg(tr)-1);
   *ptr_kt = kt;
   return gerepileupto(ltop, tr);
 }
@@ -1585,7 +1584,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       gerepileall(btop, 6, &tr, &compile_atkin, &bound_bsgs, &bound_champ, &champ, &best_champ);
   }
   if (DEBUGLEVEL)
-    fprintferr("\n\nComputation of traces done. Entering match and sort algorithm.\n");
+    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Zs possibilities for the trace\n", gel(best_champ, 2));
   res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
   return gerepileupto(ltop, subii(addis(p, 1), res));
 }
