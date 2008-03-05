@@ -1477,7 +1477,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       if (DEBUGLEVEL)
       {
         GEN p15 = prod_lgatkin(compile_atkin, nb_atkin);
-        fprintferr("Match and sort may be very long : it remains %Zspossibilities for the trace\n", p15);
+        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", p15);
       }
       res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
       return gerepileupto(ltop, subii(addis(p, 1), res));
@@ -1580,7 +1580,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (nb >= lg_mod-1 && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
     {
       if (DEBUGLEVEL)
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long : it remains %Zs possibilities for the trace", gel(best_champ, 2));
+        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", gel(best_champ, 2));
       break;
     }
     if (low_stack(st_lim, stack_lim(btop, 1)))
