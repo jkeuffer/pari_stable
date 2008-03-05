@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
-long
+int
 isnfscalar(GEN x) { return typ(x) == t_COL? RgV_isscalar(x): 0; }
 
 static GEN

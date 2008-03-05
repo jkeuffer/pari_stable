@@ -394,7 +394,7 @@ FpX_rescale(GEN P, GEN h, GEN p)
 GEN
 FpX_deriv(GEN x, GEN p) { return FpX_red(ZX_deriv(x), p); }
 
-long
+int
 FpX_is_squarefree(GEN f, GEN p)
 {
   pari_sp av = avma;
@@ -682,7 +682,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
 }
 
 /* assume T irreducible mod p */
-long
+int
 FpXQ_issquare(GEN x, GEN T, GEN p)
 {
   pari_sp av;

@@ -2805,7 +2805,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
 {
   pari_sp av = avma;
   long i, l;
-  GEN p1, id, Az, Iz, nf, A, I;
+  GEN id, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(x)!=t_VEC || lg(x)<3)
@@ -2818,17 +2818,18 @@ rnfsimplifybasis(GEN bnf, GEN x)
   Iz = cgetg(l, t_VEC); gel(x,2) = Iz;
   for (i = 1; i < l; i++)
   {
-    if (gequal(gel(I,i),id)) { gel(Iz,i) = id; Az[i] = A[i]; continue; }
+    GEN c, d;
+    if (RgM_isidentity(gel(I,i))) { gel(Iz,i) = id; Az[i] = A[i]; continue; }
 
-    gel(Iz,i) = Q_primitive_part(gel(I,i), &p1);
-    gel(Az,i) = p1? gmul(gel(A,i),p1): gel(A,i);
-    if (p1 && gequal(gel(Iz,i), id)) continue;
+    gel(Iz,i) = Q_primitive_part(gel(I,i), &c);
+    gel(Az,i) = c? gmul(gel(A,i),c): gel(A,i);
+    if (c && ZM_isidentity(gel(Iz,i))) continue;
 
-    p1 = gen_if_principal(bnf, gel(Iz,i));
-    if (p1)
+    d = gen_if_principal(bnf, gel(Iz,i));
+    if (d)
     {
       gel(Iz,i) = id;
-      gel(Az,i) = element_mulvec(nf,p1,gel(Az,i));
+      gel(Az,i) = element_mulvec(nf,d,gel(Az,i));
     }
   }
   return gerepilecopy(av, x);

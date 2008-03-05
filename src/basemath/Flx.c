@@ -1467,7 +1467,7 @@ Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 }
 
 /* assume T irreducible mod p */
-long
+int
 Flxq_issquare(GEN x, GEN T, ulong p)
 {
   pari_sp av;

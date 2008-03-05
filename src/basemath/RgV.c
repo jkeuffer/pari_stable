@@ -207,7 +207,7 @@ scalarcol_shallow(GEN x, long n) {
   fill_scalcol(y, x, n); return y;
 }
 
-long
+int
 RgV_isscalar(GEN x)
 {
   long lx = lg(x),i;
@@ -215,7 +215,7 @@ RgV_isscalar(GEN x)
     if (!gcmp0(gel(x, i))) return 0;
   return 1;
 }
-long
+int
 RgM_isscalar(GEN x, GEN s)
 {
   long i, j, lx = lg(x);
@@ -237,7 +237,7 @@ RgM_isscalar(GEN x, GEN s)
   return 1;
 }
 
-long
+int
 RgM_isidentity(GEN x)
 {
   long i,j, lx = lg(x);
@@ -257,7 +257,7 @@ RgM_isidentity(GEN x)
   return 1;
 }
 
-long
+int
 RgM_isdiagonal(GEN x)
 {
   long i,j, lx = lg(x);
@@ -274,11 +274,10 @@ RgM_isdiagonal(GEN x)
   }
   return 1;
 }
-long
+int
 isdiagonal(GEN x)
 {
-  if (typ(x)!=t_MAT) pari_err(typeer,"isdiagonal");
-  return RgM_isdiagonal(x);
+  return (typ(x)==t_MAT) && RgM_isdiagonal(x);
 }
 
 /* returns the first index i<=n such that x=v[i] if it exists, 0 otherwise */

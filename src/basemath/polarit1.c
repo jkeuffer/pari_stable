@@ -570,7 +570,7 @@ FqX_nbroots(GEN f, GEN T, GEN p)
   avma = av; return degpol(z);
 }
 
-long
+int
 FpX_is_totally_split(GEN f, GEN p)
 {
   long n=degpol(f);
@@ -1066,7 +1066,7 @@ factcantor0(GEN f, GEN pp, long flag)
 
 /* Use this function when you think f is reducible, and that there are lots of
  * factors. If you believe f has few factors, use FpX_nbfact(f,p)==1 instead */
-long
+int
 FpX_is_irred(GEN f, GEN p) {
   return !!FpX_factcantor_i(FpX_factmod_init(f,p),p,2);
 }

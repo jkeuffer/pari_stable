@@ -2087,6 +2087,9 @@ entries of $x$ (its determinant if it is indeed triangular).
 positive diagonal coefficients. Assumes $x$ is a \kbd{ZM} (has integer
 coefficiets).
 
+\fun{int}{ZM_isidentity}{GEN x} return 1 is the \typ{ZM} $x$ is the
+identity matrix, and 0 otherwise.
+
 \fun{int}{RgM_ishnf}{GEN x} as \kbd{ZM\_ishnf}, without assumptions on the
 types of the coefficients.
 
@@ -2338,14 +2341,14 @@ interpolation polynomial with value \kbd{y[i]} at \kbd{x[i]}. Assumes lengths
 are the same, components are \typ{INT}s, and the \kbd{x[i]} are distinct
 modulo \kbd{p}.
 
-\fun{long}{FpX_is_squarefree}{GEN f, GEN p} returns $1$ if the
+\fun{int}{FpX_is_squarefree}{GEN f, GEN p} returns $1$ if the
 \kbd{FpX}~\kbd{f} is squarefree, $0$ otherwise.
 
-\fun{long}{FpX_is_irred}{GEN f, GEN p} returns $1$ if the \kbd{FpX}~\kbd{f}
+\fun{int}{FpX_is_irred}{GEN f, GEN p} returns $1$ if the \kbd{FpX}~\kbd{f}
 is irreducible, $0$ otherwise. Assumes that \kbd{p} is prime. If~\kbd{f} has
 few factors, \kbd{FpX\_nbfact(f,p) == 1} is much faster.
 
-\fun{long}{FpX_is_totally_split}{GEN f, GEN p} returns $1$ if the
+\fun{int}{FpX_is_totally_split}{GEN f, GEN p} returns $1$ if the
 \kbd{FpX}~\kbd{f} splits into a product of distinct linear factors, $0$
 otherwise. Assumes that \kbd{p} is prime.
 
@@ -2446,7 +2449,7 @@ that \kbd{T} is irreducible mod \kbd{p}.
 \fun{GEN}{Fp_FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} As
 \kbd{FpXQ\_log}, \kbd{a} being a \kbd{Fp}.
 
-\fun{long}{FpXQ_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
+\fun{int}{FpXQ_issquare}{GEN x, GEN T, GEN p} returns $1$ if $x$ is a square
 and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{FpXQ_order}{GEN a, GEN ord, GEN T, GEN p} returns the order of the
@@ -2584,7 +2587,7 @@ $\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
 \fun{GEN}{init_Fq}{GEN p, long n, long v} returns an irreducible polynomial
 of degree $\kbd{n} > 0$ over $\F_p$, in variable \kbd{v}.
 
-\fun{long}{FqX_is_squarefree}{GEN P, GEN T, GEN p}
+\fun{int}{FqX_is_squarefree}{GEN P, GEN T, GEN p}
 
 \fun{GEN}{FqX_roots}{GEN x, GEN T, GEN p} return the roots of \kbd{x} in
 $\F_p[X]/(T)$. Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
@@ -2917,7 +2920,7 @@ returns the order of the \typ{Flxq} \kbd{a}.
 If \kbd{o} is non-\kbd{NULL}, it is assumed that \kbd{o} is a multiple of the
 order of \kbd{a}, either as a \typ{INT} or a factorization matrix.
 
-\fun{long}{Flxq_issquare}{GEN x, GEN T, ulong p} returns $1$ if $x$ is a square
+\fun{int}{Flxq_issquare}{GEN x, GEN T, ulong p} returns $1$ if $x$ is a square
 and $0$ otherwise. Assumes that \kbd{T} is irreducible mod \kbd{p}.
 
 \fun{GEN}{Flxq_log}{GEN a, GEN g, GEN ord, GEN T, ulong p} Let $g$ of exact
@@ -5001,26 +5004,26 @@ The following routines check whether matrices or vectors have a special
 shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This may make a
 difference when components are inexact.)
 
-\fun{long}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
+\fun{int}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
 except possibly the first one. The name comes from vectors expressed on a
 standard polynomial basis $1,T,\dots, T^{n-1}$, or on \kbd{nf.zk} (whose
 first element is $1$).
 
-\fun{long}{ZV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
+\fun{int}{ZV_isscalar}{GEN x} as \kbd{RgV\_isscalar}, assuming $x$ is a
 \kbd{ZV}.
 
-\fun{long}{isnfscalar}{GEN x} returns $1$ if $x$ is a number field element
+\fun{int}{isnfscalar}{GEN x} returns $1$ if $x$ is a number field element
 in \typ{COL} form, which is a scalar (such that \kbd{RgV\_isscalar(x)}
 is $1$) and $0$ otherwise.
 
-\fun{long}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
+\fun{int}{RgM_isscalar}{GEN x, GEN s} return 1 if $x$ is the scalar matrix
 equalt to $s$ times the identity, and 0 otherwise. If $s$ is \kbd{NULL}, test
 whether $x$ is an arbitrary scalar matrix.
 
-\fun{long}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
+\fun{int}{RgM_isidentity}{GEN x} return 1 is the \typ{MAT} $x$ is the
 identity matrix, and 0 otherwise.
 
-\fun{long}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
+\fun{int}{RgM_isdiagonal}{GEN x} return 1 is the \typ{MAT} $x$ is a
 diagonal matrix, and 0 otherwise.
 
 \fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that

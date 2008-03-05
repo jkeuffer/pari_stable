@@ -627,7 +627,7 @@ zv_equal(GEN V, GEN W)
   return 1;
 }
 
-long
+int
 ZV_isscalar(GEN x)
 {
   long lx = lg(x),i;
@@ -649,6 +649,27 @@ ZM_ishnf(GEN x)
   }
   return (signe(gcoeff(x,1,1)) > 0);
 }
+int
+ZM_isidentity(GEN x)
+{
+  long i,j, lx = lg(x);
+
+  if (lx == 1) return 1;
+  if (lx != lg(x[1])) return 0;
+  for (j=1; j<lx; j++)
+  {
+    GEN c = gel(x,j), t;
+    for (i=1; i<j; )
+      if (signe(gel(c,i++))) return 0;
+    /* i = j */
+    t = gel(c,i++);
+      if (!is_pm1(t) || signe(t) < 0) return 0;
+    for (   ; i<lx; )
+      if (signe(gel(c,i++))) return 0;
+  }
+  return 1;
+}
+
 
 /********************************************************************/
 /**                                                                **/
