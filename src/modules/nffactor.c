@@ -1107,10 +1107,12 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     PRK = prk = idealpows(nf, pr, a);
     pk = gcoeff(prk,1,1);
+#if 0
     /* reduce size first, "scramble" matrix */
     PRK = lllintpartial_ip(PRK);
     /* now floating point reduction is fast */
     PRK = lllint_fp_ip(PRK, 4);
+#endif
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
@@ -1593,7 +1595,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     else
     {
       long d;
-      rep = cgetg(dpol + 1, t_VEC); gel(rep,1) = polred;
+      rep = cgetg(dpol + 1, t_VEC); gel(rep,1) = FpX_red(polred,L.p);
       d = FpX_split_Berlekamp((GEN*)(rep + 1), L.p);
       setlg(rep, d + 1);
     }
