@@ -419,7 +419,7 @@ initout(int initerr)
   if (initerr) pariErr = &defaultErr;
 }
 
-static int last_was_newline = 0;
+static int last_was_newline = 1;
 
 static void
 set_last_newline(char c) { last_was_newline = (c == '\n'); }
