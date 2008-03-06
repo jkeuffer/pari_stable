@@ -755,11 +755,11 @@ study_modular_eqn(long q, GEN mpoly, GEN p, enum mod_type *mt, long *ptr_r)
   *ptr_r = r;
   if (DEBUGLEVEL) switch(*mt)
   {
-    case MTone_root: fprintferr("One root.\t"); break;
-    case MTElkies: fprintferr("Elkies.\t"); break;
-    case MTroots: fprintferr("l+1 roots.\t"); break;
-    case MTAtkin: fprintferr("Atkin.\t"); break;
-    case MTpathological: fprintferr("Pathological.\n"); break;
+    case MTone_root: fprintferr("One root\t"); break;
+    case MTElkies: fprintferr("Elkies\t"); break;
+    case MTroots: fprintferr("l+1 roots\t"); break;
+    case MTAtkin: fprintferr("Atkin\t"); break;
+    case MTpathological: fprintferr("Pathological\n"); break;
   }
   return gerepilecopy(ltop, g);
 }
@@ -817,7 +817,6 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &Eba4, &Eba6, &Eca4, &Eca6, &kpoly, &Ib);
   }
-  if (DEBUGLEVEL) fprintferr("\n");
   avma = ltop;
   return mkvecsmall(Fl_add(lambda, Fl_div(pellk, lambda, ellk), ellk));
 }
@@ -924,7 +923,11 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
   default: /* case MTpathological: */
     avma = ltop; return NULL;
   }
-  if (DEBUGLEVEL) fprintferr("%ld possible value(s) for the trace\n",lg(tr)-1);
+  if (DEBUGLEVEL) {
+    long n = lg(tr)-1;
+    if (n > 1 || mt == MTAtkin) fprintferr("%3ld trace(s)",n);
+    fprintferr("\n");
+  }
   *ptr_kt = kt;
   return gerepileupto(ltop, tr);
 }
