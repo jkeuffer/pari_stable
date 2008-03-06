@@ -114,7 +114,7 @@ Doc: This function is based on the C library command of the same name.
  is equal to the precision; if the precision is missing, use the current 
  \kbd{realprecision}. If the precision is explicitly 0, it is treated as 1.
  Style \kbd{e} is used when
- the binary exponent is $< -32$, to print \kbd{0.}, or when the integer
+ the decimal exponent is $< -4$, to print \kbd{0.}, or when the integer
  part cannot be decided given the known significant digits, and the \kbd{f}
  format otherwise.
 
