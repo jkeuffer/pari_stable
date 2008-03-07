@@ -226,7 +226,6 @@ Fp_ell_dbl(GEN P, GEN a4, GEN p)
 static GEN
 Fp_ell_add_i(GEN P, GEN Q, GEN a4, GEN p)
 {
-  pari_sp ltop = avma;
   GEN Px = gel(P,1), Py = gel(P,2);
   GEN Qx = gel(Q,1), Qy = gel(Q,2), lambda, C, D;
   if (is_inf(P)) return gcopy(Q);
@@ -241,7 +240,7 @@ Fp_ell_add_i(GEN P, GEN Q, GEN a4, GEN p)
   lambda = Fp_div(Fp_sub(Py, Qy, p), Fp_sub(Px, Qx, p), p);
   C = Fp_sub(Fp_sub(Fp_sqr(lambda, p), Px, p), Qx, p);
   D = Fp_sub(Fp_mul(lambda, Fp_sub(Px, C, p), p), Py, p);
-  return gerepilecopy(ltop, mkvec2(C,D));
+  return mkvec2(C,D);
 }
 static GEN
 Fp_ell_add(GEN P, GEN Q, GEN a4, GEN p)
