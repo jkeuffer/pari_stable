@@ -359,10 +359,6 @@ enum manage_var_t {
 
 #define ZX_ZXY_resultant(a,b) ZX_ZXY_rnfequation((a),(b),NULL)
 
-#define RgX_add gadd
-#define RgX_sub gsub
-#define RgX_neg gneg
-
 #define ZX_mul RgX_mul
 #define ZX_sqr RgX_sqr
 

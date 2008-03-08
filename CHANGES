@@ -138,6 +138,8 @@ JD 12- add an optional argument to quit()
    21- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
    numberofconjugates, mkvecsmall4, shallowconcat1, concat1, ZV_prod, zv_prod
+   RgX_neg, RgX_add, RgX_sub, RgV_neg, RgV_add, RgV_sub,
+   RgC_neg, RgC_add, RgC_sub, RgM_neg, RgM_add, RgM_sub,
 
   Removed
     1- obsolete library functions extract and matextract

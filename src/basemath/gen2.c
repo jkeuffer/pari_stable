@@ -1075,13 +1075,14 @@ gneg(GEN x)
       gel(y,3) = gneg(gel(x,3)); break;
 
     case t_FFELT: return FF_neg(x);
-
-    case t_POL: case t_SER:
-    case t_VEC: case t_COL: case t_MAT:
+    case t_POL: return RgX_neg(x);
+    case t_SER:
       y = init_gen_op(x, tx, &lx, &i);
       for (; i<lx; i++) gel(y,i) = gneg(gel(x,i));
       break;
-
+    case t_VEC: return RgV_neg(x);
+    case t_COL: return RgC_neg(x);
+    case t_MAT: return RgM_neg(x);
     default:
       pari_err(typeer,"negation");
       return NULL; /* not reached */

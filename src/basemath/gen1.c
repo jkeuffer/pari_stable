@@ -344,9 +344,8 @@ gred_frac2(GEN x1, GEN x2)
 GEN
 gsub(GEN x, GEN y)
 {
-  pari_sp tetpil, av = avma;
-  y = gneg_i(y); tetpil = avma;
-  return gerepile(av,tetpil, gadd(x,y));
+  pari_sp av = avma;
+  return gerepileupto(av, gadd(x,gneg_i(y)));
 }
 
 /********************************************************************/
@@ -729,26 +728,7 @@ gadd(GEN x, GEN y)
 	if (varncmp(vx, vy) < 0) return add_pol_scal(x, y, vx);
 	else                     return add_pol_scal(y, x, vy);
       }
-      /* same variable */
-      lx = lg(x);
-      ly = lg(y);
-      if (lx == ly) {
-	z = cgetg(lx, t_POL); z[1] = x[1];
-	for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-	return normalizepol_i(z, lx);
-      }
-      if (ly < lx) {
-	z = cgetg(lx,t_POL); z[1] = x[1];
-	for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-	for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
-	if (!signe(x)) z = normalizepol_i(z, lx);
-      } else {
-	z = cgetg(ly,t_POL); z[1] = y[1];
-	for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-	for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-	if (!signe(y)) z = normalizepol_i(z, ly);
-      }
-      return z;
+      return RgX_add(x, y);
     case t_SER:
       vx = varn(x);
       vy = varn(y);
@@ -780,12 +760,15 @@ gadd(GEN x, GEN y)
 	else                     return add_rfrac_scal(y, x);
       }
       return add_rfrac(x,y);
-    case t_VEC: case t_COL: case t_MAT:
-      ly = lg(y);
-      if (ly != lg(x)) pari_err(operi,"+",x,y);
-      z = cgetg(ly, ty);
-      for (i = 1; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
-      return z;
+    case t_VEC:
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgV_add(x,y);
+    case t_COL:
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgC_add(x,y);
+    case t_MAT: 
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgM_add(x,y);
 
     default: pari_err(operf,"+",x,y);
   }

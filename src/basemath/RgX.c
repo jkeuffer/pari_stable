@@ -361,7 +361,67 @@ RgX_deriv(GEN x)
 }
 /*******************************************************************/
 /*                                                                 */
-/*                  KARATSUBA (for polynomials)                    */
+/*                      ADDITION / SUBTRACTION                     */
+/*                                                                 */
+/*******************************************************************/
+/* same variable */
+GEN
+RgX_add(GEN x, GEN y)
+{
+  long i, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (lx == ly) {
+    z = cgetg(lx, t_POL); z[1] = x[1];
+    for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
+    return normalizepol_i(z, lx);
+  }
+  if (ly < lx) {
+    z = cgetg(lx,t_POL); z[1] = x[1];
+    for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
+    for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
+    if (!signe(x)) z = normalizepol_i(z, lx);
+  } else {
+    z = cgetg(ly,t_POL); z[1] = y[1];
+    for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
+    for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
+    if (!signe(y)) z = normalizepol_i(z, ly);
+  }
+  return z;
+}
+GEN
+RgX_sub(GEN x, GEN y)
+{
+  long i, lx = lg(x), ly = lg(y);
+  GEN z;
+  if (lx == ly) {
+    z = cgetg(lx, t_POL); z[1] = x[1];
+    for (i=2; i < lx; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
+    return normalizepol_i(z, lx);
+  }
+  if (ly < lx) {
+    z = cgetg(lx,t_POL); z[1] = x[1];
+    for (i=2; i < ly; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
+    for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
+    if (!signe(x)) z = normalizepol_i(z, lx);
+  } else {
+    z = cgetg(ly,t_POL); z[1] = y[1];
+    for (i=2; i < lx; i++) gel(z,i) = gsub(gel(x,i),gel(y,i));
+    for (   ; i < ly; i++) gel(z,i) = gneg(gel(y,i));
+    if (!signe(y)) z = normalizepol_i(z, ly);
+  }
+  return z;
+}
+GEN
+RgX_neg(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_POL); y[1] = x[1];
+  for (i=2; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+  return y;
+}
+/*******************************************************************/
+/*                                                                 */
+/*                  KARATSUBA MULTIPLICATION                       */
 /*                                                                 */
 /*******************************************************************/
 #if 0

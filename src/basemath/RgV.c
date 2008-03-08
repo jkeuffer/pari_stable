@@ -145,6 +145,94 @@ RgM_Rg_add_shallow(GEN x, GEN y)
   return z;
 }
 
+static GEN
+RgC_add_i(GEN x, GEN y, long lx)
+{
+  GEN A = cgetg(lx, t_COL);
+  long i;
+  for (i=1; i<lx; i++) gel(A,i) = gadd(gel(x,i), gel(y,i));
+  return A;
+}
+GEN
+RgC_add(GEN x, GEN y) { return RgC_add_i(x, y, lg(x)); }
+GEN
+RgV_add(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  GEN A = cgetg(lx, t_VEC);
+  for (i=1; i<lx; i++) gel(A,i) = gadd(gel(x,i), gel(y,i));
+  return A;
+}
+
+static GEN
+RgC_sub_i(GEN x, GEN y, long lx)
+{
+  long i;
+  GEN A = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) gel(A,i) = gsub(gel(x,i), gel(y,i));
+  return A;
+}
+GEN
+RgC_sub(GEN x, GEN y) { return RgC_sub_i(x, y, lg(x)); }
+GEN
+RgV_sub(GEN x, GEN y)
+{
+  long i, lx = lg(x);
+  GEN A = cgetg(lx, t_VEC);
+  for (i=1; i<lx; i++) gel(A,i) = gsub(gel(x,i), gel(y,i));
+  return A;
+}
+
+GEN
+RgM_add(GEN x, GEN y)
+{
+  long lx = lg(x), l, j;
+  GEN z;
+  if (lx == 1) return cgetg(1, t_MAT);
+  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  for (j = 1; j < lx; j++) gel(z,j) = RgC_add_i(gel(x,j), gel(y,j), l);
+  return z;
+}
+GEN
+RgM_sub(GEN x, GEN y)
+{
+  long lx = lg(x), l, j;
+  GEN z;
+  if (lx == 1) return cgetg(1, t_MAT);
+  z = cgetg(lx, t_MAT); l = lg(x[1]);
+  for (j = 1; j < lx; j++) gel(z,j) = RgC_sub_i(gel(x,j), gel(y,j), l);
+  return z;
+}
+
+static GEN
+RgC_neg_i(GEN x, long lx)
+{
+  long i;
+  GEN y = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+  return y;
+}
+GEN
+RgC_neg(GEN x) { return RgC_neg_i(x, lg(x)); }
+GEN
+RgV_neg(GEN x)
+{
+  long i, lx = lg(x);
+  GEN y = cgetg(lx, t_VEC);
+  for (i=1; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+  return y;
+}
+GEN
+RgM_neg(GEN x)
+{
+  long i, hx, lx = lg(x);
+  GEN y = cgetg(lx, t_MAT);
+  if (lx == 1) return y;
+  hx = lg(x[1]);
+  for (i=1; i<lx; i++) gel(y,i) = RgC_neg_i(gel(x,i), hx);
+  return y;
+}
+
 /********************************************************************/
 /*                                                                  */
 /*                    SCALAR TO MATRIX/VECTOR                       */
