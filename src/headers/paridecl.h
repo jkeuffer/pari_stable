@@ -1358,6 +1358,7 @@ int     FF_samefield(GEN x, GEN y);
 GEN     FF_sqr(GEN a);
 GEN     FF_sqrt(GEN a);
 GEN     FF_sqrtn(GEN x, GEN n, GEN *zetan);
+GEN     FF_sub(GEN x, GEN y);
 GEN     FF_to_FpXQ(GEN x);
 GEN     FF_to_FpXQ_i(GEN x);
 GEN     FF_trace(GEN x);

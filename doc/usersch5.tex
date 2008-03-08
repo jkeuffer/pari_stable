@@ -4666,6 +4666,9 @@ $-1$) else $0$.
 \fun{GEN}{FF_pow}{GEN x, GEN n} returns $a^n$ where \kbd{a} is a \typ{FFELT}
 and\kbd{n} is a \typ{INT}.
 
+\fun{GEN}{FF_add}{GEN a, GEN b} returns $a-b$ where \kbd{a} and \kbd{b} are
+\typ{FFELT} having the same definition field.
+
 \fun{GEN}{FF_Z_Z_muldiv}{GEN a, GEN x, GEN y} returns $a\*y/z$, where \kbd{a}
 is a \typ{FFELT}, and \kbd{x} and \kbd{y} are \typ{INT}, the computation being
 performed in the definition field of \kbd{a}.

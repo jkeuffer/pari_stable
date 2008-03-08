@@ -233,6 +233,25 @@ FF_add(GEN x, GEN y)
   }
   return _mkFF(x,z,r);
 }
+GEN
+FF_sub(GEN x, GEN y)
+{
+  ulong pp;
+  GEN r, T, p, z=_initFF(x,&T,&p,&pp);
+  _checkFF(x,y,"+");
+  switch(x[1])
+  {
+  case t_FF_FpXQ:
+    r=FpX_sub(gel(x,2),gel(y,2),p);
+    break;
+  case t_FF_F2xq:
+    r=F2x_add(gel(x,2),gel(y,2));
+    break;
+  default:
+    r=Flx_sub(gel(x,2),gel(y,2),pp);
+  }
+  return _mkFF(x,z,r);
+}
 
 GEN
 FF_Z_add(GEN x, GEN y)
