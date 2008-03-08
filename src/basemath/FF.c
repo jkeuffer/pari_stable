@@ -223,11 +223,8 @@ FF_add(GEN x, GEN y)
   switch(x[1])
   {
   case t_FF_FpXQ:
-    {
-      pari_sp av=avma;
-      r=gerepileupto(av,FpX_add(gel(x,2),gel(y,2),p));
-      break;
-    }
+    r=FpX_add(gel(x,2),gel(y,2),p);
+    break;
   case t_FF_F2xq:
     r=F2x_add(gel(x,2),gel(y,2));
     break;
@@ -813,10 +810,11 @@ FFX_to_FqX(GEN x, GEN T, GEN p)
   long i, l = lg(x);
   GEN z = cgetg(l, t_POL); z[1] = x[1];
   for (i = 2; i < l; i++)
-    if (typ(gel(x,i))==t_FFELT)
-      gel(z,i) = simplify_i(FF_to_FpXQ(gel(x,i)));
-    else
-      gel(z,i) = simplify_i(Rg_to_FpXQ(gel(x,i), T,p));
+  {
+    GEN y = gel(x,i);
+    y = (typ(y)==t_FFELT)? FF_to_FpXQ(y): Rg_to_FpXQ(y, T,p);
+    gel(z,i) = simplify_i(y);
+  }
   return normalizepol_i(z, l);
 }
 
