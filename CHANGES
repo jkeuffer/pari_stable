@@ -50,6 +50,7 @@ BA 29- missing GC in the leftrightpow functions
    46- print1() + read() or extern() + error/warning ==> missing \n
    47- infinite loop in nffactor [#751]
    48- ellordinate couldn't handle t_FFELTs
+   49- eint1(10,10) completely wrong
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

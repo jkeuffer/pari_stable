@@ -602,18 +602,34 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 
 /* = incgam2(0, x, prec). typ(x) = t_REAL. Optimized for eint1 */
 static GEN
-incgam2_0(GEN x)
+incgam2_0(GEN x, GEN expx)
 {
-  double m, mx = rtodbl(x);
   long l = lg(x), n, i;
   GEN z;
 
-  m = (bit_accuracy_mul(l,LOG2) + mx)/4;
-  n = (long)(1+m*m/mx);
-  z = divsr(-n, addsr(n<<1,x));
-  for (i=n-1; i >= 1; i--)
-    z = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,z)));
-  return mulrr(divrr(mpexp(negr(x)), x), addrr(real_1(l),z));
+  if (expo(x) >= 4)
+  {
+    double m, mx = rtodbl(x);
+    m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+    n = (long)(1+m*m/mx);
+    z = divsr(-n, addsr(n<<1,x));
+    for (i=n-1; i >= 1; i--)
+      z = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,z))); /* -1 / (2 + z + x/i) */
+    return divrr(addrr(real_1(l),z), mulrr(expx, x));
+  }
+  else
+  {
+    GEN S, t, H, run = real_1(l);
+    n = -bit_accuracy(l)-1;
+    S = z = t = H = run;
+    for (i = 2; expo(t) - expo(S) >= n; i++)
+    {
+      H = addrr(H, divru(run,i)); /* H = sum_{i=1} 1/i */
+      z = divru(mulrr(x,z), i);   /* z = sum_{i=1} x^(i-1)/i */
+      t = mulrr(z, H); S = addrr(S, t);
+    }
+    return subrr(mulrr(x, divrr(S,expx)), addrr(mplog(x), mpeuler(l)));
+  }
 }
 
 /* assume x != 0 */
@@ -628,7 +644,7 @@ incgam2(GEN s, GEN x, long prec)
   if (typ(x) != t_REAL) x = gtofp(x, prec);
   if (gcmp0(s)) {
     if (typ(x) == t_REAL && signe(x) > 0)
-      return gerepileupto(av, incgam2_0(x));
+      return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   }
   if (typ(x) == t_COMPLEX)
   {
@@ -746,21 +762,7 @@ eint1(GEN x, long prec)
   }
   if (signe(x) >= 0)
   {
-    GEN p3, run;
-    if (expo(x) >= 4) return gerepileupto(av, incgam2_0(x));
-
-    l = lg(x); run = real_1(l);
-    n = -bit_accuracy(l)-1;
-    S = p3 = t = p1 = run;
-    for (i = 2; expo(t) - expo(S) >= n; i++)
-    {
-      p1 = addrr(p1, divru(run,i)); /* p1 = sum_{i=1} 1/i */
-      p3 = divru(mulrr(x,p3), i);   /* p3 = sum_{i=1} x^(i-1)/i */
-      t = mulrr(p3, p1); S = addrr(S, t);
-    }
-    S = mulrr(x,mulrr(mpexp(negr(x)),S));
-    p1 = addrr(mplog(x), mpeuler(l));
-    return gerepileuptoleaf(av, subrr(S,p1));
+    return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   }
   /* rewritten from code contributed by Manfred Radimersky */
   l  = lg(x);
@@ -787,9 +789,9 @@ eint1(GEN x, long prec)
 GEN
 veceint1(GEN C, GEN nmax, long prec)
 {
-  long k, n, nstop, i, cd, nmin, G, a, chkpoint;
+  long i, n, nstop, nmin, G, chkpoint;
   pari_sp av, av1;
-  GEN Mx, My, y, e1, e2, F0, F, den, minvn, mcn, p1, vdiff, unr;
+  GEN y, e1, e2, eC, F0, unr;
 
   if (!nmax) return eint1(C,prec);
   if (typ(nmax) != t_INT) pari_err(typeer,"veceint1");
@@ -802,71 +804,75 @@ veceint1(GEN C, GEN nmax, long prec)
   }
   if (signe(C) <= 0) pari_err(talker,"negative or zero constant in veceint1");
 
-  G = -bit_accuracy(prec);
-  n=itos(nmax); y=cgetg(n+1,t_VEC);
+  n = itos(nmax); y = cgetg(n+1,t_VEC);
   for(i=1; i<=n; i++) gel(y,i) = cgetr(prec);
-  av=avma;
+  av = avma; G = expo(C);
+  if (G >= 0) nstop = n;
+  else
+  {
+    nstop = itos(gceil(divsr(4,C))); /* >= 4 ~ 4 / C */
+    if (nstop > n) nstop = n;
+  }
 
-  nstop = itos(gceil(divsr(4,C)));
-  if (nstop<1) nstop=1;
-  if (nstop>n) nstop=n;
-  nmin=n-10; if (nmin<nstop) nmin=nstop;
-  if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
-
-  e1 = mpexp(mulsr(-n,C));
-  e2 = mpexp(mulsr(10,C));
+  eC = mpexp(C);
+  e1 = gpowgs(eC, -n);
+  e2 = gpowgs(eC, 10);
   unr = real_1(prec);
   av1 = avma;
+  if(DEBUGLEVEL>1) fprintferr("nstop = %ld\n",nstop);
+  if (nstop == n) goto END;
 
+  G = -bit_accuracy(prec);
   F0 = gel(y,n); chkpoint = n;
   affrr(eint1(mulsr(n,C),prec), F0);
-  Mx = My = NULL; /* -Wall */
-  do
+  nmin = n;
+  for(;;)
   {
+    GEN minvn = divrs(unr,-n), My = subrr(minvn,C);
+    GEN mcn   = divrs(C,  -n), Mx = mcn;
+    GEN t = divrs(e1,-n), D = mkvec2( t, mulrr(My,t) );
+    long a, k, cD = 2; /* cD = #D */
+
+    /* D = [ e1/-n, (-1/n-C) * (e1/-n) ] */
+    nmin -= 10; if (nmin < nstop) nmin = nstop;
+    My = addrr(My, minvn);
     if (DEBUGLEVEL>1 && n < chkpoint)
-      { fprintferr("%ld ",n) ; chkpoint -= (itos(nmax) / 20); }
-    minvn = divrs(unr,-n);
-    mcn   = divrs(C,  -n);
-    vdiff = mkvec( divrs(e1,-n) ); cd = 1; /* cd = #vdiff */
-    affrr(mulrr(e1,e2), e1);
+      { fprintferr("%ld ",n) ; chkpoint -= nstop/20; }
     for (a=1,n--; n>=nmin; n--,a++)
     {
-      F = F0;
-      den = stor(-a, prec);
+      GEN F = F0, den = stor(-a, prec);
       for (k=1;;)
       {
-	if (k > cd)
+        GEN add;
+	if (k > cD)
 	{
-	  GEN z;
-	  if (cd == 1)
-	  {
-	    My = subrr(minvn,C);
-	    z = mulrr(My, gel(vdiff,cd));
-	    Mx = mcn;
-	  }
-	  else
-	  {
-	    z = addrr(mulrr(Mx,gel(vdiff,cd-1)), mulrr(My, gel(vdiff,cd)));
-	    Mx = addrr(Mx,mcn);
-	  }
+	  GEN z = addrr(mulrr(My, gel(D,cD)), mulrr(Mx,gel(D,cD-1)));
+          Mx = addrr(Mx,mcn);
 	  My = addrr(My,minvn);
-	  vdiff = shallowconcat(vdiff, z);
-	  cd++;
+          D = shallowconcat(D, z); cD = k;
+          /* My = -C - k/n,  Mx = -C k/n */
 	}
-	p1 = mulrr(den, gel(vdiff,k));
-	if (expo(p1) < G) { affrr(F,gel(y,n)); break; }
-	F = addrr(F,p1); k++;
-	den = mulrs(divrs(den, -k), a);
+	add = mulrr(den, gel(D,k));
+	if (expo(add) < G) { affrr(F,gel(y,n)); break; }
+	F = addrr(F,add); k++;
+	den = mulrs(divrs(den, k), -a);
+        /* den = prod(i=1,k, -a/i)*/
       }
     }
-    avma=av1; n++; F0=gel(y,n); nmin -= 10;
-    if (nmin < nstop) nmin=nstop;
+    avma = av1; F0 = gel(y, ++n);
+    if (n <= nstop) break;
+    affrr(mulrr(e1,e2), e1);
   }
-  while(n > nstop);
-  for(i=1; i<=nstop; i++)
-    affrr(eint1(mulsr(i,C),prec), gel(y,i));
+END:
+  affrr(eC, e1);
+  for(i=1;; i++)
+  { /* e1 = exp(iC) */
+    affrr(incgam2_0(mulsr(i,C), e1), gel(y,i));
+    if (i == nstop) break;
+    affrr(mulrr(e1, eC), e1); avma = av1;
+  }
   if (DEBUGLEVEL>1) fprintferr("\n");
-  avma=av; return y;
+  avma = av; return y;
 }
 
 GEN
