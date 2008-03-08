@@ -152,7 +152,15 @@ GEN
 FpX_sqr(GEN x,GEN p) { return FpX_red(ZX_sqr(x), p); }
 
 GEN
-FpX_Fp_mul(GEN x,GEN y,GEN p) { return FpX_red(ZX_Z_mul(x,y), p); }
+FpX_Fp_mul(GEN y,GEN x,GEN p)
+{
+  GEN z;
+  long i, l;
+  if (!signe(x)) return zeropol(varn(y));
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
+  return z;
+}
 
 GEN
 FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
