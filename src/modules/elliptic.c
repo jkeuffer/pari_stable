@@ -797,6 +797,13 @@ ordell(GEN e, GEN x, long prec)
     }
     return y;
   }
+  if (td == t_FFELT)
+  { /* treat separately: may be of characteristc 2 */
+    GEN P = gel(FFX_factor(mkpoln(3, gen_1, b, gneg(a)), D), 1);
+    long l = lg(P);
+    if (l == 2) { avma = av; return cgetg(1,t_VEC); }
+    return gerepileupto(av, roots_from_deg1(P));
+  }
 
   if (gcmp0(D)) {
     b = gneg_i(b);

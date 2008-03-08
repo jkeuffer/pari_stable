@@ -49,6 +49,7 @@ BA 29- missing GC in the leftrightpow functions
    45- modular matrix inversion routines used O(n^2) inversions instead of O(n)
    46- print1() + read() or extern() + error/warning ==> missing \n
    47- infinite loop in nffactor [#751]
+   48- ellordinate couldn't handle t_FFELTs
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
