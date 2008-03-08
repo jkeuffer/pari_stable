@@ -216,7 +216,7 @@ karasquare(GEN P, long nP)
   s0 = karasquare(P, n0); Q = P + n0;
   s2 = karasquare(Q, n1);
   s1 = RgX_addspec(P, n0, Q, n1);
-  s1 = gadd(karasquare(s1+2, lgpol(s1)), gneg(gadd(s0,s2)));
+  s1 = RgX_sub(karasquare(s1+2, lgpol(s1)), RgX_add(s0,s2));
   N = (n<<1) + 1;
   a = cgetg(N + 2, t_POL); a[1] = evalsigne(1)|evalvarn(0);
   t = a+2; l = lgpol(s0); s0 += 2; N0 = n0<<1;
@@ -250,16 +250,16 @@ cook_square(GEN P, long nP)
   Q = cook_square(p0, n0);
   r = RgX_addspec(p0,n0, p2,n0);
   t = RgX_addspec(p1,n0, p3,n3);
-  gel(q,-1) = gadd(r,gneg(t));
-  gel(q,1)  = gadd(r,t);
+  gel(q,-1) = RgX_sub(r,t);
+  gel(q,1)  = RgX_add(r,t);
   r = RgX_addspec(p0,n0, RgX_shiftspec(p2,n0, 2)+2,n0);
   t = gmul2n(RgX_addspec(p1,n0, RgX_shiftspec(p3,n3, 2)+2,n3), 1);
-  gel(q,-2) = gadd(r,gneg(t));
-  gel(q,2)  = gadd(r,t);
+  gel(q,-2) = RgX_sub(r,t);
+  gel(q,2)  = RgX_add(r,t);
   r = RgX_addspec(p0,n0, RgX_s_mulspec(p2,n0, 9)+2,n0);
   t = gmulsg(3, RgX_addspec(p1,n0, RgX_s_mulspec(p3,n3, 9)+2,n3));
-  gel(q,-3) = gadd(r,gneg(t));
-  gel(q,3)  = gadd(r,t);
+  gel(q,-3) = RgX_sub(r,t);
+  gel(q,3)  = RgX_add(r,t);
 
   r = new_chunk(7);
   vp = cgetg(4,t_VEC);
@@ -269,8 +269,8 @@ cook_square(GEN P, long nP)
     GEN a = gel(q,i), b = gel(q,-i);
     a = cook_square(a+2, lgpol(a));
     b = cook_square(b+2, lgpol(b));
-    gel(vp,i) = gadd(b, a);
-    gel(vm,i) = gadd(b, gneg(a));
+    gel(vp,i) = RgX_add(b, a);
+    gel(vm,i) = RgX_sub(b, a);
   }
   gel(r,0) = Q;
   gel(r,1) = gdivgs(gsub(gsub(gmulgs(gel(vm,2),9),gel(vm,3)),
@@ -796,19 +796,19 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   if (l == 2)
   {
     gel(f,0) = gadd(gel(p,0),gel(p,step));
-    gel(f,1) = gadd(gel(p,0), gneg(gel(p,step))); return;
+    gel(f,1) = gsub(gel(p,0),gel(p,step)); return;
   }
   if (l == 4)
   {
     f1 = gadd(gel(p,0),   gel(p,step<<1));
-    f2 = gadd(gel(p,0),   gneg(gel(p,step<<1)));
+    f2 = gsub(gel(p,0),   gel(p,step<<1));
     f3 = gadd(gel(p,step),gel(p,3*step));
-    f02= gadd(gel(p,step),gneg(gel(p,3*step)));
+    f02= gsub(gel(p,step),gel(p,3*step));
     f02 = mulcxI(f02);
     gel(f,0) = gadd(f1, f3);
     gel(f,1) = gadd(f2, f02);
-    gel(f,2) = gadd(f1, gneg(f3));
-    gel(f,3) = gadd(f2, gneg(f02)); return;
+    gel(f,2) = gsub(f1, f3);
+    gel(f,3) = gsub(f2, f02); return;
   }
 
   ltop = avma;
@@ -827,14 +827,14 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
     f3 = gmul(gel(Omega,3*rapi),  gel(f,i+l3));
 
     f02 = gadd(gel(f,i),f2);
-    g02 = gadd(gel(f,i),gneg(f2));
+    g02 = gsub(gel(f,i),f2);
     f13 = gadd(f1,f3);
-    g13 = mulcxI(gadd(f1,gneg(f3)));
+    g13 = mulcxI(gsub(f1,f3));
 
     gel(ff,i+1)    = gadd(f02, f13);
     gel(ff,i+l1+1) = gadd(g02, g13);
-    gel(ff,i+l2+1) = gadd(f02, gneg(f13));
-    gel(ff,i+l3+1) = gadd(g02, gneg(g13));
+    gel(ff,i+l2+1) = gsub(f02, f13);
+    gel(ff,i+l3+1) = gsub(g02, g13);
   }
   ff = gerepilecopy(ltop,ff);
   for (i=0; i<l; i++) f[i] = ff[i+1];
@@ -2197,7 +2197,7 @@ rootsold(GEN x, long prec)
 	{
 	  setlg(p1r,ln); if (!signe(p1r)) gel(p1,1) = gen_0;
 	  setlg(p1i,ln); if (!signe(p1i)) gel(p1,2) = gen_0;
-	  p6 = gadd(p1, gneg_i(gdiv(poleval(xc,p1), poleval(xd,p1))));
+	  p6 = gsub(p1, gdiv(poleval(xc,p1), poleval(xd,p1)));
 	  gel(p1,1) = p1r;
 	  gel(p1,2) = p1i; gaffect(p6, p1); avma = av2;
 	}
@@ -2213,7 +2213,7 @@ rootsold(GEN x, long prec)
 	  if (!signe(gel(p7,1))) gel(p7,1) = gen_0;
 	  if (!signe(gel(p7,2))) gel(p7,2) = gen_0;
 	}
-	p7 = gadd(p7, gneg_i(gdiv(poleval(ps,p7), poleval(xd0,p7))));
+	p7 = gsub(p7, gdiv(poleval(ps,p7), poleval(xd0,p7)));
       }
       gaffect(p7, p1);
       p6 = gdiv(poleval(ps,p7), poleval(xdabs,gabs(p7,prec)));

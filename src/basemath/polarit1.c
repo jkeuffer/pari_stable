@@ -1653,7 +1653,7 @@ ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
       W = Fq_red(gmul(Wr, gadd(gen_2, gneg(W))), T, qold);
     }
     Wr = W;
-    a = gadd(a, gmul(gneg(Wr), FqX_eval(fr, a, T, q)));
+    a = gsub(a, gmul(Wr, FqX_eval(fr, a, T, q)));
     a = Fq_red(a, T, q);
     qold = q;
   }

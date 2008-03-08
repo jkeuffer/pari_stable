@@ -210,7 +210,7 @@ caradj(GEN x, long v, GEN *py)
       *py = y;
     }
     av = avma;
-    gel(p,2) = gerepileupto(av, gadd(gmul(a,d), gneg(gmul(b,c))));
+    gel(p,2) = gerepileupto(av, gsub(gmul(a,d), gmul(b,c)));
     return p;
   }
   /* l > 3 */
@@ -606,7 +606,7 @@ quad_polmod_norm(GEN x, GEN y)
   a = gel(y,4); u = gel(x,3); /*Mod(ux + v, ax^2 + bx + c)*/
   b = gel(y,3); v = gel(x,2);
   c = gel(y,2); av = avma;
-  z = gmul(u, gadd( gmul(c, u), gmul(gneg(b), v)));
+  z = gmul(u, gsub(gmul(c,u), gmul(b,v)));
   if (!gcmp1(a)) z = gdiv(z, a);
   return gerepileupto(av, gadd(z, gsqr(v)));
 }

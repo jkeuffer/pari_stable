@@ -741,7 +741,8 @@ incgam0(GEN s, GEN x, GEN g, long prec)
       s = gtofp(s, prec);
       x = gtofp(x, prec);
     }
-    z = gadd(g? g: ggamma(s,prec), gneg(incgamc(s,x,prec)));
+    if (!g) g = ggamma(s,prec);
+    z = gsub(g, incgamc(s,x,prec));
   }
   return gerepileupto(av, z);
 }
@@ -1748,8 +1749,8 @@ cxpolylog(long m, GEN x, long prec)
   real = typ(x) == t_REAL;
 
   z = glog(x,prec); h = gen_1;
-  for (i=2; i<m; i++) h = gadd(h, ginv(utoipos(i)));
-  h = gadd(h, gneg_i( glog(gneg_i(z),prec) ));
+  for (i=2; i<m; i++) h = gadd(h, mkfrac(gen_1, utoipos(i)));
+  h = gsub(h, glog(gneg_i(z),prec));
 
   bern_upto = m+50; mpbern(bern_upto,prec);
   q = gen_1; s = szeta(m,prec);

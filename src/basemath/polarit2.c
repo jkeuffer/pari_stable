@@ -293,7 +293,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   if (T) space *= lg(T);
 
   (void)new_chunk(space); /* HACK */
-  g = gadd(f, gneg_i(gmul(a,b)));
+  g = RgX_sub(f, RgX_mul(a,b));
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
   g = gdivexact(g, p0);
   if (T)
@@ -307,20 +307,21 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
     z = FpX_mul(v,g, pd);
     t = FpX_divrem(z,a, pd, &s);
   }
-  t = gadd(gmul(u,g), gmul(t,b)); t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
-  t = gmul(t,p0);
-  s = gmul(s,p0);
+  t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
+  t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
+  t = RgX_Rg_mul(t,p0);
+  s = RgX_Rg_mul(s,p0);
   avma = av;
 
   /* already reduced mod p1 = pd p0 */
-  a2 = gadd(a,s); gel(V,j) = a2;
-  b2 = gadd(b,t); gel(V,j+1) = b2;
+  a2 = RgX_add(a,s); gel(V,j) = a2;
+  b2 = RgX_add(b,t); gel(V,j+1) = b2;
   if (noinv) return;
 
   av = avma;
   (void)new_chunk(space); /* HACK */
-  g = gadd(gmul(u,a2), gmul(v,b2));
-  g = gadd(gneg_i(g), gen_1);
+  g = RgX_add(RgX_mul(u,a2), RgX_mul(v,b2));
+  g = Rg_RgX_sub(gen_1, g);
 
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
   g = gdivexact(g, p0);
@@ -335,13 +336,14 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
     z = FpX_mul(v,g, pd);
     t = FpX_divrem(z,a, pd, &s);
   }
-  t = gadd(gmul(u,g), gmul(t,b)); t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
-  t = gmul(t,p0);
-  s = gmul(s,p0);
+  t = RgX_add(RgX_mul(u,g), RgX_mul(t,b));
+  t = T? FpXQX_red(t, T, pd): FpX_red(t, pd);
+  t = RgX_Rg_mul(t,p0);
+  s = RgX_Rg_mul(s,p0);
   avma = av;
 
-  u = gadd(u,t); gel(W,j) = u;
-  v = gadd(v,s); gel(W,j+1) = v;
+  u = RgX_add(u,t); gel(W,j) = u;
+  v = RgX_add(v,s); gel(W,j+1) = v;
 }
 
 /* v list of factors, w list of inverses.  f = v[j] v[j+1]
@@ -2899,11 +2901,11 @@ RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv)
   {
     if (pol_approx0(d1, a, exact)) break;
     q = poldivrem(d,d1, &r);
-    v = gadd(v, gneg_i(gmul(q,v1)));
+    v = gsub(v, gmul(q,v1));
     u=v; v=v1; v1=u;
     u=r; d=d1; d1=u;
   }
-  u = gadd(d, gneg_i(gmul(b,v)));
+  u = gsub(d, gmul(b,v));
   u = RgX_div(u,a);
 
   gerepileall(av, 3, &u,&v,&d);
@@ -3486,7 +3488,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     }
   }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
-  p1 = gadd(z, gneg(gmul(uze,x)));
+  p1 = gsub(z, gmul(uze,x));
   vze = RgX_divrem(p1, y, &p1);
   if (!gcmp0(p1)) pari_warn(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
@@ -3580,7 +3582,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-  p1 = gadd(v, gneg(gmul(uze,x)));
+  p1 = RgX_sub(v, gmul(uze,x));
   vze = RgX_divrem(p1, y, &p1);
   if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);
@@ -3645,15 +3647,15 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   q = degpol(Q); q0 = leading_term(Q); Q = reductum(Q);
 
   av = avma; lim = stack_lim(av,1);
-  H = gneg(reductum(Z));
+  H = RgX_neg(reductum(Z));
   pr = degpol(P);
-  A = (q <= pr)? gmul(gel(P,q+2),H): gen_0;
+  A = (q <= pr)? RgX_Rg_mul(H, gel(P,q+2)): gen_0;
   for (j = q+1; j < p; j++)
   {
     H = (degpol(H) == q-1) ?
-      addshift(reductum(H), gdivexact(gmul(gneg(gel(H,q+1)),Q), q0)) :
+      addshift(reductum(H), gdivexact(RgX_Rg_mul(Q, gneg(gel(H,q+1))), q0)) :
       addshift(H, zeropol(v));
-    if (j <= pr) A = gadd(A,gmul(gel(P,j+2),H));
+    if (j <= pr) A = gadd(A, RgX_Rg_mul(H, gel(P,j+2)));
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nextSousResultant j = %ld/%ld",j,p);
@@ -3663,8 +3665,8 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   P = normalizepol_i(P, min(pr+3,q+2));
   A = gdivexact(gadd(A,gmul(z0,P)), p0);
   A = (degpol(H) == q-1) ?
-    gadd(gmul(q0,addshift(reductum(H),A)), gmul(gneg(gel(H,q+1)),Q)) :
-    gmul(q0, addshift(H,A));
+    RgX_sub(RgX_Rg_mul(addshift(reductum(H),A),q0), RgX_Rg_mul(Q, gel(H,q+1))) :
+    RgX_Rg_mul(addshift(H,A), q0);
   return gdivexact(A, ((p-q)&1)? s: gneg(s));
 }
 

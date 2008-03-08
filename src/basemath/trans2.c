@@ -585,7 +585,7 @@ gash(GEN x, long prec)
       if (sx > 0 || (!sx && sy*sz<=0)) return gerepileupto(av, y);
 
       p1 = mppi(prec); if (sy<0) setsigne(p1,-1);
-      return gerepileupto(av, gadd(gneg_i(y), pureimag(p1)));
+      return gerepileupto(av, gsub(pureimag(p1), y));
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gash");
     default:
       av = avma; if (!(y = toser_i(x))) break;

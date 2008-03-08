@@ -3760,7 +3760,7 @@ nagelllutz(GEN e)
     lr = ratroot(ZX_Z_sub(pol, shifti(sqri(d), 6)));
     for (i=1; i<lg(lr); i++)
     {
-      GEN x = gel(lr,i), y = gmul2n(gadd(d, gneg(ellLHS0(e,x))), -1);
+      GEN x = gel(lr,i), y = gmul2n(gsub(d, ellLHS0(e,x)), -1);
       p1 = mkvec2(x, y);
       if (is_new_torsion(e,r,p1,t2))
       {

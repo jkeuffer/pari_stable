@@ -1022,7 +1022,7 @@ close_modinvertible(GEN x, GEN y)
 GEN
 reducemodinvertible(GEN x, GEN y)
 {
-  return gadd(x, gneg(close_modinvertible(x,y)));
+  return gsub(x, close_modinvertible(x,y));
 }
 GEN
 lllreducemodmatrix(GEN x,GEN y)

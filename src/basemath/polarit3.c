@@ -1504,12 +1504,12 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   while (signe(d1))
   {
     q = FpXQX_divrem(d,d1,T,p, &r);
-    v = gadd(v, gneg_i(gmul(q,v1)));
+    v = gsub(v, gmul(q,v1));
     v = FpXQX_red(v,T,p);
     u=v; v=v1; v1=u;
     u=r; d=d1; d1=u;
   }
-  u = gadd(d, gneg_i(gmul(b,v)));
+  u = gsub(d, gmul(b,v));
   u = FpXQX_red(u,T, p);
   lbot = avma;
   u = FpXQX_divrem(u,a,T,p,NULL);

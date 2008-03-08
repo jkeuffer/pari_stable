@@ -1330,14 +1330,14 @@ mulcc(GEN x, GEN y)
       p1 = gmul(xr,yr);
       p2 = gmul(xi,yi); p2 = gneg(p2);
       p3 = gmul(p3, p4);
-      p4 = gadd(p2, gneg(p1));
+      p4 = gsub(p2, p1);
     } else {
     /* R = (xr + xi) * (yr - yi) + (xr * yi - xi * yr)
      * I = xr*yi + xi*yr */
       p1 = gmul(p3,p4);
       p3 = gmul(xr,yi);
       p4 = gmul(xi,yr);
-      p2 = gadd(p3, gneg(p4));
+      p2 = gsub(p3, p4);
     }
   } else {
     if (did_add(yr, yi, &p4)) {
@@ -1346,7 +1346,7 @@ mulcc(GEN x, GEN y)
       p1 = gmul(p3,p4);
       p3 = gmul(xr,yi);
       p4 = gmul(xi,yr);
-      p2 = gadd(p4, gneg(p3));
+      p2 = gsub(p4, p3);
     } else {
     /* R = xr*yr - xi*yi
      * I = -(xr-xi)(yr-yi) + xr*yr + xi*yi */
@@ -1915,7 +1915,7 @@ gsqr(GEN x)
 	}
 	z = cgetg(3,t_COMPLEX); av = avma;
 	p1 = gadd(gel(x,1),gel(x,2));
-	p2 = gadd(gel(x,1), gneg_i(gel(x,2)));
+	p2 = gsub(gel(x,1), gel(x,2));
 	p3 = gmul(gel(x,1),gel(x,2));
 	tetpil = avma;
 	gel(z,1) = gmul(p1,p2);

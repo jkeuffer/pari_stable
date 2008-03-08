@@ -3147,8 +3147,11 @@ where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
 \fun{GEN}{RgX_neg}{GEN x} returns $-\kbd{x}$.
 
-The functions above are currently implemented through the generic routines,
-but it might change in the future.
+\fun{GEN}{RgX_Rg_add}{GEN y, GEN x} returns $x+y$
+
+\fun{GEN}{Rg_RgX_sub}{GEN x, GEN y}
+
+\fun{GEN}{RgX_Rg_sub}{GEN y, GEN x} returns $x-y$
 
 \fun{GEN}{RgX_mul}{GEN x, GEN y} multiplies the two \typ{POL} (in the same
 variable) \kbd{x} and \kbd{y}. Uses Karatsuba algorithm.

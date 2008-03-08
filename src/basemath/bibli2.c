@@ -77,7 +77,7 @@ polchebyshev1_eval_aux(long n, GEN x, GEN *pt1, GEN *pt2)
   if (n == 1) { *pt1 = gen_1; *pt2 = x; return; }
   if (n == 0) { *pt1 = x; *pt2 = gen_1; return; }
   polchebyshev1_eval_aux((n+1) >> 1, x, &t1, &t2);
-  b = gadd(gmul(gmul2n(t1,1), t2), gneg(x));
+  b = gsub(gmul(gmul2n(t1,1), t2), x);
   if (odd(n)) { *pt1 = gadd(gmul2n(gsqr(t1), 1), gen_m1); *pt2 = b; }
   else        { *pt1 = b; *pt2 = gadd(gmul2n(gsqr(t2), 1), gen_m1); }
 }
@@ -94,7 +94,7 @@ polchebyshev1_eval(long n, GEN x)
   av = avma;
   v = u_lvalrem(n, 2, (ulong*)&n);
   polchebyshev1_eval_aux((n+1)>>1, x, &t1, &t2);
-  if (n != 1) t2 = gadd(gmul(gmul2n(t1,1), t2), gneg(x));
+  if (n != 1) t2 = gsub(gmul(gmul2n(t1,1), t2), x);
   for (i = 1; i <= v; i++) t2 = gadd(gmul2n(gsqr(t2), 1), gen_m1);
   return gerepileupto(av, t2);
 }

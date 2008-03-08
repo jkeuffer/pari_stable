@@ -262,6 +262,7 @@ GEN     scalarmat_s(long x, long n);
 
 /* RgX.c */
 
+GEN     Rg_RgX_sub(GEN x, GEN y);
 GEN     RgM_to_RgXV(GEN x, long v);
 GEN     RgM_to_RgXX(GEN x, long v,long w);
 GEN     RgV_to_RgX(GEN x, long v);
@@ -283,8 +284,10 @@ GEN     RgXV_unscale(GEN v, GEN h);
 GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);
 GEN     RgX_RgXQ_compo(GEN f, GEN x, GEN T);
+GEN     RgX_Rg_add(GEN y, GEN x);
 GEN     RgX_Rg_div(GEN y, GEN x);
 GEN     RgX_Rg_mul(GEN y, GEN x);
+GEN     RgX_Rg_sub(GEN y, GEN x);
 GEN     RgX_add(GEN x, GEN y);
 GEN     RgX_deflate(GEN x0, long d);
 GEN     RgX_deriv(GEN x);

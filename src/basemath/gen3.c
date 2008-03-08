@@ -576,7 +576,7 @@ gmod(GEN x, GEN y)
 	  return gen_0;
 	case t_REAL: /* NB: conflicting semantic with lift(x * Mod(1,y)). */
 	  av = avma;
-	  return gerepileupto(av, gadd(x, gneg(gmul(_quot(x,y),y))));
+	  return gerepileuptoleaf(av, mpsub(x, mpmul(_quot(x,y),y)));
 
 	default: pari_err(operf,"%",x,y);
       }
@@ -1614,14 +1614,14 @@ deriv(GEN x, long v)
       bp = deriv(b, v);
       d = ggcd(bp, b);
       if (gcmp1(d)) {
-        d = gadd(gmul(b, deriv(a,v)), gmul(gneg_i(a), bp));
+        d = gsub(gmul(b, deriv(a,v)), gmul(a, bp));
         if (isexactzero(d)) return gerepileupto((pari_sp)(y+3), d);
         gel(y,1) = gerepileupto(av, d);
         gel(y,2) = gsqr(b); return y;
       }
       b0 = gdivexact(b, d);
       bp = gdivexact(bp,d);
-      a = gadd(gmul(b0, deriv(a,v)), gmul(gneg_i(a), bp));
+      a = gsub(gmul(b0, deriv(a,v)), gmul(a, bp));
       if (isexactzero(a)) return gerepileupto((pari_sp)(y+3), a);
       t = ggcd(a, d);
       if (!gcmp1(t)) { a = gdivexact(a, t); d = gdivexact(d, t); }

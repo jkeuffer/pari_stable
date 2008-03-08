@@ -1612,7 +1612,7 @@ chinese(GEN x, GEN y)
       }
       av=avma;
       d=gbezout(gel(x,1),gel(y,1),&u,&v);
-      p2 = gadd(gel(y,2),gneg(gel(x,2)));
+      p2 = gsub(gel(y,2), gel(x,2));
       if (!gcmp0(gmod(p2, d))) break;
       p1 = gdiv(gel(x,1),d);
       p2 = gadd(gel(x,2), gmul(gmul(u,p1), p2));
