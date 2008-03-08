@@ -97,6 +97,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
    29- allow nfgaloisconj(t_POL, 1) [ cf C-4 ], never resort to nfgaloisconj(,2)
        [ slow, unreliable ] with default flag = 0
    30- [library]: factorpadic4 -> factorpadic, factorpadic2 now static
+   31- [library]: gsub now implemented directly when typ(x) = typ(y)
 
   Added
     1- library function gpcalloc

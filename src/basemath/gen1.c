@@ -48,7 +48,8 @@ kro_quad(GEN x, GEN y)
 INLINE int
 Zp_nosquare_m1(GEN p) { return (mod4(p) & 2); /* 2 or 3 mod 4 */ }
 
-static GEN addpp(GEN x, GEN y);
+static GEN addsub_pp(GEN x, GEN y, GEN(*op)(GEN,GEN));
+static GEN addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN));
 static GEN mulpp(GEN x, GEN y);
 static GEN divpp(GEN x, GEN y);
 /* Argument codes for inline routines
@@ -125,7 +126,7 @@ addTp(GEN x, GEN y) { pari_sp av = avma; GEN z;
     long l = signe(y[4])? valp(y) + precp(y): valp(y);
     z  = cvtop(x, gel(y,2), l);
   }
-  return gerepileupto(av, addpp(z, y));
+  return gerepileupto(av, addsub_pp(z, y, addii));
 }
 /* y PADIC, x * y by converting x to padic */
 static GEN
@@ -153,6 +154,18 @@ add_intmod_same(GEN z, GEN X, GEN x, GEN y) {
   }
   else {
     GEN u = addii(x,y); if (cmpii(u, X) >= 0) u = subii(u, X);
+    gel(z,2) = gerepileuptoint((pari_sp)z, u);
+  }
+  gel(z,1) = icopy(X); return z;
+}
+static GEN
+sub_intmod_same(GEN z, GEN X, GEN x, GEN y) {
+  if (lgefint(X) == 3) {
+    ulong u = Fl_sub(itou(x),itou(y), X[2]);
+    avma = (pari_sp)z; gel(z,2) = utoi(u);
+  }
+  else {
+    GEN u = subii(x,y); if (cmpii(u, X) >= 0) u = subii(u, X);
     gel(z,2) = gerepileuptoint((pari_sp)z, u);
   }
   gel(z,1) = icopy(X); return z;
@@ -337,25 +350,12 @@ gred_frac2(GEN x1, GEN x2)
 
 /********************************************************************/
 /**                                                                **/
-/**                          SUBTRACTION                           **/
-/**                                                                **/
-/********************************************************************/
-
-GEN
-gsub(GEN x, GEN y)
-{
-  pari_sp av = avma;
-  return gerepileupto(av, gadd(x,gneg_i(y)));
-}
-
-/********************************************************************/
-/**                                                                **/
 /**                           ADDITION                             **/
 /**                                                                **/
 /********************************************************************/
 /* x, y compatible PADIC */
 static GEN
-addpp(GEN x, GEN y)
+addsub_pp(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
   pari_sp av = avma;
   long c,d,e,r,rx,ry;
@@ -371,13 +371,13 @@ addpp(GEN x, GEN y)
   {
     r = d+ry; z = powiu(p,d);
     if (r < rx) mod = mulii(z,gel(y,3)); else { r = rx; mod = gel(x,3); }
-    u = addii(gel(x,4), mulii(z,gel(y,4)));
+    u = op(gel(x,4), mulii(z,gel(y,4)));
     u = remii(u, mod);
   }
   else
   {
     if (ry < rx) { r=ry; mod = gel(y,3); } else { r=rx; mod = gel(x,3); }
-    u = addii(gel(x,4), gel(y,4));
+    u = op(gel(x,4), gel(y,4));
     if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
       avma = av; return zeropadic(p, e+r);
@@ -599,7 +599,7 @@ add_scal(GEN y, GEN x, long ty, long vy)
 }
 
 static GEN
-addfrac(GEN x, GEN y)
+addsub_frac(GEN x, GEN y, GEN (*op)(GEN,GEN))
 {
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_FRAC);
   GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
@@ -607,12 +607,12 @@ addfrac(GEN x, GEN y)
   delta = gcdii(x2,y2);
   if (is_pm1(delta))
   { /* numerator is non-zero */
-    gel(z,1) = gerepileuptoint((pari_sp)z, addii(mulii(x1,y2), mulii(y1,x2)));
+    gel(z,1) = gerepileuptoint((pari_sp)z, op(mulii(x1,y2), mulii(y1,x2)));
     gel(z,2) = mulii(x2,y2); return z;
   }
   x2 = diviiexact(x2,delta);
   y2 = diviiexact(y2,delta);
-  n = addii(mulii(x1,y2), mulii(y1,x2));
+  n = op(mulii(x1,y2), mulii(y1,x2));
   if (!signe(n)) { avma = (pari_sp)(z+3); return gen_0; }
   d = mulii(x2, y2);
   p1 = dvmdii(n, delta, &r);
@@ -698,7 +698,7 @@ gadd(GEN x, GEN y)
       av = avma; p1 = addii(gel(x,2),gel(y,2));
       gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
     }
-    case t_FRAC: return addfrac(x,y);
+    case t_FRAC: return addsub_frac(x,y,addii);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
       gel(z,2) = gadd(gel(x,2),gel(y,2));
       if (isrationalzero(gel(z,2)))
@@ -710,7 +710,7 @@ gadd(GEN x, GEN y)
       return z;
     case t_PADIC:
       if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
-      return addpp(x,y);
+      return addsub_pp(x,y, addii);
     case t_QUAD: z = cgetg(4,t_QUAD);
       if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
       gel(z,1) = gcopy(gel(x,1));
@@ -981,6 +981,75 @@ gsubsg(long x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
+/**                          SUBTRACTION                           **/
+/**                                                                **/
+/********************************************************************/
+
+GEN
+gsub(GEN x, GEN y)
+{
+  long tx = typ(x), ty = typ(y), vx, vy;
+  pari_sp av;
+  GEN z, p1;
+  if (tx == ty) switch(tx) /* shortcut to generic case */
+  {
+    case t_INT: return subii(x,y);
+    case t_REAL: return subrr(x,y);
+    case t_INTMOD:  { GEN X = gel(x,1), Y = gel(y,1);
+      z = cgetg(3,t_INTMOD);
+      if (X==Y || equalii(X,Y))
+	return sub_intmod_same(z, X, gel(x,2), gel(y,2));
+      gel(z,1) = gcdii(X,Y);
+      av = avma; p1 = subii(gel(x,2),gel(y,2));
+      gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
+    }
+    case t_FRAC: return addsub_frac(x,y, subii);
+    case t_COMPLEX: z = cgetg(3,t_COMPLEX);
+      gel(z,2) = gsub(gel(x,2),gel(y,2));
+      if (isrationalzero(gel(z,2)))
+      {
+	avma = (pari_sp)(z+3);
+	return gsub(gel(x,1),gel(y,1));
+      }
+      gel(z,1) = gsub(gel(x,1),gel(y,1));
+      return z;
+    case t_PADIC:
+      if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
+      return addsub_pp(x,y, subii);
+    case t_QUAD: z = cgetg(4,t_QUAD);
+      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
+      gel(z,1) = gcopy(gel(x,1));
+      gel(z,2) = gsub(gel(x,2),gel(y,2));
+      gel(z,3) = gsub(gel(x,3),gel(y,3)); return z;
+    case t_POLMOD:
+      if (gequal(gel(x,1), gel(y,1)))
+	return add_polmod_same(gel(x,1), gel(x,2), gel(y,2));
+      return add_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
+    case t_FFELT: return FF_sub(x,y);
+    case t_POL:
+      vx = varn(x);
+      vy = varn(y);
+      if (vx != vy) break;
+      return RgX_sub(x, y);
+    case t_VEC:
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgV_sub(x,y);
+    case t_COL:
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgC_sub(x,y);
+    case t_MAT: 
+      if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
+      return RgM_sub(x,y);
+    case t_RFRAC: case t_SER: break;
+
+    default: pari_err(operf,"+",x,y);
+  }
+  av = avma;
+  return gerepileupto(av, gadd(x,gneg_i(y)));
+}
+
+/********************************************************************/
+/**                                                                **/
 /**                        MULTIPLICATION                          **/
 /**                                                                **/
 /********************************************************************/
@@ -1208,7 +1277,7 @@ did_add(GEN x, GEN y, GEN *z)
   if (tx == ty) switch(tx)
   {
     case t_INT: *z = addii(x,y); return 1;
-    case t_FRAC: *z = addfrac(x,y); return 1;
+    case t_FRAC: *z = addsub_frac(x,y,addii); return 1;
     case t_REAL:
       if (signe(x) == -signe(y))
       { *z = subrr(x,y); return 0; }
