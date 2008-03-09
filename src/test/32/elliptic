@@ -107,9 +107,9 @@ q^101)
 7539931 + 0.E-38*I, 1.3270305788796764757190502098362372906*I, 7.33813274078
 95767390707210033323055880]
 ? l=elllseries(ccurve,2)
-0.38157540826071121129371040958008663665
+0.38157540826071121129371040958008663658
 ? elllseries(ccurve,2,1.2)-l
-1.175494351 E-38
+1.645692091 E-37
 ? tcurve=ellinit([1,0,1,-19,26]);
 ? ellorder(tcurve,[1,2])
 6
@@ -155,7 +155,7 @@ q^101)
 ? precision(cmcurve)
 38
 ? getheap
-[57, 4756]
+[58, 4768]
 ? print("Total time spent: ",gettime);
-Total time spent: 28
+Total time spent: 24
 ? \q
