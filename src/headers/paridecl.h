@@ -322,6 +322,7 @@ GEN     ZC_add(GEN x, GEN y);
 GEN     ZC_copy(GEN x);
 GEN     ZC_hnfremdiv(GEN x, GEN y, GEN *Q);
 GEN     ZC_lincomb(GEN u, GEN v, GEN X, GEN Y);
+void    ZC_lincomb1_inplace(GEN X, GEN Y, GEN v);
 GEN     ZC_neg(GEN M);
 GEN     ZC_sub(GEN x, GEN y);
 GEN     ZM_ZC_mul(GEN x, GEN y);
@@ -349,6 +350,7 @@ int     ZV_equal(GEN V, GEN W);
 GEN     ZV_prod(GEN v);
 GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZV_to_nv(GEN z);
+void    ZV_togglesign(GEN M);
 GEN     zm_to_ZM(GEN z);
 int     zv_equal(GEN V, GEN W);
 GEN     zv_neg(GEN x);
@@ -523,7 +525,6 @@ GEN     smith(GEN x);
 GEN     smithall(GEN x);
 GEN     smithclean(GEN z);
 GEN     smithrel(GEN H, GEN *newU, GEN *newUi);
-void    ZV_togglesign(GEN M);
 
 /* anal.c */
 

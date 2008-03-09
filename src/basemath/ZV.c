@@ -306,15 +306,82 @@ ZM_Z_mul(GEN X, GEN c)
   return A;
 }
 
+/* X <- X + v Y (elementary col operation) */
+void
+ZC_lincomb1_inplace(GEN X, GEN Y, GEN v)
+{
+  long i, m = lgefint(v);
+  if (m == 2) return; /* v = 0 */
+  if (m == 3)
+  {
+    long s = signe(v);
+    if (v[2] == 1) /* v = ِ+- 1 */
+    {
+      if (s > 0)
+      { /* 1 */
+        for (i = lg(X)-1; i; i--)
+          if (signe(Y[i])) gel(X,i) = addii(gel(X,i), gel(Y,i));
+      }
+      else
+      { /* -1 */
+        for (i = lg(X)-1; i; i--)
+          if (signe(Y[i])) gel(X,i) = subii(gel(X,i), gel(Y,i));
+      }
+      return;
+    }
+    if ((v[2] & HIGHBIT) == 0) { /* ! is_bigint(v) */
+      long w = v[2]; if (s < 0) w = -w; /* w = itos(v) */
+      for (i = lg(X)-1; i; i--)
+      {
+        GEN p1 = gel(X,i), p2 = gel(Y,i);
+        if      (!signe(p1)) gel(X,i) = mulsi(w,p2);
+        else if (signe(p2))
+        {
+          pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2));/*HACK*/
+          p2 = mulsi(w,p2);
+          avma = av; gel(X,i) = addii(p1,p2);
+        }
+      }
+    } else { /* is_bigint(v) */
+      ulong w = v[2];
+      for (i = lg(X)-1; i; i--)
+      {
+        GEN p1 = gel(X,i), p2 = gel(Y,i);
+        if (!signe(p1)) {
+          gel(X,i) = mului(w,p2); if (s < 0) togglesign(gel(X,i));
+        }
+        else if (signe(p2))
+        {
+          pari_sp av = avma; (void)new_chunk(1+lgefint(p1)+lgefint(p2));/*HACK*/
+          p2 = mului(w,p2); if (s < 0) togglesign(p2);
+          avma = av; gel(X,i) = addii(p1,p2);
+        }
+      }
+    }
+    return;
+  }
+  /* m > 3 */
+  for (i = lg(X)-1; i; i--)
+  {
+    GEN p1 = gel(X,i), p2 = gel(Y,i);
+    if (!signe(p1)) gel(X,i) = mulii(v,p2);
+    else if (signe(p2))
+    {
+      pari_sp av = avma; (void)new_chunk(m+lgefint(p1)+lgefint(p2)); /*HACK*/
+      p2 = mulii(v,p2);
+      avma = av; gel(X,i) = addii(p1,p2);
+    }
+  }
+}
+
 /* X + v Y */
 static GEN
-ZV_lincomb1(GEN v, GEN X, GEN Y)
+ZC_lincomb1(GEN v, GEN X, GEN Y)
 {
-  long i, lx = lg(X);
+  long i, lx = lg(X), m = lgefint(v);
   GEN p1, p2, A = cgetg(lx,t_COL);
-  if (is_bigint(v))
+  if (is_bigint_lg(v, m))
   {
-    long m = lgefint(v);
     for (i=1; i<lx; i++)
     {
       p1=gel(X,i); p2=gel(Y,i);
@@ -348,7 +415,7 @@ ZV_lincomb1(GEN v, GEN X, GEN Y)
 }
 /* -X + vY */
 static GEN
-ZV_lincomb_1(GEN v, GEN X, GEN Y)
+ZC_lincomb_1(GEN v, GEN X, GEN Y)
 {
   long i, m, lx = lg(X);
   GEN p1, p2, A = cgetg(lx,t_COL);
@@ -387,14 +454,14 @@ ZC_lincomb(GEN u, GEN v, GEN X, GEN Y)
     }
     else
     {
-      if (sv > 0) A = ZV_lincomb1 (u, Y, X);
-      else        A = ZV_lincomb_1(u, Y, X);
+      if (sv > 0) A = ZC_lincomb1 (u, Y, X);
+      else        A = ZC_lincomb_1(u, Y, X);
     }
   }
   else if (is_pm1(u))
   {
-    if (su > 0) A = ZV_lincomb1 (v, X, Y);
-    else        A = ZV_lincomb_1(v, X, Y);
+    if (su > 0) A = ZC_lincomb1 (v, X, Y);
+    else        A = ZC_lincomb_1(v, X, Y);
   }
   else
   {
@@ -521,6 +588,13 @@ ZM_neg(GEN x)
   GEN y = cgetg(lx, t_MAT);
   for (i=1; i<lx; i++) gel(y,i) = ZC_neg(gel(x,i));
   return y;
+}
+
+void
+ZV_togglesign(GEN M)
+{
+  long i;
+  for (i = lg(M)-1; i; i--) togglesign_safe(&gel(M,i));
 }
 
 /********************************************************************/

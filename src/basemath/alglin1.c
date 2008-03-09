@@ -2615,11 +2615,11 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     }
     else
     {
-      GEN piv = negi(Fp_inv(gcoeff(x,j,k), p));
-      c[j]=k; d[k]=j;
+      GEN piv = Fp_inv(gcoeff(x,j,k), p);
+      togglesign(piv);
+      c[j] = k; d[k] = j;
       gcoeff(x,j,k) = gen_m1;
-      for (i=k+1; i<=n; i++)
-	gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
+      for (i=k+1; i<=n; i++) gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
 	if (t==j) continue;
@@ -2628,8 +2628,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
 	if (!signe(piv)) continue;
 
 	gcoeff(x,t,k) = gen_0;
-	for (i=k+1; i<=n; i++)
-	  gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
+	for (i=k+1; i<=n; i++) gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
 	if (low_stack(lim, stack_lim(av,1)))
 	  gerepile_gauss_FpM_ker(x,p,k,t,av);
       }
@@ -2764,10 +2763,10 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
     if (j>m) { r++; d[k]=0; }
     else
     {
-      GEN piv = negi(Fp_inv(gcoeff(x,j,k), p));
-      c[j]=k; d[k]=j;
-      for (i=k+1; i<=n; i++)
-	gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
+      GEN piv = Fp_inv(gcoeff(x,j,k), p);
+      togglesign(piv);
+      c[j] = k; d[k] = j;
+      for (i=k+1; i<=n; i++) gcoeff(x,j,i) = Fp_mul(piv,gcoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
         if (c[t]) continue; /* already a pivot on that line */
@@ -3013,10 +3012,9 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     else
     {
       GEN piv = Fq_neg_inv(gcoeff(x,j,k), T, p);
-      c[j]=k; d[k]=j; 
+      c[j] = k; d[k] = j; 
       gcoeff(x,j,k) = gen_m1;
-      for (i=k+1; i<=n; i++)
-	gcoeff(x,j,i) = Fq_mul(piv,gcoeff(x,j,i), T, p);
+      for (i=k+1; i<=n; i++) gcoeff(x,j,i) = Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
       {
 	if (t==j) continue;
@@ -3101,7 +3099,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
     else
     {
       GEN piv = Flx_neg(Flxq_inv(gcoeff(x,j,k), T, p), p);
-      c[j]=k; d[k]=j; 
+      c[j] = k; d[k] = j; 
       gcoeff(x,j,k) = mun;
       for (i=k+1; i<=n; i++) gcoeff(x,j,i) = Flxq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)

@@ -369,7 +369,7 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
   q = negi(q);
   Zupdate_row(k,l,q,L,B);
   Zupdate_col(k,l,q,K,h);
-  gel(x,k) = ZC_lincomb(gen_1, q, gel(x,k), gel(x,l));
+  ZC_lincomb1_inplace(gel(x,k), gel(x,l), q);
 }
 
 static GEN
@@ -1458,7 +1458,7 @@ lllintpartialall(GEN m, long flag)
 	dot12new = addii(dot12, mulii(q, dot22));
 	dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
 	dot12 = dot12new;
-	gel(tm,1) = ZC_lincomb(gen_1,q, gel(tm,1),gel(tm,2));
+	ZC_lincomb1_inplace(gel(tm,1), gel(tm,2), q);
       }
 
       /* Interchange the output vectors v1 and v2.  */
@@ -1503,12 +1503,12 @@ lllintpartialall(GEN m, long flag)
 	q2neg = diviiround(q2neg, det12);
 	if (tm1)
 	{
-	  gcoeff(tm1, 1, i) = gadd(mulii(q1neg, gcoeff(tm,1,1)),
-				     mulii(q2neg, gcoeff(tm,1,2)));
-	  gcoeff(tm1, 2, i) = gadd(mulii(q1neg, gcoeff(tm,2,1)),
-				     mulii(q2neg, gcoeff(tm,2,2)));
+	  gcoeff(tm1, 1, i) = addii(mulii(q1neg, gcoeff(tm,1,1)),
+				    mulii(q2neg, gcoeff(tm,1,2)));
+	  gcoeff(tm1, 2, i) = addii(mulii(q1neg, gcoeff(tm,2,1)),
+				    mulii(q2neg, gcoeff(tm,2,2)));
 	}
-	gel(mid,i) = gadd(c, ZC_lincomb(q1neg,q2neg, gel(mid,1),gel(mid,2)));
+	gel(mid,i) = ZC_add(c, ZC_lincomb(q1neg,q2neg, gel(mid,1),gel(mid,2)));
       } /* for i */
     } /* local block */
   }
@@ -1554,9 +1554,9 @@ lllintpartialall(GEN m, long flag)
 	  if (!signe(q)) continue;
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
-	  reductions++; q = negi(q);
-	  gel(tm2,k1) = ZC_lincomb(gen_1,q, gel(tm2,k1), gel(tm2,k2));
-	  gel(dot,k1) = ZC_lincomb(gen_1,q, gel(dot,k1), gel(dot,k2));
+	  reductions++; togglesign_safe(&q);
+	  ZC_lincomb1_inplace(gel(tm2,k1), gel(tm2,k2), q);
+	  ZC_lincomb1_inplace(gel(dot,k1), gel(dot,k2), q);
 	  gcoeff(dot, k1, k1) = addii(gcoeff(dot,k1,k1),
 				      mulii(q, gcoeff(dot,k2,k1)));
 	  for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
@@ -1970,10 +1970,9 @@ lindep(GEN x, long prec)
     i=j; k=i+1;
     avma = av1; r = grndtoi(m[k][i], &e);
     if (e >= 0) pari_err(precer,"lindep");
-    r  = negi(r);
-    p1 = ZC_lincomb(gen_1,r, b[k],b[i]);
-    b[k] = b[i];
-    b[i]  = p1;
+    togglesign_safe(&r);
+    ZC_lincomb1_inplace(b[k], b[i], r);
+    swap(b[k], b[i]);
     av1 = avma;
     f = addir(r,m[k][i]);
     for (j=1; j<i; j++)

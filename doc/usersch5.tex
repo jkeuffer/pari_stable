@@ -1988,6 +1988,11 @@ not be corrupted. (We use \tet{togglesign_safe}.)
 \fun{GEN}{ZC_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
 $u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
 
+\fun{void}{ZC_lincomb1_inplace}{GEN X, GEN Y, GEN v} sets $X\leftarrow X +
+vY$, where $v$ is a \typ{INT} and $X,Y$ are \kbd{ZC} or \kbd{ZV}. (The result
+has the type of $X$.) Memory efficient (e.g. no-op if $v = 0$), but not
+gerepile-safe.
+
 \fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions).
