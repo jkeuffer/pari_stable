@@ -456,10 +456,10 @@ addQp(GEN x, GEN y)
 }
 
 /* Mod(x,X) + Mod(y,X) */
-#define add_polmod_same add_polmod_scal
-/* Mod(x,X) + Mod(y,Y) */
+#define addsub_polmod_same addsub_polmod_scal
+/* Mod(x,X) +/- Mod(y,Y) */
 static GEN
-add_polmod(GEN X, GEN Y, GEN x, GEN y)
+addsub_polmod(GEN X, GEN Y, GEN x, GEN y, GEN(*op)(GEN,GEN))
 {
   long T[3] = { evaltyp(t_POLMOD) | _evallg(3),0,0 };
   GEN z = cgetg(3,t_POLMOD);
@@ -467,21 +467,21 @@ add_polmod(GEN X, GEN Y, GEN x, GEN y)
   if (vx==vy) {
     pari_sp av;
     gel(z,1) = srgcd(X,Y); av = avma;
-    gel(z,2) = gerepileupto(av, gmod(gadd(x, y), gel(z,1))); return z;
+    gel(z,2) = gerepileupto(av, gmod(op(x, y), gel(z,1))); return z;
   }
   if (varncmp(vx, vy) < 0)
   { gel(z,1) = gcopy(X); gel(T,1) = Y; gel(T,2) = y; y = T; }
   else
   { gel(z,1) = gcopy(Y); gel(T,1) = X; gel(T,2) = x; x = T; }
-  gel(z,2) = gadd(x, y); return z;
+  gel(z,2) = op(x, y); return z;
 }
-/* Mod(y, Y) + x,  assuming x scalar or polynomial in same var and reduced degree */
+/* Mod(y, Y) +/- x,  x scalar or polynomial in same var and reduced degree */
 static GEN
-add_polmod_scal(GEN Y, GEN y, GEN x)
+addsub_polmod_scal(GEN Y, GEN y, GEN x, GEN(*op)(GEN,GEN))
 {
   GEN z = cgetg(3,t_POLMOD);
   gel(z,1) = gcopy(Y);
-  gel(z,2) = gadd(x, y); return z;
+  gel(z,2) = op(y, x); return z;
 }
 
 /* check y[a..b-1] and set signe to 1 if one coeff is non-0, 0 otherwise
@@ -718,8 +718,8 @@ gadd(GEN x, GEN y)
       gel(z,3) = gadd(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
       if (gequal(gel(x,1), gel(y,1)))
-	return add_polmod_same(gel(x,1), gel(x,2), gel(y,2));
-      return add_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
+	return addsub_polmod_same(gel(x,1), gel(x,2), gel(y,2), &gadd);
+      return addsub_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2), &gadd);
     case t_FFELT: return FF_add(x,y);
     case t_POL:
       vx = varn(x);
@@ -863,7 +863,7 @@ gadd(GEN x, GEN y)
     return RgM_Rg_add(y, x);
   }
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
-    return add_polmod_scal(gel(y,1), gel(y,2), x);
+    return addsub_polmod_scal(gel(y,1), gel(y,2), x, &gadd);
   vy = gvar(y);
   if (is_scalar_t(tx))  {
     if (tx == t_POLMOD)
@@ -872,7 +872,7 @@ gadd(GEN x, GEN y)
       if (vx == vy) y = gmod(y, gel(x,1)); /* error if ty == t_SER */
       else
 	if (varncmp(vx,vy) > 0) return add_scal(y, x, ty, vy);
-      return add_polmod_scal(gel(x,1), gel(x,2), y);
+      return addsub_polmod_scal(gel(x,1), gel(x,2), y, &gadd);
     }
     return add_scal(y, x, ty, vy);
   }
@@ -1023,8 +1023,8 @@ gsub(GEN x, GEN y)
       gel(z,3) = gsub(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
       if (gequal(gel(x,1), gel(y,1)))
-	return add_polmod_same(gel(x,1), gel(x,2), gel(y,2));
-      return add_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
+	return addsub_polmod_same(gel(x,1), gel(x,2), gel(y,2), &gsub);
+      return addsub_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2), &gsub);
     case t_FFELT: return FF_sub(x,y);
     case t_POL:
       vx = varn(x);
