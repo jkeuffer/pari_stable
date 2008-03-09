@@ -1177,9 +1177,9 @@ get_col(GEN a, GEN b, GEN p, long li)
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    GEN m = gneg_i(gel(b,i));
-    for (j=i+1; j<=li; j++) m = gadd(m, gmul(gcoeff(a,i,j), gel(u,j)));
-    gel(u,i) = gerepileupto(av, gdiv(gneg_i(m), gcoeff(a,i,i)));
+    GEN m = gel(b,i);
+    for (j=i+1; j<=li; j++) m = gsub(m, gmul(gcoeff(a,i,j), gel(u,j)));
+    gel(u,i) = gerepileupto(av, gdiv(m, gcoeff(a,i,i)));
   }
   return u;
 }
@@ -1259,46 +1259,57 @@ Fl_get_col(GEN a, uGEN b, long li, ulong p)
   return u;
 }
 
-/* bk += m * bi */
+/* bk -= m * bi */
 static void
-_addmul(GEN b, long k, long i, GEN m)
+_submul(GEN b, long k, long i, GEN m)
 {
-  gel(b,k) = gadd(gel(b,k), gmul(m, gel(b,i)));
+  gel(b,k) = gsub(gel(b,k), gmul(m, gel(b,i)));
 }
-
-/* same, reduce mod p */
-static void
-_Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
+static void /* same, reduce mod p */
+_Fp_submul(GEN b, long k, long i, GEN m, GEN p)
 {
   if (lgefint(b[i]) > lgefint(p)) gel(b,i) = remii(gel(b,i), p);
-  gel(b,k) = addii(gel(b,k), mulii(m, gel(b,i)));
+  gel(b,k) = subii(gel(b,k), mulii(m, gel(b,i)));
 }
-
-/* same, reduce mod (T,p) */
-static void
-_Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
+static void /* same, reduce mod (T,p) */
+_Fq_submul(GEN b, long k, long i, GEN m, GEN T, GEN p)
 {
   gel(b,i) = Fq_red(gel(b,i), T,p);
-  gel(b,k) = gadd(gel(b,k), gmul(m, gel(b,i)));
+  gel(b,k) = gsub(gel(b,k), gmul(m, gel(b,i)));
 }
-
-/* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & MASK)) */
-static void
+static void /* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & MASK)) */
+_Fl_submul_OK(uGEN b, long k, long i, ulong m, ulong p)
+{
+  b[k] -= m * b[i];
+  if (b[k] & MASK) b[k] %= p;
+}
+static void /* assume m < p */
+_Fl_submul(uGEN b, long k, long i, ulong m, ulong p)
+{
+  b[i] %= p;
+  b[k] = Fl_sub(b[k], Fl_mul(m, b[i], p), p);
+  if (b[k] & MASK) b[k] %= p;
+}
+static void /* same m = 1 */
+_Fl_sub(uGEN b, long k, long i, ulong p)
+{
+  b[k] = Fl_sub(b[k], b[i], p);
+  if (b[k] & MASK) b[k] %= p;
+}
+static void /* assume m < p && SMALL_ULONG(p) && (! (b[i] & b[k] & MASK)) */
 _Fl_addmul_OK(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[k] += m * b[i];
   if (b[k] & MASK) b[k] %= p;
 }
-/* assume m < p */
-static void
+static void /* assume m < p */
 _Fl_addmul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
   b[k] = Fl_add(b[k], Fl_mul(m, b[i], p), p);
   if (b[k] & MASK) b[k] %= p;
 }
-/* same m = 1 */
-static void
+static void /* same m = 1 */
 _Fl_add(uGEN b, long k, long i, ulong p)
 {
   b[k] = Fl_add(b[k], b[i], p);
@@ -1396,9 +1407,9 @@ gauss_intern(GEN a, GEN b)
       GEN m = gcoeff(a,k,i);
       if (!gcmp0(m))
       {
-	m = gneg_i(gdiv(m,p));
-	for (j=i+1; j<=aco; j++) _addmul(gel(a,j),k,i,m);
-	for (j=1;   j<=bco; j++) _addmul(gel(b,j),k,i,m);
+	m = gdiv(m,p);
+	for (j=i+1; j<=aco; j++) _submul(gel(a,j),k,i,m);
+	for (j=1;   j<=bco; j++) _submul(gel(b,j),k,i,m);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1438,7 +1449,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   if (iscol) b = mkmat(b);
   for (i=1; i<=aco; i++)
   {
-    ulong minvpiv;
+    ulong invpiv;
     /* Fl_get_col wants 0 <= a[i,j] < p for all i,j */
     if (OK_ulong) for (k = 1; k < i; k++) ucoeff(a,k,i) %= p;
     for (k = i; k <= li; k++)
@@ -1455,22 +1466,22 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
     }
     if (i == aco) break;
 
-    minvpiv = p - ucoeff(a,i,i); /* - 1/piv mod p */
+    invpiv = ucoeff(a,i,i); /* 1/piv mod p */
     for (k=i+1; k<=li; k++)
     {
       ulong m = ( ucoeff(a,k,i) %= p );
       if (!m) continue;
 
-      m = Fl_mul(m, minvpiv, p);
+      m = Fl_mul(m, invpiv, p);
       if (m == 1) {
-	for (j=i+1; j<=aco; j++) _Fl_add((uGEN)a[j],k,i, p);
-	for (j=1;   j<=bco; j++) _Fl_add((uGEN)b[j],k,i, p);
+	for (j=i+1; j<=aco; j++) _Fl_sub((uGEN)a[j],k,i, p);
+	for (j=1;   j<=bco; j++) _Fl_sub((uGEN)b[j],k,i, p);
       } else if (OK_ulong) {
-	for (j=i+1; j<=aco; j++) _Fl_addmul_OK((uGEN)a[j],k,i,m, p);
-	for (j=1;   j<=bco; j++) _Fl_addmul_OK((uGEN)b[j],k,i,m, p);
+	for (j=i+1; j<=aco; j++) _Fl_submul_OK((uGEN)a[j],k,i,m, p);
+	for (j=1;   j<=bco; j++) _Fl_submul_OK((uGEN)b[j],k,i,m, p);
       } else {
-	for (j=i+1; j<=aco; j++) _Fl_addmul((uGEN)a[j],k,i,m, p);
-	for (j=1;   j<=bco; j++) _Fl_addmul((uGEN)b[j],k,i,m, p);
+	for (j=i+1; j<=aco; j++) _Fl_submul((uGEN)a[j],k,i,m, p);
+	for (j=1;   j<=bco; j++) _Fl_submul((uGEN)b[j],k,i,m, p);
       }
     }
   }
@@ -1528,7 +1539,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
-    GEN minvpiv;
+    GEN invpiv;
     for (k = i; k <= li; k++)
     {
       GEN piv = remii(gcoeff(a,k,i), p);
@@ -1544,15 +1555,15 @@ FpM_gauss(GEN a, GEN b, GEN p)
     }
     if (i == aco) break;
 
-    minvpiv = negi(gcoeff(a,i,i)); /* -1/piv mod p */
+    invpiv = gcoeff(a,i,i); /* 1/piv mod p */
     for (k=i+1; k<=li; k++)
     {
       GEN m = remii(gcoeff(a,k,i), p); gcoeff(a,k,i) = gen_0;
       if (!signe(m)) continue;
 
-      m = Fp_mul(m, minvpiv, p);
-      for (j=i+1; j<=aco; j++) _Fp_addmul(gel(a,j),k,i,m, p);
-      for (j=1  ; j<=bco; j++) _Fp_addmul(gel(b,j),k,i,m, p);
+      m = Fp_mul(m, invpiv, p);
+      for (j=i+1; j<=aco; j++) _Fp_submul(gel(a,j),k,i,m, p);
+      for (j=1  ; j<=bco; j++) _Fp_submul(gel(b,j),k,i,m, p);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1582,7 +1593,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   bco = lg(b)-1;
   for (i=1; i<=aco; i++)
   {
-    GEN minvpiv;
+    GEN invpiv;
     for (k = i; k <= li; k++)
     {
       GEN piv = Fq_red(gcoeff(a,k,i), T,p);
@@ -1598,15 +1609,15 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     }
     if (i == aco) break;
 
-    minvpiv = Fq_neg(gcoeff(a,i,i), T, p); /* -1/piv mod p */
+    invpiv = gcoeff(a,i,i); /* 1/piv */
     for (k=i+1; k<=li; k++)
     {
       GEN m = Fq_red(gcoeff(a,k,i), T,p); gcoeff(a,k,i) = gen_0;
       if (!signe(m)) continue;
 
-      m = Fq_mul(m, minvpiv, T,p);
-      for (j=i+1; j<=aco; j++) _Fq_addmul(gel(a,j),k,i,m, T,p);
-      for (j=1;   j<=bco; j++) _Fq_addmul(gel(b,j),k,i,m, T,p);
+      m = Fq_mul(m, invpiv, T,p);
+      for (j=i+1; j<=aco; j++) _Fq_submul(gel(a,j),k,i,m, T,p);
+      for (j=1;   j<=bco; j++) _Fq_submul(gel(b,j),k,i,m, T,p);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -2003,7 +2014,7 @@ deplin(GEN x0)
 {
   pari_sp av = avma;
   long i,j,k,t,nc,nl;
-  GEN x,y,piv,q,c,l,d,ck,cj;
+  GEN D, x, y, c, l, d, ck;
 
   t = typ(x0);
   if (t == t_MAT) x = shallowcopy(x0);
@@ -2023,9 +2034,9 @@ deplin(GEN x0)
     ck = gel(x,k);
     for (j=1; j<k; j++)
     {
-      cj = gel(x,j); piv = gel(d,j); q = gneg(gel(ck,l[j]));
+      GEN cj = gel(x,j), piv = gel(d,j), q = gel(ck,l[j]);
       for (i=1; i<=nl; i++)
-	if (i!=l[j]) gel(ck,i) = gadd(gmul(piv, gel(ck,i)), gmul(q, gel(cj,i)));
+	if (i!=l[j]) gel(ck,i) = gsub(gmul(piv, gel(ck,i)), gmul(q, gel(cj,i)));
     }
 
     i = gauss_get_pivot_NZ(ck, NULL, c, 1);
@@ -2038,12 +2049,12 @@ deplin(GEN x0)
   if (k == 1) { avma = av; return scalarcol_shallow(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
   y[1] = ck[ l[1] ];
-  for (q=gel(d,1),j=2; j<k; j++)
+  for (D=gel(d,1),j=2; j<k; j++)
   {
-    gel(y,j) = gmul(gel(ck, l[j]), q);
-    q = gmul(q, gel(d,j));
+    gel(y,j) = gmul(gel(ck, l[j]), D);
+    D = gmul(D, gel(d,j));
   }
-  gel(y,j) = gneg(q);
+  gel(y,j) = gneg(D);
   for (j++; j<=nc; j++) gel(y,j) = gen_0;
   return gerepileupto(av, gdiv(y,content(y)));
 }
@@ -2520,11 +2531,9 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
       ucoeff(x,j,k) = p-1;
       if (piv == 1) { /* nothing */ }
       else if (OK_ulong)
-	for (i=k+1; i<=n; i++)
-	  ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;
+	for (i=k+1; i<=n; i++) ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;
       else
-	for (i=k+1; i<=n; i++)
-	  ucoeff(x,j,i) = Fl_mul(piv, ucoeff(x,j,i), p);
+	for (i=k+1; i<=n; i++) ucoeff(x,j,i) = Fl_mul(piv, ucoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
 	if (t == j) continue;
@@ -3249,10 +3258,10 @@ det_simple_gauss(GEN a, int inexact)
       GEN m = gcoeff(a,i,k);
       if (gcmp0(m)) continue;
 
-      m = gneg_i(gdiv(m,p));
+      m = gdiv(m,p);
       for (j=i+1; j<=nbco; j++)
       {
-        gcoeff(a,j,k) = gadd(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
+        gcoeff(a,j,k) = gsub(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
         if (low_stack(lim, stack_lim(av,1)))
         {
           if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
@@ -3334,10 +3343,9 @@ det(GEN a)
       }
       else
       {
-	m = gneg_i(m);
 	for (j=i+1; j<=nbco; j++)
 	{
-	  p1 = gadd(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
+	  p1 = gsub(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
 	  if (diveuc) p1 = mydiv(p1,pprec);
 	  gel(ck,j) = p1;
 	}
@@ -3351,7 +3359,7 @@ det(GEN a)
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
   }
   p = gcoeff(a,nbco,nbco);
-  if (s < 0) p = gneg(p); else p = gcopy(p);
+  p = (s < 0) gneg(p): gcopy(p);
   return gerepileupto(av, p);
 }
 
