@@ -1288,7 +1288,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
   pari_sp av;
-  long i, prec, extraprec, n = degpol(T->x), MARKED = 1;
+  long i, prec, extraprec, n = degpol(T->x);
   nffp_t F;
 
   extraprec = (long) (0.25 * n / (sizeof(long) / 4));
@@ -1302,7 +1302,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
 		  prec + F.extraprec, prec, F.extraprec);
-    if ((u = lllfp_marked(&MARKED, G, 100, 2, prec, 0)))
+    if ((u = lllfp(G, 100, 2, prec, LLL_KEEP_FIRST)))
     {
       if (typ(u) == t_MAT) break;
       u = gel(u,1);
@@ -1315,7 +1315,6 @@ get_red_G(nfbasic_t *T, GEN *pro)
   }
   *pro = F.ro;
   if (u0) u = gmul(u0,u);
-  if (MARKED != 1) lswap(u[1], u[MARKED]);
   return u;
 }
 
@@ -1329,11 +1328,9 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
   if (T->r1 != degpol(T->x)) u = get_red_G(T, pro);
   else
   {
-    long MARKED = 1;
-    u = lllfp_marked(&MARKED, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
+    u = lllfp(make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC,
+              LLL_GRAM|LLL_KEEP_FIRST);
     if (!u) u = matid(1);
-    else
-      if (MARKED != 1) lswap(u[1], u[MARKED]);
   }
   return u;
 }

@@ -210,7 +210,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     nf = nfnewprec_shallow(nf,prec);
   }
   z = shallowconcat(matunit, z);
-  u = lllintern(z, 100, 1, prec);
+  u = lllfp(z, 100, 1, prec, 0);
   if (u)
   {
     ru = lg(u);

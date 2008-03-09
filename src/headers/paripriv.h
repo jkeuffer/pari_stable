@@ -193,13 +193,13 @@ GEN hnfspec(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
 /* LLL */
+enum { LLL_GRAM = 1, LLL_KEEP_FIRST = 2 };
+
 GEN lllint_fp_ip(GEN x, long D);
-GEN lllfp_marked(long *M, GEN x, long D, long flag, long prec, int gram);
+GEN lllfp(GEN x, long D, long FLAG, long prec, long flag);
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
 GEN qfgaussred_positive(GEN a);
-GEN lllgramintern(GEN x, long alpha, long flag, long prec);
-GEN lllintern(GEN x, long D, long flag, long prec);
 
 /* miscellaneous linear algebra */
 GEN  diagonal_i(GEN x);
@@ -672,7 +672,7 @@ GEN     checkrnfeq(GEN x);
 
 /* bibli1.c */
 
-GEN     lll_scaled(long MARKED, GEN X0, long D);
+GEN     lll_scaled(GEN X0, long D, int keepfirst);
 GEN     lllintpartialall(GEN m, long flag);
 GEN     plindep(GEN x);
 GEN     pslq(GEN x);

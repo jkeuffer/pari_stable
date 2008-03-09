@@ -784,7 +784,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
     for (   ; i<=RU; i++) gel(p1,i) = gadd(s, gmul2n(gcoeff(A,i,j),-1));
   }
   if (prec <= 0) prec = gprecision(A);
-  u = lllintern(real_i(matep),100,1,prec);
+  u = lllfp(real_i(matep),100,1,prec,0);
   if (!u) return not_given(av,fl,fupb_PRECI);
 
   p1 = gmul(matep,u);
@@ -1207,7 +1207,7 @@ red_mod_units(GEN col, GEN z, long prec)
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) gel(x,i) = real_i(gel(col,i));
   gel(x,RU) = N2;
-  x = lllintern(shallowconcat(mat,x),100, 1,prec);
+  x = lllfp(shallowconcat(mat,x),100, 1,prec,0);
   if (!x) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);

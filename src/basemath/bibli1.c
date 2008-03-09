@@ -244,23 +244,26 @@ lll_trivial(GEN x, long flag)
 }
 
 static GEN
-lll_finish(GEN h,GEN fl,long flag)
+lll_get_im(GEN h, long k)
 {
-  long i, k, l = lg(fl);
-  GEN g;
+  long l = lg(h) - k;
+  h += k; h[0] = evaltyp(t_MAT) | evallg(l);
+  return h;
+}
 
-  k=1; while (k<l && !fl[k]) k++;
+/* k = dim Kernel */
+static GEN
+lll_finish(GEN h, long k, long flag)
+{
   switch(flag & (~lll_GRAM))
   {
-    case lll_KER: setlg(h,k);
-      return h;
-
-    case lll_IM: h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
-      return h;
+    case lll_KER: setlg(h,k+1); return h;
+    case lll_IM: return lll_get_im(h, k);
+    default: {
+      GEN g = vecslice(h,1,k);
+      return mkvec2(g, lll_get_im(h, k));
+    }
   }
-  g = cgetg(k, t_MAT); for (i=1; i<k; i++) g[i] = h[i];
-  h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
-  return mkvec2(g, h);
 }
 
 /* h[,k] += q * h[,l]. Inefficient if q = 0 */
@@ -589,19 +592,18 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   }
 }
 
-/* x integer matrix. Beware: this function can return NULL */
-static GEN
-lllint_marked(long *pMARKED, GEN x, long D, int gram,
-	      GEN *pth, GEN *ptfl, GEN *ptB)
+/* Assume x a ZM. Beware: this function can return NULL (dim x <= 1) */
+GEN
+lllint_i(GEN x, long D, long flag, GEN *pth, long *ptk, GEN *ptB)
 {
-  long lx = lg(x), hx, j, k, l, n, kmax, MARKED;
+  const int gram = flag & LLL_GRAM; /*Gram matrix*/
+  const int keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
+  long lx = lg(x), hx, j, k, l, n, kmax;
   pari_sp av, lim;
   GEN B,L,h,fl;
 
   fl = cgetg(lx,t_VECSMALL);
-  if (ptfl) *ptfl = fl;
   n = lx-1; if (n <= 1) return NULL;
-  MARKED = pMARKED? *pMARKED: 0;
   hx = lg(x[1]);
   if (gram && hx != lx) pari_err(mattype1,"lllint");
 
@@ -621,30 +623,24 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
       ZincrementalGS(x, L, B, k, fl, gram);
       kmax = k;
     }
-    if (k != MARKED)
+    if (!gram) ZRED(k,k-1, x,h,L,gel(B,k),kmax);
+    else  ZRED_gram(k,k-1, x,h,L,gel(B,k),kmax);
+    if ((!keepfirst || k > 2) && do_ZSWAP(x,h,L,B,kmax,k,D,fl,gram))
     {
-      if (!gram) ZRED(k,k-1, x,h,L,gel(B,k),kmax);
-      else  ZRED_gram(k,k-1, x,h,L,gel(B,k),kmax);
-    }
-    if (do_ZSWAP(x,h,L,B,kmax,k,D,fl,gram))
-    {
-      if      (MARKED == k)   MARKED = k-1;
-      else if (MARKED == k-1) MARKED = k;
       if (k > 2) k--;
     }
     else
     {
-      if (k != MARKED)
-	for (l=k-2; l; l--)
-	{
-	  if (!gram) ZRED(k,l, x,h,L,gel(B,l+1),kmax);
-	  else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
-	  if (low_stack(lim, stack_lim(av,1)))
-	  {
-	    if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
-	    gerepileall(av,h?4:3,&B,&L,&x,&h);
-	  }
-	}
+      for (l=k-2; l; l--)
+      {
+        if (!gram) ZRED(k,l, x,h,L,gel(B,l+1),kmax);
+        else  ZRED_gram(k,l, x,h,L,gel(B,l+1),kmax);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
+          gerepileall(av,h?4:3,&B,&L,&x,&h);
+        }
+      }
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -655,38 +651,36 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
   if (ptB)  *ptB  = B;
-  if (ptfl) *ptfl = fl;
+  if (ptk)
+  {
+    k=1; while (k<lx && !fl[k]) k++;
+    *ptk = k-1;
+  }
   if (pth)  *pth = h;
-  if (pMARKED) *pMARKED = MARKED;
   return h? h: x;
-}
-
-/* Assume x a ZM. Beware: this function can return NULL (dim x <= 1) */
-GEN
-lllint_i(GEN x, long D, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
-{
-  return lllint_marked(NULL, x,D,gram,pth,ptfl,ptB);
 }
 
 /* Assume x a ZM. Return x * lllint(x). No garbage collection */
 GEN
 lllint_ip(GEN x, long D)
 {
-  GEN fl, h = lllint_i(x, D, 0, NULL, &fl, NULL);
-  return h? lll_finish(h, fl, lll_IM): x;
+  long k;
+  GEN h = lllint_i(x, D, 0, NULL, &k, NULL);
+  return h? lll_get_im(h, k): x;
 }
 
 static GEN
-lllall_i(GEN x, long D, int gram, long flag)
+lllall_i(GEN x, long D, long gram, long flag)
 {
-  GEN fl, h;
+  long k;
+  GEN h;
   if (typ(x) != t_MAT) pari_err(typeer, "lllall");
   RgM_check_ZM(x, "lllall");
-  (void)lllint_i(x, D, gram, &h, &fl, NULL);
-  return h? lll_finish(h,fl,flag): lll_trivial(x,flag);
+  (void)lllint_i(x, D, gram, &h, &k, NULL);
+  return h? lll_finish(h,k,flag): lll_trivial(x,flag);
 }
 static GEN
-lllall(GEN x, long D, int gram, long flag)
+lllall(GEN x, long D, long gram, long flag)
 {
   pari_sp av = avma;
   return gerepilecopy(av, lllall_i(x,D,gram,flag));
@@ -696,9 +690,9 @@ lllint(GEN x) { return lllall(x,LLLDFT,0, lll_IM); }
 GEN
 lllkerim(GEN x) { return lllall(x,LLLDFT,0, lll_ALL); }
 GEN
-lllgramint(GEN x) { return lllall(x,LLLDFT,1, lll_IM | lll_GRAM); }
+lllgramint(GEN x) { return lllall(x,LLLDFT,LLL_GRAM, lll_IM | lll_GRAM); }
 GEN
-lllgramkerim(GEN x) { return lllall(x,LLLDFT,1, lll_ALL | lll_GRAM); }
+lllgramkerim(GEN x) { return lllall(x,LLLDFT,LLL_GRAM, lll_ALL | lll_GRAM); }
 
 static int
 pslg(GEN x)
@@ -850,7 +844,7 @@ static GEN
 lllgramallgen(GEN x, long flag)
 {
   long lx = lg(x), i, j, k, l, n;
-  pari_sp av0 = avma, av, lim;
+  pari_sp av, lim;
   GEN B, L, h, fl;
   int flc;
 
@@ -885,7 +879,8 @@ lllgramallgen(GEN x, long flag)
       gerepileall(av,3,&B,&L,&h);
     }
   }
-  return gerepilecopy(av0, lll_finish(h,fl,flag));
+  k=1; while (k<lx && !fl[k]) k++;
+  return lll_finish(h,k-1,flag);
 }
 
 static GEN
@@ -898,7 +893,7 @@ _mul2n(GEN x, long e) { return e? gmul2n(x, e): x; }
  * h = base change matrix (from X0)
  * R = from QR factorization of Xs[1..k-1] */
 static int
-HRS(long MARKED, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
+HRS(int keep, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
     GEN Q, GEN E, GEN F)
 {
   long e, i, N = lg(X[k]), rounds = 0;
@@ -910,7 +905,7 @@ HRS(long MARKED, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
   F[k] = 0;
   gel(Xs,k) = E[k]? gmul2n(gel(X,k), E[k]): shallowcopy(gel(X,k));
   rounds = 0;
-  if (k == MARKED) goto DONE; /* no size reduction/scaling */
+  if (keep) goto DONE;
 
 UP:
   rk = ApplyAllQ(Q, col_to_MP(gel(Xs,k), prec), k);
@@ -988,7 +983,7 @@ rescale_to_int(GEN x)
 }
 
 GEN
-lll_scaled(long MARKED, GEN X0, long D)
+lll_scaled(GEN X0, long D, int keepfirst)
 {
   GEN delta, X, Xs, h, R, Q, E, F;
   long j, kmax = 1, k, N = lg(X0);
@@ -1016,18 +1011,19 @@ PRECPB:
   {
     pari_sp av1;
     if (k == 1) {
-      HRS(MARKED, 1, 0, kmax, X, Xs, h, R, Q, E, F);
+      HRS(keepfirst, 1, 0, kmax, X, Xs, h, R, Q, E, F);
       k = 2;
     }
     if (k > kmax) {
       kmax = k;
       if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
     }
-    if (!HRS(MARKED, k, 1, kmax, X, Xs, h, R, Q, E, F)) goto PRECPB;
+    if (!HRS(0, k, 1, kmax, X, Xs, h, R, Q, E, F)) goto PRECPB;
 
     av1 = avma;
-    if (mpcmp( mpmul(delta, gsqr(gcoeff(R, k-1,k-1))),
-	       mpadd(gsqr(gcoeff(R,k-1,k)), gsqr(gcoeff(R, k,k)))) > 0)
+    if ((!keepfirst || k > 2) && 
+        mpcmp(mpmul(delta, gsqr(gcoeff(R, k-1,k-1))),
+	      mpadd(gsqr(gcoeff(R,k-1,k)), gsqr(gcoeff(R, k,k)))) > 0)
     {
       if (DEBUGLEVEL>3 && k == kmax)
       {
@@ -1037,14 +1033,12 @@ PRECPB:
       }
       lswap(X[k], X[k-1]);
       lswap(h[k], h[k-1]);
-      if      (MARKED == k)   MARKED = k-1;
-      else if (MARKED == k-1) MARKED = k;
       avma = av1; k--;
     }
     else
     {
       avma = av1;
-      if (!HRS(MARKED, k, 0, kmax, X, Xs, h, R, Q, E, F)) goto PRECPB;
+      if (!HRS(0, k, 0, kmax, X, Xs, h, R, Q, E, F)) goto PRECPB;
       k++;
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1086,29 +1080,28 @@ prec_col(GEN c, long M, long *pl, GEN *D)
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
  * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
  *
- *   if (flag = 1): if precision problems, return NULL
- *   if (flag = 2): if precision problems, return mkvec ( h )
+ *   if (FLAG = 1): if precision problems, return NULL
+ *   if (FLAG = 2): if precision problems, return mkvec ( h )
  *                  [ partial transformation matrix ], unless we could not
  *                  even start; return NULL in this case.
- *   if (flag = 3): assume x exact and !gram; return LLL-reduced basis, not
- *                  base change
- *
- * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis
- * (which may then not be LLL-reduced) */
+ *   if (FLAG = 3): assume x exact and !gram; return LLL-reduced basis, not
+ *                  base change */
 GEN
-lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
+lllfp(GEN x, long D, long FLAG, long prec, long flag)
 {
+  const int gram = flag & LLL_GRAM; /*Gram matrix*/
+  const int keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
-  long retry = 2, lx = lg(x), hx, l, j, k, k1, n, kmax, KMAX, MARKED;
+  long retry = 2, lx = lg(x), hx, l, j, k, k1, n, kmax, KMAX;
   long count, count_max = 8;
   pari_sp av0 = avma, av, lim;
   int isexact, exact_can_leave;
-  const int in_place = (flag == 3);
+  const int in_place = (FLAG == 3);
 
   if (typ(x) != t_MAT) pari_err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return matid(n);
 #if 0 /* doesn't work yet */
-  return lll_scaled(MARKED, x, D);
+  return lll_scaled(x, D, keepfirst);
 #endif
 
   hx = lg(x[1]);
@@ -1128,8 +1121,8 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   {
     if (!prec)
     {
-      RgM_check_ZM(x, "lllint_marked");
-      return lllint_marked(pMARKED, x, D, gram, &h, NULL, NULL);
+      RgM_check_ZM(x, "lllint_i");
+      return lllint_i(x, D, flag, &h, NULL, NULL);
     }
     x = mat_to_MP(x, prec);
     isexact = 1;
@@ -1142,7 +1135,6 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   }
  /* kmax = maximum column index attained during this run
   * KMAX = same over all runs (after PRECPB) */
-  MARKED = pMARKED? *pMARKED: 0;
   kmax = KMAX = 1;
   h = matid(n);
 
@@ -1159,7 +1151,7 @@ PRECPB:
     case 2: break; /* entry */
     case 1:
       if (DEBUGLEVEL>3) fprintferr("\n");
-      if (flag == 2) return mkvec(h);
+      if (FLAG == 2) return mkvec(h);
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
 	if (prec < PREC_THRESHOLD)
@@ -1190,7 +1182,7 @@ PRECPB:
     case 0: /* give up */
       if (DEBUGLEVEL>3) fprintferr("\n");
       if (DEBUGLEVEL) pari_warn(warner,"lllfp giving up");
-      if (flag) { avma=av; return NULL; }
+      if (FLAG) { avma=av; return NULL; }
       pari_err(lllger3);
   }
   exact_can_leave = 1;
@@ -1201,7 +1193,7 @@ PRECPB:
   for (j=1; j<lx; j++) { gel(L,j) = zerocol(n); gel(B,j) = gen_0; }
   if (gram && !incrementalGS(x, L, B, 1))
   {
-    if (flag) return NULL;
+    if (FLAG) return NULL;
     pari_err(lllger3);
   }
   if (DEBUGLEVEL>5) fprintferr("k =");
@@ -1239,16 +1231,11 @@ PRECPB:
       for (k1=1; k1<=kmax; k1++)
 	if (!incrementalGS(x, L, B, k1)) goto PRECPB;
     }
-    if (k != MARKED)
+    if (!gram) j = RED(k,k-1, x,h,L,KMAX);
+    else  j = RED_gram(k,k-1, x,h,L,KMAX);
+    if (!j) goto PRECPB;
+    if ((!keepfirst || k > 2) && do_SWAP(x,h,L,B,kmax,k,delta,gram))
     {
-      if (!gram) j = RED(k,k-1, x,h,L,KMAX);
-      else  j = RED_gram(k,k-1, x,h,L,KMAX);
-      if (!j) goto PRECPB;
-    }
-    if (do_SWAP(x,h,L,B,kmax,k,delta,gram))
-    {
-      if      (MARKED == k)   MARKED = k-1;
-      else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
       gel(Q,k) = gel(Q,k-1) = gen_0;
       exact_can_leave = 0;
@@ -1256,18 +1243,17 @@ PRECPB:
     }
     else
     {
-      if (k != MARKED)
-	for (l=k-2; l; l--)
-	{
-	  if (!gram) j = RED(k,l, x,h,L,KMAX);
-	  else  j = RED_gram(k,l, x,h,L,KMAX);
-	  if (!j) goto PRECPB;
-	  if (low_stack(lim, stack_lim(av,1)))
-	  {
-	    if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1], kmax = %ld", kmax);
-	    gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
-	  }
-	}
+      for (l=k-2; l; l--)
+      {
+        if (!gram) j = RED(k,l, x,h,L,KMAX);
+        else  j = RED_gram(k,l, x,h,L,KMAX);
+        if (!j) goto PRECPB;
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"lllfp[1], kmax = %ld", kmax);
+          gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
+        }
+      }
       if (++k > n)
       {
 	if (isexact)
@@ -1303,7 +1289,6 @@ PRECPB:
   }
   if (in_place) h = gmul(xinit, h);
   if (DEBUGLEVEL>3) fprintferr("\n");
-  if (pMARKED) *pMARKED = MARKED;
   return gerepilecopy(av0, h);
 }
 
@@ -1311,26 +1296,14 @@ PRECPB:
 GEN
 lllint_fp_ip(GEN x, long D)
 {
-  return lllfp_marked(NULL, x,D, 3,DEFAULTPREC,0);
+  return lllfp(x,D, 3,DEFAULTPREC, 0);
 }
 
 GEN
-lllgramintern(GEN x, long D, long flag, long prec)
-{
-  return lllfp_marked(NULL, x,D,flag,prec,1);
-}
+lllgram(GEN x,long prec) { return lllfp(x,LLLDFT,0,prec,LLL_GRAM); }
 
 GEN
-lllintern(GEN x, long D, long flag, long prec)
-{
-  return lllfp_marked(NULL, x,D,flag,prec,0);
-}
-
-GEN
-lllgram(GEN x,long prec) { return lllgramintern(x,LLLDFT,0,prec); }
-
-GEN
-lll(GEN x,long prec) { return lllintern(x,LLLDFT,0,prec); }
+lll(GEN x,long prec) { return lllfp(x,LLLDFT,0,prec,0); }
 
 GEN
 qflll0(GEN x, long flag, long prec)
@@ -1379,23 +1352,21 @@ gram_matrix(GEN x)
   return g;
 }
 
-GEN
-lllgen(GEN x) {
+static GEN
+lllallgen(GEN x, long flag)
+{
   pari_sp av = avma;
-  return gerepileupto(av, lllgramgen(gram_matrix(x)));
+  if ((flag & lll_GRAM) == 0) x = gram_matrix(x);
+  return gerepilecopy(av, lllgramallgen(x, flag));
 }
-
 GEN
-lllkerimgen(GEN x) {
-  pari_sp av = avma;
-  return gerepileupto(av, lllgramallgen(gram_matrix(x),lll_ALL));
-}
-
+lllgen(GEN x) { return lllallgen(x, lll_IM); }
 GEN
-lllgramgen(GEN x) { return lllgramallgen(x,lll_IM); }
-
+lllkerimgen(GEN x) { return lllallgen(x, lll_ALL); }
 GEN
-lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
+lllgramgen(GEN x)  { return lllallgen(x, lll_IM|lll_GRAM); }
+GEN
+lllgramkerimgen(GEN x)  { return lllallgen(x, lll_ALL|lll_GRAM); }
 
 /* Def: a matrix M is said to be -partially reduced- if | m1 +- m2 | >= |m1|
  * for any two columns m1 != m2, in M.
@@ -3437,7 +3408,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllgramintern(a, 4, 1, (prec<<1)-2);
+    u = lllfp(a, 4, 1, (prec<<1)-2, LLL_GRAM);
     if (!u) return NULL;
     r = qf_base_change(a,u,1);
     if (!i) {
@@ -3457,7 +3428,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   rinvtrans = shallowtrans( invmat(r) );
   if (DEBUGLEVEL>2)
     fprintferr("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
-  v = lllintern(rinvtrans, 100, 1, 0);
+  v = lllfp(rinvtrans, 100, 1, 0, 0);
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
