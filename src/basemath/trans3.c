@@ -609,8 +609,7 @@ incgam2_0(GEN x, GEN expx)
 
   if (expo(x) >= 4)
   {
-    double m, mx = rtodbl(x);
-    m = (bit_accuracy_mul(l,LOG2) + mx)/4;
+    double mx = rtodbl(x), m = (bit_accuracy_mul(l,LOG2) + mx)/4;
     n = (long)(1+m*m/mx);
     z = divsr(-n, addsr(n<<1,x));
     for (i=n-1; i >= 1; i--)
@@ -619,13 +618,14 @@ incgam2_0(GEN x, GEN expx)
   }
   else
   {
-    GEN S, t, H, run = real_1(l);
+    GEN S, t, H, run = real_1(l+1);
     n = -bit_accuracy(l)-1;
+    x = rtor(x, l+1);
     S = z = t = H = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
     {
-      H = addrr(H, divru(run,i)); /* H = sum_{i=1} 1/i */
-      z = divru(mulrr(x,z), i);   /* z = sum_{i=1} x^(i-1)/i */
+      H = addrr(H, divru(run,i)); /* H = sum_{k<=i} 1/k */
+      z = divru(mulrr(x,z), i);   /* z = x^(i-1)/i! */
       t = mulrr(z, H); S = addrr(S, t);
     }
     return subrr(mulrr(x, divrr(S,expx)), addrr(mplog(x), mpeuler(l)));
@@ -642,10 +642,8 @@ incgam2(GEN s, GEN x, long prec)
   double m,mx;
 
   if (typ(x) != t_REAL) x = gtofp(x, prec);
-  if (gcmp0(s)) {
-    if (typ(x) == t_REAL && signe(x) > 0)
-      return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
-  }
+  if (gcmp0(s) && typ(x) == t_REAL && signe(x) > 0)
+    return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   if (typ(x) == t_COMPLEX)
   {
     double a = rtodbl(gel(x,1));
