@@ -147,7 +147,7 @@ JD 12- add an optional argument to quit()
     1- obsolete library functions extract and matextract
     2- obsolete library function elementinv_modpr
     3- obsolete README.DOS and README.WIN
-    4- cant_deflate error code
+    4- cant_deflate, lllger3 error codes
     5- obsolete library function bruteall
     6- obsolete library function reducemodmatrix, nfreducemodidele,
        nfreducemodideal, nfreducemodideal_i

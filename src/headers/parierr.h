@@ -43,10 +43,6 @@ enum {
 /* base.c   */
   constpoler, notpoler, redpoler, zeropoler,
 
-/* bibli.c  */
-
-  lllger3,
-
 /* elliptic.c */
 
   elliper1,

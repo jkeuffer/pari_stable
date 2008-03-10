@@ -102,11 +102,6 @@ const char *errmessage[]=
 /* zeropoler */
   "zero polynomial",
 
-  /*  BIBLI.C  */
-
-/* lllger3 */
-  "not a definite matrix in lllgram",
-
   /*  ELLIPTIC.C  */
 
 /* elliper1 */
