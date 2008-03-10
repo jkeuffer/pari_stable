@@ -998,47 +998,43 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
 static GEN
 intersect_ker(GEN P, GEN MA, GEN U, GEN l)
 {
-  pari_sp ltop=avma;
-  long vp=varn(P);
-  long vu=varn(U), r=degpol(U);
-  long i;
+  pari_sp ltop = avma;
+  long i, vp = varn(P), vu = varn(U), r = degpol(U);
   GEN A, R, ib0;
   if (DEBUGLEVEL>=4) (void)timer2();
   if (lgefint(l)==3)
   {
-    ulong p=l[2];
-    GEN M, V=Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
+    ulong p = l[2];
+    GEN M, V = Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
     if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
-    M=FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
-    A=Flm_to_ZM(Flm_ker(M,p));
+    M = FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
+    A = Flm_to_ZM(Flm_ker(M,p));
   }
   else
   {
-    GEN V=FpM_Frobenius(MA,r,l,vu);
+    GEN V = FpM_Frobenius(MA,r,l,vu);
     if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
-    A=FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
+    A = FpM_ker(FpXQV_FpX_Frobenius(V, U, P, l), l);
   }
   if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
   if (lg(A)!=r+1)
     pari_err(talker,"ZZ_%Zs[%Zs]/(%Zs) is not a field in FpX_ffintersect"
 	,l,pol_x(vp),P);
-  A=gerepileupto(ltop,A);
+  A = gerepileupto(ltop,A);
   /*The formula is
-   * a_{r-1}=-\phi(a_0)/b_0
-   * a_{i-1}=\phi(a_i)+b_ia_{r-1}  i=r-1 to 1
-   * Where a_0=A[1] and b_i=U[i+2]
-   */
-  ib0=negi(Fp_inv(gel(U,2),l));
-  R=cgetg(r+1,t_MAT);
-  R[1]=A[1];
-  gel(R,r) = FpM_FpC_mul(MA,gmul(gel(A,1),ib0),l);
+   * a_{r-1} = -\phi(a_0)/b_0
+   * a_{i-1} = \phi(a_i)+b_ia_{r-1}  i=r-1 to 1
+   * Where a_0=A[1] and b_i=U[i+2] */
+  ib0 = Fp_inv(negi(gel(U,2)),l);
+  R = cgetg(r+1,t_MAT);
+  gel(R,1) = gel(A,1);
+  gel(R,r) = FpM_FpC_mul(MA, FpC_Fp_mul(gel(A,1),ib0,l), l);
   for(i=r-1;i>1;i--)
-    gel(R,i) = FpC_red(gadd(FpM_FpC_mul(MA,gel(R,i+1),l),
-	 gmul(gel(U,i+2),gel(R,r))),l);
-  R=shallowtrans(R);
-  for(i=1;i<lg(R);i++)
-    gel(R,i) = RgV_to_RgX(gel(R,i),vu);
-  A=gtopolyrev(R,vp);
+    gel(R,i) = FpC_add(FpM_FpC_mul(MA,gel(R,i+1),l),
+	               FpC_Fp_mul(gel(R,r), gel(U,i+2), l),l);
+  R = shallowtrans(R);
+  for(i=1;i<lg(R);i++) gel(R,i) = RgV_to_RgX(gel(R,i),vu);
+  A = gtopolyrev(R,vp);
   return gerepileupto(ltop,A);
 }
 
