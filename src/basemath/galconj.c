@@ -29,8 +29,9 @@ galoisconj(GEN nf)
   v = varn(x);
   if (v == 0)
   {
-    if (nf) y = gsubst(nf, 0, pol_x(MAXVARN));
-    else { y = shallowcopy(x); setvarn(y, MAXVARN); }
+    v = fetch_user_var("y");
+    if (nf) y = gsubst(nf, 0, pol_x(v));
+    else { y = shallowcopy(x); setvarn(y, v); }
   }
   else
   {
