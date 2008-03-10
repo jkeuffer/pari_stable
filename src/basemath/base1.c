@@ -1302,7 +1302,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
 		  prec + F.extraprec, prec, F.extraprec);
-    if ((u = lllfp(G, 100, 2, prec, LLL_KEEP_FIRST)))
+    if ((u = lllfp(G, 100, prec, LLL_KEEP_FIRST)))
     {
       if (typ(u) == t_MAT) break;
       u = gel(u,1);
@@ -1325,13 +1325,10 @@ static GEN
 get_LLL_basis(nfbasic_t *T, GEN *pro)
 {
   GEN u;
-  if (T->r1 != degpol(T->x)) u = get_red_G(T, pro);
+  if (T->r1 == degpol(T->x))
+    u = lllfp(make_Tr(T->x, T->bas), 100, DEFAULTPREC, LLL_GRAM|LLL_KEEP_FIRST);
   else
-  {
-    u = lllfp(make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC,
-              LLL_GRAM|LLL_KEEP_FIRST);
-    if (!u) u = matid(1);
-  }
+    u = get_red_G(T, pro);
   return u;
 }
 

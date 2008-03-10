@@ -202,8 +202,6 @@ enum {
   LLL_INPLACE    = 0x400
 };
 
-GEN lllint_fp_ip(GEN x, long D);
-GEN lllfp(GEN x, long D, long FLAG, long prec, long flag);
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
 GEN qfgaussred_positive(GEN a);

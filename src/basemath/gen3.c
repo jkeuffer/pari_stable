@@ -3331,23 +3331,6 @@ qfeval0_i(GEN q, GEN x, long n)
   return gerepileupto(av,res);
 }
 
-#if 0
-static GEN
-qfeval0(GEN q, GEN x, long n)
-{
-  long i, j;
-  pari_sp av=avma;
-  GEN res=gen_0;
-
-  for (i=2;i<n;i++)
-    for (j=1;j<i;j++)
-      res = gadd(res, gmul(gcoeff(q,i,j), gmul(gel(x,i),gel(x,j))) );
-  res=gshift(res,1);
-  for (i=1;i<n;i++)
-    res = gadd(res, gmul(gcoeff(q,i,i), gsqr(gel(x,i))) );
-  return gerepileupto(av,res);
-}
-#else
 static GEN
 qfeval0(GEN q, GEN x, long n)
 {
@@ -3367,7 +3350,6 @@ qfeval0(GEN q, GEN x, long n)
   }
   return gerepileupto(av,res);
 }
-#endif
 
 /* We assume q is a real symetric matrix */
 GEN

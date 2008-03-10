@@ -578,7 +578,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   if (s == 0) B[k+1] = B[k];
   else
   {
-    if (s < 0) pari_err(lllger3);
+    if (s < 0) pari_err(talker, "not a definite matrix in lllgram");
     B[k+1] = coeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
   }
 }
@@ -1061,28 +1061,27 @@ prec_col(GEN c, long M, long *pl, GEN *D)
   }
 }
 
+/* give up while returning partial transformation matrix */
+static GEN
+lll_fail(GEN h) { return mkvec(h); }
+
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
  * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
  *
- *   if (FLAG = 1): if precision problems, return NULL
- *   if (FLAG = 2): if precision problems, return mkvec ( h )
- *                  [ partial transformation matrix ], unless we could not
- *                  even start; return NULL in this case.
- *   if (FLAG = 3): assume x exact and !gram; return LLL-reduced basis, not
- *                  base change */
+ * if precision problems, return mkvec(h) [ partial transformation matrix ]*/
 GEN
-lllfp(GEN x, long D, long FLAG, long prec, long flag)
+lllfp(GEN x, long D, long prec, long flag)
 {
   const int gram = flag & LLL_GRAM; /*Gram matrix*/
   const int keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
+  const int in_place = flag & LLL_INPLACE; /* assume x exact, return basis */
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
-  long retry = 2, lx = lg(x), hx, l, j, k, k1, n, kmax, KMAX;
+  long retry = 1, lx = lg(x), hx, l, j, k, k1, n = lx-1, kmax, KMAX;
   long count, count_max = 8;
   pari_sp av0 = avma, av, lim;
   int isexact, exact_can_leave;
-  const int in_place = (FLAG == 3);
 
-  n = lx-1; if (n <= 1) return matid(n);
+  if (n <= 1) return matid(n);
 #if 0 /* doesn't work yet */
   return lll_scaled(x, D, keepfirst);
 #endif
@@ -1125,44 +1124,28 @@ lllfp(GEN x, long D, long FLAG, long prec, long flag)
 #  define PREC_DEC_THRESHOLD 12
 #endif
 PRECPB:
-  switch(retry--)
+  if (retry) retry = 0; /* entry */
+  else
   {
-    case 2: break; /* entry */
-    case 1:
-      if (DEBUGLEVEL>3) fprintferr("\n");
-      if (FLAG == 2) return mkvec(h);
-      if (isexact || (gram && kmax > 2))
-      { /* some progress but precision loss, try again */
-	if (prec < PREC_THRESHOLD)
-	  prec = (prec<<1)-2;
-	else
-	  prec = (long)((prec-2) * 1.25 + 2);
-	if (isexact)
-	{
-	  if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
-	  if (!in_place) H = H? ZM_mul(H, h): h;
-	  xinit = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
-	  gerepileall(av, in_place? 1: 2, &xinit, &H);
-	  x = mat_to_MP(xinit, prec);
-	  h = matid(n);
-	  retry = 1; /* never abort if x is exact */
-	  count_max = min(count_max << 1, 512);
-	  if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
-	}
-	else
-	{
-	  if (DEBUGLEVEL) pari_warn(warnprec,"lllfp",prec);
-	  x = gprec_w(xinit,prec);
-	  x = gram? qf_base_change(x, h, 1): gmul(x, h);
-	  gerepileall(av, 2, &h, &x);
-	}
-	kmax = 1; break;
-      } /* fall through */
-    case 0: /* give up */
-      if (DEBUGLEVEL>3) fprintferr("\n");
+    if (DEBUGLEVEL>3) fprintferr("\n");
+    if (!isexact) {
       if (DEBUGLEVEL) pari_warn(warner,"lllfp giving up");
-      if (FLAG) { avma=av; return NULL; }
-      pari_err(lllger3);
+      return lll_fail(h);
+    }
+    /* some progress but precision loss, try again */
+    if (prec < PREC_THRESHOLD)
+      prec = (prec<<1)-2;
+    else
+      prec = (long)((prec-2) * 1.25 + 2);
+    if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
+    if (!in_place) H = H? ZM_mul(H, h): h;
+    xinit = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
+    gerepileall(av, in_place? 1: 2, &xinit, &H);
+    x = mat_to_MP(xinit, prec);
+    h = matid(n);
+    count_max = min(count_max << 1, 512);
+    if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
+    kmax = 1;
   }
   exact_can_leave = 1;
   count = 0;
@@ -1170,11 +1153,7 @@ PRECPB:
   L = cgetg(lx,t_MAT);
   B = cgetg(lx,t_COL);
   for (j=1; j<lx; j++) { gel(L,j) = zerocol(n); gel(B,j) = gen_0; }
-  if (gram && !incrementalGS(x, L, B, 1))
-  {
-    if (FLAG) { avma=av; return NULL; }
-    pari_err(lllger3);
-  }
+  if (gram && !incrementalGS(x, L, B, 1)) return lll_fail(h);
   if (DEBUGLEVEL>5) fprintferr("k =");
   for(k=2;;)
   {
@@ -1266,23 +1245,26 @@ PRECPB:
       gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
     }
   }
-  if (in_place) h = ZM_mul(xinit, h);
+  if (in_place) h = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
   if (DEBUGLEVEL>3) fprintferr("\n");
   return gerepilecopy(av0, h);
 }
 
 /* x integral, maximal rank, LLL-reduce in place using fp */
 GEN
-lllint_fp_ip(GEN x, long D)
+lllint_fp_ip(GEN x, long D) { return lllfp(x,D, DEFAULTPREC, LLL_INPLACE); }
+
+static GEN
+lllfp_wrap(GEN x, long D, long prec, long flag)
 {
-  return lllfp(x,D, 3,DEFAULTPREC, 0);
+  GEN h = lllfp(x,D,prec,flag);
+  if (typ(h) == t_VEC) pari_err(talker, "not a definite matrix in lllgram");
+  return h;
 }
-
 GEN
-lllgram(GEN x,long prec) { return lllfp(x,LLLDFT,0,prec,LLL_GRAM); }
-
+lllgram(GEN x,long prec) { return lllfp_wrap(x,LLLDFT,prec,LLL_GRAM); }
 GEN
-lll(GEN x,long prec) { return lllfp(x,LLLDFT,0,prec,0); }
+lll(GEN x,long prec) { return lllfp_wrap(x,LLLDFT,prec,0); }
 
 GEN
 qflll0(GEN x, long flag, long prec)
@@ -3388,8 +3370,8 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllfp(a, 4, 1, (prec<<1)-2, LLL_GRAM);
-    if (!u) return NULL;
+    u = lllfp(a, 4, (prec<<1)-2, LLL_GRAM);
+    if (typ(u) == t_VEC) return NULL;
     r = qf_base_change(a,u,1);
     if (!i) {
       prec = DEFAULTPREC + nbits2nlong(gexpo(r));
@@ -3408,8 +3390,8 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   rinvtrans = shallowtrans( invmat(r) );
   if (DEBUGLEVEL>2)
     fprintferr("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
-  v = lllfp(rinvtrans, 100, 1, 0, 0);
-  if (!v) return NULL;
+  v = lllfp(rinvtrans, 100, 0, 0);
+  if (typ(v) == t_VEC) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
   v = ZM_inv(shallowtrans(v),gen_1);
