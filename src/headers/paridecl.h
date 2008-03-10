@@ -993,7 +993,7 @@ GEN     lllgramint(GEN x);
 GEN     lllgramkerim(GEN x);
 GEN     lllgramkerimgen(GEN x);
 GEN     lllint(GEN x);
-GEN     lllint_i(GEN x, long D, long flag, GEN *pth, long *ptk, GEN *ptB);
+GEN     lllint_i(GEN x, long D, long flag, GEN *ptB);
 GEN     lllint_ip(GEN x, long alpha);
 GEN     lllintpartial(GEN mat);
 GEN     lllintpartial_ip(GEN mat);

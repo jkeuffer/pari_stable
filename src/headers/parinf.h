@@ -77,12 +77,6 @@ enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
 #define nf_ALL   4
 #define nf_RAW   8
 
-/* for lllgramall[gen] */
-#define lll_ALL 0
-#define lll_KER 1
-#define lll_IM  2
-#define lll_GRAM 0x100
-
 /* for minim */
 #define min_ALL   0
 #define min_FIRST 1

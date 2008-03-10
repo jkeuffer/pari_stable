@@ -193,7 +193,14 @@ GEN hnfspec(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
 /* LLL */
-enum { LLL_GRAM = 1, LLL_KEEP_FIRST = 2 };
+enum {
+  LLL_KER  = 1, /* only kernel */
+  LLL_IM   = 2, /* only image */
+  LLL_ALL  = 4, /* kernel & image */
+  LLL_GRAM       = 0x100,
+  LLL_KEEP_FIRST = 0x200,
+  LLL_INPLACE    = 0x400
+};
 
 GEN lllint_fp_ip(GEN x, long D);
 GEN lllfp(GEN x, long D, long FLAG, long prec, long flag);

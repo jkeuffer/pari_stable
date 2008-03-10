@@ -209,13 +209,14 @@ gram_schmidt(GEN e, GEN *ptB)
 /**                          LLL ALGORITHM                         **/
 /**                                                                **/
 /********************************************************************/
+/* assume flag & (LLL_KER|LLL_IM|LLL_ALL) */
 static GEN
 lll_trivial(GEN x, long flag)
 {
   GEN y;
   if (lg(x) == 1)
   { /* dim x = 0 */
-    if (! (flag & lll_ALL)) return cgetg(1,t_MAT);
+    if (! (flag & LLL_ALL)) return cgetg(1,t_MAT);
     y=cgetg(3,t_VEC);
     gel(y,1) = cgetg(1,t_MAT);
     gel(y,2) = cgetg(1,t_MAT); return y;
@@ -223,24 +224,18 @@ lll_trivial(GEN x, long flag)
   /* here dim = 1 */
   if (gcmp0(gel(x,1)))
   {
-    switch(flag & (~lll_GRAM))
-    {
-      case lll_KER: return matid(1);
-      case lll_IM : return cgetg(1,t_MAT);
-      default: y=cgetg(3,t_VEC);
-	gel(y,1) = matid(1);
-	gel(y,2) = cgetg(1,t_MAT); return y;
-    }
+    if (flag & LLL_KER) return matid(1);
+    if (flag & LLL_IM)  return cgetg(1,t_MAT);
+    y = cgetg(3,t_VEC);
+    gel(y,1) = matid(1);
+    gel(y,2) = cgetg(1,t_MAT); return y;
   }
-  if (flag & lll_GRAM) flag ^= lll_GRAM; else x = NULL;
-  switch (flag)
-  {
-    case lll_KER: return cgetg(1,t_MAT);
-    case lll_IM : return matid(1);
-    default: y=cgetg(3,t_VEC);
-      gel(y,1) = cgetg(1,t_MAT);
-      gel(y,2) = x? gcopy(x): matid(1); return y;
-  }
+  if (flag & LLL_KER) return cgetg(1,t_MAT);
+  if (flag & LLL_IM)  return matid(1);
+  y=cgetg(3,t_VEC);
+  gel(y,1) = cgetg(1,t_MAT);
+  gel(y,2) = (flag & LLL_GRAM)? gcopy(x): matid(1);
+  return y;
 }
 
 static GEN
@@ -255,15 +250,11 @@ lll_get_im(GEN h, long k)
 static GEN
 lll_finish(GEN h, long k, long flag)
 {
-  switch(flag & (~lll_GRAM))
-  {
-    case lll_KER: setlg(h,k+1); return h;
-    case lll_IM: return lll_get_im(h, k);
-    default: {
-      GEN g = vecslice(h,1,k);
-      return mkvec2(g, lll_get_im(h, k));
-    }
-  }
+  GEN g;
+  if (flag & LLL_KER) { setlg(h,k+1); return h; }
+  if (flag & LLL_IM) return lll_get_im(h, k);
+  g = vecslice(h,1,k);
+  return mkvec2(g, lll_get_im(h, k));
 }
 
 /* h[,k] += q * h[,l]. Inefficient if q = 0 */
@@ -592,18 +583,19 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   }
 }
 
-/* Assume x a ZM. Beware: this function can return NULL (dim x <= 1) */
+/* Assume x a ZM */
 GEN
-lllint_i(GEN x, long D, long flag, GEN *pth, long *ptk, GEN *ptB)
+lllint_i(GEN x, long D, long flag, GEN *ptB)
 {
   const int gram = flag & LLL_GRAM; /*Gram matrix*/
   const int keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
-  long lx = lg(x), hx, j, k, l, n, kmax;
+  const int inplace = flag & LLL_INPLACE;
+  long lx = lg(x), hx, j, k, l, n = lx-1, kmax;
   pari_sp av, lim;
   GEN B,L,h,fl;
 
+  if (n <= 1) return lll_trivial(x,flag);
   fl = cgetg(lx,t_VECSMALL);
-  n = lx-1; if (n <= 1) return NULL;
   hx = lg(x[1]);
   if (gram && hx != lx) pari_err(mattype1,"lllint");
 
@@ -611,7 +603,7 @@ lllint_i(GEN x, long D, long flag, GEN *pth, long *ptk, GEN *ptB)
   B = scalarcol_shallow(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { fl[j] = 0; gel(L,j) = zerocol(n); }
-  h = pth? matid(n): NULL;
+  h = inplace ? NULL: matid(n);
   ZincrementalGS(x, L, B, 1, fl, gram);
   kmax = 1;
   if (DEBUGLEVEL>5) fprintferr("k = ");
@@ -651,48 +643,41 @@ lllint_i(GEN x, long D, long flag, GEN *pth, long *ptk, GEN *ptB)
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
   if (ptB)  *ptB  = B;
-  if (ptk)
+  if (flag & (LLL_IM|LLL_KER|LLL_ALL))
   {
     k=1; while (k<lx && !fl[k]) k++;
-    *ptk = k-1;
+    x = lll_finish(h ? h: x, k-1, flag);
   }
-  if (pth)  *pth = h;
-  return h? h: x;
+  return x;
 }
 
 /* Assume x a ZM. Return x * lllint(x). No garbage collection */
 GEN
 lllint_ip(GEN x, long D)
 {
-  long k;
-  GEN h = lllint_i(x, D, 0, NULL, &k, NULL);
-  return h? lll_get_im(h, k): x;
+  return lllint_i(x, D, LLL_IM | LLL_INPLACE, NULL);
 }
 
 static GEN
-lllall_i(GEN x, long D, long gram, long flag)
+lllall_i(GEN x, long D, long flag)
 {
-  long k;
-  GEN h;
-  if (typ(x) != t_MAT) pari_err(typeer, "lllall");
   RgM_check_ZM(x, "lllall");
-  (void)lllint_i(x, D, gram, &h, &k, NULL);
-  return h? lll_finish(h,k,flag): lll_trivial(x,flag);
+  return lllint_i(x, D, flag, NULL);
 }
 static GEN
-lllall(GEN x, long D, long gram, long flag)
+lllall(GEN x, long D, long flag)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, lllall_i(x,D,gram,flag));
+  return gerepilecopy(av, lllall_i(x,D,flag));
 }
 GEN
-lllint(GEN x) { return lllall(x,LLLDFT,0, lll_IM); }
+lllint(GEN x) { return lllall(x,LLLDFT, LLL_IM); }
 GEN
-lllkerim(GEN x) { return lllall(x,LLLDFT,0, lll_ALL); }
+lllkerim(GEN x) { return lllall(x,LLLDFT, LLL_ALL); }
 GEN
-lllgramint(GEN x) { return lllall(x,LLLDFT,LLL_GRAM, lll_IM | lll_GRAM); }
+lllgramint(GEN x) { return lllall(x,LLLDFT, LLL_IM | LLL_GRAM); }
 GEN
-lllgramkerim(GEN x) { return lllall(x,LLLDFT,LLL_GRAM, lll_ALL | lll_GRAM); }
+lllgramkerim(GEN x) { return lllall(x,LLLDFT, LLL_ALL | LLL_GRAM); }
 
 static int
 pslg(GEN x)
@@ -848,7 +833,6 @@ lllgramallgen(GEN x, long flag)
   GEN B, L, h, fl;
   int flc;
 
-  if (typ(x) != t_MAT) pari_err(typeer,"lllgramallgen");
   n = lx-1; if (n<=1) return lll_trivial(x,flag);
   if (lg(x[1]) != lx) pari_err(mattype1,"lllgramallgen");
 
@@ -1098,7 +1082,6 @@ lllfp(GEN x, long D, long FLAG, long prec, long flag)
   int isexact, exact_can_leave;
   const int in_place = (FLAG == 3);
 
-  if (typ(x) != t_MAT) pari_err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return matid(n);
 #if 0 /* doesn't work yet */
   return lll_scaled(x, D, keepfirst);
@@ -1119,11 +1102,7 @@ lllfp(GEN x, long D, long FLAG, long prec, long flag)
   av = avma; lim = stack_lim(av,1);
   if (k == 2)
   {
-    if (!prec)
-    {
-      RgM_check_ZM(x, "lllint_i");
-      return lllint_i(x, D, flag, &h, NULL, NULL);
-    }
+    if (!prec) prec = DEFAULTPREC;
     x = mat_to_MP(x, prec);
     isexact = 1;
   }
@@ -1162,7 +1141,7 @@ PRECPB:
 	{
 	  if (DEBUGLEVEL>2) pari_warn(warnprec,"lllfp (exact)",prec);
 	  if (!in_place) H = H? ZM_mul(H, h): h;
-	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+	  xinit = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
 	  gerepileall(av, in_place? 1: 2, &xinit, &H);
 	  x = mat_to_MP(xinit, prec);
 	  h = matid(n);
@@ -1193,7 +1172,7 @@ PRECPB:
   for (j=1; j<lx; j++) { gel(L,j) = zerocol(n); gel(B,j) = gen_0; }
   if (gram && !incrementalGS(x, L, B, 1))
   {
-    if (FLAG) return NULL;
+    if (FLAG) { avma=av; return NULL; }
     pari_err(lllger3);
   }
   if (DEBUGLEVEL>5) fprintferr("k =");
@@ -1216,7 +1195,7 @@ PRECPB:
       prec = (prec+2) >> 1;
       if (DEBUGLEVEL>3) fprintferr("\n...LLL reducing precision to %ld\n",prec);
       if (!in_place) H = H? ZM_mul(H, h): h;
-      xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+      xinit = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
       gerepileall(av, in_place? 4: 5,&B,&L,&Q,&xinit, &H);
       x = mat_to_MP(xinit, prec);
       h = matid(n);
@@ -1262,7 +1241,7 @@ PRECPB:
 
 	  if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
 	  if (!in_place) H = H? ZM_mul(H, h): h;
-	  xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+	  xinit = gram? qf_base_change(xinit, h, 1): ZM_mul(xinit, h);
 
 	  prec = good_prec(xinit, kmax);
 	  if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
@@ -1287,7 +1266,7 @@ PRECPB:
       gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
     }
   }
-  if (in_place) h = gmul(xinit, h);
+  if (in_place) h = ZM_mul(xinit, h);
   if (DEBUGLEVEL>3) fprintferr("\n");
   return gerepilecopy(av0, h);
 }
@@ -1308,6 +1287,7 @@ lll(GEN x,long prec) { return lllfp(x,LLLDFT,0,prec,0); }
 GEN
 qflll0(GEN x, long flag, long prec)
 {
+  if (typ(x) != t_MAT) pari_err(typeer,"qflll");
   switch(flag)
   {
     case 0: return lll(x,prec);
@@ -1324,6 +1304,7 @@ qflll0(GEN x, long flag, long prec)
 GEN
 qflllgram0(GEN x, long flag, long prec)
 {
+  if (typ(x) != t_MAT) pari_err(typeer,"qflllgram");
   switch(flag)
   {
     case 0: return lllgram(x,prec);
@@ -1356,17 +1337,17 @@ static GEN
 lllallgen(GEN x, long flag)
 {
   pari_sp av = avma;
-  if ((flag & lll_GRAM) == 0) x = gram_matrix(x);
+  if ((flag & LLL_GRAM) == 0) x = gram_matrix(x);
   return gerepilecopy(av, lllgramallgen(x, flag));
 }
 GEN
-lllgen(GEN x) { return lllallgen(x, lll_IM); }
+lllgen(GEN x) { return lllallgen(x, LLL_IM); }
 GEN
-lllkerimgen(GEN x) { return lllallgen(x, lll_ALL); }
+lllkerimgen(GEN x) { return lllallgen(x, LLL_ALL); }
 GEN
-lllgramgen(GEN x)  { return lllallgen(x, lll_IM|lll_GRAM); }
+lllgramgen(GEN x)  { return lllallgen(x, LLL_IM|LLL_GRAM); }
 GEN
-lllgramkerimgen(GEN x)  { return lllallgen(x, lll_ALL|lll_GRAM); }
+lllgramkerimgen(GEN x)  { return lllallgen(x, LLL_ALL|LLL_GRAM); }
 
 /* Def: a matrix M is said to be -partially reduced- if | m1 +- m2 | >= |m1|
  * for any two columns m1 != m2, in M.
@@ -1397,7 +1378,6 @@ lllintpartialall(GEN m, long flag)
   const pari_sp av = avma;
   GEN tm1, tm2, mid;
 
-  if (typ(m) != t_MAT) pari_err(typeer,"lllintpartial");
   if (ncol <= 1) return flag? matid(ncol): gcopy(m);
 
   tm1 = flag? matid(ncol): NULL;
@@ -2788,7 +2768,7 @@ GEN
 kerint(GEN x)
 {
   pari_sp av = avma;
-  GEN h = lllall_i(x, 0,0, lll_KER);
+  GEN h = lllall_i(x, 0, LLL_KER);
   if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
   return gerepilecopy(av, lllint_ip(h, 100));
 }

@@ -958,8 +958,7 @@ GS_norms(GEN B, long prec)
   long i, l = lg(B);
   GEN v = gmul(B, real_1(prec));
   l--; setlg(v, l);
-  for (i=1; i<l; i++)
-    gel(v,i) = divrr(gel(v,i+1), gel(v,i));
+  for (i=1; i<l; i++) gel(v,i) = divrr(gel(v,i+1), gel(v,i));
   return v;
 }
 
@@ -1023,7 +1022,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   pari_timer T;
 
   if (DEBUGLEVEL>2) TIMERstart(&T);
-  u = lllint_i(m, final? 1000: 4, 0, NULL, NULL, &B);
+  u = lllint_i(m, final? 1000: 4, LLL_INPLACE, &B);
   if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
   norm = GS_norms(B, DEFAULTPREC);
   for (R=lg(m)-1; R > 0; R--)
