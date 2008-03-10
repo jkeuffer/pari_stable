@@ -299,7 +299,7 @@ Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
     gcoeff(L,k,l) = addii(gcoeff(L,k,l), B);
   } else if (qq == -1) {
     for (i=1;i<l; i++) gcoeff(L,k,i) = subii(gcoeff(L,k,i),gcoeff(L,l,i));
-    gcoeff(L,k,l) = addii(gcoeff(L,k,l), negi(B));
+    gcoeff(L,k,l) = subii(gcoeff(L,k,l), B);
   } else {
     for(i=1;i<l;i++) gcoeff(L,k,i) = addii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
     gcoeff(L,k,l) = addii(gcoeff(L,k,l), mulsi(qq,B));
@@ -327,11 +327,12 @@ update_row(long k, long l, GEN q, GEN L)
 static void
 ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
+  pari_sp av = avma;
   long i,lx;
   GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
   GEN xk,xl;
-  if (!signe(q)) return;
-  q = negi(q);
+  if (!signe(q)) { avma = av; return; }
+  togglesign(q);
   xl = gel(x,l); xk = gel(x,k);
   lx = lg(xl);
   if (is_pm1(q))
@@ -358,9 +359,10 @@ ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 static void
 ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
+  pari_sp av = avma;
   GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
-  if (!signe(q)) return;
-  q = negi(q);
+  if (!signe(q)) { avma = av; return; }
+  togglesign(q);
   Zupdate_row(k,l,q,L,B);
   Zupdate_col(k,l,q,K,h);
   ZC_lincomb1_inplace(gel(x,k), gel(x,l), q);
@@ -391,7 +393,8 @@ RED_gram(long k, long l, GEN x, GEN h, GEN L, long K)
 
   if (!q) return 0;
   if (!signe(q)) return 1;
-  q = negi(q); lx = lg(x);
+  q = negi(q); /* NOT togglesign, ground(x) may return gen_1 */
+  lx = lg(x);
   xk = gel(x,k); xl = gel(x,l);
   if (is_pm1(q))
   {
@@ -437,7 +440,7 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
   GEN q = round_safe(gcoeff(L,k,l));
   if (!q) return 0;
   if (!signe(q)) return 1;
-  q = negi(q);
+  q = negi(q); /* NOT togglesign, ground(x) may return gen_1 */
   update_col(k,l,q,x);
   update_row(k,l,q,L);
   Zupdate_col(k,l,q,K,h); return 1;
@@ -1387,7 +1390,7 @@ lllintpartialall(GEN m, long flag)
       {/* Conceptually replace (v1, v2) by (v1 - q*v2, v2), where v1 and v2
 	* represent the reduced basis for the first two columns of the matrix.
 	* We do this by updating tm and the inner products. */
-	q = negi(q);
+        togglesign(q);
 	dot12new = addii(dot12, mulii(q, dot22));
 	dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
 	dot12 = dot12new;
