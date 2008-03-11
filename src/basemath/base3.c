@@ -1638,19 +1638,23 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   E = gel(fa,2); nbp = lg(P)-1;
   lists = cgetg(nbp+2,t_VEC);
 
-  gen = cgetg(1,t_VEC);
-  t = (nbp==1)? NULL: x;
+  /* rough upper bound */
+  nbgen = nbp + 1; for (i=1; i<=nbp; i++) nbgen += itos(gel(E,i));
+  gen = cgetg(nbgen+1,t_VEC);
+  nbgen = 1; t = (nbp==1)? NULL: x;
   for (i=1; i<=nbp; i++)
   {
     GEN L = zprimestar(nf, gel(P,i), gel(E,i), t, archp);
     gel(lists,i) = L;
-    for (j=1; j<lg(L); j++) gen = shallowconcat(gen,gmael(L,j,3));
+    for (j = 1; j < lg(L); j++) gel(gen, nbgen++) = gmael(L,j,3);
   }
   sarch = zarchstar(nf, x, archp);
   gel(lists,i) = sarch;
-  gen = shallowconcat(gen, gel(sarch,2));
-
+  gel(gen, nbgen++) = gel(sarch,2);
+  setlg(gen, nbgen);
+  gen = shallowconcat1(gen);
   nbgen = lg(gen)-1;
+
   if (nbp)
   {
     GEN h = cgetg(nbgen+1,t_MAT);
