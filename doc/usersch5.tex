@@ -1943,261 +1943,192 @@ argument.
 
   \kbd{compo}: composition
 
-\subsec{\kbd{ZX}, \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},
-resp.~a~\kbd{ZX}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT},
-resp.~\typ{POL}) with \typ{INT} coefficients.
+\subsec{\kbd{FpC} / \kbd{FpV}, \kbd{FpM}, \kbd{FqM}}. A \kbd{ZV}
+(resp.~a~\kbd{ZM}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT}) with
+\typ{INT} coefficients. An \kbd{FpV} or \kbd{FpM}, with respect to a given
+\typ{INT}~\kbd{p}, is the same with \kbd{Fp} coordinates; operations are
+understood over $\Z/p\Z$. An \kbd{FqM} is a matrix with \kbd{Fq} coefficients
+(with respect to given \kbd{T}, \kbd{p}), not necessarily reduced (i.e
+arbitrary \typ{INT}s and \kbd{ZX}s in the same variable as \kbd{T}).
 
-\subsubsec{\kbd{ZV}}
+\subsubsec{Basic operations}
 
-\fun{void}{RgV_check_ZV}{GEN A, const char *s} Assuming \kbd{x} is a \typ{VEC}
-or \typ{COL} raise an error if it is not a \kbd{ZV} ($s$ should point to the
-name of the caller).
+\fun{GEN}{FpC_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{Col(z) *
+Mod(1,p)}, a \typ{COL} with \typ{INTMOD} coefficients.
 
-\fun{int}{ZV_cmp0}{GEN x} returns 1 if all entries of the \kbd{ZV} $x$ are
-zero, and $0$ otherwise.
+\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
+Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
 
-\fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
-the same length (lexicographic order).
+\fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
+Mod(1,p)}, with \typ{INTMOD} coefficients.
 
-\fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal
-and $0$ otherwise. A \typ{COL} and a \typ{VEC} with the same entries are
-declared equal.
+\fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
+Mod(1,p))}, hence a \typ{COL}.
 
-\fun{GEN}{ZC_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
+\fun{GEN}{FpV_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{lift(Vec(z) *
+Mod(1,p))}, hence a \typ{VEC}
 
-\fun{GEN}{ZC_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
+\fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
+Mod(1,p))}, which is an \kbd{FpM}.
 
-\fun{GEN}{ZC_copy}{GEN x} returns a (\typ{COL}) copy of \kbd{x}.
+\fun{GEN}{FpC_center}{GEN z, GEN p, GEN pov2} returns a \typ{COL} whose
+entries are the \kbd{Fp\_center(gel(z,i))}.
 
-\fun{GEN}{ZC_neg}{GEN x} returns $-\kbd{x}$ as a \typ{COL}.
+\fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
+entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.
 
-\fun{void}{ZV_neg_inplace}{GEN x} negates the \kbd{ZV} \kbd{x} in place, by
-replacing each component by its opposite (the type of \kbd{x} remains the
-same, \typ{COL} or \typ{COL}). If you want to save even more memory by
-avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
+\fun{GEN}{FpC_add}{GEN x, GEN y, GEN p} adds the \kbd{ZC} $x$ and $y$
+and reduce modulo $p$ to obtain an \kbd{FpC}.
 
-\fun{void}{ZV_togglesign}{GEN x} negates \kbd{x} in place, by toggling the
-sign of its integer components. Universal constants \kbd{gen\_1},
-\kbd{gen\_m1}, \kbd{gen\_2} and \kbd{gen\_m2} are handled specially and will
-not be corrupted. (We use \tet{togglesign_safe}.)
+\fun{GEN}{FpV_add}{GEN x, GEN y, GEN p} same as \kbd{FpC\_add}, returning and
+\kbd{FpV}.
 
-\fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC} or \kbd{ZV}~\kbd{x}
-(which can be a column or row vector) by the \typ{INT}~\kbd{y}, returning a
-\kbd{ZC}.
+\fun{GEN}{FpC_sub}{GEN x, GEN y, GEN p} subtracts the \kbd{ZC} $y$ to 
+the \kbd{ZC} $x$ and reduce modulo $p$ to obtain an \kbd{FpC}.
 
-\fun{GEN}{ZC_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
-$u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
+\fun{GEN}{FpV_sub}{GEN x, GEN y, GEN p} same as \kbd{FpC\_sub}, returning and
+\kbd{FpV}.
 
-\fun{void}{ZC_lincomb1_inplace}{GEN X, GEN Y, GEN v} sets $X\leftarrow X +
-vY$, where $v$ is a \typ{INT} and $X,Y$ are \kbd{ZC} or \kbd{ZV}. (The result
-has the type of $X$.) Memory efficient (e.g. no-op if $v = 0$), but not
-gerepile-safe.
+\fun{GEN}{FpC_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \typ{INT}~\kbd{y} and reduce modulo \kbd{p} to
+obtain an \kbd{FpC}.
 
-\fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
-assumed to have compatible dimensions).
+assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
+an \kbd{FpM}.
 
-\fun{GEN}{ZV_content}{GEN x} returns the GCD of all the components
-of~\kbd{x}.
+\fun{GEN}{FpM_mul}{GEN x, GEN y, GEN p} multiplies the two \kbd{ZM}s~\kbd{x}
+and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
+\kbd{p} to obtain an \kbd{FpM}.
 
-\fun{GEN}{ZV_prod}{GEN x} returns the product of all the components
-of~\kbd{x}.
-
-\fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
-Returns a vector with the same type as $L$.
-
-\fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
-entries. Returns a vector with the same type as $L$.
-
-\fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
-\kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
-
-\fun{GEN}{ZV_indexsort}{GEN L} returns the permutation which, applied to the
-\kbd{ZV} $L$, would sort the vector. The result is a \typ{VECSMALL}.
-
-\subsubsec{\kbd{ZM}}
-
-\fun{void}{RgM_check_ZM}{GEN A, const char *s} Assuming \kbd{x} is a \typ{MAT}
-raise an error if it is not a \kbd{ZM} ($s$ should point to the name of the
-caller).
-
-\fun{GEN}{ZM_copy}{GEN x} returns a copy of \kbd{x}.
-
-\fun{int}{ZM_equal}{GEN A, GEN B} returns $1$ if the two \kbd{ZM} are equal
-and $0$ otherwise.
-
-\fun{GEN}{ZM_add}{GEN x, GEN y} returns $\kbd{x} + \kbd{y}$ (assumed to have
-compatible dimensions).
-
-\fun{GEN}{ZM_sub}{GEN x, GEN y} returns $\kbd{x} - \kbd{y}$ (assumed to have
-compatible dimensions).
-
-\fun{GEN}{ZM_neg}{GEN x} returns $-\kbd{x}$.
-
-\fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
-have compatible dimensions).
-
-\fun{GEN}{ZM_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
-by the \typ{INT}~\kbd{y}.
-
-\fun{GEN}{ZM_ZC_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
+\fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
-dimensions).
+dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
 
-\fun{GEN}{ZMrow_ZC_mul}{GEN x, GEN y, long i} multiplies the $i$-th row
-of \kbd{ZM}~\kbd{x} by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed
-to have compatible dimensions). Assumes that $x$ is non-empty and
-$0 < i < \kbd{lg(x[1])}$.
+\fun{GEN}{FpM_FpC_mul_FpX}{GEN x, GEN y, GEN p, long v} memory clean
+version of \kbd{RgV\_to\_RgX(FpM\_FpC\_mul(x,y,p), v)}.
 
-\fun{GEN}{ZV_ZM_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
-by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
+\fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
+(seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
+assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
+an \kbd{Fp}.
 
-\fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
-is a square \kbd{ZM} and $\kbd{n}\geq 0$.
+\fun{GEN}{FpV_dotproduct}{GEN x,GEN y,GEN p} scalar product of
+$x$ and $y$ (assumed to have the same length).
 
-\fun{GEN}{ZM_detmult}{GEN M} if \kbd{M} is a \kbd{ZM}, returns a multiple of
-the determinant of the lattice generated by its colums. This is the function
-underlying \tet{detint}.
+\fun{GEN}{FpV_dotsquare}{GEN x, GEN p} scalar product of $x$ with itself.
+has \typ{INT} entries.
 
-\fun{long}{ZM_max_lg}{GEN x} returns the effective length of the longest
-entry in $x$.
+\subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
+asymptotically efficient ($O(n^3)$ standard algorithms).
 
-\fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
-is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
-return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
-determinant of \kbd{M} is computed and used instead.
+\fun{GEN}{FpM_deplin}{GEN x, GEN p} returns a non-trivial kernel vector,
+or \kbd{NULL} if none exist.
 
-\fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
-still assume that $M'$ has integer coefficients.
+\fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}
 
-\fun{GEN}{ZC_hnfremdiv}{GEN x, GEN y, GEN *Q} assuming $y$ is an
-invertible \kbd{ZM} in HNF and $x$ is a \kbd{ZC}, returns the \kbd{ZC} $R$
-equal to $x$ mod $y$ (whose $i$-th entry belongs to $[-y_{i,i}, y_{i,i}]$).
-Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
-itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
-$x = yQ + R$.
+\fun{GEN}{FpM_image}{GEN x, GEN p} as \kbd{image}
 
-\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q}; $x$ is a \kbd{ZM} and we
-reduce each column using \kbd{ZC\_hnfremdiv}. If $Q$ is not \kbd{NULL},
-set it to the \kbd{ZM} such that $x = yQ + R$.
+\fun{GEN}{FpM_intersect}{GEN x, GEN y, GEN p} as \kbd{intersect}
 
-\fun{GEN}{ZC_hnfrem}{GEN x, GEN y} alias for \kbd{ZC\_hnfremdiv(x,y,NULL)}.
+\fun{GEN}{FpM_inv}{GEN x, GEN p} returns the inverse of \kbd{x}, or
+\kbd{NULL} if \kbd{x} is not invertible.
 
-\fun{GEN}{ZM_hnfrem}{GEN x, GEN y} alias for \kbd{ZM\_hnfremdiv(x,y,NULL)}.
+\fun{GEN}{FpM_invimage}{GEN m, GEN v, GEN p} as \kbd{inverseimage}
 
-\fun{GEN}{ZM_det_triangular}{GEN x} returns the product of the diagonal
-entries of $x$ (its determinant if it is indeed triangular).
+\fun{GEN}{FpM_ker}{GEN x, GEN p} as \kbd{ker}
 
-\fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is square upper triangular with
-positive diagonal coefficients. Assumes $x$ is a \kbd{ZM} (has integer
-coefficiets).
+\fun{long}{FpM_rank}{GEN x, GEN p} as \kbd{rank}
 
-\fun{int}{ZM_isidentity}{GEN x} return 1 is the \typ{ZM} $x$ is the
-identity matrix, and 0 otherwise.
+\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank} but returns a
+\typ{VECSMALL}
 
-\fun{int}{RgM_ishnf}{GEN x} as \kbd{ZM\_ishnf}, without assumptions on the
-types of the coefficients.
+\fun{GEN}{FpM_suppl}{GEN x, GEN p} as \kbd{suppl}
 
-\subsubsec{\kbd{ZX}}
+\subsubsec{\kbd{Fq}-linear algebra}
 
-\fun{void}{RgX_check_ZX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
-raise an error if it is not a \kbd{ZX} ($s$ should point to the name of the
-caller).
+\fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p} as \kbd{gauss}
 
-\fun{void}{RgX_check_ZXY}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
-raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
-($s$ should point to the name of the caller).
+\fun{GEN}{FqM_ker}{GEN x, GEN T, GEN p} as \kbd{ker}
 
-\fun{GEN}{ZX_copy}{GEN x,GEN p} returns a copy of \kbd{x}.
+\fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
 
-\fun{GEN}{scalar_ZX}{GEN x, long v} returns the constant \kbd{ZX} in variable
-$v$ equal to the \typ{INT} $x$.
+\subsec{\kbd{Flc} / \kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM}
+operations.
 
-\fun{GEN}{scalar_ZX_shallow}{GEN x, long v} returns the constant \kbd{ZX} in
-variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for 
-\kbd{gerepile} and friends.
+\fun{GEN}{Flv_copy}{GEN x} returns a copy of \kbd{x}.
 
-\fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
-$\kbd{l} = \kbd{lg(x)}$, in place.
+\fun{GEN}{Flm_copy}{GEN x} returns a copy of \kbd{x}.
 
-\fun{int}{ZX_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZX} are equal
-and $0$ otherwise.
+\fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
+(assumed to have compatible dimensions).
 
-\fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
+\fun{GEN}{Flm_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flm}
+\kbd{x} by \kbd{y}.
 
-\fun{GEN}{ZX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
+\fun{void}{Flm_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flm} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
-\fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
+\fun{GEN}{Flc_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flv}
+\kbd{x} by \kbd{y}.
 
-\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the
-\kbd{ZX}~\kbd{x}.
+\fun{void}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
 
-\fun{GEN}{ZX_Z_sub}{GEN x,GEN y} subtracts the integer \kbd{y} to the
-\kbd{ZX}~\kbd{x}.
+\fun{GEN}{Flc_Fl_div}{GEN x, ulong y, ulong p} divides the \kbd{Flv}
+\kbd{x} by \kbd{y}.
 
-\fun{GEN}{Z_ZX_sub}{GEN x,GEN y} subtracts the \kbd{ZX} \kbd{y} to the
-integer \kbd{x}.
+\fun{void}{Flc_Fl_div_inplace}{GEN x, ulong y, ulong p} replaces
+the \kbd{Flv} \kbd{x} by $\kbd{x}/\kbd{y}$.
 
-\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the \kbd{ZX} \kbd{x} by the integer \kbd{y}.
+\fun{GEN}{Flv_add}{GEN x, GEN y, ulong p} adds two \kbd{Flv}.
 
-\fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
-by the integer \kbd{y}.
+\fun{void}{Flv_add_inplace}{GEN x, GEN y, ulong p} replaces
+$x$ by $x+y$.
 
-\fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
+\fun{GEN}{Flv_sub}{GEN x, GEN y, ulong p} subtracts \kbd{y} to \kbd{x}.
 
-\fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
+\fun{void}{Flv_sub_inplace}{GEN x, GEN y, ulong p} replaces
+$x$ by $x-y$.
 
-\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}.
+\fun{ulong}{Flv_dotproduct}{GEN x, GEN y, ulong p} returns the scalar product
+of \kbd{x} and \kbd{y}
 
-\fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
-component in $x$.
+\fun{GEN}{zero_Flm}{long m, long n} creates a \kbd{Flm} with \kbd{m} x \kbd{n}
+components set to $0$. Note that the result allocates a
+\emph{single} column, so modifying an entry in one column modifies it in
+all columns.
 
-\fun{long}{ZXY_max_lg}{GEN x} returs the effective length of the longest
-component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
+\fun{GEN}{zero_Flv}{long n} creates a \kbd{Flv} with \kbd{n} components set to
+$0$.
 
-\fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
+\fun{GEN}{row_Flm}{GEN A, long x0} return $A[i,]$, the $i$-th row of the
+\kbd{Flm} (or \kbd{zm}) $A$.
 
-\fun{GEN}{ZX_caract}{GEN T, GEN A, long v}: let \kbd{T} and \kbd{A} be
-\kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
-More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
-rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
-algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
+\fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
+(assumed to have compatible dimensions).
 
-\fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}.
+\fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
-\fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
-\kbd{T}.
+\fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
 
-\fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
-\kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
+\fun{GEN}{Flm_indexrank}{GEN x, ulong p}
 
-\fun{GEN}{ZX_factor}{GEN T} returns the factorization of the primitive part
-of \kbd{T} over $\Q[X]$ (the content is lost).
+\fun{GEN}{Flm_inv}{GEN x, ulong p}
 
-\fun{GEN}{QX_factor}{GEN T} as \kbd{ZX\_factor}.
+\fun{GEN}{Flm_ker}{GEN x, ulong p}
 
-\fun{long}{ZX_isirreducible}{GEN T} returns 1 it \kbd{T} is irreducible, and
-0 otherwise.
+\fun{GEN}{Flm_ker_sp}{GEN x, ulong p, long deplin}, as \kbd{Flm\_ker}, in
+place (destroys~\kbd{x}).
 
-\fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
-\kbd{ZX}~\kbd{A} and \kbd{B}.
+\fun{long}{Flm_rank}{GEN x, ulong p}
 
-\fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
-\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result
-is an integer.
+\fun{GEN}{Flm_transpose}{GEN x}
 
-\fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
-under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
-$R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
+\subsec{\kbd{FlxqV}, \kbd{FlxqM}}. See \kbd{FqV}, \kbd{FqM} operations.
 
-\fun{GEN}{ZX_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
-assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
-\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
-as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to
-some integer, e.g. $0$ which is used as a seed. The function then finds a
-small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
-$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
-\kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+\fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
 
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
@@ -2643,118 +2574,6 @@ Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 \fun{long}{FqX_nbroots}{GEN f, GEN T, GEN p}
 Assumes \kbd{p} is prime and \kbd{T} irreducible in $\F_p[X]$.
 
-
-\subsec{\kbd{FpV}, \kbd{FpM}, \kbd{FqM}}. A \kbd{ZV} (resp.~a~\kbd{ZM}) is a
-\typ{VEC} or \typ{COL} (resp.~\typ{MAT}) with \typ{INT} coefficients. An
-\kbd{FpV} or \kbd{FpM}, with respect to a given \typ{INT}~\kbd{p}, is the
-same with \kbd{Fp} coordinates; operations are understood over $\Z/p\Z$. An
-\kbd{FqM} is a matrix with \kbd{Fq} coefficients (with respect to given
-\kbd{T}, \kbd{p}), not necessarily reduced (i.e arbitrary \typ{INT}s and
-\kbd{ZX}s in the same variable as \kbd{T}).
-
-\subsubsec{Basic operations}
-
-\fun{GEN}{FpC_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{Col(z) *
-Mod(1,p)}, a \typ{COL} with \typ{INTMOD} coefficients.
-
-\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
-Mod(1,p)}, a \typ{VEC} with \typ{INTMOD} coefficients.
-
-\fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
-Mod(1,p)}, with \typ{INTMOD} coefficients.
-
-\fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
-Mod(1,p))}, hence a \typ{COL}.
-
-\fun{GEN}{FpV_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{lift(Vec(z) *
-Mod(1,p))}, hence a \typ{VEC}
-
-\fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
-Mod(1,p))}, which is an \kbd{FpM}.
-
-\fun{GEN}{FpC_center}{GEN z, GEN p, GEN pov2} returns a \typ{COL} whose
-entries are the \kbd{Fp\_center(gel(z,i))}.
-
-\fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
-entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.
-
-\fun{GEN}{FpC_add}{GEN x, GEN y, GEN p} adds the \kbd{ZC} $x$ and $y$
-and reduce modulo $p$ to obtain an \kbd{FpC}.
-
-\fun{GEN}{FpV_add}{GEN x, GEN y, GEN p} same as \kbd{FpC\_add}, returning and
-\kbd{FpV}.
-
-\fun{GEN}{FpC_sub}{GEN x, GEN y, GEN p} subtracts the \kbd{ZC} $y$ to 
-the \kbd{ZC} $x$ and reduce modulo $p$ to obtain an \kbd{FpC}.
-
-\fun{GEN}{FpV_sub}{GEN x, GEN y, GEN p} same as \kbd{FpC\_sub}, returning and
-\kbd{FpV}.
-
-\fun{GEN}{FpC_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
-(seen as a column vector) by the \typ{INT}~\kbd{y} and reduce modulo \kbd{p} to
-obtain an \kbd{FpC}.
-
-\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
-(seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
-assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
-an \kbd{FpM}.
-
-\fun{GEN}{FpM_mul}{GEN x, GEN y, GEN p} multiplies the two \kbd{ZM}s~\kbd{x}
-and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
-\kbd{p} to obtain an \kbd{FpM}.
-
-\fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
-by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
-dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
-
-\fun{GEN}{FpM_FpC_mul_FpX}{GEN x, GEN y, GEN p, long v} memory clean
-version of \kbd{RgV\_to\_RgX(FpM\_FpC\_mul(x,y,p), v)}.
-
-\fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
-(seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
-assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
-an \kbd{Fp}.
-
-\fun{GEN}{FpV_dotproduct}{GEN x,GEN y,GEN p} scalar product of
-$x$ and $y$ (assumed to have the same length).
-
-\fun{GEN}{FpV_dotsquare}{GEN x, GEN p} scalar product of $x$ with itself.
-has \typ{INT} entries.
-
-\subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
-asymptotically efficient ($O(n^3)$ standard algorithms).
-
-\fun{GEN}{FpM_deplin}{GEN x, GEN p} returns a non-trivial kernel vector,
-or \kbd{NULL} if none exist.
-
-\fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}
-
-\fun{GEN}{FpM_image}{GEN x, GEN p} as \kbd{image}
-
-\fun{GEN}{FpM_intersect}{GEN x, GEN y, GEN p} as \kbd{intersect}
-
-\fun{GEN}{FpM_inv}{GEN x, GEN p} returns the inverse of \kbd{x}, or
-\kbd{NULL} if \kbd{x} is not invertible.
-
-\fun{GEN}{FpM_invimage}{GEN m, GEN v, GEN p} as \kbd{inverseimage}
-
-\fun{GEN}{FpM_ker}{GEN x, GEN p} as \kbd{ker}
-
-\fun{long}{FpM_rank}{GEN x, GEN p} as \kbd{rank}
-
-\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank} but returns a
-\typ{VECSMALL}
-
-\fun{GEN}{FpM_suppl}{GEN x, GEN p} as \kbd{suppl}
-
-\subsubsec{\kbd{Fq}-linear algebra}
-
-\fun{GEN}{FqM_gauss}{GEN a, GEN b, GEN T, GEN p} as \kbd{gauss}
-
-\fun{GEN}{FqM_ker}{GEN x, GEN T, GEN p} as \kbd{ker}
-
-\fun{GEN}{FqM_suppl}{GEN x, GEN T, GEN p} as \kbd{suppl}
-
 \subsec{\kbd{Flx}} Let \kbd{p} an understood \kbd{ulong}, assumed to be
 prime, to be given the the function arguments; an \kbd{Fl} is an \kbd{ulong}
 belonging to $[0,\kbd{p}-1]$, an \kbd{Flx}~\kbd{z} is a \typ{VECSMALL}
@@ -2816,6 +2635,12 @@ collecting garbage.
 \fun{GEN}{Flx_pow}{GEN x, long n, ulong p}
 
 \subsubsec{Miscellaneous operations}
+
+\fun{GEN}{zero_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
+
+\fun{GEN}{pol1_Flx}{long sv} returns the unit \kbd{Flx} in variable $v$.
+
+\fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
 
@@ -2885,18 +2710,6 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{Flv_roots_to_pol}{GEN a, ulong p, long sv} as
 \kbd{FpV\_roots\_to\_pol} returning an \kbd{Flx} in variable $v$.
-
-\subsec{\kbd{zx}}.
-
-\fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.
-
-\fun{GEN}{polx_zx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
-
-\fun{GEN}{zx_renormalize}{GEN x, long l}, as \kbd{Flx\_renormalize}, where
-$\kbd{l} = \kbd{lg(x)}$, in place.
-
-\fun{GEN}{zx_shift}{GEN T, long n} returns \kbd{T}
-multiplied by $\kbd{x}^n$, assuming $n\geq 0$.
 
 \subsec{\kbd{Flxq}}. See \kbd{FpXQ} operations.
 
@@ -2994,81 +2807,6 @@ particular, if $p$ is not prime or $T$ is not irreducible over $\F_p[X]$, the
 routine may still be used (but will fail if non-invertible leading terms
 occur).
 
-\subsec{\kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM} operations.
-
-\fun{GEN}{Flv_copy}{GEN x} returns a copy of \kbd{x}.
-
-\fun{GEN}{Flm_copy}{GEN x} returns a copy of \kbd{x}.
-
-\fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
-(assumed to have compatible dimensions).
-
-\fun{GEN}{Flm_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flm}
-\kbd{x} by \kbd{y}.
-
-\fun{void}{Flm_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
-the \kbd{Flm} \kbd{x} by $\kbd{x}*\kbd{y}$.
-
-\fun{GEN}{Flc_Fl_mul}{GEN x, ulong y, ulong p} multiplies the \kbd{Flv}
-\kbd{x} by \kbd{y}.
-
-\fun{void}{Flc_Fl_mul_inplace}{GEN x, ulong y, ulong p} replaces
-the \kbd{Flc} \kbd{x} by $\kbd{x}*\kbd{y}$.
-
-\fun{GEN}{Flc_Fl_div}{GEN x, ulong y, ulong p} divides the \kbd{Flv}
-\kbd{x} by \kbd{y}.
-
-\fun{void}{Flc_Fl_div_inplace}{GEN x, ulong y, ulong p} replaces
-the \kbd{Flv} \kbd{x} by $\kbd{x}/\kbd{y}$.
-
-\fun{GEN}{Flv_add}{GEN x, GEN y, ulong p} adds two \kbd{Flv}.
-
-\fun{void}{Flv_add_inplace}{GEN x, GEN y, ulong p} replaces
-$x$ by $x+y$.
-
-\fun{GEN}{Flv_sub}{GEN x, GEN y, ulong p} subtracts \kbd{y} to \kbd{x}.
-
-\fun{void}{Flv_sub_inplace}{GEN x, GEN y, ulong p} replaces
-$x$ by $x-y$.
-
-\fun{ulong}{Flv_dotproduct}{GEN x, GEN y, ulong p} returns the scalar product
-of \kbd{x} and \kbd{y}
-
-\fun{GEN}{zero_Flm}{long m, long n} creates a \kbd{Flm} with \kbd{m} x \kbd{n}
-components set to $0$. Note that the result allocates a
-\emph{single} column, so modifying an entry in one column modifies it in
-all columns.
-
-\fun{GEN}{zero_Flv}{long n} creates a \kbd{Flv} with \kbd{n} components set to
-$0$.
-
-\fun{GEN}{row_Flm}{GEN A, long x0} return $A[i,]$, the $i$-th row of the
-\kbd{Flm} (or \kbd{zm}) $A$.
-
-\fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p} multiplies  \kbd{x} and \kbd{y}
-(assumed to have compatible dimensions).
-
-\fun{GEN}{Flm_deplin}{GEN x, ulong p}
-
-\fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
-
-\fun{GEN}{Flm_indexrank}{GEN x, ulong p}
-
-\fun{GEN}{Flm_inv}{GEN x, ulong p}
-
-\fun{GEN}{Flm_ker}{GEN x, ulong p}
-
-\fun{GEN}{Flm_ker_sp}{GEN x, ulong p, long deplin}, as \kbd{Flm\_ker}, in
-place (destroys~\kbd{x}).
-
-\fun{long}{Flm_rank}{GEN x, ulong p}
-
-\fun{GEN}{Flm_transpose}{GEN x}
-
-\subsec{\kbd{FlxqV}, \kbd{FlxqM}}. See \kbd{FqV}, \kbd{FqM} operations.
-
-\fun{GEN}{FlxqM_ker}{GEN x, GEN T, ulong p}
-
 \subsec{\kbd{F2x}} An \kbd{F2x}~\kbd{z} is a \typ{VECSMALL}
 representing a polynomial over $\F_2[X]$. Specifically
 \kbd{z[0]} is the usual codeword, \kbd{z[1] = evalvarn($v$)} for some
@@ -3139,10 +2877,493 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{gener_F2xq}{GEN T, GEN *po}
 
-\subsec{\kbd{QX}}.
+\subsec{Hensel lifts}
+
+\fun{GEN}{padicsqrtlift}{GEN a, GEN S, GEN p, long e} returns a \typ{INT}
+which is a square root of $a$ mod $p^e$, assuming $S$ is a square root mod
+$p$. $p$ is odd.
+
+\fun{GEN}{padicsqrtnlift}{GEN a, GEN n, GEN S, GEN p, long e} returns a
+\typ{INT} which is an $n$-th root of $a$ mod $p^e$, assuming $S$ is an
+$n$-th root mod $p$. Assumes $n > 1$ and $p$ does not divide $n$.
+
+%\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
+%term prime to $p$, and without multiple roots mod $p$. Return a vector
+%of \typ{INT}s which are the roots of $f$ mod $p^e$.
+
+\fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
+leading term prime to $p$, and $a$ a simple root mod $p$. Return a \typ{INT}
+which are the root of $f$ mod $p^e$ congruent to $a$ mod $p$.
+
+\fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
+leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
+vector of \typ{INT}s which are the root of $f$ mod $p^e$ congruent to the
+$S[i]$ mod $p$.
+
+\fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
+\tet{ZpX_liftroot}, but $f$ is now a polynomial in $\Z[X,Y]$ and we find
+roots in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$.
+
+\subsec{Conversions involving single precision objects}
+
+\subsubsec{To single precision}
+
+\fun{GEN}{ZX_to_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
+(yielding an \kbd{Flx}).
+
+\fun{GEN}{ZV_to_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
+(yielding an \kbd{Flv}).
+
+\fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly
+called on the vector's coefficients.
+
+\fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx},
+repeatedly called on the polynomial's coefficients.
+
+\fun{GEN}{ZXXV_to_FlxXV}{GEN V, ulong p, long v}, as \kbd{ZXX\_to\_FlxX},
+repeatedly called on the vector's coefficients.
+
+\fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
+(yielding an \kbd{Flm}).
+
+\fun{GEN}{ZV_to_zv}{GEN z}, converts coefficients using \kbd{itos}
+
+\fun{GEN}{ZV_to_nv}{GEN z}, converts coefficients using \kbd{itou}
+
+\fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
+
+\fun{GEN}{FqC_to_FlxC}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
+to coefficient in Flx, result being a column vector.
+
+\fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
+to coefficient in Flx, result being a line vector.
+
+\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
+to coefficient in Flx.
+
+\subsubsec{From single precision}
+
+\fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative
+\typ{INT}s in this case)
+
+\fun{GEN}{Flx_to_ZX_inplace}{GEN z}, same as \kbd{Flx\_to\_ZX}, in place
+(\kbd{z} is destroyed).
+
+\fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
+\kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
+
+\fun{GEN}{FlxC_to_ZXC}{GEN x}, converts a vector of \kbd{Flx} to a column
+vector of polynomials with \typ{INT} coefficients (repeated calls to
+\kbd{Flx\_to\_ZX}).
+
+\fun{GEN}{FlxM_to_ZXM}{GEN z}, converts a matrix of \kbd{Flx} to a matrix of
+polynomials with \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
+
+\fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming
+coefficients are non-negative.
+
+\fun{GEN}{Flc_to_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
+\typ{INT}s in this case)
+
+\fun{GEN}{Flv_to_ZV}{GEN z}, converts to \kbd{ZV} (\typ{VEC} of non-negative
+\typ{INT}s in this case)
+
+\fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with
+non-negative \typ{INT}s coefficients in this case)
+
+\fun{GEN}{zc_to_ZC}{GEN z} as \kbd{Flc\_to\_ZC}, without assuming
+coefficients are non-negative.
+
+\fun{GEN}{zv_to_ZV}{GEN z} as \kbd{Flv\_to\_ZV}, without assuming
+coefficients are non-negative.
+
+\fun{GEN}{zm_to_ZM}{GEN z} as \kbd{Flm\_to\_ZM}, without assuming
+coefficients are non-negative.
+
+\subsubsec{Mixed precision linear algebra} Assumes dimensions are compatible.
+Multiply a multiprecision object by a single-precision one.
+
+\fun{GEN}{RgM_zc_mul}{GEN x, GEN y}
+
+\fun{GEN}{RgM_zm_mul}{GEN x, GEN y}
+
+\fun{GEN}{RgV_zc_mul}{GEN x, GEN y}
+
+\fun{GEN}{RgV_zm_mul}{GEN x, GEN y}
+
+\fun{GEN}{ZM_zc_mul}{GEN x, GEN y}
+
+\fun{GEN}{ZM_zm_mul}{GEN x, GEN y}
+
+\subsubsec{Miscellaneous}
+
+\fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
+scalar \kbd{Flx}. Assume that \kbd{evx = evalvarn(vx)} for some variable
+number \kbd{vx}.
+
+\fun{GEN}{Z_to_Flx}{GEN x, ulong p, long v} converts a \typ{INT} to a scalar
+polynomial in variable $v$.
+
+\fun{GEN}{Flx_to_Flv}{GEN x, long n} converts from \kbd{Flx} to \kbd{Flv}
+with \kbd{n} components (assumed larger than the number of coefficients of
+\kbd{x}).
+
+\fun{GEN}{zx_to_zv}{GEN x, long n} as \kbd{Flx\_to\_Flv}.
+
+\fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient
+array) to (normalized) polynomial in variable $v$.
+
+\fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
+
+\fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
+identity matrix.
+
+\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the columns of
+\kbd{Flm}~\kbd{x} to an array of \kbd{Flx} in the variable $v$
+(repeated calls to \kbd{Flv\_to\_Flx}).
+
+\fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
+
+\fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as
+\kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial
+in variable $w$.
+
+\fun{GEN}{FlxV_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxV}, to obtain
+an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
+
+\fun{GEN}{FlxX_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxX}, to obtain
+an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
+
+\fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
+constant \kbd{Flx} in variable $v$.
+
+\section{Integral, rational and generic linear algebra}
+\subsec{\kbd{ZC} / \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},
+resp.~a~\kbd{ZX}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT},
+resp.~\typ{POL}) with \typ{INT} coefficients.
+
+\subsubsec{\kbd{ZC} / \kbd{ZV}}
+
+\fun{void}{RgV_check_ZV}{GEN A, const char *s} Assuming \kbd{x} is a \typ{VEC}
+or \typ{COL} raise an error if it is not a \kbd{ZV} ($s$ should point to the
+name of the caller).
+
+\fun{int}{ZV_cmp0}{GEN x} returns 1 if all entries of the \kbd{ZV} $x$ are
+zero, and $0$ otherwise.
+
+\fun{int}{ZV_cmp}{GEN x, GEN y} compare two \kbd{ZV}, which we assume have
+the same length (lexicographic order).
+
+\fun{int}{ZV_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZV} are equal
+and $0$ otherwise. A \typ{COL} and a \typ{VEC} with the same entries are
+declared equal.
+
+\fun{GEN}{ZC_add}{GEN x, GEN y} adds \kbd{x} and \kbd{y}.
+
+\fun{GEN}{ZC_sub}{GEN x, GEN y} subtracts \kbd{x} and \kbd{y}.
+
+\fun{GEN}{ZC_copy}{GEN x} returns a (\typ{COL}) copy of \kbd{x}.
+
+\fun{GEN}{ZC_neg}{GEN x} returns $-\kbd{x}$ as a \typ{COL}.
+
+\fun{void}{ZV_neg_inplace}{GEN x} negates the \kbd{ZV} \kbd{x} in place, by
+replacing each component by its opposite (the type of \kbd{x} remains the
+same, \typ{COL} or \typ{COL}). If you want to save even more memory by
+avoiding the implicit component copies, use \kbd{ZV\_togglesign}.
+
+\fun{void}{ZV_togglesign}{GEN x} negates \kbd{x} in place, by toggling the
+sign of its integer components. Universal constants \kbd{gen\_1},
+\kbd{gen\_m1}, \kbd{gen\_2} and \kbd{gen\_m2} are handled specially and will
+not be corrupted. (We use \tet{togglesign_safe}.)
+
+\fun{GEN}{ZC_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZC} or \kbd{ZV}~\kbd{x}
+(which can be a column or row vector) by the \typ{INT}~\kbd{y}, returning a
+\kbd{ZC}.
+
+\fun{GEN}{ZC_lincomb}{GEN u, GEN v, GEN x, GEN y} returns $ux + vy$, where
+$u$, $v$ are \typ{INT} and $x,y$ are \kbd{ZC} or \kbd{ZV}. Return a \kbd{ZC}
+
+\fun{void}{ZC_lincomb1_inplace}{GEN X, GEN Y, GEN v} sets $X\leftarrow X +
+vY$, where $v$ is a \typ{INT} and $X,Y$ are \kbd{ZC} or \kbd{ZV}. (The result
+has the type of $X$.) Memory efficient (e.g. no-op if $v = 0$), but not
+gerepile-safe.
+
+\fun{GEN}{ZC_ZV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
+assumed to have compatible dimensions).
+
+\fun{GEN}{ZV_content}{GEN x} returns the GCD of all the components
+of~\kbd{x}.
+
+\fun{GEN}{ZV_prod}{GEN x} returns the product of all the components
+of~\kbd{x}.
+
+\fun{GEN}{ZV_sort}{GEN L} sort the \kbd{ZV} $L$.
+Returns a vector with the same type as $L$.
+
+\fun{GEN}{ZV_sort_uniq}{GEN L} sort the \kbd{ZV} $L$, removing duplicate
+entries. Returns a vector with the same type as $L$.
+
+\fun{long}{ZV_search}{GEN L, GEN y} look for the \typ{INT} $y$ in the sorted
+\kbd{ZV} $L$. Return an index $i$ such that $L[i] = y$, and  $0$ otherwise.
+
+\fun{GEN}{ZV_indexsort}{GEN L} returns the permutation which, applied to the
+\kbd{ZV} $L$, would sort the vector. The result is a \typ{VECSMALL}.
+
+\subsubsec{\kbd{ZM}}
+
+\fun{void}{RgM_check_ZM}{GEN A, const char *s} Assuming \kbd{x} is a \typ{MAT}
+raise an error if it is not a \kbd{ZM} ($s$ should point to the name of the
+caller).
+
+\fun{GEN}{ZM_copy}{GEN x} returns a copy of \kbd{x}.
+
+\fun{int}{ZM_equal}{GEN A, GEN B} returns $1$ if the two \kbd{ZM} are equal
+and $0$ otherwise.
+
+\fun{GEN}{ZM_add}{GEN x, GEN y} returns $\kbd{x} + \kbd{y}$ (assumed to have
+compatible dimensions).
+
+\fun{GEN}{ZM_sub}{GEN x, GEN y} returns $\kbd{x} - \kbd{y}$ (assumed to have
+compatible dimensions).
+
+\fun{GEN}{ZM_neg}{GEN x} returns $-\kbd{x}$.
+
+\fun{GEN}{ZM_mul}{GEN x, GEN y} multiplies \kbd{x} and \kbd{y} (assumed to
+have compatible dimensions).
+
+\fun{GEN}{ZM_Z_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
+by the \typ{INT}~\kbd{y}.
+
+\fun{GEN}{ZM_ZC_mul}{GEN x, GEN y} multiplies the \kbd{ZM}~\kbd{x}
+by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
+dimensions).
+
+\fun{GEN}{ZMrow_ZC_mul}{GEN x, GEN y, long i} multiplies the $i$-th row
+of \kbd{ZM}~\kbd{x} by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed
+to have compatible dimensions). Assumes that $x$ is non-empty and
+$0 < i < \kbd{lg(x[1])}$.
+
+\fun{GEN}{ZV_ZM_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
+by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
+
+\fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
+is a square \kbd{ZM} and $\kbd{n}\geq 0$.
+
+\fun{GEN}{ZM_detmult}{GEN M} if \kbd{M} is a \kbd{ZM}, returns a multiple of
+the determinant of the lattice generated by its colums. This is the function
+underlying \tet{detint}.
+
+\fun{long}{ZM_max_lg}{GEN x} returns the effective length of the longest
+entry in $x$.
+
+\fun{GEN}{ZM_inv}{GEN M, GEN d} if \kbd{M} is a \kbd{ZM} and \kbd{d}
+is a \typ{INT} such that $M' := \kbd{d}\kbd{M}^{-1}$ is integral,
+return $M'$. It is allowed to set \kbd{d = NULL}, in which case, the
+determinant of \kbd{M} is computed and used instead.
+
+\fun{GEN}{QM_inv}{GEN M, GEN d} as above, with \kbd{M} a \kbd{QM}. We
+still assume that $M'$ has integer coefficients.
+
+\fun{GEN}{ZC_hnfremdiv}{GEN x, GEN y, GEN *Q} assuming $y$ is an
+invertible \kbd{ZM} in HNF and $x$ is a \kbd{ZC}, returns the \kbd{ZC} $R$
+equal to $x$ mod $y$ (whose $i$-th entry belongs to $[-y_{i,i}, y_{i,i}]$).
+Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
+itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
+$x = yQ + R$.
+
+\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q}; $x$ is a \kbd{ZM} and we
+reduce each column using \kbd{ZC\_hnfremdiv}. If $Q$ is not \kbd{NULL},
+set it to the \kbd{ZM} such that $x = yQ + R$.
+
+\fun{GEN}{ZC_hnfrem}{GEN x, GEN y} alias for \kbd{ZC\_hnfremdiv(x,y,NULL)}.
+
+\fun{GEN}{ZM_hnfrem}{GEN x, GEN y} alias for \kbd{ZM\_hnfremdiv(x,y,NULL)}.
+
+\fun{GEN}{ZM_det_triangular}{GEN x} returns the product of the diagonal
+entries of $x$ (its determinant if it is indeed triangular).
+
+\fun{int}{ZM_ishnf}{GEN x} return $1$ if $x$ is square upper triangular with
+positive diagonal coefficients. Assumes $x$ is a \kbd{ZM} (has integer
+coefficiets).
+
+\fun{int}{ZM_isidentity}{GEN x} return 1 is the \typ{ZM} $x$ is the
+identity matrix, and 0 otherwise.
+
+\fun{int}{RgM_ishnf}{GEN x} as \kbd{ZM\_ishnf}, without assumptions on the
+types of the coefficients.
+
+\subsec{\kbd{zv}, \kbd{zm}}
+
+\fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
+occurs in the fringe case where an entry is equal to $2^{\B-1}$.
+
+\fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
+
+\fun{long}{zv_prod}{GEN x} returns the product of all the components
+of~\kbd{x} (assumes no overflow occurs).
+
+\fun{int}{zv_cmp0}{GEN x} returns 1 if all entries of the \kbd{zv} $x$ are $0$,
+and $0$ otherwise.
+
+\fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
+and $0$ otherwise.
+
+\fun{GEN}{zv_copy}{GEN x} as \kbd{Flv\_copy}.
+
+\fun{GEN}{zm_transpose}{GEN x} as \kbd{Flm\_transpose}.
+
+\fun{GEN}{zm_copy}{GEN x} as \kbd{Flm\_copy}.
+
+\fun{GEN}{zero_zm}{long m, long n} as \kbd{zero\_Flm}.
+
+\fun{GEN}{zero_zv}{long n} as \kbd{zero\_Flv}.
+
+\fun{GEN}{row_zm}{GEN A, long x0} as \kbd{row\_Flm}.
+
+\subsec{\kbd{RgC} / \kbd{RgV}, \kbd{RgM}}
+
+\kbd{RgC} and \kbd{RgV} routines assume the inputs are \kbd{VEC} or \kbd{COL}
+of the same dimension. \kbd{RgM} assume the inputs are \kbd{MAT} of
+compatible dimensions.
+
+\fun{GEN}{RgC_add}{GEN x, GEN y} returns $x + y$ as a \typ{COL}.
+
+\fun{GEN}{RgC_neg}{GEN x} returns $-x$ as a \typ{COL}.
+
+\fun{GEN}{RgC_sub}{GEN x, GEN y} returns $x - y$ as a \typ{COL}.
+
+\fun{GEN}{RgV_add}{GEN x, GEN y} returns $x + y$ as a \typ{VEC}.
+
+\fun{GEN}{RgV_neg}{GEN x} returns $-x$ as a \typ{VEC}.
+
+\fun{GEN}{RgV_sub}{GEN x, GEN y} returns $x - y$ as a \typ{VEC}.
+
+\fun{GEN}{RgM_add}{GEN x, GEN y} return $x+y$.
+
+\fun{GEN}{RgM_neg}{GEN x} returns $-x$.
+
+\fun{GEN}{RgM_sub}{GEN x, GEN y} returns $x-y$.
+
+\section{Integral, rational and generic polynomial arithmetic}
+
+\subsec{\kbd{ZX}, \kbd{QX}}
+
+\fun{void}{RgX_check_ZX}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+raise an error if it is not a \kbd{ZX} ($s$ should point to the name of the
+caller).
+
+\fun{void}{RgX_check_ZXY}{GEN x, const char *s} Assuming \kbd{x} is a \typ{POL}
+raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
+($s$ should point to the name of the caller).
+
+\fun{GEN}{ZX_copy}{GEN x,GEN p} returns a copy of \kbd{x}.
+
+\fun{GEN}{scalar_ZX}{GEN x, long v} returns the constant \kbd{ZX} in variable
+$v$ equal to the \typ{INT} $x$.
+
+\fun{GEN}{scalar_ZX_shallow}{GEN x, long v} returns the constant \kbd{ZX} in
+variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for 
+\kbd{gerepile} and friends.
+
+\fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
+\fun{int}{ZX_equal}{GEN x, GEN y} returns $1$ if the two \kbd{ZX} are equal
+and $0$ otherwise.
+
+\fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
+
+\fun{GEN}{ZX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
+
+\fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
+
+\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the
+\kbd{ZX}~\kbd{x}.
+
+\fun{GEN}{ZX_Z_sub}{GEN x,GEN y} subtracts the integer \kbd{y} to the
+\kbd{ZX}~\kbd{x}.
+
+\fun{GEN}{Z_ZX_sub}{GEN x,GEN y} subtracts the \kbd{ZX} \kbd{y} to the
+integer \kbd{x}.
+
+\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the \kbd{ZX} \kbd{x} by the integer \kbd{y}.
+
+\fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
+by the integer \kbd{y}.
+
+\fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}.
+
+\fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
+
+\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}.
+
+\fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
+component in $x$.
+
+\fun{long}{ZXY_max_lg}{GEN x} returs the effective length of the longest
+component in $x$; assume all coefficients are \typ{INT} or \kbd{ZX}s.
+
+\fun{GEN}{ZX_caract}{GEN T, GEN A, long v}: let \kbd{T} and \kbd{A} be
+\kbd{ZX}s, returns the characteristic polynomial of \kbd{Mod(A, T)}.
+More generally, \kbd{A} is allowed to be a \kbd{QX}, hence possibly has
+rational coefficients, \emph{assuming} the result is a \kbd{ZX}, i.e.~the
+algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
+
+\fun{GEN}{ZX_deriv}{GEN x} returns the derivative of \kbd{x}.
+
+\fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
+\kbd{T}.
+
+\fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
+\kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
+
+\fun{GEN}{ZX_factor}{GEN T} returns the factorization of the primitive part
+of \kbd{T} over $\Q[X]$ (the content is lost).
+
+\fun{GEN}{QX_factor}{GEN T} as \kbd{ZX\_factor}.
+
+\fun{long}{ZX_isirreducible}{GEN T} returns 1 it \kbd{T} is irreducible, and
+0 otherwise.
+
+\fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{ZX}~\kbd{A} and \kbd{B}.
+
+\fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result
+is an integer.
+
+\fun{GEN}{ZX_ZXY_resultant}{GEN A, GEN B}
+under the assumption that \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and
+$R = \text{Res}_Y(A, B) \in \Z[X]$, returns the resultant $R$.
+
+\fun{GEN}{ZX_ZXY_rnfequation}{GEN A, GEN B, long *lambda},
+assume \kbd{A} in $\Z[Y]$, \kbd{B} in $\Q[Y][X]$, and $R =
+\text{Res}_Y(A, B) \in \Z[X]$. If \kbd{lambda = NULL}, returns $R$
+as in \kbd{ZY\_ZXY\_resultant}. Otherwise, \kbd{lambda} must point to
+some integer, e.g. $0$ which is used as a seed. The function then finds a
+small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
+$R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
+\kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+
+\subsubsec{\kbd{QX}}.
+
+\fun{GEN}{QX_gcd}{GEN x,GEN y} as \kbd{ZX\_gcd}.
 
 \fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of \kbd{A} modulo \kbd{B}
 where \kbd{A} and \kbd{B} are \kbd{QX}s.
+
+\subsec{\kbd{zx}}.
+
+\fun{GEN}{zero_zx}{long sv} returns a zero \kbd{zx} in variable $v$.
+
+\fun{GEN}{polx_zx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
+
+\fun{GEN}{zx_renormalize}{GEN x, long l}, as \kbd{Flx\_renormalize}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
+\fun{GEN}{zx_shift}{GEN T, long n} returns \kbd{T}
+multiplied by $\kbd{x}^n$, assuming $n\geq 0$.
 
 \subsec{\kbd{RgX}}.
 
@@ -3291,198 +3512,6 @@ by the scalar \kbd{x}.
 \fun{GEN}{RgXQX_div}{GEN x, GEN y, GEN T, GEN *r}
 
 \fun{GEN}{RgXQX_rem}{GEN x, GEN y, GEN T, GEN *r}
-
-\subsec{Hensel lifts}
-
-\fun{GEN}{padicsqrtlift}{GEN a, GEN S, GEN p, long e} returns a \typ{INT}
-which is a square root of $a$ mod $p^e$, assuming $S$ is a square root mod
-$p$. $p$ is odd.
-
-\fun{GEN}{padicsqrtnlift}{GEN a, GEN n, GEN S, GEN p, long e} returns a
-\typ{INT} which is an $n$-th root of $a$ mod $p^e$, assuming $S$ is an
-$n$-th root mod $p$. Assumes $n > 1$ and $p$ does not divide $n$.
-
-%\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
-%term prime to $p$, and without multiple roots mod $p$. Return a vector
-%of \typ{INT}s which are the roots of $f$ mod $p^e$.
-
-\fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
-leading term prime to $p$, and $a$ a simple root mod $p$. Return a \typ{INT}
-which are the root of $f$ mod $p^e$ congruent to $a$ mod $p$.
-
-\fun{GEN}{ZpX_liftroots}{GEN f, GEN S, GEN q, long e} $f$ a \kbd{ZX} with
-leading term prime to $p$, and $S$ a vector of simple roots mod $p$. Return a
-vector of \typ{INT}s which are the root of $f$ mod $p^e$ congruent to the
-$S[i]$ mod $p$.
-
-\fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
-\tet{ZpX_liftroot}, but $f$ is now a polynomial in $\Z[X,Y]$ and we find
-roots in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$.
-
-\subsec{Conversions involving single precision objects}
-
-\subsubsec{To single precision}
-
-\fun{GEN}{ZX_to_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
-(yielding an \kbd{Flx}).
-
-\fun{GEN}{ZV_to_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
-(yielding an \kbd{Flv}).
-
-\fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly
-called on the vector's coefficients.
-
-\fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx},
-repeatedly called on the polynomial's coefficients.
-
-\fun{GEN}{ZXXV_to_FlxXV}{GEN V, ulong p, long v}, as \kbd{ZXX\_to\_FlxX},
-repeatedly called on the vector's coefficients.
-
-\fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
-(yielding an \kbd{Flm}).
-
-\fun{GEN}{ZV_to_zv}{GEN z}, converts coefficients using \kbd{itos}
-
-\fun{GEN}{ZV_to_nv}{GEN z}, converts coefficients using \kbd{itou}
-
-\fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
-
-\fun{GEN}{FqC_to_FlxC}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx, result being a column vector.
-
-\fun{GEN}{FqV_to_FlxV}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx, result being a line vector.
-
-\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, GEN p}, converts coefficients in \kbd{Fq}
-to coefficient in Flx.
-
-\subsubsec{From single precision}
-
-\fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative
-\typ{INT}s in this case)
-
-\fun{GEN}{Flx_to_ZX_inplace}{GEN z}, same as \kbd{Flx\_to\_ZX}, in place
-(\kbd{z} is destroyed).
-
-\fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
-\kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
-
-\fun{GEN}{FlxC_to_ZXC}{GEN x}, converts a vector of \kbd{Flx} to a column
-vector of polynomials with \typ{INT} coefficients (repeated calls to
-\kbd{Flx\_to\_ZX}).
-
-\fun{GEN}{FlxM_to_ZXM}{GEN z}, converts a matrix of \kbd{Flx} to a matrix of
-polynomials with \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
-
-\fun{GEN}{zx_to_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming
-coefficients are non-negative.
-
-\fun{GEN}{Flc_to_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
-\typ{INT}s in this case)
-
-\fun{GEN}{Flv_to_ZV}{GEN z}, converts to \kbd{ZV} (\typ{VEC} of non-negative
-\typ{INT}s in this case)
-
-\fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with
-non-negative \typ{INT}s coefficients in this case)
-
-\fun{GEN}{zc_to_ZC}{GEN z} as \kbd{Flc\_to\_ZC}, without assuming
-coefficients are non-negative.
-
-\fun{GEN}{zv_to_ZV}{GEN z} as \kbd{Flv\_to\_ZV}, without assuming
-coefficients are non-negative.
-
-\fun{GEN}{zm_to_ZM}{GEN z} as \kbd{Flm\_to\_ZM}, without assuming
-coefficients are non-negative.
-
-\subsubsec{Mixed precision linear algebra} Assumes dimensions are compatible.
-Multiply a multiprecision object by a single-precision one.
-
-\fun{GEN}{RgM_zc_mul}{GEN x, GEN y}
-
-\fun{GEN}{RgM_zm_mul}{GEN x, GEN y}
-
-\fun{GEN}{RgV_zc_mul}{GEN x, GEN y}
-
-\fun{GEN}{RgV_zm_mul}{GEN x, GEN y}
-
-\fun{GEN}{ZM_zc_mul}{GEN x, GEN y}
-
-\fun{GEN}{ZM_zm_mul}{GEN x, GEN y}
-
-\subsubsec{Miscellaneous}
-
-\fun{GEN}{zero_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
-
-\fun{GEN}{pol1_Flx}{long sv} returns the unit \kbd{Flx} in variable $v$.
-
-\fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
-
-\fun{GEN}{Fl_to_Flx}{ulong x, long evx} converts a \kbd{unsigned long} to a
-scalar \kbd{Flx}. Assume that \kbd{evx = evalvarn(vx)} for some variable
-number \kbd{vx}.
-
-\fun{GEN}{Z_to_Flx}{GEN x, ulong p, long v} converts a \typ{INT} to a scalar
-polynomial in variable $v$.
-
-\fun{GEN}{Flx_to_Flv}{GEN x, long n} converts from \kbd{Flx} to \kbd{Flv}
-with \kbd{n} components (assumed larger than the number of coefficients of
-\kbd{x}).
-
-\fun{GEN}{zx_to_zv}{GEN x, long n} as \kbd{Flx\_to\_Flv}.
-
-\fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient
-array) to (normalized) polynomial in variable $v$.
-
-\fun{GEN}{zv_to_zx}{GEN x, long n} as \kbd{Flv\_to\_Flx}.
-
-\fun{GEN}{zv_neg}{GEN x} return $-x$. No check for overflow is done, which
-occurs in the fringe case where an entry is equal to $2^{\B-1}$.
-
-\fun{long}{zv_content}{GEN x} returns the gcd of the entries of $x$.
-
-\fun{long}{zv_prod}{GEN x} returns the product of all the components
-of~\kbd{x} (assumes no overflow occurs).
-
-\fun{int}{zv_cmp0}{GEN x} returns 1 if all entries of the \kbd{zv} $x$ are $0$,
-and $0$ otherwise.
-
-\fun{int}{zv_equal}{GEN x, GEN y} returns $1$ if the two \kbd{zv} are equal
-and $0$ otherwise.
-
-\fun{GEN}{matid_Flm}{long n} returns an \kbd{Flm} which is an $n \times n$
-identity matrix.
-
-\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the columns of
-\kbd{Flm}~\kbd{x} to an array of \kbd{Flx} in the variable $v$
-(repeated calls to \kbd{Flv\_to\_Flx}).
-
-\fun{GEN}{zm_to_zxV}{GEN x, long n} as \kbd{Flm\_to\_FlxV}.
-
-\fun{GEN}{zm_transpose}{GEN x} as \kbd{Flm\_transpose}.
-
-\fun{GEN}{zm_copy}{GEN x} as \kbd{Flm\_copy}.
-
-\fun{GEN}{zv_copy}{GEN x} as \kbd{Flv\_copy}.
-
-\fun{GEN}{zero_zm}{long m, long n} as \kbd{zero\_Flm}.
-
-\fun{GEN}{zero_zv}{long n} as \kbd{zero\_Flv}.
-
-\fun{GEN}{row_zm}{GEN A, long x0} as \kbd{row\_Flm}.
-
-\fun{GEN}{Flm_to_FlxX}{GEN x, long sw, long sv} same as
-\kbd{Flm\_to\_FlxV(x,sv)} but returns the result as a (normalized) polynomial
-in variable $w$.
-
-\fun{GEN}{FlxV_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxV}, to obtain
-an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
-
-\fun{GEN}{FlxX_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxX}, to obtain
-an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
-
-\fun{GEN}{Fly_to_FlxY}{GEN a, long sv} convert coefficients of \kbd{a} to
-constant \kbd{Flx} in variable $v$.
 
 \section{Operations on general PARI objects}
 
