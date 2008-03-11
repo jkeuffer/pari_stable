@@ -35,12 +35,12 @@ znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
   GEN gen, ord, cache;
   long i, j, card;
 
-  (*func)(data,c);
-  if (!d) return;
+  if (!d) { (*func)(data,c); return; }
 
+  cache = const_vecsmall(d,c);
+  (*func)(data,c);  /* AFTER cache: may contain gerepileupto statement */
   gen = gel(H,1);
-  ord = gel(H,2); cache = const_vecsmall(d,c);
-
+  ord = gel(H,2);
   card = ord[1]; for (i = 2; i <= d; i++) card *= ord[i];
   for(i=1; i<card; i++)
   {
