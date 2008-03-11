@@ -494,18 +494,6 @@ NORMALIZE_i(GEN y, long a, long b)
     if (!gcmp0(gel(y,i))) { setsigne(y, 1); return y; }
   setsigne(y, 0); return y;
 }
-/* typ(y) == t_POL, varn(y) = vy, x "scalar" [e.g object in lower variable] */
-static GEN
-add_pol_scal(GEN y, GEN x, long vy)
-{
-  long i, ly = lg(y);
-  GEN z;
-  if (ly <= 3) return scalarpol(ly == 2? x: gadd(x, gel(y,2)), vy);
-  z = cgetg(ly,t_POL); z[1] = y[1];
-  gel(z,2) = gadd(x,gel(y,2));
-  for (i = 3; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-  return NORMALIZE_i(z, 2, ly);
-}
 /* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable]
  * l = valp(y) */
 static GEN
@@ -586,7 +574,7 @@ add_scal(GEN y, GEN x, long ty, long vy)
   long tx;
   switch(ty)
   {
-    case t_POL: return add_pol_scal(y, x, vy);
+    case t_POL: return RgX_Rg_add(y, x);
     case t_SER: return add_ser_scal(y, x, vy, valp(y));
     case t_RFRAC: return add_rfrac_scal(y, x);
     case t_VEC: case t_COL:
@@ -725,8 +713,8 @@ gadd(GEN x, GEN y)
       vx = varn(x);
       vy = varn(y);
       if (vx != vy) {
-	if (varncmp(vx, vy) < 0) return add_pol_scal(x, y, vx);
-	else                     return add_pol_scal(y, x, vy);
+	if (varncmp(vx, vy) < 0) return RgX_Rg_add(x, y);
+	else                     return RgX_Rg_add(y, x);
       }
       return RgX_add(x, y);
     case t_SER:
@@ -957,10 +945,10 @@ gaddsg(long x, GEN y)
 GEN
 gsubsg(long x, GEN y)
 {
-  long ty = typ(y);
   GEN z, a, b;
+  pari_sp av;
 
-  switch(ty)
+  switch(typ(y))
   {
     case t_INT:  return subsi(x,y);
     case t_REAL: return subsr(x,y);
@@ -974,9 +962,9 @@ gsubsg(long x, GEN y)
       z = cgetg(3, t_COMPLEX);
       gel(z,1) = gsubsg(x, gel(y,1));
       gel(z,2) = gneg(gel(y,2)); return z;
-
-    default: return gsub(stoi(x), y);
   }
+  av = avma;
+  return gerepileupto(av, gadd(stoi(x), gneg_i(y)));
 }
 
 /********************************************************************/
@@ -1029,7 +1017,10 @@ gsub(GEN x, GEN y)
     case t_POL:
       vx = varn(x);
       vy = varn(y);
-      if (vx != vy) break;
+      if (vx != vy) {
+	if (varncmp(vx, vy) < 0) return RgX_Rg_sub(x, y);
+	else                     return Rg_RgX_sub(x, y);
+      }
       return RgX_sub(x, y);
     case t_VEC:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);

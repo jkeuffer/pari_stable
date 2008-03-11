@@ -424,9 +424,9 @@ GEN
 RgX_Rg_add(GEN y, GEN x)
 {
   GEN z;
-  long lz, i;
-  if (!signe(y)) return scalarpol(x,varn(y));
-  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  long lz = lg(y), i;
+  if (lz == 2) return scalarpol(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gadd(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gcopy(gel(y,i));
   if (lz==3) z = normalizepol_i(z,lz);
@@ -436,9 +436,17 @@ GEN
 RgX_Rg_sub(GEN y, GEN x)
 {
   GEN z;
-  long lz, i;
-  if (!signe(y)) return scalarpol(gneg(x),varn(y));
-  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  long lz = lg(y), i;
+  if (lz == 2)
+  { /* scalarpol(gneg(x),varn(y)) optimized */
+    long v = varn(y);
+    if (isrationalzero(x)) return zeropol(v);
+    z = cgetg(3,t_POL);
+    z[1] = gcmp0(x)? evalvarn(v)
+                   : evalvarn(v) | evalsigne(1);
+    gel(z,2) = gneg(x); return z;
+  }
+  z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gsub(gel(y,2),x);
   for(i=3; i<lz; i++) gel(z,i) = gcopy(gel(y,i));
   if (lz==3) z = normalizepol_i(z,lz);
@@ -448,9 +456,9 @@ GEN
 Rg_RgX_sub(GEN x, GEN y)
 {
   GEN z;
-  long lz, i;
-  if (!signe(y)) return scalarpol(x,varn(y));
-  lz = lg(y); z = cgetg(lz,t_POL); z[1] = y[1];
+  long lz = lg(y), i;
+  if (lz == 2) return scalarpol(x,varn(y));
+  z = cgetg(lz,t_POL); z[1] = y[1];
   gel(z,2) = gsub(x, gel(y,2));
   for(i=3; i<lz; i++) gel(z,i) = gneg(gel(y,i));
   if (lz==3) z = normalizepol_i(z,lz);
