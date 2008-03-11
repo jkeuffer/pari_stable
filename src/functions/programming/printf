@@ -55,10 +55,10 @@ Doc: This function is based on the C library command of the same name.
  produced by a signed conversion.
 
  \item \kbd{+}: A sign (+ or -) is placed before a number produced by a
- signed conversion. A \kbd{+} overrideѕ a space if both are used.
+ signed conversion. A \kbd{+} overrides a space if both are used.
 
  \misctitle{The field width.} An optional decimal digit string (whose first
- digit is non­zero) specifying a \emph{minimum} field width. If the value has
+ digit is non-zero) specifying a \emph{minimum} field width. If the value has
  fewer characters than the field width, it is padded with spaces on the left
  (or right, if the left-adjusment flag has been given). In no case does a
  small field width cause truncation of a field; if the value is wider than

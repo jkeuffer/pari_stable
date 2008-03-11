@@ -45,7 +45,7 @@ Major contributors (large modules written or rewritten from scratch):
   Bruno HAIBLE: micro assembly implementations, DOS/Windows support
   Guillaume HANROT: thue, zncoppersmith
   Pascal LETARD: basic number field (round2, initial round4)
-  Jean-François MESTRE: elliptic curves
+  Jean-Francois MESTRE: elliptic curves
   Gerhard NIKLASCH: binary powering, integer extended gcd and rational
     reconstruction, primality and compositeness test, integer factorization,
     documentation layout, AIX and Solaris support, first PARI web site.

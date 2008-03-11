@@ -1230,7 +1230,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
       if (!(group&ga_all_normal) || o > order)
         karma = ugcd(p-1,n);
       else if (!improves(norm_o, deg, plift,p,n, &karma)) continue;
-      /* karma0=0, deg0<=norm_o ­> the first improves() returns 1 */
+      /* karma0=0, deg0<=norm_o -> the first improves() returns 1 */
       deg = norm_o; group |= ga_all_normal; /* STORE */
     }
     else if (group&ga_all_normal) continue;

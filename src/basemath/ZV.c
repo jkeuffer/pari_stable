@@ -315,7 +315,7 @@ ZC_lincomb1_inplace(GEN X, GEN Y, GEN v)
   if (m == 3)
   {
     long s = signe(v);
-    if (v[2] == 1) /* v = ِ+- 1 */
+    if (v[2] == 1) /* v = +- 1 */
     {
       if (s > 0)
       { /* 1 */
