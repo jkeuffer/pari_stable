@@ -209,7 +209,7 @@ gram_schmidt(GEN e, GEN *ptB)
 /**                          LLL ALGORITHM                         **/
 /**                                                                **/
 /********************************************************************/
-/* assume flag & (LLL_KER|LLL_IM|LLL_ALL) */
+/* assume flag & (LLL_KER|LLL_IM|LLL_ALL). LLL_INPLACE implies LLL_IM */
 static GEN
 lll_trivial(GEN x, long flag)
 {
@@ -221,15 +221,16 @@ lll_trivial(GEN x, long flag)
     gel(y,1) = cgetg(1,t_MAT);
     gel(y,2) = cgetg(1,t_MAT); return y;
   }
-  /* here dim = 1 */
+  /* dim x = 1 */
   if (gcmp0(gel(x,1)))
   {
     if (flag & LLL_KER) return matid(1);
-    if (flag & LLL_IM)  return cgetg(1,t_MAT);
+    if (flag & LLL_IM)  return cgetg(1,t_MAT); /* also ok for LLL_INPLACE */
     y = cgetg(3,t_VEC);
     gel(y,1) = matid(1);
     gel(y,2) = cgetg(1,t_MAT); return y;
   }
+  if (flag & LLL_INPLACE) return gcopy(x);
   if (flag & LLL_KER) return cgetg(1,t_MAT);
   if (flag & LLL_IM)  return matid(1);
   y=cgetg(3,t_VEC);
