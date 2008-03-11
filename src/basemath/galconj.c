@@ -24,14 +24,13 @@ GEN
 galoisconj(GEN nf)
 {
   GEN x = get_nfpol(nf, &nf), y, z;
-  long i, lz, v;
+  long i, lz, v = varn(x);
   pari_sp av = avma;
-  v = varn(x);
   if (v == 0)
   {
-    v = fetch_user_var("y");
-    if (nf) y = gsubst(nf, 0, pol_x(v));
-    else { y = shallowcopy(x); setvarn(y, v); }
+    long w = fetch_user_var("y");
+    if (nf) y = gsubst(nf, 0, pol_x(w));
+    else { y = shallowcopy(x); setvarn(y, w); }
   }
   else
   {
