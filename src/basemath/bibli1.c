@@ -587,7 +587,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   }
 }
 
-/* Assume x a ZM */
+/* Assume x a ZM, if ptB != NULL, set it to Gram-Schmidt (squared) norms */
 GEN
 lllint_i(GEN x, long D, long flag, GEN *ptB)
 {
@@ -598,7 +598,12 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
   pari_sp av, lim;
   GEN B,L,h,fl;
 
-  if (n <= 1) return lll_trivial(x,flag);
+  if (n <= 1)
+  {
+    if (ptB)
+      *ptB = (n == 0)? cgetg(1, t_VEC): mkvec( gsqr(gcoeff(x,1,1)) );
+    return lll_trivial(x,flag);
+  }
   fl = cgetg(lx,t_VECSMALL);
   hx = lg(x[1]);
   if (gram && hx != lx) pari_err(mattype1,"lllint");
@@ -646,7 +651,18 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
-  if (ptB)  *ptB  = B;
+  if (ptB) /* set B to { |b_i^*|^2 }_i, low accuracy */
+  {
+    GEN b = itor(gel(B,1), DEFAULTPREC);
+    setlg(B, lx);
+    for (k=1; k<lx; k++)
+    {
+      GEN c = itor(gel(B,k+1), DEFAULTPREC);
+      gel(B,k) = divrr(c, b); b = c;
+    }
+    *ptB = B;
+  }
+
   if (flag & (LLL_IM|LLL_KER|LLL_ALL))
   {
     k=1; while (k<lx && !fl[k]) k++;

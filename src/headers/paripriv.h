@@ -217,7 +217,6 @@ GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  vec_setconst(GEN v, GEN x);
 
-GEN  GS_norms(GEN B, long prec);
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
 GEN  close_modinvertible(GEN x, GEN y);

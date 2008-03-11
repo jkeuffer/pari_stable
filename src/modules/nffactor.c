@@ -1116,14 +1116,13 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     else
     {
       pari_sp av2 = avma;
-      GEN S = invmat( get_R(PRK) ), BB = GS_norms(B, DEFAULTPREC);
-      GEN smax = gen_0;
+      GEN S = invmat( get_R(PRK) ), smax = gen_0;
       long i, j;
       for (i=1; i<=d; i++)
       {
 	GEN s = gen_0;
 	for (j=1; j<=d; j++)
-	  s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(BB,j)));
+	  s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(B,j)));
 	if (gcmp(s, smax) > 0) smax = s;
       }
       GSmin = gerepileupto(av2, ginv(gmul2n(smax, 2)));
