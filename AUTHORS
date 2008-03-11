@@ -2,8 +2,8 @@ The PARI/GP project started around 1985 in the Laboratoire A2X (Universite
 Bordeaux 1, France)  and a first version was written by  Christian  Batut,
 Dominique Bernardi, Henri Cohen and Michel Olivier and maintained by Henri
 Cohen till 1995. Karim Belabas took over the maintainance between 1995 and
-2001, and the project has been jointly by Bill Allombert and Karim Belabas
-since 2002.
+2001,  the project has been jointly maintained by Bill Allombert and Karim
+Belabas since 2002.
 
 A great  number  of people  have contributed  code through  the successive
 stages which eventually resulted in the present version  of PARI/GP.  Even
@@ -34,7 +34,7 @@ Major contributors (large modules written or rewritten from scratch):
     and user's manuals, the FAQ, the http://pari.math.u-bordeaux.fr website
     the PARI resource pages.
   Dominique BERNARDI: the original gp, ECM, elliptic curves
-  Henri Cohen: original designer and project leader, native multiprecision
+  Henri COHEN: original designer and project leader, native multiprecision
     kernel, arithmetic functions, LLL, transcendental functions, number fields,
     elliptic curves
   Francisco DIAZ Y DIAZ: number fields (class groups, units)
@@ -43,7 +43,7 @@ Major contributors (large modules written or rewritten from scratch):
   Louis GRANBOULAN: breakup of monolithic PARI into modules, first GMP
     kernel, first Configure
   Bruno HAIBLE: micro assembly implementations, DOS/Windows support
-  Guillaume Hanrot: thue, zncoppersmith
+  Guillaume HANROT: thue, zncoppersmith
   Pascal LETARD: basic number field (round2, initial round4)
   Jean-François MESTRE: elliptic curves
   Gerhard NIKLASCH: binary powering, integer extended gcd and rational
