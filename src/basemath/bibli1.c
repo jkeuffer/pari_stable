@@ -586,6 +586,19 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
     B[k+1] = coeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
   }
 }
+static GEN
+GS_norms(GEN B, long prec)
+{
+  GEN N, b = itor(gel(B,1), prec);
+  long k, lx = lg(B)-1;
+  N = cgetg(t_VEC, lx);
+  for (k=1; k<lx; k++)
+  {
+    GEN c = itor(gel(B,k+1), prec);
+    gel(N,k) = divrr(c, b); b = c;
+  }
+  return N;
+}
 
 /* Assume x a ZM, if ptB != NULL, set it to Gram-Schmidt (squared) norms */
 GEN
@@ -651,17 +664,8 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
-  if (ptB) /* set B to { |b_i^*|^2 }_i, low accuracy */
-  {
-    GEN b = itor(gel(B,1), DEFAULTPREC);
-    setlg(B, lx);
-    for (k=1; k<lx; k++)
-    {
-      GEN c = itor(gel(B,k+1), DEFAULTPREC);
-      gel(B,k) = divrr(c, b); b = c;
-    }
-    *ptB = B;
-  }
+  if (ptB) *ptB = GS_norms(B, DEFAULTPREC);
+  /* set B to { |b_i^*|^2 }_i, low accuracy */
 
   if (flag & (LLL_IM|LLL_KER|LLL_ALL))
   {
