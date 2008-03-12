@@ -591,7 +591,7 @@ GS_norms(GEN B, long prec)
 {
   GEN N, b = itor(gel(B,1), prec);
   long k, lx = lg(B)-1;
-  N = cgetg(t_VEC, lx);
+  N = cgetg(lx, t_VEC);
   for (k=1; k<lx; k++)
   {
     GEN c = itor(gel(B,k+1), prec);
