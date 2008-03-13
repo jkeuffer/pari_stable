@@ -782,7 +782,7 @@ static GEN
 factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
 {
   GEN z = S->z, le = S->le;
-  GEN f, a, b, s = z;
+  GEN f, a, b, s;
   long j, e = S->e;
   ulong l = S->l;
 
@@ -793,7 +793,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
     a = addis(i, -1); b = subsi(-1,i);
     if (equalis(A, 2))
     { /* important special case, split for efficiency */
-      f = subii(a, s);
+      s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
         s = Fp_mul(z2, s, le);
@@ -812,7 +812,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       mb = negi(b);
 
       Astar >>= 1;
-      f = subii(a, s);
+      s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
         s = Fp_mul(z2, s, le); /* z^j */
@@ -828,27 +828,20 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       }
     }
   }
-  else if ((n & 3) == 2)
-  { /* A^* = 3 (mod 4) */
-    GEN pstar = negi(A), z2 = Fp_sqr(z,le);
-    ulong g = Fl_sqrt(umodiu(pstar,l), l);
-    long m = n>>1;
-    a = padicsqrtlift(pstar, utoipos(g), utoipos(l), e);
-    b = negi(a);
-    f = subii(a, s);
-    for(j=3;j<n;j+=2)
-    {
-      s = Fp_mul(z2,s,le);
-      if (ugcd(j,m)==1)
-	f = Fp_mul(f, subii(kross(j,Astar)==1? a: b, s), le);
+  else /* A^* odd */
+  {
+    ulong g;
+    if ((n & 3) == 2)
+    { /* A^* = 3 (mod 4) */
+      A = negi(A); Astar = -Astar;
+      z = Fp_neg(z, le);
+      n >>= 1;
     }
-  }
-  else
-  { /* A^* = 1 (mod 4) */
-    ulong g = Fl_sqrt(umodiu(A,l), l);
+    /* A^* = 1 (mod 4) */ 
+    g = Fl_sqrt(umodiu(A,l), l);
     a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);
-    f = subii(a, s);
+    s = z; f = subii(a, s);
     for(j=2;j<n;j++)
     {
       s = Fp_mul(z,s,le);
@@ -882,51 +875,39 @@ GEN
 factor_Aurifeuille(GEN a, long d)
 {
   pari_sp av = avma;
-  GEN fd, P, A;
-  long i, lP, va = vali(a), sa = signe(a), a4, astar;
+  GEN fd, P, E, A;
+  long i, lP, va = vali(a), sa, astar, dstar;
   struct aurifeuille_t S;
 
   if (d <= 0) pari_err(talker,"non-positive degree in factor_Aurifeuille");
+  if ((d & 3) == 2) { d >>= 1; a = negi(a); }
+  if ((va & 1) == (d & 1)) { avma = av; return gen_1; }
+  sa = signe(a);
   if (odd(d))
   {
+    long a4;
     if (d == 1)
     {
       if (!Z_issquareall(a, &A)) return gen_1;
       return gerepileuptoint(av, addis(A,1));
     }
-    if (odd(va)) return gen_1;
     A = va? shifti(a, -va): a;
     a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
     if (a4 != 1) { avma = av; return gen_1; }
   }
-  else if ((d & 3) == 2)
-  {
-    if (d == 2)
-    {
-      a = negi(a);
-      if (!Z_issquareall(a, &A)) { avma = av; return gen_1; }
-      return gerepileuptoint(av, addis(A,1));
-    }
-    if (odd(va)) return gen_1;
-    A = va? shifti(a, -va): a;
-    a4 = mod4(A); if (sa < 0) a4 = 4 - a4;
-    if (a4 != 3) { avma = av; return gen_1; }
-  }
   else if ((d & 7) == 4)
-  {
-    if ((va & 1) == 0) return gen_1;
     A = shifti(a, -va);
+  else
+  {
+    avma = av; return gen_1;
   }
-  fd = factoru(d); P = gel(fd,1); lP = lg(P);
-  astar = sa;
-  for (i = 1; i < lP; i++)
-    if (odd( (Z_lvalrem(A, P[i], &A)) ) ) astar *= P[i];
-  if (sa < 0)
-  { /* negate in place if possible */
-    if (A == a) A = icopy(A);
-    setsigne(A,1);
-  }
-  if (!Z_issquare(A)) { avma = av; return gen_1; }
+  fd = factoru(d); P = gel(fd,1); E = gel(fd,2); lP = lg(P);
+  for (dstar = 1, i = 1; i < lP; i++)
+    if (odd(E[i])) dstar *= P[i];
+  astar = ugcd(umodiu(A, dstar), dstar);
+  if (sa < 0) astar = -astar;
+
+  if (!Z_issquare(divis(A,astar))) { avma = av; return gen_1; }
 
   A = sa < 0? absi(a): a;
   Aurifeuille_init(A, d, &S);
