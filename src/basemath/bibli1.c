@@ -188,9 +188,7 @@ gram_schmidt(GEN e, GEN *ptB)
   for (i=1;i<lx;i++)
   {
     GEN p1 = NULL;
-    pari_sp av;
-    gel(B,i) = RgV_dotsquare(gel(f,i));
-    gel(iB,i) = ginv(gel(B,i)); av = avma;
+    pari_sp av = avma;
     for (j=1; j<i; j++)
     {
       GEN mu = gmul(RgV_dotproduct(gel(e,i),gel(f,j)), gel(iB,j));
@@ -199,6 +197,8 @@ gram_schmidt(GEN e, GEN *ptB)
     }
     p1 = p1? gerepileupto(av, gsub(gel(e,i), p1)): gel(e,i);
     gel(f,i) = p1;
+    gel(B,i) = RgV_dotsquare(gel(f,i));
+    gel(iB,i) = ginv(gel(B,i));
   }
   *ptB = B; return f;
 }
