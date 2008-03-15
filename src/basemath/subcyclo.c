@@ -790,10 +790,19 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
   { /* A^* even */
     long m = n>>2;
     GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
-    if (equalis(A, 2)) /* FIXME: even Astar = 2 */
-    { /* important special case, split for efficiency */
-      a = addsi(-1,i);
-      b = subsi(-1,i);
+    if (Astar == 2)
+    { /* important special case (includes A=2), split for efficiency */
+      if (!equalis(A, 2))
+      {
+        GEN f = sqrti(shifti(A,-1)), mf = Fp_neg(f,le), fi = Fp_mul(f,i,le);
+        a = Fp_add(mf, fi, le);
+        b = Fp_sub(mf, fi, le);
+      }
+      else
+      {
+        a = addsi(-1,i);
+        b = subsi(-1,i);
+      }
       s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
@@ -855,7 +864,8 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
 static void
 Aurifeuille_init(GEN a, long n, struct aurifeuille_t *S)
 {
-  GEN bound = ceil_safe(gpowgs(addrs(gsqrt(a,3),1), phiu(n)));
+  GEN sqrta = sqrtr_abs(itor(a, 3));
+  GEN bound = ceil_safe(gpowgs(addrs(sqrta,1), phiu(n)));
   GEN zl = polsubcyclo_start(n, 0, 0, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);
   S->z  = gel(zl,2);
@@ -876,7 +886,7 @@ factor_Aurifeuille(GEN a, long d)
 {
   pari_sp av = avma;
   GEN fd, P, E, A;
-  long i, lP, va = vali(a), sa, astar, dstar;
+  long i, lP, va = vali(a), sa, astar, D;
   struct aurifeuille_t S;
 
   if (d <= 0) pari_err(talker,"non-positive degree in factor_Aurifeuille");
@@ -901,9 +911,8 @@ factor_Aurifeuille(GEN a, long d)
   {
     avma = av; return gen_1;
   }
-  fd = factoru(d); P = gel(fd,1); E = gel(fd,2); lP = lg(P);
-  for (dstar = 1, i = 1; i < lP; i++)
-    if (odd(E[i])) dstar *= P[i];
+  /* v_2(d) = 0 or 2. Kill 2 from factorization (minor efficiency gain) */
+  fd = factoru(odd(d)? d: d>>2); P = gel(fd,1); E = gel(fd,2); lP = lg(P);
   astar = sa;
   if (odd(va)) astar <<= 1;
   for (i = 1; i < lP; i++)
@@ -915,7 +924,10 @@ factor_Aurifeuille(GEN a, long d)
   }
   if (!Z_issquare(A)) { avma = av; return gen_1; }
 
-  A = sa < 0? absi(a): a;
-  Aurifeuille_init(A, d, &S);
+  D = odd(d)? 1: 4;
+  for (i = 1; i < lP; i++) D *= P[i];
+  if (D != d) { a = powiu(a, d/D); d = D; }
+
+  Aurifeuille_init(a, d, &S);
   return gerepileuptoint(av, factor_Aurifeuille_aux(a, astar, d, &S));
 }
