@@ -288,6 +288,18 @@ ZC_Z_mul(GEN X, GEN c)
   return A;
 }
 GEN
+ZC_z_mul(GEN X, long c)
+{
+  long i, l;
+  GEN A;
+  if (!c) return zerocol(lg(X)-1);
+  if (c == 1) return ZC_copy(X);
+  if (c ==-1) return ZC_neg(X);
+  l = lg(X); A = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(A,i) = mulsi(c,gel(X,i));
+  return A;
+}
+GEN
 ZM_Z_mul(GEN X, GEN c)
 {
   long i, j, h, l = lg(X);

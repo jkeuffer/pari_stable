@@ -325,6 +325,7 @@ GEN     ZC_lincomb(GEN u, GEN v, GEN X, GEN Y);
 void    ZC_lincomb1_inplace(GEN X, GEN Y, GEN v);
 GEN     ZC_neg(GEN M);
 GEN     ZC_sub(GEN x, GEN y);
+GEN     ZC_z_mul(GEN X, long c);
 GEN     ZM_ZC_mul(GEN x, GEN y);
 GEN     ZM_Z_mul(GEN X, GEN c);
 GEN     ZM_add(GEN x, GEN y);
