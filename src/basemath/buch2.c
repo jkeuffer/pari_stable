@@ -1479,7 +1479,7 @@ static GEN
 add_principal_part(GEN nf, GEN u, GEN v, long flag)
 {
   if (flag & nf_GENMAT)
-    return (isnfscalar(u) && gcmp1(gel(u,1)))? v: arch_mul(v,u);
+    return (typ(u) == t_COL && RgV_isscalar(u) && gcmp1(gel(u,1)))? v: arch_mul(v,u);
   else
     return element_mul(nf, v, u);
 }
@@ -1570,16 +1570,6 @@ isprincipalgenforce(GEN bnf,GEN x)
   return isprincipalall(bnf,x,nf_GEN | nf_FORCE);
 }
 
-static GEN
-rational_unit(GEN x, long n, long RU)
-{
-  GEN y;
-  if (!gcmp1(x) && !gcmp_1(x)) return cgetg(1,t_COL);
-  y = zerocol(RU);
-  gel(y,RU) = mkintmodu((gsigne(x) > 0)? 0: n>>1, n);
-  return y;
-}
-
 /* if x a famat, assume it is an algebraic integer (very costly to check) */
 GEN
 isunit(GEN bnf,GEN x)
@@ -1593,27 +1583,22 @@ isunit(GEN bnf,GEN x)
   p1 = gmael(bnf,8,4); /* roots of 1 */
   n = itou(gel(p1,1));
   z  = algtobasis(nf, gel(p1,2));
-  switch(tx)
-  {
-    case t_INT: case t_FRAC:
-      return rational_unit(x, n, RU);
-
-    case t_MAT: /* famat */
-      if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
-	pari_err(talker, "not a factorization matrix in isunit");
-      break;
-
-    case t_COL:
-      if (degpol(nf[1]) != lg(x)-1)
-	pari_err(talker,"not an algebraic number in isunit");
-      break;
-
-    default: x = algtobasis(nf, x);
-      break;
+  if (tx == t_MAT)
+  { /* famat, assumed integral */
+    if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
+      pari_err(talker, "not a factorization matrix in isunit");
+  } else {
+    x = nf_to_scalar_or_basis(nf,x);
+    if (typ(x) != t_COL)
+    { /* rational unit ? */
+      long s;
+      if (typ(x) != t_INT || !is_pm1(x)) return cgetg(1,t_COL);
+      s = signe(x); avma = av; v = zerocol(RU);
+      gel(v,RU) = mkintmodu((s > 0)? 0: n>>1, n);
+      return v;
+    }
+    if (!gcmp1(Q_denom(x))) { avma = av; return cgetg(1,t_COL); }
   }
-  /* assume a famat is integral */
-  if (tx != t_MAT && !gcmp1(denom(x))) { avma = av; return cgetg(1,t_COL); }
-  if (isnfscalar(x)) return gerepileupto(av, rational_unit(gel(x,1),n,RU));
 
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) gel(v,i) = gen_1;

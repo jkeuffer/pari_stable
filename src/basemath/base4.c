@@ -126,12 +126,9 @@ idealhermite_aux(GEN nf, GEN x)
 
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
-    x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x))
-    {
-      z = gel(x,1);
-      return gcmp0(z)? cgetg(1, t_MAT): scalarmat(Q_abs(z), lg(x)-1);
-    }
+    x = nf_to_scalar_or_basis(nf, x);
+    if (typ(x) != t_COL)
+      return gcmp0(x)? cgetg(1, t_MAT): scalarmat(Q_abs(x), degpol(nf[1]));
     x = Q_primitive_part(x, &cx);
     x = eltimul_get_table(nf, x);
   } else {
@@ -236,16 +233,9 @@ get_arch(GEN nf,GEN x,long prec)
   GEN v;
 
   RU = lg(nf[6]) - 1;
-  switch(typ(x))
-  {
-    case t_MAT: return famat_get_arch(nf,x,prec);
-    case t_POLMOD:
-    case t_POL: x = algtobasis_i(nf,x);   /* fall through */
-    case t_COL: if (!RgV_isscalar(x)) break;
-      x = gel(x,1); /* fall through */
-    default: /* rational number */
-      return scalar_get_arch(R1, RU, x, prec);
-  }
+  if (typ(x) == t_MAT) return famat_get_arch(nf,x,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  if (typ(x) != t_COL) return scalar_get_arch(R1, RU, x, prec);
   x = gmul(gmael(nf,5,1),x);
   v = cgetg(RU+1,t_VEC);
   for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
@@ -314,17 +304,9 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
   GEN v, t;
 
   RU = lg(nf[6])-1;
-  switch(typ(x))
-  {
-    case t_MAT: return famat_get_arch_real(nf,x,emb,prec);
-
-    case t_POLMOD:
-    case t_POL: x = algtobasis_i(nf,x);   /* fall through */
-    case t_COL: if (!RgV_isscalar(x)) break;
-      x = gel(x,1); /* fall through */
-    default: /* rational number */
-      return scalar_get_arch_real(R1, RU, x, emb, prec);
-  }
+  if (typ(x) == t_MAT) return famat_get_arch_real(nf,x,emb,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
   v = cgetg(RU+1,t_COL);
   x = gmul(gmael(nf,5,1), x);
   for (i=1; i<=R1; i++)
@@ -629,24 +611,29 @@ idealfactor(GEN nf, GEN x)
   N = degpol(nf[1]);
   if (tx == id_PRINCIPAL)
   {
-    x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) x = gel(x,1);
+    x = nf_to_scalar_or_basis(nf, x);
     if (typ(x) != t_COL)
     {
+      long lfa; 
       f = factor(Q_abs(x));
-      c1 = gel(f,1); f1 = cgetg(1, t_VEC);
-      c2 = gel(f,2); f2 = cgetg(1, t_COL);
-      for (i = 1; i < lg(c1); i++)
+      c1 = gel(f,1); lfa = lg(c1);
+      if (lfa == 1) { avma = av; return trivfact(); }
+      c2 = gel(f,2);
+      settyp(c1, t_VEC); /* for shallowconcat */
+      settyp(c2, t_VEC); /* for shallowconcat */
+      for (i = 1; i < lfa; i++)
       {
 	GEN P = primedec(nf, gel(c1,i)), E = gel(c2,i), z;
-	long l = lg(P);
-	z = cgetg(l, t_COL);
-	for (j = 1; j < l; j++) gel(z,j) = mulii(gmael(P,j,3), E);
-	f1 = shallowconcat(f1, P);
-	f2 = shallowconcat(f2, z);
+	long lP = lg(P);
+	z = cgetg(lP, t_COL);
+	for (j = 1; j < lP; j++) gel(z,j) = mulii(gmael(P,j,3), E);
+        gel(c1,i) = P;
+        gel(c2,i) = z;
       }
-      gel(f,1) = f1; settyp(f1, t_COL);
-      gel(f,2) = f2; return gerepilecopy(av, f);
+      c1 = shallowconcat1(c1); settyp(c1, t_COL);
+      c2 = shallowconcat1(c2);
+      gel(f,1) = c1;
+      gel(f,2) = c2; return gerepilecopy(av, f);
     }
     /* faster valuations for principal ideal x than for X = x in HNF form */
     x = Q_primitive_part(x, &cx);
@@ -1475,9 +1462,7 @@ arch_pow(GEN x, GEN n) {
 static GEN
 idealmulelt(GEN nf, GEN x, GEN v)
 {
-  long t = typ(x);
-  if (t == t_POL || t == t_POLMOD) x = algtobasis(nf,x);
-  if (isnfscalar(x)) x = gel(x,1);
+  x = nf_to_scalar_or_basis(nf,x);
   if (typ(x) != t_COL) return gcmp0(x)? cgetg(1,t_MAT): gmul(Q_abs(x), v);
   return idealmat_to_hnf(nf, element_mulvec(nf, x, v));
 }
@@ -2511,32 +2496,6 @@ check_ZKmodule(GEN x, const char *s)
 }
 
 static GEN
-scalmul(GEN x, GEN v)
-{
-  long i, l;
-  GEN y;
-  if (gcmp1(x)) return shallowcopy(v);
-  if (gcmp_1(x)) return gneg(v);
-  l = lg(v); y = cgetg(l, typ(v));
-  for (i = 1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
-  return y;
-}
-
-GEN
-element_mulvec(GEN nf, GEN x, GEN v)
-{
-  long l, i;
-  GEN M, y;
-
-  if (typ(x) != t_COL) return scalmul(x, v);
-  if (RgV_isscalar(x)) return scalmul(gel(x,1), v);
-  M = eltmul_get_table(nf,x);
-  l = lg(v); y = cgetg(l, typ(v));
-  for (i=1; i < l; i++) gel(y,i) = gmul(M, gel(v,i));
-  return y;
-}
-
-static GEN
 element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
 {
   long l, j;
@@ -2623,8 +2582,8 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 
   if (a != gen_1) /* frequently called with a = gen_1 */
   {
-    if (isnfscalar(a)) a = gel(a,1);
-    if (gcmp1(a)) a = gen_1;
+    a = nf_to_scalar_or_basis(nf,a);
+    if (typ(a) == t_INT && is_pm1(a) && signe(a) > 0) a = gen_1;
   }
 
   aA = (a == gen_1)? A: idealmulelt(nf,a,A);

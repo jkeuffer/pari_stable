@@ -27,10 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*  represented as column vectors over the integral basis nf[7]    */
 /*                                                                 */
 /*******************************************************************/
-
-int
-isnfscalar(GEN x) { return typ(x) == t_COL? RgV_isscalar(x): 0; }
-
 static GEN
 scal_mul(GEN nf, GEN x, GEN y, long ty)
 {
@@ -104,6 +100,112 @@ mul_by_tabi(GEN tab, GEN x, GEN y)
   return v;
 }
 
+GEN
+element_mulidid(GEN nf, long i, long j)
+{
+  long N;
+  GEN tab = get_tab(nf, &N);
+  tab += (i-1)*N; return gel(tab,j);
+}
+
+/* Outputs x.w_i, where w_i is the i-th elt of the integral basis.
+ * Assume x a RgV of correct length */
+GEN
+element_mulid(GEN nf, GEN x, long i)
+{
+  long j, k, N;
+  GEN v, tab;
+
+  if (i==1) return gcopy(x);
+  tab = get_tab(nf, &N); tab += (i-1)*N;
+  v = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++)
+  {
+    pari_sp av = avma;
+    GEN s = gen_0;
+    for (j=1; j<=N; j++)
+    {
+      GEN c = gcoeff(tab,k,j);
+      if (signe(c)) s = gadd(s, _mulix(c, gel(x,j)));
+    }
+    gel(v,k) = gerepileupto(av,s);
+  }
+  return v;
+}
+/* as element_mulid, assume x a ZV of correct length */
+GEN
+elementi_mulid(GEN nf, GEN x, long i)
+{
+  long j, k, N;
+  GEN v, tab;
+
+  if (i==1) return ZC_copy(x);
+  tab = get_tab(nf, &N); tab += (i-1)*N;
+  v = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++)
+  {
+    pari_sp av = avma;
+    GEN s = gen_0;
+    for (j=1; j<=N; j++)
+    {
+      GEN c = gcoeff(tab,k,j);
+      if (signe(c)) s = addii(s, _mulii(c, gel(x,j)));
+    }
+    gel(v,k) = gerepileuptoint(av, s);
+  }
+  return v;
+}
+
+/* table of multiplication by wi in ZK = Z[w1,..., wN] */
+GEN
+eltmulid_get_table(GEN nf, long i)
+{
+  long k,N;
+  GEN m, tab = get_tab(nf, &N);
+  tab += (i-1)*N;
+  m = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++) m[k] = tab[k];
+  return m;
+}
+
+static GEN
+RgC_mul_get_table(GEN nf, GEN x)
+{
+  long i, l = lg(x);
+  GEN mul = cgetg(l,t_MAT);
+  gel(mul,1) = x; /* assume w_1 = 1 */
+  for (i=2; i<l; i++) gel(mul,i) = element_mulid(nf,x,i);
+  return mul;
+}
+static GEN
+ZC_mul_get_table(GEN nf, GEN x)
+{
+  long i, l = lg(x);
+  GEN mul = cgetg(l,t_MAT);
+  gel(mul,1) = x; /* assume w_1 = 1 */
+  for (i=2; i<l; i++) gel(mul,i) = elementi_mulid(nf,x,i);
+  return mul;
+}
+
+/* table of multiplication by x in ZK = Z[w1,..., wN] */
+GEN
+eltmul_get_table(GEN nf, GEN x)
+{
+  if (typ(x) == t_MAT) return x;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) return scalarmat_shallow(x, degpol(nf[1]));
+  return RgC_mul_get_table(nf, x);
+}
+/* as eltmul_get_table, x integral */
+GEN
+eltimul_get_table(GEN nf, GEN x)
+{
+  if (typ(x) == t_MAT) return x;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) return scalarmat_shallow(x, degpol(nf[1]));
+  return ZC_mul_get_table(nf, x);
+}
+
 /* product of x and y in nf */
 GEN
 element_mul(GEN nf, GEN x, GEN y)
@@ -125,6 +227,26 @@ element_mul(GEN nf, GEN x, GEN y)
 
   tab = get_tab(nf, &N);
   return mul_by_tabi(tab,x,y);
+}
+
+GEN
+element_mulvec(GEN nf, GEN x, GEN v)
+{
+  long l, i;
+  GEN M, y;
+
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) {
+    if (gcmp1(x)) return shallowcopy(v);
+    if (gcmp_1(x)) return gneg(v);
+    l = lg(v); y = cgetg(l, typ(v));
+    for (i = 1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
+    return y;
+  }
+  M = RgC_mul_get_table(nf, x);
+  l = lg(v); y = cgetg(l, typ(v));
+  for (i=1; i < l; i++) gel(y,i) = gmul(M, gel(v,i));
+  return y;
 }
 
 /* inverse of x in nf */
@@ -390,18 +512,13 @@ element_pow(GEN nf, GEN x, GEN n)
   GEN y, cx;
 
   if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=degpol(nf[1]);
-  s=signe(n); if (!s) return scalarcol_shallow(gen_1,N);
+  nf = checknf(nf); N = degpol(nf[1]);
+  s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
+  x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL)
   {
-    x = algtobasis(nf,x);
-    if (typ(x) != t_COL) pari_err(typeer,"element_pow");
-  }
-
-  if (RgV_isscalar(x))
-  {
     y = scalarcol_shallow(gen_1,N);
-    gel(y,1) = powgi(gel(x,1),n); return y;
+    gel(y,1) = powgi(x,n); return y;
   }
   x = primitive_part(x, &cx);
   y = leftright_pow(x, n, (void*)nf, _sqr, _mul);
@@ -450,114 +567,6 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   return gerepileupto(av,y);
 }
 
-GEN
-element_mulidid(GEN nf, long i, long j)
-{
-  long N;
-  GEN tab = get_tab(nf, &N);
-  tab += (i-1)*N; return gel(tab,j);
-}
-
-/* Outputs x.w_i, where w_i is the i-th elt of the integral basis */
-GEN
-element_mulid(GEN nf, GEN x, long i)
-{
-  long j, k, N;
-  GEN v, tab;
-
-  if (i==1) return gcopy(x);
-  tab = get_tab(nf, &N);
-  if (typ(x) != t_COL || lg(x) != N+1) pari_err(typeer,"element_mulid");
-  tab += (i-1)*N;
-  v = cgetg(N+1,t_COL);
-  for (k=1; k<=N; k++)
-  {
-    pari_sp av = avma;
-    GEN s = gen_0;
-    for (j=1; j<=N; j++)
-    {
-      GEN c = gcoeff(tab,k,j);
-      if (signe(c)) s = gadd(s, _mulix(c, gel(x,j)));
-    }
-    gel(v,k) = gerepileupto(av,s);
-  }
-  return v;
-}
-/* as element_mulid, assume x a ZV of correct length */
-GEN
-elementi_mulid(GEN nf, GEN x, long i)
-{
-  long j, k, N;
-  GEN v, tab;
-
-  if (i==1) return ZC_copy(x);
-  tab = get_tab(nf, &N);
-  tab += (i-1)*N;
-  v = cgetg(N+1,t_COL);
-  for (k=1; k<=N; k++)
-  {
-    pari_sp av = avma;
-    GEN s = gen_0;
-    for (j=1; j<=N; j++)
-    {
-      GEN c = gcoeff(tab,k,j);
-      if (signe(c)) s = addii(s, _mulii(c, gel(x,j)));
-    }
-    gel(v,k) = gerepileuptoint(av, s);
-  }
-  return v;
-}
-
-/* table of multiplication by wi in ZK = Z[w1,..., wN] */
-GEN
-eltmulid_get_table(GEN nf, long i)
-{
-  long k,N;
-  GEN m, tab = get_tab(nf, &N);
-  tab += (i-1)*N;
-  m = cgetg(N+1,t_COL);
-  for (k=1; k<=N; k++) m[k] = tab[k];
-  return m;
-}
-
-/* table of multiplication by x in ZK = Z[w1,..., wN] */
-GEN
-eltmul_get_table(GEN nf, GEN x)
-{
-  if (typ(x) == t_MAT) return x;
-  else
-  {
-    long i, N = degpol(nf[1]);
-    GEN mul = cgetg(N+1,t_MAT);
-    x = algtobasis_i(nf, x);
-    if (RgV_isscalar(x)) return scalarmat_shallow(gel(x,1), N);
-    gel(mul,1) = x; /* assume w_1 = 1 */
-    for (i=2; i<=N; i++) gel(mul,i) = element_mulid(nf,x,i);
-    return mul;
-  }
-}
-static GEN
-ZC_mul_get_table(GEN nf, GEN x)
-{
-  long i, l = lg(x);
-  GEN mul = cgetg(l,t_MAT);
-  gel(mul,1) = x; /* assume w_1 = 1 */
-  for (i=2; i<l; i++) gel(mul,i) = elementi_mulid(nf,x,i);
-  return mul;
-}
-/* as eltmul_get_table, x integral */
-GEN
-eltimul_get_table(GEN nf, GEN x)
-{
-  if (typ(x) == t_MAT) return x;
-  else
-  {
-    x = algtobasis_i(nf, x);
-    if (ZV_isscalar(x)) return scalarmat_shallow(gel(x,1), lg(x)-1);
-    return ZC_mul_get_table(nf, x);
-  }
-}
-
 /* valuation of integer x, with resp. to prime ideal P above p.
  * p.P^(-1) = b Z_K, v >= val_p(norm(x)), and N = deg(nf)
  * [b may be given as the 'multiplication by b' matrix]
@@ -600,14 +609,12 @@ element_val(GEN nf, GEN x, GEN vp)
   checkprimeid(vp);
   p = gel(vp,1);
   e = itos(gel(vp,3));
+  x = nf_to_scalar_or_basis(nf, x);
   switch(typ(x))
   {
     case t_INT: return e * Z_pval(x,p);
     case t_FRAC:return e * Q_pval(x,p);
-    default: x = algtobasis_i(nf,x); break;
   }
-  if (RgV_isscalar(x)) return e*Q_pval(gel(x,1),p);
-
   x = Q_primitive_part(x, &cx);
   w = int_elt_val(nf,x,p,gel(vp,5),NULL);
   avma = av; return w + e * (cx? Q_pval(cx,p): 0);
@@ -705,6 +712,31 @@ algtobasis_i(GEN nf, GEN x)
     case t_POL:
       return poltobasis(nf,x);
     case t_COL:
+      if (lg(x) == lg(gel(nf,7))) break;
+    default: pari_err(typeer,"algtobasis_i");
+  }
+  return x;
+}
+GEN
+nf_to_scalar_or_basis(GEN nf, GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return x;
+    case t_POLMOD:
+      x = gel(x,2);
+      if (typ(x) != t_POL) return x;
+      /* fall through */
+    case t_POL:
+    {
+      long l = lg(x);
+      if (l == 2) return gen_0;
+      if (l == 3) return gel(x,2);
+      return poltobasis(nf,x);
+    }
+    case t_COL:
+      if (RgV_isscalar(x)) return gel(x,1);
       if (lg(x) == lg(gel(nf,7))) break;
     default: pari_err(typeer,"algtobasis_i");
   }
@@ -973,23 +1005,19 @@ zsigne(GEN nf,GEN x,GEN arch)
   if (l == 1) return cgetg(1,t_COL);
   V = cgetg(l,t_COL); av = avma;
   nf = checknf(nf);
-  switch(typ(x))
-  {
-    case t_MAT: /* factorisation */
-    {
-      GEN g = gel(x,1), e = gel(x,2), z = vec_setconst(V, gen_0);
-      for (i=1; i<lg(g); i++)
-	if (mpodd(gel(e,i))) z = ZC_add(z, zsigne(nf,gel(g,i),archp));
-      for (i=1; i<l; i++) gel(V,i) = mpodd(gel(z,i))? gen_1: gen_0;
-      avma = av; return V;
-    }
-    case t_POLMOD: x = gel(x,2);      /* fall through */
-    case t_POL: x = algtobasis(nf, x); /* fall through */
-    case t_COL: if (!RgV_isscalar(x)) break;
-		x = gel(x,1);         /* fall through */
-    case t_INT: case t_FRAC:
-      s = gsigne(x); if (!s) pari_err(talker,"zero element in zsigne");
-      return vec_setconst(V, (s < 0)? gen_1: gen_0);
+  if (typ(x) == t_MAT)
+  { /* factorisation */
+    GEN g = gel(x,1), e = gel(x,2), z = vec_setconst(V, gen_0);
+    for (i=1; i<lg(g); i++)
+      if (mpodd(gel(e,i))) z = ZC_add(z, zsigne(nf,gel(g,i),archp));
+    for (i=1; i<l; i++) gel(V,i) = mpodd(gel(z,i))? gen_1: gen_0;
+    avma = av; return V;
+  }
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL)
+  { /* scalar: INT or FRAC */
+    s = gsigne(x); if (!s) pari_err(talker,"zero element in zsigne");
+    return vec_setconst(V, (s < 0)? gen_1: gen_0);
   }
   x = Q_primpart(x); M = gmael(nf,5,1);
   for (i = 1; i < l; i++)
