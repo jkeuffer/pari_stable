@@ -777,7 +777,7 @@ struct aurifeuille_t {
  * sigma_j(g) / g =  (j|A)  if j = 1 (4)
  *                  (-j|A)i if j = 3 (4)
  *   */
-/* factor Phi_n(A), Astar squarefree kernel of A */
+/* factor Phi_n(A), Astar: A* = squarefree kernel of A */
 static GEN
 factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
 {
@@ -787,12 +787,13 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
   ulong l = S->l;
 
   if ((n & 7) == 4)
-  { /* A^* even, A^* = squarefree kernel of A */
+  { /* A^* even */
     long m = n>>2;
     GEN i = Fp_powu(z, m, le), z2 = Fp_sqr(z, le);
-    a = addis(i, -1); b = subsi(-1,i);
-    if (equalis(A, 2))
+    if (equalis(A, 2)) /* FIXME: even Astar = 2 */
     { /* important special case, split for efficiency */
+      a = addsi(-1,i);
+      b = subsi(-1,i);
       s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
@@ -802,16 +803,17 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       }
     }
     else
-    { /* -Ai = 2^(2*) (-2i) B */
-      long v = vali(A);
-      GEN ma, mb, B = shifti(A, -v), gl = utoipos(l);
-      GEN g = padicsqrtlift(B, Fp_sqrt(B,gl), gl, e);
-      a = modii(shifti(mulii(a, g), v>>1), le);
-      ma = negi(a);
-      b = Fp_mul(a, i, le);
-      mb = negi(b);
-
+    {
+      GEN ma, mb, B = Fp_mul(A, i, le), gl = utoipos(l);
+      long t;
       Astar >>= 1;
+      t = Astar & 3; if (Astar < 0) t = 4-t; /* t = 1 or 3 */
+      if (t == 1) B = Fp_neg(B, le);
+      a = padicsqrtlift(B, Fp_sqrt(B, gl), gl, e);
+      b = Fp_mul(a, i, le);
+      ma = Fp_neg(a, le);
+      mb = Fp_neg(b, le);
+
       s = z; f = subii(a, s);
       for (j=3;j<n;j+=2)
       {
@@ -819,10 +821,8 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
         if (ugcd(j,m)==1)
         {
           GEN t;
-          if ((j & 3) == 1)
-            t = (kross(j, Astar)  < 0)? ma: a;
-          else
-            t = (kross(-j, Astar) < 0)? mb: b;
+          if ((j & 3) == 1) t = (kross(j, Astar) < 0)? ma: a;
+          else              t = (kross(j, Astar) < 0)? mb: b;
           f = Fp_mul(f, subii(t, s), le);
         }
       }
@@ -904,10 +904,16 @@ factor_Aurifeuille(GEN a, long d)
   fd = factoru(d); P = gel(fd,1); E = gel(fd,2); lP = lg(P);
   for (dstar = 1, i = 1; i < lP; i++)
     if (odd(E[i])) dstar *= P[i];
-  astar = ugcd(umodiu(A, dstar), dstar);
-  if (sa < 0) astar = -astar;
-
-  if (!Z_issquare(divis(A,astar))) { avma = av; return gen_1; }
+  astar = sa;
+  if (odd(va)) astar <<= 1;
+  for (i = 1; i < lP; i++)
+    if (odd( (Z_lvalrem(A, P[i], &A)) ) ) astar *= P[i];
+  if (sa < 0)
+  { /* negate in place if possible */
+    if (A == a) A = icopy(A);
+    setsigne(A,1);
+  }
+  if (!Z_issquare(A)) { avma = av; return gen_1; }
 
   A = sa < 0? absi(a): a;
   Aurifeuille_init(A, d, &S);
