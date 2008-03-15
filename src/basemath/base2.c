@@ -2711,7 +2711,7 @@ get_d(GEN nf, GEN pol, GEN A)
       c = simplify_i(quicktrace(c,sym));
       gcoeff(T,j,i) = gcoeff(T,i,j) = c;
     }
-  return algtobasis_i(nf, det(T));
+  return nf_to_scalar_or_basis(nf, det(T));
 }
 
 /* nf = base field K
