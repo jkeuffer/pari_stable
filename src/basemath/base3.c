@@ -233,19 +233,17 @@ GEN
 element_mulvec(GEN nf, GEN x, GEN v)
 {
   long l, i;
-  GEN M, y;
+  GEN y;
 
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) {
     if (gcmp1(x)) return shallowcopy(v);
     if (gcmp_1(x)) return gneg(v);
-    l = lg(v); y = cgetg(l, typ(v));
-    for (i = 1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
-    return y;
   }
-  M = RgC_mul_get_table(nf, x);
+  else
+    x = RgC_mul_get_table(nf, x);
   l = lg(v); y = cgetg(l, typ(v));
-  for (i=1; i < l; i++) gel(y,i) = gmul(M, gel(v,i));
+  for (i=1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
   return y;
 }
 

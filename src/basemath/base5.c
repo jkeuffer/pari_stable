@@ -947,11 +947,11 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 
   vpro = cgetg(N+1,t_VEC);
   for (i=1; i<=N; i++) gel(vpro,i) = monomial(gen_1, i-1, v);
-  vpro = gmul(vpro, elts);
+  vpro = gmul(vpro, elts); /* RgXV */
   B = cgetg(m+1, t_MAT);
   for(i=k=1; i<=N; i++)
   {
-    GEN w = element_mulvec(nf, gel(vpro,i), gel(ids,i));
+    GEN w = gmul(gel(vpro,i), gel(ids,i));
     for(j=1; j<=n; j++)
     {
       p1 = grem(gmul(bs, gel(w,j)), polabs);
