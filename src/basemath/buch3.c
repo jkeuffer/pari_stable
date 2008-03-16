@@ -183,7 +183,7 @@ fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
 {
   pari_sp av = avma;
   GEN p = gel(pr,1);
-  long v = int_elt_val(nf,L0,p,tau,NULL);
+  long v = typ(L0) == t_INT? 0: int_elt_val(nf,L0,p,tau,NULL);
   if (cx)
   {
     long w = Q_pval(cx, p);
@@ -297,8 +297,8 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     la = lg(e); newL = cgetg(la, t_VEC);
     for (k=1; k<la; k++)
     {
-      GEN L0, cx, LL = algtobasis_i(nf, gel(L,k));
-      L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
+      GEN cx, LL = nf_to_scalar_or_basis(nf, gel(L,k));
+      GEN L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
       for (j=1; j<lp; j++)
       {
 	pr = gel(listpr,j);
@@ -319,7 +319,8 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 	  LL = element_mul(nf, LL, t);
 	}
       }
-      gel(newL,k) = FpC_red(make_integral(nf,LL,f,listpr), fZ);
+      LL = make_integral(nf,LL,f,listpr);
+      gel(newL,k) = typ(LL) == t_INT? LL: FpC_red(LL, fZ);
     }
 
     av = avma;

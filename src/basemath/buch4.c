@@ -545,8 +545,13 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   S = gel(bnfS,6); ls = lg(S);
   if (ls==1) return cgetg(1, t_COL);
 
-  xb = algtobasis_i(nf,*px); p1 = Q_denom(xb);
-  N = mulii(gnorm(gmul(*px,p1)), p1); /* relevant primes divide N */
+  xb = nf_to_scalar_or_basis(nf,*px);
+  switch(typ(xb))
+  {
+    case t_INT:  N = xb; break;
+    case t_FRAC: N = mulii(gel(xb,1),gel(xb,2)); break;
+    default: { GEN d = Q_denom(xb); N = mulii(gnorm(gmul(*px,d)), d); }
+  } /* relevant primes divide N */
   if (is_pm1(N)) return zerocol(ls -1);
 
   p1 = gel(bnfS,2);

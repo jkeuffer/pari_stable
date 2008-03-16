@@ -732,7 +732,11 @@ intdvd(GEN x, GEN y, GEN *z) {
 
 /* x t_FRAC, p t_INT, return v_p(x) */
 static long
-ratval(GEN x, GEN p) { return Z_pval(gel(x,1),p) - Z_pval(gel(x,2),p); }
+ratval(GEN x, GEN p) {
+  long v = Z_pval(gel(x,1),p);
+  if (v) return v;
+  return - Z_pval(gel(x,2),p);
+}
 
 long
 Q_pval(GEN x, GEN p) { return (typ(x) == t_INT)? Z_pval(x, p): ratval(x, p); }

@@ -1307,7 +1307,7 @@ GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
-  GEN prkZ,cx,x,u, p = gel(pr,1), b = gel(pr,5);
+  GEN prkZ, u, p = gel(pr,1), b = gel(pr,5);
   GEN vden = gen_0;
   GEN mul = eltimul_get_table(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
@@ -1315,18 +1315,26 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   prkZ = gcoeff(prk, 1,1);
   for (i=1; i < l; i++)
   {
-    x = algtobasis_i(nf, gel(g,i));
-    x = Q_remove_denom(x, &cx);
-    if (cx)
+    GEN dx, x = nf_to_scalar_or_basis(nf, gel(g,i));
+    long vdx = 0;
+    x = Q_remove_denom(x, &dx);
+    if (dx)
     {
-      long k = Z_pvalrem(cx, p, &u);
-      if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
-	x = ZC_Z_mul(x, Fp_inv(u, prkZ));
-      if (k)
-	vden = addii(vden, mului(k, gel(e,i)));
+      vdx = Z_pvalrem(dx, p, &u);
+      if (!is_pm1(u))
+      { /* could avoid the inversion, but prkZ is small--> cheap */
+        u = Fp_inv(u, prkZ);
+	x = typ(x) == t_INT? mulii(x,u): ZC_Z_mul(x, u);
+      }
+      if (vdx) vden = addii(vden, mului(vdx, gel(e,i)));
     }
-    (void)int_elt_val(nf, x, p, mul, &x);
-    gel(newg,i) = ZC_hnfrem(x, prk);
+    if (typ(x) == t_INT) {
+      if (!vdx) vden = subii(vden, mului(Z_pvalrem(x, p, &x), gel(e,i)));
+    } else {
+      (void)int_elt_val(nf, x, p, mul, &x);
+      x =  ZC_hnfrem(x, prk);
+    }
+    gel(newg,i) = x;
   }
   if (vden == gen_0) setlg(newg, l);
   else
@@ -1370,14 +1378,15 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   e = gel(fa,2); l = lg(e);
   for (i=1; i<l; i++)
   {
-    GEN t, x = algtobasis_i(nf, gel(g,i));
+    GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
+    if (typ(x) != t_COL) continue; /* rational */
     x = Q_primpart(x);
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
     t = gmul(get_arch(nf,x,prec), gel(e,i));
     y = y? gadd(y,t): t;
   }
-  return y;
+  return y ? y: zerovec(lg(nf[6])-1);
 }
 
 GEN
@@ -2183,6 +2192,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN listpr)
 
   /* L0 = L / d, L integral */
   fZ = gcoeff(f,1,1);
+  if (typ(L) == t_INT) return Fp_mul(L, Fp_inv(d, fZ), fZ);
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
   t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = ZC_Z_mul(L,t);
@@ -2431,6 +2441,11 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
   return idealapprfact_i(nf,fact,1);
 }
 
+static void
+not_in_ideal() {
+  pari_err(talker,"element not in ideal in ideal_two_elt2");
+}
+
 /* Given an integral ideal x and a in x, gives a b such that
  * x = aZ_K + bZ_K using the approximation theorem */
 GEN
@@ -2440,17 +2455,21 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
   GEN cx, b;
 
   nf = checknf(nf);
-  a = algtobasis_i(nf, a);
+  a = nf_to_scalar_or_basis(nf, a);
   x = idealhermite_aux(nf,x);
-  if (gcmp0(x))
+  if (lg(x) == 1)
   {
-    if (!gcmp0(a)) pari_err(talker,"element not in ideal in ideal_two_elt2");
-    avma = av; return gcopy(a);
+    if (typ(a) != t_INT || signe(a)) not_in_ideal();
+    avma = av; return zerocol(degpol(nf[1]));
   }
   x = Q_primitive_part(x, &cx);
   if (cx) a = gdiv(a, cx);
-  if (!hnf_invimage(x, a))
-    pari_err(talker,"element does not belong to ideal in ideal_two_elt2");
+  if (typ(a) != t_COL)
+  { /* rational number */
+    if (typ(a) != t_INT || resii(a, gcoeff(x,1,1)) != gen_0) not_in_ideal();
+  }
+  else
+    if (!hnf_invimage(x, a)) not_in_ideal();
 
   b = mat_ideal_two_elt2(nf, x, a);
   b = centermod(b, gcoeff(x,1,1));

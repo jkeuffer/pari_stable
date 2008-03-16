@@ -102,17 +102,14 @@ logarch2arch(GEN x, long r1, long prec)
 
 /* multiply be by ell-th powers of units as to find small L2-norm for new be */
 static GEN
-reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
+reducebetanaive(GEN bnfz, GEN be, GEN ell)
 {
-  long i,k,n,ru,r1, prec = nf_get_prec(bnfz);
-  GEN z,p1,p2,nmax,c, nf = checknf(bnfz);
+  long i, k, n, ru, r1, prec = nf_get_prec(bnfz);
+  GEN z, p1, p2, nmax, b, c, nf = checknf(bnfz);
 
   r1 = nf_get_r1(nf);
-  if (!b)
-  {
-    be = algtobasis_i(nf, be);
-    b = gmul(gmael(nf,5,1), be);
-  }
+  be = algtobasis_i(nf, be);
+  b = gmul(gmael(nf,5,1), be);
   n = max((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
   c = gmul(real_i(gel(bnfz,3)), ell);
@@ -146,8 +143,8 @@ static GEN
 reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
 {
   GEN c, fa;
-  be = algtobasis_i(bnfz, be);
-  be = primitive_part(be, &c);
+  be = nf_to_scalar_or_basis(bnfz, be);
+  be = Q_primitive_part(be, &c);
   if (c)
   {
     fa = factor(c);
@@ -224,7 +221,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Zs\n",be);
-  return reducebetanaive(bnfz, be, NULL, ell);
+  return reducebetanaive(bnfz, be, ell);
 }
 
 static GEN

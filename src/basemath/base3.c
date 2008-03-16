@@ -568,7 +568,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 }
 
 /* valuation of integer x, with resp. to prime ideal P above p.
- * p.P^(-1) = b Z_K, v >= val_p(norm(x)), and N = deg(nf)
+ * p.P^(-1) = b Z_K
  * [b may be given as the 'multiplication by b' matrix]
  */
 long
@@ -738,7 +738,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
     case t_COL:
       if (RgV_isscalar(x)) return gel(x,1);
       if (lg(x) == lg(gel(nf,7))) break;
-    default: pari_err(typeer,"algtobasis_i");
+    default: pari_err(typeer,"nf_to_scalar_or_basis");
   }
   return x;
 }
@@ -1107,20 +1107,26 @@ element_sqrmodideal(GEN nf, GEN x, GEN id) {
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? ZC_hnfrem(element_mul(nf,x,y), id): algtobasis_i(nf, y);
+  return x? ZC_hnfrem(element_mul(nf,x,y), id): y;
 }
 /* assume k >= 0, ideal in HNF */
 GEN
 element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 {
-  GEN y = NULL;
-  for(;;)
+  GEN y;
+  if (!signe(k)) return scalarcol_shallow(gen_1, degpol(nf[1]));
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) {
+    x = Fp_pow(x, k, gcoeff(ideal,1,1));
+    return scalarcol_shallow(x, degpol(nf[1]));
+  }
+  for(y = NULL;;)
   {
     if (mpodd(k)) y = element_mulmodideal(nf,y,x,ideal);
     k = shifti(k,-1); if (!signe(k)) break;
     x = element_sqrmodideal(nf,x,ideal);
   }
-  return y? y: scalarcol_shallow(gen_1,degpol(nf[1]));
+  return y;
 }
 
 /* assume k >= 0, assume idele = [HNFideal, arch] */
@@ -1158,8 +1164,16 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
     n = centermodii(gel(e,i), EX, EXo2);
     sn = signe(n); if (!sn) continue;
 
-    h = Q_remove_denom(gel(g,i), &dh);
-    if (dh) h = FpC_Fp_mul(h, Fp_inv(dh,idZ), idZ);
+    h = nf_to_scalar_or_basis(nf, gel(g,i));
+    switch(typ(h))
+    {
+      case t_INT: break;
+      case t_FRAC:
+        h = Fp_div(gel(h,1), gel(h,2), idZ); break;
+      default:
+        h = Q_remove_denom(h, &dh);
+        if (dh) h = FpC_Fp_mul(h, Fp_inv(dh,idZ), idZ);
+    }
     if (sn > 0)
       plus = elt_mulpow_modideal(nf, plus, h, n, id);
     else /* sn < 0 */
@@ -1531,7 +1545,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
   pari_sp av = avma;
   long i, k, kmin, kmax;
 
-  if (typ(a) != t_INT) a = algtobasis_i(nf,a);
+  a = nf_to_scalar_or_basis(nf,a);
   if (DEBUGLEVEL>3)
   {
     fprintferr("entering zlog, "); flusherr();
