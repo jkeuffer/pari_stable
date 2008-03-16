@@ -915,20 +915,28 @@ rnfpolred(GEN nf, GEN pol, long prec)
   return gerepilecopy(av,w);
 }
 
+static GEN
+powers(long N, long v)
+{
+  GEN L = cgetg(N+1,t_VEC);
+  long i;
+  for (i=1; i<=N; i++) gel(L,i) = monomial(gen_1, i-1, v);
+  return L;
+}
 /* given a relative polynomial pol over nf, compute a pseudo-basis for the
  * extension, then an absolute basis */
 static GEN
 makebasis(GEN nf, GEN pol, GEN rnfeq)
 {
-  GEN elts,ids,polabs,plg,plg0,B,bs,p1,den,vbs,d,vpro;
+  GEN W, I, polabs, plg, plg0, B, bs, p1, den, vbs, d;
   pari_sp av = avma;
-  long n,N,m,i,j,k, v = varn(pol);
+  long n, N, m, i, j, k;
 
   polabs= gel(rnfeq,1);
   plg   = gel(rnfeq,2); plg = lift_intern(plg);
   p1 = rnfpseudobasis(nf,pol);
-  elts= gel(p1,1);
-  ids = gel(p1,2);
+  W = gel(p1,1);
+  I = gel(p1,2);
   if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
   N = degpol(pol);
   n = degpol(nf[1]); m = n*N;
@@ -944,14 +952,12 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 
   /* bs = integer basis of K, as elements of L */
   bs = gmul(vbs, RgXV_to_RgM(gel(nf,7),n));
-
-  vpro = cgetg(N+1,t_VEC);
-  for (i=1; i<=N; i++) gel(vpro,i) = monomial(gen_1, i-1, v);
-  vpro = gmul(vpro, elts); /* RgXV */
+  W = gmul(powers(N, varn(pol)), W); /* vector of nfX */
   B = cgetg(m+1, t_MAT);
   for(i=k=1; i<=N; i++)
   {
-    GEN w = gmul(gel(vpro,i), gel(ids,i));
+    GEN w = gel(W,i), id = gel(I,i);
+    w = typ(w) == t_COL? element_mulvec(nf, w, id): gmul(w,id);
     for(j=1; j<=n; j++)
     {
       p1 = grem(gmul(bs, gel(w,j)), polabs);
