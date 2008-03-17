@@ -96,25 +96,25 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     {
       if (j > zeros+2)
       {
-        tmp  = gmul(gcoeff(mu,j,zeros+1), gcoeff(r,kappa,zeros+1));
-        rtmp = gsub(itor(gcoeff(G,kappa,j),prec), tmp);
+        tmp  = gmul(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
+        rtmp = gsub(itor(gmael(G,kappa,j),prec), tmp);
         for (k=zeros+2; k<j-1; k++)
         {
-          tmp  = gmul(gcoeff(mu,j,k), gcoeff(r,kappa,k));
+          tmp  = gmul(gmael(mu,j,k), gmael(r,kappa,k));
           rtmp = gsub(rtmp,tmp);
         }
-        tmp = gmul(gcoeff(mu,j,j-1), gcoeff(r,kappa,j-1));
-        gcoeff(r,kappa,j) = gsub(rtmp, tmp);
+        tmp = gmul(gmael(mu,j,j-1), gmael(r,kappa,j-1));
+        gmael(r,kappa,j) = gsub(rtmp, tmp);
       }
       else if (j==zeros+2)
       {              
-        tmp = gmul(gcoeff(mu,j,zeros+1), gcoeff(r,kappa,zeros+1));
-        rtmp = itor(gcoeff(G,kappa,j), prec);
-        gcoeff(r,kappa,j) = gsub(rtmp, tmp);
+        tmp = gmul(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
+        rtmp = itor(gmael(G,kappa,j), prec);
+        gmael(r,kappa,j) = gsub(rtmp, tmp);
       }
       else
-        gcoeff(r,kappa,j) = itor(gcoeff(G,kappa,j), prec);
-      gcoeff(mu,kappa,j)= gdiv(gcoeff(r,kappa,j), gcoeff(r,j,j));
+        gmael(r,kappa,j) = itor(gmael(G,kappa,j), prec);
+      gmael(mu,kappa,j)= gdiv(gmael(r,kappa,j), gmael(r,j,j));
     }
     if (DEBUGLEVEL>=4)
     {
@@ -129,93 +129,93 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     for (j=kappa-1; j>zeros; j--)
     {
       /* test of the relaxed size-reduction condition */
-      tmp = mpabs(gcoeff(mu,kappa,j));
+      tmp = mpabs(gmael(mu,kappa,j));
       if (gcmp(tmp, halfplus) > 0) 
       {
         test = 1;
         /* we consider separately the case X = +-1 */     
         if (gcmp(tmp, onedothalfplus) <= 0)
         {
-          sg = gsigne(gcoeff(mu,kappa,j));
+          sg = gsigne(gmael(mu,kappa,j));
           if ( sg >=0 )   /* in this case, X is 1 */
           {
             for (k=zeros+1; k<j; k++)
-              gcoeff(mu,kappa,k) = gsub(gcoeff(mu,kappa,k),gcoeff(mu,j,k));
+              gmael(mu,kappa,k) = gsub(gmael(mu,kappa,k),gmael(mu,j,k));
             for (i=1; i<=n; i++)    
-              gcoeff(B,kappa,i) = subii(gcoeff(B,kappa,i), gcoeff(B,j,i));
+              gmael(B,kappa,i) = subii(gmael(B,kappa,i), gmael(B,j,i));
 
 #ifdef WITH_TRANSFORM
             for (i=1; i<=d; i++) 
-              gcoeff(U,kappa,i) = subii(gcoeff(U,kappa,i), gcoeff(U,j,i));
+              gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
 #endif
-            ztmp=muliu(gcoeff(G,kappa,j), 2);
-            ztmp=subii(gcoeff(G,j,j), ztmp);
-            gcoeff(G,kappa,kappa)=addii(gcoeff(G,kappa,kappa), ztmp);
+            ztmp=muliu(gmael(G,kappa,j), 2);
+            ztmp=subii(gmael(G,j,j), ztmp);
+            gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
-              gcoeff(G,kappa,i)=subii(gcoeff(G,kappa,i), gcoeff(G,j,i)); 
+              gmael(G,kappa,i)=subii(gmael(G,kappa,i), gmael(G,j,i)); 
             for (i=j+1; i<kappa; i++)
-              gcoeff(G,kappa,i)=subii(gcoeff(G,kappa,i), gcoeff(G,i,j));
+              gmael(G,kappa,i)=subii(gmael(G,kappa,i), gmael(G,i,j));
             for (i=kappa+1; i<=kappamax; i++)
-              gcoeff(G,i,kappa)=subii(gcoeff(G,i,kappa), gcoeff(G,i,j));
+              gmael(G,i,kappa)=subii(gmael(G,i,kappa), gmael(G,i,j));
           }
           else          /* otherwise X is -1 */ 
           {
             for (k=zeros+1; k<j; k++)
-              gcoeff(mu,kappa,k)=gadd(gcoeff(mu,kappa,k), gcoeff(mu,j,k));
+              gmael(mu,kappa,k)=gadd(gmael(mu,kappa,k), gmael(mu,j,k));
             for (i=1; i<=n; i++)    
-              gcoeff(B,kappa,i)=addii(gcoeff(B,kappa,i), gcoeff(B,j,i));
+              gmael(B,kappa,i)=addii(gmael(B,kappa,i), gmael(B,j,i));
 
 #ifdef WITH_TRANSFORM
             for (i=1; i<=d; i++)    
-              gcoeff(U,kappa,i)=addii(gcoeff(U,kappa,i),gcoeff(U,j,i));
+              gmael(U,kappa,i)=addii(gmael(U,kappa,i),gmael(U,j,i));
 #endif
-            ztmp=muliu(gcoeff(G,kappa,j), 2);
-            ztmp=addii(gcoeff(G,j,j), ztmp);
-            gcoeff(G,kappa,kappa)=addii(gcoeff(G,kappa,kappa), ztmp);
+            ztmp=muliu(gmael(G,kappa,j), 2);
+            ztmp=addii(gmael(G,j,j), ztmp);
+            gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
-              gcoeff(G,kappa,i)=addii(gcoeff(G,kappa,i), gcoeff(G,j,i));
+              gmael(G,kappa,i)=addii(gmael(G,kappa,i), gmael(G,j,i));
             for (i=j+1; i<kappa; i++)
-              gcoeff(G,kappa,i)=addii(gcoeff(G,kappa,i), gcoeff(G,i,j));
+              gmael(G,kappa,i)=addii(gmael(G,kappa,i), gmael(G,i,j));
             for (i=kappa+1; i<=kappamax; i++)
-              gcoeff(G,i,kappa)=addii(gcoeff(G,i,kappa), gcoeff(G,i,j));
+              gmael(G,i,kappa)=addii(gmael(G,i,kappa), gmael(G,i,j));
           }
         }
 
         else   /* we must have |X| >= 2 */
         {        	
-          tmp=ground(gcoeff(mu,kappa,j));
+          tmp=ground(gmael(mu,kappa,j));
           for (k=zeros+1; k<j; k++)
           {
-            rtmp = gmul(tmp, gcoeff(mu,j,k));
-            gcoeff(mu,kappa,k) = gsub(gcoeff(mu,kappa,k), rtmp);
+            rtmp = gmul(tmp, gmael(mu,j,k));
+            gmael(mu,kappa,k) = gsub(gmael(mu,kappa,k), rtmp);
           }
           if (!is_bigint(tmp))
             /* X is stored in a long signed int */        	  
           {        	      
             xx = itos(tmp);
             for (i=1; i<=n; i++)  
-              gcoeff(B,kappa,i) = subii(gcoeff(B,kappa,i),
-                                        mulis(gcoeff(B,j,i),xx));
+              gmael(B,kappa,i) = subii(gmael(B,kappa,i),
+                                        mulis(gmael(B,j,i),xx));
 #ifdef WITH_TRANSFORM
             for (i=1; i<=d; i++)  
-              gcoeff(U,kappa,i) = subii(gcoeff(U,kappa,i),
-                                      mulis(gcoeff(U,j,i), xx));
+              gmael(U,kappa,i) = subii(gmael(U,kappa,i),
+                                      mulis(gmael(U,j,i), xx));
 #endif
-            gcoeff(G,kappa,kappa) = subii(gcoeff(G,kappa,kappa),
-                                          mulis(gcoeff(G,kappa,j), 2*xx));
+            gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa),
+                                          mulis(gmael(G,kappa,j), 2*xx));
 
-            ztmp = mulis(gcoeff(G,j,j), xx);
+            ztmp = mulis(gmael(G,j,j), xx);
             ztmp = mulis(ztmp, xx);
-            gcoeff(G,kappa,kappa)=addii(gcoeff(G,kappa,kappa), ztmp);
+            gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
-              gcoeff(G,kappa,i) = subii(gcoeff(G,kappa,i),
-                                        mulis(gcoeff(G,j,i), xx));
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i),
+                                        mulis(gmael(G,j,i), xx));
             for (i=j+1; i<kappa; i++)
-              gcoeff(G,kappa,i) = subii(gcoeff(G,kappa,i),
-                                        mulis(gcoeff(G,i,j), xx));
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i),
+                                        mulis(gmael(G,i,j), xx));
             for (i=kappa+1; i<=kappamax; i++)
-              gcoeff(G,i,kappa) = subii(gcoeff(G,i,kappa), 
-                                        mulis(gcoeff(G,i,j), xx));
+              gmael(G,i,kappa) = subii(gmael(G,i,kappa), 
+                                        mulis(gmael(G,i,j), xx));
           }
 
           else
@@ -226,90 +226,90 @@ Babai (int kappa, GEN G, GEN B, GEN U,
               expo = 0;
               for (i=1; i<=n; i++) 
               {
-                ztmp = mulii(X, gcoeff(B,j,i));
-                gcoeff(B,kappa,i) = subii(gcoeff(B,kappa,i), ztmp);
+                ztmp = mulii(X, gmael(B,j,i));
+                gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
               }
 #ifdef WITH_TRANSFORM
               for (i=1; i<=d; i++) 
               {
-                ztmp = mulii(X, gcoeff(U,j,i));
-                gcoeff(U,kappa,i) = subii(gcoeff(U,kappa,i), ztmp);
+                ztmp = mulii(X, gmael(U,j,i));
+                gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
               }
 #endif
-              ztmp = mulii(gcoeff(G,kappa,j), X);
+              ztmp = mulii(gmael(G,kappa,j), X);
               ztmp = muliu(ztmp, 2);
-              gcoeff(G,kappa,kappa) = subii(gcoeff(G,kappa,kappa), ztmp);
-              ztmp = mulii(gcoeff(G,j,j), X);
+              gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa), ztmp);
+              ztmp = mulii(gmael(G,j,j), X);
               ztmp = mulii(ztmp, X);
-              gcoeff(G,kappa,kappa) = addii(gcoeff(G,kappa,kappa), ztmp);
+              gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
               for (i=1; i<=j; i++)
               {
-                ztmp = mulii( X, gcoeff(G,j,i));
-                gcoeff(G,kappa,i) = subii(gcoeff(G,kappa,i), ztmp);
+                ztmp = mulii( X, gmael(G,j,i));
+                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
               }
               for (i=j+1; i<kappa; i++)
               {
-                ztmp = mulii( X, gcoeff(G,i,j));
-                gcoeff(G,kappa,i) = subii(gcoeff(G,kappa,i), ztmp);
+                ztmp = mulii( X, gmael(G,i,j));
+                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
               } 
               for (i=kappa+1; i<=kappamax; i++)
               {
-                ztmp = mulii( X, gcoeff(G,i,j));
-                gcoeff(G,i,kappa) = subii(gcoeff(G,i,kappa), ztmp);
+                ztmp = mulii( X, gmael(G,i,j));
+                gmael(G,i,kappa) = subii(gmael(G,i,kappa), ztmp);
               }
             }
             else
             {
               for (i=1; i<=n; i++)  
               {
-                ztmp = mulii( X, gcoeff(B,j,i));
+                ztmp = mulii( X, gmael(B,j,i));
                 ztmp = shifti( ztmp, expo); 
-                gcoeff(B,kappa,i) = subii( 
-                    gcoeff(B,kappa,i), ztmp);
+                gmael(B,kappa,i) = subii( 
+                    gmael(B,kappa,i), ztmp);
               }
 
 #ifdef WITH_TRANSFORM
               for (i=1; i<=d; i++)  
               {
-                ztmp = mulii( X, gcoeff(U,j,i));
+                ztmp = mulii( X, gmael(U,j,i));
                 ztmp = shifti( ztmp, expo); 
-                gcoeff(U,kappa,i) = subii( 
-                    gcoeff(U,kappa,i), ztmp);
+                gmael(U,kappa,i) = subii( 
+                    gmael(U,kappa,i), ztmp);
               }
 #endif
 
-              ztmp = mulii( gcoeff(G,kappa,j), X);
+              ztmp = mulii( gmael(G,kappa,j), X);
               ztmp = shifti( ztmp, expo+1);
-              gcoeff(G,kappa,kappa) = subii( 
-                  gcoeff(G,kappa,kappa), ztmp);
-              ztmp = mulii( gcoeff(G,j,j), X);
+              gmael(G,kappa,kappa) = subii( 
+                  gmael(G,kappa,kappa), ztmp);
+              ztmp = mulii( gmael(G,j,j), X);
               ztmp = mulii( ztmp,  X);
               ztmp = shifti( ztmp, 2*expo);
-              gcoeff(G,kappa,kappa) = addii( 
-                  gcoeff(G,kappa,kappa), ztmp);
+              gmael(G,kappa,kappa) = addii( 
+                  gmael(G,kappa,kappa), ztmp);
 
               for (i=1; i<=j; i++)
               {
-                ztmp = mulii( X, gcoeff(G,j,i));
+                ztmp = mulii( X, gmael(G,j,i));
                 ztmp = shifti( ztmp, expo);
-                gcoeff(G,kappa,i) = subii( 
-                    gcoeff(G,kappa,i), ztmp);
+                gmael(G,kappa,i) = subii( 
+                    gmael(G,kappa,i), ztmp);
               }
 
               for (i=j+1; i<kappa; i++)
               {
-                ztmp = mulii( X, gcoeff(G,i,j));
+                ztmp = mulii( X, gmael(G,i,j));
                 ztmp = shifti( ztmp, expo);
-                gcoeff(G,kappa,i) = subii( 
-                    gcoeff(G,kappa,i), ztmp);
+                gmael(G,kappa,i) = subii( 
+                    gmael(G,kappa,i), ztmp);
               } 
 
               for (i=kappa+1; i<=kappamax; i++)
               {
-                ztmp = mulii( X, gcoeff(G,i,j));
+                ztmp = mulii( X, gmael(G,i,j));
                 ztmp = shifti( ztmp, expo);
-                gcoeff(G,i,kappa) = subii( 
-                    gcoeff(G,i,kappa), ztmp);
+                gmael(G,i,kappa) = subii( 
+                    gmael(G,i,kappa), ztmp);
               }
             }
           }
@@ -320,11 +320,11 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     if (test) aa = zeros+1;
   } while (test);
 
-  gel(s,zeros) = itor(gcoeff(G,kappa,kappa),prec);
+  gel(s,zeros) = itor(gmael(G,kappa,kappa),prec);
   /* the last s[kappa-1]=r[kappa][kappa] is computed only if kappa increases */
   for (k=zeros+1; k<=kappa-2; k++)
   {
-    tmp = gmul(gcoeff(mu,kappa,k), gcoeff(r,kappa,k));
+    tmp = gmul(gmael(mu,kappa,k), gmael(r,kappa,k));
     gel(s,k) = gsub(gel(s,k-1), tmp);
   }
 }
@@ -348,8 +348,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
 
   int newkappa, loops, lovasz;
 
-  n = lg(B)-1;
-  d = lg(gel(B,1))-1;
+  d = lg(B)-1;
+  n = lg(gel(B,1))-1;
   if(DEBUGLEVEL>=4)
    fprintferr ("d = %d, n=%d\n", d, n);
   if(DEBUGLEVEL>=2)
@@ -375,13 +375,13 @@ fplll (GEN G, GEN B, GEN U, long prec)
   i = 1; 
 
   do {
-    gcoeff(G,i,i) = ZV_dotsquare(row(B,i));
-    gcoeff(r,i,i) = itor(gcoeff(G,i,i), prec);
-  } while ((signe(gcoeff(G,i,i)) == 0)&&(++i <=d));
+    gmael(G,i,i) = ZV_dotsquare(gel(B,i));
+    gmael(r,i,i) = itor(gmael(G,i,i), prec);
+  } while ((signe(gmael(G,i,i)) == 0)&&(++i <=d));
   zeros = i-1; /* all vectors B[i] with i <= zeros are zero vectors */
   kappa = i+1;
   if (zeros < d)
-    gcoeff(r,zeros+1,zeros+1) = itor(gcoeff(G,zeros+1,zeros+1),prec);
+    gmael(r,zeros+1,zeros+1) = itor(gmael(G,zeros+1,zeros+1),prec);
   for (i=zeros+1; i<=d; i++)
     alpha[i]=1;
   if (DEBUGLEVEL>=4)
@@ -395,7 +395,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
     if (kappa>kappamax)
     {
       for (i=zeros+1; i<=kappa; i++)
-        gcoeff(G,kappa,i) = ZV_dotproduct(row(B,kappa), row(B,i));
+        gmael(G,kappa,i) = ZV_dotproduct(gel(B,kappa), gel(B,i));
       kappamax++; 
     }
     if (DEBUGLEVEL>=2)
@@ -435,17 +435,17 @@ fplll (GEN G, GEN B, GEN U, long prec)
       /* ************************************ */
       /* Step4: Success of Lovasz's condition */
       /* ************************************ */  
-      /* xtt * gcoeff(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
+      /* xtt * gmael(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
       
-      tmp = gmul( gcoeff(r,kappa-1,kappa-1), ctt);
+      tmp = gmul( gmael(r,kappa-1,kappa-1), ctt);
       if (DEBUGLEVEL>=4)
         fprintferr("s[%ld] is %Zs\n %Zs\n", kappa-2, gel(s,kappa-2),
-                                            gcoeff(r,kappa-1,kappa-1));
+                                            gmael(r,kappa-1,kappa-1));
       lovasz++;
       if( gcmp(tmp, gel(s,kappa-2)) <=0 ) {
         alpha[kappa] = kappa;
-        tmp = gmul( gcoeff(mu,kappa,kappa-1), gcoeff(r,kappa,kappa-1));
-        gcoeff(r,kappa,kappa) = gsub( gel(s,kappa-2), tmp);
+        tmp = gmul( gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
+        gmael(r,kappa,kappa) = gsub( gel(s,kappa-2), tmp);
         kappa++;
       } 
       else
@@ -459,7 +459,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
           lovasz++;
           kappa--;
           if (kappa<zeros+2) break;
-          tmp = gmul(gcoeff(r,kappa-1,kappa-1), ctt);
+          tmp = gmul(gmael(r,kappa-1,kappa-1), ctt);
         } while (gcmp(gel(s,kappa-2), tmp) <=0 );
 
         if (DEBUGLEVEL>=4)
@@ -494,21 +494,21 @@ fplll (GEN G, GEN B, GEN U, long prec)
         /* Step6: Update the mu's and r's */
         /* ****************************** */  
 
-        mutmp = row(mu,kappa2);
+        mutmp = shallowcopy(gel(mu,kappa2));
         for (i=kappa2; i>kappa; i--)
           for (j=1;j<=d;j++)
-            gcoeff(mu,i,j) = gcoeff(mu,i-1,j);
+            gmael(mu,i,j) = gmael(mu,i-1,j);
         for (j=1;j<=d;j++)
-          gcoeff(mu,kappa,j) = gel(mutmp,j);
+          gmael(mu,kappa,j) = gel(mutmp,j);
 
-        mutmp = row(r,kappa2);
+        mutmp = shallowcopy(gel(r,kappa2));
         for (i=kappa2; i>kappa; i--)
           for (j=1;j<=d;j++)
-            gcoeff(r,i,j) = gcoeff(r,i-1,j);
+            gmael(r,i,j) = gmael(r,i-1,j);
         for (j=1;j<=d;j++)
-          gcoeff(r,kappa,j) = gel(mutmp,j);
+          gmael(r,kappa,j) = gel(mutmp,j);
 
-        gcoeff(r,kappa,kappa) = gel(s,kappa-1);
+        gmael(r,kappa,kappa) = gel(s,kappa-1);
 
         if (DEBUGLEVEL>=4)
           fprintferr("Step 6 is over\n");
@@ -517,40 +517,40 @@ fplll (GEN G, GEN B, GEN U, long prec)
         /* Step7: Update B, G, U */
         /* ********************* */  	  
 
-        Btmp = row(B, kappa2);
+        Btmp = shallowcopy(gel(B, kappa2));
         for (i=kappa2; i>kappa; i--)
           for(j=1; j<=n; j++)
-            gcoeff(B,i,j) = gcoeff(B,i-1,j);
+            gmael(B,i,j) = gmael(B,i-1,j);
         for(j=1; j<=n; j++)
-          gcoeff(B,kappa,j) = gel(Btmp,j);
+          gmael(B,kappa,j) = gel(Btmp,j);
 
 #ifdef WITH_TRANSFORM
-          Btmp = row(U,kappa2);
+          Btmp = shallowcopy(gel(U,kappa2));
           for (i=kappa2; i>kappa; i--)
             for(j=1; j<=n; j++)
-              gcoeff(U,i,j) = gcoeff(U,i-1,j);
+              gmael(U,i,j) = gmael(U,i-1,j);
           for(j=1; j<=n; j++)
-            gcoeff(U,kappa,j) = gel(Btmp, j);
+            gmael(U,kappa,j) = gel(Btmp, j);
 #endif
           for (i=1; i<=kappa2; i++)
-            gel(SPtmp,i) = gcoeff(G,kappa2,i);
+            gel(SPtmp,i) = gmael(G,kappa2,i);
           for (i=kappa2+1; i<=kappamax; i++)
-            gel(SPtmp,i) = gcoeff(G,i,kappa2);
+            gel(SPtmp,i) = gmael(G,i,kappa2);
           for (i=kappa2; i>kappa; i--)
           {
             for (j=1; j<kappa; j++)
-              gcoeff(G,i,j) = gcoeff(G,i-1,j);
-            gcoeff(G,i,kappa) = gel(SPtmp,i-1);
+              gmael(G,i,j) = gmael(G,i-1,j);
+            gmael(G,i,kappa) = gel(SPtmp,i-1);
             for (j=kappa+1; j<=i; j++)
-              gcoeff(G,i,j) = gcoeff(G,i-1,j-1);
+              gmael(G,i,j) = gmael(G,i-1,j-1);
             for (j=kappa2+1; j<=kappamax; j++)
-              gcoeff(G,j,i) = gcoeff(G,j,i-1);     
+              gmael(G,j,i) = gmael(G,j,i-1);     
           }
           for (i=1; i<kappa; i++)
-            gcoeff(G,kappa,i) = gel(SPtmp,i);
-          gcoeff(G,kappa,kappa) = gel(SPtmp,kappa2);
+            gmael(G,kappa,i) = gel(SPtmp,i);
+          gmael(G,kappa,kappa) = gel(SPtmp,kappa2);
           for (i=kappa2+1; i<=kappamax; i++)
-            gcoeff(G,i,kappa) = gel(SPtmp,i);
+            gmael(G,i,kappa) = gel(SPtmp,i);
           if (DEBUGLEVEL>=4)
           {
             output(B);
@@ -563,11 +563,11 @@ fplll (GEN G, GEN B, GEN U, long prec)
           /* ************************************** */  	  
 
 
-          if ( (kappa==zeros+1) && (signe(gcoeff(G,kappa,kappa))==0) )
+          if ( (kappa==zeros+1) && (signe(gmael(G,kappa,kappa))==0) )
           {
             zeros++;
             kappa++;
-            gcoeff(r,kappa,kappa) = gcoeff(G,kappa,kappa);
+            gmael(r,kappa,kappa) = gmael(G,kappa,kappa);
           }
           kappa++;
           if (DEBUGLEVEL)
@@ -583,14 +583,14 @@ fplll (GEN G, GEN B, GEN U, long prec)
   {
     tmp= gen_1;
     for (i = zeros+1; i<=d; i++)
-      tmp = gmul( tmp, gcoeff(r,i,i));
+      tmp = gmul( tmp, gmael(r,i,i));
     tmp= gsqrt(tmp,prec);
     fprintferr( "\nLoop iterations = %d \n", loops);
     fprintferr( "Lovasz tests = %d \n", lovasz);
     if (zeros < d)
     {
       fprintferr("Vol(L) is %Zs\n", tmp);
-      tmp = gsqrt(gcoeff(r,zeros+1,zeros+1),prec);
+      tmp = gsqrt(gmael(r,zeros+1,zeros+1),prec);
       fprintferr("||b_1|| is %Zs \n", tmp); 
     }
   }
