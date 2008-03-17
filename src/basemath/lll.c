@@ -551,5 +551,8 @@ LLL(GEN B, long flag)
   B = shallowcopy(B);
   if (flag) U = matid(n);
   B = fplll(G, B, U, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
-  return gerepilecopy(av, mkvec2(B,compute_B(B)));
+  if (flag)
+    return gerepilecopy(av, B);
+  else
+    return gerepilecopy(av, mkvec2(B,compute_B(B)));
 }
