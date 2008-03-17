@@ -272,7 +272,7 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 
 static GEN
-fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
+fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
 {
   pari_sp av, av2, lim;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
@@ -281,7 +281,7 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
   GEN SPtmp;
   GEN alpha;
   GEN U=ptrU?*ptrU:NULL;
-  const long triangular=0;
+  const long triangular = 0;
   pari_timer T;
   int newkappa, loops, lovasz;
 
@@ -343,12 +343,7 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
     }
 
     if (low_stack(lim, stack_lim(av,1)))
-    {
-      if (U)
-        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
-      else
-        gerepileall(av,5,&B,&G,&mu,&r,&s);
-    }
+        gerepileall(av,U?6:5,&B,&G,&mu,&r,&s,&U);
 
     /* ********************************** */
     /* Step3: Call to the Babai algorithm */
@@ -369,8 +364,6 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
     /* ************************************ */
     /* Step4: Success of Lovasz's condition */
     /* ************************************ */
-    /* xtt * gmael(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
-
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
     lovasz++;
     if (cmprr(tmp, gel(s,kappa-1)) <=0 )
@@ -460,80 +453,8 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
     msgTIMER(&T,"LLL");
   if (ptrU) *ptrU=U;
   if (ptrG) *ptrG=G;
+  if (ptrr) *ptrr = mattodiagonal_i(r);
   return B;
-}
-
-/* principal minors in a ring A: all computations are done within A
- * (Gauss-Bareiss algorithm) */
-static GEN
-gminors(GEN a)
-{
-  pari_sp av, lim;
-  long nbco = lg(a)-1,i,j,k,s;
-  GEN p,pprec;
-  GEN B;
-
-  if (typ(a)!=t_MAT) pari_err(mattype1,"det");
-  if (!nbco) return gen_1;
-  if (DEBUGLEVEL > 7) (void)timer2();
-
-  av = avma; lim = stack_lim(av,2);
-  a = shallowcopy(a); s = 1;
-  for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
-  {
-    GEN ci, ck, m, p1;
-    int diveuc = (gcmp1(pprec)==0);
-
-    p = gcoeff(a,i,i);
-    if (gcmp0(p))
-    {
-      k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
-      if (k>nbco) return gerepilecopy(av, p);
-      lswap(a[k], a[i]); s = -s;
-      p = gcoeff(a,i,i);
-    }
-    ci = gel(a,i);
-    for (k=i+1; k<=nbco; k++)
-    {
-      ck = gel(a,k); m = gel(ck,i);
-      if (gcmp0(m))
-      {
-	if (gcmp1(p))
-	{
-	  if (diveuc)
-	    gel(a,k) = gdiv(gel(a,k), pprec);
-	}
-	else
-	  for (j=i+1; j<=nbco; j++)
-	  {
-	    p1 = gmul(p, gel(ck,j));
-	    if (diveuc) p1 = gdiv(p1,pprec);
-	    gel(ck,j) = p1;
-	  }
-      }
-      else
-      {
-	m = gneg_i(m);
-	for (j=i+1; j<=nbco; j++)
-	{
-	  p1 = gadd(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
-	  if (diveuc) p1 = gdiv(p1,pprec);
-	  gel(ck,j) = p1;
-	}
-      }
-      if (low_stack(lim,stack_lim(av,2)))
-      {
-	if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
-	gerepileall(av,2, &a,&pprec); p = gcoeff(a,i,i); ci = gel(a,i);
-      }
-    }
-    if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
-  }
-  B=cgetg(lg(a)+1, t_COL);
-  gel(B,1) = gen_1;
-  for(i=1; i<lg(a); i++)
-    gel(B,i+1) = absi(gmael(a,i,i));
-  return gerepileupto(av,B);
 }
 
 static long
@@ -559,10 +480,7 @@ LLLint(GEN B, long D, GEN *M)
   B = shallowcopy(B);
   eta = strtor(ETA,prec);
   delta  = subsr(1, divsr(1, stor(D, prec)));
-  B = fplll(B, &G, NULL, delta, eta, prec);
-  if (!M) return gerepilecopy(av, B);
-  *M=gminors(gmul(shallowtrans(B),B));
-  gerepileall(av, 2, &B, M);
+  B = fplll(B, &G, NULL, M, delta, eta, prec);
+  gerepileall(av, M?2:1, &B, M);
   return B;
 }
-
