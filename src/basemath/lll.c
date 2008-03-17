@@ -123,7 +123,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             if (U)
               for (i=1; i<=d; i++)
                 gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
-            ztmp=subii(gmael(G,j,j), muliu(gmael(G,kappa,j), 2));
+            ztmp = shifti(gmael(G,kappa,j), 1);
+            ztmp = subii(gmael(G,j,j), ztmp);
             gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
               gmael(G,kappa,i) = subii(gmael(G,kappa,i), gmael(G,j,i));
@@ -142,7 +143,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             if (U)
               for (i=1; i<=d; i++)
                 gmael(U,kappa,i)=addii(gmael(U,kappa,i),gmael(U,j,i));
-            ztmp=addii(gmael(G,j,j), muliu(gmael(G,kappa,j), 2));
+            ztmp = shifti(gmael(G,kappa,j), 1);
+            ztmp = addii(gmael(G,j,j), ztmp);
             gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
               gmael(G,kappa,i)=addii(gmael(G,kappa,i), gmael(G,j,i));
@@ -174,10 +176,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
               for (i=1; i<=d; i++)
                 gmael(U,kappa,i) = subii(gmael(U,kappa,i),
                                          mulis(gmael(U,j,i), xx));
-            gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa),
-                                         mulii(gmael(G,kappa,j), mulss(2,xx)));
-
-            ztmp = mulii(gmael(G,j,j), sqrs(xx));
+            ztmp = shifti(mulis(gmael(G,kappa,j), xx), 1);
+            ztmp = subii(mulii(gmael(G,j,j), sqrs(xx)), ztmp);
             gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
               gmael(G,kappa,i) = subii(gmael(G,kappa,i),
@@ -205,7 +205,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
                 gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
               }
 
-            ztmp = mulii(gmael(G,kappa,j), shifti(X,1));
+            ztmp = shifti(mulii(gmael(G,kappa,j), X), 1);
             ztmp = subii(mulii(gmael(G,j,j), sqri(X)), ztmp);
             gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
 
