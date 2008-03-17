@@ -61,8 +61,6 @@ Babai (int kappa, GEN G, GEN B, GEN U,
        GEN eta, long prec)
 {
   long i, j, k, test, sg;
-  long expo;
-  GEN X;
   long aa = (a > zeros)? a : zeros+1;
   GEN tmp, rtmp, ztmp;
   long loops=0;
@@ -193,81 +191,41 @@ Babai (int kappa, GEN G, GEN B, GEN U,
                                         mulis(gmael(G,i,j), xx));
           } else
           {
-            expo = gexpo(tmp)-bit_accuracy(lg(tmp));
-            X = gfloor2n(tmp,-expo);
-
-            if (expo <= 0)
+            long expo = gexpo(tmp)-bit_accuracy(lg(tmp));
+            GEN X = shifti(gfloor2n(tmp, -expo), expo);
+            for (i=1; i<=n; i++)
             {
-              X = shifti(X,expo);
-              expo = 0;
-              for (i=1; i<=n; i++)
-              {
-                ztmp = mulii(X, gmael(B,j,i));
-                gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
-              }
-              if (U)
-                for (i=1; i<=d; i++)
-                {
-                  ztmp = mulii(X, gmael(U,j,i));
-                  gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
-                }
-              ztmp = mulii(gmael(G,kappa,j), muliu(X,2));
-              gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa), ztmp);
-              ztmp = mulii(gmael(G,j,j), sqri(X));
-              gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
-              for (i=1; i<=j; i++)
-              {
-                ztmp = mulii(X, gmael(G,j,i));
-                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
-              }
-              for (i=j+1; i<kappa; i++)
-              {
-                ztmp = mulii(X, gmael(G,i,j));
-                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
-              }
-              for (i=kappa+1; i<=kappamax; i++)
-              {
-                ztmp = mulii(X, gmael(G,i,j));
-                gmael(G,i,kappa) = subii(gmael(G,i,kappa), ztmp);
-              }
+              ztmp = mulii(X, gmael(B,j,i));
+              gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
             }
-            else
+
+            if (U)
+              for (i=1; i<=d; i++)
+              {
+                ztmp = mulii(X, gmael(U,j,i));
+                gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
+              }
+
+            ztmp = mulii(gmael(G,kappa,j), shifti(X,1));
+            ztmp = subii(mulii(gmael(G,j,j), sqri(X)), ztmp);
+            gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
+
+            for (i=1; i<=j; i++)
             {
-              GEN sX = shifti(X, expo);
-              for (i=1; i<=n; i++)
-              {
-                ztmp = mulii(sX, gmael(B,j,i));
-                gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
-              }
+              ztmp = mulii(X, gmael(G,j,i));
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
+            }
 
-              if (U)
-                for (i=1; i<=d; i++)
-                {
-                  ztmp = mulii(sX, gmael(U,j,i));
-                  gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
-                }
+            for (i=j+1; i<kappa; i++)
+            {
+              ztmp = mulii(X, gmael(G,i,j));
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
+            }
 
-              ztmp = shifti(mulii(gmael(G,kappa,j), sX), 1);
-              ztmp = subii(mulii(gmael(G,j,j), sqri(sX)), ztmp);
-              gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
-
-              for (i=1; i<=j; i++)
-              {
-                ztmp = mulii(sX, gmael(G,j,i));
-                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
-              }
-
-              for (i=j+1; i<kappa; i++)
-              {
-                ztmp = mulii(sX, gmael(G,i,j));
-                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
-              }
-
-              for (i=kappa+1; i<=kappamax; i++)
-              {
-                ztmp = mulii(sX, gmael(G,i,j));
-                gmael(G,i,kappa) = subii(gmael(G,i,kappa), ztmp);
-              }
+            for (i=kappa+1; i<=kappamax; i++)
+            {
+              ztmp = mulii(X, gmael(G,i,j));
+              gmael(G,i,kappa) = subii(gmael(G,i,kappa), ztmp);
             }
           }
         }
