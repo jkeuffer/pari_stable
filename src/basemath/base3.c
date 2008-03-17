@@ -734,11 +734,11 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       return poltobasis(nf,x);
     }
     case t_COL:
-      if (RgV_isscalar(x)) return gel(x,1);
-      if (lg(x) == lg(gel(nf,7))) break;
-    default: pari_err(typeer,"nf_to_scalar_or_basis");
+      if (lg(x) != lg(gel(nf,7))) break;
+      return RgV_isscalar(x)? gel(x,1): x;
   }
-  return x;
+  pari_err(typeer,"nf_to_scalar_or_basis");
+  return NULL; /* not reached */
 }
 GEN
 algtobasis_cp(GEN nf, GEN x)
