@@ -618,7 +618,11 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
     return lll_trivial(x,flag);
   }
   if (flag==(LLL_IM|LLL_INPLACE))
-    return LLLint(x,D,ptB);
+  {
+    x = LLLint(x,D,ptB);
+    if (ptB) *ptB = GS_norms(*ptB, DEFAULTPREC);
+    return x;
+  }
   fl = cgetg(lx,t_VECSMALL);
   hx = lg(x[1]);
   if (gram && hx != lx) pari_err(mattype1,"lllint");
