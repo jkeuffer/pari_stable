@@ -561,6 +561,6 @@ LLL(GEN B, GEN *ptrU, GEN *M)
   B = fplll(B, ptrU, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
   if (!ptrU) B=gerepileupto(av,B);
   else gerepileall(av, 2, &B, ptrU);
-  if (M) *M=gminors(B);
+  if (M) *M=gminors(gmul(shallowtrans(B),B));
   return B;
 }
