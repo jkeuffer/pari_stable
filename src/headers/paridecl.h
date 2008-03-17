@@ -1699,7 +1699,7 @@ GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 
 /* lll.c */
 
-GEN     LLL(GEN B, long flag);
+GEN     LLL(GEN B, GEN *U, GEN *M);
 
 /* members.c */
 

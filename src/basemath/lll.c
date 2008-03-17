@@ -272,7 +272,7 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 
 static GEN
-fplll (GEN B, GEN U, GEN delta, GEN eta, long prec)
+fplll (GEN B, GEN *ptrU, GEN delta, GEN eta, long prec)
 {
   pari_sp ltop=avma, av, av2, lim;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
@@ -280,6 +280,7 @@ fplll (GEN B, GEN U, GEN delta, GEN eta, long prec)
   GEN tmp;
   GEN SPtmp;
   GEN alpha;
+  GEN U=ptrU?*ptrU:NULL;
   const long triangular=0;
   pari_timer T;
   int newkappa, loops, lovasz;
@@ -458,7 +459,11 @@ fplll (GEN B, GEN U, GEN delta, GEN eta, long prec)
   if (DEBUGLEVEL>=2)
     msgTIMER(&T,"LLL");
   if (U)
-    return gerepilecopy(ltop,mkvec2(B,U));
+  {
+    gerepileall(ltop, 2, &B, &U);
+    *ptrU=U;
+    return B;
+  }
   else
     return gerepilecopy(ltop,B);
 }
@@ -537,14 +542,13 @@ gminors(GEN a)
 }
 
 GEN
-LLL(GEN B, long flag)
+LLL(GEN B, GEN *ptrU, GEN *M)
 {
   pari_sp av=avma;
   if (typ(B)!=t_MAT) pari_err(typeer,"LLL");
   long prec = DEFAULTPREC;
   long n = lg(B)-1;
   long d = lg(gel(B,1))-1;
-  GEN U = NULL;
   GEN eta = strtor(ETA,prec);
   GEN delta  = strtor(DELTA,prec);
   double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
@@ -553,10 +557,10 @@ LLL(GEN B, long flag)
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
   goodprec = nbits2prec(goodprec); 
   B = shallowcopy(B);
-  if (flag) U = matid(n);
-  B = fplll(B, U, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
-  if (flag)
-    return gerepilecopy(av, B);
-  else
-    return gerepilecopy(av, mkvec2(B,gminors(B)));
+  if (ptrU) *ptrU = matid(n);
+  B = fplll(B, ptrU, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
+  if (!ptrU) B=gerepileupto(av,B);
+  else gerepileall(av, 2, &B, ptrU);
+  if (M) *M=gminors(B);
+  return B;
 }
