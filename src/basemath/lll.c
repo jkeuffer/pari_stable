@@ -1,5 +1,5 @@
 /*
-  Copyright 2005, 2006 Damien Stehlé.
+  Copyright 2005, 2006 Damien Stehle'.
 
   This program is free software; you can redistribute it and/or modify it
   under the terms of the GNU General Public License as published by the
@@ -17,7 +17,7 @@
   02111-1307, USA.
 
   This program implements ideas from the paper "Floating-point LLL Revisited", 
-  by Phong Nguyen and Damien Stehlé, in the Proceedings of Eurocrypt'2005, 
+  by Phong Nguyen and Damien Stehle', in the Proceedings of Eurocrypt'2005, 
   Springer-Verlag; and was partly inspired by Shoup's NTL library: 
   http://www.shoup.net/ntl/
 
@@ -37,7 +37,6 @@
 
 GEN halfplus, onedothalfplus, ctt;
 
-// #define VERBOSE
 // #define TRIANGULAR
 // #define WITH_TRANSFORM
 
@@ -46,6 +45,44 @@ GEN halfplus, onedothalfplus, ctt;
 #define SHIFT 0
 #endif
 #endif
+
+static void
+Print_matf (GEN B, int d, int n)
+{
+  int i, j;
+  fprintferr("[");
+  for (i=1;i<=d;i++)
+    {
+      fprintferr("[");
+      for (j=1;j<=n;j++)
+        {
+          fprintferr("% .9Ze",gmael(B,i,j));
+          if (j < n) fprintferr(" ");
+        }
+      fprintferr("]\n");
+    }
+  fprintferr("]\n");
+}
+
+static void
+Print_mat (GEN B, int d, int n)
+{
+  int i, j;
+  fprintferr("[");
+  for (i=1;i<=d;i++)
+    {
+      fprintferr("[");
+      for (j=1;j<=n;j++)
+        {
+          fprintferr("%Zd",gmael(B,i,j));
+          if (j < n) fprintferr(" ");
+        }
+      fprintferr("]\n");
+    }
+  fprintferr("]\n");
+}
+
+
 
 /* Reference for the algorithm:
 Floating-Point LLL Revisited, by Phong Nguyen and Damien Stehle
@@ -75,19 +112,21 @@ Babai (int kappa, GEN G, GEN B, GEN U,
   GEN X;
   long aa = (a > zeros)? a : zeros+1;
   GEN tmp, rtmp, ztmp;
-  if (DEBUGLEVEL)
+  long loops=0;
+  if (DEBUGLEVEL>=4)
   {
-    fprintferr("\nr: \n%Zs\n",r);
+    fprintferr("\nr: \n");
+    Print_matf(r, kappamax, kappamax);
     fprintferr("\n          STARTING BABAI WITH k=%d\n", kappa);
-    fprintferr("\nmu: \n%Zs\n",mu);
+    fprintferr("\nmu: \n");
+    Print_matf(mu, kappamax, kappamax);
     fprintferr("a is %d, zeros is %d, aa is %d\n", a, zeros, aa);
-    fprintferr("%Zs\n",B);
+    Print_mat(B, kappamax, n);
   }
 
-  do
-  {
+  do {
     test=0;
-
+    loops++;
     /* ************************************** */
     /* Step2: compute the GSO for stage kappa */
     /* ************************************** */
@@ -97,7 +136,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
       if (j > zeros+2)
       {
         tmp  = gmul(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
-        rtmp = gsub(itor(gmael(G,kappa,j),prec), tmp);
+        rtmp = itor(gmael(G,kappa,j), prec);
+        rtmp = gsub(rtmp, tmp);
         for (k=zeros+2; k<j-1; k++)
         {
           tmp  = gmul(gmael(mu,j,k), gmael(r,kappa,k));
@@ -114,12 +154,14 @@ Babai (int kappa, GEN G, GEN B, GEN U,
       }
       else
         gmael(r,kappa,j) = itor(gmael(G,kappa,j), prec);
-      gmael(mu,kappa,j)= gdiv(gmael(r,kappa,j), gmael(r,j,j));
+      gmael(mu,kappa,j)  = gdiv(gmael(r,kappa,j), gmael(r,j,j));
     }
     if (DEBUGLEVEL>=4)
     {
-      fprintferr("\nmu:\n %Zs\n", mu);
-      fprintferr("\nr :\n %Zs\n", r);
+      fprintferr("\nmu :\n");
+      Print_matf(mu, kappa, kappa);
+      fprintferr("\nr :\n");
+      Print_matf(r, kappa, kappa);
     }
 
     /* **************************** */
@@ -130,6 +172,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     {
       /* test of the relaxed size-reduction condition */
       tmp = mpabs(gmael(mu,kappa,j));
+      if (DEBUGLEVEL>=4)
+        fprintferr( "tmp is : %Zs\n",tmp);
       if (gcmp(tmp, halfplus) > 0) 
       {
         test = 1;
@@ -152,11 +196,11 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             ztmp=subii(gmael(G,j,j), ztmp);
             gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
-              gmael(G,kappa,i)=subii(gmael(G,kappa,i), gmael(G,j,i)); 
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i), gmael(G,j,i)); 
             for (i=j+1; i<kappa; i++)
-              gmael(G,kappa,i)=subii(gmael(G,kappa,i), gmael(G,i,j));
+              gmael(G,kappa,i) = subii(gmael(G,kappa,i), gmael(G,i,j));
             for (i=kappa+1; i<=kappamax; i++)
-              gmael(G,i,kappa)=subii(gmael(G,i,kappa), gmael(G,i,j));
+              gmael(G,i,kappa) = subii(gmael(G,i,kappa), gmael(G,i,j));
           }
           else          /* otherwise X is -1 */ 
           {
@@ -183,16 +227,24 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 
         else   /* we must have |X| >= 2 */
         {        	
-          tmp=ground(gmael(mu,kappa,j));
+          rtmp = rtor(gmael(mu,kappa,j),prec);
+          tmp=itor(ceil_safe(rtmp),prec);
+
           for (k=zeros+1; k<j; k++)
           {
             rtmp = gmul(tmp, gmael(mu,j,k));
             gmael(mu,kappa,k) = gsub(gmael(mu,kappa,k), rtmp);
           }
-          if (!is_bigint(tmp))
+          if (0 && !is_bigint(tmp))
             /* X is stored in a long signed int */        	  
           {        	      
             xx = itos(tmp);
+            if (DEBUGLEVEL>=4)
+            {
+              fprintferr("          xx[%d] is %ld\n", j, xx);
+              fprintferr("          and tmp was %Zs\n",tmp);
+            }
+
             for (i=1; i<=n; i++)  
               gmael(B,kappa,i) = subii(gmael(B,kappa,i),
                                         mulis(gmael(B,j,i),xx));
@@ -220,9 +272,17 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 
           else
           {
-            X = grndtoi(tmp,&expo);
+            expo = gexpo(tmp)-bit_accuracy(lg(tmp));
+            X = gfloor2n(tmp,-expo);
+            if (DEBUGLEVEL>=4)
+            {
+              fprintferr("tmp is %Zs\n",tmp);
+              fprintferr("and expo is %d, and X is %Zs\n", (int) expo,X);
+            }
+
             if (expo <= 0)
             {
+              X = shifti(X,expo);
               expo = 0;
               for (i=1; i<=n; i++) 
               {
@@ -292,24 +352,21 @@ Babai (int kappa, GEN G, GEN B, GEN U,
               {
                 ztmp = mulii( X, gmael(G,j,i));
                 ztmp = shifti( ztmp, expo);
-                gmael(G,kappa,i) = subii( 
-                    gmael(G,kappa,i), ztmp);
+                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
               }
 
               for (i=j+1; i<kappa; i++)
               {
                 ztmp = mulii( X, gmael(G,i,j));
                 ztmp = shifti( ztmp, expo);
-                gmael(G,kappa,i) = subii( 
-                    gmael(G,kappa,i), ztmp);
+                gmael(G,kappa,i) = subii(gmael(G,kappa,i), ztmp);
               } 
 
               for (i=kappa+1; i<=kappamax; i++)
               {
                 ztmp = mulii( X, gmael(G,i,j));
                 ztmp = shifti( ztmp, expo);
-                gmael(G,i,kappa) = subii( 
-                    gmael(G,i,kappa), ztmp);
+                gmael(G,i,kappa) = subii(gmael(G,i,kappa), ztmp);
               }
             }
           }
@@ -318,14 +375,27 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     }
     /* Anything happened? */
     if (test) aa = zeros+1;
+    if (DEBUGLEVEL>=4)
+    {
+      fprintferr("          test is %d\n", test);
+      fprintferr("\nmu: \n");
+      Print_matf (mu, kappa, kappa);
+      fprintferr("\nr: \n");
+      Print_matf (r, kappa, kappa);
+    }
   } while (test);
 
-  gel(s,zeros) = itor(gmael(G,kappa,kappa),prec);
+  gel(s,zeros) = itor(gmael(G,kappa,kappa), prec);
   /* the last s[kappa-1]=r[kappa][kappa] is computed only if kappa increases */
   for (k=zeros+1; k<=kappa-2; k++)
   {
     tmp = gmul(gmael(mu,kappa,k), gmael(r,kappa,k));
     gel(s,k) = gsub(gel(s,k-1), tmp);
+  }
+  if (DEBUGLEVEL>=4)
+  {
+    fprintferr("          Number of loops is %d\n", loops);
+    Print_mat (G, kappamax, kappamax);
   }
 }
 
@@ -355,7 +425,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
   if(DEBUGLEVEL>=2)
   {
     fprintferr("Entering LLL^2: LLL-reduction factors(%Zs,%Zs)\n",ctt,halfplus);
-    fprintferr("Working precision set to %d bits\n", prec);
+    fprintferr("Working precision set to %d words\n", prec);
   }
 
   alpha = cgetg(d+1, t_VECSMALL);
@@ -364,6 +434,12 @@ fplll (GEN G, GEN B, GEN U, long prec)
   r  = zeromatcopy(d,d);
   s  = zerovec(d+2)+1;
   SPtmp = zerovec(d+1);
+
+  if (DEBUGLEVEL>=4)
+  {
+    Print_mat (B, d, n);
+    fprintferr("Step 1 is over\n");
+  }
 
   /* ********************************* */
   /* Step2: Initializing the main loop */
@@ -381,7 +457,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
   zeros = i-1; /* all vectors B[i] with i <= zeros are zero vectors */
   kappa = i+1;
   if (zeros < d)
-    gmael(r,zeros+1,zeros+1) = itor(gmael(G,zeros+1,zeros+1),prec);
+    gmael(r,zeros+1,zeros+1) = itor(gmael(G,zeros+1,zeros+1), prec);
   for (i=zeros+1; i<=d; i++)
     alpha[i]=1;
   if (DEBUGLEVEL>=4)
@@ -408,6 +484,16 @@ fplll (GEN G, GEN B, GEN U, long prec)
             kappa, loops);
       }
     }
+    if (DEBUGLEVEL>=4)
+    {
+      fprintferr("alpha= ");
+      for (i=zeros+1; i<=d; i++)
+        fprintferr("%d ",alpha[i]);
+      fprintferr("\n");
+      fprintferr("entering the while loop with k=%d\n", kappa);
+      Print_mat (B, d, n);
+    }
+
       /* ********************************** */
       /* Step3: Call to the Babai algorithm */
       /* ********************************** */   
@@ -429,7 +515,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
       if(DEBUGLEVEL>=4)
       {
         fprintferr("Step 3 is over\n");
-        output(B);output(r);
+        Print_mat(B, kappamax, n);
+        Print_matf(r, kappamax, kappamax);
       }
 
       /* ************************************ */
@@ -437,15 +524,16 @@ fplll (GEN G, GEN B, GEN U, long prec)
       /* ************************************ */  
       /* xtt * gmael(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
       
-      tmp = gmul( gmael(r,kappa-1,kappa-1), ctt);
+      tmp = gmul(gmael(r,kappa-1,kappa-1), ctt);
       if (DEBUGLEVEL>=4)
         fprintferr("s[%ld] is %Zs\n %Zs\n", kappa-2, gel(s,kappa-2),
                                             gmael(r,kappa-1,kappa-1));
       lovasz++;
-      if( gcmp(tmp, gel(s,kappa-2)) <=0 ) {
+      if (gcmp(tmp, gel(s,kappa-2)) <=0 )
+      {
         alpha[kappa] = kappa;
-        tmp = gmul( gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
-        gmael(r,kappa,kappa) = gsub( gel(s,kappa-2), tmp);
+        tmp = gmul(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
+        gmael(r,kappa,kappa) = gsub(gel(s,kappa-2), tmp);
         kappa++;
       } 
       else
@@ -553,15 +641,14 @@ fplll (GEN G, GEN B, GEN U, long prec)
             gmael(G,i,kappa) = gel(SPtmp,i);
           if (DEBUGLEVEL>=4)
           {
-            output(B);
-            output(G);
+            Print_mat (B, kappamax, n);
+            Print_mat (G, kappamax, kappamax);
             fprintferr("Step 7 is over\n");
           } 
 
           /* ************************************** */
           /* Step8: Prepare the next loop iteration */
           /* ************************************** */  	  
-
 
           if ( (kappa==zeros+1) && (signe(gmael(G,kappa,kappa))==0) )
           {
@@ -570,12 +657,12 @@ fplll (GEN G, GEN B, GEN U, long prec)
             gmael(r,kappa,kappa) = gmael(G,kappa,kappa);
           }
           kappa++;
-          if (DEBUGLEVEL)
-          {
-            output(B); output(G);
+          if (DEBUGLEVEL>=4)
+          { 
+            Print_mat (B, kappamax, n);
+            Print_mat (G, kappamax, kappamax);
             fprintferr("Step 8 is over, new kappa=%d\n",kappa);
           }
-
         }
     }
 
