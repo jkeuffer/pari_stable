@@ -406,8 +406,8 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       /* Step7: Update B, G, U */
       /* ********************* */
 
-      rotate(B,kappa2,kappa,d);
-      if (U) rotate(U,kappa2,kappa,d);
+      rotate(B,kappa2,kappa,n);
+      if (U) rotate(U,kappa2,kappa,n);
 
       for (i=1; i<=kappa2; i++)
         gel(SPtmp,i) = gmael(G,kappa2,i);
