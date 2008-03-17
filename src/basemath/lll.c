@@ -13,10 +13,10 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file is a conversion to libpari API of the file proved.c in fplll-1.3
+/* This file is a conversion to libpari API and data types 
+   of the file proved.c in fplll-1.3
    by Damien Stehle'.
-*/
-/*
+
   Copyright 2005, 2006 Damien Stehle'.
 
   This program is free software; you can redistribute it and/or modify it
@@ -219,9 +219,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             for (i=kappa+1; i<=kappamax; i++)
               gmael(G,i,kappa)=addii(gmael(G,i,kappa), gmael(G,i,j));
           }
-        }
-
-        else   /* we must have |X| >= 2 */
+        } else   /* we must have |X| >= 2 */
         {        	
           rtmp = rtor(gmael(mu,kappa,j),prec);
           tmp=itor(ceil_safe(rtmp),prec);
@@ -264,9 +262,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             for (i=kappa+1; i<=kappamax; i++)
               gmael(G,i,kappa) = subii(gmael(G,i,kappa),
                                         mulis(gmael(G,i,j), xx));
-          }
-
-          else
+          } else
           {
             expo = gexpo(tmp)-bit_accuracy(lg(tmp));
             X = gfloor2n(tmp,-expo);
@@ -332,8 +328,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 #endif
 
               ztmp = shifti(mulii(gmael(G,kappa,j), sX), 1);
-              gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa), ztmp);
-              ztmp = mulii(gmael(G,j,j), sqri(sX));
+              ztmp = subii(mulii(gmael(G,j,j), sqri(sX)), ztmp);
               gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
 
               for (i=1; i<=j; i++)
@@ -439,7 +434,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
   do {
     gmael(G,i,i) = ZV_dotsquare(gel(B,i));
     gmael(r,i,i) = itor(gmael(G,i,i), prec);
-  } while ((signe(gmael(G,i,i)) == 0)&&(++i <=d));
+  } while (signe(gmael(G,i,i)) == 0 && (++i <=d));
   zeros = i-1; /* all vectors B[i] with i <= zeros are zero vectors */
   kappa = i+1;
   if (zeros < d)
@@ -638,7 +633,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
       /* Step8: Prepare the next loop iteration */
       /* ************************************** */
 
-      if ( (kappa==zeros+1) && (signe(gmael(G,kappa,kappa))==0) )
+      if ( kappa==zeros+1 && signe(gmael(G,kappa,kappa))==0 )
       {
         zeros++;
         kappa++;
@@ -656,9 +651,9 @@ fplll (GEN G, GEN B, GEN U, long prec)
 
   if (DEBUGLEVEL>=2)
   {
-    tmp= gen_1;
+    tmp = gen_1;
     for (i = zeros+1; i<=d; i++)
-      tmp = gmul( tmp, gmael(r,i,i));
+      tmp = gmul(tmp, gmael(r,i,i));
     tmp= gsqrt(tmp,prec);
     fprintferr( "\nLoop iterations = %d \n", loops);
     fprintferr( "Lovasz tests = %d \n", lovasz);
