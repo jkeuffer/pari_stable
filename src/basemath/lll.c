@@ -272,9 +272,9 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 
 static GEN
-fplll (GEN B, GEN *ptrU, GEN delta, GEN eta, long prec)
+fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN delta, GEN eta, long prec)
 {
-  pari_sp ltop=avma, av, av2, lim;
+  pari_sp av, av2, lim;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
   GEN G, mu, r, s;
   GEN tmp;
@@ -458,14 +458,9 @@ fplll (GEN B, GEN *ptrU, GEN delta, GEN eta, long prec)
 
   if (DEBUGLEVEL>=2)
     msgTIMER(&T,"LLL");
-  if (U)
-  {
-    gerepileall(ltop, 2, &B, &U);
-    *ptrU=U;
-    return B;
-  }
-  else
-    return gerepilecopy(ltop,B);
+  if (ptrU) *ptrU=U;
+  if (ptrG) *ptrG=G;
+  return B;
 }
 
 /* principal minors in a ring A: all computations are done within A
@@ -541,26 +536,33 @@ gminors(GEN a)
   return gerepileupto(av,B);
 }
 
-GEN
-LLL(GEN B, GEN *ptrU, GEN *M)
+static long
+good_prec(long d, GEN delta, GEN eta)
 {
-  pari_sp av=avma;
-  if (typ(B)!=t_MAT) pari_err(typeer,"LLL");
-  long prec = DEFAULTPREC;
-  long n = lg(B)-1;
-  long d = lg(gel(B,1))-1;
-  GEN eta = strtor(ETA,prec);
-  GEN delta  = strtor(DELTA,prec);
   double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
   long goodprec = (ulong) (7.0 + 0.2*d + d* log(rho)/ log(2.0)
       +  2.0 * log ( (double) d )
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
-  goodprec = nbits2prec(goodprec); 
+  return nbits2prec(goodprec); 
+}
+
+GEN
+LLLint(GEN B, long D, GEN *M)
+{
+  pari_sp av=avma;
+  long d = lg(gel(B,1))-1;
+  long prec = DEFAULTPREC;
+  GEN eta = strtor(ETA,prec);
+  GEN delta = subsr(1, divsr(1, stor(D, prec)));
+  GEN G;
+  prec = good_prec(d,delta,eta); 
   B = shallowcopy(B);
-  if (ptrU) *ptrU = matid(n);
-  B = fplll(B, ptrU, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
-  if (!ptrU) B=gerepileupto(av,B);
-  else gerepileall(av, 2, &B, ptrU);
-  if (M) *M=gminors(gmul(shallowtrans(B),B));
+  eta = strtor(ETA,prec);
+  delta  = subsr(1, divsr(1, stor(D, prec)));
+  B = fplll(B, &G, NULL, delta, eta, prec);
+  if (!M) return gerepilecopy(av, B);
+  *M=gminors(gmul(shallowtrans(B),B));
+  gerepileall(av, 2, &B, M);
   return B;
 }
+
