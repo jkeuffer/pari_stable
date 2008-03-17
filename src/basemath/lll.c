@@ -54,7 +54,7 @@ computes mu_kappaj, r_kappaj for j<=kappa, and s(kappa)
 The algorithm is the iterative Babai algorithm of the paper
 */
 
-void
+static void
 Babai (int kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
        GEN *ptrmu, GEN *ptrr, GEN *ptrs,
        int a, int zeros, int kappamax, int n,
@@ -271,12 +271,12 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 
-GEN
-fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
+static GEN
+fplll (GEN B, GEN U, GEN delta, GEN eta, long prec)
 {
   pari_sp ltop=avma, av, av2, lim;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
-  GEN mu, r, s;
+  GEN G, mu, r, s;
   GEN tmp;
   GEN SPtmp;
   GEN alpha;
@@ -286,6 +286,8 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 
   d = lg(B)-1;
   n = lg(gel(B,1))-1;
+  G = zeromatcopy(n,n);
+
   if(DEBUGLEVEL>=2)
   {
     TIMERstart(&T);
@@ -463,7 +465,7 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 
 /* principal minors in a ring A: all computations are done within A
  * (Gauss-Bareiss algorithm) */
-GEN
+static GEN
 gminors(GEN a)
 {
   pari_sp av, lim;
@@ -542,7 +544,7 @@ LLL(GEN B, long flag)
   long prec = DEFAULTPREC;
   long n = lg(B)-1;
   long d = lg(gel(B,1))-1;
-  GEN G, U = NULL;
+  GEN U = NULL;
   GEN eta = strtor(ETA,prec);
   GEN delta  = strtor(DELTA,prec);
   double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
@@ -550,10 +552,9 @@ LLL(GEN B, long flag)
       +  2.0 * log ( (double) d )
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
   goodprec = nbits2prec(goodprec); 
-  G = zeromatcopy(n,n);
   B = shallowcopy(B);
   if (flag) U = matid(n);
-  B = fplll(G, B, U, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
+  B = fplll(B, U, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
   if (flag)
     return gerepilecopy(av, B);
   else
