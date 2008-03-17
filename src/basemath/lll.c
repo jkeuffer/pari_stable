@@ -107,7 +107,6 @@ Babai (int kappa, GEN G, GEN B, GEN U,
        int a, int zeros, int kappamax, int n, long prec)
 {
   long i, j, k, test, sg;
-  long xx;
   long expo;
   GEN X;
   long aa = (a > zeros)? a : zeros+1;
@@ -139,20 +138,21 @@ Babai (int kappa, GEN G, GEN B, GEN U,
         rtmp = itor(gmael(G,kappa,j), prec);
         for (k=zeros+1; k<=j-1; k++)
         {
-          tmp  = gmul(gmael(mu,j,k), gmael(r,kappa,k));
-          rtmp = gsub(rtmp,tmp);
+          tmp  = mulrr(gmael(mu,j,k), gmael(r,kappa,k));
+          rtmp = subrr(rtmp,tmp);
         }
         gmael(r,kappa,j) = gerepileupto(btop, rtmp);
       }
       else if (j==zeros+2)
       {
-        tmp = gmul(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
+        pari_sp btop=avma;
+        tmp = mulrr(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
         rtmp = itor(gmael(G,kappa,j), prec);
-        gmael(r,kappa,j) = gsub(rtmp, tmp);
+        gmael(r,kappa,j) = gerepileupto(btop, subrr(rtmp, tmp));
       }
       else
         gmael(r,kappa,j) = itor(gmael(G,kappa,j), prec);
-      gmael(mu,kappa,j)  = gdiv(gmael(r,kappa,j), gmael(r,j,j));
+      gmael(mu,kappa,j)  = divrr(gmael(r,kappa,j), gmael(r,j,j));
     }
     if (DEBUGLEVEL>=4)
     {
@@ -182,7 +182,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
           if ( sg >=0 )   /* in this case, X is 1 */
           {
             for (k=zeros+1; k<j; k++)
-              gmael(mu,kappa,k) = gsub(gmael(mu,kappa,k), gmael(mu,j,k));
+              gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), gmael(mu,j,k));
             for (i=1; i<=n; i++)
               gmael(B,kappa,i) = subii(gmael(B,kappa,i), gmael(B,j,i));
 
@@ -202,7 +202,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
           else          /* otherwise X is -1 */
           {
             for (k=zeros+1; k<j; k++)
-              gmael(mu,kappa,k)=gadd(gmael(mu,kappa,k), gmael(mu,j,k));
+              gmael(mu,kappa,k)=addrr(gmael(mu,kappa,k), gmael(mu,j,k));
             for (i=1; i<=n; i++)
               gmael(B,kappa,i)=addii(gmael(B,kappa,i), gmael(B,j,i));
 
@@ -222,17 +222,18 @@ Babai (int kappa, GEN G, GEN B, GEN U,
         } else   /* we must have |X| >= 2 */
         {        	
           rtmp = rtor(gmael(mu,kappa,j),prec);
-          tmp=itor(ceil_safe(rtmp),prec);
+          ztmp = ceil_safe(rtmp);
+          tmp  = itor(ztmp,prec);
 
           for (k=zeros+1; k<j; k++)
           {
-            rtmp = gmul(tmp, gmael(mu,j,k));
-            gmael(mu,kappa,k) = gsub(gmael(mu,kappa,k), rtmp);
+            rtmp = mulrr(tmp, gmael(mu,j,k));
+            gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), rtmp);
           }
-          if (0&&!is_bigint(shifti(ceil_safe(tmp),2)))
+          if (!is_bigint(ztmp))
             /* X is stored in a long signed int */
           {
-            xx = itos(ceil_safe(tmp));
+            long xx = itos(ztmp);
             if (DEBUGLEVEL>=4)
             {
               fprintferr("          xx[%d] is %ld\n", j, xx);
@@ -245,14 +246,13 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 #ifdef WITH_TRANSFORM
             for (i=1; i<=d; i++)
               gmael(U,kappa,i) = subii(gmael(U,kappa,i),
-                                      mulis(gmael(U,j,i), xx));
+                                       mulis(gmael(U,j,i), xx));
 #endif
             gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa),
-                                          mulis(gmael(G,kappa,j), 2*xx));
+                                         mulii(gmael(G,kappa,j), mulss(2,xx)));
 
-            ztmp = mulis(gmael(G,j,j), xx);
-            ztmp = mulis(ztmp, xx);
-            gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
+            ztmp = mulii(gmael(G,j,j), sqrs(xx));
+            gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
               gmael(G,kappa,i) = subii(gmael(G,kappa,i),
                                         mulis(gmael(G,j,i), xx));
@@ -288,11 +288,9 @@ Babai (int kappa, GEN G, GEN B, GEN U,
                 gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
               }
 #endif
-              ztmp = mulii(gmael(G,kappa,j), X);
-              ztmp = muliu(ztmp, 2);
+              ztmp = mulii(gmael(G,kappa,j), muliu(X,2));
               gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa), ztmp);
-              ztmp = mulii(gmael(G,j,j), X);
-              ztmp = mulii(ztmp, X);
+              ztmp = mulii(gmael(G,j,j), sqri(X));
               gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
               for (i=1; i<=j; i++)
               {
@@ -369,8 +367,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
   /* the last s[kappa-1]=r[kappa][kappa] is computed only if kappa increases */
   for (k=zeros+1; k<=kappa-2; k++)
   {
-    tmp = gmul(gmael(mu,kappa,k), gmael(r,kappa,k));
-    gel(s,k+1) = gsub(gel(s,k), tmp);
+    tmp = mulrr(gmael(mu,kappa,k), gmael(r,kappa,k));
+    gel(s,k+1) = subrr(gel(s,k), tmp);
   }
   if (DEBUGLEVEL>=4)
   {
@@ -456,8 +454,6 @@ fplll (GEN G, GEN B, GEN U, long prec)
       kappamax++;
     }
     loops++;
-    if (loops%100==0)
-      gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
     if (DEBUGLEVEL>=2)
     {
       if (kappa>newkappa)
@@ -494,6 +490,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
     Babai (kappa, G, B, U, mu, r, s,
         alpha[kappa], zeros, kappamax, n, prec);
 #endif
+    if (loops%100==0)
+      gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
 
     if(DEBUGLEVEL>=4)
     {
@@ -507,7 +505,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
     /* ************************************ */
     /* xtt * gmael(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
 
-    tmp = gmul(gmael(r,kappa-1,kappa-1), ctt);
+    tmp = mulrr(gmael(r,kappa-1,kappa-1), ctt);
     if (DEBUGLEVEL>=4)
       fprintferr("s[%ld] is %Zs\n %Zs\n", kappa-2, gel(s,kappa-1),
           gmael(r,kappa-1,kappa-1));
@@ -515,8 +513,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
     if (gcmp(tmp, gel(s,kappa-1)) <=0 )
     {
       alpha[kappa] = kappa;
-      tmp = gmul(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
-      gmael(r,kappa,kappa) = gsub(gel(s,kappa-1), tmp);
+      tmp = mulrr(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
+      gmael(r,kappa,kappa) = subrr(gel(s,kappa-1), tmp);
       kappa++;
     }
     else
@@ -530,7 +528,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
         lovasz++;
         kappa--;
         if (kappa<zeros+2) break;
-        tmp = gmul(gmael(r,kappa-1,kappa-1), ctt);
+        tmp = mulrr(gmael(r,kappa-1,kappa-1), ctt);
       } while (gcmp(gel(s,kappa-1), tmp) <=0 );
 
       if (DEBUGLEVEL>=4)
@@ -653,7 +651,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
   {
     tmp = gen_1;
     for (i = zeros+1; i<=d; i++)
-      tmp = gmul(tmp, gmael(r,i,i));
+      tmp = mulrr(tmp, gmael(r,i,i));
     tmp= gsqrt(tmp,prec);
     fprintferr( "\nLoop iterations = %d \n", loops);
     fprintferr( "Lovasz tests = %d \n", lovasz);
@@ -686,7 +684,7 @@ LLL(GEN B, long prec)
   goodprec = (ulong) (7.0 + 0.2*d + d* log(rho)/ log(2.0)
       +  2.0 * log ( (double) d )
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
-  goodprec = nbits2prec(goodprec);
+  goodprec = nbits2prec(goodprec); 
   halfplus=rtor(eta,goodprec);
   onedothalfplus=addsr(1,halfplus);
   ctt=rtor(delta, goodprec);
