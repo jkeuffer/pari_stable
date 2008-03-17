@@ -55,21 +55,29 @@ The algorithm is the iterative Babai algorithm of the paper
 */
 
 void
-Babai (int kappa, GEN G, GEN B, GEN U,
-       GEN mu, GEN r, GEN s,
+Babai (int kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
+       GEN *ptrmu, GEN *ptrr, GEN *ptrs,
        int a, int zeros, int kappamax, int n,
        GEN eta, long prec)
 {
+  pari_sp av, lim;
+  GEN G=*ptrG, B=*ptrB, U=*ptrU;
+  GEN mu=*ptrmu, r=*ptrr, s=*ptrs;
   long i, j, k, test;
   long aa = (a > zeros)? a : zeros+1;
   GEN tmp, rtmp, ztmp;
-  long loops=0;
   GEN onedothalfplus=addsr(1,eta);
   long d = lg(B)-1;
-
+  av = avma; lim = stack_lim(av, 1);
   do {
     test=0;
-    loops++;
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (U)
+        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
+      else
+        gerepileall(av,5,&B,&G,&mu,&r,&s);
+    }
     /* ************************************** */
     /* Step2: compute the GSO for stage kappa */
     /* ************************************** */
@@ -241,6 +249,8 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     tmp = mulrr(gmael(mu,kappa,k), gmael(r,kappa,k));
     gel(s,k+1) = subrr(gel(s,k), tmp);
   }
+  *ptrG=G; *ptrB=B; *ptrU=U;
+  *ptrmu=mu; *ptrr=r; *ptrs=s;
 }
 
 static void
@@ -264,7 +274,7 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 GEN
 fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 {
-  pari_sp ltop=avma, av, av2;
+  pari_sp ltop=avma, av, av2, lim;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
   GEN mu, r, s;
   GEN tmp;
@@ -289,7 +299,7 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
   r  = zeromatcopy(d,d);
   s  = zerovec(d+1);
   SPtmp = zerovec(d+1);
-  av = avma;
+  av = avma; lim = stack_lim(av, 1);
 
   /* ********************************* */
   /* Step2: Initializing the main loop */
@@ -329,6 +339,14 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       }
     }
 
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if (U)
+        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
+      else
+        gerepileall(av,5,&B,&G,&mu,&r,&s);
+    }
+
     /* ********************************** */
     /* Step3: Call to the Babai algorithm */
     /* ********************************** */
@@ -336,22 +354,14 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
     if (triangular)
     {
       if (kappamax + 0 <= n) 
-        Babai (kappa, G, B, U, mu, r, s,
+        Babai (kappa, &G, &B, &U, &mu, &r, &s,
           alpha[kappa], zeros, kappamax, kappamax+0, eta, prec);
       else
-        Babai (kappa, G, B, U, mu, r, s,
+        Babai (kappa, &G, &B, &U, &mu, &r, &s,
           alpha[kappa], zeros, kappamax, n, eta, prec);
     } else 
-      Babai (kappa, G, B, U, mu, r, s,
+      Babai (kappa, &G, &B, &U, &mu, &r, &s,
         alpha[kappa], zeros, kappamax, n, eta, prec);
-
-    if (loops%100==0)
-    {
-      if (U)
-        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
-      else
-        gerepileall(av,5,&B,&G,&mu,&r,&s);
-    }
 
     /* ************************************ */
     /* Step4: Success of Lovasz's condition */
@@ -451,14 +461,15 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
     return gerepilecopy(ltop,B);
 }
 
-/* determinant in a ring A: all computations are done within A
+/* principal minors in a ring A: all computations are done within A
  * (Gauss-Bareiss algorithm) */
 GEN
-gminor(GEN a, long n)
+gminors(GEN a)
 {
   pari_sp av, lim;
-  long nbco = n,i,j,k,s;
+  long nbco = lg(a)-1,i,j,k,s;
   GEN p,pprec;
+  GEN B;
 
   if (typ(a)!=t_MAT) pari_err(mattype1,"det");
   if (!nbco) return gen_1;
@@ -516,19 +527,11 @@ gminor(GEN a, long n)
     }
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
   }
-  p = gcoeff(a,nbco,nbco);
-  if (s < 0) p = gneg(p); else p = gcopy(p);
-  return gerepileupto(av, p);
-}
-
-GEN compute_B(GEN A)
-{
-  GEN B=cgetg(lg(A)+1,t_COL);
-  long i;
-  A = gmul(shallowtrans(A),A);
-  for(i=0;i<lg(A);i++)
-    gel(B,i+1) = gminor(A,i);
-  return B;
+  B=cgetg(lg(a)+1,t_COL);
+  gel(B,1) = gen_1;
+  for(i=1;i<lg(a);i++)
+    gel(B,i+1) = gmael(a,i,i);
+  return gerepilecopy(av,B);
 }
 
 GEN
@@ -554,5 +557,5 @@ LLL(GEN B, long flag)
   if (flag)
     return gerepilecopy(av, B);
   else
-    return gerepilecopy(av, mkvec2(B,compute_B(B)));
+    return gerepilecopy(av, mkvec2(B,gminors(B)));
 }
