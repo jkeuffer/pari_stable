@@ -37,8 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ETA "0.51"
 #define DELTA "0.99"
 
-GEN halfplus, onedothalfplus, ctt;
-
 // #define TRIANGULAR
 // #define WITH_TRANSFORM
 
@@ -104,7 +102,8 @@ The algorithm is the iterative Babai algorithm of the paper
 void
 Babai (int kappa, GEN G, GEN B, GEN U,
        GEN mu, GEN r, GEN s,
-       int a, int zeros, int kappamax, int n, long prec)
+       int a, int zeros, int kappamax, int n,
+       GEN eta, long prec)
 {
   long i, j, k, test, sg;
   long expo;
@@ -112,6 +111,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
   long aa = (a > zeros)? a : zeros+1;
   GEN tmp, rtmp, ztmp;
   long loops=0;
+  GEN onedothalfplus=addsr(1,eta);
   if (DEBUGLEVEL>=4)
   {
     fprintferr("\nr: \n");
@@ -172,7 +172,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
       tmp = mpabs(gmael(mu,kappa,j));
       if (DEBUGLEVEL>=4)
         fprintferr( "tmp is : %Zs\n",tmp);
-      if (gcmp(tmp, halfplus) > 0)
+      if (gcmp(tmp, eta) > 0)
       {
         test = 1;
         /* we consider separately the case X = +-1 */
@@ -384,7 +384,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 
 GEN
-fplll (GEN G, GEN B, GEN U, long prec)
+fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 {
   pari_sp ltop=avma, av;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
@@ -394,7 +394,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
   GEN SPtmp;
   GEN alpha;
   GEN Btmp;
-
+  long delay=0;
+  pari_timer T;
   int newkappa, loops, lovasz;
 
   d = lg(B)-1;
@@ -403,7 +404,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
     fprintferr ("d = %d, n=%d\n", d, n);
   if(DEBUGLEVEL>=2)
   {
-    fprintferr("Entering LLL^2: LLL-reduction factors(%Zs,%Zs)\n",ctt,halfplus);
+    TIMERstart(&T);
+    fprintferr("Entering LLL^2: LLL-reduction factors(%Zs,%Zs)\n",delta,eta);
     fprintferr("Working precision set to %d words\n", prec);
   }
 
@@ -458,9 +460,8 @@ fplll (GEN G, GEN B, GEN U, long prec)
     {
       if (kappa>newkappa)
       {
-        newkappa++;
-        fprintferr("Discovering vector k = %d, iterations = %d\n",
-            kappa, loops);
+        newkappa++; delay+=TIMER(&T);
+        fprintferr("Discovering vector k = %d, iterations = %d, time = %ld ms\n", kappa, loops, delay);
       }
     }
     if (DEBUGLEVEL>=4)
@@ -480,15 +481,15 @@ fplll (GEN G, GEN B, GEN U, long prec)
 #ifdef TRIANGULAR
     if (kappamax + SHIFT <= n){
       Babai (kappa, G, B, U, mu, r, s,
-          alpha[kappa], zeros, kappamax, kappamax+SHIFT, prec);
+          alpha[kappa], zeros, kappamax, kappamax+SHIFT, eta, prec);
     }
     else {
       Babai (kappa, G, B, U, mu, r, s,
-          alpha[kappa], zeros, kappamax, n, prec);
+          alpha[kappa], zeros, kappamax, n, eta, prec);
     }
 #else
     Babai (kappa, G, B, U, mu, r, s,
-        alpha[kappa], zeros, kappamax, n, prec);
+        alpha[kappa], zeros, kappamax, n, eta, prec);
 #endif
     if (loops%100==0)
       gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
@@ -505,7 +506,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
     /* ************************************ */
     /* xtt * gmael(r,kappa-1,kappa-1) <= s[kappa-2] ?? */
 
-    tmp = mulrr(gmael(r,kappa-1,kappa-1), ctt);
+    tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
     if (DEBUGLEVEL>=4)
       fprintferr("s[%ld] is %Zs\n %Zs\n", kappa-2, gel(s,kappa-1),
           gmael(r,kappa-1,kappa-1));
@@ -528,7 +529,7 @@ fplll (GEN G, GEN B, GEN U, long prec)
         lovasz++;
         kappa--;
         if (kappa<zeros+2) break;
-        tmp = mulrr(gmael(r,kappa-1,kappa-1), ctt);
+        tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
       } while (gcmp(gel(s,kappa-1), tmp) <=0 );
 
       if (DEBUGLEVEL>=4)
@@ -666,29 +667,27 @@ fplll (GEN G, GEN B, GEN U, long prec)
 }
 
 GEN
-LLL(GEN B, long prec)
+LLL(GEN B)
 {
   pari_sp av=avma;
   if (typ(B)!=t_MAT) pari_err(typeer,"LLL");
+  long prec=DEFAULTPREC;
   long n = lg(B)-1;
   long d = lg(gel(B,1))-1;
-  GEN G = zeromatcopy(d,n);
-  GEN U = zeromatcopy(d,n);
-  GEN eta, delta;
-  long goodprec;
-  double rho;
-  eta=strtor(ETA,prec);
-  delta=strtor(DELTA,prec);
-
-  rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
-  goodprec = (ulong) (7.0 + 0.2*d + d* log(rho)/ log(2.0)
+  GEN eta = strtor(ETA,prec);
+  GEN delta  = strtor(DELTA,prec);
+  double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
+  long goodprec = (ulong) (7.0 + 0.2*d + d* log(rho)/ log(2.0)
       +  2.0 * log ( (double) d )
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
   goodprec = nbits2prec(goodprec); 
-  halfplus=rtor(eta,goodprec);
-  onedothalfplus=addsr(1,halfplus);
-  ctt=rtor(delta, goodprec);
   B = shallowcopy(B);
-  B = fplll(G, B, U, goodprec);
-  return gerepileupto(av, B);
+  for (prec=3;prec<=goodprec;prec++)
+  {
+    GEN G = zeromatcopy(d,n);
+    GEN U = zeromatcopy(d,n);
+    B = gerepileupto(av, fplll(G, B, U,
+                         strtor(DELTA,prec), strtor(ETA,prec), prec));
+  }
+  return B;
 }
