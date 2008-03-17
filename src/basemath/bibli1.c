@@ -617,8 +617,8 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
       *ptB = (n == 0)? cgetg(1, t_VEC): mkvec( gsqr(gcoeff(x,1,1)) );
     return lll_trivial(x,flag);
   }
-  if (!(flag&~LLL_INPLACE))
-    return LLL(x,NULL,ptB);
+  if (flag==(LLL_IM|LLL_INPLACE))
+    return LLLint(x,D,ptB);
   fl = cgetg(lx,t_VECSMALL);
   hx = lg(x[1]);
   if (gram && hx != lx) pari_err(mattype1,"lllint");
@@ -681,7 +681,7 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
 GEN
 lllint_ip(GEN x, long D)
 {
-  return lllint_i(x, D, LLL_IM | LLL_INPLACE, NULL);
+  return LLLint(x,D,NULL);
 }
 
 static GEN
