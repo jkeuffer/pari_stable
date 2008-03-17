@@ -60,7 +60,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
        int a, int zeros, int kappamax, int n,
        GEN eta, long prec)
 {
-  long i, j, k, test, sg;
+  long i, j, k, test;
   long aa = (a > zeros)? a : zeros+1;
   GEN tmp, rtmp, ztmp;
   long loops=0;
@@ -107,14 +107,13 @@ Babai (int kappa, GEN G, GEN B, GEN U,
     {
       /* test of the relaxed size-reduction condition */
       tmp = mpabs(gmael(mu,kappa,j));
-      if (gcmp(tmp, eta) > 0)
+      if (cmprr(tmp, eta) > 0)
       {
         test = 1;
         /* we consider separately the case X = +-1 */
-        if (gcmp(tmp, onedothalfplus) <= 0)
+        if (cmprr(tmp, onedothalfplus) <= 0)
         {
-          sg = gsigne(gmael(mu,kappa,j));
-          if ( sg >=0 )   /* in this case, X is 1 */
+          if ( signe(gmael(mu,kappa,j)) > 0 ) /* in this case, X is 1 */
           {
             for (k=zeros+1; k<j; k++)
               gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), gmael(mu,j,k));
@@ -361,7 +360,7 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
     lovasz++;
-    if (gcmp(tmp, gel(s,kappa-1)) <=0 )
+    if (cmprr(tmp, gel(s,kappa-1)) <=0 )
     {
       alpha[kappa] = kappa;
       tmp = mulrr(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
@@ -381,7 +380,7 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
         kappa--;
         if (kappa<zeros+2) break;
         tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
-      } while (gcmp(gel(s,kappa-1), tmp) <=0 );
+      } while (cmprr(gel(s,kappa-1), tmp) <=0 );
       avma = av2;
 
       for (i=kappa; i<kappa2; i++)
