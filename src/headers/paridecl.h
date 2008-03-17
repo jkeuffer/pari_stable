@@ -1697,6 +1697,10 @@ GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 
+/* lll.c */
+
+GEN     LLL(GEN B, long flag);
+
 /* members.c */
 
 GEN     member_a1(GEN x);

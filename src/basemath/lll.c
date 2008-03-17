@@ -373,7 +373,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
 GEN
 fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 {
-  pari_sp ltop=avma, av;
+  pari_sp ltop=avma, av, av2;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
   GEN mu, r;
   GEN s, mutmp;
@@ -517,12 +517,14 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       /* kappa2 remains the initial kappa            */
       /* ******************************************* */
       kappa2 = kappa;
+      av2 = avma;
       do {
         lovasz++;
         kappa--;
         if (kappa<zeros+2) break;
         tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
       } while (gcmp(gel(s,kappa-1), tmp) <=0 );
+      avma = av2;
 
       if (DEBUGLEVEL>=4)
       {
@@ -657,18 +659,101 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       fprintferr("||b_1|| is %Zs \n", tmp);
     }
   }
-  return gerepilecopy(ltop,B);
+  if (U)
+    return gerepilecopy(ltop,mkvec2(B,U));
+  else
+    return gerepilecopy(ltop,B);
+}
+
+/* determinant in a ring A: all computations are done within A
+ * (Gauss-Bareiss algorithm) */
+GEN
+gminor(GEN a, long n)
+{
+  pari_sp av, lim;
+  long nbco = n,i,j,k,s;
+  GEN p,pprec;
+
+  if (typ(a)!=t_MAT) pari_err(mattype1,"det");
+  if (!nbco) return gen_1;
+  if (DEBUGLEVEL > 7) (void)timer2();
+
+  av = avma; lim = stack_lim(av,2);
+  a = shallowcopy(a); s = 1;
+  for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
+  {
+    GEN ci, ck, m, p1;
+    int diveuc = (gcmp1(pprec)==0);
+
+    p = gcoeff(a,i,i);
+    if (gcmp0(p))
+    {
+      k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
+      if (k>nbco) return gerepilecopy(av, p);
+      lswap(a[k], a[i]); s = -s;
+      p = gcoeff(a,i,i);
+    }
+    ci = gel(a,i);
+    for (k=i+1; k<=nbco; k++)
+    {
+      ck = gel(a,k); m = gel(ck,i);
+      if (gcmp0(m))
+      {
+	if (gcmp1(p))
+	{
+	  if (diveuc)
+	    gel(a,k) = gdiv(gel(a,k), pprec);
+	}
+	else
+	  for (j=i+1; j<=nbco; j++)
+	  {
+	    p1 = gmul(p, gel(ck,j));
+	    if (diveuc) p1 = gdiv(p1,pprec);
+	    gel(ck,j) = p1;
+	  }
+      }
+      else
+      {
+	m = gneg_i(m);
+	for (j=i+1; j<=nbco; j++)
+	{
+	  p1 = gadd(gmul(p,gel(ck,j)), gmul(m,gel(ci,j)));
+	  if (diveuc) p1 = gdiv(p1,pprec);
+	  gel(ck,j) = p1;
+	}
+      }
+      if (low_stack(lim,stack_lim(av,2)))
+      {
+	if(DEBUGMEM>1) pari_warn(warnmem,"det. col = %ld",i);
+	gerepileall(av,2, &a,&pprec); p = gcoeff(a,i,i); ci = gel(a,i);
+      }
+    }
+    if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
+  }
+  p = gcoeff(a,nbco,nbco);
+  if (s < 0) p = gneg(p); else p = gcopy(p);
+  return gerepileupto(av, p);
+}
+
+GEN compute_B(GEN A)
+{
+  GEN B=cgetg(lg(A)+1,t_COL);
+  long i;
+  A = gmul(shallowtrans(A),A);
+  for(i=0;i<lg(A);i++)
+    gel(B,i+1) = gminor(A,i);
+  return B;
 }
 
 GEN
-LLL(GEN B)
+LLL(GEN B, long flag)
 {
   pari_sp av=avma;
   if (typ(B)!=t_MAT) pari_err(typeer,"LLL");
-  long prec=DEFAULTPREC;
+  long prec = DEFAULTPREC;
   long n = lg(B)-1;
   long d = lg(gel(B,1))-1;
-  GEN G = zeromatcopy(n,n);
+  GEN G, U = NULL;
   GEN eta = strtor(ETA,prec);
   GEN delta  = strtor(DELTA,prec);
   double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
@@ -676,7 +761,9 @@ LLL(GEN B)
       +  2.0 * log ( (double) d )
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
   goodprec = nbits2prec(goodprec); 
+  G = zeromatcopy(n,n);
   B = shallowcopy(B);
-  B = fplll(G, B, NULL, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
-  return gerepileupto(av, B);
+  if (flag) U = matid(n);
+  B = fplll(G, B, U, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
+  return gerepilecopy(av, mkvec2(B,compute_B(B)));
 }
