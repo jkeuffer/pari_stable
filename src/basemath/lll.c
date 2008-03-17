@@ -529,11 +529,11 @@ gminors(GEN a)
     }
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
   }
-  B=cgetg(lg(a)+1,t_COL);
+  B=cgetg(lg(a)+1, t_COL);
   gel(B,1) = gen_1;
-  for(i=1;i<lg(a);i++)
-    gel(B,i+1) = gmael(a,i,i);
-  return gerepilecopy(av,B);
+  for(i=1; i<lg(a); i++)
+    gel(B,i+1) = absi(gmael(a,i,i));
+  return gerepileupto(av,B);
 }
 
 GEN
