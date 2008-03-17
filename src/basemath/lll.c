@@ -286,6 +286,18 @@ Babai (int kappa, GEN G, GEN B, GEN U,
   }
 }
 
+static void
+rotate(GEN mu,long kappa2, long kappa,long d)
+{
+  long i,j;
+  GEN mutmp = shallowcopy(gel(mu,kappa2));
+  for (i=kappa2; i>kappa; i--)
+    for (j=1;j<=d;j++)
+      gmael(mu,i,j) = gmael(mu,i-1,j);
+  for (j=1;j<=d;j++)
+    gmael(mu,kappa,j) = gel(mutmp,j);
+}
+
 /* ****************** */
 /* The LLL Algorithm  */
 /* ****************** */
@@ -297,12 +309,10 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
 {
   pari_sp ltop=avma, av, av2;
   int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
-  GEN mu, r;
-  GEN s, mutmp;
+  GEN mu, r, s;
   GEN tmp;
   GEN SPtmp;
   GEN alpha;
-  GEN Btmp;
   const long triangular=0;
   pari_timer T;
   int newkappa, loops, lovasz;
@@ -430,19 +440,8 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       /* Step6: Update the mu's and r's */
       /* ****************************** */
 
-      mutmp = shallowcopy(gel(mu,kappa2));
-      for (i=kappa2; i>kappa; i--)
-        for (j=1;j<=d;j++)
-          gmael(mu,i,j) = gmael(mu,i-1,j);
-      for (j=1;j<=d;j++)
-        gmael(mu,kappa,j) = gel(mutmp,j);
-
-      mutmp = shallowcopy(gel(r,kappa2));
-      for (i=kappa2; i>kappa; i--)
-        for (j=1;j<=d;j++)
-          gmael(r,i,j) = gmael(r,i-1,j);
-      for (j=1;j<=d;j++)
-        gmael(r,kappa,j) = gel(mutmp,j);
+      rotate(mu,kappa2,kappa,d);
+      rotate(r,kappa2,kappa,d);
 
       gmael(r,kappa,kappa) = gel(s,kappa);
 
@@ -450,22 +449,8 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       /* Step7: Update B, G, U */
       /* ********************* */
 
-      Btmp = shallowcopy(gel(B, kappa2));
-      for (i=kappa2; i>kappa; i--)
-        for(j=1; j<=n; j++)
-          gmael(B,i,j) = gmael(B,i-1,j);
-      for(j=1; j<=n; j++)
-        gmael(B,kappa,j) = gel(Btmp,j);
-
-      if (U)
-      {
-        Btmp = shallowcopy(gel(U,kappa2));
-        for (i=kappa2; i>kappa; i--)
-          for(j=1; j<=n; j++)
-            gmael(U,i,j) = gmael(U,i-1,j);
-        for(j=1; j<=n; j++)
-          gmael(U,kappa,j) = gel(Btmp, j);
-      }
+      rotate(B,kappa2,kappa,d);
+      if (U) rotate(U,kappa2,kappa,d);
 
       for (i=1; i<=kappa2; i++)
         gel(SPtmp,i) = gmael(G,kappa2,i);
