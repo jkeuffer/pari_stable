@@ -37,15 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ETA "0.51"
 #define DELTA "0.99"
 
-// #define TRIANGULAR
-// #define WITH_TRANSFORM
-
-#ifdef TRIANGULAR
-#ifndef SHIFT
-#define SHIFT 0
-#endif
-#endif
-
 static void
 Print_matf (GEN B, int d, int n)
 {
@@ -112,6 +103,7 @@ Babai (int kappa, GEN G, GEN B, GEN U,
   GEN tmp, rtmp, ztmp;
   long loops=0;
   GEN onedothalfplus=addsr(1,eta);
+  long d = lg(B)-1;
   if (DEBUGLEVEL>=4)
   {
     fprintferr("\nr: \n");
@@ -186,10 +178,9 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             for (i=1; i<=n; i++)
               gmael(B,kappa,i) = subii(gmael(B,kappa,i), gmael(B,j,i));
 
-#ifdef WITH_TRANSFORM
-            for (i=1; i<=d; i++)
-              gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
-#endif
+            if (U)
+              for (i=1; i<=d; i++)
+                gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
             ztmp=subii(gmael(G,j,j), muliu(gmael(G,kappa,j), 2));
             gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
@@ -206,10 +197,9 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             for (i=1; i<=n; i++)
               gmael(B,kappa,i)=addii(gmael(B,kappa,i), gmael(B,j,i));
 
-#ifdef WITH_TRANSFORM
-            for (i=1; i<=d; i++)
-              gmael(U,kappa,i)=addii(gmael(U,kappa,i),gmael(U,j,i));
-#endif
+            if (U)
+              for (i=1; i<=d; i++)
+                gmael(U,kappa,i)=addii(gmael(U,kappa,i),gmael(U,j,i));
             ztmp=addii(gmael(G,j,j), muliu(gmael(G,kappa,j), 2));
             gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
             for (i=1; i<=j; i++)
@@ -243,11 +233,10 @@ Babai (int kappa, GEN G, GEN B, GEN U,
             for (i=1; i<=n; i++)
               gmael(B,kappa,i) = subii(gmael(B,kappa,i),
                                         mulis(gmael(B,j,i),xx));
-#ifdef WITH_TRANSFORM
-            for (i=1; i<=d; i++)
-              gmael(U,kappa,i) = subii(gmael(U,kappa,i),
-                                       mulis(gmael(U,j,i), xx));
-#endif
+            if (U)
+              for (i=1; i<=d; i++)
+                gmael(U,kappa,i) = subii(gmael(U,kappa,i),
+                                         mulis(gmael(U,j,i), xx));
             gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa),
                                          mulii(gmael(G,kappa,j), mulss(2,xx)));
 
@@ -281,13 +270,12 @@ Babai (int kappa, GEN G, GEN B, GEN U,
                 ztmp = mulii(X, gmael(B,j,i));
                 gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
               }
-#ifdef WITH_TRANSFORM
-              for (i=1; i<=d; i++)
-              {
-                ztmp = mulii(X, gmael(U,j,i));
-                gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
-              }
-#endif
+              if (U)
+                for (i=1; i<=d; i++)
+                {
+                  ztmp = mulii(X, gmael(U,j,i));
+                  gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
+                }
               ztmp = mulii(gmael(G,kappa,j), muliu(X,2));
               gmael(G,kappa,kappa) = subii(gmael(G,kappa,kappa), ztmp);
               ztmp = mulii(gmael(G,j,j), sqri(X));
@@ -317,13 +305,12 @@ Babai (int kappa, GEN G, GEN B, GEN U,
                 gmael(B,kappa,i) = subii(gmael(B,kappa,i), ztmp);
               }
 
-#ifdef WITH_TRANSFORM
-              for (i=1; i<=d; i++)
-              {
-                ztmp = mulii(sX, gmael(U,j,i));
-                gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
-              }
-#endif
+              if (U)
+                for (i=1; i<=d; i++)
+                {
+                  ztmp = mulii(sX, gmael(U,j,i));
+                  gmael(U,kappa,i) = subii(gmael(U,kappa,i), ztmp);
+                }
 
               ztmp = shifti(mulii(gmael(G,kappa,j), sX), 1);
               ztmp = subii(mulii(gmael(G,j,j), sqri(sX)), ztmp);
@@ -395,6 +382,7 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
   GEN alpha;
   GEN Btmp;
   long delay=0;
+  const long triangular=0;
   pari_timer T;
   int newkappa, loops, lovasz;
 
@@ -478,21 +466,25 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
     /* Step3: Call to the Babai algorithm */
     /* ********************************** */
 
-#ifdef TRIANGULAR
-    if (kappamax + SHIFT <= n){
-      Babai (kappa, G, B, U, mu, r, s,
-          alpha[kappa], zeros, kappamax, kappamax+SHIFT, eta, prec);
-    }
-    else {
-      Babai (kappa, G, B, U, mu, r, s,
+    if (triangular)
+    {
+      if (kappamax + 0 <= n) 
+        Babai (kappa, G, B, U, mu, r, s,
+          alpha[kappa], zeros, kappamax, kappamax+0, eta, prec);
+      else
+        Babai (kappa, G, B, U, mu, r, s,
           alpha[kappa], zeros, kappamax, n, eta, prec);
-    }
-#else
-    Babai (kappa, G, B, U, mu, r, s,
+    } else 
+      Babai (kappa, G, B, U, mu, r, s,
         alpha[kappa], zeros, kappamax, n, eta, prec);
-#endif
+
     if (loops%100==0)
-      gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
+    {
+      if (U)
+        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
+      else
+        gerepileall(av,5,&B,&G,&mu,&r,&s);
+    }
 
     if(DEBUGLEVEL>=4)
     {
@@ -594,14 +586,16 @@ fplll (GEN G, GEN B, GEN U, GEN delta, GEN eta, long prec)
       for(j=1; j<=n; j++)
         gmael(B,kappa,j) = gel(Btmp,j);
 
-#ifdef WITH_TRANSFORM
-      Btmp = shallowcopy(gel(U,kappa2));
-      for (i=kappa2; i>kappa; i--)
+      if (U)
+      {
+        Btmp = shallowcopy(gel(U,kappa2));
+        for (i=kappa2; i>kappa; i--)
+          for(j=1; j<=n; j++)
+            gmael(U,i,j) = gmael(U,i-1,j);
         for(j=1; j<=n; j++)
-          gmael(U,i,j) = gmael(U,i-1,j);
-      for(j=1; j<=n; j++)
-        gmael(U,kappa,j) = gel(Btmp, j);
-#endif
+          gmael(U,kappa,j) = gel(Btmp, j);
+      }
+
       for (i=1; i<=kappa2; i++)
         gel(SPtmp,i) = gmael(G,kappa2,i);
       for (i=kappa2+1; i<=kappamax; i++)
@@ -674,6 +668,7 @@ LLL(GEN B)
   long prec=DEFAULTPREC;
   long n = lg(B)-1;
   long d = lg(gel(B,1))-1;
+  GEN G = zeromatcopy(n,n);
   GEN eta = strtor(ETA,prec);
   GEN delta  = strtor(DELTA,prec);
   double rho = rtodbl(gdiv(gsqr(addrs(eta,1)), gsub(delta,gsqr(eta))));
@@ -682,12 +677,6 @@ LLL(GEN B)
       - log( (rtodbl(eta)-0.5)*(1.0-rtodbl(delta)) ) / log(2));
   goodprec = nbits2prec(goodprec); 
   B = shallowcopy(B);
-  for (prec=3;prec<=goodprec;prec++)
-  {
-    GEN G = zeromatcopy(d,n);
-    GEN U = zeromatcopy(d,n);
-    B = gerepileupto(av, fplll(G, B, U,
-                         strtor(DELTA,prec), strtor(ETA,prec), prec));
-  }
-  return B;
+  B = fplll(G, B, NULL, strtor(DELTA,goodprec), strtor(ETA,goodprec), goodprec);
+  return gerepileupto(av, B);
 }
