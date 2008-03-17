@@ -617,7 +617,7 @@ lllint_i(GEN x, long D, long flag, GEN *ptB)
       *ptB = (n == 0)? cgetg(1, t_VEC): mkvec( gsqr(gcoeff(x,1,1)) );
     return lll_trivial(x,flag);
   }
-  if (flag==(LLL_IM|LLL_INPLACE))
+  if (flag==LLL_INPLACE)
   {
     x = LLLint(x,D,ptB);
     if (ptB) *ptB = GS_norms(*ptB, DEFAULTPREC);
