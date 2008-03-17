@@ -575,9 +575,10 @@ initmat(long l)
 static GEN
 nftocomplex(GEN nf, GEN x)
 {
+  GEN M = gmael(nf,5,1);
   x = nf_to_scalar_or_basis(nf,x);
-  if (typ(x) != t_COL) return const_col(degpol(nf[1]), x);
-  return gmul(gmael(nf,5,1), x);
+  if (typ(x) != t_COL) return const_col(lg(M[1])-1, x);
+  return gmul(M, x);
 }
 /* assume x a square t_MAT, return a t_VEC of embeddings of its columns */
 static GEN
