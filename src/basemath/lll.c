@@ -55,9 +55,9 @@ The algorithm is the iterative Babai algorithm of the paper
 */
 
 static void
-Babai (int kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
+Babai (long kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
        GEN *ptrmu, GEN *ptrr, GEN *ptrs,
-       int a, int zeros, int kappamax, int n,
+       long a, long zeros, long kappamax, long n,
        GEN eta, long prec)
 {
   pari_sp av, lim;
@@ -72,12 +72,7 @@ Babai (int kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
   do {
     test=0;
     if (low_stack(lim, stack_lim(av,1)))
-    {
-      if (U)
-        gerepileall(av,6,&B,&G,&U,&mu,&r,&s);
-      else
-        gerepileall(av,5,&B,&G,&mu,&r,&s);
-    }
+      gerepileall(av,U?6:5,&B,&G,&mu,&r,&s,&U);
     /* ************************************** */
     /* Step2: compute the GSO for stage kappa */
     /* ************************************** */
@@ -114,12 +109,12 @@ Babai (int kappa, GEN *ptrG, GEN *ptrB, GEN *ptrU,
     for (j=kappa-1; j>zeros; j--)
     {
       /* test of the relaxed size-reduction condition */
-      tmp = mpabs(gmael(mu,kappa,j));
-      if (cmprr(tmp, eta) > 0)
+      tmp = gmael(mu,kappa,j);
+      if (absr_cmp(tmp, eta) > 0)
       {
         test = 1;
         /* we consider separately the case X = +-1 */
-        if (cmprr(tmp, onedothalfplus) <= 0)
+        if (absr_cmp(tmp, onedothalfplus) <= 0)
         {
           if ( signe(gmael(mu,kappa,j)) > 0 ) /* in this case, X is 1 */
           {
@@ -275,7 +270,7 @@ static GEN
 fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
 {
   pari_sp av, av2, lim;
-  int kappa, kappa2, d, n=0, i, j, zeros, kappamax;
+  long kappa, kappa2, d, n=0, i, j, zeros, kappamax;
   GEN G, mu, r, s;
   GEN tmp;
   GEN SPtmp;
@@ -283,7 +278,7 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
   GEN U=ptrU?*ptrU:NULL;
   const long triangular = 0;
   pari_timer T;
-  int newkappa, loops, lovasz;
+  long newkappa;
 
   d = lg(B)-1;
   n = lg(gel(B,1))-1;
@@ -309,7 +304,6 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
   /* ********************************* */
 
   newkappa = 1;
-  loops = lovasz = 0;
   kappamax = 1;
   i = 1;
 
@@ -332,7 +326,6 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
         gmael(G,kappa,i) = ZV_dotproduct(gel(B,kappa), gel(B,i));
       kappamax++;
     }
-    loops++;
     if (DEBUGLEVEL>=2)
     {
       if (kappa>newkappa)
@@ -365,7 +358,6 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
     /* Step4: Success of Lovasz's condition */
     /* ************************************ */
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
-    lovasz++;
     if (cmprr(tmp, gel(s,kappa-1)) <=0 )
     {
       alpha[kappa] = kappa;
@@ -382,7 +374,6 @@ fplll(GEN B, GEN *ptrG, GEN *ptrU, GEN *ptrr, GEN delta, GEN eta, long prec)
       kappa2 = kappa;
       av2 = avma;
       do {
-        lovasz++;
         kappa--;
         if (kappa<zeros+2) break;
         tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
