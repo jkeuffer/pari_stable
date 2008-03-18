@@ -1339,7 +1339,7 @@ compilenode(long n, int mode, long flag)
           op_push(OCpushlex,vn);
         else
           op_push(OCpushdyn,(long)ep);
-        if (flag&FLreturn)
+        if (!(flag&FLnocopy))
           op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
       }
@@ -1421,7 +1421,7 @@ compilenode(long n, int mode, long flag)
       else if (ep->valence==EpVAR || ep->valence==EpNEW)
       {
         op_push(OCpushdyn,(long)ep);
-        if (flag&FLreturn)
+        if (!(flag&FLnocopy))
           op_push(OCcopyifclone,0);
         compilecast(n,Ggen,mode);
       }

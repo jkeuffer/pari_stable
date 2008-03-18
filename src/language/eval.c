@@ -366,7 +366,7 @@ pushlex(long vn, GEN x)
 {
   struct var_lex *v=var+s_var.n+vn;
   v->flag  = PUSH_VAL;
-  v->value = (isclone(x))? gcopy(x): x;
+  v->value = x;
 }
 
 INLINE void
