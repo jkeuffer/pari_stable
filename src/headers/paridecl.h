@@ -986,10 +986,10 @@ GEN     kerint1(GEN x);
 GEN     lindep(GEN x, long prec);
 GEN     lindep0(GEN x, long flag,long prec);
 GEN     lindep2(GEN x, long bit);
-GEN     lll(GEN x, long prec);
-GEN     lllfp(GEN x, long D, long prec, long flag);
+GEN     lll(GEN x);
+GEN     lllfp(GEN x, long D, long flag);
 GEN     lllgen(GEN x);
-GEN     lllgram(GEN x, long prec);
+GEN     lllgram(GEN x);
 GEN     lllgramgen(GEN x);
 GEN     lllgramint(GEN x);
 GEN     lllgramkerim(GEN x);
@@ -1008,8 +1008,8 @@ GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     perf(GEN a);
-GEN     qflll0(GEN x, long flag, long prec);
-GEN     qflllgram0(GEN x, long flag, long prec);
+GEN     qflll0(GEN x, long flag);
+GEN     qflllgram0(GEN x, long flag);
 char*   stackmalloc(size_t N);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
@@ -1699,7 +1699,7 @@ GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 
 /* lll.c */
 
-GEN     LLLint(GEN B, long D, GEN *M);
+GEN     LLLint(GEN x, long D, long flag, GEN *B);
 
 /* members.c */
 

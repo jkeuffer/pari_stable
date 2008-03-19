@@ -2018,7 +2018,7 @@ ideallllred_elt(GEN nf, GEN I, GEN vdir)
       G = gmul2n(G, e);
     }
   }
-  u = lll(gmul(G0, I), DEFAULTPREC);
+  u = lll(gmul(G0, I));
   return gmul(I, gel(u,1)); /* small elt in I */
 }
 
@@ -2124,7 +2124,7 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
   y = gmul(computeGtwist(nf,vdir), x);
-  y = gmul(x, gel(lll(y,prec),1));
+  y = gmul(x, gel(lll(y),1));
   return gerepileupto(av, principalidele(nf,y,prec));
 }
 

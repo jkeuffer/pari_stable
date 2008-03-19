@@ -61,6 +61,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the conversion style 'g' of the 'format' default now printfs in style 'f'
     if the decimal exponent is < -4 ( was: if the binary exponent is < -32 ),
     in order to conform to standard printf specifications.
+  - all LLL variants now use an implementation of NGuyen & Stehle's algorithm
+    The LLL-reduced bases will be different from previous versions.
 
 * Specific to the PARI library:
 ===============================
@@ -115,6 +117,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename derivpol -> RgX_deriv
   - obsolete library functions roots2 and rootsold are no longer public
   - rename factorpadic4 -> factorpadic, factorpadic2 now static
+  - the "prec" parameter has disappeared in all floating point LLL various
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

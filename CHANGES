@@ -98,6 +98,8 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        [ slow, unreliable ] with default flag = 0
    30- [library]: factorpadic4 -> factorpadic, factorpadic2 now static
    31- [library]: gsub now implemented directly when typ(x) = typ(y)
+   32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
+   33- [library]: the "prec" parameter of floating point LLLs has disappeared
 
   Added
     1- library function gpcalloc
@@ -143,6 +145,8 @@ JD 12- add an optional argument to quit()
    RgC_neg, RgC_add, RgC_sub, RgM_neg, RgM_add, RgM_sub,
    FF_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub, ZC_lincomb1_inplace, ZC_z_mul
    22- library function nf_to_scalar_or_basis
+   23- file src/basemath/lll.c
+
   Removed
     1- obsolete library functions extract and matextract
     2- obsolete library function elementinv_modpr

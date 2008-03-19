@@ -784,7 +784,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
     for (   ; i<=RU; i++) gel(p1,i) = gadd(s, gmul2n(gcoeff(A,i,j),-1));
   }
   if (prec <= 0) prec = gprecision(A);
-  u = lllfp(real_i(matep),100,prec,0);
+  u = lll(real_i(matep));
   if (typ(u) != t_MAT) return not_given(av,fl,fupb_PRECI);
 
   p1 = gmul(matep,u);
@@ -1207,7 +1207,7 @@ red_mod_units(GEN col, GEN z, long prec)
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) gel(x,i) = real_i(gel(col,i));
   gel(x,RU) = N2;
-  x = lllfp(shallowconcat(mat,x),100,prec,0);
+  x = lll(shallowconcat(mat,x));
   if (typ(x) != t_MAT) return NULL;
   x = gel(x,RU);
   if (signe(x[RU]) < 0) x = gneg_i(x);
@@ -1714,7 +1714,7 @@ signunits(GEN bnf)
 static GEN
 red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
-  GEN u = lll(gmul(G0, *ideal), DEFAULTPREC);
+  GEN u = lll(gmul(G0, *ideal));
   *ideal = ZM_mul(*ideal,u); /* approximate LLL reduction */
   return Q_from_QR(gmul(G, *ideal), prec);
 }
@@ -2020,7 +2020,7 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
-  GEN m, u = lll(gmul(G, I), DEFAULTPREC);
+  GEN m, u = lll(gmul(G, I));
   m = ZM_ZC_mul(I, gel(u,1));
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Zs\n",m);
@@ -3180,7 +3180,7 @@ PRECPB:
     }
     /* arch. components of fund. units */
     H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
-    U = ZM_mul(U, lll(H, DEFAULTPREC));
+    U = ZM_mul(U, lll(H));
     B = gmul(A, U);
     A = cleanarch(B, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");

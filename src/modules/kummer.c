@@ -207,8 +207,8 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     nf = nfnewprec_shallow(nf,prec);
   }
   z = shallowconcat(matunit, z);
-  u = lllfp(z, 100, prec, 0);
-  if (typ(u) == t_MAT)
+  u = lll(z);
+  if (lg(u) == lg(z))
   {
     ru = lg(u);
     for (j=1; j < ru; j++)

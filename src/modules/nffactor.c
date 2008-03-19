@@ -1107,13 +1107,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     PRK = prk = idealpows(nf, pr, a);
     pk = gcoeff(prk,1,1);
-#if 0
-    /* reduce size first, "scramble" matrix */
-    PRK = lllintpartial_ip(PRK);
-    /* now floating point reduction is fast */
-    PRK = lllint_fp_ip(PRK, 4);
-#endif
-    PRK = lllint_i(PRK, D, LLL_INPLACE, &B);
+    PRK = LLLint(PRK, D, LLL_INPLACE, &B);
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
     {

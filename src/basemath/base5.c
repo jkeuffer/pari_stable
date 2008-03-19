@@ -639,11 +639,11 @@ findmin(GEN nf, GEN x, GEN muf)
   else
   {
     GEN G = gmael(nf,5,2);
-    m = lllfp(gmul(G, x), 4, 0, 0);
+    m = lllfp(gmul(G,x), 4, 0);
     if (typ(m) != t_MAT)
     {
       x = lllint_ip(x,4);
-      m = lllfp(gmul(G, x), 4, 0, 0);
+      m = lllfp(gmul(G,x), 4, 0);
       if (typ(m) != t_MAT) pari_err(precer,"rnflllgram");
     }
     x = ZM_mul(x, m);
