@@ -1714,7 +1714,7 @@ signunits(GEN bnf)
 static GEN
 red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
-  GEN u = lll(gmul(G0, *ideal));
+  GEN u = lllint(gmul(G0, *ideal));
   *ideal = ZM_mul(*ideal,u); /* approximate LLL reduction */
   return Q_from_QR(gmul(G, *ideal), prec);
 }
@@ -2020,7 +2020,7 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
-  GEN m, u = lll(gmul(G, I));
+  GEN m, u = lllint(gmul(G, I));
   m = ZM_ZC_mul(I, gel(u,1));
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Zs\n",m);
@@ -3180,7 +3180,7 @@ PRECPB:
     }
     /* arch. components of fund. units */
     H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
-    U = ZM_mul(U, lll(H));
+    U = ZM_mul(U, lllint(H));
     B = gmul(A, U);
     A = cleanarch(B, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");

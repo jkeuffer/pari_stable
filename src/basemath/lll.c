@@ -722,12 +722,40 @@ lllgramkerim(GEN x) { return lllall(x,LLLDFT, LLL_ALL | LLL_GRAM); }
 static GEN
 rescale_to_int(GEN x)
 {
-  long e, prec = gprecision(x);
-  GEN y;
-  if (!prec) return Q_primpart(x);
+  long e, i,j, lx, hx, emin;
+  GEN D = gen_1;
+  int exact = 1;
 
-  y = gmul2n(x, bit_accuracy(prec) - gexpo(x));
-  return gcvtoi(y, &e);
+  lx = lg(x); if (lx == 1) return x;
+  hx = lg(x[1]);
+  emin = HIGHEXPOBIT;
+  for (j = 1; j < lx; j++)
+    for (i = 1; i < hx; i++)
+    {
+      GEN c = gcoeff(x,i,j);
+      switch(typ(c))
+      {
+        case t_REAL:
+          exact = 0;
+          if (!signe(c)) continue;
+          e = expo(c) - bit_accuracy(lg(c));
+          break;
+        case t_INT:
+          if (!signe(c)) continue;
+          e = expi(c) + 32;
+          break;
+        case t_FRAC:
+          e = expi(gel(c,1)) - expi(gel(c,2)) + 32;
+          if (exact) D = lcmii(D, gel(c,2));
+          break;
+        default:
+          pari_err(typeer,"rescale_to_int");
+          return NULL; /* not reached */
+      }
+      if (e < emin) emin = e;
+    }
+  if (exact) return D == gen_1 ? x: Q_muli_to_int(x, D);
+  return gcvtoi(gmul2n(x, -emin), &e);
 }
 
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
@@ -743,17 +771,10 @@ lllfp(GEN x, long D, long flag)
   return gerepilecopy(av, h);
 }
 
-static GEN
-lllfp_wrap(GEN x, long D, long flag)
-{
-  GEN h = lllfp(x,D,flag);
-  if (typ(h) == t_VEC) pari_err(talker, "not a definite matrix in lllgram");
-  return h;
-}
 GEN
-lllgram(GEN x) { return lllfp_wrap(x,LLLDFT,LLL_GRAM); }
+lllgram(GEN x) { return lllfp(x,LLLDFT,LLL_GRAM|LLL_IM); }
 GEN
-lll(GEN x) { return lllfp_wrap(x,LLLDFT,0); }
+lll(GEN x) { return lllfp(x,LLLDFT,LLL_IM); }
 
 GEN
 qflll0(GEN x, long flag)

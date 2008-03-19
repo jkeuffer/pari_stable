@@ -1326,7 +1326,7 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
 {
   GEN u;
   if (T->r1 == degpol(T->x))
-    u = lllfp(make_Tr(T->x, T->bas), 100, LLL_GRAM|LLL_KEEP_FIRST);
+    u = LLLint(make_Tr(T->x, T->bas), 100, LLL_GRAM|LLL_KEEP_FIRST, NULL);
   else
     u = get_red_G(T, pro);
   return u;

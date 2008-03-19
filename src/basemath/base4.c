@@ -2006,7 +2006,11 @@ ideallllred_elt(GEN nf, GEN I, GEN vdir)
 {
   GEN u, G0;
 
-  if (vdir && typ(vdir) == t_MAT) G0 = vdir;
+  if (vdir && typ(vdir) == t_MAT)
+  {
+    G0 = vdir;
+    u = lll(gmul(G0, I));
+  }
   else
   {
     GEN G = computeGtwist(nf, vdir);
@@ -2017,9 +2021,9 @@ ideallllred_elt(GEN nf, GEN I, GEN vdir)
       if (rank(G0) == r) break; /* maximal rank ? */
       G = gmul2n(G, e);
     }
+    u = lllint(ZM_mul(G0, I));
   }
-  u = lll(gmul(G0, I));
-  return gmul(I, gel(u,1)); /* small elt in I */
+  return ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
 }
 
 GEN
