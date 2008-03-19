@@ -981,35 +981,14 @@ GEN     algdep(GEN x, long n, long prec);
 GEN     algdep0(GEN x, long n, long bit,long prec);
 GEN     algdep2(GEN x, long n, long bit);
 GEN     gram_matrix(GEN M);
-GEN     kerint(GEN x);
-GEN     kerint1(GEN x);
 GEN     lindep(GEN x, long prec);
 GEN     lindep0(GEN x, long flag,long prec);
 GEN     lindep2(GEN x, long bit);
-GEN     lll(GEN x);
-GEN     lllfp(GEN x, long D, long flag);
-GEN     lllgen(GEN x);
-GEN     lllgram(GEN x);
-GEN     lllgramgen(GEN x);
-GEN     lllgramint(GEN x);
-GEN     lllgramkerim(GEN x);
-GEN     lllgramkerimgen(GEN x);
-GEN     lllint(GEN x);
-GEN     lllint_fp_ip(GEN x, long D);
-GEN     lllint_i(GEN x, long D, long flag, GEN *ptB);
-GEN     lllint_ip(GEN x, long alpha);
-GEN     lllintpartial(GEN mat);
-GEN     lllintpartial_ip(GEN mat);
-GEN     lllkerim(GEN x);
-GEN     lllkerimgen(GEN x);
-GEN     matkerint0(GEN x,long flag);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     perf(GEN a);
-GEN     qflll0(GEN x, long flag);
-GEN     qflllgram0(GEN x, long flag);
 char*   stackmalloc(size_t N);
 GEN     zncoppersmith(GEN P0, GEN N, GEN X, GEN B) ;
 
@@ -1091,7 +1070,6 @@ GEN     buchreal(GEN D, GEN gsens, GEN gcbach, GEN gcbach2, GEN gRELSUP, long pr
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, GEN flag, long prec);
 GEN     quadray(GEN bnf, GEN f, long prec);
-
 
 /* buch2.c */
 
@@ -1700,6 +1678,25 @@ GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 /* lll.c */
 
 GEN     LLLint(GEN x, long D, long flag, GEN *B);
+GEN     kerint(GEN x);
+GEN     kerint1(GEN x);
+GEN     lll(GEN x);
+GEN     lllfp(GEN x, long D, long flag);
+GEN     lllgen(GEN x);
+GEN     lllgram(GEN x);
+GEN     lllgramgen(GEN x);
+GEN     lllgramint(GEN x);
+GEN     lllgramkerim(GEN x);
+GEN     lllgramkerimgen(GEN x);
+GEN     lllint(GEN x);
+GEN     lllint_ip(GEN x, long alpha);
+GEN     lllintpartial(GEN mat);
+GEN     lllintpartial_ip(GEN mat);
+GEN     lllkerim(GEN x);
+GEN     lllkerimgen(GEN x);
+GEN     matkerint0(GEN x,long flag);
+GEN     qflll0(GEN x, long flag);
+GEN     qflllgram0(GEN x, long flag);
 
 /* members.c */
 

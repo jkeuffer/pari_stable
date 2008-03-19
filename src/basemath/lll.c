@@ -743,10 +743,6 @@ lllfp(GEN x, long D, long flag)
   return gerepilecopy(av, h);
 }
 
-/* x integral, maximal rank, LLL-reduce in place using fp */
-GEN
-lllint_fp_ip(GEN x, long D) { return lllfp(x,D, LLL_INPLACE); }
-
 static GEN
 lllfp_wrap(GEN x, long D, long flag)
 {
@@ -813,7 +809,7 @@ GEN
 kerint1(GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, lllint_fp_ip(matrixqz3(ker(x)), 100));
+  return gerepilecopy(av, lllint_ip(matrixqz3(ker(x)), LLLDFT));
 }
 
 GEN

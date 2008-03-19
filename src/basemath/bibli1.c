@@ -220,45 +220,6 @@ mat_to_MP(GEN x, long prec)
   return y;
 }
 
-static GEN
-to_mp(GEN x, long prec)
-{ return (typ(x) == t_INT)? x: gtofp(x, prec); }
-static GEN
-col_to_mp(GEN x, long prec)
-{
-  long j, l = lg(x);
-  GEN y = cgetg(l, t_COL);
-  for (j=1; j<l; j++) gel(y,j) = to_mp(gel(x,j), prec);
-  return y;
-}
-static GEN
-mat_to_mp(GEN x, long prec)
-{
-  long j, l = lg(x);
-  GEN y = cgetg(l, t_MAT);
-  for (j=1; j<l; j++) gel(y,j) = col_to_mp(gel(x,j), prec);
-  return y;
-}
-
-static void
-prec_col(GEN c, long M, long *pl, GEN *D)
-{
-  long i, l;
-  for (i=1; i<=M; i++)
-  {
-    GEN x = gel(c,i);
-    switch(typ(x)) {
-      case t_REAL:
-	*D = NULL;
-	l = lg(x); if (l > *pl) *pl = l;
-	break;
-      case t_FRAC:
-	if (*D) *D = lcmii(*D, gel(x,2));
-	break;
-    }
-  }
-}
-
 GEN
 gram_matrix(GEN x)
 {
@@ -656,7 +617,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
       fprintferr("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
     }
 
-    sh = lllint_fp_ip(M, 4);
+    sh = lllint_ip(M, 4);
     /* Take the first vector if it is non constant */
     short_pol = gel(sh,1);
     if (ZV_isscalar(short_pol)) short_pol = gel(sh, 2);
@@ -761,7 +722,7 @@ lindep2(GEN x, long bit)
     gel(c,lx)           = gcvtoi(gshift(gel(re,i),bit), &e);
     if (im) gel(c,lx+1) = gcvtoi(gshift(gel(im,i),bit), &e);
   }
-  M = lllint_fp_ip(M,100);
+  M = lllint_ip(M,100);
   M = gel(M,1);
   M[0] = evaltyp(t_COL) | evallg(lx);
   return gerepilecopy(av, M);
@@ -1598,8 +1559,7 @@ plindep(GEN x)
     gel(c,1) = gel(x,i+1);
     gel(m,i) = c;
   }
-  m = lllintpartial_ip( ZM_hnfmodid(m, pn) );
-  m = lllint_fp_ip(m, 100);
+  m = lllint_ip(ZM_hnfmodid(m, pn), 100);
   return gerepilecopy(av, gel(m,1));
 }
 
