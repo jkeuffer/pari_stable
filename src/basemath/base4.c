@@ -188,56 +188,19 @@ mylog(GEN x, long prec)
   return glog(x,prec);
 }
 
-GEN get_arch(GEN nf,GEN x,long prec);
-
-static GEN
-famat_get_arch(GEN nf, GEN x, long prec)
-{
-  GEN A, a, g = gel(x,1), e = gel(x,2);
-  long i, l = lg(e);
-
-  if (l <= 1)
-    return get_arch(nf, gen_1, prec);
-  A = NULL; /* -Wall */
-  for (i=1; i<l; i++)
-  {
-    a = get_arch(nf, gel(g,i), prec);
-    a = gmul(gel(e,i), a);
-    A = (i == 1)? a: gadd(A, a);
-  }
-  return A;
-}
-
-static GEN
-scalar_get_arch(long R1, long RU, GEN x, long prec)
-{
-  GEN v = cgetg(RU+1,t_VEC);
-  GEN p1 = glog(x, prec);
-  long i;
-
-  for (i=1; i<=R1; i++) gel(v,i) = p1;
-  if (i <= RU)
-  {
-    p1 = gmul2n(p1,1);
-    for (   ; i<=RU; i++) gel(v,i) = p1;
-  }
-  return v;
-}
-
-/* For internal use. Get archimedean components: [e_i log( sigma_i(x) )],
- * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
+/* For internal use. Get archimedean components: [e_i Log( sigma_i(X) )],
+ * where X = primpart(x), and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
 GEN
 get_arch(GEN nf,GEN x,long prec)
 {
-  long i, RU, R1 = nf_get_r1(nf);
+  long i, R1, RU;
   GEN v;
-
-  RU = lg(nf[6]) - 1;
-  if (typ(x) == t_MAT) return famat_get_arch(nf,x,prec);
+  if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
   x = nf_to_scalar_or_basis(nf,x);
-  if (typ(x) != t_COL) return scalar_get_arch(R1, RU, x, prec);
-  x = gmul(gmael(nf,5,1),x);
-  v = cgetg(RU+1,t_VEC);
+  RU = lg(nf[6]) - 1;
+  if (typ(x) != t_COL) return zerovec(RU);
+  x = gmul(gmael(nf,5,1), Q_primpart(x));
+  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
   for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
   for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
   return v;
@@ -295,20 +258,22 @@ low_prec(GEN x)
   return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3);
 }
 
-/* as above but return NULL if precision problem, and set *emb to the
- * embeddings of x */
+/* For internal use. Get archimedean components: [e_i log( | sigma_i(x) | )],
+ * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1)
+ * Return NULL if precision problem, and set *emb to the embeddings of x */
 GEN
 get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 {
-  long i, RU, R1 = nf_get_r1(nf);
+  long i, RU, R1;
   GEN v, t;
 
-  RU = lg(nf[6])-1;
   if (typ(x) == t_MAT) return famat_get_arch_real(nf,x,emb,prec);
   x = nf_to_scalar_or_basis(nf,x);
+  RU = lg(nf[6])-1;
+  R1 = nf_get_r1(nf);
   if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
-  v = cgetg(RU+1,t_COL);
   x = gmul(gmael(nf,5,1), x);
+  v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++)
   {
     t = gabs(gel(x,i),prec); if (low_prec(t)) return NULL;
@@ -1379,11 +1344,10 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   for (i=1; i<l; i++)
   {
     GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
-    if (typ(x) != t_COL) continue; /* rational */
-    x = Q_primpart(x);
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
-    t = gmul(get_arch(nf,x,prec), gel(e,i));
+    t = get_arch(nf,x,prec); if (gel(t,1) == gen_0) continue; /* rational */
+    t = gmul(t, gel(e,i));
     y = y? gadd(y,t): t;
   }
   return y ? y: zerovec(lg(nf[6])-1);
