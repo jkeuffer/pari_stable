@@ -303,8 +303,8 @@ get_om(GEN nf, GEN a) {
 static GEN
 getallelts(GEN bnr)
 {
-  GEN nf,G,C,c,g, list, pows, gk;
-  long lc,i,j,k,no;
+  GEN nf, G, C, c, g, list, pows, gk;
+  long lc, i, j, no;
 
   nf = checknf(bnr);
   G = gel(bnr,5);
@@ -313,16 +313,15 @@ getallelts(GEN bnr)
   c = gel(G,2);
   g = gel(G,3); lc = lg(c)-1;
   list = cgetg(no+1,t_VEC);
-  if (!lc)
-  {
-    gel(list,1) = idealhermite(nf,gen_1);
-    return list;
-  }
+  gel(list,1) = matid(degpol(nf[1])); /* (1) */
+  if (!no) return list;
+
   pows = cgetg(lc+1,t_VEC);
   c = shallowcopy(c); settyp(c, t_VECSMALL);
   for (i=1; i<=lc; i++)
   {
-    c[i] = k = itos(gel(c,i));
+    long k = itos(gel(c,i));
+    c[i] = k;
     gk = cgetg(k, t_VEC); gel(gk,1) = gel(g,i);
     for (j=2; j<k; j++)
       gel(gk,j) = idealmodidele(bnr, idealmul(nf, gel(gk,j-1), gel(gk,1)));
@@ -333,19 +332,19 @@ getallelts(GEN bnr)
   for (i=2; i<=lc; i++) C[i] = C[i-1] * c[lc-i+1];
   /* C[i] = c(k-i+1) * ... * ck */
   /* j < C[i+1] <==> j only involves g(k-i)...gk */
-  i = 1; list[1] = 0; /* dummy */
+  i = 1;
   for (j=1; j < C[1]; j++)
     gel(list, j+1) = gmael(pows,lc,j);
-  for (   ; j<no; j++)
+  while(j<no)
   {
-    GEN p1,p2;
+    long k;
+    GEN a;
     if (j == C[i+1]) i++;
-    p2 = gmael(pows,lc-i,j/C[i]);
-    p1 = gel(list ,j%C[i]+1);
-    if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
-    gel(list, j+1) = p2;
+    a = gmael(pows,lc-i,j/C[i]);
+    k = j%C[i] + 1;
+    if (k > 1) a = idealmodidele(bnr, idealmul(nf, a, gel(list,k)));
+    gel(list, ++j) = a;
   }
-  gel(list,1) = idealhermite(nf,gen_1);
   return list;
 }
 
