@@ -1164,7 +1164,7 @@ certifybuchall(GEN bnf)
       GEN h, g = gel(p1,1);
       for (j = 1; j < lg(g); j++)
       {
-	h = idealhermite(nf, gel(g,j));
+	h = idealhermite_aux(nf, gel(g,j));
 	bad = lcmii(bad, gcoeff(h,1,1));
       }
     }

@@ -1324,8 +1324,8 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
   GEN z = C? C: gen_1;
   for (i=1; i<c; i++)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, gel(g,i), gel(e,i)));
-  if (typ(z) != t_MAT) z = idealhermite(nf,z);
-  if (typ(y) != t_MAT) y = idealhermite(nf,y);
+  if (typ(z) != t_MAT) z = idealhermite_aux(nf,z);
+  if (typ(y) != t_MAT) y = idealhermite_aux(nf,y);
   i = ZM_equal(y, z); avma = av; return i;
 }
 
@@ -1510,7 +1510,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   if (id == C) /* e = 0 */
   {
     if (!C) return isprincipalall(bnf, gen_1, flag);
-    C = idealhermite(nf,C); id = z;
+    C = idealhermite_aux(nf,C); id = z;
     if (gen) gel(id,1) = C; else id = C;
   }
   c = getrand();

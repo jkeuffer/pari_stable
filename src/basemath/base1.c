@@ -661,64 +661,77 @@ polgalois(GEN x, long prec)
 
 #undef _res
 
+/* assume correct dimensions, return x(s) mod T */
+static GEN
+ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
+{
+  return algtobasis(nf, RgX_RgXQ_compo(coltoliftalg(nf,x), s, T));
+}
+
+static GEN
+pr_galoisapply(GEN nf, GEN pr, GEN aut)
+{
+  GEN PR = cgetg(6,t_VEC), p = gel(pr,1), e = gel(pr,3);
+  GEN b, u, pov2 = shifti(p,-1), s = gel(aut,2), T = gel(aut,1);
+  gel(PR,1) = p;
+  gel(PR,3) = e;
+  gel(PR,4) = gel(pr,4);
+  b = centermod_i(ZC_galoisapply(nf, gel(pr,5), s,T), p, pov2);
+  u = centermod_i(ZC_galoisapply(nf, gel(pr,2), s,T), p, pov2);
+  if (is_pm1(e) && int_elt_val(nf, u, p, b, NULL))
+  {
+    GEN t = gel(u,1);
+    gel(u,1) =  (signe(t) > 0)? subii(t, p) : addii(t, p);
+  }
+  gel(PR,2) = u;
+  gel(PR,5) = b; return PR;
+}
+
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {
   pari_sp av = avma;
   long lx, j, N;
-  GEN p, p1, y, pol;
+  GEN y, T;
 
-  nf=checknf(nf); pol=gel(nf,1);
-  if (typ(aut)==t_POL) aut = gmodulo(aut,pol);
+  nf = checknf(nf); T = gel(nf,1);
+  if (typ(aut)==t_POL) aut = gmodulo(aut,T);
   else
   {
-    if (typ(aut)!=t_POLMOD || !gequal(gel(aut,1),pol))
-      pari_err(talker,"incorrect galois automorphism in galoisapply");
+    if (typ(aut)!=t_POLMOD || !gequal(gel(aut,1),T))
+      pari_err(typeer,"galoisapply");
   }
   switch(typ(x))
   {
-    case t_INT: case t_INTMOD: case t_FRAC: case t_PADIC:
-      avma=av; return gcopy(x);
+    case t_INT: case t_INTMOD: case t_FRAC:
+      avma = av; return gcopy(x);
 
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
-      p1 = gsubst(x,varn(pol),aut);
-      if (typ(p1)!=t_POLMOD || !gequal(gel(p1,1),pol)) p1 = gmodulo(p1,pol);
-      return gerepileupto(av,p1);
+      y = gsubst(x,varn(T),aut);
+      if (typ(y)!=t_POLMOD || !gequal(gel(y,1),T)) y = gmodulo(y,T);
+      return gerepileupto(av,y);
 
     case t_VEC:
-      if (lg(x)==3)
+      switch(lg(x))
       {
-	y=cgetg(3,t_VEC);
-	gel(y,1) = galoisapply(nf,aut,gel(x,1));
-	gel(y,2) = gcopy(gel(x,2)); return gerepileupto(av, y);
+        case 3: y = cgetg(3,t_VEC);
+          gel(y,1) = galoisapply(nf,aut,gel(x,1));
+          gel(y,2) = gcopy(gel(x,2)); return gerepileupto(av, y);
+        case 6: return gerepilecopy(av, pr_galoisapply(nf, x, aut));
       }
-      if (lg(x)!=6) pari_err(typeer,"galoisapply");
-      y=cgetg(6,t_VEC); y[1]=x[1]; y[3]=x[3]; y[4]=x[4];
-      p = gel(x,1);
-      p1=centermod(galoisapply(nf,aut,gel(x,2)), p);
-      if (is_pm1(x[3]))
-	if (Z_pval(subres(coltoliftalg(nf,p1),pol), p) > itos(gel(x,4)))
-	  gel(p1,1) =  (signe(p1[1]) > 0)? subii(gel(p1,1), p)
-					 : addii(gel(p1,1), p);
-      gel(y,2) = p1;
-      gel(y,5) = centermod(galoisapply(nf,aut,gel(x,5)), p);
-      return gerepilecopy(av,y);
+      break;
 
     case t_COL:
-      N = degpol(pol);
-      if (lg(x)!=N+1) pari_err(typeer,"galoisapply");
-      p1 = gsubst(coltoliftalg(nf,x), varn(pol), aut);
-      return gerepileupto(av, algtobasis(nf,p1));
+      return gerepileupto(av, ZC_galoisapply(nf,x, gel(aut,2),T));
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      N=degpol(pol);
-      if (lg(x[1])!=N+1) pari_err(typeer,"galoisapply");
-      p1=cgetg(lx,t_MAT);
-      for (j=1; j<lx; j++) gel(p1,j) = galoisapply(nf,aut,gel(x,j));
-      if (lx==N+1) p1 = idealhermite(nf,p1);
-      return gerepileupto(av,p1);
+      N = degpol(T);
+      if (lg(x[1])!=N+1) break;
+      y = cgetg(lx,t_MAT);
+      for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2),T);
+      return gerepileupto(av, idealhermite_aux(nf,y));
   }
   pari_err(typeer,"galoisapply");
   return NULL; /* not reached */
