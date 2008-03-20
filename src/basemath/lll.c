@@ -347,7 +347,7 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
   if(DEBUGLEVEL>=4)
   {
     TIMERstart(&T);
-    fprintferr("Entering L^2: LLL-parameters (%Z.2f,%.2Zf), working precision %d words\n",delta,eta, prec);
+    fprintferr("Entering L^2: LLL-parameters (%Z.3f,%.3Zf), working precision %d words\n",delta,eta, prec);
   }
 
   alpha = cgetg(d+1, t_VECSMALL);
