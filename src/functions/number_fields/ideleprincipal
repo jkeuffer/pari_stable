@@ -9,4 +9,5 @@ Doc: creates the principal idele
  rational or polmod) in the number field $\var{nf}$. The result is a
  two-component vector, the first being a one-column matrix representing the
  corresponding principal ideal, and the second being the vector with $r_1+r_2$
- components giving the complex logarithmic embedding of $x$.
+ components giving the complex logarithmic embedding of (the primitive part
+ of) $x$.
