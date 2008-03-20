@@ -1925,12 +1925,12 @@ chk_vdir(GEN nf, GEN vdir)
 {
   long l, i, t;
   GEN v;
-  if (!vdir || gcmp0(vdir)) return NULL;
+  if (!vdir) return NULL;
   l = lg(vdir);
   if (l != lg(nf[6])) pari_err(talker, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) pari_err(talker, "not a vector in idealred");
+  if (t != t_VEC) pari_err(typeer, "idealred");
   v = cgetg(l, t_VECSMALL);
   for (i=1; i<l; i++) v[i] = itos(gceil(gel(vdir,i)));
   return v;
@@ -1939,29 +1939,29 @@ chk_vdir(GEN nf, GEN vdir)
 static GEN
 computeGtwist(GEN nf, GEN vdir)
 {
-  long i, j, k, l, lG, v, r1, r2;
-  GEN p1, G = gmael(nf,5,2);
+  long i, j, k, l, lG, v, r1;
+  GEN G = gmael(nf,5,2);
 
   vdir = chk_vdir(nf, vdir);
   if (!vdir) return G;
   l = lg(vdir); lG = lg(G);
-  p1 = shallowcopy(G);
-  nf_get_sign(nf, &r1, &r2);
+  G = shallowcopy(G);
+  r1 = nf_get_r1(nf);
   for (i=1; i<l; i++)
   {
     v = vdir[i]; if (!v) continue;
     if (i <= r1) {
-      for (j=1; j<lG; j++) gcoeff(p1,i,j) = gmul2n(gcoeff(p1,i,j), v);
+      for (j=1; j<lG; j++) gcoeff(G,i,j) = gmul2n(gcoeff(G,i,j), v);
     } else {
       k = (i<<1) - r1;
       for (j=1; j<lG; j++)
       {
-	gcoeff(p1,k-1,j) = gmul2n(gcoeff(p1,k-1,j), v);
-	gcoeff(p1,k  ,j) = gmul2n(gcoeff(p1,k  ,j), v);
+	gcoeff(G,k-1,j) = gmul2n(gcoeff(G,k-1,j), v);
+	gcoeff(G,k  ,j) = gmul2n(gcoeff(G,k  ,j), v);
       }
     }
   }
-  return p1;
+  return G;
 }
 
 /* assume I in NxN matrix form (not necessarily HNF) */
@@ -2081,13 +2081,12 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   long N, tx;
   GEN y;
 
-  nf = checknf(nf);
-  vdir = chk_vdir(nf,vdir);
-  N = degpol(nf[1]);
+  nf = checknf(nf); N = degpol(nf[1]);
   tx = idealtyp(&x,&y);
   if (tx == id_PRINCIPAL) return gcopy(x);
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
+  vdir = chk_vdir(nf,vdir);
   y = gmul(computeGtwist(nf,vdir), x);
   y = gmul(x, gel(lll(y),1));
   return gerepileupto(av, principalidele(nf,y,prec));
