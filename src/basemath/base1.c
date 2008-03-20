@@ -1211,8 +1211,8 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   MDI = ideal_two_elt(nf, A);
   gel(MDI,2) = eltimul_get_table(nf, gel(MDI,2));
   gel(mat,7) = MDI;
-  if (is_pm1(T->index))
-    D = idealhermite_aux(nf, ZX_deriv(x));
+  if (is_pm1(T->index)) /* principal ideal (x'), whose norm is |dK| */
+    D = ZM_hnfmod(eltimul_get_table(nf, ZX_deriv(x)), absdK);
   else
     D = gmul(dA, idealinv(nf, A));
   gel(mat,3) = gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */
