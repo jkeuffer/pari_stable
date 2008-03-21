@@ -51,6 +51,7 @@ BA 29- missing GC in the leftrightpow functions
    47- infinite loop in nffactor [#751]
    48- ellordinate couldn't handle t_FFELTs
    49- eint1(10,10) completely wrong
+   50- ispower broken due to uninitialized variable
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -98,7 +99,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        [ slow, unreliable ] with default flag = 0
    30- [library]: factorpadic4 -> factorpadic, factorpadic2 now static
    31- [library]: gsub now implemented directly when typ(x) = typ(y)
-   32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
+BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    33- [library]: the "prec" parameter of floating point LLLs has disappeared
 
   Added

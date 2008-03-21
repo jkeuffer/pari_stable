@@ -937,6 +937,7 @@ isanypower(GEN x, GEN *pty)
         k <<= 1; x = y;
       }
     }
+    mask = 0;
     v3 = u_lvalrem(e2, 3, &e2); if (v3) mask = 1;
     v5 = u_lvalrem(e2, 5, &e2); if (v5) mask |= 2;
     v7 = u_lvalrem(e2, 7, &e2); if (v7) mask |= 4;
