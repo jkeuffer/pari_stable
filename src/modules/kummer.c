@@ -863,7 +863,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   P = cgetg(l,t_MAT);
   for (j=1; j<l; j++)
   {
-    GEN g, id = idealhermite(nfz, gel(raygenz,j));
+    GEN g, id = idealhermite_aux(nfz, gel(raygenz,j));
     g = Stelt(nf, gmul(gel(nfz,7), id), polrel);
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     gel(P,j) = isprincipalray(bnr, g);
