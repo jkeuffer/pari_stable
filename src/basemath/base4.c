@@ -2504,8 +2504,7 @@ static GEN
 element_close(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
-  long tx = typ(x);
-  if (is_extscalar_t(tx)) x = poltobasis(checknf(nf), x);
+  x = algtobasis_i(checknf(nf), x);
   return gerepileupto(av, close_modinvertible(x, ideal));
 }
 
