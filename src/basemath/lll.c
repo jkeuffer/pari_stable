@@ -337,7 +337,7 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
   {
     if (kappa>kappamax)
     {
-      kappamax++;
+      kappamax = kappa;
       if (!gram) {
         for (i=zeros+1; i<=kappa; i++)
           gmael(G,kappa,i) = ZV_dotproduct(gel(B,kappa), gel(B,i));
