@@ -320,26 +320,29 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
   /* Step2: Initializing the main loop */
   kappamax = 1;
   i = 1;
+  maxG = d; /* later updated to kappamax if (!gram) */
 
   do {
     if (!gram) gmael(G,i,i) = ZV_dotsquare(gel(B,i));
     gmael(r,i,i) = itor(gmael(G,i,i), prec);
   } while (signe(gmael(G,i,i)) == 0 && (++i <=d));
   zeros = i-1; /* all vectors B[i] with i <= zeros are zero vectors */
-  kappa = i+1;
+  kappa = i;
   if (zeros < d)
     gmael(r,zeros+1,zeros+1) = itor(gmael(G,zeros+1,zeros+1), prec);
   for (i=zeros+1; i<=d; i++)
     alpha[i]=1;
 
-  while (kappa <= d)
+  while (++kappa <= d)
   {
     if (kappa>kappamax)
     {
-      if (!gram)
+      kappamax++;
+      if (!gram) {
         for (i=zeros+1; i<=kappa; i++)
           gmael(G,kappa,i) = ZV_dotproduct(gel(B,kappa), gel(B,i));
-      kappamax++;
+        maxG = kappamax;
+      }
       if (DEBUGLEVEL>=6) fprintferr("K%ld ",kappa);
     }
 
@@ -350,8 +353,7 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
     }
 
     /* Step3: Call to the Babai algorithm */
-    Babai(kappa, &G, &B, &U, &mu, &r, &s, alpha[kappa], zeros,
-      gram? lg(G)-1: kappamax,
+    Babai(kappa, &G, &B, &U, &mu, &r, &s, alpha[kappa], zeros, maxG,
       gram? 0 : ((triangular && kappamax <= n) ? kappamax: n),
       eta, prec);
 
@@ -389,7 +391,6 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
       if (!gram) rotate(B,kappa2,kappa,n);
       if (U) rotate(U,kappa2,kappa,d);
 
-      maxG = gram ? n: kappamax;
       for (i=1; i<=kappa2; i++) gel(SPtmp,i) = gmael(G,kappa2,i);
       for (i=kappa2+1; i<=maxG; i++) gel(SPtmp,i) = gmael(G,i,kappa2);
       for (i=kappa2; i>kappa; i--)
@@ -410,7 +411,6 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
         gmael(r,kappa,kappa) = itor(gmael(G,kappa,kappa),prec);
       }
     }
-    kappa++;
   }
 
   if (DEBUGLEVEL>=4) msgTIMER(&T,"LLL");
