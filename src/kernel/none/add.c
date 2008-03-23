@@ -226,7 +226,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     setsigne(z,sy); return z;
   }
 
-  if (e < 0) { z=x; x=y; y=z; ey=ex; i=sx; sx=sy; sy=i; e=-e; }
+  if (e < 0) { swap(x,y); lswap(sx,sy); ey=ex; e=-e; }
   /* now ey >= ex */
   lx = lg(x);
   ly = lg(y);
