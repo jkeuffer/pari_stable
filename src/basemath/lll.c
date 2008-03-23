@@ -97,12 +97,12 @@ Updates B (kappa); computes mu_{kappa,j}, r_{kappa,j} for j<=kappa, and s(kappa)
 */
 static void
 Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
-      long a, long zeros, long maxG, long n, GEN eta, long prec)
+      long a, long zeros, long maxG, long n, GEN eta, GEN etaplus1, long prec)
 {
   pari_sp av, lim;
   GEN G=*pG, B=*pB, U=*pU, mu=*pmu, r=*pr, s=*ps;
   long i, j, k, test, aa = (a > zeros)? a : zeros+1;
-  GEN tmp, rtmp, ztmp, onedothalfplus=addsr(1,eta);
+  GEN tmp, rtmp, ztmp;
   long d = U ? lg(U)-1: 0;
   /* HACK: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
   av = avma; lim = stack_lim(av, 1);
@@ -147,9 +147,9 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
 
       test = 1;
       /* we consider separately the case |X| = 1 */
-      if (absr_cmp(tmp, onedothalfplus) <= 0)
+      if (absr_cmp(tmp, etaplus1) <= 0)
       {
-        if ( signe(tmp) > 0 )
+        if (signe(tmp) > 0)
         { /* in this case, X = 1 */
           for (k=zeros+1; k<j; k++)
             gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), gmael(mu,j,k));
@@ -158,8 +158,8 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
 
           for (i=1; i<=d; i++)
             gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
-          ztmp = shifti(gmael(G,kappa,j), 1);
-          ztmp = subii(gmael(G,j,j), ztmp);
+          
+          ztmp = subii(gmael(G,j,j), shifti(gmael(G,kappa,j), 1));
           gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
           for (i=1; i<=j; i++)
             gmael(G,kappa,i) = subii(gmael(G,kappa,i), gmael(G,j,i));
@@ -171,21 +171,20 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
         else
         { /* otherwise X = -1 */
           for (k=zeros+1; k<j; k++)
-            gmael(mu,kappa,k)=addrr(gmael(mu,kappa,k), gmael(mu,j,k));
+            gmael(mu,kappa,k) = addrr(gmael(mu,kappa,k), gmael(mu,j,k));
           for (i=1; i<=n; i++)
-            gmael(B,kappa,i)=addii(gmael(B,kappa,i), gmael(B,j,i));
+            gmael(B,kappa,i) = addii(gmael(B,kappa,i), gmael(B,j,i));
 
           for (i=1; i<=d; i++)
-            gmael(U,kappa,i)=addii(gmael(U,kappa,i),gmael(U,j,i));
-          ztmp = shifti(gmael(G,kappa,j), 1);
-          ztmp = addii(gmael(G,j,j), ztmp);
-          gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
+            gmael(U,kappa,i) = addii(gmael(U,kappa,i),gmael(U,j,i));
+          ztmp = addii(gmael(G,j,j), shifti(gmael(G,kappa,j), 1));
+          gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
           for (i=1; i<=j; i++)
-            gmael(G,kappa,i)=addii(gmael(G,kappa,i), gmael(G,j,i));
+            gmael(G,kappa,i) = addii(gmael(G,kappa,i), gmael(G,j,i));
           for (i=j+1; i<kappa; i++)
-            gmael(G,kappa,i)=addii(gmael(G,kappa,i), gmael(G,i,j));
+            gmael(G,kappa,i) = addii(gmael(G,kappa,i), gmael(G,i,j));
           for (i=kappa+1; i<=maxG; i++)
-            gmael(G,i,kappa)=addii(gmael(G,i,kappa), gmael(G,i,j));
+            gmael(G,i,kappa) = addii(gmael(G,i,kappa), gmael(G,i,j));
         }
       } else {        	
         /* we have |X| >= 2 */
@@ -235,7 +234,7 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
 
           for (i=1; i<=j; i++)
             gmael(G,kappa,i) = subii(gmael(G,kappa,i),
-                               mulii(X, gmael(G,j,i)));
+                                     mulii(X, gmael(G,j,i)));
           for (   ; i<kappa; i++)
             gmael(G,kappa,i) = subii(gmael(G,kappa,i),
                                      mulii(X, gmael(G,i,j)));
@@ -277,7 +276,7 @@ rotate(GEN mu,long kappa2, long kappa,long d)
 
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 static GEN
-fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
+fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
 {
   const long inplace = flag & LLL_INPLACE;
   const long gram = flag & LLL_GRAM; /*Gram matrix*/
@@ -285,6 +284,7 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
   pari_sp av, av2, lim;
   long kappa, kappa2, d, n, i, j, zeros, kappamax, maxG;
   GEN U, G, mu, r, s, tmp, SPtmp, alpha;
+  GEN delta = dbltor(DELTA), eta = dbltor(ETA), etaplus1 = dbltor(ETA+1);
   const long triangular = 0;
   pari_timer T;
 
@@ -355,7 +355,7 @@ fplll(GEN B, GEN *ptrr, GEN delta, GEN eta, long flag, long prec)
     /* Step3: Call to the Babai algorithm */
     Babai(kappa, &G, &B, &U, &mu, &r, &s, alpha[kappa], zeros, maxG,
       gram? 0 : ((triangular && kappamax <= n) ? kappamax: n),
-      eta, prec);
+      eta, etaplus1, prec);
 
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
     if (cmprr(tmp, gel(s,kappa-1)) <= 0)
@@ -445,7 +445,7 @@ LLLint(GEN x, long D, long flag, GEN *B)
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
   prec = good_prec(d,DELTA,ETA); 
-  return fplll(x, B, dbltor(DELTA), dbltor(ETA), flag, prec);
+  return fplll(x, B, DELTA, ETA, flag, prec);
 }
 
 /********************************************************************/
