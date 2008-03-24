@@ -972,7 +972,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
-  if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Zs\n",piv);
+  if (DEBUGLEVEL>7) fprintferr("special_pivot output:\n%Zs\n",piv);
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_COL);
@@ -1043,7 +1043,7 @@ static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long N0 = 1; /* # of traces added at each step */
-  double BitPerFactor = 0.5; /* nb bits in p^(a-b) / modular factor */
+  double BitPerFactor = 1.5; /* nb bits in p^(a-b) / modular factor */
   long i,j,tmax,n0,C, dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp, logBr;

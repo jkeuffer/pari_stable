@@ -89,54 +89,71 @@ lll_finish(GEN h, long k, long flag)
   http://www.shoup.net/ntl/
 */
 
+/* x - s*y */
+static GEN
+submuls(GEN x, GEN y, long s)
+{
+  pari_sp av;
+  if (!signe(y)) return x;
+  av = avma;
+  (void)new_chunk(3+lgefint(x)+lgefint(y)); /* HACK */
+  y = mulsi(s,y);
+  avma = av; return subii(x, y);
+}
+static GEN
+submul(GEN x, GEN y, GEN s)
+{
+  pari_sp av;
+  if (!signe(y)) return x;
+  av = avma;
+  (void)new_chunk(lgefint(s)+lgefint(x)+lgefint(y)); /* HACK */
+  y = mulii(s,y);
+  avma = av; return subii(x, y);
+}
+
 /***********************************************/
 /* Babai's Nearest Plane algorithm (iterative) */
 /***********************************************/
 /* Size-reduces b_kappa using mu_{i,j} and r_{i,j} for j<=i <kappa
 Updates B (kappa); computes mu_{kappa,j}, r_{kappa,j} for j<=kappa, and s(kappa)
+mu, r, s updated in place (affrr).
 */
 static void
-Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
+Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       long a, long zeros, long maxG, long n, GEN eta, GEN etaplus1, long prec)
 {
-  pari_sp av, lim;
-  GEN G=*pG, B=*pB, U=*pU, mu=*pmu, r=*pr, s=*ps;
+  pari_sp lim = stack_lim(av,2);
+  GEN B = *pB, G = *pG, U = *pU, tmp, rtmp, ztmp;
   long i, j, k, test, aa = (a > zeros)? a : zeros+1;
-  GEN tmp, rtmp, ztmp;
   long d = U ? lg(U)-1: 0;
   /* HACK: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
-  av = avma; lim = stack_lim(av, 1);
   do {
     test=0;
-    if (low_stack(lim, stack_lim(av,1)))
+    if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Babai");
-      gerepileall(av,U?6:5,&B,&G,&mu,&r,&s,&U);
+      gerepileall(av,U?3:2,&B,&G,&U);
     }
     /* Step2: compute the GSO for stage kappa */
     for (j=aa; j<kappa; j++)
     {
-      if (j > zeros+2)
+      pari_sp btop = avma;
+      k = zeros+1;
+      if (j > k)
       {
-        pari_sp btop=avma;
-        rtmp = itor(gmael(G,kappa,j), prec);
-        for (k=zeros+1; k<=j-1; k++)
+        tmp  = mulrr(gmael(mu,j,k), gmael(r,kappa,k));
+        rtmp = subir(gmael(G,kappa,j), tmp);
+        for (k++; k<=j-1; k++)
         {
           tmp  = mulrr(gmael(mu,j,k), gmael(r,kappa,k));
           rtmp = subrr(rtmp,tmp);
         }
-        gmael(r,kappa,j) = gerepileupto(btop, rtmp);
-      }
-      else if (j==zeros+2)
-      {
-        pari_sp btop=avma;
-        tmp = mulrr(gmael(mu,j,zeros+1), gmael(r,kappa,zeros+1));
-        rtmp = itor(gmael(G,kappa,j), prec);
-        gmael(r,kappa,j) = gerepileupto(btop, subrr(rtmp, tmp));
+        affrr(rtmp, gmael(r,kappa,j));
       }
       else
-        gmael(r,kappa,j) = itor(gmael(G,kappa,j), prec);
-      gmael(mu,kappa,j)  = divrr(gmael(r,kappa,j), gmael(r,j,j));
+        affir(gmael(G,kappa,j), gmael(r,kappa,j));
+      affrr(divrr(gmael(r,kappa,j), gmael(r,j,j)), gmael(mu,kappa,j));
+      avma = btop;
     }
 
     /* Step3--5: compute the X_j's  */
@@ -151,16 +168,19 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
       {
         if (signe(tmp) > 0)
         { /* in this case, X = 1 */
+          pari_sp btop = avma;
           for (k=zeros+1; k<j; k++)
-            gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), gmael(mu,j,k));
+            affrr(subrr(gmael(mu,kappa,k), gmael(mu,j,k)), gmael(mu,kappa,k));
+          avma = btop;
+
           for (i=1; i<=n; i++)
             gmael(B,kappa,i) = subii(gmael(B,kappa,i), gmael(B,j,i));
-
           for (i=1; i<=d; i++)
             gmael(U,kappa,i) = subii(gmael(U,kappa,i), gmael(U,j,i));
-          
+          btop = avma;
           ztmp = subii(gmael(G,j,j), shifti(gmael(G,kappa,j), 1));
-          gmael(G,kappa,kappa)=addii(gmael(G,kappa,kappa), ztmp);
+          ztmp = addii(gmael(G,kappa,kappa), ztmp);
+          gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
             gmael(G,kappa,i) = subii(gmael(G,kappa,i), gmael(G,j,i));
           for (i=j+1; i<kappa; i++)
@@ -170,15 +190,19 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
         }
         else
         { /* otherwise X = -1 */
+          pari_sp btop = avma;
           for (k=zeros+1; k<j; k++)
-            gmael(mu,kappa,k) = addrr(gmael(mu,kappa,k), gmael(mu,j,k));
+            affrr(addrr(gmael(mu,kappa,k), gmael(mu,j,k)), gmael(mu,kappa,k));
+          avma = btop;
+
           for (i=1; i<=n; i++)
             gmael(B,kappa,i) = addii(gmael(B,kappa,i), gmael(B,j,i));
-
           for (i=1; i<=d; i++)
             gmael(U,kappa,i) = addii(gmael(U,kappa,i),gmael(U,j,i));
+          btop = avma;
           ztmp = addii(gmael(G,j,j), shifti(gmael(G,kappa,j), 1));
-          gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
+          ztmp = addii(gmael(G,kappa,kappa), ztmp);
+          gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
             gmael(G,kappa,i) = addii(gmael(G,kappa,i), gmael(G,j,i));
           for (i=j+1; i<kappa; i++)
@@ -188,59 +212,55 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
         }
       } else {        	
         /* we have |X| >= 2 */
-        ztmp = ceil_safe( rtor(tmp,prec) );
-        tmp  = itor(ztmp,prec);
-
+        pari_sp btop;
+        ztmp = ceil_safe(tmp);
+        btop = avma;
         for (k=zeros+1; k<j; k++)
         {
-          rtmp = mulrr(tmp, gmael(mu,j,k));
-          gmael(mu,kappa,k) = subrr(gmael(mu,kappa,k), rtmp);
+          rtmp = subrr(gmael(mu,kappa,k), mulir(ztmp, gmael(mu,j,k)));
+          affrr(rtmp, gmael(mu,kappa,k));
         }
+        avma = btop;
         if (!is_bigint(ztmp))
         { /* X is stored in a long signed int */
           long xx = itos(ztmp);
 
           for (i=1; i<=n; i++)
-            gmael(B,kappa,i) = subii(gmael(B,kappa,i),
-                                     mulis(gmael(B,j,i),xx));
+            gmael(B,kappa,i) = submuls(gmael(B,kappa,i), gmael(B,j,i), xx);
           for (i=1; i<=d; i++)
-            gmael(U,kappa,i) = subii(gmael(U,kappa,i),
-                                     mulis(gmael(U,j,i), xx));
+            gmael(U,kappa,i) = submuls(gmael(U,kappa,i), gmael(U,j,i), xx);
+          btop = avma;
           ztmp = shifti(mulis(gmael(G,kappa,j), xx), 1);
           ztmp = subii(mulii(gmael(G,j,j), sqrs(xx)), ztmp);
-          gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
+          ztmp = addii(gmael(G,kappa,kappa), ztmp);
+          gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
-            gmael(G,kappa,i) = subii(gmael(G,kappa,i),
-                                     mulis(gmael(G,j,i), xx));
+            gmael(G,kappa,i) = submuls(gmael(G,kappa,i), gmael(G,j,i), xx);
           for (i=j+1; i<kappa; i++)
-            gmael(G,kappa,i) = subii(gmael(G,kappa,i),
-                                     mulis(gmael(G,i,j), xx));
+            gmael(G,kappa,i) = submuls(gmael(G,kappa,i), gmael(G,i,j), xx);
           for (i=kappa+1; i<=maxG; i++)
-            gmael(G,i,kappa) = subii(gmael(G,i,kappa),
-                                     mulis(gmael(G,i,j), xx));
+            gmael(G,i,kappa) = submuls(gmael(G,i,kappa), gmael(G,i,j), xx);
         } else {
-          long expo = expo(tmp)-bit_accuracy(lg(tmp));
-          GEN X = shifti(gfloor2n(tmp, -expo), expo);
+          GEN tmp2  = itor(ztmp,prec);
+          long expo = expo(tmp2)-bit_accuracy(lg(tmp2));
+          GEN X = shifti(gfloor2n(tmp2, -expo), expo);
+          pari_sp btop;
 
           for (i=1; i<=n; i++)
-            gmael(B,kappa,i) = subii(gmael(B,kappa,i),
-                                     mulii(X, gmael(B,j,i)));
+            gmael(B,kappa,i) = submul(gmael(B,kappa,i), gmael(B,j,i), X);
           for (i=1; i<=d; i++)
-            gmael(U,kappa,i) = subii(gmael(U,kappa,i),
-                                     mulii(X, gmael(U,j,i)));
+            gmael(U,kappa,i) = submul(gmael(U,kappa,i), gmael(U,j,i), X);
+          btop = avma;
           ztmp = shifti(mulii(gmael(G,kappa,j), X), 1);
           ztmp = subii(mulii(gmael(G,j,j), sqri(X)), ztmp);
-          gmael(G,kappa,kappa) = addii(gmael(G,kappa,kappa), ztmp);
-
+          ztmp = addii(gmael(G,kappa,kappa), ztmp);
+          gmael(G,kappa,kappa) = gerepileuptoint(btop, ztmp);
           for (i=1; i<=j; i++)
-            gmael(G,kappa,i) = subii(gmael(G,kappa,i),
-                                     mulii(X, gmael(G,j,i)));
+            gmael(G,kappa,i) = submul(gmael(G,kappa,i), gmael(G,j,i), X);
           for (   ; i<kappa; i++)
-            gmael(G,kappa,i) = subii(gmael(G,kappa,i),
-                                     mulii(X, gmael(G,i,j)));
+            gmael(G,kappa,i) = submul(gmael(G,kappa,i), gmael(G,i,j), X);
           for (i=kappa+1; i<=maxG; i++)
-            gmael(G,i,kappa) = subii(gmael(G,i,kappa),
-                                     mulii(X, gmael(G,i,j)));
+            gmael(G,i,kappa) = submul(gmael(G,i,kappa), gmael(G,i,j), X);
         }
       }
     }
@@ -248,20 +268,21 @@ Babai(long kappa, GEN *pG, GEN *pB, GEN *pU, GEN *pmu, GEN *pr, GEN *ps,
     if (test) aa = zeros+1;
   } while (test);
 
-  gel(s,zeros+1) = itor(gmael(G,kappa,kappa), prec);
+  affir(gmael(G,kappa,kappa), gel(s,zeros+1));
   /* the last s[kappa-1]=r[kappa][kappa] is computed only if kappa increases */
+  av = avma;
   for (k=zeros+1; k<=kappa-2; k++)
   {
-    tmp = mulrr(gmael(mu,kappa,k), gmael(r,kappa,k));
-    gel(s,k+1) = subrr(gel(s,k), tmp);
+    tmp = subrr(gel(s,k), mulrr(gmael(mu,kappa,k), gmael(r,kappa,k)));
+    affrr(tmp, gel(s,k+1));
   }
-  *pG = G; *pB = B; *pU = U; *pmu = mu; *pr = r; *ps = s;
+  *pB = B; *pG = G; *pU = U; avma = av;
 }
 
 static void
-rotate(GEN mu,long kappa2, long kappa,long d)
+rotate(GEN mu, long kappa2, long kappa, long d)
 {
-  long i,j;
+  long i, j;
   pari_sp av = avma;
   GEN mutmp = shallowcopy(gel(mu,kappa2));
   for (i=kappa2; i>kappa; i--)
@@ -309,13 +330,23 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
     fprintferr("Entering L^2: LLL-parameters (%Z.3f,%.3Zf), working precision %d words\n",delta,eta, prec);
   }
 
-  alpha = cgetg(d+1, t_VECSMALL);
-
-  mu = zeromatcopy(d,d);
-  r  = zeromatcopy(d,d);
-  s  = zerovec(d+1);
+  mu = cgetg(d+1, t_MAT);
+  r  = cgetg(d+1, t_MAT);
+  s  = cgetg(d+1, t_VEC);
+  for (j = 1; j <= d; j++)
+  {
+    GEN M = cgetg(d+1, t_COL), R = cgetg(d+1, t_COL);
+    gel(mu,j)= M;
+    gel(r,j) = R;
+    gel(s,j) = cgetr(prec);
+    for (i = 1; i <= d; i++) {
+      gel(R,i) = cgetr(prec);
+      gel(M,i) = cgetr(prec);
+    }
+  }
   SPtmp = zerovec(d+1);
-  av = avma; lim = stack_lim(av, 1);
+  alpha = cgetg(d+1, t_VECSMALL);
+  av = avma; lim = stack_lim(av, 2);
 
   /* Step2: Initializing the main loop */
   kappamax = 1;
@@ -324,50 +355,42 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
 
   do {
     if (!gram) gmael(G,i,i) = ZV_dotsquare(gel(B,i));
-    gmael(r,i,i) = itor(gmael(G,i,i), prec);
+    affir(gmael(G,i,i), gmael(r,i,i));
   } while (signe(gmael(G,i,i)) == 0 && (++i <=d));
   zeros = i-1; /* all vectors B[i] with i <= zeros are zero vectors */
   kappa = i;
-  if (zeros < d)
-    gmael(r,zeros+1,zeros+1) = itor(gmael(G,zeros+1,zeros+1), prec);
-  for (i=zeros+1; i<=d; i++)
-    alpha[i]=1;
+  if (zeros < d) affir(gmael(G,zeros+1,zeros+1), gmael(r,zeros+1,zeros+1));
+  for (i=zeros+1; i<=d; i++) alpha[i]=1;
 
   while (++kappa <= d)
   {
     if (kappa>kappamax)
     {
+      if (DEBUGLEVEL>=6) fprintferr("K%ld ",kappa);
       kappamax = kappa;
       if (!gram) {
         for (i=zeros+1; i<=kappa; i++)
           gmael(G,kappa,i) = ZV_dotproduct(gel(B,kappa), gel(B,i));
         maxG = kappamax;
       }
-      if (DEBUGLEVEL>=6) fprintferr("K%ld ",kappa);
     }
-
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) pari_warn(warnmem,"fplll");
-      gerepileall(av,U?6:5,&B,&G,&mu,&r,&s,&U);
-    }
-
-    /* Step3: Call to the Babai algorithm */
-    Babai(kappa, &G, &B, &U, &mu, &r, &s, alpha[kappa], zeros, maxG,
+    /* Step3: Call to the Babai algorithm, mu,r,s updated in place */
+    Babai(av, kappa, &G,&B,&U, mu,r,s, alpha[kappa], zeros, maxG,
       gram? 0 : ((triangular && kappamax <= n) ? kappamax: n),
       eta, etaplus1, prec);
 
+    av2 = avma;
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
     if (cmprr(tmp, gel(s,kappa-1)) <= 0)
     { /* Step4: Success of Lovasz's condition */
       alpha[kappa] = kappa;
       tmp = mulrr(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
-      gmael(r,kappa,kappa) = subrr(gel(s,kappa-1), tmp);
+      affrr(subrr(gel(s,kappa-1), tmp), gmael(r,kappa,kappa));
+      avma = av2;
     }
     else
     { /* Step5: Find the right insertion index kappa, kappa2 = initial kappa */
       kappa2 = kappa;
-      av2 = avma;
       do {
         kappa--;
         if (kappa<zeros+2 + (keepfirst ? 1: 0)) break;
@@ -385,7 +408,7 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
       /* Step6: Update the mu's and r's */
       rotate(mu,kappa2,kappa,d);
       rotate(r,kappa2,kappa,d);
-      gmael(r,kappa,kappa) = gel(s,kappa);
+      affrr(gel(s,kappa), gmael(r,kappa,kappa)); 
 
       /* Step7: Update B, G, U */
       if (!gram) rotate(B,kappa2,kappa,n);
@@ -408,7 +431,7 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
       if (kappa == zeros+1 && !signe(gmael(G,kappa,kappa)))
       {
         zeros++; kappa++;
-        gmael(r,kappa,kappa) = itor(gmael(G,kappa,kappa),prec);
+        affir(gmael(G,kappa,kappa), gmael(r,kappa,kappa));
       }
     }
   }
@@ -444,7 +467,11 @@ LLLint(GEN x, long D, long flag, GEN *B)
 
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
+#if 1
   prec = good_prec(d,DELTA,ETA); 
+#else
+  prec = 4;
+#endif
   return fplll(x, B, DELTA, ETA, flag, prec);
 }
 
