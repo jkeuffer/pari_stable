@@ -49,7 +49,7 @@ Doc: \idx{LLL} algorithm applied to the
  applying LLL to the partially reduced matrix is significatively \emph{slower}
  than starting from a knapsack-type lattice.
  
- If $\fl=4$, as $\fl=1, returning a vector $[K, T]$ of matrices: the
+ If $\fl=4$, as $\fl=1$, returning a vector $[K, T]$ of matrices: the
  columns of $K$ represent a basis of the integer kernel of $x$
  (not LLL-reduced in general) and $T$ is the transformation
  matrix such that $x\cdot T$ is an LLL-reduced $\Z$-basis of the image
