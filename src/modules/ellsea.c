@@ -1094,15 +1094,36 @@ set_cost(GEN B, GEN b, GEN cost_vec, long *pi)
   *pi = i; avma = av;
 }
 
+static int 
+cmp_atkin(void*E, GEN a, GEN b)
+{
+  long ta=typ(a)==t_INT, tb=typ(b)==t_INT, c;
+  if (ta || tb) return ta-tb;
+  c = lg(gel(a,2)) - lg(gel(b,2));
+  if (c) return c;
+  return cmpii(gel(b,1), gel(a,1));
+}
+
+static void 
+add_atkin(GEN atkin, GEN trace, long *nb)
+{
+  long l = lg(atkin)-1;
+  long i, k = gen_search(atkin, trace, 1, NULL, cmp_atkin);
+  if (k==0 || k > l) return;
+  for (i = l; i > k; i--)
+    gel(atkin,i) = gel(atkin,i-1);
+  if (typ(gel(atkin,l))==t_INT) (*nb)++;
+  gel(atkin,k) = trace;
+}
+
 static GEN
-champion(GEN compile_atkin, long k)
+champion(GEN compile_atkin, long k, GEN ell)
 {
   const long two_k = 1L<<k;
   pari_sp ltop = avma, btop, st_lim;
   long i, j, n, i1, i2;
   GEN B, Bp, cost_vec;
-
-  n = itos(gmael(compile_atkin, k, 1));
+  n = itou(ell);
   cost_vec = cgetg(n+1, t_VECSMALL);
   for (i = 1; i <= k; i++)
   {
@@ -1300,7 +1321,7 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 GEN
 ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
-  const long ATKIN_CUT = 20;
+  const long MAX_ATKIN = 20;
   pari_sp ltop = avma, btop, st_lim;
   long i, j, nb_atkin, lp, nb, lg_mod, M, get_extra_l;
   GEN compile_atkin, cat, fact, bound_champ, champ;
@@ -1332,7 +1353,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   bound = sqrti(shifti(p, 4));
   product = gen_2;
   nb = 0;
-  compile_atkin = zerovec(lg_mod-1); nb_atkin = 0;
+  compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
   while (gcmp(product, bound) <= 0)
   {
@@ -1364,7 +1385,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     else
       /* compute possible values for the trace using Atkin method. */
-      gel(compile_atkin, ++nb_atkin) = mkvec3(ellkt, trace_mod, ell);
+      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, ell), &nb_atkin);
     /*increase the product with this prime and go to the next prime */
     product = mulii(product, ellkt);
     if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -1403,7 +1424,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (lg(trace_mod) == 2)
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr, 1), gel(tr, 2));
     else
-      gel(compile_atkin, ++nb_atkin) = mkvec3(ellkt, trace_mod, ell);
+      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, ell), &nb_atkin);
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
     if (   get_extra_l && nb < lg_mod-1
         && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
@@ -1415,24 +1436,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     get_extra_l = 1;
     bound_champ = gdiv(bound, gel(tr, 2));
-    if (DEBUGLEVEL>=2) fprintferr("Running champion on %ld primes", nb_atkin);
-    if (nb_atkin > ATKIN_CUT)
-    {
-      GEN v, lgatkin = get_lgatkin(compile_atkin, nb_atkin);
-      v = vecsmall_indexsort(lgatkin);
-      if (DEBUGLEVEL>=2)
-      {
-        fprintferr(", forgetting prime(s) ");
-        for(i=21; i<=nb_atkin; i++)
-          fprintferr("%Zs(%ld) ",gmael(compile_atkin, v[i],3), lgatkin[v[i]]);
-      }
-      setlg(v, ATKIN_CUT+1);
-      vecsmall_sort(v);
-      champ = champion(shallowextract(compile_atkin, v), ATKIN_CUT);
-    }
-    else
-      champ = champion(compile_atkin, nb_atkin);
-    if (DEBUGLEVEL>=2) fprintferr(".\n");
+    champ = champion(compile_atkin, nb_atkin, ell);
     best_champ = gel(champ, lg(champ) - 1);
     for (i = 1; i < lg(champ); i++)
     {
@@ -1446,18 +1450,21 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     i = 1;
     j = 1;
     bits = gen_0;
-    while (j <= nb_atkin && i < lg(fact))
+    for (i=1; i < lg(fact); i++)
     {
-      if (equalii(gel(fact,i), gmael(compile_atkin, j, 3)))
+      for (j=1; j <= nb_atkin; j++)
       {
-        bits = addii(bits, shifti(gen_1, j-1));
-        i++;
+        if (equalii(gel(fact,i), gmael(compile_atkin, j, 3)))
+        {
+          bits = addii(bits, shifti(gen_1, j-1));
+          break;
+        }
       }
-      j++;
     }
     cat = shallowextract(compile_atkin, bits);
     nb_atkin = lg(cat)-1;
     for (i=1; i<=nb_atkin; i++) gel(compile_atkin, i) = gel(cat, i);
+    for (   ; i<=MAX_ATKIN; i++) gel(compile_atkin, i) = gen_0;
     if (DEBUGLEVEL>=2)
       fprintferr("Keeping %ld primes, %Zs remaining possibilities.\n",
                  nb_atkin, gel(best_champ, 2));
