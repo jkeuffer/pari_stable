@@ -1418,7 +1418,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     else
       /* compute possible values for the trace using Atkin method. */
-      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, utoi(ell)), &nb_atkin);
+      add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
     /*increase the product with this prime and go to the next prime */
     product = mulii(product, ellkt);
     if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -1452,7 +1452,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (lg(trace_mod) == 2)
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr, 1), gel(tr, 2));
     else
-      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, utoi(ell)), &nb_atkin);
+      add_atkin(compile_atkin, mkvec2(ellkt, trace_mod), &nb_atkin);
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
     if (get_extra_l
         && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
