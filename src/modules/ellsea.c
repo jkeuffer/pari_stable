@@ -62,6 +62,19 @@ list_to_pol(GEN list)
   return gerepileupto(ltop, gtopoly(P, -1));
 }
 
+static GEN
+get_modular_eqn(long ell, char *type)
+{
+  long i;
+  for (i=1; i<lg(modular_eqn); i++)
+    if (equalis(gmael(modular_eqn, i, 1), ell))
+    {
+      *type = *GSTR(gmael(modular_eqn, i, 2));
+      return list_to_pol(gmael(modular_eqn, i, 3));
+    }
+  return NULL;
+}
+
 /*Gives the first precS terms of the Weierstrass series related to */
 /*E: y^2 = x^3 + a4x + a6.  Assumes (precS-2)*(2precS+3) < ULONG_MAX, i.e.
  * precS < 46342 in 32-bit machines */
@@ -871,15 +884,13 @@ find_trace_lp1_roots(long ell, GEN p)
 
 /*trace modulo ell^k: [], [t] or [t1,...,td] */
 static GEN
-find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
+find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
 {
   pari_sp ltop = avma;
   GEN  g, meqn, meqnj, tr = NULL; /* needed by MTElkies */
   char meqntype;
   long k = 1, kt, r;
   enum mod_type mt;
-  ulong ell = itou(gmael(modular_eqn, nb, 1));
-  if (DEBUGLEVEL) fprintferr("Process prime %ld.\tType: ", ell);
   if (ell <= 13)
   {
     long lp = bit_accuracy(lg(p))-bfffo(*int_MSW(p));
@@ -892,8 +903,9 @@ find_trace(GEN a4, GEN a6, long nb, GEN p, long *ptr_kt, long EARLY_ABORT)
     }
   }
   kt = k;
-  meqn = list_to_pol(gmael(modular_eqn, nb, 3));
-  meqntype = *GSTR(gmael(modular_eqn, nb, 2));
+  meqn = get_modular_eqn(ell, &meqntype);
+  if (!meqn) return gen_0;
+  if (DEBUGLEVEL) fprintferr("Process prime %ld.\tType: ", ell);
   meqnj = FpXY_evalx(meqn, Fp_ell_j(a4, a6, p), p);
   g = study_modular_eqn(ell, meqnj, p, &mt, &r);
   /* If l is an Elkies prime, search for a factor of the l-division polynomial.
@@ -1117,14 +1129,13 @@ add_atkin(GEN atkin, GEN trace, long *nb)
 }
 
 static GEN
-champion(GEN compile_atkin, long k, GEN ell)
+champion(GEN compile_atkin, long k, ulong ell)
 {
   const long two_k = 1L<<k;
   pari_sp ltop = avma, btop, st_lim;
   long i, j, n, i1, i2;
   GEN B, Bp, cost_vec;
-  n = itou(ell);
-  cost_vec = cgetg(n+1, t_VECSMALL);
+  cost_vec = cgetg(ell+1, t_VECSMALL);
   for (i = 1; i <= k; i++)
   {
     GEN A = gel(compile_atkin,i);
@@ -1323,7 +1334,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 20;
   pari_sp ltop = avma, btop, st_lim;
-  long i, j, nb_atkin, lp, nb, lg_mod, M, get_extra_l;
+  long i, j, nb_atkin, lp, nb, M, get_extra_l;
   GEN compile_atkin, cat, fact, bound_champ, champ;
   GEN tr, bound, product, trace_mod, bound_bsgs, growth_factor, best_champ;
   GEN p9, bits, res;
@@ -1331,7 +1342,6 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
 
   if (!modular_eqn && !get_seadata()) return NULL;
-  lg_mod = lg(modular_eqn);
   /*First compute the trace modulo 2 */
   if (FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p) > 0)
   {
@@ -1360,7 +1370,8 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     GEN ell = gmael(modular_eqn, ++nb, 1);
     long kt;
     GEN ellkt;
-    if (nb >= lg_mod)
+    trace_mod = find_trace(a4, a6, itou(ell), p, &kt, EARLY_ABORT);
+    if (trace_mod==gen_0)
     {
       pari_warn(warner,"no more modular polynomials available!");
       if (DEBUGLEVEL)
@@ -1371,7 +1382,6 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
       return gerepileuptoint(ltop, subii(addis(p,1), res));
     }
-    trace_mod = find_trace(a4, a6, nb, p, &kt, EARLY_ABORT);
     if (!trace_mod) continue;
     ellkt = powiu(ell, kt);
     if (lg(trace_mod) == 2)
@@ -1411,14 +1421,20 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   btop = avma; st_lim = stack_lim(btop, 1);
   get_extra_l = 1;
   bound_bsgs = gdiv(bound_bsgs, growth_factor);
-  while (nb < lg_mod-1)
+  while (1)
   {
     GEN ell = gmael(modular_eqn, ++nb, 1);
     long kt;
     GEN ellkt;
     bound_bsgs = gmul(bound_bsgs, growth_factor);
     if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
-    trace_mod = find_trace(a4, a6, nb, p , &kt, EARLY_ABORT);
+    trace_mod = find_trace(a4, a6, itou(ell), p , &kt, EARLY_ABORT);
+    if (trace_mod==gen_0)
+    {
+      if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
+        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", gel(best_champ, 2));
+      break;
+    }
     if (!trace_mod) continue;
     ellkt = powiu(ell, kt);
     if (lg(trace_mod) == 2)
@@ -1426,7 +1442,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     else
       add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, ell), &nb_atkin);
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
-    if (   get_extra_l && nb < lg_mod-1
+    if (get_extra_l
         && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
         && (lg(trace_mod) > 3 || gcmp(gdiv(gel(best_champ, 2), bound_bsgs), 
             gdivgs(sqri(ell), 25)) >= 0))
@@ -1436,7 +1452,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     get_extra_l = 1;
     bound_champ = gdiv(bound, gel(tr, 2));
-    champ = champion(compile_atkin, nb_atkin, ell);
+    champ = champion(compile_atkin, nb_atkin, itou(ell));
     best_champ = gel(champ, lg(champ) - 1);
     for (i = 1; i < lg(champ); i++)
     {
@@ -1468,12 +1484,6 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (DEBUGLEVEL>=2)
       fprintferr("Keeping %ld primes, %Zs remaining possibilities.\n",
                  nb_atkin, gel(best_champ, 2));
-    if (nb >= lg_mod-1 && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
-    {
-      if (DEBUGLEVEL)
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", gel(best_champ, 2));
-      break;
-    }
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 6, &tr, &compile_atkin, &bound_bsgs, &bound_champ, &champ, &best_champ);
   }
