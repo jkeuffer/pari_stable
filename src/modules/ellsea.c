@@ -1375,6 +1375,16 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
    * compile_atkin is a vector containing informations about Atkin primes,
    *   informations about Elkies primes lie in tr. */
   bound = sqrti(shifti(p, 4));
+  M = 1000000;
+  lp = bit_accuracy(lg(p)) - bfffo(*int_MSW(p));
+  if (lp <= 160)
+    bound_bsgs = mulrs(divrs(gpowgs(dbltor(1.048), lp), 9), M);
+  else if (lp <= 192)
+    bound_bsgs = mulrs(divrr(gpowgs(dbltor(1.052), lp), dbltor(16.65)), M);
+  else if (lp <= 306)
+    bound_bsgs = mulrs(mulrr(gpowgs(dbltor(1.035), lp), dbltor(1.35)), M);
+  else bound_bsgs = mulss(50000, M);
+  growth_factor = dbltor(1.26);
   product = gen_2;
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
@@ -1414,17 +1424,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &product);
   }
-  M = 1000000;
-  lp = bit_accuracy(lg(p)) - bfffo(*int_MSW(p));
-  if (lp <= 160)
-    bound_bsgs = mulrs(divrs(gpowgs(dbltor(1.048), lp), 9), M);
-  else if (lp <= 192)
-    bound_bsgs = mulrs(divrr(gpowgs(dbltor(1.052), lp), dbltor(16.65)), M);
-  else if (lp <= 306)
-    bound_bsgs = mulrs(mulrr(gpowgs(dbltor(1.035), lp), dbltor(1.35)), M);
-  else bound_bsgs = mulss(50000, M);
-  growth_factor = dbltor(1.26);
-  best_champ = mkvec2(value(-1, compile_atkin, nb_atkin), 
+  best_champ = mkvec2(value(-1, compile_atkin, nb_atkin),
                       prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
