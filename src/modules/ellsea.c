@@ -1176,10 +1176,11 @@ champion(GEN atkin, long k, ulong ell)
   for (i = 1, n = 1; i <= two_k; i++)
     if (B[i])
     {
-      GEN b = cost(B[i], cost_vec);
-      gel(res, n++) = mkvec2copy(value(B[i],atkin,k), b);
+      GEN b = cost (B[i], cost_vec);
+      GEN v = value(B[i], atkin, k);
+      gel(res, n++) = mkvec3(utoi(B[i]), b, v);
     }
-  return gerepileupto(ltop, res);
+  return gerepilecopy(ltop, res);
 }
 
 static GEN
@@ -1345,10 +1346,10 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 20;
   pari_sp ltop = avma, btop, st_lim;
-  long i, j, nb_atkin, lp, M, get_extra_l;
-  GEN compile_atkin, cat, fact;
+  long i, nb_atkin, lp, M, get_extra_l;
+  GEN compile_atkin;
   GEN tr, bound, product, trace_mod, bound_bsgs, growth_factor, best_champ;
-  GEN p9, bits, res;
+  GEN p9, res;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
   long ell = 2;
@@ -1437,7 +1438,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   {
     long kt;
     GEN ellkt;
-    GEN bound_champ, champ;
+    GEN cat, bound_champ, champ;
     NEXT_PRIME_VIADIFF(ell, primepointer);
     bound_bsgs = gmul(bound_bsgs, growth_factor);
     if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
@@ -1470,28 +1471,15 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     for (i = 1; i < lg(champ); i++)
     {
       GEN C = gel(champ,i);
-      if (gcmp(gel(C,1), bound_champ) > 0 
+      if (gcmp(gel(C,3), bound_champ) > 0 
           && gcmp(gel(C,2), gel(best_champ, 2)) < 0) best_champ = C;
     }
     /*best_champ is the champion of lowest cost among champions less than the */
     /*required bound. We now recover the corresponding sets of traces. */
-    fact = gel(Z_factor(gel(best_champ, 1)), 1);
-    bits = gen_0;
-    for (i=1; i < lg(fact); i++)
-    {
-      for (j=1; j <= nb_atkin; j++)
-      {
-        if (equalii(gel(fact,i), gmael(compile_atkin, j, 3)))
-        {
-          bits = addii(bits, shifti(gen_1, j-1));
-          break;
-        }
-      }
-    }
-    cat = shallowextract(compile_atkin, bits);
+    cat = shallowextract(compile_atkin, gel(best_champ, 1));
+    for (i=1; i<lg(cat);   i++) gel(compile_atkin, i) = gel(cat, i);
+    for (   ; i<=nb_atkin; i++) gel(compile_atkin, i) = gen_0;
     nb_atkin = lg(cat)-1;
-    for (i=1; i<=nb_atkin; i++)  gel(compile_atkin, i) = gel(cat, i);
-    for (   ; i<=MAX_ATKIN; i++) gel(compile_atkin, i) = gen_0;
     if (DEBUGLEVEL>=2)
       fprintferr("Keeping %ld primes, %Zs remaining possibilities.\n",
                  nb_atkin, gel(best_champ, 2));
