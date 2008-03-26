@@ -2629,18 +2629,10 @@ gtovec(GEN x)
 GEN
 gtovecrev(GEN x)
 {
-  long ly, i;
-  GEN y;
-  if (!x) return cgetg(1,t_VEC);
-  switch (typ(x))
-  {
-    case t_POL:
-      ly=lg(x)-1; y=cgetg(ly,t_VEC);
-      for (i=1; i<ly; i++) gel(y,i) = gcopy(gel(x,i+1));
-      return y;
-    default:
-      return gtovec(x);
-  }
+  GEN y = gtovec(x);
+  long ly = lg(y), lim = ly>>1, i;
+  for (i = 1; i <= lim; i++) swap(gel(y,i), gel(y,ly-i));
+  return y;
 }
 
 GEN
