@@ -1086,24 +1086,110 @@ choose_card(GEN o, GEN a4, GEN a6, GEN p)
 }
 
 static GEN
-cost(GEN ell, GEN cost_vec)
+cost(long mask, GEN cost_vec)
 {
   pari_sp ltop = avma;
-  GEN fact = Z_factor(ell), P = vec_to_vecsmall(gel(fact,1)), c = gen_1;
   long i;
-  for (i = 1; i < lg(P); i++) c = mulis(c, cost_vec[P[i]]);
+  GEN c = gen_1;
+  for (i = 1; i < lg(cost_vec); i++)
+    if (mask&(1L<<(i-1)))
+      c = mulis(c, cost_vec[i]);
+  return gerepileuptoint(ltop, c);
+}
+
+static GEN
+value(long mask, GEN atkin, long k)
+{
+  pari_sp ltop = avma;
+  long i;
+  GEN c = gen_1;
+  for (i = 1; i <= k; i++)
+    if (mask&(1L<<(i-1)))
+      c = mulii(c, gmael(atkin, i, 1));
   return gerepileuptoint(ltop, c);
 }
 
 static void
-set_cost(GEN B, GEN b, GEN cost_vec, long *pi)
+set_cost(GEN B, long b, GEN cost_vec, long *pi)
 {
   pari_sp av = avma;
   GEN costb = cost(b, cost_vec);
   long i = *pi;
-  while (cmpii(costb, cost(gel(B,i), cost_vec)) < 0) --i;
-  gel(B, ++i) = b;
+  while (cmpii(costb, cost(B[i], cost_vec)) < 0) --i;
+  B[++i] = b;
   *pi = i; avma = av;
+}
+
+static GEN
+prod_lgatkin(GEN compile_atkin, long k)
+{
+  pari_sp av = avma;
+  long i;
+  GEN p = gen_1;
+  for (i = 1; i <= k; i++) p = mulis(p, lg(gmael(compile_atkin, i, 2)) - 1);
+  return gerepileuptoint(av, p);
+}
+
+static GEN
+get_lgatkin(GEN compile_atkin, long k)
+{
+  GEN v = cgetg(k+1, t_VECSMALL);
+  long j;
+  for (j = 1; j <= k; ++j) v[j] = lg(gmael(compile_atkin, j, 2))-1;
+  return v;
+}
+
+static GEN
+champion(GEN atkin, long k, ulong ell)
+{
+  const long two_k = 1L<<k;
+  pari_sp ltop = avma, btop, st_lim;
+  long i, j, n, i1, i2;
+  GEN B, Bp, cost_vec, res;
+  cost_vec = get_lgatkin(atkin, k);
+  B  = const_vecsmall(two_k, 0);
+  Bp = const_vecsmall(two_k, 0);
+  Bp[2] = 1;
+  btop = avma; st_lim = stack_lim(btop, 1);
+  for (n = 2, j = 2; j <= k; j++)
+  {
+    long b;
+    i = 1;
+    for (i1 = 2, i2 = 1; i1 <= n; )
+    {
+      pari_sp av = avma;
+      long b1 = Bp[i1], b2 = Bp[i2]|(1<<(j-1));
+      if (cmpii(value(b1,atkin,k),value(b2,atkin,k)) < 0)
+        { b = b1; i1++; avma = av; } else { b = b2; i2++; }
+      set_cost(B, b, cost_vec, &i);
+    }
+    for ( ; i2 <= n; i2++)
+    {
+      b = Bp[i2]|(1<<(j-1));
+      set_cost(B, b, cost_vec, &i);
+    }
+    n = i;
+    for (i = 1; i <= n; i++)
+      Bp[i] = B[i];
+  }
+  res = cgetg(n, t_VEC);
+  for (i = 1, n = 1; i <= two_k; i++)
+    if (B[i])
+    {
+      GEN b = cost(B[i], cost_vec);
+      gel(res, n++) = mkvec2copy(value(B[i],atkin,k), b);
+    }
+  return gerepileupto(ltop, res);
+}
+
+static GEN
+compute_diff(GEN v)
+{
+  pari_sp av = avma;
+  long i, l = lg(v) - 1;
+  GEN diff = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++) gel(diff, i) = subii(gel(v, i+1), gel(v, i));
+  return gerepileupto(av, ZV_sort_uniq(diff));
 }
 
 static int 
@@ -1126,81 +1212,6 @@ add_atkin(GEN atkin, GEN trace, long *nb)
     gel(atkin,i) = gel(atkin,i-1);
   if (typ(gel(atkin,l))==t_INT) (*nb)++;
   gel(atkin,k) = trace;
-}
-
-static GEN
-champion(GEN compile_atkin, long k, ulong ell)
-{
-  const long two_k = 1L<<k;
-  pari_sp ltop = avma, btop, st_lim;
-  long i, j, n, i1, i2;
-  GEN B, Bp, cost_vec;
-  cost_vec = cgetg(ell+1, t_VECSMALL);
-  for (i = 1; i <= k; i++)
-  {
-    GEN A = gel(compile_atkin,i);
-    long r = itos(gel(A,3));
-    cost_vec[r] = lg(gel(A,2))-1;
-  }
-  B  = vec_ei(two_k, 1);
-  Bp = vec_ei(two_k, 1);
-  gel(Bp, 2) = gmael(compile_atkin, 1, 1);
-  btop = avma; st_lim = stack_lim(btop, 1);
-  for (n = 2, j = 2; j <= k; j++)
-  {
-    GEN b, A = gel(compile_atkin,j);
-    i = 1;
-    for (i1 = 2, i2 = 1; i1 <= n; )
-    {
-      pari_sp av = avma;
-      GEN b1 = gel(Bp,i1), b2 = mulii(gel(A,1), gel(Bp,i2));
-      if (cmpii(b1,b2) < 0) { b = b1; i1++; avma = av; } else { b = b2; i2++; }
-      set_cost(B, b, cost_vec, &i);
-    }
-    for ( ; i2 <= n; i2++)
-    {
-      b = mulii(gel(A,1), gel(Bp,i2));
-      set_cost(B, b, cost_vec, &i);
-    }
-    n = i;
-    for (i = 1; i <= n; i++) gel(Bp,i) = gel(B,i);
-    if (low_stack(st_lim, stack_lim(btop, 1))) gerepileall(btop, 2, &B, &Bp);
-  }
-  for (i = 1, n = 1; i <= two_k; i++) {
-    GEN C = gel(B,i);
-    if (cmpis(C,1) > 0) gel(B, n++) = mkvec2(C, cost(C, cost_vec));
-  }
-  setlg(B, n);
-  return gerepilecopy(ltop, B);
-}
-
-static GEN
-compute_diff(GEN v)
-{
-  pari_sp av = avma;
-  long i, l = lg(v) - 1;
-  GEN diff = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(diff, i) = subii(gel(v, i+1), gel(v, i));
-  return gerepileupto(av, ZV_sort_uniq(diff));
-}
-
-static GEN
-prod_lgatkin(GEN compile_atkin, long k)
-{
-  pari_sp av = avma;
-  long i;
-  GEN p = gen_1;
-  for (i = 1; i <= k; i++) p = mulis(p, lg(gmael(compile_atkin, i, 2)) - 1);
-  return gerepileuptoint(av, p);
-}
-
-static GEN
-get_lgatkin(GEN compile_atkin, long k)
-{
-  GEN v = cgetg(k+1, t_VECSMALL);
-  long j;
-  for (j = 1; j <= k; ++j) v[j] = lg(gmael(compile_atkin, j, 2))-1;
-  return v;
 }
 
 /* V = baby / giant, P = Pb / Pg */
