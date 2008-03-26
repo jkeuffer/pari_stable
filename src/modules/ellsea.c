@@ -1349,7 +1349,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   long i, nb_atkin, lp, M, get_extra_l;
   GEN compile_atkin;
   GEN tr, bound, product, trace_mod, bound_bsgs, growth_factor, best_champ;
-  GEN p9, res;
+  GEN res;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
   long ell = 2;
@@ -1424,10 +1424,8 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     bound_bsgs = mulrs(mulrr(gpowgs(dbltor(1.035), lp), dbltor(1.35)), M);
   else bound_bsgs = mulss(50000, M);
   growth_factor = dbltor(1.26);
-  p9 = gen_1;
-  for (i = 1; i <= nb_atkin; i++)
-    p9 = mulii(p9, gmael(compile_atkin, i, 1));
-  best_champ = mkvec2(p9, prod_lgatkin(compile_atkin, nb_atkin));
+  best_champ = mkvec2(value(-1, compile_atkin, nb_atkin), 
+                      prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
     fprintferr("Too many possibilities for the trace: %Zs. Look for new primes\n", gel(best_champ, 2));
