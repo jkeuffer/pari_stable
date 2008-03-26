@@ -1334,12 +1334,14 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 {
   const long MAX_ATKIN = 20;
   pari_sp ltop = avma, btop, st_lim;
-  long i, j, nb_atkin, lp, nb, M, get_extra_l;
+  long i, j, nb_atkin, lp, M, get_extra_l;
   GEN compile_atkin, cat, fact, bound_champ, champ;
   GEN tr, bound, product, trace_mod, bound_bsgs, growth_factor, best_champ;
   GEN p9, bits, res;
   GEN a4 = modii(mulis(Rg_to_Fp(gel(E,10), p), -27), p);
   GEN a6 = modii(mulis(Rg_to_Fp(gel(E,11), p), -54), p);
+  long ell = 2;
+  byteptr primepointer = diffptr + 1;
 
   if (!modular_eqn && !get_seadata()) return NULL;
   /*First compute the trace modulo 2 */
@@ -1362,15 +1364,14 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
    *   informations about Elkies primes lie in tr. */
   bound = sqrti(shifti(p, 4));
   product = gen_2;
-  nb = 0;
   compile_atkin = zerovec(MAX_ATKIN); nb_atkin = 0;
   btop = avma; st_lim = stack_lim(btop, 1);
   while (gcmp(product, bound) <= 0)
   {
-    GEN ell = gmael(modular_eqn, ++nb, 1);
+    NEXT_PRIME_VIADIFF(ell, primepointer);
     long kt;
     GEN ellkt;
-    trace_mod = find_trace(a4, a6, itou(ell), p, &kt, EARLY_ABORT);
+    trace_mod = find_trace(a4, a6, ell, p, &kt, EARLY_ABORT);
     if (trace_mod==gen_0)
     {
       pari_warn(warner,"no more modular polynomials available!");
@@ -1383,10 +1384,10 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       return gerepileuptoint(ltop, subii(addis(p,1), res));
     }
     if (!trace_mod) continue;
-    ellkt = powiu(ell, kt);
+    ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)
     {
-      if (EARLY_ABORT && dvdii(addis(p, 1 - trace_mod[1]), ell))
+      if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
       {
         if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %Zs\n",ell);
         avma = ltop; return gen_0;
@@ -1395,7 +1396,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     }
     else
       /* compute possible values for the trace using Atkin method. */
-      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, ell), &nb_atkin);
+      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, utoi(ell)), &nb_atkin);
     /*increase the product with this prime and go to the next prime */
     product = mulii(product, ellkt);
     if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -1423,12 +1424,12 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   bound_bsgs = gdiv(bound_bsgs, growth_factor);
   while (1)
   {
-    GEN ell = gmael(modular_eqn, ++nb, 1);
     long kt;
     GEN ellkt;
+    NEXT_PRIME_VIADIFF(ell, primepointer);
     bound_bsgs = gmul(bound_bsgs, growth_factor);
     if (gcmp(gel(best_champ, 2), bound_bsgs) < 0) break;
-    trace_mod = find_trace(a4, a6, itou(ell), p , &kt, EARLY_ABORT);
+    trace_mod = find_trace(a4, a6, ell, p , &kt, EARLY_ABORT);
     if (trace_mod==gen_0)
     {
       if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
@@ -1436,23 +1437,23 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       break;
     }
     if (!trace_mod) continue;
-    ellkt = powiu(ell, kt);
+    ellkt = powuu(ell, kt);
     if (lg(trace_mod) == 2)
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr, 1), gel(tr, 2));
     else
-      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, ell), &nb_atkin);
+      add_atkin(compile_atkin, mkvec3(ellkt, trace_mod, utoi(ell)), &nb_atkin);
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
     if (get_extra_l
         && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
         && (lg(trace_mod) > 3 || gcmp(gdiv(gel(best_champ, 2), bound_bsgs), 
-            gdivgs(sqri(ell), 25)) >= 0))
+            gdivgs(sqrs(ell), 25)) >= 0))
     {
       get_extra_l = 0;
       continue;
     }
     get_extra_l = 1;
     bound_champ = gdiv(bound, gel(tr, 2));
-    champ = champion(compile_atkin, nb_atkin, itou(ell));
+    champ = champion(compile_atkin, nb_atkin, ell);
     best_champ = gel(champ, lg(champ) - 1);
     for (i = 1; i < lg(champ); i++)
     {
