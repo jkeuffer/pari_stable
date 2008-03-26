@@ -1158,14 +1158,15 @@ champion(GEN atkin, long k, ulong ell)
     for (i1 = 2, i2 = 1; i1 <= n; )
     {
       pari_sp av = avma;
-      long b1 = Bp[i1], b2 = Bp[i2]|(1<<(j-1));
-      if (cmpii(value(b1,atkin,k),value(b2,atkin,k)) < 0)
-        { b = b1; i1++; avma = av; } else { b = b2; i2++; }
+      long b1 = Bp[i1], b2 = Bp[i2]|(1L<<(j-1));
+      if (cmpii(value(b1, atkin, k), value(b2, atkin, k)) < 0)
+        { b = b1; i1++; } else { b = b2; i2++; }
+      avma = av;
       set_cost(B, b, cost_vec, &i);
     }
     for ( ; i2 <= n; i2++)
     {
-      b = Bp[i2]|(1<<(j-1));
+      b = Bp[i2]|(1L<<(j-1));
       set_cost(B, b, cost_vec, &i);
     }
     n = i;
