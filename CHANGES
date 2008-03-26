@@ -52,6 +52,8 @@ BA 29- missing GC in the leftrightpow functions
    48- ellordinate couldn't handle t_FFELTs
    49- eint1(10,10) completely wrong
    50- ispower broken due to uninitialized variable
+   51- compilation fails with yacc unable to handle parse.y [ add explicit
+       rule in Makefile to prevent from generating a wrong one ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
