@@ -1059,15 +1059,6 @@ matrixqz0(GEN x,GEN p)
   pari_err(flagerr,"matrixqz"); return NULL; /* not reached */
 }
 
-static int
-ZV_isin(GEN x)
-{
-  long i,l = lg(x);
-  for (i=1; i<l; i++)
-    if (typ(x[i]) != t_INT) return 0;
-  return 1;
-}
-
 GEN
 matrixqz(GEN x, GEN p)
 {
@@ -1089,8 +1080,8 @@ matrixqz(GEN x, GEN p)
   p1 = x; x = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    gel(x,j) = primpart(gel(p1,j));
-    if (!ZV_isin(gel(x,j))) pari_err(talker, "not a rational matrix in matrixqz");
+    gel(x,j) = Q_primpart(gel(p1,j));
+    RgV_check_ZV(gel(x,j), "matrixqz");
   }
   /* x integral */
 
