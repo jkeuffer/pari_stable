@@ -213,7 +213,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       } else {        	
         /* we have |X| >= 2 */
         pari_sp btop;
-        ztmp = ceil_safe(tmp);
+        ztmp = roundr_safe(tmp);
         btop = avma;
         for (k=zeros+1; k<j; k++)
         {
