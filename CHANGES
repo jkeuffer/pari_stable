@@ -104,6 +104,7 @@ BA  8- [svn/CVS] number development snapshots according to repository version
 BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    33- [library]: the "prec" parameter of floating point LLLs has disappeared
    34- Vecrev(x) now equivalent to extract(Vec(x), "-1..1") [was only for t_POL]
+   35- duplicate factors in nffactor (easy cases)
 
   Added
     1- library function gpcalloc

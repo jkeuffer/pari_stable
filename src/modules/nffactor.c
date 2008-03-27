@@ -900,6 +900,7 @@ nextK:
 	}
       }
       lfamod -= K;
+      if (lfamod < 11) maxK = lfamod-1;
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = degpol[ind[1]];
 
@@ -1338,7 +1339,11 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   famod = gel(listmod,l);
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    if (l > 1) T->polbase = unifpol(nf, gel(res,l), t_COL);
+    if (l > 1)
+    {
+      T->pol = gel(res,l);
+      T->polbase = unifpol(nf, gel(res,l), t_COL);
+    }
     L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = shallowconcat(res, L);

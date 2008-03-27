@@ -787,6 +787,7 @@ nextK:
 	}
       }
       lfamod -= K;
+      if (lfamod < 11) maxK = lfamod-1;
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = degpol[ind[1]];
       bound = factor_bound(pol);
