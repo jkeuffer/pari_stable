@@ -1919,8 +1919,27 @@ roundr(GEN x)
   if (ex == -1) return s>0? gen_1:
 			    absrnz_egal2n(x)? gen_0: gen_m1;
   av = avma;
-  t = real2n(-1, nbits2prec(ex+1)); /* = 0.5 */
-  return gerepileuptoint(av, floorr( addrr(x,t) ));
+  t = addrr(real2n(-1, nbits2prec(ex+1)), x); /* x + 0.5 */
+  return gerepileuptoint(av, floorr(t));
+}
+GEN
+roundr_safe(GEN x)
+{
+  long e1, ex, lx, s = signe(x);
+  pari_sp av;
+  GEN t, y;
+ 
+  if (!s || (ex = expo(x)) < -1) return gen_0; 
+  if (ex == -1) return s>0? gen_1:
+			    absrnz_egal2n(x)? gen_0: gen_m1;
+  av = avma;
+  t = addrr(real2n(-1,nbits2prec(ex+1)), x); /* x + 0.5 */
+
+  lx = lg(x);
+  e1 = expo(t) - bit_accuracy(lx) + 1;
+  y = ishiftr_lg(t, lx, e1);
+  if (signe(x) < 0) y = addsi(-1,y);
+  return gerepileuptoint(av,y);
 }
 
 GEN
@@ -1967,8 +1986,8 @@ ground(GEN x)
 GEN
 grndtoi(GEN x, long *e)
 {
-  GEN y, p1;
-  long i, tx=typ(x), lx, ex, e1;
+  GEN y;
+  long i, tx=typ(x), lx, e1;
   pari_sp av;
 
   *e = -(long)HIGHEXPOBIT;
@@ -1976,25 +1995,27 @@ grndtoi(GEN x, long *e)
   {
     case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
     case t_FRAC: return diviiround(gel(x,1), gel(x,2));
-    case t_REAL:
-      ex = expo(x);
+    case t_REAL: {
+      long ex = expo(x);
+      GEN t;
       if (!signe(x) || ex < -1) { *e = ex; return gen_0; }
       av = avma;
-      p1 = addrr(real2n(-1,nbits2prec(ex+2)), x); e1 = expo(p1);
+      /* ex+2 since we may have ex = -1 */
+      t = addrr(real2n(-1,nbits2prec(ex+2)), x); e1 = expo(t);
       if (e1 < 0)
       {
-	if (signe(p1) >= 0) { *e = ex; avma = av; return gen_0; }
+	if (signe(t) >= 0) { *e = ex; avma = av; return gen_0; }
 	*e = expo(addsr(1,x)); avma = av; return gen_m1;
       }
       lx = lg(x);
       e1 = e1 - bit_accuracy(lx) + 1;
-      y = ishiftr_lg(p1, lx, e1);
+      y = ishiftr_lg(t, lx, e1);
       if (signe(x) < 0) y = addsi(-1,y);
       y = gerepileuptoint(av,y);
 
       if (e1 <= 0) { av = avma; e1 = expo(subri(x,y)); avma = av; }
       *e = e1; return y;
-
+    }
     case t_POLMOD: y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
       gel(y,2) = grndtoi(gel(x,2), e); return y;

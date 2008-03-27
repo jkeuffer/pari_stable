@@ -1134,6 +1134,10 @@ values.)
 of \kbd{x}. (Recall that a \typ{REAL} represents an interval of possible
 values.)
 
+\fun{GEN}{roundr_safe}{GEN x} rounds the \typ{REAL} \kbd{x} to the nearest
+integer (towards~$+\infty$). Complement the mantissa with an infinite number
+of $0$ before rounding, hence never raise an exception.
+
 \subsec{Valuation and shift}
 
 \fun{long}{vals}{long s} 2-adic valuation of the \kbd{long}~\kbd{s}. Returns

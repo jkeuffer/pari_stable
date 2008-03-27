@@ -153,6 +153,7 @@ JD 12- add an optional argument to quit()
    FF_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub, ZC_lincomb1_inplace, ZC_z_mul
    22- library function nf_to_scalar_or_basis
    23- file src/basemath/lll.c
+   24- library function roundr_safe
 
   Removed
     1- obsolete library functions extract and matextract

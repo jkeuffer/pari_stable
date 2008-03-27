@@ -1559,6 +1559,7 @@ GEN     real_i(GEN x);
 GEN     recip(GEN x);
 GEN     round0(GEN x, GEN *pte);
 GEN     roundr(GEN x);
+GEN     roundr_safe(GEN x);
 GEN     scalarpol(GEN x, long v);
 GEN     scalarser(GEN x, long v, long prec);
 GEN     simplify(GEN x);

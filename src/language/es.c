@@ -578,7 +578,7 @@ absrtostr_width_frac(GEN x, int width_frac)
   }
   else
     z = mpabs(x);
-  z = grndtoi(z, &ls); /* round; ls is junk */
+  z = roundr_safe(z);
   if (!signe(z)) return real0tostr_width_frac(width_frac);
 
   s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */
@@ -639,7 +639,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
   }
   else
     z = x;
-  z = grndtoi(z, &ls); /* round; ls is junk */
+  z = roundr_safe(z);
   if (!signe(z)) return real0tostr(ex, format, exp_char, wanted_dec);
 
   s = itostr_sign(z, 1, &ls); /* ls > 0, number of digits in s */

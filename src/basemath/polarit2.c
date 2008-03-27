@@ -573,7 +573,7 @@ two_factor_bound(GEN x)
   }
   z = shiftr(sqrtr(z), n);
   z = divrr(z, dbltor(pow((double)n, 0.75)));
-  z = grndtoi(sqrtr(z), &i);
+  z = roundr_safe(sqrtr(z));
   z = mulii(z, absi(gel(x,n)));
   return gerepileuptoint(av, shifti(z, 1));
 }
