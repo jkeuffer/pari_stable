@@ -58,7 +58,7 @@ const char *errmessage[]=
 /* user */
   "",
 
-    /*  MP.S  */
+  /*  MP.S  */
 
 /* affer2 */
   "impossible assignment I-->S",
@@ -101,11 +101,6 @@ const char *errmessage[]=
   "reducible polynomial",
 /* zeropoler */
   "zero polynomial",
-
-  /*  ELLIPTIC.C  */
-
-/* elliper1 */
-  "bad argument for an elliptic curve related function",
 
   /*  GEN.C */
 

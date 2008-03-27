@@ -54,6 +54,8 @@ BA 29- missing GC in the leftrightpow functions
    50- ispower broken due to uninitialized variable
    51- compilation fails with yacc unable to handle parse.y [ add explicit
        rule in Makefile to prevent from generating a wrong one ]
+   52- duplicate factors in nffactor (easy cases) [#761]
+   53- ellisoncurve(e, P) didn't check that "point" P had the correct format
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -104,7 +106,6 @@ BA  8- [svn/CVS] number development snapshots according to repository version
 BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    33- [library]: the "prec" parameter of floating point LLLs has disappeared
    34- Vecrev(x) now equivalent to extract(Vec(x), "-1..1") [was only for t_POL]
-   35- duplicate factors in nffactor (easy cases)
 
   Added
     1- library function gpcalloc
@@ -163,6 +164,7 @@ JD 12- add an optional argument to quit()
     7- useless undocumented library function gkrogs (use krois)
     8- obsolete library functions roots2 and rootsold are no longer public
     9- useless library function isnfscalar
+   10- useless error code 'elliper1'
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

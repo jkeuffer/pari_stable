@@ -26,20 +26,35 @@ is_inf(GEN z) { return lg(z) < 3; }
 
 void
 checkpt(GEN z)
-{ if (typ(z)!=t_VEC) pari_err(elliper1); }
+{
+  if (typ(z)!=t_VEC || lg(z) > 3)
+    pari_err(talker, "not a point in ellxxx");
+}
 void
 checksell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 6) pari_err(elliper1); }
+{
+  if (typ(e)!=t_VEC || lg(e) < 6)
+    pari_err(talker, "not an elliptic curve in ellxxx");
+}
 void
 checkell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 14) pari_err(elliper1); }
+{
+  if (typ(e)!=t_VEC || lg(e) < 14)
+    pari_err(talker, "not an elliptic curve in ellxxx");
+}
 void /* check for roots, we don't want a curve over Fp */
 checkbell(GEN e)
-{ if (typ(e)!=t_VEC || lg(e) < 20 || typ(e[14]) != t_COL) pari_err(elliper1); }
+{
+  if (typ(e)!=t_VEC || lg(e) < 20 || typ(e[14]) != t_COL)
+    pari_err(talker, "not an elliptic curve over R in ellxxx");
+}
 
 static void
 checkch(GEN z)
-{ if (typ(z)!=t_VEC || lg(z) != 5) pari_err(elliper1); }
+{
+  if (typ(z)!=t_VEC || lg(z) != 5)
+    pari_err(talker,"not a coordinate change in ellxxx");
+}
 
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
@@ -454,7 +469,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
   gel(y,5) = gmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
   if (lx == 6) return y;
-  if (lx < 14) pari_err(elliper1);
+  if (lx < 14) pari_err(talker,"not an elliptic curve in coordch");
 
   /* B2 = (b2 + 12r) / u^2 */
   gel(y,6) = gmul(v2,gadd(gel(e,6),gmul2n(rx3,2)));
@@ -474,7 +489,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   gel(y,12) = gmul(gsqr(v6),gel(e,12));
   gel(y,13) = gel(e,13);
   if (lx == 14) return y;
-  if (lx < 20) pari_err(elliper1);
+  if (lx < 20) pari_err(talker,"not an elliptic curve in coordch");
   R = gel(e,14);
   if (typ(R) != t_COL) set_dummy(y);
   else if (typ(e[1])==t_PADIC)
@@ -689,20 +704,22 @@ oncurve(GEN e, GEN z)
 }
 
 GEN
-ellisoncurve(GEN e, GEN a)
+ellisoncurve(GEN e, GEN x)
 {
-  long i, tx = typ(a), lx = lg(a);
+  long i, tx = typ(x), lx = lg(x);
 
-  checksell(e); if (!is_vec_t(tx)) pari_err(elliper1);
-  lx = lg(a); if (lx==1) return cgetg(1,tx);
-  tx = typ(a[1]);
+  checksell(e);
+  if (!is_vec_t(tx))
+    pari_err(talker, "neither a point nor a vector of points in ellisoncurve");
+  lx = lg(x); if (lx==1) return cgetg(1,tx);
+  tx = typ(x[1]);
   if (is_vec_t(tx))
   {
     GEN z = cgetg(lx,tx);
-    for (i=1; i<lx; i++) gel(z,i) = ellisoncurve(e,gel(a,i));
+    for (i=1; i<lx; i++) gel(z,i) = ellisoncurve(e,gel(x,i));
     return z;
   }
-  return oncurve(e, a)? gen_1: gen_0;
+  return oncurve(e, x)? gen_1: gen_0;
 }
 
 GEN
@@ -3363,7 +3380,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
   if (flag > 2 || flag < 0) pari_err(flagerr,"ellheight");
-  checkbell(e); if (!is_matvec_t(tx)) pari_err(elliper1);
+  checkbell(e); if (!is_matvec_t(tx)) pari_err(typeer, "ellgheight");
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
@@ -3437,7 +3454,7 @@ mathell(GEN e, GEN x, long prec)
   long lx = lg(x),i,j,tx=typ(x);
   pari_sp av = avma;
 
-  if (!is_vec_t(tx)) pari_err(elliper1);
+  if (!is_vec_t(tx)) pari_err(typeer, "ellheightmatrix");
   y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
   for (i=1; i<lx; i++)
   {
@@ -3485,7 +3502,7 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   long tz1 = typ(z1), tz2 = typ(z2);
   pari_sp av = avma;
 
-  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) pari_err(elliper1);
+  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) pari_err(typeer, "ellbil");
   if (lg(z1)==1) return cgetg(1,tz1);
   if (lg(z2)==1) return cgetg(1,tz2);
 
