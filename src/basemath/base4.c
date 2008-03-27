@@ -127,9 +127,17 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
     x = nf_to_scalar_or_basis(nf, x);
-    if (typ(x) != t_COL)
-      return gcmp0(x)? cgetg(1, t_MAT): scalarmat(Q_abs(x), degpol(nf[1]));
+    switch(typ(x))
+    {
+      case t_COL: break;
+      case t_INT:  if (!signe(x)) return cgetg(1,t_MAT);
+        return scalarmat(absi(x), degpol(nf[1]));
+      case t_FRAC: 
+        return scalarmat(Q_abs(x), degpol(nf[1]));
+      default: pari_err(typeer,"idealhermite");
+    }
     x = Q_primitive_part(x, &cx);
+    RgV_check_ZV(x, "idealhermite");
     x = eltimul_get_table(nf, x);
   } else {
     long N = degpol(nf[1]), nx = lg(x)-1;
