@@ -1690,6 +1690,7 @@ GEN     lllgramkerim(GEN x);
 GEN     lllgramkerimgen(GEN x);
 GEN     lllint(GEN x);
 GEN     lllint_ip(GEN x, long alpha);
+GEN     lllint_knapsack_inplace(GEN x, long D, GEN *ptB);
 GEN     lllintpartial(GEN mat);
 GEN     lllintpartial_ip(GEN mat);
 GEN     lllkerim(GEN x);

@@ -1012,7 +1012,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   pari_timer T;
 
   if (DEBUGLEVEL>2) TIMERstart(&T);
-  u = LLLint(m, final? 1000: 4, LLL_INPLACE, &norm);
+  u = lllint_knapsack_inplace(m, final? 1000: 4, &norm);
   if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr(gel(norm,R), Bnorm) < 0) break;
@@ -1044,7 +1044,7 @@ static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long N0 = 1; /* # of traces added at each step */
-  double BitPerFactor = 1.5; /* nb bits in p^(a-b) / modular factor */
+  double BitPerFactor = 0.5; /* nb bits in p^(a-b) / modular factor */
   long i,j,tmax,n0,C, dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp, logBr;

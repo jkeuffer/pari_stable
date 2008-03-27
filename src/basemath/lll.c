@@ -759,6 +759,218 @@ qflllgram0(GEN x, long flag)
 
 /********************************************************************/
 /**                                                                **/
+/**                          INTEGRAL LLL                          **/
+/**         (faster than fplll for incremental knapsacks)          **/
+/**                                                                **/
+/********************************************************************/
+/* L[k,] += q * L[l,], l < k. Inefficient if q = 0 */
+static void
+Zupdate_row(long k, long l, GEN q, GEN L, GEN B)
+{
+  long i, qq = itos_or_0(q);
+  if (!qq)
+  {
+    for(i=1;i<l;i++)  gcoeff(L,k,i) = addii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), mulii(q,B));
+    return;
+  }
+  if (qq == 1) {
+    for (i=1;i<l; i++) gcoeff(L,k,i) = addii(gcoeff(L,k,i),gcoeff(L,l,i));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), B);
+  } else if (qq == -1) {
+    for (i=1;i<l; i++) gcoeff(L,k,i) = subii(gcoeff(L,k,i),gcoeff(L,l,i));
+    gcoeff(L,k,l) = subii(gcoeff(L,k,l), B);
+  } else {
+    for(i=1;i<l;i++) gcoeff(L,k,i) = addii(gcoeff(L,k,i),mulsi(qq,gcoeff(L,l,i)));
+    gcoeff(L,k,l) = addii(gcoeff(L,k,l), mulsi(qq,B));
+  }
+}
+
+static void
+ZRED(long k, long l, GEN x, GEN L, GEN B, long K)
+{
+  pari_sp av = avma;
+  GEN q = truedivii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1));
+  if (!signe(q)) { avma = av; return; }
+  togglesign(q);
+  Zupdate_row(k,l,q,L,B);
+  ZC_lincomb1_inplace(gel(x,k), gel(x,l), q);
+}
+
+static int
+do_ZSWAP(GEN x, GEN L, GEN B, long kmax, long k, long D, GEN fl)
+{
+  GEN la,la2,p1,Bk;
+  long i, j, lx;
+  pari_sp av;
+
+  if (!fl[k-1]) return 0;
+  av = avma;
+  la = gcoeff(L,k,k-1); la2 = sqri(la);
+  Bk = gel(B,k);
+  if (fl[k])
+  {
+    GEN q;
+    if (!D) return 0; /* only lswap non-kernel + kernel vector */
+    q = addii(la2, mulii(gel(B,k-1),gel(B,k+1)));
+    if (cmpii(mulsi(D-1,sqri(Bk)), mulsi(D,q)) <= 0) {
+      avma = av; return 0;
+    }
+    gel(B,k) = diviiexact(q, Bk);
+  }
+  /* ZSWAP(k-1,k) */
+  if (DEBUGLEVEL>3 && k==kmax)
+  { /* output diagnostics associated to re-normalized rational quantities */
+    pari_sp av1 = avma;
+    GEN d = mulii(gel(B,k-1),gel(B,k+1));
+    p1 = subii(mulsi(D-1, sqri(Bk)), mulsi(D, la2));
+    fprintferr(" (%ld)", expi(p1) - expi(mulsi(D, d)));
+    avma = av1;
+  }
+  lswap(x[k-1], x[k]); lx = lg(x);
+  for (j=1; j<k-1; j++) lswap(coeff(L,k-1,j), coeff(L,k,j))
+  if (fl[k])
+  {
+    av = avma;
+    for (i=k+1; i<=kmax; i++)
+    {
+      GEN t = gcoeff(L,i,k);
+      p1 = subii(mulii(gel(B,k+1),gcoeff(L,i,k-1)), mulii(la,t));
+      p1 = diviiexact(p1, Bk);
+      gcoeff(L,i,k) = icopy_av(p1,(GEN)av);
+      av = avma = (pari_sp)coeff(L,i,k);
+
+      p1 = addii(mulii(la,gcoeff(L,i,k-1)), mulii(gel(B,k-1),t));
+      p1 = diviiexact(p1, Bk);
+      gcoeff(L,i,k-1) = icopy_av(p1,(GEN)av);
+      av = avma = (pari_sp)coeff(L,i,k-1);
+    }
+  }
+  else if (signe(la))
+  {
+    p1 = diviiexact(la2, Bk);
+    gel(B,k+1) = gel(B,k) = p1;
+    for (i=k+2; i<=lx; i++) gel(B,i) = diviiexact(mulii(p1,gel(B,i)), Bk);
+    for (i=k+1; i<=kmax; i++)
+      gcoeff(L,i,k-1) = diviiexact(mulii(la,gcoeff(L,i,k-1)), Bk);
+    for (j=k+1; j<kmax; j++)
+      for (i=j+1; i<=kmax; i++)
+	gcoeff(L,i,j) = diviiexact(mulii(p1,gcoeff(L,i,j)), Bk);
+  }
+  else
+  {
+    for (i=k+1; i<=kmax; i++)
+    {
+      gcoeff(L,i,k) = gcoeff(L,i,k-1);
+      gcoeff(L,i,k-1) = gen_0;
+    }
+    B[k] = B[k-1]; fl[k] = 1; fl[k-1] = 0;
+  }
+  return 1;
+}
+
+static void
+ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl)
+{
+  GEN u = NULL; /* gcc -Wall */
+  long i, j, s;
+  for (j=1; j<=k; j++)
+    if (j==k || fl[j])
+    {
+      pari_sp av = avma;
+      u = ZV_dotproduct(gel(x,k), gel(x,j));
+      for (i=1; i<j; i++)
+	if (fl[i])
+	{
+	  u = subii(mulii(gel(B,i+1), u), mulii(gcoeff(L,k,i), gcoeff(L,j,i)));
+	  u = diviiexact(u, gel(B,i));
+	}
+      gcoeff(L,k,j) = gerepileuptoint(av, u);
+    }
+  s = signe(u);
+  if (s == 0) B[k+1] = B[k];
+  else
+  {
+    if (s < 0) pari_err(talker, "not a definite matrix in lll");
+    B[k+1] = coeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
+  }
+}
+static GEN
+GS_norms(GEN B, long prec)
+{
+  GEN N, b = itor(gel(B,1), prec);
+  long k, lx = lg(B)-1;
+  N = cgetg(lx, t_VEC);
+  for (k=1; k<lx; k++)
+  {
+    GEN c = itor(gel(B,k+1), prec);
+    gel(N,k) = divrr(c, b); b = c;
+  }
+  return N;
+}
+
+/* Assume x a ZM, set ptB to Gram-Schmidt (squared) norms */
+GEN
+lllint_knapsack_inplace(GEN x, long D, GEN *ptB)
+{
+  long lx = lg(x), j, k, l, n = lx-1, kmax;
+  pari_sp av, lim;
+  GEN B,L,fl;
+
+  if (n <= 1)
+  {
+    *ptB = (n == 0)? cgetg(1, t_VEC): mkvec( gsqr(gcoeff(x,1,1)) );
+    return lll_trivial(x, LLL_IM);
+  }
+  fl = cgetg(lx,t_VECSMALL);
+
+  av = avma; lim = stack_lim(av,1); x = shallowcopy(x);
+  B = scalarcol_shallow(gen_1, lx);
+  L = cgetg(lx,t_MAT);
+  for (j=1; j<lx; j++) { fl[j] = 0; gel(L,j) = zerocol(n); }
+  ZincrementalGS(x, L, B, 1, fl);
+  kmax = 1;
+  if (DEBUGLEVEL>5) fprintferr("k = ");
+  for (k=2;;)
+  {
+    if (k > kmax)
+    {
+      if (DEBUGLEVEL>3) fprintferr("K%ld ",k);
+      ZincrementalGS(x, L, B, k, fl);
+      kmax = k;
+    }
+    ZRED(k,k-1, x,L,gel(B,k),kmax);
+    if (do_ZSWAP(x,L,B,kmax,k,D,fl))
+    {
+      if (k > 2) k--;
+    }
+    else
+    {
+      for (l=k-2; l; l--)
+      {
+        ZRED(k,l, x,L,gel(B,l+1),kmax);
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if(DEBUGMEM>1) pari_warn(warnmem,"lllint[1], kmax = %ld", kmax);
+          gerepileall(av,3,&B,&L,&x);
+        }
+      }
+      if (++k > n) break;
+    }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"lllint[2], kmax = %ld", kmax);
+      gerepileall(av,3,&B,&L,&x);
+    }
+  }
+  if (DEBUGLEVEL>3) fprintferr("\n");
+  /* set B to { |b_i^*|^2 }_i, low accuracy */
+  *ptB = GS_norms(B, DEFAULTPREC);
+  return x;
+}
+
+/********************************************************************/
+/**                                                                **/
 /**                   INTEGRAL KERNEL (LLL REDUCED)                **/
 /**                                                                **/
 /********************************************************************/
