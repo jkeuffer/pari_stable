@@ -849,21 +849,16 @@ ordell(GEN e, GEN x, long prec)
   return gerepileupto(av,y);
 }
 
-/* n t_QUAD */
+/* n t_QUAD or t_COMPLEX, z != [0] */
 static GEN
 CM_ellpow(GEN e, GEN z, GEN n)
 {
-  GEN x, y, p0, p1, q0, q1, z1, z2, pol, grdx, b2ov12;
+  GEN x, y, p0, p1, q0, q1, z1, z2, grdx, b2ov12, N = gnorm(n);
   long ln, ep, vn;
-  pari_sp av = avma;
 
-  if (is_inf(z)) return gcopy(z);
-  pol = gel(n,1);
-  if (signe(pol[2]) < 0) pari_err(typeer,"CM_ellpow");
-  if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
-    pari_err(impl, "powell for nonintegral CM exponent");
-
-  ln = itos_or_0( shifti(addsi(1, quadnorm(n)), 2) );
+  if (typ(N) != t_INT)
+    pari_err(typeer,"powell (non integral CM exponent)");
+  ln = itos_or_0( shifti(addsi(1, N), 2) );
   if (!ln) pari_err(talker, "norm too large in CM");
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
@@ -896,7 +891,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
   y = gsub( gmul(d_ellLHS(e,z), poleval(y,grdx)), ellLHS0(e,x));
   z = cgetg(3,t_VEC);
   gel(z,1) = gcopy(x);
-  gel(z,2) = gmul2n(y,-1); return gerepileupto(av, z);
+  gel(z,2) = gmul2n(y,-1); return z;
 }
 
 static GEN
@@ -911,10 +906,21 @@ powell(GEN e, GEN z, GEN n)
   long s;
 
   checksell(e); checkpt(z);
-  if (typ(n)==t_QUAD) return CM_ellpow(e,z,n);
-  if (typ(n) != t_INT) pari_err(impl,"powell for non integral, non CM, exponents");
+  if (is_inf(z)) return mkvec(gen_0);
+  switch(typ(n))
+  {
+    case t_INT: break;
+    case t_QUAD: {
+      GEN pol = gel(n,1);
+      if (signe(pol[2]) < 0) pari_err(typeer,"CM_ellpow");
+    } /* fall through */
+    case t_COMPLEX:
+      return gerepileupto(av, CM_ellpow(e,z,n));
+    default:
+      pari_err(typeer,"powell (non integral, non CM exponent)");
+  }
   s = signe(n);
-  if (!s || is_inf(z)) return mkvec(gen_0);
+  if (!s) return mkvec(gen_0);
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
   return gerepileupto(av, leftright_pow(z, n, (void*)e, &_sqr, &_mul));
