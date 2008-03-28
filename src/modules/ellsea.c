@@ -1391,9 +1391,9 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   btop = avma; st_lim = stack_lim(btop, 1);
   while (gcmp(product, bound) <= 0)
   {
-    NEXT_PRIME_VIADIFF(ell, primepointer);
-    long kt;
     GEN ellkt;
+    long kt;
+    NEXT_PRIME_VIADIFF(ell, primepointer);
     trace_mod = find_trace(a4, a6, ell, p, &kt, EARLY_ABORT);
     if (trace_mod==gen_0)
     {
