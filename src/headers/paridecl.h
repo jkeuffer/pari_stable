@@ -655,7 +655,7 @@ GEN     gregula(GEN x, long prec);
 GEN     hclassno(GEN x);
 long    hil0(GEN x, GEN y, GEN p);
 long    hil(GEN x, GEN y, GEN p);
-long    isanypower(GEN x, GEN *y);
+long    Z_isanypower(GEN x, GEN *y);
 long    isfundamental(GEN x);
 long    ispower(GEN x, GEN k, GEN *pty);
 long    isprime(GEN x);

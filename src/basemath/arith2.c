@@ -829,7 +829,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     }
 
   if (all != 1)
-  { /* smallfact: look for easy pure powers then stop. Cf isanypower */
+  { /* smallfact: look for easy pure powers then stop. Cf Z_isanypower */
     GEN x = n, y;
     ulong mask = 7, ex0 = 11;
     long ex, k = 1;

@@ -196,7 +196,7 @@ gener(GEN m)
     if (!mod2(x)) x = addii(x,q);
     gel(z,2) = gerepileuptoint(av, x); return z;
   }
-  e = isanypower(m, &p);
+  e = Z_isanypower(m, &p);
   gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(m)); return z;
 }
 
@@ -867,7 +867,7 @@ gisanypower(GEN x, GEN *pty)
     int sw = (cmpii(a, b) > 0);
 
     if (sw) swap(a, b);
-    k = isanypower(a, pty? &a: NULL);
+    k = Z_isanypower(a, pty? &a: NULL);
     if (!k) { avma = av; return 0; }
     fa = factoru(k);
     P = gel(fa,1);
@@ -886,13 +886,13 @@ gisanypower(GEN x, GEN *pty)
     *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
-  if (tx == t_INT) return isanypower(x, pty);
+  if (tx == t_INT) return Z_isanypower(x, pty);
   pari_err(talker, "missing exponent");
   return 0; /* not reached */
 }
 
 long
-isanypower(GEN x, GEN *pty)
+Z_isanypower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
   long ex, v, i, j, l, k, s = signe(x);
@@ -900,7 +900,6 @@ isanypower(GEN x, GEN *pty)
   byteptr d = diffptr;
   ulong mask, p = 0, ex0 = 11, e = 0, e2;
 
-  if (typ(x) != t_INT) pari_err(typeer, "isanypower");
   if (absi_cmp(x, gen_2) < 0) return 0; /* -1,0,1 */
 
   x = absi(x); /* Z_lvalrem_stop assigns to x */
@@ -975,7 +974,7 @@ isanypower(GEN x, GEN *pty)
     /* cut off at 4 bits which seems to be about optimum;  for primes
      * >> 10^3 the modular checks are no longer competitively fast */
     while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
-    if (DEBUGLEVEL>4) fprintferr("isanypower: now k=%ld, x=%Zs\n", k, x);
+    if (DEBUGLEVEL>4) fprintferr("Z_isanypower: now k=%ld, x=%Zs\n", k, x);
     do
     {
       if (*d) NEXT_PRIME_VIADIFF(p,d);
@@ -2260,8 +2259,8 @@ znlog(GEN x, GEN g)
 	if (cmpii(g, pk) >= 0) g = subii(g, pk);
       }
       x = Rg_to_Fp(x, pk);
-      k = isanypower(pk, &p);
-      if (k == 0) k = 1;
+      k = Z_isanypower(pk, &p);
+      if (!k) { p = pk; k = 1; }
       break;
     }
     default: pari_err(talker,"not an element of (Z/pZ)* in znlog");

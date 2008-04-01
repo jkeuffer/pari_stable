@@ -1210,6 +1210,12 @@ powers, then \kbd{sqrtremi} is called.
 \fun{long}{Z_issquareall}{GEN n, GEN *sqrtn} as \kbd{Z\_issquare}. If
 \kbd{n} is indeed a square, set \kbd{sqrtn} to its integer square root.
 
+\fun{long}{Z_isanypower}{GEN x, GEN *ptn} returns the maximal $k\geq 2$  such
+that the \typ{INT} $x = n^k$ is a perfect power, or $0$ if no such $k$ exist;
+in particular \kbd{ispower(1)}, \kbd{ispower(0)}, \kbd{ispower(-1)} all
+return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
+\kbd{ptn} is not \kbd{NULL}, set \kbd{*ptn} to $n$.
+
 \fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
 for an \kbd{ulong} operand \kbd{n}.
 
