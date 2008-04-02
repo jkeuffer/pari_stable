@@ -2360,14 +2360,18 @@ gmillerrabin(GEN n, long k) { return map_proto_lGL(millerrabin,n,k); }
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/
 /**                                                                 **/
 /*********************************************************************/
+static long 
+isfund(GEN x) {
+  if (typ(x) != t_INT) pari_err(arither1);
+  return Z_isfundamental(x);
+}
 GEN
-gisfundamental(GEN x) { return map_proto_lG(isfundamental,x); }
+gisfundamental(GEN x) { return map_proto_lG(isfund,x); }
 
 long
-isfundamental(GEN x)
+Z_isfundamental(GEN x)
 {
   long r;
-  if (typ(x) != t_INT) pari_err(arither1);
   if (!signe(x)) return 0;
   r = mod16(x);
   if (!r) return 0;

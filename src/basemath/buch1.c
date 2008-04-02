@@ -228,7 +228,7 @@ quadhilbert(GEN D, GEN flag, long prec)
       pari_err(talker,"not a polynomial of degree 2 in quadhilbert");
     D = gmael(D,7,3);
   }
-  else if (!isfundamental(D))
+  else if (!Z_isfundamental(D))
     pari_err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,prec)
 		     : quadhilbertimag(D,flag);
@@ -629,7 +629,7 @@ quadray(GEN D, GEN f, long prec)
   if (typ(D) == t_INT)
   {
     long v = gvar(f);
-    if (!isfundamental(D))
+    if (!Z_isfundamental(D))
       pari_err(talker,"quadray needs a fundamental discriminant");
     if (v == NO_VARIABLE) v = fetch_user_var("y");
     pol = quadpoly0(D, v);
