@@ -256,7 +256,7 @@ nfroots(GEN nf,GEN pol)
     {
       if (typ(A) == t_POLMOD)
       { /* see basistoalg */
-        if (!polegal_spec(T,gel(A,1)))
+        if (!RgX_equal(T,gel(A,1)))
           pari_err(talker,"not the same number field in basistoalg");
       }
       else

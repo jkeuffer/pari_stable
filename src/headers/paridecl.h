@@ -293,6 +293,7 @@ GEN     RgX_deflate(GEN x0, long d);
 GEN     RgX_deriv(GEN x);
 GEN     RgX_div_by_X_x(GEN a, GEN x, GEN *r);
 GEN     RgX_divrem(GEN x,GEN y,GEN *r);
+long    RgX_equal(GEN x, GEN y);
 GEN     RgX_inflate(GEN x0, long d);
 int     RgX_is_rational(GEN x);
 GEN     RgX_modXn_shallow(GEN a, long n);

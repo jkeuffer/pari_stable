@@ -309,7 +309,6 @@ GEN  lift_if_rational(GEN x);
 GEN  monomial(GEN a, long degpol, long v);
 GEN  monomialcopy(GEN a, long degpol, long v);
 GEN  mulmat_pol(GEN A, GEN x);
-long polegal_spec(GEN x, GEN y);
 GEN  polrecip_i(GEN x);
 GEN  pol_to_monic(GEN pol, GEN *lead);
 GEN  ser2pol_i(GEN x, long lx);

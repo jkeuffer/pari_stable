@@ -3475,6 +3475,9 @@ of \kbd{RgX}.
 \fun{int}{RgX_is_rational}{GEN P} return 1 is the \kbd{RgX}~\kbd{P} hasonly
 rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
 
+\fun{long}{RgX_equal}{GEN x, GEN y} returns $1$ if $x$ and $y$ have the same
+degree and their coefficients are equal (as per \tet{gequal}). Variable
+numbers are not checked.
 \smallskip
 
 \fun{GEN}{RgXQ_mul}{GEN y, GEN x, GEN T}

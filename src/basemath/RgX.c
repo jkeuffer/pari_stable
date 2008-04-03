@@ -26,6 +26,17 @@ RgX_is_rational(GEN x)
     if (!is_rational(gel(x,i))) return 0;
   return 1;
 }
+long
+RgX_equal(GEN x, GEN y)
+{
+  long i = lg(x);
+
+  if (i != lg(y)) return 0;
+  for (i--; i > 1; i--)
+    if (!gequal(gel(x,i),gel(y,i))) return 0;
+  return 1;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         COMPOSITION                            **/

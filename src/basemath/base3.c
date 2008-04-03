@@ -618,18 +618,6 @@ element_val(GEN nf, GEN x, GEN vp)
   avma = av; return w + e * (cx? Q_pval(cx,p): 0);
 }
 
-/* polegal without comparing variables */
-long
-polegal_spec(GEN x, GEN y)
-{
-  long i = lg(x);
-
-  if (i != lg(y)) return 0;
-  for (i--; i > 1; i--)
-    if (!gequal(gel(x,i),gel(y,i))) return 0;
-  return 1;
-}
-
 GEN
 coltoalg(GEN nf, GEN x)
 {
@@ -671,7 +659,7 @@ basistoalg(GEN nf, GEN x)
       return z;
 
     case t_POLMOD:
-      if (!polegal_spec(gel(nf,1),gel(x,1)))
+      if (!RgX_equal(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
     default: z = cgetg(3,t_POLMOD);
@@ -785,7 +773,7 @@ algtobasis(GEN nf, GEN x)
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf,gel(x,i));
       return z;
     case t_POLMOD:
-      if (!polegal_spec(gel(nf,1),gel(x,1)))
+      if (!RgX_equal(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in algtobasis");
       x = gel(x,2);
       if (typ(x) != t_POL) break;
@@ -886,7 +874,7 @@ rnfalgtobasis(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      if (!polegal_spec(gel(rnf,1),gel(x,1)))
+      if (!RgX_equal(gel(rnf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in rnfalgtobasis");
       x = lift_to_pol(x); /* fall through */
     case t_POL: {
