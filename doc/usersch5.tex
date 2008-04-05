@@ -327,7 +327,7 @@ or~1.
 \fun{void}{togglesign}{GEN x} sets the $s$ sign of~\kbd{x} to $-s$, in place.
 
 \fun{void}{togglesign_safe}{GEN *x} sets the $s$ sign of~\kbd{*x} to $-s$, in
-place, unless \kbd{*x} is one of the іnteger universal constants in which case
+place, unless \kbd{*x} is one of the integer universal constants in which case
 replace \kbd{*x} by its negation (e.g.~replace \kbd{gen\_1} by \kbd{gen\_m1}).
 
 \fun{void}{setexpo}{GEN x, long s} sets the binary exponent of the
@@ -5382,7 +5382,7 @@ structure; they are integrated within PARI's diagnostics system, printing
 messages if \kbd{DEBUGFILES} is high enough.
 
 \fun{pariFILE*}{pari_fopen}{const char *s, const char *mode} wrapper
-around \kbd{fopen(s, mode)}, return \kbd{NULL} on faіlure.
+around \kbd{fopen(s, mode)}, return \kbd{NULL} on failure.
 
 \fun{pariFILE*}{pari_fopen_or_fail}{const char *s, const char *mode}
 wrapper around \kbd{fopen(s, mode)}; error on failure.

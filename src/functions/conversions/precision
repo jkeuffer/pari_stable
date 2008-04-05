@@ -44,7 +44,7 @@ Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  or $X$-adic \emph{unit}.
  \bprog
  ? precision(1 + O(x), 10)
- %1 = 1 ٍ+ O(x^10)
+ %1 = 1 + O(x^10)
  ? precision(x^2 + O(x^10), 3)
  %2 = x^2 + O(x^5)
  ? precision(7^2 + O(7^10), 3)
