@@ -7,5 +7,7 @@ setrand(1); bnf=bnfinit(x^2-65);
 for(i=1,1000, do(i-500))
 setrand(1); bnf=bnfinit(x^5-37);
 for(i=1,1000, do(i-500))
+/* regression tests: */
+bnfisintnorm(bnfinit(x^3+5), 5)
 print("Total time spent: ",gettime);
 \q
