@@ -1059,7 +1059,16 @@ static GEN
 mul_rfrac_scal(GEN n, GEN d, GEN x)
 {
   pari_sp av = avma;
-  GEN z = gred_rfrac2_i(x, d);
+  GEN z;
+
+  switch(typ(x))
+  {
+    case t_INTMOD: case t_POLMOD:
+      n = gmul(n, x);
+      d = gmul(d, gmodulo(gen_1, gel(x,1)));
+      return gerepileupto(av, gdiv(n,d));
+  }
+  z = gred_rfrac2_i(x, d);
   n = simplify_i(n);
   if (typ(z) == t_RFRAC)
     z = gred_rfrac_simple(gmul(gel(z,1), n), gel(z,2));

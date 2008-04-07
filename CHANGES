@@ -58,6 +58,8 @@ BA 29- missing GC in the leftrightpow functions
    53- ellisoncurve(e, P) didn't check that "point" P had the correct format
    54- znlog(...,znprimroot(p)) --> SEGV [#765]
    55- wrong signs in bnfisintnorm e.g. [bnfinit(x^3+5), 5] -> x [#767]
+   56- x/(x+2) * Mod(1,2) -> Mod(1, 2)*x/(x + 2)  [ should be Mod(1,2) ]
+   57- substpol(x/(y^3*x+1),y^2,1) -> x/(y^3*x + 1) [ should be x/(y*x+1) ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
