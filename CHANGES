@@ -161,6 +161,7 @@ JD 12- add an optional argument to quit()
    22- library function nf_to_scalar_or_basis
    23- file src/basemath/lll.c
    24- library function roundr_safe
+BA 25- [ellap] Port of SEA algorithm from the ellsea GP package.
 
   Removed
     1- obsolete library functions extract and matextract
