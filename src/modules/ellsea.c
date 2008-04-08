@@ -34,7 +34,6 @@ ANY WARRANTY WHATSOEVER. */
 #include "paripriv.h"
 
 static THREAD GEN modular_eqn;
-static const ulong BOUND_ONE_ROOT = 23;
 
 void
 pari_init_seadata(void) { modular_eqn = NULL; }
@@ -405,7 +404,7 @@ eigen_ellpow(struct eigen_ellinit *E, GEN z, ulong n)
 
 /*Finds the eigenvalue of the Frobenius given E, ell odd prime, h factor of the
  *ell-division polynomial, p and tr the possible values for the trace
- *(useful for primes with one root less than BOUND_ONE_ROOT) */
+ *(useful for primes with one root)*/
 static ulong
 find_eigen_value(GEN a4, GEN a6, ulong ell, GEN h, GEN p, GEN tr)
 {
@@ -916,7 +915,6 @@ find_trace(GEN a4, GEN a6, ulong ell, GEN p, long *ptr_kt, long EARLY_ABORT)
   case MTone_root:
     tr = find_trace_one_root(ell, p);
     kt = k = 1;
-    if (ell >= BOUND_ONE_ROOT) break;
     /* FIXME: why do we really always take k = 1 even if ell small ? */
     /* fall through */
   case MTElkies:
