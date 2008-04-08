@@ -809,11 +809,13 @@ rnfbasistoalg(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
+      if (!RgX_equal(gel(rnf,1),gel(x,1)))
+        pari_err(talker,"not the same number field in rnfbasistoalg");
       return gcopy(x);
 
     default: z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(rnf,1));
-      gel(z,2) = gmul(x,pol_1(varn(rnf[1]))); return z;
+      gel(z,2) = gtopoly(x, varn(rnf[1])); return z;
   }
 }
 
