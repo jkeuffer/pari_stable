@@ -624,6 +624,9 @@ coltoalg(GEN nf, GEN x)
   return mkpolmod( coltoliftalg(nf, x), gel(nf,1) );
 }
 
+static long
+RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
+
 GEN
 basistoalg(GEN nf, GEN x)
 {
@@ -659,7 +662,7 @@ basistoalg(GEN nf, GEN x)
       return z;
 
     case t_POLMOD:
-      if (!RgX_equal(gel(nf,1),gel(x,1)))
+      if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
     default: z = cgetg(3,t_POLMOD);
@@ -773,7 +776,7 @@ algtobasis(GEN nf, GEN x)
       for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf,gel(x,i));
       return z;
     case t_POLMOD:
-      if (!RgX_equal(gel(nf,1),gel(x,1)))
+      if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in algtobasis");
       x = gel(x,2);
       if (typ(x) != t_POL) break;
@@ -809,7 +812,7 @@ rnfbasistoalg(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      if (!RgX_equal(gel(rnf,1),gel(x,1)))
+      if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
         pari_err(talker,"not the same number field in rnfbasistoalg");
       return gcopy(x);
 
@@ -876,7 +879,7 @@ rnfalgtobasis(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      if (!RgX_equal(gel(rnf,1),gel(x,1)))
+      if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in rnfalgtobasis");
       x = lift_to_pol(x); /* fall through */
     case t_POL: {
