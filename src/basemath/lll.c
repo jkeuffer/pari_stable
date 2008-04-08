@@ -118,7 +118,7 @@ submul(GEN x, GEN y, GEN s)
 Updates B (kappa); computes mu_{kappa,j}, r_{kappa,j} for j<=kappa, and s(kappa)
 mu, r, s updated in place (affrr).
 */
-static void
+static long
 Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       long a, long zeros, long maxG, long n, GEN eta, GEN etaplus1, long prec)
 {
@@ -127,14 +127,18 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
   long i, j, k, test, aa = (a > zeros)? a : zeros+1;
   long d = U ? lg(U)-1: 0;
   /* HACK: we set d = 0 (resp. n = 0) to avoid updating U (resp. B) */
+  GEN maxmu = gen_0, max2mu = gen_0, max3mu;
   do {
     test=0;
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"Babai");
-      gerepileall(av,U?3:2,&B,&G,&U);
+      gerepileall(av,U?5:4,&B,&G,&maxmu,&max2mu,&U);
     }
     /* Step2: compute the GSO for stage kappa */
+    max3mu = max2mu;
+    max2mu = maxmu;
+    maxmu = real_0(prec);
     for (j=aa; j<kappa; j++)
     {
       pari_sp btop = avma;
@@ -153,7 +157,16 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
       else
         affir(gmael(G,kappa,j), gmael(r,kappa,j));
       affrr(divrr(gmael(r,kappa,j), gmael(r,j,j)), gmael(mu,kappa,j));
+      if (absr_cmp(maxmu, gmael(mu,kappa,j))<0)
+        maxmu = gmael(mu,kappa,j);
       avma = btop;
+    }
+    maxmu = absr(maxmu);
+    if (typ(max3mu)==t_REAL && absr_cmp(max3mu, shiftr(max2mu, 5))<=0)
+    {
+      *pB = B; *pG = G; *pU = U;
+      if (DEBUGLEVEL>5) fprintferr("prec too low\n");
+      return kappa;
     }
 
     /* Step3--5: compute the X_j's  */
@@ -277,6 +290,7 @@ Babai(pari_sp av, long kappa, GEN *pG, GEN *pB, GEN *pU, GEN mu, GEN r, GEN s,
     affrr(tmp, gel(s,k+1));
   }
   *pB = B; *pG = G; *pU = U; avma = av;
+  return 0;
 }
 
 static void
@@ -297,19 +311,19 @@ rotate(GEN mu, long kappa2, long kappa, long d)
 
 /* LLL-reduces the integer matrix(ces) (G,B,U)? "in place" */
 static GEN
-fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
+fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
 {
   const long inplace = flag & LLL_INPLACE;
   const long gram = flag & LLL_GRAM; /*Gram matrix*/
   const long keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
   pari_sp av, av2, lim;
-  long kappa, kappa2, d, n, i, j, zeros, kappamax, maxG;
-  GEN U, G, mu, r, s, tmp, SPtmp, alpha;
+  long kappa, kappa2, d, n, i, j, zeros, kappamax, maxG, bab;
+  GEN G, mu, r, s, tmp, SPtmp, alpha;
   GEN delta = dbltor(DELTA), eta = dbltor(ETA), etaplus1 = dbltor(ETA+1);
   const long triangular = 0;
   pari_timer T;
+  GEN B = *ptrB, U;
 
-  B = shallowcopy(B);
   d = lg(B)-1;
   if (gram)
   {
@@ -322,7 +336,7 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
     G = zeromatcopy(d,d);
     n = lg(gel(B,1))-1;
   }
-  U = inplace? NULL: matid(d);
+  U = inplace? NULL: *ptrU;
 
   if(DEBUGLEVEL>=4)
   {
@@ -375,9 +389,10 @@ fplll(GEN B, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
       }
     }
     /* Step3: Call to the Babai algorithm, mu,r,s updated in place */
-    Babai(av, kappa, &G,&B,&U, mu,r,s, alpha[kappa], zeros, maxG,
+    bab = Babai(av, kappa, &G,&B,&U, mu,r,s, alpha[kappa], zeros, maxG,
       gram? 0 : ((triangular && kappamax <= n) ? kappamax: n),
       eta, etaplus1, prec);
+    if (bab) {*ptrB=(gram?G:B); *ptrU=U; return NULL; }
 
     av2 = avma;
     tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
@@ -462,17 +477,24 @@ good_prec(long d, double delta, double eta)
 GEN
 LLLint(GEN x, long D, long flag, GEN *B)
 {
+  pari_sp ltop=avma;
   const double ETA = 0.51, DELTA = (D-1) / (double)D;
-  long prec, d, n = lg(x)-1;
-
+  const long inplace = flag & LLL_INPLACE;
+  long p,prec, d, n = lg(x)-1;
+  GEN U;
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
-#if 1
   prec = good_prec(d,DELTA,ETA); 
-#else
-  prec = 4;
-#endif
-  return fplll(x, B, DELTA, ETA, flag, prec);
+  x = shallowcopy(x);
+  U = inplace?NULL:matid(n);
+  for (p = min(3,prec); p <= prec; p++)
+  {
+    GEN m = fplll(&x, &U, B, DELTA, ETA, flag, p);
+    if (m) return m;
+    gerepileall(ltop,inplace?1:2,&x,&U);
+  }
+  pari_err(bugparier,"LLLint");
+  return NULL;
 }
 
 /********************************************************************/
