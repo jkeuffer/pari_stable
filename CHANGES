@@ -61,6 +61,8 @@ BA 29- missing GC in the leftrightpow functions
    56- x/(x+2) * Mod(1,2) -> Mod(1, 2)*x/(x + 2)  [ should be Mod(1,2) ]
    57- substpol(x/(y^3*x+1),y^2,1) -> x/(y^3*x + 1) [ should be x/(y*x+1) ]
    58- missing sanity checks in rnfbasistoalg()
+   59- setrand(1); E=ellinit([0,0,0,1,T^4]*Mod(1,ffinit(2,7,T))) --> "weird
+       base ring; can't divide"
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

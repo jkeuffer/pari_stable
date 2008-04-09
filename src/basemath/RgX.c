@@ -868,18 +868,31 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   for (i=2; i<dy+3; i++)
   {
     p2 = gel(y,i);
-    /* gneg to avoid gsub's later on */
-    gel(p1,i) = isrationalzero(p2)? NULL: gneg(p2);
+    gel(p1,i) = isrationalzero(p2)? NULL: p2;
   }
   avy = avma;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; z += 2;
 
-  p2 = gel(x,dx);
-  p2 = y_lead? f(p2,y_lead): gcopy(p2);
-  if (isexactzero(p2))
-    pari_err(talker,"RgX_divrem: weird base ring. Can't divide\n   %Zs\nby %Zs",
-	     x-2, y);
+  if (y_lead == NULL)
+    p2 = gcopy(gel(x,dx));
+  else {
+    for(;;) {
+      p2 = f(gel(x,dx),y_lead);
+      if (!isexactzero(p2) || (--dx < 0)) break;
+    }
+    if (dx < 0) /* x was in fact zero */
+    {
+      if (pr == ONLY_DIVIDES) return gen_0;
+      x = gerepileupto(av, p2);
+      if (pr)
+      {
+        if (pr == ONLY_REM) return x;
+        *pr = x;
+      }
+      return x;
+    }
+  }
   y = p1+2;
   gel(z,dz) = p2;
 
@@ -887,7 +900,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     av1=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
+      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (y_lead) p1 = f(p1,y_lead);
 
     if (isrationalzero(p1)) { avma=av1; p1 = gen_0; }
@@ -903,7 +916,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     p1 = gel(x,i);
     /* we always enter this loop at least once */
     for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
+      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     if (!gcmp0(p1)) { sx = 1; break; } /* remainder is non-zero */
     if (!isexactzero(p1)) break;
@@ -927,7 +940,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     av1=avma; p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
-      if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
+      if (y[i-j] && gel(z,j) != gen_0) p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
     gel(rem,i) = avma==av1? gcopy(p1):gerepileupto(av1,p1);
   }
