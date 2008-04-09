@@ -581,13 +581,13 @@ cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t)
 /* X = (x-r)/u^2
  * Y = (y - s(x-r) - t) / u^3 */
 static GEN
-ellchangepoint0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
+ellchangepoint0(GEN x, GEN v2, GEN v3, GEN r, GEN s, GEN t)
 {
   GEN p1,z;
 
   if (is_inf(x)) return x;
 
-  z = cgetg(3,t_VEC); p1 = gadd(gel(x,1),mor);
+  z = cgetg(3,t_VEC); p1 = gsub(gel(x,1),r);
   gel(z,1) = gmul(v2, p1);
   gel(z,2) = gmul(v3, gsub(gel(x,2), gadd(gmul(s,p1),t)));
   return z;
@@ -596,27 +596,27 @@ ellchangepoint0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 GEN
 ellchangepoint(GEN x, GEN ch)
 {
-  GEN y, v, v2, v3, mor, r, s, t, u;
+  GEN y, v, v2, v3, r, s, t, u;
   long tx, i, lx = lg(x);
   pari_sp av = avma;
 
-  checkpt(x); checkch(ch);
-  if (lx < 2) return gcopy(x);
+  if (typ(x) != t_VEC) pari_err(typeer,"ellchangepoint");
+  checkch(ch);
+  if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1);
   r = gel(ch,2);
   s = gel(ch,3);
   t = gel(ch,4);
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);
-  mor = gneg_i(r);
   tx = typ(x[1]);
   if (is_matvec_t(tx))
   {
     y = cgetg(lx,tx);
     for (i=1; i<lx; i++)
-      gel(y,i) = ellchangepoint0(gel(x,i),v2,v3,mor,s,t);
+      gel(y,i) = ellchangepoint0(gel(x,i),v2,v3,r,s,t);
   }
   else
-    y = ellchangepoint0(x,v2,v3,mor,s,t);
+    y = ellchangepoint0(x,v2,v3,r,s,t);
   return gerepilecopy(av,y);
 }
 
@@ -625,10 +625,11 @@ ellchangepoint(GEN x, GEN ch)
 static GEN
 ellchangepointinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
 {
-  GEN u2X, z;
-  GEN X=gel(x,1), Y=gel(x,2);
+  GEN u2X, z, X, Y;
   if (is_inf(x)) return x;
 
+  X = gel(x,1);
+  Y = gel(x,2);
   u2X = gmul(u2,X);
   z = cgetg(3, t_VEC);
   gel(z,1) = gadd(u2X, r);
@@ -643,14 +644,15 @@ ellchangepointinv(GEN x, GEN ch)
   long tx, i, lx = lg(x);
   pari_sp av = avma;
 
-  checkpt(x); checkch(ch);
-  if (lx < 2) return gcopy(x);
+  if (typ(x) != t_VEC) pari_err(typeer,"ellchangepointinv");
+  checkch(ch);
+  if (lx == 1) return cgetg(1, t_VEC);
   u = gel(ch,1);
   r = gel(ch,2);
   s = gel(ch,3);
   t = gel(ch,4);
   tx = typ(x[1]);
-  u2=gsqr(u); u3=gmul(u,u2);
+  u2 = gsqr(u); u3 = gmul(u,u2);
   if (is_matvec_t(tx))
   {
     y = cgetg(lx,tx);
