@@ -165,7 +165,7 @@ sub_intmod_same(GEN z, GEN X, GEN x, GEN y) {
     avma = (pari_sp)z; gel(z,2) = utoi(u);
   }
   else {
-    GEN u = subii(x,y); if (cmpii(u, X) >= 0) u = subii(u, X);
+    GEN u = subii(x,y); if (signe(u) < 0) u = addii(u, X);
     gel(z,2) = gerepileuptoint((pari_sp)z, u);
   }
   gel(z,1) = icopy(X); return z;
