@@ -40,7 +40,6 @@ ENDEXTERN
 
 static Colormap PARI_Colormap;
 static XColor  *PARI_Colors;
-static XColor  *PARI_ExactColors;
 
 struct data_x
 {
@@ -124,16 +123,14 @@ PARI_ColorSetUp(Display *display, GEN colors)
 
   PARI_Colormap = DefaultColormap(display, 0);
   PARI_Colors = (XColor *) pari_malloc((n+1) * sizeof(XColor));
-  PARI_ExactColors = (XColor *) pari_malloc((n+1) * sizeof(XColor));
   for (i=0; i<n; i++)
   {
     int r, g, b;
     color_to_rgb(gel(pari_colormap,i+1), &r, &g, &b);
-    PARI_ExactColors[i].red   = r*65535/255;
-    PARI_ExactColors[i].green = g*65535/255;
-    PARI_ExactColors[i].blue  = b*65535/255;
-    PARI_ExactColors[i].flags = DoRed | DoGreen | DoBlue;
-    memcpy(&PARI_Colors[i],&PARI_ExactColors[i],sizeof(PARI_ExactColors[i]));
+    PARI_Colors[i].red   = r*65535/255;
+    PARI_Colors[i].green = g*65535/255;
+    PARI_Colors[i].blue  = b*65535/255;
+    PARI_Colors[i].flags = DoRed | DoGreen | DoBlue;
     if (!XAllocColor(display, PARI_Colormap, &PARI_Colors[i]))
       pari_err(talker, "cannot allocate color %ld", i);
   }
