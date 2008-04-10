@@ -1096,7 +1096,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   const long D = 100;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
   const long d = degpol(nf[1]);
-  pari_sp av = avma;
+  pari_sp av = avma, av2;
   GEN prk, PRK, B, GSmin, pk;
   pari_timer ti;
 
@@ -1105,27 +1105,25 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 
   for (;; avma = av, a<<=1)
   {
+    GEN S, smax = gen_0;
+    long i, j;
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
-    PRK = prk = idealpows(nf, pr, a);
+    prk = idealpows(nf, pr, a);
+    av2 = avma;
     pk = gcoeff(prk,1,1);
-    PRK = LLLint(PRK, D, LLL_INPLACE, &B);
-    if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
-    else
+    PRK = LLLint(prk, D, LLL_INPLACE, &B);
+    S = invmat( get_R(PRK) );
+    for (i=1; i<=d; i++)
     {
-      pari_sp av2 = avma;
-      GEN S = invmat( get_R(PRK) ), smax = gen_0;
-      long i, j;
-      for (i=1; i<=d; i++)
-      {
-	GEN s = gen_0;
-	for (j=1; j<=d; j++)
-	  s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(B,j)));
-	if (gcmp(s, smax) > 0) smax = s;
-      }
-      GSmin = gerepileupto(av2, ginv(gmul2n(smax, 2)));
+      GEN s = gen_0;
+      for (j=1; j<=d; j++)
+        s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), gel(B,j)));
+      if (gcmp(s, smax) > 0) smax = s;
     }
+    GSmin = ginv(gmul2n(smax, 2));
     if (gcmp(GSmin, C) >= 0) break;
   }
+  gerepileall(av2, 2, &PRK, &GSmin);
   if (DEBUGLEVEL>2)
     fprintferr("for this exponent, GSmin = %Zs\nTime reduction: %ld\n",
       GSmin, TIMER(&ti));
@@ -1305,8 +1303,8 @@ AGAIN:
       list = nf_chk_factors(T, P, Q_div_to_int(CM_L,utoipos(C)), famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
-      CM_L = gerepilecopy(av2, CM_L);
     }
+    CM_L = gerepilecopy(av2, CM_L);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nf_LLL_cmbf");
