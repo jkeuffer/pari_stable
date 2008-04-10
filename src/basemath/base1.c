@@ -1331,24 +1331,20 @@ get_red_G(nfbasic_t *T, GEN *pro)
   return u;
 }
 
-/* Return the base change matrix giving an LLL-reduced basis for the
- * integer basis of nf(T).
- * *ro = roots of x, computed to precision prec [or NULL] */
-static GEN
-get_LLL_basis(nfbasic_t *T, GEN *pro)
-{
-  GEN u;
-  if (T->r1 == degpol(T->x))
-    u = LLLint(make_Tr(T->x,T->bas), 100, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM, NULL);
-  else
-    u = get_red_G(T, pro);
-  return u;
-}
-
+/* Compute an LLL-reduced basis for the integer basis of nf(T).
+ * *pro = roots of x, computed to precision prec [or NULL -> recompute] */
 static void
 set_LLL_basis(nfbasic_t *T, GEN *pro)
 {
-  T->bas = gmul(T->bas, get_LLL_basis(T, pro));
+  GEN B = T->bas;
+  if (T->r1 == degpol(T->x)) {
+    pari_sp av = avma;
+    GEN u = LLLint(make_Tr(T->x,B), 100, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM, NULL);
+    B = gerepileupto(av, gmul(B, u));
+  }
+  else
+    B = gmul(B, get_red_G(T, pro));
+  T->bas = B;
   T->basden = NULL; /* recompute */
   if (DEBUGLEVEL) msgtimer("LLL basis");
 }
