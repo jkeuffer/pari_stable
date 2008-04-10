@@ -665,7 +665,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 
   lc = absi(leading_term(pol));
   if (is_pm1(lc)) lc = NULL;
-  lcpol = lc? gmul(lc,pol): pol;
+  lcpol = lc? ZX_Z_mul(pol, lc): pol;
 
   {
     GEN pa_b,pa_bs2,pb, lc2 = lc? sqri(lc): NULL;
@@ -792,7 +792,7 @@ nextK:
       i = 1; curdeg = degpol[ind[1]];
       bound = factor_bound(pol);
       if (lc) lc = absi(leading_term(pol));
-      lcpol = lc? gmul(lc,pol): pol;
+      lcpol = lc? ZX_Z_mul(pol, lc): pol;
       if (DEBUGLEVEL>3)
 	fprintferr("\nfound factor %Zs\nremaining modular factor(s): %ld\n",
 		   y, lfamod);
@@ -1012,11 +1012,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   pari_timer T;
 
   if (DEBUGLEVEL>2) TIMERstart(&T);
-#if 0
-  u = lllint_knapsack_inplace(m, final? 1000: 4, &norm);
-#else
   u = LLLint(m, final? 1000: 4, LLL_INPLACE, &norm);
-#endif
   if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr(gel(norm,R), Bnorm) < 0) break;
@@ -1124,7 +1120,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     delta = b = 0; /* -Wall */
 AGAIN:
     M_L = Q_div_to_int(CM_L, utoipos(C));
-    T2 = centermod( gmul(Tra, M_L), pa );
+    T2 = centermod( ZM_mul(Tra, M_L), pa );
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
       double t = gexpo(T2) - max(32, BitPerFactor*r);
@@ -1187,8 +1183,8 @@ AGAIN:
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
-      CM_L = gerepilecopy(av2, CM_L);
     }
+    CM_L = gerepilecopy(av2, CM_L);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"LLL_cmbf");
@@ -1238,7 +1234,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   A = factor_bound(target);
 
   la = absi(leading_term(target));
-  B = mului(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
+  B = mului(n, sqri(mulii(la, root_bound(target)))); /* = bound for S_2 */
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
@@ -1277,7 +1273,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   if (DEBUGLEVEL>2) TIMERstart(&T);
   lc = absi(leading_term(pol));
   if (is_pm1(lc)) lc = NULL;
-  lcpol = lc? gmul(lc,pol): pol;
+  lcpol = lc? ZX_Z_mul(pol, lc): pol;
 
   bound = root_bound(pol);
   if (lc) bound = mulii(lc, bound);
@@ -1304,7 +1300,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   for (m=1, i=1; i <= lz; i++)
   {
     GEN q, r, y = gel(z,i);
-    if (lc) y = gmul(y, lc);
+    if (lc) y = ZX_Z_mul(y, lc);
     y = centermod_i(y, pe, pes2);
     if (! (q = polidivis(lcpol, y, NULL)) ) continue;
 
@@ -1314,7 +1310,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
       r = gdiv(r,lc);
       pol = Q_primpart(pol);
       lc = absi( leading_term(pol) );
-      if (is_pm1(lc)) lc = NULL; else lcpol = gmul(lc, pol);
+      if (is_pm1(lc)) lc = NULL; else lcpol = ZX_Z_mul(pol, lc);
     }
     gel(z,m++) = r;
     if (low_stack(lim, stack_lim(av,2)))
