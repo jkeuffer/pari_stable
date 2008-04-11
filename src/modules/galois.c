@@ -135,7 +135,7 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = (PERM)pari_malloc((n1+1) * sizeof(IND));
+  PERM s3 = (PERM)stackmalloc((n1+1) * sizeof(IND));
   for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
   s3[0] = (IND)n1; return s3;
 }
@@ -273,7 +273,7 @@ static PERM *
 alloc_pobj(long n, long m)
 {
   long i;
-  PERM *g = (PERM*) pari_malloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
+  PERM *g = (PERM*) stackmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
   PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
@@ -899,7 +899,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 	}
 	if (DEBUGLEVEL) dbg_rac(0,nbracint,numi,racint,multi);
 	for (i=1; i<=nbracint; i++)
-	  if (multi[i]==1) { avma = av1; return permmul(T, ss[numi[i]]); }
+	  if (multi[i]==1) return permmul(T, ss[numi[i]]);
 	init = 1;
       }
       else
@@ -928,7 +928,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
 	    }
 	  if (DEBUGLEVEL) dbg_rac(nri,nbracint,numi,racint,multi);
 	  for (i=nri+1; i<=nbracint; i++)
-	    if (multi[i]==1) { avma = av1; return permmul(T, ss[numi[i]]); }
+	    if (multi[i]==1) return permmul(T, ss[numi[i]]);
 	}
       }
       avma = av1; if (!nbracint) break;
@@ -2261,7 +2261,7 @@ galoismodulo11(long EVEN, GEN pol, GEN dpol)
 }
 
 static void
-init_isin(long N, long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
+init_isin(long N, long n1, long n2, GROUP *tau, PERM *s0, resolv *R)
 {
   int fl = 1;
   if (DEBUGLEVEL) {
@@ -2309,26 +2309,24 @@ init_isin(long N, long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
     default: /* case 11: */
       *s0=data11(N,n1,tau); break;
   }
-  *ss = lirecoset(n1,n2,N);
   if (fl) lireresolv(n1,n2,N,R); else { R->a = NULL; R->nm = n1; R->nv = n2; }
 }
 
 static long
 isin_G_H(buildroot *BR, long n1, long n2)
 {
+  pari_sp av = avma;
   const long N = BR->N;
   PERM s0, ww;
-  GROUP ss,tau;
+  GROUP tau, ss = lirecoset(n1,n2,N);
   resolv R;
 
-  init_isin(N,n1,n2, &tau, &ss, &s0, &R);
+  init_isin(N,n1,n2, &tau, &s0, &R);
   ww = check_isin(BR, &R, tau, ss);
-  pari_free(ss);
-  if (R.a) pari_free(R.a);
   if (ww)
   {
     long z[NMAX+1], i , j, l = lg(BR->r);
-    s0 = permmul(ww, s0); pari_free(ww);
+    s0 = permmul(ww, s0);
     if (DEBUGLEVEL)
     {
       fprintferr("\n    Output of isin_%ld_G_H(%ld,%ld): %ld",N,n1,n2,n2);
@@ -2341,15 +2339,14 @@ isin_G_H(buildroot *BR, long n1, long n2)
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
       for (j=1; j<=N; j++) p1[j] = z[j];
     }
-    pari_free(s0);
-    pari_free(tau); return n2;
+    avma = av; return n2;
   }
   if (DEBUGLEVEL)
   {
     fprintferr("    Output of isin_%ld_G_H(%ld,%ld): not included.\n",N,n1,n2);
     flusherr();
   }
-  pari_free(tau); return 0;
+  avma = av; return 0;
 }
 
 GEN
