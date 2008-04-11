@@ -32,18 +32,13 @@ typedef struct {
 } resolv; /* resolvent */
 
 typedef struct {
-  long pr, prmax;
+  long pr, prmax, N;
   GEN p, r, coef;
 } buildroot;
 
 static long isin_G_H(buildroot *BR, long n1, long n2);
 
-static IND ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
-static PERM ID = ID_data;
-static long N, EVEN;
-
 static long *par_vec;
-
 /* k-1 entries filled so far
  * m = maximal allowed value, n = sum to reach with remaining elements */
 static void
@@ -90,7 +85,7 @@ partitions(long n)
 
 /* affect to the permutation x the N arguments that follow */
 static void
-_aff(PERM x,...)
+_aff(long N, PERM x,...)
 {
   va_list args; long i;
   va_start(args,x); for (i=1; i<=N; i++) x[i] = va_arg(args,int);
@@ -125,7 +120,7 @@ _typ(long l,...)
 
 /* create a permutation with the N arguments of the function */
 static PERM
-_cr(IND a,...)
+_cr(long N, IND a,...)
 {
   static IND x[NMAX+1];
   va_list args;
@@ -165,7 +160,7 @@ raye(long *g, long num)
 
 /* we can never determine the group completely in there */
 static long
-rayergroup11(long num, long *gr)
+rayergroup11(long EVEN, long num, long *gr)
 {
   long r = 0;
 
@@ -189,11 +184,11 @@ rayergroup11(long num, long *gr)
 }
 
 static long
-rayergroup(long **GR, long num, long *gr)
+rayergroup(long EVEN, long **GR, long num, long *gr)
 {
   long i,nbgr,r;
 
-  if (!GR) return rayergroup11(num,gr);
+  if (!GR) return rayergroup11(EVEN,num,gr);
   nbgr = lg(GR); r = 0 ;
   if (EVEN)
   {
@@ -209,14 +204,14 @@ rayergroup(long **GR, long num, long *gr)
 }
 
 static long
-galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
+galmodp(long EVEN, GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 {
   long i,k,l,n,nbremain;
   byteptr d = diffptr;
   GEN p1, dtyp;
   ulong p = 0;
 
-  switch(N)
+  switch(degpol(pol))
   {
     case  8: nbremain = EVEN? 28: 22; break;
     case  9: nbremain = EVEN? 18: 16; break;
@@ -237,7 +232,7 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */
     n = RgV_isin(TYP, dtyp);
     if (!n) return 1; /* only for N=11 */
-    nbremain -= rayergroup(GR,n,gr);
+    nbremain -= rayergroup(EVEN,GR,n,gr);
     if (nbremain==1) return 1;
   }
   return 0;
@@ -246,8 +241,8 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 static void
 preci(GEN o, long p)
 {
-  long i;
-  for (i=1; i<=N; i++)
+  long i, l = lg(o);
+  for (i=1; i<l; i++)
   {
     GEN x = gel(o,i);
     if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
@@ -303,14 +298,13 @@ allocgroup(long n, long card)
 #endif
 
 static pariFILE *
-galopen(const char *pre, long n, long n1, long n2, long no)
+galopen(const char *pre, long n, long n1, long n2)
 {
   pari_sp av = avma;
   char *s = stackmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1 + 3);
   pariFILE *f;
 
   (void)sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
-  if (no) (void)sprintf(s + strlen(s), "_%ld", no);
   f = pari_fopengz(s);
   if (!f) pari_err(talker,"galois files not available\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
@@ -328,7 +322,7 @@ bin(char c)
 }
 
 #define BUFFS 512
-/* fill in g[i][j] (i<=n, j<=m) with (buffered) data from fd */
+/* fill in g[i][j] (i<=n, j<=m) with (buffered) data from f->file */
 static void
 read_obj(PERM *g, pariFILE *f, long n, long m)
 {
@@ -350,29 +344,15 @@ read_obj(PERM *g, pariFILE *f, long n, long m)
 static GROUP
 lirecoset(long n1, long n2, long n)
 {
-  GROUP gr, grptr;
+  GROUP gr;
   char c, ch[8];
-  long no, m, cardgr;
-  pariFILE *f;
-
-  if (n<11 || n2<8)
-  {
-    f = galopen("COS", n, n1, n2, 0);
-    (void)fread(&c,sizeof(char), 1, f->file); m=bin(c);
-    (void)fread(&c,sizeof(char), 1, f->file);
-    (void)fread(ch,sizeof(char), 6, f->file); cardgr=atol(ch);
-    gr=allocgroup(m,cardgr);
-    read_obj(gr, f,cardgr,m); return gr;
-  }
-  m = 11; cardgr = 45360;
-  gr = grptr = allocgroup(n, 8 * cardgr);
-  for (no=1; no<=8; no++)
-  {
-    f = galopen("COS", n, n1, n2, no);
-    (void)fread(ch, sizeof(char), 8, f->file);
-    read_obj(grptr, f,cardgr,m); grptr += cardgr;
-  }
-  return gr;
+  long m, cardgr;
+  pariFILE *f = galopen("COS", n, n1, n2);
+  (void)fread(&c,sizeof(char), 1, f->file); m=bin(c);
+  (void)fread(&c,sizeof(char), 1, f->file);
+  (void)fread(ch,sizeof(char), 6, f->file); cardgr=atol(ch);
+  gr=allocgroup(m,cardgr);
+  read_obj(gr, f,cardgr,m); return gr;
 }
 
 static void
@@ -380,9 +360,7 @@ lireresolv(long n1, long n2, long n, resolv *R)
 {
   char ch[5];
   long nm, nv;
-  pariFILE *f;
-
-  f = galopen("RES", n, n1, n2, 0);
+  pariFILE *f = galopen("RES", n, n1, n2);
   (void)fread(ch,sizeof(char),5,f->file); nm = atol(ch);
   (void)fread(ch,sizeof(char),3,f->file); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
@@ -496,6 +474,7 @@ zaux(GEN *z, GEN *r)
 static GEN
 gpoly(GEN rr, long n1, long n2)
 {
+  const long N = lg(rr)-1;
   GEN p1,p2,z[6], *r = (GEN*)rr; /* syntaxic kludge */
   long i,j;
 
@@ -711,7 +690,7 @@ gpoly(GEN rr, long n1, long n2)
 
 /* a is a t_VECSMALL representing a polynomial */
 static GEN
-new_pol(GEN r, GEN a)
+new_pol(long N, GEN r, GEN a)
 {
   long i, j, l = lg(a);
   GEN x, z, v = cgetg(N+1, t_VEC);
@@ -732,7 +711,7 @@ tschirn(buildroot *BR)
   long i, k, v = varn(BR->p), l = lg(BR->r);
   GEN a, h, r;
 
-  if (l >= N) pari_err(bugparier,"tschirn");
+  if (l >= BR->N) pari_err(bugparier,"tschirn");
   if (DEBUGLEVEL)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
@@ -749,7 +728,7 @@ tschirn(buildroot *BR)
 
   r = gel(BR->r,1);
   preci(r, BR->prmax); /* max accuracy original roots */
-  appendL(BR->r, new_pol(r, a));
+  appendL(BR->r, new_pol(BR->N, r, a));
   fixprec(BR); /* restore accuracy */
 }
 
@@ -801,7 +780,7 @@ moreprec(buildroot *BR)
     ro = sortroots(cleanroots(BR->p,BR->prmax), gel(BR->r,1));
     delete_roots(BR);
     appendL(BR->r, gclone(ro));
-    for (d = 2; d < l; d++) appendL(BR->r, new_pol(ro, gel(BR->coef,d)));
+    for (d = 2; d < l; d++) appendL(BR->r, new_pol(BR->N, ro, gel(BR->coef,d)));
     avma = av;
   }
   fixprec(BR);
@@ -810,7 +789,7 @@ moreprec(buildroot *BR)
 /* determine "sufficient" extra bit-precision such that we may decide
  * (heuristic) whether z is an integer. */
 static GEN
-get_ro(GEN rr, PERM S1, PERM S2, resolv *R)
+get_ro(long N, GEN rr, PERM S1, PERM S2, resolv *R)
 {
   GEN r = cgetg(N+1, t_VEC);
   long i;
@@ -842,7 +821,7 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
   long e;
   for (;;)
   {
-    ro = get_ro(gel(BR->r, d), S1,S2,R); roi = grndtoi(ro, &e);
+    ro = get_ro(BR->N, gel(BR->r, d), S1,S2,R); roi = grndtoi(ro, &e);
     if (e < 0)
     {
       if (e < -64 || sufprec(ro)) break;
@@ -855,7 +834,7 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
   /* compute with 64 more bits */
   BR->pr += DEFAULTPREC-2;
   moreprec(BR);
-  ro = get_ro(gel(BR->r, d), S1,S2,R);
+  ro = get_ro(BR->N, gel(BR->r, d), S1,S2,R);
   BR->pr -= DEFAULTPREC-2;
   fixprec(BR);
   /* ro much closer to roi ? */
@@ -971,22 +950,17 @@ NEXT:
 
 /* DEGREE 8 */
 static long
-galoisprim8(buildroot *BR)
+galoisprim8(long EVEN, buildroot *BR)
 {
   long rep;
 
-/* PRIM_8_1: */
   rep=isin_G_H(BR,50,43);
   if (rep) return EVEN? 37: 43;
-/* PRIM_8_2: */
   if (!EVEN) return 50;
-/* PRIM_8_3: */
   rep=isin_G_H(BR,49,48);
   if (!rep) return 49;
-/* PRIM_8_4: */
   rep=isin_G_H(BR,48,36);
   if (!rep) return 48;
-/* PRIM_8_5: */
   rep=isin_G_H(BR,36,25);
   return rep? 25: 36;
 }
@@ -995,12 +969,9 @@ static long
 galoisimpodd8(buildroot *BR, long nh)
 {
   long rep;
-/* IMPODD_8_1: */
   if (nh!=47) goto IMPODD_8_6;
-/* IMPODD_8_2: */
   rep=isin_G_H(BR,47,46);
   if (!rep) goto IMPODD_8_5;
-/* IMPODD_8_4: */
   rep=isin_G_H(BR,46,28);
   if (rep) goto IMPODD_8_7; else return 46;
 
@@ -1099,10 +1070,8 @@ IMPODD_8_28:
 IMPODD_8_29:
   rep=isin_G_H(BR,15,7);
   if (rep) goto IMPODD_8_19;
-/* IMPODD_8_30: */
   rep=isin_G_H(BR,15,6);
   if (!rep) goto IMPODD_8_32;
-/* IMPODD_8_31: */
   rep=isin_G_H(BR,6,1);
   return rep? 1: 6;
 
@@ -1123,12 +1092,9 @@ static long
 galoisimpeven8(buildroot *BR, long nh)
 {
    long rep;
-/* IMPEVEN_8_1: */
    if (nh!=45) goto IMPEVEN_8_6;
-/* IMPEVEN_8_2: */
    rep=isin_G_H(BR,45,42);
    if (!rep) goto IMPEVEN_8_5;
-/* IMPEVEN_8_4: */
   rep=isin_G_H(BR,42,34);
   if (rep) goto IMPEVEN_8_7; else goto IMPEVEN_8_8;
 
@@ -1294,197 +1260,196 @@ IMPEVEN_8_45:
 }
 
 static long
-closure8(buildroot *BR)
+closure8(long EVEN, buildroot *BR)
 {
   long rep;
 
   if (!EVEN)
   {
-  /* CLOS_8_1: */
     rep=isin_G_H(BR,50,47);
     if (rep) return galoisimpodd8(BR,47);
-  /* CLOS_8_2: */
     rep=isin_G_H(BR,50,44);
     if (rep) return galoisimpodd8(BR,44);
   }
   else
   {
-  /* CLOS_8_3: */
     rep=isin_G_H(BR,49,45);
     if (rep) return galoisimpeven8(BR,45);
-  /* CLOS_8_4: */
     rep=isin_G_H(BR,49,39);
     if (rep) return galoisimpeven8(BR,39);
   }
-  return galoisprim8(BR);
+  return galoisprim8(EVEN, BR);
 }
 
 static GROUP
 initgroup(long n, long nbgr)
 {
   GROUP t = allocgroup(n,nbgr);
-  t[1] = ID; return t;
+  PERM ID =  t[1];
+  long i;
+  for (i = 1; i <= n; i++) ID[i] = i;
+  return t;
 }
 
 static PERM
-data8(long n1, long n2, GROUP *t)
+data8(long N, long n1, long n2, GROUP *t)
 {
   switch(n1)
   {
     case 7: if (n2!=1) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
+      return (*t)[1];
     case 9: if (n2!=4) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 4, 3, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 4, 3, 5, 6, 8, 7);
+      return (*t)[1];
     case 10: if (n2!=2) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
+      return (*t)[1];
     case 11:
       switch(n2)
       {
 	case 2:
 	  *t=initgroup(N,2);
-	  _aff((*t)[2], 1, 2, 5, 6, 3, 4, 8, 7);
-	  return _cr(1, 3, 5, 8, 2, 4, 6, 7);
+	  _aff(N, (*t)[2], 1, 2, 5, 6, 3, 4, 8, 7);
+	  return _cr(N, 1, 3, 5, 8, 2, 4, 6, 7);
 	case 4:
 	  *t=initgroup(N,1);
-	  return _cr(1, 3, 7, 5, 2, 4, 8, 6);
+	  return _cr(N, 1, 3, 7, 5, 2, 4, 8, 6);
       }break;
     case 14: if (n2!=4) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 4, 3, 5, 6, 8, 7);
+      return _cr(N, 1, 2, 4, 3, 5, 6, 8, 7);
     case 15: if (n2!=6 && n2!=8) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
+      return (*t)[1];
     case 16: if (n2!=7) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 18:
       switch(n2)
       {
 	case 9: *t=initgroup(N,3);
-	  _aff((*t)[2], 1, 5, 3, 7, 2, 6, 4, 8);
-	  _aff((*t)[3], 1, 2, 3, 4, 6, 5, 8, 7);
-	  return ID;
+	  _aff(N, (*t)[2], 1, 5, 3, 7, 2, 6, 4, 8);
+	  _aff(N, (*t)[3], 1, 2, 3, 4, 6, 5, 8, 7);
+	  return (*t)[1];
 	case 10: *t=initgroup(N,3);
-	  _aff((*t)[2], 1, 6, 3, 8, 2, 5, 4, 7);
-	  _aff((*t)[3], 1, 5, 3, 7, 2, 6, 4, 8);
-	  return ID;
+	  _aff(N, (*t)[2], 1, 6, 3, 8, 2, 5, 4, 7);
+	  _aff(N, (*t)[3], 1, 5, 3, 7, 2, 6, 4, 8);
+	  return (*t)[1];
       }break;
     case 19: if (n2!=9) break;
       *t=initgroup(N,1);
-      return _cr(1, 5, 3, 8, 2, 6, 4, 7);
+      return _cr(N, 1, 5, 3, 8, 2, 6, 4, 7);
     case 20: if (n2!=10) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 22:
       switch(n2)
       {
 	case 9: *t=initgroup(N,6);
-	  _aff((*t)[2], 1, 2, 7, 8, 3, 4, 6, 5);
-	  _aff((*t)[3], 1, 2, 7, 8, 3, 4, 5, 6);
-	  _aff((*t)[4], 1, 2, 5, 6, 3, 4, 8, 7);
-	  _aff((*t)[5], 1, 2, 5, 6, 3, 4, 7, 8);
-	  _aff((*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
-	  return _cr(1, 3, 5, 7, 2, 4, 6, 8);
+	  _aff(N, (*t)[2], 1, 2, 7, 8, 3, 4, 6, 5);
+	  _aff(N, (*t)[3], 1, 2, 7, 8, 3, 4, 5, 6);
+	  _aff(N, (*t)[4], 1, 2, 5, 6, 3, 4, 8, 7);
+	  _aff(N, (*t)[5], 1, 2, 5, 6, 3, 4, 7, 8);
+	  _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
+	  return _cr(N, 1, 3, 5, 7, 2, 4, 6, 8);
 	case 11: *t=initgroup(N,6);
-	  _aff((*t)[2], 1, 2, 5, 6, 7, 8, 4, 3);
-	  _aff((*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
-	  _aff((*t)[4], 1, 2, 3, 4, 7, 8, 6, 5);
-	  _aff((*t)[5], 1, 2, 3, 4, 7, 8, 5, 6);
-	  _aff((*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
-	  return ID;
+	  _aff(N, (*t)[2], 1, 2, 5, 6, 7, 8, 4, 3);
+	  _aff(N, (*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
+	  _aff(N, (*t)[4], 1, 2, 3, 4, 7, 8, 6, 5);
+	  _aff(N, (*t)[5], 1, 2, 3, 4, 7, 8, 5, 6);
+	  _aff(N, (*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
+	  return (*t)[1];
       }break;
     case 23: if (n2!=8) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 6, 5, 8, 7);
+      return _cr(N, 1, 2, 3, 4, 6, 5, 8, 7);
     case 26: if (n2!=15 && n2!=17) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 28: if (n2!=21) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 7, 8, 5, 6);
+      return _cr(N, 1, 2, 3, 4, 7, 8, 5, 6);
     case 29: if (n2!=18 && n2!=19) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 30: if (n2!=21) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 7, 8, 5, 6);
+      return _cr(N, 1, 2, 3, 4, 7, 8, 5, 6);
     case 31: if (n2!=21) break;
       *t=initgroup(N,3);
-      _aff((*t)[2], 1, 2, 3, 4, 7, 8, 5, 6);
-      _aff((*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 7, 8, 5, 6);
+      _aff(N, (*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
+      return (*t)[1];
     case 32: if (n2!=12 && n2!=13) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 33:
       switch(n2)
       {
 	case 13: *t=initgroup(N,1);
-	  return _cr(1, 5, 2, 6, 3, 7, 4, 8);
+	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
 	case 18: *t=initgroup(N,1);
-	  return _cr(1, 2, 5, 6, 3, 4, 7, 8);
+	  return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
       }break;
     case 34:
       switch(n2)
       {
 	case 14: *t=initgroup(N,3);
-	  _aff((*t)[2], 1, 2, 3, 4, 5, 8, 6, 7);
-	  _aff((*t)[3], 1, 2, 3, 4, 5, 7, 8, 6);
-	  return _cr(1, 5, 2, 6, 3, 7, 4, 8);
+	  _aff(N, (*t)[2], 1, 2, 3, 4, 5, 8, 6, 7);
+	  _aff(N, (*t)[3], 1, 2, 3, 4, 5, 7, 8, 6);
+	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
 	case 18: *t=initgroup(N,1);
-	  return _cr(1, 2, 5, 6, 3, 4, 8, 7);
+	  return _cr(N, 1, 2, 5, 6, 3, 4, 8, 7);
       }break;
     case 39: if (n2!=24) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 40: if (n2!=23) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 41:
       switch(n2)
       {
 	case 24: *t=initgroup(N,1);
-	  return _cr(1, 5, 2, 6, 3, 7, 4, 8);
+	  return _cr(N, 1, 5, 2, 6, 3, 7, 4, 8);
 	case 29: *t=initgroup(N,1);
-	  return _cr(1, 2, 5, 6, 3, 4, 7, 8);
+	  return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
       }break;
     case 42: if (n2!=34) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 5, 6, 8, 7);
+      return _cr(N, 1, 2, 3, 4, 5, 6, 8, 7);
     case 45: if (n2!=41 && n2!=42) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
     case 46: if (n2!=28) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 5, 6, 3, 4, 7, 8);
+      return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
     case 47: if (n2!=35) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 5, 6, 3, 4, 7, 8);
+      return _cr(N, 1, 2, 5, 6, 3, 4, 7, 8);
     case 49: if (n2!=48) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
+      return (*t)[1];
   }
-  *t=initgroup(N,1); return ID;
+  *t=initgroup(N,1); return (*t)[1];
 }
 
 static long
-galoismodulo8(GEN pol, GEN dpol)
+galoismodulo8(long EVEN, GEN pol, GEN dpol)
 {
   long res, gr[51];
   pari_sp av = avma;
@@ -1542,46 +1507,38 @@ galoismodulo8(GEN pol, GEN dpol)
   GR[47]= _gr( 16, 1,2,3,4,5,6,7,8,9,11,12,13,14,15,20,22);
   GR[48]= _gr( -8, 1,3,5,9,12,15,20,21);
 
-  gr[0]=51; res = galmodp(pol,dpol,TYP,gr,GR);
+  gr[0]=51; res = galmodp(EVEN,pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
   return EVEN? 49: 50;
 }
 
 /* DEGREE 9 */
 static long
-galoisprim9(buildroot *BR)
+galoisprim9(long EVEN, buildroot *BR)
 {
   long rep;
 
   if (!EVEN)
   {
-  /* PRIM_9_1: */
     rep=isin_G_H(BR,34,26);
     if (!rep) return 34;
-  /* PRIM_9_2: */
     rep=isin_G_H(BR,26,19);
     if (!rep) return 26;
-  /* PRIM_9_3: */
     rep=isin_G_H(BR,19,16);
     if (rep) return 16;
-  /* PRIM_9_4: */
     rep=isin_G_H(BR,19,15);
     return rep? 15: 19;
   }
-/* PRIM_9_5: */
   rep=isin_G_H(BR,33,32);
   if (!rep) goto PRIM_9_7;
-/* PRIM_9_6: */
   rep=isin_G_H(BR,32,27);
   return rep? 27: 32;
 
 PRIM_9_7:
   rep=isin_G_H(BR,33,23);
   if (!rep) return 33;
-/* PRIM_9_8: */
   rep=isin_G_H(BR,23,14);
   if (!rep) return 23;
-/* PRIM_9_9: */
   rep=isin_G_H(BR,14,9);
   return rep? 9: 14;
 }
@@ -1591,10 +1548,8 @@ galoisimpodd9(buildroot *BR)
 {
   long rep;
 
-/* IMPODD_9_1: */
   rep=isin_G_H(BR,31,29);
   if (!rep) goto IMPODD_9_5;
-/* IMPODD_9_2: */
   rep=isin_G_H(BR,29,20);
   if (!rep) return 29;
 IMPODD_9_3:
@@ -1607,7 +1562,6 @@ IMPODD_9_4:
 IMPODD_9_5:
   rep=isin_G_H(BR,31,28);
   if (!rep) goto IMPODD_9_9;
-/* IMPODD_9_6: */
   rep=isin_G_H(BR,28,22);
   if (!rep) return 28;
 IMPODD_9_7:
@@ -1620,25 +1574,18 @@ IMPODD_9_8:
 IMPODD_9_9:
   rep=isin_G_H(BR,31,24);
   if (!rep) return 31;
-/* IMPODD_9_10: */
   rep=isin_G_H(BR,24,22);
   if (rep) goto IMPODD_9_7;
-/* IMPODD_9_11: */
   rep=isin_G_H(BR,24,20);
   if (rep) goto IMPODD_9_3;
-/* IMPODD_9_12: */
   rep=isin_G_H(BR,24,18);
   if (!rep) return 24;
-/* IMPODD_9_13: */
   rep=isin_G_H(BR,18,13);
   if (rep) goto IMPODD_9_8;
-/* IMPODD_9_14: */
   rep=isin_G_H(BR,18,12);
   if (rep) goto IMPODD_9_4;
-/* IMPODD_9_15: */
   rep=isin_G_H(BR,18,8);
   if (!rep) return 18;
-/* IMPODD_9_16: */
   rep=isin_G_H(BR,8,4);
   return rep? 4: 8;
 }
@@ -1648,10 +1595,8 @@ galoisimpeven9(buildroot *BR)
 {
   long rep;
 
-/* IMPEVEN_9_1: */
   rep=isin_G_H(BR,30,25);
   if (!rep) goto IMPEVEN_9_7;
-/* IMPEVEN_9_2: */
   rep=isin_G_H(BR,25,17);
   if (!rep) return 25;
 IMPEVEN_9_3:
@@ -1671,105 +1616,95 @@ IMPEVEN_9_6:
 IMPEVEN_9_7:
   rep=isin_G_H(BR,30,21);
   if (!rep) return 30;
-/* IMPEVEN_9_8: */
   rep=isin_G_H(BR,21,17);
   if (rep) goto IMPEVEN_9_3;
-/* IMPEVEN_9_9: */
   rep=isin_G_H(BR,21,11);
   if (!rep) goto IMPEVEN_9_13;
-/* IMPEVEN_9_10: */
   rep=isin_G_H(BR,11,7);
   if (rep) goto IMPEVEN_9_4;
-/* IMPEVEN_9_11: */
   rep=isin_G_H(BR,11,5);
   if (!rep) return 11;
-/* IMPEVEN_9_12: */
   rep=isin_G_H(BR,5,2);
   return rep? 2: 5;
 
 IMPEVEN_9_13:
   rep=isin_G_H(BR,21,10);
   if (!rep) return 21;
-/* IMPEVEN_9_14: */
   rep=isin_G_H(BR,10,6);
   if (rep) goto IMPEVEN_9_6;
-/* IMPEVEN_9_15: */
   rep=isin_G_H(BR,10,3);
   if (!rep) return 10;
-/* IMPEVEN_9_16: */
   rep=isin_G_H(BR,3,1);
   return rep? 1: 3;
 }
 
 static long
-closure9(buildroot *BR)
+closure9(long EVEN, buildroot *BR)
 {
   long rep;
   if (!EVEN)
   {
-  /* CLOS_9_1: */
     rep=isin_G_H(BR,34,31);
     if (rep) return galoisimpodd9(BR);
   }
   else
   {
-  /* CLOS_9_2: */
     rep=isin_G_H(BR,33,30);
     if (rep) return galoisimpeven9(BR);
   }
-  return galoisprim9(BR);
+  return galoisprim9(EVEN, BR);
 }
 
 static PERM
-data9(long n1, long n2, GROUP *t)
+data9(long N, long n1, long n2, GROUP *t)
 {
   switch(n1)
   {
     case 6: if (n2!=1) break;
       *t=initgroup(N,3);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
-      _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
+      _aff(N, (*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
+      return (*t)[1];
     case 7: if (n2!=2) break;
       *t=initgroup(N,3);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
-      _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
+      _aff(N, (*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
+      return (*t)[1];
     case 8: if (n2!=4) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 4, 7, 2, 5, 8, 3, 6, 9);
-      return ID;
+      _aff(N, (*t)[2], 1, 4, 7, 2, 5, 8, 3, 6, 9);
+      return (*t)[1];
     case 12: if (n2!=4) break;
       *t=initgroup(N,3);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
-      _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
+      _aff(N, (*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
+      return (*t)[1];
     case 13: if (n2!=4) break;
       *t=initgroup(N,1);
-      return _cr(1, 4, 7, 2, 5, 8, 3, 6, 9);
+      return _cr(N, 1, 4, 7, 2, 5, 8, 3, 6, 9);
     case 14: if (n2!=9) break;
       *t=initgroup(N,3);
-      _aff((*t)[2], 1, 2, 3, 5, 6, 4, 9, 7, 8);
-      _aff((*t)[3], 1, 2, 3, 6, 4, 5, 8, 9, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 5, 6, 4, 9, 7, 8);
+      _aff(N, (*t)[3], 1, 2, 3, 6, 4, 5, 8, 9, 7);
+      return (*t)[1];
     case 17: if (n2!=6) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
+      return (*t)[1];
     case 21: if (n2!=10) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
+      return (*t)[1];
     case 33: if (n2!=32) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 9, 8);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 7, 9, 8);
+      return (*t)[1];
   }
-  *t=initgroup(N,1); return ID;
+  *t=initgroup(N,1); return (*t)[1];
 }
 
 static long
-galoismodulo9(GEN pol, GEN dpol)
+galoismodulo9(long EVEN, GEN pol, GEN dpol)
 {
   long res, gr[35];
   pari_sp av = avma;
@@ -1811,37 +1746,31 @@ galoismodulo9(GEN pol, GEN dpol)
   GR[31]= _gr( 19, 1,2,3,4,5,6,7,8,9,10,11,12,14,15,17,24,25,26,30);
   GR[32]= _gr( -7, 1,5,10,12,25,27,30);
 
-  gr[0]=35; res = galmodp(pol,dpol,TYP,gr,GR);
+  gr[0]=35; res = galmodp(EVEN,pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
   return EVEN? 33: 34;
 }
 
 /* DEGREE 10 */
 static long
-galoisprim10(buildroot *BR)
+galoisprim10(long EVEN, buildroot *BR)
 {
   long rep;
   if (EVEN)
   {
-  /* PRIM_10_1: */
     rep=isin_G_H(BR,44,31);
     if (!rep) return 44;
-  /* PRIM_10_2: */
     rep=isin_G_H(BR,31,26);
     if (!rep) return 31;
-  /* PRIM_10_3: */
     rep=isin_G_H(BR,26,7);
     return rep? 7: 26;
   }
   else
   {
-  /* PRIM_10_4: */
     rep=isin_G_H(BR,45,35);
     if (!rep) return 45;
-  /* PRIM_10_5: */
     rep=isin_G_H(BR,35,32);
     if (!rep) goto PRIM_10_7;
-  /* PRIM_10_6: */
     rep=isin_G_H(BR,32,13);
     return rep? 13: 32;
 
@@ -1857,26 +1786,21 @@ galoisimpeven10(buildroot *BR, long nogr)
   long rep;
   if (nogr==42)
   {
- /* IMPEVEN_10_1: */
     rep=isin_G_H(BR,42,28);
     if (!rep) return 42;
- /* IMPEVEN_10_2: */
     rep=isin_G_H(BR,28,18);
     return rep? 18: 28;
   }
   else
   {
- /* IMPEVEN_10_3: */
     rep=isin_G_H(BR,37,34);
     if (!rep) goto IMPEVEN_10_5;
- /* IMPEVEN_10_4: */
     rep=isin_G_H(BR,34,15);
     if (rep) goto IMPEVEN_10_7; else return 34;
 
   IMPEVEN_10_5:
     rep=isin_G_H(BR,37,24);
     if (!rep) return 37;
- /* IMPEVEN_10_6: */
     rep=isin_G_H(BR,24,15);
     if (!rep) return 24;
   IMPEVEN_10_7:
@@ -1891,10 +1815,8 @@ galoisimpodd10(buildroot *BR, long nogr)
   long rep;
   if (nogr==43)
   {
- /*  IMPODD_10_1: */
     rep=isin_G_H(BR,43,41);
     if (!rep) goto IMPODD_10_3;
- /* IMPODD_10_2: */
     rep=isin_G_H(BR,41,40);
     if (rep) goto IMPODD_10_4; else goto IMPODD_10_5;
 
@@ -1929,7 +1851,6 @@ galoisimpodd10(buildroot *BR, long nogr)
    IMPODD_10_10:
     rep=isin_G_H(BR,41,22);
     if (!rep) return 41;
- /* IMPODD_10_11: */
     rep=isin_G_H(BR,22,12);
     if (rep) goto IMPODD_10_14; else goto IMPODD_10_18;
 
@@ -1950,7 +1871,6 @@ galoisimpodd10(buildroot *BR, long nogr)
    IMPODD_10_16:
     rep=isin_G_H(BR,27,20);
     if (!rep) goto IMPODD_10_21;
- /* IMPODD_10_17: */
     rep=isin_G_H(BR,20,10);
     if (rep) goto IMPODD_10_12; return 20;
 
@@ -1969,7 +1889,6 @@ galoisimpodd10(buildroot *BR, long nogr)
    IMPODD_10_21:
     rep=isin_G_H(BR,27,19);
     if (rep) goto IMPODD_10_27;
- /* IMPODD_10_22: */
     rep=isin_G_H(BR,27,17);
     if (rep) goto IMPODD_10_28; else return 27;
 
@@ -2022,10 +1941,8 @@ galoisimpodd10(buildroot *BR, long nogr)
   }
   else
   {
-  /* IMPODD_10_34: */
     rep=isin_G_H(BR,39,38);
     if (!rep) goto IMPODD_10_36;
-  /* IMPODD_10_35: */
     rep=isin_G_H(BR,38,25);
     if (rep) goto IMPODD_10_37; else goto IMPODD_10_38;
 
@@ -2107,7 +2024,6 @@ galoisimpodd10(buildroot *BR, long nogr)
    IMPODD_10_55:
     rep=isin_G_H(BR,22,11);
     if (rep) goto IMPODD_10_48;
- /* IMPODD_10_56: */
     rep=isin_G_H(BR,22,5);
     if (rep) goto IMPODD_10_58; else return 22;
 
@@ -2118,107 +2034,102 @@ galoisimpodd10(buildroot *BR, long nogr)
    IMPODD_10_58:
     rep=isin_G_H(BR,5,4);
     if (rep) return 4;
- /* IMPODD_10_59: */
     rep=isin_G_H(BR,5,3);
     if (rep) goto IMPODD_10_53; else return 5;
   }
 }
 
 static long
-closure10(buildroot *BR)
+closure10(long EVEN, buildroot *BR)
 {
   long rep;
   if (EVEN)
   {
-  /* CLOS_10_1: */
     rep=isin_G_H(BR,44,42);
     if (rep) return galoisimpeven10(BR,42);
-  /* CLOS_10_2: */
     rep=isin_G_H(BR,44,37);
     if (rep) return galoisimpeven10(BR,37);
   }
   else
   {
-  /* CLOS_10_3: */
     rep=isin_G_H(BR,45,43);
     if (rep) return galoisimpodd10(BR,43);
-  /* CLOS_10_4: */
     rep=isin_G_H(BR,45,39);
     if (rep) return galoisimpodd10(BR,39);
   }
-  return galoisprim10(BR);
+  return galoisprim10(EVEN, BR);
 }
 
 static PERM
-data10(long n1,long n2,GROUP *t)
+data10(long N, long n1,long n2,GROUP *t)
 {
   switch(n1)
   {
     case 6: if (n2!=2) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
+      return _cr(N, 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
     case 9: if (n2!=3 && n2!=6) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
+      return (*t)[1];
     case 10: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
+      return (*t)[1];
     case 14: case 16:*t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 17: if (n2!=5) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
+      return (*t)[1];
     case 19: case 20: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
+      return (*t)[1];
     case 21: if (n2!=10) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
+      return _cr(N, 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
     case 23: if (n2!=3) break;
       *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 25: *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 26: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 4, 9, 6, 8, 10, 3, 7, 5);
-      return _cr(1, 2, 3, 10, 6, 5, 7, 4, 8, 9);
+      _aff(N, (*t)[2], 1, 2, 4, 9, 6, 8, 10, 3, 7, 5);
+      return _cr(N, 1, 2, 3, 10, 6, 5, 7, 4, 8, 9);
     case 27: if (n2!=17 && n2!=21) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
+      return (*t)[1];
     case 28: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
+      return (*t)[1];
     case 29: if (n2!=5) break;
       *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 32: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 4, 9, 6, 8, 10, 3, 7, 5);
-      return _cr(1, 2, 3, 10, 6, 5, 7, 4, 8, 9);
+      _aff(N, (*t)[2], 1, 2, 4, 9, 6, 8, 10, 3, 7, 5);
+      return _cr(N, 1, 2, 3, 10, 6, 5, 7, 4, 8, 9);
     case 36: if (n2!=11) break;
       *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 38: if (n2!=12) break;
       *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 39: if (n2!=22) break;
       *t=initgroup(N,1);
-      return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
+      return _cr(N, 1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 40: if (n2!=12) break;
       *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 5, 6, 7, 8, 10, 9);
+      return _cr(N, 1, 2, 3, 4, 5, 6, 7, 8, 10, 9);
     case 41: if (n2!=22 && n2!=40) break;
       *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 10, 9);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 10, 9);
+      return (*t)[1];
   }
-  *t=initgroup(N,1); return ID;
+  *t=initgroup(N,1); return (*t)[1];
 }
 
 static long
-galoismodulo10(GEN pol, GEN dpol)
+galoismodulo10(long EVEN, GEN pol, GEN dpol)
 {
   long res, gr[46];
   pari_sp av = avma;
@@ -2270,34 +2181,29 @@ galoismodulo10(GEN pol, GEN dpol)
   GR[43]= _gr( 32, 1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,22,23,24,25,26,27,28,29,30,33,35,40,42);
   GR[44]= _gr(-22, 1,3,5,7,9,11,13,14,16,18,20,22,24,26,27,30,32,35,36,38,40,41);
 
-  gr[0]=46; res = galmodp(pol,dpol,TYP,gr,GR);
+  gr[0]=46; res = galmodp(EVEN,pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
   return EVEN? 44: 45;
 }
 
 /* DEGREE 11 */
 static long
-closure11(buildroot *BR)
+closure11(long EVEN, buildroot *BR)
 {
   long rep;
   if (EVEN)
   {
-  /* EVEN_11_1: */
     rep=isin_G_H(BR,7,6);
     if (!rep) return 7;
-  /* EVEN_11_2: */
     rep=isin_G_H(BR,6,5);
     if (!rep) return 6;
-  /* EVEN_11_3: */
     rep=isin_G_H(BR,5,3);
     if (!rep) return 5;
-  /* EVEN_11_4: */
     rep=isin_G_H(BR,3,1);
     return rep? 1: 3;
   }
   else
   {
-  /* ODD_11_1: */
     GEN h = BR->p, r = compositum(h, h);
     r = gel(r,lg(r)-1);
     if (degpol(r) == 22) return 2; /* D11 */
@@ -2305,34 +2211,27 @@ closure11(buildroot *BR)
     setvarn(r, 0); r = nffactor(h, r);
     /* S11 of F_110[11] */
     if (lg(r[1]) == 3) return 8; else return 4;
-#if 0
-    rep=isin_G_H(BR,8,4);
-    if (!rep) return 8;
-  /* ODD_11_2: */
-    rep=isin_G_H(BR,4,2);
-    return rep? 2: 4;
-#endif
   }
 }
 
 static PERM
-data11(long n1, GROUP *t)
+data11(long N, long n1, GROUP *t)
 {
   switch(n1)
   {
     case 5: *t=initgroup(N,1);
-      return _cr(1, 2, 3, 7, 8, 6, 11, 5, 9, 4, 10);
+      return _cr(N, 1, 2, 3, 7, 8, 6, 11, 5, 9, 4, 10);
     case 6: *t=initgroup(N,1);
-      return _cr(1, 2, 3, 4, 6, 10, 11, 9, 7, 5, 8);
+      return _cr(N, 1, 2, 3, 4, 6, 10, 11, 9, 7, 5, 8);
     case 7: *t=initgroup(N,2);
-      _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10);
-      return ID;
+      _aff(N, (*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10);
+      return (*t)[1];
   }
-  *t=initgroup(N,1); return ID;
+  *t=initgroup(N,1); return (*t)[1];
 }
 
 static long
-galoismodulo11(GEN pol, GEN dpol)
+galoismodulo11(long EVEN, GEN pol, GEN dpol)
 {
   long res, gr[6] = {0, 1, 1, 1, 1, 1};
   pari_sp av = avma;
@@ -2356,13 +2255,13 @@ galoismodulo11(GEN pol, GEN dpol)
     gel(TYP,4) = _typ(6, 2,2,2,2,2,1);
     gel(TYP,5) = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
   }
-  res = galmodp(pol,dpol,TYP,gr,NULL);
+  res = galmodp(EVEN,pol,dpol,TYP,gr,NULL);
   avma=av; if (!res) return 0;
   return EVEN? 7: 8;
 }
 
 static void
-init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
+init_isin(long N, long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
 {
   int fl = 1;
   if (DEBUGLEVEL) {
@@ -2372,10 +2271,10 @@ init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
   {
     case 8:
       if ((n1==47 && n2==46) || (n1==44 && n2==40)) fl=0;
-      *s0=data8(n1,n2,tau); break;
+      *s0=data8(N, n1,n2,tau); break;
     case 9:
       if ((n1==31 && n2==29) || (n1==34 && n2==31) || (n1==33 && n2==30)) fl=0;
-      *s0=data9(n1,n2,tau); break;
+      *s0=data9(N,n1,n2,tau); break;
     case 10:
       if ((n1==45 && (n2==43||n2==39))
        || (n1==44 && (n2==42||n2==37))
@@ -2406,9 +2305,9 @@ init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
        || (n1== 9 && n2==3)
        || (n1== 6 && n2==1)
        || (n1== 5 && n2==3)) fl = 0;
-      *s0=data10(n1,n2,tau); break;
+      *s0=data10(N,n1,n2,tau); break;
     default: /* case 11: */
-      *s0=data11(n1,tau); break;
+      *s0=data11(N,n1,tau); break;
   }
   *ss = lirecoset(n1,n2,N);
   if (fl) lireresolv(n1,n2,N,R); else { R->a = NULL; R->nm = n1; R->nv = n2; }
@@ -2417,13 +2316,15 @@ init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
 static long
 isin_G_H(buildroot *BR, long n1, long n2)
 {
+  const long N = BR->N;
   PERM s0, ww;
   GROUP ss,tau;
   resolv R;
 
-  init_isin(n1,n2, &tau, &ss, &s0, &R);
+  init_isin(N,n1,n2, &tau, &ss, &s0, &R);
   ww = check_isin(BR, &R, tau, ss);
-  pari_free(ss); pari_free(tau); if (R.a) pari_free(R.a);
+  pari_free(ss);
+  if (R.a) pari_free(R.a);
   if (ww)
   {
     long z[NMAX+1], i , j, l = lg(BR->r);
@@ -2440,14 +2341,15 @@ isin_G_H(buildroot *BR, long n1, long n2)
       for (j=1; j<=N; j++) z[j] = p1[(int)s0[j]];
       for (j=1; j<=N; j++) p1[j] = z[j];
     }
-    pari_free(s0); return n2;
+    pari_free(s0);
+    pari_free(tau); return n2;
   }
   if (DEBUGLEVEL)
   {
     fprintferr("    Output of isin_%ld_G_H(%ld,%ld): not included.\n",N,n1,n2);
     flusherr();
   }
-  return 0;
+  pari_free(tau); return 0;
 }
 
 GEN
@@ -2475,7 +2377,7 @@ polgaloisnamesbig(long n, long k)
 GEN
 galoisbig(GEN pol, long prec)
 {
-  GEN dpol, res;
+  GEN res;
   long *tab, t = 0;
   pari_sp av = avma;
   long tab8[]={0,
@@ -2490,9 +2392,8 @@ galoisbig(GEN pol, long prec)
     200,240,320,320,320,360,400,400,640,720, 720,720,800,960,1440,
     1920,1920,1920,3840,7200,14400,14400,28800,1814400,3628800};
   long tab11[]={0, 11,22,55,110,660,7920,19958400,39916800};
-
-  N = degpol(pol); dpol = ZX_disc(pol); EVEN = Z_issquare(dpol);
-  ID[0] = (IND)N;
+  GEN dpol = ZX_disc(pol);
+  long N = degpol(pol), EVEN = Z_issquare(dpol);
 
   if (DEBUGLEVEL)
   {
@@ -2501,10 +2402,10 @@ galoisbig(GEN pol, long prec)
   }
   switch(N)
   {
-    case 8: t = galoismodulo8(pol,dpol);  tab=tab8; break;
-    case 9: t = galoismodulo9(pol,dpol);  tab=tab9; break;
-    case 10:t = galoismodulo10(pol,dpol); tab=tab10; break;
-    case 11:t = galoismodulo11(pol,dpol); tab=tab11; break;
+    case 8: t = galoismodulo8(EVEN,pol,dpol);  tab=tab8; break;
+    case 9: t = galoismodulo9(EVEN,pol,dpol);  tab=tab9; break;
+    case 10:t = galoismodulo10(EVEN,pol,dpol); tab=tab10; break;
+    case 11:t = galoismodulo11(EVEN,pol,dpol); tab=tab11; break;
     default: pari_err(impl,"galois in degree > 11");
       return NULL; /* not reached */
   }
@@ -2522,15 +2423,16 @@ galoisbig(GEN pol, long prec)
     BR.p = pol;
     BR.pr = (long)(cauchy_bound(pol) / (LOG2 * BITS_IN_LONG)) + prec;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2;
+    BR.N = N;
     BR.r = cget1(N+1, t_VEC);
     r = gclone ( cleanroots(BR.p, BR.prmax) );
     appendL(BR.r, r); preci(r, BR.pr);
     switch(N)
     {
-      case  8: t = closure8(&BR); break;
-      case  9: t = closure9(&BR); break;
-      case 10: t = closure10(&BR); break;
-      case 11: t = closure11(&BR); break;
+      case  8: t = closure8(EVEN, &BR); break;
+      case  9: t = closure9(EVEN, &BR); break;
+      case 10: t = closure10(EVEN, &BR); break;
+      case 11: t = closure11(EVEN, &BR); break;
     }
     for (i = 1; i < lg(BR.r); i++) gunclone(gel(BR.r,i));
   }
