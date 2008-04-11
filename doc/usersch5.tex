@@ -3478,6 +3478,9 @@ rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
 \fun{long}{RgX_equal}{GEN x, GEN y} returns $1$ if $x$ and $y$ have the same
 degree and their coefficients are equal (as per \tet{gequal}). Variable
 numbers are not checked.
+
+\fun{long}{RgX_equal_var}{GEN x, GEN y} returns $1$ if $x$ and $y$
+have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 \smallskip
 
 \fun{GEN}{RgXQ_mul}{GEN y, GEN x, GEN T}

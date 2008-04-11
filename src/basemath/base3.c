@@ -624,9 +624,6 @@ coltoalg(GEN nf, GEN x)
   return mkpolmod( coltoliftalg(nf, x), gel(nf,1) );
 }
 
-static long
-RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
-
 GEN
 basistoalg(GEN nf, GEN x)
 {

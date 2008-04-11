@@ -264,7 +264,7 @@ nfroots(GEN nf,GEN pol)
     }
     return gerepilecopy(av, mkvec(A));
   }
-  A = lift_intern( fix_relative_pol(T,pol,0) ) ;
+  A = fix_relative_pol(T,pol,1) ;
   if (degpol(T) == 1)
     return gerepileupto(av, nfrootsQ(simplify_i(A)));
 
@@ -351,32 +351,43 @@ nf_pol_lift(GEN pol, GEN bound, nfcmbf_t *T)
 GEN
 nffactor(GEN nf,GEN pol)
 {
-  GEN A, g, y, ex, rep, T, den;
-  pari_sp av;
+  GEN A, g, y, ex, T, den, rep = cgetg(3, t_MAT);
+  pari_sp av = avma;
   long d;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
   if (typ(pol) != t_POL) pari_err(notpoler,"nffactor");
-  if (varncmp(varn(pol), varn(T)) >= 0)
-    pari_err(talker,"polynomial variable must have highest priority in nffactor");
-
-  d = degpol(pol);
-  if (d == 0) return trivfact();
-  rep = cgetg(3, t_MAT); av = avma;
-  if (d == 1)
-  {
-    gel(rep,1) = mkcol( gcopy(pol) );
-    gel(rep,2) = mkcol( gen_1 );
-    return rep;
+  A = Q_primpart( fix_relative_pol(T,pol,1) );
+  d = degpol(A);
+  if (d <= 0) {
+    avma = av;
+    if (d == 0) /* trivfact() */
+      y = ex = cgetg(1, t_COL);
+    else { /* 0^1 */
+      y = mkcol( zeropol(varn(pol)) );
+      ex = mkcol( gen_1 );
+    }
+    gel(rep,1) = y;
+    gel(rep,2) = ex; return rep;
+  }
+  if (d == 1) {
+    int t2 = (typ(gel(A,2)) == t_POL);
+    int t3 = (typ(gel(A,3)) == t_POL);
+    A = gerepilecopy(av, A);
+    if (t2 || t3)
+    {
+      T = ZX_copy(T);
+      if (t2) gel(A,2) = mkpolmod(gel(A,2), T);
+      if (t3) gel(A,3) = mkpolmod(gel(A,3), T);
+    }
+    gel(rep,1) = mkcol(A);
+    gel(rep,2) = mkcol(gen_1); return rep;
   }
 
-  A = lift_intern( fix_relative_pol(T,pol,0) );
-  if (degpol(T) == 1)
-    return gerepileupto(av, ZX_factor(simplify_i(A)));
+  if (degpol(T) == 1) return gerepileupto(av, ZX_factor(A));
 
-  A = Q_primpart(A);
   den = get_den(&nf, T);
   g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
 
@@ -1635,7 +1646,9 @@ rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
 
   nf=checknf(nf); vnf = varn(nf[1]);
   if (v<0) v = 0;
-  T = fix_relative_pol(gel(nf,1),T,1);
+  T = fix_relative_pol(gel(nf,1),T,0);
+  if (!gcmp1(leading_term(T)))
+    pari_err(impl,"rnfcharpoly for non-monic polynomial");
   if (typ(alpha) == t_POLMOD) alpha = gel(alpha, 2);
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
     return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), degpol(T)));

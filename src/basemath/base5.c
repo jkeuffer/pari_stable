@@ -152,18 +152,12 @@ GEN
 rnfinitalg(GEN nf, GEN pol, long prec)
 {
   pari_sp av = avma;
-  long vpol;
   GEN rnf, bas, D,d,f, B;
 
-  if (typ(pol)!=t_POL) pari_err(notpoler,"rnfinitalg");
-  nf = checknf(nf); vpol = varn(pol);
-  pol = fix_relative_pol(gel(nf,1),pol,0);
-  if (varncmp(vpol, varn(nf[1])) >= 0)
-    pari_err(talker,"main variable must be of higher priority in rnfinitalg");
-
-  bas = rnfallbase(nf,pol, &D,&d, &f);
+  nf = checknf(nf);
+  bas = rnfallbase(nf,&pol, &D,&d, &f);
   B = matbasistoalg(nf,gel(bas,1));
-  gel(bas,1) = lift_if_rational( RgM_to_RgXV(B,vpol) );
+  gel(bas,1) = lift_if_rational( RgM_to_RgXV(B,varn(pol)) );
 
   rnf = cgetg(13, t_VEC);
   gel(rnf,1) = pol;

@@ -36,6 +36,8 @@ RgX_equal(GEN x, GEN y)
     if (!gequal(gel(x,i),gel(y,i))) return 0;
   return 1;
 }
+long
+RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
 
 /********************************************************************/
 /**                                                                **/

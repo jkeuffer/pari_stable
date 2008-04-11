@@ -169,7 +169,7 @@ GEN    primedec_apply_kummer(GEN nf,GEN pol,long e,GEN p);
 GEN    prodid(GEN nf, GEN I);
 GEN    pr_norm(GEN pr);
 GEN    quadhilbertreal(GEN D, long prec);
-GEN    rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
+GEN    rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pfi);
 GEN    rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
 GEN    sqr_by_tab(GEN tab, GEN x);

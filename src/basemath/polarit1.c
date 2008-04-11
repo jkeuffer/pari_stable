@@ -2176,9 +2176,8 @@ polfnf(GEN a, GEN T)
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
-  A = primpart( lift_intern(fix_relative_pol(T,a,0)) );
-  T = Q_primpart(T);
-  tmonic = is_pm1(leading_term(T));
+  T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
+  A = Q_primpart( fix_relative_pol(T,a,1) );
 
   dent = tmonic? indexpartial(T, NULL): ZX_disc(T);
   unt = mkpolmod(gen_1,T);

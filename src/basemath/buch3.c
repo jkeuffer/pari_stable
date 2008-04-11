@@ -1408,14 +1408,17 @@ rnfnormgroup(GEN bnr, GEN polrel)
   checkbnr(bnr); bnf=gel(bnr,1); raycl=gel(bnr,5);
   nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
   polrel = fix_relative_pol(gel(nf,1),polrel,1);
-  if (typ(polrel)!=t_POL) pari_err(typeer,"rnfnormgroup");
+  if (!gcmp1(leading_term(polrel)))
+    pari_err(impl,"rnfnormgroup for non-monic polynomial");
+
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = utoipos(reldeg);
-  group = diagonal_i(FpC_red(gel(raycl,2), greldeg));
+  group = FpC_red(gel(raycl,2), greldeg);
   for (i=1; i<lg(group); i++)
-    if (!signe(gcoeff(group,i,i))) gcoeff(group,i,i) = greldeg;
-  detgroup = ZM_det_triangular(group);
+    if (!signe(gel(group,i))) gel(group,i) = greldeg;
+  detgroup = detcyc(group, &i/*junk*/);
+  group = diagonal_i(group);
   k = cmpiu(detgroup,reldeg);
   if (k < 0)
     pari_err(talker,"not an Abelian extension in rnfnormgroup?");
@@ -1528,17 +1531,16 @@ GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   pari_sp av = avma;
-  GEN nf, module, bnr, group, p1, pol2;
+  GEN nf, module, bnr, group, den, pol2, D, d;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
-  p1 = unifpol(nf, polrel, t_COL);
-  pol2 = RgX_rescale(polrel, Q_denom(p1));
+  den = Q_denom( unifpol(nf, polrel, t_COL) );
+  pol2 = RgX_rescale(polrel, den);
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
 
-  pol2 = fix_relative_pol(gel(nf,1), pol2, 1);
-  module = mkvec2(gel(rnfdiscf(nf, pol2),1),
-		  const_vec(nf_get_r1(nf), gen_1));
+  (void)rnfallbase(nf,&pol2, &D, &d, NULL);
+  module = mkvec2(D, const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);
   if (!group) { avma = av; return gen_0; }

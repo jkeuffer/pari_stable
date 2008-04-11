@@ -2655,43 +2655,50 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 }
 
 static void
-check_pol(GEN x, long v)
+check_pol(GEN *px, long v)
 {
-  long i,tx, lx = lg(x);
-  if (varn(x) != v)
-    pari_err(talker,"incorrect variable in rnf function");
+  GEN x = *px;
+  long i, lx = lg(x);
+  if (varn(x) != v) pari_err(talker,"incorrect variable in rnf function");
   for (i=2; i<lx; i++)
   {
-    tx = typ(x[i]);
-    if (!is_const_t(tx)) pari_err(talker,"incorrect coeff in rnf function");
+    long tx = typ(x[i]);
+    if (!is_rational_t(tx)) pari_err(talker,"incorrect coeff in rnf function");
   }
+  if (lx == 2) *px = gen_0;
+  if (lx == 3) *px = gel(x,2);
 }
 
-/* check whether pol is a polynomials with coeffs in the number field defined
- * by the absolute equation Tnf(y) = 0 */
+/* check whether P is a polynomials with coeffs in the number field defined
+ * by the absolute equation T(y) = 0 */
 GEN
-fix_relative_pol(GEN Tnf, GEN pol, int chk_lead)
+fix_relative_pol(GEN T, GEN P, int lift)
 {
-  long i, vnf = varn(Tnf), lx = lg(pol);
-  if (typ(pol) != t_POL || varncmp(varn(pol), vnf) >= 0)
+  long i, vT = varn(T), lP = lg(P);
+  GEN Q = cgetg(lP, t_POL);
+  if (typ(P) != t_POL || varncmp(varn(P), vT) >= 0)
     pari_err(talker,"incorrect polynomial in rnf function");
-  pol = shallowcopy(pol);
-  for (i=2; i<lx; i++)
-    switch(typ(pol[i]))
+  Q[1] = P[1];
+  for (i=2; i<lP; i++)
+  {
+    GEN c = gel(P,i);
+    switch(typ(c))
     {
       case t_INT: case t_FRAC: break;
       case t_POL:
-	check_pol(gel(pol,i), vnf);
-	gel(pol,i) = gmodulo(gel(pol,i), Tnf); break;
+        c = RgX_rem(c,T);
+	check_pol(&c, vT);
+	if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
+        break;
       case t_POLMOD:
-	if (!gequal(gmael(pol,i,1), Tnf)) pari_err(consister,"rnf function");
+	if (!RgX_equal_var(gel(c,1), T)) pari_err(consister,"rnf function");
+        if (lift) c = gel(c,2);
 	break;
       default: pari_err(typeer, "rnf function");
     }
-
-  if (chk_lead && !gcmp1(leading_term(pol)))
-    pari_err(impl,"non-monic relative polynomials");
-  return pol;
+    gel(Q,i) = c;
+  }
+  return normalizepol_i(Q, lP);
 }
 
 /* determinant of the trace pairing */
@@ -2720,13 +2727,16 @@ get_d(GEN nf, GEN pol, GEN A)
  * Returns a pseudo-basis [A,I] of Z_L, set (D,d) to the relative
  * discriminant, and f to the index-ideal */
 GEN
-rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
+rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 {
   long i, n, N, l, *ep;
-  GEN p1, A, nfT, P, id, I, z, d, D, disc;
+  GEN p1, A, nfT, P, id, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = gel(nf,1);
-  pol = fix_relative_pol(nfT,pol,1);
+  pol = fix_relative_pol(nfT,pol,0);
+  if (!gcmp1(leading_term(pol)))
+    pari_err(impl,"non-monic relative polynomials");
+
   N = degpol(nfT);
   n = degpol(pol);
   disc = discsr(pol); pol = lift(pol);
@@ -2763,6 +2773,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
     D = idealpow(nf,D,gen_2);
   }
   p1 = core2partial(Q_content(d), 0);
+  *ppol = pol;
   *pd = gdiv(d, sqri(gel(p1,2)));
   *pD = idealmul(nf,D,d); return z;
 }
@@ -2771,7 +2782,7 @@ GEN
 rnfpseudobasis(GEN nf, GEN pol)
 {
   pari_sp av = avma;
-  GEN D, d, y = cgetg(5, t_VEC), z = rnfallbase(nf,pol, &D, &d, NULL);
+  GEN D, d, y = cgetg(5, t_VEC), z = rnfallbase(nf,&pol, &D, &d, NULL);
   y[1] = z[1];
   y[2] = z[2];
   gel(y,3) = D;
@@ -2782,7 +2793,7 @@ GEN
 rnfdiscf(GEN nf, GEN pol)
 {
   pari_sp av = avma;
-  GEN D, d; (void)rnfallbase(nf,pol, &D, &d, NULL);
+  GEN D, d; (void)rnfallbase(nf,&pol, &D, &d, NULL);
   return gerepilecopy(av, mkvec2(D,d));
 }
 
