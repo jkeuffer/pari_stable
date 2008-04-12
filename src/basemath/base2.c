@@ -2873,28 +2873,23 @@ rnfdet0(GEN nf, GEN x, GEN y)
 
 /* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,
    t in a^-1 such that xt-yz=1. In the present version, z is in Z. */
-static GEN
-nfidealdet1(GEN nf, GEN a, GEN b)
+static void
+nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
 {
-  pari_sp av = avma;
-  GEN x,p1,res,u,v,da,db;
+  GEN x, uv, y, da, db;
 
   a = idealinv(nf,a);
   a = Q_remove_denom(a, &da);
   b = Q_remove_denom(b, &db);
   x = idealcoprime(nf,a,b);
-  p1 = idealaddtoone(nf, idealmul(nf,x,a), b);
-  u = gel(p1,1);
-  v = gel(p1,2);
+  uv = idealaddtoone(nf, idealmul(nf,x,a), b);
+  y = gel(uv,2);
   if (da) x = gmul(x,da);
-  if (db) v = gdiv(v,db);
-
-  res = cgetg(5,t_VEC);
-  gel(res,1) = x;
-  gel(res,2) = v;
-  gel(res,3) = db ? negi(db): gen_m1;
-  gel(res,4) = element_div(nf, u, gel(res,1));
-  return gerepilecopy(av,res);
+  if (db) y = gdiv(y,db);
+  *px = x;
+  *py = y;
+  *pz = db ? negi(db): gen_m1;
+  *pt = element_div(nf, gel(uv,1), x);
 }
 
 static GEN
@@ -2941,11 +2936,14 @@ rnfsteinitz(GEN nf, GEN order)
     }
     else
     {
-      p1 = nfidealdet1(nf,a,b);
-      gel(A,i) = gadd(element_mulvec(nf, gel(p1,1), c1),
-		      element_mulvec(nf, gel(p1,2), c2));
-      gel(A,i+1) = gadd(element_mulvec(nf, gel(p1,3), c1),
-			element_mulvec(nf, gel(p1,4), c2));
+      pari_sp av2 = avma;
+      GEN x, y, z, t;
+      nfidealdet1(nf,a,b, &x,&y,&z,&t);
+      x = RgC_add(element_mulvec(nf, x, c1), element_mulvec(nf, y, c2));
+      y = RgC_add(element_mulvec(nf, z, c1), element_mulvec(nf, t, c2));
+      gerepileall(av2, 2, &x,&y);
+      gel(A,i) = x;
+      gel(A,i+1) = y;
       gel(I,i) = Id;
       gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &p1);
       if (p1) gel(A,i+1) = element_mulvec(nf, p1,gel(A,i+1));
