@@ -2730,7 +2730,7 @@ GEN
 rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 {
   long i, n, N, l, *ep;
-  GEN p1, A, nfT, P, id, I, z, d, D, disc, pol = *ppol;
+  GEN A, nfT, P, id, I, z, d, D, disc, pol = *ppol;
 
   nf = checknf(nf); nfT = gel(nf,1);
   pol = fix_relative_pol(nfT,pol,0);
@@ -2772,10 +2772,13 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
     if (pf) *pf = idealinv(nf, D);
     D = idealpow(nf,D,gen_2);
   }
-  p1 = core2partial(Q_content(d), 0);
-  *ppol = pol;
-  *pd = gdiv(d, sqri(gel(p1,2)));
-  *pD = idealmul(nf,D,d); return z;
+  if (pd)
+  {
+    GEN f = core2partial(Q_content(d), 0);
+    *pd = gdiv(d, sqri(gel(f,2)));
+  }
+  *pD = idealmul(nf,D,d);
+  *ppol = pol; return z;
 }
 
 GEN

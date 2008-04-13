@@ -1487,12 +1487,11 @@ liftpol(GEN pol, GEN q)
 static int
 rnf_is_abelian(GEN nf, GEN pol)
 {
-  GEN modpr, pr, T, pp, ro, nfL, eq, C, z, a, sig;
+  GEN modpr, pr, T, pp, ro, nfL, C, z, a, sig, eq = rnfequation2(nf,pol);
   long i, j, l, v = varn(nf[1]);
   ulong p, k, ka;
 
-  eq = rnfequation2(nf,pol);
-  C =   shallowcopy(gel(eq,1)); setvarn(C, v);
+  C = gel(eq,1); setvarn(C, v);
   a = lift_intern(gel(eq,2)); setvarn(a, v); /* root of nf[1] */
   z = nfrootsall_and_pr(C, liftpol(pol, a));
   if (!z) return 0;
@@ -1531,15 +1530,15 @@ GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   pari_sp av = avma;
-  GEN nf, module, bnr, group, den, pol2, D, d;
+  GEN nf, module, bnr, group, den, pol2, D;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
   den = Q_denom( unifpol(nf, polrel, t_COL) );
-  pol2 = RgX_rescale(polrel, den);
+  pol2 = is_pm1(den)? polrel: RgX_rescale(polrel, den);
   if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
 
-  (void)rnfallbase(nf,&pol2, &D, &d, NULL);
+  (void)rnfallbase(nf,&pol2, &D, NULL, NULL);
   module = mkvec2(D, const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);
