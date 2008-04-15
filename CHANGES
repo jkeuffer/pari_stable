@@ -119,6 +119,8 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    34- Vecrev(x) now equivalent to extract(Vec(x), "-1..1") [was only for t_POL]
    35- allow t_COMPLEX as well as t_QUAD in ellpow
    36- [library] rename isfundamental -> Z_isfundamental
+   37- we used to have Set(1) == Set("1") ( = ["1"] ). Now the latter returns
+       ["\"1\""] (the Set whose element evaluate to the character string "1")
 
   Added
     1- library function gpcalloc
