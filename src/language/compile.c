@@ -1232,8 +1232,10 @@ genclosure(entree *ep)
     case PPdefaultmulti:
       switch(c)
       {
-      case 'M':
+      case 'G':
+        return NULL;
       case 'L':
+      case 'M':
         op_push(OCpushlong,strtol(q+1,NULL,10));
         op_push(OCdefaultitos,-index);
         break;
