@@ -999,6 +999,7 @@ lllint_knapsack_inplace(GEN x, long D, GEN *ptB)
 GEN
 matkerint0(GEN x, long flag)
 {
+  if (typ(x) != t_MAT) pari_err(typeer,"matkerint");
   switch(flag)
   {
     case 0: return kerint(x);
