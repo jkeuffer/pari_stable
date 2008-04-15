@@ -1205,6 +1205,7 @@ hilii(GEN x, GEN y, GEN p)
 
   if (signe(p)<=0)
     return (signe(x)<0 && signe(y)<0)? -1: 1;
+  if (is_pm1(p)) pari_err(talker,"p = 1 in hilbert()");
   av = avma;
   a = odd(Z_pvalrem(x,p,&u));
   b = odd(Z_pvalrem(y,p,&v));

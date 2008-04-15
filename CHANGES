@@ -66,6 +66,7 @@ BA 29- missing GC in the leftrightpow functions
    60- nffactor(nfinit(y),x*y)
        nffactor(nfinit(y),x^2*y+1)
        nffactor(nfinit(y),x^2*y)  --> errors or SEGV. [#769]
+   61- hilbert(1,1,1) --> oo loop [#770]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
