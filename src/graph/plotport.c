@@ -253,26 +253,23 @@ check_rect_init(long ne)
   return e;
 }
 
+static long
+initrect_get_arg(GEN x, long flag, long *dft)
+{ /* FIXME: gcmp0(x) undocumented backward compatibility hack */
+  if (!x || gcmp0(x) || flag) { PARI_get_plot(0); return *dft - 1; }
+  if (typ(x) != t_INT) pari_err(typeer, "initrect");
+  return itos(x);
+}
 void
 initrect_gen(long ne, GEN x, GEN y, long flag)
 {
   long xi, yi;
-  if (flag) {
-    double xd = gtodouble(x), yd = gtodouble(y);
 
-    PARI_get_plot(0);
-    xi = pari_plot.width - 1;
-    yi = pari_plot.height - 1;
-    if (xd) xi = DTOL(xd*xi);
-    if (yd) yi = DTOL(yd*yi);
-  } else {
-    if (typ(x) != t_INT) pari_err(typeer, "initrect");
-    if (typ(y) != t_INT) pari_err(typeer, "initrect");
-    xi = itos(x);
-    yi = itos(y);
-    if (!xi || !yi) PARI_get_plot(0);
-    if (!xi) xi = pari_plot.width - 1;
-    if (!yi) yi = pari_plot.height - 1;
+  xi = initrect_get_arg(x, flag, &pari_plot.width);
+  yi = initrect_get_arg(y, flag, &pari_plot.height);
+  if (flag) {
+    if (x) xi = DTOL(xi * gtodouble(x));
+    if (y) yi = DTOL(yi * gtodouble(y));
   }
   initrect(ne, xi, yi);
 }

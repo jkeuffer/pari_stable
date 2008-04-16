@@ -63,6 +63,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     in order to conform to standard printf specifications.
   - all LLL variants now use an implementation of NGuyen & Stehle's algorithm
     The LLL-reduced bases will be different from previous versions.
+  - plotinit: change the way default arguments are evaluated (omit dimension,
+    instead of interpreting 0 in a special way) 
 
 * Specific to the PARI library:
 ===============================
