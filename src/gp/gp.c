@@ -210,19 +210,6 @@ kill_all_buffers(Buffer *B)
   }
 }
 
-static void
-jump_to_given_buffer(Buffer *buf)
-{
-  Buffer *b;
-  while ( (b = current_buffer) )
-  {
-    if (b == buf) break;
-    pop_buffer();
-  }
-  if (!b || !b->env) longjmp(GP_DATA->env, 0);
-  longjmp(b->env, 0);
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                             HELP                               **/
@@ -1240,6 +1227,15 @@ next_expr(char *t)
   }
 }
 
+static Buffer *
+filtered_buffer(filtre_t *F)
+{
+  Buffer *b = new_buffer();
+  init_filtre(F, b);
+  push_stack(&bufstack, (void*)b);
+  return b;
+}
+
 static void
 gp_initrc(growarray A, char *path)
 {
@@ -1250,8 +1246,7 @@ gp_initrc(growarray A, char *path)
   VOLATILE long c = 0;
 
   if (!file) return;
-  b = new_buffer();
-  init_filtre(&F, b);
+  b = filtered_buffer(&F);
   for(;;)
   {
     if (setjmp(GP_DATA->env)) fprintferr("...skipping line %ld.\n", c);
@@ -1298,7 +1293,7 @@ gp_initrc(growarray A, char *path)
       }
     }
   }
-  delete_buffer(b);
+  pop_buffer();
   if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
   fclose(file);
 }
@@ -1472,11 +1467,8 @@ gp_main_loop(int ismain)
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
   VOLATILE pari_sp av = avma;
-  Buffer *b = new_buffer();
   filtre_t F;
-
-  init_filtre(&F, b);
-  push_stack(&bufstack, (void*)b);
+  Buffer *b = filtered_buffer(&F);
   for(;;)
   {
     if (ismain)
@@ -1545,30 +1537,16 @@ int
 break_loop(long numerr)
 {
   static FILE *oldinfile = NULL;
-  static Buffer *b = NULL;
-  VOLATILE int go_on = 0;
-  char *t;
   filtre_t F;
-
-  if (b) jump_to_given_buffer(b);
-  b = new_buffer();
-  push_stack(&bufstack, (void*)b);
-
-  t = NULL;
-  if (bufstack->prev)
-  {
-    Buffer *oldb = (Buffer*)bufstack->prev->value;
-    t = oldb->buf;
-    /* something fishy, probably a ^C, or we overran analyseur */
-  }
-  oldinfile = pari_infile;
-  init_filtre(&F, b);
+  Buffer *b = filtered_buffer(&F);
+  VOLATILE int go_on = 0;
 
   term_color(c_ERR); pari_putc('\n');
   errcontext("Break loop (type 'break' or Control-d to go back to GP)", NULL, NULL);
   term_color(c_NONE);
   if (numerr == siginter)
     pari_puts("[type <Return> in empty line to continue]\n");
+  oldinfile = pari_infile;
   pari_infile = stdin;
   for(;;)
   {
@@ -1655,12 +1633,10 @@ extern0(const char *s)
 GEN
 input0(void)
 {
-  Buffer *b = new_buffer();
   filtre_t F;
+  Buffer *b = filtered_buffer(&F);
   GEN x;
 
-  init_filtre(&F, b);
-  push_stack(&bufstack, (void*)b);
   while (! get_line_from_file(DFT_INPROMPT,&F,pari_infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(1); }
   x = readseq(b->buf);
