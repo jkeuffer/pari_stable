@@ -1226,7 +1226,7 @@ genclosure(entree *ep)
         op_push(OCvarn,-index);
         break;
       default:
-        pari_err(talker,"Unknown prototype code `%c' for `%s'",c,ep->name);
+        pari_err(talker,"Unknown prototype code `D%c' for `%s'",c,ep->name);
       }
       break;
     case PPdefaultmulti:
@@ -1244,7 +1244,8 @@ genclosure(entree *ep)
         op_push(OCtostr,-index);
         break;
       default:
-        pari_err(talker,"Unknown prototype code `%c' for `%s'",c,ep->name);
+        pari_err(talker,
+                 "Unknown prototype code `D...,%c,' for `%s'",c,ep->name);
       }
       break;
     case PPstar:
