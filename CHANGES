@@ -71,7 +71,7 @@ BA 29- missing GC in the leftrightpow functions
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
     2- contfrac(x, b): no longer allow (undocumented) type t_MAT for b
-    3- builtin-in GP functions can now be used as closures.
+BA  3- builtin-in GP functions can now be used as closures.
     4- allow nffactor(t_POL, t_POL), nfroots(t_POL, t_POL) [ necessary when
        nf.disc could not be factored and addprimes() would have to be used ]
     5- removed undocumented interface FpM_mul(x,y,NULL), and analogously for
