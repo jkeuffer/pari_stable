@@ -3122,16 +3122,16 @@ PRECPB:
     gerepileall(av2, 4, &W,&C,&B,&dep);
     cache.chk = cache.last;
     need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-  if (need)
-  { /* dependent rows */
-    if (need > 5)
-    {
-      if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
-      L_jid = vecslice(F.perm, 1, need);
-      vecsmall_sort(L_jid); jid = 0;
+    if (need)
+    { /* dependent rows */
+      if (need > 5)
+      {
+        if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
+        L_jid = vecslice(F.perm, 1, need);
+        vecsmall_sort(L_jid); jid = 0;
+      }
+      goto MORE;
     }
-    goto MORE;
-  }
   }
   need = 1;
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
