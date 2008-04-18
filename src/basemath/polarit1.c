@@ -2195,7 +2195,7 @@ polfnf(GEN a, GEN T)
     G = ZX_ZXY_resultant(T, G);
   }
   /* n guaranteed to be squarefree */
-  fa = ZX_DDF(Q_primpart(n),0); lx = lg(fa);
+  fa = ZX_DDF(Q_primpart(n)); lx = lg(fa);
   P = cgetg(lx,t_COL);
   E = cgetg(lx,t_COL);
   if (lx == 2)
