@@ -496,7 +496,7 @@ nfissquarefree(GEN nf, GEN x)
 GEN
 rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
 {
-  long k, lA, lB;
+  long lA, lB;
   GEN nf, C;
 
   A = get_nfpol(A, &nf);       lA = lg(A);
@@ -504,10 +504,8 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
   if (lA<=3 || lB<=3) pari_err(constpoler,"rnfequation");
 
   RgX_check_ZX(A,"rnfequation");
-  B = primpart(lift_intern(B));
+  B = Q_primpart(B);
   RgX_check_ZXY(B,"rnfequation");
-  for (k=2; k<lB; k++)
-    if (lg(B[k]) >= lA) gel(B,k) = grem(gel(B,k),A);
 
   if (!nfissquarefree(A,B))
     pari_err(talker,"inseparable relative equation in rnfequation");
@@ -991,11 +989,10 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   }
   else
   {
-    GEN rel, eq = rnfequation2(nf,relpol);
-    a   = gel(eq,3);
-    rel = deg1pol_i(gen_1, mkpolmod(deg1pol_i(negi(a),gen_0,varn(T)), T), v);
-    rel = poleval(relpol, rel);
-
+    GEN eq = rnfequation2(nf,relpol), rel;
+    a = gel(eq,3);
+    /* relpol( X + Mod(-a y, T(y)) )*/
+    rel = RgXQX_translate(relpol, deg1pol_i(negi(a),gen_0,varn(T)), T);
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {
@@ -1007,14 +1004,11 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   pol = gel(red,1);
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Zs\n",pol);
   if (flag & nf_ABSOLUTE)
-  {
-    if (flag & nf_ADDZK) pol = mkvec2(pol, gel(red,2));
-    return gerepilecopy(av, pol);
-  }
+    return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 
-  elt = eltabstorel(gel(red,2), T, relpol, a);
+  elt = RgXQX_translate(gel(red,2), deg1pol_i(a,gen_0,varn(T)), T);
   pol = rnfcharpoly(nf,relpol,elt,v);
   if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
-  elt = mkpolmod(modreverse_i(gel(elt,2),gel(elt,1)), pol);
-  return gerepilecopy(av, mkvec2(pol, elt));
+  elt = modreverse_i(elt,relpol);
+  return gerepilecopy(av, mkvec2(pol, mkpolmod(elt,pol)));
 }

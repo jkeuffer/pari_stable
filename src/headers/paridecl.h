@@ -274,6 +274,7 @@ GEN     RgXQX_mul(GEN x,GEN y,GEN T);
 GEN     RgXQX_pseudorem(GEN x, GEN y, GEN T);
 GEN     RgXQX_red(GEN P, GEN T);
 GEN     RgXQX_sqr(GEN x, GEN T);
+GEN     RgXQX_translate(GEN P, GEN c, GEN T);
 GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);
 GEN     RgXQ_norm(GEN x, GEN T);
@@ -313,6 +314,7 @@ GEN     RgX_sqr(GEN x);
 GEN     RgX_sqrspec(GEN a, long na);
 GEN     RgX_sub(GEN x, GEN y);
 GEN     RgX_to_RgV(GEN x, long N);
+GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
 int     is_rational(GEN x);
 

@@ -143,6 +143,80 @@ RgX_inflate(GEN x0, long d)
   return y;
 }
 
+/* return P(X + c) using destructive Horner, optimize for c = 1,-1 */
+GEN
+RgX_translate(GEN P, GEN c)
+{
+  pari_sp av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
+
+  if (!signe(P) || gcmp0(c)) return gcopy(P);
+  Q = shallowcopy(P);
+  R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
+  if (gcmp1(c))
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = gadd(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
+	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  else if (gcmp_1(c))
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = gsub(R[k], R[k+1]);
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
+	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  else
+  {
+    for (i=1; i<=n; i++)
+    {
+      for (k=n-i; k<n; k++) R[k] = gadd(R[k], gmul(c, R[k+1]));
+      if (low_stack(lim, stack_lim(av,2)))
+      {
+	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL, i = %ld/%ld", i,n);
+	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+      }
+    }
+  }
+  return gerepilecopy(av, Q);
+}
+/* return lift( P(X + c) ) using Horner, c in R[y]/(T) */
+GEN
+RgXQX_translate(GEN P, GEN c, GEN T)
+{
+  pari_sp av = avma, lim;
+  GEN Q, *R;
+  long i, k, n;
+
+  if (!signe(P) || gcmp0(c)) return gcopy(P);
+  Q = shallowcopy(P);
+  R = (GEN*)(Q+2); n = degpol(P);
+  lim = stack_lim(av, 2);
+  for (i=1; i<=n; i++)
+  {
+    for (k=n-i; k<n; k++) R[k] = RgX_rem(gadd(R[k], gmul(c, R[k+1])), T);
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"RgXQX_translate, i = %ld/%ld", i,n);
+      Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
+    }
+  }
+  return gerepilecopy(av, Q);
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                          CONVERSIONS                           **/

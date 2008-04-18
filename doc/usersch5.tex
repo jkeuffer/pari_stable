@@ -3500,6 +3500,14 @@ have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 \fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
 
+\fun{GEN}{RgX_translate}{GEN P, GEN c} assume $c$ is a scalar or
+a polynomials whose main variable has lower priority than the main variable
+$X$ of $P$. Returns $P(X + c)$ (optimized for $c = \pm 1$).
+
+\fun{GEN}{RgXQX_translate}{GEN P, GEN c, GEN T} assume the main variable
+$X$ of $P$ has higher priority than the main variable $Y$ of $T$ and $c$.
+Return a lift of $P(X+\text{Mod}(c(Y), T(Y)))$.
+
 \fun{GEN}{RgXQC_red}{GEN z, GEN T} \kbd{z} a vector whose
 coefficients are \kbd{RgX}s (arbitrary \kbd{GEN}s in fact), reduce them to
 \kbd{RgXQ}s (applying \kbd{grem} coefficientwise) in a \typ{COL}.

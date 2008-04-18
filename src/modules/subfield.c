@@ -55,57 +55,6 @@ typedef struct _blockdata {
 static GEN print_block_system(blockdata *B, GEN Y, GEN BS);
 static GEN test_block(blockdata *B, GEN L, GEN D);
 
-/* return P(X + c) using destructive Horner, optimize for c = 1,-1 */
-GEN
-translate_pol(GEN P, GEN c)
-{
-  pari_sp av = avma, lim;
-  GEN Q, *R;
-  long i, k, n;
-
-  if (!signe(P) || gcmp0(c)) return gcopy(P);
-  Q = shallowcopy(P);
-  R = (GEN*)(Q+2); n = degpol(P);
-  lim = stack_lim(av, 2);
-  if (gcmp1(c))
-  {
-    for (i=1; i<=n; i++)
-    {
-      for (k=n-i; k<n; k++) R[k] = gadd(R[k], R[k+1]);
-      if (low_stack(lim, stack_lim(av,2)))
-      {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(1), i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
-      }
-    }
-  }
-  else if (gcmp_1(c))
-  {
-    for (i=1; i<=n; i++)
-    {
-      for (k=n-i; k<n; k++) R[k] = gsub(R[k], R[k+1]);
-      if (low_stack(lim, stack_lim(av,2)))
-      {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL(-1), i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
-      }
-    }
-  }
-  else
-  {
-    for (i=1; i<=n; i++)
-    {
-      for (k=n-i; k<n; k++) R[k] = gadd(R[k], gmul(c, R[k+1]));
-      if (low_stack(lim, stack_lim(av,2)))
-      {
-	if(DEBUGMEM>1) pari_warn(warnmem,"TR_POL, i = %ld/%ld", i,n);
-	Q = gerepilecopy(av, Q); R = (GEN*)Q+2;
-      }
-    }
-  }
-  return gerepilecopy(av, Q);
-}
-
 /* COMBINATORIAL PART: generate potential block systems */
 
 #define BIL 32 /* for 64bit machines also */
@@ -483,7 +432,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = gel(DATA,5);
-  if (!gcmp0(TR)) w1_Q = translate_pol(w1_Q, TR);
+  if (!gcmp0(TR)) w1_Q = RgX_translate(w1_Q, TR);
   return gdiv(w1_Q,den);
 }
 
@@ -692,7 +641,7 @@ compute_data(blockdata *B)
     if (DEBUGLEVEL>1) fprintferr("... update (translate) an existing DATA\n\n");
 
     gel(DATA,5) = TR;
-    pol = translate_pol(gel(DATA,1), gen_m1);
+    pol = RgX_translate(gel(DATA,1), gen_m1);
     l = lg(roo); p1 = cgetg(l, t_VEC);
     for (i=1; i<l; i++) gel(p1,i) = gadd(TR, gel(roo,i));
     roo = p1;
@@ -706,18 +655,18 @@ compute_data(blockdata *B)
     {
       if (degpol(interp[i]) > 0) /* do not turn pol_1(0) into gen_1 */
       {
-	p1 = translate_pol(gel(interp,i), gen_m1);
+	p1 = RgX_translate(gel(interp,i), gen_m1);
 	gel(interp,i) = FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-	p1 = translate_pol(gel(bezoutC,i), gen_m1);
+	p1 = RgX_translate(gel(bezoutC,i), gen_m1);
 	gel(bezoutC,i) = FpXX_red(p1, p);
       }
     }
     ff = cgetg(lff, t_VEC); /* copy, do not overwrite! */
     for (i=1; i<lff; i++)
-      gel(ff,i) = FpX_red(translate_pol(gel(S->ff,i), mTR), p);
+      gel(ff,i) = FpX_red(RgX_translate(gel(S->ff,i), mTR), p);
   }
   else
   {
