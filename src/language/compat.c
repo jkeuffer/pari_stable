@@ -55,7 +55,9 @@ rounderror(GEN x)
 }
 
 static GEN
-_factpol(GEN x, long t/*unused*/, long hint) {(void)t; return factpol(x,hint);}
+_factpol(GEN x, long t/*unused*/, long hint/*unused*/) {
+  (void)t; (void)hint; return QX_factor(x);
+}
 
 static void
 suppressed(void) {pari_err(talker,"this function no longer exists");}

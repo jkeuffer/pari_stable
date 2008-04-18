@@ -67,6 +67,7 @@ BA 29- missing GC in the leftrightpow functions
        nffactor(nfinit(y),x^2*y+1)
        nffactor(nfinit(y),x^2*y)  --> errors or SEGV. [#769]
    61- hilbert(1,1,1) --> oo loop [#770]
+   62- nffactor(nf, x+1/2) --> (x+1/2)^1 [ not normalized ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -185,6 +186,8 @@ BA 25- [ellap] Port of SEA algorithm from the ellsea GP package.
     8- obsolete library functions roots2 and rootsold are no longer public
     9- useless library function isnfscalar
    10- useless error code 'elliper1'
+   11- obsolete undocumented library function factpol()
+   12- library function combine_factors() is no longer public
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

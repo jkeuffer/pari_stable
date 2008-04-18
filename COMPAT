@@ -120,6 +120,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - obsolete library functions roots2 and rootsold are no longer public
   - rename factorpadic4 -> factorpadic, factorpadic2 now static
   - the "prec" parameter has disappeared in all floating point LLL various
+  - remove obsolete function factpol()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -348,7 +348,7 @@ int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
 double cauchy_bound(GEN p);
 GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
 int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
-GEN ZX_DDF(GEN x, long hint);
+GEN ZX_DDF(GEN x);
 GEN fact_from_DDF(GEN fa, GEN e, long n);
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN logmax_modulus_bound(GEN p);

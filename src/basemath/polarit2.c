@@ -640,7 +640,7 @@ factor_bound(GEN S)
 }
 
 /* Naive recombination of modular factors: combine up to maxK modular
- * factors, degree <= klim and divisible by hint
+ * factors, degree <= klim
  *
  * target = polynomial we want to factor
  * famod = array of modular factors.  Product should be congruent to
@@ -648,7 +648,7 @@ factor_bound(GEN S)
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 static GEN
 cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
-     long maxK, long klim,long hint)
+     long maxK, long klim)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   ulong spa_b, spa_bs2, Sbound;
@@ -712,7 +712,7 @@ nextK:
       degsofar[j] = curdeg;
       ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
     }
-    if (curdeg <= klim && curdeg % hint == 0) /* trial divide */
+    if (curdeg <= klim) /* trial divide */
     {
       GEN y, q, list;
       pari_sp av;
@@ -1224,8 +1224,8 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 }
 
 /* use van Hoeij's knapsack algorithm */
-GEN
-combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
+static GEN
+combine_factors(GEN target, GEN famod, GEN p, long klim)
 {
   GEN la, B, A, res, L, pa, pb, listmod;
   long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
@@ -1242,7 +1242,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Zs^%ld)", p,a);
-  L = cmbf(target, famod, A, p, a, b, maxK, klim, hint);
+  L = cmbf(target, famod, A, p, a, b, maxK, klim);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
 
   res     = gel(L,1);
@@ -1327,7 +1327,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
 /* Assume a squarefree, degree(a) > 0, a(0) != 0.
  * If fl != 0 look only for rational roots */
 static GEN
-DDF(GEN a, long hint, int fl)
+DDF(GEN a, int fl)
 {
   GEN lead, prime, famod, z, ap;
   const long da = degpol(a);
@@ -1338,7 +1338,6 @@ DDF(GEN a, long hint, int fl)
   pari_timer T, T2;
 
   if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
-  if (hint <= 0) hint = 1;
   nmax = da+1;
   chosenp = 0;
   lead = gel(a,da+2); if (gcmp1(lead)) lead = NULL;
@@ -1380,7 +1379,7 @@ DDF(GEN a, long hint, int fl)
     ti = TIMER(&T);
     fprintferr("Time setup: %ld\n", ti);
   }
-  z = combine_factors(a, famod, prime, da-1, hint);
+  z = combine_factors(a, famod, prime, da-1);
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", ti + TIMER(&T));
   return gerepilecopy(av, z);
@@ -1467,12 +1466,12 @@ poldeflate(GEN x, long *m)
 /* Distinct Degree Factorization (deflating first)
  * Assume x squarefree, degree(x) > 0, x(0) != 0 */
 GEN
-ZX_DDF(GEN x, long hint)
+ZX_DDF(GEN x)
 {
   GEN L;
   long m;
   x = poldeflate(x, &m);
-  L = DDF(x, hint, 0);
+  L = DDF(x, 0);
   if (m > 1)
   {
     GEN e, v, fa = factoru(m);
@@ -1488,7 +1487,7 @@ ZX_DDF(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), hint, 0));
+	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
       L = L2;
     }
   }
@@ -1545,26 +1544,35 @@ fact_from_DDF(GEN fa, GEN e, long n)
   return y;
 }
 
-/* Factor x in Z[t]. Assume all factors have degree divisible by hint */
-GEN
-factpol(GEN x, long hint)
+/* Factor x in Z[t] */
+static GEN
+ZX_factor_i(GEN x)
 {
-  pari_sp av = avma;
   GEN fa,ex,y;
   long n,i,l;
 
-  if (typ(x)!=t_POL) pari_err(notpoler,"factpol");
-  if (!signe(x)) pari_err(zeropoler,"factpol");
-
-  fa = ZX_squff(Q_primpart(x), &ex);
+  if (!signe(x)) pari_err(zeropoler,"ZX_factor");
+  fa = ZX_squff(x, &ex);
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)
   {
-    gel(fa,i) = ZX_DDF(gel(fa,i), hint);
+    gel(fa,i) = ZX_DDF(gel(fa,i));
     n += lg(fa[i])-1;
   }
   y = fact_from_DDF(fa,ex,n);
-  return gerepileupto(av, sort_factor_pol(y, cmpii));
+  return sort_factor_pol(y, cmpii);
+}
+GEN
+ZX_factor(GEN x)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, ZX_factor_i(x));
+}
+GEN
+QX_factor(GEN x)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, ZX_factor_i(Q_primpart(x)));
 }
 
 GEN
@@ -1579,7 +1587,7 @@ nfrootsQ(GEN x)
   val = ZX_valuation(Q_primpart(x), &x);
   d = ZX_gcd(ZX_deriv(x), x);
   if (degpol(d)) x = RgX_div(x, d);
-  z = DDF(x, 1, 1);
+  z = DDF(x, 1);
   if (val) z = shallowconcat(z, gen_0);
   return gerepilecopy(av, z);
 }

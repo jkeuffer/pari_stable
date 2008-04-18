@@ -2659,7 +2659,6 @@ check_pol(GEN *px, long v)
 {
   GEN x = *px;
   long i, lx = lg(x);
-  if (varn(x) != v) pari_err(talker,"incorrect variable in rnf function");
   for (i=2; i<lx; i++)
   {
     long tx = typ(x[i]);
@@ -2686,7 +2685,9 @@ fix_relative_pol(GEN T, GEN P, int lift)
     {
       case t_INT: case t_FRAC: break;
       case t_POL:
-        c = RgX_rem(c,T);
+        if (varn(c) != vT)
+          pari_err(talker,"incorrect variable in rnf function");
+        if (lg(c) >= lg(T)) c = RgX_rem(c,T);
 	check_pol(&c, vT);
 	if (!lift && typ(c) == t_POL) c = mkpolmod(c, T);
         break;

@@ -976,8 +976,8 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
   nf = checknf(nf); v = varn(relpol);
   if (DEBUGLEVEL>1) (void)timer2();
-  relpol = unifpol(nf, relpol, t_POLMOD);
   T = gel(nf,1);
+  relpol = fix_relative_pol(T, relpol, 0);
   if ((flag & nf_ADDZK) && !(flag & nf_ABSOLUTE))
     pari_err(impl,"this combination of flags in rnfpolredabs");
   if (flag & nf_PARTIALFACT)

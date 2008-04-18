@@ -207,7 +207,7 @@ QXQX_normalize(GEN P, GEN T)
   if (!gcmp1(P0))
   {
     long t = typ(P0);
-    if (t == t_POL && !degpol(P0)) P0 = gel(P0,2);
+    if (t == t_POL && !degpol(P0)) { P0 = gel(P0,2); t = t_FRAC; }
     if (is_rational_t(t))
       P = gdiv(P, P0);
     else
@@ -359,7 +359,7 @@ nffactor(GEN nf,GEN pol)
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
   if (typ(pol) != t_POL) pari_err(notpoler,"nffactor");
-  A = Q_primpart( fix_relative_pol(T,pol,1) );
+  A = fix_relative_pol(T,pol,1);
   d = degpol(A);
   if (d <= 0) {
     avma = av;
@@ -373,25 +373,19 @@ nffactor(GEN nf,GEN pol)
     gel(rep,2) = ex; return rep;
   }
   if (d == 1) {
-    int t2 = (typ(gel(A,2)) == t_POL);
-    int t3 = (typ(gel(A,3)) == t_POL);
-    A = gerepilecopy(av, A);
-    if (t2 || t3)
-    {
-      T = ZX_copy(T);
-      if (t2) gel(A,2) = mkpolmod(gel(A,2), T);
-      if (t3) gel(A,3) = mkpolmod(gel(A,3), T);
-    }
+    GEN c;
+    A = gerepileupto(av, Q_primpart( QXQX_normalize(A,T) ));
+    c = gel(A,2);
+    if (typ(c) == t_POL && degpol(c) > 0) gel(A,2) = mkpolmod(c, ZX_copy(T));
     gel(rep,1) = mkcol(A);
     gel(rep,2) = mkcol(gen_1); return rep;
   }
+  if (degpol(T) == 1) return gerepileupto(av, ZX_factor(Q_primpart(A)));
 
-  if (degpol(T) == 1) return gerepileupto(av, ZX_factor(A));
-
+  A = Q_primpart( QXQX_normalize(A, T) );
   den = get_den(&nf, T);
   g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
 
-  A = Q_primpart( QXQX_normalize(A, T) );
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
   if (degpol(g))
