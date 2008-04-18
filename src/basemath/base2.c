@@ -3081,10 +3081,10 @@ polcompositum0(GEN A, GEN B, long flall)
   {
     D = RgX_rescale(A, stoi(1 - k));
     C = gdivexact(C, D);
-    if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C, 0), D);
+    if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C), D);
   }
   else
-    C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+    C = ZX_DDF(C); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   gen_sort_inplace(C, (void*)&cmpii, &gen_cmp_RgX, NULL);
   if (flall)
   {
