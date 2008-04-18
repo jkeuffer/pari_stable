@@ -242,31 +242,17 @@ nfroots(GEN nf,GEN pol)
 
   if (!nf) return nfrootsQ(pol);
   T = get_nfpol(nf, &nf);
-  if (typ(pol) != t_POL) pari_err(notpoler,"nfroots");
-  if (varncmp(varn(pol), varn(T)) >= 0)
-    pari_err(talker,"polynomial variable must have highest priority in nfroots");
+  A = fix_relative_pol(T,pol,1);
   d = degpol(pol);
+  if (d < 0) pari_err(zeropoler, "nfroots");
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
   {
-    A = gneg_i(gdiv(gel(pol,2),gel(pol,3)));
-    if (nf)
-      A = basistoalg(nf,A);
-    else
-    {
-      if (typ(A) == t_POLMOD)
-      { /* see basistoalg */
-        if (!RgX_equal(T,gel(A,1)))
-          pari_err(talker,"not the same number field in basistoalg");
-      }
-      else
-        A = mkpolmod(gmod(A,T), T);
-    }
+    A = QXQX_normalize(A,T);
+    A = mkpolmod(gneg_i(gel(A,2)), T);
     return gerepilecopy(av, mkvec(A));
   }
-  A = fix_relative_pol(T,pol,1) ;
-  if (degpol(T) == 1)
-    return gerepileupto(av, nfrootsQ(simplify_i(A)));
+  if (degpol(T) == 1) return gerepileupto(av, nfrootsQ(simplify_i(A)));
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
@@ -358,7 +344,6 @@ nffactor(GEN nf,GEN pol)
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
-  if (typ(pol) != t_POL) pari_err(notpoler,"nffactor");
   A = fix_relative_pol(T,pol,1);
   d = degpol(A);
   if (d <= 0) {
@@ -372,20 +357,18 @@ nffactor(GEN nf,GEN pol)
     gel(rep,1) = y;
     gel(rep,2) = ex; return rep;
   }
+  A = Q_primpart( QXQX_normalize(A, T) );
   if (d == 1) {
     GEN c;
-    A = gerepileupto(av, Q_primpart( QXQX_normalize(A,T) ));
-    c = gel(A,2);
+    A = gerepilecopy(av, A); c = gel(A,2);
     if (typ(c) == t_POL && degpol(c) > 0) gel(A,2) = mkpolmod(c, ZX_copy(T));
     gel(rep,1) = mkcol(A);
     gel(rep,2) = mkcol(gen_1); return rep;
   }
-  if (degpol(T) == 1) return gerepileupto(av, ZX_factor(Q_primpart(A)));
+  if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_i(A)));
 
-  A = Q_primpart( QXQX_normalize(A, T) );
   den = get_den(&nf, T);
   g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
-
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
   if (degpol(g))
