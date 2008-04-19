@@ -1579,7 +1579,7 @@ ppgamma(ST_t *T, long prec)
 
  /* We simplify to get one of the following two expressions
   * if (b > a) : sqrt{Pi}^a 2^{a-au} Gamma(u)^{a+c} Gamma(  u/2  )^{|b-a|}
-  * if (b <= a): sqrt{Pi}^b 2^{b-bu} Gamma(u)^{b+c) Gamma((u+1)/2)^{|b-a|} */
+  * if (b <= a): sqrt{Pi}^b 2^{b-bu} Gamma(u)^{b+c} Gamma((u+1)/2)^{|b-a|} */
   if (b > a)
   {
     t = a; s = b; X = x2; Y = gsub(x2,ghalf);
