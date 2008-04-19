@@ -189,7 +189,7 @@ BA 25- [ellap] Port of SEA algorithm from the ellsea GP package.
     8- obsolete library functions roots2 and rootsold are no longer public
     9- useless library function isnfscalar
    10- useless error code 'elliper1'
-   11- obsolete undocumented library function factpol()
+   11- obsolete undocumented library function factpol(), lift_to_pol()
    12- library function combine_factors() is no longer public
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

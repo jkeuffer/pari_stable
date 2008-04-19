@@ -225,7 +225,9 @@ rnfelementabstorel(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      x = lift_to_pol(x); /* fall through */
+      x = gel(x,2);
+      if (typ(x) != t_POL) return gcopy(x);
+      /* fall through */
     case t_POL:
     {
       GEN k, T, pol, rnfeq = gel(rnf,11), nf = gel(rnf,10);

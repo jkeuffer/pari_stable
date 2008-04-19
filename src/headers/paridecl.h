@@ -879,7 +879,6 @@ GEN     ideallistunitgen(GEN nf,long bound);
 GEN     ideallistzstar(GEN nf,long bound);
 GEN     ideallistzstargen(GEN nf,long bound);
 GEN     idealstar0(GEN nf, GEN x,long flag);
-GEN     lift_to_pol(GEN x);
 GEN     lllreducemodmatrix(GEN x,GEN y);
 GEN     matalgtobasis(GEN nf, GEN x);
 GEN     matbasistoalg(GEN nf, GEN x);

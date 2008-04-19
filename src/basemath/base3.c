@@ -863,14 +863,6 @@ matalgtobasis(GEN nf,GEN x)
   return z;
 }
 
-/* assume x is a t_POLMOD */
-GEN
-lift_to_pol(GEN x)
-{
-  GEN y = gel(x,2);
-  return (typ(y) != t_POL)? scalarpol(y,varn(x[1])): y;
-}
-
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
@@ -888,7 +880,8 @@ rnfalgtobasis(GEN rnf,GEN x)
     case t_POLMOD:
       if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in rnfalgtobasis");
-      x = lift_to_pol(x); /* fall through */
+      if (typ(x) != t_POL) { GEN A = gel(rnf,8); return gmul(x, gel(A,1)); }
+      /* fall through */
     case t_POL: {
       pari_sp av = avma;
       return gerepileupto(av, poltobasis(rnf, x));
