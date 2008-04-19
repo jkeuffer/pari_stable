@@ -223,6 +223,52 @@ RgXQX_translate(GEN P, GEN c, GEN T)
 /**                       (not memory clean)                       **/
 /**                                                                **/
 /********************************************************************/
+/* to INT / FRAC / (POLMOD mod T), not memory clean because T not copied */
+static GEN
+RgXQ_to_mod(GEN x, GEN T)
+{
+  long d;
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return gcopy(x);
+
+    default:
+      d = degpol(x);
+      if (d < 0) return gen_0;
+      if (d == 0) return gcopy(gel(x,2));
+      return mkpolmod(gcopy(x), T);
+  }
+}
+/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X], apply RgXQ_to_mod to all coeffs.
+ * Not memory clean because T not copied */
+static GEN
+RgXQX_to_mod(GEN z, GEN T)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
+  x[1] = z[1]; return normalizepol_i(x,l);
+}
+/* Apply RgXQX_to_mod to all entries. Memory-clean ! */
+GEN
+RgXQXV_to_mod(GEN V, GEN T)
+{
+  long i, l = lg(V); 
+  GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
+  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(V,i), T);
+  return z;
+}
+/* Apply RgXQ_to_mod to all entries. Memory-clean ! */
+GEN
+RgXQV_to_mod(GEN V, GEN T)
+{
+  long i, l = lg(V); 
+  GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
+  for (i=1;i<l; i++) gel(z,i) = RgXQ_to_mod(gel(V,i), T);
+  return z;
+}
+
 GEN
 RgX_renormalize(GEN x)
 {

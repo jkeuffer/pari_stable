@@ -54,41 +54,6 @@ typedef struct /* for use in nfsqff */
   GEN dn;
 } nfcmbf_t;
 
-/* return (x mod T) */
-static GEN
-RgXQ_to_mod(GEN x, GEN T)
-{
-  long d;
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      return gcopy(x);
-
-    default:
-      d = degpol(x);
-      if (d < 0) return gen_0;
-      if (d == 0) return gcopy(gel(x,2));
-      return mkpolmod(gcopy(x), T);
-  }
-}
-/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X] */
-static GEN
-RgXQX_to_mod(GEN z, GEN T)
-{
-  long i,l = lg(z);
-  GEN x = cgetg(l,t_POL);
-  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
-  x[1] = z[1]; return normalizepol_i(x,l);
-}
-static GEN
-RgXQXV_to_mod(GEN V, GEN T)
-{
-  long i, l = lg(V); 
-  GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
-  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(V,i), T);
-  return z;
-}
-
 /* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
  *
  * We essentially follow M. Encarnacion "On a modular Algorithm for computing
@@ -299,7 +264,7 @@ nfroots(GEN nf,GEN pol)
   }
   A = Q_primpart( QXQX_normalize(A, T) );
   A = nfsqff(nf,A,1, den);
-  A = gerepileupto(av, RgXQXV_to_mod(A, T));
+  A = gerepileupto(av, RgXQV_to_mod(A, T));
   gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
   return A;
 }
@@ -1632,7 +1597,7 @@ nfrootsall_and_pr(GEN nf, GEN pol)
 {
   GEN J1,J2, pr, T = get_nfpol(nf,&nf), den = get_den(&nf, T);
   pari_sp av = avma;
-  GEN z = gerepileupto(av, nfsqff(nf, pol, 2, den));
+  GEN z = gerepilecopy(av, nfsqff(nf, pol, 2, den));
   if (lg(z) == 1) return NULL;
   (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
 		      &J1, &J2, &pr, &T);
