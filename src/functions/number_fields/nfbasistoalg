@@ -4,7 +4,17 @@ C-Name: basistoalg
 Prototype: GG
 Help: nfbasistoalg(nf,x): transforms the column vector x on the integral
  basis into an algebraic number
-Doc: this is the inverse function of
- \kbd{nfalgtobasis}. Given an object $x$ whose entries are expressed on the
- integral basis \kbd{\var{nf}.zk}, transforms it into an object whose entries
- are algebraic numbers (i.e.~polmods).
+Doc: Given an algebraic number $x$ in the number field \kbd{nf}, transforms it
+ into \typ{POLMOD} form.
+ \bprog
+ ? nf = nfinit(y^2 + 4);
+ ? nf.zk
+ %2 = [1, 1/2*y]
+ ? nfbasistoalg(nf, [1,1]~)
+ %3 = Mod(1/2*y + 1, y^2 + 4)
+ ? nfbasistoalg(nf, y)
+ %4 = Mod(y, y^2 + 4)
+ ? nfbasistoalg(nf, Mod(y, y^2+4))
+ %4 = Mod(y, y^2 + 4)
+ @eprog
+ This is the inverse function of \kbd{nfalgtobasis}.

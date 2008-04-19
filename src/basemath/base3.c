@@ -627,37 +627,16 @@ coltoalg(GEN nf, GEN x)
 GEN
 basistoalg(GEN nf, GEN x)
 {
-  long tx=typ(x),lx=lg(x),i,j,l;
+  long tx = typ(x);
   GEN z;
 
   nf = checknf(nf);
   switch(tx)
   {
-    case t_COL:
-      for (i=1; i<lx; i++)
-      {
-	long t = typ(x[i]);
-	if (is_matvec_t(t)) break;
-      }
-      if (i==lx) {
-	pari_sp av = avma;
-	return gerepilecopy(av, coltoalg(nf, x));
-      }
-      /* fall through */
-
-    case t_VEC: z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf,gel(x,i));
-      return z;
-    case t_MAT: z=cgetg(lx,t_MAT);
-      if (lx == 1) return z;
-      l = lg(x[1]);
-      for (j=1; j<lx; j++)
-      {
-	gel(z,j) = cgetg(l,t_COL);
-	for (i=1; i<l; i++) gcoeff(z,i,j) = basistoalg(nf,gcoeff(x,i,j));
-      }
-      return z;
-
+    case t_COL: {
+      pari_sp av = avma;
+      return gerepilecopy(av, coltoalg(nf, x));
+    }
     case t_POLMOD:
       if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
@@ -668,9 +647,7 @@ basistoalg(GEN nf, GEN x)
   }
 }
 
-/* FIXME: basistoalg and algtobasis should not treat recursive objects
- * since t_COLs are ambiguous, and the functionnality is almost useless.
- * (Even then, matbasistoalg and matalgtobasis can be used instead.)
+/* (Even then, matbasistoalg and matalgtobasis can be used instead.)
  * The following shallow functions do what the public functions should do,
  * without sanity checks.
  * Assume nf is a genuine nf. */
@@ -740,10 +717,6 @@ RgX_to_nfX(GEN nf, GEN x)
   return y;
 }
 
-GEN
-algtobasis_cp(GEN nf, GEN x)
-{ return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
-
 /* gmul(A, RgX_to_RgV(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)
@@ -773,28 +746,38 @@ poltobasis(GEN nf, GEN x)
 GEN
 algtobasis(GEN nf, GEN x)
 {
-  long tx=typ(x),lx=lg(x),i,N;
-  pari_sp av=avma;
-  GEN z;
+  long tx = typ(x);
+  pari_sp av;
 
   nf = checknf(nf);
   switch(tx)
   {
-    case t_VEC: case t_COL: case t_MAT:
-      z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf,gel(x,i));
-      return z;
     case t_POLMOD:
       if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in algtobasis");
-      x = gel(x,2);
-      if (typ(x) != t_POL) break;
-      /* fall through */
+      x = gel(x,2); tx = typ(x);
+      switch(tx)
+      {
+        case t_INT:
+        case t_FRAC: return scalarcol(x, degpol(nf[1]));
+        case t_POL: 
+          av = avma;
+          return gerepileupto(av,poltobasis(nf,x));
+      }
+      break;
+
     case t_POL:
+      av = avma;
       return gerepileupto(av,poltobasis(nf,x));
 
+    case t_COL:
+      return gcopy(x);
+
+    case t_INT:
+    case t_FRAC: return scalarcol(x, degpol(nf[1]));
   }
-  N=degpol(nf[1]); return scalarcol(x,N);
+  pari_err(typeer,"algtobasis");
+  return NULL; /* not reached */
 }
 
 GEN
@@ -832,16 +815,24 @@ rnfbasistoalg(GEN rnf,GEN x)
 GEN
 matbasistoalg(GEN nf,GEN x)
 {
-  long i, j, li, lx = lg(x);
-  GEN c, z = cgetg(lx,t_MAT);
+  long i, j, li, lx = lg(x), tx = typ(x);
+  GEN z = cgetg(lx, tx);
 
-  if (typ(x) != t_MAT) pari_err(talker,"not a matrix in matbasistoalg");
   if (lx == 1) return z;
+  switch(tx)
+  {
+    case t_VEC: case t_COL:
+      for (i=1; i<lx; i++) gel(z,i) = basistoalg(nf, gel(x,i));
+      return z;
+    case t_MAT: break;
+    default: pari_err(typeer, "matbasistoalg");
+  }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
   {
-    c = cgetg(li,t_COL); gel(z,j) = c;
-    for (i=1; i<li; i++) gel(c,i) = basistoalg(nf,gcoeff(x,i,j));
+    GEN c = cgetg(li,t_COL), xj = gel(x,j);
+    gel(z,j) = c;
+    for (i=1; i<li; i++) gel(c,i) = basistoalg(nf, gel(xj,i));
   }
   return z;
 }
@@ -849,16 +840,24 @@ matbasistoalg(GEN nf,GEN x)
 GEN
 matalgtobasis(GEN nf,GEN x)
 {
-  long i, j, li, lx = lg(x);
-  GEN c, z = cgetg(lx, t_MAT);
+  long i, j, li, lx = lg(x), tx = typ(x);
+  GEN z = cgetg(lx, tx);
 
-  if (typ(x) != t_MAT) pari_err(talker,"not a matrix in matalgtobasis");
   if (lx == 1) return z;
+  switch(tx)
+  {
+    case t_VEC: case t_COL:
+      for (i=1; i<lx; i++) gel(z,i) = algtobasis(nf, gel(x,i));
+      return z;
+    case t_MAT: break;
+    default: pari_err(typeer, "matalgtobasis");
+  }
   li = lg(x[1]);
   for (j=1; j<lx; j++)
   {
-    c = cgetg(li,t_COL); gel(z,j) = c;
-    for (i=1; i<li; i++) gel(c,i) = algtobasis_cp(nf, gcoeff(x,i,j));
+    GEN c = cgetg(li,t_COL), xj = gel(x,j);
+    gel(z,j) = c;
+    for (i=1; i<li; i++) gel(c,i) = algtobasis(nf, gel(xj,i));
   }
   return z;
 }

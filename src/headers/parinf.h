@@ -119,7 +119,6 @@ GEN  zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);
  * Return the corresponding elements as t_POLs (implicitly mod nf.pol) */
 #define coltoliftalg(nf,x) (gmul(gel((nf),7), (x)))
 GEN    algtobasis_i(GEN nf, GEN x);
-GEN    algtobasis_cp(GEN nf, GEN x);
 GEN    basistoalg_i(GEN nf, GEN x);
 GEN    poltobasis(GEN nf,GEN x);
 GEN    coltoalg(GEN nf,GEN x);

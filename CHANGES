@@ -126,6 +126,8 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
        ["\"1\""] (the Set whose element evaluate to the character string "1")
    38- plotinit: change the way default arguments are evaluated (omit, instead
        of interpreting 0 in a special way) 
+   39- nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT,
+       use matbasistoalg / matalgtobasis, which now also accept t_VEC/t_COL
 
   Added
     1- library function gpcalloc

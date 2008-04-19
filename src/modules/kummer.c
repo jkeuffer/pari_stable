@@ -471,11 +471,10 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
 static GEN
 get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
-  GEN fu = check_units(bnf,"rnfkummer");
-  GEN tu = gmael3(bnf,8,4,2);
-  return shallowconcat(algtobasis(bnf,shallowconcat(fu,tu)), vecslice(cycgen,1,rc));
+  GEN fu = check_units(bnf,"rnfkummer"), tu = gmael3(bnf,8,4,2);
+  GEN units = matalgtobasis(bnf,shallowconcat(fu,tu));
+  return shallowconcat(units, vecslice(cycgen,1,rc));
 }
-
 
 GEN
 lift_if_rational(GEN x)

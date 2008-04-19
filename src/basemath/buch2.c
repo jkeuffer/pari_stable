@@ -1437,11 +1437,11 @@ static GEN
 triv_gen(GEN nf, GEN x, long c, long flag)
 {
   GEN y;
-  if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis_cp(nf,x);
+  if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis(nf,x);
   if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(3,t_VEC);
   gel(y,1) = zerocol(c);
-  gel(y,2) = algtobasis_cp(nf,x); return y;
+  gel(y,2) = algtobasis(nf,x); return y;
 }
 
 GEN
@@ -2561,7 +2561,7 @@ smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
   gel(y,8) = gel(bnf,2);
   gel(y,9) = codeprimes(gel(bnf,5), degpol(nf[1]));
   gel(y,10) = mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
-  gel(y,11) = algtobasis(bnf, gel(res,5));
+  gel(y,11) = matalgtobasis(bnf, gel(res,5));
   (void)check_and_build_matal(bnf);
   gel(y,12) = gel(bnf,10); return gerepilecopy(av, y);
 }

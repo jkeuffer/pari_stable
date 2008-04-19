@@ -65,6 +65,11 @@ This file lists the incompatible changes between Version 2.x and older versions
     The LLL-reduced bases will be different from previous versions.
   - plotinit: change the way default arguments are evaluated (omit dimension,
     instead of interpreting 0 in a special way) 
+  - nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT
+    (not being able to apply nfbasistoalg to nfalgtobasis(nf,x) was awkward
+    and inconsistent; the doc stated that those were inverse functions,
+    but they were not). Use matbasistoalg / matalgtobasis, which now also
+    accept t_VEC/t_COL.
 
 * Specific to the PARI library:
 ===============================

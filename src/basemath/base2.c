@@ -2632,7 +2632,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
-    W = algtobasis(nf, gmul(Wa, matbasistoalg(nf,gel(pseudo,1))));
+    W = matalgtobasis(nf, gmul(Wa, matbasistoalg(nf,gel(pseudo,1))));
     I = gel(pseudo,2);
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */

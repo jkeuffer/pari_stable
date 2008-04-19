@@ -1001,7 +1001,7 @@ lowerboundforregulator_i(GEN bnf)
   if (!RU) return gen_1;
 
   G = gmael(nf,5,2);
-  units = algtobasis(bnf,units);
+  units = matalgtobasis(bnf,units);
   minunit = gnorml2(gmul(G, gel(units,1))); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
   {
@@ -1171,7 +1171,7 @@ certifybuchall(GEN bnf)
   }
   /* p | bad <--> p | some element occurring in cycgen[i]  */
 
-  funits = algtobasis(nf, funits);
+  funits = matalgtobasis(nf, funits);
   zu = mkvec2(gel(zu,1), algtobasis(nf, gel(zu,2)));
 
   for (p = *delta++; p <= bound; ) {
