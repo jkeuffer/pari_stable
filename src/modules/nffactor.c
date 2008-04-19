@@ -54,6 +54,41 @@ typedef struct /* for use in nfsqff */
   GEN dn;
 } nfcmbf_t;
 
+/* return (x mod T) */
+static GEN
+RgXQ_to_mod(GEN x, GEN T)
+{
+  long d;
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return gcopy(x);
+
+    default:
+      d = degpol(x);
+      if (d < 0) return gen_0;
+      if (d == 0) return gcopy(gel(x,2));
+      return mkpolmod(gcopy(x), T);
+  }
+}
+/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X] */
+static GEN
+RgXQX_to_mod(GEN z, GEN T)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
+  x[1] = z[1]; return normalizepol_i(x,l);
+}
+static GEN
+RgXQXV_to_mod(GEN V, GEN T)
+{
+  long i, l = lg(V); 
+  GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
+  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(V,i), T);
+  return z;
+}
+
 /* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
  *
  * We essentially follow M. Encarnacion "On a modular Algorithm for computing
@@ -264,7 +299,9 @@ nfroots(GEN nf,GEN pol)
   }
   A = Q_primpart( QXQX_normalize(A, T) );
   A = nfsqff(nf,A,1, den);
-  return gerepileupto(av, gen_sort(A, (void*)&cmp_RgX, &cmp_nodata));
+  A = gerepileupto(av, RgXQXV_to_mod(A, T));
+  gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
+  return A;
 }
 
 /* assume x is squarefree */
@@ -383,7 +420,7 @@ nffactor(GEN nf,GEN pol)
     av1 = avma;
     for (j=l-1; j>=1; j--)
     {
-      GEN fact = lift(gel(y,j)), quo = g, q;
+      GEN fact = gel(y,j), quo = g, q;
       long e = 0;
       for(e = 1;; e++)
       {
@@ -393,12 +430,12 @@ nffactor(GEN nf,GEN pol)
       }
       E[j] = e;
     }
-    avma = av1; y = gerepileupto(av, y);
+    avma = av1; y = gerepileupto(av, RgXQXV_to_mod(y, T));
     ex = zc_to_ZC(E);
   }
   else
   {
-    y = gerepileupto(av, nfsqff(nf,A,0, den));
+    y = gerepileupto(av, RgXQXV_to_mod(nfsqff(nf,A,0, den), T));
     ex = const_col(lg(y)-1, gen_1);
   }
   if (DEBUGLEVEL>3)
@@ -1475,35 +1512,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   }
 }
 
-/* return (x mod T) */
-static GEN
-RgXQ_to_mod(GEN x, GEN T)
-{
-  long d;
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      return gcopy(x);
-
-    default:
-      d = degpol(x);
-      if (d < 0) return gen_0;
-      if (d == 0) return gcopy(gel(x,2));
-      return mkpolmod(gcopy(x), T);
-  }
-}
-
-/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X] */
-static GEN
-RgXQX_to_mod(GEN z, GEN T)
-{
-  long i,l = lg(z);
-  GEN x = cgetg(l,t_POL);
-  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
-  x[1] = z[1]; return normalizepol_i(x,l);
-}
-
-/* return the factorization of the square-free polynomial x.
+/* return the factorization of the square-free polynomial x. Not memory-clean
    The coeffs of x are in Z_nf and its leading term is a rational integer.
    deg(x) > 1, deg(nfpol) > 1
    If fl = 1, return only the roots of x in nf
@@ -1514,7 +1523,6 @@ static GEN
 nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
   long i, l, n, nbf, dpol = degpol(pol);
-  pari_sp av = avma;
   GEN pr, C0, polbase, init_fa = NULL;
   GEN N2, z, res, polmod, polred, lt, nfpol = gel(nf,1);
   nfcmbf_t T;
@@ -1526,8 +1534,8 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   polbase = unifpol(nf, pol, t_COL);
   if (typ(polbase) != t_POL) pari_err(typeer, "nfsqff");
   polmod  = unifpol(nf, pol, t_POLMOD);
-  if (dpol == 1) /* irreducible */
-    return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
+  /* deg = 1 => irreducible */
+  if (dpol == 1) return mkvec(QXQX_normalize(polmod, nfpol));
   /* heuristic */
   if (dpol*3 < n)
   {
@@ -1541,17 +1549,16 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 	gel(z,i) = gneg(gdiv(gel(t,2), gel(t,3)));
       }
       setlg(z, i);
-      if (fl == 2 && i != l) { avma = av; return cgetg(1,t_VEC); }
+      if (fl == 2 && i != l) return cgetg(1,t_VEC);
     }
-    return gerepilecopy(av, z);
+    return z;
   }
 
   nbf = nf_pick_prime(5, nf, polbase, fl, &lt, &init_fa, &pr, &L.Tp);
   if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
   if (nbf <= 1)
   {
-    if (!fl) /* irreducible */
-      return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
+    if (!fl) return mkvec(QXQX_normalize(polmod, nfpol)); /* irreducible */
     if (!nbf) return cgetg(1,t_VEC); /* no root */
   }
 
@@ -1590,12 +1597,12 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   if (fl) {
     GEN z = nf_DDF_roots(pol, polred, nfpol, mul_content(lt, T.dn),
                          init_fa, nbf, fl, &L);
-    if (lg(z) == 1) { avma = av; return cgetg(1, t_VEC); }
-    return gerepilecopy(av,z);
+    if (lg(z) == 1) return cgetg(1, t_VEC);
+    return z;
   }
 
   {
-    pari_sp av2 = avma;
+    pari_sp av = avma;
     if (L.Tp)
       res = FqX_split_all(init_fa, L.Tp, L.p);
     else
@@ -1606,7 +1613,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
       setlg(res, d + 1);
     }
     gen_sort_inplace(res, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
-    T.fact  = gerepilecopy(av2, res);
+    T.fact  = gerepilecopy(av, res);
   }
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Zs", pr);
   T.pr = pr;
@@ -1617,19 +1624,15 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   res = nf_combine_factors(&T, polred, L.p, L.k, dpol-1);
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", TIMER(&ti_tot));
-
-  l = lg(res); z = cgetg(l, t_VEC);
-  nfpol = ZX_copy(nfpol);
-  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(res,i), nfpol);
-  return gerepileupto(av, z);
+  return res;
 }
 
 GEN
 nfrootsall_and_pr(GEN nf, GEN pol)
 {
-  GEN J1,J2, pr, z, T = get_nfpol(nf,&nf), den = get_den(&nf, T);
-
-  z = nfsqff(nf, pol, 2, den);
+  GEN J1,J2, pr, T = get_nfpol(nf,&nf), den = get_den(&nf, T);
+  pari_sp av = avma;
+  GEN z = gerepileupto(av, nfsqff(nf, pol, 2, den));
   if (lg(z) == 1) return NULL;
   (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
 		      &J1, &J2, &pr, &T);

@@ -67,7 +67,9 @@ BA 29- missing GC in the leftrightpow functions
        nffactor(nfinit(y),x^2*y+1)
        nffactor(nfinit(y),x^2*y)  --> errors or SEGV. [#769]
    61- hilbert(1,1,1) --> oo loop [#770]
-   62- nffactor(nf, x+1/2) --> (x+1/2)^1 [ not normalized ]
+   62- nffactor(y^2+1, x+1/2) --> x+1/2 [ not integral ]
+   63- nffactor(y^2+1,x*y+1) --> x*y + 1 [ not normalized, missing POLMOD ]
+   64- nffactor(y^2+1,x^2+2*y+1) --> x^2+2*y+1 [ missing POLMOD ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
