@@ -448,7 +448,7 @@ functions guarantee this.
 \noindent$\bullet$ Another variant (a special case of \tet{gerepileall}
 below, where $n=1$) is
 
-\fun{GEN}{gerepilecopy}{pari_sp ltop, GEN x)}
+\fun{GEN}{gerepilecopy}{pari_sp ltop, GEN x}
 
 \noindent which is functionally equivalent to \kbd{gerepileupto(ltop,
 gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
@@ -2087,7 +2087,7 @@ and the underscore character (\kbd{\_}), the first character being
 alphabetic.
 
 Then figure out the correct \idx{parser code} corresponding to the function
-prototype, as explained in~\secref{se:gp.interface}) and write a GP script
+prototype (as explained in~\secref{se:gp.interface}) and write a GP script
 like the following:
 \bprog
 install(libname, code, gpname, library)

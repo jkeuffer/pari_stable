@@ -442,8 +442,8 @@ remain at least 25\% more efficient. (But they do not have denominators!)
 % n = Mod(1,1009^2); for (i=1,10^6, n++)
 \subsec{Quadratic numbers}\sidx{quadratic number} (\tet{t_QUAD}):
 This type is used to work in the quadratic order of \emph{discriminant}
-\kbd{d}, where \kbd{d} is a non-square integer congruent to $0$ or $1$ modulo
-$4$). The command
+\kbd{d}, where \kbd{d} is a non-square integer congruent to $0$ or $1$
+(modulo $4$). The command
 \bprog
     w = quadgen(d)
 @eprog\noindent
@@ -2458,7 +2458,7 @@ e.g.~\kbd{3.3 E-5}.
 \item In style \kbd{f}, real numbers are generally printed in \idx{fixed
 floating point format} without exponent, e.g.~\kbd{0.000033}. A large
 real number, whose integer part is not well defined (not enough significant
-digits, is printed in style~\kbd{e}. For instance \kbd{10.\pow 100} known to
+digits), is printed in style~\kbd{e}. For instance \kbd{10.\pow 100} known to
 ten significant digits is always printed in style \kbd{e}.
 
 \item In style \kbd{g}, non-zero real numbers are printed in \kbd{f} format,

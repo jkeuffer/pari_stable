@@ -1358,12 +1358,12 @@ readable.
 \smallskip
 
 To summarize, in addition to being able to factor integers, you can
-factor polynomials over $\C$ and $\R$ (this is the function \kbd{polroots}),
-over $\F_p$ (the function \kbd{factormod}, over $\F_{p^k}$ (the function
-\kbd{factorff}), over $\Q_p$ (the function \kbd{factorpadic}), over $\Q$ (the
-function \kbd{factor}), and over number fields (the functions \kbd{factornf}
-and \kbd{nffactor}). Note however that \kbd{factor} itself will try to guess
-intelligently over which ring you want to factor: try
+factor polynomials over $\C$ and $\R$ using \kbd{polroots},
+over $\F_p$ using \kbd{factormod}, over $\F_{p^k}$ using \kbd{factorff},
+over $\Q_p$ using \kbd{factorpadic}, over $\Q$ using \kbd{factor}, and over
+number fields using \kbd{factornf} or \kbd{nffactor}. Note however
+that \kbd{factor} itself will try to guess intelligently over which ring you
+want to factor: try
 \bprog
   pol = x^2 + 1;
   factor(pol)
