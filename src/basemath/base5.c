@@ -594,7 +594,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   long i, j, l = lg(x), ru = lg(nf[6]);
   GEN y = cgetg(l, t_POL), v, z;
 
-  x = unifpol(nf, x, t_COL);
+  x = RgX_to_nfX(nf, x);
   y[1] = x[1];
   for (i=2; i<l; i++) gel(y,i) = nftocomplex(nf, gel(x,i));
   i = gprecision(y); if (i && i <= 3) return NULL;

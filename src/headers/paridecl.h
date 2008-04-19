@@ -854,6 +854,7 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
+GEN     RgX_to_nfX(GEN nf,GEN pol);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     arch_to_perm(GEN arch);
 GEN     basistoalg(GEN nf, GEN x);
@@ -1833,7 +1834,6 @@ GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfroots(GEN nf,GEN pol);
-GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* part.c */
 

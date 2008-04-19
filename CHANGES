@@ -171,7 +171,7 @@ JD 12- add an optional argument to quit()
    RgC_neg, RgC_add, RgC_sub, RgM_neg, RgM_add, RgM_sub,
    FF_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub, ZC_lincomb1_inplace, ZC_z_mul
    Z_isanypower, RgX_equal, RgX_equal_var, RgX_translate, RgXQX_translate
-   RgXQV_to_mod, RgXQXV_to_mod
+   RgXQV_to_mod, RgXQXV_to_mod, RgX_to_nfX
    22- library function nf_to_scalar_or_basis
    23- file src/basemath/lll.c
    24- library function roundr_safe

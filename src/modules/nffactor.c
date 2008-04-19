@@ -135,44 +135,6 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   return gerepilecopy(ltop, sol);
 }
 
-static GEN
-unifpol0(GEN nf,GEN x,long flag)
-{
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      return gcopy(x);
-
-    case t_POLMOD:
-      x = gel(x,2); /* fall through */
-      if (typ(x) != t_POL) return gcopy(x); /* scalar */
-    case t_POL:
-      if (!degpol(x)) return gcopy(constant_term(x));
-      return (flag == t_COL)? algtobasis(nf, x): gmodulo(x, gel(nf,1));
-
-    default: /* t_COL */
-      return (flag == t_COL)? gcopy(x): basistoalg(nf, x);
-  }
-}
-
-/* Let x be a polynomial with coefficients in Z or nf (vectors or polymods)
- * return the same polynomial with coefficients expressed:
- *  if flag=t_COL: as vectors (on the integral basis).
- *  if flag=t_POLMOD: as polmods.
- */
-GEN
-unifpol(GEN nf, GEN x, long flag)
-{
-  if (typ(x)==t_POL && varncmp(varn(x), varn(nf[1])) < 0)
-  {
-    long i, d = lg(x);
-    GEN y = cgetg(d,t_POL); y[1] = x[1];
-    for (i=2; i<d; i++) gel(y,i) = unifpol0(nf, gel(x,i), flag);
-    return y;
-  }
-  return unifpol0(nf, x, flag);
-}
-
 GEN
 nffactormod(GEN nf, GEN x, GEN pr)
 {
@@ -275,8 +237,10 @@ nfissplit(GEN nf, GEN x)
 {
   pari_sp av = avma;
   long l;
+  nf = checknf(nf);
+  x = fix_relative_pol(gel(nf,1), x, 1);
   if (typ(x) != t_POL) pari_err(typeer, "nfissplit");
-  l = lg(nfsqff(checknf(nf), x, 2, gen_1));
+  l = lg(nfsqff(nf, x, 2, gen_1));
   avma = av; return l != 1;
 }
 
@@ -1008,8 +972,7 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
   return FpX_center(FpX_rem(y, T, pk), pk, pks2);
 }
 
-/* Assume P in nfX form [ unifpol(,t_COL) ], lc(P) != 0 mod p.
- * Reduce P to Zp[X]/(T) mod p^a */
+/* Assume P in nfX form, lc(P) != 0 mod p. Reduce P to Zp[X]/(T) mod p^a */
 static GEN
 ZqX(GEN P, GEN pk, GEN T, GEN proj)
 {
@@ -1329,7 +1292,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
     if (l > 1)
     {
       T->pol = gel(res,l);
-      T->polbase = unifpol(nf, gel(res,l), t_COL);
+      T->polbase = RgX_to_nfX(nf, gel(res,l));
     }
     L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
@@ -1477,9 +1440,9 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   }
 }
 
-/* return the factorization of the square-free polynomial x. Not memory-clean
-   The coeffs of x are in Z_nf and its leading term is a rational integer.
-   deg(x) > 1, deg(nfpol) > 1
+/* return the factorization of the square-free polynomial pol. Not memory-clean
+   The coeffs of pol are in Z_nf and its leading term is a rational integer.
+   deg(pol) > 0, deg(nfpol) > 1
    If fl = 1, return only the roots of x in nf
    If fl = 2, as fl=1 if pol splits, [] otherwise
    den is usually 1, otherwise nf.zk is doubtful, and den bounds the
@@ -1489,23 +1452,21 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
   long i, l, n, nbf, dpol = degpol(pol);
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, z, res, polmod, polred, lt, nfpol = gel(nf,1);
+  GEN N2, z, res, polred, lt, nfpol = gel(nf,1);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   n = degpol(nfpol);
-  polbase = unifpol(nf, pol, t_COL);
-  if (typ(polbase) != t_POL) pari_err(typeer, "nfsqff");
-  polmod  = unifpol(nf, pol, t_POLMOD);
+  polbase = RgX_to_nfX(nf, pol);
   /* deg = 1 => irreducible */
-  if (dpol == 1) return mkvec(QXQX_normalize(polmod, nfpol));
+  if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
   /* heuristic */
   if (dpol*3 < n)
   {
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = gel(polfnf(polmod, nfpol),1);
+    z = gel(polfnf(pol, nfpol),1);
     if (fl) {
       l = lg(z);
       for (i = 1; i < l; i++)
@@ -1523,7 +1484,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
   if (nbf <= 1)
   {
-    if (!fl) return mkvec(QXQX_normalize(polmod, nfpol)); /* irreducible */
+    if (!fl) return mkvec(QXQX_normalize(pol, nfpol)); /* irreducible */
     if (!nbf) return cgetg(1,t_VEC); /* no root */
   }
 
@@ -1531,8 +1492,6 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     msgTIMER(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Zs\n", pr);
   }
-
-  pol = simplify_i(lift(polmod));
   L.tozk = gel(nf,8);
   L.topow= Q_remove_denom(gel(nf,7), &L.topowden);
   T.dn = den; /* override */
@@ -1599,7 +1558,7 @@ nfrootsall_and_pr(GEN nf, GEN pol)
   pari_sp av = avma;
   GEN z = gerepilecopy(av, nfsqff(nf, pol, 2, den));
   if (lg(z) == 1) return NULL;
-  (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
+  (void)nf_pick_prime(1, nf, RgX_to_nfX(nf, pol), 2,
 		      &J1, &J2, &pr, &T);
   return mkvec3(z, pr, nf);
 }

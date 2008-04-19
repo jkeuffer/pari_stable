@@ -1529,18 +1529,18 @@ GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   pari_sp av = avma;
-  GEN nf, module, bnr, group, den, pol2, D;
+  GEN nf, module, bnr, group, den, D;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   if (typ(polrel) != t_POL) pari_err(typeer,"rnfconductor");
-  den = Q_denom( unifpol(nf, polrel, t_COL) );
-  pol2 = is_pm1(den)? polrel: RgX_rescale(polrel, den);
-  if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gen_0; }
+  den = Q_denom( RgX_to_nfX(nf, polrel) );
+  if (!is_pm1(den)) polrel = RgX_rescale(polrel, den);
+  if (flag && !rnf_is_abelian(nf, polrel)) { avma = av; return gen_0; }
 
-  (void)rnfallbase(nf,&pol2, &D, NULL, NULL);
+  (void)rnfallbase(nf,&polrel, &D, NULL, NULL);
   module = mkvec2(D, const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
-  group = rnfnormgroup(bnr,pol2);
+  group = rnfnormgroup(bnr,polrel);
   if (!group) { avma = av; return gen_0; }
   return gerepileupto(av, conductor(bnr,group,1));
 }

@@ -728,6 +728,18 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
   pari_err(typeer,"nf_to_scalar_or_basis");
   return NULL; /* not reached */
 }
+/* Let x be a polynomial with coefficients in Q or nf. Return the same
+ * polynomial with coefficients expressed as vectors (on the integral basis).
+ * No consistency checks, not memory-clean. */
+GEN
+RgX_to_nfX(GEN nf, GEN x)
+{
+  long i, l = lg(x);
+  GEN y = cgetg(l,t_POL); y[1] = x[1];
+  for (i=2; i<l; i++) gel(y,i) = nf_to_scalar_or_basis(nf, gel(x,i));
+  return y;
+}
+
 GEN
 algtobasis_cp(GEN nf, GEN x)
 { return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
@@ -779,8 +791,6 @@ algtobasis(GEN nf, GEN x)
       if (typ(x) != t_POL) break;
       /* fall through */
     case t_POL:
-      if (varn(x) != varn(gel(nf,1)))
-	pari_err(talker,"incompatible variables in algtobasis");
       return gerepileupto(av,poltobasis(nf,x));
 
   }

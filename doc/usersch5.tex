@@ -5009,10 +5009,14 @@ then the $r_2$ pairs of complex conjugates.
 \fun{long}{nf_get_prec}{GEN nf} returns the precision (in words) to which the
 \var{nf} was computed.
 
-\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ a number field 
+\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ be a number field 
 element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
 or \typ{FRAC}, return the latter. Otherwise returns its basis representation
-(\tet{nfalgtobasis}. Shallow function.
+(\tet{nfalgtobasis}). Shallow function.
+
+\fun{GEN}{RgX_to_nfX}{GEN nf, GEN x} let $x$ be a polynomial whose coefficients
+are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
+coefficient and return the resulting new polynomial. Shallow function.
 
 \subsec{Increasing accuracy}
 
