@@ -550,7 +550,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   {
     case t_INT:  N = xb; break;
     case t_FRAC: N = mulii(gel(xb,1),gel(xb,2)); break;
-    default: { GEN d = Q_denom(xb); N = mulii(gnorm(gmul(*px,d)), d); }
+    default: { GEN d = Q_denom(xb); N = mulii(idealnorm(nf,gmul(*px,d)), d); }
   } /* relevant primes divide N */
   if (is_pm1(N)) return zerocol(ls -1);
 
@@ -604,7 +604,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
   bnf = checkbnf(bnf);
   nf = checknf(bnf);
   if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
-  x = basistoalg(nf,x);
+  x = basistoalg_i(nf,x);
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = isunit(bnf, x);
   if (!v || lg(v) == 1) { avma = av; return cgetg(1,t_COL); }
@@ -723,27 +723,24 @@ GEN
 rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
-  GEN bnf, rel, relpol, theta;
+  GEN bnf, rel, relpol, theta, nfpol;
   GEN nf, aux, H, U, Y, M, A, bnfS, sunitrel, futu, tu, w, prod, S1, S2;
   long L, i, drel, itu;
 
   if (typ(T) != t_VEC || lg(T) != 9)
     pari_err(talker,"please apply rnfisnorminit first");
   bnf = gel(T,1); rel = gel(T,2); relpol = gel(T,3); theta = gel(T,4);
+  drel = degpol(relpol);
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
   nf = checknf(bnf);
-  x = basistoalg(nf,x);
-  if (typ(x) != t_POLMOD) pari_err(typeer, "rnfisnorm");
-  drel = degpol(relpol);
-  if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
-  {
-    GEN res = cgetg(3, t_VEC);
-    gel(res,1) = simplify(gel(x,2));
-    gel(res,2) = gen_1; return res;
-  }
+  x = basistoalg_i(nf,x);
+  if (gcmp0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
+  if (gcmp1(x)) { avma = av; return mkvec2(gen_1, gen_1); }
+  if (gcmp_1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }
 
   /* build set T of ideals involved in the solutions */
+  nfpol = gel(nf,1);
   prod = gel(T,5);
   S1   = gel(T,6);
   S2   = gel(T,7);
@@ -771,10 +768,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   tu = gmael3(rel,8,4,2);
   futu = shallowconcat(check_units(rel,"rnfisnorm"), tu);
   bnfS = bnfsunit(bnf,S1,3);
-  sunitrel = gel(bnfsunit(rel,S2,3), 1);
-  if (lg(sunitrel) > 1)
-    sunitrel = lift_intern(basistoalg(rel, sunitrel));
-  sunitrel = shallowconcat(futu, sunitrel);
+  sunitrel = shallowconcat(futu, gel(bnfsunit(rel,S2,3), 1));
 
   A = lift(bnfissunit(bnf,bnfS,x));
   L = lg(sunitrel);
@@ -797,13 +791,13 @@ rnfisnorm(GEN T, GEN x, long flag)
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback(sunitrel, gfloor(Y));
-  x = gdiv(x, gnorm(gmodulo(lift_intern(aux), relpol)));
+  x = gdiv(mkpolmod(x,nfpol), gnorm(gmodulo(lift_intern(aux), relpol)));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
   {
     x = gel(x,2); /* rational number */
     if (typ(x) == t_POL) x = gel(x,2);
   }
-  if (typ(aux) == t_POLMOD && degpol(nf[1]) == 1)
+  if (typ(aux) == t_POLMOD && degpol(nfpol) == 1)
     gel(aux,2) = lift_intern(gel(aux,2));
   return gerepilecopy(av, mkvec2(aux, x));
 }

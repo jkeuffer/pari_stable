@@ -1516,8 +1516,8 @@ GEN
 idealnorm(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  long tx;
   GEN y;
+  long tx, lx;
 
   nf = checknf(nf);
   switch(idealtyp(&x,&y))
@@ -1525,10 +1525,11 @@ idealnorm(GEN nf, GEN x)
     case id_PRIME:
       return pr_norm(x);
     case id_PRINCIPAL:
-      x = gnorm(basistoalg(nf,x)); break;
+      x = RgXQ_norm(basistoalg_i(nf,x), gel(nf,1)); break;
     default:
-      if (lg(x) != lg(nf[1])-2) x = idealhermite_aux(nf,x);
-      x = RgM_det_triangular(x);
+      lx = lg(x); if (lx == 1) return gen_0;
+      if (lx != lg(x[1])) x = idealhermite_aux(nf,x);
+      return RgM_det_triangular(x);
   }
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));

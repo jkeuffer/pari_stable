@@ -503,7 +503,6 @@ gnorm(GEN x)
       gel(y,2) = FF_norm(x);
       return y;
     case t_POLMOD:
-      if (typ(gel(x,2)) != t_POL) return gpowgs(gel(x,2), degpol(gel(x,1)));
       return RgXQ_norm(gel(x,2), gel(x,1));
 
     case t_VEC: case t_COL: case t_MAT:

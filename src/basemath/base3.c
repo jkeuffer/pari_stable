@@ -647,8 +647,7 @@ basistoalg(GEN nf, GEN x)
   }
 }
 
-/* (Even then, matbasistoalg and matalgtobasis can be used instead.)
- * The following shallow functions do what the public functions should do,
+/* The following shallow functions do what the public functions should do,
  * without sanity checks.
  * Assume nf is a genuine nf. */
 GEN
@@ -658,8 +657,12 @@ basistoalg_i(GEN nf, GEN x)
   {
     case t_COL: return coltoliftalg(nf, x);
     case t_POLMOD: return gel(x,2);
-    default: return x;
+    case t_POL:
+    case t_INT:
+    case t_FRAC: return x;
   }
+  pari_err(typeer,"basistoalg_i");
+  return NULL; /* not reached */
 }
 GEN
 algtobasis_i(GEN nf, GEN x)
