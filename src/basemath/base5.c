@@ -970,11 +970,11 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   GEN red, bas, elt, pol, T, a;
-  long v, fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
+  long fl = (flag & nf_ADDZK)? nf_ADDZK: nf_RAW;
   pari_sp av = avma;
 
   if (typ(relpol)!=t_POL) pari_err(typeer,"rnfpolredabs");
-  nf = checknf(nf); v = varn(relpol);
+  nf = checknf(nf);
   if (DEBUGLEVEL>1) (void)timer2();
   T = gel(nf,1);
   relpol = fix_relative_pol(T, relpol, 0);
@@ -1007,8 +1007,9 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 
   elt = RgXQX_translate(gel(red,2), deg1pol_i(a,gen_0,varn(T)), T);
-  pol = rnfcharpoly(nf,relpol,elt,v);
-  if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
-  elt = modreverse_i(elt,relpol);
-  return gerepilecopy(av, mkvec2(pol, mkpolmod(elt,pol)));
+  elt = fix_relative_pol(T, elt, 0);
+  pol = caract2(relpol, elt, varn(relpol));
+  pol = lift_if_rational(pol);
+  if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(modreverse_i(elt,relpol),pol));
+  return gerepilecopy(av, pol);
 }

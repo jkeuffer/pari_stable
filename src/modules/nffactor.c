@@ -52,7 +52,6 @@ typedef struct /* for use in nfsqff */
   GEN pr;
   GEN Br, bound, ZC, BS_2;
   GEN dn;
-  long hint;
 } nfcmbf_t;
 
 /* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
@@ -726,7 +725,7 @@ FqX_centermod(GEN z, GEN T, GEN pk, GEN pks2)
 }
 
 /* Naive recombination of modular factors: combine up to maxK modular
- * factors, degree <= klim and divisible by hint
+ * factors, degree <= klim
  *
  * target = polynomial we want to factor
  * famod = array of modular factors.  Product should be congruent to
@@ -819,7 +818,7 @@ nextK:
       degsofar[j] = curdeg;
       ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
     }
-    if (curdeg <= klim && curdeg % T->hint == 0) /* trial divide */
+    if (curdeg <= klim) /* trial divide */
     {
       GEN t, y, q, list;
       pari_sp av;
@@ -1308,8 +1307,8 @@ AGAIN:
 static GEN
 nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 {
-  GEN z, res, L, listmod, famod = T->fact, nf = T->nf;
-  long i, m, l, maxK = 3, nft = lg(famod)-1;
+  GEN res, L, listmod, famod = T->fact, nf = T->nf;
+  long l, maxK = 3, nft = lg(famod)-1;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) TIMERstart(&ti);
@@ -1334,10 +1333,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = shallowconcat(res, L);
   }
-
-  m = lg(res); z = cgetg(m, t_VEC);
-  for (i=1;i<m; i++) gel(z,i) = unifpol(nf,gel(res,i), t_POLMOD);
-  return z;
+  return res;
 }
 
 static GEN
@@ -1479,6 +1475,34 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   }
 }
 
+/* return (x mod T) */
+static GEN
+RgXQ_to_mod(GEN x, GEN T)
+{
+  long d;
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return gcopy(x);
+
+    default:
+      d = degpol(x);
+      if (d < 0) return gen_0;
+      if (d == 0) return gcopy(gel(x,2));
+      return mkpolmod(gcopy(x), T);
+  }
+}
+
+/* T a ZX, z lifted from (Q[Y]/(T(Y)))[X] */
+static GEN
+RgXQX_to_mod(GEN z, GEN T)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) gel(x,i) = RgXQ_to_mod(gel(z,i), T);
+  x[1] = z[1]; return normalizepol_i(x,l);
+}
+
 /* return the factorization of the square-free polynomial x.
    The coeffs of x are in Z_nf and its leading term is a rational integer.
    deg(x) > 1, deg(nfpol) > 1
@@ -1489,10 +1513,10 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 static GEN
 nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
-  long n, nbf, dpol = degpol(pol);
+  long i, l, n, nbf, dpol = degpol(pol);
   pari_sp av = avma;
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, rep, polmod, polred, lt, nfpol = gel(nf,1);
+  GEN N2, z, res, polmod, polred, lt, nfpol = gel(nf,1);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
@@ -1507,15 +1531,13 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   /* heuristic */
   if (dpol*3 < n)
   {
-    GEN z, t;
-    long i;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
     z = gel(polfnf(polmod, nfpol),1);
     if (fl) {
-      long l = lg(z);
+      l = lg(z);
       for (i = 1; i < l; i++)
       {
-	t = gel(z,i); if (degpol(t) > 1) break;
+	GEN t = gel(z,i); if (degpol(t) > 1) break;
 	gel(z,i) = gneg(gdiv(gel(t,2), gel(t,3)));
       }
       setlg(z, i);
@@ -1575,16 +1597,16 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   {
     pari_sp av2 = avma;
     if (L.Tp)
-      rep = FqX_split_all(init_fa, L.Tp, L.p);
+      res = FqX_split_all(init_fa, L.Tp, L.p);
     else
     {
       long d;
-      rep = cgetg(dpol + 1, t_VEC); gel(rep,1) = FpX_red(polred,L.p);
-      d = FpX_split_Berlekamp((GEN*)(rep + 1), L.p);
-      setlg(rep, d + 1);
+      res = cgetg(dpol + 1, t_VEC); gel(res,1) = FpX_red(polred,L.p);
+      d = FpX_split_Berlekamp((GEN*)(res + 1), L.p);
+      setlg(res, d + 1);
     }
-    gen_sort_inplace(rep, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
-    T.fact  = gerepilecopy(av2, rep);
+    gen_sort_inplace(res, (void*)&cmp_RgX, &gen_cmp_RgX, NULL);
+    T.fact  = gerepilecopy(av2, res);
   }
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Zs", pr);
   T.pr = pr;
@@ -1592,12 +1614,14 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   T.polbase = polbase;
   T.pol   = pol;
   T.nf    = nf;
-  T.hint  = 1; /* useless */
-
-  rep = nf_combine_factors(&T, polred, L.p, L.k, dpol-1);
+  res = nf_combine_factors(&T, polred, L.p, L.k, dpol-1);
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", TIMER(&ti_tot));
-  return gerepileupto(av, rep);
+
+  l = lg(res); z = cgetg(l, t_VEC);
+  nfpol = ZX_copy(nfpol);
+  for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(res,i), nfpol);
+  return gerepileupto(av, z);
 }
 
 GEN
@@ -1610,32 +1634,4 @@ nfrootsall_and_pr(GEN nf, GEN pol)
   (void)nf_pick_prime(1, nf, unifpol(nf, pol, t_COL), 2,
 		      &J1, &J2, &pr, &T);
   return mkvec3(z, pr, nf);
-}
-
-/* return the characteristic polynomial of alpha over nf, where alpha
-   is an element of the algebra nf[X]/(T) given as a polynomial in X */
-GEN
-rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
-{
-  long vnf, vT, lT;
-  pari_sp av = avma;
-  GEN p1;
-
-  nf=checknf(nf); vnf = varn(nf[1]);
-  if (v<0) v = 0;
-  T = fix_relative_pol(gel(nf,1),T,0);
-  if (!gcmp1(leading_term(T)))
-    pari_err(impl,"rnfcharpoly for non-monic polynomial");
-  if (typ(alpha) == t_POLMOD) alpha = gel(alpha, 2);
-  if (typ(alpha) != t_POL || varn(alpha) == vnf)
-    return gerepileupto(av, gpowgs(gsub(pol_x(v), alpha), degpol(T)));
-  vT = varn(T);
-  lT = lg(T);
-  if (varn(alpha) != vT || varncmp(v, vnf)>=0)
-    pari_err(talker,"incorrect variables in rnfcharpoly");
-  if (lg(alpha) >= lT) alpha = RgX_rem(alpha, T);
-  if (lT <= 4)
-    return gerepileupto(av, gsub(pol_x(v), alpha));
-  p1 = caract2(T, unifpol(nf,alpha, t_POLMOD), v);
-  return gerepileupto(av, unifpol(nf, p1, t_POLMOD));
 }

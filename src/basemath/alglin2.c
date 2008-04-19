@@ -43,9 +43,8 @@ charpoly0(GEN x, long v, long flag)
 
 /* (v - x)^d */
 static GEN
-caract_const(GEN x, long v, long d)
+caract_const(pari_sp av, GEN x, long v, long d)
 {
-  pari_sp av = avma;
   return gerepileupto(av, gpowgs(deg1pol_i(gen_1, gneg_i(x), v), d));
 }
 
@@ -56,9 +55,10 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   long d = degpol(p), dx;
   GEN ch, L;
 
-  if (typ(x) != t_POL) return caract_const(x, v, d);
+  if (typ(x) != t_POL) return caract_const(av, x, v, d);
   dx = degpol(x);
-  if (dx <= 0) return dx? monomial(gen_1, d, v): caract_const(gel(x,2), v, d);
+  if (dx <= 0)
+    return dx? monomial(gen_1, d, v): caract_const(av, gel(x,2), v, d);
 
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
@@ -75,7 +75,6 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   if (!gcmp1(L)) ch = gdiv(ch, L);
   return gerepileupto(av, ch);
 }
-
 /* return caract(Mod(x,p)) in variable v */
 GEN
 caract2(GEN p, GEN x, long v)
@@ -86,6 +85,41 @@ GEN
 caractducos(GEN p, GEN x, long v)
 {
   return caract2_i(p,x,v, (GEN (*)(GEN,GEN,GEN*))resultantducos);
+}
+
+/* characteristic polynomial (in v) of x over nf, where x is an element of the
+ * algebra nf[t]/(Q(t)) */
+GEN
+rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
+{
+  long tx = typ(x), vQ = varn(Q), dQ = degpol(Q), vx, vT;
+  pari_sp av = avma;
+  GEN T;
+
+  if (v < 0) v = 0;
+  nf = checknf(nf); T = gel(nf,1); vT = varn(T);
+  Q = fix_relative_pol(T,Q,0);
+  if (tx == t_POLMOD) {
+    GEN M = gel(x,1);
+    long vM = varn(M);
+    int ok = 1;
+    if      (vM == vQ) { if (!RgX_equal(M, Q)) ok = 0; }
+    else if (vM == vT) { if (!RgX_equal(M, T)) ok = 0; }
+    else ok = 0;
+    if (!ok) pari_err(consister,"rnfcharpoly");
+    x = gel(x, 2); tx = typ(x);
+  }
+  if (tx != t_POL) {
+    if (!is_rational_t(tx)) pari_err(typeer,"rnfcharpoly");
+    return caract_const(av, x, v, dQ);
+  }
+  vx = varn(x);
+  if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
+  if (vx != vQ) pari_err(typeer,"rnfcharpoly");
+  x = fix_relative_pol(T,x,0);
+  if (degpol(x) >= dQ) x = RgX_rem(x, Q);
+  if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
+  return gerepilecopy(av, lift_if_rational( caract2(Q, x, v) ));
 }
 
 /* characteristic pol. Easy cases. Return NULL in case it's not so easy. */

@@ -526,6 +526,7 @@ GEN     minpoly(GEN x, long v);
 GEN     qfgaussred(GEN a);
 GEN     qfgaussred_positive(GEN a);
 GEN     qfsign(GEN a);
+GEN     rnfcharpoly(GEN nf, GEN T, GEN alpha, long v);
 GEN     smith(GEN x);
 GEN     smithall(GEN x);
 GEN     smithclean(GEN z);
@@ -1830,7 +1831,6 @@ GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfroots(GEN nf,GEN pol);
-GEN     rnfcharpoly(GEN nf, GEN T, GEN alpha, long v);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* part.c */
