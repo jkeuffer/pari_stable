@@ -721,7 +721,7 @@ sd_log(const char *v, long flag)
   if (pari_logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
     TeX_define("PARIbreak",
-	       "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
+	       "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}");
     TeX_define("PARIpromptSTART", "\\vskip\\medskipamount\\bgroup\\bf");
     TeX_define("PARIpromptEND", "\\egroup\\bgroup\\tt");
     TeX_define("PARIinputEND", "\\egroup");
