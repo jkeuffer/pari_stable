@@ -2850,23 +2850,28 @@ rnfsimplifybasis(GEN bnf, GEN x)
   return gerepilecopy(av, x);
 }
 
-GEN
-rnfdet2(GEN nf, GEN A, GEN I)
+static GEN
+get_order(GEN nf, GEN O, const char *s)
 {
-  pari_sp av = avma;
-  GEN p1;
-  nf = checknf(nf);
-  if (typ(I) != t_VEC) pari_err(typeer,"rnfdet2");
-  p1 = idealmul(nf, det(matbasistoalg(nf, A)), prodid(nf, I));
-  return gerepileupto(av, p1);
+  if (typ(O) == t_POL)
+    return rnfpseudobasis(nf, O);
+  if (typ(O)!=t_VEC || lg(O) < 3 || typ(O[1]) != t_MAT || typ(O[2]) != t_VEC
+      || lg(O[1]) != lg(O[2]))
+    pari_err(talker,"not a pseudo-matrix in %s", s);
+  return O;
 }
 
 GEN
 rnfdet(GEN nf, GEN order)
 {
-  if (typ(order)!=t_VEC || lg(order)<3)
-    pari_err(talker,"not a pseudo-matrix in rnfdet");
-  return rnfdet2(nf,gel(order,1),gel(order,2));
+  pari_sp av = avma;
+  GEN A, I, D;
+  nf = checknf(nf);
+  order = get_order(nf, order, "rnfdet");
+  A = gel(order,1);
+  I = gel(order,2);
+  D = idealmul(nf, det(matbasistoalg(nf, A)), prodid(nf, I));
+  return gerepileupto(av, D);
 }
 
 /* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,
@@ -2888,17 +2893,6 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
   *py = y;
   *pz = db ? negi(db): gen_m1;
   *pt = element_div(nf, gel(uv,1), x);
-}
-
-static GEN
-get_order(GEN nf, GEN O, const char *s)
-{
-  if (typ(O) == t_POL)
-    return rnfpseudobasis(nf, O);
-  if (typ(O)!=t_VEC || lg(O) < 3 || typ(O[1]) != t_MAT || typ(O[2]) != t_VEC
-      || lg(O[1]) != lg(O[2]))
-    pari_err(talker,"not a pseudo-matrix in %s", s);
-  return O;
 }
 
 /* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an

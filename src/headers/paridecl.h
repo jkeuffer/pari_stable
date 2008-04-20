@@ -832,7 +832,6 @@ GEN     primedec(GEN nf,GEN p);
 GEN     rnfbasis(GEN bnf, GEN order);
 GEN     rnfdedekind(GEN nf, GEN T, GEN pr);
 GEN     rnfdet(GEN nf, GEN order);
-GEN     rnfdet2(GEN nf, GEN A, GEN I);
 GEN     rnfdiscf(GEN nf, GEN pol);
 GEN     rnfequation(GEN nf, GEN pol2);
 GEN     rnfequation0(GEN nf, GEN pol2, long flall);
