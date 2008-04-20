@@ -4871,7 +4871,7 @@ the right name in the first place.
 \fun{void}{closure_disassemble}{GEN C} print the \typ{CLOSURE} \kbd{C} in
 GP assembly format.
 
-\fun{GEN}{closure_callgen}{GEN C, long n, ...} evaluate the \typ{CLOSURE}
+\fun{GEN}{closure_callgenall}{GEN C, long n, ...} evaluate the \typ{CLOSURE}
 \kbd{C} with the \kbd{n} arguments (of type \kbd{GEN}) following \kbd{n} in
 the function call. Assumes \kbd{C} has arity $\geq \kbd{n}$.
 
@@ -4888,11 +4888,21 @@ has arity $\geq \kbd{lg(args)-1}$.
 The following technical functions are used to evaluate \emph{inline}
 closures, after pushing lexical arguments on the evaluator stack.
 
-\fun{GEN}{closure_evalgen}{GEN code}
+\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result
+or \kbd{NULL} if the evaluation was aborted (\kbd{break}).
 
-\fun{GEN}{closure_evalres}{GEN code}
+\fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
+an exception if the evaluation was aborted. Meant for pseudo-iterators where
+interrupting the closure ins meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
 
-\fun{void}{closure_evalvoid}{GEN code}
+\fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
+
+\fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
+value is ignored.
+
+\fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluate closure, while
+traping error \kbd{numerr}. Return \kbd{NULL} if error trapped, and the result
+otherwise..
 
 Various function used to manipulate and retrieve arguments on the evaluator
 stack:
@@ -4906,6 +4916,14 @@ stack:
 \fun{void}{set_lex}{long vn, GEN x}
 
 \fun{void}{closure_reset}{void}
+
+Functions returning new closures:
+
+\fun{GEN}{closure_deriv}{GEN code} returns a closure corresponding to the
+numerical derivative of the closure \kbd{code}.
+
+\fun{GEN}{genclosure}{entree *ep} creates a closure associated to a PARI
+function.
 
 \section{General Number Fields}
 
