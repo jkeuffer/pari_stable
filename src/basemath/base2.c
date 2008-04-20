@@ -2869,12 +2869,6 @@ rnfdet(GEN nf, GEN order)
   return rnfdet2(nf,gel(order,1),gel(order,2));
 }
 
-GEN
-rnfdet0(GEN nf, GEN x, GEN y)
-{
-  return y? rnfdet2(nf,x,y): rnfdet(nf,x);
-}
-
 /* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,
    t in a^-1 such that xt-yz=1. In the present version, z is in Z. */
 static void

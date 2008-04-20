@@ -193,6 +193,7 @@ BA 25- [ellap] Port of SEA algorithm from the ellsea GP package.
    10- useless error code 'elliper1'
    11- obsolete undocumented library function factpol(), lift_to_pol()
    12- library function combine_factors() is no longer public
+   13- obsolete undocumented library function rnfdet0
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

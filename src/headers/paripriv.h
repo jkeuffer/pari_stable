@@ -649,7 +649,6 @@ int     nfissquarefree(GEN nf, GEN x);
 GEN     nfreducemodpr_i(GEN x, GEN prh);
 GEN     polsymmodp(GEN g, GEN p);
 GEN     respm(GEN x, GEN y, GEN pm);
-GEN     rnfdet0(GEN nf, GEN x, GEN y);
 
 /* base3.c */
 
