@@ -1504,7 +1504,8 @@ gp_closure(long n)
   return getclosure(&pos);
 }
 
-GEN closure_deriv(GEN G)
+GEN
+closure_deriv(GEN G)
 {
   pari_sp ltop=avma;
   long i;
