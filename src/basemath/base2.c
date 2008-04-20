@@ -2810,27 +2810,26 @@ gen_if_principal(GEN bnf, GEN x)
   return z;
 }
 
-/* given bnf and a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d] it
- * does not matter), tries to simplify the HNF as much as possible. The
- * resulting matrix will be upper triangular but the diagonal coefficients
- * will not be equal to 1. The ideals are guaranteed to be integral and
- * primitive. */
+/* given bnf and a pseudo-basis of an order in HNF [A,I], tries to simplify
+ * the HNF as much as possible. The resulting matrix will be upper triangular
+ * but the diagonal coefficients will not be equal to 1. The ideals are
+ * guaranteed to be integral and primitive. */
 GEN
 rnfsimplifybasis(GEN bnf, GEN x)
 {
   pari_sp av = avma;
   long i, l;
-  GEN id, Az, Iz, nf, A, I;
+  GEN y, id, Az, Iz, nf, A, I;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  if (typ(x)!=t_VEC || lg(x)<3)
+  if (typ(x) != t_VEC || lg(x) < 3)
     pari_err(talker,"not a pseudo-basis in nfsimplifybasis");
-  x = shallowcopy(x);
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
   id = matid(degpol(nf[1]));
-  Az = cgetg(l, t_MAT); gel(x,1) = Az;
-  Iz = cgetg(l, t_VEC); gel(x,2) = Iz;
+  y = cgetg(3, t_VEC);
+  Az = cgetg(l, t_MAT); gel(y,1) = Az;
+  Iz = cgetg(l, t_VEC); gel(y,2) = Iz;
   for (i = 1; i < l; i++)
   {
     GEN c, d;
@@ -2847,7 +2846,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
       gel(Az,i) = element_mulvec(nf,d,gel(Az,i));
     }
   }
-  return gerepilecopy(av, x);
+  return gerepilecopy(av, y);
 }
 
 static GEN
