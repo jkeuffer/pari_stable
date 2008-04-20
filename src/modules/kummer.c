@@ -834,7 +834,7 @@ Stelt(GEN nf, GEN J, GEN polrel)
   x = cgetg(3,t_VEC);
   gel(x,1) = RgXV_to_RgM(A, degpol(polrel));
   gel(x,2) = I;
-  return prodid(nf, gel(nfhermite(nf,x),2));
+  return prodid(nf, gel(nfhnf(nf,x),2));
 }
 
 static GEN

@@ -2623,19 +2623,19 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
 
 /* Given a torsion-free module x outputs a pseudo-basis for x in HNF */
 GEN
-nfhermite(GEN nf, GEN x)
+nfhnf(GEN nf, GEN x)
 {
   long i, j, def, k, m;
   pari_sp av0 = avma, av, lim;
   GEN y, A, I, J;
 
   nf = checknf(nf);
-  check_ZKmodule(x, "nfhermite");
+  check_ZKmodule(x, "nfhnf");
   A = gel(x,1);
   I = gel(x,2); k = lg(A)-1;
-  if (!k) pari_err(talker,"not a matrix of maximal rank in nfhermite");
+  if (!k) pari_err(talker,"not a matrix of maximal rank in nfhnf");
   m = lg(A[1])-1;
-  if (k < m) pari_err(talker,"not a matrix of maximal rank in nfhermite");
+  if (k < m) pari_err(talker,"not a matrix of maximal rank in nfhnf");
 
   av = avma; lim = stack_lim(av, 2);
   A = matalgtobasis(nf,A);
@@ -2646,7 +2646,7 @@ nfhermite(GEN nf, GEN x)
     GEN d, di = NULL;
 
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
-    if (!j) pari_err(talker,"not a matrix of maximal rank in nfhermite");
+    if (!j) pari_err(talker,"not a matrix of maximal rank in nfhnf");
     if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
 
     y = gcoeff(A,i,def);
@@ -2674,7 +2674,7 @@ nfhermite(GEN nf, GEN x)
     }
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"nfhermite, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"nfhnf, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }
@@ -2946,14 +2946,14 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 }
 
 GEN
-nfhermitemod(GEN nf, GEN x, GEN detmat)
+nfhnfmod(GEN nf, GEN x, GEN detmat)
 {
   long li, co, i, j, def, ldef, N;
   pari_sp av0=avma, av, lim;
   GEN d0, w, p1, d, u, v, A, I, J, di, unnf;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  check_ZKmodule(x, "nfhermitemod");
+  check_ZKmodule(x, "nfhnfmod");
   A = gel(x,1);
   I = gel(x,2);
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
@@ -2987,7 +2987,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"[1]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"[1]: nfhnfmod, i = %ld", i);
       gerepileall(av,2, &A,&I);
     }
   }
@@ -3018,7 +3018,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"[2]: nfhermitemod, i = %ld", i);
+      if(DEBUGMEM>1) pari_warn(warnmem,"[2]: nfhnfmod, i = %ld", i);
       gerepileall(av,3, &A,&I,&J);
     }
   }

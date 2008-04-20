@@ -315,7 +315,7 @@ rnfprincipaltohermite(GEN rnf,GEN x)
   x = rnfbasistoalg(rnf,x);
   x = rnfalgtobasis(rnf, gmul(x, gmodulo(gel(bas,1), gel(rnf,1))));
   settyp(x, t_MAT);
-  return gerepileupto(av, nfhermite(nf, mkvec2(x, gel(bas,2))));
+  return gerepileupto(av, nfhnf(nf, mkvec2(x, gel(bas,2))));
 }
 
 GEN
@@ -332,7 +332,7 @@ rnfidealhermite(GEN rnf, GEN x)
       gel(z,2) = gmul(x, gel(bas,2)); return z;
 
     case t_VEC:
-      if (lg(x) == 3 && typ(x[1]) == t_MAT) return nfhermite(nf, x);
+      if (lg(x) == 3 && typ(x[1]) == t_MAT) return nfhnf(nf, x);
       return rnfidealabstorel(rnf, x);
 
     case t_POLMOD: case t_POL: case t_COL:
@@ -422,7 +422,7 @@ rnfidealabstorel(GEN rnf, GEN x)
     gel(A,j) = mulmat_pol(invbas, t);
     gel(I,j) = id;
   }
-  return gerepileupto(av, nfhermite(nf,z));
+  return gerepileupto(av, nfhnf(nf,z));
 }
 
 GEN
@@ -480,7 +480,7 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   p1 = gmul(gel(z,1), gel(x,1));
   p2 = rnfalgtobasis(rnf, gmul(gel(z,2), x1)); settyp(p2, t_MAT);
   z = mkvec2(shallowconcat(p1, p2), shallowconcat(x2, x2));
-  return gerepileupto(av, nfhermite(nf,z));
+  return gerepileupto(av, nfhnf(nf,z));
 }
 
 int

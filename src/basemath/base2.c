@@ -2375,7 +2375,7 @@ rnfjoinmodules_i(GEN nf, GEN Hx, GEN Ix, GEN Hy, GEN Iy)
   H = cgetg(l, t_MAT);
   I = cgetg(l, t_VEC);
   fill(lx, H     , Hx, I     , Ix);
-  fill(ly, H+lx-1, Hy, I+lx-1, Iy); return nfhermite(nf, mkvec2(H, I));
+  fill(ly, H+lx-1, Hy, I+lx-1, Iy); return nfhnf(nf, mkvec2(H, I));
 }
 static GEN
 rnfjoinmodules(GEN nf, GEN x, GEN y)
@@ -2466,7 +2466,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 
   A = cgetg(m+d+1,t_MAT);
   I = cgetg(m+d+1,t_VEC); base = mkvec2(A, I);
- /* base[2] temporarily multiplied by p, for the final nfhermitemod,
+ /* base[2] temporarily multiplied by p, for the final nfhnfmod,
   * which requires integral ideals */
   matid = scalarmat(p, n);
   prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
@@ -2485,7 +2485,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
   }
   /* the modulus is integral */
-  base = nfhermitemod(nf,base, gmul(powiu(p, m-d),
+  base = nfhnfmod(nf,base, gmul(powiu(p, m-d),
 				    idealpows(nf, prinvp, d)));
   gel(base,2) = gdiv(gel(base,2), p); /* cancel the factor p */
   vt = vdisc - 2*d;

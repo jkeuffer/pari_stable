@@ -128,6 +128,7 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
        of interpreting 0 in a special way) 
    39- nfbasistoalg / nfalgtobasis no longer accept t_VEC/t_COL/t_MAT,
        use matbasistoalg / matalgtobasis, which now also accept t_VEC/t_COL
+   40- rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
 
   Added
     1- library function gpcalloc
