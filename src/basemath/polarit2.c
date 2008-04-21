@@ -1597,20 +1597,26 @@ nfrootsQ(GEN x)
 /**                          FACTORIZATION                            **/
 /**                                                                   **/
 /***********************************************************************/
-#define assign_or_fail(x,y) {\
-  if (y==NULL) y=x; else if (!gequal(x,y)) return 0;\
+#define assign_or_fail(x,y) { GEN __x = x;\
+  if (y==NULL) y=__x; else if (!gequal(__x,y)) return 0;\
 }
-#define tsh 6
-#define typs(x,y) ((x << tsh) | y)
-#define typ1(x) (x >> tsh)
-#define typ2(x) (x & ((1<<tsh)-1))
+
+static const long tsh = 6;
+static long
+RgX_type_code(long t1, long t2) { return (t1 << tsh) | t2; }
+void
+RgX_type_decode(long x, long *t1, long *t2)
+{
+  *t1 = x >> tsh;
+  *t2 = (x & ((1<<tsh)-1));
+}
 
 long
 RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
   long t[16];
   long tx = typ(x), lx, i, j, s, pa = LONG_MAX;
-  GEN pcx=NULL, p=NULL,pol=NULL,ff=NULL,p1,p2;
+  GEN pcx=NULL, p=NULL, pol=NULL, ff=NULL;
 
   if (is_scalar_t(tx))
   {
@@ -1636,43 +1642,42 @@ RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
   lx = lg(x);
   for (i=2; i<lx; i++)
   {
-    p1=gel(x,i);
-    switch(typ(p1))
+    GEN c = gel(x,i);
+    switch(typ(c))
     {
       case t_INT: case t_FRAC:
 	break;
       case t_REAL:
-	s = precision(p1); if (s < pa) pa = s;
+	s = precision(c); if (s < pa) pa = s;
 	t[2]=1; break;
       case t_INTMOD:
-	assign_or_fail(gel(p1,1),p);
+	assign_or_fail(gel(c,1),p);
 	t[3]=1; break;
       case t_FFELT:
-	if (ff==NULL) ff=p1;
-	else if (!FF_samefield(p1,ff)) return 0;
-	p2=FF_p_i(p1);
-	assign_or_fail(p2,p);
+	if (ff==NULL) ff=c;
+	else if (!FF_samefield(c,ff)) return 0;
+	assign_or_fail(FF_p_i(c),p);
 	t[15]=1; break;
       case t_COMPLEX:
 	if (!pcx) pcx = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
 	for (j=1; j<=2; j++)
 	{
-	  p2 = gel(p1,j);
-	  switch(typ(p2))
+	  GEN d = gel(c,j);
+	  switch(typ(d))
 	  {
 	    case t_INT: case t_FRAC:
 	      assign_or_fail(pcx,pol);
 	      t[4]=1; break;
 	    case t_REAL:
-	      s = precision(p2); if (s < pa) pa = s;
+	      s = precision(d); if (s < pa) pa = s;
 	      t[5]=1; break;
 	    case t_INTMOD:
-	      assign_or_fail(gel(p2,1),p);
+	      assign_or_fail(gel(d,1),p);
 	      assign_or_fail(pcx,pol);
 	      t[6]=1; break;
 	    case t_PADIC:
-	      s = precp(p2) + valp(p2); if (s < pa) pa = s;
-	      assign_or_fail(gel(p2,2),p);
+	      s = precp(d) + valp(d); if (s < pa) pa = s;
+	      assign_or_fail(gel(d,2),p);
 	      assign_or_fail(pcx,pol);
 	      t[7]=1; break;
 	    default: return 0;
@@ -1680,38 +1685,38 @@ RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	}
 	break;
       case t_PADIC:
-	s = precp(p1) + valp(p1); if (s < pa) pa = s;
-	assign_or_fail(gel(p1,2),p);
+	s = precp(c) + valp(c); if (s < pa) pa = s;
+	assign_or_fail(gel(c,2),p);
 	t[8]=1; break;
       case t_QUAD:
 	for (j=2; j<=3; j++)
 	{
-	  p2 = gel(p1,j);
-	  switch(typ(p2))
+	  GEN d = gel(c,j);
+	  switch(typ(d))
 	  {
 	    case t_INT: case t_FRAC:
-	      assign_or_fail(gel(p1,1),pol);
+	      assign_or_fail(gel(c,1),pol);
 	      t[9]=1; break;
 	    case t_INTMOD:
-	      assign_or_fail(gel(p2,1),p);
-	      assign_or_fail(gel(p1,1),pol);
+	      assign_or_fail(gel(d,1),p);
+	      assign_or_fail(gel(c,1),pol);
 	      t[10]=1; break;
 	    case t_PADIC:
-	      s = precp(p2) + valp(p2); if (s < pa) pa = s;
-	      assign_or_fail(gel(p2,2),p);
-	      assign_or_fail(gel(p1,1),pol);
+	      s = precp(d) + valp(d); if (s < pa) pa = s;
+	      assign_or_fail(gel(d,2),p);
+	      assign_or_fail(gel(c,1),pol);
 	      t[11]=1; break;
 	    default: return 0;
 	  }
 	}
 	break;
       case t_POLMOD:
-	assign_or_fail(gel(p1,1),pol);
+	assign_or_fail(gel(c,1),pol);
 	for (j=1; j<=2; j++)
 	{
 	  GEN pbis = NULL, polbis = NULL;
 	  long pabis;
-	  switch(RgX_type(gel(p1,j),&pbis,&polbis,&pabis))
+	  switch(RgX_type(gel(c,j),&pbis,&polbis,&pabis))
 	  {
 	    case t_INT: t[12]=1; break;
 	    case t_INTMOD: t[13]=1; break;
@@ -1739,19 +1744,19 @@ RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
   {
     *ptpol=pol; *ptp=p;
     i = t[13]? t_POLMOD: (t[10]? t_QUAD: t_COMPLEX);
-    return typs(i, t_INTMOD);
+    return RgX_type_code(i, t_INTMOD);
   }
   if (t[7]||t[11]||t[14])
   {
     *ptpol=pol; *ptp=p; *ptpa=pa;
     i = t[14]? t_POLMOD: (t[11]? t_QUAD: t_COMPLEX);
-    return typs(i, t_PADIC);
+    return RgX_type_code(i, t_PADIC);
   }
   if (t[4]||t[9]||t[12])
   {
     *ptpol=pol;
     i = t[12]? t_POLMOD: (t[9]? t_QUAD: t_COMPLEX);
-    return typs(i, t_INT);
+    return RgX_type_code(i, t_INT);
   }
   if (t[15])
   {
@@ -2044,7 +2049,7 @@ factor(GEN x)
 	default:
 	{
 	  GEN p5;
-	  long killv;
+	  long killv, t1, t2;
 	  x = shallowcopy(x); lx=lg(x);
 	  pol = shallowcopy(pol);
 	  v = pari_var_next_temp();
@@ -2060,14 +2065,15 @@ factor(GEN x)
 	  }
 	  killv = (avma != (pari_sp)pol);
 	  if (killv) setvarn(pol, fetch_var());
-	  switch (typ2(tx))
+          RgX_type_decode(tx, &t1, &t2);
+	  switch (t2)
 	  {
 	    case t_INT: p1 = polfnf(x,pol); break;
 	    case t_INTMOD: p1 = factorff(x,p,pol); break;
 	    default: pari_err(impl,"factor of general polynomial");
 	      return NULL; /* not reached */
 	  }
-	  switch (typ1(tx))
+	  switch (t1)
 	  {
 	    case t_POLMOD:
 	      if (killv) (void)delete_var();
@@ -2108,10 +2114,6 @@ factor(GEN x)
   pari_err(talker,"can't factor %Zs",x);
   return NULL; /* not reached */
 }
-#undef typ1
-#undef typ2
-#undef typs
-#undef tsh
 
 /* assume n > 0. Compute x^n using left-right binary powering */
 GEN

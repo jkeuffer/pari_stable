@@ -301,7 +301,6 @@ GEN  quad_polmod_conj(GEN x, GEN y);
 GEN  quad_polmod_norm(GEN x, GEN y);
 
 /* Polynomials */
-long RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 /* a) Arithmetic/conversions */
 GEN  addmulXn(GEN x, GEN y, long d);
 GEN  addshiftpol(GEN x, GEN y, long d);

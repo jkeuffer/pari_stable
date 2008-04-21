@@ -3379,6 +3379,62 @@ multiplied by $\kbd{x}^n$, assuming $n\geq 0$.
 
 \subsec{\kbd{RgX}}.
 
+\fun{long}{RgX_type}{GEN x, GEN *ptp, GEN *ptpol, long *ptprec} returns
+the ``natural'' base ring over which the polynomial $x$ is defined. Raise an
+error if it detects consistency problems in modular objects: incompatible rings
+(e.g. $\F_p$ and $\F_q$ for primes $p\neq q$, $\F_p[X]/(T)$ and $\F_p[X]/(U)$
+for $T\neq U$). Minor discrepancies are supported if they make general sense
+(e.g. $\F_p$ and $\F_{p^k}$, but not $\F_p$ and $\Q_p$); \typ{FFELT} and
+\typ{POLMOD} of \typ{INTMOD}s are considered inconsistent, even if they define
+the same field : if you need to use simultaneously these different finite
+field implementations, multiply the polynomial by a \typ{FFELT} equal to $1$
+first.
+
+\item 0: none of the others (presumably multivariate, possibly inconsistent).
+
+\item \typ{INT}: defined over $\Q$ (not necessarily $\Z$).
+
+\item \typ{INTMOD}: defined over $\Z/p\Z$, where \kbd{*ptp} is set to $p$.
+It is not checked whether $p$ is prime.
+
+\item \typ{COMPLEX}: defined over $\C$ (at least one \typ{COMPLEX} with at
+least one inexact floating point \typ{REAL} component). Set \kbd{*ptprec}
+to the minimal accuracy (as per \kbd{precision}) of inexact components.
+
+\item \typ{REAL}: defined over $\R$ (at least one inexact floating point
+\typ{REAL} component). Set \kbd{*ptprec} to the minimal accuracy (as per
+\kbd{precision}) of inexact components.
+
+\item \typ{PADIC}: defined over $\Q_p$, where \kbd{*ptp} is set to $p$ and
+\kbd{*ptprec} to the $p$-adic accuracy.
+
+\item \typ{FFELT}: defined over a finite field $\F_{p^k}$, where \kbd{*ptp}
+is set to the field characteristic $p$ and \kbd{*ptpol} is set to a
+\typ{FFELT} belonging to the field. 
+
+\item other values are composite corresponding to quotients $R[X]/(T)$, with
+one primary type \kbd{t1}, descrіbing the form of the quotient,
+and a secondary type \kbd{t2}, describing $R$. If \kbd{t} is the
+\kbd{RgX\_type}, \kbd{t1} and \kbd{t2} are recovered using
+
+\fun{void}{RgX_type_decode}{long t, long *t1, long *t2}
+
+\kbd{t1} is one of
+
+\typ{POLMOD} : at least one \typ{POLMOD} component,
+set \kbd{*ppol} to the modulus,
+
+\typ{QUAD} : no \typ{POLMOD}, at least one \typ{QUAD} component,
+set \kbd{*ppol} to the modulus (\kbd{$-$.pol}) of the \typ{QUAD},
+
+\typ{COMPLEX} : no \typ{POLMOD} or \typ{QUAD}, at least one \typ{COMPLEX} 
+component, set \kbd{*ppol} to $y^2 + 1$.
+
+and the underlying base ring $R$ is given by \kbd{t2}, which
+is one of \typ{INT}, \typ{INTMOD} (set \kbd{*ptp}) or \typ{PADIC} 
+(set \kbd{*ptp} and \kbd{*ptprec}), with the same meaning
+as above.
+
 \fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
