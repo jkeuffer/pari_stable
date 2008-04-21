@@ -2009,7 +2009,7 @@ factor(GEN x)
       switch(tx)
       {
 	case 0: pari_err(impl,"factor for general polynomials");
-	case t_INT: return ZX_factor(x);
+	case t_INT: return QX_factor(x);
 	case t_INTMOD: return factmod(x,p);
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lg(x)-2;
