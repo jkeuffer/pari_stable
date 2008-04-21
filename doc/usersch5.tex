@@ -792,10 +792,11 @@ the lower \B\ bits and stores the high-order \B\ bits into \kbd{hiremainder}.
 of \kbd{x} and \kbd{y}, returns the lower \B\ bits and stores the high-order
 \B\ bits into \kbd{hiremainder}.
 
-\fun{ulong}{divll}{ulong x, ulong y} returns the Euclidean quotient of
-(\kbd{hiremainder << \B})${}+{}$\kbd{x} by \kbd{y} and stores the remainder
-into \kbd{hiremainder}. An error occurs if the quotient cannot be represented
-by an \kbd{ulong}, i.e.~if initially $\kbd{hiremainder}\ge\kbd{y}$.
+\fun{ulong}{divll}{ulong x, ulong y} returns the quotient of
+$  \left(\kbd{hiremainder} * 2^{\B}\right) + \kbd{x} $
+by \kbd{y} and stores the remainder into \kbd{hiremainder}. An error occurs
+if the quotient cannot be represented by an \kbd{ulong}, i.e.~if initially
+$\kbd{hiremainder}\ge\kbd{y}$.
 
 \subsec{Modular kernel}.
 The following routines are not part of the level 0 kernel per se, but
@@ -1640,9 +1641,9 @@ non-negative residue).
 \fun{GEN}{Fp_sub}{GEN a, GEN b, GEN m} returns the difference of \kbd{a} and
 \kbd{b} modulo \kbd{m} (smallest non-negative residue).
 
-\fun{GEN}{Fp_center}{GEN a, GEN p, GEN pov2} assuming \kbd{a} is between
-$0$ and $\kbd{p} - 1$ and \kbd{pov2} is \kbd{shifti(p,-1)}, returns the
-representative of \kbd{a} in the symmetric residue system.
+\fun{GEN}{Fp_center}{GEN a, GEN p, GEN pov2} assuming that \kbd{pov2} is
+\kbd{shifti(p,-1)} and that \kbd{a} is between $0$ and $\kbd{p} - 1$ and,
+returns the representative of \kbd{a} in the symmetric residue system.
 
 \fun{GEN}{Fp_mul}{GEN a, GEN b, GEN m} returns the product of \kbd{a} by
 \kbd{b} modulo \kbd{m} (smallest non-negative residue).
@@ -1982,10 +1983,10 @@ Mod(1,p))}, hence a \typ{VEC}
 Mod(1,p))}, which is an \kbd{FpM}.
 
 \fun{GEN}{FpC_center}{GEN z, GEN p, GEN pov2} returns a \typ{COL} whose
-entries are the \kbd{Fp\_center(gel(z,i))}.
+entries are the \kbd{Fp\_center} of the \kbd{gel(z,i)}.
 
 \fun{GEN}{FpM_center}{GEN z, GEN p, GEN pov2} returns a matrix whose
-entries are the \kbd{Fp\_center(gcoeff(z,i,j))}.
+entries are the \kbd{Fp\_center} of the \kbd{gcoeff(z,i,j)}.
 
 \fun{GEN}{FpC_add}{GEN x, GEN y, GEN p} adds the \kbd{ZC} $x$ and $y$
 and reduce modulo $p$ to obtain an \kbd{FpC}.
@@ -2016,8 +2017,12 @@ and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.
 
-\fun{GEN}{FpM_FpC_mul_FpX}{GEN x, GEN y, GEN p, long v} memory clean
-version of \kbd{RgV\_to\_RgX(FpM\_FpC\_mul(x,y,p), v)}.
+\fun{GEN}{FpM_FpC_mul_FpX}{GEN x, GEN y, GEN p, long v} is a memory-clean
+version of
+\bprog
+  GEN tmp = FpM_FpC_mul(x,y,p);
+  return RgV_to_RgX(tmp, v);
+@eprog
 
 \fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
 (seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
@@ -3184,9 +3189,9 @@ Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
 itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
 $x = yQ + R$.
 
-\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q}; $x$ is a \kbd{ZM} and we
-reduce each column using \kbd{ZC\_hnfremdiv}. If $Q$ is not \kbd{NULL},
-set it to the \kbd{ZM} such that $x = yQ + R$.
+\fun{GEN}{ZM_hnfremdiv}{GEN x, GEN y, GEN *Q} reduce
+each column of the \kbd{ZM} $x$ using \kbd{ZC\_hnfremdiv}. If $Q$ is not
+\kbd{NULL}, set it to the \kbd{ZM} such that $x = yQ + R$.
 
 \fun{GEN}{ZC_hnfrem}{GEN x, GEN y} alias for \kbd{ZC\_hnfremdiv(x,y,NULL)}.
 
@@ -3478,10 +3483,10 @@ remainder $\kbd{A}(\kbd{a})$.
 $q$ and pseudo-remainder $r$ such that $\kbd{lc}(y)^{\deg(x) - \deg(y) + 1}x
 = qy + r$. Return $q$ and set \kbd{*ptr} to $r$.
 
-\fun{GEN}{RgX_pseudorem}{GEN x, GEN y} return the pseudo-remainder
+\fun{GEN}{RgX_pseudorem}{GEN x, GEN y} return the remainder
 in the pseudo-division of $x$ by $y$.
 
-\fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the pseudo-remainder
+\fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the remainder
 in the pseudo-division of $x$ by $y$ over $R[X]/(T)$.
 
 \fun{GEN}{RgX_mulXn}{GEN x, long n} returns $\kbd{x} * t^n$. This may
@@ -3551,7 +3556,7 @@ have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
 \fun{GEN}{RgXQ_matrix_pow}{GEN y, long n, long m, GEN P} returns
-\kbd{RgXQ\_powers(y,m-1,P)} as a matrix of dimension $n \geq \deg P$.
+\kbd{RgXQ\_powers(y,m-1,P)}, as a matrix of dimension $n \geq \deg P$.
 
 \fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
@@ -4170,10 +4175,11 @@ such that \kbd{cmp(data,x,y)} returns a negative result if $x
 < y$, a positive one if $x > y$ and 0 if $x = y$. The \kbd{data} argument is
 there in case your \kbd{cmp} requires additional context.
 
-\fun{GEN}{gen_sort}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as \kbd{sort}.
+\fun{GEN}{gen_sort}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as
+\kbd{sort}, with an explicit comparison routine.
 
 \fun{GEN}{gen_sort_uniq}{GEN x, void *data, int (*cmp)(void *,GEN,GEN)}, as
-\kbd{sort}, removing duplicate entries.
+\kbd{gen\_sort}, removing duplicate entries.
 
 \fun{GEN}{gen_indexsort}{GEN x, void *data, int (*cmp)(void*,GEN,GEN)},
 as \kbd{indexsort}.
@@ -4199,12 +4205,12 @@ the latter factorization are preserved, e.g. when merging the factorization
 of $2$ and $1/2$, the result is $2^0$.
 
 \fun{long}{gen_search}{GEN v, GEN y, long flag, void *data, int
-(*cmp)(void*,GEN,GEN)}. Let \kbd{v} be a vector sorted according to
-\kbd{cmp(data,a,b)}; look for an index $i$ such that  \kbd{v[$i$]}
-is equal to \kbd{y}. \kbd{flag} has the same meaning as in \kbd{setsearch}:
-if \kbd{flag} is 0, return $i$ if it exists and 0 otherwise; if \kbd{flag} is
-non-zero, return $0$ if $i$ exists and the index where \kbd{y} should be
-inserted otherwise.
+(*cmp)(void*,GEN,GEN)}.\hfil\break
+Let \kbd{v} be a vector sorted according to \kbd{cmp(data,a,b)}; look for an
+index $i$ such that  \kbd{v[$i$]} is equal to \kbd{y}. \kbd{flag} has the
+same meaning as in \kbd{setsearch}: if \kbd{flag} is 0, return $i$ if it
+exists and 0 otherwise; if \kbd{flag} is non-zero, return $0$ if $i$ exists
+and the index where \kbd{y} should be inserted otherwise.
 
 \fun{long}{tablesearch}{GEN T, GEN x, int (*cmp)(GEN,GEN)} is a faster
 implementation for the common case \kbd{gen\_search(T,x,0,cmp,cmp\_nodata)}.
@@ -5364,10 +5370,11 @@ typedef struct {
 } hashtable;
 @eprog\noindent
 
-\fun{hashtable*}{hash_create}{ulong minsize, ulong (*hash)(void*), int
-(*eq)(void*,void*)} creates a hashtable with enough room to contain
-\kbd{minsize} entries. The functions \kbd{hash} and \kbd{eq} will be used to
-compute the hash value of keys and test keys for equality, respectively.
+\fun{hashtable*}{hash_create}{ulong size, ulong (*hash)(void*), int
+(*eq)(void*,void*)}\hfil\break
+creates a hashtable with enough room to contain \kbd{size} entries.
+The functions \kbd{hash} and \kbd{eq} will be used to compute the hash value
+of keys and test keys for equality, respectively.
 
 \fun{void}{hash_insert}{hashtable *h, void *k, void *v} inserts $(k,v)$
 in hashtable $h$. No copy is made: $k$ and $v$ themselves are stored. The
@@ -5483,7 +5490,7 @@ messages if \kbd{DEBUGFILES} is high enough.
 around \kbd{fopen(s, mode)}, return \kbd{NULL} on failure.
 
 \fun{pariFILE*}{pari_fopen_or_fail}{const char *s, const char *mode}
-wrapper around \kbd{fopen(s, mode)}; error on failure.
+simple wrapper around \kbd{fopen(s, mode)}; error on failure.
 
 \fun{pariFILE*}{pari_fopengz}{const char *s} opens the file whose name is
 $s$,  and associates a (read-only) \kbd{pariFILE} with it. If $s$ is a

@@ -1678,15 +1678,13 @@ seen so far:
 \tet{pari_flush}, \tet{pari_printf} output according to the values of the
 \teb{pariOut}~/ \teb{pariErr} global variables which provides a global
 output context, i.e.~ a set of low-level functions to actually interact with
-a ``stream''.
-
-By default, we have \kbd{pariOut = defaultOut}, the output ``stream'' is an
-actual \kbd{FILE*}, \tet{pari_outfile}, initialized to \tet{stdout}, and
-the low-level printing functions are actually the standard \kbd{putc} /
-\kbd{puts}, plus some magic to handle a logfile if one is open. If you intend
-to change \kbd{pariOut}, diverting output in non-trivial ways, this probably
-means you are rewriting \kbd{gp}. In that case, have a look at the code in
-\kbd{language/es.c} (\kbd{pariOut80} comes to mind).
+a ``stream''. By default, we have \kbd{pariOut = defaultOut}, the output
+``stream'' is an actual \kbd{FILE*}, \tet{pari_outfile}, initialized to
+\tet{stdout}, and the low-level printing functions are actually the standard
+\kbd{putc} / \kbd{puts}, plus some magic to handle a logfile if one is open.
+If you intend to change \kbd{pariOut}, diverting output in non-trivial ways,
+this probably means you are rewriting \kbd{gp}. In that case, have a look at
+the code in \kbd{language/es.c} (\kbd{pariOut80} comes to mind).
 
 Still keeping the default output context \kbd{defaultOut}, you can change
 PARI's standard output, redirecting \tet{pari_outfile} to another file, using
