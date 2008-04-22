@@ -1832,6 +1832,7 @@ GEN     nffactor(GEN nf,GEN x);
 GEN     nffactormod(GEN nf,GEN pol,GEN pr);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN     nfroots(GEN nf,GEN pol);
+GEN     polfnf(GEN a, GEN t);
 
 /* part.c */
 
@@ -1941,7 +1942,6 @@ GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 int     poldvd(GEN x, GEN y, GEN *z);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
-GEN     polfnf(GEN a, GEN t);
 GEN     rootmod(GEN f, GEN p);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootmod2(GEN f, GEN p);

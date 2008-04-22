@@ -298,32 +298,97 @@ nf_pol_lift(GEN pol, GEN bound, nfcmbf_t *T)
   return x;
 }
 
+static GEN
+zerofact(long v)
+{
+  GEN z = cgetg(3, t_MAT);
+  gel(z,1) = mkcol(zeropol(v));
+  gel(z,2) = mkcol(gen_1); return z;
+}
+
+/* Return the factorization of A in Q[X]/(T) in rep [pre-allocated with
+ * cgeg(3,t_MAT)], reclaiming all memory between avma and rep. 
+ * y is the vector of irreducible factors of B = Q_primpart( A/gcd(A,A') ).
+ * Bad primes divide 'bad' */
+static void
+fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
+{
+  pari_sp av = (pari_sp)rep;
+  long n = lg(y)-1;
+  GEN ex;
+
+  if (A != B)
+  { /* not squarefree */
+    if (n == 1)
+    { /* perfect power, simple ! */
+      y = gerepileupto(av, RgXQXV_to_mod(y, T));
+      ex = mkcol( utoipos(degpol(A) / degpol(gel(y,1))) );
+    }
+    else
+    { /* compute valuations mod a prime of degree 1 (avoid coeff explosion) */
+      pari_sp av1 = avma;
+      long j;
+      GEN quo, p, r, Bp, E = cgetalloc(t_VECSMALL,n+1);
+      byteptr pt = diffptr;
+      ulong pp = 0;
+      for (;; avma = av1)
+      {
+        NEXT_PRIME_VIADIFF_CHECK(pp, pt);
+        if (! umodiu(bad,pp)) continue;
+        p = utoipos(pp);
+        r = FpX_oneroot(T, p);
+        if (!r) continue;
+        Bp = FpXY_evalx(B, r, p);
+        if (FpX_is_squarefree(Bp, p)) break;
+      }
+
+      quo = FpXY_evalx(Q_primpart(A), r, p);
+      for (j=n; j>=2; j--)
+      {
+        GEN fact = FpXY_evalx(gel(y,j), r, p);
+        long e = 0;
+        for(;; e++)
+        {
+          GEN q = FpX_divrem(quo,fact,p,ONLY_DIVIDES);
+          if (!q) break;
+          quo = q;
+        }
+        E[j] = e;
+      }
+      E[1] = degpol(quo) / degpol(gel(y,1));
+      y = gerepileupto(av, RgXQXV_to_mod(y, T));
+      ex = zc_to_ZC(E); pari_free((void*)E);
+    }
+  }
+  else
+  {
+    y = gerepileupto(av, RgXQXV_to_mod(y, T));
+    ex = const_col(n, gen_1);
+  }
+  gel(rep,1) = y; settyp(y, t_COL);
+  gel(rep,2) = ex;
+}
+
 /* return the factorization of x in nf */
 GEN
 nffactor(GEN nf,GEN pol)
 {
-  GEN A, g, y, ex, T, den, rep = cgetg(3, t_MAT);
+  GEN bad, A, B, G, y, T, den, rep = cgetg(3, t_MAT);
   pari_sp av = avma;
-  long d;
+  long dA;
+  int sqfree;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   T = get_nfpol(nf, &nf);
   A = fix_relative_pol(T,pol,1);
-  d = degpol(A);
-  if (d <= 0) {
-    avma = av;
-    if (d == 0) /* trivfact() */
-      y = ex = cgetg(1, t_COL);
-    else { /* 0^1 */
-      y = mkcol( zeropol(varn(pol)) );
-      ex = mkcol( gen_1 );
-    }
-    gel(rep,1) = y;
-    gel(rep,2) = ex; return rep;
+  dA = degpol(A);
+  if (dA <= 0) {
+    avma = (pari_sp)(rep + 3);
+    return (dA == 0)? trivfact(): zerofact(varn(pol));
   }
   A = Q_primpart( QXQX_normalize(A, T) );
-  if (d == 1) {
+  if (dA == 1) {
     GEN c;
     A = gerepilecopy(av, A); c = gel(A,2);
     if (typ(c) == t_POL && degpol(c) > 0) gel(A,2) = mkpolmod(c, ZX_copy(T));
@@ -333,44 +398,17 @@ nffactor(GEN nf,GEN pol)
   if (degpol(T) == 1) return gerepileupto(av, QX_factor(simplify_i(A)));
 
   den = get_den(&nf, T);
-  g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
+  bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);
+  G = nfgcd(A, RgX_deriv(A), T, bad);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
-  if (degpol(g))
-  { /* not squarefree */
-    pari_sp av1;
-    GEN E;
-    long l, j;
-    g = QXQX_normalize(g, T);
-    A = RgXQX_div(A,g, T);
+  sqfree = (degpol(G) == 0);
+  B = sqfree? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
+  y = nfsqff(nf,B,0, den);
+  if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
 
-    y = nfsqff(nf,A,0, den); l = lg(y);
-    E = cgetg(l, t_VECSMALL); /* will be left on stack */
-    av1 = avma;
-    for (j=l-1; j>=1; j--)
-    {
-      GEN fact = gel(y,j), quo = g, q;
-      long e = 0;
-      for(e = 1;; e++)
-      {
-	q = RgXQX_divrem(quo,fact,T, ONLY_DIVIDES);
-	if (!q) break;
-	quo = q;
-      }
-      E[j] = e;
-    }
-    avma = av1; y = gerepileupto(av, RgXQXV_to_mod(y, T));
-    ex = zc_to_ZC(E);
-  }
-  else
-  {
-    y = gerepileupto(av, RgXQXV_to_mod(nfsqff(nf,A,0, den), T));
-    ex = const_col(lg(y)-1, gen_1);
-  }
-  if (DEBUGLEVEL>3)
-    fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
-  gel(rep,1) = y;
-  gel(rep,2) = ex; return sort_factor_pol(rep, cmp_RgX);
+  fact_from_sqff(rep, A, B, y, T, bad);
+  return sort_factor_pol(rep, cmp_RgX);
 }
 
 /* assume x scalar or t_COL */
@@ -1440,6 +1478,61 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   }
 }
 
+static GEN
+nfsqff_trager(GEN u, GEN T, GEN dent)
+{
+  long k = 0, i, lx; 
+  GEN P, x0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
+  int tmonic;
+  if (DEBUGLEVEL>4) fprintferr("nfsqff_trager: choosing k = %ld\n",k);
+
+  /* n guaranteed to be squarefree */
+  fa = ZX_DDF(Q_primpart(n)); lx = lg(fa);
+  if (lx == 2) return mkcol(u);
+
+  tmonic = is_pm1(leading_term(T));
+  P = cgetg(lx,t_COL);
+  x0 = deg1pol_i(stoi(-k), gen_0, varn(T));
+  for (i=lx-1; i>0; i--)
+  {
+    GEN f = gel(fa,i), F = RgXQX_translate(f, x0, T);
+    if (!tmonic) F = Q_primpart(F);
+    F = nfgcd(u, F, T, dent);
+    if (typ(F) != t_POL || degpol(F) == 0)
+      pari_err(talker,"reducible modulus in factornf");
+    gel(P,i) = QXQX_normalize(F, T);
+  }
+  return P;
+}
+
+/* Factor polynomial a on the number field defined by polynomial T, using
+ * Trager's trick */
+GEN
+polfnf(GEN a, GEN T)
+{
+  GEN rep = cgetg(3, t_MAT), A, B, G, y, dent, bad;
+  long dA;
+  int sqfree, tmonic;
+
+  if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
+  T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
+  A = Q_primpart( fix_relative_pol(T,a,1) );
+  dA = degpol(A);
+  if (dA <= 0)
+  {
+    avma = (pari_sp)(rep + 3);
+    return (dA == 0)? trivfact(): zerofact(varn(A));
+  }
+  bad = dent = ZX_disc(T);
+  if (tmonic) dent = indexpartial(T, dent);
+  G = nfgcd(A,RgX_deriv(A), T, dent);
+  sqfree = (degpol(G) == 0);
+  B = sqfree? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
+  y = nfsqff_trager(B, T, dent);
+  fact_from_sqff(rep, A, B, y, T, bad);
+  return sort_factor_pol(rep, cmp_RgX);
+}
+
 /* return the factorization of the square-free polynomial pol. Not memory-clean
    The coeffs of pol are in Z_nf and its leading term is a rational integer.
    deg(pol) > 0, deg(nfpol) > 1
@@ -1450,29 +1543,29 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 static GEN
 nfsqff(GEN nf, GEN pol, long fl, GEN den)
 {
-  long i, l, n, nbf, dpol = degpol(pol);
+  long n, nbf, dpol = degpol(pol);
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, z, res, polred, lt, nfpol = gel(nf,1);
+  GEN N2, res, polred, lt, nfpol = gel(nf,1);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   n = degpol(nfpol);
-  polbase = RgX_to_nfX(nf, pol);
   /* deg = 1 => irreducible */
   if (dpol == 1) return mkvec(QXQX_normalize(pol, nfpol));
   /* heuristic */
   if (dpol*3 < n)
   {
+    GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = gel(polfnf(pol, nfpol),1);
+    z = nfsqff_trager(Q_primpart(pol), nfpol, den);
     if (fl) {
-      l = lg(z);
+      long i, l = lg(z);
       for (i = 1; i < l; i++)
       {
 	GEN t = gel(z,i); if (degpol(t) > 1) break;
-	gel(z,i) = gneg(gdiv(gel(t,2), gel(t,3)));
+	gel(z,i) = gdiv(gel(t,2), negi(gel(t,3)));
       }
       setlg(z, i);
       if (fl == 2 && i != l) return cgetg(1,t_VEC);
@@ -1480,6 +1573,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     return z;
   }
 
+  polbase = RgX_to_nfX(nf, pol);
   nbf = nf_pick_prime(5, nf, polbase, fl, &lt, &init_fa, &pr, &L.Tp);
   if (fl == 2 && nbf < dpol) return cgetg(1,t_VEC);
   if (nbf <= 1)

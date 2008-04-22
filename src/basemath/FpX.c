@@ -204,6 +204,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     GEN b = ZX_to_Flx(y, pp);
     z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
+    if (!z) return NULL;
     z = shallowcopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {

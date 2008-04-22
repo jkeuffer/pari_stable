@@ -2165,65 +2165,6 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
 /*                  FACTOR USING TRAGER'S TRICK                    */
 /*                                                                 */
 /*******************************************************************/
-/* Factor polynomial a on the number field defined by polynomial T */
-GEN
-polfnf(GEN a, GEN T)
-{
-  pari_sp av = avma;
-  GEN x0, P, E, u, G, fa, n, unt, dent, A;
-  long lx, i, k, e;
-  int sqfree, tmonic;
-
-  if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
-  if (gcmp0(a)) return gcopy(a);
-  T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
-  A = Q_primpart( fix_relative_pol(T,a,1) );
-
-  dent = tmonic? indexpartial(T, NULL): ZX_disc(T);
-  unt = mkpolmod(gen_1,T);
-  G = nfgcd(A,RgX_deriv(A), T, dent);
-  sqfree = gcmp1(G);
-  if (sqfree)
-    u = A;
-  else
-    u = Q_primpart( RgXQX_div(A, G, T) );
-  k = 0; n = ZX_ZXY_rnfequation(T, u, &k);
-  if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
-  if (!sqfree)
-  {
-    G = poleval(G, deg1pol_i(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
-    G = ZX_ZXY_resultant(T, G);
-  }
-  /* n guaranteed to be squarefree */
-  fa = ZX_DDF(Q_primpart(n)); lx = lg(fa);
-  P = cgetg(lx,t_COL);
-  E = cgetg(lx,t_COL);
-  if (lx == 2)
-  { /* P^k, k irreducible */
-    gel(P,1) = gmul(unt,u);
-    gel(E,1) = utoipos(degpol(A) / degpol(u));
-    return gerepilecopy(av, mkmat2(P,E));
-  }
-  x0 = gadd(pol_x(varn(A)), gmulsg(-k, mkpolmod(pol_x(varn(T)), T)));
-  for (i=lx-1; i>0; i--)
-  {
-    GEN f = gel(fa,i), F = lift_intern(poleval(f, x0));
-    if (!tmonic) F = Q_primpart(F);
-    F = nfgcd(u, F, T, dent);
-    if (typ(F) != t_POL || degpol(F) == 0)
-      pari_err(talker,"reducible modulus in factornf");
-    e = 1;
-    if (!sqfree)
-    {
-      while (poldvd(G,f, &G)) e++;
-      if (degpol(G) == 0) sqfree = 1;
-    }
-    gel(P,i) = gdiv(gmul(unt,F), leading_term(F));
-    gel(E,i) = utoipos(e);
-  }
-  return gerepilecopy(av, sort_factor_pol(mkmat2(P,E), cmp_RgX));
-}
-
 static GEN
 FqX_frob_deflate(GEN f, GEN T, GEN p)
 {

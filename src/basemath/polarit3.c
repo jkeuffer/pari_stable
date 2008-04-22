@@ -1841,7 +1841,7 @@ FpXY_evalx(GEN Q, GEN x, GEN p)
   for (i=2; i<lb; i++) 
   {
     GEN q = gel(Q,i);
-    gel(z,i) = typ(q) == t_INT? q: FpX_eval(q, x, p);
+    gel(z,i) = typ(q) == t_INT? modii(q,p): FpX_eval(q, x, p);
   }
   return FpX_renormalize(z, lb);
 }

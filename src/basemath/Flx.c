@@ -743,7 +743,7 @@ Flx_rem(GEN x, GEN y, ulong p)
   return Flx_renormalize(c-2, i+3);
 }
 
-/* as FpX_divrem but working only on ulong types. ASSUME pr != ONLY_DIVIDES
+/* as FpX_divrem but working only on ulong types.
  * if relevant, *pr is the last object on stack */
 GEN
 Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
@@ -761,7 +761,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
       q = vecsmall_copy(x);
     else
       q = Flx_Fl_mul(x, Fl_inv(y[2], p), p);
-    if (pr) *pr = zero_Flx(sv);
+    if (pr && pr != ONLY_DIVIDES) *pr = zero_Flx(sv);
     return q;
   }
   dx = degpol(x);
@@ -769,7 +769,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   if (dz < 0)
   {
     q = zero_Flx(sv);
-    if (pr) *pr = vecsmall_copy(x);
+    if (pr && pr != ONLY_DIVIDES) *pr = vecsmall_copy(x);
     return q;
   }
   x += 2;
@@ -833,7 +833,11 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   }
   i=dy-1; while (i>=0 && !c[i]) i--;
   c = Flx_renormalize(c-2, i+3);
-  *pr = c; return q;
+  if (pr == ONLY_DIVIDES) 
+  { if (lg(c) != 2) return NULL; }
+  else  
+    *pr = c;
+  return q;
 }
 
 long
