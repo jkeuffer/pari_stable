@@ -131,6 +131,7 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    40- rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
    41- uniformize factornf and nffactor outputs (+ speed them up for 
        non-squarefree inputs: compute valuations mod a suitable prime)
+   42- treat Mat(t_LIST) as Mat(t_VEC)
 
   Added
     1- library function gpcalloc

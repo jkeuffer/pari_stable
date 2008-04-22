@@ -903,6 +903,11 @@ gtomat(GEN x)
 
   if (!x) return cgetg(1, t_MAT);
   tx = typ(x);
+  if (tx == t_LIST) {
+    x = list_data(x);
+    if (!x) return cgetg(1, t_MAT);
+    tx = t_VEC;
+  }
   if (! is_matvec_t(tx))
   {
     y = cgetg(2,t_MAT); gel(y,1) = mkcolcopy(x);
