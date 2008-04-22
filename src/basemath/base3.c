@@ -882,6 +882,7 @@ rnfalgtobasis(GEN rnf,GEN x)
     case t_POLMOD:
       if (!RgX_equal_var(gel(rnf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in rnfalgtobasis");
+      x = gel(x,2);
       if (typ(x) != t_POL) { GEN A = gel(rnf,8); return gmul(x, gel(A,1)); }
       /* fall through */
     case t_POL: {
