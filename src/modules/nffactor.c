@@ -43,7 +43,7 @@ typedef struct {
   GEN topowden; /* topow x / topowden = basistoalg(x) */
 } nflift_t;
 
-typedef struct /* for use in nfsqff */
+typedef struct
 {
   nflift_t *L;
   GEN nf;
@@ -219,11 +219,7 @@ nfroots(GEN nf,GEN pol)
   den = get_den(&nf, T);
   g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
 
-  if (degpol(g))
-  { /* not squarefree */
-    g = QXQX_normalize(g, T);
-    A = RgXQX_div(A,g, T);
-  }
+  if (degpol(g)) A = RgXQX_div(A, QXQX_normalize(g, T), T);
   A = Q_primpart( QXQX_normalize(A, T) );
   A = nfsqff(nf,A,1, den);
   A = gerepileupto(av, RgXQV_to_mod(A, T));
@@ -376,7 +372,6 @@ nffactor(GEN nf,GEN pol)
   GEN bad, A, B, G, y, T, den, rep = cgetg(3, t_MAT);
   pari_sp av = avma;
   long dA;
-  int sqfree;
   pari_timer ti;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
@@ -402,8 +397,7 @@ nffactor(GEN nf,GEN pol)
   G = nfgcd(A, RgX_deriv(A), T, bad);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
-  sqfree = (degpol(G) == 0);
-  B = sqfree? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
+  B = (degpol(G) == 0)? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
   y = nfsqff(nf,B,0, den);
   if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
 
@@ -1512,7 +1506,7 @@ polfnf(GEN a, GEN T)
 {
   GEN rep = cgetg(3, t_MAT), A, B, G, y, dent, bad;
   long dA;
-  int sqfree, tmonic;
+  int tmonic;
 
   if (typ(a)!=t_POL || typ(T)!=t_POL) pari_err(typeer,"polfnf");
   T = Q_primpart(T); tmonic = is_pm1(leading_term(T));
@@ -1526,8 +1520,7 @@ polfnf(GEN a, GEN T)
   bad = dent = ZX_disc(T);
   if (tmonic) dent = indexpartial(T, dent);
   G = nfgcd(A,RgX_deriv(A), T, dent);
-  sqfree = (degpol(G) == 0);
-  B = sqfree? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
+  B = (degpol(G) == 0)? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
   y = nfsqff_trager(B, T, dent);
   fact_from_sqff(rep, A, B, y, T, bad);
   return sort_factor_pol(rep, cmp_RgX);
@@ -1559,7 +1552,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   {
     GEN z;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    z = nfsqff_trager(Q_primpart(pol), nfpol, den);
+    z = nfsqff_trager(Q_primpart(pol), nfpol, mulii(den,gel(nf,4)));
     if (fl) {
       long i, l = lg(z);
       for (i = 1; i < l; i++)
