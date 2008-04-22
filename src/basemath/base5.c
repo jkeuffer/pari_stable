@@ -851,8 +851,8 @@ PRECPB:
   if (H) h = gmul(H, h);
   if (DEBUGLEVEL) fprintferr("\n");
   y = cgetg(3,t_VEC);
-  gel(y,1) = mkvec2(algtobasis(nf,MPOL), gcopy(I));
-  gel(y,2) = algtobasis(nf,h); return gerepileupto(av, y);
+  gel(y,1) = mkvec2(matalgtobasis(nf,MPOL), gcopy(I));
+  gel(y,2) = matalgtobasis(nf,h); return gerepileupto(av, y);
 }
 
 GEN
