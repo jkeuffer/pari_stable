@@ -61,6 +61,7 @@ Description:
  (gen):small            gtos($1)
  
  (void):int             gen_0
+ (-2):int               gen_m2
  (-1):int               gen_m1
  (0):int                gen_0
  (1):int                gen_1
