@@ -19,23 +19,23 @@ Doc: \sidx{algebraic dependence}
  \bprog
  \\\\\\\\\ LLL
  ? \p200
- ? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 3.8s
- ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 1s
- ? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right in 3.3s
- ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong in 2.9s
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ wrong in 0.8s
+ ? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong in 0.4s
+ ? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right in 0.8s
+ ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong in 1.0s
  ? \p250
- ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.8s
- ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 3.4s
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 1.0s
+ ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 1.0s
  \\\\\\\\\ PSLQ
  ? \p200
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 14s.
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 15s.
  ? \p250
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 18s
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 20s
  @eprog\noindent
  Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
  flag produces its first correct result at 205 digits, and from then on a
  steady stream of correct results. Interestingly enough, our PSLQ also
- reliably succeeds from 205 digits on (and is 5 times slower at that
+ reliably succeeds from 205 digits on (and is 15 times slower at that
  accuracy).
  
  The above example is the testcase studied in a 2000 paper by Borwein and
@@ -43,7 +43,7 @@ Doc: \sidx{algebraic dependence}
  {\bf 217}, p.~65--82. The paper concludes in the superiority of the PSLQ
  algorithm, which either shows that PARI's implementation of PSLQ is lacking,
  or that its LLL is extremely good. The version of PARI tested there was
- 1.39, which succeeded reliably from precision 265 on, in about 60 as much
+ 1.39, which succeeded reliably from precision 265 on, in about 200 as much
  time as the current version.
  
 Variant: Also available is \fun{GEN}{algdep}{GEN x, long k, long prec}
