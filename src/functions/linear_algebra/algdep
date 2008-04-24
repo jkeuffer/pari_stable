@@ -15,7 +15,10 @@ Doc: \sidx{algebraic dependence}
  Internally, \tet{lindep}$([1,x,\ldots,x^k], \fl)$ is used. If
  \tet{lindep} is not able to find a relation and returns a lower bound for the
  sup norm of the smallest relation, \tet{algdep} returns that bound instead.
- A suitable non-zero value of $\fl$ may improve on the default behaviour:
+ A non-zero value of $\fl$ may improve on the default behaviour
+ if the input number is known to a \emph{huge} accuracy, and you suspect the
+ last bits are incorrect  (this truncates the number, throwing away the least
+ significant bits), but default values are usually sufficient:
  \bprog
  \\\\\\\\\ LLL
  ? \p200
@@ -26,12 +29,25 @@ Doc: \sidx{algebraic dependence}
  ? \p250
  ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 1.0s
  ? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right in 1.0s
+ ? \p500
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 2.9s
+ ? \p1000
+ ? algdep(2^(1/6)+3^(1/5), 30);      \\ right in 10.6s
  \\\\\\\\\ PSLQ
  ? \p200
- ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 15s.
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ failure in 15s
  ? \p250
  ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 20s
+ ? \p500
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 52s
+ ? \p1000
+ ? algdep(2^(1/6)+3^(1/5), 30, -3);  \\ right in 164s
  @eprog\noindent
+ The changes in \kbd{defaultprecision} only affect the quality of the
+ initial approximation to $2^{1/6} + 3^{1/5}$, \kbd{algdep} itself uses
+ exact operations (the size of its operands depend on the accuracy of the
+ input of course: more accurate input means slower operations). 
+ 
  Proceeding by increments of 5 digits of accuracy, \kbd{algdep} with default
  flag produces its first correct result at 205 digits, and from then on a
  steady stream of correct results. Interestingly enough, our PSLQ also
