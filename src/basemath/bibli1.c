@@ -856,6 +856,7 @@ lindep(GEN x, long prec)
 typedef struct {
   long vmind, t12, t1234, reda, fin;
   long ct;
+  pari_timer t;
 } pslq_timer;
 
 /* WARNING: for double ** matrices, A[i] is the i-th ROW of A */
@@ -1011,6 +1012,7 @@ static void
 init_timer(pslq_timer *T)
 {
   T->vmind = T->t12 = T->t1234 = T->reda = T->fin = T->ct = 0;
+  TIMERstart(&T->t);
 }
 
 static int
@@ -1066,7 +1068,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   else
     x = real_i(x);
 
-  if (DEBUGLEVEL>=3) { (void)timer(); init_timer(M->T); }
+  if (DEBUGLEVEL>=3) init_timer(M->T);
   x = col_to_MP(x, prec); settyp(x,t_VEC);
   M->n = n;
   M->A = matid(n);
@@ -1125,7 +1127,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   p1 = cgetg(n,t_VEC);
   for (i=1; i<n; i++) gel(p1,i) = gmul(gel(tabga,i), gabs(gcoeff(H,i,i),prec));
   m = vecmaxind(p1);
-  if (DEBUGLEVEL>3) M->T->vmind += timer();
+  if (DEBUGLEVEL>3) M->T->vmind += TIMER(&M->T->t);
   SWAP(M, m);
   if (m <= n-2)
   {
@@ -1135,7 +1137,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     t2 = gmul(t2, tinv);
     if (M->flreal) { t1c = t1; t2c = t2; }
     else           { t1c = gconj(t1); t2c = gconj(t2); }
-    if (DEBUGLEVEL>3) M->T->t12 += timer();
+    if (DEBUGLEVEL>3) M->T->t12 += TIMER(&M->T->t);
     for (i=m; i<=n; i++)
     {
       t3 = gcoeff(H,i,m);
@@ -1143,7 +1145,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
       gcoeff(H,i,m) = gadd(gmul(t1c,t3), gmul(t2c,t4));
       gcoeff(H,i,m+1) = gsub(gmul(t1, t4), gmul(t2, t3));
     }
-    if (DEBUGLEVEL>3) M->T->t1234 += timer();
+    if (DEBUGLEVEL>3) M->T->t1234 += TIMER(&M->T->t);
   }
   for (i=1; i<n; i++)
     if (is_zero(gcoeff(H,i,i), M->EXP, prec)) {
@@ -1151,7 +1153,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     }
   for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
 
-  if (DEBUGLEVEL>3) M->T->reda += timer();
+  if (DEBUGLEVEL>3) M->T->reda += TIMER(&M->T->t);
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
   if (is_zero(gel(M->y,m), M->EXP, prec)
@@ -1160,12 +1162,12 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
 
   if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>3) M->T->fin += timer();
+    if (DEBUGLEVEL>3) M->T->fin += TIMER(&M->T->t);
     M->T->ct++;
     if ((M->T->ct&0xff) == 0)
     {
       if (DEBUGLEVEL == 3)
-	fprintferr("time for ct = %ld : %ld\n",M->T->ct,timer());
+	fprintferr("time for ct = %ld : %ld\n",M->T->ct, TIMER(&M->T->t));
       else
 	fprintferr("time [max,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",
 		   M->T->vmind, M->T->t12, M->T->t1234, M->T->reda, M->T->fin);
@@ -1199,7 +1201,7 @@ pslq(GEN x)
 
   tabga = get_tabga(M.flreal, M.n, prec);
   av = avma;
-  if (DEBUGLEVEL>=3) printf("Initialization time = %ld\n",timer());
+  if (DEBUGLEVEL>=3) msgTIMER(&M.T->t, "Initialization");
   for (;;)
   {
     if ((p1 = one_step_gen(&M, tabga, prec)))
@@ -1456,7 +1458,7 @@ pslqL2(GEN x)
   for (i=2; i<n; i++) tabgabar[i] = tabgabar[i-1]*gabar;
 
   av = avma;
-  if (DEBUGLEVEL>=3) printf("Initialization time = %ld\n",timer());
+  if (DEBUGLEVEL>=3) msgTIMER(&M.T->t, "Initialization");
 RESTART:
   flit = initializedoubles(&Mbar, &M, prec);
   storeprecdoubles(&Mbarst, &Mbar);
@@ -1480,7 +1482,7 @@ RESTART:
 	tinvbar = 1.0 / sqrt(sqrd(Hbar[m][m]) + sqrd(Hbar[m][m+1]));
 	t1bar = tinvbar*Hbar[m][m];
 	t2bar = tinvbar*Hbar[m][m+1];
-	if (DEBUGLEVEL>=4) T.t12 += timer();
+	if (DEBUGLEVEL>=4) T.t12 += TIMER(&M.T->t);
 	for (i=m; i<=n; i++)
 	{
 	  t3bar = Hbar[i][m];
@@ -1491,7 +1493,7 @@ RESTART:
 	    Hbar[i][m] = conjd(t1bar)*t3bar + conjd(t2bar)*t4bar;
 	  Hbar[i][m+1] = t1bar*t4bar - t2bar*t3bar;
 	}
-	if (DEBUGLEVEL>=4) T.t1234 += timer();
+	if (DEBUGLEVEL>=4) T.t1234 += TIMER(&M.T->t);
       }
 
       flit = checkentries(&Mbar);
