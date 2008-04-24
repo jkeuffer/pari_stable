@@ -376,8 +376,8 @@ GEN
 shallowconcat1(GEN x)
 {
   pari_sp av = avma;
-  long istart = 1, cat = 0, tx = typ(x), lx, t, i;
-  GEN z, y = NULL;
+  long cat = 0, tx = typ(x), lx, t, i;
+  GEN z;
 
   if      (tx == t_VEC) lx = lg(x);
   else if (tx == t_LIST)
@@ -385,26 +385,20 @@ shallowconcat1(GEN x)
   else
   { pari_err(typeer,"concat"); return NULL; /* not reached */ }
   if (lx==1) pari_err(talker,"trying to concat elements of an empty vector");
+  if (lx==2) return gel(x,1);
 
-  t = typ( gel(x,1) );
-  if (!is_matvec_t(t) && t != t_VECSMALL && t != t_STR) t = 0;
-  for (i = 2; i<lx; i++) {
-    GEN c = gel(x,i); 
-    long tc = typ(c);
-    if (tc == t) continue;
-    z = catmany(x + istart, x + i-1, t);
-    /* z = last "homogeneous vector" object seen, y = previous one */
-    if (!y) y = z;
-    else {
-      y = shallowconcat(y, z); z = NULL;
-      if (++cat == 16) { cat = 0; y = gerepileuptoleaf(av, y); }
-    }
-    t = (is_matvec_t(tc) || tc == t_VECSMALL || tc == t_STR)? tc: 0;
-    istart = i;
+  t = typ(gel(x,1));
+  i = 2;
+  if (is_matvec_t(t) || t == t_VECSMALL || t == t_STR)
+  { /* detect a "homogeneous" object: catmany is faster */
+    for (; i<lx; i++)
+      if (typ(gel(x,i)) != t) break;
+    z = catmany(x + 1, x + i-1, t);
   }
-  z = catmany(x + istart, x + i-1, t);
-  /* z = last "homogeneous vector" object seen, y = previous one */
-  if (y) z = shallowconcat(y, z);
+  for (; i<lx; i++) {
+    z = shallowconcat(z, gel(x,i));
+    if (++cat == 16) { cat = 0; z = gerepileuptoleaf(av, z); }
+  }
   return z;
 }
 
