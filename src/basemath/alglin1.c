@@ -389,6 +389,7 @@ shallowconcat1(GEN x)
 
   t = typ(gel(x,1));
   i = 2;
+  z = NULL; /* -Wall */
   if (is_matvec_t(t) || t == t_VECSMALL || t == t_STR)
   { /* detect a "homogeneous" object: catmany is faster */
     for (; i<lx; i++)
