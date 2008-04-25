@@ -51,6 +51,8 @@ const char *errmessage[]=
   "precision too low",
 /* siginter */
   "",
+/* alarmer */
+  "",
 /* typeer */
   "incorrect type",
 /* consister */

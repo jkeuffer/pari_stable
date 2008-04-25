@@ -24,7 +24,7 @@ enum {
   talker, flagerr, warner, warnprec, warnfile,
   bugparier, impl, archer, warnmem, precer,
 
-  siginter, typeer, consister, user,
+  siginter, alarmer, typeer, consister, user,
 
 /* mp.s ou mp.c */
 

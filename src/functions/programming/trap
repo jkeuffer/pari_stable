@@ -61,6 +61,8 @@ Doc: tries to
  the keywords to \kbd{gp}, and there are currently far too many useless ones):
  
  \kbd{accurer}: accuracy problem
+
+ \kbd{alarmer}: alarm time-out
  
  \kbd{archer}: not available on this architecture or operating system
  

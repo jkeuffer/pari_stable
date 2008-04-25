@@ -150,6 +150,7 @@ GEN Strexpand(GEN g);
 GEN Strtex(GEN g);
 
 /* gp specific routines */
+void alarm0(long s);
 void alias0(const char *s, const char *old);
 void allocatemem0(GEN z);
 GEN  break0(long n);

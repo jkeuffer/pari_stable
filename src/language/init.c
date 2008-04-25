@@ -79,8 +79,9 @@ static THREAD GEN *dft_handler;
   PARI_SIGINT_block = block;         \
   if (!block && PARI_SIGINT_pending) \
   {                                  \
+    int sig = PARI_SIGINT_pending;   \
     PARI_SIGINT_pending = 0;         \
-    raise(SIGINT);                   \
+    raise(sig);                      \
   }                                  \
 }
 
@@ -365,14 +366,14 @@ pari_sighandler(int sig)
   {
 #ifdef SIGBREAK
     case SIGBREAK:
-      if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
+      if (PARI_SIGINT_block) PARI_SIGINT_pending=SIGBREAK;
       else pari_handle_SIGINT();
       return;
 #endif
 
 #ifdef SIGINT
     case SIGINT:
-      if (PARI_SIGINT_block) PARI_SIGINT_pending=1;
+      if (PARI_SIGINT_block) PARI_SIGINT_pending=SIGINT;
       else pari_handle_SIGINT();
       return;
 #endif
@@ -1081,7 +1082,7 @@ pari_err(long numerr, ...)
       pari_printf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case siginter: case invmoder:
+      case talker: case siginter: case alarmer: case invmoder:
 	ch1=va_arg(ap, char*);
 	pari_vprintf(ch1,ap); pari_putc('.'); break;
 
@@ -1170,6 +1171,7 @@ trap0(const char *e, GEN r, GEN f)
   else if (!strcmp(e,"invmoder")) numerr = invmoder;
   else if (!strcmp(e,"archer")) numerr = archer;
   else if (!strcmp(e,"siginter")) numerr = siginter;
+  else if (!strcmp(e,"alarmer")) numerr = alarmer;
   else if (!strcmp(e,"talker")) numerr = talker;
   else if (!strcmp(e,"user")) numerr = user;
   else if (*e) pari_err(impl,"this trap keyword");

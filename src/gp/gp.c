@@ -973,7 +973,7 @@ escape(char *tch)
   }
 }
 
-enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
+enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT, ti_ALARM };
 /* flag:
  *   ti_NOPRINT   don't print
  *   ti_REGULAR   print elapsed time (flags & CHRONO)
@@ -994,6 +994,7 @@ gp_format_time(long flag)
   {
     case ti_REGULAR:   pre = "time = "; break;
     case ti_INTERRUPT: pre = "user interrupt after "; break;
+    case ti_ALARM: pre = "alarm interrupt after "; break;
     case ti_LAST:      pre = "  ***   last result computed in "; break;
     default: return NULL;
   }
@@ -1507,6 +1508,7 @@ gp_main_loop(int ismain)
     }
     z = pari_eval_str(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
+    alarm(0);
 
     if (!pari_last_was_newline()) pari_putc('\n');
 
@@ -1531,6 +1533,12 @@ void
 gp_sigint_fun(void) {
   if (GP_DATA->flags & TEXMACS) tm_start_output();
   pari_err(siginter, gp_format_time(ti_INTERRUPT));
+}
+
+void
+gp_alarm_fun(void) {
+  if (GP_DATA->flags & TEXMACS) tm_start_output();
+  pari_err(alarmer, gp_format_time(ti_ALARM));
 }
 
 int
@@ -1599,6 +1607,18 @@ gp_exception_handler(long numerr)
   return break_loop(numerr);
 }
 
+static void
+gp_alarm_handler(int sig)
+{
+#ifndef HAS_SIGACTION
+  /*SYSV reset the signal handler in the handler*/
+  (void)os_signal(sig,gp_alarm_handler);
+#endif
+  if (PARI_SIGINT_block) PARI_SIGINT_pending=sig;
+  else gp_alarm_fun();
+  return;
+}
+
 /********************************************************************/
 /*                                                                  */
 /*                      GP-SPECIFIC ROUTINES                        */
@@ -1651,6 +1671,13 @@ system0(const char *s)
 #else
   pari_err(archer);
 #endif
+}
+
+void
+alarm0(long s)
+{
+  if (s < 0) pari_err(talker,"delay must be non-negative");
+  alarm(s);
 }
 
 /*******************************************************************/
@@ -1792,6 +1819,9 @@ main(int argc, char **argv)
   read_opt(A, argc,argv);
 
   pari_init_opts(top-bot, GP_DATA->primelimit, INIT_SIGm);
+#ifdef SIGALRM
+  (void)os_signal(SIGALRM,gp_alarm_handler);
+#endif
   newfun = pari_get_modules();
   grow_append(*newfun, functions_gp);
   grow_append(*newfun, functions_highlevel);
