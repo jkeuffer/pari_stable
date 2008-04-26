@@ -768,7 +768,7 @@ sub basic_subst {
       | alpha | beta | chi | delta | epsilon | varepsilon | phi | gamma | eta
       | iota | varphi | kappa | lambda | mu | nu | omicron | pi | theta | rho
       | sigma | tau | ypsilon | varpi | omega | xi | psi | zeta
-      | int | expr | seq | args | gcd | sum | prod | Re | infty )
+      | int | expr | seq | args | gcd | lcm | sum | prod | Re | infty )
       (?![a-zA-Z])/$tr{startword}$1$tr{endword}/xg;
   s/ *\\in(?![a-zA-Z]) */ belongs to /g;
   s/\\pm(?![a-zA-Z])/$tr{pm}/g;
