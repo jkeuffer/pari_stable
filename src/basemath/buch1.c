@@ -206,11 +206,7 @@ quadhilbertimag(GEN D)
     P = real_i( roots_to_pol_intern(lead,P,0,0) );
     P = grndtoi(P,&exmax);
     if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
-    if (exmax <= -10)
-    {
-      if (pq && degpol(ZX_gcd(P, ZX_deriv(P)))) { avma = av; return gen_0; }
-      break;
-    }
+    if (exmax <= -10) break;
     avma = av0; prec += (DEFAULTPREC-2) + nbits2nlong(exmax);
     if (DEBUGLEVEL) pari_warn(warnprec,"quadhilbertimag",prec);
   }
@@ -533,7 +529,7 @@ compocyclo(GEN nf, long m, long d)
   GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = gel(nf,3);
   long ell,vx;
 
-  p1 = quadhilbertimag(D, NULL);
+  p1 = quadhilbertimag(D);
   p2 = polcyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
@@ -578,7 +574,7 @@ treatspecialsigma(GEN bnr)
   GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = gel(nf,3), p1, p2, tryf;
   long Ds, fl, i = isZ(f);
 
-  if (i == 1) return quadhilbertimag(gel(nf,3), NULL); /* f = 1 */
+  if (i == 1) return quadhilbertimag(gel(nf,3)); /* f = 1 */
 
   if (equaliu(D,3))
   {
