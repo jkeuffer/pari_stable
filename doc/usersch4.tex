@@ -775,8 +775,8 @@ or simply \kbd{z = cgetc(MEDDEFAULTPREC)}.
   for(i=1; i<4; i++) gel(z, i) = cgetg(5, t_COL);
 @eprog
 %
-\noindent If one wishes to create space for the matrix elements themselves,
-one has to follow this with a double loop to fill each column vector.
+\noindent To create space for the matrix elements themselves,
+follow this with a double loop, filling each column vector.
 
 These last two examples illustrate the fact that since PARI types are
 recursive, all the branches of the tree must be created. The function
