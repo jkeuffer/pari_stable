@@ -574,7 +574,7 @@ treatspecialsigma(GEN bnr)
   GEN f = gmael3(bnr,2,1,1), nf = gmael(bnr,1,7), D = gel(nf,3), p1, p2, tryf;
   long Ds, fl, i = isZ(f);
 
-  if (i == 1) return quadhilbertimag(gel(nf,3)); /* f = 1 */
+  if (i == 1) return quadhilbertimag(D); /* f = 1 */
 
   if (equaliu(D,3))
   {
