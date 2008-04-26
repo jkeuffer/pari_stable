@@ -524,14 +524,14 @@ do_exhaustive(GEN P, GEN N, long x, GEN B)
   return zv_to_ZV(sol);
 }
 
-#define X_SMALL 1000
-
 /* General Coppersmith, look for a root x0 <= p, p >= B, p | N, |x0| <= X */
 GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
   GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst, Z;
   long delta, i, j, row, d, l, dim, t, bnd = 10;
+  const ulong X_SMALL = 1000;
+
   pari_sp av = avma;
 
   if (typ(P0) != t_POL || typ(N) != t_INT) pari_err(typeer, "zncoppersmith");
@@ -543,7 +543,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
-  if (cmpis(X, X_SMALL) <= 0)
+  if (cmpiu(X, X_SMALL) <= 0)
     return gerepileupto(av, do_exhaustive(P0, N, itos(X), B));
 
   /* bnd-hack is only for the case B = N */
