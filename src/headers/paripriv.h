@@ -339,10 +339,6 @@ GEN  RgXQ_minpoly_naive(GEN y, GEN P);
 GEN lift_intern0(GEN x,long v);
 #define lift_intern(x) (lift_intern0((x),-1))
 
-/* b') Chinese Remainder Theorem */
-GEN ZM_init_CRT(GEN Hp, ulong p);
-int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
-
 /* c) factorization */
 double cauchy_bound(GEN p);
 GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
@@ -616,7 +612,6 @@ GEN     aprcl(GEN N);
 
 /* arith1.c */
 
-GEN     Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C);
 GEN     bestappr_mod(GEN x, GEN A, GEN B);
 long    hilii(GEN x, GEN y, GEN p);
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
@@ -682,7 +677,7 @@ GEN     pslqL2(GEN x);
 
 GEN     buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec);
 GEN     form_to_ideal(GEN x);
-GEN     getallforms(GEN D, long *pth, GEN *ptz);
+GEN     getallforms(GEN D, GEN *ptz);
 
 /* buch2.c */
 
@@ -844,10 +839,7 @@ GEN     FpX_compositum(GEN A, GEN B, GEN p);
 GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
 GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
 GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);
-int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p);
-GEN     ZX_init_CRT(GEN Hp, ulong p, long v);
 ulong   ZX_ZXY_ResBound(GEN A, GEN B, GEN dB);
-int     Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p);
 GEN     ffinit_Artin_Shreier(GEN ip, long l);
 GEN     ffinit_rand(GEN p, long n);
 byteptr init_modular(ulong *p);

@@ -2892,6 +2892,74 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 
 \fun{GEN}{gener_F2xq}{GEN T, GEN *po}
 
+\subsec{Chinese remainder theorem over $\Z$}
+
+\fun{GEN}{Z_chinese}{GEN a, GEN b, GEN A, GEN B} returns the integer
+in $[0, \lcm(A,B)[$ congruent to $a$ mod $A$ and $b$ mod $B$, assuming it
+exists; in other words, that $a$ and $b$ are congruent mod $\gcd(A,B)$.
+
+\fun{GEN}{Z_chinese_all}{GEN a, GEN b, GEN A, GEN B, GEN *pC} as
+\kbd{Z\_chinese}, setting \kbd{*pC} to the lcm of $A$ and $B$.
+
+\fun{GEN}{Z_chinese_coprime}{GEN a, GEN b, GEN A, GEN B, GEN C}, as 
+\kbd{Z\_chinese}, assuming that $\gcd(A,B) = 1$ and that $C = \lcm(A,B) = AB$.
+
+\fun{void}{Z_chinese_pre}{GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd}
+initializes chinese remainder computations modulo $A$ and $B$. Sets
+\kbd{*pC} to $\lcm(A,B)$, \kbd{*pd} to $\gcd(A,B)$, 
+\kbd{*pU} to an integer congruent to $0$ mod $(A/d)$ and $1$ mod $(B/d)$.
+It is allowed to set \kbd{pd = NULL}, in which case, $d$ is still
+computed, but not saved.
+
+\fun{GEN}{Z_chinese_post}{GEN a, GEN b, GEN C, GEN U, GEN d} returns
+the solution to the chinese remainder problem $x$ congruent
+to $a$ mod $A$ and $b$ mod $B$, where $C, U, d$ were set in
+\kbd{Z\_chinese\_pre}. If $d$ is \kbd{NULL}, assume the problem has a
+solution. Otherwise, return \kbd{NULL} if it has no solution.
+
+\medskip
+
+The following pair of functions is used in homomorphic imaging schemes,
+when reconstructing an integer from its images modulo pairwise coprime
+integers. The idea is as follows: we want to discover an integer $H$ which
+satisfies $|H| < B$ for some known bound $B$; we are given pairs $(H_p, p)$
+with $H$ congruent to $H_p$ mod $p$ and all $p$ pairwise coprime.
+
+Given \kbd{H} congruent to $H_p$ modulo a number of $p$, whose product is
+$q$, and a new pair $(\kbd{Hp}, \kbd{p})$, \kbd{p} coprime to $q$, the
+following incremental functions use the chinese remainder theorem (CRT) to
+find a new \kbd{H}, congruent to the preceding one modulo $q$, but also to
+\kbd{Hp} modulo \kbd{p}. It is defined uniquely modulo $qp$, and we choose
+the centered representative. When $P$ is larger than $2B$, we have $\kbd{H} =
+H$, but of course, the value of \kbd{H} may stabilize sooner. In many
+applications it is possible to directly check that such a partial result is
+correct.
+
+\fun{GEN}{Z_init_CRT}{ulong Hp, ulong p} given a \kbd{Fl} \kbd{Hp} in 
+$[0, p-1]$, returns the centered representative \kbd{H} congruent to \kbd{Hp}
+modulo \kbd{p}.
+
+\fun{int}{Z_incremental_CRT}{GEN *H, ulong Hp, GEN q, GEN qp, ulong p}
+given a \typ{INT} \kbd{*H}, centered modulo \kbd{q}, a new pair $(\kbd{Hp},
+\kbd{p})$ with \kbd{p} coprime to \kbd{q}, and the product $\kbd{qp} = \kbd{p}
+\cdot \kbd{q}$, this function updates \kbd{*H} so that it also becomes
+congruent to $(\kbd{Hp}, \kbd{p})$. It returns $1$ if the new value is equal
+to the old one, and $0$ otherwise.
+
+As above, for $H$ a \kbd{ZM}: we assume that $H$ and all \kbd{Hp} have
+dimension $> 0$. The original \kbd{*H} is destroyed.
+
+\fun{GEN}{ZM_init_CRT}{GEN Hp, ulong p}
+
+\fun{int}{ZM_incremental_CRT}{GEN *H, GEN Hp, GEN q, GEN qp, ulong p}
+
+As above for $H$ a \kbd{ZX}: note that the degree may increase or decrease.
+The original \kbd{*H} is destroyed.
+
+\fun{GEN}{ZX_init_CRT}{GEN Hp, ulong p, long v}
+
+\fun{int}{ZX_incremental_CRT}{GEN *H, GEN Hp, GEN q, GEN qp, ulong p}
+
 \subsec{Hensel lifts}
 
 \fun{GEN}{padicsqrtlift}{GEN a, GEN S, GEN p, long e} returns a \typ{INT}

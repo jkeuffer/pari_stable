@@ -1621,17 +1621,16 @@ chinese(GEN x, GEN y)
       tetpil=avma; gel(z,1) = gmul(p1,gel(y,1)); gel(z,2) = gmod(p2,gel(z,1));
       gerepilecoeffssp(av,tetpil,z+1,2); return z;
     case t_INTMOD:
-      z = cgetg(3,t_INTMOD); av = avma;
-      d = bezout(gel(x,1),gel(y,1),&u,&v);
-      p2 = subii(gel(y,2), gel(x,2));
-      if (remii(p2, d) != gen_0) break;
-      p1 = diviiexact(gel(x,1),d);
-      p2 = addii(gel(x,2), mulii(mulii(u,p1), p2));
-      tetpil = avma;
-      gel(z,1) = mulii(p1, gel(y,1));
-      gel(z,2) = modii(p2, gel(z,1));
-      gerepilecoeffssp(av,tetpil,z+1,2); return z;
-
+    {
+      GEN A = gel(x,1), B = gel(y,1);
+      GEN a = gel(x,2), b = gel(y,2), c, d, C, U;
+      z = cgetg(3,t_INTMOD);
+      Z_chinese_pre(A, B, &C, &U, &d);
+      c = Z_chinese_post(a, b, C, U, d);
+      if (!c) pari_err(consister,"Z_chinese");
+      gel(z,1) = icopy_av(C, z);
+      gel(z,2) = icopy_av(c, gel(z,1)); return z;
+    }
     case t_POL:
       lx=lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
       if (lx != lg(y) || varn(x) != varn(y)) break;
@@ -1647,14 +1646,54 @@ chinese(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
+/* init chinese(Mod(.,A), Mod(.,B)) */
+void
+Z_chinese_pre(GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd)
+{
+  GEN u, d = bezout(A,B,&u,NULL); /* U = u(A/d), u(A/d) + v(B/d) = 1 */
+  GEN t = diviiexact(A,d);
+  *pU = mulii(u, t);
+  *pC = mulii(t, B);
+  if (pd) *pd = d;
+}
+/* Assume C = lcm(A, B), U = 0 mod (A/d), U = 1 mod (B/d), a = b mod d,
+ * where d = gcd(A,B) or NULL, return x = a (mod A), b (mod B). 
+ * If d not NULL, check wether a = b mod d. */
+GEN
+Z_chinese_post(GEN a, GEN b, GEN C, GEN U, GEN d)
+{
+  GEN b_a;
+  if (!signe(a)) 
+  {
+    if (d && remii(b, d) != gen_0) return NULL;
+    return Fp_mul(b, U, C);
+  }
+  b_a = subii(b,a);
+  if (d && remii(b_a, d) != gen_0) return NULL;
+  return modii(addii(a, mulii(U, b_a)), C);
+}
+GEN
+Z_chinese(GEN a, GEN b, GEN A, GEN B)
+{
+  pari_sp av = avma;
+  GEN C, U; Z_chinese_pre(A, B, &C, &U, NULL);
+  return gerepileuptoint(av, Z_chinese_post(a,b, C, U, NULL));
+}
+GEN
+Z_chinese_all(GEN a, GEN b, GEN A, GEN B, GEN *pC)
+{
+  GEN U; Z_chinese_pre(A, B, pC, &U, NULL);
+  return Z_chinese_post(a,b, *pC, U, NULL);
+}
+
 /* return lift(chinese(a mod A, b mod B))
  * assume(A,B)=1, a,b,A,B integers and C = A*B */
 GEN
 Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)
 {
   pari_sp av = avma;
-  GEN c = addii(a, mulii(mulii(Fp_inv(A,B), A), subii(b,a)));
-  return gerepileuptoint(av, modii(c, C));
+  GEN U = mulii(Fp_inv(A,B), A);
+  return gerepileuptoint(av, Z_chinese_post(a,b,C,U, NULL));
 }
 /*********************************************************************/
 /**                                                                 **/

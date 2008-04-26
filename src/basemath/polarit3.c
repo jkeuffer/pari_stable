@@ -1532,7 +1532,8 @@ Fl_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
   ax = mului(Fl_mul(d,qinv,p), q); /* d mod p, 0 mod q */
   avma = av; return addii(a, ax); /* in ]-q, pq[ assuming a in -]-q,q[ */
 }
-
+GEN
+Z_init_CRT(ulong Hp, ulong p) { return stoi(Fl_center(Hp, p, p>>1)); }
 GEN
 ZX_init_CRT(GEN Hp, ulong p, long v)
 {
@@ -1610,9 +1611,9 @@ ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 }
 
 int
-ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
+ZM_incremental_CRT(GEN *pH, GEN Hp, GEN q, GEN qp, ulong p)
 {
-  GEN h, lim = shifti(qp,-1);
+  GEN h, H = *pH, lim = shifti(qp,-1);
   ulong qinv = Fl_inv(umodiu(q,p), p);
   long i,j, l = lg(H), m = lg(H[1]);
   int stable = 1;
@@ -2429,7 +2430,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     if (!H)
     {
       stable = 0; q = utoipos(p);
-      H = stoi(Fl_center(Hp, p, p>>1));
+      H = Z_init_CRT(Hp, p);
     }
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
     {

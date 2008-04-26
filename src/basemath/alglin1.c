@@ -1667,7 +1667,7 @@ ZM_inv(GEN M, GEN dM)
     else
     {
       GEN qp = muliu(q,p);
-      stable = ZM_incremental_CRT(H, Hp, q,qp, p);
+      stable = ZM_incremental_CRT(&H, Hp, q,qp, p);
       q = qp;
     }
     if (DEBUGLEVEL>5) msgtimer("inverse mod %ld (stable=%ld)", p,stable);

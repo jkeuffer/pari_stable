@@ -2655,13 +2655,10 @@ ellap1(GEN e, GEN p)
 FOUND: /* found a point of exponent h on E_u */
     h = exact_order(h, f, cp4, p);
     /* h | #E_u(Fp) = A (mod B) */
-    if (B == gen_1) B = h;
+    if (B == gen_1)
+      B = h;
     else
-    {
-      GEN C = chinese(mkintmod(A,B), mkintmod(gen_0, h));
-      A = gel(C,2);
-      B = gel(C,1);
-    }
+      A = Z_chinese_all(A, gen_0, B, h, &B);
 
     i = (cmpii(B, pordmin) < 0);
     /* If we are not done, update A mod B for the _next_ curve, isomorphic to
@@ -2847,10 +2844,10 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN C = chinese(mkintmodu(smodss(A,B),B), mkintmodu(0,h));
-      A = itos(gel(C,2));
-      if (is_bigint(C[1])) { h = A; break; }
-      B = itos(gel(C,1));
+      GEN C; 
+      A = itos( Z_chinese_all(gen_0, modss(A,B), utoipos(h), utoipos(B), &C) );
+      if (is_bigint(C)) { h = A; break; }
+      B = itos(C);
     }
 
     i = (B < pordmin);

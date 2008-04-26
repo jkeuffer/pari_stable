@@ -183,6 +183,9 @@ JD 12- add an optional argument to quit()
    24- library function roundr_safe
 BA 25- [ellap] Port of SEA algorithm from the ellsea GP package
 BA 26- new alarm GP function and alarmer error code
+   27- library functions Z_chinese, Z_chinese_all, Z_chinese_coprime,
+       Z_chinese_post, Z_chinese_pre, Z_incremental_CRT, Z_init_CRT,
+       ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT, ZX_init_CRT
 
   Removed
     1- obsolete library functions extract and matextract

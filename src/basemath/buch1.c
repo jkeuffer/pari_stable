@@ -28,7 +28,7 @@ isoforder2(GEN form)
 }
 
 GEN
-getallforms(GEN D, long *pth, GEN *ptz)
+getallforms(GEN D, GEN *ptz)
 {
   ulong d = itou(D), dover3 = d/3, t, b2, a, b, c, h;
   GEN z, L = cgetg((long)(sqrt(d) * log2(d)), t_VEC);
@@ -65,7 +65,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
     /* a = c */
     if (a * a == t) { z = mului(a,z); gel(L,++h) = mkvecsmall3(a,b,c); }
   }
-  *pth = h; *ptz = z; setlg(L,h+1); return L;
+  *ptz = z; setlg(L,h+1); return L;
 }
 
 static ulong
@@ -141,18 +141,24 @@ get_pq(GEN D, GEN z, GEN pq, ulong *ptp, ulong *ptq)
   *ptq = wp[i];
 }
 
+struct gpq_data {
+  ulong p, q;
+  long e;
+  GEN sqd, u, pq, pq2;
+};
+
 static GEN
-gpq(GEN form, ulong p, ulong q, long e, GEN sqd, GEN u, long prec)
+gpq(GEN form, struct gpq_data *D, long prec)
 {
   long a = form[1], a2 = a << 1; /* gcd(a2, u) = 2 */
   GEN p1,p2,p3,p4;
-  GEN w = lift(chinese(gmodulss(-form[2], a2), u));
-  GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(sqd, a2));
-  p1 = trueeta(gdivgs(al,p), prec);
-  p2 = p == q? p1: trueeta(gdivgs(al,q), prec);
-  p3 = trueeta(gdiv(al,muluu(p,q)), prec);
+  GEN w = Z_chinese(D->u, stoi(-form[2]), D->pq2, stoi(a2));
+  GEN al = mkcomplex(gdivgs(w, -a2), gdivgs(D->sqd, a2));
+  p1 = trueeta(gdivgs(al,D->p), prec);
+  p2 = D->p == D->q? p1: trueeta(gdivgs(al,D->q), prec);
+  p3 = trueeta(gdiv(al, D->pq), prec);
   p4 = trueeta(al, prec);
-  return gpowgs(gdiv(gmul(p1,p2),gmul(p3,p4)), e);
+  return gpowgs(gdiv(gmul(p1,p2),gmul(p3,p4)), D->e);
 }
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0 */
@@ -161,30 +167,38 @@ quadhilbertimag(GEN D, GEN pq)
 {
   GEN z, L, P, qfp, u;
   pari_sp av = avma;
-  long h, i, e, prec;
+  long h, i, prec;
+  struct gpq_data T;
   ulong p, q;
 
   if (DEBUGLEVEL>1) (void)timer2();
-  if (cmpiu(D,11) <= 0) return pol_x(0);
-  L = getallforms(D,&h,&z);
+  if (lgefint(D) == 3)
+  {
+    long d = D[2]; /* = |D| */
+    if (d <= 11 || d == 19 || d == 43 || d == 67 || d == 163) return pol_x(0);
+  }
+  L = getallforms(D,&z);
+  h = lg(L)-1;
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
-  if (h == 1) { avma=av; return pol_x(0); }
-
   get_pq(D, z, pq, &p, &q);
-  e = 24 / ugcd((p%24 - 1) * (q%24 - 1), 24);
-  if(DEBUGLEVEL>1) fprintferr("p = %lu, q = %lu, e = %ld\n",p,q,e);
+  T.p = p;
+  T.q = q;
+  T.e = 24 / ugcd((p%24 - 1) * (q%24 - 1), 24);
+  if(DEBUGLEVEL>1) fprintferr("p = %lu, q = %lu, e = %ld\n",p,q,T.e);
   qfp = primeform_u(D, p);
+  T.pq =  muluu(p, q);
+  T.pq2 = shifti(T.pq,1);
   if (p == q)
   {
     u = gel(compimagraw(qfp, qfp),2);
-    u = gmodulo(u, shifti(sqru(p),1));
+    T.u = modii(u, T.pq2);
   }
   else
   {
-    GEN qfq = primeform_u(D, q);
-    GEN up = mkintmodu(itou(gel(qfp,2)), p << 1);
-    GEN uq = mkintmodu(itou(gel(qfq,2)), q << 1);
-    u = chinese(up,uq);
+    GEN qfq = primeform_u(D, q), bp = gel(qfp,2), bq = gel(qfq,2);
+    T.u = Z_chinese_coprime(bp, bq, utoipos(p), utoipos(q), T.pq);
+    if (mpodd(bp) != mpodd(T.u)) T.u = addii(T.u, T.pq);
+    /* T.u = bp (mod 2p), T.u = bq (mod 2q) */
   }
   /* u modulo 2pq */
   prec = 3;
@@ -192,11 +206,12 @@ quadhilbertimag(GEN D, GEN pq)
   {
     long ex, exmax = 0;
     pari_sp av0 = avma;
-    GEN lead, sqd = sqrtr_abs(itor(D, prec));
+    GEN lead; 
+    T.sqd = sqrtr_abs(itor(D, prec));
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
     {
-      GEN s = gpq(gel(L,i), p, q, e, sqd, u, prec);
+      GEN s = gpq(gel(L,i), &T, prec);
       if (DEBUGLEVEL>3) fprintferr("%ld ", i);
       gel(P,i) = s; ex = gexpo(s); if (ex > 0) exmax += ex;
     }
@@ -534,7 +549,7 @@ compocyclo(GEN nf, long m, long d)
   GEN sb,a,b,s,p1,p2,p3,res,polL,polLK,nfL, D = gel(nf,3);
   long ell,vx;
 
-  p1 = quadhilbertimag(D, gen_0);
+  p1 = quadhilbertimag(D, NULL);
   p2 = polcyclo(m,0);
   if (d==1) return do_compo(p1,p2);
 
