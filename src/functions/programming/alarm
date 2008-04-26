@@ -18,7 +18,6 @@ Doc: trigger an \var{alarmer} exception after $s$ seconds, cancelling any
  default(primelimit,16777216);
  timefact(N,sec)=
  {
-   trap(alarmer,0,alarm(sec);factor(N);alarm(0));
-   factor(N,16777216);
+   trap(alarmer,factor(N,0),alarm(sec);my(F=factor(N));alarm(0);F);
  }
  @eprog
