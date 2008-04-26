@@ -8,7 +8,7 @@ Description:
  (gen):gen      glcm0($1, NULL)
  (gen, gen):gen glcm($1, $2)
 Doc: least common multiple of $x$ and $y$, i.e.~such
- that $\text{lcm}(x,y)*\gcd(x,y) = \text{abs}(x*y)$. If $y$ is omitted and $x$
+ that $\lcm(x,y)*\gcd(x,y) = \text{abs}(x*y)$. If $y$ is omitted and $x$
  is a vector, returns the $\text{lcm}$ of all components of $x$.
  
  When $x$ and $y$ are both given and one of them is a vector/matrix type,
