@@ -68,34 +68,18 @@ getallforms(GEN D, GEN *ptz)
   *ptz = z; setlg(L,h+1); return L;
 }
 
-static ulong
-check_pq(GEN gp, GEN z, long d, GEN D)
-{
-  ulong p = itou(gp);
-  if (!umodiu(z,p) || kross(d,(long)p) <= 0 ||
-    gcmp1(gel(redimag(primeform_u(D,p)),1)));
-      pari_err(talker,"[quadhilbert] incorrect values in pq: %lu", p);
-  return p;
-}
 #define MOD4(x) ((x)&3)
 /* find P and Q two non principal prime ideals (above p,q) such that
  *   (pq, 2z) = 1  [coprime to all class group representatives]
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
  * Try to have e = 24 / gcd(24, (p-1)(q-1)) as small as possible */
 static void
-get_pq(GEN D, GEN z, GEN pq, ulong *ptp, ulong *ptq)
+get_pq(GEN D, GEN z, ulong *ptp, ulong *ptq)
 {
   const long MAXL = 50;
   GEN form, wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC);
   long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
-
-  if (pq && typ(pq)==t_VEC)
-  {
-    if (lg(pq) != 3) pari_err(typeer, "quadhilbert (pq)");
-    *ptp = check_pq(gel(pq,1),z,d,D);
-    *ptq = check_pq(gel(pq,2),z,d,D); return;
-  }
 
   ell = 3;
   while (l < MAXL)
@@ -163,7 +147,7 @@ gpq(GEN form, struct gpq_data *D, long prec)
 
 /* returns an equation for the Hilbert class field of Q(sqrt(D)), D < 0 */
 static GEN
-quadhilbertimag(GEN D, GEN pq)
+quadhilbertimag(GEN D)
 {
   GEN z, L, P, qfp, u;
   pari_sp av = avma;
@@ -180,7 +164,7 @@ quadhilbertimag(GEN D, GEN pq)
   L = getallforms(D,&z);
   h = lg(L)-1;
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
-  get_pq(D, z, pq, &p, &q);
+  get_pq(D, z, &p, &q);
   T.p = p;
   T.q = q;
   T.e = 24 / ugcd((p%24 - 1) * (q%24 - 1), 24);
@@ -234,7 +218,7 @@ quadhilbertimag(GEN D, GEN pq)
 }
 
 GEN
-quadhilbert(GEN D, GEN flag, long prec)
+quadhilbert(GEN D, long prec)
 {
   if (typ(D) != t_INT)
   {
@@ -246,7 +230,7 @@ quadhilbert(GEN D, GEN flag, long prec)
   else if (!Z_isfundamental(D))
     pari_err(talker,"quadhilbert needs a fundamental discriminant");
   return (signe(D)>0)? quadhilbertreal(D,prec)
-		     : quadhilbertimag(D,flag);
+		     : quadhilbertimag(D);
 }
 
 /* return a vector of all roots of 1 in bnf [not necessarily quadratic] */

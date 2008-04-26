@@ -202,6 +202,7 @@ BA 26- new alarm GP function and alarmer error code
    11- obsolete undocumented library function factpol(), lift_to_pol()
    12- library function combine_factors() is no longer public
    13- obsolete undocumented library function rnfdet0, rnfdet2
+   14- obsolete optional argument to quadhilbert(D < 0)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
