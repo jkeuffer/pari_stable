@@ -766,7 +766,7 @@ closure_eval(GEN C)
           pari_err(talker,"_[_]: not a vector");
         }
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        g->x = *(C->ptcell);
         break;
       }
     case OCcompo2:
@@ -796,7 +796,7 @@ closure_eval(GEN C)
         check_array_index(c, lg(p[d]));
         C->ptcell = (GEN *) gel(p,d)+c;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        g->x = *(C->ptcell);
         break;
       }
     case OCcompoC:
@@ -823,7 +823,7 @@ closure_eval(GEN C)
         C->ptcell = (GEN *) p+c;
         C->full_col = c;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        g->x = *(C->ptcell);
         break;
       }
     case OCcompoL:
@@ -853,14 +853,13 @@ closure_eval(GEN C)
         C->full_row = r; /* record row number */
         C->ptcell = &p2;
         C->parent   = p;
-        g->x = *(g->c.ptcell);
+        g->x = p2;
         break;
       }
     case OCdefaultarg:
       if (var[s_var.n+operand].flag==DEFAULT_VAL)
       {
-        GEN z = closure_evalgen(gel(st,sp-1));
-        if (!z) pari_err(talker,"break not allowed in function parameter");
+        GEN z = closure_evalnobrk(gel(st,sp-1));
         pushlex(operand,z);
       }
       sp--;
