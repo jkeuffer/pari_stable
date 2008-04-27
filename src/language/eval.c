@@ -284,6 +284,7 @@ typedef struct gp_pointer
   GEN x;
   entree *ep;
   long vn;
+  long sp;
 } gp_pointer;
 
 
@@ -442,6 +443,24 @@ pari_close_evaluator(void)
   stack_delete(&s_lvars);
 }
 
+static gp_pointer *
+new_ptr(void)
+{
+  if (rp==s_ptrs.n-1)
+  {
+    long i;
+    gp_pointer *old = ptrs;
+    (void)stack_new(&s_ptrs);
+    if (old != ptrs)
+      for(i=0; i<rp; i++)
+      {
+        gp_pointer *g = &ptrs[i];
+        if(g->sp >= 0) gel(st,g->sp) = (GEN) &(g->x);
+      }
+  }
+  return &ptrs[rp++];
+}
+
 INLINE GEN
 copyupto(GEN z, GEN t)
 {
@@ -581,38 +600,32 @@ closure_eval(GEN C)
       break;
     case OCsimpleptrdyn:
       {
-        gp_pointer *g;
-        if (rp==s_ptrs.n-1)
-          (void)stack_new(&s_ptrs);
-        g = &ptrs[rp++];
+        gp_pointer *g = new_ptr();
         g->vn=0;
         g->ep = (entree*) operand;
         checkvalue(g->ep);
         g->x = (GEN) g->ep->value;
+        g->sp = sp;
         gel(st,sp++) = (GEN)&(g->x);
         break;
       }
     case OCsimpleptrlex:
       {
-        gp_pointer *g;
-        if (rp==s_ptrs.n-1)
-          (void)stack_new(&s_ptrs);
-        g = &ptrs[rp++];
+        gp_pointer *g = new_ptr();
         g->vn=operand;
         g->ep=(entree *)0x1L;
         g->x = (GEN) var[s_var.n+operand].value;
+        g->sp = sp;
         gel(st,sp++) = (GEN)&(g->x);
         break;
       }
     case OCnewptrdyn:
       {
-        gp_pointer *g;
+        gp_pointer *g = new_ptr();
         matcomp *C;
-        if (rp==s_ptrs.n-1)
-          (void)stack_new(&s_ptrs);
-        g = &ptrs[rp++];
         ep = (entree*) operand;
         checkvalue(ep);
+        g->sp = -1;
         g->x = (GEN) ep->value;
         g->vn=0;
         g->ep=NULL;
@@ -624,11 +637,9 @@ closure_eval(GEN C)
       }
     case OCnewptrlex:
       {
-        gp_pointer *g;
+        gp_pointer *g = new_ptr();
         matcomp *C;
-        if (rp==s_ptrs.n-1)
-          (void)stack_new(&s_ptrs);
-        g = &ptrs[rp++];
+        g->sp = -1;
         g->x = copylex(operand);
         g->vn=0;
         g->ep=NULL;
@@ -641,6 +652,7 @@ closure_eval(GEN C)
     case OCpushptr:
       {
         gp_pointer *g = &ptrs[rp-1];
+        g->sp = sp;
         gel(st,sp++) = (GEN)&(g->x);
       }
       break;
@@ -734,8 +746,7 @@ closure_eval(GEN C)
         long c=st[sp-1];
         gp_pointer *g = &ptrs[rp-1];
         matcomp *C=&g->c;
-        GEN p;
-        p=*C->ptcell;
+        GEN p = g->x;
         sp--;
         switch(typ(p))
         {
@@ -777,8 +788,7 @@ closure_eval(GEN C)
         long d=st[sp-1];
         gp_pointer *g = &ptrs[rp-1];
         matcomp *C=&g->c;
-        GEN p;
-        p=*C->ptcell;
+        GEN p = g->x;
         sp-=2;
         if (typ(p)!=t_MAT)
           pari_err(talker,"_[_,_]: not a matrix");
@@ -805,8 +815,7 @@ closure_eval(GEN C)
         long c=st[sp-1];
         gp_pointer *g = &ptrs[rp-1];
         matcomp *C=&g->c;
-        GEN p;
-        p=*C->ptcell;
+        GEN p = g->x;
         sp--;
         if (typ(p)!=t_MAT)
           pari_err(talker,"_[,_]: not a matrix");
@@ -834,8 +843,7 @@ closure_eval(GEN C)
         long r=st[sp-1];
         gp_pointer *g = &ptrs[rp-1];
         matcomp *C=&g->c;
-        GEN p, p2;
-        p=*C->ptcell;
+        GEN p = g->x, p2;
         sp--;
         if (typ(p)!=t_MAT)
           pari_err(talker,"_[_,]: not a matrix");
