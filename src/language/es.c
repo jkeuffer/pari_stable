@@ -4006,7 +4006,7 @@ gp_history(gp_hist *H, long p, char *old, char *entry)
     char *str = stackmalloc(128);
     long pmin = (long)(t - s) + 1;
     if (pmin <= 0) pmin = 1;
-    sprintf(str, "History result %%%ld not available [%%%ld-%%%ld]", p,pmin,t);
+    sprintf(str, "History result %%%ld not available [%%%ld-%%%lu]", p,pmin,t);
     pari_err(talker2, str, old, entry);
   }
   z = H->res[ (p-1) % s ];
