@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 static int
 is_inf(GEN z) { return lg(z) < 3; }
+static GEN
+inf() { return mkvec(gen_0); }
 
 void
 checkpt(GEN z)
@@ -745,10 +747,10 @@ addell(GEN e, GEN z1, GEN z2)
 	eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
 	eq = gequal(y1,y2);
-      if (!eq) { avma = av; return mkvec(gen_0); }
+      if (!eq) { avma = av; return inf(); }
     }
     p2 = d_ellLHS(e,z1);
-    if (gcmp0(p2)) { avma = av; return mkvec(gen_0); }
+    if (gcmp0(p2)) { avma = av; return inf(); }
     p1 = gadd(gsub(gel(e,4),gmul(gel(e,1),y1)),
 	      gmul(x1,gadd(gmul2n(gel(e,2),1),gmulsg(3,x1))));
   }
@@ -855,7 +857,7 @@ ordell(GEN e, GEN x, long prec)
 static GEN
 CM_ellpow(GEN e, GEN z, GEN n)
 {
-  GEN x, y, p0, p1, q0, q1, z1, z2, grdx, b2ov12, N = gnorm(n);
+  GEN p1p, q1p, x, y, p0, p1, q0, q1, z1, z2, grdx, b2ov12, N = gnorm(n);
   long ln, ep, vn;
 
   if (typ(N) != t_INT)
@@ -887,10 +889,19 @@ CM_ellpow(GEN e, GEN z, GEN n)
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
     pari_err(talker,"not a complex multiplication in powell");
+  q1p = RgX_deriv(q1);
+  q1 = poleval(q1, grdx);
+  if (gcmp0(q1)) return inf();
+
+  p1p = RgX_deriv(p1);
+  p1 = poleval(p1, grdx);
+  p1p = poleval(p1p, grdx);
+  q1p = poleval(q1p, grdx);
+
   x = gdiv(p1,q1);
-  y = gdiv(deriv(x,0),n);
-  x = gsub(poleval(x,grdx), b2ov12);
-  y = gsub( gmul(d_ellLHS(e,z), poleval(y,grdx)), ellLHS0(e,x));
+  y = gdiv(gsub(gmul(p1p,q1), gmul(p1,q1p)), gmul(n,gsqr(q1)));
+  x = gsub(x, b2ov12);
+  y = gsub( gmul(d_ellLHS(e,z), y), ellLHS0(e,x));
   z = cgetg(3,t_VEC);
   gel(z,1) = gcopy(x);
   gel(z,2) = gmul2n(y,-1); return z;
@@ -908,7 +919,7 @@ powell(GEN e, GEN z, GEN n)
   long s;
 
   checksell(e); checkpt(z);
-  if (is_inf(z)) return mkvec(gen_0);
+  if (is_inf(z)) return inf();
   switch(typ(n))
   {
     case t_INT: break;
@@ -922,7 +933,7 @@ powell(GEN e, GEN z, GEN n)
       pari_err(typeer,"powell (non integral, non CM exponent)");
   }
   s = signe(n);
-  if (!s) return mkvec(gen_0);
+  if (!s) return inf();
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
   return gerepileupto(av, leftright_pow(z, n, (void*)e, &_sqr, &_mul));
@@ -1405,7 +1416,7 @@ pointell(GEN e, GEN z, long prec)
 
   checkbell(e); (void)get_periods(e, &T);
   v = weipellnumall(&T,z,1,prec);
-  if (!v) { avma = av; return mkvec(gen_0); }
+  if (!v) { avma = av; return inf(); }
   gel(v,1) = gsub(gel(v,1), gdivgs(gel(e,6),12));
   gel(v,2) = gsub(gel(v,2), gmul2n(ellLHS0(e,gel(v,1)),-1));
   return gerepilecopy(av, v);
@@ -3718,7 +3729,7 @@ ratroot(GEN p)
   GEN L, a, ld;
   long i, t, v = ZX_valuation(p, &p);
 
-  if (v == 3) return mkvec(gen_0);
+  if (v == 3) return inf();
   if (v == 2) return mkvec2(gen_0, gmul2n(negi(gel(p,2)), -2));
 
   L = cgetg(4,t_VEC); t = 1;
@@ -3765,7 +3776,7 @@ nagelllutz(GEN e)
   if (v) e = _coordch(e,v);
   pol = RgX_rescale(RHSpol(e), utoipos(4));
   r = cgetg(17, t_VEC);
-  gel(r,1) = mkvec(gen_0);
+  gel(r,1) = inf();
   lr = ratroot(pol); nlr=lg(lr)-1;
   for (t=1,i=1; i<=nlr; i++)
   {
