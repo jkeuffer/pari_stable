@@ -572,6 +572,24 @@ compilefacteurmat(long n, int mode)
 }
 
 static void
+compilesmall(long n, long x, long mode)
+{
+  if (mode==Ggen)
+  {
+    GEN stog[]={gen_m1, gen_0, gen_1, gen_2};
+    if (x>=-1 && x<=2)
+      op_push(OCpushlong, (long) stog[x+1]);
+    else
+      op_push(OCpushstoi, x);
+  }
+  else
+  {
+    op_push(OCpushlong, x);
+    compilecast(n,Gsmall,mode);
+  }
+}
+
+static void
 compilevec(long n, long mode, op_code op)
 {
   pari_sp ltop=avma;
@@ -796,6 +814,12 @@ compilefunc(entree *ep, long n, int mode)
       nb  = lg(arg)-1;
       lnc = first_safe_arg(arg);
     }
+  }
+  else if (x==OPn && tree[y].f==Fsmall)
+  {
+    avma=ltop;
+    compilesmall(y, -tree[y].x, mode);
+    return;
   }
   else if (x==OPtrans && tree[y].f==Fvec)
   {
@@ -1387,19 +1411,7 @@ compilenode(long n, int mode, long flag)
       return;
     }
   case Fsmall:
-    if (mode==Ggen)
-    {
-      GEN stog[]={gen_m1, gen_0, gen_1, gen_2};
-      if (x>=-1 && x<=2)
-        op_push(OCpushlong, (long) stog[x+1]);
-      else
-        op_push(OCpushstoi, x);
-    }
-    else
-    {
-      op_push(OCpushlong, x);
-      compilecast(n,Gsmall,mode);
-    }
+    compilesmall(n, x, mode);
     return;
   case Fvec:
     compilevec(n, mode, OCvec);
