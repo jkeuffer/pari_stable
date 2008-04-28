@@ -1202,6 +1202,8 @@ closure_disassemble(GEN C)
     case OCpushlong:
       if (operand==(long)gnil)
         pari_printf("pushlong\tgnil\n");
+      else if (operand==(long)gen_m2)
+        pari_printf("pushlong\tgen_m2\n");
       else if (operand==(long)gen_m1)
         pari_printf("pushlong\tgen_m1\n");
       else if (operand==(long)gen_0)

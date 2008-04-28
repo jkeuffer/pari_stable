@@ -576,9 +576,9 @@ compilesmall(long n, long x, long mode)
 {
   if (mode==Ggen)
   {
-    GEN stog[]={gen_m1, gen_0, gen_1, gen_2};
-    if (x>=-1 && x<=2)
-      op_push(OCpushlong, (long) stog[x+1]);
+    GEN stog[]={gen_m2, gen_m1, gen_0, gen_1, gen_2};
+    if (x>=-2 && x<=2)
+      op_push(OCpushlong, (long) stog[x+2]);
     else
       op_push(OCpushstoi, x);
   }
