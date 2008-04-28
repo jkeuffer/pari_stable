@@ -1111,13 +1111,16 @@ szeta_odd(long k, long prec)
     qn = gsqr(q); z = ginv( addrs(q,-1) );
     for (n=2; ; n++)
     {
+      long ep1, l;
       p1 = ginv( mulir(powuu(n,k),addrs(qn,-1)) );
 
-      z = addrr(z,p1); if (expo(p1)< li) break;
+      z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
+      l = prec+1 + nbits2nlong(ep1);
+      if (l < lg(qn)) setlg(qn, l);
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
+	if (DEBUGMEM>1) pari_warn(warnmem,"szeta, delta = %ld", expo(p1)-li);
 	gerepileall(av2,2, &z, &qn);
       }
     }
@@ -1142,14 +1145,17 @@ szeta_odd(long k, long prec)
     qn = q; z=gen_0;
     for (n=1; ; n++)
     {
-      p1=mulir(powuu(n,k),gsqr(addrs(qn,-1)));
-      p1=divrr(addrs(mulrr(qn,addsr(1,mulsr(n<<1,p2))),-1),p1);
+      long ep1, l;
+      p1 = mulir(powuu(n,k),gsqr(addrs(qn,-1)));
+      p1 = divrr(addrs(mulrr(qn,addsr(1,mulsr(n<<1,p2))),-1),p1);
 
-      z=addrr(z,p1); if (expo(p1) < li) break;
-      qn=mulrr(qn,q);
+      z = addrr(z,p1); if ((ep1 = expo(p1)) < li) break;
+      l = prec+1 + nbits2nlong(ep1);
+      if (l < lg(qn)) setlg(qn, l);
+      qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"szeta");
+	if (DEBUGMEM>1) pari_warn(warnmem,"szeta, delta = %ld", ep1-li);
 	gerepileall(av2,2, &z, &qn);
       }
     }
