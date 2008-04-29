@@ -253,6 +253,7 @@ parseproto(char const **q, char *c, const char *str)
       compile_err("function has incomplete prototype",str);
     case 'G':
     case '&':
+    case 'W':
     case 'V':
     case 'I':
     case 'E':
@@ -856,6 +857,10 @@ compilefunc(entree *ep, long n, int mode)
         case 'G':
           compilenode(arg[j],Ggen,j>=lnc?FLnocopy:0);
           j++;
+          break;
+        case 'W':
+          getlvalue(arg[j]);
+          compilenode(arg[j++],Ggen,FLnocopy);
           break;
         case 'M':
           if (tree[arg[j]].f!=Fsmall)

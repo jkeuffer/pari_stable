@@ -246,6 +246,7 @@ check_proto(const char *code)
     case 'M':
     case 'P':
     case 'S':
+    case 'W':
     case 'f':
     case 'n':
     case 'p':

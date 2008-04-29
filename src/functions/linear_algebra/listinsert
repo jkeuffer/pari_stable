@@ -1,7 +1,7 @@
 Function: listinsert
 Section: linear_algebra
 C-Name: listinsert
-Prototype: GGL
+Prototype: WGL
 Help: listinsert(L,x,n): insert x at index n in list L, shifting the
  remaining elements to the right
 Description: 
