@@ -134,7 +134,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     }
     gel(v,i) = mkintmod(n_q, gel(qj,e));
   }
-  return gerepileuptoint(av, lift(chinese1(v)));
+  return gerepileuptoint(av, lift(chinese1_coprime_Z(v)));
 }
 
 /***********************************************************************/

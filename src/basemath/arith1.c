@@ -574,7 +574,7 @@ gissquareall(GEN x, GEN *pt)
 	if (v) t = mulii(t, gpowgs(p, v>>1));
 	gel(L,i) = mkintmod(t, gpowgs(p, e));
       }
-      *pt = gerepileupto(av, chinese1(L));
+      *pt = gerepileupto(av, chinese1_coprime_Z(L));
       return gen_1;
     }
 
@@ -812,7 +812,7 @@ ispower(GEN x, GEN K, GEN *pt)
 	  gel(L,i) = mkintmod(t, gpowgs(p, e));
 	}
       }
-      if (pt) *pt = gerepileupto(av, chinese1(L));
+      if (pt) *pt = gerepileupto(av, chinese1_coprime_Z(L));
       return 1;
     }
     case t_FFELT:
@@ -1629,7 +1629,8 @@ chinese(GEN x, GEN y)
       c = Z_chinese_post(a, b, C, U, d);
       if (!c) pari_err(consister,"Z_chinese");
       gel(z,1) = icopy_av(C, z);
-      gel(z,2) = icopy_av(c, gel(z,1)); return z;
+      gel(z,2) = icopy_av(c, gel(z,1));
+      avma = (pari_sp)gel(z,2); return z;
     }
     case t_POL:
       lx=lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
@@ -1695,6 +1696,22 @@ Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)
   GEN U = mulii(Fp_inv(A,B), A);
   return gerepileuptoint(av, Z_chinese_post(a,b,C,U, NULL));
 }
+
+/* chinese1 for coprime moduli in Z */
+static GEN
+chinese1_coprime_Z_aux(GEN x, GEN y)
+{
+  GEN z = cgetg(3, t_INTMOD);
+  GEN A = gel(x,1), a = gel(x, 2);
+  GEN B = gel(y,1), b = gel(y, 2), C = mulii(A,B);
+  pari_sp av = avma;
+  GEN U = mulii(Fp_inv(A,B), A);
+  gel(z,2) = gerepileuptoint(av, Z_chinese_post(a,b,C,U, NULL));
+  gel(z,1) = C; return z;
+}
+GEN
+chinese1_coprime_Z(GEN x) {return gassoc_proto(chinese1_coprime_Z_aux,x,NULL);}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                      OPERATIONS MODULO m                        **/

@@ -2946,6 +2946,15 @@ given a \typ{INT} \kbd{*H}, centered modulo \kbd{q}, a new pair $(\kbd{Hp},
 congruent to $(\kbd{Hp}, \kbd{p})$. It returns $1$ if the new value is equal
 to the old one, and $0$ otherwise.
 
+\fun{GEN}{chinese1_coprime_Z}{GEN v} an alternative divide-and-conquer
+implementation: $v$ is a vector of \typ{INTMOD} with pairwise coprime moduli.
+Return the \typ{INTMOD} solving the corresponding chinese remainder problem.
+This is a streamlined version of 
+
+\fun{GEN}{chinese1}{GEN v}, which solves a general chinese remainder problem
+(not necessarily over $\Z$, moduli not assumed coprime).
+
+
 As above, for $H$ a \kbd{ZM}: we assume that $H$ and all \kbd{Hp} have
 dimension $> 0$. The original \kbd{*H} is destroyed.
 

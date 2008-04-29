@@ -634,6 +634,7 @@ GEN     bestappr(GEN x, GEN k);
 long    cgcd(long a,long b);
 long    ugcd(ulong a,ulong b);
 GEN     chinese1(GEN x);
+GEN     chinese1_coprime_Z(GEN x);
 GEN     chinese(GEN x, GEN y);
 GEN     classno2(GEN x);
 GEN     classno(GEN x);
