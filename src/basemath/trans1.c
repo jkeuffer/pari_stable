@@ -311,10 +311,25 @@ puiss0(GEN x)
     case t_POLMOD:
       y = cgetg(3,t_POLMOD);
       gel(y,1) = gcopy(gel(x,1));
-      gel(y,2) = pol_1(varn(x[1])); return y;
+      gel(y,2) = puiss0(gel(x,1)); return y;
 
-    case t_POL: case t_SER: case t_RFRAC:
-      return pol_1(gvar(x));
+    case t_RFRAC:
+      x = gel(x,2);
+    case t_POL: case t_SER: {
+      pari_sp av = avma;
+      GEN p, T;
+      long vx = varn(x), tx = RgX_type(x, &p, &T, &lx);
+      if (RgX_type_is_composite(tx))
+        RgX_type_decode(tx, &i /*junk*/, &tx);
+      switch(tx)
+      {
+        case t_INTMOD: x = mkintmod(gen_1,p); break;
+        case t_PADIC: x = cvtop(gen_1, p, lx); break;
+        case t_FFELT: x = FF_1(T); break;
+        default: x = gen_1; break;
+      }
+      return gerepileupto(av, scalarpol(x, vx));
+    }
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);

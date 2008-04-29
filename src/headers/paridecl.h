@@ -1970,6 +1970,7 @@ GEN     Q_remove_denom(GEN x, GEN *ptd);
 GEN     QX_factor(GEN x);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
 void    RgX_type_decode(long x, long *t1, long *t2);
+int     RgX_type_is_composite(long t);
 long    RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 GEN     RgXQ_inv(GEN x, GEN y);
 GEN     ZX_factor(GEN x);

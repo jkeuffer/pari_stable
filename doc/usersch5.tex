@@ -3517,6 +3517,9 @@ is one of \typ{INT}, \typ{INTMOD} (set \kbd{*ptp}) or \typ{PADIC}
 (set \kbd{*ptp} and \kbd{*ptprec}), with the same meaning
 as above.
 
+\fun{int}{RgX_type_is_composite}{long t} $t$ as returned by \kbd{RgX\_type},
+return 1 if $t$ is a composite type, and 0 otherwise.
+
 \fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
 \fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}.
