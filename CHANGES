@@ -71,6 +71,7 @@ BA 29- missing GC in the leftrightpow functions
    63- nffactor(y^2+1,x*y+1) --> x*y + 1 [ not normalized, missing POLMOD ]
    64- nffactor(y^2+1,x^2+2*y+1) --> x^2+2*y+1 [ missing POLMOD ]
    65- ellpow() with CM raised a "division by 0" instead of returning [0] [#777]
+   66- ellpow(e,z,2^20*I) --> norm too large in CM.
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -173,8 +174,8 @@ JD 12- add an optional argument to quit()
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
    21- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
-   numberofconjugates, mkvecsmall4, shallowconcat1, concat1, ZV_prod, zv_prod
-   RgX_neg, RgX_add, RgX_sub, RgV_neg, RgV_add, RgV_sub,
+   numberofconjugates, mkquad, mkvecsmall4, shallowconcat1, concat1, ZV_prod,
+   zv_prod RgX_neg, RgX_add, RgX_sub, RgV_neg, RgV_add, RgV_sub,
    RgC_neg, RgC_add, RgC_sub, RgM_neg, RgM_add, RgM_sub,
    FF_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub, ZC_lincomb1_inplace, ZC_z_mul
    Z_isanypower, RgX_equal, RgX_equal_var, RgX_translate, RgXQX_translate

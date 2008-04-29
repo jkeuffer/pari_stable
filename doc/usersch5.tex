@@ -3958,6 +3958,9 @@ before $x$ is subject to garbage collection.
 \fun{GEN}{mulcxmI}{GEN x}, as \tet{mulcxI}, but returns the \typ{COMPLEX}
 $-ix$.
 
+\fun{GEN}{mkquad}{GEN n, GEN x, GEN y} creates the \typ{QUAD} $x + yw$,
+where $w$ is a root of $n$, which is of the form \kbd{quadpoly(D)}.
+
 \fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
 $y > 1$ and $(x,y) = 1$.
 

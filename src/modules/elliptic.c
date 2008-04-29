@@ -855,7 +855,7 @@ ordell(GEN e, GEN x, long prec)
 
 /* n t_QUAD or t_COMPLEX, z != [0] */
 static GEN
-CM_ellpow(GEN e, GEN z, GEN n)
+ellpow_CM(GEN e, GEN z, GEN n)
 {
   GEN p1p, q1p, x, y, p0, p1, q0, q1, z1, z2, grdx, b2ov12, N = gnorm(n);
   long ln, ep, vn;
@@ -902,9 +902,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
   y = gdiv(gsub(gmul(p1p,q1), gmul(p1,q1p)), gmul(n,gsqr(q1)));
   x = gsub(x, b2ov12);
   y = gsub( gmul(d_ellLHS(e,z), y), ellLHS0(e,x));
-  z = cgetg(3,t_VEC);
-  gel(z,1) = gcopy(x);
-  gel(z,2) = gmul2n(y,-1); return z;
+  return mkvec2(x, gmul2n(y,-1));
 }
 
 static GEN
@@ -912,31 +910,49 @@ _sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
 static GEN
 _mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
 
+/* [n] z, n integral */
+static GEN
+ellpow_Z(GEN e, GEN z, GEN n)
+{
+  long s;
+
+  if (typ(n) != t_INT) pari_err(typeer,"ellpow_Z");
+  if (is_inf(z)) return inf();
+  s = signe(n);
+  if (!s) return inf();
+  if (is_pm1(n)) return s < 0? invell(e,z): z;
+  return leftright_pow(z, n, (void*)e, &_sqr, &_mul);
+}
+/* [a + bw] z, a,b integral */
+static GEN
+ellpow_CM_aux(GEN e, GEN z, GEN a, GEN b, GEN w)
+{
+  GEN A = ellpow_Z(e,z,a), B = ellpow_Z(e,z,b);
+  if (!is_inf(B)) B = ellpow_CM(e, B, w);
+  return addell(e, A, B);
+}
 GEN
 powell(GEN e, GEN z, GEN n)
 {
   pari_sp av = avma;
-  long s;
 
   checksell(e); checkpt(z);
   if (is_inf(z)) return inf();
   switch(typ(n))
   {
-    case t_INT: break;
+    case t_INT: return gerepilecopy(av, ellpow_Z(e,z,n));
     case t_QUAD: {
-      GEN pol = gel(n,1);
-      if (signe(pol[2]) < 0) pari_err(typeer,"CM_ellpow");
-    } /* fall through */
-    case t_COMPLEX:
-      return gerepileupto(av, CM_ellpow(e,z,n));
-    default:
-      pari_err(typeer,"powell (non integral, non CM exponent)");
+      GEN pol = gel(n,1), a = gel(n,2), b = gel(n,3);
+      if (signe(pol[2]) < 0) pari_err(typeer,"ellpow_CM");
+      return gerepileupto(av, ellpow_CM_aux(e,z,a,b,mkquad(pol, gen_0,gen_1)));
+    }
+    case t_COMPLEX: {
+      GEN a = gel(n,1), b = gel(n,2);
+      return gerepileupto(av, ellpow_CM_aux(e,z,a,b,gi));
+    }
   }
-  s = signe(n);
-  if (!s) return inf();
-  if (s < 0) z = invell(e,z);
-  if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
-  return gerepileupto(av, leftright_pow(z, n, (void*)e, &_sqr, &_mul));
+  pari_err(typeer,"powell (non integral, non CM exponent)");
+  return NULL; /* not reached */
 }
 
 /********************************************************************/
@@ -3636,7 +3652,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   if (q)
   {
     long n = k>>1;
-    GEN p1, best = q, np = powell(e,p,utoipos(n));
+    GEN p1, best = q, np = ellpow_Z(e,p,utoipos(n));
     if (n % 2 && smaller_x(gel(np,1), gel(best,1))) best = np;
     p1 = addell(e,q,np);
     if (smaller_x(gel(p1,1), gel(best,1))) q = p1;
@@ -3683,7 +3699,7 @@ _addFp(void *E, GEN x, GEN y)
 static GEN
 _powFp(void *E, GEN x, GEN n)
 {
-  return powell((GEN)E,x,n);
+  return ellpow_Z((GEN)E,x,n);
 }
 
 const static struct bb_group ellFp={_addFp,_powFp,NULL,NULL,is_inf};
@@ -3822,7 +3838,7 @@ nagelllutz(GEN e)
       if (_orderell(e,gel(r,k)) == t2) break;
     if (k>t) pari_err(bugparier,"elltors (bug3)");
 
-    p1 = powell(e,gel(r,k),utoipos(t>>2));
+    p1 = ellpow_Z(e,gel(r,k),utoipos(t>>2));
     k2 = (!is_inf(p1) && gequal(gel(r,2),p1))? 3: 2;
     w3 = mkvec2(gel(r,k), gel(r,k2));
   }
@@ -3882,7 +3898,7 @@ torspnt(GEN E, GEN w, long n, long prec)
   gel(p,2) = gmul2n(myround(gmul2n(gel(q,2),3), &e),-3);
   if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
-      && is_inf(powell(E,p,utoipos(n)))
+      && is_inf(ellpow_Z(E,p,utoipos(n)))
       && _orderell(E,p) == n)? p: NULL;
 }
 
