@@ -2944,8 +2944,8 @@ lift0(GEN x, long v)
 
     case t_QUAD:
       y=cgetg(4,t_QUAD); gel(y,1) = gcopy(gel(x,1));
-      for (i=2; i<4; i++) gel(y,i) = lift0(gel(x,i), v);
-      return y;
+      gel(y,2) = lift0(gel(x,2),v);
+      gel(y,3) = lift0(gel(x,3),v); return y;
   }
   pari_err(typeer,"lift");
   return NULL; /* not reached */
