@@ -2048,7 +2048,7 @@ factor(GEN x)
 
 	default:
 	{
-	  GEN p5;
+	  GEN w;
 	  long killv, t1, t2;
 	  x = shallowcopy(x); lx=lg(x);
 	  pol = shallowcopy(pol);
@@ -2078,9 +2078,8 @@ factor(GEN x)
 	    case t_POLMOD:
 	      if (killv) (void)delete_var();
 	      return gerepileupto(av,p1);
-	    case t_COMPLEX: p5 = gi; break;
-	    case t_QUAD: p5=cgetg(4,t_QUAD);
-	      gel(p5,1) = pol; gel(p5,2) = gen_0; gel(p5,3) = gen_1;
+	    case t_COMPLEX: w = gi; break;
+	    case t_QUAD: w = mkquad(pol,gen_0,gen_1);
 	      break;
 	    default: pari_err(impl,"factor of general polynomial");
 	      return NULL; /* not reached */
@@ -2088,12 +2087,12 @@ factor(GEN x)
 	  p2=gel(p1,1);
 	  for(i=1; i<lg(p2); i++)
 	  {
-	    GEN p3 = gel(p2,i);
+	    GEN P = gel(p2,i);
 	    long j;
-	    for(j=2; j<lg(p3); j++)
+	    for(j=2; j<lg(P); j++)
 	    {
-	      GEN p4 = gel(p3,j);
-	      if(typ(p4)==t_POLMOD) gel(p3,j) = gsubst(gel(p4,2),v,p5);
+	      GEN p = gel(P,j);
+	      if(typ(p)==t_POLMOD) gel(P,j) = gsubst(gel(p,2),v,w);
 	    }
 	  }
 	  if (killv) (void)delete_var();
