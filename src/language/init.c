@@ -1124,7 +1124,8 @@ pari_err(long numerr, ...)
     size_t d = top - bot;
     char buf[256];
     /* don't use pari_printf: it needs the PARI stack for %.3f conversion */
-    sprintf(buf, "\n  current stack size: %lu (%.3lf Mbytes)\n", (ulong)d, d/1048576.);
+    sprintf(buf, "\n  current stack size: %lu (%.3f Mbytes)\n",
+                 (ulong)d, (double)d/1048576.);
     pariErr->puts(buf);
     pariErr->puts("  [hint] you can increase GP stack with allocatemem()\n");
   }
