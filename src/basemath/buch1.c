@@ -807,40 +807,6 @@ check_bach(double cbach, double B)
   return cbach;
 }
 
-#if 0
-static long
-factorquad(GEN f, long kcz, ulong limp)
-{
-  ulong p;
-  long i, k, lo;
-  pari_sp av;
-  GEN x = gel(f,1);
-
-  if (is_pm1(x)) { B->primfact[0] = 0; return 1; }
-  av = avma; lo = 0;
-  x = absi(x);
-  for (i=1; ; i++)
-  {
-    int stop;
-    k = Z_lvalrem_stop(x, (ulong)FB[i], &stop);
-    if (k) { B->primfact[++lo] = i; B->exprimfact[lo] = k; }
-    if (stop) break;
-    if (i == kcz) { avma = av; return 0; }
-  }
-  avma = av;
-  if (lgefint(x) != 3 || (p=(ulong)x[2]) > B->limhash) return 0;
-
-  if (p != 1 && p <= limp)
-  {
-    if (B->badprim && ugcd(p, umodiu(B->badprim,p)) > 1) return 0;
-    B->primfact[++lo] = B->numFB[p]; B->exprimfact[lo] = 1;
-    p = 1;
-  }
-  B->primfact[0] = lo; return p;
-}
-
-#else /* Same, Z_lvalrem_stop unrolled. Ugly but more than 30% faster :-( */
-
 /* Is |q| <= p ? */
 static int
 isless_iu(GEN q, ulong p) {
@@ -899,7 +865,6 @@ END:
   }
   B->primfact[0] = lo; return X;
 }
-#endif
 
 /* Check for a "large prime relation" involving q; q may not be prime */
 static long *
