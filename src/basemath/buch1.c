@@ -815,55 +815,52 @@ isless_iu(GEN q, ulong p) {
 }
 
 static long
-factorquad(struct buch_quad *B, GEN f, long kcz, ulong limp)
+factorquad(struct buch_quad *B, GEN f, long nFB, ulong limp)
 {
   ulong X;
-  long i, lo;
-  pari_sp av;
-  GEN x = gel(f,1);
+  long i, lo = 0;
+  GEN x = gel(f,1), FB = B->FB, P = B->primfact, E = B->exprimfact;
 
-  if (is_pm1(x)) { B->primfact[0] = 0; return 1; }
-  av = avma; lo = 0;
   for (i=1; lgefint(x) > 3; i++)
   {
-    ulong p = (ulong)B->FB[i], r;
+    ulong p = (ulong)FB[i], r;
     GEN q = diviu_rem(x, p, &r);
     if (!r)
     {
       long k = 0;
       do { k++; x = q; q = diviu_rem(x, p, &r); } while (!r);
-      B->primfact[++lo] = i; B->exprimfact[lo] = k;
+      lo++; P[lo] = p; E[lo] = k;
     }
     if (isless_iu(q,p)) {
-      avma = av;
       if (lgefint(x) == 3) { X = (ulong)x[2]; goto END; }
       return 0;
     }
-    if (i == kcz) { avma = av; return 0; }
+    if (i == nFB) return 0;
   }
-  avma = av; X = (ulong)x[2];
+  X = (ulong)x[2];
+  if (X == 1) { P[0] = 0; return 1; }
   for (;; i++)
   { /* single precision affair, split for efficiency */
-    ulong p = (ulong)B->FB[i];
+    ulong p = (ulong)FB[i];
     ulong q = X / p, r = X % p; /* gcc makes a single div */
     if (!r)
     {
       long k = 0;
       do { k++; X = q; q = X / p; r = X % p; } while (!r);
-      B->primfact[++lo] = i; B->exprimfact[lo] = k;
+      lo++; P[lo] = p; E[lo] = k;
     }
     if (q <= p) break;
-    if (i == kcz) return 0;
+    if (i == nFB) return 0;
   }
 END:
   if (X > B->limhash) return 0;
   if (X != 1 && X <= limp)
   {
     if (B->badprim && ugcd(X, umodiu(B->badprim,X)) > 1) return 0;
-    B->primfact[++lo] = B->numFB[X]; B->exprimfact[lo] = 1;
+    lo++; P[lo] = X; E[lo] = 1;
     X = 1;
   }
-  B->primfact[0] = lo; return X;
+  P[0] = lo; return X;
 }
 
 /* Check for a "large prime relation" involving q; q may not be prime */
@@ -1068,7 +1065,7 @@ sub_fact(struct buch_quad *B, GEN col, GEN F)
   long i;
   for (i=1; i<=B->primfact[0]; i++)
   {
-    ulong k = B->primfact[i], p = B->FB[k];
+    ulong p = B->primfact[i], k = B->numFB[p];
     long e = B->exprimfact[i];
     if (umodiu(b, p<<1) > p) e = -e;
     col[k] -= e;
@@ -1081,7 +1078,7 @@ add_fact(struct buch_quad *B, GEN col, GEN F)
   long i;
   for (i=1; i<=B->primfact[0]; i++)
   {
-    ulong k = B->primfact[i], p = B->FB[k];
+    ulong p = B->primfact[i], k = B->numFB[p];
     long e = B->exprimfact[i];
     if (umodiu(b, p<<1) > p) e = -e;
     col[k] += e;
