@@ -395,60 +395,6 @@ isrationalzeroscalar(GEN g)
 }
 
 int
-isexactzero(GEN g)
-{
-  long i, lx;
-  switch (typ(g))
-  {
-    case t_INT:
-      return !signe(g);
-    case t_INTMOD:
-      return !signe(gel(g,2));
-    case t_COMPLEX:
-      return isexactzero(gel(g,1)) && isexactzero(gel(g,2));
-    case t_FFELT:
-      return FF_cmp0(g);
-    case t_QUAD:
-      return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
-    case t_POLMOD:
-      return isexactzero(gel(g,2));
-    case t_POL:
-      lx = lg(g); /* cater for Mod(0,2)*x^0 */
-      return lx == 2 || (lx == 3 && isexactzero(gel(g,2)));
-    case t_RFRAC:
-      return isexactzero(gel(g,1)); /* may occur: Mod(0,2)/x */
-    case t_VEC: case t_COL: case t_MAT:
-      for (i=lg(g)-1; i; i--)
-	if (!isexactzero(gel(g,i))) return 0;
-      return 1;
-  }
-  return 0;
-}
-
-int
-isrationalzero(GEN g)
-{
-  long i;
-  switch (typ(g))
-  {
-    case t_INT:
-      return !signe(g);
-    case t_COMPLEX:
-      return isrationalzero(gel(g,1)) && isrationalzero(gel(g,2));
-    case t_QUAD:
-      return isrationalzero(gel(g,2)) && isrationalzero(gel(g,3));
-    case t_POLMOD:
-      return isrationalzero(gel(g,2));
-    case t_POL: return lg(g) == 2;
-    case t_VEC: case t_COL: case t_MAT:
-      for (i=lg(g)-1; i; i--)
-	if (!isrationalzero(gel(g,i))) return 0;
-      return 1;
-  }
-  return 0;
-}
-
-int
 iscomplex(GEN x)
 {
   switch(typ(x))

@@ -293,8 +293,60 @@ gtolong(GEN x)
 /*                         COMPARISONS                             */
 /*                                                                 */
 /*******************************************************************/
+int
+isexactzero(GEN g)
+{
+  long i, lx;
+  switch (typ(g))
+  {
+    case t_INT:
+      return !signe(g);
+    case t_INTMOD:
+      return !signe(gel(g,2));
+    case t_COMPLEX:
+      return isexactzero(gel(g,1)) && isexactzero(gel(g,2));
+    case t_FFELT:
+      return FF_cmp0(g);
+    case t_QUAD:
+      return isexactzero(gel(g,2)) && isexactzero(gel(g,3));
+    case t_POLMOD:
+      return isexactzero(gel(g,2));
+    case t_POL:
+      lx = lg(g); /* cater for Mod(0,2)*x^0 */
+      return lx == 2 || (lx == 3 && isexactzero(gel(g,2)));
+    case t_RFRAC:
+      return isexactzero(gel(g,1)); /* may occur: Mod(0,2)/x */
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(g)-1; i; i--)
+	if (!isexactzero(gel(g,i))) return 0;
+      return 1;
+  }
+  return 0;
+}
 
-/* returns 1 whenever x = 0, and 0 otherwise */
+int
+isrationalzero(GEN g)
+{
+  long i;
+  switch (typ(g))
+  {
+    case t_INT:
+      return !signe(g);
+    case t_COMPLEX:
+      return isrationalzero(gel(g,1)) && isrationalzero(gel(g,2));
+    case t_QUAD:
+      return isrationalzero(gel(g,2)) && isrationalzero(gel(g,3));
+    case t_POLMOD:
+      return isrationalzero(gel(g,2));
+    case t_POL: return lg(g) == 2;
+    case t_VEC: case t_COL: case t_MAT:
+      for (i=lg(g)-1; i; i--)
+	if (!isrationalzero(gel(g,i))) return 0;
+      return 1;
+  }
+  return 0;
+}
+
 int
 gcmp0(GEN x)
 {
@@ -1776,31 +1828,31 @@ normalizepol_approx(GEN x, long lx)
 GEN
 normalizepol_i(GEN x, long lx)
 {
-  long i;
-  GEN z;
-  for (i = lx-1; i>1; i--)
-    if (! isrationalzero(gel(x,i))) break;
-  if (i <= 1)
-  { /* Pol(0) */
-    stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + 2));
-    x[0] = evaltyp(t_POL)|evallg(2);
-    setsigne(x,0); return x;
-  }
-  /* not a rational 0, to be kept iff all other coeffs are exact 0s */
-  z = gel(x,i);
-  for (; i>1; i--)
-    if (! isexactzero(gel(x,i))) break;
-  if (i == 1)
-  { /* e.g. Pol(Mod(0,2)) */
-    stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + 3));
-    x[0] = evaltyp(t_POL)|evallg(3);
-    setsigne(x,0); gel(x,2) = z; return x;
-  }
+  long i, LX = 0;
+  GEN KEEP = NULL;
 
-  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + i+1));
-  setlg(x, i+1);
-  for (; i>1; i--)
-    if (! gcmp0(gel(x,i)) ) { setsigne(x,1); return x; }
+  for (i = lx-1; i>1; i--)
+  {
+    GEN z = gel(x,i);
+    if (! gcmp0(z) ) {
+      if (!LX) LX = i+1;
+      stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + LX));
+      x[0] = evaltyp(t_POL) | evallg(LX);
+      setsigne(x,1); return x;
+    } else if (!isexactzero(z)) {
+      if (!LX) LX = i+1; /* to be kept as leading coeff */
+    } else if (!isrationalzero(z))
+      KEEP = z; /* to be kept iff all other coeffs are exact 0s */
+  }
+  if (!LX) {
+    if (KEEP) { /* e.g. Pol(Mod(0,2)) */
+      gel(x,2) = KEEP;
+      LX = 3;
+    } else
+      LX = 2; /* Pol(0) */
+  }
+  stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + LX));
+  x[0] = evaltyp(t_POL) | evallg(LX);
   setsigne(x,0); return x;
 }
 
