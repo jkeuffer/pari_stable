@@ -295,7 +295,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   (void)new_chunk(space); /* HACK */
   g = RgX_sub(f, RgX_mul(a,b));
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
-  g = gdivexact(g, p0);
+  g = RgX_Rg_divexact(g, p0);
   if (T)
   {
     z = FpXQX_mul(v,g, T,pd);
@@ -324,7 +324,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   g = Rg_RgX_sub(gen_1, g);
 
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
-  g = gdivexact(g, p0);
+  g = RgX_Rg_divexact(g, p0);
   if (T)
   {
     z = FpXQX_mul(v,g, T,pd);
@@ -993,7 +993,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 
     if (lt)
     {
-      pol = gdivexact(pol, leading_term(y));
+      pol = RgX_Rg_divexact(pol, leading_term(y));
       lt = absi(leading_term(pol));
       ltpol = gmul(lt, pol);
     }
@@ -3312,10 +3312,7 @@ gdivexact(GEN x, GEN y)
 	case t_POL:
 	  if (varn(x)==varn(y)) return poldivrem(x,y, NULL);
       }
-      lx = lg(x); z = new_chunk(lx);
-      for (i=2; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
-      z[1] = x[1];
-      z[0] = x[0]; return z;
+      return RgX_Rg_divexact(x, y);
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); z = new_chunk(lx);
       for (i=1; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
@@ -3386,7 +3383,7 @@ subresall(GEN u, GEN v, GEN *sol)
 	h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
     if (both_odd(du,dv)) signh = -signh;
-    v = gdivexact(r,p1);
+    v = RgX_Rg_divexact(r,p1);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
@@ -3469,8 +3466,8 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
 	h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
     if (both_odd(du, dv)) signh = -signh;
-    v  = gdivexact(r,p1);
-    uze= gdivexact(uze,p1);
+    v  = RgX_Rg_divexact(r,p1);
+    uze= RgX_Rg_divexact(uze,p1);
     if (dr == 3) {
       z = gel(v,2);
       if (dv > 1)
@@ -3527,7 +3524,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   long dx, dy, tx = typ(x), ty = typ(y);
   GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
-  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"subresext");
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) pari_err(typeer,"RgX_gcd");
   if (gcmp0(x)) {
     if (gcmp0(y)) { *U = *V = gen_0; return gen_0; }
     return zero_bezout(y,U,V);
@@ -3572,8 +3569,8 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 	p1 = gmul(gpowgs(h,degq), p1);
 	h = gdiv(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    v  = gdivexact(r,p1);
-    uze= gdivexact(uze,p1);
+    v  = RgX_Rg_divexact(r,p1);
+    uze= RgX_Rg_divexact(uze,p1);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
@@ -3581,8 +3578,8 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-  p1 = RgX_sub(v, gmul(uze,x));
-  vze = RgX_divrem(p1, y, &p1);
+  
+  vze = RgX_divrem(RgX_sub(v, gmul(uze,x)), y, &p1);
   if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);
@@ -3605,18 +3602,18 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 static GEN
 reductum(GEN P)
 {
-  if (signe(P)==0) return P;
   return normalizepol_i(shallowcopy(P),lg(P)-1);
 }
 
+/* x^n / y^(n-1), assume n > 0 */
 static GEN
 Lazard(GEN x, GEN y, long n)
 {
   long a, b;
   GEN c;
 
-  if (n<=1) return x;
-  a=1; while (n >= (b=a+a)) a=b;
+  if (n == 1) return x;
+  a=1; while (n >= (b=a+a)) a=b; /* a = 2^k <= n < 2^(k+1) */
   c=x; n-=a;
   while (a>1)
   {
@@ -3626,47 +3623,61 @@ Lazard(GEN x, GEN y, long n)
   return c;
 }
 
+/* F (x/y)^(n-1), assume n >= 1 */
 static GEN
 Lazard2(GEN F, GEN x, GEN y, long n)
 {
-  if (n<=1) return F;
-  return gdivexact(gmul(Lazard(x,y,n-1), F), y);
+  if (n == 1) return F;
+  return RgX_Rg_divexact(RgX_Rg_mul(F, Lazard(x,y,n-1)), y);
 }
 
-/* deg(P) > deg(Q) */
+/* delta = deg(P) - deg(Q) > 0, deg(Q) > 0, P,Q,Z t_POL in the same variable,
+ * s "scalar". Return prem(P, -Q) / s^delta lc(P) */
 static GEN
 nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 {
-  GEN p0, q0, z0, H, A;
-  long pr, p, q, j, v = varn(P);
+  GEN p0, q0, h0, TMP, H, A, z0 = leading_term(Z);
+  long pr, p, q, j;
   pari_sp av, lim;
 
-  z0 = leading_term(Z);
-  p = degpol(P); p0 = leading_term(P); P = reductum(P);
-  q = degpol(Q); q0 = leading_term(Q); Q = reductum(Q);
-
+  p = degpol(P); p0 = gel(P,p+2); P = reductum(P); pr = degpol(P);
+  q = degpol(Q); q0 = gel(Q,q+2); Q = reductum(Q);
+  /* p > q, p > pr. Very often p - 1 = q = pr */
   av = avma; lim = stack_lim(av,1);
-  H = RgX_neg(reductum(Z));
-  pr = degpol(P);
-  A = (q <= pr)? RgX_Rg_mul(H, gel(P,q+2)): gen_0;
+  H = RgX_neg(reductum(Z)); /* deg < q */
+  A = (q <= pr)? RgX_Rg_mul(H, gel(P,q+2)): NULL;
   for (j = q+1; j < p; j++)
   {
-    H = (degpol(H) == q-1) ?
-      addshift(reductum(H), gdivexact(RgX_Rg_mul(Q, gneg(gel(H,q+1))), q0)) :
-      addshift(H, zeropol(v));
-    if (j <= pr) A = gadd(A, RgX_Rg_mul(H, gel(P,j+2)));
+    if (degpol(H) == q-1)
+    { /* h0 = coeff of degree q-1 = leading coeff */
+      h0 = gel(H,q+1); normalizepol_i(H, q+1);
+      H = addshift(H, RgX_Rg_divexact(RgX_Rg_mul(Q, gneg(h0)), q0));
+    }
+    else
+      H = RgX_shift_shallow(H, 1);
+    if (j <= pr)
+    {
+      TMP = RgX_Rg_mul(H, gel(P,j+2));
+      A = A? RgX_add(A, TMP): TMP;
+    }
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"nextSousResultant j = %ld/%ld",j,p);
       gerepileall(av,2,&A,&H);
     }
   }
-  P = normalizepol_i(P, min(pr+3,q+2));
-  A = gdivexact(gadd(A,gmul(z0,P)), p0);
-  A = (degpol(H) == q-1) ?
-    RgX_sub(RgX_Rg_mul(addshift(reductum(H),A),q0), RgX_Rg_mul(Q, gel(H,q+1))) :
-    RgX_Rg_mul(addshift(H,A), q0);
-  return gdivexact(A, ((p-q)&1)? s: gneg(s));
+  if (q-1 < pr) P = normalizepol_i(P, q+2);
+  TMP = RgX_Rg_mul(P, z0);
+  A = A? RgX_add(A, TMP): TMP;
+  A = RgX_Rg_divexact(A, p0);
+  if (degpol(H) == q-1)
+  {
+    h0 = gel(H,q+1); normalizepol_i(H, q+1);
+    A = RgX_sub(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul(Q, h0));
+  }
+  else
+    A = RgX_Rg_mul(addshift(H,A), q0);
+  return RgX_Rg_divexact(A, s);
 }
 
 GEN
@@ -3678,36 +3689,35 @@ resultantducos(GEN P, GEN Q)
 
   if ((Z = init_resultant(P,Q))) return Z;
   dP = degpol(P);
-  dQ = degpol(Q);
-  P = primitive_part(P, &cP);
-  Q = primitive_part(Q, &cQ);
-  delta = dP - dQ;
+  dQ = degpol(Q); delta = dP - dQ;
   if (delta < 0)
   {
-    Z = (dP & dQ & 1)? gneg(Q): Q;
+    Z = (dP & dQ & 1)? RgX_neg(Q): Q;
     Q = P; P = Z; delta = -delta;
+    lswap(dP, dQ);
   }
-  s = gen_1;
-  if (degpol(Q) > 0)
+  if (dQ <= 0) /* non-0, since 0 caught in init_resultant() */
+    return gerepileupto(av, gpowgs(gel(Q,2), dP));
+
+  P = primitive_part(P, &cP);
+  Q = primitive_part(Q, &cQ);
+  av2 = avma; lim = stack_lim(av2,1);
+  s = gpowgs(leading_term(Q),delta);
+  Z = Q;
+  Q = RgX_pseudorem(P, RgX_neg(Q));
+  P = Z; /* delta = deg(P)-deg(Q) > 0 */
+  while(degpol(Q) > 0)
   {
-    av2 = avma; lim = stack_lim(av2,1);
-    s = gpowgs(leading_term(Q),delta);
-    Z = Q;
-    Q = RgX_pseudorem(P, gneg(Q));
+    delta = degpol(P) - degpol(Q);
+    Z = Lazard2(Q, leading_term(Q), s, delta);
+    Q = nextSousResultant(P, Q, Z, odd(delta)? s: gneg(s));
     P = Z;
-    while(degpol(Q) > 0)
+    if (low_stack(lim,stack_lim(av,1)))
     {
-      if (low_stack(lim,stack_lim(av,1)))
-      {
-	if(DEBUGMEM>1) pari_warn(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
-	gerepileall(av2,2,&P,&Q); s = leading_term(P);
-      }
-      delta = degpol(P) - degpol(Q);
-      Z = Lazard2(Q, leading_term(Q), s, delta);
-      Q = nextSousResultant(P, Q, Z, s);
-      P = Z;
-      s = leading_term(P);
+      if(DEBUGMEM>1) pari_warn(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
+      gerepileall(av2,2,&P,&Q);
     }
+    s = leading_term(P);
   }
   if (!signe(Q)) { avma = av; return gen_0; }
   if (!degpol(P)){ avma = av; return gen_1; }
@@ -4051,7 +4061,7 @@ sturmpart(GEN x, GEN a, GEN b)
 	p1 = gmul(gpowgs(h,degq),p1);
 	h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    v = gdivexact(r,p1);
+    v = RgX_Rg_divexact(r,p1);
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"polsturm, dr = %ld",dr);
@@ -4099,7 +4109,7 @@ RgXQ_inv(GEN x, GEN y)
   }
   if (isinexact(x) || isinexact(y)) return RgXQ_inv_inexact(x,y);
 
-  av = avma; d = subresext(x,y,&u,&v);
+  av = avma; d = subresext(x,y,&u,&v/*junk*/);
   if (gcmp0(d)) pari_err(talker,"non-invertible polynomial in RgXQ_inv");
   if (typ(d) == t_POL && varn(d) == vx)
   {

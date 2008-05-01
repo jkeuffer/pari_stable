@@ -905,6 +905,13 @@ RgX_sqr(GEN x)
 /*                                                                 */
 /*******************************************************************/
 GEN
+RgX_Rg_divexact(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg_copy(lx, x); z[1] = x[1];
+  for (i=2; i<lx; i++) gel(z,i) = gdivexact(gel(x,i),y);
+  return z;
+}
+GEN
 RgX_Rg_div(GEN x, GEN y) {
   long i, lx = lg(x);
   GEN z = cgetg_copy(lx, x); z[1] = x[1];

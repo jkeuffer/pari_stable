@@ -1780,7 +1780,7 @@ normalizepol_i(GEN x, long lx)
   GEN z;
   for (i = lx-1; i>1; i--)
     if (! isrationalzero(gel(x,i))) break;
-  if (i == 1)
+  if (i <= 1)
   { /* Pol(0) */
     stackdummy((pari_sp)(x + lg(x)), (pari_sp)(x + 2));
     x[0] = evaltyp(t_POL)|evallg(2);
