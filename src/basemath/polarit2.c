@@ -3598,12 +3598,13 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 /*                RESULTANT USING DUCOS VARIANT                    */
 /*                                                                 */
 /*******************************************************************/
-
+#if 0
 static GEN
 reductum(GEN P)
 {
   return normalizepol_i(shallowcopy(P),lg(P)-1);
 }
+#endif
 
 /* x^n / y^(n-1), assume n > 0 */
 static GEN
@@ -3631,27 +3632,55 @@ Lazard2(GEN F, GEN x, GEN y, long n)
   return RgX_Rg_divexact(RgX_Rg_mul(F, Lazard(x,y,n-1)), y);
 }
 
+static GEN
+RgX_neg_i(GEN x, long lx)
+{
+  long i;
+  GEN y = cgetg(lx, t_POL); y[1] = x[1];
+  for (i=2; i<lx; i++) gel(y,i) = gneg(gel(x,i));
+  return y;
+}
+static GEN
+RgX_Rg_mul_i(GEN y, GEN x, long ly)
+{
+  long i;
+  GEN z;
+  if (isrationalzero(x)) return zeropol(varn(y));
+  z = cgetg(ly,t_POL); z[1] = y[1];
+  for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
+  return z;
+}
+static long
+reductum_lg(GEN x, long lx)
+{
+  long i = lx-2;
+  while (i > 1 && gcmp0(gel(x,i))) i--;
+  return i+1;
+}
+
 /* delta = deg(P) - deg(Q) > 0, deg(Q) > 0, P,Q,Z t_POL in the same variable,
  * s "scalar". Return prem(P, -Q) / s^delta lc(P) */
 static GEN
 nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 {
   GEN p0, q0, h0, TMP, H, A, z0 = leading_term(Z);
-  long pr, p, q, j;
+  long pr, p, q, j, lP, lQ;
   pari_sp av, lim;
 
-  p = degpol(P); p0 = gel(P,p+2); P = reductum(P); pr = degpol(P);
-  q = degpol(Q); q0 = gel(Q,q+2); Q = reductum(Q);
+  p = degpol(P); p0 = gel(P,p+2); lP = reductum_lg(P,lg(P)); pr = lP - 3;
+  q = degpol(Q); q0 = gel(Q,q+2); lQ = reductum_lg(Q,lg(Q));
   /* p > q, p > pr. Very often p - 1 = q = pr */
   av = avma; lim = stack_lim(av,1);
-  H = RgX_neg(reductum(Z)); /* deg < q */
-  A = (q <= pr)? RgX_Rg_mul(H, gel(P,q+2)): NULL;
+  /* H = RgX_neg(reductum(Z)) optimized, using Q ~ Z */
+  H = RgX_neg_i(Z, lQ); /* deg H < q */
+
+  A = (q <= pr)? RgX_Rg_mul_i(H, gel(P,q+2), lQ): NULL;
   for (j = q+1; j < p; j++)
   {
     if (degpol(H) == q-1)
     { /* h0 = coeff of degree q-1 = leading coeff */
       h0 = gel(H,q+1); normalizepol_i(H, q+1);
-      H = addshift(H, RgX_Rg_divexact(RgX_Rg_mul(Q, gneg(h0)), q0));
+      H = addshift(H, RgX_Rg_divexact(RgX_Rg_mul_i(Q, gneg(h0), lQ), q0));
     }
     else
       H = RgX_shift_shallow(H, 1);
@@ -3666,14 +3695,14 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
       gerepileall(av,2,&A,&H);
     }
   }
-  if (q-1 < pr) P = normalizepol_i(P, q+2);
-  TMP = RgX_Rg_mul(P, z0);
+  if (q-1 < pr) lP = reductum_lg(P, q+3);
+  TMP = RgX_Rg_mul_i(P, z0, lP);
   A = A? RgX_add(A, TMP): TMP;
   A = RgX_Rg_divexact(A, p0);
   if (degpol(H) == q-1)
   {
     h0 = gel(H,q+1); normalizepol_i(H, q+1);
-    A = RgX_sub(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul(Q, h0));
+    A = RgX_sub(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul_i(Q, h0, lQ));
   }
   else
     A = RgX_Rg_mul(addshift(H,A), q0);
