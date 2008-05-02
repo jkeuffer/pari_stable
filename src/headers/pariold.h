@@ -326,7 +326,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lsubii  (long)subii
 #define lsubir  (long)subir
 #define lsubis  (long)subis
-#define lsubres (long)subres
+#define lsubres (long)resultant
 #define lsubri  (long)subri
 #define lsubrr  (long)subrr
 #define lsubrs  (long)subrs

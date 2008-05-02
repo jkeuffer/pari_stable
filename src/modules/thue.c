@@ -1238,7 +1238,7 @@ bnfisintnorm(GEN bnf, GEN a)
   for (i=1; i<l; i++)
   {
     x = gel(res,i);
-    sNx = signe(subres(gel(nf,1), x));
+    sNx = signe(resultant(gel(nf,1), x));
     if (sNx != sa)
     {
       if (! unit) norm_1 = get_unit_1(bnf, &unit);

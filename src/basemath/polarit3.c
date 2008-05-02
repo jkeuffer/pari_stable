@@ -2014,7 +2014,7 @@ FlxX_resultant(GEN u, GEN v, ulong p, long sx)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"subresall, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"resultant_all, dr = %ld",dr);
       gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
@@ -2200,14 +2200,14 @@ INIT:
   { /* sub-resultant faster for small degrees */
     if (LERS)
     {
-      H = subresall(A,B,&q);
+      H = resultant_all(A,B,&q);
       if (typ(q) != t_POL || degpol(q)!=1 || !ZX_is_squarefree(H)) goto INIT;
       H0 = gel(q,2); if (typ(H0) == t_POL) setvarn(H0,vX);
       H1 = gel(q,3); if (typ(H1) == t_POL) setvarn(H1,vX);
     }
     else
     {
-      H = subres(A,B);
+      H = resultant(A,B);
       if (checksqfree && !ZX_is_squarefree(H)) goto INIT;
     }
     goto END;
@@ -2368,7 +2368,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
 GEN
 ZX_caract(GEN A, GEN B, long v)
 {
-  return (degpol(A) < 16) ? caractducos(A,B,v): ZX_caract_sqf(A,B, NULL, v);
+  return (degpol(A) < 16) ? caract2(A,B,v): ZX_caract_sqf(A,B, NULL, v);
 }
 
 static GEN
@@ -2406,7 +2406,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
       for(;; prec = (prec-1)<<1)
       {
 	GEN run = real_1(prec);
-	GEN R = subres(gmul(A, run), gmul(B, run));
+	GEN R = resultant(gmul(A, run), gmul(B, run));
 	bound = gexpo(R) + 1;
 	if (!gcmp0(R)) break;
       }
@@ -2451,6 +2451,22 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   return gerepileuptoint(av, icopy(H));
 }
 
+/* A0 and B0 in Q[X] */
+GEN
+QX_resultant(GEN A0, GEN B0)
+{
+  GEN s, a, b, A, B;
+  pari_sp av = avma;
+
+  A = Q_primitive_part(A0, &a);
+  B = Q_primitive_part(B0, &b);
+  s = ZX_resultant(A, B);
+  if (!signe(s)) { avma = av; return gen_0; }
+  if (a) s = gmul(s, gpowgs(a,degpol(B)));
+  if (b) s = gmul(s, gpowgs(b,degpol(A)));
+  return gerepileupto(av, s);
+}
+
 GEN
 ZX_resultant(GEN A, GEN B) { return ZX_resultant_all(A,B,NULL,0); }
 
@@ -2473,12 +2489,25 @@ GEN
 ZX_disc_all(GEN x, ulong bound)
 {
   pari_sp av = avma;
-  GEN l, d = ZX_resultant_all(x, ZX_deriv(x), NULL, bound);
-  l = leading_term(x); if (!gcmp1(l)) d = diviiexact(d,l);
-  if (degpol(x) & 2) d = negi(d);
+  GEN l = leading_term(x), d = ZX_resultant_all(x, ZX_deriv(x), NULL, bound);
+  long s = (degpol(x) & 2) ? -1: 1;
+  if (is_pm1(l))
+  { if (signe(l) < 0) s = -s; }
+  else
+    d = diviiexact(d,l);
+  if (s == -1) togglesign_safe(&d);
   return gerepileuptoint(av,d);
 }
 GEN ZX_disc(GEN x) { return ZX_disc_all(x,0); }
+
+GEN
+QX_disc(GEN x)
+{
+  pari_sp av = avma;
+  GEN c, d = ZX_disc( Q_primitive_part(x, &c) );
+  if (c) d = gmul(d, gpowgs(c, 2*degpol(x) - 2));
+  return gerepileupto(av, d);
+}
 
 int
 ZX_is_squarefree(GEN x)

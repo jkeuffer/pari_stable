@@ -43,9 +43,6 @@ static GEN
 lseriesell0(GEN a, GEN b, GEN c, GEN d, long prec)
   {(void)c; return elllseries(a,b,d,prec);}
 
-static GEN
-subres0(GEN x, GEN y) { return subres(x,y); }
-
 static long
 rounderror(GEN x)
 {
@@ -577,7 +574,7 @@ entree oldfonctions[]={
 {"reduceddisc",1,(void*)reduceddiscsmith,7,"G","reduceddisc(f)=vector of elementary divisors of Z[a]/f'(a)Z[a], where a is a root of the polynomial f"},
 {"regula",1,(void*)regula,4,"Gp","regula(x)=regulator of the real quadratic field of discriminant x"},
 {"reorder",0,(void*)suppressed,11,"G","reorder(x)=THIS FUNCTION HAS BEEN SUPPRESSED"},
-{"resultant",2,(void*)subres0,7,"GG","resultant(x,y)=resultant of the polynomials x and y with exact entries"},
+{"resultant",2,(void*)resultant_all,7,"GGD&","resultant(x,y)=resultant of the polynomials x and y with exact entries"},
 {"resultant2",2,(void*)resultant2,7,"GG","resultant2(x,y)=resultant of the polynomials x and y"},
 {"reverse",1,(void*)recip,7,"G","reverse(x)=reversion of the power series x"},
 {"rhoreal",1,(void*)rhoreal,4,"G","rhoreal(x)=single reduction step of the binary quadratic form x of positive discriminant"},

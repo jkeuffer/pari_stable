@@ -317,7 +317,6 @@ GEN  swap_vars(GEN b0, long v);
 
 /* b) Modular */
 GEN  bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
-GEN  caractducos(GEN p, GEN x, long v);
 GEN  FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 GEN  FpX_quad_root(GEN x, GEN p, int unknown);
 long FpX_split_Berlekamp(GEN *t, GEN pp);

@@ -48,8 +48,9 @@ caract_const(pari_sp av, GEN x, long v, long d)
   return gerepileupto(av, gpowgs(deg1pol_i(gen_1, gneg_i(x), v), d));
 }
 
-static GEN
-caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
+/* return caract(Mod(x,p)) in variable v */
+GEN
+caract2(GEN p, GEN x, long v)
 {
   pari_sp av = avma;
   long d = degpol(p), dx;
@@ -63,7 +64,7 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
   gel(x,2) = gadd(gel(x,2), pol_x(MAXVARN));
-  ch = subres_f(p, x, NULL);
+  ch = resultant_all(p, x, NULL);
   if (v != MAXVARN)
   {
     if (typ(ch) == t_POL && varn(ch) == MAXVARN)
@@ -74,17 +75,6 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   L = leading_term(ch);
   if (!gcmp1(L)) ch = gdiv(ch, L);
   return gerepileupto(av, ch);
-}
-/* return caract(Mod(x,p)) in variable v */
-GEN
-caract2(GEN p, GEN x, long v)
-{
-  return caract2_i(p,x,v, subresall);
-}
-GEN
-caractducos(GEN p, GEN x, long v)
-{
-  return caract2_i(p,x,v, (GEN (*)(GEN,GEN,GEN*))resultantducos);
 }
 
 /* characteristic polynomial (in v) of x over nf, where x is an element of the

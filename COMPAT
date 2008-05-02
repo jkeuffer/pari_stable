@@ -128,6 +128,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the "prec" parameter has disappeared in all floating point LLL various
   - remove obsolete function factpol()
   - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
+  - rename subres -> resultant, subresall -> resultant_all.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

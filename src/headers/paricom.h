@@ -382,8 +382,7 @@ enum manage_var_t {
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))
 #define Z_issquare(x) (Z_issquareall((x),NULL))
-#define subres(x,y) (subresall((x),(y),NULL))
-/* #define subres(x,y) (resultantducos((x),(y))) */
+#define resultant(x,y) (resultant_all((x),(y),NULL))
 
 #define invmat(a) (gauss((a),NULL))
 

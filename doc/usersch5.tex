@@ -3409,6 +3409,9 @@ algebraic number \kbd{Mod(A,T)} is integral over \kbd{Z}.
 \fun{GEN}{ZX_disc}{GEN T} returns the discriminant of the \kbd{ZX}
 \kbd{T}.
 
+\fun{GEN}{QX_disc}{GEN T} returns the discriminant of the \kbd{QX}
+\kbd{T}.
+
 \fun{int}{ZX_is_squarefree}{GEN T} returns $1$ if the
 \kbd{ZX}~\kbd{T} is squarefree, $0$ otherwise.
 
@@ -3422,6 +3425,9 @@ of \kbd{T} over $\Q[X]$ (the content is lost).
 
 \fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{ZX}~\kbd{A} and \kbd{B}.
+
+\fun{GEN}{QX_resultant}{GEN A, GEN B} returns the resultant of the
+\kbd{QX}~\kbd{A} and \kbd{B}.
 
 \fun{GEN}{ZX_QX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{ZX}~\kbd{A} and the \kbd{QX}~\kbd{B}, \emph{assuming} the result
@@ -3519,6 +3525,13 @@ as above.
 
 \fun{int}{RgX_type_is_composite}{long t} $t$ as returned by \kbd{RgX\_type},
 return 1 if $t$ is a composite type, and 0 otherwise.
+
+\fun{GEN}{RgX_get_0}{GEN x} returns $0$ in the base ring over which $x$
+is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
+\kbd{O(5\pow 10)}).
+
+\fun{GEN}{RgX_get_1}{GEN x} returns $1$ in the base ring over which $x$
+is defined, to the proper accuracy (e.g. \kbd{0}, \kbd{Mod(0,3)},
 
 \fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}.
 
@@ -4440,10 +4453,11 @@ type or a \typ{POL}).
 
 \subsec{GCD, content and primitive part}
 
-\fun{GEN}{subres}{GEN x, GEN y} creates the resultant of the \typ{POL}s
-\kbd{x} and~\kbd{y} computed using the subresultant algorithm. Either of
-\kbd{x} and \kbd{y} may also be scalars (treated as polynomials of degree
-$0$)
+\fun{GEN}{resultant}{GEN x, GEN y} creates the resultant of the \typ{POL}s
+\kbd{x} and~\kbd{y} computed using Sylverster's matrix (inexact inputs), a
+modular algorithm (inputs in $\Q[X]$) or the subresultant algorithm, as
+optimized by Lazard and Ducos. Either of \kbd{x} and \kbd{y} may also be
+scalars (treated as polynomials of degree $0$)
 
 \fun{GEN}{ggcd}{GEN x, GEN y} creates the GCD of \kbd{x} and~\kbd{y}.
 
@@ -4585,17 +4599,20 @@ the coefficient of the term of degree \kbd{n} in the main variable.
 of \kbd{x} with respect to its main variable. Uses the subresultant
 algorithm.
 
-\fun{GEN}{subres}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
-to the main variable of highest priority. Uses the subresultant algorithm.
+\fun{GEN}{resultant}{GEN x,GEN y} resultant of \kbd{x} and \kbd{y}, with respect
+to the main variable of highest priority. Uses either
+the subresultant algorithm (generic case), a modular algorithm (іnputs in
+$\Q[X]$) or Sylvester's matrix (inexact inputs).
 
 \fun{GEN}{resultant2}{GEN x, GEN y} resultant of \kbd{x} and \kbd{y}, with
 respect to the main variable of highest priority. Computes the determinant
 of Sylvester's matrix.
 
-\fun{GEN}{subresall}{GEN u, GEN v, GEN *sol} returns \kbd{subres(x,y)}. If
-\kbd{sol} is not \kbd{NULL}, sets it to the last non-zero remainder
-in the polynomial remainder sequence if such a sequence was computed,
-and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0).
+\fun{GEN}{resultant_all}{GEN u, GEN v, GEN *sol} returns
+\kbd{resultant(x,y)}. If \kbd{sol} is not \kbd{NULL}, sets it to the last
+non-zero remainder in the polynomial remainder sequence if such a sequence
+was computed, and to \kbd{gen\_0} otherwise (e.g. polynomials of degree 0,
+$u,v$ in $\Q[X]$).
 
 \subsec{Vectors and Matrices}
 See~\secref{se:clean} and~\secref{se:unclean} for various useful constructors.

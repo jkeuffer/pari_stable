@@ -39,6 +39,46 @@ RgX_equal(GEN x, GEN y)
 long
 RgX_equal_var(GEN x, GEN y) { return varn(x) == varn(y) && RgX_equal(x,y); }
 
+
+/* Returns 1 in the base ring over which x is defined */
+/* HACK: this also works for t_SER */
+GEN
+RgX_get_1(GEN x)
+{
+  pari_sp av = avma;
+  GEN p, T;
+  long i, lx, vx = varn(x), tx = RgX_type(x, &p, &T, &lx);
+  if (RgX_type_is_composite(tx))
+    RgX_type_decode(tx, &i /*junk*/, &tx);
+  switch(tx)
+  {
+    case t_INTMOD: x = mkintmod(gen_1,p); break;
+    case t_PADIC: x = cvtop(gen_1, p, lx); break;
+    case t_FFELT: x = FF_1(T); break;
+    default: x = gen_1; break;
+  }
+  return gerepileupto(av, scalarpol(x, vx));
+}
+/* Returns 0 in the base ring over which x is defined */
+/* HACK: this also works for t_SER */
+GEN
+RgX_get_0(GEN x)
+{
+  pari_sp av = avma;
+  GEN p, T;
+  long i, lx, vx = varn(x), tx = RgX_type(x, &p, &T, &lx);
+  if (RgX_type_is_composite(tx))
+    RgX_type_decode(tx, &i /*junk*/, &tx);
+  switch(tx)
+  {
+    case t_INTMOD: x = mkintmod(gen_0,p); break;
+    case t_PADIC: x = cvtop(gen_0, p, lx); break;
+    case t_FFELT: x = FF_zero(T); break;
+    default: x = gen_0; break;
+  }
+  return gerepileupto(av, scalarpol(x, vx));
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                         COMPOSITION                            **/
@@ -1400,7 +1440,7 @@ RgXQ_norm(GEN x, GEN T)
   pari_sp av;
   GEN L, y;
 
-  av = avma; y = subres(T, x);
+  av = avma; y = resultant(T, x);
   L = leading_term(T);
   if (gcmp1(L) || gcmp0(x)) return y;
   return gerepileupto(av, gdiv(y, gpowgs(L, degpol(x))));

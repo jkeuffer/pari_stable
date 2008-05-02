@@ -5,23 +5,21 @@ Prototype: GGDnD0,L,
 Help: polresultant(x,y,{v},{flag=0}): resultant of the polynomials x and y,
  with respect to the main variables of x and y if v is omitted, with respect
  to the variable v otherwise. flag is optional, and can be 0: default,
- assumes that the polynomials have exact entries (uses the subresultant
- algorithm), 1 for arbitrary polynomials, using Sylvester's matrix, or 2:
- using a Ducos's modified subresultant algorithm
+ uses either the subresultant algorithm, a modular algorithm or Sylvester's
+ matrix, depending on the inputs; 1 uses Sylvester's matrix (should always be
+ slower than the default).
 Doc: resultant of the two
  polynomials $x$ and $y$ with exact entries, with respect to the main
  variables of $x$ and $y$ if $v$ is omitted, with respect to the variable $v$
  otherwise. The algorithm assumes the base ring is a domain.
  
- If $\fl=0$, uses the \idx{subresultant algorithm}.
+ If $\fl=0$ (default), uses the the algorithm best suited to the intputs, 
+ either the \idx{subresultant algorithm} (Lazard/Ducos variant, generic case),
+ a modular algorithm (inputs in $\Q[X]$) or Sylvester's matrix (inexact
+ inputs).
  
- If $\fl=1$, uses the determinant of Sylvester's matrix instead (here $x$ and
- $y$ may have non-exact coefficients).
+ If $\fl=1$, uses the determinant of Sylvester's matrix instead; this should
+ always be slower than the default.
  
- If $\fl=2$, uses Ducos's modified subresultant algorithm. It should be much
- faster than the default if the coefficient ring is complicated (e.g
- multivariate polynomials or huge coefficients), and slightly slower
- otherwise.
-
  If you also need the $u$ and $v$ such that $x*u + y*v = res(x,y)$,
  use the \tet{bezoutres} function.

@@ -478,7 +478,7 @@ do_compo(GEN x, GEN y)
   for  (a = 0;; a = nexta(a))
   {
     if (a) x = gsubst(x, 0, gaddsg(a, pol_x(0)));
-    z = gsubst(subres(x,y), MAXVARN, pol_x(0));
+    z = gsubst(resultant(x,y), MAXVARN, pol_x(0));
     if (issquarefree(z)) return z;
   }
 }

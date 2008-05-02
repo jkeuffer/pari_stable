@@ -634,7 +634,7 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
 static long
 factorgen(FB_t *F, GEN nf, GEN I, GEN m, FACT *fact)
 {
-  GEN Nm = absi( subres(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
+  GEN Nm = absi( resultant(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
   GEN N  = diviiexact(Nm, ZM_det_triangular(I)); /* N(m / I) */
   return can_factor(F, nf, I, m, N, fact);
 }

@@ -932,9 +932,9 @@ compute_M0(GEN M_star,long N)
 	/* f1 = n1 X + n2 Y + n3 Z - M */
 	/* f2 = n1 YZ + n2 XZ + n3 XY */
 	/* f3 = X^n1 Y^n2 Z^n3 - 1*/
-	g1=subres(f1,f2); g1=gdiv(g1,content(g1));
-	g2=subres(f1,f3); g2=gdiv(g2,content(g2));
-	g3=subres(g1,g2); g3=gdiv(g3,content(g3));
+	g1=resultant(f1,f2); g1=gdiv(g1,content(g1));
+	g2=resultant(f1,f3); g2=gdiv(g2,content(g2));
+	g3=resultant(g1,g2); g3=gdiv(g3,content(g3));
 	pf1=gsubst(f1,vM,M_star); pg1=gsubst(g1,vM,M_star);
 	pf2=gsubst(f2,vM,M_star); pg2=gsubst(g2,vM,M_star);
 	pf3=gsubst(f3,vM,M_star); pg3=gsubst(g3,vM,M_star);

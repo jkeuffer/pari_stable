@@ -2878,7 +2878,7 @@ RgX_gcd_simple(GEN x, GEN y)
       avma = av1;
       if (y == yorig) return gcopy(y);
       y = normalizepol_approx(y, lg(y));
-      if (lg(y) == 3) { avma = av; return gen_1; }
+      if (lg(y) == 3) { avma = av; return pol_1(varn(x)); }
       return gerepileupto(av,y);
     }
     x = y; y = r;
@@ -2910,56 +2910,6 @@ RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv)
   gerepileall(av, 3, &u,&v,&d);
   return d;
 }
-
-static int issimplefield(GEN x);
-static int
-issimplepol(GEN x)
-{
-  long i, lx = lg(x);
-  for (i=2; i<lx; i++)
-    if (issimplefield(gel(x,i))) return 1;
-  return 0;
-}
-/* return 1 if coeff explosion is not possible */
-static int
-issimplefield(GEN x)
-{
-  switch(typ(x))
-  {
-    case t_REAL: case t_INTMOD: case t_PADIC: case t_SER:
-      return 1;
-    case t_COMPLEX:
-      return issimplefield(gel(x,1)) || issimplefield(gel(x,2));
-    case t_POLMOD:
-      return (typ(x[2]) == t_POL && issimplepol(gel(x,2)))
-	   || issimplefield(gel(x,2)) || issimplepol(gel(x,1));
-  }
-  return 0;
-}
-
-static int
-can_use_modular_gcd(GEN x)
-{
-  long i;
-  for (i = lg(x)-1; i > 1; i--)
-  {
-    long t = typ(gel(x,i));
-    if (!is_rational_t(t)) return 0;
-  }
-  return 1;
-}
-
-static GEN
-gcdmonome(GEN x, GEN y)
-{
-  long dx=degpol(x), v=varn(x), e=gval(y, v);
-  pari_sp av = avma;
-  GEN t = ggcd(leading_term(x), content(y));
-
-  if (dx < e) e = dx;
-  return gerepileupto(av, monomialcopy(t, e, v));
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                    CONTENT / PRIMITIVE PART                     */
@@ -3331,34 +3281,66 @@ gdivexact(GEN x, GEN y)
 static GEN
 init_resultant(GEN x, GEN y)
 {
-  long tx,ty;
-  if (gcmp0(x) || gcmp0(y)) return gen_0;
-  tx = typ(x); ty = typ(y);
+  long tx = typ(x), ty = typ(y), vx, vy;
   if (is_scalar_t(tx) || is_scalar_t(ty))
   {
-    if (tx==t_POL) return gpowgs(y,degpol(x));
-    if (ty==t_POL) return gpowgs(x,degpol(y));
+    if (gcmp0(x) || gcmp0(y)) return gen_0;
+    if (tx==t_POL) return gpowgs(y, degpol(x));
+    if (ty==t_POL) return gpowgs(x, degpol(y));
     return gen_1;
   }
-  if (tx!=t_POL || ty!=t_POL) pari_err(typeer,"subresall");
-  if (varn(x)==varn(y)) return NULL;
-  return (varncmp(varn(x),varn(y))<0)? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
+  if (tx!=t_POL || ty!=t_POL) pari_err(typeer,"resultant_all");
+  if (!signe(x) || !signe(y)) return gen_0;
+  vx = varn(x);
+  vy = varn(y); if (vx == vy) return NULL;
+  return (varncmp(vx,vy) < 0)? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
 }
 
+static long
+RgX_simpletype(GEN x)
+{
+  long T = t_INT, i, lx = lg(x);
+  for (i = 2; i < lx; i++)
+  {
+    GEN c = gel(x,i);
+    long tc = typ(c);
+    switch(tc) {
+      case t_INT:
+        break;
+      case t_FRAC:
+        if (T == t_INT) T = t_FRAC;
+        break;
+      default:
+        if (isinexact(c)) return t_REAL;
+        T = 0; break;
+    }
+  }
+  return T;
+}
+
+#if 0
 /* Return resultant(u,v). If sol != NULL: set *sol to the last non-zero
  * polynomial in the prs IF the sequence was computed, and gen_0 otherwise */
 GEN
-subresall(GEN u, GEN v, GEN *sol)
+resultant_all(GEN u, GEN v, GEN *sol)
 {
   pari_sp av, av2, lim;
-  long degq,dx,dy,du,dv,dr,signh;
-  GEN z,g,h,r,p1,p2,cu,cv;
+  long degq, dx, dy, du, dv, dr, signh, Tu, Tv;
+  GEN z, g, h, r, p1, p2, cu, cv;
 
-  if (sol) *sol=gen_0;
+  if (sol) *sol = gen_0;
   if ((r = init_resultant(u,v))) return r;
 
-  if (isinexact(u) || isinexact(v)) return resultant2(u,v);
-  dx=degpol(u); dy=degpol(v); signh=1;
+  if ((Tu = RgX_simpletype(u)) == t_REAL || (Tv = RgX_simpletype(v)) == t_REAL)
+    return resultant2(u,v); /* inexact */
+  if (Tu && Tv) /* rational */
+  {
+    if (Tu == t_INT && Tv == t_INT) return ZX_resultant(u,v);
+    return QX_resultant(u,v);
+  }
+
+  dx = degpol(u);
+  dy = degpol(v); signh = 1;
   if (dx < dy)
   {
     swap(u,v); lswap(dx,dy);
@@ -3393,7 +3375,7 @@ subresall(GEN u, GEN v, GEN *sol)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"subresall, dr = %ld",dr);
+      if(DEBUGMEM>1) pari_warn(warnmem,"resultant_all, dr = %ld",dr);
       gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
@@ -3410,6 +3392,7 @@ subresall(GEN u, GEN v, GEN *sol)
   if (sol) { *sol = gcopy(u); gunclone(u); }
   return z;
 }
+#endif
 
 static GEN
 scalar_res(GEN x, GEN y, GEN *U, GEN *V)
@@ -3604,14 +3587,6 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 /*                RESULTANT USING DUCOS VARIANT                    */
 /*                                                                 */
 /*******************************************************************/
-#if 0
-static GEN
-reductum(GEN P)
-{
-  return normalizepol_i(shallowcopy(P),lg(P)-1);
-}
-#endif
-
 /* x^n / y^(n-1), assume n > 0 */
 static GEN
 Lazard(GEN x, GEN y, long n)
@@ -3715,14 +3690,14 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   return RgX_Rg_divexact(A, s);
 }
 
-GEN
-resultantducos(GEN P, GEN Q)
+/* Ducos's subresultant */
+static GEN
+resultant_aux(GEN P, GEN Q, GEN *sol)
 {
-  pari_sp av = avma, av2, lim;
+  pari_sp av, av2, lim;
   long dP, dQ, delta, sig = 1;
   GEN cP, cQ, Z, s;
 
-  if ((Z = init_resultant(P,Q))) return Z;
   dP = degpol(P);
   dQ = degpol(Q); delta = dP - dQ;
   if (delta < 0)
@@ -3730,41 +3705,61 @@ resultantducos(GEN P, GEN Q)
     if (both_odd(dP, dQ)) sig = -1;
     swap(P,Q); lswap(dP, dQ); delta = -delta;
   }
-  if (dQ <= 0) /* non-0, since 0 caught in init_resultant() */
-  {
-    Q = gel(Q,2);
-    return gerepileupto(av, gpowgs(sig == 1? Q: gneg(Q), dP));
-  }
-
+  if (dQ == 0) /* 0 caught in init_resultant(), dQ = 0 ==> sig = 1 */
+    return gpowgs(gel(Q,2), dP);
+  av = avma;
   P = primitive_part(P, &cP);
   Q = primitive_part(Q, &cQ);
   av2 = avma; lim = stack_lim(av2,1);
   s = gpowgs(leading_term(Q),delta);
+  if (both_odd(dP, dQ)) sig = -sig;
   Z = Q;
-  if (both_odd(degpol(P), degpol(Q))) sig = -sig;
   Q = RgX_pseudorem(P, Q);
-  P = Z; /* delta = deg(P)-deg(Q) > 0 */
+  P = Z;
   while(degpol(Q) > 0)
   {
-    delta = degpol(P) - degpol(Q);
+    delta = degpol(P) - degpol(Q); /* > 0 */
     Z = Lazard2(Q, leading_term(Q), s, delta);
     if (!odd(delta)) sig = -sig;
     Q = nextSousResultant(P, Q, Z, s);
     P = Z;
     if (low_stack(lim,stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
+      if(DEBUGMEM>1) pari_warn(warnmem,"resultant_all, degpol Q = %ld",degpol(Q));
       gerepileall(av2,2,&P,&Q);
     }
     s = leading_term(P);
   }
   if (!signe(Q)) { avma = av; return gen_0; }
-  if (!degpol(P)){ avma = av; return sig > 0? gen_1: gen_m1; }
+  av2 = avma;
   s = Lazard(leading_term(Q), s, degpol(P));
   if (sig == -1) s = gneg(s);
   if (cP) s = gmul(s, gpowgs(cP,dQ));
-  if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP && sig == 1) s = gcopy(s);
-  return gerepileupto(av, s);
+  if (cQ) s = gmul(s, gpowgs(cQ,dP));
+  if (sol) { *sol = P; gerepileall(av, 2, &s, sol); return s; }
+  return (avma == av2)? gerepilecopy(av, s): gerepileupto(av, s);
+}
+/* Return resultant(P,Q). If sol != NULL: set *sol to the last non-zero
+ * polynomial in the prs IF the sequence was computed, and gen_0 otherwise.
+ * Uses Sylvester's matrix if P or Q inexact, a modular algorithm if they
+ * are in Q[X], and Ducos/Lazard optimization of the subresultant algorithm
+ * in the "generic" case. */
+GEN
+resultant_all(GEN P, GEN Q, GEN *sol)
+{
+  long TP, TQ;
+  GEN s;
+
+  if (sol) *sol = gen_0;
+  if ((s = init_resultant(P,Q))) return s;
+  if ((TP = RgX_simpletype(P)) == t_REAL || (TQ = RgX_simpletype(Q)) == t_REAL)
+    return resultant2(P,Q); /* inexact */
+  if (TP && TQ) /* rational */
+  {
+    if (TP == t_INT && TQ == t_INT) return ZX_resultant(P,Q);
+    return QX_resultant(P,Q);
+  }
+  return resultant_aux(P, Q, sol);
 }
 
 /*******************************************************************/
@@ -3867,9 +3862,9 @@ polresultant0(GEN x, GEN y, long v, long flag)
   }
   switch(flag)
   {
-    case 0: x=subresall(x,y,NULL); break;
+    case 2:
+    case 0: x=resultant_all(x,y,NULL); break;
     case 1: x=resultant2(x,y); break;
-    case 2: x=resultantducos(x,y); break;
     default: pari_err(flagerr,"polresultant");
   }
   if (m) x = gsubst(x,MAXVARN,pol_x(0));
@@ -3881,11 +3876,60 @@ polresultant0(GEN x, GEN y, long v, long flag)
 /*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/
+static int
+can_use_modular_gcd(GEN x)
+{
+  long i;
+  for (i = lg(x)-1; i > 1; i--)
+  {
+    long t = typ(gel(x,i));
+    if (!is_rational_t(t)) return 0;
+  }
+  return 1;
+}
+
+static int issimplefield(GEN x);
+static int
+issimplepol(GEN x)
+{
+  long i, lx = lg(x);
+  for (i=2; i<lx; i++)
+    if (issimplefield(gel(x,i))) return 1;
+  return 0;
+}
+/* return 1 if coeff explosion is not possible */
+static int
+issimplefield(GEN x)
+{
+  switch(typ(x))
+  {
+    case t_REAL: case t_INTMOD: case t_PADIC: case t_SER:
+      return 1;
+    case t_COMPLEX:
+      return issimplefield(gel(x,1)) || issimplefield(gel(x,2));
+    case t_POLMOD:
+      return (typ(x[2]) == t_POL && issimplepol(gel(x,2)))
+	   || issimplefield(gel(x,2)) || issimplepol(gel(x,1));
+  }
+  return 0;
+}
+
+static GEN
+gcdmonome(GEN x, GEN y)
+{
+  long dx=degpol(x), v=varn(x), e=gval(y, v);
+  pari_sp av = avma;
+  GEN t = ggcd(leading_term(x), content(y));
+
+  if (dx < e) e = dx;
+  return gerepileupto(av, monomialcopy(t, e, v));
+}
+
 GEN
 srgcd(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y), dx, dy, vx;
-  pari_sp av, av1, tetpil, lim;
+  pari_sp av, av1, lim;
   GEN d, g, h, p1, p2, u, v;
 
   if (!signe(y)) return gcopy(x);
@@ -3902,15 +3946,18 @@ srgcd(GEN x, GEN y)
   if (issimplepol(x) || issimplepol(y)) x = RgX_gcd_simple(x,y);
   else
   {
-    dx=lg(x); dy=lg(y);
-    if (dx<dy) { swap(x,y); lswap(dx,dy); }
-    p1=content(x); p2=content(y); d=ggcd(p1,p2);
-
-    tetpil=avma; d = scalarpol(d, vx);
-    if (dy==3) return gerepile(av,tetpil,d);
-
-    av1=avma; lim=stack_lim(av1,1);
-    u=gdiv(x,p1); v=gdiv(y,p2); g=h=gen_1;
+    dx = lg(x); dy = lg(y);
+    if (dx < dy) { swap(x,y); lswap(dx,dy); }
+    if (dy==3)
+    {
+      d = ggcd(gel(y,2), content(x));
+      return gerepileupto(av, scalarpol(d, vx));
+    }
+    u = primitive_part(x, &p1); if (!p1) p1 = gen_1;
+    v = primitive_part(y, &p2); if (!p2) p2 = gen_1;
+    d = ggcd(p1,p2);
+    av1 = avma; lim = stack_lim(av1,1);
+    g = h = gen_1;
     for(;;)
     {
       GEN r = RgX_pseudorem(u,v);
@@ -3919,62 +3966,72 @@ srgcd(GEN x, GEN y)
       if (dr <= 3)
       {
 	if (gcmp0(r)) break;
-	avma=av1; return gerepile(av,tetpil,d);
+	avma = av1; return gerepileupto(av, scalarpol(d, vx));
       }
       if (DEBUGLEVEL > 9) fprintferr("srgcd: dr = %ld\n", dr);
-      du=lg(u); dv=lg(v); degq=du-dv; u=v;
+      du = lg(u); dv = lg(v); degq = du-dv;
+      u = v; p1 = g; g = leading_term(u);
       switch(degq)
       {
-	case 0:
-	  v = gdiv(r,g);
-	  g = leading_term(u);
-	  break;
+	case 0: break;
 	case 1:
-	  v = gdiv(r,gmul(h,g));
-	  h = g = leading_term(u);
-	  break;
+          p1 = gmul(h,p1); h = g; break;
 	default:
-	  v = gdiv(r,gmul(gpowgs(h,degq),g));
-	  g = leading_term(u);
+          p1 = gmul(gpowgs(h,degq), p1);
 	  h = gdiv(gpowgs(g,degq), gpowgs(h,degq-1));
       }
+      v = RgX_Rg_div(r,p1);
       if (low_stack(lim, stack_lim(av1,1)))
       {
 	if(DEBUGMEM>1) pari_warn(warnmem,"srgcd");
-	gerepileall(av1,4,&u,&v,&g,&h);
+	gerepileall(av1,4, &u,&v,&g,&h);
       }
     }
-    p1 = content(v); if (!gcmp1(p1)) v = gdiv(v,p1);
-    x = gmul(d,v);
+    x = RgX_Rg_mul(primpart(v), d);
   }
-
-  if (typ(x)!=t_POL) x = scalarpol(x, vx);
-  else
-  {
-    p1=leading_term(x); ty=typ(p1);
-    if ((ty == t_FRAC || is_intreal_t(ty)) && gsigne(p1)<0) x = gneg(x);
-  }
+  p1 = leading_term(x); ty = typ(p1);
+  if ((ty == t_FRAC || is_intreal_t(ty)) && gsigne(p1) < 0) x = gneg(x);
   return gerepileupto(av,x);
 }
+
+static GEN
+RgX_disc_aux(GEN x)
+{
+  long dx = degpol(x), Tx;
+  GEN D, L, y;
+  if (!signe(x) || !dx) return RgX_get_0(x);
+  Tx = RgX_simpletype(x);
+  if (Tx == t_INT) return ZX_disc(x);
+  if (Tx == t_FRAC) return QX_disc(x);
+
+  y = RgX_deriv(x);
+  if (!signe(y)) return RgX_get_0(y);
+  if (Tx == t_REAL)
+    D = resultant2(x,y);
+  else
+    D = resultant_aux(x, y, NULL);
+  L = leading_term(x); if (!gcmp1(L)) D = gdiv(D,L);
+  if (dx & 2) D = gneg(D);
+  return D;
+}
+GEN
+RgX_disc(GEN x) { pari_sp av = avma; return gerepileupto(av, RgX_disc_aux(x)); }
 
 GEN
 poldisc0(GEN x, long v)
 {
-  long tx=typ(x), i;
+  long tx = typ(x), i;
   pari_sp av;
-  GEN z,p1,p2;
+  GEN z, D;
 
   switch(tx)
   {
     case t_POL:
-      if (gcmp0(x)) return gen_0;
       av = avma; i = 0;
       if (v >= 0 && v != varn(x)) x = fix_pol(x,v, &i);
-      p1 = subres(x, RgX_deriv(x));
-      p2 = leading_term(x); if (!gcmp1(p2)) p1 = gdiv(p1,p2);
-      if (degpol(x) & 2) p1 = gneg(p1);
-      if (i) p1 = gsubst(p1, MAXVARN, pol_x(0));
-      return gerepileupto(av,p1);
+      D = RgX_disc_aux(x);
+      if (i) D = gsubst(D, MAXVARN, pol_x(0));
+      return gerepileupto(av, D);
 
     case t_COMPLEX:
       return utoineg(4);

@@ -135,6 +135,10 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
        non-squarefree inputs: compute valuations mod a suitable prime)
    42- treat Mat(t_LIST) as Mat(t_VEC)
    43- t_POL^0 always returned t_INT 1 [ try to return 1 in coefficient ring ] 
+   44- polresultant(x,y,,0) now chooses the best algorithm by itself 
+       [Ducos, modular, Sylvester], polresultant(x,y,,2) is now a synonym 
+       for the default. The change also improves poldisc().
+   45- [library] rename subres -> resultant, subresall -> resultant_all.
 
   Added
     1- library function gpcalloc
@@ -168,7 +172,8 @@ JD 12- add an optional argument to quit()
    ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
-   zv_copy, zv_equal, bitvec_test_set, ZM_is_identity
+   zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
+   resultant, resultant_all, QX_disc, QX_resultant
    18- universal constant gen_m2, for symmetry
    19- GP function version() [ current version number ]
    20- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
