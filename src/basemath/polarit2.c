@@ -3309,8 +3309,14 @@ gdivexact(GEN x, GEN y)
       {
 	case t_INTMOD:
 	case t_POLMOD: return gmul(x,ginv(y));
-	case t_POL:
-	  if (varn(x)==varn(y)) return poldivrem(x,y, NULL);
+	case t_POL: { /* not stack-clean */
+          long v;
+	  if (varn(x)!=varn(y)) break;
+          v = polvaluation(y,&y);
+          if (v) x = RgX_shift_shallow(x,-v);
+          if (!degpol(y)) { y = gel(y,2); break; }
+          return RgX_divrem(x,y, NULL);
+        }
       }
       return RgX_Rg_divexact(x, y);
     case t_VEC: case t_COL: case t_MAT:
@@ -3664,17 +3670,17 @@ static GEN
 nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 {
   GEN p0, q0, h0, TMP, H, A, z0 = leading_term(Z);
-  long pr, p, q, j, lP, lQ;
+  long p, q, j, lP, lQ;
   pari_sp av, lim;
 
-  p = degpol(P); p0 = gel(P,p+2); lP = reductum_lg(P,lg(P)); pr = lP - 3;
+  p = degpol(P); p0 = gel(P,p+2); lP = reductum_lg(P,lg(P));
   q = degpol(Q); q0 = gel(Q,q+2); lQ = reductum_lg(Q,lg(Q));
-  /* p > q, p > pr. Very often p - 1 = q = pr */
+  /* p > q. Very often p - 1 = q */
   av = avma; lim = stack_lim(av,1);
   /* H = RgX_neg(reductum(Z)) optimized, using Q ~ Z */
   H = RgX_neg_i(Z, lQ); /* deg H < q */
 
-  A = (q <= pr)? RgX_Rg_mul_i(H, gel(P,q+2), lQ): NULL;
+  A = (q+2 < lP)? RgX_Rg_mul_i(H, gel(P,q+2), lQ): NULL;
   for (j = q+1; j < p; j++)
   {
     if (degpol(H) == q-1)
@@ -3684,7 +3690,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
     }
     else
       H = RgX_shift_shallow(H, 1);
-    if (j <= pr)
+    if (j+2 < lP)
     {
       TMP = RgX_Rg_mul(H, gel(P,j+2));
       A = A? RgX_add(A, TMP): TMP;
@@ -3695,14 +3701,14 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
       gerepileall(av,2,&A,&H);
     }
   }
-  if (q-1 < pr) lP = reductum_lg(P, q+3);
+  if (q+2 < lP) lP = reductum_lg(P, q+3);
   TMP = RgX_Rg_mul_i(P, z0, lP);
   A = A? RgX_add(A, TMP): TMP;
   A = RgX_Rg_divexact(A, p0);
   if (degpol(H) == q-1)
   {
-    h0 = gel(H,q+1); normalizepol_i(H, q+1);
-    A = RgX_sub(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul_i(Q, h0, lQ));
+    h0 = gel(H,q+1); normalizepol_i(H, q+1); /* destroy old H */
+    A = RgX_add(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul_i(Q, gneg(h0), lQ));
   }
   else
     A = RgX_Rg_mul(addshift(H,A), q0);
@@ -3713,33 +3719,37 @@ GEN
 resultantducos(GEN P, GEN Q)
 {
   pari_sp av = avma, av2, lim;
-  long dP,dQ,delta;
-  GEN cP,cQ,Z,s;
+  long dP, dQ, delta, sig = 1;
+  GEN cP, cQ, Z, s;
 
   if ((Z = init_resultant(P,Q))) return Z;
   dP = degpol(P);
   dQ = degpol(Q); delta = dP - dQ;
   if (delta < 0)
   {
-    Z = (dP & dQ & 1)? RgX_neg(Q): Q;
-    Q = P; P = Z; delta = -delta;
-    lswap(dP, dQ);
+    if (both_odd(dP, dQ)) sig = -1;
+    swap(P,Q); lswap(dP, dQ); delta = -delta;
   }
   if (dQ <= 0) /* non-0, since 0 caught in init_resultant() */
-    return gerepileupto(av, gpowgs(gel(Q,2), dP));
+  {
+    Q = gel(Q,2);
+    return gerepileupto(av, gpowgs(sig == 1? Q: gneg(Q), dP));
+  }
 
   P = primitive_part(P, &cP);
   Q = primitive_part(Q, &cQ);
   av2 = avma; lim = stack_lim(av2,1);
   s = gpowgs(leading_term(Q),delta);
   Z = Q;
-  Q = RgX_pseudorem(P, RgX_neg(Q));
+  if (both_odd(degpol(P), degpol(Q))) sig = -sig;
+  Q = RgX_pseudorem(P, Q);
   P = Z; /* delta = deg(P)-deg(Q) > 0 */
   while(degpol(Q) > 0)
   {
     delta = degpol(P) - degpol(Q);
     Z = Lazard2(Q, leading_term(Q), s, delta);
-    Q = nextSousResultant(P, Q, Z, odd(delta)? s: gneg(s));
+    if (!odd(delta)) sig = -sig;
+    Q = nextSousResultant(P, Q, Z, s);
     P = Z;
     if (low_stack(lim,stack_lim(av,1)))
     {
@@ -3749,10 +3759,11 @@ resultantducos(GEN P, GEN Q)
     s = leading_term(P);
   }
   if (!signe(Q)) { avma = av; return gen_0; }
-  if (!degpol(P)){ avma = av; return gen_1; }
+  if (!degpol(P)){ avma = av; return sig > 0? gen_1: gen_m1; }
   s = Lazard(leading_term(Q), s, degpol(P));
+  if (sig == -1) s = gneg(s);
   if (cP) s = gmul(s, gpowgs(cP,dQ));
-  if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP) s = gcopy(s);
+  if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP && sig == 1) s = gcopy(s);
   return gerepileupto(av, s);
 }
 
