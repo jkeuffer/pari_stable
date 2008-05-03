@@ -1,0 +1,54 @@
+gettime;
+allocatemem(20*10^6);
+
+do(P,Q)= sizebyte( polresultant(P,Q) );
+polrandom(d, A, j) = A = x^d; for(j=0,d, A = A + random() * x^j); A;
+
+P = k*x^5 + c*x^4 + d*x^3 + e*x^2 + f*x + g;
+Q = P';
+do(P,Q)
+
+P = x^4 + b*x^3 + c*x^2 + d*x + e;
+Q = x^4 + g*x^3 + h*x^2 + k*x + j;
+do(P,Q)
+
+P = x^7 + x^3 + b*x^2 + c*x + d;
+Q = x^7 + x^3 + f*x^2 + g*x + h;
+do(P,Q)
+
+P = x^20 + a*x^5 + b;
+Q = x^20 + c*x^5 + d;
+do(P,Q)
+
+P = (x+a)^8;
+Q = (x+z)^8;
+do(P,Q)
+
+P = x^50 + 5*a*x^40 + 4*a*x^30 + a*x^20 + 2*a*x^10 + 3*a;
+Q = x^45 + 2*b*x^35 + b*x^25 + 4*b*x^15 + 5*b*x^5 + 6*b;
+do(P,Q)
+
+P = polcyclo(31); P = subst(P, x, a*x);
+Q = polcyclo(29); Q = subst(Q, x, a*x);
+do(P,Q)
+
+P = 1; for(j=0,100, P = P + b^(100-j) * x^j);
+Q = 1; for(j=0,100, Q = Q + b^j * x^j);
+do(P,Q)
+
+P = 1; for(j=0,300, P = P + x^j);
+Q = 1; for(j=0,200, Q = Q + j*x^j);
+do(P,Q)
+
+P = 1; for(j=0,300, P = P + j^5*x^j);
+Q = 1; for(j=0,300, Q = Q + j^4*x^j);
+do(P,Q)
+
+n = 110; 
+setrand(1);
+P = polrandom(n); 
+Q = polrandom(n);
+do(P,Q)
+
+print("Total time spent: ",gettime);
+\q
