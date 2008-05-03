@@ -3006,6 +3006,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   GEN res, L, resc, B, C, C0, lambda, dep, clg1, clg2, Vbase;
   const char *precpb = NULL;
   const long minsFB = 3;
+  int FIRST = 1;
   RELCACHE_t cache;
   FB_t F;
   GRHcheck_t G, *GRHcheck = &G;
@@ -3035,14 +3036,13 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
 	      gmul2n(gpowgs(mppi(DEFAULTPREC), R2), R1+R2));
   if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Zs\n",R1,R2, D);
   av = avma; cache.base = NULL; F.subFB = NULL;
-  cbach /= 2;
   init_GRHcheck(GRHcheck, N, R1, LOGD);
 
 START:
-  avma = av;
+  if (!FIRST) cbach = check_bach(cbach,12.);
+  FIRST = 0; avma = av;
   if (cache.base) delete_cache(&cache);
   if (F.subFB) delete_FB(&F);
-  cbach = check_bach(cbach,12.);
   LIMC = (long)(cbach*LOGD2);
   if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
   LIMC2 = max(3 * N, (long)(cbach2*LOGD2));

@@ -1503,6 +1503,8 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   double drc, lim, LOGD, LOGD2;
   GRHcheck_t G, *GRHcheck = &G;
   struct buch_quad BQ;
+  int FIRST = 1;
+
   check_quaddisc(D, &s, /*junk*/&i, "buchquad");
   BQ.Disc = D;
   if (s < 0)
@@ -1539,12 +1541,14 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
     cbach = 6.;
   }
   if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buchquad");
-  av = avma; cbach /= 2;
+  av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
   init_GRHcheck(GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
-START: avma = av; cbach = check_bach(cbach,6.);
+START:
+  if (!FIRST) cbach = check_bach(cbach,6.);
+  FIRST = 0; avma = av; 
   if (BQ.subFB) gunclone(BQ.subFB);
   if (BQ.powsubFB) gunclone(BQ.powsubFB);
   clearhash(BQ.hashtab);
