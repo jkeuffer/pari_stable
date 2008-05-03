@@ -523,7 +523,7 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1)
 
 /* Check for solutions under a small bound (see paper) */
 static GEN
-SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
+SmallSols(GEN S, long Bx, GEN poly, GEN rhs)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   const long prec = DEFAULTPREC;
@@ -759,7 +759,7 @@ get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 }
 
 static GEN
-LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
+LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pS)
 {
   GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
   GEN c1,c2,c3,c4,c10,c11,c13,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5, Ind;
@@ -928,14 +928,14 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
       }
     }
   }
-  *pro = ro; return MiddleSols(pS, x3, ro, P, rhs, s, c1);
+  return MiddleSols(pS, x3, ro, P, rhs, s, c1);
 
 PRECPB:
   ne = gerepilecopy(av, ne);
   prec += 5 * (DEFAULTPREC-2);
   if (DEBUGLEVEL>1) pari_warn(warnprec,"thue",prec);
   tnf = inithue(P, bnf, 0, prec);
-  return LargeSols(tnf, rhs, ne, pro, pS);
+  return LargeSols(tnf, rhs, ne, pS);
 }
 
 /* Given a tnf structure as returned by thueinit, a RHS and
@@ -946,7 +946,7 @@ GEN
 thue(GEN tnf, GEN rhs, GEN ne)
 {
   pari_sp av = avma;
-  GEN P, ro, x3, S;
+  GEN P, x3, S;
 
   if (!checktnf(tnf)) pari_err(talker,"not a tnf in thue");
   if (typ(rhs) != t_INT) pari_err(typeer,"thue");
@@ -954,21 +954,21 @@ thue(GEN tnf, GEN rhs, GEN ne)
   P = gel(tnf,1);
   if (lg(tnf) == 8)
   {
-    x3 = LargeSols(tnf, rhs, ne, &ro, &S);
+    x3 = LargeSols(tnf, rhs, ne, &S);
     if (!x3) { avma = av; return cgetg(1,t_VEC); }
   }
   else
   { /* Case s=0. All solutions are "small". */
-    GEN c0   = gel(tnf,2); /* t_REAL */
+    GEN c0 = gel(tnf,2); /* t_REAL */
     S = cgetg(1,t_VEC);
-    ro = roots(P, DEFAULTPREC);
-    x3 = sqrtnr(mulir(constant_term(P), divir(absi(rhs),c0)), degpol(P));
+    x3 = sqrtnr(mulir(absi(rhs),c0), degpol(P));
+    x3 = addrr(x3, dbltor(0.1)); /* guard from round-off errors */
   }
 
   if (DEBUGLEVEL>=2)
     fprintferr("All solutions are <= %Zs\n", x3);
 
-  return gerepilecopy(av, SmallSols(S, itos(gfloor(x3)), P, rhs, ro));
+  return gerepilecopy(av, SmallSols(S, itos(floorr(x3)), P, rhs));
 }
 
 struct sol_abs

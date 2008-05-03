@@ -72,6 +72,8 @@ BA 29- missing GC in the leftrightpow functions
    64- nffactor(y^2+1,x^2+2*y+1) --> x^2+2*y+1 [ missing POLMOD ]
    65- ellpow() with CM raised a "division by 0" instead of returning [0] [#777]
    66- ellpow(e,z,2^20*I) --> norm too large in CM.
+   67- p=x^4-x^3+x^2-x+1; tnf = thueinit(p); thue(tnf,1) -> missing solutions
+       (could occur whenever p has no real root) [#764]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
