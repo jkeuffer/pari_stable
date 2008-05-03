@@ -2232,7 +2232,7 @@ INIT:
     b = ZXX_to_FlxX(B, p, varn(A));
     if (LERS)
     {
-      if (!b[lb-1] || degpol(a) < degA) continue; /* p | lc(A)lc(B) */
+      if (degpol(a) < degA || lg(b) < lb) continue; /* p | lc(A)lc(B) */
       if (checksqfree)
       { /* find degree list for generic Euclidean Remainder Sequence */
 	long goal = min(degpol(a), degpol(b)); /* longest possible */
@@ -2268,7 +2268,24 @@ INIT:
       H1p= gel(C1,1);
     }
     else
+    {
+      long dropa = degA - degpol(a), dropb = lb - lg(b);
       Hp = Flx_FlyX_resultant_polint(a, b, p, (ulong)dres, sX);
+      if (dropa && dropb)
+        Hp = zero_Flx(sX);
+      else {
+        if (dropa) {
+          GEN lcb = gel(b,lb-1);
+          if (!odd(degA)) Flx_neg(lcb, p);
+          if (!Flx_cmp1(lcb)) Hp = Flx_mul(Hp, Flx_pow(lcb, dropa, p), p);
+        }
+        else if (dropb)
+        {
+          ulong lca = a[degA+2];
+          if (lca != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(lca, dropb, p), p);
+        }
+      }
+    }
     if (!H && degpol(Hp) != dres) continue;
     if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
@@ -2388,7 +2405,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
 {
   ulong Hp, dp, p;
   pari_sp av = avma, av2, lim;
-  long degA;
+  long degA, degB;
   int stable;
   GEN q, a, b, H;
   byteptr d;
@@ -2397,6 +2414,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   q = H = NULL;
   av2 = avma; lim = stack_lim(av,2);
   degA = degpol(A);
+  degB = degpol(B);
   if (!bound)
   {
     bound = ZX_ZXY_ResBound(A, B, dB);
@@ -2420,13 +2438,31 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   dp = 1; /* denominator mod p */
   for(;;)
   {
+    long dropa, dropb;
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
-    a = ZX_to_Flx(A, p);
-    b = ZX_to_Flx(B, p);
-    Hp= Flx_resultant(a, b, p);
-    if (dp != 1) Hp = Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
+    a = ZX_to_Flx(A, p); dropa = degA - degpol(a);
+    b = ZX_to_Flx(B, p); dropb = degB - degpol(b);
+    if (dropa && dropb) /* p | lc(A), p | lc(B) */
+      Hp = 0;
+    else
+    {
+      Hp = Flx_resultant(a, b, p);
+      if (dropa)
+      { /* multiply by (-1)^(deg A + 1) * lc(B)^(deg A - deg a) */
+        ulong lcb = b[degB+2];
+        if (!odd(degA)) lcb = p - lcb;
+        if (lcb != 1) Hp = Fl_mul(Hp, Fl_powu(lcb, dropa, p), p);
+      }
+      else if (dropb)
+      { /* multiply by lc(A)^(deg B - deg b) */
+        ulong lca = a[degA+2];
+        if (lca != 1) Hp = Fl_mul(Hp, Fl_powu(lca, dropb, p), p);
+      }
+      if (dp != 1) Hp = Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
+    }
+
     if (!H)
     {
       stable = 0; q = utoipos(p);
