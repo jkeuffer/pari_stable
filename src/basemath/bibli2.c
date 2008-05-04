@@ -1148,9 +1148,10 @@ numtoperm(long n, GEN x)
     x = divis_rem(x, r,&a);
     for (i=r; i>=a+2; i--) v[i] = v[i-1];
     v[i] = r;
+    if ((r & 0x1f) == 0) x = gerepileuptoint(av, x);
   }
   avma = av;
-  for (i=1; i<=n; i++) gel(v,i) = stoi(v[i]);
+  for (i=1; i<=n; i++) gel(v,i) = utoipos(v[i]);
   return v;
 }
 
