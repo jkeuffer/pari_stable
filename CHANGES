@@ -75,6 +75,7 @@ BA 29- missing GC in the leftrightpow functions
    67- p=x^4-x^3+x^2-x+1; tnf = thueinit(p); thue(tnf,1) -> missing solutions
        (could occur whenever p has no real root) [#764]
    68- missing GC in numtoperm()
+   69- harmless uninitialized memory read in mulrrz_i()
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
