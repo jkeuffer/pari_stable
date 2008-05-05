@@ -281,7 +281,6 @@ GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E,
 long cornacchia(GEN d, GEN p, GEN *px, GEN *py);
 long cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
 GEN  primeform_u(GEN x, ulong p);
-GEN  qf_disc(GEN x);
 void qfb_comp(GEN z,GEN x,GEN y);
 GEN  qfr_to_qfr5(GEN x, long prec);
 GEN  qfr3_comp(GEN x, GEN y, GEN D, GEN isqrtD);

@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define discsr(x) poldisc0((x),-1)
 #define isfundamental Z_isfundamental
 #define factorpadic4 factorpadic
 #define smith2 smithall

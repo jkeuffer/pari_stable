@@ -96,9 +96,9 @@ quadgen(GEN x)
 /***********************************************************************/
 
 static GEN
-qf_disc0(GEN x, GEN y, GEN z) { return subii(sqri(y), shifti(mulii(x,z),2)); }
+qfb_disc0(GEN x, GEN y, GEN z) { return subii(sqri(y), shifti(mulii(x,z),2)); }
 GEN
-qf_disc(GEN x) { return qf_disc0(gel(x,1), gel(x,2), gel(x,3)); }
+qfb_disc(GEN x) { return qfb_disc0(gel(x,1), gel(x,2), gel(x,3)); }
 
 GEN
 qfi(GEN x, GEN y, GEN z)
@@ -126,7 +126,7 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
   pari_sp av = avma;
   long s;
   if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) pari_err(typeer,"Qfb");
-  s = signe(qf_disc0(x,y,z)); avma = av;
+  s = signe(qfb_disc0(x,y,z)); avma = av;
   if (!s) pari_err(talker,"zero discriminant in Qfb");
   if (s < 0) return qfi(x, y, z);
 
@@ -284,7 +284,7 @@ qfr_unit(GEN x)
   if (typ(x) != t_QFR) pari_err(typeer,"qfr_unit");
   prec = precision(gel(x,4));
   if (!prec) pari_err(talker,"not a t_REAL in 4th component of a t_QFR");
-  return qfr_unit_by_disc(qf_disc(x), prec);
+  return qfr_unit_by_disc(qfb_disc(x), prec);
 }
 
 static GEN
@@ -309,7 +309,7 @@ GEN
 qfi_unit(GEN x)
 {
   if (typ(x) != t_QFI) pari_err(typeer,"qfi_unit");
-  return qfi_unit_by_disc(qf_disc(x));
+  return qfi_unit_by_disc(qfb_disc(x));
 }
 
 static GEN
@@ -805,7 +805,7 @@ qfr3_red(GEN x, GEN D, GEN isqrtD) {
 static void
 get_disc(GEN x, GEN *D)
 {
-  if (!*D) *D = qf_disc(x);
+  if (!*D) *D = qfb_disc(x);
   else if (typ(*D) != t_INT) pari_err(arither1);
   if (!signe(*D)) pari_err(talker,"reducible form in qfr_init");
 }
@@ -1119,7 +1119,7 @@ qfbimagsolvep(GEN Q, GEN p)
     if (gcmp1(a)) return qfbsolve_cornacchia(c, p, 0);
     if (gcmp1(c)) return qfbsolve_cornacchia(a, p, 1);
   }
-  d = qf_disc(Q); if (kronecker(d,p) < 0) return gen_0;
+  d = qfb_disc(Q); if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
   if (is_pm1(gel(a,1))) /* principal form */
   {
@@ -1154,7 +1154,7 @@ redrealsl2step(GEN A)
   GEN a = gel(V,1);
   GEN b = gel(V,2);
   GEN c = gel(V,3);
-  GEN d = qf_disc0(a,b,c);
+  GEN d = qfb_disc0(a,b,c);
   GEN rd = sqrti(d);
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
@@ -1178,7 +1178,7 @@ redrealsl2(GEN V)
   GEN a = gel(V,1);
   GEN b = gel(V,2);
   GEN c = gel(V,3);
-  GEN d = qf_disc0(a,b,c);
+  GEN d = qfb_disc0(a,b,c);
   GEN rd = sqrti(d);
   btop = avma; st_lim = stack_lim(btop, 1);
   u1 = v2 = gen_1; v1 = u2 = gen_0;
@@ -1207,7 +1207,7 @@ GEN
 qfbrealsolvep(GEN Q, GEN p)
 {
   pari_sp ltop = avma, btop, st_lim;
-  GEN N, P, P1, P2, M, d = qf_disc(Q);
+  GEN N, P, P1, P2, M, d = qfb_disc(Q);
   if (kronecker(d, p) < 0) { avma = ltop; return gen_0; }
   M = N = redrealsl2(Q);
   P = primeform(d, p, DEFAULTPREC);

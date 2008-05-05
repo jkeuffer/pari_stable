@@ -129,6 +129,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove obsolete function factpol()
   - rename library functions nfhermite -> nfhnf, nfhermitemod -> nfhnfmod
   - rename subres -> resultant, subresall -> resultant_all.
+  - remove obsolete discsr. Use RgX_disc (or quad_disc, qfb_disc...)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

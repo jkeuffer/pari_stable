@@ -268,7 +268,7 @@ entree oldfonctions[]={
 {"direuler",83,(void*)direuler0,7,"V=GGEDG","direuler(p=a,b,expr)=Dirichlet Euler product of expression expr from p=a to p=b, limited to b terms. Expr should be a polynomial or rational function in p and X, and X is understood to mean p^(-s)"},
 {"dirmul",2,(void*)dirmul,7,"GG","dirmul(x,y)=multiplication of the Dirichlet series x by the Dir. series y"},
 {"dirzetak",2,(void*)dirzetak,6,"GG","dirzetak(nf,b)=Dirichlet series of the Dedekind zeta function of the number field nf up to the bound b-1"},
-{"disc",1,(void*)discsr,7,"G","disc(x)=discriminant of the polynomial x"},
+{"disc",1,(void*)poldisc0,7,"GDn","disc(x)=discriminant of the polynomial x"},
 {"discf",1,(void*)discf,6,"G","discf(x)=discriminant of the number field defined by the polynomial x using round 4"},
 {"discf2",1,(void*)discf2,6,"G","discf2(x)=discriminant of the number field defined by the polynomial x using round 2"},
 {"discrayabs",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D0,L,","discrayabs(bnr,subgroup)=absolute [N,R1,discf] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup"},

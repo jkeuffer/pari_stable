@@ -125,7 +125,7 @@ member_disc(GEN x) /* discriminant */
   {
     switch(t)
     {
-      case typ_Q  : return discsr(gel(x,1));
+      case typ_Q  : return quad_disc(x);
       case typ_CLA:
 	x = gmael(x,1,3);
 	if (typ(x) != t_VEC || lg(x) != 3) break;
@@ -315,7 +315,7 @@ member_fu(GEN x) /* fundamental units */
       case typ_CLA: x = gel(x,1); if (lg(x) < 10) break;
 	return gel(x,9);
       case typ_Q:
-	x = discsr(gel(x,1));
+	x = quad_disc(x);
 	return (signe(x)<0)? cgetg(1,t_VEC): fundunit(x);
     }
     member_err("fu");
@@ -335,7 +335,7 @@ member_tu(GEN x)
     switch(t)
     {
       case typ_Q:
-	y = discsr(gel(x,1));
+	y = quad_disc(x);
 	if (signe(y)<0 && cmpiu(y,4)<=0) /* |y| <= 4 */
 	  y = stoi((itos(y) == -4)? 4: 6);
 	else

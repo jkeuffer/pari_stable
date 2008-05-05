@@ -37,11 +37,9 @@ else\
 static long
 kro_quad(GEN x, GEN y)
 {
-  long k;
   pari_sp av=avma;
-
-  x = subii(sqri(gel(x,3)), shifti(gel(x,2),2));
-  k = kronecker(x,y); avma=av; return k;
+  long k = kronecker(quad_disc(x), y);
+  avma = av; return k;
 }
 
 /* is -1 not a square in Zp, assume p prime */
@@ -842,7 +840,7 @@ gadd(GEN x, GEN y)
       }
 
     case t_PADIC: /* ty == t_QUAD */
-      return (kro_quad(gel(y,1),gel(x,2)) == -1)? addRq(x, y): addTp(y, x);
+      return (kro_quad(y,gel(x,2)) == -1)? addRq(x, y): addTp(y, x);
   }
   /* tx < ty, !is_const_t(y) */
   if (ty == t_MAT) {
@@ -1653,7 +1651,7 @@ gmul(GEN x, GEN y)
       }
 
     case t_PADIC: /* ty == t_QUAD */
-      return (kro_quad(gel(y,1),gel(x,2))== -1)? mulRq(x, y): mulTp(y, x);
+      return (kro_quad(y,gel(x,2))== -1)? mulRq(x, y): mulTp(y, x);
     }
   }
 

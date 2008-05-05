@@ -2441,7 +2441,6 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   GEN Prd, A, I, p, tau, g, matid;
   GEN modpr, h, k, base, nfT, T, gzk, hzk, prinvp, X, pal;
 
-  P = lift(P);
   nf = checknf(nf); nfT = gel(nf,1);
   modpr = nf_to_ff_init(nf,&pr, &T, &p);
   tau = coltoliftalg(nf, gel(pr,5));
@@ -2506,8 +2505,12 @@ GEN
 rnfdedekind(GEN nf, GEN P, GEN pr)
 {
   pari_sp av = avma;
-  long v = element_val(nf, discsr(P), pr);
+  long v;
   GEN z;
+  nf = checknf(nf);
+  P = fix_relative_pol(gel(nf,1), P, 0);
+  v = element_val(nf, RgX_disc(P), pr);
+  P = lift_intern(P);
   avma = av; z = rnfdedekind_i(nf, P, pr, v);
   if (!z) {
     z = cgetg(4, t_VEC);
@@ -2740,7 +2743,7 @@ rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pf)
 
   N = degpol(nfT);
   n = degpol(pol);
-  disc = discsr(pol); pol = lift(pol);
+  disc = RgX_disc(pol); pol = lift(pol);
   P = idealfactor(nf, disc);
   ep= (long*)P[2];
   P = gel(P,1); l = lg(P);

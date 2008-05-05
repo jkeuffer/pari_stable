@@ -4036,23 +4036,22 @@ poldisc0(GEN x, long v)
     case t_COMPLEX:
       return utoineg(4);
 
-    case t_QUAD: case t_POLMOD:
+    case t_QUAD:
+      return quad_disc(x);
+    case t_POLMOD:
       return poldisc0(gel(x,1), v);
 
     case t_QFR: case t_QFI:
-      av = avma; return gerepileuptoint(av, qf_disc(x));
+      av = avma; return gerepileuptoint(av, qfb_disc(x));
 
     case t_VEC: case t_COL: case t_MAT:
       i=lg(x); z=cgetg(i,tx);
       for (i--; i; i--) gel(z,i) = poldisc0(gel(x,i), v);
       return z;
   }
-  pari_err(typeer,"discsr");
+  pari_err(typeer,"poldisc");
   return NULL; /* not reached */
 }
-
-GEN
-discsr(GEN x) { return poldisc0(x, -1); }
 
 GEN
 reduceddiscsmith(GEN x)

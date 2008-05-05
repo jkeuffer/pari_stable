@@ -1584,6 +1584,18 @@ gaffect(GEN x, GEN y)
 /*           CONVERSION QUAD --> REAL, COMPLEX OR P-ADIC           */
 /*                                                                 */
 /*******************************************************************/
+/* x a t_QUAD, return the associated discriminant */
+GEN
+quad_disc(GEN x)
+{
+  GEN Q = gel(x,1), b = gel(Q,3), c = gel(Q,2), c4;
+  if (is_pm1(b)) 
+  {
+    pari_sp av = avma; new_chunk(lgefint(c) + 1);
+    c4 = shifti(c,2); avma = av; return subsi(1, c4);
+  }
+  c4 = shifti(c,2); togglesign_safe(&c4); return c4;
+}
 
 GEN
 quadtoc(GEN x, long prec)
@@ -1594,7 +1606,7 @@ quadtoc(GEN x, long prec)
   if (gcmp0(v)) return gtofp(u, prec);
   av = avma; Q = gel(x,1);
   /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */
-  z = itor(subsi(signe(gel(Q,3))? 1: 0, shifti(gel(Q,2),2)), prec);
+  z = itor(quad_disc(x), prec);
   z = gsub(sqrtr(z), gel(Q,3));
   if (signe(gel(Q,2)) < 0) /* Q[2] = -D/4 or (1-D)/4 */
     setexpo(z, expo(z)-1);
@@ -1609,13 +1621,12 @@ quadtoc(GEN x, long prec)
 static GEN
 qtop(GEN x, GEN p, long d)
 {
-  GEN z, D, P, b, c, u = gel(x,2), v = gel(x,3);
+  GEN z, D, P, b, u = gel(x,2), v = gel(x,3);
   pari_sp av;
   if (gcmp0(v)) return cvtop(u, p, d);
   P = gel(x,1);
   b = gel(P,3);
-  c = gel(P,2); av = avma;
-  D = is_pm1(b)? subsi(1, shifti(c,2)): shifti(negi(c),2);
+  av = avma; D = quad_disc(x);
   if (equaliu(p,2)) d += 2;
   z = gmul2n(gsub(padic_sqrt(cvtop(D,p,d)), b), -1);
   return gerepileupto(av, gadd(u, gmul(v, z)));
