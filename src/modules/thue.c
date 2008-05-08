@@ -1230,7 +1230,8 @@ GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
   pari_sp av = avma;
-  GEN unit = NULL, z, x, res = bnfisintnormabs(bnf, a), nf = checknf(bnf);
+  GEN nf = checknf(bnf), T = gel(nf,1);
+  GEN unit = NULL, z, x, res = bnfisintnormabs(bnf, a);
   long sNx, i, j = 1, l = lg(res), sa = signe(a);
   long norm_1 = 0; /* gcc -Wall */
 
@@ -1238,11 +1239,11 @@ bnfisintnorm(GEN bnf, GEN a)
   for (i=1; i<l; i++)
   {
     x = gel(res,i);
-    sNx = signe(resultant(gel(nf,1), x));
+    sNx = signe(resultant(T, x));
     if (sNx != sa)
     {
       if (! unit) norm_1 = get_unit_1(bnf, &unit);
-      if (norm_1) x = gmul(unit,x);
+      if (norm_1) x = (typ(unit) == t_INT)? gmul(unit,x): RgXQ_mul(unit,x,T);
       else
       {
 	if (DEBUGLEVEL > 2) fprintferr("%Zs eliminated because of sign\n",x);
