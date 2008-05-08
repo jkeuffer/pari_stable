@@ -920,7 +920,8 @@ ellpow_Z(GEN e, GEN z, GEN n)
   if (is_inf(z)) return inf();
   s = signe(n);
   if (!s) return inf();
-  if (is_pm1(n)) return s < 0? invell(e,z): z;
+  if (s < 0) z = invell(e,z);
+  if (is_pm1(n)) return z;
   return leftright_pow(z, n, (void*)e, &_sqr, &_mul);
 }
 /* [a + bw] z, a,b integral */
