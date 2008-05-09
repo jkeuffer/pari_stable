@@ -859,7 +859,7 @@ compilefunc(entree *ep, long n, int mode)
           j++;
           break;
         case 'W':
-          getlvalue(arg[j]);
+          (void)getlvalue(arg[j]);
           compilenode(arg[j++],Ggen,FLnocopy);
           break;
         case 'M':

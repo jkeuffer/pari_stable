@@ -3660,7 +3660,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   {
     if (degpol(H) == q-1)
     { /* h0 = coeff of degree q-1 = leading coeff */
-      h0 = gel(H,q+1); normalizepol_i(H, q+1);
+      h0 = gel(H,q+1); (void)normalizepol_i(H, q+1);
       H = addshift(H, RgX_Rg_divexact(RgX_Rg_mul_i(Q, gneg(h0), lQ), q0));
     }
     else
@@ -3682,7 +3682,7 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
   A = RgX_Rg_divexact(A, p0);
   if (degpol(H) == q-1)
   {
-    h0 = gel(H,q+1); normalizepol_i(H, q+1); /* destroy old H */
+    h0 = gel(H,q+1); (void)normalizepol_i(H, q+1); /* destroy old H */
     A = RgX_add(RgX_Rg_mul(addshift(H,A),q0), RgX_Rg_mul_i(Q, gneg(h0), lQ));
   }
   else

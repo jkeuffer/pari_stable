@@ -2276,7 +2276,7 @@ INIT:
       else {
         if (dropa) {
           GEN lcb = gel(b,lb-1);
-          if (!odd(degA)) Flx_neg(lcb, p);
+          if (!odd(degA)) lcb = Flx_neg(lcb, p);
           if (!Flx_cmp1(lcb)) Hp = Flx_mul(Hp, Flx_pow(lcb, dropa, p), p);
         }
         else if (dropb)
