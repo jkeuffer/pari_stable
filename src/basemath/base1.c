@@ -1010,11 +1010,14 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
   if (typ(basden[1]) != t_VEC) basden = get_bas_den(basden); /*integral basis*/
   bas = gel(basden,1);
   den = gel(basden,2);
-  for (i=1; i<=n; i++)
+  /* i = 1 split for efficiency, assume bas[1] = 1 */
+  for (j=1; j<=n; j++)
+    gel(mul,j) = gel(mul,1+(j-1)*n) = col_ei(n, j);
+  for (i=2; i<=n; i++)
     for (j=i; j<=n; j++)
     {
       pari_sp av = avma;
-      z = grem(gmul(gel(bas,j),gel(bas,i)), x);
+      z = RgX_rem(RgX_mul(gel(bas,j),gel(bas,i)), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
