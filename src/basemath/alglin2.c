@@ -685,11 +685,10 @@ gconj(GEN x)
 GEN
 conjvec(GEN x,long prec)
 {
-  pari_sp av,tetpil;
-  long lx,s,i,tx=typ(x);
-  GEN z,y,p1,p2,p;
+  long lx, s, i;
+  GEN z, y, p;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT: case t_INTMOD: case t_FRAC:
       return mkcolcopy(x);
@@ -707,30 +706,35 @@ conjvec(GEN x,long prec)
       break;
 
     case t_POLMOD:
-      y=gel(x,1); lx=lg(y);
-      if (lx<=3) return cgetg(1,t_COL);
-      av=avma; p=NULL;
+      y = gel(x,1); lx = lg(y);
+      if (lx <= 3) return cgetg(1,t_COL);
+      p = NULL;
       for (i=2; i<lx; i++)
       {
-	tx=typ(y[i]);
-	if (tx==t_INTMOD) p = gmael(y,i,1);
-	else
-	  if (!is_rational_t(tx))
-	    pari_err(talker,"not a rational polynomial in conjvec");
+        GEN c = gel(y,i);
+        switch(typ(c)) {
+	  case t_INTMOD: p = gel(c,1); break;
+          case t_INT:
+          case t_FRAC: break;
+          default: pari_err(talker,"not a rational polynomial in conjvec");
+        }
       }
       if (!p)
       {
-	p1=roots(y,prec); x = gel(x,2); tetpil=avma;
-	z=cgetg(lx-2,t_COL);
+        pari_sp av = avma;
+	GEN r = roots(y,prec);
+        x = gel(x,2);
+	z = cgetg(lx-2,t_COL);
 	for (i=1; i<=lx-3; i++)
 	{
-	  p2=gel(p1,i); if (gcmp0(gel(p2,2))) p2 = gel(p2,1);
-	  gel(z,i) = poleval(x, p2);
+          GEN c = gel(r,i);
+	  if (gcmp0(gel(c,2))) c = gel(c,1);
+	  gel(z,i) = poleval(x, c);
 	 }
-	return gerepile(av,tetpil,z);
+	return gerepileupto(av, z);
       }
-      z=cgetg(lx-2,t_COL); gel(z,1) = gcopy(x);
-      for (i=2; i<=lx-3; i++) gel(z,i) = gpow(gel(z,i-1),p,prec);
+      z = cgetg(lx-2,t_COL); gel(z,1) = gcopy(x);
+      for (i=2; i<=lx-3; i++) gel(z,i) = powgi(gel(z,i-1), p);
       break;
 
     default:
