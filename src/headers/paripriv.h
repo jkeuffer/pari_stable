@@ -735,7 +735,6 @@ GEN     vandermondeinverseprep(GEN L);
 
 /* galois.c */
 
-GEN     partitions(long n);
 GEN     polgaloisnamesbig(long n, long k);
 
 /* gen1.c */

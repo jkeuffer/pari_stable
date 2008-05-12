@@ -1,0 +1,12 @@
+Function: partitions
+Section: number_theoretical
+C-Name: partitions
+Prototype: LD0,L,
+Help: partitions(n,{restr=0}): return vector of partitions of n, a positive
+ integer. The second optional argument may be set to a number smaller than n
+ to restrict the value of each element in the partitions to that value. The
+ default of 0 means that this maximum is n itself.
+Doc: returns vector of partitions of $n$, a positive
+ integer. The second optional argument may be set to a number smaller than
+ $n$ to restrict the value of each element in the partitions to that value.
+ The default of 0 means that this maximum is $n$ itself.

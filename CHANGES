@@ -201,6 +201,7 @@ BA 26- new alarm GP function and alarmer error code
        Z_chinese_coprime, Z_chinese_post, Z_chinese_pre, Z_incremental_CRT,
        Z_init_CRT, ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT,
        ZX_init_CRT, RgX_disc, quad_disc, qfb_disc.
+RM 28- partitions()
 
   Removed
     1- obsolete library functions extract and matextract

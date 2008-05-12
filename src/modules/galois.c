@@ -56,8 +56,8 @@ do_par(GEN T, long k, long n, long m)
 }
 
 /* compute the partitions of n, as decreasing t_VECSMALLs */
-GEN
-partitions(long n)
+static GEN
+partitions_galois(long n)
 {
   pari_sp av;
   long i, p;
@@ -1454,7 +1454,7 @@ galoismodulo8(long EVEN, GEN pol, GEN dpol)
   long res, gr[51];
   pari_sp av = avma;
   long **GR = (long**)cgeti(49);
-  GEN TYP = partitions(8);
+  GEN TYP = partitions_galois(8);
 
 /* List of possible types in group j: GR[j][0] = #GR[j] if
  * the group is odd, - #GR[j] if even */
@@ -1709,7 +1709,7 @@ galoismodulo9(long EVEN, GEN pol, GEN dpol)
   long res, gr[35];
   pari_sp av = avma;
   long **GR = (long**) cgeti(33);
-  GEN TYP = partitions(9);
+  GEN TYP = partitions_galois(9);
 
   /* 42 TYPES ORDONNES CROISSANT (T[1],...,T[30])*/
 
@@ -2134,7 +2134,7 @@ galoismodulo10(long EVEN, GEN pol, GEN dpol)
   long res, gr[46];
   pari_sp av = avma;
   long **GR = (long**) cgeti(45);
-  GEN TYP = partitions(10);
+  GEN TYP = partitions_galois(10);
 
   GR[ 1]= _gr(  4, 1,6,30,42);
   GR[ 2]= _gr(  3, 1,6,30);

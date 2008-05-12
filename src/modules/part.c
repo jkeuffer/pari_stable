@@ -181,3 +181,87 @@ numbpart(GEN n)
   affrr(mod2(n)? subrr(p1,p2): addrr(p1,p2), sum);
   return gerepileuptoint (ltop, roundr(mulrr(D,sum)));
 }
+
+/**
+* Return a vector in which each element is a vector of partitions of 
+* the positive integer n, in which the length of each of these partitions
+* is pext, in which the minimum element in each of the partitions is amin,
+* and in which the maximum element in each of the partitions is amax.
+* R. J. Mathar, mathar@strw.leidenuniv.nl, 2008-05-05
+*/
+/* assume pext >= 2 */
+static GEN
+partitr(long n, long pext, long amin, long amax)
+{
+  GEN pi;
+
+  if (pext == 2)
+  {
+    long a, L1 = max(amin, n-amax), L2 = min(amax, n/pext);
+    if (L1 > L2) return NULL;
+    pi = cgetg(L2 - L1 + 2, t_VEC);
+    for (a = L1; a <= L2; a++) gel(pi, a-L1+1) = mkvecsmall2(a, n-a);
+  }
+  else
+  {
+    pari_sp av = avma;
+    long a, l, L1 = amin, L2 = min(amax, n/pext);
+    if (L1 > L2) return NULL;
+    pi = cgetg(L2 - L1 + 2, t_VEC); l = 1;
+    for (a = L1; a <= L2; a++)
+    {
+      GEN P = partitr(n-a, pext-1, a, amax);
+      long i, lP;
+      if (!P) continue;
+      lP = lg(P);
+      for (i = 1; i < lP; i++) gel(P,i) = vecsmall_prepend(gel(P,i), a);
+      gel(pi, l++) = P;
+    }
+    if (l == 1) { avma = av; return NULL; }
+    setlg(pi, l);
+    pi = gerepilecopy(av, shallowconcat1(pi));
+  }
+  return pi;
+}
+
+/**
+* Return a vector in which each element is a vector of partitions of 
+* the positive integer n,
+* and in which the maximum element in each of the partitions is amax.
+* The restrictions on the maximum element can be lifted setting amax to zero,
+* which allows for each element to grow to its maximum of n itself.
+* 
+* Example: partit(9,2) yields
+*  [[1, 2, 2, 2, 2], [1, 1, 1, 2, 2, 2], [1, 1, 1, 1, 1, 2, 2],
+*     [1, 1, 1, 1, 1, 1, 1, 2], [1, 1, 1, 1, 1, 1, 1, 1, 1]]
+* R. J. Mathar, mathar@strw.leidenuniv.nl, 2008-05-05
+*/
+GEN
+partitions(long n, long amax)
+{
+  pari_sp av = avma;
+  GEN pi;
+  long p, l;
+
+  if (n <= 0) return cgetg(1, t_VEC);
+
+  /* lift the restriction on the maximum element if amax=0 */
+  if (amax == 0) amax = n;
+
+  /* the partitions are generated in Abramowitz-Stegun order:
+  * first the partitions with 1 element, then those with 2, then
+  * those with 3 until 1+1+1+..+1=n, the longest, is created. p is the
+  * length of these partitions. */
+
+  /* partitions with 1 element */
+  pi = cgetg(n+1, t_VEC); l = 1;
+  if (n <= amax) gel(pi, l++) = mkvecsmall(n);
+  /* vector of partitions of length p, elements in the range of 1.. amax */
+  for (p = 2; p <= n; ++p)
+  {
+    GEN P = partitr(n, p, 1, amax);
+    if (P) gel(pi, l++) = P;
+  }
+  setlg(pi, l);
+  return gerepilecopy(av, shallowconcat1(pi)) ;
+}

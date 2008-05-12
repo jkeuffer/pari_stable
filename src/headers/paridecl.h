@@ -1848,6 +1848,7 @@ GEN     polfnf(GEN a, GEN t);
 /* part.c */
 
 GEN     numbpart(GEN x);
+GEN     partitions(long n, long amax);
 
 /* perm.c */
 
