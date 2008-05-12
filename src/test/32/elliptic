@@ -157,5 +157,4 @@ q^101)
 ? getheap
 [58, 4768]
 ? print("Total time spent: ",gettime);
-Total time spent: 24
-? \q
+Total time spent: 28

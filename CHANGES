@@ -143,6 +143,8 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
        [Ducos, modular, Sylvester], polresultant(x,y,,2) is now a synonym 
        for the default. The change also improves poldisc().
    45- [library] rename subres -> resultant, subresall -> resultant_all.
+   46- regression tests in src/test/in/ no longer need to end with
+       'print("Total time spent: ",gettime)'
 
   Added
     1- library function gpcalloc

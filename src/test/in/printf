@@ -72,6 +72,3 @@ printf("%%-20.10g for aa : %-20.10g\n", aa) /* ERROR : aa is not a t_REAL */
 10^38 + 1.
 
 printf("%.100f",1.)
-
-print("Total time spent: ",gettime);
-\q

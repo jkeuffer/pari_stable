@@ -64,5 +64,3 @@ incgam(2,1)
 zeta(0.5+14.1347251*I)
 \\
 getheap
-print("Total time spent: ",gettime);
-\q

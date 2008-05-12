@@ -66,5 +66,4 @@ a, 1, 0, 2*a, 4, 4294967290*a^2, 4294967243*a, 4294966427, 64*a^2 + 42949670
 ? getheap
 [13, 5323]
 ? print("Total time spent: ",gettime);
-Total time spent: 1616
-? \q
+Total time spent: 1368

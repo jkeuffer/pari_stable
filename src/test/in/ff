@@ -39,5 +39,3 @@ ffgen(x*Mod(1,2))
 ffprimroot(ffgen((x+1)*Mod(1,2)))
 
 getheap
-print("Total time spent: ",gettime);
-\q

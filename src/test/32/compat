@@ -2715,6 +2715,5 @@ mod(391, 3120), mod(2081, 3120)]]
 44
 ? getheap()
 [610, 115339]
-? print("Total time spent: ",gettime());
-Total time spent: 796
-? \q
+? print("Total time spent: ",gettime);
+Total time spent: 368

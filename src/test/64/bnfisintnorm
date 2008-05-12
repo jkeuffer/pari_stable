@@ -689,4 +689,3 @@ x + 17, 13/2*x - 99/2, 5/2*x + 21/2]
 [-x]
 ? print("Total time spent: ",gettime);
 Total time spent: 820
-? \q

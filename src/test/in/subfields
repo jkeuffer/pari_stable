@@ -32,5 +32,3 @@ x^60 + 36*x^59 + 579*x^58 + 5379*x^57 + 30720*x^56 + 100695*x^55 + 98167*x^54 - 
 ];}
 
 for (i=1,#v, print(i,": ",nfsubfields(v[i])))
-print("Total time spent: ",gettime);
-\q

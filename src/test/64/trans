@@ -429,4 +429,3 @@ x^17 - 1
 [60, 3956]
 ? print("Total time spent: ",gettime);
 Total time spent: 28
-? \q

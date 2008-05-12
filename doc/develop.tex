@@ -114,7 +114,7 @@ Additionnally, for true closure,
 \item \kbd{z[6]} points to a \typ{VEC} which hold the values of all lexical
 variables defined in the scope the closure was defined.
 
-\section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type need to go
+\section{The type \typ{LIST}}\kbdsidx{t_LIST}\sidx{list} This type needs to go
 through various hoops to support GP's inconvenient memory model. Don't
 use \typ{LIST}s in pure library mode, reimplement ordinary lists! This
 dynamic type is implemented by a \kbd{GEN} of length 3: two codewords and a
@@ -250,6 +250,68 @@ auxiliary table containing $O(\sqrt{p})$ group elements.
 \fun{GEN}{gen_eltorder}{GEN x, GEN N, void *E, const struct bb_group *grp}
 computes the order of $x$. If $N$ is not \kbd{NULL} it is a multiple of the
 order, as a \typ{INT} or a factorization matrix.
+
+\chapter{Regression tests, benches}
+
+This chapter documents how to write an automated test module, say \kbd{fun}, so
+that \kbd{make test-fun} executes the statements in the \kbd{fun} module
+and times them, compares the output to a template, and prints an error message
+if they do not match.
+
+\item Pick a \emph{new} name for your test, say \kbd{fun}, and write down a
+GP script named \kbd{fun}. Make sure it produces some useful ouput and tests
+adequately a set of routines. 
+
+\item The script should not be too long: one minute runs should be enough.
+Try to break your script into independent easily reproduceable tests, this way
+regressions are easier to debug; e.g. include \kbd{setrand(1)} statement before
+a randomized computation. The expected output may be different on 32-bit and
+64-bit machines but should otherwise be platform-independant. If possible, the
+output shouldn't even depend on \kbd{sizeof(long)}; using a \kbd{realprecision}
+that exists on both 32-bit and 64-bit architectures, e.g. \kbd{\bs p 38} is a
+good first step.
+
+\item Dump your script into \kbd{src/test/in/} and run \kbd{Configure}.
+
+\item \kbd{make test-fun} now runs the new test, producing a \kbd{[BUG]} error
+message and a \kbd{.dif} file in the relevant object directory \kbd{Oxxx}.
+In fact, we compared the output to a non-existing template, so this must fail.
+
+\item Go to the relevant \kbd{Oxxx} directory, then
+\bprog
+  patch -p0 < fun.dif
+@eprog\noindent
+generates a template output in the right place \kbd{src/test/32/fun}, for
+instance on a 32-bit machine.
+
+\item If different output is expected on 32-bit and 64-bit machines, run the
+test on a 64-bit machine and patch again, thereby
+producing \kbd{src/test/64/fun}. If, on the contrary, the output must be the
+same, make sure the output template land in the \kbd{src/test/32/} directory
+(which provides a default template when the 64-bit output file is missing);
+in particular move the file from \kbd{src/test/64/} to \kbd{src/test/32/}
+if the test was run on a 64-bit machine.
+
+\item You can now re­run the test to check for regressions: no \kbd{[BUG]}
+is expected this time ! Of course you can at any time add some checks, and
+iterate the test / patch phases. In particular, each time a bug in the
+\kbd{fun} module is fixed, it is a good idea to add a minimal test case to
+the test suite.
+
+\item
+
+\item By default, your new test is now included in \kbd{make test-all}. If
+it is particularly annoying, e.g. opens tons of graphical windows as
+\kbd{make test-ploth} or just much longer than the recommanded minute, you
+may edit \kbd{config/get\_tests} and add \kbd{fun} test to the list of
+excluded tests, in the \kbd{test\_extra\_out} variable.
+
+\item The \kbd{get\_tests} script also defines the recipe for
+\kbd{make bench} timings, via the variable \kbd{test\_basic}. A test is
+included as \kbd{fun} or \kbd{fun\_$n$}, where $n$ is an integer $\leq 1000$; 
+the latter means that the timing is weighted by a factor $n/1000$. (This was
+introduced a long time ago, when the \kbd{nfields} bench was so much slower
+than the others that it hid slowdowns elsewhere.)
 
 \vfill\eject
 \input index\end

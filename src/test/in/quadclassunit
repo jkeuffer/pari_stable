@@ -9,5 +9,3 @@ test(D) =
   );
 }
 setrand(1); test(10^15); test(-10^15)
-print("Total time spent: ",gettime);
-\q

@@ -49,5 +49,3 @@ addii(1,2)
 kill(addii)
 /* up to here */
 getheap
-print("Total time spent: ",gettime);
-\q

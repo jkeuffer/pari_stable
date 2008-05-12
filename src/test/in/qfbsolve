@@ -21,4 +21,3 @@ bqfb(N=10000)=
     if(Q==0||qfbeval(q,Q)!=r,print("qfbsolve(",q,",",r,")!=",Q);break));
 }
 bqfb();
-print("Total time spent: ",gettime);

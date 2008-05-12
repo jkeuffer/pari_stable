@@ -611,5 +611,4 @@ t(d).cyc));
 -999999999999007 [2903838, 2, 2]
 -999999999999003 [4036316, 2]
 ? print("Total time spent: ",gettime);
-Total time spent: 15556
-? \q
+Total time spent: 15172

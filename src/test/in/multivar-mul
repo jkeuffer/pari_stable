@@ -20,5 +20,3 @@ if(f(N,M,v,w), print("("t1")*("t2") ",[N,M],v,w)),2),2);
 }
 
 doit(9,9);
-print("Total time spent: ",gettime);
-\q

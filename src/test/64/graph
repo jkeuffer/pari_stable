@@ -64,4 +64,3 @@
 [9, 137]
 ? print("Total time spent: ",gettime);
 Total time spent: 12
-? \q

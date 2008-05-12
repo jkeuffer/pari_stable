@@ -67,4 +67,3 @@ a, 1, 0, 2*a, 4, 4294967290*a^2, 4294967243*a, 4294966427, 64*a^2 + 42949670
 [13, 4417]
 ? print("Total time spent: ",gettime);
 Total time spent: 2290
-? \q

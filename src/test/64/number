@@ -271,4 +271,3 @@ Mod(391, 3120), Mod(2081, 3120)]]
 [87, 2687]
 ? print("Total time spent: ",gettime);
 Total time spent: 41
-? \q

@@ -49,6 +49,3 @@ setrand(1);
 P = polrandom(n); 
 Q = polrandom(n);
 do(P,Q)
-
-print("Total time spent: ",gettime);
-\q

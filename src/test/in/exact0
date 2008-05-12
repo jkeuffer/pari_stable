@@ -26,4 +26,3 @@ for (i = 1, #v,
   print1(Ser(w), " "); print();
 )
 }
-print("Total time spent: ",gettime);

@@ -159,4 +159,3 @@ q^101)
 [57, 4457]
 ? print("Total time spent: ",gettime);
 Total time spent: 17
-? \q

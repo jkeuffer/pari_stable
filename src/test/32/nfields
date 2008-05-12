@@ -1183,5 +1183,4 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap
 [202, 119401]
 ? print("Total time spent: ",gettime);
-Total time spent: 448
-? \q
+Total time spent: 200

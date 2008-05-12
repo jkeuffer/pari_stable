@@ -633,5 +633,3 @@ zideallog(nf2,w,bid)
 znstar(3120)
 getstack()
 getheap()
-print("Total time spent: ",gettime());
-\q

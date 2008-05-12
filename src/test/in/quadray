@@ -14,5 +14,3 @@ Q(-4,31)
 Q(-40,1)
 Q(-51,3)
 quadhilbert(-15)
-print("Total time spent: ",gettime);
-\q

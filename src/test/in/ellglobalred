@@ -5,5 +5,3 @@
     if (N != M, print(e," bad for N = ",N))
   );
 }
-print("Total time spent: ",gettime);
-\q

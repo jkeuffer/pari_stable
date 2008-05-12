@@ -137,4 +137,3 @@ og(p)/log(q))));
 [26, 3260]
 ? print("Total time spent: ",gettime);
 Total time spent: 44
-? \q

@@ -16,5 +16,3 @@ do(n)= my(k,z); if (k=ispower(n,,&z), print([k,z]));
 
 for (i=1, #v, do(v[i]))
 for (i=1, 10^6, do(i))
-print("Total time spent: ",gettime);
-\q

@@ -72,10 +72,10 @@ for testdata in $testlist; do
       *)   file_diff=$testname-$suf.dif
            gp=$execdir/gp-$suf;;
     esac
-    $gp -q --test < $file_in > $file_test 2>&1
+    (cat $file_in; echo 'print("Total time spent: ",gettime);') | $gp -q --test  > $file_test 2>&1
     diff -c $file_out $file_test > $file_diff
     pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
-    time=`${tail}2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
+    time=`${tail}1 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
     if test -n "$time"; then
       eval t='$'time$suf
       if test -n "$exprbug"; then

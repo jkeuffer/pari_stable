@@ -122,4 +122,3 @@ O(x^12)
 [59, 785]
 ? print("Total time spent: ",gettime);
 Total time spent: 0
-? \q

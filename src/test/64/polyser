@@ -159,4 +159,3 @@ name
 [58, 7150]
 ? print("Total time spent: ",gettime);
 Total time spent: 8
-? \q

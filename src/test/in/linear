@@ -101,5 +101,3 @@ vector(10,x,1/x)
 setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8))
 setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8))
 getheap
-print("Total time spent: ",gettime);
-\q

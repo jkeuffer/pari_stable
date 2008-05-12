@@ -6,6 +6,3 @@ vecextract(A,"-2..-4")
 vecextract(A,"^65")
 vecextract(matid(3),"2..","..")
 vecextract(matid(3),"-2..","-1..")
-
-print("Total time spent: ",gettime);
-\q

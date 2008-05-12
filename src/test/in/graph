@@ -27,5 +27,3 @@ plotmove(0,100,100);plotstring(0,Pi)
 plotmove(0,200,200);plotstring(0,"(0,0)")
 psdraw([0,10,10])
 getheap
-print("Total time spent: ",gettime);
-\q

@@ -83,5 +83,3 @@ znorder(Mod(33,2^16+1))
 forprime(p=2,100,print(p," ",lift(znprimroot(p))))
 znstar(3120)
 getheap
-print("Total time spent: ",gettime);
-\q

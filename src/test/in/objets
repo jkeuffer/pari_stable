@@ -59,5 +59,3 @@ padicprec(padicno,127)
 length(divisors(1000))
 Mod(10873,49649)^-1
 getheap
-print("Total time spent: ",gettime);
-\q

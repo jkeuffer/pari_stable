@@ -686,5 +686,4 @@ x - 71/2, 3/2*x + 19/2]
 ? bnfisintnorm(bnfinit(x^3+5),5)
 [-x]
 ? print("Total time spent: ",gettime);
-Total time spent: 1008
-? \q
+Total time spent: 1036

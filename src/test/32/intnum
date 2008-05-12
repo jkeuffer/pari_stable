@@ -84,5 +84,4 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 40970
-? \q
+Total time spent: 40778

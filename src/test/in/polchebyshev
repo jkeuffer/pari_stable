@@ -4,4 +4,3 @@ L(n)=pollegendre(n);
 print("U");for (n=-50,50, if (U(n+1)+U(n-1)-2*x*U(n), print(n)))
 print("T");for (n=-50,50, if (T(n+1)+T(n-1)-2*x*T(n), print(n)))
 print("L");for (n=-50,50, if ((n+1)*L(n+1)-(2*n+1)*x*L(n)+n*L(n-1), print(n)))
-print("Total time spent: ",gettime);

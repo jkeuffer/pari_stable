@@ -52,5 +52,3 @@ taylor(y/(x-y),y)
 \\ thue
 variable(name^4-other)
 getheap
-print("Total time spent: ",gettime);
-\q

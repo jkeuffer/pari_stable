@@ -32,5 +32,3 @@ plotmove(0,100,100); plotstring(0,Pi)
 plotmove(0,200,200); plotstring(0,"(0,0)")
 plotdraw([0,10,10])
 psdraw([0,10,10])
-print("Total time spent: ",gettime);
-\q

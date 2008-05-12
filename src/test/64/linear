@@ -730,4 +730,3 @@ Vecsmall([4, 3, 2, 1])
 [109, 11407]
 ? print("Total time spent: ",gettime);
 Total time spent: 10
-? \q

@@ -32,7 +32,3 @@ init(N); doit3(N);
 x1=(8*b^2 + 8*b + 1)/(4*b + 1);
 x2=32*b^4/(32*b^3 + 40*b^2 + 12*b + 1);
 x1-x2 \\ simplified ?
-
-
-print("Total time spent: ",gettime);
-\q

@@ -20,5 +20,3 @@ sumdiv(8!,x,x)
 suminf(n=1,2.^-n)
 6/Pi^2*sumpos(n=1,n^-2)
 getheap
-print("Total time spent: ",gettime);
-\q
