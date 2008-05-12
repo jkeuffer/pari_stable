@@ -1,13 +1,25 @@
+test(N) = 
+{
+  p=vector(N); p[1]=1; 
+  for(n=1,N-1,
+     s=0;
+     for(k=1,n,
+       t=k*(3*k-1)\2;
+       if(t>n,break);
+       s+=(-1)^(k+1)*p[n+1-t];
+       t=k*(3*k+1)\2;
+       if(t>n,break);
+       s+=(-1)^(k+1)*p[n+1-t]
+    );
+    p[n+1]=s;
+    if(s!=numbpart(n), print(n,"\n",s,"\n",numbpart(n)); break)
+  );
+}
 numbpart(0)
-numbpart(1)
-numbpart(2)
-numbpart(3)
-numbpart(200)
-numbpart(450)
+test(2*10^4);
 numbpart(52602)
 numbpart(147007)
 numbpart(10^15+2)
-sum(i=10^4, 2*10^4, numbpart(i))
 partitions(1)
 partitions(9)
 partitions(9,3)
