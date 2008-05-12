@@ -1,0 +1,15 @@
+install(factor_Aurifeuille,GL)
+do(d, a) = polcyclo(d, a) / factor_Aurifeuille(a, d);
+
+do(35, -7*3^2)
+do(35, 5*3^2*7^2)
+
+do(70, 7*3^2)
+do(70, -5*3^2)
+
+do(44, 2*11*9^2)
+do(44, 2*11)
+do(12,6)
+do(4,8)
+
+do(100,2)

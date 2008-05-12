@@ -165,7 +165,7 @@ JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
    14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
    15- new benches: 'galoisinit', 'ispower', 'nffactor', 'subfields',
-       'resultant', 'partition'
+       'resultant', 'partition', 'aurifeuille'
    16- RgV.c, FpV.c, ZX.c, ZV.c
    17- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
    Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
