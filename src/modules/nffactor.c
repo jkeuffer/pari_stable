@@ -1557,8 +1557,10 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
       long i, l = lg(z);
       for (i = 1; i < l; i++)
       {
-	GEN t = gel(z,i); if (degpol(t) > 1) break;
-	gel(z,i) = gdiv(gel(t,2), negi(gel(t,3)));
+	GEN LT, t = gel(z,i); if (degpol(t) > 1) break;
+        LT = gel(t,3);
+        if (typ(LT) == t_POL) LT = gel(LT,2); /* constant */
+	gel(z,i) = gdiv(gel(t,2), negi(LT));
       }
       setlg(z, i);
       if (fl == 2 && i != l) return cgetg(1,t_VEC);
