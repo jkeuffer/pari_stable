@@ -76,6 +76,7 @@ BA 29- missing GC in the leftrightpow functions
        (could occur whenever p has no real root) [#764]
    68- missing GC in numtoperm()
    69- harmless uninitialized memory read in mulrrz_i()
+   70- sigma(..., 2) --> SEGV [ introduced in 2.4.1 ] [#783]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

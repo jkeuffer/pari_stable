@@ -250,7 +250,6 @@ long  ifac_omega(GEN n, long hint);
 long  ifac_bigomega(GEN n, long hint);
 GEN   ifac_totient(GEN n, long hint);
 GEN   ifac_numdiv(GEN n, long hint);
-GEN   ifac_sumdiv(GEN n, long hint);
 GEN   ifac_sumdivk(GEN n, long k, long hint);
 int   miller(GEN n, long k);
 GEN   mpqs(GEN N);

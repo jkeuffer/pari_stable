@@ -1398,7 +1398,7 @@ sumdiv(GEN n)
     }
   }
   if(BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m,addsi(1,n)));
-  m = mulii(m, ifac_sumdiv(n, decomp_default_hint));
+  m = mulii(m, ifac_sumdivk(n, 1, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
 

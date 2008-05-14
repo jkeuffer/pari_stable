@@ -2924,19 +2924,6 @@ long ifac_decomp(GEN n, long hint);
  * accumulating prime / exponent pairs on the PARI stack to be picked up
  * by aux_end().  Return number of distinct primes found */
 
-/* encapsulated functions; these call ifac_start() themselves, ensure stack
- * housekeeping etc. Call them on any large composite left over after trial
- * division, and multiply/add the result onto whatever you already have from
- * the small factors.  On large primes, they will run into trouble */
-long ifac_moebius(GEN n, long hint);
-long ifac_issquarefree(GEN n, long hint);
-long ifac_omega(GEN n, long hint);
-long ifac_bigomega(GEN n, long hint);
-GEN ifac_totient(GEN n, long hint); /* for gp's eulerphi() */
-GEN ifac_numdiv(GEN n, long hint);
-GEN ifac_sumdiv(GEN n, long hint);
-GEN ifac_sumdivk(GEN n, long k, long hint);
-
 /*** implementation ***/
 
 #define ifac_initial_length (3 + 7*3) /* codeword, moebius, hint, 7 slots */
@@ -3758,6 +3745,11 @@ ifac_decomp(GEN n, long hint)
   return ifac_decomp_break(n, NULL, gen_0, hint);
 }
 
+/* encapsulated functions; these call ifac_start() themselves, ensure stack
+ * housekeeping etc. Call them on any large composite left over after trial
+ * division, and multiply/add the result onto whatever you already have from
+ * the small factors.  On large primes, they will run into trouble */
+
 #define ifac_memcheck(av,lim,part,here)\
   INIT0(here);\
   if (low_stack(lim, stack_lim(av,1)))\
@@ -3881,46 +3873,22 @@ ifac_numdiv(GEN n, long hint)
 }
 
 GEN
-ifac_sumdiv(GEN n, long hint)
+ifac_sumdivk(GEN n, long k, long hint)
 {
-  GEN t = gen_1, S = cgeti(lgefint(n)+1); /* S < n(log n + 1) */
+  GEN t = gen_1, S = cgeti(k * lgefint(n)+1); /* S < n^k (log n+1)^{k == 1} */
   pari_sp av=avma, lim=stack_lim(av,1);
   GEN here, part = ifac_start(n, 0, hint);
 
   for(;;)
   {
     long e;
-    GEN p, u;
-    here = ifac_main(&part);
-    if (here == gen_1) { avma = av; affii(t, S); return S; }
-
-    p = VALUE(here);
-    e = itos(EXPON(here));
-    u = addsi(1, p); for (; e > 1; e--) u = addsi(1, mulii(p, u));
-    t = mulii(t, u);
-    ifac_memcheck_extra(av, lim, part, here, t, S);
-  }
-}
-
-/* Assume k > 1. The calling function knows what to do with the other cases. */
-GEN
-ifac_sumdivk(GEN n, long k, long hint)
-{
-  GEN t = gen_1, S = cgeti(k * lgefint(n)+1); /* S < 2 n^k */
-  pari_sp av=avma, lim=stack_lim(av,1);
-  GEN here, part = ifac_start(n, 0, hint);
-
-  for(;;)
-  {
-    long e = itos(EXPON(here));
     GEN q, u;
-
     here = ifac_main(&part);
     if (here == gen_1) { avma = av; affii(t, S); return S; }
 
-    q = powiu(VALUE(here), k);
-    u = addsi(1, q);
-    for (; e > 1; e--) u = addsi(1, mulii(q, u));
+    q = VALUE(here); if (k > 1) q = powiu(q, k);
+    e = itos(EXPON(here));
+    u = addsi(1, q); for (; e > 1; e--) u = addsi(1, mulii(q, u));
     t = mulii(t, u);
     ifac_memcheck_extra(av, lim, part, here, t, S);
   }
