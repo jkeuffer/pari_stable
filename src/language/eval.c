@@ -1076,9 +1076,9 @@ closure_trapgen(long numerr, GEN C)
   long saved_mvar=s_var.n;
   long saved_lvar=s_lvars.n;
   VOLATILE GEN x;
-  CATCH(numerr) { x = NULL; }
+  CATCH(numerr) { x = (GEN)1L; }
   TRY { x = closure_evalgen(C); } ENDCATCH;
-  if (!x)
+  if (x == (GEN)1L)
   {
     long nbmvar=s_var.n-saved_mvar;
     long nblvar=s_lvars.n-saved_lvar;

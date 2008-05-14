@@ -5058,34 +5058,51 @@ has arity $\geq \kbd{lg(args)-1}$.
 The following technical functions are used to evaluate \emph{inline}
 closures, after pushing lexical arguments on the evaluator stack.
 
-\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result
-or \kbd{NULL} if the evaluation was aborted (\kbd{break}).
+The control flow statements (break, next and return) will cause the
+evaluation of the closure to be interrupted. This is called below a
+flow change. When that occurs, the functions below generally returns \kbd{NULL}.
+The caller can then adopt three positions:
+
+\item raise an exception (\kbd{closure\_evalnobrk}).
+
+\item pass through (by returning NULL itself).
+
+\item handle the flow change (undocumented yet, done by loop statements).
+
+\fun{GEN}{closure_evalgen}{GEN code} evaluates a closure and returns the result.
 
 \fun{GEN}{closure_evalnobrk}{GEN code} as \kbd{closure\_evalgen} but raise
-an exception if the evaluation was aborted. Meant for pseudo-iterators where
-interrupting the closure ins meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
+an exception if a flow change occurs. Meant for pseudo-iterators where
+interrupting the closure is meaningless, e.g.~\kbd{intnum} or \kbd{sumninm}.
 
 \fun{GEN}{closure_evalres}{GEN code} evaluates a closure and returns the result.
+The difference with \kbd{closure\_evalgen} being that, if the flow end by a
+\kbd{return} statement, the result will be the returned value instead of
+\kbd{NULL}.
 
 \fun{void}{closure_evalvoid}{GEN code} evaluates a closure whose return
 value is ignored.
 
-\fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluate closure, while
-traping error \kbd{numerr}. Return \kbd{NULL} if error trapped, and the result
-otherwise..
+\fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
+trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
+result otherwise.
 
-Various function used to manipulate and retrieve arguments on the evaluator
-stack:
+Functions to deal with lexical variables introduced through the prototype
+code 'V':
 
-\fun{GEN}{get_lex}{long vn}
+Such functions need to manually create and delete a lexical variable for
+each code 'V', which will be given a number $-1, -2, \ldots$.
 
-\fun{void}{pop_lex}{void}
+\fun{void}{push_lex}{GEN a} creates a new lexical variable whose initial value
+is $a$ on the top of the stack. This variable get the number $-1$, and the number of the other variables is decreased by one unit.
 
-\fun{void}{push_lex}{GEN a}
+\fun{void}{pop_lex}{void} deletes topmost lexical variable, increasing the
+number of other variables by one unit.
 
-\fun{void}{set_lex}{long vn, GEN x}
+\fun{GEN}{get_lex}{long vn} get the value of the variable with number \kbd{vn}.
 
-\fun{void}{closure_reset}{void}
+\fun{void}{set_lex}{long vn, GEN x} set the value of the variable with number
+\kbd{vn}.
 
 Functions returning new closures:
 

@@ -1181,7 +1181,7 @@ trap0(const char *e, GEN r, GEN f)
   if (f && r)
   { /* explicit recovery text */
     GEN x = closure_trapgen(numerr,f);
-    if (!x) { gp_function_name = NULL; x = closure_evalgen(r); }
+    if (x == (GEN)1L) { gp_function_name = NULL; x = closure_evalgen(r); }
     return x;
   }
 
