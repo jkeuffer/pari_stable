@@ -44,4 +44,15 @@ extern const char *keyword_list[];
 #define DATA_END    ((char) 5)
 #define DATA_ESCAPE ((char) 27)
 
+/* gp specific routines */
+void alarm0(long s);
+GEN  extern0(const char *cmd);
+void gp_quit(long exitcode);
+GEN  input0(void);
+void kill0(entree *ep);
+GEN  read0(const char *s);
+void system0(const char *cmd);
+GEN  trap0(const char *e, GEN f, GEN r);
+int  whatnow(const char *s, int silent);
+
 ENDEXTERN
