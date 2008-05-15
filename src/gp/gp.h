@@ -52,7 +52,6 @@ GEN  input0(void);
 void kill0(entree *ep);
 GEN  read0(const char *s);
 void system0(const char *cmd);
-GEN  trap0(const char *e, GEN f, GEN r);
 int  whatnow(const char *s, int silent);
 
 ENDEXTERN

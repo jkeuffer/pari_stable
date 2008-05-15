@@ -1669,6 +1669,7 @@ void    pari_thread_close(void);
 void    pari_warn(long numerr, ...);
 GEN     shallowcopy(GEN x);
 stackzone* switch_stack(stackzone *z, long n);
+GEN     trap0(const char *e, GEN f, GEN r);
 long    taille(GEN x);
 long    taille2(GEN x);
 long    timer(void);
