@@ -1135,18 +1135,6 @@ element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
   return y;
 }
 
-/* assume k >= 0, assume idele = [HNFideal, arch] */
-GEN
-element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
-{
-  GEN y = element_powmodideal(nf,x,k,gel(idele,1));
-  if (mpodd(k))
-  { if (!gcmp1(k)) y = set_sign_mod_idele(nf, x, y, idele, sarch); }
-  else
-  { if (!gcmp0(k)) y = set_sign_mod_idele(nf, NULL, y, idele, sarch); }
-  return y;
-}
-
 /* a * g^n mod id */
 static GEN
 elt_mulpow_modideal(GEN nf, GEN a, GEN g, GEN n, GEN id)

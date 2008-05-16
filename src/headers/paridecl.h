@@ -876,7 +876,6 @@ GEN     element_muli(GEN nf,GEN x,GEN y);
 GEN     element_mulid(GEN nf, GEN x, long i);
 GEN     element_pow(GEN nf,GEN x,GEN k);
 GEN     element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal);
-GEN     element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN structarch);
 GEN     element_sqr(GEN nf,GEN x);
 GEN     element_sqri(GEN nf, GEN x);
 long    element_val(GEN nf, GEN x, GEN vp);

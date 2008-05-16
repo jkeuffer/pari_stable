@@ -225,6 +225,8 @@ RM 28- partitions()
    13- obsolete undocumented library function rnfdet0, rnfdet2
    14- obsolete optional argument to quadhilbert(D < 0)
    15- obsolete library function discsr(). Use RgX_disc (or quad_disc, qfb_disc)
+   16- obsolete library function element_powmodidele() [use element_powmodideal
+       + set_sign_mod_idele]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
