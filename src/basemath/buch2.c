@@ -187,7 +187,7 @@ ok_subFB(FB_t *F, long t, GEN D)
   GEN LP, P = gel(F->LP,t);
   long p = itos(gel(P,1));
   LP = F->LV[p];
-  return smodis(D,p) && (!isclone(LP) || t != F->iLP[p] + lg(LP)-1);
+  return (!isclone(LP) || t != F->iLP[p] + lg(LP)-1);
 }
 
 /* set subFB, reset F->pow

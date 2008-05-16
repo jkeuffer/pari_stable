@@ -77,6 +77,8 @@ BA 29- missing GC in the leftrightpow functions
    68- missing GC in numtoperm()
    69- harmless uninitialized memory read in mulrrz_i()
    70- sigma(..., 2) --> SEGV [ introduced in 2.4.1 ] [#783]
+   71- tuning problems in bnfinit
+       bnfinit(polredabs(quadhilbert(-2939))) --> oo loop
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
