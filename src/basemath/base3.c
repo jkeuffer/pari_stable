@@ -628,7 +628,7 @@ GEN
 basistoalg(GEN nf, GEN x)
 {
   long tx = typ(x);
-  GEN z;
+  GEN z, T;
 
   nf = checknf(nf);
   switch(tx)
@@ -641,9 +641,21 @@ basistoalg(GEN nf, GEN x)
       if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in basistoalg");
       return gcopy(x);
-    default: z = cgetg(3,t_POLMOD);
-      gel(z,1) = gcopy(gel(nf,1));
-      gel(z,2) = gtopoly(x, varn(nf[1])); return z;
+    case t_POL:
+      T = gel(nf,1);
+      if (varn(T) != varn(x)) pari_err(consister,"basistoalg");
+      z = cgetg(3,t_POLMOD);
+      gel(z,1) = gcopy(T);
+      gel(z,2) = RgX_rem(x, T); return z;
+    case t_INT:
+    case t_FRAC:
+      T = gel(nf,1);
+      z = cgetg(3,t_POLMOD);
+      gel(z,1) = gcopy(T);
+      gel(z,2) = gcopy(x); return z;
+    default:
+      pari_err(typeer,"basistoalg");
+      return NULL; /* not reached */
   }
 }
 
