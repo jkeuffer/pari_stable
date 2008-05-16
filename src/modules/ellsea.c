@@ -240,8 +240,8 @@ Fp_ell_add_i(GEN P, GEN Q, GEN a4, GEN p)
 {
   GEN Px = gel(P,1), Py = gel(P,2);
   GEN Qx = gel(Q,1), Qy = gel(Q,2), lambda, C, D;
-  if (is_inf(P)) return gcopy(Q);
-  if (is_inf(Q)) return gcopy(P);
+  if (is_inf(P)) return Q;
+  if (is_inf(Q)) return P;
   if (equalii(Px, Qx))
   {
     if (equalii(Py, Qy))
@@ -262,21 +262,16 @@ Fp_ell_add(GEN P, GEN Q, GEN a4, GEN p)
 }
 
 static GEN
-Fp_ell_inv(GEN P, GEN p)
+Fp_ell_inv_i(GEN P, GEN p)
 {
-  GEN t;
   if (is_inf(P)) return P;
-  t = cgetg(3, t_VEC);
-  gel(t, 1) = icopy(gel(P,1));
-  gel(t, 2) = Fp_neg(gel(P,2), p);
-  return t;
+  return mkvec2(gel(P,1), Fp_neg(gel(P,2), p));
 }
 
 static GEN
-Fp_ell_sub(GEN P, GEN Q, GEN a4, GEN p)
+Fp_ell_sub_i(GEN P, GEN Q, GEN a4, GEN p)
 {
-  pari_sp av = avma;
-  return gerepilecopy(av, Fp_ell_add_i(P, Fp_ell_inv(Q, p), a4, p));
+  return Fp_ell_add_i(P, Fp_ell_inv_i(Q, p), a4, p);
 }
 
 struct _Fp_ell
@@ -984,30 +979,30 @@ crt(GEN A, GEN a, GEN B, GEN b)
   return v;
 }
 
-/* x VEC defined modulo P (= *P), y VECSMALL modulo q, (q,P) = 1 */
-/* return the vector mod q P congruent to x (resp. y) mod P (resp. q). */
-/* update P ( <-- qP ) */
-static GEN
-multiple_crt(GEN x, GEN y, GEN q, GEN *P)
+/* x VEC defined modulo P (= *P), y VECSMALL modulo q, (q,P) = 1. */
+/* Update in place:
+ *   x to vector mod q P congruent to x mod P (resp. y mod q). */
+/*   P ( <-- qP ) */
+static void
+multiple_crt(GEN x, GEN y, GEN q, GEN P)
 {
-  pari_sp ltop = avma;
+  pari_sp ltop = avma, av; 
   long i, j, k, lx = lg(x)-1, ly = lg(y)-1;
-  GEN  t, a1, a2, u, v;
-  (void)bezout(*P,q,&u,&v);
-  a1 = mulii(*P,u);
-  a2 = mulii(q,v);
-  *P = mulii(*P, q);
-  t = cgetg(lx*ly+1, t_VEC);
-  for (i = 1, k = 1; i <= lx; i++)
+  GEN  a1, a2, u, v, A2X;
+  (void)bezout(P,q,&u,&v);
+  a1 = mulii(P,u);
+  a2 = mulii(q,v); A2X = ZC_Z_mul(x, a2);
+  av = avma; affii(mulii(P,q), P);
+  for (i = 1, k = 1; i <= lx; i++, avma = av)
   {
-    GEN a2x = mulii(a2, gel(x,i));
+    GEN a2x = gel(A2X,i);
     for (j = 1; j <= ly; ++j)
     {
-      pari_sp av = avma;
-      gel(t, k++) = gerepileupto(av, Fp_add(Fp_mulu(a1, y[j], *P), a2x, *P));
+      GEN t = Fp_add(Fp_mulu(a1, y[j], P), a2x, P);
+      affii(t, gel(x, k++));
     }
   }
-  gerepileall(ltop, 2, P, &t); return t;
+  setlg(x, k); avma = ltop;
 }
 
 /****************************************************************************/
@@ -1015,19 +1010,39 @@ multiple_crt(GEN x, GEN y, GEN q, GEN *P)
 /****************************************************************************/
 
 static GEN
-possible_traces(GEN C, GEN *P)
+possible_traces(GEN compile, GEN mask, GEN *P)
 {
-  pari_sp ltop = avma, st_lim = stack_lim(ltop, 1);
-  GEN v = vecsmall_to_vec(gmael(C,1,2));
-  long i;
-  *P = gmael(C,1,1);
-  for (i = 2; i < lg(C); i++)
+  GEN V, Pfinal = gen_1, C = shallowextract(compile, mask);
+  long i, lfinal = 1, lC = lg(C), lP;
+  pari_sp av = avma;
+
+  for (i = 1; i < lC; i++)
   {
-    v = multiple_crt(v, gmael(C,i,2), gmael(C,i,1), P);
-    if (low_stack(st_lim, stack_lim(ltop, 1))) gerepileall(ltop, 2, P, &v);
+    GEN c = gel(C,i), t;
+    Pfinal = mulii(Pfinal, gel(c,1));
+    t = mulss(lfinal, lg(gel(c,2))-1);
+    if (lgefint(t) > 3) pari_err(errlg);
+    lfinal = t[2];
   }
-  gerepileall(ltop, 2, P, &v);
-  return v;
+  Pfinal = gerepileuptoint(av, Pfinal);
+  lP = lgefint(Pfinal); lfinal++;
+  if (lfinal <= 0) pari_err(errlg);
+  /* allocate room for final result */
+  V = cgetg(lfinal, t_VEC);
+  for (i = 1; i < lfinal; i++) gel(V,i) = cgeti(lP);
+
+  {
+    GEN c = gel(C,1), v = gel(c,2);
+    long l = lg(v);
+    for (i = 1; i < l; i++) affsi(v[i], gel(V,i));
+    setlg(V, l); affii(gel(c,1), Pfinal); /* reset Pfinal */
+  }
+  for (i = 2; i < lC; i++)
+  {
+    GEN c = gel(C,i);
+    multiple_crt(V, gel(c,2), gel(c,1), Pfinal); /* Pfinal updated! */
+  }
+  *P = Pfinal; return V;
 }
 
 /* Finds a random point on E */
@@ -1227,30 +1242,33 @@ BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
   { 
     pari_sp av = avma;
     GEN d = subii(gel(diff, i), gel(diff, i-1));
-    GEN Q = Fp_ell_add(gel(pre, i-1), Fp_ell_pow(P, d, a4, p), a4, p);
-    gel(pre, i) = gerepileupto(av, Q);
+    GEN Q = Fp_ell_add_i(gel(pre, i-1), Fp_ell_pow(P, d, a4, p), a4, p);
+    gel(pre, i) = gerepilecopy(av, Q);
   }
   *pdiff = diff; return pre;
 }
 
-/* u = trace_elkies, Mu = prod_elkies */
+/* u = trace_elkies, Mu = prod_elkies. Let caller collect garbage */
+/* Match & sort: variant from Lercier's thesis, section 11.2.3 */
+/* baby/giant/table updated in place: this routines uses
+ *   size(baby)+size(giant)+size(table)+size(table_ind) + O(log p)
+ * bits of stack */
 static GEN
 match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 {
-  pari_sp ltop = avma, av1, av2;
+  pari_sp av1, av2;
   GEN baby, giant, SgMb, Mb, Mg, den, Sg, dec_inf, div, pp1 = addis(p,1);
-  GEN P, Pb, Pg, point, diff, pre, d, table, card, table_ind;
-  long r=0, s=0, best_i, i;
+  GEN P, Pb, Pg, point, diff, pre, table, table_ind;
+  long best_i, i, lbaby, lgiant, lp = lg(p);
 
   if (!k)
   { /*no Atkin prime: Mu >= 4*sqrt(p). */
-    card = subii(addis(p,1), u);
+    GEN card = subii(pp1, u);
     card = mkvec2(card, addii(card, Mu));
-    return gerepileuptoint(ltop, choose_card(card, a4, a6, p));
+    return choose_card(card, a4, a6, p);
   }
   if (k == 1)
-  {
-    /*only one Atkin prime, check the cardinality with random points */
+  { /*only one Atkin prime, check the cardinality with random points */
     GEN r = gel(compile_atkin, 1), r1 = gel(r,1), r2 = gel(r,2);
     long l = lg(r2);
     GEN card = cgetg(l, t_VEC), Cs2, C, U;
@@ -1261,37 +1279,36 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
       GEN t = Z_chinese_post(u, stoi(r2[i]), C, U, NULL);
       gel(card, i) = subii(pp1, Fp_center(t, C, Cs2));
     }
-    return gerepileuptoint(ltop, choose_card(card, a4, a6, p));
+    return choose_card(card, a4, a6, p);
   }
   av1 = avma;
   best_i = separation( get_lgatkin(compile_atkin, k) );
   avma = av1;
-  baby  = shallowextract(compile_atkin, stoi(best_i));
-  baby  = possible_traces(baby, &Mb);
-  av2 = avma;
-  giant = shallowextract(compile_atkin, subis(shifti(gen_1, k), best_i+1));
-  giant = possible_traces(giant, &Mg);
+
+  baby  = possible_traces(compile_atkin, stoi(best_i), &Mb);
+  giant = possible_traces(compile_atkin, subis(int2n(k), best_i+1), &Mg);
+  lbaby = lg(baby);
+  lgiant = lg(giant);
   den = Fp_inv(Fp_mul(Mu, Mb, Mg), Mg);
+  av2 = avma;
+  for (i = 1; i < lgiant; i++, avma = av2)
+    affii(Fp_mul(gel(giant,i), den, Mg), gel(giant,i));
+  gen_sort_inplace(giant, (void*)&cmpii, &cmp_nodata, NULL);
   Sg = Fp_mul(negi(u), den, Mg);
-  for (i = 1; i < lg(giant); i++)
-    gel(giant,i) = Fp_mul(gel(giant,i), den, Mg);
-  giant = ZV_sort(giant);
-  gerepileall(av2, 3, &giant, &Mg, &Sg);
-  /* the variant from Lercier's thesis, section 11.2.3 */
   den = Fp_inv(Fp_mul(Mu, Mg, Mb), Mb);
-  for (i = 1; i < lg(baby); i++)
-    gel(baby,i) = Fp_mul(subii(gel(baby,i), u), den, Mb);
-  SgMb = mulii(Sg, Mb);
-  dec_inf = gceil(gsub(gdivgs(Mb, -2), gdiv(SgMb, Mg)));
+  dec_inf = divii(mulii(Mb,addii(Mg,shifti(Sg,1))), shifti(Mg,1));
+  togglesign(dec_inf); /* now, dec_inf = ceil(- (Mb/2 + Sg Mb/Mg) ) */
   div = mulii(truedivii(dec_inf, Mb), Mb);
-  for (i = 1; i < lg(baby); i++)
+  av2 = avma;
+  for (i = 1; i < lbaby; i++, avma = av2)
   {
-    GEN b = addii(gel(baby,i), div);
+    GEN b = addii(Fp_mul(subii(gel(baby,i), u), den, Mb), div);
     if (cmpii(b, dec_inf) < 0) b = addii(b, Mb);
-    gel(baby,i) = b;
+    affii(b, gel(baby,i));
   }
-  baby = ZV_sort(baby);
-  gerepileall(av2, 5, &baby, &Mb, &giant, &Mg, &SgMb);
+  gen_sort_inplace(baby, (void*)&cmpii, &cmp_nodata, NULL);
+
+  SgMb = mulii(Sg, Mb);
   P = find_pt_aff(a4, a6, p);
   point = Fp_ell_pow(P, Mu, a4, p);
   Pb = Fp_ell_pow(point, Mg, a4, p);
@@ -1301,43 +1318,46 @@ match_and_sort(GEN compile_atkin, long k, GEN Mu, GEN u, GEN a4, GEN a6, GEN p)
 
   /*Now we compute the table of babies, this table contains only the */
   /*lifted x-coordinate of the points in order to use less memory */
-  table = cgetg(lg(baby), t_VEC);
+  table = cgetg(lbaby, t_VEC);
+  for (i = 1; i < lbaby; i++) gel(table,i) = cgeti(lp);
+  av1 = avma;
   /* (p+1 - u - Mu*Mb*Sg) P - (baby[1]) Pb */
   point = Fp_ell_pow(P, subii(subii(pp1, u), mulii(Mu, addii(SgMb, mulii(Mg, gel(baby,1))))), a4, p);
-  gel(table, 1) = gel(point, 1);
-  for (i = 2; i < lg(baby); i++)
+  affii(gel(point,1), gel(table, 1));
+  for (i = 2; i < lbaby; i++)
   {
-    av1 = avma;
-    d = subii(gel(baby, i), gel(baby, i-1));
-    point = Fp_ell_sub(point, gel(pre, ZV_search(diff, d)), a4, p);
-    point = gerepileupto(av1, point);
-    gel(table, i) = gel(point, 1);
+    GEN d = subii(gel(baby, i), gel(baby, i-1));
+    point = Fp_ell_sub_i(point, gel(pre, ZV_search(diff, d)), a4, p);
+    affii(gel(point,1), gel(table, i));
+    point = gerepilecopy(av1, point);
   }
   /* Precomputations for giants */
   pre = BSGS_pre(&diff, giant, Pg, a4, p);
 
   /* Look for a collision among the x-coordinates */
-  table_ind = indexsort(table);
-  table = shallowextract(table, table_ind);
+  gen_sort_inplace(table, (void*)&cmpii, &cmp_nodata, &table_ind);
   av1 = avma;
   point = Fp_ell_pow(Pg, gel(giant, 1), a4, p);
-  for (i = 1; i < lg(giant) - 1; i++)
+  for (i = 1; i < lgiant - 1; i++)
   {
-    s = ZV_search(table, gel(point, 1));
-    if (s) { s = table_ind[s]; r = i; break; }
+    GEN d;
+    long s = ZV_search(table, gel(point, 1));
+    if (s) {
+      GEN B = gel(baby,table_ind[s]), G = gel(giant,i);
+      GEN GMb = mulii(G, Mb), BMg = mulii(B, Mg);
+      /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
+      GEN card = subii(subii(pp1, u), mulii(Mu, addii(SgMb, addii(GMb, BMg))));
+      card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));
+      return choose_card(card, a4, a6, p);
+    }
 
     d = subii(gel(giant, i+1), gel(giant, i));
-    point = gerepileupto(av1, Fp_ell_add(point, gel(pre, ZV_search(diff, d)), a4, p));
+    point = Fp_ell_add_i(point, gel(pre, ZV_search(diff, d)), a4, p);
+    if ((i & 0xff) == 0) point = gerepilecopy(av1, point);
   }
   /* no match ? */
-  if (i==lg(giant)-1) pari_err(bugparier,"match_and_sort");
-
-  /* p+1 - u - Mu (Sg Mb + GIANT Mb + BABY Mg) */
-{
-  GEN GMb = mulii(gel(giant,r), Mb), BMg = mulii(gel(baby,s), Mg);
-  card = subii(subii(pp1, u), mulii(Mu, addii(SgMb, addii(GMb, BMg))));
-  card = mkvec2(card, addii(card, mulii(mulsi(2,Mu), GMb)));}
-  return gerepileuptoint(ltop, choose_card(card, a4, a6, p));
+  pari_err(bugparier,"match_and_sort");
+  return NULL; /* not reached */
 }
 
 /* E is an elliptic curve defined over Z or over Fp in ellinit format, defined
