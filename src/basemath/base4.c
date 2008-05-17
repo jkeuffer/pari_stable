@@ -2831,7 +2831,7 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
   nf = checknf(nf);
   modpr = nf_to_Fq_init(nf, &pr,&T,&p);
   if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr");
-  x = nfM_to_FqM(lift(x), nf, modpr);
+  x = nfM_to_FqM(x, nf, modpr);
   return gerepilecopy(av, FqM_to_nfM(FqM_ker(x,T,p), modpr));
 }
 
@@ -2839,16 +2839,26 @@ GEN
 nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 {
   pari_sp av = avma;
-  GEN T,p,modpr;
+  GEN T, p, modpr;
   long tb = typ(b);
 
   nf = checknf(nf);
   modpr = nf_to_Fq_init(nf, &pr,&T,&p);
   if (typ(a)!=t_MAT) pari_err(typeer,"nfsolvemodpr");
-  if (tb != t_MAT && tb != t_COL) pari_err(typeer,"nfsolvemodpr");
-  a = nfM_to_FqM(lift(a), nf, modpr);
-  b = nfV_to_FqV(lift(b), nf, modpr);
-  return gerepilecopy(av, FqM_to_nfM(FqM_gauss(a,b,T,p), modpr));
+  a = nfM_to_FqM(a, nf, modpr);
+  switch(tb)
+  {
+    case t_MAT:
+      b = nfM_to_FqM(b, nf, modpr);
+      a = FqM_to_nfM(FqM_gauss(a,b,T,p), modpr);
+      break;
+    case t_COL:
+      b = nfV_to_FqV(b, nf, modpr);
+      a = FqV_to_nfV(FqM_gauss(a,b,T,p), modpr);
+      break;
+    default: pari_err(typeer,"nfsolvemodpr");
+  }
+  return gerepilecopy(av, a);
 }
 
 /* Given a pseudo-basis x, outputs a multiple of its ideal determinant */
