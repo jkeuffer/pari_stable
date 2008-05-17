@@ -2182,20 +2182,20 @@ to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p, int zk)
   *p = gel(*pr,1); return modpr;
 }
 GEN
-nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
+nf_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
   GEN modpr = to_ff_init(nf,pr,T,p,0);
   GEN tau = modpr_TAU(modpr);
   if (!tau) gel(modpr,mpr_TAU) = anti_uniformizer2(nf, *pr);
   return modpr;
 }
 GEN
-zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
+zk_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
   return to_ff_init(nf,pr,T,p,1);
 }
 
 /* assume x in 'basis' form (t_COL) */
 GEN
-zk_to_ff(GEN x, GEN modpr)
+zk_to_Fq(GEN x, GEN modpr)
 {
   GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
   GEN ffproj = gel(modpr,mpr_FFP);
@@ -2262,7 +2262,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
     x = FpC_red(x, p);
   }
-  return zk_to_ff(x, modpr);
+  return zk_to_Fq(x, modpr);
 }
 
 GEN
@@ -2271,81 +2271,91 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   pari_sp av = avma;
   nf = checknf(nf);
   checkmodpr(modpr);
-  return gerepileupto(av, algtobasis(nf, ff_to_nf(Rg_to_ff(nf,x,modpr),modpr)));
+  return gerepileupto(av, algtobasis(nf, Fq_to_nf(Rg_to_ff(nf,x,modpr),modpr)));
 }
 
+/* lift A from residue field to nf */
 GEN
-nf_to_ff(GEN nf, GEN x, GEN modpr)
+Fq_to_nf(GEN A, GEN modpr)
 {
-  pari_sp av = avma;
-  return gerepileupto(av, Rg_to_ff(checknf(nf), x, modpr));
-}
-
-GEN
-ff_to_nf(GEN x, GEN modpr)
-{
-  if (lg(modpr) < LARGEMODPR) return x;
-  return mulmat_pol(gel(modpr,mpr_NFP), x);
+  if (lg(modpr) < LARGEMODPR) return A;
+  return mulmat_pol(gel(modpr,mpr_NFP), A);
 }
 GEN
-modprM_lift(GEN x, GEN modpr)
+FqV_to_nfV(GEN A, GEN nf,GEN modpr)
 {
-  long i,j,h,l = lg(x);
-  GEN y = cgetg(l, t_MAT);
-  if (l == 1) return y;
+  long i,l = lg(A);
+  GEN B = cgetg(l,typ(A));
+  for (i=1; i<l; i++) gel(B,i) = Fq_to_nf(gel(A,i), modpr);
+  return B;
+}
+GEN
+FqM_to_nfM(GEN A, GEN modpr)
+{
+  long i,j,h,l = lg(A);
+  GEN B = cgetg(l, t_MAT);
 
-  h = lg(x[1]);
+  if (l == 1) return B;
+  h = lg(A[1]);
   for (j=1; j<l; j++)
   {
-    GEN p1 = cgetg(h,t_COL); gel(y,j) = p1;
-    for (i=1; i<h; i++) gel(p1,i) = ff_to_nf(gcoeff(x,i,j), modpr);
+    GEN Aj = gel(A,j), Bj = cgetg(h,t_COL); gel(B,j) = Bj;
+    for (i=1; i<h; i++) gel(Bj,i) = Fq_to_nf(gel(Aj,i), modpr);
   }
-  return y;
+  return B;
 }
 GEN
-modprX_lift(GEN x, GEN modpr)
+FqX_to_nfX(GEN A, GEN modpr)
 {
   long i, l;
-  GEN z;
+  GEN B;
 
-  if (typ(x)!=t_POL) return gcopy(x); /* scalar */
-  l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
-  for (i=2; i<l; i++) gel(z,i) = ff_to_nf(gel(x,i), modpr);
-  return z;
+  if (typ(A)!=t_POL) return icopy(A); /* scalar */
+  l = lg(A); B = cgetg(l, t_POL); B[1] = A[1];
+  for (i=2; i<l; i++) gel(B,i) = Fq_to_nf(gel(A,i), modpr);
+  return B;
 }
 
-/* reduce the coefficients of pol modulo modpr */
+/* reduce A to residue field */
 GEN
-modprX(GEN x, GEN nf,GEN modpr)
+nf_to_Fq(GEN nf, GEN A, GEN modpr)
 {
-  long i, l;
-  GEN z;
-
-  if (typ(x)!=t_POL) return nf_to_ff(nf,x,modpr);
-  l = lg(x); z = cgetg(l,t_POL); z[1] = x[1];
-  for (i=2; i<l; i++) gel(z,i) = nf_to_ff(nf,gel(x,i),modpr);
-  return normalizepol(z);
+  pari_sp av = avma;
+  return gerepileupto(av, Rg_to_ff(checknf(nf), A, modpr));
 }
+/* A t_VEC/t_COL */
 GEN
-modprV(GEN z, GEN nf,GEN modpr)
+nfV_to_FqV(GEN A, GEN nf,GEN modpr)
 {
-  long i,l = lg(z);
-  GEN x;
-  x = cgetg(l,typ(z));
-  for (i=1; i<l; i++) gel(x,i) = nf_to_ff(nf,gel(z,i), modpr);
-  return x;
+  long i,l = lg(A);
+  GEN B = cgetg(l,typ(A));
+  for (i=1; i<l; i++) gel(B,i) = nf_to_Fq(nf,gel(A,i), modpr);
+  return B;
 }
-/* assume z a t_VEC/t_COL/t_MAT */
+/* A  t_MAT */
 GEN
-modprM(GEN z, GEN nf,GEN modpr)
+nfM_to_FqM(GEN A, GEN nf,GEN modpr)
 {
-  long i,l = lg(z);
-  GEN x;
+  long i,j,h,l = lg(A);
+  GEN B = cgetg(l,t_MAT);
 
-  if (typ(z) != t_MAT) return modprV(z,nf,modpr);
-  x = cgetg(l,t_MAT); if (l==1) return x;
-  for (i=1; i<l; i++) gel(x,i) = modprV(gel(z,i),nf,modpr);
-  return x;
+  if (l == 1) return B;
+  h = lg(A[1]);
+  for (j=1; j<l; j++)
+  {
+    GEN Aj = gel(A,j), Bj = cgetg(h,t_COL); gel(B,j) = Bj;
+    for (i=1; i<h; i++) gel(Bj,i) = nf_to_Fq(nf, gel(Aj,i), modpr);
+  }
+  return B;
+}
+/* A t_POL */
+GEN
+nfX_to_FqX(GEN A, GEN nf,GEN modpr)
+{
+  long i,l = lg(A);
+  GEN B = cgetg(l,t_POL); B[1] = A[1];
+  for (i=2; i<l; i++) gel(B,i) = nf_to_Fq(nf,gel(A,i),modpr);
+  return normalizepol_i(B, l);
 }
 
 /*******************************************************************/
@@ -2442,23 +2452,23 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   GEN modpr, h, k, base, nfT, T, gzk, hzk, prinvp, X, pal;
 
   nf = checknf(nf); nfT = gel(nf,1);
-  modpr = nf_to_ff_init(nf,&pr, &T, &p);
+  modpr = nf_to_Fq_init(nf,&pr, &T, &p);
   tau = coltoliftalg(nf, gel(pr,5));
   n = degpol(nfT);
   m = degpol(P);
 
-  Prd = modprX(P, nf, modpr);
+  Prd = nfX_to_FqX(P, nf, modpr);
   A = gel(FqX_factor(Prd,T,p),1);
   r = lg(A); if (r < 2) pari_err(constpoler,"rnfdedekind");
   g = gel(A,1);
   for (i=2; i<r; i++) g = FqX_mul(g, gel(A,i), T, p);
   h = FqX_div(Prd,g, T, p);
-  gzk = modprX_lift(g, modpr);
-  hzk = modprX_lift(h, modpr);
+  gzk = FqX_to_nfX(g, modpr);
+  hzk = FqX_to_nfX(h, modpr);
 
   k = gsub(P, RgXQX_mul(gzk,hzk, nfT));
   k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
-  k = modprX(k, nf, modpr);
+  k = nfX_to_FqX(k, nf, modpr);
   k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
   d = degpol(k);  /* <= m */
   if (!d) return NULL; /* pr-maximal */
@@ -2476,7 +2486,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   }
   X = pol_x(varn(P));
   pal = FqX_div(Prd,k, T,p);
-  pal = modprX_lift(pal, modpr);
+  pal = FqX_to_nfX(pal, modpr);
   for (   ; j<=m+d; j++)
   {
     gel(A,j) = RgX_to_RgV(pal,m);
@@ -2531,7 +2541,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   GEN Tauinv, Tau, prhinv, pip, nfT, id, rnfId;
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Zs\n",pr);
-  modpr = nf_to_ff_init(nf,&pr,&T,&p);
+  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
   p1 = rnfdedekind_i(nf, pol, modpr, vdisc);
   if (!p1) { avma = av; return NULL; }
   if (gcmp1(gel(p1,1))) return gerepilecopy(av,gel(p1,2));
@@ -2601,14 +2611,14 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       }
 
     /* compute Ip =  pr-radical [ could use Ker(trace) if q large ] */
-    MWmod = modprM(MW,nf,modpr);
+    MWmod = nfM_to_FqM(MW,nf,modpr);
     F = cgetg(n+1, t_MAT); F[1] = rnfId[1];
     for (j=2; j<=n; j++) gel(F,j) = rnfelementid_powmod(MWmod, j, q1, T,p);
     Ip = FqM_ker(F,T,p);
     if (lg(Ip) == 1) { W = W0; I = I0; break; }
 
     /* Fill C: W_k A_j = sum_i C_(i,j),k A_i */
-    A = modprM_lift(FqM_suppl(Ip,T,p), modpr);
+    A = FqM_to_nfM(FqM_suppl(Ip,T,p), modpr);
     for (j=1; j<lg(Ip); j++)
     {
       p1 = gel(A,j);
@@ -2628,10 +2638,10 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 	for (i=1; i<=n; i++)
 	{
 	  GEN c = grem(gel(z,i), nfT);
-	  gcoeff(C, (j-1)*n+i, k) = nf_to_ff(nf,c,modpr);
+	  gcoeff(C, (j-1)*n+i, k) = nf_to_Fq(nf,c,modpr);
 	}
       }
-    G = modprM_lift(FqM_ker(C,T,p), modpr);
+    G = FqM_to_nfM(FqM_ker(C,T,p), modpr);
 
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */

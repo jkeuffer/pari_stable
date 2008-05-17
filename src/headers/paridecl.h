@@ -813,6 +813,9 @@ GEN     tschirnhaus(GEN x);
 
 /* base2.c */
 
+GEN     Fq_to_nf(GEN x, GEN modpr);
+GEN     FqM_to_nfM(GEN z, GEN modpr);
+GEN     FqX_to_nfX(GEN x, GEN modpr);
 GEN     allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw);
 GEN     base(GEN x, GEN *y);
 GEN     base2(GEN x, GEN *y);
@@ -823,16 +826,14 @@ GEN     discf(GEN x);
 GEN     discf2(GEN x);
 GEN     factoredbase(GEN x, GEN p, GEN *y);
 GEN     factoreddiscf(GEN x, GEN p);
-GEN     ff_to_nf(GEN x, GEN modpr);
 GEN     fix_relative_pol(GEN nf, GEN x, int lift);
 GEN     gcdpm(GEN f1,GEN f2,GEN pm);
 GEN     indexpartial(GEN P, GEN DP);
-GEN     modprX(GEN x, GEN nf,GEN modpr);
-GEN     modprX_lift(GEN x, GEN modpr);
-GEN     modprM(GEN z, GEN nf,GEN modpr);
-GEN     modprM_lift(GEN z, GEN modpr);
-GEN     nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
-GEN     nf_to_ff(GEN nf, GEN x, GEN modpr);
+GEN     nf_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p);
+GEN     nf_to_Fq(GEN nf, GEN x, GEN modpr);
+GEN     nfM_to_FqM(GEN z, GEN nf,GEN modpr);
+GEN     nfV_to_FqV(GEN z, GEN nf,GEN modpr);
+GEN     nfX_to_FqX(GEN x, GEN nf,GEN modpr);
 GEN     nfbasis(GEN x, GEN *y,long flag,GEN p);
 GEN     nfbasis0(GEN x,long flag,GEN p);
 GEN     nfdiscf0(GEN x,long flag, GEN p);
@@ -858,8 +859,8 @@ GEN     rnfsteinitz(GEN nf, GEN order);
 GEN     smallbase(GEN x, GEN *y);
 GEN     smalldiscf(GEN x);
 long    val_fact(ulong n, ulong p);
-GEN     zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
-GEN     zk_to_ff(GEN x, GEN modpr);
+GEN     zk_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p);
+GEN     zk_to_Fq(GEN x, GEN modpr);
 GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */

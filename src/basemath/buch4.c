@@ -118,8 +118,8 @@ qpsoluble(GEN T,GEN p)
 static long
 quad_char(GEN nf, GEN t, GEN pr)
 {
-  GEN ord, ordp, T, p, modpr = nf_to_ff_init(nf, &pr,&T,&p);
-  t = nf_to_ff(nf,t,modpr);
+  GEN ord, ordp, T, p, modpr = nf_to_Fq_init(nf, &pr,&T,&p);
+  t = nf_to_Fq(nf,t,modpr);
   if (T)
   {
     ord = subis( pr_norm(pr), 1 ); /* |(O_K / pr)^*| */

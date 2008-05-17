@@ -158,7 +158,6 @@ GEN    init_units(GEN BNF);
 long   int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 GEN    make_integral(GEN nf, GEN L0, GEN f, GEN listpr);
 GEN    maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
-GEN    modprV(GEN z, GEN nf,GEN modpr);
 GEN    nfpol_to_Flx(GEN nf, GEN pol, ulong *ptp);
 GEN    nfrootsall_and_pr(GEN nf, GEN pol);
 GEN    norm_by_embed(long r1, GEN x);

@@ -1445,8 +1445,8 @@ rnfnormgroup(GEN bnr, GEN polrel)
       /* primes of degree 1 are enough, and simpler */
       if (itos(gel(pr,4)) > 1) break;
 
-      modpr = nf_to_ff_init(nf, &pr, &T, &pp);
-      polr = modprX(polrel, nf, modpr);
+      modpr = zk_to_Fq_init(nf, &pr, &T, &pp);
+      polr = nfX_to_FqX(polrel, nf, modpr);
       /* if pr (probably) ramified, we have to use all (non-ram) P | pr */
       if (idealval(nf,cnd,pr)) { oldf = 0; continue; }
       if (!FqX_is_squarefree(polr, T,pp)) { oldf = 0; continue; }
@@ -1501,15 +1501,15 @@ rnf_is_abelian(GEN nf, GEN pol)
 
   pr = gel(z,2);
   nfL = gel(z,3);
-  modpr = nf_to_ff_init(nfL, &pr, &T, &pp);
+  modpr = nf_to_Fq_init(nfL, &pr, &T, &pp);
   p = itou(pp);
   k = umodiu(gel(eq,3), p);
-  ka = (k * itou(nf_to_ff(nfL, a, modpr))) % p;
+  ka = (k * itou(nf_to_Fq(nfL, a, modpr))) % p;
   sig= cgetg(l+1, t_VECSMALL);
   /* image of c = ro[1] + k a [distinguished root of C] by the l automorphisms
    * sig[i]: ro[1] -> ro[i] */
   for (i = 1; i <= l; i++)
-    sig[i] = Fl_add(ka, itou(nf_to_ff(nfL, gel(ro,i), modpr)), p);
+    sig[i] = Fl_add(ka, itou(nf_to_Fq(nfL, gel(ro,i), modpr)), p);
   ro = Q_primpart(ro);
   for (i=2; i<=l; i++) { /* start at 2, since sig[1] = identity */
     gel(ro,i) = ZX_to_Flx(gel(ro,i), p);

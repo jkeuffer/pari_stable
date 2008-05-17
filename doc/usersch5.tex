@@ -1876,7 +1876,8 @@ reduced.
   \kbd{Fq}: $\Z[X]/(p,T(X))$, $p$ a \typ{INT}, $T$ a \typ{POL} with \kbd{Fp}
 coefficients or \kbd{NULL} (in which case no reduction modulo \kbd{T} is
 performed). Implemented as \typ{POL}s $z$ with \kbd{Fp} coefficients,
-$\deg(z) < \deg \kbd{T}$.
+$\deg(z) < \deg \kbd{T}$, although $z$ a \typ{INT} is allowed for elements in
+the prime field.
 
   \kbd{Z}:  the integers $\Z$, implemented as \typ{INT}s.
 
@@ -5262,6 +5263,61 @@ returns only the latter.
 underlying the above, except that the first argument must now have the
 corresponding number field type. I.e. one cannot call
 \kbd{nfnewprec\_shallow(nf, prec)} if \kbd{nf} is actually a \var{bnf}.
+
+\subsec{Reducing modulo maximal ideals}
+
+\fun{GEN}{nfmodprinit}{GEN nf, GEN pr} returns an abstract \kbd{modpr}
+structure, associated to reduction modulo the maximal ideal \kbd{pr}, in
+\kbd{idealprimedec} format. From this data we can quickly project any 
+\kbd{pr}-integral $x$ to the residue field. This function is almost useless
+in library mode, we rather use:
+
+\fun{GEN}{nf_to_Fq_init}{GEN nf, GEN *ppr, GEN *pT, GEN *pp} a concrete
+version of \kbd{nfmodprinit}: \kbd{nf} and \kbd{*ppr} are the inputs, the
+return value is a \kbd{modpr} and \kbd{*ppr}, \kbd{*pT} and \kbd{*pp} are set
+as side effects.
+
+The input \kbd{*ppr} is either a maximal ideal or already a \kbd{modpr} (in
+which case it is replaced by the underlying maximal ideal). The residue field
+is realized as $\F_p[X]/(T)$ for some monic $T\in\F_p[X]$, and we set
+\kbd{*pT} to $T$ and \kbd{*pp} to $p$. Set $T = \kbd{NULL}$ if the prime has
+degree $1$ and the reѕidu field is $\F_p$.
+
+In short, this receives (or initializes) a \kbd{modpr} structure, and
+extracts from it $T$, $p$ and $\goth{p}$. 
+
+\fun{GEN}{nf_to_Fq}{GEN nf, GEN x, GEN modpr} returns an \kbd{Fq} congruent
+to $x$ modulo the maximal ideal associated to \kbd{modpr}. The output is
+canonical: all elements in a given residue class are represented by the same
+\kbd{Fq}.
+
+\fun{GEN}{Fq_to_nf}{GEN x, GEN modpr} returns an \kbd{nf} element lifting
+the residue field element $x$, either a \typ{INT} or an algebraic integer
+in \kbd{algtobasis} format.
+
+\fun{GEN}{zkmodprinit}{GEN nf, GEN pr} as \tet{nfmodprinit}, but we assume we
+will only reduce algebraic integers, hence do not initialize data allowing to
+remove denominators. More precisely, we can in fact still handle an $x$ whose
+denominator is not $0$ in the residue field (i.e. if the valuation 
+of $x$ is non-negative at all primes dividing $p$).
+
+\fun{GEN}{zk_to_Fq_init}{GEN nf, GEN *pr, GEN *T, GEN *p} as
+\kbd{nf\_to\_ff\_init}, able to reduce only $p$-integral elements.
+
+\fun{GEN}{zk_to_Fq}{GEN x, GEN modpr} as \kbd{nf\_to\_ff}, for
+a $p$-integral $x$.
+
+\fun{GEN}{nfM_to_FqM}{GEN M, GEN nf,GEN modpr} reduces a matrix
+of \kbd{nf} elements to the residue field; returns an \kbd{FqM}.
+
+\fun{GEN}{FqM_to_nfM}{GEN M, GEN modpr} lifts an \kbd{FqM} to a matrix of
+\kbd{nf} elements.
+
+\fun{GEN}{nfX_to_FqX}{GEN Q, GEN nf,GEN modpr} reduces a polynomial
+with \kbd{nf} coefficients to the residue field; returns an \kbd{FqX}.
+
+\fun{GEN}{FqX_to_nfX}{GEN Q, GEN modpr} lifts an \kbd{FqX} to a polynomial
+with coefficients in \kbd{nf}.
 
 \section{Miscellaneous routines}
 

@@ -148,14 +148,14 @@ nffactormod(GEN nf, GEN x, GEN pr)
   if (varncmp(vx,vn) >= 0)
     pari_err(talker,"polynomial variable must have highest priority in nffactormod");
 
-  modpr = nf_to_ff_init(nf, &pr, &T, &p);
-  xrd = modprX(x, nf, modpr);
+  modpr = nf_to_Fq_init(nf, &pr, &T, &p);
+  xrd = nfX_to_FqX(x, nf, modpr);
   rep = FqX_factor(xrd,T,p);
   settyp(rep, t_MAT);
   F = gel(rep,1); l = lg(F);
   E = gel(rep,2); settyp(E, t_COL);
   for (j = 1; j < l; j++) {
-    gel(F,j) = modprX_lift(gel(F,j), modpr);
+    gel(F,j) = FqX_to_nfX(gel(F,j), modpr);
     gel(E,j) = stoi(E[j]);
   }
   return gerepilecopy(av, rep);
@@ -1433,8 +1433,8 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
     apr = primedec_apply_kummer(nf,r,1,ap);
 
-    modpr = zk_to_ff_init(nf,&apr,&aT,&ap);
-    red = modprX(polbase, nf, modpr);
+    modpr = zk_to_Fq_init(nf,&apr,&aT,&ap);
+    red = nfX_to_FqX(polbase, nf, modpr);
     if (!aT)
     { /* degree 1 */
       red = ZX_to_Flx(red, pp);

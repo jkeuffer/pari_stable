@@ -1213,9 +1213,9 @@ static GEN
 nf_log(GEN nf, GEN a, GEN g, GEN pr)
 {
   pari_sp av = avma;
-  GEN T,p, modpr = nf_to_ff_init(nf, &pr, &T, &p);
-  GEN A = nf_to_ff(nf,a,modpr);
-  GEN G = nf_to_ff(nf,g,modpr);
+  GEN T,p, modpr = nf_to_Fq_init(nf, &pr, &T, &p);
+  GEN A = nf_to_Fq(nf,a,modpr);
+  GEN G = nf_to_Fq(nf,g,modpr);
   GEN ord = addis(T?powiu(p,degpol(T)):p,-1);
   return gerepileuptoint(av, Fq_FpXQ_log(A,G,ord,T,p));
 }
@@ -1275,8 +1275,8 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     g = scalarcol_shallow(pgener_Fp(p), degpol(nf[1]));
   else
   {
-    GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
-    g = ff_to_nf(gener_FpXQ(T,p,NULL), modpr);
+    GEN T, modpr = zk_to_Fq_init(nf, &pr, &T, &p);
+    g = Fq_to_nf(gener_FpXQ(T,p,NULL), modpr);
     g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */

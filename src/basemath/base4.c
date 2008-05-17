@@ -1226,7 +1226,7 @@ famat_reduce(GEN fa)
 static GEN
 nf_to_Fp_simple(GEN x, GEN modpr, GEN p)
 {
-  GEN c, r = zk_to_ff(Q_primitive_part(x, &c), modpr);
+  GEN c, r = zk_to_Fq(Q_primitive_part(x, &c), modpr);
   if (c) r = Rg_to_Fp(gmul(r, c), p);
   return r;
 }
@@ -1258,7 +1258,7 @@ famat_to_Fp_simple(GEN nf, GEN x, GEN modpr, GEN p)
 GEN
 to_Fp_simple(GEN nf, GEN x, GEN pr)
 {
-  GEN T, p, modpr = zk_to_ff_init(nf, &pr, &T, &p);
+  GEN T, p, modpr = zk_to_Fq_init(nf, &pr, &T, &p);
   switch(typ(x))
   {
     case t_COL: return nf_to_Fp_simple(x,modpr,p);
@@ -2796,9 +2796,9 @@ element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
   GEN z, p, pr, T;
 
   nf = checknf(nf);
-  modpr = nf_to_ff_init(nf,&pr,&T,&p);
-  z = ff_to_nf(Fq_mul(nf_to_ff(nf,x,modpr), nf_to_ff(nf,y,modpr),T,p), modpr);
-  return gerepileupto(av, algtobasis(nf, ff_to_nf(z,modpr)));
+  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  z = Fq_to_nf(Fq_mul(nf_to_Fq(nf,x,modpr), nf_to_Fq(nf,y,modpr),T,p), modpr);
+  return gerepileupto(av, algtobasis(nf, Fq_to_nf(z,modpr)));
 }
 
 GEN
@@ -2816,10 +2816,10 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
   GEN z,T,p,modpr;
 
   nf = checknf(nf);
-  modpr = nf_to_ff_init(nf,&pr,&T,&p);
-  z = nf_to_ff(nf,x,modpr);
+  modpr = nf_to_Fq_init(nf,&pr,&T,&p);
+  z = nf_to_Fq(nf,x,modpr);
   z = Fq_pow(z,k,T,p);
-  return gerepileupto(av, algtobasis(nf, ff_to_nf(z,modpr)));
+  return gerepileupto(av, algtobasis(nf, Fq_to_nf(z,modpr)));
 }
 
 GEN
@@ -2829,10 +2829,10 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
   GEN T,p,modpr;
 
   nf = checknf(nf);
-  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  modpr = nf_to_Fq_init(nf, &pr,&T,&p);
   if (typ(x)!=t_MAT) pari_err(typeer,"nfkermodpr");
-  x = modprM(lift(x), nf, modpr);
-  return gerepilecopy(av, modprM_lift(FqM_ker(x,T,p), modpr));
+  x = nfM_to_FqM(lift(x), nf, modpr);
+  return gerepilecopy(av, FqM_to_nfM(FqM_ker(x,T,p), modpr));
 }
 
 GEN
@@ -2843,12 +2843,12 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
   long tb = typ(b);
 
   nf = checknf(nf);
-  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  modpr = nf_to_Fq_init(nf, &pr,&T,&p);
   if (typ(a)!=t_MAT) pari_err(typeer,"nfsolvemodpr");
   if (tb != t_MAT && tb != t_COL) pari_err(typeer,"nfsolvemodpr");
-  a = modprM(lift(a), nf, modpr);
-  b = modprM(lift(b), nf, modpr);
-  return gerepilecopy(av, modprM_lift(FqM_gauss(a,b,T,p), modpr));
+  a = nfM_to_FqM(lift(a), nf, modpr);
+  b = nfV_to_FqV(lift(b), nf, modpr);
+  return gerepilecopy(av, FqM_to_nfM(FqM_gauss(a,b,T,p), modpr));
 }
 
 /* Given a pseudo-basis x, outputs a multiple of its ideal determinant */
