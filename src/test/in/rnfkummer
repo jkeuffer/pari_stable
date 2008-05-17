@@ -16,6 +16,13 @@ do(y^4-52*y^2+26, 3, Mat(5))
 do(quadpoly(5288,y), 9, [1,0;0,3])
 do(quadpoly(5288,y), 9, [1,0;0,3], 3)
 do(y^4+y^3-9*y^2-9*y+11, 10, Mat(5))
+do(y^4-y^3-159*y^2-441*y+1701, 10, Mat(5))
+do(quadpoly(344,y),11,matdiagonal([5,1]))
+/* \\ both used to be very slow (>20h). Now ~ 7mn
+ do(quadpoly(17,y),311,Mat(13))
+ do(nf=nfinit(y^4-y^3+2*y+1), idealprimedec(nf,463)[2]);
+*/
+
 
 /* 0 eq. OK at \p200 */
 do(y^6-19*y^5-11*y^4-6*y^3-15*y^2-11*y+15, 4, [2,1,1; 0,1,0;0,0,1])
