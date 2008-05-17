@@ -712,35 +712,36 @@ shallowextract(GEN x, GEN L)
   if (tl==t_STR)
   {
     char *s = GSTR(L);
-    long first, last, cmpl;
+    long first, last, cmpl, d;
     if (! get_range(s, &first, &last, &cmpl, lx))
       pari_err(talker, "incorrect range in extract");
     if (lx == 1) return cgetg(1,tx);
+    d = last - first;
     if (cmpl)
     {
-      if (first <= last)
+      if (d >= 0)
       {
-	y = cgetg(lx - (last - first + 1),tx);
+	y = cgetg(lx - (1+d),tx);
 	for (j=1; j<first; j++) gel(y,j) = gel(x,j);
 	for (i=last+1; i<lx; i++,j++) gel(y,j) = gel(x,i);
       }
       else
       {
-	y = cgetg(lx - (first - last + 1),tx);
+	y = cgetg(lx - (1-d),tx);
 	for (j=1,i=lx-1; i>first; i--,j++) gel(y,j) = gel(x,i);
 	for (i=last-1; i>0; i--,j++) gel(y,j) = gel(x,i);
       }
     }
     else
     {
-      if (first <= last)
+      if (d >= 0)
       {
-	y = cgetg(last-first+2,tx);
+	y = cgetg(d+2,tx);
 	for (i=first,j=1; i<=last; i++,j++) gel(y,j) = gel(x,i);
       }
       else
       {
-	y = cgetg(first-last+2,tx);
+	y = cgetg(2-d,tx);
 	for (i=first,j=1; i>=last; i--,j++) gel(y,j) = gel(x,i);
       }
     }
