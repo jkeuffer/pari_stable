@@ -847,33 +847,6 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
   return lllreducemodmatrix(a, idealmulh(nf,xh,yh));
 }
 
-/* y should be an idele (not mandatory). For internal use. */
-static GEN
-ideleaddone_i(GEN nf, GEN x, GEN y)
-{
-  GEN p1, p2, u, arch, archp;
-  long i, nba;
-
-  (void)idealtyp(&y, &arch);
-  u = idealaddtoone_i(nf, x, y); /* u in x, 1-u in y */
-  if (!arch) return u;
-
-  archp = arch_to_perm(arch);
-  if (lg(archp) == 1) return u;
-
-  if (gcmp0(u)) u = gel(idealhermite_aux(nf,x),1);
-  p2 = zarchstar(nf, idealmul(nf,x,y), archp);
-  p2 = gel(p2,2); nba = 0;
-  p1 = ZM_ZC_mul(gel(p2,3), zsigne(nf,u,archp));
-  for (i = 1; i < lg(p1); i++)
-  {
-    GEN t = gel(p1,i);
-    if (mpodd(t)) { nba = 1; u = element_mul(nf,u,gel(p2,i)); }
-  }
-  if (gcmp0(u)) return gcopy(gel(x,1)); /* can happen if y = Z_K */
-  return nba? u: gcopy(u);
-}
-
 GEN
 unnf_minus_x(GEN x)
 {
@@ -885,27 +858,15 @@ unnf_minus_x(GEN x)
   return y;
 }
 
-static GEN
-addone(GEN f(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
+GEN
+idealaddtoone(GEN nf, GEN x, GEN y)
 {
   GEN z = cgetg(3,t_VEC), a;
   pari_sp av = avma;
   nf = checknf(nf);
-  a = gerepileupto(av, f(nf,x,y));
+  a = gerepileupto(av, idealaddtoone_i(nf,x,y));
   gel(z,1) = a;
   gel(z,2) = unnf_minus_x(a); return z;
-}
-
-GEN
-idealaddtoone(GEN nf, GEN x, GEN y)
-{
-  return addone(idealaddtoone_i,nf,x,y);
-}
-
-GEN
-ideleaddone(GEN nf, GEN x, GEN y)
-{
-  return addone(ideleaddone_i,nf,x,y);
 }
 
 /* assume elements of list are integral ideals */

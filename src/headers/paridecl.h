@@ -955,7 +955,6 @@ GEN     idealprodprime(GEN nf, GEN L);
 GEN     idealred_elt(GEN nf, GEN I);
 long    idealtyp(GEN *ideal, GEN *arch);
 long    idealval(GEN nf,GEN ix,GEN vp);
-GEN     ideleaddone(GEN nf, GEN x, GEN idele);
 long    isideal(GEN nf,GEN x);
 GEN     minideal(GEN nf,GEN ix,GEN vdir,long prec);
 GEN     mul_content(GEN cx, GEN cy);
