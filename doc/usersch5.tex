@@ -5316,6 +5316,13 @@ of \kbd{nf} elements to the residue field; returns an \kbd{FqM}.
 \fun{GEN}{FqM_to_nfM}{GEN M, GEN modpr} lifts an \kbd{FqM} to a matrix of
 \kbd{nf} elements.
 
+\fun{GEN}{nfV_to_FqV}{GEN A, GEN nf,GEN modpr} reduces a vector
+of \kbd{nf} elements to the residue field; returns an \kbd{FqV}
+with the same type as \kbd{A} (\typ{VEC} or \typ{COL}).
+
+\fun{GEN}{FqV_to_nfV}{GEN A, GEN modpr} lifts an \kbd{FqV} to a vector of
+\kbd{nf} elements (same type as \kbd{A}).
+
 \fun{GEN}{nfX_to_FqX}{GEN Q, GEN nf,GEN modpr} reduces a polynomial
 with \kbd{nf} coefficients to the residue field; returns an \kbd{FqX}.
 
