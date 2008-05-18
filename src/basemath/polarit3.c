@@ -2274,15 +2274,20 @@ INIT:
       if (dropa && dropb)
         Hp = zero_Flx(sX);
       else {
-        if (dropa) {
-          GEN lcb = gel(b,lb-1);
-          if (!odd(degA)) lcb = Flx_neg(lcb, p);
-          if (!Flx_cmp1(lcb)) Hp = Flx_mul(Hp, Flx_pow(lcb, dropa, p), p);
+        if (dropa)
+        { /* multiply by ((-1)^deg B lc(B))^(deg A - deg a) */
+          GEN c = gel(b,lb-1);
+          if (odd(degB)) c = Flx_neg(c, p);
+          if (!Flx_cmp1(c)) {
+            c = Flx_pow(c, dropa, p);
+            if (!Flx_cmp1(c)) Hp = Flx_mul(Hp, c, p);
+          }
         }
         else if (dropb)
-        {
-          ulong lca = a[degA+2];
-          if (lca != 1) Hp = Flx_Fl_mul(Hp, Fl_powu(lca, dropb, p), p);
+        { /* multiply by lc(A)^(deg B - deg b) */
+          ulong c = a[degA+2];
+          c = Fl_powu(c, dropb, p);
+          if (c != 1) Hp = Flx_Fl_mul(Hp, c, p);
         }
       }
     }
@@ -2450,15 +2455,17 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     {
       Hp = Flx_resultant(a, b, p);
       if (dropa)
-      { /* multiply by (-1)^(deg A + 1) * lc(B)^(deg A - deg a) */
-        ulong lcb = b[degB+2];
-        if (!odd(degA)) lcb = p - lcb;
-        if (lcb != 1) Hp = Fl_mul(Hp, Fl_powu(lcb, dropa, p), p);
+      { /* multiply by ((-1)^deg B lc(B))^(deg A - deg a) */
+        ulong c = b[degB+2]; /* lc(B) */
+        if (odd(degB)) c = p - c;
+        c = Fl_powu(c, dropa, p);
+        if (c != 1) Hp = Fl_mul(Hp, c, p);
       }
       else if (dropb)
       { /* multiply by lc(A)^(deg B - deg b) */
-        ulong lca = a[degA+2];
-        if (lca != 1) Hp = Fl_mul(Hp, Fl_powu(lca, dropb, p), p);
+        ulong c = a[degA+2]; /* lc(A) */
+        c = Fl_powu(c, dropb, p);
+        if (c != 1) Hp = Fl_mul(Hp, c, p);
       }
       if (dp != 1) Hp = Fl_mul(Hp, Fl_powu(Fl_inv(dp,p), degA, p), p);
     }

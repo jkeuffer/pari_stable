@@ -49,3 +49,7 @@ setrand(1);
 P = polrandom(n); 
 Q = polrandom(n);
 do(P,Q)
+
+polresultant(-27673*x^2+322883101*x-1876122109136,x^4+4503599627370517)
+P=-27673*x^2+322883101*x-1876122109136;
+for(n=1,5,for(l=0,5,print(polresultant(P*x^l+1,n*x^4+4503599627370517))))
