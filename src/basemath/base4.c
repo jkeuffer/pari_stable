@@ -858,8 +858,6 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
   u = idealaddtoone_i(nf, x, y); /* u in x, 1-u in y */
   if (!arch) return u;
 
-  if (typ(arch) != t_VEC && lg(arch)-1 != nf_get_r1(nf))
-    pari_err(talker,"incorrect idele in idealaddtoone");
   archp = arch_to_perm(arch);
   if (lg(archp) == 1) return u;
 
@@ -882,8 +880,8 @@ unnf_minus_x(GEN x)
   long i, N = lg(x);
   GEN y = cgetg(N,t_COL);
 
-  gel(y,1) = gsub(gen_1,gel(x,1));
-  for (i=2;i<N; i++) gel(y,i) = gneg(gel(x,i));
+  gel(y,1) = gsubsg(1, gel(x,1));
+  for (i=2; i<N; i++) gel(y,i) = gneg(gel(x,i));
   return y;
 }
 
