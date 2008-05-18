@@ -1221,7 +1221,8 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
       h = gel(z,tnew+1);
       /* make Newton sums integral */
       lPpow = mul_content(lPpow, dn);
-      if (lPpow) h = FpX_red(gmul(h,lPpow), pk);
+      if (lPpow)
+        h = (typ(h) == t_INT)? Fp_mul(h, lPpow, pk): FpX_Fp_mul(h, lPpow, pk);
       gel(Tra,i) = nf_bestlift(h, NULL, L); /* S_tnew(famod) */
     }
 
