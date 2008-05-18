@@ -2282,7 +2282,7 @@ Fq_to_nf(GEN A, GEN modpr)
   return mulmat_pol(gel(modpr,mpr_NFP), A);
 }
 GEN
-FqV_to_nfV(GEN A, GEN nf,GEN modpr)
+FqV_to_nfV(GEN A, GEN modpr)
 {
   long i,l = lg(A);
   GEN B = cgetg(l,typ(A));
