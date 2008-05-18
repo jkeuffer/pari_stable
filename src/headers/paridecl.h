@@ -815,6 +815,7 @@ GEN     tschirnhaus(GEN x);
 
 GEN     Fq_to_nf(GEN x, GEN modpr);
 GEN     FqM_to_nfM(GEN z, GEN modpr);
+GEN     FqV_to_nfV(GEN z, GEN modpr);
 GEN     FqX_to_nfX(GEN x, GEN modpr);
 GEN     allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw);
 GEN     base(GEN x, GEN *y);
