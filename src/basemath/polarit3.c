@@ -2276,8 +2276,8 @@ INIT:
       else {
         if (dropa)
         { /* multiply by ((-1)^deg B lc(B))^(deg A - deg a) */
-          GEN c = gel(b,lb-1);
-          if (odd(degB)) c = Flx_neg(c, p);
+          GEN c = gel(b,lb-1); /* lc(B) */
+          if (!odd(lb)) c = Flx_neg(c, p); /* deg B = lb - 3 */
           if (!Flx_cmp1(c)) {
             c = Flx_pow(c, dropa, p);
             if (!Flx_cmp1(c)) Hp = Flx_mul(Hp, c, p);
@@ -2285,7 +2285,7 @@ INIT:
         }
         else if (dropb)
         { /* multiply by lc(A)^(deg B - deg b) */
-          ulong c = a[degA+2];
+          ulong c = a[degA+2]; /* lc(A) */
           c = Fl_powu(c, dropb, p);
           if (c != 1) Hp = Flx_Fl_mul(Hp, c, p);
         }
