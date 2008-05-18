@@ -1319,8 +1319,8 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
       gel(s,i) = zsigne(nf,gel(gen,i),arch);
     }
     y = cgetg(6,t_VEC); appendL(list, y);
-    y[1] = z[1];
-    y[2] = z[2];
+    gel(y,1) = gel(z,1);
+    gel(y,2) = gel(z,2);
     gel(y,3) = gen;
     gel(y,4) = s;
     gel(y,5) = U;
@@ -1388,39 +1388,39 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 GEN
 zarchstar(GEN nf, GEN x, GEN archp)
 {
-  long i, nba;
-  pari_sp av;
-  GEN p1, y, bas, gen, mat, gZ, v;
+  long nba;
+  GEN cyc, gen, mat;
 
   archp = arch_to_perm(archp);
   nba = lg(archp) - 1;
-  y = cgetg(4,t_VEC);
   if (!nba)
   {
-    gel(y,1) = cgetg(1,t_VEC);
-    gel(y,2) = cgetg(1,t_VEC);
-    gel(y,3) = cgetg(1,t_MAT); return y;
+    cyc = gen = cgetg(1, t_VEC);
+    mat = cgetg(1, t_MAT);
   }
-  p1 = cgetg(nba+1,t_VEC); for (i=1; i<=nba; i++) gel(p1,i) = gen_2;
-  gel(y,1) = p1; av = avma;
-  if (gcmp1(gcoeff(x,1,1))) x = NULL; /* x = O_K */
-  gZ = x? subsi(1, gcoeff(x,1,1)): gen_m1; /* gZ << 0, gZ = 1 mod x */
-  if (nba == 1)
+  else
   {
-    gel(y,2) = mkvec(gZ);
-    gel(y,3) = scalarmat(gen_1,1); return y;
+    GEN xZ = gcoeff(x,1,1), gZ;
+    pari_sp av = avma;
+    if (gcmp1(xZ)) x = NULL; /* x = O_K */
+    gZ = x? subsi(1, xZ): gen_m1; /* gZ << 0, gZ = 1 mod x */
+    if (nba == 1)
+    {
+      gen = mkvec(gZ);
+      mat = scalarmat(gen_1,1);
+    }
+    else
+    {
+      GEN bas = gmael(nf,5,1);
+      if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
+      gen = cgetg(nba+1,t_VEC);
+      gel(gen,1) = gZ;
+      mat = archstar_full_rk(x, bas, mkmat(const_vecsmall(nba,1)), gen);
+      gerepileall(av,2,&gen,&mat);
+    }
+    cyc = const_vec(nba, gen_2);
   }
-  bas = gmael(nf,5,1);
-  if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
-  gen = cgetg(nba+1,t_VEC);
-  v = mkmat( const_vecsmall(nba, 1) );
-  gel(gen,1) = gZ;
-
-  mat = archstar_full_rk(x, bas, v, gen);
-  gerepileall(av,2,&gen,&mat);
-
-  gel(y,2) = gen;
-  gel(y,3) = mat; return y;
+  return mkvec3(cyc,gen,mat);
 }
 
 static GEN
@@ -1622,24 +1622,27 @@ log_gen_arch(zlog_S *S, long index)
   return gmul(S->U, y);
 }
 
-static GEN
-compute_gen(GEN nf, GEN u1, GEN gen, GEN bid)
-{
-  long i, c = lg(u1);
-  GEN L = cgetg(c,t_VEC);
-  for (i=1; i<c; i++)
-    gel(L,i) = famat_to_nf_modidele(nf, gen, gel(u1,i), bid);
-  return L;
-}
+/* add [h,cyc] or [h,cyc,gen] to bid */
 static void
-add_clgp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
+add_grp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
 {
-  GEN c = cgetg(u1? 4: 3, t_VEC);
-  long L;
-  gel(bid,2) = c;
-  gel(c,1) = detcyc(cyc, &L);
-  gel(c,2) = cyc;
-  if (u1) gel(c,3) = (u1 == gen_1? gen: compute_gen(nf, u1, gen, bid));
+  GEN h = ZV_prod(cyc);
+  if (u1)
+  {
+    GEN G = mkvec3(h,cyc,NULL/*dummy, bid[2] needed below*/);
+    gel(bid,2) = G;
+    if (u1 != gen_1)
+    {
+      long i, c = lg(u1);
+      GEN g = cgetg(c,t_VEC);
+      for (i=1; i<c; i++)
+        gel(g,i) = famat_to_nf_modidele(nf, gen, gel(u1,i), bid);
+      gen = g;
+    }
+    gel(G,3) = gen; /* replace dummy */
+  }
+  else
+    gel(bid,2) = mkvec2(h,cyc);
 }
 
 /* Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
@@ -1669,33 +1672,34 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   x = idealhermite_aux(nf, ideal);
   if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
     pari_err(talker,"Idealstar needs an integral non-zero ideal: %Zs",x);
+  sarch = zarchstar(nf, x, archp);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);
   E = gel(fa,2); nbp = lg(P)-1;
-  lists = cgetg(nbp+2,t_VEC);
-
-  /* rough upper bound */
-  nbgen = nbp + 1; for (i=1; i<=nbp; i++) nbgen += itos(gel(E,i));
-  gen = cgetg(nbgen+1,t_VEC);
-  nbgen = 1; t = (nbp==1)? NULL: x;
-  for (i=1; i<=nbp; i++)
-  {
-    GEN L = zprimestar(nf, gel(P,i), gel(E,i), t, archp);
-    gel(lists,i) = L;
-    for (j = 1; j < lg(L); j++) gel(gen, nbgen++) = gmael(L,j,3);
-  }
-  sarch = zarchstar(nf, x, archp);
-  gel(lists,i) = sarch;
-  gel(gen, nbgen++) = gel(sarch,2);
-  setlg(gen, nbgen);
-  gen = shallowconcat1(gen);
-  nbgen = lg(gen)-1;
-
   if (nbp)
   {
-    GEN h = cgetg(nbgen+1,t_MAT);
+    GEN h;
     long cp = 0;
-    zlog_S S; init_zlog(&S, nbgen, P, E, archp, lists, NULL);
+    zlog_S S;
+
+    lists = cgetg(nbp+2,t_VEC);
+    /* rough upper bound */
+    nbgen = nbp + 1; for (i=1; i<=nbp; i++) nbgen += itos(gel(E,i));
+    gen = cgetg(nbgen+1,t_VEC);
+    nbgen = 1;
+    t = (nbp==1)? NULL: x;
+    for (i=1; i<=nbp; i++)
+    {
+      GEN L = zprimestar(nf, gel(P,i), gel(E,i), t, archp);
+      gel(lists,i) = L;
+      for (j = 1; j < lg(L); j++) gel(gen, nbgen++) = gmael(L,j,3);
+    }
+    gel(lists,i) = sarch;
+    gel(gen, nbgen++) = gel(sarch,2); setlg(gen, nbgen);
+    gen = shallowconcat1(gen); nbgen = lg(gen)-1;
+
+    h = cgetg(nbgen+1,t_MAT);
+    init_zlog(&S, nbgen, P, E, archp, lists, NULL);
     for (i=1; i<=nbp; i++)
     {
       GEN L2 = gel(lists,i);
@@ -1722,8 +1726,9 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   }
   else
   {
-    cyc = cgetg(nbgen+1, t_VEC);
-    for (j=1; j<=nbgen; j++) gel(cyc,j) = gen_2;
+    lists = mkvec(sarch);
+    gen = gel(sarch,2); nbgen = lg(gen)-1;
+    cyc = const_vec(nbgen, gen_2);
     U = matid(nbgen);
     if (add_gen) u1 = gen_1;
   }
@@ -1733,7 +1738,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   gel(y,3) = fa;
   gel(y,4) = lists;
   gel(y,5) = U;
-  add_clgp(nf, u1, cyc, gen, y);
+  add_grp(nf, u1, cyc, gen, y);
   return gerepilecopy(av, y);
 }
 
@@ -1907,7 +1912,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   gel(y,3) = fa;
   gel(y,4) = lists;
   gel(y,5) = U;
-  add_clgp(nf, u1, cyc, gen, y);
+  add_grp(nf, u1, cyc, gen, y);
   return gerepilecopy(av,y);
 }
 
@@ -2102,7 +2107,7 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
   gel(y,3) = fa1;
   gel(y,4) = lists;
   gel(y,5) = U;
-  add_clgp(nf, u1, cyc, gen, y);
+  add_grp(nf, u1, cyc, gen, y);
   return gerepilecopy(av,y);
 }
 static GEN
