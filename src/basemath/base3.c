@@ -1667,7 +1667,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
     archp = cgetg(1, t_VECSMALL);
   }
   x = idealhermite_aux(nf, ideal);
-  if (lg(x) == 1 || !gcmp1(denom(gcoeff(x,1,1))))
+  if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
     pari_err(talker,"Idealstar needs an integral non-zero ideal: %Zs",x);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);
