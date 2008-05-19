@@ -466,7 +466,7 @@ modr_safe(GEN x, GEN y)
   d = nbits2prec(expo(q));
   if (d>lg(x)) return NULL;
   f = floorr(q);
-  if (gsigne(y) < 0 && signe(subri(q,f))) f = addrs(f, 1);
+  if (gsigne(y) < 0 && signe(subri(q,f))) f = addis(f, 1);
   return signe(f)? gadd(x, negr(mulir(f,y))): x;
 }
 

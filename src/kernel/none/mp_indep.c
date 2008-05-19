@@ -306,7 +306,7 @@ mulir(GEN x, GEN y)
   GEN z;
 
   if (!sx) return gen_0;
-  if (lg(x) == 3) {
+  if (lgefint(x) == 3) {
     z = mulur((ulong)x[2], y); if (sx < 0) togglesign(z); return z;
   }
   sy = signe(y);
