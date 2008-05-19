@@ -1508,11 +1508,10 @@ ZX_squff(GEN f, GEN *ex)
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
 
-  T = ZX_gcd(ZX_deriv(f), f);
-  V = RgX_div(f,T);
+  T = ZX_gcd_all(f, ZX_deriv(f), &V);
   for (k=i=1;; k++)
   {
-    W = ZX_gcd(T,V); T = RgX_div(T,W); dW = degpol(W);
+    W = ZX_gcd_all(T,V, &T); dW = degpol(W);
     /* W = prod P^e, e > k; V = prod P^e, e >= k */
     if (dW != degpol(V)) { gel(P,i) = RgX_div(V,W); e[i] = k; i++; }
     if (dW <= 0) break;
@@ -1579,14 +1578,13 @@ GEN
 nfrootsQ(GEN x)
 {
   pari_sp av = avma;
-  GEN z, d;
+  GEN z;
   long val;
 
   if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
   val = ZX_valuation(Q_primpart(x), &x);
-  d = ZX_gcd(ZX_deriv(x), x);
-  if (degpol(d)) x = RgX_div(x, d);
+  (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF(x, 1);
   if (val) z = shallowconcat(z, gen_0);
   return gerepilecopy(av, z);

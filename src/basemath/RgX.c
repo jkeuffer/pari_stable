@@ -1230,6 +1230,13 @@ RgX_reverse(GEN x)
   return y;
 }
 
+INLINE GEN
+rem(GEN c, GEN T)
+{
+  if (T && typ(c) == t_POL && varn(c) == varn(T)) c = RgX_rem(c, T);
+  return c;
+}
+
 /* assume dx >= dy, y non constant, T either NULL or a t_POL. */
 GEN
 RgXQX_pseudorem(GEN x, GEN y, GEN T)
@@ -1247,13 +1254,13 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
     gel(x,0) = gneg(gel(x,0)); p--;
     for (i=1; i<=dy; i++)
     {
-      gel(x,i) = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
-      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
+      GEN c = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
+      gel(x,i) = rem(c, T);
     }
     for (   ; i<=dx; i++)
     {
-      gel(x,i) = gmul(gel(y,0), gel(x,i));
-      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
+      GEN c = gmul(gel(y,0), gel(x,i));
+      gel(x,i) = rem(c, T);
     }
     do { x++; dx--; } while (dx >= 0 && gcmp0(gel(x,0)));
     if (dx < dy) break;
@@ -1271,17 +1278,16 @@ RgXQX_pseudorem(GEN x, GEN y, GEN T)
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpX_FpXY_resultant] */
     GEN t = gel(y,0);
-    if (T)
+    if (T && typ(t) == t_POL && varn(t) == varn(T))
     { /* assume p fairly small */
-      for (i=1; i<p; i++)
-	t = RgX_rem(gmul(t, gel(y,0)), T);
+      for (i=1; i<p; i++) t = RgX_rem(gmul(t, gel(y,0)), T);
     }
     else
       t = gpowgs(t, p);
     for (i=2; i<lx; i++)
     {
-      gel(x,i) = gmul(gel(x,i), t);
-      if (T) gel(x,i) = RgX_rem(gel(x,i), T);
+      GEN c = gmul(gel(x,i), t);
+      gel(x,i) = rem(c,T);
     }
     if (!T) return gerepileupto(av, x);
   }
@@ -1294,11 +1300,11 @@ RgX_pseudorem(GEN x, GEN y) { return RgXQX_pseudorem(x,y, NULL); }
 /* assume dx >= dy, y non constant
  * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
 GEN
-RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
+RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
 {
   long vx = varn(x), dx, dy, dz, i, iz, lx, lz, p;
   pari_sp av = avma, av2, lim;
-  GEN z, r, ypow;
+  GEN c, z, r, ypow;
 
   if (!signe(y)) pari_err(gdiver);
   (void)new_chunk(2);
@@ -1307,17 +1313,29 @@ RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
   lz = dz+3; z = cgetg(lz, t_POL) + 2;
   ypow = new_chunk(dz+1);
   gel(ypow,0) = gen_1;
-  for (i=1; i<=dz; i++) gel(ypow,i) = gmul(gel(ypow,i-1), gel(y,0));
+  gel(ypow,1) = gel(y,0);
+  for (i=2; i<=dz; i++)
+  {
+    c = gmul(gel(ypow,i-1), gel(y,0));
+    gel(ypow,i) = rem(c,T);
+  }
   av2 = avma; lim = stack_lim(av2,1);
   for (iz=0;;)
   {
     p--;
-    gel(z,iz++) = gmul(gel(x,0), gel(ypow,p));
+    c = gmul(gel(x,0), gel(ypow,p));
+    gel(z,iz++) = rem(c,T); 
     gel(x,0) = gneg(gel(x,0));
     for (i=1; i<=dy; i++)
-      gel(x,i) = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
+    {
+      c = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
+      gel(x,i) = rem(c,T);
+    }
     for (   ; i<=dx; i++)
-      gel(x,i) = gmul(gel(y,0), gel(x,i));
+    {
+      c = gmul(gel(y,0), gel(x,i));
+      gel(x,i) = rem(c,T);
+    }
     x++; dx--;
     while (dx >= dy && gcmp0(gel(x,0))) { x++; dx--; gel(z,iz++) = gen_0; }
     if (dx < dy) break;
@@ -1342,10 +1360,14 @@ RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
   z[0] = evaltyp(t_POL) | evallg(lz);
   z[1] = evalsigne(1) | evalvarn(vx);
   z = RgX_reverse(z) - 2;
-  r = gmul(x, gel(ypow,p));
+  c = gel(ypow,p); r = RgX_Rg_mul(x, c);
+  if (T && typ(c) == t_POL && varn(c) == varn(T)) r = RgXQX_red(r, T);
   gerepileall(av, 2, &z, &r);
   *ptr = r; return z;
 }
+GEN
+RgX_pseudodivrem(GEN x, GEN y, GEN *ptr)
+{ return RgXQX_pseudodivrem(x,y,NULL,ptr); }
 
 GEN
 RgXQX_mul(GEN x, GEN y, GEN T)

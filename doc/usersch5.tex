@@ -3391,7 +3391,13 @@ by the integer \kbd{y}.
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returns $\kbd{x}^2$.
 
-\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of \kbd{x} and \kbd{y}.
+\fun{GEN}{ZX_gcd}{GEN x,GEN y} returns a gcd of $x$ and $y$.
+
+\fun{GEN}{ZX_gcd_all}{GEN x, GEN y, GEN *pX}. returns a gcd $d$ of $x$ and
+$y$. If \kbd{pX} is not \kbd{NULL}, set $\kbd{*pX}$ to a (non-zero) integer
+multiple of $x/d$. If $x$ and $y$ are both monic, then $d$ is monic and
+\kbd{*pX} is exactly $x/d$. Not memory clean if the gcd is $1$
+(in that case \kbd{*pX} is set to $x$).
 
 \fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
 component in $x$.
@@ -3424,6 +3430,11 @@ of \kbd{T} over $\Q[X]$ (the content is lost).
 \fun{long}{ZX_isirreducible}{GEN T} returns 1 it \kbd{T} is irreducible, and
 0 otherwise.
 
+\fun{GEN}{ZX_squff}{GEN T, GEN *E} write $T$ as a product $\prod T_i^{e_i}$
+with the $e_1 < e_2 < \cdots$ all distinct and the $T_i$ pairwise coprime.
+Return the vector of the $T_i$, and set \kbd{*E} to the vector of the $e_i$,
+as a \typ{VECSMALL}.
+
 \fun{GEN}{ZX_resultant}{GEN A, GEN B} returns the resultant of the
 \kbd{ZX}~\kbd{A} and \kbd{B}.
 
@@ -3446,6 +3457,18 @@ some integer, e.g. $0$ which is used as a seed. The function then finds a
 small $\lambda \in \Z$ (starting from \kbd{*lambda}) such that
 $R_\lambda(X) := \text{Res}_Y(A, B(X + \lambda Y))$ is squarefree, resets
 \kbd{*lambda} to the chosen value and returns $R_{\lambda}$.
+
+\fun{GEN}{nfgcd}{GEN P, GEN Q, GEN T, GEN den} given $P$ and $Q$ in
+$\Z[X,Y]$, $T$ monic irreducible in $\Z[Y]$, returns the primitive $d$ in
+$\Z[X,Y]$ which is a gcd of $P$, $Q$ in $K[X]$, where $K$ is the number field
+$\Q[Y]/(T)$. If not \kbd{NULL}, \kbd{den} is a multiple of the integral
+denominator of the (monic) gcd of $P,Q$ in $K[X]$.
+
+\fun{GEN}{nfgcd_all}{GEN P, GEN Q, GEN T, GEN den, GEN *Pnew} as \kbd{nfgcd}.
+If \kbd{Pnew} is not \kbd{NULL}, set \kbd{*Pnew} to a non-zero integer
+multiple of $P/d$. If $P$ and $Q$ are both monic, then $d$ is monic and
+\kbd{*Pnew} is exactly $P/d$. Not memory clean if the gcd is $1$
+(in that case \kbd{*Pnew} is set to $P$).
 
 \subsubsec{\kbd{QX}}.
 
@@ -3582,6 +3605,11 @@ in the pseudo-division of $x$ by $y$.
 
 \fun{GEN}{RgXQX_pseudorem}{GEN x, GEN y, GEN T} return the remainder
 in the pseudo-division of $x$ by $y$ over $R[X]/(T)$.
+
+\fun{GEN}{RgXQX_pseudodivrem}{GEN x, GEN y, GEN T, GEN *ptr} compute
+a pseudo-quotient $q$ and pseudo-remainder $r$ such that
+$\kbd{lc}(y)^{\deg(x) - \deg(y) + 1}x = qy + r$ in $R[X]/(T)$. Return $q$ and
+set \kbd{*ptr} to $r$.
 
 \fun{GEN}{RgX_mulXn}{GEN x, long n} returns $\kbd{x} * t^n$. This may
 be a \typ{FRAC} if $n < 0$ and the valuation of \kbd{x} is not large

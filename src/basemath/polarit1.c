@@ -1506,8 +1506,7 @@ Zp_appr(GEN f, GEN a)
   if (typ(a) != t_PADIC) pari_err(typeer,"Zp_appr");
   p = gel(a,2); prec = gcmp0(a)? valp(a): precp(a);
   f = QpX_to_ZX(f);
-  z = ZX_gcd(f, ZX_deriv(f));
-  if (degpol(z) > 0) f = RgX_div(f,z);
+  (void)ZX_gcd_all(f, ZX_deriv(f), &f);
   z = ZX_Zp_root(f, gtrunc(a), p, prec);
   return gerepilecopy(av, ZV_to_ZpV(z, p, prec));
 }
@@ -1518,8 +1517,7 @@ ZX_Zp_roots(GEN f, GEN p, long prec)
   GEN y, z, rac;
   long lx, i, j, k;
 
-  z = ZX_gcd(f, ZX_deriv(f));
-  if (degpol(z) > 0) f = RgX_div(f,z);
+  (void)ZX_gcd_all(f, ZX_deriv(f), &f);
   rac = FpX_roots(f, p);
   lx = lg(rac); if (lx == 1) return rac;
   y = cgetg(degpol(f)+1,t_COL);

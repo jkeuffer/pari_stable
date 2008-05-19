@@ -1678,7 +1678,7 @@ static GEN
 _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
 {
   long i, v = varn(x), l = lg(a);
-  GEN ch, d, y = cgetg(l,t_VEC);
+  GEN ch, y = cgetg(l,t_VEC);
 
   for (i=1; i<l; i++)
   {
@@ -1690,9 +1690,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
       if (!ch) continue;
       return ch;
     }
-    d = ZX_gcd(ZX_deriv(ch), ch);
-    if (degpol(d)) ch = gdivexact(ch,d);
-
+    (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
     if (canon_pol(ch) < 0 && pta) gel(a,i) = gneg_i(gel(a,i));
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Zs\n", ch);
     gel(y,i) = ch;
@@ -1813,8 +1811,7 @@ static GEN
 get_polmin_w(CG_data *d, long k)
 {
   GEN g = get_pol(d, gel(d->ZKembed,k));
-  GEN h = ZX_gcd(g, ZX_deriv(g));
-  if (degpol(h)) g = gdivexact(g,h);
+  (void)ZX_gcd_all(g, ZX_deriv(g), &g);
   return g;
 }
 

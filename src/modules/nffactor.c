@@ -54,7 +54,7 @@ typedef struct
   GEN dn;
 } nfcmbf_t;
 
-/* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
+/* P,Q in Z[X,Y], T in Z[Y] irreducible. compute GCD in Q[Y]/(T)[X].
  *
  * We essentially follow M. Encarnacion "On a modular Algorithm for computing
  * GCDs of polynomials over number fields" (ISSAC'94).
@@ -68,72 +68,77 @@ typedef struct
  * rarely succeed, and even if it does the polynomial we get has sensible
  * coefficients, so the full division will not be too costly.
  *
- * FIXME: Handle rational coefficient for P and Q.
  * If not NULL, den must a a multiple of the denominator of the gcd,
- * for example the discriminant of nf.
+ * for example the discriminant of T.
  *
- * NOTE: if nf is not irreducible, nfgcd may loop forever, esp. if gcd | nf */
+ * NOTE: if T is not irreducible, nfgcd may loop forever, esp. if gcd | T */
 GEN
-nfgcd(GEN P, GEN Q, GEN nf, GEN den)
+nfgcd_all(GEN P, GEN Q, GEN T, GEN den, GEN *Pnew)
 {
-  pari_sp ltop = avma;
-  GEN sol, mod = NULL;
-  long x = varn(P);
-  long y = varn(nf);
-  long d = degpol(nf);
-  GEN lP, lQ;
-  if (!signe(P) || !signe(Q)) return zeropol(x);
+  pari_sp btop, st_lim, ltop = avma;
+  GEN lP, lQ, M, dsol, R, ax, bo, sol, mod = NULL;
+  long vP = varn(P), vT = varn(T), dT = degpol(T), dM = 0, dR;
+  ulong p;
+  byteptr primepointer;
+
+  if (!signe(P)) { if (Pnew) *Pnew = zeropol(vT); return gcopy(Q); }
+  if (!signe(Q)) { if (Pnew) *Pnew = pol_1(vT);   return gcopy(P); }
   /*Compute denominators*/
-  if (!den) den = ZX_disc(nf);
+  if (!den) den = ZX_disc(T);
   lP = leading_term(P);
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
-    den = mulii(den, gcdii(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
-  { /*Modular GCD*/
-    pari_sp btop = avma, st_lim = stack_lim(btop, 1);
-    ulong p;
-    long dM=0, dR;
-    GEN M, dsol;
-    GEN R, ax, bo;
-    byteptr primepointer = init_modular(&p);
-    for (;;)
+    den = mulii(den, gcdii(ZX_resultant(lP, T), ZX_resultant(lQ, T)));
+
+  btop = avma; st_lim = stack_lim(btop, 1);
+  primepointer = init_modular(&p);
+  for (;;)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
+    /*Discard primes dividing disc(T) or lc(PQ) */
+    if (!smodis(den, p)) continue;
+    if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
+    /*Discard primes when modular gcd does not exist*/
+    if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,vT),
+                           ZXX_to_FlxX(Q,p,vT),
+                           ZX_to_Flx(T,p), p)) == NULL) continue;
+    dR = degpol(R);
+    if (dR == 0) { avma = ltop; if (Pnew) *Pnew = P; return pol_1(vP); }
+    if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
+
+    R = RgXX_to_RgM(FlxX_to_ZXX(R), dT);
+    /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
+    if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
+    if (low_stack(st_lim, stack_lim(btop, 1)))
     {
-      NEXT_PRIME_VIADIFF_CHECK(p, primepointer);
-      /*Discard primes dividing disc(T) or lc(PQ) */
-      if (!smodis(den, p)) continue;
-      if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
-      /*Discard primes when modular gcd does not exist*/
-      if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,y),
-			     ZXX_to_FlxX(Q,p,y),
-			     ZX_to_Flx(nf,p), p)) == NULL) continue;
-      dR = degpol(R);
-      if (dR == 0) return pol_1(x);
-      if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
-
-      R = RgXX_to_RgM(FlxX_to_ZXX(R), d);
-      /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
-      if (!mod || dR < dM) { M = R; mod = utoipos(p); dM = dR; continue; }
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-      {
-	if (DEBUGMEM>1) pari_warn(warnmem,"nfgcd");
-	gerepileall(btop, 2, &M, &mod);
-      }
-
-      ax = muliu(Fp_inv(utoipos(p), mod), p);
-      M = ZM_add(R, ZM_Z_mul(ZM_sub(M, R), ax));
-      mod = muliu(mod, p);
-      M = FpM_red(M, mod);
-      /* I suspect it must be better to take amax > bmax*/
-      bo = sqrti(shifti(mod, -1));
-      if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
-      sol = RgM_to_RgXX(sol,x,y);
-      dsol = Q_primpart(sol);
-      if (gcmp0(RgXQX_pseudorem(P, dsol, nf))
-       && gcmp0(RgXQX_pseudorem(Q, dsol, nf))) break;
+      if (DEBUGMEM>1) pari_warn(warnmem,"nfgcd");
+      gerepileall(btop, 2, &M, &mod);
     }
+
+    ax = muliu(Fp_inv(utoipos(p), mod), p);
+    M = ZM_add(R, ZM_Z_mul(ZM_sub(M, R), ax));
+    mod = muliu(mod, p);
+    M = FpM_red(M, mod);
+    /* I suspect it must be better to take amax > bmax*/
+    bo = sqrti(shifti(mod, -1));
+    if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
+    sol = RgM_to_RgXX(sol,vP,vT);
+    dsol = Q_primpart(sol);
+
+    R = RgXQX_pseudorem(Q, dsol, T);
+    if (signe(R)) continue;
+    if (Pnew)
+      *Pnew = RgXQX_pseudodivrem(P, dsol, T, &R);
+    else
+      R = RgXQX_pseudorem(P, dsol, T);
+    if (signe(R)) continue;
+    gerepileall(ltop, Pnew? 2: 1, &dsol, Pnew);
+    return dsol; /* both remainders are 0 */
   }
-  return gerepilecopy(ltop, sol);
 }
+GEN
+nfgcd(GEN P, GEN Q, GEN T, GEN den)
+{ return nfgcd_all(P,Q,T,den,NULL); }
 
 GEN
 nffactormod(GEN nf, GEN x, GEN pr)
@@ -170,7 +175,7 @@ QXQX_normalize(GEN P, GEN T)
     long t = typ(P0);
     if (t == t_POL && !degpol(P0)) { P0 = gel(P0,2); t = t_FRAC; }
     if (is_rational_t(t))
-      P = gdiv(P, P0);
+      P = RgX_Rg_div(P, P0);
     else
       P = RgXQX_RgXQ_mul(P, QXQ_inv(P0,T), T);
   }
@@ -198,7 +203,7 @@ GEN
 nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
-  GEN A, g, T, den;
+  GEN A, T, den;
   long d;
 
   if (!nf) return nfrootsQ(pol);
@@ -217,9 +222,8 @@ nfroots(GEN nf,GEN pol)
 
   A = Q_primpart(A);
   den = get_den(&nf, T);
-  g = nfgcd(A, RgX_deriv(A), T, den == gen_1? gel(nf,4): mulii(gel(nf,4), den));
-
-  if (degpol(g)) A = RgXQX_div(A, QXQX_normalize(g, T), T);
+  (void)nfgcd_all(A, RgX_deriv(A), T,
+                  den == gen_1? gel(nf,4): mulii(gel(nf,4), den), &A);
   A = Q_primpart( QXQX_normalize(A, T) );
   A = nfsqff(nf,A,1, den);
   A = gerepileupto(av, RgXQV_to_mod(A, T));
@@ -369,7 +373,7 @@ fact_from_sqff(GEN rep, GEN A, GEN B, GEN y, GEN T, GEN bad)
 GEN
 nffactor(GEN nf,GEN pol)
 {
-  GEN bad, A, B, G, y, T, den, rep = cgetg(3, t_MAT);
+  GEN bad, A, B, y, T, den, rep = cgetg(3, t_MAT);
   pari_sp av = avma;
   long dA;
   pari_timer ti;
@@ -394,10 +398,8 @@ nffactor(GEN nf,GEN pol)
 
   den = get_den(&nf, T);
   bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);
-  G = nfgcd(A, RgX_deriv(A), T, bad);
+  (void)nfgcd_all(A, RgX_deriv(A), T, bad, &B);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
-
-  B = (degpol(G) == 0)? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
   y = nfsqff(nf,B,0, den);
   if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
 
@@ -1505,7 +1507,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
 GEN
 polfnf(GEN a, GEN T)
 {
-  GEN rep = cgetg(3, t_MAT), A, B, G, y, dent, bad;
+  GEN rep = cgetg(3, t_MAT), A, B, y, dent, bad;
   long dA;
   int tmonic;
 
@@ -1520,8 +1522,7 @@ polfnf(GEN a, GEN T)
   }
   bad = dent = ZX_disc(T);
   if (tmonic) dent = indexpartial(T, dent);
-  G = nfgcd(A,RgX_deriv(A), T, dent);
-  B = (degpol(G) == 0)? A: Q_primpart( RgXQX_div(A, QXQX_normalize(G,T), T) );
+  (void)nfgcd_all(A,RgX_deriv(A), T, dent, &B);
   y = nfsqff_trager(B, T, dent);
   fact_from_sqff(rep, A, B, y, T, bad);
   return sort_factor_pol(rep, cmp_RgX);

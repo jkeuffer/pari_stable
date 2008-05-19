@@ -2568,6 +2568,7 @@ _gcd(GEN a, GEN b)
   return Q_gcd(a,b);
 }
 
+#if 0
 /* ceil( || p ||_oo / lc(p) ) */
 static GEN
 maxnorm(GEN p)
@@ -2584,19 +2585,20 @@ maxnorm(GEN p)
   m = divii(m, gel(p,n));
   return gerepileuptoint(av, addis(absi(m),1));
 }
+#endif
 
 /* A, B in Z[X] */
 GEN
-ZX_gcd(GEN A, GEN B)
+ZX_gcd_all(GEN A, GEN B, GEN *Anew)
 {
-  GEN a, b, q, qp, H, Hp, g, bound = NULL;
-  long m, n;
+  GEN R, a, b, q, qp, H, Hp, g;
+  long m, n, vA = varn(A);
   ulong p;
-  pari_sp av, avlim;
+  pari_sp ltop = avma, av, avlim;
   byteptr d;
 
-  if (!signe(A)) return ZX_copy(B);
-  if (!signe(B)) return ZX_copy(A);
+  if (!signe(A)) { if (Anew) *Anew = zeropol(vA); return ZX_copy(B); }
+  if (!signe(B)) { if (Anew) *Anew = pol_1(vA); return ZX_copy(A); }
 
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (is_pm1(g)) g = NULL;
@@ -2612,7 +2614,10 @@ ZX_gcd(GEN A, GEN B)
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
-    if (m == 0) { H = pol_1(varn(A)); break; } /* coprime. DONE */
+    if (m == 0) { /* coprime. DONE */
+      avma = ltop; if (Anew) *Anew = A;
+      return pol_1(vA);
+    }
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
     if (!g) /* make sure lead(H) = g mod p */
@@ -2624,41 +2629,31 @@ ZX_gcd(GEN A, GEN B)
     }
     if (m < n)
     { /* First time or degree drop [all previous p were as above; restart]. */
-      H = ZX_init_CRT(Hp,p,varn(A));
+      H = ZX_init_CRT(Hp,p,vA);
       q = utoipos(p); n = m; continue;
     }
-    if (DEBUGLEVEL>5)
-      msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
-
-    qp = muliu(q,p);
-    if (ZX_incremental_CRT(&H, Hp, q, qp, p))
-    { /* H stable: check divisibility */
-      if (g) {
-	if (!bound)
-	{
-	  GEN mA = maxnorm(A), mB = maxnorm(B);
-	  if (cmpii(mA, mB) > 0) mA = mB;
-	  bound = gclone( shifti(mulii(mA, g), n+1) );
-	  if (DEBUGLEVEL>5)
-	    msgtimer("bound 2^%ld. Goal 2^%ld", expi(q),expi(bound));
-	}
-	if (cmpii(qp, bound) < 0) goto next;
-	H = primpart(H);
-	gunclone(bound); break;
-      }
-      if (gcmp0(RgX_rem(A,H)) && gcmp0(RgX_rem(B,H))) break; /* DONE */
-      if (DEBUGLEVEL) fprintferr("QX_gcd: trial division failed");
-    }
-next:
-    q = qp;
+    if (DEBUGLEVEL>5) msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
     if (low_stack(avlim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) pari_warn(warnmem,"QX_gcd");
       gerepileall(av, 2, &H, &q);
     }
+
+    qp = muliu(q,p);
+    if (!ZX_incremental_CRT(&H, Hp, q, qp, p)) { q = qp; continue; }
+    /* H stable: check divisibility */
+    R = RgX_pseudorem(B,H); q = qp;
+    if (signe(R)) continue;
+    if (Anew)
+      *Anew = RgX_pseudodivrem(A, H, &R);
+    else
+      R = RgX_pseudorem(A, H);
+    if (signe(R)) continue;
+    return H;
   }
-  return H;
 }
+GEN
+ZX_gcd(GEN A, GEN B) { return ZX_gcd_all(A,B,NULL); }
 
 /* A0 and B0 in Q[X] */
 GEN

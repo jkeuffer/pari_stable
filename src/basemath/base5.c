@@ -891,7 +891,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   pol = lift(pol);
   for (j=1; j<=n; j++)
   {
-    GEN p1, newpol;
+    GEN p1, newpol, L;
 
     p1 = gel(I,j); al = gmul(gcoeff(p1,1,1),gel(O,j));
     p1 = coltoalg(nf,gel(al,n));
@@ -900,12 +900,10 @@ rnfpolred(GEN nf, GEN pol, long prec)
     newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
     newpol = Q_primpart(newpol);
 
-    p1 = nfgcd(newpol, RgX_deriv(newpol), nfpol, gel(nf,4));
-    if (degpol(p1) > 0) newpol = RgXQX_div(newpol, p1, nfpol);
-    p1 = leading_term(newpol);
-    if (typ(p1) != t_POL) p1 = scalarpol(p1, varn(nfpol));
-    newpol = RgXQX_div(newpol, p1, nfpol);
-    gel(w,j) = newpol;
+    (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, gel(nf,4), &newpol);
+    L = leading_term(newpol);
+    gel(w,j) = (typ(L) == t_POL)? RgXQX_div(newpol, L, nfpol)
+                                : RgX_Rg_div(newpol, L);
   }
   return gerepilecopy(av,w);
 }
