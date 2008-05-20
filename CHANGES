@@ -211,7 +211,7 @@ RM 28- partitions()
    29- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
    30- library functions ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all,
-       RgXQX_pseudodivrem
+       RgXQX_pseudodivrem, Flx_roots_naive.
 
   Removed
     1- obsolete library functions extract and matextract

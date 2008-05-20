@@ -189,7 +189,7 @@ root_mod_even(GEN f, ulong p)
 }
 
 /* by checking f(0..p-1) */
-static GEN
+GEN
 Flx_roots_naive(GEN f, ulong p)
 {
   long d = degpol(f), n = 0;

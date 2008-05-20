@@ -2043,6 +2043,7 @@ long    ZX_isirreducible(GEN x);
 
 GEN     FlxX_resultant(GEN u, GEN v, ulong p, long sx);
 GEN     Flx_FlxY_resultant(GEN a, GEN b, ulong pp);
+GEN     Flx_roots_naive(GEN f, ulong p);
 GEN     FpV_polint(GEN xa, GEN ya, GEN p, long v);
 GEN     FpX_FpXQ_compo(GEN f,GEN x,GEN T,GEN p);
 GEN     FpX_FpXQV_compo(GEN f,GEN x,GEN T,GEN p);
