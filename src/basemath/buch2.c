@@ -2020,7 +2020,7 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
-  GEN m, u = lllint(gmul(G, I));
+  GEN m, u = lllint(ZM_mul(G, I));
   m = ZM_ZC_mul(I, gel(u,1));
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Zs\n",m);
