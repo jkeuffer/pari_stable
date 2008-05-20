@@ -916,12 +916,12 @@ in the following example:
 \fun{GEN}{gadd[z]}{GEN x, GEN y[, GEN z]} followed by the explicit
 description of the function
 
-\kbd{GEN \key{gadd}(GEN x, GEN y)}
+\fun{GEN}{gadd}{GEN x, GEN y}
 
 \noindent which creates its result on the stack, returning a \kbd{GEN} pointer
 to it, and the parts in brackets indicate that there exists also a function
 
-\kbd{void \key{gaddz}(GEN x, GEN y, GEN z)}
+\fun{void}{gaddz}{GEN x, GEN y, GEN z}
 
 \noindent which assigns its result to the pre-existing object
 \kbd{z}, leaving the stack unchanged. All such functions are obtained using
@@ -1380,7 +1380,8 @@ types), and of type \typ{REAL} otherwise.
 \funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
 the \typ{INT} or \typ{REAL} \kbd{x} and~\kbd{y}. The function
 \kbd{mpdivz} does not exist (its semantic would change drastically
-depending on the type of the \kbd{z} argument).
+depending on the type of the \kbd{z} argument), and neither do
+\kbd{mprem[z]} nor \kbd{mpmod[z]} (specific to integers).
 
 \funno{GEN}{\op si[z]}{long s, GEN x[, GEN z]} applies \op\ to the
 \kbd{long}~\kbd{s} and the \typ{INT}~\kbd{x}.
@@ -4426,11 +4427,11 @@ comparison function:
 
 \subsec{Generic unary operators}
 
-\funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
+\fun{GEN}{gneg[z]}{GEN x[, GEN z]} yields $-\kbd{x}$.
 
 \fun{GEN}{gneg_i}{GEN x} shallow function yielding $-\kbd{x}$.
 
-\funno{GEN}{gabs[\key{z}]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
+\fun{GEN}{gabs[z]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
 
 \fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
 
@@ -4444,21 +4445,21 @@ comparison function:
 
 \fun{GEN}{gdiv[z]}{GEN x, GEN y[, GEN z]}
 
-\fun{GEN}{gaddgs[z]}{GEN x, long s[, GEN z]}
+\fun{GEN}{gaddgs}{GEN x, long s[, GEN z]}
 
-\fun{GEN}{gaddsg[z]}{GEN s, GEN x[, GEN z]}
+\fun{GEN}{gaddsg}{GEN s, GEN x[, GEN z]}
 
-\fun{GEN}{gsubgs[z]}{GEN x, long s[, GEN z]}
+\fun{GEN}{gsubgs}{GEN x, long s[, GEN z]}
 
-\fun{GEN}{gsubsg[z]}{GEN s, GEN x[, GEN z]}
+\fun{GEN}{gsubsg}{GEN s, GEN x[, GEN z]}
 
-\fun{GEN}{gmulgs[z]}{GEN x, long s[, GEN z]}
+\fun{GEN}{gmulgs}{GEN x, long s[, GEN z]}
 
-\fun{GEN}{gmulsg[z]}{GEN s, GEN x[, GEN z]}
+\fun{GEN}{gmulsg}{GEN s, GEN x[, GEN z]}
 
-\fun{GEN}{gdivgs[z]}{GEN x, long s[, GEN z]}
+\fun{GEN}{gdivgs}{GEN x, long s[, GEN z]}
 
-\fun{GEN}{gdivsg[z]}{GEN s, GEN x[, GEN z]}
+\fun{GEN}{gdivsg}{GEN s, GEN x[, GEN z]}
 
 \subsec{Divisibility, Euclidean division}
 
@@ -4475,7 +4476,7 @@ of \kbd{x} and~\kbd{y}.
 \fun{GEN}{gdivent[z]}{GEN x, GEN y[, GEN z]} yields the true Euclidean
 quotient of \kbd{x} and the \typ{INT} or \typ{POL}~\kbd{y}.
 
-\fun{GEN}{gdiventsg[z]}{long s, GEN y[, GEN z]}, as \kbd{gdivent}
+\fun{GEN}{gdiventsg}{long s, GEN y[, GEN z]}, as \kbd{gdivent}
 except that \kbd{x} is a \kbd{long}.
 
 \fun{GEN}{gdiventgs[z]}{GEN x, long s[, GEN z]}, as \kbd{gdivent}
@@ -4487,10 +4488,10 @@ is also allowed, in which case the remainder is the unique real $r$ such that
 $0 \leq r < |\kbd{y}|$ and $\kbd{y} = q\kbd{x} + r$ for some (in fact unique)
 integer $q$.
 
-\fun{GEN}{gmodsg[z]}{long s, GEN y[, GEN z]} as \kbd{gmod}, except \kbd{x} is
+\fun{GEN}{gmodsg}{long s, GEN y[, GEN z]} as \kbd{gmod}, except \kbd{x} is
 a \kbd{long}.
 
-\fun{GEN}{gmodgs[z]}{GEN x, long s[, GEN z]} as \kbd{gmod}, except \kbd{y} is
+\fun{GEN}{gmodgs}{GEN x, long s[, GEN z]} as \kbd{gmod}, except \kbd{y} is
 a \kbd{long}.
 
 \fun{GEN}{gdivmod}{GEN x, GEN y, GEN *r} If \kbd{r} is not equal to
@@ -4632,11 +4633,11 @@ part.
 \noindent The names and prototypes of the functions corresponding
 to \op\ are as follows:
 
-\funno{GEN}{g\op[z]}{GEN x, GEN y[, GEN z]}
+\funno{GEN}{g\op}{GEN x, GEN y}
 
-\funno{GEN}{g\op gs[z]}{GEN x, long s[, GEN z]}
+\funno{GEN}{g\op gs}{GEN x, long s}
 
-\funno{GEN}{g\op sg[z]}{long s, GEN y[, GEN z]}
+\funno{GEN}{g\op sg}{long s, GEN y}
 
 \fun{GEN}{gpow}{GEN x, GEN y, long l} creates $\kbd{x}^{\kbd{y}}$. If
 \kbd{y} is a \typ{INT}, return \kbd{powgi(x,y)} (the precision \kbd{l} is not
@@ -4652,6 +4653,16 @@ binary powering.
 
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
 into~\kbd{x} for the variable number~\kbd{v}.
+
+In addition we also have the obsolete forms:
+
+\fun{void}{gaddz}{GEN x, GEN y, GEN z}
+
+\fun{void}{gsubz}{GEN x, GEN y, GEN z}
+
+\fun{void}{gmulz}{GEN x, GEN y, GEN z}
+
+\fun{void}{gdivz}{GEN x, GEN y, GEN z}
 
 \subsec{Miscellaneous functions}
 
@@ -5569,15 +5580,15 @@ prefix\kbd{mp} even though \typ{INT} inputs are forbidden:
 $n\geq 1$.
 
 
-\fun{GEN}{mpcos}{GEN x} returns $\cos(x)$.
+\fun{GEN}{mpcos[z]}{GEN x[, GEN z]} returns $\cos(x)$.
 
-\fun{GEN}{mpsin}{GEN x} returns $\sin(x)$.
+\fun{GEN}{mpsin[z]}{GEN x[, GEN z]} returns $\sin(x)$.
 
-\fun{GEN}{mplog}{GEN x} returns $\log(x)$. We must have $x > 0$ since the
-result must be a \typ{REAL}. Use \kbd{glog} for the general case, where
-you want such computations as $\log -1 = i$.
+\fun{GEN}{mplog[z]}{GEN x[, GEN z]} returns $\log(x)$. We must have $x > 0$
+since the result must be a \typ{REAL}. Use \kbd{glog} for the general case,
+where you want such computations as $\log -1 = i$.
 
-\fun{GEN}{mpexp}{GEN x} returns $\exp(x)$.
+\fun{GEN}{mpexp[z]}{GEN x[, GEN z]} returns $\exp(x)$.
 
 \fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
 \kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if

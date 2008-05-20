@@ -193,8 +193,6 @@ enum manage_var_t {
 #define gopssz(f, x, y, z)  STMT_START {\
   pari_sp __av = avma; affii(f((x),(y)), (z)); avma=__av; } STMT_END
 
-#define mptruncz(x,y)  gopgz(mptrunc,(x),(y))
-#define mpfloorz(x,y)  gopgz(mpfloor,(x),(y))
 #define mpaddz(x,y,z)  gopggz(mpadd,(x),(y),(z))
 #define addsiz(s,y,z)  gopsgz(addsi,(s),(y),(z))
 #define addsrz(s,y,z)  gopsgz(addsr,(s),(y),(z))
@@ -220,7 +218,6 @@ enum manage_var_t {
 #define mulirz(x,y,z)  gopggz(mulir,(x),(y),(z))
 #define mulriz(x,y,z)  gopggz(mulir,(y),(x),(z))
 #define mulrrz(x,y,z)  gopggz(mulrr,(x),(y),(z))
-#define mpdvmdz(x,y,z,t) (dvmdiiz((x),(y),(z),(t))
 #define addssz(s,y,z)  gopssz(addss,(s),(y),(z))
 #define modssz(s,y,z)  gopssz(modss,(s),(y),(z))
 #define mulssz(s,y,z)  gopssz(mulss,(s),(y),(z))

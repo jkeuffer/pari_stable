@@ -234,7 +234,8 @@ RM 28- partitions()
        gdivsgz, gmaxgsz, gmaxsgz, gmingsz, gminsgz, gmodgsz, gmodsgz, gmulgsz,
        gmulsgz, gsubgsz, gsubsgz, gachz, gacosz, gashz, gasinz, gatanz, gathz,
        gchz, gcosz, gcotanz, gexpz, ggamdz, ggammaz, glngammaz, glogz, gpsiz,
-       gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz, TRgopgz
+       gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz, TRgopgz,
+       mpfloorz, mptruncz, mpdvmdz
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
