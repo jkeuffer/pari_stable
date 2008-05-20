@@ -570,7 +570,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
       {
 	GEN w = gadd(gmul(gaddgs(a,k-1),u), gmul(gaddgs(p3,1-k),v));
 	gmulz(divru(q,k),v, u);
-	gdivgsz(w,k,v);
+	gaffect(gdivgs(w,k), v);
 	mulrrz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);

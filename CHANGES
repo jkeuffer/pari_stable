@@ -234,6 +234,11 @@ RM 28- partitions()
        + set_sign_mod_idele]
    17- obsolete undocumented library function ideleaddone().
    18- unused undocumented library functions os_open/os_read/os_close
+   19- useless macros gaddgsz, gaddsgz, gdiventgsz, gdiventsgz, gdivgsz,
+       gdivsgz, gmaxgsz, gmaxsgz, gmingsz, gminsgz, gmodgsz, gmodsgz, gmulgsz,
+       gmulsgz, gsubgsz, gsubsgz, gachz, gacosz, gashz, gasinz, gatanz, gathz,
+       gchz, gcosz, gcotanz, gexpz, ggamdz, ggammaz, glngammaz, glogz, gpsiz,
+       gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
