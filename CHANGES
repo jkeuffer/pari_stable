@@ -233,6 +233,7 @@ RM 28- partitions()
    16- obsolete library function element_powmodidele() [use element_powmodideal
        + set_sign_mod_idele]
    17- obsolete undocumented library function ideleaddone().
+   18- unused undocumented library functions os_open/os_read/os_close
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

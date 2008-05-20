@@ -3184,15 +3184,6 @@ try_pipe(const char *cmd, int fl)
 #endif
 }
 
-void
-os_close(long fd)
-{
-#ifdef WINCE
-  CloseHandle((HANDLE)fd);
-#else
-  close(fd);
-#endif
-}
 typedef void (*pari_sighandler_t)(int);
 
 pari_sighandler_t
@@ -3214,6 +3205,16 @@ os_signal(int sig, pari_sighandler_t f)
 #endif
 }
 
+#if 0
+void
+os_close(long fd)
+{
+#ifdef WINCE
+  CloseHandle((HANDLE)fd);
+#else
+  close(fd);
+#endif
+}
 void
 os_read(long fd, char ch[], long s)
 {
@@ -3224,7 +3225,6 @@ os_read(long fd, char ch[], long s)
   (void)read(fd,ch,s);
 #endif
 }
-
 long
 os_open(const char *s, int mode)
 {
@@ -3241,6 +3241,7 @@ os_open(const char *s, int mode)
 #endif
   return fd;
 }
+#endif
 
 char *
 os_getenv(const char *s)
