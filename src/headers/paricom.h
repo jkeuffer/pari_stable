@@ -182,12 +182,6 @@ enum manage_var_t {
 /*            result is gaffect-ed to last parameter               */
 /*                                                                 */
 /*******************************************************************/
-#define TRgopgz(f, x, y, fstr)  STMT_START {\
-  GEN __y = (y);\
-  long prec = precision(__y);\
-  pari_sp __av = avma;\
-  if (!prec) pari_err(infprecer, fstr);\
-  gaffect(f(x), __y); avma=__av; } STMT_END
 #define gopgz(f, x, y)  STMT_START {\
   pari_sp __av = avma; gaffect(f(x), (y)); avma=__av; } STMT_END
 #define gopggz(f, x, y, z)  STMT_START {\
