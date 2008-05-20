@@ -311,7 +311,7 @@ affir(GEN x, GEN y)
     }
     for (i=2; i<ly; i++,xd=int_precW(xd)) y[i]=*xd;
     /* lx > ly: round properly */
-    if (x[2+lx-ly] & HIGHBIT) roundr_up_ip(y, ly);
+    if (x[lx-ly+1] & HIGHBIT) roundr_up_ip(y, ly);
   }
 }
 
