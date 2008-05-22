@@ -5,8 +5,14 @@ Prototype: GVE
 Help: sumdiv(n,X,expr): sum of expression expr, X running over the divisors
  of n
 Doc: sum of expression \var{expr} over the positive divisors of $n$.
- 
+ This function is a trivial wrapper essentially equivalent to
+ \bprog
+   D = divisors(n);
+   for (i = 1, #D, X = D[i]; eval(expr))
+ @eprog\noindent (except that \kbd{X} is lexically scoped to the \kbd{sumdiv}
+ loop).
  Arithmetic functions like \tet{sigma} use the multiplicativity of the
- underlying expression to speed up the computation. In the present version
- \vers, there is no way to indicate that \var{expr} is multiplicative in
- $n$, hence specialized functions should be preferred whenever possible.
+ underlying expression to speed up the computation. Since there is no way to
+ indicate that \var{expr} is multiplicative in $n$, specialized functions
+ should always be preferred.
+ %\syn{NO}
