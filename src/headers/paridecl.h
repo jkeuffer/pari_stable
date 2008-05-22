@@ -668,7 +668,6 @@ GEN     gispsp(GEN x);
 GEN     gissquareall(GEN x, GEN *pt);
 GEN     gissquare(GEN x);
 GEN     gkronecker(GEN x, GEN y);
-GEN     gmillerrabin(GEN n, long k);
 GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 GEN     gracine(GEN a);

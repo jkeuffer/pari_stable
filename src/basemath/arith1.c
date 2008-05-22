@@ -2391,26 +2391,17 @@ isprime(GEN x)
 
 GEN
 gispseudoprime(GEN x, long flag)
-{
-  if (flag == 0) return map_proto_lG(BSW_psp,x);
-  return gmillerrabin(x, flag);
-}
+{ return flag? map_proto_lGL(millerrabin, x, flag): map_proto_lG(BSW_psp,x); }
 
 long
 ispseudoprime(GEN x, long flag)
-{
-  if (flag == 0) return BSW_psp(x);
-  return millerrabin(x, flag);
-}
+{ return flag? millerrabin(x, flag): BSW_psp(x); }
 
 GEN
 gispsp(GEN x) { return map_proto_lG(ispsp,x); }
 
 long
 ispsp(GEN x) { return millerrabin(x,1); }
-
-GEN
-gmillerrabin(GEN n, long k) { return map_proto_lGL(millerrabin,n,k); }
 
 /*********************************************************************/
 /**                                                                 **/
