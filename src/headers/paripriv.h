@@ -114,6 +114,12 @@ GEN  sumpos0(GEN a, GEN code, long flag,long prec);
 GEN  vecteursmall(GEN nmax, GEN code);
 GEN  zbrent0(GEN a, GEN b, GEN code, long prec);
 
+GEN     get_lex(long vn);
+long    loop_break(void);
+void    pop_lex(void);
+void    push_lex(GEN a);
+void    set_lex(long vn, GEN x);
+
 /* multiprecision */
 GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);

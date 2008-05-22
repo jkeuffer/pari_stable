@@ -1320,13 +1320,8 @@ void    closure_evalvoid(GEN C);
 void    closure_reset(void);
 GEN     closure_trapgen(long numerr, GEN C);
 void    freeep(entree *ep);
-GEN     get_lex(long vn);
-long    loop_break(void);
 GEN     next0(long n);
-void    pop_lex(void);
-void    push_lex(GEN a);
 GEN     return0(GEN x);
-void    set_lex(long vn, GEN x);
 
 /* FF.c */
 
