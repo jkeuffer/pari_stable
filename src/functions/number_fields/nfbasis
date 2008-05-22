@@ -33,6 +33,7 @@ Doc: \idx{integral basis} of the number
  is desired: only factors with exponents greater or equal to 2 will be
  considered.
  
-Variant: An extended version is \fun{GEN}{nfbasis}{GEN x, GEN *d, long flag,
- GEN fa = NULL}, where \kbd{*d} receives the discriminant of the number field
+Variant: An extended version is
+ \fun{GEN}{nfbasis}{GEN x, GEN *d, long flag, GEN fa = NULL}, where \kbd{*d}
+ receives the discriminant of the number field
  (\emph{not} of the polynomial $x$).
