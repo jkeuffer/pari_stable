@@ -80,6 +80,7 @@ BA 29- missing GC in the leftrightpow functions
    71- tuning problems in bnfinit
        bnfinit(polredabs(quadhilbert(-2939))) --> oo loop
    72- minor inaccuracy in GMP kernel (affir)
+   73- missing GC in gamma / lngamma
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

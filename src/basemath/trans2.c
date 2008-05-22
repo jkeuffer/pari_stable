@@ -1126,12 +1126,18 @@ cxgamma(GEN s0, int dolog, long prec)
 
   nnx = gaddgs(s, nn);
   a = ginv(nnx); invn2 = gsqr(a);
+  av2 = avma; avlim = stack_lim(av2,3);
   tes = divrunu(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL>5) msgtimer("Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
   {
     u = divrunu(bernreal(i,prec), i-1); /* Bi / i(i-1) */
     tes = gadd(u, gmul(invn2,tes));
+    if (low_stack(avlim,stack_lim(av2,3)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"gamma");
+      tes = gerepileupto(av2, tes);
+    }
   }
   if (DEBUGLEVEL>5) msgtimer("Bernoulli sum");
 
