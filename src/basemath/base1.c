@@ -879,20 +879,6 @@ quicktrace(GEN x, GEN sym)
   return p1;
 }
 
-/* T = trace(w[i]), x = sum x[i] w[i], x[i] integer */
-static GEN
-trace_col(GEN x, GEN T)
-{
-  pari_sp av = avma;
-  GEN t = gen_0;
-  long i, l = lg(x);
-
-  t = mulii(gel(x,1),gel(T,1));
-  for (i=2; i<l; i++)
-    if (signe(x[i])) t = addii(t, mulii(gel(x,i),gel(T,i)));
-  return gerepileuptoint(av, t);
-}
-
 /* pol belonging to Z[x], return a monic polynomial generating the same field
  * as pol (x-> ax+b)) set lead = NULL if pol was monic (after dividing
  * by the content), and to to leading coefficient otherwise.
@@ -938,25 +924,23 @@ nf_get_sign(GEN nf, long *r1, long *r2)
 static GEN
 get_Tr(GEN mul, GEN x, GEN basden)
 {
-  GEN tr,T,T1,sym, bas = gel(basden,1), den = gel(basden,2);
-  long i,j,n = lg(bas)-1;
-  T = cgetg(n+1,t_MAT);
-  T1 = cgetg(n+1,t_COL);
-  sym = polsym(x, n-1);
+  GEN t, bas = gel(basden,1), den = gel(basden,2);
+  long i, j, n = lg(bas)-1;
+  GEN T = cgetg(n+1,t_MAT), TW = cgetg(n+1,t_COL), sym = polsym(x, n-1);
 
-  gel(T1,1) = utoipos(n);
+  gel(TW,1) = utoipos(n);
   for (i=2; i<=n; i++)
   {
-    tr = quicktrace(gel(bas,i), sym);
-    if (den && den[i]) tr = diviiexact(tr,gel(den,i));
-    gel(T1,i) = tr; /* tr(w[i]) */
+    t = quicktrace(gel(bas,i), sym);
+    if (den && den[i]) t = diviiexact(t,gel(den,i));
+    gel(TW,i) = t; /* tr(w[i]) */
   }
-  gel(T,1) = T1;
+  gel(T,1) = TW;
   for (i=2; i<=n; i++)
   {
-    gel(T,i) = cgetg(n+1,t_COL); gcoeff(T,1,i) = gel(T1,i);
-    for (j=2; j<=i; j++)
-      gcoeff(T,i,j) = gcoeff(T,j,i) = trace_col(gel(mul,j+(i-1)*n), T1);
+    gel(T,i) = cgetg(n+1,t_COL); gcoeff(T,1,i) = gel(TW,i);
+    for (j=2; j<=i; j++) /* Tr(W[i]W[j]) */
+      gcoeff(T,i,j) = gcoeff(T,j,i) = ZV_dotproduct(gel(mul,j+(i-1)*n), TW);
   }
   return T;
 }
@@ -992,19 +976,19 @@ GEN
 get_mul_table(GEN x,GEN basden,GEN invbas)
 {
   long i,j, n = degpol(x);
-  GEN z, d, bas, den, mul = cgetg(n*n+1,t_MAT);
+  GEN z, d, w, den, mul = cgetg(n*n+1,t_MAT);
 
   if (typ(basden[1]) != t_VEC) basden = get_bas_den(basden); /*integral basis*/
-  bas = gel(basden,1);
+  w   = gel(basden,1);
   den = gel(basden,2);
-  /* i = 1 split for efficiency, assume bas[1] = 1 */
+  /* i = 1 split for efficiency, assume w[1] = 1 */
   for (j=1; j<=n; j++)
     gel(mul,j) = gel(mul,1+(j-1)*n) = col_ei(n, j);
   for (i=2; i<=n; i++)
     for (j=i; j<=n; j++)
     {
       pari_sp av = avma;
-      z = RgX_rem(RgX_mul(gel(bas,j),gel(bas,i)), x);
+      z = (i == j)? RgXQ_sqr(gel(w,i), x): RgXQ_mul(gel(w,i),gel(w,j), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
@@ -1018,34 +1002,46 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
 
 /* as get_Tr, mul_table not precomputed */
 static GEN
-make_Tr(GEN x, GEN w)
+make_Tr(GEN x, GEN basden)
 {
   long i,j, n = degpol(x);
-  GEN p1,p2,t,d;
+  GEN c, t, d, w;
   GEN sym = cgetg(n+2,t_VEC);
   GEN den = cgetg(n+1,t_VEC);
   GEN T = cgetg(n+1,t_MAT);
-  pari_sp av;
 
   sym = polsym(x, n-1);
-  p1 = get_bas_den(w);
-  w   = gel(p1,1);
-  den = gel(p1,2);
-  for (i=1; i<=n; i++)
+  w   = gel(basden,1); /* W[i] = w[i]/den[i] */
+  den = gel(basden,2);
+  /* assume W[1] = 1, case i = 1 split for efficiency */
+  c = cgetg(n+1,t_COL); gel(T,1) = c;
+  gel(c, 1) = utoipos(n);
+  for (j=2; j<=n; j++)
   {
-    p1 = cgetg(n+1,t_COL); gel(T,i) = p1;
-    for (j=1; j<i ; j++) gel(p1,j) = gcoeff(T,i,j);
+    pari_sp av = avma;
+    t = quicktrace(gel(w,j), sym);
+    if (den)
+    {
+      d = gel(den,j);
+      if (d) t = diviiexact(t, d);
+    }
+    gel(c,j) = gerepileuptoint(av, t);
+  }
+  for (i=2; i<=n; i++)
+  {
+    c = cgetg(n+1,t_COL); gel(T,i) = c;
+    for (j=1; j<i ; j++) gel(c,j) = gcoeff(T,i,j);
     for (   ; j<=n; j++)
     {
-      av = avma;
-      p2 = grem(gmul(gel(w,i),gel(w,j)), x);
-      t = quicktrace(p2, sym);
+      pari_sp av = avma;
+      t = (i == j)? RgXQ_sqr(gel(w,i), x): RgXQ_mul(gel(w,i),gel(w,j), x);
+      t = quicktrace(t, sym);
       if (den)
       {
 	d = _mulii(gel(den,i),gel(den,j));
 	if (d) t = diviiexact(t, d);
       }
-      gel(p1,j) = gerepileuptoint(av, t);
+      gel(c,j) = gerepileuptoint(av, t); /* Tr (W[i]W[j]) */
     }
   }
   return T;
@@ -1329,7 +1325,9 @@ set_LLL_basis(nfbasic_t *T, GEN *pro)
   GEN B = T->bas;
   if (T->r1 == degpol(T->x)) {
     pari_sp av = avma;
-    GEN u = LLLint(make_Tr(T->x,B), 100, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM, NULL);
+    GEN u, basden = T->basden;
+    if (!basden) basden = get_bas_den(B);
+    u = LLLint(make_Tr(T->x,basden), 100, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM, NULL);
     B = gerepileupto(av, gmul(B, u));
   }
   else
