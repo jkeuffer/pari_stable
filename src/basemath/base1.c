@@ -1643,11 +1643,9 @@ remove_duplicates(GEN y, GEN a)
   GEN z;
 
   if (l < 2) return;
-  z = new_chunk(3);
-  gel(z,1) = y;
-  gel(z,2) = a; (void)sort_factor_pol(z, gcmp);
+  z = mkmat2(y, a); (void)sort_factor_pol(z, cmpii);
   for  (k=1, i=2; i<l; i++)
-    if (!gequal(gel(y,i), gel(y,k)))
+    if (!ZX_equal(gel(y,i), gel(y,k)))
     {
       k++;
       a[k] = a[i];
@@ -1676,7 +1674,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
       return ch;
     }
     (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
-    if (canon_pol(ch) < 0 && pta) gel(a,i) = gneg_i(gel(a,i));
+    if (canon_pol(ch) < 0 && pta) gel(a,i) = RgX_neg(gel(a,i));
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Zs\n", ch);
     gel(y,i) = ch;
   }
