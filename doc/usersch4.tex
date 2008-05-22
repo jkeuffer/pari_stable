@@ -2065,10 +2065,9 @@ can then compare with the C prototypes as they stand in \kbd{paridecl.h}.
 \misctitle{Remark}: If you need to implement complicated control statements
 (probably for some improved summation functions), you need to know
 how the parser implements closures and lexicals and how the evaluator lets
-you deal with them (in particular the
-\tet{push_lex} and \tet{pop_lex} functions). None of this is documented.
-Check and adapt the source code in \kbd{language/sumiter.c} and
-\kbd{language/intnum.c}.
+you deal with them, in particular the \tet{push_lex} and \tet{pop_lex}
+functions. Check their descriptions and adapt the source code in
+\kbd{language/sumiter.c} and \kbd{language/intnum.c}.
 
 \subsec{Integration with \kbd{gp} as a shared module}
 

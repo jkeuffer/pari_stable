@@ -1307,11 +1307,11 @@ void    writetex(const char *s, GEN g);
 
 void    allocatemem0(GEN z);
 GEN     break0(long n);
-void    closure_disassemble(GEN n);
 GEN     closure_callgen1(GEN C, GEN x);
 GEN     closure_callgen2(GEN C, GEN x, GEN y);
 GEN     closure_callgenall(GEN C, long n, ...);
 GEN     closure_callgenvec(GEN C, GEN args);
+void    closure_disassemble(GEN n);
 GEN     closure_evalgen(GEN C);
 GEN     closure_evalnobrk(GEN C);
 GEN     closure_evalres(GEN C);
@@ -1319,8 +1319,12 @@ void    closure_evalvoid(GEN C);
 void    closure_reset(void);
 GEN     closure_trapgen(long numerr, GEN C);
 void    freeep(entree *ep);
+GEN     get_lex(long vn);
 GEN     next0(long n);
+void    pop_lex(void);
+void    push_lex(GEN a);
 GEN     return0(GEN x);
+void    set_lex(long vn, GEN x);
 
 /* FF.c */
 
