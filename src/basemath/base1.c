@@ -289,21 +289,8 @@ tschirnhaus(GEN x)
   avma=av2; return gerepileupto(av,u);
 }
 
-int
-gpolcomp(GEN p1, GEN p2)
-{
-  long j = lg(p1)-2;
-  int s;
-
-  if (lg(p2)-2 != j)
-    pari_err(bugparier,"gpolcomp (different degrees)");
-  for (; j>=2; j--)
-  {
-    s = absi_cmp(gel(p1,j), gel(p2,j));
-    if (s) return s;
-  }
-  return 0;
-}
+static int
+cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX(&absi_cmp, x, y); }
 
 /* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic in Z[X].
  * Return POL and set *ptlead = L */
@@ -1364,7 +1351,7 @@ better_pol(GEN xn, GEN dxn, GEN x, GEN dx)
   int fl;
   if (!x) return 1;
   fl = absi_cmp(dxn, dx);
-  return (fl < 0 || (!fl && gpolcomp(xn, x) < 0));
+  return (fl < 0) || (fl == 0 && cmp_abs_ZX(xn, x) < 0);
 }
 
 static GEN
@@ -2001,7 +1988,7 @@ findmindisc(GEN *py, GEN *pa)
   {
     k = v[i];
     if (!absi_equal(gel(discs,k), dmin)) break;
-    if (gpolcomp(gel(y,k),z) < 0) { z = gel(y,k); b = gel(a,k); }
+    if (cmp_abs_ZX(gel(y,k),z) < 0) { z = gel(y,k); b = gel(a,k); }
   }
   *py = z; *pa = b;
 }

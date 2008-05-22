@@ -779,7 +779,6 @@ GEN     get_nf(GEN x, long *t);
 GEN     get_nfpol(GEN x, GEN *nf);
 GEN     get_primeid(GEN x);
 GEN     glambdak(GEN nfz, GEN s, long prec);
-int     gpolcomp(GEN p1, GEN p2);
 GEN     gzetak(GEN nfz, GEN s, long prec);
 GEN     gzetakall(GEN nfz, GEN s, long flag, long prec);
 GEN     initalg(GEN x, long prec);
