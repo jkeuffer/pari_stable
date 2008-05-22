@@ -378,7 +378,7 @@ Buchray(GEN bnf,GEN module,long flag)
   cyc = gmael(bigres,1,2);
   gen = gmael(bigres,1,3); ngen = lg(cyc)-1;
 
-  bid = Idealstar(nf,module,1);
+  bid = Idealstar(nf,module, nf_GEN|nf_INIT);
   cycbid = gmael(bid,2,2);
   genbid = gmael(bid,2,3);
   Ri = lg(cycbid)-1; lh = ngen+Ri;
@@ -512,7 +512,7 @@ bnrclassno(GEN bnf,GEN ideal)
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
   bigres = gel(bnf,8); h = gmael(bigres,1,1); /* class number */
-  bid = Idealstar(nf,ideal,0);
+  bid = Idealstar(nf,ideal,nf_INIT);
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) { avma = av; return icopy(h); }
   D = get_dataunit(bnf, bid); /* (Z_K/f)^* / units ~ Z^n / D */
@@ -1692,7 +1692,7 @@ chk_listBU(GEN L, const char *s) {
   }
 }
 
-/* Given lists of [zidealstarinit, unit ideallogs], return lists of ray class
+/* Given lists of [bid, unit ideallogs], return lists of ray class
  * numbers */
 GEN
 bnrclassnolist(GEN bnf,GEN L)
@@ -2090,10 +2090,10 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   sgnU = zsignunits(bnf, NULL, 1);
 
   if (allarch) arch = const_vec(r1, gen_1);
-  bidp = Idealstar(nf, mkvec2(gen_1, arch), 0);
+  bidp = Idealstar(nf, mkvec2(gen_1, arch), nf_INIT);
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
-    bidp = Idealstar(nf,matid(degk),0);
+    bidp = Idealstar(nf,matid(degk), nf_INIT);
     if (r1>15) pari_err(talker,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {
@@ -2112,7 +2112,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
   /* The goal is to compute Ray (lists of bnrclassno). Z contains "zsimps",
-   * simplified zidealstarinit, from which bnrclassno is easy to compute.
+   * simplified bid, from which bnrclassno is easy to compute.
    * Once p > sqbou, delete Z[i] for i > sqbou and compute directly Ray */
   Ray = Z;
   while (p[2] <= bound)
@@ -2143,7 +2143,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       q = Q; ideal = pr;
       for (l=1;; l++) /* Q <= bound */
       {
-	bidp = Idealstar(nf,ideal,0);
+	bidp = Idealstar(nf,ideal, nf_INIT);
 	embunit = zlog_units_noarch(nf, U, bidp);
 	for (i=Q; i<=bound; i+=Q)
 	{

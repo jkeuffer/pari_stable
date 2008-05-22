@@ -30,8 +30,13 @@ Doc: outputs a \var{bid} structure,
  
  If $\fl=2$, as $\fl=1$, but including generators, which wastes some time.
  
- If $\fl=0$, \emph{deprecated}. Only outputs $(\Z_K/I)^*$ as an abelian group,
+ If $\fl=0$, only outputs $(\Z_K/I)^*$ as an abelian group,
  i.e as a 3-component vector $[h,d,g]$: $h$ is the order, $d$ is the vector of
  SNF\sidx{Smith normal form} cyclic components and $g$ the corresponding
- generators. This flag is deprecated: it is in fact slightly faster
- to compute a true \var{bid} structure, which contains much more information.
+ generators.
+Variant: Instead the above hardcoded numerical flags, one should rather use
+ \fun{GEN}{Idealstar}{GEN nf, GEN ideal, long flag}, where \kbd{flag} is
+ an or-ed combination of \tet{nf_GEN} (include generators) and \tet{nf_INIT}
+ (return a full \kbd{bid}, not a group), possibly $0$. This offers
+ one more combination: gen, but no init.
+

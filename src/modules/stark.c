@@ -699,9 +699,9 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   muslambda = gmul(den, element_div(nf, mu, lambda));
 
   /* compute a system of generators of (Ok/cond)^* cond1-positive */
-  zid = zidealstarinitgen(nf, cond0);
-  cyc = gmael(zid, 2, 2);
-  gen = gmael(zid, 2, 3);
+  zid = Idealstar(nf, cond0, nf_GEN);
+  cyc = gel(zid, 2);
+  gen = gel(zid, 3);
   nz = lg(gen) - 1;
 
   nchi = cgetg(nChar+1, t_VEC);

@@ -1646,9 +1646,9 @@ add_grp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
 }
 
 /* Compute [[ideal,arch], [h,[cyc],[gen]], idealfact, [liste], U]
-   gen not computed unless add_gen != 0 */
+   flag may include nf_GEN | nf_INIT */
 GEN
-Idealstar(GEN nf, GEN ideal,long add_gen)
+Idealstar(GEN nf, GEN ideal, long flag)
 {
   pari_sp av = avma;
   long i, j, k, nbp, R1, nbgen;
@@ -1722,7 +1722,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
     }
     /* assert(cp == nbgen) */
     h = ZM_hnfall(h,NULL,0);
-    cyc = smithrel(h, &U, add_gen? &u1: NULL);
+    cyc = smithrel(h, &U, (flag & nf_GEN)? &u1: NULL);
   }
   else
   {
@@ -1730,7 +1730,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
     gen = gel(sarch,2); nbgen = lg(gen)-1;
     cyc = const_vec(nbgen, gen_2);
     U = matid(nbgen);
-    if (add_gen) u1 = gen_1;
+    if (flag & nf_GEN) u1 = gen_1;
   }
 
   y = cgetg(6,t_VEC);
@@ -1739,32 +1739,29 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   gel(y,4) = lists;
   gel(y,5) = U;
   add_grp(nf, u1, cyc, gen, y);
+  if (!(flag & nf_INIT)) y = gel(y,2);
   return gerepilecopy(av, y);
 }
 
-GEN
-zidealstarinitgen(GEN nf, GEN ideal)
-{ return Idealstar(nf,ideal,1); }
-GEN
-zidealstarinit(GEN nf, GEN ideal)
-{ return Idealstar(nf,ideal,0); }
 /* FIXME: obsolete */
 GEN
+zidealstarinitgen(GEN nf, GEN ideal)
+{ return Idealstar(nf,ideal, nf_INIT|nf_GEN); }
+GEN
+zidealstarinit(GEN nf, GEN ideal)
+{ return Idealstar(nf,ideal, nf_INIT); }
+GEN
 zidealstar(GEN nf, GEN ideal)
-{
-  pari_sp av = avma;
-  GEN y = Idealstar(nf,ideal,1);
-  return gerepilecopy(av,gel(y,2));
-}
+{ return Idealstar(nf,ideal, nf_GEN); }
 
 GEN
 idealstar0(GEN nf, GEN ideal,long flag)
 {
   switch(flag)
   {
-    case 0: return zidealstar(nf,ideal);
-    case 1: return zidealstarinit(nf,ideal);
-    case 2: return zidealstarinitgen(nf,ideal);
+    case 0: return Idealstar(nf,ideal, nf_GEN);
+    case 1: return Idealstar(nf,ideal, nf_INIT);
+    case 2: return Idealstar(nf,ideal, nf_INIT|nf_GEN);
     default: pari_err(flagerr,"idealstar");
   }
   return NULL; /* not reached */
@@ -1981,13 +1978,14 @@ zlog_unitsarch(GEN sgnU, GEN bid)
   return U;
 }
 
-/*  flag &1 : generators, otherwise no
+/*  flag & nf_GEN : generators, otherwise no
  *  flag &2 : units, otherwise no
  *  flag &4 : ideals in HNF, otherwise bid */
 static GEN
 Ideallist(GEN bnf, ulong bound, long flag)
 {
-  const long do_gen = flag & 1, do_units = flag & 2, big_id = !(flag & 4);
+  const long do_units = flag & 2, big_id = !(flag & 4);
+  const long istar_flag = (flag & nf_GEN) | nf_INIT;
   byteptr ptdif = diffptr;
   pari_sp lim, av, av0 = avma;
   long i, j, l;
@@ -2000,7 +1998,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   nf = checknf(bnf);
   if ((long)bound <= 0) return empty;
   id = matid(degpol(nf[1]));
-  if (big_id) id = Idealstar(nf,id,do_gen);
+  if (big_id) id = Idealstar(nf,id, istar_flag);
 
   /* z[i] will contain all "objects" of norm i. Depending on flag, this means
    * an ideal, a bid, or a couple [bid, log(units)]. Such objects are stored
@@ -2039,7 +2037,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
 	ID.L = utoipos(l);
 	if (big_id) {
 	  if (l > 1) ID.prL = idealpow(nf,pr,ID.L);
-	  ID.prL = Idealstar(nf,ID.prL,do_gen);
+	  ID.prL = Idealstar(nf,ID.prL, istar_flag);
 	  if (do_units) ID.emb = zlog_units_noarch(nf, U, ID.prL);
 	}
 	for (iQ = Q,i = 1; iQ <= bound; iQ += Q,i++)

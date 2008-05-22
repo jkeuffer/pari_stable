@@ -682,9 +682,9 @@ entree oldfonctions[]={
 {"zeta",1,(void*)gzeta,3,"Gp","zeta(s)=Riemann zeta function at s"},
 {"zetak",2,(void*)gzetak,6,"GGp","zetak(nfz,s)=Dedekind zeta function of the number field nfz at s, where nfz is the vector computed by initzeta (NOT by initalg)"},
 {"zideallog",3,(void*)zideallog,6,"GGG","zideallog(nf,x,bid)=if bid is a big ideal as given by zidealstarinit or zidealstarinitgen , gives the vector of exponents on the generators bid[2][3] (even if these generators have not been computed)"},
-{"zidealstar",2,(void*)zidealstar,6,"GG","zidealstar(nf,I)=3-component vector v, giving the structure of (Z_K/I)^*. v[1] is  the order (i.e. phi(I)), v[2] is a vector of cyclic components, and v[3]  is a vector giving the corresponding generators"},
-{"zidealstarinit",2,(void*)zidealstarinit,6,"GG","zidealstarinit(nf,I)=6-component vector [I,v,fa,f2,U,V] where v is as in zidealstar without the generators, fa is the prime ideal factorisation of I and f2, U and V are technical but essential to work in (Z_K/I)^*"},
-{"zidealstarinitgen",2,(void*)zidealstarinitgen,6,"GG","zidealstarinitgen(nf,I)=6-component vector [I,v,fa,f2,U,V] where v is as in zidealstar fa is the prime ideal factorisation of I and f2, U and V are technical but essential to work in (Z_K/I)^*"},
+{"zidealstar",2,(void*)idealstar0,6,"GGD0,L,","zidealstar(nf,I)=3-component vector v, giving the structure of (Z_K/I)^*. v[1] is  the order (i.e. phi(I)), v[2] is a vector of cyclic components, and v[3]  is a vector giving the corresponding generators"},
+{"zidealstarinit",2,(void*)idealstar0,6,"GGD1,L,","zidealstarinit(nf,I)=6-component vector [I,v,fa,f2,U,V] where v is as in zidealstar without the generators, fa is the prime ideal factorisation of I and f2, U and V are technical but essential to work in (Z_K/I)^*"},
+{"zidealstarinitgen",2,(void*)idealstar0,6,"GGD2,L,","zidealstarinitgen(nf,I)=6-component vector [I,v,fa,f2,U,V] where v is as in zidealstar fa is the prime ideal factorisation of I and f2, U and V are technical but essential to work in (Z_K/I)^*"},
 {"znstar",1,(void*)znstar,4,"G","znstar(n)=3-component vector v, giving the structure of (Z/nZ)^*. v[1] is  the order (i.e. phi(n)), v[2] is a vector of cyclic components, and v[3]  is a vector giving the corresponding generators"},
 
 {NULL,0,NULL,0,NULL,NULL} /* sentinel */

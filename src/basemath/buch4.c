@@ -222,7 +222,7 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
   if (q > itos(gel(pr,3))<<1)  return -1;
   p1 = gpowgs(coltoalg(nf, gel(pr,2)), la);
 
-  zinit = zidealstarinit(nf, idealpows(nf,pr,q));
+  zinit = Idealstar(nf, idealpows(nf,pr,q), nf_INIT);
   if (!check2(nf,gdiv(gx,p1),zinit)) res = -1;
   return res;
 }
@@ -290,7 +290,7 @@ qpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (equaliu(gel(pr,1), 2))
   { /* tough case */
-    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
+    zinit = Idealstar(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(T),pr,zinit)) return 1;
   }
@@ -323,7 +323,7 @@ zpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (equaliu(gel(pr,1),2))
   {
-    zinit = zidealstarinit(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
+    zinit = Idealstar(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
   }
   else

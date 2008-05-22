@@ -403,7 +403,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
 static GEN
 logall(GEN nf, GEN vec, long lW, long mginv, long ell, GEN pr, long ex)
 {
-  GEN m, M, bid = zidealstarinitgen(nf, idealpows(nf, pr, ex));
+  GEN m, M, bid = Idealstar(nf, idealpows(nf, pr, ex), nf_INIT);
   long ellrank, i, l = lg(vec);
 
   ellrank = prank(gmael(bid,2,2), ell);
