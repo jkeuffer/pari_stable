@@ -255,7 +255,7 @@ partitions(long n, long amax)
 
   /* partitions with 1 element */
   pi = cgetg(n+1, t_VEC); l = 1;
-  if (n <= amax) gel(pi, l++) = mkvecsmall(n);
+  if (n <= amax) gel(pi, l++) = mkvec( mkvecsmall(n) );
   /* vector of partitions of length p, elements in the range of 1.. amax */
   for (p = 2; p <= n; ++p)
   {
