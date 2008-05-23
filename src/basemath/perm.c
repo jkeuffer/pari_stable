@@ -794,15 +794,8 @@ GEN
 dicyclicgroup(GEN g1, GEN g2, long s1, long s2)
 {
   GEN H = cgetg(3, t_VEC);
-  GEN p3,p4;
-  p3 = cgetg(3, t_VEC);
-  gel(p3,1) = vecsmall_copy(g1);
-  gel(p3,2) = vecsmall_copy(g2);
-  p4 = cgetg(3,t_VECSMALL);
-  p4[1] = s1;
-  p4[2] = s2;
-  gel(H,1) = p3;
-  gel(H,2) = p4;
+  gel(H,1) = mkvec2(vecsmall_copy(g1), vecsmall_copy(g2));
+  gel(H,2) = mkvecsmall2(s1, s2);
   return H;
 }
 
