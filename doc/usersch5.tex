@@ -5413,6 +5413,116 @@ with \kbd{nf} coefficients to the residue field; returns an \kbd{FqX}.
 \fun{GEN}{FqX_to_nfX}{GEN Q, GEN modpr} lifts an \kbd{FqX} to a polynomial
 with coefficients in \kbd{nf}.
 
+\section{Permutation groups}
+
+The permutation groups facility is meant to deal with subgroups of Galois
+groups obtained by \tet{galoisinit} and thus is currently limited to weakly
+super-solvable groups.
+
+A permutation group \var{grp} is a subgroup of a transitive subgroup of $S_n$
+for some $n$ which is called below the \emph{domain} of the subgroup.  The
+trivial group does not have a domain.
+
+The permutation group \var{grp} is represented by a \typ{VEC} with two
+components:
+
+$\var{grp}[1]$ is a generating subset $[s_1,\ldots,s_g]$ of \var{grp}
+expressed as a vector of permutations of length $n$.
+
+$\var{grp}[2]$ contains the relative orders $[o_1,\ldots,o_g]$ of
+the generators $\var{grp}[1]$.
+
+See \tet{galoisinit} for the technical details.
+
+\fun{GEN}{checkgroup}{GEN gal, GEN *elts} checks whether \var{gal} is a
+permutation group or a Galois group. Returns the underlying permutation
+group and set \var{elts} to the list of elements or to \kbd{NULL} if it is not
+known.
+
+\fun{GEN}{galois_group}{GEN gal} return the underlying permutation group of the
+Galois group \var{gal}.
+
+\fun{GEN}{cyclicgroup}{GEN g, long s} returns the cyclic group with generator
+$g$ of order $s$.
+
+\fun{GEN}{dicyclicgroup}{GEN g1, GEN g2, long s1, long s2} returns the group
+with generators \var{g1}, \var{g2} with respecting relative orders \var{s1},
+\var{s2}.
+
+\fun{GEN}{abelian_group}{GEN v} let v be a \typ{VECSMALL} seen as the SNF of
+a small abelian group, return its regular representation.
+
+\fun{long}{group_domain}{GEN grp} returns the \kbd{domain} of the
+\emph{non-trivial} permutation group \var{grp}.
+
+\fun{GEN}{group_elts}{GEN grp, long n} returns the list of elements of the
+permutation group \var{grp} of domain \var{n} as permutations.
+
+\fun{long}{group_order}{GEN grp} returns the order of the permutation group
+\var{grp} (which is the product of the relative orders).
+
+\fun{long}{group_isabelian}{GEN grp} returns $1$ the the permutation group
+\var{grp} is Abelian, else $0$.
+
+\fun{GEN}{group_abelianHNF}{GEN grp, GEN elts} if \var{grp} is not Abelian,
+returns \kbd{NULL}, else returns the HNF matrix of \var{grp} with respect to
+the generating family $\var{grp}[1]$. If \var{elts} is no \kbd{NULL}, it must
+be the list of elements of \var{grp}.
+
+\fun{GEN}{group_abelianSNF}{GEN grp, GEN elts} if \var{grp} is not Abelian,
+returns \kbd{NULL}, else returns its cyclic decomposition. If \var{elts} is no
+\kbd{NULL}, it must be the list of elements of \var{grp}.
+
+\fun{long}{group_isA4S4}{GEN grp} return $1$ if the permutation group
+\var{grp} is isomorphic to $A_4$, $2$ if it is isomorphic to $S_4$ and
+$0$ else. This is mainly to deal with the idiosynchrasy of the format. 
+
+\fun{GEN}{group_leftcoset}{GEN G, GEN g} where $G$ is a
+permutation group and $g$ a permutation of the same domain,
+the the left coset $gG$ as a vector of permutation.
+
+\fun{GEN}{group_rightcoset}{GEN G, GEN g} where $G$ is a
+permutation group and $g$ a permutation of the same domain,
+the the right coset $Gg$  as a vector of permutation.
+
+\fun{long}{group_perm_normalize}{GEN G, GEN g} where $G$ is a
+permutation group and $g$ a permutation of the same domain, return $1$ if 
+$gGg^-1=G$, else $0$.
+
+\fun{GEN}{group_quotient}{GEN G, GEN H}, where $G$ is a permutation group and
+$H$ is a subgroup of $G$, returns the quotient map $G\rightarrow G/H$
+as an abstract data structure.
+
+\fun{GEN}{quotient_perm}{GEN C, GEN g} where $C$ is the quotient map
+$G\rightarrow G/H$ for some subgroup $H$ of $G$ and $g$ an element of $G$,
+return the image of $g$ by $C$ (i.e. the coset $gH$).
+
+\fun{GEN}{quotient_group}{GEN C, GEN G} where $C$ is the quotient map
+$G\rightarrow G/H$ for some \emph{normal} subgroup $H$ of $G$, return the
+quotient group $G/H$ as a permutation group.
+
+\fun{GEN}{quotient_subgroup_lift}{GEN C, GEN H, GEN S} where $C$ is the
+quotient map $G\rightarrow G/H$ for some group $G$ normalizing $H$ and $S$ is
+a subgroup of $G/H$, return the inverse image of $S$ by $C$.
+
+\fun{GEN}{group_subgroups}{GEN grp} returns the list of subgroups of the
+permutation group \var{grp}.
+
+\fun{GEN}{groupelts_abelian_group}{GEN elts} where \var{elts} is the list of
+elements of an \emph{Abelian} permutation group, returns the corresponding
+permutation group.
+
+\fun{GEN}{groupelts_center}{GEN elts} where \var{elts} is the list of elements
+of a permutation group, returns the list of elements of the center of the
+group.
+
+\fun{GEN}{group_export}{GEN grp, long format} exports a permutation group
+to another format, see \tet{galoisexport}.
+
+\fun{long}{group_ident}{GEN grp, GEN elts} returns the GAP4 index of the group
+\var{grp}, see \tet{galoisidentify}. If \var{elts} is no \kbd{NULL}, it must be
+the list of elements of \var{grp}.
+
 \section{Miscellaneous routines}
 
 \subsec{Linear algebra}
