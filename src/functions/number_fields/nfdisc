@@ -1,6 +1,6 @@
 Function: nfdisc
 Section: number_fields
-C-Name: nfdiscf0
+C-Name: nfdisc0
 Prototype: GD0,L,DG
 Help: nfdisc(x,{flag=0},{fa}): discriminant of the number field defined by
  the polynomial x using round 4. Optional args flag and fa are as in nfbasis
@@ -16,4 +16,4 @@ Doc: \idx{field discriminant} of the number field defined by the integral,
  2: use the round 2 algorithm, instead of the default \idx{round 4}. This
  should be slower except maybe for polynomials of small degree and
  coefficients.
-Variant: Also available is \fun{GEN}{discf}{GEN x} ($\fl=0$).
+Variant: Also available is \fun{GEN}{nfdisc}{GEN x} ($\fl=0$).
