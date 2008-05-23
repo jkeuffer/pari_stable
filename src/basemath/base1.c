@@ -290,7 +290,7 @@ tschirnhaus(GEN x)
 }
 
 static int
-cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX(&absi_cmp, x, y); }
+cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX((void*)&absi_cmp, x, y); }
 
 /* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic in Z[X].
  * Return POL and set *ptlead = L */
