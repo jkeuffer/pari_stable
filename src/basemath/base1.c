@@ -1491,11 +1491,16 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   if (DEBUGLEVEL) (void)timer2();
   if (typ(x) == t_POL)
   {
+    nfmaxord_t S;
     RgX_check_ZX(x, "nfinit");
     if (!ZX_isirreducible(x)) pari_err(redpoler, "nfinit");
     x = pol_to_monic(x, &(T->lead));
-    bas = allbase(x, flag, &dx, &dK, &index, &fa);
+    nfmaxord(&S, x, flag, fa);
     if (DEBUGLEVEL) msgtimer("round4");
+    index = S.index;
+    dx = S.dT;
+    dK = S.dK;
+    bas = S.basis;
     r1 = sturm(x);
   }
   else if (is_polbas(x))

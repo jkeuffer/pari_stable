@@ -150,6 +150,7 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    45- [library] rename subres -> resultant, subresall -> resultant_all.
    46- regression tests in src/test/in/ no longer need to end with
        'print("Total time spent: ",gettime)'
+   47- rename library functions discf -> nfdisc, nfdiscf0 -> nfdisc0
 
   Added
     1- library function gpcalloc
@@ -214,6 +215,7 @@ RM 28- partitions()
    30- library functions ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all,
        RgXQX_pseudodivrem, Flx_roots_naive.
    31- library function Idealstar
+   32- library function nfordmax
 
   Removed
     1- obsolete library functions extract and matextract
@@ -239,6 +241,8 @@ RM 28- partitions()
        gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz, TRgopgz,
        mpfloorz, mptruncz, mpdvmdz
    16- obsolete library function gmillerrabin, gpolcomp
+   17- obsolete library functions allbase, base, base2, factoredbase, smallbase,
+       discf2, factoreddiscf, smalldiscf. Use nfbasis0 / nfdisc0 / nfmaxord
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

@@ -77,6 +77,10 @@ static GEN
 buchinitforcefu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS|nf_FORCE); }
 static GEN
 smallbuchinit_c(B_ARGS) { return smallbuchinit(B_ARG1,prec); }
+static GEN
+factoredbase(GEN x, GEN fa) { return nfbasis0(x, 0, fa); }
+static GEN
+factoreddiscf(GEN x, GEN fa) { return nfdisc0(x, 0, fa); }
 
 entree oldfonctions[]={
 {"!_",0,(void*)gnot,13,"G","!_"},
@@ -189,8 +193,8 @@ entree oldfonctions[]={
 {"assmat",1,(void*)matcompanion,8,"G","matcompanion(x)=associated matrix to polynomial x"},
 {"atan",1,(void*)gatan,3,"Gp","atan(x)=inverse tangent of x"},
 {"atanh",1,(void*)gath,3,"Gp","atanh(x)=inverse hyperbolic tangent of x"},
-{"basis",13,(void*)base,6,"Gf","basis(x)=integral basis of the field Q[a], where a is a root of the polynomial x, using the round 4 algorithm"},
-{"basis2",13,(void*)base2,6,"Gf","basis2(x)=integral basis of the field Q[a], where a is a root of the polynomial x, using the round 2 algorithm"},
+{"basis",13,(void*)nfbasis0,6,"GD0,L,DG","basis(x)=integral basis of the field Q[a], where a is a root of the polynomial x, using the round 4 algorithm"},
+{"basis2",13,(void*)nfbasis0,6,"GD2,L,DG","basis2(x)=integral basis of the field Q[a], where a is a root of the polynomial x, using the round 2 algorithm"},
 {"basistoalg",2,(void*)basistoalg,6,"GG","basistoalg(nf,x)=transforms the vertical vector x on the integral basis into an algebraic number"},
 {"bernreal",11,(void*)bernreal,3,"Lp","bernreal(x)=Bernoulli number B_x, as a real number with the current precision"},
 {"bernvec",11,(void*)bernvec,3,"L","bernvec(x)=Vector of rational Bernoulli numbers B_0, B_2,... up to B_(2x)"},
@@ -269,16 +273,16 @@ entree oldfonctions[]={
 {"dirmul",2,(void*)dirmul,7,"GG","dirmul(x,y)=multiplication of the Dirichlet series x by the Dir. series y"},
 {"dirzetak",2,(void*)dirzetak,6,"GG","dirzetak(nf,b)=Dirichlet series of the Dedekind zeta function of the number field nf up to the bound b-1"},
 {"disc",1,(void*)poldisc0,7,"GDn","disc(x)=discriminant of the polynomial x"},
-{"discf",1,(void*)discf,6,"G","discf(x)=discriminant of the number field defined by the polynomial x using round 4"},
-{"discf2",1,(void*)discf2,6,"G","discf2(x)=discriminant of the number field defined by the polynomial x using round 2"},
-{"discrayabs",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D0,L,","discrayabs(bnr,subgroup)=absolute [N,R1,discf] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup"},
-{"discrayabscond",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D2,L,","discrayabscond(bnr,subgroup)=absolute [N,R1,discf] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup. Result is zero if fmodule is not the conductor"},
+{"discf",1,(void*)nfdisc0,6,"GD0,L,DG","discf(x)=discriminant of the number field defined by the polynomial x using round 4"},
+{"discf2",1,(void*)nfdisc0,6,"GD2,L,DG","discf2(x)=discriminant of the number field defined by the polynomial x using round 2"},
+{"discrayabs",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D0,L,","discrayabs(bnr,subgroup)=absolute [N,R1,disc] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup"},
+{"discrayabscond",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D2,L,","discrayabscond(bnr,subgroup)=absolute [N,R1,disc] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup. Result is zero if fmodule is not the conductor"},
 {"discrayabslist",2,(void*)discrayabslist,6,"GG","discrayabslist(bnf,listes)=if listes is a 2-component vector as output by ideallistunit or similar, gives list of corresponding discrayabscond"},
 {"discrayabslistarch",32,(void*)discrayabslistarch,6,"GGL","discrayabslistarch(bnf,arch,bound)=gives list of discrayabscond of all modules up to norm bound with archimedean places arch, in a longvector format"},
 {"discrayabslistarchall",32,(void*)discrayabslistarch,6,"GL","discrayabslistarchall(bnf,bound)=gives list of discrayabscond of all modules up to norm bound with all possible archimedean places arch in reverse lexicographic order, in a longvector format"},
 {"discrayabslistlong",21,(void*)discrayabslistlong,6,"GL","discrayabslistlong(bnf,bound)=gives list of discrayabscond of all modules up to norm bound without archimedean places, in a longvector format"},
-{"discrayrel",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D1,L,","discrayrel(bnr,subgroup)=relative [N,R1,rnfdiscf] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup"},
-{"discrayrelcond",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D3,L,","discrayrelcond(bnr,subgroup)=relative [N,R1,rnfdiscf] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup. Result is zero if module is not the conductor"},
+{"discrayrel",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D1,L,","discrayrel(bnr,subgroup)=relative [N,R1,rnfdisc] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup"},
+{"discrayrelcond",62,(void*)bnrdisc0,6,"GD0,G,D0,G,D3,L,","discrayrelcond(bnr,subgroup)=relative [N,R1,rnfdisc] of the subfield of the ray class field bnr given by buchrayinit, defined by the HNF matrix subgroup. Result is zero if module is not the conductor"},
 {"divisors",1,(void*)divisors,4,"G","divisors(x)=gives a vector formed by the divisors of x in increasing order"},
 {"divres",2,(void*)gdiventres,1,"GG","divres(x,y)=euclidean division of x by y giving as a 2-dimensional column vector the quotient and the remainder"},
 {"divsum",22,(void*)divsum,9,"GVE","divsum(n,X,expr)=sum of expression expr, X running over the divisors of n"},
@@ -296,7 +300,7 @@ entree oldfonctions[]={
 {"factfq",3,(void*)factorff,4,"GGG","factfq(x,p,a)=factorization of the polynomial x in the finite field F_p[X]/a(X)F_p[X]"},
 {"factmod",2,(void*)factmod,4,"GG","factmod(x,p)=factorization mod p of the polynomial x using Berlekamp"},
 {"factor",1,(void*)factor,4,"G","factor(x)=factorization of x"},
-{"factoredbasis",28,(void*)factoredbase,6,"GGf","factoredbasis(x,p)=integral basis of the maximal order defined by the polynomial x, where p is the matrix of the factorization of the discriminant of x"},
+{"factoredbasis",28,(void*)factoredbase,6,"GG","factoredbasis(x,p)=integral basis of the maximal order defined by the polynomial x, where p is the matrix of the factorization of the discriminant of x"},
 {"factoreddiscf",2,(void*)factoreddiscf,6,"GG","factoreddiscf(x,p)=discriminant of the maximal order defined by the polynomial x, where p is the matrix of the factorization of the discriminant of x"},
 {"factoredpolred",2,(void*)factoredpolred,6,"GG","factoredpolred(x,p)=reduction of the polynomial x, where p is the matrix of the factorization of the discriminant of x (gives minimal polynomials only)"},
 {"factoredpolred2",2,(void*)factoredpolred2,6,"GG","factoredpolred2(x,p)=reduction of the polynomial x, where p is the matrix of the factorization of the discriminant of x (gives elements and minimal polynomials)"},
@@ -393,8 +397,8 @@ entree oldfonctions[]={
 {"incgam4",3,(void*)incgam0,3,"GGGp","incgam4(s,x,y)=incomplete gamma function where y=gamma(s) is precomputed"},
 {"indexrank",1,(void*)indexrank,8,"G","indexrank(x)=gives two extraction vectors (rows and columns) for the matrix x such that the exracted matrix is square of maximal rank"},
 {"indsort",1,(void*)indexsort,8,"G","indsort(x)=indirect sorting of the vector x"},
-{"initalg",1,(void*)initalg,6,"Gp","initalg(x)=x being a nonconstant irreducible polynomial, gives the vector: [x,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual),r1+r2 first roots, integral basis, matrix of power basis in terms of integral basis, multiplication table of basis]"},
-{"initalgred",1,(void*)initalgred,6,"Gp","initalgred(x)=x being a nonconstant irreducible polynomial, finds (using polred) a simpler polynomial pol defining the same number field, and gives the vector: [pol,[r1,r2],discf,index,[M,MC,T2,T,different] (see manual), r1+r2 first roots, integral basis, matrix of power basis in terms of integral basis, multiplication table of basis]"},
+{"initalg",1,(void*)initalg,6,"Gp","initalg(x)=x being a nonconstant irreducible polynomial, gives the vector: [x,[r1,r2],nfdisc,index,[M,MC,T2,T,different] (see manual),r1+r2 first roots, integral basis, matrix of power basis in terms of integral basis, multiplication table of basis]"},
+{"initalgred",1,(void*)initalgred,6,"Gp","initalgred(x)=x being a nonconstant irreducible polynomial, finds (using polred) a simpler polynomial pol defining the same number field, and gives the vector: [pol,[r1,r2],nfdisc,index,[M,MC,T2,T,different] (see manual), r1+r2 first roots, integral basis, matrix of power basis in terms of integral basis, multiplication table of basis]"},
 {"initalgred2",1,(void*)initalgred2,6,"Gp","initalgred2(P)=P being a nonconstant irreducible polynomial, gives a two-element vector [nf,mod(a,pol)], where nf is as output by initalgred and mod(a,pol) is a polymod equal to mod(x,P) and pol=nf[1]"},
 {"initell",1,(void*)initell,5,"Gp","initell(x)=x being the vector [a1,a2,a3,a4,a6], gives the vector: [a1,a2,a3,a4,a6,b2,b4,b6,b8,c4,c6,delta,j,[e1,e2,e3],w1,w2,eta1,eta2,q,area]"},
 {"initzeta",1,(void*)initzeta,6,"Gp","initzeta(x)=compute number field information necessary to use zetak, where x is an irreducible polynomial"},
@@ -617,9 +621,9 @@ entree oldfonctions[]={
 {"sin",1,(void*)gsin,3,"Gp","sin(x)=sine of x"},
 {"sinh",1,(void*)gsh,3,"Gp","sinh(x)=hyperbolic sine of x"},
 {"size",10,(void*)sizedigit,2,"lG","size(x)=maximum number of decimal digits minus one of (the coefficients of) x"},
-{"smallbasis",13,(void*)smallbase,6,"Gf","smallbasis(x)=integral basis of the field Q[a], where a is a root of the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
+{"smallbasis",13,(void*)nfbasis0,6,"GD1,L,DG","smallbasis(x)=integral basis of the field Q[a], where a is a root of the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
 {"smallbuchinit",93,(void*)smallbuchinit_c,6,BUCH_PROTO,"smallbuchinit(pol)=small buchinit, which can be converted to a big one using makebigbnf"},
-{"smalldiscf",1,(void*)smalldiscf,6,"G","smalldiscf(x)=discriminant of the number field defined by the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
+{"smalldiscf",1,(void*)nfdisc0,6,"GD1,L,DG","smalldiscf(x)=discriminant of the number field defined by the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
 {"smallfact",1,(void*)smallfact,4,"G","smallfact(x)=partial factorization of the integer x (using only the stored primes)"},
 {"smallinitell",1,(void*)smallinitell,5,"Gp","smallinitell(x)=x being the vector [a1,a2,a3,a4,a6], gives the vector: [a1,a2,a3,a4,a6,b2,b4,b6,b8,c4,c6,delta,j]"},
 {"smallpolred",1,(void*)smallpolred,6,"G","smallpolred(x)=partial reduction of the polynomial x (gives minimal polynomials only)"},

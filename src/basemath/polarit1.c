@@ -1888,10 +1888,10 @@ static GEN
 padicff(GEN x,GEN p,long pr)
 {
   pari_sp av = avma;
-  GEN q, bas, invbas, mul, dK, nf, g, e, dx = absi(ZX_disc(x));
-  long n = degpol(x), v = Z_pvalrem(dx,p,&q);
+  GEN q, invbas, nf, g, e; 
+  long n = degpol(x), v = Z_pvalrem(absi(ZX_disc(x)), p, &q);
+  nfmaxord_t S;
 
-  nf = cgetg(10,t_VEC); gel(nf,1) = x;
   if (is_pm1(q)) {
     e = mkcol(utoi(v));
     g = mkcol(p);
@@ -1899,14 +1899,16 @@ padicff(GEN x,GEN p,long pr)
     e = mkcol2(utoi(v), gen_1);
     g = mkcol2(p, q);
   }
-  bas = nfbasis(x, &dK, 0, mkmat2(g,e));
-  gel(nf,3) = dK;
-  gel(nf,4) = dvdii( diviiexact(dx, dK), p )? p: gen_1;
-  invbas = QM_inv(RgXV_to_RgM(bas,n), gen_1);
-  mul = get_mul_table(x,bas,invbas);
-  gel(nf,7) = bas;
+  nfmaxord(&S, x, 0, mkmat2(g,e));
+
+  nf = cgetg(10,t_VEC);
+  gel(nf,1) = x;
+  gel(nf,3) = S.dK;
+  gel(nf,4) = dvdii(S.index, p)? p: gen_1;
+  invbas = QM_inv(RgXV_to_RgM(S.basis,n), gen_1);
+  gel(nf,7) = S.basis;
   gel(nf,8) = invbas;
-  gel(nf,9) = mul;
+  gel(nf,9) = get_mul_table(x, S.basis, invbas);
   gel(nf,2) = gel(nf,5) = gel(nf,6) = gen_0;
   return gerepileupto(av,padicff2(nf,p,pr));
 }

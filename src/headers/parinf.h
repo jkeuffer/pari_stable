@@ -25,7 +25,17 @@ typedef struct {
   GEN basden; /* [nums(bas), dens(bas)] */
 } nfbasic_t;
 
+typedef struct {
+  GEN dT; /* discriminant of defining polynomial */
+  GEN dK; /* field discriminant */
+  GEN index; /* index of power basis in maximal order */
+  GEN dTP, dTE; /* (possibly partial) factorization of dT, primes / exponents */
+  GEN dKP, dKE; /* (possibly partial) factorization of dK, primes / exponents */
+  GEN basis; /* Z-basis for maximal order */
+} nfmaxord_t;
+
 GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
+void nfmaxord(nfmaxord_t *S, GEN f, long flag, GEN w);
 
 typedef struct {
   GEN x;
@@ -45,7 +55,7 @@ void remake_GM(GEN nf, nffp_t *F, long prec);
 /* for initalg_i */
 #define nf_ROUND2      64
 #define nf_NOROOTS     32
-#define nf_PARTIALFACT 16 /* and allbase */
+#define nf_PARTIALFACT 16 /* and nfmaxord */
 #define nf_RED          8
 #define nf_PARTRED      2
 #define nf_ORIG         1

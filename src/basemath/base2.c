@@ -25,17 +25,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define compat_ROUND2  2
 
 static void
-allbase_check_args(GEN f, long flag, GEN *dx, GEN *ptw)
+nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
-  GEN w = *ptw;
+  GEN dT;
 
   if (DEBUGLEVEL) (void)timer2();
-  if (typ(f)!=t_POL) pari_err(notpoler,"allbase");
-  if (degpol(f) <= 0) pari_err(constpoler,"allbase");
+  if (typ(T)!=t_POL) pari_err(notpoler,"nfmaxord");
+  if (degpol(T) <= 0) pari_err(constpoler,"nfmaxord");
 
-  *dx = w? factorback(w, NULL): ZX_disc(f);
-  if (!signe(*dx)) pari_err(talker,"reducible polynomial in allbase");
-  if (!w) *ptw = auxdecomp(absi(*dx), (flag & nf_PARTIALFACT)? 0: 1);
+  dT = fa? factorback(fa, NULL): ZX_disc(T);
+  if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
+  S->dT = dT;
+  if (!fa) fa = auxdecomp(absi(dT), (flag & nf_PARTIALFACT) == 0);
+  S->dTP = gel(fa,1);
+  S->dTE = vec_to_vecsmall(gel(fa,2));
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
 }
 
@@ -82,13 +85,12 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
   if (signe(p) < 0) { *z = absi(x); return 1; }
   return Z_pvalrem(x, p, z);
 }
-static GEN
-allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
-                    GEN *dK, GEN *index, GEN *ptw)
+static void
+allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
 {
-  GEN a = NULL, da = NULL;
-  long n = degpol(f), lw = lg(w1), i, j, k;
-  for (i=1; i<lw; i++)
+  GEN a = NULL, da = NULL, index, P2, E2, D;
+  long n = degpol(f), lP = lg(P), i, j, k;
+  for (i=1; i<lP; i++)
   {
     GEN M, db, b = gel(ordmax,i);
     if (b == gen_1) continue;
@@ -118,36 +120,33 @@ allbase_from_ordmax(GEN ordmax, GEN w1, GEN f, GEN dx,
       da = mulii(da,db);
       a = ZM_hnfmodid(M, da);
     }
-    if (DEBUGLEVEL>5) fprintferr("Result for prime %Zs is:\n%Zs\n",w1[i],b);
+    if (DEBUGLEVEL>5) fprintferr("Result for prime %Zs is:\n%Zs\n",P[i],b);
   }
   if (da)
   {
-    *index = diviiexact(da, gcoeff(a,1,1));
-    for (j=2; j<=n; j++) *index = mulii(*index, diviiexact(da, gcoeff(a,j,j)));
+    index = diviiexact(da, gcoeff(a,1,1));
+    for (j=2; j<=n; j++) index = mulii(index, diviiexact(da, gcoeff(a,j,j)));
     a = gdiv(ZM_hnfcenter(a), da);
   }
   else
   {
-    *index = gen_1;
+    index = gen_1;
     a = matid(n);
   }
-  *dK = diviiexact(dx, sqri(*index));
+  S->dK = diviiexact(S->dT, sqri(index));
+  S->index = index;
 
-  if (ptw)
+  D = S->dK;
+  P2 = cgetg(lP, t_COL);
+  E2 = cgetg(lP, t_VECSMALL);
+  for (k = j = 1; j < lP; j++)
   {
-    long lfa = 1;
-    GEN W1, W2, D = *dK;
-    W1 = cgetg(lw, t_COL);
-    W2 = cgetg(lw, t_COL);
-    for (j=1; j<lw; j++)
-    {
-      k = safe_Z_pvalrem(D, gel(w1,j), &D);
-      if (k) { gel(W1,lfa) = gel(w1,j); gel(W2,lfa) = utoipos(k); lfa++; }
-    }
-    setlg(W1, lfa);
-    setlg(W2, lfa); *ptw = mkmat2(W1,W2);
+    long v = Z_pvalrem(D, gel(P,j), &D);
+    if (v) { gel(P2,k) = gel(P,j); E2[k] = v; k++; }
   }
-  return RgM_to_RgXV(a, varn(f));
+  setlg(P2, k); S->dKP = P2;
+  setlg(E2, k); S->dKE = P2;
+  S->basis = RgM_to_RgXV(a, varn(f));
 }
 
 /*******************************************************************/
@@ -299,6 +298,7 @@ matinv(GEN x, GEN d)
   return y;
 }
 
+/* epsilon > 1 */
 static GEN
 maxord2(GEN cf, GEN p, long epsilon)
 {
@@ -486,35 +486,24 @@ maxord2(GEN cf, GEN p, long epsilon)
  *
  *  2) discriminant of K (in *y).
  */
-static GEN
-allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
+static void
+allbase2(nfmaxord_t *S, GEN f)
 {
-  GEN ordmax = cgetg(1, t_VEC), w,w1,w2,cf;
-  long n, h, i;
+  GEN cf, ordmax, P = S->dTP, E = S->dTE;
+  long i, lP = lg(P), n = degpol(f);
 
-  w = ptw? *ptw: NULL;
-  allbase_check_args(f,flag,dx, &w);
-  w1 = gel(w,1);
-  w2 = vec_to_vecsmall(gel(w,2));
-  n = degpol(f); h = lg(w1)-1;
-  cf = cgetg(n+1,t_VEC);
-  gel(cf,2) = companion(f);
+  cf = cgetg(n+1,t_VEC); gel(cf,2) = companion(f);
   for (i=3; i<=n; i++) gel(cf,i) = ZM_mul(gel(cf,2), gel(cf,i-1));
-
-  for (i=1; i<=h; i++)
+  ordmax = cgetg(lP, t_VEC);
+  for (i=1; i<lP; i++)
   {
-    if (w2[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
-    if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n",w1[i],w2[i]);
-    ordmax = shallowconcat(ordmax, mkvec( maxord2(cf,gel(w1,i),w2[i]) ));
+    GEN p = gel(P, i);
+    long e = E[i];
+    if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n", p, e);
+    gel(ordmax,i) = e == 1? gen_1: maxord2(cf, p, e);
   }
-  return allbase_from_ordmax(ordmax, w1, f, *dx, dK, index, ptw);
+  allbase_from_ordmax(S, ordmax, P, f);
 }
-
-GEN
-base2(GEN x, GEN *pdK) { return nfbasis(x, pdK, compat_ROUND2, NULL); }
-
-GEN
-discf2(GEN x) { return nfdiscf0(x, compat_ROUND2, NULL); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -525,28 +514,22 @@ GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 
-/* return integer basis. Set dK = disc(K), dx = disc(f), w (possibly partial)
- * factorization of dK. *ptw can be set by the caller, in which case it is
- * taken to be the factorization of disc(f), then overwritten
- * [no consistency check] */
-GEN
-allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
+/* return integer basis. If fa not NULL, taken to be the factorization
+ * of disc(T) [no consistency check] */
+void
+nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
 {
-  VOLATILE GEN w1, w2, ordmax;
-  VOLATILE long lw, i, k;
-  GEN w;
+  VOLATILE GEN P, E, ordmax;
+  VOLATILE long lP, i, k;
 
-  if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,index,ptw);
-  w = ptw? *ptw: NULL;
-  allbase_check_args(f, flag, dx, &w);
-  w1 = gel(w,1);
-  w2 = vec_to_vecsmall(gel(w,2));
-  lw = lg(w1);
+  nfmaxord_check_args(S, T, flag, fa);
+  if (flag & nf_ROUND2) { allbase2(S, T); return; }
+  P = S->dTP; lP = lg(P);
+  E = S->dTE;
   ordmax = cgetg(1, t_VEC);
-  /* "complete" factorization first */
-  for (i=1; i<lw; i++)
+  for (i=1; i<lP; i++)
   {
-    if (w2[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
+    if (E[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -559,44 +542,44 @@ allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       l = lg(u);
       for (k = 1; k < l; k++) gel(u,k) = gcoeff(auxdecomp(gel(u,k), 2),1,1);
 
-      w1[i] = u[1];
-      w1 = shallowconcat(w1, vecslice(u, 2, l-1));
-      N = *dx;
-      w2[i] = Z_pvalrem(N, gel(w1,i), &N);
-      k  = lw;
-      lw = lg(w1);
-      for ( ; k < lw; k++) w2[k] = Z_pvalrem(N, gel(w1,k), &N);
+      P[i] = u[1];
+      P = shallowconcat(P, vecslice(u, 2, l-1));
+      N = S->dT; E[i] = Z_pvalrem(N, gel(P,i), &N);
+      for (k=lP, lP=lg(P); k < lP; k++) E[k] = Z_pvalrem(N, gel(P,k), &N);
     } RETRY {
-      if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n",w1[i],w2[i]);
-      ordmax = shallowconcat(ordmax, mkvec( maxord(gel(w1,i),f,w2[i]) ));
+      if (DEBUGLEVEL) fprintferr("Treating p^k = %Zs^%ld\n",P[i],E[i]);
+      ordmax = shallowconcat(ordmax, mkvec( maxord(gel(P,i),T,E[i]) ));
     } ENDCATCH;
   }
-  return allbase_from_ordmax(ordmax, w1, f, *dx, dK, index, ptw);
+  allbase_from_ordmax(S, ordmax, P, T);
 }
 
 static GEN
 update_fact(GEN x, GEN f)
 {
-  GEN e, q, d = ZX_disc(x), p = gel(f,1);
+  GEN E, Q, d = ZX_disc(x), P = gel(f,1);
   long iq, i, k, l;
-  if (typ(f)!=t_MAT || lg(f)!=3) pari_err(talker,"not a factorisation in nfbasis");
-  l = lg(p);
-  q = cgetg(l,t_COL);
-  e = cgetg(l,t_COL); iq = 1;
+  if (typ(f)!=t_MAT || lg(f)!=3)
+    pari_err(talker,"not a factorisation in nfbasis");
+  l = lg(P);
+  Q = cgetg(l,t_COL);
+  E = cgetg(l,t_COL); iq = 1;
   for (i=1; i<l; i++)
   {
-    k = safe_Z_pvalrem(d, gel(p,i), &d);
-    if (k) { q[iq] = p[i]; gel(e,iq) = utoipos(k); iq++; }
+    k = safe_Z_pvalrem(d, gel(P,i), &d);
+    if (k) { Q[iq] = P[i]; gel(E,iq) = utoipos(k); iq++; }
   }
-  setlg(q,iq); setlg(e,iq);
-  return merge_factor_i(Z_factor(d), mkmat2(q,e));
+  setlg(Q,iq);
+  setlg(E,iq);
+  return merge_factor_i(Z_factor(d), mkmat2(Q,E));
 }
 
 /* FIXME: have to deal with compatibility flags */
 static void
 _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 {
-  GEN x, dx, dK, basis, lead, index;
+  GEN x, lead;
+  nfmaxord_t S;
   long fl = 0;
 
   if (typ(x0)!=t_POL) pari_err(typeer,"nfbasis");
@@ -604,13 +587,12 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   RgX_check_ZX(x0, "nfbasis");
 
   x = pol_to_monic(x0, &lead);
-  if (fa && gcmp0(fa)) fa = NULL; /* compatibility. NULL is the proper arg */
   if (fa && lead) fa = update_fact(x, fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
-  basis = allbase(x, fl, &dx, &dK, &index, &fa);
-  if (pbas) *pbas = RgXV_unscale(basis, lead);
-  if (pdK)  *pdK = dK;
+  nfmaxord(&S, x, fl, fa);
+  if (pbas) *pbas = RgXV_unscale(S.basis, lead);
+  if (pdK)  *pdK = S.dK;
 }
 
 GEN
@@ -620,7 +602,6 @@ nfbasis(GEN x, GEN *pdK, long flag, GEN fa)
   GEN bas; _nfbasis(x, flag, fa, &bas, pdK);
   gerepileall(av, pdK? 2: 1, &bas, pdK); return bas;
 }
-
 GEN
 nfbasis0(GEN x, long flag, GEN fa)
 {
@@ -628,33 +609,15 @@ nfbasis0(GEN x, long flag, GEN fa)
   GEN bas; _nfbasis(x, flag, fa, &bas, NULL);
   return gerepilecopy(av, bas);
 }
-
 GEN
-nfdiscf0(GEN x, long flag, GEN fa)
+nfdisc0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN dK; _nfbasis(x, flag, fa, NULL, &dK);
   return gerepilecopy(av, dK);
 }
-
 GEN
-base(GEN x, GEN *pdK) { return nfbasis(x, pdK, 0, NULL); }
-
-GEN
-smallbase(GEN x, GEN *pdK) { return nfbasis(x, pdK, compat_PARTIAL, NULL); }
-
-GEN
-factoredbase(GEN x, GEN fa, GEN *pdK) { return nfbasis(x, pdK, 0, fa); }
-
-GEN
-discf(GEN x) { return nfdiscf0(x, 0, NULL); }
-
-GEN
-smalldiscf(GEN x) { return nfdiscf0(x, nf_PARTIALFACT, NULL); }
-
-GEN
-factoreddiscf(GEN x, GEN fa) { return nfdiscf0(x, 0, fa); }
-
+nfdisc(GEN x) { return nfdisc0(x, 0, NULL); }
 
 /* return U if Z[alpha] is not maximal or 2*dU < m-1; else return NULL */
 static GEN
