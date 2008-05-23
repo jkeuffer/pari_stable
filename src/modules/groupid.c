@@ -428,7 +428,7 @@ group_ident(GEN G, GEN S)
   pari_sp av = avma;
   long idx = group_ident_i(G, S);
   avma = av;
-  if (!idx) pari_err(impl,"galoisindex for groups of order >127");
+  if (!idx) pari_err(impl,"galoisidentify for groups of order >127");
   return idx;
 }
 
