@@ -1408,7 +1408,6 @@ GEN     map_proto_lGL(long f(GEN,long), GEN x, long y);
 
 long    Q_pval(GEN x, GEN p);
 long    ZX_valuation(GEN x, GEN *Z);
-GEN     cgetimag(void);
 GEN     cgetp(GEN x);
 GEN     cvtop(GEN x, GEN p, long l);
 GEN     cvtop2(GEN x, GEN y);

@@ -181,8 +181,6 @@ cgetp(GEN x)
 }
 
 GEN
-cgetimag(void) { GEN y = cgetg(3,t_COMPLEX); gel(y,1) = gen_0; return y; }
-GEN
 pureimag(GEN x) { return mkcomplex(gen_0, x); }
 
 /*******************************************************************/

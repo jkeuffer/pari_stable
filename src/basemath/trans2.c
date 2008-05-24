@@ -626,23 +626,25 @@ GEN
 gach(GEN x, long prec)
 {
   pari_sp av;
-  GEN a, y, p1;
-  long v;
+  GEN y, p1;
 
   switch(typ(x))
   {
-    case t_REAL:
-      if (signe(x) == 0) { y=cgetimag(); gel(y,2) = acos0(expo(x)); return y; }
-      if (signe(x) > 0 && expo(x) >= 0) return mpach(x); /* x >= 1 */
-      /* -1 < x < 1 */
-      if (expo(x) < 0) { y = cgetimag(); gel(y,2) = mpacos(x); return y; }
-      /* x <= -1 */
-      if (absrnz_egal1(x)) { y = cgetimag(); gel(y,2) = mppi(lg(x)); return y; }
-      y = cgetg(3,t_COMPLEX);
-      av = avma; p1 = mpach(x); togglesign(p1);
-      gel(y,1) = p1;
-      gel(y,2) = mppi(lg(x)); return y;
-
+    case t_REAL: {
+      long s = signe(x), e = expo(x);
+      GEN a, b;
+      if (s > 0 && e >= 0) return mpach(x);
+      /* x < 1 */
+      y = cgetg(3,t_COMPLEX); a = gen_0;
+      if (s == 0) b = acos0(e);
+      else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
+      else {
+        if (!absrnz_egal1(x)) { a = mpach(x); togglesign(a); } 
+        b = mppi(lg(x));
+      }
+      gel(y,1) = a;
+      gel(y,2) = b; return y;
+    }
     case t_COMPLEX:
       av = avma;
       p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec)); /* x + sqrt(x^2-1) */
@@ -652,7 +654,9 @@ gach(GEN x, long prec)
 
     case t_INTMOD: case t_PADIC: pari_err(typeer,"gach");
 
-    default:
+    default: {
+      GEN a;
+      long v;
       av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
       if (v < 0) pari_err(negexper,"gach");
@@ -673,6 +677,7 @@ gach(GEN x, long prec)
 	p1 = gach(p1, prec);
       }
       return gerepileupto(av, gadd(p1,a));
+    }
   }
   return transc(gach,x,prec);
 }
