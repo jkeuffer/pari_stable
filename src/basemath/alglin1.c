@@ -387,9 +387,9 @@ shallowconcat1(GEN x)
   if (lx==1) pari_err(talker,"trying to concat elements of an empty vector");
   if (lx==2) return gel(x,1);
 
-  t = typ(gel(x,1));
+  z = gel(x,1);
+  t = typ(z);
   i = 2;
-  z = NULL; /* -Wall */
   if (is_matvec_t(t) || t == t_VECSMALL || t == t_STR)
   { /* detect a "homogeneous" object: catmany is faster */
     for (; i<lx; i++)
