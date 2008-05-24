@@ -2027,37 +2027,6 @@ gtolist(GEN x)
 }
 
 GEN
-listconcat(GEN A, GEN B)
-{
-  long i, l1, lx;
-  GEN L, z, L1, L2;
-
-  if (typ(A) != t_LIST) {
-    if (typ(B) != t_LIST) pari_err(typeer,"listconcat");
-    L = listcopy(B);
-    (void)listinsert(L, A, 1);
-    return L;
-  } else if (typ(B) != t_LIST) {
-    L = listcopy(A);
-    (void)listput(L, B, 0);
-    return L;
-  }
-  /* A, B both t_LISTs */
-  L1 = list_data(A); if (!L1) return listcopy(B);
-  L2 = list_data(B); if (!L2) return listcopy(A);
-
-  l1 = lg(L1);
-  lx = l1-1 + lg(L2);
-  z = cgetg(3, t_LIST);
-  list_nmax(z) = lx-1;
-  list_data(z) = L = (GEN)pari_malloc(lx * sizeof(long));
-  L2 -= l1-1;
-  for (i=1; i<l1; i++) gel(L,i) = gclone(gel(L1,i));
-  for (   ; i<lx; i++) gel(L,i) = gclone(gel(L2,i));
-  L[0] = evaltyp(t_VEC) | evallg(lx); return z;
-}
-
-GEN
 listsort(GEN L, long flag)
 {
   long i, l;

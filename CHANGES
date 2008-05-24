@@ -222,6 +222,7 @@ BA 33- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        group_rightcoset, group_perm_normalize, group_quotient, quotient_perm,
        quotient_group, quotient_subgroup_lift, group_subgroups,
        groupelts_abelian_group, groupelts_center, group_export, group_ident
+   34- file src/basemath/concat.c
 
   Removed
     1- obsolete library functions extract and matextract

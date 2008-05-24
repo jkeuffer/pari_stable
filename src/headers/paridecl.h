@@ -428,9 +428,6 @@ GEN     ZM_inv(GEN M, GEN dM);
 void    appendL(GEN x, GEN t);
 GEN     apply0(GEN A, GEN f);
 GEN     cget1(long l, long t);
-GEN     concat(GEN x, GEN y);
-GEN     concat1(GEN x);
-GEN     concatsp3(GEN x, GEN y, GEN z);
 GEN     deplin(GEN x);
 GEN     det(GEN a);
 GEN     det0(GEN a,long flag);
@@ -468,13 +465,10 @@ GEN     rowcopy(GEN A, long x0);
 GEN     rowslice(GEN A, long x1, long x2);
 GEN     rowslicepermute(GEN A, GEN p, long x1, long x2);
 GEN     rowpermute(GEN A, GEN p);
-GEN     shallowconcat(GEN x, GEN y);
-GEN     shallowconcat1(GEN x);
 GEN     shallowextract(GEN x, GEN L);
 GEN     shallowtrans(GEN x);
 GEN     sum(GEN v, long a, long b);
 GEN     suppl(GEN x);
-GEN     vconcat(GEN A, GEN B);
 GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
@@ -1158,6 +1152,15 @@ GEN  genclosure(entree *ep);
 long localvars_find(GEN pack, entree *ep);
 void localvars_unpack(GEN pack);
 
+/* concat.c */
+
+GEN     concat(GEN x, GEN y);
+GEN     concat1(GEN x);
+GEN     concatsp3(GEN x, GEN y, GEN z);
+GEN     shallowconcat(GEN x, GEN y);
+GEN     shallowconcat1(GEN x);
+GEN     vconcat(GEN A, GEN B);
+
 /* default.c */
 
 GEN default0(const char *a, const char *b, long flag);
@@ -1436,7 +1439,6 @@ int     gsigne(GEN x);
 GEN     gtolist(GEN x);
 long    gtolong(GEN x);
 int     lexcmp(GEN x, GEN y);
-GEN     listconcat(GEN list1, GEN list2);
 GEN     listcreate(void);
 GEN     listinsert(GEN list, GEN object, long index);
 void    listkill(GEN list);
