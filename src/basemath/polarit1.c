@@ -312,7 +312,8 @@ FpX_roots_i(GEN f, GEN p)
   db = degpol(b); n += da + db; setlg(y, n+1);
   if (db) gel(y,j)    = FpX_normalize(b,p);
   if (da) gel(y,j+db) = FpX_normalize(a,p);
-  pol = deg1pol_i(gen_1, gen_1, varn(f)); pol0 = constant_term(pol);
+  pol0 = icopy(gen_1); /* constant term, will vary in place */
+  pol = deg1pol_i(gen_1, pol0, varn(f));
   while (j <= n)
   { /* cf FpX_split_Berlekamp */
     a = gel(y,j); da = degpol(a);
@@ -368,7 +369,8 @@ FpX_oneroot_i(GEN f, GEN p)
   else
     if (db && db < da) a = b;
   a = FpX_normalize(a,p);
-  pol = deg1pol_i(gen_1, gen_1, varn(f)); pol0 = constant_term(pol);
+  pol0 = icopy(gen_1); /* constant term, will vary in place */
+  pol = deg1pol_i(gen_1, pol0, varn(f));
   for(;;)
   { /* cf FpX_split_Berlekamp */
     da = degpol(a);
