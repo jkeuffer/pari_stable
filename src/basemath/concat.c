@@ -72,19 +72,6 @@ strconcat(GEN x, GEN y)
   return x;
 }
 
-/* concat 3 matrices. Internal */
-GEN
-concatsp3(GEN x, GEN y, GEN z)
-{
-  long i, lx = lg(x), ly = lg(y), lz = lg(z);
-  GEN t, r = cgetg(lx+ly+lz-2, t_MAT);
-  t = r;
-  for (i=1; i<lx; i++) *++t = *++x;
-  for (i=1; i<ly; i++) *++t = *++y;
-  for (i=1; i<lz; i++) *++t = *++z;
-  return r;
-}
-
 /* concat A and B vertically. Internal */
 GEN
 vconcat(GEN A, GEN B)

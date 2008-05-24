@@ -1156,7 +1156,6 @@ void localvars_unpack(GEN pack);
 
 GEN     concat(GEN x, GEN y);
 GEN     concat1(GEN x);
-GEN     concatsp3(GEN x, GEN y, GEN z);
 GEN     shallowconcat(GEN x, GEN y);
 GEN     shallowconcat1(GEN x);
 GEN     vconcat(GEN A, GEN B);
