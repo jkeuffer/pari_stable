@@ -2316,7 +2316,7 @@ scalarpol(GEN x, long v)
   gel(y,2) = gcopy(x); return y;
 }
 
-/* deg1pol(a,b,x)=a*x+b, assumes a != 0 */
+/* x0 + x1*T, do not assume x1 != 0 */
 GEN
 deg1pol(GEN x1, GEN x0,long v)
 {
