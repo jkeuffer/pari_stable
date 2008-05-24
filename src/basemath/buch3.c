@@ -889,7 +889,7 @@ compute_M0(GEN M_star,long N)
       else if (n1==n2 || n2==n3)
       { /* n3 > N/3 >= n1 */
 	long k = N - 2*n2;
-	p2 = deg1pol_i(stoi(-n2), M_star, vx); /* M* - n2 X */
+	p2 = deg1pol_shallow(stoi(-n2), M_star, vx); /* M* - n2 X */
 	p3 = gmul(powuu(k,k),
 		  gpowgs(gsubgs(RgX_Rg_mul(p2, M_star), k*k), n2));
 	pol = gsub(p3, RgX_mul(monomial(powuu(n2,n2), n2, vx),

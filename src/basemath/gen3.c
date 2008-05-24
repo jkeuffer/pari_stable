@@ -2328,7 +2328,7 @@ deg1pol(GEN x1, GEN x0,long v)
 
 /* same, no copy */
 GEN
-deg1pol_i(GEN x1, GEN x0,long v)
+deg1pol_shallow(GEN x1, GEN x0,long v)
 {
   GEN x = cgetg(4,t_POL);
   x[1] = evalsigne(1) | evalvarn(v);

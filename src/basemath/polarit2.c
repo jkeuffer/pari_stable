@@ -1790,7 +1790,7 @@ deg1_from_roots(GEN L, long v)
   long i, l = lg(L);
   GEN z = cgetg(l,t_COL);
   for (i=1; i<l; i++)
-    gel(z,i) = deg1pol_i(gen_1, gneg(gel(L,i)), v);
+    gel(z,i) = deg1pol_shallow(gen_1, gneg(gel(L,i)), v);
   return z;
 }
 GEN
@@ -2029,7 +2029,7 @@ factor(GEN x)
 	    if (typ(p1[r1]) == t_COMPLEX) break;
 	  lx=(r1+lx)>>1; p2=cgetg(lx,t_COL);
 	  for(i=1; i<r1; i++)
-	    gel(p2,i) = deg1pol_i(gen_1, negr(gel(p1,i)), v);
+	    gel(p2,i) = deg1pol_shallow(gen_1, negr(gel(p1,i)), v);
 	  for(   ; i<lx; i++)
 	  {
 	    GEN a = gel(p1,2*i-r1);
@@ -2060,7 +2060,7 @@ factor(GEN x)
 	    {
 	      case t_QUAD: p1++;
 	      case t_COMPLEX:
-		gel(x,i) = mkpolmod(deg1pol_i(gel(p1,2), gel(p1,1), v), pol);
+		gel(x,i) = mkpolmod(deg1pol_shallow(gel(p1,2), gel(p1,1), v), pol);
 	    }
 	  }
 	  killv = (avma != (pari_sp)pol);

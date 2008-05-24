@@ -1404,7 +1404,7 @@ nfpolred(int part, nfbasic_t *T)
   ok_pol_t O;
   FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
-  if (degpol(x) == 1) { T->x = deg1pol_i(gen_1, gen_m1, v); return gen_1; }
+  if (degpol(x) == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return gen_1; }
   O.ind    = 0;
   O.indmax = part? min(n,3): n;
   O.xbest  = NULL;
@@ -2080,7 +2080,7 @@ polredabs0(GEN x, long flag)
   {
     u = NULL;
     y = mkvec( pol_x(vx) );
-    a = mkvec( deg1pol_i(gen_1, negi(gel(x,2)), vx) );
+    a = mkvec( deg1pol_shallow(gen_1, negi(gel(x,2)), vx) );
   }
   else
   {

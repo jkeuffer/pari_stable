@@ -1475,7 +1475,7 @@ GEN     centerlift(GEN x);
 GEN     centerlift0(GEN x,long v);
 GEN     compo(GEN x, long n);
 GEN     deg1pol(GEN x1, GEN x0,long v);
-GEN     deg1pol_i(GEN x1, GEN x0,long v);
+GEN     deg1pol_shallow(GEN x1, GEN x0,long v);
 long    degree(GEN x);
 GEN     denom(GEN x);
 GEN     deriv(GEN x, long v);

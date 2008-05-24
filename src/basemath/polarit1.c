@@ -313,7 +313,7 @@ FpX_roots_i(GEN f, GEN p)
   if (db) gel(y,j)    = FpX_normalize(b,p);
   if (da) gel(y,j+db) = FpX_normalize(a,p);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
-  pol = deg1pol_i(gen_1, pol0, varn(f));
+  pol = deg1pol_shallow(gen_1, pol0, varn(f));
   while (j <= n)
   { /* cf FpX_split_Berlekamp */
     a = gel(y,j); da = degpol(a);
@@ -370,7 +370,7 @@ FpX_oneroot_i(GEN f, GEN p)
     if (db && db < da) a = b;
   a = FpX_normalize(a,p);
   pol0 = icopy(gen_1); /* constant term, will vary in place */
-  pol = deg1pol_i(gen_1, pol0, varn(f));
+  pol = deg1pol_shallow(gen_1, pol0, varn(f));
   for(;;)
   { /* cf FpX_split_Berlekamp */
     da = degpol(a);
@@ -931,9 +931,9 @@ FpX_factor_2(GEN f, GEN p, long d)
   if (signe(r)) r = subii(p, r);
   if (signe(s)) s = subii(p, s);
   sgn = cmpii(s, r); if (sgn < 0) swap(s,r);
-  R = deg1pol_i(gen_1, r, v);
+  R = deg1pol_shallow(gen_1, r, v);
   if (!sgn) return mkmat2(mkcol(R), mkvecsmall(2));
-  S = deg1pol_i(gen_1, s, v);
+  S = deg1pol_shallow(gen_1, s, v);
   return mkmat2(mkcol2(R,S), mkvecsmall2(1,1));
 }
 
@@ -1165,8 +1165,8 @@ FpX_split_Berlekamp(GEN *t, GEN p)
 	GEN r = FpX_quad_root(a,p,1);
 	if (r)
 	{
-	  t[i] = deg1pol_i(gen_1, subii(p,r), vu); r = otherroot(a,r,p);
-	  t[L] = deg1pol_i(gen_1, subii(p,r), vu); L++;
+	  t[i] = deg1pol_shallow(gen_1, subii(p,r), vu); r = otherroot(a,r,p);
+	  t[L] = deg1pol_shallow(gen_1, subii(p,r), vu); L++;
 	}
 	set_irred(i);
       }
@@ -1481,7 +1481,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
     return mkcol(a0);
   }
 
-  f = poleval(f, deg1pol_i(p, a, varn(f)));
+  f = poleval(f, deg1pol_shallow(p, a, varn(f)));
   f = gdivexact(f, powiu(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
@@ -1794,7 +1794,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
     return mkcol(a);
   }
   /* TODO: need RgX_RgYQX_compo ? */
-  f = lift_intern(poleval(f, deg1pol_i(p, mkpolmod(a,T), varn(f))));
+  f = lift_intern(poleval(f, deg1pol_shallow(p, mkpolmod(a,T), varn(f))));
   f = gdiv(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
   R = FqX_roots_i(FqX_red(f,T,p), T, p); lR = lg(R);
@@ -2186,7 +2186,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
   n = NULL;
   for (k = 0; cmpui(k, p) < 0; k++)
   {
-    GEN U = poleval(u, deg1pol_i(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
+    GEN U = poleval(u, deg1pol_shallow(gen_1, gmulsg(k, pol_x(varn(T))), varn(A)));
     n = FpX_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
     n = NULL;

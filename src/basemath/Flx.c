@@ -1552,7 +1552,7 @@ Flxq_charpoly(GEN x, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   long v=varn(T);
-  GEN R = Flx_FlxY_resultant(T, deg1pol_i(pol1_Flx(x[1]),Flx_neg(x,p),v) ,p);
+  GEN R = Flx_FlxY_resultant(T, deg1pol_shallow(pol1_Flx(x[1]),Flx_neg(x,p),v) ,p);
   return gerepileupto(ltop,R);
 }
 
@@ -2369,7 +2369,7 @@ FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v)
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    gel(W,k) = deg1pol_i(pol1_Flx(T[1]),Flx_neg(gel(V,k),p),v);
+    gel(W,k) = deg1pol_shallow(pol1_Flx(T[1]),Flx_neg(gel(V,k),p),v);
   return gerepileupto(ltop, FlxqXV_prod(W, T, p));
 }
 

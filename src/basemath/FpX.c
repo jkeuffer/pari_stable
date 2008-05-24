@@ -528,7 +528,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   long i;
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
-    gel(g,i) = deg1pol_i(gen_1,modii(negi(gel(V,i)),p),v);
+    gel(g,i) = deg1pol_shallow(gen_1,modii(negi(gel(V,i)),p),v);
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
@@ -883,7 +883,7 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   GEN R;
   T = shallowcopy(T); setvarn(T, MAXVARN);
   x = shallowcopy(x); setvarn(x, MAXVARN);
-  R = FpX_FpXY_resultant(T, deg1pol_i(gen_1,FpX_neg(x,p),v),p);
+  R = FpX_FpXY_resultant(T, deg1pol_shallow(gen_1,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
 

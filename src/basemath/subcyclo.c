@@ -608,7 +608,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       pari_err(typeer,"galoissubcyclo");
       return NULL;/*Not reached*/
   }
-  if (n==1) { avma = ltop; return deg1pol_i(gen_1,gen_m1,v); }
+  if (n==1) { avma = ltop; return deg1pol_shallow(gen_1,gen_m1,v); }
 
   switch(typ(sg))
   {
@@ -658,7 +658,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   if (cnd == 1)
   {
     avma=  ltop;
-    return gscycloconductor(deg1pol_i(gen_1,gen_m1,v),1,flag);
+    return gscycloconductor(deg1pol_shallow(gen_1,gen_m1,v),1,flag);
   }
   if (n != cnd)
   {
@@ -699,7 +699,7 @@ polsubcyclo_g(long n, long d, GEN Z, long v)
   long o, p, r, g, gd, l , val;
   GEN zl, L, T, le, B, powz;
   if (v<0) v = 0;
-  if (d==1) return deg1pol_i(gen_1,gen_m1,v);
+  if (d==1) return deg1pol_shallow(gen_1,gen_m1,v);
   if (d<=0 || n<=0) pari_err(typeer,"polsubcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n)

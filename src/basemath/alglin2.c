@@ -45,7 +45,7 @@ charpoly0(GEN x, long v, long flag)
 static GEN
 caract_const(pari_sp av, GEN x, long v, long d)
 {
-  return gerepileupto(av, gpowgs(deg1pol_i(gen_1, gneg_i(x), v), d));
+  return gerepileupto(av, gpowgs(deg1pol_shallow(gen_1, gneg_i(x), v), d));
 }
 
 /* return caract(Mod(x,p)) in variable v */

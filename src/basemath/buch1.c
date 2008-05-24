@@ -264,7 +264,7 @@ get_lambda(GEN bnr)
   for (a=0; a<f2; a++)
     for (b=0; b<f2; b++)
     {
-      GEN la = deg1pol_i(stoi(a), stoi(b), v); /* ax + b */
+      GEN la = deg1pol_shallow(stoi(a), stoi(b), v); /* ax + b */
       if (umodiu(gnorm(mkpolmod(la, pol)), f2) != 1) continue;
       if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 

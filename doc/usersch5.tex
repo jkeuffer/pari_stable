@@ -3962,6 +3962,12 @@ Assumes that \kbd{x} is non-zero.
 \fun{GEN}{scalarpol}{GEN x, long v} creates a constant \typ{POL} in variable
 \kbd{v}, whose constant coefficient is (a copy of) \kbd{x}.
 
+\fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
+$a + b \kbd{pol\_x($v$)}$
+
+\fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
+
+\fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
 
 \fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
 \kbd{gen\_0}.
@@ -4023,7 +4029,6 @@ containing \kbd{[stoi(x), stoi(y)]}.
 \fun{GEN}{mkvec3s}{long x, long y, long z} creates a 3-dimensional \typ{VEC}
 containing \kbd{[stoi(x), stoi(y), stoi(z)]}.
 
-
 \fun{GEN}{mkvecsmall}{long x} creates a 1-dimensional \typ{VECSMALL}
 containing \kbd{x}.
 
@@ -4035,6 +4040,9 @@ containing \kbd{[x, y]}.
 
 \fun{GEN}{mkvecsmall4}{long x, long y, long z, long t} creates a 4-dimensional
 \typ{VECSMALL} containing \kbd{[x, y, z, t]}.
+
+\fun{GEN}{mkvecsmalln}{long n, ...} returns the \typ{VECSMALL} whose $n$
+coefficients (\kbd{long}) follow.
 
 \subsec{Unclean Constructors}\label{se:unclean}
 
@@ -4099,10 +4107,6 @@ as above on $64$-bit machines).
 @eprog
 \noindent returns $a_2 2^{64} + a_1 2^{32} + a_0$.
 
-\fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
-
-\fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
-
 \fun{GEN}{mkpoln}{long n, ...} Returns the \typ{POL} whose $n$
 coefficients (\kbd{GEN}) follow, in order of decreasing degree.
 \bprog
@@ -4118,15 +4122,15 @@ coefficients (\kbd{GEN}) follow.
 \fun{GEN}{mkcoln}{long n, ...} returns the \typ{COL} whose $n$
 coefficients (\kbd{GEN}) follow.
 
-\fun{GEN}{mkvecsmalln}{long n, ...} returns the \typ{VECSMALL} whose $n$
-coefficients (\kbd{long}) follow.
-
 \fun{GEN}{scalarcol_shallow}{GEN x, long n} creates a \typ{COL} with \kbd{n}
 components set to \kbd{gen\_0}, but the first one which is set to a shallow
 copy of \kbd{x}. (The name comes from \kbd{RgV\_isscalar}.)
 
 \fun{GEN}{scalarmat_shallow}{GEN x, long n} creates an $n\times n$
 scalar matrix whose diagonal is set to shallow copies of the scalar \kbd{x}.
+
+\fun{GEN}{deg1pol_shallow}{GEN a, GEN b,long v} returns the degree 1
+\typ{POL} $a + b \kbd{pol\_x($v$)}$
 
 \subsec{Integer parts}
 

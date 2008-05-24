@@ -778,7 +778,7 @@ FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
   }
   W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    gel(W,k) = deg1pol_i(gen_1,Fq_neg(gel(V,k),T,p),v);
+    gel(W,k) = deg1pol_shallow(gen_1,Fq_neg(gel(V,k),T,p),v);
   return gerepileupto(ltop, FpXQXV_prod(W, T, p));
 }
 
@@ -1189,7 +1189,7 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
   long v = varn(P);
 
   /* x - y */
-  if (m == 1) return deg1pol_i(gen_1, deg1pol_i(subis(l,1), gen_0, w), v);
+  if (m == 1) return deg1pol_shallow(gen_1, deg1pol_shallow(subis(l,1), gen_0, w), v);
   M = FpM_Frobenius_pow(MP,d,P,l);
 
   Tl = shallowcopy(P); setvarn(Tl,w);
@@ -2115,7 +2115,7 @@ FpX_direct_compositum(GEN A, GEN B, GEN p)
   GEN a, b, x;
   a = shallowcopy(A); setvarn(a, MAXVARN);
   b = shallowcopy(B); setvarn(b, MAXVARN);
-  x = deg1pol_i(gen_1, pol_x(MAXVARN), 0); /* x + y */
+  x = deg1pol_shallow(gen_1, pol_x(MAXVARN), 0); /* x + y */
   return FpX_FpXY_resultant(a, poleval(b,x),p);
 }
 
@@ -2130,7 +2130,7 @@ FpX_compositum(GEN A, GEN B, GEN p)
   b = shallowcopy(B); setvarn(b, MAXVARN);
   for (k = 1;; k = next_lambda(k))
   {
-    GEN x = deg1pol_i(gen_1, gmulsg(k, pol_x(MAXVARN)), 0); /* x + k y */
+    GEN x = deg1pol_shallow(gen_1, gmulsg(k, pol_x(MAXVARN)), 0); /* x + k y */
     GEN C = FpX_FpXY_resultant(a, poleval(b,x),p);
     if (FpX_is_squarefree(C, p)) return C;
   }
@@ -2775,11 +2775,11 @@ ffinit_Artin_Shreier(GEN ip, long l)
 {
   long i, p = itos(ip);
   GEN T, Q, xp = monomial(gen_1,p,0); /* x^p */
-  T = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0)); /* x^p - x - 1 */
+  T = ZX_sub(xp, deg1pol_shallow(gen_1,gen_1,0)); /* x^p - x - 1 */
   if (l == 1) return T;
 
   Q = ZX_sub(monomial(gen_1,2*p-1,MAXVARN), monomial(gen_1,p,MAXVARN));
-  Q = gsub(xp, deg1pol_i(gen_1, Q, 0)); /* x^p - x - (y^(2p-1)-y^p) */
+  Q = gsub(xp, deg1pol_shallow(gen_1, Q, 0)); /* x^p - x - (y^(2p-1)-y^p) */
   for (i = 2; i <= l; ++i)
   {
     setvarn(T,MAXVARN);

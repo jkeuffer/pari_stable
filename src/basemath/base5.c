@@ -199,8 +199,8 @@ rnfelementreltoabs(GEN rnf,GEN x)
 GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
-  GEN ky = mkpolmod(deg1pol_i(k, gen_0, varn(T)),T);
-  GEN u = deg1pol_i(gen_1, ky, varn(pol));
+  GEN ky = mkpolmod(deg1pol_shallow(k, gen_0, varn(T)),T);
+  GEN u = deg1pol_shallow(gen_1, ky, varn(pol));
   return mkpolmod(degpol(pol) > 1? u: RgX_rem(u,pol), pol);
 }
 GEN
@@ -992,7 +992,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     GEN eq = rnfequation2(nf,relpol), rel;
     a = gel(eq,3);
     /* relpol( X + Mod(-a y, T(y)) )*/
-    rel = RgXQX_translate(relpol, deg1pol_i(negi(a),gen_0,varn(T)), T);
+    rel = RgXQX_translate(relpol, deg1pol_shallow(negi(a),gen_0,varn(T)), T);
     bas = makebasis(nf, rel, eq);
     if (DEBUGLEVEL>1)
     {
@@ -1006,7 +1006,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (flag & nf_ABSOLUTE)
     return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 
-  elt = RgXQX_translate(gel(red,2), deg1pol_i(a,gen_0,varn(T)), T);
+  elt = RgXQX_translate(gel(red,2), deg1pol_shallow(a,gen_0,varn(T)), T);
   elt = fix_relative_pol(T, elt, 0);
   pol = caract2(relpol, elt, varn(relpol));
   pol = lift_if_rational(pol);

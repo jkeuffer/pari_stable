@@ -1355,7 +1355,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   }
   else
     z = rootpadicfast(polred, L->p, L->k);
-  Cltdnx_r = deg1pol_i(Cltdn? Cltdn: gen_1, NULL, varn(pol));
+  Cltdnx_r = deg1pol_shallow(Cltdn? Cltdn: gen_1, NULL, varn(pol));
   C2ltdnpol  = C2ltdn? gmul(C2ltdn, pol): pol;
   for (m=1,i=1; i<lg(z); i++)
   {
@@ -1489,7 +1489,7 @@ nfsqff_trager(GEN u, GEN T, GEN dent)
 
   tmonic = is_pm1(leading_term(T));
   P = cgetg(lx,t_COL);
-  x0 = deg1pol_i(stoi(-k), gen_0, varn(T));
+  x0 = deg1pol_shallow(stoi(-k), gen_0, varn(T));
   for (i=lx-1; i>0; i--)
   {
     GEN f = gel(fa,i), F = RgXQX_translate(f, x0, T);

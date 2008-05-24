@@ -381,7 +381,7 @@ polcyclo(long n, long v)
 
   if (n <= 0) pari_err(talker, "argument must be positive in polcyclo");
   if (v<0) v = 0;
-  if (n == 1) return deg1pol_i(gen_1, gen_m1, v);
+  if (n == 1) return deg1pol_shallow(gen_1, gen_m1, v);
   P = gel(factoru(n), 1); l = lg(P);
   s = P[1]; T = polcyclo_prime(s, v);
   for (i = 2; i < l; i++)

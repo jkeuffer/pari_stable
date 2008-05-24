@@ -1079,7 +1079,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
     av = avma;
     z = Fp_inv(FpX_eval(Tp, gel(L,i),mod),mod);
     z = Fp_mul(den,z,mod);
-    P = FpX_Fp_mul(FpX_div(T, deg1pol_i(gen_1,negi(gel(L,i)),x),mod), z, mod);
+    P = FpX_Fp_mul(FpX_div(T, deg1pol_shallow(gen_1,negi(gel(L,i)),x),mod), z, mod);
     gel(M,i) = gerepilecopy(av, RgX_to_RgV(P, n-1));
   }
   gunclone(Tp); /*unclone*/
@@ -1923,7 +1923,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     PG=cgetg(3,t_VEC);
     gel(PG,1) = mkvec( mkvecsmall2(2,1) );
     gel(PG,2) = mkvecsmall(2);
-    tau = deg1pol_i(gen_m1, negi(gel(P,3)), x);
+    tau = deg1pol_shallow(gen_m1, negi(gel(P,3)), x);
     tau = RgX_to_FpX(tau, ip);
     tau = FpX_FpXQ_compo(gel(Pmod,gp), tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
