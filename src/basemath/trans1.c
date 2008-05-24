@@ -119,7 +119,7 @@ constpi(long prec)
   prec++;
 
   A = real_1(prec);
-  i = A[1]; A[1] = evalsigne(1) | evalexpo(-1);
+  i = A[1]; A[1] = evalsigne(1) | _evalexpo(-1);
   B = sqrtr_abs(A); /* = 1/sqrt(2) */
   A[1] = i;
   C = real2n(-2, prec); av2 = avma;
@@ -549,7 +549,7 @@ powp(GEN x, GEN n)
     mod = mulii(mod, powiu(p,v));
     mod = gerepileuptoint((pari_sp)y, mod);
   }
-  y[1] = evalprecp(precp(x) + v) | evalvalp(0);
+  y[1] = evalprecp(precp(x) + v) | _evalvalp(0);
   gel(y,2) = icopy(p);
   gel(y,3) = mod;
   gel(y,4) = Fp_pow(gel(x,4), n, mod);
@@ -687,7 +687,7 @@ ser_pow(GEN x, GEN n, long prec)
 
     lx = lg(x);
     y = cgetg(lx,t_SER);
-    y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
+    y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
     X = x+2;
     Y = y+2;
 
@@ -1551,7 +1551,7 @@ serexp(GEN x, long prec)
     ly = lx+ex; y = cgetg(ly,t_SER);
     mi = lx-1; while (mi>=3 && isrationalzero(gel(x,mi))) mi--;
     mi += ex-2;
-    y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
+    y[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coefficient of X^i in z */
     xd = x+2-ex; yd = y+2; ly -= 2;
     gel(yd,0) = gen_1;
@@ -2369,7 +2369,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       mi += ex-2;
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;
-      pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
+      pc[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(y));
       gel(pc,2) = gen_1; ps[1] = y[1];
       for (i=2; i<ex+2; i++) gel(ps,i) = gcopy(gel(y,i));
       for (i=3; i< ex2; i++) gel(pc,i) = gen_0;

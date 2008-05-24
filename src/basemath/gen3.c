@@ -970,14 +970,14 @@ mpinv(GEN b)
   GEN x = cgetr(l), a = mpcopy(b);
   double t;
 
-  a[1] = evalexpo(0) | evalsigne(1);
+  a[1] = _evalexpo(0) | evalsigne(1);
   for (i = 3; i < l; i++) x[i] = 0;
   t = (((double)HIGHBIT) * HIGHBIT) / (double)(ulong)a[2];
   if (((ulong)t) & HIGHBIT)
-    x[1] = evalexpo(0) | evalsigne(1);
+    x[1] = _evalexpo(0) | evalsigne(1);
   else {
     t *= 2;
-    x[1] = evalexpo(-1) | evalsigne(1);
+    x[1] = _evalexpo(-1) | evalsigne(1);
   }
   x[2] = (ulong)t;
   l1 = 1; l -= 2;

@@ -1637,7 +1637,7 @@ gen_cmp_RgX(void *data, GEN x, GEN y)
 int
 cmp_RgX(GEN x, GEN y)
 {
-  long F[3] = {evallg(3)|evaltyp(t_POL)};
+  long F[3] = {_evallg(3)|evaltyp(t_POL)};
   if (typ(x) == t_POLMOD) x = gel(x,2);
   if (typ(y) == t_POLMOD) y = gel(y,2);
   if (typ(x) == t_POL) {

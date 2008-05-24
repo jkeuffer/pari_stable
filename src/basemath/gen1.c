@@ -515,7 +515,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
   if (l > 0)
   {
     ly += l; y -= l; z = cgetg(ly,t_SER);
-    z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
+    z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(vy);
     gel(z,2) = gcopy(x);
     for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
     for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
@@ -529,7 +529,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
   x = gadd(x, gel(y,2));
   if (!isrationalzero(x))
   {
-    z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
+    z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(vy);
     gel(z,2) = x;
     for (i=3; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
     if (gcmp0(x)) return normalize(z);
@@ -2067,7 +2067,7 @@ div_scal_ser(GEN x, GEN y) { /* TODO: improve */
   if (gcmp0(x)) { pari_sp av=avma; return gerepileupto(av, gmul(x, ginv(y))); }
   ly = lg(y); z = (GEN)pari_malloc(ly*sizeof(long));
   z[0] = evaltyp(t_SER) | evallg(ly);
-  z[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
+  z[1] = evalsigne(1) | _evalvalp(0) | evalvarn(varn(y));
   gel(z,2) = x; for (i=3; i<ly; i++) gel(z,i) = gen_0;
   y = gdiv(z,y); pari_free(z); return y;
 }

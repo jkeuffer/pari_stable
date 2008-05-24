@@ -1446,7 +1446,7 @@ _weipell(GEN c4, GEN c6, long PREC)
   pari_sp av;
   GEN t, res = cgetg(precres+2,t_SER), *P = (GEN*)(res + 2);
 
-  res[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
+  res[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
   if (!PREC) { setsigne(res,0); return res; }
 
   for (i=1; i<precres; i+=2) P[i]= gen_0;
@@ -3564,7 +3564,7 @@ elltaniyama(GEN e, long prec)
   pari_sp av=avma, tetpil;
 
   checkell(e); x = cgetg(prec+3,t_SER);
-  x[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
+  x[1] = evalsigne(1) | _evalvalp(-2) | evalvarn(0);
   gel(x,2) = gen_1;
   d = ginv(gtoser(anell(e,prec+1), 0)); setvalp(d,-1);
   /* 2y(t) + a1x + a3 = d tx'(t). Solve for x(t),y(t):

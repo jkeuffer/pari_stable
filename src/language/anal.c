@@ -814,7 +814,7 @@ pari_var_create(entree *ep)
   if (nvar == max_avail) pari_err(talker,"no more variables available");
   v = nvar++;
   /* set p = pol_x(v) */
-  p[0] = evaltyp(t_POL) | evallg(4);
+  p[0] = evaltyp(t_POL) | _evallg(4);
   p[1] = evalsigne(1) | evalvarn(v);
   gel(p,2) = gen_0;
   gel(p,3) = gen_1;
@@ -992,7 +992,7 @@ alias0(const char *s, const char *old)
   if (EpVALENCE(e) != EpALIAS && EpVALENCE(e) != EpNEW)
     pari_err(talker,"can't replace an existing symbol by an alias");
   freeep(e);
-  x = newbloc(2); x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
+  x = newbloc(2); x[0] = evaltyp(t_STR)|_evallg(2); /* for getheap */
   gel(x,1) = (GEN)ep;
   e->value=x; e->valence=EpALIAS;
 }

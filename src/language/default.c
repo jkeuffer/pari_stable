@@ -489,7 +489,7 @@ sd_graphcolormap(const char *v, long flag)
       case '[': {
         const char *ap[3];
 	gel(pari_colormap, i) = lp;
-	lp[0] = evaltyp(t_VECSMALL)|evallg(4);
+	lp[0] = evaltyp(t_VECSMALL)|_evallg(4);
 	for (ap[0] = ++p, j=0; *p && *p != ']'; p++)
 	  if (*p == ',' && j<2) { *p++ = 0; ap[++j] = p; }
 	while (j<2) ap[++j] = "0";

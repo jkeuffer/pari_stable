@@ -560,30 +560,30 @@ init_universal_constants(void)
    * + 3 (half) + 3 (gi) */
   GEN p = universal_constants = (long*) pari_malloc(22*sizeof(long));
   gen_0 = p; p+=2; gnil = p; p+=2;
-  gen_0[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
+  gen_0[0] = gnil[0] = evaltyp(t_INT) | _evallg(2);
   gen_0[1] = gnil[1] = evallgefint(2);
 
   gen_1 = p; p+=3;
   gen_2 = p; p+=3;
-  gen_1[0] = gen_2[0] = evaltyp(t_INT) | evallg(3);
+  gen_1[0] = gen_2[0] = evaltyp(t_INT) | _evallg(3);
   gen_1[1] = gen_2[1] = evalsigne(1) | evallgefint(3);
   gen_1[2] = 1; gen_2[2]= 2;
 
   gen_m1 = p; p+=3;
-  gen_m1[0] = evaltyp(t_INT) | evallg(3);
+  gen_m1[0] = evaltyp(t_INT) | _evallg(3);
   gen_m1[1] = evalsigne(-1) | evallgefint(3);
   gen_m1[2] = 1;
 
   gen_m2 = p; p+=3;
-  gen_m2[0] = evaltyp(t_INT) | evallg(3);
+  gen_m2[0] = evaltyp(t_INT) | _evallg(3);
   gen_m2[1] = evalsigne(-1) | evallgefint(3);
   gen_m2[2] = 2;
 
   ghalf = p; p+=3; gi = p; p+=3;
-  ghalf[0] = evaltyp(t_FRAC) | evallg(3);
+  ghalf[0] = evaltyp(t_FRAC) | _evallg(3);
   gel(ghalf,1) = gen_1;
   gel(ghalf,2) = gen_2;
-  gi[0] = evaltyp(t_COMPLEX) | evallg(3);
+  gi[0] = evaltyp(t_COMPLEX) | _evallg(3);
   gel(gi,1) = gen_0;
   gel(gi,2) = gen_1;
 }
@@ -690,7 +690,7 @@ pari_init_opts(size_t parisize, ulong maxprime, ulong init_opts)
   pari_init_seadata();
 
   primetab = (GEN) pari_malloc(1 * sizeof(long));
-  primetab[0] = evaltyp(t_VEC) | evallg(1);
+  primetab[0] = evaltyp(t_VEC) | _evallg(1);
 
   funct_old_hash = init_fun_hash();
   functions_hash = init_fun_hash();
@@ -1484,7 +1484,7 @@ gclone(GEN x)
 	for (i=1; i<lx; i++) y[i] = x[i];
 	break;
       case t_LIST:
-	y[0] = evaltyp(t_LIST)|evallg(3);
+	y[0] = evaltyp(t_LIST)|_evallg(3);
 	listassign(x, y);
 	break;
       default:

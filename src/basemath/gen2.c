@@ -1809,7 +1809,7 @@ normalize(GEN x)
     stackdummy((pari_sp)y, (pari_sp)x);
     gel(y,2) = z;
     y[1] = evalsigne(0) | evalvalp(valp(x)+i) | evalvarn(varn(x));
-    y[0] = evaltyp(t_SER) | evallg(3);
+    y[0] = evaltyp(t_SER) | _evallg(3);
     return y;
   }
 
@@ -1910,7 +1910,7 @@ ensure_nb(GEN L, long l)
     if (list_data(L))
       pari_err(talker, "store list in variable before appending elements");
     v = (GEN)pari_malloc((nmax+1) * sizeof(long));
-    v[0] = evaltyp(t_VEC) | evallg(1);
+    v[0] = evaltyp(t_VEC) | _evallg(1);
   }
   list_data(L) = v;
   list_nmax(L) = nmax;

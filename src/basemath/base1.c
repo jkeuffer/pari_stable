@@ -2410,7 +2410,7 @@ initzeta(GEN pol, long prec)
   if (r1) gel(ck_odd,1) = subrr(gel(ck_odd,1), mulsr(r1, mplog2(prec)));
   serie_even = cgetg(r+3,t_SER);
   serie_odd = cgetg(r2+3,t_SER);
-  serie_even[1] = serie_odd[1] = evalsigne(1)+evalvalp(1);
+  serie_even[1] = serie_odd[1] = evalsigne(1)|_evalvalp(1);
   i = 0;
   while (i < i0/2)
   {

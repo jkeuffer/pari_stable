@@ -165,7 +165,7 @@ addrex01(GEN x)
 {
   long l = lg(x);
   GEN y = cgetr(l);
-  y[1] = evalsigne(1) | evalexpo(1);
+  y[1] = evalsigne(1) | _evalexpo(1);
   y[2] = HIGHBIT | (((ulong)x[2] & ~HIGHBIT) >> 1);
   shift_right(y, x, 3,l, x[2], 1);
   return y;

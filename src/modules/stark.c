@@ -1560,7 +1560,7 @@ ppgamma(ST_t *T, long prec)
 
   /* expansion of log(Gamma(u)) at u = 1 */
   gamun = cgetg(r+3, t_SER);
-  gamun[1] = evalsigne(1) | evalvalp(0) | evalvarn(0);
+  gamun[1] = evalsigne(1) | _evalvalp(0) | evalvarn(0);
   gel(gamun,2) = gen_0;
   gel(gamun,3) = gneg(eul);
   for (i = 2; i <= r; i++)
@@ -1570,7 +1570,7 @@ ppgamma(ST_t *T, long prec)
 
   /* expansion of log(Gamma(u) / Gamma(1/2)) at u = 1/2 */
   gamdm = cgetg(r+3, t_SER);
-  gamdm[1] = evalsigne(1) | evalvalp(0) | evalvarn(0);
+  gamdm[1] = evalsigne(1) | _evalvalp(0) | evalvarn(0);
   gel(gamdm,2) = gen_0;
   gel(gamdm,3) = gneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)

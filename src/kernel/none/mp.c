@@ -1789,13 +1789,13 @@ sqrtr_abs(GEN x)
   a = rtor(x, l+1);
   t = cgetr(l+1);
   if (ex & 1) { /* odd exponent */
-    a[1] = evalsigne(1) | evalexpo(1);
+    a[1] = evalsigne(1) | _evalexpo(1);
     t[2] = (long)sqrtu2((ulong*)a + 2);
   } else { /* even exponent */
-    a[1] = evalsigne(1) | evalexpo(0);
+    a[1] = evalsigne(1) | _evalexpo(0);
     t[2] = (long)sqrtu2_1((ulong*)a + 2);
   }
-  t[1] = evalsigne(1) | evalexpo(0);
+  t[1] = evalsigne(1) | _evalexpo(0);
   for (i = 3; i <= l; i++) t[i] = 0;
 
   /* |x| = 2^(ex/2) a, t ~ sqrt(a) */
