@@ -246,7 +246,7 @@ BA 33- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        gchz, gcosz, gcotanz, gexpz, ggamdz, ggammaz, glngammaz, glogz, gpsiz,
        gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz, TRgopgz,
        mpfloorz, mptruncz, mpdvmdz
-   16- obsolete library function gmillerrabin, gpolcomp
+   16- obsolete library function gmillerrabin, gpolcomp, caradj0
    17- obsolete library functions allbase, base, base2, factoredbase, smallbase,
        discf2, factoreddiscf, smalldiscf. Use nfbasis0 / nfdisc0 / nfmaxord
 

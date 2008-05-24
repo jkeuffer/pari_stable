@@ -499,7 +499,6 @@ GEN     adj(GEN x);
 GEN     caract(GEN x, long v);
 GEN     caract2(GEN p, GEN x, long v);
 GEN     caradj(GEN x, long v, GEN *py);
-GEN     caradj0(GEN x, long v);
 GEN     carberkowitz(GEN x, long v);
 GEN     carhess(GEN x, long v);
 GEN     charpoly0(GEN x, long v,long flag);

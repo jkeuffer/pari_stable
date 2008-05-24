@@ -228,7 +228,7 @@ entree oldfonctions[]={
 {"cf",1,(void*)gcf,4,"Gp","cf(x)=continued fraction expansion of x (x rational,real or rational function)"},
 {"cf2",2,(void*)gcf2,4,"GGp","cf2(b,x)=continued fraction expansion of x (x rational,real or rational function), where b is the vector of numerators of the continued fraction"},
 {"changevar",0,(void*)suppressed,11,"GG","changevar(x,y)=THIS FUNCTION HAS BEEN SUPPRESSED"},
-{"char",14,(void*)caradj0,8,"Gn","char(x,y)=det(y*I-x)=characteristic polynomial of the matrix x using the comatrix"},
+{"char",14,(void*)caradj,8,"GnD&","char(x,y)=det(y*I-x)=characteristic polynomial of the matrix x using the comatrix"},
 {"char1",14,(void*)caract,8,"Gn","char1(x,y)=det(y*I-x)=characteristic polynomial of the matrix x using Lagrange interpolation"},
 {"char2",14,(void*)carhess,8,"Gn","char2(x,y)=characteristic polynomial of the matrix x expressed with variable y, using the Hessenberg form. Can be much faster or much slower than char, depending on the base ring"},
 {"chell",2,(void*)ellchangecurve,5,"GG","chell(x,y)=change data on elliptic curve according to y=[u,r,s,t]"},

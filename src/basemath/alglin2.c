@@ -188,12 +188,6 @@ caract(GEN x, long v)
   return gerepileupto(av, gdiv(p1, mpfact(n)));
 }
 
-GEN
-caradj0(GEN x, long v)
-{
-  return caradj(x,v,NULL);
-}
-
 /* assume x square matrice */
 static GEN
 mattrace(GEN x)
