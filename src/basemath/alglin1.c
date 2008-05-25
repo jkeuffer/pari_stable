@@ -1645,7 +1645,7 @@ deplin(GEN x0)
   if (k > nc) { avma = av; return zerocol(nc); }
   if (k == 1) { avma = av; return scalarcol_shallow(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
-  y[1] = ck[ l[1] ];
+  gel(y,1) = gel(ck, l[1]);
   for (D=gel(d,1),j=2; j<k; j++)
   {
     gel(y,j) = gmul(gel(ck, l[j]), D);
@@ -1653,7 +1653,8 @@ deplin(GEN x0)
   }
   gel(y,j) = gneg(D);
   for (j++; j<=nc; j++) gel(y,j) = gen_0;
-  return gerepileupto(av, gdiv(y,content(y)));
+  y = primitive_part(y, &c);
+  return c? gerepileupto(av, y): gerepilecopy(av, y);
 }
 
 /*******************************************************************/
@@ -1863,7 +1864,7 @@ imagecomplspec(GEN x, long *nlze)
 static GEN
 sinverseimage(GEN mat, GEN y)
 {
-  pari_sp av=avma,tetpil;
+  pari_sp av = avma;
   long i, nbcol = lg(mat);
   GEN col,p1 = cgetg(nbcol+1,t_MAT);
 
@@ -1878,8 +1879,8 @@ sinverseimage(GEN mat, GEN y)
   col = gel(p1,i); p1 = gel(col,nbcol);
   if (gcmp0(p1)) return NULL;
 
-  p1 = gneg_i(p1); setlg(col,nbcol); tetpil=avma;
-  return gerepile(av,tetpil, gdiv(col, p1));
+  p1 = gneg_i(p1); setlg(col,nbcol);
+  return gerepileupto(av, RgC_Rg_div(col, p1));
 }
 
 /* Calcule l'image reciproque de v par m */

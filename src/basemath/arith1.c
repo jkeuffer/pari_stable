@@ -490,7 +490,7 @@ polissquareall(GEN x, GEN *pt)
   }
   else
   {
-    x = gdiv(x,a);
+    x = RgX_Rg_div(x,a);
     y = gtrunc(gsqrt(greffe(x,2+l,1),0));
     if (!gequal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
@@ -723,7 +723,7 @@ polispower(GEN x, GEN K, GEN *pt)
   av = avma;
   if (degpol(x))
   {
-    x = gdiv(x,a);
+    x = RgX_Rg_div(x,a);
     y = gtrunc(gsqrtn(greffe(x,lg(x),1), K, NULL, 0)); av2 = avma;
     if (!gequal(powgi(y, K), x)) { avma = av; return 0; }
   }
@@ -3156,7 +3156,7 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
     }
   } else {
     reg = regula(D,DEFAULTPREC);
-    if (!equalii(x,D)) H = divii(H, ground(gdiv(regula(x,DEFAULTPREC), reg)));
+    if (!equalii(x,D)) H = divii(H, roundr(divrr(regula(x,DEFAULTPREC), reg)));
   }
   if (ptreg) *ptreg = reg;
   *ptD = D; return H;

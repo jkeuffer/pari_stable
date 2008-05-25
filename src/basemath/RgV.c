@@ -247,6 +247,34 @@ RgC_Rg_mul(GEN x, GEN y) {
   for (i=1; i<lx; i++) gel(z,i) = gmul(gel(x,i),y);
   return z;
 }
+GEN
+RgM_Rg_div(GEN X, GEN c) {
+  long i, j, h, l = lg(X);
+  GEN A = cgetg(l, t_MAT);
+  if (l == 1) return A;
+  h = lg(X[1]);
+  for (j=1; j<l; j++)
+  {
+    GEN a = cgetg(h, t_COL), x = gel(X, j);
+    for (i = 1; i < h; i++) gel(a,i) = gdiv(gel(x,i), c);
+    gel(A,j) = a;
+  }
+  return A;
+}
+GEN
+RgM_Rg_mul(GEN X, GEN c) {
+  long i, j, h, l = lg(X);
+  GEN A = cgetg(l, t_MAT);
+  if (l == 1) return A;
+  h = lg(X[1]);
+  for (j=1; j<l; j++)
+  {
+    GEN a = cgetg(h, t_COL), x = gel(X, j);
+    for (i = 1; i < h; i++) gel(a,i) = gmul(gel(x,i), c);
+    gel(A,j) = a;
+  }
+  return A;
+}
 
 /********************************************************************/
 /*                                                                  */

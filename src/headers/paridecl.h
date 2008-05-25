@@ -238,6 +238,8 @@ GEN     RgV_neg(GEN x);
 GEN     RgV_sub(GEN x, GEN y);
 GEN     RgM_Rg_add(GEN x, GEN y);
 GEN     RgM_Rg_add_shallow(GEN x, GEN y);
+GEN     RgM_Rg_div(GEN x, GEN y);
+GEN     RgM_Rg_mul(GEN x, GEN y);
 GEN     RgM_add(GEN x, GEN y);
 GEN     RgM_det_triangular(GEN x);
 int     RgM_isdiagonal(GEN x);

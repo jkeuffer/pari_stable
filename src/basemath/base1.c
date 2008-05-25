@@ -817,7 +817,7 @@ nfiso0(GEN a, GEN b, long fliso)
     p1 = gel(y,i);
     if (typ(p1) == t_POL) setvarn(p1, vb); else p1 = scalarpol(p1, vb);
     if (lb) p1 = RgX_unscale(p1, lb);
-    gel(y,i) = la? gdiv(p1,la): p1;
+    gel(y,i) = la? RgX_Rg_div(p1,la): p1;
   }
   return gerepilecopy(av,y);
 }
@@ -1422,7 +1422,7 @@ nfpolred(int part, nfbasic_t *T)
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, xbest);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
-  mat = d? gdiv(ZM_hnfmodid(mat,d), d): matid(n);
+  mat = d? RgM_Rg_div(ZM_hnfmodid(mat,d), d): matid(n);
 
   (void)Z_issquareall(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);
@@ -1562,7 +1562,7 @@ initalg_i(GEN x, long flag, long prec)
     if (flag & nf_ORIG)
     {
       if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
-      if (T.lead) rev = gdiv(rev, T.lead);
+      if (T.lead) rev = RgX_Rg_div(rev, T.lead);
       rev = mkpolmod(rev, T.x);
     }
   }
@@ -1967,7 +1967,7 @@ static GEN
 storeeval(GEN a, GEN x, GEN z, GEN lead)
 {
   GEN beta = modreverse_i(a, x);
-  if (lead) beta = gdiv(beta, lead);
+  if (lead) beta = RgX_Rg_div(beta, lead);
   return mkvec2(z, mkpolmod(beta,z));
 }
 
@@ -2288,7 +2288,7 @@ zeta_get_limx(long r1, long r2, long bit)
   p2 = gmul2n(mpmul(powuu(N,r), p1), -r2);
   c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
 
-  A0 = logr_abs( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
+  A0 = logr_abs( gmul2n(c0, bit) ); p2 = divrr(A0, c1);
   p1 = divrr(mulsr(N*(r+1), logr_abs(p2)), addsr(2*(r+1), gmul2n(A0,2)));
   return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
 }

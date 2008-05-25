@@ -1011,7 +1011,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
       if (pr == ONLY_REM) return zeropol(varn(x));
       *pr = zeropol(varn(x));
     }
-    return gdiv(x, y_lead);
+    return RgX_Rg_div(x, y_lead);
   }
   dx = degpol(x);
   if (dx < dy)

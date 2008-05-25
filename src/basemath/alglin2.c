@@ -73,7 +73,7 @@ caract2(GEN p, GEN x, long v)
       ch = gsubst(ch, MAXVARN, pol_x(v));
   }
   L = leading_term(ch);
-  if (!gcmp1(L)) ch = gdiv(ch, L);
+  if (!gcmp1(L)) ch = RgX_Rg_div(ch, L);
   return gerepileupto(av, ch);
 }
 
@@ -185,7 +185,7 @@ caract(GEN x, long v)
     Q = gmul(Q, x_k);
     C = diviuexact(mulsi(k-n,C), k+1); /* (-1)^{k} binomial(n,k) */
   }
-  return gerepileupto(av, gdiv(p1, mpfact(n)));
+  return gerepileupto(av, RgX_Rg_div(p1, mpfact(n)));
 }
 
 /* assume x square matrice */
@@ -279,7 +279,7 @@ easymin(GEN x, long v)
   dR=RgX_deriv(R);
   if (!lgpol(dR)) {avma=ltop; return NULL;}
   G=srgcd(R,dR);
-  G=gdiv(G,leading_term(G));
+  G=RgX_Rg_div(G,leading_term(G));
   G=gdeuc(R,G);
   return gerepileupto(ltop,G);
 }
@@ -1262,12 +1262,12 @@ matrixqz3(GEN x)
     j=1; while (j<n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
     if (j==n) continue;
 
-    c[j]=k; gel(x,j) = gdiv(gel(x,j),gcoeff(x,k,j));
+    c[j]=k; gel(x,j) = RgC_Rg_div(gel(x,j),gcoeff(x,k,j));
     for (j1=1; j1<n; j1++)
       if (j1!=j)
       {
 	GEN t = gcoeff(x,k,j1);
-	if (!gcmp0(t)) gel(x,j1) = gsub(gel(x,j1),gmul(t,gel(x,j)));
+	if (!gcmp0(t)) gel(x,j1) = RgC_sub(gel(x,j1), RgC_Rg_mul(gel(x,j),t));
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {
@@ -3216,7 +3216,7 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
     { /* possible accuracy problem */
       GEN D = RgX_gcd_simple(a,b);
       if (degpol(D)) {
-	D = gdiv(D, leading_term(D));
+	D = RgX_Rg_div(D, leading_term(D));
 	a = RgX_div(a, D); b = RgX_div(b, D);
 	d = RgX_extgcd(a,b, pu,pv); /* retry now */
 	d = gmul(d, D);
@@ -3326,8 +3326,8 @@ gsmithall_i(GEN x,long all)
       }
       if (!gcmp1(d))
       {
-	gcoeff(x,k,k) = gdiv(T,d);
-	if (all) gel(V,k) = gdiv(gel(V,k), d);
+	gcoeff(x,k,k) = RgX_Rg_div(T,d);
+	if (all) gel(V,k) = RgC_Rg_div(gel(V,k), d);
       }
     }
   }
