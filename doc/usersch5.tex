@@ -5151,9 +5151,9 @@ The following technical functions are used to evaluate \emph{inline}
 closures, after pushing lexical arguments on the evaluator stack.
 
 The control flow statements (break, next and return) will cause the
-evaluation of the closure to be interrupted. This is called below a
-flow change. When that occurs, the functions below generally returns \kbd{NULL}.
-The caller can then adopt three positions:
+evaluation of the closure to be interrupted; this is called below a
+\emph{flow change}. When that occurs, the functions below generally returns
+\kbd{NULL}. The caller can then adopt three positions:
 
 \item raise an exception (\kbd{closure\_evalnobrk}).
 
@@ -5178,6 +5178,9 @@ value is ignored.
 \fun{GEN}{closure_trapgen}{long numerr, GEN code} evaluates closure, while
 trapping error \kbd{numerr}. Return \kbd{(GEN)1L} if error trapped, and the
 result otherwise.
+
+\fun{void}{closure_reset}{void} reinitializes the byte-code evaluator.
+This is used by the error recovery code.
 
 Functions to deal with lexical variables introduced through the prototype
 code 'V':
