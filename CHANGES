@@ -170,11 +170,10 @@ BA  9- library function ZV_indexsort
 BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
 JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
-   14- library function Z_ZX_sub, ZX_Z_sub, zx_renormalize, zv_content
+   14- files src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c
    15- new benches: 'galoisinit', 'ispower', 'nffactor', 'subfields',
        'resultant', 'partition', 'aurifeuille'
-   16- RgV.c, FpV.c, ZX.c, ZV.c
-   17- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
+   16- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
    Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
    Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
    Flv_sub, Flv_sub_inplace, Fp_mulu, FpV_inv, FpXQ_inv, FqV_inv, RgM_check_ZM,
@@ -187,12 +186,13 @@ JD 12- add an optional argument to quit()
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
    zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
-   resultant, resultant_all, QX_disc, QX_resultant
-   18- universal constant gen_m2, for symmetry
-   19- GP function version() [ current version number ]
-   20- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
+   resultant, resultant_all, QX_disc, QX_resultant, Z_ZX_sub, ZX_Z_sub,
+   zx_renormalize, zv_content
+   17- universal constant gen_m2, for symmetry
+   18- GP function version() [ current version number ]
+   19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
-   21- library function galoisinit0, get_nfpol, get_bnfpol, 
+   20- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
    numberofconjugates, mkquad, mkvecsmall4, shallowconcat1, concat1, ZV_prod,
    zv_prod RgX_neg, RgX_add, RgX_sub, RgV_neg, RgV_add, RgV_sub,
@@ -202,29 +202,25 @@ JD 12- add an optional argument to quit()
    RgXQV_to_mod, RgXQXV_to_mod, RgX_to_nfX, RgX_type, RgX_type_decode,
    RgX_type_is_composite, RgX_Rg_divexact, RgC_Rg_div, RgC_Rg_mul, RgM_Rg_div,
    RgM_Rg_mul
-   22- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
-   23- file src/basemath/lll.c
-   24- library function roundr_safe
-BA 25- [ellap] Port of SEA algorithm from the ellsea GP package
-BA 26- new alarm GP function and alarmer error code
-   27- library functions chinese_coprime_Z, Z_chinese, Z_chinese_all,
+   21- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
+   22- library function roundr_safe
+BA 23- [ellap] Port of SEA algorithm from the ellsea GP package
+BA 24- new alarm GP function and alarmer error code
+   25- library functions chinese_coprime_Z, Z_chinese, Z_chinese_all,
        Z_chinese_coprime, Z_chinese_post, Z_chinese_pre, Z_incremental_CRT,
        Z_init_CRT, ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT,
        ZX_init_CRT, RgX_disc, quad_disc, qfb_disc, deg1pol, deg1pol_shallow
-RM 28- partitions()
-   29- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
+RM 26- partitions()
+   27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
-   30- library functions ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all,
-       RgXQX_pseudodivrem, Flx_roots_naive.
-   31- library function Idealstar
-   32- library function nfordmax
-BA 33- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
+       ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all, RgXQX_pseudodivrem,
+       Flx_roots_naive, Idealstar, nfordmax
+BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        abelian_group, group_domain, group_elts, group_order, group_isabelian,
        group_abelianHNF, group_abelianSNF, group_isA4S4, group_leftcoset,
        group_rightcoset, group_perm_normalize, group_quotient, quotient_perm,
        quotient_group, quotient_subgroup_lift, group_subgroups,
        groupelts_abelian_group, groupelts_center, group_export, group_ident
-   34- file src/basemath/concat.c
 
   Removed
     1- obsolete library functions extract and matextract
