@@ -2837,7 +2837,7 @@ nfdetint(GEN nf, GEN x)
   m1 = lg(A[1]); m = m1-1;
   id = matid(N);
   c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
-  piv = pivprec = scalarcol_shallow(gen_1,N);
+  piv = pivprec = gen_1;
 
   av1 = avma; lim = stack_lim(av1,1);
   det1 = idprod = gen_0; /* dummy for gerepilemany */

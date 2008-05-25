@@ -2219,7 +2219,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     {
       GEN tau = modpr_TAU(modpr);
       if (!tau) pari_err(talker,"modpr initialized for integers only!");
-      x = element_mul(nf,x, element_pow(nf, tau, utoipos(v)));
+      x = element_muli(nf,x, element_pow(nf, tau, utoipos(v)));
       x = gdivexact(x, gpowgs(p, v));
     }
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));

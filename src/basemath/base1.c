@@ -128,10 +128,11 @@ checkprimeid(GEN id)
 GEN
 checknfelt_mod(GEN nf, GEN x, const char *s)
 {
-  if (!gequal(gel(x,1),gel(nf,1)))
-    pari_err(talker,"incompatible modulus in %s:\n  mod = %Zs,\n  nf  = %Zs",
-	s, x[1], nf[1]);
-  return gel(x,2);
+  GEN T = gel(x,1), a = gel(x,2);
+  if (!RgX_equal_var(T, gel(nf,1)))
+    pari_err(talker, "incompatible modulus in %s:\n  mod = %Zs,\n  nf  = %Zs",
+	     s, a, T);
+  return a;
 }
 
 GEN

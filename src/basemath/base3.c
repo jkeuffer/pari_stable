@@ -28,21 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 static GEN
-scal_mul(GEN nf, GEN x, GEN y, long ty)
-{
-  pari_sp av=avma, tetpil;
-  GEN p1;
-
-  if (!is_extscalar_t(ty))
-  {
-    if (ty!=t_COL) pari_err(typeer,"nfmul");
-    y = coltoliftalg(nf, y);
-  }
-  p1 = gmul(x,y); tetpil=avma;
-  return gerepile(av,tetpil,algtobasis(nf,p1));
-}
-
-static GEN
 get_tab(GEN nf, long *N)
 {
   GEN tab = (typ(nf) == t_MAT)? nf: gel(nf,9);
@@ -210,23 +195,32 @@ eltimul_get_table(GEN nf, GEN x)
 GEN
 element_mul(GEN nf, GEN x, GEN y)
 {
-  long N,tx,ty;
-  GEN tab;
+  long N;
+  GEN z;
+  pari_sp av = avma;
 
   if (x == y) return element_sqr(nf,x);
 
-  tx=typ(x); ty=typ(y);
-  nf=checknf(nf);
-  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_mul");
-  if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
-  if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
-  if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
-  if (tx != t_COL || ty != t_COL) pari_err(typeer,"element_mul");
-  if (RgV_isscalar(x)) return gmul(gel(x,1),y);
-  if (RgV_isscalar(y)) return gmul(gel(y,1),x);
-
-  tab = get_tab(nf, &N);
-  return mul_by_tabi(tab,x,y);
+  nf = checknf(nf);
+  x = nf_to_scalar_or_basis(nf, x);
+  y = nf_to_scalar_or_basis(nf, y);
+  if (typ(x) != t_COL)
+  {
+    if (typ(y) == t_COL) z = RgC_Rg_mul(y, x);
+    else {
+      N = degpol(gel(nf,1));
+      z = zerocol(N); gel(z,1) = gmul(x,y);
+    }
+  }
+  else
+  {
+    if (typ(y) != t_COL) z = RgC_Rg_mul(x, y);
+    else {
+      GEN tab = get_tab(nf, &N);
+      z = mul_by_tabi(tab,x,y);
+    }
+  }
+  return gerepileupto(av, z);
 }
 
 GEN
@@ -251,71 +245,43 @@ element_mulvec(GEN nf, GEN x, GEN v)
 GEN
 element_inv(GEN nf, GEN x)
 {
-  pari_sp av=avma;
-  long i,N,tx=typ(x);
-  GEN p1;
+  pari_sp av = avma;
+  GEN T, z;
 
-  nf=checknf(nf); N=degpol(nf[1]);
-  if (is_extscalar_t(tx))
-  {
-    if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_inv");
-    else if (tx==t_POL) x=gmodulo(x,gel(nf,1));
-    return gerepileupto(av, algtobasis(nf, ginv(x)));
+  nf = checknf(nf); T = gel(nf,1);
+  x = nf_to_scalar_or_alg(nf, x);
+  if (typ(x) == t_POL)
+    z = poltobasis(nf, QXQ_inv(x, T));
+  else {
+    z = zerocol(degpol(T)); gel(z,1) = ginv(x);
   }
-  if (tx != t_COL) pari_err(typeer,"element_inv");
-  if (RgV_isscalar(x))
-  {
-    p1=cgetg(N+1,t_COL); gel(p1,1) = ginv(gel(x,1));
-    for (i=2; i<=N; i++) gel(p1,i) = gcopy(gel(x,i));
-    return p1;
-  }
-  p1 = QXQ_inv(coltoliftalg(nf,x), gel(nf,1));
-  return gerepileupto(av, poltobasis(nf,p1));
+  return gerepileupto(av, z);
 }
 
 /* quotient of x and y in nf */
 GEN
 element_div(GEN nf, GEN x, GEN y)
 {
-  pari_sp av=avma;
-  long tx = typ(x), ty = typ(y);
-  GEN p1;
+  pari_sp av = avma;
+  GEN T, z;
 
-  nf=checknf(nf);
-  if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_div");
-  else if (tx==t_POL) x=gmodulo(x,gel(nf,1));
-
-  if (ty==t_POLMOD) (void)checknfelt_mod(nf,y,"element_div");
-  else if (ty==t_POL) y=gmodulo(y,gel(nf,1));
-
-  if (is_extscalar_t(tx))
-  {
-    if (is_extscalar_t(ty)) p1=gdiv(x,y);
-    else
-    {
-      if (ty!=t_COL) pari_err(typeer,"nfdiv");
-      p1 = gdiv(x, coltoalg(nf, y));
+  nf = checknf(nf); T = gel(nf,1);
+  y = nf_to_scalar_or_alg(nf, y);
+  if (typ(y) != t_POL) {
+    x = nf_to_scalar_or_basis(nf, x);
+    if (typ(x) == t_COL) z = RgC_Rg_div(x, y);
+    else {
+      z = zerocol(degpol(T)); gel(z,1) = gdiv(x,y);
     }
-    return gerepileupto(av, algtobasis(nf,p1));
   }
-  if (is_extscalar_t(ty))
+  else
   {
-    if (tx!=t_COL) pari_err(typeer,"nfdiv");
-    p1 = gdiv(coltoalg(nf,x), y);
-    return gerepileupto(av, algtobasis(nf,p1));
+    x = nf_to_scalar_or_alg(nf, x);
+    z = QXQ_inv(y, T);
+    z = (typ(x) == t_POL)? RgXQ_mul(z, x, T): RgX_Rg_mul(z, x);
+    z = poltobasis(nf, z);
   }
-  if (tx != t_COL || ty != t_COL) pari_err(typeer,"element_div");
-
-  if (RgV_isscalar(y)) return gdiv(x,gel(y,1));
-  if (RgV_isscalar(x))
-  {
-    p1=element_inv(nf,y);
-    return gerepileupto(av, gmul(gel(x,1),p1));
-  }
-
-  p1 = gmul(coltoliftalg(nf,x), QXQ_inv(coltoliftalg(nf,y), gel(nf,1)));
-  p1 = RgX_rem(p1, gel(nf,1));
-  return gerepileupto(av, poltobasis(nf,p1));
+  return gerepileupto(av, z);
 }
 
 /* product of INTEGERS (i.e vectors with integral coeffs) x and y in nf */
@@ -331,8 +297,9 @@ element_muli(GEN nf, GEN x, GEN y)
     if (ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
     return ZC_Z_mul(y, x);
   }
-  if (tx != t_COL || lg(x) != N+1
-   || ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
+  if (tx != t_COL || lg(x) != N+1) pari_err(typeer,"element_muli");
+  if (ty == t_INT) return ZC_Z_mul(x, y);
+  if (ty != t_COL || lg(y) != N+1) pari_err(typeer,"element_muli");
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
@@ -480,26 +447,29 @@ sqr_by_tab(GEN tab, GEN x)
 GEN
 element_sqr(GEN nf, GEN x)
 {
-  long N, tx = typ(x);
-  GEN tab;
+  pari_sp av = avma;
+  long N;
+  GEN z;
 
   nf = checknf(nf);
-  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
-  if (is_extscalar_t(tx))
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) 
   {
-    pari_sp av = avma;
-    return gerepileupto(av, algtobasis(nf, gsqr(x)));
+    N = degpol(gel(nf,1));
+    z = zerocol(N); gel(z,1) = gsqr(x);
   }
-  if (tx != t_COL) pari_err(typeer,"element_sqr");
-
-  tab = get_tab(nf, &N);
-  return sqr_by_tabi(tab,x);
+  else
+  {
+    GEN tab = get_tab(nf, &N);
+    z = sqr_by_tabi(tab,x);
+  }
+  return gerepileupto(av, z);
 }
 
 static GEN
-_mul(void *data, GEN x, GEN y) { return element_mul((GEN)data,x,y); }
+_mul(void *data, GEN x, GEN y) { return element_muli((GEN)data,x,y); }
 static GEN
-_sqr(void *data, GEN x) { return element_sqr((GEN)data,x); }
+_sqr(void *data, GEN x) { return element_sqri((GEN)data,x); }
 
 /* Compute x^n in nf, left-shift binary powering */
 GEN
@@ -513,14 +483,10 @@ element_pow(GEN nf, GEN x, GEN n)
   nf = checknf(nf); N = degpol(nf[1]);
   s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL)
-  {
-    y = scalarcol_shallow(gen_1,N);
-    gel(y,1) = powgi(x,n); return y;
-  }
+  if (typ(x) != t_COL) { y = zerocol(N); gel(y,1) = powgi(x,n); return y; }
   x = primitive_part(x, &cx);
   y = leftright_pow(x, n, (void*)nf, _sqr, _mul);
-  if (s<0) y = element_inv(nf, y);
+  if (s < 0) y = element_inv(nf, y);
   if (cx) y = gmul(y, powgi(cx, n));
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
@@ -591,7 +557,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 	return w;
       }
     }
-    r=x; x=y; y=r;
+    swap(x, y);
   }
 }
 
@@ -703,12 +669,16 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
     case t_INT: case t_FRAC:
       return x;
     case t_POLMOD:
-      x = gel(x,2);
+      x = checknfelt_mod(nf,x,"nf_to_scalar_or_basis");
       if (typ(x) != t_POL) return x;
       /* fall through */
     case t_POL:
     {
+      GEN T = gel(nf,1);
       long l = lg(x);
+      if (varn(x) != varn(T))
+        pari_err(talker,"incompatible variables in nf_to_scalar_or_alg");
+      if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
       return poltobasis(nf,x);
@@ -730,6 +700,36 @@ RgX_to_nfX(GEN nf, GEN x)
   GEN y = cgetg(l,t_POL); y[1] = x[1];
   for (i=2; i<l; i++) gel(y,i) = nf_to_scalar_or_basis(nf, gel(x,i));
   return y;
+}
+
+GEN
+nf_to_scalar_or_alg(GEN nf, GEN x)
+{
+  switch(typ(x))
+  {
+    case t_INT: case t_FRAC:
+      return x;
+    case t_POLMOD:
+      x = checknfelt_mod(nf,x,"nf_to_scalar_or_alg");
+      if (typ(x) != t_POL) return x;
+      /* fall through */
+    case t_POL:
+    {
+      GEN T = gel(nf,1);
+      long l = lg(x);
+      if (varn(x) != varn(T))
+        pari_err(talker,"incompatible variables in nf_to_scalar_or_alg");
+      if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
+      if (l == 2) return gen_0;
+      if (l == 3) return gel(x,2);
+      return x;
+    }
+    case t_COL:
+      if (lg(x) != lg(gel(nf,7))) break;
+      return RgV_isscalar(x)? gel(x,1): coltoliftalg(nf, x);
+  }
+  pari_err(typeer,"nf_to_scalar_or_alg");
+  return NULL; /* not reached */
 }
 
 /* gmul(A, RgX_to_RgV(x)), A t_MAT (or t_VEC) of compatible dimensions */
@@ -911,9 +911,9 @@ rnfalgtobasis(GEN rnf,GEN x)
 GEN
 nfdiveuc(GEN nf, GEN a, GEN b)
 {
-  pari_sp av=avma, tetpil;
-  a = element_div(nf,a,b); tetpil=avma;
-  return gerepile(av,tetpil,ground(a));
+  pari_sp av = avma;
+  a = element_div(nf,a,b);
+  return gerepileupto(av, ground(a));
 }
 
 /* Given a and b in nf, gives a "small" algebraic integer r in nf
@@ -922,9 +922,9 @@ nfdiveuc(GEN nf, GEN a, GEN b)
 GEN
 nfmod(GEN nf, GEN a, GEN b)
 {
-  pari_sp av=avma,tetpil;
-  GEN p1=gneg_i(element_mul(nf,b,ground(element_div(nf,a,b))));
-  tetpil=avma; return gerepile(av,tetpil,gadd(a,p1));
+  pari_sp av = avma;
+  GEN p1 = gneg_i(element_mul(nf,b,ground(element_div(nf,a,b))));
+  return gerepileupto(av, gadd(a,p1));
 }
 
 /* Given a and b in nf, gives a two-component vector [y,r] in nf such
@@ -1109,11 +1109,11 @@ element_invmodideal(GEN nf, GEN x, GEN y)
 
 static GEN
 element_sqrmodideal(GEN nf, GEN x, GEN id) {
-  return ZC_hnfrem(element_sqr(nf,x), id);
+  return ZC_hnfrem(element_sqri(nf,x), id);
 }
 static GEN
 element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? ZC_hnfrem(element_mul(nf,x,y), id): y;
+  return x? ZC_hnfrem(element_muli(nf,x,y), id): y;
 }
 /* assume k >= 0, ideal in HNF */
 GEN

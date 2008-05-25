@@ -207,7 +207,7 @@ get_pinvpi(GEN nf, GEN fZ, GEN p, GEN pi, GEN *v)
 {
   if (!*v) {
     GEN invpi = element_inv(nf, pi);
-    *v = make_integral_Z(gmul(p, invpi), mulii(p, fZ));
+    *v = make_integral_Z(RgC_Rg_mul(invpi, p), mulii(p, fZ));
   }
   return *v;
 }
@@ -287,7 +287,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       pi = get_pi(F, pr, &gel(vecpi,j));
       pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
       t = element_pow(nf, pinvpi, stoi(v));
-      mulI = mulI? element_mul(nf, mulI, t): t;
+      mulI = mulI? element_muli(nf, mulI, t): t;
       t = powiu(gel(pr,1), v);
       dmulI = dmulI? mulii(dmulI, t): t;
     }
@@ -311,7 +311,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 	  pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
 	  t = element_pow(nf,pinvpi,stoi(v));
 	  LL = element_mul(nf, LL, t);
-	  LL = gdiv(LL, powiu(p, v));
+	  LL = RgC_Rg_div(LL, powiu(p, v));
 	}
 	else
 	{

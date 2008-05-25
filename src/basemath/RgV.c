@@ -233,6 +233,21 @@ RgM_neg(GEN x)
   return y;
 }
 
+GEN
+RgC_Rg_div(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
+  return z;
+}
+GEN
+RgC_Rg_mul(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_COL);
+  for (i=1; i<lx; i++) gel(z,i) = gmul(gel(x,i),y);
+  return z;
+}
+
 /********************************************************************/
 /*                                                                  */
 /*                    SCALAR TO MATRIX/VECTOR                       */

@@ -228,6 +228,8 @@ GEN     FpX_to_mod(GEN z, GEN p);
 
 /* RgV.c */
 
+GEN     RgC_Rg_div(GEN x, GEN y);
+GEN     RgC_Rg_mul(GEN x, GEN y);
 GEN     RgC_add(GEN x, GEN y);
 GEN     RgC_neg(GEN x);
 GEN     RgC_sub(GEN x, GEN y);
@@ -880,6 +882,7 @@ GEN     matbasistoalg(GEN nf, GEN x);
 GEN     nfdiveuc(GEN nf, GEN a, GEN b);
 GEN     nfdivrem(GEN nf, GEN a, GEN b);
 GEN     nfmod(GEN nf, GEN a, GEN b);
+GEN     nf_to_scalar_or_alg(GEN nf, GEN x);
 GEN     nf_to_scalar_or_basis(GEN nf, GEN x);
 GEN     reducemodinvertible(GEN x, GEN y);
 GEN     rnfalgtobasis(GEN rnf, GEN x);

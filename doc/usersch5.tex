@@ -5311,6 +5311,11 @@ element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
 or \typ{FRAC}, return the latter. Otherwise returns its basis representation
 (\tet{nfalgtobasis}). Shallow function.
 
+\fun{GEN}{nf_to_scalar_or_alg}{GEN nf, GEN x} let $x$ be a number field 
+element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
+or \typ{FRAC}, return the latter. Otherwise returns its lifted \typ{POLMOD}
+representation (lifted \tet{nfbasistoalg}). Shallow function.
+
 \fun{GEN}{RgX_to_nfX}{GEN nf, GEN x} let $x$ be a polynomial whose coefficients
 are number field elements; apply \kbd{nf\_to\_scalar\_or\_basis} to each
 coefficient and return the resulting new polynomial. Shallow function.
@@ -5585,6 +5590,10 @@ vector of
 
 \fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
 and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
+
+\fun{GEN}{RgC_Rg_div}{GEN x, GEN y}
+
+\fun{GEN}{RgC_Rg_mul}{GEN x, GEN y}
 
 \fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
 fewer copies.
