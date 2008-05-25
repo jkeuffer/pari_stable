@@ -151,6 +151,7 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    46- regression tests in src/test/in/ no longer need to end with
        'print("Total time spent: ",gettime)'
    47- rename library functions discf -> nfdisc, nfdiscf0 -> nfdisc0
+   48- arguments of stirling1 / stirling2 are now ulongs [ were longs ]
 
   Added
     1- library function gpcalloc

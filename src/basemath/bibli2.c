@@ -836,7 +836,7 @@ a set of n elements into m non-empty subsets.
 */
 
 GEN
-stirling2uu(ulong n, ulong m)
+stirling2(ulong n, ulong m)
 {
   pari_sp av = avma, lim = stack_lim(av, 2);
   GEN p1 = gen_0;
@@ -854,7 +854,7 @@ stirling2uu(ulong n, ulong m)
     p1  = (k&1) ? subii(p1, p2) : addii(p1, p2);
     if (low_stack(lim, stack_lim(av,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"stirling2uu");
+      if(DEBUGMEM>1) pari_warn(warnmem,"stirling2");
       gerepileall(av, 2, &p1, &bmk);
     }
   }
@@ -867,20 +867,12 @@ stirling2uu(ulong n, ulong m)
   return gerepileuptoint(av,diviiexact(p1, mpfact(m)));
 }
 
-GEN
-stirling2(long n, long m)
-{
-  if (n < 0 || m < 0)
-    pari_err(talker, "Negative arguments in stirling2(%ld,%ld)",n,m);
-  return stirling2uu((ulong)n,(ulong)m);
-}
-
 /**
 Stirling number of the first kind. Up to the sign, the number of
 permutations of n symbols which have exactly m cycles.
 */
 GEN
-stirling1uu(ulong n, ulong m)
+stirling1(ulong n, ulong m)
 {
   pari_sp ltop=avma;
   ulong k;
@@ -890,7 +882,7 @@ stirling1uu(ulong n, ulong m)
   for (k = 0; k <= n-m; ++k)
   {
     GEN p2 = mulii(mulii(binomialuu(n-1+k, n-m+k), binomialuu(2*n-m, n-m-k)),
-		  stirling2uu(n-m+k, k));
+		  stirling2(n-m+k, k));
     if(k&1)
       p1 = subii(p1,p2);
     else
@@ -901,20 +893,14 @@ stirling1uu(ulong n, ulong m)
 }
 
 GEN
-stirling1(long n, long m)
+stirling(long n, long m, long flag)
 {
   if (n<0 || m<0)
     pari_err(talker, "Negative arguments in stirling");
-  return stirling1uu((ulong)n,(ulong)m);
-}
-
-GEN
-stirling(long n, long m, long flag)
-{
   switch (flag)
   {
-    case 1: return stirling1(n,m);
-    case 2: return stirling2(n,m);
+    case 1: return stirling1((ulong)n,(ulong)m);
+    case 2: return stirling2((ulong)n,(ulong)m);
     default: pari_err(flagerr,"stirling");
   }
   return NULL; /*NOT REACHED*/

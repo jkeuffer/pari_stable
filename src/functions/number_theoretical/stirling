@@ -6,7 +6,8 @@ Help: stirling(n,k,{flag=1}): If flag=1 (default) return the Stirling number
  of the first kind s(n,k), if flag=2, return the Stirling number of the second
  kind S(n,k)
 Doc: \idx{Stirling number} of the first kind $s(n,k)$ ($\fl=1$, default) or
- of the second kind $S(n,k)$ (\fl=2). The former is $(-1)^{n-k}$ times the
+ of the second kind $S(n,k)$ (\fl=2), where $n$, $k$ are non-negative
+ integers. The former is $(-1)^{n-k}$ times the
  number of permutations of $n$ symbols with exactly $k$ cycles; the latter is
  the number of ways of partitioning a set of $n$ elements into $k$ non-empty
  subsets. Note that if all $s(n,k)$ are needed, it is much faster to compute
@@ -23,5 +24,5 @@ Doc: \idx{Stirling number} of the first kind $s(n,k)$ ($\fl=1$, default) or
    vector(n, i, t = divrem(Q, x-i); Q=t[1]; t[2]);
  }
  @eprog
-Variant: Also available are \fun{GEN}{stirling1}{long n, long k}
- ($\fl=1$) and \fun{GEN}{stirling2}{long n, long k} ($\fl=2$).
+Variant: Also available are \fun{GEN}{stirling1}{ulong n, ulong k}
+ ($\fl=1$) and \fun{GEN}{stirling2}{ulong n, ulong k} ($\fl=2$).
