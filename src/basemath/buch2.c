@@ -1643,11 +1643,11 @@ isunit(GEN bnf,GEN x)
   /* p1 = arg(the missing root of 1) */
 
   pi2_sur_w = divru(mppi(prec), n>>1); /* 2pi / n */
-  e = umodiu(ground(gdiv(p1, pi2_sur_w)), n);
+  e = umodiu(roundr(divrr(p1, pi2_sur_w)), n);
   if (n > 2)
   {
     GEN ro = gmul(row(gmael(nf,5,1), 1), z);
-    GEN p2 = ground(gdiv(garg(ro, prec), pi2_sur_w));
+    GEN p2 = roundr(divrr(garg(ro, prec), pi2_sur_w));
     e *= Fl_inv(umodiu(p2,n), n);
     e %= n;
   }
@@ -2196,6 +2196,11 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   long i, R1 = 2*RU - N;
   pari_sp av = avma;
 
+  if (RU == 1)
+  {
+    *ptL = zeromat(0, lg(A)-1);
+    return gen_1;
+  }
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
   T = cgetg(RU+1,t_COL);
@@ -2212,11 +2217,11 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   Im_mdet = vecpermute(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. Last column is T */
-  kR = gdivgs(det2(Im_mdet), N);
+  kR = divrs(det2(Im_mdet), N);
   /* R > 0.2 uniformly */
-  if (gcmp0(kR) || gexpo(kR) < -3) { avma=av; return NULL; }
+  if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
-  kR = mpabs(kR);
+  setsigne(kR,1);
   L = gauss_intern(Im_mdet,NULL); /* Im_mdet^(-1) */
   if (!L) { *ptL = NULL; return kR; }
 
@@ -2255,7 +2260,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   double c;
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
-  D = gmul2n(gmul(*ptkR,z), 1); /* bound for denom(lambda) */
+  D = gmul2n(mpmul(*ptkR,z), 1); /* bound for denom(lambda) */
   if (expo(D) < 0 && rtodbl(D) < 0.95) return fupb_BACH;
   lambda = bestappr_noer(lambda,D);
   if (!lambda)
@@ -2264,7 +2269,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     return fupb_PRECI;
   }
   den = Q_denom(lambda);
-  if (gcmp(den,D) > 0)
+  if (mpcmp(den,D) > 0)
   {
     if (DEBUGLEVEL) fprintferr("D = %Zs\nden = %Zs\n",D,
 		    lgefint(den) <= DEFAULTPREC? den: itor(den,3));
