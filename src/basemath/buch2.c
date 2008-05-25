@@ -859,31 +859,29 @@ init_units(GEN BNF)
 /*                                                                 */
 /*******************************************************************/
 
-/* gen: prime ideals, return Norm (product), bound for denominator.
- * C = possible extra prime (^1) or NULL */
+/* G: prime ideals, E: vector of non-negative exponents.
+ * C = possible extra prime (^1) or NULL 
+ * Return Norm (product) */
 static GEN
-get_norm_fact_primes(GEN gen, GEN ex, GEN C, GEN *pd)
+get_norm_fact_primes(GEN G, GEN E, GEN C)
 {
-  GEN N,d,P,p,e;
-  long i,s,c = lg(ex);
-  d = N = gen_1;
+  GEN N = gen_1, P, p;
+  long i, c = lg(E);
   for (i=1; i<c; i++)
-    if ((s = signe(ex[i])))
-    {
-      P = gel(gen,i); e = gel(ex,i); p = gel(P,1);
-      N = mulii(N, powgi(p, mulii(gel(P,4), e)));
-      if (s < 0)
-      {
-	e = gceil(gdiv(negi(e), gel(P,3)));
-	d = mulii(d, powgi(p, e));
-      }
-    }
+  {
+    GEN ex = gel(E,i);
+    long s = signe(ex);
+    if (!s) continue;
+
+    P = gel(G,i); p = gel(P,1);
+    N = mulii(N, powgi(p, mulii(gel(P,4), ex)));
+  }
   if (C)
   {
     P = C; p = gel(P,1);
     N = mulii(N, powgi(p, gel(P,4)));
   }
-  *pd = d; return N;
+  return N;
 }
 
 /* gen: HNF ideals */
@@ -1311,8 +1309,8 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
-  x = grndtoi(gmul(dx, gauss_realimag(nf,col)), pe);
-  return (*pe > -5)? NULL: gdiv(x, dx);
+  x = grndtoi(RgC_Rg_mul(gauss_realimag(nf,col), dx), pe);
+  return (*pe > -5)? NULL: RgC_Rg_div(x, dx);
 }
 
 /* y = C \prod g[i]^e[i] ? */
@@ -2499,8 +2497,8 @@ makematal(GEN bnf)
     GEN c = getrand();
     GEN ex = (j<=lW)? gel(W,j): gel(B,j-lW);
     GEN C = (j<=lW)? NULL: gel(pFB,j);
-    GEN dx, Nx = get_norm_fact_primes(pFB, ex, C, &dx);
-    GEN y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, dx, &e);
+    GEN Nx = get_norm_fact_primes(pFB, ex, C);
+    GEN y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, gen_1, &e);
     if (y && !fact_ok(nf,y,C,pFB,ex)) y = NULL;
     if (y)
     {
@@ -3172,7 +3170,7 @@ PRECPB:
   /* fundamental units */
   if (flun & (nf_UNITS|nf_INIT))
   {
-    GEN B, U, H, v = extract_full_lattice(L); /* L may be very large */
+    GEN AU, U, H, v = extract_full_lattice(L); /* L may be very large */
     if (v)
     {
       A = vecpermute(A, v);
@@ -3181,11 +3179,11 @@ PRECPB:
     /* arch. components of fund. units */
     H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
     U = ZM_mul(U, lllint(H));
-    B = gmul(A, U);
-    A = cleanarch(B, N, PRECREG);
+    AU = gmul(A, U);
+    A = cleanarch(AU, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
     if (!A) {
-      precadd = (DEFAULTPREC-2) + divsBIL( gexpo(B) ) - gprecision(B);
+      precadd = (DEFAULTPREC-2) + divsBIL( gexpo(AU) ) - gprecision(AU);
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch"; goto PRECPB;
     }

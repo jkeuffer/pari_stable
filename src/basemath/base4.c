@@ -826,7 +826,7 @@ idealadd(GEN nf, GEN x, GEN y)
   }
   z = shallowconcat(x,y);
   z = modid? ZM_hnfmodid(z,p1): ZM_hnfmod(z, p1);
-  if (dz) z = gdiv(z,dz);
+  if (dz) z = RgM_Rg_div(z,dz);
   return gerepileupto(av,z);
 }
 
@@ -1519,7 +1519,7 @@ hnfideal_inv(GEN nf, GEN I)
   dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
   dual = ZM_hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
-  return gdiv(dual,IZ);
+  return RgM_Rg_div(dual,IZ);
 }
 
 /* return p * P^(-1)  [integral] */
@@ -1564,7 +1564,7 @@ idealinv(GEN nf, GEN x)
       }
       x = idealhermite_aux(nf,x); break;
     case id_PRIME:
-      x = gdiv(pidealprimeinv(nf,x), gel(x,1));
+      x = RgM_Rg_div(pidealprimeinv(nf,x), gel(x,1));
   }
   x = gerepileupto(av,x); if (!ax) return x;
   gel(res,1) = x;
@@ -1599,7 +1599,8 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
     gel(x,1) = powgi(gel(x,1),n1);
     if (s < 0)
     {
-      gel(x,2) = gdiv(element_pow(nf,gel(x,5),n), powgi(gel(vp,1),subii(n,n1)));
+      GEN q = powgi(gel(vp,1),subii(n,n1));
+      gel(x,2) = RgC_Rg_div(element_pow(nf,gel(x,5),n), q);
       *d = gel(x,1);
     }
     else
@@ -1621,7 +1622,7 @@ idealpowprime(GEN nf, GEN vp, GEN n)
   if (s == 0) return matid(degpol(nf[1]));
   x = idealpowprime_spec(nf, vp, n, &d);
   x = prime_to_ideal_aux(nf,x);
-  if (d) x = gdiv(x, d);
+  if (d) x = RgM_Rg_div(x, d);
   return x;
 }
 
@@ -1649,7 +1650,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   }
   x = idealmulspec(nf,x,y);
   if (cx) x = gmul(x,cx);
-  if (dx) x = gdiv(x,dx);
+  if (dx) x = RgM_Rg_div(x,dx);
   return x;
 }
 GEN
@@ -1878,7 +1879,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   z = kerint(shallowconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = ZM_hnfmodid(ZM_mul(x,z), lcmii(xZ, yZ));
-  if (dx) z = gdiv(z,dx);
+  if (dx) z = RgM_Rg_div(z,dx);
   return gerepileupto(av,z);
 }
 
@@ -2255,7 +2256,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   else
     d = NULL;
   z = lllreducemodmatrix(z, x);
-  return d? gdiv(z,d): z;
+  return d? RgC_Rg_div(z,d): z;
 }
 
 GEN
@@ -2359,7 +2360,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   }
   if (!s) { avma = av; return zerocol(N); }
   y = lllreducemodmatrix(s, F);
-  return gerepileupto(av, den? gdiv(y,den): y);
+  return gerepileupto(av, den? RgM_Rg_div(y,den): y);
 }
 
 static GEN

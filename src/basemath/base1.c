@@ -2357,7 +2357,7 @@ initzeta(GEN pol, long prec)
   nf_get_sign(nf, &r1, &r2);
   gr1 = gmael(nf,2,1); gr2 = gmael(nf,2,2);
   r = r1 + r2; R = r+2;
-  av = avma; p1 = gel(bnf,8); p2 = gmul(gmul2n(gmael(p1,1,1),r1), gel(p1,2));
+  av = avma; p1 = gel(bnf,8); p2 = mpmul(shifti(gmael(p1,1,1),r1), gel(p1,2));
   resi = gerepileupto(av, gdiv(p2, gmael(p1,4,1)));
 
   av = avma;

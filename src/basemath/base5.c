@@ -116,7 +116,7 @@ makenfabs(GEN rnf)
   M = modulereltoabs(rnf, gel(rnf,7));
   n = degpol(pol);
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
-  if (d) M = gdiv(ZM_hnfcenter(ZM_hnfmodid(M, d)), d);
+  if (d) M = RgM_Rg_div(ZM_hnfcenter(ZM_hnfmodid(M, d)), d);
   else   M = matid(n);
 
   gel(NF,1) = pol;
@@ -644,7 +644,7 @@ findmin(GEN nf, GEN x, GEN muf)
     y = gmul(M, x);
   }
   m = gauss_realimag(y, muf);
-  if (cx) m = gdiv(m, cx);
+  if (cx) m = RgM_Rg_div(m, cx);
   m = grndtoi(m, &e);
   if (e >= 0) return NULL; /* precision problem */
   if (cx) m = gmul(m, cx);
@@ -940,7 +940,10 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   if (den)
   { /* restore denominators */
     gel(vbs,2) = plg; d = den;
-    for (i=3; i<=n; i++) { d = mulii(d,den); gel(vbs,i) = gdiv(gel(vbs,i), d); }
+    for (i=3; i<=n; i++) {
+      d = mulii(d,den);
+      gel(vbs,i) = RgX_Rg_div(gel(vbs,i), d);
+    }
   }
 
   /* bs = integer basis of K, as elements of L */
@@ -958,7 +961,8 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     }
   }
   B = Q_remove_denom(B, &den);
-  if (den) { B = ZM_hnfmodid(B, den); B = gdiv(B, den); } else B = matid(m);
+  if (den) { B = ZM_hnfmodid(B, den); B = RgM_Rg_div(B, den); }
+  else B = matid(m);
   return gerepilecopy(av, mkvec2(polabs, B));
 }
 

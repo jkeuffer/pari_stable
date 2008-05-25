@@ -126,7 +126,7 @@ allbase_from_ordmax(nfmaxord_t *S, GEN ordmax, GEN P, GEN f)
   {
     index = diviiexact(da, gcoeff(a,1,1));
     for (j=2; j<=n; j++) index = mulii(index, diviiexact(da, gcoeff(a,j,j)));
-    a = gdiv(ZM_hnfcenter(a), da);
+    a = RgM_Rg_div(ZM_hnfcenter(a), da);
   }
   else
   {
@@ -470,7 +470,8 @@ maxord2(GEN cf, GEN p, long epsilon)
       gerepileall(av2, 2, &m, &delta);
     }
   }
-  return gerepileupto(av, gdiv(ZM_hnfmodid(shallowtrans(m), delta), delta));
+  m = shallowtrans(m);
+  return gerepileupto(av, RgM_Rg_div(ZM_hnfmodid(m, delta), delta));
 }
 
 /* Input:
@@ -686,14 +687,14 @@ GEN
 gcdpm(GEN f1, GEN f2, GEN pm)
 {
   pari_sp av = avma;
-  long c, n = degpol(f1), v = varn(f1);
-  GEN col, a = sylpm(f1,f2,pm);
-  for (c = 1; c <= n; c++)
-    if (!equalii(gcoeff(a,c,c), pm))
-    {
-      col = gdiv(gel(a,c), gcoeff(a,c,c));
-      return gerepilecopy(av, RgV_to_RgX(col,v));
-    }
+  GEN a = sylpm(f1,f2,pm);
+  long c, l = lg(a), v = varn(f1);
+  for (c = 1; c < l; c++)
+  {
+    GEN t = gcoeff(a,c,c);
+    if (!equalii(t, pm))
+      return gerepileupto(av, RgX_Rg_div(RgV_to_RgX(gel(a,c), v), t));
+  }
   avma = av; return zeropol(v);
 }
 
@@ -735,7 +736,7 @@ compmod(GEN f, GEN g, GEN T, GEN p)
   if (!D) return z;
   update_den(&z, &D, NULL);
   Dp = mulii(D,p);
-  return gdiv( FpX_center(z, Dp, shifti(Dp,-1)), D );
+  return RgX_Rg_div( FpX_center(z, Dp, shifti(Dp,-1)), D );
 }
 
 static GEN
@@ -770,7 +771,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   }
   b = ZM_hnfmodid(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Zs\n",b);
-  return gdiv(b, pd);
+  return RgM_Rg_div(b, pd);
 }
 
 static GEN
@@ -792,7 +793,7 @@ QpX_mod(GEN e, GEN f, GEN pk)
   mod = d? mulii(pk,d): pk;
   e = FpX_rem(e, centermod(f, mod), mod);
   e = FpX_center(e, mod, shifti(mod,-1));
-  if (d) e = gdiv(e, d);
+  if (d) e = RgX_Rg_div(e, d);
   return e;
 }
 #endif
@@ -892,7 +893,7 @@ Decomp(decomp_t *S, long flag)
     for (   ; i<=n; i++)
       gel(res,i) = FpX_center(FpX_rem(ZX_mul(gel(ib2,i),e), fred, D), D, Dov2);
     res = RgXV_to_RgM(res, n);
-    return gdiv(ZM_hnfmodid(res,D), D); /* normalized integral basis */
+    return RgM_Rg_div(ZM_hnfmodid(res,D), D); /* normalized integral basis */
   }
 }
 
@@ -939,7 +940,7 @@ static GEN
 redelt(GEN a, GEN N, GEN p)
 {
   GEN da; a = redelt_i(a, N, p, &da);
-  if (da) a = gdiv(a, da);
+  if (da) a = RgX_Rg_div(a, da);
   return a;
 }
 
@@ -1156,7 +1157,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
 
   q = powiu(S->p, s+1);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, q);
-  return gdiv(compmod(nup, phi, S->chi, q), powiu(S->p, s));
+  return RgX_Rg_div(compmod(nup, phi, S->chi, q), powiu(S->p, s));
 }
 
 static void
@@ -1242,7 +1243,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et)
   while (s < 0) { s = s + Ea; t++; }
 
   c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
-  c = gdiv(RgX_rem(c, S->chi), powiu(S->p, t));
+  c = RgX_Rg_div(RgX_rem(c, S->chi), powiu(S->p, t));
   S->phi = gadd( pol_x( varn(S->chi) ), redelt(c, S->psc, S->p) );
   if (factcp(S) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
@@ -1275,7 +1276,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
     update_den(&g, &Dg, NULL);
     g = centermod(g, mulii(S->p, Dg));
   }
-  if (!is_pm1(Dg)) g = gdiv(g, Dg);
+  if (!is_pm1(Dg)) g = RgX_Rg_div(g, Dg);
   return g;
 }
 
@@ -1317,8 +1318,8 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
     else
     { /* gamm = beta/p^eq, special case of the above */
       GEN h = powiu(S->p, eq);
-      gamm = gdiv(beta, h);
-      chig = gdiv(RgX_unscale(chib, h), powiu(h, N));
+      gamm = RgX_Rg_div(beta, h);
+      chig = RgX_Rg_div(RgX_unscale(chib, h), powiu(h, N));
       chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
     }
 
@@ -2457,8 +2458,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
   }
   /* the modulus is integral */
-  base = nfhnfmod(nf,base, gmul(powiu(p, m-d),
-				    idealpows(nf, prinvp, d)));
+  base = nfhnfmod(nf,base, gmul(powiu(p, m-d), idealpows(nf, prinvp, d)));
   gel(base,2) = gdiv(gel(base,2), p); /* cancel the factor p */
   vt = vdisc - 2*d;
   return gerepilecopy(av, mkvec3(vt < 2? gen_1: gen_0, base, stoi(vt)));
