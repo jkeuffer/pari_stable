@@ -2532,14 +2532,18 @@ GEN
 ZX_disc_all(GEN x, ulong bound)
 {
   pari_sp av = avma;
-  GEN l = leading_term(x), d = ZX_resultant_all(x, ZX_deriv(x), NULL, bound);
-  long s = (degpol(x) & 2) ? -1: 1;
+  GEN l, R;
+  long s, d = degpol(x);
+  if (d <= 1) return d ? gen_1: gen_0;
+  s = (d & 2) ? -1: 1;
+  l = leading_term(x);
+  R = ZX_resultant_all(x, ZX_deriv(x), NULL, bound);
   if (is_pm1(l))
   { if (signe(l) < 0) s = -s; }
   else
-    d = diviiexact(d,l);
-  if (s == -1) togglesign_safe(&d);
-  return gerepileuptoint(av,d);
+    R = diviiexact(R,l);
+  if (s == -1) togglesign_safe(&R);
+  return gerepileuptoint(av,R);
 }
 GEN ZX_disc(GEN x) { return ZX_disc_all(x,0); }
 
