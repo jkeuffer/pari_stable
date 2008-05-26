@@ -5669,7 +5669,7 @@ the base change matrix $U$ may be very large (when the kernel is large).
 \kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such that $x
 U = H$. The meaning of \kbd{remove} is the same as in \tet{ZM_hnfall}.
 
-This routine uses the LLL variant of Havas, Majewski and Mathews, which is
+This routine uses the \idx{LLL} variant of Havas, Majewski and Mathews, which is
 polynomial time, but rather slow in practice because it uses an exact LLL
 over the integers instead of a floating point variant; it uses polynomial
 space but lots of memory is needed for large dimensions, say larger than 300.
@@ -5725,6 +5725,103 @@ mode.
 \fun{GEN}{smithall}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
 \kbd{ZM\_smithall(x, \&U, \&V)} and returns $[U,V,D]$. Normally useless in
 library mode.
+
+\subsec{The LLL algorithm}\sidx{LLL}
+
+The basic GP functions and their immediate variants are normally not very
+useful in library mode. We briefly list them here for completeness, see the
+documentation of \kbd{qflll0} and \kbd{qflllgram0} for details:
+
+\item \fun{GEN}{qflll0}{GEN x, long flag}
+
+\fun{GEN}{lll}{GEN x} \fl = 0
+
+\fun{GEN}{lllint}{GEN x} \fl = 1
+
+\fun{GEN}{lllkerim}{GEN x} \fl = 4
+
+\fun{GEN}{lllkerimgen}{GEN x} \fl = 5
+
+\fun{GEN}{lllgen}{GEN x} \fl = 8
+
+\item \fun{GEN}{qflllgram0}{GEN x, long flag}
+
+\fun{GEN}{lllgram}{GEN x} \fl = 0
+
+\fun{GEN}{lllgramint}{GEN x} \fl = 1
+
+\fun{GEN}{lllgramkerim}{GEN x} \fl = 4
+
+\fun{GEN}{lllgramkerimgen}{GEN x} \fl = 5
+
+\fun{GEN}{lllgramgen}{GEN x} \fl = 8
+
+\smallskip
+
+The basic workhorse underlying all integral and floating point LLLs is
+
+\fun{GEN}{ZM_lll}{GEN x, double D, long flag}, where $x$ is a \kbd{ZM};
+$D \in ]1/4,1[$ is the Lov\'{a}sz constant determining the frequency of
+swaps during the algorithm: a larger values means better guarantees for the
+basis (in principle smaller basis vectors) but slower runtimes (suggested
+value: $D = 0.99$).
+
+\misctitle{Important:} This function does not collect garbage and its output
+is not suitable for either \kbd{gerepile} or \kbd{gerepileupto}. We expect
+the caller to do something simple with the output (e.g. matrix
+multiplication), then collect garbage immediately.
+
+\fl is an or-ed combination of the following flags
+
+\item  \tet{LLL_GRAM}. If set, the input matrix $x$ is the Gram matrix ${}^t
+v v$ of some lattice vectors $v$.
+
+\item  \tet{LLL_INPLACE}. If unset, we return the base change matrix $U$,
+otherwise the transformed matrix $x U$ or ${}^t U x U$ (\kbd{LLL\_GRAM}).
+Implies \tet{LLL_IM} (see below).
+
+\item  \tet{LLL_KEEP_FIRST}. The first vector in the output basis іs the same
+one as was originally input. Provided this is a shortest non-zero vector of
+the lattice, the output basis is still LLL-reduced. This is used to reduce
+maximal orders of number fields with respect to the $T_2$ quadratic form, to
+ensure that the first vector in the output basis corresponds to $1$ (which is
+a shortest vector).
+
+The last three flags are mutually exclusive, either 0 or a single one must be
+set:
+
+\item  \tet{LLL_KER} If set, only return a kernel basis $K$ (not LLL-reduced).
+
+\item  \tet{LLL_IM} If set, only return an LLL-reduced lattice basis $T$.
+(This is implied by \tet{LLL_INPLACE}).
+
+\item  \tet{LLL_ALL} If set, returns a 2-component vector $[K, T]$
+corresponding to both kernel and image.
+
+
+\fun{GEN}{lllfp}{GEN x, double D, long flag} is a variant for matrices
+with inexact entries: $x$ is a matrix with real coefficients (types
+\typ{INT}, \typ{FRAC} and \typ{REAL}), $D$ and $\fl$ are as in \tet{ZM_lll}.
+The matrix is rescaled, rounded to nearest integers, then fed to
+\kbd{ZM\_lll}. The flag \kbd{LLL\_INPLACE} is still accepted but less useful
+(it returns an LLL-reduced basis associated to rounded input, instead of an
+exact base change matrix).
+
+\fun{GEN}{ZM_lll_norms}{GEN x, double D, long flag, GEN *ptB} slightly more
+general version of \kbd{ZM\_lll}, setting \kbd{*ptB} to a vector containing
+the squared norms of the Gram-Schmidt vectors $(b_i^*)$ associated to the
+output basis $(b_i)$, $b_i^* = b_i + \sum_{j < i} \mu_{i,j} b_j^*$.
+
+
+\fun{GEN}{lllintpartial_inplace}{GEN x} given a \kbd{ZM} $x$ of maximal rank,
+returns a partially reduced basis $(b_i)$ for the space spanned by the
+columns of $x$: $|b_i \pm b_j| \geq |b_i|$ for any two distinct basis vectors
+$b_i$, $b_j$. This is faster than the LLL algorithm, but produces much larger
+bases.
+
+\fun{GEN}{lllintpartial}{GEN x} as \kbd{lllintpartial\_inplace} (slightly
+slower), but returns the base change matrix $U$ from the canonical basis to
+the $b_i$, i.e. $x U$ is the output of \kbd{lllintpartial\_inplace}.
 
 \subsec{Transcendental functions}
 

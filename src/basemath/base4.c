@@ -2910,7 +2910,7 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 {
   long i;
   GEN c;
-  D = lllint_ip(Q_primitive_part(D, &c), 4);
+  D = ZM_lll(Q_primitive_part(D, &c), 0.75, LLL_INPLACE);
   if (c) D = gmul(D,c);
   for (i=1; i<=lim; i++) gel(x,i) = element_reduce(nf, gel(x,i), D);
 }
@@ -2930,7 +2930,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
 
   li = lg(A[1]);
   unnf = scalarcol_shallow(gen_1,N);
-  detmat = lllint_ip(Q_remove_denom(detmat, NULL), 100);
+  detmat = ZM_lll(Q_remove_denom(detmat, NULL), 0.99, LLL_INPLACE);
 
   av = avma; lim = stack_lim(av,2);
   A = matalgtobasis(nf, A);

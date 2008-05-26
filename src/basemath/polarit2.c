@@ -1012,7 +1012,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
   pari_timer T;
 
   if (DEBUGLEVEL>2) TIMERstart(&T);
-  u = LLLint(m, final? 1000: 4, LLL_INPLACE, &norm);
+  u = ZM_lll_norms(m, final? 0.999: 0.75, LLL_INPLACE, &norm);
   if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr(gel(norm,R), Bnorm) < 0) break;

@@ -1079,8 +1079,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
 static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 {
-  const long D = 100;
-  const double alpha = ((double)D-1) / D; /* LLL parameter */
+  const double alpha = 0.99; /* LLL parameter */
   const long d = degpol(nf[1]);
   pari_sp av = avma, av2;
   GEN prk, PRK, B, GSmin, pk;
@@ -1097,7 +1096,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     prk = idealpows(nf, pr, a);
     av2 = avma;
     pk = gcoeff(prk,1,1);
-    PRK = LLLint(prk, D, LLL_INPLACE, &B);
+    PRK = ZM_lll_norms(prk, alpha, LLL_INPLACE, &B);
     S = invmat( get_R(PRK) );
     for (i=1; i<=d; i++)
     {

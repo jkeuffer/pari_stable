@@ -258,7 +258,7 @@ gram_matrix(GEN x)
  * would use single-precision calculations as much as possible.
  *
  * Original code: Peter Montgomery (1994) */
-GEN
+static GEN
 lllintpartialall(GEN m, long flag)
 {
   const long ncol = lg(m)-1;
@@ -300,27 +300,29 @@ lllintpartialall(GEN m, long flag)
       }
 
       /* Interchange the output vectors v1 and v2.  */
-      swap(dot11,dot22); lswap(tm[1],tm[2]);
+      swap(dot11,dot22);
+      swap(gel(tm,1), gel(tm,2));
 
       /* Occasionally (including final pass) do garbage collection.  */
-      if (npass2 % 8 == 0 || !progress)
+      if ((npass2 & 0xff) == 0 || !progress)
 	gerepileall(av2, 4, &dot11,&dot12,&dot22,&tm);
     } /* while npass2 < 2 || progress */
 
     {
       long i;
-      GEN det12 = subii(mulii(dot11, dot22), mulii(dot12, dot12));
+      GEN det12 = subii(mulii(dot11, dot22), sqri(dot12));
 
       mid = cgetg(ncol+1, t_MAT);
       for (i = 1; i <= 2; i++)
       {
+        GEN tmi = gel(tm,i);
 	if (tm1)
 	{
-	  coeff(tm1,1,i) = coeff(tm,1,i);
-	  coeff(tm1,2,i) = coeff(tm,2,i);
+          GEN tm1i = gel(tm1,i);
+	  gel(tm1i,1) = gel(tmi,1);
+	  gel(tm1i,2) = gel(tmi,2);
 	}
-	gel(mid,i) = ZC_lincomb(
-	   gcoeff(tm,1,i),gcoeff(tm,2,i), gel(m,1),gel(m,2));
+	gel(mid,i) = ZC_lincomb(gel(tmi,1),gel(tmi,2), gel(m,1),gel(m,2));
       }
       for (i = 3; i <= ncol; i++)
       {
@@ -341,10 +343,10 @@ lllintpartialall(GEN m, long flag)
 	q2neg = diviiround(q2neg, det12);
 	if (tm1)
 	{
-	  gcoeff(tm1, 1, i) = addii(mulii(q1neg, gcoeff(tm,1,1)),
-				    mulii(q2neg, gcoeff(tm,1,2)));
-	  gcoeff(tm1, 2, i) = addii(mulii(q1neg, gcoeff(tm,2,1)),
-				    mulii(q2neg, gcoeff(tm,2,2)));
+	  gcoeff(tm1,1,i) = addii(mulii(q1neg, gcoeff(tm,1,1)),
+				  mulii(q2neg, gcoeff(tm,1,2)));
+	  gcoeff(tm1,2,i) = addii(mulii(q1neg, gcoeff(tm,2,1)),
+				  mulii(q2neg, gcoeff(tm,2,2)));
 	}
 	gel(mid,i) = ZC_add(c, ZC_lincomb(q1neg,q2neg, gel(mid,1),gel(mid,2)));
       } /* for i */
@@ -384,9 +386,8 @@ lllintpartialall(GEN m, long flag)
 
 	  j = i + ijdif; if (j > ncol) j -= ncol;
 	  /* let k1, resp. k2,  index of larger, resp. smaller, column */
-	  if (cmpii(gcoeff(dot,i,i),
-		    gcoeff(dot,j,j)) > 0) { k1 = i; k2 = j; }
-	  else                            { k1 = j; k2 = i; }
+	  if (cmpii(gcoeff(dot,i,i), gcoeff(dot,j,j)) > 0) { k1 = i; k2 = j; }
+	  else                                             { k1 = j; k2 = i; }
 	  codi = gcoeff(dot,k2,k2);
 	  q = signe(codi)? diviiround(gcoeff(dot,k1,k2), codi): gen_0;
 	  if (!signe(q)) continue;
@@ -395,8 +396,8 @@ lllintpartialall(GEN m, long flag)
 	  reductions++; togglesign_safe(&q);
 	  ZC_lincomb1_inplace(gel(tm2,k1), gel(tm2,k2), q);
 	  ZC_lincomb1_inplace(gel(dot,k1), gel(dot,k2), q);
-	  gcoeff(dot, k1, k1) = addii(gcoeff(dot,k1,k1),
-				      mulii(q, gcoeff(dot,k2,k1)));
+	  gcoeff(dot,k1,k1) = addii(gcoeff(dot,k1,k1),
+			            mulii(q, gcoeff(dot,k2,k1)));
 	  for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
 	} /* for ijdif */
 	if (low_stack(lim, stack_lim(av3,2)))
@@ -426,10 +427,9 @@ lllintpartialall(GEN m, long flag)
       for (j = i+1; j <= ncol; j++)
 	if (cmpii(gcoeff(dot,s,s),gcoeff(dot,j,j)) > 0) s = j;
       if (i != s)
-      { /* Exchange with proper column */
-	/* Only diagonal of dot is updated */
-	lswap(tm2[i], tm2[s]);
-	lswap(coeff(dot,i,i), coeff(dot,s,s));
+      { /* Exchange with proper column; only the diagonal of dot is updated */
+	swap(gel(tm2,i), gel(tm2,s));
+	swap(gcoeff(dot,i,i), gcoeff(dot,s,s));
       }
     }
     i = 1;
@@ -444,16 +444,10 @@ lllintpartialall(GEN m, long flag)
 }
 
 GEN
-lllintpartial(GEN mat)
-{
-  return lllintpartialall(mat,1);
-}
+lllintpartial(GEN mat) { return lllintpartialall(mat,1); }
 
 GEN
-lllintpartial_ip(GEN mat)
-{
-  return lllintpartialall(mat,0);
-}
+lllintpartial_inplace(GEN mat) { return lllintpartialall(mat,0); }
 
 /********************************************************************/
 /**                                                                **/
@@ -617,7 +611,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
       fprintferr("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
     }
 
-    sh = lllint_ip(M, 4);
+    sh = ZM_lll(M, 0.75, LLL_INPLACE);
     /* Take the first vector if it is non constant */
     short_pol = gel(sh,1);
     if (ZV_isscalar(short_pol)) short_pol = gel(sh, 2);
@@ -722,7 +716,7 @@ lindep2(GEN x, long bit)
     gel(c,lx)           = gcvtoi(gshift(gel(re,i),bit), &e);
     if (im) gel(c,lx+1) = gcvtoi(gshift(gel(im,i),bit), &e);
   }
-  M = lllint_ip(M,100);
+  M = ZM_lll(M, 0.99, LLL_INPLACE);
   M = gel(M,1);
   M[0] = evaltyp(t_COL) | evallg(lx);
   return gerepilecopy(av, M);
@@ -1561,7 +1555,7 @@ plindep(GEN x)
     gel(c,1) = gel(x,i+1);
     gel(m,i) = c;
   }
-  m = lllint_ip(ZM_hnfmodid(m, pn), 100);
+  m = ZM_lll(ZM_hnfmodid(m, pn), 0.99, LLL_INPLACE);
   return gerepilecopy(av, gel(m,1));
 }
 
@@ -2242,7 +2236,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllfp(a, 4, LLL_GRAM);
+    u = lllfp(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
     r = qf_base_change(a,u,1);
     if (!i) {

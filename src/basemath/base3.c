@@ -1061,7 +1061,7 @@ reducemodinvertible(GEN x, GEN y)
 GEN
 lllreducemodmatrix(GEN x,GEN y)
 {
-  return reducemodinvertible(x, lllint_ip(y,4));
+  return reducemodinvertible(x, ZM_lll(y, 0.75, LLL_INPLACE));
 }
 
 /* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = idele[2].
@@ -1352,7 +1352,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
   for (i = 1; i < lgmat; i++) mat[i] = v[i];
   for (     ; i <= nba; i++)  gel(mat,i) = cgetg(nba+1, t_VECSMALL);
 
-  if (x) { x = lllint_ip(x,4); bas = gmul(bas, x); }
+  if (x) { x = ZM_lll(x, 0.75, LLL_INPLACE); bas = gmul(bas, x); }
 
   for (r=1;; r++)
   { /* reset */

@@ -666,8 +666,6 @@ GEN     checkrnfeq(GEN x);
 
 /* bibli1.c */
 
-GEN     lll_scaled(GEN X0, long D, int keepfirst);
-GEN     lllintpartialall(GEN m, long flag);
 GEN     plindep(GEN x);
 GEN     pslq(GEN x);
 GEN     pslqL2(GEN x);

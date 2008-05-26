@@ -189,7 +189,8 @@ JD 12- add an optional argument to quit()
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
    zv_copy, zv_equal, bitvec_test_set, ZM_is_identity, RgX_get_0, RgX_get_1,
    resultant, resultant_all, QX_disc, QX_resultant, Z_ZX_sub, ZX_Z_sub,
-   zx_renormalize, zv_content
+   zx_renormalize, zv_content, ZM_lll, ZM_lll_norms, lllfp, lllintpartial,
+   lllintpartial_inplace
    17- universal constant gen_m2, for symmetry
    18- GP function version() [ current version number ]
    19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,

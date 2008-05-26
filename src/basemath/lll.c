@@ -16,8 +16,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* default quality ratio for LLL: 99/100 */
-static const long LLLDFT = 100;
+/* default quality ratio for LLL */
+static const double LLLDFT = 0.99;
 
 /* assume flag & (LLL_KER|LLL_IM|LLL_ALL). LLL_INPLACE implies LLL_IM */
 static GEN
@@ -35,7 +35,7 @@ lll_trivial(GEN x, long flag)
   if (gcmp0(gel(x,1)))
   {
     if (flag & LLL_KER) return matid(1);
-    if (flag & LLL_IM)  return cgetg(1,t_MAT); /* also ok for LLL_INPLACE */
+    if (flag & (LLL_IM|LLL_INPLACE)) return cgetg(1,t_MAT);
     y = cgetg(3,t_VEC);
     gel(y,1) = matid(1);
     gel(y,2) = cgetg(1,t_MAT); return y;
@@ -313,7 +313,6 @@ rotate(GEN mu, long kappa2, long kappa, long d)
 static GEN
 fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long prec)
 {
-  const long inplace = flag & LLL_INPLACE;
   const long gram = flag & LLL_GRAM; /*Gram matrix*/
   const long keepfirst = flag & LLL_KEEP_FIRST; /*never swap with first vector*/
   pari_sp av, av2, lim;
@@ -336,7 +335,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
     G = zeromatcopy(d,d);
     n = lg(gel(B,1))-1;
   }
-  U = inplace? NULL: *ptrU;
+  U = *ptrU; /* NULL if inplace */
 
   if(DEBUGLEVEL>=4)
   {
@@ -456,12 +455,12 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   if (U && flag & (LLL_IM|LLL_KER|LLL_ALL)) U = lll_finish(U, zeros, flag);
   if (gram)
   {
-    if (!inplace) return U;
+    if (U) return U;
     for (i = 1; i <= d; i++)
       for (j = i+1; j <= d; j++) gmael(G,i,j) = gmael(G,j,i);
     return G;
   }
-  return inplace? B: U;
+  return U? U: B;
 }
 
 static long
@@ -475,25 +474,24 @@ good_prec(long d, double delta, double eta)
 
 /* Assume x a ZM, if ptB != NULL, set it to Gram-Schmidt (squared) norms */
 GEN
-LLLint(GEN x, long D, long flag, GEN *B)
+ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
 {
-  pari_sp ltop=avma;
-  const double ETA = 0.51, DELTA = (D-1) / (double)D;
-  const long inplace = flag & LLL_INPLACE;
+  pari_sp ltop = avma;
+  const double ETA = 0.51;
   long p,prec, d, n = lg(x)-1;
   GEN U;
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
   prec = good_prec(d,DELTA,ETA); 
   x = shallowcopy(x);
-  U = inplace?NULL:matid(n);
+  U = (flag & LLL_INPLACE)? NULL: matid(n);
   for (p = min(3,prec); p <= prec; p++)
   {
     GEN m = fplll(&x, &U, B, DELTA, ETA, flag, p);
     if (m) return m;
-    gerepileall(ltop,inplace?1:2,&x,&U);
+    gerepileall(ltop, U? 2: 1, &x, &U);
   }
-  pari_err(bugparier,"LLLint");
+  pari_err(bugparier,"ZM_lll");
   return NULL;
 }
 
@@ -664,30 +662,20 @@ lllgramgen(GEN x)  { return lllallgen(x, LLL_IM|LLL_GRAM); }
 GEN
 lllgramkerimgen(GEN x)  { return lllallgen(x, LLL_ALL|LLL_GRAM); }
 
-/* Assume x a ZM. Return x * lllint(x). No garbage collection */
-GEN
-lllint_ip(GEN x, long D) { return LLLint(x,D,LLL_INPLACE,NULL); }
-
 static GEN
-lllall_i(GEN x, long D, long flag)
-{
-  RgM_check_ZM(x, "lllall");
-  return LLLint(x, D, flag, NULL);
-}
-static GEN
-lllall(GEN x, long D, long flag)
+lllall(GEN x, long flag)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, lllall_i(x,D,flag));
+  return gerepilecopy(av, ZM_lll(x, LLLDFT, flag));
 }
 GEN
-lllint(GEN x) { return lllall(x,LLLDFT, LLL_IM); }
+lllint(GEN x) { return lllall(x, LLL_IM); }
 GEN
-lllkerim(GEN x) { return lllall(x,LLLDFT, LLL_ALL); }
+lllkerim(GEN x) { return lllall(x, LLL_ALL); }
 GEN
-lllgramint(GEN x) { return lllall(x,LLLDFT, LLL_IM | LLL_GRAM); }
+lllgramint(GEN x) { return lllall(x, LLL_IM | LLL_GRAM); }
 GEN
-lllgramkerim(GEN x) { return lllall(x,LLLDFT, LLL_ALL | LLL_GRAM); }
+lllgramkerim(GEN x) { return lllall(x, LLL_ALL | LLL_GRAM); }
 
 static GEN
 rescale_to_int(GEN x)
@@ -725,19 +713,19 @@ rescale_to_int(GEN x)
       if (e < emin) emin = e;
     }
   if (exact) return D == gen_1 ? x: Q_muli_to_int(x, D);
-  return gcvtoi(gmul2n(x, -emin), &e);
+  return grndtoi(gmul2n(x, -emin), &e);
 }
 
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
- * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100 */
+ * Quality ratio = D in ]0.25, 1[. Suggested values: 0.75 or 0.99 */
 GEN
-lllfp(GEN x, long D, long flag)
+lllfp(GEN x, double D, long flag)
 {
   long n = lg(x)-1;
   pari_sp av = avma;
   GEN h;
   if (n <= 1) return matid(n);
-  h = LLLint(flag & LLL_INPLACE? x: rescale_to_int(x), D, flag, NULL);
+  h = ZM_lll(rescale_to_int(x), D, flag);
   return gerepilecopy(av, h);
 }
 
@@ -752,10 +740,10 @@ qflll0(GEN x, long flag)
   if (typ(x) != t_MAT) pari_err(typeer,"qflll");
   switch(flag)
   {
-    case 0: return lll(x);
-    case 1: return lllint(x);
-    case 2: return lllintpartial(x);
-    case 4: return lllkerim(x);
+    case 0: RgM_check_ZM(x,"qflll"); return lll(x);
+    case 1: RgM_check_ZM(x,"qflll"); return lllint(x);
+    case 2: RgM_check_ZM(x,"qflll"); return lllintpartial(x);
+    case 4: RgM_check_ZM(x,"qflll"); return lllkerim(x);
     case 5: return lllkerimgen(x);
     case 8: return lllgen(x);
     default: pari_err(flagerr,"qflll");
@@ -769,9 +757,9 @@ qflllgram0(GEN x, long flag)
   if (typ(x) != t_MAT) pari_err(typeer,"qflllgram");
   switch(flag)
   {
-    case 0: return lllgram(x);
-    case 1: return lllgramint(x);
-    case 4: return lllgramkerim(x);
+    case 0: RgM_check_ZM(x,"qflllgram"); return lllgram(x);
+    case 1: RgM_check_ZM(x,"qflllgram"); return lllgramint(x);
+    case 4: RgM_check_ZM(x,"qflllgram"); return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
     case 8: return lllgramgen(x);
     default: pari_err(flagerr,"qflllgram");
@@ -1000,6 +988,7 @@ GEN
 matkerint0(GEN x, long flag)
 {
   if (typ(x) != t_MAT) pari_err(typeer,"matkerint");
+  RgM_check_ZM(x, "kerint");
   switch(flag)
   {
     case 0: return kerint(x);
@@ -1013,14 +1002,14 @@ GEN
 kerint1(GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, lllint_ip(matrixqz3(ker(x)), LLLDFT));
+  return gerepilecopy(av, ZM_lll(matrixqz3(ker(x)), LLLDFT, LLL_INPLACE));
 }
 
 GEN
 kerint(GEN x)
 {
   pari_sp av = avma;
-  GEN h = lllall_i(x, LLLDFT, LLL_KER);
+  GEN h = ZM_lll(x, LLLDFT, LLL_KER);
   if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
-  return gerepilecopy(av, lllint_ip(h, LLLDFT));
+  return gerepilecopy(av, ZM_lll(h, LLLDFT, LLL_INPLACE));
 }

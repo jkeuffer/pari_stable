@@ -1902,7 +1902,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       fprintferr("\n*** Ideal no %ld: [%Zs, %Zs, %Zs, %Zs]\n",
 		 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
 #if 1 /* slower but seems to find more relations this way... */
-    IDEAL = lllint_ip(prime_to_ideal(nf,ideal), 4);
+    IDEAL = ZM_lll(prime_to_ideal(nf,ideal), 0.75, LLL_INPLACE);
 #else
     IDEAL = prime_to_ideal(nf,ideal);
 #endif
