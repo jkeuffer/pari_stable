@@ -3308,7 +3308,7 @@ still assume that $M'$ has integer coefficients.
 
 \fun{GEN}{ZC_hnfremdiv}{GEN x, GEN y, GEN *Q} assuming $y$ is an
 invertible \kbd{ZM} in HNF and $x$ is a \kbd{ZC}, returns the \kbd{ZC} $R$
-equal to $x$ mod $y$ (whose $i$-th entry belongs to $[-y_{i,i}, y_{i,i}]$).
+equal to $x$ mod $y$ (whose $i$-th entry belongs to $[-y_{i,i}/2, y_{i,i}/2[$).
 Stack clean \emph{unless} $x$ is already reduced (in which case, returns $x$
 itself, not a copy). If $Q$ is not \kbd{NULL}, set it to the \kbd{ZC} such that
 $x = yQ + R$.
