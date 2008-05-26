@@ -221,7 +221,6 @@ GEN  vec_setconst(GEN v, GEN x);
 
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
-GEN  close_modinvertible(GEN x, GEN y);
 
 /* famat */
 GEN factorback_i(GEN fa, GEN e, GEN nf, int red);

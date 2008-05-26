@@ -5726,11 +5726,30 @@ mode.
 \kbd{ZM\_smithall(x, \&U, \&V)} and returns $[U,V,D]$. Normally useless in
 library mode.
 
+\subsec{Reduction modulo matrices}
+
+Besises \tet{ZC_hnfrem} and \tet{ZM_hnfrem} which were specific to integral
+input, we also have:
+
+\fun{GEN}{reducemodinvertible}{GEN x, GEN y} $y$ is an invertible matrix
+and $x$ a \typ{COL} or \typ{MAT} of compatible dimension. 
+Returns $x - y\lfloor y^{-1}x \rceil$, which has small entries and differs
+from $x$ by an integral linear combination of the columns of $y$. Suitable
+for \kbd{gerepileupto}, but does not collect garbage.
+
+\fun{GEN}{closemodinvertible}{GEN x, GEN y} returns $x -
+\kbd{reducemodinvertible}(x,y)$, i.e. an integral linear comination of
+the columns of $y$, which is close to $x$.
+
+\fun{GEN}{reducemodlll}{GEN x,GEN y} LLL-reduce the \kbd{ZM} $y$ and call
+\kbd{reducemodinvertible} to find a small representative of $x$ mod $y \Z^n$.
+Suitable for \kbd{gerepileupto}, but does not collect garbage.
+
 \subsec{The LLL algorithm}\sidx{LLL}
 
 The basic GP functions and their immediate variants are normally not very
 useful in library mode. We briefly list them here for completeness, see the
-documentation of \kbd{qflll0} and \kbd{qflllgram0} for details:
+documentation of \kbd{qflll} and \kbd{qflllgram} for details:
 
 \item \fun{GEN}{qflll0}{GEN x, long flag}
 
@@ -5771,7 +5790,7 @@ is not suitable for either \kbd{gerepile} or \kbd{gerepileupto}. We expect
 the caller to do something simple with the output (e.g. matrix
 multiplication), then collect garbage immediately.
 
-\fl is an or-ed combination of the following flags
+\noindent\kbd{flag} is an or-ed combination of the following flags:
 
 \item  \tet{LLL_GRAM}. If set, the input matrix $x$ is the Gram matrix ${}^t
 v v$ of some lattice vectors $v$.
@@ -5819,9 +5838,9 @@ columns of $x$: $|b_i \pm b_j| \geq |b_i|$ for any two distinct basis vectors
 $b_i$, $b_j$. This is faster than the LLL algorithm, but produces much larger
 bases.
 
-\fun{GEN}{lllintpartial}{GEN x} as \kbd{lllintpartial\_inplace} (slightly
-slower), but returns the base change matrix $U$ from the canonical basis to
-the $b_i$, i.e. $x U$ is the output of \kbd{lllintpartial\_inplace}.
+\fun{GEN}{lllintpartial}{GEN x} as \kbd{lllintpartial\_inplace}, but returns
+the base change matrix $U$ from the canonical basis to the $b_i$, i.e. $x U$
+is the output of \kbd{lllintpartial\_inplace}.
 
 \subsec{Transcendental functions}
 

@@ -844,7 +844,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
 {
   GEN xh = get_hnfid(nf, x), yh = get_hnfid(nf, y);
   GEN a = hnfmerge_get_1(xh, yh);
-  return lllreducemodmatrix(a, idealmulh(nf,xh,yh));
+  return reducemodlll(a, idealmulh(nf,xh,yh));
 }
 
 GEN
@@ -2255,7 +2255,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   }
   else
     d = NULL;
-  z = lllreducemodmatrix(z, x);
+  z = reducemodlll(z, x);
   return d? RgC_Rg_div(z,d): z;
 }
 
@@ -2359,7 +2359,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     s = s? gadd(s,t): t;
   }
   if (!s) { avma = av; return zerocol(N); }
-  y = lllreducemodmatrix(s, F);
+  y = reducemodlll(s, F);
   return gerepileupto(av, den? RgM_Rg_div(y,den): y);
 }
 
@@ -2467,14 +2467,20 @@ element_reduce(GEN nf, GEN x, GEN ideal)
   x = algtobasis_i(checknf(nf), x);
   return gerepileupto(av, reducemodinvertible(x, ideal));
 }
-/* Given an element x and an ideal in matrix form (not necessarily HNF),
- * gives an a in ideal such that x-a is small. No checks */
+/* Given an element x and an ideal in HNF, gives an a in ideal such that
+ * x-a is small. No checks */
 static GEN
 element_close(GEN nf, GEN x, GEN ideal)
 {
   pari_sp av = avma;
-  x = algtobasis_i(checknf(nf), x);
-  return gerepileupto(av, close_modinvertible(x, ideal));
+  GEN y = gcoeff(ideal,1,1);
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(y) == t_INT && is_pm1(y)) return ground(x);
+  if (typ(x) == t_COL) 
+    x = closemodinvertible(x, ideal);
+  else
+    x = gmul(y, gdivround(x,y));
+  return gerepileupto(av, x);
 }
 
 /* u A + v B */
