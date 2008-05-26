@@ -2236,7 +2236,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
     i = gprecision(a); if (i) prec = i;
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllfp(a, 0.75, LLL_GRAM);
+    u = i? lllfp(a, 0.75, LLL_GRAM): ZM_lll(a, 0.75, LLL_GRAM);
     if (lg(u) != lg(a)) return NULL;
     r = qf_base_change(a,u,1);
     if (!i) {
