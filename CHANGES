@@ -81,6 +81,8 @@ BA 29- missing GC in the leftrightpow functions
        bnfinit(polredabs(quadhilbert(-2939))) --> oo loop
    72- minor inaccuracy in GMP kernel (affir)
    73- missing GC in gamma / lngamma
+   74- obscure SEGV when setting 'log' in a file read from command-line
+       as gp foo.gp [#789]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
