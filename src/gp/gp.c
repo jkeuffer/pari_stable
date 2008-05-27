@@ -1860,7 +1860,7 @@ main(int argc, char **argv)
       (void)read0((char*)A->v[i]);
     }
     GP_DATA->flags = f;
-    /* reading one of the input fileѕ above can set it */
+    /* reading one of the input files above can set it */
     if (!pari_logfile) pari_logfile = l;
   }
   grow_kill(A);
