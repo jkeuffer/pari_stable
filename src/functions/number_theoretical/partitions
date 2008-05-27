@@ -6,7 +6,15 @@ Help: partitions(n,{restr=0}): return vector of partitions of n, a positive
  integer. The second optional argument may be set to a number smaller than n
  to restrict the value of each element in the partitions to that value. The
  default of 0 means that this maximum is n itself.
-Doc: returns vector of partitions of $n$, a positive
- integer. The second optional argument may be set to a number smaller than
+Doc: returns vector of partitions of the integer $n$ (negative values return
+ \kbd{[]}, $n = 0$ returns the trivial partition of the empty set).
+ The second optional argument may be set to a non-negative number smaller than
  $n$ to restrict the value of each element in the partitions to that value.
  The default of 0 means that this maximum is $n$ itself.
+
+ A partition is given by a \typ{VECSMALL}:
+ \bprog
+ ? partitions(4, 2)
+ %1 = [Vecsmall([2, 2]), Vecsmall([1, 1, 2]), Vecsmall([1, 1, 1, 1])]
+ @eprog\noindent
+ correspond to $2+2$, $1+1+2$, $1+1+1+1$.
