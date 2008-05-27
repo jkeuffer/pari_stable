@@ -1084,27 +1084,23 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   return y;
 }
 
-/* given an element x in Z_K and an integral ideal y with x, y coprime,
+/* given an element x in Z_K and an integral ideal y in HNF, coprime with x,
    outputs an element inverse of x modulo y */
 GEN
 element_invmodideal(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  GEN a, xh, yh;
+  GEN a, xh, yZ = gcoeff(y,1,1);
 
   nf = checknf(nf);
-  if (gcmp1(gcoeff(y,1,1))) return zerocol( degpol(nf[1]) );
+  if (is_pm1(yZ)) return zerocol( degpol(nf[1]) );
 
-  yh = get_hnfid(nf, y);
-  switch (typ(x))
-  {
-    case t_POL: case t_POLMOD: case t_COL:
-      xh = idealhermite_aux(nf,x); break;
-    default: pari_err(typeer,"element_invmodideal");
-      return NULL; /* not reached */
-  }
-  a = element_div(nf, hnfmerge_get_1(xh, yh), x);
-  return gerepileupto(av, ZC_hnfrem(a, yh));
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
+
+  xh = idealhermite_aux(nf,x);
+  a = element_div(nf, hnfmerge_get_1(xh, y), x);
+  return gerepileupto(av, ZC_hnfrem(a, y));
 }
 
 static GEN
