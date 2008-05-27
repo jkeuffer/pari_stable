@@ -370,12 +370,25 @@ get_entree(long n)
 
 /* match any Fentry */
 static entree *
-getentry(long n)
+getsymbol(long n)
 {
   n = detag(n);
   if (tree[n].f!=Fentry)
     compile_varer1(tree[n].str);
   return get_entree(n);
+}
+
+/* match any Fentry */
+static entree *
+getentry(long n)
+{
+  return do_alias(getsymbol(n));
+}
+
+static entree *
+getfunc(long n)
+{
+  return do_alias(get_entree(n));
 }
 
 /* match Fentry that are not actually EpSTATIC functions called without parens*/
@@ -412,12 +425,6 @@ numbmvar(void)
     if(localvars[i].type==Lmy)
       n++;
   return n;
-}
-
-static entree *
-getfunc(long n)
-{
-  return do_alias(get_entree(n));
 }
 
 INLINE int
@@ -950,7 +957,7 @@ compilefunc(entree *ep, long n, int mode)
           }
         case 'S':
           {
-            entree *ep = getentry(arg[j++]);
+            entree *ep = getsymbol(arg[j++]);
             op_push(OCpushlong, (long)ep);
             break;
           }
@@ -1326,7 +1333,7 @@ closurefunc(entree *ep, long n, long mode)
   if (!C) compile_err("sorry, closure not implemented",tree[n].str);
   if (C==gen_0)
   {
-    compilefunc(getfunc(n),n,mode);
+    compilefunc(ep,n,mode);
     return;
   }
   op_push(OCpushgen, data_push(C));
