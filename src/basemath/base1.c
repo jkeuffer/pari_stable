@@ -1405,13 +1405,12 @@ nfpolred(int part, nfbasic_t *T)
   ok_pol_t O;
   FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
 
-  if (degpol(x) == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return gen_1; }
+  if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
   O.ind    = 0;
   O.indmax = part? min(n,3): n;
   O.xbest  = NULL;
   chk.data = (void*)&O;
-  if (!_polred(x, a, NULL, &chk))
-    pari_err(talker,"you found a counter-example to a conjecture, please report!");
+  if (!_polred(x, a, NULL, &chk)) return NULL;
   xbest = O.xbest; dxbest = O.dxbest;
   if (!better_pol(xbest, dxbest, x, dx)) return NULL; /* no improvement */
 
