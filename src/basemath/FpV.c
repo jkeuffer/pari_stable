@@ -167,7 +167,7 @@ Flc_Fl_div(GEN x, ulong y, ulong p)
 void
 Flc_Fl_div_inplace(GEN x, ulong y, ulong p)
 {
-  return Flc_Fl_mul_inplace(x, Fl_inv(y, p), p);
+  Flc_Fl_mul_inplace(x, Fl_inv(y, p), p);
 }
 
 /* x *= y */

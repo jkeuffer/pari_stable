@@ -2883,7 +2883,7 @@ void
 gen_output(GEN x, pariout_t *T)
 {
   if (!T) T = GP_DATA->fmt;
-  return gen_output_fun(x, T, get_fun(T->prettyp));
+  gen_output_fun(x, T, get_fun(T->prettyp));
 }
 
 void
