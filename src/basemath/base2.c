@@ -721,21 +721,28 @@ update_den(GEN *e, GEN *de, GEN *pp)
   }
 }
 
-/* f o g mod (T,p) */
+/* SCAL * f o g mod (T,p), SCAL rational of NULL (= 1)  */
 static GEN
-compmod(GEN f, GEN g, GEN T, GEN p)
+compmod(GEN f, GEN g, GEN T, GEN p, GEN SCAL)
 {
   GEN D = NULL, Dp, z, df, dg, q;
   f = Q_remove_denom(f, &df);
-  g = Q_remove_denom(g, &dg);
+  if (typ(g) == t_VEC) /* pair [num,den] */
+  { dg = gel(g,2); g = gel(g,1); }
+  else
+    g = Q_remove_denom(g, &dg);
   if (df) D = df;
   if (dg) D = mul_content(D, powiu(dg, degpol(f)));
   q = D ? mulii(p, D): p;
   if (dg) f = FpX_rescale(f, dg, q);
   z = FpX_FpXQ_compo(f, g, T, q);
-  if (!D) return z;
+  if (!D) {
+    if (SCAL) z = RgX_Rg_mul(z, SCAL);
+    return z;
+  }
   update_den(&z, &D, NULL);
   Dp = mulii(D,p);
+  if (SCAL) D = gdiv(D, SCAL);
   return RgX_Rg_div( FpX_center(z, Dp, shifti(Dp,-1)), D );
 }
 
@@ -743,7 +750,7 @@ static GEN
 dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 {
   long n = degpol(f), dU, i;
-  GEN b, ha, pd, pdp;
+  GEN D, da, b, ha, pd, pdp;
 
   if (n == 1) return scalarmat(gen_1, 1);
   if (DEBUGLEVEL>5)
@@ -751,21 +758,21 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     fprintferr("  entering Dedekind Basis with parameters p=%Zs\n",p);
     fprintferr("  f = %Zs,\n  a = %Zs\n",f,a);
   }
-  ha = pd = powiu(p,mf/2); pdp = mulii(pd,p);
+  pd = powiu(p,mf/2); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
   b = cgetg(n, t_MAT); /* Z[a] + U/p Z[a] is maximal */
+  ha = scalarpol(pd, varn(f));
+  a = Q_remove_denom(a, &da);
+  D = da? mulii(pdp, da): pdp;
   /* skip first column = [pd, 0,...,0] */
   for (i=1; i<n; i++)
   {
     if (i == dU)
-      ha = gmul(diviiexact(pd, p), compmod(U, a, f, pdp));
+      ha = compmod(U, mkvec2(a,da), f, pdp, diviiexact(pd, p));
     else
     {
-      GEN d, mod;
-      ha = Q_remove_denom(gmul(ha,a), &d);
-      mod = d? mulii(pdp, d): pdp;
-      ha = FpX_rem(ha, f, mod);
-      if (d) ha = gdivexact(ha,d);
+      ha = FpXQ_mul(ha, a, f, D);
+      if (da) ha = gdivexact(ha, da);
     }
     gel(b,i) = RgX_to_RgV(ha,n);
   }
@@ -1129,7 +1136,7 @@ static GEN
 getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
 	 long oE, long Ediv)
 {
-  GEN chin, q;
+  GEN chin, q, qp;
   long r, s;
 
   if (degpol(nup) == 1)
@@ -1155,9 +1162,10 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
-  q = powiu(S->p, s+1);
-  nup = FpXQ_pow(nup, utoipos(r), S->chi, q);
-  return RgX_Rg_div(compmod(nup, phi, S->chi, q), powiu(S->p, s));
+  
+  q = powiu(S->p, s); qp = mulii(q, S->p);
+  nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
+  return compmod(nup, phi, S->chi, qp, mkfrac(gen_1,q));
 }
 
 static void
@@ -1165,7 +1173,9 @@ kill_cache(decomp_t *S) { S->precns = NULL; }
 
 /* S->phi := T o T0 mod (p, f) */
 static void
-composemod(decomp_t *S, GEN T, GEN T0) { S->phi = compmod(T, T0, S->f, S->p); }
+composemod(decomp_t *S, GEN T, GEN T0) {
+  S->phi = compmod(T, T0, S->f, S->p, NULL);
+}
 
 static int
 update_phi(decomp_t *S, long *ptl, long flag)
@@ -1189,14 +1199,14 @@ update_phi(decomp_t *S, long *ptl, long flag)
     if (!equalii(prc, S->psc)) break;
 
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
-    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc): S->phi;
+    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, S->psc, NULL): S->phi;
     PHI = gadd(PHI, ZX_Z_mul(X, mului(k, S->p)));
     S->chi = mycaract(S, S->f, PHI, S->psc, pdf);
   }
   psc = mulii(sqri(prc), S->p);
   S->chi = FpX_red(S->chi, psc);
   if (!PHI) /* ok above for k = 0 */
-    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc): S->phi;
+    PHI = S->phi0? compmod(S->phi, S->phi0, S->f, psc, NULL): S->phi;
   S->phi = PHI;
 
   if (is_pm1(prc))
@@ -1556,11 +1566,11 @@ get_norm(norm_S *S, GEN a)
   if (S->M)
   {
     long e;
-    GEN N = grndtoi( norm_by_embed(S->r1, gmul(S->M, a)), &e );
+    GEN N = grndtoi( norm_by_embed(S->r1, RgM_RgC_mul(S->M, a)), &e );
     if (e > -5) pari_err(precer, "get_norm");
     return N;
   }
-  if (S->w) a = gmul(S->w, a);
+  if (S->w) a = RgV_RgC_mul(S->w, a);
   return ZX_resultant_all(S->T, a, S->D, 0);
 }
 
@@ -2051,7 +2061,7 @@ modprinit(GEN nf, GEN pr, int zk)
     if (N == f) T = gel(nf,1); /* pr inert */
     else
     {
-      T = gmul(Q_primpart(basis), gel(pr,2));
+      T = RgV_RgC_mul(Q_primpart(basis), gel(pr,2));
       T = FpX_normalize(T,p);
       basis = vecpermute(basis, c);
     }
@@ -2458,7 +2468,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
   }
   /* the modulus is integral */
-  base = nfhnfmod(nf,base, gmul(powiu(p, m-d), idealpows(nf, prinvp, d)));
+  base = nfhnfmod(nf,base, ZM_Z_mul(idealpows(nf, prinvp, d), powiu(p, m-d)));
   gel(base,2) = gdiv(gel(base,2), p); /* cancel the factor p */
   vt = vdisc - 2*d;
   return gerepilecopy(av, mkvec3(vt < 2? gen_1: gen_0, base, stoi(vt)));
@@ -2561,7 +2571,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       {
 	GEN z = RgXQX_rem(gmul(gel(Waa,i),gel(Waa,j)), pol, nfT);
 	long tz = typ(z);
-	  if (is_scalar_t(tz) || (tz == t_POL && varncmp(varn(z), vpol) > 0))
+        if (is_scalar_t(tz) || (tz == t_POL && varncmp(varn(z), vpol) > 0))
 	  z = gmul(z, gel(Wainv,1));
 	else
 	  z = mulmat_pol(Wainv, z);
@@ -2597,7 +2607,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     for (k=1; k<=n; k++)
       for (j=1; j<=n; j++)
       {
-	GEN z = gmul(Ainv, gmod(element_mulid(MW, gel(A,j),k), nfT));
+	GEN z = RgM_RgC_mul(Ainv, gmod(element_mulid(MW, gel(A,j),k), nfT));
 	for (i=1; i<=n; i++)
 	{
 	  GEN c = grem(gel(z,i), nfT);
@@ -2608,7 +2618,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
 
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
-    W = matalgtobasis(nf, gmul(Wa, matbasistoalg(nf,gel(pseudo,1))));
+    W = matalgtobasis(nf, RgM_mul(Wa, matbasistoalg(nf,gel(pseudo,1))));
     I = gel(pseudo,2);
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */
@@ -2812,7 +2822,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
     if (RgM_isidentity(gel(I,i))) { gel(Iz,i) = id; Az[i] = A[i]; continue; }
 
     gel(Iz,i) = Q_primitive_part(gel(I,i), &c);
-    gel(Az,i) = c? gmul(gel(A,i),c): gel(A,i);
+    gel(Az,i) = c? RgC_Rg_mul(gel(A,i),c): gel(A,i);
     if (c && ZM_isidentity(gel(Iz,i))) continue;
 
     d = gen_if_principal(bnf, gel(Iz,i));
@@ -2862,8 +2872,8 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
   x = idealcoprime(nf,a,b);
   uv = idealaddtoone(nf, idealmul(nf,x,a), b);
   y = gel(uv,2);
-  if (da) x = gmul(x,da);
-  if (db) y = gdiv(y,db);
+  if (da) x = ZM_Z_mul(x,da);
+  if (db) y = RgC_Rg_div(y,db);
   *px = x;
   *py = y;
   *pz = db ? negi(db): gen_m1;
@@ -2948,9 +2958,9 @@ rnfbasis(GEN bnf, GEN order)
   a = gen_if_principal(bnf, cl);
   if (!a)
   {
-    GEN p1 = ideal_two_elt(nf, cl);
-    A = shallowconcat(A, gmul(gel(p1,1), col));
-    a = gel(p1,2);
+    GEN v = ideal_two_elt(nf, cl);
+    A = shallowconcat(A, gmul(gel(v,1), col));
+    a = gel(v,2);
   }
   A = shallowconcat(A, element_mulvec(nf, a, col));
   return gerepilecopy(av, A);
@@ -3055,11 +3065,11 @@ polcompositum0(GEN A, GEN B, long flall)
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     { /* invmod possibly very costly */
-      a = gmul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), gel(C,i)));
-      a = gneg_i(RgX_rem(a, gel(C,i)));
+      a = RgXQ_mul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), gel(C,i)), gel(C,i));
+      a = gneg_i(a);
       b = gadd(pol_x(v), gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
-      w[1] = C[i];
+      gel(w,1) = gel(C,i);
       gel(w,2) = mkpolmod(a, gel(w,1));
       gel(w,3) = mkpolmod(b, gel(w,1));
       gel(w,4) = stoi(-k); gel(C,i) = w;
