@@ -3384,6 +3384,43 @@ compatible dimensions.
 
 \fun{GEN}{RgM_sub}{GEN x, GEN y} returns $x-y$.
 
+\fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
+and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
+
+\fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
+fewer copies. Not suitable for \kbd{gerepileupto}.
+
+\fun{GEN}{RgC_Rg_div}{GEN x, GEN y}
+
+\fun{GEN}{RgM_Rg_div}{GEN x, GEN y} returns $x/y$ ($y$ treated as a scalar).
+
+\fun{GEN}{RgC_Rg_mul}{GEN x, GEN y}
+
+\fun{GEN}{RgM_Rg_mul}{GEN x, GEN y} returns $x\times y$ ($y$ treated as a
+scalar).
+
+\fun{GEN}{RgV_RgC_mul}{GEN x, GEN y} returns $x\times y$.
+
+\fun{GEN}{RgV_RgM_mul}{GEN x, GEN y} returns $x\times y$.
+
+\fun{GEN}{RgM_RgC_mul}{GEN x, GEN y} returns $x\times y$.
+
+\fun{GEN}{RgM_mul}{GEN x, GEN y} returns $x\times y$.
+
+\fun{GEN}{RgM_sqr}{GEN x} returns $x^2$.
+
+\fun{GEN}{RgC_RgV_mul}{GEN x, GEN y} returns $x\times y$ (the square matrix
+$(x_iy_j)$).
+
+The last two functions are not well defined in general and only provided for
+convenience in specific cases:
+
+\fun{GEN}{RgC_RgM_mul}{GEN x, GEN y} returns $x\times y[1,]$ is $y$ is
+a row matrix $1\times n$, error otherwise.
+
+\fun{GEN}{RgM_RgV_mul}{GEN x, GEN y} returns $x\times y[,1]$ is $y$ is
+a column matrix $n\times 1$, error otherwise.
+
 \section{Integral, rational and generic polynomial arithmetic}
 
 \subsec{\kbd{ZX}, \kbd{QX}}
@@ -5588,20 +5625,6 @@ has \typ{INT} entries.
 
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} associated to the
 vector of
-
-\fun{GEN}{RgM_Rg_add}{GEN x, GEN y} assuming $x$ is a square matrix
-and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
-
-\fun{GEN}{RgC_Rg_div}{GEN x, GEN y}
-
-\fun{GEN}{RgC_Rg_mul}{GEN x, GEN y}
-
-\fun{GEN}{RgM_Rg_div}{GEN x, GEN y}
-
-\fun{GEN}{RgM_Rg_mul}{GEN x, GEN y}
-
-\fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
-fewer copies.
 
 \fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).

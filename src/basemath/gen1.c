@@ -1233,39 +1233,6 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   gel(z,2) = gmul(x, y); return z;
 }
 
-/* compatible t_VEC * t_COL, l = lg(x) = lg(y) */
-static GEN
-VC_mul(GEN x, GEN y, long l)
-{
-  pari_sp av = avma;
-  GEN z = gen_0;
-  long i;
-  for (i=1; i<l; i++)
-  {
-    GEN c = gel(y,i);
-    if (!isrationalzeroscalar(c)) z = gadd(z, gmul(gel(x,i), c));
-  }
-  return gerepileupto(av,z);
-}
-/* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lg(x[1]): 1 */
-static GEN
-MC_mul(GEN x, GEN y, long l, long lz)
-{
-  GEN z = cgetg(lz,t_COL);
-  long i, j;
-  for (i=1; i<lz; i++)
-  {
-    pari_sp av = avma;
-    GEN t = gen_0;
-    for (j=1; j<l; j++)
-    {
-      GEN c = gel(y,j);
-      if (!isrationalzeroscalar(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
-    }
-    gel(z,i) = gerepileupto(av,t);
-  }
-  return z;
-}
 /* set z = x+y and return 1 if x,y have the same sign
  * set z = x-y and return 0 otherwise */
 static int
@@ -1538,14 +1505,7 @@ gmul(GEN x, GEN y)
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);
     case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
-    case t_MAT:
-      ly = lg(y); if (ly == 1) return cgetg(1,t_MAT);
-      lx = lg(x);
-      if (lx != lg(y[1])) pari_err(operi,"*",x,y);
-      z = cgetg(ly,t_MAT);
-      l = (lx == 1)? 1: lg(x[1]);
-      for (j=1; j<ly; j++) gel(z,j) = MC_mul(x, gel(y,j), lx, l);
-      return z;
+    case t_MAT: return RgM_mul(x, y);
 
     case t_VECSMALL: /* multiply as permutation. cf perm_mul */
       l = lg(x); z = cgetg(l, t_VECSMALL);
@@ -1657,67 +1617,31 @@ gmul(GEN x, GEN y)
 
   if (is_matvec_t(ty))
   {
-    ly = lg(y);
     if (!is_matvec_t(tx))
     {
       if (is_noncalc_t(tx)) pari_err(operf, "*",x,y); /* necessary if ly = 1 */
-      z = cgetg(ly,ty);
+      ly = lg(y); z = cgetg(ly,ty);
       for (i=1; i<ly; i++) gel(z,i) = gmul(x,gel(y,i));
       return z;
     }
-    lx = lg(x);
-
     switch(tx)
     {
       case t_VEC:
-	switch(ty)
-	{
-	  case t_COL:
-	    if (lx != ly) pari_err(operi,"*",x,y);
-	    return VC_mul(x, y, lx);
-
-	  case t_MAT:
-	    if (ly == 1) return cgetg(1,t_VEC);
-	    if (lx != lg(y[1])) pari_err(operi,"*",x,y);
-	    z = cgetg(ly, t_VEC);
-	    for (i=1; i<ly; i++) gel(z,i) = VC_mul(x, gel(y,i), lx);
-	    return z;
+	switch(ty) {
+	  case t_COL: return RgV_RgC_mul(x,y);
+	  case t_MAT: return RgV_RgM_mul(x,y);
 	}
 	break;
-
       case t_COL:
-	switch(ty)
-	{
-	  case t_VEC:
-	    z = cgetg(ly,t_MAT);
-	    for (i=1; i<ly; i++)
-	    {
-	      p1 = gmul(gel(y,i),x);
-	      if (typ(p1) != t_COL) pari_err(operi,"*",x,y);
-	      gel(z,i) = p1;
-	    }
-	    return z;
-
-	  case t_MAT:
-	    if (ly != 1 && lg(y[1]) != 2) pari_err(operi,"*",x,y);
-	    z = cgetg(ly,t_MAT);
-	    for (i=1; i<ly; i++) gel(z,i) = gmul(gcoeff(y,1,i),x);
-	    return z;
+	switch(ty) {
+	  case t_VEC: return RgC_RgV_mul(x,y);
+	  case t_MAT: return RgC_RgM_mul(x,y);
 	}
 	break;
-
       case t_MAT:
-	switch(ty)
-	{
-	  case t_VEC:
-	    if (lx != 2) pari_err(operi,"*",x,y);
-	    z = cgetg(ly,t_MAT);
-	    for (i=1; i<ly; i++) gel(z,i) = gmul(gel(y,i),gel(x,1));
-	    return z;
-
-	  case t_COL:
-	    if (lx != ly) pari_err(operi,"*",x,y);
-	    return MC_mul(x, y, lx, (lx == 1)? 1: lg(x[1]));
+	switch(ty) {
+	  case t_VEC: return RgM_RgV_mul(x,y);
+	  case t_COL: return RgM_RgC_mul(x,y);
 	}
     }
   }
@@ -1888,7 +1812,7 @@ sqr_ser_part(GEN x, long l1, long l2)
 GEN
 gsqr(GEN x)
 {
-  long tx=typ(x), lx, i, j, l;
+  long tx=typ(x), i, l;
   pari_sp av, tetpil;
   GEN z, p1, p2, p3, p4;
 
@@ -1985,13 +1909,7 @@ gsqr(GEN x)
       gel(z,1) = gsqr(gel(x,1));
       gel(z,2) = gsqr(gel(x,2)); return z;
 
-    case t_MAT:
-      lx = lg(x);
-      if (lx!=1 && lx != lg(x[1])) pari_err(operi,"*",x,x);
-      z = cgetg(lx, t_MAT);
-      for (j=1; j<lx; j++) gel(z,j) = MC_mul(x, gel(x,j), lx, lx);
-      return z;
-
+    case t_MAT: return RgM_sqr(x);
     case t_QFR: return sqcompreal(x);
     case t_QFI: return sqcompimag(x);
     case t_VECSMALL:
