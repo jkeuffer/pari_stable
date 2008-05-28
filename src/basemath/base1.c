@@ -1214,7 +1214,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   if (is_pm1(T->index)) /* principal ideal (x'), whose norm is |dK| */
     D = ZM_hnfmod(eltimul_get_table(nf, ZX_deriv(x)), absdK);
   else
-    D = gmul(dA, idealinv(nf, A));
+    D = RgM_Rg_mul(idealinv(nf, A), dA);
   gel(mat,3) = gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */
   gel(mat,4) = Tr;
   gel(mat,5) = D;
@@ -1240,19 +1240,17 @@ nfbasechange(GEN u, GEN x)
   switch(typ(x))
   {
     case t_COL: /* nfelt */
-      return gmul(u, x);
+      return RgM_RgC_mul(u, x);
 
     case t_MAT: /* ideal */
-      y = shallowcopy(x);
-      lx = lg(x);
-      for (i=1; i<lx; i++) gel(y,i) = gmul(u, gel(y,i));
+      lx = lg(x); y = cgetg(lx, t_MAT);
+      for (i=1; i<lx; i++) gel(y,i) = RgM_RgC_mul(u, gel(x,i));
       break;
 
     case t_VEC: /* pr */
-      checkprimeid(x);
-      y = shallowcopy(x);
-      gel(y,2) = gmul(u, gel(y,2));
-      gel(y,5) = gmul(u, gel(y,5));
+      checkprimeid(x); y = shallowcopy(x);
+      gel(y,2) = RgM_RgC_mul(u, gel(y,2));
+      gel(y,5) = RgM_RgC_mul(u, gel(y,5));
       break;
     default: y = x;
   }
@@ -1298,7 +1296,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
   for (i=1; ; i++)
   {
     F.prec = prec; make_M_G(&F, 0); G = F.G;
-    if (u0) G = gmul(G, u0);
+    if (u0) G = RgM_mul(G, u0);
     if (DEBUGLEVEL)
       fprintferr("get_red_G: starting LLL, prec = %ld (%ld + %ld)\n",
 		  prec + F.extraprec, prec, F.extraprec);
@@ -1306,7 +1304,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     {
       if (lg(u)-1 == n) break;
       /* singular ==> loss of accuracy */
-      if (u0) u0 = gerepileupto(av, gmul(u0,u));
+      if (u0) u0 = gerepileupto(av, RgM_mul(u0,u));
       else    u0 = gerepilecopy(av, u);
     }
     prec = (prec<<1)-2 + divsBIL(gexpo(u0));
@@ -1314,7 +1312,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
     if (DEBUGLEVEL) pari_warn(warnprec,"get_red_G", prec);
   }
   *pro = F.ro;
-  if (u0) u = gmul(u0,u);
+  if (u0) u = RgM_mul(u0,u);
   return u;
 }
 
@@ -1329,10 +1327,10 @@ set_LLL_basis(nfbasic_t *T, GEN *pro)
     GEN u, basden = T->basden;
     if (!basden) basden = get_bas_den(B);
     u = ZM_lll(make_Tr(T->x,basden), 0.99, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM);
-    B = gerepileupto(av, gmul(B, u));
+    B = gerepileupto(av, RgV_RgM_mul(B, u));
   }
   else
-    B = gmul(B, get_red_G(T, pro));
+    B = RgV_RgM_mul(B, get_red_G(T, pro));
   T->bas = B;
   T->basden = NULL; /* recompute */
   if (DEBUGLEVEL) msgtimer("LLL basis");
@@ -1791,7 +1789,7 @@ get_pol(CG_data *d, GEN x)
 static GEN
 get_polchar(CG_data *d, GEN x)
 {
-  return get_pol(d, gmul(d->ZKembed,x));
+  return get_pol(d, RgM_RgC_mul(d->ZKembed,x));
 }
 
 /* return a defining polynomial for Q(w_i) */
@@ -1826,7 +1824,7 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   for (     ; i <=N; i++)
   {
     v = vecmul(gel(M,k), gel(M,i));
-    v = gmul(Mi, split_realimag(v, r1, r2));
+    v = RgM_RgC_mul(Mi, split_realimag(v, r1, r2));
     gel(Mk,i) = grndtoi(v, &e);
     if (e > -5) return NULL;
   }
@@ -1851,7 +1849,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   pari_sp av;
 
   d->u = U;
-  d->ZKembed = gmul(d->M, U);
+  d->ZKembed = RgM_mul(d->M, U);
 
   av = avma; bound = d->bound;
   S = cgetg(N+1, t_VECSMALL);
@@ -1890,13 +1888,13 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   }
   if (!firstprim)
   { /* try (a little) to find primitive elements to improve bound */
-    GEN x = cgetg(N+1, t_COL), e, B;
+    GEN x = cgetg(N+1, t_VECSMALL), e, B;
     if (DEBUGLEVEL>1)
       fprintferr("chk_gen_init: difficult field, trying random elements\n");
     for (i = 0; i < 10; i++)
     {
-      for (j = 1; j <= N; j++) gel(x,j) = stoi( (long)random_Fl(7) - 3 );
-      e = gmul(d->ZKembed, x);
+      for (j = 1; j <= N; j++) x[j] = (long)random_Fl(7) - 3;
+      e = RgM_zc_mul(d->ZKembed, x);
       P = get_pol(d, e);
       if (!ZX_is_squarefree(P)) continue;
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Zs\n",P);
@@ -1932,7 +1930,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       for (h = 1; h < dP; h++)
       {
 	long r; /* add to M2 the elts of M * nf.zk[i]  */
-	for (j = 1; j <= rkM; j++) gel(M2,k++) = gmul(Mx, gel(M,j));
+	for (j = 1; j <= rkM; j++) gel(M2,k++) = RgM_RgC_mul(Mx, gel(M,j));
 	setlg(M2, k); k = 1;
 	M = image(shallowconcat(M, M2));
 	r = lg(M) - 1;
@@ -2081,27 +2079,24 @@ polredabs0(GEN x, long flag)
     u = NULL;
     y = mkvec( pol_x(vx) );
     a = mkvec( deg1pol_shallow(gen_1, negi(gel(x,2)), vx) );
+    l = 2;
   }
   else
   {
     GEN v = _polredabs(&T, &u);
     y = gel(v,1);
     a = gel(v,2);
-  }
-  l = lg(a);
-  for (i=1; i<l; i++)
-    if (canon_pol(gel(y,i)) < 0) gel(a,i) = gneg_i(gel(a,i));
-  remove_duplicates(y,a);
-  l = lg(a);
-  if (l == 1)
-  {
-    y = mkvec(x);
-    a = mkvec(pol_x(vx));
+    l = lg(a);
+    for (i=1; i<l; i++)
+      if (canon_pol(gel(y,i)) < 0) gel(a,i) = ZC_neg(gel(a,i));
+    remove_duplicates(y,a);
+    l = lg(a);
   }
   if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
   if (flag & nf_ALL)
   {
-    if (u) for (i=1; i<l; i++) gel(a,i) = gmul(T.bas, gmul(u, gel(a,i)));
+    if (u) for (i=1; i<l; i++)
+      gel(a,i) = RgV_RgC_mul(T.bas, ZM_ZC_mul(u, gel(a,i)));
     y = storeallpol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK) pari_err(impl,"nf_ADDZK flag when nf_ALL set (polredabs)");
   }
@@ -2109,13 +2104,13 @@ polredabs0(GEN x, long flag)
   {
     GEN z;
     findmindisc(&y, &a); z = y;
-    if (u && l > 1) a = gmul(T.bas, gmul(u, a));
+    if (u) a = RgV_RgC_mul(T.bas, ZM_ZC_mul(u, a));
     y = storepol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
       GEN t, y0 = y, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern(gel(y,2)): modreverse_i(a, x);
-      t = gmul(RgXQ_powers(t, degpol(z)-1, z), B);
+      t = RgV_RgM_mul(RgXQ_powers(t, degpol(z)-1, z), B);
       y = mkvec2(y0, t);
     }
   }
