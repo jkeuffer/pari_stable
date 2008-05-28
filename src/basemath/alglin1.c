@@ -592,10 +592,10 @@ matmuldiagonal(GEN m, GEN d)
   GEN y;
 
   if (typ(m)!=t_MAT) pari_err(typeer,"matmuldiagonal");
-  if (! is_vec_t(j) || lg(d)!=lx)
+  if (! is_vec_t(j) || lg(d) != lx)
     pari_err(talker,"incorrect vector in matmuldiagonal");
-  y=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) gel(y,j) = gmul(gel(d,j),gel(m,j));
+  y = cgetg(lx,t_MAT);
+  for (j=1; j<lx; j++) gel(y,j) = RgC_Rg_mul(gel(m,j), gel(d,j));
   return y;
 }
 
@@ -1979,19 +1979,18 @@ FqM_suppl(GEN x, GEN T, GEN p)
 GEN
 image2(GEN x)
 {
-  pari_sp av=avma,tetpil;
-  long k,n,i;
-  GEN p1,p2;
+  pari_sp av = avma;
+  long k, n, i;
+  GEN A, B;
 
   if (typ(x)!=t_MAT) pari_err(typeer,"image2");
-  k=lg(x)-1; if (!k) return gcopy(x);
-  n=lg(x[1])-1; p1=ker(x); k=lg(p1)-1;
-  if (k) { p1=suppl(p1); n=lg(p1)-1; }
-  else p1=matid(n);
-
-  tetpil=avma; p2=cgetg(n-k+1,t_MAT);
-  for (i=k+1; i<=n; i++) gel(p2,i-k) = gmul(x,gel(p1,i));
-  return gerepile(av,tetpil,p2);
+  if (lg(x) == 1) return cgetg(1,t_MAT);
+  n = lg(x[1])-1; A = ker(x); k = lg(A)-1;
+  if (!k) { avma = av; return gcopy(x); }
+  A = suppl(A); n = lg(A)-1;
+  B = cgetg(n-k+1, t_MAT);
+  for (i = k+1; i <= n; i++) gel(B,i-k) = RgM_RgC_mul(x, gel(A,i));
+  return gerepileupto(av, B);
 }
 
 GEN

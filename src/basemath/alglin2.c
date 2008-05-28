@@ -237,7 +237,7 @@ caradj(GEN x, long v, GEN *py)
   for (k = 2; k < l-1; k++)
   {
     GEN y0 = y;
-    y = gmul(y, x);
+    y = RgM_mul(y, x);
     t = gdivgs(mattrace(y), -k);
     for (i = 1; i < l; i++) gcoeff(y,i,i) = gadd(gcoeff(y,i,i), t);
     y = gclone(y);
@@ -1181,11 +1181,23 @@ RgC_lincomb(GEN u, GEN v, GEN A, GEN B)
 static void
 QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
 {
-  GEN p1,u,v,d, D;
+  GEN p1, u, v, d;
 
   if (gcmp0(ak)) { lswap(A[j],A[k]); return; }
-  D = lcmii(denom(aj), denom(ak));
-  if (!is_pm1(D)) { aj = gmul(aj,D); ak = gmul(ak,D); }
+  if (typ(aj) == t_INT) {
+    if (typ(ak) != t_INT) { aj = mulii(aj, gel(ak,2)); ak = gel(ak,1); }
+  } else {
+    if (typ(aj) == t_INT) { ak = mulii(ak, gel(aj,2)); aj = gel(aj,1); }
+    else {
+      GEN daj = gel(aj,2), dak = gel(ak,2), D = gcdii(daj, dak);
+      aj = gel(aj,1); ak = gel(ak,1);
+      if (!is_pm1(D)) { daj = diviiexact(daj, D); dak = diviiexact(dak, D); }
+      if (!is_pm1(dak)) aj = mulii(aj, dak);
+      if (!is_pm1(daj)) ak = mulii(ak, daj);
+    }
+  }
+  /* aj,ak were multiplied by their least common denominator */
+
   d = bezout(aj,ak,&u,&v);
   /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
@@ -1203,9 +1215,9 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
   }
 
   if (!is_pm1(d)) { aj = diviiexact(aj,d); ak = diviiexact(ak,d); }
-  p1 = gel(A,k); aj = negi(aj);
+  p1 = gel(A,k);
   gel(A,k) = RgC_lincomb(u,v, gel(A,j),p1);
-  gel(A,j) = RgC_lincomb(aj,ak, p1,gel(A,j));
+  gel(A,j) = RgC_lincomb(negi(aj),ak, p1,gel(A,j));
 }
 
 static GEN
@@ -1238,7 +1250,7 @@ matrixqz_aux(GEN A)
     if (!gcmp0(a))
     {
       a = Q_denom(a);
-      if (!is_pm1(a)) gel(A,k) = gmul(gel(A,k), a);
+      if (!is_pm1(a)) gel(A,k) = RgC_Rg_mul(gel(A,k), a);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1294,16 +1306,16 @@ matrixqz3(GEN x)
 GEN
 intersect(GEN x, GEN y)
 {
-  pari_sp av,tetpil;
   long j, lx = lg(x);
+  pari_sp av;
   GEN z;
 
   if (typ(x)!=t_MAT || typ(y)!=t_MAT) pari_err(typeer,"intersect");
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
 
-  av=avma; z=ker(shallowconcat(x,y));
-  for (j=lg(z)-1; j; j--) setlg(z[j],lx);
-  tetpil=avma; return gerepile(av,tetpil,gmul(x,z));
+  av = avma; z = ker(shallowconcat(x,y));
+  for (j=lg(z)-1; j; j--) setlg(z[j], lx);
+  return gerepileupto(av, RgM_mul(x,z));
 }
 
 /**************************************************************/
@@ -1785,7 +1797,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       p1[k] = (i <= k0)? y[i]: z[i];
     }
   }
-  if (T) C = gmul(C,T);
+  if (T) C = typ(C)==t_MAT? RgM_mul(C,T): RgV_RgM_mul(C,T);
   *ptdep = dep;
   *ptB = B;
   H = hnffinal(matbnew, perm, ptdep, ptB, &C);
@@ -2865,16 +2877,10 @@ col_mul(GEN x, GEN c)
   if (typ(x) == t_INT)
   {
     long s = signe(x);
-    GEN xc = NULL;
-    if (s)
-    {
-      if (!is_pm1(x)) xc = gmul(x,c);
-      else xc = (s>0)? c: gneg_i(c);
-    }
-    return xc;
+    if (!s) return NULL;
+    if (is_pm1(x)) return (s > 0)? c: RgC_neg(c);
   }
-  else
-    return gmul(x, c);
+  return RgC_Rg_mul(c, x);
 }
 
 static void
@@ -3230,9 +3236,10 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
       GEN D = RgX_gcd_simple(a,b);
       if (degpol(D)) {
 	D = RgX_Rg_div(D, leading_term(D));
-	a = RgX_div(a, D); b = RgX_div(b, D);
+	a = RgX_div(a, D);
+        b = RgX_div(b, D);
 	d = RgX_extgcd(a,b, pu,pv); /* retry now */
-	d = gmul(d, D);
+	d = RgX_mul(d, D);
       }
     }
 #else
@@ -3407,23 +3414,18 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
  ****         Frobenius form and Jordan form of a matrix            ****
  ****                                                               ****
  ***********************************************************************/
-
 GEN
 Frobeniusform(GEN V, long n)
 {
-  long i,j,k;
-  GEN M = cgetg(n+1, t_MAT);
-  for(i=1; i<=n; i++)
-    gel(M,i) = zerocol(n);
+  long i, j, k;
+  GEN M = zeromatcopy(n,n);
   for (k=1,i=1;i<lg(V);i++,k++)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
     if (k+d-1 > n) pari_err(talker, "accuracy lost in matfrobenius");
-    for (j=0; j<d-1; j++, k++)
-      gcoeff(M,k+1,k) = gen_1;
-    for (j=0; j<d; j++)
-      gcoeff(M,k-j,k) = gneg(gel(P, 1+d-j));
+    for (j=0; j<d-1; j++, k++) gcoeff(M,k+1,k) = gen_1;
+    for (j=0; j<d; j++) gcoeff(M,k-j,k) = gneg(gel(P, 1+d-j));
   }
   return M;
 }
@@ -3431,13 +3433,8 @@ Frobeniusform(GEN V, long n)
 static GEN
 build_frobeniusbc(GEN V, long n)
 {
-  long i,j,k,l;
-  GEN z;
-  long m=lg(V)-1;
-  GEN M = cgetg(n+1, t_MAT);
-  for(i=1; i<=n; i++)
-    gel(M,i) = zerocol(n);
-  z = monomial(gen_m1, 1, 0);
+  long i, j, k, l, m = lg(V)-1;
+  GEN M = zeromatcopy(n,n), z = monomial(gen_m1, 1, 0); /* -x */
   for (k=1,l=1+m,i=1;i<=m;i++,k++)
   {
     GEN  P = gel(V,i);
@@ -3457,12 +3454,11 @@ build_frobeniusbc(GEN V, long n)
 static GEN
 build_basischange(GEN N, GEN U)
 {
-  long n = lg(N);
-  long i, j;
+  long i, j, n = lg(N);
   GEN p2 = cgetg(n, t_MAT);
   for (j = 1; j < n; ++j)
   {
-    pari_sp btop=avma;
+    pari_sp btop = avma;
     GEN p3 = gen_0;
     for (i = 1; i < n; ++i)
       p3 = gadd(p3, gel(gsubst(gcoeff(U, i, j), 0, N),i));
@@ -3495,6 +3491,6 @@ matfrobenius(GEN M, long flag, long v)
   D = smithclean(mattodiagonal_i(gel(A,3)));
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
-  R = build_basischange(N, gmul(B,gel(A,1)));
+  R = build_basischange(N, RgM_mul(B,gel(A,1)));
   return gerepilecopy(ltop, mkvec2(N,R));
 }
