@@ -621,6 +621,7 @@ rnfscal(GEN m, GEN x, GEN y)
   return z;
 }
 
+/* x ideal in HNF */
 static GEN
 findmin(GEN nf, GEN x, GEN muf)
 {
@@ -644,11 +645,12 @@ findmin(GEN nf, GEN x, GEN muf)
     y = gmul(M, x);
   }
   m = gauss_realimag(y, muf);
-  if (cx) m = RgM_Rg_div(m, cx);
+  if (cx) m = RgC_Rg_div(m, cx);
   m = grndtoi(m, &e);
   if (e >= 0) return NULL; /* precision problem */
-  if (cx) m = gmul(m, cx);
-  return gerepileupto(av, gmul(x,m));
+  m = ZM_ZC_mul(x, m);
+  if (cx) m = RgC_Rg_mul(m, cx);
+  return gerepileupto(av, m);
 }
 
 static int
