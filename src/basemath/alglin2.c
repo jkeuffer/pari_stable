@@ -717,8 +717,14 @@ conjvec(GEN x,long prec)
 	  case t_INTMOD: {
             GEN p = gel(c,1); 
             T = RgX_to_FpX(T,p); /* left on stack */
-            z = cgetg(lx-2,t_COL); gel(z,1) = RgX_to_FpX(x, p);
-            for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
+            z = cgetg(lx-2,t_COL);
+            if (typ(x) == t_POL) {
+              gel(z,1) = RgX_to_FpX(x, p);
+              for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
+            } else {
+              x = Rg_to_Fp(x, p);
+              for (i=1; i<=lx-3; i++) gel(z,i) = x;
+            }
             return z;
           }
           case t_INT:
