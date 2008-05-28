@@ -719,7 +719,10 @@ conjvec(GEN x,long prec)
             T = RgX_to_FpX(T,p); /* left on stack */
             z = cgetg(lx-2,t_COL);
             if (typ(x) == t_POL) {
-              gel(z,1) = RgX_to_FpX(x, p);
+              x = RgX_to_FpX(x, p);
+              if (varn(x) != varn(T))
+                pari_err(talker,"not a rational polynomial in conjvec");
+              gel(z,1) = x;
               for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
             } else {
               x = Rg_to_Fp(x, p);
@@ -733,6 +736,8 @@ conjvec(GEN x,long prec)
         }
       }
       av = avma;
+      if (varn(x) != varn(T))
+        pari_err(talker,"inconsistent variables in conjvec");
       r = cleanroots(T,prec);
       z = cgetg(lx-2,t_COL);
       for (i=1; i<=lx-3; i++) gel(z,i) = poleval(x, gel(r,i));
