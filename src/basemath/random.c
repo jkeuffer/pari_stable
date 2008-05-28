@@ -79,15 +79,6 @@ pari_rand(void)
   return v + (xorgen_w ^ (xorgen_w>>ws));
 }
 
-long
-pari_rand31(void) {
-#ifdef LONG_IS_64BIT
-  return pari_rand() >> 33;
-#else
-  return pari_rand() >> 1;
-#endif
-}
-
 void
 setrand(GEN seed) {
   switch (typ(seed))

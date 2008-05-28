@@ -2112,7 +2112,6 @@ GEN     to_Kronecker(GEN P, GEN Q);
 GEN     genrand(GEN N);
 GEN     getrand(void);
 ulong   pari_rand(void);
-long    pari_rand31(void);
 GEN     randomi(GEN x);
 ulong   random_Fl(ulong n);
 void    setrand(GEN seed);
