@@ -680,7 +680,7 @@ GEN
 conjvec(GEN x,long prec)
 {
   long lx, s, i;
-  GEN z, y, p;
+  GEN z;
 
   switch(typ(x))
   {
@@ -691,45 +691,47 @@ conjvec(GEN x,long prec)
       z=cgetg(3,t_COL); gel(z,1) = gcopy(x); gel(z,2) = gconj(x); break;
 
     case t_VEC: case t_COL:
-      lx=lg(x); z=cgetg(lx,t_MAT);
-      for (i=1; i<lx; i++) gel(z,i) = conjvec(gel(x,i),prec);
-      if (lx == 1) break;
-      s = lg(z[1]);
-      for (i=2; i<lx; i++)
-	if (lg(z[i])!=s) pari_err(talker,"incompatible field degrees in conjvec");
-      break;
-
-    case t_POLMOD:
-      y = gel(x,1); lx = lg(y);
-      if (lx <= 3) return cgetg(1,t_COL);
-      p = NULL;
+      lx = lg(x); z = cgetg(lx,t_MAT);
+      if (lx == 1) return z;
+      gel(z,1) = conjvec(gel(x,1),prec);
+      s = lg(gel(z,1));
       for (i=2; i<lx; i++)
       {
-        GEN c = gel(y,i);
+        gel(z,i) = conjvec(gel(x,i),prec);
+        if (lg(gel(z,i)) != s)
+          pari_err(talker,"incompatible field degrees in conjvec");
+      }
+      break;
+
+    case t_POLMOD: {
+      GEN T = gel(x,1), r;
+      pari_sp av;
+
+      lx = lg(T);
+      if (lx <= 3) return cgetg(1,t_COL);
+      x = gel(x,2);
+      for (i=2; i<lx; i++)
+      {
+        GEN c = gel(T,i);
         switch(typ(c)) {
-	  case t_INTMOD: p = gel(c,1); break;
+	  case t_INTMOD: {
+            GEN p = gel(c,1); 
+            T = RgX_to_FpX(T,p); /* left on stack */
+            z = cgetg(lx-2,t_COL); gel(z,1) = RgX_to_FpX(x, p);
+            for (i=2; i<=lx-3; i++) gel(z,i) = FpXQ_pow(gel(z,i-1), p, T, p);
+            return z;
+          }
           case t_INT:
           case t_FRAC: break;
           default: pari_err(talker,"not a rational polynomial in conjvec");
         }
       }
-      if (!p)
-      {
-        pari_sp av = avma;
-	GEN r = roots(y,prec);
-        x = gel(x,2);
-	z = cgetg(lx-2,t_COL);
-	for (i=1; i<=lx-3; i++)
-	{
-          GEN c = gel(r,i);
-	  if (gcmp0(gel(c,2))) c = gel(c,1);
-	  gel(z,i) = poleval(x, c);
-	 }
-	return gerepileupto(av, z);
-      }
-      z = cgetg(lx-2,t_COL); gel(z,1) = gcopy(x);
-      for (i=2; i<=lx-3; i++) gel(z,i) = powgi(gel(z,i-1), p);
-      break;
+      av = avma;
+      r = cleanroots(T,prec);
+      z = cgetg(lx-2,t_COL);
+      for (i=1; i<=lx-3; i++) gel(z,i) = poleval(x, gel(r,i));
+      return gerepileupto(av, z);
+    }
 
     default:
       pari_err(typeer,"conjvec");

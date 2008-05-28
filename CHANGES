@@ -155,6 +155,8 @@ BA 32- all LLL variants now use an implementation of NGuyen & Stehle's algorithm
    47- rename library functions discf -> nfdisc, nfdiscf0 -> nfdisc0
    48- arguments of stirling1 / stirling2 are now ulongs [ were longs ]
 BA 49- user variables can now be aliased [#790].
+   50- conjvec(POLMOD of INTMODs) now returns lifted conjugates (10 times
+       faster)
 
   Added
     1- library function gpcalloc

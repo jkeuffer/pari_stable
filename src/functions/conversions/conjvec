@@ -5,10 +5,15 @@ Prototype: Gp
 Help: conjvec(x): conjugate vector of the algebraic number x
 Doc: 
  conjugate vector representation of $x$. If $x$ is a
- polmod, equal to \kbd{Mod}$(a,q)$, this gives a vector of length
- $\text{degree}(q)$ containing the complex embeddings of the polmod if $q$ has
- integral or rational coefficients, and the conjugates of the polmod if $q$
- has some intmod coefficients. The order is the same as that of the
- \kbd{polroots} functions. If $x$ is an integer or a rational number, the
- result is~$x$. If $x$ is a (row or column) vector, the result is a matrix
- whose columns are the conjugate vectors of the individual elements of $x$.
+ polmod, equal to \kbd{Mod}$(a,T)$, this gives a vector of length
+ $\text{degree}(T)$ containing:
+ 
+ \item the complex embeddings of $x$ if $T$ has rational coefficients, 
+ i.e.~the $a(r[i])$ where $r = \kbd{polroots}(T)$;
+ 
+ \item the lifted conjugates of $x$ if $T$ has some intmod coefficients;
+ i.e.~the $x^{p^i}$ lifted to $\Z[t].
+ 
+ \noindent If $x$ is an integer or a rational number, the result is~$x$. If
+ $x$ is a (row or column) vector, the result is a matrix whose columns are
+ the conjugate vectors of the individual elements of $x$.
