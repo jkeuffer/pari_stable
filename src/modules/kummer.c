@@ -679,7 +679,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   prec = DEFAULTPREC +
     nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(gmael(nf,5,1)))));
   if (nf_get_prec(nf) < prec) nf = nfnewprec_shallow(nf, prec);
-  msign = ZM_to_zm( zsigns(nf, vecWB) );
+  msign = nfsign(nf, vecWB);
   arch = ZV_to_zv(arch);
 
   vecMsup = cgetg(lSml2+1,t_VEC);

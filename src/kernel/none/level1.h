@@ -202,6 +202,7 @@ GEN    zeroser(long v, long e);
 GEN    zerovec(long n);
 GEN    col_ei(long n, long i);
 GEN    vec_ei(long n, long i);
+GEN    vecsmall_ei(long n, long i);
 
 #else
 
@@ -538,6 +539,8 @@ INLINE GEN
 col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
 INLINE GEN
 vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
+INLINE GEN
+vecsmall_ei(long n, long i) { GEN e = const_vecsmall(n,0); e[i] = 1; return e; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN

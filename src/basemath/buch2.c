@@ -1660,31 +1660,31 @@ GEN
 zsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 {
   long l = lg(archp), i;
-  GEN y = cgetg(l, t_COL);
+  GEN y = cgetg(l, t_VECSMALL);
   pari_sp av = avma;
 
   for (i=1; i<l; i++)
   {
-    GEN p1 = ground( gmul(imag_i(gel(LA,archp[i])), invpi) );
-    gel(y,i) = mpodd(p1)? gen_1: gen_0;
+    GEN c = ground( gmul(imag_i(gel(LA,archp[i])), invpi) );
+    y[i] = mpodd(c)? 1: 0;
   }
   avma = av; return y;
 }
 
 GEN
-zsignunits(GEN bnf, GEN archp, int add_zu)
+nfsign_units(GEN bnf, GEN archp, int add_zu)
 {
   GEN y, A = gel(bnf,3), invpi = ginv( mppi(DEFAULTPREC) );
-  long l, j = 1, RU = lg(A);
+  long j = 1, RU = lg(A);
 
   if (!archp) archp = perm_identity( nf_get_r1(gel(bnf,7)) );
-  l = lg(archp);
   if (add_zu) { RU++; A--; }
   y = cgetg(RU,t_MAT);
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1);
-    gel(y, j++) = equaliu(w,2)? const_col(l - 1, gen_1): cgetg(1, t_COL);
+    gel(y, j++) = equaliu(w,2)? const_vecsmall(lg(archp)-1, 1)
+                              : cgetg(1, t_VECSMALL);
   }
   for ( ; j < RU; j++) gel(y,j) = zsign_from_logarch(gel(A,j), invpi, archp);
   return y;
@@ -1694,18 +1694,20 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
 GEN
 signunits(GEN bnf)
 {
-  pari_sp av = avma;
-  GEN y;
-  long i, j;
+  pari_sp av;
+  GEN S, y, nf;
+  long i, j, r1, r2;
 
   bnf = checkbnf(bnf);
-  y = zsignunits(bnf, NULL, 0);
+  nf = gel(bnf,7); nf_get_sign(nf, &r1,&r2);
+  S = zeromatcopy(r1, r1+r2-1); av = avma;
+  y = nfsign_units(bnf, NULL, 0);
   for (j = 1; j < lg(y); j++)
   {
-    GEN c = gel(y,j);
-    for (i = 1; i < lg(c); i++) gel(c,i) = (gel(c,i) == gen_0)? gen_1: gen_m1;
+    GEN Sj = gel(S,j), yj = gel(y,j);
+    for (i = 1; i <= r1; i++) gel(Sj,i) = yj[i]? gen_m1: gen_1;
   }
-  return gerepilecopy(av, y);
+  avma = av; return S;
 }
 
 /* LLL-reduce ideal and return Cholesky for T2 | ideal */

@@ -954,7 +954,7 @@ eval_sign(GEN M, GEN x, long k)
   GEN z = mpmul(gcoeff(M,k,1), gel(x,1));
   for (i = 2; i < l; i++)
     z = mpadd(z, mpmul(gcoeff(M,k,i), gel(x,i)));
-  if (lg(z) < DEFAULTPREC) pari_err(precer,"zsigne");
+  if (lg(z) < DEFAULTPREC) pari_err(precer,"nfsign_arch");
   return signe(z);
 }
 
@@ -990,60 +990,53 @@ perm_to_arch(GEN nf, GEN archp)
   return v;
 }
 
-/* reduce mod 2 in place */
+/* return (column) vector of R1 signatures of x (0 or 1) */
 GEN
-F2V_red_ip(GEN v)
-{
-  long i, l = lg(v);
-  for (i = 1; i < l; i++) gel(v,i) = mpodd(gel(v,i))? gen_1: gen_0;
-  return v;
-}
-
-/* return (column) vector of R1 signatures of x (0 or 1)
- * if arch = NULL, assume arch = [0,..0] */
-GEN
-zsigne(GEN nf,GEN x,GEN arch)
+nfsign_arch(GEN nf,GEN x,GEN arch)
 {
   GEN M, V, archp = arch_to_perm(arch);
-  long i, s, l = lg(archp);
+  long i, s, n = lg(archp)-1;
   pari_sp av;
 
-  if (l == 1) return cgetg(1,t_COL);
-  V = cgetg(l,t_COL); av = avma;
+  if (!n) return cgetg(1,t_VECSMALL);
   nf = checknf(nf);
   if (typ(x) == t_MAT)
   { /* factorisation */
-    GEN g = gel(x,1), e = gel(x,2), z = vec_setconst(V, gen_0);
+    GEN g = gel(x,1), e = gel(x,2);
+    V = const_vecsmall(n, 0);
     for (i=1; i<lg(g); i++)
-      if (mpodd(gel(e,i))) z = ZC_add(z, zsigne(nf,gel(g,i),archp));
-    for (i=1; i<l; i++) gel(V,i) = mpodd(gel(z,i))? gen_1: gen_0;
-    avma = av; return V;
+      if (mpodd(gel(e,i))) F2v_add_inplace(V, nfsign_arch(nf,gel(g,i),archp));
+    avma = (pari_sp)V; return V;
   }
+  av = avma; V = cgetg(n+1,t_VECSMALL);
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL)
-  { /* scalar: INT or FRAC */
-    s = gsigne(x); if (!s) pari_err(talker,"zero element in zsigne");
-    return vec_setconst(V, (s < 0)? gen_1: gen_0);
+  switch(typ(x))
+  {
+    case t_INT:
+      s = signe(x); if (!s) pari_err(talker,"zero element in nfsign_arch");
+      avma = av; return const_vecsmall(n, (s < 0)? 1: 0);
+    case t_FRAC:
+      s = signe(gel(x,1));
+      avma = av; return const_vecsmall(n, (s < 0)? 1: 0);
   }
   x = Q_primpart(x); M = gmael(nf,5,1);
-  for (i = 1; i < l; i++)
-    gel(V,i) = (eval_sign(M, x, archp[i]) > 0)? gen_0: gen_1;
-  avma = av; return V;
+  for (i = 1; i <= n; i++) V[i] = (eval_sign(M, x, archp[i]) < 0)? 1: 0;
+  avma = (pari_sp)V; return V;
 }
 
-/* return the t_COL vector of signs of x; the matrix of such if x is a vector
+/* return the vector of signs of x; the matrix of such if x is a vector
  * of nf elements */
 GEN
-zsigns(GEN nf, GEN x)
+nfsign(GEN nf, GEN x)
 {
-  long r1, i, l;
+  long i, l;
   GEN arch, S;
 
-  nf = checknf(nf); r1 = nf_get_r1(nf);
-  arch = cgetg(r1+1, t_VECSMALL); for (i=1; i<=r1; i++) arch[i] = i;
-  if (typ(x) != t_VEC) return zsigne(nf, x, arch);
+  nf = checknf(nf);
+  arch = perm_identity( nf_get_r1(nf) );
+  if (typ(x) != t_VEC) return nfsign_arch(nf, x, arch);
   l = lg(x); S = cgetg(l, t_MAT);
-  for (i=1; i<l; i++) gel(S,i) = zsigne(nf, gel(x,i), arch);
+  for (i=1; i<l; i++) gel(S,i) = nfsign_arch(nf, gel(x,i), arch);
   return S;
 }
 
@@ -1076,11 +1069,11 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   if (nba == 1) return y;
 
   archp = arch_to_perm(gel(idele,2));
-  s = zsigne(nf, y, archp);
-  if (x) s = ZC_add(s, zsigne(nf, x, archp));
-  s = ZM_ZC_mul(gel(sarch,3), s);
+  s = nfsign_arch(nf, y, archp);
+  if (x) F2v_add_inplace(s, nfsign_arch(nf, x, archp));
+  s = F2m_F2c_mul(gel(sarch,3), s);
   for (i=1; i<nba; i++)
-    if (mpodd(gel(s,i))) y = element_mul(nf,y,gel(gen,i));
+    if (s[i]) y = element_mul(nf,y,gel(gen,i));
   return y;
 }
 
@@ -1293,7 +1286,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   gel(y,1) = mkvec(addis(powiu(p,f), -1));
   gel(y,2) = mkvec(g);
   gel(y,3) = mkvec(g0);
-  gel(y,4) = mkvec(zsigne(nf,g0,arch));
+  gel(y,4) = mkvec(nfsign_arch(nf,g0,arch));
   gel(y,5) = gen_1;
   prb = prh;
   for (a = b = 1; a < e; a = b)
@@ -1312,7 +1305,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     for (i = 1; i < l; i++)
     {
       if (x) gel(gen,i) = makeprimetoideal(x,u,v,gel(gen,i));
-      gel(s,i) = zsigne(nf,gel(gen,i),arch);
+      gel(s,i) = nfsign_arch(nf,gel(gen,i),arch);
     }
     y = cgetg(6,t_VEC); appendL(list, y);
     gel(y,1) = gel(z,1);
@@ -1373,7 +1366,10 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 	gel(a,1) = addis(gel(a,1), 1);
       }
       gel(gen,lgmat) = a;
-      if (lgmat++ == nba) return Flm_to_ZM( Flm_inv(mat,2) ); /* full rank */
+      if (lgmat++ == nba) {
+        mat = Flm_inv(mat,2); /* full rank */
+        settyp(mat, t_VEC); return mat;
+      }
       setlg(mat,lgmat+1);
     }
   }
@@ -1390,10 +1386,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
   archp = arch_to_perm(archp);
   nba = lg(archp) - 1;
   if (!nba)
-  {
-    cyc = gen = cgetg(1, t_VEC);
-    mat = cgetg(1, t_MAT);
-  }
+    cyc = gen = mat = cgetg(1, t_VEC);
   else
   {
     GEN xZ = gcoeff(x,1,1), gZ;
@@ -1403,7 +1396,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
     if (nba == 1)
     {
       gen = mkvec(gZ);
-      mat = scalarmat(gen_1,1);
+      mat = mkvec( mkvecsmall(1) );
     }
     else
     {
@@ -1449,7 +1442,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
       gel(++y,0) = negi(t); if (!signe(t)) continue;
 
-      if (mod2(t)) *psigne = *psigne? ZC_add(*psigne, gel(s,i)): gel(s,i);
+      if (mod2(t)) F2v_add_inplace(*psigne, gel(s,i));
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
     }
   }
@@ -1463,8 +1456,8 @@ zlog_add_sign(GEN y0, GEN sgn, GEN lists)
   long i;
   if (!sgn) return;
   y = y0 + lg(y0);
-  s = ZM_ZC_mul(gmael(lists, lg(lists)-1, 3), sgn);
-  for (i = lg(s)-1; i > 0; i--) gel(--y,0) = mpodd(gel(s,i))? gen_1: gen_0;
+  s = F2m_F2c_mul(gmael(lists, lg(lists)-1, 3), sgn);
+  for (i = lg(s)-1; i > 0; i--) gel(--y,0) = s[i]? gen_1: gen_0;
 }
 
 static GEN
@@ -1476,7 +1469,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
   long i, l;
 
   y0 = y = cgetg(lg(U), t_COL);
-  if (!sgn) sgn = zsigne(nf, to_famat(g,e), arch);
+  if (!sgn) sgn = nfsign_arch(nf, to_famat(g,e), arch);
   l = lg(vp);
   for (i=1; i < l; i++)
   {
@@ -1551,7 +1544,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
     kmin = 1; kmax = lg(S->P)-1;
     y = y0;
   }
-  if (!sgn) sgn = zsigne(nf, a, S->archp);
+  if (!sgn) sgn = nfsign_arch(nf, a, S->archp);
   for (k = kmin; k <= kmax; k++)
   {
     list= gel(S->lists,k);
@@ -1587,7 +1580,8 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
   }
   else
   {
-    GEN pr = gel(S->P,index), prk, g;
+    GEN prk, g, pr = gel(S->P,index);
+    long narchp = lg(S->archp)-1;
 
     if (e == 2)
       L = gel(L2,2);
@@ -1598,7 +1592,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     prk = idealpow(nf, pr, gel(S->e,index));
     for (i = 1; i < l; i++)
     {
-      GEN G = gel(g,i), sgn = NULL; /* positive at f_oo */
+      GEN G = gel(g,i), sgn = const_vecsmall(narchp,0); /*positive at f_oo*/
       y = zerocol(S->n);
       (void)zlog_pk(nf, G, y + yind, pr, prk, L2, &sgn);
       zlog_add_sign(y, sgn, S->lists);
@@ -1613,7 +1607,7 @@ GEN
 log_gen_arch(zlog_S *S, long index)
 {
   GEN y = zerocol(S->n);
-  zlog_add_sign(y, col_ei(lg(S->archp)-1, index), S->lists);
+  zlog_add_sign(y, vecsmall_ei(lg(S->archp)-1, index), S->lists);
   return RgM_RgC_mul(S->U, y);
 }
 
@@ -1704,7 +1698,8 @@ Idealstar(GEN nf, GEN ideal, long flag)
 	for (k=1; k<lg(G); k++)
 	{ /* log(g^f) mod idele */
 	  GEN g = gel(G,k), f = gel(F,k), a = element_powmodideal(nf,g,f,x);
-	  GEN sgn = mpodd(f)? zsigne(nf, g, S.archp): zerocol(lg(S.archp)-1);
+	  GEN sgn = mpodd(f)? nfsign_arch(nf, g, S.archp)
+                            : const_vecsmall(lg(S.archp)-1, 0);
 	  gel(h,++cp) = gneg(zlog_ind(nf, a, &S, sgn, i));
 	  coeff(h,cp,cp) = F[k];
 	}
@@ -1794,7 +1789,7 @@ vecmodii(GEN a, GEN b)
 
 /* Given x (not necessarily integral), and bid as output by zidealstarinit,
  * compute the vector of components on the generators bid[2].
- * Assume (x,bid) = 1 and sgn is either NULL or zsigne(x, bid) */
+ * Assume (x,bid) = 1 and sgn is either NULL or nfsign_arch(x, bid) */
 GEN
 zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
 {
@@ -1965,12 +1960,9 @@ zlog_units_noarch(GEN nf, GEN U, GEN bid)
 static GEN
 zlog_unitsarch(GEN sgnU, GEN bid)
 {
-  GEN U, liste = gel(bid,4), arch = gmael(bid,1,2);
-  long i;
-  U = ZM_ZC_mul(gmael(liste, lg(liste)-1, 3),
-	        rowpermute(sgnU, arch_to_perm(arch)));
-  for (i = 1; i < lg(U); i++) (void)F2V_red_ip(gel(U,i));
-  return U;
+  GEN lists = gel(bid,4), arch = gmael(bid,1,2);
+  return F2m_F2c_mul(gmael(lists, lg(lists)-1, 3),
+	             rowpermute(sgnU, arch_to_perm(arch)));
 }
 
 /*  flag & nf_GEN : generators, otherwise no
@@ -2131,7 +2123,7 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
     if (typ(z) != t_VEC) pari_err(typeer,"ideallistarch");
-    ID.sgnU = zsignunits(bnf, NULL, 1);
+    ID.sgnU = nfsign_units(bnf, NULL, 1);
     join_z = &join_archunit;
   } else
     join_z = &join_arch;

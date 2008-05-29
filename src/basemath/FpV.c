@@ -104,6 +104,19 @@ Flv_add_inplace(GEN x, GEN y, ulong p)
   long i, l = lg(x);
   for (i = 1; i < l; i++) x[i] = Fl_add(x[i], y[i], p);
 }
+void
+F2v_add_inplace(GEN x, GEN y)
+{
+  long i, l = lg(x);
+  for (i = 1; i < l; i++) x[i] ^= y[i];
+}
+ulong
+F2v_sum(GEN x)
+{
+  long i, l = lg(x), s = 0;
+  for (i = 1; i < l; i++) s ^= x[i];
+  return s;
+}
 
 GEN
 FpC_sub(GEN x, GEN y, GEN p)
@@ -241,6 +254,22 @@ Flmrow_Flc_mul(GEN x, GEN y, ulong p, long lx, long i)
   for (k = 2; k < lx; k++)
     c = Fl_add(c, Fl_mul(ucoeff(x,i,k), y[k], p), p);
   return c;
+}
+
+GEN
+F2m_F2c_mul(GEN x, GEN y)
+{
+  long j, l = lg(y);
+  GEN z = NULL;
+
+  if (l == 1) return cgetg(1, t_VECSMALL);
+  for (j=1; j<l; j++)
+  {
+    if (!y[j]) continue;
+    if (!z) z = Flv_copy(gel(x,j)); else F2v_add_inplace(z, gel(x,j));
+  }
+  if (!z) z = const_vecsmall(l-1, 0);
+  return z;
 }
 
 static GEN

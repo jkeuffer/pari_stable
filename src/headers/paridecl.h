@@ -189,6 +189,9 @@ GEN     gener_FpXQ(GEN T, GEN p, GEN *o);
 
 /* FpV.c */
 
+GEN     F2m_F2c_mul(GEN x, GEN y);
+ulong   F2v_sum(GEN x);
+void    F2v_add_inplace(GEN x, GEN y);
 GEN     Flc_Fl_div(GEN x, ulong y, ulong p);
 void    Flc_Fl_div_inplace(GEN x, ulong y, ulong p);
 GEN     Flc_Fl_mul(GEN x, ulong y, ulong p);
@@ -416,6 +419,7 @@ GEN     zx_to_ZX(GEN z);
 
 GEN     Flm_deplin(GEN x, ulong p);
 GEN     Flm_gauss(GEN a, GEN b, ulong p);
+GEN     Flm_image(GEN x, ulong p);
 GEN     Flm_indexrank(GEN x, ulong p);
 GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);
@@ -907,8 +911,8 @@ GEN     zidealstar(GEN nf, GEN x);
 GEN     zidealstarinit(GEN nf, GEN x);
 GEN     Idealstar(GEN nf, GEN x,long flun);
 GEN     zidealstarinitgen(GEN nf, GEN x);
-GEN     zsigne(GEN nf,GEN alpha,GEN arch);
-GEN     zsigns(GEN nf,GEN alpha);
+GEN     nfsign_arch(GEN nf,GEN alpha,GEN arch);
+GEN     nfsign(GEN nf,GEN alpha);
 
 /* base4.c */
 
@@ -1107,7 +1111,7 @@ GEN     isunit(GEN bignf, GEN x);
 GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
 GEN     smallbuchinit(GEN pol,double bach,double bach2,long nbrelpid,long prec);
-GEN     zsignunits(GEN bnf, GEN archp, int add_zu);
+GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
 

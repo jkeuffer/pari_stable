@@ -210,7 +210,6 @@ GEN qfgaussred_positive(GEN a);
 
 /* miscellaneous linear algebra */
 GEN  diagonal_i(GEN x);
-GEN  F2V_red_ip(GEN v);
 GEN  gauss_realimag(GEN x, GEN y);
 GEN  imagecomplspec(GEN x, long *nlze);
 void rowselect_p(GEN A, GEN B, GEN p, long init);

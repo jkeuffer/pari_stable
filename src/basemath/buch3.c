@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* Faster than Buchray (because it can use zsignunits: easier zarchstar) */
+/* Faster than Buchray (because it can use nfsign_units: easier zarchstar) */
 GEN
 buchnarrow(GEN bnf)
 {
@@ -36,7 +36,7 @@ buchnarrow(GEN bnf)
 
   cyc = gel(clgp,2);
   gen = gel(clgp,3);
-  v = FpM_image(zsignunits(bnf, NULL, 1), gen_2);
+  v = Flm_image(nfsign_units(bnf,NULL,1), 2);
   t = lg(v)-1;
   if (t == r1) { avma = av; return gcopy(clgp); }
 
@@ -44,7 +44,7 @@ buchnarrow(GEN bnf)
   p1 = cgetg(ngen+r1-t + 1,t_COL);
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
-  v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_to_Flm(v, 2), gen + (ngen - t));
+  v = archstar_full_rk(NULL, gmael(nf,5,1), v, gen + (ngen - t));
   v = rowslice(v, t+1, r1);
 
   logs = cgetg(ngen+1,t_MAT);
@@ -53,7 +53,7 @@ buchnarrow(GEN bnf)
   for (j=1; j<=ngen; j++)
   {
     GEN z = zsign_from_logarch(gel(GD,j), invpi, archp);
-    gel(logs,j) = F2V_red_ip( ZM_ZC_mul(v, z) );
+    gel(logs,j) = zc_to_ZC( F2m_F2c_mul(v, z) );
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */
@@ -352,7 +352,7 @@ get_dataunit(GEN bnf, GEN bid)
   GEN D, cyc = gmael(bid,2,2), U = init_units(bnf), nf = gel(bnf,7);
   long i, l;
   zlog_S S; init_zlog_bid(&S, bid);
-  D = zsignunits(bnf, S.archp, 1); l = lg(D);
+  D = nfsign_units(bnf, S.archp, 1); l = lg(D);
   for (i = 1; i < l; i++)
   {
     GEN v = zlog(nf, gel(U,i),gel(D,i), &S);
@@ -2087,7 +2087,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   fadkabs = Z_factor(absi(gel(nf,3)));
   h = gmael3(bnf,8,1,1);
   U = init_units(bnf);
-  sgnU = zsignunits(bnf, NULL, 1);
+  sgnU = nfsign_units(bnf, NULL, 1);
 
   if (allarch) arch = const_vec(r1, gen_1);
   bidp = Idealstar(nf, mkvec2(gen_1, arch), nf_INIT);

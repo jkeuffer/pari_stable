@@ -115,7 +115,6 @@ vecsmall_copy(GEN x)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_VECSMALL);
-  if (typ(x)!=t_VECSMALL) pari_err(typeer,"vecsmall_copy");
   for (i=1; i<l; i++) z[i] = x[i];
   return z;
 }

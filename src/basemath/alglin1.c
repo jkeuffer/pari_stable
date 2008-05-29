@@ -2464,6 +2464,27 @@ FpM_rank(GEN x, GEN p)
   return lg(x)-1 - r;
 }
 
+GEN
+Flm_image(GEN x, ulong p)
+{
+  pari_sp av = avma;
+  GEN d,y;
+  long j,k,r;
+
+  d = Flm_gauss_pivot(x,p,&r);
+
+  /* r = dim ker(x) */
+  if (!r) { avma = av; return gcopy(x); }
+
+  /* r = dim Im(x) */
+  r = lg(x)-1 - r; avma = (pari_sp)d; /* d left on stack */
+  y=cgetg(r+1,t_MAT);
+  for (j=k=1; j<=r; k++)
+    if (d[k]) gel(y,j++) = Flv_copy(gel(x,k));
+  return y;
+}
+
+
 long
 Flm_rank(GEN x, ulong p)
 {
