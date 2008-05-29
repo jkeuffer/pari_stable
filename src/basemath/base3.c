@@ -808,7 +808,7 @@ rnfbasistoalg(GEN rnf,GEN x)
     case t_VEC: case t_COL:
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
       for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
-      p1 = RgM_RgC_mul(gmael(rnf,7,1), p1);
+      p1 = RgV_RgC_mul(gmael(rnf,7,1), p1);
       return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
 
     case t_MAT:
@@ -2122,7 +2122,7 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   long i, j, l = lg(L), lz;
   GEN v, z, V;
   ideal_data ID;
-  GEN (*join_z)(ideal_data*, GEN) = &join_arch;
+  GEN (*join_z)(ideal_data*, GEN);
 
   if (typ(L) != t_VEC) pari_err(typeer, "ideallistarch");
   if (l == 1) return cgetg(1,t_VEC);
@@ -2131,9 +2131,10 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
     if (typ(z) != t_VEC) pari_err(typeer,"ideallistarch");
-    join_z = &join_archunit;
     ID.sgnU = zsignunits(bnf, NULL, 1);
-  }
+    join_z = &join_archunit;
+  } else
+    join_z = &join_arch;
   ID.nf = checknf(bnf);
   arch = arch_to_perm(arch);
   av = avma; V = cgetg(l, t_VEC);
