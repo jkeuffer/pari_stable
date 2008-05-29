@@ -1581,9 +1581,9 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
   if (e == 1)
   {
     L = gel(L2,1);
-    y = vec_ei(S->n, yind+1);
+    y = col_ei(S->n, yind+1);
     zlog_add_sign(y, gmael(L,4,1), S->lists);
-    return RgM_RgC_mul(S->U, y);
+    return mkmat( RgM_RgC_mul(S->U, y) );
   }
   else
   {
