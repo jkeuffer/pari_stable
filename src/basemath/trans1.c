@@ -1402,7 +1402,7 @@ mpexp_basecase(GEN x)
   if (signe(y) < 0) z = ginv(z);
   if (sh) {
     setexpo(z, expo(z)+sh);
-    if (lg(z) > l+1) z = rtor(z, l); /* spurious precision increase */
+    if (lg(z) > l) z = rtor(z, l); /* spurious precision increase */
   }
 #ifdef DEBUG
 {
