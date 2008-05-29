@@ -487,7 +487,7 @@ element_pow(GEN nf, GEN x, GEN n)
   x = primitive_part(x, &cx);
   y = leftright_pow(x, n, (void*)nf, _sqr, _mul);
   if (s < 0) y = element_inv(nf, y);
-  if (cx) y = gmul(y, powgi(cx, n));
+  if (cx) y = RgC_Rg_mul(y, powgi(cx, n));
   return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
@@ -808,7 +808,7 @@ rnfbasistoalg(GEN rnf,GEN x)
     case t_VEC: case t_COL:
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
       for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
-      p1 = gmul(gmael(rnf,7,1), p1);
+      p1 = RgM_RgC_mul(gmael(rnf,7,1), p1);
       return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
 
     case t_MAT:
@@ -1190,7 +1190,7 @@ zidealij(GEN x, GEN y, GEN *U)
     GEN c = gel(G,j);
     gel(c,1) = addsi(1, gel(c,1)); /* 1 + g_j */
   }
-  if (U) *U = gmul(*U, ginv(x));
+  if (U) *U = RgM_mul(*U, ginv(x));
   return mkvec2(cyc, G);
 }
 
@@ -1348,7 +1348,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
   for (i = 1; i < lgmat; i++) mat[i] = v[i];
   for (     ; i <= nba; i++)  gel(mat,i) = cgetg(nba+1, t_VECSMALL);
 
-  if (x) { x = ZM_lll(x, 0.75, LLL_INPLACE); bas = gmul(bas, x); }
+  if (x) { x = ZM_lll(x, 0.75, LLL_INPLACE); bas = RgV_RgM_mul(bas, x); }
 
   for (r=1;; r++)
   { /* reset */
@@ -1435,12 +1435,12 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     if (j == 1)
       e = mkcol( nf_log(nf, a, gel(gen,1), pr) );
     else if (typ(a) == t_INT)
-      e = gmul(subis(a, 1), gel(U,1));
+      e = RgC_Rg_mul(gel(U,1), subis(a, 1));
     else
     { /* t_COL */
       GEN t = gel(a,1);
       gel(a,1) = addsi(-1, gel(a,1)); /* a -= 1 */
-      e = gmul(U, a);
+      e = RgM_RgC_mul(U, a);
       gel(a,1) = t; /* restore */
     }
     /* here lg(e) == lg(cyc) */
@@ -1581,9 +1581,9 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
   if (e == 1)
   {
     L = gel(L2,1);
-    y = zerocol(S->n); gel(y, yind+1) = gen_1;
+    y = vec_ei(S->n, yind+1);
     zlog_add_sign(y, gmael(L,4,1), S->lists);
-    A = mkmat(y);
+    return RgM_RgC_mul(S->U, y);
   }
   else
   {
@@ -1594,8 +1594,7 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     else
       L = zidealij(idealpows(nf,pr,e-1), idealpows(nf,pr,e), NULL);
     g = gel(L,2);
-    l = lg(g);
-    A = cgetg(l, t_MAT);
+    l = lg(g); A = cgetg(l, t_MAT);
     prk = idealpow(nf, pr, gel(S->e,index));
     for (i = 1; i < l; i++)
     {
@@ -1605,8 +1604,8 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
       zlog_add_sign(y, sgn, S->lists);
       gel(A,i) = y;
     }
+    return RgM_mul(S->U, A);
   }
-  return gmul(S->U, A);
 }
 /* Log on bid.gen of generator of P_{1,f} / P_{1,f v[index]}
  * v = vector of r1 real places */
@@ -1615,7 +1614,7 @@ log_gen_arch(zlog_S *S, long index)
 {
   GEN y = zerocol(S->n);
   zlog_add_sign(y, col_ei(lg(S->archp)-1, index), S->lists);
-  return gmul(S->U, y);
+  return RgM_RgC_mul(S->U, y);
 }
 
 /* add [h,cyc] or [h,cyc,gen] to bid */

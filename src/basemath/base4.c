@@ -115,7 +115,7 @@ idealmat_to_hnf(GEN nf, GEN x)
   x = Q_primitive_part(x, &cx);
   if (nx < N) x = vec_mulid(nf, x, nx, N);
   x = ZM_hnfmod(x, ZM_detmult(x));
-  return cx? gmul(x,cx): x;
+  return cx? RgM_Rg_mul(x,cx): x;
 }
 
 GEN
@@ -148,7 +148,7 @@ idealhermite_aux(GEN nf, GEN x)
     if (nx < N) x = vec_mulid(nf, x, nx, N);
   }
   x = ZM_hnfmod(x, ZM_detmult(x));
-  return cx? gmul(x, cx): x;
+  return cx? RgM_Rg_mul(x, cx): x;
 }
 
 GEN
@@ -207,7 +207,7 @@ get_arch(GEN nf,GEN x,long prec)
   x = nf_to_scalar_or_basis(nf,x);
   RU = lg(nf[6]) - 1;
   if (typ(x) != t_COL) return zerovec(RU);
-  x = gmul(gmael(nf,5,1), Q_primpart(x));
+  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
   v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
   for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
   for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
@@ -229,7 +229,7 @@ famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   {
     a = get_arch_real(nf, gel(g,i), &t, prec);
     if (!a) return NULL;
-    a = gmul(gel(e,i), a);
+    a = RgC_Rg_mul(a, gel(e,i));
     t = vecpow(t, gel(e,i));
     if (i == 1) { A = a;          T = t; }
     else        { A = gadd(A, a); T = vecmul(T, t); }
@@ -280,7 +280,7 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
   RU = lg(nf[6])-1;
   R1 = nf_get_r1(nf);
   if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
-  x = gmul(gmael(nf,5,1), x);
+  x = RgM_RgC_mul(gmael(nf,5,1), x);
   v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++)
   {
@@ -496,8 +496,8 @@ mat_ideal_two_elt(GEN nf, GEN x)
   }
   a = centermod(a, xZ);
   tetpil = avma;
-  gel(y,1) = gmul(xZ,cx);
-  gel(y,2) = gmul(a, cx);
+  gel(y,1) = gmul(xZ, cx);
+  gel(y,2) = RgC_Rg_mul(a, cx);
   gerepilecoeffssp(av,tetpil,y+1,2); return y;
 }
 
@@ -945,7 +945,7 @@ idealmulprime(GEN nf, GEN x, GEN vp)
   GEN cx;
   x = Q_primitive_part(x, &cx);
   x = idealmulspec(nf,x,vp);
-  return cx? gmul(x,cx): x;
+  return cx? RgM_Rg_mul(x,cx): x;
 }
 
 static GEN
@@ -1025,7 +1025,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
     if (lg(x) == 1 || lg(y) == 1) return cgetg(1,t_MAT);
     y = idealmulh(nf,x,y);
   }
-  return cx? gmul(y,cx): y;
+  return cx? RgM_Rg_mul(y,cx): y;
 }
 
 /* operations on elements in factored form */
@@ -1314,8 +1314,8 @@ famat_to_arch(GEN nf, GEN fa, long prec)
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
     t = get_arch(nf,x,prec); if (gel(t,1) == gen_0) continue; /* rational */
-    t = gmul(t, gel(e,i));
-    y = y? gadd(y,t): t;
+    t = RgV_Rg_mul(t, gel(e,i));
+    y = y? RgV_add(y,t): t;
   }
   return y ? y: zerovec(lg(nf[6])-1);
 }
@@ -1436,7 +1436,7 @@ idealmul(GEN nf, GEN x, GEN y)
 	{
 	  GEN mx = eltmul_get_table(nf, x);
 	  GEN mpi= eltimul_get_table(nf, gel(y,2));
-	  p1 = shallowconcat(gmul(mx,gel(y,1)), gmul(mx,mpi));
+	  p1 = shallowconcat(RgM_Rg_mul(mx,gel(y,1)), RgM_mul(mx,mpi));
 	  p1 = idealmat_to_hnf(nf, p1);
 	  break;
 	}
@@ -1637,7 +1637,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
 
   /* inert, special cased for efficiency */
   if (itos(gel(vp,4)) == degpol(nf[1]))
-    return gmul(x, powgi(gel(vp,1), n));
+    return RgM_Rg_mul(x, powgi(gel(vp,1), n));
 
   y = idealpowprime_spec(nf, vp, n, &dx);
   x = Q_primitive_part(x, &cx);
@@ -1649,7 +1649,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
     if (is_pm1(cx)) cx = NULL;
   }
   x = idealmulspec(nf,x,y);
-  if (cx) x = gmul(x,cx);
+  if (cx) x = RgM_Rg_mul(x,cx);
   if (dx) x = RgM_Rg_div(x,dx);
   return x;
 }
@@ -1701,7 +1701,7 @@ idealpow(GEN nf, GEN x, GEN n)
 	m = eltimul_get_table(nf, alpha);
 	x = ZM_hnfmodid(m, powgi(a,n1));
 	if (s<0) x = hnfideal_inv(nf,x);
-	if (cx) x = gmul(x, powgi(cx,n));
+	if (cx) x = RgM_Rg_mul(x, powgi(cx,n));
     }
   x = gerepileupto(av, x);
   if (!ax) return x;
@@ -2029,7 +2029,7 @@ END:
       break;
 
     case t_COL:
-      if (y) y = vecinv(gmul(gmael(nf,5,1), y));
+      if (y) y = vecinv(RgM_RgC_mul(gmael(nf,5,1), y));
       break;
 
     default:
@@ -2056,8 +2056,8 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   if (tx != id_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
 
   vdir = chk_vdir(nf,vdir);
-  y = gmul(computeGtwist(nf,vdir), x);
-  y = gmul(x, gel(lll(y),1));
+  y = RgM_mul(computeGtwist(nf,vdir), x);
+  y = RgM_RgC_mul(x, gel(lll(y),1));
   return gerepileupto(av, principalidele(nf,y,prec));
 }
 
@@ -2251,7 +2251,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
   {
     z = Q_remove_denom(z, &d);
     d = diviiexact(d, coprime_part(d, F));
-    x = gmul(x, d);
+    x = RgM_Rg_mul(x, d);
   }
   else
     d = NULL;
@@ -2406,7 +2406,7 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
 
   b = mat_ideal_two_elt2(nf, x, a);
   b = centermod(b, gcoeff(x,1,1));
-  b = cx? gmul(b,cx): gcopy(b);
+  b = cx? RgC_Rg_mul(b,cx): gcopy(b);
   return gerepileupto(av, b);
 }
 
@@ -2917,7 +2917,7 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN D)
   long i;
   GEN c;
   D = ZM_lll(Q_primitive_part(D, &c), 0.75, LLL_INPLACE);
-  if (c) D = gmul(D,c);
+  if (c) D = RgM_Rg_mul(D,c);
   for (i=1; i<=lim; i++) gel(x,i) = element_reduce(nf, gel(x,i), D);
 }
 

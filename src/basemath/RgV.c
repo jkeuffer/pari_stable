@@ -347,6 +347,13 @@ RgC_Rg_mul(GEN x, GEN y) {
   return z;
 }
 GEN
+RgV_Rg_mul(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg(lx, t_VEC);
+  for (i=1; i<lx; i++) gel(z,i) = gmul(gel(x,i),y);
+  return z;
+}
+GEN
 RgM_Rg_div(GEN X, GEN c) {
   long i, j, h, l = lg(X);
   GEN A = cgetg(l, t_MAT);

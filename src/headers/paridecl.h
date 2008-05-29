@@ -254,6 +254,7 @@ GEN     RgM_zc_mul(GEN x, GEN y);
 GEN     RgM_zm_mul(GEN x, GEN y);
 GEN     RgV_RgM_mul(GEN x, GEN y);
 GEN     RgV_RgC_mul(GEN x, GEN y);
+GEN     RgV_Rg_mul(GEN x, GEN y);
 GEN     RgV_add(GEN x, GEN y);
 GEN     RgV_dotproduct(GEN x, GEN y);
 GEN     RgV_dotsquare(GEN x);
