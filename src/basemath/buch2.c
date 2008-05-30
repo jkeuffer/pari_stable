@@ -1677,7 +1677,7 @@ nfsign_units(GEN bnf, GEN archp, int add_zu)
   GEN y, A = gel(bnf,3), invpi = ginv( mppi(DEFAULTPREC) );
   long j = 1, RU = lg(A);
 
-  if (!archp) archp = perm_identity( nf_get_r1(gel(bnf,7)) );
+  if (!archp) archp = identity_perm( nf_get_r1(gel(bnf,7)) );
   if (add_zu) { RU++; A--; }
   y = cgetg(RU,t_MAT);
   if (add_zu)

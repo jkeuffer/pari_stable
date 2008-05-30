@@ -959,34 +959,30 @@ eval_sign(GEN M, GEN x, long k)
 }
 
 GEN
-arch_to_perm(GEN arch)
+vec01_to_indices(GEN v)
 {
   long i, k, l;
-  GEN perm;
+  GEN p;
 
-  if (!arch) return cgetg(1, t_VECSMALL);
-  switch (typ(arch))
+  switch (typ(v))
   {
-   case t_VECSMALL: return arch;
+   case t_VECSMALL: return v;
    case t_VEC: break;
-   default: pari_err(typeer,"arch_to_perm");
+   default: pari_err(typeer,"vec01_to_indices");
   }
-  l = lg(arch);
-  perm = cgetg(l, t_VECSMALL);
-  for (k=1, i=1; i < l; i++)
-    if (signe(arch[i])) perm[k++] = i;
-  setlg(perm, k); return perm;
+  l = lg(v);
+  p = new_chunk(l) + l;
+  for (k=1, i=l-1; i; i--)
+    if (signe(v[i])) { *--p = i; k++; }
+  *--p = evallg(k) | evaltyp(t_VECSMALL);
+  avma = (pari_sp)p; return p;
 }
 GEN
-perm_to_arch(GEN nf, GEN archp)
+indices_to_vec01(GEN p, long r)
 {
-  long i, l;
-  GEN v;
-  if (typ(archp) == t_VEC) return archp;
-
-  l = lg(archp); nf = checknf(nf);
-  v = zerovec( nf_get_r1(nf) );
-  for (i = 1; i < l; i++) gel(v, archp[i]) = gen_1;
+  long i, l = lg(p);
+  GEN v = zerovec(r);
+  for (i = 1; i < l; i++) gel(v, p[i]) = gen_1;
   return v;
 }
 
@@ -994,7 +990,7 @@ perm_to_arch(GEN nf, GEN archp)
 GEN
 nfsign_arch(GEN nf,GEN x,GEN arch)
 {
-  GEN M, V, archp = arch_to_perm(arch);
+  GEN M, V, archp = vec01_to_indices(arch);
   long i, s, n = lg(archp)-1;
   pari_sp av;
 
@@ -1033,7 +1029,7 @@ nfsign(GEN nf, GEN x)
   GEN arch, S;
 
   nf = checknf(nf);
-  arch = perm_identity( nf_get_r1(nf) );
+  arch = identity_perm( nf_get_r1(nf) );
   if (typ(x) != t_VEC) return nfsign_arch(nf, x, arch);
   l = lg(x); S = cgetg(l, t_MAT);
   for (i=1; i<l; i++) gel(S,i) = nfsign_arch(nf, gel(x,i), arch);
@@ -1068,7 +1064,7 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   gen = gel(sarch,2); nba = lg(gen);
   if (nba == 1) return y;
 
-  archp = arch_to_perm(gel(idele,2));
+  archp = vec01_to_indices(gel(idele,2));
   s = nfsign_arch(nf, y, archp);
   if (x) F2v_add_inplace(s, nfsign_arch(nf, x, archp));
   s = F2m_F2c_mul(gel(sarch,3), s);
@@ -1383,7 +1379,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
   long nba;
   GEN cyc, gen, mat;
 
-  archp = arch_to_perm(archp);
+  archp = vec01_to_indices(archp);
   nba = lg(archp) - 1;
   if (!nba)
     cyc = gen = mat = cgetg(1, t_VEC);
@@ -1506,7 +1502,7 @@ init_zlog(zlog_S *S, long n, GEN P, GEN e, GEN arch, GEN lists, GEN U)
   S->U = U;
   S->P = P;
   S->e = e;
-  S->archp = arch_to_perm(arch);
+  S->archp = vec01_to_indices(arch);
   S->lists = lists;
   S->ind = get_index(lists);
 }
@@ -1651,7 +1647,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
     i = typ(arch);
     if (!is_vec_t(i) || lg(arch) != R1+1)
       pari_err(talker,"incorrect archimedean component in Idealstar");
-    archp = arch_to_perm(arch);
+    archp = vec01_to_indices(arch);
   }
   else
   {
@@ -1962,7 +1958,7 @@ zlog_unitsarch(GEN sgnU, GEN bid)
 {
   GEN lists = gel(bid,4), arch = gmael(bid,1,2);
   return F2m_F2c_mul(gmael(lists, lg(lists)-1, 3),
-	             rowpermute(sgnU, arch_to_perm(arch)));
+	             rowpermute(sgnU, vec01_to_indices(arch)));
 }
 
 /*  flag & nf_GEN : generators, otherwise no
@@ -2128,7 +2124,7 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   } else
     join_z = &join_arch;
   ID.nf = checknf(bnf);
-  arch = arch_to_perm(arch);
+  arch = vec01_to_indices(arch);
   av = avma; V = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {

@@ -661,7 +661,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   T     = gmael(nf, 5, 4);
   cond  = gmael(bnr, 2, 1);
   cond0 = gel(cond,1); condZ = gcoeff(cond0,1,1);
-  cond1 = arch_to_perm(gel(cond,2));
+  cond1 = vec01_to_indices(gel(cond,2));
   N     = degpol(nf[1]);
 
   sqrtnc  = gsqrt(idealnorm(nf, cond0), prec);

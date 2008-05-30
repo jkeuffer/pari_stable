@@ -1629,7 +1629,7 @@ zetap(GEN s)
      to the twisted partial zeta function Z_f(a, c, s) for a in va */
   /* The line below looks a bit stupid but it is to keep the
      possibility of later adding p-adic Dirichlet L-functions */
-  va = perm_identity(f - 1);
+  va = identity_perm(f - 1);
   if (DEBUGLEVEL > 1)
     fprintferr("zetap: computing values of twisted partial zeta functions\n");
   val = twistpartialzeta(gp, q, f, c, va, cff);

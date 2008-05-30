@@ -197,7 +197,6 @@ JD 12- add an optional argument to quit()
    lllintpartial_inplace, reducemodlll, reducemodinvertible, closemodinvertible,
    RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
    RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, ZM_max_lg
-
    17- universal constant gen_m2, for symmetry
    18- GP function version() [ current version number ]
    19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
@@ -231,6 +230,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        group_rightcoset, group_perm_normalize, group_quotient, quotient_perm,
        quotient_group, quotient_subgroup_lift, group_subgroups,
        groupelts_abelian_group, groupelts_center, group_export, group_ident
+   28- library functions identity_perm, cyclic_perm, perm_mul, perm_commute,
+       perm_inv, perm_pow, cyc_pow_perm, cyc_pow, perm_cycles, perm_order,
+       vecperm_orbits
 
   Removed
     1- obsolete library functions extract and matextract

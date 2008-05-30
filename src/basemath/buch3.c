@@ -49,7 +49,7 @@ buchnarrow(GEN bnf)
 
   logs = cgetg(ngen+1,t_MAT);
   GD = gmael(bnf,9,3); invpi = ginv( mppi(DEFAULTPREC) );
-  archp = perm_identity(r1);
+  archp = identity_perm(r1);
   for (j=1; j<=ngen; j++)
   {
     GEN z = zsign_from_logarch(gel(GD,j), invpi, archp);
@@ -1379,7 +1379,7 @@ conductor(GEN bnr, GEN H0, long all)
     setlg(archp, j);
   }
   ideal = iscond0? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
-  mod = mkvec2(ideal, perm_to_arch(nf, archp));
+  mod = mkvec2(ideal, indices_to_vec01(archp, nf_get_r1(nf)));
   if (!all) return gerepilecopy(av, mod);
 
   if (iscond0 && iscondinf)

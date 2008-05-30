@@ -794,7 +794,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   {
     avma = avm;
     pari_warn(warner,"Combinatorics too hard : would need %Zs tests!\n I'll skip it but you will get a partial result...",NN);
-    return perm_identity(n);
+    return identity_perm(n);
   }
   N2 = itos(NQ);
   for (l2 = 0; l2 <= N2; l2++)
@@ -1299,7 +1299,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   ar = cgetg(n+1, t_VEC);
   for (i = 1; i <= n; i++) gel(ar,i) = cgeti(1 + lg(td->ladic));
   mt = gel(td->PV, td->order[n]);
-  t = perm_identity(n) + 1; /* Sorry for this hack */
+  t = identity_perm(n) + 1; /* Sorry for this hack */
   u = cgetg(n+1, t_VECSMALL) + 1; /* too lazy to correct */
   MT = cgetg(n+1, t_MAT);
   for (j = 1; j <= n; j++) gel(MT,j) = cgetg(n+1, t_COL);
@@ -1578,7 +1578,7 @@ s4galoisgen(struct galois_lift *gl)
   gel(res,1)= mkvec4(r1,r2,r3,r4);
   gel(res,2) = mkvecsmall4(2,2,3,2);
   ltop2 = avma;
-  sg = perm_identity(6);
+  sg = identity_perm(6);
   pj = const_vecsmall(6, 0);
   sigma = cgetg(n+1, t_VECSMALL);
   tau = cgetg(n+1, t_VECSMALL);
@@ -1799,7 +1799,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   for(k=lg(Fp)-1;k>=1;k--)
   {
     pari_sp btop=avma;
-    GEN psi=NULL, fres=NULL, sg = perm_identity(1);
+    GEN psi=NULL, fres=NULL, sg = identity_perm(1);
     long el=gf->fp, dg=1, dgf=1, e, pr;
     for(e=1; e<=Fe[k]; e++)
     {
@@ -2098,7 +2098,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj: G[%d]=%Zs of relative order %d\n", j, gj, oj);
     B = perm_cycles(gmael(PG,1,j));
-    pf = perm_identity(n);
+    pf = identity_perm(n);
     for (k=lg(Fp)-1; k>=1; k--)
     {
       long f, dg = 1, el = oj, osel = 1, a = 0;

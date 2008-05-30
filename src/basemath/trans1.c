@@ -326,7 +326,7 @@ puiss0(GEN x)
       return y;
     case t_QFR: return qfr_unit(x);
     case t_QFI: return qfi_unit(x);
-    case t_VECSMALL: return perm_identity(lg(x) - 1);
+    case t_VECSMALL: return identity_perm(lg(x) - 1);
   }
   pari_err(typeer,"gpow");
   return NULL; /* not reached */
