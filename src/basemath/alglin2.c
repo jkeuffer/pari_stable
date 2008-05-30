@@ -2555,11 +2555,9 @@ ZM_hnflll(GEN A, GEN *ptB, int remove)
 GEN
 hnflll(GEN x)
 {
-  GEN U, z = cgetg(3, t_VEC);
-  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
-  RgM_check_ZM(x, "mathnf0");
-  gel(z,1) = ZM_hnflll(x, &U, 0);
-  gel(z,2) = U; return z;
+  GEN z = cgetg(3, t_VEC);
+  gel(z,1) = ZM_hnflll(x, &gel(z,2), 0);
+  return z;
 }
 
 /* Variation on HNFLLL: Extended GCD */
@@ -2639,7 +2637,7 @@ extendedgcd(GEN A)
 
 /* HNF with permutation. */
 GEN
-hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
+ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm)
 {
   GEN U, c, l, perm, d, p, q, b;
   pari_sp av = avma, av1, lim;
@@ -2744,8 +2742,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       else
 	u[t++] = U[j];
     *ptU = u;
-    *ptperm = perm;
-    gerepileall(av, 3, &p, ptU, ptperm);
+    if (ptperm) *ptperm = perm;
+    gerepileall(av, ptperm? 3: 2, &p, ptU, ptperm);
   }
   else
   {
@@ -2760,10 +2758,9 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
 GEN
 hnfperm(GEN A)
 {
-  GEN U, perm, y = cgetg(4, t_VEC);
-  gel(y,1) = hnfperm_i(A, &U, &perm);
-  gel(y,2) = U;
-  gel(y,3) = vecsmall_to_vec(perm); return y;
+  GEN y = cgetg(4, t_VEC);
+  gel(y,1) = ZM_hnfperm(A, &gel(y,2), &gel(y,3));
+  return y;
 }
 
 /* Hermite Normal Form, with base change matrix if ptB != NULL.
@@ -2857,8 +2854,6 @@ GEN
 hnfall(GEN x)
 {
   GEN z = cgetg(3, t_VEC);
-  if (typ(x)!=t_MAT) pari_err(typeer,"mathnf0");
-  RgM_check_ZM(x, "hnfall");
   gel(z,1) = ZM_hnfall(x, (GEN*)(z+2), 1);
   return z;
 }
@@ -2996,12 +2991,12 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
 	  *ptV = gauss(x,p1);
 	}
 	else
-	  p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
+	  p1 = ZM_hnfperm(x, ptV, ptU? &perm: NULL);
       }
       mdet = ZM_det_triangular(p1);
     }
     else
-      p1 = hnfperm_i(x, ptV, ptU? &perm: NULL);
+      p1 = ZM_hnfperm(x, ptV, ptU? &perm: NULL);
     x = p1;
   }
   n = lg(x)-1;

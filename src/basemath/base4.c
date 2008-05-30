@@ -895,7 +895,7 @@ idealaddmultoone(GEN nf, GEN list)
     }
     gel(L,i) = I; z = shallowconcat(z, I);
   }
-  H = hnfperm_i(z, &U, &perm);
+  H = ZM_hnfperm(z, &U, &perm);
   if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
     pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)

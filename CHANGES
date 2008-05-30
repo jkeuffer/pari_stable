@@ -187,7 +187,7 @@ JD 12- add an optional argument to quit()
    RgX_check_ZX, RgX_check_ZXY, RgX_pseudodivrem, RgX_pseudorem, RgX_reverse,
    ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
    ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid, ZM_hnfmodidpart,
-   ZM_hnfrem, ZM_hnfremdiv, ZM_max_lg, ZM_snf, ZM_snfall, ZM_snfall_i,
+   ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall, ZM_snfall_i,
    ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,
@@ -196,7 +196,7 @@ JD 12- add an optional argument to quit()
    zx_renormalize, zv_content, ZM_lll, ZM_lll_norms, lllfp, lllintpartial,
    lllintpartial_inplace, reducemodlll, reducemodinvertible, closemodinvertible,
    RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
-   RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub
+   RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, ZM_max_lg
 
    17- universal constant gen_m2, for symmetry
    18- GP function version() [ current version number ]

@@ -5697,6 +5697,15 @@ This routine uses a naive algorithm which is potentially exponential in the
 dimension but is fast in practice, although it may require lots of memory;
 the base change matrix $U$ may be very large (when the kernel is large).
 
+\fun{GEN}{ZM_hnfperm}{GEN A, GEN *ptU, GEN *ptperm} returns the hnf 
+$H = P A U$ of the matrix $P A$, where $P$ is a suitable permutation matrix,
+and $U\in \text{Gl}_n(\Z)$. $P$ is chosen so as to (heuristically) minimize the
+size of $U$; in this respect it is less efficient than \kbd{ZM_hnflll}
+but usually faster. Set \kbd{*ptU} to $U$ and \kbd{*pterm} to a \typ{VECSMALL}
+representing the row permutation associated to $P = (\delta_{i,\kbd{perm}[i]}$.
+If \kbd{ptU} is set to \kbd{NULL}, $U$ is not computed, saving some time;
+although useless, setting \kbd{ptperm} to \kbd{NULL} is also allowed.
+
 \fun{GEN}{ZM_hnflll}{GEN x, GEN *U, int remove} returns the HNF $H$ of the
 \kbd{ZM} $x$; if $U$ is not \kbd{NULL}, set if to the matrix $U$ such that $x
 U = H$. The meaning of \kbd{remove} is the same as in \tet{ZM_hnfall}.
@@ -5743,13 +5752,15 @@ Normally useless in library mode.
 \fun{GEN}{hnfmodid}{GEN x,GEN d} checks whether $x$ is a \kbd{ZM}, then calls
 \tet{ZM_hnfmodid}. Normally useless in library mode.
 
-\fun{GEN}{hnfall}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
+\fun{GEN}{hnfall}{GEN x} calls
 \kbd{ZM\_hnfall(x, \&U, 1)} and returns $[H, U]$. Normally useless in library
 mode.
 
-\fun{GEN}{hnflll}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
-\kbd{ZM\_hnflll(x, \&U, 1)} and returns $[H, U]$. Normally useless in library
-mode.
+\fun{GEN}{hnflll}{GEN x} calls \kbd{ZM\_hnflll(x, \&U, 1)} and returns $[H,
+U]$. Normally useless in library mode.
+
+\fun{GEN}{hnfperm}{GEN x} calls \kbd{ZM\_perm(x, \&U, \&P)} and returns $[H, U,
+P]$. Normally useless in library mode.
 
 \fun{GEN}{smith}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
 \kbd{ZM\_smith}. Normally useless in library mode.
