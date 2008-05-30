@@ -1340,7 +1340,7 @@ conductor(GEN bnr, GEN H0, long all)
   pari_sp av = avma;
   long j, k, l;
   GEN bnf, nf, bid, ideal, archp, clhray, bnr2, e2, e, mod, H;
-  int iscond = 1;
+  int iscond0 = 1, iscondinf = 1;
   zlog_S S;
 
   if (all > 0) checkbnrgen(bnr); else checkbnr(bnr);
@@ -1359,7 +1359,7 @@ conductor(GEN bnr, GEN H0, long all)
     {
       if (!contains(H, bnr_log_gen_pr(bnr, &S, nf, j, k))) break;
       if (all < 0) { avma = av; return gen_0; }
-      iscond = 0;
+      iscond0 = 0;
     }
     gel(e2,k) = stoi(j);
   }
@@ -1369,17 +1369,20 @@ conductor(GEN bnr, GEN H0, long all)
     if (!contains(H, bnr_log_gen_arch(bnr, &S, k))) continue;
     if (all < 0) { avma = av; return gen_0; }
     archp[k] = 0;
-    iscond = 0;
+    iscondinf = 0;
   }
   if (all < 0) { avma = av; return gen_1; }
-  for (j = k = 1; k < l; k++)
-    if (archp[k]) archp[j++] = archp[k];
-  setlg(archp, j);
-  ideal = ZV_equal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
+  if (!iscondinf)
+  {
+    for (j = k = 1; k < l; k++)
+      if (archp[k]) archp[j++] = archp[k];
+    setlg(archp, j);
+  }
+  ideal = iscond0? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   mod = mkvec2(ideal, perm_to_arch(nf, archp));
   if (!all) return gerepilecopy(av, mod);
 
-  if (iscond)
+  if (iscond0 && iscondinf)
   {
     bnr2 = bnr;
     if (!H) H = diagonal_i(gmael(bnr,5,2));

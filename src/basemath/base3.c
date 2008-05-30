@@ -1513,9 +1513,9 @@ init_zlog(zlog_S *S, long n, GEN P, GEN e, GEN arch, GEN lists, GEN U)
 void
 init_zlog_bid(zlog_S *S, GEN bid)
 {
-  GEN ideal = gel(bid,1), fa = gel(bid,3), fa2 = gel(bid,4), U = gel(bid,5);
-  GEN arch = (typ(ideal)==t_VEC && lg(ideal)==3)? gel(ideal,2): NULL;
-  init_zlog(S, lg(U)-1, gel(fa,1), gel(fa,2), arch, fa2, U);
+  GEN ideal = gel(bid,1), fa = gel(bid,3), lists = gel(bid,4), U = gel(bid,5);
+  GEN arch = gel(ideal,2);
+  init_zlog(S, lg(U)-1, gel(fa,1), gel(fa,2), arch, lists, U);
 }
 
 /* Return decomposition of a on the S->nf successive generators contained in
@@ -1700,8 +1700,8 @@ Idealstar(GEN nf, GEN ideal, long flag)
 	  GEN g = gel(G,k), f = gel(F,k), a = element_powmodideal(nf,g,f,x);
 	  GEN sgn = mpodd(f)? nfsign_arch(nf, g, S.archp)
                             : const_vecsmall(lg(S.archp)-1, 0);
-	  gel(h,++cp) = gneg(zlog_ind(nf, a, &S, sgn, i));
-	  coeff(h,cp,cp) = F[k];
+	  gel(h,++cp) = ZC_neg(zlog_ind(nf, a, &S, sgn, i));
+	  gcoeff(h,cp,cp) = f;
 	}
       }
     }
