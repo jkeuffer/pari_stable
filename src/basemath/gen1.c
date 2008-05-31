@@ -250,7 +250,7 @@ gred_rfrac_simple(GEN n, GEN d)
   }
   z = cgetg(3,t_RFRAC);
   gel(z,1) = gmul(n, cn);
-  gel(z,2) = gmul(d, cd); return z;
+  gel(z,2) = RgX_Rg_mul(d, cd); return z;
 }
 
 static GEN
@@ -277,21 +277,24 @@ static GEN
 gred_rfrac2_i(GEN n, GEN d)
 {
   GEN y, z;
-  long tn, td, v;
+  long td, tn, v, vd, vn;
 
   n = simplify_i(n);
   if (isrationalzero(n)) return gcopy(n);
   d = simplify_i(d);
   td = typ(d);
-  if (td!=t_POL || varncmp(varn(d), gvar(n)) > 0) return gdiv(n,d);
+  if (td != t_POL) return gdiv(n,d);
   tn = typ(n);
-  if (tn!=t_POL)
+  vd = varn(d);
+  if (tn != t_POL)
   {
-    if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
+    if (varncmp(vd, gvar(n)) >= 0) return gdiv(n,d);
+    if (varncmp(vd, gvar2(n)) < 0) return gred_rfrac_simple(n,d);
     pari_err(talker,"incompatible variables in gred");
   }
-  if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
-  if (varncmp(varn(d), varn(n)) > 0) return RgX_Rg_div(n,d);
+  vn = varn(n);
+  if (varncmp(vd, vn) < 0) return gred_rfrac_simple(n,d);
+  if (varncmp(vd, vn) > 0) return RgX_Rg_div(n,d);
 
   /* now n and d are t_POLs in the same variable */
   v = polvaluation(n, &n) - polvaluation(d, &d);
@@ -632,36 +635,36 @@ add_rfrac(GEN x, GEN y)
   if (!degpol(delta))
   {
     n = simplify_i( gadd(gmul(x1,y2), gmul(y1,x2)) );
-    d = gmul(x2, y2);
+    d = RgX_mul(x2, y2);
     return gerepileupto(av, gred_rfrac_simple(n, d));
   }
-  x2 = gdeuc(x2,delta);
-  y2 = gdeuc(y2,delta);
+  x2 = RgX_div(x2,delta);
+  y2 = RgX_div(y2,delta);
   n = gadd(gmul(x1,y2), gmul(y1,x2));
   if (!signe(n))
   {
     n = simplify_i(n);
     if (isrationalzero(n)) return gerepileupto(av, n);
-    return gerepilecopy(av, mkrfrac(n, gmul(gel(x,2),y2)));
+    return gerepilecopy(av, mkrfrac(n, RgX_mul(gel(x,2),y2)));
   }
   if (degpol(n) == 0)
-    return gerepileupto(av, gred_rfrac_simple(gel(n,2), gmul(gel(x,2),y2)));
+    return gerepileupto(av, gred_rfrac_simple(gel(n,2), RgX_mul(gel(x,2),y2)));
   p1 = RgX_divrem(n, delta, &r); /* we want gcd(n,delta) */
   if (isexactzero(r))
   {
-    d = gmul(x2, y2);
+    d = RgX_mul(x2, y2);
     /* "constant" denominator ? */
-    z = lg(d) == 3? gdiv(p1, gel(d,2)): gred_rfrac_simple(p1, d);
+    z = lg(d) == 3? RgX_Rg_div(p1, gel(d,2)): gred_rfrac_simple(p1, d);
     return gerepileupto(av, z);
   }
   p1 = srgcd(delta, r);
   if (degpol(p1))
   {
-    n = gdeuc(n,p1);
-    d = gmul(gmul(x2,y2), gdeuc(delta, p1));
+    n = RgX_div(n,p1);
+    d = RgX_mul(RgX_mul(x2,y2), RgX_div(delta, p1));
   }
   else
-    d = gmul(gel(x,2), y2);
+    d = RgX_mul(gel(x,2), y2);
   return gerepileupto(av, gred_rfrac_simple(n, d));
 }
 
@@ -900,9 +903,9 @@ gadd(GEN x, GEN y)
 
 	av = avma;
 	/* take advantage of y = t^n ! */
-	if (degpol(d)) {
+	if (degpol(d))
 	  y = gdiv(n, greffe(d,l,1));
-	} else {
+	else {
 	  y = gdiv(n, gel(d,2));
 	  if (gvar(y) == vy) y = greffe(y,l,1); else y = scalarser(y, vy, l);
 	}
@@ -2170,7 +2173,7 @@ gdiv(GEN x, GEN y)
 
     case t_MAT:
       av = avma;
-      return gerepileupto(av, gmul(x, invmat(y)));
+      return gerepileupto(av, RgM_mul(x, invmat(y)));
 
     default: pari_err(operf,"/",x,y);
   }
@@ -2639,7 +2642,7 @@ gdivgs(GEN x, long s)
       {
 	z = cgetg(3, t_RFRAC);
 	gel(z,1) = gdiv(gel(x,1), p1);
-	gel(z,2) = gmul(gel(x,2), gdivsg(s,p1));
+	gel(z,2) = RgX_Rg_mul(gel(x,2), gdivsg(s,p1));
 	z = gerepilecopy(av, z);
       }
       return z;
