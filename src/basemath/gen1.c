@@ -297,7 +297,7 @@ gred_rfrac2_i(GEN n, GEN d)
   if (varncmp(vd, vn) > 0) return RgX_Rg_div(n,d);
 
   /* now n and d are t_POLs in the same variable */
-  v = polvaluation(n, &n) - polvaluation(d, &d);
+  v = RgX_valrem(n, &n) - RgX_valrem(d, &d);
   if (!degpol(d))
   {
     n = RgX_Rg_div(n,gel(d,2));
@@ -880,7 +880,7 @@ gadd(GEN x, GEN y)
       {
 	case t_SER:
 	  if (lg(x) == 2) return gcopy(y);
-	  i = lg(y) + valp(y) - polvaluation(x, NULL);
+	  i = lg(y) + valp(y) - RgX_val(x);
 	  if (i < 3) return gcopy(y);
 
 	  p1 = greffe(x,i,0); y = gadd(p1,y);
@@ -896,7 +896,7 @@ gadd(GEN x, GEN y)
 	GEN n, d;
 	long vn, vd;
 	n = gel(y,1); vn = gval(n, vy);
-	d = gel(y,2); vd = polvaluation(d, &d);
+	d = gel(y,2); vd = RgX_valrem(d, &d);
 
 	l = lg(x) + valp(x) - (vn - vd);
 	if (l < 3) return gcopy(x);
@@ -1692,9 +1692,9 @@ gmul(GEN x, GEN y)
 	{
 	  long vn;
 	  if (lg(x) == 2) return zeropol(vx);
-	  if (lg(y) == 2) return zeroser(vx, valp(y)+polvaluation(x,NULL));
+	  if (lg(y) == 2) return zeroser(vx, valp(y)+RgX_val(x));
 	  av = avma;
-	  vn = polvaluation(x, &x);
+	  vn = RgX_valrem(x, &x);
 	  avma = av;
 	  /* take advantage of x = t^n ! */
 	  if (degpol(x)) {
@@ -2418,7 +2418,7 @@ gdiv(GEN x, GEN y)
       {
 	case t_SER:
 	  if (lg(y) == 2)
-	    return zeroser(vx, polvaluation(x,NULL) - valp(y));
+	    return zeroser(vx, RgX_val(x) - valp(y));
 	  p1 = greffe(x,lg(y),0);
 	  p2 = div_ser(p1, y, vx);
 	  pari_free(p1); return p2;
@@ -2439,7 +2439,7 @@ gdiv(GEN x, GEN y)
       {
 	case t_POL:
 	  if (lg(x) == 2)
-	    return zeroser(vx, valp(x) - polvaluation(y,NULL));
+	    return zeroser(vx, valp(x) - RgX_val(y));
 	  p1 = greffe(y,lg(x),0);
 	  p2 = div_ser(x, p1, vx);
 	  pari_free(p1); return p2;

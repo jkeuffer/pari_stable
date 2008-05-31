@@ -633,7 +633,7 @@ logmax_modulus(GEN p, double tau)
     bit = (long) ((double)k * log2(1./tau2) +
 		     (double)(nn-k)*log2(1./eps) + 3*log2((double)nn)) + 1;
     homothetie_gauss(q, e, bit-(long)floor(dbllog2(gel(q,2+nn))+0.5));
-    nn -= polvaluation(q, &q);
+    nn -= RgX_valrem(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(av, graeffe(q));
     tau2 *= 1.5; if (tau2 > 0.9) tau2 = 0.5;
@@ -683,7 +683,7 @@ logmodulus(GEN p, long k, double tau)
   for (i=1; i<imax; i++)
   {
     q = eval_rel_pol(q,bit);
-    kk -= polvaluation(q, &q);
+    kk -= RgX_valrem(q, &q);
     nn = degpol(q);
 
     set_karasquare_limit(bit);
@@ -766,7 +766,7 @@ dual_modulus(GEN p, double lrho, double tau, long l)
   for (i=0; i<imax; i++)
   {
     q = eval_rel_pol(q,bit); v2 = n - degpol(q);
-    v = polvaluation(q, &q);
+    v = RgX_valrem(q, &q);
     ll -= max(v, v2); if (ll < 0) ll = 0;
 
     nn = degpol(q); delta_k += v;
@@ -1911,7 +1911,7 @@ static GEN
 roots_com(GEN q, long bit)
 {
   GEN L, p;
-  long v = polvaluation_inexact(q, &p);
+  long v = RgX_valrem_inexact(q, &p);
   if (lg(p) == 3) L = cgetg(1,t_VEC); /* constant polynomial */
   else L = isexactpol(p)? solve_exact_pol(p,bit): all_roots(p,bit);
   if (v)
@@ -2106,7 +2106,7 @@ rootsold(GEN x, long prec)
     } else if (ti != t_INT && ti != t_FRAC) real = 0;
   }
   av1 = avma;
-  k = polvaluation_inexact(x, &pax);
+  k = RgX_valrem_inexact(x, &pax);
   for (i = 1; i <= k; i++) gaffsg(0,gel(y,i));
   if (k == deg0) return y;
 

@@ -1503,7 +1503,7 @@ ZX_squff(GEN f, GEN *ex)
   long i, k, dW, n, val;
 
   if (signe(leading_term(f)) < 0) f = gneg_i(f);
-  val = ZX_valuation(f, &f);
+  val = ZX_valrem(f, &f);
   n = 1 + degpol(f); if (val) n++;
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
@@ -1583,7 +1583,7 @@ nfrootsQ(GEN x)
 
   if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
   if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
-  val = ZX_valuation(Q_primpart(x), &x);
+  val = ZX_valrem(Q_primpart(x), &x);
   (void)ZX_gcd_all(x, ZX_deriv(x), &x);
   z = DDF(x, 1);
   if (val) z = shallowconcat(z, gen_0);
@@ -2473,7 +2473,7 @@ zero_gcd(GEN x, long tx)
       if (!isinexact(x)) break;
       av = avma;
       return gerepileupto(av,
-	monomialcopy(content(x), polvaluation(x,NULL), varn(x))
+	monomialcopy(content(x), RgX_val(x), varn(x))
       );
 
     case t_RFRAC:
@@ -3260,7 +3260,7 @@ gdivexact(GEN x, GEN y)
 	case t_POL: { /* not stack-clean */
           long v;
 	  if (varn(x)!=varn(y)) break;
-          v = polvaluation(y,&y);
+          v = RgX_valrem(y,&y);
           if (v) x = RgX_shift_shallow(x,-v);
           if (!degpol(y)) { y = gel(y,2); break; }
           return RgX_divrem(x,y, NULL);

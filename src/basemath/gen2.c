@@ -236,9 +236,9 @@ greffe(GEN x, long l, long use_stack)
   if (typ(x)!=t_POL) pari_err(notpoler,"greffe");
   if (l <= 2) pari_err(talker, "l <= 2 in greffe");
 
-  /* optimed version of polvaluation + normalize */
+  /* optimed version of RgX_valrem + normalize */
   i = 2; while (i<lx && isexactzero(gel(x,i))) i++;
-  i -= 2; /* = polvaluation(x, NULL) */
+  i -= 2; /* = RgX_val(x) */
 
   if (use_stack) y = cgetg(l,t_SER);
   else
@@ -743,36 +743,6 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
-long
-polvaluation(GEN x, GEN *Z)
-{
-  long vx;
-  if (lg(x) == 2) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
-  for (vx = 0;; vx++)
-    if (!isexactzero(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift_shallow(x, -vx);
-  return vx;
-}
-long
-ZX_valuation(GEN x, GEN *Z)
-{
-  long vx;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
-  for (vx = 0;; vx++)
-    if (signe(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift_shallow(x, -vx);
-  return vx;
-}
-long
-polvaluation_inexact(GEN x, GEN *Z)
-{
-  long vx;
-  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
-  for (vx = 0;; vx++)
-    if (!gcmp0(gel(x,2+vx))) break;
-  if (Z) *Z = RgX_shift_shallow(x, -vx);
-  return vx;
-}
 static int
 intdvd(GEN x, GEN y, GEN *z) {
   GEN r, q = dvmdii(x,y,&r);
@@ -843,7 +813,7 @@ ggval(GEN x, GEN p)
 	vx = varn(x);
 	if (vp == vx)
 	{
-	  if (ismonome(p)) return polvaluation(x, NULL) / degpol(p);
+	  if (ismonome(p)) return RgX_val(x) / degpol(p);
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {
@@ -868,7 +838,7 @@ ggval(GEN x, GEN p)
       vp = gvar(p);
       vx = varn(x);
       if (vp == vx) {
-	vp = polvaluation(p, NULL);
+	vp = RgX_val(p);
 	if (!vp) pari_err(talker, "forbidden divisor %Zs in ggval", p);
 	return (long)(valp(x) / vp);
       }

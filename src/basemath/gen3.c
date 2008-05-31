@@ -1644,7 +1644,7 @@ ggrando(GEN x, long n)
   case t_POL:
     if (!signe(x)) pari_err(talker,"zero argument in O()");
     v = varn(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");
-    m = n * polvaluation(x, NULL); break;
+    m = n * RgX_val(x); break;
   case t_RFRAC:
     if (!gcmp0(gel(x,1))) pari_err(talker,"zero argument in O()");
     v = gvar(x); if ((ulong)v > MAXVARN) pari_err(talker,"incorrect object in O()");

@@ -3756,6 +3756,18 @@ and $\kbd{x} \bs t^{-n}$ otherwise.
 \fun{GEN}{RgX_shift_shallow}{GEN x, long n} as \kbd{RgX\_shift}, but
 shallow (coefficients are not copied).
 
+\fun{long}{RgX_valrem}{GEN P, GEN *pz} returns the valuation $v$ of the
+\typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
+coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz}, set it to 
+$\kbd{RgX\_shift\_shallow}(P,-v)$.
+
+\fun{long}{RgX_val}{GEN P} returns the valuation $v$ of the
+\typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
+coefficients are $0$ using \kbd{gcmp0}.
+
+\fun{long}{RgX_valrem_inexact}{GEN P, GEN *z} as \kbd{RgX\_valrem}
+but use \kbd{isexactzero} instead of \kbd{gcmp0}.
+
 \fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
 its main variable.
 
@@ -4269,21 +4281,16 @@ $\kbd{p}^e$ divides~\kbd{x}, when this makes sense.
 \fun{long}{gval}{GEN x, long v} returns the highest power of the variable
 number \kbd{v} dividing the \typ{POL}~\kbd{x}.
 
-\fun{long}{polvaluation}{GEN P, GEN *z} returns the valuation $v$ of the
-\typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
-coefficients are $0$ using \kbd{gcmp0}. If \kbd{z} is non-\kbd{NULL}, set it
-to $\kbd{P} / X^v$.
-
-\fun{long}{polvaluation_inexact}{GEN P, GEN *z} as \kbd{polvaluation}
-but use \kbd{isexactzero} instead of \kbd{gcmp0}.
-
 \fun{long}{poldeflate}{GEN P, long *d} sets \kbd{d} to the largest exponent
 such that $P$ is of the form $P(x^d)$ (use \kbd{gcmp0} to check
 coefficients), $0$ if $P$ is the zero polynomial. Returns
 \kbd{RgX\_deflate(P,d)}.
 
-\fun{long}{ZX_valuation}{GEN P, GEN *z} as \kbd{polvaluation}, but assumes
+\fun{long}{ZX_valrem}{GEN P, GEN *z} as \kbd{RgX\_valrem}, but assumes
 \kbd{P} has \typ{INT} coefficients.
+
+\fun{long}{ZX_val}{GEN P} as \kbd{RgX\_val}, but assumes \kbd{P} has \typ{INT}
+coefficients.
 
 \subsec{Comparison operators}
 

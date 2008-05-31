@@ -3744,7 +3744,7 @@ static GEN
 ratroot(GEN p)
 {
   GEN L, a, ld;
-  long i, t, v = ZX_valuation(p, &p);
+  long i, t, v = ZX_valrem(p, &p);
 
   if (v == 3) return inf();
   if (v == 2) return mkvec2(gen_0, gmul2n(negi(gel(p,2)), -2));

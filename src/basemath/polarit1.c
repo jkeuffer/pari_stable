@@ -281,7 +281,7 @@ FpX_roots_i(GEN f, GEN p)
   long n, j, da, db;
   GEN y, pol, pol0, a, b, q = shifti(p,-1);
 
-  n = ZX_valuation(f, &f)? 1: 0;
+  n = ZX_valrem(f, &f)? 1: 0;
   y = cgetg(lg(f), t_COL);
   j = 1;
   if (n) {
@@ -347,7 +347,7 @@ FpX_oneroot_i(GEN f, GEN p)
   long da, db;
   GEN pol, pol0, a, b, q = shifti(p,-1);
 
-  if (ZX_valuation(f, NULL)) return gen_0;
+  if (ZX_val(f)) return gen_0;
   da = degpol(f);
   if (da == 1) return subii(p, gel(f,2));
   if (da == 2) return FpX_quad_root(f, p, 1);
@@ -1262,7 +1262,7 @@ FpX_factor_i(GEN f, GEN pp)
 
   /* to hold factors and exponents */
   t = (GEN*)cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
-  val = ZX_valuation(f, &f);
+  val = ZX_valrem(f, &f);
   e = nbfact = 1;
   if (val) { t[1] = pol_x(varn(f)); E[1] = val; nbfact++; }
 

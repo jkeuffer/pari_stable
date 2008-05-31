@@ -485,12 +485,42 @@ RgX_mulXn(GEN x, long d)
   long v;
   if (d >= 0) return RgX_shift(x, d);
   d = -d;
-  v = polvaluation(x, NULL);
+  v = RgX_val(x);
   if (v >= d) return RgX_shift(x, -d);
   av = avma;
   z = gred_rfrac_simple( RgX_shift(x, -v),
 			 monomial(gen_1, d - v, varn(x)));
   return gerepileupto(av, z);
+}
+
+long
+RgX_val(GEN x)
+{
+  long v;
+  if (lg(x) == 2) return LONG_MAX;
+  for (v = 0;; v++)
+    if (!isexactzero(gel(x,2+v))) break;
+  return v;
+}
+long
+RgX_valrem(GEN x, GEN *Z)
+{
+  long v;
+  if (lg(x) == 2) { *Z = zeropol(varn(x)); return LONG_MAX; }
+  for (v = 0;; v++)
+    if (!isexactzero(gel(x,2+v))) break;
+  *Z = RgX_shift_shallow(x, -v);
+  return v;
+}
+long
+RgX_valrem_inexact(GEN x, GEN *Z)
+{
+  long v;
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return LONG_MAX; }
+  for (v = 0;; v++)
+    if (!gcmp0(gel(x,2+v))) break;
+  if (Z) *Z = RgX_shift_shallow(x, -v);
+  return v;
 }
 
 GEN

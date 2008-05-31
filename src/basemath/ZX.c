@@ -262,3 +262,23 @@ ZX_equal(GEN V, GEN W)
     if (!equalii(gel(V,i), gel(W,i))) return 0;
   return 1;
 }
+
+long
+ZX_val(GEN x)
+{
+  long vx;
+  if (!signe(x)) return LONG_MAX;
+  for (vx = 0;; vx++)
+    if (signe(gel(x,2+vx))) break;
+  return vx;
+}
+long
+ZX_valrem(GEN x, GEN *Z)
+{
+  long vx;
+  if (!signe(x)) { *Z = zeropol(varn(x)); return LONG_MAX; }
+  for (vx = 0;; vx++)
+    if (signe(gel(x,2+vx))) break;
+  *Z = RgX_shift_shallow(x, -vx);
+  return vx;
+}

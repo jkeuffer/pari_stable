@@ -450,7 +450,7 @@ polissquareall(GEN x, GEN *pt)
   if (pt) *pt = gen_0;
   if (l&1) return 0; /* odd degree */
   av = avma;
-  v = polvaluation(x, &x);
+  v = RgX_valrem(x, &x);
   if (v) {
     l = degpol(x);
     if (l&1) return 0;
@@ -716,7 +716,7 @@ polispower(GEN x, GEN K, GEN *pt)
 
   if (!signe(x)) return 1;
   if (l % k) return 0; /* degree not multiple of k */
-  v = polvaluation(x, &x);
+  v = RgX_valrem(x, &x);
   if (v % k) return 0;
   av2 = avma; a = gel(x,2); b = NULL;
   if (!ispower(a, K, &b)) { avma = av2; return 0; }
