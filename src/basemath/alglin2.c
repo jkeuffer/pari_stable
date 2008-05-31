@@ -1094,11 +1094,11 @@ matrixqz0(GEN x,GEN p)
 }
 
 GEN
-matrixqz(GEN x, GEN p)
+matrixqz(GEN x, GEN D)
 {
   pari_sp av = avma, av1, lim;
   long i,j,j1,m,n,nfact;
-  GEN P, p1, p2;
+  GEN P, p1;
 
   if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   n = lg(x)-1; if (!n) return gcopy(x);
@@ -1106,8 +1106,8 @@ matrixqz(GEN x, GEN p)
   if (n > m) pari_err(talker,"need more rows than columns in matrixqz");
   if (n==m)
   {
-    p1 = det(x);
-    if (gcmp0(p1)) pari_err(talker,"matrix of non-maximal rank in matrixqz");
+    D = det(x);
+    if (gcmp0(D)) pari_err(talker,"matrix of non-maximal rank in matrixqz");
     avma = av; return matid(n);
   }
   /* m > n */
@@ -1119,23 +1119,18 @@ matrixqz(GEN x, GEN p)
   }
   /* x integral */
 
-  if (!p || gcmp0(p))
+  if (!D || gcmp0(D))
   {
     pari_sp av2 = avma;
-    p1 = shallowtrans(x); setlg(p1,n+1);
-    p2 = det(p1); p1[n] = p1[n+1]; p2 = gcdii(p2,det(p1));
-    if (!signe(p2)) p2 = ZM_detmult(x);
-    if (gcmp1(p2)) { avma = av2; return ZM_copy(x); }
+    D = ZM_detmult(shallowtrans(x));
+    if (gcmp1(D)) { avma = av2; return ZM_copy(x); }
   }
-  else
-    p2 = p;
-  P = gel(Z_factor(p2),1);
+  P = gel(Z_factor(D),1);
   nfact = lg(P)-1;
   av1 = avma; lim = stack_lim(av1,1);
   for (i=1; i<=nfact; i++)
   {
-    GEN pov2;
-    p = gel(P,i); pov2 = shifti(p, -1);
+    GEN p = gel(P,i), pov2 = shifti(p, -1);
     for(;;)
     {
       GEN N, M = FpM_ker(x, p);
