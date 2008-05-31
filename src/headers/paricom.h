@@ -280,6 +280,8 @@ enum manage_var_t {
 #define lgpol(a) ((long)lg(a)-2)
 
 #define odd(x) ((x) & 1)
+#define both_odd(x,y) ((x)&(y)&1)
+
 #define mpodd(x) (signe(x) && mod2(x))
 
 #define ONLY_REM ((GEN*)0x1L)

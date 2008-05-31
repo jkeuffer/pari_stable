@@ -32,9 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
    signe(x) is not valid. Use degpol(x)>=0 instead.
 */
-
-#define both_odd(x,y) ((x)&(y)&1)
-
 /***********************************************************************/
 /**                                                                   **/
 /**          Conversion from Flx                                      **/

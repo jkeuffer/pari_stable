@@ -34,9 +34,6 @@ typedef ulong *uGEN;
 #define pdswap(x,y) { double* _t=x; x=y; y=_t; }
 #define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 
-/* */
-#define both_odd(x,y) ((x)&(y)&1)
-
 /* FIXME: obsolete */
 GEN Mod0(GEN x, GEN y,long flag);
 
