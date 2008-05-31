@@ -181,6 +181,7 @@ JD 12- add an optional argument to quit()
        'resultant', 'partition', 'aurifeuille'
    16- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,
    Flc_Fl_mul_inplace, Flm_Fl_mul, Flm_Fl_mul_inplace, Flm_copy, Flm_mul,
+   Flm_inage,
    Flv_Fl_mul_inplace, Flv_add, Flv_add_inplace, Flv_copy, Flv_dotproduct,
    Flv_sub, Flv_sub_inplace, Fp_mulu, FpV_inv, FpXQ_inv, FqV_inv, RgM_check_ZM,
    RgM_det_trianguar, RgM_isdiagonal, RgV_check_ZV, RgXQX_pseudorem,
