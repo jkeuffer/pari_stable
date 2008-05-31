@@ -2732,7 +2732,7 @@ nfsmith(GEN nf, GEN x)
 
 	  b = idealdiv(nf,gel(I,k),gel(I,i));
 	  p2 = idealdiv(nf,gel(J,i), idealmulelt(nf,p1,gel(J,l)));
-	  p3 = gauss(p2, b);
+	  p3 = gauss_intern(p2, b);
 	  l=1; while (l<=N && gcmp1(denom(gel(p3,l)))) l++;
 	  if (l>N) pari_err(talker,"bug2 in nfsmith");
 	  p1 = element_mulvecrow(nf,gel(b,l),A,k,i);

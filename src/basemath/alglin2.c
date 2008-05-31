@@ -2988,7 +2988,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
 	if (m == n)
 	{
 	  p1 = ZM_hnfmod(x,mdet);
-	  *ptV = gauss(x,p1);
+	  *ptV = gauss_intern(x,p1);
 	}
 	else
 	  p1 = ZM_hnfperm(x, ptV, ptU? &perm: NULL);
@@ -3039,7 +3039,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
   if (V) V = vecpermute(V, p1);
 
   p1 = ZM_hnfmod(x, mdet);
-  if (V) V = ZM_mul(V, gauss(x,p1));
+  if (V) V = ZM_mul(V, gauss_intern(x,p1));
   x = p1;
 
   if (DEBUGLEVEL>7) fprintferr("starting SNF loop");

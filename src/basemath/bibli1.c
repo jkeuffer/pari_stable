@@ -842,7 +842,7 @@ lindep(GEN x, long prec)
     }
   }
   p1 = cgetg(lx,t_COL); gel(p1,n) = gen_1; for (i=1; i<n; i++) gel(p1,i) = gen_0;
-  return gerepileupto(av, gauss(shallowtrans((GEN)b),p1));
+  return gerepileupto(av, gauss_intern(shallowtrans((GEN)b),p1));
 }
 
 /* PSLQ Programs */
