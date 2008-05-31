@@ -1968,7 +1968,7 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
   if (nbgen)
   {
     GEN u1u2 = matsnf0(diagonal_i(shallowconcat(cyc1,cyc2)), 1|4); /* all && clean */
-    cyc = mattodiagonal_i( gel(u1u2,3) );
+    cyc = RgM_diagonal_shallow( gel(u1u2,3) );
     U = gel(u1u2,1);
     U = shallowconcat(
       l1==1   ? zeromat(nbgen, lg(U1)-1): ZM_mul(vecslice(U, 1,   l1-1), U1),

@@ -3031,7 +3031,7 @@ ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec)
   if (U) U = matid(n);
 
   /* square, maximal rank n */
-  p1 = gen_indexsort(mattodiagonal_i(x), NULL, &negcmpii);
+  p1 = gen_indexsort(RgM_diagonal_shallow(x), NULL, &negcmpii);
   ys = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) gel(ys,j) = vecpermute(gel(x, p1[j]), p1);
   x = ys;
@@ -3120,7 +3120,7 @@ THEEND:
   if (return_vec)
   {
     long l = lg(x)-1;
-    if (typ(x) == t_MAT) x = mattodiagonal_i(x);
+    if (typ(x) == t_MAT) x = RgM_diagonal_shallow(x);
     if (m0 > l) x = shallowconcat(zerovec(m0-l), x);
   }
 
@@ -3346,7 +3346,7 @@ gsmithall_i(GEN x,long all)
       }
     }
   }
-  z = all? mkvec3(shallowtrans(U), V, x): mattodiagonal_i(x);
+  z = all? mkvec3(shallowtrans(U), V, x): RgM_diagonal_shallow(x);
   return gerepilecopy(av, z);
 }
 
@@ -3483,7 +3483,7 @@ matfrobenius(GEN M, long flag, long v)
   }
   if (flag>2) pari_err(flagerr,"matfrobenius");
   A = matsnf0(M_x,3);
-  D = smithclean(mattodiagonal_i(gel(A,3)));
+  D = smithclean(RgM_diagonal_shallow(gel(A,3)));
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, RgM_mul(B,gel(A,1)));

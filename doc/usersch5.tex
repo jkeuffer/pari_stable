@@ -3445,6 +3445,10 @@ a column matrix $n\times 1$, error otherwise.
 \fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
 
+\fun{GEN}{RgM_diagonal}{GEN m} returns the diagonal of $m$ as a \typ{VEC}.
+
+\fun{GEN}{RgM_diagonal_shallow}{GEN m} shallow version of \kbd{RgM\_diagonal}
+
 \fun{GEN}{gram_matrix}{GEN v} returns the \idx{Gram matrix} $(v_i\cdot v_j)$
 associated to the entries of $v$ (matrix or vector).
 

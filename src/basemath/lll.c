@@ -451,7 +451,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   }
 
   if (DEBUGLEVEL>=4) msgTIMER(&T,"LLL");
-  if (ptrr) *ptrr = mattodiagonal_i(r);
+  if (ptrr) *ptrr = RgM_diagonal_shallow(r);
   if (U && flag & (LLL_IM|LLL_KER|LLL_ALL)) U = lll_finish(U, zeros, flag);
   if (gram)
   {

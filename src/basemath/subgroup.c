@@ -431,7 +431,7 @@ subgroup_engine(subgp_iter *T)
   if (typ(cyc) != t_VEC)
   {
     if (typ(cyc) != t_MAT) pari_err(typeer,"forsubgroup");
-    cyc = mattodiagonal_i(cyc);
+    cyc = RgM_diagonal_shallow(cyc);
   }
   for (i=1; i<n-1; i++)
     if (!dvdii(gel(cyc,i), gel(cyc,i+1)))
@@ -525,7 +525,7 @@ get_snf(GEN x, long *N)
   {
     case t_MAT:
       if (!RgM_isdiagonal(x)) return NULL;
-      cyc = mattodiagonal_i(x); break;
+      cyc = RgM_diagonal_shallow(x); break;
     case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = gel(x,2);
     case t_COL: cyc = shallowcopy(x); break;
     default: return NULL;

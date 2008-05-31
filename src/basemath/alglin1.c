@@ -621,7 +621,7 @@ matmultodiagonal(GEN A, GEN B)
 
 /* [m[1,1], ..., m[l,l]], internal */
 GEN
-mattodiagonal_i(GEN m)
+RgM_diagonal_shallow(GEN m)
 {
   long i, lx = lg(m);
   GEN y = cgetg(lx,t_VEC);
@@ -631,12 +631,12 @@ mattodiagonal_i(GEN m)
 
 /* same, public function */
 GEN
-mattodiagonal(GEN m)
+RgM_diagonal(GEN m)
 {
   long i, lx = lg(m);
   GEN y = cgetg(lx,t_VEC);
 
-  if (typ(m)!=t_MAT) pari_err(typeer,"mattodiagonal");
+  if (typ(m)!=t_MAT) pari_err(typeer,"RgM_diagonal");
   for (i=1; i<lx; i++) gel(y,i) = gcopy(gcoeff(m,i,i));
   return y;
 }

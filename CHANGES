@@ -207,14 +207,19 @@ JD 12- add an optional argument to quit()
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
    20- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
-   numberofconjugates, mkquad, mkvecsmall4, shallowconcat1, concat1, ZV_prod,
-   zv_prod RgX_neg, RgX_add, RgX_sub, RgV_neg, RgV_add, RgV_sub,
-   RgC_neg, RgC_add, RgC_sub, RgM_neg, RgM_add, RgM_sub,
-   FF_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub, ZC_lincomb1_inplace, ZC_z_mul
-   Z_isanypower, RgX_equal, RgX_equal_var, RgX_translate, RgXQX_translate
-   RgXQV_to_mod, RgXQXV_to_mod, RgX_to_nfX, RgX_type, RgX_type_decode,
-   RgX_type_is_composite, RgX_Rg_divexact, RgC_Rg_div, RgC_Rg_mul, RgM_Rg_div,
-   RgM_Rg_mul, RgV_Rg_mul
+   numberofconjugates, mkquad, mkvecsmall4, shallowconcat1, concat1,
+   ZV_prod,
+   zv_prod
+   RgX_neg, RgX_add, RgX_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub,
+   RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX, RgX_type,
+   RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
+   RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul
+   RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
+   RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,
+   RgM_diagonal_shallow,
+   FF_sub, ZC_lincomb1_inplace, ZC_z_mul
+   Z_isanypower,
+   RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod,
    21- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
    22- library function roundr_safe
 BA 23- [ellap] Port of SEA algorithm from the ellsea GP package
