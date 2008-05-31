@@ -3777,6 +3777,9 @@ but use \kbd{isexactzero} instead of \kbd{gcmp0}.
 \fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
 its main variable.
 
+\fun{GEN}{RgX_disc}{GEN x} returns the discriminant of the \typ{POL} \kbd{x}
+with respect to its main variable.
+
 \fun{GEN}{RgX_modXn_shallow}{GEN x, long n} return $\kbd{x \% } t^n$,
 where $n\geq 0$. Shallow function.
 
@@ -4782,9 +4785,6 @@ the coefficient of the term of degree \kbd{n} in the main variable.
 
 \fun{long}{degree}{GEN x} returns \kbd{poldegree(x, -1)}, the degree of
 \kbd{x} with respect to its main variable.
-
-\fun{GEN}{RgX_disc}{GEN x} returns the discriminant
-of the \typ{POL} \kbd{x} with respect to its main variable.
 
 \fun{GEN}{quad_disc}{GEN x} returns the discriminant of the \typ{QUAD}
 \kbd{x}.
