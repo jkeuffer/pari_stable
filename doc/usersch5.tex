@@ -763,7 +763,7 @@ of an \kbd{ulong}~\kbd{p} protected from overflows could read
  }
 @eprog\noindent
 For most architectures, the functions mentioned below are really chunks of
-inlined assembler code, and the above 'global' variables are actually
+inlined assembler code, and the above `global' variables are actually
 local register values.
 
 \fun{ulong}{addll}{ulong x, ulong y} adds \kbd{x} and \kbd{y}, returns the
@@ -806,7 +806,10 @@ representing classes modulo $m$ are assumed to belong to $[0,m-1]$. The
 result may be wrong for a number of reasons otherwise: it may not be reduced,
 overflow can occur, etc.
 
-\fun{in}{odd}{ulong x} returns 1 if $x$ is odd, and 0 otherwise.
+\fun{int}{odd}{ulong x} returns 1 if $x$ is odd, and 0 otherwise.
+
+\fun{int}{both_odd}{ulong x, ulong y} returns 1 if $x$ and $y$ are both odd,
+and 0 otherwise.
 
 \fun{ulong}{Fl_add}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
@@ -885,7 +888,7 @@ $p$ could be computed as follows.
       ulong s = 0, pp = itou(p);
       x = ZV_to_Flv(x, pp);
       y = ZV_to_Flv(y, pp);
-      if (u_SMALL_ULONG(pp))
+      if (SMALL_ULONG(pp))
       { /* very small */
         for (i = 1; i < l; i++)
         {
@@ -1283,6 +1286,11 @@ functions {\tt void \op sz(long,GEN)}, {\tt void \op iz(GEN,GEN)} and
 \smallskip
 
 \subsec{Comparison operators}
+
+\fun{int}{min}{long a, long b}
+
+\fun{int}{max}{long a, long b} These two functions are implemented as macros
+and evaluate twice each of their arguments.
 
 \fun{int}{mpcmp}{GEN x, GEN y} compares the \typ{INT} or \typ{REAL}~\kbd{x}
 to the \typ{INT} or \typ{REAL}~\kbd{y}. The result is the sign of
