@@ -160,6 +160,7 @@ BA 49- user variables can now be aliased [#790].
        faster)
    51- rename polvaluation -> RgX_valrem(x, pz) and no longer accept pz = NULL
        (use RgX_val). Same for ZX_valuation -> ZX_valrem [ & ZX_val ]
+       rename poldeflate -> RgX_deflate_max
 
   Added
     1- library function gpcalloc

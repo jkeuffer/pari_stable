@@ -1827,7 +1827,7 @@ all_roots(GEN p, long bit)
   long bit0,  bit2, n = degpol(p), i, e, h;
   pari_sp av;
 
-  pd = poldeflate(p, &h); lc = leading_term(pd);
+  pd = RgX_deflate_max(p, &h); lc = leading_term(pd);
   e = (long)((2/LOG2) * cauchy_bound(pd)); if (e < 0) e = 0;
   bit0 = bit + gexpo(pd) - gexpo(lc) + (long)log2(n/h)+1+e;
   bit2 = bit0; e = 0;

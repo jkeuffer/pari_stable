@@ -2024,7 +2024,7 @@ GEN     leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN), GEN 
 GEN     leftright_pow_u_fold(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
 GEN     newtonpoly(GEN x, GEN p);
 GEN     nfrootsQ(GEN x);
-GEN     poldeflate(GEN x0, long *m);
+GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     poldisc0(GEN x, long v);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 GEN     polresultant0(GEN x, GEN y,long v,long flag);

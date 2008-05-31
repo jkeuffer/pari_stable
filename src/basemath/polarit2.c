@@ -1457,7 +1457,7 @@ gdeflate(GEN x, long v, long d)
 
 /* set *m to the largest d such that x0 = A(X^d); return A */
 GEN
-poldeflate(GEN x, long *m)
+RgX_deflate_max(GEN x, long *m)
 {
   *m = checkdeflate(x);
   return RgX_deflate(x, *m);
@@ -1470,7 +1470,7 @@ ZX_DDF(GEN x)
 {
   GEN L;
   long m;
-  x = poldeflate(x, &m);
+  x = RgX_deflate_max(x, &m);
   L = DDF(x, 0);
   if (m > 1)
   {
