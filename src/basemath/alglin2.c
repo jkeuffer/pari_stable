@@ -1085,11 +1085,12 @@ jacobi(GEN a, long prec)
 GEN
 matrixqz0(GEN x,GEN p)
 {
+  if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   if (!p) return matrixqz(x,NULL);
-  if (typ(p)!=t_INT) pari_err(typeer,"matrixqz0");
+  if (typ(p) != t_INT) pari_err(typeer,"matrixqz");
   if (signe(p)>=0) return matrixqz(x,p);
-  if (equaliu(p,1)) return matrixqz2(x);
-  if (equaliu(p,2)) return matrixqz3(x);
+  if (equaliu(p,1)) return matrixqz2(x); /* p = -1 */
+  if (equaliu(p,2)) return matrixqz3(x); /* p = -2 */
   pari_err(flagerr,"matrixqz"); return NULL; /* not reached */
 }
 
@@ -1097,10 +1098,9 @@ GEN
 matrixqz(GEN x, GEN D)
 {
   pari_sp av = avma, av1, lim;
-  long i,j,j1,m,n,nfact;
-  GEN P, p1;
+  long i, j, m, n, lP;
+  GEN P, y;
 
-  if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
   n = lg(x)-1; if (!n) return gcopy(x);
   m = lg(x[1])-1;
   if (n > m) pari_err(talker,"need more rows than columns in matrixqz");
@@ -1111,46 +1111,46 @@ matrixqz(GEN x, GEN D)
     avma = av; return matid(n);
   }
   /* m > n */
-  p1 = x; x = cgetg(n+1,t_MAT);
+  y = x; x = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    gel(x,j) = Q_primpart(gel(p1,j));
+    gel(x,j) = Q_primpart(gel(y,j));
     RgV_check_ZV(gel(x,j), "matrixqz");
   }
-  /* x integral */
 
+  /* x now a ZM */
   if (!D || gcmp0(D))
   {
     pari_sp av2 = avma;
     D = ZM_detmult(shallowtrans(x));
-    if (gcmp1(D)) { avma = av2; return ZM_copy(x); }
+    if (is_pm1(D)) { avma = av2; return ZM_copy(x); }
   }
-  P = gel(Z_factor(D),1);
-  nfact = lg(P)-1;
+  P = gel(Z_factor(D), 1); lP = lg(P);
   av1 = avma; lim = stack_lim(av1,1);
-  for (i=1; i<=nfact; i++)
+  for (i=1; i < lP; i++)
   {
     GEN p = gel(P,i), pov2 = shifti(p, -1);
     for(;;)
     {
       GEN N, M = FpM_ker(x, p);
-      if (lg(M)==1) break;
+      long lM = lg(M);
+      if (lM==1) break;
 
       M = FpM_center(M, p, pov2);
       N = gdivexact(ZM_mul(x,M), p);
-      for (j=1; j<lg(M); j++)
+      for (j=1; j<lM; j++)
       {
-	j1=n; while (!signe(gcoeff(M,j1,j))) j1--;
-	gel(x,j1) = gel(N,j);
+	long k = n; while (!signe(gcoeff(M,k,j))) k--;
+	gel(x,k) = gel(N,j);
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"matrixqz");
-	x = gerepilecopy(av1,x);
+	if (DEBUGMEM>1) pari_warn(warnmem,"matrixqz, prime p = %Zs", p);
+	x = gerepilecopy(av1, x);
       }
     }
   }
-  return gerepilecopy(av,x);
+  return gerepilecopy(av, x);
 }
 
 static GEN
@@ -1197,15 +1197,15 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
   /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
   { /* ak | aj */
-    p1 = negi(diviiexact(aj,ak));
-    gel(A,j) = RgC_lincomb(gen_1, p1, gel(A,j), gel(A,k));
+    GEN c = negi(diviiexact(aj,ak));
+    gel(A,j) = RgC_lincomb(gen_1, c, gel(A,j), gel(A,k));
     return;
   }
   if (!signe(v))
   { /* aj | ak */
-    p1 = negi(diviiexact(ak,aj));
-    gel(A,k) = RgC_lincomb(gen_1, p1, gel(A,k), gel(A,j));
-    lswap(A[j], A[k]);
+    GEN c = negi(diviiexact(ak,aj));
+    gel(A,k) = RgC_lincomb(gen_1, c, gel(A,k), gel(A,j));
+    swap(gel(A,j), gel(A,k));
     return;
   }
 
@@ -1226,7 +1226,7 @@ matrixqz_aux(GEN A)
   if (n == 1) return cgetg(1,t_MAT);
   if (n == 2) { 
     A = Q_primpart(A);
-    if (ZV_cmp0(A)) A = cgetg(1,t_MAT);
+    if ( ZV_cmp0(gel(A,1)) ) A = cgetg(1,t_MAT);
     return A;
   }
   m = lg(A[1]);
@@ -1260,9 +1260,7 @@ GEN
 matrixqz2(GEN x)
 {
   pari_sp av = avma;
-  if (typ(x)!=t_MAT) pari_err(typeer,"matrixqz2");
-  x = shallowcopy(x);
-  return gerepileupto(av, matrixqz_aux(x));
+  return gerepileupto(av, matrixqz_aux( shallowcopy(x) ));
 }
 
 GEN
@@ -1272,7 +1270,6 @@ matrixqz3(GEN x)
   long j,j1,k,m,n;
   GEN c;
 
-  if (typ(x)!=t_MAT) pari_err(typeer,"matrixqz3");
   n = lg(x); if (n==1) return gcopy(x);
   m = lg(x[1]); x = shallowcopy(x);
   c = const_vecsmall(n-1, 0);
