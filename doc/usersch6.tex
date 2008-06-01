@@ -350,6 +350,22 @@ cleans up the output in place. This means that elementary divisors equal to 1
 are deleted and $U$, $V$ are updated. The output is not suitable for
 \kbd{gerepileupto}.
 
+The following 3 routines underly the various \tet{matrixqz} variants.
+In all case the $m\times n$ \typ{MAT} $x$ is assumed to have rational
+(\typ{INT} and \typ{FRAC}) coefficients
+
+\fun{GEN}{QM_ImQ_hnf}{GEN x} returns an HNF basis for
+$\text{Im}_\Q x \cap \Z^n$.
+
+\fun{GEN}{QM_ImZ_hnf}{GEN x} returns an HNF basis for
+$\text{Im}_\Z x \cap \Z^n$.
+
+\fun{GEN}{QM_minors_coprime}{GEN x, GEN D}, assumes $m\geq n$, and returns
+a matrix in $M_{m,n}(\Z)$ with the same $\Q$-image as $x$, such that 
+the GCD of all $n\times n$ minors is coprime to $D$; if $D$ is \kbd{NULL},
+we want the GCD to be $1$.
+\smallskip
+
 The following routines are simple wrappers around the above ones and are
 normally useless in library mode:
 

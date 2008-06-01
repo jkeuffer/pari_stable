@@ -1085,17 +1085,17 @@ jacobi(GEN a, long prec)
 GEN
 matrixqz0(GEN x,GEN p)
 {
-  if (typ(x) != t_MAT) pari_err(typeer,"matrixqz");
-  if (!p) return matrixqz(x,NULL);
-  if (typ(p) != t_INT) pari_err(typeer,"matrixqz");
-  if (signe(p)>=0) return matrixqz(x,p);
-  if (equaliu(p,1)) return matrixqz2(x); /* p = -1 */
-  if (equaliu(p,2)) return matrixqz3(x); /* p = -2 */
-  pari_err(flagerr,"matrixqz"); return NULL; /* not reached */
+  if (typ(x) != t_MAT) pari_err(typeer,"QM_minors_coprime");
+  if (!p) return QM_minors_coprime(x,NULL);
+  if (typ(p) != t_INT) pari_err(typeer,"QM_minors_coprime");
+  if (signe(p)>=0) return QM_minors_coprime(x,p);
+  if (equaliu(p,1)) return QM_ImZ_hnf(x); /* p = -1 */
+  if (equaliu(p,2)) return QM_ImQ_hnf(x); /* p = -2 */
+  pari_err(flagerr,"QM_minors_coprime"); return NULL; /* not reached */
 }
 
 GEN
-matrixqz(GEN x, GEN D)
+QM_minors_coprime(GEN x, GEN D)
 {
   pari_sp av = avma, av1, lim;
   long i, j, m, n, lP;
@@ -1103,11 +1103,11 @@ matrixqz(GEN x, GEN D)
 
   n = lg(x)-1; if (!n) return gcopy(x);
   m = lg(x[1])-1;
-  if (n > m) pari_err(talker,"need more rows than columns in matrixqz");
+  if (n > m) pari_err(talker,"need more rows than columns in QM_minors_coprime");
   if (n==m)
   {
     D = det(x);
-    if (gcmp0(D)) pari_err(talker,"matrix of non-maximal rank in matrixqz");
+    if (gcmp0(D)) pari_err(talker,"matrix of non-maximal rank in QM_minors_coprime");
     avma = av; return matid(n);
   }
   /* m > n */
@@ -1115,7 +1115,7 @@ matrixqz(GEN x, GEN D)
   for (j=1; j<=n; j++)
   {
     gel(x,j) = Q_primpart(gel(y,j));
-    RgV_check_ZV(gel(x,j), "matrixqz");
+    RgV_check_ZV(gel(x,j), "QM_minors_coprime");
   }
 
   /* x now a ZM */
@@ -1145,7 +1145,7 @@ matrixqz(GEN x, GEN D)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if (DEBUGMEM>1) pari_warn(warnmem,"matrixqz, prime p = %Zs", p);
+	if (DEBUGMEM>1) pari_warn(warnmem,"QM_minors_coprime, prime p = %Zs", p);
 	x = gerepilecopy(av1, x);
       }
     }
@@ -1216,7 +1216,7 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
 }
 
 static GEN
-matrixqz_aux(GEN A)
+QM_imZ_hnf_aux(GEN A)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k,n,m;
@@ -1249,7 +1249,7 @@ matrixqz_aux(GEN A)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"matrixqz_aux");
+      if(DEBUGMEM>1) pari_warn(warnmem,"QM_imZ_hnf_aux");
       A = gerepilecopy(av,A);
     }
   }
@@ -1257,14 +1257,14 @@ matrixqz_aux(GEN A)
 }
 
 GEN
-matrixqz2(GEN x)
+QM_ImZ_hnf(GEN x)
 {
   pari_sp av = avma;
-  return gerepileupto(av, matrixqz_aux( shallowcopy(x) ));
+  return gerepileupto(av, QM_imZ_hnf_aux( shallowcopy(x) ));
 }
 
 GEN
-matrixqz3(GEN x)
+QM_ImQ_hnf(GEN x)
 {
   pari_sp av = avma, av1, lim;
   long j,j1,k,m,n;
@@ -1288,11 +1288,11 @@ matrixqz3(GEN x)
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"matrixqz3");
+      if(DEBUGMEM>1) pari_warn(warnmem,"QM_ImQ_hnf");
       x = gerepilecopy(av1,x);
     }
   }
-  return gerepileupto(av, matrixqz_aux(x));
+  return gerepileupto(av, QM_imZ_hnf_aux(x));
 }
 
 GEN

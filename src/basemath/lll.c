@@ -790,7 +790,7 @@ GEN
 kerint1(GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, ZM_lll(matrixqz3(ker(x)), LLLDFT, LLL_INPLACE));
+  return gerepilecopy(av, ZM_lll(QM_ImQ_hnf(ker(x)), LLLDFT, LLL_INPLACE));
 }
 
 GEN

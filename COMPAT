@@ -132,6 +132,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove obsolete discsr. Use RgX_disc (or quad_disc, qfb_disc...)
   - remove obsolete allbase, base, base2, factoredbase, smallbase,
     discf2, factoreddiscf, smalldiscf. Use nfbasis0 / nfdisc0 / nfmaxord
+  - rename library functions matrixqz2 -> QM_ImZ_hnf, matrixqz3 ->
+    QM_ImQ_hnf, matrixqz -> QM_minors_coprime
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
