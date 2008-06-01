@@ -1489,6 +1489,7 @@ long    Z_pvalrem(GEN x, GEN p, GEN *py);
 
 /* gen3.c */
 
+GEN     RgM_mulreal(GEN x, GEN y);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);
@@ -1571,7 +1572,7 @@ GEN     mkintn(long n, ...);
 GEN     mkpoln(long n, ...);
 GEN     mkvecn(long n, ...);
 GEN     mkvecsmalln(long n, ...);
-GEN     mulmat_real(GEN x, GEN y);
+GEN     mulreal(GEN x, GEN y);
 GEN     numer(GEN x);
 long    padicprec(GEN x, GEN p);
 GEN     polcoeff0(GEN x,long n,long v);

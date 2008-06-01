@@ -3467,41 +3467,42 @@ qf_base_change(GEN q, GEN M, int flag)
 
 /* return Re(x * y), x and y scalars */
 GEN
-mul_real(GEN x, GEN y)
+mulreal(GEN x, GEN y)
 {
   if (typ(x) == t_COMPLEX)
   {
     if (typ(y) == t_COMPLEX)
     {
-      pari_sp av=avma, tetpil;
-      GEN p1 = gmul(gel(x,1), gel(y,1));
-      GEN p2 = gneg(gmul(gel(x,2), gel(y,2)));
-      tetpil=avma; return gerepile(av,tetpil,gadd(p1,p2));
+      pari_sp av = avma;
+      GEN a = gmul(gel(x,1), gel(y,1));
+      GEN b = gmul(gel(x,2), gel(y,2));
+      return gerepileupto(av, gsub(a, b));
     }
     x = gel(x,1);
   }
-  else if (typ(y) == t_COMPLEX) y = gel(y,1);
+  else
+    if (typ(y) == t_COMPLEX) y = gel(y,1);
   return gmul(x,y);
 }
 
 /* Compute Re(x * y), x and y matrices of compatible dimensions
- * assume lx, ly > 1, and scalar entries */
+ * assume scalar entries */
 GEN
-mulmat_real(GEN x, GEN y)
+RgM_mulreal(GEN x, GEN y)
 {
-  long i, j, k, lx = lg(x), ly = lg(y), l = lg(x[1]);
-  pari_sp av;
-  GEN p1, z = cgetg(ly,t_MAT);
-
+  long i, j, k, l, lx = lg(x), ly = lg(y);
+  GEN z = cgetg(ly,t_MAT);
+  l = (lx == 1)? 1: lg(x[1]);
   for (j=1; j<ly; j++)
   {
-    gel(z,j) = cgetg(l,t_COL);
+    GEN zj = cgetg(l,t_COL), yj = gel(y,j);
+    gel(z,j) = zj;
     for (i=1; i<l; i++)
     {
-      p1 = gen_0; av=avma;
-      for (k=1; k<lx; k++)
-	p1 = gadd(p1, mul_real(gcoeff(x,i,k),gcoeff(y,k,j)));
-      gcoeff(z,i,j) = gerepileupto(av, p1);
+      pari_sp av = avma;
+      GEN c = mulreal(gcoeff(x,i,1),gel(yj,1));
+      for (k=2; k<lx; k++) c = gadd(c, mulreal(gcoeff(x,i,k),gel(yj,k)));
+      gel(zj, i) = gerepileupto(av, c);
     }
   }
   return z;
@@ -3518,7 +3519,7 @@ hqfeval0(GEN q, GEN x, long n)
     for (j=1;j<i;j++)
     {
       GEN p1 = gmul(gel(x,i),gconj(gel(x,j)));
-      res = gadd(res, mul_real(gcoeff(q,i,j),p1));
+      res = gadd(res, mulreal(gcoeff(q,i,j),p1));
     }
   res=gshift(res,1);
   for (i=1;i<n;i++)

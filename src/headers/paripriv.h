@@ -747,7 +747,6 @@ void    gopsg2z(GEN (*f) (GEN, GEN), long s, GEN y, GEN z);
 
 GEN     gsubst_expr(GEN pol, GEN from, GEN to);
 GEN     inv_ser(GEN b);
-GEN     mul_real(GEN x, GEN y);
 GEN     poltoser(GEN x, long v, long prec);
 GEN     qfbeval(GEN q, GEN x, GEN y);
 GEN     rfractoser(GEN x, long v, long prec);

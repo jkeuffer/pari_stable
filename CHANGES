@@ -245,6 +245,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        perm_inv, perm_pow, cyc_pow_perm, cyc_pow, perm_cycles, perm_order,
        vecperm_orbits
    29- New chapter in Libpari Guide: usersch6.tex
+   30- library functions mulreal & RgM_mulreal
 
   Removed
     1- obsolete library functions extract and matextract
