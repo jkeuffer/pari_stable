@@ -928,6 +928,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
   *iscol = 0;
   if (*b)
   {
+    if (*li != *aco) pari_err(mattype1,"gauss");
     switch(typ(*b))
     {
       case t_MAT:
@@ -956,7 +957,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
  *
  * li > aco is allowed if b = NULL, in which case return c such that c a = Id */
 GEN
-gauss_intern(GEN a, GEN b)
+RgM_solve(GEN a, GEN b)
 {
   pari_sp av = avma, lim = stack_lim(av,1);
   long i, j, k, li, bco, aco;
@@ -1025,7 +1026,7 @@ gauss_intern(GEN a, GEN b)
 GEN
 gauss(GEN a, GEN b)
 {
-  GEN z = gauss_intern(a,b);
+  GEN z = RgM_solve(a,b);
   if (!z) pari_err(matinv1);
   return z;
 }

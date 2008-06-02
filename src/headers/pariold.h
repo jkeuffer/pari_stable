@@ -235,7 +235,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define limag   (long)gimag
 #define linteg  (long)integ
 #define linv    (long)ginv
-#define linvmat (long)invmat
+#define linvmat (long)RgM_inv
 #define linvmod (long)ginvmod
 #define llegendre (long)legendre
 #define llift   (long)lift

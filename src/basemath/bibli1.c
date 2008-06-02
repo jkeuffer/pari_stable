@@ -842,7 +842,7 @@ lindep(GEN x, long prec)
     }
   }
   p1 = cgetg(lx,t_COL); gel(p1,n) = gen_1; for (i=1; i<n; i++) gel(p1,i) = gen_0;
-  return gerepileupto(av, gauss_intern(shallowtrans((GEN)b),p1));
+  return gerepileupto(av, RgM_solve(shallowtrans((GEN)b),p1));
 }
 
 /* PSLQ Programs */
@@ -2216,7 +2216,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
 {
   pari_sp av = avma;
   VOLATILE long i,j,l;
-  VOLATILE GEN r,rinvtrans,u,v,res,z,vnorm,rperm,perm,uperm, bound = B0;
+  VOLATILE GEN r,rinv,rinvtrans,u,v,res,z,vnorm,rperm,perm,uperm, bound = B0;
 
   if (typ(a) == t_VEC)
   {
@@ -2253,7 +2253,9 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
   }
   /* now r~ * r = a in LLL basis */
-  rinvtrans = shallowtrans( invmat(r) );
+  rinv = RgM_inv(r);
+  if (!rinv) return NULL;
+  rinvtrans = shallowtrans(rinv);
   if (DEBUGLEVEL>2)
     fprintferr("Fincke-Pohst, final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lll(rinvtrans);

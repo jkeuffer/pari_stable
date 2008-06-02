@@ -2172,8 +2172,9 @@ gdiv(GEN x, GEN y)
     case t_QFR: av = avma; return gerepileupto(av, compreal(x, ginv(y)));
 
     case t_MAT:
-      av = avma;
-      return gerepileupto(av, RgM_mul(x, invmat(y)));
+      av = avma; y = RgM_inv(y);
+      if (!y) pari_err(matinv1);
+      return gerepileupto(av, RgM_mul(x, y));
 
     default: pari_err(operf,"/",x,y);
   }
@@ -2382,7 +2383,9 @@ gdiv(GEN x, GEN y)
     case t_REAL: case t_INTMOD: case t_PADIC: case t_POLMOD:
       return gmul(x, ginv(y)); /* missing gerepile, for speed */
     case t_MAT:
-      av = avma; return gerepileupto(av, gmul(x, invmat(y)));
+      av = avma; y = RgM_inv(y);
+      if (!y) pari_err(matinv1);
+      return gerepileupto(av, gmul(x, y));
   }
   if (is_matvec_t(tx)) {
     lx = lg(x); z = cgetg_copy(lx, x);

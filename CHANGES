@@ -84,6 +84,7 @@ BA 29- missing GC in the leftrightpow functions
    74- obscure SEGV when setting 'log' in a file read from command-line
        as gp foo.gp [#789]
    75- check that moduli are compatible in Rg_to_Fp(t_INTMOD, t_INT)
+   76- matsolve([1;2;3],[1,2,4]~) --> [1]~  (should raise an error)
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
@@ -218,7 +219,7 @@ JD 12- add an optional argument to quit()
    RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul
    RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
    RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,
-   RgM_diagonal_shallow,
+   RgM_diagonal_shallow, RgM_inv, RgM_solve
    FF_sub, ZC_lincomb1_inplace, ZC_z_mul
    Z_isanypower,
    RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod,

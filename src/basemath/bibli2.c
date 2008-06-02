@@ -1184,10 +1184,12 @@ modreverse_i(GEN a, GEN T)
   if (n <= 0) return gcopy(a);
   if (n == 1)
     return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
-  if (gcmp0(a) || typ(a) != t_POL) pari_err(talker,"reverse polmod does not exist");
+  if (typ(a) != t_POL || !signe(a))
+    pari_err(talker,"reverse polmod does not exist");
 
   y = RgXV_to_RgM(RgXQ_powers(a,n-1,T), n);
-  y = gauss(y, col_ei(n, 2));
+  y = RgM_solve(y, col_ei(n, 2));
+  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Zs,%Zs)", a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 

@@ -1040,7 +1040,7 @@ nfsign(GEN nf, GEN x)
 GEN
 closemodinvertible(GEN x, GEN y)
 {
-  return gmul(y, ground(gauss_intern(y,x)));
+  return gmul(y, ground(RgM_solve(y,x)));
 }
 GEN
 reducemodinvertible(GEN x, GEN y)

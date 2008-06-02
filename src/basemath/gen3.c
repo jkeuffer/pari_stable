@@ -1129,7 +1129,9 @@ ginv(GEN x)
 	togglesign(y[2]);
       return y;
     case t_MAT:
-      return (lg(x)==1)? cgetg(1,t_MAT): invmat(x);
+      y = RgM_inv(x);
+      if (!y) pari_err(matinv1);
+      return y;
     case t_VECSMALL:
     {
       long i,lx = lg(x);

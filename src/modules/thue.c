@@ -154,7 +154,7 @@ T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
   m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1,prec);
 
-  A = invmat(m1);
+  A = RgM_inv(m1); if (!A) pari_err(precer,"thue");
   IntM = gsub(gmul(A,m1), matid(r));
 
   eps2 = gadd(vecmax(gabs(IntM,prec)), real2n(-e, prec));

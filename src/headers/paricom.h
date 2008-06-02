@@ -336,7 +336,7 @@ enum manage_var_t {
 #define Z_issquare(x) (Z_issquareall((x),NULL))
 #define resultant(x,y) (resultant_all((x),(y),NULL))
 
-#define invmat(a) (gauss((a),NULL))
+#define RgM_inv(a) (RgM_solve((a),NULL))
 
 /* output of get_nf and get_bnf */
 #define typ_NULL 0

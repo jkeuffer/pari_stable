@@ -749,48 +749,48 @@ split_realimag(GEN x, long r1, long r2)
   return y;
 }
 
-/* assume x = (r1+r2) x (r1+2r2) matrix and y compatible vector
+/* assume M = (r1+r2) x (r1+2r2) matrix and y compatible vector or matrix
  * r1 first lines of x,y are real. Solve the system obtained by splitting
- * real and imaginary parts. If x is of nf type, use M instead.
- */
+ * real and imaginary parts. */
 GEN
-gauss_realimag(GEN x, GEN y)
+RgM_solve_realimag(GEN M, GEN y)
 {
-  GEN M = (typ(x)==t_VEC)? gmael(checknf(x),5,1): x;
   long l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
   M = split_realimag(M,r1,r2);
-  y = split_realimag(y,r1,r2); return gauss(M, y);
+  y = split_realimag(y,r1,r2); return RgM_solve(M, y);
 }
 
 static GEN
-getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
+getfu(GEN nf, GEN *ptA, long fl, long *pte, long prec)
 {
-  long e, i, j, R1, RU, N=degpol(nf[1]);
+  GEN p1, p2, u, y, matep, A, vec, T = gel(nf,1), M = gmael(nf,5,1);
+  long e, i, j, R1, RU, N = degpol(T);
   pari_sp av = avma;
-  GEN p1,p2,u,y,matep,s,A,vec;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
-  R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
+  R1 = nf_get_r1(nf); RU = (N+R1)>>1;
   if (RU==1) { *pte=LONG_MAX; return cgetg(1,t_VEC); }
 
   *pte = 0; A = *ptA;
   matep = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
-    s = gen_0; for (i=1; i<=RU; i++) s = gadd(s,real_i(gcoeff(A,i,j)));
-    s = gdivgs(s, -N);
-    p1=cgetg(RU+1,t_COL); gel(matep,j) = p1;
-    for (i=1; i<=R1; i++) gel(p1,i) = gadd(s, gcoeff(A,i,j));
-    for (   ; i<=RU; i++) gel(p1,i) = gadd(s, gmul2n(gcoeff(A,i,j),-1));
+    GEN c = cgetg(RU+1,t_COL), Aj = gel(A,j);
+    GEN s = gdivgs(sum(real_i(Aj), 1, RU), -N); /* -log |norm(Aj)| / N */
+    gel(matep,j) = c;
+    for (i=1; i<=R1; i++) gel(c,i) = gadd(s, gel(Aj,i));
+    for (   ; i<=RU; i++) gel(c,i) = gadd(s, gmul2n(gel(Aj,i),-1));
   }
-  if (prec <= 0) prec = gprecision(A);
   u = lll(real_i(matep));
   if (typ(u) != t_MAT) return not_given(av,fl,fupb_PRECI);
 
-  p1 = gmul(matep,u);
-  if (expgexpo(p1) > 20) { *pte = LONG_MAX; return not_given(av,fl,fupb_LARGE); }
-  matep = gexp(p1,prec);
-  y = grndtoi(gauss_realimag(nf,matep), &e);
+  y = RgM_mul(matep,u);
+  if (expgexpo(y) > 20) { *pte=LONG_MAX; return not_given(av,fl,fupb_LARGE); }
+  
+  if (prec <= 0) prec = gprecision(A);
+  y = RgM_solve_realimag(M, gexp(y,prec));
+  if (!y) return not_given(av,fl,fupb_PRECI);
+  y = grndtoi(y, &e);
   *pte = -e;
   if (e >= 0) return not_given(av,fl,fupb_PRECI);
   for (j=1; j<RU; j++)
@@ -805,7 +805,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   p2 = PiI2n(1,prec); for (   ; i<=RU; i++) gel(vec,i) = p2;
   for (j=1; j<RU; j++)
   {
-    p1 = gel(y,j); p2 = QXQ_inv(p1, gel(nf,1));
+    p1 = gel(y,j); p2 = QXQ_inv(p1, T);
     if (gcmp(QuickNormL2(p2,DEFAULTPREC),
 	     QuickNormL2(p1,DEFAULTPREC)) < 0)
     {
@@ -1288,9 +1288,9 @@ prec_arch(GEN bnf)
 GEN
 isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
-  GEN nf, x, matunit, s;
+  GEN nf, x, matunit, s, M;
   long N, R1, RU, i, prec = gprecision(col);
-  bnf = checkbnf(bnf); nf = checknf(bnf);
+  bnf = checkbnf(bnf); nf = checknf(bnf); M = gmael(nf,5,1);
   if (!prec) prec = prec_arch(bnf);
   matunit = gel(bnf,3);
   N = degpol(nf[1]);
@@ -1309,7 +1309,8 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
-  x = grndtoi(RgC_Rg_mul(gauss_realimag(nf,col), dx), pe);
+  x = RgM_solve_realimag(M,col); if (!x) return NULL;
+  x = grndtoi(RgC_Rg_mul(x, dx), pe);
   return (*pe > -5)? NULL: RgC_Rg_div(x, dx);
 }
 
@@ -1605,7 +1606,7 @@ isunit(GEN bnf,GEN x)
   /* ex = fundamental units exponents */
   rlog = real_i(logunit);
   prec = nf_get_prec(nf);
-  for (i=1;;)
+  for (i=1;; i++)
   {
     GEN rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
     if (rx)
@@ -1616,13 +1617,16 @@ isunit(GEN bnf,GEN x)
 	long p = 2 + max(1, (nf_get_prec(nf)-2) / 2);
 	if (typ(logN) != t_REAL || gprecision(rx) > p)
 	  { avma = av; return cgetg(1,t_COL); } /* not a precision problem */
-	rx = NULL;
       }
-    }
-    if (rx)
-    {
-      ex = grndtoi(gauss(rlog, rx), &e);
-      if (gcmp0(gel(ex,RU)) && e < -4) break;
+      else
+      {
+        ex = RgM_solve(rlog, rx);
+        if (ex)
+        {
+          ex = grndtoi(ex, &e);
+          if (gcmp0(gel(ex,RU)) && e < -4) break;
+        }
+      }
     }
     if (i == 1)
       prec = MEDDEFAULTPREC + divsBIL( gexpo(x) );
@@ -1631,7 +1635,6 @@ isunit(GEN bnf,GEN x)
       if (i > 4) pari_err(precer,"isunit");
       prec = (prec-1)<<1;
     }
-    i++;
     if (DEBUGLEVEL) pari_warn(warnprec,"isunit",prec);
     nf = nfnewprec_shallow(nf, prec);
   }
@@ -2224,7 +2227,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   if (!signe(kR) || expo(kR) < -3) { avma=av; return NULL; }
 
   setsigne(kR,1);
-  L = gauss_intern(Im_mdet,NULL); /* Im_mdet^(-1) */
+  L = RgM_solve(Im_mdet,NULL); /* Im_mdet^(-1) */
   if (!L) { *ptL = NULL; return kR; }
 
   L = gmul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */

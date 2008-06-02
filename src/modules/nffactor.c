@@ -1097,7 +1097,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
     av2 = avma;
     pk = gcoeff(prk,1,1);
     PRK = ZM_lll_norms(prk, alpha, LLL_INPLACE, &B);
-    S = invmat( get_R(PRK) );
+    S = RgM_inv( get_R(PRK) ); if (!S) continue;
     for (i=1; i<=d; i++)
     {
       GEN s = gen_0;

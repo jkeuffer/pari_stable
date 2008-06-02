@@ -1229,7 +1229,7 @@ hnffromLLL(GEN nf)
   x = RgXV_to_RgM(gel(nf,7), degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
-  return gauss_intern(ZM_hnfmodid(x, d), x);
+  return RgM_solve(ZM_hnfmodid(x, d), x);
 }
 
 static GEN

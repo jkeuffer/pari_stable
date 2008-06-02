@@ -3432,8 +3432,8 @@ scalar).
 \fun{GEN}{RgC_RgV_mul}{GEN x, GEN y} returns $x\times y$ (the square matrix
 $(x_iy_j)$).
 
-The last two functions are not well defined in general and only provided for
-convenience in specific cases:
+The following two functions are not well defined in general and only provided
+for convenience in specific cases:
 
 \fun{GEN}{RgC_RgM_mul}{GEN x, GEN y} returns $x\times y[1,]$ is $y$ is
 a row matrix $1\times n$, error otherwise.
@@ -3441,9 +3441,30 @@ a row matrix $1\times n$, error otherwise.
 \fun{GEN}{RgM_RgV_mul}{GEN x, GEN y} returns $x\times y[,1]$ is $y$ is
 a column matrix $n\times 1$, error otherwise.
 
+\smallskip
+
 \fun{GEN}{RgV_dotproduct}{GEN x,GEN y} returns the scalar product of $x$ and $y$
 
 \fun{GEN}{RgV_dotsquare}{GEN x} returns the scala product of $x$ with itself.
+
+\fun{GEN}{RgM_inv}{GEN a} returns a left inverse of $a$ (which needs not be
+square), or \kbd{NULL} if this turns out to be impossible. The latter
+happens when the matrix does not have maximal rank (or when roundoff errors
+make it appear so).
+
+\fun{GEN}{RgM_solve}{GEN a, GEN b} returns $a^{-1}b$ where $a^{-1}$
+denotes a \emph{left} inverse of $a$ and $b$ is a \typ{COL} or \typ{MAT}.
+Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}. Note
+that if $a$ is not invertible, 
+
+\fun{GEN}{RgM_solve_realimag}{GEN M, GEN b} $M$ being a \typ{MAT}
+with $r_1+r_2$ rows and $r_1+2r_2$ columns, $y$ a \typ{COL} or \typ{MAT}
+such that the equation $Mx = y$ makes sense, returns $x$ under the following
+simpifying assumptions: the first $r_1$ rows of $M$ and $y$ are real
+(the $r_2$ others are complex), and $x$ is real. This is stabler and faster
+than calling $\kbd{RgM\_solve}(M, b)$ over $\C$. In most applications,
+$M$ approximates the complex embeddings of an integer basis in a number
+field, and $x$ is actually rational.
 
 \fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
@@ -3456,7 +3477,7 @@ entries of $x$ (its determinant if it is indeed triangular).
 associated to the entries of $v$ (matrix or vector).
 
 The following routines check whether matrices or vectors have a special
-shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This may make a
+shape, using \kbd{gcmp1} and \kbd{gcmp0} to test components. (This makes a
 difference when components are inexact.)
 
 \fun{int}{RgV_isscalar}{GEN x} return 1 if $x$ all the entries of $x$ are $0$
@@ -3480,7 +3501,6 @@ diagonal matrix, and 0 otherwise.
 \fun{long}{RgV_isin}{GEN v, GEN x} return the first index $i$ such that
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
-
 
 \section{Integral, rational and generic polynomial arithmetic}
 

@@ -123,7 +123,7 @@ makenfabs(GEN rnf)
   gel(NF,3) = mulii(powiu(gel(nf,3), degpol(rnf[1])),
 		      idealnorm(nf, gel(rnf,3)));
   gel(NF,7) = RgM_to_RgXV(M,varn(pol));
-  gel(NF,8) = invmat(M);
+  gel(NF,8) = RgM_inv(M);
   gel(NF,9) = get_mul_table(pol, gel(NF,7), gel(NF,8));
   /* possibly wrong, but correct prime divisors [for primedec] */
   gel(NF,4) = Q_denom(gel(NF,7));
@@ -167,7 +167,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   gel(rnf,5) = cgetg(1, t_VEC); /* dummy */
   gel(rnf,6) = cgetg(1, t_VEC); /* dummy */
   gel(rnf,7) = bas;
-  gel(rnf,8) = lift_if_rational( invmat(B) );
+  gel(rnf,8) = lift_if_rational( RgM_inv(B) );
   gel(rnf,9) = cgetg(1,t_VEC); /* dummy */
   gel(rnf,10) = nf;
   gel(rnf,11) = rnfequation2(nf,pol);
@@ -644,7 +644,8 @@ findmin(GEN nf, GEN x, GEN muf)
     x = ZM_mul(x, m);
     y = gmul(M, x);
   }
-  m = gauss_realimag(y, muf);
+  m = RgM_solve_realimag(y, muf);
+  if (!m) return NULL; /* precision problem */
   if (cx) m = RgC_Rg_div(m, cx);
   m = grndtoi(m, &e);
   if (e >= 0) return NULL; /* precision problem */
