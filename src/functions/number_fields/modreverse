@@ -2,12 +2,36 @@ Function: modreverse
 Section: number_fields
 C-Name: polymodrecip
 Prototype: G
-Help: modreverse(a): reverse polmod of the polmod a, if it exists
-Doc: $a$ being a polmod $A(X)$ modulo $T(X)$, finds
- the ``reverse polmod'' $B(X)$ modulo $Q(X)$, where $Q$ is the minimal
- polynomial of $a$, which must be equal to the degree of $T$, and such that if
- $\theta$ is a root of $T$ then $\theta=B(\alpha)$ for a certain root $\alpha$
- of $Q$.
+Help: modreverse(z): reverse polmod of the polmod z, if it exists
+Doc: $z$ being a polmod $A(X)$ modulo $T(X)$, let $Q$ be the minimal
+ polynomial of $z$, which must satisfy $\text{deg}(Q) = \text{det}(T)$.
+ Returns the ``reverse polmod'' $B(X)$ modulo $Q(X)$, such that the roots of
+ $T$ are the $B(\alpha)$, where $\alpha$ runs over the roots of $Q$.
  
- This is very useful when one changes the generating element in algebraic
- extensions.
+ This is quite useful when one changes the generating element in algebraic
+ extensions:
+ \bprog
+ ? u = Mod(x, x^3 - x -1); v = u^5;
+ ? w = modreverse(v)
+ %2 = Mod(x^2 - 4*x + 1, x^3 - 5*x^2 + 4*x - 1)
+ @eprog\noindent
+ which means that $x^3 - 5x^2 + 4x -1$ is another defining polynomial for the
+ cubic field 
+ $$\Q(u) = \Q[x]/(x^3 - x - 1) = \Q[x]/(x^3 - 5x^2 + 4x - 1) = \Q(v),$$
+ and that $u = v^2 - 4v + 1$. From this, it is easy to convert elements
+ between the $A(u)\in \Q(u)$ and $B(v)\in \Q(v)$ representations:
+ \bprog
+ ? A = u^2 + 2*u + 3; subst(lift(A), 'x, w)
+ %3 = Mod(x^2 - 3*x + 3, x^3 - 5*x^2 + 4*x - 1)
+ ? B = v^2 + v + 1;   subst(lift(B), 'x, v)
+ %4 = Mod(26*x^2 + 31*x + 26, x^3 - x - 1)
+ @eprog
+ If the minimal polynomial of $z$ has lower degree than expected, the routine
+ fails
+ \bprog
+ ? u = Mod(-x^3 + 9*x, x^4 - 10*x^2 + 1)
+ ? modreverse(u)
+   *** modreverse: reverse polmod does not exist: Mod(-x^3+9*x, x^4-10*x^2+1).
+ ? u^2
+ %6 = Mod(8, x^4 - 10*x^2 + 1)
+ @eprog
