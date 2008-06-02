@@ -3452,10 +3452,9 @@ square), or \kbd{NULL} if this turns out to be impossible. The latter
 happens when the matrix does not have maximal rank (or when roundoff errors
 make it appear so).
 
-\fun{GEN}{RgM_solve}{GEN a, GEN b} returns $a^{-1}b$ where $a^{-1}$
-denotes a \emph{left} inverse of $a$ and $b$ is a \typ{COL} or \typ{MAT}.
-Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}. Note
-that if $a$ is not invertible, 
+\fun{GEN}{RgM_solve}{GEN a, GEN b} returns $a^{-1}b$ where $a$ is a square
+\typ{MAT} and $b$ is a \typ{COL} or \typ{MAT}.
+Returns \kbd{NULL} if $a^{-1}$ cannot be computed, see \tet{RgM_inv}.
 
 \fun{GEN}{RgM_solve_realimag}{GEN M, GEN b} $M$ being a \typ{MAT}
 with $r_1+r_2$ rows and $r_1+2r_2$ columns, $y$ a \typ{COL} or \typ{MAT}
