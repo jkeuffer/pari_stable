@@ -1,19 +1,18 @@
 default(realprecision,38);
 \e
 \\ Initialisations diverses
-gettime; nfpol=x^5-5*x^3+5*x+25
-qpol=y^3-y-1;un=Mod(1,qpol);w=Mod(y,qpol);p=un*(x^5-5*x+w)
+gettime;
 p2=x^5+3021*x^4-786303*x^3-6826636057*x^2-546603588746*x+3853890514072057
 fa=[11699,6;2392997,2;4987333019653,2]
 setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8));
 setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
-nf=nfinit(nfpol)
+nfpol=x^5-5*x^3+5*x+25; nf=nfinit(nfpol)
 nfinit(nfpol,2)
 nfinit(nfpol,3)
 nfinit(nfpol,4)
 nf3=nfinit(x^6+108);
 nf4=nfinit(x^3-10*x+8)
-setrand(1);bnf2=bnfinit(qpol);nf2=bnf2[7];
+setrand(1);bnf2=bnfinit(y^3-y-1);nf2=bnf2[7];
 setrand(1);bnf=bnfinit(x^2-x-57,,[0.2,0.2])
 setrand(1);bnfinit(x^2-x-100000,1)
 \p19
@@ -74,8 +73,6 @@ idt=idealmul(nf,idx,idx,1)
 idz=idealintersect(nf,idx,idy)
 aid=[idx,idy,idz,matid(5),idx]
 bid=idealstar(nf2,54,1)
-vaid=[idx,idy,matid(5)]
-haid=[matid(5),matid(5),matid(5)]
 idealadd(nf,idx,idy)
 idealaddtoone(nf,idx,idy)
 idealaddtoone(nf,[idy,idx])
@@ -90,7 +87,7 @@ idealhnf(nf,vp)
 idealhnf(nf,vp[2],3)
 ideallist(bnf,20)
 \\ ideallistarch
-ideallog(nf2,w,bid)
+ideallog(nf2,y,bid)
 idealmin(nf,idx,[1,2,3])
 idealnorm(nf,idt)
 idp=idealpow(nf,idx,7)
@@ -98,16 +95,16 @@ idealpow(nf,idx,7,1)
 idealprimedec(nf,2)
 idealprimedec(nf,3)
 idealprimedec(nf,11)
-idealprincipal(nf,Mod(x^3+5,nfpol))
+idealprincipal(nf,x^3+5)
 idealtwoelt(nf,idy)
 idealtwoelt(nf,idy,10)
 idealstar(nf2,54)
 idealval(nf,idp,vp)
-ideleprincipal(nf,Mod(x^3+5,nfpol))
+ideleprincipal(nf,x^3+5)
 \\
-ba=nfalgtobasis(nf,Mod(x^3+5,nfpol))
-bb=nfalgtobasis(nf,Mod(x^3+x,nfpol))
-bc=matalgtobasis(nf,[Mod(x^2+x,nfpol);Mod(x^2+1,nfpol)])
+ba=nfalgtobasis(nf,x^3+5)
+bb=nfalgtobasis(nf,x^3+x)
+bc=matalgtobasis(nf,[x^2+x;x^2+1])
 matbasistoalg(nf,bc)
 nfbasis(x^3+4*x+5)
 nfbasis(x^3+4*x+5,2)
@@ -141,7 +138,7 @@ nfisisom(x^3+x^2-2*x-1,x^3+x^2-2*x-1)
 nfisisom(x^3-2,nfinit(x^3-6*x^2-6*x-30))
 nfroots(nf2,x+2)
 nfrootsof1(nf)
-nfsnf(nf,[as,haid,vaid])
+nfsnf(nf,[as, [matid(5),matid(5),matid(5)], [idx,idy,matid(5)]])
 nfsubfields(nf)
 polcompositum(x^4-4*x+2,x^3-x-1)
 polcompositum(x^4-4*x+2,x^3-x-1,1)
@@ -159,7 +156,7 @@ polsubcyclo(31,5)
 setrand(1);poltschirnhaus(x^5-x-1)
 \\
 \\ rnfalgtobasis
-aa=rnfpseudobasis(nf2,p)
+p=x^5-5*x+y; aa=rnfpseudobasis(nf2,p)
 rnfbasis(bnf2,aa)
 \\ rnfbasis
 \\ rnfcharpoly
