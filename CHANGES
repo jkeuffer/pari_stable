@@ -275,6 +275,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    17- obsolete library functions allbase, base, base2, factoredbase, smallbase,
        discf2, factoreddiscf, smalldiscf. Use nfbasis0 / nfdisc0 / nfmaxord
    18- obsolete library function pari_rand31  [ use pari_rand ]
+   19- obsolete undocumented library function bruterr
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

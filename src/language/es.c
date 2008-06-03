@@ -2923,13 +2923,6 @@ outmat(GEN x)
 }
 
 void
-bruterr(GEN x,char format,long sigd)
-{
-  PariOUT *out = pariOut; pariOut = pariErr;
-  brute(x,format,sigd); pariOut = out;
-}
-
-void
 fprintferr(const char* fmt, ...)
 {
   va_list args;

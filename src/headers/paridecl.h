@@ -1253,7 +1253,6 @@ GEN     Strchr(GEN g);
 GEN     Strexpand(GEN g);
 GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);
-void    bruterr(GEN x,char format,long dec);
 void    dbgGEN(GEN x, long nb);
 void    error0(GEN g);
 void    etatpile(void);
