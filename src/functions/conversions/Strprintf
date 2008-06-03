@@ -1,5 +1,4 @@
 Function: Strprintf
-Class: basic
 Section: programming/specific
 C-Name: Strprintf
 Prototype: ss*

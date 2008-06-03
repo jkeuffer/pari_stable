@@ -1,5 +1,4 @@
 Function: printf
-Class: basic
 Section: programming/specific
 C-Name: printf0
 Prototype: vss*
