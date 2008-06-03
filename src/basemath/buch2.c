@@ -630,12 +630,13 @@ can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N, FACT *fact)
   return is_pm1(N) || divide_p(F, itos(N), 1, nf, I, m, fact);
 }
 
-/* can we factor m/I ? [m in I from pseudomin] */
+/* can we factor m/I ? [m in I from pseudomin], NI = norm I */
 static long
-factorgen(FB_t *F, GEN nf, GEN I, GEN m, FACT *fact)
+factorgen(FB_t *F, GEN nf, GEN I, GEN NI, GEN m, FACT *fact)
 {
-  GEN Nm = absi( resultant(coltoliftalg(nf,m), gel(nf,1)) ); /* |Nm| */
-  GEN N  = diviiexact(Nm, ZM_det_triangular(I)); /* N(m / I) */
+  GEN T = gel(nf,1);
+  GEN Nm = absi( ZX_QX_resultant(T, coltoliftalg(nf,m)) ); /* |Nm| */
+  GEN N  = diviiexact(Nm, NI); /* N(m / I) */
   return can_factor(F, nf, I, m, N, fact);
 }
 
@@ -997,16 +998,17 @@ Vbase_to_FB(FB_t *F, GEN pr)
 static GEN
 SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 {
-  GEN vdir, id, z, ex, y, x0;
+  GEN vdir, id, z, ex, y, x0, Nx = ZM_det_triangular(x);
   long nbtest_lim, nbtest, bou, i, ru, lgsub;
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
-  /* try without reduction if x is small */
-  if (flag && can_factor(F, nf, x, NULL, ZM_det_triangular(x), fact)) return NULL;
+  /* try without reduction if x is small.
+   * N.B can_factor destroys its NI argument */
+  if (flag && can_factor(F, nf, x, NULL, icopy(Nx), fact)) return NULL;
 
   /* if reduction fails (y scalar), do not retry can_factor */
   y = idealred_elt(nf,x);
-  if ((!flag || !ZV_isscalar(y)) && factorgen(F, nf, x, y, fact)) return y;
+  if ((!flag || !ZV_isscalar(y)) && factorgen(F, nf, x, Nx, y, fact)) return y;
 
   /* reduce in various directions */
   ru = lg(nf[6]);
@@ -1016,7 +1018,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   {
     vdir[i] = 10;
     y = ideallllred_elt(nf,x,vdir);
-    if (factorgen(F, nf, x, y, fact)) return y;
+    if (factorgen(F, nf, x, Nx, y, fact)) return y;
     vdir[i] = 0;
   }
 
@@ -1046,8 +1048,9 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
     for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
     for (bou=1; bou<ru; bou++)
     {
-      y = ideallllred_elt(nf, gel(id,1), vdir);
-      if (factorgen(F, nf, gel(id,1), y, fact))
+      GEN I = gel(id,1), NI = ZM_det_triangular(I);
+      y = ideallllred_elt(nf, I, vdir);
+      if (factorgen(F, nf, I, NI, y, fact))
       {
 	for (i=1; i<lgsub; i++)
 	  if (ex[i]) add_to_fact(Vbase_to_FB(F,gel(Vbase,i)), ex[i], fact);
@@ -1111,27 +1114,21 @@ get_Vbase(GEN bnf)
 
 /* all primes up to Minkowski bound factor on factorbase ? */
 void
-testprimes(GEN bnf, ulong bound)
+testprimes(GEN bnf, GEN BOUND)
 {
   pari_sp av0 = avma, av;
-  ulong p, pmax;
-  long i, nbideal, k;
+  ulong p, pmax, bound = itou_or_0(BOUND);
   FACT *fact;
-  GEN f, dK, p1, Vbase, vP, fb, nf = checknf(bnf);
+  GEN nf = gel(bnf,7), f = gel(nf,4), dK = gel(nf,3), Vbase, fb, gp;
   byteptr d = diffptr + 1;
   FB_t F;
 
-  maxprime_check(bound);
-  if (DEBUGLEVEL>1)
-    fprintferr("PHASE 1: check primes to Zimmert bound = %lu\n\n",bound);
-  dK= gel(nf,3);
-  f = gel(nf,4);
-  if (!gcmp1(f))
+  if (!is_pm1(f))
   {
-    GEN D = gmael(nf,5,5);
+    GEN D = gmael(nf,5,5), L;
     if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Ps\n",D);
-    p1 = isprincipalall(bnf, D, nf_FORCE);
-    if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", p1);
+    L = isprincipalall(bnf, D, nf_FORCE);
+    if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", L);
   }
   /* sort factorbase for tablesearch */
   fb = gen_sort(gel(bnf,5), (void*)&cmp_prime_ideal, cmp_nodata);
@@ -1139,18 +1136,21 @@ testprimes(GEN bnf, ulong bound)
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
   fact = (FACT*)stackmalloc((F.KC+1)*sizeof(FACT));
+
+  if (!bound) bound = maxprime();
   for (av=avma, p=2; p < bound; avma=av)
   {
+    GEN vP = primedec(bnf, utoipos(p));
+    long i, l = lg(vP);
     if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
-    vP = primedec(bnf, utoipos(p));
-    nbideal = lg(vP)-1;
     /* loop through all P | p if ramified, all but one otherwise */
-    if (!umodiu(dK,p)) nbideal++;
-    for (i=1; i<nbideal; i++)
+    if (umodiu(dK,p)) l--;
+    for (i=1; i<l; i++)
     {
       GEN P = gel(vP,i);
+      long k;
       if (DEBUGLEVEL>1) fprintferr("  Testing P = %Ps\n",P);
-      if (cmpiu(pr_norm(P), bound) >= 0)
+      if (cmpii(pr_norm(P), BOUND) >= 0)
       {
 	if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
 	break;
@@ -1164,7 +1164,32 @@ testprimes(GEN bnf, ulong bound)
     }
     NEXT_PRIME_VIADIFF(p, d);
   }
-  if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
+  if (lgefint(BOUND) == 3) { avma = av0; return; }
+
+  pari_warn(warner,"Zimmert's bound is large (%Pd), certification will take a long time", BOUND);
+  gp = utoipos(bound);
+  for (av=avma;; gp = gerepileuptoint(av, nextprime(addis(gp,1))))
+  {
+    GEN vP = primedec(bnf, gp);
+    long i, l = lg(vP);
+    if (DEBUGLEVEL>1) fprintferr("*** p = %Pu\n",gp);
+    /* loop through all P | p if ramified, all but one otherwise */
+    if (!dvdii(dK,gp)) l--;
+    for (i=1; i<l; i++)
+    {
+      GEN P = gel(vP,i);
+      if (DEBUGLEVEL>1) fprintferr("  Testing P = %Ps\n",P);
+      if (cmpii(pr_norm(P), BOUND) >= 0)
+      {
+	if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
+	break;
+      }
+      if (DEBUGLEVEL>1)
+	fprintferr("    is %Ps\n", isprincipal(bnf,P));
+      else /* faster: don't compute result */
+	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase, fact);
+    }
+  }
   avma = av0;
 }
 
@@ -2061,7 +2086,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
-  GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
+  GEN ideal, Nideal, m, ex = cgetg(lgsub, t_VECSMALL);
 
   if (DEBUGLEVEL) {
     long d = cache->end - cache->last;
@@ -2098,11 +2123,12 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
     ideal = remove_content(ideal);
     if (gcmp1(gcoeff(ideal,1,1))) continue;
 
+    Nideal = ZM_det_triangular(ideal);
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
       m = pseudomin(ideal, gel(F->vecG,j));
-      if (!factorgen(F,nf,ideal,m,fact))
+      if (!factorgen(F,nf,ideal,Nideal,m,fact))
       {
 	if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
 	continue;
@@ -2138,7 +2164,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
 static int
 be_honest(FB_t *F, GEN nf, FACT *fact)
 {
-  GEN P, ideal, m;
+  GEN P, ideal, Nideal, m;
   long ex, i, j, J, k, iz, nbtest, ru;
   long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   pari_sp av;
@@ -2170,10 +2196,11 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 	  if (ex) ideal = idealmulh(nf,ideal, gmael(F->pow->id2,i,ex));
 	}
 	ideal = remove_content(ideal);
+        Nideal = ZM_det_triangular(ideal);
 	for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
 	  m = pseudomin(ideal, gel(F->vecG,k));
-	  if (factorgen(F,nf,ideal,m,fact)) break;
+	  if (factorgen(F,nf,ideal,Nideal, m,fact)) break;
 	}
 	avma = av2; if (k < ru) break;
 	if (++nbtest > 50)

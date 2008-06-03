@@ -600,14 +600,13 @@ minkowski_bound(GEN D, long N, long r2, long prec)
 }
 
 /* DK = |dK| */
-static long
+static GEN
 zimmertbound(long N,long R2,GEN DK)
 {
   pari_sp av = avma;
   GEN w;
-  long n;
 
-  if (N < 2) return 1;
+  if (N < 2) return gen_1;
   if (N < 21)
   {
     const double c[19][11] = {
@@ -649,9 +648,7 @@ zimmertbound(long N,long R2,GEN DK)
   {
     w = minkowski_bound(DK, N, R2, DEFAULTPREC);
   }
-  n = itos_or_0( gceil(w) );
-  if (!n) pari_err(talker,"Minkowski bound is too large");
-  avma = av; return n;
+  return gerepileuptoint(av, ceil_safe(w));
 }
 
 /* return \gamma_n^n if known, an upper bound otherwise */

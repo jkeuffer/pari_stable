@@ -165,6 +165,7 @@ BA 49- user variables can now be aliased [#790].
        rename poldeflate -> RgX_deflate_max
    52- rename matrixqz2 -> QM_ImZ_hnf, matrixqz3 -> QM_ImQ_hnf, matrixqz ->
        QM_minors_coprime
+   53- bnfcertify can now handle Zimmert/Minkowski bounds > 2^31
 
   Added
     1- library function gpcalloc
