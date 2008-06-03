@@ -81,7 +81,7 @@ Doc: This function is based on the C library command of the same name.
 
  \item \kbd{l}: argument is a \kbd{long} integer.
 
- \item \kbd{Z}: argument is a \kbd{GEN}.
+ \item \kbd{P}: argument is a \kbd{GEN}.
 
  \misctitle{The conversion specifier.} A character that specifies the type of
  conversion to be applied.

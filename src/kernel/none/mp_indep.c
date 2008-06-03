@@ -578,7 +578,7 @@ remiimul(GEN x, GEN sy)
 #if 0
   q = subii(r,remii(x,y));
   if (signe(q))
-    pari_err(talker,"bug in remiimul: x = %Zs\ny = %Zs\ndif = %Zs", x,y,q);
+    pari_err(talker,"bug in remiimul: x = %Ps\ny = %Ps\ndif = %Ps", x,y,q);
 #endif
   return gerepileuptoint(av, r); /* = remii(x, y) */
 }

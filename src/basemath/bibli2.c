@@ -1189,7 +1189,7 @@ modreverse_i(GEN a, GEN T)
 
   y = RgXV_to_RgM(RgXQ_powers(a,n-1,T), n);
   y = RgM_solve(y, col_ei(n, 2));
-  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Zs,%Zs)", a,T);
+  if (!y) pari_err(talker,"reverse polmod does not exist: Mod(%Ps,%Ps)", a,T);
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 

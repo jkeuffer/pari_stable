@@ -675,7 +675,7 @@ itos(GEN x)
 }
 INLINE long
 gtos(GEN x) {
-  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Zs'",x);
+  if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Ps'",x);
   return itos(x);
 }
 

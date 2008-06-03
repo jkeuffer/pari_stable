@@ -771,7 +771,7 @@ ggval(GEN x, GEN p)
   if (isrationalzero(x)) return LONG_MAX;
   if (is_const_t(tx) && tp==t_POL) return 0;
   if (tp == t_INT && (!signe(p) || is_pm1(p)))
-    pari_err(talker, "forbidden divisor %Zs in ggval", p);
+    pari_err(talker, "forbidden divisor %Ps in ggval", p);
   switch(tx)
   {
     case t_INT:
@@ -808,7 +808,7 @@ ggval(GEN x, GEN p)
       if (tp==t_POL)
       {
 	if (degpol(p) <= 0)
-	  pari_err(talker, "forbidden divisor %Zs in ggval", p);
+	  pari_err(talker, "forbidden divisor %Ps in ggval", p);
 	vp = varn(p);
 	vx = varn(x);
 	if (vp == vx)
@@ -839,7 +839,7 @@ ggval(GEN x, GEN p)
       vx = varn(x);
       if (vp == vx) {
 	vp = RgX_val(p);
-	if (!vp) pari_err(talker, "forbidden divisor %Zs in ggval", p);
+	if (!vp) pari_err(talker, "forbidden divisor %Ps in ggval", p);
 	return (long)(valp(x) / vp);
       }
       if (varncmp(vx, vp) > 0) return 0;

@@ -99,7 +99,7 @@ vconcat(GEN A, GEN B)
 static void
 err_cat(GEN x, GEN y)
 {
-  pari_err(talker,"impossible concatenation: %s %Zs . %s %Zs",
+  pari_err(talker,"impossible concatenation: %s %Ps . %s %Ps",
       type_name(typ(x)), matsize(x), type_name(typ(y)), matsize(y));
 }
 

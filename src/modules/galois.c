@@ -78,7 +78,7 @@ partitions_galois(long n)
   if (DEBUGLEVEL > 7)
   {
     fprintferr("Partitions of %ld (%ld)\n",n, p);
-    for (i=1; i<=p; i++) fprintferr("i = %ld: %Zs\n",i,gel(T,i));
+    for (i=1; i<=p; i++) fprintferr("i = %ld: %Ps\n",i,gel(T,i));
   }
   T[0] = evallg(p + 1) | evaltyp(t_VEC); return T;
 }
@@ -848,7 +848,7 @@ dbg_rac(long nri,long nbracint,long numi[],GEN racint[],long multi[])
   fprintferr("\t# rational integer roots = %ld:",nbracint-nri);
   for (k = nri+1; k <= nbracint; k++) fprintferr(" %ld^%ld", numi[k], multi[k]);
   fprintferr("\n");
-  for (k = nri+1; k <= nbracint; k++) fprintferr("\t%2ld: %Zs\n", numi[k], racint[k]);
+  for (k = nri+1; k <= nbracint; k++) fprintferr("\t%2ld: %Ps\n", numi[k], racint[k]);
   flusherr();
 }
 
@@ -2394,7 +2394,7 @@ galoisbig(GEN pol, long prec)
 
   if (DEBUGLEVEL)
   {
-    fprintferr("Galoisbig: polynomial #1 = %Zs\n", pol);
+    fprintferr("Galoisbig: polynomial #1 = %Ps\n", pol);
     fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
   }
   switch(N)

@@ -1418,7 +1418,7 @@ gsubstvec(GEN e, GEN v, GEN r)
   for(i=1;i<l;i++)
   {
     GEN T = gel(v,i);
-    if (!gcmpX(T)) pari_err(talker,"not a variable in substvec (%Zs)", T);
+    if (!gcmpX(T)) pari_err(talker,"not a variable in substvec (%Ps)", T);
     w[i]=varn(T);
     z[i]=fetch_var();
   }

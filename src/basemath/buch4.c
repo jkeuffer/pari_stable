@@ -417,7 +417,7 @@ nfhilbert(GEN nf,GEN a,GEN b)
     if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
     {
       if (DEBUGLEVEL >=4)
-	fprintferr("nfhilbert not soluble at finite place: %Zs\n",S[i]);
+	fprintferr("nfhilbert not soluble at finite place: %Ps\n",S[i]);
       avma = av; return -1;
     }
   avma = av; return 1;

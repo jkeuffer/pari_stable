@@ -1615,15 +1615,16 @@ function. \kbd{fmt} is a character string similar to the one
 \tet{printf} uses. In there, \kbd{\%} characters have a special meaning, and
 describe how to print the remaining operands. In addition to the standard
 format types (see the GP function \tet{printf}), you can use the \emph{length
-modifier}~\kbd{Z} to specify that an argument is a \kbd{GEN}. For instance,
-the following are valid conversions for a \kbd{GEN} argument
+modifier}~\kbd{P} (for PARI of course!) to specify that an argument is a 
+\kbd{GEN}. For instance, the following are valid conversions for a \kbd{GEN}
+argument
 \bprog
-    %Zs     @com convert to \kbd{char*} (will print an arbitrary \kbd{GEN})
-    %Z.10s  @com convert to \kbd{char*}, truncated to 10 chars
-    %Z.2f   @com convert to floating point format with 2 decimals
-    %Z4d    @com convert to integer, field width at least 4
+    %Ps     @com convert to \kbd{char*} (will print an arbitrary \kbd{GEN})
+    %P.10s  @com convert to \kbd{char*}, truncated to 10 chars
+    %P.2f   @com convert to floating point format with 2 decimals
+    %P4d    @com convert to integer, field width at least 4
 
-    pari_printf("x[%d] = %Zs is not invertible!\n", i, gel(x,i));
+    pari_printf("x[%d] = %Ps is not invertible!\n", i, gel(x,i));
 @eprog\noindent
 Here \kbd{i} is an \kbd{int}, \kbd{x} a \kbd{GEN} which is not a leaf
 (presumably a vector, or a polynomial) and this would insert the value of its
@@ -1634,7 +1635,7 @@ $i$-th \kbd{GEN} component: \kbd{gel(x,i)}.
 \fun{void}{output}{GEN x}, which prints \kbd{x}, followed by a newline and a
 buffer flush. This is more or less equivalent to
 \bprog
-    pari_printf("%Zs\n", x);
+    pari_printf("%Ps\n", x);
     pari_flush();
 @eprog
 
@@ -1723,7 +1724,7 @@ also use it in the more versatile guise
 where \kbd{format} describes the format to use to write the remaining
 operands, as in the \tet{pari_printf} function. For instance:
 \bprog
-  pari_err(talker, "x[%d] = %Zs is not invertible!", i, gel(x,i));
+  pari_err(talker, "x[%d] = %Ps is not invertible!", i, gel(x,i));
 @eprog\noindent
 The simple syntax seen above is
 just a special case with a constant format and no remaining arguments.
@@ -1836,7 +1837,7 @@ or
   TIMERstart(&T);
   for (i = 1; i < 10; i++) {
     ...
-    msgTIMER(&T, "for i = %ld (L[i] = %Zs)", i, L[i]);
+    msgTIMER(&T, "for i = %ld (L[i] = %Ps)", i, L[i]);
   }
 @eprog
 

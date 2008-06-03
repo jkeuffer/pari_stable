@@ -1004,12 +1004,12 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
     if (DEBUGLEVEL>1)
     {
       msgtimer("absolute basis");
-      fprintferr("original absolute generator: %Zs\n", gel(eq,1));
+      fprintferr("original absolute generator: %Ps\n", gel(eq,1));
     }
   }
   red = polredabs0(bas, fl);
   pol = gel(red,1);
-  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Zs\n",pol);
+  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Ps\n",pol);
   if (flag & nf_ABSOLUTE)
     return gerepilecopy(av, (flag & nf_ADDZK)? red: pol);
 

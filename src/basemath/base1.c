@@ -130,7 +130,7 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 {
   GEN T = gel(x,1), a = gel(x,2);
   if (!RgX_equal_var(T, gel(nf,1)))
-    pari_err(talker, "incompatible modulus in %s:\n  mod = %Zs,\n  nf  = %Zs",
+    pari_err(talker, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
 	     s, a, T);
   return a;
 }
@@ -286,7 +286,7 @@ tschirnhaus(GEN x)
   }
   while (degpol(srgcd(u,RgX_deriv(u)))); /* while u not separable */
   if (DEBUGLEVEL>1)
-    fprintferr("Tschirnhaus transform. New pol: %Zs",u);
+    fprintferr("Tschirnhaus transform. New pol: %Ps",u);
   avma=av2; return gerepileupto(av,u);
 }
 
@@ -1360,7 +1360,7 @@ ok_pol(void *TT, GEN xn)
   if (++T->ind > T->indmax && T->xbest) return T->xbest;
 
   if (!ZX_is_squarefree(xn)) return (T->ind == T->indmax)? T->xbest: NULL;
-  if (DEBUGLEVEL>3) fprintferr("ok_pol: generator %Zs\n", xn);
+  if (DEBUGLEVEL>3) fprintferr("ok_pol: generator %Ps\n", xn);
   dxn = ZX_disc(xn);
   if (better_pol(xn, dxn, T->xbest, T->dxbest))
   {
@@ -1415,7 +1415,7 @@ nfpolred(int part, nfbasic_t *T)
   /* update T */
   phi = gel(a, O.indbest);
   if (canon_pol(xbest) < 0) phi = gneg_i(phi);
-  if (DEBUGLEVEL>1) fprintferr("xbest = %Zs\n",xbest);
+  if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",xbest);
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, xbest);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
@@ -1678,7 +1678,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
     }
     (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
     if (canon_pol(ch) < 0 && pta) gel(a,i) = RgX_neg(gel(a,i));
-    if (DEBUGLEVEL>3) fprintferr("polred: generator %Zs\n", ch);
+    if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
     gel(y,i) = ch;
   }
   if (CHECK) return NULL; /* no suitable polynomial found */
@@ -1810,7 +1810,7 @@ chk_gen(void *data, GEN x)
   av1 = avma;
   h = ZX_gcd(g, ZX_deriv(g));
   if (degpol(h)) { avma = av; return NULL; }
-  if (DEBUGLEVEL>3) fprintferr("  generator: %Zs\n",g);
+  if (DEBUGLEVEL>3) fprintferr("  generator: %Ps\n",g);
   avma = av1; return gerepileupto(av, g);
 }
 
@@ -1862,11 +1862,11 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       GEN B = T2_from_embed(gel(d->ZKembed,i), r1);
       if (gcmp(B,bound) < 0) bound = B ;
       if (!firstprim) firstprim = i; /* index of first primitive element */
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Zs\n",P);
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Ps\n",P);
     }
     else
     {
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Zs\n",P);
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Ps\n",P);
       if (firstprim)
       { /* cycle basis vectors so that primitive elements come last */
 	GEN u = d->u, e = d->ZKembed;
@@ -1897,7 +1897,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       e = RgM_zc_mul(d->ZKembed, x);
       P = get_pol(d, e);
       if (!ZX_is_squarefree(P)) continue;
-      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Zs\n",P);
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Ps\n",P);
       B = T2_from_embed(e, r1);
       if (gcmp(B,bound) < 0) bound = B ;
     }
@@ -2294,8 +2294,8 @@ zeta_get_N0(GEN C,  GEN limx)
   pari_sp av = avma;
   GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
   if (e >= 0 || is_bigint(z))
-    pari_err(talker, "need %Zs coefficients in initzeta: computation impossible", z);
-  if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %Zs\n", z);
+    pari_err(talker, "need %Ps coefficients in initzeta: computation impossible", z);
+  if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %Ps\n", z);
   avma = av; return itos(z);
 }
 

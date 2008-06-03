@@ -339,7 +339,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 	  p1 = mulii(p1, powiu(p, Mp[j+1]*(Lp[j]-Mp[j])));
 	  p1 = mulii(p1, gcoeff(BINMAT, Lp[j]-Mp[j+1]+1, Mp[j]-Mp[j+1]+1));
 	}
-	fprintferr("  alpha_lambda(mu,p) = %Zs\n",p1);
+	fprintferr("  alpha_lambda(mu,p) = %Ps\n",p1);
       }
 
       T->countsub = 0; dopsubtyp(T);
@@ -354,7 +354,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 	  if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
 	  if (!equaliu(p1,T->countsub))
 	  {
-	    fprintferr("  alpha = %Zs\n",p1);
+	    fprintferr("  alpha = %Ps\n",p1);
 	    pari_err(bugparier,"forsubgroup (alpha != countsub)");
 	  }
 	}
@@ -509,7 +509,7 @@ subgroup_engine(subgp_iter *T)
     for (i=1; i<lsubq; i++)
       gel(T->subq,i) = gmulsg(T->powlist[k],gel(T->subq,i));
     if (DEBUGLEVEL>2)
-      fprintferr("(lifted) subgp of prime to %Zs part:\n%Zs\n",p, T->subq);
+      fprintferr("(lifted) subgp of prime to %Ps part:\n%Ps\n",p, T->subq);
   }
   dopsub(T, p,indexsubq);
   if (DEBUGLEVEL) fprintferr("nb subgroup = %ld\n",T->count);

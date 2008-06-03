@@ -107,10 +107,11 @@ BA  8- [svn/CVS] number development snapshots according to repository version
        ignored (was used only for integers in 'prettyprint' output mode and
        defaulted to 0 [no effect]). Use printf !
    15- %Z is no longer a valid conversion specification for PARI formats,
-       since Z is now handled as a length modifier. Use %Zs instead.
+       since this is now handled as a length modifier. Use %Ps instead
+       (P stands for PARI).
    16- remove the (ugly) prettyprint engine ('output' = 2), render as matbrute.
        printp / printp1 now act as print/print1
-   17- pariprintf renamed to pari_printf, %Z conversion disappeared (use %Zs)
+   17- pariprintf renamed to pari_printf, %Z conversion disappeared (use %Ps)
    18- rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush ->
        pari_flush, gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
        gpfree -> pari_free

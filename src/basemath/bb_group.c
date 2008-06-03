@@ -112,7 +112,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
     q = gel(fa,i);
     e = itos(gel(ex,i));
     if (DEBUGLEVEL>5)
-      fprintferr("Pohlig-Hellman: DL mod %Zs^%ld\n",q,e);
+      fprintferr("Pohlig-Hellman: DL mod %Ps^%ld\n",q,e);
     qj = new_chunk(e+1);
     gel(qj,0) = gen_1;
     gel(qj,1) = q;
@@ -156,7 +156,7 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
     m = o;
     o = factorback(m,NULL);
     if (typ(o) != t_INT)
-      pari_err(talker, "incorrect order in gen_eltorder: %Zs", o);
+      pari_err(talker, "incorrect order in gen_eltorder: %Ps", o);
   }
   else
     m = Z_factor(o);

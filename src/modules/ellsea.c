@@ -643,7 +643,7 @@ find_isogenous_from_canonical(GEN a4, GEN a6, long q, GEN meqn, GEN g, GEN p)
   if (gcmp0(dJ))
   {
     GEN jl;
-    if (DEBUGLEVEL) fprintferr("Division by zero for prime %Zs\n", p);
+    if (DEBUGLEVEL) fprintferr("Division by zero for prime %Ps\n", p);
     E4l = Fp_div(E4, sqru(q), p);
     jl  = Fp_div(Fp_powu(E4l, 3, p), deltal, p);
     E6l = Fp_sqrt(Fp_mul(Fp_sub(jl, utoi(1728), p), deltal, p), p);
@@ -809,7 +809,7 @@ find_trace_Elkies_power(GEN a4, GEN a6, ulong ell, long k, GEN meqn, char meqnty
   for (cnt = 2; cnt <= k; cnt++)
   {
     GEN tmp, mpoly;
-    if (DEBUGLEVEL) fprintferr(", %Zs", powuu(ell, cnt));
+    if (DEBUGLEVEL) fprintferr(", %Ps", powuu(ell, cnt));
     mpoly = FpXY_evalx(meqn, Fp_ell_j(Eca4, Eca6, p), p);
     tmp = find_kernel_power(Eba4, Eba6, Eca4, Eca6, ell, meqn, meqntype, mpoly, kpoly, Ib, p);
     if (!tmp) { avma = ltop; return NULL; }
@@ -1424,7 +1424,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
       if (DEBUGLEVEL)
       {
         GEN p15 = prod_lgatkin(compile_atkin, nb_atkin);
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", p15);
+        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Ps possibilities for the trace", p15);
       }
       res = match_and_sort(compile_atkin, nb_atkin, gel(tr, 1), gel(tr, 2), a4, a6, p);
       return gerepileuptoint(ltop, subii(addis(p,1), res));
@@ -1435,7 +1435,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     {
       if (EARLY_ABORT && dvdiu(addis(p, 1 - trace_mod[1]), ell))
       {
-        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %Zs\n",ell);
+        if (DEBUGLEVEL) fprintferr("\nAborting: #E(Fp) divisible by %Ps\n",ell);
         avma = ltop; return gen_0;
       }
       tr = crt(ellkt, stoi(trace_mod[1]), gel(tr,1), gel(tr,2));
@@ -1452,7 +1452,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
                       prod_lgatkin(compile_atkin, nb_atkin));
   /*If the number of possible traces is too large, we treat a new prime */
   if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) >= 0)
-    fprintferr("Too many possibilities for the trace: %Zs. Look for new primes\n", gel(best_champ, 2));
+    fprintferr("Too many possibilities for the trace: %Ps. Look for new primes\n", gel(best_champ, 2));
   btop = avma; st_lim = stack_lim(btop, 1);
   get_extra_l = 1;
   bound_bsgs = gdiv(bound_bsgs, growth_factor);
@@ -1468,7 +1468,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     if (trace_mod==gen_0)
     {
       if (DEBUGLEVEL && gcmp(gel(best_champ, 2), bound_bsgs) > 0)
-        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Zs possibilities for the trace", gel(best_champ, 2));
+        pari_warn(warner,"no more modular polynomials available, match and sort may be very long: it remains %Ps possibilities for the trace", gel(best_champ, 2));
       break;
     }
     if (!trace_mod) continue;
@@ -1503,13 +1503,13 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     for (   ; i<=nb_atkin; i++) gel(compile_atkin, i) = gen_0;
     nb_atkin = lg(cat)-1;
     if (DEBUGLEVEL>=2)
-      fprintferr("Keeping %ld primes, %Zs remaining possibilities.\n",
+      fprintferr("Keeping %ld primes, %Ps remaining possibilities.\n",
                  nb_atkin, gel(best_champ, 2));
     if (low_stack(st_lim, stack_lim(btop, 1)))
       gerepileall(btop, 3, &tr, &compile_atkin, &bound_bsgs, &best_champ);
   }
   if (DEBUGLEVEL)
-    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Zs possibilities for the trace.\n", gel(best_champ, 2));
+    fprintferr("\nComputation of traces done. Entering match-and-sort algorithm.\nIt remains %Ps possibilities for the trace.\n", gel(best_champ, 2));
   res = match_and_sort(compile_atkin, nb_atkin, gel(tr,1), gel(tr,2), a4,a6,p);
   return gerepileuptoint(ltop, subii(addis(p, 1), res));
 }

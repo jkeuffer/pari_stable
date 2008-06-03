@@ -47,7 +47,7 @@ Rg_to_Fp(GEN x, GEN p)
       GEN q = gel(x,1), a = gel(x,2);
       if (equalii(q, p)) return icopy(a);
       if (!dvdii(q,p))
-        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Zs, %Zs", q, p);
+        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Ps, %Ps", q, p);
       return remii(a, p);
     }
     default: pari_err(typeer, "Rg_to_Fp");
@@ -70,7 +70,7 @@ Rg_to_Fl(GEN x, ulong p)
       GEN q = gel(x,1), a = gel(x,2);
       if (equaliu(q, p)) return itou(a);
       if (!dvdiu(q,p))
-        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Zs, %lu", q, p);
+        pari_err(talker,"inconsistent moduli in Rg_to_Fp: %Ps, %lu", q, p);
       return umodiu(a, p);
     }
     default: pari_err(typeer, "Rg_to_Fl");
@@ -1022,7 +1022,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   }
   if (DEBUGLEVEL>=4) msgtimer("matrix polcyclo");
   if (lg(A)!=r+1)
-    pari_err(talker,"ZZ_%Zs[%Zs]/(%Zs) is not a field in FpX_ffintersect"
+    pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
 	,l,pol_x(vp),P);
   A = gerepileupto(ltop,A);
   /*The formula is
@@ -1084,13 +1084,13 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) (void)timer2();
       A = FpM_ker(RgM_Rg_add_shallow(MA, z),l);
       if (lg(A)!=2)
-	pari_err(talker,"ZZ_%Zs[%Zs]/(%Zs) is not a field in FpX_ffintersect"
+	pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
 	    ,l,pol_x(vp),P);
       A = RgV_to_RgX(gel(A,1),vp);
 
       B = FpM_ker(RgM_Rg_add_shallow(MB, z),l);
       if (lg(B)!=2)
-	pari_err(talker,"ZZ_%Zs[%Zs]/(%Zs) is not a field in FpX_ffintersect"
+	pari_err(talker,"ZZ_%Ps[%Ps]/(%Ps) is not a field in FpX_ffintersect"
 	    ,l,pol_x(vq),Q);
       B = RgV_to_RgX(gel(B,1),vq);
 
@@ -2257,7 +2257,7 @@ INIT:
 	  if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
 	}
 	if (DEBUGLEVEL>4)
-	  fprintferr("Degree list for ERS (trials: %ld) = %Zs\n",n+1,dglist);
+	  fprintferr("Degree list for ERS (trials: %ld) = %Ps\n",n+1,dglist);
       }
 
       for (i=0,n = 0; i <= dres; n++)
@@ -2864,7 +2864,7 @@ init_Fq_i(GEN p, long n, long v)
   GEN P;
   if (n <= 0) pari_err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) pari_err(typeer, "ffinit");
-  if (signe(p) <= 0) pari_err(talker,"%Zs is not a prime", p);
+  if (signe(p) <= 0) pari_err(talker,"%Ps is not a prime", p);
   if (v < 0) v = 0;
   if (n == 1) return pol_x(v);
   if (fpinit_check(p, n+1, n)) return polcyclo(n+1, v);

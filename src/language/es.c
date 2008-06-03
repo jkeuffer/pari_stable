@@ -689,7 +689,7 @@ absrtostr(GEN x, int sp, char FORMAT, long wanted_dec)
  * available under the terms of the GNU GPL version 2 or later. It
  * was itself adapted from an original version by Patrick Powell. */
 
-/* Modifications for format %Zs: R.Butel IMB/CNRS 2007/12/03 */
+/* Modifications for format %Ps: R.Butel IMB/CNRS 2007/12/03 */
 
 static void
 str_putc(outString *S, char c) {
@@ -827,7 +827,7 @@ fmtnum(outString *S, long lvalue, GEN gvalue, int base, int signvalue,
       }
       gvalue = gfloor( simplify_i(gvalue) );
       if (typ(gvalue) != t_INT)
-        pari_err(talker,"not a t_INT in integer format conversion: %Zs", gvalue);
+        pari_err(talker,"not a t_INT in integer format conversion: %Ps", gvalue);
     }
     s = signe(gvalue);
     if (!s) { lbuf = 1; buf = zerotostr(); goto END; }
@@ -1034,7 +1034,7 @@ fmtreal(outString *S, GEN gvalue, int space, int signvalue, int FORMAT,
     sigd = get_sigd(gvalue, FORMAT, maxwidth);
     gvalue = gtofp(gvalue, ndec2prec(sigd));
     if (typ(gvalue) != t_REAL)
-      pari_err(talker,"impossible conversion to t_REAL: %Zs",gvalue);
+      pari_err(talker,"impossible conversion to t_REAL: %Ps",gvalue);
   }
   if ((FORMAT == 'f' || FORMAT == 'F') && maxwidth >= 0)
     buf = absrtostr_width_frac(gvalue, maxwidth);
@@ -1132,16 +1132,16 @@ nextch:
 ------------------------------------------------------------------------*/
           case 'l':
             if (GENflag)
-              pari_err(talker, "Z/l length modifiers in the same conversion");
+              pari_err(talker, "P/l length modifiers in the same conversion");
             if (longflag)
               pari_err(impl, "ll length modifier in printf");
             longflag = 1;
             goto nextch;
-          case 'Z':
+          case 'P':
             if (longflag)
-              pari_err(talker, "Z/l length modifiers in the same conversion");
+              pari_err(talker, "P/l length modifiers in the same conversion");
             if (GENflag)
-              pari_err(talker, "'Z' length modifier appears twice");
+              pari_err(talker, "'P' length modifier appears twice");
             GENflag = 1;
             goto nextch;
           case 'h': /* dummy: va_arg promotes short into int */
@@ -2610,7 +2610,7 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
           pari_printf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pari_printf("{\"%s\",%Zs,%Zs}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pari_printf("{\"%s\",%Ps,%Ps}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:
@@ -2834,7 +2834,7 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
           pari_printf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
       }
       else
-        pari_printf("\\{\"%s\",%Zs,%Zs\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+        pari_printf("\\{\"%s\",%Ps,%Ps\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
       break;
 
     case t_MAT:

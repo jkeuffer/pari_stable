@@ -1255,7 +1255,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   long a, b, e = itos(ep), f = itos(gel(pr,4));
   GEN p = gel(pr,1), list, g, g0, y, u,v, prh, prb, pre;
 
-  if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Zs\n",e,pr);
+  if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Ps\n",e,pr);
   if (f == 1)
     g = scalarcol_shallow(pgener_Fp(p), degpol(nf[1]));
   else
@@ -1528,7 +1528,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
   if (DEBUGLEVEL>3)
   {
     fprintferr("entering zlog, "); flusherr();
-    if (DEBUGLEVEL>5) fprintferr("with a = %Zs\n",a);
+    if (DEBUGLEVEL>5) fprintferr("with a = %Ps\n",a);
   }
   if (index)
   {
@@ -1656,7 +1656,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
   }
   x = idealhermite_aux(nf, ideal);
   if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
-    pari_err(talker,"Idealstar needs an integral non-zero ideal: %Zs",x);
+    pari_err(talker,"Idealstar needs an integral non-zero ideal: %Ps",x);
   sarch = zarchstar(nf, x, archp);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);
@@ -1758,7 +1758,7 @@ check_nfelt(GEN x, GEN *den)
 {
   long l = lg(x), i;
   GEN t, d = NULL;
-  if (typ(x) != t_COL) pari_err(talker,"%Zs not a nfelt", x);
+  if (typ(x) != t_COL) pari_err(talker,"%Ps not a nfelt", x);
   for (i=1; i<l; i++)
   {
     t = gel(x,i);
@@ -1768,7 +1768,7 @@ check_nfelt(GEN x, GEN *den)
       case t_FRAC:
 	if (!d) d = gel(t,2); else d = lcmii(d, gel(t,2));
 	break;
-      default: pari_err(talker,"%Zs not a nfelt", x);
+      default: pari_err(talker,"%Ps not a nfelt", x);
     }
   }
   *den = d;

@@ -434,7 +434,7 @@ polsubcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     i = d-(1+d)/(1+o);
     borne = mulii(binomial(utoipos(d),i),powuu(o,i));
   }
-  if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: borne=%Zs\n",borne);
+  if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: borne=%Ps\n",borne);
   val = logint(shifti(borne,2), gl, NULL);
   avma = av;
   if (DEBUGLEVEL >= 4) fprintferr("Subcyclo: val=%ld\n",val);
@@ -675,7 +675,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   }
   O = znstar_cosets(n, phi_n, H);
   if (DEBUGLEVEL >= 1) msgtimer("znstar_cosets");
-  if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: orbits=%Zs\n",O);
+  if (DEBUGLEVEL >= 6) fprintferr("Subcyclo: orbits=%Ps\n",O);
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",phi_n/card,card);
   av = avma;

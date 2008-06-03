@@ -187,7 +187,7 @@ gener(GEN m)
   e = mod4(m);
   if (e == 0) /* m = 0 mod 4 */
   { /* m != 4, non cyclic */
-    if (!equaliu(m,4)) pari_err(talker,"primitive root mod %Zs does not exist", m);
+    if (!equaliu(m,4)) pari_err(talker,"primitive root mod %Ps does not exist", m);
     gel(z,2) = utoipos(3); return z;
   }
   if (e == 2) /* m = 0 mod 2 */
@@ -750,7 +750,7 @@ ispower(GEN x, GEN K, GEN *pt)
 
   if (!K) return gisanypower(x, pt);
   if (typ(K) != t_INT) pari_err(typeer, "ispower");
-  if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Zs in ispower",K);
+  if (signe(K) <= 0) pari_err(talker, "non-positive exponent %Ps in ispower",K);
   if (is_pm1(K)) { if (pt) *pt = gcopy(x); return 1; }
   switch(typ(x)) {
     case t_INT:
@@ -974,7 +974,7 @@ Z_isanypower(GEN x, GEN *pty)
     /* cut off at 4 bits which seems to be about optimum;  for primes
      * >> 10^3 the modular checks are no longer competitively fast */
     while ( (ex = is_odd_power(x, &y, &ex0, 4)) ) { k *= ex; x = y; }
-    if (DEBUGLEVEL>4) fprintferr("Z_isanypower: now k=%ld, x=%Zs\n", k, x);
+    if (DEBUGLEVEL>4) fprintferr("Z_isanypower: now k=%ld, x=%Ps\n", k, x);
     do
     {
       if (*d) NEXT_PRIME_VIADIFF(p,d);
@@ -1491,7 +1491,7 @@ Fp_sqrt(GEN a, GEN p)
   if (e == 0) /* p = 2 */
   {
     avma = av;
-    if (!equaliu(p,2)) pari_err(talker,"composite modulus in Fp_sqrt: %Zs",p);
+    if (!equaliu(p,2)) pari_err(talker,"composite modulus in Fp_sqrt: %Ps",p);
     if (!signe(a) || !mod2(a)) return gen_0;
     return gen_1;
   }
@@ -1505,7 +1505,7 @@ Fp_sqrt(GEN a, GEN p)
       if (i >= 0)
       {
 	if (i) continue;
-	pari_err(talker,"composite modulus in Fp_sqrt: %Zs",p);
+	pari_err(talker,"composite modulus in Fp_sqrt: %Ps",p);
       }
       av1 = avma;
       y = m = Fp_pow(utoipos((ulong)k),q,p);
@@ -1819,7 +1819,7 @@ GEN
 Fp_inv(GEN a, GEN m)
 {
   GEN res;
-  if (! invmod(a,m,&res)) pari_err(invmoder,"%Zs", gmodulo(res,m));
+  if (! invmod(a,m,&res)) pari_err(invmoder,"%Ps", gmodulo(res,m));
   return res;
 }
 

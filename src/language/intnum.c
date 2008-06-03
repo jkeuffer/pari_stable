@@ -109,7 +109,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     }
     sum = gmul(sum,del);
     gel(s,j) = gerepileupto(av, gmul2n(gadd(gel(s,j-1), sum), -1));
-    if (DEBUGLEVEL>3) fprintferr("qrom3: iteration %ld: %Zs\n", j,s[j]);
+    if (DEBUGLEVEL>3) fprintferr("qrom3: iteration %ld: %Ps\n", j,s[j]);
 
     if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-j-6, KLOC)))
       return gmulsg(sig,ss);
@@ -151,7 +151,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
     }
     sum = gmul(sum,del); p1 = gdivgs(gel(s,j-1),3);
     gel(s,j) = gerepileupto(av, gadd(p1,sum));
-    if (DEBUGLEVEL>3) fprintferr("qrom2: iteration %ld: %Zs\n", j,s[j]);
+    if (DEBUGLEVEL>3) fprintferr("qrom2: iteration %ld: %Ps\n", j,s[j]);
 
     if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-(3*j/2)-6, KLOC)))
       return gmulsg(sig, ss);

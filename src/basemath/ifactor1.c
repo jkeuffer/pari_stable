@@ -73,7 +73,7 @@ miller_ok(miller_t *S, GEN c)
     { /* too many sqrt(-1)s mod n */
       if (DEBUGLEVEL) {
 	GEN z = gcdii(addii(c, S->sqrt1), S->n);
-	pari_warn(warner,"found factor\n\t%Zs\ncurrently lost to the factoring machinery", z);
+	pari_warn(warner,"found factor\n\t%Ps\ncurrently lost to the factoring machinery", z);
       }
       return 1;
     }
@@ -598,7 +598,7 @@ plisprime(GEN N, long flag)
   eps = cmpis(N,2);
   if (eps<=0) return eps? gen_0: gen_1;
 
-  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Zs\n", N);
+  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Ps\n", N);
   N = absi(N);
   if (!F)
   {
@@ -629,7 +629,7 @@ plisprime(GEN N, long flag)
       else                      r = plisprime(p,flag);
     }
     gmael(C,3,i) = r;
-    if (r == gen_0) pari_err(talker,"False prime number %Zs in plisprime", p);
+    if (r == gen_0) pari_err(talker,"False prime number %Ps in plisprime", p);
   }
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
@@ -1753,7 +1753,7 @@ ellfacteur(GEN n, int insist)
 fin:
   affii(gl, res);
   if (DEBUGLEVEL >= 4) {
-    fprintferr("ECM: time = %6ld ms,\tp <= %6lu,\n\tfound factor = %Zs\n",
+    fprintferr("ECM: time = %6ld ms,\tp <= %6lu,\n\tfound factor = %Ps\n",
 	       timer2(), p, res);
     flusherr();
   }
@@ -1967,7 +1967,7 @@ fin:
       if (DEBUGLEVEL >= 4)
       {
 	rho_dbg(c0-(c>>5), 0);
-	fprintferr("\tfound factor = %Zs\n",g);
+	fprintferr("\tfound factor = %Ps\n",g);
 	flusherr();
       }
       avma = av; return icopy(g);
@@ -2009,7 +2009,7 @@ fin:
     if (DEBUGLEVEL >= 4)
     {
       rho_dbg(c0-(c>>5), 0);
-      fprintferr("\tfound %sfactor = %Zs\n", (g1!=n ? "composite " : ""), g);
+      fprintferr("\tfound %sfactor = %Ps\n", (g1!=n ? "composite " : ""), g);
       flusherr();
     }
     res = cgetg(7, t_VEC);
@@ -2028,7 +2028,7 @@ fin:
   if (DEBUGLEVEL >= 4)
   {
     rho_dbg(c0-(c>>5), 0);
-    fprintferr("\tfound factors = %Zs, %Zs,\n\tand %Zs\n", res[1], res[4], res[7]);
+    fprintferr("\tfound factors = %Ps, %Ps,\n\tand %Ps\n", res[1], res[4], res[7]);
     flusherr();
   }
   return res;
@@ -2074,7 +2074,7 @@ squfof_ambig(long a, long B, long dd, GEN D)
     avma = av;
   }
 #ifdef DEBUG_SQUFOF
-  fprintferr("SQUFOF: ambigous cycle of discriminant %Zs\n", D);
+  fprintferr("SQUFOF: ambigous cycle of discriminant %Ps\n", D);
   fprintferr("SQUFOF: Form on ambigous cycle (%ld, %ld, %ld)\n", a, b, c);
 #endif
 
@@ -2193,7 +2193,7 @@ squfof(GEN n)
   {
     fprintferr("SQUFOF: entering main loop with forms\n"
 	       "\t(1, %ld, %ld) and (1, %ld, %ld)\n\tof discriminants\n"
-	       "\t%Zs and %Zs, respectively\n", b1, -c1, b2, -c2, D1, D2);
+	       "\t%Ps and %Ps, respectively\n", b1, -c1, b2, -c2, D1, D2);
     (void)timer2();
   }
 
@@ -2519,7 +2519,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
 
   if (DEBUGLEVEL >= 5)
   {
-    fprintferr("OddPwrs: is %Zs\n\t...a", x);
+    fprintferr("OddPwrs: is %Ps\n\t...a", x);
     if (*mask&1) fprintferr(" 3rd%s", (*mask==7?",":(*mask!=1?" or":"")));
     if (*mask&2) fprintferr(" 5th%s", (*mask==7?", or":(*mask&4?" or":"")));
     if (*mask&4) fprintferr(" 7th");
@@ -2665,7 +2665,7 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
   while (p < *curexp) {  p = itou( nextprime(utoipos(p + 1)) ); }
   *curexp = p;
 
-  if (DEBUGLEVEL>4) fprintferr("OddPwrs: examining %Zs\n", x);
+  if (DEBUGLEVEL>4) fprintferr("OddPwrs: examining %Ps\n", x);
   /* check size of x vs. curexp */
   /* tunable cutoff was 18 initially, but cheap enough to go further (given
    * the 2^14 minimal cutoff point for trial division) */
@@ -2957,9 +2957,9 @@ static void
 ifac_factor_dbg(GEN x)
 {
   GEN c = CLASS(x), v = VALUE(x);
-  if (c == gen_2) fprintferr("IFAC: factor %Zs\n\tis prime (finished)\n", v);
-  else if (c == gen_1) fprintferr("IFAC: factor %Zs\n\tis prime\n", v);
-  else if (c == gen_0) fprintferr("IFAC: factor %Zs\n\tis composite\n", v);
+  if (c == gen_2) fprintferr("IFAC: factor %Ps\n\tis prime (finished)\n", v);
+  else if (c == gen_1) fprintferr("IFAC: factor %Ps\n\tis prime\n", v);
+  else if (c == gen_0) fprintferr("IFAC: factor %Ps\n\tis composite\n", v);
 }
 #ifdef IFAC_DEBUG
 static void
@@ -3122,7 +3122,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   }
   /* case cmp_res == 0: repeated factor detected */
   if (DEBUGLEVEL >= 4)
-    fprintferr("IFAC: repeated factor %Zs\n\tin ifac_sort_one\n", value);
+    fprintferr("IFAC: repeated factor %Ps\n\tin ifac_sort_one\n", value);
   if (moebius_mode) return 1;	/* not squarefree */
   old = scan - 3;
   /* if old class0 was composite and new is prime, or vice versa, complain
@@ -3180,7 +3180,7 @@ ifac_isprime(GEN x)
     CLASS(x) = gen_0; /* composite */
   else if (factor_proven && ! BSW_isprime(VALUE(x)))
   {
-    pari_warn(warner, "IFAC: pseudo-prime %Zs\n\tis not prime. PLEASE REPORT!\n",
+    pari_warn(warner, "IFAC: pseudo-prime %Ps\n\tis not prime. PLEASE REPORT!\n",
 	      VALUE(x));
     CLASS(x) = gen_0;
   }
@@ -3215,9 +3215,9 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 	{
 	  if (DEBUGLEVEL>=3)
 	  {
-	    fprintferr("IFAC: factor %Zs\n\tis prime (no larger composite)\n",
+	    fprintferr("IFAC: factor %Ps\n\tis prime (no larger composite)\n",
 		       VALUE(*where));
-	    fprintferr("IFAC: prime %Zs\n\tappears with exponent = %ld\n",
+	    fprintferr("IFAC: prime %Ps\n\tappears with exponent = %ld\n",
 		       VALUE(*where), itos(EXPON(*where)));
 	  }
 	  CLASS(scan) = gen_2;
@@ -3278,17 +3278,17 @@ ifac_divide(GEN *partial, GEN *where)
 	CLASS(scan) = NULL;	/* at any rate it's Unknown now */
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("IFAC: a factor was divisible by another prime factor,\n"
-		     "\tleaving a cofactor = %Zs\n", VALUE(scan));
+		     "\tleaving a cofactor = %Ps\n", VALUE(scan));
       }
       res = 1;
       if (DEBUGLEVEL >= 5)
-	fprintferr("IFAC: prime %Zs\n\tappears at least to the power %ld\n",
+	fprintferr("IFAC: prime %Ps\n\tappears at least to the power %ld\n",
 		   VALUE(*where), newexp);
     }
   } /* for */
   CLASS(*where) = gen_2; /* make it a finished prime */
   if (DEBUGLEVEL >= 3)
-    fprintferr("IFAC: prime %Zs\n\tappears with exponent = %ld\n",
+    fprintferr("IFAC: prime %Ps\n\tappears with exponent = %ld\n",
 	       VALUE(*where), newexp);
   return res;
 }
@@ -3324,7 +3324,7 @@ ifac_crack(GEN *partial, GEN *where)
 #endif
 
   if (DEBUGLEVEL >= 3) {
-    fprintferr("IFAC: cracking composite\n\t%Zs\n", **where);
+    fprintferr("IFAC: cracking composite\n\t%Ps\n", **where);
     if (DEBUGLEVEL >= 4) fprintferr("IFAC: checking for pure square\n");
   }
   /* crack squares.  Quite fast due to the initial square residue test */
@@ -3332,7 +3332,7 @@ ifac_crack(GEN *partial, GEN *where)
   while (Z_issquareall(VALUE(*where), &factor))
   {
     if (DEBUGLEVEL >= 4)
-      fprintferr("IFAC: found %Zs =\n\t%Zs ^2\n", **where, factor);
+      fprintferr("IFAC: found %Ps =\n\t%Ps ^2\n", **where, factor);
     affii(factor, VALUE(*where)); avma = av; factor = NULL;
     if (exponent == gen_1)
       EXPON(*where) = gen_2;
@@ -3360,7 +3360,7 @@ ifac_crack(GEN *partial, GEN *where)
     {
       if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
       if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: found %Zs =\n\t%Zs ^%ld\n", **where, factor, exp1);
+	fprintferr("IFAC: found %Ps =\n\t%Ps ^%ld\n", **where, factor, exp1);
       affii(factor, VALUE(*where)); avma = av; factor = NULL;
       if (exponent == gen_1)
       { EXPON(*where) = utoipos(exp1); av = avma; }
@@ -3377,7 +3377,7 @@ ifac_crack(GEN *partial, GEN *where)
     {
       if (exp2 == 1) exp2 = exp1; /* remember this after the loop */
       if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: found %Zs =\n\t%Zs ^%ld\n", **where, factor, exp1);
+	fprintferr("IFAC: found %Ps =\n\t%Ps ^%ld\n", **where, factor, exp1);
       affii(factor, VALUE(*where)); avma = av; factor = NULL;
       if (exponent == gen_1)
       { EXPON(*where) = utoipos(exp1); av = avma; }
@@ -3392,7 +3392,7 @@ ifac_crack(GEN *partial, GEN *where)
     if (exp2 > 1 && hint != 15 && ifac_isprime(*where))
     { /* Something nice has happened and our composite has become prime */
       if (DEBUGLEVEL >= 4)
-	fprintferr("IFAC: factor %Zs\n\tis prime\n", VALUE(*where));
+	fprintferr("IFAC: factor %Ps\n\tis prime\n", VALUE(*where));
       return 0;	/* bypass subsequent ifac_whoiswho() call */
     }
   } /* odd power stage */
@@ -3438,7 +3438,7 @@ ifac_crack(GEN *partial, GEN *where)
 
 	/* don't print it out at level 3 or above, where it would appear
 	 * several times before and after this message already */
-	if (DEBUGLEVEL == 2) fprintferr("\t%Zs\n", VALUE(*where));
+	if (DEBUGLEVEL == 2) fprintferr("\t%Ps\n", VALUE(*where));
       }
       CLASS(*where) = gen_1; /* might as well trial-divide by it... */
       return 1;
@@ -3450,12 +3450,12 @@ ifac_crack(GEN *partial, GEN *where)
   /* got single integer back:  work out the cofactor (in place) */
   if (!dvdiiz(VALUE(*where), factor, VALUE(*where)))
   {
-    fprintferr("IFAC: factoring %Zs\n", VALUE(*where));
-    fprintferr("\tyielded 'factor' %Zs\n\twhich isn't!\n", factor);
+    fprintferr("IFAC: factoring %Ps\n", VALUE(*where));
+    fprintferr("\tyielded 'factor' %Ps\n\twhich isn't!\n", factor);
     pari_err(bugparier, "factoring");
   }
   /* factoring engines report the factor found; tell about the cofactor */
-  if (DEBUGLEVEL >= 4) fprintferr("IFAC: cofactor = %Zs\n", VALUE(*where));
+  if (DEBUGLEVEL >= 4) fprintferr("IFAC: cofactor = %Ps\n", VALUE(*where));
 
   /* The two factors are 'factor' and VALUE(*where), find out which is larger */
   cmp_res = cmpii(factor, VALUE(*where));
@@ -3578,7 +3578,7 @@ ifac_main(GEN *partial)
   if (moebius_mode && EXPON(here) != gen_1)
   {
     if (DEBUGLEVEL >= 3)
-      fprintferr("IFAC: main loop: repeated old factor\n\t%Zs\n", *here);
+      fprintferr("IFAC: main loop: repeated old factor\n\t%Ps\n", *here);
     return gen_0;
   }
 
@@ -3599,7 +3599,7 @@ ifac_main(GEN *partial)
       if (moebius_mode && EXPON(here) != gen_1) /* that was a power */
       {
 	if (DEBUGLEVEL >= 3)
-	  fprintferr("IFAC: main loop: repeated new factor\n\t%Zs\n", *here);
+	  fprintferr("IFAC: main loop: repeated new factor\n\t%Ps\n", *here);
 	return gen_0;
       }
       /* deal with the new unknowns.  No sort: ifac_crack did it */
@@ -3614,7 +3614,7 @@ ifac_main(GEN *partial)
 	{
 	  if (DEBUGLEVEL >= 3)
 	    fprintferr("IFAC: main loop: another factor was divisible by\n"
-		       "\t%Zs\n", *here);
+		       "\t%Ps\n", *here);
 	  return gen_0;
 	}
 	ifac_defrag(partial, &here);
@@ -3631,7 +3631,7 @@ ifac_main(GEN *partial)
   if (moebius_mode && EXPON(here) != gen_1)
   {
     if (DEBUGLEVEL >= 3)
-      fprintferr("IFAC: after main loop: repeated old factor\n\t%Zs\n", *here);
+      fprintferr("IFAC: after main loop: repeated old factor\n\t%Ps\n", *here);
     return gen_0;
   }
   if (DEBUGLEVEL >= 4)

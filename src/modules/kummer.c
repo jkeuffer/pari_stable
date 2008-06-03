@@ -135,7 +135,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
     if (!B) break;
     b = B; gel(c,besti) = addis(gel(c,besti), bestk);
   }
-  if (DEBUGLEVEL) fprintferr("naive reduction mod U^l: unit exp. = %Zs\n",c);
+  if (DEBUGLEVEL) fprintferr("naive reduction mod U^l: unit exp. = %Ps\n",c);
   return fix_be(bnfz, be, gmul(ell,c));
 }
 
@@ -183,7 +183,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   long j,ru, prec = nf_get_prec(bnfz);
   GEN emb,z,u,matunit, nf = checknf(bnfz);
 
-  if (DEBUGLEVEL>1) fprintferr("reducing beta = %Zs\n",be);
+  if (DEBUGLEVEL>1) fprintferr("reducing beta = %Ps\n",be);
   /* reduce mod Q^ell */
   be = reduce_mod_Qell(nf, be, ell);
   /* reduce l-th root */
@@ -195,7 +195,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     /* make be integral */
     be = reduce_mod_Qell(nf, be, ell);
   }
-  if (DEBUGLEVEL>1) fprintferr("beta reduced via ell-th root = %Zs\n",be);
+  if (DEBUGLEVEL>1) fprintferr("beta reduced via ell-th root = %Ps\n",be);
 
   matunit = gmul(real_i(gel(bnfz,3)), ell); /* log. embeddings of fu^ell */
   for (;;)
@@ -220,7 +220,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
       be = fix_be(bnfz, be, gmul(ell,u));
     }
   }
-  if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Zs\n",be);
+  if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
   return reducebetanaive(bnfz, be, ell);
 }
 
@@ -464,7 +464,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
   gel(BE,2) = centermod(gel(BE,2), ell);
   be = factorbackelt(BE, bnfz, NULL);
   be = reducebeta(bnfz, be, ell);
-  if (DEBUGLEVEL>1) fprintferr("beta reduced = %Zs\n",be);
+  if (DEBUGLEVEL>1) fprintferr("beta reduced = %Ps\n",be);
   return be;
 }
 
@@ -1048,7 +1048,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   if (C->p == gen_0) C->p = mkpolmod(zeropol(v),gel(a,1));
   C->q = poleval(q, a);
   C->rev = modreverse_i(gel(a,2), gel(a,1));
-  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Zs\n",C->R);
+  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Ps\n",C->R);
 }
 
 static GEN
@@ -1281,7 +1281,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           be = compute_beta(X, vecWB, gell, bnfz);
           P = compute_polrel(nfz, &T, be, g, ell);
           P = lift_if_rational(P);
-          if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Zs\n", P);
+          if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Ps\n", P);
           if (!all) {
             H = rnfnormgroup(bnr, P);
             if (gequal(subgroup, H)) return P; /* DONE */

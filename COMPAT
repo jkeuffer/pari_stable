@@ -117,8 +117,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename assmat -> matcompanion
   - removed obsolete undocumented bruteall()
   - %Z is no longer a valid conversion specification for PARI formats,
-    since Z is now handled as a length modifier. Use %Zs instead.
-  - rename pariprintf -> pari_printf (%Z conversion disappeared, use %Zs)
+    since this is now handled as a length modifier. Use %Ps instead.
+  - rename pariprintf -> pari_printf (%Z conversion disappeared, use %Ps)
   - rename pariputc -> pari_putc, pariputs -> pari_puts, pariflush -> pari_flush
   - rename gpmalloc -> pari_malloc, gprealloc -> pari_realloc,
     gpfree -> pari_free

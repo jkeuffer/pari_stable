@@ -184,7 +184,7 @@ ellprint(GEN e)
   checksell(e);
   vx = fetch_var(); name_var(vx, "X");
   vy = fetch_var(); name_var(vy, "Y"); z = mkvec2(pol_x(vx), pol_x(vy));
-  fprintferr("%Zs - (%Zs)\n", ellLHS(e, z), ellRHS(e, pol_x(vx)));
+  fprintferr("%Ps - (%Ps)\n", ellLHS(e, z), ellRHS(e, pol_x(vx)));
   (void)delete_var();
   (void)delete_var(); avma = av;
 }
@@ -1034,9 +1034,9 @@ zell(GEN e, GEN z, long prec)
     if (bad) t = gneg(t);
     if (DEBUGLEVEL) {
       if (DEBUGLEVEL>4) {
-	fprintferr("  z  = %Zs\n",z);
-	fprintferr("  z1 = %Zs\n",z1);
-	fprintferr("  z2 = %Zs\n",z2);
+	fprintferr("  z  = %Ps\n",z);
+	fprintferr("  z1 = %Ps\n",z1);
+	fprintferr("  z2 = %Ps\n",z2);
       }
       fprintferr("ellpointtoz: %s square root\n", bad? "bad": "good");
       flusherr();

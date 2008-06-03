@@ -539,7 +539,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
     for (i = 1; i < l; i++)
       for (j = 1; j < i; j++)
 	if (degpol(FpX_gcd(gel(p1,i), gel(p1,j), p)))
-	  pari_err(talker, "polhensellift: factors %Zs and %Zs are not coprime",
+	  pari_err(talker, "polhensellift: factors %Ps and %Ps are not coprime",
 		     p1[i], p1[j]);
   }
   return gerepilecopy(av, hensel_lift_fact(pol,p1,NULL,p,powiu(p,exp),exp));
@@ -633,8 +633,8 @@ factor_bound(GEN S)
   GEN b = Beauzamy_bound(S);
   if (DEBUGLEVEL>2)
   {
-    fprintferr("Mignotte bound: %Zs\n",a);
-    fprintferr("Beauzamy bound: %Zs\n",b);
+    fprintferr("Mignotte bound: %Ps\n",a);
+    fprintferr("Beauzamy bound: %Ps\n",b);
   }
   return gerepileupto(av, ceil_safe(gmin(a, b)));
 }
@@ -701,7 +701,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 3)
-    fprintferr("\n### K = %d, %Zs combinations\n", K,binomial(utoipos(lfamod), K));
+    fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
   Sbound = (ulong) ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];
@@ -794,7 +794,7 @@ nextK:
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? ZX_Z_mul(pol, lc): pol;
       if (DEBUGLEVEL>3)
-	fprintferr("\nfound factor %Zs\nremaining modular factor(s): %ld\n",
+	fprintferr("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
 		   y, lfamod);
       continue;
     }
@@ -973,7 +973,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
-  if (DEBUGLEVEL>7) fprintferr("special_pivot output:\n%Zs\n",piv);
+  if (DEBUGLEVEL>7) fprintferr("special_pivot output:\n%Ps\n",piv);
 
   r  = lg(piv)-1;
   list = cgetg(r+1, t_COL);
@@ -1216,8 +1216,8 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
     fl = 1;
   }
   if (DEBUGLEVEL > 3) {
-    fprintferr("S_2   bound: %Zs^%ld\n", q,b);
-    fprintferr("coeff bound: %Zs^%ld\n", q,a);
+    fprintferr("S_2   bound: %Ps^%ld\n", q,b);
+    fprintferr("coeff bound: %Ps^%ld\n", q,a);
   }
   *pta = a;
   *ptb = b; return fl;
@@ -1241,7 +1241,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
   if (DEBUGLEVEL>2) (void)TIMER(&T);
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Zs^%ld)", p,a);
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
   L = cmbf(target, famod, A, p, a, b, maxK, klim);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
 
@@ -1295,7 +1295,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
     z = ZpX_liftroots(pol, z, p, e);
     z = deg1_from_roots(z, v);
   }
-  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Zs^%ld)", p,e);
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,e);
 
   for (m=1, i=1; i <= lz; i++)
   {
@@ -1427,7 +1427,7 @@ gdeflate(GEN x, long v, long d)
       if (lx == 2) return zeroser(v, V / d);
       y = ser2pol_i(x, lx);
       if (V % d != 0 || checkdeflate(y) % d != 0)
-	pari_err(talker, "can't deflate this power series (d = %ld): %Zs", d, x);
+	pari_err(talker, "can't deflate this power series (d = %ld): %Ps", d, x);
       y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
       setvalp(y, V/d); return gerepilecopy(av, y);
     }
@@ -2110,7 +2110,7 @@ factor(GEN x)
       y = gauss_factor(x);
       if (y) return y;
   }
-  pari_err(talker,"can't factor %Zs",x);
+  pari_err(talker,"can't factor %Ps",x);
   return NULL; /* not reached */
 }
 

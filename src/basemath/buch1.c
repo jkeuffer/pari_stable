@@ -276,7 +276,7 @@ get_lambda(GEN bnr)
       if (DEBUGLEVEL)
       {
 	if (DEBUGLEVEL>1) fprintferr("\n");
-	fprintferr("lambda = %Zs\n",la);
+	fprintferr("lambda = %Ps\n",la);
       }
       return labas;
     }
@@ -974,7 +974,7 @@ FBquad(struct buch_quad *B, long C2, long C1, GRHcheck_t *S)
   if (DEBUGLEVEL)
   {
     msgtimer("factor base");
-    if (DEBUGLEVEL>7) fprintferr("FB = %Zs\n", B->FB);
+    if (DEBUGLEVEL>7) fprintferr("FB = %Ps\n", B->FB);
   }
   LIM = (expi(B->Disc) < 16)? 100: 1000;
   while (p < LIM)
@@ -1474,7 +1474,7 @@ get_R(struct buch_quad *B, GEN C, long sreg, GEN z, GEN *ptR)
       if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
       return fupb_RELAT;
     }
-    if (DEBUGLEVEL) fprintferr("#### Tentative regulator: %Zs\n",R);
+    if (DEBUGLEVEL) fprintferr("#### Tentative regulator: %Ps\n",R);
   }
   c = gtodouble(gmul(z, R));
   if (c < 0.8 || c > 1.3) return fupb_RELAT;
@@ -1625,7 +1625,7 @@ MORE:
   }
 
   h = ZM_det_triangular(W);
-  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Zs\n", h);
+  if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Ps\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
   switch(get_R(&BQ, C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))

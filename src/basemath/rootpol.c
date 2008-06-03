@@ -2679,6 +2679,6 @@ zrhqr(GEN a, long prec)
     if (DEBUGLEVEL>3) fprintferr("%ld ",i);
     gel(rr,i) = gtofp(y, prec);
   }
-  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Zs",rr); flusherr(); }
+  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Ps",rr); flusherr(); }
   return gerepilecopy(av, rr);
 }

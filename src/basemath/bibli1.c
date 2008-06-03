@@ -354,8 +354,8 @@ lllintpartialall(GEN m, long flag)
   }
   if (DEBUGLEVEL>6)
   {
-    if (tm1) fprintferr("tm1 = %Zs",tm1);
-    fprintferr("mid = %Zs",mid); /* = m * tm1 */
+    if (tm1) fprintferr("tm1 = %Ps",tm1);
+    fprintferr("mid = %Ps",mid); /* = m * tm1 */
   }
   gerepileall(av, tm1? 2: 1, &mid, &tm1);
   {
@@ -552,7 +552,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
     for (j = 0; j < d; j++) gel(P,j+2) = modii(mulii(gel(P,j+2), z), N);
   }
-  if (DEBUGLEVEL >= 2) fprintferr("Modified P: %Zs\n", P);
+  if (DEBUGLEVEL >= 2) fprintferr("Modified P: %Ps\n", P);
 
   choose_params(P, N, X, B, &delta, &t);
   if (DEBUGLEVEL >= 2)
@@ -606,7 +606,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     if (DEBUGLEVEL >= 2)
     {
-      if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Zs\n", M);
+      if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Ps\n", M);
       fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(Z));
       fprintferr("expected shvector bitsize: %ld\n", expi(ZM_det_triangular(M))/dim);
     }
@@ -621,7 +621,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     if (DEBUGLEVEL >= 2)
     {
-      fprintferr("Candidate: %Zs\n", short_pol);
+      fprintferr("Candidate: %Ps\n", short_pol);
       fprintferr("bitsize Norm: %ld\n", expi(nsp));
       fprintferr("bitsize bound: %ld\n", expi(mului(bnd, Z)));
     }
@@ -645,7 +645,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   for (i = -bnd + 1; i < bnd; i++)
   {
     r = nfrootsQ(R);
-    if (DEBUGLEVEL >= 2) fprintferr("Roots: %Zs\n", r);
+    if (DEBUGLEVEL >= 2) fprintferr("Roots: %Ps\n", r);
 
     for (j = 1; j < lg(r); j++)
     {
@@ -1651,10 +1651,10 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 
   if (DEBUGLEVEL>6)
   {
-    fprintferr("adding vector = %Zs\n",V);
-    fprintferr("vector in new basis = %Zs\n",a);
-    fprintferr("list = %Zs\n",L);
-    fprintferr("base change matrix =\n%Zs\n", invp);
+    fprintferr("adding vector = %Ps\n",V);
+    fprintferr("vector in new basis = %Ps\n",a);
+    fprintferr("list = %Ps\n",L);
+    fprintferr("base change matrix =\n%Ps\n", invp);
   }
   k = 1; while (k<n && (L[k] || gcmp0(gel(a,k)))) k++;
   if (k == n) return 0;
@@ -2014,7 +2014,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   if (!BORNE) borne2 = mpsub(norme1,eps);
   else        borne2 = mpmul(norme1,alpha);
   if (DEBUGLEVEL)
-    fprintferr("smallvectors looking for norm < %Zs\n",gprec_w(borne1,3));
+    fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
   v = cgetg(N,t_VEC);
   inc = const_vecsmall(n, 1);
@@ -2098,7 +2098,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
 	if (!check(data,x)) { checkcnt++ ; continue; /* main */}
-	if (DEBUGLEVEL>4) fprintferr("New bound: %Zs", norme1);
+	if (DEBUGLEVEL>4) fprintferr("New bound: %Ps", norme1);
 	borne1 = mpadd(norme1, eps);
 	borne2 = mpmul(borne1, alpha);
 	s = 0; checkcnt = 0;

@@ -1751,7 +1751,7 @@ dochk_gerepileupto(GEN av, GEN x)
   if (!isonstack(x)) return 1;
   if (x > av)
   {
-    pari_warn(warner,"bad object %Zs",x);
+    pari_warn(warner,"bad object %Ps",x);
     return 0;
   }
   tx = typ(x);
@@ -1761,7 +1761,7 @@ dochk_gerepileupto(GEN av, GEN x)
   for (i=lontyp[tx]; i<lx; i++)
     if (!dochk_gerepileupto(av, gel(x,i)))
     {
-      pari_warn(warner,"bad component %ld in object %Zs",i,x);
+      pari_warn(warner,"bad component %ld in object %Ps",i,x);
       return 0;
     }
   return 1;
@@ -1781,17 +1781,17 @@ dbg_gerepile(pari_sp av)
     const long tx = typ(x), lx = lg(x);
     GEN a;
 
-    pari_printf(" [%ld] %Zs:", x - (GEN)avma, x);
+    pari_printf(" [%ld] %Ps:", x - (GEN)avma, x);
     if (! is_recursive_t(tx)) { pari_putc('\n'); x += lx; continue; }
     a = x + lontyp[tx]; x += lx;
-    for (  ; a < x; a++) pari_printf("  %Zs,", *a);
+    for (  ; a < x; a++) pari_printf("  %Ps,", *a);
     pari_printf("\n");
   }
 }
 void
 dbg_gerepileupto(GEN q)
 {
-  fprintferr("%Zs:\n", q);
+  fprintferr("%Ps:\n", q);
   dbg_gerepile((pari_sp) (q+lg(q)));
 }
 
