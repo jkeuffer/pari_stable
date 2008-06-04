@@ -1,4 +1,4 @@
-svn list -R | grep -v '/$'
+svn list -R -r COMMITTED | grep -v '/$'
 # generated files
 echo Odos/paricfg.h
 echo doc/usersch3.tex
