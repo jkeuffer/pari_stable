@@ -1,9 +1,0 @@
-Function: printp1
-Section: programming/specific
-C-Name: printp1
-Prototype: vs*
-Help: printp1({str}*): outputs its string arguments (in beautified format)
- without ending with newline
-Doc: outputs its (string) arguments in prettyprint (beautified) format,
- without ending with a newline.
- %\syn{NO}

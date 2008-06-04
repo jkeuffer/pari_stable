@@ -71,6 +71,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     but they were not). Use matbasistoalg / matalgtobasis, which now also
     accept t_VEC/t_COL.
   - removed obsolete optional argument to quadhilbert(D < 0)
+  - removed obsolete GP functions printp, printp1. Use print.
 
 * Specific to the PARI library:
 ===============================
