@@ -3928,13 +3928,11 @@ pari_fprintf(FILE *file, const char *fmt, ...)
   pari_vfprintf(file, fmt, ap); va_end(ap);
 }
 
-#define PR_NL() {pari_putc('\n'); pari_flush(); }
-#define PR_NO() pari_flush()
-void print   (GEN g) { print0(g, f_RAW);       PR_NL(); }
-void printp  (GEN g) { print0(g, f_PRETTYOLD); PR_NL(); }
-void printtex(GEN g) { print0(g, f_TEX);       PR_NL(); }
-void print1  (GEN g) { print0(g, f_RAW);       PR_NO(); }
-void printp1 (GEN g) { print0(g, f_PRETTYOLD); PR_NO(); }
+void print   (GEN g) { print0(g, f_RAW);       pari_putc('\n'); pari_flush(); }
+void printp  (GEN g) { print0(g, f_PRETTYOLD); pari_putc('\n'); pari_flush(); }
+void printtex(GEN g) { print0(g, f_TEX);       pari_putc('\n'); pari_flush(); }
+void print1  (GEN g) { print0(g, f_RAW);       pari_flush(); }
+void printp1 (GEN g) { print0(g, f_PRETTYOLD); pari_flush(); }
 
 void error0(GEN g) { pari_err(user, g); }
 
