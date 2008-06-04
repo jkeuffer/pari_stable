@@ -7,4 +7,5 @@ echo src/language/parse.c
 echo src/language/parse.h
 echo src/gp/gp_init.h
 echo src/gp/highlvl.h
+echo src/gp/whatnow.h
 echo src/funclist

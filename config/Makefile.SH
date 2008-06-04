@@ -530,7 +530,7 @@ EOT
 
 if test -n "$add_funclist"; then
   cat >> $file << EOT
-desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h
+desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h $src/gp/whatnow.h
 
 $src/funclist::
 	@-cd $desc && find ../functions -name CVS -prune -o -name .\\* -prune -o -type f -print | env LANG= LC_COLLATE= LC_ALL= sort | xargs cksum > funclist\$(TMPSUF)
@@ -551,6 +551,10 @@ $src/gp/gp_init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 $src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
 	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF)
 	mv $desc/highlvl\$(TMPSUF) \$@
+
+$src/gp/whatnow.h: $desc/whatnow $src/whatnow
+	cd $desc && \$(PERL) whatnow > whatnow\$(TMPSUF)
+	mv $desc/whatnow\$(TMPSUF) \$@
 
 L0MODS=$kern0/asm0.h $knone/addll.h $knone/mulll.h $knone/bfffo.h $knone/divll.h
 EOT
@@ -626,7 +630,9 @@ for dir in basemath modules language gp graph graphdyn systems; do
     depend="$ANAL_H"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
-  whatnow);;
+  whatnow)
+    depend="$src/gp/whatnow.h"
+    ;;
   init)
     depend="$ANAL_H $src/language/init.h"
     cflags="$cflags \$(DLCFLAGS)"

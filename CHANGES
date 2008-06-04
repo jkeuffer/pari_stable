@@ -166,7 +166,7 @@ BA 49- user variables can now be aliased [#790].
    52- rename matrixqz2 -> QM_ImZ_hnf, matrixqz3 -> QM_ImQ_hnf, matrixqz ->
        QM_minors_coprime
    53- bnfcertify can now handle Zimmert/Minkowski bounds > 2^31
-   54- moved misc/dico.new to src/whatnow + (somewhat) integrate it in the
+   54- moved misc/dico.new to src/whatnow + integrate it in the
        description system [ new script desc/whatnow ]
 
   Added
