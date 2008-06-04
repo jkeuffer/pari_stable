@@ -4,11 +4,11 @@
 # Outputs the whatnow_list to be included in gp.c
 #
 ##################################################
-$paridir = "$ENV{PARIDIR}" || ".";
+$src = "..";
 $special = "\@";
 
-%funold = read_oldfun("$paridir/src/language/compat.c");
-%gpold  = read_oldfun("$paridir/src/gp/gp_init.c");
+%funold = read_oldfun("$src/language/compat.c");
+%gpold  = read_oldfun("$src/gp/gp_init.c");
 for ( read_dico() )
 { my ($oldname,$name,$arg,$oldarg) = split(/$special/);
   if ($funold{$oldname}) { push(@funres, get_new($name,$oldarg,$arg)); next; }
@@ -43,7 +43,7 @@ sub read_oldfun {
 }
 
 sub read_dico {
-  o_r("$paridir/src/whatnow");
+  o_r("$src/whatnow");
   my(@diclist);
   while(<IN>)
   {
