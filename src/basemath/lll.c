@@ -340,7 +340,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   if(DEBUGLEVEL>=4)
   {
     TIMERstart(&T);
-    fprintferr("Entering L^2: LLL-parameters (%P.3f,%.3Zf), working precision %d words\n",delta,eta, prec);
+    fprintferr("Entering L^2: LLL-parameters (%P.3f,%.3Pf), working precision %d words\n",delta,eta, prec);
   }
 
   mu = cgetg(d+1, t_MAT);
