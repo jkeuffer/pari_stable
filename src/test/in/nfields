@@ -1,8 +1,7 @@
 default(realprecision,38);
 \e
 \\ Initialisations diverses
-gettime;
-p2=x^5+3021*x^4-786303*x^3-6826636057*x^2-546603588746*x+3853890514072057
+gettime; p2=Pol([1,3021,-786303,-6826636057,-546603588746,3853890514072057])
 fa=[11699,6;2392997,2;4987333019653,2]
 setrand(1);a=matrix(3,5,j,k,vectorv(5,l,random\10^8));
 setrand(1);as=matrix(3,3,j,k,vectorv(5,l,random\10^8));
