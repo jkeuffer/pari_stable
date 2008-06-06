@@ -1490,6 +1490,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   if (typ(x) == t_POL)
   {
     nfmaxord_t S;
+    x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
     if (!ZX_isirreducible(x)) pari_err(redpoler, "nfinit");
     x = pol_to_monic(x, &(T->lead));
@@ -2071,7 +2072,6 @@ polredabs0(GEN x, long flag)
   GEN y, a, u;
   nfbasic_t T;
 
-  x = Q_primpart(x);
   nfbasic_init(x, flag & nf_PARTIALFACT, NULL, &T);
   x = T.x; vx = varn(x);
 
