@@ -85,6 +85,7 @@ BA 29- missing GC in the leftrightpow functions
        as gp foo.gp [#789]
    75- check that moduli are compatible in Rg_to_Fp(t_INTMOD, t_INT)
    76- matsolve([1;2;3],[1,2,4]~) --> [1]~  (should raise an error)
+   77- allow polredabs(x in Q[X])
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

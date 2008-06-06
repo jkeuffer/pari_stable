@@ -891,7 +891,7 @@ pol_to_monic(GEN pol, GEN *lead)
   long n = lg(pol)-1;
 
   if (n==1 || gcmp1(gel(pol,n))) { *lead = NULL; return pol; }
-  return primitive_pol_to_monic(primpart(pol), lead);
+  return primitive_pol_to_monic(Q_primpart(pol), lead);
 }
 
 /* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
@@ -2071,6 +2071,7 @@ polredabs0(GEN x, long flag)
   GEN y, a, u;
   nfbasic_t T;
 
+  x = Q_primpart(x);
   nfbasic_init(x, flag & nf_PARTIALFACT, NULL, &T);
   x = T.x; vx = varn(x);
 
