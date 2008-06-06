@@ -394,8 +394,8 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
     if (bab) {*ptrB=(gram?G:B); *ptrU=U; return NULL; }
 
     av2 = avma;
-    tmp = mulrr(gmael(r,kappa-1,kappa-1), delta);
-    if (cmprr(tmp, gel(s,kappa-1)) <= 0)
+    if ((keepfirst && kappa == 2) ||
+        cmprr(mulrr(gmael(r,kappa-1,kappa-1), delta), gel(s,kappa-1)) <= 0)
     { /* Step4: Success of Lovasz's condition */
       alpha[kappa] = kappa;
       tmp = mulrr(gmael(mu,kappa,kappa-1), gmael(r,kappa,kappa-1));
