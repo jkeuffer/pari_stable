@@ -3496,7 +3496,7 @@ mathell(GEN e, GEN x, long prec)
   }
   for (i=1; i<lx; i++)
   {
-    coeff(y,i,i) = pdiag[i];
+    gcoeff(y,i,i) = gel(pdiag,i);
     for (j=i+1; j<lx; j++)
     {
       h = ghell(e, addell(e,gel(x,i),gel(x,j)), prec);
@@ -3573,7 +3573,7 @@ elltaniyama(GEN e, long prec)
   if (!prec) goto END;
   c = gsqr(d);
   /* 4x^3 + b2 x^2 + 2b4 x + b6 = c (t x'(t))^2; c = 1/t^2 + O(1/t) */
-  C = c+4; /* C[i] = coeff(c, t^i) */
+  C = c+4; /* C[i] = coef(c, t^i) */
   X = x+4;
   /* n = -3 */
   gel(X,-1) = gmul2n(gmul(gel(X,-2),gel(C,-1)), -1);

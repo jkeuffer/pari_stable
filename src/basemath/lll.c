@@ -600,7 +600,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
   if (gcmp0(u)) B[k+1] = B[k];
   else
   {
-    B[k+1] = coeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
+    gel(B,k+1) = gcoeff(L,k,k); gcoeff(L,k,k) = gen_1; fl[k] = 1;
   }
 }
 

@@ -2426,7 +2426,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   cyc = cgetg(lo,t_VEC); /* elementary divisors */
   for (j=1; j<lo; j++)
   {
-    cyc[j] = coeff(D,j,j);
+    gel(cyc,j) = gcoeff(D,j,j);
     if (gcmp1(gel(cyc,j)))
     { /* strip useless components */
       lo = j; setlg(cyc,lo); setlg_col(Ur,lo);
@@ -2989,14 +2989,14 @@ shift_embed(GEN G, GEN Gtw, long a, long r1)
 {
   long j, k, l = lg(G);
   if (a <= r1)
-    for (j=1; j<l; j++) coeff(G,a,j) = coeff(Gtw,a,j);
+    for (j=1; j<l; j++) gcoeff(G,a,j) = gcoeff(Gtw,a,j);
   else
   {
     k = (a<<1) - r1;
     for (j=1; j<l; j++)
     {
-      coeff(G,k-1,j) = coeff(Gtw,k-1,j);
-      coeff(G,k  ,j) = coeff(Gtw,k,  j);
+      gcoeff(G,k-1,j) = gcoeff(Gtw,k-1,j);
+      gcoeff(G,k  ,j) = gcoeff(Gtw,k,  j);
     }
   }
 }

@@ -58,14 +58,14 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
     gcoeff(mu,k,k) = mpneg(Nx);
   }
   else
-    coeff(mu,k,k) = x[k];
+    gcoeff(mu,k,k) = gel(x,k);
   if (B)
   {
     gel(B,k) = x2;
-    for (i=1; i<k; i++) coeff(mu,k,i) = x[i];
+    for (i=1; i<k; i++) gcoeff(mu,k,i) = gel(x,i);
   }
   else
-    for (i=1; i<k; i++) coeff(mu,i,k) = x[i];
+    for (i=1; i<k; i++) gcoeff(mu,i,k) = gel(x,i);
   return no_prec_pb(x2);
 }
 
@@ -130,7 +130,7 @@ Q_from_QR(GEN x, long prec)
   GEN L, B = zerovec(k);
   L = zeromatcopy(k,k);
   if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
-  for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
+  for (j=1; j<=k; j++) gcoeff(L,j,j) = gel(B,j);
   return shallowtrans(L);
 }
 
@@ -398,7 +398,7 @@ lllintpartialall(GEN m, long flag)
 	  ZC_lincomb1_inplace(gel(dot,k1), gel(dot,k2), q);
 	  gcoeff(dot,k1,k1) = addii(gcoeff(dot,k1,k1),
 			            mulii(q, gcoeff(dot,k2,k1)));
-	  for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
+	  for (d = 1; d <= ncol; d++) gcoeff(dot,k1,d) = gcoeff(dot,d,k1);
 	} /* for ijdif */
 	if (low_stack(lim, stack_lim(av3,2)))
 	{

@@ -2716,7 +2716,10 @@ nfsmith(GEN nf, GEN x)
 	d = nfbezout(nf, a,b, gel(I,i),gel(I,j), &u,&v,&w,&dinv);
 	ri = rowcomb(nf, u,v,       i,j, A, i);
 	rj = rowcomb(nf, a,gneg(b), j,i, A, i);
-	for (k=1; k<=i; k++) { coeff(A,j,k) = rj[k]; coeff(A,i,k) = ri[k]; }
+	for (k=1; k<=i; k++) {
+          gcoeff(A,j,k) = gel(rj,k);
+          gcoeff(A,i,k) = gel(ri,k);
+        }
 	gel(I,i) = d; gel(I,j) = w; c = 1;
       }
       if (c) continue;

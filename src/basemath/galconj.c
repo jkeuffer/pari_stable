@@ -112,7 +112,7 @@ galoisconj2(GEN nf, long prec)
   polr = nf_get_roots(nf);
   p2 = gmael(nf, 5, 1);
   w = cgetg(n + 2, t_VEC);
-  for (i = 1; i <= n; i++) w[i] = coeff(p2, 1, i);
+  for (i = 1; i <= n; i++) gel(w,i) = gcoeff(p2, 1, i);
   for (i = 2; i <= n && nbauto < nbmax; i++)
   {
     gel(w,n+1) = gel(polr,i);
