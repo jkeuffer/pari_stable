@@ -172,7 +172,7 @@ BA 49- user variables can now be aliased [#790].
    55- bittest(x, n) no longer accepts t_VEC arguments n
 
   Added
-    1- library function gpcalloc
+    1- library function pari_calloc, cgetalloc
     2- [libpari] public generic hashtables
     3- library function FpM_FpC_mul_FpX
     4- library function shallowextract

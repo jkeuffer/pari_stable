@@ -568,6 +568,11 @@ beware that this is not permanent independent storage, but part of the stack.
 \noindent Objects allocated through these last two functions cannot be
 \kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI type.
 
+\fun{GEN}{cgetalloc}{long t, size_t l}, same as \kbd{cgetg(t, l)}, except
+that the result is allocated using \tet{pari_malloc} instead of the PARI
+stack. The resulting \kbd{GEN} is now impervious to garbage collecting
+routines, but should be freed using \tet{pari_free}.
+
 \subsec{Garbage collection}.
 See \secref{se:garbage} for a detailed explanation and many examples.
 
