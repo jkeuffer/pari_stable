@@ -353,6 +353,18 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
     for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
   return z;
 }
+GEN
+Flx_Fl_mul_to_monic(GEN y, ulong x, ulong p)
+{
+  GEN z;
+  long i, l;
+  l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1];
+  if (HIGHWORD(x | p))
+    for(i=2; i<l-1; i++) z[i] = Fl_mul(y[i], x, p);
+  else
+    for(i=2; i<l-1; i++) z[i] = (y[i] * x) % p;
+  z[l-1] = 1; return z;
+}
 
 /* Return a*x^n, assuming n >= 0 */
 GEN
@@ -374,7 +386,7 @@ Flx_normalize(GEN z, ulong p)
   long l = lg(z)-1;
   ulong p1 = z[l]; /* leading term */
   if (p1 == 1) return z;
-  return Flx_Fl_mul(z, Fl_inv(p1,p), p);
+  return Flx_Fl_mul_to_monic(z, Fl_inv(p1,p), p);
 }
 
 /* return (x * X^d) + y. Assume d > 0, x > 0 and y >= 0 */
@@ -2025,7 +2037,17 @@ FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p)
   res[1] = P[1];
   for(i=2; i<lP; i++)
     gel(res,i) = Flxq_mul(U,gel(P,i), T,p);
-  return FlxX_renormalize(res,lg(res));
+  return FlxX_renormalize(res, lP);
+}
+GEN
+FlxqX_Flxq_mul_to_monic(GEN P, GEN U, GEN T, ulong p)
+{
+  long i, lP = lg(P);
+  GEN res = cgetg(lP,t_POL);
+  res[1] = P[1];
+  for(i=2; i<lP-1; i++) gel(res,i) = Flxq_mul(U,gel(P,i), T,p);
+  gel(res,lP-1) = pol1_Flx(T[1]);
+  return FlxX_renormalize(res, lP);
 }
 
 GEN
@@ -2033,7 +2055,7 @@ FlxqX_normalize(GEN z, GEN T, ulong p)
 {
   GEN p1 = leading_term(z);
   if (!lgpol(z) || (!degpol(p1) && p1[1] == 1)) return z;
-  return FlxqX_Flxq_mul(z, Flxq_inv(p1,T,p), T,p);
+  return FlxqX_Flxq_mul_to_monic(z, Flxq_inv(p1,T,p), T,p);
 }
 
 /* x and y in Z[Y][X]. Assume T irreducible mod p */

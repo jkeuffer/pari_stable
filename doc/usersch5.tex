@@ -2276,6 +2276,9 @@ to the \kbd{FpX}~\kbd{y}, using a shallow copy (result not suitable for
 \fun{GEN}{FpX_Fp_mul}{GEN y, GEN x, GEN p} multiplies the \kbd{FpX}~\kbd{y}
 by the \kbd{Fp}~\kbd{x}.
 
+\fun{GEN}{FpX_Fp_mul_to_monic}{GEN y,GEN x,GEN p} returns $y*x$ assuming the
+result is monic of the same degree as $y$ (in particular $x\neq 0$).
+
 \fun{GEN}{FpX_rescale}{GEN P, GEN h, GEN p} returns $h^{\deg(P)} P(x/h)$.
 \kbd{P} is an \kbd{FpX} and \kbd{h} is a non-zero \kbd{Fp} (the routine would
 work with any non-zero \typ{INT} but is not efficient in this case).
@@ -2515,6 +2518,10 @@ enforce strict consistency, which would not imply any efficiency gain.)
 \fun{GEN}{FqX_Fq_mul}{GEN P, GEN U, GEN T, GEN p} multiplies the
 \kbd{FqX}~\kbd{y} by the \kbd{Fq}~\kbd{x}.
 
+\fun{GEN}{FqX_Fq_mul_to_monic}{GEN P, GEN U, GEN T, GEN p}
+returns $P*U$ assuming the result is monic of the same degree as $P$ (in
+particular $U\neq 0$).
+
 \fun{GEN}{FqX_normalize}{GEN z, GEN T, GEN p} divides the \kbd{FqX}~\kbd{z}
 by its leading term.
 
@@ -2652,6 +2659,10 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 \fun{GEN}{Flx_mul}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
+
+\fun{GEN}{Flx_Fl_mul_to_monic}{GEN y, ulong x, ulong p} returns $y*x$
+assuming the result is monic of the same degree as $y$ (in particular $x\neq
+0$).
 
 \fun{GEN}{Flx_sqr}{GEN x, ulong p}
 
@@ -2831,6 +2842,10 @@ in the main variable of \kbd{b}.
 \fun{GEN}{FlxqX_mul}{GEN x, GEN y, GEN T, ulong p}
 
 \fun{GEN}{FlxqX_Flxq_mul}{GEN P, GEN U, GEN T, ulong p}
+
+\fun{GEN}{FlxqX_Flxq_mul_to_monic}{GEN P, GEN U, GEN T, ulong p}
+returns $P*U$ assuming the result is monic of the same degree as $P$ (in
+particular $U\neq 0$).
 
 \fun{GEN}{FlxqX_normalize}{GEN z, GEN T, ulong p}
 

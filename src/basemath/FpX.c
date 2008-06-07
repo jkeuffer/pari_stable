@@ -58,7 +58,7 @@ FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);
   if (lg(z) == 2 || gcmp1(p1)) return z;
-  return FpX_Fp_mul(z, Fp_inv(p1,p), p);
+  return FpX_Fp_mul_to_monic(z, Fp_inv(p1,p), p);
 }
 
 GEN
@@ -160,6 +160,15 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
   l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
   for(i=2; i<l; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
   return z;
+}
+GEN
+FpX_Fp_mul_to_monic(GEN y,GEN x,GEN p)
+{
+  GEN z;
+  long i, l;
+  l = lg(y); z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l-1; i++) gel(z,i) = Fp_mul(gel(y,i), x, p);
+  gel(z,l-1) = gen_1; return z;
 }
 
 GEN
