@@ -170,16 +170,15 @@ static GEN
 QXQX_normalize(GEN P, GEN T)
 {
   GEN P0 = leading_term(P);
-  if (!gcmp1(P0))
+  long t = typ(P0);
+  if (t == t_POL)
   {
-    long t = typ(P0);
-    if (t == t_POL && !degpol(P0)) { P0 = gel(P0,2); t = t_FRAC; }
-    if (is_rational_t(t))
-      P = RgX_Rg_div(P, P0);
-    else
-      P = RgXQX_RgXQ_mul(P, QXQ_inv(P0,T), T);
+    if (degpol(P0)) return RgXQX_RgXQ_mul(P, QXQ_inv(P0,T), T);
+    P0 = gel(P0,2); t = typ(P0);
   }
-  return P;
+  /* t = t_INT/t_FRAC */
+  if (t == t_INT && is_pm1(P0) && signe(P0) > 0) return P; /* monic */
+  return RgX_Rg_div(P, P0);
 }
 static GEN
 get_den(GEN *nf, GEN T)
@@ -198,6 +197,15 @@ get_den(GEN *nf, GEN T)
   return den;
 }
 
+/* lt(A) is an integer; ensure it is not a constant t_POL. In place */
+static void
+ensure_lt_INT(GEN A)
+{
+  long n = lg(A)-1;
+  GEN lt = gel(A,n);
+  while (typ(lt) != t_INT) gel(A,n) = lt = gel(lt,2);
+}
+
 /* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
@@ -209,7 +217,7 @@ nfroots(GEN nf,GEN pol)
   if (!nf) return nfrootsQ(pol);
   T = get_nfpol(nf, &nf);
   A = fix_relative_pol(T,pol,1);
-  d = degpol(pol);
+  d = degpol(A);
   if (d < 0) pari_err(zeropoler, "nfroots");
   if (d == 0) return cgetg(1,t_VEC);
   if (d == 1)
@@ -224,14 +232,15 @@ nfroots(GEN nf,GEN pol)
   den = get_den(&nf, T);
   (void)nfgcd_all(A, RgX_deriv(A), T,
                   den == gen_1? gel(nf,4): mulii(gel(nf,4), den), &A);
-  A = Q_primpart( QXQX_normalize(A, T) );
+  if (degpol(A) != d) A = Q_primpart( QXQX_normalize(A, T) );
+  ensure_lt_INT(A);
   A = nfsqff(nf,A,1, den);
   A = gerepileupto(av, RgXQV_to_mod(A, T));
   gen_sort_inplace(A, (void*)&cmp_RgX, &cmp_nodata, NULL);
   return A;
 }
 
-/* assume x is squarefree */
+/* assume x is squarefree monic in nf.zk[X] */
 int
 nfissplit(GEN nf, GEN x)
 {
@@ -400,6 +409,7 @@ nffactor(GEN nf,GEN pol)
   bad = gel(nf,4); if (den != gen_1) bad = mulii(bad, den);
   (void)nfgcd_all(A, RgX_deriv(A), T, bad, &B);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
+  ensure_lt_INT(B);
   y = nfsqff(nf,B,0, den);
   if (DEBUGLEVEL>3) fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
 
@@ -1474,6 +1484,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
   }
 }
 
+/* assume lt(T) is a t_INT and T square free */
 static GEN
 nfsqff_trager(GEN u, GEN T, GEN dent)
 {
@@ -1522,6 +1533,7 @@ polfnf(GEN a, GEN T)
   bad = dent = ZX_disc(T);
   if (tmonic) dent = indexpartial(T, dent);
   (void)nfgcd_all(A,RgX_deriv(A), T, dent, &B);
+  ensure_lt_INT(B);
   y = nfsqff_trager(B, T, dent);
   fact_from_sqff(rep, A, B, y, T, bad);
   return sort_factor_pol(rep, cmp_RgX);
@@ -1641,6 +1653,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
   return res;
 }
 
+/* assume pol monic in nf.zk[X] */
 GEN
 nfrootsall_and_pr(GEN nf, GEN pol)
 {
