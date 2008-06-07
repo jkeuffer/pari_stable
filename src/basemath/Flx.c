@@ -1989,9 +1989,8 @@ FlxqX_red(GEN z, GEN T, ulong p)
   GEN res;
   long i, l = lg(z);
   res = cgetg(l,t_POL); res[1] = z[1];
-  for(i=2;i<l;i++)
-    gel(res,i) = Flx_rem(gel(z,i),T,p);
-  return FlxX_renormalize(res,lg(res));
+  for(i=2;i<l;i++) gel(res,i) = Flx_rem(gel(z,i),T,p);
+  return FlxX_renormalize(res,l);
 }
 
 GEN

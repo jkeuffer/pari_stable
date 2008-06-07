@@ -1109,9 +1109,9 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, GEN mod2, long x)
 static GEN
 galoisgrouptopol(GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
 {
-  GEN mod2 = shifti(mod,-1), aut = cgetg(lg(res), t_COL);
-  long i;
-  for (i = 1; i < lg(res); i++)
+  long i, l = lg(res);
+  GEN mod2 = shifti(mod,-1), aut = cgetg(l, t_COL);
+  for (i = 1; i < l; i++)
   {
     if (DEBUGLEVEL>=6) fprintferr("%d ",i);
     gel(aut,i) = permtopol(gel(res,i), L, M, den, mod, mod2, v);

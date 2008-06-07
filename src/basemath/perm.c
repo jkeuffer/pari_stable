@@ -478,12 +478,11 @@ perm_mul(GEN s, GEN t)
 }
 
 /* Multiply (compose) two permutations, putting the result in the second one. */
-static GEN
-perm_mul_inplace(GEN s, GEN t)
+static void
+perm_mul_inplace2(GEN s, GEN t)
 {
-  long i;
-  for (i = 1; i < lg(s); i++) t[i] = s[t[i]];
-  return t;
+  long i, l = lg(s);
+  for (i = 1; i < l; i++) t[i] = s[t[i]];
 }
 /* Compute the inverse (reciprocal) of a permutation. */
 GEN
@@ -1060,9 +1059,9 @@ group_subgroups(GEN G)
 	GEN c = gmael(p1,j,1);
 	if (!perm_commute(gel(c,1),gel(c,3)))
 	{
-	  if (perm_commute(gel(c,2),gel(c,3))) { lswap(c[1], c[2]); }
+	  if (perm_commute(gel(c,2),gel(c,3))) { swap(gel(c,1), gel(c,2)); }
 	  else
-	    (void)perm_mul_inplace(gel(c,2), gel(c,1));
+	    perm_mul_inplace2(gel(c,2), gel(c,1));
 	}
       }
   }
