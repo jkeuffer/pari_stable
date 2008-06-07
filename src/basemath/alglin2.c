@@ -168,24 +168,27 @@ caract(GEN x, long v)
 {
   long k, n;
   pari_sp av=avma;
-  GEN  p1, C, x_k, Q;
+  GEN  T, C, x_k, Q;
 
-  if ((p1 = easychar(x,v,NULL))) return p1;
+  if ((T = easychar(x,v,NULL))) return T;
 
-  p1 = gen_0; Q = C = gen_1; n = lg(x)-1;
-  x_k = pol_x(v);
-  for (k=0; k<=n; k++)
+  n = lg(x)-1;
+  if (n == 1) return gerepileupto(av, deg1pol(gen_1, gneg(gcoeff(x,1,1)), v));
+
+  x_k = pol_x(v); /* to be modified in place */
+  T = det(x); C = utoineg(n); Q = pol_x(v);
+  for (k=1; k<=n; k++)
   {
-    GEN mk = stoi(-k), d;
+    GEN mk = utoineg(k), d;
     gel(x_k,2) = mk;
     d = det(RgM_Rg_add_shallow(x, mk));
-    p1 = gadd(gmul(p1, x_k), gmul(gmul(C, d), Q));
+    T = RgX_add(gmul(T, x_k), RgX_Rg_mul(Q, gmul(C, d)));
     if (k == n) break;
 
-    Q = gmul(Q, x_k);
-    C = diviuexact(mulsi(k-n,C), k+1); /* (-1)^{k} binomial(n,k) */
+    Q = RgX_mul(Q, x_k);
+    C = diviuexact(mulsi(k-n,C), k+1); /* (-1)^k binomial(n,k) */
   }
-  return gerepileupto(av, RgX_Rg_div(p1, mpfact(n)));
+  return gerepileupto(av, RgX_Rg_div(T, mpfact(n)));
 }
 
 /* assume x square matrice */
