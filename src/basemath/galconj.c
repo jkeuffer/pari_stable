@@ -1068,7 +1068,7 @@ GEN
 vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
 {
   pari_sp av;
-  long i, n = lg(L), x = varn(T);
+  long i, n = lg(L);
   GEN P, Tp, M = cgetg(n, t_MAT);
   av = avma;
   Tp = gclone(FpX_deriv(T,mod)); /*clone*/
