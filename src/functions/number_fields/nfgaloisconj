@@ -26,24 +26,11 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  and increasing the default precision may help. This variant is slow and
  unreliable: don't use it.
  
- If $\fl=4$, use Allombert's algorithm and permutation testing. If the
- field is Galois with weakly super-solvable Galois group, return
- the complete list of automorphisms, else only the identity element. If
- present, $d$ is assumed to be a multiple of the least common
- denominator of the conjugates expressed as polynomial in a root of
- \var{pol}.
- 
- A group G is weakly super-solvable (WKSS) if it contains a super-solvable
- normal subgroup $H$ such that $G/H$ is trivial or isomorphic to $A_4$
- or $S_4$. Abelian and nilpotent groups are WKSS. In practice, almost all
- small groups are WKSS, the exceptions having order 36(1 exception), 48(2),
- 56(1), 60(1), 72(5), 75(1), 80(1), 96(10) and $\geq 108$.
- 
- Hence $\fl = 4$ permits to quickly check whether a polynomial of order
- strictly less than $36$ is Galois or not. (Note that the result is rigorous,
- whereas factorisations modulo small primes are not enough when the
- polynomial is indeed Galois.) This method is much faster than \kbd{nfroots}
- and can be applied to polynomials of huge degree.
+ If $\fl=4$, use \kbd{galoisinit}. If the field is Galois with weakly
+ super-solvable Galois group (see \tet{galoisinit}), return the complete list
+ of automorphisms, else only the identity element. If present, $d$ is assumed to
+ be a multiple of the least common denominator of the conjugates expressed as
+ polynomial in a root of \var{pol}.
  
  This routine can only compute $\Q$-automorphisms, but it may be used to get
  $K$-automorphism for any base field $K$ as follows:
