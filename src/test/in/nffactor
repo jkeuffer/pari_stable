@@ -32,3 +32,6 @@ lift(nfroots(subst(S,x,y),S))
 S=x^9+9*x^8+36*x^7+69*x^6+36*x^5-99*x^4-303*x^3-450*x^2-342*x-226;
 T=y^9-15*y^6-87*y^3-125;
 lift(nffactor(T,S))
+
+lift(nffactor(nfinit(y^2+1),(x-y)^3*(x^2+y)^4*(x^3-y*x+y)^5))
+
