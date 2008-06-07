@@ -1709,11 +1709,7 @@ bittest(GEN x, long n)
 }
 
 GEN
-gbittest(GEN x, GEN n)
-{
-  if (typ(n) != t_INT) pari_err(typeer,"bittest");
-  return map_proto_lGL(bittest,x,itos(n));
-}
+gbittest(GEN x, long n) { return map_proto_lGL(bittest,x,n); }
 
 /***********************************************************************/
 /**                                                                   **/

@@ -169,6 +169,7 @@ BA 49- user variables can now be aliased [#790].
    53- bnfcertify can now handle Zimmert/Minkowski bounds > 2^31
    54- moved misc/dico.new to src/whatnow + integrate it in the
        description system [ new script desc/whatnow ]
+   55- bittest(x, n) no longer accepts t_VEC arguments n
 
   Added
     1- library function gpcalloc
