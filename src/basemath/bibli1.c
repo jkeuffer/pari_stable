@@ -1096,10 +1096,10 @@ static void
 SWAP(pslq_M *M, long m)
 {
   long j, n = M->n;
-  lswap(M->y[m], M->y[m+1]);
-  lswap(M->B[m], M->B[m+1]);
-  for (j=1; j<=n; j++) lswap(coeff(M->A,m,j), coeff(M->A,m+1,j));
-  for (j=1; j<n;  j++) lswap(coeff(M->H,m,j), coeff(M->H,m+1,j));
+  swap(gel(M->y,m), gel(M->y,m+1));
+  swap(gel(M->B,m), gel(M->B,m+1));
+  for (j=1; j<=n; j++) swap(gcoeff(M->A,m,j), gcoeff(M->A,m+1,j));
+  for (j=1; j<n;  j++) swap(gcoeff(M->H,m,j), gcoeff(M->H,m+1,j));
 }
 
 static void

@@ -542,8 +542,8 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
     gel(B,k) = gdiv(q, Bk);
   }
 
-  lswap(h[k-1], h[k]); lx = lg(L);
-  for (j=1; j<k-1; j++) lswap(coeff(L,k-1,j), coeff(L,k,j));
+  swap(gel(h,k-1), gel(h,k)); lx = lg(L);
+  for (j=1; j<k-1; j++) swap(gcoeff(L,k-1,j), gcoeff(L,k,j));
   if (fl[k])
   {
     for (i=k+1; i<lx; i++)

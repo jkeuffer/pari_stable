@@ -333,7 +333,7 @@ hess(GEN x)
       if (gcmp0(p)) continue;
 
       for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
-      lswap(x[i], x[m]); p = ginv(p);
+      swap(gel(x,i), gel(x,m)); p = ginv(p);
       for (i=m+1; i<lx; i++)
       {
 	p1 = gcoeff(x,i,m-1);
@@ -1178,7 +1178,7 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
 {
   GEN p1, u, v, d;
 
-  if (gcmp0(ak)) { lswap(A[j],A[k]); return; }
+  if (gcmp0(ak)) { swap(gel(A,j), gel(A,k)); return; }
   if (typ(aj) == t_INT) {
     if (typ(ak) != t_INT) { aj = mulii(aj, gel(ak,2)); ak = gel(ak,1); }
   } else {
@@ -1515,7 +1515,7 @@ col_dup(long l, GEN col)
 **   C   = r x (co-1) matrix of GEN
 **   perm= permutation vector (length li-1), indexing the rows of mat: easier
 **     to maintain perm than to copy rows. For columns we can do it directly
-**     using e.g. lswap(mat[i], mat[j])
+**     using e.g. swap(mat[i], mat[j])
 **   k0 = integer. The k0 first lines of mat are dense, the others are sparse.
 ** Output: cf ASCII art in the function body
 **
@@ -1569,8 +1569,8 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
       case 1: /* move trivial generator between lig+1 and li */
 	lswap(perm[i], perm[lig]);
-	if (T) lswap(T[n], T[col]);
-	lswap(mat[n], mat[col]); p = gel(mat,col);
+	if (T) swap(gel(T,n), gel(T,col));
+	swap(gel(mat,n), gel(mat,col)); p = gel(mat,col);
 	if (p[perm[lig]] < 0) /* = -1 */
 	{ /* convert relation -g = 0 to g = 0 */
 	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1604,8 +1604,8 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
     /* only 0, +/- 1 entries, at least 2 of them non-zero */
     lswap(perm[i], perm[lig]);
-    lswap(mat[n], mat[col]); p = gel(mat,col);
-    if (T) lswap(T[n], T[col]);
+    swap(gel(mat,n), gel(mat,col)); p = gel(mat,col);
+    if (T) swap(gel(T,n), gel(T,col));
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1647,8 +1647,8 @@ hnfspec_i(GEN mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
     lswap(vmax[n], vmax[col]);
     lswap(perm[i], perm[lig]);
-    lswap(mat[n], mat[col]); p = gel(mat,col);
-    if (T) lswap(T[n], T[col]);
+    swap(gel(mat,n), gel(mat,col)); p = gel(mat,col);
+    if (T) swap(gel(T,n), gel(T,col));
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
@@ -1945,7 +1945,11 @@ ZC_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
 {
   GEN p1,u,v,d;
 
-  if (!signe(ak)) { lswap(A[j],A[k]); if (U) lswap(U[j],U[k]); return; }
+  if (!signe(ak)) { 
+    swap(gel(A,j), gel(A,k));
+    if (U) swap(gel(U,j), gel(U,k));
+    return;
+  }
   d = bezout(aj,ak,&u,&v);
   /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
@@ -1960,10 +1964,10 @@ ZC_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
   { /* aj | ak */
     p1 = diviiexact(ak,aj); togglesign(p1);
     ZC_lincomb1_inplace(gel(A,k), gel(A,j), p1);
-    lswap(A[j], A[k]);
+    swap(gel(A,j), gel(A,k));
     if (U) {
       ZC_lincomb1_inplace(gel(U,k), gel(U,j), p1);
-      lswap(U[j], U[k]);
+      swap(gel(U,j), gel(U,k));
     }
     return;
   }
@@ -2424,8 +2428,8 @@ hnfswap(GEN A, GEN B, long k, GEN lambda, GEN D)
   GEN t, p1, p2, Lk = gel(lambda,k);
   long i,j,n = lg(A);
 
-  lswap(A[k],A[k-1]);
-  if (B) lswap(B[k],B[k-1]);
+  swap(gel(A,k), gel(A,k-1));
+  if (B) swap(gel(B,k), gel(B,k-1));
   for (j=k-2; j; j--) swap(gcoeff(lambda,j,k-1), gel(Lk,j));
   for (i=k+1; i<n; i++)
   {
@@ -2803,8 +2807,8 @@ ZM_hnfall(GEN A, GEN *ptB, long remove)
     r--;
     if (j < r) /* A[j] != 0 */
     {
-      lswap(A[j], A[r]);
-      if (B) lswap(B[j], B[r]);
+      swap(gel(A,j), gel(A,r));
+      if (B) swap(gel(B,j), gel(B,r));
       h[j] = h[r]; h[r] = li; c[li] = r;
     }
     if (signe(gcoeff(A,li,r)) < 0)

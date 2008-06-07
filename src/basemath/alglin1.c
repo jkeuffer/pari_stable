@@ -2865,7 +2865,7 @@ det_simple_gauss(GEN a, int inexact)
     }
     if (k != i)
     {
-      lswap(a[i],a[k]); s = -s;
+      swap(gel(a,i), gel(a,k)); s = -s;
       p = gcoeff(a,i,i);
     }
 
@@ -2936,7 +2936,7 @@ det(GEN a)
     {
       k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
       if (k>nbco) return gerepilecopy(av, p);
-      lswap(a[k], a[i]); s = -s;
+      swap(gel(a,k), gel(a,i)); s = -s;
       p = gcoeff(a,i,i);
     }
     ci = gel(a,i);

@@ -696,9 +696,9 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   p2 = nftau(r1, gel(B,k-1));
   if (gcmp(gmulsg(alpha,p1), gmulsg(alpha-1,p2)) > 0) return 0;
 
-  lswap(MC[k-1],MC[k]);
-  lswap(h[k-1],  h[k]);
-  lswap(I[k-1],  I[k]);
+  swap(gel(MC,k-1),gel(MC,k));
+  swap(gel(h,k-1), gel(h,k));
+  swap(gel(I,k-1), gel(I,k));
   for (j=1; j<=k-2; j++) swap(gcoeff(mu,k-1,j),gcoeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
   mufc = gconj(muf);

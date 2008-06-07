@@ -2613,7 +2613,9 @@ nfhnf(GEN nf, GEN x)
 
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
     if (!j) pari_err(talker,"not a matrix of maximal rank in nfhnf");
-    if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
+    if (j==def) j--; else {
+      swap(gel(A,j), gel(A,def)); swap(gel(I,j), gel(I,def));
+    }
 
     y = gcoeff(A,i,def);
     gel(A,def) = element_mulvec(nf, element_inv(nf,y), gel(A,def));
@@ -2945,7 +2947,9 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   for (i=li-1; i>=ldef; i--)
   {
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
-    if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
+    if (j==def) j--; else {
+      swap(gel(A,j), gel(A,def)); swap(gel(I,j), gel(I,def));
+    }
     for (  ; j; j--)
     {
       GEN a, b, S, T, S0, T0 = gel(A,j);

@@ -1533,7 +1533,7 @@ END:
     long j, lx;
     GEN y = (typ(x) == t_LIST)? list_data(x): x;
     lx = lg(y);
-    for (j=1; j<=(lx-1)>>1; j++) lswap(y[j], y[lx-j]);
+    for (j=1; j<=(lx-1)>>1; j++) swap(gel(y,j), gel(y,lx-j));
   }
   return x;
 }

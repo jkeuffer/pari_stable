@@ -232,7 +232,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     for (s=j+1; s<i; s++)
       if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
-    lswap(V[j], V[minp]);
+    swap(gel(V,j), gel(V,minp));
     lswap(link[j], link[minp]);
 
     minp = j+1;
@@ -240,7 +240,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
     for (s=j+2; s<i; s++)
       if (degpol(V[s]) < mind) { minp = s; mind = degpol(V[s]); }
 
-    lswap(V[j+1], V[minp]);
+    swap(gel(V,j+1), gel(V,minp));
     lswap(link[j+1], link[minp]);
 
     if (T)

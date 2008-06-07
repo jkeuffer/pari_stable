@@ -2231,9 +2231,9 @@ e12(ulong k, long prec)
     case 3: gel(z,1) = ginv( gsqrt(gen_2, prec) );
 	    gel(z,2) = mpcopy(gel(z,1)); break;
   }
-  if (sPiov2) lswap(z[1], z[2]);
-  if (sPi) togglesign(z[1]);
-  if (s)   togglesign(z[2]);
+  if (sPiov2) swap(gel(z,1), gel(z,2));
+  if (sPi) togglesign(gel(z,1));
+  if (s)   togglesign(gel(z,2));
   return z;
 }
 
