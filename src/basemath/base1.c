@@ -1695,7 +1695,7 @@ allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
   nfbasic_t T;
   nfbasic_init(x, flag, fa, &T);
   set_LLL_basis(&T, &ro);
-  if (T.lead) pari_err(impl,"polred for non-monic polynomial");
+  if (T.lead) pari_err(impl,"polred for non-monic polynomials");
   return _polred(T.x, T.bas, pta, CHECK);
 }
 

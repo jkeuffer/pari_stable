@@ -1409,7 +1409,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   nf=gel(bnf,7); cnd=gmael3(bnr,2,1,1);
   polrel = fix_relative_pol(gel(nf,1),polrel,1);
   if (!gcmp1(leading_term(polrel)))
-    pari_err(impl,"rnfnormgroup for non-monic polynomial");
+    pari_err(impl,"rnfnormgroup for non-monic polynomials");
 
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
