@@ -497,37 +497,37 @@ Let \kbd{x} and \kbd{y} be two preexisting PARI objects and suppose that we
 want to compute $\kbd{x}^2 + \kbd{y}^2$. This is done using the following
 program:
 \bprog
-  GEN p1 = gsqr(x);
-  GEN p2 = gsqr(y), z = gadd(p1,p2);
+  GEN x2 = gsqr(x);
+  GEN y2 = gsqr(y), z = gadd(x2,y2);
 @eprog\noindent
 The \kbd{GEN} \kbd{z} indeed points at the desired quantity. However,
-consider the stack: it contains as unnecessary garbage \kbd{p1} and \kbd{p2}.
-More precisely it contains (in this order) \kbd{z}, \kbd{p2}, \kbd{p1}.
+consider the stack: it contains as unnecessary garbage \kbd{x2} and \kbd{y2}.
+More precisely it contains (in this order) \kbd{z}, \kbd{y2}, \kbd{x2}.
 (Recall that, since the stack grows downward from the top, the most recent
 object comes first.)
 
-It is not possible to get rid of \kbd{p1}, \kbd{p2} before \kbd{z} is
+It is not possible to get rid of \kbd{x2}, \kbd{y2} before \kbd{z} is
 computed, since they are used in the final operation. We cannot record
-\kbd{avma} before \kbd{p1} is computed and restore it later, since this would
+\kbd{avma} before \kbd{x2} is computed and restore it later, since this would
 destroy \kbd{z} as well. It is not possible either to use the function
-\kbd{cgiv} since \kbd{p1} and \kbd{p2} are not at the bottom of the stack and
+\kbd{cgiv} since \kbd{x2} and \kbd{y2} are not at the bottom of the stack and
 we do not want to give back~\kbd{z}.
 
 But using \kbd{gerepile}, we can give back the memory locations corresponding
-to \kbd{p1}, \kbd{p2}, and move the object \kbd{z} upwards so that no
+to \kbd{x2}, \kbd{y2}, and move the object \kbd{z} upwards so that no
 space is lost. Specifically:
 \bprog
   pari_sp ltop = avma;  /*@Ccom remember the current address of the top of the stack */
-  GEN p1 = gsqr(x);
-  GEN p2 = gsqr(y);
+  GEN x2 = gsqr(x);
+  GEN y2 = gsqr(y);
   pari_sp lbot = avma;  /*@Ccom keep the address of the bottom of the garbage pile */
-  GEN z = gadd(p1, p2); /*@Ccom z is now the last object on the stack */
+  GEN z = gadd(x2, y2); /*@Ccom z is now the last object on the stack */
   z = gerepile(ltop, lbot, z);
 @eprog
 \noindent Of course, the last two instructions could also have been
 written more simply:
 \bprog
-  z = gerepile(ltop, lbot, gadd(p1,p2));
+  z = gerepile(ltop, lbot, gadd(x2,y2));
 @eprog\noindent In fact \kbd{gerepileupto} is even simpler to use, because
 the result of \kbd{gadd} is the last object on the stack and \kbd{gadd}
 is guaranteed to return an object suitable for \kbd{gerepileupto}:
@@ -629,7 +629,7 @@ gel(z, 2) = gsub(p3,p4); z = gerepile(ltop,lbot,z);
 \misctitle{Exercise}. Write a function which multiplies a matrix by a column
 vector. Hint: start with a \kbd{cgetg} of the result, and use \kbd{gerepile}
 whenever a coefficient of the result vector is computed. You can look at the
-answer in \kbd{src/basemath/gen1.c:MC\_mul()}.
+answer in \kbd{src/basemath/RgV.c:RgM\_RgC\_mul()}.
 
 \subsubsec{gerepileall}
 
@@ -773,10 +773,9 @@ or simply \kbd{z = cgetc(MEDDEFAULTPREC)}.
 \bprog
   z = cgetg(4, t_MAT);
   for(i=1; i<4; i++) gel(z, i) = cgetg(5, t_COL);
-@eprog
-%
-\noindent To create space for the matrix elements themselves,
-follow this with a double loop, filling each column vector.
+@eprog\noindent
+or simply \kbd{z = zeromatcopy(4, 3)}, which further initializes all entries
+to \kbd{gen\_0}.
 
 These last two examples illustrate the fact that since PARI types are
 recursive, all the branches of the tree must be created. The function
