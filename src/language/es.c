@@ -2600,10 +2600,17 @@ bruti_intern(GEN g, pariout_t *T, outString *S, int addsign)
         if (typ(g[5])==t_STR)
           str_puts(S, GSTR(gel(g,5)));
         else
-          pari_printf("(%s)->%s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+        {
+          str_putc(S,'(');   str_puts(S,GSTR(gmael(g,5,1)));
+          str_puts(S,")->"); str_puts(S,GSTR(gmael(g,5,2)));
+        }
       }
       else
-        pari_printf("{\"%s\",%Ps,%Ps}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+      {
+        str_puts(S,"{\""); str_puts(S,GSTR(gel(g,2)));
+        str_puts(S,"\","); wr_vecsmall(T,S,gel(g,3));
+        str_putc(S,',');   bruti(gel(g,4),T,S); str_putc(S,'}');
+      }
       break;
 
     case t_MAT:
@@ -2824,10 +2831,17 @@ texi_sign(GEN g, pariout_t *T, outString *S, int addsign)
         if (typ(g[5])==t_STR)
           str_puts(S, GSTR(gel(g,5)));
         else
-          pari_printf("(%s)\\mapsto %s",GSTR(gmael(g,5,1)),GSTR(gmael(g,5,2)));
+        {
+          str_putc(S,'(');          str_puts(S,GSTR(gmael(g,5,1)));
+          str_puts(S,")\\mapsto "); str_puts(S,GSTR(gmael(g,5,2)));
+        }
       }
       else
-        pari_printf("\\{\"%s\",%Ps,%Ps\\}",GSTR(gel(g,2)),gel(g,3),gel(g,4));
+      {
+        str_puts(S,"\\{\""); str_puts(S,GSTR(gel(g,2)));
+        str_puts(S,"\","); texi(gel(g,3),T,S);
+        str_putc(S,',');   texi(gel(g,4),T,S); str_puts(S,"\\}");
+      }
       break;
 
     case t_MAT:
