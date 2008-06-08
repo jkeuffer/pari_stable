@@ -311,12 +311,9 @@ static GEN AllStark(GEN data, GEN nf, long flag, long prec);
 static GEN
 InitQuotient(GEN C)
 {
-  GEN z = cgetg(5, t_VEC), U, D = ZM_snfall_i(C, &U, NULL, 1);
   long junk;
-  gel(z,1) = detcyc(D, &junk);
-  gel(z,2) = D;
-  gel(z,3) = U;
-  gel(z,4) = C; return z;
+  GEN U, D = ZM_snfall_i(C, &U, NULL, 1), cyc = detcyc(D, &junk);
+  return mkvec4(cyc, D, U, C);
 }
 
 /* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
@@ -365,8 +362,6 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   long nb, i;
   GEN D, Mr, U, T, subgrp;
 
-  disable_dbg(0);
-
   Mr = diagonal_i(gmael(bnr, 5, 2));
   D = ZM_snfall_i(hnf_gauss(C, Mr), &U, NULL, 1);
   T = ZM_mul(C,ginv(U));
@@ -374,8 +369,6 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
     gel(subgrp,i) = ZM_hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
-
-  disable_dbg(-1);
   return gerepilecopy(av, subgrp);
 }
 
@@ -403,7 +396,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   long v, e, f;
   pari_sp av = avma;
   GEN bnf, mod, mod0, bnrpr, subpr, M, dtQ, p1;
-  GEN rep, cycpr, cycQ;
+  GEN cycpr, cycQ;
 
   bnf  = gel(bnr,1);
   mod  = gmael(bnr, 2, 1);
@@ -417,12 +410,9 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     e = 1;
   }
   else
-  {
-    GEN mpr = cgetg(3, t_VEC);
+  { /* part of mod coprime to pr */
     GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
-    gel(mpr,1) = mpr0; /* part of mod coprime to pr */
-    mpr[2] = mod[2];
-    bnrpr = buchrayinitgen(bnf, mpr);
+    bnrpr = buchrayinitgen(bnf, mkvec2(mpr0, gel(mod,2)));
     cycpr = gmael(bnrpr, 5, 2);
     M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
     subpr = ZM_hnf(shallowconcat(M, diagonal_i(cycpr)));
@@ -435,10 +425,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   p1   = ZM_ZC_mul(gel(dtQ,3), isprincipalray(bnrpr, pr));
   cycQ = gel(dtQ,2);
   f  = itos( Order(cycQ, p1) );
-  avma = av;
-  rep = cgetg(3, t_VECSMALL);
-  rep[1] = e;
-  rep[2] = f; return rep;
+  avma = av; return mkvecsmall2(e, f);
 }
 
 static GEN get_listCR(GEN bnr, GEN dtQ);
@@ -454,7 +441,9 @@ CplxModulus(GEN data, long *newprec, long prec)
   pari_sp av;
   GEN pol, listCR, cpl, bnr = gel(data,1), nf = checknf(bnr);
 
+  disable_dbg(0);
   listCR = get_listCR(bnr, gel(data,3));
+  disable_dbg(-1);
   for (av = avma;; avma = av)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
@@ -490,7 +479,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
   long first = 1, pr, rb, oldcpl = -1, iscyc = 0;
   pari_sp av = avma, av1;
-  GEN rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
+  GEN bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC, rep = NULL;
   GEN candD, bpr, indpr, sgp, p1, p2;
 
   sgp = gel(dtQ,4);
@@ -498,8 +487,6 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   nf  = gel(bnf,7);
   N   = degpol(nf[1]);
   f   = gmael3(bnr, 2, 1, 1);
-
-  rep = NULL;
 
   /* if cpl < rb, it is not necessary to try another modulus */
   rb = expi( powgi(mulii(gel(nf,3), ZM_det_triangular(f)), gmul2n(gmael(bnr,5,1), 3)) );
@@ -510,8 +497,8 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   indpr = cgetg(nbp + 1,t_VECSMALL);
   for (i = 1; i <= nbp; i++)
   {
-    p1 = GetIndex(gel(bpr,i), bnr, sgp);
-    indpr[i] = p1[1] * p1[2];
+    GEN ef = GetIndex(gel(bpr,i), bnr, sgp);
+    indpr[i] = ef[1] * ef[2];
   }
 
   /* Initialization of the possible infinite part */
@@ -566,7 +553,9 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	  ImC = ComputeKernel(bnrm, bnr, dtQ);
 
 	  /* ... and its subgroups of index 2 */
+          disable_dbg(0);
 	  candD  = ComputeIndex2Subgroup(bnrm, ImC);
+          disable_dbg(-1);
 	  nbcand = lg(candD) - 1;
 	  for (c = 1; c <= nbcand; c++)
 	  {
@@ -580,8 +569,8 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	    /* check the splitting of primes */
 	    for (j = 1; j <= nbp; j++)
 	    {
-	      p1 = GetIndex(gel(bpr,j), bnrm, D);
-	      if (p1[1] * p1[2] == indpr[j]) break; /* no good */
+	      GEN ef = GetIndex(gel(bpr,j), bnrm, D);
+	      if (ef[1] * ef[2] == indpr[j]) break; /* no good */
 	    }
 	    if (j <= nbp) continue;
 
@@ -1014,8 +1003,6 @@ get_listCR(GEN bnr, GEN dtQ)
   hD   = itos(gel(dtQ,1));
   h    = hD >> 1;
 
-  disable_dbg(0);
-
   listCR = cgetg(h + 1, t_VEC); /* non-conjugate characters */
   nc  = 1;
   allCR  = cgetg(h + 1, t_VEC); /* all characters, including conjugates */
@@ -1044,7 +1031,6 @@ get_listCR(GEN bnr, GEN dtQ)
     if (!equaliu(d, 2))
       gel(allCR,tnc++) = ConjChar(lchi, Mr);
   }
-  disable_dbg(-1);
   setlg(listCR, nc); return listCR;
 }
 
@@ -2339,7 +2325,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   long cl, i, j, cpt = 0, N, h, v, n, r1, r2, den;
   pari_sp av, av2;
   int **matan;
-  GEN bnr, p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta, sig;
+  GEN bnr, p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
   GEN vChar, degs, C, dataCR, cond1, L1, an;
   LISTray LIST;
 
@@ -2412,31 +2398,28 @@ LABDOUB:
   veczeta = cgetg(h + 1, t_VEC);
   for (i = 1; i <= h; i++)
   {
-    GEN z = gen_0;
-
-    sig = gel(p1,i);
+    GEN z = gen_0, sig = gel(p1,i);
     for (j = 1; j <= cl; j++)
     {
       GEN dtcr = gel(dataCR,j), CHI = ch_CHI(dtcr);
-      GEN val = ComputeImagebyChar(CHI, sig);
-      GEN p2 = real_i(gmul(gel(Lp,j), val));
-      if (itos(gel(CHI,3)) != 2) p2 = gmul2n(p2, 1); /* character not real */
-      z = gadd(z, p2);
+      GEN t = mulreal(gel(Lp,j), ComputeImagebyChar(CHI, sig));
+      if (itos(gel(CHI,3)) != 2) t = gmul2n(t, 1); /* character not real */
+      z = gadd(z, t);
     }
     gel(veczeta,i) = gdivgs(z, den);
   }
-  if (DEBUGLEVEL>1) fprintferr("zetavalues = %Ps\n", veczeta);
-
-  if (DEBUGLEVEL>1 && !flag)
-    fprintferr("Checking the square-root of the Stark unit...\n");
-
   for (j = 1; j <= h; j++)
     gel(veczeta,j) = gmul2n(gch(gel(veczeta,j), newprec), 1);
   polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
   if (DEBUGLEVEL)
   {
-    if (DEBUGLEVEL>1) fprintferr("polrelnum = %Ps\n", polrelnum);
-    msgtimer("Compute %s", (flag)? "quickpol": "polrelnum");
+    if (DEBUGLEVEL>1) {
+      fprintferr("polrelnum = %Ps\n", polrelnum);
+      fprintferr("zetavalues = %Ps\n", veczeta);
+      if (!flag)
+        fprintferr("Checking the square-root of the Stark unit...\n");
+    }
+    msgtimer("Compute %s", flag? "quickpol": "polrelnum");
   }
 
   if (flag)
@@ -2444,24 +2427,22 @@ LABDOUB:
 
   /* try to recognize this polynomial */
   polrel = RecCoeff(nf, polrelnum, v, newprec);
-
   if (!polrel)
   {
-    if (DEBUGLEVEL>1)
-    fprintferr("It's not a square...\n");
     for (j = 1; j <= h; j++)
       gel(veczeta,j) = gsubgs(gsqr(gel(veczeta,j)), 2);
     polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
     if (DEBUGLEVEL)
     {
-      if (DEBUGLEVEL>1) fprintferr("polrelnum = %Ps\n", polrelnum);
+      if (DEBUGLEVEL>1) {
+        fprintferr("It's not a square...\n");
+        fprintferr("polrelnum = %Ps\n", polrelnum);
+      }
       msgtimer("Compute polrelnum");
     }
-    /* try to recognize this polynomial */
     polrel = RecCoeff(nf, polrelnum, v, newprec);
   }
-
-  if (!polrel) /* if it fails... */
+  if (!polrel) /* FAILED */
   {
     long incr_pr;
     if (++cpt >= 3) pari_err(precer, "stark (computation impossible)");
@@ -2471,10 +2452,8 @@ LABDOUB:
        or b) double the fractional digits.
     */
     incr_pr = gprecision(polrelnum)-2 - divsBIL( gexpo(polrelnum) );
-    if (incr_pr < 0)
-      incr_pr = -incr_pr + EXTRA_PREC;
+    if (incr_pr < 0) incr_pr = -incr_pr + EXTRA_PREC;
     newprec = newprec + max(ADD_PREC, cpt*incr_pr);
-
     if (DEBUGLEVEL) pari_warn(warnprec, "AllStark", newprec);
 
     nf = nfnewprec_shallow(nf, newprec);
@@ -2484,9 +2463,10 @@ LABDOUB:
     goto LABDOUB;
   }
 
-  if (DEBUGLEVEL>1) fprintferr("polrel = %Ps\n", polrel);
-  if (DEBUGLEVEL) msgtimer("Recpolnum");
-
+  if (DEBUGLEVEL) { 
+    if (DEBUGLEVEL>1) fprintferr("polrel = %Ps\n", polrel);
+    msgtimer("Recpolnum");
+  }
   return gerepilecopy(av, polrel);
 }
 
@@ -2767,9 +2747,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 
     gel(allCR,i) = lchi;
   }
-
-  /* the trivial character has to be a row vector too! */
-  settyp(allCR[cl], t_VEC);
+  settyp(allCR[cl], t_VEC); /* set correct type for trivial character */
 
   setlg(listCR, nc + 1);
   if (nc == 0) pari_err(talker, "no non-trivial character in bnrL1");
