@@ -1258,7 +1258,7 @@ GEN     Strtex(GEN g);
 void    brute(GEN g, char format, long dec);
 void    dbgGEN(GEN x, long nb);
 void    error0(GEN g);
-void    etatpile(void);
+void    dbg_pari_heap(void);
 char*   expand_tilde(const char *s);
 int     file_is_binary(FILE *f);
 void    flusherr(void);

@@ -2133,35 +2133,28 @@ get_texvar(long v, char *buf, unsigned int len)
 }
 
 void
-etatpile(void)
+dbg_pari_heap(void)
 {
   long nu, l, u, s;
   pari_sp av = avma;
-  GEN adr;
-  double r;
+  GEN adr = getheap();
 
   nu = (top-avma)/sizeof(long);
   l = (top-bot)/sizeof(long);
-  r = 100.0*nu/l;
   pari_printf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
-	    top, bot, avma);
-
+	      top, bot, avma);
   pari_printf(" Used :                         %ld  long words  (%ld K)\n",
-	    nu, nu/1024*sizeof(long));
-
+	      nu, nu/1024*sizeof(long));
   pari_printf(" Available :                    %ld  long words  (%ld K)\n",
-	   (l-nu), (l-nu)/1024*sizeof(long));
-
-  pari_printf(" Occupation of the PARI stack : %6.2f percent\n",r);
-
-  adr = getheap();
+	      (l-nu), (l-nu)/1024*sizeof(long));
+  pari_printf(" Occupation of the PARI stack : %6.2f percent\n", 100.0*nu/l);
   pari_printf(" %ld objects on heap occupy %ld long words\n\n",
-	    itos(gel(adr,1)), itos(gel(adr,2)));
-  avma = av;
+	      itos(gel(adr,1)), itos(gel(adr,2)));
   u = pari_var_next();
   s = MAXVARN - pari_var_next_temp();
   pari_printf(" %ld variable names used (%ld user + %ld private) out of %d\n\n",
-	     u+s, u, s, MAXVARN);
+	      u+s, u, s, MAXVARN);
+  avma = av;
 }
 
 #define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))

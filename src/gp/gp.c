@@ -959,7 +959,7 @@ escape(char *tch)
 	}
       }
       break;
-    case 's': etatpile(); break;
+    case 's': dbg_pari_heap(); break;
     case 't': gentypes(); break;
     case 'u':
       print_all_user_fun((*s == 'm')? 1: 0);

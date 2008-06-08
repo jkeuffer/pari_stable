@@ -255,6 +255,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    30- library functions mulreal & RgM_mulreal
    31- library functions Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic,
        FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
+   32- library function dbg_pari_heap
 
   Removed
     1- obsolete library functions extract and matextract
