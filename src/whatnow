@@ -214,6 +214,7 @@ erfc
 eta
 euler=Euler;
 eval
+_geval
 exp
 extract(x,y)=vecextract(x,y);
 fact(x)=factorial(x);
