@@ -2275,15 +2275,22 @@ discrayabslistlong(GEN bnf, long bound) {
   return discrayabslistarch(bnf,zerovec(r1),bound);
 }
 
+int
+subgroup_conductor_ok(GEN H, GEN L)
+{ /* test conductor */
+  long i, l = lg(L);
+  for (i = 1; i < l; i++)
+    if ( hnf_gauss(H, gel(L,i)) ) return 0;
+  return 1;
+}
 static GEN
-subgroupcond(GEN bnr, GEN indexbound)
+conductor_elts(GEN bnr)
 {
-  pari_sp av = avma;
-  long i, k, l, le, la;
-  GEN e, li, p1, lidet, perm, L, nf = checknf(bnr);
+  GEN e, L, nf = gmael(bnr,1,7);
+  long le, la, i, k;
   zlog_S S;
 
-  checkbnr(bnr); init_zlog_bid(&S, gel(bnr,2));
+  init_zlog_bid(&S, gel(bnr,2));
   e = S.e; le = lg(e); la = lg(S.archp);
   L = cgetg(le + la - 1, t_VEC);
   i = 1;
@@ -2291,13 +2298,47 @@ subgroupcond(GEN bnr, GEN indexbound)
     gel(L,i++) = bnr_log_gen_pr(bnr, &S, nf, itos(gel(e,k)), k);
   for (k = 1; k < la; k++)
     gel(L,i++) = bnr_log_gen_arch(bnr, &S, k);
-  li = subgroupcondlist(gmael(bnr,5,2), indexbound, L);
-  l = lg(li);
-  /* sort by increasing index */
-  lidet = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(lidet,i) = ZM_det_triangular(gel(li,i));
-  perm = indexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) li[i] = p1[perm[l-i]];
+  return L;
+}
+
+/* Let C a congruence group in bnr, compute its subgroups whose index is
+ * described by bound (see subgrouplist) as subgroups of Clk(bnr).
+ * Restrict to subgroups havіng the same conductor as bnr */
+GEN
+subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
+{
+  pari_sp av = avma;
+  long l, i, j;
+  GEN D, Mr, U, T, subgrp, L;
+
+  Mr = diagonal_i(gmael(bnr, 5, 2));
+  D = ZM_snfall_i(hnf_gauss(C, Mr), &U, NULL, 1);
+  T = ZM_mul(C, RgM_inv(U));
+  L = conductor_elts(bnr);
+  subgrp  = subgrouplist(D, bound);
+  l = lg(subgrp);
+  for (i = j = 1; i < l; i++)
+  {
+    GEN H = ZM_hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
+    if (subgroup_conductor_ok(H, L)) gel(subgrp, j++) = H;
+  }
+  setlg(subgrp, j);
+  return gerepilecopy(av, subgrp);
+}
+
+static GEN
+subgroupcond(GEN bnr, GEN indexbound)
+{
+  pari_sp av = avma;
+  GEN li = subgroupcondlist(gmael(bnr,5,2), indexbound, conductor_elts(bnr));
+  if (typ(indexbound) != t_VEC)
+  { /* sort by increasing index if not single value */
+    long i, l = lg(li);
+    GEN p1, perm, lidet = cgetg(l,t_VEC);
+    for (i=1; i<l; i++) gel(lidet,i) = ZM_det_triangular(gel(li,i));
+    perm = indexsort(lidet); p1 = li; li = cgetg(l,t_VEC);
+    for (i=1; i<l; i++) li[i] = p1[perm[l-i]];
+  }
   return gerepilecopy(av,li);
 }
 
@@ -2307,8 +2348,9 @@ subgrouplist0(GEN bnr, GEN indexbound, long all)
   if (typ(bnr)!=t_VEC) pari_err(typeer,"subgrouplist");
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
   {
+    checkbnr(bnr);
     if (!all) return subgroupcond(bnr,indexbound);
-    checkbnr(bnr); bnr = gmael(bnr,5,2);
+    bnr = gmael(bnr,5,2);
   }
   return subgrouplist(bnr,indexbound);
 }

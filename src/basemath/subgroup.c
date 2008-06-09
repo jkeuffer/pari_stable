@@ -115,13 +115,9 @@ list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
   GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
-  if (S->gen)
-  { /* test conductor */
-    long i, l = lg(S->gen);
-    for (i = 1; i < l; i++)
-      if ( hnf_gauss(H, gel(S->gen,i)) ) return;
+  if (!S->gen || subgroup_conductor_ok(H, S->gen)) {
+    addcell(S, H); T->countsub++;
   }
-  addcell(S, H); T->countsub++;
 }
 /* -------------------------------------------------------------- */
 

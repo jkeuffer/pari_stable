@@ -685,6 +685,8 @@ GEN     red_mod_units(GEN col, GEN z, long prec);
 /* buch3.c */
 
 GEN     minkowski_bound(GEN D, long N, long r2, long prec);
+int     subgroup_conductor_ok(GEN H, GEN L);
+GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 
 /* elliptic.c */
 

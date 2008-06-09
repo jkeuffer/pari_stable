@@ -312,8 +312,8 @@ static GEN
 InitQuotient(GEN C)
 {
   long junk;
-  GEN U, D = ZM_snfall_i(C, &U, NULL, 1), cyc = detcyc(D, &junk);
-  return mkvec4(cyc, D, U, C);
+  GEN U, D = ZM_snfall_i(C, &U, NULL, 1), h = detcyc(D, &junk);
+  return mkvec4(h, D, U, C);
 }
 
 /* Let s: A -> B given by P, and let DA, DB be resp. the matrix of the
@@ -351,25 +351,6 @@ ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
     gel(P,i) = ZM_ZC_mul(mgq, isprincipalray(bnrn, gel(genm,i)));
 
   return gerepileupto(av, ComputeKernel0(P, Mrm, Mrq));
-}
-
-/* Let C a congruence group in bnr, compute its subgroups of index 2 as
-   subgroups of Clk(bnr) */
-static GEN
-ComputeIndex2Subgroup(GEN bnr, GEN C)
-{
-  pari_sp av = avma;
-  long nb, i;
-  GEN D, Mr, U, T, subgrp;
-
-  Mr = diagonal_i(gmael(bnr, 5, 2));
-  D = ZM_snfall_i(hnf_gauss(C, Mr), &U, NULL, 1);
-  T = ZM_mul(C,ginv(U));
-  subgrp  = subgrouplist(D, mkvec(gen_2));
-  nb = lg(subgrp);
-  for (i = 1; i < nb; i++)
-    gel(subgrp,i) = ZM_hnf(shallowconcat(ZM_mul(T, gel(subgrp,i)), Mr));
-  return gerepilecopy(av, subgrp);
 }
 
 static GEN
@@ -552,19 +533,15 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	  /* compute Im(C) in Clk(m)... */
 	  ImC = ComputeKernel(bnrm, bnr, dtQ);
 
-	  /* ... and its subgroups of index 2 */
+	  /* ... and its subgroups of index 2 with conductor m */
           disable_dbg(0);
-	  candD  = ComputeIndex2Subgroup(bnrm, ImC);
+	  candD = subgrouplist_cond_sub(bnrm, ImC, mkvec(gen_2));
           disable_dbg(-1);
 	  nbcand = lg(candD) - 1;
 	  for (c = 1; c <= nbcand; c++)
 	  {
 	    GEN D  = gel(candD,c);
 	    long cpl;
-
-	    /* check if m is the conductor */
-	    p1 = conductor(bnrm, D, -1);
-	    if (!signe(p1)) continue;
 
 	    /* check the splitting of primes */
 	    for (j = 1; j <= nbp; j++)
@@ -2325,11 +2302,10 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   long cl, i, j, cpt = 0, N, h, v, n, r1, r2, den;
   pari_sp av, av2;
   int **matan;
-  GEN bnr, p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
+  GEN bnr = gel(data,1), p1, p2, S, T, polrelnum, polrel, Lp, W, veczeta;
   GEN vChar, degs, C, dataCR, cond1, L1, an;
   LISTray LIST;
 
-  bnr = gel(data,1);
   nf_get_sign(nf, &r1,&r2);
   N     = degpol(nf[1]);
   cond1 = gmael3(bnr, 2, 1, 2);
@@ -2496,7 +2472,7 @@ pol_quad_conj(GEN x, GEN y)
 /* k = nf quadratic field, P relative equation of H_k (Hilbert class field)
  * return T in Z[X], such that H_k / Q is the compositum of Q[X]/(T) and k */
 static GEN
-makescind(GEN nf, GEN P, long cl)
+makescind(GEN nf, GEN P)
 {
   GEN Pp, p, perm, pol, G, L, a, roo, nfpol = gel(nf,1);
   long i, k, l, is_P;
@@ -2546,64 +2522,57 @@ quadhilbertreal(GEN D, long prec)
 {
   pari_sp av = avma;
   long newprec;
-  VOLATILE long cl;
-  VOLATILE GEN pol, bnf, bnr, dtQ, data, nf, exp, M;
+  VOLATILE GEN bnf, bnr, dtQ, data, nf, cyc, M;
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
   disable_dbg(0);
-
-  /* quick computation of the class number */
-  cl = itos(gel(quadclassunit0(D, 0, NULL, prec),1));
-  if (cl == 1) { disable_dbg(-1); avma = av; return pol_x(0); }
-
-START:
-  pol = quadpoly0(D, fetch_user_var("y"));
-  bnf = bnfinit0(pol, 1, NULL, prec);
-  nf  = gel(bnf,7);
+  bnf = bnfinit0(quadpoly0(D, fetch_user_var("y")), 1, NULL, prec);
   disable_dbg(-1);
+  cyc = gmael3(bnf,8, 1, 2);
+  if (lg(cyc) == 1) { avma = av; return pol_x(0); }
+  /* if the exponent of the class group is 2, use Genus Theory */
+  if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusField(bnf));
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
-  /* if the exponent of the class group is 2, use Genus Theory */
-  exp = gmael4(bnf, 8, 1, 2, 1);
-  if (equaliu(exp,2)) return gerepileupto(av, GenusField(bnf));
+  bnr  = buchrayinitgen(bnf, gen_1);
+  M = diagonal_i(gmael(bnr,5,2));
+  dtQ = InitQuotient(M);
+  nf  = gel(bnf,7);
 
-  CATCH(precer) {
-    prec += EXTRA_PREC; pol = NULL;
-    pari_warn(warnprec, "quadhilbertreal", prec);
-  } TRY {
-    /* find the modulus defining N */
-    bnr  = buchrayinitgen(bnf, gen_1);
-    M = diagonal_i(gmael(bnr,5,2));
-    dtQ  = InitQuotient(M);
-    data = FindModulus(bnr, dtQ, &newprec, prec);
-    if (DEBUGLEVEL) msgtimer("FindModulus");
+  for(;;) {
+    VOLATILE GEN pol = NULL;
+    CATCH(precer) {
+      prec += EXTRA_PREC;
+      pari_warn(warnprec, "quadhilbertreal", prec);
+    } TRY {
+      /* find the modulus defining N */
+      data = FindModulus(bnr, dtQ, &newprec, prec);
+      if (DEBUGLEVEL) msgtimer("FindModulus");
+      if (!data)
+      {
+        long i, l = lg(M);
+        GEN vec = cgetg(l, t_VEC);
+        for (i = 1; i < l; i++)
+        {
+          GEN t = gcoeff(M,i,i);
+          gcoeff(M,i,i) = gen_1;
+          gel(vec,i) = bnrstark(bnr, M, prec);
+          gcoeff(M,i,i) = t;
+        }
+        CATCH_RELEASE();
+        return gerepileupto(av, vec);
+      }
 
-    if (!data)
-    {
-      long i, l = lg(M);
-      GEN vec = cgetg(l, t_VEC);
-      for (i = 1; i < l; i++)
-	{
-	  GEN t = gcoeff(M,i,i);
-	  gcoeff(M,i,i) = gen_1;
-	  gel(vec,i) = bnrstark(bnr, M, prec);
-	  gcoeff(M,i,i) = t;
-	}
-      CATCH_RELEASE();
-      return vec;
-    }
-
-    if (newprec > prec)
-    {
-      if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
-      nf = nfnewprec_shallow(nf, newprec);
-    }
-    pol = AllStark(data, nf, 0, newprec);
-  } ENDCATCH;
-  if (!pol) goto START;
-
-  return gerepileupto(av, makescind(nf, pol, cl));
+      if (newprec > prec)
+      {
+        if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
+        nf = nfnewprec_shallow(nf, newprec);
+      }
+      pol = AllStark(data, nf, 0, newprec);
+    } ENDCATCH;
+    if (pol) return gerepileupto(av, makescind(nf, pol));
+  }
 }
 
 static GEN
@@ -2655,7 +2624,6 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   /* find a suitable extension N */
   dtQ = InitQuotient(subgrp);
   data  = FindModulus(bnr, dtQ, &newprec, prec);
-
   if (!data)
   {
     GEN vec, H, cyc = gel(dtQ,2), U = gel(dtQ,3), M = ginv(U);
@@ -2679,7 +2647,6 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     if (DEBUGLEVEL>1) fprintferr("new precision: %ld\n", newprec);
     nf = nfnewprec_shallow(nf, newprec);
   }
-
   return gerepileupto(av, AllStark(data, nf, 0, newprec));
 }
 
