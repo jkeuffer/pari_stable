@@ -8,12 +8,12 @@ Doc: This function is based on the C library command of the same name.
  subsequent arguments are converted for output. The format is a
  character string composed of zero or more directives:
 
- \item ordinary characters (not \kbd{\%}), printed unchanged, 
+ \item ordinary characters (not \kbd{\%}), printed unchanged,
 
  \item conversions specifications (\kbd{\%} followed by some characters)
  which fetch one argument from the list and prints it according to the
  specification.
- 
+
  More precisely, a conversion specification consists in a \kbd{\%}, one or more
  optional flags (among \kbd{\#}, \kbd{0}, \kbd{-}, \kbd{+}, ` '), an optional
  decimal digit string specifying a minimal field width, an optional precision
@@ -29,7 +29,7 @@ Doc: This function is based on the C library command of the same name.
  and \kbd{X} conversions (hexa), respectively \kbd{0x} and \kbd{0X} are
  prepended. For other conversions, the flag is ignored.
 
- \item \kbd{0}: The value should be zero padded. For 
+ \item \kbd{0}: The value should be zero padded. For
  \kbd{d},
  \kbd{i},
  \kbd{o},
@@ -102,7 +102,7 @@ Doc: This function is based on the C library command of the same name.
 
  \item \kbd{f}, \kbd{F}: The (real) argument is converted in the style
  \kbd{[ -]ddd.ddd}, where the number of digits after the decimal point
- is equal to the precision; if the precision is missing, use the current 
+ is equal to the precision; if the precision is missing, use the current
  \kbd{realprecision} for the total number of printed digits. If the precision
  is explicitly 0, no decimal-point character appears. If a decimal point
  appears, at least one digit appears before it.
@@ -110,7 +110,7 @@ Doc: This function is based on the C library command of the same name.
  \item \kbd{g}, \kbd{G}: The (real) argument is converted in style
  \kbd{e} or \kbd{f} (or \kbd{E} or \kbd{F} for \kbd{G} conversions)
  \kbd{[ -]ddd.ddd}, where the total number of digits printed
- is equal to the precision; if the precision is missing, use the current 
+ is equal to the precision; if the precision is missing, use the current
  \kbd{realprecision}. If the precision is explicitly 0, it is treated as 1.
  Style \kbd{e} is used when
  the decimal exponent is $< -4$, to print \kbd{0.}, or when the integer
@@ -165,8 +165,8 @@ Doc: This function is based on the C library command of the same name.
 
  [ 0.33  0.25  0.20]
  @eprog
- \misctitle{Technical note:} our implementation of \tet{printf} 
- deviates from the C89 and C99 standards in a few places: 
+ \misctitle{Technical note:} our implementation of \tet{printf}
+ deviates from the C89 and C99 standards in a few places:
 
  \item whenever a precision is missing, the current \kbd{realprecision} is
  used to determine the number of printed digits (C89: use 6 decimals after

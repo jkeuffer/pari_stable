@@ -9,7 +9,7 @@ Doc: row vector of $p$-adic roots of
  non-zero modulo $p$. Note that this is not the same as the roots in
  $\Z/p^r\Z$, rather it gives approximations in $\Z/p^r\Z$ of the true
  roots living in $\Q_p$.
- 
+
  If \var{pol} has inexact \typ{PADIC} coefficients, this is not always
  well-defined; in this case, the equation is first made integral, then lifted
  to $\Z$. Hence the roots given are approximations of the roots of a

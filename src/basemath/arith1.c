@@ -1658,13 +1658,13 @@ Z_chinese_pre(GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd)
   if (pd) *pd = d;
 }
 /* Assume C = lcm(A, B), U = 0 mod (A/d), U = 1 mod (B/d), a = b mod d,
- * where d = gcd(A,B) or NULL, return x = a (mod A), b (mod B). 
+ * where d = gcd(A,B) or NULL, return x = a (mod A), b (mod B).
  * If d not NULL, check wether a = b mod d. */
 GEN
 Z_chinese_post(GEN a, GEN b, GEN C, GEN U, GEN d)
 {
   GEN b_a;
-  if (!signe(a)) 
+  if (!signe(a))
   {
     if (d && remii(b, d) != gen_0) return NULL;
     return Fp_mul(b, U, C);
@@ -2408,7 +2408,7 @@ ispsp(GEN x) { return millerrabin(x,1); }
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/
 /**                                                                 **/
 /*********************************************************************/
-static long 
+static long
 isfund(GEN x) {
   if (typ(x) != t_INT) pari_err(arither1);
   return Z_isfundamental(x);

@@ -3,7 +3,7 @@ C-Name: gadd1e
 Prototype: &
 Section: symbolic_operators
 Help: x++
-Description: 
+Description:
  (*bptr):bptr				++$1
  (*small):small				++$1
  (*lg):lg				++$1

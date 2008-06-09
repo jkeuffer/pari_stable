@@ -9,7 +9,7 @@ Doc: evaluates \var{seq},
  Nothing is done if $s>0$ and $a>b$ or if $s<0$ and $a<b$. $s$ must be in
  $\R^*$ or a vector of steps $[s_1,\dots,s_n]$. In the latter case, the
  successive steps are used in the order they appear in $s$.
- 
+
  \bprog
  ? forstep(x=5, 20, [2,4], print(x))
  5

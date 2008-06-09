@@ -4,7 +4,7 @@ C-Name: pointell
 Prototype: GGp
 Help: ellztopoint(E,z): coordinates of point P on the curve E corresponding
  to the complex number z
-Doc: 
+Doc:
  $E$ being an \var{ell} as output by
  \kbd{ellinit}, computes the coordinates $[x,y]$ on the curve $E$
  corresponding to the complex number $z$. Hence this is the inverse function

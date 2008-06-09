@@ -4,7 +4,7 @@ C-Name: akell
 Prototype: GG
 Help: ellak(E,n): computes the n-th Fourier coefficient of the L-function of
  the elliptic curve E (assumed E is a minimal model)
-Doc: 
+Doc:
  computes the coefficient $a_n$ of the
  $L$-function of the elliptic curve $E$, i.e.~in principle coefficients of a
  newform of weight 2 assuming \idx{Taniyama-Weil conjecture} (which is now

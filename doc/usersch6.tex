@@ -109,12 +109,12 @@ then the $r_2$ pairs of complex conjugates.
 \fun{long}{nf_get_prec}{GEN nf} returns the precision (in words) to which the
 \var{nf} was computed.
 
-\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ be a number field 
+\fun{GEN}{nf_to_scalar_or_basis}{GEN nf, GEN x} let $x$ be a number field
 element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
 or \typ{FRAC}, return the latter. Otherwise returns its basis representation
 (\tet{nfalgtobasis}). Shallow function.
 
-\fun{GEN}{nf_to_scalar_or_alg}{GEN nf, GEN x} let $x$ be a number field 
+\fun{GEN}{nf_to_scalar_or_alg}{GEN nf, GEN x} let $x$ be a number field
 element. If it is a rational scalar, i.e.~can be represented by a \typ{INT}
 or \typ{FRAC}, return the latter. Otherwise returns its lifted \typ{POLMOD}
 representation (lifted \tet{nfbasistoalg}). Shallow function.
@@ -167,7 +167,7 @@ corresponding number field type. I.e. one cannot call
 
 \fun{GEN}{nfmodprinit}{GEN nf, GEN pr} returns an abstract \kbd{modpr}
 structure, associated to reduction modulo the maximal ideal \kbd{pr}, in
-\kbd{idealprimedec} format. From this data we can quickly project any 
+\kbd{idealprimedec} format. From this data we can quickly project any
 \kbd{pr}-integral $x$ to the residue field. This function is almost useless
 in library mode, we rather use:
 
@@ -183,7 +183,7 @@ is realized as $\F_p[X]/(T)$ for some monic $T\in\F_p[X]$, and we set
 degree $1$ and the residue field is $\F_p$.
 
 In short, this receives (or initializes) a \kbd{modpr} structure, and
-extracts from it $T$, $p$ and $\goth{p}$. 
+extracts from it $T$, $p$ and $\goth{p}$.
 
 \fun{GEN}{nf_to_Fq}{GEN nf, GEN x, GEN modpr} returns an \kbd{Fq} congruent
 to $x$ modulo the maximal ideal associated to \kbd{modpr}. The output is
@@ -197,7 +197,7 @@ in \kbd{algtobasis} format.
 \fun{GEN}{zkmodprinit}{GEN nf, GEN pr} as \tet{nfmodprinit}, but we assume we
 will only reduce algebraic integers, hence do not initialize data allowing to
 remove denominators. More precisely, we can in fact still handle an $x$ whose
-denominator is not $0$ in the residue field (i.e. if the valuation 
+denominator is not $0$ in the residue field (i.e. if the valuation
 of $x$ is non-negative at all primes dividing $p$).
 
 \fun{GEN}{zk_to_Fq_init}{GEN nf, GEN *pr, GEN *T, GEN *p} as
@@ -307,7 +307,7 @@ This routine uses a naive algorithm which is potentially exponential in the
 dimension but is fast in practice, although it may require lots of memory;
 the base change matrix $U$ may be very large (when the kernel is large).
 
-\fun{GEN}{ZM_hnfperm}{GEN A, GEN *ptU, GEN *ptperm} returns the hnf 
+\fun{GEN}{ZM_hnfperm}{GEN A, GEN *ptU, GEN *ptperm} returns the hnf
 $H = P A U$ of the matrix $P A$, where $P$ is a suitable permutation matrix,
 and $U\in \text{Gl}_n(\Z)$. $P$ is chosen so as to (heuristically) minimize the
 size of $U$; in this respect it is less efficient than \kbd{ZM\_hnflll}
@@ -361,7 +361,7 @@ $\text{Im}_\Q x \cap \Z^n$.
 $\text{Im}_\Z x \cap \Z^n$.
 
 \fun{GEN}{QM_minors_coprime}{GEN x, GEN D}, assumes $m\geq n$, and returns
-a matrix in $M_{m,n}(\Z)$ with the same $\Q$-image as $x$, such that 
+a matrix in $M_{m,n}(\Z)$ with the same $\Q$-image as $x$, such that
 the GCD of all $n\times n$ minors is coprime to $D$; if $D$ is \kbd{NULL},
 we want the GCD to be $1$.
 \smallskip
@@ -513,7 +513,7 @@ Besises the \emph{hnfrem} functions, which were specific to integral input,
 we also have:
 
 \fun{GEN}{reducemodinvertible}{GEN x, GEN y} $y$ is an invertible matrix
-and $x$ a \typ{COL} or \typ{MAT} of compatible dimension. 
+and $x$ a \typ{COL} or \typ{MAT} of compatible dimension.
 Returns $x - y\lfloor y^{-1}x \rceil$, which has small entries and differs
 from $x$ by an integral linear combination of the columns of $y$. Suitable
 for \kbd{gerepileupto}, but does not collect garbage.

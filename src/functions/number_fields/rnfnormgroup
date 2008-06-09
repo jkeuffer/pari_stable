@@ -7,7 +7,7 @@ Help: rnfnormgroup(bnr,pol): norm group (or Artin or Takagi group)
  the module corresponding to bnr is assumed to be a multiple of the
  conductor. The result is the HNF defining the norm group on the given
  generators in bnr[5][3]
-Doc: 
+Doc:
  \var{bnr} being a big ray
  class field as output by \kbd{bnrinit} and \var{pol} a relative polynomial
  defining an \idx{Abelian extension}, computes the norm group (alias Artin

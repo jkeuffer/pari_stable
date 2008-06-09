@@ -3,5 +3,5 @@ Help: _.b6
 Section: member_functions
 C-Name: member_b6
 Prototype: G
-Description: 
+Description:
  (ell):gen:copy	       gel($1, 8)

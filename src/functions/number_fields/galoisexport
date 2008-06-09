@@ -18,5 +18,5 @@ Doc: \var{gal} being be a Galois field as output by \tet{galoisinit},
  ? galoisidentify(G)
  %4 = [6, 1]
  @eprog
- 
+
  This command also accepts subgroups returned by \kbd{galoissubgroups}.

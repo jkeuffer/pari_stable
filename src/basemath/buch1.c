@@ -190,7 +190,7 @@ quadhilbertimag(GEN D)
   {
     long ex, exmax = 0;
     pari_sp av0 = avma;
-    GEN lead; 
+    GEN lead;
     T.sqd = sqrtr_abs(itor(D, prec));
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
@@ -1548,7 +1548,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START:
   if (!FIRST) cbach = check_bach(cbach,6.);
-  FIRST = 0; avma = av; 
+  FIRST = 0; avma = av;
   if (BQ.subFB) gunclone(BQ.subFB);
   if (BQ.powsubFB) gunclone(BQ.powsubFB);
   clearhash(BQ.hashtab);

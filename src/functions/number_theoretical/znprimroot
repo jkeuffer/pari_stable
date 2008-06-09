@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: ggener
 Prototype: G
 Help: znprimroot(n): returns a primitive root of n when it exists
-Description: 
+Description:
  (int):gen	gener($1)
  (gen):gen	ggener($1)
 Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
@@ -11,7 +11,7 @@ Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
   odd prime and $k \geq 0$). If the group is not cyclic, the result is
   undefined. If $n$ is a prime, then the smallest positive primitive root is
   returned. This is no longer true for composites.
-  
+
   Note that this function requires factoring $n$ and $p-1$ for each prime
   divisor $p$ of $n$, in order to determine the exact order of elements in
   $(\Z/n\Z)^*$: this is likely to be very costly if $n$ is large.

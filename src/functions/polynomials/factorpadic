@@ -12,7 +12,7 @@ Doc: $p$-adic factorization
  the $p$-adic valuation of the discriminant of \var{pol} for the result to
  make any sense. The method used is a modified version of the \idx{round 4}
  algorithm of \idx{Zassenhaus}.
- 
+
  If $\fl=1$, use an algorithm due to \idx{Buchmann} and \idx{Lenstra}, which is
  much less efficient.
 Variant:

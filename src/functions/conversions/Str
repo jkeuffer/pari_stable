@@ -3,14 +3,14 @@ Section: conversions
 C-Name: Str
 Prototype: s*
 Help: Str({x}*): concatenates its (string) argument into a single string
-Description: 
+Description:
  (gen):genstr:copy:parens	$genstr:1
-Doc: 
+Doc:
  converts its argument list into a
  single character string (type \typ{STR}, the empty string if $x$ is omitted).
  To recover an ordinary \kbd{GEN} from a string, apply \kbd{eval} to it. The
  arguments of \kbd{Str} are evaluated in string context, see \secref{se:strings}.
- 
+
  \bprog
  ? x2 = 0; i = 2; Str(x, i)
  %1 = "x2"

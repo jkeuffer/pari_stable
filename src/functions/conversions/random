@@ -3,20 +3,20 @@ Section: conversions
 C-Name: genrand
 Prototype: DG
 Help: random({N=2^31}): random integer between 0 and N-1
-Description: 
+Description:
  (?int):int	genrand($1)
  (real):void	$"incorrect type `real' in random"
-Doc: 
+Doc:
  returns a (pseudo-)random integer
  uniformly distributed between $0$ and $N-1$. $N$ is an integer, which can be
  arbitrary large. The random seed may be obtained via \tet{getrand}, and reset
  using \tet{setrand}: from a given seed, the exact same values will be
  generated. The same seed is used at each startup, reseed the generator
  yourself if this is a problem.
- 
+
  Note that \kbd{random(2\pow31)} \emph{is} equivalent to \kbd{random()}. This
  was not the case, up to version 2.4.
- 
+
  This function does not depend on the system's random number generator. Up to
  version 2.4 included, pseudo-random numbers were obtained by means of linear
  congruences and were not well distributed in arithmetic progressions. We now

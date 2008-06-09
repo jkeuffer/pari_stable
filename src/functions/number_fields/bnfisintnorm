@@ -11,5 +11,5 @@ Doc: computes a complete system of
  $\Norm(a)=x$,
  where $a$ is an integer in $\var{bnf}$. If $\var{bnf}$ has not been certified,
  the correctness of the result depends on the validity of \idx{GRH}.
- 
+
  See also \tet{bnfisnorm}.

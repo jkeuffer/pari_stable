@@ -1,6 +1,6 @@
 Function: clone
 Class: gp2c
-Description: 
+Description:
  (small):small:parens		$1
  (int):int			gclone($1)
  (real):real			gclone($1)

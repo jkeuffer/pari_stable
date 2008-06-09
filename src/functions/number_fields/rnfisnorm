@@ -17,7 +17,7 @@ Doc: similar to
  \tet{rnfisnorminit} applied to the extension $L/K$. This tries to decide
  whether the element $a$ in $K$ is the norm of some $x$ in the extension
  $L/K$.
- 
+
  The output is a vector $[x,q]$, where $a = \Norm(x)*q$. The
  algorithm looks for a solution $x$ which is an $S$-integer, with $S$ a list
  of places of $K$ containing at least the ramified primes, the generators of
@@ -25,17 +25,17 @@ Doc: similar to
  Galois, then this is enough; otherwise, $\fl$ is used to add more primes to
  $S$: all the places above the primes $p \leq \fl$ (resp.~$p|\fl$) if $\fl>0$
  (resp.~$\fl<0$).
- 
+
  The answer is guaranteed (i.e.~$a$ is a norm iff $q = 1$) if the field is
  Galois, or, under \idx{GRH}, if $S$ contains all primes less than
  $12\log^2\left|\disc(M)\right|$, where $M$ is the normal
  closure of $L/K$.
- 
+
  If \tet{rnfisnorminit} has determined (or was told) that $L/K$ is
  \idx{Galois}, and $\fl \neq 0$, a Warning is issued (so that you can set
  $\fl = 1$ to check whether $L/K$ is known to be Galois, according to $T$).
  Example:
- 
+
  \bprog
  bnf = bnfinit(y^3 + y^2 - 2*y - 1);
  p = x^2 + Mod(y^2 + 2*y + 1, bnf.pol);

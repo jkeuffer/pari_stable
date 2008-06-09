@@ -14,7 +14,7 @@ Doc: draw on the rectwindow $w$
  polygon is drawn, not only the part of the polygon which is inside the
  rectwindow. If $\fl$ is non-zero, close the polygon. In any case, the
  virtual cursor does not move.
- 
+
  $X$ and $Y$ are allowed to be scalars (in this case, both have to).
  There, a single segment will be drawn, between the virtual cursor current
  position and the point $(X,Y)$. And only the part thereof which

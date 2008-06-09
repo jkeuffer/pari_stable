@@ -6,12 +6,12 @@ Description:
  (gen,?var):pol  gtopolyrev($1, $2)
 Help: Polrev(x,{v=x}): convert x (usually a vector or a power series) into a
  polynomial with variable v, starting with the constant term
-Doc: 
+Doc:
  transform the object $x$ into a polynomial
  with main variable $v$. If $x$ is a scalar, this gives a constant polynomial.
  If $x$ is a power series, the effect is identical to \kbd{truncate}, i.e.~it
  chops off the $O(X^k)$.
- 
+
  The main use of this function is when $x$ is a vector: it creates the
  polynomial whose coefficients are given by $x$, with $x[1]$ being the
  constant term. \tet{Pol} can be used if one wants $x[1]$ to be the leading

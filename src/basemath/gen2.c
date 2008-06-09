@@ -1557,7 +1557,7 @@ GEN
 quad_disc(GEN x)
 {
   GEN Q = gel(x,1), b = gel(Q,3), c = gel(Q,2), c4;
-  if (is_pm1(b)) 
+  if (is_pm1(b))
   {
     pari_sp av = avma; (void)new_chunk(lgefint(c) + 1);
     c4 = shifti(c,2); avma = av; return subsi(1, c4);

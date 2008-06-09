@@ -5,7 +5,7 @@ C-Name: whatnow0
 Prototype: vr
 Help: whatnow(key): if key was present in GP version 1.39.15 or lower, gives
  the new function name
-Description: 
+Description:
  (str):void             whatnow($1, 0)
 Doc: if keyword \var{key} is the name of a function that was present in GP
  version 1.39.15 or lower, outputs the new function name and syntax, if it

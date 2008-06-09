@@ -20,35 +20,35 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  storing at most $m$ vectors (no limit if $m$ is omitted). The function
  searches for the minimal non-zero vectors if $b$ is omitted. The precise
  behaviour depends on $\fl$.
- 
+
  If $\fl=0$ (default), seeks at most $2m$ vectors. The result is a
  three-component vector, the first component being the number of vectors
  found, the second being the maximum norm found, and the last vector is a
  matrix whose columns are the vectors found, only one being given for each
  pair $\pm v$ (at most $m$ such pairs, unless $m$ was omitted). The vectors
  are returned in no particular order.
- 
+
  If $\fl=1$, ignores $m$ and returns the first vector whose norm is less
  than $b$. In this variant, an explicit $b$ must be provided.
- 
+
  In these two cases, $x$ is assumed to have integral entries. The
  implementation uses low precision floating point computations for maximal
  speed, which gives incorrect result when $x$ has large entries. (The
  condition is checked in the code and the routine will raise an error if
  large rounding errors occur.) A more robust, but much slower,
  implementation is chosen if the following flag is used:
- 
+
  If $\fl=2$, $x$ can have non integral real entries. In this case, if $b$
  is omitted, the ``minimal'' vectors only have approximately the same norm.
  If $b$ is omitted, $m$ is an upper bound for the number of vectors that
  will be stored and returned, but all minimal vectors are nevertheless
  enumerated. If $m$ is omitted, all vectors found are stored and returned;
- note that this may be a huge vector! 
- 
+ note that this may be a huge vector!
+
  \bprog
  ? x = matid(2);
  ? qfminim(x)  \\@com 4 minimal vectors of norm 1: $\pm[0,1]$, $\pm[1,0]$
- %2 = [4, 1, [0, 1; 1, 0]] 
+ %2 = [4, 1, [0, 1; 1, 0]]
  ? { x=
  [4, 2, 0, 0, 0,-2, 0, 0, 0, 0, 0, 0, 1,-1, 0, 0, 0, 1, 0,-1, 0, 0, 0,-2;
   2, 4,-2,-2, 0,-2, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0, 0, 0, 0,-1, 0, 1,-1,-1;
@@ -81,7 +81,7 @@ Doc: $x$ being a square and symmetric matrix representing a positive definite
  In the last example, we store 0 vectors to limit memory use. All minimal
  vectors are nevertheless enumerated. Provided \kbd{parisize} is about 50MB,
  \kbd{qfminim(x)} succeeds in 2.5 seconds.
- 
+
 Variant: Also available are
  \fun{GEN}{minim}{GEN x, GEN b = NULL, GEN m = NULL} ($\fl=0$),
  \fun{GEN}{minim2}{GEN x, GEN b = NULL, GEN m = NULL} ($\fl=1$).

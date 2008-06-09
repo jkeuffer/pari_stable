@@ -9,12 +9,12 @@ Doc: \idx{infinite sum} of expression
  when the relative error of the expression is less than the default precision
  for 3 consecutive evaluations. The expressions must always evaluate to a
  complex number.
- 
+
  If the series converges slowly, make sure \kbd{realprecision} is low (even 28
  digits may be too much). In this case, if the series is alternating or the
  terms have a constant sign, \tet{sumalt} and \tet{sumpos} should be used
  instead.
- 
+
  \bprog
  ? \p28
  ? suminf(i = 1, -(-1)^i / i)
@@ -23,5 +23,5 @@ Doc: \idx{infinite sum} of expression
  time = 0 ms.
  %1 = -2.524354897 E-29
  @eprog
- 
+
  \synt{suminf}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.

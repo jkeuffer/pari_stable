@@ -73,7 +73,7 @@ lll_finish(GEN h, long k, long flag)
 /**                   FPLLL (adapted from D. Stehle's code)        **/
 /**                                                                **/
 /********************************************************************/
-/* Babai() and fplll() are a conversion to libpari API and data types 
+/* Babai() and fplll() are a conversion to libpari API and data types
    of the file proved.c in fplll-1.3 by Damien Stehle'.
 
   Copyright 2005, 2006 Damien Stehle'.
@@ -422,7 +422,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
       /* Step6: Update the mu's and r's */
       rotate(mu,kappa2,kappa,d);
       rotate(r,kappa2,kappa,d);
-      affrr(gel(s,kappa), gmael(r,kappa,kappa)); 
+      affrr(gel(s,kappa), gmael(r,kappa,kappa));
 
       /* Step7: Update B, G, U */
       if (!gram) rotate(B,kappa2,kappa,n);
@@ -469,7 +469,7 @@ good_prec(long d, double delta, double eta)
   double t = eta+1, rho = t*t / (delta - eta*eta);
   long goodprec = (ulong) (7.0 + 0.2*d + d*log2(rho)
       +  2.0 * log ((double) d) - log2( (eta-0.5)*(1.0-delta) ));
-  return nbits2prec(goodprec); 
+  return nbits2prec(goodprec);
 }
 
 /* Assume x a ZM, if ptB != NULL, set it to Gram-Schmidt (squared) norms */
@@ -482,7 +482,7 @@ ZM_lll_norms(GEN x, double DELTA, long flag, GEN *B)
   GEN U;
   if (n <= 1) return lll_trivial(x, flag);
   d = lg(gel(x,1))-1;
-  prec = good_prec(d,DELTA,ETA); 
+  prec = good_prec(d,DELTA,ETA);
   x = shallowcopy(x);
   U = (flag & LLL_INPLACE)? NULL: matid(n);
   for (p = min(3,prec); p <= prec; p++)

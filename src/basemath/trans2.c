@@ -639,7 +639,7 @@ gach(GEN x, long prec)
       if (s == 0) b = acos0(e);
       else if (e < 0) b = mpacos(x); /* -1 < x < 1 */
       else {
-        if (!absrnz_egal1(x)) { a = mpach(x); togglesign(a); } 
+        if (!absrnz_egal1(x)) { a = mpach(x); togglesign(a); }
         b = mppi(lg(x));
       }
       gel(y,1) = a;

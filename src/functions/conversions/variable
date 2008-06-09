@@ -4,16 +4,16 @@ C-Name: gpolvar
 Prototype: DG
 Help: variable({x}): main variable of object x. Gives p for p-adic x, error
  for scalars. Returns the list of user variables if x is omitted.
-Description: 
+Description:
  (pol):var:parens:copy	$var:1
  (gen):gen	gpolvar($1)
-Doc: 
+Doc:
  gives the main variable of the object $x$, and
  $p$ if $x$ is a $p$-adic number. Gives an error if $x$ has no variable
  associated to it. If $x$ is omitted, returns the list of user variables known
  to the interpreter, by order of decreasing priority. (Highest priority is $x$,
  which always come first.)
- 
+
 Variant: However, in library mode, this function should not be used for $x$
  non-\kbd{NULL}, since \tet{gvar} is more appropriate. Instead, for
  $x$ a $p$-adic (type \typ{PADIC}), $p$ is $gel(x,2)$; otherwise, use

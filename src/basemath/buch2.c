@@ -787,7 +787,7 @@ getfu(GEN nf, GEN *ptA, long fl, long *pte, long prec)
 
   y = RgM_mul(matep,u);
   if (expgexpo(y) > 20) { *pte=LONG_MAX; return not_given(av,fl,fupb_LARGE); }
-  
+
   if (prec <= 0) prec = gprecision(A);
   y = RgM_solve_realimag(M, gexp(y,prec));
   if (!y) return not_given(av,fl,fupb_PRECI);
@@ -861,7 +861,7 @@ init_units(GEN BNF)
 /*******************************************************************/
 
 /* G: prime ideals, E: vector of non-negative exponents.
- * C = possible extra prime (^1) or NULL 
+ * C = possible extra prime (^1) or NULL
  * Return Norm (product) */
 static GEN
 get_norm_fact_primes(GEN G, GEN E, GEN C)

@@ -9,6 +9,6 @@ Help: core(n,{flag=0}): unique (positive of negative) squarefree integer d
 Doc: if $n$ is a non-zero integer written as
  $n=df^2$ with $d$ squarefree, returns $d$. If $\fl$ is non-zero,
  returns the two-element row vector $[d,f]$.
- 
+
 Variant: Also available are \fun{GEN}{core}{GEN n} ($\fl = 0$) and
  \fun{GEN}{core2}{GEN n} ($\fl = 1$)

@@ -11,7 +11,7 @@ Doc: let $K$ the field represented by
  pseudo-basis of size $n$. The routine returns either a true $\Z_K$-basis of
  $M$ (of size $n$) if it exists, or an $n+1$-element generating set of $M$ if
  not.
- 
+
  It is allowed to use an irreducible polynomial $P$ in $K[X]$ instead of $M$,
  in which case, $M$ is defined as the ring of integers of $K[X]/(P)$, viewed
  as a $\Z_K$-module.

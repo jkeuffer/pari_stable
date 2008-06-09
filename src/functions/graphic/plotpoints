@@ -12,7 +12,7 @@ Doc: draw on the rectwindow $w$ the
  $Y$ and which are inside $w$. The virtual cursor does \emph{not} move. This
  is basically the same function as \kbd{plothraw}, but either with no scaling
  factor or with a scale chosen using the function \kbd{plotscale}.
- 
+
  As was the case with the \kbd{plotlines} function, $X$ and $Y$ are allowed to
  be (simultaneously) scalar. In this case, draw the single point $(X,Y)$ on
  the rectwindow $w$ (if it is actually inside $w$), and in any case

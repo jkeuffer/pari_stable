@@ -13,7 +13,7 @@ Doc: writes (appends) to
  function. If saved objects refer to (polynomial) variables that are not
  defined in the new session, they will be displayed in a funny way (see
  \secref{se:kill}).
- 
+
  If $x$ is omitted, saves all user variables from the session, together with
  their names. Reading such a ``named object'' back in a \kbd{gp} session will set
  the corresponding user variable to the saved value. E.g after
@@ -26,12 +26,12 @@ Doc: writes (appends) to
  priority, but are set to the new value). In particular, reading such a
  session log into a clean session will restore all variables exactly as they
  were in the original one.
- 
+
  User functions, installed functions and history objects can not be saved via
  this function. Just as a regular input file, a binary file can be compressed
  using \tet{gzip}, provided the file name has the standard \kbd{.gz}
  extension.\sidx{binary file}
- 
+
  In the present implementation, the binary files are architecture dependent
  and compatibility with future versions of \kbd{gp} is not guaranteed. Hence
  binary files should not be used for long term storage (also, they are

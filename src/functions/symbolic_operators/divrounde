@@ -3,7 +3,7 @@ Section: symbolic_operators
 C-Name: gdivrounde
 Prototype: &G
 Help: x\/=y: shortcut for x=x\/y
-Description: 
+Description:
  (*int, int):int:parens			 $1 = gdivround($1, $2)
  (*pol, gen):gen:parens			 $1 = gdivround($1, $2)
  (*gen, gen):gen:parens			 $1 = gdivround($1, $2)

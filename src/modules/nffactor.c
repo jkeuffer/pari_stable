@@ -316,7 +316,7 @@ zerofact(long v)
 }
 
 /* Return the factorization of A in Q[X]/(T) in rep [pre-allocated with
- * cgeg(3,t_MAT)], reclaiming all memory between avma and rep. 
+ * cgeg(3,t_MAT)], reclaiming all memory between avma and rep.
  * y is the vector of irreducible factors of B = Q_primpart( A/gcd(A,A') ).
  * Bad primes divide 'bad' */
 static void
@@ -1488,7 +1488,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 static GEN
 nfsqff_trager(GEN u, GEN T, GEN dent)
 {
-  long k = 0, i, lx; 
+  long k = 0, i, lx;
   GEN P, x0, fa, n = ZX_ZXY_rnfequation(T, u, &k);
   int tmonic;
   if (DEBUGLEVEL>4) fprintferr("nfsqff_trager: choosing k = %ld\n",k);

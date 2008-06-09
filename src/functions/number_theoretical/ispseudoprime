@@ -5,7 +5,7 @@ Prototype: GD0,L,
 Help: ispseudoprime(x,{flag}): true(1) if x is a strong pseudoprime, false(0)
  if not. If flag is 0 or omitted, use BPSW test, otherwise use strong
  Rabin-Miller test for flag randomly chosen bases
-Description: 
+Description:
  (int):bool	ispsp($1)
  (gen):gen	gispsp($1)
 Doc: true (1) if $x$ is a strong pseudo
@@ -13,17 +13,17 @@ Doc: true (1) if $x$ is a strong pseudo
  is not prime; if, on the other hand it returns true, it is only highly likely
  that $x$ is a prime number. Use \tet{isprime} (which is of course much
  slower) to prove that $x$ is indeed prime.
- 
+
  If $\fl = 0$, checks whether $x$ is a Baillie-Pomerance-Selfridge-Wagstaff
  pseudo prime (strong Rabin-Miller pseudo prime for base $2$, followed by
  strong Lucas test for the sequence $(P,-1)$, $P$ smallest positive integer
  such that $P^2 - 4$ is not a square mod $x$).
- 
+
  There are no known composite numbers passing this test, although it is
  expected that infinitely many such numbers exist. In particular, all
  composites $\leq 10^{15}$ are correctly detected (checked using
  Galway's list of strong 2-pseudoprimes at
  \kbd{http://oldweb.cecm.sfu.ca/pseudoprime/}).
- 
+
  If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime  for
  $\fl$ randomly chosen bases (with end-matching to catch square roots of $-1$).

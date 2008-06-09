@@ -3,6 +3,6 @@ Help: _.diff
 Section: member_functions
 C-Name: member_diff
 Prototype: G
-Description: 
+Description:
  (nf):gen:copy                  gmael($1, 5, 5)
  (gen):gen                      member_diff($1)

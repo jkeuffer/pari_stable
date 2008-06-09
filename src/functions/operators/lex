@@ -9,7 +9,7 @@ Doc: gives the result of a lexicographic comparison
  a wide sense: It is admissible to compare objects of different types
  (scalars, vectors, matrices), provided the scalars can be compared, as well
  as vectors/matrices of different lengths. The comparison is recursive.
- 
+
  In case all components are equal up to the smallest length of the operands,
  the more complex is considered to be larger. More precisely, the longest is
  the largest; when lengths are equal, we have matrix $>$ vector $>$ scalar.

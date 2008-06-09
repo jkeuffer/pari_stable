@@ -9,7 +9,7 @@ Doc: For $s$ a complex number, Riemann's zeta
  when $s$ is of type integer, in which case it is computed using
  Bernoulli numbers\sidx{Bernoulli numbers} for $s\le0$ or $s>0$ and
  even, and using modular forms for $s>0$ and odd.
- 
+
  For $s$ a $p$-adic number, Kubota-Leopoldt zeta function at $s$, that
  is the unique continuous $p$-adic function on the $p$-adic integers
  that interpolates the values of $(1 - p^{-k}) \zeta(k)$ at negative

@@ -2,7 +2,7 @@ Function: input
 Class: gp
 Section: programming/specific
 C-Name: input0
-Prototype: 
+Prototype:
 Help: input(): read an expression from the input file or standard input
 Doc: reads a string, interpreted as a GP expression,
  from the input file, usually standard input (i.e.~the keyboard). If a

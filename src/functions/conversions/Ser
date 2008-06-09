@@ -13,6 +13,6 @@ Doc: transforms the object $x$ into a power series
  coefficients of the vector are understood to be the coefficients of the power
  series starting from the constant term (i.e.~the reverse of the function
  \kbd{Pol}).
- 
+
  The warning given for \kbd{Pol} also applies here: this is not a substitution
  function.

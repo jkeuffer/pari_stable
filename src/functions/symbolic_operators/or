@@ -1,7 +1,7 @@
 Function: _||_
 C-Name: orpari
 Prototype: GE
-Help: x||y: 
+Help: x||y:
 Section: symbolic_operators
-Description: 
+Description:
  (bool, bool):bool:parens               $(1) || $(2)

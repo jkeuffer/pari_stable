@@ -13,7 +13,7 @@ Doc: extracts the $n^{\text{th}}$-component of $x$. This is to be understood
  $x$ is a matrix, the $n^{\text{th}}$ column, if $x$ is a polynomial, the
  $n^{\text{th}}$ coefficient (i.e.~of degree $n-1$), and for power series,
  the $n^{\text{th}}$ significant coefficient.
- 
+
  For polynomials and power series, one should rather use \tet{polcoeff}, and
  for vectors and matrices, the \kbd{[$\,$]} operator. Namely, if $x$ is a
  vector, then \tet{x[n]} represents the $n^{\text{th}}$ component of $x$. If
@@ -21,7 +21,7 @@ Doc: extracts the $n^{\text{th}}$-component of $x$. This is to be understood
  column \kbd{n} of the matrix, \tet{x[m,]} represents the $m^{\text{th}}$
  \emph{row} of $x$, and \tet{x[,n]} represents the $n^{\text{th}}$
  \emph{column} of $x$.
- 
+
  Using of this function requires detailed knowledge of the structure of the
  different PARI types, and thus it should almost never be used directly.
  Some useful exceptions:

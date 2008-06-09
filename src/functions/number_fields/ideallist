@@ -12,24 +12,24 @@ Doc: computes the list
  Each component is itself a row vector containing the information about
  ideals of a given norm, in no specific order, depending on the value of
  $\fl$:
- 
+
  The possible values of $\fl$ are:
- 
+
  \quad 0: give the \var{bid} associated to the ideals, without generators.
- 
+
  \quad 1: as 0, but include the generators in the \var{bid}.
- 
+
  \quad 2: in this case, \var{nf} must be a \var{bnf} with units. Each
  component is of the form $[\var{bid},U]$, where \var{bid} is as case 0
  and $U$ is a vector of discrete logarithms of the units. More precisely, it
  gives the \kbd{ideallog}s with respect to \var{bid} of \kbd{bnf.tufu}.
  This structure is technical, and only meant to be used in conjunction with
  \tet{bnrclassnolist} or \tet{bnrdisclist}.
- 
+
  \quad 3: as 2, but include the generators in the \var{bid}.
- 
+
  \quad 4: give only the HNF of the ideal.
- 
+
  \bprog
  ? nf = nfinit(x^2+1);
  ? L = ideallist(nf, 100);

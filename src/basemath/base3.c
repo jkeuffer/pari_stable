@@ -453,7 +453,7 @@ element_sqr(GEN nf, GEN x)
 
   nf = checknf(nf);
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) 
+  if (typ(x) != t_COL)
   {
     N = degpol(gel(nf,1));
     z = zerocol(N); gel(z,1) = gsqr(x);
@@ -775,7 +775,7 @@ algtobasis(GEN nf, GEN x)
       {
         case t_INT:
         case t_FRAC: return scalarcol(x, degpol(nf[1]));
-        case t_POL: 
+        case t_POL:
           av = avma;
           return gerepileupto(av,poltobasis(nf,x));
       }

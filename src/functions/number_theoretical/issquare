@@ -4,7 +4,7 @@ C-Name: gissquareall
 Prototype: GD&
 Help: issquare(x,{&n}): true(1) if x is a square, false(0) if not. If n is
  given puts the exact square root there if it was computed
-Description: 
+Description:
  (int):bool	Z_issquare($1)
  (mp):int	gissquare($1)
  (gen):gen	gissquare($1)

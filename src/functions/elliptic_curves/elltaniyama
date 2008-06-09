@@ -4,7 +4,7 @@ C-Name: elltaniyama
 Prototype: GP
 Help: elltaniyama(E): modular parametrization of elliptic curve E (minimal
  model)
-Doc: 
+Doc:
  computes the modular parametrization of the
  elliptic curve $E$, where $E$ is an \var{sell} as output by \kbd{ellinit}, in
  the form of a two-component vector $[u,v]$ of power series, given to the

@@ -294,7 +294,7 @@ RgXQX_to_mod(GEN z, GEN T)
 GEN
 RgXQXV_to_mod(GEN V, GEN T)
 {
-  long i, l = lg(V); 
+  long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
   for (i=1;i<l; i++) gel(z,i) = RgXQX_to_mod(gel(V,i), T);
   return z;
@@ -303,7 +303,7 @@ RgXQXV_to_mod(GEN V, GEN T)
 GEN
 RgXQV_to_mod(GEN V, GEN T)
 {
-  long i, l = lg(V); 
+  long i, l = lg(V);
   GEN z = cgetg(l, t_VEC); T = ZX_copy(T);
   for (i=1;i<l; i++) gel(z,i) = RgXQ_to_mod(gel(V,i), T);
   return z;
@@ -378,7 +378,7 @@ RgM_to_RgXX(GEN x, long v,long w)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx+1, t_POL);
-  y[1]=evalsigne(1) | evalvarn(v);
+  y[1] = evalsigne(1) | evalvarn(v);
   y++;
   for (j=1; j<lx; j++) gel(y,j) = RgV_to_RgX(gel(x,j), w);
   return normalizepol_i(--y, lx+1);
@@ -1354,7 +1354,7 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
   {
     p--;
     c = gmul(gel(x,0), gel(ypow,p));
-    gel(z,iz++) = rem(c,T); 
+    gel(z,iz++) = rem(c,T);
     gel(x,0) = gneg(gel(x,0));
     for (i=1; i<=dy; i++)
     {

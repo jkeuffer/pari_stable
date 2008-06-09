@@ -1,6 +1,6 @@
 Function: copy
 Class: gp2c
-Description: 
+Description:
  (small):small:parens		$1
  (int):int			icopy($1)
  (real):real			gcopy($1)

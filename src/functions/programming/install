@@ -12,22 +12,22 @@ Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
  (see the Libpari Manual for an explanation of those). If \var{lib} is
  omitted, uses \kbd{libpari.so}. If \var{gpname} is omitted, uses
  \var{name}.
- 
+
  This function is useful for adding custom functions to the \kbd{gp} interpreter,
  or picking useful functions from unrelated libraries. For instance, it
  makes the function \tet{system} obsolete:
- 
+
  \bprog
  ? install(system, vs, sys, "libc.so")
  ? sys("ls gp*")
  gp.c            gp.h            gp_rl.c
  @eprog
- 
+
  But it also gives you access to all (non static) functions defined in the
  PARI library. For instance, the function \kbd{GEN addii(GEN x, GEN y)} adds
  two PARI integers, and is not directly accessible under \kbd{gp} (it is
  eventually called by the \kbd{+} operator of course):
- 
+
  \bprog
  ? install("addii", "GG")
  ? addii(1, 2)
@@ -36,7 +36,7 @@ Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
  Re-installing a function will print a Warning, and update the prototype code
  if needed, but will reload a symbol from the library, even it the latter has
  been recompiled.
- 
+
  \misctitle{Caution:} This function may not work on all systems, especially
  when \kbd{gp} has been compiled statically. In that case, the first use of an
  installed function will provoke a Segmentation Fault, i.e.~a major internal

@@ -9,12 +9,12 @@ Help: bnrconductor(a1,{a2},{a3},{flag=0}): conductor f of the subfield of
 Doc: conductor $f$ of
  the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
  \kbd{bnr} at the beginning of this section).
- 
+
  If $\fl = 0$, returns $f$.
- 
+
  If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group
  modulo $f$, as a finite abelian group; finally $H$ is the subgroup of $Cl_f$
  defining the extension.
- 
+
  If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
  replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.

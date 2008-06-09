@@ -4,7 +4,7 @@ C-Name: mathell
 Prototype: GGp
 Help: ellheightmatrix(E,x): gives the height matrix for vector of points x
  on elliptic curve E, assume to be a minimal model.
-Doc: 
+Doc:
  $x$ being a vector of points, this
  function outputs the Gram matrix of $x$ with respect to the N\'eron-Tate
  height, in other words, the $(i,j)$ component of the matrix is equal to

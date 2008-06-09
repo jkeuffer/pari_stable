@@ -3565,7 +3565,7 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-  
+
   vze = RgX_divrem(RgX_sub(v, gmul(uze,x)), y, &p1);
   if (!gcmp0(p1)) pari_warn(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);

@@ -8,11 +8,11 @@ Help: alarm({s = 0}): trigger an "alarmer" exception after s seconds,
  omitted.
 Doc: trigger an \var{alarmer} exception after $s$ seconds, cancelling any
  previously set alarm. Stop a pending alarm if s = 0 or is omitted.
-  
+
  For example, the function \kbd{timefact(N,sec)} below
  will try to factor $N$ and give up after \var{sec} seconds,
  returning a partial factorisation.
-  
+
  \bprog
  default(factor_add_primes,1);
  default(primelimit,16777216);

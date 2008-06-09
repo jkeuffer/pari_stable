@@ -1,6 +1,6 @@
 Function: _formatcode
 Class: gp2c_internal
-Description: 
+Description:
  (#small):void	                $1
  (small):small	                %ld
  (#str):void	                $%1

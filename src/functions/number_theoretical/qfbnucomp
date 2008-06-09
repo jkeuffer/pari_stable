@@ -10,9 +10,9 @@ Doc: \idx{composition} of the primitive positive
  constant, but for optimal speed, one should take $L=|D|^{1/4}$, where $D$ is
  the common discriminant of $x$ and $y$. When $x$ and $y$ do not have the same
  discriminant, the result is undefined.
- 
+
  The current implementation is straightforward and in general \emph{slower}
  than the generic routine (since the latter takes advantage of asymptotically
  fast operations and careful optimizations).
- 
+
 Variant: Also available is \fun{GEN}{nudupl}{GEN x, GEN L} when $x=y$.

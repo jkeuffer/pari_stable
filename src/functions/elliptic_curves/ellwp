@@ -12,14 +12,14 @@ Help: ellwp(E,{z=x},{flag=0}):
 Doc: Computes the value at $z$ of the Weierstrass $\wp$ function attached to
  the elliptic curve $E$ as given by \kbd{ellinit} (alternatively, $E$ can be
  given as a lattice $[\omega_1,\omega_2]$).
- 
+
  If $z$ is omitted or is a simple variable, computes the \emph{power series}
  expansion in $z$ (starting $z^{-2}+O(z^2)$). The number of terms to an
  \emph{even} power in the expansion is the default serieslength in \kbd{gp},
  and the second argument (C long integer) in library mode.
- 
+
  Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
  means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
- 
+
 Variant: Also available is \fun{GEN}{weipell}{GEN E, long precdl} for the power
  series.

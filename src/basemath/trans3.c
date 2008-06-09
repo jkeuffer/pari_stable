@@ -759,10 +759,7 @@ eint1(GEN x, long prec)
     x = gtofp(x, prec);
     if (typ(x) != t_REAL) pari_err(impl,"non-real argument in eint1");
   }
-  if (signe(x) >= 0)
-  {
-    return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
-  }
+  if (signe(x) >= 0) return gerepileuptoleaf(av, incgam2_0(x, mpexp(x)));
   /* rewritten from code contributed by Manfred Radimersky */
   l  = lg(x);
   n  = bit_accuracy(l);

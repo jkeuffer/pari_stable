@@ -11,7 +11,7 @@ Doc: creates a column vector with two components, the first being the Euclidean
  need to do two divisions if one needs both the quotient and the remainder.
  If $v$ is present, and $x$, $y$ are multivariate
  polynomials, divide with respect to the variable $v$.
- 
+
  Beware that \kbd{divrem($x$,$y$)[2]} is in general not the same as
  \kbd{$x$ \% $y$}; no GP operator corresponds to it:
  \bprog

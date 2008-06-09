@@ -19,9 +19,9 @@ Doc: tries to tell whether the
  this case, $x$ is a norm iff $b=1$). If $\fl$ is non zero the program adds to
  $S$ the following prime ideals, depending on the sign of $\fl$. If $\fl>0$,
  the ideals of norm less than $\fl$. And if $\fl<0$ the ideals dividing $\fl$.
- 
+
  Assuming \idx{GRH}, the answer is guaranteed (i.e.~$x$ is a norm iff $b=1$),
  if $S$ contains all primes less than $12\log(\disc(\var{Bnf}))^2$, where
  $\var{Bnf}$ is the Galois closure of $\var{bnf}$.
- 
+
  See also \tet{bnfisintnorm}.

@@ -10,7 +10,7 @@ Doc: outputs all the subgroups of the Galois
  orders of the generators. The cardinal of a subgroup is the product of the
  relative orders. Such subgroup can be used instead of a Galois group in the
  following command: \kbd{galoisisabelian}, \kbd{galoissubgroups}, \kbd{galoisexport} and \kbd{galoisidentify}.
- 
+
  To get the subfield fixed by a subgroup \var{sub} of \var{gal}, use
  \bprog
  galoisfixedfield(gal,sub[1])

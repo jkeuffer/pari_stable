@@ -132,7 +132,7 @@ idealhermite_aux(GEN nf, GEN x)
       case t_COL: break;
       case t_INT:  if (!signe(x)) return cgetg(1,t_MAT);
         return scalarmat(absi(x), degpol(nf[1]));
-      case t_FRAC: 
+      case t_FRAC:
         return scalarmat(Q_abs(x), degpol(nf[1]));
       default: pari_err(typeer,"idealhermite");
     }
@@ -587,7 +587,7 @@ idealfactor(GEN nf, GEN x)
     x = nf_to_scalar_or_basis(nf, x);
     if (typ(x) != t_COL)
     {
-      long lfa; 
+      long lfa;
       f = factor(Q_abs(x));
       c1 = gel(f,1); lfa = lg(c1);
       if (lfa == 1) { avma = av; return trivfact(); }
@@ -2476,7 +2476,7 @@ element_close(GEN nf, GEN x, GEN ideal)
   GEN y = gcoeff(ideal,1,1);
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(y) == t_INT && is_pm1(y)) return ground(x);
-  if (typ(x) == t_COL) 
+  if (typ(x) == t_COL)
     x = closemodinvertible(x, ideal);
   else
     x = gmul(y, gdivround(x,y));

@@ -12,6 +12,6 @@ Doc: computes a two-element
  and $a\in\Z$, where $a$ is the one passed as argument if any. If $x$ is given
  by at least two generators, $a$ is chosen to be the positive generator of
  $x\cap\Z$.
- 
+
  Note that when an explicit $a$ is given, we use an asymptotically faster
  method, however in practice it is usually slower.

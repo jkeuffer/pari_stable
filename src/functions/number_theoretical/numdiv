@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: gnumbdiv
 Prototype: G
 Help: numdiv(x): number of divisors of x
-Description: 
+Description:
  (int):int	numbdiv($1)
  (gen):gen	gnumbdiv($1)
 Doc: number of divisors of $|x|$. $x$ must be of type integer.

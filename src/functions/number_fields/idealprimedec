@@ -10,7 +10,7 @@ Doc: computes the prime ideal
  decomposition of the prime number $p$ in the number field $\var{nf}$. $p$
  must be a (positive) prime number. Note that the fact that $p$ is prime is
  not checked, so if a non-prime $p$ is given the result is undefined.
- 
+
  The result is a vector of \tev{pr} structures, each representing one of the
  prime ideals above $p$ in the number field $\var{nf}$. The representation
  $P=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
@@ -21,6 +21,6 @@ Doc: computes the prime ideal
  will be useful for computing valuations, but which the user can ignore. The
  number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
  ideal (this is automatic if $e>1$).
- 
+
  The components of \kbd{P} should be accessed by member functions: \kbd{P.p},
  \kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector $[p,a]$).

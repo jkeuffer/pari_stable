@@ -718,7 +718,7 @@ conjvec(GEN x,long prec)
         GEN c = gel(T,i);
         switch(typ(c)) {
 	  case t_INTMOD: {
-            GEN p = gel(c,1); 
+            GEN p = gel(c,1);
             T = RgX_to_FpX(T,p); /* left on stack */
             z = cgetg(lx-2,t_COL);
             if (typ(x) == t_POL) {
@@ -1227,7 +1227,7 @@ QM_imZ_hnf_aux(GEN A)
 
   n = lg(A);
   if (n == 1) return cgetg(1,t_MAT);
-  if (n == 2) { 
+  if (n == 2) {
     A = Q_primpart(A);
     if ( ZV_cmp0(gel(A,1)) ) A = cgetg(1,t_MAT);
     return A;
@@ -1948,7 +1948,7 @@ ZC_elem(GEN aj, GEN ak, GEN A, GEN U, long j, long k)
 {
   GEN p1,u,v,d;
 
-  if (!signe(ak)) { 
+  if (!signe(ak)) {
     swap(gel(A,j), gel(A,k));
     if (U) swap(gel(U,j), gel(U,k));
     return;

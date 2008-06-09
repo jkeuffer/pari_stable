@@ -5,7 +5,7 @@ Prototype: GD-1,L,
 Help: factor(x,{lim}): factorization of x. lim is optional and can be set
  whenever x is of (possibly recursive) rational type. If lim is set return
  partial factorization, using primes up to lim (up to primelimit if lim=0)
-Description: 
+Description:
  (int, ?-1):vec        Z_factor($1)
  (gen, ?-1):vec        factor($1)
  (int, 0):vec          smallfact($1)
@@ -17,7 +17,7 @@ Doc: general factorization function.
  If $x$ is a vector or a matrix, the factoring is done componentwise (hence
  the result is a vector or matrix of two-column matrices). By convention,
  $0$ is factored as $0^1$.
- 
+
  If $x$ is of type integer or rational, the factors are \var{pseudoprimes}
  (see \kbd{ispseudoprime}), and in general not rigorously proven primes. In
  fact, any factor which is $\leq 10^{15}$ is a genuine prime number. Use
@@ -26,7 +26,7 @@ Doc: general factorization function.
  fa = factor(2^2^7 +1)
  isprime( fa[,1] )
  @eprog\noindent
- Another possibility is to set the global default \tet{factor_proven}, which 
+ Another possibility is to set the global default \tet{factor_proven}, which
  will perform a rigorous primality proof for each pseudoprime factor.
 
  An argument \var{lim} can be added, meaning that we look only for prime
@@ -35,28 +35,28 @@ Doc: general factorization function.
  $\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
  be a proven composite! See \tet{factorint} for more information about the
  algorithms used.
- 
+
  The polynomials or rational functions to be factored must have scalar
  coefficients. In particular PARI does \emph{not} know how to factor
  multivariate polynomials. See \tet{factormod} and \tet{factorff} for the
  algorithms used over finite fields, \tet{factornf} for the algorithms over
  number fields. Over $\Q$, \idx{van Hoeij}'s method is used, which is able to
  cope with hundreds of modular factors.
- 
+
  Note that PARI tries to guess in a sensible way over which ring you want
  to factor. Note also that factorization of polynomials is done up to
  multiplication by a constant. In particular, the factors of rational
  polynomials will have integer coefficients, and the content of a polynomial
  or rational function is discarded and not included in the factorization. If
  needed, you can always ask for the content explicitly:
- 
+
  \bprog
  ? factor(t^2 + 5/2*t + 1)
  %1 =
  [2*t + 1 1]
- 
+
  [t + 2 1]
- 
+
  ? content(t^2 + 5/2*t + 1)
  %2 = 1/2
  @eprog\noindent

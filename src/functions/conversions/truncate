@@ -5,7 +5,7 @@ Prototype: GD&
 Help: truncate(x,{&e}): truncation of x; when x is a power series,take away
  the O(X^). If e is present, do not take into account loss of integer part
  precision, and set e = error estimate in bits
-Description: 
+Description:
  (small):small:parens   $1
  (int):int:copy:parens  $1
  (real):int             truncr($1)
@@ -24,12 +24,12 @@ Doc: truncates $x$ and sets $e$ to the number of
  applies componentwise on vector / matrices; $e$ is then the maximal number of
  error bits. If $x$ is a rational function, the result is the ``integer part''
  (Euclidean quotient of numerator by denominator) and $e$ is not set.
- 
+
  Note a very special use of \kbd{truncate}: when applied to a power series, it
  transforms it into a polynomial or a rational function with denominator
  a power of $X$, by chopping away the $O(X^k)$. Similarly, when applied to
  a $p$-adic number, it transforms it into an integer or a rational number
  by chopping away the $O(p^k)$.
- 
+
 Variant: Also available are \fun{GEN}{gcvtoi}{GEN x, long *e} and
  \fun{GEN}{gtrunc}{GEN x}.

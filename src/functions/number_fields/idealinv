@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealinv
 Prototype: GG
 Help: idealinv(nf,x): inverse of the ideal x in the number field nf.
-Description: 
+Description:
  (gen, gen):gen	idealinv($1, $2)
 Doc: inverse of the ideal $x$ in the
  number field $\var{nf}$. The result is the Hermite normal form of the

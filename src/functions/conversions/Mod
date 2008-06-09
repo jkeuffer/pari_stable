@@ -3,17 +3,17 @@ Section: conversions
 C-Name: gmodulo
 Prototype: GG
 Help: Mod(x,y): creates 'x modulo y'.
-Description: 
+Description:
  (small, small):gen         gmodulss($1, $2)
  (small, gen):gen           gmodulsg($1, $2)
  (gen, gen):gen             gmodulo($1, $2)
-Doc: 
+Doc:
  creates the PARI object
  $(x \mod y)$, i.e.~an intmod or a polmod. $y$ must be an integer or a
  polynomial. If $y$ is an integer, $x$ must be an integer, a rational
  number, or a $p$-adic number compatible with the modulus $y$. If $y$ is a
  polynomial, $x$ must be a scalar (which is not a polmod), a polynomial, a
  rational function, or a power series.
- 
+
  This function is not the same as $x$ \kbd{\%} $y$, the result of which is an
  integer or a polynomial.

@@ -11,7 +11,7 @@ Doc: if $x$ is a fractional ideal
  all prime ideals $\wp$ such that the valuation of $x$ at $\wp$ is non-zero, we
  have $v_{\wp}(\alpha)=v_{\wp}(x)$, and. $v_{\wp}(\alpha)\ge0$ for all other
  ${\wp}$.
- 
+
  If $\fl$ is non-zero, $x$ must be given as a prime ideal factorization, as
  output by \kbd{idealfactor}, but possibly with zero or negative exponents.
  This yields an element $\alpha$ such that for all prime ideals $\wp$ occurring

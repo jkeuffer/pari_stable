@@ -10,6 +10,6 @@ Doc: \idx{Dedekind}'s $\eta$ function, without the
  imaginary part, the result is $\prod_{n=1}^\infty(1-q^n)$, where
  $q=e^{2i\pi x}$. If $x$ is a power series (or can be converted to a power
  series) with positive valuation, the result is $\prod_{n=1}^\infty(1-x^n)$.
- 
+
  If $\fl=1$ and $x$ can be converted to a complex number (i.e.~is not a power
  series), computes the true $\eta$ function, including the leading $q^{1/24}$.

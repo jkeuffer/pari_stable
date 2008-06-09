@@ -1162,7 +1162,7 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
-  
+
   q = powiu(S->p, s); qp = mulii(q, S->p);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, qp);
   return compmod(nup, phi, S->chi, qp, mkfrac(gen_1,q));

@@ -11,13 +11,13 @@ Doc: \idx{Galois} group of the non-constant
  which the data file of Galois resolvents has been installed (available in the
  Unix distribution as a separate package), degrees 8, 9, 10 and 11 are also
  implemented.
- 
+
  The output is a 4-component vector $[n,s,k,name]$ with the
  following meaning: $n$ is the cardinality of the group, $s$ is its signature
  ($s=1$ if the group is a subgroup of the alternating group $A_n$, $s=-1$
  otherwise) and name is a character string containing name of the transitive
  group according to the GAP 4 transitive groups library by Alexander Hulpke.
- 
+
  $k$ is more arbitrary and the choice made up to version~2.2.3 of PARI is rather
  unfortunate: for $n > 7$, $k$ is the numbering of the group among all
  transitive subgroups of $S_n$, as given in ``The transitive groups of degree up
@@ -78,7 +78,7 @@ Doc: \idx{Galois} group of the non-constant
  $M_{42}=[42,-1,4]$, $PSL_2(7)=PSL_3(2)=[168,1,5]$, $A_7=[2520,1,6]$,
  $S_7=[5040,-1,7]$.
  \smallskip
- 
+
  \misctitle{Warning:} The method used is that of resolvent polynomials and is
  sensitive to the current precision. The precision is updated internally but,
  in very rare cases, a wrong result may be returned if the initial precision

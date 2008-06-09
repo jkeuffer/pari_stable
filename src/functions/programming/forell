@@ -4,7 +4,7 @@ C-Name: forell
 Prototype: vVLLI
 Help: forell(E,a,b,seq): execute seq for each elliptic curves E of conductor
  between a and b in the elldata database.
-Doc: evaluates \var{seq}, where 
+Doc: evaluates \var{seq}, where
  the formal variable $E$ ranges through all elliptic curves of conductors from
  $a$ to $b$. Th \tet{elldata} database must be installed and contain data for
  the specified conductors.

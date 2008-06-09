@@ -6,7 +6,7 @@ Help: ellidentify(E): look up the elliptic curve E in the elldata database and
  return [[N, M, ...], C] where N is the name of the curve in J. E. Cremona
  database, M the minimal model and C the coordinates change (see
  ellchangecurve).
-Doc: 
+Doc:
  look up the elliptic curve $E$ (over $\Z$)
  in the \tet{elldata} database and return \kbd{[[N, M, G], C]}  where $N$
  is the name of the curve in J.  E.  Cremona database, $M$ the minimal

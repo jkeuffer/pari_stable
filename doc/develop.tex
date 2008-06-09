@@ -260,7 +260,7 @@ if they do not match.
 
 \item Pick a \emph{new} name for your test, say \kbd{fun}, and write down a
 GP script named \kbd{fun}. Make sure it produces some useful ouput and tests
-adequately a set of routines. 
+adequately a set of routines.
 
 \item The script should not be too long: one minute runs should be enough.
 Try to break your script into independent easily reproduceable tests, this way
@@ -306,7 +306,7 @@ excluded tests, in the \kbd{test\_extra\_out} variable.
 
 \item The \kbd{get\_tests} script also defines the recipe for
 \kbd{make bench} timings, via the variable \kbd{test\_basic}. A test is
-included as \kbd{fun} or \kbd{fun\_$n$}, where $n$ is an integer $\leq 1000$; 
+included as \kbd{fun} or \kbd{fun\_$n$}, where $n$ is an integer $\leq 1000$;
 the latter means that the timing is weighted by a factor $n/1000$. (This was
 introduced a long time ago, when the \kbd{nfields} bench was so much slower
 than the others that it hid slowdowns elsewhere.)

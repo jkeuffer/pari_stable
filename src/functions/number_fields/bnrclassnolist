@@ -9,7 +9,7 @@ Doc: $\var{bnf}$ being as
  output by \kbd{ideallist} or \kbd{ideallistarch}, outputs the list of the
  class numbers of the corresponding ray class groups. To compute a single
  class number, \tet{bnrclassno} is more efficient.
- 
+
  \bprog
  ? bnf = bnfinit(x^2 - 2);
  ? L = ideallist(bnf, 100, 2);

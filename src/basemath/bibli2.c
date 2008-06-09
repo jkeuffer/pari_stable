@@ -1215,7 +1215,7 @@ polymodrecip(GEN x)
 /**                                                                **/
 /********************************************************************/
 static int
-cmp_small(GEN x, GEN y) { 
+cmp_small(GEN x, GEN y) {
   long a = (long)x, b = (long)y;
   return a>b? 1: (a<b? -1: 0);
 }

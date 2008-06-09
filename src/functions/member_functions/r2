@@ -3,6 +3,6 @@ Section: member_functions
 C-Name: member_r2
 Prototype: G
 Help: _.r2
-Description: 
+Description:
  (nf):int:copy                  gmael($1, 2, 2)
  (gen):int                      member_r2($1)

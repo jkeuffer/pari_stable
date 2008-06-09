@@ -4,7 +4,7 @@ C-Name: gtomat
 Prototype: DG
 Help: Mat({x=[]}): transforms any GEN x into a matrix. Empty matrix if x is
  omitted
-Doc: 
+Doc:
  transforms the object $x$ into a matrix.
  If $x$ is already a matrix, a copy of $x$ is created.
  If $x$ is not a vector or a matrix, this creates a $1\times 1$ matrix.
@@ -12,7 +12,7 @@ Doc:
  1-column) matrix, \emph{unless} all elements are column (resp.~row) vectors
  of the same length, in which case the vectors are concatenated sideways
  and the associated big matrix is returned.
- 
+
  \bprog
  ? Mat(x + 1)
  %1 =
@@ -22,15 +22,15 @@ Doc:
  ? Mat(%)
  %3 =
  [1 0 0]
- 
+
  [0 1 0]
- 
+
  [0 0 1]
  ? Col( [1,2; 3,4] )
  %4 = [[1, 2], [3, 4]]~
  ? Mat(%)
  %5 =
  [1 2]
- 
+
  [3 4]
  @eprog

@@ -3,5 +3,5 @@ Help: _.e
 Section: member_functions
 C-Name: member_e
 Prototype: G
-Description: 
+Description:
  (prid):int:copy       gel($1, 3)

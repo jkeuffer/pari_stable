@@ -18,7 +18,7 @@ Description:
  (empty, prid, vec)
  (empty, gal, vec)
  (empty, var, pol, gen)
- 
+
 Function: _cast
 Class: gp2c_internal
 Help: (type1):type2 : cast expression of type1 to type2
@@ -34,8 +34,8 @@ Description:
  (real):bool           signe($1)
  (int):bool            signe($1)
  (mp):bool             signe($1)
- (pol):bool            signe($1) 
- 
+ (pol):bool            signe($1)
+
  (void):negbool        1
  (#bool):negbool       ${1 value not}
  (bool):negbool        !$(1)
@@ -46,20 +46,20 @@ Description:
  (real):negbool        !signe($1)
  (mp):negbool          !signe($1)
  (pol):negbool         !signe($1)
- 
+
  (bool):small_int
- (typ):small_int 
- (small):small_int 
- 
+ (typ):small_int
+ (small):small_int
+
  (bool):small
- (typ):small 
+ (typ):small
  (small_int):small
  (bptr):small           *$(1)
  (int):small            itos($1)
  (#lg):small:parens     ${1 value 1 sub}
  (lg):small:parens      $(1)-1
  (gen):small            gtos($1)
- 
+
  (void):int             gen_0
  (-2):int               gen_m2
  (-1):int               gen_m1
@@ -70,21 +70,21 @@ Description:
  (small):int            stoi($1)
  (mp):int
  (gen):int
- 
+
  (mp):real
  (gen):real
- 
+
  (int):mp
  (real):mp
  (gen):mp
- 
+
  (#bool):lg:parens             ${1 1 value add}
  (bool):lg:parens              $(1)+1
  (#small):lg:parens            ${1 1 value add}
  (small):lg:parens             $(1)+1
- 
+
  (gen):vecsmall
- 
+
  (nf):vec
  (bnf):vec
  (bnr):vec
@@ -94,15 +94,15 @@ Description:
  (prid):vec
  (gal):vec
  (gen):vec
- 
+
  (gen):list
- 
+
  (pol):var      varn($1)
  (gen):var      gvar($1)
- 
+
  (var):pol      pol_x($1)
  (gen):pol
- 
+
  (int):gen
  (mp):gen
  (vecsmall):gen
@@ -110,15 +110,15 @@ Description:
  (list):gen
  (pol):gen
  (genstr):gen
- 
+
  (gen):genstr GENtoGENstr($1)
  (str):genstr strtoGENstr($1)
- 
+
  (genstr):str GSTR($1)
  (typ):str type_name($1)
- 
+
  (#str):typ  ${1 str_format}
- 
+
  (bnf):nf:parens       gel($1, 7)
  (gen):nf
  (bnr):bnf:parens      gel($1, 1)

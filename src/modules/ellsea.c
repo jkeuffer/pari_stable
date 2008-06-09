@@ -115,7 +115,7 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
   gel(f, 2) = scalarpol(gen_2,0);
   gel(f2, 2) = FpX_Fp_mul(rhs, utoi(4), p);
   a42 = Fp_sqr(a4, p);
-  gel(f, 3) = FpX_rem(mkpoln(5, utoi(3), gen_0, Fp_mul(utoi(6), a4, p), 
+  gel(f, 3) = FpX_rem(mkpoln(5, utoi(3), gen_0, Fp_mul(utoi(6), a4, p),
                         Fp_mul(utoi(12), a6, p), Fp_neg(a42, p)), h, p);
   if (n == 3) return gerepileupto(ltop, gel(f, 3));
   gel(f, 4) = FpX_rem(FpX_Fp_mul(mkpoln(7, gen_1, gen_0,
@@ -127,7 +127,7 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
   gel(f2, 3) = FpXQ_sqr(gel(f, 3), h, p);
   gel(ff, 3) = gel(f, 3);
   gel(ff, 4) = FpX_Fp_mul(FpXQ_mul(rhs, gel(f, 4), h, p), gen_2, p);
-  gel(f, 5)  = FpX_sub(FpXQ_mul(gel(ff, 4), gel(f2, 2), h, p), 
+  gel(f, 5)  = FpX_sub(FpXQ_mul(gel(ff, 4), gel(f2, 2), h, p),
                       FpXQ_mul(gel(ff, 3), gel(f2, 3), h, p), p);
   if (n == 5) return gerepileupto(ltop, gel(f, 5));
   gel(f2, 4) = FpXQ_mul(rhs, FpXQ_sqr(gel(f, 4), h, p), h, p);
@@ -150,7 +150,7 @@ elldivpol(GEN a4, GEN a6, long n, GEN h, GEN p)
   }
   m = n/2;
   if (n&1L)
-    res = FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m), h, p), 
+    res = FpX_sub(FpXQ_mul(gel(ff, m+2), gel(f2, m), h, p),
                   FpXQ_mul(gel(ff, m+1), gel(f2, m+1), h, p), p);
   else
     res = FpXQ_mul(
@@ -228,7 +228,7 @@ Fp_ell_dbl(GEN P, GEN a4, GEN p)
   pari_sp ltop = avma;
   GEN lambda, C, D, x = gel(P,1), y = gel(P,2);
   if (is_inf(P) || !signe(y)) return mkvec(gen_0);
-  lambda = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p), 
+  lambda = Fp_div(Fp_add(Fp_mulu(Fp_sqr(x,p), 3, p), a4, p),
                   Fp_mulu(y, 2, p), p);
   C = Fp_sub(Fp_sqr(lambda, p), Fp_mulu(x, 2, p), p);
   D = Fp_sub(Fp_mul(lambda, Fp_sub(x, C, p), p), y, p);
@@ -347,7 +347,7 @@ eigen_elldbl(void *E, GEN P)
   GEN p = Edat->p, h = Edat->h, x = gel(P,1), y = gel(P,2);
   if (is_inf(P)) return gcopy(P);
   if (gequal(x, pol_x(0)) && gequal(y, gen_1))
-    return Edat->X12;   
+    return Edat->X12;
   else
   {
     GEN t1 = FpX_Fp_add(FpX_Fp_mul(FpXQ_sqr(x,h,p),utoi(3),p), Edat->a4, p);
@@ -364,7 +364,7 @@ eigen_elldbl(void *E, GEN P)
  * Computations are done modulo Y^2 - (X^3 + a4X + a6)
  * An inversion is equivalent to 4M, so that this function requires about 7M
  * which is the same as with the method using ell-division polynomials
- * Working in mixed projective coordinates would require 11M */ 
+ * Working in mixed projective coordinates would require 11M */
 static GEN
 eigen_elladd(void *E, GEN P, GEN Q)
 {
@@ -499,7 +499,7 @@ find_kernel(GEN a4, GEN a6, ulong ell, GEN a4t, GEN a6t, GEN pp1, GEN p, long *p
   }
   for (k = 2; k <= dim; k++)
   {
-     GEN C = Fp_inv(shifti(mpfact(2*k),-1), p); 
+     GEN C = Fp_inv(shifti(mpfact(2*k),-1), p);
      gel(list, k) = FpX_Fp_mul(gel(list, k), C, p);
   }
   M = shallowtrans(RgXV_to_RgM(list, dim+2));
@@ -549,7 +549,7 @@ compute_u(GEN gprime, GEN Dxxg, GEN DxJg, GEN DJJg, GEN j, GEN pJ, GEN px, ulong
 }
 
 /* Finds the isogenous EC, and the sum of the x-coordinates of the points in
- * the kernel of the isogeny E -> Eb 
+ * the kernel of the isogeny E -> Eb
  * E: elliptic curve, q: a prime, meqn: Atkin modular equation
  * g: root of meqn defining isogenous curve Eb. */
 static GEN
@@ -705,7 +705,7 @@ find_kernel_power(GEN Eba4, GEN Eba6, GEN Eca4, GEN Eca6, ulong ell, GEN meqn, c
     }
     /*check that the kernel kpoly is the good one */
     if (check)
-    {    
+    {
       GEN kpoly2 = FpX_sqr(kpoly, p);
       GEN h = lift(numer(gsubst(gtmp, vx, gdiv(num_iso, kpoly2))));
       if (signe(elldivpol(Eba4, Eba6, ell, h, p)))
@@ -947,7 +947,7 @@ separation(GEN cnt)
   pari_sp btop, st_lim;
   long k = lg(cnt)-1, l = (1L<<k)-1, best_i, i, j;
   GEN best_r, P, P3, r;
- 
+
   P = gen_1;
   for (j = 1; j <= k; ++j) P = mulis(P, cnt[j]);
   /* p_b * p_g = P is constant */
@@ -986,7 +986,7 @@ crt(GEN A, GEN a, GEN B, GEN b)
 static void
 multiple_crt(GEN x, GEN y, GEN q, GEN P)
 {
-  pari_sp ltop = avma, av; 
+  pari_sp ltop = avma, av;
   long i, j, k, lx = lg(x)-1, ly = lg(y)-1;
   GEN  a1, a2, u, v, A2X;
   (void)bezout(P,q,&u,&v);
@@ -1207,7 +1207,7 @@ compute_diff(GEN v)
   return gerepileupto(av, ZV_sort_uniq(diff));
 }
 
-static int 
+static int
 cmp_atkin(void*E, GEN a, GEN b)
 {
   long ta=typ(a)==t_INT, tb=typ(b)==t_INT, c;
@@ -1217,7 +1217,7 @@ cmp_atkin(void*E, GEN a, GEN b)
   return cmpii(gel(b,1), gel(a,1));
 }
 
-static void 
+static void
 add_atkin(GEN atkin, GEN trace, long *nb)
 {
   long l = lg(atkin)-1;
@@ -1239,7 +1239,7 @@ BSGS_pre(GEN *pdiff, GEN V, GEN P, GEN a4, GEN p)
   gel(pre, 1) = Fp_ell_pow(P, gel(diff, 1), a4, p);
   /* what we'd _really_ want here is a hashtable diff[i] -> pre[i]  */
   for (i = 2; i < l; i++)
-  { 
+  {
     pari_sp av = avma;
     GEN d = subii(gel(diff, i), gel(diff, i-1));
     GEN Q = Fp_ell_add_i(gel(pre, i-1), Fp_ell_pow(P, d, a4, p), a4, p);
@@ -1393,7 +1393,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
   }
   else
     tr = mkvec2(gen_2, gen_1);
-  /* 'product' is the product of the primes we use, the computation 
+  /* 'product' is the product of the primes we use, the computation
    *  stops when product > 4*sqrt(p)
    * l is the current prime,
    * compile_atkin is a vector containing informations about Atkin primes,
@@ -1480,7 +1480,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     /*Let us now treat an other prime if we are too far from the bound_bsgs */
     if (get_extra_l
         && gcmpgs(gdiv(gel(best_champ, 2), bound_bsgs), 5) >= 0
-        && (lg(trace_mod) > 3 || gcmp(gdiv(gel(best_champ, 2), bound_bsgs), 
+        && (lg(trace_mod) > 3 || gcmp(gdiv(gel(best_champ, 2), bound_bsgs),
             gdivgs(sqrs(ell), 25)) >= 0))
     {
       get_extra_l = 0;
@@ -1493,7 +1493,7 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
     for (i = 1; i < lg(champ); i++)
     {
       GEN C = gel(champ,i);
-      if (gcmp(gel(C,3), bound_champ) > 0 
+      if (gcmp(gel(C,3), bound_champ) > 0
           && gcmp(gel(C,2), gel(best_champ, 2)) < 0) best_champ = C;
     }
     /*best_champ is the champion of lowest cost among champions less than the */

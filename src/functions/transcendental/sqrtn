@@ -8,7 +8,7 @@ Help: sqrtn(x,n,{&z}): nth-root of x, n must be integer. If present, z is
 Doc: principal branch of the $n$th root of $x$,
  i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$. Intmod
  a prime and $p$-adics are allowed as arguments.
- 
+
  If $z$ is present, it is set to a suitable root of unity allowing to
  recover all the other roots. If it was not possible, z is
  set to zero. In the case this argument is present and no square root exist,
@@ -25,7 +25,7 @@ Doc: principal branch of the $n$th root of $x$,
  ? z
  %3 = 0
  @eprog
- 
+
  The following script computes all roots in all possible cases:
  \bprog
  sqrtnall(x,n)=

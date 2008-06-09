@@ -5,7 +5,7 @@ Prototype: GGDG
 Help: ellorder(E,z,{o}): order of the point z on the elliptic curve E over Q
  or Fp, 0 if non-torsion. The parameter o, if present, is a non-zero
  multiple of the order of z.
-Doc: 
+Doc:
  gives the order of the point $z$ on the elliptic
  curve $E$. If the curve is defined over $\Q$, return zero if the point has
  infinite order. The parameter o, if present, is a non-zero

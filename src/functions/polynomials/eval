@@ -15,7 +15,7 @@ Doc: replaces in $x$ the formal variables by the values that
  have been assigned to them after the creation of $x$. This is mainly useful
  in GP, and not in library mode. Do not confuse this with substitution (see
  \kbd{subst}).
- 
+
  If $x$ is a character string, \kbd{eval($x$)} executes $x$ as a GP
  command, as if directly input from the keyboard, and returns its
  output. For convenience, $x$ is evaluated as if
@@ -26,7 +26,7 @@ Doc: replaces in $x$ the formal variables by the values that
    *** eval: Warning: unused characters: a.
  % 1 = 1
  @eprog
- 
+
 Variant: Also available are \fun{GEN}{poleval}{GEN q, GEN x},
  \fun{GEN}{qfeval}{GEN q, GEN x}, and \fun{GEN}{hqfeval}{GEN q, GEN x} to
  evaluate $q$ at $x$, where $q$ is respectively assumed to be a polynomial, a

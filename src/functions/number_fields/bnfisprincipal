@@ -15,26 +15,26 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  the format output by the function \kbd{idealprimedec}, this function tests
  whether the ideal is principal or not. The result is more complete than a
  simple true/false answer: it gives a row vector $[v_1,v_2]$, where
- 
+
  $v_1$ is the vector of components $c_i$ of the class of the ideal $x$ in the
  class group, expressed on the generators $g_i$ given by \kbd{bnfinit}
  (specifically \kbd{\var{bnf}.gen}). The $c_i$ are chosen so that $0\le c_i<n_i$
  where $n_i$ is the order of $g_i$ (the vector of $n_i$ being \kbd{\var{bnf}.cyc}).
- 
+
  $v_2$ gives on the integral basis the components of $\alpha$ such that
  $x=\alpha\prod_ig_i^{c_i}$. In particular, $x$ is principal if and only if
  $v_1$ is equal to the zero vector. In the latter case, $x = \alpha\Z_K$ where
  $\alpha$ is given by $v_2$. Note that if $\alpha$ is too large to be given, a
  warning message will be printed and $v_2$ will be set equal to the empty
  vector.
- 
+
  If $\fl=0$, outputs only $v_1$, which is much easier to compute.
- 
+
  If $\fl=2$, does as if $\fl$ were $0$, but doubles the precision until a
  result is obtained.
- 
+
  If $\fl=3$, as in the default behaviour ($\fl=1$), but doubles the precision
  until a result is obtained.
- 
+
  The user is warned that these two last setting may induce \emph{very} lengthy
  computations.

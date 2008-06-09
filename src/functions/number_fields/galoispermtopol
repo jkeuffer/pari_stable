@@ -12,7 +12,7 @@ Doc: \var{gal} being a
  permutation \var{perm} of the roots $\var{gal}.roots$. \var{perm} can
  also be a vector or matrix, in this case, \kbd{galoispermtopol} is
  applied to all components recursively.
- 
+
  \noindent Note that
  \bprog
  G = galoisinit(pol);

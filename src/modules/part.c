@@ -183,7 +183,7 @@ numbpart(GEN n)
 }
 
 /**
-* Return a vector in which each element is a vector of partitions of 
+* Return a vector in which each element is a vector of partitions of
 * the positive integer n, in which the length of each of these partitions
 * is pext, in which the minimum element in each of the partitions is amin,
 * and in which the maximum element in each of the partitions is amax.
@@ -225,12 +225,12 @@ partitr(long n, long pext, long amin, long amax)
 }
 
 /**
-* Return a vector in which each element is a vector of partitions of 
+* Return a vector in which each element is a vector of partitions of
 * the positive integer n,
 * and in which the maximum element in each of the partitions is amax.
 * The restrictions on the maximum element can be lifted setting amax to zero,
 * which allows for each element to grow to its maximum of n itself.
-* 
+*
 * Example: partit(9,2) yields
 *  [[1, 2, 2, 2, 2], [1, 1, 1, 2, 2, 2], [1, 1, 1, 1, 1, 2, 2],
 *     [1, 1, 1, 1, 1, 1, 1, 2], [1, 1, 1, 1, 1, 1, 1, 1, 1]]
@@ -246,7 +246,7 @@ partitions(long n, long amax)
   /* lift the restriction on the maximum element if amax=0 */
   if (amax == 0) amax = n;
   if (amax < 0) pari_err(talker,"negative maximum part");
-  
+
   if (n <= 0) {
     if (n < 0) return cgetg(1, t_VEC);
     pi = cgetg(2, t_VEC);

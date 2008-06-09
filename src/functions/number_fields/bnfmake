@@ -12,6 +12,6 @@ Doc: \var{sbnf} being a ``small $\var{bnf}$''
  \kbd{gp} (or $\var{prec}$ in library mode) is greater than the precision of the
  roots $\var{sbnf}[5]$, these are recomputed so as to get a result with
  greater accuracy.
- 
+
  Note that the member functions are \emph{not} available for \var{sbnf}, you
  have to use \kbd{bnfmake} explicitly first.

@@ -2012,7 +2012,7 @@ and reduce modulo $p$ to obtain an \kbd{FpC}.
 \fun{GEN}{FpV_add}{GEN x, GEN y, GEN p} same as \kbd{FpC\_add}, returning and
 \kbd{FpV}.
 
-\fun{GEN}{FpC_sub}{GEN x, GEN y, GEN p} subtracts the \kbd{ZC} $y$ to 
+\fun{GEN}{FpC_sub}{GEN x, GEN y, GEN p} subtracts the \kbd{ZC} $y$ to
 the \kbd{ZC} $x$ and reduce modulo $p$ to obtain an \kbd{FpC}.
 
 \fun{GEN}{FpV_sub}{GEN x, GEN y, GEN p} same as \kbd{FpC\_sub}, returning and
@@ -2975,7 +2975,7 @@ from the modular kernel, then \kbd{*\_to\_mod}:
 \fun{GEN}{rootmod}{GEN f, GEN p}, applies \kbd{FpX\_roots}.
 
 \fun{GEN}{rootmod2}{GEN f, GEN p}, applies \kbd{ZX\_to\_flx} then
-\kbd{Flx\_roots\_naive}. 
+\kbd{Flx\_roots\_naive}.
 
 \fun{GEN}{factmod}{GEN f, GEN p} applies \kbd{FpX\_factor}.
 
@@ -2990,12 +2990,12 @@ exists; in other words, that $a$ and $b$ are congruent mod $\gcd(A,B)$.
 \fun{GEN}{Z_chinese_all}{GEN a, GEN b, GEN A, GEN B, GEN *pC} as
 \kbd{Z\_chinese}, setting \kbd{*pC} to the lcm of $A$ and $B$.
 
-\fun{GEN}{Z_chinese_coprime}{GEN a, GEN b, GEN A, GEN B, GEN C}, as 
+\fun{GEN}{Z_chinese_coprime}{GEN a, GEN b, GEN A, GEN B, GEN C}, as
 \kbd{Z\_chinese}, assuming that $\gcd(A,B) = 1$ and that $C = \lcm(A,B) = AB$.
 
 \fun{void}{Z_chinese_pre}{GEN A, GEN B, GEN *pC, GEN *pU, GEN *pd}
 initializes chinese remainder computations modulo $A$ and $B$. Sets
-\kbd{*pC} to $\lcm(A,B)$, \kbd{*pd} to $\gcd(A,B)$, 
+\kbd{*pC} to $\lcm(A,B)$, \kbd{*pd} to $\gcd(A,B)$,
 \kbd{*pU} to an integer congruent to $0$ mod $(A/d)$ and $1$ mod $(B/d)$.
 It is allowed to set \kbd{pd = NULL}, in which case, $d$ is still
 computed, but not saved.
@@ -3024,7 +3024,7 @@ H$, but of course, the value of \kbd{H} may stabilize sooner. In many
 applications it is possible to directly check that such a partial result is
 correct.
 
-\fun{GEN}{Z_init_CRT}{ulong Hp, ulong p} given a \kbd{Fl} \kbd{Hp} in 
+\fun{GEN}{Z_init_CRT}{ulong Hp, ulong p} given a \kbd{Fl} \kbd{Hp} in
 $[0, p-1]$, returns the centered representative \kbd{H} congruent to \kbd{Hp}
 modulo \kbd{p}.
 
@@ -3038,7 +3038,7 @@ to the old one, and $0$ otherwise.
 \fun{GEN}{chinese1_coprime_Z}{GEN v} an alternative divide-and-conquer
 implementation: $v$ is a vector of \typ{INTMOD} with pairwise coprime moduli.
 Return the \typ{INTMOD} solving the corresponding chinese remainder problem.
-This is a streamlined version of 
+This is a streamlined version of
 
 \fun{GEN}{chinese1}{GEN v}, which solves a general chinese remainder problem
 (not necessarily over $\Z$, moduli not assumed coprime).
@@ -3539,7 +3539,7 @@ raise an error if it one of its coefficients is not an integer or a \kbd{ZX}
 $v$ equal to the \typ{INT} $x$.
 
 \fun{GEN}{scalar_ZX_shallow}{GEN x, long v} returns the constant \kbd{ZX} in
-variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for 
+variable $v$ equal to the \typ{INT} $x$. Shallow function not suitable for
 \kbd{gerepile} and friends.
 
 \fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
@@ -3709,7 +3709,7 @@ to the minimal accuracy (as per \kbd{precision}) of inexact components.
 
 \item \typ{FFELT}: defined over a finite field $\F_{p^k}$, where \kbd{*ptp}
 is set to the field characteristic $p$ and \kbd{*ptpol} is set to a
-\typ{FFELT} belonging to the field. 
+\typ{FFELT} belonging to the field.
 
 \item other values are composite corresponding to quotients $R[X]/(T)$, with
 one primary type \kbd{t1}, describing the form of the quotient,
@@ -3726,11 +3726,11 @@ set \kbd{*ppol} to the modulus,
 \typ{QUAD} : no \typ{POLMOD}, at least one \typ{QUAD} component,
 set \kbd{*ppol} to the modulus (\kbd{$-$.pol}) of the \typ{QUAD},
 
-\typ{COMPLEX} : no \typ{POLMOD} or \typ{QUAD}, at least one \typ{COMPLEX} 
+\typ{COMPLEX} : no \typ{POLMOD} or \typ{QUAD}, at least one \typ{COMPLEX}
 component, set \kbd{*ppol} to $y^2 + 1$.
 
 and the underlying base ring $R$ is given by \kbd{t2}, which
-is one of \typ{INT}, \typ{INTMOD} (set \kbd{*ptp}) or \typ{PADIC} 
+is one of \typ{INT}, \typ{INTMOD} (set \kbd{*ptp}) or \typ{PADIC}
 (set \kbd{*ptp} and \kbd{*ptprec}), with the same meaning
 as above.
 
@@ -3810,7 +3810,7 @@ shallow (coefficients are not copied).
 
 \fun{long}{RgX_valrem}{GEN P, GEN *pz} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
-coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz}, set it to 
+coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz}, set it to
 $\kbd{RgX\_shift\_shallow}(P,-v)$.
 
 \fun{long}{RgX_val}{GEN P} returns the valuation $v$ of the
@@ -5536,7 +5536,7 @@ writable directory among \kbd{/tmp}, \kbd{/var/tmp} and \kbd{.}.
 
 \fun{char*}{pari_unique_dir}{const char *s} creates a ``unique directory''
 and return its name built from the string $s$, the user id and process pid
-(on Unix systems). This directory is itself located in 
+(on Unix systems). This directory is itself located in
 
 The name returned is \tet{pari_malloc}'ed.
 

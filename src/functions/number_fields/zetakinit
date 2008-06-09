@@ -13,7 +13,7 @@ Doc: computes a number of initialization data
  through the \kbd{zetak} function. The only component which can be used if
  it has not been computed already is $v[1][4]$ which is the result of the
  \kbd{bnfinit} call.
- 
+
  This function is very inefficient and should be rewritten. It needs to
  computes millions of coefficients of the corresponding Dirichlet series if
  the precision is big. Unless the discriminant is small it will not be able

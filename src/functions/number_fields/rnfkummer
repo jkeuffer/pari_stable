@@ -14,7 +14,7 @@ Doc: \var{bnr}
  If \var{deg} is positive, outputs the list of all relative equations of
  degree \var{deg} contained in the ray class field defined by \var{bnr}, with
  the \emph{same} conductor as $(\var{bnr}, \var{subgroup})$.
- 
+
  \misctitle{Warning:} this routine only works for subgroups of prime index. It
  uses Kummer theory, adjoining necessary roots of unity (it needs to compute a
  tough \kbd{bnfinit} here), and finds a generator via Hecke's characterization

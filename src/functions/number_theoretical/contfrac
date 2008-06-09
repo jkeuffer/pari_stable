@@ -10,11 +10,11 @@ Doc: returns the row vector whose components are the partial quotients of the
  \idx{continued fraction} expansion of $x$. In other words, a result
  $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n)$. The
  output is normalized so that $a_n \neq 1$ (unless we also have $n = 0$).
- 
+
  The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
  number, the expansion stops at the last significant partial quotient if
  $nmax$ is omitted. $x$ can also be a rational function or a power series.
- 
+
  If a vector $b$ is supplied, the numerators are equal to the coefficients
  of $b$, instead of all equal to $1$ as above; more precisely, $x \approx
  (1/b_0)(a_0+b_1/(a_1+\dots+b_n/a_n))$; for a numerical continued fraction

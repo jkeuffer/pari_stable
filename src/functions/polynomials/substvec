@@ -9,7 +9,7 @@ Doc: $v$ being a vector of monomials of degree 1 (variables),
  $x$ all occurrences of $v_i$ by $w_i$. The substitutions are done
  simultaneously; more precisely, the $v_i$ are first replaced by new
  variables in $x$, then these are replaced by the $w_i$:
- 
+
  \bprog
  ? substvec([x,y], [x,y], [y,x])
  %1 = [y, x]

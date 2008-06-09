@@ -12,14 +12,14 @@ Doc: numerical summation of the series \var{expr}, which must be a series of
  an alternating one, then we use \tet{sumalt}. For regular functions, the
  function \kbd{sumnum} is in general much faster once the initializations
  have been made using \kbd{sumnuminit}.
- 
+
  The routine is heuristic and assumes that \var{expr} is more or less a
  decreasing function of $X$. In particular, the result will be completely
  wrong if \var{expr} is 0 too often. We do not check either that all terms
  have the same sign. As \tet{sumalt}, this function should be used to
  try and guess the value of an infinite sum.
- 
+
  If $\fl=1$, use slightly different polynomials. Sometimes faster.
- 
+
  \synt{sumpos}{void *E, GEN (*eval)(GEN,void*),GEN a,long prec}. Also
  available is \tet{sumpos2} with the same arguments ($\fl = 1$).

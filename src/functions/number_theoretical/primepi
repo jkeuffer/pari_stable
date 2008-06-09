@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: primepi
 Prototype: G
 Help: primepi(x): the prime counting function pi(x) = #{p <= x, p prime}.
-Description: 
+Description:
  (gen):int	primepi($1)
 Doc: the prime counting function. Returns the number of
  primes $p$, $p \leq x$. Uses a naive algorithm so that $x$ must be less than

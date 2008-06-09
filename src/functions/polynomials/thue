@@ -14,7 +14,7 @@ Doc: solves the equation
  result is conditional (on the GRH or some heuristic strengthening),
  a Warning is printed. Otherwise, the result is unconditional, barring bugs.
  For instance, here's how to solve the Thue equation $x^{13} - 5y^{13} = - 4$:
- 
+
  \bprog
  ? tnf = thueinit(x^13 - 5);
  ? thue(tnf, -4)
@@ -22,7 +22,7 @@ Doc: solves the equation
  @eprog
  Hence, the only solution is $x = 1$, $y = 1$ and the result is
  unconditional. On the other hand:
- 
+
  \bprog
  ? tnf = thueinit(x^3-2*x^2+3*x-17);
  ? thue(tnf, -15)

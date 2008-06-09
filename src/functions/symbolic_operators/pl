@@ -1,7 +1,7 @@
 Function: +_
 Help: +_
 Section: symbolic_operators
-Description: 
+Description:
  (small):small:parens			$1
  (int):int:parens:copy			$1
  (real):real:parens:copy		$1

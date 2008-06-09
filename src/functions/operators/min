@@ -3,7 +3,7 @@ Section: operators
 C-Name: gmin
 Prototype: GG
 Help: min(x,y): minimum of x and y
-Description: 
+Description:
  (small, small):small	minss($1, $2)
  (small, int):int	gminsg($1, $2)
  (int, small):int	gmings($1, $2)

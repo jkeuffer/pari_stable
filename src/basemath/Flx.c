@@ -842,9 +842,9 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   }
   i=dy-1; while (i>=0 && !c[i]) i--;
   c = Flx_renormalize(c-2, i+3);
-  if (pr == ONLY_DIVIDES) 
+  if (pr == ONLY_DIVIDES)
   { if (lg(c) != 2) return NULL; }
-  else  
+  else
     *pr = c;
   return q;
 }

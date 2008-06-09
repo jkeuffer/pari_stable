@@ -3,7 +3,7 @@ Section: symbolic_operators
 C-Name: gsub1e
 Prototype: &
 Help: x--
-Description: 
+Description:
  (*bptr):bptr				--$1
  (*small):small				--$1
  (*lg):lg				--$1

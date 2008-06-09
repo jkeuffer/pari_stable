@@ -2872,7 +2872,7 @@ FOUND:
     if (B == 1) B = h;
     else
     {
-      GEN C; 
+      GEN C;
       A = itos( Z_chinese_all(gen_0, modss(A,B), utoipos(h), utoipos(B), &C) );
       if (is_bigint(C)) { h = A; break; }
       B = itos(C);

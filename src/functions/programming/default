@@ -5,7 +5,7 @@ Prototype: D"",r,D"",s,D0,L,
 Help: default({key},{val}): returns the current value of the
  default key. If val is present, set opt to val first. If no argument is
  given, print a list of all defaults as well as their values.
-Description: 
+Description:
  ("realprecision"):small:prec              getrealprecision()
  ("realprecision",small):small:prec        setrealprecision($2, &prec)
  ("seriesprecision"):small                 precdl

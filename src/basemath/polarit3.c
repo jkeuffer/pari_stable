@@ -1851,7 +1851,7 @@ FpXY_evalx(GEN Q, GEN x, GEN p)
   long i, lb = lg(Q);
   GEN z;
   z = cgetg(lb, t_POL); z[1] = Q[1];
-  for (i=2; i<lb; i++) 
+  for (i=2; i<lb; i++)
   {
     GEN q = gel(Q,i);
     gel(z,i) = typ(q) == t_INT? modii(q,p): FpX_eval(q, x, p);

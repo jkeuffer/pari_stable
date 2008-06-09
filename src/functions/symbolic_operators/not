@@ -3,6 +3,6 @@ Help: !_
 Section: symbolic_operators
 C-Name: gnot
 Prototype: G
-Description: 
+Description:
  (negbool):bool:parens		$1
  (bool):negbool:parens		$1

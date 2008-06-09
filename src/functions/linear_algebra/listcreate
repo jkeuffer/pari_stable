@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: listcreate
 Prototype: D0,L,
 Help: listcreate(): creates an empty list
-Description: 
+Description:
  (?int):void	listcreate()
  (small):list	listcreate()
 Doc: creates an empty list. This routine used to have a mandatory argument,

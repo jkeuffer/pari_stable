@@ -12,10 +12,10 @@ Doc: \var{znf} being a number
  field at the complex number $x$. If $\fl=1$ computes Dedekind $\Lambda$
  function instead (i.e.~the product of the Dedekind zeta function by its gamma
  and exponential factors).
- 
+
  \misctitle{CAVEAT.} This implementation is not satisfactory and must be
  rewritten. In particular
- 
+
  \item The accuracy of the result depends in an essential way on the
  accuracy of both the \kbd{zetakinit} program and the current accuracy.
  Be wary in particular that $x$ of large imaginary part or, on the
@@ -32,15 +32,15 @@ Doc: \var{znf} being a number
  ? zetak(zetakinit(x), 3-1e-28)
  %4 = -25.33411749           \\ junk
  @eprog
- 
+
  \item As the precision increases, results become unexpectedly
  completely wrong:
  \bprog
  ? \p100
- ? zetak(zetakinit(x^2-5), -1) - 1/30 
+ ? zetak(zetakinit(x^2-5), -1) - 1/30
  %1 = 7.26691813 E-108    \\ perfect
  ? \p150
- ? zetak(zetakinit(x^2-5), -1) - 1/30 
+ ? zetak(zetakinit(x^2-5), -1) - 1/30
  %2 = -2.486113578 E-156  \\ perfect
  ? \p200
  ? zetak(zetakinit(x^2-5), -1) - 1/30
@@ -49,6 +49,6 @@ Doc: \var{znf} being a number
  ? zetak(zetakinit(x^2-5), -1) - 1/30
  %4 = 1.6 E43             \\ junk
  @eprog
- 
+
 Variant: \fun{GEN}{glambdak}{GEN znf, GEN x, long prec} or
  \fun{GEN}{gzetak}{GEN znf, GEN x, long prec}.

@@ -9,6 +9,6 @@ Doc: changes the help
  defined, its definition will still be printed before the message \var{str}.
  It is recommended that you document global variables and user functions in
  this way. Of course \kbd{gp} will not protest if you skip this.
- 
+
  Nothing prevents you from modifying the help of built-in PARI
  functions. (But if you do, we would like to hear why you needed to do it!)

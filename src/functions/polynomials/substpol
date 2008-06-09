@@ -7,13 +7,13 @@ Help: substpol(x,y,z): in expression x, replace the polynomial y by the
 Doc: replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
  expression $x$. Every type is allowed for $x$, but the same behaviour
  as \kbd{subst} above apply.
- 
+
  The difference with \kbd{subst} is that $y$ is allowed to be any polynomial
  here. The substitution is done as per the following script:
  \bprog
  subst_poly(pol, from, to) =
  { my(t = 'subst_poly_t, M = from - t);
- 
+
    subst(lift(Mod(pol,M), variable(M)), t, to)
  }
  @eprog\noindent

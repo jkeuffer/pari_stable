@@ -1,5 +1,5 @@
 Function: unclone
 Class: gp2c
-Description: 
+Description:
  (small):void   (void)0 /*unclone*/
  (gen):void     gunclone($1)

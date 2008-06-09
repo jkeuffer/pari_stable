@@ -3,5 +3,5 @@ C-Name: andpari
 Prototype: GE
 Help: _&&_
 Section: symbolic_operators
-Description: 
+Description:
  (bool, bool):bool:parens               $(1) && $(2)

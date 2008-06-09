@@ -7,7 +7,7 @@ Help: bnrinit(bnf,f,{flag=0}): given a bnf as output by
  linked to the ray class group structure corresponding to this module. flag
  is optional, and can be 0: default (same as bnrclass with flag = 1), 1:
  compute also the generators (same as bnrclass with flag = 2).
-Description: 
+Description:
  (gen,gen,?small):bnr       bnrinit0($1, $2, $3)
 Doc: $\var{bnf}$ is as
  output by \kbd{bnfinit}, $f$ is a modulus, initializes data linked to
@@ -17,18 +17,18 @@ Doc: $\var{bnf}$ is as
  \kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
  modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{.gen} refer to the
  ray class group (as a finite abelian group), its cardinality, its elementary
- divisors, its generators. 
- 
+ divisors, its generators.
+
  The last group of functions are different from the members of the underlying
  \var{bnf}, which refer to the class group; use \kbd{\var{bnr}.bnf.\var{xxx}}
  to access these, e.g.~\kbd{\var{bnr}.bnf.cyc} to get the cyclic decomposition
  of the class group.
- 
+
  They are also different from the members of the underlying \var{bid}, which
  refer to $(\Z_K/f)^*$; use \kbd{\var{bnr}.bid.\var{xxx}} to access these,
  e.g.~\kbd{\var{bnr}.bid.no} to get $\phi(f)$.
- 
+
  If $\fl=0$ (default), the generators of the ray class group are not computed,
  which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
- 
+
  If $\fl=1$, as the default, except that generators are computed.

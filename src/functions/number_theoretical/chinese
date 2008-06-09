@@ -4,21 +4,21 @@ C-Name: chinese
 Prototype: GDG
 Help: chinese(x,{y}): x,y being both intmods (or polmods) computes z in the
  same residue classes as x and y
-Description: 
+Description:
  (gen):gen      chinese1($1)
  (gen, gen):gen chinese($1, $2)
 Doc: if $x$ and $y$ are both intmods or both
  polmods, creates (with the same type) a $z$ in the same residue class
  as $x$ and in the same residue class as $y$, if it is possible.
- 
+
  This function also allows vector and matrix arguments, in which case the
  operation is recursively applied to each component of the vector or matrix.
  For polynomial arguments, it is applied to each coefficient.
- 
+
  If $y$ is omitted, and $x$ is a vector, \kbd{chinese} is applied recursively
  to the components of $x$, yielding a residue belonging to the same class as all
  components of $x$.
- 
+
  Finally $\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows
  vector arguments to contain other data, so long as they are identical in both
  vectors.

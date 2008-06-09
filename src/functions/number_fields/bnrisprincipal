@@ -14,7 +14,7 @@ Doc: \var{bnr} being the
  vector $v$ where $v[1]$ is the vector of components of $x$ on the ray class
  group generators, $v[2]$ gives on the integral basis an element $\alpha$ such
  that $x=\alpha\prod_ig_i^{x_i}$.
- 
+
  If $\fl=0$, outputs only $v_1$. In that case, \var{bnr} need not contain the
  ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
  If $x$ is not coprime to the modulus of \var{bnr} the result is undefined.

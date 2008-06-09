@@ -3,7 +3,7 @@ Section: symbolic_operators
 C-Name: gmod
 Prototype: GG
 Help: x%y: Euclidean remainder of x and y
-Description: 
+Description:
  (small, small):small		smodss($1, $2)
  (small, int):int		modsi($1, $2)
  (int, small):small		smodis($1, $2)

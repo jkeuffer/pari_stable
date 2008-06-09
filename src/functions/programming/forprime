@@ -22,7 +22,7 @@ Doc: evaluates \var{seq},
  $X$ is incremented to the smallest prime strictly larger than $X$ at the end
  of each iteration. Nothing is done if $a>b$. Note that $a$ and $b$ must be in
  $\R$.
- 
+
  \bprog
  ? { forprime(p = 2, 12,
  print(p);

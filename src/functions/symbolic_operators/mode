@@ -3,7 +3,7 @@ C-Name: gmode
 Prototype: &G
 Section: symbolic_operators
 Help: x%=y: shortcut for x=x%y
-Description: 
+Description:
  (*small, small):small:parens            $1 = smodss($1, $2)
  (*int, small):int:parens                $1 = modis($1, $2)
  (*int, int):int:parens	                 $1 = modii($1, $2)

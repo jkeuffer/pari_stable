@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gconj
 Prototype: G
 Help: conj(x): the algebraic conjugate of x
-Doc: 
+Doc:
  conjugate of $x$. The meaning of this
  is clear, except that for real quadratic numbers, it means conjugation in the
  real quadratic field. This function has no effect on integers, reals,

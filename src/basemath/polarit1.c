@@ -1890,7 +1890,7 @@ static GEN
 padicff(GEN x,GEN p,long pr)
 {
   pari_sp av = avma;
-  GEN q, invbas, nf, g, e; 
+  GEN q, invbas, nf, g, e;
   long n = degpol(x), v = Z_pvalrem(absi(ZX_disc(x)), p, &q);
   nfmaxord_t S;
 

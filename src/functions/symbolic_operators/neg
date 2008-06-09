@@ -3,7 +3,7 @@ Help: -_
 Section: symbolic_operators
 C-Name: gneg
 Prototype: G
-Description: 
+Description:
  (small):small:parens		-$(1)
  (int):int			negi($1)
  (real):real			negr($1)

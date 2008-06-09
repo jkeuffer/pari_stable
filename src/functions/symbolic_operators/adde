@@ -3,7 +3,7 @@ C-Name: gadde
 Prototype: &G
 Help: x+=y: shortcut for x=x+y
 Section: symbolic_operators
-Description: 
+Description:
  (*small, small):small:parens		 $1 += $(2)
  (*lg, small):lg:parens		         $1 += $(2)
  (*int, small):int:parens		 $1 = addis($1, $2)

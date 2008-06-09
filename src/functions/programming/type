@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: type0
 Prototype: G
 Help: type(x): return the type of the GEN x.
-Description: 
+Description:
  (gen):typ              typ($1)
 Doc: this is useful only under \kbd{gp}. Returns the internal type name of
  the PARI object $x$ as a  string. Check out existing type names with the

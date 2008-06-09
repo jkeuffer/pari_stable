@@ -9,7 +9,7 @@ Doc: kills the present value of the variable, alias or user-defined
  can now be used to name any GP object (variable or function). This is the
  only way to replace a variable by a function having the same name (or the
  other way round), as in the following example:
- 
+
  \bprog
  ? f = 1
  %1 = 1
@@ -21,11 +21,11 @@ Doc: kills the present value of the variable, alias or user-defined
  ? f()
  %2 = 0
  @eprog
- 
+
  When you kill a variable, all objects that used it become invalid. You
  can still display them, even though the killed variable will be printed in a
  funny way. For example:
- 
+
  \bprog
  ? a^2 + 1
  %1 = a^2 + 1
@@ -33,7 +33,7 @@ Doc: kills the present value of the variable, alias or user-defined
  ? %1
  %2 = #<1>^2 + 1
  @eprog
- 
+
  If you simply want to restore a variable to its ``undefined'' value
  (monomial of degree one), use the \idx{quote} operator: \kbd{a = 'a}.
  Predefined symbols (\kbd{x} and GP function names) cannot be killed.

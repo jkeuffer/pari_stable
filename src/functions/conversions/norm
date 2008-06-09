@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gnorm
 Prototype: G
 Help: norm(x): norm of x
-Doc: 
+Doc:
  algebraic norm of $x$, i.e.~the product of $x$ with
  its conjugate (no square roots are taken), or conjugates for polmods. For
  vectors and matrices, the norm is taken componentwise and hence is not the

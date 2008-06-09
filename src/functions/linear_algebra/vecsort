@@ -9,7 +9,7 @@ Help: vecsort(x,{cmp},{flag=0}): sorts the vector of vectors (or matrix) x in
  return the permutation instead of the permuted vector, 2: sort using
  lexicographic order, 4: use descending instead of ascending order, 8: remove
  duplicate entries
-Description: 
+Description:
  (vecsmall,?gen):vecsmall       vecsort0($1, $2, 0)
  (vecsmall,?gen,small):vecsmall vecsort0($1, $2, $3)
  (vec, , ?0):vec                sort($1)
@@ -28,7 +28,7 @@ Description:
  (vec, ?gen, small):gen         vecsort0($1, $2, $3)
 Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  $x$ must be a vector, and its components integers, reals, or fractions.
- 
+
  If \kbd{cmp} is present, it is understood as a comparison function
  and we sort according to it. The following possibilities exist:
 
@@ -61,18 +61,18 @@ Doc: sorts the vector $x$ in ascending order, using a mergesort method.
  ? vecextract(v, perm)
  @eprog\noindent Similar ideas apply whenever we sort according to the values
  of a function which is expensive to compute.
- 
+
  \noindent The binary digits of \fl\ mean:
- 
+
  \item 1: indirect sorting of the vector $x$, i.e.~if $x$ is an
  $n$-component vector, returns a permutation of $[1,2,\dots,n]$ which
  applied to the components of $x$ sorts $x$ in increasing order.
  For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
  \kbd{vecsort(x)}.
- 
+
  \item 2: sorts $x$ by ascending lexicographic order (as per the
  \kbd{lex} comparison function).
- 
+
  \item 4: use descending instead of ascending order.
 
  \item 8: remove ``duplicate'' entries with respect to the sorting function

@@ -8,7 +8,7 @@ Help: ideallistarch(nf,list,arch): list is a vector of vectors of of bid's as
  moduli whose finite part is as in original list, in the same order, and
  archimedean part is now arch. The information contained is of the same kind
  as was present in the input.
-Doc: 
+Doc:
  \var{list} is a vector of vectors of bid's, as output by \tet{ideallist} with
  flag $0$ to $3$. Return a vector of vectors with the same number of
  components as the original \var{list}. The leaves give information about
@@ -16,10 +16,10 @@ Doc:
  archimedean part is now \var{arch} (it was originally trivial). The
  information contained is of the same kind as was present in the input; see
  \tet{ideallist}, in particular the meaning of \fl.
- 
+
  \bprog
  ? bnf = bnfinit(x^2-2);
- ? bnf.sign  
+ ? bnf.sign
  %2 = [2, 0]                         \\@com two places at infinity
  ? L = ideallist(bnf, 100, 0);
  ? l = L[98]; vector(#l, i, l[i].clgp)

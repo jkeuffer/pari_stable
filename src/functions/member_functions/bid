@@ -3,5 +3,5 @@ Section: member_functions
 C-Name: member_bid
 Prototype: G
 Help: _.bid
-Description: 
+Description:
  (gen):gen                      member_bid($1)

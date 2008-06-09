@@ -8,15 +8,15 @@ Help: quadclassunit(D,{flag=0},{tech=[]}): compute the structure of the
  the optional technical parameters
 Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  class group of a quadratic order of discriminant $D$.
- 
+
  This function should be used instead of \tet{qfbclassno} or \tet{quadregula}
  when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted. It
  is a special case of \tet{bnfinit}, which is slower, but more robust.
-  
+
  If $\fl$ is non-zero \emph{and} $D>0$, computes the narrow class group and
  regulator, instead of the ordinary (or wide) ones. In the current version
  \vers, this does not work at all: use the general function \tet{bnfnarrow}.
-  
+
  Optional parameter \var{tech} is a row vector of the form $[c_1, c_2]$,
  where $c_1 \leq c_2$ are positive real numbers which control the execution
  time and the stack size. For a given $c_1$, set $c_2 = c_1$ to get maximum
@@ -28,18 +28,18 @@ Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  relations are easier to find, but more relations are needed and the linear
  algebra will be harder. The default is $c_1 = c_2 = 0.2$, so the result is
  \emph{not} rigorously proven.
-  
+
  The result is a vector $v$ with 3 components if $D<0$, and $4$ otherwise.
  The correspond respectively to
-  
+
  \item $v[1]$: the class number
-  
+
  \item $v[2]$: a vector giving the structure of the class group as a product
  of cyclic groups;
-  
+
  \item $v[3]$: a vector giving generators of those cyclic groups (as binary
  quadratic forms).
-  
+
  \item $v[4]$: (omitted if $D < 0$) the regulator, computed to an accuracy
  which is the maximum of an internal accuracy determined by the program and
  the current default (note that once the regulator is known to a small

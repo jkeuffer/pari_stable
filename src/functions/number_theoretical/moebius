@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: gmu
 Prototype: G
 Help: moebius(x): Moebius function of x
-Description: 
+Description:
  (int):small	mu($1)
  (gen):gen	gmu($1)
 Doc: \idx{Moebius} $\mu$-function of $|x|$. $x$ must be of type integer.

@@ -14,25 +14,25 @@ Doc: \idx{integral basis} of the number
  modified version of the \idx{round 4} algorithm by default, due to David
  \idx{Ford}, Sebastian \idx{Pauli} and Xavier \idx{Roblot}. The binary digits
  of $\fl$ have the following meaning:
- 
+
  1: assume that no square of a prime greater than the default \kbd{primelimit}
  divides the discriminant of $x$, i.e.~that the index of $x$ has only small
  prime divisors.
- 
+
  2: use \idx{round 2} algorithm. For small degrees and coefficient size, this
  is sometimes a little faster. (This program is the translation into C of a
  program written by David \idx{Ford} in Algeb.)
- 
+
  Thus for instance, if $\fl=3$, this uses the round 2 algorithm and outputs
  an order which will be maximal at all the small primes.
- 
+
  If \var{fa} is present, we assume (without checking!) that it is the two-column
  matrix of the factorization of the discriminant of the polynomial $x$. Note
  that it does \emph{not} have to be a complete factorization. This is
  especially useful if only a local integral basis for some small set of places
  is desired: only factors with exponents greater or equal to 2 will be
  considered.
- 
+
 Variant: An extended version is
  \fun{GEN}{nfbasis}{GEN x, GEN *d, long flag, GEN fa = NULL}, where \kbd{*d}
  receives the discriminant of the number field

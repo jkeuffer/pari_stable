@@ -11,17 +11,17 @@ Help: subgrouplist(bnr,{bound},{flag=0}): bnr being as output by bnrinit or
 Doc: \var{bnr} being as output by \kbd{bnrinit} or a list of cyclic components
  of a finite Abelian group $G$, outputs the list of subgroups of $G$. Subgroups
  are given as HNF left divisors of the SNF matrix corresponding to $G$.
- 
+
  \misctitle{Warning:} the present implementation cannot treat a group $G$
  where any cyclic factor has more than $2^{31}$, resp.~$2^{63}$ elements on a
  $32$-bit, resp.~$64$-bit architecture. \tet{forsubgroup} is a bit more
  general and can handle $G$ if all $p$-Sylow subgroups of $G$ satisfy the
  condition above.
- 
+
  If $\fl=0$ (default) and \var{bnr} is as output by \kbd{bnrinit}, gives
  only the subgroups whose modulus is the conductor. Otherwise, the modulus is
  not taken into account.
- 
+
  If \var{bound} is present, and is a positive integer, restrict the output to
  subgroups of index less than \var{bound}. If \var{bound} is a vector
  containing a single positive integer $B$, then only subgroups of index

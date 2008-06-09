@@ -11,7 +11,7 @@ Doc: initializes the \var{tnf}
  to solve Thue equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is
  non-zero, certify the result unconditionally. Otherwise, assume \idx{GRH},
  this being much faster of course.
- 
+
  \emph{If} the conditional computed class group is trivial \emph{or} you are
  only interested in the case $a = \pm1$, then results are unconditional
  anyway. So one should only use the flag is \kbd{thue} prints a Warning (see

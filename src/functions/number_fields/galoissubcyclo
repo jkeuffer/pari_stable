@@ -12,34 +12,34 @@ Doc: computes the subextension
  of $\Q(\zeta_n)$ fixed by the subgroup $H \subset (\Z/n\Z)^*$. By the
  Kronecker-Weber theorem, all abelian number fields can be generated in this
  way (uniquely if $n$ is taken to be minimal).
- 
+
  \noindent The pair $(n, H)$ is deduced from the parameters $(N, H)$ as follows
- 
+
  \item $N$ an integer: then $n = N$; $H$ is a generator, i.e. an
  integer or an integer modulo $n$; or a vector of generators.
- 
+
  \item $N$ the output of \kbd{znstar($n$)}. $H$ as in the first case
  above, or a matrix, taken to be a HNF left divisor of the SNF for $(\Z/n\Z)^*$
  (of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
- 
+
  \item $N$ the output of \kbd{bnrinit(bnfinit(y), $m$, 1)} where $m$ is a
  module. $H$ as in the first case, or a matrix taken to be a HNF left
  divisor of the SNF for the ray class group modulo $m$
  (of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
- 
+
  In this last case, beware that $H$ is understood relatively to $N$; in
  particular, if the infinite place does not divide the module, e.g if $m$ is
  an integer, then it is not a subgroup of $(\Z/n\Z)^*$, but of its quotient by
  $\{\pm 1\}$.
- 
+
  If $fl=0$, compute a polynomial (in the variable \var{v}) defining the
  the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of $(\Z/n\Z)^*$.
- 
+
  If $fl=1$, compute only the conductor of the abelian extension, as a module.
- 
+
  If $fl=2$, output $[pol, N]$, where $pol$ is the polynomial as output when
  $fl=0$ and $N$ the conductor as output when $fl=1$.
- 
+
  The following function can be used to compute all subfields of
  $\Q(\zeta_n)$ (of exact degree \kbd{d}, if \kbd{d} is set):
  \bprog

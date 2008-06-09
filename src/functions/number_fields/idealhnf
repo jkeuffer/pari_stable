@@ -10,7 +10,7 @@ Doc: gives the \idx{Hermite normal form}
  (typically by an algebraic number if it is principal, by a $\Z_K$-system of
  generators, as a prime ideal as given by \kbd{idealprimedec}, or by a
  $\Z$-basis).
- 
+
  If $b$ is not omitted, assume the ideal given was $a\Z_K+b\Z_K$, where $a$
  and $b$ are elements of $K$ given either as vectors on the integral basis
  $\var{nf}[7]$ or as algebraic numbers.

@@ -1,6 +1,6 @@
 Function: _decl_base
 Class: gp2c_internal
-Description: 
+Description:
  (C!void)          void
  (C!long)          long
  (C!int)           int
@@ -12,7 +12,7 @@ Description:
 
 Function: _decl_ext
 Class: gp2c_internal
-Description: 
+Description:
  (C!char*)         *$1
  (C!func_GG)       (*$1)(GEN, GEN)
 

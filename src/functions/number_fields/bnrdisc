@@ -16,14 +16,14 @@ Doc: $a1$, $a2$, $a3$
  meaning of $a1$, $a2$, $a3$), outputs a 3-component row vector $[N,r_1,D]$,
  where $N$ is the (absolute) degree of $L$, $r_1$ the number of real places of
  $L$, and $D$ the discriminant of $L/\Q$, including sign (if $\fl=0$).
- 
+
  If $\fl=1$, as above but outputs relative data. $N$ is now the degree of
  $L/K$, $r_1$ is the number of real places of $K$ unramified in $L$ (so that
  the number of real places of $L$ is equal to $r_1$ times the relative degree
  $N$), and $D$ is the relative discriminant ideal of $L/K$.
- 
+
  If $\fl=2$, as the default case, except that if the modulus is not the
  exact conductor corresponding to the $L$, no data is computed and the result
  is $0$.
- 
+
  If $\fl=3$, as case 2, but output relative data.

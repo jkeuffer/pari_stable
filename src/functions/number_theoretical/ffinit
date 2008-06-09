@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: ffinit
 Prototype: GLDn
 Help: ffinit(p,n,{v=x}): monic irreducible polynomial of degree n over F_p[v]
-Description: 
+Description:
  (int, small, ?var):pol	ffinit($1, $2, $3)
 Doc: computes a monic polynomial of degree $n$ which is irreducible over
   $\F_p$, where $p$ is assumed to be prime. This function uses a fast variant

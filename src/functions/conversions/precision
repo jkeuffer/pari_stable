@@ -28,19 +28,19 @@ Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  it is not possible to use it to obtain a polynomial from a power series; tor
  that, see \tet{truncate}.) Now the meaning of precision is different from the
  above (floating point accuracy), and depends on the type of $x$:
- 
+
  For exact types, no change. For $x$ a vector or a matrix, the operation is
  done componentwise.
- 
+
  For real $x$, $n$ is the number of desired significant \emph{decimal}
  digits. If $n$ is smaller than the precision of $x$, $x$ is truncated,
  otherwise $x$ is extended with zeros.
- 
+
  For $x$ a $p$-adic or a power series, $n$ is the desired number of
  \emph{significant} $p$-adic or $X$-adic digits, where $X$ is the main
  variable of $x$. (Note: yes, this is inconsistent.)
  Note that the precision is a priori distinct from the exponent $k$ appearing
- in $O(*^k)$; it is indeed equal to $k$ if and only if $x$ is a $p$-adic 
+ in $O(*^k)$; it is indeed equal to $k$ if and only if $x$ is a $p$-adic
  or $X$-adic \emph{unit}.
  \bprog
  ? precision(1 + O(x), 10)
@@ -52,9 +52,9 @@ Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  @eprog\noindent
  For the last two examples, note that $x^2 + O(x^5) = x^2(1 + O(x^3))$
  indeed has 3 significant coefficients
- 
- 
- 
+
+
+
 Variant: Also available are \fun{GEN}{gprec}{GEN x, long n} and
  \fun{long}{precision}{GEN x}. In both, the accuracy is expressed in
  \emph{words} (32-bit or 64-bit depending on the architecture).

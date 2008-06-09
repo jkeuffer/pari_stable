@@ -1,8 +1,8 @@
 Function: I
 Section: transcendental
 C-Name: geni
-Prototype: 
+Prototype:
 Help: I=I(): square root of -1
-Description: 
+Description:
  ():gen	gi
 Doc: the complex number $\sqrt{-1}$.

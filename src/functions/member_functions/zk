@@ -3,6 +3,6 @@ Help: _.zk
 Section: member_functions
 C-Name: member_zk
 Prototype: G
-Description: 
+Description:
  (nf):vec:copy         gel($1, 17)
  (gen):vec             member_zk($1)

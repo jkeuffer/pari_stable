@@ -5,7 +5,7 @@ Prototype: G
 Help: ellgenerators(E): if E is an elliptic curve as output by ellinit(),
  return the generators of the Mordell-Weil group associated to the curve.
  This function depends on the curve being referenced in the elldata database.
-Doc: 
+Doc:
  returns a $\Z$-basis of the free part of the
  \idx{Mordell-Weil group} associated to $E$.  This function depends on the
  \tet{elldata} database being installed and referencing the curve, and so

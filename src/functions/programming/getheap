@@ -1,7 +1,7 @@
 Function: getheap
 Section: programming/specific
 C-Name: getheap
-Prototype: 
+Prototype:
 Help: getheap(): 2-component vector giving the current number of objects in
  the heap and the space they occupy
 Doc: returns a two-component row vector giving the

@@ -16,22 +16,22 @@ Doc: return a primitive root of the multiplicative
  ? o
  %3 =
  [2 1]
- 
+
  [71 1]
- 
+
  [491 1]
- 
+
  [39191 1]
- 
+
  [101833 1]
- 
+
  [1594407138061 1]
- 
+
  [22540118872981 1]
  ? fflog(g^1000000, g)
  time = 3,380 ms.
  %5 = 1000000
- 
+
  ? fflog(g^1000,g);
  time = 24 ms.
  ? fflog(g^1000,g,o);

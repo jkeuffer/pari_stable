@@ -9,7 +9,7 @@ Doc: let $\var{rnf}$ be a relative
  the absolute extension $L/\Q$ given by a $\Z$-basis of elements of $L$.
  Returns the relative pseudo-matrix in HNF giving the ideal $x$ considered as
  an ideal of the relative extension $L/K$.
- 
+
  If $x$ is an ideal in HNF form, associated to an \var{nf} structure, for
  instance as output by $\tet{idealhnf}(\var{nf},\dots)$,
  use \kbd{rnfidealabstorel(rnf, nf.zk * x)} to convert it to a relative ideal.

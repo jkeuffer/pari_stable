@@ -3,7 +3,7 @@ Help: _!=_
 Section: symbolic_operators
 C-Name: gne
 Prototype: GG
-Description: 
+Description:
  (small, small):bool:parens		$(1) != $(2)
  (lg, lg):bool:parens			$(1) != $(2)
  (small, int):bool:parens		cmpsi($1, $2) != 0

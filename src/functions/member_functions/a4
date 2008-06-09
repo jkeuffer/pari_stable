@@ -3,5 +3,5 @@ Help: _.a4
 Section: member_functions
 C-Name: member_a4
 Prototype: G
-Description: 
+Description:
  (ell):gen:copy        gel($1, 4)

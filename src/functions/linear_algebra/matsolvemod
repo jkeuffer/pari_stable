@@ -19,7 +19,7 @@ Doc: $M$ being any integral matrix,
  ? matsolvemod(M, 3, 1) \\ M X = [1,1]~ over F_3
  %3 = [-1, 1]~
  @eprog
- 
+
  If $\fl=1$, all solutions are returned in the form of a two-component row
  vector $[x,u]$, where $x$ is a small integer solution to the system of
  congruences and $u$ is a matrix whose columns give a basis of the homogeneous

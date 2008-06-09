@@ -1876,8 +1876,8 @@ roundr_safe(GEN x)
   long e1, ex, lx, s = signe(x);
   pari_sp av;
   GEN t, y;
- 
-  if (!s || (ex = expo(x)) < -1) return gen_0; 
+
+  if (!s || (ex = expo(x)) < -1) return gen_0;
   if (ex == -1) return s>0? gen_1:
 			    absrnz_egal2n(x)? gen_0: gen_m1;
   av = avma;

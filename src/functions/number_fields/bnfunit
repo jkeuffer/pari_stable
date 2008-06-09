@@ -6,7 +6,7 @@ Help: bnfunit(bnf): compute the fundamental units of the number field bnf
  output by bnfinit when they have not yet been computed (i.e. with flag=2)
 Doc: $\var{bnf}$ being as output by
  \kbd{bnfinit}, outputs the vector of fundamental units of the number field.
- 
+
  This function is mostly useless, since it will only succeed if
  \var{bnf} contains the units, in which case \kbd{bnf.fu} is recommended
  instead, or \var{bnf} was produced with \kbd{bnfinit(,,2)}, which is itself

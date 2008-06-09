@@ -4,7 +4,7 @@ C-Name: znorder
 Prototype: GDG
 Help: znorder(x,{o}): order of the integermod x in (Z/nZ)*. Optional o is
  assumed to be a multiple of the order.
-Description: 
+Description:
  (gen):int             order($1)
  (gen,):int            order($1)
  (gen,int):int         znorder($1, $2)

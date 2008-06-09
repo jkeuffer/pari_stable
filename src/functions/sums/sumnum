@@ -2,7 +2,7 @@ Function: sumnum
 Section: sums
 C-Name: sumnum0
 Prototype: V=GGEDGD0,L,p
-Help: sumnum(X=a,sig,expr,{tab},{flag=0}): numerical summation of expr from 
+Help: sumnum(X=a,sig,expr,{tab},{flag=0}): numerical summation of expr from
  X = ceiling(a) to +infinity. sig is either a scalar or a two-component vector
  coding the function's decrease rate at infinity. It is assumed that the
  scalar part of sig is to the right of all poles of expr. If present, tab
@@ -11,17 +11,17 @@ Help: sumnum(X=a,sig,expr,{tab},{flag=0}): numerical summation of expr from
 Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  from ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a
  holomorphic function $f(X)$ for $\Re(X)\ge \sigma$.
- 
+
  The parameter $\sigma\in\R$ is coded in the argument \kbd{sig} as follows: it
  is either
- 
+
  \item a real number $\sigma$. Then the function $f$ is assumed to
  decrease at least as $1/X^2$ at infinity, but not exponentially;
- 
+
  \item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
  before, $\alpha < -1$. The function $f$ is assumed to decrease like
  $X^{\alpha}$. In particular, $\alpha\le-2$ is equivalent to no $\alpha$ at all.
- 
+
  \item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
  before, $\alpha > 0$. The function $f$ is assumed to decrease like
  $\exp(-\alpha X)$. In this case it is essential that $\alpha$ be exactly the
@@ -29,20 +29,20 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  the default value of $m$ used for the integration step. In practice, if
  the function is exponentially decreasing \kbd{sumnum} is slower and less
  accurate than \kbd{sumpos} or \kbd{suminf}, so should not be used.
- 
+
  The function uses the \tet{intnum} routines and integration on the line
  $\Re(s) = \sigma$. The optional argument \var{tab} is as in intnum, except it
  must be initialized with \kbd{sumnuminit} instead of \kbd{intnuminit}.
- 
+
  When \var{tab} is not precomputed, \kbd{sumnum} can be slower than
  \kbd{sumpos}, when the latter is applicable. It is in general faster for
  slowly decreasing functions.
- 
- 
+
+
  Finally, if $\fl$ is nonzero, we assume that the function $f$ to be summed is
  of real type, i.e. satisfies $\overline{f(z)}=f(\overline{z})$, which
  speeds up the computation.
- 
+
  \bprog
  ? \p 308
  ? a = sumpos(n=1, 1/(n^3+n+1));
@@ -64,7 +64,7 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  time = 0 ms.
  %5 = 1.97... E-306 \\@com perfect.
  @eprog
- 
+
  For slowly decreasing function, we must indicate singularities:
  \bprog
  ? \p 308
@@ -78,7 +78,7 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  ? b - zeta(4/3)
  %3 = 1.05... E-300 \\@com better
  @eprog
- 
+
  Since the \emph{complex} values of the function are used, beware of
  determination problems. For instance:
  \bprog
@@ -95,12 +95,12 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  time = 8,990 ms.
  %3 = -1.19... E-305 \\@com perfect, as $1/(n*\sqrt{n})$ above but much slower
  @eprog
- 
+
  For exponentially decreasing functions, \kbd{sumnum} is given for
  completeness, but one of \tet{suminf} or \tet{sumpos} should always be
  preferred. If you experiment with such functions and \kbd{sumnum} anyway,
  indicate the exact rate of decrease and increase $m$ by $1$ or $2$:
- 
+
  \bprog
  ? suminf(n=1, 2^(-n)) - 1
  time = 10 ms.
@@ -119,5 +119,5 @@ Doc: numerical summation of \var{expr}, the variable $X$ taking integer values
  time = 11,770 ms.
  %5 = -1.9... E-305 \\@com now perfect, but slow.
  @eprog
- 
+
  \synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long flag, long prec}.

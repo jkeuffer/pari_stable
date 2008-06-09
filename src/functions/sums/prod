@@ -13,9 +13,9 @@ Doc: product of expression
  the default precision. If it is set equal to the power series $1+O(X^k)$ for
  a certain $k$, they will be done using power series of precision at most $k$.
  These are the three most common initializations.
- 
+
  \noindent As an extreme example, compare
- 
+
  \bprog
  ? prod(i=1, 100, 1 - X^i);  \\@com this has degree $5050$ !!
  time = 128 ms.
@@ -35,5 +35,5 @@ Doc: product of expression
  time = 8ms.
  %4 = O(X^1001)
  @eprog
- 
+
  \synt{produit}{GEN a, GEN b, char *expr, GEN x}.

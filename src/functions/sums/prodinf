@@ -10,8 +10,8 @@ Doc: \idx{infinite product} of
  stops when the relative error of the expression minus 1 is less than the
  default precision. In particular, non-convergent products result in infinite
  loops. The expressions must always evaluate to an element of $\C$.
- 
+
  If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
- 
+
  \synt{prodinf}{void *E, GEN (*eval)(GEN, void*), GEN a, long prec}
  ($\fl=0$), or \tet{prodinf1} with the same arguments ($\fl=1$).

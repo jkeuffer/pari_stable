@@ -755,7 +755,7 @@ gadd(GEN x, GEN y)
     case t_COL:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_add(x,y);
-    case t_MAT: 
+    case t_MAT:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgM_add(x,y);
 
@@ -1029,7 +1029,7 @@ gsub(GEN x, GEN y)
     case t_COL:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgC_sub(x,y);
-    case t_MAT: 
+    case t_MAT:
       if (lg(y) != lg(x)) pari_err(operi,"+",x,y);
       return RgM_sub(x,y);
     case t_RFRAC: case t_SER: break;

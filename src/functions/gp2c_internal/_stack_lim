@@ -1,6 +1,6 @@
 Function: _stack_lim
 Class: gp2c_internal
-Description: 
+Description:
  (pari_sp,small):pari_sp       stack_lim($1, $2)
 
 Function: _low_stack_lim

@@ -12,7 +12,7 @@ Help: bnrclass(bnf,ideal,{flag=0}): given a big number field as output by
  When flag=1 or 2, the fifth component is the ray class group structure
  obtained when flag=0
 Doc: \emph{this function is DEPRECATED, use \kbd{bnrinit}}.
- 
+
  $\var{bnf}$ being as output by \kbd{bnfinit} (the units are mandatory unless
  the ideal is trivial), and \var{ideal} being a modulus, computes the ray
  class group of the number field for the modulus \var{ideal}, as a

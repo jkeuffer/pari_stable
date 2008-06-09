@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: ggcd0
 Prototype: GDG
 Help: gcd(x,{y}): greatest common divisor of x and y.
-Description: 
+Description:
  (small, small):small	cgcd($1, $2)
  (int, int):int	        gcdii($1, $2)
  (gen):gen              content($1)
@@ -12,7 +12,7 @@ Doc: creates the greatest common divisor of $x$ and $y$. $x$ and $y$ can be
  of quite general types, for instance both rational numbers. If $y$ is
  omitted and $x$ is a vector, returns the $\text{gcd}$ of all components of
  $x$, i.e.~this is equivalent to \kbd{content(x)}.
- 
+
  When $x$ and $y$ are both given and one of them is a vector/matrix type,
  the GCD is again taken recursively on each component, but in a different way.
  If $y$ is a vector, resp.~matrix, then the result has the same type as $y$,
@@ -20,15 +20,15 @@ Doc: creates the greatest common divisor of $x$ and $y$. $x$ and $y$ can be
  if $x$ is a vector/matrix the result has the same type as $x$ and an
  analogous definition. Note that for these types, \kbd{gcd} is not
  commutative.
- 
+
  The algorithm used is a naive \idx{Euclid} except for the following inputs:
- 
+
  \item integers: use modified right-shift binary (``plus-minus''
  variant).
- 
+
  \item univariate polynomials with coeffients in the same number
  field (in particular rational): use modular gcd algorithm.
- 
+
  \item general polynomials: use the \idx{subresultant algorithm} if
  coefficient explosion is likely (exact, non modular, coefficients).
 

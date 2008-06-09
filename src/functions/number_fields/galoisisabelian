@@ -8,5 +8,5 @@ Help: galoisisabelian(gal,{flag=0}): gal being as output by galoisinit,
 Doc: \var{gal} being as output by \kbd{galoisinit}, return $0$ if
  \var{gal} is not an abelian group, and the HNF matrix of \var{gal} over
  \kbd{gal.gen} if $fl=0$, $1$ if $fl=1$.
- 
+
  This command also accepts subgroups returned by \kbd{galoissubgroups}.

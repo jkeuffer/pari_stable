@@ -846,7 +846,7 @@ factor_Aurifeuille_aux(GEN A, long Astar, long n, struct aurifeuille_t *S)
       z = Fp_neg(z, le);
       n >>= 1;
     }
-    /* A^* = 1 (mod 4) */ 
+    /* A^* = 1 (mod 4) */
     g = Fl_sqrt(umodiu(A,l), l);
     a = padicsqrtlift(A, utoipos(g), utoipos(l), e);
     b = negi(a);

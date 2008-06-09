@@ -4,7 +4,7 @@ C-Name: gregula
 Prototype: Gp
 Help: quadregulator(x): regulator of the real quadratic field of
  discriminant x
-Description: 
+Description:
  (int):mp:prec	regula($1, prec)
  (gen):gen:prec	gregula($1, prec)
 Doc: regulator of the quadratic field of positive discriminant $x$. Returns

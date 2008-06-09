@@ -16,7 +16,7 @@ Doc: initialize tables for integration from
  the current precision. Otherwise the integration step is $1/2^m$. Reasonable
  values of $m$ are $m=6$ or $m=7$ for $100$ decimal digits, and $m=9$ for
  $1000$ decimal digits.
- 
+
  The result is technical, but in some cases it is useful to know the output.
  Let $x=\phi(t)$ be the change of variable which is used. \var{tab}[1] contains
  the integer $m$ as above, either given by the user or computed from the default

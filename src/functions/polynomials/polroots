@@ -10,11 +10,11 @@ Doc: complex roots of the polynomial
  its multiplicity. The precision is given as for transcendental functions: in
  GP it is kept in the variable \kbd{realprecision} and is transparent to the
  user, but it must be explicitly given as a second argument in library mode.
- 
+
  The algorithm used is a modification of A.~Sch\"onhage\sidx{Sch\"onage}'s
  root-finding algorithm, due to and implemented by X.~Gourdon. Barring bugs, it
  is guaranteed to converge and to give the roots to the required accuracy.
- 
+
  If $\fl=1$, use a variant of the Newton-Raphson method, which is \emph{not}
  guaranteed to converge, nor to give accurate results, but is rather
  fast when it does. If you get the messages ``too many iterations in roots''

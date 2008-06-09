@@ -14,29 +14,29 @@ Doc: if $x$ is a (not necessarily square)
  \idx{Hermite normal form} of $x$. If the rank of $x$ is equal to its number
  of rows, the result is a square matrix. In general, the columns of the result
  form a basis of the lattice spanned by the columns of $x$.
- 
+
  If $\fl=0$, uses the naive algorithm. This is in general fastest but may
  require too much memory as the dimension gets large (bigger than 100, say),
  in which case you may try \kbd{mathnfmod(x, matdetint(x))} when $x$ has
  maximal rank, and \kbd{mathnf(x, 4)} otherwise.
- 
+
  If $\fl=1$, outputs a two-component row vector $[H,U]$, where $H$ is the
  Hermite normal form of $x$ defined as above,  and $U$ is the
  unimodular transformation matrix such that $xU=[0|H]$. When the kernel is
  large, $U$ has in general huge coefficients. In the worst case, the runtime
  is exponential with respect to the dimension, but the routine behaves well
  in small dimension (less than 50 or 100, say).
- 
+
  If $\fl=3$, uses Batut's algorithm and output $[H,U,P]$, such that $H$ and
  $U$ are as before and $P$ is a permutation of the rows such that $P$ applied
  to $xU$ gives $H$. This is in general slower than $\fl=1$ but the matrix $U$
  is smaller; it may still be large.
- 
+
  If $\fl=4$, as in case 1 above, but uses a variant of \idx{LLL}
  reduction along the way. The matrix $U$ is in general close to optimal (in
  terms of smallest $L_2$ norm), but the reduction is in general slow,
  although provably polynomial-time.
- 
+
 Variant: Also available are \fun{GEN}{hnf}{GEN x} ($\fl=0$) and
  \fun{GEN}{hnfall}{GEN x} ($\fl=1$). To reduce \emph{huge} (say $400 \times
  400$ and more) relation matrices (sparse with small entries), you can use

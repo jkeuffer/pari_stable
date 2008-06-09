@@ -15,7 +15,7 @@ Doc: \sidx{compositum} $P$ and $Q$
  the number field $\Q(X)/ (R)$, and sorted by increasing degree (with respect
  to lexicographic ordering for factors of equal degrees). Returns an error if
  one of the polynomials is not squarefree.
- 
+
  Note that it is more efficient to reduce to the case where $P$ and $Q$ are
  irreducible first. The routine will not perform this for you, since it may be
  expensive, and the inputs are irreducible in most applications anyway.
@@ -28,13 +28,13 @@ Doc: \sidx{compositum} $P$ and $Q$
  to obtain the same result. If you are only interested in the degrees of the
  simple factors, the \kbd{rnfequation} instruction can be replaced by a
  trivial \kbd{poldegree(P) * poldegree(L[i])}.
- 
+
  If $\fl=1$, outputs a vector of 4-component vectors $[R,a,b,k]$, where $R$
  ranges through the list of all possible compositums as above, and $a$
  (resp. $b$) expresses the root of $P$ (resp. $Q$) as an element of
  $\Q(X)/(R)$. Finally, $k$ is a small integer such that $b + ka = X$ modulo
  $R$.
- 
+
  A compositum is quite often defined by a complicated polynomial, which it is
  advisable to reduce before further work. Here is a simple example involving
  the field $\Q(\zeta_5, 5^{1/5})$:

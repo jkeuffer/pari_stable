@@ -577,7 +577,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   long N1, N2, R1, Ni, Z, ord = gt->f, c_idx = gt->g-1;
   long hop = 0;
   GEN NN, NQ;
-  
+
   *psi = pf = cgetg(m, t_VECSMALL);
   ltop2 = avma;
   NN = diviiexact(mpfact(m), mulsi(c, gpowgs(mpfact(d), c)));
@@ -675,7 +675,7 @@ static void
 inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
 {
   long i, n = lg(L)-1;
-  GEN p = cgetg(n+1, t_VECSMALL); 
+  GEN p = cgetg(n+1, t_VECSMALL);
   if (DEBUGLEVEL >= 8) fprintferr("GaloisConj:Init Test\n");
   td->order = p;
   for (i = 1; i <= n-2; i++) p[i] = i+2;
@@ -833,7 +833,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 	ar[p1] = ar[p1+1] + V;
       }
       if (-(ulong)ar[1] > (ulong)n) continue;
-      
+
       /* intheadlong succeeds. Full computation */
       for (p1=1, p5=d; p1 <= a; p1++, p5++)
       {
@@ -1942,7 +1942,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     if (!galoisanalysis(P, &Pga, 0)) return NULL;
     Pgb.l = gb->l;
     Pden = galoisborne(P, NULL, &Pgb);
-    
+
     if (Pgb.valabs > gb->valabs)
     {
       if (DEBUGLEVEL>=4)
@@ -2233,7 +2233,7 @@ numberofconjugates(GEN T, long pinit)
   pari_sp av = avma;
   long p, c, nbtest = 0, n = degpol(T), nbmax = (n < 10)? 20: (n<<1) + 1;
   byteptr diff = diffptr;
- 
+
 #if 0
   c = sturm(T); c = ugcd(c, n - c); /* too costly: finite primes are cheaper */
 #else
@@ -2254,7 +2254,7 @@ numberofconjugates(GEN T, long pinit)
       else
       {
         c = ugcd(c, L[1]);
-        for (i = 2; i <= n; i++) 
+        for (i = 2; i <= n; i++)
           if (L[i]) { c = ugcd(c, L[i]*i); if (c == 1) break; }
       }
       if (DEBUGLEVEL >= 6)

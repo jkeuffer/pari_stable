@@ -4,7 +4,7 @@ C-Name: gfundunit
 Prototype: Gp
 Help: quadunit(D): fundamental unit of the quadratic field of discriminant D
  where D must be positive
-Description: 
+Description:
  (int):gen	fundunit($1)
  (gen):gen	gfundunit($1)
 Doc: fundamental unit\sidx{fundamental units} of the

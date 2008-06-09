@@ -14,14 +14,14 @@ Doc: factors the integer $n$ into a product of
  permission of the LiDIA maintainers), as well as a search for pure powers.
  The output is a two-column matrix as for \kbd{factor}. Use \kbd{isprime} on
  the result if you want to guarantee primality.
- 
+
  This gives direct access to the integer factoring engine called by most
  arithmetical functions. \fl\ is optional; its binary digits mean 1: avoid
  MPQS, 2: skip first stage ECM (we may still fall back to it later), 4: avoid
  Rho and SQUFOF, 8: don't run final ECM (as a result, a huge composite may be
  declared to be prime). Note that a (strong) probabilistic primality test is
  used; thus composites might not be detected, although no example is known.
- 
+
  You are invited to play with the flag settings and watch the internals at
  work by using \kbd{gp}'s \tet{debuglevel} default parameter (level 3 shows
  just the outline, 4 turns on time keeping, 5 and above show an increasing

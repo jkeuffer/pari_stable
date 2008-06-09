@@ -8,20 +8,20 @@ Doc: \idx{LLL} reduction of
  the ideal $I$ in the number field \var{nf}, along the direction \var{vdir}.
  If \var{vdir} is present, it must be an $r1+r2$-component vector ($r1$ and
  $r2$ number of real and complex places of \var{nf} as usual).
- 
+
  This function finds a ``small'' $a$ in $I$ (it is an LLL pseudo-minimum
  along direction \var{vdir}). The result is the Hermite normal form of
  the LLL-reduced ideal $r I/a$, where $r$ is a rational number such that the
  resulting ideal is integral and primitive. This is often, but not always, a
  reduced ideal in the sense of \idx{Buchmann}. If $I$ is an idele, the
  logarithmic embeddings of $a$ are subtracted to the Archimedean part.
- 
+
  More often than not, a \idx{principal ideal} will yield the identity
  matrix. This is a quick and dirty way to check if ideals are principal,
  but it is not a necessary condition; a non-trivial result does not prove
  that the ideal is non-trivial in the class group. For guaranteed results,
  see \kbd{bnfisprincipal}, which requires the computation of a full
  \kbd{bnf} structure.
- 
+
  Note that this is \emph{not} the same as the LLL reduction of the lattice
  $I$ since ideal operations are involved.

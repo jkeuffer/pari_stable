@@ -3,6 +3,6 @@ Section: elliptic_curves
 C-Name: addell
 Prototype: GGG
 Help: elladd(E,z1,z2): sum of the points z1 and z2 on elliptic curve E
-Doc: 
+Doc:
  sum of the points $z1$ and $z2$ on the
  elliptic curve corresponding to $E$.

@@ -16,7 +16,7 @@ Doc: outputs a \var{bid} structure,
  \var{nf} is a number field and $I$ is a \var{modulus}: either an ideal in any
  form, or a row vector whose first component is an ideal and whose second
  component is a row vector of $r_1$ 0 or 1.
- 
+
  This \var{bid} is used in \tet{ideallog} to compute discrete logarithms. It
  also contains useful information which can be conveniently retrieved as
  \kbd{\var{bid}.mod} (the modulus),
@@ -24,12 +24,12 @@ Doc: outputs a \var{bid} structure,
  \kbd{\var{bid}.no} (the cardinality of $G$),
  \kbd{\var{bid}.cyc} (elementary divisors) and
  \kbd{\var{bid}.gen} (generators).
- 
+
  If $\fl=1$ (default), the result is a \var{bid} structure without
  generators.
- 
+
  If $\fl=2$, as $\fl=1$, but including generators, which wastes some time.
- 
+
  If $\fl=0$, only outputs $(\Z_K/I)^*$ as an abelian group,
  i.e as a 3-component vector $[h,d,g]$: $h$ is the order, $d$ is the vector of
  SNF\sidx{Smith normal form} cyclic components and $g$ the corresponding

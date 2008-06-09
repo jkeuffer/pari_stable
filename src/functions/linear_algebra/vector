@@ -8,7 +8,7 @@ Doc: creates a row vector (type
  \typ{VEC}) with $n$ components whose components are the expression
  \var{expr} evaluated at the integer points between 1 and $n$. If one of the
  last two arguments is omitted, fill the vector with zeroes.
- 
+
  Avoid modifying $X$ within \var{expr}; if you do, the formal variable
  still runs from $1$ to $n$. In particular, \kbd{vector(n,i,expr)} is not
  equivalent to

@@ -11,5 +11,5 @@ Doc: searches if $y$ belongs to the set
  $x[j]=y$, otherwise returns 0. If $\fl$ is non-zero returns the index $j$
  where $y$ should be inserted, and $0$ if it already belongs to $x$ (this is
  meant to be used in conjunction with \kbd{listinsert}).
- 
+
  This function works also if $x$ is a \emph{sorted} list (see \kbd{listsort}).

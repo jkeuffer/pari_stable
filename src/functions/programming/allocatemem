@@ -9,7 +9,7 @@ Doc: this very special operation
  must be a non-negative integer. If $x \neq 0$, a new stack of size
  $16*\ceil{x/16}$ bytes is allocated. If $x=0$, the size of
  the new stack is twice the size of the old one. The old stack is discarded.
- 
+
  \misctitle{Warning.} This function should be typed at the \kbd{gp} prompt in
  interactive usage, or left by itself at the start of batch files.
  It cannot be used meaningfully in loop-like constructs, or as part of a
@@ -27,7 +27,7 @@ Doc: this very special operation
  @eprog\noindent were \kbd{file.gp} contains an \kbd{allocatemem} statement,
  the \kbd{x = 1} is never executed, since all pending instructions in the
  current sequence are discarded.
- 
+
  The technical reason is that this routine moves the stack, so temporary
  objects created during the current expression evaluation are not correct
  anymore. (In particular byte-compiled expressions, which are allocated on

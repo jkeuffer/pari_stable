@@ -11,7 +11,7 @@ Help: plotrecthraw(w,data,{flags=0}): plot graph(s) for data in rectwindow
 Doc: plot graph(s) for
  \var{data} in rectwindow $w$. $\fl$ has the same significance here as in
  \kbd{ploth}, though recursive plot is no more significant.
- 
+
  \var{data} is a vector of vectors, each corresponding to a list a coordinates.
  If parametric plot is set, there must be an even number of vectors, each
  successive pair corresponding to a curve. Otherwise, the first one contains

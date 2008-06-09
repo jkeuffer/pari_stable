@@ -17,36 +17,36 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  killed whenever you click on it), and returns a four-component vector giving
  the coordinates of the bounding box in the form
  $[\var{xmin},\var{xmax},\var{ymin},\var{ymax}]$.
- 
+
  \misctitle{Important note}: \kbd{ploth} may evaluate \kbd{expr} thousands of
  times; given the relatively low resolution of plotting devices, few
  significant digits of the result will be meaningful. Hence you should keep
  the current precision to a minimum (e.g.~9) before calling this function.
- 
+
  $n$ specifies the number of reference point on the graph, where a value of 0
  means we use the hardwired default values (1000 for general plot, 1500 for
  parametric plot, and 15 for recursive plot).
- 
+
  If no $\fl$ is given, \var{expr} is either a scalar expression $f(X)$, in which
  case the plane curve $y=f(X)$ will be drawn, or a vector
  $[f_1(X),\dots,f_k(X)]$, and then all the curves $y=f_i(X)$ will be drawn in
  the same window.
- 
+
  \noindent The binary digits of $\fl$ mean:
- 
+
  \item $1 = \kbd{Parametric}$: \tev{parametric plot}. Here \var{expr} must
  be a vector with an even number of components. Successive pairs are then
  understood as the parametric coordinates of a plane curve. Each of these are
  then drawn.
- 
+
  For instance:
  \bprog
- ploth(X=0,2*Pi,[sin(X),cos(X)], "Parametric") 
+ ploth(X=0,2*Pi,[sin(X),cos(X)], "Parametric")
  ploth(X=0,2*Pi,[sin(X),cos(X)])
  ploth(X=0,2*Pi,[X,X,sin(X),cos(X)], "Parametric")
  @eprog\noindent draw successively a circle, two entwined sinusoidal curves
  and a circle cut by the line $y=x$.
- 
+
  \item $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
  only \emph{one} curve can be drawn at a time, i.e.~\var{expr} must be either a
  two-component vector (for a single parametric curve, and the parametric flag
@@ -68,9 +68,9 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  @eprog\noindent
  to see why. Hence, it's usually a good idea to try and plot the same curve
  with slightly different parameters.
- 
+
  The other values toggle various display options:
- 
+
  \item $4 = \kbd{no\_Rescale}$: do not rescale plot according to the
  computed extrema. This is used in conjunction with \tet{plotscale} when
  graphing multiple functions on a rectwindow (as a \tet{plotrecth} call):
@@ -85,25 +85,25 @@ Doc: high precision plot of the function $y=f(x)$ represented by the expression
  \bprog
    ploth(t=0,2*Pi, [cos(t),sin(t)], "Parametric")
  @eprog
- 
+
  \item $8 = \kbd{no\_X\_axis}$: do not print the $x$-axis.
- 
+
  \item $16 = \kbd{no\_Y\_axis}$: do not print the $y$-axis.
- 
+
  \item $32 = \kbd{no\_Frame}$: do not print frame.
- 
+
  \item $64 = \kbd{no\_Lines}$: only plot reference points, do not join them.
- 
+
  \item $128 = \kbd{Points\_too}$: plot both lines and points.
- 
+
  \item $256 = \kbd{Splines}$: use splines to interpolate the points.
- 
+
  \item $512 = \kbd{no\_X\_ticks}$: plot no $x$-ticks.
- 
+
  \item $1024 = \kbd{no\_Y\_ticks}$: plot no $y$-ticks.
- 
+
  \item $2048 = \kbd{Same\_ticks}$: plot all ticks with the same length.
- 
+
  \item $4096 = \kbd{Complex}$: is a parametric plot but where each member of
  \kbd{expr} is considered a complex number encoding the two coordinates of a
  point. For instance:

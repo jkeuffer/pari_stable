@@ -248,12 +248,12 @@ RgV_RgC_mul(GEN x, GEN y)
 GEN
 RgC_RgV_mul(GEN x, GEN y)
 {
-  long i, ly = lg(y); 
+  long i, ly = lg(y);
   GEN z = cgetg(ly,t_MAT);
   for (i=1; i<ly; i++) gel(z,i) = RgC_Rg_mul(x, gel(y,i));
   return z;
 }
-GEN 
+GEN
 RgC_RgM_mul(GEN x, GEN y)
 {
   long i, ly = lg(y);

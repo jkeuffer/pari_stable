@@ -5,14 +5,14 @@ Prototype: GD0,L,
 Help: elltors(E,{flag=0}): torsion subgroup of elliptic curve E: order,
  structure, generators. If flag = 0, use Doud's algorithm; if flag = 1, use
  Lutz-Nagell
-Doc: 
+Doc:
  if $E$ is an elliptic curve \emph{defined
  over $\Q$}, outputs the torsion subgroup of $E$ as a 3-component vector
  \kbd{[t,v1,v2]}, where \kbd{t} is the order of the torsion group, \kbd{v1}
  gives the structure of the torsion group as a product of cyclic groups
  (sorted by decreasing order), and \kbd{v2} gives generators for these cyclic
  groups. $E$ must be an \var{ell} as output by \kbd{ellinit}.
- 
+
  \bprog
  ?  E = ellinit([0,0,0,-1,0]);
  ?  elltors(E)
@@ -20,11 +20,11 @@ Doc:
  @eprog
  Here, the torsion subgroup is isomorphic to $\Z/2\Z \times \Z/2\Z$, with
  generators $[0,0]$ and $[1,0]$.
- 
+
  If $\fl = 0$, use Doud's algorithm: bound torsion by computing $\#E(\F_p)$
  for small primes of good reduction, then look for torsion points using
  Weierstrass parametrization (and Mazur's classification).
- 
+
  If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be an
  \var{sell}.
 Variant: Also available is \fun{GEN}{elltors}{GEN E} for \kbd{elltors(E, 0)}.

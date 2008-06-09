@@ -8,7 +8,7 @@ Help: intlaplaceinv(X=sig,z,expr,{tab}): numerical integration on the line
 Doc: numerical integration of $(2i\pi)^{-1}\var{expr}(X)e^{Xz}$ with respect
  to $X$ on the line $\Re(X)=sig$. In other words, inverse Laplace transform
  of the function corresponding to \var{expr} at the value $z$.
- 
+
  $sig$ is coded as follows. Either it is a real number $\sigma$, equal to the
  abscissa of integration, and then the integrand is assumed to
  be slowly decreasing when the imaginary part of the variable tends to
@@ -17,12 +17,12 @@ Doc: numerical integration of $(2i\pi)^{-1}\var{expr}(X)e^{Xz}$ with respect
  or $\alpha>0$ for functions decreasing like $\exp(-\alpha t)$. Note that it
  is not necessary to choose the exact value of $\alpha$. \var{tab} is as in
  \kbd{intnum}.
- 
+
  It is often a good idea to use this function with a value of $m$ one or two
  higher than the one chosen by default (which can be viewed thanks to the
  function \kbd{intnumstep}), or to increase the abscissa of integration
  $\sigma$. For example:
- 
+
  \bprog
  ? \p 105
  ? intlaplaceinv(x=2, 1, 1/x) - 1
@@ -49,5 +49,5 @@ Doc: numerical integration of $(2i\pi)^{-1}\var{expr}(X)e^{Xz}$ with respect
  time = 330 ms.
  %7 = 1.07... E-72 + 3.2... E-72*I \\@com too far now...
  @eprog
- 
+
  \synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, long prec}.

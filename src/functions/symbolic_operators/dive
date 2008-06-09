@@ -3,7 +3,7 @@ Section: symbolic_operators
 C-Name: gdive
 Prototype: &G
 Help: x/=y: shortcut for x=x/y
-Description: 
+Description:
  (*small, gen):void	        $"cannot divide small: use \= instead."
  (*int, gen):void	        $"cannot divide int: use \= instead."
  (*real, real):real:parens               $1 = divrr($1, $2)

@@ -753,7 +753,7 @@ nfiso0(GEN a, GEN b, long fliso)
 
   a = get_nfpol(a, &nfa);
   if (!nfa) { a = Q_primpart(a); RgX_check_ZX(a, "nsiso0"); }
-  b = get_nfpol(b, &nfb); 
+  b = get_nfpol(b, &nfb);
   if (!nfb) { b = Q_primpart(b); RgX_check_ZX(b, "nsiso0"); }
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
   m = degpol(a);

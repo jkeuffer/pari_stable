@@ -3,7 +3,7 @@ Section: symbolic_operators
 C-Name: gdivent
 Help: x\y: Euclidean quotient of x and y
 Prototype: GG
-Description: 
+Description:
  (small, small):small:parens		$(1)/$(2)
  (int, small):int			truedivis($1, $2)
  (small, int):int			gdiventsg($1, $2)

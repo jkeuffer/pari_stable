@@ -12,14 +12,14 @@ Doc: resultant of the two
  polynomials $x$ and $y$ with exact entries, with respect to the main
  variables of $x$ and $y$ if $v$ is omitted, with respect to the variable $v$
  otherwise. The algorithm assumes the base ring is a domain.
- 
- If $\fl=0$ (default), uses the the algorithm best suited to the intputs, 
+
+ If $\fl=0$ (default), uses the the algorithm best suited to the intputs,
  either the \idx{subresultant algorithm} (Lazard/Ducos variant, generic case),
  a modular algorithm (inputs in $\Q[X]$) or Sylvester's matrix (inexact
  inputs).
- 
+
  If $\fl=1$, uses the determinant of Sylvester's matrix instead; this should
  always be slower than the default.
- 
+
  If you also need the $u$ and $v$ such that $x*u + y*v = res(x,y)$,
  use the \tet{bezoutres} function.

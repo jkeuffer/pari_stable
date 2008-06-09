@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: gphi
 Prototype: G
 Help: eulerphi(x): Euler's totient function of x
-Description: 
+Description:
  (int):int	phi($1)
  (gen):gen	gphi($1)
 Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of $|x|$,

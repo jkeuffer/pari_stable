@@ -4,10 +4,10 @@ C-Name: gtoset
 Prototype: DG
 Help: Set({x=[]}): convert x into a set, i.e. a row vector with strictly
  increasing coefficients. Empty set if x is omitted
-Description: 
+Description:
  ():vec	cgetg(1,t_VEC)
  (gen):vec	gtoset($1)
-Doc: 
+Doc:
  converts $x$ into a set, i.e.~into a row
  vector of character strings, with strictly increasing entries with respect to
  lexicographic ordering. The components of $x$ are put in canonical form (type

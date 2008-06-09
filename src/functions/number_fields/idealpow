@@ -8,11 +8,11 @@ Doc: computes the $k$-th power of
  the ideal $x$ in the number field $\var{nf}$. $k$ can be positive, negative
  or zero. The result is NOT reduced, it is really the $k$-th ideal power, and
  is given in HNF.
- 
+
  If $\fl$ is non-zero, reduce the result using \kbd{idealred}. Note however
  that this is NOT the same as as $\kbd{idealpow}(\var{nf},x,k)$ followed by
  reduction, since the reduction is performed throughout the powering process.
- 
+
 Variant: Also available are
  \fun{GEN}{idealpow}{GEN nf, GEN x, GEN k} and
  \fun{GEN}{idealpows}{GEN nf, GEN x, long k} ($\fl = 0$).

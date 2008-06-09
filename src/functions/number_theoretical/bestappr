@@ -17,10 +17,10 @@ Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  ? bestappr([Pi, sqrt(2) + 'x], 10^3)
  %3 = [355/113, x + 1393/985]
  @eprog
- By definition, $n/d$ is the best rational approximation to $x$ if 
+ By definition, $n/d$ is the best rational approximation to $x$ if
  $|d x - n| < |v x - u|$ for all integers $(u,v)$ with $v \leq A$. (Which
  implies that $n/d$ is a convergent of the continued fraction of $x$.)
- 
+
  If $B$ is present, $x$ must be an \typ{INTMOD} (or a recursive combination of
  those), modulo $N$ say. The routine then returns the unique rational number
  $a/b$ in coprime integers $a\leq A$ and $b\leq B$ which is congruent to $x$

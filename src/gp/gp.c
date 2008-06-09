@@ -623,7 +623,7 @@ aide0(const char *s0, int flag)
     n = atoi(s);
     if (n < 0 || n > 15) pari_err(talker2,"no such section in help: ?",s,s);
     if (n == 12)
-      community(); 
+      community();
     else if (long_help)
       external_help(s,3);
     else

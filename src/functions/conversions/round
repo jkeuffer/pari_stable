@@ -5,7 +5,7 @@ Prototype: GD&
 Help: round(x,{&e}): take the nearest integer to all the coefficients of x.
  If e is present, do not take into account loss of integer part precision,
  and set e = error estimate in bits
-Description: 
+Description:
  (small):small:parens   $1
  (int):int:copy:parens  $1
  (real):int             roundr($1)
@@ -21,7 +21,7 @@ Doc: If $x$ is in $\R$, rounds $x$ to the nearest integer (rounding to
  rounded value (the ``fractional part''). If the exponent of $x$ is too large
  compared to its precision (i.e.~$e>0$), the result is undefined and an error
  occurs if $e$ was not given.
- 
+
  \misctitle{Important remark:} contrary to the other truncation functions,
  this function operates on every coefficient at every level of a PARI object.
  For example
@@ -30,6 +30,6 @@ Doc: If $x$ is in $\R$, rounds $x$ to the nearest integer (rounding to
  $$\text{round}\left(\dfrac{2.4*X^2-1.7}{X}\right)=\dfrac{2*X^2-2}{X}.$$
  An important use of \kbd{round} is to get exact results after an approximate
  computation, when theory tells you that the coefficients must be integers.
- 
+
 Variant: Also available are \fun{GEN}{grndtoi}{GEN x, long *e} and
  \fun{GEN}{ground}{GEN x}.

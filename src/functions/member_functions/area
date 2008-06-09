@@ -3,5 +3,5 @@ Help: _.area
 Section: member_functions
 C-Name: member_area
 Prototype: G
-Description: 
+Description:
  (bell):gen:copy        gel($1, 19)
