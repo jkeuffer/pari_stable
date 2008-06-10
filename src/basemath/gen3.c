@@ -329,7 +329,7 @@ isinexactreal(GEN x)
       case t_REAL:
 	return 1;
 
-      case t_COMPLEX: case t_QUAD:
+      case t_COMPLEX:
 	return (typ(x[1])==t_REAL || typ(x[2])==t_REAL);
     }
     return 0;
