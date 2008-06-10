@@ -87,6 +87,7 @@ BA 29- missing GC in the leftrightpow functions
    76- matsolve([1;2;3],[1,2,4]~) --> [1]~  (should raise an error)
    77- allow polredabs(x in Q[X])
 BA 78- [galoisinit] Documentation of "weakly" supersolvable was incorrect.
+   79- binomial(t_REAL or t_COMPLEX, k) was very slow for large k
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]

@@ -757,7 +757,7 @@ binomialuu(ulong n, ulong k)
 GEN
 binomial(GEN n, long k)
 {
-  long i;
+  long i, prec;
   pari_sp av;
   GEN y;
 
@@ -798,14 +798,19 @@ binomial(GEN n, long k)
       y = divide_conquer_prod(y,mulii);
     }
     y = diviiexact(y, mpfact(k));
+    return gerepileuptoint(av, y);
   }
-  else
-  {
-    y = cgetg(k+1,t_VEC);
-    for (i=1; i<=k; i++) gel(y,i) = gsubgs(n,i-1);
-    y = divide_conquer_prod(y,gmul);
-    y = gdiv(y, mpfact(k));
+
+  prec = precision(n);
+  if (prec && k > 200 + 0.8*bit_accuracy(prec)) {
+    GEN A = mpfactr(k, prec), B = ggamma(gsubgs(n,k-1), prec);
+    return gerepileupto(av, gdiv(ggamma(gaddgs(n,1), prec), gmul(A,B)));
   }
+
+  y = cgetg(k+1,t_VEC);
+  for (i=1; i<=k; i++) gel(y,i) = gsubgs(n,i-1);
+  y = divide_conquer_prod(y,gmul);
+  y = gdiv(y, mpfact(k));
   return gerepileupto(av, y);
 }
 
