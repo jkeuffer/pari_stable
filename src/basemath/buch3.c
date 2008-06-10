@@ -2303,7 +2303,7 @@ conductor_elts(GEN bnr)
 
 /* Let C a congruence group in bnr, compute its subgroups whose index is
  * described by bound (see subgrouplist) as subgroups of Clk(bnr).
- * Restrict to subgroups havіng the same conductor as bnr */
+ * Restrict to subgroups having the same conductor as bnr */
 GEN
 subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
 {
