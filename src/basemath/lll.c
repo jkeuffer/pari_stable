@@ -740,7 +740,7 @@ qflll0(GEN x, long flag)
   if (typ(x) != t_MAT) pari_err(typeer,"qflll");
   switch(flag)
   {
-    case 0: RgM_check_ZM(x,"qflll"); return lll(x);
+    case 0: return lll(x);
     case 1: RgM_check_ZM(x,"qflll"); return lllint(x);
     case 2: RgM_check_ZM(x,"qflll"); return lllintpartial(x);
     case 4: RgM_check_ZM(x,"qflll"); return lllkerim(x);
