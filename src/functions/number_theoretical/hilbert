@@ -1,6 +1,6 @@
 Function: hilbert
 Section: number_theoretical
-C-Name: hil0
+C-Name: hilbert
 Prototype: lGGDG
 Help: hilbert(x,y,{p}): Hilbert symbol at p of x,y.
 Doc: \idx{Hilbert symbol} of $x$ and $y$ modulo the prime $p$, $p=0$ meaning

@@ -607,7 +607,6 @@ GEN     aprcl(GEN N);
 /* arith1.c */
 
 GEN     bestappr_mod(GEN x, GEN A, GEN B);
-long    hilii(GEN x, GEN y, GEN p);
 int     is_gener_Fp(GEN x, GEN p, GEN p_1, GEN L);
 int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 

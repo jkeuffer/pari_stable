@@ -1188,23 +1188,15 @@ krouu(ulong x, ulong y)
 /**                          HILBERT SYMBOL                         **/
 /**                                                                 **/
 /*********************************************************************/
-
-long
-hil0(GEN x, GEN y, GEN p)
-{
-  return hil(x,y, p? p: gen_0);
-}
-
 #define eps(t) (((signe(t)*(mod2BIL(t)))&3)==3)
 long
-hilii(GEN x, GEN y, GEN p)
+hilbertii(GEN x, GEN y, GEN p)
 {
   pari_sp av;
   long a, b, z;
   GEN u, v;
 
-  if (signe(p)<=0)
-    return (signe(x)<0 && signe(y)<0)? -1: 1;
+  if (!p) return (signe(x)<0 && signe(y)<0)? -1: 1;
   if (is_pm1(p)) pari_err(talker,"p = 1 in hilbert()");
   av = avma;
   a = odd(Z_pvalrem(x,p,&u));
@@ -1225,37 +1217,43 @@ hilii(GEN x, GEN y, GEN p)
 }
 
 static void
-err_at2(void) { pari_err(talker, "insufficient precision for p = 2 in hilbert"); }
+err_at2(void) {pari_err(talker, "insufficient precision for p = 2 in hilbert");}
 
 long
-hil(GEN x, GEN y, GEN p)
+hilbert(GEN x, GEN y, GEN p)
 {
   pari_sp av;
-  long a,tx,ty,z;
-  GEN p1,p2;
+  long tx, ty, z;
+  GEN p1, p2;
 
   if (gcmp0(x) || gcmp0(y)) return 0;
   av = avma; tx = typ(x); ty = typ(y);
-  if (tx>ty) { p1=x; x=y; y=p1; a=tx,tx=ty; ty=a; }
+  if (tx > ty) swapspec(x,y, tx,ty);
+  if (p)
+  {
+    if (typ(p) != t_INT) pari_err(typeer,"hilbert");
+    if (signe(p) <= 0) p = NULL;
+  }
+
   switch(tx) /* <= ty */
   {
     case t_INT:
       switch(ty)
       {
-	case t_INT: return hilii(x,y,p);
+	case t_INT: return hilbertii(x,y,p);
 	case t_REAL:
 	  return (signe(x)<0 && signe(y)<0)? -1: 1;
 	case t_INTMOD:
 	  p = gel(y,1); if (equaliu(p,2)) err_at2();
-	  return hilii(x, gel(y,2), p);
+	  return hilbertii(x, gel(y,2), p);
 	case t_FRAC:
-	  z = hilii(x, mulii(gel(y,1),gel(y,2)), p);
+	  z = hilbertii(x, mulii(gel(y,1),gel(y,2)), p);
 	  avma = av; return z;
 	case t_PADIC:
 	  p = gel(y,2);
 	  if (equaliu(p,2) && precp(y) <= 1) err_at2();
 	  p1 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
-	  z = hilii(x, p1, p); avma = av; return z;
+	  z = hilbertii(x, p1, p); avma = av; return z;
       }
       break;
 
@@ -1270,12 +1268,12 @@ hil(GEN x, GEN y, GEN p)
       {
 	case t_INTMOD:
 	  if (!equalii(p, gel(y,1))) break;
-	  return hilii(gel(x,2),gel(y,2),p);
+	  return hilbertii(gel(x,2),gel(y,2),p);
 	case t_FRAC:
-	  return hil(gel(x,2),y,p);
+	  return hilbert(gel(x,2),y,p);
 	case t_PADIC:
 	  if (!equalii(p, gel(y,2))) break;
-	  return hil(gel(x,2),y,p);
+	  return hilbert(gel(x,2),y,p);
       }
       break;
 
@@ -1285,9 +1283,9 @@ hil(GEN x, GEN y, GEN p)
       {
 	case t_FRAC:
 	  p2 = mulii(gel(y,1),gel(y,2));
-	  z = hilii(p1,p2,p); avma = av; return z;
+	  z = hilbertii(p1,p2,p); avma = av; return z;
 	case t_PADIC:
-	  z = hil(p1,y,NULL); avma = av; return z;
+	  z = hilbert(p1,y,NULL); avma = av; return z;
       }
       break;
 
@@ -1297,9 +1295,9 @@ hil(GEN x, GEN y, GEN p)
       if (equaliu(p,2) && (precp(x) <= 1 || precp(y) <= 1)) err_at2();
       p1 = odd(valp(x))? mulii(p,gel(x,4)): gel(x,4);
       p2 = odd(valp(y))? mulii(p,gel(y,4)): gel(y,4);
-      z = hilii(p1,p2,p); avma = av; return z;
+      z = hilbertii(p1,p2,p); avma = av; return z;
   }
-  pari_err(talker,"forbidden or incompatible types in hil");
+  pari_err(talker,"forbidden or incompatible types in hilbert");
   return 0; /* not reached */
 }
 #undef eps

@@ -172,6 +172,8 @@ BA 49- user variables can now be aliased [#790].
    54- moved misc/dico.new to src/whatnow + integrate it in the
        description system [ new script desc/whatnow ]
    55- bittest(x, n) no longer accepts t_VEC arguments n
+   56- rename library functions hil0->hilbert, hilii->hilbertii
+       [ delete useless hil() ]
 
   Added
     1- library function pari_calloc, cgetalloc
