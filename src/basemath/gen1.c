@@ -701,12 +701,12 @@ gadd(GEN x, GEN y)
       if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
       return addsub_pp(x,y, addii);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
+      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
       gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gadd(gel(x,2),gel(y,2));
       gel(z,3) = gadd(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
-      if (gequal(gel(x,1), gel(y,1)))
+      if (RgX_equal_var(gel(x,1), gel(y,1)))
 	return addsub_polmod_same(gel(x,1), gel(x,2), gel(y,2), &gadd);
       return addsub_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2), &gadd);
     case t_FFELT: return FF_add(x,y);
@@ -1006,12 +1006,12 @@ gsub(GEN x, GEN y)
       if (!equalii(gel(x,2),gel(y,2))) pari_err(operi,"+",x,y);
       return addsub_pp(x,y, subii);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
+      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"+",x,y);
       gel(z,1) = gcopy(gel(x,1));
       gel(z,2) = gsub(gel(x,2),gel(y,2));
       gel(z,3) = gsub(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
-      if (gequal(gel(x,1), gel(y,1)))
+      if (RgX_equal_var(gel(x,1), gel(y,1)))
 	return addsub_polmod_same(gel(x,1), gel(x,2), gel(y,2), &gsub);
       return addsub_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2), &gsub);
     case t_FFELT: return FF_sub(x,y);
@@ -1358,7 +1358,7 @@ mulqq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD);
   GEN p1, p2, p3, p4, P = gel(x,1), b = gel(P,3), c = gel(P,2);
   pari_sp av, tetpil;
-  if (!gequal(P, gel(y,1))) pari_err(operi,"*",x,y);
+  if (!RgX_equal_var(P, gel(y,1))) pari_err(operi,"*",x,y);
 
   gel(z,1) = gcopy(P); av = avma;
   p2 = gmul(gel(x,2),gel(y,2));
@@ -1452,7 +1452,7 @@ gmul(GEN x, GEN y)
     case t_QUAD: return mulqq(x, y);
     case t_FFELT: return FF_mul(x, y);
     case t_POLMOD:
-      if (gequal(gel(x,1), gel(y,1)))
+      if (RgX_equal_var(gel(x,1), gel(y,1)))
 	return mul_polmod_same(gel(x,1), gel(x,2), gel(y,2));
       return mul_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
     case t_POL:
@@ -1738,7 +1738,7 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
     if (Q==NULL) { Q = p2; if (degpol(Q) <= 0) return 0; }
     else if (p2 != Q)
     {
-      if (!gequal(p2, Q))
+      if (!RgX_equal_var(p2, Q))
       {
 	if (DEBUGMEM) pari_warn(warner,"different modulus in ff_poltype");
 	return 0;
@@ -2119,14 +2119,14 @@ gdiv(GEN x, GEN y)
       return divpp(x, y);
 
     case t_QUAD:
-      if (!gequal(gel(x,1),gel(y,1))) pari_err(operi,"/",x,y);
+      if (!RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"/",x,y);
       av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_FFELT: return FF_div(x,y);
 
     case t_POLMOD: av = avma;
-      if (gequal(gel(x,1), gel(y,1)))
+      if (RgX_equal_var(gel(x,1), gel(y,1)))
       {
 	GEN X = gel(x,1);
 	x = gel(x,2);

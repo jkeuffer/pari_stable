@@ -2502,11 +2502,11 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   {
     t[j] = FqX_normalize(gel(t,j), T,p);
     for (k=1; k<j; k++)
-      if (gequal(t[j],t[k]))
+      if (RgX_equal(gel(t,j), gel(t,k)))
       {
 	E[k] += E[j]; nbfact--;
 	E[j] = E[nbfact];
-	t[j] = t[nbfact]; break;
+	gel(t,j) = gel(t,nbfact); break;
       }
   }
   setlg(t, nbfact);

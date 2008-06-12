@@ -686,7 +686,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
   if (typ(aut)==t_POL) aut = gmodulo(aut,T);
   else
   {
-    if (typ(aut)!=t_POLMOD || !gequal(gel(aut,1),T))
+    if (typ(aut)!=t_POLMOD || !RgX_equal_var(gel(aut,1),T))
       pari_err(typeer,"galoisapply");
   }
   switch(typ(x))
@@ -697,7 +697,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
     case t_POLMOD: x = gel(x,2); /* fall through */
     case t_POL:
       y = gsubst(x,varn(T),aut);
-      if (typ(y)!=t_POLMOD || !gequal(gel(y,1),T)) y = gmodulo(y,T);
+      if (typ(y)!=t_POLMOD || !RgX_equal_var(gel(y,1),T)) y = gmodulo(y,T);
       return gerepileupto(av,y);
 
     case t_VEC:

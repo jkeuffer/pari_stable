@@ -35,10 +35,12 @@ vec_setconst(GEN v, GEN x)
 int
 vec_isconst(GEN v)
 {
-  long i, l=lg(v);
+  long i, l = lg(v);
+  GEN w;
   if (l==1) return 1;
+  w = gel(v,1);
   for(i=2;i<l;i++)
-    if (!gequal(gel(v,i), gel(v,1))) return 0;
+    if (!gequal(gel(v,i), w)) return 0;
   return 1;
 }
 
@@ -50,11 +52,13 @@ vec_isconst(GEN v)
 int
 vec_is1to1(GEN v)
 {
-  long i,j;
-  long l=lg(v);
+  long i, j, l = lg(v);
   for (i=1; i<l; i++)
+  {
+    GEN w = gel(v,i);
     for(j=i+1; j<l; j++)
-      if (gequal(gel(v,i), gel(v,j))) return 0;
+      if (gequal(gel(v,j), w)) return 0;
+  }
   return 1;
 }
 

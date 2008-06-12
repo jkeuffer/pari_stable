@@ -72,7 +72,7 @@ ok_congruence(GEN X, ulong ell, long lW, GEN vecMsup)
 static int
 ok_sign(GEN X, GEN msign, GEN arch)
 {
-  return gequal(Flm_Flc_mul(msign, X, 2), arch);
+  return zv_equal(Flm_Flc_mul(msign, X, 2), arch);
 }
 
 /* REDUCTION MOD ell-TH POWERS */
@@ -295,7 +295,7 @@ isprimeidealconj(GEN nfz, GEN pr1, GEN pr2, tau_s *tau)
   if (!equalii(p, gel(pr2,1))
    || !equalii(gel(pr1,3), gel(pr2,3))
    || !equalii(gel(pr1,4), gel(pr2,4))) return 0;
-  if (gequal(x,gel(pr2,2))) return 1;
+  if (ZV_equal(x,gel(pr2,2))) return 1;
   for(;;)
   {
     if (int_elt_val(nfz,x,p,b2,NULL)) return 1;
@@ -775,7 +775,7 @@ FOUND:  X = Flm_Flc_mul(K, y, ell);
               res = shallowconcat(res, gerepileupto(av, P));
             else
             {
-              if (gequal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
+              if (ZM_equal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
               avma = av; continue;
             }
           }
@@ -1284,14 +1284,14 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Ps\n", P);
           if (!all) {
             H = rnfnormgroup(bnr, P);
-            if (gequal(subgroup, H)) return P; /* DONE */
+            if (ZM_equal(subgroup, H)) return P; /* DONE */
             continue;
           } else {
             GEN P0 = Q_primpart(lift(P));
             GEN g = nfgcd(P0, RgX_deriv(P0), polnf, gel(nf,4));
             if (degpol(g)) continue;
             H = rnfnormgroup(bnr, P);
-            if (!gequal(subgroup,H) && conductor(bnr, H, -1) == gen_0) continue;
+            if (!ZM_equal(subgroup,H) && conductor(bnr,H,-1) == gen_0) continue;
           }
           res = shallowconcat(res, P);
           if (all < 0 && rk == ncyc) return res;

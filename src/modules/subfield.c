@@ -408,7 +408,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
     w1_Q = centermod(gmul(w1, remii(den,q)), q);
-    if (gequal(w1_Q, w0_Q))
+    if (ZX_equal(w1_Q, w0_Q))
     {
       GEN G = is_pm1(den)? g: RgX_rescale(g,den);
       if (gcmp0(RgX_RgXQ_compo(G, w1_Q, T))) break;

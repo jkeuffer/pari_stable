@@ -486,7 +486,7 @@ gcmp_1(GEN x)
       av=avma; y=equalii(addsi(1,gel(x,4)), gel(x,3)); avma=av; return y;
 
     case t_POLMOD:
-      av=avma; p1=gadd(gen_1,gel(x,2));
+      av=avma; p1 = gaddgs(gel(x,2), 1);
       y = signe(p1) && !gequal(p1,gel(x,1)); avma=av; return !y;
 
     case t_POL:
@@ -676,9 +676,10 @@ gequal(GEN x, GEN y)
       case t_FRAC: case t_INTMOD:
 	return equalii(gel(x,2), gel(y,2)) && equalii(gel(x,1), gel(y,1));
 
-      case t_COMPLEX: case t_POLMOD:
+      case t_COMPLEX:
 	return gequal(gel(x,2),gel(y,2)) && gequal(gel(x,1),gel(y,1));
-
+      case t_POLMOD:
+	return gequal(gel(x,2),gel(y,2)) && RgX_equal_var(gel(x,1),gel(y,1));
       case t_POL:
 	return polegal(x,y);
 
@@ -693,7 +694,7 @@ gequal(GEN x, GEN y)
 	    && equalii(gel(x,3),gel(y,3));
 
       case t_QUAD:
-	return gequal(gel(x,1),gel(y,1))
+	return RgX_equal_var(gel(x,1),gel(y,1))
 	    && gequal(gel(x,2),gel(y,2))
 	    && gequal(gel(x,3),gel(y,3));
 
@@ -1443,7 +1444,7 @@ gaffect(GEN x, GEN y)
       modiiz(gel(x,4),gel(y,3),gel(y,4));
       setvalp(y,valp(x)); return;
     case t_QUAD:
-      if (! gequal(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
+      if (! RgX_equal_var(gel(x,1),gel(y,1))) pari_err(operi,"",x,y);
       affii(gel(x,2),gel(y,2));
       affii(gel(x,3),gel(y,3)); return;
     case t_VEC: case t_COL: case t_MAT:

@@ -349,7 +349,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 	if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
 	break;
       }
-      if (gequal(J, gel(id2,j-1))) { j = 1; break; }
+      if (ZM_equal(J, gel(id2,j-1))) { j = 1; break; }
       gel(id2,j) = J;
       gel(alg,j) = m;
     }
@@ -982,7 +982,7 @@ pr_index(GEN L, GEN pr)
   long j, l = lg(L);
   GEN al = gel(pr,2);
   for (j=1; j<l; j++)
-    if (gequal(al, gmael(L,j,2))) return j;
+    if (ZV_equal(al, gmael(L,j,2))) return j;
   pari_err(bugparier,"codeprime");
   return 0; /* not reached */
 }

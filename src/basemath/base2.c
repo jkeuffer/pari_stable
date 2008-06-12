@@ -3032,7 +3032,7 @@ GEN
 polcompositum0(GEN A, GEN B, long flall)
 {
   pari_sp av = avma;
-  int same = (A == B || gequal(A,B));
+  int same;
   long v, k;
   GEN C, D, LPRS;
 
@@ -3040,6 +3040,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (degpol(A)<=0 || degpol(B)<=0) pari_err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) pari_err(talker,"not the same variable in compositum");
+  same = (A == B || RgX_equal(A,B));
   A = Q_primpart(A); RgX_check_ZX(A,"compositum");
   if (!ZX_is_squarefree(A)) pari_err(talker,"compositum: %Ps inseparable", A);
   if (!same) {

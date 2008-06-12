@@ -200,7 +200,7 @@ ellidentify(GEN E)
   V = ellcondlist(itos(gel(G,1)));
   M = ellchangecurve(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
-    if (gequal(gmael(V,j,2), M))
+    if (ZV_equal(gmael(V,j,2), M))
       return gerepilecopy(ltop, mkvec2(gel(V,j),gel(G,2)));
   pari_err(talker,"No such elliptic curve in database");
   return NULL;

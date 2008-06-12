@@ -492,7 +492,7 @@ polissquareall(GEN x, GEN *pt)
   {
     x = RgX_Rg_div(x,a);
     y = gtrunc(gsqrt(greffe(x,2+l,1),0));
-    if (!gequal(gsqr(y), x)) { avma = av; return 0; }
+    if (!RgX_equal(gsqr(y), x)) { avma = av; return 0; }
     if (!pt) { avma = av; return 1; }
     if (!gcmp1(a))
     {
@@ -725,7 +725,7 @@ polispower(GEN x, GEN K, GEN *pt)
   {
     x = RgX_Rg_div(x,a);
     y = gtrunc(gsqrtn(greffe(x,lg(x),1), K, NULL, 0)); av2 = avma;
-    if (!gequal(powgi(y, K), x)) { avma = av; return 0; }
+    if (!RgX_equal(powgi(y, K), x)) { avma = av; return 0; }
   }
   else y = pol_1(varn(x));
   if (pt)
@@ -1603,7 +1603,7 @@ chinese(GEN x, GEN y)
   {
     case t_POLMOD:
       z = cgetg(3, t_POLMOD);
-      if (gequal(gel(x,1),gel(y,1)))  /* same modulus */
+      if (RgX_equal_var(gel(x,1),gel(y,1)))  /* same modulus */
       {
 	gel(z,1) = gcopy(gel(x,1));
 	gel(z,2) = chinese(gel(x,2),gel(y,2));

@@ -2686,7 +2686,7 @@ ggcd(GEN x, GEN y)
     if (ty == t_POLMOD)
     {
       z = cgetg(3,t_POLMOD);
-      if (gequal(gel(x,1),gel(y,1)))
+      if (RgX_equal_var(gel(x,1),gel(y,1)))
 	gel(z,1) = gcopy(gel(x,1));
       else
 	gel(z,1) = ggcd(gel(x,1),gel(y,1));

@@ -769,7 +769,7 @@ look_eta(GEN eta, long pk, GEN z)
 {
   long i;
   for (i=1; i<=pk; i++)
-    if (gequal(z, gel(eta,i))) return i-1;
+    if (ZX_equal(z, gel(eta,i))) return i-1;
   return -1;
 }
 /* same pk = 2^k */

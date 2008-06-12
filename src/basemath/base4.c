@@ -1772,23 +1772,28 @@ idealmulred(GEN nf, GEN x, GEN y, long prec)
 long
 isideal(GEN nf,GEN x)
 {
+  long N, i, j, lx, tx = typ(x);
   pari_sp av;
-  long N,i,j,tx=typ(x),lx;
+  GEN T;
 
-  nf=checknf(nf); lx=lg(x);
-  if (tx==t_VEC && lx==3) { x=gel(x,1); tx=typ(x); lx=lg(x); }
-  if (is_scalar_t(tx))
-    return (tx==t_INT || tx==t_FRAC || tx==t_POL ||
-		     (tx==t_POLMOD && gequal(gel(nf,1),gel(x,1))));
-  if (typ(x)==t_VEC) return (lx==6);
-  if (typ(x)!=t_MAT) return 0;
-  N = degpol(nf[1]);
+  nf = checknf(nf); T = gel(nf,1); lx = lg(x);
+  if (tx==t_VEC && lx==3) { x = gel(x,1); tx = typ(x); lx = lg(x); }
+  switch(tx)
+  {
+    case t_INT: case t_FRAC: return 1;
+    case t_POL: return varn(x) == varn(T);
+    case t_POLMOD: return RgX_equal_var(T, gel(x,1));
+    case t_VEC: return (lx==6);
+    case t_MAT: break;
+    default: return 0;
+  }
+  N = degpol(T);
   if (lx-1 != N) return (lx == 1);
   if (lg(x[1])-1 != N) return 0;
 
   av = avma; x = Q_primpart(x);
   if (!ZM_ishnf(x)) return 0;
-  for (i=1; i<=N; i++)
+  for (i=2; i<=N; i++)
     for (j=2; j<=N; j++)
       if (! hnf_invimage(x, element_mulid(nf,gel(x,i),j)))
       {
