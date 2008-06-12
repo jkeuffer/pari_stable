@@ -988,7 +988,7 @@ indices_to_vec01(GEN p, long r)
 
 /* return (column) vector of R1 signatures of x (0 or 1) */
 GEN
-nfsign_arch(GEN nf,GEN x,GEN arch)
+nfsign_arch(GEN nf, GEN x, GEN arch)
 {
   GEN M, V, archp = vec01_to_indices(arch);
   long i, s, n = lg(archp)-1;
@@ -1372,15 +1372,13 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
 }
 
 /* x integral ideal, compute elements in 1+x (in x, if x = zk) whose sign
- * matrix is invertible */
+ * matrix is invertible. archp in 'indices' format */
 GEN
-zarchstar(GEN nf, GEN x, GEN archp)
+nfarchstar(GEN nf, GEN x, GEN archp)
 {
-  long nba;
+  long nba = lg(archp) - 1;
   GEN cyc, gen, mat;
 
-  archp = vec01_to_indices(archp);
-  nba = lg(archp) - 1;
   if (!nba)
     cyc = gen = mat = cgetg(1, t_VEC);
   else
@@ -1657,7 +1655,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
   x = idealhermite_aux(nf, ideal);
   if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
     pari_err(talker,"Idealstar needs an integral non-zero ideal: %Ps",x);
-  sarch = zarchstar(nf, x, archp);
+  sarch = nfarchstar(nf, x, archp);
   fa = idealfactor(nf, ideal);
   P = gel(fa,1);
   E = gel(fa,2); nbp = lg(P)-1;
@@ -1862,7 +1860,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 
   lists1 = gel(bid1,4); lx1 = lg(lists1);
   lists2 = gel(bid2,4); lx2 = lg(lists2);
-  /* concat (lists1 - last elt [zarchstar]) + lists2 */
+  /* concat (lists1 - last elt [nfarchstar]) + lists2 */
   lx = lx1+lx2-2; lists = cgetg(lx,t_VEC);
   for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
   for (   ; i<lx; i++)    lists[i] = lists2[i-lx1+2];
@@ -2073,7 +2071,7 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
   checkbid(bid1);
   f1 = gel(bid1,1); G1 = gel(bid1,2); fa1 = gel(bid1,3);
   x = gel(f1,1);
-  sarch = zarchstar(nf, x, arch);
+  sarch = nfarchstar(nf, x, arch);
   lists1 = gel(bid1,4); lx1 = lg(lists1);
   lists = cgetg(lx1,t_VEC);
   for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
@@ -2124,7 +2122,7 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
   } else
     join_z = &join_arch;
   ID.nf = checknf(bnf);
-  arch = vec01_to_indices(arch);
+  ID.arch = vec01_to_indices(arch);
   av = avma; V = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {

@@ -225,6 +225,81 @@ with \kbd{nf} coefficients to the residue field; returns an \kbd{FqX}.
 \fun{GEN}{FqX_to_nfX}{GEN Q, GEN modpr} lifts an \kbd{FqX} to a polynomial
 with coefficients in \kbd{nf}.
 
+\subsec{Signatures}
+
+``Signs'' of the real embeddings of number field element are represented in
+additive notation, using the standard identification $(\Z/2\Z, +) \to
+(\{-1,1\},\times)$, $s\mapsto (-1)^s$.
+
+With respect to a fixed \kbd{nf} structure, a selection of real places (a
+divisor at infinity, the archimedean part of PARI ideles) is normally given as
+a \typ{VECSMALL} of indices of the roots \kbd{nf.roots} of the defining
+polynomial for the number field. For compatibility reasons, in particular under
+GP, the (obsolete) \kbd{vec01} form is also accepted: a \typ{VEC} with
+\kbd{gen\_0} or \kbd{gen\_1} entries.
+
+The following internal functions go back and forth between the two
+representations for the archimedean part of ideles (GP: $0/1$ vectors, library:
+list of indices):
+
+\fun{GEN}{vec01_to_indices}{GEN v} given a \typ{VEC} $v$ with \typ{INT} entries
+equal to $0$ or $1$, return as a \typ{VECSMALL} the list of indices $i$
+such that $v[i] = 1$. If $v$ is already a \typ{VECSMALL}, return it
+(not suitable for \kbd{gerepile} in this case).
+
+\fun{GEN}{indices_to_vec01}{GEN p, long n} return the $0/1$ vector of length
+$n$ with ones exactly at the positions $p[1], p[2], \ldots$
+
+
+\fun{GEN}{nfsign}{GEN nf,GEN x} $x$ being a number field element and \kbd{nf}
+any form of number field, return the $0-1$-vector giving the signs of the 
+$r_1$ real embeddings of $x$, as a \typ{VECSMALL}. Linear algebra functions
+like \tet{F2v_add_inplace} then allow keeping track of signs in series of
+multiplications. 
+
+If $x$ is a \typ{VEC} of number field elements, return the matrix whose
+colums are the signs of the $x[i]$.
+
+\fun{GEN}{nfsign_arch}{GEN nf,GEN x,GEN arch} \kbd{arch} being a list of
+distinct real places, either in \kbd{vec01} (\typ{VEC} with \kbd{gen\_0} or
+\kbd{gen\_1} entries) or \kbd{indices} (\typ{VECSMALL}) form (see
+\tet{vec01_to_indices}), returns the signs of $x$ at the corresponding
+places. This is the low-level function underlying \kbd{nfsign}.
+
+\fun{GEN}{nfsign_units}{GEN bnf, GEN archp, int add_tu}
+\kbd{archp} being a divisor at infinity in \kbd{indices} form
+(or \kbd{NULL} for the divisor including all real places), return the signs
+at \kbd{archp} of a system of fundamental units for the field, in the same
+order as \kbd{bnf.tufu} if \kbd{add\_tu} is set; and in the same order as
+\kbd{bnf.fu} otherwise.
+
+\fun{GEN}{nfsign_from_logarch}{GEN L, GEN invpi, GEN archp} given $L$
+the vector of $\Log \sigma(x)$, where $\sigma$ runs through the (real
+or complex) embeddings of some number field, \kbd{invpi} being
+a floating point approximation to $1/\pi$, and \kbd{archp} being a divisor
+at infinity in \kbd{indices} form, return the signs of $x$
+at the corresponding places. This is the low-level function underlying
+\kbd{nfsign\_units}; the latter is actually a trivial wrapper
+\kbd{bnf} structures include the $\Log \sigma(x)$ for a system of fundamental
+units of the field.
+
+\fun{GEN}{set_sign_mod_idele}{GEN nf, GEN x, GEN y, GEN idele, GEN sarch}
+let $f = f_0f_\intfy$ be the divisor represented by \kbd{idele}, $x$, $y$ two
+number field elements. Returns $yt$ with $t = 1 \text{mod}^* f$ such that $x$
+and $ty$ have the same signs at $f_\infty$; if $x =
+\kbd{NULL}$, make $ty$ totally positive at $f_\infty$. \kbd{sarch} is the
+output of \kbd{nfarchstar(nf, f0, finf)}.
+
+\fun{GEN}{nfarchstar}{GEN nf, GEN f0, GEN finf} for a divisor $f =
+f_0f_\infty$ represented by the integral ideal \kbd{f0} in HNF and
+the \kbd{finf} in \kbd{indices} form, returns $(\Z_K/f_\infty)^*$ in a form
+suitable for computations mod $f$. More precisely, returns
+$[c, g, M]$, where $c = [2,\ldots, 2]$ gives the cyclic structure of that
+group ($\#f_\infty$ copies of $\Z/2\Z$), $g$ a minimal system of independant
+generators, which are furthermore congruent to $1$ mod $f_0$ (no condition if
+$f_0 = \Z_K$), and $M$ is the matrix of signs of the $g[i]$ at $f_\infty$,
+which is square and invertible over $\F_2$.
+
 \subsec{Maximal order and discriminant}
 
 A number field $K = \Q[X]/(T)$ is defined by a monic $T\in\Z[X]$. The
@@ -260,20 +335,6 @@ the absolute value of the discriminant of $T$. It is not mandatory that all
 entries in the first column be primes; this is useful if only a local  integral
 basis  for  some small set of places is desired: only factors with exponents
 greater or equal to $2$ will be considered.
-
-\subsec{Miscellaneous}
-
-\noindent The following internal functions go back and forth between two
-representations for the archimedean part of ideles (GP: $0/1$ vectors,
-library: list of indices):
-
-\fun{GEN}{vec01_to_indices}{GEN v} given a \typ{VEC} $v$ with \typ{INT} entries
-equal to $0$ or $1$, return as a \typ{VECSMALL} the list of indices $i$
-such that $v[i] = 1$. If $v$ is already a \typ{VECSMALL}, return it
-(not suitable for \kbd{gerepile} in this case).
-
-\fun{GEN}{indices_to_vec01}{GEN p, long n} return the $0/1$ vector of length
-$n$ with ones exactly at the positions $p[1], p[2], \ldots$
 
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}

@@ -190,7 +190,6 @@ void   wr_rel(GEN col);
 GEN    zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
 GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
 GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);
-GEN    zsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 
 /* Dedekind zeta */
 GEN  zeta_get_limx(long r1, long r2, long bit);

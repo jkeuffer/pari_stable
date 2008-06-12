@@ -911,13 +911,14 @@ GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 GEN     vec01_to_indices(GEN arch);
 GEN     vecmodii(GEN a, GEN b);
-GEN     zarchstar(GEN nf,GEN x,GEN arch);
+GEN     nfarchstar(GEN nf,GEN x,GEN arch);
 GEN     zideallog(GEN nf,GEN x,GEN bigideal);
 GEN     zidealstar(GEN nf, GEN x);
 GEN     zidealstarinit(GEN nf, GEN x);
 GEN     Idealstar(GEN nf, GEN x,long flun);
 GEN     zidealstarinitgen(GEN nf, GEN x);
 GEN     nfsign_arch(GEN nf,GEN alpha,GEN arch);
+GEN     nfsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 GEN     nfsign(GEN nf,GEN alpha);
 
 /* base4.c */

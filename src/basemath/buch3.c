@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* Faster than Buchray (because it can use nfsign_units: easier zarchstar) */
+/* Faster than Buchray (because it can use nfsign_units: easier nfarchstar) */
 GEN
 buchnarrow(GEN bnf)
 {
@@ -52,7 +52,7 @@ buchnarrow(GEN bnf)
   archp = identity_perm(r1);
   for (j=1; j<=ngen; j++)
   {
-    GEN z = zsign_from_logarch(gel(GD,j), invpi, archp);
+    GEN z = nfsign_from_logarch(gel(GD,j), invpi, archp);
     gel(logs,j) = zc_to_ZC( F2m_F2c_mul(v, z) );
   }
   /* [ cyc  0 ]

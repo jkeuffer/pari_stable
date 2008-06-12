@@ -1685,7 +1685,7 @@ isunit(GEN bnf,GEN x)
 }
 
 GEN
-zsign_from_logarch(GEN LA, GEN invpi, GEN archp)
+nfsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 {
   long l = lg(archp), i;
   GEN y = cgetg(l, t_VECSMALL);
@@ -1714,7 +1714,7 @@ nfsign_units(GEN bnf, GEN archp, int add_zu)
     gel(y, j++) = equaliu(w,2)? const_vecsmall(lg(archp)-1, 1)
                               : cgetg(1, t_VECSMALL);
   }
-  for ( ; j < RU; j++) gel(y,j) = zsign_from_logarch(gel(A,j), invpi, archp);
+  for ( ; j < RU; j++) gel(y,j) = nfsign_from_logarch(gel(A,j), invpi, archp);
   return y;
 }
 

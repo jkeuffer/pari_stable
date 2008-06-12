@@ -637,7 +637,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   /* compute a system of elements congru to 1 mod cond0 and giving all
      possible signatures for cond1 */
-  sarch = zarchstar(nf, cond0, cond1);
+  sarch = nfarchstar(nf, cond0, cond1);
 
   /* find lambda in diff.cond such that gcd(lambda.(diff.cond)^-1,cond0) = 1
      and lambda >> 0 at cond1 */
