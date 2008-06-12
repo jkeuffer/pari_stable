@@ -349,7 +349,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 	if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
 	break;
       }
-      if (ZM_equal(J, gel(id2,j-1))) { j = 1; break; }
+      if (gequal(J, gel(id2,j-1))) { j = 1; break; }
       gel(id2,j) = J;
       gel(alg,j) = m;
     }
