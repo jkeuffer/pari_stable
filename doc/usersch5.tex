@@ -3872,6 +3872,9 @@ of \kbd{RgX}.
 \fun{int}{RgX_is_rational}{GEN P} return 1 is the \kbd{RgX}~\kbd{P} hasonly
 rational coefficients (\typ{INT} and \typ{FRAC}), and 0 otherwise.
 
+\fun{int}{RgX_is_monomial}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
+monomial in its main variable, 0~otherwise.
+
 \fun{long}{RgX_equal}{GEN x, GEN y} returns $1$ if $x$ and $y$ have the same
 degree and their coefficients are equal (as per \tet{gequal}). Variable
 numbers are not checked.
@@ -4443,9 +4446,6 @@ round to a small integer (suitable for \kbd{itos}). Otherwise, returns 1
 (of component types embeddable into the reals) but is not itself real, 0~if
 \kbd{x} is a real (not necessarily of type \typ{REAL}), or raises an error if
 \kbd{x} is not embeddable into the complex numbers.
-
-\fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
-monomial in its main variable, 0~otherwise.
 
 \subsubsec{Obsolete}
 

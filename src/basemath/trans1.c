@@ -624,7 +624,7 @@ gpowgs(GEN x, long n)
       return gerepileupto(av,y);
     }
     case t_POL:
-      if (ismonome(x)) return pow_monome(x, n);
+      if (RgX_is_monomial(x)) return pow_monome(x, n);
     default: {
       pari_sp av = avma;
       y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqr, &_mul);

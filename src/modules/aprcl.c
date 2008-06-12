@@ -780,7 +780,7 @@ look_eta2(long k, GEN z)
   if (typ(z) != t_POL) d = 0; /* t_INT */
   else
   {
-    if (!ismonome(z)) return -1;
+    if (!RgX_is_monomial(z)) return -1;
     d = degpol(z);
     z = gel(z,d+2); /* leading term */
   }

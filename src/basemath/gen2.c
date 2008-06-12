@@ -814,7 +814,7 @@ ggval(GEN x, GEN p)
 	vx = varn(x);
 	if (vp == vx)
 	{
-	  if (ismonome(p)) return RgX_val(x) / degpol(p);
+	  if (RgX_is_monomial(p)) return RgX_val(x) / degpol(p);
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {

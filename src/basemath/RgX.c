@@ -26,6 +26,16 @@ RgX_is_rational(GEN x)
     if (!is_rational(gel(x,i))) return 0;
   return 1;
 }
+int
+RgX_is_monomial(GEN x)
+{
+  long i;
+  if (!signe(x)) return 0;
+  for (i=lg(x)-2; i>1; i--)
+    if (!isexactzero(gel(x,i))) return 0;
+  return 1;
+}
+
 long
 RgX_equal(GEN x, GEN y)
 {

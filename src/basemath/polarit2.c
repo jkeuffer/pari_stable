@@ -3918,15 +3918,16 @@ issimplefield(GEN x)
   return 0;
 }
 
+/* x monomial, y t_POL in the same variable */
 static GEN
 gcdmonome(GEN x, GEN y)
 {
-  long dx=degpol(x), v=varn(x), e=gval(y, v);
+  long dx = degpol(x), e = RgX_val(y);
   pari_sp av = avma;
   GEN t = ggcd(leading_term(x), content(y));
 
   if (dx < e) e = dx;
-  return gerepileupto(av, monomialcopy(t, e, v));
+  return gerepileupto(av, monomialcopy(t, e, varn(x)));
 }
 
 /* x, y are t_POL in the same variable */
@@ -3939,12 +3940,12 @@ RgX_gcd(GEN x, GEN y)
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
-  if (ismonome(x)) return gcdmonome(x,y);
-  if (ismonome(y)) return gcdmonome(y,x);
-  av = avma;
+  if (RgX_is_monomial(x)) return gcdmonome(x,y);
+  if (RgX_is_monomial(y)) return gcdmonome(y,x);
   if (can_use_modular_gcd(x) &&
       can_use_modular_gcd(y)) return QX_gcd(x,y); /* Q[X] */
 
+  av = avma;
   if (issimplepol(x) || issimplepol(y)) x = RgX_gcd_simple(x,y);
   else
   {

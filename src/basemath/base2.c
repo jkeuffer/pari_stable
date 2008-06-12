@@ -1379,7 +1379,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa)
 	S->chi= chie; composemod(S, eta, S->phi); return 1;
       }
 
-      if (ismonome(nue))
+      if (RgX_is_monomial(nue))
       { /* vp(eta) = vp(gamma - delta) > 0 */
 	long Le, Ee;
 	GEN pie;

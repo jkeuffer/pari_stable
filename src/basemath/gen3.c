@@ -410,16 +410,6 @@ iscomplex(GEN x)
   return 0; /* not reached */
 }
 
-int
-ismonome(GEN x)
-{
-  long i;
-  if (typ(x)!=t_POL || !signe(x)) return 0;
-  for (i=lg(x)-2; i>1; i--)
-    if (!isexactzero(gel(x,i))) return 0;
-  return 1;
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                    GENERIC REMAINDER                            */
@@ -559,7 +549,7 @@ gmod(GEN x, GEN y)
 	  return gerepile(av,tetpil,grem(p1,y));
 
 	case t_SER:
-	  if (ismonome(y) && varn(x) == varn(y))
+	  if (RgX_is_monomial(y) && varn(x) == varn(y))
 	  {
 	    long d = degpol(y);
 	    if (lg(x)-2 + valp(x) < d) pari_err(operi,"%",x,y);
@@ -1208,7 +1198,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
 GEN
 gsubstpol(GEN x, GEN T, GEN y)
 {
-  if (typ(T) == t_POL && ismonome(T) && gcmp1(leading_term(T)))
+  if (typ(T) == t_POL && RgX_is_monomial(T) && gcmp1(leading_term(T)))
   {
     long d = degpol(T), v = varn(T);
     pari_sp av = avma;
@@ -2727,7 +2717,7 @@ _rfraccoeff(GEN x, long n, long v)
   if (v < 0) v = min(vp, vq);
   P = (vp == v)? p: swap_vars(p, v);
   Q = (vq == v)? q: swap_vars(q, v);
-  if (!ismonome(Q)) pari_err(typeer, "polcoeff");
+  if (!RgX_is_monomial(Q)) pari_err(typeer, "polcoeff");
   n += degpol(Q);
   return gdiv(_polcoeff(P, n, v), leading_term(Q));
 }
