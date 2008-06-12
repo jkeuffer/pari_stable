@@ -9,15 +9,10 @@ Doc: replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
  as \kbd{subst} above apply.
 
  The difference with \kbd{subst} is that $y$ is allowed to be any polynomial
- here. The substitution is done as per the following script:
- \bprog
- subst_poly(pol, from, to) =
- { my(t = 'subst_poly_t, M = from - t);
-
-   subst(lift(Mod(pol,M), variable(M)), t, to)
- }
- @eprog\noindent
- For instance
+ here. The substitution is done moding out all components of $x$
+ (recursively) by $y - t$, where $t$ is a new free variable of lowest
+ priority. Then substituting $t$ by $z$ in the resulting expression. For
+ instance
  \bprog
  ? substpol(x^4 + x^2 + 1, x^2, y)
  %1 = y^2 + y + 1

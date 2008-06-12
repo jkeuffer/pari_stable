@@ -1157,42 +1157,59 @@ ser2pol_i(GEN x, long lx)
   return y;
 }
 
-/*
-   subst_poly(pol, from, to) =
-   { local(t='subst_poly_t, M);
+/* T t_POL in var v, mod out by T components of x which are
+ * t_POL/t_RFRAC in v. Recursively */
+static GEN
+mod_r(GEN x, long v, GEN T)
+{
+  long i, w, lx, tx = typ(x);
+  GEN y;
 
-     \\ if fraction
-     M = numerator(from) - t * denominator(from);
-     \\ else
-     M = from - t;
-     subst(pol % M, t, to)
-   }
- */
+  if (is_const_t(tx)) return x;
+  switch(tx)
+  {
+    case t_POLMOD:
+      w = varn(gel(x,1));
+      if (w == v) pari_err(talker, "subst: unexpected variable precedence");
+      if (varncmp(v, w) < 0) return x;
+      return gmodulo(mod_r(gel(x,2),v,T), mod_r(gel(x,1),v,T));
+    case t_POL:
+      w = varn(x);
+      if (w == v) return RgX_rem(x, T);
+      if (varncmp(v, w) < 0) return x;
+      lx = lg(x); y = cgetg(lx, t_POL); y[1] = x[1];
+      for (i = 2; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
+      return normalizepol_i(y, lx);
+    case t_RFRAC:
+      return gdiv(mod_r(gel(x,1),v,T), mod_r(gel(x,2),v,T));
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); y = cgetg(lx, tx);
+      for (i = 1; i < lx; i++) gel(y,i) = mod_r(gel(x,i),v,T);
+      return y;
+  }
+  pari_err(typeer,"substpol");
+  return NULL;/*not reached*/
+}
 GEN
-gsubst_expr(GEN pol, GEN from, GEN to)
+gsubst_expr(GEN expr, GEN from, GEN to)
 {
   pari_sp av = avma;
-  long v = fetch_var(); /* FIXME: Need fetch_var_low_priority() */
-  GEN tmp;
+  long w, v = fetch_var(); /* FIXME: Need fetch_var_low_priority() */
+  GEN y;
 
   from = simplify_i(from);
   switch (typ(from)) {
-  case t_RFRAC: /* M= numerator(from) - t * denominator(from) */
-    tmp = gsub(gel(from,1), gmul(pol_x(v), gel(from,2)));
-    break;
-  default:
-    tmp = gsub(from, pol_x(v));	/* M = from - t */
+    case t_RFRAC: /* M= numerator(from) - t * denominator(from) */
+      y = gsub(gel(from,1), gmul(pol_x(v), gel(from,2)));
+      break;
+    default:
+      y = gsub(from, pol_x(v));	/* M = from - t */
   }
-
-  if (v <= gvar(from)) pari_err(talker, "subst: unexpected variable precedence");
-  tmp = gmul(pol, mkpolmod(gen_1, tmp));
-  if (typ(tmp) == t_POLMOD)
-    tmp = gel(tmp,2);			/* optimize lift */
-  else					/* Vector? */
-    tmp = lift0(tmp, gvar(from));
-  tmp = gsubst(tmp, v, to);
-  (void)delete_var();
-  return gerepilecopy(av, tmp);
+  w = gvar(from);
+  if (varncmp(v,w) <= 0)
+    pari_err(talker, "subst: unexpected variable precedence");
+  y = gsubst(mod_r(expr, w, y), v, to);
+  (void)delete_var(); return gerepileupto(av, y);
 }
 
 GEN

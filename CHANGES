@@ -177,6 +177,9 @@ BA 49- user variables can now be aliased [#790].
    57- split library function disable_dbg() -> dbg_block() / dbg_release()
    58- rename library functions srgcd -> RgX_gcd
    59- rename library functions ismonome -> RgX_is_monomial
+   60- make the semantics of substpol more precise and less surprising:
+       substpol((x^2+x+1)/(x^2+x-1),x^2,x^3) -> (x^3 + x + 1)/(x^3 + x - 1)
+       [ was: (x^6 - x^3 - 2*x - 1)/(x^6 - 3*x^3 + 1)  ]
 
   Added
     1- library function pari_calloc, cgetalloc
