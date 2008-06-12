@@ -174,6 +174,7 @@ BA 49- user variables can now be aliased [#790].
    55- bittest(x, n) no longer accepts t_VEC arguments n
    56- rename library functions hil0->hilbert, hilii->hilbertii
        [ delete useless hil() ]
+   57- split library function disable_dbg() -> dbg_block() / dbg_release()
 
   Added
     1- library function pari_calloc, cgetalloc

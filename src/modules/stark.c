@@ -422,9 +422,9 @@ CplxModulus(GEN data, long *newprec, long prec)
   pari_sp av;
   GEN pol, listCR, cpl, bnr = gel(data,1), nf = checknf(bnr);
 
-  disable_dbg(0);
+  dbg_block();
   listCR = get_listCR(bnr, gel(data,3));
-  disable_dbg(-1);
+  dbg_release();
   for (av = avma;; avma = av)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
@@ -502,9 +502,9 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 
   for(;;)
   {
-    disable_dbg(0);
+    dbg_block();
     listid = ideallist(nf, maxnorm); /* all ideals of norm <= maxnorm */
-    disable_dbg(-1);
+    dbg_release();
 
     av1 = avma;
     for (n = minnorm; n <= maxnorm; n++)
@@ -523,10 +523,10 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	  gel(arch,N+1-s) = gen_0;
 
 	  /* compute Clk(m), check if m is a conductor */
-	  disable_dbg(0);
+	  dbg_block();
 	  bnrm = buchrayinitgen(bnf, m);
 	  p1   = conductor(bnrm, NULL, -1);
-	  disable_dbg(-1);
+	  dbg_release();
 	  gel(arch,N+1-s) = gen_1;
 	  if (!signe(p1)) continue;
 
@@ -534,9 +534,9 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	  ImC = ComputeKernel(bnrm, bnr, dtQ);
 
 	  /* ... and its subgroups of index 2 with conductor m */
-          disable_dbg(0);
+          dbg_block();
 	  candD = subgrouplist_cond_sub(bnrm, ImC, mkvec(gen_2));
-          disable_dbg(-1);
+          dbg_release();
 	  nbcand = lg(candD) - 1;
 	  for (c = 1; c <= nbcand; c++)
 	  {
@@ -914,7 +914,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   C     = gmul2n(sqrtr_abs(divir(dk, gpowgs(mppi(prec2),N))), -r2);
   initc = init_get_chic(Mr);
 
-  disable_dbg(0);
+  dbg_block();
 
   l = lg(listCR); dataCR = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
@@ -962,7 +962,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
     ch_CHI0(dtcr) = chi;
   }
 
-  disable_dbg(-1);
+  dbg_release();
   return gerepilecopy(av, dataCR);
 }
 
@@ -2526,9 +2526,9 @@ quadhilbertreal(GEN D, long prec)
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
-  disable_dbg(0);
+  dbg_block();
   bnf = bnfinit0(quadpoly0(D, fetch_user_var("y")), 1, NULL, prec);
-  disable_dbg(-1);
+  dbg_release();
   cyc = gmael3(bnf,8, 1, 2);
   if (lg(cyc) == 1) { avma = av; return pol_x(0); }
   /* if the exponent of the class group is 2, use Genus Theory */

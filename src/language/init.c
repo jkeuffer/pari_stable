@@ -839,17 +839,11 @@ recover(int flag)
   (void)os_signal(SIGINT, sigfun);
 }
 
+static THREAD long dbg = -1;
 void
-disable_dbg(long val)
-{
-  static long oldval = -1;
-  if (val < 0)
-  {
-    if (oldval >= 0) { DEBUGLEVEL = oldval; oldval = -1; }
-  }
-  else if (DEBUGLEVEL)
-    { oldval = DEBUGLEVEL; DEBUGLEVEL = val; }
-}
+dbg_block() { if (DEBUGLEVEL) { dbg = DEBUGLEVEL; DEBUGLEVEL = 0; } }
+void
+dbg_release() { if (dbg >= 0) { DEBUGLEVEL = dbg; dbg = -1; } }
 
 #define MAX_PAST 25
 #define STR_LEN 20
@@ -958,7 +952,7 @@ void
 err_recover(long numerr)
 {
   initout(0);
-  disable_dbg(-1);
+  dbg_release();
   killallfiles(0);
   err_clean();
 

@@ -252,9 +252,9 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   if (!dn)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
-    disable_dbg(0);
+    dbg_block();
     dis = ZX_disc_all(T, 1+logint(res,gen_2,NULL));
-    disable_dbg(-1);
+    dbg_release();
     den = indexpartial(T,dis);
     if (ptdis) *ptdis = dis;
   }
@@ -1812,9 +1812,9 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
 	psi = const_vecsmall(g,1);
 	dgf = dg; fres = gcopy(frob); continue;
       }
-      disable_dbg(0);
+      dbg_block();
       lo = listznstarelts(dg, n / gf->fp);
-      disable_dbg(-1);
+      dbg_release();
       if (e!=1) lo = galoisfindgroups(lo, sg, dgf);
       if (DEBUGLEVEL>=4) fprintferr("Galoisconj:Subgroups list:%Ps\n", lo);
       for (l = 1; l < lg(lo); l++)
