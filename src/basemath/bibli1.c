@@ -2013,7 +2013,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
   borne1 = mpadd(norme1,eps);
   if (!BORNE) borne2 = mpsub(norme1,eps);
   else        borne2 = mpmul(norme1,alpha);
-  if (DEBUGLEVEL)
+  if (DEBUGLEVEL>2)
     fprintferr("smallvectors looking for norm < %Ps\n",gprec_w(borne1,3));
 
   v = cgetg(N,t_VEC);
@@ -2132,7 +2132,7 @@ smallvectors(GEN q, GEN BORNE, long maxnum, FP_chk_fun *CHECK)
 	{
 	  pari_sp av2 = avma;
 	  GEN per = indexsort(norms);
-	  if (DEBUGLEVEL) fprintferr("sorting...\n");
+	  if (DEBUGLEVEL>2) fprintferr("sorting...\n");
 	  for (j = 0, i = 1; i <= s; i++)
 	  { /* let N be the minimal norm so far for x satisfying 'check'. Keep
 	     * all elements of norm N */
@@ -2176,7 +2176,7 @@ END:
   if (check)
   {
     GEN per, alph, pols, p;
-    if (DEBUGLEVEL) fprintferr("final sort & check...\n");
+    if (DEBUGLEVEL>2) fprintferr("final sort & check...\n");
     setlg(norms,stockmax+1); per = indexsort(norms);
     alph = cgetg(stockmax+1,t_VEC);
     pols = cgetg(stockmax+1,t_VEC);
