@@ -309,7 +309,7 @@ gred_rfrac2_i(GEN n, GEN d)
   {
     y = RgX_divrem(n, d, &z);
     if (!signe(z)) { cgiv(z); return v? RgX_mulXn(y, v): y; }
-    z = srgcd(d, z);
+    z = RgX_gcd(d, z);
     if (degpol(z)) { n = gdeuc(n,z); d = gdeuc(d,z); }
   }
   return fix_rfrac(gred_rfrac_simple(n,d), v);
@@ -467,7 +467,7 @@ addsub_polmod(GEN X, GEN Y, GEN x, GEN y, GEN(*op)(GEN,GEN))
   long vx = varn(X), vy = varn(Y);
   if (vx==vy) {
     pari_sp av;
-    gel(z,1) = srgcd(X,Y); av = avma;
+    gel(z,1) = RgX_gcd(X,Y); av = avma;
     gel(z,2) = gerepileupto(av, gmod(op(x, y), gel(z,1))); return z;
   }
   if (varncmp(vx, vy) < 0)
@@ -631,7 +631,7 @@ add_rfrac(GEN x, GEN y)
   GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_RFRAC);
   GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
 
-  delta = srgcd(x2,y2);
+  delta = RgX_gcd(x2,y2);
   if (!degpol(delta))
   {
     n = simplify_i( gadd(gmul(x1,y2), gmul(y1,x2)) );
@@ -657,7 +657,7 @@ add_rfrac(GEN x, GEN y)
     z = lg(d) == 3? RgX_Rg_div(p1, gel(d,2)): gred_rfrac_simple(p1, d);
     return gerepileupto(av, z);
   }
-  p1 = srgcd(delta, r);
+  p1 = RgX_gcd(delta, r);
   if (degpol(p1))
   {
     n = RgX_div(n,p1);
@@ -1225,7 +1225,7 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   pari_sp av;
 
   if (vx==vy) {
-    gel(z,1) = srgcd(X,Y); av = avma;
+    gel(z,1) = RgX_gcd(X,Y); av = avma;
     gel(z,2) = gerepileupto(av, gmod(gmul(x, y), gel(z,1)));
     return z;
   }

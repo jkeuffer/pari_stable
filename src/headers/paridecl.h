@@ -2039,7 +2039,7 @@ GEN     primpart(GEN x);
 GEN     reduceddiscsmith(GEN pol);
 GEN     resultant2(GEN x, GEN y);
 GEN     roots_from_deg1(GEN x);
-GEN     srgcd(GEN x, GEN y);
+GEN     RgX_gcd(GEN x, GEN y);
 long    sturmpart(GEN x, GEN a, GEN b);
 GEN     resultant_all(GEN u, GEN v, GEN *sol);
 GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);

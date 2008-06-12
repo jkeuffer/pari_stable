@@ -2735,7 +2735,14 @@ ggcd(GEN x, GEN y)
     case t_POL:
       switch(ty)
       {
-	case t_POL: return srgcd(x,y);
+	case t_POL:
+          if (vx != vy)
+          {
+            if (!signe(y)) return gcopy(x);
+            if (!signe(x)) return gcopy(y);
+            return gen_1;
+          }
+          return RgX_gcd(x,y);
 	case t_SER:
 	  z = ggcd(content(x), content(y));
 	  return monomialcopy(z, min(valp(y),gval(x,vx)), vx);
@@ -3906,8 +3913,7 @@ issimplefield(GEN x)
     case t_COMPLEX:
       return issimplefield(gel(x,1)) || issimplefield(gel(x,2));
     case t_POLMOD:
-      return (typ(x[2]) == t_POL && issimplepol(gel(x,2)))
-	   || issimplefield(gel(x,2)) || issimplepol(gel(x,1));
+      return issimplepol(gel(x,1));
   }
   return 0;
 }
@@ -3923,18 +3929,16 @@ gcdmonome(GEN x, GEN y)
   return gerepileupto(av, monomialcopy(t, e, v));
 }
 
+/* x, y are t_POL in the same variable */
 GEN
-srgcd(GEN x, GEN y)
+RgX_gcd(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), dx, dy, vx;
+  long dx, dy;
   pari_sp av, av1, lim;
   GEN d, g, h, p1, p2, u, v;
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
-  if (is_scalar_t(tx) || is_scalar_t(ty)) return gen_1;
-  if (tx!=t_POL || ty!=t_POL) pari_err(typeer,"srgcd");
-  vx=varn(x); if (vx!=varn(y)) return gen_1;
   if (ismonome(x)) return gcdmonome(x,y);
   if (ismonome(y)) return gcdmonome(y,x);
   av = avma;
@@ -3949,7 +3953,7 @@ srgcd(GEN x, GEN y)
     if (dy==3)
     {
       d = ggcd(gel(y,2), content(x));
-      return gerepileupto(av, scalarpol(d, vx));
+      return gerepileupto(av, scalarpol(d, varn(x)));
     }
     u = primitive_part(x, &p1); if (!p1) p1 = gen_1;
     v = primitive_part(y, &p2); if (!p2) p2 = gen_1;
@@ -3964,9 +3968,9 @@ srgcd(GEN x, GEN y)
       if (dr <= 3)
       {
 	if (gcmp0(r)) break;
-	avma = av1; return gerepileupto(av, scalarpol(d, vx));
+	avma = av1; return gerepileupto(av, scalarpol(d, varn(x)));
       }
-      if (DEBUGLEVEL > 9) fprintferr("srgcd: dr = %ld\n", dr);
+      if (DEBUGLEVEL > 9) fprintferr("RgX_gcd: dr = %ld\n", dr);
       du = lg(u); dv = lg(v); degq = du-dv;
       u = v; p1 = g; g = leading_term(u);
       switch(degq)
@@ -3981,14 +3985,22 @@ srgcd(GEN x, GEN y)
       v = RgX_Rg_div(r,p1);
       if (low_stack(lim, stack_lim(av1,1)))
       {
-	if(DEBUGMEM>1) pari_warn(warnmem,"srgcd");
+	if(DEBUGMEM>1) pari_warn(warnmem,"RgX_gcd");
 	gerepileall(av1,4, &u,&v,&g,&h);
       }
     }
     x = RgX_Rg_mul(primpart(v), d);
   }
-  p1 = leading_term(x); ty = typ(p1);
-  if ((ty == t_FRAC || is_intreal_t(ty)) && gsigne(p1) < 0) x = gneg(x);
+  p1 = leading_term(x);
+  switch(typ(p1))
+  {
+    case t_INT: case t_REAL:
+      if (signe(x) < 0) x = RgX_neg(x);
+      break;
+    case t_FRAC:
+      if (signe(gel(x,1)) < 0) x = RgX_neg(x);
+      break;
+  }
   return gerepileupto(av,x);
 }
 

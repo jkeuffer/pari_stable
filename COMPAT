@@ -137,6 +137,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename library functions matrixqz2 -> QM_ImZ_hnf, matrixqz3 ->
     QM_ImQ_hnf, matrixqz -> QM_minors_coprime
   - rename library functions hil0->hilbert, hilii->hilbertii
+  - rename library functions srgcd -> RgX_gcd
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
