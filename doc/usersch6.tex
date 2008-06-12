@@ -274,17 +274,17 @@ order as \kbd{bnf.tufu} if \kbd{add\_tu} is set; and in the same order as
 \kbd{bnf.fu} otherwise.
 
 \fun{GEN}{nfsign_from_logarch}{GEN L, GEN invpi, GEN archp} given $L$
-the vector of $\Log \sigma(x)$, where $\sigma$ runs through the (real
+the vector of $\log \sigma(x)$, where $\sigma$ runs through the (real
 or complex) embeddings of some number field, \kbd{invpi} being
 a floating point approximation to $1/\pi$, and \kbd{archp} being a divisor
 at infinity in \kbd{indices} form, return the signs of $x$
 at the corresponding places. This is the low-level function underlying
 \kbd{nfsign\_units}; the latter is actually a trivial wrapper
-\kbd{bnf} structures include the $\Log \sigma(x)$ for a system of fundamental
+\kbd{bnf} structures include the $\log \sigma(x)$ for a system of fundamental
 units of the field.
 
 \fun{GEN}{set_sign_mod_idele}{GEN nf, GEN x, GEN y, GEN idele, GEN sarch}
-let $f = f_0f_\intfy$ be the divisor represented by \kbd{idele}, $x$, $y$ two
+let $f = f_0f_\infty$ be the divisor represented by \kbd{idele}, $x$, $y$ two
 number field elements. Returns $yt$ with $t = 1 \text{mod}^* f$ such that $x$
 and $ty$ have the same signs at $f_\infty$; if $x =
 \kbd{NULL}$, make $ty$ totally positive at $f_\infty$. \kbd{sarch} is the
