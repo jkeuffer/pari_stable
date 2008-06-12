@@ -2685,19 +2685,18 @@ ggcd(GEN x, GEN y)
   {
     if (ty == t_POLMOD)
     {
+      GEN T = gel(x,1);
       z = cgetg(3,t_POLMOD);
-      if (RgX_equal_var(gel(x,1),gel(y,1)))
-	gel(z,1) = gcopy(gel(x,1));
-      else
-	gel(z,1) = ggcd(gel(x,1),gel(y,1));
-      if (degpol(z[1])<=0) gel(z,2) = gen_0;
+      T = RgX_equal_var(T,gel(y,1))? gcopy(T): RgX_gcd(T, gel(y,1));
+      gel(z,1) = T;
+      if (degpol(T) <= 0) gel(z,2) = gen_0;
       else
       {
 	GEN X, Y, d;
 	av = avma; X = gel(x,2); Y = gel(y,2);
 	d = ggcd(content(X), content(Y));
 	if (!gcmp1(d)) { X = gdiv(X,d); Y = gdiv(Y,d); }
-	p1 = ggcd(gel(z,1), X);
+	p1 = ggcd(T, X);
 	gel(z,2) = gerepileupto(av, gmul(d, ggcd(p1, Y)));
       }
       return z;
@@ -2761,7 +2760,7 @@ ggcd(GEN x, GEN y)
 
     case t_RFRAC: z=cgetg(3,t_RFRAC);
       if (ty != t_RFRAC) pari_err(operf,"g",x,y);
-      p1 = gdeuc(gel(y,2), ggcd(gel(x,2), gel(y,2)));
+      p1 = RgX_div(gel(y,2), RgX_gcd(gel(x,2), gel(y,2)));
       tetpil = avma;
       gel(z,2) = gerepile((pari_sp)z,tetpil,gmul(p1, gel(x,2)));
       gel(z,1) = ggcd(gel(x,1), gel(y,1)); return z;

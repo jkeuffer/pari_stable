@@ -2120,15 +2120,18 @@ rootsold(GEN x, long prec)
 
   xd0 = RgX_deriv(pax); pa = pax;
   pq = NULL; /* for lint */
-  if (exact) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq = RgX_div(pax,pp); }
-  else{ pp = gen_1; h = 0; }
+  if (exact) {
+    pp = RgX_gcd(pax,xd0); h = degpol(pp);
+    if (h) pq = RgX_div(pax,pp);
+  }
+  else { pp = gen_1; h = 0; }
   m = 0;
   while (k != deg0)
   {
     m++;
     if (h)
     {
-      pa = pp; pb = pq; pp = ggcd(pa,RgX_deriv(pa)); h = degpol(pp);
+      pa = pp; pb = pq; pp = RgX_gcd(pa,RgX_deriv(pa)); h = degpol(pp);
       pq = h? RgX_div(pa,pp): pa;
       ps = RgX_div(pb,pq);
     }

@@ -1822,7 +1822,7 @@ padicappr(GEN f, GEN a)
   }
   if (typ(f)!=t_POL) pari_err(notpoler,"padicappr");
   if (gcmp0(f)) pari_err(zeropoler,"padicappr");
-  z = ggcd(f, RgX_deriv(f));
+  z = RgX_gcd(f, RgX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   T = gel(a,1); a = gel(a,2);
   p = NULL; prec = LONG_MAX;

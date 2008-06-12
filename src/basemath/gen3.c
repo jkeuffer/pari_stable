@@ -460,15 +460,15 @@ modr_safe(GEN x, GEN y)
   return signe(f)? gadd(x, negr(mulir(f,y))): x;
 }
 
-/* x t_POLMOD, y t_POL, return x % y */
+/* x t_POLMOD, y t_POL in the same variable as x[1], return x % y */
 static GEN
 polmod_mod(GEN x, GEN y)
 {
-  GEN z;
-  if (RgX_equal_var(gel(x,1), y)) return gcopy(x);
-  z = cgetg(3,t_POLMOD);
-  gel(z,1) = ggcd(gel(x,1),y);
-  gel(z,2) = grem(gel(x,2),gel(z,1));
+  GEN z, T = gel(x,1);
+  if (RgX_equal_var(T, y)) return gcopy(x);
+  z = cgetg(3,t_POLMOD); T = RgX_gcd(T,y);
+  gel(z,1) = T;
+  gel(z,2) = grem(gel(x,2), T);
   return z;
 }
 GEN
@@ -1550,7 +1550,7 @@ deriv(GEN x, long v)
       y = cgetg(3,t_RFRAC); av = avma;
 
       bp = deriv(b, v);
-      d = ggcd(bp, b);
+      d = RgX_gcd(bp, b);
       if (gcmp1(d)) {
         d = gsub(gmul(b, deriv(a,v)), gmul(a, bp));
         if (isexactzero(d)) return gerepileupto((pari_sp)(y+3), d);
