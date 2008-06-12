@@ -315,6 +315,11 @@ pre_allocate(RELCACHE_t *cache, size_t n)
   size_t len = (cache->last - cache->base) + n;
   if (len >= cache->len) reallocate(cache, len << 1);
 }
+/* x,y are or the form [Z, ZV]. Are they equal ? */
+static int
+ZZV_equal(GEN x, GEN y) {
+  return equalii(gel(x,1),gel(y,1)) && ZV_equal(gel(x,2), gel(y,2));
+}
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
 static void
@@ -349,7 +354,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 	if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
 	break;
       }
-      if (gequal(J, gel(id2,j-1))) { j = 1; break; }
+      if (ZZV_equal(J, gel(id2,j-1))) { j = 1; break; }
       gel(id2,j) = J;
       gel(alg,j) = m;
     }
