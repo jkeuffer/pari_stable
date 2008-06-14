@@ -268,7 +268,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
    32- library function dbg_pari_heap
    33- library function nfarchstar (was zarchstar), nfsign,
-       nfsign_arch, nfsign_units, nfsign_from_logarch, 
+       nfsign_arch, nfsign_units, nfsign_from_logarch, buchquad
 
   Removed
     1- obsolete library functions extract and matextract

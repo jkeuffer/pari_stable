@@ -339,7 +339,7 @@ greater or equal to $2$ will be considered.
 \subsec{Obsolete routines}
 
 Still provided for backward compatibility, but should not be used in new
-programs.
+programs. They will eventually disappear.
 
 \fun{GEN}{zidealstar}{GEN nf, GEN x} short for \kbd{Idealstar(nf,x,nf\_GEN)}
 
@@ -348,6 +348,12 @@ short for \kbd{Idealstar(nf,x,nf\_INIT)}
 
 \fun{GEN}{zidealstarinitgen}{GEN nf, GEN x}
 short for \kbd{Idealstar(nf,x,nf\_GEN|nf\_INIT)}
+
+\fun{GEN}{buchimag}{GEN D, GEN c1, GEN c2, GEN gCO} short
+for \kbd{buchquad(D,gtodouble(c1),gtodouble(c2), /*ignored*/0)}
+
+\fun{GEN}{buchreal}{GEN D, GEN gsens, GEN c1, GEN c2, GEN RELSUP, long prec}
+short for for \kbd{buchquad(D,gtodouble(c1),gtodouble(c2), prec)}
 
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}

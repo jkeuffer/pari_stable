@@ -1091,8 +1091,9 @@ GEN     ZV_sort_uniq(GEN L);
 
 /* buch1.c */
 
-GEN     buchimag(GEN D, GEN gcbach, GEN gcbach2, GEN gCO);
-GEN     buchreal(GEN D, GEN gsens, GEN gcbach, GEN gcbach2, GEN gRELSUP, long prec);
+GEN     buchimag(GEN D, GEN c1, GEN c2, GEN gCO);
+GEN     buchquad(GEN D, double c1, double c2, long prec);
+GEN     buchreal(GEN D, GEN gsens, GEN c1, GEN c2, GEN gRELSUP, long prec);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, long prec);
 GEN     quadray(GEN bnf, GEN f, long prec);
