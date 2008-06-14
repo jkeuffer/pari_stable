@@ -18,6 +18,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                DECLARATIONS of PUBLIC FUNCTIONS                 */
 /*                                                                 */
 /*******************************************************************/
+/* OBSOLETE */
+GEN     bernvec(long nomb);
+GEN     buchimag(GEN D, GEN c1, GEN c2, GEN gCO);
+GEN     buchreal(GEN D, GEN gsens, GEN c1, GEN c2, GEN gRELSUP, long prec);
+GEN     zidealstar(GEN nf, GEN x);
+GEN     zidealstarinit(GEN nf, GEN x);
+GEN     zidealstarinitgen(GEN nf, GEN x);
+GEN     rootmod(GEN f, GEN p);
+GEN     rootmod2(GEN f, GEN p);
+GEN     factmod(GEN f, GEN p);
+GEN     simplefactmod(GEN f, GEN p);
+void    gerepilemany(pari_sp av, GEN* g[], int n);
+GEN     listcreate(void);
+void    listkill(GEN list);
 
 /* F2x.c */
 
@@ -914,10 +928,7 @@ GEN     vec01_to_indices(GEN arch);
 GEN     vecmodii(GEN a, GEN b);
 GEN     nfarchstar(GEN nf,GEN x,GEN arch);
 GEN     zideallog(GEN nf,GEN x,GEN bigideal);
-GEN     zidealstar(GEN nf, GEN x);
-GEN     zidealstarinit(GEN nf, GEN x);
 GEN     Idealstar(GEN nf, GEN x,long flun);
-GEN     zidealstarinitgen(GEN nf, GEN x);
 GEN     nfsign_arch(GEN nf,GEN alpha,GEN arch);
 GEN     nfsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 GEN     nfsign(GEN nf,GEN alpha);
@@ -1091,9 +1102,7 @@ GEN     ZV_sort_uniq(GEN L);
 
 /* buch1.c */
 
-GEN     buchimag(GEN D, GEN c1, GEN c2, GEN gCO);
 GEN     buchquad(GEN D, double c1, double c2, long prec);
-GEN     buchreal(GEN D, GEN gsens, GEN c1, GEN c2, GEN gRELSUP, long prec);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, long prec);
 GEN     quadray(GEN bnf, GEN f, long prec);
@@ -1462,9 +1471,7 @@ int     gsigne(GEN x);
 GEN     gtolist(GEN x);
 long    gtolong(GEN x);
 int     lexcmp(GEN x, GEN y);
-GEN     listcreate(void);
 GEN     listinsert(GEN list, GEN object, long index);
-void    listkill(GEN list);
 void    listpop(GEN L, long index);
 GEN     listput(GEN list, GEN object, long index);
 GEN     listsort(GEN list, long flag);
@@ -1651,7 +1658,6 @@ void    gerepileallsp(pari_sp av, pari_sp tetpil, int n, ...);
 void    gerepilecoeffs(pari_sp av, GEN x, int n);
 void    gerepilecoeffssp(pari_sp av, pari_sp tetpil, long *g, int n);
 GEN     gerepilecopy(pari_sp av, GEN x);
-void    gerepilemany(pari_sp av, GEN* g[], int n);
 void    gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* g[], int n);
 GEN     gerepileupto(pari_sp av, GEN q);
 GEN     getheap(void);
@@ -1960,7 +1966,6 @@ GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
 GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
 GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
 GEN     factcantor(GEN x, GEN p);
-GEN     factmod(GEN f, GEN p);
 GEN     factorff(GEN f, GEN p, GEN a);
 GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
@@ -1972,12 +1977,9 @@ GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 int     poldvd(GEN x, GEN y, GEN *z);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
-GEN     rootmod(GEN f, GEN p);
 GEN     rootmod0(GEN f, GEN p,long flag);
-GEN     rootmod2(GEN f, GEN p);
 GEN     rootpadic(GEN f, GEN p, long r);
 GEN     rootpadicfast(GEN f, GEN p, long e);
-GEN     simplefactmod(GEN f, GEN p);
 
 /* polarit2.c */
 
@@ -2237,7 +2239,6 @@ ulong   upowuu(ulong p, ulong k);
 
 GEN     bernfrac(long n);
 GEN     bernreal(long n, long prec);
-GEN     bernvec(long nomb);
 GEN     gach(GEN x, long prec);
 GEN     gacos(GEN x, long prec);
 GEN     garg(GEN x, long prec);
