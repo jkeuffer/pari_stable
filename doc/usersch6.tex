@@ -336,6 +336,19 @@ entries in the first column be primes; this is useful if only a local  integral
 basis  for  some small set of places is desired: only factors with exponents
 greater or equal to $2$ will be considered.
 
+\subsec{Obsolete routines}
+
+Still provided for backward compatibility, but should not be used in new
+programs.
+
+\fun{GEN}{zidealstar}{GEN nf, GEN x} short for \kbd{Idealstar(nf,x,nf\_GEN)}
+
+\fun{GEN}{zidealstarinit}{GEN nf, GEN x}
+short for \kbd{Idealstar(nf,x,nf\_INIT)}
+
+\fun{GEN}{zidealstarinitgen}{GEN nf, GEN x}
+short for \kbd{Idealstar(nf,x,nf\_GEN|nf\_INIT)}
+
 \section{Linear algebra over $\Z$}
 \subsec{Hermite and Smith Normal Forms}
 
