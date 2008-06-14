@@ -666,7 +666,7 @@ GEN     pslqL2(GEN x);
 
 /* buch1.c */
 
-GEN     buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec);
+GEN     buchquad(GEN D, double cbach, double cbach2, long prec);
 GEN     form_to_ideal(GEN x);
 GEN     getallforms(GEN D, GEN *ptz);
 

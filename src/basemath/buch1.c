@@ -1494,9 +1494,10 @@ quad_be_honest(struct buch_quad *B)
 }
 
 GEN
-buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
+buchquad(GEN D, double cbach, double cbach2, long prec)
 {
   pari_sp av0 = avma, av, av2;
+  const long RELSUP = 5;
   long i, s, current, triv, nrelsup, nreldep, need, nsubFB;
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
@@ -1511,9 +1512,9 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   {
     if (cmpiu(BQ.Disc,4) <= 0)
     {
-      GEN z = cgetg(6,t_VEC);
-      gel(z,1) = gel(z,4) = gel(z,5) = gen_1;
-      gel(z,2) = gel(z,3) = cgetg(1,t_VEC); return z;
+      GEN z = cgetg(5,t_VEC);
+      gel(z,1) = gel(z,4) = gen_1; gel(z,2) = gel(z,3) = cgetg(1,t_VEC);
+      return z;
     }
     BQ.PRECREG = 0;
   } else {
@@ -1658,18 +1659,18 @@ MORE:
 
 GEN
 buchimag(GEN D, GEN c, GEN c2, GEN REL)
-{ return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), 0); }
+{ (void)REL; return buchquad(D,gtodouble(c),gtodouble(c2),0); }
 
 GEN
 buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
   if (signe(flag)) pari_err(impl,"narrow class group");
-  return buchquad(D,gtodouble(c),gtodouble(c2),itos(REL), prec);
+  (void)REL; return buchquad(D,gtodouble(c),gtodouble(c2),prec);
 }
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
 {
-  long lx, RELSUP;
+  long lx;
   double cbach, cbach2;
 
   if (!data) lx=1;
@@ -1678,16 +1679,14 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
     lx = lg(data);
     if (typ(data)!=t_VEC || lx > 7)
       pari_err(talker,"incorrect parameters in quadclassunit");
-    if (lx > 4) lx = 4;
+    if (lx > 3) lx = 3;
   }
   cbach = cbach2 = 0.2; /* was 0.1, but slower on average for 20 digits disc */
-  RELSUP = 5;
   switch(lx)
   {
-    case 4: RELSUP = itos(gel(data,3));
     case 3: cbach2 = gtodouble(gel(data,2));
     case 2: cbach  = gtodouble(gel(data,1));
   }
   if (flag) pari_err(impl,"narrow class group");
-  return buchquad(x,cbach,cbach2,RELSUP,prec);
+  return buchquad(x,cbach,cbach2,prec);
 }
