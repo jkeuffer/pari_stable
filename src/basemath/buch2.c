@@ -2575,37 +2575,6 @@ check_and_build_matal(GEN bnf) {
   return check_and_build_obj(bnf, MATAL, &makematal);
 }
 
-GEN
-smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
-{
-  GEN y, bnf, nf, res;
-  pari_sp av = avma;
-
-  if (typ(pol)==t_VEC) bnf = checkbnf(pol);
-  else
-  {
-    const long fl = nf_INIT | nf_UNITS | nf_FORCE;
-    bnf = buchall(pol, bach, bach2, nbrelpid, fl, prec);
-  }
-  nf  = gel(bnf,7);
-  res = gel(bnf,8);
-
-  y = cgetg(13,t_VEC);
-  gel(y,1) = gel(nf,1);
-  gel(y,2) = gmael(nf,2,1);
-  gel(y,3) = gel(nf,3);
-  gel(y,4) = gel(nf,7);
-  gel(y,5) = gel(nf,6);
-  gel(y,6) = gmael(nf,5,5);
-  gel(y,7) = gel(bnf,1);
-  gel(y,8) = gel(bnf,2);
-  gel(y,9) = codeprimes(gel(bnf,5), degpol(nf[1]));
-  gel(y,10) = mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
-  gel(y,11) = matalgtobasis(bnf, gel(res,5));
-  (void)check_and_build_matal(bnf);
-  gel(y,12) = gel(bnf,10); return gerepilecopy(av, y);
-}
-
 static GEN
 get_regulator(GEN mun)
 {
@@ -2754,6 +2723,25 @@ buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
   return z;
 }
 
+static GEN
+bnftosbnf(GEN bnf)
+{
+  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), res = gel(bnf,8);
+
+  gel(y,1) = gel(nf,1);
+  gel(y,2) = gmael(nf,2,1);
+  gel(y,3) = gel(nf,3);
+  gel(y,4) = gel(nf,7);
+  gel(y,5) = gel(nf,6);
+  gel(y,6) = gmael(nf,5,5);
+  gel(y,7) = gel(bnf,1);
+  gel(y,8) = gel(bnf,2);
+  gel(y,9) = codeprimes(gel(bnf,5), degpol(nf[1]));
+  gel(y,10) = mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
+  gel(y,11) = matalgtobasis(bnf, gel(res,5));
+  (void)check_and_build_matal(bnf);
+  gel(y,12) = gel(bnf,10); return y;
+}
 GEN
 bnfmake(GEN sbnf, long prec)
 {
@@ -2802,7 +2790,7 @@ bnfmake(GEN sbnf, long prec)
 static GEN
 classgroupall(GEN P, GEN data, long flag, long prec)
 {
-  double bach = 0.3, bach2 = 0.3;
+  double c1 = 0.3, c2 = 0.3;
   long fl, lx, nbrelpid = 4;
 
   if (!data) lx = 1;
@@ -2815,22 +2803,29 @@ classgroupall(GEN P, GEN data, long flag, long prec)
   switch(lx)
   {
     case 4: nbrelpid = itos(gel(data,3));
-    case 3: bach2 = gtodouble( gel(data,2));
-    case 2: bach  = gtodouble( gel(data,1));
+    case 3: c2 = gtodouble( gel(data,2));
+    case 2: c1  = gtodouble( gel(data,1));
   }
   switch(flag)
   {
     case 0: fl = nf_INIT | nf_UNITS; break;
     case 1: fl = nf_INIT | nf_UNITS | nf_FORCE; break;
     case 2: fl = nf_INIT | nf_ROOT1; break;
-    case 3: return smallbuchinit(P, bach, bach2, nbrelpid, prec);
+    case 3: {
+      pari_sp av = avma;
+      if (typ(P)==t_VEC)
+        P = checkbnf(P);
+      else
+        P = buchall(P, c1, c2, nbrelpid, nf_INIT | nf_UNITS | nf_FORCE, prec);
+      return gerepilecopy(av, bnftosbnf(P));
+    }
     case 4: fl = nf_UNITS; break;
     case 5: fl = nf_UNITS | nf_FORCE; break;
     case 6: fl = 0; break;
     default: pari_err(flagerr,"classgroupall");
       return NULL; /* not reached */
   }
-  return buchall(P, bach, bach2, nbrelpid, fl, prec);
+  return buchall(P, c1, c2, nbrelpid, fl, prec);
 }
 
 GEN
@@ -3271,8 +3266,8 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   else
   {
     PRECREG = max(prec, MEDDEFAULTPREC);
-    nf = initalg(P, PRECREG); /* P non-monic and nfinit CHANGEd it ? */
-    if (lg(nf)==3) {
+    nf = initalg(P, PRECREG);
+    if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
       nf = gel(nf,1);
     }

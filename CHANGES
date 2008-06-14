@@ -299,6 +299,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    18- obsolete library function pari_rand31  [ use pari_rand ]
    19- obsolete undocumented library function bruterr
    20- obsolete GP functions printp, printp1
+   21- obsolete library function smallbuchinit
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

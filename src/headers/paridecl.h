@@ -1128,7 +1128,6 @@ GEN     isprincipalgenforce(GEN bignf,GEN x);
 GEN     isunit(GEN bignf, GEN x);
 GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
-GEN     smallbuchinit(GEN pol,double bach,double bach2,long nbrelpid,long prec);
 GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */

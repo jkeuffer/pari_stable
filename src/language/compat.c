@@ -76,7 +76,7 @@ buchinitfu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS); }
 static GEN
 buchinitforcefu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS|nf_FORCE); }
 static GEN
-smallbuchinit_c(B_ARGS) { return smallbuchinit(B_ARG1,prec); }
+smallbuchinit(B_ARGS) { return bnfinit0(g1,3,NULL,prec); }
 static GEN
 factoredbase(GEN x, GEN fa) { return nfbasis0(x, 0, fa); }
 static GEN
@@ -622,7 +622,7 @@ entree oldfonctions[]={
 {"sinh",1,(void*)gsh,3,"Gp","sinh(x)=hyperbolic sine of x"},
 {"size",10,(void*)sizedigit,2,"lG","size(x)=maximum number of decimal digits minus one of (the coefficients of) x"},
 {"smallbasis",13,(void*)nfbasis0,6,"GD1,L,DG","smallbasis(x)=integral basis of the field Q[a], where a is a root of the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
-{"smallbuchinit",93,(void*)smallbuchinit_c,6,BUCH_PROTO,"smallbuchinit(pol)=small buchinit, which can be converted to a big one using makebigbnf"},
+{"smallbuchinit",93,(void*)smallbuchinit,6,BUCH_PROTO,"smallbuchinit(pol)=small buchinit, which can be converted to a big one using makebigbnf"},
 {"smalldiscf",1,(void*)nfdisc0,6,"GD1,L,DG","smalldiscf(x)=discriminant of the number field defined by the polynomial x where one assumes that no square of a prime>primelimit divides the discriminant of x"},
 {"smallfact",1,(void*)smallfact,4,"G","smallfact(x)=partial factorization of the integer x (using only the stored primes)"},
 {"smallinitell",1,(void*)smallinitell,5,"Gp","smallinitell(x)=x being the vector [a1,a2,a3,a4,a6], gives the vector: [a1,a2,a3,a4,a6,b2,b4,b6,b8,c4,c6,delta,j]"},
