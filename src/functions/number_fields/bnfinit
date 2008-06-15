@@ -94,22 +94,3 @@ Doc: initializes a
  \kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to \tet{bnrisprincipal}), or
  those corresponding to the relations in $W$ and $B$ (when the \kbd{bnf}
  internal precision needs to be increased). \smallskip
-
- An \var{sbnf} is a 12 component vector $v$, as follows. Let $\var{bnf}$ be
- the result of a full \kbd{bnfinit}, complete with units. Then $v[1]$ is the
- polynomial $P$, $v[2]$ is the number of real embeddings $r_1$, $v[3]$ is the
- field discriminant, $v[4]$ is the integral basis, $v[5]$ is the list of roots
- as in the sixth component of \kbd{nfinit}, $v[6]$ is the matrix $MD$ of
- \kbd{nfinit} giving a $\Z$-basis of the different, $v[7]$ is the matrix
- $\kbd{W} = \var{bnf}[1]$, $v[8]$ is the matrix $\kbd{matalpha}=\var{bnf}[2]$,
- $v[9]$ is the prime ideal factor base $\var{bnf}[5]$ coded in a compact way,
- and ordered according to the permutation $\var{bnf}[6]$, $v[10]$ is the
- 2-component vector giving the number of roots of unity and a generator,
- expressed on the integral basis, $v[11]$ is the list of fundamental units,
- expressed on the integral basis, $v[12]$ is a vector containing the algebraic
- numbers alpha corresponding to the columns of the matrix \kbd{matalpha},
- expressed on the integral basis.
-
- Note that all the components are exact (integral or rational), except for
- the roots in $v[5]$. Note also that member functions will \emph{not} work on
- \var{sbnf}, you have to use \kbd{bnfmake} explicitly first.

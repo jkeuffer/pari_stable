@@ -2708,18 +2708,18 @@ buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
 static GEN
 bnftosbnf(GEN bnf)
 {
-  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), res = gel(bnf,8);
+  GEN y = cgetg(13,t_VEC), nf  = gel(bnf,7), T = gel(nf,1), res = gel(bnf,8);
 
-  gel(y,1) = gel(nf,1);
+  gel(y,1) = T;
   gel(y,2) = gmael(nf,2,1);
   gel(y,3) = gel(nf,3);
   gel(y,4) = gel(nf,7);
   gel(y,5) = gel(nf,6);
-  gel(y,6) = gmael(nf,5,5);
+  gel(y,6) = gen_0; /* FIXME: unused */
   gel(y,7) = gel(bnf,1);
   gel(y,8) = gel(bnf,2);
-  gel(y,9) = codeprimes(gel(bnf,5), degpol(nf[1]));
-  gel(y,10) = mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
+  gel(y,9) = codeprimes(gel(bnf,5), degpol(T));
+  gel(y,10) = mkvec2(gmael(res,4,1), nf_to_scalar_or_basis(nf,gmael(res,4,2)));
   gel(y,11) = matalgtobasis(bnf, gel(res,5));
   (void)check_and_build_matal(bnf);
   gel(y,12) = gel(bnf,10); return y;
@@ -2770,7 +2770,7 @@ sbnf2bnf(GEN sbnf, long prec)
   class_group_gen(nf,W,C,Vbase,prec,NULL, &clgp,&clgp2);
 
   zu = gel(sbnf,10);
-  zu = mkvec2(gel(zu,1), gmul(bas,gel(zu,2)));
+  zu = mkvec2(gel(zu,1), nf_to_scalar_or_alg(nf, gel(zu,2)));
 
   res = get_clfu(clgp, get_regulator(A), zu, fu);
   y = buchall_end(nf,res,clgp2,W,gel(sbnf,8),A,C,Vbase);

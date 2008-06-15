@@ -310,6 +310,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    23- obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
    24- awkward flag '3' for bnfinit. Use bnfcompress().
    25- badly named bnfmake. Use bnfinit(sbnf).
+   26- useless component v[6] in "small bnfs" (was 'different', is 0)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
