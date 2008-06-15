@@ -2809,11 +2809,11 @@ static GEN
 buchall_for_degree_one_pol(GEN nf)
 {
   GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
-  GEN W, B, A, C, Vbase, res;
+  GEN W, A, B, C, Vbase, res;
   GEN fu = v, R = gen_1, zu = mkvec2(gen_2, gen_m1);
   GEN clg1 = mkvec3(gen_1,v,v), clg2 = mkvec3(m,v,v);
 
-  W = B = A = C= m;
+  W = A = B = C = m;
   Vbase = cgetg(1,t_COL);
   res = get_clfu(clg1, R, zu, fu);
   return buchall_end(nf,res,clg2,W,B,A,C,Vbase);
@@ -2862,15 +2862,6 @@ extract_full_lattice(GEN x)
     }
   }
   return v;
-}
-
-static GEN
-nf_cloneprec(GEN nf, long prec, GEN *pnf)
-{
-  pari_sp av = avma;
-  nf = gclone( nfnewprec_shallow(nf, prec) );
-  if (*pnf) gunclone(*pnf);
-  avma = av; return *pnf = nf;
 }
 
 static void
@@ -2952,12 +2943,11 @@ compute_vecG(GEN nf, FB_t *F, long n)
   F->G0 = G0; F->vecG = vecG;
 }
 
-static GEN
-buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
-     long PRECREG)
+GEN
+buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
-  pari_sp av, av2;
-  long N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
+  pari_sp av0 = avma, av, av2;
+  long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
   long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
@@ -2970,9 +2960,24 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   GRHcheck_t G, *GRHcheck = &G;
   FACT *fact;
 
-  nf = *pnf; *pnf = NULL;
-  N = degpol(nf[1]);
-  if (N <= 1) return buchall_for_degree_one_pol(nf);
+  if (DEBUGLEVEL) (void)timer2();
+  P = get_nfpol(P, &nf);
+  if (nf)
+    PRECREG = nf_get_prec(nf);
+  else
+  {
+    PRECREG = max(prec, MEDDEFAULTPREC);
+    nf = initalg(P, PRECREG);
+    if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
+      pari_warn(warner,"non-monic polynomial. Change of variables discarded");
+      nf = gel(nf,1);
+    }
+  }
+  N = degpol(P);
+  if (N <= 1) {
+    res = buchall_for_degree_one_pol(nf);
+    return gerepilecopy(av0, res);
+  }
   zu = rootsof1(nf);
   gel(zu,2) = coltoliftalg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
@@ -3043,9 +3048,11 @@ MORE:
     if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, L_jid, &jid, fact)) goto START;
     L_jid = NULL;
   }
+PRECPB:
   if (precpb)
   {
-PRECPB:
+    pari_sp av3 = avma;
+    GEN nf0 = nf;
     if (precadd) { PRECREG += precadd; precadd = 0; }
     else           PRECREG = (PRECREG<<1)-2;
     if (DEBUGLEVEL)
@@ -3053,8 +3060,10 @@ PRECPB:
       char str[64]; sprintf(str,"buchall (%s)",precpb);
       pari_warn(warnprec,str,PRECREG);
     }
-    precdouble++; precpb = NULL;
-    nf = nf_cloneprec(nf, PRECREG, pnf);
+    nf = gclone( nfnewprec_shallow(nf, PRECREG) );
+    if (precdouble) gunclone(nf0);
+    avma = av3; precdouble++; precpb = NULL;
+
     if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
     cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
@@ -3168,30 +3177,7 @@ PRECPB:
   Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu);
-  return buchall_end(nf,res,clg2,W,B,A,C,Vbase);
-}
-
-GEN
-buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
-{
-  pari_sp av = avma;
-  long PRECREG;
-  GEN z, nf;
-
-  if (DEBUGLEVEL) (void)timer2();
-  P = get_nfpol(P, &nf);
-  if (nf)
-    PRECREG = nf_get_prec(nf);
-  else
-  {
-    PRECREG = max(prec, MEDDEFAULTPREC);
-    nf = initalg(P, PRECREG);
-    if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
-      pari_warn(warner,"non-monic polynomial. Change of variables discarded");
-      nf = gel(nf,1);
-    }
-  }
-  z = buch(&nf, cbach, cbach2, nbrelpid, flun, PRECREG);
-  z = gerepilecopy(av, z); if (nf) gunclone(nf);
-  return z;
+  res = buchall_end(nf,res,clg2,W,B,A,C,Vbase);
+  res = gerepilecopy(av0, res); if (precdouble) gunclone(nf);
+  return res;
 }
