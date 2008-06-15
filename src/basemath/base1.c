@@ -1537,7 +1537,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
  *    do a polred and return [nfinit(x), Mod(a,red)], where
  *    Mod(a,red) = Mod(v,x) (i.e return the base change). */
 GEN
-initalg_i(GEN x, long flag, long prec)
+nfinitall(GEN x, long flag, long prec)
 {
   const pari_sp av = avma;
   GEN nf, rev = NULL, ro = NULL;
@@ -1571,11 +1571,11 @@ initalg_i(GEN x, long flag, long prec)
 }
 
 GEN
-initalgred(GEN x, long prec)  { return initalg_i(x, nf_RED, prec); }
+initalgred(GEN x, long prec)  { return nfinitall(x, nf_RED, prec); }
 GEN
-initalgred2(GEN x, long prec) { return initalg_i(x, nf_RED|nf_ORIG, prec); }
+initalgred2(GEN x, long prec) { return nfinitall(x, nf_RED|nf_ORIG, prec); }
 GEN
-initalg(GEN x, long prec)     { return initalg_i(x, 0, prec); }
+initalg(GEN x, long prec)     { return nfinitall(x, 0, prec); }
 
 GEN
 nfinit0(GEN x, long flag,long prec)
@@ -1583,11 +1583,11 @@ nfinit0(GEN x, long flag,long prec)
   switch(flag)
   {
     case 0:
-    case 1: return initalg_i(x,0,prec);
-    case 2: return initalg_i(x,nf_RED,prec);
-    case 3: return initalg_i(x,nf_RED|nf_ORIG,prec);
-    case 4: return initalg_i(x,nf_PARTRED,prec);
-    case 5: return initalg_i(x,nf_PARTRED|nf_ORIG,prec);
+    case 1: return nfinitall(x,0,prec);
+    case 2: return nfinitall(x,nf_RED,prec);
+    case 3: return nfinitall(x,nf_RED|nf_ORIG,prec);
+    case 4: return nfinitall(x,nf_PARTRED,prec);
+    case 5: return nfinitall(x,nf_PARTRED|nf_ORIG,prec);
     default: pari_err(flagerr,"nfinit");
   }
   return NULL; /* not reached */

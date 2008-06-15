@@ -187,7 +187,7 @@ get_den(GEN *nf, GEN T)
   if (!*nf)
   {
     GEN fa, P, q, D;
-    *nf = initalg_i(T, nf_PARTIALFACT, DEFAULTPREC);
+    *nf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
     D = gel(*nf, 3);
     if (is_pm1(D)) return gen_1;
     fa = smallfact(D);
