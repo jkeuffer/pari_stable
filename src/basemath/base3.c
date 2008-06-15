@@ -677,7 +677,7 @@ nf_to_scalar_or_basis(GEN nf, GEN x)
       GEN T = gel(nf,1);
       long l = lg(x);
       if (varn(x) != varn(T))
-        pari_err(talker,"incompatible variables in nf_to_scalar_or_alg");
+        pari_err(talker,"incompatible variables in nf_to_scalar_or_basis");
       if (l >= lg(T)) { x = RgX_rem(x, T); l = lg(x); }
       if (l == 2) return gen_0;
       if (l == 3) return gel(x,2);
