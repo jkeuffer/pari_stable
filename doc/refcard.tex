@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.24}% Version of this reference card
-\def\PARIversion{2.4.2}% Version of PARI described on this reference card
-\def\year{2007}
-\def\month{October}
+\def\versionnumber{2.25}% Version of this reference card
+\def\PARIversion{2.4.3}% Version of PARI described on this reference card
+\def\year{2008}
+\def\month{June}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -890,11 +890,9 @@ $a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \li{expo.~of ideal $x$ on ray class gp}{bnrisprincipal$(\var{bnr},x,\{\fl\})$}
 \li{expo.~of $x$ on fund.~units}{bnfisunit$(\var{bnf},x)$}
 \li{as above for $S$-units}{bnfissunit$(\var{bnfs},x)$}
-\li{fundamental units of \var{bnf}}{bnfunit$(\var{bnf})$}
 \li{signs of real embeddings of \kbd{\var{bnf}.fu}}{bnfsignunit$(\var{bnf})$}
 %
 \subsec{Class Field Theory}
-\li{ray class group structure for mod.~$m$}{bnrclass$(\var{bnf},m,\{\fl\})$}
 \li{ray class number for mod.~$m$}{bnrclassno$(\var{bnf},m)$}
 \li{discriminant of class field ext}{bnrdisc$(a_1,\{a_2\},\{a_3\})$}
 \li{ray class numbers, $l$ list of mods}{bnrclassnolist$(\var{bnf},l)$}
