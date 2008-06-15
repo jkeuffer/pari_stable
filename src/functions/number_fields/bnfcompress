@@ -1,0 +1,15 @@
+Function: bnfcompress
+Section: number_fields
+C-Name: bnfcompress
+Prototype: G
+Help: bnfcompress(bnf): converts bnf to a much smaller sbnf, containing the
+ same information. Use bnfinit(sbnf) to recover a true bnf.
+Doc: computes a compressed version of \var{bnf} (from \tet{bnfinit}), a
+ ``small Buchmann's number field'' (or \var{sbnf} for short) which contains
+ enough information to recover a full $\var{bnf}$ vector very rapidly, but
+ which is much smaller and hence easy to store and print. Calling
+ \kbd{bnfinit} on the result recovers a true \kbd{bnf}, in general different
+ from the original. Note that an \tev{snbf} is useless for almost all
+ purposes besides storage, and must be converted back to \tev{bnf} form
+ before use; for instance, no \kbd{nf*}, \kbd{bnf*} or member function
+ accepts them.
