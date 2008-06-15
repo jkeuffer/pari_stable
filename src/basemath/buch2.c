@@ -2985,6 +2985,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   compute_vecG(nf, &F, min(RU, 9));
   D = absi(gel(nf,3)); drc = gtodouble(D);
+  if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-N + R2 * log(4/PI)) * sqrt(2*PI*N*drc));
   if (lim < 3) lim = 3;
@@ -2996,8 +2997,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(D,DEFAULTPREC), gel(zu,1)),
-	      gmul2n(gpowgs(mppi(DEFAULTPREC), R2), R1+R2));
-  if (DEBUGLEVEL) fprintferr("R1 = %ld, R2 = %ld\nD = %Ps\n",R1,R2, D);
+	      gmul2n(gpowgs(mppi(DEFAULTPREC), R2), RU));
   av = avma; cache.base = NULL; F.subFB = NULL;
   init_GRHcheck(GRHcheck, N, R1, LOGD);
 
