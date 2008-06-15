@@ -1109,8 +1109,8 @@ GEN     quadray(GEN bnf, GEN f, long prec);
 
 /* buch2.c */
 
+GEN     bnfcompress(GEN bnf);
 GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
-GEN     bnfmake(GEN sbnf,long prec);
 GEN     bnfnewprec(GEN nf, long prec);
 GEN     bnfnewprec_shallow(GEN nf, long prec);
 GEN     bnrnewprec(GEN bnr, long prec);

@@ -271,6 +271,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    32- library function dbg_pari_heap
    33- library function nfarchstar (was zarchstar), nfsign,
        nfsign_arch, nfsign_units, nfsign_from_logarch, buchquad
+   34- function bnfcompress() [ to create a "small bnf" from a true
+       bnf, to be recoved using bnfinit ]. More consistent than old
+       bnfnit(,3) / bnfmake.
 
   Removed
     1- obsolete library functions extract and matextract
@@ -305,6 +308,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    22- obsolete GP functions bnfclassunit, bnfreg, bnfclgp, bnfunit.
        Use bnfinit.
    23- obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
+   24- awkward flag '3' for bnfinit. Use bnfcompress().
+   25- badly named bnfmake. Use bnfinit(sbnf).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

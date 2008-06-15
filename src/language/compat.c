@@ -79,7 +79,7 @@ buchinitfu(B_ARGS) { return B_CALL(0); }
 static GEN
 buchinitforcefu(B_ARGS) { return B_CALL(nf_FORCE); }
 static GEN
-smallbuchinit(B_ARGS) { return bnfinit0(g1,3,NULL,prec); }
+smallbuchinit(B_ARGS) { return bnfcompress(bnfinit0(g1,0,NULL,prec)); }
 static GEN
 factoredbase(GEN x, GEN fa) { return nfbasis0(x, 0, fa); }
 static GEN
@@ -485,7 +485,7 @@ entree oldfonctions[]={
 {"log",1,(void*)glog,3,"Gp","log(x)=ln(x)=natural logarithm of x"},
 {"logagm",1,(void*)glog,3,"Gp","logagm(x)=natural logarithm of x, computed using agm (faster than log for more than a few hundred decimal digits)"},
 {"lseriesell",4,(void*)lseriesell0,5,"GGGGp","lseriesell(e,s,N,A)=L-series at s of the elliptic curve e, where |N| is the conductor, sign(N) the sign of the functional equation, and A a cut-off point close to 1"},
-{"makebigbnf",1,(void*)bnfmake,6,"Gp","makebigbnf(sbnf)=transforms small sbnf as output by smallbuchinit into a true big bnf"},
+{"makebigbnf",1,(void*)bnfinit0,6,"GD0,L,DGp","makebigbnf(sbnf)=transforms small sbnf as output by smallbuchinit into a true big bnf"},
 {"mat",1,(void*)gtomat,8,"G","mat(x)=transforms any GEN x into a matrix"},
 {"matextract",3,(void*)extract0,8,"GGG","matextract(x,y,z)=extraction of the components of the matrix x according to the vector or masks y (for the rows) and z (for the columns) from left to right (1,2,4,8,...for the first, second, third, fourth, ...rows or columns)"},
 {"mathell",2,(void*)mathell,5,"GGp","mathell(e,x)=gives the height matrix for vector of points x on elliptic curve e using theta functions"},

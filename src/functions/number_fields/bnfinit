@@ -5,15 +5,13 @@ Prototype: GD0,L,DGp
 Help: bnfinit(P,{flag=0},{tech=[]}): compute the necessary data for future
  use in ideal and unit group computations, including fundamental units if
  they are not too large. flag and tech are both optional. flag can be any of
- 0: default, 1: insist on having fundamental units,
- 3: small bnfinit, which can be converted to a big one using bnfmake. See
- manual for details about tech
+ 0: default, 1: insist on having fundamental units.
+ See manual for details about tech
 Description:
  (gen):bnf:prec	bnfinit0($1, 0, NULL, prec)
  (gen, 0):bnf:prec	bnfinit0($1, 0, NULL, prec)
  (gen, 1):bnf:prec	bnfinit0($1, 1, NULL, prec)
  (gen, 2):bnf:prec	bnfinit0($1, 2, NULL, prec)
- (gen, 3):bnf:prec	bnfinit0($1, 3, NULL, prec)
  (gen, ?small, ?gen):bnf:prec	bnfinit0($1, $2, $3, prec)
 Doc: initializes a
  \var{bnf} structure. Used in programs such as \kbd{bnfisprincipal},
@@ -37,12 +35,6 @@ Doc: initializes a
  is issued. They could be obtained using the so-called compact representation
  of algebraic numbers as a formal product of algebraic integers. The latter is
  implemented internally but not publicly accessible yet.
-
- When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
- Buchmann's number field'' (or \var{sbnf} for short) which contains enough
- information to recover the full $\var{bnf}$ vector very rapidly, but which is
- much smaller and hence easy to store and print. It is supposed to be used in
- conjunction with \kbd{bnfmake}.
 
  $\var{tech}$ is a technical vector (empty by default, see \ref{se:GRHbnf}).
  Careful use of this parameter may speed up your computations considerably.

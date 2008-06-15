@@ -2725,7 +2725,15 @@ bnftosbnf(GEN bnf)
   gel(y,12) = gel(bnf,10); return y;
 }
 GEN
-bnfmake(GEN sbnf, long prec)
+bnfcompress(GEN bnf)
+{
+  pari_sp av = avma;
+  bnf = checkbnf(bnf);
+  return gerepilecopy(av, bnftosbnf( checkbnf(bnf) ));
+}
+
+static GEN
+sbnf2bnf(GEN sbnf, long prec)
 {
   long j, k, l, n;
   pari_sp av = avma;
@@ -2775,6 +2783,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
   double c1 = 0.3, c2 = 0.3;
   long fl, nbrelpid = 4;
 
+  if (typ(P) == t_VEC && lg(P) == 13) return sbnf2bnf(P, prec); /* sbnf */
   if (data)
   {
     long lx = lg(data);
@@ -2791,14 +2800,6 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     case 2:
     case 0: fl = 0; break;
     case 1: fl = nf_FORCE; break;
-    case 3: {
-      pari_sp av = avma;
-      if (typ(P)==t_VEC)
-        P = checkbnf(P);
-      else
-        P = buchall(P, c1, c2, nbrelpid, nf_FORCE, prec);
-      return gerepilecopy(av, bnftosbnf(P));
-    }
     default: pari_err(flagerr,"bnfinit");
       return NULL; /* not reached */
   }
