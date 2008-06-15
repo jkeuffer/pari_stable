@@ -401,7 +401,7 @@ localred(e)=elllocalred(e);
 log
 logagm(x)=log(x,1);
 lseriesell(e,s,N,A)=elllseries(e,s,A);
-makebigbnf(sbnf)=bnfmake(sbnf);
+makebigbnf(sbnf)=bnfinit(sbnf);
 mat(x)=Mat(x);
 matextract(x,y,z)=vecextract(x,y,z);
 mathell(e,x)=ellheightmatrix(e,x);
@@ -576,7 +576,7 @@ sin
 sinh
 size(x)=sizedigit(x);
 smallbasis(x)=nfbasis(x,1);
-smallbuchinit(x)=bnfinit(x,3);
+smallbuchinit(x)=bnfcompress(x);
 smalldiscf(x)=nfdisc(x,1);
 smallfact(x)=factor(x,0);
 smallinitell(x)=ellinit(x,1);
