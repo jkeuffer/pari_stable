@@ -63,24 +63,35 @@ suppressed(void) {pari_err(talker,"this function no longer exists");}
 #define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec
 #define B_ARG1 g1,gtodouble(g2),gtodouble(g3),l1
 #define B_CALL(flag) buchall(B_ARG1,(flag),prec)
+
+#define CLASSUNIT(flag) \
+  pari_sp av = avma; \
+  GEN bnf = B_CALL(flag), nf = gel(bnf,7), x; \
+  x = mkvec4(gel(nf,1), gel(nf,2), mkvec2(gel(nf,3), gel(nf,4)), gel(nf,7));\
+  return gerepilecopy(av, mkmat(shallowconcat(x, gel(bnf,8))));
+
 static GEN
-buchgen(B_ARGS) { return B_CALL(0); }
+buchgenfu(B_ARGS) { CLASSUNIT(0); }
 static GEN
-buchgenfu(B_ARGS) { return B_CALL(nf_UNITS); }
+buchgenforcefu(B_ARGS) { CLASSUNIT(nf_FORCE); }
 static GEN
-buchgenforcefu(B_ARGS) { return B_CALL(nf_UNITS|nf_FORCE); }
+buchinitfu(B_ARGS) { return B_CALL(0); }
 static GEN
-buchinit(B_ARGS) { return B_CALL(nf_INIT); }
-static GEN
-buchinitfu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS); }
-static GEN
-buchinitforcefu(B_ARGS) { return B_CALL(nf_INIT|nf_UNITS|nf_FORCE); }
+buchinitforcefu(B_ARGS) { return B_CALL(nf_FORCE); }
 static GEN
 smallbuchinit(B_ARGS) { return bnfinit0(g1,3,NULL,prec); }
 static GEN
 factoredbase(GEN x, GEN fa) { return nfbasis0(x, 0, fa); }
 static GEN
 factoreddiscf(GEN x, GEN fa) { return nfdisc0(x, 0, fa); }
+static GEN
+buchfu(GEN bnf)
+{
+  GEN res;
+  bnf = checkbnf(bnf); res = gel(bnf,8);
+  if (lg(res) != 6) return cgetg(1, t_MAT);
+  return gcopy(gel(res,5));
+}
 
 entree oldfonctions[]={
 {"!_",0,(void*)gnot,13,"G","!_"},
@@ -210,11 +221,11 @@ entree oldfonctions[]={
 {"boundfact",21,(void*)boundfact,4,"GL","boundfact(x,lim)=partial factorization of the integer x (using primes up to lim)"},
 {"buchcertify",10,(void*)certifybuchall,6,"lG","buchcertify(bnf)=certify the correctness (i.e. remove the GRH) of the bnf data output by buchinit or buchinitfu"},
 {"buchfu",1,(void*)buchfu,6,"Gp","buchfu(bnf)=compute the fundamental units of the number field bnf output by buchinit"},
-{"buchgen",99,(void*)buchgen,6,BUCH_PROTO,"buchgen(P,...)=compute the structure of the class group and the regulator for the number field defined by the polynomial P. See manual for the other parameters (which can be omitted)"},
+{"buchgen",99,(void*)buchgenfu,6,BUCH_PROTO,"buchgen(P,...)=compute the structure of the class group and the regulator for the number field defined by the polynomial P. See manual for the other parameters (which can be omitted)"},
 {"buchgenforcefu",99,(void*)buchgenforcefu,6,BUCH_PROTO,"buchgenforcefu(P,...)=compute the structure of the class group, the regulator a primitive root of unity and a system of fundamental units for the number field defined by the polynomial P, and insist until the units are obtained. See manual for the other parameters (which can be omitted)"},
 {"buchgenfu",99,(void*)buchgenfu,6,BUCH_PROTO,"buchgenfu(P,...)=compute the structure of the class group, the regulator a primitive root of unity and a system of fundamental units (if they are not too large) for the number field defined by the polynomial P. See manual for the other parameters (which can be omitted)"},
 {"buchimag",99,(void*)buchimag,4,"GD0.1,G,D0.1,G,D5,G,","buchimag(D,...)=compute the structure of the class group of the complex quadratic field of discriminant D<0. See manual for the other parameters (which can be omitted)"},
-{"buchinit",99,(void*)buchinit,6,BUCH_PROTO,"buchinit(P,...)=compute the necessary data for future use in ideal and unit group computations. See manual for details"},
+{"buchinit",99,(void*)buchinitfu,6,BUCH_PROTO,"buchinit(P,...)=compute the necessary data for future use in ideal and unit group computations. See manual for details"},
 {"buchinitforcefu",99,(void*)buchinitforcefu,6,BUCH_PROTO,"buchinitforcefu(P,...)=compute the necessary data for future use in ideal and unit group computations, and insist on having fundamental units. See manual for details"},
 {"buchinitfu",99,(void*)buchinitfu,6,BUCH_PROTO,"buchinitfu(P,...)=compute the necessary data for future use in ideal and unit group computations, including fundamental units if they are not too large. See manual for details"},
 {"buchnarrow",1,(void*)buchnarrow,6,"Gp","buchnarrow(bnf)=given a big number field as output by buchinitxx, gives as a 3-component vector the structure of the narrow class group"},

@@ -5,7 +5,7 @@ Prototype: GD0,L,DGp
 Help: bnfinit(P,{flag=0},{tech=[]}): compute the necessary data for future
  use in ideal and unit group computations, including fundamental units if
  they are not too large. flag and tech are both optional. flag can be any of
- 0: default, 1: insist on having fundamental units, 2: do not compute units,
+ 0: default, 1: insist on having fundamental units,
  3: small bnfinit, which can be converted to a big one using bnfmake. See
  manual for details about tech
 Description:
@@ -37,11 +37,6 @@ Doc: initializes a
  is issued. They could be obtained using the so-called compact representation
  of algebraic numbers as a formal product of algebraic integers. The latter is
  implemented internally but not publicly accessible yet.
-
- When $\fl=2$, on the contrary, it is initially agreed that units are not
- computed. Note that the resulting \var{bnf} will not be suitable for
- \kbd{bnrinit}, and that this flag provides negligible time savings
- compared to the default. In short, it is deprecated.
 
  When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
  Buchmann's number field'' (or \var{sbnf} for short) which contains enough

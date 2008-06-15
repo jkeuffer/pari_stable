@@ -480,19 +480,6 @@ buchray(GEN bnf, GEN ideal)
 { return Buchray(bnf,ideal, nf_GEN); }
 
 GEN
-bnrclass0(GEN bnf, GEN ideal, long flag)
-{
-  switch(flag)
-  {
-    case 0: flag = nf_GEN; break;
-    case 1: flag = nf_INIT; break;
-    case 2: flag = nf_INIT | nf_GEN; break;
-    default: pari_err(flagerr,"bnrclass");
-  }
-  return Buchray(bnf,ideal,flag);
-}
-
-GEN
 bnrinit0(GEN bnf, GEN ideal, long flag)
 {
   switch(flag)

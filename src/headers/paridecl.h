@@ -1109,7 +1109,6 @@ GEN     quadray(GEN bnf, GEN f, long prec);
 
 /* buch2.c */
 
-GEN     bnfclassunit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfmake(GEN sbnf,long prec);
 GEN     bnfnewprec(GEN nf, long prec);
@@ -1117,8 +1116,6 @@ GEN     bnfnewprec_shallow(GEN nf, long prec);
 GEN     bnrnewprec(GEN bnr, long prec);
 GEN     bnrnewprec_shallow(GEN bnr, long prec);
 GEN     buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
-GEN     buchfu(GEN bignf);
-GEN     classgrouponly(GEN P,GEN data,long prec);
 GEN     isprincipal(GEN bignf, GEN x);
 GEN     isprincipalall(GEN bignf, GEN x,long flall);
 GEN     isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
@@ -1126,13 +1123,11 @@ GEN     isprincipalforce(GEN bignf,GEN x);
 GEN     isprincipalgen(GEN bignf, GEN x);
 GEN     isprincipalgenforce(GEN bignf,GEN x);
 GEN     isunit(GEN bignf, GEN x);
-GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
 GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
 
-GEN     bnrclass0(GEN bignf, GEN ideal, long flag);
 GEN     bnrclassno(GEN bignf,GEN ideal);
 GEN     bnrclassnolist(GEN bnf,GEN listes);
 GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN flag);

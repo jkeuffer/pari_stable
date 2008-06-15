@@ -701,20 +701,19 @@ cleanarch(GEN x, long N, long prec)
 }
 
 static GEN
-not_given(pari_sp av, long fl, long reason)
+not_given(long force, long reason)
 {
-  const char *s;
   switch(reason)
   {
-    case fupb_LARGE: s="fundamental units too large"; break;
-    case fupb_PRECI: s="insufficient precision for fundamental units"; break;
-    default: s="unknown problem with fundamental units";
+    case fupb_LARGE:
+      pari_warn(warner,"fundamental units too large, not given");
+      break;
+    case fupb_PRECI:
+      if (!force)
+        pari_warn(warner,"insufficient precision for fundamental units, not given");
+      break;
   }
-  if (fl & nf_FORCE)
-  { if (reason != fupb_PRECI) pari_err(talker, "bnfinit: %s", s); }
-  else
-    pari_warn(warner,"%s, not given",s);
-  avma = av; return cgetg(1,t_MAT);
+  return cgetg(1,t_MAT);
 }
 
 /* check whether exp(x) will get too big */
@@ -767,11 +766,10 @@ RgM_solve_realimag(GEN M, GEN y)
 }
 
 static GEN
-getfu(GEN nf, GEN *ptA, long fl, long *pte, long prec)
+getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
 {
   GEN p1, p2, u, y, matep, A, vec, T = gel(nf,1), M = gmael(nf,5,1);
   long e, i, j, R1, RU, N = degpol(T);
-  pari_sp av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
   R1 = nf_get_r1(nf); RU = (N+R1)>>1;
@@ -788,20 +786,23 @@ getfu(GEN nf, GEN *ptA, long fl, long *pte, long prec)
     for (   ; i<=RU; i++) gel(c,i) = gadd(s, gmul2n(gel(Aj,i),-1));
   }
   u = lll(real_i(matep));
-  if (typ(u) != t_MAT) return not_given(av,fl,fupb_PRECI);
+  if (typ(u) != t_MAT) return not_given(force, fupb_PRECI);
 
   y = RgM_mul(matep,u);
-  if (expgexpo(y) > 20) { *pte=LONG_MAX; return not_given(av,fl,fupb_LARGE); }
+  if (expgexpo(y) > 20) {
+    if (force) pari_err(talker, "bnfinit: fundamental units too large");
+    *pte = LONG_MAX; return not_given(force, fupb_LARGE);
+  }
 
   if (prec <= 0) prec = gprecision(A);
   y = RgM_solve_realimag(M, gexp(y,prec));
-  if (!y) return not_given(av,fl,fupb_PRECI);
+  if (!y) return not_given(force, fupb_PRECI);
   y = grndtoi(y, &e);
   *pte = -e;
-  if (e >= 0) return not_given(av,fl,fupb_PRECI);
+  if (e >= 0) return not_given(force, fupb_PRECI);
   for (j=1; j<RU; j++)
     if (!gcmp1(idealnorm(nf, gel(y,j)))) break;
-  if (j < RU) { *pte = 0; return not_given(av,fl,fupb_PRECI); }
+  if (j < RU) { *pte = 0; return not_given(force, fupb_PRECI); }
   A = gmul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
@@ -830,31 +831,24 @@ getfu(GEN nf, GEN *ptA, long fl, long *pte, long prec)
 }
 
 GEN
-buchfu(GEN bnf)
-{
-  pari_sp av = avma;
-  GEN nf, A, res;
-  long c;
-
-  bnf = checkbnf(bnf); A = gel(bnf,3); nf = gel(bnf,7);
-  res = gel(bnf,8);
-  if (lg(res)==6 && lg(res[5])==lg(nf[6])-1) return gcopy(gel(res,5));
-  return gerepilecopy(av, getfu(nf, &A, nf_UNITS, &c, 0));
-}
-
-GEN
 init_units(GEN BNF)
 {
-  GEN bnf = checkbnf(BNF), x = gel(bnf,8), v, funits;
+  GEN bnf = checkbnf(BNF), res = gel(bnf,8), v, funits;
   long i, l;
-  if (lg(x) == 5) funits = buchfu(bnf);
+  if (lg(res) == 5)
+  {
+    pari_sp av = avma;
+    GEN nf = gel(bnf,7), A = gel(bnf,3);
+    if (lg(res)==6 && lg(res[5])==lg(nf[6])-1) return gcopy(gel(res,5));
+    funits = gerepilecopy(av, getfu(nf, &A, nf_FORCE, &l, 0));
+  } 
   else
   {
-    if (lg(x) != 6) pari_err(talker,"incorrect big number field");
-    funits = gel(x,5);
+    if (lg(res) != 6) pari_err(talker,"incorrect big number field");
+    funits = gel(res,5);
   }
   l = lg(funits) + 1;
-  v = cgetg(l, t_VEC); gel(v,1) = gmael(x, 4, 2);
+  v = cgetg(l, t_VEC); gel(v,1) = gmael(res, 4, 2);
   for (i = 2; i < l; i++) v[i] = funits[i-1];
   return v;
 }
@@ -2684,32 +2678,20 @@ nfbasic_from_sbnf(GEN sbnf, nfbasic_t *T)
 }
 
 static GEN
-get_clfu(GEN clgp, GEN reg, GEN zu, GEN fu, long fl)
+get_clfu(GEN clgp, GEN reg, GEN zu, GEN fu)
 {
-  long l = (fl & nf_UNITS)? 6
-			  : (fl & nf_ROOT1)? 5: 4;
   GEN z = cgetg(6, t_VEC);
   gel(z,1) = clgp;
   gel(z,2) = reg;
   gel(z,3) = gen_1; /* DUMMY */
   gel(z,4) = zu;
-  gel(z,5) = fu; setlg(z, l); return z;
+  gel(z,5) = fu; return z;
 }
 
 static GEN
-buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
-	    GEN Vbase)
+buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
 {
-  GEN z;
-  if (! (fl & nf_INIT))
-  {
-    GEN x = cgetg(5, t_VEC);
-    x[1]=nf[1];
-    x[2]=nf[2];
-    gel(x,3) = mkvec2(gel(nf,3), gel(nf,4));
-    x[4]=nf[7]; return mkmat( shallowconcat(x, res) );
-  }
-  z = cgetg(11,t_VEC);
+  GEN z = cgetg(11,t_VEC);
   gel(z,1) = W;
   gel(z,2) = B;
   gel(z,3) = A;
@@ -2782,108 +2764,49 @@ bnfmake(GEN sbnf, long prec)
   zu = gel(sbnf,10);
   zu = mkvec2(gel(zu,1), gmul(bas,gel(zu,2)));
 
-  res = get_clfu(clgp, get_regulator(A), zu, fu, nf_UNITS);
-  y = buchall_end(nf,nf_INIT,res,clgp2,W,gel(sbnf,8),A,C,Vbase);
+  res = get_clfu(clgp, get_regulator(A), zu, fu);
+  y = buchall_end(nf,res,clgp2,W,gel(sbnf,8),A,C,Vbase);
   y[10] = sbnf[12]; return gerepilecopy(av,y);
-}
-
-static GEN
-classgroupall(GEN P, GEN data, long flag, long prec)
-{
-  double c1 = 0.3, c2 = 0.3;
-  long fl, lx, nbrelpid = 4;
-
-  if (!data) lx = 1;
-  else
-  {
-    lx = lg(data);
-    if (typ(data)!=t_VEC || lx > 5)
-      pari_err(talker,"incorrect parameters in classgroup");
-  }
-  switch(lx)
-  {
-    case 4: nbrelpid = itos(gel(data,3));
-    case 3: c2 = gtodouble( gel(data,2));
-    case 2: c1  = gtodouble( gel(data,1));
-  }
-  switch(flag)
-  {
-    case 0: fl = nf_INIT | nf_UNITS; break;
-    case 1: fl = nf_INIT | nf_UNITS | nf_FORCE; break;
-    case 2: fl = nf_INIT | nf_ROOT1; break;
-    case 3: {
-      pari_sp av = avma;
-      if (typ(P)==t_VEC)
-        P = checkbnf(P);
-      else
-        P = buchall(P, c1, c2, nbrelpid, nf_INIT | nf_UNITS | nf_FORCE, prec);
-      return gerepilecopy(av, bnftosbnf(P));
-    }
-    case 4: fl = nf_UNITS; break;
-    case 5: fl = nf_UNITS | nf_FORCE; break;
-    case 6: fl = 0; break;
-    default: pari_err(flagerr,"classgroupall");
-      return NULL; /* not reached */
-  }
-  return buchall(P, c1, c2, nbrelpid, fl, prec);
-}
-
-GEN
-bnfclassunit0(GEN P, long flag, GEN data, long prec)
-{
-  if (typ(P)==t_INT) return quadclassunit0(P,0,data,prec);
-  if (flag < 0 || flag > 2) pari_err(flagerr,"bnfclassunit");
-  return classgroupall(P,data,flag+4,prec);
 }
 
 GEN
 bnfinit0(GEN P, long flag, GEN data, long prec)
 {
-#if 0
-  /* TODO: synchronize quadclassunit output with bnfinit */
-  if (typ(P)==t_INT)
+  double c1 = 0.3, c2 = 0.3;
+  long fl, nbrelpid = 4;
+
+  if (data)
   {
-    if (flag<4) pari_err(impl,"specific bnfinit for quadratic fields");
-    return quadclassunit0(P,0,data,prec);
+    long lx = lg(data);
+    if (typ(data) != t_VEC || lx > 5) pari_err(typeer,"bnfinit");
+    switch(lx)
+    {
+      case 4: nbrelpid = itos(gel(data,3));
+      case 3: c2 = gtodouble( gel(data,2));
+      case 2: c1  = gtodouble( gel(data,1));
+    }
   }
-#endif
-  if (flag < 0 || flag > 3) pari_err(flagerr,"bnfinit");
-  return classgroupall(P,data,flag,prec);
-}
-
-GEN
-classgrouponly(GEN P, GEN data, long prec)
-{
-  pari_sp av = avma;
-  GEN z;
-
-  if (typ(P)==t_INT)
+  switch(flag)
   {
-    z=quadclassunit0(P,0,data,prec); setlg(z,4);
-    return gerepilecopy(av,z);
+    case 2:
+    case 0: fl = 0; break;
+    case 1: fl = nf_FORCE; break;
+    case 3: {
+      pari_sp av = avma;
+      if (typ(P)==t_VEC)
+        P = checkbnf(P);
+      else
+        P = buchall(P, c1, c2, nbrelpid, nf_FORCE, prec);
+      return gerepilecopy(av, bnftosbnf(P));
+    }
+    default: pari_err(flagerr,"bnfinit");
+      return NULL; /* not reached */
   }
-  z=gel(classgroupall(P,data,6,prec),1);
-  return gerepilecopy(av,gel(z,5));
-}
-
-GEN
-regulator(GEN P, GEN data, long prec)
-{
-  pari_sp av = avma;
-  GEN z;
-
-  if (typ(P)==t_INT)
-  {
-    if (signe(P) < 0) return gen_1;
-    z=quadclassunit0(P,0,data,prec);
-    return gerepilecopy(av,gel(z,4));
-  }
-  z=gel(classgroupall(P,data,6,prec),1);
-  return gerepilecopy(av,gel(z,6));
+  return buchall(P, c1, c2, nbrelpid, fl, prec);
 }
 
 static GEN
-buchall_for_degree_one_pol(GEN nf, long flun)
+buchall_for_degree_one_pol(GEN nf)
 {
   GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
   GEN W, B, A, C, Vbase, res;
@@ -2892,8 +2815,8 @@ buchall_for_degree_one_pol(GEN nf, long flun)
 
   W = B = A = C= m;
   Vbase = cgetg(1,t_COL);
-  res = get_clfu(clg1, R, zu, fu, flun);
-  return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);
+  res = get_clfu(clg1, R, zu, fu);
+  return buchall_end(nf,res,clg2,W,B,A,C,Vbase);
 }
 
 /* return (small set of) indices of columns generating the same lattice as x.
@@ -3049,7 +2972,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
 
   nf = *pnf; *pnf = NULL;
   N = degpol(nf[1]);
-  if (N <= 1) return buchall_for_degree_one_pol(nf, flun);
+  if (N <= 1) return buchall_for_degree_one_pol(nf);
   zu = rootsof1(nf);
   gel(zu,2) = coltoliftalg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
@@ -3205,9 +3128,10 @@ PRECPB:
   F.KCZ2 = 0; /* be honest only once */
 
   /* fundamental units */
-  if (flun & (nf_UNITS|nf_INIT))
   {
+    pari_sp av3 = avma;
     GEN AU, U, H, v = extract_full_lattice(L); /* L may be very large */
+    long e;
     if (v)
     {
       A = vecpermute(A, v);
@@ -3224,16 +3148,11 @@ PRECPB:
       if (precadd <= 0) precadd = 1;
       precpb = "cleanarch"; goto PRECPB;
     }
-  }
-  fu = NULL;
-  if (flun & nf_UNITS)
-  {
-    long e;
-    fu = getfu(nf, &A, flun, &e, PRECREG);
+    fu = getfu(nf, &A, flun & nf_FORCE, &e, PRECREG);
     if (e <= 0 && (flun & nf_FORCE))
     {
       if (e < 0) precadd = (DEFAULTPREC-2) + divsBIL( (-e) );
-      precpb = "getfu"; goto PRECPB;
+      avma = av3; precpb = "getfu"; goto PRECPB;
     }
   }
   /* class group generators */
@@ -3248,8 +3167,8 @@ PRECPB:
   delete_cache(&cache); delete_FB(&F);
   Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
-  res = get_clfu(clg1, R, zu, fu, flun);
-  return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);
+  res = get_clfu(clg1, R, zu, fu);
+  return buchall_end(nf,res,clg2,W,B,A,C,Vbase);
 }
 
 GEN

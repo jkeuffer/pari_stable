@@ -181,6 +181,8 @@ BA 49- user variables can now be aliased [#790].
    60- make the semantics of substpol more precise and less surprising:
        substpol((x^2+x+1)/(x^2+x-1),x^2,x^3) -> (x^3 + x + 1)/(x^3 + x - 1)
        [ was: (x^6 - x^3 - 2*x - 1)/(x^6 - 3*x^3 + 1)  ]
+   61- deprecated flag '2' for bnfinit [ don't compute units ] is now ignored
+       ==> bnfunit becomes totally useless.
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -300,6 +302,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    19- obsolete undocumented library function bruterr
    20- obsolete GP functions printp, printp1
    21- obsolete library function smallbuchinit
+   22- obsolete GP functions bnfclassunit, bnfreg, bnfclgp, bnfunit.
+       Use bnfinit.
+   23- obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
