@@ -347,7 +347,11 @@ member_tu(GEN x)
 	if (lg(x) > 8)
 	{
 	  y = gel(x,8);
-	  if (typ(y) == t_VEC || lg(y) == 3) { res[2] = y[2]; break; }
+	  if (typ(y) == t_VEC || lg(y) == 3) 
+          { 
+            gel(res,2) = gcopy(gel(y,2));
+            break;
+          }
 	}
       default: member_err("tu");
 	return NULL; /* not reached */
@@ -366,21 +370,21 @@ member_tu(GEN x)
     }
     gel(res,2) = basistoalg(bnf, gel(y,2));
   }
-  res[1] = y[1]; return res;
+  gel(res,1) = gcopy(gel(y,1)); return res;
 }
 
 GEN
 member_futu(GEN x) /*  concatenation of fu and tu, w is lost */
 {
   GEN fuc = member_fu(x);
-  return shallowconcat(fuc, gel(member_tu(x),2));
+  return concat(fuc, gel(member_tu(x),2));
 }
 
 GEN
 member_tufu(GEN x) /*  concatenation of tu and fu, w is lost */
 {
   GEN fuc = member_fu(x);
-  return shallowconcat(gel(member_tu(x),2), fuc);
+  return concat(gel(member_tu(x),2), fuc);
 }
 
 GEN
