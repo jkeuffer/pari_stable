@@ -170,6 +170,21 @@ op_push(op_code o, long x)
   operand[m]=x;
 }
 
+static void
+op_insert(long k, op_code o, long x)
+{
+  long i;
+  long n=stack_new(&s_opcode);
+  (void) stack_new(&s_operand);
+  for (i=n-1; i>=k; i--)
+  {
+    opcode[i+1] = opcode[i];
+    operand[i+1]= operand[i];
+  }
+  opcode[k]  = o;
+  operand[k] = x;
+}
+
 static long
 data_push(GEN x)
 {
@@ -725,7 +740,7 @@ compilefunc(entree *ep, long n, int mode)
   PPproto mod;
   GEN arg=listtogen(y,Flistarg);
   long lnc=first_safe_arg(arg);
-  long nbpointers=0;
+  long nbpointers=0, nbopcodes;
   long nb=lg(arg)-1, lev=0;
   entree *ev[8];
   if (tree[n].f==Faffect)
@@ -843,6 +858,7 @@ compilefunc(entree *ep, long n, int mode)
   p=ep->code;
   if (!ep->value)
     compile_err("unknown function",tree[n].str);
+  nbopcodes = s_opcode.n;
   ret=get_ret_type(&p);
   i=0; j=1;
   if (*p)
@@ -1123,6 +1139,11 @@ compilefunc(entree *ep, long n, int mode)
       op_push(OCcallgen2, (long) ep);
     else
       op_push(OCcallgen, (long) ep);
+    if (nbpointers==0 && s_opcode.n>nbopcodes+128)
+    {
+      op_insert(nbopcodes,OCavma,0);
+      op_push(OCgerepile,0);
+    }
     compilecast(n,Ggen,mode);
     break;
   case RET_INT:

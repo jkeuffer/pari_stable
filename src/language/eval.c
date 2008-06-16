@@ -688,6 +688,9 @@ closure_eval(GEN C)
     case OCprecdl:
       st[sp++]=precdl;
       break;
+    case OCavma:
+      st[sp++]=avma;
+      break;
     case OCstoi:
       gel(st,sp-1)=stoi(st[sp-1]);
       break;
@@ -707,6 +710,17 @@ closure_eval(GEN C)
       break;
     case OCcopy:
       gel(st,sp-1) = gcopy(gel(st,sp-1));
+      break;
+    case OCgerepile:
+      sp--;
+      if (st[sp-1]-avma>1000000)
+      {
+        if (DEBUGMEM>=2)
+          pari_warn(warnmem,"eval: recovering %ld bytes",st[sp-1]-avma);
+        gel(st,sp-1) = gerepileupto(st[sp-1], gel(st,sp));
+      }
+      else
+        gel(st,sp-1) = gel(st,sp);
       break;
     case OCcopyifclone:
       if (isclone(gel(st,sp-1)))
@@ -1377,6 +1391,12 @@ closure_disassemble(GEN C)
       break;
     case OCpop:
       pari_printf("pop\t\t%ld\n",operand);
+      break;
+    case OCavma:
+      pari_printf("avma\n",operand);
+      break;
+    case OCgerepile:
+      pari_printf("gerepile\n",operand);
       break;
     }
   }
