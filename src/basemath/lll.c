@@ -379,7 +379,7 @@ fplll(GEN *ptrB, GEN *ptrU, GEN *ptrr, double DELTA, double ETA, long flag, long
   {
     if (kappa>kappamax)
     {
-      if (DEBUGLEVEL>=6) fprintferr("K%ld ",kappa);
+      if (DEBUGLEVEL>=4) fprintferr("K%ld ",kappa);
       kappamax = kappa;
       if (!gram) {
         for (i=zeros+1; i<=kappa; i++)
