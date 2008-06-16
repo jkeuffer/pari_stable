@@ -361,8 +361,8 @@ get_dataunit(GEN bnf, GEN bid)
   return shallowconcat(D, diagonal_i(cyc));
 }
 
-static GEN
-Buchray(GEN bnf,GEN module,long flag)
+GEN
+Buchray(GEN bnf, GEN module, long flag)
 {
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
   GEN bigres, bid, cycbid, genbid, x, y, funits, H, El;
@@ -468,16 +468,6 @@ Buchray(GEN bnf,GEN module,long flag)
   gel(y,6) = mkvec2(u2,u1); /* [QM, ZM] */
   return gerepilecopy(av,y);
 }
-
-GEN
-buchrayinitgen(GEN bnf, GEN ideal)
-{ return Buchray(bnf,ideal, nf_INIT | nf_GEN); }
-GEN
-buchrayinit(GEN bnf, GEN ideal)
-{ return Buchray(bnf,ideal, nf_INIT); }
-GEN
-buchray(GEN bnf, GEN ideal)
-{ return Buchray(bnf,ideal, nf_GEN); }
 
 GEN
 bnrinit0(GEN bnf, GEN ideal, long flag)

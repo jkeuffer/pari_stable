@@ -311,6 +311,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    24- awkward flag '3' for bnfinit. Use bnfcompress().
    25- badly named bnfmake. Use bnfinit(sbnf).
    26- useless component v[6] in "small bnfs" (was 'different', is 0)
+   27- obsolete library functions buchray, buchrayinit, buchrayinitgen:
+       use Buchray.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

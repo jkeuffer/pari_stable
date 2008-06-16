@@ -393,7 +393,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   else
   { /* part of mod coprime to pr */
     GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
-    bnrpr = buchrayinitgen(bnf, mkvec2(mpr0, gel(mod,2)));
+    bnrpr = Buchray(bnf, mkvec2(mpr0, gel(mod,2)), nf_INIT|nf_GEN);
     cycpr = gmael(bnrpr, 5, 2);
     M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
     subpr = ZM_hnf(shallowconcat(M, diagonal_i(cycpr)));
@@ -524,7 +524,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 
 	  /* compute Clk(m), check if m is a conductor */
 	  dbg_block();
-	  bnrm = buchrayinitgen(bnf, m);
+	  bnrm = Buchray(bnf, m, nf_INIT|nf_GEN);
 	  p1   = conductor(bnrm, NULL, -1);
 	  dbg_release();
 	  gel(arch,N+1-s) = gen_1;
@@ -806,7 +806,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   }
   else
   {
-    bnrc = buchrayinitgen(gel(bnr,1), condc);
+    bnrc = Buchray(gel(bnr,1), condc, nf_INIT|nf_GEN);
     CHI = GetPrimChar(chi, bnr, bnrc, prec);
   }
   return gerepilecopy(av, SingleArtinNumber(bnrc, CHI, prec));
@@ -942,7 +942,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
       }
       else
       {
-	ch_bnr(dtcr) = buchrayinitgen(bnf, cond);
+	ch_bnr(dtcr) = Buchray(bnf, cond, nf_INIT|nf_GEN);
 	ch_diff(dtcr) = get_prdiff(bnr, cond);
       }
     }
@@ -2535,7 +2535,7 @@ quadhilbertreal(GEN D, long prec)
   if (equaliu(gel(cyc,1), 2)) return gerepileupto(av, GenusField(bnf));
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
-  bnr  = buchrayinitgen(bnf, gen_1);
+  bnr  = Buchray(bnf, gen_1, nf_INIT|nf_GEN);
   M = diagonal_i(gmael(bnr,5,2));
   dtQ = InitQuotient(M);
   nf  = gel(bnf,7);

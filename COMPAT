@@ -144,6 +144,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename library functions hil0->hilbert, hilii->hilbertii
   - rename library functions srgcd -> RgX_gcd
   - rename library functions ismonome -> RgX_is_monomial
+  - remove obsolete buchray, buchrayinit, buchrayinitgen: use Buchray.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

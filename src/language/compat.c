@@ -92,6 +92,16 @@ buchfu(GEN bnf)
   if (lg(res) != 6) return cgetg(1, t_MAT);
   return gcopy(gel(res,5));
 }
+static GEN
+buchrayinitgen(GEN bnf, GEN ideal)
+{ return Buchray(bnf,ideal, nf_INIT | nf_GEN); }
+static GEN
+buchrayinit(GEN bnf, GEN ideal)
+{ return Buchray(bnf,ideal, nf_INIT); }
+static GEN
+buchray(GEN bnf, GEN ideal)
+{ return Buchray(bnf,ideal, nf_GEN); }
+
 
 entree oldfonctions[]={
 {"!_",0,(void*)gnot,13,"G","!_"},

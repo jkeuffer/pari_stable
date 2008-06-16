@@ -1184,7 +1184,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (smodis(gcoeff(ideal,1,1), ell)) gothf = idealz;
   else
   { /* ell | N(ideal) */
-    GEN bnrz = buchrayinitgen(bnfz, idealz);
+    GEN bnrz = Buchray(bnfz, idealz, nf_INIT|nf_GEN);
     GEN subgroupz = invimsubgroup(bnrz, bnr, subgroup, &T);
     gothf = conductor(bnrz,subgroupz,0);
   }

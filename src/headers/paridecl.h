@@ -1128,6 +1128,7 @@ GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
 
+GEN     Buchray(GEN bnf, GEN module, long flag);
 GEN     bnrclassno(GEN bignf,GEN ideal);
 GEN     bnrclassnolist(GEN bnf,GEN listes);
 GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN flag);
@@ -1138,9 +1139,6 @@ GEN     bnrinit0(GEN bignf,GEN ideal,long flag);
 long    bnrisconductor(GEN arg0,GEN arg1,GEN arg2);
 GEN     bnrisprincipal(GEN bnf, GEN x,long flag);
 GEN     buchnarrow(GEN bignf);
-GEN     buchray(GEN bignf,GEN ideal);
-GEN     buchrayinit(GEN bignf,GEN ideal);
-GEN     buchrayinitgen(GEN bignf,GEN ideal);
 long    certifybuchall(GEN bnf);
 GEN     conductor(GEN bnr,GEN subgroup,long all);
 GEN     decodemodule(GEN nf, GEN fa);
