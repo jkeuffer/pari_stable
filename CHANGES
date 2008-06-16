@@ -98,7 +98,7 @@ BA  3- builtin-in GP functions can now be used as closures.
        nf.disc could not be factored and addprimes() would have to be used ]
     5- removed undocumented interface FpM_mul(x,y,NULL), and analogously for
        FpV_dotproduct, FpV_dotsquare, FpM_FpC_mul
-    6- [libary] rename assmat -> matcompanion
+    6- [library] rename assmat -> matcompanion
     7- prototype of FpX_center [ add one argument ]
 BA  8- [svn/CVS] number development snapshots according to repository version
     9- delete CVS.txt and replace it with README-subversion
