@@ -545,6 +545,7 @@ closure_eval(GEN C)
   long saved_sp=sp-C[1];
   long saved_rp=rp;
   long pc, j, nbmvar=0, nblvar=0;
+  if (isclone(C)) ++bl_refc(C);
   if (lg(C)==7)
   {
     GEN z=gel(C,6);
@@ -1070,6 +1071,7 @@ endeval:
     rp = saved_rp;
   }
   restore_vars(nbmvar, nblvar);
+  if (isclone(C)) gunclone(C);
 }
 
 GEN
