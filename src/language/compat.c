@@ -62,7 +62,7 @@ suppressed(void) {pari_err(talker,"this function no longer exists");}
 #define BUCH_PROTO "GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"
 #define B_ARGS GEN g1,GEN g2,GEN g3,GEN g4,GEN g5,long l1,long l2,long prec
 #define B_ARG1 g1,gtodouble(g2),gtodouble(g3),l1
-#define B_CALL(flag) buchall(B_ARG1,(flag),prec)
+#define B_CALL(flag) Buchall(B_ARG1,(flag),prec)
 
 #define CLASSUNIT(flag) \
   pari_sp av = avma; \

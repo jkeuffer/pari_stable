@@ -51,5 +51,5 @@ Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  in longer computing times for equally correct outputs (under GRH).
 Variant: Іf you really need to experiment with the \var{tech} parameter, it is
  usually more convenient to use
- \fun{GEN}{buchquad}{GEN D, double c1, double c2, long prec}
+ \fun{GEN}{Buchquad}{GEN D, double c1, double c2, long prec}
 

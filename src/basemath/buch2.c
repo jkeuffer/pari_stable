@@ -2803,11 +2803,11 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
     default: pari_err(flagerr,"bnfinit");
       return NULL; /* not reached */
   }
-  return buchall(P, c1, c2, nbrelpid, fl, prec);
+  return Buchall(P, c1, c2, nbrelpid, fl, prec);
 }
 
 static GEN
-buchall_for_degree_one_pol(GEN nf)
+Buchall_deg1(GEN nf)
 {
   GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
   GEN W, A, B, C, Vbase, res;
@@ -2945,7 +2945,7 @@ compute_vecG(GEN nf, FB_t *F, long n)
 }
 
 GEN
-buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
+Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av0 = avma, av, av2;
   long PRECREG, N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
@@ -2975,10 +2975,7 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
     }
   }
   N = degpol(P);
-  if (N <= 1) {
-    res = buchall_for_degree_one_pol(nf);
-    return gerepilecopy(av0, res);
-  }
+  if (N <= 1) return gerepilecopy(av0, Buchall_deg1(nf));
   zu = rootsof1(nf);
   gel(zu,2) = coltoliftalg(nf, gel(zu,2));
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
@@ -3058,7 +3055,7 @@ PRECPB:
     else           PRECREG = (PRECREG<<1)-2;
     if (DEBUGLEVEL)
     {
-      char str[64]; sprintf(str,"buchall (%s)",precpb);
+      char str[64]; sprintf(str,"Buchall (%s)",precpb);
       pari_warn(warnprec,str,PRECREG);
     }
     nf = gclone( nfnewprec_shallow(nf, PRECREG) );

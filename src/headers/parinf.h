@@ -74,7 +74,7 @@ void remake_GM(GEN nf, nffp_t *F, long prec);
 /* for buchray */
 #define nf_INIT  4
 
-/* for buchall */
+/* for Buchall */
 #define nf_ROOT1 512
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
 

@@ -1494,7 +1494,7 @@ quad_be_honest(struct buch_quad *B)
 }
 
 GEN
-buchquad(GEN D, double cbach, double cbach2, long prec)
+Buchquad(GEN D, double cbach, double cbach2, long prec)
 {
   pari_sp av0 = avma, av, av2;
   const long RELSUP = 5;
@@ -1506,7 +1506,7 @@ buchquad(GEN D, double cbach, double cbach2, long prec)
   struct buch_quad BQ;
   int FIRST = 1;
 
-  check_quaddisc(D, &s, /*junk*/&i, "buchquad");
+  check_quaddisc(D, &s, /*junk*/&i, "Buchquad");
   BQ.Disc = D;
   if (s < 0)
   {
@@ -1541,7 +1541,7 @@ buchquad(GEN D, double cbach, double cbach2, long prec)
     if (cbach2 < cbach) cbach2 = cbach;
     cbach = 6.;
   }
-  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in buchquad");
+  if (cbach <= 0.) pari_err(talker,"Bach constant <= 0 in Buchquad");
   av = avma;
   BQ.powsubFB = BQ.subFB = NULL;
   init_GRHcheck(GRHcheck, 2, BQ.PRECREG? 2: 0, LOGD);
@@ -1659,19 +1659,19 @@ MORE:
 
 GEN
 buchimag(GEN D, GEN c, GEN c2, GEN REL)
-{ (void)REL; return buchquad(D,gtodouble(c),gtodouble(c2),0); }
+{ (void)REL; return Buchquad(D,gtodouble(c),gtodouble(c2),0); }
 
 GEN
 buchreal(GEN D, GEN flag, GEN c, GEN c2, GEN REL, long prec) {
   if (signe(flag)) pari_err(impl,"narrow class group");
-  (void)REL; return buchquad(D,gtodouble(c),gtodouble(c2),prec);
+  (void)REL; return Buchquad(D,gtodouble(c),gtodouble(c2),prec);
 }
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
 {
   long lx;
-  double cbach, cbach2;
+  double c1 = 0.2, c2 = 0.2;
 
   if (!data) lx=1;
   else
@@ -1681,12 +1681,11 @@ quadclassunit0(GEN x, long flag, GEN data, long prec)
       pari_err(talker,"incorrect parameters in quadclassunit");
     if (lx > 3) lx = 3;
   }
-  cbach = cbach2 = 0.2; /* was 0.1, but slower on average for 20 digits disc */
   switch(lx)
   {
-    case 3: cbach2 = gtodouble(gel(data,2));
-    case 2: cbach  = gtodouble(gel(data,1));
+    case 3: c2 = gtodouble(gel(data,2));
+    case 2: c1 = gtodouble(gel(data,1));
   }
   if (flag) pari_err(impl,"narrow class group");
-  return buchquad(x,cbach,cbach2,prec);
+  return Buchquad(x,c1,c2,prec);
 }

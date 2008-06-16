@@ -93,4 +93,10 @@ Doc: initializes a
  \kbd{bnfinit} call. For instance, the generators of the principal ideals
  \kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to \tet{bnrisprincipal}), or
  those corresponding to the relations in $W$ and $B$ (when the \kbd{bnf}
- internal precision needs to be increased). \smallskip
+ internal precision needs to be increased).
+Variant:
+ \fun{GEN}{Buchall}{GEN P, double c1, double c2, long nbrelpid, long flag,
+ long prec} gives direct access to the technical parameters; \kbd{flag}
+ is either $0$ (default) or \tet{nf_FORCE} (insist on finding fundamental
+ units).
+

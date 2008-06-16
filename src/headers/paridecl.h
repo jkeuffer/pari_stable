@@ -1102,7 +1102,7 @@ GEN     ZV_sort_uniq(GEN L);
 
 /* buch1.c */
 
-GEN     buchquad(GEN D, double c1, double c2, long prec);
+GEN     Buchquad(GEN D, double c1, double c2, long prec);
 GEN     quadclassunit0(GEN x, long flag,GEN data, long prec);
 GEN     quadhilbert(GEN D, long prec);
 GEN     quadray(GEN bnf, GEN f, long prec);
@@ -1115,7 +1115,7 @@ GEN     bnfnewprec(GEN nf, long prec);
 GEN     bnfnewprec_shallow(GEN nf, long prec);
 GEN     bnrnewprec(GEN bnr, long prec);
 GEN     bnrnewprec_shallow(GEN bnr, long prec);
-GEN     buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
+GEN     Buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
 GEN     isprincipal(GEN bignf, GEN x);
 GEN     isprincipalall(GEN bignf, GEN x,long flall);
 GEN     isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
