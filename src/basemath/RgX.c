@@ -257,7 +257,11 @@ RgXQX_translate(GEN P, GEN c, GEN T)
   lim = stack_lim(av, 2);
   for (i=1; i<=n; i++)
   {
-    for (k=n-i; k<n; k++) R[k] = RgX_rem(gadd(R[k], gmul(c, R[k+1])), T);
+    for (k=n-i; k<n; k++)
+    {
+      pari_sp av2 = avma;
+      R[k] = gerepileupto(av2, RgX_rem(gadd(R[k], gmul(c, R[k+1])), T));
+    }
     if (low_stack(lim, stack_lim(av,2)))
     {
       if(DEBUGMEM>1) pari_warn(warnmem,"RgXQX_translate, i = %ld/%ld", i,n);
