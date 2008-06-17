@@ -256,7 +256,7 @@ RM 26- partitions()
    27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
        ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all, RgXQX_pseudodivrem,
-       Flx_roots_naive, Idealstar, nfordmax
+       Flx_roots_naive
 BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        abelian_group, group_domain, group_elts, group_order, group_isabelian,
        group_abelianHNF, group_abelianSNF, group_isA4S4, group_leftcoset,
@@ -271,8 +271,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    31- library functions Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic,
        FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
    32- library function dbg_pari_heap
-   33- library function nfarchstar (was zarchstar), nfsign,
-       nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall
+   33- library function  nfordmax, nfarchstar (was zarchstar), nfsign,
+       nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
+       Idealstar
    34- function bnfcompress() [ to create a "small bnf" from a true
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.
