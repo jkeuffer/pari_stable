@@ -1369,10 +1369,9 @@ RgXQX_pseudodivrem(GEN x, GEN y, GEN T, GEN *ptr)
     p--;
     c = gmul(gel(x,0), gel(ypow,p));
     gel(z,iz++) = rem(c,T);
-    gel(x,0) = gneg(gel(x,0));
     for (i=1; i<=dy; i++)
     {
-      c = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
+      c = gsub(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));
       gel(x,i) = rem(c,T);
     }
     for (   ; i<=dx; i++)
