@@ -652,11 +652,12 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 {
   FpX_muldata D;
   pari_sp av;
+  long s = signe(n);
   GEN y;
 
-  if (!signe(n)) return pol_1(varn(x));
+  if (!s) return pol_1(varn(x));
   if (is_pm1(n)) /* +/- 1 */
-    return (signe(n) < 0)? FpXQ_inv(x,pol,p): ZX_copy(x);
+    return (s < 0)? FpXQ_inv(x,pol,p): ZX_copy(x);
   av = avma;
   if (!is_bigint(p))
   {
@@ -669,7 +670,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   {
     D.pol = pol;
     D.p   = p;
-    if (signe(n) < 0) x = FpXQ_inv(x,pol,p);
+    if (s < 0) x = FpXQ_inv(x,pol,p);
     y = leftright_pow(x, n, (void*)&D, &_FpXQ_sqr, &_FpXQ_mul);
   }
   return gerepileupto(av, y);
