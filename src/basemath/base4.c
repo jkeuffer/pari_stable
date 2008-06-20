@@ -95,6 +95,10 @@ prime_to_ideal(GEN nf, GEN vp)
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
 
+static GEN
+ZM_Q_mul(GEN x, GEN y) 
+{ return typ(y) == t_INT? ZM_Z_mul(x,y): RgM_Rg_mul(x,y); }
+
 /* x integral ideal in t_MAT form, nx columns */
 static GEN
 vec_mulid(GEN nf, GEN x, long nx, long N)
@@ -117,12 +121,9 @@ idealmat_to_hnf(GEN nf, GEN x)
   x = Q_primitive_part(x, &cx);
   if (nx < N) x = vec_mulid(nf, x, nx, N);
   x = ZM_hnfmod(x, ZM_detmult(x));
-  return cx? RgM_Rg_mul(x,cx): x;
+  return cx? ZM_Q_mul(x,cx): x;
 }
 
-static GEN
-ZM_Q_mul(GEN x, GEN y) 
-{ return typ(y) == t_INT? ZM_Z_mul(x,y): RgM_Rg_mul(x,y); }
 GEN
 idealhermite_aux(GEN nf, GEN x)
 {
@@ -155,15 +156,12 @@ idealhermite_aux(GEN nf, GEN x)
   x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? ZM_Q_mul(x,cx): x;
 }
-
 GEN
 idealhermite(GEN nf, GEN x)
 {
-  pari_sp av=avma;
-  GEN p1;
-  nf = checknf(nf); p1 = idealhermite_aux(nf,x);
-  if (p1==x || p1==gel(x,1)) return gcopy(p1);
-  return gerepileupto(av,p1);
+  pari_sp av = avma;
+  GEN y = idealhermite_aux(checknf(nf), x);
+  return (avma == av)? gcopy(y): gerepileupto(av, y);
 }
 
 GEN

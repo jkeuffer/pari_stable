@@ -3,15 +3,56 @@ Section: number_fields
 C-Name: idealhnf0
 Prototype: GGDG
 Help: idealhnf(nf,a,{b}): hermite normal form of the ideal a in the number
- field nf, whatever form a may have. If called as idealhnf(nf,a,b), the ideal
+ field nf. If called as idealhnf(nf,a,b), the ideal
  is given as aZ_K+bZ_K in the number field K defined by nf
-Doc: gives the \idx{Hermite normal form}
- matrix of the ideal $a$. The ideal can be given in any form whatsoever
- (typically by an algebraic number if it is principal, by a $\Z_K$-system of
- generators, as a prime ideal as given by \kbd{idealprimedec}, or by a
- $\Z$-basis).
+Doc: gives the \idx{Hermite normal form} of the ideal $a\Z_K+b\Z_K$, where $a$
+ and $b$ are elements of the number field $K$ defined by \kbd{nf}.
+ \bprog
+ ? nf = nfinit(y^3 - 2);
+ ? idealhnf(nf, 2, y+1)
+ %2 =
+ [1 0 0]
 
- If $b$ is not omitted, assume the ideal given was $a\Z_K+b\Z_K$, where $a$
- and $b$ are elements of $K$ given either as vectors on the integral basis
- $\var{nf}[7]$ or as algebraic numbers.
+ [0 1 0]
+
+ [0 0 1]
+ ? idealhnf(nf, y/2, [0,0,1/3]~)
+ %3 =
+ [1/3 0 0]
+ 
+ [0 1/6 0]
+ 
+ [0 0 1/6]
+ @eprog
+
+ If $b$ is omitted, returns the HNF of the ideal defined by $a$: $a$ may be an
+ algebraic number (defining a principal ideal), a maximal ideal (as given by
+ \kbd{idealprimedec} or \kbd{idealfactor}), or a matrix whose columns give
+ generators for the ideal. This last format is a little complicated, but
+ useful to reduce general modules to the canonical form once in a while:
+
+ \item if strictly less than $N = [K:\Q]$ generators are given, $a$
+ is the $\Z_K$-module they generate,
+
+ \item if $N$ or more are given, it is \emph{assumed} that they form a
+ $\Z$-basis (that the matrix has maximal rank $N$). This acts 
+ as \kbd{mathnf} since the $\Z_K$-module structure is (taken for
+ granted hence) not taken into account in this case.
+ \bprog
+ ? idealhnf(nf, idealprimedec(nf,2)[1])
+ %4 =
+ [2 0 0]
+ 
+ [0 1 0]
+ 
+ [0 0 1]
+ ? idealhnf(nf, [1,2;2,3;3,4])
+ %5 =
+ [1 0 0]
+ 
+ [0 1 0]
+ 
+ [0 0 1]
+ @eprog
+
 Variant: Also available is \fun{GEN}{idealhermite}{GEN nf, GEN a}.
