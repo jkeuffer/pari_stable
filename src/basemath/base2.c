@@ -1632,16 +1632,14 @@ errprime(GEN p) { pari_err(talker, "primedec: %Ps is not prime", p); }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
- * Return a p-uniformizer for pr. */
+ * Return a p-uniformizer for pr. Assume pr not inert, i.e. m > 0 */
 static GEN
 uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
 {
   long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
   GEN u, Mv, x, q;
 
-  if (!m) return scalarcol_shallow(p,N);
-  /* we want v_p(Norm(x)) = p^f, f = N-m */
-  f = N - m;
+  f = N - m; /* we want v_p(Norm(x)) = p^f */
   q = powiu(p,f+1);
 
   u = FpM_invimage(shallowconcat(P, V), col_ei(N,1), p);
@@ -1655,7 +1653,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   if (!ramif || is_uniformizer(u, q, S)) return u;
 
   /* P/p ramified, u in P^2, not in Q for all other Q|p */
-  Mv = eltimul_get_table(nf, unnf_minus_x(u));
+  Mv = zk_multable(nf, unnf_minus_x(u));
   l = lg(P);
   for (i=1; i<l; i++)
   {
@@ -1728,7 +1726,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
   if (f == N) /* inert */
   {
     u = scalarcol_shallow(p,N);
-    t = scalarcol_shallow(gen_1,N);
+    t = gen_1;
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
@@ -1797,15 +1795,18 @@ static GEN
 get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 {
   GEN u, t;
-  long e, f;
+  long e, f, N;
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
+  N = degpol(gel(nf,1));
+  f = N - (lg(P)-1);
+  if (f == N)
+    return mk_pr(p,scalarcol_shallow(p,N),1,f,gen_1);
 
   u = uniformizer(nf, S, P, V, p, ramif);
   /* P = (p,u) prime. t is an anti-uniformizer: Z_K + t/p Z_K = P^(-1) */
-  t = FpM_deplin(eltimul_get_table(nf, u), p);
+  t = FpM_deplin(zk_multable(nf, u), p);
   e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
-  f = degpol(nf[1]) - (lg(P)-1);
   return mk_pr(p,u,e,f,t);
 }
 
@@ -1854,7 +1855,7 @@ _primedec(GEN nf, GEN p)
     if (!beta) errprime(p);
     beta = FpC_red(poltobasis(nf,beta), p);
 
-    mulbeta = FpM_red(eltimul_get_table(nf, beta), p);
+    mulbeta = FpM_red(zk_multable(nf, beta), p);
     p1 = shallowconcat(mulbeta, Ip);
     /* Fp-base of ideal (Ip, beta) in ZK/p */
     gel(h,1) = FpM_image(p1, p);
@@ -1880,19 +1881,19 @@ _primedec(GEN nf, GEN p)
     dim = lg(mat1)-1; /* A2 product of 'dim' fields */
     if (dim > 1)
     { /* phi2 v = 0 <==> a = M2 v in Ker phi */
-      GEN I, R, r, a, mula, mul2, v = gel(mat1,2);
+      GEN R, a, mula, mul2, v = gel(mat1,2);
       long n;
 
       a = FpM_FpC_mul(M2,v, p);
-      mula = FpM_red(eltimul_get_table(nf, a), p);
+      mula = zk_scalar_or_multable(nf, a); /* not a scalar */
+      mula = FpM_red(mula, p);
       mul2 = FpM_mul(Mi2, FpM_mul(mula,M2, p), p);
       R = FpX_roots(pol_min(mul2,p), p); /* totally split mod p */
 
       n = lg(R)-1;
       for (i=1; i<=n; i++)
       {
-	r = lift_intern(gel(R,i));
-	I = RgM_Rg_add_shallow(mula, negi(r));
+	GEN r = gel(R,i), I = RgM_Rg_add_shallow(mula, negi(r));
 	gel(h,c++) = FpM_image(shallowconcat(H, I), p);
       }
       if (n == dim)
@@ -1961,8 +1962,12 @@ static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), z;
+  long N = lg(gel(pr,2))-1, e = itou(gel(pr,3)), f = itou(gel(pr,4));
+  if (e*f == N) return col_ei(N, 1);
+
   z = FpC_red(special_anti_uniformizer(nf, pr), p);
-  z = ZM_hnfmodid(eltimul_get_table(nf, z), p);
+  z = zk_scalar_or_multable(nf, z); /* not a scalar */
+  z = ZM_hnfmodid(z, p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
 }
@@ -2077,7 +2082,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
   if (uisprime(f))
   {
-    mul = eltmulid_get_table(nf, c[2]);
+    mul = zk_wi_multable(nf, c[2]);
     mul = vecpermute(mul, c);
   }
   else
@@ -2109,7 +2114,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
     mul = cgetg(f+1,t_MAT);
     gel(mul,1) = v; /* assume w_1 = 1 */
-    for (i=2; i<=f; i++) gel(mul,i) = element_mulid(nf,v,c[i]);
+    for (i=2; i<=f; i++) gel(mul,i) = elementi_mulid(nf,v,c[i]);
   }
 
   /* Z_K/pr = Fp(v), mul = mul by v */
@@ -2427,7 +2432,6 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 
   nf = checknf(nf); nfT = gel(nf,1);
   modpr = nf_to_Fq_init(nf,&pr, &T, &p);
-  tau = coltoliftalg(nf, gel(pr,5));
   n = degpol(nfT);
   m = degpol(P);
 
@@ -2441,7 +2445,14 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   hzk = FqX_to_nfX(h, modpr);
 
   k = gsub(P, RgXQX_mul(gzk,hzk, nfT));
-  k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
+  tau = gel(pr,5);
+  if (typ(tau) == t_INT)
+    k = gdiv(k, p);
+  else
+  {
+    tau = coltoliftalg(nf, tau);
+    k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
+  }
   k = nfX_to_FqX(k, nf, modpr);
   k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
   d = degpol(k);  /* <= m */

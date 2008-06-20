@@ -81,8 +81,10 @@ idealtyp(GEN *ideal, GEN *arch)
 static GEN
 prime_to_ideal_aux(GEN nf, GEN vp)
 {
-  GEN m = eltimul_get_table(nf, gel(vp,2));
-  return ZM_hnfmodid(m, gel(vp,1));
+  GEN p = gel(vp,1), pi = gel(vp,2);
+  GEN m = zk_scalar_or_multable(nf, pi);
+  if (typ(m) == t_INT) return scalarmat(p, lg(pi)-1);
+  return ZM_hnfmodid(m, p);
 }
 
 /* vp = [a,x,...], a in Z. Return (a,x)  [HACK: vp need not be prime] */
@@ -118,6 +120,9 @@ idealmat_to_hnf(GEN nf, GEN x)
   return cx? RgM_Rg_mul(x,cx): x;
 }
 
+static GEN
+ZM_Q_mul(GEN x, GEN y) 
+{ return typ(y) == t_INT? ZM_Z_mul(x,y): RgM_Rg_mul(x,y); }
 GEN
 idealhermite_aux(GEN nf, GEN x)
 {
@@ -138,9 +143,9 @@ idealhermite_aux(GEN nf, GEN x)
     }
     x = Q_primitive_part(x, &cx);
     RgV_check_ZV(x, "idealhermite");
-    x = eltimul_get_table(nf, x);
+    x = zk_multable(nf, x);
   } else {
-    long N = degpol(nf[1]), nx = lg(x)-1;
+    long N = degpol(gel(nf,1)), nx = lg(x)-1;
     if (lg(x[1]) != N+1) pari_err(typeer,"idealhermite");
 
     if (nx == N && RgM_ishnf(x)) return x;
@@ -148,7 +153,7 @@ idealhermite_aux(GEN nf, GEN x)
     if (nx < N) x = vec_mulid(nf, x, nx, N);
   }
   x = ZM_hnfmod(x, ZM_detmult(x));
-  return cx? RgM_Rg_mul(x, cx): x;
+  return cx? ZM_Q_mul(x,cx): x;
 }
 
 GEN
@@ -349,17 +354,73 @@ idealaddtoone0(GEN nf, GEN arg1, GEN arg2)
   return idealaddtoone(nf,arg1,arg2);
 }
 
+static GEN
+hnf_Z_QC(GEN nf, GEN a, GEN b)
+{
+  GEN db;
+  b = Q_remove_denom(b, &db);
+  if (db) a = mulii(a, db);
+  b = zk_scalar_or_multable(nf, b);
+  if (typ(b) == t_INT) {
+    b = gcdii(b,a);
+    return db? mkfraccopy(b, db): a;
+  } else {
+    b = hnfmodid(b, a);
+    return db? RgM_Rg_div(b, db): b;
+  }
+}
+static GEN
+hnf_Q_QC(GEN nf, GEN a, GEN b)
+{
+  GEN db, da;
+
+  if (typ(a) == t_INT) return hnf_Z_QC(nf, a, b);
+  da = gel(a,2);
+  a = gel(a,1);
+  b = Q_remove_denom(b, &db);
+  b = ZC_Z_mul(b, da);
+  if (db) {
+    GEN d = gcdii(da,db);
+    db = diviiexact(db,d);
+    a = mulii(a, db);
+    da = mulii(da, db); /* lcm(denom(a),denom(b)) */
+  }
+  b = zk_scalar_or_multable(nf, b);
+  if (typ(b) == t_INT) return gdiv(gcdii(b, a), da);
+  return RgM_Rg_div(hnfmodid(b, a), da);
+}
+static GEN
+hnf_QC_QC(GEN nf, GEN a, GEN b)
+{
+  GEN da, db, d, x;
+  a = Q_remove_denom(a, &da);
+  b = Q_remove_denom(b, &db);
+  if (da) b = ZC_Z_mul(b, da);
+  if (db) a = ZC_Z_mul(a, db);
+  d = mul_denom(da, db);
+  x = shallowconcat(zk_multable(nf,a), zk_multable(nf,b));
+  x = ZM_hnfmod(x, ZM_detmult(x));
+  return d? RgM_Rg_div(x, d): x;
+}
+static GEN
+hnf_Q_Q(GEN nf, GEN a, GEN b) {return scalarmat(ggcd(a,b), degpol(gel(nf,1)));}
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {
+  long ta, tb;
   pari_sp av;
   GEN x;
   if (!b) return idealhermite(nf,a);
 
   /* HNF of aZ_K+bZ_K */
   av = avma; nf = checknf(nf);
-  x = shallowconcat(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
-  return gerepileupto(av, idealmat_to_hnf(nf, x));
+  a = nf_to_scalar_or_basis(nf,a); ta = typ(a);
+  b = nf_to_scalar_or_basis(nf,b); tb = typ(b);
+  if (ta == t_COL)
+    x = (tb==t_COL)? hnf_QC_QC(nf, a,b): hnf_Q_QC(nf, b,a);
+  else
+    x = (tb==t_COL)? hnf_Q_QC(nf, a,b): hnf_Q_Q(nf, a,b);
+  return gerepileupto(av, x);
 }
 
 /*******************************************************************/
@@ -414,13 +475,13 @@ get_random_a(GEN nf, GEN x, GEN xZ)
   /* look for a in x such that a O/xZ = x O/xZ */
   for (i = 2; i < l; i++)
   {
-    GEN t, y;
+    GEN t, y, xi = gel(x,i);
     av1 = avma;
-    y = eltimul_get_table(nf, gel(x,i));
+    y = zk_scalar_or_multable(nf, xi); /* ZM, cannot be a scalar */
     t = FpM_red(y, xZ);
     if (gcmp0(t)) { avma = av1; continue; }
-    if (ok_elt(x,xZ, t)) return gel(x,i);
-    beta[lm]= x[i];
+    if (ok_elt(x,xZ, t)) return xi;
+    gel(beta,lm) = xi;
     /* mul[i] = { canonical generators for x[i] O/xZ as Z-module } */
     gel(mul,lm) = t; lm++;
   }
@@ -463,7 +524,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   {
     cx = gerepilecopy(av,cx);
     gel(y,1) = cx;
-    gel(y,2) = scalarcol_shallow(cx, N); return y;
+    gel(y,2) = scalarcol_shallow(gen_0, N); return y;
   }
   if (N < 6)
     a = get_random_a(nf, x, xZ);
@@ -734,7 +795,7 @@ idealval(GEN nf, GEN ix, GEN P)
   gel(B,1) = gen_0; /* dummy */
   for (j=2; j<=N; j++)
   {
-    if (do_mul) gel(mul,j) = element_mulid(nf,t0,j);
+    if (do_mul) gel(mul,j) = elementi_mulid(nf,t0,j);
     x = gel(ix,j);
     y = cgetg(N+1, t_COL); gel(B,j) = y;
     for (i=1; i<=N; i++)
@@ -844,7 +905,7 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
 {
   GEN xh = get_hnfid(nf, x), yh = get_hnfid(nf, y);
   GEN a = hnfmerge_get_1(xh, yh);
-  return reducemodlll(a, idealmulh(nf,xh,yh));
+  return reducemodlll(a, idealmul_HNF(nf,xh,yh));
 }
 
 GEN
@@ -912,24 +973,18 @@ idealaddmultoone(GEN nf, GEN list)
  * y = [a,alpha] corresponds to the integral ideal aZ_K+alpha Z_K, a in Z,
  * alpha a ZV or a ZM (multiplication table). Multiply them */
 static GEN
-idealmulspec(GEN nf, GEN x, GEN y)
+idealmul_HNF_two(GEN nf, GEN x, GEN y)
 {
-  long i, N = lg(x)-1;
   GEN m, a = gel(y,1), alpha = gel(y,2);
+  long i, N;
 
-  switch(typ(alpha))
+  if (typ(alpha) != t_MAT)
   {
-    case t_MAT:
-      break;
-    case t_COL:
-      if (ZV_isscalar(alpha)) return ZM_Z_mul(x, gcdii(a, gel(alpha,1)));
-      /* fall through */
-    default:
-      alpha = eltimul_get_table(nf, alpha);
+    alpha = zk_scalar_or_multable(nf, alpha);
+    if (typ(alpha) == t_INT) /* e.g. y inert ? 0 should not (but may) occur */
+      return signe(a)? ZM_Z_mul(x, gcdii(a, alpha)): cgetg(1,t_MAT);
   }
-  if (!signe(a)) return ZM_hnf(ZM_mul(alpha, x));
-
-  m = cgetg((N<<1)+1,t_MAT);
+  N = lg(x)-1; m = cgetg((N<<1)+1,t_MAT);
   for (i=1; i<=N; i++) gel(m,i)   = ZM_ZC_mul(alpha,gel(x,i));
   for (i=1; i<=N; i++) gel(m,i+N) = ZC_Z_mul(gel(x,i), a);
   return ZM_hnfmodid(m, mulii(a, gcoeff(x,1,1)));
@@ -944,50 +999,33 @@ idealmulprime(GEN nf, GEN x, GEN vp)
 {
   GEN cx;
   x = Q_primitive_part(x, &cx);
-  x = idealmulspec(nf,x,vp);
+  x = idealmul_HNF_two(nf,x,vp);
   return cx? RgM_Rg_mul(x,cx): x;
 }
 
-static GEN
-mul(GEN nf, GEN x, GEN y)
-{
-  GEN yZ = gcoeff(y,1,1);
-  if (is_pm1(yZ)) return gcopy(x);
-  y = mat_ideal_two_elt(nf,y);
-  return idealmulspec(nf, x, y);
-}
-
-/* Assume ix and iy are integral in HNF form (or ideles of the same form).
- * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K
- * For internal use. */
+/* Assume ix and iy are integral in HNF form [NOT ideles]. Not memory clean.
+ * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K */
 GEN
-idealmulh(GEN nf, GEN ix, GEN iy)
+idealmul_HNF(GEN nf, GEN x, GEN y)
 {
-  long f = 0;
-  GEN res,x,y;
-
-  if (typ(ix)==t_VEC) {f=1;  x=gel(ix,1);} else x=ix;
-  if (typ(iy)==t_VEC && typ(iy[1]) != t_INT) {f+=2; y=gel(iy,1);} else y=iy;
-  res = f? cgetg(3,t_VEC): NULL;
-
+  GEN z;
   if (typ(y) == t_VEC)
-    y = idealmulspec(nf,x,y);
+    z = idealmul_HNF_two(nf,x,y);
   else
-  {
-    GEN xZ = gcoeff(x,1,1);
-    GEN yZ = gcoeff(x,1,1);
-    y = (cmpii(xZ, yZ) < 0)? mul(nf,y,x): mul(nf,x,y);
+  { /* reduce one ideal to two-elt form. The smallest */
+    GEN xZ = gcoeff(x,1,1), yZ = gcoeff(y,1,1);
+    if (cmpii(xZ, yZ) < 0)
+    {
+      if (is_pm1(xZ)) return gcopy(y);
+      z = idealmul_HNF_two(nf, y, mat_ideal_two_elt(nf,x));
+    }
+    else
+    {
+      if (is_pm1(yZ)) return gcopy(x);
+      z = idealmul_HNF_two(nf, x, mat_ideal_two_elt(nf,y));
+    }
   }
-  if (!f) return y;
-
-  gel(res,1) = y;
-  if (f==3) y = arch_mul(gel(ix,2), gel(iy,2));
-  else
-  {
-    y = (f==2)? gel(iy,2): gel(ix,2);
-    y = gcopy(y);
-  }
-  gel(res,2) = y; return res;
+  return z;
 }
 
 GEN
@@ -997,35 +1035,26 @@ mul_content(GEN cx, GEN cy)
   if (!cy) return cx;
   return gmul(cx,cy);
 }
+GEN
+mul_denom(GEN dx, GEN dy)
+{
+  if (!dx) return dy;
+  if (!dy) return dx;
+  return mulii(dx,dy);
+}
 
 /* x and y are ideals in matrix form */
 static GEN
 idealmat_mul(GEN nf, GEN x, GEN y)
 {
-  long i,j, rx = lg(x)-1, ry = lg(y)-1;
-  GEN cx, cy, m;
-
+  GEN cx, cy;
+  if (lg(x) == 1 || lg(y) == 1) return cgetg(1,t_MAT);
   x = Q_primitive_part(x, &cx);
   y = Q_primitive_part(y, &cy); cx = mul_content(cx,cy);
-  if (rx <= 2 || ry <= 2)
-  {
-    m = cgetg(rx*ry+1,t_MAT);
-    for (i=1; i<=rx; i++)
-      for (j=1; j<=ry; j++)
-	gel(m, (i-1)*ry+j) = element_muli(nf,gel(x,i),gel(y,j));
-    if (ZV_isscalar(gel(x,1)) && ZV_isscalar(gel(y,1)))
-      y = ZM_hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
-    else
-      y = ZM_hnfmod(m, ZM_detmult(m));
-  }
-  else
-  {
-    if (!ZM_ishnf(x)) x = idealmat_to_hnf(nf,x);
-    if (!ZM_ishnf(y)) y = idealmat_to_hnf(nf,y);
-    if (lg(x) == 1 || lg(y) == 1) return cgetg(1,t_MAT);
-    y = idealmulh(nf,x,y);
-  }
-  return cx? RgM_Rg_mul(y,cx): y;
+  if (!ZM_ishnf(x)) x = idealmat_to_hnf(nf,x);
+  if (!ZM_ishnf(y)) y = idealmat_to_hnf(nf,y);
+  y = idealmul_HNF(nf,x,y);
+  return cx? ZM_Q_mul(y,cx): y;
 }
 
 /* operations on elements in factored form */
@@ -1241,7 +1270,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   long i, l = lg(g);
   GEN prkZ, u, p = gel(pr,1), b = gel(pr,5);
   GEN vden = gen_0;
-  GEN mul = eltimul_get_table(nf, b);
+  GEN mul = zk_scalar_or_multable(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prkZ = gcoeff(prk, 1,1);
@@ -1406,60 +1435,74 @@ idealmulelt(GEN nf, GEN x, GEN v)
   if (typ(x) != t_COL) return gcmp0(x)? cgetg(1,t_MAT): gmul(Q_abs(x), v);
   return idealmat_to_hnf(nf, element_mulvec(nf, x, v));
 }
+/* FIXME: export ? */
+static int
+pr_is_inert(GEN P) { GEN f = gel(P,4); return f[2] == lg(gel(P,2))-1; }
 
-/* output the ideal product ix.iy (don't reduce) */
-GEN
-idealmul(GEN nf, GEN x, GEN y)
+/* tx <= ty */
+static GEN
+idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
 {
-  pari_sp av;
-  long tx,ty,f;
-  GEN res,ax,ay,p1;
-
-  tx = idealtyp(&x,&ax);
-  ty = idealtyp(&y,&ay);
-  if (tx>ty) {
-    res=ax; ax=ay; ay=res;
-    res=x; x=y; y=res;
-    f=tx; tx=ty; ty=f;
-  }
-  f = (ax||ay); res = f? cgetg(3,t_VEC): NULL; /* product is an idele */
-  nf=checknf(nf); av=avma;
+  GEN z;
   switch(tx)
   {
     case id_PRINCIPAL:
       switch(ty)
       {
 	case id_PRINCIPAL:
-	  p1 = idealhermite_aux(nf, element_mul(nf,x,y));
-	  break;
+	  return idealhermite_aux(nf, element_mul(nf,x,y));
 	case id_PRIME:
 	{
-	  GEN mx = eltmul_get_table(nf, x);
-	  GEN mpi= eltimul_get_table(nf, gel(y,2));
-	  p1 = shallowconcat(RgM_Rg_mul(mx,gel(y,1)), RgM_mul(mx,mpi));
-	  p1 = idealmat_to_hnf(nf, p1);
-	  break;
+	  GEN p = gel(y,1), pi = gel(y,2), cx;
+          if (pr_is_inert(y)) return RgM_Rg_mul(idealhermite_aux(nf,x),p);
+
+          x = nf_to_scalar_or_basis(nf, x);
+          switch(typ(x))
+          {
+            case t_INT:
+              if (!signe(x)) return cgetg(1,t_MAT);
+              return ZM_Z_mul(prime_to_ideal_aux(nf,y), absi(x));
+            case t_FRAC:
+              return RgM_Rg_mul(prime_to_ideal_aux(nf,y), Q_abs(x));
+          }
+          /* t_COL */
+          x = Q_primitive_part(x, &cx);
+          x = zk_multable(nf, x);
+	  z = shallowconcat(ZM_Z_mul(x,p), ZM_ZC_mul(x,pi));
+          z = ZM_hnfmod(z, ZM_detmult(z));
+          return cx? ZM_Q_mul(z, cx): z;
 	}
 	default: /* id_MAT */
-	  p1 = idealmulelt(nf, x,y);
-      }break;
-
+	  return idealmulelt(nf, x,y);
+      }
     case id_PRIME:
-      p1 = (ty==id_PRIME)? prime_to_ideal_aux(nf,y)
+      z = (ty==id_PRIME)? prime_to_ideal_aux(nf,y)
 			 : idealmat_to_hnf(nf,y);
-      p1 = idealmulprime(nf,p1,x); break;
+      return idealmulprime(nf,z,x);
 
     default: /* id_MAT */
-      p1 = idealmat_mul(nf,x,y);
+      return idealmat_mul(nf,x,y);
   }
-  p1 = gerepileupto(av,p1);
-  if (!f) return p1;
+}
 
+/* output the ideal product ix.iy (don't reduce) */
+GEN
+idealmul(GEN nf, GEN x, GEN y)
+{
+  pari_sp av;
+  GEN res, ax, ay, z;
+  long tx = idealtyp(&x,&ax);
+  long ty = idealtyp(&y,&ay), f;
+  if (tx>ty) { swap(ax,ay); swap(x,y); lswap(tx,ty); }
+  f = (ax||ay); res = f? cgetg(3,t_VEC): NULL; /* product is an idele */
+  av = avma;
+  z = gerepileupto(av, idealmul_aux(checknf(nf), x,y, tx,ty));
+  if (!f) return z;
   if (ax && ay)
     ax = arch_mul(ax, ay);
   else
     ax = gcopy(ax? ax: ay);
-  gel(res,1) = p1; gel(res,2) = ax; return res;
+  gel(res,1) = z; gel(res,2) = ax; return res;
 }
 
 /* assume pr in primedec format */
@@ -1513,7 +1556,7 @@ hnfideal_inv(GEN nf, GEN I)
   if (lg(I)==1) pari_err(talker, "cannot invert zero ideal");
   IZ = gcoeff(I,1,1); /* I \cap Z */
   if (!signe(IZ)) pari_err(talker, "cannot invert zero ideal");
-  J = idealmulh(nf,I, gmael(nf,5,7));
+  J = idealmul_HNF(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
   dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
@@ -1571,14 +1614,13 @@ idealinv(GEN nf, GEN x)
   gel(res,2) = arch_inv(ax); return res;
 }
 
-/* return x such that vp^n = x/d */
+/* Return x such that vp^n = x/d. Assume n != 0 */
 static GEN
-idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
+idealpowprime(GEN nf, GEN vp, GEN n, GEN *d)
 {
   GEN n1, x, r;
   long s = signe(n);
 
-  if (s == 0) pari_err(talker, "0th power in idealpowprime_spec");
   if (s < 0) n = negi(n);
   /* now n > 0 */
   x = shallowcopy(vp);
@@ -1586,7 +1628,7 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
   {
     if (s < 0)
     {
-      x[2] = x[5];
+      gel(x,2) = gel(x,5);
       *d = gel(x,1);
     }
     else
@@ -1612,20 +1654,6 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
   return x;
 }
 
-static GEN
-idealpowprime(GEN nf, GEN vp, GEN n)
-{
-  GEN x, d;
-  long s = signe(n);
-
-  nf = checknf(nf);
-  if (s == 0) return matid(degpol(nf[1]));
-  x = idealpowprime_spec(nf, vp, n, &d);
-  x = prime_to_ideal_aux(nf,x);
-  if (d) x = RgM_Rg_div(x, d);
-  return x;
-}
-
 /* x * vp^n. Assume x in HNF (possibly non-integral) */
 GEN
 idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
@@ -1636,10 +1664,9 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   nf = checknf(nf);
 
   /* inert, special cased for efficiency */
-  if (itos(gel(vp,4)) == degpol(nf[1]))
-    return RgM_Rg_mul(x, powgi(gel(vp,1), n));
+  if (pr_is_inert(vp)) return RgM_Rg_mul(x, powgi(gel(vp,1), n));
 
-  y = idealpowprime_spec(nf, vp, n, &dx);
+  y = idealpowprime(nf, vp, n, &dx);
   x = Q_primitive_part(x, &cx);
   if (cx && dx)
   {
@@ -1648,7 +1675,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
     else { dx = gel(cx,2); cx = gel(cx,1); }
     if (is_pm1(cx)) cx = NULL;
   }
-  x = idealmulspec(nf,x,y);
+  x = idealmul_HNF_two(nf,x,y);
   if (cx) x = RgM_Rg_mul(x,cx);
   if (dx) x = RgM_Rg_div(x,dx);
   return x;
@@ -1659,51 +1686,61 @@ idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n)
   return idealmulpowprime(nf,x,vp, negi(n));
 }
 
+static GEN
+idealpow_aux(GEN nf, GEN x, long tx, GEN n)
+{
+  GEN T = gel(nf,1), m, cx, n1, a, alpha;
+  long N = degpol(T), s = signe(n);
+  if (!s) return matid(N);
+  switch(tx)
+  {
+    case id_PRINCIPAL: tx = typ(x);
+      x = nf_to_scalar_or_alg(nf, x);
+      x = (typ(x) == t_POL)? RgXQ_pow(x,n,T): powgi(x,n);
+      return idealhermite_aux(nf,x);
+    case id_PRIME: {
+      GEN d;
+      if (pr_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
+      x = idealpowprime(nf, x, n, &d);
+      x = prime_to_ideal_aux(nf,x);
+      return d? RgM_Rg_div(x, d): x;
+    }
+    default:
+      if (is_pm1(n)) return (s < 0)? idealinv(nf, x): gcopy(x);
+      n1 = (s < 0)? negi(n): n;
+
+      x = Q_primitive_part(x, &cx);
+      a = mat_ideal_two_elt(nf,x); alpha = gel(a,2); a = gel(a,1);
+      alpha = element_pow(nf,alpha,n1);
+      m = zk_scalar_or_multable(nf, alpha);
+      if (typ(m) == t_INT) {
+        x = gcdii(m, powgi(a,n1));
+        if (s<0) x = ginv(x);
+        if (cx) x = gmul(x, powgi(cx,n));
+        x = scalarmat(x, N);
+      }
+      else {
+        x = ZM_hnfmodid(m, powgi(a,n1));
+        if (s<0) x = hnfideal_inv(nf,x);
+        if (cx) x = RgM_Rg_mul(x, powgi(cx,n));
+      }
+      return x;
+  }
+}
+
 /* raise the ideal x to the power n (in Z) */
 GEN
 idealpow(GEN nf, GEN x, GEN n)
 {
   pari_sp av;
-  long tx, N, s = signe(n);
-  GEN res,ax,m,cx,n1,a,alpha;
+  long tx;
+  GEN res, ax;
 
   if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpow");
   tx = idealtyp(&x,&ax);
   res = ax? cgetg(3,t_VEC): NULL;
-  nf = checknf(nf);
-  av = avma; N = degpol(nf[1]);
-  if (!s) x = matid(N);
-  else
-    switch(tx)
-    {
-      case id_PRINCIPAL: tx = typ(x);
-	if (!is_const_t(tx))
-	  switch(tx)
-	  {
-	    case t_COL: x = coltoalg(nf,x); break;
-	    case t_POL: x = gmodulo(x,gel(nf,1));
-	  }
-	x = powgi(x,n);
-	x = idealhermite_aux(nf,x); break;
-      case id_PRIME:
-	x = idealpowprime(nf,x,n); break;
-      default:
-	if (is_pm1(n))
-	{
-	  x = (s < 0)? idealinv(nf, x): gcopy(x);
-	  break;
-	}
-	n1 = (s < 0)? negi(n): n;
-
-	x = Q_primitive_part(x, &cx);
-	a=ideal_two_elt(nf,x); alpha=gel(a,2); a=gel(a,1);
-	alpha = element_pow(nf,alpha,n1);
-	m = eltimul_get_table(nf, alpha);
-	x = ZM_hnfmodid(m, powgi(a,n1));
-	if (s<0) x = hnfideal_inv(nf,x);
-	if (cx) x = RgM_Rg_mul(x, powgi(cx,n));
-    }
-  x = gerepileupto(av, x);
+  av = avma;
+  x = gerepileupto(av, idealpow_aux(checknf(nf), x, tx, n));
   if (!ax) return x;
   ax = arch_pow(ax, n);
   gel(res,1) = x;
@@ -1795,7 +1832,7 @@ isideal(GEN nf,GEN x)
   if (!ZM_ishnf(x)) return 0;
   for (i=2; i<=N; i++)
     for (j=2; j<=N; j++)
-      if (! hnf_invimage(x, element_mulid(nf,gel(x,i),j)))
+      if (! hnf_invimage(x, elementi_mulid(nf,gel(x,i),j)))
       {
 	avma = av; return 0;
       }
@@ -1880,7 +1917,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   if (!signe(yZ)) { avma = av; return cgetg(1, t_MAT); }
   if (dx) y = ZM_Z_mul(y, dx);
   if (dy) x = ZM_Z_mul(x, dy);
-  dx = mul_content(dx,dy);
+  dx = mul_denom(dx,dy);
   z = kerint(shallowconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = ZM_hnfmodid(ZM_mul(x,z), lcmii(xZ, yZ));
@@ -2456,10 +2493,20 @@ static GEN
 element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
 {
   long l, j;
-  GEN y, M = eltmul_get_table(nf,x);
+  GEN y, dx;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) == t_COL)
+    x = zk_multable(nf, Q_remove_denom(x, &dx));
+  else
+    dx = NULL;
 
   l = min(lg(m), lim+1); y = cgetg(l, t_VEC);
-  for (j=1; j<l; j++) gel(y,j) = gmul(M, gcoeff(m,i,j));
+  for (j=1; j<l; j++)
+  {
+    GEN t = gmul(x, gcoeff(m,i,j));
+    if (dx) t = gdiv(t, dx);
+    gel(y,j) = t;
+  }
   return y;
 }
 

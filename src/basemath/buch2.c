@@ -347,7 +347,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
-      GEN J = red(nf, idealmulh(nf,vp,gel(id2,j-1)), F->G0, &m);
+      GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
       if (!J)
       {
@@ -500,7 +500,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     for (m = 1; m <= k; m++)
     {
       GEN t = gel(LP,m);
-      gel(t,5) = eltimul_get_table(nf, gel(t,5));
+      gel(t,5) = zk_scalar_or_multable(nf, gel(t,5));
     }
     if (f == l)
       setisclone(LP); /* flag it: all prime divisors in FB */
@@ -993,11 +993,19 @@ Vbase_to_FB(FB_t *F, GEN pr)
   return F->iLP[p] + pr_index(F->LV[p], pr);
 }
 
+/* x, y 2 ideles whose first component is an integral HNF */
+static GEN
+idelemul_HNF(GEN nf, GEN x, GEN y)
+{
+  return mkvec2( idealmul_HNF(nf, gel(x,1), gel(y,1)),
+                 arch_mul(gel(x,2), gel(y,2)));
+}
+
 /* return famat y (principal ideal) such that y / x is smooth [wrt Vbase] */
 static GEN
 SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
 {
-  GEN vdir, id, z, ex, y, x0, Nx = ZM_det_triangular(x);
+  GEN vdir, z, ex, y, x0, Nx = ZM_det_triangular(x);
   long nbtest_lim, nbtest, bou, i, ru, lgsub;
   int flag = (gexpo(gcoeff(x,1,1)) < 100);
 
@@ -1030,8 +1038,8 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   for(;;)
   {
     pari_sp av = avma;
+    GEN I, NI, id = x0;
     if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
-    id = x0;
     for (i=1; i<lgsub; i++)
     {
       ex[i] = random_bits(RANDOM_BITS);
@@ -1039,15 +1047,15 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
       { /* avoid prec pb: don't let id become too large as lgsub increases */
 	if (id != x0) id = ideallllred(nf,id,NULL,0);
 	z[1] = Vbase[i];
-	id = idealmulh(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
+	id = idelemul_HNF(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
       }
     }
     if (id == x0) continue;
 
+    I = gel(id,1); NI = ZM_det_triangular(I);
     for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
     for (bou=1; bou<ru; bou++)
     {
-      GEN I = gel(id,1), NI = ZM_det_triangular(I);
       y = ideallllred_elt(nf, I, vdir);
       if (factorgen(F, nf, I, NI, y, fact))
       {
@@ -2116,7 +2124,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       for (i=1; i<lgsub; i++)
       { /* reduce mod apparent order */
 	ex[i] = random_bits(RANDOM_BITS) % F->pow->ord[i];
-	if (ex[i]) ideal = idealmulh(nf,ideal, gmael(F->pow->id2,i,ex[i]));
+	if (ex[i]) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex[i]));
       }
     } while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
@@ -2192,7 +2200,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 	for (i=1; i<lgsub; i++)
 	{
 	  ex = random_bits(RANDOM_BITS) % F->pow->ord[i];
-	  if (ex) ideal = idealmulh(nf,ideal, gmael(F->pow->id2,i,ex));
+	  if (ex) ideal = idealmul_HNF(nf,ideal, gmael(F->pow->id2,i,ex));
 	}
 	ideal = remove_content(ideal);
         Nideal = ZM_det_triangular(ideal);
@@ -2394,8 +2402,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       p1 = gcoeff(Uir,i,j);
       if (signe(p1))
       {
-	z[1]=Vbase[i]; J = idealpowred(nf0,z,p1,prec);
-	I = idealmulh(nf0,I,J);
+	z[1]=Vbase[i]; 
+	I = idelemul_HNF(nf0, I, idealpowred(nf0,z,p1,prec));
 	I = ideallllred(nf0,I,NULL,prec);
       }
     }

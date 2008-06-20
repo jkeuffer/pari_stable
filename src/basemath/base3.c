@@ -143,7 +143,7 @@ elementi_mulid(GEN nf, GEN x, long i)
 
 /* table of multiplication by wi in ZK = Z[w1,..., wN] */
 GEN
-eltmulid_get_table(GEN nf, long i)
+zk_wi_multable(GEN nf, long i)
 {
   long k,N;
   GEN m, tab = get_tab(nf, &N);
@@ -153,17 +153,8 @@ eltmulid_get_table(GEN nf, long i)
   return m;
 }
 
-static GEN
-RgC_mul_get_table(GEN nf, GEN x)
-{
-  long i, l = lg(x);
-  GEN mul = cgetg(l,t_MAT);
-  gel(mul,1) = x; /* assume w_1 = 1 */
-  for (i=2; i<l; i++) gel(mul,i) = element_mulid(nf,x,i);
-  return mul;
-}
-static GEN
-ZC_mul_get_table(GEN nf, GEN x)
+GEN
+zk_multable(GEN nf, GEN x)
 {
   long i, l = lg(x);
   GEN mul = cgetg(l,t_MAT);
@@ -172,23 +163,15 @@ ZC_mul_get_table(GEN nf, GEN x)
   return mul;
 }
 
-/* table of multiplication by x in ZK = Z[w1,..., wN] */
+/* x integral in nf; table of multiplication by x in ZK = Z[w1,..., wN].
+ * Return a t_INT if x is scalar, and a ZM otherwise */
 GEN
-eltmul_get_table(GEN nf, GEN x)
+zk_scalar_or_multable(GEN nf, GEN x)
 {
-  if (typ(x) == t_MAT) return x;
+  long tx = typ(x);
+  if (tx == t_MAT || tx == t_INT) return x;
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) return scalarmat_shallow(x, degpol(nf[1]));
-  return RgC_mul_get_table(nf, x);
-}
-/* as eltmul_get_table, x integral */
-GEN
-eltimul_get_table(GEN nf, GEN x)
-{
-  if (typ(x) == t_MAT) return x;
-  x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) return scalarmat_shallow(x, degpol(nf[1]));
-  return ZC_mul_get_table(nf, x);
+  return (typ(x) == t_COL)? zk_multable(nf, x): x;
 }
 
 /* product of x and y in nf */
@@ -226,19 +209,23 @@ element_mul(GEN nf, GEN x, GEN y)
 GEN
 element_mulvec(GEN nf, GEN x, GEN v)
 {
-  long l, i;
-  GEN y;
+  long tx, l, i;
+  GEN y, dx = NULL;
 
   x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) {
-    if (gcmp1(x)) return shallowcopy(v);
-    if (gcmp_1(x)) return gneg(v);
+  tx = typ(x);
+  if (tx != t_COL) {
+    if (tx == t_INT && is_pm1(x))
+      return signe(x) > 0? shallowcopy(v): gneg(v);
   }
   else
-    x = RgC_mul_get_table(nf, x);
+  {
+    x = Q_remove_denom(x, &dx);
+    x = zk_multable(nf, x);
+  }
   l = lg(v); y = cgetg(l, typ(v));
   for (i=1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
-  return y;
+  return dx? gdiv(y, dx): y;
 }
 
 /* inverse of x in nf */
@@ -501,7 +488,7 @@ _mulidmod(void *data, GEN x, GEN y)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
   (void)y; /* ignored */
-  return FpC_red(element_mulid(D->nf, x, D->I), D->p);
+  return FpC_red(elementi_mulid(D->nf, x, D->I), D->p);
 }
 static GEN
 _sqrmod(void *data, GEN x)
@@ -533,14 +520,17 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 
 /* valuation of integer x, with resp. to prime ideal P above p.
  * p.P^(-1) = b Z_K
- * [b may be given as the 'multiplication by b' matrix]
+ * [b may be given as the 'multiplication by b' matrix, possibly a t_INT]
  */
 long
 int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 {
-  long i, k, w, N = degpol(nf[1]);
-  GEN r, a, y, mul = eltimul_get_table(nf, b);
+  long i, k, w, N;
+  GEN r, a, y, mul = zk_scalar_or_multable(nf, b);
 
+  if (typ(mul) == t_INT) return newx? ZV_pvalrem(x, p, newx):ZV_pval(x, p);
+
+  N = degpol(nf[1]);
   y = cgetg(N+1, t_COL); /* will hold the new x */
   x = shallowcopy(x);
   for(w=0;; w++)
@@ -551,7 +541,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
       for (k=2; k<=N; k++) a = addii(a, mulii(gel(x,k), gcoeff(mul,i,k)));
       /* is it divisible by p ? */
       gel(y,i) = dvmdii(a,p,&r);
-      if (signe(r))
+      if (r != gen_0)
       {
 	if (newx) *newx = x;
 	return w;
@@ -1228,13 +1218,16 @@ detcyc(GEN cyc, long *L)
  * mv = multiplication table by v */
 static GEN
 makeprimetoideal(GEN UV, GEN u,GEN mv, GEN x)
-{ return ZC_hnfrem(ZC_add(u, ZM_ZC_mul(mv,x)), UV); }
+{
+  GEN xv = typ(mv) == t_INT? ZC_Z_mul(x, mv): ZM_ZC_mul(mv,x);
+  return ZC_hnfrem(ZC_add(u, xv), UV);
+}
 
 static GEN
-makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN v, GEN gen)
+makeprimetoidealvec(GEN nf, GEN UV, GEN u,GEN mv, GEN gen)
 {
   long i, lx = lg(gen);
-  GEN y = cgetg(lx,t_VEC), mv = eltimul_get_table(nf, v);
+  GEN y = cgetg(lx,t_VEC);
   for (i=1; i<lx; i++) gel(y,i) = makeprimetoideal(UV,u,mv, gel(gen,i));
   return y;
 }
@@ -1273,7 +1266,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   {
     GEN uv = idealaddtoone(nf,pre, idealdivpowprime(nf,x,pr,ep));
     u = gel(uv,1);
-    v = eltimul_get_table(nf, gel(uv,2));
+    v = zk_scalar_or_multable(nf, gel(uv,2));
     g0 = makeprimetoideal(x,u,v,g);
   }
 
@@ -1882,11 +1875,16 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
 
   if (gen)
   {
-    GEN u, v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
+    GEN mu,mv, u,v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
     u = gel(uv,1);
     v = gel(uv,2);
-    gen = shallowconcat(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
-		        makeprimetoidealvec(nf,x,v,u, gel(G2,3)));
+    mv = zk_scalar_or_multable(nf, v);
+    if (typ(mv) == t_INT)
+      mu = subsi(1,mv);
+    else
+      mu = RgM_Rg_add(ZM_neg(mv), gen_1); /* mult by u = 1-v */
+    gen = shallowconcat(makeprimetoidealvec(nf,x,u,mv, gel(G1,3)),
+		        makeprimetoidealvec(nf,x,v,mu, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, gel(f1,2));

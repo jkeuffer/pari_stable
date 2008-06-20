@@ -163,6 +163,32 @@ underlying the above, except that the first argument must now have the
 corresponding number field type. I.e. one cannot call
 \kbd{nfnewprec\_shallow(nf, prec)} if \kbd{nf} is actually a \var{bnf}.
 
+\subsec{Number field arithmetic}
+The number field $K = \Q[X]/(T)$ is represented by an \kbd{nf} (or \kbd{bnf}
+or \kbd{bnr} structure). An algebraic number belonging to $K$ is given as
+
+\item a \typ{INT}, \typ{FRAC} or \typ{POL} (implicitly modulo $T$), or
+
+\item a \typ{POLMOD} (modulo $T$), or
+
+\item a \typ{COL}~\kbd{v} of dimension $N = [K:\Q]$, representing
+the element in terms of the computed integral basis, as
+\bprog
+  sum(i = 1, N, v[i] * nf.zk[i])
+@eprog
+The preferred forms are \typ{INT} and \typ{COL} of \typ{INT}. Routines can
+handle denominators but it is much more efficient to remove  denominators
+first (\tet{Q_remove_denom}) and take them into account at the end.
+
+\fun{GEN}{zk_multable}{GEN nf, GEN x} given a \kbd{ZC} $x$ (implicitly
+representing an algebraic integer), returns the \kbd{ZM} giving the
+multiplication table by $x$.
+
+\fun{GEN}{zk_scalar_or_multable}{GEN nf, GEN x} given a \typ{INT} or \kbd{ZC}
+$x$, returns a \typ{INT} equal to $x$ if the latter is a scalar
+(\typ{INT} or \kbd{ZV\_isscalar}$(x)$ is 1) and
+\kbd{zk\_multable}$(\var{nf},x)$ otherwise.
+
 \subsec{Reducing modulo maximal ideals}
 
 \fun{GEN}{nfmodprinit}{GEN nf, GEN pr} returns an abstract \kbd{modpr}

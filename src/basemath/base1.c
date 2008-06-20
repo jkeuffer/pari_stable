@@ -1209,10 +1209,13 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   dA = dA? diviiexact(absdK, dA): absdK;
   A = ZM_hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
-  gel(MDI,2) = eltimul_get_table(nf, gel(MDI,2));
+  gel(MDI,2) = zk_scalar_or_multable(nf, gel(MDI,2));
   gel(mat,7) = MDI;
   if (is_pm1(T->index)) /* principal ideal (x'), whose norm is |dK| */
-    D = ZM_hnfmod(eltimul_get_table(nf, ZX_deriv(x)), absdK);
+  {
+    D = zk_scalar_or_multable(nf, ZX_deriv(x));
+    if (typ(D) == t_MAT) D = ZM_hnfmod(D, absdK);
+  }
   else
     D = RgM_Rg_mul(idealinv(nf, A), dA);
   gel(mat,3) = gen_0; /* FIXME: was gram matrix of current mat[2]. Useless */

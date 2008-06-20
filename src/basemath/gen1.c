@@ -334,9 +334,8 @@ gred_frac2(GEN x1, GEN x2)
   p1 = gcdii(x2,p1);
   if (is_pm1(p1))
   {
-    avma = av; y = cgetg(3,t_FRAC);
-    gel(y,1) = icopy(x1);
-    gel(y,2) = icopy(x2);
+    avma = av;
+    y = mkfraccopy(x1, x2);
   }
   else
   {

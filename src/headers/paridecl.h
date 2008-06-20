@@ -315,6 +315,7 @@ GEN     RgXQXV_to_mod(GEN V, GEN T);
 GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);
 GEN     RgXQ_norm(GEN x, GEN T);
+GEN     RgXQ_pow(GEN x, GEN n, GEN T);
 GEN     RgXQ_powers(GEN x, long l, GEN T);
 GEN     RgXQ_sqr(GEN x,GEN T);
 GEN     RgXV_to_RgM(GEN v, long n);
@@ -902,7 +903,6 @@ GEN     element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal);
 GEN     element_sqr(GEN nf,GEN x);
 GEN     element_sqri(GEN nf, GEN x);
 long    element_val(GEN nf, GEN x, GEN vp);
-GEN     eltmul_get_table(GEN nf, GEN x);
 GEN     ideallist(GEN nf,long bound);
 GEN     ideallist0(GEN nf,long bound, long flag);
 GEN     ideallistarch(GEN nf, GEN list, GEN arch);
@@ -932,6 +932,8 @@ GEN     Idealstar(GEN nf, GEN x,long flun);
 GEN     nfsign_arch(GEN nf,GEN alpha,GEN arch);
 GEN     nfsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 GEN     nfsign(GEN nf,GEN alpha);
+GEN     zk_multable(GEN nf, GEN x);
+GEN     zk_scalar_or_multable(GEN, GEN x);
 
 /* base4.c */
 
@@ -966,7 +968,7 @@ GEN     ideallllred(GEN nf,GEN ix,GEN vdir,long prec);
 GEN     ideallllred_elt(GEN nf, GEN I, GEN vdir);
 GEN     idealmul(GEN nf, GEN ix, GEN iy);
 GEN     idealmul0(GEN nf, GEN ix, GEN iy, long flag, long prec);
-GEN     idealmulh(GEN nf, GEN ix, GEN iy);
+GEN     idealmul_HNF(GEN nf, GEN ix, GEN iy);
 GEN     idealmulprime(GEN nf,GEN ix,GEN vp);
 GEN     idealmulred(GEN nf, GEN ix, GEN iy, long prec);
 GEN     idealnorm(GEN nf, GEN x);
@@ -981,6 +983,7 @@ long    idealval(GEN nf,GEN ix,GEN vp);
 long    isideal(GEN nf,GEN x);
 GEN     minideal(GEN nf,GEN ix,GEN vdir,long prec);
 GEN     mul_content(GEN cx, GEN cy);
+GEN     mul_denom(GEN cx, GEN cy);
 GEN     nfdetint(GEN nf,GEN pseudo);
 GEN     nfhnf(GEN nf, GEN x);
 GEN     nfhnfmod(GEN nf, GEN x, GEN d);
@@ -1490,6 +1493,8 @@ long    Z_lvalrem(GEN n, ulong p, GEN *py);
 long    z_pval(long n, GEN p);
 long    Z_pval(GEN n, GEN p);
 long    Z_pvalrem(GEN x, GEN p, GEN *py);
+long    ZV_pval(GEN x, GEN p);
+long    ZV_pvalrem(GEN x, GEN p, GEN *px);
 
 /* gen3.c */
 

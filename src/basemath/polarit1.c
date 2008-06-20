@@ -1865,7 +1865,7 @@ padicff2(GEN nf,GEN p,long k)
   GEN z, mat, D, U,fa, pk, dec_p, Ui, mulx;
   long i, l;
 
-  mulx = eltimul_get_table(nf, gmael(nf,8,2)); /* mul by (x mod T) */
+  mulx = zk_scalar_or_multable(nf, gmael(nf,8,2)); /* mul by (x mod T) */
   dec_p = primedec(nf,p);
   l = lg(dec_p); fa = cgetg(l,t_COL);
   D = NULL; /* -Wall */

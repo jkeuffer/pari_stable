@@ -1462,6 +1462,22 @@ RgXQ_u_pow(GEN x, ulong n, GEN T)
   y = leftright_pow_u(x, n, (void*)T, &_sqr, &_mul);
   return gerepileupto(av, y);
 }
+/* x,T in Rg[X], n in N, compute lift(x^n mod T)) */
+GEN
+RgXQ_pow(GEN x, GEN n, GEN T)
+{
+  pari_sp av;
+  long s = signe(n);
+  GEN y;
+
+  if (!s) return pol_1(varn(x));
+  if (is_pm1(n) == 1) 
+    return (s < 0)? RgXQ_inv(x, T): gcopy(x);
+  av = avma;
+  if (s < 0) x = RgXQ_inv(x, T);
+  y = leftright_pow(x, n, (void*)T, &_sqr, &_mul);
+  return gerepileupto(av, y);
+}
 
 /* generates the list of powers of x of degree 0,1,2,...,l*/
 GEN

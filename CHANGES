@@ -185,6 +185,8 @@ BA 49- user variables can now be aliased [#790].
        [ was: (x^6 - x^3 - 2*x - 1)/(x^6 - 3*x^3 + 1)  ]
    61- deprecated flag '2' for bnfinit [ don't compute units ] is now ignored
        ==> bnfunit becomes totally useless.
+   62- the last component in prime ideals "primedec" format is a number field
+       element, but no longer necessarily in t_COL form
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -231,19 +233,20 @@ JD 12- add an optional argument to quit()
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
    20- library function galoisinit0, get_nfpol, get_bnfpol, 
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
-   numberofconjugates, mkquad, mkvecsmall4, shallowconcat1, concat1,
-   ZV_prod,
+   numberofconjugates, mkfraccopy, mkquad, mkvecsmall4, shallowconcat1, concat1,
+   ZV_prod, ZV_pval, ZV_pvalrem
    zv_prod
    RgX_neg, RgX_add, RgX_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub,
    RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX, RgX_type,
    RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
-   RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul
+   RgXQ_norm, RgXQ_pow,
+   RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
    RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
    RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,
-   RgM_diagonal_shallow, RgM_inv, RgM_solve
-   FF_sub, ZC_lincomb1_inplace, ZC_z_mul
+   RgM_diagonal_shallow, RgM_inv, RgM_solve,
+   FF_sub, ZC_lincomb1_inplace, ZC_z_mul,
    Z_isanypower,
-   RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod,
+   RgXQX_translate, RgXQV_to_mod, RgXQXV_to_mod
    21- library function nf_to_scalar_or_basis, nf_to_scalar_or_alg
    22- library function roundr_safe
 BA 23- [ellap] Port of SEA algorithm from the ellsea GP package
@@ -256,7 +259,7 @@ RM 26- partitions()
    27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
        ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all, RgXQX_pseudodivrem,
-       Flx_roots_naive
+       Flx_roots_naive, zk_multable, zk_scalar_or_multable
 BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        abelian_group, group_domain, group_elts, group_order, group_isabelian,
        group_abelianHNF, group_abelianSNF, group_isA4S4, group_leftcoset,
@@ -277,6 +280,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    34- function bnfcompress() [ to create a "small bnf" from a true
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.
+   35- library functions mul_content, mul_denom
 
   Removed
     1- obsolete library functions extract and matextract

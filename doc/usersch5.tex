@@ -1180,6 +1180,13 @@ the prime-to-\kbd{p} part of~\kbd{x}.
 \fun{long}{Z_pval}{GEN x, GEN p} as \kbd{Z\_pvalrem} but only returns the
 ``valuation''.
 
+\fun{long}{ZV_pvalrem}{GEN x, GEN p, GEN *r} $x$ being a vector of \typ{INT}s,
+return the min $v$ of the valuations of its components and set \kbd{*r} to
+$x/p^v$. Infinite loop if $x$ is the zero vector.
+
+\fun{long}{ZV_pval}{GEN x, GEN p} as \kbd{ZV\_pvalrem} but only returns the
+``valuation''.
+
 \fun{long}{Z_lvalrem}{GEN x, ulong p, GEN *r} as \kbd{Z\_pvalrem}, except
 that \kbd{p} is an \kbd{ulong} ($\kbd{p} > 1$).
 
@@ -3883,19 +3890,21 @@ numbers are not checked.
 have the same variable number and \kbd{RgX\_equal(x,y)} is $1$.
 \smallskip
 
-\fun{GEN}{RgXQ_mul}{GEN y, GEN x, GEN T}
+\fun{GEN}{RgXQ_mul}{GEN y, GEN x, GEN T} computes $xy$ mod $T$
 
-\fun{GEN}{RgXQ_norm}{GEN x, GEN T} returns the norm of \kbd{Mod(x, T)}.
-
-\fun{GEN}{RgXQ_sqr}{GEN x, GEN T}
+\fun{GEN}{RgXQ_sqr}{GEN x, GEN T} computes $x^2$ mod $T$
 
 \fun{GEN}{RgXQ_inv}{GEN x, GEN T} return the inverse of $x$ mod $T$.
+
+\fun{GEN}{RgXQ_pow}{GEN x, GEN n, GEN T} computes $x^n$ mod $T$
 
 \fun{GEN}{RgXQ_powers}{GEN x, long n, GEN T} returns $[\kbd{x}^0,
 \dots, \kbd{x}^\kbd{n}]$ as a \typ{VEC} of \kbd{RgXQ}s.
 
 \fun{GEN}{RgXQ_matrix_pow}{GEN y, long n, long m, GEN P} returns
 \kbd{RgXQ\_powers(y,m-1,P)}, as a matrix of dimension $n \geq \deg P$.
+
+\fun{GEN}{RgXQ_norm}{GEN x, GEN T} returns the norm of \kbd{Mod(x, T)}.
 
 \fun{GEN}{RgX_RgXQ_compo}{GEN f,GEN x,GEN T} returns
 $\kbd{f}(\kbd{x})$ modulo $T$.
@@ -4179,6 +4188,9 @@ the identity.
 
 \smallskip
 See also next section for analogs of the following functions:
+
+\fun{GEN}{mkfraccopy}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
+$y > 1$ and $(x,y) = 1$.
 
 \fun{GEN}{mkcolcopy}{GEN x} creates a 1-dimensional \typ{COL} containing
 \kbd{x}.
@@ -4757,6 +4769,16 @@ is a rational number (\typ{INT} or \typ{FRAC}) and the result is integral.
 
 \fun{GEN}{Q_muli_to_int}{GEN x, GEN d} returns \kbd{x * c}, assuming $c$
 is a \typ{INT} and the result is integral.
+
+\fun{GEN}{mul_content}{GEN cx, GEN cy}  \kbd{cx} and \kbd{cy} are
+as set by \kbd{primitive\_part} or \kbd{Q\_primitive\_part}: either a \kbd{GEN}
+or \kbd{NULL} representing the trivial content $1$. Returns their product
+(either a \kbd{GEN} or \kbd{NULL}).
+
+\fun{GEN}{mul_denom}{GEN dx, GEN dy} \kbd{dx} and \kbd{dy} are
+as set by \kbd{Q\_remove\_denom}: either a \typ{INT} or \kbd{NULL} representing
+the trivial denominatory $1$. Returns their product (either a \typ{INT} or
+\kbd{NULL}).
 
 \subsec{Complex numbers}
 

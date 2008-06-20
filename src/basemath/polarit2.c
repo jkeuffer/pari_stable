@@ -3117,7 +3117,7 @@ GEN
 Q_remove_denom(GEN x, GEN *ptd)
 {
   GEN d = Q_denom(x);
-  if (gcmp1(d)) d = NULL; else x = Q_muli_to_int(x,d);
+  if (d == gen_1) d = NULL; else x = Q_muli_to_int(x,d);
   if (ptd) *ptd = d;
   return x;
 }

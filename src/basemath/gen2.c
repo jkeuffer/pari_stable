@@ -1048,6 +1048,35 @@ Z_pval(GEN x, GEN p) {
     vx++; x = q;
   }
 }
+long
+ZV_pval(GEN x, GEN p)
+{
+  long i, lx = lg(x), v = 0;
+  pari_sp av = avma;
+  GEN y = shallowcopy(x);
+  for(;; v++)
+    for (i = 1; i < lx; i++)
+    {
+      GEN r; gel(y,i) = dvmdii(gel(y,i), p, &r);
+      if (r != gen_0) { avma = av; return v; }
+    }
+}
+long
+ZV_pvalrem(GEN x, GEN p, GEN *px)
+{
+  long i, lx = lg(x), v = 0;
+  GEN y = cgetg(lx, t_COL);
+  x = shallowcopy(x);
+  for(;; v++)
+  {
+    for (i = 1; i < lx; i++)
+    {
+      GEN r; gel(y,i) = dvmdii(gel(x,i), p, &r);
+      if (r != gen_0) { *px = x; return v; }
+    }
+    swap(x, y);
+  }
+}
 
 /*******************************************************************/
 /*                                                                 */

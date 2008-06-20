@@ -28,6 +28,7 @@ GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
 GEN    mkcomplex(GEN x, GEN y);
 GEN    mkfrac(GEN x, GEN y);
+GEN    mkfraccopy(GEN x, GEN y);
 GEN    mkintmod(GEN x, GEN y);
 GEN    mkintmodu(ulong x, ulong y);
 GEN    mkmat(GEN x);
@@ -560,6 +561,9 @@ icopy(GEN x)
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }
+INLINE GEN
+mkfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
+  gel(v,1) = icopy(x); gel(v,2) = icopy(y); return v; }
 
 /* copy integer x as if we had avma = av */
 INLINE GEN
