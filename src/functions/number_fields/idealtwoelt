@@ -5,13 +5,15 @@ Prototype: GGDG
 Help: idealtwoelt(nf,x,{a}): two-element representation of an ideal x in the
  number field nf. If (optional) a is non-zero, first element will be equal to a
 Doc: computes a two-element
- representation of the ideal $x$ in the number field $\var{nf}$, using a
- straightforward (exponential time) search. $x$ can be an ideal in any form,
- (including perhaps an Archimedean part, which is ignored) and the result is a
- row vector $[a,\alpha]$ with two components such that $x=a\Z_K+\alpha\Z_K$
- and $a\in\Z$, where $a$ is the one passed as argument if any. If $x$ is given
- by at least two generators, $a$ is chosen to be the positive generator of
- $x\cap\Z$.
+ representation of the ideal $x$ in the number field $\var{nf}$, combining a
+ random search and an explicit approximation theorem. $x$ is an ideal
+ in any form (including perhaps an Archimedean part, which is ignored) and the
+ result is a row vector $[a,\alpha]$ with two components such that
+ $x=a\Z_K+\alpha\Z_K$ and $a\in\Z$, where $a$ is the one passed as argument if
+ any. If $x$ is given by at least two generators, $a$ is chosen to be the
+ positive generator of $x\cap\Z$.
 
- Note that when an explicit $a$ is given, we use an asymptotically faster
- method, however in practice it is usually slower.
+ Note that when an explicit $a$ is given, we must factor it and this may
+ be costly. When $a$ is omitted, we use a fast lazy factorization of $x\cap
+ \Z$, yielding an algorithm in randomized polynomial time (and generally
+ much faster in practice).
