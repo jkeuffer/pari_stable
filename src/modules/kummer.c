@@ -862,7 +862,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   P = cgetg(l,t_MAT);
   for (j=1; j<l; j++)
   {
-    GEN g, id = idealhermite_aux(nfz, gel(raygenz,j));
+    GEN g, id = idealhnf_shallow(nfz, gel(raygenz,j));
     g = Stelt(nf, gmul(gel(nfz,7), id), polrel);
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     gel(P,j) = isprincipalray(bnr, g);
@@ -1028,7 +1028,7 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
   GEN I = ideal_two_elt(nf,id);
   GEN x = coltoliftalg(nf, gel(I,2));
   gel(I,2) = algtobasis(nfz, RgX_RgXQ_compo(x, C->p, C->R));
-  return prime_to_ideal(nfz,I);
+  return idealhnf_two(nfz,I);
 }
 
 static void

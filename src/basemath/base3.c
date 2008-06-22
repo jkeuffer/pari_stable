@@ -1077,7 +1077,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
-  xh = idealhermite_aux(nf,x);
+  xh = idealhnf_shallow(nf,x);
   a = element_div(nf, hnfmerge_get_1(xh, y), x);
   return gerepileupto(av, ZC_hnfrem(a, y));
 }
@@ -1258,7 +1258,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     g = poltobasis(nf, g);
   }
   /* g generates  (Z_K / pr)^* */
-  prh = prime_to_ideal(nf,pr);
+  prh = idealhnf_two(nf,pr);
   pre = (e==1)? prh: idealpow(nf,pr,ep);
   g0 = g;
   u = v = NULL; /* gcc -Wall */
@@ -1645,7 +1645,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
     arch = zerovec(R1);
     archp = cgetg(1, t_VECSMALL);
   }
-  x = idealhermite_aux(nf, ideal);
+  x = idealhnf_shallow(nf, ideal);
   if (lg(x) == 1 || typ(gcoeff(x,1,1)) != t_INT)
     pari_err(talker,"Idealstar needs an integral non-zero ideal: %Ps",x);
   sarch = nfarchstar(nf, x, archp);

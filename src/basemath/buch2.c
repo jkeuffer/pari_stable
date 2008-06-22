@@ -344,7 +344,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
     gel(id2,1) = mkvec2(gel(vp,1), gel(vp,2));
     alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
-    vp = prime_to_ideal(nf,vp);
+    vp = idealhnf_two(nf,vp);
     for (j=2; j<=a; j++)
     {
       GEN J = red(nf, idealmul_HNF(nf,vp,gel(id2,j-1)), F->G0, &m);
@@ -1167,7 +1167,7 @@ testprimes(GEN bnf, GEN BOUND)
       else if (DEBUGLEVEL>1)
 	fprintferr("    is %Ps\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
-	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase, fact);
+	(void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
     }
     NEXT_PRIME_VIADIFF(p, d);
   }
@@ -1194,7 +1194,7 @@ testprimes(GEN bnf, GEN BOUND)
       if (DEBUGLEVEL>1)
 	fprintferr("    is %Ps\n", isprincipal(bnf,P));
       else /* faster: don't compute result */
-	(void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase, fact);
+	(void)SPLIT(&F, nf, idealhnf_two(nf,P), Vbase, fact);
     }
   }
   avma = av0;
@@ -1355,8 +1355,8 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
   GEN z = C? C: gen_1;
   for (i=1; i<c; i++)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, gel(g,i), gel(e,i)));
-  if (typ(z) != t_MAT) z = idealhermite_aux(nf,z);
-  if (typ(y) != t_MAT) y = idealhermite_aux(nf,y);
+  if (typ(z) != t_MAT) z = idealhnf_shallow(nf,z);
+  if (typ(y) != t_MAT) y = idealhnf_shallow(nf,y);
   i = ZM_equal(y, z); avma = av; return i;
 }
 
@@ -1479,19 +1479,23 @@ GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
   GEN nf, arch, c;
-  long pr, tx = idealtyp(&x, &arch);
+  long pr;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  if (tx == id_PRINCIPAL)
+  switch( idealtyp(&x, &arch) )
   {
-    if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
-    return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
+    case id_PRINCIPAL:
+      if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
+      return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
+    case id_PRIME:
+      if (degpol(nf[1]) == 1)
+        return gerepileupto(av, triv_gen(nf, gel(x,1), 0, flag));
+      x = idealhnf_two(nf, x);
+      break;
+    case id_MAT:
+      if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
   }
-  x = idealhermite_aux(nf, x);
-  if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
-  if (degpol(nf[1]) == 1)
-    return gerepileupto(av, triv_gen(nf, gcoeff(x,1,1), 0, flag));
 
   pr = prec_arch(bnf); /* precision of unit matrix */
   c = getrand();
@@ -1541,7 +1545,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   if (id == C) /* e = 0 */
   {
     if (!C) return isprincipalall(bnf, gen_1, flag);
-    C = idealhermite_aux(nf,C); id = z;
+    C = idealhnf_shallow(nf,C); id = z;
     if (gen) gel(id,1) = C; else id = C;
   }
   c = getrand();
@@ -1939,9 +1943,9 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
       fprintferr("\n*** Ideal no %ld: [%Ps, %Ps, %Ps, %Ps]\n",
 		 noideal, ideal[1], ideal[2], ideal[3], ideal[4]);
 #if 1 /* slower but seems to find more relations this way... */
-    IDEAL = ZM_lll(prime_to_ideal(nf,ideal), 0.75, LLL_INPLACE);
+    IDEAL = ZM_lll(idealhnf_two(nf,ideal), 0.75, LLL_INPLACE);
 #else
-    IDEAL = prime_to_ideal(nf,ideal);
+    IDEAL = idealhnf_two(nf,ideal);
 #endif
     r = red_ideal(&IDEAL, F->G0, G, prec);
     if (!r) pari_err(bugparier, "small_norm (precision too low)");
@@ -2119,7 +2123,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid, FACT *fact)
       if (jid == F->KC) jid = 1; else jid++;
     }
     avma = av;
-    ideal = P = prime_to_ideal(nf, gel(F->LP,jid));
+    ideal = P = idealhnf_two(nf, gel(F->LP,jid));
     do {
       for (i=1; i<lgsub; i++)
       { /* reduce mod apparent order */
@@ -2192,7 +2196,7 @@ be_honest(FB_t *F, GEN nf, FACT *fact)
 
     for (j=1; j<J; j++)
     {
-      GEN ideal0 = prime_to_ideal(nf,gel(P,j));
+      GEN ideal0 = idealhnf_two(nf,gel(P,j));
       pari_sp av1, av2 = avma;
       for(nbtest=0;;)
       {

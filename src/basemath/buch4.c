@@ -259,7 +259,7 @@ repres(GEN nf, GEN pr)
   fond = cgetg(f+1, t_VEC);
   gel(fond,1) = gel(bas,1);
   if (f > 1) {
-    GEN mat = prime_to_ideal(nf,pr);
+    GEN mat = idealhnf_two(nf,pr);
     for (i = k = 2; k <= f; i++)
       if (!is_pm1(gmael(mat,i,i))) gel(fond,k++) = gel(bas,i);
   }

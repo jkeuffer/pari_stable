@@ -55,4 +55,4 @@ Doc: gives the \idx{Hermite normal form} of the ideal $a\Z_K+b\Z_K$, where $a$
  [0 0 1]
  @eprog
 
-Variant: Also available is \fun{GEN}{idealhermite}{GEN nf, GEN a}.
+Variant: Also available is \fun{GEN}{idealhnf}{GEN nf, GEN a}.

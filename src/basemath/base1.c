@@ -719,7 +719,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
       if (lg(x[1])!=N+1) break;
       y = cgetg(lx,t_MAT);
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2),T);
-      return gerepileupto(av, idealhermite_aux(nf,y));
+      return gerepileupto(av, idealhnf_shallow(nf,y));
   }
   pari_err(typeer,"galoisapply");
   return NULL; /* not reached */

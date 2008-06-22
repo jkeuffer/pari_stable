@@ -187,6 +187,8 @@ BA 49- user variables can now be aliased [#790].
        ==> bnfunit becomes totally useless.
    62- the last component in prime ideals "primedec" format is a number field
        element, but no longer necessarily in t_COL form
+   63- rename library functions idealhermite -> idealhnf
+   64- no longer allow ideals in *non-square* t_MAT form 
 
   Added
     1- library function pari_calloc, cgetalloc

@@ -1598,7 +1598,7 @@ Fp_basis(GEN nf, GEN pr)
   long i, j, l;
   GEN x, y;
   if (typ(pr) == t_MAT) return pr;
-  x = prime_to_ideal(nf, pr);
+  x = idealhnf_two(nf, pr);
   l = lg(x);
   y = cgetg(l, t_MAT);
   for (i=j=1; i<l; i++)
@@ -2038,7 +2038,7 @@ modprinit(GEN nf, GEN pr, int zk)
   nf = checknf(nf); checkprimeid(pr);
   f = itos( gel(pr,4) );
   N = degpol(nf[1]);
-  prh = prime_to_ideal(nf, pr);
+  prh = idealhnf_two(nf, pr);
   tau = zk? gen_0: anti_uniformizer2(nf, pr);
   p = gel(pr,1);
 
