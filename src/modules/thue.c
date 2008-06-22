@@ -1212,8 +1212,8 @@ bnfisintnormabs(GEN bnf, GEN a)
     if (!T.Nprimes) x = gen_1;
     else
     {
-      x = isprincipalfact(bnf, Primes, vecsmall_to_col(x), NULL,
-			  nf_FORCE | nf_GEN_IF_PRINCIPAL);
+      x = vecsmall_to_col(x);
+      x = isprincipalfact(bnf, Primes, x, NULL, nf_FORCE | nf_GEN_IF_PRINCIPAL);
       x = coltoliftalg(nf, x);
     }
     /* x solution, up to sign */

@@ -488,7 +488,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   if (ls>1)
   {
     GEN den, Sperm, perm, dep, B, A, U1 = U;
-    long lH, lB, fl = nf_GEN|nf_FORCE;
+    long lH, lB;
 
    /* U1 = upper left corner of U, invertible. S * U1 = principal ideals
     * whose generators generate the S-units */
@@ -508,12 +508,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(Sperm, lH);
     for (i=1; i<lH; i++)
     {
-      GEN v = isprincipalfact(bnf,Sperm,gel(H,i),NULL,fl);
+      GEN v = isprincipalfact(bnf,Sperm,gel(H,i),NULL, nf_GEN|nf_FORCE);
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
     }
     for (j=1; j<lB; j++,i++)
     {
-      GEN v = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i),fl);
+      GEN v = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i), nf_GEN|nf_FORCE);
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
    }
     den = ZM_det_triangular(H); H = ZM_inv(H,den);
