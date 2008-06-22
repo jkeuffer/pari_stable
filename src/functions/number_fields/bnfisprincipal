@@ -6,35 +6,58 @@ Help: bnfisprincipal(bnf,x,{flag=1}): bnf being output by bnfinit (with
  flag<=2), gives [v,alpha], where v is the vector of exponents on
  the class group generators and alpha is the generator of the resulting
  principal ideal. In particular x is principal if and only if v is the zero
- vector. flag is optional, whose meaning is: 0: output only v; 1: default; 2:
- output only v, precision being doubled until the result is obtained; 3: as 2
- but output generators
+ vector. flag is optional, whose binary digits mean 1: output [v,alpha] (only v
+ if unset); 2: increase precision until alpha can be computed (do not insist
+ if unset).
 Doc: $\var{bnf}$ being the \sidx{principal ideal}
- number field data output by \kbd{bnfinit}, and $x$ being either a $\Z$-basis
- of an ideal in the number field (not necessarily in HNF) or a prime ideal in
- the format output by the function \kbd{idealprimedec}, this function tests
- whether the ideal is principal or not. The result is more complete than a
- simple true/false answer: it gives a row vector $[v_1,v_2]$, where
+ number field data output by \kbd{bnfinit}, and $x$ being an ideal, this
+ function tests whether the ideal is principal or not. The result is more
+ complete than a simple true/false answer and solves general discrete
+ logarithm problem. Assume the class group is $\oplus (\Z/d_i\Z)g_i$
+ (where the generators $g_i$ and their orders $d_i$ are respectively given by
+ \kbd{bnf.gen} and \kbd{bnf.cyc}). The routine returns a row vector $[e,t]$,
+ where $e$ is a vector of exponents $0 \leq e_i < d_i$, and $t$ is a number
+ field element such that
+ $$ x = (t) \prod_i  g_i^{e_i}.$$
+ For \emph{given} $g_i$ (i.e. for a given \kbd{bnf}), the $e_i$ are unique,
+ and $t$ is unique modulo units.
 
- $v_1$ is the vector of components $c_i$ of the class of the ideal $x$ in the
- class group, expressed on the generators $g_i$ given by \kbd{bnfinit}
- (specifically \kbd{\var{bnf}.gen}). The $c_i$ are chosen so that $0\le c_i<n_i$
- where $n_i$ is the order of $g_i$ (the vector of $n_i$ being \kbd{\var{bnf}.cyc}).
+ In particular, $x$ is principal if and only if $e$ is the zero vector. Note
+ that the empty vector, which is returned when the class number is $1$, is
+ considered to be a zero vector (of dimension $0$).
+ \bprog
+ ? K = bnfinit(y^2+23);
+ ? K.cyc
+ %2 = [3]
+ ? K.gen
+ %3 = [[2, 0; 0, 1]]          \\ a prime ideal above 2
+ ? P = idealprimedec(K,3)[1]; \\ a prime ideal above 3
+ ? v = bnfisprincipal(K, P)
+ %5 = [[2]~, [3/4, 1/4]~]
+ ? idealmul(K, v[2], factorback(K.gen, v[1], K))
+ %6 =
+ [3 0]
 
- $v_2$ gives on the integral basis the components of $\alpha$ such that
- $x=\alpha\prod_ig_i^{c_i}$. In particular, $x$ is principal if and only if
- $v_1$ is equal to the zero vector. In the latter case, $x = \alpha\Z_K$ where
- $\alpha$ is given by $v_2$. Note that if $\alpha$ is too large to be given, a
- warning message will be printed and $v_2$ will be set equal to the empty
- vector.
+ [0 1]
+ ? % == idealhnf(K, P)
+ %7 = 1
+ @eprog
 
- If $\fl=0$, outputs only $v_1$, which is much easier to compute.
+ The binary digits of \fl mean:
+ ideal. In particular x is principal if and only if v is the zero
+ vector. flag is optional, whose binary digits mean 1: output [v,alpha] (only v
+ if unset); 2: increase precision until alpha can be computed (do not insist
+ if unset).
+ 
+ \item $1$: If set, outputs $[e,t]$ as explained above, otherwise return
+ only $e$, which is much easier to compute. The following idiom tests whether
+ an ideal is principal:
+ \bprog
+   is_principal(bnf, x) = bnfisprincipal(bnf,x,0) == 0;
+ @eprog
 
- If $\fl=2$, does as if $\fl$ were $0$, but doubles the precision until a
- result is obtained.
-
- If $\fl=3$, as in the default behaviour ($\fl=1$), but doubles the precision
- until a result is obtained.
-
- The user is warned that these two last setting may induce \emph{very} lengthy
- computations.
+ \item $2$: It may not be possible to recover $t$, given the initial accuracy
+ to which \kbd{bnf} was computed. In that case, a warning is printed and $t$ is
+ set equal to the empty vector \kbd{[]\til}. If this bit is set,
+ increase the precision and recompute needed quantities until $t$ can be
+ computed. Warning: setting this may induce \emph{very} lengthy computations.
