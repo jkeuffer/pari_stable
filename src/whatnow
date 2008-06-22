@@ -495,7 +495,7 @@ prime
 primedec(nf,p)=idealprimedec(nf,p);
 primes
 primroot(n)=znprimroot(n);
-principalideal(nf,x)=idealprincipal(nf,x);
+principalideal(nf,x)=;
 principalidele(nf,x)=ideleprincipal(nf,x);
 print
 print1

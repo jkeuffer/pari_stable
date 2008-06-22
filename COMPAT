@@ -78,6 +78,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
   - remove awkward flag '3' for bnfinit. Use bnfcompress().
   - remove badly named bnfmake. Use bnfinit(sbnf).
+  - idealmin now returns a number field element, instead of the associated
+    "principal idele"
+  - removed obsolete GP functions idealprincipal. Use number field elements
+    "as is".
 
 * Specific to the PARI library:
 ===============================
@@ -145,6 +149,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename library functions srgcd -> RgX_gcd
   - rename library functions ismonome -> RgX_is_monomial
   - remove obsolete buchray, buchrayinit, buchrayinitgen: use Buchray.
+  - rename library functions minideal -> idealmin and change prototype
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

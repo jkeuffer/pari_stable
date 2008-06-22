@@ -189,6 +189,9 @@ BA 49- user variables can now be aliased [#790].
        element, but no longer necessarily in t_COL form
    63- rename library functions idealhermite -> idealhnf
    64- no longer allow ideals in *non-square* t_MAT form 
+   65- idealmin now returns a number field element, instead of the associated
+       "principal idele"
+   66- rename library functions minideal -> idealmin and change prototype
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -322,6 +325,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    26- useless component v[6] in "small bnfs" (was 'different', is 0)
    27- obsolete library functions buchray, buchrayinit, buchrayinitgen:
        use Buchray.
+   28- obsolete GP functions idealprincipal. Use number field elements "as is"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

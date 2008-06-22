@@ -101,7 +101,8 @@ buchrayinit(GEN bnf, GEN ideal)
 static GEN
 buchray(GEN bnf, GEN ideal)
 { return Buchray(bnf,ideal, nf_GEN); }
-
+static GEN
+principalideal(GEN nf, GEN x) { return algtobasis(nf,x); }
 
 entree oldfonctions[]={
 {"!_",0,(void*)gnot,13,"G","!_"},
@@ -506,7 +507,7 @@ entree oldfonctions[]={
 {"matsize",1,(void*)matsize,2,"G","matsize(x)=number of rows and columns of the vector/matrix x as a 2-vector"},
 {"max",2,(void*)gmax,1,"GG","max(x,y)=maximum of x and y"},
 {"min",2,(void*)gmin,1,"GG","min(x,y)=minimum of x and y"},
-{"minideal",3,(void*)minideal,6,"GGGp","minideal(nf,ix,vdir)=minimum of the ideal ix in the direction vdir in the number field nf"},
+{"minideal",3,(void*)idealmin,6,"GGG","idealmin(nf,ix,vdir)=minimum of the ideal ix in the direction vdir in the number field nf"},
 {"minim",33,(void*)minim,8,"GGG","minim(x,bound,maxnum)=number of vectors of square norm <= bound, maximum norm and list of vectors for the integral and definite quadratic form x; minimal non-zero vectors if bound=0"},
 {"minim2",23,(void*)minim2,8,"GG","minim2(x,bound)=looks for vectors of square norm <= bound, return the first one and its norm"},
 {"mod",25,(void*)gmodulo,2,"GG","mod(x,y)=creates the integer x modulo y on the PARI stack"},

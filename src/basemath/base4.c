@@ -158,34 +158,6 @@ idealhnf(GEN nf, GEN x)
   return (avma == av)? gcopy(y): gerepileupto(av, y);
 }
 
-GEN
-principalideal(GEN nf, GEN x)
-{
-  GEN z = cgetg(2,t_MAT);
-
-  nf = checknf(nf);
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      x = scalarcol(x, degpol(nf[1])); break;
-
-    case t_POLMOD:
-      x = checknfelt_mod(nf,x,"principalideal");
-      /* fall through */
-    case t_POL:
-      x = algtobasis(nf,x);
-      break;
-
-    case t_MAT:
-      if (lg(x)!=2) pari_err(typeer,"principalideal");
-      x = gel(x,1);
-    case t_COL:
-      if (lg(x)-1==degpol(nf[1])) { x = gcopy(x); break; }
-    default: pari_err(typeer,"principalideal");
-  }
-  gel(z,1) = x; return z;
-}
-
 static GEN
 mylog(GEN x, long prec)
 {
@@ -295,13 +267,12 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 GEN
 principalidele(GEN nf, GEN x, long prec)
 {
-  GEN p1, y = cgetg(3,t_VEC);
+  GEN y = cgetg(3,t_VEC);
   pari_sp av;
-
-  p1 = principalideal(nf,x);
-  gel(y,1) = p1;
-  av = avma; p1 = get_arch(nf,gel(p1,1),prec);
-  gel(y,2) = gerepileupto(av,p1); return y;
+  x = nf_to_scalar_or_basis(nf,x);
+  gel(y,1) = x; av = avma;
+  gel(y,2) = gerepileupto(av, get_arch(nf,x,prec));
+  return y;
 }
 
 /* GP functions */
@@ -1977,7 +1948,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
       if (!aI) return I;
       goto END;
     case id_PRIME:
-      if (pr_is_inert(I)) { y = gel(I,1); I=matid(N); goto END; }
+      if (pr_is_inert(I)) { c1 = gel(I,1); y = NULL; I = matid(N); goto END; }
       I = idealhnf_two(nf,I);
       break;
     case id_MAT:
@@ -2050,7 +2021,7 @@ END:
 }
 
 GEN
-minideal(GEN nf, GEN x, GEN vdir, long prec)
+idealmin(GEN nf, GEN x, GEN vdir)
 {
   pari_sp av = avma;
   GEN y;
@@ -2062,9 +2033,9 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
     case id_MAT: if (lg(x) == 1) return gen_0;
   }
   vdir = chk_vdir(nf,vdir);
-  y = RgM_mul(computeGtwist(nf,vdir), x);
-  y = RgM_RgC_mul(x, gel(lll(y),1));
-  return gerepileupto(av, principalidele(nf,y,prec));
+  y = lll( RgM_mul(computeGtwist(nf,vdir), x) );
+  y = RgM_RgC_mul(x, gel(y,1));
+  return gerepileupto(av, y);
 }
 
 /*******************************************************************/
