@@ -1199,8 +1199,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   long i;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  if (typ(a)!=t_INT)
-    pari_err(talker,"expected an integer in bnfisintnorm");
+  if (typ(a)!=t_INT) pari_err(talker,"expected an integer in bnfisintnorm");
   if (!signe(a))  return mkvec(gen_0);
   if (is_pm1(a)) return mkvec(gen_1);
 
