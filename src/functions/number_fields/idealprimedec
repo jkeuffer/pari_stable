@@ -11,7 +11,7 @@ Doc: computes the prime ideal
  must be a (positive) prime number. Note that the fact that $p$ is prime is
  not checked, so if a non-prime $p$ is given the result is undefined.
 
- The result is a vector of \tev{pr} structures, each representing one of the
+ The result is a vector of \tev{prid} structures, each representing one of the
  prime ideals above $p$ in the number field $\var{nf}$. The representation
  $P=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
  equal to $p\Z_K+\alpha\Z_K$ where $\Z_K$ is the ring of integers of the field

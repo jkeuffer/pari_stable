@@ -14,5 +14,5 @@ Doc: $\var{nf}$ is a number field,
  $d_i$ respectively, the result is a column vector of integers $(x_i)$ such
  that $0\le x_i<d_i$ and
  $$x \equiv \prod_i g_i^{x_i} \pmod{\ ^*D}\enspace.$$
- Note that when \kbd{D} is an idele, this implies also sign conditions on the
- embeddings.
+ Note that when the support of \kbd{D} contains places at infinity, this
+ congruence implies also sign conditions on the associated real embeddings.

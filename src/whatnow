@@ -496,7 +496,7 @@ primedec(nf,p)=idealprimedec(nf,p);
 primes
 primroot(n)=znprimroot(n);
 principalideal(nf,x)=;
-principalidele(nf,x)=ideleprincipal(nf,x);
+principalidele(nf,x)=;
 print
 print1
 prod(x,X=a,b,expr)=prod(X=a,b,expr,x);

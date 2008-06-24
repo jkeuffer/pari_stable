@@ -5,13 +5,14 @@ Prototype: GGGD0,L,p
 Help: idealpow(nf,x,k,{flag=0}): k-th power of the ideal x in HNF in the
  number field nf. If (optional) flag is non-null, reduce the result
 Doc: computes the $k$-th power of
- the ideal $x$ in the number field $\var{nf}$. $k$ can be positive, negative
- or zero. The result is NOT reduced, it is really the $k$-th ideal power, and
- is given in HNF.
+ the ideal $x$ in the number field $\var{nf}$; $k\in\Z$.
+ If $x$ is an extended
+ ideal\sidx{ideal (extended)}, its principal part is suitably
+ updated: i.e. raising $[I,t]$ to the $k$-th power, yields $[I^k, t^k]$.
 
- If $\fl$ is non-zero, reduce the result using \kbd{idealred}. Note however
- that this is NOT the same as as $\kbd{idealpow}(\var{nf},x,k)$ followed by
- reduction, since the reduction is performed throughout the powering process.
+ If $\fl$ is non-zero, reduce the result using \kbd{idealred}, \emph{throughout
+ the (binary) powering process}; in particular, this is \emph{not} the same as
+ as $\kbd{idealpow}(\var{nf},x,k)$ followed by reduction.
 
 Variant: Also available are
  \fun{GEN}{idealpow}{GEN nf, GEN x, GEN k} and

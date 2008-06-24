@@ -133,7 +133,6 @@ GEN    poltobasis(GEN nf,GEN x);
 GEN    coltoalg(GEN nf,GEN x);
 
 /* Other number fields routines */
-GEN    arch_mul(GEN x, GEN y);
 GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
 GEN    bnrGetSurj(GEN bnr1, GEN bnr2);
 GEN    check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
@@ -159,7 +158,6 @@ GEN    get_roots(GEN x,long r1,long prec);
 GEN    get_theta_abstorel(GEN T, GEN pol, GEN k);
 GEN    idealaddtoone_i(GEN nf, GEN x, GEN y);
 GEN    idealcoprime_fact(GEN nf, GEN x, GEN fy);
-GEN    idealhnf_shallow(GEN nf, GEN x);
 GEN    idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 GEN    init_unif_mod_fZ(GEN L);
 GEN    init_units(GEN BNF);

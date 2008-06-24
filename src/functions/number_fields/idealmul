@@ -10,12 +10,22 @@ Description:
  (gen, gen, gen, #small):gen	$"invalid flag in idealmul"
  (gen, gen, gen, small):gen:prec	idealmul0($1, $2, $3, $4, prec)
 Doc: ideal multiplication of the ideals $x$ and $y$ in the number field
- \var{nf}. The result is a generating set for the ideal product with at most
- $n$ elements, and is in Hermite normal form if either $x$ or $y$ is in HNF
- or is a prime ideal as output by \kbd{idealprimedec}, and this is given
- together with the sum of the Archimedean information in $x$ and $y$ if both
- are given.
-
+ \var{nf}; the result is the ideal product in HNF. If either $x$ or $y$
+ are extended ideals\sidx{ideal (extended)}, their principal part is suitably
+ updated: i.e. multiplying $[I,t]$, $[J,u]$ yields $[IJ, tu]$; multiplying
+ $I$ and $[J, u]$ yields $[IJ, u]$.
+ \bprog
+ ? nf = nfinit(x^2 + 1);
+ ? idealmul(nf, 2, x+1)
+ %2 =
+ [4 2]
+ 
+ [0 2]
+ ? idealmul(nf, [2, x], x+1)        \\ extended ideal * ideal
+ %4 = [[4, 2; 0, 2], x]
+ ? idealmul(nf, [2, x], [x+1, x])   \\ two extended ideals
+ %5 = [[4, 2; 0, 2], [-1, 0]~]
+ @eprog\noindent
  If $\fl$ is non-zero, reduce the result using \kbd{idealred}.
 Variant: Also available are \fun{GEN}{idealmul}{GEN nf, GEN x, GEN y}
  ($\fl=0$) or \fun{GEN}{idealmulred}{GEN nf, GEN x, GEN y, long prec}

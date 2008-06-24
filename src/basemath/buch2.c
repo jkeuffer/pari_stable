@@ -993,14 +993,6 @@ Vbase_to_FB(FB_t *F, GEN pr)
   return F->iLP[p] + pr_index(F->LV[p], pr);
 }
 
-/* x, y 2 ideles whose first component is an integral HNF */
-static GEN
-idelemul_HNF(GEN nf, GEN x, GEN y)
-{
-  return mkvec2( idealmul_HNF(nf, gel(x,1), gel(y,1)),
-                 arch_mul(gel(x,2), gel(y,2)));
-}
-
 /* return famat y (principal ideal) such that y / x is smooth [wrt Vbase] */
 static GEN
 SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
@@ -1047,7 +1039,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
       { /* avoid prec pb: don't let id become too large as lgsub increases */
 	if (id != x0) id = ideallllred(nf,id,NULL,0);
 	z[1] = Vbase[i];
-	id = idelemul_HNF(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
+	id = extideal_HNF_mul(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
       }
     }
     if (id == x0) continue;
@@ -1245,35 +1237,6 @@ red_mod_units(GEN col, GEN z, long prec)
   setlg(x,RU); return x;
 }
 
-/* clg2 format changed for version 2.0.21 (contained ideals, now archs)
- * Compatibility mode: old clg2 format */
-static GEN
-get_Garch(GEN nf, GEN gen, GEN clg2, long prec)
-{
-  long i,c;
-  GEN g,z,J,Garch, clorig = gel(clg2,3);
-
-  c = lg(gen); Garch = cgetg(c,t_MAT);
-  for (i=1; i<c; i++)
-  {
-    g = gel(gen,i);
-    z = gel(clorig,i); J = gel(z,1);
-    if (!ZM_equal(g,J))
-    {
-      z = idealinv(nf,z); J = gel(z,1);
-      J = Q_remove_denom(J, NULL);
-      if (!ZM_equal(g,J))
-      {
-	z = ideallllred(nf,z,NULL,prec); J = gel(z,1);
-	if (!ZM_equal(g,J))
-	  pari_err(bugparier,"isprincipal (incompatible bnf generators)");
-      }
-    }
-    Garch[i] = z[2];
-  }
-  return Garch;
-}
-
 /* [x] archimedian components, A column vector. return [x] A
  * x may be a translated GEN (y + k) */
 static GEN
@@ -1366,18 +1329,17 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 {
   long i,lW,lB,e,c, prec = *ptprec;
   GEN Q,xar,Wex,Bex,U,p1,gen,cyc,xc,ex,d,col,A;
-  GEN W       = gel(bnf,1);
-  GEN B       = gel(bnf,2);
-  GEN WB_C    = gel(bnf,4);
-  GEN nf      = gel(bnf,7);
-  GEN clg2    = gel(bnf,9);
+  GEN W    = gel(bnf,1);
+  GEN B    = gel(bnf,2);
+  GEN WB_C = gel(bnf,4);
+  GEN nf   = gel(bnf,7);
+  GEN clg2 = gel(bnf,9);
   FB_t F;
   GEN Vbase = get_Vbase(bnf);
   GEN L = recover_partFB(&F, Vbase, lg(x)-1);
   FACT *fact;
-  int old_format = (typ(clg2[2]) == t_MAT);
 
-  U = gel(clg2,1); if (old_format) U = ginv(U);
+  U = gel(clg2,1);
   cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3);
   ex = cgetg(c+1,t_COL);
@@ -1416,19 +1378,6 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     return gcopy(ex);
 
   /* compute arch component of the missing principal ideal */
-  if (old_format)
-  {
-    GEN Garch, V = gel(clg2,2);
-    Bex = zc_to_ZC(Bex);
-    p1 = c? shallowconcat(ZM_ZC_mul(V,Q), Bex): Bex;
-    col = act_arch(p1, WB_C);
-    if (c)
-    {
-      Garch = get_Garch(nf,gen,clg2,prec);
-      col = gadd(col, act_arch(ex, Garch));
-    }
-  }
-  else
   { /* g A = G Ur A + [ga]A, Ur A = D Q + R as above (R = ex)
 	   = G R + [GD]Q + [ga]A */
     GEN ga = gel(clg2,2), GD = gel(clg2,3);
@@ -1514,7 +1463,7 @@ static GEN
 add_principal_part(GEN nf, GEN u, GEN v, long flag)
 {
   if (flag & nf_GENMAT)
-    return (typ(u) == t_COL && RgV_isscalar(u) && gcmp1(gel(u,1)))? v: arch_mul(v,u);
+    return (typ(u) == t_COL && RgV_isscalar(u) && gcmp1(gel(u,1)))? v: famat_mul(v,u);
   else
     return element_mul(nf, v, u);
 }
@@ -2407,7 +2356,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       if (signe(p1))
       {
 	z[1]=Vbase[i]; 
-	I = idelemul_HNF(nf0, I, idealpowred(nf0,z,p1,prec));
+	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1,prec));
 	I = ideallllred(nf0,I,NULL,prec);
       }
     }

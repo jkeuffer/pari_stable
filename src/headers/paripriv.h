@@ -228,7 +228,7 @@ GEN famat_pow(GEN f, GEN n);
 GEN famat_reduce(GEN fa);
 GEN famat_to_arch(GEN nf, GEN fa, long prec);
 GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
-GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
+GEN famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid);
 GEN merge_factor_i(GEN f, GEN g);
 GEN to_famat_all(GEN x, GEN y);
 GEN to_famat(GEN g, GEN e);
@@ -645,9 +645,8 @@ GEN     elementi_mulid(GEN nf, GEN x, long i);
 
 /* base4.c */
 
-GEN     arch_inv(GEN x);
-GEN     arch_pow(GEN x, GEN n);
 void    check_listpr(GEN x);
+GEN     extideal_HNF_mul(GEN nf, GEN x, GEN y);
 GEN     factor_norm(GEN x);
 GEN     famat_to_nf(GEN nf, GEN f);
 long    val_norm(GEN x, GEN p, long *vz);

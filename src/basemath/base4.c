@@ -34,11 +34,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * p is a rational prime, a belongs to Z_K, e=e(P/p), f=f(P/p), and b
  * Lenstra constant (p.P^(-1)= p Z_K + b Z_K).
  *
- * An idele is a couple[I,V] where I is a valid ideal and V a row vector
- * with r1+r2 components (real or complex). For instance, if M=(a), V
- * contains the complex logarithms of the first r1+r2 conjugates of a
- * (depends on the chosen generator a). All subroutines work with either
- * ideles or ideals (an omitted V is assumed to be 0).
+ * An extended ideal is a couple[I,F] where I is a valid ideal and F a
+ * factorization matrix associated to an algebraic number.
+ * All routines work with either extended ideals or ideals (an omitted F
+ * is assumed to be [;] <-> 1).
  *
  * All ideals are output in HNF form. */
 
@@ -57,16 +56,9 @@ idealtyp(GEN *ideal, GEN *arch)
   switch(tx)
   {
     case t_MAT: lx = lg(x);
-      if (lx>2)
-      {
-        t = id_MAT;
-        if (lx != lg(x[1])) pari_err(talker,"non-square t_MAT in idealtyp");
-      }
-      else
-      {
-	t = id_PRINCIPAL;
-	x = (lx==2)? gel(x,1): gen_0;
-      }
+      if (lx == 1) { t = id_PRINCIPAL; x = gen_0; break; }
+      if (lx != lg(x[1])) pari_err(talker,"non-square t_MAT in idealtyp");
+      t = id_MAT;
       break;
 
     case t_VEC: if (lg(x)!=6) pari_err(talker, "incorrect ideal in idealtyp");
@@ -262,17 +254,6 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
     gel(v,i) = glog(t,prec);
   }
   *emb = x; return v;
-}
-
-GEN
-principalidele(GEN nf, GEN x, long prec)
-{
-  GEN y = cgetg(3,t_VEC);
-  pari_sp av;
-  x = nf_to_scalar_or_basis(nf,x);
-  gel(y,1) = x; av = avma;
-  gel(y,2) = gerepileupto(av, get_arch(nf,x,prec));
-  return y;
 }
 
 /* GP functions */
@@ -709,7 +690,7 @@ idealval(GEN nf, GEN ix, GEN P)
   if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,P);
   tx = idealtyp(&ix,&a);
   if (tx == id_PRINCIPAL) return element_val(nf,ix,P);
-  checkprimeid(P);
+  checkprid(P);
   p = gel(P,1);
   if (tx == id_PRIME) {
     if (!equalii(p, gel(ix,1))) return 0;
@@ -941,7 +922,7 @@ idealmulprime(GEN nf, GEN x, GEN vp)
   return cx? RgM_Rg_mul(x,cx): x;
 }
 
-/* Assume ix and iy are integral in HNF form [NOT ideles]. Not memory clean.
+/* Assume ix and iy are integral in HNF form [NOT extended]. Not memory clean.
  * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K */
 GEN
 idealmul_HNF(GEN nf, GEN x, GEN y)
@@ -966,34 +947,7 @@ idealmul_HNF(GEN nf, GEN x, GEN y)
   return z;
 }
 
-GEN
-mul_content(GEN cx, GEN cy)
-{
-  if (!cx) return cy;
-  if (!cy) return cx;
-  return gmul(cx,cy);
-}
-GEN
-mul_denom(GEN dx, GEN dy)
-{
-  if (!dx) return dy;
-  if (!dy) return dx;
-  return mulii(dx,dy);
-}
-
-/* x and y are ideals in non-empty matrix form */
-static GEN
-idealmat_mul(GEN nf, GEN x, GEN y)
-{
-  GEN cx, cy;
-  x = Q_primitive_part(x, &cx);
-  y = Q_primitive_part(y, &cy); cx = mul_content(cx,cy);
-  y = idealmul_HNF(nf,x,y);
-  return cx? ZM_Q_mul(y,cx): y;
-}
-
 /* operations on elements in factored form */
-
 GEN
 to_famat(GEN g, GEN e)
 {
@@ -1076,6 +1030,58 @@ famat_pow(GEN f, GEN n)
   gel(h,1) = gcopy(gel(f,1));
   gel(h,2) = ZC_Z_mul(gel(f,2),n);
   return h;
+}
+
+/* x assumed to be a t_MATs (factorization matrix), or compatible with
+ * the element_* functions. */
+static GEN
+ext_mul(GEN nf, GEN x, GEN y) {
+  if (typ(x) == t_MAT) return (x == y)? famat_sqr(x): famat_mul(x,y);
+  return element_mul(nf, x, y);
+}
+static GEN
+ext_inv(GEN nf, GEN x) {
+  if (typ(x) == t_MAT) return famat_inv(x);
+  return element_inv(nf, x);
+}
+static GEN
+ext_pow(GEN nf, GEN x, GEN n) {
+  if (typ(x) == t_MAT) return famat_pow(x,n);
+  return element_pow(nf, x, n);
+}
+
+/* x, y 2 extended ideals whose first component is an integral HNF */
+GEN
+extideal_HNF_mul(GEN nf, GEN x, GEN y)
+{
+  return mkvec2(idealmul_HNF(nf, gel(x,1), gel(y,1)),
+                ext_mul(nf, gel(x,2), gel(y,2)));
+}
+
+GEN
+mul_content(GEN cx, GEN cy)
+{
+  if (!cx) return cy;
+  if (!cy) return cx;
+  return gmul(cx,cy);
+}
+GEN
+mul_denom(GEN dx, GEN dy)
+{
+  if (!dx) return dy;
+  if (!dy) return dx;
+  return mulii(dx,dy);
+}
+
+/* x and y are ideals in non-empty matrix form */
+static GEN
+idealmat_mul(GEN nf, GEN x, GEN y)
+{
+  GEN cx, cy;
+  x = Q_primitive_part(x, &cx);
+  y = Q_primitive_part(y, &cy); cx = mul_content(cx,cy);
+  y = idealmul_HNF(nf,x,y);
+  return cx? ZM_Q_mul(y,cx): y;
 }
 
 GEN
@@ -1243,7 +1249,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 
 /* prod g[i]^e[i] mod bid, assume (g[i], id) = 1 */
 GEN
-famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
+famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN t,sarch,module,cyc,fa2;
   long lc;
@@ -1259,7 +1265,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
     t = famat_to_nf_modideal_coprime(nf, g, e, id, EX);
   }
   if (!t) t = gen_1;
-  return set_sign_mod_idele(nf, to_famat(g,e), t, module, sarch);
+  return set_sign_mod_divisor(nf, to_famat(g,e), t, module, sarch);
 }
 
 GEN
@@ -1328,41 +1334,6 @@ vecdiv(GEN x, GEN y)
   return z;
 }
 
-/* x,y assumed to be of the same type, either
- * 	t_VEC: logarithmic distance components
- * 	t_COL: multiplicative distance components [FIXME: find decent type]
- *	t_POLMOD: nf elt
- *	t_MAT: factorisation of nf elt */
-GEN
-arch_mul(GEN x, GEN y) {
-  switch (typ(x)) {
-    case t_POLMOD: return gmul(x, y);
-    case t_COL:    return vecmul(x, y);
-    case t_MAT:    return (x == y)? famat_sqr(x): famat_mul(x,y);
-    default:       return (x == y)? gmul2n(x,1): gadd(x,y); /* t_VEC */
-  }
-}
-
-GEN
-arch_inv(GEN x) {
-  switch (typ(x)) {
-    case t_POLMOD: return ginv(x);
-    case t_COL:    return vecinv(x);
-    case t_MAT:    return famat_inv(x);
-    default:       return gneg(x); /* t_VEC */
-  }
-}
-
-GEN
-arch_pow(GEN x, GEN n) {
-  switch (typ(x)) {
-    case t_POLMOD: return powgi(x,n);
-    case t_COL:    return vecpow(x,n);
-    case t_MAT:    return famat_pow(x,n);
-    default:       return gmul(n,x);
-  }
-}
-
 /* v ideal as a square t_MAT */
 static GEN
 idealmulelt(GEN nf, GEN x, GEN v)
@@ -1376,9 +1347,8 @@ idealmulelt(GEN nf, GEN x, GEN v)
   x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? ZM_Q_mul(x,cx): x;
 }
-/* FIXME: export ? */
-static int
-pr_is_inert(GEN P) { GEN f = gel(P,4); return f[2] == lg(gel(P,2))-1; }
+int
+prime_is_inert(GEN P) { GEN f = gel(P,4); return f[2] == lg(gel(P,2))-1; }
 
 /* tx <= ty */
 static GEN
@@ -1395,7 +1365,7 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
 	case id_PRIME:
 	{
 	  GEN p = gel(y,1), pi = gel(y,2), cx;
-          if (pr_is_inert(y)) return RgM_Rg_mul(idealhnf_principal(nf,x),p);
+          if (prime_is_inert(y)) return RgM_Rg_mul(idealhnf_principal(nf,x),p);
 
           x = nf_to_scalar_or_basis(nf, x);
           switch(typ(x))
@@ -1434,12 +1404,12 @@ idealmul(GEN nf, GEN x, GEN y)
   long tx = idealtyp(&x,&ax);
   long ty = idealtyp(&y,&ay), f;
   if (tx>ty) { swap(ax,ay); swap(x,y); lswap(tx,ty); }
-  f = (ax||ay); res = f? cgetg(3,t_VEC): NULL; /* product is an idele */
+  f = (ax||ay); res = f? cgetg(3,t_VEC): NULL; /*product is an extended ideal*/
   av = avma;
   z = gerepileupto(av, idealmul_aux(checknf(nf), x,y, tx,ty));
   if (!f) return z;
   if (ax && ay)
-    ax = arch_mul(ax, ay);
+    ax = ext_mul(nf, ax, ay);
   else
     ax = gcopy(ax? ax: ay);
   gel(res,1) = z; gel(res,2) = ax; return res;
@@ -1542,7 +1512,7 @@ idealinv(GEN nf, GEN x)
   }
   x = gerepileupto(av,x); if (!ax) return x;
   gel(res,1) = x;
-  gel(res,2) = arch_inv(ax); return res;
+  gel(res,2) = ext_inv(nf, ax); return res;
 }
 
 /* Return x such that vp^n = x/d. Assume n != 0 */
@@ -1595,7 +1565,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   nf = checknf(nf);
 
   /* inert, special cased for efficiency */
-  if (pr_is_inert(vp)) return RgM_Rg_mul(x, powgi(gel(vp,1), n));
+  if (prime_is_inert(vp)) return RgM_Rg_mul(x, powgi(gel(vp,1), n));
 
   y = idealpowprime(nf, vp, n, &dx);
   x = Q_primitive_part(x, &cx);
@@ -1631,7 +1601,7 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
       return idealhnf_principal(nf,x);
     case id_PRIME: {
       GEN d;
-      if (pr_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
+      if (prime_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
       x = idealpowprime(nf, x, n, &d);
       x = idealhnf_two(nf,x);
       return d? RgM_Rg_div(x, d): x;
@@ -1673,7 +1643,7 @@ idealpow(GEN nf, GEN x, GEN n)
   av = avma;
   x = gerepileupto(av, idealpow_aux(checknf(nf), x, tx, n));
   if (!ax) return x;
-  ax = arch_pow(ax, n);
+  ax = ext_pow(nf, ax, n);
   gel(res,1) = x;
   gel(res,2) = ax;
   return res;
@@ -1714,13 +1684,13 @@ _sqr(void *data, GEN x)
 GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
-  pari_sp av=avma;
-  long s = signe(n);
+  pari_sp av = avma;
   idealred_muldata D;
+  long s;
   GEN y;
 
   if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpowred");
-  if (s == 0) return idealpow(nf,x,n);
+  s = signe(n); if (s == 0) return idealpow(nf,x,n);
   D.nf  = nf;
   D.prec= prec;
   y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
@@ -1944,22 +1914,25 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   switch (idealtyp(&I,&aI))
   {
     case id_PRINCIPAL:
-      if (gcmp0(I)) { y=gen_1; I=cgetg(1,t_MAT); } else { y=I; I=matid(N); }
+      if (gcmp0(I)) I = cgetg(1,t_MAT); else { c1 = I; I = matid(N); }
       if (!aI) return I;
       goto END;
     case id_PRIME:
-      if (pr_is_inert(I)) { c1 = gel(I,1); y = NULL; I = matid(N); goto END; }
+      if (prime_is_inert(I)) {
+        c1 = gel(I,1); I = matid(N);
+        if (!aI) return I;
+        goto END;
+      }
       I = idealhnf_two(nf,I);
       break;
     case id_MAT:
       I = Q_primitive_part(I, &c1);
   }
   y = ideallllred_elt(nf, I, vdir);
-
   if (ZV_isscalar(y))
   { /* already reduced */
     if (!aI) return gerepilecopy(av, I);
-    y = NULL; goto END;
+    goto END;
   }
 
   x = coltoliftalg(nf, y); /* algebraic integer */
@@ -1974,49 +1947,25 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   if (!T) /* x is a unit, I already reduced */
   {
     if (!aI) return gerepilecopy(av, I);
-    y = NULL; goto END;
+    goto END;
   }
 
+  b = zk_multable(nf,b);
   J = cgetg(N+1,t_MAT); /* = I T/ x integral */
-  for (i=1; i<=N; i++)
-    gel(J,i) = element_muli(nf,b,gel(I,i));
+  for (i=1; i<=N; i++) gel(J,i) = ZM_ZC_mul(b, gel(I,i));
   J = Q_primitive_part(J, &c);
  /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
-  if (ZV_isscalar(gel(I,1))) {
-    b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
-    I = ZM_hnfmodid(J,b);
-  } else {
-    b = ZM_detmult(J);
-    I = ZM_hnfmod(J,b);
-  }
+  I = ZM_hnfmodid(J, mulii(gcoeff(I,1,1), c? diviiexact(T,c): T));
   if (!aI) return gerepileupto(av, I);
 
+  c = mul_content(c,c1);
+  y = c? gmul(y, gdiv(c,T)): gdiv(y, T);
+  aI = ext_mul(nf, aI,y);
+  return gerepilecopy(av, mkvec2(I, aI));
+
 END:
-  switch(typ(aI))
-  {
-    case t_POLMOD: y = x; /*Fall through*/
-    case t_MAT: /* compute y, I0 = J y */
-      if (!T) y = c1;
-      else
-      {
-	c = mul_content(c,c1);
-	y = c? gmul(y, gdiv(c,T)): gdiv(y, T);
-      }
-      break;
-
-    case t_COL:
-      if (y) y = vecinv(RgM_RgC_mul(gmael(nf,5,1), y));
-      break;
-
-    default:
-      if (y) {
-	if (prec <= 0) prec = nf_get_prec(nf);
-	y = gneg_i(get_arch(nf,y,prec));
-      }
-      break;
-  }
-  if (y) aI = arch_mul(aI,y);
+  if (c1) aI = ext_mul(nf, aI,c1);
   return gerepilecopy(av, mkvec2(I, aI));
 }
 
@@ -2181,7 +2130,7 @@ void
 check_listpr(GEN x)
 {
   long l = lg(x), i;
-  for (i=1; i<l; i++) checkprimeid(gel(x,i));
+  for (i=1; i<l; i++) checkprid(gel(x,i));
 }
 
 /* Given a prime ideal factorization with possibly zero or negative

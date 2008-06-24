@@ -114,7 +114,7 @@ compute_fact(GEN nf, GEN u1, GEN gen)
       if (typ(g) != t_MAT)
       {
 	if (z)
-	  gel(z,2) = arch_mul(gel(z,2), to_famat_all(g, e));
+	  gel(z,2) = famat_mul(gel(z,2), to_famat_all(g, e));
 	else
 	  z = mkvec2(NULL, to_famat_all(g, e));
 	continue;
@@ -152,29 +152,29 @@ too_big(GEN nf, GEN bet)
   return 0; /* not reached */
 }
 
-/* GTM 193: Algo 4.3.4. Reduce x mod idele */
+/* GTM 193: Algo 4.3.4. Reduce x mod divisor */
 static GEN
-_idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
+_idealmoddivisor(GEN nf, GEN x, GEN divisor, GEN sarch)
 {
   pari_sp av = avma;
-  GEN a,A,D,G, f = gel(idele,1);
+  GEN a,A,D,G, f = gel(divisor,1);
 
   G = redideal(nf, x, f);
   D = redideal(nf, idealdiv(nf,G,x), f);
   A = element_div(nf,D,G);
   if (too_big(nf,A) > 0) { avma = av; return x; }
-  a = set_sign_mod_idele(nf, NULL, A, idele, sarch);
+  a = set_sign_mod_divisor(nf, NULL, A, divisor, sarch);
   if (a != A && too_big(nf,A) > 0) { avma = av; return x; }
   return idealmul(nf, a, x);
 }
 
 GEN
-idealmodidele(GEN bnr, GEN x)
+idealmoddivisor(GEN bnr, GEN x)
 {
   GEN bid = gel(bnr,2), fa2 = gel(bid,4);
-  GEN idele = gel(bid,1);
+  GEN divisor = gel(bid,1);
   GEN sarch = gel(fa2,lg(fa2)-1);
-  return _idealmodidele(checknf(bnr), x, idele, sarch);
+  return _idealmoddivisor(checknf(bnr), x, divisor, sarch);
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
@@ -266,7 +266,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
      * to f + no denominators */
     if (!I)
     {
-      gel(basecl,i) = famat_to_nf_modidele(nf, L, e, bid);
+      gel(basecl,i) = famat_to_nf_moddivisor(nf, L, e, bid);
       continue;
     }
     if (lg(A) == 1)
@@ -331,11 +331,11 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       G = element_muli(nf, G, mulI);
       G = ZC_hnfrem(G, ZM_Z_mul(f, dmulI));
     }
-    G = set_sign_mod_idele(nf,A,G,module,sarch);
+    G = set_sign_mod_divisor(nf,A,G,module,sarch);
     I = idealmul(nf,I,G);
     if (dmulI) I = gdivexact(I, dmulI);
     /* more or less useless, but cheap at this point */
-    I = _idealmodidele(nf,I,module,sarch);
+    I = _idealmoddivisor(nf,I,module,sarch);
     gel(basecl,i) = gerepilecopy(av, I);
   }
   return basecl;
@@ -432,7 +432,7 @@ Buchray(GEN bnf, GEN module, long flag)
     if (typ(El[j]) != t_INT) /* <==> != 1 */
     {
       GEN F = to_famat_all(gel(El,j), gel(cyc,j));
-      p1 = arch_mul(F, p1);
+      p1 = famat_mul(F, p1);
     }
     gel(logs,j) = zideallog(nf, p1, bid); /* = log(Gen[j]) */
   }
@@ -531,7 +531,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   j = lg(ep);
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
-      beta = arch_mul(to_famat_all(gel(El,i), negi(gel(ep,i))), beta);
+      beta = famat_mul(to_famat_all(gel(El,i), negi(gel(ep,i))), beta);
   p1 = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);

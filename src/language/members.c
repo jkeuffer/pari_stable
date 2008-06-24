@@ -33,7 +33,7 @@ member_err(const char *s)
 GEN
 member_e(GEN x)
 {
-  x = get_primeid(x);
+  x = checkprid_i(x);
   if (!x) member_err("e");
   return gel(x,3);
 }
@@ -41,7 +41,7 @@ member_e(GEN x)
 GEN
 member_f(GEN x)
 {
-  x = get_primeid(x);
+  x = checkprid_i(x);
   if (!x) member_err("f");
   return gel(x,4);
 }
@@ -54,7 +54,7 @@ member_p(GEN x)
     return gmael(x,2,1);
   switch(typ(x)) {
     case t_VEC:
-      x = get_primeid(x);
+      x = checkprid_i(x);
       return gel(x,1);
     case t_PADIC:
       return gel(x,2);
@@ -429,7 +429,7 @@ GEN
 member_gen(GEN x)
 {
   long t;
-  GEN y = get_primeid(x);
+  GEN y = checkprid_i(x);
   if (y) return mkvec2copy(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
   if (t == typ_GAL)

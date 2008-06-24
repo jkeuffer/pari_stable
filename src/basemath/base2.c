@@ -2035,7 +2035,7 @@ modprinit(GEN nf, GEN pr, int zk)
   GEN res, tau, mul, x, p, T, pow, ffproj, nfproj, prh, c;
   long N, i, k, f;
 
-  nf = checknf(nf); checkprimeid(pr);
+  nf = checknf(nf); checkprid(pr);
   f = itos( gel(pr,4) );
   N = degpol(nf[1]);
   prh = idealhnf_two(nf, pr);
@@ -2148,7 +2148,7 @@ checkmodpr(GEN modpr)
 {
   if (typ(modpr) != t_COL || lg(modpr) < SMALLMODPR)
     pari_err(talker,"incorrect modpr format");
-  checkprimeid(gel(modpr,mpr_PR));
+  checkprid(gel(modpr,mpr_PR));
 }
 
 

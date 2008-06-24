@@ -596,11 +596,21 @@ $\Z$-basis of the ideal.
 
 One may use \kbd{idealhnf} to convert any ideal to the last (preferred) format.
 
-\item an \tev{idele} is a 2-component vector, the first being an ideal as
-above, the second being a $(r_1+r_2)$-component row vector giving Archimedean
-information, as complex numbers (usually representing logarithms of complex
-embeddings).
-\smallskip
+\item an \emph{extended ideal} \sidx{ideal (extended)} is a 2-component
+vector $[I, t]$, where $I$ is an ideal as above and $t$ is an algebraic
+number, representing the ideal $(t)I$. This is useful whenever \tet{idealred}
+is involved, implicitly working in the ideal class group, while keeping track
+of principal ideals. Ideal operations suitably update the principal part
+when it makes sense (in a multiplicative context), e.g.~using \kbd{idealmul}
+on $[I,t]$, $[J,u]$, we obtain $[IJ, tu]$. When it does not make sense, the
+extended part is silently discarded, e.g.~using \kbd{idealadd} with the above
+input produces $I+J$.
+
+The ``principal part'' $t$ in an extended ideal may be
+represented in any of the above forms, and \emph{also} as a factorization
+matrix (in terms of number field elements, not ideals!), possibly the empty
+matrix \kbd{[;]} representing $1$. In the latter case, elements stay in
+factored form, which is a convenient way to avoid coefficient explosion.
 
 \subsec{Finite abelian groups}
 

@@ -192,6 +192,11 @@ BA 49- user variables can now be aliased [#790].
    65- idealmin now returns a number field element, instead of the associated
        "principal idele"
    66- rename library functions minideal -> idealmin and change prototype
+   67- cleared up the confuѕion caused by PARI "ideles", which were remotely
+       related to the mathematical notion, and covered two distinct uses. The
+       first one (ideal + list of real places) is now called "divisor"; the
+       second one (ideal + factorization matrix, which used to be a vector 
+       of logarithms of complex embeddings) is now called "extended ideal".
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -286,6 +291,11 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.
    35- library functions mul_content, mul_denom
+   36- a concept of "extended ideal" [I, t], where t is an algebraic number
+       (possibly in factored form). The pair represents the ideal I x (t)
+       In applications the norm of I stays bounded for a given base field,
+       and t keeps track of the "principal part" of the ideal (usually in
+       factored form to avoid coefficient explosion).
 
   Removed
     1- obsolete library functions extract and matextract
@@ -325,7 +335,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    26- useless component v[6] in "small bnfs" (was 'different', is 0)
    27- obsolete library functions buchray, buchrayinit, buchrayinitgen:
        use Buchray.
-   28- obsolete GP functions idealprincipal. Use number field elements "as is"
+   28- obsolete GP function idealprincipal. Use number field elements "as is"
+   29- obsolete GP function ideleprincipal. No routine remains that would
+       use the auxiliary "archimedean information"
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

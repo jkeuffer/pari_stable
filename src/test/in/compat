@@ -468,7 +468,6 @@ primedec(nf,11)
 primes(100)
 forprime(p=2,100,print(p," ",lift(primroot(p))))
 principalideal(nf,mod(x^3+5,nfpol))
-principalidele(nf,mod(x^3+5,nfpol))
 print((x-12*y)/(y+13*x));
 print([1,2;3,4])
 print1(x+y);print1(" equals ");print(x+y);

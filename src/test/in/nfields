@@ -90,7 +90,6 @@ idealtwoelt(nf,idy)
 idealtwoelt(nf,idy,10)
 idealstar(nf2,54)
 idealval(nf,idp,vp)
-ideleprincipal(nf,x^3+5)
 \\
 ba=nfalgtobasis(nf,x^3+5)
 bb=nfalgtobasis(nf,x^3+x)

@@ -560,7 +560,7 @@ element_val(GEN nf, GEN x, GEN vp)
 
   if (gcmp0(x)) return LONG_MAX;
   nf = checknf(nf);
-  checkprimeid(vp);
+  checkprid(vp);
   p = gel(vp,1);
   e = itos(gel(vp,3));
   x = nf_to_scalar_or_basis(nf, x);
@@ -1043,10 +1043,10 @@ reducemodlll(GEN x,GEN y)
   return reducemodinvertible(x, ZM_lll(y, 0.75, LLL_INPLACE));
 }
 
-/* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = idele[2].
+/* multiply y by t = 1 mod^* f such that sign(x) = sign(y) at arch = divisor[2].
  * If x == NULL, make y >> 0 at sarch */
 GEN
-set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
+set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN divisor, GEN sarch)
 {
   GEN s, archp, gen;
   long nba,i;
@@ -1054,7 +1054,7 @@ set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch)
   gen = gel(sarch,2); nba = lg(gen);
   if (nba == 1) return y;
 
-  archp = vec01_to_indices(gel(idele,2));
+  archp = vec01_to_indices(gel(divisor,2));
   s = nfsign_arch(nf, y, archp);
   if (x) F2v_add_inplace(s, nfsign_arch(nf, x, archp));
   s = F2m_F2c_mul(gel(sarch,3), s);
@@ -1612,7 +1612,7 @@ add_grp(GEN nf, GEN u1, GEN cyc, GEN gen, GEN bid)
       long i, c = lg(u1);
       GEN g = cgetg(c,t_VEC);
       for (i=1; i<c; i++)
-        gel(g,i) = famat_to_nf_modidele(nf, gen, gel(u1,i), bid);
+        gel(g,i) = famat_to_nf_moddivisor(nf, gen, gel(u1,i), bid);
       gen = g;
     }
     gel(G,3) = gen; /* replace dummy */
@@ -1683,7 +1683,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
       {
 	GEN L = gel(L2,j), F = gel(L,1), G = gel(L,3);
 	for (k=1; k<lg(G); k++)
-	{ /* log(g^f) mod idele */
+	{ /* log(g^f) mod divisor */
 	  GEN g = gel(G,k), f = gel(F,k), a = element_powmodideal(nf,g,f,x);
 	  GEN sgn = mpodd(f)? nfsign_arch(nf, g, S.archp)
                             : const_vecsmall(lg(S.archp)-1, 0);

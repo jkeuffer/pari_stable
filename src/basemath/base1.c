@@ -119,7 +119,7 @@ checkbid(GEN bid)
 }
 
 void
-checkprimeid(GEN id)
+checkprid(GEN id)
 {
   if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
     pari_err(talker,"incorrect prime ideal");
@@ -136,7 +136,7 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
 }
 
 GEN
-get_primeid(GEN x)
+checkprid_i(GEN x)
 {
   if (typ(x) != t_VEC) return NULL;
   if (lg(x) == 3) x = gel(x,1);
@@ -674,6 +674,18 @@ pr_galoisapply(GEN nf, GEN pr, GEN aut)
   gel(PR,2) = u;
   gel(PR,5) = b; return PR;
 }
+static GEN
+fa_galoisapply(GEN nf, GEN fa, GEN aut)
+{
+  long i, lx = lg(fa);
+  GEN G, g;
+  if (typ(fa) != t_MAT) pari_err(typeer, "galoisapply");
+  if (lx == 1) return cgetg(1, t_MAT);
+  if (lx != 3) pari_err(typeer, "galoisapply");
+  g = gel(fa,1); lx = lg(g); G = cgetg(lx, t_COL);
+  for (i = 1; i < lx; i++) gel(G,i) = galoisapply(nf, aut, gel(g,i));
+  return mkmat2(g, ZC_copy(gel(fa,2)));
+}
 
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
@@ -703,10 +715,11 @@ galoisapply(GEN nf, GEN aut, GEN x)
     case t_VEC:
       switch(lg(x))
       {
-        case 3: y = cgetg(3,t_VEC);
-          gel(y,1) = galoisapply(nf,aut,gel(x,1));
-          gel(y,2) = gcopy(gel(x,2)); return gerepileupto(av, y);
         case 6: return gerepilecopy(av, pr_galoisapply(nf, x, aut));
+        case 3: y = cgetg(3,t_VEC);
+          gel(y,1) = galoisapply(nf, aut, gel(x,1));
+          gel(y,2) = fa_galoisapply(nf, aut, gel(x,2));
+          return gerepileupto(av, y);
       }
       break;
 
@@ -715,8 +728,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      N = degpol(T);
-      if (lg(x[1])!=N+1) break;
+      N = degpol(T); if (lg(x[1])!=N+1) break;
       y = cgetg(lx,t_MAT);
       for (j=1; j<lx; j++) gel(y,j) = ZC_galoisapply(nf,gel(x,j), gel(aut,2),T);
       return gerepileupto(av, idealhnf_shallow(nf,y));
@@ -1251,7 +1263,7 @@ nfbasechange(GEN u, GEN x)
       break;
 
     case t_VEC: /* pr */
-      checkprimeid(x); y = shallowcopy(x);
+      checkprid(x); y = shallowcopy(x);
       gel(y,2) = RgM_RgC_mul(u, gel(y,2));
       gel(y,5) = RgM_RgC_mul(u, gel(y,5));
       break;

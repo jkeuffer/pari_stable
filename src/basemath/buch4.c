@@ -286,7 +286,7 @@ qpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (gcmp0(T)) return 1;
   if (typ(T)!=t_POL) pari_err(notpoler,"qpsolublenf");
-  checkprimeid(pr); nf = checknf(nf);
+  checkprid(pr); nf = checknf(nf);
 
   if (equaliu(gel(pr,1), 2))
   { /* tough case */
@@ -319,7 +319,7 @@ zpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (gcmp0(T)) return 1;
   if (typ(T)!=t_POL) pari_err(notpoler,"zpsolublenf");
-  checkprimeid(pr); nf = checknf(nf);
+  checkprid(pr); nf = checknf(nf);
 
   if (equaliu(gel(pr,1),2))
   {
@@ -362,7 +362,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   pari_sp av = avma;
 
   if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
-  checkprimeid(pr); nf = checknf(nf);
+  checkprid(pr); nf = checknf(nf);
   p = gel(pr,1);
 
   if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
@@ -464,7 +464,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   M = cgetg(ls,t_MAT);
   for (i=1; i<ls; i++)
   {
-    p1 = gel(S,i); checkprimeid(p1);
+    p1 = gel(S,i); checkprid(p1);
     gel(M,i) = isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */

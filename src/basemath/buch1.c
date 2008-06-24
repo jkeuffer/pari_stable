@@ -319,7 +319,7 @@ getallelts(GEN bnr)
     c[i] = k;
     gk = cgetg(k, t_VEC); gel(gk,1) = gel(g,i);
     for (j=2; j<k; j++)
-      gel(gk,j) = idealmodidele(bnr, idealmul(nf, gel(gk,j-1), gel(gk,1)));
+      gel(gk,j) = idealmoddivisor(bnr, idealmul(nf, gel(gk,j-1), gel(gk,1)));
     gel(pows,i) = gk; /* powers of g[i] */
   }
 
@@ -337,7 +337,7 @@ getallelts(GEN bnr)
     if (j == C[i+1]) i++;
     a = gmael(pows,lc-i,j/C[i]);
     k = j%C[i] + 1;
-    if (k > 1) a = idealmodidele(bnr, idealmul(nf, a, gel(list,k)));
+    if (k > 1) a = idealmoddivisor(bnr, idealmul(nf, a, gel(list,k)));
     gel(list, ++j) = a;
   }
   return list;
