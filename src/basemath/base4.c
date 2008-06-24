@@ -1471,7 +1471,9 @@ hnfideal_inv(GEN nf, GEN I)
 GEN
 pidealprimeinv(GEN nf, GEN x)
 {
-  GEN y = cgetg(6,t_VEC); y[1] = x[1]; y[2] = x[5];
+  GEN y;
+  if (prime_is_inert(x)) return matid(lg(gel(x,2)) - 1);
+  y = cgetg(6,t_VEC); y[1] = x[1]; y[2] = x[5];
   gel(y,3) = gel(y,5) = gen_0;
   gel(y,4) = subsi(degpol(nf[1]), gel(x,4));
   return idealhnf_two(nf,y);
