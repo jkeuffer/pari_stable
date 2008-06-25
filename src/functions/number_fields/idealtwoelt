@@ -7,10 +7,11 @@ Help: idealtwoelt(nf,x,{a}): two-element representation of an ideal x in the
 Doc: computes a two-element
  representation of the ideal $x$ in the number field $\var{nf}$, combining a
  random search and an explicit approximation theorem. $x$ is an ideal
- in any form (including perhaps an Archimedean part, which is ignored) and the
+ in any form (possibly an extended ideal, whose principal part is ignored)
+ and the
  result is a row vector $[a,\alpha]$ with two components such that
  $x=a\Z_K+\alpha\Z_K$ and $a\in\Z$, where $a$ is the one passed as argument if
- any. If $x$ is given by at least two generators, $a$ is chosen to be the
+ any. Unless $x$ was given as a principal ideal, $a$ is chosen to be the
  positive generator of $x\cap\Z$.
 
  Note that when an explicit $a$ is given, we must factor it and this may
