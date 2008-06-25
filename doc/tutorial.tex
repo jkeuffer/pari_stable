@@ -1881,13 +1881,11 @@ not very different.
 
 The same \kbd{quadgen} function is used to create elements. Ideals are again
 represented by binary quadratic forms $(a,b,c)$, this time indefinite. However,
-the Archimedean valuations of the number field start to come into play (as
-is clear if one considers ideles instead of ideals), hence in fact quadratic
-forms with positive discriminant will be represented as a quadruplet
-$(a,b,c,d)$ where the quadratic form itself is $ax^2+bxy+cy^2$ with $a$,
-$b$ and $c$ integral, and $d$ is the Archimedean component, a real number.
-For people familiar with the notion, $d$ represents a ``distance'' as defined
-by Shanks and Lenstra.
+the Archimedean valuations of the number field start to come into play, hence
+in fact quadratic forms with positive discriminant will be represented as a
+quadruplet $(a,b,c,d)$ where the quadratic form itself is $ax^2+bxy+cy^2$
+with $a$, $b$ and $c$ integral, and $d\in \R$ is a ``distance'' 
+component, as defined by Shanks and Lenstra.
 
 To create such forms, one uses the same function as for definite ones, but
 you can add a fourth (optional) argument to initialize the distance:
