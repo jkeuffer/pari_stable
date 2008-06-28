@@ -1320,7 +1320,9 @@ gen_sortspec(GEN v, long n, void *E, int (*cmp)(void*,GEN,GEN))
   GEN x, y, w;
   switch(n)
   {
-    case 1: return mkvecsmall(1);
+    case 1: 
+      (void)cmp(E,gel(v,1),gel(v,1)); /* check for type error */
+      return mkvecsmall(1);
     case 2:
       return cmp(E,gel(v,1),gel(v,2)) <= 0? mkvecsmall2(1,2)
 					  : mkvecsmall2(2,1);

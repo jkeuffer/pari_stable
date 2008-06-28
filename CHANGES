@@ -91,6 +91,8 @@ BA 78- [galoisinit] Documentation of "weakly" supersolvable was incorrect.
    80- quadclassunit(-3 or -4) --> one extra (obsolete) component.
 BA 81- the evaluator did not garbage collect huge expressions [#713]
 BA 82- changing a function in use caused a crash [#784]
+   83- vecsort() would not check the type of element in 1-dimensional vector
+       [ e.g. vecsort([I] should be an error ]
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
