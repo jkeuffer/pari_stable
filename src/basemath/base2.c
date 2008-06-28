@@ -1754,7 +1754,7 @@ pradical(GEN nf, GEN p, GEN *phi)
   /* matrix of Frob: x->x^p over Z_K/p */
   frob = cgetg(N+1,t_MAT);
   for (i=1; i<=N; i++)
-    gel(frob,i) = element_powid_mod_p(nf,i,p, p);
+    gel(frob,i) = wi_pow_mod_p(nf,i,p, p);
 
   m = frob; q = p;
   while (cmpiu(q,N) < 0) { q = mulii(q,p); m = FpM_mul(m, frob, p); }
@@ -2094,7 +2094,7 @@ modprinit(GEN nf, GEN pr, int zk)
     frob = cgetg(f+1, t_MAT);
     for (i=1; i<=f; i++)
     {
-      x = element_powid_mod_p(nf,c[i],p, p);
+      x = wi_pow_mod_p(nf,c[i],p, p);
       gel(frob,i) = FpM_FpC_mul(ffproj, x, p);
     }
     u = col_ei(f,2); k = 2;
@@ -2114,7 +2114,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
     mul = cgetg(f+1,t_MAT);
     gel(mul,1) = v; /* assume w_1 = 1 */
-    for (i=2; i<=f; i++) gel(mul,i) = elementi_mulid(nf,v,c[i]);
+    for (i=2; i<=f; i++) gel(mul,i) = zk_wi_mul(nf,v,c[i]);
   }
 
   /* Z_K/pr = Fp(v), mul = mul by v */
@@ -2375,7 +2375,7 @@ rnfjoinmodules(GEN nf, GEN x, GEN y)
 }
 
 typedef struct {
-  GEN nf, multab, modpr,T,p;
+  GEN multab, T,p;
   long h;
 } rnfeltmod_muldata;
 
@@ -2383,8 +2383,8 @@ static GEN
 _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  GEN z = x? element_mulid(D->multab,x,D->h)
-	   : element_mulidid(D->multab,D->h,D->h);
+  GEN z = x? nf_wi_mul(D->multab,x,D->h)
+	   : wi_wj_mul(D->multab,D->h,D->h);
   (void)y;
   return FqV_red(z,D->T,D->p);
 }
@@ -2393,11 +2393,11 @@ _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   GEN z = x? sqr_by_tab(D->multab,x)
-	   : element_mulidid(D->multab,D->h,D->h);
+	   : wi_wj_mul(D->multab,D->h,D->h);
   return FqV_red(z,D->T,D->p);
 }
 
-/* Compute W[h]^n mod pr in the extension, assume n >= 0 */
+/* Compute W[h]^n mod (T,p) in the extension, assume n >= 0. T a ZX */
 static GEN
 rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 {
@@ -2618,7 +2618,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     for (k=1; k<=n; k++)
       for (j=1; j<=n; j++)
       {
-	GEN z = RgM_RgC_mul(Ainv, gmod(element_mulid(MW, gel(A,j),k), nfT));
+	GEN z = RgM_RgC_mul(Ainv, gmod(nf_wi_mul(MW, gel(A,j),k), nfT));
 	for (i=1; i<=n; i++)
 	{
 	  GEN c = grem(gel(z,i), nfT);

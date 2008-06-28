@@ -897,7 +897,7 @@ GEN     element_inv(GEN nf, GEN x);
 GEN     element_invmodideal(GEN nf, GEN x, GEN ideal);
 GEN     element_mul(GEN nf,GEN x,GEN y);
 GEN     element_muli(GEN nf,GEN x,GEN y);
-GEN     element_mulid(GEN nf, GEN x, long i);
+GEN     nf_wi_mul(GEN nf, GEN x, long i);
 GEN     element_pow(GEN nf,GEN x,GEN k);
 GEN     element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal);
 GEN     element_sqr(GEN nf,GEN x);

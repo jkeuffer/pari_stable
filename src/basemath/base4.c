@@ -29,16 +29,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 
 /* A valid ideal is either principal (valid nf_element), or prime, or a matrix
- * on the integer basis (preferably HNF).
+ * on the integer basis in HNF.
  * A prime ideal is of the form [p,a,e,f,b], where the ideal is p.Z_K+a.Z_K,
  * p is a rational prime, a belongs to Z_K, e=e(P/p), f=f(P/p), and b
- * Lenstra constant (p.P^(-1)= p Z_K + b Z_K).
+ * is Lenstra's constant, such that p.P^(-1)= p Z_K + b Z_K.
  *
- * An extended ideal is a couple[I,F] where I is a valid ideal and F a
- * factorization matrix associated to an algebraic number.
- * All routines work with either extended ideals or ideals (an omitted F
- * is assumed to be [;] <-> 1).
- *
+ * An extended ideal is a couple [I,F] where I is a valid ideal and F is
+ * either an algebraic number, or a factorization matrix associated to an
+ * algebraic number. All routines work with either extended ideals or ideals
+ * (an omitted F is assumed to be [;] <-> 1).
  * All ideals are output in HNF form. */
 
 /* types and conversions */
@@ -74,12 +73,12 @@ idealtyp(GEN *ideal, GEN *arch)
   *ideal = x; return t;
 }
 
-/* pr = [a,x,...], a in Z. Return (a,x)  [HACK: pr need not be prime] */
+/* nf a true nf; v = [a,x,...], a in Z. Return (a,x) */
 GEN
-idealhnf_two(GEN nf, GEN pr)
+idealhnf_two(GEN nf, GEN v)
 {
-  GEN p = gel(pr,1), pi = gel(pr,2), m = zk_scalar_or_multable(nf, pi);
-  if (typ(m) == t_INT) return scalarmat(p, lg(pi)-1);
+  GEN p = gel(v,1), pi = gel(v,2), m = zk_scalar_or_multable(nf, pi);
+  if (typ(m) == t_INT) return scalarmat(p, degpol(gel(nf,1)));
   return ZM_hnfmodid(m, p);
 }
 
@@ -87,16 +86,6 @@ static GEN
 ZM_Q_mul(GEN x, GEN y) 
 { return typ(y) == t_INT? ZM_Z_mul(x,y): RgM_Rg_mul(x,y); }
 
-/* x integral ideal in t_MAT form, nx columns */
-static GEN
-vec_mulid(GEN nf, GEN x, long nx, long N)
-{
-  GEN m = cgetg(nx*N + 1, t_MAT);
-  long i, j, k;
-  for (i=k=1; i<=nx; i++)
-    for (j=1; j<=N; j++) gel(m, k++) = elementi_mulid(nf, gel(x,i),j);
-  return m;
-}
 
 GEN
 idealhnf_principal(GEN nf, GEN x)
@@ -119,6 +108,16 @@ idealhnf_principal(GEN nf, GEN x)
   return cx? ZM_Q_mul(x,cx): x;
 }
 
+/* x integral ideal in t_MAT form, nx columns */
+static GEN
+vec_mulid(GEN nf, GEN x, long nx, long N)
+{
+  GEN m = cgetg(nx*N + 1, t_MAT);
+  long i, j, k;
+  for (i=k=1; i<=nx; i++)
+    for (j=1; j<=N; j++) gel(m, k++) = zk_wi_mul(nf, gel(x,i),j);
+  return m;
+}
 GEN
 idealhnf_shallow(GEN nf, GEN x)
 {
@@ -731,7 +730,7 @@ idealval(GEN nf, GEN ix, GEN P)
   gel(B,1) = gen_0; /* dummy */
   for (j=2; j<=N; j++)
   {
-    if (do_mul) gel(mul,j) = elementi_mulid(nf,t0,j);
+    if (do_mul) gel(mul,j) = zk_wi_mul(nf,t0,j);
     x = gel(ix,j);
     y = cgetg(N+1, t_COL); gel(B,j) = y;
     for (i=1; i<=N; i++)
@@ -1735,7 +1734,7 @@ isideal(GEN nf,GEN x)
   if (!ZM_ishnf(x)) return 0;
   for (i=2; i<=N; i++)
     for (j=2; j<=N; j++)
-      if (! hnf_invimage(x, elementi_mulid(nf,gel(x,i),j)))
+      if (! hnf_invimage(x, zk_wi_mul(nf,gel(x,i),j)))
       {
 	avma = av; return 0;
       }

@@ -641,7 +641,7 @@ GEN     respm(GEN x, GEN y, GEN pm);
 
 void    check_nfelt(GEN x, GEN *den);
 GEN     zk_scalar_or_multable(GEN nf, GEN x);
-GEN     elementi_mulid(GEN nf, GEN x, long i);
+GEN     zk_wi_mul(GEN nf, GEN x, long i);
 
 /* base4.c */
 
