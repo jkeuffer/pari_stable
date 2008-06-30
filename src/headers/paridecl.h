@@ -892,12 +892,12 @@ GEN     RgX_to_nfX(GEN nf,GEN pol);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     basistoalg(GEN nf, GEN x);
 GEN     closemodinvertible(GEN x, GEN y);
+GEN     element_add(GEN nf, GEN x, GEN y);
 GEN     element_div(GEN nf, GEN x, GEN y);
 GEN     element_inv(GEN nf, GEN x);
 GEN     element_invmodideal(GEN nf, GEN x, GEN ideal);
 GEN     element_mul(GEN nf,GEN x,GEN y);
 GEN     element_muli(GEN nf,GEN x,GEN y);
-GEN     nf_wi_mul(GEN nf, GEN x, long i);
 GEN     element_pow(GEN nf,GEN x,GEN k);
 GEN     element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal);
 GEN     element_sqr(GEN nf,GEN x);
@@ -932,7 +932,15 @@ GEN     Idealstar(GEN nf, GEN x,long flun);
 GEN     nfsign_arch(GEN nf,GEN alpha,GEN arch);
 GEN     nfsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 GEN     nfsign(GEN nf,GEN alpha);
+
+GEN     nf_multable(GEN nf, GEN x);
+GEN     tablemul(GEN TAB, GEN x, GEN y);
+GEN     tablemul_ei(GEN M, GEN x, long i);
+GEN     tablemul_ei_ej(GEN M, long i, long j);
+GEN     tablemulvec(GEN M, GEN x, GEN v);
+GEN     tablesqr(GEN tab, GEN x);
 GEN     zk_multable(GEN nf, GEN x);
+GEN     nf_ei_multable(GEN nf, long i);
 GEN     zk_scalar_or_multable(GEN, GEN x);
 
 /* base4.c */

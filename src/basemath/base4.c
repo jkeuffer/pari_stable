@@ -115,7 +115,7 @@ vec_mulid(GEN nf, GEN x, long nx, long N)
   GEN m = cgetg(nx*N + 1, t_MAT);
   long i, j, k;
   for (i=k=1; i<=nx; i++)
-    for (j=1; j<=N; j++) gel(m, k++) = zk_wi_mul(nf, gel(x,i),j);
+    for (j=1; j<=N; j++) gel(m, k++) = zk_ei_mul(nf, gel(x,i),j);
   return m;
 }
 GEN
@@ -730,7 +730,7 @@ idealval(GEN nf, GEN ix, GEN P)
   gel(B,1) = gen_0; /* dummy */
   for (j=2; j<=N; j++)
   {
-    if (do_mul) gel(mul,j) = zk_wi_mul(nf,t0,j);
+    if (do_mul) gel(mul,j) = zk_ei_mul(nf,t0,j);
     x = gel(ix,j);
     y = cgetg(N+1, t_COL); gel(B,j) = y;
     for (i=1; i<=N; i++)
@@ -1734,7 +1734,7 @@ isideal(GEN nf,GEN x)
   if (!ZM_ishnf(x)) return 0;
   for (i=2; i<=N; i++)
     for (j=2; j<=N; j++)
-      if (! hnf_invimage(x, zk_wi_mul(nf,gel(x,i),j)))
+      if (! hnf_invimage(x, zk_ei_mul(nf,gel(x,i),j)))
       {
 	avma = av; return 0;
       }

@@ -298,6 +298,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        In applications the norm of I stays bounded for a given base field,
        and t keeps track of the "principal part" of the ideal (usually in
        factored form to avoid coefficient explosion).
+   37- element_add, nf_multable, tablemul, tablemul_ei, tablemul_ei_ej,
+       tablemulvec, tablesqr, nf_ei_multable.
 
   Removed
     1- obsolete library functions extract and matextract

@@ -34,13 +34,7 @@ get_tab(GEN nf, long *N)
   *N = lg(tab[1])-1; return tab;
 }
 
-/* x != 0 t_INT. Return x * y (not memory clean) */
-static GEN
-_mulix(GEN x, GEN y) {
-  return is_pm1(x)? (signe(x) < 0)? gneg(y): y
-		  : gmul(x, y);
-}
-/* x != 0, y t_INT. Return x * y (not memory clean) */
+/* x != 0, y t_INT. Return x * y (not memory clean if x = 1) */
 static GEN
 _mulii(GEN x, GEN y) {
   return is_pm1(x)? (signe(x) < 0)? negi(y): y
@@ -48,23 +42,25 @@ _mulii(GEN x, GEN y) {
 }
 
 GEN
-wi_wj_mul(GEN nf, long i, long j)
+tablemul_ei_ej(GEN M, long i, long j)
 {
   long N;
-  GEN tab = get_tab(nf, &N);
+  GEN tab = get_tab(M, &N);
   tab += (i-1)*N; return gel(tab,j);
 }
 
 /* Outputs x.w_i, where w_i is the i-th elt of the integral basis.
- * Assume x a RgV of correct length */
+ * x an RgV of correct length and arbitrary content (polynomials, scalars...).
+ * M is the multiplication table wi wj = sum_k M_k^(i,j) wk */
 GEN
-nf_wi_mul(GEN nf, GEN x, long i)
+tablemul_ei(GEN M, GEN x, long i)
 {
   long j, k, N;
   GEN v, tab;
 
   if (i==1) return gcopy(x);
-  tab = get_tab(nf, &N); tab += (i-1)*N;
+  tab = get_tab(M, &N); tab += (i-1)*N;
+  /* wi . x = [ sum_j tab[k,j] x[j] ]_k */
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
@@ -73,15 +69,15 @@ nf_wi_mul(GEN nf, GEN x, long i)
     for (j=1; j<=N; j++)
     {
       GEN c = gcoeff(tab,k,j);
-      if (signe(c)) s = gadd(s, _mulix(c, gel(x,j)));
+      if (!gcmp0(c)) s = gadd(s, gmul(c, gel(x,j)));
     }
     gel(v,k) = gerepileupto(av,s);
   }
   return v;
 }
-/* as nf_wi_mul, assume x a ZV of correct length */
+/* as tablemul_ei, assume x a ZV of correct length */
 GEN
-zk_wi_mul(GEN nf, GEN x, long i)
+zk_ei_mul(GEN nf, GEN x, long i)
 {
   long j, k, N;
   GEN v, tab;
@@ -105,10 +101,10 @@ zk_wi_mul(GEN nf, GEN x, long i)
 
 /* table of multiplication by wi in ZK = Z[w1,..., wN] */
 GEN
-zk_wi_multable(GEN nf, long i)
+nf_ei_multable(GEN TAB, long i)
 {
   long k,N;
-  GEN m, tab = get_tab(nf, &N);
+  GEN m, tab = get_tab(TAB, &N);
   tab += (i-1)*N;
   m = cgetg(N+1,t_MAT);
   for (k=1; k<=N; k++) m[k] = tab[k];
@@ -121,7 +117,16 @@ zk_multable(GEN nf, GEN x)
   long i, l = lg(x);
   GEN mul = cgetg(l,t_MAT);
   gel(mul,1) = x; /* assume w_1 = 1 */
-  for (i=2; i<l; i++) gel(mul,i) = zk_wi_mul(nf,x,i);
+  for (i=2; i<l; i++) gel(mul,i) = zk_ei_mul(nf,x,i);
+  return mul;
+}
+GEN
+nf_multable(GEN nf, GEN x)
+{
+  long i, l = lg(x);
+  GEN mul = cgetg(l,t_MAT);
+  gel(mul,1) = x; /* assume w_1 = 1 */
+  for (i=2; i<l; i++) gel(mul,i) = tablemul_ei(nf,x,i);
   return mul;
 }
 
@@ -136,11 +141,42 @@ zk_scalar_or_multable(GEN nf, GEN x)
   return (typ(x) == t_COL)? zk_multable(nf, x): x;
 }
 
+static GEN
+RgC_Rg_add(GEN x, GEN y)
+{
+  long k, lx = lg(x);
+  GEN z = cgetg(t_COL, lx); gel(z,1) = gadd(y,gel(x,1));
+  for (k = 2; k < lx; k++) gel(z,k) = gcopy(gel(x,k));
+  return z;
+}
+
+/* sum of x and y in nf */
+GEN
+element_add(GEN nf, GEN x, GEN y)
+{
+  GEN z;
+  pari_sp av = avma;
+
+  nf = checknf(nf);
+  x = nf_to_scalar_or_basis(nf, x);
+  y = nf_to_scalar_or_basis(nf, y);
+  if (typ(x) != t_COL) {
+    if (typ(y) == t_COL) z = RgC_Rg_add(y, x);
+    else {
+      long N = degpol(gel(nf,1));
+      z = zerocol(N); gel(z,1) = gadd(x,y);
+    }
+  } else {
+    if (typ(y) != t_COL) z = RgC_Rg_add(x, y);
+    else z = gadd(x, y);
+  }
+  return gerepileupto(av, z);
+}
+
 /* product of x and y in nf */
 GEN
 element_mul(GEN nf, GEN x, GEN y)
 {
-  long N;
   GEN z;
   pari_sp av = avma;
 
@@ -153,7 +189,7 @@ element_mul(GEN nf, GEN x, GEN y)
   {
     if (typ(y) == t_COL) z = RgC_Rg_mul(y, x);
     else {
-      N = degpol(gel(nf,1));
+      long N = degpol(gel(nf,1));
       z = zerocol(N); gel(z,1) = gmul(x,y);
     }
   }
@@ -176,14 +212,13 @@ GEN
 element_sqr(GEN nf, GEN x)
 {
   pari_sp av = avma;
-  long N;
   GEN z;
 
   nf = checknf(nf);
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL)
   {
-    N = degpol(gel(nf,1));
+    long N = degpol(gel(nf,1));
     z = zerocol(N); gel(z,1) = gsqr(x);
   }
   else
@@ -195,7 +230,6 @@ element_sqr(GEN nf, GEN x)
   }
   return gerepileupto(av, z);
 }
-
 
 GEN
 element_mulvec(GEN nf, GEN x, GEN v)
@@ -216,6 +250,18 @@ element_mulvec(GEN nf, GEN x, GEN v)
   }
   l = lg(v); y = cgetg(l, typ(v));
   for (i=1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
+  return dx? gdiv(y, dx): y;
+}
+GEN
+tablemulvec(GEN M, GEN x, GEN v)
+{
+  long l, i;
+  GEN y, dx = NULL;
+
+  if (RgV_isscalar(x)) return RgV_Rg_mul(v, gel(x,1));
+  x = nf_multable(M, x);
+  l = lg(v); y = cgetg(l, t_VEC);
+  for (i=1; i < l; i++) gel(y,i) = RgM_RgC_mul(x, gel(v,i));
   return dx? gdiv(y, dx): y;
 }
 
@@ -267,20 +313,21 @@ element_div(GEN nf, GEN x, GEN y)
 GEN
 element_muli(GEN nf, GEN x, GEN y)
 {
-  long i, j, k, N, tx = typ(x), ty = typ(y);
-  GEN s, v, tab = get_tab(nf, &N);
+  long i, j, k, N;
+  GEN s, v, TAB = get_tab(nf, &N);
 
-  if (tx == t_INT)
+  if (typ(x) == t_INT)
   {
-    if (ty == t_INT) return scalarcol(mulii(x,y), N);
+    if (typ(y) == t_INT) return scalarcol(mulii(x,y), N);
     return ZC_Z_mul(y, x);
   }
-  if (ty == t_INT) return ZC_Z_mul(x, y);
+  if (typ(y) == t_INT) return ZC_Z_mul(x, y);
   /* both x and y are ZV */
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
     pari_sp av = avma;
+    GEN TABi = TAB;
     if (k == 1)
       s = mulii(gel(x,1),gel(y,1));
     else
@@ -289,14 +336,13 @@ element_muli(GEN nf, GEN x, GEN y)
     for (i=2; i<=N; i++)
     {
       GEN t, xi = gel(x,i);
-      long base;
+      TABi += N;
       if (!signe(xi)) continue;
 
-      base = (i-1)*N;
       t = NULL;
       for (j=2; j<=N; j++)
       {
-	GEN p1, c = gcoeff(tab,k,base+j); /* m^{i,j}_k */
+	GEN p1, c = gcoeff(TABi, k, j); /* m^{i,j}_k */
 	if (!signe(c)) continue;
 	p1 = _mulii(c, gel(y,j));
 	t = t? addii(t, p1): p1;
@@ -311,14 +357,15 @@ element_muli(GEN nf, GEN x, GEN y)
 GEN
 element_sqri(GEN nf, GEN x)
 {
-  long i, j, k, N, tx = typ(x);
-  GEN s, v, tab = get_tab(nf, &N);
+  long i, j, k, N;
+  GEN s, v, TAB = get_tab(nf, &N);
 
-  if (tx == t_INT) return scalarcol(sqri(x), N);
+  if (typ(x) == t_INT) return scalarcol(sqri(x), N);
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
     pari_sp av = avma;
+    GEN TABi = TAB;
     if (k == 1)
       s = sqri(gel(x,1));
     else
@@ -326,15 +373,14 @@ element_sqri(GEN nf, GEN x)
     for (i=2; i<=N; i++)
     {
       GEN p1, c, t, xi = gel(x,i);
-      long base;
+      TABi += N;
       if (!signe(xi)) continue;
 
-      base = (i-1)*N;
-      c = gcoeff(tab,k,base+i);
+      c = gcoeff(TABi, k, i);
       t = signe(c)? _mulii(c,xi): NULL;
       for (j=i+1; j<=N; j++)
       {
-	c = gcoeff(tab,k,base+j);
+	c = gcoeff(TABi, k, j);
 	if (!signe(c)) continue;
 	p1 = _mulii(c, shifti(gel(x,j),1));
 	t = t? addii(t, p1): p1;
@@ -346,8 +392,43 @@ element_sqri(GEN nf, GEN x)
   return v;
 }
 
+/* both x and y are RgV */
 GEN
-sqr_by_tab(GEN tab, GEN x)
+tablemul(GEN TAB, GEN x, GEN y)
+{
+  long i, j, k, N = lg(x)-1;
+  GEN s, v = cgetg(N+1,t_COL);
+  for (k=1; k<=N; k++)
+  {
+    pari_sp av = avma;
+    GEN TABi = TAB;
+    if (k == 1)
+      s = gmul(gel(x,1),gel(y,1));
+    else
+      s = gadd(gmul(gel(x,1),gel(y,k)),
+	       gmul(gel(x,k),gel(y,1)));
+    for (i=2; i<=N; i++)
+    {
+      GEN t, xi = gel(x,i);
+      TABi += N;
+      if (gcmp0(xi)) continue;
+
+      t = NULL;
+      for (j=2; j<=N; j++)
+      {
+	GEN p1, c = gcoeff(TABi, k, j); /* m^{i,j}_k */
+	if (gcmp0(c)) continue;
+	p1 = gmul(c, gel(y,j));
+	t = t? gadd(t, p1): p1;
+      }
+      if (t) s = gadd(s, gmul(xi, t));
+    }
+    gel(v,k) = gerepileupto(av,s);
+  }
+  return v;
+}
+GEN
+tablesqr(GEN TAB, GEN x)
 {
   long i, j, k, N = lg(x)-1;
   GEN s, v = cgetg(N+1,t_COL);
@@ -355,6 +436,7 @@ sqr_by_tab(GEN tab, GEN x)
   for (k=1; k<=N; k++)
   {
     pari_sp av = avma;
+    GEN TABi = TAB;
     if (k == 1)
       s = gsqr(gel(x,1));
     else
@@ -362,15 +444,14 @@ sqr_by_tab(GEN tab, GEN x)
     for (i=2; i<=N; i++)
     {
       GEN p1, c, t, xi = gel(x,i);
-      long base;
+      TABi += N;
       if (gcmp0(xi)) continue;
 
-      base = (i-1)*N;
-      c = gcoeff(tab,k,base+i);
+      c = gcoeff(TABi, k, i);
       t = !gcmp0(c)? gmul(c,xi): NULL;
       for (j=i+1; j<=N; j++)
       {
-	c = gcoeff(tab,k,(i-1)*N+j);
+	c = gcoeff(TABi, k, j);
 	if (gcmp0(c)) continue;
 	p1 = gmul(gmul2n(c,1), gel(x,j));
 	t = t? gadd(t, p1): p1;
@@ -411,13 +492,12 @@ typedef struct {
   GEN nf, p;
   long I;
 } eltmod_muldata;
-
 static GEN
-wi_mul_mod(void *data, GEN x, GEN y)
+ei_mul_mod(void *data, GEN x, GEN y)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
   (void)y; /* ignored */
-  return FpC_red(zk_wi_mul(D->nf, x, D->I), D->p);
+  return FpC_red(zk_ei_mul(D->nf, x, D->I), D->p);
 }
 static GEN
 sqr_mod(void *data, GEN x)
@@ -425,10 +505,9 @@ sqr_mod(void *data, GEN x)
   eltmod_muldata *D = (eltmod_muldata*)data;
   return FpC_red(element_sqri(D->nf, x), D->p);
 }
-
 /* x = I-th vector of the Z-basis of Z_K, in Z^n, compute lift(x^n mod p) */
 GEN
-wi_pow_mod_p(GEN nf, long I, GEN n, GEN p)
+pow_ei_mod_p(GEN nf, long I, GEN n, GEN p)
 {
   pari_sp av = avma;
   eltmod_muldata D;
@@ -438,12 +517,12 @@ wi_pow_mod_p(GEN nf, long I, GEN n, GEN p)
   if (typ(n) != t_INT) pari_err(talker,"not an integer exponent in nfpow");
   nf = checknf(nf); N = degpol(nf[1]);
   s = signe(n);
-  if (s < 0) pari_err(talker,"negative power in wi_pow_mod_p");
+  if (s < 0) pari_err(talker,"negative power in pow_ei_mod_p");
   if (!s || I == 1) return scalarcol_shallow(gen_1,N);
   D.nf = nf;
   D.p = p;
   D.I = I;
-  y = leftright_pow(col_ei(N, I), n, (void*)&D, &sqr_mod, &wi_mul_mod);
+  y = leftright_pow(col_ei(N, I), n, (void*)&D, &sqr_mod, &ei_mul_mod);
   return gerepileupto(av,y);
 }
 
@@ -512,11 +591,10 @@ coltoalg(GEN nf, GEN x)
 GEN
 basistoalg(GEN nf, GEN x)
 {
-  long tx = typ(x);
   GEN z, T;
 
   nf = checknf(nf);
-  switch(tx)
+  switch(typ(x))
   {
     case t_COL: {
       pari_sp av = avma;
@@ -680,17 +758,16 @@ poltobasis(GEN nf, GEN x)
 GEN
 algtobasis(GEN nf, GEN x)
 {
-  long tx = typ(x);
   pari_sp av;
 
   nf = checknf(nf);
-  switch(tx)
+  switch(typ(x))
   {
     case t_POLMOD:
       if (!RgX_equal_var(gel(nf,1),gel(x,1)))
 	pari_err(talker,"not the same number field in algtobasis");
-      x = gel(x,2); tx = typ(x);
-      switch(tx)
+      x = gel(x,2);
+      switch(typ(x))
       {
         case t_INT:
         case t_FRAC: return scalarcol(x, degpol(nf[1]));
@@ -717,12 +794,12 @@ algtobasis(GEN nf, GEN x)
 GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
-  long tx = typ(x), lx = lg(x), i;
+  long lx = lg(x), i;
   pari_sp av = avma;
   GEN p1, z, nf;
 
   checkrnf(rnf);
-  switch(tx)
+  switch(typ(x))
   {
     case t_VEC: case t_COL:
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
@@ -731,7 +808,7 @@ rnfbasistoalg(GEN rnf,GEN x)
       return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
 
     case t_MAT:
-      z = cgetg(lx,tx);
+      z = cgetg(lx, t_MAT);
       for (i=1; i<lx; i++) gel(z,i) = rnfbasistoalg(rnf,gel(x,i));
       return z;
 

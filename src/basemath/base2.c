@@ -1754,7 +1754,7 @@ pradical(GEN nf, GEN p, GEN *phi)
   /* matrix of Frob: x->x^p over Z_K/p */
   frob = cgetg(N+1,t_MAT);
   for (i=1; i<=N; i++)
-    gel(frob,i) = wi_pow_mod_p(nf,i,p, p);
+    gel(frob,i) = pow_ei_mod_p(nf,i,p, p);
 
   m = frob; q = p;
   while (cmpiu(q,N) < 0) { q = mulii(q,p); m = FpM_mul(m, frob, p); }
@@ -2082,7 +2082,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
   if (uisprime(f))
   {
-    mul = zk_wi_multable(nf, c[2]);
+    mul = nf_ei_multable(nf, c[2]);
     mul = vecpermute(mul, c);
   }
   else
@@ -2094,7 +2094,7 @@ modprinit(GEN nf, GEN pr, int zk)
     frob = cgetg(f+1, t_MAT);
     for (i=1; i<=f; i++)
     {
-      x = wi_pow_mod_p(nf,c[i],p, p);
+      x = pow_ei_mod_p(nf,c[i],p, p);
       gel(frob,i) = FpM_FpC_mul(ffproj, x, p);
     }
     u = col_ei(f,2); k = 2;
@@ -2114,7 +2114,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
     mul = cgetg(f+1,t_MAT);
     gel(mul,1) = v; /* assume w_1 = 1 */
-    for (i=2; i<=f; i++) gel(mul,i) = zk_wi_mul(nf,v,c[i]);
+    for (i=2; i<=f; i++) gel(mul,i) = zk_ei_mul(nf,v,c[i]);
   }
 
   /* Z_K/pr = Fp(v), mul = mul by v */
@@ -2383,8 +2383,8 @@ static GEN
 _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  GEN z = x? nf_wi_mul(D->multab,x,D->h)
-	   : wi_wj_mul(D->multab,D->h,D->h);
+  GEN z = x? tablemul_ei(D->multab,x,D->h)
+	   : tablemul_ei_ej(D->multab,D->h,D->h);
   (void)y;
   return FqV_red(z,D->T,D->p);
 }
@@ -2392,8 +2392,8 @@ static GEN
 _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  GEN z = x? sqr_by_tab(D->multab,x)
-	   : wi_wj_mul(D->multab,D->h,D->h);
+  GEN z = x? tablesqr(D->multab,x)
+	   : tablemul_ei_ej(D->multab,D->h,D->h);
   return FqV_red(z,D->T,D->p);
 }
 
@@ -2618,7 +2618,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     for (k=1; k<=n; k++)
       for (j=1; j<=n; j++)
       {
-	GEN z = RgM_RgC_mul(Ainv, gmod(nf_wi_mul(MW, gel(A,j),k), nfT));
+	GEN z = RgM_RgC_mul(Ainv, gmod(tablemul_ei(MW, gel(A,j),k), nfT));
 	for (i=1; i<=n; i++)
 	{
 	  GEN c = grem(gel(z,i), nfT);

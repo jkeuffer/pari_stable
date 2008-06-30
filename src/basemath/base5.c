@@ -919,47 +919,47 @@ powers(long N, long v)
   for (i=1; i<=N; i++) gel(L,i) = monomial(gen_1, i-1, v);
   return L;
 }
-/* given a relative polynomial pol over nf, compute a pseudo-basis for the
- * extension, then an absolute basis */
+/* Let K = Q[X]/T = nf. Given a relative polynomial pol in K[X], L = K[X]/(pol),
+ * compute a pseudo-basis for Z_L, then an absolute basis */
 static GEN
 makebasis(GEN nf, GEN pol, GEN rnfeq)
 {
-  GEN W, I, polabs, plg, plg0, B, bs, p1, den, vbs, d;
+  GEN T = gel(nf,1), TAB = gel(nf,9), W, I, polabs, a, a0, B, ZK, p1, den, A, d;
   pari_sp av = avma;
   long n, N, m, i, j, k;
 
-  polabs= gel(rnfeq,1);
-  plg   = gel(rnfeq,2); plg = lift_intern(plg);
+  polabs= gel(rnfeq,1); /* in Z[X], L = Q[X] / polabs, and pol | polabs */
+  a     = gel(rnfeq,2); a = lift_intern(a); /* root of T in Q[X]/polabs */
   p1 = rnfpseudobasis(nf,pol);
   W = gel(p1,1);
   I = gel(p1,2);
   if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
   N = degpol(pol);
-  n = degpol(nf[1]); m = n*N;
+  n = degpol(T); m = n*N;
 
-  plg0= Q_remove_denom(plg, &den); /* plg = plg0/den */
-  /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
-  vbs = RgXQ_powers(plg0, n-1, polabs);
+  a0 = Q_remove_denom(a, &den); /* a = a0/den */
+  /* K = Q(a), A[i+1] = a^i as an elt of L = Q[X] / polabs */
+  A = RgXQ_powers(a0, n-1, polabs);
   if (den)
   { /* restore denominators */
-    gel(vbs,2) = plg; d = den;
+    gel(A,2) = a; d = den;
     for (i=3; i<=n; i++) {
       d = mulii(d,den);
-      gel(vbs,i) = RgX_Rg_div(gel(vbs,i), d);
+      gel(A,i) = RgX_Rg_div(gel(A,i), d);
     }
   }
+  /* ZK = integer basis of K, as elements of L */
+  ZK = RgV_RgM_mul(A, RgXV_to_RgM(gel(nf,7),n));
 
-  /* bs = integer basis of K, as elements of L */
-  bs = gmul(vbs, RgXV_to_RgM(gel(nf,7),n));
   W = gmul(powers(N, varn(pol)), W); /* vector of nfX */
   B = cgetg(m+1, t_MAT);
   for(i=k=1; i<=N; i++)
   {
     GEN w = gel(W,i), id = gel(I,i);
-    w = typ(w) == t_COL? element_mulvec(nf, w, id): gmul(w,id);
+    w = typ(w) == t_COL? tablemulvec(TAB, w, id): RgM_Rg_mul(id,w);
     for(j=1; j<=n; j++)
     {
-      p1 = grem(gmul(bs, gel(w,j)), polabs);
+      p1 = grem(RgV_dotproduct(ZK, gel(w,j)), polabs);
       gel(B,k++) = RgX_to_RgV(p1, m);
     }
   }

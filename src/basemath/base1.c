@@ -976,15 +976,6 @@ get_bas_den(GEN bas)
   return mkvec2(dbas, den);
 }
 
-/* allow x or y = NULL (act as 1) */
-static GEN
-_mulii(GEN x, GEN y)
-{
-  if (!x) return y;
-  if (!y) return x;
-  return mulii(x,y);
-}
-
 GEN
 get_mul_table(GEN x,GEN basden,GEN invbas)
 {
@@ -1005,7 +996,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
-	d = _mulii(gel(den,i), gel(den,j));
+	d = mul_denom(gel(den,i), gel(den,j));
 	if (d) z = gdivexact(z, d);
       }
       gel(mul,j+(i-1)*n) = gel(mul,i+(j-1)*n) = gerepileupto(av,z);
@@ -1051,7 +1042,7 @@ make_Tr(GEN x, GEN basden)
       t = quicktrace(t, sym);
       if (den)
       {
-	d = _mulii(gel(den,i),gel(den,j));
+	d = mul_denom(gel(den,i),gel(den,j));
 	if (d) t = diviiexact(t, d);
       }
       gel(c,j) = gerepileuptoint(av, t); /* Tr (W[i]W[j]) */
