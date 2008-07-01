@@ -141,15 +141,6 @@ zk_scalar_or_multable(GEN nf, GEN x)
   return (typ(x) == t_COL)? zk_multable(nf, x): x;
 }
 
-static GEN
-RgC_Rg_add(GEN x, GEN y)
-{
-  long k, lx = lg(x);
-  GEN z = cgetg(t_COL, lx); gel(z,1) = gadd(y,gel(x,1));
-  for (k = 2; k < lx; k++) gel(z,k) = gcopy(gel(x,k));
-  return z;
-}
-
 /* sum of x and y in nf */
 GEN
 element_add(GEN nf, GEN x, GEN y)

@@ -248,6 +248,7 @@ GEN     FpX_to_mod(GEN z, GEN p);
 
 /* RgV.c */
 
+GEN     RgC_Rg_add(GEN x, GEN y);
 GEN     RgC_Rg_div(GEN x, GEN y);
 GEN     RgC_Rg_mul(GEN x, GEN y);
 GEN     RgC_RgM_mul(GEN x, GEN y);

@@ -3436,6 +3436,9 @@ and $y$ a scalar, returns the square matrix $x + y*\text{Id}$.
 \fun{GEN}{RgM_Rg_add_shallow}{GEN x, GEN y} as \kbd{RgM\_Rg\_add} with much
 fewer copies. Not suitable for \kbd{gerepileupto}.
 
+\fun{GEN}{RgC_Rg_add}{GEN x, GEN y} assuming $x$ is a column vector
+and $y$ a scalar, returns the vector $[x_1 + y, x_2,\dots,x_n]$.
+
 \fun{GEN}{RgC_Rg_div}{GEN x, GEN y}
 
 \fun{GEN}{RgM_Rg_div}{GEN x, GEN y} returns $x/y$ ($y$ treated as a scalar).

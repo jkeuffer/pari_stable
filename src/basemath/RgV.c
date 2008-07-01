@@ -150,6 +150,15 @@ RgM_Rg_add_shallow(GEN x, GEN y)
   return z;
 }
 
+GEN
+RgC_Rg_add(GEN x, GEN y)
+{
+  long k, lx = lg(x);
+  GEN z = cgetg(lx, t_COL); gel(z,1) = gadd(y,gel(x,1));
+  for (k = 2; k < lx; k++) gel(z,k) = gcopy(gel(x,k));
+  return z;
+}
+
 static GEN
 RgC_add_i(GEN x, GEN y, long lx)
 {
