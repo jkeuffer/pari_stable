@@ -577,9 +577,9 @@ add_scal(GEN y, GEN x, long ty, long vy)
     case t_POL: return RgX_Rg_add(y, x);
     case t_SER: return add_ser_scal(y, x, vy, valp(y));
     case t_RFRAC: return add_rfrac_scal(y, x);
-    case t_VEC:
     case t_COL:
       return RgC_Rg_add(y, x);
+    case t_VEC:
       tx = typ(x);
       if (!is_matvec_t(tx) && isrationalzero(x)) return gcopy(y);
       break;
@@ -847,13 +847,18 @@ gadd(GEN x, GEN y)
       return (kro_quad(y,gel(x,2)) == -1)? addRq(x, y): addTp(y, x);
   }
   /* tx < ty, !is_const_t(y) */
-  if (ty == t_MAT) {
-    if (is_matvec_t(tx)) pari_err(operf,"+",x,y);
-    if (isrationalzero(x)) return gcopy(y);
-    return RgM_Rg_add(y, x);
+  switch(ty)
+  {
+    case t_MAT:
+      if (is_matvec_t(tx)) pari_err(operf,"+",x,y);
+      if (isrationalzero(x)) return gcopy(y);
+      return RgM_Rg_add(y, x);
+    case t_COL:
+      if (tx == t_VEC) pari_err(operf,"+",x,y);
+      return RgC_Rg_add(y, x);
+    case t_POLMOD: /* is_const_t(tx) in this case */
+      return addsub_polmod_scal(gel(y,1), gel(y,2), x, &gadd);
   }
-  if (ty == t_POLMOD) /* is_const_t(tx) in this case */
-    return addsub_polmod_scal(gel(y,1), gel(y,2), x, &gadd);
   vy = gvar(y);
   if (is_scalar_t(tx))  {
     if (tx == t_POLMOD)
