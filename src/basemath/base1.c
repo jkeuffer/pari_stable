@@ -2152,7 +2152,7 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
   for (i=1; i<l; i++)
   {
     p = itos(gel(pp,i));
-    exp[2] = w / p; y = element_pow(nf,x,exp);
+    exp[2] = w / p; y = nfpow(nf,x,exp);
     if (nf_pm1(y) > 0) /* y = 1 */
     {
       if (p!=2 || !gcmp1(gcoeff(fa,i,2))) return NULL;

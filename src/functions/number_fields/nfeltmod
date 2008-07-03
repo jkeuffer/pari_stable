@@ -9,4 +9,4 @@ Doc:
  \var{nf}, computes an element $r$ of $\var{nf}$ of the form $r=x-qy$ with
  $q$ and algebraic integer, and such that $r$ is small. This is functionally
  identical to
- $$\kbd{x - nfeltmul(\var{nf},round(nfeltdiv(\var{nf},x,y)),y)}.$$
+ $$\kbd{x - nfmul(\var{nf},round(nfdiv(\var{nf},x,y)),y)}.$$

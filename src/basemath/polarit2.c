@@ -2266,9 +2266,9 @@ idmul(void *nf, GEN x, GEN y) { return idealmul((GEN) nf, x, y); }
 static GEN
 idpow(void *nf, GEN x, GEN n) { return idealpow((GEN) nf, x, n); }
 static GEN
-eltmul(void *nf, GEN x, GEN y) { return element_mul((GEN) nf, x, y); }
+eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }
 static GEN
-eltpow(void *nf, GEN x, GEN n) { return element_pow((GEN) nf, x, n); }
+eltpow(void *nf, GEN x, GEN n) { return nfpow((GEN) nf, x, n); }
 
 #if 0
 static GEN

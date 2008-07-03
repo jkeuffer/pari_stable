@@ -199,6 +199,15 @@ BA 49- user variables can now be aliased [#790].
        first one (ideal + list of real places) is now called "divisor"; the
        second one (ideal + factorization matrix, which used to be a vector 
        of logarithms of complex embeddings) is now called "extended ideal".
+   68- rename library functions element_mulmodpr -> nfmulmodpr,
+       element_powmodpr -> nfpowmodpr, element_val -> nfval,
+       element_divmodpr -> nfdivmodpr,
+       element_mul -> nfmul, element_pow -> nfpow, element_div -> nfdiv,
+       element_reduce -> nfreduce.
+   69- Allow Scalar + t_COL: x + y returns [ y[1]+x, y[2],... ]. Consistent
+       with RgC_Rg_add and RgV_isscalar, and allows linear algebra over number
+       fields with less rigid data types (can mix freely t_COL, t_INT
+       and t_FRAC, instead of converting everything to t_COL).
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -298,8 +307,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        In applications the norm of I stays bounded for a given base field,
        and t keeps track of the "principal part" of the ideal (usually in
        factored form to avoid coefficient explosion).
-   37- element_add, nf_multable, tablemul, tablemul_ei, tablemul_ei_ej,
-       tablemulvec, tablesqr, nf_ei_multable.
+   37- nfadd, multable, tablemul, tablemul_ei, tablemul_ei_ej,
+       tablemulvec, tablesqr, ei_multable.
 
   Removed
     1- obsolete library functions extract and matextract

@@ -8,3 +8,5 @@ Help: nfsolvemodpr(nf,a,b,pr): solution of a*x=b in Z_K/pr, where a is a
 Doc: solution of $a\cdot x = b$
  in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
  \var{pr} is in \key{modpr} format (see \kbd{nfmodprinit}).
+Variant: This function is normally useless in library mode. Project your
+ inputs to the residue field using \kbd{nfM\_to\_FqM}, then work there.

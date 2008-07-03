@@ -81,7 +81,7 @@ static GEN
 fix_be(GEN bnfz, GEN be, GEN u)
 {
   GEN nf = checknf(bnfz), fu = gmael(bnfz,8,5);
-  return element_mul(nf, be, factorbackelt(fu, u, nf));
+  return nfmul(nf, be, factorbackelt(fu, u, nf));
 }
 
 static GEN
@@ -191,7 +191,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
   if (typ(z) == t_MAT && !gcmp1(gcoeff(z,1,1)))
   {
     z = idealred_elt(nf, z);
-    be = element_div(nf, be, element_pow(nf, z, ell));
+    be = nfdiv(nf, be, nfpow(nf, z, ell));
     /* make be integral */
     be = reduce_mod_Qell(nf, be, ell);
   }
@@ -957,7 +957,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   for (i=2; i<=m; i++) r[i] = (r[i-1] * g) % ell;
   powtaubet = powtau(be, m, T->tau);
   if (DEBUGLEVEL>1) { fprintferr("Computing Newton sums: "); TIMERstart(&ti); }
-  prim_invbe = Q_primitive_part(element_inv(nfz, be), &C_invbe);
+  prim_invbe = Q_primitive_part(nfinv(nfz, be), &C_invbe);
   powtau_prim_invbe = powtau(prim_invbe, m, T->tau);
 
   root = cgetg(ell + 2, t_POL);

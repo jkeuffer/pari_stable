@@ -364,7 +364,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       REL_t *rel = cache->last + 1;
       rel->R = col_0(F->KC); rel->nz = F->subFB[i];
       rel->R[ rel->nz ] = j;
-      for (k = 2; k < j; k++) m = element_mul(nf, m, gel(alg,k));
+      for (k = 2; k < j; k++) m = nfmul(nf, m, gel(alg,k));
       rel->m = gclone(m);
       rel->ex = NULL;
       rel->pow = New;
@@ -1465,7 +1465,7 @@ add_principal_part(GEN nf, GEN u, GEN v, long flag)
   if (flag & nf_GENMAT)
     return (typ(u) == t_COL && RgV_isscalar(u) && gcmp1(gel(u,1)))? v: famat_mul(v,u);
   else
-    return element_mul(nf, v, u);
+    return nfmul(nf, v, u);
 }
 
 /* isprincipal for C * \prod P[i]^e[i] (C omitted if NULL) */

@@ -161,7 +161,7 @@ _idealmoddivisor(GEN nf, GEN x, GEN divisor, GEN sarch)
 
   G = redideal(nf, x, f);
   D = redideal(nf, idealdiv(nf,G,x), f);
-  A = element_div(nf,D,G);
+  A = nfdiv(nf,D,G);
   if (too_big(nf,A) > 0) { avma = av; return x; }
   a = set_sign_mod_divisor(nf, NULL, A, divisor, sarch);
   if (a != A && too_big(nf,A) > 0) { avma = av; return x; }
@@ -206,7 +206,7 @@ static GEN
 get_pinvpi(GEN nf, GEN fZ, GEN p, GEN pi, GEN *v)
 {
   if (!*v) {
-    GEN invpi = element_inv(nf, pi);
+    GEN invpi = nfinv(nf, pi);
     *v = make_integral_Z(RgC_Rg_mul(invpi, p), mulii(p, fZ));
   }
   return *v;
@@ -286,8 +286,8 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       p  = gel(pr,1);
       pi = get_pi(F, pr, &gel(vecpi,j));
       pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
-      t = element_pow(nf, pinvpi, stoi(v));
-      mulI = mulI? element_muli(nf, mulI, t): t;
+      t = nfpow(nf, pinvpi, stoi(v));
+      mulI = mulI? nfmuli(nf, mulI, t): t;
       t = powiu(gel(pr,1), v);
       dmulI = dmulI? mulii(dmulI, t): t;
     }
@@ -298,7 +298,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     for (k=1; k<la; k++)
     {
       GEN cx, LL = nf_to_scalar_or_basis(nf, gel(L,k));
-      GEN L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
+      GEN L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster nfval) */
       for (j=1; j<lp; j++)
       {
 	pr = gel(listpr,j);
@@ -309,14 +309,14 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 	if (v > 0)
 	{
 	  pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
-	  t = element_pow(nf,pinvpi,stoi(v));
-	  LL = element_mul(nf, LL, t);
+	  t = nfpow(nf,pinvpi,stoi(v));
+	  LL = nfmul(nf, LL, t);
 	  LL = RgC_Rg_div(LL, powiu(p, v));
 	}
 	else
 	{
-	  t = element_pow(nf,pi,stoi(-v));
-	  LL = element_mul(nf, LL, t);
+	  t = nfpow(nf,pi,stoi(-v));
+	  LL = nfmul(nf, LL, t);
 	}
       }
       LL = make_integral(nf,LL,f,listpr);
@@ -328,7 +328,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     G = famat_to_nf_modideal_coprime(nf, newL, e, f, EX);
     if (mulI)
     {
-      G = element_muli(nf, G, mulI);
+      G = nfmuli(nf, G, mulI);
       G = ZC_hnfrem(G, ZM_Z_mul(f, dmulI));
     }
     G = set_sign_mod_divisor(nf,A,G,module,sarch);
@@ -548,7 +548,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   {
     GEN u = gel(bnr,6), y = gmul(gel(u,1), zideallog(nf, p1, bid));
     y = reducemodinvertible(y, gel(u,2));
-    alpha = element_div(nf, alpha, factorbackelt(init_units(bnf), y, nf));
+    alpha = nfdiv(nf, alpha, factorbackelt(init_units(bnf), y, nf));
   }
   return gerepilecopy(av, mkvec2(ex,alpha));
 }
@@ -799,7 +799,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
-	|| !ZV_isscalar(element_pow(nf, zc_to_ZC(x), w))))
+	|| !ZV_isscalar(nfpow(nf, zc_to_ZC(x), w))))
     {
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }

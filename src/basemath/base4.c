@@ -492,7 +492,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
       u1 = mulii(a1, v1);
       t = ZC_Z_mul(pi0, u1); gel(t,1) = addii(gel(t,1), u0);
       u = ZC_Z_mul(pi1, u0); gel(u,1) = addii(gel(u,1), u1);
-      a = element_muli(nf, centermod(u, xZ), centermod(t, xZ));
+      a = nfmuli(nf, centermod(u, xZ), centermod(t, xZ));
     }
   }
   a = centermod(a, xZ);
@@ -686,15 +686,15 @@ idealval(GEN nf, GEN ix, GEN P)
   GEN mul, B, a, x, y, r, t0, p, pk, cx, vals;
   int do_mul;
 
-  if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,P);
+  if (is_extscalar_t(tx) || tx==t_COL) return nfval(nf,ix,P);
   tx = idealtyp(&ix,&a);
-  if (tx == id_PRINCIPAL) return element_val(nf,ix,P);
+  if (tx == id_PRINCIPAL) return nfval(nf,ix,P);
   checkprid(P);
   p = gel(P,1);
   if (tx == id_PRIME) {
     if (!equalii(p, gel(ix,1))) return 0;
     return (ZV_equal(gel(P,2), gel(ix,2))
-	 || element_val(nf, gel(ix,2), P))? 1: 0;
+	 || nfval(nf, gel(ix,2), P))? 1: 0;
   }
   /* id_MAT */
   nf = checknf(nf);
@@ -1036,17 +1036,17 @@ famat_pow(GEN f, GEN n)
 static GEN
 ext_mul(GEN nf, GEN x, GEN y) {
   if (typ(x) == t_MAT) return (x == y)? famat_sqr(x): famat_mul(x,y);
-  return element_mul(nf, x, y);
+  return nfmul(nf, x, y);
 }
 static GEN
 ext_inv(GEN nf, GEN x) {
   if (typ(x) == t_MAT) return famat_inv(x);
-  return element_inv(nf, x);
+  return nfinv(nf, x);
 }
 static GEN
 ext_pow(GEN nf, GEN x, GEN n) {
   if (typ(x) == t_MAT) return famat_pow(x,n);
-  return element_pow(nf, x, n);
+  return nfpow(nf, x, n);
 }
 
 /* x, y 2 extended ideals whose first component is an integral HNF */
@@ -1092,9 +1092,9 @@ famat_to_nf(GEN nf, GEN f)
 
   x = gel(f,1);
   e = gel(f,2);
-  t = element_pow(nf, gel(x,1), gel(e,1));
+  t = nfpow(nf, gel(x,1), gel(e,1));
   for (i=lg(x)-1; i>1; i--)
-    t = element_mul(nf, t, element_pow(nf, gel(x,i), gel(e,i)));
+    t = nfmul(nf, t, nfpow(nf, gel(x,i), gel(e,i)));
   return t;
 }
 
@@ -1341,7 +1341,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   if (lg(v) == 1) return cgetg(1, t_MAT);
   x = nf_to_scalar_or_basis(nf,x);
   if (typ(x) != t_COL) return gcmp0(x)? cgetg(1,t_MAT): RgM_Rg_mul(v, Q_abs(x));
-  x = element_mulvec(nf, x, v);
+  x = nfC_nf_mul(nf, v, x);
   x = Q_primitive_part(x, &cx);
   x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? ZM_Q_mul(x,cx): x;
@@ -1360,7 +1360,7 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
       switch(ty)
       {
 	case id_PRINCIPAL:
-	  return idealhnf_principal(nf, element_mul(nf,x,y));
+	  return idealhnf_principal(nf, nfmul(nf,x,y));
 	case id_PRIME:
 	{
 	  GEN p = gel(y,1), pi = gel(y,2), cx;
@@ -1544,12 +1544,12 @@ idealpowprime(GEN nf, GEN vp, GEN n, GEN *d)
     if (s < 0)
     {
       GEN q = powgi(gel(vp,1),subii(n,n1));
-      gel(x,2) = RgC_Rg_div(element_pow(nf,gel(x,5),n), q);
+      gel(x,2) = RgC_Rg_div(nfpow(nf,gel(x,5),n), q);
       *d = gel(x,1);
     }
     else
     {
-      gel(x,2) = element_pow(nf,gel(x,2),n);
+      gel(x,2) = nfpow(nf,gel(x,2),n);
       *d = NULL;
     }
   }
@@ -1613,7 +1613,7 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
 
       x = Q_primitive_part(x, &cx);
       a = mat_ideal_two_elt(nf,x); alpha = gel(a,2); a = gel(a,1);
-      alpha = element_pow(nf,alpha,n1);
+      alpha = nfpow(nf,alpha,n1);
       m = zk_scalar_or_multable(nf, alpha);
       if (typ(m) == t_INT) {
         x = gcdii(m, powgi(a,n1));
@@ -2063,7 +2063,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN listpr)
    * write (d1) = D1 D2, D2 minimal, (D2,f) = 1. */
   D2 = nf_coprime_part(nf, d1, listpr);
   t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
-  L = element_muli(nf,t,L);
+  L = nfmuli(nf,t,L);
 
   /* if (L0, f) = 1, then L in D1 ==> in D1 D2 = (d1) */
   return Q_div_to_int(L, d1); /* exact division */
@@ -2162,8 +2162,8 @@ idealapprfact_i(GEN nf, GEN x, int nored)
     if (!s) continue;
     if (s < 0) flagden = 1;
     pi = unif_mod_fZ(gel(L,i), F);
-    q = element_pow(nf, pi, gel(e,i));
-    z = z? element_mul(nf, z, q): q;
+    q = nfpow(nf, pi, gel(e,i));
+    z = z? nfmul(nf, z, q): q;
   }
   if (!z) return scalarcol_shallow(gen_1, degpol(nf[1]));
   if (nored)
@@ -2282,7 +2282,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     if (gcmp0(gel(w,i))) continue;
     u = hnfmerge_get_1(idealdivpowprime(nf,F, gel(L,i), gel(e,i)),
 		       idealpow(nf, gel(L,i), gel(e,i)));
-    t = element_mul(nf, u, gel(w,i));
+    t = nfmul(nf, u, gel(w,i));
     s = s? gadd(s,t): t;
   }
   if (!s) { avma = av; return zerocol(N); }
@@ -2395,14 +2395,16 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
   return y;
 }
 
-/* Given an element x and an ideal in matrix form (not necessarily HNF),
- * gives an r such that x-r is in ideal and r is small. No checks */
+/* Given an element x and an ideal I in HNF, gives an r such that x-r is in H
+ * and r is small */
 GEN
-element_reduce(GEN nf, GEN x, GEN ideal)
+nfreduce(GEN nf, GEN x, GEN I)
 {
   pari_sp av = avma;
+  GEN aI;
   x = algtobasis_i(checknf(nf), x);
-  return gerepileupto(av, reducemodinvertible(x, ideal));
+  if (idealtyp(&I,&aI) != id_MAT) pari_err(typeer,"nfreduce");
+  return gerepileupto(av, reducemodinvertible(x, I));
 }
 /* Given an element x and an ideal in HNF, gives an a in ideal such that
  * x-a is small. No checks */
@@ -2426,11 +2428,11 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
 {
   GEN z;
   if (gcmp0(u))
-    z = element_mulvec(nf,v,B);
+    z = nfC_nf_mul(nf,B,v);
   else
   {
-    z = u==gen_1? A: element_mulvec(nf,u,A);
-    if (!gcmp0(v)) z = gadd(z, element_mulvec(nf,v,B));
+    z = u==gen_1? A: nfC_nf_mul(nf,A,u);
+    if (!gcmp0(v)) z = RgC_add(z, nfC_nf_mul(nf,B,v));
   }
   return z;
 }
@@ -2459,7 +2461,7 @@ zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
   *di = idealinv(nf,d);
   av = avma;
   *w = gerepileupto(av, idealmul(nf, idealmul(nf,A,B), *di));
-  *v = element_inv(nf,b);
+  *v = nfinv(nf,b);
   *u = gen_0; return d;
 }
 
@@ -2492,7 +2494,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
       u = col_ei(lg(B)-1, 1);
     else
     {
-      u = element_inv(nf, a);
+      u = nfinv(nf, a);
       w = idealmul(nf, u, w); /* AB/d */
     }
   }
@@ -2500,7 +2502,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   { /* bB | aA  (slightly less frequent) */
     w = A;
     u = gen_0;
-    v = element_inv(nf, b);
+    v = nfinv(nf, b);
     w = idealmul(nf, v, w); /* AB/d */
   }
   else
@@ -2510,11 +2512,11 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
     uv = idealaddtoone(nf, w, idealmul(nf,bB,di));
     w = idealmul(nf,w,B);
     u = gel(uv,1);
-    v = element_div(nf,gel(uv,2),b);
+    v = nfdiv(nf,gel(uv,2),b);
     if (a != gen_1)
     {
-      GEN inva = element_inv(nf, a);
-      u =  element_mul(nf,u,inva);
+      GEN inva = nfinv(nf, a);
+      u =  nfmul(nf,u,inva);
       w = idealmul(nf, inva, w); /* AB/d */
     }
   }
@@ -2555,7 +2557,7 @@ nfhnf(GEN nf, GEN x)
     }
 
     y = gcoeff(A,i,def);
-    gel(A,def) = element_mulvec(nf, element_inv(nf,y), gel(A,def));
+    gel(A,def) = nfC_nf_mul(nf, gel(A,def), nfinv(nf,y));
     gel(I,def) = idealmul(nf, y, gel(I,def));
     for (  ; j; j--)
     {
@@ -2694,7 +2696,7 @@ nfsmith(GEN nf, GEN x)
 }
 
 GEN
-element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
+nfmulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
   GEN z, p, pr, T;
@@ -2706,15 +2708,15 @@ element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 }
 
 GEN
-element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
+nfdivmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   pari_sp av = avma;
   nf = checknf(nf);
-  return gerepileupto(av, nfreducemodpr(nf, element_div(nf,x,y), modpr));
+  return gerepileupto(av, nfreducemodpr(nf, nfdiv(nf,x,y), modpr));
 }
 
 GEN
-element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
+nfpowmodpr(GEN nf,GEN x,GEN k,GEN pr)
 {
   pari_sp av=avma;
   GEN z,T,p,modpr;
@@ -2799,9 +2801,9 @@ nfdetint(GEN nf, GEN x)
     for (i=1; i<=m; i++)
       if (!c[i])
       {
-	vi=element_mul(nf,piv,gcoeff(A,i,k));
+	vi=nfmul(nf,piv,gcoeff(A,i,k));
 	for (j=1; j<=m; j++)
-	  if (c[j]) vi=gadd(vi,element_mul(nf,gcoeff(pass,i,j),gcoeff(A,j,k)));
+	  if (c[j]) vi=gadd(vi,nfmul(nf,gcoeff(pass,i,j),gcoeff(A,j,k)));
 	gel(v,i) = vi; if (!t && !gcmp0(vi)) t=i;
       }
     if (t)
@@ -2829,9 +2831,9 @@ nfdetint(GEN nf, GEN x)
 	    for (j=1; j<=m; j++)
 	      if (c[j] && j!=t)
 	      {
-		p1 = gsub(element_mul(nf,piv,gcoeff(pass,i,j)),
-			  element_mul(nf,gel(v,i),gcoeff(pass,t,j)));
-		gcoeff(pass,i,j) = rg>1? element_div(nf,p1,pivprec)
+		p1 = gsub(nfmul(nf,piv,gcoeff(pass,i,j)),
+			  nfmul(nf,gel(v,i),gcoeff(pass,t,j)));
+		gcoeff(pass,i,j) = rg>1? nfdiv(nf,p1,pivprec)
 				       : p1;
 	      }
 	    gcoeff(pass,i,t) = gneg(gel(v,i));
@@ -2848,15 +2850,27 @@ nfdetint(GEN nf, GEN x)
   return gerepileupto(av, idealmul(nf,idprod,det1));
 }
 
-/* clean in place (destroy x) */
+/* reduce in place components of x[1..lim] mod D (destroy x). D in HNF */
 static void
 nfcleanmod(GEN nf, GEN x, long lim, GEN D)
 {
   long i;
-  GEN c;
-  D = ZM_lll(Q_primitive_part(D, &c), 0.75, LLL_INPLACE);
-  if (c) D = RgM_Rg_mul(D,c);
-  for (i=1; i<=lim; i++) gel(x,i) = element_reduce(nf, gel(x,i), D);
+  GEN DQ = gcoeff(D,1,1), dD;
+  D = Q_remove_denom(D, &dD); /* inefficient unless dD = 1: we don't use it */
+  for (i=1; i<=lim; i++) {
+    GEN c = gel(x,i);
+    c = nf_to_scalar_or_basis(nf, c);
+    if (typ(c) != t_COL)
+      c = gmod(c, DQ);
+    else
+    {
+      GEN dc;
+      c = Q_remove_denom(c, &dc);
+      if (dc) D = ZM_Z_mul(D, dc); /* hopefully rare */
+      c = ZC_hnfrem(c, D);
+    }
+    gel(x,i) = c;
+  }
 }
 
 GEN
@@ -2918,7 +2932,7 @@ nfhnfmod(GEN nf, GEN x, GEN detmat)
   for (i=li-1; i>=1; i--)
   {
     d = nfbezout(nf, gen_1,gcoeff(A,i,i), d0,gel(I,i), &u,&v,&w,&di);
-    p1 = element_mulvec(nf,v,gel(A,i));
+    p1 = nfC_nf_mul(nf,gel(A,i),v);
     if (i > 1)
     {
       d0 = idealmul(nf,d0,di);

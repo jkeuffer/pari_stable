@@ -185,7 +185,7 @@ lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
 
   if (psquarenf(nf,gx,pr)) return 1;
 
-  la = element_val(nf,gx,pr);
+  la = nfval(nf,gx,pr);
   gpx = poleval(RgX_deriv(pol), x);
   mu = gcmp0(gpx)? la+nu+1: idealval(nf,gpx,pr);
   avma = av;
@@ -203,7 +203,7 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
   if (psquare2nf(nf,gx,pr,zinit)) return 1;
 
   gpx = poleval(RgX_deriv(pol), x);
-  la = element_val(nf,gx,pr);
+  la = nfval(nf,gx,pr);
   mu = gcmp0(gpx)? la+nu+1: idealval(nf,gpx,pr);
 
   if (la > mu<<1) return 1;
@@ -371,8 +371,8 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   va = idealval(nf,a,pr);
   vb = idealval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
-  t = element_div(nf, element_pow(nf,a, stoi(vb)),
-		      element_pow(nf,b, stoi(va)));
+  t = nfdiv(nf, nfpow(nf,a, stoi(vb)),
+		      nfpow(nf,b, stoi(va)));
   if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
@@ -564,7 +564,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   for (i=1; i<ls; i++)
   {
     GEN P = gel(S,i);
-    v[i] = (remii(N, gel(P,1)) == gen_0)? element_val(nf,xb,P): 0;
+    v[i] = (remii(N, gel(P,1)) == gen_0)? nfval(nf,xb,P): 0;
   }
   /* here, x = S v */
   p1 = vecpermute(v, perm);

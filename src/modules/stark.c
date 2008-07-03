@@ -662,7 +662,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     idh = idg;
   }
 
-  muslambda = gmul(den, element_div(nf, mu, lambda));
+  muslambda = gmul(den, nfdiv(nf, mu, lambda));
 
   /* compute a system of generators of (Ok/cond)^* cond1-positive */
   zid = Idealstar(nf, cond0, nf_GEN);
@@ -706,7 +706,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   while ( (i = NextElt(&G)) )
   {
-    gel(vB,i) = FpC_red(element_muli(nf, gel(vB,i), gel(gen,i)), condZ);
+    gel(vB,i) = FpC_red(nfmuli(nf, gel(vB,i), gel(gen,i)), condZ);
     for (j=1; j<i; j++) vB[j] = vB[i];
 
     for (ic = 1; ic <= nChar; ic++)
@@ -717,7 +717,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     }
 
     gel(vB,i) = set_sign_mod_divisor(nf, NULL, gel(vB,i), cond,sarch);
-    beta2 = element_mul(nf, gel(vB,i), muslambda);
+    beta2 = nfmul(nf, gel(vB,i), muslambda);
 
     s0 = powgi(z, Rg_to_Fp(gmul(vt, beta2), den));
     for (ic = 1; ic <= nChar; ic++)

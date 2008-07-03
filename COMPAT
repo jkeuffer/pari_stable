@@ -150,6 +150,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - rename library functions ismonome -> RgX_is_monomial
   - remove obsolete buchray, buchrayinit, buchrayinitgen: use Buchray.
   - rename library functions minideal -> idealmin and change prototype
+  - rename library functions element_mulmodpr -> nfmulmodpr,
+    element_powmodpr -> nfpowmodpr, element_val -> nfval,
+    element_add -> nfadd, element_divmodpr -> nfdivmodpr,
+    element_mul -> nfmul, element_pow -> nfpow, element_div -> nfdiv.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

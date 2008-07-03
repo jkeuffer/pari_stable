@@ -1954,7 +1954,7 @@ GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), e = gel(pr,3);
-  return gdivexact(element_pow(nf,gel(pr,5), e), powiu(p, itou(e)-1));
+  return gdivexact(nfpow(nf,gel(pr,5), e), powiu(p, itou(e)-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
@@ -2082,7 +2082,7 @@ modprinit(GEN nf, GEN pr, int zk)
 
   if (uisprime(f))
   {
-    mul = nf_ei_multable(nf, c[2]);
+    mul = ei_multable(nf, c[2]);
     mul = vecpermute(mul, c);
   }
   else
@@ -2235,7 +2235,7 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     {
       GEN tau = modpr_TAU(modpr);
       if (!tau) pari_err(talker,"modpr initialized for integers only!");
-      x = element_muli(nf,x, element_pow(nf, tau, utoipos(v)));
+      x = nfmuli(nf,x, nfpow(nf, tau, utoipos(v)));
       x = gdivexact(x, gpowgs(p, v));
     }
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
@@ -2503,7 +2503,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   GEN z;
   nf = checknf(nf);
   P = fix_relative_pol(gel(nf,1), P, 0);
-  v = element_val(nf, RgX_disc(P), pr);
+  v = nfval(nf, RgX_disc(P), pr);
   P = lift_intern(P);
   avma = av; z = rnfdedekind_i(nf, P, pr, v);
   if (!z) {
@@ -2562,13 +2562,13 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       if (gequal(gel(I,j),id)) { gel(Tau,j) = gel(Tauinv,j) = gen_1; continue; }
 
       p1 = ideal_two_elt(nf,gel(I,j));
-      v1 = element_val(nf,gel(p1,1),pr);
-      v2 = element_val(nf,gel(p1,2),pr);
+      v1 = nfval(nf,gel(p1,1),pr);
+      v2 = nfval(nf,gel(p1,2),pr);
       tau = (v1 > v2)? gel(p1,2): gel(p1,1);
-      tauinv = element_inv(nf, tau);
+      tauinv = nfinv(nf, tau);
       gel(Tau,j) = tau;
       gel(Tauinv,j) = tauinv;
-      gel(W,j) = element_mulvec(nf, tau, gel(W,j));
+      gel(W,j) = nfC_nf_mul(nf, gel(W,j), tau);
       gel(I,j) = idealmul(nf,    tauinv, gel(I,j));
     }
     /* W = (Z_K/pr)-basis of O/pr. O = (W0,I0) ~ (W, I) */
@@ -2636,8 +2636,8 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     for (j=1; j<=n; j++)
       if (gel(Tau,j) != gen_1)
       {
-	gel(W,j) = element_mulvec(nf, gel(Tauinv,j), gel(W,j));
-	gel(I,j) = idealmul(nf,       gel(Tau,j),    gel(I,j) );
+	gel(W,j) = nfC_nf_mul(nf, gel(W,j), gel(Tauinv,j));
+	gel(I,j) = idealmul(nf, gel(Tau,j), gel(I,j));
       }
     if (DEBUGLEVEL>3) fprintferr(" new order:\n%Ps\n%Ps\n", W, I);
     if (sep <= 3 || gequal(I,I0)) break;
@@ -2840,7 +2840,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
     if (d)
     {
       gel(Iz,i) = id;
-      gel(Az,i) = element_mulvec(nf,d,gel(Az,i));
+      gel(Az,i) = nfC_nf_mul(nf, gel(Az,i), d);
     }
   }
   return gerepilecopy(av, y);
@@ -2888,7 +2888,7 @@ nfidealdet1(GEN nf, GEN a, GEN b, GEN *px, GEN *py, GEN *pz, GEN *pt)
   *px = x;
   *py = y;
   *pz = db ? negi(db): gen_m1;
-  *pt = element_div(nf, gel(uv,1), x);
+  *pt = nfdiv(nf, gel(uv,1), x);
 }
 
 /* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
@@ -2927,14 +2927,14 @@ rnfsteinitz(GEN nf, GEN order)
       pari_sp av2 = avma;
       GEN x, y, z, t;
       nfidealdet1(nf,a,b, &x,&y,&z,&t);
-      x = RgC_add(element_mulvec(nf, x, c1), element_mulvec(nf, y, c2));
-      y = RgC_add(element_mulvec(nf, z, c1), element_mulvec(nf, t, c2));
+      x = RgC_add(nfC_nf_mul(nf, c1, x), nfC_nf_mul(nf, c2, y));
+      y = RgC_add(nfC_nf_mul(nf, c1, z), nfC_nf_mul(nf, c2, t));
       gerepileall(av2, 2, &x,&y);
       gel(A,i) = x;
       gel(A,i+1) = y;
       gel(I,i) = Id;
       gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &p1);
-      if (p1) gel(A,i+1) = element_mulvec(nf, p1,gel(A,i+1));
+      if (p1) gel(A,i+1) = nfC_nf_mul(nf, gel(A,i+1), p1);
     }
   }
   l = lg(order);
@@ -2973,7 +2973,7 @@ rnfbasis(GEN bnf, GEN order)
     A = shallowconcat(A, gmul(gel(v,1), col));
     a = gel(v,2);
   }
-  A = shallowconcat(A, element_mulvec(nf, a, col));
+  A = shallowconcat(A, nfC_nf_mul(nf, col, a));
   return gerepilecopy(av, A);
 }
 
@@ -2999,7 +2999,7 @@ rnfhnfbasis(GEN bnf, GEN order)
 
     a = gen_if_principal(bnf, gel(I,j));
     if (!a) { avma = av; return gen_0; }
-    gel(A,j) = element_mulvec(nf, a, gel(A,j));
+    gel(A,j) = nfC_nf_mul(nf, gel(A,j), a);
   }
   return gerepilecopy(av,A);
 }

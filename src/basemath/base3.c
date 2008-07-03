@@ -49,9 +49,9 @@ tablemul_ei_ej(GEN M, long i, long j)
   tab += (i-1)*N; return gel(tab,j);
 }
 
-/* Outputs x.w_i, where w_i is the i-th elt of the integral basis.
+/* Outputs x.ei, where ei is the i-th elt of the algebra basis.
  * x an RgV of correct length and arbitrary content (polynomials, scalars...).
- * M is the multiplication table wi wj = sum_k M_k^(i,j) wk */
+ * M is the multiplication table ei ej = sum_k M_k^(i,j) ek */
 GEN
 tablemul_ei(GEN M, GEN x, long i)
 {
@@ -59,9 +59,10 @@ tablemul_ei(GEN M, GEN x, long i)
   GEN v, tab;
 
   if (i==1) return gcopy(x);
-  tab = get_tab(M, &N); tab += (i-1)*N;
+  tab = get_tab(M, &N);
+  if (typ(x) != t_COL) { v = zerocol(N); gel(v,i) = gcopy(x); return v; }
+  tab += (i-1)*N; v = cgetg(N+1,t_COL);
   /* wi . x = [ sum_j tab[k,j] x[j] ]_k */
-  v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
     pari_sp av = avma;
@@ -99,9 +100,9 @@ zk_ei_mul(GEN nf, GEN x, long i)
   return v;
 }
 
-/* table of multiplication by wi in ZK = Z[w1,..., wN] */
+/* table of multiplication by wi in R[w1,..., wN] */
 GEN
-nf_ei_multable(GEN TAB, long i)
+ei_multable(GEN TAB, long i)
 {
   long k,N;
   GEN m, tab = get_tab(TAB, &N);
@@ -121,12 +122,15 @@ zk_multable(GEN nf, GEN x)
   return mul;
 }
 GEN
-nf_multable(GEN nf, GEN x)
+multable(GEN M, GEN x)
 {
-  long i, l = lg(x);
-  GEN mul = cgetg(l,t_MAT);
+  long i, N;
+  GEN mul;
+  M = get_tab(M, &N);
+  if (typ(x) != t_COL) return scalarmat(x, N);
+  mul = cgetg(N+1,t_MAT);
   gel(mul,1) = x; /* assume w_1 = 1 */
-  for (i=2; i<l; i++) gel(mul,i) = tablemul_ei(nf,x,i);
+  for (i=2; i<=N; i++) gel(mul,i) = tablemul_ei(M,x,i);
   return mul;
 }
 
@@ -143,7 +147,7 @@ zk_scalar_or_multable(GEN nf, GEN x)
 
 /* sum of x and y in nf */
 GEN
-element_add(GEN nf, GEN x, GEN y)
+nfadd(GEN nf, GEN x, GEN y)
 {
   GEN z;
   pari_sp av = avma;
@@ -159,19 +163,19 @@ element_add(GEN nf, GEN x, GEN y)
     }
   } else {
     if (typ(y) != t_COL) z = RgC_Rg_add(x, y);
-    else z = gadd(x, y);
+    else z = RgC_add(x, y);
   }
   return gerepileupto(av, z);
 }
 
 /* product of x and y in nf */
 GEN
-element_mul(GEN nf, GEN x, GEN y)
+nfmul(GEN nf, GEN x, GEN y)
 {
   GEN z;
   pari_sp av = avma;
 
-  if (x == y) return element_sqr(nf,x);
+  if (x == y) return nfsqr(nf,x);
 
   nf = checknf(nf);
   x = nf_to_scalar_or_basis(nf, x);
@@ -191,7 +195,7 @@ element_mul(GEN nf, GEN x, GEN y)
       GEN dx, dy;
       x = Q_remove_denom(x, &dx);
       y = Q_remove_denom(y, &dy);
-      z = element_muli(nf,x,y);
+      z = nfmuli(nf,x,y);
       dx = mul_denom(dx,dy);
       if (dx) z = RgC_Rg_div(z, dx);
     }
@@ -200,7 +204,7 @@ element_mul(GEN nf, GEN x, GEN y)
 }
 /* square of x in nf */
 GEN
-element_sqr(GEN nf, GEN x)
+nfsqr(GEN nf, GEN x)
 {
   pari_sp av = avma;
   GEN z;
@@ -216,14 +220,14 @@ element_sqr(GEN nf, GEN x)
   {
     GEN dx;
     x = Q_remove_denom(x, &dx);
-    z = element_sqri(nf,x);
+    z = nfsqri(nf,x);
     if (dx) z = RgC_Rg_div(z, sqri(dx));
   }
   return gerepileupto(av, z);
 }
 
 GEN
-element_mulvec(GEN nf, GEN x, GEN v)
+nfC_nf_mul(GEN nf, GEN v, GEN x)
 {
   long tx, l, i;
   GEN y, dx = NULL;
@@ -233,15 +237,27 @@ element_mulvec(GEN nf, GEN x, GEN v)
   if (tx != t_COL) {
     if (tx == t_INT && is_pm1(x))
       return signe(x) > 0? shallowcopy(v): gneg(v);
+    l = lg(v); y = cgetg(l, t_COL);
+    for (i=1; i < l; i++) 
+    {
+      GEN c = gel(v,i);
+      if (typ(c) != t_COL) c = gmul(c, x); else c = RgC_Rg_mul(c, x);
+      gel(y,i) = c;
+    }
   }
   else
   {
     x = Q_remove_denom(x, &dx);
     x = zk_multable(nf, x);
+    l = lg(v); y = cgetg(l, t_COL);
+    for (i=1; i < l; i++) 
+    {
+      GEN c = gel(v,i);
+      if (typ(c)!=t_COL) c = RgC_Rg_mul(gel(x,1), c); else c = RgM_RgC_mul(x,c);
+      gel(y,i) = c;
+    }
   }
-  l = lg(v); y = cgetg(l, typ(v));
-  for (i=1; i < l; i++) gel(y,i) = gmul(x, gel(v,i));
-  return dx? gdiv(y, dx): y;
+  return dx? RgC_Rg_div(y, dx): y;
 }
 GEN
 tablemulvec(GEN M, GEN x, GEN v)
@@ -250,15 +266,20 @@ tablemulvec(GEN M, GEN x, GEN v)
   GEN y, dx = NULL;
 
   if (RgV_isscalar(x)) return RgV_Rg_mul(v, gel(x,1));
-  x = nf_multable(M, x);
+  x = multable(M, x);
   l = lg(v); y = cgetg(l, t_VEC);
-  for (i=1; i < l; i++) gel(y,i) = RgM_RgC_mul(x, gel(v,i));
+  for (i=1; i < l; i++)
+  {
+    GEN c = gel(v,i);
+    if (typ(c)!=t_COL) c = RgC_Rg_mul(gel(x,1), c); else c = RgM_RgC_mul(x,c);
+    gel(y,i) = c;
+  }
   return dx? gdiv(y, dx): y;
 }
 
 /* inverse of x in nf */
 GEN
-element_inv(GEN nf, GEN x)
+nfinv(GEN nf, GEN x)
 {
   pari_sp av = avma;
   GEN T, z;
@@ -275,7 +296,7 @@ element_inv(GEN nf, GEN x)
 
 /* quotient of x and y in nf */
 GEN
-element_div(GEN nf, GEN x, GEN y)
+nfdiv(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN T, z;
@@ -302,7 +323,7 @@ element_div(GEN nf, GEN x, GEN y)
 /* product of INTEGERS (t_INT or ZC) x and y in nf
  * compute xy as ( sum_i x_i sum_j y_j m^{i,j}_k )_k */
 GEN
-element_muli(GEN nf, GEN x, GEN y)
+nfmuli(GEN nf, GEN x, GEN y)
 {
   long i, j, k, N;
   GEN s, v, TAB = get_tab(nf, &N);
@@ -346,7 +367,7 @@ element_muli(GEN nf, GEN x, GEN y)
 }
 /* square of INTEGER (t_INT or ZC) x in nf */
 GEN
-element_sqri(GEN nf, GEN x)
+nfsqri(GEN nf, GEN x)
 {
   long i, j, k, N;
   GEN s, v, TAB = get_tab(nf, &N);
@@ -387,8 +408,12 @@ element_sqri(GEN nf, GEN x)
 GEN
 tablemul(GEN TAB, GEN x, GEN y)
 {
-  long i, j, k, N = lg(x)-1;
-  GEN s, v = cgetg(N+1,t_COL);
+  long i, j, k, N;
+  GEN s, v;
+  if (typ(x) != t_COL) return gmul(x, y);
+  if (typ(y) != t_COL) return gmul(y, x);
+  N = lg(x)-1;
+  v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
     pari_sp av = avma;
@@ -421,8 +446,12 @@ tablemul(GEN TAB, GEN x, GEN y)
 GEN
 tablesqr(GEN TAB, GEN x)
 {
-  long i, j, k, N = lg(x)-1;
-  GEN s, v = cgetg(N+1,t_COL);
+  long i, j, k, N;
+  GEN s, v;
+  
+  if (typ(x) != t_COL) return gsqr(x);
+  N = lg(x)-1;
+  v = cgetg(N+1,t_COL);
 
   for (k=1; k<=N; k++)
   {
@@ -455,28 +484,32 @@ tablesqr(GEN TAB, GEN x)
 }
 
 static GEN
-_mul(void *data, GEN x, GEN y) { return element_muli((GEN)data,x,y); }
+_mul(void *data, GEN x, GEN y) { return nfmuli((GEN)data,x,y); }
 static GEN
-_sqr(void *data, GEN x) { return element_sqri((GEN)data,x); }
+_sqr(void *data, GEN x) { return nfsqri((GEN)data,x); }
 
-/* Compute x^n in nf, left-shift binary powering */
+/* Compute z^n in nf, left-shift binary powering */
 GEN
-element_pow(GEN nf, GEN x, GEN n)
+nfpow(GEN nf, GEN z, GEN n)
 {
   pari_sp av = avma;
-  long s,N;
-  GEN y, cx;
+  long s, N;
+  GEN x, cx, T;
 
   if (typ(n)!=t_INT) pari_err(talker,"not an integer exponent in nfpow");
-  nf = checknf(nf); N = degpol(nf[1]);
+  nf = checknf(nf); T = gel(nf,1); N = degpol(T);
   s = signe(n); if (!s) return scalarcol_shallow(gen_1,N);
-  x = nf_to_scalar_or_basis(nf, x);
-  if (typ(x) != t_COL) { y = zerocol(N); gel(y,1) = powgi(x,n); return y; }
+  x = nf_to_scalar_or_basis(nf, z);
+  if (typ(x) != t_COL) { GEN y = zerocol(N); gel(y,1) = powgi(x,n); return y; }
+  if (s < 0) { /* simplified nfinv */
+    x = nf_to_scalar_or_alg(nf, z);
+    x = poltobasis(nf, QXQ_inv(x, T));
+    n = absi(n);
+  }
   x = primitive_part(x, &cx);
-  y = leftright_pow(x, n, (void*)nf, _sqr, _mul);
-  if (s < 0) y = element_inv(nf, y);
-  if (cx) y = RgC_Rg_mul(y, powgi(cx, n));
-  return av==avma? gcopy(y): gerepileupto(av,y);
+  x = leftright_pow(x, n, (void*)nf, _sqr, _mul);
+  if (cx) x = RgC_Rg_mul(x, powgi(cx, n));
+  return av==avma? gcopy(x): gerepileupto(av,x);
 }
 
 typedef struct {
@@ -494,7 +527,7 @@ static GEN
 sqr_mod(void *data, GEN x)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
-  return FpC_red(element_sqri(D->nf, x), D->p);
+  return FpC_red(nfsqri(D->nf, x), D->p);
 }
 /* x = I-th vector of the Z-basis of Z_K, in Z^n, compute lift(x^n mod p) */
 GEN
@@ -551,7 +584,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 }
 
 long
-element_val(GEN nf, GEN x, GEN vp)
+nfval(GEN nf, GEN x, GEN vp)
 {
   pari_sp av = avma;
   long w, e;
@@ -563,14 +596,11 @@ element_val(GEN nf, GEN x, GEN vp)
   p = gel(vp,1);
   e = itos(gel(vp,3));
   x = nf_to_scalar_or_basis(nf, x);
-  switch(typ(x))
-  {
-    case t_INT: return e * Z_pval(x,p);
-    case t_FRAC:return e * Q_pval(x,p);
-  }
+  if (typ(x) != t_COL) return e * Q_pval(x,p);
   x = Q_primitive_part(x, &cx);
   w = int_elt_val(nf,x,p,gel(vp,5),NULL);
-  avma = av; return w + e * (cx? Q_pval(cx,p): 0);
+  if (cx) w += e*Q_pval(cx,p);
+  avma = av; return w;
 }
 
 GEN
@@ -893,13 +923,12 @@ rnfalgtobasis(GEN rnf,GEN x)
 }
 
 /* Given a and b in nf, gives an algebraic integer y in nf such that a-b.y
- * is "small"
- */
+ * is "small" */
 GEN
 nfdiveuc(GEN nf, GEN a, GEN b)
 {
   pari_sp av = avma;
-  a = element_div(nf,a,b);
+  a = nfdiv(nf,a,b);
   return gerepileupto(av, ground(a));
 }
 
@@ -909,8 +938,8 @@ GEN
 nfmod(GEN nf, GEN a, GEN b)
 {
   pari_sp av = avma;
-  GEN p1 = gneg_i(element_mul(nf,b,ground(element_div(nf,a,b))));
-  return gerepileupto(av, gadd(a,p1));
+  GEN p1 = gneg_i(nfmul(nf,b,ground(nfdiv(nf,a,b))));
+  return gerepileupto(av, nfadd(nf,a,p1));
 }
 
 /* Given a and b in nf, gives a two-component vector [y,r] in nf such
@@ -919,12 +948,12 @@ GEN
 nfdivrem(GEN nf, GEN a, GEN b)
 {
   pari_sp av = avma;
-  GEN p1,z, y = ground(element_div(nf,a,b));
+  GEN p1,z, y = ground(nfdiv(nf,a,b));
 
-  p1 = gneg_i(element_mul(nf,b,y));
+  p1 = gneg_i(nfmul(nf,b,y));
   z = cgetg(3,t_VEC);
   gel(z,1) = gcopy(y);
-  gel(z,2) = gadd(a,p1); return gerepileupto(av, z);
+  gel(z,2) = nfadd(nf,a,p1); return gerepileupto(av, z);
 }
 
 /*************************************************************************/
@@ -1055,14 +1084,14 @@ set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN divisor, GEN sarch)
   if (x) F2v_add_inplace(s, nfsign_arch(nf, x, archp));
   s = F2m_F2c_mul(gel(sarch,3), s);
   for (i=1; i<nba; i++)
-    if (s[i]) y = element_mul(nf,y,gel(gen,i));
+    if (s[i]) y = nfmul(nf,y,gel(gen,i));
   return y;
 }
 
 /* given an element x in Z_K and an integral ideal y in HNF, coprime with x,
    outputs an element inverse of x modulo y */
 GEN
-element_invmodideal(GEN nf, GEN x, GEN y)
+nfinvmodideal(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
   GEN a, xh, yZ = gcoeff(y,1,1);
@@ -1074,21 +1103,21 @@ element_invmodideal(GEN nf, GEN x, GEN y)
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
   xh = idealhnf_shallow(nf,x);
-  a = element_div(nf, hnfmerge_get_1(xh, y), x);
+  a = nfdiv(nf, hnfmerge_get_1(xh, y), x);
   return gerepileupto(av, ZC_hnfrem(a, y));
 }
 
 static GEN
-element_sqrmodideal(GEN nf, GEN x, GEN id) {
-  return ZC_hnfrem(element_sqri(nf,x), id);
+nfsqrmodideal(GEN nf, GEN x, GEN id) {
+  return ZC_hnfrem(nfsqri(nf,x), id);
 }
 static GEN
-element_mulmodideal(GEN nf, GEN x, GEN y, GEN id) {
-  return x? ZC_hnfrem(element_muli(nf,x,y), id): y;
+nfmulmodideal(GEN nf, GEN x, GEN y, GEN id) {
+  return x? ZC_hnfrem(nfmuli(nf,x,y), id): y;
 }
-/* assume k >= 0, ideal in HNF */
+/* assume x integral, k >= 0, ideal in HNF */
 GEN
-element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
+nfpowmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 {
   GEN y;
   if (!signe(k)) return scalarcol_shallow(gen_1, degpol(nf[1]));
@@ -1099,9 +1128,9 @@ element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
   }
   for(y = NULL;;)
   {
-    if (mpodd(k)) y = element_mulmodideal(nf,y,x,ideal);
+    if (mpodd(k)) y = nfmulmodideal(nf,y,x,ideal);
     k = shifti(k,-1); if (!signe(k)) break;
-    x = element_sqrmodideal(nf,x,ideal);
+    x = nfsqrmodideal(nf,x,ideal);
   }
   return y;
 }
@@ -1110,7 +1139,7 @@ element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal)
 static GEN
 elt_mulpow_modideal(GEN nf, GEN a, GEN g, GEN n, GEN id)
 {
-  return element_mulmodideal(nf, a, element_powmodideal(nf,g,n,id), id);
+  return nfmulmodideal(nf, a, nfpowmodideal(nf,g,n,id), id);
 }
 
 /* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id.
@@ -1145,7 +1174,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
       minus = elt_mulpow_modideal(nf, minus, h, negi(n), id);
   }
   if (minus)
-    plus = element_mulmodideal(nf, plus, element_invmodideal(nf,minus,id), id);
+    plus = nfmulmodideal(nf, plus, nfinvmodideal(nf,minus,id), id);
   return plus? plus: scalarcol_shallow(gen_1, lg(id)-1);
 }
 
@@ -1680,7 +1709,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
 	GEN L = gel(L2,j), F = gel(L,1), G = gel(L,3);
 	for (k=1; k<lg(G); k++)
 	{ /* log(g^f) mod divisor */
-	  GEN g = gel(G,k), f = gel(F,k), a = element_powmodideal(nf,g,f,x);
+	  GEN g = gel(G,k), f = gel(F,k), a = nfpowmodideal(nf,g,f,x);
 	  GEN sgn = mpodd(f)? nfsign_arch(nf, g, S.archp)
                             : const_vecsmall(lg(S.archp)-1, 0);
 	  gel(h,++cp) = ZC_neg(zlog_ind(nf, a, &S, sgn, i));
