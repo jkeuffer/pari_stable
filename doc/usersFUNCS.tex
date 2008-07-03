@@ -145,10 +145,11 @@ to monadic operators (the first does nothing, the second negates $x$).
 The library syntax is \fun{GEN}{gneg}{GEN x} for \kbd{-}$x$.
 
 \subseckbd{+}, \kbd{-}: The expression $x$ \kbd{+} $y$ is the \idx{sum} and
-$x$ \kbd{-} $y$ is the \idx{difference} of $x$ and $y$. Among the prominent
-impossibilities are addition/subtraction between a scalar type and a vector
-or a matrix, between vector/matrices of incompatible sizes and between an
-intmod and a real number.
+$x$ \kbd{-} $y$ is the \idx{difference} of $x$ and $y$. Addition/subtraction
+between a scalar type $x$ and a \typ{COL} or \typ{MAT} $y$ returns
+respectively $[y[1] \pm x, y[2],\dots]$ and $y \pm x \text{Id}$. Other
+addition/subtraction between a scalar type and a vector or a matrix, or
+between vector/matrices of incompatible sizes are forbidden.
 
 The library syntax is \fun{GEN}{gadd}{GEN x, GEN y} for $x$ \kbd{+} $y$,
 \fun{GEN}{gsub}{GEN x, GEN y} for $x$ \kbd{-} $y$.

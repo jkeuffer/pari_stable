@@ -577,7 +577,9 @@ add_scal(GEN y, GEN x, long ty, long vy)
     case t_POL: return RgX_Rg_add(y, x);
     case t_SER: return add_ser_scal(y, x, vy, valp(y));
     case t_RFRAC: return add_rfrac_scal(y, x);
-    case t_VEC: case t_COL:
+    case t_VEC:
+    case t_COL:
+      return RgC_Rg_add(y, x);
       tx = typ(x);
       if (!is_matvec_t(tx) && isrationalzero(x)) return gcopy(y);
       break;
