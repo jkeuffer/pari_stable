@@ -12,5 +12,14 @@ Doc:
  outputs the $n^{\text{th}}$ bit of $x$ starting
  from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
  The result is 0 or 1.
-
+ \bprog
+ ? bittest(7, 3)
+ %1 = 1 \\ the 3rd bit is 1
+ ? bittest(7, 4)
+ %2 = 0 \\ the 4th bit is 0
+ @eprog\noindent
  See \secref{se:bitand} for the behaviour at negative arguments.
+Variant: For a \typ{INT} $x$, the variant \fun{long}{bittest}{GEN x, long n} is
+ generally easier to use.
+
+
