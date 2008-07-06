@@ -155,6 +155,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     element_add -> nfadd, element_divmodpr -> nfdivmodpr,
     element_mul -> nfmul, element_pow -> nfpow, element_div -> nfdiv.
   - remove obsolete library function smallfact; use boundfact or Z_factor_limit
+  - rename mu -> moebius, gmu -> gmoebius, phi -> eulerphi, gphi ->
+    geulerphi, phiu -> eulerphiu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

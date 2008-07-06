@@ -1,9 +1,12 @@
 Function: moebius
 Section: number_theoretical
-C-Name: gmu
+C-Name: gmoebius
 Prototype: G
 Help: moebius(x): Moebius function of x
 Description:
- (int):small	mu($1)
- (gen):gen	gmu($1)
+ (int):small	moebius($1)
+ (gen):gen	gmoebius($1)
 Doc: \idx{Moebius} $\mu$-function of $|x|$. $x$ must be of type integer.
+Variant: For a \typ{INT} $x$, the variant
+ \fun{long}{moebius}{GEN n} is generally easier to use.
+

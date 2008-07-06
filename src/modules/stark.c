@@ -293,7 +293,7 @@ GetDeg(GEN dataCR)
   long i, l = lg(dataCR);
   GEN degs = cgetg(l, t_VECSMALL);
 
-  for (i = 1; i < l; i++) degs[i] = phiu(itou(gel(ch_CHI(gel(dataCR, i)), 3)));
+  for (i = 1; i < l; i++) degs[i] = eulerphiu(itou(gel(ch_CHI(gel(dataCR, i)), 3)));
   return degs;
 }
 

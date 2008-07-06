@@ -1026,7 +1026,7 @@ to_mat(GEN p, long e) {
 }
 /* factor phi(n) */
 GEN
-factor_phi(GEN n)
+factor_eulerphi(GEN n)
 {
   pari_sp av = avma;
   GEN B = NULL, A, P, E, AP, AE;
@@ -1081,7 +1081,7 @@ factor_phi(GEN n)
 /***********************************************************************/
 
 GEN
-gmu(GEN n) { return map_proto_lG(mu,n); }
+gmoebius(GEN n) { return map_proto_lG(moebius,n); }
 
 INLINE void
 chk_arith(GEN n) {
@@ -1090,7 +1090,7 @@ chk_arith(GEN n) {
 }
 
 long
-mu(GEN n)
+moebius(GEN n)
 {
   byteptr d = diffptr+1; /* point at 3 - 2 */
   pari_sp av = avma;
@@ -1234,10 +1234,10 @@ bigomega(GEN n)
 }
 
 GEN
-gphi(GEN n) { return map_proto_G(phi,n); }
+geulerphi(GEN n) { return map_proto_G(eulerphi,n); }
 
 ulong
-phiu(ulong n)
+eulerphiu(ulong n)
 {
   byteptr d = diffptr+1;
   pari_sp av;
@@ -1272,7 +1272,7 @@ phiu(ulong n)
 }
 
 GEN
-phi(GEN n)
+eulerphi(GEN n)
 {
   byteptr d = diffptr+1;
   pari_sp av = avma;
@@ -1281,7 +1281,7 @@ phi(GEN n)
   long v;
 
   chk_arith(n);
-  if (lgefint(n) == 3) return utoipos(phiu((ulong)n[2]));
+  if (lgefint(n) == 3) return utoipos(eulerphiu((ulong)n[2]));
   v = vali(n); n = shifti(n,-v); setsigne(n, 1);
   m = v > 1 ? int2n(v-1) : gen_1;
   if (is_pm1(n)) return gerepileuptoint(av,m);

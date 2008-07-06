@@ -666,7 +666,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
     n = cnd;
   }
   card = group_order(H);
-  phi_n = phiu(n);
+  phi_n = eulerphiu(n);
   if (card == phi_n)
   {
     avma = ltop;
@@ -865,7 +865,7 @@ static void
 Aurifeuille_init(GEN a, long n, struct aurifeuille_t *S)
 {
   GEN sqrta = sqrtr_abs(itor(a, 3));
-  GEN bound = ceil_safe(gpowgs(addrs(sqrta,1), phiu(n)));
+  GEN bound = ceil_safe(gpowgs(addrs(sqrta,1), eulerphiu(n)));
   GEN zl = polsubcyclo_start(n, 0, 0, bound, &(S->e), (long*)&(S->l));
   S->le = gel(zl,1);
   S->z  = gel(zl,2);

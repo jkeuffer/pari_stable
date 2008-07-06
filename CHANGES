@@ -209,6 +209,8 @@ BA 49- user variables can now be aliased [#790].
        fields with less rigid data types (can mix freely t_COL, t_INT
        and t_FRAC, instead of converting everything to t_COL).
    70- Rename Z_factor_limit -> Z_factor_until, and auxdecomp -> Z_factor_limit
+   71- Rename mu -> moebius, gmu -> gmoebius, phi -> eulerphi, gphi ->
+       geulerphi, phiu -> eulerphiu
 
   Added
     1- library function pari_calloc, cgetalloc
