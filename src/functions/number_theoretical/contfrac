@@ -59,5 +59,5 @@ Doc: returns the row vector whose components are the partial quotients of the
 
  \misctitle{Obsolete hack} (don't use this): If $b$ is an integer, \var{nmax}
  is ignored and the command is understood as \kbd{contfrac($x,, b$)}.
-Variant: Also available are \fun{GEN}{gboundcf}{GEN x, long nmax} and
- \fun{GEN}{gcf}{GEN x}.
+Variant: Also available are \fun{GEN}{gboundcf}{GEN x, long nmax},
+ \fun{GEN}{gcf}{GEN x} and \fun{GEN}{gcf2}{GEN b, GEN x}.
