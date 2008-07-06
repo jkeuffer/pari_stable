@@ -190,7 +190,7 @@ get_den(GEN *nf, GEN T)
     *nf = nfinitall(T, nf_PARTIALFACT, DEFAULTPREC);
     D = gel(*nf, 3);
     if (is_pm1(D)) return gen_1;
-    fa = smallfact(D);
+    fa = Z_factor_limit(D, 0);
     P = gel(fa,1); q = gel(P, lg(P)-1);
     if (!BSW_psp(q)) den = q; /* *nf[3] may be incorrect */
   }
