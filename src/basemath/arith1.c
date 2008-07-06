@@ -323,13 +323,7 @@ znstar(GEN N)
 /**                                                                 **/
 /*********************************************************************/
 GEN
-gracine(GEN a)
-{
-  return map_proto_G(racine,a);
-}
-
-GEN
-racine(GEN a)
+sqrtint(GEN a)
 {
   if (typ(a) != t_INT) pari_err(arither1);
   switch (signe(a))

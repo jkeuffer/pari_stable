@@ -208,9 +208,11 @@ BA 49- user variables can now be aliased [#790].
        with RgC_Rg_add and RgV_isscalar, and allows linear algebra over number
        fields with less rigid data types (can mix freely t_COL, t_INT
        and t_FRAC, instead of converting everything to t_COL).
-   70- Rename Z_factor_limit -> Z_factor_until, and auxdecomp -> Z_factor_limit
-   71- Rename mu -> moebius, gmu -> gmoebius, phi -> eulerphi, gphi ->
-       geulerphi, phiu -> eulerphiu, gener -> znprimroot, ggener -> znprimroot0
+   70- Rename library functions Z_factor_limit -> Z_factor_until,
+       and auxdecomp -> Z_factor_limit
+   71- Rename library functions mu -> moebius, gmu -> gmoebius,
+       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
+       gener -> znprimroot, ggener -> znprimroot0, racine -> sqrtint
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -355,6 +357,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    29- obsolete GP function ideleprincipal. No routine remains that would
        use the auxiliary "archimedean information"
    30- obsolete library function smallfact [ use boundfact or Z_factor_limit ]
+   31- obsolete library function gracine [ use sqrtint ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

@@ -307,7 +307,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lpui    (long)gpui
 #define lquadgen (long)quadgen
 #define lquadpoly (long)quadpoly
-#define lracine (long)racine
+#define lracine (long)sqrtint
 #define lrcopy  (long)rcopy
 #define lreal   (long)greal
 #define lrecip  (long)recip
