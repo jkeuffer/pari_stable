@@ -1899,7 +1899,7 @@ ellintegralmodel(GEN e)
     {
       case t_INT: break;
       case t_FRAC: /* partial factorization */
-	L = shallowconcat(L, gel(auxdecomp(gel(u,2), 0),1));
+	L = shallowconcat(L, gel(Z_factor_limit(gel(u,2), 0),1));
 	break;
       default: pari_err(talker, "not a rational curve in ellintegralmodel");
     }

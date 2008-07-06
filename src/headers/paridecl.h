@@ -734,7 +734,7 @@ GEN     znstar(GEN x);
 
 long    Z_issquarefree(GEN x);
 GEN     addprimes(GEN primes);
-GEN     auxdecomp(GEN n, long all);
+GEN     Z_factor_limit(GEN n, long all);
 long    bigomega(GEN n);
 GEN     binaire(GEN x);
 long    bittest(GEN x, long n);
@@ -781,7 +781,6 @@ GEN     prime(long n);
 GEN     primepi(GEN x);
 GEN     primes(long n);
 GEN     removeprimes(GEN primes);
-GEN     smallfact(GEN n);
 GEN     sumdiv(GEN n);
 GEN     sumdivk(GEN n,long k);
 ulong   phiu(ulong n);

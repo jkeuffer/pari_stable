@@ -604,7 +604,7 @@ plisprime(GEN N, long flag)
   {
     GEN cbrtN = gsqrtn(N, utoi(3), NULL, nbits2prec((expi(N)+2)/3));
     GEN N_1 = addis(N,-1), f;
-    F = Z_factor_limit(N_1, sqri(floorr(cbrtN)));
+    F = Z_factor_until(N_1, sqri(floorr(cbrtN)));
     f = factorback(F, NULL); F = gel(F,1);
     if (!equalii(f, N_1) && !BLS_test(N,f)) { avma = ltop; return gen_0; }
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
@@ -644,7 +644,7 @@ BSW_isprime(GEN N)
   GEN fa, P, F, p, N_1;
 
   if (BSW_isprime_small(N)) return 1;
-  N_1 = subis(N,1); fa = auxdecomp(N_1, 1<<19);
+  N_1 = subis(N,1); fa = Z_factor_limit(N_1, 1<<19);
   l = lg(gel(fa,1))-1; p = gcoeff(fa,l,1);
   F = diviiexact(N_1,  powgi(p, gcoeff(fa,l,2)));
   P = gel(fa,1);
@@ -2702,7 +2702,7 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  *    smallest) and the corresponding exponent.
  *
  * Encapsulated user interface:
- *  - ifac_decomp()  [ to be called by auxdecomp() ]: puts a succession of
+ *  - ifac_decomp()  [ to be called by Z_factor_limit() ]: puts a succession of
  *  prime divisor / exponent pairs onto the stack, unsorted.
  *
  *  - For each of the arithmetic functions, there is a 'contributor'

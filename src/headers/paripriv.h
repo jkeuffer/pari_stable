@@ -238,7 +238,7 @@ GEN trivfact(void);
 int   BSW_isprime(GEN x);
 int   BSW_isprime_small(GEN x);
 GEN   coprime_part(GEN x, GEN f);
-GEN   Z_factor_limit(GEN n, GEN limit);
+GEN   Z_factor_until(GEN n, GEN limit);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
 long  ifac_decomp_break(GEN n, long (*B)(GEN,GEN,GEN,GEN), GEN s, long hint);
 long  ifac_moebius(GEN n, long hint);

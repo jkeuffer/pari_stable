@@ -471,7 +471,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   else
   {
     const long lim = 47;
-    GEN a1, fa = auxdecomp(xZ, lim), P = gel(fa,1), E = gel(fa,2);
+    GEN a1, fa = Z_factor_limit(xZ, lim), P = gel(fa,1), E = gel(fa,2);
     long l = lg(P)-1;
 
     a1 = powgi(gel(P, l), gel(E, l));

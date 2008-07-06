@@ -666,7 +666,7 @@ isprimitive(GEN nf)
   /* N = [L:Q] = product of primes >= p, same is true for [L:K]
    * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
   d = absi(gel(nf,3));
-  fa = gel(auxdecomp(d,0),2); /* list of v_q(d_L). Don't check large primes */
+  fa = gel(Z_factor_limit(d,0),2); /* list of v_q(d_L). Don't check large primes */
   if (mod2(d)) i = 1;
   else
   { /* q = 2 */

@@ -304,7 +304,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   a = POL + 2; lead = gel(a,n);
   if (signe(lead) < 0) { POL = gneg_i(POL); a = POL+2; lead = negi(lead); }
   if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return POL; }
-  fa = auxdecomp(lead,0); lead = gen_1;
+  fa = Z_factor_limit(lead,0); lead = gen_1;
   e = gel(fa,2); fa = gel(fa,1);
   for (i=lg(e)-1; i>0;i--) e[i] = itos(gel(e,i));
   for (i=lg(fa)-1; i>0; i--)

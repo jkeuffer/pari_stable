@@ -1249,18 +1249,22 @@ Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
 $0$ otherwise.
 
-\fun{GEN}{Z_factor_limit}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
+\fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 factorization process as soon as the unfactored part is smaller than \kbd{lim}.
 The resulting factorisation matrix only contains the factors found. No other
 assumptions can be made on the remaining factors.
 
-\fun{GEN}{boundfact}{GEN x, long lim} trial divide $x$ by all primes $p <
-\kbd{lim}$ and return the corresponding factorization matrix. In this case,
-the last ``prime'' divisor in the first column of the factorization matrix
-may well be a proven composite.
+\fun{GEN}{Z_factor_limit}{GEN n, long lim} trial divide $x$ by all primes $p
+< \kbd{lim}$ in the precomputed list of prime numbers and return the
+corresponding factorization matrix. In this case, the last ``prime'' divisor
+in the first column of the factorization matrix may well be a proven
+composite.
 
-This requires \kbd{primelimit} to be larger than \kbd{lim}. If \kbd{lim} is
-zero, the effect is the same as setting $\kbd{lim} = \kbd{primelimit}$.
+If \kbd{lim} is zero, the effect is the same as setting $\kbd{lim} =
+\kbd{maxprime()}$: use all precomputed primes.
+
+\fun{GEN}{boundfact}{GEN x, long lim} as \tet{Z_factor_limit}, applying to
+\typ{INT} or \typ{FRAC} inputs.
 
 \fun{GEN}{core}{GEN n} unique squarefree integer $d$ dividing $n$ such that
 $n/d$ is a square.

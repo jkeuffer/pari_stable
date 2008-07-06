@@ -761,8 +761,8 @@ aux_end(GEN n, long nb)
 }
 
 static GEN
-auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
-		  GEN state, ulong all, long hint)
+ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+	GEN state, ulong all, long hint)
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
@@ -773,7 +773,6 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 #define STOREu(x,e) STORE(utoipos(x), e)
 #define STOREi(x,e) STORE(icopy(x),   e)
 
-  if (typ(n) != t_INT) pari_err(arither1);
   i = signe(n); if (!i) pari_err(talker, "zero argument in factorint");
   (void)cgetg(3,t_MAT);
   if (i < 0) STORE(utoineg(1), 1);
@@ -887,43 +886,33 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
   avma = ltop; return res;
 }
 
-GEN
-auxdecomp(GEN n, long all)
-{
-  return auxdecomp1(n,NULL,NULL, all,decomp_default_hint);
-}
-
 /* see before ifac_crack() in ifactor1.c for current semantics of 'hint'
    (factorint's 'flag') */
 GEN
 factorint(GEN n, long flag)
 {
-  return auxdecomp1(n,NULL,NULL, 1,flag);
+  if (typ(n) != t_INT) pari_err(arither1);
+  return ifactor(n,NULL,NULL, 1,flag);
 }
 
 GEN
+Z_factor_limit(GEN n, long all)
+{ return ifactor(n,NULL,NULL, all,decomp_default_hint); }
+GEN
 Z_factor(GEN n)
-{
-  return auxdecomp1(n,NULL,NULL, 1,decomp_default_hint);
-}
+{ return ifactor(n,NULL,NULL, 1,decomp_default_hint); }
 
 /* Factor until the unfactored part is smaller than limit. Return the
  * factored part. Hence factorback(output) may be smaller than n */
 GEN
-Z_factor_limit(GEN n, GEN limit)
+Z_factor_until(GEN n, GEN limit)
 {
   GEN state = cgetg(3,t_VEC);
  /* icopy is mainly done to allocate memory for affect().
   * Currently state[1] is discarded in initial call to ifac_break_limit */
   gel(state,1) = icopy(n);
   gel(state,2) = gcopy(limit);
-  return auxdecomp1(n, &ifac_break_limit, state, 1, decomp_default_hint);
-}
-
-GEN
-smallfact(GEN n)
-{
-  return boundfact(n,0);
+  return ifactor(n, &ifac_break_limit, state, 1, decomp_default_hint);
 }
 
 GEN
@@ -941,10 +930,10 @@ boundfact(GEN n, long lim)
   if (lim <= 1) lim = 0;
   switch(typ(n))
   {
-    case t_INT: return auxdecomp(n,lim);
+    case t_INT: return Z_factor_limit(n,lim);
     case t_FRAC:
-      p1 = auxdecomp(gel(n,1),lim);
-      p2 = auxdecomp(gel(n,2),lim); gel(p2,2) = gneg_i(gel(p2,2));
+      p1 = Z_factor_limit(gel(n,1),lim);
+      p2 = Z_factor_limit(gel(n,2),lim); gel(p2,2) = gneg_i(gel(p2,2));
       return gerepilecopy(av, merge_factor_i(p1,p2));
   }
   pari_err(arither1);
@@ -1305,9 +1294,9 @@ phi(GEN n)
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) {
-      m = mulis(m, p-1);
+      m = muliu(m, p-1);
       if (v > 2) m = mulii(m, powuu(p, v-1));
-      else if (v == 2) m = mulis(m, p);
+      else if (v == 2) m = muliu(m, p);
     }
     if (stop) {
       if (!is_pm1(n)) m = mulii(m, addis(n,-1));
@@ -1343,7 +1332,7 @@ numbdiv(GEN n)
     int stop;
     NEXT_PRIME_VIADIFF(p,d);
     v = Z_lvalrem_stop(n, p, &stop);
-    if (v) m = mulis(m, v+1);
+    if (v) m = muliu(m, v+1);
     if (stop)
     {
       if (!is_pm1(n)) m = shifti(m,1);
@@ -1547,7 +1536,8 @@ corepartial(GEN n, long all)
   long i;
   GEN fa, P, E, c = gen_1;
 
-  fa = auxdecomp(n,all);
+  if (typ(n) != t_INT) pari_err(typeer,"corepartial");
+  fa = Z_factor_limit(n,all);
   P = gel(fa,1);
   E = gel(fa,2);
   for (i=1; i<lg(P); i++)
@@ -1562,7 +1552,8 @@ core2partial(GEN n, long all)
   long i;
   GEN fa, P, E, c = gen_1, f = gen_1;
 
-  fa = auxdecomp(n,all);
+  if (typ(n) != t_INT) pari_err(typeer,"core2partial");
+  fa = Z_factor_limit(n,all);
   P = gel(fa,1);
   E = gel(fa,2);
   for (i=1; i<lg(P); i++)

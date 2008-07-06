@@ -36,7 +36,7 @@ nfmaxord_check_args(nfmaxord_t *S, GEN T, long flag, GEN fa)
   dT = fa? factorback(fa, NULL): ZX_disc(T);
   if (!signe(dT)) pari_err(talker,"reducible polynomial in nfmaxord");
   S->dT = dT;
-  if (!fa) fa = auxdecomp(absi(dT), (flag & nf_PARTIALFACT) == 0);
+  if (!fa) fa = Z_factor_limit(absi(dT), (flag & nf_PARTIALFACT) == 0);
   S->dTP = gel(fa,1);
   S->dTE = vec_to_vecsmall(gel(fa,2));
   if (DEBUGLEVEL) msgtimer("disc. factorisation");
@@ -541,7 +541,7 @@ nfmaxord(nfmaxord_t *S, GEN T, long flag, GEN fa)
       u = get_coprimes(p, diviiexact(gel(x,1),p));
       /* no small factors, but often a prime power */
       l = lg(u);
-      for (k = 1; k < l; k++) gel(u,k) = gcoeff(auxdecomp(gel(u,k), 2),1,1);
+      for (k = 1; k < l; k++) gel(u,k) = gcoeff(Z_factor_limit(gel(u,k), 2),1,1);
 
       P[i] = u[1];
       P = shallowconcat(P, vecslice(u, 2, l-1));
@@ -1525,9 +1525,9 @@ indexpartial(GEN P, GEN DP)
 
   if(DEBUGLEVEL>=5) (void)TIMER(&T);
   if (!DP) DP = ZX_disc(P);
-  DP = mpabs(DP);
+  DP = absi(DP);
   if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
-  fa = auxdecomp(DP, 0);
+  fa = Z_factor_limit(DP, 0);
   if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
   nb = lg(fa[1])-1;
   for (i = 1; i <= nb; i++)
