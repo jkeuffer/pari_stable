@@ -2308,7 +2308,7 @@ subgroupcond(GEN bnr, GEN indexbound)
 {
   pari_sp av = avma;
   GEN li = subgroupcondlist(gmael(bnr,5,2), indexbound, conductor_elts(bnr));
-  if (typ(indexbound) != t_VEC)
+  if (indexbound && typ(indexbound) != t_VEC)
   { /* sort by increasing index if not single value */
     long i, l = lg(li);
     GEN p1, perm, lidet = cgetg(l,t_VEC);
