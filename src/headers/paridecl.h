@@ -358,7 +358,6 @@ GEN     RgX_sub(GEN x, GEN y);
 GEN     RgX_to_RgV(GEN x, long N);
 GEN     RgX_translate(GEN P, GEN c);
 GEN     RgX_unscale(GEN P, GEN h);
-int     is_rational(GEN x);
 
 /* ZV.c */
 

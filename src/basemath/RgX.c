@@ -17,13 +17,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 
 int
-is_rational(GEN x) { long t = typ(x); return is_rational_t(t); }
-int
 RgX_is_rational(GEN x)
 {
   long i;
   for (i = lg(x)-1; i>1; i--)
-    if (!is_rational(gel(x,i))) return 0;
+  {
+    long t = typ(gel(x,i));
+    if (!is_rational_t(t)) return 0;
+  }
   return 1;
 }
 int

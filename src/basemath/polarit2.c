@@ -2436,6 +2436,8 @@ gauss_gcd(GEN x, GEN y)
 }
 
 static int
+is_rational(GEN x) { long t = typ(x); return is_rational_t(t); }
+static int
 c_is_rational(GEN x)
 {
   return (is_rational(gel(x,1)) && is_rational(gel(x,2)));
