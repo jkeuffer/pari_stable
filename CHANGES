@@ -210,7 +210,7 @@ BA 49- user variables can now be aliased [#790].
        and t_FRAC, instead of converting everything to t_COL).
    70- Rename Z_factor_limit -> Z_factor_until, and auxdecomp -> Z_factor_limit
    71- Rename mu -> moebius, gmu -> gmoebius, phi -> eulerphi, gphi ->
-       geulerphi, phiu -> eulerphiu
+       geulerphi, phiu -> eulerphiu, gener -> znprimroot, ggener -> znprimroot0
 
   Added
     1- library function pari_calloc, cgetalloc

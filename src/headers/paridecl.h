@@ -682,7 +682,6 @@ GEN     fundunit(GEN x);
 GEN     gboundcf(GEN x, long k);
 GEN     gcf2(GEN b, GEN x);
 GEN     gcf(GEN x);
-GEN     gener(GEN m);
 ulong   pgener_Fl_local(ulong p, GEN L);
 ulong   pgener_Fl(ulong p);
 GEN     pgener_Fp_local(GEN p, GEN L);
@@ -690,7 +689,6 @@ GEN     pgener_Fp(GEN p);
 ulong   pgener_Zl(ulong p);
 GEN     pgener_Zp(GEN p);
 GEN     gfundunit(GEN x);
-GEN     ggener(GEN m);
 long    gisanypower(GEN x, GEN *pty);
 GEN     gisfundamental(GEN x);
 GEN     gisprime(GEN x, long flag);
@@ -728,6 +726,8 @@ GEN     seq_umul(ulong a, ulong b);
 long    uissquareall(ulong A, ulong *sqrtA);
 GEN     znorder(GEN x, GEN o);
 GEN     znlog(GEN x, GEN g);
+GEN     znprimroot(GEN m);
+GEN     znprimroot0(GEN m);
 GEN     znstar(GEN x);
 
 /* arith2.c */

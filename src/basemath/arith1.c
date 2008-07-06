@@ -29,9 +29,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /******************************************************************/
 
 GEN
-ggener(GEN m)
+znprimroot0(GEN m)
 {
-  return map_proto_G(gener,m);
+  return map_proto_G(znprimroot,m);
 }
 
 int
@@ -170,12 +170,19 @@ pgener_Zp(GEN p)
   return x;
 }
 
+static GEN
+gener_Zp(GEN q)
+{
+  GEN p;
+  long e = Z_isanypower(q, &p);
+  return e > 1? pgener_Zp(p): pgener_Fp(q);
+}
+
 GEN
-gener(GEN m)
+znprimroot(GEN m)
 {
   pari_sp av;
-  long e;
-  GEN x, p, z;
+  GEN x, z;
 
   if (typ(m) != t_INT) pari_err(arither1);
   if (!signe(m)) pari_err(talker,"zero modulus in znprimroot");
@@ -184,20 +191,23 @@ gener(GEN m)
   m = absi(m);
   gel(z,1) = m; av = avma;
 
-  e = mod4(m);
-  if (e == 0) /* m = 0 mod 4 */
-  { /* m != 4, non cyclic */
-    if (!equaliu(m,4)) pari_err(talker,"primitive root mod %Ps does not exist", m);
-    gel(z,2) = utoipos(3); return z;
-  }
-  if (e == 2) /* m = 0 mod 2 */
+  switch(mod4(m))
   {
-    GEN q = shifti(m,-1); x = gel(gener(q), 2);
-    if (!mod2(x)) x = addii(x,q);
-    gel(z,2) = gerepileuptoint(av, x); return z;
+    case 0: /* m = 0 mod 4 */
+      if (!equaliu(m,4)) /* m != 4, non cyclic */
+        pari_err(talker,"primitive root mod %Ps does not exist", m);
+      x = utoipos(3);
+      break;
+    case 2: /* m = 2 mod 4 */
+      m = shifti(m,-1); /* becomes odd */
+      if (is_pm1(m)) { x = gen_1; break; }
+      x = gener_Zp(m); if (!mod2(x)) x = addii(x,m);
+      break;
+    default: /* m odd */
+      x = gener_Zp(m);
+      break;
   }
-  e = Z_isanypower(m, &p);
-  gel(z,2) = gerepileuptoint(av, e > 1? pgener_Zp(p): pgener_Fp(m)); return z;
+  gel(z,2) = gerepileuptoint(av, x); return z;
 }
 
 GEN
