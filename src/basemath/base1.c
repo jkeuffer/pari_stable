@@ -1325,14 +1325,14 @@ get_red_G(nfbasic_t *T, GEN *pro)
 /* Compute an LLL-reduced basis for the integer basis of nf(T).
  * *pro = roots of x, computed to precision prec [or NULL -> recompute] */
 static void
-set_LLL_basis(nfbasic_t *T, GEN *pro)
+set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
 {
   GEN B = T->bas;
   if (T->r1 == degpol(T->x)) {
     pari_sp av = avma;
     GEN u, basden = T->basden;
     if (!basden) basden = get_bas_den(B);
-    u = ZM_lll(make_Tr(T->x,basden), 0.99, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM);
+    u = ZM_lll(make_Tr(T->x,basden), DELTA, LLL_GRAM|LLL_KEEP_FIRST|LLL_IM);
     B = gerepileupto(av, RgV_RgM_mul(B, u));
   }
   else
@@ -1551,7 +1551,7 @@ nfinitall(GEN x, long flag, long prec)
 
   nfbasic_init(x, flag, NULL, &T);
   nfbasic_add_disc(&T); /* more expensive after set_LLL_basis */
-  set_LLL_basis(&T, &ro);
+  set_LLL_basis(&T, &ro, 0.99);
 
   if (T.lead && !(flag & (nf_RED|nf_PARTRED)))
   {
@@ -1562,7 +1562,7 @@ nfinitall(GEN x, long flag, long prec)
   {
     rev = nfpolred(flag & nf_PARTRED, &T);
     if (DEBUGLEVEL) msgtimer("polred");
-    if (rev) { ro = NULL; set_LLL_basis(&T, &ro); } /* changed T.x */
+    if (rev) { ro = NULL; set_LLL_basis(&T, &ro, 0.99); } /* changed T.x */
     if (flag & nf_ORIG)
     {
       if (!rev) rev = pol_x(varn(T.x)); /* no improvement */
@@ -1700,7 +1700,7 @@ allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
   GEN ro = NULL;
   nfbasic_t T;
   nfbasic_init(x, flag, fa, &T);
-  set_LLL_basis(&T, &ro);
+  set_LLL_basis(&T, &ro, 0.99);
   if (T.lead) pari_err(impl,"polred for non-monic polynomials");
   return _polred(T.x, T.bas, pta, CHECK);
 }
@@ -2043,7 +2043,7 @@ _polredabs(nfbasic_t *T, GEN *u)
   nffp_t F;
   CG_data d; chk.data = (void*)&d;
 
-  set_LLL_basis(T, &ro);
+  set_LLL_basis(T, &ro, 0.9999);
 
   /* || polchar ||_oo < 2^e */
   e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
