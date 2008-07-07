@@ -788,7 +788,7 @@ gpow(GEN x, GEN n, long prec)
     switch (tx)
     {
     case t_INTMOD:
-      if (!BSW_psp(gel(x,1))) pari_err(talker,"gpow: modulus %Ps is not prime",x[1]);
+      if (!BPSW_psp(gel(x,1))) pari_err(talker,"gpow: modulus %Ps is not prime",x[1]);
       y = cgetg(3,t_INTMOD); gel(y,1) = icopy(gel(x,1));
       av = avma;
       z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
@@ -1046,7 +1046,7 @@ palogaux(GEN x)
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   if (e <= 0) {
-    if (!BSW_psp(p))
+    if (!BPSW_psp(p))
       pari_err(talker, "error in p-adic log, %Ps is not a prime", p);
     pari_err(bugparier, "log_p");
   }

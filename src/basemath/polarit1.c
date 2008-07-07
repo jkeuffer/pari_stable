@@ -335,7 +335,7 @@ FpX_roots_i(GEN f, GEN p)
 	gel(y,j+db) = FpX_div(a,b, p);
 	gel(y,j)    = b; break;
       }
-      if (pol0[2] == 100 && !BSW_psp(p))
+      if (pol0[2] == 100 && !BPSW_psp(p))
 	pari_err(talker, "not a prime in polrootsmod");
     }
   }
@@ -388,7 +388,7 @@ FpX_oneroot_i(GEN f, GEN p)
         a = (db <= (da >> 1))? b: FpX_div(a,b, p);
         break;
       }
-      if (pol0[2] == 100 && !BSW_psp(p))
+      if (pol0[2] == 100 && !BPSW_psp(p))
 	pari_err(talker, "not a prime in polrootsmod");
     }
   }

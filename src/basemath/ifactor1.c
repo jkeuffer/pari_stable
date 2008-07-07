@@ -388,7 +388,7 @@ uu_coprime(ulong n, ulong u)
   return gcduodd(n, u) == 1;
 }
 
-/* Fl_BSW_psp */
+/* Fl_BPSW_psp */
 int
 uisprime(ulong n)
 {
@@ -488,7 +488,7 @@ uisprime_nosmalldiv(ulong n)
 }
 
 long
-BSW_psp(GEN N)
+BPSW_psp(GEN N)
 {
   pari_sp av;
   miller_t S;
@@ -522,7 +522,7 @@ BSW_psp(GEN N)
 
 /* no prime divisor <= 661 */
 long
-BSW_psp_nosmalldiv(GEN N)
+BPSW_psp_nosmalldiv(GEN N)
 {
   pari_sp av;
   miller_t S;
@@ -572,7 +572,7 @@ pl831(GEN N, GEN p)
     if (!equalii(g,N)) return 0;
   }
 }
-/* Assume N is a strong BSW pseudoprime
+/* Assume N is a strong BPSW pseudoprime
  *
  * flag 0: return gen_1 (prime), gen_0 (composite)
  * flag 1: return gen_0 (composite), gen_1 (small prime), matrix (large prime)
@@ -621,10 +621,10 @@ plisprime(GEN N, long flag)
     if (!witness) { avma = ltop; return gen_0; }
     gmael(C,1,i) = icopy(p);
     gmael(C,2,i) = utoi(witness);
-    if (!flag) r = BSW_isprime(p)? gen_1: gen_0;
+    if (!flag) r = BPSW_isprime(p)? gen_1: gen_0;
     else
     {
-      if (BSW_isprime_small(p)) r = gen_1;
+      if (BPSW_isprime_small(p)) r = gen_1;
       else if (expi(p) > 250)   r = isprimeAPRCL(p)? gen_2: gen_0;
       else                      r = plisprime(p,flag);
     }
@@ -635,15 +635,15 @@ plisprime(GEN N, long flag)
   return gerepileupto(ltop,C);
 }
 
-/* assume x a BSW pseudoprime */
+/* assume x a BPSW pseudoprime */
 int
-BSW_isprime(GEN N)
+BPSW_isprime(GEN N)
 {
   pari_sp av = avma;
   long l, res;
   GEN fa, P, F, p, N_1;
 
-  if (BSW_isprime_small(N)) return 1;
+  if (BPSW_isprime_small(N)) return 1;
   N_1 = subis(N,1); fa = Z_factor_limit(N_1, 1<<19);
   l = lg(gel(fa,1))-1; p = gcoeff(fa,l,1);
   F = diviiexact(N_1,  powgi(p, gcoeff(fa,l,2)));
@@ -652,7 +652,7 @@ BSW_isprime(GEN N)
   if (cmpii(gpowgs(F, 3), N) >= 0) /* half-smooth, F >= N^(1/3) */
     res = BLS_test(N, F)
 	  && isprimeSelfridge(mkvec2(N,vecslice(P,1,l-1)));
-  else if (BSW_psp_nosmalldiv(p)) /* smooth */
+  else if (BPSW_psp_nosmalldiv(p)) /* smooth */
     res = isprimeSelfridge(mkvec2(N,P));
   else
     res = isprimeAPRCL(N);
@@ -733,7 +733,7 @@ nextprime(GEN n)
   /* now find an actual (pseudo)prime */
   for(;;)
   {
-    if (BSW_psp(n)) break;
+    if (BPSW_psp(n)) break;
     rcd = prc210_d1[rcn];
     if (++rcn > 47) rcn = 0;
     n = addsi(rcd, n);
@@ -774,7 +774,7 @@ precprime(GEN n)
   /* now find an actual (pseudo)prime */
   for(;;)
   {
-    if (BSW_psp(n)) break;
+    if (BPSW_psp(n)) break;
     if (--rcn < 0) rcn = 47;
     rcd = prc210_d1[rcn];
     n = addsi(-rcd, n);
@@ -3176,9 +3176,9 @@ static int
 ifac_isprime(GEN x)
 {
   int res = 0;
-  if (!BSW_psp_nosmalldiv(VALUE(x)))
+  if (!BPSW_psp_nosmalldiv(VALUE(x)))
     CLASS(x) = gen_0; /* composite */
-  else if (factor_proven && ! BSW_isprime(VALUE(x)))
+  else if (factor_proven && ! BPSW_isprime(VALUE(x)))
   {
     pari_warn(warner, "IFAC: pseudo-prime %Ps\n\tis not prime. PLEASE REPORT!\n",
 	      VALUE(x));

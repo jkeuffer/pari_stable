@@ -2367,11 +2367,11 @@ gisprime(GEN x, long flag)
 long
 isprimeSelfridge(GEN x) { return (plisprime(x,0)==gen_1); }
 
-/* Assume x BSW pseudoprime. Check whether it's small enough to be certified
+/* Assume x BPSW pseudoprime. Check whether it's small enough to be certified
  * prime (< 10^15). Reference for strong 2-pseudoprimes: William Galway's list
  * at http://oldweb.cecm.sfu.ca/pseudoprime/, extending Richard Pinch (<10^13)*/
 int
-BSW_isprime_small(GEN x)
+BPSW_isprime_small(GEN x)
 {
   long l = lgefint(x);
   if (l < 4) return 1;
@@ -2388,16 +2388,16 @@ BSW_isprime_small(GEN x)
 long
 isprime(GEN x)
 {
-  return BSW_psp(x) && BSW_isprime(x);
+  return BPSW_psp(x) && BPSW_isprime(x);
 }
 
 GEN
 gispseudoprime(GEN x, long flag)
-{ return flag? map_proto_lGL(millerrabin, x, flag): map_proto_lG(BSW_psp,x); }
+{ return flag? map_proto_lGL(millerrabin, x, flag): map_proto_lG(BPSW_psp,x); }
 
 long
 ispseudoprime(GEN x, long flag)
-{ return flag? millerrabin(x, flag): BSW_psp(x); }
+{ return flag? millerrabin(x, flag): BPSW_psp(x); }
 
 GEN
 gispsp(GEN x) { return map_proto_lG(ispsp,x); }

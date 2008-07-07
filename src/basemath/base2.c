@@ -1535,7 +1535,7 @@ indexpartial(GEN P, GEN DP)
     long E = itos(gmael(fa,2,i)), e = E >> 1;
     GEN p = gmael(fa,1,i), q = p;
     if (i == nb)
-      q = powiu(p, (odd(E) && !BSW_psp(p))? e+1: e);
+      q = powiu(p, (odd(E) && !BPSW_psp(p))? e+1: e);
     else if (e >= 2)
     {
       if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Ps^%ld ",p,E);

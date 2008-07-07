@@ -1576,7 +1576,7 @@ localred_result(long f, long kod, long c, GEN v)
 static GEN
 localredbug(GEN p, const char *s)
 {
-  if (BSW_psp(p)) pari_err(bugparier, s);
+  if (BPSW_psp(p)) pari_err(bugparier, s);
   pari_err(talker,"not a prime in localred");
   return NULL; /* not reached */
 }

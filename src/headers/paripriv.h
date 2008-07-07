@@ -235,8 +235,8 @@ GEN to_famat(GEN g, GEN e);
 GEN trivfact(void);
 
 /* integer factorization / discrete log */
-int   BSW_isprime(GEN x);
-int   BSW_isprime_small(GEN x);
+int   BPSW_isprime(GEN x);
+int   BPSW_isprime_small(GEN x);
 GEN   coprime_part(GEN x, GEN f);
 GEN   Z_factor_until(GEN n, GEN limit);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
@@ -769,7 +769,7 @@ GEN     pollardbrent(GEN n);
 ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
 GEN     squfof(GEN n);
 int     uisprime_nosmalldiv(ulong n);
-long    BSW_psp_nosmalldiv(GEN N);
+long    BPSW_psp_nosmalldiv(GEN N);
 
 /* init.c */
 

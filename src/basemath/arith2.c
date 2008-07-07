@@ -847,7 +847,7 @@ ifactor(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   }
 
   /* test primality */
-  if (BSW_psp_nosmalldiv(n)) { STOREi(n, 1); return aux_end(n,nb); }
+  if (BPSW_psp_nosmalldiv(n)) { STOREi(n, 1); return aux_end(n,nb); }
 
   /* now we have a large composite */
   if (ifac_break && (*ifac_break)(n,NULL,NULL,state)) /*initialize ifac_break*/
@@ -1114,7 +1114,7 @@ moebius(GEN n)
     if (v) s = -s;
     if (stop) { avma = av; return is_pm1(n)? s: -s; }
   }
-  if (BSW_psp_nosmalldiv(n)) { avma=av; return -s; }
+  if (BPSW_psp_nosmalldiv(n)) { avma=av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n, decomp_default_hint);
   avma = av; return (s<0 ? -v : v); /* correct also if v==0 */
@@ -1147,7 +1147,7 @@ Z_issquarefree(GEN x)
     if (v > 1) { avma = av; return 0; }
     if (stop) { avma = av; return 1; }
   }
-  if (BSW_psp_nosmalldiv(x)) { avma = av; return 1; }
+  if (BPSW_psp_nosmalldiv(x)) { avma = av; return 1; }
   v = ifac_issquarefree(x, decomp_default_hint);
   avma = av; return v;
 }
@@ -1196,7 +1196,7 @@ omega(GEN n)
     if (v) nb++;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
   }
-  if (BSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
   /* large composite without small factors */
   nb += ifac_omega(n, decomp_default_hint);
   avma = av; return nb;
@@ -1228,7 +1228,7 @@ bigomega(GEN n)
     nb += v;
     if (stop) { avma = av; return is_pm1(n)? nb: nb+1; }
   }
-  if (BSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
+  if (BPSW_psp_nosmalldiv(n)) { avma = av; return nb+1; }
   nb += ifac_bigomega(n, decomp_default_hint);
   avma = av; return nb;
 }
@@ -1303,7 +1303,7 @@ eulerphi(GEN n)
       return gerepileuptoint(av,m);
     }
   }
-  if (BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
+  if (BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m, addis(n,-1)));
   m = mulii(m, ifac_totient(n, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1339,7 +1339,7 @@ numbdiv(GEN n)
       return gerepileuptoint(av,m);
     }
   }
-  if(BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, shifti(m,1));
+  if(BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, shifti(m,1));
   m = mulii(m, ifac_numdiv(n, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1386,7 +1386,7 @@ sumdiv(GEN n)
       return gerepileuptoint(av, m);
     }
   }
-  if(BSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m,addsi(1,n)));
+  if(BPSW_psp_nosmalldiv(n)) return gerepileuptoint(av, mulii(m,addsi(1,n)));
   m = mulii(m, ifac_sumdivk(n, 1, decomp_default_hint));
   return gerepileuptoint(av,m);
 }
@@ -1439,7 +1439,7 @@ sumdivk(GEN n, long k)
       goto fin;
     }
   }
-  if (BSW_psp_nosmalldiv(n)) { m = mulii(m, addsi(1, powiu(n,k))); goto fin; }
+  if (BPSW_psp_nosmalldiv(n)) { m = mulii(m, addsi(1, powiu(n,k))); goto fin; }
   m = mulii(m, ifac_sumdivk(n, k, decomp_default_hint));
  fin:
   if (k1 < 0) m = gdiv(m, powiu(n1,k));

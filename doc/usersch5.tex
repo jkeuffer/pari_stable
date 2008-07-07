@@ -1243,8 +1243,18 @@ for an \kbd{ulong} operand \kbd{n}.
 \fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 (fully proven) prime number and $0$ otherwise.
 
-\fun{long}{BSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
+
+\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
+compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
+also caches square roots of $-1$ that are encountered during the successive
+tests and stops as soon as three distinct square roots have been produced; we
+have in principle factored $n$ at this point, but unfortunately, there is
+currently no way for the factoring machinery to become aware of it. (It is
+highly implausible that hard to find factors would be exhibited in this way,
+though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
+expect it to be less reliable.
 
 \fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
 $0$ otherwise.
