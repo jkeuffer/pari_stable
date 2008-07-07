@@ -217,6 +217,8 @@ BA 49- user variables can now be aliased [#790].
    72- Rename library functions BSW_* -> BPSW_*
    73- Functions quadunit(), quadregulator(), and factor() no longer apply
        componentwise to vector / matrix arguments. Use apply()
+   74- [libpari] removed obsolete 'prec' argument from prototypes of idealmul0,
+       idealmulred, idealpow0, idealpowred, ideallllred
 
   Added
     1- library function pari_calloc, cgetalloc

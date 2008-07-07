@@ -265,16 +265,16 @@ ideal_two_elt0(GEN nf, GEN x, GEN a)
 }
 
 GEN
-idealpow0(GEN nf, GEN x, GEN n, long flag, long prec)
+idealpow0(GEN nf, GEN x, GEN n, long flag)
 {
-  if (flag) return idealpowred(nf,x,n,prec);
+  if (flag) return idealpowred(nf,x,n);
   return idealpow(nf,x,n);
 }
 
 GEN
-idealmul0(GEN nf, GEN x, GEN y, long flag, long prec)
+idealmul0(GEN nf, GEN x, GEN y, long flag)
 {
-  if (flag) return idealmulred(nf,x,y,prec);
+  if (flag) return idealmulred(nf,x,y);
   return idealmul(nf,x,y);
 }
 
@@ -1659,53 +1659,35 @@ idealpows(GEN nf, GEN ideal, long e)
 }
 
 static GEN
-_idealmulred(GEN nf, GEN x, GEN y, long prec)
-{
-  return ideallllred(nf,idealmul(nf,x,y), NULL, prec);
-}
-
-typedef struct {
-  GEN nf;
-  long prec;
-} idealred_muldata;
-
+_idealmulred(GEN nf, GEN x, GEN y)
+{ return ideallllred(nf,idealmul(nf,x,y), NULL); }
 static GEN
-_mul(void *data, GEN x, GEN y)
-{
-  idealred_muldata *D = (idealred_muldata *)data;
-  return _idealmulred(D->nf,x,y,D->prec);
-}
+_mul(void *data, GEN x, GEN y) { return _idealmulred((GEN)data,x,y); }
 static GEN
-_sqr(void *data, GEN x)
-{
-  return _mul(data,x,x);
-}
+_sqr(void *data, GEN x) { return _mul(data,x,x); }
 
 /* compute x^n (x ideal, n integer), reducing along the way */
 GEN
-idealpowred(GEN nf, GEN x, GEN n, long prec)
+idealpowred(GEN nf, GEN x, GEN n)
 {
   pari_sp av = avma;
-  idealred_muldata D;
   long s;
   GEN y;
 
   if (typ(n) != t_INT) pari_err(talker,"non-integral exponent in idealpowred");
   s = signe(n); if (s == 0) return idealpow(nf,x,n);
-  D.nf  = nf;
-  D.prec= prec;
-  y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
+  y = leftright_pow(x, n, (void*)nf, &_sqr, &_mul);
 
   if (s < 0) y = idealinv(nf,y);
-  if (s < 0 || is_pm1(n)) y = ideallllred(nf,y,NULL,prec);
+  if (s < 0 || is_pm1(n)) y = ideallllred(nf,y,NULL);
   return gerepileupto(av,y);
 }
 
 GEN
-idealmulred(GEN nf, GEN x, GEN y, long prec)
+idealmulred(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, _idealmulred(nf,x,y,prec));
+  return gerepileupto(av, _idealmulred(nf,x,y));
 }
 
 long
@@ -1903,7 +1885,7 @@ GEN
 idealred_elt(GEN nf, GEN I) { return ideallllred_elt(nf, I, NULL); }
 
 GEN
-ideallllred(GEN nf, GEN I, GEN vdir, long prec)
+ideallllred(GEN nf, GEN I, GEN vdir)
 {
   pari_sp av = avma;
   long N, i;

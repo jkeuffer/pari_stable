@@ -96,10 +96,9 @@ static GEN
 compute_fact(GEN nf, GEN u1, GEN gen)
 {
   GEN G, basecl;
-  long prec,i,j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
+  long i, j, l = lg(u1), h = lg(u1[1]); /* l > 1 */
 
   basecl = cgetg(l,t_VEC);
-  prec = nf_get_prec(nf);
   G = cgetg(3,t_VEC);
   gel(G,2) = cgetg(1,t_MAT);
 
@@ -121,8 +120,8 @@ compute_fact(GEN nf, GEN u1, GEN gen)
       }
 
       gel(G,1) = g;
-      g = idealpowred(nf,G,e,prec);
-      z = z? idealmulred(nf,z,g,prec): g;
+      g = idealpowred(nf,G,e);
+      z = z? idealmulred(nf,z,g): g;
     }
     gel(z,2) = famat_reduce(gel(z,2));
     gel(basecl,j) = z;

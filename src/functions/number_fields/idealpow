@@ -1,7 +1,7 @@
 Function: idealpow
 Section: number_fields
 C-Name: idealpow0
-Prototype: GGGD0,L,p
+Prototype: GGGD0,L,
 Help: idealpow(nf,x,k,{flag=0}): k-th power of the ideal x in HNF in the
  number field nf. If (optional) flag is non-null, reduce the result
 Doc: computes the $k$-th power of
@@ -18,5 +18,4 @@ Variant:
  \noindent See also
  \fun{GEN}{idealpow}{GEN nf, GEN x, GEN k} and
  \fun{GEN}{idealpows}{GEN nf, GEN x, long k} ($\fl = 0$).
- Corresponding to $\fl=1$ is \fun{GEN}{idealpowred}{GEN nf, GEN vp, GEN k,
- long prec}.
+ Corresponding to $\fl=1$ is \fun{GEN}{idealpowred}{GEN nf, GEN vp, GEN k}.

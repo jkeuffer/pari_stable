@@ -302,7 +302,7 @@ static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
   GEN m, y;
-  y = ideallllred(nf, init_famat(I), G0, 0);
+  y = ideallllred(nf, init_famat(I), G0);
   m = gel(y,2);
   y = gel(y,1); *pm = lg(m)==1? gen_1: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
@@ -1037,9 +1037,9 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
       ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       { /* avoid prec pb: don't let id become too large as lgsub increases */
-	if (id != x0) id = ideallllred(nf,id,NULL,0);
+	if (id != x0) id = ideallllred(nf,id,NULL);
 	z[1] = Vbase[i];
-	id = extideal_HNF_mul(nf, id, idealpowred(nf,z,utoipos(ex[i]),0));
+	id = extideal_HNF_mul(nf, id, idealpowred(nf,z,utoipos(ex[i])));
       }
     }
     if (id == x0) continue;
@@ -1488,8 +1488,8 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     if (signe(e[i]))
     {
       if (gen) z[1] = P[i]; else z = gel(P,i);
-      id2 = idealpowred(bnf,z, gel(e,i),prec);
-      id = id? idealmulred(nf,id,id2,prec): id2;
+      id2 = idealpowred(bnf,z, gel(e,i));
+      id = id? idealmulred(nf,id,id2): id2;
     }
   if (id == C) /* e = 0 */
   {
@@ -2286,7 +2286,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 
 /* find the smallest (wrt norm) among I, I^-1 and red(I^-1) */
 static GEN
-inverse_if_smaller(GEN nf, GEN I, long prec)
+inverse_if_smaller(GEN nf, GEN I)
 {
   GEN J, d, dmin, I1;
 
@@ -2295,7 +2295,7 @@ inverse_if_smaller(GEN nf, GEN I, long prec)
   J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
-  I1 = ideallllred(nf,I1,NULL,prec);
+  I1 = ideallllred(nf,I1,NULL);
   J = gel(I1,1);
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) I=I1;
   return I;
@@ -2349,18 +2349,18 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   for (j=1; j<lo; j++)
   {
     GEN p1 = gcoeff(Uir,1,j);
-    z[1]=Vbase[1]; I = idealpowred(nf0,z,p1,prec);
+    z[1]=Vbase[1]; I = idealpowred(nf0,z,p1);
     for (i=2; i<lo0; i++)
     {
       p1 = gcoeff(Uir,i,j);
       if (signe(p1))
       {
 	z[1]=Vbase[i]; 
-	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1,prec));
-	I = ideallllred(nf0,I,NULL,prec);
+	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1));
+	I = ideallllred(nf0,I,NULL);
       }
     }
-    J = inverse_if_smaller(nf0, I, prec);
+    J = inverse_if_smaller(nf0, I);
     if (J != I)
     { /* update wrt P */
       neg_row(Y ,j); gel(V,j) = ZC_neg(gel(V,j));

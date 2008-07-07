@@ -2252,9 +2252,9 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 }
 
 static GEN
-idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y, 0); }
+idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y); }
 static GEN
-idpowred(void *nf, GEN x, GEN n) { return idealpowred((GEN) nf, x, n, 0); }
+idpowred(void *nf, GEN x, GEN n) { return idealpowred((GEN) nf, x, n); }
 static GEN
 idmul(void *nf, GEN x, GEN y) { return idealmul((GEN) nf, x, y); }
 static GEN
