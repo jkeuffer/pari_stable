@@ -1772,7 +1772,7 @@ RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 GEN
 factor0(GEN x,long flag)
 {
-  return (flag<0)? factor(x): gboundfact(x,flag);
+  return (flag<0)? factor(x): boundfact(x,flag);
 }
 
 GEN
@@ -1987,12 +1987,6 @@ factor(GEN x)
   pari_sp av, tetpil;
   GEN  y, p, p1, p2, pol;
 
-  if (is_matvec_t(tx))
-  {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) gel(y,i) = factor(gel(x,i));
-    return y;
-  }
   if (gcmp0(x))
   {
     y = cgetg(3,t_MAT);

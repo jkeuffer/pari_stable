@@ -755,7 +755,6 @@ GEN     gbitnegimply(GEN x, GEN y);
 GEN     gbitor(GEN x, GEN y);
 GEN     gbittest(GEN x, long n);
 GEN     gbitxor(GEN x, GEN y);
-GEN     gboundfact(GEN n, long lim);
 GEN     gissquarefree(GEN x);
 GEN     gmoebius(GEN n);
 GEN     gnumbdiv(GEN n);

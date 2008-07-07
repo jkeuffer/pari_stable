@@ -916,12 +916,6 @@ Z_factor_until(GEN n, GEN limit)
 }
 
 GEN
-gboundfact(GEN n, long lim)
-{
-  return map_proto_GL(boundfact,n,lim);
-}
-
-GEN
 boundfact(GEN n, long lim)
 {
   GEN p1, p2;
