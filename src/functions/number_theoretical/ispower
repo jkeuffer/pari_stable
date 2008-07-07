@@ -8,8 +8,8 @@ Help: ispower(x,{k},{&n}): if k > 0 is given, return true (1) if x is a k-th
  If n is present, and the function returns a non-zero result, set n to the
  k-th root of x.
 Description:
- (int):small       isanypower($1, NULL)
- (int, &int):small isanypower($1, &$2)
+ (int):small       Z_isanypower($1, NULL)
+ (int, &int):small Z_isanypower($1, &$2)
 Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
  (0) if not.
 
@@ -26,3 +26,5 @@ Doc: if $k$ is given, returns true (1) if $x$ is a $k$-th power, false
  \bprog
  k = (x.p ^ poldegree(x.pol) - 1) / fforder(x)
  @eprog
+Variant: Also available is 
+ \fun{long}{gisanypower}{GEN x, GEN *pty} ($k$ omitted).
