@@ -7,6 +7,8 @@ Description:
  (int):small	moebius($1)
  (gen):gen	gmoebius($1)
 Doc: \idx{Moebius} $\mu$-function of $|x|$. $x$ must be of type integer.
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.
 Variant: For a \typ{INT} $x$, the variant
  \fun{long}{moebius}{GEN n} is generally easier to use.
 

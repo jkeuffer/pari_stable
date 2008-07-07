@@ -20,6 +20,8 @@ Doc: number of prime divisors of the integer $|x|$ counted with
  ? omega(392)
  %3 = 2;  \\ without multiplicity
  @eprog
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.
 Variant: For a \typ{INT} $x$, the variant
  \fun{long}{bigomega}{GEN n} is generally easier to use.
 

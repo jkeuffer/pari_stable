@@ -7,6 +7,8 @@ Description:
  (int):int	eulerphi($1)
  (gen):gen	geulerphi($1)
 Doc: Euler's $\phi$ (totient)\sidx{Euler totient function} function of $|x|$,
- in other words $|(\Z/x\Z)^*|$. $x$ must be of type integer.
+ in other words $|(\Z/x\Z)^*|$. Normally, $x$ must be of type integer, but
+ the function accepts vector/matrices arguments, and is then applied
+ componentwise.
 Variant: For a \typ{INT} $x$, the variant
  \fun{GEN}{eulerphi}{GEN n} is also available.

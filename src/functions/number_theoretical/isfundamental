@@ -9,3 +9,5 @@ Description:
  (gen):gen	gisfundamental($1)
 Doc: true (1) if $x$ is equal to 1 or to the discriminant of a quadratic
  field, false (0) otherwise.
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.

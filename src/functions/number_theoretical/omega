@@ -19,5 +19,7 @@ Doc: number of distinct prime divisors of $|x|$. $x$ must be of type integer.
  ? bigomega(392)
  %3 = 5;  \\ = 3+2, with multiplicity
  @eprog
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.
 Variant: For a \typ{INT} $x$, the variant
  \fun{long}{omega}{GEN n} is generally easier to use.

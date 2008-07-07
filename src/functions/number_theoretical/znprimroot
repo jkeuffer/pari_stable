@@ -7,13 +7,15 @@ Description:
  (int):gen	znprimroot($1)
  (gen):gen	znprimroot0($1)
 Doc: returns a primitive root (generator) of $(\Z/n\Z)^*$, whenever this
-  latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
-  odd prime and $k \geq 0$). If the group is not cyclic, the result is
-  undefined. If $n$ is a prime, then the smallest positive primitive root is
-  returned. This is no longer true for composites.
+ latter group is cyclic ($n = 4$ or $n = 2p^k$ or $n = p^k$, where $p$ is an
+ odd prime and $k \geq 0$). If the group is not cyclic, the result is
+ undefined. If $n$ is a prime, then the smallest positive primitive root is
+ returned. This is no longer true for composites.
 
-  Note that this function requires factoring $n$ and $p-1$ for each prime
-  divisor $p$ of $n$, in order to determine the exact order of elements in
-  $(\Z/n\Z)^*$: this is likely to be very costly if $n$ is large.
+ Note that this function requires factoring $n$ and $p-1$ for each prime
+ divisor $p$ of $n$, in order to determine the exact order of elements in
+ $(\Z/n\Z)^*$: this is likely to be very costly if $n$ is large.
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.
 Variant: For a \typ{INT} $x$, the special case
  \fun{GEN}{znprimroot}{GEN n} is also available.

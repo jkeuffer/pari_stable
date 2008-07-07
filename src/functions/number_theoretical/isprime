@@ -19,7 +19,8 @@ Doc: true (1) if $x$ is a prime
  This routine proves or disproves rigorously that a number is prime, which can
  be very slow when $x$ is indeed prime and has more than $1000$ digits, say.
  Use \tet{ispseudoprime} to quickly check for compositeness. See also
- \kbd{factor}.
+ \kbd{factor}. It accepts vector/matrices arguments, and is then applied
+ componentwise.
 
  If $\fl=0$, use a combination of Baillie-PSW pseudo primality test (see
  \tet{ispseudoprime}), Selfridge ``$p-1$'' test if $x-1$ is smooth enough, and

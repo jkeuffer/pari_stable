@@ -11,3 +11,5 @@ Doc: finds the smallest pseudoprime (see
  type. Note that if $x$ is a pseudoprime, this function returns $x$ and not
  the smallest pseudoprime strictly larger than $x$. To rigorously prove that
  the result is prime, use \kbd{isprime}.
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.

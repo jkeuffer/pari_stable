@@ -13,6 +13,8 @@ Doc: true (1) if $x$ is a strong pseudo
  is not prime; if, on the other hand it returns true, it is only highly likely
  that $x$ is a prime number. Use \tet{isprime} (which is of course much
  slower) to prove that $x$ is indeed prime.
+ The function accepts vector/matrices arguments, and is then applied
+ componentwise.
 
  If $\fl = 0$, checks whether $x$ is a Baillie-Pomerance-Selfridge-Wagstaff
  pseudo prime (strong Rabin-Miller pseudo prime for base $2$, followed by

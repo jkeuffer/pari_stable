@@ -428,22 +428,20 @@ for $x\hbox{\kbd{\pow}}n$.
 \section{Arithmetic functions}\label{se:arithmetic}
 
 These functions are by definition functions whose natural domain of
-definition is either $\Z$ (or $\Z_{>0}$), or sometimes polynomials
-over a base ring. Functions which concern polynomials exclusively will be
-explained in the next section. The way these functions are used is
-completely different from transcendental functions: in general only the types
-integer and polynomial are accepted as arguments. If a vector or matrix type
-is given, the function will be applied on each coefficient independently.
+definition is either $\Z$ (or $\Z_{>0}$). The way these functions are used is
+completely different from transcendental functions in that there are no
+automatic type conversions: in general only integers are accepted as
+arguments.
 
-In the present version \vers, all arithmetic functions in the narrow sense
-of the word~--- Euler's totient\sidx{Euler totient function} function, the
-\idx{Moebius} function, the sums over divisors or powers of divisors
-etc.--- call, after trial division by small primes, the same versatile
-factoring machinery described under \kbd{factorint}. It includes
-\idx{Shanks SQUFOF}, \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and
-has an early exit option for the functions \teb{moebius} and (the integer
-function underlying) \teb{issquarefree}. Note that it relies on a (fairly
-strong) probabilistic primality test, see \kbd{ispseudoprime}.
+All arithmetic functions in the narrow sense of the word~--- Euler's
+totient\sidx{Euler totient function} function, the \idx{Moebius} function,
+the sums over divisors or powers of divisors etc.--- call, after trial
+division by small primes, the same versatile factoring machinery described
+under \kbd{factorint}. It includes \idx{Shanks SQUFOF}, \idx{Pollard Rho},
+\idx{ECM} and \idx{MPQS} stages, and has an early exit option for the
+functions \teb{moebius} and (the integer function underlying)
+\teb{issquarefree}. Note that it relies on a (fairly strong) probabilistic
+primality test, see \kbd{ispseudoprime}.
 
 \bigskip
 
