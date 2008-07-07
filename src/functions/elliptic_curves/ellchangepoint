@@ -9,5 +9,5 @@ Doc:
  vector of points $x$ using the vector \kbd{v=[u,r,s,t]}, i.e.~if $x'$ and
  $y'$ are the new coordinates, then $x=u^2x'+r$, $y=u^3y'+su^2x'+t$ (see also
  \kbd{ellchangecurve}).
-Variant: Also available is \fun{GEN}{ellchangepointinv}{GEN x, GEN ch} to
- invert the coordinate change.
+Variant: The reciprocal function \fun{GEN}{ellchangepointinv}{GEN x, GEN ch}
+ inverts the coordinate change.

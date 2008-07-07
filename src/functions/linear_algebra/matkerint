@@ -14,4 +14,4 @@ Doc: gives an \idx{LLL}-reduced $\Z$-basis
  If $\fl=1$, uses $\kbd{matrixqz}(x,-2)$. If LLL reduction of the final result
  is not desired, you can save time using \kbd{matrixqz(matker(x),-2)} instead.
 
-Variant: Also available is \fun{GEN}{kerint}{GEN x} ($\fl=0$).
+Variant: See also \fun{GEN}{kerint}{GEN x} ($\fl=0$).

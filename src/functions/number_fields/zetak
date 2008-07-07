@@ -50,5 +50,5 @@ Doc: \var{znf} being a number
  %4 = 1.6 E43             \\ junk
  @eprog
 
-Variant: \fun{GEN}{glambdak}{GEN znf, GEN x, long prec} or
+Variant: See also \fun{GEN}{glambdak}{GEN znf, GEN x, long prec} or
  \fun{GEN}{gzetak}{GEN znf, GEN x, long prec}.

@@ -14,7 +14,8 @@ Doc: computes the $k$-th power of
  the (binary) powering process}; in particular, this is \emph{not} the same as
  as $\kbd{idealpow}(\var{nf},x,k)$ followed by reduction.
 
-Variant: Also available are
+Variant:
+ \noindent See also
  \fun{GEN}{idealpow}{GEN nf, GEN x, GEN k} and
  \fun{GEN}{idealpows}{GEN nf, GEN x, long k} ($\fl = 0$).
  Corresponding to $\fl=1$ is \fun{GEN}{idealpowred}{GEN nf, GEN vp, GEN k,

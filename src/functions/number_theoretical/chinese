@@ -22,4 +22,4 @@ Doc: if $x$ and $y$ are both intmods or both
  Finally $\kbd{chinese}(x,x) = x$ regardless of the type of $x$; this allows
  vector arguments to contain other data, so long as they are identical in both
  vectors.
-Variant: Also available is \fun{GEN}{chinese1}{GEN x}.
+Variant: \fun{GEN}{chinese1}{GEN x} is also available.

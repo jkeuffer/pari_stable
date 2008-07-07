@@ -3828,15 +3828,15 @@ shallow (coefficients are not copied).
 
 \fun{long}{RgX_valrem}{GEN P, GEN *pz} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
-coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz}, set it to
+coefficients are $0$ using \kbd{gcmp0}. Set \kbd{*pz} to
 $\kbd{RgX\_shift\_shallow}(P,-v)$.
 
 \fun{long}{RgX_val}{GEN P} returns the valuation $v$ of the
 \typ{POL}~\kbd{P} with respect to its main variable $X$. Check whether
 coefficients are $0$ using \kbd{gcmp0}.
 
-\fun{long}{RgX_valrem_inexact}{GEN P, GEN *z} as \kbd{RgX\_valrem}
-but use \kbd{isexactzero} instead of \kbd{gcmp0}.
+\fun{long}{RgX_valrem_inexact}{GEN P, GEN *z} as \kbd{RgX\_valrem}, using
+\kbd{isexactzero} instead of \kbd{gcmp0}.
 
 \fun{GEN}{RgX_deriv}{GEN x} returns the derivative of \kbd{x} with respect to
 its main variable.
@@ -4778,9 +4778,9 @@ is a rational number (\typ{INT} or \typ{FRAC}) and the result is integral.
 is a \typ{INT} and the result is integral.
 
 \fun{GEN}{mul_content}{GEN cx, GEN cy}  \kbd{cx} and \kbd{cy} are
-as set by \kbd{primitive\_part} or \kbd{Q\_primitive\_part}: either a \kbd{GEN}
-or \kbd{NULL} representing the trivial content $1$. Returns their product
-(either a \kbd{GEN} or \kbd{NULL}).
+as set by \kbd{primitive\_part}: either a \kbd{GEN} or \kbd{NULL}
+representing the trivial content $1$. Returns their product (either a
+\kbd{GEN} or \kbd{NULL}).
 
 \fun{GEN}{mul_denom}{GEN dx, GEN dy} \kbd{dx} and \kbd{dy} are
 as set by \kbd{Q\_remove\_denom}: either a \typ{INT} or \kbd{NULL} representing

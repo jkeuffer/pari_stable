@@ -31,5 +31,6 @@ Doc: truncates $x$ and sets $e$ to the number of
  a $p$-adic number, it transforms it into an integer or a rational number
  by chopping away the $O(p^k)$.
 
-Variant: Also available are \fun{GEN}{gcvtoi}{GEN x, long *e} and
- \fun{GEN}{gtrunc}{GEN x}.
+Variant: The following functions are also available: \fun{GEN}{gtrunc}{GEN x}
+ and \fun{GEN}{gcvtoi}{GEN x, long *e}.
+

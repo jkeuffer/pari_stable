@@ -2,18 +2,18 @@ Function: bnrdisc
 Section: number_fields
 C-Name: bnrdisc0
 Prototype: GDGDGD0,L,
-Help: bnrdisc(a1,{a2},{a3},{flag=0}): absolute or relative [N,R1,discf] of
- the field defined by a1,a2,a3. [a1,{a2},{a3}] is of type [bnr],
+Help: bnrdisc(A,{B},{C},{flag=0}): absolute or relative [N,R1,discf] of
+ the field defined by A,B,C. [A,{B},{C}] is of type [bnr],
  [bnr,subgroup], [bnf, module] or [bnf,module,subgroup], where bnf is as
  output by bnfinit, bnr by bnrinit, and
  subgroup is the HNF matrix of a subgroup of the corresponding ray class
  group (if omitted, the trivial subgroup). flag is optional whose binary
  digits mean 1: give relative data; 2: return 0 if module is not the
  conductor
-Doc: $a1$, $a2$, $a3$
+Doc: $A$, $B$, $C$
  defining a big ray number field $L$ over a ground field $K$ (see \kbd{bnr}
  at the beginning of this section for the
- meaning of $a1$, $a2$, $a3$), outputs a 3-component row vector $[N,r_1,D]$,
+ meaning of $A$, $B$, $C$), outputs a 3-component row vector $[N,r_1,D]$,
  where $N$ is the (absolute) degree of $L$, $r_1$ the number of real places of
  $L$, and $D$ the discriminant of $L/\Q$, including sign (if $\fl=0$).
 
