@@ -2381,12 +2381,6 @@ long
 ispseudoprime(GEN x, long flag)
 { return flag? millerrabin(x, flag): BPSW_psp(x); }
 
-GEN
-gispsp(GEN x) { return map_proto_lG(ispsp,x); }
-
-long
-ispsp(GEN x) { return millerrabin(x,1); }
-
 /*********************************************************************/
 /**                                                                 **/
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/

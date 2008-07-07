@@ -360,6 +360,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        use the auxiliary "archimedean information"
    30- obsolete library function smallfact [ use boundfact or Z_factor_limit ]
    31- obsolete library function gracine [ use sqrtint ]
+   32- obsolete library function ispsp, gispsp. Use ispseudoprime or BPSW_psp.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

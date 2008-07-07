@@ -159,6 +159,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     geulerphi, phiu -> eulerphiu, gener -> znprimroot, ggener -> znprimroot0,
     racine -> sqrtint [ NO COMPATIBILITY #define PROVIDED: too dangerous ]
   - remove obsolete library function gracine
+  - remove obsolete library function ispsp, gispsp. Use ispseudoprime
+    or BPSW_psp.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
