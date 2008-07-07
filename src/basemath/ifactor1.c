@@ -31,15 +31,15 @@ int factor_add_primes = 0, factor_proven = 0;
 typedef struct {
   ulong n, sqrt1, sqrt2, t1, t;
   long r1;
-} Fl_miller_t;
+} Fl_MR_Jaeschke_t;
 
 typedef struct {
   GEN n, sqrt1, sqrt2, t1, t;
   long r1;
-} miller_t;
+} MR_Jaeschke_t;
 
 static void
-init_miller(miller_t *S, GEN n)
+init_MR_Jaeschke(MR_Jaeschke_t *S, GEN n)
 {
   if (signe(n) < 0) n = absi(n);
   S->n = n;
@@ -50,7 +50,7 @@ init_miller(miller_t *S, GEN n)
   S->sqrt2 = cgeti(lg(n)); S->sqrt2[1] = evalsigne(0)|evallgefint(2);
 }
 static void
-Fl_init_miller(Fl_miller_t *S, ulong n)
+Fl_init_MR_Jaeschke(Fl_MR_Jaeschke_t *S, ulong n)
 {
   S->n = n;
   S->t = n-1;
@@ -65,7 +65,7 @@ Fl_init_miller(Fl_miller_t *S, ulong n)
  * should somehow be made available to the factoring machinery. But so
  * exceedingly rare... besides we use BSPW now. */
 static int
-miller_ok(miller_t *S, GEN c)
+MR_Jaeschke_ok(MR_Jaeschke_t *S, GEN c)
 {
   if (signe(S->sqrt1))
   { /* saw one earlier: compare */
@@ -84,7 +84,7 @@ miller_ok(miller_t *S, GEN c)
   return 0;
 }
 static int
-Fl_miller_ok(Fl_miller_t *S, ulong c)
+Fl_MR_Jaeschke_ok(Fl_MR_Jaeschke_t *S, ulong c)
 {
   if (S->sqrt1)
   { /* saw one earlier: compare */
@@ -99,7 +99,7 @@ Fl_miller_ok(Fl_miller_t *S, ulong c)
 /* is n strong pseudo-prime for base a ? 'End matching' (check for square
  * roots of -1) added by GN */
 static int
-bad_for_base(miller_t *S, GEN a)
+bad_for_base(MR_Jaeschke_t *S, GEN a)
 {
   long r, lim, av = avma;
   GEN c2, c = Fp_pow(a, S->t1, S->n);
@@ -111,17 +111,17 @@ bad_for_base(miller_t *S, GEN a)
   for (r = S->r1 - 1; r; r--) /* r1 - 1 squarings */
   {
     c2 = c; c = remii(sqri(c), S->n);
-    if (equalii(S->t, c)) return miller_ok(S, c2);
+    if (equalii(S->t, c)) return MR_Jaeschke_ok(S, c2);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"miller(rabin)");
+      if(DEBUGMEM>1) pari_warn(warnmem,"Rabin-Miller");
       c = gerepileuptoint(av, c);
     }
   }
   return 1;
 }
 static int
-Fl_bad_for_base(Fl_miller_t *S, ulong a)
+Fl_bad_for_base(Fl_MR_Jaeschke_t *S, ulong a)
 {
   long r;
   ulong c2, c = Fl_powu(a, S->t1, S->n);
@@ -132,7 +132,7 @@ Fl_bad_for_base(Fl_miller_t *S, ulong a)
   for (r = S->r1 - 1; r; r--) /* r1 - 1 squarings */
   {
     c2 = c; c = Fl_sqr(c, S->n);
-    if (c == S->t) return Fl_miller_ok(S, c2);
+    if (c == S->t) return Fl_MR_Jaeschke_ok(S, c2);
   }
   return 1;
 }
@@ -144,7 +144,7 @@ millerrabin(GEN n, long k)
   pari_sp av2, av = avma;
   ulong r;
   long i;
-  miller_t S;
+  MR_Jaeschke_t S;
 
   if (typ(n) != t_INT) pari_err(arither1);
   if (!signe(n)) return 0;
@@ -152,7 +152,7 @@ millerrabin(GEN n, long k)
   if (lgefint(n)==3 && (ulong)(n[2])<=3) return (n[2] != 1);
 
   if (!mod2(n)) return 0;
-  init_miller(&S, n); av2 = avma;
+  init_MR_Jaeschke(&S, n); av2 = avma;
   for (i=1; i<=k; i++)
   {
     do r = umodui(pari_rand(), n); while (!r);
@@ -193,14 +193,14 @@ millerrabin(GEN n, long k)
  * in the range  n < 2^36  (with less than 250 exceptions, indeed with fewer
  * than 1400 exceptions up to 2^42). --GN */
 static int
-Fl_miller(ulong n, long k)
+Fl_MR_Jaeschke(ulong n, long k)
 {
   const ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
   const ulong *p;
   ulong r;
   long i;
-  Fl_miller_t S;
+  Fl_MR_Jaeschke_t S;
 
   if (!(n & 1)) return 0;
   if (k == 16)
@@ -214,7 +214,7 @@ Fl_miller(ulong n, long k)
     k = 2;
   }
   else p = pr; /* 2,3,5,... */
-  Fl_init_miller(&S, n);
+  Fl_init_MR_Jaeschke(&S, n);
   for (i=1; i<=k; i++)
   {
     r = p[i] % n; if (!r) break;
@@ -224,22 +224,22 @@ Fl_miller(ulong n, long k)
 }
 
 int
-miller(GEN n, long k)
+MR_Jaeschke(GEN n, long k)
 {
   pari_sp av2, av = avma;
   const ulong pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
   const ulong *p;
   long i;
-  miller_t S;
+  MR_Jaeschke_t S;
 
-  if (lgefint(n) == 3) return Fl_miller((ulong)n[2], k);
+  if (lgefint(n) == 3) return Fl_MR_Jaeschke((ulong)n[2], k);
 
   if (!mod2(n)) return 0;
   if      (k == 16) { p = pr+13; k = 4; } /* 2,13,23,1662803 */
   else if (k == 17) { p = pr+11; k = 2; } /* 31,73 */
   else p = pr; /* 2,3,5,... */
-  init_miller(&S, n); av2 = avma;
+  init_MR_Jaeschke(&S, n); av2 = avma;
   for (i=1; i<=k; i++)
   {
     if (bad_for_base(&S, utoipos(p[i]))) { avma = av; return 0; }
@@ -392,7 +392,7 @@ uu_coprime(ulong n, ulong u)
 int
 uisprime(ulong n)
 {
-  Fl_miller_t S;
+  Fl_MR_Jaeschke_t S;
   if (n < 103)
     switch(n)
     {
@@ -441,7 +441,7 @@ uisprime(ulong n)
       !uu_coprime(n, 4269855901UL)) return 0;
 #endif
   if (n < 10427) return 1;
-  Fl_init_miller(&S, n);
+  Fl_init_MR_Jaeschke(&S, n);
   if (Fl_bad_for_base(&S, 2)) return 0;
   if (n < 1016801) switch(n) {
   /* strong 2-pseudoprimes without prime divisors < 103. All have 2 prime
@@ -481,8 +481,8 @@ uisprime(ulong n)
 int
 uisprime_nosmalldiv(ulong n)
 {
-  Fl_miller_t S;
-  Fl_init_miller(&S, n);
+  Fl_MR_Jaeschke_t S;
+  Fl_init_MR_Jaeschke(&S, n);
   if (Fl_bad_for_base(&S, 2)) return 0;
   return u_IsLucasPsP(n);
 }
@@ -491,7 +491,7 @@ long
 BPSW_psp(GEN N)
 {
   pari_sp av;
-  miller_t S;
+  MR_Jaeschke_t S;
   int k;
 
   if (typ(N) != t_INT) pari_err(arither1);
@@ -515,7 +515,7 @@ BPSW_psp(GEN N)
 #endif
   /* no prime divisor < 103 */
   av = avma;
-  init_miller(&S, N);
+  init_MR_Jaeschke(&S, N);
   k = (!bad_for_base(&S, gen_2) && IsLucasPsP(N));
   avma = av; return k;
 }
@@ -525,12 +525,12 @@ long
 BPSW_psp_nosmalldiv(GEN N)
 {
   pari_sp av;
-  miller_t S;
+  MR_Jaeschke_t S;
   int k;
 
   if (lgefint(N) == 3) return uisprime_nosmalldiv((ulong)N[2]);
   av = avma;
-  init_miller(&S, N);
+  init_MR_Jaeschke(&S, N);
   k = (!bad_for_base(&S, gen_2) && IsLucasPsP(N));
   avma = av; return k;
 }
@@ -791,7 +791,7 @@ precprime(GEN n)
  * the diffptr table, and we'll update it before that if it isn't NPRC.
  * *q is incremented whenever q!=NULL and we wrap from 209 mod 210 to
  * 1 mod 210;  this makes sense
- * k =  second argument for miller(). --GN1998Aug22 */
+ * k =  second argument for MR_Jaeschke(). --GN1998Aug22 */
 ulong
 snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
 {
@@ -832,7 +832,7 @@ snextpr(ulong p, byteptr *d, long *rcn, long *q, long k)
   /* look for the next one */
   n = p + prc210_d1[*rcn];
   if (++*rcn > 47) *rcn = 0;
-  while (!Fl_miller(n, k))
+  while (!Fl_MR_Jaeschke(n, k))
   {
     n += prc210_d1[*rcn];
     if (++*rcn > 47) { *rcn = 0; if (q) (*q)++; }
@@ -1288,13 +1288,12 @@ alloc_scratch(long nbc, long spc, long tf)
  * lest cache thrashing slow down everything disproportionally. --GN
  */
 
-/* parameters for miller() via snextpr(), for use by ellfacteur() */
-#define miller_k1 16		/* B1 phase, foolproof below 10^12 */
-#define miller_k2 1		/* B2 phase, not foolproof, much faster */
-/* (miller_k2 will let thousands of composites slip through, which doesn't
+/* parameters for MR_Jaeschke() via snextpr(), for use by ellfacteur() */
+static const long MR_Jaeschke_k1 = 16;/* B1 phase, foolproof below 10^12 */
+static const long MR_Jaeschke_k2 = 1; /* B2 phase, not foolproof, much faster */
+/* MR_Jaeschke_k2 will let thousands of composites slip through, which doesn't
  * harm ECM, but ellmult() during the B1 phase should only be fed primes
- * which really are prime)
- */
+ * which really are prime */
 /* ellfacteur() has been re-tuned to be useful as a first stage before
  * MPQS, especially for _large_ arguments, when insist is false, and now
  * also for the case when insist is true, vaguely following suggestions
@@ -1486,7 +1485,7 @@ ellfacteur(GEN n, int insist)
     while (p < B1 && p <= B2_rt)
     {
       pari_sp av = avma;
-      p = snextpr(p, &d, &rcn, NULL, miller_k1);
+      p = snextpr(p, &d, &rcn, NULL, MR_Jaeschke_k1);
       B2_p = B2/p;		/* beware integer overflow on 32-bit CPUs */
       for (m=1; m<=B2_p; m*=p)
       {
@@ -1500,7 +1499,7 @@ ellfacteur(GEN n, int insist)
     while (p < B1)
     {
       pari_sp av = avma;
-      p = snextpr(p, &d, &rcn, NULL, miller_k1);
+      p = snextpr(p, &d, &rcn, NULL, MR_Jaeschke_k1);
       if (ellmult(nbc, p, X, X, XAUX) > 1) goto fin; /* p^2 > B2: no loop */
       avma = av;
     }
@@ -1524,7 +1523,7 @@ ellfacteur(GEN n, int insist)
     if (DEBUGLEVEL >= 7) fprintferr("\t(got [2]Q...[10]Q)\n");
 
     /* get next prime (still using the foolproof test) */
-    p = snextpr(p, &d, &rcn, NULL, miller_k1);
+    p = snextpr(p, &d, &rcn, NULL, MR_Jaeschke_k1);
     /* make sure we have the residue class number (mod 210) */
     if (rcn == NPRC)
     {
@@ -1691,7 +1690,7 @@ ellfacteur(GEN n, int insist)
       {
 	ulong p2 = p; /* save current p for diagnostics */
 	/* get next probable prime */
-	p = snextpr(p, &d, &rcn, &bstp, miller_k2);
+	p = snextpr(p, &d, &rcn, &bstp, MR_Jaeschke_k2);
 	/* work out the corresponding baby-step multiplier */
 	k = bstp - (rcn < rcn0 ? 1 : 0);
 	/* check whether it's giant-step time */
@@ -1962,7 +1961,7 @@ fin:
   /* if it isn't n, and looks prime, return it */
   if  (!equalii(g,n))
   {
-    if (miller(g,17))
+    if (MR_Jaeschke(g,17))
     {
       if (DEBUGLEVEL >= 4)
       {

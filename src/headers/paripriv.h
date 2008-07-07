@@ -237,6 +237,7 @@ GEN trivfact(void);
 /* integer factorization / discrete log */
 int   BPSW_isprime(GEN x);
 int   BPSW_isprime_small(GEN x);
+int   MR_Jaeschke(GEN n, long k);
 GEN   coprime_part(GEN x, GEN f);
 GEN   Z_factor_until(GEN n, GEN limit);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
@@ -248,7 +249,6 @@ long  ifac_bigomega(GEN n, long hint);
 GEN   ifac_totient(GEN n, long hint);
 GEN   ifac_numdiv(GEN n, long hint);
 GEN   ifac_sumdivk(GEN n, long k, long hint);
-int   miller(GEN n, long k);
 GEN   mpqs(GEN N);
 ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);

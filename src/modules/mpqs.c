@@ -2674,7 +2674,7 @@ mpqs_get_relation(char *buf, long pos, FILE *FREL)
   return buf;
 }
 
-#define isprobableprime(n) (miller((n),17))
+#define isprobableprime(n) (MR_Jaeschke((n),17))
 static int
 split(GEN N, GEN *e, GEN *res)
 {
