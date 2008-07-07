@@ -761,7 +761,7 @@ print_shortversion(void)
   patch = n & mask; n >>= PARI_VERSION_SHIFT;
   minor = n & mask; n >>= PARI_VERSION_SHIFT;
   major = n;
-  pari_printf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
+  printf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
 }
 
 static char *
