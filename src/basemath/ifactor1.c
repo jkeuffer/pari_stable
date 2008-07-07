@@ -652,9 +652,11 @@ plisprime(GEN N, long flag)
   if (!flag) { avma = ltop; return gen_1; }
   return gerepileupto(ltop,C);
 }
+static long
+isprimeSelfridge(GEN x) { return (plisprime(x,0)==gen_1); }
 
 /* assume x a BPSW pseudoprime */
-int
+long
 BPSW_isprime(GEN N)
 {
   pari_sp av = avma;
@@ -676,7 +678,6 @@ BPSW_isprime(GEN N)
     res = isprimeAPRCL(N);
   avma = av; return res;
 }
-
 
 /***********************************************************************/
 /**                                                                   **/

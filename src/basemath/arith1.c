@@ -2365,9 +2365,6 @@ gisprime(GEN x, long flag)
 }
 
 long
-isprimeSelfridge(GEN x) { return (plisprime(x,0)==gen_1); }
-
-long
 isprime(GEN x)
 {
   return BPSW_psp(x) && BPSW_isprime(x);
