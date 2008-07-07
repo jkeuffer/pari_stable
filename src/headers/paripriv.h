@@ -235,8 +235,6 @@ GEN to_famat(GEN g, GEN e);
 GEN trivfact(void);
 
 /* integer factorization / discrete log */
-int   BPSW_isprime(GEN x);
-int   BPSW_isprime_small(GEN x);
 int   MR_Jaeschke(GEN n, long k);
 GEN   coprime_part(GEN x, GEN f);
 GEN   Z_factor_until(GEN n, GEN limit);

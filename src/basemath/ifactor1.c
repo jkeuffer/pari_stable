@@ -539,8 +539,26 @@ BPSW_psp_nosmalldiv(GEN N)
 /**                                                                   **/
 /**                       Pocklington-Lehmer                          **/
 /**                        P-1 primality test                         **/
-/** Crude implementation  BA 2000Apr21                                **/
+/**                                                                   **/
 /***********************************************************************/
+/* Assume x BPSW pseudoprime. Check whether it's small enough to be certified
+ * prime (< 10^15). Reference for strong 2-pseudoprimes: William Galway's list
+ * at http://oldweb.cecm.sfu.ca/pseudoprime/, extending Richard Pinch (<10^13)*/
+static int
+BPSW_isprime_small(GEN x)
+{
+  long l = lgefint(x);
+  if (l < 4) return 1;
+  if (l == 4)
+  {
+    pari_sp av = avma;
+    long t = cmpii(x, u2toi(0x38d7eUL, 0xa4c68000UL)); /* 10^15 */
+    avma = av;
+    if (t < 0) return 1;
+  }
+  return 0;
+}
+
 /* Brillhart, Lehmer, Selfridge test (Crandall & Pomerance, Th 4.1.5)
  * N^(1/3) <= f fully factored, f | N-1 */
 static int

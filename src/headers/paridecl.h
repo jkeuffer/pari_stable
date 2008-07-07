@@ -1632,6 +1632,7 @@ ulong hash_GEN(GEN x);
 /* ifactor1.c */
 
 long    BPSW_psp(GEN N);
+int     BPSW_isprime(GEN x);
 int     uisprime(ulong n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
 int     is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);

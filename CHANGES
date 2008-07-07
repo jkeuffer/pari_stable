@@ -315,6 +315,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        factored form to avoid coefficient explosion).
    37- nfadd, multable, tablemul, tablemul_ei, tablemul_ei_ej,
        tablemulvec, tablesqr, ei_multable.
+   38- library functions BPSW_psp & BPSW_isprime
 
   Removed
     1- obsolete library functions extract and matextract

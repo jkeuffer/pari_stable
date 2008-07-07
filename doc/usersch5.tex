@@ -1246,6 +1246,13 @@ for an \kbd{ulong} operand \kbd{n}.
 \fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
 Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
 
+\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
+prove its primality. The function \tet{isprime} is currently implemented
+as
+\bprog
+ BPSW_psp(x) && BPSW_isprime(x)
+@eprog
+
 \fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
 compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
 also caches square roots of $-1$ that are encountered during the successive
