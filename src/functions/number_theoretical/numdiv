@@ -7,3 +7,5 @@ Description:
  (int):int	numbdiv($1)
  (gen):gen	gnumbdiv($1)
 Doc: number of divisors of $|x|$. $x$ must be of type integer.
+Variant: If $x$ is a \typ{INT}, one may use \fun{GEN}{numbdiv}{GEN n} directly.
+
