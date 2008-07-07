@@ -1,12 +1,9 @@
 Function: quadunit
 Section: number_theoretical
-C-Name: gfundunit
-Prototype: Gp
+C-Name: quadunit
+Prototype: G
 Help: quadunit(D): fundamental unit of the quadratic field of discriminant D
  where D must be positive
-Description:
- (int):gen	fundunit($1)
- (gen):gen	gfundunit($1)
 Doc: fundamental unit\sidx{fundamental units} of the
  real quadratic field $\Q(\sqrt D)$ where  $D$ is the positive discriminant
  of the field. If $D$ is not a fundamental discriminant, this probably gives

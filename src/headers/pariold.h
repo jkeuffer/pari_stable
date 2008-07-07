@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define gregula quadregulator
+#define gfundunit quadunit
 #define minideal(x,y,z,t) idealmin(x,y,z)
 #define idealhermite idealhnf
 #define srgcd(x) RgX_gcd(x)

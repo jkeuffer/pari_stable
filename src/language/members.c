@@ -316,7 +316,7 @@ member_fu(GEN x) /* fundamental units */
 	return gel(x,9);
       case typ_Q:
 	x = quad_disc(x);
-	return (signe(x)<0)? cgetg(1,t_VEC): fundunit(x);
+	return (signe(x)<0)? cgetg(1,t_VEC): quadunit(x);
     }
     member_err("fu");
   }

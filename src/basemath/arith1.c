@@ -2902,9 +2902,6 @@ bestappr0(GEN x, GEN a, GEN b)
 /**                                                                   **/
 /***********************************************************************/
 
-GEN
-gfundunit(GEN x) { return map_proto_G(fundunit,x); }
-
 static GEN
 get_quad(GEN f, GEN pol, long r)
 {
@@ -2930,13 +2927,13 @@ update_f(GEN f, GEN a)
 }
 
 GEN
-fundunit(GEN x)
+quadunit(GEN x)
 {
   pari_sp av = avma, av2, lim;
   long r, flp, flq;
   GEN pol, y, a, u, v, u1, v1, sqd, f;
 
-  check_quaddisc_real(x, &r, "fundunit");
+  check_quaddisc_real(x, &r, "quadunit");
   sqd = sqrti(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
   f = mkmat2(mkcol2(a, gen_1), mkcol2(gen_1, gen_0));
@@ -2949,7 +2946,7 @@ fundunit(GEN x)
     if (flp) break; update_f(f,a);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"fundunit");
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadunit");
       gerepileall(av2,4, &a,&f,&u,&v);
     }
   }
@@ -2963,16 +2960,13 @@ fundunit(GEN x)
 }
 
 GEN
-gregula(GEN x, long prec) { return map_proto_GL(regula,x,prec); }
-
-GEN
-regula(GEN x, long prec)
+quadregulator(GEN x, long prec)
 {
   pari_sp av = avma, av2, lim;
   long r, fl, rexp;
   GEN reg, rsqd, y, u, v, u1, v1, sqd;
 
-  check_quaddisc_real(x, &r, "regula");
+  check_quaddisc_real(x, &r, "quadregulator");
   sqd = sqrti(x);
   rsqd = gsqrt(x,prec);
   rexp = 0; reg = stor(2, prec);
@@ -2986,10 +2980,10 @@ regula(GEN x, long prec)
     reg = mulrr(reg, divri(addir(u1,rsqd),v));
     rexp += expo(reg); setexpo(reg,0);
     u = u1; v = v1;
-    if (rexp & ~EXPOBITS) pari_err(talker,"exponent overflow in regula");
+    if (rexp & ~EXPOBITS) pari_err(talker,"exponent overflow in quadregulator");
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      if(DEBUGMEM>1) pari_warn(warnmem,"regula");
+      if(DEBUGMEM>1) pari_warn(warnmem,"quadregulator");
       gerepileall(av2,3, &reg,&u,&v);
     }
   }
@@ -3133,8 +3127,9 @@ conductor_part(GEN x, long xmod4, GEN *ptD, GEN *ptreg)
       case 3: H = divis(H,3); break;
     }
   } else {
-    reg = regula(D,DEFAULTPREC);
-    if (!equalii(x,D)) H = divii(H, roundr(divrr(regula(x,DEFAULTPREC), reg)));
+    reg = quadregulator(D,DEFAULTPREC);
+    if (!equalii(x,D))
+      H = divii(H, roundr(divrr(quadregulator(x,DEFAULTPREC), reg)));
   }
   if (ptreg) *ptreg = reg;
   *ptD = D; return H;

@@ -211,8 +211,9 @@ BA 49- user variables can now be aliased [#790].
    70- Rename library functions Z_factor_limit -> Z_factor_until,
        and auxdecomp -> Z_factor_limit
    71- Rename library functions mu -> moebius, gmu -> gmoebius,
-       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu,
-       gener -> znprimroot, ggener -> znprimroot0, racine -> sqrtint
+       phi -> eulerphi, gphi -> geulerphi, phiu -> eulerphiu, 
+       gener -> znprimroot, ggener -> znprimroot0, racine -> sqrtint,
+       regula -> quadregulator, fundunit -> quadunit
    72- Rename library functions BSW_* -> BPSW_*
 
   Added
@@ -361,6 +362,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    30- obsolete library function smallfact [ use boundfact or Z_factor_limit ]
    31- obsolete library function gracine [ use sqrtint ]
    32- obsolete library function ispsp, gispsp. Use ispseudoprime or BPSW_psp.
+   33- obsolete library function gregula, gfundunit. Use quadregulator and
+       quadunit
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
