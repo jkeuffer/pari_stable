@@ -2342,44 +2342,6 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zeta)
 
 /*********************************************************************/
 /**                                                                 **/
-/**                NEXT / PRECEDING (PSEUDO) PRIME                  **/
-/**                                                                 **/
-/*********************************************************************/
-GEN
-gnextprime(GEN n) { return map_proto_G(nextprime,n); }
-
-GEN
-gprecprime(GEN n) { return map_proto_G(precprime,n); }
-
-GEN
-gisprime(GEN x, long flag)
-{
-  switch (flag)
-  {
-    case 0: return map_proto_lG(isprime,x);
-    case 1: return map_proto_GL(plisprime,x,1);
-    case 2: return map_proto_lG(isprimeAPRCL,x);
-  }
-  pari_err(flagerr,"gisprime");
-  return 0;
-}
-
-long
-isprime(GEN x)
-{
-  return BPSW_psp(x) && BPSW_isprime(x);
-}
-
-GEN
-gispseudoprime(GEN x, long flag)
-{ return flag? map_proto_lGL(millerrabin, x, flag): map_proto_lG(BPSW_psp,x); }
-
-long
-ispseudoprime(GEN x, long flag)
-{ return flag? millerrabin(x, flag): BPSW_psp(x); }
-
-/*********************************************************************/
-/**                                                                 **/
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/
 /**                                                                 **/
 /*********************************************************************/

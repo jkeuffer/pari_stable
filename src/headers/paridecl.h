@@ -689,19 +689,13 @@ ulong   pgener_Zl(ulong p);
 GEN     pgener_Zp(GEN p);
 long    gisanypower(GEN x, GEN *pty);
 GEN     gisfundamental(GEN x);
-GEN     gisprime(GEN x, long flag);
-GEN     gispseudoprime(GEN x, long flag);
 GEN     gissquareall(GEN x, GEN *pt);
 GEN     gissquare(GEN x);
 GEN     gkronecker(GEN x, GEN y);
-GEN     gnextprime(GEN n);
-GEN     gprecprime(GEN n);
 GEN     hclassno(GEN x);
 long    hilbert(GEN x, GEN y, GEN p);
 long    hilbertii(GEN x, GEN y, GEN p);
 long    ispower(GEN x, GEN k, GEN *pty);
-long    isprime(GEN x);
-long    ispseudoprime(GEN x, long flag);
 long    krois(GEN x, long y);
 long    kronecker(GEN x, GEN y);
 long    krosi(long s, GEN x);
@@ -1627,13 +1621,18 @@ ulong hash_GEN(GEN x);
 
 long    BPSW_psp(GEN N);
 long    BPSW_isprime(GEN x);
-int     uisprime(ulong n);
+GEN     gisprime(GEN x, long flag);
+GEN     gispseudoprime(GEN x, long flag);
+GEN     gnextprime(GEN n);
+GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
 int     is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
+long    isprime(GEN x);
+long    ispseudoprime(GEN x, long flag);
 long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
-GEN     plisprime(GEN N, long flag);
 GEN     precprime(GEN n);
+int     uisprime(ulong n);
 
 /* init.c */
 

@@ -163,6 +163,14 @@ millerrabin(GEN n, long k)
   avma = av; return 1;
 }
 
+GEN
+gispseudoprime(GEN x, long flag)
+{ return flag? map_proto_lGL(millerrabin, x, flag): map_proto_lG(BPSW_psp,x); }
+
+long
+ispseudoprime(GEN x, long flag)
+{ return flag? millerrabin(x, flag): BPSW_psp(x); }
+
 /* As above for k bases taken in pr (i.e not random). We must have |n|>2 and
  * 1<=k<=11 (not checked) or k in {16,17} to select some special sets of bases.
  *
@@ -599,7 +607,7 @@ pl831(GEN N, GEN p)
  * a[i] prime factor of N-1,
  * b[i] witness for a[i] as in pl831
  * c[i] plisprime(a[i]) */
-GEN
+static GEN
 plisprime(GEN N, long flag)
 {
   pari_sp ltop = avma;
@@ -678,6 +686,22 @@ BPSW_isprime(GEN N)
     res = isprimeAPRCL(N);
   avma = av; return res;
 }
+
+GEN
+gisprime(GEN x, long flag)
+{
+  switch (flag)
+  {
+    case 0: return map_proto_lG(isprime,x);
+    case 1: return map_proto_GL(plisprime,x,1);
+    case 2: return map_proto_lG(isprimeAPRCL,x);
+  }
+  pari_err(flagerr,"gisprime");
+  return 0;
+}
+
+long
+isprime(GEN x) { return BPSW_psp(x) && BPSW_isprime(x); }
 
 /***********************************************************************/
 /**                                                                   **/
@@ -801,6 +825,11 @@ precprime(GEN n)
   if (avma == av) return icopy(n);
   return gerepileuptoint(av, n);
 }
+
+GEN
+gnextprime(GEN n) { return map_proto_G(nextprime,n); }
+GEN
+gprecprime(GEN n) { return map_proto_G(precprime,n); }
 
 /* Find next single-word prime strictly larger than p.
  * If **d is non-NULL (somewhere in a diffptr), this is p + *(*d)++.
