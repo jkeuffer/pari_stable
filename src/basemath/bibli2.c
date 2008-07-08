@@ -750,7 +750,7 @@ binomialuu(ulong n, ulong k)
   GEN z;
   k = min(k,n-k);
   if (!k) return gen_1;
-  z=diviiexact(seq_umul(n-k+1, n), seq_umul(1UL, k));
+  z=diviiexact(seq_umul(n-k+1, n), seq_umul(2UL, k));
   return gerepileuptoint(ltop,z);
 }
 
