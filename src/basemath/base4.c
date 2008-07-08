@@ -1748,8 +1748,8 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   GEN x, y, yZ, Nx, Ny, Nz, cy;
 
   nf = checknf(nf);
-  x = idealhnf_shallow(nf, x);
-  y = idealhnf_shallow(nf, y);
+  x = idealhnf_shallow(nf, x0);
+  y = idealhnf_shallow(nf, y0);
   if (lg(y) == 1) pari_err(talker, "cannot invert zero ideal");
   if (lg(x) == 1) { avma = av; return cgetg(1, t_MAT); } /* numerator is zero */
   y = Q_primitive_part(y, &cy);
