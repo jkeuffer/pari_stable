@@ -1260,32 +1260,6 @@ return 0. If the return value $k$ is not $0$ (so that $x = n^k$) and
 \fun{long}{uissquareall}{ulong n, ulong *sqrtn} as \kbd{Z\_issquareall},
 for an \kbd{ulong} operand \kbd{n}.
 
-\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-(fully proven) prime number and $0$ otherwise.
-
-\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
-Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise.
-
-\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
-prove its primality. The function \tet{isprime} is currently implemented
-as
-\bprog
- BPSW_psp(x) && BPSW_isprime(x)
-@eprog
-
-\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
-compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
-also caches square roots of $-1$ that are encountered during the successive
-tests and stops as soon as three distinct square roots have been produced; we
-have in principle factored $n$ at this point, but unfortunately, there is
-currently no way for the factoring machinery to become aware of it. (It is
-highly implausible that hard to find factors would be exhibited in this way,
-though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
-expect it to be less reliable.
-
-\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
-$0$ otherwise.
-
 \fun{GEN}{Z_factor_until}{GEN n, GEN lim} as \kbd{Z\_factor}, but stop the
 factorization process as soon as the unfactored part is smaller than \kbd{lim}.
 The resulting factorisation matrix only contains the factors found. No other
@@ -1315,6 +1289,40 @@ necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
 \fun{GEN}{core2partial}{GEN n, long lim} as \kbd{core2}, using
 \kbd{boundfact(n,lim)} to partially factor \kbd{n}. The resulting $d$ is not
 necessarily squarefree, but $p^2 \mid n$ implies $p > \kbd{lim}$.
+
+\subsec{Primality and compositeness tests}
+
+\fun{int}{uisprime}{ulong p}, returns $1$ if \kbd{p} is a prime number and
+$0$ otherwise.
+
+\fun{int}{isprime}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+(fully proven) prime number and $0$ otherwise.
+
+\fun{long}{isprimeAPRCL}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+prime number and $0$ otherwise, using only the APRCL test --- not even trial
+division or compositeness tests. The workhorse \kbd{isprime} should be
+faster on average, especially if non-primes are included!
+
+\fun{long}{BPSW_psp}{GEN n}, returns $1$ if the \typ{INT} \kbd{n} is a
+Baillie-Pomerance-Selfridge-Wagstaff pseudoprime, and $0$ otherwise (proven
+composite).
+
+\fun{int}{BPSW_isprime}{GEN x} assuming $x$ is a BPSW-pseudoprime, rigorously
+prove its primality. The function \tet{isprime} is currently implemented
+as
+\bprog
+ BPSW_psp(x) && BPSW_isprime(x)
+@eprog
+
+\fun{long}{millerrabin}{GEN n, long k} performs strong Rabin-Miller
+compositeness tests on the \typ{INT} $n$, for $k$ random bases. This function
+also caches square roots of $-1$ that are encountered during the successive
+tests and stops as soon as three distinct square roots have been produced; we
+have in principle factored $n$ at this point, but unfortunately, there is
+currently no way for the factoring machinery to become aware of it. (It is
+highly implausible that hard to find factors would be exhibited in this way,
+though.) This should be slower than \tet{BPSW_psp} for $k\geq 4$ and we would
+expect it to be less reliable.
 
 \subsec{Generic unary operators}. Let ``\op'' be a unary operation among
 
