@@ -908,19 +908,6 @@ idealmul_HNF_two(GEN nf, GEN x, GEN y)
   return ZM_hnfmodid(m, mulii(a, gcoeff(x,1,1)));
 }
 
-/* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
- * product. Can be used for arbitrary vp of the form [p,a,e,f,b], IF vp
- * =pZ_K+aZ_K, p is an integer, and norm(vp) = p^f; e and b are not used.
- * For internal use. */
-GEN
-idealmulprime(GEN nf, GEN x, GEN vp)
-{
-  GEN cx;
-  x = Q_primitive_part(x, &cx);
-  x = idealmul_HNF_two(nf,x,vp);
-  return cx? RgM_Rg_mul(x,cx): x;
-}
-
 /* Assume ix and iy are integral in HNF form [NOT extended]. Not memory clean.
  * HACK: ideal in iy can be of the form [a,b], a in Z, b in Z_K */
 GEN
@@ -1070,17 +1057,6 @@ mul_denom(GEN dx, GEN dy)
   if (!dx) return dy;
   if (!dy) return dx;
   return mulii(dx,dy);
-}
-
-/* x and y are ideals in non-empty matrix form */
-static GEN
-idealmat_mul(GEN nf, GEN x, GEN y)
-{
-  GEN cx, cy;
-  x = Q_primitive_part(x, &cx);
-  y = Q_primitive_part(y, &cy); cx = mul_content(cx,cy);
-  y = idealmul_HNF(nf,x,y);
-  return cx? ZM_Q_mul(y,cx): y;
 }
 
 GEN
@@ -1353,7 +1329,7 @@ prime_is_inert(GEN P) { GEN f = gel(P,4); return f[2] == lg(gel(P,2))-1; }
 static GEN
 idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
 {
-  GEN z;
+  GEN z, cx, cy;
   switch(tx)
   {
     case id_PRINCIPAL:
@@ -1386,11 +1362,18 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
 	  return idealmulelt(nf, x,y);
       }
     case id_PRIME:
-      if (ty==id_PRIME) y = idealhnf_two(nf,y);
-      return idealmulprime(nf,y,x);
+      if (ty==id_PRIME)
+      { y = idealhnf_two(nf,y); cy = NULL; }
+      else
+        y = Q_primitive_part(y, &cy);
+      y = idealmul_HNF_two(nf,y,x);
+      return cy? RgM_Rg_mul(y,cy): y;
 
     default: /* id_MAT */
-      return idealmat_mul(nf,x,y);
+      x = Q_primitive_part(x, &cx);
+      y = Q_primitive_part(y, &cy); cx = mul_content(cx,cy);
+      y = idealmul_HNF(nf,x,y);
+      return cx? ZM_Q_mul(y,cx): y;
   }
 }
 

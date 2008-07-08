@@ -962,7 +962,6 @@ GEN     ideallllred_elt(GEN nf, GEN I, GEN vdir);
 GEN     idealmul(GEN nf, GEN ix, GEN iy);
 GEN     idealmul0(GEN nf, GEN ix, GEN iy, long flag);
 GEN     idealmul_HNF(GEN nf, GEN ix, GEN iy);
-GEN     idealmulprime(GEN nf,GEN ix,GEN vp);
 GEN     idealmulred(GEN nf, GEN ix, GEN iy);
 GEN     idealnorm(GEN nf, GEN x);
 GEN     idealpow(GEN nf, GEN ix, GEN n);
