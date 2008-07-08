@@ -1929,14 +1929,13 @@ static void
 concat_join(GEN *pz, GEN v, GEN (*f)(ideal_data*,GEN), ideal_data *data)
 {
   long i, nz, lv = lg(v);
-  GEN z, Z, Zt;
+  GEN z, Z;
   if (lv == 1) return;
   z = *pz; nz = lg(z)-1;
-  Z = cgetg(lv + nz, typ(z));
-  for (i = 1; i <=nz; i++) Z[i] = z[i];
-  Zt = Z + nz;
-  for (i = 1; i < lv; i++) gel(Zt,i) = f(data, gel(v,i));
-  *pz = Z;
+  *pz = Z = cgetg(lv + nz, typ(z));
+  for (i = 1; i <=nz; i++) gel(Z,i) = gel(z,i);
+  Z += nz;
+  for (i = 1; i < lv; i++) gel(Z,i) = f(data, gel(v,i));
 }
 static GEN
 join_idealinit(ideal_data *D, GEN x) {
