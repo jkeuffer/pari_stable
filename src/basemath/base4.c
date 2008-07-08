@@ -1450,35 +1450,38 @@ idealnorm(GEN nf, GEN x)
  * I^(-1) = { x \in K, Tr(x D^(-1) I) \in Z }, D different of K/Q
  *
  * nf[5][6] = pp( D^(-1) ) = pp( HNF( T^(-1) ) ), T = (Tr(wi wj))
- * nf[5][7] = same in 2-elt form */
+ * nf[5][7] = same in 2-elt form.
+ * Assume I integral. Return the integral ideal (I\cap Z) I^(-1) */
 static GEN
-hnfideal_inv(GEN nf, GEN I)
+idealinv_HNF_aux(GEN nf, GEN I)
 {
-  GEN J, dI, IZ,dual;
-
-  I = Q_remove_denom(I, &dI); IZ = gcoeff(I,1,1); /* I \cap Z */
-  J = idealmul_HNF(nf,I, gmael(nf,5,7));
+  GEN dual, IZ = gcoeff(I,1,1); /* I \cap Z */
+  GEN J = idealmul_HNF(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
   dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
-  dual = ZM_hnfmodid(dual, IZ);
-  if (dI) IZ = gdiv(IZ,dI);
-  return RgM_Rg_div(dual,IZ);
+  return ZM_hnfmodid(dual, IZ);
+}
+/* I HNF with rational coefficients (denominator d). */
+static GEN
+idealinv_HNF(GEN nf, GEN I)
+{
+  GEN J, IQ = gcoeff(I,1,1); /* I \cap Q */
+
+  /* J = (dI)^(-1) * (d IQ) */
+  J = idealinv_HNF_aux(nf, Q_remove_denom(I, NULL));
+  if (typ(IQ) != t_INT || !is_pm1(IQ)) J = RgM_Rg_div(J, IQ);
+  return J;
 }
 
 /* return p * P^(-1)  [integral] */
 GEN
 pidealprimeinv(GEN nf, GEN x)
 {
-  GEN y;
   if (prime_is_inert(x)) return matid(lg(gel(x,2)) - 1);
-  y = cgetg(6,t_VEC); y[1] = x[1]; y[2] = x[5];
-  gel(y,3) = gel(y,5) = gen_0;
-  gel(y,4) = subsi(degpol(nf[1]), gel(x,4));
-  return idealhnf_two(nf,y);
+  return idealhnf_two(nf, mkvec2(gel(x,1), gel(x,5)));
 }
 
-/* Calcule le dual de mat_id pour la forme trace */
 GEN
 idealinv(GEN nf, GEN x)
 {
@@ -1492,7 +1495,7 @@ idealinv(GEN nf, GEN x)
   {
     case id_MAT:
       if (lg(x)-1 != degpol(nf[1])) pari_err(consister,"idealinv");
-      x = hnfideal_inv(nf,x); break;
+      x = idealinv_HNF(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
       else
@@ -1623,8 +1626,13 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
       }
       else {
         x = ZM_hnfmodid(m, powgi(a,n1));
-        if (s<0) x = hnfideal_inv(nf,x);
-        if (cx) x = RgM_Rg_mul(x, powgi(cx,n));
+        if (cx) cx = powgi(cx,n);
+        if (s<0) {
+          GEN xZ = gcoeff(x,1,1);
+          cx = cx ? gdiv(cx, xZ): ginv(xZ);
+          x = idealinv_HNF_aux(nf,x);
+        }
+        if (cx) x = RgM_Rg_mul(x, cx);
       }
       return x;
   }
@@ -1754,7 +1762,7 @@ GEN
 idealdivexact(GEN nf, GEN x0, GEN y0)
 {
   pari_sp av = avma;
-  GEN x,y,Nx,Ny,Nz, cy = Q_content(y0);
+  GEN x, y, yZ, Nx, Ny, Nz, cy = Q_content(y0);
 
   nf = checknf(nf);
   if (gcmp0(cy)) pari_err(talker, "cannot invert zero ideal");
@@ -1780,8 +1788,9 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
 
   y = idealhnf_shallow(nf, y);
   y = ZM_hnfmodid(y, diviiexact(Ny,Nz));
-  y = hnfideal_inv(nf,y);
-  return gerepileupto(av, idealmat_mul(nf,x,y));
+  yZ = gcoeff(y,1,1);
+  y = idealmul_HNF(nf,x, idealinv_HNF_aux(nf,y));
+  return gerepileupto(av, RgM_Rg_div(y, yZ));
 }
 
 GEN
@@ -2060,7 +2069,7 @@ idealprodprime(GEN nf, GEN L)
 
   if (l == 1) return matid(degpol(nf[1]));
   z = idealhnf_two(nf, gel(L,1));
-  for (i=2; i<l; i++) z = idealmulprime(nf,z, gel(L,i));
+  for (i=2; i<l; i++) z = idealmul_HNF_two(nf,z, gel(L,i));
   return z;
 }
 
@@ -2467,7 +2476,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   aA = (a == gen_1)? A: idealmul(nf,a,A);
   bB = idealmul(nf,b,B);
   d = idealadd(nf,aA,bB);
-  di = hnfideal_inv(nf,d);
+  di = idealinv_HNF(nf,d);
   if (gequal(aA, d))
   { /* aA | bB  (frequent) */
     w = B;
