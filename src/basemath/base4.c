@@ -1745,16 +1745,18 @@ GEN
 idealdivexact(GEN nf, GEN x0, GEN y0)
 {
   pari_sp av = avma;
-  GEN x, y, yZ, Nx, Ny, Nz, cy = Q_content(y0);
+  GEN x, y, yZ, Nx, Ny, Nz, cy;
 
   nf = checknf(nf);
-  if (gcmp0(cy)) pari_err(talker, "cannot invert zero ideal");
-
-  x = gdiv(x0,cy); Nx = idealnorm(nf,x);
-  if (gcmp0(Nx)) { avma = av; return gcopy(x0); } /* numerator is zero */
-
-  y = gdiv(y0,cy); Ny = idealnorm(nf,y);
-  if (!gcmp1(denom(x)) || !dvdii(Nx,Ny))
+  x = idealhnf_shallow(nf, x);
+  y = idealhnf_shallow(nf, y);
+  if (lg(y) == 1) pari_err(talker, "cannot invert zero ideal");
+  if (lg(x) == 1) { avma = av; return cgetg(1, t_MAT); } /* numerator is zero */
+  y = Q_primitive_part(y, &cy);
+  if (cy) x = RgM_Rg_div(x0,cy);
+  Nx = idealnorm(nf,x);
+  Ny = idealnorm(nf,y);
+  if (typ(Nx) != t_INT || typ(Ny) != t_INT || !dvdii(Nx,Ny))
     pari_err(talker, "quotient not integral in idealdivexact");
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
@@ -1764,12 +1766,10 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
     Nz = diviiexact(Nz,p1);
   }
   /* Replace x/y  by  x+(Nx/Nz) / y+(Ny/Nz) */
-  x = idealhnf_shallow(nf, x);
   x = ZM_hnfmodid(x, diviiexact(Nx,Nz));
   /* y reduced to unit ideal ? */
   if (Nz == Ny) return gerepileupto(av, x);
 
-  y = idealhnf_shallow(nf, y);
   y = ZM_hnfmodid(y, diviiexact(Ny,Nz));
   yZ = gcoeff(y,1,1);
   y = idealmul_HNF(nf,x, idealinv_HNF_aux(nf,y));
