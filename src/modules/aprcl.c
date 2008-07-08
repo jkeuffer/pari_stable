@@ -930,7 +930,7 @@ step6(GEN N, ulong t, GEN et)
 static GEN
 _res(long a, long b) { return b? mkvec2s(a, b): mkvecs(a); }
 
-GEN
+static GEN
 aprcl(GEN N)
 {
   GEN et, fat, flaglp, tabfaq, tabj, res, globfa;

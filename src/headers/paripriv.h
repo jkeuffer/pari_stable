@@ -598,10 +598,6 @@ GENbin* copy_bin(GEN x);
 GENbin* copy_bin_canon(GEN x);
 GEN bin_copy(GENbin *p);
 
-/* aprcl.c */
-
-GEN     aprcl(GEN N);
-
 /* arith1.c */
 
 GEN     bestappr_mod(GEN x, GEN A, GEN B);
