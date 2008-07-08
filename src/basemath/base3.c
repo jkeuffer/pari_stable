@@ -2070,14 +2070,6 @@ ideallist0(GEN bnf,long bound, long flag) {
   return Ideallist(bnf,bound,flag);
 }
 GEN
-ideallistzstar(GEN nf,long bound) { return Ideallist(nf,bound,0); }
-GEN
-ideallistzstargen(GEN nf,long bound) { return Ideallist(nf,bound,1); }
-GEN
-ideallistunit(GEN nf,long bound) { return Ideallist(nf,bound,2); }
-GEN
-ideallistunitgen(GEN nf,long bound) { return Ideallist(nf,bound,3); }
-GEN
 ideallist(GEN bnf,long bound) { return Ideallist(bnf,bound,4); }
 
 /* bid1 = for module m1 (without arch. part), arch = archimedean part.

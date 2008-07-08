@@ -369,6 +369,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    32- obsolete library function ispsp, gispsp. Use ispseudoprime or BPSW_psp.
    33- obsolete library function gregula, gfundunit, gboundfact.
        Use quadregulator, quadunit, boundfact
+   34- obsolete library functions ideallistunit, ideallistunitgen,
+       ideallistzstar, ideallistzstargen. Use ideallist0.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):
