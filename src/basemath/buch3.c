@@ -129,15 +129,6 @@ compute_fact(GEN nf, GEN u1, GEN gen)
   return basecl;
 }
 
-/* given two coprime integral ideals x and f (f HNF), compute "small"
- * non-zero a in x, such that a = 1 mod (f). GTM 193: Algo 4.3.3 */
-static GEN
-redideal(GEN nf,GEN x,GEN f)
-{
-  if (gcmp1(gcoeff(f,1,1))) return idealred_elt(nf, x); /* f = 1 */
-  return idealaddtoone_i(nf,x,f); /* a = b mod (x f), != 0 since 1 mod f */
-}
-
 static int
 too_big(GEN nf, GEN bet)
 {
@@ -153,13 +144,22 @@ too_big(GEN nf, GEN bet)
 
 /* GTM 193: Algo 4.3.4. Reduce x mod divisor */
 static GEN
-_idealmoddivisor(GEN nf, GEN x, GEN divisor, GEN sarch)
+idealmoddivisor_aux(GEN nf, GEN x, GEN divisor, GEN sarch)
 {
   pari_sp av = avma;
   GEN a,A,D,G, f = gel(divisor,1);
 
-  G = redideal(nf, x, f);
-  D = redideal(nf, idealdiv(nf,G,x), f);
+  if ( gcmp1(gcoeff(f,1,1)) ) /* f = 1 */
+  {
+    G = idealred_elt(nf, x);
+    D = idealred_elt(nf, idealdiv(nf,G,x));
+  }
+  else
+  {/* given coprime integral ideals x and f (f HNF), compute "small"
+    * G in x, such that G = 1 mod (f). GTM 193: Algo 4.3.3 */
+    G = idealaddtoone_i(nf, x, f);
+    D = idealaddtoone_i(nf, idealdiv(nf,G,x), f);
+  }
   A = nfdiv(nf,D,G);
   if (too_big(nf,A) > 0) { avma = av; return x; }
   a = set_sign_mod_divisor(nf, NULL, A, divisor, sarch);
@@ -173,7 +173,7 @@ idealmoddivisor(GEN bnr, GEN x)
   GEN bid = gel(bnr,2), fa2 = gel(bid,4);
   GEN divisor = gel(bid,1);
   GEN sarch = gel(fa2,lg(fa2)-1);
-  return _idealmoddivisor(checknf(bnr), x, divisor, sarch);
+  return idealmoddivisor_aux(checknf(bnr), x, divisor, sarch);
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
@@ -334,7 +334,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     I = idealmul(nf,I,G);
     if (dmulI) I = gdivexact(I, dmulI);
     /* more or less useless, but cheap at this point */
-    I = _idealmoddivisor(nf,I,module,sarch);
+    I = idealmoddivisor_aux(nf,I,module,sarch);
     gel(basecl,i) = gerepilecopy(av, I);
   }
   return basecl;
