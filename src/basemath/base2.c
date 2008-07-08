@@ -2561,7 +2561,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       long v1, v2;
       if (gequal(gel(I,j),id)) { gel(Tau,j) = gel(Tauinv,j) = gen_1; continue; }
 
-      p1 = ideal_two_elt(nf,gel(I,j));
+      p1 = idealtwoelt(nf,gel(I,j));
       v1 = nfval(nf,gel(p1,1),pr);
       v2 = nfval(nf,gel(p1,2),pr);
       tau = (v1 > v2)? gel(p1,2): gel(p1,1);
@@ -2969,7 +2969,7 @@ rnfbasis(GEN bnf, GEN order)
   a = gen_if_principal(bnf, cl);
   if (!a)
   {
-    GEN v = ideal_two_elt(nf, cl);
+    GEN v = idealtwoelt(nf, cl);
     A = shallowconcat(A, gmul(gel(v,1), col));
     a = gel(v,2);
   }

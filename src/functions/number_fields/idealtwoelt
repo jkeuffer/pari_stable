@@ -1,6 +1,6 @@
 Function: idealtwoelt
 Section: number_fields
-C-Name: ideal_two_elt0
+C-Name: idealtwoelt0
 Prototype: GGDG
 Help: idealtwoelt(nf,x,{a}): two-element representation of an ideal x in the
  number field nf. If (optional) a is non-zero, first element will be equal to a
@@ -18,3 +18,8 @@ Doc: computes a two-element
  be costly. When $a$ is omitted, we use a fast lazy factorization of $x\cap
  \Z$, yielding an algorithm in randomized polynomial time (and generally
  much faster in practice).
+Variant: Also available are
+ \fun{GEN}{idealtwoelt}{GEN nf, GEN x} and
+ \fun{GEN}{idealtwoelt2}{GEN nf, GEN x, GEN a}.
+
+

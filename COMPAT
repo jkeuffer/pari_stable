@@ -168,6 +168,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     quadunit
   - removed obsolete 'prec' argument from prototypes of idealmul0,
     idealmulred, idealpow0, idealpowred, ideallllred
+  - Rename library functions ideal_two_elt* -> idealtwoelt*
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

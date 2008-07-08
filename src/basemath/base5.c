@@ -461,7 +461,7 @@ rnfidealtwoelement(GEN rnf, GEN x)
   NF = check_and_build_nfabs(rnf);
   y = rnfidealreltoabs(rnf,x);
   y = matalgtobasis(NF, y); settyp(y, t_MAT);
-  y = ideal_two_elt(NF, ZM_hnf(y));
+  y = idealtwoelt(NF, ZM_hnf(y));
   z = rnfelementabstorel(rnf, gmul(gel(NF,7), gel(y,2)));
   return gerepilecopy(av, mkvec2(gel(y,1), z));
 }

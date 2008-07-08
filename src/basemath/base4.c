@@ -258,10 +258,10 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 /* GP functions */
 
 GEN
-ideal_two_elt0(GEN nf, GEN x, GEN a)
+idealtwoelt0(GEN nf, GEN x, GEN a)
 {
-  if (!a) return ideal_two_elt(nf,x);
-  return ideal_two_elt2(nf,x,a);
+  if (!a) return idealtwoelt(nf,x);
+  return idealtwoelt2(nf,x,a);
 }
 
 GEN
@@ -507,7 +507,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
  * a = 0 or alpha = 0 are possible, but do not try to determine whether
  * x is principal. */
 GEN
-ideal_two_elt(GEN nf, GEN x)
+idealtwoelt(GEN nf, GEN x)
 {
   GEN z;
   long N, tx = idealtyp(&x,&z);
@@ -525,7 +525,7 @@ ideal_two_elt(GEN nf, GEN x)
       gel(z,2) = zerocol(N); return z;
 
     case t_POLMOD:
-      x = checknfelt_mod(nf, x, "ideal_two_elt"); /* fall through */
+      x = checknfelt_mod(nf, x, "idealtwoelt"); /* fall through */
     case t_POL:
       gel(z,1) = gen_0;
       gel(z,2) = algtobasis(nf,x); return z;
@@ -535,7 +535,7 @@ ideal_two_elt(GEN nf, GEN x)
         gel(z,2) = gcopy(x); return z;
       }
   }
-  pari_err(typeer,"ideal_two_elt");
+  pari_err(typeer,"idealtwoelt");
   return NULL; /* not reached */
 }
 
@@ -2285,13 +2285,13 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 
 static void
 not_in_ideal() {
-  pari_err(talker,"element not in ideal in ideal_two_elt2");
+  pari_err(talker,"element not in ideal in idealtwoelt2");
 }
 
 /* Given an integral ideal x and a in x, gives a b such that
  * x = aZ_K + bZ_K using the approximation theorem */
 GEN
-ideal_two_elt2(GEN nf, GEN x, GEN a)
+idealtwoelt2(GEN nf, GEN x, GEN a)
 {
   pari_sp av = avma;
   GEN cx, b;

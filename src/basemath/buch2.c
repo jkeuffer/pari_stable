@@ -305,7 +305,7 @@ red(GEN nf, GEN I, GEN G0, GEN *pm)
   y = ideallllred(nf, init_famat(I), G0);
   m = gel(y,2);
   y = gel(y,1); *pm = lg(m)==1? gen_1: gmael(m, 1, 1);
-  return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
+  return is_pm1(gcoeff(y,1,1))? NULL: idealtwoelt(nf,y);
 }
 
 /* make sure enough room to store n more relations */

@@ -1211,7 +1211,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(mat,6) = A; /* primitive part of codifferent, dA its content */
   dA = dA? diviiexact(absdK, dA): absdK;
   A = ZM_hnfmodid(A, dA);
-  MDI = ideal_two_elt(nf, A);
+  MDI = idealtwoelt(nf, A);
   gel(MDI,2) = zk_scalar_or_multable(nf, gel(MDI,2));
   gel(mat,7) = MDI;
   if (is_pm1(T->index)) /* principal ideal (x'), whose norm is |dK| */

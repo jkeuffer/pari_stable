@@ -1025,7 +1025,7 @@ typedef struct {
 static GEN
 lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 {
-  GEN I = ideal_two_elt(nf,id);
+  GEN I = idealtwoelt(nf,id);
   GEN x = coltoliftalg(nf, gel(I,2));
   gel(I,2) = algtobasis(nfz, RgX_RgXQ_compo(x, C->p, C->R));
   return idealhnf_two(nfz,I);
