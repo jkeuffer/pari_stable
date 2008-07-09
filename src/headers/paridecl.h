@@ -546,6 +546,7 @@ GEN     hess(GEN x);
 GEN     hnf(GEN x);
 GEN     hnfall(GEN x);
 GEN     hnflll(GEN x);
+GEN     hnfmerge_get_1(GEN A, GEN B);
 GEN     hnfmod(GEN x, GEN d);
 GEN     hnfmodid(GEN x,GEN p);
 GEN     hnfperm(GEN x);
@@ -926,7 +927,6 @@ GEN     ei_multable(GEN nf, long i);
 GEN     zk_scalar_or_multable(GEN, GEN x);
 
 /* base4.c */
-
 GEN     nfdivmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     nfmulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     nfC_nf_mul(GEN nf, GEN v, GEN x);
@@ -938,12 +938,14 @@ GEN     idealtwoelt2(GEN nf, GEN x, GEN a);
 GEN     idealadd(GEN nf, GEN x, GEN y);
 GEN     idealaddmultoone(GEN nf, GEN list);
 GEN     idealaddtoone(GEN nf, GEN x, GEN y);
+GEN     idealaddtoone_i(GEN nf, GEN x, GEN y);
 GEN     idealaddtoone0(GEN nf, GEN x, GEN y);
 GEN     idealappr(GEN nf, GEN x);
 GEN     idealappr0(GEN nf, GEN x, long fl);
 GEN     idealapprfact(GEN nf, GEN x);
 GEN     idealchinese(GEN nf, GEN x, GEN y);
 GEN     idealcoprime(GEN nf, GEN x, GEN y);
+GEN     idealcoprimefact(GEN nf, GEN x, GEN fy);
 GEN     idealdiv(GEN nf, GEN x, GEN y);
 GEN     idealdiv0(GEN nf, GEN x, GEN y,long flag);
 GEN     idealdivexact(GEN nf, GEN x, GEN y);

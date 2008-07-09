@@ -853,35 +853,37 @@ idealaddmultoone(GEN nf, GEN list)
 {
   pari_sp av = avma;
   long N, i, l, tx = typ(list);
-  GEN z, H, U, perm, L;
+  GEN H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (!is_vec_t(tx)) pari_err(talker,"not a vector of ideals in idealaddmultoone");
-  l = lg(list); z = cgetg(1,t_MAT);
-  L = cgetg(l, tx);
+  l = lg(list);
+  L = cgetg(l, t_VEC);
   if (l == 1) pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<l; i++)
   {
     GEN I = gel(list,i);
     if (typ(I) != t_MAT) I = idealhnf_shallow(nf,I);
-    if (lg(I) == 1)
-      I = zeromat(N,N);
-    else
+    if (lg(I) != 1)
     {
       RgM_check_ZM(I,"idealaddmultoone");
       if (lg(gel(I,1)) != N+1)
         pari_err(talker,"%Zs: not an ideal in idealaddmultoone", I);
     }
-    gel(L,i) = I; z = shallowconcat(z, I);
+    gel(L,i) = I;
   }
-  H = ZM_hnfperm(z, &U, &perm);
+  H = ZM_hnfperm(shallowconcat1(L), &U, &perm);
   if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
     pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
   U = gel(U,(l-2)*N + i); /* z U = 1 */
   for (i=1; i<l; i++)
-    gel(L,i) = ZM_ZC_mul(gel(L,i), vecslice(U, (i-1)*N + 1, i*N));
+  {
+    GEN c = gel(L,i);
+    c = (lg(c) == 1)? zerocol(N): ZM_ZC_mul(c, vecslice(U, (i-1)*N + 1, i*N));
+    gel(L,i) = c;
+  }
   return gerepilecopy(av, L);
 }
 
@@ -2314,7 +2316,7 @@ idealtwoelt2(GEN nf, GEN x, GEN a)
 /* Given 2 integral ideals x and y in nf, returns a beta in nf such that
  * beta * x is an integral ideal coprime to y */
 GEN
-idealcoprime_fact(GEN nf, GEN x, GEN fy)
+idealcoprimefact(GEN nf, GEN x, GEN fy)
 {
   GEN L = gel(fy,1), e;
   long i, r = lg(L);
@@ -2327,7 +2329,7 @@ GEN
 idealcoprime(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  return gerepileupto(av, idealcoprime_fact(nf, x, idealfactor(nf,y)));
+  return gerepileupto(av, idealcoprimefact(nf, x, idealfactor(nf,y)));
 }
 
 /*******************************************************************/

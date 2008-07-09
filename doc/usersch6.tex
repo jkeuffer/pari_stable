@@ -377,6 +377,53 @@ the same ideal $y$. This essentially reduces each ideal multiplication to
 an $N\times N$ matrix multiplication followed by a $N\times 2N$ modular
 HNF reduction (modulo $xy\cap \Z$).
 
+\misctitle{Approximation.}
+
+\fun{GEN}{idealaddtoone}{GEN nf, GEN A, GEN B} given to coprime integer ideals
+$A$, $B$, returns $[a,b]$ with $a\in A$, $b\in B$, such that $a + b = 1$
+The reѕult is reduced mod $AB$, so $a$, $b$ will be small.
+
+\fun{GEN}{idealaddtoone_i}{GEN nf, GEN A, GEN B} as \tet{idealaddtoone} except
+that \kbd{nf} must be a true \var{nf}, and only $a$ is returned.
+
+\fun{GEN}{hnfmerge_get_1}{GEN A, GEN B} given two square integral matrices $A$,
+$B$ of the same dimension, in upper HNF, return $a$ in the image of $A$ such
+that $1-a$ is in the image of $B$. (By abuse of notation we denote $1$ the
+column vector $[1,0,\dots,0]$.) If such an $a$ does not exist, raise an error.
+This is the function underlying \tet{idealaddtoone}.
+
+\fun{GEN}{idealaddmultoone}{GEN nf, GEN v} given a list of $n$ (globally)
+coprime integer ideals $(v[i])$ returns an $n$-dimensional vector $a$ such that
+$a[i]\in v[i]$ and $\sum a[i] = 1$. If $[K:\Q] = N$, this routine computes
+the HNF reduction (with $Gl_{nN}(\Z)$ base change) of an $N\times nN$ matrix;
+so it is well worth pruning "useless" ideals from the list (as long as the
+ideals remain globally coprime).
+
+\fun{GEN}{idealappr}{GEN nf, GEN x} given a fractional ideal $x$, returns
+an algebraic number $\alpha$ such that $v(x) = v(\alpha)$ for all valuations
+such that $v(x) > 0$, and $v(\alpha) \geq 0$ at all others.
+
+\fun{GEN}{idealapprfact}{GEN nf, GEN fx} same as \tet{idealappr}, $x$ being
+given in factored form, as after \kbd{fx = idealfactor(nf,x)}, except that we
+allow $0$ exponents in the factorization. Returns an algebraic number
+$\alpha$ such that $v(x) = v(\alpha)$ for all valuations associated to the
+prime ideal decomposition of $x$, and $v(\alpha) \geq 0$ at all others.
+
+\fun{GEN}{idealcoprime}{GEN nf, GEN x, GEN y}. Given 2 integral ideals $x$ and 
+$y$, returns an algebraic number $\alpha$ such that
+$\alpha x$ is an integral ideal coprime to $y$.
+
+\fun{GEN}{idealcoprimefact}{GEN nf, GEN x, GEN fy} same as
+\tet{idealcoprime}, except that $y$ is given in factored form, as from
+\tet{idealfactor}.
+
+\fun{GEN}{idealchinese}{GEN nf, GEN x, GEN y} $x$ being a prime ideal
+factorization (i.e.~a 2 by 2 matrix whose first column contain prime ideals,
+and the second column integral exponents), $y$ a vector of elements in
+$\var{nf}$ indexed by the ideals in $x$, computes an element $b$ such that
+$v_\wp(b - y_\wp) \geq v_\wp(x)$ for all prime ideals in $x$ and $v_\wp(b)\geq
+0$ for all other $\wp$.
+
 \subsec{Reducing modulo maximal ideals}
 
 \fun{GEN}{nfmodprinit}{GEN nf, GEN pr} returns an abstract \kbd{modpr}

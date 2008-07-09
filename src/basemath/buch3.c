@@ -389,7 +389,7 @@ Buchray(GEN bnf, GEN module, long flag)
     El = cgetg(ngen+1,t_VEC);
     for (j=1; j<=ngen; j++)
     {
-      p1 = idealcoprime_fact(nf, gel(gen,j), fx);
+      p1 = idealcoprimefact(nf, gel(gen,j), fx);
       if (RgV_isscalar(p1)) p1 = gel(p1,1);
       gel(El,j) = p1;
     }

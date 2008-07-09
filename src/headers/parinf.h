@@ -154,8 +154,6 @@ GEN    get_nfindex(GEN bas);
 GEN    get_proj_modT(GEN basis, GEN T, GEN p);
 GEN    get_roots(GEN x,long r1,long prec);
 GEN    get_theta_abstorel(GEN T, GEN pol, GEN k);
-GEN    idealaddtoone_i(GEN nf, GEN x, GEN y);
-GEN    idealcoprime_fact(GEN nf, GEN x, GEN fy);
 GEN    idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
 GEN    init_unif_mod_fZ(GEN L);
 GEN    init_units(GEN BNF);
