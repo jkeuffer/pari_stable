@@ -1,7 +1,7 @@
 Function: lindep
 Section: linear_algebra
 C-Name: lindep0
-Prototype: GD0,L,p
+Prototype: GD0,L,
 Help: lindep(x,{flag=0}): Z-linear dependencies between components of x.
  flag is optional, and can be 0: default, PSLQ; -1: using Hastad et al; -2:
  returns a non-trivial kernel vector (not integral in general); positive, and

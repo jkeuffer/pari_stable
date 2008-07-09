@@ -167,10 +167,12 @@ This file lists the incompatible changes between Version 2.x and older versions
   - remove obsolete library function gregula, gfundunit. Use quadregulator and
     quadunit
   - removed obsolete 'prec' argument from prototypes of idealmul0,
-    idealmulred, idealpow0, idealpowred, ideallllred
+    idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
+    lindep, lindep0
   - Rename library functions ideal_two_elt* -> idealtwoelt*
   - removed obsolete library functions ideallistunit, ideallistunitgen,
     ideallistzstar, ideallistzstargen. Use ideallist0.
+  - removed obsolete library function algdep2. Use algdep0 (same arguments).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

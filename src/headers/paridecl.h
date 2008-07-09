@@ -1011,12 +1011,11 @@ GEN     rnfinitalg(GEN nf,GEN pol,long prec);
 
 GEN     Q_from_QR(GEN x, long prec);
 GEN     R_from_QR(GEN x, long prec);
-GEN     algdep(GEN x, long n, long prec);
-GEN     algdep0(GEN x, long n, long bit,long prec);
-GEN     algdep2(GEN x, long n, long bit);
+GEN     algdep(GEN x, long n);
+GEN     algdep0(GEN x, long n, long bit);
 GEN     gram_matrix(GEN M);
-GEN     lindep(GEN x, long prec);
-GEN     lindep0(GEN x, long flag,long prec);
+GEN     lindep(GEN x);
+GEN     lindep0(GEN x, long flag);
 GEN     lindep2(GEN x, long bit);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     qfrep0(GEN a, GEN borne, long flag);

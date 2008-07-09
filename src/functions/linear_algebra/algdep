@@ -1,7 +1,7 @@
 Function: algdep
 Section: linear_algebra
 C-Name: algdep0
-Prototype: GLD0,L,p
+Prototype: GLD0,L,
 Help: algdep(x,k,{flag=0}): algebraic relations up to degree n of x, using
  lindep([1,x,...,x^(k-1)], flag).
 Doc: \sidx{algebraic dependence}

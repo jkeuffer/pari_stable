@@ -218,7 +218,8 @@ BA 49- user variables can now be aliased [#790].
    73- Functions quadunit(), quadregulator(), and factor() no longer apply
        componentwise to vector / matrix arguments. Use apply()
    74- [libpari] removed obsolete 'prec' argument from prototypes of idealmul0,
-       idealmulred, idealpow0, idealpowred, ideallllred
+       idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
+       lindep, lindep0
    75- Rename library functions ideal_two_elt* -> idealtwoelt*
 
   Added
@@ -373,6 +374,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        Use quadregulator, quadunit, boundfact
    34- obsolete library functions ideallistunit, ideallistunitgen,
        ideallistzstar, ideallistzstargen. Use ideallist0.
+   35- obsolete library function algdep2. Use algdep0 (same arguments).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

@@ -703,9 +703,7 @@ lindep2(GEN x, long bit)
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
-  if (lx == 3 && real_indep(re,im,bit))
-    { avma = av; return cgetg(1, t_VEC); }
-
+  if (lx == 3 && real_indep(re,im,bit)) { avma = av; return cgetg(1, t_VEC); }
   if (gcmp0(im)) im = NULL;
   ly = im? lx+2: lx+1;
   M = cgetg(lx,t_MAT);
@@ -724,13 +722,16 @@ lindep2(GEN x, long bit)
 
 #define quazero(x) (gcmp0(x) || (typ(x)==t_REAL && expo(x) < EXP))
 GEN
-lindep(GEN x, long prec)
+lindep(GEN x)
 {
   GEN *b,*be,*bn,**m,qzer;
   GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
   long i,j,fl,k, lx = lg(x), tx = typ(x), n = lx-1;
   pari_sp av = avma, lim = stack_lim(av,1), av0, av1;
-  const long EXP = - bit_accuracy(prec) + 2*n;
+  long EXP, prec = gprecision(x);
+
+  if (!prec) prec = DEFAULTPREC;
+  EXP = 2*n - bit_accuracy(prec);
 
   if (! is_vec_t(tx)) pari_err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
@@ -1058,7 +1059,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   M->EXP = - bit_accuracy(prec) + max(n, 8);
   M->flreal = is_zero(imag_i(x), M->EXP, prec);
   if (!M->flreal)
-    return lindep(x,prec); /* FIXME */
+    return lindep(x); /* FIXME */
   else
     x = real_i(x);
 
@@ -1560,7 +1561,7 @@ plindep(GEN x)
 }
 
 GEN
-lindep0(GEN x,long bit,long prec)
+lindep0(GEN x,long bit)
 {
   long i, tx = typ(x);
   if (! is_vec_t(tx) && tx != t_MAT) pari_err(typeer,"lindep");
@@ -1568,7 +1569,7 @@ lindep0(GEN x,long bit,long prec)
     if (typ(gel(x,i)) == t_PADIC) return plindep(x);
   switch (bit)
   {
-    case -1: return lindep(x,prec);
+    case -1: return lindep(x);
     case -2: return deplin(x);
     case -3: return pslq(x);
     case -4: return pslqL2(x);
@@ -1577,7 +1578,7 @@ lindep0(GEN x,long bit,long prec)
 }
 
 GEN
-algdep0(GEN x, long n, long bit, long prec)
+algdep0(GEN x, long n, long bit)
 {
   long tx = typ(x), i;
   pari_sp av;
@@ -1600,25 +1601,19 @@ algdep0(GEN x, long n, long bit, long prec)
     y = plindep(y);
   else
   {
-    y = lindep0(y, bit, prec);
+    y = lindep0(y, bit);
     if (typ(y) == t_REAL) return gerepileupto(av, y);
   }
   if (lg(y) < 2) pari_err(talker,"higher degree than expected in algdep");
   y = RgV_to_RgX(y, 0);
   if (gsigne(leading_term(y)) > 0) return gerepilecopy(av, y);
-  return gerepileupto(av, gneg(y));
+  return gerepileupto(av, RgX_neg(y));
 }
 
 GEN
-algdep2(GEN x, long n, long bit)
+algdep(GEN x, long n)
 {
-  return algdep0(x,n,bit,0);
-}
-
-GEN
-algdep(GEN x, long n, long prec)
-{
-  return algdep0(x,n,0,prec);
+  return algdep0(x,n,0);
 }
 
 /********************************************************************/
