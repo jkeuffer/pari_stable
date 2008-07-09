@@ -1855,6 +1855,77 @@ or
   }
 @eprog
 
+\section{Iterators, Numerical integration, Sums, Products}
+\subsec{Iterators}
+Since it is easier to program directly simple loops in library mode, some GP
+iterators are mainly useful for GP programming. Here are the others:
+
+\item \tet{fordiv} is a trivial iteration over a list produced by
+\tet{divisors}.
+
+\item \tet{forell} is not yet provided with a usable public interface, but
+the code should be straightforward to copy and adapt to your needs.
+
+\item \tet{forsubgroup} is currently not implemented as an iterator but as a
+ traversal procedure with callbacks.
+
+\fun{void}{traversesubgroups}{GEN G, GEN B, void fun(GEN, void*), void *E}
+goes through the same subgroups as \tet{forsubgroup(H = G, B,)}, calling
+\tet{fun(H, E)} for each subgroup $H$.
+
+\item \tet{forprime}, for which we refer you to Appendix B (the section about
+PARI's private prime table)
+
+\item \tet{forvec}, for which we provide a convenient iterator. To
+initialize the analog of \kbd{forvec(X = v, ..., flag)}, call
+
+\fun{GEN}{forvec_start}{GEN v, long flag, GEN *D, GEN (**next)(GEN,GEN)}
+where $D$ (state vector) and \kbd{next} (iterator function, depends
+on \kbd{flag} and the types of the bounds in $v[i]$) are set by the call.
+This returns the first element in the \kbd{forvec} sequence, or \kbd{NULL} if
+no such element exist. This is then used as follows:
+\bprog
+  GEN (*next)(GEN,GEN);
+  GEN D, X = forvec_start(x, flag, &D, &next);
+  while (X) {
+    ...
+    X = next(D, X);   \\ next element in the sequence, NULL if none left.
+  }
+@eprog\noindent
+Note that the value of $X$ must be used immediately or copied since the next
+call to the iterator destroys it (the relevant vector is updated in place).
+The iterator is working very hard to not use up PARI stack, and is more
+efficient when all lower bounds in the initialization vector $v$ are
+integers. In that case, the cost is linear in the number of tuples
+enumerated, and you can expect to run over more than $10^9$ tuples per
+minute. If speed is critical and you know that all integers involved are
+non-negative and going to remain less than $2^{32}$ or $2^{64}$, write a
+simple direct backtracking algorithm using $C$ \kbd{long}s.
+
+\subsec{Numerical analysis}
+
+Numerical routines code a function (to be integrated, summed, zeroed, etc.)
+with two parameters named
+\bprog
+  GEN (*eval)(GEN,void*)
+  void *E;
+@eprog\noindent
+The second is meant to contain all auxiliary data needed by your function.
+The first is such that \kbd{eval(x, E)} returns your function evaluated at
+\kbd{x}. For instance, one may code the family of functions
+$f_t: x \to (x+t)^2$ via
+\bprog
+GEN fun(GEN x, void *t) { return gsqr(gadd(x, (GEN)t)); }
+@eprog\noindent
+One can then integrate $f_1$ between $a$ and $b$ with the call
+\bprog
+intnum((void*)stoi(1), &fun, a, b, NULL, prec);
+@eprog\noindent
+Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
+\kbd{void*}) the above mechanism handles arbitrary functions. For simple
+functions without extra parameters, you may set \kbd{E = NULL} and ignore
+that argument in your function definition.
+
 \section{A complete program}
 \label{se:prog}
 

@@ -27,9 +27,6 @@ typedef struct {
   slist *list;
 } sublist_t;
 
-/* MAX: [G:H] <= bound, EXACT: [G:H] = bound, TYPE: type(H) = bound */
-enum { b_NONE, b_MAX, b_EXACT, b_TYPE };
-
 /* SUBGROUPS
  * G = Gp x I, with Gp a p-Sylow (I assumed small).
  * Compute subgroups of I by recursive calls
@@ -54,9 +51,13 @@ typedef struct subgp_iter {
   long countsub; /* number of subgroups of type M (so far) */
   long count; /* number of p-subgroups so far [updated when M completed] */
   GEN expoI; /* exponent of I */
-  void(*fun)(struct subgp_iter *, GEN); /* applied to each subgroup */
-  void *fundata; /* for fun */
+
+  void(*fun)(GEN, void *); /* callback applied to each subgroup */
+  void *fundata; /* data for fun */
 } subgp_iter;
+
+/* MAX: [G:H] <= bound, EXACT: [G:H] = bound, TYPE: type(H) = bound */
+enum { b_NONE, b_MAX, b_EXACT, b_TYPE };
 
 #define len(x)      (x)[0]
 #define setlen(x,l) len(x)=(l)
@@ -88,12 +89,12 @@ conjugate(long *typ)
 }
 /* --- subgp_iter 'fun' associated to forsubgroup -------------- */
 static void
-std_fun(subgp_iter *T, GEN x)
+std_fun(GEN x, void *data)
 {
   pari_sp ltop=avma;
-  GEN code = (GEN) T->fundata;
+  GEN code = (GEN)data;
   set_lex(-1,x);
-  closure_evalvoid(code); T->countsub++;
+  closure_evalvoid(code);
   avma=ltop;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
@@ -111,12 +112,12 @@ addcell(sublist_t *S, GEN H)
 }
 
 static void
-list_fun(subgp_iter *T, GEN x)
+list_fun(GEN x, void *data)
 {
-  sublist_t *S = (sublist_t*)T->fundata;
+  sublist_t *S = (sublist_t*)data;
   GEN H = ZM_hnf(shallowconcat(S->hnfgroup,x));
   if (!S->gen || subgroup_conductor_ok(H, S->gen)) {
-    addcell(S, H); T->countsub++;
+    addcell(S, H);
   }
 }
 /* -------------------------------------------------------------- */
@@ -126,13 +127,14 @@ static void
 treatsub(subgp_iter *T, GEN H)
 {
   long i;
-  if (!T->subq) T->fun(T, H);
+  if (!T->subq) { T->fun(H, T->fundata); T->countsub++; }
   else
   { /* not a p group, add the trivial part */
     GEN Hp = gmul(T->expoI, H); /* lift H to G */
-    long l = lg(T->subqpart);
-    for (i=1; i<l; i++)
-      T->fun(T, shallowconcat(Hp, gel(T->subqpart,i)));
+    long n = lg(T->subqpart)-1;
+    for (i=1; i<=n; i++)
+      T->fun(shallowconcat(Hp, gel(T->subqpart,i)), T->fundata);
+    T->countsub += n;
   }
 }
 
@@ -345,15 +347,12 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       {
 	fprintferr("  countsub = %ld\n", T->countsub);
 	msgtimer("for this type");
-	if (T->fun != list_fun || !((sublist_t*)(T->fundata))->gen)
-	{
-	  if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
-	  if (!equaliu(p1,T->countsub))
-	  {
-	    fprintferr("  alpha = %Ps\n",p1);
-	    pari_err(bugparier,"forsubgroup (alpha != countsub)");
-	  }
-	}
+        if (T->subq) p1 = muliu(p1,lg(T->subqpart)-1);
+        if (!equaliu(p1,T->countsub))
+        {
+          fprintferr("  alpha = %Ps\n",p1);
+          pari_err(bugparier,"forsubgroup (alpha != countsub)");
+        }
       }
     }
   }
@@ -437,7 +436,7 @@ subgroup_engine(subgp_iter *T)
     switch(T->boundtype)
     {
       case b_EXACT: if (!is_pm1(T->bound)) break;
-      default: T->fun(T, cyc);
+      default: T->fun(cyc, T->fundata);
     }
     avma = av; return;
   }
@@ -543,21 +542,23 @@ get_snf(GEN x, long *N)
 }
 
 void
-forsubgroup(GEN cyc, GEN bound, GEN code)
+traversesubgroups(GEN cyc, GEN bound, void fun(GEN, void*), void *data)
 {
   subgp_iter T;
   long N;
 
-  T.fun = &std_fun;
-  cyc = get_snf(cyc,&N);
-  if (!cyc) pari_err(typeer,"forsubgroup");
+  T.fun = fun;
+  T.cyc = get_snf(cyc,&N); if (!T.cyc) pari_err(typeer,"forsubgroup");
   T.bound = bound;
-  T.cyc = cyc;
-  T.fundata = (void*)code;
-  push_lex(gen_0);
-
+  T.fundata = data;
   subgroup_engine(&T);
+}
 
+void
+forsubgroup(GEN cyc, GEN bound, GEN code)
+{
+  push_lex(gen_0);
+  traversesubgroups(cyc, bound, &std_fun, (void*)code);
   pop_lex();
 }
 

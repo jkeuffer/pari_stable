@@ -2159,6 +2159,7 @@ GEN     subfields0(GEN nf,long d);
 /* subgroup.c */
 
 GEN     subgrouplist(GEN cyc, GEN bound);
+void    traversesubgroups(GEN cyc, GEN B, void fun(GEN,void*), void *E);
 
 /* stark.c */
 

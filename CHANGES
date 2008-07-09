@@ -311,7 +311,6 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
        Idealstar, idealaddtoone_i, idealcoprimefact, hnfmerge_get_1,
        nfinvmodideal, nfpowmodideal
-
    34- function bnfcompress() [ to create a "small bnf" from a true
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.
@@ -324,6 +323,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    37- nfadd, multable, tablemul, tablemul_ei, tablemul_ei_ej,
        tablemulvec, tablesqr, ei_multable.
    38- library functions BPSW_psp & BPSW_isprime
+   39- public interface to forsubgroup: traversesubgroups()
 
   Removed
     1- obsolete library functions extract and matextract
