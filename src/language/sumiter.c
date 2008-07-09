@@ -460,9 +460,8 @@ void
 forvec(GEN x, GEN code, long flag)
 {
   pari_sp av = avma;
-  GEN D;
   GEN (*next)(GEN,GEN);
-  GEN v = forvec_start(x, flag, &D, &next);
+  GEN D, v = forvec_start(x, flag, &D, &next);
   push_lex(v);
   while (v) {
     closure_evalvoid(code); if (loop_break()) break;
