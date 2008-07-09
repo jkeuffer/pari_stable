@@ -2182,8 +2182,6 @@ GEN     sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
 GEN     suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec);
-GEN     vecteur(GEN nmax, GEN n);
-GEN     vvecteur(GEN nmax, GEN n);
 GEN     zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec);
 
 /* thue.c */
