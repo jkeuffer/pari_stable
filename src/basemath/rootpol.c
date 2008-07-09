@@ -1873,8 +1873,7 @@ isvalidcoeff(GEN x)
   switch (typ(x))
   {
     case t_INT: case t_REAL: case t_FRAC: return 1;
-    case t_COMPLEX:
-      if (isvalidcoeff(gel(x,1)) && isvalidcoeff(gel(x,2))) return 1;
+    case t_COMPLEX: return isvalidcoeff(gel(x,1)) && isvalidcoeff(gel(x,2));
   }
   return 0;
 }
@@ -1982,19 +1981,20 @@ isconj(GEN x, GEN y, long e)
 }
 
 /* the vector of roots of p, with absolute error 2^(- bit_accuracy(l)) */
-GEN
-roots(GEN p, long l)
+static GEN
+roots_aux(GEN p, long l, long clean)
 {
   pari_sp av = avma;
   long n, i, k, s, t, e;
   GEN c, L, p1, res, rea, com;
 
-  if (gcmp0(p)) pari_err(zeropoler,"roots");
   if (typ(p) != t_POL)
   {
+    if (gcmp0(p)) pari_err(zeropoler,"roots");
     if (!isvalidcoeff(p)) pari_err(typeer,"roots");
     return cgetg(1,t_VEC); /* constant polynomial */
   }
+  if (!signe(p)) pari_err(zeropoler,"roots");
   if (!isvalidpol(p)) pari_err(talker,"invalid coefficients in roots");
   if (lg(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
 
@@ -2020,7 +2020,10 @@ roots(GEN p, long l)
   }
   setlg(rea,s+1); rea = sort(rea);
   res = cgetg(n,t_COL);
-  for (i=1; i<=s; i++) gel(res,i) = tocomplex(gel(rea,i),l);
+  if (clean)
+    for (i=1; i<=s; i++) gel(res,i) = gtofp(gel(rea,i), l);
+  else
+    for (i=1; i<=s; i++) gel(res,i) = tocomplex(gel(rea,i), l);
   for (i=1; i<=t; i++)
   {
     c = gel(com,i); if (!c) continue;
@@ -2038,6 +2041,11 @@ roots(GEN p, long l)
   }
   return gerepileupto(av,res);
 }
+GEN
+roots(GEN p, long l) { return roots_aux(p,l, 0); }
+/* clean up roots. If root is real replace it by its real part */
+GEN
+cleanroots(GEN p, long l) { return roots_aux(p,l, 1); }
 
 static GEN rootsold(GEN x, long prec);
 GEN
@@ -2050,21 +2058,6 @@ roots0(GEN p, long flag,long l)
     default: pari_err(flagerr,"polroots");
   }
   return NULL; /* not reached */
-}
-
-/* clean up roots. If root is real replace it by its real part */
-GEN
-cleanroots(GEN p, long prec)
-{
-  GEN s, r = roots(p,prec);
-  long i, l = lg(r);
-  for (i=1; i<l; i++)
-  {
-    s = gel(r,i);
-    if (signe(s[2])) break; /* remaining roots are complex */
-    r[i] = s[1]; /* root is real; take real part */
-  }
-  return r;
 }
 
 /*******************************************************************/

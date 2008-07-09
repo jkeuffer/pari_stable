@@ -847,13 +847,12 @@ nfisincl(GEN a, GEN b) { return nfiso0(a,b,0); }
 /*************************************************************************/
 
 GEN
-get_roots(GEN x,long r1,long prec)
+get_roots(GEN x, long r1, long prec)
 {
-  GEN roo = (typ(x)!=t_POL)? shallowcopy(x): roots(x,prec);
+  GEN roo = (typ(x)!=t_POL)? shallowcopy(x): cleanroots(x,prec);
   long i, ru = (lg(roo)-1 + r1) >> 1;
 
-  for (i=1; i<=r1; i++) gel(roo,i) = real_i(gel(roo,i));
-  for (   ; i<=ru; i++) roo[i] = roo[(i<<1)-r1];
+  for (i=r1+1; i<=ru; i++) gel(roo,i) = gel(roo, (i<<1)-r1);
   roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
 }
 

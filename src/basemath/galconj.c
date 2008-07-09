@@ -61,7 +61,7 @@ galoisconj2pol(GEN x, long prec)
   if (!ZX_isirreducible(x)) pari_err(redpoler, "galoisconj2pol");
 
   nbmax = numberofconjugates(x, 2);
-  polr = roots(x, prec);
+  polr = cleanroots(x, prec);
   p1 = gel(polr,1);
   /* accuracy in decimal digits */
   prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);

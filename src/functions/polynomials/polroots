@@ -19,4 +19,7 @@ Doc: complex roots of the polynomial
  guaranteed to converge, nor to give accurate results, but is rather
  fast when it does. If you get the messages ``too many iterations in roots''
  or ``INTERNAL ERROR: incorrect result in roots'', use the default algorithm.
-Variant: Also available is \fun{GEN}{roots}{GEN x, long prec}.
+Variant: Also available is \fun{GEN}{roots}{GEN x, long prec}, as well as
+ \fun{GEN}{cleanroots}{GEN x, long prec} which ensures that real roots of
+ real polynomials are returned as \typ{REAL} (instead of \typ{COMPLEX}s with
+ 0 imaginary part).

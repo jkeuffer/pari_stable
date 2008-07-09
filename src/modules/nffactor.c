@@ -563,7 +563,7 @@ nf_root_bounds(GEN P, GEN T)
   if (nf && nf_get_prec(nf) >= prec)
     R = gel(nf,6);
   else
-    R = roots(T, prec);
+    R = cleanroots(T, prec);
   lR = lg(R);
   V = cgetg(lR, t_VEC);
   Ps = cgetg(l, t_POL); /* sigma (P) */

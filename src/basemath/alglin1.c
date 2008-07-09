@@ -2772,12 +2772,7 @@ eigen(GEN x, long prec)
 
   ex = 16 - bit_accuracy(prec);
   y=cgetg(n,t_MAT);
-  p=caradj(x,0,NULL); rr=roots(p,prec);
-  for (i=1; i<n; i++)
-  {
-    GEN p1 = gel(rr,i);
-    if (!signe(p1[2]) || gexpo(gel(p1,2)) - gexpo(p1) < ex) rr[i] = p1[1];
-  }
+  p=caradj(x,0,NULL); rr = cleanroots(p,prec);
   ly=1; k=2; r2=gel(rr,1);
   for(;;)
   {

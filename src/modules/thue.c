@@ -76,15 +76,15 @@ Vecmaxind(GEN v) { long i; (void)_Vecmax(v, &i); return i; }
 static GEN
 tnf_get_roots(GEN poly, long prec, long S, long T)
 {
-  GEN R0 = roots(poly, prec), R = cgetg(lg(R0), t_COL);
+  GEN R0 = cleanroots(poly, prec), R = cgetg(lg(R0), t_COL);
   long k;
 
-  for (k=1; k<=S; k++) gel(R,k) = real_i(gel(R0,k));
+  for (k=1; k<=S; k++) gel(R,k) = gel(R0,k);
   /* swap roots to get the usual order */
   for (k=1; k<=T; k++)
   {
-    R[k+S]  = R0[2*k+S-1];
-    R[k+S+T]= R0[2*k+S];
+    gel(R,k+S)  = gel(R0,2*k+S-1);
+    gel(R,k+S+T)= gel(R0,2*k+S);
   }
   return R;
 }
