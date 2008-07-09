@@ -685,10 +685,6 @@ gmodulo(GEN x,GEN y)
   return NULL; /* not reached */
 }
 
-/* FIXME: obsolete, kept for backward compatibility */
-GEN
-Mod0(GEN x,GEN y,long flag) { (void)flag; return gmodulo(x,y); }
-
 /*******************************************************************/
 /*                                                                 */
 /*                 GENERIC EUCLIDEAN DIVISION                      */

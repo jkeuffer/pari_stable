@@ -173,7 +173,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed obsolete library functions ideallistunit, ideallistunitgen,
     ideallistzstar, ideallistzstargen. Use ideallist0.
   - removed obsolete library function algdep2. Use algdep0 (same arguments).
-
+  - removed obsolete library function Mod0. Use gmodulo.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
