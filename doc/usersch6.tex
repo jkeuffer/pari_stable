@@ -226,6 +226,14 @@ to
 argument is a true \var{nf} (e.g.~a \var{bnf} is not allowed) and their
 argument are restricted in various ways, see the precise description below.
 
+\fun{GEN}{nfinvmodideal}{GEN nf, GEN x, GEN A} given an algebraic integer
+$x$ and a non-zero integral ideal $A$ in HNF, returns a $y$ such that
+$xy \equiv 1$ modulo $A$.
+
+\fun{GEN}{nfpowmodideal}{GEN nf, GEN x, GEN n, GEN ideal} given an algebraic
+integer $x$, an integer $n$, and a non-zero integral ideal $A$ in HNF,
+returns an algebraic integer congruent to $x^n$ modulo $A$.
+
 \fun{GEN}{nfmuli}{GEN nf, GEN x, GEN y} returns $x\times y$ assuming
 that both $x$ and $y$ are either \typ{INT}s or \kbd{ZV}s of the correct
 dimension.

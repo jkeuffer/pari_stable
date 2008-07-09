@@ -1094,17 +1094,14 @@ GEN
 nfinvmodideal(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
-  GEN a, xh, yZ = gcoeff(y,1,1);
+  GEN a, yZ = gcoeff(y,1,1);
 
-  nf = checknf(nf);
   if (is_pm1(yZ)) return zerocol( degpol(nf[1]) );
-
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) == t_INT) return gerepileupto(av, Fp_inv(x, yZ));
 
-  xh = idealhnf_shallow(nf,x);
-  a = nfdiv(nf, hnfmerge_get_1(xh, y), x);
-  return gerepileupto(av, ZC_hnfrem(a, y));
+  a = hnfmerge_get_1(idealhnf_principal(nf,x), y);
+  return gerepileupto(av, ZC_hnfrem(nfdiv(nf,a,x), y));
 }
 
 static GEN
@@ -1115,22 +1112,25 @@ static GEN
 nfmulmodideal(GEN nf, GEN x, GEN y, GEN id) {
   return x? ZC_hnfrem(nfmuli(nf,x,y), id): y;
 }
-/* assume x integral, k >= 0, ideal in HNF */
+/* assume x integral, k integer, A in HNF */
 GEN
-nfpowmodideal(GEN nf,GEN x,GEN k,GEN ideal)
+nfpowmodideal(GEN nf,GEN x,GEN k,GEN A)
 {
+  long s = signe(k);
   GEN y;
-  if (!signe(k)) return scalarcol_shallow(gen_1, degpol(nf[1]));
+
+  if (!s) return scalarcol_shallow(gen_1, degpol(nf[1]));
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) {
-    x = Fp_pow(x, k, gcoeff(ideal,1,1));
+    x = Fp_pow(x, k, gcoeff(A,1,1));
     return scalarcol_shallow(x, degpol(nf[1]));
   }
+  if (s < 0) { x = nfinvmodideal(nf, x,A); k = absi(k); }
   for(y = NULL;;)
   {
-    if (mpodd(k)) y = nfmulmodideal(nf,y,x,ideal);
+    if (mpodd(k)) y = nfmulmodideal(nf,y,x,A);
     k = shifti(k,-1); if (!signe(k)) break;
-    x = nfsqrmodideal(nf,x,ideal);
+    x = nfsqrmodideal(nf,x,A);
   }
   return y;
 }
