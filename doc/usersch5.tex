@@ -3525,6 +3525,14 @@ a row matrix $1\times n$, error otherwise.
 a column matrix $n\times 1$, error otherwise.
 
 \smallskip
+\fun{GEN}{RgV_sum}{GEN v} sum of the entries of $v$
+
+\fun{GEN}{RgV_sumpart}{GEN v, long n} returns the sum $v[1] + \dots + v[n]$
+(assumes that \kbd{lg}$(v) > n$).
+
+\fun{GEN}{RgV_sumpart2}{GEN v, long m, long n} returns the sum $v[m] + \dots +
+v[n]$ (assumes that \kbd{lg}$(v) > n$ and $m > 0$). Returns \kbd{gen\_0}
+when $m > n$.
 
 \fun{GEN}{RgV_dotproduct}{GEN x,GEN y} returns the scalar product of $x$ and $y$
 

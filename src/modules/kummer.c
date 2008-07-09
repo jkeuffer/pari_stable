@@ -968,7 +968,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     GEN mmu = get_mmu(i, r, ell);
     /* p1 = prim_invbe ^ -mu */
     p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, mmu, nfz));
-    if (C_invbe) p1 = gmul(p1, powgi(C_invbe, sum(mmu,1,m)));
+    if (C_invbe) p1 = gmul(p1, powgi(C_invbe, RgV_sumpart(mmu, m)));
     /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
     gel(root, 2 + r[i+1]) = monomial(p1, r[i+1], vT);
   }

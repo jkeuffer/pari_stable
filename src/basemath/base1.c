@@ -1762,8 +1762,8 @@ factoredpolred2(GEN x, GEN fa) { return polred0(x, red_PARTIAL, fa); }
 GEN
 T2_from_embed_norm(GEN x, long r1)
 {
-  GEN p = sum(x, 1, r1);
-  GEN q = sum(x, r1+1, lg(x)-1);
+  GEN p = RgV_sumpart(x, r1);
+  GEN q = RgV_sumpart2(x,r1+1, lg(x)-1);
   if (q != gen_0) p = gadd(p, gmul2n(q,1));
   return p;
 }

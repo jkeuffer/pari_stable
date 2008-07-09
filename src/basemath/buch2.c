@@ -682,7 +682,7 @@ cleanarch(GEN x, long N, long prec)
   }
   if (!is_vec_t(tx)) pari_err(talker,"not a vector/matrix in cleanarch");
   RU = lg(x)-1; R1 = (RU<<1)-N;
-  s = gdivgs(sum(real_i(x), 1, RU), -N); /* -log |norm(x)| / N */
+  s = gdivgs(RgV_sum(real_i(x)), -N); /* -log |norm(x)| / N */
   y = cgetg(RU+1,tx);
   pi2 = Pi2n(1, prec);
   for (i=1; i<=R1; i++) {
@@ -780,7 +780,7 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
   for (j=1; j<RU; j++)
   {
     GEN c = cgetg(RU+1,t_COL), Aj = gel(A,j);
-    GEN s = gdivgs(sum(real_i(Aj), 1, RU), -N); /* -log |norm(Aj)| / N */
+    GEN s = gdivgs(RgV_sum(real_i(Aj)), -N); /* -log |norm(Aj)| / N */
     gel(matep,j) = c;
     for (i=1; i<=R1; i++) gel(c,i) = gadd(s, gel(Aj,i));
     for (   ; i<=RU; i++) gel(c,i) = gadd(s, gmul2n(gel(Aj,i),-1));
@@ -1596,7 +1596,7 @@ isunit(GEN bnf,GEN x)
     GEN rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
     if (rx)
     {
-      GEN logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
+      GEN logN = RgV_sum(rx); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
       {
 	long p = 2 + max(1, (nf_get_prec(nf)-2) / 2);

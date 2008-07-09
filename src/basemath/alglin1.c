@@ -393,19 +393,6 @@ extract0(GEN x, GEN l1, GEN l2)
   return y;
 }
 
-/* v[a] + ... + v[b] */
-GEN
-sum(GEN v, long a, long b)
-{
-  GEN p;
-  long i;
-  if (a > b) return gen_0;
-  if (b > lg(v)-1) pari_err(talker,"incorrect length in sum");
-  p = gel(v,a);
-  for (i=a+1; i<=b; i++) p = gadd(p, gel(v,i));
-  return p;
-}
-
 GEN
 select0(GEN A, GEN f)
 {

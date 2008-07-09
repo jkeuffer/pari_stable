@@ -111,6 +111,36 @@ RgV_dotproduct(GEN x,GEN y)
   if (x == y) return RgV_dotsquare(x);
   return RgV_dotproduct_i(x, y, lg(x));
 }
+/* v[1] + ... + v[lg(v)-1] */
+GEN
+RgV_sum(GEN v)
+{
+  GEN p;
+  long i, l = lg(v);
+  if (l == 1) return gen_0;
+  p = gel(v,1); for (i=2; i<l; i++) p = gadd(p, gel(v,i));
+  return p;
+}
+/* v[1] + ... + v[n]. Assume lg(v) > n. */
+GEN
+RgV_sumpart(GEN v, long n)
+{
+  GEN p;
+  long i;
+  if (!n) return gen_0;
+  p = gel(v,1); for (i=2; i<=n; i++) p = gadd(p, gel(v,i));
+  return p;
+}
+/* v[m] + ... + v[n]. Assume lg(v) > n, m > 0. */
+GEN
+RgV_sumpart2(GEN v, long m, long n)
+{
+  GEN p;
+  long i;
+  if (n < m) return gen_0;
+  p = gel(v,m); for (i=m+1; i<=n; i++) p = gadd(p, gel(v,i));
+  return p;
+}
 
 /*                    ADDITION SCALAR + MATRIX                     */
 /* x square matrix, y scalar; create the square matrix x + y*Id */

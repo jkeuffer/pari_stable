@@ -261,6 +261,7 @@ JD 12- add an optional argument to quit()
    lllintpartial_inplace, reducemodlll, reducemodinvertible, closemodinvertible,
    RgC_RgM_mul, RgC_RgV_mul, RgM_RgC_mul, RgM_RgV_mul, RgM_mul, RgM_sqr,
    RgV_RgM_mul, RgV_RgC_mul, RgV_add, RgV_neg, RgV_sub, ZM_max_lg, RgC_Rg_add
+   RgV_sum, RgV_sumpart, RgV_sumpart2
    17- universal constant gen_m2, for symmetry
    18- GP function version() [ current version number ]
    19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
