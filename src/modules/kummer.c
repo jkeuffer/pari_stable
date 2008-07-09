@@ -216,7 +216,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     {
       u = gel(u,j); /* coords on (fu^ell, be) of a small generator */
       ru--; setlg(u, ru);
-      be = fix_be(bnfz, be, ZM_Z_mul(u, ell));
+      be = fix_be(bnfz, be, ZC_Z_mul(u, ell));
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
