@@ -4589,6 +4589,10 @@ as \kbd{indexsort}, removing duplicate entries.
 \kbd{perm} is non-\kbd{NULL}, it is set to the permutation that would sort
 the original \kbd{x}.
 
+\fun{GEN}{gen_setminus}{GEN A, GEN B, int (*cmp)(GEN,GEN)} given two sorted
+vectors $A$ and $B$, returns the vector of elements of $A$ not belonging to
+$B$.
+
 \fun{GEN}{sort_factor}{GEN y, void *data, int (*cmp)(void *,GEN,GEN)}:
 assuming \kbd{y} is a factorization matrix, sorts its rows in place (no copy
 is made) according to the comparison function \kbd{cmp} applied to its first
