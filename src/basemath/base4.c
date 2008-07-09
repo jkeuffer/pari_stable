@@ -1411,7 +1411,7 @@ GEN
 idealnorm(GEN nf, GEN x)
 {
   pari_sp av;
-  GEN y;
+  GEN y, T;
   long tx;
 
   switch(idealtyp(&x,&y))
@@ -1420,8 +1420,9 @@ idealnorm(GEN nf, GEN x)
     case id_MAT: return RgM_det_triangular(x);
   }
   /* id_PRINCIPAL */
-  nf = checknf(nf); av = avma;
-  x = RgXQ_norm(basistoalg_i(nf,x), gel(nf,1));
+  nf = checknf(nf); T = gel(nf,1); av = avma;
+  x = nf_to_scalar_or_alg(nf, x);
+  x = (typ(x) == t_POL)? RgXQ_norm(x, T): gpowgs(x, degpol(T));
   tx = typ(x);
   if (tx == t_INT) return gerepileuptoint(av, absi(x));
   if (tx != t_FRAC) pari_err(typeer, "idealnorm");
@@ -1755,7 +1756,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   if (lg(y) == 1) pari_err(talker, "cannot invert zero ideal");
   if (lg(x) == 1) { avma = av; return cgetg(1, t_MAT); } /* numerator is zero */
   y = Q_primitive_part(y, &cy);
-  if (cy) x = RgM_Rg_div(x0,cy);
+  if (cy) x = RgM_Rg_div(x,cy);
   Nx = idealnorm(nf,x);
   Ny = idealnorm(nf,y);
   if (typ(Nx) != t_INT || typ(Ny) != t_INT || !dvdii(Nx,Ny))
@@ -2378,9 +2379,11 @@ nfreduce(GEN nf, GEN x, GEN I)
 {
   pari_sp av = avma;
   GEN aI;
-  x = algtobasis_i(checknf(nf), x);
-  if (idealtyp(&I,&aI) != id_MAT) pari_err(typeer,"nfreduce");
-  return gerepileupto(av, reducemodinvertible(x, I));
+  x = nf_to_scalar_or_basis(checknf(nf), x);
+  if (idealtyp(&I,&aI) != id_MAT || lg(I)==1) pari_err(typeer,"nfreduce");
+  if (typ(x) != t_COL) x = scalarcol( gmod(x, gcoeff(I,1,1)), lg(I)-1 );
+  else x = reducemodinvertible(x, I);
+  return gerepileupto(av, x);
 }
 /* Given an element x and an ideal in HNF, gives an a in ideal such that
  * x-a is small. No checks */

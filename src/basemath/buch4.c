@@ -343,8 +343,8 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
   long rep;
   GEN pol;
 
-  a = basistoalg_i(nf, a);
-  b = basistoalg_i(nf, b);
+  a = nf_to_scalar_or_alg(nf, a);
+  b = nf_to_scalar_or_alg(nf, b);
   pol = mkpoln(3, a, gen_0, b);
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
@@ -395,8 +395,8 @@ nfhilbert(GEN nf,GEN a,GEN b)
   if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbert");
   nf = checknf(nf);
 
-  a = basistoalg_i(nf, a);
-  b = basistoalg_i(nf, b);
+  a = nf_to_scalar_or_alg(nf, a);
+  b = nf_to_scalar_or_alg(nf, b);
  /* local solutions in real completions ? */
   r1 = nf_get_r1(nf); ro = gel(nf,6);
   for (i=1; i<=r1; i++)
@@ -604,7 +604,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
   bnf = checkbnf(bnf);
   nf = checknf(bnf);
   if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
-  x = basistoalg_i(nf,x);
+  x = nf_to_scalar_or_alg(nf,x);
   v = NULL;
   if ( (w = make_unit(nf, bnfS, &x)) ) v = isunit(bnf, x);
   if (!v || lg(v) == 1) { avma = av; return cgetg(1,t_COL); }
@@ -734,7 +734,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   bnf = checkbnf(bnf);
   rel = checkbnf(rel);
   nf = checknf(bnf);
-  x = basistoalg_i(nf,x);
+  x = nf_to_scalar_or_alg(nf,x);
   if (gcmp0(x)) { avma = av; return mkvec2(gen_0, gen_1); }
   if (gcmp1(x)) { avma = av; return mkvec2(gen_1, gen_1); }
   if (gcmp_1(x) && odd(drel)) { avma = av; return mkvec2(gen_m1, gen_1); }

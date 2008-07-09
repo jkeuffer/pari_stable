@@ -442,7 +442,6 @@ computeP2(GEN bnr, long prec)
   GEN listray,P0,P,f,lanum, la = get_lambda(bnr), nf = checknf(bnr);
 
   f = gmael3(bnr,2,1,1);
-  la = algtobasis_i(nf,la);
   listray = getallelts(bnr);
   clrayno = lg(listray)-1; av2 = avma;
 PRECPB:

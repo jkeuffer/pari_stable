@@ -643,42 +643,7 @@ basistoalg(GEN nf, GEN x)
   }
 }
 
-/* The following shallow functions do what the public functions should do,
- * without sanity checks.
- * Assume nf is a genuine nf. */
-GEN
-basistoalg_i(GEN nf, GEN x)
-{
-  switch(typ(x))
-  {
-    case t_COL: return coltoliftalg(nf, x);
-    case t_POLMOD: return gel(x,2);
-    case t_POL:
-    case t_INT:
-    case t_FRAC: return x;
-  }
-  pari_err(typeer,"basistoalg_i");
-  return NULL; /* not reached */
-}
-GEN
-algtobasis_i(GEN nf, GEN x)
-{
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      return scalarcol_shallow(x, degpol( gel(nf,1) ));
-    case t_POLMOD:
-      x = gel(x,2);
-      if (typ(x) != t_POL) return scalarcol_shallow(x, degpol( gel(nf,1) ));
-      /* fall through */
-    case t_POL:
-      return poltobasis(nf,x);
-    case t_COL:
-      if (lg(x) == lg(gel(nf,7))) break;
-    default: pari_err(typeer,"algtobasis_i");
-  }
-  return x;
-}
+/* Assume nf is a genuine nf. */
 GEN
 nf_to_scalar_or_basis(GEN nf, GEN x)
 {
@@ -720,6 +685,7 @@ RgX_to_nfX(GEN nf, GEN x)
   return y;
 }
 
+/* Assume nf is a genuine nf. */
 GEN
 nf_to_scalar_or_alg(GEN nf, GEN x)
 {
@@ -824,7 +790,7 @@ rnfbasistoalg(GEN rnf,GEN x)
   {
     case t_VEC: case t_COL:
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
-      for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
+      for (i=1; i<lx; i++) gel(p1,i) = nf_to_scalar_or_alg(nf, gel(x,i));
       p1 = RgV_RgC_mul(gmael(rnf,7,1), p1);
       return gerepileupto(av, gmodulo(p1,gel(rnf,1)));
 

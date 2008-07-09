@@ -108,7 +108,6 @@ reducebetanaive(GEN bnfz, GEN be, GEN ell)
   GEN z, p1, p2, nmax, b, c, nf = checknf(bnfz);
 
   r1 = nf_get_r1(nf);
-  be = algtobasis_i(nf, be);
   b = gmul(gmael(nf,5,1), be);
   n = max((itos(ell)>>1), 3);
   z = cgetg(n+1, t_VEC);
@@ -217,7 +216,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     {
       u = gel(u,j); /* coords on (fu^ell, be) of a small generator */
       ru--; setlg(u, ru);
-      be = fix_be(bnfz, be, gmul(ell,u));
+      be = fix_be(bnfz, be, ZM_Z_mul(u, ell));
     }
   }
   if (DEBUGLEVEL>1) fprintferr("beta LLL-reduced mod U^l = %Ps\n",be);
