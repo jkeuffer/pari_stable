@@ -38,7 +38,7 @@ Doc: evaluates \var{seq} for
  @eprog\noindent
  Note that in this last representation, the index $[G:H]$ is given by the
  determinant. See \tet{galoissubcyclo} and \tet{galoisfixedfield} for
- \tet{nfsubfields} applications to \idx{Galois} theory.
+ applications to \idx{Galois} theory.
 
  \misctitle{Warning:} the present implementation cannot treat a group $G$, if
  one of its $p$-Sylow subgroups has a cyclic factor with more than $2^{31}$,
