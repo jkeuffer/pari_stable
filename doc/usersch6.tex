@@ -619,38 +619,43 @@ formats seen above), and call
 
 \fun{GEN}{bnfisprincipal0}{GEN bnf, GEN x, long flag}. The \kbd{bnf}
 structure already contains informations about the class group in the form
-$\oplus_{i=1}^n \Z/d_i\Z g_i$ for canonical integers $d_i$
-($d_n\mid\dots\mid d_1$ all $> 1$) and (essentially random) generators
+$\oplus_{i=1}^n (\Z/d_i\Z) g_i$ for canonical integers $d_i$
+(with $d_n\mid\dots\mid d_1$ all $> 1$) and essentially random generators
 $g_i$, which are ideals in HNF. We normally do not need the value of the
 $g_i$, only that they are fixed once and for all and that any (non-zero)
 fractional ideal $x$ can be expressed uniquely as $x = (t)\prod_{i=1}^n
 g_i^{e_i}$, where $0 \leq e_i < d_i$, and $(t)$ is some principal ideal.
-Computing $e$ is normally straightforward, but $t$ may be very expensive
-to obtain explicitly. The routine returns (possibly partial) information
-about the pair $[e,t]$, depending on \kbd{flag}, which is an or-ed
-combination of the following symbolic flags:
+Computing $e$ is straightforward, but $t$ may be very expensive to obtain
+explicitly. The routine returns (possibly partial) information about the pair
+$[e,t]$, depending on \kbd{flag}, which is an or-ed combination of the
+following symbolic flags:
 
-$\item$ \tet{nf_GEN} tries to compute $t$.
-Returns $[e,t]$, with $t = []$ if the computation failed. This flag is
-normally useless in non-trivial situations since the next two serve analogous
-purposes in much more efficient ways.
+\item \tet{nf_GEN} tries to compute $t$.
+Returns $[e,t]$, with $t$ an empty vector if the computation failed. This
+flag is normally useless in non-trivial situations since the next two serve
+analogous purposes in more efficient ways.
 
-$\item$ \tet{nf_GENMAT} tries to compute $t$ in factored form, which is
+\item \tet{nf_GENMAT} tries to compute $t$ in factored form, which is
 much more efficient than \kbd{nf\_GEN} if the class group is moderately
 large; imagine a small ideal $x = (t)g^{10000}$: the norm of $t$ has $10000$
-as many digits as the norm of $g$; do we really want to see it as a vector
-of huge meaningless integers ? The idea is to compute $e$ first, which is
+as many digits as the norm of $g$; do we want to see it as a vector
+of huge meaningless integers? The idea is to compute $e$ first, which is
 easy, then compute $(t)$ as $x \prod g_i^{-e_i}$ using successive
 \tet{idealmulred}, where the ideal reduction extracts small principal ideals
 along the way, eventually raised to large powers because of the binary
 exponentiation technique; the point is to keep this principal part in
-factored \emph{unexpanded} form. Returns $[e,t]$, with $t = []$ if the
-computation failed.
+factored \emph{unexpanded} form. Returns $[e,t]$, with $t$ an empty vector if
+the computation failed; this should be exceedingly rare, unless the initial
+accuracy to which \kbd{bnf} was computed was ridiculously low (and then
+\kbd{bnfinit} should not have succeeded either). Setting/unsetting
+\kbd{nf\_GEN} has no effect when this flag is set.
 
-$\item$ \tet{nf_GEN_IF_PRINCIPAL} tries to compute $t$ only if the ideal is
-principal ($e = 0$). Returns \kbd{gen\_0} if the ideal is not principal
+\item \tet{nf_GEN_IF_PRINCIPAL} tries to compute $t$ \emph{only} if the
+ideal is principal ($e = 0$). Returns \kbd{gen\_0} if the ideal is not
+principal. Setting/unsetting \kbd{nf\_GEN} has no effect when this flag is
+set, but setting/unsetting \kbd{nf\_GENMAT} is possible.
 
-$\item$ \tet{nf_FORCE} in the above, insist on computing $t$, even if it
+\item \tet{nf_FORCE} in the above, insist on computing $t$, even if it
 requires recomputing a \kbd{bnf} from scratch. This is a last resort, and
 normally the accuracy of a \kbd{bnf} can be increased without trouble, but it
 may be that some algebraic information simply cannot be recovered from what
@@ -669,12 +674,12 @@ where the $L[i]$ are ideals, the $f[i]$ integers and $C$ is either an ideal
 or \kbd{NULL} (omitted). Make sure to include \tet{nf_GENMAT} in \kbd{flag}!
 
 \fun{GEN}{isprincipalfact_or_fail}{GEN bnf, GEN C, GEN L, GEN f} is
-a function for desperate conditions, much more clever than
-\kbd{nf\_FORCE} (we actually use it when trying to increase the accuracy of a
-\var{bnf}). If performs 
+for delicate cases, where we must be more clever than \kbd{nf\_FORCE}
+(it is used when trying to increase the accuracy of a \var{bnf}, for
+instance). If performs 
 \bprog
   isprincipalfact(bnf,C, L, f, nf_GENMAT);
-@eprog
+@eprog\noindent
 but if it fails to compute $t$, it just returns a \typ{INT}, which is the
 estimated precision (in words, as usual) that would have been sufficient to
 complete the computation. The point is that \kbd{nf\_FORCE} does exactly this
