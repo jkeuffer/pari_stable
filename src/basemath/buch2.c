@@ -1126,7 +1126,7 @@ testprimes(GEN bnf, GEN BOUND)
   {
     GEN D = gmael(nf,5,5), L;
     if (DEBUGLEVEL>1) fprintferr("**** Testing Different = %Ps\n",D);
-    L = isprincipalall(bnf, D, nf_FORCE);
+    L = bnfisprincipal0(bnf, D, nf_FORCE);
     if (DEBUGLEVEL>1) fprintferr("     is %Ps\n", L);
   }
   /* sort factorbase for tablesearch */
@@ -1285,7 +1285,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
   GEN nf, x, matunit, s, M;
   long N, R1, RU, i, prec = gprecision(col);
-  bnf = checkbnf(bnf); nf = checknf(bnf); M = gmael(nf,5,1);
+  bnf = checkbnf(bnf); nf = gel(bnf,7); M = gmael(nf,5,1);
   if (!prec) prec = prec_arch(bnf);
   matunit = gel(bnf,3);
   N = degpol(nf[1]);
@@ -1323,9 +1323,11 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
   i = ZM_equal(y, z); avma = av; return i;
 }
 
-/* assume x in HNF. cf class_group_gen for notations */
+/* assume x in HNF. cf class_group_gen for notations.
+ * Return NULL iff flag & nf_FORCE and computation of principal ideal generator
+ * fails */
 static GEN
-_isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
+isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
 {
   long i,lW,lB,e,c, prec = *ptprec;
   GEN Q,xar,Wex,Bex,U,p1,gen,cyc,xc,ex,d,col,A;
@@ -1391,9 +1393,9 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   Q = gdiv(ZM_det_triangular(x), get_norm_fact(gen, ex, &d));
   col = isprincipalarch(bnf, col, Q, gen_1, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
-  if (!col && !gcmp0(ex))
+  if (!col && !ZV_cmp0(ex))
   {
-    p1 = isprincipalfact(bnf, gen, gneg(ex), x, flag);
+    p1 = isprincipalfact(bnf, x, gen, ZC_neg(ex), flag);
     if (typ(p1) != t_VEC) return p1;
     col = gel(p1,2);
   }
@@ -1414,10 +1416,12 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 }
 
 static GEN
-triv_gen(GEN nf, GEN x, long c, long flag)
+triv_gen(GEN bnf, GEN x, long flag)
 {
-  GEN y;
+  GEN y, nf = gel(bnf,7);
+  long c;
   if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis(nf,x);
+  c = lg(mael3(bnf,8,1,2)) - 1;
   if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(3,t_VEC);
   gel(y,1) = zerocol(c);
@@ -1425,33 +1429,32 @@ triv_gen(GEN nf, GEN x, long c, long flag)
 }
 
 GEN
-isprincipalall(GEN bnf,GEN x,long flag)
+bnfisprincipal0(GEN bnf,GEN x,long flag)
 {
-  GEN nf, arch, c;
+  GEN arch, c;
   long pr;
   pari_sp av = avma;
 
-  bnf = checkbnf(bnf); nf = gel(bnf,7);
+  bnf = checkbnf(bnf);
   switch( idealtyp(&x, &arch) )
   {
     case id_PRINCIPAL:
       if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
-      return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
+      return triv_gen(bnf, x, flag);
     case id_PRIME:
-      if (degpol(nf[1]) == 1)
-        return gerepileupto(av, triv_gen(nf, gel(x,1), 0, flag));
-      x = idealhnf_two(nf, x);
+      if (prime_is_inert(x))
+        return gerepileupto(av, triv_gen(bnf, gel(x,1), flag));
+      x = idealhnf_two(gel(bnf,7), x);
       break;
     case id_MAT:
       if (lg(x)==1) pari_err(talker,"zero ideal in isprincipal");
   }
-
   pr = prec_arch(bnf); /* precision of unit matrix */
   c = getrand();
   for (;;)
   {
     pari_sp av1 = avma;
-    GEN y = _isprincipal(bnf,x,&pr,flag);
+    GEN y = isprincipalall(bnf,x,&pr,flag);
     if (y) return gerepilecopy(av, y);
 
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",pr);
@@ -1468,90 +1471,183 @@ add_principal_part(GEN nf, GEN u, GEN v, long flag)
     return nfmul(nf, v, u);
 }
 
-/* isprincipal for C * \prod P[i]^e[i] (C omitted if NULL) */
-GEN
-isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
+#if 0
+/* compute C prod P[i]^e[i],  e[i] >=0 for all i. C may be NULL (omitted)
+ * e destroyed ! */
+static GEN
+expand(GEN nf, GEN C, GEN P, GEN e)
 {
-  long l = lg(e), i, prec;
-  pari_sp av = avma;
-  GEN c, id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
-  int gen = flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL);
-
-  prec = prec_arch(bnf);
-  if (gen)
+  long i, l = lg(e), done = 1;
+  GEN id = C;
+  for (i=1; i<l; i++)
   {
-    z = cgetg(3,t_VEC);
-    gel(z,2) = (flag & nf_GENMAT)? cgetg(1, t_MAT): gmodulo(gen_1,gel(nf,1));
+    GEN ei = gel(e,i);
+    if (signe(ei))
+    {
+      if (mod2(ei)) id = id? idealmul(nf, id, gel(P,i)): gel(P,i);
+      ei = shifti(ei,-1);
+      if (signe(ei)) done = 0;
+      gel(e,i) = ei;
+    }
   }
-  id = C;
+  if (id != C) id = ideallllred(nf, id, NULL);
+  if (done) return id;
+  return idealmulred(nf, id, idealsqr(nf, expand(nf,id,P,e)));
+}
+/* C is an extended ideal, possibly with C[1] = NULL */
+static GEN
+expandext(GEN nf, GEN C, GEN P, GEN e)
+{
+  long i, l = lg(e), done = 1;
+  GEN A = gel(C,1);
+  for (i=1; i<l; i++)
+  {
+    GEN ei = gel(e,i);
+    if (signe(ei))
+    {
+      if (mod2(ei)) A = A? idealmul(nf, A, gel(P,i)): gel(P,i);
+      ei = shifti(ei,-1);
+      if (signe(ei)) done = 0;
+      gel(e,i) = ei;
+    }
+  }
+  if (A == gel(C,1))
+    A = C;
+  else
+    A = ideallllred(nf, mkvec2(A, gel(C,2)), NULL);
+  if (done) return A;
+  return idealmulred(nf, A, idealsqr(nf, expand(nf,A,P,e)));
+}
+#endif
+
+static GEN
+expand(GEN nf, GEN C, GEN P, GEN e)
+{
+  long i, l = lg(e);
+  GEN B, A = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
     if (signe(e[i]))
     {
-      if (gen) z[1] = P[i]; else z = gel(P,i);
-      id2 = idealpowred(bnf,z, gel(e,i));
-      id = id? idealmulred(nf,id,id2): id2;
+      B = idealpowred(nf, gel(P,i), gel(e,i));
+      A = A? idealmulred(nf,A,B): B;
     }
-  if (id == C) /* e = 0 */
+  return A;
+}
+static GEN
+expandext(GEN nf, GEN C, GEN P, GEN e)
+{
+  long i, l = lg(e);
+  GEN B, A = gel(C,1), C1 = A;
+  for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
+    if (signe(e[i]))
+    {
+      gel(C,1) = gel(P,i);
+      B = idealpowred(nf, C, gel(e,i));
+      A = A? idealmulred(nf,A,B): B;
+    }
+  return A == C1? C: A;
+}
+
+/* isprincipal for C * \prod P[i]^e[i] (C omitted if NULL) */
+GEN
+isprincipalfact(GEN bnf, GEN C, GEN P, GEN e, long flag)
+{
+  const long gen = flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL);
+  long prec;
+  pari_sp av = avma;
+  GEN C0, Cext, c, id, nf = checknf(bnf);
+
+  if (gen)
   {
-    if (!C) return isprincipalall(bnf, gen_1, flag);
-    C = idealhnf_shallow(nf,C); id = z;
-    if (gen) gel(id,1) = C; else id = C;
+    Cext = (flag & nf_GENMAT)? cgetg(1, t_MAT): mkpolmod(gen_1,gel(nf,1));
+    C0 = mkvec2(C, Cext);
+    id = expandext(nf, C0, P, e);
+  } else {
+    Cext = NULL;
+    C0 = C;
+    id = expand(nf, C, P, e);
   }
+  if (id == C0) /* e = 0 */
+  {
+    if (!C) return bnfisprincipal0(bnf, gen_1, flag);
+    C = idealhnf_shallow(nf,C);
+  }
+  else
+  {
+    if (gen) { C = gel(id,1); Cext = gel(id,2); } else C = id;
+  }
+  prec = prec_arch(bnf);
   c = getrand();
   for (;;)
   {
     pari_sp av1 = avma;
-    GEN y = _isprincipal(bnf, gen? gel(id,1): id,&prec,flag);
+    GEN y = isprincipalall(bnf, C, &prec, flag);
     if (y)
     {
       if (flag & nf_GEN_IF_PRINCIPAL)
       {
 	if (typ(y) == t_INT) { avma = av; return NULL; }
-	y = add_principal_part(nf, y, gel(id,2), flag);
+	y = add_principal_part(nf, y, Cext, flag);
       }
       else
       {
 	GEN u = gel(y,2);
 	if (!gen || typ(y) != t_VEC) return gerepileupto(av,y);
-	if (lg(u) == 1) return gerepilecopy(av,y);
-	gel(y,2) = add_principal_part(nf, u, gel(id,2), flag);
+	if (lg(u) != 1) gel(y,2) = add_principal_part(nf, u, Cext, flag);
       }
       return gerepilecopy(av, y);
-    }
-
-    if (flag & nf_GIVEPREC)
-    {
-      if (DEBUGLEVEL)
-	pari_warn(warner,"insufficient precision for generators, not given");
-      avma = av; return utoipos(prec);
     }
     if (DEBUGLEVEL) pari_warn(warnprec,"isprincipal",prec);
     avma = av1; bnf = bnfnewprec_shallow(bnf,prec); setrand(c);
   }
 }
+GEN
+isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e)
+{
+  const long flag = nf_GENMAT|nf_FORCE;
+  long prec;
+  pari_sp av = avma;
+  GEN u, y, id, C0, Cext, nf = gel(bnf,7);
+
+  Cext = cgetg(1, t_MAT);
+  C0 = mkvec2(C, Cext);
+  id = expandext(nf, C0, P, e);
+  if (id == C0) /* e = 0 */
+    C = idealhnf_shallow(nf,C);
+  else {
+    C = gel(id,1); Cext = gel(id,2);
+  }
+  prec = prec_arch(bnf);
+  y = isprincipalall(bnf, C, &prec, flag);
+  if (!y) { avma = av; return utoipos(prec); }
+  u = gel(y,2);
+  if (lg(u) != 1) gel(y,2) = add_principal_part(nf, u, Cext, flag);
+  return gerepilecopy(av, y);
+}
+
 
 GEN
 isprincipal(GEN bnf,GEN x)
 {
-  return isprincipalall(bnf,x,0);
+  return bnfisprincipal0(bnf,x,0);
 }
 
 GEN
 isprincipalgen(GEN bnf,GEN x)
 {
-  return isprincipalall(bnf,x,nf_GEN);
+  return bnfisprincipal0(bnf,x,nf_GEN);
 }
 
 GEN
 isprincipalforce(GEN bnf,GEN x)
 {
-  return isprincipalall(bnf,x,nf_FORCE);
+  return bnfisprincipal0(bnf,x,nf_FORCE);
 }
 
 GEN
 isprincipalgenforce(GEN bnf,GEN x)
 {
-  return isprincipalall(bnf,x,nf_GEN | nf_FORCE);
+  return bnfisprincipal0(bnf,x,nf_GEN | nf_FORCE);
 }
 
 /* if x a famat, assume it is an algebraic integer (very costly to check) */
@@ -2465,7 +2561,7 @@ makecycgen(GEN bnf)
       if (y && !fact_ok(nf,y,NULL,gen,gel(D,i))) y = NULL;
       if (y) { gel(h,i) = to_famat_all(y,gen_1); continue; }
     }
-    y = isprincipalfact(bnf, gen, gel(D,i), NULL, nf_GENMAT|nf_FORCE);
+    y = isprincipalfact(bnf, NULL, gen, gel(D,i), nf_GENMAT|nf_FORCE);
     h[i] = y[2];
   }
   return h;
@@ -2496,21 +2592,20 @@ makematal(GEN bnf)
     GEN C = (j<=lW)? NULL: gel(pFB,j);
     GEN Nx = get_norm_fact_primes(pFB, ex, C);
     GEN y = isprincipalarch(bnf,gel(WB_C,j), Nx,gen_1, gen_1, &e);
-    if (y && !fact_ok(nf,y,C,pFB,ex)) y = NULL;
-    if (y)
+    if (y && fact_ok(nf,y,C,pFB,ex))
     {
       if (DEBUGLEVEL>1) fprintferr("*%ld ",j);
       gel(ma,j) = y; continue;
     }
-
-    if (!y) y = isprincipalfact(bnf,pFB,ex,C, nf_GENMAT|nf_FORCE|nf_GIVEPREC);
+    y = isprincipalfact_or_fail(bnf, C, pFB, ex);
     if (typ(y) != t_INT)
     {
       if (DEBUGLEVEL>1) fprintferr("%ld ",j);
-      ma[j] = y[2]; continue;
+      gel(ma,j) = gel(y,2); continue;
     }
 
-    prec = itos(y); j--;
+    prec = itos(y);
+    j--; /* will retry the same element in next loop */
     if (DEBUGLEVEL) pari_warn(warnprec,"makematal",prec);
     nf = nfnewprec_shallow(nf,prec);
     bnf = bnfinit0(nf,1,NULL,prec); setrand(c);

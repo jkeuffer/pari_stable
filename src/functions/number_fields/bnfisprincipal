@@ -1,6 +1,6 @@
 Function: bnfisprincipal
 Section: number_fields
-C-Name: isprincipalall
+C-Name: bnfisprincipal0
 Prototype: GGD1,L,
 Help: bnfisprincipal(bnf,x,{flag=1}): bnf being output by bnfinit (with
  flag<=2), gives [v,alpha], where v is the vector of exponents on
@@ -43,17 +43,13 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  %7 = 1
  @eprog
 
- The binary digits of \fl mean:
- ideal. In particular x is principal if and only if v is the zero
- vector. flag is optional, whose binary digits mean 1: output [v,alpha] (only v
- if unset); 2: increase precision until alpha can be computed (do not insist
- if unset).
+ \noindent The binary digits of \fl mean:
  
- \item $1$: If set, outputs $[e,t]$ as explained above, otherwise return
- only $e$, which is much easier to compute. The following idiom tests whether
- an ideal is principal:
+ \item $1$: If set, outputs $[e,t]$ as explained above, otherwise returns
+ only $e$, which is much easier to compute. The following idiom only tests
+ whether an ideal is principal:
  \bprog
-   is_principal(bnf, x) = bnfisprincipal(bnf,x,0) == 0;
+   is_principal(bnf, x) = !bnfisprincipal(bnf,x,0);
  @eprog
 
  \item $2$: It may not be possible to recover $t$, given the initial accuracy
@@ -61,3 +57,8 @@ Doc: $\var{bnf}$ being the \sidx{principal ideal}
  set equal to the empty vector \kbd{[]\til}. If this bit is set,
  increase the precision and recompute needed quantities until $t$ can be
  computed. Warning: setting this may induce \emph{very} lengthy computations.
+Variant: Instead of the above hardcoded numerical flags, one should
+ rather use an or-er combination of the symbolic flags \tet{nf_GEN} (include
+ generators, possibly a place holder if too difficult) and \tet{nf_FORCE}
+ (insist on finding the generators).
+

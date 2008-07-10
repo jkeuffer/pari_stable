@@ -1213,7 +1213,7 @@ bnfisintnormabs(GEN bnf, GEN a)
     else
     {
       x = vecsmall_to_col(x);
-      x = isprincipalfact(bnf, Primes, x, NULL, nf_FORCE | nf_GEN_IF_PRINCIPAL);
+      x = isprincipalfact(bnf, NULL, Primes, x, nf_FORCE | nf_GEN_IF_PRINCIPAL);
       x = coltoliftalg(nf, x);
     }
     /* x solution, up to sign */

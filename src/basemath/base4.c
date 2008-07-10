@@ -1023,6 +1023,11 @@ famat_pow(GEN f, GEN n)
 /* x assumed to be a t_MATs (factorization matrix), or compatible with
  * the element_* functions. */
 static GEN
+ext_sqr(GEN nf, GEN x) {
+  if (typ(x) == t_MAT) return famat_sqr(x);
+  return nfsqr(nf, x);
+}
+static GEN
 ext_mul(GEN nf, GEN x, GEN y) {
   if (typ(x) == t_MAT) return (x == y)? famat_sqr(x): famat_mul(x,y);
   return nfmul(nf, x, y);
@@ -1379,7 +1384,7 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
   }
 }
 
-/* output the ideal product ix.iy (don't reduce) */
+/* output the ideal product ix.iy */
 GEN
 idealmul(GEN nf, GEN x, GEN y)
 {
@@ -1397,6 +1402,19 @@ idealmul(GEN nf, GEN x, GEN y)
   else
     ax = gcopy(ax? ax: ay);
   gel(res,1) = z; gel(res,2) = ax; return res;
+}
+GEN
+idealsqr(GEN nf, GEN x)
+{
+  pari_sp av;
+  GEN res, ax, z;
+  long tx = idealtyp(&x,&ax);
+  res = ax? cgetg(3,t_VEC): NULL; /*product is an extended ideal*/
+  av = avma;
+  z = gerepileupto(av, idealmul_aux(checknf(nf), x,x, tx,tx));
+  if (!ax) return z;
+  gel(res,1) = z;
+  gel(res,2) = ext_sqr(nf, ax); return res;
 }
 
 /* assume pr in primedec format */
@@ -1656,9 +1674,12 @@ static GEN
 _idealmulred(GEN nf, GEN x, GEN y)
 { return ideallllred(nf,idealmul(nf,x,y), NULL); }
 static GEN
+_idealsqrred(GEN nf, GEN x)
+{ return ideallllred(nf,idealsqr(nf,x), NULL); }
+static GEN
 _mul(void *data, GEN x, GEN y) { return _idealmulred((GEN)data,x,y); }
 static GEN
-_sqr(void *data, GEN x) { return _mul(data,x,x); }
+_sqr(void *data, GEN x) { return _idealsqrred((GEN)data, x); }
 
 /* compute x^n (x ideal, n integer), reducing along the way */
 GEN

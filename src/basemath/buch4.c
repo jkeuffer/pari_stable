@@ -508,12 +508,12 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(Sperm, lH);
     for (i=1; i<lH; i++)
     {
-      GEN v = isprincipalfact(bnf,Sperm,gel(H,i),NULL, nf_GEN|nf_FORCE);
+      GEN v = isprincipalfact(bnf, NULL,Sperm,gel(H,i), nf_GEN|nf_FORCE);
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
     }
     for (j=1; j<lB; j++,i++)
     {
-      GEN v = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i), nf_GEN|nf_FORCE);
+      GEN v = isprincipalfact(bnf, gel(Sperm,i),Sperm,gel(B,j),nf_GEN|nf_FORCE);
       gel(sunit,i) = coltoliftalg(nf, gel(v,2));
    }
     den = ZM_det_triangular(H); H = ZM_inv(H,den);

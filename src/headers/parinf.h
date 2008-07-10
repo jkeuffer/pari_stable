@@ -67,8 +67,7 @@ void remake_GM(GEN nf, nffp_t *F, long prec);
 /* for isprincipal */
 #define nf_GEN   1
 #define nf_FORCE 2
-#define nf_GIVEPREC 4
-#define nf_GENMAT 8
+#define nf_GENMAT 4
 #define nf_GEN_IF_PRINCIPAL 512
 
 /* for buchray */

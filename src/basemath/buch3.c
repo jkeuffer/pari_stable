@@ -499,7 +499,7 @@ GEN
 quick_isprincipalgen(GEN bnf, GEN x)
 { /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
   GEN idep, gen = gmael3(bnf,8,1,3), ep = isprincipal(bnf,x);
-  idep = isprincipalfact(bnf, gen, gneg(ep), x, nf_GENMAT|nf_FORCE);
+  idep = isprincipalfact(bnf, x, gen, ZC_neg(ep), nf_GENMAT|nf_FORCE);
   return mkvec2(ep, gel(idep,2));
 }
 
@@ -540,7 +540,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
     pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
 
   genray = gel(rayclass,3);
-  p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GENMAT | nf_FORCE);
+  p1 = isprincipalfact(bnf, x, genray, gneg(ex), nf_GENMAT | nf_FORCE);
   if (!gcmp0(gel(p1,1))) pari_err(bugparier,"isprincipalray");
   p1 = gel(p1,2); alpha = factorbackelt(p1, nf, NULL);
   if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
