@@ -81,7 +81,7 @@ static GEN
 fix_be(GEN bnfz, GEN be, GEN u)
 {
   GEN nf = checknf(bnfz), fu = gmael(bnfz,8,5);
-  return nfmul(nf, be, factorbackelt(fu, u, nf));
+  return nfmul(nf, be, nffactorback(nf, fu, u));
 }
 
 static GEN
@@ -461,7 +461,7 @@ compute_beta(GEN X, GEN vecWB, GEN ell, GEN bnfz)
   GEN BE, be;
   BE = famat_reduce(famat_factorback(vecWB, zv_to_ZV(X)));
   gel(BE,2) = centermod(gel(BE,2), ell);
-  be = factorbackelt(BE, bnfz, NULL);
+  be = nffactorback(bnfz, BE, NULL);
   be = reducebeta(bnfz, be, ell);
   if (DEBUGLEVEL>1) fprintferr("beta reduced = %Ps\n",be);
   return be;
@@ -967,7 +967,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
      * 1/be = C_invbe * prim_invbe */
     GEN mmu = get_mmu(i, r, ell);
     /* p1 = prim_invbe ^ -mu */
-    p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, mmu, nfz));
+    p1 = to_alg(nfz, nffactorback(nfz, powtau_prim_invbe, mmu));
     if (C_invbe) p1 = gmul(p1, powgi(C_invbe, RgV_sumpart(mmu, m)));
     /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
     gel(root, 2 + r[i+1]) = monomial(p1, r[i+1], vT);
@@ -978,7 +978,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   C_Rk = C_root;
 
   /* Compute modulo X^ell - 1, T^ell - t, nfzpol(MAXVARN) */
-  p1 = to_alg(nfz, factorbackelt(powtaubet, get_reverse(r), nfz));
+  p1 = to_alg(nfz, nffactorback(nfz, powtaubet, get_reverse(r)));
   num_t = Q_remove_denom(p1, &den_t);
 
   nfzpol = shallowcopy(gel(nfz,1));
@@ -1161,7 +1161,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   {
     p1 = tauofelt(gel(vselmer,j), tau);
     if (typ(p1) == t_MAT) /* famat */
-      p1 = factorbackelt(gel(p1,1), FpC_red(gel(p1,2),gell), nfz);
+      p1 = nffactorback(nfz, gel(p1,1), FpC_red(gel(p1,2),gell));
     gel(Tv,j) = isvirtualunit(bnfz, p1, cycgen,cyc,gell,rc);
   }
   P = FpM_ker(RgM_Rg_add_shallow(Tv, stoi(-g)), gell);

@@ -2330,13 +2330,9 @@ factorback_i(GEN fa, GEN e, GEN OBJ, int red)
 }
 
 GEN
-factorbackelt(GEN fa, GEN e, GEN nf)
+nffactorback(GEN nf, GEN fa, GEN e)
 {
-  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
-  if (!nf) pari_err(talker, "missing nf in factorbackelt");
-
-  nf = checknf(nf);
-  return factorback_aux(fa, e, &eltmul, &eltpow, nf);
+  return factorback_aux(fa, e, &eltmul, &eltpow, checknf(nf));
 }
 
 GEN
@@ -2348,7 +2344,7 @@ factorback0(GEN fa, GEN e, GEN nf)
 GEN
 factorback(GEN fa, GEN nf)
 {
-  return factorback_i(fa,nf,NULL,0);
+  return factorback_i(fa,NULL,nf,0);
 }
 
 GEN

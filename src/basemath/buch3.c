@@ -508,7 +508,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
   pari_sp av = avma;
-  GEN bnf, nf, bid, U, El, ep, p1, beta, idep, ex, rayclass, divray, genray;
+  GEN bnf, nf, bid, U, El, ep, L, beta, idep, ex, rayclass, divray, genray;
   GEN alpha;
 
   checkbnr(bnr); rayclass = gel(bnr,5);
@@ -531,8 +531,8 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = famat_mul(to_famat_all(gel(El,i), negi(gel(ep,i))), beta);
-  p1 = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
-  ex = vecmodii(p1, divray);
+  ex = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
+  ex = vecmodii(ex, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
@@ -540,14 +540,15 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
     pari_err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
 
   genray = gel(rayclass,3);
-  p1 = isprincipalfact(bnf, x, genray, gneg(ex), nf_GENMAT | nf_FORCE);
-  if (!gcmp0(gel(p1,1))) pari_err(bugparier,"isprincipalray");
-  p1 = gel(p1,2); alpha = factorbackelt(p1, nf, NULL);
+  L = isprincipalfact(bnf, x, genray, gneg(ex),
+                      nf_GENMAT|nf_GEN_IF_PRINCIPAL|nf_FORCE);
+  if (L == gen_0) pari_err(bugparier,"isprincipalray");
+  alpha = nffactorback(nf, L, NULL);
   if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
   {
-    GEN u = gel(bnr,6), y = gmul(gel(u,1), zideallog(nf, p1, bid));
+    GEN u = gel(bnr,6), y = gmul(gel(u,1), zideallog(nf, L, bid));
     y = reducemodinvertible(y, gel(u,2));
-    alpha = nfdiv(nf, alpha, factorbackelt(init_units(bnf), y, nf));
+    alpha = nfdiv(nf, alpha, nffactorback(nf, init_units(bnf), y));
   }
   return gerepilecopy(av, mkvec2(ex,alpha));
 }
