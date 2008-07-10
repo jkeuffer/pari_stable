@@ -1461,6 +1461,19 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
     avma = av1; bnf = bnfnewprec_shallow(bnf,pr); setrand(c);
   }
 }
+GEN
+isprincipal(GEN bnf,GEN x) { return bnfisprincipal0(bnf,x,0); }
+
+/* FIXME: OBSOLETE */
+GEN
+isprincipalgen(GEN bnf,GEN x)
+{ return bnfisprincipal0(bnf,x,nf_GEN); }
+GEN
+isprincipalforce(GEN bnf,GEN x)
+{ return bnfisprincipal0(bnf,x,nf_FORCE); }
+GEN
+isprincipalgenforce(GEN bnf,GEN x)
+{ return bnfisprincipal0(bnf,x,nf_GEN | nf_FORCE); }
 
 static GEN
 add_principal_part(GEN nf, GEN u, GEN v, long flag)
@@ -1623,31 +1636,6 @@ isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e)
   u = gel(y,2);
   if (lg(u) != 1) gel(y,2) = add_principal_part(nf, u, Cext, flag);
   return gerepilecopy(av, y);
-}
-
-
-GEN
-isprincipal(GEN bnf,GEN x)
-{
-  return bnfisprincipal0(bnf,x,0);
-}
-
-GEN
-isprincipalgen(GEN bnf,GEN x)
-{
-  return bnfisprincipal0(bnf,x,nf_GEN);
-}
-
-GEN
-isprincipalforce(GEN bnf,GEN x)
-{
-  return bnfisprincipal0(bnf,x,nf_FORCE);
-}
-
-GEN
-isprincipalgenforce(GEN bnf,GEN x)
-{
-  return bnfisprincipal0(bnf,x,nf_GEN | nf_FORCE);
 }
 
 /* if x a famat, assume it is an algebraic integer (very costly to check) */
