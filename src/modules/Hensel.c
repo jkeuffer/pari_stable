@@ -194,6 +194,21 @@ Newton_exponents(long e)
   setlg(E, l); return E;
 }
 
+/* lift accelerator */
+long
+hensel_lift_accel(long n, long *pmask)
+{
+  long a, j, mask = 0;
+  for(j=BITS_IN_LONG-1, a=n ;; j--)
+  {
+    mask |= (a&1)<<j;
+    a = (a+1)>>1;
+    if (a==1) break;
+  }
+  *pmask = mask>>j;
+  return BITS_IN_LONG-j;
+}
+
 /* a = modular factors of f mod (p,T) [possibly T=NULL], lift to precision p^e0
  * flag = 0: standard.
  * flag = 1: return TreeLift structure

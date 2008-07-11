@@ -1968,7 +1968,6 @@ GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic(GEN x, GEN p, long r);
 int     gdvd(GEN x, GEN y);
-long    hensel_lift_accel(long n, long *pmask);
 GEN     padicappr(GEN f, GEN a);
 GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
@@ -1981,6 +1980,7 @@ GEN     rootpadicfast(GEN f, GEN p, long e);
 /* Hensel.c */
 
 GEN     Newton_exponents(long e);
+long    hensel_lift_accel(long n, long *pmask);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 
 /* QX_factor.c */

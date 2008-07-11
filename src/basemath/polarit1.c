@@ -1578,21 +1578,6 @@ rootpadic(GEN f, GEN p, long prec)
 /*************************************************************************/
 /*                             rootpadicfast                             */
 /*************************************************************************/
-
-/* lift accelerator */
-long
-hensel_lift_accel(long n, long *pmask)
-{
-  long a, j, mask = 0;
-  for(j=BITS_IN_LONG-1, a=n ;; j--)
-  {
-    mask |= (a&1)<<j;
-    a = (a+1)>>1;
-    if (a==1) break;
-  }
-  *pmask = mask>>j;
-  return BITS_IN_LONG-j;
-}
 /* SPEC:
  * p is a t_INT > 1, e >= 0
  * f is a ZX with leading term prime to p.
