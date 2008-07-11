@@ -311,53 +311,37 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
 }
 
 /* Front-end for hensel_lift_fact:
-   lift the factorization of pol mod p given by fct to p^exp (if possible) */
+   lift the factorization of pol mod p given by L to p^N (if possible) */
 GEN
-polhensellift(GEN pol, GEN fct, GEN p, long exp)
+polhensellift(GEN pol, GEN L, GEN p, long N)
 {
-  GEN p1, p2;
-  long i, j, l;
+  GEN T = NULL;
+  long i, l, t;
   pari_sp av = avma;
 
-  /* we check the arguments */
   if (typ(pol) != t_POL) pari_err(talker, "not a polynomial in polhensellift");
-  if ((typ(fct) != t_COL && typ(fct) != t_VEC) || (lg(fct) < 3))
+  RgX_check_ZXY(pol, "polhensellift");
+  t = typ(L);
+  if (!is_vec_t(t) || lg(L) < 3)
     pari_err(talker, "not a factorization in polhensellift");
-  if (typ(p) != t_INT) pari_err(talker, "not a prime number in polhensellift");
-  if (exp < 1) pari_err(talker, "not a positive exponent in polhensellift");
+  t = typ(p);
+  if (t == t_VEC) /* [p, T] */
+  {
+    T = gel(p,2);
+    if (typ(T) != t_POL) pari_err(talker, "incorrect T in polhensellift");
+    RgX_check_ZX(T, "polhensellift");
+    p = gel(p,1); t = typ(p);
+  }
+  if (t != t_INT) pari_err(talker, "incorrect p in polhensellift");
+  if (N < 1) pari_err(talker, "not a positive exponent in polhensellift");
 
-  l = lg(pol);
-  for (i = 2; i < l; i++)
-    if (typ(pol[i]) != t_INT)
-      pari_err(talker, "not an integral polynomial in polhensellift");
-  p1 = lift(fct); /* make sure the coeffs are integers and not intmods */
-  l = lg(p1);
+  l = lg(L); L = shallowcopy(L);
   for (i = 1; i < l; i++)
   {
-    p2 = gel(p1,i);
-    if (typ(p2) != t_POL)
-    {
-      if (typ(p2) != t_INT)
-	pari_err(talker, "not an integral factorization in polhensellift");
-      gel(p1,i) = scalar_ZX_shallow(p2, varn(pol));
-    }
+    if (typ(gel(L,i)) != t_POL)
+      gel(L,i) = scalar_ZX_shallow(gel(L,i), varn(pol));
+    RgX_check_ZXY(gel(L,i), "polhensellift");
   }
-
-  /* then we check that pol \equiv \prod f ; f \in fct mod p */
-  p2 = gel(p1,1);
-  for (j = 2; j < l; j++) p2 = FpX_mul(p2, gel(p1,j), p);
-  if (!gcmp0(FpX_sub(pol, p2, p)))
-    pari_err(talker, "not a correct factorization in polhensellift");
-
-  /* finally we check that the elements of fct are coprime mod p */
-  if (!FpX_is_squarefree(pol, p))
-  {
-    for (i = 1; i < l; i++)
-      for (j = 1; j < i; j++)
-	if (degpol(FpX_gcd(gel(p1,i), gel(p1,j), p)))
-	  pari_err(talker, "polhensellift: factors %Ps and %Ps are not coprime",
-		     p1[i], p1[j]);
-  }
-  return gerepilecopy(av, hensel_lift_fact(pol,p1,NULL,p,powiu(p,exp),exp));
+  return gerepilecopy(av, hensel_lift_fact(pol, L, T, p, powiu(p,N), N));
 }
 
