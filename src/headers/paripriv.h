@@ -797,12 +797,14 @@ GEN     factcantor0(GEN f, GEN pp, long flag);
 
 /* polarit2.c */
 
-GEN     DDF_roots(GEN pol, GEN polp, GEN p);
-long    checkdeflate(GEN x);
-void    factor_quad(GEN x, GEN res, long *ptcnt);
-long    logint(GEN B, GEN y, GEN *ptq);
 long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);
+
+/* QX_factor */
+
+GEN     DDF_roots(GEN pol, GEN polp, GEN p);
+void    factor_quad(GEN x, GEN res, long *ptcnt);
+long    logint(GEN B, GEN y, GEN *ptq);
 
 /* FpX.c */
 

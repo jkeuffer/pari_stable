@@ -1,0 +1,1025 @@
+/* $Id: polarit2.c 10436 2008-07-11 14:08:05Z kb $
+
+Copyright (C) 2000  The PARI group.
+
+This file is part of the PARI/GP package.
+
+PARI/GP is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY WHATSOEVER.
+
+Check the License for details. You should have received a copy of it, along
+with the package; see the file 'COPYING'. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+#include "pari.h"
+#include "paripriv.h"
+
+/* assume same variables, y normalized, non constant */
+static GEN
+polidivis(GEN x, GEN y, GEN bound)
+{
+  long dx, dy, dz, i, j;
+  pari_sp av;
+  GEN z,p1,y_lead;
+
+  dy=degpol(y);
+  dx=degpol(x);
+  dz=dx-dy; if (dz<0) return NULL;
+  z=cgetg(dz+3,t_POL); z[1] = x[1];
+  x += 2; y += 2; z += 2;
+  y_lead = gel(y,dy);
+  if (gcmp1(y_lead)) y_lead = NULL;
+
+  p1 = gel(x,dx);
+  gel(z,dz) = y_lead? diviiexact(p1,y_lead): icopy(p1);
+  for (i=dx-1; i>=dy; i--)
+  {
+    av = avma; p1 = gel(x,i);
+    for (j=i-dy+1; j<=i && j<=dz; j++)
+      p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
+    if (y_lead) p1 = diviiexact(p1,y_lead);
+    if (bound && absi_cmp(p1, bound) > 0) return NULL;
+    p1 = gerepileupto(av,p1);
+    gel(z,i-dy) = p1;
+  }
+  av = avma;
+  for (;; i--)
+  {
+    p1 = gel(x,i);
+    /* we always enter this loop at least once */
+    for (j=0; j<=i && j<=dz; j++)
+      p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
+    if (!gcmp0(p1)) return NULL;
+    avma = av;
+    if (!i) break;
+  }
+  return z - 2;
+}
+
+#if 0
+/* cf Beauzamy et al: upper bound for
+ *      lc(x) * [2^(5/8) / pi^(3/8)] e^(1/4n) 2^(n/2) sqrt([x]_2)/ n^(3/8)
+ * where [x]_2 = sqrt(\sum_i=0^n x[i]^2 / binomial(n,i)). One factor has
+ * all coeffs less than then bound */
+static GEN
+two_factor_bound(GEN x)
+{
+  long i, j, n = lg(x) - 3;
+  pari_sp av = avma;
+  GEN *invbin, c, r = cgetr(3), z;
+
+  x += 2; invbin = (GEN*)new_chunk(n+1);
+  z = real_1(3); /* invbin[i] = 1 / binomial(n, i) */
+  for (i=0,j=n; j >= i; i++,j--)
+  {
+    invbin[i] = invbin[j] = z;
+    z = divru(mulrs(z, i+1), n-i);
+  }
+  z = invbin[0]; /* = 1 */
+  for (i=0; i<=n; i++)
+  {
+    c = gel(x,i); if (!signe(c)) continue;
+    affir(c, r);
+    z = addrr(z, mulrr(gsqr(r), invbin[i]));
+  }
+  z = shiftr(sqrtr(z), n);
+  z = divrr(z, dbltor(pow((double)n, 0.75)));
+  z = roundr_safe(sqrtr(z));
+  z = mulii(z, absi(gel(x,n)));
+  return gerepileuptoint(av, shifti(z, 1));
+}
+#endif
+
+/* A | S ==> |a_i| <= binom(d-1, i-1) || S ||_2 + binom(d-1, i) lc(S) */
+static GEN
+Mignotte_bound(GEN S)
+{
+  long i, d = degpol(S);
+  GEN C, N2, t, binlS, lS = leading_term(S), bin = vecbinome(d-1);
+
+  N2 = sqrtr(QuickNormL2(S,DEFAULTPREC));
+  binlS = is_pm1(lS)? bin: gmul(lS, bin);
+
+  /* i = 0 */
+  C = gel(binlS,1);
+  /* i = d */
+  t = N2; if (gcmp(C, t) < 0) C = t;
+  for (i = 1; i < d; i++)
+  {
+    t = addri(mulir(gel(bin,i), N2), gel(binlS,i+1));
+    if (mpcmp(C, t) < 0) C = t;
+  }
+  return C;
+}
+/* A | S ==> |a_i|^2 <= 3^{3/2 + d} / (4 \pi d) [P]_2^2,
+ * where [P]_2 is Bombieri's 2-norm */
+static GEN
+Beauzamy_bound(GEN S)
+{
+  const long prec = DEFAULTPREC;
+  long i, d = degpol(S);
+  GEN bin, lS, s, C;
+  bin = vecbinome(d);
+
+  s = real_0(prec);
+  for (i=0; i<=d; i++)
+  {
+    GEN c = gel(S,i+2);
+    if (gcmp0(c)) continue;
+    /* s += P_i^2 / binomial(d,i) */
+    s = addrr(s, divri(itor(sqri(c), prec), gel(bin,i+1)));
+  }
+  /* s = [S]_2^2 */
+  C = powrshalf(stor(3,prec), 3 + 2*d); /* 3^{3/2 + d} */
+  C = divrr(mulrr(C, s), mulsr(4*d, mppi(prec)));
+  lS = absi(leading_term(S));
+  return mulir(lS, sqrtr(C));
+}
+
+static GEN
+factor_bound(GEN S)
+{
+  pari_sp av = avma;
+  GEN a = Mignotte_bound(S);
+  GEN b = Beauzamy_bound(S);
+  if (DEBUGLEVEL>2)
+  {
+    fprintferr("Mignotte bound: %Ps\n",a);
+    fprintferr("Beauzamy bound: %Ps\n",b);
+  }
+  return gerepileupto(av, ceil_safe(gmin(a, b)));
+}
+
+/* Naive recombination of modular factors: combine up to maxK modular
+ * factors, degree <= klim
+ *
+ * target = polynomial we want to factor
+ * famod = array of modular factors.  Product should be congruent to
+ * target/lc(target) modulo p^a
+ * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
+static GEN
+cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
+     long maxK, long klim)
+{
+  long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
+  ulong spa_b, spa_bs2, Sbound;
+  GEN lc, lcpol, pa = powiu(p,a), pas2 = shifti(pa,-1);
+  uGEN trace1   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
+  uGEN trace2   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
+  GEN ind      = cgetg(lfamod+1, t_VECSMALL);
+  GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
+  GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
+  GEN listmod  = cgetg(lfamod+1, t_COL);
+  GEN fa       = cgetg(lfamod+1, t_COL);
+
+  if (maxK < 0) maxK = lfamod-1;
+
+  lc = absi(leading_term(pol));
+  if (is_pm1(lc)) lc = NULL;
+  lcpol = lc? ZX_Z_mul(pol, lc): pol;
+
+  {
+    GEN pa_b,pa_bs2,pb, lc2 = lc? sqri(lc): NULL;
+
+    pa_b = powiu(p, a-b); /* < 2^31 */
+    pa_bs2 = shifti(pa_b,-1);
+    pb= powiu(p, b);
+    for (i=1; i <= lfamod; i++)
+    {
+      GEN T1,T2, P = gel(famod,i);
+      long d = degpol(P);
+
+      degpol[i] = d; P += 2;
+      T1 = gel(P,d-1);/* = - S_1 */
+      T2 = sqri(T1);
+      if (d > 1) T2 = subii(T2, shifti(gel(P,d-2),1));
+      T2 = modii(T2, pa); /* = S_2 Newton sum */
+      if (lc)
+      {
+	T1 = Fp_mul(lc, T1, pa);
+	T2 = Fp_mul(lc2,T2, pa);
+      }
+      trace1[i] = itou(diviiround(T1, pb));
+      trace2[i] = itou(diviiround(T2, pb));
+    }
+    spa_b   = (ulong)  pa_b[2]; /* < 2^31 */
+    spa_bs2 = (ulong)pa_bs2[2]; /* < 2^31 */
+  }
+  degsofar[0] = 0; /* sentinel */
+
+  /* ind runs through strictly increasing sequences of length K,
+   * 1 <= ind[i] <= lfamod */
+nextK:
+  if (K > maxK || 2*K > lfamod) goto END;
+  if (DEBUGLEVEL > 3)
+    fprintferr("\n### K = %d, %Ps combinations\n", K,binomial(utoipos(lfamod), K));
+  setlg(ind, K+1); ind[1] = 1;
+  Sbound = (ulong) ((K+1)>>1);
+  i = 1; curdeg = degpol[ind[1]];
+  for(;;)
+  { /* try all combinations of K factors */
+    for (j = i; j < K; j++)
+    {
+      degsofar[j] = curdeg;
+      ind[j+1] = ind[j]+1; curdeg += degpol[ind[j+1]];
+    }
+    if (curdeg <= klim) /* trial divide */
+    {
+      GEN y, q, list;
+      pari_sp av;
+      ulong t;
+
+      /* d - 1 test */
+      for (t=trace1[ind[1]],i=2; i<=K; i++)
+	t = Fl_add(t, trace1[ind[i]], spa_b);
+      if (t > spa_bs2) t = spa_b - t;
+      if (t > Sbound)
+      {
+	if (DEBUGLEVEL>6) fprintferr(".");
+	goto NEXT;
+      }
+      /* d - 2 test */
+      for (t=trace2[ind[1]],i=2; i<=K; i++)
+	t = Fl_add(t, trace2[ind[i]], spa_b);
+      if (t > spa_bs2) t = spa_b - t;
+      if (t > Sbound)
+      {
+	if (DEBUGLEVEL>6) fprintferr("|");
+	goto NEXT;
+      }
+
+      av = avma;
+      /* check trailing coeff */
+      y = lc;
+      for (i=1; i<=K; i++)
+      {
+	GEN q = constant_term(gel(famod,ind[i]));
+	if (y) q = mulii(y, q);
+	y = centermodii(q, pa, pas2);
+      }
+      if (!signe(y) || remii(constant_term(lcpol), y) != gen_0)
+      {
+	if (DEBUGLEVEL>3) fprintferr("T");
+	avma = av; goto NEXT;
+      }
+      y = lc; /* full computation */
+      for (i=1; i<=K; i++)
+      {
+	GEN q = gel(famod,ind[i]);
+	if (y) q = gmul(y, q);
+	y = centermod_i(q, pa, pas2);
+      }
+
+      /* y is the candidate factor */
+      if (! (q = polidivis(lcpol,y,bound)) )
+      {
+	if (DEBUGLEVEL>3) fprintferr("*");
+	avma = av; goto NEXT;
+      }
+      /* found a factor */
+      list = cgetg(K+1, t_VEC);
+      gel(listmod,cnt) = list;
+      for (i=1; i<=K; i++) list[i] = famod[ind[i]];
+
+      y = Q_primpart(y);
+      gel(fa,cnt++) = y;
+      /* fix up pol */
+      pol = q;
+      if (lc) pol = Q_div_to_int(pol, leading_term(y));
+      for (i=j=k=1; i <= lfamod; i++)
+      { /* remove used factors */
+	if (j <= K && i == ind[j]) j++;
+	else
+	{
+	  famod[k] = famod[i];
+	  trace1[k] = trace1[i];
+	  trace2[k] = trace2[i];
+	  degpol[k] = degpol[i]; k++;
+	}
+      }
+      lfamod -= K;
+      if (lfamod < 11) maxK = lfamod-1;
+      if (lfamod < 2*K) goto END;
+      i = 1; curdeg = degpol[ind[1]];
+      bound = factor_bound(pol);
+      if (lc) lc = absi(leading_term(pol));
+      lcpol = lc? ZX_Z_mul(pol, lc): pol;
+      if (DEBUGLEVEL>3)
+	fprintferr("\nfound factor %Ps\nremaining modular factor(s): %ld\n",
+		   y, lfamod);
+      continue;
+    }
+
+NEXT:
+    for (i = K+1;;)
+    {
+      if (--i == 0) { K++; goto nextK; }
+      if (++ind[i] <= lfamod - K + i)
+      {
+	curdeg = degsofar[i-1] + degpol[ind[i]];
+	if (curdeg <= klim) break;
+      }
+    }
+  }
+END:
+  if (degpol(pol) > 0)
+  { /* leftover factor */
+    if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
+
+    setlg(famod, lfamod+1);
+    gel(listmod,cnt) = shallowcopy(famod);
+    gel(fa,cnt++) = pol;
+  }
+  if (DEBUGLEVEL>6) fprintferr("\n");
+  setlg(listmod, cnt);
+  setlg(fa, cnt); return mkvec2(fa, listmod);
+}
+
+void
+factor_quad(GEN x, GEN res, long *ptcnt)
+{
+  GEN a = gel(x,4), b = gel(x,3), c = gel(x,2), d, u, z1, z2, t;
+  GEN D = subii(sqri(b), shifti(mulii(a,c), 2));
+  long v, cnt = *ptcnt;
+
+  if (!Z_issquareall(D, &d)) { gel(res,cnt++) = x; *ptcnt = cnt; return; }
+
+  t = shifti(negi(addii(b, d)), -1);
+  z1 = gdiv(t, a); u = denom(z1);
+  z2 = gdiv(addii(t, d), a);
+  v = varn(x);
+  gel(res,cnt++) = gmul(u, gsub(pol_x(v), z1)); u = diviiexact(a, u);
+  gel(res,cnt++) = gmul(u, gsub(pol_x(v), z2)); *ptcnt = cnt;
+}
+
+/* y > 1 and B integers. Let n such that y^(n-1) <= B < y^n.
+ * Return e = max(n,1), set *ptq = y^e if non-NULL */
+long
+logint(GEN B, GEN y, GEN *ptq)
+{
+  pari_sp av = avma;
+  long e,i,fl;
+  GEN q,pow2, r = y;
+
+  if (typ(B) != t_INT) B = ceil_safe(B);
+  if (expi(B) <= (expi(y) << 6)) /* e small, be naive */
+  {
+    for (e=1; cmpii(r, B) < 0; e++) r = mulii(r,y);
+    goto END;
+  }
+  /* binary splitting: compute bits of e one by one */
+  /* compute pow2[i] = y^(2^i) [i < very crude upper bound for log_2(n)] */
+  pow2 = new_chunk(bit_accuracy(lgefint(B)));
+  gel(pow2,0) = y;
+  for (i=0,q=r;; )
+  {
+    fl = cmpii(r,B); if (fl >= 0) break;
+    q = r; r = sqri(q);
+    i++; gel(pow2,i) = r;
+  }
+  if (i == 0) { e = 1; goto END; } /* y <= B */
+
+  for (i--, e=1<<i;;)
+  { /* y^e = q < B <= r = q * y^(2^i) */
+    if (!fl) break; /* B = r */
+    /* q < B < r */
+    if (--i < 0) { if (fl > 0) e++; break; }
+    r = mulii(q, gel(pow2,i));
+    fl = cmpii(r, B);
+    if (fl <= 0) { e += (1<<i); q = r; }
+  }
+  if (fl <= 0) { e++; r = mulii(r,y); }
+END:
+  if (ptq) *ptq = gerepileuptoint(av, icopy(r)); else avma = av;
+  return e;
+}
+
+/* recombination of modular factors: van Hoeij's algorithm */
+
+/* Q in Z[X], return Q(2^n) */
+static GEN
+shifteval(GEN Q, long n)
+{
+  long i, l = lg(Q);
+  GEN s;
+
+  if (!signe(Q)) return gen_0;
+  s = gel(Q,l-1);
+  for (i = l-2; i > 1; i--) s = addii(gel(Q,i), shifti(s, n));
+  return s;
+}
+
+/* return integer y such that all |a| <= y if P(a) = 0 */
+static GEN
+root_bound(GEN P0)
+{
+  GEN Q = shallowcopy(P0), lP = absi(leading_term(Q)), x,y,z;
+  long k, d = degpol(Q);
+
+  /* P0 = lP x^d + Q, deg Q < d */
+  Q = normalizepol_i(Q, d+2);
+  for (k=lg(Q)-1; k>1; k--) gel(Q,k) = absi(gel(Q,k));
+  k = (long)(cauchy_bound(P0) / LOG2);
+  for (  ; k >= 0; k--)
+  {
+    pari_sp av = avma;
+    /* y = 2^k; Q(y) >= lP y^d ? */
+    if (cmpii(shifteval(Q,k), shifti(lP, d*k)) >= 0) break;
+    avma = av;
+  }
+  if (k < 0) k = 0;
+  x = int2n(k);
+  y = int2n(k+1);
+  for(k=0; ; k++)
+  {
+    z = shifti(addii(x,y), -1);
+    if (equalii(x,z) || k > 5) break;
+    if (cmpii(poleval(Q,z), mulii(lP, powiu(z, d))) < 0)
+      y = z;
+    else
+      x = z;
+  }
+  return y;
+}
+
+GEN
+special_pivot(GEN x)
+{
+  GEN t, H = ZM_hnf(x);
+  long i,j, l = lg(H), h = lg(H[1]);
+  for (i=1; i<h; i++)
+  {
+    int fl = 0;
+    for (j=1; j<l; j++)
+    {
+      t = gcoeff(H,i,j);
+      if (signe(t))
+      {
+	if (!is_pm1(t) || fl) return NULL;
+	fl = 1;
+      }
+    }
+  }
+  return H;
+}
+
+GEN
+chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N)
+{
+  long i = 1, j, l = lg(famod);
+  GEN V = cgetg(l, t_VEC);
+  for (j = 1; j < l; j++)
+    if (signe(c[j])) V[i++] = famod[j];
+  if (lt && i > 1) gel(V,1) = gmul(lt, gel(V,1));
+  setlg(V, i);
+  if (T) return FpXQXV_prod(V, T, N);
+  else return FpXV_prod(V,N);
+}
+
+static GEN
+chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
+{
+  long i, r;
+  GEN pol = P, list, piv, y, ltpol, lt, paov2;
+
+  piv = special_pivot(M_L);
+  if (!piv) return NULL;
+  if (DEBUGLEVEL>7) fprintferr("special_pivot output:\n%Ps\n",piv);
+
+  r  = lg(piv)-1;
+  list = cgetg(r+1, t_COL);
+  lt = absi(leading_term(pol));
+  if (is_pm1(lt)) lt = NULL;
+  ltpol = lt? gmul(lt, pol): pol;
+  paov2 = shifti(pa,-1);
+  for (i = 1;;)
+  {
+    if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
+    y = chk_factors_get(lt, famod, gel(piv,i), NULL, pa);
+    y = FpX_center(y, pa, paov2);
+    if (! (pol = polidivis(ltpol,y,bound)) ) return NULL;
+    if (lt) y = Q_primpart(y);
+    gel(list,i) = y;
+    if (++i >= r) break;
+
+    if (lt)
+    {
+      pol = RgX_Rg_divexact(pol, leading_term(y));
+      lt = absi(leading_term(pol));
+      ltpol = gmul(lt, pol);
+    }
+    else
+      ltpol = pol;
+  }
+  y = Q_primpart(pol);
+  gel(list,i) = y; return list;
+}
+
+GEN
+LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
+{
+  GEN norm, u;
+  long i, R;
+  pari_timer T;
+
+  if (DEBUGLEVEL>2) TIMERstart(&T);
+  u = ZM_lll_norms(m, final? 0.999: 0.75, LLL_INPLACE, &norm);
+  if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
+  for (R=lg(m)-1; R > 0; R--)
+    if (cmprr(gel(norm,R), Bnorm) < 0) break;
+  for (i=1; i<=R; i++) setlg(u[i], n0+1);
+  if (R <= 1)
+  {
+    if (!R) pari_err(bugparier,"LLL_cmbf [no factor]");
+    return NULL; /* irreducible */
+  }
+  setlg(u, R+1); return u;
+}
+
+static ulong
+next2pow(ulong a)
+{
+  ulong b = 1;
+  while (b < a) b <<= 1;
+  return b;
+}
+
+/* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
+ * van Hoeij's knapsack
+ *
+ * P = squarefree in Z[X].
+ * famod = array of (lifted) modular factors mod p^a
+ * bound = Mignotte bound for the size of divisors of P (for the sup norm)
+ * previously recombined all set of factors with less than rec elts */
+static GEN
+LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
+{
+  const long N0 = 1; /* # of traces added at each step */
+  double BitPerFactor = 0.5; /* nb bits in p^(a-b) / modular factor */
+  long i,j,tmax,n0,C, dP = degpol(P);
+  double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
+  double b0 = log((double)dP*2) / logp, logBr;
+  GEN lP, Br, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
+  pari_sp av, av2, lim;
+  long ti_LLL = 0, ti_CF  = 0;
+
+  lP = absi(leading_term(P));
+  if (is_pm1(lP)) lP = NULL;
+  Br = root_bound(P);
+  if (lP) Br = gmul(lP, Br);
+  logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
+
+  n0 = lg(famod) - 1;
+  C = (long)ceil( sqrt(N0 * n0 / 4.) ); /* > 1 */
+  Bnorm = dbltor(n0 * (C*C + N0*n0/4.) * 1.00001);
+  ZERO = zeromat(n0, N0);
+
+  av = avma; lim = stack_lim(av, 1);
+  TT = cgetg(n0+1, t_VEC);
+  Tra  = cgetg(n0+1, t_MAT);
+  for (i=1; i<=n0; i++)
+  {
+    TT[i]  = 0;
+    gel(Tra,i) = cgetg(N0+1, t_COL);
+  }
+  CM_L = scalarmat_s(C, n0);
+  /* tmax = current number of traces used (and computed so far) */
+  for (tmax = 0;; tmax += N0)
+  {
+    long b, bmin, bgood, delta, tnew = tmax + N0, r = lg(CM_L)-1;
+    GEN M_L, q, CM_Lp, oldCM_L;
+    int first = 1;
+    pari_timer ti2, TI;
+
+    bmin = (long)ceil(b0 + tnew*logBr);
+    if (DEBUGLEVEL>2)
+      fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
+		 r, tmax, bmin);
+
+    /* compute Newton sums (possibly relifting first) */
+    if (a <= bmin)
+    {
+      a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
+      a = (long)next2pow((ulong)a);
+
+      pa = powiu(p,a);
+      famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
+      for (i=1; i<=n0; i++) TT[i] = 0;
+    }
+    for (i=1; i<=n0; i++)
+    {
+      GEN p1 = gel(Tra,i);
+      GEN p2 = polsym_gen(gel(famod,i), gel(TT,i), tnew, NULL, pa);
+      gel(TT,i) = p2;
+      p2 += 1+tmax; /* ignore traces number 0...tmax */
+      for (j=1; j<=N0; j++) p1[j] = p2[j];
+      if (lP)
+      { /* make Newton sums integral */
+	GEN lPpow = powiu(lP, tmax);
+	for (j=1; j<=N0; j++)
+	{
+	  lPpow = mulii(lPpow,lP);
+	  gel(p1,j) = mulii(gel(p1,j), lPpow);
+	}
+      }
+    }
+
+    /* compute truncation parameter */
+    if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
+    oldCM_L = CM_L;
+    av2 = avma;
+    delta = b = 0; /* -Wall */
+AGAIN:
+    M_L = Q_div_to_int(CM_L, utoipos(C));
+    T2 = centermod( ZM_mul(Tra, M_L), pa );
+    if (first)
+    { /* initialize lattice, using few p-adic digits for traces */
+      double t = gexpo(T2) - max(32, BitPerFactor*r);
+      bgood = (long) (t * LOGp2);
+      b = max(bmin, bgood);
+      delta = a - b;
+    }
+    else
+    { /* add more p-adic digits and continue reduction */
+      long b0 = (long)(gexpo(T2) * LOGp2);
+      if (b0 < b) b = b0;
+      b = max(b-delta, bmin);
+      if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
+    }
+
+    q = powiu(p, b);
+    m = vconcat( CM_L, gdivround(T2, q) );
+    if (first)
+    {
+      GEN P1 = scalarmat(powiu(p, a-b), N0);
+      first = 0;
+      m = shallowconcat( m, vconcat(ZERO, P1) );
+      /*     [ C M_L        0     ]
+       * m = [                    ]   square matrix
+       *     [  T2'  p^(a-b) I_N0 ]   T2' = Tra * M_L  truncated
+       */
+    }
+
+    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
+    if (DEBUGLEVEL>2)
+      fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
+		 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+    if (!CM_L) { list = mkcol(P); break; }
+    if (b > bmin)
+    {
+      CM_L = gerepilecopy(av2, CM_L);
+      goto AGAIN;
+    }
+    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this block of traces");
+
+    i = lg(CM_L) - 1;
+    if (i == r && ZM_equal(CM_L, oldCM_L))
+    {
+      CM_L = oldCM_L;
+      avma = av2; continue;
+    }
+
+    CM_Lp = FpM_image(CM_L, utoipos(27449)); /* inexpensive test */
+    if (lg(CM_Lp) != lg(CM_L))
+    {
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
+      CM_L = ZM_hnf(CM_L);
+    }
+
+    if (i <= r && i*rec < n0)
+    {
+      pari_timer ti;
+      if (DEBUGLEVEL>2) TIMERstart(&ti);
+      list = chk_factors(P, Q_div_to_int(CM_L,utoipos(C)), bound, famod, pa);
+      if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
+      if (list) break;
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
+    }
+    CM_L = gerepilecopy(av2, CM_L);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) pari_warn(warnmem,"LLL_cmbf");
+      gerepileall(av, 5, &CM_L, &TT, &Tra, &famod, &pa);
+    }
+  }
+  if (DEBUGLEVEL>2)
+    fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
+  return list;
+}
+
+/* Find a,b minimal such that A < q^a, B < q^b, 1 << q^(a-b) < 2^31 */
+int
+cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
+{
+  long a,b,amin,d = (long)(31 * LOG2/gtodouble(glog(q,DEFAULTPREC)) - 1e-5);
+  int fl = 0;
+
+  b = logint(B, q, qb);
+  amin = b + d;
+  if (gcmp(powiu(q, amin), A) <= 0)
+  {
+    a = logint(A, q, qa);
+    b = a - d; *qb = powiu(q, b);
+  }
+  else
+  { /* not enough room */
+    a = amin;  *qa = powiu(q, a);
+    fl = 1;
+  }
+  if (DEBUGLEVEL > 3) {
+    fprintferr("S_2   bound: %Ps^%ld\n", q,b);
+    fprintferr("coeff bound: %Ps^%ld\n", q,a);
+  }
+  *pta = a;
+  *ptb = b; return fl;
+}
+
+/* use van Hoeij's knapsack algorithm */
+static GEN
+combine_factors(GEN target, GEN famod, GEN p, long klim)
+{
+  GEN la, B, A, res, L, pa, pb, listmod;
+  long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
+  pari_timer T;
+
+  A = factor_bound(target);
+
+  la = absi(leading_term(target));
+  B = mului(n, sqri(mulii(la, root_bound(target)))); /* = bound for S_2 */
+
+  (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
+
+  if (DEBUGLEVEL>2) (void)TIMER(&T);
+  famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
+  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
+  L = cmbf(target, famod, A, p, a, b, maxK, klim);
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
+
+  res     = gel(L,1);
+  listmod = gel(L,2); l = lg(listmod)-1;
+  famod = gel(listmod,l);
+  if (maxK >= 0 && lg(famod)-1 > 2*maxK)
+  {
+    if (l!=1) A = factor_bound(gel(res,l));
+    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
+    L = LLL_cmbf(gel(res,l), famod, p, pa, A, a, maxK);
+    if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
+    /* remove last elt, possibly unfactored. Add all new ones. */
+    setlg(res, l); res = shallowconcat(res, L);
+  }
+  return res;
+}
+
+/* assume pol(0) != 0, polp = pol/lc(pol) mod p.
+ * Return vector of rational roots of a */
+GEN
+DDF_roots(GEN pol, GEN polp, GEN p)
+{
+  GEN lc, lcpol, z, pe, pes2, bound;
+  long i, m, e, lz, v = varn(pol);
+  pari_sp av, lim;
+  pari_timer T;
+
+  if (DEBUGLEVEL>2) TIMERstart(&T);
+  lc = absi(leading_term(pol));
+  if (is_pm1(lc)) lc = NULL;
+  lcpol = lc? ZX_Z_mul(pol, lc): pol;
+
+  bound = root_bound(pol);
+  if (lc) bound = mulii(lc, bound);
+  e = logint(addis(shifti(bound, 1), 1), p, &pe);
+  pes2 = shifti(pe, -1);
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
+
+  av = avma; lim = stack_lim(av,2);
+  z = FpX_roots(polp, p);
+  lz = lg(z)-1;
+  if (lz > (degpol(pol) >> 2))
+  { /* many roots */
+    z = shallowconcat(deg1_from_roots(z, v),
+		 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
+    z = hensel_lift_fact(pol, z, NULL, p, pe, e);
+  }
+  else
+  {
+    z = ZpX_liftroots(pol, z, p, e);
+    z = deg1_from_roots(z, v);
+  }
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,e);
+
+  for (m=1, i=1; i <= lz; i++)
+  {
+    GEN q, r, y = gel(z,i);
+    if (lc) y = ZX_Z_mul(y, lc);
+    y = centermod_i(y, pe, pes2);
+    if (! (q = polidivis(lcpol, y, NULL)) ) continue;
+
+    lcpol = pol = q;
+    r = negi( constant_term(y) );
+    if (lc) {
+      r = gdiv(r,lc);
+      pol = Q_primpart(pol);
+      lc = absi( leading_term(pol) );
+      if (is_pm1(lc)) lc = NULL; else lcpol = ZX_Z_mul(pol, lc);
+    }
+    gel(z,m++) = r;
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) pari_warn(warnmem,"DDF_roots, m = %ld", m);
+      gerepileall(av, lc? 4:2, &z, &pol, &lc, &lcpol);
+
+    }
+  }
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Recombination");
+  z[0] = evaltyp(t_VEC) | evallg(m); return z;
+}
+
+/* Assume a squarefree, degree(a) > 0, a(0) != 0.
+ * If fl != 0 look only for rational roots */
+static GEN
+DDF(GEN a, int fl)
+{
+  GEN lead, prime, famod, z, ap;
+  const long da = degpol(a);
+  long chosenp, p, nfacp, np, nmax, ti = 0;
+  pari_sp av = avma, av1;
+  byteptr pt = diffptr;
+  const long MAXNP = 7;
+  pari_timer T, T2;
+
+  if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
+  nmax = da+1;
+  chosenp = 0;
+  lead = gel(a,da+2); if (gcmp1(lead)) lead = NULL;
+  av1 = avma;
+  for (p = np = 0; np < MAXNP; avma = av1)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(p,pt);
+    if (lead && !smodis(lead,p)) continue;
+    z = ZX_to_Flx(a, p);
+    if (!Flx_is_squarefree(z, p)) continue;
+
+    nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);
+    if (DEBUGLEVEL>4)
+      fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
+		  p, nfacp, fl?"roots": "factors", TIMER(&T2));
+    if (nfacp < nmax)
+    {
+      if (nfacp <= 1)
+      {
+	if (!fl) { avma = av; return mkcol(a); } /* irreducible */
+	if (!nfacp) return cgetg(1, t_VEC); /* no root */
+      }
+      nmax = nfacp; chosenp = p;
+      if (da > 100 && nmax < 5) break; /* large degree, few factors. Enough */
+    }
+    np++;
+  }
+  prime = utoipos(chosenp);
+  ap = lead? FpX_normalize(a, prime): FpX_red(a, prime);
+  if (fl) return gerepilecopy(av, DDF_roots(a, ap, prime));
+
+  famod = cgetg(nmax+1,t_COL);
+  gel(famod,1) = ap;
+  if (nmax != FpX_split_Berlekamp((GEN*)(famod+1), prime))
+    pari_err(bugparier,"DDF: wrong numbers of factors");
+  if (DEBUGLEVEL>2)
+  {
+    if (DEBUGLEVEL>4) msgTIMER(&T2, "splitting mod p = %ld", chosenp);
+    ti = TIMER(&T);
+    fprintferr("Time setup: %ld\n", ti);
+  }
+  z = combine_factors(a, famod, prime, da-1);
+  if (DEBUGLEVEL>2)
+    fprintferr("Total Time: %ld\n===========\n", ti + TIMER(&T));
+  return gerepilecopy(av, z);
+}
+
+/* Distinct Degree Factorization (deflating first)
+ * Assume x squarefree, degree(x) > 0, x(0) != 0 */
+GEN
+ZX_DDF(GEN x)
+{
+  GEN L;
+  long m;
+  x = RgX_deflate_max(x, &m);
+  L = DDF(x, 0);
+  if (m > 1)
+  {
+    GEN e, v, fa = factoru(m);
+    long i,j,k, l;
+
+    e = gel(fa,2); k = 0;
+    fa= gel(fa,1); l = lg(fa);
+    for (i=1; i<l; i++) k += e[i];
+    v = cgetg(k+1, t_VECSMALL); k = 1;
+    for (i=1; i<l; i++)
+      for (j=1; j<=e[i]; j++) v[k++] = fa[i];
+    for (k--; k; k--)
+    {
+      GEN L2 = cgetg(1,t_VEC);
+      for (i=1; i < lg(L); i++)
+	L2 = shallowconcat(L2, DDF(RgX_inflate(gel(L,i), v[k]), 0));
+      L = L2;
+    }
+  }
+  return L;
+}
+
+/* SquareFree Factorization. f = prod P^e, all e distinct, in Z[X] (char 0
+ * would be enough, if ZX_gcd --> ggcd). Return (P), set *ex = (e) */
+GEN
+ZX_squff(GEN f, GEN *ex)
+{
+  GEN T, V, W, P, e;
+  long i, k, dW, n, val;
+
+  if (signe(leading_term(f)) < 0) f = gneg_i(f);
+  val = ZX_valrem(f, &f);
+  n = 1 + degpol(f); if (val) n++;
+  e = cgetg(n,t_VECSMALL);
+  P = cgetg(n,t_COL);
+
+  T = ZX_gcd_all(f, ZX_deriv(f), &V);
+  for (k=i=1;; k++)
+  {
+    W = ZX_gcd_all(T,V, &T); dW = degpol(W);
+    /* W = prod P^e, e > k; V = prod P^e, e >= k */
+    if (dW != degpol(V)) { gel(P,i) = RgX_div(V,W); e[i] = k; i++; }
+    if (dW <= 0) break;
+    V = W;
+  }
+  if (val) { gel(P,i) = pol_x(varn(f)); e[i] = val; i++;}
+  setlg(P,i);
+  setlg(e,i); *ex = e; return P;
+}
+
+GEN
+fact_from_DDF(GEN fa, GEN e, long n)
+{
+  GEN v,w, y = cgetg(3, t_MAT);
+  long i,j,k, l = lg(fa);
+
+  v = cgetg(n+1,t_COL); gel(y,1) = v;
+  w = cgetg(n+1,t_COL); gel(y,2) = w;
+  for (k=i=1; i<l; i++)
+  {
+    GEN L = gel(fa,i), ex = utoipos(e[i]);
+    long J = lg(L);
+    for (j=1; j<J; j++,k++)
+    {
+      gel(v,k) = gcopy(gel(L,j));
+      gel(w,k) = ex;
+    }
+  }
+  return y;
+}
+
+/* Factor x in Z[t] */
+static GEN
+ZX_factor_i(GEN x)
+{
+  GEN fa,ex,y;
+  long n,i,l;
+
+  if (!signe(x)) pari_err(zeropoler,"ZX_factor");
+  fa = ZX_squff(x, &ex);
+  l = lg(fa); n = 0;
+  for (i=1; i<l; i++)
+  {
+    gel(fa,i) = ZX_DDF(gel(fa,i));
+    n += lg(fa[i])-1;
+  }
+  y = fact_from_DDF(fa,ex,n);
+  return sort_factor_pol(y, cmpii);
+}
+GEN
+ZX_factor(GEN x)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, ZX_factor_i(x));
+}
+GEN
+QX_factor(GEN x)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, ZX_factor_i(Q_primpart(x)));
+}
+
+GEN
+nfrootsQ(GEN x)
+{
+  pari_sp av = avma;
+  GEN z;
+  long val;
+
+  if (typ(x)!=t_POL) pari_err(notpoler,"nfrootsQ");
+  if (!signe(x)) pari_err(zeropoler,"nfrootsQ");
+  val = ZX_valrem(Q_primpart(x), &x);
+  (void)ZX_gcd_all(x, ZX_deriv(x), &x);
+  z = DDF(x, 1);
+  if (val) z = shallowconcat(z, gen_0);
+  return gerepilecopy(av, z);
+}

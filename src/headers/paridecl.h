@@ -1978,9 +1978,19 @@ GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootpadic(GEN f, GEN p, long r);
 GEN     rootpadicfast(GEN f, GEN p, long e);
 
-/* polarit2.c */
+/* Hensel.c */
 
 GEN     Newton_exponents(long e);
+GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
+
+/* QX_factor.c */
+
+GEN     QX_factor(GEN x);
+GEN     ZX_factor(GEN x);
+GEN     ZX_squff(GEN f, GEN *ex);
+
+/* polarit2.c */
+
 GEN     Q_content(GEN x);
 GEN     Q_denom(GEN x);
 GEN     Q_div_to_int(GEN x, GEN c);
@@ -1990,15 +2000,12 @@ GEN     Q_muli_to_int(GEN x, GEN d);
 GEN     Q_primitive_part(GEN x, GEN *ptc);
 GEN     Q_primpart(GEN x);
 GEN     Q_remove_denom(GEN x, GEN *ptd);
-GEN     QX_factor(GEN x);
 GEN     RgX_disc(GEN x);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
 void    RgX_type_decode(long x, long *t1, long *t2);
 int     RgX_type_is_composite(long t);
 long    RgX_type(GEN x, GEN *ptp, GEN *ptpol, long *ptpa);
 GEN     RgXQ_inv(GEN x, GEN y);
-GEN     ZX_factor(GEN x);
-GEN     ZX_squff(GEN f, GEN *ex);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);
@@ -2014,7 +2021,6 @@ GEN     factorback2(GEN fa,GEN e);
 GEN     gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,GEN), void *data);
 GEN     nffactorback(GEN nf, GEN L, GEN e);
 GEN     idealfactorback(GEN nf, GEN L, GEN e, int red);
-GEN     factpol(GEN x, long hint);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);
@@ -2033,7 +2039,6 @@ GEN     newtonpoly(GEN x, GEN p);
 GEN     nfrootsQ(GEN x);
 GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     poldisc0(GEN x, long v);
-GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 GEN     polresultant0(GEN x, GEN y,long v,long flag);
 GEN     polsym(GEN x, long n);
 GEN     primitive_part(GEN x, GEN *c);

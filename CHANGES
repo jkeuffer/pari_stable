@@ -332,6 +332,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    39- public interface to forsubgroup: traversesubgroups()
    40- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
    41- GP functions nffactorback / idealfactorback
+   42- files src/modules/QX_factor.c, src/modules/Hensel.c
 
   Removed
     1- obsolete library functions extract and matextract
