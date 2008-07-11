@@ -1381,18 +1381,25 @@ ellsea(GEN E, GEN p, long EARLY_ABORT)
 
   if (!modular_eqn && !get_seadata()) return NULL;
   /*First compute the trace modulo 2 */
-  if (FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p) > 0)
+  switch(FpX_nbroots(mkpoln(4, gen_1, gen_0, a4, a6), p))
   {
-    if (EARLY_ABORT)
-    {
-      if (DEBUGLEVEL)
-        fprintferr("Aborting: the number of points is divisible by 2\n");
-      avma = ltop; return gen_0;
-    }
-    tr = mkvec2(gen_2, gen_0);
+    case 3: /* bonus time: 4 | #E(Fp) = p+1 - a_p */
+      i = mod4(p)+1; if (i == 4) i = 0;
+      tr = mkvec2(utoipos(4), utoi(i));
+      break;
+    case 1:
+      tr = mkvec2(gen_2, gen_0);
+      break;
+    default : /* 0 */
+      tr = mkvec2(gen_2, gen_1);
+      break;
   }
-  else
-    tr = mkvec2(gen_2, gen_1);
+  if (EARLY_ABORT && gel(tr,2) != gen_1)
+  {
+    if (DEBUGLEVEL) fprintferr("Aborting: #E(Fp) divisible by 2\n");
+    avma = ltop; return gen_0;
+  }
+
   /* 'product' is the product of the primes we use, the computation
    *  stops when product > 4*sqrt(p)
    * l is the current prime,

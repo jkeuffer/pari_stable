@@ -3,8 +3,7 @@ Section: elliptic_curves
 C-Name: ellap
 Prototype: GG
 Help: ellap(E,p): computes a_p for the elliptic curve E using
- Shanks-Mestre's method (and Jacobi symbols for p small). Assume the equation
- is minimal at p.
+ Shanks-Mestre's method. Assume the equation is minimal at p.
 Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  prime number $p$. This is defined by the equation $\#E(\F_p) = p+1 - a_p$,
  where $\#E(\F_p)$ stands for the number of points of the curve $E$ over the
@@ -13,7 +12,8 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  Cornacchia's algorithm, hence very fast: $O(\log p)^2$). Otherwise, we use
  Shanks-Mestre's baby-step/giant-step method, which runs in time $O(p^{1/4})$
  using $O(p^{1/4})$ storage, hence becomes unreasonable when $p$ has about
- 30~digits.
+ 30~digits. If the \tet{ellsea} package is installed, the \tet{SEA} algorithm
+ becomes available and primes of the order of 200~digits become feasible.
 
  No checking is done that $p$ is indeed prime. $E$ must be an \var{sell} as
  output by \kbd{ellinit}, defined over $\Q$, $\F_p$ or $\Q_p$. $E$ must be
