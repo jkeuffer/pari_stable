@@ -852,7 +852,7 @@ GEN
 idealaddmultoone(GEN nf, GEN list)
 {
   pari_sp av = avma;
-  long N, i, l, tx = typ(list);
+  long N, i, l, nz, tx = typ(list);
   GEN H, U, perm, L;
 
   nf = checknf(nf); N = degpol(nf[1]);
@@ -860,12 +860,14 @@ idealaddmultoone(GEN nf, GEN list)
   l = lg(list);
   L = cgetg(l, t_VEC);
   if (l == 1) pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
+  nz = 0; /* number of non-zero ideals in L */
   for (i=1; i<l; i++)
   {
     GEN I = gel(list,i);
     if (typ(I) != t_MAT) I = idealhnf_shallow(nf,I);
     if (lg(I) != 1)
     {
+      nz++;
       RgM_check_ZM(I,"idealaddmultoone");
       if (lg(gel(I,1)) != N+1)
         pari_err(talker,"%Zs: not an ideal in idealaddmultoone", I);
@@ -877,11 +879,17 @@ idealaddmultoone(GEN nf, GEN list)
     pari_err(talker,"ideals don't sum to Z_K in idealaddmultoone");
   for (i=1; i<=N; i++)
     if (perm[i] == 1) break;
-  U = gel(U,(l-2)*N + i); /* z U = 1 */
+  U = gel(U,(nz-1)*N + i); /* (L[1]|...|L[nz]) U = 1 */
+  nz = 0;
   for (i=1; i<l; i++)
   {
     GEN c = gel(L,i);
-    c = (lg(c) == 1)? zerocol(N): ZM_ZC_mul(c, vecslice(U, (i-1)*N + 1, i*N));
+    if (lg(c) == 1)
+      c = zerocol(N); 
+    else {
+      c = ZM_ZC_mul(c, vecslice(U, nz*N + 1, (nz+1)*N));
+      nz++;
+    }
     gel(L,i) = c;
   }
   return gerepilecopy(av, L);
