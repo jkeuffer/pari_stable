@@ -21,7 +21,6 @@ bnr=bnrinit(bnf,[[5,3;0,1],[1,0]],1)
 rnfinit(nf2,x^5-x-2)
 \\
 bnfcertify(bnf)
-setrand(1);bnfinit(x^2-x-100000).fu
 setrand(1);bnfinit(x^2-x-100000,1).fu
 setrand(1);bnfinit(x^4+24*x^2+585*x+1791,,[0.1,0.1])
 bnrconductor(bnf,[[25,13;0,1],[1,1]])
