@@ -511,19 +511,22 @@ RgX_mulXn(GEN x, long d)
 long
 RgX_val(GEN x)
 {
-  long v;
-  if (lg(x) == 2) return LONG_MAX;
-  for (v = 0;; v++)
-    if (!isexactzero(gel(x,2+v))) break;
-  return v;
+  long i, lx = lg(x);
+  if (lx == 2) return LONG_MAX;
+  for (i = 2; i < lx; i++)
+    if (!isexactzero(gel(x,i))) break;
+  if (i == lx) i--; /* possible with non-rational zeros */
+  return i - 2;
 }
 long
 RgX_valrem(GEN x, GEN *Z)
 {
-  long v;
-  if (lg(x) == 2) { *Z = zeropol(varn(x)); return LONG_MAX; }
-  for (v = 0;; v++)
-    if (!isexactzero(gel(x,2+v))) break;
+  long v, i, lx = lg(x);
+  if (lx == 2) { *Z = zeropol(varn(x)); return LONG_MAX; }
+  for (i = 2; i < lx; i++)
+    if (!isexactzero(gel(x,i))) break;
+  if (i == lx) i--; /* possible with non-rational zeros */
+  v = i - 2;
   *Z = RgX_shift_shallow(x, -v);
   return v;
 }

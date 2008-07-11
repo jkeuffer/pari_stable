@@ -93,6 +93,8 @@ BA 81- the evaluator did not garbage collect huge expressions [#713]
 BA 82- changing a function in use caused a crash [#784]
    83- vecsort() would not check the type of element in 1-dimensional vector
        [ e.g. vecsort([I] now raises an error ]
+   84- RgX_val would raise a SEGV on t_POLs with exact *non-rational* 0
+       leading coeff, e.g. Mod(0,2)*x
 
   Changed
     1- [libpari] prototype of gpmalloc, gprealloc [ return void * ]
