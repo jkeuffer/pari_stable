@@ -374,9 +374,6 @@ x^4 - 8374015687535120430/83718587879473471*x^3 + 8907744727915040221/837185
  -1], 0]
 ? bnfcertify(bnf)
 1
-? setrand(1);bnfinit(x^2-x-100000).fu
-  *** bnfinit: Warning: insufficient precision for fundamental units, not given.
-  *** _.fu: missing units in .fu.
 ? setrand(1);bnfinit(x^2-x-100000,1).fu
 [Mod(379554884019013781006303254896369154068336082609238336*x + 119836165644
 250789990462835950022871665178127611316131167, x^2 - x - 100000)]
@@ -1112,4 +1109,4 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? getheap
 [180, 107744]
 ? print("Total time spent: ",gettime);
-Total time spent: 140
+Total time spent: 130
