@@ -839,57 +839,6 @@ subfields_poldata(GEN T, poldata *PD)
   }
 }
 
-GEN
-subfields(GEN nf, long d)
-{
-  pari_sp av = avma;
-  long N, v0;
-  GEN LSB, pol, G;
-  poldata PD;
-  primedata S;
-  blockdata B;
-
-  pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
-  v0 = varn(pol); N = degpol(pol);
-  if (d == N) return gerepilecopy(av, _subfield(pol, pol_x(v0)));
-  if (d == 1) return gerepilecopy(av, _subfield(pol_x(v0), pol));
-  if (d < 1 || d > N || N % d) return cgetg(1,t_VEC);
-
-  /* much easier if nf is Galois (WSS) */
-  G = galoisinit(nf? nf: pol, NULL);
-  if (G != gen_0)
-  { /* Bingo */
-    GEN L = galoissubgroups(G), F;
-    long k,i, l = lg(L), o = N/d;
-    F = cgetg(l, t_VEC);
-    k = 1;
-    for (i=1; i<l; i++)
-    {
-      GEN H = gel(L,i);
-      if (group_order(H) == o)
-	gel(F,k++) = lift_intern(galoisfixedfield(G, gel(H,1), 0, v0));
-    }
-    setlg(F, k);
-    return gerepilecopy(av, F);
-  }
-
-  subfields_poldata(nf? nf: pol, &PD);
-
-  B.PD = &PD;
-  B.S  = &S;
-  B.N  = N;
-  B.d  = d;
-  B.size = N/d;
-
-  choose_prime(&S, PD.pol, PD.dis);
-  LSB = subfields_of_given_degree(&B);
-  (void)delete_var(); /* from choose_prime */
-  avma = av;
-  if (!LSB) return cgetg(1, t_VEC);
-  G = gcopy(LSB); gunclone(LSB);
-  return fix_var(G, v0);
-}
-
 static GEN
 subfieldsall(GEN nf)
 {
@@ -946,7 +895,54 @@ subfieldsall(GEN nf)
 }
 
 GEN
-subfields0(GEN nf, long d)
+nfsubfields(GEN nf, long d)
 {
-  return d? subfields(nf,d): subfieldsall(nf);
+  pari_sp av = avma;
+  long N, v0;
+  GEN LSB, pol, G;
+  poldata PD;
+  primedata S;
+  blockdata B;
+
+  if (!d) return subfieldsall(nf);
+
+  pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
+  v0 = varn(pol); N = degpol(pol);
+  if (d == N) return gerepilecopy(av, _subfield(pol, pol_x(v0)));
+  if (d == 1) return gerepilecopy(av, _subfield(pol_x(v0), pol));
+  if (d < 1 || d > N || N % d) return cgetg(1,t_VEC);
+
+  /* much easier if nf is Galois (WSS) */
+  G = galoisinit(nf? nf: pol, NULL);
+  if (G != gen_0)
+  { /* Bingo */
+    GEN L = galoissubgroups(G), F;
+    long k,i, l = lg(L), o = N/d;
+    F = cgetg(l, t_VEC);
+    k = 1;
+    for (i=1; i<l; i++)
+    {
+      GEN H = gel(L,i);
+      if (group_order(H) == o)
+	gel(F,k++) = lift_intern(galoisfixedfield(G, gel(H,1), 0, v0));
+    }
+    setlg(F, k);
+    return gerepilecopy(av, F);
+  }
+
+  subfields_poldata(nf? nf: pol, &PD);
+
+  B.PD = &PD;
+  B.S  = &S;
+  B.N  = N;
+  B.d  = d;
+  B.size = N/d;
+
+  choose_prime(&S, PD.pol, PD.dis);
+  LSB = subfields_of_given_degree(&B);
+  (void)delete_var(); /* from choose_prime */
+  avma = av;
+  if (!LSB) return cgetg(1, t_VEC);
+  G = gcopy(LSB); gunclone(LSB);
+  return fix_var(G, v0);
 }

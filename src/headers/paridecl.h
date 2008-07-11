@@ -2157,8 +2157,7 @@ GEN     znstar_small(GEN zn);
 
 /* subfield.c */
 
-GEN     subfields(GEN nf, long d);
-GEN     subfields0(GEN nf,long d);
+GEN     nfsubfields(GEN nf, long d);
 
 /* subgroup.c */
 

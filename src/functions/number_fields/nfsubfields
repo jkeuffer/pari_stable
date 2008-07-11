@@ -1,6 +1,6 @@
 Function: nfsubfields
 Section: number_fields
-C-Name: subfields0
+C-Name: nfsubfields
 Prototype: GD0,L,
 Help: nfsubfields(pol,{d=0}): find all subfields of degree d of number field
  defined by pol (all subfields if d is null or omitted). Result is a vector of

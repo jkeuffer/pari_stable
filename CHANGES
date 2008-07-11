@@ -224,6 +224,7 @@ BA 49- user variables can now be aliased [#790].
    76- Rename library function factorback0 -> factorback2.
    77- factorback() no longer accepts an optional 3rd argument (nf). Use
        idealfactorback(). See also nffactorback().
+   78- Rename library function subfields0 -> nfsubfields
 
   Added
     1- library function pari_calloc, cgetalloc
