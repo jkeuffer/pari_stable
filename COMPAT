@@ -84,6 +84,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     "as is".
   - Functions quadunit(), quadregulator(), and factor() no longer apply
     componentwise to vector / matrix arguments. Use apply()
+  - factorback() no longer accepts an optional 3rd argument (nf). Use
+    idealfactorback(). See also nffactorback().
 
 * Specific to the PARI library:
 ===============================
@@ -174,6 +176,8 @@ This file lists the incompatible changes between Version 2.x and older versions
     ideallistzstar, ideallistzstargen. Use ideallist0.
   - removed obsolete library function algdep2. Use algdep0 (same arguments).
   - removed obsolete library function Mod0. Use gmodulo.
+  - factorback() now accepts a single argument. Rename
+    factorback0 -> factorback2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

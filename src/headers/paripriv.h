@@ -217,7 +217,6 @@ GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
 
 /* famat */
-GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
 GEN factorbackprime(GEN nf, GEN L, GEN e);
 GEN famat_inv(GEN f);
 GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
@@ -801,7 +800,6 @@ GEN     factcantor0(GEN f, GEN pp, long flag);
 GEN     DDF_roots(GEN pol, GEN polp, GEN p);
 long    checkdeflate(GEN x);
 void    factor_quad(GEN x, GEN res, long *ptcnt);
-GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow) (void *, GEN, GEN), void *data);
 long    logint(GEN B, GEN y, GEN *ptq);
 long    s_centermod(long x, ulong pp, ulong pps2);
 GEN     sylvestermatrix_i(GEN x, GEN y);

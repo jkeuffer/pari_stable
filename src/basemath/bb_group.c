@@ -98,7 +98,7 @@ gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
   if (typ(ord) == t_MAT)
   {
     fa = ord;
-    ord= factorback(fa,NULL);
+    ord= factorback(fa);
   }
   else
     fa = Z_factor(ord);
@@ -154,7 +154,7 @@ gen_eltorder(GEN a, GEN o, void *E, const struct bb_group *grp)
   if (typ(o) == t_MAT)
   {
     m = o;
-    o = factorback(m,NULL);
+    o = factorback(m);
     if (typ(o) != t_INT)
       pari_err(talker, "incorrect order in gen_eltorder: %Ps", o);
   }

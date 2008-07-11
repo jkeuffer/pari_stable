@@ -2263,6 +2263,10 @@ static GEN
 eltmul(void *nf, GEN x, GEN y) { return nfmul((GEN) nf, x, y); }
 static GEN
 eltpow(void *nf, GEN x, GEN n) { return nfpow((GEN) nf, x, n); }
+static GEN
+mul(void *a, GEN x, GEN y) { return gmul(x,y);}
+static GEN
+powi(void *a, GEN x, GEN y) { return powgi(x,y);}
 
 #if 0
 static GEN
@@ -2271,28 +2275,32 @@ static GEN
 ellpow(void *ell, GEN x, GEN n) { return powell((GEN) ell, x, n); }
 #endif
 
+/* [L,e] = [fa, NULL] or [elts, NULL] or [elts, exponents] */
 GEN
-factorback_aux(GEN fa, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,GEN), void *data)
+gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN),
+               GEN (*_pow)(void*,GEN,GEN), void *data)
 {
   pari_sp av = avma;
-  long k,l,lx,t = typ(fa);
+  long k, l, lx, t = typ(L);
   GEN p,x;
 
   if (e) /* supplied vector of exponents */
-    p = fa;
-  else /* genuine factorization */
+    p = L;
+  else
   {
-    if (t == t_MAT) {
-      l = lg(fa);
+    if (t == t_MAT) { /* genuine factorization */
+      l = lg(L);
       if (l == 1) return gen_1;
       if (l != 3) pari_err(talker,"not a factorisation in factorback");
     } else {
       if (!is_vec_t(t)) pari_err(talker,"not a factorisation in factorback");
-      return gerepileupto(av, divide_conquer_assoc(fa, _mul,data));
+      /* product of the L[i] */
+      return gerepileupto(av, divide_conquer_assoc(L, _mul,data));
     }
-    p = gel(fa,1);
-    e = gel(fa,2);
+    p = gel(L,1);
+    e = gel(L,2);
   }
+  /* p = elts, e = expo */
   lx = lg(p);
   t = t_INT; /* dummy */
   /* check whether e is an integral vector of correct length */
@@ -2306,46 +2314,27 @@ factorback_aux(GEN fa, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,
   if (lx == 1) return gen_1;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
-    if (signe(e[k]))
-      gel(x,l++) = _pow(data,gel(p,k),gel(e,k));
-  setlg(x,l);
+    if (signe(e[k])) gel(x,l++) = _pow(data, gel(p,k), gel(e,k));
+  x[0] = evaltyp(t_VEC) | _evallg(l);
   return gerepileupto(av, divide_conquer_assoc(x, _mul,data));
 }
 
-static GEN _agmul(void *a, GEN x, GEN y) { return gmul(x,y);}
-static GEN _apowgi(void *a, GEN x, GEN y) { return powgi(x,y);}
-
 GEN
-factorback_i(GEN fa, GEN e, GEN OBJ, int red)
+idealfactorback(GEN nf, GEN L, GEN e, int red)
 {
-  if (!OBJ)
-  {
-    if (e) {
-      OBJ = checknf_i(e); if (OBJ) e = NULL;
-    }
-    if (!OBJ) return factorback_aux(fa, e, &_agmul, &_apowgi, NULL);
-  }
-  if (red) return factorback_aux(fa, e, &idmulred, &idpowred, OBJ);
-  else     return factorback_aux(fa, e, &idmul,    &idpow, OBJ);
+  nf = checknf(nf);
+  if (red) return gen_factorback(L, e, &idmulred, &idpowred, (void*)nf);
+  else     return gen_factorback(L, e, &idmul, &idpow, (void*)nf);
 }
 
 GEN
-nffactorback(GEN nf, GEN fa, GEN e)
-{
-  return factorback_aux(fa, e, &eltmul, &eltpow, checknf(nf));
-}
+nffactorback(GEN nf, GEN L, GEN e)
+{ return gen_factorback(L, e, &eltmul, &eltpow, (void*)checknf(nf)); }
 
 GEN
-factorback0(GEN fa, GEN e, GEN nf)
-{
-  return factorback_i(fa,e,nf,0);
-}
-
+factorback2(GEN L, GEN e) { return gen_factorback(L, e, &mul, &powi, NULL); }
 GEN
-factorback(GEN fa, GEN nf)
-{
-  return factorback_i(fa,NULL,nf,0);
-}
+factorback(GEN fa) { return factorback2(fa, NULL); }
 
 GEN
 gisirreducible(GEN x)

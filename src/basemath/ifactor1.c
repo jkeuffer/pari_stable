@@ -631,7 +631,7 @@ plisprime(GEN N, long flag)
     GEN cbrtN = gsqrtn(N, utoi(3), NULL, nbits2prec((expi(N)+2)/3));
     GEN N_1 = addis(N,-1), f;
     F = Z_factor_until(N_1, sqri(floorr(cbrtN)));
-    f = factorback(F, NULL); F = gel(F,1);
+    f = factorback(F); F = gel(F,1);
     if (!equalii(f, N_1) && !BLS_test(N,f)) { avma = ltop; return gen_0; }
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }

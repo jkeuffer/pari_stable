@@ -2233,7 +2233,7 @@ _Fp_easylog(void *E, GEN x, GEN g, GEN ord)
   p1 = addsi(-1, p);
   if (equalii(p1,x))  /* -1 */
   {
-    ord = (typ(ord)==t_MAT) ? factorback(ord,NULL) : ord;
+    ord = (typ(ord)==t_MAT) ? factorback(ord) : ord;
     return gerepileupto(av, shifti(ord,-1));
   }
   avma = av; return NULL;

@@ -754,7 +754,7 @@ Fp_FpXQ_log(GEN a, GEN g, GEN o, GEN T, GEN p)
   if (is_pm1(a)) return gen_0;
   /* p > 2 */
 
-  ord  = typ(o)==t_MAT ? factorback(o, NULL) : o;
+  ord  = typ(o)==t_MAT ? factorback(o) : o;
   ordp = subis(p, 1); /* even */
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));

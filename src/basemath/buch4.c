@@ -475,13 +475,11 @@ bnfsunit(GEN bnf,GEN S,long prec)
   card = gen_1;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
-    GEN u, D = ZM_snfall_i(H, &u, NULL, 1);
-    card = detcyc(D, &i);
-    setlg(D,i);
-    p1=cgetg(i,t_VEC); pow=ZM_inv(u,gen_1);
-    for(i--; i; i--)
-      gel(p1,i) = factorback_i(gen, gel(pow,i), nf, 1);
-    gel(res,5) = mkvec3(card,D,p1);
+    GEN A, u, D = ZM_snfall_i(H, &u, NULL, 1);
+    card = detcyc(D, &i); setlg(D,i);
+    A = cgetg(i,t_VEC); pow = ZM_inv(u,gen_1);
+    for(i--; i; i--) gel(A,i) = idealfactorback(gen, gel(pow,i), nf, 1);
+    gel(res,5) = mkvec3(card, D, A);
   }
 
   /* S-units */
@@ -790,7 +788,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   Y = gmul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
-  aux = factorback(sunitrel, gfloor(Y));
+  aux = factorback2(sunitrel, gfloor(Y));
   x = gdiv(mkpolmod(x,nfpol), gnorm(gmodulo(lift_intern(aux), relpol)));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
   {

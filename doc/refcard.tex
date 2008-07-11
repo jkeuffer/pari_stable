@@ -1,8 +1,8 @@
 % $Id$
 % This file is intended to be processed by plain TeX (TeX82).
-% Reference Card for PARI-GP version 2.1
+% Reference Card for PARI-GP.
 
-% Copyright (c) 1997-2005 Karim Belabas.
+% Copyright (c) 1997-2008 Karim Belabas.
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU General Public License
 
@@ -20,7 +20,7 @@
 \def\versionnumber{2.25}% Version of this reference card
 \def\PARIversion{2.4.3}% Version of PARI described on this reference card
 \def\year{2008}
-\def\month{June}
+\def\month{July}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -619,7 +619,7 @@ $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
 \li{smallest prime $\ge x$}{nextprime$(x)$}
 \li{largest prime $\le x$}{precprime$(x)$}
 \li{factorization of $x$}{factor$(x,\{lim\})$}
-\li{reconstruct $x$ from its factorization}{factorback$(fa,\{nf\})$}
+\li{reconstruct $x$ from its factorization}{factorback$(f,\{e\})$}
 \par
 \subsec{Divisors}
 \li{number of distinct prime divisors}{omega$(x)$}
@@ -934,7 +934,7 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 %
 \subsec{Primes and Multiplicative Structure}
 \li{factor ideal $x$ in \var{nf}}{idealfactor$(\var{nf},x)$}
-\li{recover $x$ from its factorization in \var{nf}}{factorback$(x,nf)$}
+\li{expand ideal factorization in \var{nf}}{idealfactorback$(nf,f,{e})$}
 \li{decomposition of prime $p$ in \var{nf}}{idealprimedec$(\var{nf},p)$}
 \li{valuation of $x$ at prime ideal $pr$}{idealval$(\var{nf},x,pr)$}
 \li{weak approximation theorem in \var{nf}}{idealchinese$(\var{nf},x,y)$}

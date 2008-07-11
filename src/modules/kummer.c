@@ -148,7 +148,7 @@ reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
   {
     fa = factor(c);
     gel(fa,2) = FpC_red(gel(fa,2), gell);
-    c = factorback(fa, NULL);
+    c = factorback(fa);
     be = gmul(be, c);
   }
   return be;

@@ -221,6 +221,9 @@ BA 49- user variables can now be aliased [#790].
        idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
        lindep, lindep0
    75- Rename library functions ideal_two_elt* -> idealtwoelt*
+   76- Rename library function factorback0 -> factorback2.
+   77- factorback() no longer accepts an optional 3rd argument (nf). Use
+       idealfactorback(). See also nffactorback().
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -327,6 +330,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    38- library functions BPSW_psp & BPSW_isprime
    39- public interface to forsubgroup: traversesubgroups()
    40- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
+   41- GP functions nffactorback / idealfactorback
 
   Removed
     1- obsolete library functions extract and matextract
