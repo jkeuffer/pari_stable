@@ -701,7 +701,7 @@ idealval(GEN nf, GEN ix, GEN P)
   N = lg(ix)-1; if (!N) pari_err(talker,"zero ideal in idealval");
   ix = Q_primitive_part(ix, &cx);
   i = val_norm(ix,p, &k);
-  if (!i) { avma = av; return cx? itos(gel(P,3)) * Q_pval(cx,p): 0; }
+  if (!i) { v = cx? itos(gel(P,3)) * Q_pval(cx,p): 0; avma = av; return v; }
 
   e = itos(gel(P,3));
   f = itos(gel(P,4));
