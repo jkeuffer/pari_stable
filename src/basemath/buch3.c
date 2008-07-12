@@ -1608,10 +1608,10 @@ bnrdisc0(GEN A, GEN B, GEN C, long flag)
 }
 GEN
 discrayrel(GEN bnr, GEN H)
-{ return Discrayrel(bnr,H,nf_REL); }
+{ return bnrdisc(bnr,H,nf_REL); }
 GEN
 discrayrelcond(GEN bnr, GEN H)
-{ return Discrayrel(bnr,H,nf_REL | nf_COND); }
+{ return bnrdisc(bnr,H,nf_REL | nf_COND); }
 GEN
 discrayabs(GEN bnr, GEN H)
 { return bnrdisc(bnr,H,0); }
@@ -1781,7 +1781,7 @@ get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
   GEN arch2 = shallowcopy(arch), mod = mkvec2(ideal, arch2);
   long nz = 0, l = lg(arch), k, clhss;
   for (k = 1; k < l; k++)
-  { /* FIXME: this is wasteful. Use the same algorithm as conductor */
+  { /* FIXME: this is wasteful. Use the same algorithm as bnrconductor */
     if (signe(arch[k]))
     {
       gel(arch2,k) = gen_0; clhss = itos(bnrclassno(bnf,mod));

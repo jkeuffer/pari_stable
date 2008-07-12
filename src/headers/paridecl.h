@@ -32,6 +32,13 @@ GEN     simplefactmod(GEN f, GEN p);
 void    gerepilemany(pari_sp av, GEN* g[], int n);
 GEN     listcreate(void);
 void    listkill(GEN list);
+GEN     discrayabs(GEN bnr,GEN subgroup);
+GEN     discrayabscond(GEN bnr,GEN subgroup);
+GEN     discrayrel(GEN bnr,GEN subgroup);
+GEN     discrayrelcond(GEN bnr,GEN subgroup);
+GEN     isprincipalforce(GEN bnf,GEN x);
+GEN     isprincipalgen(GEN bnf, GEN x);
+GEN     isprincipalgenforce(GEN bnf,GEN x);
 
 /* F2x.c */
 
@@ -1116,9 +1123,6 @@ GEN     Buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long
 GEN     isprincipal(GEN bnf, GEN x);
 GEN     bnfisprincipal0(GEN bnf, GEN x,long flall);
 GEN     isprincipalfact(GEN bnf, GEN C, GEN L, GEN f, long flag);
-GEN     isprincipalforce(GEN bnf,GEN x);
-GEN     isprincipalgen(GEN bnf, GEN x);
-GEN     isprincipalgenforce(GEN bnf,GEN x);
 GEN     isunit(GEN bignf, GEN x);
 GEN     signunits(GEN bignf);
 GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
@@ -1143,13 +1147,9 @@ GEN     bnrsurjection(GEN bnr1, GEN bnr2);
 GEN     buchnarrow(GEN bignf);
 long    certifybuchall(GEN bnf);
 GEN     decodemodule(GEN nf, GEN fa);
-GEN     discrayabs(GEN bnr,GEN subgroup);
-GEN     discrayabscond(GEN bnr,GEN subgroup);
 GEN     discrayabslist(GEN bnf,GEN listes);
 GEN     discrayabslistarch(GEN bnf, GEN arch, long bound);
 GEN     discrayabslistlong(GEN bnf, long bound);
-GEN     discrayrel(GEN bnr,GEN subgroup);
-GEN     discrayrelcond(GEN bnr,GEN subgroup);
 GEN     idealmoddivisor(GEN bnr, GEN x);
 GEN     isprincipalray(GEN bnf, GEN x);
 GEN     isprincipalraygen(GEN bnf, GEN x);
