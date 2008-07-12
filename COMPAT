@@ -179,6 +179,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - factorback() now accepts a single argument. Rename
     factorback0 -> factorback2.
   - rename library function subfields0 -> nfsubfields
+  - changed prototypes of bnrdisc, bnrconductor, bnrisconductor [ actually
+    renamed bnrdisc0, bnrconductor0, bnrisconductor0 ]. Just use the new
+    prototype, it's more convenient.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

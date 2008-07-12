@@ -271,7 +271,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 
   initc = init_get_chic(gmael(bnr, 5, 2));
   Mrc   = diagonal_i(gmael(bnrc, 5, 2));
-  M = bnrGetSurj(bnr, bnrc);
+  M = bnrsurjection(bnr, bnrc);
   (void)ZM_hnfall(shallowconcat(M, Mrc), &U, 1);
   l = lg(M);
   U = rowslice(vecslice(U, l, lg(U)-1), 1, l-1);
@@ -395,7 +395,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
     bnrpr = Buchray(bnf, mkvec2(mpr0, gel(mod,2)), nf_INIT|nf_GEN);
     cycpr = gmael(bnrpr, 5, 2);
-    M = ZM_mul(bnrGetSurj(bnr, bnrpr), subgroup);
+    M = ZM_mul(bnrsurjection(bnr, bnrpr), subgroup);
     subpr = ZM_hnf(shallowconcat(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(ZM_det_triangular(subgroup), ZM_det_triangular(subpr)) );
@@ -461,7 +461,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   long first = 1, pr, rb, oldcpl = -1, iscyc = 0;
   pari_sp av = avma, av1;
   GEN bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC, rep = NULL;
-  GEN candD, bpr, indpr, sgp, p1, p2;
+  GEN candD, bpr, indpr, sgp, p2;
 
   sgp = gel(dtQ,4);
   bnf = gel(bnr,1);
@@ -525,10 +525,10 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 	  /* compute Clk(m), check if m is a conductor */
 	  dbg_block();
 	  bnrm = Buchray(bnf, m, nf_INIT|nf_GEN);
-	  p1   = conductor(bnrm, NULL, -1);
+	  c = bnrisconductor(bnrm, NULL);
 	  dbg_release();
 	  gel(arch,N+1-s) = gen_1;
-	  if (!signe(p1)) continue;
+	  if (!c) continue;
 
 	  /* compute Im(C) in Clk(m)... */
 	  ImC = ComputeKernel(bnrm, bnr, dtQ);
@@ -2610,7 +2610,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   subgrp = get_subgroup(subgrp,Mcyc,"bnrstark");
 
   /* compute bnr(conductor) */
-  p1     = conductor(bnr, subgrp, 2);
+  p1     = bnrconductor(bnr, subgrp, 2);
   bnr    = gel(p1,2); Mcyc = diagonal_i(gmael(bnr, 5, 2));
   subgrp = gel(p1,3);
   if (gcmp1( ZM_det_triangular(subgrp) )) { avma = av; return pol_x(0); }
@@ -2677,7 +2677,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (flag < 0 || flag > 8) pari_err(flagerr,"bnrL1");
 
   /* compute bnr(conductor) */
-  if (!(flag & 2)) bnr = gel(conductor(bnr, NULL, 2),2);
+  if (!(flag & 2)) bnr = gel(bnrconductor(bnr, NULL, 2),2);
   cyc  = gmael(bnr, 5, 2);
   Mcyc = diagonal_i(cyc);
   subgp = get_subgroup(subgp,Mcyc,"bnrL1");

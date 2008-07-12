@@ -229,6 +229,7 @@ BA 49- user variables can now be aliased [#790].
    78- Rename library function subfields0 -> nfsubfields
    79- Extend polhensellift to work over unramified extensions of Q_p
        [ was Q_p only ]
+   80- [libpari] changed prototypes of bnrdisc, bnrconductor, bnrisconductor
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -337,6 +338,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    40- library function bnfisprincipal0 (with new public flags, see nf_GENMAT)
    41- GP functions nffactorback / idealfactorback
    42- files src/modules/QX_factor.c, src/modules/Hensel.c
+   43- library functions bnrisconductor0, bnrdisc0, bnrconductor0,
+       bnrsurjection, ABC_to_bnr
 
   Removed
     1- obsolete library functions extract and matextract

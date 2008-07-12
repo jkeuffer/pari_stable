@@ -631,10 +631,11 @@ quadray(GEN D, GEN f, long prec)
   }
   else
   {
+    GEN nf = gel(bnf,7);
     bnf = checkbnf(D);
-    if (degpol(gmael(bnf,7,1)) != 2)
+    if (degpol(gel(nf,1)) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
-    D = gmael(bnf,7,3);
+    D = gel(nf,3);
   }
   bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x(0); }
@@ -642,7 +643,7 @@ quadray(GEN D, GEN f, long prec)
     y = bnrstark(bnr,NULL,prec);
   else
   {
-    bnr = gel(conductor(bnr,NULL,2), 2);
+    bnr = gel(bnrconductor(bnr,NULL,2), 2);
     y = treatspecialsigma(bnr);
     if (!y) y = computeP2(bnr, prec);
   }

@@ -131,7 +131,6 @@ GEN    coltoalg(GEN nf,GEN x);
 
 /* Other number fields routines */
 GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
-GEN    bnrGetSurj(GEN bnr1, GEN bnr2);
 GEN    check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
 GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);

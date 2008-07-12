@@ -1077,7 +1077,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (!vnf) pari_err(talker,"main variable in kummer must not be x");
   wk = gmael3(bnf,8,4,1);
   /* step 7 */
-  p1 = conductor(bnr, subgroup, 2);
+  p1 = bnrconductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
   bnr      = gel(p1,2);
   subgroup = gel(p1,3);
@@ -1185,7 +1185,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   { /* ell | N(ideal) */
     GEN bnrz = Buchray(bnfz, idealz, nf_INIT|nf_GEN);
     GEN subgroupz = invimsubgroup(bnrz, bnr, subgroup, &T);
-    gothf = conductor(bnrz,subgroupz,0);
+    gothf = bnrconductor(bnrz,subgroupz,0);
   }
   /* step 9, 10, 11 */
   if (DEBUGLEVEL>2) fprintferr("Step 9, 10 and 11\n");
@@ -1290,7 +1290,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
             GEN g = nfgcd(P0, RgX_deriv(P0), polnf, gel(nf,4));
             if (degpol(g)) continue;
             H = rnfnormgroup(bnr, P);
-            if (!ZM_equal(subgroup,H) && conductor(bnr,H,-1) == gen_0) continue;
+            if (!ZM_equal(subgroup,H) && !bnrisconductor(bnr,H)) continue;
           }
           res = shallowconcat(res, P);
           if (all < 0 && rk == ncyc) return res;

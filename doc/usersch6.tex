@@ -692,6 +692,66 @@ may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
 decision can be taken at the place where it is most likely to be useful.
 
+\subsec{Class field theory}
+
+Under GP, a class-field theoretic description of a number field is given by a
+triple $A$, $B$, $C$, where the defining set $[A,B,C]$ can have any of the
+following forms: $[\var{bnr}]$, $[\var{bnr},\var{subgroup}]$,
+$[\var{bnf},\var{modulus}]$, $[\var{bnf},\var{modulus},\var{subgroup}]$.
+You can still use directly all of (\kbd{libpari}'s routines implementing) GP's
+functions as described in Chapter~3, but they are often awkward in the context
+of \kbd{libpari} programming. In particular, it does not make much sens to
+always input a triple $A,B,C$ because of the fringe
+$[\var{bnf},\var{modulus},\var{subgroup}]$. The first routine to call, is
+thus
+
+\fun{GEN}{Buchray}{GEN bnf, GEN mod, long flag} initializes a \var{bnr}
+structure from \kbd{bnf} and modulus \kbd{mod}. \kbd{flag} is an or-ed
+combination of \kbd{nf\_GEN} (include generators) and \kbd{nf\_INIT} (if
+omitted, do not return a \var{bnr}, only the ray class group as an abelian
+group). In fact, only flag really makes sense: \kbd{nf\_GEN | nf\_INIT} to
+initialize a proper \var{bnr}: removing \kbd{nf\_GEN} does not save time, but
+the corresponding crippled \var{bnr} structure will raise errors in most
+class field theoretic functions. (Possibly also 0 to quickly compute the ray
+class group order and structure, but for what application?)
+
+Now we have a proper \var{bnr} encoding a \kbd{bnf} and a modulus, we no longer
+need the $[\var{bnf},\var{modulus}]$,
+$[\var{bnf},\var{modulus},\var{subgroup}]$ forms (which would internally call
+\tet{Buchray} anyway). Recall that a subgroup $H$ is given by a matrix in HNF,
+whose column express generators of $H$ on the fixed generators of the ray class
+group that stored in our \var{bnr}. You may also code the trivial subgroup by
+\kbd{NULL}.
+
+\fun{GEN}{bnrconductor}{GEN bnr, GEN H, long flag} see the documentation of
+the GP function.
+
+\fun{long}{bnrisconductor}{GEN bnr, GEN H} returns 1 is the class field
+defined by the subgroup $H$ (of the ray class group mod $f$ coded in \kbd{bnr})
+has conductor $f$. Returns 0 otherwise.
+
+\fun{GEN}{bnrdisc}{GEN bnr, GEN H, long flag} returns the discriminant and
+signature of the class field defined by \kbd{bnr} and $H$. See the description
+of the GP function for details. \fl is an or-ed combination of the flags
+\tet{nf_REL} (output relative data) and \tet{nf_COND} (return 0 unless the
+modulus is the conductor).
+
+\fun{GEN}{bnrsurjection}{GEN BNR, GEN bnr} \kbd{BNR} and \kbd{bnr}
+defined over the same field $K$, for moduli $F$ and $f$ with
+$F\mid f$, returns the matrix of the canonical surjection
+$\text{Cl}_K(F)\to \text{Cl}_K(f)$ (giving the image of the fixed ray class
+group generators of \kbd{BNR} in terms of the ones in \kbd{bnr}).
+
+\fun{GEN}{ABC_to_bnr}{GEN A, GEN B, GEN C, GEN *H, int addgen} This is a
+quick conversion function designed to go from the too general (inefficient)
+$A$, $B$, $C$ form to the preferred \var{bnr}, $H$ form for class fields.
+Given $A$, $B$, $C$ as explained above (omitted entries coded by \kbd{NULL}),
+return the associated \var{bnr}, and set $H$ to the associated subgroup. If
+\kbd{addgen} is $1$, make sure that if the \var{bnr} needed to be computed,
+then it contains generators.
+
+
+
 \subsec{Obsolete routines}
 
 Still provided for backward compatibility, but should not be used in new

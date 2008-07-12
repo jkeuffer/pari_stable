@@ -628,9 +628,8 @@ is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
 $\chi(\prod g_i^{n_i}) = \exp(2i\pi\sum a_i n_i / d_i)$.
 
 \item given such a structure, a \tev{subgroup} $H$ is input as a square
-matrix, whose column express generators of $H$ on the given generators $g_i$.
-Note that the absolute value of the determinant of that matrix is equal to
-the index $(G:H)$.
+matrix in HNF, whose column express generators of $H$ on the given generators
+$g_i$. Note that the determinant of that matrix is equal to the index $(G:H)$.
 
 \subsec{Relative extensions}
 
@@ -687,7 +686,7 @@ equal to the product of the determinant of $A$ by all the ideals of $I$. The
 determinant of a pseudo-matrix is the determinant of any pseudo-basis of the
 module it generates.
 
-\subsec{Class field theory}
+\subsec{Class field theory}\label{se:CFT}
 
 A $\tev{modulus}$, in the sense of class field theory, is a divisor supported
 on the non-complex places of $K$. In PARI terms, this means either an
@@ -708,14 +707,16 @@ technical data needed to solve discrete log problems.
 Finally we explain how to input ray number fields (or \var{bnr}), using class
 field theory. These are defined by a triple $A$, $B$, $C$, where the
 defining set $[A,B,C]$ can have any of the following forms: $[\var{bnr}]$,
-$[\var{bnr},\var{subgroup}]$, $[\var{bnf},\var{module}]$,
-$[\var{bnf},\var{module},\var{subgroup}]$.
+$[\var{bnr},\var{subgroup}]$, $[\var{bnf},\var{mod}]$,
+$[\var{bnf},\var{mod},\var{subgroup}]$. The last two forms are kept for
+backward compatibility, but no longer serve any real purpose (see example
+below); no newly written function will accept them.
 
 \item $\var{bnf}$ is as output by \kbd{bnfinit}, where units are mandatory
 unless the modulus is trivial; \var{bnr} is as output by \kbd{bnrinit}. This
 is the ground field $K$.
 
-\item \emph{module} is a modulus $\goth{f}$, as described above.
+\item \emph{mod} is a modulus $\goth{f}$, as described above.
 
 \item \emph{subgroup} a subgroup of the ray class group modulo $\goth{f}$ of
 $K$. As described above, this is input as a square matrix expressing
@@ -724,6 +725,22 @@ given generators.
 
 The corresponding \var{bnr} is the subfield of the ray class field of $K$
 modulo $\goth{f}$, fixed by the given subgroup.
+
+\bprog
+  ? K = bnfinit(y^2+1);
+  ? bnr = bnrinit(K, 13)
+  ? %.clgp
+  %3 = [36, [12, 3]]
+  ? bnrdisc(bnr); \\ discriminant of the full ray class field
+  ? bnrdisc(bnr, [3,1;0,1]); \\ discriminant of cyclic cubic extension of K
+@eprog\noindent
+We could have written directly
+\bprog
+  ? bnrdisc(K, 13);
+  ? bnrdisc(K, 13, [3,1;0,1]);
+@eprog\noindent
+avoiding one \tet{bnrinit}, but this would actually be slower since the
+\kbd{bnrinit} is called internally anyway. And now twice!
 
 \subsec{General use}
 

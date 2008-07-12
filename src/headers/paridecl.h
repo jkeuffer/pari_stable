@@ -1125,19 +1125,23 @@ GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
 
+GEN     ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen);
 GEN     Buchray(GEN bnf, GEN module, long flag);
 GEN     bnrclassno(GEN bignf,GEN ideal);
 GEN     bnrclassnolist(GEN bnf,GEN listes);
-GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN flag);
+GEN     bnrconductor0(GEN A, GEN B, GEN C, long flag);
+GEN     bnrconductor(GEN bnr, GEN H0, long flag);
 GEN     bnrconductorofchar(GEN bnr,GEN chi);
-GEN     bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag);
+GEN     bnrdisc0(GEN A, GEN B, GEN C, long flag);
+GEN     bnrdisc(GEN bnr, GEN H, long flag);
 GEN     bnrdisclist0(GEN bnf,GEN borne, GEN arch);
 GEN     bnrinit0(GEN bignf,GEN ideal,long flag);
-long    bnrisconductor(GEN arg0,GEN arg1,GEN arg2);
+long    bnrisconductor0(GEN A, GEN B, GEN C);
+long    bnrisconductor(GEN bnr, GEN H);
 GEN     bnrisprincipal(GEN bnf, GEN x,long flag);
+GEN     bnrsurjection(GEN bnr1, GEN bnr2);
 GEN     buchnarrow(GEN bignf);
 long    certifybuchall(GEN bnf);
-GEN     conductor(GEN bnr,GEN subgroup,long all);
 GEN     decodemodule(GEN nf, GEN fa);
 GEN     discrayabs(GEN bnr,GEN subgroup);
 GEN     discrayabscond(GEN bnr,GEN subgroup);

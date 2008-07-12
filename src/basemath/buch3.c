@@ -1175,14 +1175,12 @@ certifybuchall(GEN bnf)
 /* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
    matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
 GEN
-bnrGetSurj(GEN bnr1, GEN bnr2)
+bnrsurjection(GEN bnr1, GEN bnr2)
 {
   long l, i;
   GEN M, gen = gmael(bnr1, 5, 3);
-
   l = lg(gen); M = cgetg(l, t_MAT);
-  for (i = 1; i < l; i++)
-    gel(M,i) = isprincipalray(bnr2, gel(gen,i));
+  for (i = 1; i < l; i++) gel(M,i) = isprincipalray(bnr2, gel(gen,i));
   return M;
 }
 
@@ -1194,56 +1192,39 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
   GEN H2, Delta = diagonal_i(gmael(bnr2,5,2)); /* SNF structure of Cl_n */
 
   if (!H) return Delta;
-  H2 = ZM_mul(bnrGetSurj(bnr, bnr2), H);
+  H2 = ZM_mul(bnrsurjection(bnr, bnr2), H);
   return ZM_hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
 }
 
-static GEN
-args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, int gen)
+/* convert A,B,C to [bnr, H] */
+GEN
+ABC_to_bnr(GEN A, GEN B, GEN C, GEN *H, int gen)
 {
-  GEN bnr,bnf;
-
-  if (typ(arg0)!=t_VEC)
-    pari_err(talker,"neither bnf nor bnr in conductor or discray");
-  if (!arg1) arg1 = gen_0;
-  if (!arg2) arg2 = gen_0;
-
-  switch(lg(arg0))
-  {
-    case 7:  /* bnr */
-      bnr = arg0; (void)checkbnf(gel(bnr,1));
-      *subgroup = arg1; break;
-
-    case 11: /* bnf */
-      bnf = checkbnf(arg0);
-      bnr = Buchray(bnf,arg1, gen? nf_INIT | nf_GEN: nf_INIT);
-      *subgroup = arg2; break;
-
-    default: pari_err(talker,"neither bnf nor bnr in conductor or discray");
-      return NULL; /* not reached */
-  }
-  if (!gcmp0(*subgroup))
-  {
-    long tx = typ(*subgroup);
-    if (!is_matvec_t(tx))
-      pari_err(talker,"bad subgroup in conductor or discray");
-  }
-  return bnr;
+  if (typ(A) == t_VEC)
+    switch(lg(A))
+    {
+      case 7: /* bnr */
+        *H = B; return A;
+      case 11: /* bnf */
+        if (!B) pari_err(talker,"missing conductor in ABC_to_bnr");
+        *H = C; return Buchray(A,B, gen? nf_INIT | nf_GEN: nf_INIT);
+    }
+  pari_err(typeer,"ABC_to_bnr");
+  *H = NULL; return NULL; /* not reached */
 }
 
 GEN
-bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN all)
+bnrconductor0(GEN A, GEN B, GEN C, long flag)
 {
-  long flag = all? itos(all): 0;
-  GEN sub = arg1, bnr = args_to_bnr(arg0,arg1,arg2,&sub, flag > 0);
-  return conductor(bnr,sub, flag);
+  GEN H, bnr = ABC_to_bnr(A,B,C,&H, flag > 0);
+  return bnrconductor(bnr, H, flag);
 }
 
 long
-bnrisconductor(GEN arg0,GEN arg1,GEN arg2)
+bnrisconductor0(GEN A,GEN B,GEN C)
 {
-  GEN sub = arg1, bnr = args_to_bnr(arg0,arg1,arg2,&sub, 0);
-  return itos(conductor(bnr,sub,-1));
+  GEN H, bnr = ABC_to_bnr(A,B,C,&H, 0);
+  return bnrisconductor(bnr, H);
 }
 
 static GEN
@@ -1302,14 +1283,13 @@ contains(GEN H, GEN A)
 { return H? (hnf_gauss(H, A) != NULL): gcmp0(A); }
 
 /* (see also Discrayrel). Given a number field bnf=bnr[1], a ray class
- * group structure bnr (with generators if all > 0), and a subgroup H of the
- * ray class group, compute the conductor of H if all=0. If all > 0, compute
+ * group structure bnr (with generators if flag > 0), and a subgroup H of the
+ * ray class group, compute the conductor of H if flag=0. If flag > 0, compute
  * furthermore the corresponding H' and output
- * if all = 1: [[ideal,arch],[hm,cyc,gen],H']
- * if all = 2: [[ideal,arch],newbnr,H']
- * if all < 0, answer only 1 is module is the conductor, 0 otherwise. */
+ * if flag = 1: [[ideal,arch],[hm,cyc,gen],H']
+ * if flag = 2: [[ideal,arch],newbnr,H'] */
 GEN
-conductor(GEN bnr, GEN H0, long all)
+bnrconductor(GEN bnr, GEN H0, long flag)
 {
   pari_sp av = avma;
   long j, k, l;
@@ -1317,7 +1297,7 @@ conductor(GEN bnr, GEN H0, long all)
   int iscond0 = 1, iscondinf = 1;
   zlog_S S;
 
-  if (all > 0) checkbnrgen(bnr); else checkbnr(bnr);
+  if (flag) checkbnrgen(bnr); else checkbnr(bnr);
   bnf = gel(bnr,1);
   bid = gel(bnr,2); init_zlog_bid(&S, bid);
   clhray = gmael(bnr,5,1);
@@ -1332,7 +1312,6 @@ conductor(GEN bnr, GEN H0, long all)
     for (j = itos(gel(e,k)); j > 0; j--)
     {
       if (!contains(H, bnr_log_gen_pr(bnr, &S, nf, j, k))) break;
-      if (all < 0) { avma = av; return gen_0; }
       iscond0 = 0;
     }
     gel(e2,k) = stoi(j);
@@ -1341,11 +1320,9 @@ conductor(GEN bnr, GEN H0, long all)
   for (k = 1; k < l; k++)
   {
     if (!contains(H, bnr_log_gen_arch(bnr, &S, k))) continue;
-    if (all < 0) { avma = av; return gen_0; }
     archp[k] = 0;
     iscondinf = 0;
   }
-  if (all < 0) { avma = av; return gen_1; }
   if (!iscondinf)
   {
     for (j = k = 1; k < l; k++)
@@ -1354,7 +1331,7 @@ conductor(GEN bnr, GEN H0, long all)
   }
   ideal = iscond0? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   mod = mkvec2(ideal, indices_to_vec01(archp, nf_get_r1(nf)));
-  if (!all) return gerepilecopy(av, mod);
+  if (!flag) return gerepilecopy(av, mod);
 
   if (iscond0 && iscondinf)
   {
@@ -1366,7 +1343,34 @@ conductor(GEN bnr, GEN H0, long all)
     bnr2 = Buchray(bnf, mod, nf_INIT | nf_GEN);
     H = imageofgroup(bnr, bnr2, H);
   }
-  return gerepilecopy(av, mkvec3(mod, (all == 1)? gel(bnr2,5): bnr2, H));
+  return gerepilecopy(av, mkvec3(mod, (flag == 1)? gel(bnr2,5): bnr2, H));
+}
+long
+bnrisconductor(GEN bnr, GEN H0)
+{
+  pari_sp av = avma;
+  long j, k, l;
+  GEN bnf, nf, bid, archp, clhray, e, H;
+  zlog_S S;
+
+  checkbnr(bnr);
+  bnf = gel(bnr,1);
+  bid = gel(bnr,2); init_zlog_bid(&S, bid);
+  clhray = gmael(bnr,5,1);
+  nf = gel(bnf,7);
+  H = check_subgroup(bnr, H0, &clhray, 1, "conductor");
+
+  archp = S.archp;
+  e     = S.e; l = lg(e);
+  for (k = 1; k < l; k++)
+  {
+    j = itos(gel(e,k));
+    if (contains(H, bnr_log_gen_pr(bnr, &S, nf, j, k))) { avma = av; return 0; }
+  }
+  l = lg(archp);
+  for (k = 1; k < l; k++)
+    if (contains(H, bnr_log_gen_arch(bnr, &S, k))) { avma = av; return 0; }
+  avma = av; return 1; 
 }
 
 /* return the norm group corresponding to the relative extension given by
@@ -1519,7 +1523,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,polrel);
   if (!group) { avma = av; return gen_0; }
-  return gerepileupto(av, conductor(bnr,group,1));
+  return gerepileupto(av, bnrconductor(bnr,group,1));
 }
 
 /* Given a number field bnf=bnr[1], a ray class group structure bnr, and a
@@ -1573,14 +1577,14 @@ Discrayrel(GEN bnr, GEN H0, long flag)
   return gerepilecopy(av, mkvec3(clhray, stoi(nz), dlk));
 }
 
-static GEN
-Discrayabs(GEN bnr, GEN subgroup, long flag)
+GEN
+bnrdisc(GEN bnr, GEN H, long flag)
 {
   pari_sp av = avma;
   long clhray, n, R1;
   GEN z, p1, D, dk, nf, dkabs;
 
-  D = Discrayrel(bnr, subgroup, flag);
+  D = Discrayrel(bnr, H, flag);
   if ((flag & nf_REL) || D == gen_0) return D;
 
   nf = checknf(bnr);
@@ -1597,10 +1601,10 @@ Discrayabs(GEN bnr, GEN subgroup, long flag)
 }
 
 GEN
-bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag)
+bnrdisc0(GEN A, GEN B, GEN C, long flag)
 {
-  GEN H, bnr = args_to_bnr(arg0,arg1,arg2,&H, 0);
-  return Discrayabs(bnr,H,flag);
+  GEN H, bnr = ABC_to_bnr(A,B,C,&H, 0);
+  return bnrdisc(bnr,H,flag);
 }
 GEN
 discrayrel(GEN bnr, GEN H)
@@ -1610,10 +1614,10 @@ discrayrelcond(GEN bnr, GEN H)
 { return Discrayrel(bnr,H,nf_REL | nf_COND); }
 GEN
 discrayabs(GEN bnr, GEN H)
-{ return Discrayabs(bnr,H,0); }
+{ return bnrdisc(bnr,H,0); }
 GEN
 discrayabscond(GEN bnr, GEN H)
-{ return Discrayabs(bnr,H,nf_COND); }
+{ return bnrdisc(bnr,H,nf_COND); }
 
 /* chi character of abelian G: chi[i] = chi(z_i), where G = \oplus Z/cyc[i] z_i.
  * Return Ker chi [ NULL = trivial subgroup of G ] */
@@ -1644,7 +1648,7 @@ GEN
 bnrconductorofchar(GEN bnr, GEN chi)
 {
   pari_sp av = avma; checkbnr(bnr);
-  return gerepileupto(av, conductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
+  return gerepileupto(av, bnrconductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
 }
 
 /* t = [bid,U], h = #Cl(K) */
