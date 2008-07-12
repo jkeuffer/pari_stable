@@ -712,8 +712,9 @@ omitted, do not return a \var{bnr}, only the ray class group as an abelian
 group). In fact, only flag really makes sense: \kbd{nf\_GEN | nf\_INIT} to
 initialize a proper \var{bnr}: removing \kbd{nf\_GEN} does not save time, but
 the corresponding crippled \var{bnr} structure will raise errors in most
-class field theoretic functions. (Possibly also 0 to quickly compute the ray
-class group order and structure, but for what application?)
+class field theoretic functions. Possibly also 0 to quickly compute the ray
+class group structure; \tet{bnrclassno} is faster if we only need the
+\emph{order} of the ray class group.
 
 Now we have a proper \var{bnr} encoding a \kbd{bnf} and a modulus, we no longer
 need the $[\var{bnf},\var{modulus}]$,
@@ -749,8 +750,6 @@ Given $A$, $B$, $C$ as explained above (omitted entries coded by \kbd{NULL}),
 return the associated \var{bnr}, and set $H$ to the associated subgroup. If
 \kbd{addgen} is $1$, make sure that if the \var{bnr} needed to be computed,
 then it contains generators.
-
-
 
 \subsec{Obsolete routines}
 
