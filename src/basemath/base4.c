@@ -1680,10 +1680,10 @@ idealpows(GEN nf, GEN ideal, long e)
 
 static GEN
 _idealmulred(GEN nf, GEN x, GEN y)
-{ return ideallllred(nf,idealmul(nf,x,y), NULL); }
+{ return idealred0(nf,idealmul(nf,x,y), NULL); }
 static GEN
 _idealsqrred(GEN nf, GEN x)
-{ return ideallllred(nf,idealsqr(nf,x), NULL); }
+{ return idealred0(nf,idealsqr(nf,x), NULL); }
 static GEN
 _mul(void *data, GEN x, GEN y) { return _idealmulred((GEN)data,x,y); }
 static GEN
@@ -1702,7 +1702,7 @@ idealpowred(GEN nf, GEN x, GEN n)
   y = leftright_pow(x, n, (void*)nf, &_sqr, &_mul);
 
   if (s < 0) y = idealinv(nf,y);
-  if (s < 0 || is_pm1(n)) y = ideallllred(nf,y,NULL);
+  if (s < 0 || is_pm1(n)) y = idealred0(nf,y,NULL);
   return gerepileupto(av,y);
 }
 
@@ -1897,7 +1897,7 @@ RM_round_maxrank(GEN G0)
 
 /* assume I in NxN matrix form (not necessarily HNF) */
 GEN
-ideallllred_elt(GEN nf, GEN I, GEN vdir)
+idealred_elt0(GEN nf, GEN I, GEN vdir)
 {
   GEN u, G0;
 
@@ -1908,12 +1908,13 @@ ideallllred_elt(GEN nf, GEN I, GEN vdir)
   u = lllint(ZM_mul(G0, I));
   return ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
 }
+GEN
+idealred_elt(GEN nf, GEN I) { return idealred_elt0(nf, I, NULL); }
+GEN
+idealred(GEN nf, GEN I) { return idealred0(nf, I, NULL); }
 
 GEN
-idealred_elt(GEN nf, GEN I) { return ideallllred_elt(nf, I, NULL); }
-
-GEN
-ideallllred(GEN nf, GEN I, GEN vdir)
+idealred0(GEN nf, GEN I, GEN vdir)
 {
   pari_sp av = avma;
   long N, i;
@@ -1939,7 +1940,7 @@ ideallllred(GEN nf, GEN I, GEN vdir)
     case id_MAT:
       I = Q_primitive_part(I, &c1);
   }
-  y = ideallllred_elt(nf, I, vdir);
+  y = idealred_elt0(nf, I, vdir);
   if (ZV_isscalar(y))
   { /* already reduced */
     if (!aI) return gerepilecopy(av, I);

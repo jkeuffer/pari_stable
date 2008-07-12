@@ -1451,8 +1451,20 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
   l = lg(vp);
   for (i=1; i < l; i++)
   {
-    GEN pr = gel(vp,i), prk;
-    prk = (l==2)? gmael(bid,1,1): idealpow(nf, pr, gel(ep,i));
+    GEN pr = gel(vp,i), prk, ex;
+    if (l == 2) {
+      prk = gmael(bid,1,1);
+      ex = EX;
+    } else { /* try to improve EX: should be group exponent mod prf, not f */
+      GEN k = gel(ep,i);
+      prk = idealpow(nf, pr, k);
+      /* trivial upper bound (Nv-1)p^(k-1) */
+      ex = subis(pr_norm(pr),1);
+      if (!is_pm1(k)) {
+        ex = mulii(ex, powgi(gel(pr,1), subis(k,1)));
+        ex = gcdii(ex, EX);
+      }
+    }
     /* FIXME: FIX group exponent (should be mod prk, not f !) */
     x = famat_makecoprime(nf, g, e, pr, prk, EX);
     y = zlog_pk(nf, x, y, pr, prk, gel(lists,i), &sgn);

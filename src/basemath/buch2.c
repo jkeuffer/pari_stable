@@ -302,7 +302,7 @@ static GEN
 red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
   GEN m, y;
-  y = ideallllred(nf, init_famat(I), G0);
+  y = idealred0(nf, init_famat(I), G0);
   m = gel(y,2);
   y = gel(y,1); *pm = lg(m)==1? gen_1: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: idealtwoelt(nf,y);
@@ -1016,7 +1016,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
   for (i=1; i<ru; i++)
   {
     vdir[i] = 10;
-    y = ideallllred_elt(nf,x,vdir);
+    y = idealred_elt0(nf,x,vdir);
     if (factorgen(F, nf, x, Nx, y, fact)) return y;
     vdir[i] = 0;
   }
@@ -1037,7 +1037,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
       ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       { /* avoid prec pb: don't let id become too large as lgsub increases */
-	if (id != x0) id = ideallllred(nf,id,NULL);
+	if (id != x0) id = idealred0(nf,id,NULL);
 	z[1] = Vbase[i];
 	id = extideal_HNF_mul(nf, id, idealpowred(nf,z,utoipos(ex[i])));
       }
@@ -1048,7 +1048,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase, FACT *fact)
     for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
     for (bou=1; bou<ru; bou++)
     {
-      y = ideallllred_elt(nf, I, vdir);
+      y = idealred_elt0(nf, I, vdir);
       if (factorgen(F, nf, I, NI, y, fact))
       {
 	for (i=1; i<lgsub; i++)
@@ -1503,7 +1503,7 @@ expand(GEN nf, GEN C, GEN P, GEN e)
       gel(e,i) = ei;
     }
   }
-  if (id != C) id = ideallllred(nf, id, NULL);
+  if (id != C) id = idealred0(nf, id, NULL);
   if (done) return id;
   return idealmulred(nf, id, idealsqr(nf, expand(nf,id,P,e)));
 }
@@ -1527,7 +1527,7 @@ expandext(GEN nf, GEN C, GEN P, GEN e)
   if (A == gel(C,1))
     A = C;
   else
-    A = ideallllred(nf, mkvec2(A, gel(C,2)), NULL);
+    A = idealred0(nf, mkvec2(A, gel(C,2)), NULL);
   if (done) return A;
   return idealmulred(nf, A, idealsqr(nf, expand(nf,A,P,e)));
 }
@@ -2379,7 +2379,7 @@ inverse_if_smaller(GEN nf, GEN I)
   J = gel(I1,1); J = Q_remove_denom(J, NULL); gel(I1,1) = J;
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) {I=I1; dmin=d;}
   /* try reducing (often _increases_ the norm) */
-  I1 = ideallllred(nf,I1,NULL);
+  I1 = idealred0(nf,I1,NULL);
   J = gel(I1,1);
   d = ZM_det_triangular(J); if (cmpii(d,dmin) < 0) I=I1;
   return I;
@@ -2441,7 +2441,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       {
 	z[1]=Vbase[i]; 
 	I = extideal_HNF_mul(nf0, I, idealpowred(nf0,z,p1));
-	I = ideallllred(nf0,I,NULL);
+	I = idealred0(nf0,I,NULL);
       }
     }
     J = inverse_if_smaller(nf0, I);

@@ -218,18 +218,8 @@ GEN  detcyc(GEN cyc, long *L);
 
 /* famat */
 GEN factorbackprime(GEN nf, GEN L, GEN e);
-GEN famat_inv(GEN f);
-GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
-GEN famat_mul(GEN f, GEN g);
-GEN famat_pow(GEN f, GEN n);
-GEN famat_reduce(GEN fa);
-GEN famat_to_arch(GEN nf, GEN fa, long prec);
-GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
-GEN famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid);
-GEN merge_factor_i(GEN f, GEN g);
-GEN to_famat_all(GEN x, GEN y);
-GEN to_famat(GEN g, GEN e);
 GEN trivfact(void);
+GEN merge_factor_i(GEN f, GEN g);
 
 /* integer factorization / discrete log */
 int   MR_Jaeschke(GEN n, long k);

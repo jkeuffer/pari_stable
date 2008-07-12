@@ -692,6 +692,66 @@ may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
 decision can be taken at the place where it is most likely to be useful.
 
+\subsec{Ideal reduction}
+
+Given an ideal $x$ this means finding a ``simpler'' ideal in the same ideal
+class. The public GP function is of course available
+
+\fun{GEN}{idealred0}{GEN nf, GEN x, GEN v} finds a small $a\in x$ and returns
+the primitive part of $x/(a)$ (which is an ideal in HNF). What ``small'' means
+depends on the parameter $v$, see the GP description.
+
+\fun{GEN}{idealred}{GEN nf, GEN x} is shortcut for \kbd{idealred0(nf,x,NULL)},
+since $v$ is better left omitted in practice.
+
+These two functions remain a little complicated to use: in order not to lose
+information $x$ must be an extended ideal, otherwise the value of $a$ is lost.
+There is a subtelty here: the principal ideal $(a)$ is easy to recover, but
+$a$ itself is an instance of the principal ideal problem which is very
+difficult given only an \var{nf} (once a \var{bnf} structure is available,
+\tet{bnfisprincipal0} will recover it).
+
+\fun{GEN}{idealred_elt0}{GEN nf, GEN x, GEN v} analog to \kbd{idealred0},
+returning only the algebraic number $a$ (instead of a rational multiple
+of the quotient $x/(a)$). This function is called within \kbd{idealred0}.
+\kbd{nf} must be a true \var{nf} (not a \var{bnf} for instance) and the
+ideal $x$ must be integral, in HNF.
+
+\fun{GEN}{idealred_elt}{GEN nf, GEN x} shortcut for
+\kbd{idealred_elt0(nf,x,NULL)}.
+
+\fun{GEN}{idealmoddivisor}{GEN bnr, GEN x} A proof-of-concept implementation,
+useless in practice. If \kbd{bnr} is associated to some modulus $f$, returns a
+``small'' ideal in the same class as $x$ in the ray class group modulo $f$.
+The reason why this is useless is that using extended ideals with principal
+part in a computation, there is a simple way to reduce them: simply reduce
+the principal element in $(\Z_K/f)^*$. 
+
+\fun{GEN}{famat_to_nf_moddivisor}{GEN nf, GEN g, GEN e, GEN bid}
+given a true \var{nf} associated to a number field $K$, a \var{bid} structure
+associated to a modulus $f$, and an algebraic number in factored form $\prod
+g[i]^e[i]$, such that $(g[i],f) = 1$ for all $i$, returns a small element in
+$\Z_K$ congruent to it mod $f$. Note that if $f$ contains places at infinity,
+this includes sign conditions at the specified places.
+
+A simpler case when the conductor has no place at infinity:
+\fun{GEN}{famat_to_nf_modideal_coprime}{GEN nf, GEN g, GEN e, GEN f, GEN expo}
+as above except that the ideal is now integral in HNF, and we pass the
+exponent of the group $(\Z_K/f)^*$ as \kbd{expo}; any multiple will also do,
+at the expense of efficiency. Of course if a \var{bid} for $f$ is
+available, if is easy to extract $f$ and the exact value of \kbd{expo} from
+it (the latter is the first elementary divisor in the group structure).
+
+What to do when the $g[i]$ are not coprime to $f$, but only $\prod
+g[i]^{e[i]}$ is ? Then the situation is more complicated, and we advise to
+solve it one prime divisor of $f$ at a time. Let $v$ the valuation
+associated to a maximal ideal \kbd{pr} and assume $v(f) = k > 0$:
+\fun{GEN}{famat_makecoprime}{GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN expo}
+returns an element in $(\Z_K/\kbd{pr}^k)^*$ congruent to the product 
+$\prod g[i]^{e[i]}$, assumed to be globally coprime to $f$. As above,
+\kbd{expo} is any positive multiple of the exponent of $(\Z_K/\kbd{pr}^k)^*$,
+for instance $(Nv-1)p^{k-1}$, if $p$ is the underlying rational prime.
+
 \subsec{Class field theory}
 
 Under GP, a class-field theoretic description of a number field is given by a

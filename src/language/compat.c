@@ -397,7 +397,7 @@ entree oldfonctions[]={
 {"ideallistunitgen",21,(void*)ideallist0,6,"GLD3,L,","ideallistunitgen(bnf,bound)=2-component vector [L,U] where L is as ideallistzstar, and U is a vector of vector of zinternallogs of the units, with generators"},
 {"ideallistzstar",21,(void*)ideallist0,6,"GLD0,L,","ideallistzstar(nf,bound)=vector of vectors of all zidealstarinits of all ideals of norm<=bound, without generators"},
 {"ideallistzstargen",21,(void*)ideallist0,6,"GLD1,L,","ideallistzstargen(nf,bound)=vector of vectors of all zidealstarinits of all ideals of norm<=bound, with generators"},
-{"ideallllred",3,(void*)ideallllred,6,"GGGp","ideallllred(nf,x,vdir)=LLL reduction of the ideal x in the number field nf along direction vdir, in HNF"},
+{"ideallllred",3,(void*)idealred0,6,"GGGp","ideallllred(nf,x,vdir)=LLL reduction of the ideal x in the number field nf along direction vdir, in HNF"},
 {"idealmul",3,(void*)idealmul,6,"GGG","idealmul(nf,x,y)=product of the two ideals x and y in the number field nf"},
 {"idealmulred",3,(void*)idealmulred,6,"GGGp","idealmulred(nf,x,y)=reduced product of the two ideals x and y in the number field nf"},
 {"idealnorm",2,(void*)idealnorm,6,"GG","idealnorm(nf,x)=norm of the ideal x in the number field nf"},
