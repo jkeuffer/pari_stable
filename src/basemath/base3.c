@@ -1465,7 +1465,6 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
         ex = gcdii(ex, EX);
       }
     }
-    /* FIXME: FIX group exponent (should be mod prk, not f !) */
     x = famat_makecoprime(nf, g, e, pr, prk, EX);
     y = zlog_pk(nf, x, y, pr, prk, gel(lists,i), &sgn);
   }
