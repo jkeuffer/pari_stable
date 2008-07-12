@@ -627,12 +627,12 @@ quadray(GEN D, GEN f, long prec)
       pari_err(talker,"quadray needs a fundamental discriminant");
     if (v == NO_VARIABLE) v = fetch_user_var("y");
     pol = quadpoly0(D, v);
-    bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
+    bnf = bnfinit0(pol, nf_FORCE, NULL, prec);
   }
   else
   {
-    GEN nf = gel(bnf,7);
-    bnf = checkbnf(D);
+    GEN nf;
+    bnf = checkbnf(D); nf = gel(bnf,7);
     if (degpol(gel(nf,1)) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = gel(nf,3);
