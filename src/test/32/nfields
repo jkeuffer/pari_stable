@@ -807,7 +807,7 @@ ecsmall([]), Vecsmall([])], [1/9, 0, 0; 0, 1/9, 0; 0, 0, 1/9]]], [[], [], []
 ? ideallog(nf2,y,bid)
 [368, 0, 5]~
 ? idealmin(nf,idx,[1,2,3])
-[-2, 1, 1, 0, 1]~
+[1, 0, 1, 0, 0]~
 ? idealnorm(nf,idt)
 16
 ? idp=idealpow(nf,idx,7)
@@ -1106,6 +1106,6 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? sizebyte(%)
 152
 ? getheap
-[181, 118048]
+[181, 118046]
 ? print("Total time spent: ",gettime);
-Total time spent: 170
+Total time spent: 188

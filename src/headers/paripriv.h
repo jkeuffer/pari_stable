@@ -641,6 +641,7 @@ GEN     extideal_HNF_mul(GEN nf, GEN x, GEN y);
 GEN     factor_norm(GEN x);
 GEN     famat_to_nf(GEN nf, GEN f);
 long    val_norm(GEN x, GEN p, long *vz);
+GEN     RM_round_maxrank(GEN G);
 
 /* base5.c */
 

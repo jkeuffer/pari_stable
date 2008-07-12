@@ -1841,10 +1841,8 @@ idealintersect(GEN nf, GEN x, GEN y)
 static GEN
 chk_vdir(GEN nf, GEN vdir)
 {
-  long l, i, t;
+  long i, t, l = lg(vdir);
   GEN v;
-  if (!vdir) return NULL;
-  l = lg(vdir);
   if (l != lg(nf[6])) pari_err(talker, "incorrect vector length in idealred");
   t = typ(vdir);
   if (t == t_VECSMALL) return vdir;
@@ -1860,8 +1858,8 @@ computeGtwist(GEN nf, GEN vdir)
   long i, j, k, l, lG, v, r1;
   GEN G = gmael(nf,5,2);
 
+  if (!vdir) return RM_round_maxrank(G); /* FIXME: should be part of nf */
   vdir = chk_vdir(nf, vdir);
-  if (!vdir) return G;
   l = lg(vdir); lG = lg(G);
   G = shallowcopy(G);
   r1 = nf_get_r1(nf);
@@ -1879,7 +1877,22 @@ computeGtwist(GEN nf, GEN vdir)
       }
     }
   }
-  return G;
+  return RM_round_maxrank(G);
+}
+
+GEN
+RM_round_maxrank(GEN G0)
+{
+  long e, r = lg(G0)-1;
+  pari_sp av = avma;
+  GEN G = G0;
+  for (e = 4; ; e <<= 1)
+  {
+    GEN H = ground(G);
+    if (rank(H) == r) return H; /* maximal rank ? */
+    avma = av;
+    G = gmul2n(G0, e);
+  }
 }
 
 /* assume I in NxN matrix form (not necessarily HNF) */
@@ -1891,16 +1904,7 @@ ideallllred_elt(GEN nf, GEN I, GEN vdir)
   if (vdir && typ(vdir) == t_MAT)
     G0 = vdir; /* assumed ZM */
   else
-  {
-    GEN G = computeGtwist(nf, vdir);
-    long e, r = lg(G)-1;
-    for (e = 4; ; e <<= 1)
-    {
-      G0 = ground(G);
-      if (rank(G0) == r) break; /* maximal rank ? */
-      G = gmul2n(G, e);
-    }
-  }
+    G0 = computeGtwist(nf, vdir);
   u = lllint(ZM_mul(G0, I));
   return ZM_ZC_mul(I, gel(u,1)); /* small elt in I */
 }
@@ -1980,7 +1984,7 @@ GEN
 idealmin(GEN nf, GEN x, GEN vdir)
 {
   pari_sp av = avma;
-  GEN y;
+  GEN y, dx;
   nf = checknf(nf);
   switch( idealtyp(&x,&y) )
   {
@@ -1988,9 +1992,10 @@ idealmin(GEN nf, GEN x, GEN vdir)
     case id_PRIME: x = idealhnf_two(nf,x); break;
     case id_MAT: if (lg(x) == 1) return gen_0;
   }
-  vdir = chk_vdir(nf,vdir);
-  y = lll( RgM_mul(computeGtwist(nf,vdir), x) );
-  y = RgM_RgC_mul(x, gel(y,1));
+  x = Q_remove_denom(x, &dx);
+  y = lllint( ZM_mul(computeGtwist(nf,vdir), x) );
+  y = ZM_ZC_mul(x, gel(y,1));
+  if (dx) y = RgC_Rg_div(y, dx);
   return gerepileupto(av, y);
 }
 
