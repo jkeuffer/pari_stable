@@ -114,7 +114,7 @@ qpsoluble(GEN T,GEN p)
   avma = av; return res;
 }
 
-/* is t a square in (O_K/pr), assume v_pr(t) >= 0 ? */
+/* is t a square in (O_K/pr) ? Assume v_pr(t) >= 0 */
 static long
 quad_char(GEN nf, GEN t, GEN pr)
 {
