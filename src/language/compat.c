@@ -414,7 +414,7 @@ entree oldfonctions[]={
 {"imagecompl",1,(void*)imagecompl,8,"G","imagecompl(x)=vector of column indices not corresponding to the indices given by the function image"},
 {"incgam",2,(void*)incgam,3,"GGp","incgam(s,x)=incomplete gamma function"},
 {"incgam1",2,(void*)suppressed,3,"GGp","incgam1(s,x)=incomplete gamma function (for debugging only)"},
-{"incgam2",2,(void*)incgam2,3,"GGp","incgam2(s,x)=incomplete gamma function (for debugging only)"},
+{"incgam2",2,(void*)suppressed,3,"GGp","incgam2(s,x)=incomplete gamma function (for debugging only)"},
 {"incgam3",2,(void*)incgamc,3,"GGp","incgam3(s,x)=complementary incomplete gamma function"},
 {"incgam4",3,(void*)incgam0,3,"GGGp","incgam4(s,x,y)=incomplete gamma function where y=gamma(s) is precomputed"},
 {"indexrank",1,(void*)indexrank,8,"G","indexrank(x)=gives two extraction vectors (rows and columns) for the matrix x such that the exracted matrix is square of maximal rank"},

@@ -633,7 +633,7 @@ incgam2_0(GEN x, GEN expx)
 }
 
 /* assume x != 0 */
-GEN
+static GEN
 incgam2(GEN s, GEN x, long prec)
 {
   GEN b, x_s, S, y;
