@@ -1458,11 +1458,13 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
     } else { /* try to improve EX: should be group exponent mod prf, not f */
       GEN k = gel(ep,i);
       prk = idealpow(nf, pr, k);
-      /* trivial upper bound (Nv-1)p^(k-1) */
+      /* upper bound: gcd(EX, (Nv-1)p^(k-1)) = (Nv-1) p^min(k-1,v_p(EX)) */
       ex = subis(pr_norm(pr),1);
       if (!is_pm1(k)) {
-        ex = mulii(ex, powgi(gel(pr,1), subis(k,1)));
-        ex = gcdii(ex, EX);
+        GEN p = gel(pr,1), k_1 = subis(k,1);
+        long v = Z_pval(EX, p);
+        if (cmpui(v, k_1) > 0) v = itos(k_1);
+        if (v) ex = mulii(ex, gpowgs(p, v));
       }
     }
     x = famat_makecoprime(nf, g, e, pr, prk, EX);
