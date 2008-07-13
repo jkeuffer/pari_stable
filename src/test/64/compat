@@ -1347,7 +1347,7 @@ ok
 ? incgam1(2,1)
   *** incgam1: this function no longer exists.
 ? incgam2(2,1)
-0.73575888234288464319104754032292173489
+  *** incgam2: this function no longer exists.
 ? incgam3(2,1)
 0.26424111765711535680895245967707826509
 ? incgam4(4,1,6)
@@ -2701,6 +2701,6 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getstack()
 88
 ? getheap()
-[609, 104048]
+[608, 104040]
 ? print("Total time spent: ",gettime);
-Total time spent: 250
+Total time spent: 260
