@@ -409,7 +409,7 @@ logall(GEN nf, GEN vec, long lW, long mginv, long ell, GEN pr, long ex)
   M = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
-    m = zideallog(nf, gel(vec,i), bid);
+    m = ideallog(nf, gel(vec,i), bid);
     setlg(m, ellrank+1);
     if (i < lW) m = gmulsg(mginv, m);
     gel(M,i) = ZV_to_Flv(m, ell);

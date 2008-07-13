@@ -433,7 +433,7 @@ Buchray(GEN bnf, GEN module, long flag)
       GEN F = to_famat_shallow(gel(El,j), gel(cyc,j));
       p1 = famat_mul(F, p1);
     }
-    gel(logs,j) = zideallog(nf, p1, bid); /* = log(Gen[j]) */
+    gel(logs,j) = ideallog(nf, p1, bid); /* = log(Gen[j]) */
   }
   /* [ cyc  0 ]
    * [-logs H ] = relation matrix for Cl_f */
@@ -531,7 +531,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = famat_mul(to_famat_shallow(gel(El,i), negi(gel(ep,i))), beta);
-  ex = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
+  ex = ZM_ZC_mul(U, shallowconcat(ep, ideallog(nf,beta,bid)));
   ex = vecmodii(ex, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
@@ -546,7 +546,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   alpha = nffactorback(nf, L, NULL);
   if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
   {
-    GEN u = gel(bnr,6), y = gmul(gel(u,1), zideallog(nf, L, bid));
+    GEN u = gel(bnr,6), y = gmul(gel(u,1), ideallog(nf, L, bid));
     y = reducemodinvertible(y, gel(u,2));
     alpha = nfdiv(nf, alpha, nffactorback(nf, init_units(bnf), y));
   }

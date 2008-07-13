@@ -1782,7 +1782,7 @@ vecmodii(GEN a, GEN b)
  * compute the vector of components on the generators bid[2].
  * Assume (x,bid) = 1 and sgn is either NULL or nfsign_arch(x, bid) */
 GEN
-zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
+ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
 {
   pari_sp av;
   long N, lcyc;
@@ -1807,11 +1807,11 @@ zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid)
       y = famat_zlog(nf, gel(x,1), gel(x,2), sgn, bid);
       goto END;
 
-    default: pari_err(talker,"not an element in zideallog");
+    default: pari_err(talker,"not an element in ideallog");
   }
   if (!ok)
   {
-    if (lg(x) != N+1) pari_err(talker,"not an element in zideallog");
+    if (lg(x) != N+1) pari_err(talker,"not an element in ideallog");
     check_nfelt(x, &den);
   }
   if (den)
@@ -1830,7 +1830,7 @@ END:
   return gerepileupto(av, vecmodii(y, cyc));
 }
 GEN
-zideallog(GEN nf, GEN x, GEN bid) { return zideallog_sgn(nf, x, NULL, bid); }
+ideallog(GEN nf, GEN x, GEN bid) { return ideallog_sgn(nf, x, NULL, bid); }
 
 /*************************************************************************/
 /**									**/

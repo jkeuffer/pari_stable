@@ -174,7 +174,7 @@ GEN    to_Fp_simple(GEN nf, GEN x, GEN ffproj);
 GEN    unif_mod_fZ(GEN pr, GEN F);
 GEN    unnf_minus_x(GEN x);
 void   wr_rel(GEN col);
-GEN    zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
+GEN    ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
 GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
 GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);
 

@@ -151,7 +151,7 @@ psquarenf(GEN nf,GEN a,GEN pr)
 static long
 check2(GEN nf, GEN a, GEN zinit)
 {
-  GEN zlog = zideallog(nf,a,zinit), cyc = gmael(zinit,2,2);
+  GEN zlog = ideallog(nf,a,zinit), cyc = gmael(zinit,2,2);
   long i, l = lg(cyc);
 
   for (i=1; i<l; i++)

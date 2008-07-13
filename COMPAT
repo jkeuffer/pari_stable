@@ -182,7 +182,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - changed prototypes of bnrdisc, bnrconductor, bnrisconductor [ actually
     renamed bnrdisc0, bnrconductor0, bnrisconductor0 ]. Just use the new
     prototype, it's more convenient.
-  - renamed ideallllred -> idealred0
+  - renamed ideallllred -> idealred0, zideallog -> ideallog
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

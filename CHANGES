@@ -223,15 +223,15 @@ BA 49- user variables can now be aliased [#790].
    74- [libpari] removed obsolete 'prec' argument from prototypes of idealmul0,
        idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
        lindep, lindep0
-   75- Rename library functions ideal_two_elt* -> idealtwoelt*
-   76- Rename library function factorback0 -> factorback2.
-   77- factorback() no longer accepts an optional 3rd argument (nf). Use
+   75- Rename library functions ideal_two_elt* -> idealtwoelt*,
+       factorback0 -> factorback2, subfields0 -> nfsubfields,
+       zideallog -> ideallog
+   76- factorback() no longer accepts an optional 3rd argument (nf). Use
        idealfactorback(). See also nffactorback().
-   78- Rename library function subfields0 -> nfsubfields
-   79- Extend polhensellift to work over unramified extensions of Q_p
+   77- Extend polhensellift to work over unramified extensions of Q_p
        [ was Q_p only ]
-   80- [libpari] changed prototypes of bnrdisc, bnrconductor, bnrisconductor
-   81- slightly the matrices used in idealmin (round them): the elements
+   78- [libpari] changed prototypes of bnrdisc, bnrconductor, bnrisconductor
+   79- slightly change the matrices used in idealmin (round them): the elements
        returned are a little different.
 
   Added

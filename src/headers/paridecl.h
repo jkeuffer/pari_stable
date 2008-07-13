@@ -928,7 +928,7 @@ GEN     rnfbasistoalg(GEN rnf, GEN x);
 GEN     set_sign_mod_divisor(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 GEN     vec01_to_indices(GEN arch);
 GEN     vecmodii(GEN a, GEN b);
-GEN     zideallog(GEN nf,GEN x,GEN bigideal);
+GEN     ideallog(GEN nf,GEN x,GEN bigideal);
 
 GEN     multable(GEN nf, GEN x);
 GEN     tablemul(GEN TAB, GEN x, GEN y);
