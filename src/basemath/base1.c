@@ -293,26 +293,28 @@ tschirnhaus(GEN x)
 static int
 cmp_abs_ZX(GEN x, GEN y) { return gen_cmp_RgX((void*)&absi_cmp, x, y); }
 
-/* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic in Z[X].
- * Return POL and set *ptlead = L */
+/* Assume pol != 0 in Z[X]. Find C, L in Z such that POL = C pol(x/L) monic
+ * in Z[X]. Return POL and set *ptlc = L. Wasteful (but correct) if pol is not
+ * primitive: better if caller used Q_primpart already. No GC. */
 GEN
-primitive_pol_to_monic(GEN pol, GEN *ptlead)
+ZX_primitive_to_monic(GEN pol, GEN *ptlc)
 {
-  long i,j,n = degpol(pol);
-  GEN lead,fa,e,a, POL = shallowcopy(pol);
+  long i,j, n = degpol(pol);
+  GEN lc, fa, P, E, a, POL = shallowcopy(pol);
 
-  a = POL + 2; lead = gel(a,n);
-  if (signe(lead) < 0) { POL = gneg_i(POL); a = POL+2; lead = negi(lead); }
-  if (is_pm1(lead)) { if (ptlead) *ptlead = NULL; return POL; }
-  fa = Z_factor_limit(lead,0); lead = gen_1;
-  e = gel(fa,2); fa = gel(fa,1);
-  for (i=lg(e)-1; i>0;i--) e[i] = itos(gel(e,i));
-  for (i=lg(fa)-1; i>0; i--)
+  a = POL + 2; lc = gel(a,n);
+  if (signe(lc) < 0) { POL = ZX_neg(POL); a = POL+2; lc = gel(a,n); }
+  if (is_pm1(lc)) { if (ptlc) *ptlc = NULL; return POL; }
+  fa = Z_factor_limit(lc,0); lc = gen_1;
+  P = gel(fa,1);
+  E = gel(fa,2);
+  for (i = lg(P)-1; i > 0; i--)
   {
-    GEN p = gel(fa,i), pk, pku;
-    long k = (long)ceil((double)e[i] / n);
-    long d = k * n - e[i], v, j0;
-    /* find d, k such that  p^d pol(x / p^k) monic */
+    GEN p = gel(P,i), pk, pku;
+    long v, j0, e = itos(gel(E,i)), k = e/n, d = k*n - e;
+
+    if (d < 0) { k++; d += n; }
+    /* k = ceil(e[i] / n); find d, k such that  p^d pol(x / p^k) monic */
     for (j=n-1; j>0; j--)
     {
       if (!signe(a[j])) continue;
@@ -320,6 +322,8 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
       while (v + d < k * j) { k++; d += n; }
     }
     pk = powiu(p,k); j0 = d/k;
+    lc = mulii(lc, pk);
+
     pku = powiu(p,d - k*j0);
     /* a[j] *= p^(d - kj) */
     for (j=j0; j>=0; j--)
@@ -335,9 +339,19 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
       if (j > j0) pku = mulii(pku, pk);
       gel(a,j) = diviiexact(gel(a,j), pku);
     }
-    lead = mulii(lead, pk);
   }
-  if (ptlead) *ptlead = lead; return POL;
+  if (ptlc) *ptlc = lc; return POL;
+}
+/* pol != 0 in Z[x], returns a monic polynomial POL in Z[x] generating the
+ * same field: there exist C, L in Z such that POL(x) = C pol(x/L).
+ * Set *L = NULL if L = 1, and to L otherwise. No garbage collecting. */
+GEN
+ZX_to_monic(GEN pol, GEN *L)
+{
+  long n = lg(pol)-1;
+  GEN lc = gel(pol,n);
+  if (is_pm1(lc)) { *L = NULL; return signe(lc) > 0? pol: ZX_neg(pol); }
+  return ZX_primitive_to_monic(Q_primpart(pol), L);
 }
 
 /* x1*x2^2 + x2*x3^2 + x3*x4^2 + x4*x1^2 */
@@ -359,7 +373,7 @@ roots_to_ZX(GEN z, long *e)
   return b;
 }
 
-GEN
+static GEN
 polgaloisnames(long a, long b)
 {
   const char * const t[]={"S1", "S2", "A3", "S3",
@@ -417,7 +431,7 @@ polgalois(GEN x, long prec)
   if (typ(x)!=t_POL) pari_err(notpoler,"galois");
   n=degpol(x); if (n<=0) pari_err(constpoler,"galois");
   if (n>11) pari_err(impl,"galois of degree higher than 11");
-  x = primpart(x);
+  x = Q_primpart(x);
   RgX_check_ZX(x, "galois");
   if (!ZX_isirreducible(x)) pari_err(impl,"galois of reducible polynomial");
 
@@ -431,7 +445,7 @@ polgalois(GEN x, long prec)
     return f? galois_res(n,3,1,1):
 	      galois_res(n,6,-1,2);
   }
-  x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
+  x1 = x = ZX_primitive_to_monic(x,NULL); av1=avma;
   if (n > 7) return galoisbig(x, prec);
   for(;;)
   {
@@ -773,8 +787,8 @@ nfiso0(GEN a, GEN b, long fliso)
   if (fliso) { if (n!=m) return gen_0; }
   else       { if (n%m) return gen_0; }
 
-  if (nfb) lb = NULL; else b = pol_to_monic(b,&lb);
-  if (nfa) la = NULL; else a = pol_to_monic(a,&la);
+  if (nfb) lb = NULL; else b = ZX_primitive_to_monic(b,&lb);
+  if (nfa) la = NULL; else a = ZX_primitive_to_monic(a,&la);
   if (nfa && nfb)
   {
     if (fliso)
@@ -889,20 +903,6 @@ quicktrace(GEN x, GEN sym)
       p1 = gadd(p1, gmul(gel(x,i),gel(sym,i)));
   }
   return p1;
-}
-
-/* pol belonging to Z[x], return a monic polynomial generating the same field
- * as pol (x-> ax+b)) set lead = NULL if pol was monic (after dividing
- * by the content), and to to leading coefficient otherwise.
- * No garbage collecting done.
- */
-GEN
-pol_to_monic(GEN pol, GEN *lead)
-{
-  long n = lg(pol)-1;
-
-  if (n==1 || gcmp1(gel(pol,n))) { *lead = NULL; return pol; }
-  return primitive_pol_to_monic(Q_primpart(pol), lead);
 }
 
 /* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
@@ -1498,7 +1498,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     x = Q_primpart(x);
     RgX_check_ZX(x, "nfinit");
     if (!ZX_isirreducible(x)) pari_err(redpoler, "nfinit");
-    x = pol_to_monic(x, &(T->lead));
+    x = ZX_primitive_to_monic(x, &(T->lead));
     nfmaxord(&S, x, flag, fa);
     if (DEBUGLEVEL) msgtimer("round4");
     index = S.index;

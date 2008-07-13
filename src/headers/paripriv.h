@@ -289,7 +289,6 @@ GEN  monomial(GEN a, long degpol, long v);
 GEN  monomialcopy(GEN a, long degpol, long v);
 GEN  mulmat_pol(GEN A, GEN x);
 GEN  polrecip_i(GEN x);
-GEN  pol_to_monic(GEN pol, GEN *lead);
 GEN  ser2pol_i(GEN x, long lx);
 GEN  ser2rfrac_i(GEN x);
 GEN  shiftpol_i(GEN x, long v);
@@ -606,8 +605,6 @@ void    nfbasic_add_disc(nfbasic_t *T);
 void    nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T);
 GEN     nffromhnfbasis(GEN nf, GEN x);
 GEN     nftohnfbasis(GEN nf, GEN x);
-GEN     polgaloisnames(long a, long b);
-GEN     primitive_pol_to_monic(GEN pol, GEN *ptlead);
 
 /* base2.c */
 

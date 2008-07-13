@@ -306,6 +306,7 @@ RM 26- partitions()
    27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
        ZX_squff, ZX_gcd_all, nfgcd, nfgcd_all, RgXQX_pseudodivrem,
+       ZX_to_monic, ZX_primitive_to_monic
        Flx_roots_naive, zk_multable, zk_scalar_or_multable
 BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        abelian_group, group_domain, group_elts, group_order, group_isabelian,

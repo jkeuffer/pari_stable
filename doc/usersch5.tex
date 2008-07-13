@@ -3657,6 +3657,16 @@ multiple of $x/d$. If $x$ and $y$ are both monic, then $d$ is monic and
 \kbd{*pX} is exactly $x/d$. Not memory clean if the gcd is $1$
 (in that case \kbd{*pX} is set to $x$).
 
+\fun{GEN}{ZX_to_monic}{GEN q GEN *L} given $q$ a non-zero \kbd{ZX},
+returns a monic integral polynomial $Q$ such that $Q(x) = C q(x/L)$, for some
+integers $C$ and $L$. If $\kbd{L}$ is not \kbd{NULL}, set \kbd{*L} to $L$.
+Not suitable for gerepileupto.
+
+\fun{GEN}{ZX_primitive_to_monic}{GEN pol, GEN *L} as \tet{ZX_to_monic} except
+\kbd{pol} is assumed to have trivial content, which avoids recomputing it.
+The result is suboptimal if \kbd{pol} is not primitive ($L$ larger than
+necessary), but remains correct.
+
 \fun{long}{ZX_max_lg}{GEN x} returns the effective length of the longest
 component in $x$.
 

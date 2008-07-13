@@ -836,6 +836,8 @@ GEN     rootsof1(GEN x);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
 GEN     tschirnhaus(GEN x);
+GEN     ZX_to_monic(GEN pol, GEN *lead);
+GEN     ZX_primitive_to_monic(GEN pol, GEN *lead);
 
 /* base2.c */
 

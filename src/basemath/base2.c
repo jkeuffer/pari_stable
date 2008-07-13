@@ -587,7 +587,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
   if (!degpol(x0)) pari_err(zeropoler,"nfbasis");
   RgX_check_ZX(x0, "nfbasis");
 
-  x = pol_to_monic(x0, &lead);
+  x = ZX_to_monic(x0, &lead);
   if (fa && lead) fa = update_fact(x, fa);
   if (flag & compat_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & compat_ROUND2)  fl |= nf_ROUND2;
