@@ -292,6 +292,80 @@ by the $i$-th basis element $e_i$. Shallow function.
 \fun{GEN}{tablemulvec}{GEN M, GEN x, GEN v} given a vector $v$ of elements
 in the algebra, returns the $x\cdot v[i]$.
 
+\subsec{Elements in factored form}
+
+Computational algebraic theory performs extensively linear
+algebra on $\Z$-modules with a natural multiplicative structure ($K^*$,
+fractional ideals in $K$, $\Z_K^*$, ideal class group), thereby raising 
+elements to horrendously large powers. A seemingly inocuous elementary linear
+algebra operation like $C_i\leftarrow C_i - 10000 C_1$ involves raising
+entries in $C_1$ to the $10000$-th power. Understandably, it is often more
+efficient to keep elements in factored form rather than expand every such
+expression. A \emph{factorization matrix} (or \tev{famat}) is a two column
+matrix, the first column containing \emph{elements} (arbitrary objects which
+may be repeated in the column), and the second one contains \emph{exponents}
+(\typ{INT}s, allowed to be 0). By abuse of notation, the empty matrix
+\kbd{cgetg(1, t\_MAT)} is recognized as the trivial factorization (no
+element, no exponent).
+
+Even though we think of a \var{famat} with columns $g$ and $e$
+as one meaningful object when fully expanded as $\prod g[i]^{e[i]}$,
+\var{famat}s are basically about concatenating information to keep track of
+linear algebra: the objects stored in a \var{famat} need not be
+operation-compatible, they will not even be compared to each other (with one
+exception: \tet{famat_reduce}). Multiplying two \var{famat}s just
+concatenateѕ their elements and exponents columns. In a context where a
+\var{famat} is expected, an object $x$ which is not of type \typ{MAT} will be
+treated as the factorization $x^1$. The following functions all return
+\var{famat}s:
+
+\fun{GEN}{famat_mul}{GEN f, GEN g} $f$ is a \var{famat}, and $g$ is either 
+a \var{famat} or an object whose type is \emph{not} \typ{MAT} (understood
+as $g^1$). Returns $fg$. The empty factorization is the neutral element
+for \var{famat} multiplication.
+
+\fun{GEN}{famat_pow}{GEN f, GEN n} $n$ is a \typ{INT}. If $f$ is a \typ{MAT},
+assume it is a \var{famat} and return $f^n$ (multiplies the exponent column
+by $n$). Otherwise, understand it as an element and returns the $1$-line
+\var{famat} $f^n$.
+
+\fun{GEN}{famat_sqr}{GEN f} returns $f^2$.
+
+\fun{GEN}{famat_inv}{GEN f} returns $f^{-1}$.
+
+\fun{GEN}{to_famat}{GEN x, GEN k} given an element $x$ and an exponent
+$k$, returns the \var{famat} $x^k$.
+
+\fun{GEN}{to_famat_shallow}{GEN x, GEN k} same, as a shallow function.
+
+Note that it is trivial to break up a \var{famat} into its two constituent
+columns: \kbd{gel(f,1)} and \kbd{gel(f,2)} are the elements and exponents
+respectively. Conversely, \kbd{mkmat2} builds a \var{famat} from two
+\typ{COL}s of the same length.
+
+The last two functions makes an assumption about the elements: they must be
+regular algebraic numbers (not \var{famat}s) over a given number field:
+
+\fun{GEN}{famat_reduce}{GEN f} given a \var{famat} $f$, returns a \var{famat}
+$g$ without repeated elements or 0 exponents, such that the expanded forms
+of $f$ and $g$ would be equal.
+
+\fun{GEN}{famat_to_nf}{GEN nf, GEN f} You normally never want to do this !
+This is a simplified form of \tet{nffactorback}, where we do not check the
+user input for consistency.
+
+The description of \kbd{famat\_to\_nf} says that you do not want to use this
+function. Then how do we recover genuine number field elements? Well, in 
+most cases, we do not need to, since most of the functions useful in this
+context accept \var{famat}s as inputs, for instance \tet{nfsign},
+\tet{nfsign_arch}, \tet{zideallog} and \tet{isunit}. See also the end of
+\secref{se:Ideal_reduction}.
+
+\misctitle{Caveat.} on \var{famat} inputs, \kbd{isunit} assumes that
+it is an algebraic integer, since this is possibly very expensive to check,
+and normally easy to ensure from the user's side; don't feed it ridiculous
+inputs.
+
 \subsec{Ideal arithmetic}
 
 \misctitle{Conversion to HNF.}
@@ -692,7 +766,7 @@ may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
 decision can be taken at the place where it is most likely to be useful.
 
-\subsec{Ideal reduction}
+\subsec{Ideal reduction}\label{se:Ideal_reduction}
 
 Given an ideal $x$ this means finding a ``simpler'' ideal in the same ideal
 class. The public GP function is of course available

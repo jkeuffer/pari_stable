@@ -1447,7 +1447,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
   long i, l;
 
   y0 = y = cgetg(lg(U), t_COL);
-  if (!sgn) sgn = nfsign_arch(nf, to_famat(g,e), arch);
+  if (!sgn) sgn = nfsign_arch(nf, mkmat2(g,e), arch);
   l = lg(vp);
   for (i=1; i < l; i++)
   {

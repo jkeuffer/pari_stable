@@ -149,112 +149,6 @@ idealhnf(GEN nf, GEN x)
   return (avma == av)? gcopy(y): gerepileupto(av, y);
 }
 
-static GEN
-mylog(GEN x, long prec)
-{
-  if (gcmp0(x)) pari_err(precer,"get_arch");
-  return glog(x,prec);
-}
-
-/* For internal use. Get archimedean components: [e_i Log( sigma_i(X) )],
- * where X = primpart(x), and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
-GEN
-get_arch(GEN nf,GEN x,long prec)
-{
-  long i, R1, RU;
-  GEN v;
-  if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
-  x = nf_to_scalar_or_basis(nf,x);
-  RU = lg(nf[6]) - 1;
-  if (typ(x) != t_COL) return zerovec(RU);
-  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
-  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
-  for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
-  for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
-  return v;
-}
-
-GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-
-static GEN
-famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
-{
-  GEN A, T, a, t, g = gel(x,1), e = gel(x,2);
-  long i, l = lg(e);
-
-  if (l <= 1)
-    return get_arch_real(nf, gen_1, emb, prec);
-  A = T = NULL; /* -Wall */
-  for (i=1; i<l; i++)
-  {
-    a = get_arch_real(nf, gel(g,i), &t, prec);
-    if (!a) return NULL;
-    a = RgC_Rg_mul(a, gel(e,i));
-    t = vecpow(t, gel(e,i));
-    if (i == 1) { A = a;          T = t; }
-    else        { A = gadd(A, a); T = vecmul(T, t); }
-  }
-  *emb = T; return A;
-}
-
-static GEN
-scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
-{
-  GEN v, x, p1;
-  long i, s;
-
-  s = gsigne(u);
-  if (!s) pari_err(talker,"0 in get_arch_real");
-  x = cgetg(RU+1, t_COL);
-  for (i=1; i<=RU; i++) gel(x,i) = u;
-
-  v = cgetg(RU+1, t_COL);
-  if (s < 0) u = gneg(u);
-  p1 = glog(u,prec);
-  for (i=1; i<=R1; i++) gel(v,i) = p1;
-  if (i <= RU)
-  {
-    p1 = gmul2n(p1,1);
-    for (   ; i<=RU; i++) gel(v,i) = p1;
-  }
-  *emb = x; return v;
-}
-
-static int
-low_prec(GEN x)
-{
-  return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3);
-}
-
-/* For internal use. Get archimedean components: [e_i log( | sigma_i(x) | )],
- * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1)
- * Return NULL if precision problem, and set *emb to the embeddings of x */
-GEN
-get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
-{
-  long i, RU, R1;
-  GEN v, t;
-
-  if (typ(x) == t_MAT) return famat_get_arch_real(nf,x,emb,prec);
-  x = nf_to_scalar_or_basis(nf,x);
-  RU = lg(nf[6])-1;
-  R1 = nf_get_r1(nf);
-  if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
-  x = RgM_RgC_mul(gmael(nf,5,1), x);
-  v = cgetg(RU+1,t_COL);
-  for (i=1; i<=R1; i++)
-  {
-    t = gabs(gel(x,i),prec); if (low_prec(t)) return NULL;
-    gel(v,i) = glog(t,prec);
-  }
-  for (   ; i<=RU; i++)
-  {
-    t = gnorm(gel(x,i)); if (low_prec(t)) return NULL;
-    gel(v,i) = glog(t,prec);
-  }
-  *emb = x; return v;
-}
-
 /* GP functions */
 
 GEN
@@ -944,16 +838,19 @@ idealmul_HNF(GEN nf, GEN x, GEN y)
 }
 
 /* operations on elements in factored form */
-GEN
-to_famat(GEN g, GEN e)
-{
-  if (typ(g) != t_COL) { g = shallowcopy(g); settyp(g, t_COL); }
-  if (typ(e) != t_COL) { e = shallowcopy(e); settyp(e, t_COL); }
-  return mkmat2(g, e);
-}
 
 GEN
-to_famat_all(GEN x, GEN y) { return to_famat(mkcol(x), mkcol(y)); }
+to_famat(GEN x, GEN y) {
+  GEN fa = cgetg(3, t_MAT);
+  gel(fa,1) = mkcol(gcopy(x));
+  gel(fa,2) = mkcol(gcopy(y)); return fa;
+}
+GEN
+to_famat_shallow(GEN x, GEN y) {
+  GEN fa = cgetg(3, t_MAT);
+  gel(fa,1) = mkcol(x);
+  gel(fa,2) = mkcol(y); return fa;
+}
 
 static GEN
 append(GEN v, GEN x)
@@ -996,11 +893,12 @@ famat_mul(GEN f, GEN g)
   return h;
 }
 
-static GEN
+GEN
 famat_sqr(GEN f)
 {
   GEN h;
   if (lg(f) == 1) return cgetg(1,t_MAT);
+  if (typ(f) != t_MAT) return to_famat(f,gen_2);
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
   gel(h,2) = gmul2n(gel(f,2),1);
@@ -1011,9 +909,10 @@ famat_inv(GEN f)
 {
   GEN h;
   if (lg(f) == 1) return cgetg(1,t_MAT);
+  if (typ(f) != t_MAT) return to_famat(f,gen_m1);
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
-  gel(h,2) = gneg(gel(f,2));
+  gel(h,2) = ZC_neg(gel(f,2));
   return h;
 }
 GEN
@@ -1021,7 +920,7 @@ famat_pow(GEN f, GEN n)
 {
   GEN h;
   if (lg(f) == 1) return cgetg(1,t_MAT);
-  if (typ(f) != t_MAT) return to_famat_all(f,n);
+  if (typ(f) != t_MAT) return to_famat(f,n);
   h = cgetg(3,t_MAT);
   gel(h,1) = gcopy(gel(f,1));
   gel(h,2) = ZC_Z_mul(gel(f,2),n);
@@ -1255,29 +1154,7 @@ famat_to_nf_moddivisor(GEN nf, GEN g, GEN e, GEN bid)
     t = famat_to_nf_modideal_coprime(nf, g, e, id, EX);
   }
   if (!t) t = gen_1;
-  return set_sign_mod_divisor(nf, to_famat(g,e), t, module, sarch);
-}
-
-GEN
-famat_to_arch(GEN nf, GEN fa, long prec)
-{
-  GEN g,e, y = NULL;
-  long i,l;
-
-  if (typ(fa) != t_MAT) return get_arch(nf, fa, prec);
-  if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
-  g = gel(fa,1);
-  e = gel(fa,2); l = lg(e);
-  for (i=1; i<l; i++)
-  {
-    GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
-    /* multiplicative arch would be better (save logs), but exponents overflow
-     * [ could keep track of expo separately, but not worth it ] */
-    t = get_arch(nf,x,prec); if (gel(t,1) == gen_0) continue; /* rational */
-    t = RgV_Rg_mul(t, gel(e,i));
-    y = y? RgV_add(y,t): t;
-  }
-  return y ? y: zerovec(lg(nf[6])-1);
+  return set_sign_mod_divisor(nf, mkmat2(g,e), t, module, sarch);
 }
 
 GEN

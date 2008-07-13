@@ -216,9 +216,6 @@ GEN  vec_setconst(GEN v, GEN x);
 GEN  dim1proj(GEN prh);
 GEN  detcyc(GEN cyc, long *L);
 
-/* famat */
-GEN factorbackprime(GEN nf, GEN L, GEN e);
-GEN trivfact(void);
 GEN merge_factor_i(GEN f, GEN g);
 
 /* integer factorization / discrete log */
@@ -626,7 +623,7 @@ GEN     zk_ei_mul(GEN nf, GEN x, long i);
 void    check_listpr(GEN x);
 GEN     extideal_HNF_mul(GEN nf, GEN x, GEN y);
 GEN     factor_norm(GEN x);
-GEN     famat_to_nf(GEN nf, GEN f);
+GEN     factorbackprime(GEN nf, GEN L, GEN e);
 long    val_norm(GEN x, GEN p, long *vz);
 GEN     RM_round_maxrank(GEN G);
 
@@ -782,6 +779,7 @@ long    FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p);
 GEN     Zp_appr(GEN f, GEN a);
 int     cmp_padic(GEN x, GEN y);
 GEN     factcantor0(GEN f, GEN pp, long flag);
+GEN     trivfact(void);
 
 /* polarit2.c */
 

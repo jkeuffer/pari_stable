@@ -113,9 +113,9 @@ compute_fact(GEN nf, GEN u1, GEN gen)
       if (typ(g) != t_MAT)
       {
 	if (z)
-	  gel(z,2) = famat_mul(gel(z,2), to_famat_all(g, e));
+	  gel(z,2) = famat_mul(gel(z,2), to_famat_shallow(g, e));
 	else
-	  z = mkvec2(NULL, to_famat_all(g, e));
+	  z = mkvec2(NULL, to_famat_shallow(g, e));
 	continue;
       }
 
@@ -430,7 +430,7 @@ Buchray(GEN bnf, GEN module, long flag)
     p1 = gel(cycgen,j);
     if (typ(El[j]) != t_INT) /* <==> != 1 */
     {
-      GEN F = to_famat_all(gel(El,j), gel(cyc,j));
+      GEN F = to_famat_shallow(gel(El,j), gel(cyc,j));
       p1 = famat_mul(F, p1);
     }
     gel(logs,j) = zideallog(nf, p1, bid); /* = log(Gen[j]) */
@@ -530,7 +530,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   j = lg(ep);
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
-      beta = famat_mul(to_famat_all(gel(El,i), negi(gel(ep,i))), beta);
+      beta = famat_mul(to_famat_shallow(gel(El,i), negi(gel(ep,i))), beta);
   ex = ZM_ZC_mul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(ex, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
@@ -1803,7 +1803,7 @@ get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
   R1 = clhray * nz;
   dlk = factordivexact(factorpow(Z_factor(utoipos(Nf)),clhray), idealrel);
   /* r2 odd, set dlk = -dlk */
-  if (((n-R1)&3)==2) dlk = factormul(to_famat_all(gen_m1,gen_1), dlk);
+  if (((n-R1)&3)==2) dlk = factormul(to_famat_shallow(gen_m1,gen_1), dlk);
   return mkvec3(utoipos(n),
 		stoi(R1),
 		factormul(dlk,factorpow(fadkabs,clhray)));
@@ -1848,7 +1848,7 @@ get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
       S += clhss;
     }
     E[k] = ep;
-    idealrel = factormul(idealrel, to_famat_all(p, utoi(f * S)));
+    idealrel = factormul(idealrel, to_famat_shallow(p, utoi(f * S)));
   }
   nz = get_nz(D->bnf, gel(mod,1), gel(mod,2), clhray);
   return get_NR1D(N, clhray, D->degk, nz, D->fadk, idealrel);
@@ -2228,7 +2228,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
 	    S += clhss;
 	  }
 	  E[k] = ep;
-	  idealrel = factormul(idealrel, to_famat_all(p, utoi(f * S)));
+	  idealrel = factormul(idealrel, to_famat_shallow(p, utoi(f * S)));
 	}
 	if (!allarch && nba)
 	  nz = get_nz(bnf, decodemodule(nf,Fa), arch, clhray);

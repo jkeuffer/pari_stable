@@ -1192,6 +1192,134 @@ testprimes(GEN bnf, GEN BOUND)
   avma = av0;
 }
 
+/**** logarithmic embeddings ****/
+
+static GEN
+famat_to_arch(GEN nf, GEN fa, long prec)
+{
+  GEN g,e, y = NULL;
+  long i,l;
+
+  if (typ(fa) != t_MAT) return get_arch(nf, fa, prec);
+  if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
+  g = gel(fa,1);
+  e = gel(fa,2); l = lg(e);
+  for (i=1; i<l; i++)
+  {
+    GEN t, x = nf_to_scalar_or_basis(nf, gel(g,i));
+    /* multiplicative arch would be better (save logs), but exponents overflow
+     * [ could keep track of expo separately, but not worth it ] */
+    t = get_arch(nf,x,prec); if (gel(t,1) == gen_0) continue; /* rational */
+    t = RgV_Rg_mul(t, gel(e,i));
+    y = y? RgV_add(y,t): t;
+  }
+  return y ? y: zerovec(lg(nf[6])-1);
+}
+
+static GEN
+mylog(GEN x, long prec)
+{
+  if (gcmp0(x)) pari_err(precer,"get_arch");
+  return glog(x,prec);
+}
+
+/* For internal use. Get archimedean components: [e_i Log( sigma_i(X) )],
+ * where X = primpart(x), and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
+GEN
+get_arch(GEN nf,GEN x,long prec)
+{
+  long i, R1, RU;
+  GEN v;
+  if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  RU = lg(nf[6]) - 1;
+  if (typ(x) != t_COL) return zerovec(RU);
+  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
+  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
+  for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
+  for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
+  return v;
+}
+
+GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
+
+static GEN
+famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
+{
+  GEN A, T, a, t, g = gel(x,1), e = gel(x,2);
+  long i, l = lg(e);
+
+  if (l <= 1)
+    return get_arch_real(nf, gen_1, emb, prec);
+  A = T = NULL; /* -Wall */
+  for (i=1; i<l; i++)
+  {
+    a = get_arch_real(nf, gel(g,i), &t, prec);
+    if (!a) return NULL;
+    a = RgC_Rg_mul(a, gel(e,i));
+    t = vecpow(t, gel(e,i));
+    if (i == 1) { A = a;          T = t; }
+    else        { A = gadd(A, a); T = vecmul(T, t); }
+  }
+  *emb = T; return A;
+}
+
+static GEN
+scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
+{
+  GEN v, x, p1;
+  long i, s;
+
+  s = gsigne(u);
+  if (!s) pari_err(talker,"0 in get_arch_real");
+  x = cgetg(RU+1, t_COL);
+  for (i=1; i<=RU; i++) gel(x,i) = u;
+
+  v = cgetg(RU+1, t_COL);
+  if (s < 0) u = gneg(u);
+  p1 = glog(u,prec);
+  for (i=1; i<=R1; i++) gel(v,i) = p1;
+  if (i <= RU)
+  {
+    p1 = gmul2n(p1,1);
+    for (   ; i<=RU; i++) gel(v,i) = p1;
+  }
+  *emb = x; return v;
+}
+
+static int
+low_prec(GEN x) { return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3); }
+
+/* For internal use. Get archimedean components: [e_i log( | sigma_i(x) | )],
+ * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1)
+ * Return NULL if precision problem, and set *emb to the embeddings of x */
+GEN
+get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
+{
+  long i, RU, R1;
+  GEN v, t;
+
+  if (typ(x) == t_MAT) return famat_get_arch_real(nf,x,emb,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  RU = lg(nf[6])-1;
+  R1 = nf_get_r1(nf);
+  if (typ(x) != t_COL) return scalar_get_arch_real(R1, RU, x, emb, prec);
+  x = RgM_RgC_mul(gmael(nf,5,1), x);
+  v = cgetg(RU+1,t_COL);
+  for (i=1; i<=R1; i++)
+  {
+    t = gabs(gel(x,i),prec); if (low_prec(t)) return NULL;
+    gel(v,i) = glog(t,prec);
+  }
+  for (   ; i<=RU; i++)
+  {
+    t = gnorm(gel(x,i)); if (low_prec(t)) return NULL;
+    gel(v,i) = glog(t,prec);
+  }
+  *emb = x; return v;
+}
+
+
 GEN
 init_red_mod_units(GEN bnf, long prec)
 {
@@ -2547,7 +2675,7 @@ makecycgen(GEN bnf)
       GEN N = ZM_det_triangular(gel(gen,i));
       y = isprincipalarch(bnf,gel(GD,i), N, gel(cyc,i), gen_1, &e);
       if (y && !fact_ok(nf,y,NULL,gen,gel(D,i))) y = NULL;
-      if (y) { gel(h,i) = to_famat_all(y,gen_1); continue; }
+      if (y) { gel(h,i) = to_famat_shallow(y,gen_1); continue; }
     }
     y = isprincipalfact(bnf, NULL, gen, gel(D,i), nf_GENMAT|nf_FORCE);
     h[i] = y[2];

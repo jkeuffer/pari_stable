@@ -609,8 +609,11 @@ The ``principal part'' $t$ in an extended ideal may be
 represented in any of the above forms, and \emph{also} as a factorization
 matrix (in terms of number field elements, not ideals!), possibly the empty
 matrix \kbd{[;]} representing $1$. In the latter case, elements stay in
-factored form, which is a convenient way to avoid coefficient explosion.
-To recover the conventional expanded form, try \tet{nffactorback}.
+factored form, or \tev{famat} for \emph{fa}ctorization \emph{mat}rix, which
+is a convenient way to avoid coefficient explosion. To recover the
+conventional expanded form, try \tet{nffactorback}; but many functions
+already accept \var{famat}s as input, for instance \tet{ideallog}, so
+expanding huge elements should never be necessary.
 
 \subsec{Finite abelian groups}
 
