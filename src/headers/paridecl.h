@@ -783,6 +783,14 @@ GEN     sumdivk(GEN n,long k);
 ulong   eulerphiu(ulong n);
 GEN     Z_factor(GEN n);
 
+/* DedekZeta.c */
+
+GEN     glambdak(GEN nfz, GEN s, long prec);
+GEN     gzetak(GEN nfz, GEN s, long prec);
+GEN     gzetakall(GEN nfz, GEN s, long flag, long prec);
+GEN     initzeta(GEN pol, long prec);
+GEN     dirzetak(GEN nf, GEN b);
+
 /* base1.c */
 
 GEN     T2_from_embed(GEN x, long r1);
@@ -796,7 +804,6 @@ GEN     checknf(GEN nf);
 GEN     checknfelt_mod(GEN nf, GEN x, const char *s);
 void    checkprid(GEN bid);
 void    checkrnf(GEN rnf);
-GEN     dirzetak(GEN nf, GEN b);
 GEN     factoredpolred(GEN x, GEN fa);
 GEN     factoredpolred2(GEN x, GEN fa);
 GEN     galoisapply(GEN nf, GEN aut, GEN x);
@@ -805,13 +812,9 @@ GEN     get_bnfpol(GEN x, GEN *bnf, GEN *nf);
 GEN     get_nf(GEN x, long *t);
 GEN     get_nfpol(GEN x, GEN *nf);
 GEN     checkprid_i(GEN x);
-GEN     glambdak(GEN nfz, GEN s, long prec);
-GEN     gzetak(GEN nfz, GEN s, long prec);
-GEN     gzetakall(GEN nfz, GEN s, long flag, long prec);
 GEN     initalg(GEN x, long prec);
 GEN     initalgred(GEN x, long prec);
 GEN     initalgred2(GEN x, long prec);
-GEN     initzeta(GEN pol, long prec);
 long    nf_get_r1(GEN nf);
 long    nf_get_r2(GEN nf);
 GEN     nf_get_roots(GEN nf);
