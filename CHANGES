@@ -346,6 +346,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    43- library functions bnrisconductor0, bnrdisc0, bnrconductor0,
        bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
        idealred_elt, idealred_elt0
+   44- library functions trueeta, exp_Ir
 
   Removed
     1- obsolete library functions extract and matextract

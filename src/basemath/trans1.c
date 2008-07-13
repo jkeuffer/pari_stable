@@ -2295,7 +2295,7 @@ exp_Ir(GEN x)
   pari_sp av = avma;
   GEN v = cgetg(3,t_COMPLEX);
   mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
-  if (!signe(x)) return gerepilecopy(av, gel(v,1));
+  if (!signe(gel(v,2))) return gerepilecopy(av, gel(v,1));
   return v;
 }
 

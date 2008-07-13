@@ -5674,22 +5674,27 @@ $n\geq 1$.
 
 \fun{GEN}{mplog[z]}{GEN x[, GEN z]} returns $\log(x)$. We must have $x > 0$
 since the result must be a \typ{REAL}. Use \kbd{glog} for the general case,
-where you want such computations as $\log -1 = i$.
+where you want such computations as $\log(-1) = i$.
 
 \fun{GEN}{mpexp[z]}{GEN x[, GEN z]} returns $\exp(x)$.
 
 \fun{GEN}{mpexp1}{GEN x} returns $\exp(x)-1$, but is more accurate than
 \kbd{subrs(mpexp(x), 1)}, which suffers from catastrophic cancellation if
 $|x|$ is very small.
-Two variants of sin and cos:
+
+\fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
+function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
+
+\noindent A few variants on sin and cos:
 
 \fun{void}{mpsincos}{GEN x, GEN *s, GEN *c} sets $s$ and $c$ to
 $\sin(x)$ and $\cos(x)$ respectively, where $x$ is a \typ{REAL}
 
-\fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
+\fun{GEN}{exp_Ir}{GEN x} returns $\exp(ix)$, where $x$ is a \typ{REAL}.
+The return type is \typ{COMPLEXE} unless the imaginary part is equal to $0$
+to the current accuracy (its sign is $0$).
 
-\fun{GEN}{szeta}{long s, long prec} returns the value of Riemann's zeta
-function at the (possibly negative) integer $s\neq 1$, in relative accuracy \kbd{prec}.
+\fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
 
 \section{Permutations }
 
