@@ -22,18 +22,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-/* p > 2 */
+/* p > 2, T ZX, p prime, x t_INT */
 static long
-lemma6(GEN pol,GEN p,long nu,GEN x)
+lemma6(GEN T, GEN p, long nu, GEN x)
 {
   long la, mu;
   pari_sp av = avma;
-  GEN gpx, gx = poleval(pol, x);
+  GEN gpx, gx = poleval(T, x);
 
-  if (Zp_issquare(gx,p)) { avma = av; return 1; }
+  if (Zp_issquare(gx, p)) { avma = av; return 1; }
 
   la = Z_pval(gx, p);
-  gpx = poleval(ZX_deriv(pol), x);
+  gpx = poleval(ZX_deriv(T), x);
   mu = signe(gpx)? Z_pval(gpx,p)
                  : la+nu+1; /* mu = +oo */
   avma = av;
@@ -41,17 +41,17 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
   if (la >= nu<<1 && mu >= nu) return 0;
   return -1;
 }
-/* p = 2: retur 1 = yes, -1 = no, 0 = inconclusive */
+/* p = 2, T ZX, x t_INT: return 1 = yes, -1 = no, 0 = inconclusive */
 static long
-lemma7(GEN pol,long nu,GEN x)
+lemma7(GEN T, long nu, GEN x)
 {
   long odd4, la, mu;
   pari_sp av = avma;
-  GEN gpx, oddgx, gx = poleval(pol, x);
+  GEN gpx, oddgx, gx = poleval(T, x);
 
   if (Zp_issquare(gx,gen_2)) return 1;
 
-  gpx = poleval(ZX_deriv(pol), x);
+  gpx = poleval(ZX_deriv(T), x);
   la = Z_lvalrem(gx, 2, &oddgx);
   odd4 = umodiu(oddgx,4); avma = av;
 
@@ -75,23 +75,24 @@ lemma7(GEN pol,long nu,GEN x)
   return -1;
 }
 
+/* T a ZX, p a prime, pnu = p^nu, x0 t_INT */
 static long
-zpsol(GEN pol,GEN p,long nu,GEN pnu,GEN x0)
+zpsol(GEN T, GEN p, long nu, GEN pnu, GEN x0)
 {
   long i, res;
   pari_sp av = avma;
-  GEN x,pnup;
+  GEN x, pnup;
 
-  res = equaliu(p,2)? lemma7(pol,nu,x0): lemma6(pol,p,nu,x0);
+  res = equaliu(p,2)? lemma7(T,nu,x0): lemma6(T,p,nu,x0);
   if (res== 1) return 1;
   if (res==-1) return 0;
   x = x0; pnup = mulii(pnu,p);
   for (i=0; i < itos(p); i++)
   {
     x = addii(x,pnu);
-    if (zpsol(pol,p,nu+1,pnup,x)) { avma=av; return 1; }
+    if (zpsol(T,p,nu+1,pnup,x)) { avma = av; return 1; }
   }
-  avma=av; return 0;
+  avma = av; return 0;
 }
 
 /* return 1 if equation y^2=T(x) has an integral p-adic solution, 0
@@ -110,7 +111,7 @@ long
 qpsoluble(GEN T,GEN p)
 {
   pari_sp av = avma;
-  long res = zpsoluble(T,p) || zpsol(polrecip_i(T),p,1,p,gen_0);
+  long res = zpsoluble(T,p) || zpsol(polrecip_i(T), p, 1, p, gen_0);
   avma = av; return res;
 }
 
@@ -128,66 +129,64 @@ quad_char(GEN nf, GEN t, GEN pr)
     if (typ(t) == t_POL)
     {
       if (degpol(t)) pari_err(bugparier,"nfhilbertp");
-      t = constant_term(t);
+      t = gel(t,2);
     }
   }
   return kronecker(t, p);
 }
 
-/* (pr,2) = 1. return 1 if a square in (ZK / pr), 0 otherwise */
+/* (pr,2) = 1. return 1 if x square in (ZK / pr), 0 otherwise */
 static long
-psquarenf(GEN nf,GEN a,GEN pr)
+psquarenf(GEN nf,GEN x,GEN pr)
 {
   pari_sp av = avma;
   long v;
 
-  if (gcmp0(a)) return 1;
-  v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
+  if (gcmp0(x)) return 1;
+  v = nfval(nf,x,pr); if (v&1) return 0;
+  if (v) x = gdiv(x, gpowgs(coltoalg(nf, gel(pr,2)), v));
 
-  v = quad_char(nf, a, pr); avma = av; return v;
+  v = quad_char(nf, x, pr); avma = av; return v;
 }
 
+/* Is  x a square in (ZK / pr^(1+2e))^* ?  pr | 2 */
 static long
-check2(GEN nf, GEN a, GEN zinit)
+check2(GEN nf, GEN x, GEN zinit)
 {
-  GEN zlog = ideallog(nf,a,zinit), cyc = gmael(zinit,2,2);
-  long i, l = lg(cyc);
-
-  for (i=1; i<l; i++)
-  {
-    if (mpodd(gel(cyc,i))) break;
+  GEN zlog = ideallog(nf, x, zinit);
+  long i, l = lg(zlog);
+  for (i=1; i<l; i++) /* all elementary divisors are even (1+2e > 1) */
     if (mpodd(gel(zlog,i))) return 0;
-  }
   return 1;
 }
 
-/* pr | 2. Return 1 if a square in (ZK / pr), 0 otherwise */
+/* pr | 2. Return 1 if x (in Z_K) is square in ZK / pr^(1+2e), 0 otherwise */
 static long
-psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
+psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
 {
   long v;
   pari_sp av = avma;
 
-  if (gcmp0(a)) return 1;
-  v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(coltoalg(nf, gel(pr,2)), v));
-  /* now (a,pr) = 1 */
-  v = check2(nf,a,zinit); avma = av; return v;
+  if (gcmp0(x)) return 1;
+  v = nfval(nf,x,pr); if (v&1) return 0;
+  /* x /= pi^v, pi a pr-uniformizer */
+  if (v) x = gmul2n(nfmul(nf, x, nfpow(nf, gel(pr,5), stoi(v))), -v);
+  /* now (x,pr) = 1 */
+  v = check2(nf,x,zinit); avma = av; return v;
 }
 
 static long
-lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
+lemma6nf(GEN nf,GEN T,GEN pr,long nu,GEN x)
 {
   pari_sp av = avma;
   long la, mu;
-  GEN gpx, gx = poleval(pol, x);
+  GEN gpx, gx = poleval(T, x);
 
   if (psquarenf(nf,gx,pr)) return 1;
 
   la = nfval(nf,gx,pr);
-  gpx = poleval(RgX_deriv(pol), x);
-  mu = gcmp0(gpx)? la+nu+1: idealval(nf,gpx,pr);
+  gpx = poleval(RgX_deriv(T), x);
+  mu = gcmp0(gpx)? la+nu+1: nfval(nf,gpx,pr);
   avma = av;
   if (la > mu<<1) return 1;
   if (la >= nu<<1  && mu >= nu) return 0;
@@ -195,16 +194,16 @@ lemma6nf(GEN nf,GEN pol,GEN pr,long nu,GEN x)
 }
 
 static long
-lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
+lemma7nf(GEN nf,GEN T,GEN pr,long nu,GEN x,GEN zinit)
 {
   long res, la, mu, q;
-  GEN gpx, p1, gx = poleval(pol, x);
+  GEN gpx, gx = poleval(T, x);
 
   if (psquare2nf(nf,gx,pr,zinit)) return 1;
 
-  gpx = poleval(RgX_deriv(pol), x);
+  gpx = poleval(RgX_deriv(T), x);
   la = nfval(nf,gx,pr);
-  mu = gcmp0(gpx)? la+nu+1: idealval(nf,gpx,pr);
+  mu = gcmp0(gpx)? la+nu+1: nfval(nf,gpx,pr);
 
   if (la > mu<<1) return 1;
   if (nu > mu)
@@ -220,22 +219,23 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
     q = nu2-la; res = 0;
   }
   if (q > itos(gel(pr,3))<<1)  return -1;
-  p1 = gpowgs(coltoalg(nf, gel(pr,2)), la);
 
   zinit = Idealstar(nf, idealpows(nf,pr,q), nf_INIT);
-  if (!check2(nf,gdiv(gx,p1),zinit)) res = -1;
+  /* gx /= pi^la, pi a pr-uniformizer */
+  gx = gmul2n(nfmul(nf, gx, nfpow(nf, gel(pr,5), stoi(la))), -la);
+  if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
 
 static long
-zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
+zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
   long i, res;
   pari_sp av = avma;
   GEN pnup;
 
-  res = zinit? lemma7nf(nf,pol,pr,nu,x0,zinit)
-             : lemma6nf(nf,pol,pr,nu,x0);
+  res = zinit? lemma7nf(nf,T,pr,nu,x0,zinit)
+             : lemma6nf(nf,T,pr,nu,x0);
   avma = av;
   if (res== 1) return 1;
   if (res==-1) return 0;
@@ -244,7 +244,7 @@ zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   for (i=1; i<lg(repr); i++)
   {
     GEN x = gadd(x0,gmul(pnu,gel(repr,i)));
-    if (zpsolnf(nf,pol,pr,nu,pnup,x,repr,zinit)) { avma = av; return 1; }
+    if (zpsolnf(nf,T,pr,nu,pnup,x,repr,zinit)) { avma = av; return 1; }
   }
   avma = av; return 0;
 }
@@ -253,7 +253,7 @@ zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 static GEN
 repres(GEN nf, GEN pr)
 {
-  long i, j, k, f = itos(gel(pr,4)), pp, ppf, ppi;
+  long i, j, k, f = itos(gel(pr,4)), p, pf, pi;
   GEN fond, rep, bas = gel(nf,7);
 
   fond = cgetg(f+1, t_VEC);
@@ -264,14 +264,14 @@ repres(GEN nf, GEN pr)
       if (!is_pm1(gmael(mat,i,i))) gel(fond,k++) = gel(bas,i);
   }
 
-  pp = itos(gel(pr,1));
-  ppf = upowuu(pp, f);
-  rep = cgetg(ppf+1,t_VEC);
-  gel(rep,1) = gen_0; ppi=1;
-  for (i=0; i<f; i++,ppi*=pp)
-    for (j=1; j<pp; j++)
-      for (k=1; k<=ppi; k++)
-	gel(rep, j*ppi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
+  p = itos(gel(pr,1));
+  pf = upowuu(p, f);
+  rep = cgetg(pf+1,t_VEC);
+  gel(rep,1) = gen_0; pi=1;
+  for (i=0; i<f; i++,pi*=p)
+    for (j=1; j<p; j++)
+      for (k=1; k<=pi; k++)
+	gel(rep, j*pi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
   return gmodulo(rep,gel(nf,1));
 }
 
@@ -290,7 +290,7 @@ qpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (equaliu(gel(pr,1), 2))
   { /* tough case */
-    zinit = Idealstar(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)), nf_INIT);
+    zinit = Idealstar(nf, idealpows(nf,pr,1+2*nfval(nf,gen_2,pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(T),pr,zinit)) return 1;
   }
@@ -323,7 +323,7 @@ zpsolublenf(GEN nf,GEN T,GEN pr)
 
   if (equaliu(gel(pr,1),2))
   {
-    zinit = Idealstar(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)), nf_INIT);
+    zinit = Idealstar(nf,idealpows(nf,pr,1+2*nfval(nf,gen_2,pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
   }
   else
@@ -354,70 +354,61 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 }
 
 /* local quadratic Hilbert symbol (a,b)_pr, for a,b (non-zero) in nf */
-long
-nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
+static long
+nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
 {
-  GEN p, t;
+  GEN t, p = gel(pr,1);
   long va, vb, rep;
   pari_sp av = avma;
 
   if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
-  checkprid(pr); nf = checknf(nf);
-  p = gel(pr,1);
-
   if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
-  va = idealval(nf,a,pr);
-  vb = idealval(nf,b,pr);
+  va = nfval(nf,a,pr);
+  vb = nfval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
   t = nfdiv(nf, nfpow(nf,a, stoi(vb)),
-		      nfpow(nf,b, stoi(va)));
-  if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
+		nfpow(nf,b, stoi(va)));
+  if (odd(va) && odd(vb)) t = ZC_neg(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
   rep = quad_char(nf, t, pr);
   avma = av; return rep;
 }
 
-/* global quadratic Hilbert symbol (a,b):
+/* Global quadratic Hilbert symbol (a,b):
  *  =  1 if X^2 - aY^2 - bZ^2 has a point in projective plane
  *  = -1 otherwise
- * a, b should be non-zero
- */
+ * a, b should be non-zero */
 long
-nfhilbert(GEN nf,GEN a,GEN b)
+nfhilbert(GEN nf, GEN a, GEN b)
 {
   pari_sp av = avma;
-  long r1, i;
-  GEN S, ro;
+  long i, l;
+  GEN S, sa, sb;
 
-  if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbert");
   nf = checknf(nf);
-
-  a = nf_to_scalar_or_alg(nf, a);
-  b = nf_to_scalar_or_alg(nf, b);
- /* local solutions in real completions ? */
-  r1 = nf_get_r1(nf); ro = gel(nf,6);
-  for (i=1; i<=r1; i++)
-    if (signe(poleval(a,gel(ro,i))) < 0 &&
-	signe(poleval(b,gel(ro,i))) < 0)
+ /* local solutions in real completions ? [ error in nfsign if arg is 0 ]*/
+  sa = nfsign(nf, a);
+  sb = nfsign(nf, b); l = lg(sa);
+  for (i=1; i<l; i++)
+    if (sa[i] && sb[i])
     {
-      if (DEBUGLEVEL>=4)
+      if (DEBUGLEVEL>3)
 	fprintferr("nfhilbert not soluble at real place %ld\n",i);
       avma = av; return -1;
     }
 
   /* local solutions in finite completions ? (pr | 2ab)
    * primes above 2 are toughest. Try the others first */
-
-  S = gel(idealfactor(nf,gmod(gmul(gmulsg(2,a),b), gel(nf,1))), 1);
+  S = gel(idealfactor(nf, nfmul(nf, gmul2n(a,1),b)), 1);
   /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
   for (i=lg(S)-1; i>1; i--)
     if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
     {
-      if (DEBUGLEVEL >=4)
-	fprintferr("nfhilbert not soluble at finite place: %Ps\n",S[i]);
+      if (DEBUGLEVEL>3)
+	fprintferr("nfhilbert not soluble at finite place %Ps\n",S[i]);
       avma = av; return -1;
     }
   avma = av; return 1;
@@ -426,7 +417,8 @@ nfhilbert(GEN nf,GEN a,GEN b)
 long
 nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 {
-  if (p) return nfhilbertp(nf,a,b,p);
+  nf = checknf(nf);
+  if (p) { checkprid(p); return nfhilbertp(nf,a,b,p); }
   return nfhilbert(nf,a,b);
 }
 

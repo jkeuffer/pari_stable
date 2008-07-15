@@ -1185,7 +1185,6 @@ GEN     bnfissunit(GEN bnf,GEN suni,GEN x);
 GEN     bnfsunit(GEN bnf,GEN s,long PREC);
 long    nfhilbert(GEN bnf,GEN a,GEN b);
 long    nfhilbert0(GEN bnf,GEN a,GEN b,GEN p);
-long    nfhilbertp(GEN bnf,GEN a,GEN b,GEN p);
 long    qpsoluble(GEN pol,GEN p);
 long    qpsolublenf(GEN bnf,GEN pol,GEN p);
 long    zpsoluble(GEN pol,GEN p);
