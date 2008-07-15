@@ -397,6 +397,7 @@ Z_issquareall(GEN x, GEN *pt)
   return 1;
 }
 
+/* a t_INT, p prime */
 long
 Zp_issquare(GEN a, GEN p)
 {
