@@ -95,23 +95,16 @@ zpsol(GEN T, GEN p, long nu, GEN pnu, GEN x0)
   avma = av; return 0;
 }
 
-/* return 1 if equation y^2=T(x) has an integral p-adic solution, 0
- * otherwise. */
-long
-zpsoluble(GEN T,GEN p)
-{
-  if (typ(T)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"zpsoluble");
-  RgX_check_ZX(T, "zpsoluble");
-  return zpsol(T,p,0,gen_1,gen_0);
-}
-
 /* return 1 if equation y^2=T(x) has a rational p-adic solution (possibly
  * infinite), 0 otherwise. */
 long
-qpsoluble(GEN T,GEN p)
+hyperell_locally_soluble(GEN T,GEN p)
 {
   pari_sp av = avma;
-  long res = zpsoluble(T,p) || zpsol(polrecip_i(T), p, 1, p, gen_0);
+  long res;
+  if (typ(T)!=t_POL || typ(p)!=t_INT) pari_err(typeer,"zpsoluble");
+  RgX_check_ZX(T, "zpsoluble");
+  res = zpsol(T,p,0,gen_1,gen_0) || zpsol(polrecip_i(T), p, 1, p, gen_0);
   avma = av; return res;
 }
 
@@ -135,7 +128,7 @@ quad_char(GEN nf, GEN t, GEN pr)
   return kronecker(t, p);
 }
 
-/* (pr,2) = 1. return 1 if x square in (ZK / pr), 0 otherwise */
+/* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise */
 static long
 psquarenf(GEN nf,GEN x,GEN pr)
 {
@@ -144,7 +137,8 @@ psquarenf(GEN nf,GEN x,GEN pr)
 
   if (gcmp0(x)) return 1;
   v = nfval(nf,x,pr); if (v&1) return 0;
-  if (v) x = gdiv(x, gpowgs(coltoalg(nf, gel(pr,2)), v));
+  if (v) x = RgC_Rg_div(nfmul(nf, x, nfpow(nf, gel(pr,5), stoi(v))),
+                        gpowgs(gel(pr,1), v));
 
   v = quad_char(nf, x, pr); avma = av; return v;
 }
@@ -160,7 +154,7 @@ check2(GEN nf, GEN x, GEN zinit)
   return 1;
 }
 
-/* pr | 2. Return 1 if x (in Z_K) is square in ZK / pr^(1+2e), 0 otherwise */
+/* pr | 2. Return 1 if x in Z_K is square in Z_{K_pr}, 0 otherwise */
 static long
 psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
 {
@@ -279,13 +273,13 @@ repres(GEN nf, GEN pr)
  * (possibly (1,y,0) = oo), 0 otherwise.
  * coeffs of T are algebraic integers in nf */
 long
-qpsolublenf(GEN nf,GEN T,GEN pr)
+nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
 {
   GEN repr, zinit, p1;
   pari_sp av = avma;
 
+  if (typ(T)!=t_POL) pari_err(notpoler,"nf_hyperell_locally_soluble");
   if (gcmp0(T)) return 1;
-  if (typ(T)!=t_POL) pari_err(notpoler,"qpsolublenf");
   checkprid(pr); nf = checknf(nf);
 
   if (equaliu(gel(pr,1), 2))
@@ -308,34 +302,6 @@ qpsolublenf(GEN nf,GEN T,GEN pr)
   avma = av; return 0;
 }
 
-/* = 1 if equation y^2 = z^deg(T) * T(x/z) has a pr-adic integral solution
- * (possibly (1,y,0) = oo), 0 otherwise.
- * coeffs of T are algebraic integers in nf */
-long
-zpsolublenf(GEN nf,GEN T,GEN pr)
-{
-  GEN repr,zinit;
-  pari_sp av = avma;
-
-  if (gcmp0(T)) return 1;
-  if (typ(T)!=t_POL) pari_err(notpoler,"zpsolublenf");
-  checkprid(pr); nf = checknf(nf);
-
-  if (equaliu(gel(pr,1),2))
-  {
-    zinit = Idealstar(nf,idealpows(nf,pr,1+2*nfval(nf,gen_2,pr)), nf_INIT);
-    if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
-  }
-  else
-  {
-    if (psquarenf(nf,constant_term(T),pr)) return 1;
-    zinit = NULL;
-  }
-  repr = repres(nf,pr);
-  if (zpsolnf(nf,T,pr,0,gen_1,gen_0,repr,zinit)) { avma=av; return 1; }
-  avma=av; return 0;
-}
-
 static long
 hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
@@ -349,7 +315,7 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
   /* varn(nf.pol) = 0, pol is not a valid GEN  [as in Pol([x,x], x)].
    * But it is only used as a placeholder, hence it is not a problem */
 
-  rep = qpsolublenf(nf,pol,p)? 1: -1;
+  rep = nf_hyperell_locally_soluble(nf,pol,p)? 1: -1;
   avma = av; return rep;
 }
 
