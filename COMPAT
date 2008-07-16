@@ -89,6 +89,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - no longer export private library function incgam2. Remove it also under
     GP when compatible = 3. Situation is the same as incgam1 (removed long
     ago), 1.39.15 doc stated both were provided "for debugging only".
+  - Change of behaviour for Set(t_STR): Set("1") used to return ["1"], now
+    it returns ["\"1\""], i.e returns the set whose element evaluates to the
+    character string "1".
 
 * Specific to the PARI library:
 ===============================
