@@ -861,7 +861,7 @@ append(GEN v, GEN x)
   gel(w,i) = gcopy(x); return w;
 }
 
-/* add x^1 to factorisation f */
+/* add x^1 to famat f */
 static GEN
 famat_add(GEN f, GEN x)
 {
@@ -884,7 +884,13 @@ GEN
 famat_mul(GEN f, GEN g)
 {
   GEN h;
-  if (typ(g) != t_MAT) return famat_add(f, g);
+  if (typ(g) != t_MAT) {
+    if (typ(f) == t_MAT) return famat_add(f, g);
+    h = cgetg(3, t_MAT);
+    gel(h,1) = mkcol2(gcopy(f), gcopy(g));
+    gel(h,2) = mkcol2(gen_1, gen_1);
+  }
+  if (typ(f) != t_MAT) return famat_add(g, f);
   if (lg(f) == 1) return gcopy(g);
   if (lg(g) == 1) return gcopy(f);
   h = cgetg(3,t_MAT);

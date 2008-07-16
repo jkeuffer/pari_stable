@@ -319,10 +319,10 @@ concatenateѕ their elements and exponents columns. In a context where a
 treated as the factorization $x^1$. The following functions all return
 \var{famat}s:
 
-\fun{GEN}{famat_mul}{GEN f, GEN g} $f$ is a \var{famat}, and $g$ is either 
-a \var{famat} or an object whose type is \emph{not} \typ{MAT} (understood
-as $g^1$). Returns $fg$. The empty factorization is the neutral element
-for \var{famat} multiplication.
+\fun{GEN}{famat_mul}{GEN f, GEN g} $f$, $g$ are \var{famat}, 
+objects whose type is \emph{not} \typ{MAT} (understood as $f^1$ or $g^1$).
+Returns $fg$. The empty factorization is the neutral element for \var{famat}
+multiplication.
 
 \fun{GEN}{famat_pow}{GEN f, GEN n} $n$ is a \typ{INT}. If $f$ is a \typ{MAT},
 assume it is a \var{famat} and return $f^n$ (multiplies the exponent column
