@@ -496,14 +496,6 @@ bnrclassno(GEN bnf,GEN ideal)
 }
 
 GEN
-quick_isprincipalgen(GEN bnf, GEN x)
-{ /* x \prod g[i]^(-ep[i]) = factorisation of principal ideal */
-  GEN idep, gen = gmael3(bnf,8,1,3), ep = isprincipal(bnf,x);
-  idep = isprincipalfact(bnf, x, gen, ZC_neg(ep), nf_GENMAT|nf_FORCE);
-  return mkvec2(ep, gel(idep,2));
-}
-
-GEN
 bnrisprincipal(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
@@ -524,7 +516,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   if (typ(x) == t_VEC && lg(x) == 3)
   { idep = gel(x,2); x = gel(x,1); }  /* precomputed */
   else
-    idep = quick_isprincipalgen(bnf, x);
+    idep = bnfisprincipal0(bnf, x, nf_FORCE|nf_GENMAT);
   ep  = gel(idep,1);
   beta= gel(idep,2);
   j = lg(ep);

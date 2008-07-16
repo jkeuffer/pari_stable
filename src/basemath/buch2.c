@@ -1527,7 +1527,11 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
     if (typ(p1) != t_VEC) return p1;
     col = gel(p1,2);
   }
-  if (!col)
+  if (col)
+  { /* add back missing content */
+    if (xc) col = (typ(col)==t_MAT)? famat_mul(col,xc): RgC_Rg_mul(col,xc);
+  }
+  else
   {
     if (e < 0) e = 0;
     *ptprec = prec + divsBIL(e) + (MEDDEFAULTPREC-2);
@@ -1537,9 +1541,8 @@ isprincipalall(GEN bnf, GEN x, long *ptprec, long flag)
       return NULL;
     }
     pari_warn(warner,"precision too low for generators, not given");
+    col = cgetg(1, t_COL);
   }
-  if (xc && col) col = gmul(xc, col);
-  if (!col) col = cgetg(1, t_COL);
   return (flag & nf_GEN_IF_PRINCIPAL)? col: mkvec2(ex, col);
 }
 

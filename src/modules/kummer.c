@@ -433,7 +433,7 @@ static GEN
 isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
 {
   long i, l = lg(cycgen);
-  GEN logdisc, b, y = quick_isprincipalgen(bnfz, id);
+  GEN logdisc, b, y = bnfisprincipal0(bnfz, id, nf_FORCE|nf_GENMAT);
 
   logdisc = FpC_red(gel(y,1), gell);
   b = gel(y,2);
@@ -794,9 +794,10 @@ static GEN
 isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
 {
   GEN L, b, eps, y, q, nf = checknf(bnf);
+  GEN w = idealsqrtn(nf, v, gell, 1);
   long i, l = lg(cycgen);
 
-  L = quick_isprincipalgen(bnf, idealsqrtn(nf, v, gell, 1));
+  L = bnfisprincipal0(bnf, w, nf_GENMAT|nf_FORCE);
   q = gel(L,1);
   if (gcmp0(q)) { eps = v; y = q; }
   else
