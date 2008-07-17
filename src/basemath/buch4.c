@@ -436,7 +436,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     GEN A, u, D = ZM_snfall_i(H, &u, NULL, 1);
     card = detcyc(D, &i); setlg(D,i);
     A = cgetg(i,t_VEC); pow = ZM_inv(u,gen_1);
-    for(i--; i; i--) gel(A,i) = idealfactorback(gen, gel(pow,i), nf, 1);
+    for(i--; i; i--) gel(A,i) = idealfactorback(nf, gen, gel(pow,i), 1);
     gel(res,5) = mkvec3(card, D, A);
   }
 
