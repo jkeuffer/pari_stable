@@ -6,10 +6,10 @@ Help: polhensellift(A, B, p, e): lift the factorization B of A modulo p to a
  factorization modulo p^e using Hensel lift. The factors in B must be
  pairwise relatively prime modulo p
 Doc: given a prime $p$, an integral polynomial $A$ whose leading coefficient
- is a $p$-unit, a vector $B$ of integral polynomials that are pairwise
- relatively prime modulo $p$, and whose product is congruent to $A$ modulo
- $p$, lift the elements of $B$ to polynomials whose product is congruent to
- $A$ modulo $p^e$. 
+ is a $p$-unit, a vector $B$ of integral polynomials that are monic and
+ pairwise relatively prime modulo $p$, and whose product is congruent to
+ $A/\text{lc}(A)$ modulo $p$, lift the elements of $B$ to polynomials whose
+ product is congruent to $A$ modulo $p^e$. 
 
  More generally, if $T$ is an integral polynomial irreducible mod $p$, and
  $B$ is a factorization of $A$ over the finite field $\F_p[t]/(T)$, you can
@@ -22,3 +22,6 @@ Doc: given a prime $p$, an integral polynomial $A$ whose leading coefficient
  ? lift(lift( r[1] * r[2] * Mod(Mod(1,p^6),T) ))
  %2 = x^2 + (t + 1)
  @eprog 
+Variant: The underlying routine (skipping all consistency checks) is
+ \fun{GEN}{hensel_lift_fact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe}
+ where \kbd{pe} is $p^e$.

@@ -2000,6 +2000,7 @@ GEN     rootpadicfast(GEN f, GEN p, long e);
 
 GEN     Newton_exponents(long e);
 long    hensel_lift_accel(long n, long *pmask);
+GEN     hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 
 /* QX_factor.c */
@@ -2048,7 +2049,6 @@ GEN     ginvmod(GEN x, GEN y);
 GEN     gisirreducible(GEN x);
 GEN     glcm(GEN x, GEN y);
 GEN     glcm0(GEN x, GEN y);
-GEN     hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 GEN     leftright_pow(GEN,GEN,void*,GEN (*sqr)(void*,GEN),GEN (*mul)(void*,GEN,GEN));
 GEN     leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN));
 GEN     leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));

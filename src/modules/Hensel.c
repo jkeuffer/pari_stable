@@ -270,7 +270,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
 /* Q list of (coprime, monic) factors of pol mod (T,p). Lift mod p^e = pe.
  * T may be NULL */
 GEN
-hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e)
+hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe)
 {
   pari_sp av = avma;
   if (lg(Q) == 2) return mkvec(pol);
@@ -357,6 +357,6 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
       gel(L,i) = scalar_ZX_shallow(gel(L,i), varn(pol));
     RgX_check_ZXY(gel(L,i), "polhensellift");
   }
-  return gerepilecopy(av, hensel_lift_fact(pol, L, T, p, powiu(p,N), N));
+  return gerepilecopy(av, hensel_lift_fact(pol, L, T, p, N, powiu(p,N)));
 }
 

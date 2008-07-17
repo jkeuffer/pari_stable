@@ -1932,10 +1932,9 @@ GEN
 ZX_monic_factorpadic(GEN f, GEN p, long prec)
 {
   GEN w, poly, p1, p2, ex, P, E;
-  long n=degpol(f), i, k, j, pr;
+  long n=degpol(f), i, k, j;
 
   if (n==1) return mkmat2(mkcol(f), mkcol(gen_1));
-  pr = prec;
 
   poly = ZX_squff(f,&ex);
   P = cgetg(n+1,t_COL);
@@ -1947,7 +1946,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
     w = gel(fa,1);
     if (expo_is_squarefree(gel(fa,2)))
     { /* no repeated factors: Hensel lift */
-      p1 = hensel_lift_fact(fx, w, NULL, p, powiu(p,pr), pr);
+      p1 = hensel_lift_fact(fx, w, NULL, p, prec, powiu(p,prec));
       p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
@@ -1957,7 +1956,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
       continue;
     }
     /* use Round 4 */
-    p2 = maxord_i(p, fx, Z_pval(ZX_disc(fx),p), w, pr);
+    p2 = maxord_i(p, fx, Z_pval(ZX_disc(fx),p), w, prec);
     if (p2)
     {
       p2 = gerepilecopy(av1,p2);
