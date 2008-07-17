@@ -1219,7 +1219,7 @@ GEN
 gsubstpol(GEN x, GEN T, GEN y)
 {
   if (typ(T) == t_POL && RgX_is_monomial(T) && gcmp1(leading_term(T)))
-  {
+  { /* T = t^d */
     long d = degpol(T), v = varn(T);
     pari_sp av = avma;
     GEN deflated = d == 1? x: gdeflate(x, v, d);
@@ -1227,6 +1227,85 @@ gsubstpol(GEN x, GEN T, GEN y)
     avma = av;
   }
   return gsubst_expr(x,T,y);
+}
+
+static long
+checkdeflate(GEN x)
+{
+  ulong d = 0, i, lx = (ulong)lg(x);
+  for (i=3; i<lx; i++)
+    if (!gcmp0(gel(x,i))) { d = ugcd(d,i-2); if (d == 1) break; }
+  return (long)d;
+}
+
+/* return NULL if substitution fails */
+GEN
+gdeflate(GEN x, long v, long d)
+{
+  long i, lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return gcopy(x);
+  if (d <= 0) pari_err(talker,"need positive degree in gdeflate");
+  if (tx == t_POL || tx == t_SER)
+  {
+    long vx = varn(x);
+    pari_sp av;
+    if (varncmp(vx, v) < 0)
+    {
+      lx = lg(x); z = cgetg(lx, tx); z[1] = x[1];
+      for (i=2; i<lx; i++)
+      {
+        gel(z,i) = gdeflate(gel(x,i),v,d);
+        if (!z[i]) return NULL;
+      }
+      return z;
+    }
+    if (varncmp(vx, v) > 0) return gcopy(x);
+    av = avma;
+    if (tx == t_SER)
+    {
+      long V = valp(x);
+      GEN y;
+
+      lx = lg(x);
+      if (lx == 2) return zeroser(v, V / d);
+      y = ser2pol_i(x, lx);
+      if (V % d != 0 || checkdeflate(y) % d != 0)
+	pari_err(talker, "can't deflate this power series (d = %ld): %Ps", d, x);
+      y = poltoser(RgX_deflate(y, d), v, 1 + (lx-3)/d);
+      setvalp(y, V/d); return gerepilecopy(av, y);
+    }
+    /* t_POL */
+    if (checkdeflate(x) % d != 0) return NULL;
+    return gerepilecopy(av, RgX_deflate(x,d));
+  }
+  if (tx == t_RFRAC)
+  {
+    z = cgetg(3, t_RFRAC);
+    gel(z,1) = gdeflate(gel(x,1),v,d); if (!z[1]) return NULL;
+    gel(z,2) = gdeflate(gel(x,2),v,d); if (!z[2]) return NULL;
+    return z;
+  }
+  if (is_matvec_t(tx))
+  {
+    lx = lg(x); z = cgetg(lx, tx);
+    for (i=1; i<lx; i++)
+    {
+      gel(z,i) = gdeflate(gel(x,i),v,d);
+      if (!z[i]) return NULL;
+    }
+    return z;
+  }
+  pari_err(typeer,"gdeflate");
+  return NULL; /* not reached */
+}
+
+/* set *m to the largest d such that x0 = A(X^d); return A */
+GEN
+RgX_deflate_max(GEN x, long *m)
+{
+  *m = checkdeflate(x);
+  return RgX_deflate(x, *m);
 }
 
 GEN

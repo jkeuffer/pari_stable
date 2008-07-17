@@ -1511,6 +1511,7 @@ long    ZV_pvalrem(GEN x, GEN p, GEN *px);
 /* gen3.c */
 
 GEN     RgM_mulreal(GEN x, GEN y);
+GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
 GEN     centerlift(GEN x);
@@ -1528,6 +1529,7 @@ GEN     floor_safe(GEN x);
 GEN     gand(GEN x, GEN y);
 GEN     gceil(GEN x);
 GEN     gcvtoi(GEN x, long *e);
+GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivent(GEN x, GEN y);
 GEN     gdiventgs(GEN x, long y);
 GEN     gdiventres(GEN x, GEN y);
@@ -2039,7 +2041,6 @@ GEN     gen_factorback(GEN L, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(voi
 GEN     nffactorback(GEN nf, GEN L, GEN e);
 GEN     idealfactorback(GEN nf, GEN L, GEN e, int red);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
-GEN     gdeflate(GEN x, long v, long d);
 GEN     gdivexact(GEN x, GEN y);
 GEN     ggcd(GEN x, GEN y);
 GEN     ggcd0(GEN x, GEN y);
@@ -2054,7 +2055,6 @@ GEN     leftright_pow_fold(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN), GEN 
 GEN     leftright_pow_u_fold(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN), GEN (*msqr)(void*,GEN));
 GEN     newtonpoly(GEN x, GEN p);
 GEN     nfrootsQ(GEN x);
-GEN     RgX_deflate_max(GEN x0, long *m);
 GEN     poldisc0(GEN x, long v);
 GEN     polresultant0(GEN x, GEN y,long v,long flag);
 GEN     polsym(GEN x, long n);

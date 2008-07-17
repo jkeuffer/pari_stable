@@ -3942,7 +3942,7 @@ form $Q(X^d)$, return $Q$. Shallow function, not suitable for
 
 \fun{long}{RgX_deflate_max}{GEN P, long *d} sets \kbd{d} to the largest exponent
 such that $P$ is of the form $P(x^d)$ (use \kbd{gcmp0} to check
-coefficients), $0$ if $P$ is the zero polynomial. Returns
+whether coefficients are 0), $0$ if $P$ is the zero polynomial. Returns
 \kbd{RgX\_deflate(P,d)}.
 
 \fun{GEN}{RgX_inflate}{GEN P, long d} return $P(X^d)$. Shallow function, not
