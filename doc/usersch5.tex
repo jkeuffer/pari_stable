@@ -4227,6 +4227,13 @@ Assumes that \kbd{x} is non-zero.
 \fun{GEN}{deg1pol}{GEN a, GEN b,long v} creates the degree 1 \typ{POL}
 $a + b \kbd{pol\_x}(v)$
 
+\fun{GEN}{deg1_from_roots}{GEN L, long v} given a vector $L$ of scalars,
+returns the vector of monic linear polynomials in variable $v$ whose roots
+are the $L[i]$, i.e. the $x - L[i]$.
+
+\fun{GEN}{roots_from_deg1}{GEN L} given a vector $L$ of monic linear
+polynomials, return their roots, i.e. the $- L[i](0)$.
+
 \fun{GEN}{pol_1}{long v} Returns the constant polynomial $1$ in variable $v$.
 
 \fun{GEN}{pol_x}{long v} Returns the monomial of degree $1$ in variable $v$.
