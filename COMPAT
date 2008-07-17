@@ -177,18 +177,17 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed obsolete 'prec' argument from prototypes of idealmul0,
     idealmulred, idealpow0, idealpowred, ideallllred, algdep, algdep0,
     lindep, lindep0
-  - Rename library functions ideal_two_elt* -> idealtwoelt*
   - removed obsolete library functions ideallistunit, ideallistunitgen,
     ideallistzstar, ideallistzstargen. Use ideallist0.
   - removed obsolete library function algdep2. Use algdep0 (same arguments).
   - removed obsolete library function Mod0. Use gmodulo.
-  - factorback() now accepts a single argument. Rename
-    factorback0 -> factorback2.
-  - rename library function subfields0 -> nfsubfields
+  - factorback() now accepts a single argument.
+  - rename library functions factorback0 -> factorback2,
+    subfields0 -> nfsubfields, ideallllred -> idealred0, zideallog -> ideallog,
+    isunit -> bnfisunit, ideal_two_elt* -> idealtwoelt*
   - changed prototypes of bnrdisc, bnrconductor, bnrisconductor [ actually
     renamed bnrdisc0, bnrconductor0, bnrisconductor0 ]. Just use the new
     prototype, it's more convenient.
-  - renamed ideallllred -> idealred0, zideallog -> ideallog
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

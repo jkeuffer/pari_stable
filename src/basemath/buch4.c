@@ -546,10 +546,10 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   return v;
 }
 
-/* Analog to isunit, for S-units. Let v the result
+/* Analog to bnfisunit, for S-units. Let v the result
  * If x not an S-unit, v = []~, else
  * x = \prod_{i=0}^r e_i^v[i] * prod{i=r+1}^{r+s} s_i^v[i]
- * where the e_i are the field units (cf isunit), and the s_i are
+ * where the e_i are the field units (cf bnfisunit), and the s_i are
  * the S-units computed by bnfsunit (in the same order) */
 GEN
 bnfissunit(GEN bnf,GEN bnfS,GEN x)
@@ -562,7 +562,7 @@ bnfissunit(GEN bnf,GEN bnfS,GEN x)
   if (typ(bnfS)!=t_VEC || lg(bnfS)!=7) pari_err(typeer,"bnfissunit");
   x = nf_to_scalar_or_alg(nf,x);
   v = NULL;
-  if ( (w = make_unit(nf, bnfS, &x)) ) v = isunit(bnf, x);
+  if ( (w = make_unit(nf, bnfS, &x)) ) v = bnfisunit(bnf, x);
   if (!v || lg(v) == 1) { avma = av; return cgetg(1,t_COL); }
   return gerepileupto(av, concat(v, w));
 }

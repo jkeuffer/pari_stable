@@ -810,7 +810,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
     eps = famat_mul(famat_inv(eps), v);
   }
   setlg(y, rc+1);
-  b = isunit(bnf,eps);
+  b = bnfisunit(bnf,eps);
   if (lg(b) == 1) pari_err(bugparier,"isvirtualunit");
   return shallowconcat(lift_intern(b), y);
 }

@@ -1141,7 +1141,7 @@ GEN     isprincipal(GEN bnf, GEN x);
 GEN     bnfisprincipal0(GEN bnf, GEN x,long flall);
 GEN     isprincipalfact(GEN bnf, GEN C, GEN L, GEN f, long flag);
 GEN     isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e);
-GEN     isunit(GEN bignf, GEN x);
+GEN     bnfisunit(GEN bignf, GEN x);
 GEN     signunits(GEN bignf);
 GEN     nfsign_units(GEN bnf, GEN archp, int add_zu);
 

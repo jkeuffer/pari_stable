@@ -225,7 +225,7 @@ BA 49- user variables can now be aliased [#790].
        lindep, lindep0
    75- Rename library functions ideal_two_elt* -> idealtwoelt*,
        factorback0 -> factorback2, subfields0 -> nfsubfields,
-       zideallog -> ideallog
+       zideallog -> ideallog, isunit -> bnfisunit
    76- factorback() no longer accepts an optional 3rd argument (nf). Use
        idealfactorback(). See also nffactorback().
    77- Extend polhensellift to work over unramified extensions of Q_p

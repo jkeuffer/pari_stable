@@ -358,13 +358,12 @@ The description of \kbd{famat\_to\_nf} says that you do not want to use this
 function. Then how do we recover genuine number field elements? Well, in 
 most cases, we do not need to, since most of the functions useful in this
 context accept \var{famat}s as inputs, for instance \tet{nfsign},
-\tet{nfsign_arch}, \tet{ideallog} and \tet{isunit}. See also the end of
+\tet{nfsign_arch}, \tet{ideallog} and \tet{bnfisunit}. See also the end of
 \secref{se:Ideal_reduction}.
 
-\misctitle{Caveat.} on \var{famat} inputs, \kbd{isunit} assumes that
-it is an algebraic integer, since this is possibly very expensive to check,
-and normally easy to ensure from the user's side; don't feed it ridiculous
-inputs.
+\misctitle{Caveat.} on \var{famat} inputs, \kbd{bnfisunit} assumes that
+it is an algebraic integer, since this is expensive to check, and normally
+easy to ensure from the user's side; don't feed it ridiculous inputs.
 
 \subsec{Ideal arithmetic}
 

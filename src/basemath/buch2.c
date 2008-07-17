@@ -1771,7 +1771,7 @@ isprincipalfact_or_fail(GEN bnf, GEN C, GEN P, GEN e)
 
 /* if x a famat, assume it is an algebraic integer (very costly to check) */
 GEN
-isunit(GEN bnf,GEN x)
+bnfisunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, e, n, prec;
   pari_sp av = avma;
@@ -1785,7 +1785,7 @@ isunit(GEN bnf,GEN x)
   if (tx == t_MAT)
   { /* famat, assumed integral */
     if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
-      pari_err(talker, "not a factorization matrix in isunit");
+      pari_err(talker, "not a factorization matrix in bnfisunit");
   } else {
     x = nf_to_scalar_or_basis(nf,x);
     if (typ(x) != t_COL)
@@ -1832,10 +1832,10 @@ isunit(GEN bnf,GEN x)
       prec = MEDDEFAULTPREC + divsBIL( gexpo(x) );
     else
     {
-      if (i > 4) pari_err(precer,"isunit");
+      if (i > 4) pari_err(precer,"bnfisunit");
       prec = (prec-1)<<1;
     }
-    if (DEBUGLEVEL) pari_warn(warnprec,"isunit",prec);
+    if (DEBUGLEVEL) pari_warn(warnprec,"bnfisunit",prec);
     nf = nfnewprec_shallow(nf, prec);
   }
 

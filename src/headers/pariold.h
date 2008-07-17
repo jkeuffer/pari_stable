@@ -15,6 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* For compatibility with 1.x.x */
 /*functions renamed*/
+#define isunit bnfisunit
 #define zideallog ideallog
 #define ideallllred idealred0
 #define ideal_two_elt idealtwoelt
