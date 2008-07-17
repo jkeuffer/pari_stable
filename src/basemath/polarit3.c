@@ -291,21 +291,25 @@ GEN
 FpXX_red(GEN z, GEN p)
 {
   GEN res;
-  long i;
-  res = cgetg(lg(z),t_POL); res[1] = z[1];
-  for(i=2;i<lg(res);i++)
-    if (typ(z[i])==t_INT)
-      gel(res,i) = modii(gel(z,i),p);
+  long i, l = lg(z);
+  res = cgetg(l,t_POL); res[1] = z[1];
+  for (i=2; i<l; i++)
+  {
+    GEN zi = gel(z,i), c;
+    if (typ(zi)==t_INT)
+      c = modii(zi,p);
     else
     {
-      pari_sp av=avma;
-      gel(res,i) = FpX_red(gel(z,i),p);
-      if (lg(res[i])<=3)
+      pari_sp av = avma;
+      c = FpX_red(zi,p);
+      if (lg(c) <= 3)
       {
-	if (lg(res[i])==2) {avma=av;gel(res,i) = gen_0;}
-	else gel(res,i) = gerepilecopy(av,gmael(res,i,2));
+	if (lg(c)==2) { avma = av; c = gen_0;}
+	else c = gerepilecopy(av, gel(c,2));
       }
     }
+    gel(res,i) = c;
+  }
   return FpXX_renormalize(res,lg(res));
 }
 GEN
@@ -1338,44 +1342,44 @@ GEN
 from_Kronecker(GEN z, GEN T)
 {
   long i,j,lx,l = lg(z), N = (degpol(T)<<1) + 1;
-  GEN a,x, t = cgetg(N,t_POL);
+  GEN x, t = cgetg(N,t_POL);
   t[1] = T[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
   T = gcopy(T);
-  for (i=2; i<lx+2; i++)
+  for (i=2; i<lx+2; i++, z+= N-2)
   {
-    a = cgetg(3,t_POLMOD); gel(x,i) = a;
-    gel(a,1) = T;
-    for (j=2; j<N; j++) t[j] = z[j];
-    z += (N-2);
-    gel(a,2) = grem(normalizepol_i(t,N), T);
+    for (j=2; j<N; j++) gel(t,j) = gel(z,j);
+    gel(x,i) = mkpolmod(RgX_rem(normalizepol_i(t,N), T), T);
   }
-  a = cgetg(3,t_POLMOD); gel(x,i) = a;
-  gel(a,1) = T;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  gel(a,2) = grem(normalizepol_i(t,N), T);
+  gel(x,i) = mkpolmod(RgX_rem(normalizepol_i(t,N), T), T);
   return normalizepol_i(x, i+1);
 }
 
+/* Kronecker substitution, RgYX -> RgY :
+ * Q a RgY of degree n, P(X) = sum P_i * X^i, where the deg P_i are t_POLMOD
+ * mod Q or RgY of degree < n.
+ * Lift the P_i which are t_POLMOD, then return P( Y^(2n-1) ) */
 GEN
 to_Kronecker(GEN P, GEN Q)
 {
-  /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
-  long i,j,k,l, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
-  GEN p1, y = cgetg((N-2)*(lx-2) + 2, t_POL);
+  long i, k, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
+  GEN y = cgetg((N-2)*(lx-2) + 2, t_POL);
+
   for (k=i=2; i<lx; i++)
   {
-    p1 = gel(P,i); l = typ(p1);
-    if (l == t_POLMOD) { p1 = gel(p1,2); l = typ(p1); }
-    if (is_scalar_t(l) || varncmp(varn(p1), vQ) > 0)
+    GEN c = gel(P,i);
+    long j, tc = typ(c);
+    if (tc == t_POLMOD) { c = gel(c,2); tc = typ(c); }
+    if (is_scalar_t(tc) || varncmp(varn(c), vQ) > 0)
     {
-      gel(y,k++) = p1; j = 3;
+      gel(y,k++) = c; j = 3;
     }
     else
     {
-      l = lg(p1);
-      for (j=2; j < l; j++) y[k++] = p1[j];
+      long l = lg(c);
+      for (j=2; j < l; j++) gel(y,k++) = gel(c,j);
     }
     if (i == lx-1) break;
     for (   ; j < N; j++) gel(y,k++) = gen_0;
