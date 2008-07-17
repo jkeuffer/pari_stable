@@ -377,30 +377,28 @@ F2x_rem(GEN x, GEN y)
 GEN
 F2x_divrem(GEN x, GEN y, GEN *pr)
 {
+  long dx, dy, dz, lx = lg(x), vs = x[1];
   GEN z;
-  long dx,dy,dz,i;
-  long vs=x[1];
-  long lx=lg(x);
 
   if (pr == ONLY_REM) return F2x_rem(x, y);
   dy = F2x_degree(y);
   if (!dy)
   {
     z = vecsmall_copy(x);
-    if (pr) *pr = zero_Flx(vs);
+    if (pr && pr != ONLY_DIVIDES) *pr = zero_Flx(vs);
     return z;
   }
   dx = F2x_degree_lg(x,lx);
   dz = dx-dy;
   if (dz < 0)
   {
+    if (pr == ONLY_DIVIDES) return dx < 0? vecsmall_copy(x): NULL;
     z = zero_Flx(vs);
     if (pr) *pr = vecsmall_copy(x);
     return z;
   }
-  z = cgetg(lg(x)-lg(y)+3, t_VECSMALL); z[1] = vs;
+  z = const_vecsmall(lg(x)-lg(y)+2, 0); z[1] = vs;
   x = vecsmall_copy(x);
-  for (i=2; i<lg(z); i++) z[i]=0;
   while (dx>=dy)
   {
     F2x_set_coeff(z,dx-dy);
@@ -411,6 +409,10 @@ F2x_divrem(GEN x, GEN y, GEN *pr)
   z = F2x_renormalize(z, lg(z));
   if (!pr) { cgiv(x); return z; }
   x = F2x_renormalize(x, lx);
+  if (pr == ONLY_DIVIDES) {
+    if (lg(x) == 2) { cgiv(x); return z; } 
+    avma = (pari_sp)(z + lg(z)); return NULL;
+  }
   *pr = x; return z;
 }
 

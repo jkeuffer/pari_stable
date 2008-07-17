@@ -562,6 +562,13 @@ gmod(GEN x, GEN y)
   pari_err(operf,"%",x,y);
   return NULL; /* not reached */
 }
+/* divisibility: return 1 if y | x, 0 otherwise */
+int
+gdvd(GEN x, GEN y)
+{
+  pari_sp av = avma;
+  x = gmod(x,y); avma = av; return gcmp0(x);
+}
 
 GEN
 gmodgs(GEN x, long y)

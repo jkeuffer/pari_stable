@@ -2022,7 +2022,11 @@ ring. Standard functions \var{fun} are
   \kbd{rem}: Euclidean remainder
 
   \kbd{divrem}: return Euclidean quotient, store remainder in a pointer
-argument.
+argument. Three special values of that pointer argument modify the default
+behaviour: \kbd{NULL} (do not store the remainder, used to implement
+\kbd{div}), \tet{ONLY_REM} (return the remainder, used to implement
+\kbd{rem}), \tet{ONLY_DIVIDES} (return the quotient if the division is exact,
+and \kbd{NULL} otherwise).
 
   \kbd{gcd}: GCD
 
@@ -3854,9 +3858,17 @@ algorithm.
 $\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$. Return its square (as a true
 \kbd{GEN}).
 
-\fun{GEN}{RgX_divrem}{GEN x, GEN y, GEN *r}
+\fun{GEN}{RgX_divrem}{GEN x, GEN y, GEN *r} by default, returns the Euclidean
+quotient and store the remainder in $r$. Three special values of $r$ change
+that behaviour
+\item \kbd{NULL}: do not store the remainder, used to implement \kbd{RgX\_div},
 
-\fun{GEN}{RgX_div}{GEN x, GEN y, GEN *r}
+\item \tet{ONLY_REM}: return the remainder, used to implement \kbd{RgX\_rem},
+
+\item \tet{ONLY_DIVIDES}: return the quotient if the division is exact, and
+\kbd{NULL} otherwise.
+
+\fun{GEN}{RgX_div}{GEN x, GEN y}
 
 \fun{GEN}{RgX_div_by_X_x}{GEN A, GEN a, GEN *r} returns the
 quotient of the \kbd{RgX}~\kbd{A} by $(X - \kbd{a})$, and sets \kbd{r} to the

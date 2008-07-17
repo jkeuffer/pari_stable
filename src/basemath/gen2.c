@@ -795,22 +795,29 @@ ggval(GEN x, GEN p)
       if (!equalii(p,gel(x,2))) break;
       return valp(x);
 
-    case t_POLMOD:
-      if (tp == t_INT) return ggval(gel(x,2),p);
+    case t_POLMOD: {
+      GEN a = gel(x,1), b = gel(x,2);
+      long v;
+      if (tp == t_INT) return ggval(b,p);
       if (tp != t_POL) break;
-      if (varn(x[1]) != varn(p)) return 0;
+      v = varn(p);
+      if (varn(a) != v) return 0;
       av = avma;
-      if (!poldvd(gel(x,1),p,&p1)) break;
-      if (!poldvd(gel(x,2),p,&p2)) { avma = av; return 0; }
-      val = 1; while (poldvd(p1,p,&p1) && poldvd(p2,p,&p2)) val++;
+      a = RgX_divrem(a, p, ONLY_DIVIDES);
+      if (!a) break;
+      if (typ(b) != t_POL || varn(b) != v ||
+          !(b = RgX_divrem(b, p, ONLY_DIVIDES)) ) { avma = av; return 0; }
+      val = 1;
+      while ((a = RgX_divrem(a, p, ONLY_DIVIDES)) &&
+             (b = RgX_divrem(b, p, ONLY_DIVIDES)) ) val++;
       avma = av; return val;
-
+    }
     case t_POL:
       if (tp==t_POL)
       {
+        long vp = varn(p);
 	if (degpol(p) <= 0)
 	  pari_err(talker, "forbidden divisor %Ps in ggval", p);
-	vp = varn(p);
 	vx = varn(x);
 	if (vp == vx)
 	{
@@ -818,14 +825,14 @@ ggval(GEN x, GEN p)
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {
-	    if (!poldvd(x,p,&x)) break;
+            x = RgX_divrem(x,p,ONLY_DIVIDES);
+	    if (!x) { avma = av; return val; }
 	    if (low_stack(limit, stack_lim(av,1)))
 	    {
 	      if(DEBUGMEM>1) pari_warn(warnmem,"ggval");
 	      x = gerepilecopy(av, x);
 	    }
 	  }
-	  avma = av; return val;
 	}
 	if (varncmp(vx, vp) > 0) return 0;
       }

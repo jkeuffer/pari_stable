@@ -24,29 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*******************************************************************/
 /*                                                                 */
-/*                           DIVISIBILITY                          */
-/*                 Return 1 if y  |  x,  0 otherwise               */
-/*                                                                 */
-/*******************************************************************/
-
-int
-gdvd(GEN x, GEN y)
-{
-  pari_sp av=avma;
-  x=gmod(x,y); avma=av; return gcmp0(x);
-}
-
-int
-poldvd(GEN x, GEN y, GEN *z)
-{
-  pari_sp av = avma;
-  GEN p1 = poldivrem(x,y,ONLY_DIVIDES);
-  if (p1) { *z = p1; return 1; }
-  avma=av; return 0;
-}
-
-/*******************************************************************/
-/*                                                                 */
 /*                  POLYNOMIAL EUCLIDEAN DIVISION                  */
 /*                                                                 */
 /*******************************************************************/
