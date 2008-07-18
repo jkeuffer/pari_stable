@@ -1825,21 +1825,8 @@ FlxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
 GEN
 FlxX_to_Kronecker(GEN P, GEN Q)
 {
-  /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
-  long i,j,k,l;
-  long lx = lg(P), N = (degpol(Q)<<1) + 1;
-  GEN p1;
-  GEN y = cgetg((N-2)*(lx-2) + 2, t_VECSMALL);
-  y[1] = P[1];
-  for (k=i=2; i<lx; i++)
-  {
-    p1 = gel(P,i);
-    l = lg(p1);
-    for (j=2; j < l; j++) y[k++] = p1[j];
-    if (i == lx-1) break;
-    for (   ; j < N; j++) y[k++] = 0;
-  }
-  setlg(y, k); return y;
+  GEN z = FlxX_to_Kronecker_spec(P+2, lg(P)-2, Q);
+  z[1] = P[1]; return z;
 }
 
 GEN
