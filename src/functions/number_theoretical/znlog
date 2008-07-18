@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: znlog
 Prototype: GG
 Help: znlog(x,g): g as output by znprimroot (modulo a prime). Return
- smallest non-negative n such that g^n = x
+ smallest non-negative n such that g^n = x.
 Doc: let $N$ such that $(\Z/N\Z)^*$ is cyclic and $g$ a primitive root mod
  $N$, as would be output by \kbd{znprimroot}$(N)$.
  The result is the discrete log of $x$ in the multiplicative group

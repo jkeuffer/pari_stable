@@ -2,7 +2,7 @@ Function: numerator
 Section: conversions
 C-Name: numer
 Prototype: G
-Help: numerator(x): numerator of x
+Help: numerator(x): numerator of x.
 Doc:
  numerator of $x$. The meaning of this
  is clear when $x$ is a rational number or function. If $x$ is an integer

@@ -2,7 +2,7 @@ Function: acos
 Section: transcendental
 C-Name: gacos
 Prototype: Gp
-Help: acos(x): inverse cosine of x
+Help: acos(x): inverse cosine of x.
 Doc: principal branch of $\text{cos}^{-1}(x)$, i.e.~such that
  $\text{Re(acos}(x))\in [0,\pi]$. If $x\in \R$ and $|x|>1$, then
  $\text{acos}(x)$ is complex.

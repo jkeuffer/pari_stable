@@ -4,7 +4,7 @@ C-Name: qfgaussred
 Prototype: G
 Help: qfgaussred(q): square reduction of the (symmetric) matrix q (returns a
  square matrix whose i-th diagonal term is the coefficient of the i-th square
- in which the coefficient of the i-th variable is 1)
+ in which the coefficient of the i-th variable is 1).
 Doc:
  \idx{decomposition into squares} of the
  quadratic form represented by the symmetric matrix $q$. The result is a

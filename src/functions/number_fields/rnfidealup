@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfidealup
 Prototype: GG
 Help: rnfidealup(rnf,x): lifts the ideal x (of the base field) to the
- relative field
+ relative field.
 Doc: $\var{rnf}$ being a relative number
  field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an ideal of
  $K$, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in the form of a

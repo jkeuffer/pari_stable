@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rootsof1
 Prototype: G
 Help: nfrootsof1(nf): number of roots of unity and primitive root of unity
- in the number field nf
+ in the number field nf.
 Doc: computes the number of roots of unity
  $w$ and a primitive $w$-th root of unity (expressed on the integral basis)
  belonging to the number field $\var{nf}$. The result is a two-component

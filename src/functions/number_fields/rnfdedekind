@@ -6,7 +6,7 @@ Help: rnfdedekind(nf,pol,pr): relative Dedekind criterion over nf, applied to
  the order defined by a root of irreducible polynomial pol, modulo the prime
  ideal pr. Returns [flag,basis,val], where basis is a pseudo-basis of the
  enlarged order, flag is 1 iff this order is pr-maximal, and val is the
- valuation in pr of the order discriminant
+ valuation in pr of the order discriminant.
 Doc: given a number field
  $\var{nf}$ as output by \kbd{nfinit} and a polynomial \var{pol} with
  coefficients in $\var{nf}$ defining a relative extension $L$ of $\var{nf}$,

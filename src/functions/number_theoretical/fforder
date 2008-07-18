@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: fforder
 Prototype: GDG
 Help: fforder(x,{o}): multiplicative order of the finite field element x.
- Optional o is assumed to be a multiple of the order of the element
+ Optional o is assumed to be a multiple of the order of the element.
 Doc: multiplicative order of the finite field element $x$.  If $o$ is
  present, it is assumed to be a multiple of the order of the element. This
  multiple can also be given by a factorization matrix, which is the preferred

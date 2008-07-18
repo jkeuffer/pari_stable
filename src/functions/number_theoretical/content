@@ -2,7 +2,7 @@ Function: content
 Section: number_theoretical
 C-Name: content
 Prototype: G
-Help: content(x): gcd of all the components of x, when this makes sense
+Help: content(x): gcd of all the components of x, when this makes sense.
 Doc: computes the gcd of all the coefficients of $x$,
  when this gcd makes sense. This is the natural definition
  if $x$ is a polynomial (and by extension a power series) or a

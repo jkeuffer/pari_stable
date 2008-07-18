@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: listsort
 Prototype: WD0,L,
 Help: listsort(list,{flag=0}): sort list in place. If flag is non-zero,
- suppress all but one occurence of each element in list
+ suppress all but one occurence of each element in list.
 Doc: sorts \var{list} (which must
  be of type \typ{LIST}) in place. If $\fl$ is non-zero, suppresses all repeated
  coefficients. This is faster than the \kbd{vecsort} command since no

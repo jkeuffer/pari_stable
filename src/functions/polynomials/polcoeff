@@ -5,7 +5,7 @@ Prototype: GLDn
 Help: polcoeff(x,n,{v}): coefficient of degree n of x, or the n-th component
  for vectors or matrices (for which it is simpler to use x[]). With respect
  to the main variable if v is omitted, with respect to the variable v
- otherwise
+ otherwise.
 Description:
  (pol, 0):gen:copy      constant_term($1)
  (gen, small, ?var):gen polcoeff0($1, $2, $3)

@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfelementabstorel
 Prototype: GG
 Help: rnfeltabstorel(rnf,x): transforms the element x from absolute to
- relative representation
+ relative representation.
 Doc: $\var{rnf}$ being a relative
  number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an
  element of $L$ expressed as a polynomial modulo the absolute equation

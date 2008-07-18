@@ -4,7 +4,7 @@ C-Name: rnfbasis
 Prototype: GG
 Help: rnfbasis(bnf,M): given a projective Z_K-module M as output by
  rnfpseudobasis or rnfsteinitz, gives either a basis of M if it is free, or an
- n+1-element generating set
+ n+1-element generating set.
 Doc: let $K$ the field represented by
  \var{bnf}, as output by \kbd{bnfinit}. $M$ is a projective $\Z_K$-module
  of rank $n$ ($M\otimes K$ is an $n$-dimensional $K$-vector space), given by a

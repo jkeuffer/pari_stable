@@ -5,7 +5,7 @@ Prototype: GG
 Help: rnfpseudobasis(nf,pol): given a pol with coefficients in nf, gives a
  4-component vector [A,I,D,d] where [A,I] is a pseudo basis of the maximal
  order in HNF on the power basis, D is the relative ideal discriminant, and d
- is the relative discriminant in nf^*/nf*^2
+ is the relative discriminant in nf^*/nf*^2.
 Doc: given a number field
  $\var{nf}$ as output by \kbd{nfinit} and a polynomial \var{pol} with
  coefficients in $\var{nf}$ defining a relative extension $L$ of $\var{nf}$,

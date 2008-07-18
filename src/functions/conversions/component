@@ -5,7 +5,7 @@ Prototype: GL
 Help: component(x,n): the n'th component of the internal representation of
  x. For vectors or matrices, it is simpler to use x[]. For list objects such
  as nf, bnf, bnr or ell, it is much easier to use member functions starting
- with "."
+ with ".".
 Doc: extracts the $n^{\text{th}}$-component of $x$. This is to be understood
  as follows: every PARI type has one or two initial \idx{code words}. The
  components are counted, starting at 1, after these code words. In particular

@@ -4,7 +4,7 @@ C-Name: ellrootno
 Prototype: lGDG
 Help: ellrootno(E,{p=1}): root number for the L-function of the elliptic
  curve E. p can be 1 (default), global root number, or a prime p (including
- 0) for the local root number at p
+ 0) for the local root number at p.
 Doc:
  $E$ being an \var{sell} as output by
  \kbd{ellinit}, this computes the local (if $p\neq 1$) or global (if $p=1$)

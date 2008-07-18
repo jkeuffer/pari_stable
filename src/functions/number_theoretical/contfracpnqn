@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: pnqn
 Prototype: G
 Help: contfracpnqn(x): [p_n,p_{n-1}; q_n,q_{n-1}] corresponding to the
- continued fraction x
+ continued fraction x.
 Doc: when $x$ is a vector or a one-row matrix, $x$
  is considered as the list of partial quotients $[a_0,a_1,\dots,a_n]$ of a
  rational number, and the result is the 2 by 2 matrix

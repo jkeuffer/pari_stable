@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfidealabstorel
 Prototype: GG
 Help: rnfidealabstorel(rnf,x): transforms the ideal x from absolute to
- relative representation
+ relative representation.
 Doc: let $\var{rnf}$ be a relative
  number field extension $L/K$ as output by \kbd{rnfinit}, and $x$ an ideal of
  the absolute extension $L/\Q$ given by a $\Z$-basis of elements of $L$.

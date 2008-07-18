@@ -2,7 +2,7 @@ Function: norm
 Section: conversions
 C-Name: gnorm
 Prototype: G
-Help: norm(x): norm of x
+Help: norm(x): norm of x.
 Doc:
  algebraic norm of $x$, i.e.~the product of $x$ with
  its conjugate (no square roots are taken), or conjugates for polmods. For

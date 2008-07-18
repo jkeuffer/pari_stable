@@ -2,7 +2,7 @@ Function: rnfidealnormabs
 Section: number_fields
 C-Name: rnfidealnormabs
 Prototype: GG
-Help: rnfidealnormabs(rnf,x): absolute norm of the ideal x
+Help: rnfidealnormabs(rnf,x): absolute norm of the ideal x.
 Doc: $\var{rnf}$ being a relative
  number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
  relative ideal (which can be, as in the absolute case, of many different

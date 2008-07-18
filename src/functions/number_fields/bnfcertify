@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: certifybuchall
 Prototype: lG
 Help: bnfcertify(bnf): certify the correctness (i.e. remove the GRH) of the
- bnf data output by bnfinit
+ bnf data output by bnfinit.
 Doc: $\var{bnf}$ being as output by
  \kbd{bnfinit}, checks whether the result is correct, i.e.~whether it is
  possible to remove the assumption of the Generalized Riemann

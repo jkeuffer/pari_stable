@@ -1,7 +1,7 @@
 Function: _-=_
 C-Name: gsube
 Prototype: &G
-Help: x-=y: shortcut for x=x-y
+Help: x-=y: shortcut for x=x-y.
 Section: symbolic_operators
 Description:
  (*small, small):small:parens		 $1 -= $(2)

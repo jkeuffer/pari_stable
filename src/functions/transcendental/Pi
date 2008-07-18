@@ -2,7 +2,7 @@ Function: Pi
 Section: transcendental
 C-Name: mppi
 Prototype: p
-Help: Pi=Pi(): the constant pi, with current precision
+Help: Pi=Pi(): the constant pi, with current precision.
 Description:
  ():real:prec	mppi(prec)
 Doc: the constant $\pi$ ($3.14159\cdots$).

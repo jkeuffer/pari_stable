@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealintersect
 Prototype: GGG
 Help: idealintersect(nf,A,B): intersection of two ideals A and B in the
- number field defined by nf
+ number field defined by nf.
 Doc: intersection of the two ideals
  $A$ and $B$ in the number field $\var{nf}$. The result is given in HNF.
  \bprog

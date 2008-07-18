@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: initzeta
 Prototype: Gp
 Help: zetakinit(x): compute number field information necessary to use zetak,
- where x is an irreducible polynomial
+ where x is an irreducible polynomial.
 Doc: computes a number of initialization data
  concerning the number field defined by the polynomial $x$ so as to be able
  to compute the \idx{Dedekind} zeta and lambda functions (respectively

@@ -4,7 +4,7 @@ C-Name: factorpadic0
 Prototype: GGLD0,L,
 Help: factorpadic(pol,p,r,{flag=0}): p-adic factorization of the polynomial pol
  to precision r. flag is optional and may be set to 0 (use round 4) or 1 (use
- Buchmann-Lenstra)
+ Buchmann-Lenstra).
 Doc: $p$-adic factorization
  of the polynomial \var{pol} to precision $r$, the result being a
  two-column matrix as in \kbd{factor}. The factors are normalized so that

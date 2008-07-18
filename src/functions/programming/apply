@@ -2,7 +2,7 @@ Function: apply
 Section: programming/specific
 C-Name: apply0
 Prototype: GG
-Help: apply(f, A): apply function f to each entry in A
+Help: apply(f, A): apply function f to each entry in A.
 Doc: Apply the \typ{CLOSURE} \kbd{f} to the entries of \kbd{A}. If \kbd{A}
  is a scalar, return \kbd{f(A)}. If \kbd{A} is a polynomial or power series,
  apply \kbd{f} on all coefficients. If \kbd{A} is a vector or list, return

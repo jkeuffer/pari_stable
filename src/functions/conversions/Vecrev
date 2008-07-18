@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gtovecrev
 Prototype: DG
 Help: Vecrev({x=[]}): transforms the object x into a vector.
- Empty vector if x is omitted
+ Empty vector if x is omitted.
 Description:
  ():vec	cgetg(1,t_VEC)
  (gen):vec	gtovecrev($1)

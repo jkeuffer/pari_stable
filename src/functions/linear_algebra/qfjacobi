@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: jacobi
 Prototype: Gp
 Help: qfjacobi(x): eigenvalues and orthogonal matrix of eigenvectors of the
- real symmetric matrix x
+ real symmetric matrix x.
 Doc: $x$ being a real symmetric matrix, this gives a
  vector having two components: the first one is the vector of eigenvalues of
  $x$, the second is the corresponding orthogonal matrix of eigenvectors of

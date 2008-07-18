@@ -6,7 +6,7 @@ Description:
 
 Function: _call_GG
 Class: gp2c_internal
-Help: Call a function with proto GG on two GENs
+Help: Call a function with proto GG on two GENs.
 Description:
  (func_GG, gen, gen):gen         $(1)($2, $3)
 
@@ -17,7 +17,7 @@ Prototype: vV=GID0,L,
 Help: forvec(X=v,seq,{flag=0}): v being a vector of two-component vectors of
  length n, the sequence is evaluated with X[i] going from v[i][1] to v[i][2]
  for i=n,..,1 if flag is zero or omitted. If flag = 1 (resp. flag = 2),
- restrict to increasing (resp. strictly increasing) sequences
+ restrict to increasing (resp. strictly increasing) sequences.
 Doc: Let $v$ be an $n$-component
  vector (where $n$ is arbitrary) of two-component vectors $[a_i,b_i]$
  for $1\le i\le n$. This routine evaluates \var{seq}, where the formal

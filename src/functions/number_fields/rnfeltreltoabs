@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfelementreltoabs
 Prototype: GG
 Help: rnfeltreltoabs(rnf,x): transforms the element x from relative to
- absolute representation
+ absolute representation.
 Doc: $\var{rnf}$ being a relative
  number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an
  element of $L$ expressed as a polynomial or polmod with polmod

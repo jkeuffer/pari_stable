@@ -7,7 +7,7 @@ Help: bnrdisclist(bnf,bound,{arch}): gives list of discriminants of
  The ramified Archimedean places are given by arch; all possible values are
  taken if arch is omitted. Supports the alternative syntax
  bnrdisclist(bnf,list), where list is as output by ideallist or ideallistarch
- (with units)
+ (with units).
 Doc: $\var{bnf}$ being as output by \kbd{bnfinit} (with units), computes a
  list of discriminants of Abelian extensions of the number field by increasing
  modulus norm up to bound \var{bound}. The ramified Archimedean places are

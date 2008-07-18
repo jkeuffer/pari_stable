@@ -2,7 +2,7 @@ Function: numbpart
 Section: number_theoretical
 C-Name: numbpart
 Prototype: G
-Help: numbpart(n): number of partitions of n
+Help: numbpart(n): number of partitions of n.
 Doc: gives the number of unrestricted partitions of
  $n$, usually called $p(n)$ in the literature; in other words the number of
  nonnegative integer solutions to $a+2b+3c+\cdots=n$. $n$ must be of type

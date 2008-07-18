@@ -5,7 +5,7 @@ Prototype: GGD0,L,p
 Help: zetak(nfz,x,{flag=0}): Dedekind zeta function of the number field nfz
  at x, where nfz is the vector computed by zetakinit (NOT by nfinit); flag is
  optional, and can be 0: default, compute zetak, or non-zero: compute the
- lambdak function, i.e. with the gamma factors
+ lambdak function, i.e. with the gamma factors.
 Doc: \var{znf} being a number
  field initialized by \kbd{zetakinit} (\emph{not} by \kbd{nfinit}),
  computes the value of the \idx{Dedekind} zeta function of the number

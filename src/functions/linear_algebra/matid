@@ -2,7 +2,7 @@ Function: matid
 Section: linear_algebra
 C-Name: matid
 Prototype: L
-Help: matid(n): identity matrix of order n (n C-integer)
+Help: matid(n): identity matrix of order n.
 Description:
  (small):vec    matid($1)
 Doc: creates the $n\times n$ identity matrix.

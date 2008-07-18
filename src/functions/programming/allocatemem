@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: allocatemem0
 Prototype: vDG
 Help: allocatemem({s=0}): allocates a new stack of s bytes. doubles the
- stack if s is omitted
+ stack if s is omitted.
 Doc: this very special operation
  allows the user to change the stack size \emph{after} initialization. $x$
  must be a non-negative integer. If $x \neq 0$, a new stack of size

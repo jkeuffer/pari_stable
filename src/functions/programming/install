@@ -6,7 +6,7 @@ Prototype: vrrD"",r,D"",s,
 Help: install(name,code,{gpname},{lib}): load from dynamic library 'lib' the
  function 'name'. Assign to it the name 'gpname' in this GP session, with
  argument code 'code'. If 'lib' is omitted use 'libpari.so'. If 'gpname' is
- omitted, use 'name'
+ omitted, use 'name'.
 Doc: loads from dynamic library \var{lib} the function \var{name}. Assigns to it
  the name \var{gpname} in this \kbd{gp} session, with argument code \var{code}
  (see the Libpari Manual for an explanation of those). If \var{lib} is

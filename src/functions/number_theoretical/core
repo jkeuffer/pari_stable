@@ -5,7 +5,7 @@ Prototype: GD0,L,
 Help: core(n,{flag=0}): unique squarefree integer d
  dividing n such that n/d is a square. If (optional) flag is non-null, output
  the two-component row vector [d,f], where d is the unique squarefree integer
- dividing n such that n/d=f^2 is a square
+ dividing n such that n/d=f^2 is a square.
 Doc: if $n$ is a non-zero integer written as
  $n=df^2$ with $d$ squarefree, returns $d$. If $\fl$ is non-zero,
  returns the two-element row vector $[d,f]$.

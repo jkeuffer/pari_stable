@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: nffactormod
 Prototype: GGG
 Help: nffactormod(nf,pol,pr): factorize polynomial pol modulo prime ideal pr
- in number field nf
+ in number field nf.
 Doc: factorization of the
  univariate polynomial $x$ modulo the prime ideal \var{pr} in the number
  field $\var{nf}$. $x$ can have coefficients in the number field (scalar,

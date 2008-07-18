@@ -2,7 +2,7 @@ Function: modreverse
 Section: number_fields
 C-Name: polymodrecip
 Prototype: G
-Help: modreverse(z): reverse polmod of the polmod z, if it exists
+Help: modreverse(z): reverse polmod of the polmod z, if it exists.
 Doc: $z$ being a polmod $A(X)$ modulo $T(X)$, let $Q$ be the minimal
  polynomial of $z$, which must satisfy $\text{deg}(Q) = \text{det}(T)$.
  Returns the ``reverse polmod'' $B(X)$ modulo $Q(X)$, such that the roots of

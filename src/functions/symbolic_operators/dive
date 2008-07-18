@@ -2,7 +2,7 @@ Function: _/=_
 Section: symbolic_operators
 C-Name: gdive
 Prototype: &G
-Help: x/=y: shortcut for x=x/y
+Help: x/=y: shortcut for x=x/y.
 Description:
  (*small, gen):void	        $"cannot divide small: use \= instead."
  (*int, gen):void	        $"cannot divide int: use \= instead."

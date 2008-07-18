@@ -2,7 +2,7 @@ Function: simplify
 Section: conversions
 C-Name: simplify
 Prototype: G
-Help: simplify(x): simplify the object x as much as possible
+Help: simplify(x): simplify the object x as much as possible.
 Doc:
  this function simplifies $x$ as much as it can.
  Specifically, a complex or quadratic number whose imaginary part is an exact

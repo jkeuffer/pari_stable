@@ -2,6 +2,6 @@ Function: matcompanion
 Section: linear_algebra
 C-Name: matcompanion
 Prototype: G
-Help: matcompanion(x): companion matrix to polynomial x
+Help: matcompanion(x): companion matrix to polynomial x.
 Doc:
  the left companion matrix to the polynomial $x$.

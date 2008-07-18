@@ -2,7 +2,7 @@ Function: atanh
 Section: transcendental
 C-Name: gath
 Prototype: Gp
-Help: atanh(x): inverse hyperbolic tangent of x
+Help: atanh(x): inverse hyperbolic tangent of x.
 Doc: principal branch of $\text{tanh}^{-1}(x)$, i.e.~such
  that $\text{Im(atanh}(x))\in{} ]-\pi/2,\pi/2]$. If $x\in \R$ and $|x|>1$ then
  $\text{atanh}(x)$ is complex.

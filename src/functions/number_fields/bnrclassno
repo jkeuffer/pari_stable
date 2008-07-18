@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: bnrclassno
 Prototype: GG
 Help: bnrclassno(bnf,I): ray class number of the module I for the big number
- field bnf. Faster than bnrinit if only the ray class number is wanted
+ field bnf. Faster than bnrinit if only the ray class number is wanted.
 Doc: $\var{bnf}$ being as output by
  \kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
  being a modulus, computes the ray class number of the number field for the

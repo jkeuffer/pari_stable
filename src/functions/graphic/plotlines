@@ -7,7 +7,7 @@ Help: plotlines(w,X,Y,{flag=0}): draws an open polygon in rectwindow
  w where X and Y contain the x (resp. y) coordinates of the vertices.
  If X and Y are both single values (i.e not vectors), draw the
  corresponding line (and move cursor). If (optional) flag is non-zero, close
- the polygon
+ the polygon.
 Doc: draw on the rectwindow $w$
  the polygon such that the (x,y)-coordinates of the vertices are in the
  vectors of equal length $X$ and $Y$. For simplicity, the whole

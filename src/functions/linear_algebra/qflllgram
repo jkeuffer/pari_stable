@@ -7,7 +7,7 @@ Help: qflllgram(G,{flag=0}): LLL reduction of the lattice whose gram matrix
  be 0: default,1: assumes x is integral, 4: assumes x is integral,
  returns [K,T],  where K is the integer kernel of x
  and T the LLL reduced image, 5: same as 4 but x may have polynomial
- coefficients, 8: same as 0 but x may have polynomial coefficients
+ coefficients, 8: same as 0 but x may have polynomial coefficients.
 Doc: same as \kbd{qflll}, except that the
  matrix $G = \kbd{x\til * x}$ is the Gram matrix of some lattice vectors $x$,
  and not the coordinates of the vectors themselves. In particular, $G$ must

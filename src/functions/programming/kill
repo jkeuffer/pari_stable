@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: kill0
 Prototype: vS
 Help: kill(s): kills the present value of the variable or function s.
- Returns new value or 0
+ Returns new value or 0.
 Doc: kills the present value of the variable, alias or user-defined
  function $s$. The corresponding identifier
  can now be used to name any GP object (variable or function). This is the

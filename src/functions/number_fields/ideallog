@@ -4,7 +4,7 @@ C-Name: ideallog
 Prototype: GGG
 Help: ideallog(nf,x,bid): if bid is a big ideal, as given by
  idealstar(nf,I,1) or idealstar(nf,I,2), gives the vector of exponents on the
- generators bid[2][3] (even if these generators have not been computed)
+ generators bid[2][3] (even if these generators have not been computed).
 Doc: $\var{nf}$ is a number field,
  \var{bid} is as output by \kbd{idealstar(nf, D, \dots)} and $x$ a
  non-necessarily integral element of \var{nf} which must have valuation

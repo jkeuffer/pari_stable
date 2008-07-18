@@ -2,7 +2,7 @@ Function: select
 Section: programming/specific
 C-Name: select0
 Prototype: GG
-Help: select(A, f): selects elements of A according to the selection function f
+Help: select(A, f): selects elements of A according to the selection function f.
 Doc: Given a vector, list or matrix \kbd{A} and a \typ{CLOSURE} \kbd{f},
  returns the elements $x$ of \kbd{A} such that $f(x)$ is non-zero. In other
  words, \kbd{f} is seen as a selection function returning a boolean value.

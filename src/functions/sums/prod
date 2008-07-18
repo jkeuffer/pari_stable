@@ -3,7 +3,7 @@ Section: sums
 C-Name: produit
 Prototype: V=GGEDG
 Help: prod(X=a,b,expr,{x=1}): x times the product (X runs from a to b) of
- expression
+ expression.
 Doc: product of expression
  \var{expr}, initialized at $x$, the formal parameter $X$ going from $a$ to
  $b$. As for \kbd{sum}, the main purpose of the initialization parameter $x$

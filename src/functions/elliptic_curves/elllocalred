@@ -5,7 +5,7 @@ Prototype: GG
 Help: elllocalred(E,p): E being an elliptic curve, returns
  [f,kod,[u,r,s,t],c], where f is the conductor's exponent, kod is the Kodaira
  type for E at p, [u,r,s,t] is the change of variable needed to make E
- minimal at p, and c is the local Tamagawa number c_p
+ minimal at p, and c is the local Tamagawa number c_p.
 Doc:
  calculates the \idx{Kodaira} type of the
  local fiber of the elliptic curve $E$ at the prime $p$.

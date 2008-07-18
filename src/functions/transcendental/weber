@@ -6,7 +6,7 @@ Help: weber(x,{flag=0}): One of Weber's f function of x. flag is optional,
  and can be 0: default, function f(x)=exp(-i*Pi/24)*eta((x+1)/2)/eta(x),
  1: function f1(x)=eta(x/2)/eta(x)
  2: function f2(x)=sqrt(2)*eta(2*x)/eta(x). Note that
- j = (f^24-16)^3/f^24 = (f1^24+16)^3/f1^24 = (f2^24+16)^3/f2^24
+ j = (f^24-16)^3/f^24 = (f1^24+16)^3/f1^24 = (f2^24+16)^3/f2^24.
 Doc: one of Weber's three $f$ functions.
  If $\fl=0$, returns
  $$f(x)=\exp(-i\pi/24)\cdot\eta((x+1)/2)\,/\,\eta(x) \quad\hbox{such that}\quad

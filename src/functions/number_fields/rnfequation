@@ -5,7 +5,7 @@ Prototype: GGD0,L,
 Help: rnfequation(nf,pol,{flag=0}): given a pol with coefficients in nf,
  gives the absolute equation apol of the number field defined by pol. flag is
  optional, and can be 0: default, or non-zero, gives [apol,th], where th
- expresses the root of nf.pol in terms of the root of apol
+ expresses the root of nf.pol in terms of the root of apol.
 Doc: given a number field
  $\var{nf}$ as output by \kbd{nfinit} (or simply a polynomial) and a
  polynomial \var{pol} with coefficients in $\var{nf}$ defining a relative

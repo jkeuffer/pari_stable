@@ -2,7 +2,7 @@ Function: _+_
 Section: symbolic_operators
 C-Name: gadd
 Prototype: GG
-Help: x+y: sum of x and y
+Help: x+y: sum of x and y.
 Description:
  (lg, 1):small:parens		$(1)
  (small, small):small:parens	$(1) + $(2)

@@ -2,6 +2,6 @@ Function: prime
 Section: number_theoretical
 C-Name: prime
 Prototype: L
-Help: prime(n): returns the n-th prime (n C-integer)
+Help: prime(n): returns the n-th prime (n C-integer).
 Doc: the $x^{\text{th}}$ prime number, which must be among
  the precalculated primes.

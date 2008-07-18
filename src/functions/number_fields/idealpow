@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealpow0
 Prototype: GGGD0,L,
 Help: idealpow(nf,x,k,{flag=0}): k-th power of the ideal x in HNF in the
- number field nf. If (optional) flag is non-null, reduce the result
+ number field nf. If (optional) flag is non-null, reduce the result.
 Doc: computes the $k$-th power of
  the ideal $x$ in the number field $\var{nf}$; $k\in\Z$.
  If $x$ is an extended

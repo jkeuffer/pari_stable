@@ -4,7 +4,7 @@ C-Name: lift0
 Prototype: GDn
 Help: lift(x,{v}): lifts every element of Z/nZ to Z or T[x]/PT[x] to T[x]
  for a type T if v is omitted, otherwise lift only polmods with main
- variable v. If v does not occur in x, lift only intmods
+ variable v. If v does not occur in x, lift only intmods.
 Description:
  (pol):pol	lift($1)
  (vec):vec	lift($1)

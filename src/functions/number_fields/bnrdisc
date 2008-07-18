@@ -9,7 +9,7 @@ Help: bnrdisc(A,{B},{C},{flag=0}): absolute or relative [N,R1,discf] of
  subgroup is the HNF matrix of a subgroup of the corresponding ray class
  group (if omitted, the trivial subgroup). flag is optional whose binary
  digits mean 1: give relative data; 2: return 0 if modulus is not the
- conductor
+ conductor.
 Doc: $A$, $B$, $C$ defining a class field $L$ over a ground field $K$
  (of type \kbd{[\var{bnr}]},
  \kbd{[\var{bnr}, \var{subgroup}]},

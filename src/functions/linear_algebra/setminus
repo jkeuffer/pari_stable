@@ -2,7 +2,7 @@ Function: setminus
 Section: linear_algebra
 C-Name: setminus
 Prototype: GG
-Help: setminus(x,y): set of elements of x not belonging to y
+Help: setminus(x,y): set of elements of x not belonging to y.
 Description:
  (vec, vec):vec	setminus($1, $2)
 Doc: difference of the two sets $x$ and $y$,

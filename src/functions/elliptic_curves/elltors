@@ -4,7 +4,7 @@ C-Name: elltors0
 Prototype: GD0,L,
 Help: elltors(E,{flag=0}): torsion subgroup of elliptic curve E: order,
  structure, generators. If flag = 0, use Doud's algorithm; if flag = 1, use
- Lutz-Nagell
+ Lutz-Nagell.
 Doc:
  if $E$ is an elliptic curve \emph{defined
  over $\Q$}, outputs the torsion subgroup of $E$ as a 3-component vector

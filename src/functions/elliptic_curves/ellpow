@@ -2,7 +2,7 @@ Function: ellpow
 Section: elliptic_curves
 C-Name: powell
 Prototype: GGG
-Help: ellpow(E,z,n): n times the point z on elliptic curve E (n in Z)
+Help: ellpow(E,z,n): n times the point z on elliptic curve E (n in Z).
 Doc:
  computes $[n]z$, where $z$ is a point on the elliptic curve $E$. The
  exponent $n$ is in $\Z$, or may be a complex quadratic integer if the curve $E$

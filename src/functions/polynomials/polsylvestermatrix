@@ -4,7 +4,7 @@ C-Name: sylvestermatrix
 Prototype: GG
 Help: polsylvestermatrix(x,y): forms the sylvester matrix associated to the
  two polynomials x and y. Warning: the polynomial coefficients are in
- columns, not in rows
+ columns, not in rows.
 Doc: forms the Sylvester matrix
  corresponding to the two polynomials $x$ and $y$, where the coefficients of
  the polynomials are put in the columns of the matrix (which is the natural

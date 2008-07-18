@@ -3,7 +3,7 @@ Section: conversions
 C-Name: precision0
 Prototype: GD0,L,
 Help: precision(x,{n}): change the precision of x to be n. If n is omitted,
- output real precision of object x
+ output real precision of object x.
 Doc: gives the precision in decimal digits of the PARI object $x$. If $x$ is
  an exact object, the largest single precision integer is returned.
  \bprog

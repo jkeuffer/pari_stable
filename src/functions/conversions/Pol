@@ -5,7 +5,7 @@ Prototype: GDn
 Description:
  (gen,?var):pol  gtopoly($1, $2)
 Help: Pol(x,{v=x}): convert x (usually a vector or a power series) into a
- polynomial with variable v, starting with the leading coefficient
+ polynomial with variable v, starting with the leading coefficient.
 Doc:
  transforms the object $x$ into a polynomial with main variable $v$. If $x$
  is a scalar, this gives a constant polynomial. If $x$ is a power series with

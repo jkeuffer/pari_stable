@@ -2,7 +2,7 @@ Function: nfeltpow
 Section: number_fields
 C-Name: nfpow
 Prototype: GGG
-Help: nfeltpow(nf,x,k): element x^k in nf
+Help: nfeltpow(nf,x,k): element x^k in nf.
 Doc: given an element $x$ in \var{nf}, and a positive or negative integer $k$,
  computes $x^k$ in the number field $\var{nf}$.
 Variant: \fun{GEN}{nfinv}{GEN nf, GEN x} correspond to $k = -1$, and

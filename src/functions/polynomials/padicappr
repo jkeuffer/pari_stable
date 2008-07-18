@@ -2,7 +2,7 @@ Function: padicappr
 Section: polynomials
 C-Name: padicappr
 Prototype: GG
-Help: padicappr(pol,a): p-adic roots of the polynomial pol congruent to a mod p
+Help: padicappr(pol,a): p-adic roots of the polynomial pol congruent to a mod p.
 Doc: vector of $p$-adic roots of the
  polynomial $pol$ congruent to the $p$-adic number $a$ modulo $p$, and with
  the same $p$-adic precision as $a$. The number $a$ can be an ordinary

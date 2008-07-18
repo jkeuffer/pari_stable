@@ -3,7 +3,7 @@ Section: polynomials
 C-Name: sturmpart
 Prototype: lGDGDG
 Help: polsturm(pol,{a},{b}): number of real roots of the polynomial pol in the
- interval]a,b] (which are respectively taken to be -oo or +oo when omitted)
+ interval]a,b] (which are respectively taken to be -oo or +oo when omitted).
 Doc: number of real roots of the real polynomial \var{pol} in the interval
  $]a,b]$, using Sturm's algorithm. $a$ (resp.~$b$) is taken to be $-\infty$
  (resp.~$+\infty$) if omitted.

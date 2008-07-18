@@ -7,7 +7,7 @@ Help: polcompositum(P,Q,{flag=0}): vector of all possible compositums
  flag is set (i.e non-null), output for each compositum, not only the
  compositum polynomial pol, but a vector [R,a,b,k] where a (resp. b) is a root
  of P (resp. Q) expressed as a polynomial modulo R,
- and a small integer k such that al2+k*al1 is the chosen root of R
+ and a small integer k such that al2+k*al1 is the chosen root of R.
 Doc: \sidx{compositum} $P$ and $Q$
  being squarefree polynomials in $\Z[X]$ in the same variable, outputs
  the simple factors of the \'etale $\Q$-algebra $A = \Q(X, Y) / (P(X), Q(Y))$.

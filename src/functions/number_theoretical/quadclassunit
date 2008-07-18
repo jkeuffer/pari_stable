@@ -4,7 +4,7 @@ C-Name: quadclassunit0
 Prototype: GD0,L,DGp
 Help: quadclassunit(D,{flag=0},{tech=[]}): compute the structure of the
  class group and the regulator of the quadratic field of discriminant D.
- See manual for the optional technical parameters
+ See manual for the optional technical parameters.
 Doc: \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the
  class group of a quadratic order of discriminant $D$.
 

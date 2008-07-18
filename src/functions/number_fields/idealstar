@@ -10,7 +10,7 @@ Help: idealstar(nf,I,{flag=1}): gives the structure of (Z_K/I)^*. flag is
  [I,v,fa,f2,U,V] where v is as above without the generators, fa is the prime
  ideal factorisation of I and f2, U and V are technical but essential to work
  in (Z_K/I)^*. Finally if flag=2, same as with flag=1 except that the
- generators are also given
+ generators are also given.
 Doc: outputs a \var{bid} structure,
  necessary for computing in the finite abelian group $G = (\Z_K/I)^*$. Here,
  \var{nf} is a number field and $I$ is a \var{modulus}: either an ideal in any

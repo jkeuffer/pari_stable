@@ -3,4 +3,4 @@ C-Name: parihist
 Prototype: D0,L,
 Class: gp
 Section: symbolic_operators
-Help: last history item
+Help: last history item.

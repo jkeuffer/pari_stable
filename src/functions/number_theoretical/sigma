@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: gsumdivk
 Prototype: GD1,L,
 Help: sigma(x,{k=1}): sum of the k-th powers of the divisors of x. k is
- optional and if omitted is assumed to be equal to 1
+ optional and if omitted is assumed to be equal to 1.
 Description:
  (int, ?1):int	sumdiv($1)
  (int, 0):int	numbdiv($1)

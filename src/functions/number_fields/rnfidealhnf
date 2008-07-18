@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfidealhermite
 Prototype: GG
 Help: rnfidealhnf(rnf,x): relative version of idealhnf, where rnf is a
- relative numberfield
+ relative numberfield.
 Doc: $\var{rnf}$ being a relative number
  field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a relative
  ideal (which can be, as in the absolute case, of many different types,

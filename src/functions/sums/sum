@@ -3,7 +3,7 @@ Section: sums
 C-Name: somme
 Prototype: V=GGEDG
 Help: sum(X=a,b,expr,{x=0}): x plus the sum (X goes from a to b) of
- expression expr
+ expression expr.
 Doc: sum of expression \var{expr},
  initialized at $x$, the formal parameter going from $a$ to $b$. As for
  \kbd{prod}, the initialization parameter $x$ may be given to force the type

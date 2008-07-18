@@ -8,7 +8,7 @@ Help: qflll(x,{flag=0}): LLL reduction of the vectors forming the matrix x
  integral, returns a partially reduced basis,
  4: assumes x is integral, returns [K,T] where K is the integer kernel of x
  and T the LLL reduced image, 5: same as 4 but x may have polynomial
- coefficients, 8: same as 0 but x may have polynomial coefficients
+ coefficients, 8: same as 0 but x may have polynomial coefficients.
 Description:
  (vec, ?0):vec:prec	lll($1, prec)
  (vec, 1):vec	lllint($1)

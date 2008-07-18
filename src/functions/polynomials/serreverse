@@ -2,6 +2,6 @@ Function: serreverse
 Section: polynomials
 C-Name: recip
 Prototype: G
-Help: serreverse(x): reversion of the power series x
+Help: serreverse(x): reversion of the power series x.
 Doc: reverse power series (i.e.~$x^{-1}$, not $1/x$)
  of $x$. $x$ must be a power series whose valuation is exactly equal to one.

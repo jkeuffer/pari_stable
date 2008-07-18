@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: algtobasis
 Prototype: GG
 Help: nfalgtobasis(nf,x): transforms the algebraic number x into a column
- vector on the integral basis nf.zk
+ vector on the integral basis nf.zk.
 Doc: Given an algebraic number $x$ in the number field $\var{nf}$,
  transforms it to a column vector on the integral basis \kbd{\var{nf}.zk}.
  \bprog

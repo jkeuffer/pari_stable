@@ -6,7 +6,7 @@ Help: trap({e}, {rec}, {seq}): try to execute seq, trapping runtime error e (all
  of them if e ommitted); sequence rec is executed if the error occurs and
  is the result of the command. When seq is omitted, define rec as a default
  handler for error e (a break loop will be started if rec omitted). If rec
- is the empty string "" pop out the last default handler
+ is the empty string "" pop out the last default handler.
 Doc: tries to
  evaluate \var{seq}, trapping runtime error $e$, that is effectively preventing
  it from aborting computations in the usual way; the recovery sequence

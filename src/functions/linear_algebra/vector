@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: vecteur
 Prototype: GDVDE
 Help: vector(n,{X},{expr=0}): row vector with n components of expression
- expr (X ranges from 1 to n). By default, fill with 0s
+ expr (X ranges from 1 to n). By default, fill with 0s.
 Doc: creates a row vector (type
  \typ{VEC}) with $n$ components whose components are the expression
  \var{expr} evaluated at the integer points between 1 and $n$. If one of the

@@ -5,7 +5,7 @@ Prototype: GGD0,L,p
 Help: bnrrootnumber(bnr,chi,{flag=0}): returns the so-called Artin Root
  Number, i.e. the constant W appearing in the functional equation of the
  Hecke L-function associated to chi. Set flag = 1 if the character is known
- to be primitive
+ to be primitive.
 Doc: if $\chi=\var{chi}$ is a
  \idx{character} over \var{bnr}, not necessarily primitive, let
  $L(s,\chi) = \sum_{id} \chi(id) N(id)^{-s}$ be the associated

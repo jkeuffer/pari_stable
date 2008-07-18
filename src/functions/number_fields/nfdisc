@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: nfdisc0
 Prototype: GD0,L,DG
 Help: nfdisc(x,{flag=0},{fa}): discriminant of the number field defined by
- the polynomial x using round 4. Optional args flag and fa are as in nfbasis
+ the polynomial x using round 4. Optional args flag and fa are as in nfbasis.
 Doc: \idx{field discriminant} of the number field defined by the integral,
  preferably monic, irreducible polynomial $x$. $\fl$ and $fa$ are exactly as
  in \kbd{nfbasis}. That is, $fa$ provides the matrix of a partial

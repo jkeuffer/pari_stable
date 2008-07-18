@@ -2,5 +2,5 @@ Function: cotan
 Section: transcendental
 C-Name: gcotan
 Prototype: Gp
-Help: cotan(x): cotangent of x
+Help: cotan(x): cotangent of x.
 Doc: cotangent of $x$.

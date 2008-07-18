@@ -6,7 +6,7 @@ Help: bnfinit(P,{flag=0},{tech=[]}): compute the necessary data for future
  use in ideal and unit group computations, including fundamental units if
  they are not too large. flag and tech are both optional. flag can be any of
  0: default, 1: insist on having fundamental units.
- See manual for details about tech
+ See manual for details about tech.
 Description:
  (gen):bnf:prec	bnfinit0($1, 0, NULL, prec)
  (gen, 0):bnf:prec	bnfinit0($1, 0, NULL, prec)

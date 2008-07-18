@@ -4,7 +4,7 @@ C-Name: sumalt0
 Prototype: V=GED0,L,p
 Help: sumalt(X=a,expr,{flag=0}): Cohen-Villegas-Zagier's acceleration of
  alternating series expr, X starting at a. flag is optional, and can be 0:
- default, or 1: uses a slightly different method using Zagier's polynomials
+ default, or 1: uses a slightly different method using Zagier's polynomials.
 Doc: numerical summation of the series \var{expr}, which should be an
  \idx{alternating series}, the formal variable $X$ starting at $a$. Use an
  algorithm of Cohen, Villegas and Zagier (\emph{Experiment. Math.} {\bf 9}

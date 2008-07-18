@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealred0
 Prototype: GGDG
 Help: idealred(nf,I,{v=0}): LLL reduction of the ideal I in the number
- field nf along direction v, in HNF
+ field nf along direction v, in HNF.
 Doc: \idx{LLL} reduction of
  the ideal $I$ in the number field \var{nf}, along the direction $v$.
  The $v$ parameter is best left omitted, but if it is present, it must

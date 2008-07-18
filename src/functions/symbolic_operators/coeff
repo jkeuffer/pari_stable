@@ -13,7 +13,7 @@ Description:
 
 Function: _[_,]
 Class: symbolic_operators
-Help: x[y,]: y-th row of x
+Help: x[y,]: y-th row of x.
 Description:
  (mp,small):gen                 $"Scalar has no rows"
  (vec,small):vec                rowcopy($1, $2)

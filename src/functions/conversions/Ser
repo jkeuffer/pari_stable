@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gtoser
 Prototype: GDn
 Help: Ser(x,{v=x}): convert x (usually a vector) into a power series with
- variable v, starting with the constant coefficient
+ variable v, starting with the constant coefficient.
 Doc: transforms the object $x$ into a power series
  with main variable $v$ ($x$ by default). If $x$ is a scalar, this gives a
  constant power series with precision given by the default \kbd{serieslength}

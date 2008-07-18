@@ -3,7 +3,7 @@ Section: programming/specific
 C-Name: gpwritebin
 Prototype: vsDG
 Help: writebin(filename,{x}): write x as a binary object to file filename.
- If x is omitted, write all session variables
+ If x is omitted, write all session variables.
 Doc: writes (appends) to
  \var{filename} the object $x$ in binary format. This format is not human
  readable, but contains the exact internal structure of $x$, and is much

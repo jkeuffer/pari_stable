@@ -3,7 +3,7 @@ Section: conversions
 C-Name: denom
 Prototype: G
 Help: denominator(x): denominator of x (or lowest common denominator in case
- of an array)
+ of an array).
 Doc:
  denominator of $x$. The meaning of this
  is clear when $x$ is a rational number or function. If $x$ is an integer

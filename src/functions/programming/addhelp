@@ -2,7 +2,7 @@ Function: addhelp
 Section: programming/specific
 C-Name: addhelp
 Prototype: vSs
-Help: addhelp(S,str): add/change help message for the symbol S
+Help: addhelp(S,str): add/change help message for the symbol S.
 Doc: changes the help
  message for the symbol $S$. The string \var{str} is expanded on the spot
  and stored as the online help for $S$. If $S$ is a function \emph{you} have

@@ -5,7 +5,7 @@ Prototype: GGD2,L,p
 Help: ellheight(E,x,{flag=2}): canonical height of point x on elliptic curve
  E (assumed to be a minimal model). flag is optional and selects the algorithm
  used to compute the archimedean local height. Its meaning is 0: use
- theta-functions, 1: use Tate's method, 2: use Mestre's AGM
+ theta-functions, 1: use Tate's method, 2: use Mestre's AGM.
 Doc: global \idx{N\'eron-Tate height} of the point $z$ on the elliptic curve
  $E$ (defined over $\Q$), given by a standard minimal integral model. $E$
  must be an \kbd{ell} as output by \kbd{ellinit}. \fl selects the algorithm

@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: elllseries
 Prototype: GGDGp
 Help: elllseries(E,s,{A=1}): L-series at s of the elliptic curve E, where A
- a cut-off point close to 1
+ a cut-off point close to 1.
 Doc:
  $E$ being an \var{sell} as output by
  \kbd{ellinit}, this computes the value of the L-series of $E$ at $s$. It is

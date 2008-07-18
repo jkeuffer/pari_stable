@@ -2,7 +2,7 @@ Function: znprimroot
 Section: number_theoretical
 C-Name: znprimroot0
 Prototype: G
-Help: znprimroot(n): returns a primitive root of n when it exists
+Help: znprimroot(n): returns a primitive root of n when it exists.
 Description:
  (int):gen	znprimroot($1)
  (gen):gen	znprimroot0($1)

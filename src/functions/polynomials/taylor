@@ -3,7 +3,7 @@ Section: polynomials
 C-Name: tayl
 Prototype: GnP
 Help: taylor(x,y): taylor expansion of x with respect to the main variable
- of y
+ of y.
 Doc: Taylor expansion around $0$ of $x$ with respect to
  the simple variable $y$. $x$ can be of any reasonable type, for example a
  rational function. The number of terms of the expansion is transparent to the

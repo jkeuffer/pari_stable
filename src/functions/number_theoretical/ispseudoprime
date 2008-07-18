@@ -4,7 +4,7 @@ C-Name: gispseudoprime
 Prototype: GD0,L,
 Help: ispseudoprime(x,{flag}): true(1) if x is a strong pseudoprime, false(0)
  if not. If flag is 0 or omitted, use BPSW test, otherwise use strong
- Rabin-Miller test for flag randomly chosen bases
+ Rabin-Miller test for flag randomly chosen bases.
 Description:
  (int):bool	ispsp($1)
  (gen):gen	gispsp($1)

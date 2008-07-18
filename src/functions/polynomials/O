@@ -2,7 +2,7 @@ Function: O(_^_)
 Section: programming/internals
 C-Name: ggrando
 Prototype: GD1,L,
-Help: O(p^e): p-adic or power series zero with precision given by e
+Help: O(p^e): p-adic or power series zero with precision given by e.
 Description:
  (gen):gen          ggrando($1, 1)
  (1,small):gen      ggrando(gen_1, $2)

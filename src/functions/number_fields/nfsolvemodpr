@@ -4,7 +4,7 @@ C-Name: nfsolvemodpr
 Prototype: GGGG
 Help: nfsolvemodpr(nf,a,b,pr): solution of a*x=b in Z_K/pr, where a is a
  matrix and b a column vector, and where pr is in modpr format (see
- nfmodprinit)
+ nfmodprinit).
 Doc: solution of $a\cdot x = b$
  in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
  \var{pr} is in \key{modpr} format (see \kbd{nfmodprinit}).

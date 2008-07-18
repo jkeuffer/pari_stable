@@ -1,6 +1,6 @@
 Function: _type_preorder
 Class: gp2c_internal
-Help: List of chains of type preorder
+Help: List of chains of type preorder.
 Description:
  (empty, void, bool, small, int, mp, gen)
  (empty, real, mp)

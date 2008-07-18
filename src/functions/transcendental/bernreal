@@ -3,7 +3,7 @@ Section: transcendental
 C-Name: bernreal
 Prototype: Lp
 Help: bernreal(x): Bernoulli number B_x, as a real number with the current
- precision
+ precision.
 Doc: Bernoulli number\sidx{Bernoulli numbers}
  $B_x$, as \kbd{bernfrac}, but $B_x$ is returned as a real number
  (with the current precision).

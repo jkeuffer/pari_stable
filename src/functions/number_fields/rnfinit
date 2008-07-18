@@ -5,7 +5,7 @@ Prototype: GGp
 Help: rnfinit(nf,pol): pol being a non constant irreducible polynomial
  defined over the number field nf, initializes a vector of data necessary for
  working in relative number fields (rnf functions). See manual for technical
- details
+ details.
 Doc: $\var{nf}$ being a number field in \kbd{nfinit}
  format considered as base field, and \var{pol} a polynomial defining a relative
  extension over $\var{nf}$, this computes all the necessary data to work in the

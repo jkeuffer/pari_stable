@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: basistoalg
 Prototype: GG
 Help: nfbasistoalg(nf,x): transforms the column vector x on the integral
- basis into an algebraic number
+ basis into an algebraic number.
 Doc: Given an algebraic number $x$ in the number field \kbd{nf}, transforms it
  into \typ{POLMOD} form.
  \bprog

@@ -2,7 +2,7 @@ Function: Str
 Section: conversions
 C-Name: Str
 Prototype: s*
-Help: Str({x}*): concatenates its (string) argument into a single string
+Help: Str({x}*): concatenates its (string) argument into a single string.
 Description:
  (gen):genstr:copy:parens	$genstr:1
 Doc:

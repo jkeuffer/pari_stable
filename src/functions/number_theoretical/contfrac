@@ -5,7 +5,7 @@ Prototype: GDGD0,L,
 Help: contfrac(x,{b},{nmax}): continued fraction expansion of x (x
  rational,real or rational function). b and nmax are both optional, where b
  is the vector of numerators of the continued fraction, and nmax is a bound
- for the number of terms in the continued fraction expansion
+ for the number of terms in the continued fraction expansion.
 Doc: returns the row vector whose components are the partial quotients of the
  \idx{continued fraction} expansion of $x$. In other words, a result
  $[a_0,\dots,a_n]$ means that $x \approx a_0+1/(a_1+\dots+1/a_n)$. The

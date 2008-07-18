@@ -2,10 +2,10 @@ Function: qfperfection
 Section: linear_algebra
 C-Name: perf
 Prototype: G
-Help: qfperfection(a): rank of matrix of xx~ for x minimal vectors of a gram
- matrix a
+Help: qfperfection(G): rank of matrix of xx~ for x minimal vectors of a gram
+ matrix G.
 Doc:
- $x$ being a square and symmetric matrix with
+ $G$ being a square and symmetric matrix with
  integer entries representing a positive definite quadratic form, outputs the
  perfection rank of the form. That is, gives the rank of the family of the $s$
  symmetric matrices $v_iv_i^t$, where $s$ is half the number of minimal

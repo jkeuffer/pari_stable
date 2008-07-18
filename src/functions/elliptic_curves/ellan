@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: anell
 Prototype: GL
 Help: ellan(E,n): computes the first n Fourier coefficients of the
- L-function of the elliptic curve E (n<2^24 on a 32-bit machine)
+ L-function of the elliptic curve E (n<2^24 on a 32-bit machine).
 Doc:
  computes the vector of the first $n$ $a_k$
  corresponding to the elliptic curve $E$. All comments in \kbd{ellak}

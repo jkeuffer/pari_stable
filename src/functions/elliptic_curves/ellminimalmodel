@@ -4,7 +4,7 @@ C-Name: ellminimalmodel
 Prototype: GD&
 Help: ellminimalmodel(E,{&v}): return the standard minimal integral model of
  the rational elliptic curve E. Sets v to the corresponding change of
- variables
+ variables.
 Doc: return the standard minimal integral model of the rational elliptic
  curve $E$. If present, sets $v$ to the corresponding change of variables,
  which is a vector $[u,r,s,t]$ with rational components. The return value is

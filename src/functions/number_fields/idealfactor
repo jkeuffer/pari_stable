@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealfactor
 Prototype: GG
 Help: idealfactor(nf,x): factorization of the ideal x given in HNF into
- prime ideals in the number field nf
+ prime ideals in the number field nf.
 Doc: factors into prime ideal powers the
  ideal $x$ in the number field $\var{nf}$. The output format is similar to the
  \kbd{factor} function, and the prime ideals are represented in the form

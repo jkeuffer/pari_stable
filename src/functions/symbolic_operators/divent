@@ -1,7 +1,7 @@
 Function: _\_
 Section: symbolic_operators
 C-Name: gdivent
-Help: x\y: Euclidean quotient of x and y
+Help: x\y: Euclidean quotient of x and y.
 Prototype: GG
 Description:
  (small, small):small:parens		$(1)/$(2)

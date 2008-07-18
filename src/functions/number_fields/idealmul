@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: idealmul0
 Prototype: GGGD0,L,
 Help: idealmul(nf,x,y,{flag=0}): product of the two ideals x and y in the
- number field nf. If (optional) flag is non-nul, reduce the result
+ number field nf. If (optional) flag is non-nul, reduce the result.
 Description:
  (gen, gen, gen, ?0):gen	idealmul($1, $2, $3)
  (gen, gen, gen, 1):gen         idealmulred($1, $2, $3)

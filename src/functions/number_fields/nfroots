@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: nfroots
 Prototype: DGG
 Help: nfroots({nf},x): roots of polynomial x belonging to nf (Q if
- omitted) without multiplicity
+ omitted) without multiplicity.
 Doc: roots of the polynomial $x$ in the
  number field $\var{nf}$ given by \kbd{nfinit} without multiplicity (in $\Q$
  if $\var{nf}$ is omitted). $x$ has coefficients in the number field (scalar,

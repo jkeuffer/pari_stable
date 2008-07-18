@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gtomat
 Prototype: DG
 Help: Mat({x=[]}): transforms any GEN x into a matrix. Empty matrix if x is
- omitted
+ omitted.
 Doc:
  transforms the object $x$ into a matrix.
  If $x$ is already a matrix, a copy of $x$ is created.

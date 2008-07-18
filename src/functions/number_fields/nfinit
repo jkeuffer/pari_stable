@@ -9,7 +9,7 @@ Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial,
  set to 0: default; 1: do not compute different; 2: first use polred to find
  a simpler polynomial; 3: outputs a two-element vector [nf,Mod(a,P)], where
  nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol; 4:
- as 2 but use a partial polred; 5: is to 3 what 4 is to 2
+ as 2 but use a partial polred; 5: is to 3 what 4 is to 2.
 Description:
  (gen, ?0):nf:prec	nfinit0($1, 0, prec)
  (gen, 1):nf:prec	nfinit0($1, 1, prec)

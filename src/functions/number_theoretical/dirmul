@@ -3,6 +3,6 @@ Section: number_theoretical
 C-Name: dirmul
 Prototype: GG
 Help: dirmul(x,y): multiplication of the Dirichlet series x by the Dirichlet
- series y
+ series y.
 Doc: $x$ and $y$ being vectors of perhaps different lengths considered as
  \idx{Dirichlet series}, computes the product of $x$ by $y$, again as a vector.

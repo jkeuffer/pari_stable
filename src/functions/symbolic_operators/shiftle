@@ -2,7 +2,7 @@ Function: _<<=_
 Section: symbolic_operators
 C-Name: gshiftle
 Prototype: &L
-Help: x<<=y: shortcut for x=x<<y
+Help: x<<=y: shortcut for x=x<<y.
 Description:
  (*small, small):small:parens		 $1 <<= $(2)
  (*int, small):int:parens	         $1 = shifti($1, $2)

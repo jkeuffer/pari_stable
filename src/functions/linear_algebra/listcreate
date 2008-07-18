@@ -2,7 +2,7 @@ Function: listcreate
 Section: linear_algebra
 C-Name: listcreate
 Prototype: D0,L,
-Help: listcreate(): creates an empty list
+Help: listcreate(): creates an empty list.
 Description:
  (?int):void	listcreate()
  (small):list	listcreate()

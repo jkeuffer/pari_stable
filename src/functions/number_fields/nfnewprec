@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: nfnewprec
 Prototype: Gp
 Help: nfnewprec(nf): transform the number field data nf into new data using
- the current (usually larger) precision
+ the current (usually larger) precision.
 Doc: transforms the number field $\var{nf}$
  into the corresponding data using current (usually larger) precision. This
  function works as expected if $\var{nf}$ is in fact a $\var{bnf}$ (update

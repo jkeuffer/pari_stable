@@ -12,7 +12,7 @@ Help: bnrL1(bnr, {subgroup}, {flag=0}): bnr being output by bnrinit(,,1) and
  this case, only for non-trivial characters), 2: if 0 then compute the value
  of the primitive L-function associated to chi, if 1 then compute the value
  of the L-function L_S(s, chi) where S is the set of places dividing the
- modulus of bnr (and the infinite places), 3: return also the characters
+ modulus of bnr (and the infinite places), 3: return also the characters.
 Doc: \var{bnr} being
  the number field data which is output by \kbd{bnrinit(,,1)} and
  \var{subgroup} being a square matrix defining a congruence subgroup of the

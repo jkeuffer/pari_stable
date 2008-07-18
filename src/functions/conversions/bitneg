@@ -4,7 +4,7 @@ C-Name: gbitneg
 Prototype: GD-1,L,
 Help: bitneg(x,{n=-1}): bitwise negation of an integers x truncated to n
  bits. n=-1 means represent infinite sequences of bit 1 as negative numbers.
- Negative numbers behave as if modulo big power of 2
+ Negative numbers behave as if modulo big power of 2.
 Doc:
  \idx{bitwise negation} of an integer $x$,
  truncated to $n$ bits, that is the integer $$\sum_{i=0}^{n-1} \kbd{not}(x_i)

@@ -5,7 +5,7 @@ Prototype: V=GED0,L,p
 Help: sumpos(X=a,expr,{flag=0}): sum of positive (or negative) series expr,
  the formal
  variable X starting at a. flag is optional, and can be 0: default, or 1:
- uses a slightly different method using Zagier's polynomials
+ uses a slightly different method using Zagier's polynomials.
 Doc: numerical summation of the series \var{expr}, which must be a series of
  terms having the same sign, the formal variable $X$ starting at $a$. The
  algorithm used is Van Wijngaarden's trick for converting such a series into

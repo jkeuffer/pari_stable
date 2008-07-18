@@ -5,7 +5,7 @@ Prototype: GD0,L,DG
 Help: polred(x,{flag=0},{fa}): reduction of the polynomial x (gives minimal
  polynomials only). Second and third args are optional. The following binary
  digits of flag are significant 1: partial reduction, 2: gives also elements.
- fa, if present, contains the factorization matrix of the discriminant
+ fa, if present, contains the factorization matrix of the discriminant.
 Doc: finds polynomials with reasonably
  small coefficients defining subfields of the number field defined by $x$.
  One of the polynomials always defines $\Q$ (hence is equal to $x-1$),

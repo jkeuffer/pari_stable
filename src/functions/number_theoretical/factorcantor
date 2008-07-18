@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: factcantor
 Prototype: GG
 Help: factorcantor(x,p): factorization mod p of the polynomial x using
- Cantor-Zassenhaus
+ Cantor-Zassenhaus.
 Doc: factors the polynomial $x$ modulo the
  prime $p$, using distinct degree plus
  \idx{Cantor-Zassenhaus}\sidx{Zassenhaus}. The coefficients of $x$ must be

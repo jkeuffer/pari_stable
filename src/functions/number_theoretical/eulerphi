@@ -2,7 +2,7 @@ Function: eulerphi
 Section: number_theoretical
 C-Name: geulerphi
 Prototype: G
-Help: eulerphi(x): Euler's totient function of x
+Help: eulerphi(x): Euler's totient function of x.
 Description:
  (int):int	eulerphi($1)
  (gen):gen	geulerphi($1)

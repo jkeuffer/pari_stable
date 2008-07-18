@@ -2,6 +2,6 @@ Function: _'
 Section: symbolic_operators
 C-Name: deriv
 Prototype: GDn
-Help: x': derivative of x with respect to the main variable
+Help: x': derivative of x with respect to the main variable.
 Description:
  (gen):gen                      deriv($1,-1)

@@ -5,7 +5,7 @@ Prototype: GDG
 Help: concat(x,{y}): concatenation of x and y, which can be scalars, vectors
  or matrices, or lists (in this last case, both x and y have to be lists). If
  y is omitted, x has to be a list or row vector and its elements are
- concatenated
+ concatenated.
 Description:
  (mp,mp):vec           concat($1, $2)
  (vec,mp):vec          concat($1, $2)

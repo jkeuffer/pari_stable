@@ -2,7 +2,7 @@ Function: valuation
 Section: conversions
 C-Name: ggval
 Prototype: lGG
-Help: valuation(x,p): valuation of x with respect to p
+Help: valuation(x,p): valuation of x with respect to p.
 Doc:
  computes the highest
  exponent of $p$ dividing $x$. If $p$ is of type integer, $x$ must be an

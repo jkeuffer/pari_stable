@@ -4,7 +4,7 @@ C-Name: matrice
 Prototype: GGDVDVDE
 Help: matrix(m,n,{X},{Y},{expr=0}): mXn matrix of expression expr, the row
  variable X going from 1 to m and the column variable Y going from 1 to n. By
- default, fill with 0s
+ default, fill with 0s.
 Doc: creation of the
  $m\times n$ matrix whose coefficients are given by the expression
  \var{expr}. There are two formal parameters in \var{expr}, the first one

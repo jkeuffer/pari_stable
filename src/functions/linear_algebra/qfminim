@@ -13,7 +13,7 @@ Help: qfminim(x,{b},{m},{flag=0}): x being a square and symmetric
  these, and mat lists half the vectors (the other half is given by -mat). 1:
  ignores m and returns the first vector whose norm is less than b. 2: as 0
  but uses a more robust, slower implementation, valid for non integral
- quadratic forms
+ quadratic forms.
 Doc: $x$ being a square and symmetric matrix representing a positive definite
  quadratic form, this function deals with the vectors of $x$ whose norm is
  less than or equal to $b$, enumerated using the Fincke-Pohst algorithm,

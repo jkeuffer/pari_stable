@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: ellzeta
 Prototype: GGp
 Help: ellzeta(E,z): E being given by ellinit, returns the value at z of the
- Weierstrass zeta function of the period lattice of E
+ Weierstrass zeta function of the period lattice of E.
 Doc:
  $E$ being given by \kbd{ellinit}, returns the
  value at $z$ of the Weierstrass $\zeta$ function of the period lattice $L$

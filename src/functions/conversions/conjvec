@@ -2,7 +2,7 @@ Function: conjvec
 Section: conversions
 C-Name: conjvec
 Prototype: Gp
-Help: conjvec(z): conjugate vector of the algebraic number z
+Help: conjvec(z): conjugate vector of the algebraic number z.
 Doc:
  conjugate vector representation of $z$. If $z$ is a
  polmod, equal to \kbd{Mod}$(a,T)$, this gives a vector of length

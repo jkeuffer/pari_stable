@@ -2,7 +2,7 @@ Function: pollegendre
 Section: polynomials
 C-Name: pollegendre_eval
 Prototype: LDG
-Help: pollegendre(n,{a='x}): legendre polynomial of degree n evaluated at a
+Help: pollegendre(n,{a='x}): legendre polynomial of degree n evaluated at a.
 Description:
   (small,?var):gen    pollegendre($1,$2)
   (small,gen):gen     pollegendre_eval($1,$2)

@@ -2,7 +2,7 @@ Function: _/_
 Section: symbolic_operators
 C-Name: gdiv
 Prototype: GG
-Help: x/y: quotient of x and y
+Help: x/y: quotient of x and y.
 Description:
  (0, mp):small			($2, 0)/*for side effect*/
  (#small, real):real		divsr($1, $2)

@@ -7,7 +7,7 @@ Help: subgrouplist(bnr,{bound},{flag=0}): bnr being as output by bnrinit or
  subgroups of G (of index bounded by bound, if not omitted), given as HNF
  left divisors of the SNF matrix corresponding to G. If flag=0 (default) and
  bnr is as output by bnrinit, gives only the subgroups for which the modulus
- is the conductor
+ is the conductor.
 Doc: \var{bnr} being as output by \kbd{bnrinit} or a list of cyclic components
  of a finite Abelian group $G$, outputs the list of subgroups of $G$. Subgroups
  are given as HNF left divisors of the SNF matrix corresponding to $G$.

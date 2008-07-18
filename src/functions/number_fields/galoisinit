@@ -5,7 +5,7 @@ Prototype: GDG
 Help: galoisinit(pol,{den}): pol being a polynomial or a number field as
  output by nfinit defining a Galois extension of Q, compute the Galois group
  and all neccessary informations for computing fixed fields. den is optional
- and has the same meaning as in nfgaloisconj(,4)(see manual)
+ and has the same meaning as in nfgaloisconj(,4)(see manual).
 Description:
  (gen, ?int):gal        galoisinit($1, $2)
 Doc: computes the Galois group

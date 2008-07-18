@@ -10,7 +10,7 @@ Help: bnfisnorm(bnf,x,{flag=1}): Tries to tell whether x (in Q) is the norm
  the program adds to S all the primes : dividing flag if flag<0, or less than
  flag if flag>0. The answer is guaranteed (i.e x norm iff b=1) under GRH, if
  S contains all primes less than 12.log(disc(Bnf))^2, where Bnf is the Galois
- closure of bnf
+ closure of bnf.
 Doc: tries to tell whether the
  rational number $x$ is the norm of some element y in $\var{bnf}$. Returns a
  vector $[a,b]$ where $x=Norm(a)*b$. Looks for a solution which is an $S$-unit,

@@ -2,7 +2,7 @@ Function: alias
 Section: programming/specific
 C-Name: alias0
 Prototype: vrr
-Help: alias(newkey,key): newkey is now an alias for key
+Help: alias(newkey,key): newkey is now an alias for key.
 Doc: defines the keyword \var{newkey} as an alias for keyword \var{key}.
  \var{key} must correspond to an existing \emph{function} name. This is
  different from the general user macros in that alias expansion takes place

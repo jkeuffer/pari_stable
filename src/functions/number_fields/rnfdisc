@@ -4,7 +4,7 @@ C-Name: rnfdiscf
 Prototype: GG
 Help: rnfdisc(nf,pol): given a pol with coefficients in nf, gives a
  2-component vector [D,d], where D is the relative ideal discriminant, and d
- is the relative discriminant in nf^*/nf*^2
+ is the relative discriminant in nf^*/nf*^2.
 Doc: given a number field $\var{nf}$ as
  output by \kbd{nfinit} and a polynomial \var{pol} with coefficients in
  $\var{nf}$ defining a relative extension $L$ of $\var{nf}$, computes the

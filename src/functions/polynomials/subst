@@ -3,7 +3,7 @@ Section: polynomials
 C-Name: gsubst
 Prototype: GnG
 Help: subst(x,y,z): in expression x, replace the variable y by the
- expression z
+ expression z.
 Doc: replace the simple variable $y$ by the argument $z$ in the ``polynomial''
  expression $x$. Every type is allowed for $x$, but if it is not a genuine
  polynomial (or power series, or rational function), the substitution will be

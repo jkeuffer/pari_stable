@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: quadpoly0
 Prototype: GDn
 Help: quadpoly(D,{v=x}): quadratic polynomial corresponding to the
- discriminant D, in variable v
+ discriminant D, in variable v.
 Doc: creates the ``canonical'' quadratic
  polynomial (in the variable $v$) corresponding to the discriminant $D$,
  i.e.~the minimal polynomial of $\kbd{quadgen}(D)$. $D$ must be an integer

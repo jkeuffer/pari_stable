@@ -4,7 +4,7 @@ C-Name: roots0
 Prototype: GD0,L,p
 Help: polroots(x,{flag=0}): complex roots of the polynomial x. flag is
  optional, and can be 0: default, uses Schonhage's method modified by
- Gourdon, or 1: uses a modified Newton method
+ Gourdon, or 1: uses a modified Newton method.
 Doc: complex roots of the polynomial
  \var{pol}, given as a column vector where each root is repeated according to
  its multiplicity. The precision is given as for transcendental functions: in

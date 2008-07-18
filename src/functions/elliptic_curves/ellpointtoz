@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: zell
 Prototype: GGp
 Help: ellpointtoz(E,P): lattice point z corresponding to the point P on the
- elliptic curve E
+ elliptic curve E.
 Doc:
  if $E$ is an elliptic curve with coefficients
  in $\R$, this computes a complex number $t$ (modulo the lattice defining

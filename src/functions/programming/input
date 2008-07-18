@@ -3,7 +3,7 @@ Class: gp
 Section: programming/specific
 C-Name: input0
 Prototype:
-Help: input(): read an expression from the input file or standard input
+Help: input(): read an expression from the input file or standard input.
 Doc: reads a string, interpreted as a GP expression,
  from the input file, usually standard input (i.e.~the keyboard). If a
  sequence of expressions is given, the result is the result of the last

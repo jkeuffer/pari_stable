@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: nucomp
 Prototype: GGG
 Help: qfbnucomp(x,y,L): composite of primitive positive definite quadratic
- forms x and y using nucomp and nudupl, where L=[|D/4|^(1/4)] is precomputed
+ forms x and y using nucomp and nudupl, where L=[|D/4|^(1/4)] is precomputed.
 Doc: \idx{composition} of the primitive positive
  definite binary quadratic forms $x$ and $y$ (type \typ{QFI}) using the NUCOMP
  and NUDUPL algorithms of \idx{Shanks}, \`a la Atkin. $L$ is any positive

@@ -5,7 +5,7 @@ C-Name: initrect_gen
 Prototype: vLDGDGD0,L,
 Help: plotinit(w,{x},{y},{flag=0}): initialize rectwindow w to size x,y.
  If flag!=0, x and y express fractions of the size of the current output
- device. Omitting x or y means use the full size of the device
+ device. Omitting x or y means use the full size of the device.
 Doc: initialize the rectwindow $w$,
  destroying any rect objects you may have already drawn in $w$. The virtual
  cursor is set to $(0,0)$. The rectwindow size is set to width $x$ and height

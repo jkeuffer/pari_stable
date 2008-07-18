@@ -2,7 +2,7 @@ Function: getrand
 Section: programming/specific
 C-Name: getrand
 Prototype:
-Help: getrand(): current value of random number seed
+Help: getrand(): current value of random number seed.
 Doc: returns the current value of the seed used by the
  pseudo-random number generator \tet{random}. Useful mainly for debugging
  purposes, to reproduce a specific chain of computations. The returned value

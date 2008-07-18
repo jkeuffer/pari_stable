@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: qfbclassno0
 Prototype: GD0,L,
 Help: qfbclassno(D,{flag=0}): class number of discriminant D using Shanks's
- method by default. If (optional) flag is set to 1, use Euler products
+ method by default. If (optional) flag is set to 1, use Euler products.
 Doc: ordinary class number of the quadratic
  order of discriminant $D$. In the present version \vers, a $O(D^{1/2})$
  algorithm is used for $D > 0$ (using Euler product and the functional

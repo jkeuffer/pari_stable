@@ -2,6 +2,6 @@ Function: primes
 Section: number_theoretical
 C-Name: primes
 Prototype: L
-Help: primes(x): returns the vector of the first x primes
+Help: primes(x): returns the vector of the first x primes.
 Doc: creates a row vector whose components
  are the first $x$ prime numbers, which must be among the precalculated primes.

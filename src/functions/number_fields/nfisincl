@@ -5,7 +5,7 @@ Prototype: GG
 Help: nfisincl(x,y): tests whether the number field x is isomorphic to a
  subfield of y (where x and y are either polynomials or number fields as
  output by nfinit). Return 0 if not, and otherwise all the isomorphisms. If y
- is a number field, a faster algorithm is used
+ is a number field, a faster algorithm is used.
 Doc: tests whether the number field $K$ defined
  by the polynomial $x$ is conjugate to a subfield of the field $L$ defined
  by $y$ (where $x$ and $y$ must be in $\Q[X]$). If they are not, the output

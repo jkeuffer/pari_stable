@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: primeform
 Prototype: GGp
 Help: qfbprimeform(x,p): returns the prime form of discriminant x, whose
- first coefficient is p
+ first coefficient is p.
 Doc: prime binary quadratic form of discriminant
  $x$ whose first coefficient is the prime number $p$. By abuse of notation,
  $p = \pm 1$ is a valid special case which returns the unit form. Returns an

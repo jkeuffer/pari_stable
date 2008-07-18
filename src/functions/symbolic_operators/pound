@@ -2,7 +2,7 @@ Function: #_
 Section: symbolic_operators
 C-Name: glength
 Prototype: lG
-Help: #x: number of non code words in x, number of characters for a string
+Help: #x: number of non code words in x, number of characters for a string.
 Description:
  (vecsmall):lg	lg($1)
  (vec):lg	lg($1)

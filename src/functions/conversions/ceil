@@ -2,7 +2,7 @@ Function: ceil
 Section: conversions
 C-Name: gceil
 Prototype: G
-Help: ceil(x): ceiling of x=smallest integer>=x
+Help: ceil(x): ceiling of x = smallest integer >= x.
 Description:
  (small):small:parens   $1
  (int):int:copy:parens  $1

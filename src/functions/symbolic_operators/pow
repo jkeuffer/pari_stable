@@ -1,5 +1,5 @@
 Function: _^_
-Help: x^y: compute x to the power y
+Help: x^y: compute x to the power y.
 Section: symbolic_operators
 C-Name: gpow
 Prototype: GGp

@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: nfmod
 Prototype: GGG
 Help: nfeltmod(nf,x,y): gives r such that r=x-by is small with q algebraic
- integer
+ integer.
 Doc:
  given two elements $x$ and $y$ in
  \var{nf}, computes an element $r$ of $\var{nf}$ of the form $r=x-qy$ with

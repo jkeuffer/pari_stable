@@ -3,7 +3,7 @@ Section: sums
 C-Name: divsum
 Prototype: GVE
 Help: sumdiv(n,X,expr): sum of expression expr, X running over the divisors
- of n
+ of n.
 Doc: sum of expression \var{expr} over the positive divisors of $n$.
  This function is a trivial wrapper essentially equivalent to
  \bprog

@@ -2,7 +2,7 @@ Function: polrootspadic
 Section: polynomials
 C-Name: rootpadic
 Prototype: GGL
-Help: polrootspadic(x,p,r): p-adic roots of the polynomial x to precision r
+Help: polrootspadic(x,p,r): p-adic roots of the polynomial x to precision r.
 Doc: row vector of $p$-adic roots of
  the polynomial \var{pol}, given to $p$-adic precision $r$. Multiple roots are
  \emph{not} repeated. $p$ is assumed to be a prime, and \var{pol} to be

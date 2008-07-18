@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: quadunit
 Prototype: G
 Help: quadunit(D): fundamental unit of the quadratic field of discriminant D
- where D must be positive
+ where D must be positive.
 Doc: fundamental unit\sidx{fundamental units} of the
  real quadratic field $\Q(\sqrt D)$ where  $D$ is the positive discriminant
  of the field. If $D$ is not a fundamental discriminant, this probably gives

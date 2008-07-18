@@ -5,7 +5,7 @@ Prototype: GD0,L,
 Help: coredisc(n,{flag=0}): discriminant of the quadratic field Q(sqrt(n)).
  If (optional) flag is non-null, output a two-component row vector [d,f],
  where d is the discriminant of the quadratic field Q(sqrt(n)) and n=df^2. f
- may be a half integer
+ may be a half integer.
 Doc: a \emph{fundamental discriminant} is an integer of the form $t\equiv 1
  \mod 4$ or $4t \equiv 8,12 \mod 16$, with $t$ squarefree (i.e.~$1$ or the
  discriminant of a quadratic number field). Given a non-zero integer

@@ -5,8 +5,7 @@ Prototype: GGD0,L,
 Help: bnrinit(bnf,f,{flag=0}): given a bnf as output by
  bnfinit and a modulus f, initializes data
  linked to the ray class group structure corresponding to this module. flag
- is optional, and can be 0: default, 1:
- compute also the generators.
+ is optional, and can be 0: default, 1: compute also the generators.
 Description:
  (gen,gen,?small):bnr       bnrinit0($1, $2, $3)
 Doc: $\var{bnf}$ is as

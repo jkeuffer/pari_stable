@@ -6,7 +6,7 @@ Help: elleisnum(E,k,{flag=0}): E being an elliptic curve (or, alternatively,
  given by a 2-component vector representing its periods)
  and k an even positive integer, computes the
  numerical value of the Eisenstein series of weight k. When flag is non-zero
- and k=4 or 6, this gives g2 or g3 with the correct normalization
+ and k=4 or 6, this gives g2 or g3 with the correct normalization.
 Doc:
  $E$ being an elliptic curve as
  output by \kbd{ellinit} (or, alternatively, given by a 2-component vector

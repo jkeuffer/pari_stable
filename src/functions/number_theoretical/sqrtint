@@ -2,7 +2,7 @@ Function: sqrtint
 Section: number_theoretical
 C-Name: sqrtint
 Prototype: G
-Help: sqrtint(x): integer square root of x (x integer)
+Help: sqrtint(x): integer square root of x (x integer).
 Description:
  (gen):int sqrtint($1)
 Doc: integer square root of $x$, which must be a non-negative integer. The

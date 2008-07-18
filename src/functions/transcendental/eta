@@ -4,7 +4,7 @@ C-Name: eta0
 Prototype: GD0,L,p
 Help: eta(x,{flag=0}): if flag=0, eta function without the q^(1/24),
  otherwise eta of the complex number x in the upper half plane intelligently
- computed using SL(2,Z) transformations
+ computed using SL(2,Z) transformations.
 Doc: \idx{Dedekind}'s $\eta$ function, without the
  $q^{1/24}$. This means the following: if $x$ is a complex number with positive
  imaginary part, the result is $\prod_{n=1}^\infty(1-q^n)$, where

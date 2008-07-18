@@ -2,7 +2,7 @@ Function: _*_
 Section: symbolic_operators
 C-Name: gmul
 Prototype: GG
-Help: x*y: product of x and y
+Help: x*y: product of x and y.
 Description:
  (small, small):small:parens	$(1)*$(2)
  (int, small):int		mulis($1, $2)

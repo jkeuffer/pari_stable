@@ -3,7 +3,7 @@ Section: linear_algebra
 C-Name: setisset
 Prototype: lG
 Help: setisset(x): true(1) if x is a set (row vector with strictly
- increasing entries), false(0) if not
+ increasing entries), false(0) if not.
 Doc:
  returns true (1) if $x$ is a set, false (0) if
  not. In PARI, a set is simply a row vector whose entries are strictly

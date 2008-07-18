@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: vecbezout
 Prototype: GG
 Help: bezout(x,y): gives a 3-dimensional row vector [u,v,d] such that
- d=gcd(x,y) and u*x+v*y=d
+ d=gcd(x,y) and u*x+v*y=d.
 Doc: finds $u$ and $v$ minimal in a natural sense such that
  $x*u+y*v=\gcd(x,y)$. The arguments must be both integers or both
  polynomials, and the result is a row vector with three components $u$, $v$,

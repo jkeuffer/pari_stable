@@ -5,7 +5,7 @@ Prototype: GDG
 Help: factorback(f,{e}): given a factorisation f, gives the factored
  object back. If this is a prime ideal factorisation you must supply the
  corresponding number field as last argument. If e is present, f has to be a
- vector of the same length, and we return the product of the f[i]^e[i]
+ vector of the same length, and we return the product of the f[i]^e[i].
 Doc: gives back the factored object
  corresponding to a factorization. The integer $1$ corresponds to the empty
  factorization.

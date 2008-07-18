@@ -3,7 +3,7 @@ Section: conversions
 C-Name: gtolist
 Prototype: DG
 Help: List({x=[]}): transforms the vector or list x into a list. Empty list
- if x is omitted
+ if x is omitted.
 Description:
  ():list listcreate()
  (gen):list	gtolist($1)

@@ -2,7 +2,7 @@ Function: _-_
 Section: symbolic_operators
 C-Name: gsub
 Prototype: GG
-Help: x-y: difference of x and y
+Help: x-y: difference of x and y.
 Description:
  (small, small):small:parens	$(1) - $(2)
  (lg, small):lg:parens	        $(1) - $(2)

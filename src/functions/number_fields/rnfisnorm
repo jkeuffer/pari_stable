@@ -11,7 +11,7 @@ Help: rnfisnorm(T,a,{flag=0}): T is as output by rnfisnorminit applied to
  primes p <= flag (resp. p | flag) if flag > 0 (resp. flag < 0). The answer
  is guaranteed (i.e a is a norm iff q=1) if L/K is Galois or, under GRH, if S
  contains all primes less than 12.log(disc(M))^2, where M is the normal
- closure of L/K
+ closure of L/K.
 Doc: similar to
  \kbd{bnfisnorm} but in the relative case. $T$ is as output by
  \tet{rnfisnorminit} applied to the extension $L/K$. This tries to decide

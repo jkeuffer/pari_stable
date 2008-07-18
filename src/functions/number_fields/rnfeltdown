@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfelementdown
 Prototype: GG
 Help: rnfeltdown(rnf,x): expresses x on the base field if possible; returns
- an error otherwise
+ an error otherwise.
 Doc: $\var{rnf}$ being a relative number
  field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of
  $L$ expressed as a polynomial or polmod with polmod coefficients, computes

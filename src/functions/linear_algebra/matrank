@@ -2,5 +2,5 @@ Function: matrank
 Section: linear_algebra
 C-Name: rank
 Prototype: lG
-Help: matrank(x): rank of the matrix x
+Help: matrank(x): rank of the matrix x.
 Doc: rank of the matrix $x$.

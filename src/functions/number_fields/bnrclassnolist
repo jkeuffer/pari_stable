@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: bnrclassnolist
 Prototype: GG
 Help: bnrclassnolist(bnf,list): if list is as output by ideallist or
- similar, gives list of corresponding ray class numbers
+ similar, gives list of corresponding ray class numbers.
 Doc: $\var{bnf}$ being as
  output by \kbd{bnfinit}, and \var{list} being a list of moduli (with units) as
  output by \kbd{ideallist} or \kbd{ideallistarch}, outputs the list of the

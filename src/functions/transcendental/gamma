@@ -2,5 +2,5 @@ Function: gamma
 Section: transcendental
 C-Name: ggamma
 Prototype: Gp
-Help: gamma(x): gamma function at x
+Help: gamma(x): gamma function at x.
 Doc: gamma function of $x$.

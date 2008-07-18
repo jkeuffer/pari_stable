@@ -4,7 +4,7 @@ C-Name: galoispermtopol
 Prototype: GG
 Help: galoispermtopol(gal,perm): gal being a galois field as output by
  galoisinit and perm a element of gal.group, return the polynomial defining
- the corresponding Galois automorphism
+ the corresponding Galois automorphism.
 Doc: \var{gal} being a
  Galois field as output by \kbd{galoisinit} and \var{perm} a element of
  $\var{gal}.group$, return the polynomial defining the Galois

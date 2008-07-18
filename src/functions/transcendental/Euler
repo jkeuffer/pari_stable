@@ -2,7 +2,7 @@ Function: Euler
 Section: transcendental
 C-Name: mpeuler
 Prototype: p
-Help: Euler=Euler(): Euler's constant with current precision
+Help: Euler=Euler(): Euler's constant with current precision.
 Description:
  ():real:prec	mpeuler(prec)
 Doc: Euler's constant $\gamma=0.57721\cdots$. Note that

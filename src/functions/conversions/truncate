@@ -4,7 +4,7 @@ C-Name: trunc0
 Prototype: GD&
 Help: truncate(x,{&e}): truncation of x; when x is a power series,take away
  the O(X^). If e is present, do not take into account loss of integer part
- precision, and set e = error estimate in bits
+ precision, and set e = error estimate in bits.
 Description:
  (small):small:parens   $1
  (int):int:copy:parens  $1

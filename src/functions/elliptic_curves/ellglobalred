@@ -4,7 +4,7 @@ C-Name: ellglobalred
 Prototype: G
 Help: ellglobalred(E): E being an elliptic curve, returns [N,[u,r,s,t],c],
  where N is the conductor of E, [u,r,s,t] leads to the standard model for E,
- and c is the product of the local Tamagawa numbers c_p
+ and c is the product of the local Tamagawa numbers c_p.
 Description:
  (gen):gen	ellglobalred($1)
 Doc:

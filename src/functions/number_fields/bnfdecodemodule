@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: decodemodule
 Prototype: GG
 Help: bnfdecodemodule(nf,m): given a coded module m as in bnrdisclist,
- gives the true module
+ gives the true module.
 Doc: if $m$ is a module as output in the
  first component of an extension given by \kbd{bnrdisclist}, outputs the
  true module.

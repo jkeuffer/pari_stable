@@ -2,7 +2,7 @@ Function: nfsnf
 Section: number_fields
 C-Name: nfsmith
 Prototype: GG
-Help: nfsnf(nf,x): if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x
+Help: nfsnf(nf,x): if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x.
 Doc: given a torsion module $x$ as a 3-component row
  vector $[A,I,J]$ where $A$ is a square invertible $n\times n$ matrix, $I$ and
  $J$ are two ideal lists, outputs an ideal list $d_1,\dots,d_n$ which is the

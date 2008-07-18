@@ -4,7 +4,7 @@ C-Name: bnfisunit
 Prototype: GG
 Help: bnfisunit(bnf,x): bnf being output by bnfinit, gives
  the column vector of exponents of x on the fundamental units and the roots
- of unity if x is a unit, the empty vector otherwise
+ of unity if x is a unit, the empty vector otherwise.
 Doc: \var{bnf} being the number field data
  output by \kbd{bnfinit} and $x$ being an algebraic number (type integer,
  rational or polmod), this outputs the decomposition of $x$ on the fundamental

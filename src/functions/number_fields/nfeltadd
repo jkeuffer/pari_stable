@@ -2,7 +2,7 @@ Function: nfeltadd
 Section: number_fields
 C-Name: nfadd
 Prototype: GGG
-Help: nfadd(nf,x,y): element x+y in nf
+Help: nfadd(nf,x,y): element x+y in nf.
 Doc:
  given two elements $x$ and $y$ in
  \var{nf}, computes their sub $x-y$ in the number field $\var{nf}$.

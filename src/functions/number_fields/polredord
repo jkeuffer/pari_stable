@@ -2,7 +2,7 @@ Function: polredord
 Section: number_fields
 C-Name: ordred
 Prototype: G
-Help: polredord(x): reduction of the polynomial x, staying in the same order
+Help: polredord(x): reduction of the polynomial x, staying in the same order.
 Doc: finds polynomials with reasonably small
  coefficients and of the same degree as that of $x$ defining suborders of the
  order defined by $x$. One of the polynomials always defines $\Q$ (hence

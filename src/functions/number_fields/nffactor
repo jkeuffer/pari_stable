@@ -2,7 +2,7 @@ Function: nffactor
 Section: number_fields
 C-Name: nffactor
 Prototype: GG
-Help: nffactor(nf,x): factor polynomial x in number field nf
+Help: nffactor(nf,x): factor polynomial x in number field nf.
 Doc: factorization of the univariate
  polynomial $x$ over the number field $\var{nf}$ given by \kbd{nfinit}. $x$
  has coefficients in $\var{nf}$ (i.e.~either scalar, polmod, polynomial or

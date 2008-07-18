@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfelementup
 Prototype: GG
 Help: rnfeltup(rnf,x): expresses x (belonging to the base field) on the
- relative field
+ relative field.
 Doc: $\var{rnf}$ being a relative number
  field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of
  $K$ expressed as a polynomial or polmod, computes $x$ as an element of the

@@ -2,7 +2,7 @@ Function: agm
 Section: transcendental
 C-Name: agm
 Prototype: GGp
-Help: agm(x,y): arithmetic-geometric mean of x and y
+Help: agm(x,y): arithmetic-geometric mean of x and y.
 Doc: arithmetic-geometric mean of $x$ and $y$. In the
  case of complex or negative numbers, the principal square root is always
  chosen. $p$-adic or power series arguments are also allowed. Note that

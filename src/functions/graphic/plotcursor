@@ -3,6 +3,6 @@ Class: highlevel
 Section: graphic
 C-Name: rectcursor
 Prototype: L
-Help: plotcursor(w): current position of cursor in rectwindow w
+Help: plotcursor(w): current position of cursor in rectwindow w.
 Doc: give as a 2-component vector the current
  (scaled) position of the virtual cursor corresponding to the rectwindow $w$.

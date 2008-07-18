@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: factorff
 Prototype: GGG
 Help: factorff(x,p,a): factorization of the polynomial x in the finite field
- F_p[X]/a(X)F_p[X]
+ F_p[X]/a(X)F_p[X].
 Doc: factors the polynomial $x$ in the field
  $\F_q$ defined by the irreducible polynomial $a$ over $\F_p$. The
  coefficients of $x$ must be operation-compatible with $\Z/p\Z$. The result

@@ -3,14 +3,8 @@ Class: highlevel
 Section: graphic
 C-Name: rectploth
 Prototype: LV=GGEpD0,M,D0,L,\nParametric|1; Recursive|2; no_Rescale|4; no_X_axis|8; no_Y_axis|16; no_Frame|32; no_Lines|64; Points_too|128; Splines|256; no_X_ticks|512; no_Y_ticks|1024; Same_ticks|2048; Complex|4096
-Help: plotrecth(w,X=a,b,expr,{flags=0},{n=0}): plot graph(s) for expr
- in rectwindow w, where expr is scalar for a single non-parametric plot, and
- a vector otherwise. If plotting is parametric, its length should be even and
- pairs of entries give points coordinates. If not, all entries but the first
- are y-coordinates. Both flags and n are optional. Binary digits of flags
- mean: 1 parametric plot, 2 recursive plot, 4 do not rescale w, 8 omit
- x-axis, 16 omit y-axis, 32 omit frame, 64 do not join points, 128 plot both
- lines and points. n specifies the number of reference points on the graph
- (0=use default value). Returns a vector for the bounding box
+Help: plotrecth(w,X=a,b,expr,{flag=0},{n=0}):
+ writes to rectwindow w the curve output of
+ ploth(w,X=a,b,expr,flag,n). Returns a vector for the bounding box.
 Doc: writes to rectwindow $w$ the curve output of
- \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.
+ \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$. Returns a vector for the bounding box.

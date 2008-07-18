@@ -4,7 +4,7 @@ C-Name: pollead
 Prototype: GDn
 Help: pollead(x,{v}): leading coefficient of polynomial or series x, or x
  itself if x is a scalar. Error otherwise. With respect to the main variable
- of x if v is omitted, with respect to the variable v otherwise
+ of x if v is omitted, with respect to the variable v otherwise.
 Description:
  (pol):gen:copy         leading_term($1)
  (gen):gen              pollead($1, -1)

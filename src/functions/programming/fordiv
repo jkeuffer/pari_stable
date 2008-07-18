@@ -3,7 +3,7 @@ Section: programming/control
 C-Name: fordiv
 Prototype: vGVI
 Help: fordiv(n,X,seq): the sequence is evaluated, X running over the
- divisors of n
+ divisors of n.
 Doc: evaluates \var{seq}, where
  the formal variable $X$ ranges through the divisors of $n$
  (see \tet{divisors}, which is used as a subroutine). It is assumed that

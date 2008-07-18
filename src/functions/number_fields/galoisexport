@@ -4,7 +4,7 @@ C-Name: galoisexport
 Prototype: GD0,L,
 Help: galoisexport(gal,{flag}): gal being a galois field as output by
  galoisinit, output a string representing the underlying permutation group in
- GAP notation (default) or Magma notation (flag = 1)
+ GAP notation (default) or Magma notation (flag = 1).
 Doc: \var{gal} being be a Galois field as output by \tet{galoisinit},
  export the underlying permutation group as a string suitable
  for (no flags or $\fl=0$) GAP or ($\fl=1$) Magma. The following example

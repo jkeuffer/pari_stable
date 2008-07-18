@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: polfnf
 Prototype: GG
 Help: factornf(x,t): factorization of the polynomial x over the number field
- defined by the polynomial t
+ defined by the polynomial t.
 Doc: factorization of the univariate polynomial $x$
  over the number field defined by the (univariate) polynomial $t$. $x$ may
  have coefficients in $\Q$ or in the number field. The algorithm reduces to

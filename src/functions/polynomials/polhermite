@@ -3,7 +3,7 @@ Section: polynomials
 C-Name: polhermite_eval
 Prototype: LDG
 Help: polhermite(n,{a='x}): Hermite polynomial H(n,v) of degree n, evaluated
- at a
+ at a.
 Description:
   (small,?var):gen    polhermite($1,$2)
   (small,gen):gen     polhermite_eval($1,$2)

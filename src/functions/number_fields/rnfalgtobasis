@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfalgtobasis
 Prototype: GG
 Help: rnfalgtobasis(rnf,x): relative version of nfalgtobasis, where rnf is a
- relative numberfield
+ relative numberfield.
 Doc: expresses $x$ on the relative
  integral basis. Here, $\var{rnf}$ is a relative number field extension $L/K$
  as output by \kbd{rnfinit}, and $x$ an element of $L$ in absolute form, i.e.

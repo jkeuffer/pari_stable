@@ -4,7 +4,7 @@ C-Name: galoisapply
 Prototype: GGG
 Help: nfgaloisapply(nf,aut,x): Apply the Galois automorphism aut
  (polynomial or polmod) to the object x (element or ideal) in the number
- field nf
+ field nf.
 Doc: $\var{nf}$ being a
  number field as output by \kbd{nfinit}, and \var{aut} being a \idx{Galois}
  automorphism of $\var{nf}$ expressed either as a polynomial or a polmod

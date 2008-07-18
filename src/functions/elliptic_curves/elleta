@@ -3,7 +3,7 @@ Section: elliptic_curves
 C-Name: elleta
 Prototype: Gp
 Help: elleta(om): om=[om1,om2], returns the two-component row vector
- [eta1,eta2] of quasi-periods associated to [om1,om2]
+ [eta1,eta2] of quasi-periods associated to [om1,om2].
 Doc:
  returns the quasi-periods $[\eta_1,\eta_2]$
  associated to the lattice basis $\var{om} = [\omega_1, \omega_2]$.

@@ -3,7 +3,7 @@ Section: number_theoretical
 C-Name: bestappr0
 Prototype: GGDG
 Help: bestappr(x, A,{B}): gives the best approximation to the real x with
- denominator less or equal to A
+ denominator less or equal to A.
 Doc: if $B$ is omitted, finds the best rational approximation to $x\in\R$
  with denominator at most equal to $A$ using continued fractions. If $B$ is
  present perform rational modular reconstruction (see below). In both cases,

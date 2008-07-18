@@ -3,7 +3,7 @@ Section: programming/control
 C-Name: forstep
 Prototype: vV=GGGI
 Help: forstep(X=a,b,s,seq): the sequence is evaluated, X going from a to b
- in steps of s (can be a vector of steps)
+ in steps of s (can be a vector of steps).
 Doc: evaluates \var{seq},
  where the formal variable $X$ goes from $a$ to $b$, in increments of $s$.
  Nothing is done if $s>0$ and $a>b$ or if $s<0$ and $a<b$. $s$ must be in

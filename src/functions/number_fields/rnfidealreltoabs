@@ -3,7 +3,7 @@ Section: number_fields
 C-Name: rnfidealreltoabs
 Prototype: GG
 Help: rnfidealreltoabs(rnf,x): transforms the ideal x from relative to
- absolute representation
+ absolute representation.
 Doc: $\var{rnf}$ being a relative
  number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
  relative ideal, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in

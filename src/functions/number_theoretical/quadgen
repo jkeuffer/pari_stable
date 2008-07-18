@@ -2,7 +2,7 @@ Function: quadgen
 Section: number_theoretical
 C-Name: quadgen
 Prototype: G
-Help: quadgen(D): standard generator of quadratic order of discriminant D
+Help: quadgen(D): standard generator of quadratic order of discriminant D.
 Doc: creates the quadratic
  number\sidx{omega} $\omega=(a+\sqrt{D})/2$ where $a=0$ if $D\equiv0\mod4$,
  $a=1$ if $D\equiv1\mod4$, so that $(1,\omega)$ is an integral basis for the

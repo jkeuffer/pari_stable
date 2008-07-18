@@ -4,7 +4,7 @@ C-Name: matker0
 Prototype: GD0,L,
 Help: matker(x,{flag=0}): basis of the kernel of the matrix x. flag is
  optional, and may be set to 0: default; non-zero: x is known to have
- integral entries
+ integral entries.
 Doc: gives a basis for the kernel of the
  matrix $x$ as columns of a matrix. A priori the matrix can have entries of
  any type.

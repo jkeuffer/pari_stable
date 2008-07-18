@@ -2,7 +2,7 @@ Function: printtex
 Section: programming/specific
 C-Name: printtex
 Prototype: vs*
-Help: printtex({str}*): outputs its string arguments in TeX format
+Help: printtex({str}*): outputs its string arguments in TeX format.
 Doc: outputs its (string) arguments in \TeX\ format. This output can then be
  used in a \TeX\ manuscript.
  The printing is done on the standard output. If you want to print it to a

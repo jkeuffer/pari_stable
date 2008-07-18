@@ -6,7 +6,7 @@ Help: matrixqz(A,{p=0}): if p>=0, transforms the rational or integral mxn (m>=n)
  matrix A into an integral matrix with gcd of maximal determinants coprime to
  p. If p=-1, finds a basis of the intersection with Z^n of the lattice spanned
  by the columns of A. If p=-2, finds a basis of the intersection with Z^n of
- the Q-vector space spanned by the columns of A
+ the Q-vector space spanned by the columns of A.
 Doc: $A$ being an $m\times n$ matrix in $M_{m,n}(\Q)$, let
  $\text{Im}_\Q A$ (resp.~$\text{Im}_\Z A$) the $\Q$-vector space
  (resp.~the $\Z$-module) spanned by the columns of $A$. This function has

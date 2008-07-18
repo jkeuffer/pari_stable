@@ -2,6 +2,6 @@ Function: atan
 Section: transcendental
 C-Name: gatan
 Prototype: Gp
-Help: atan(x): inverse tangent of x
+Help: atan(x): inverse tangent of x.
 Doc: principal branch of $\text{tan}^{-1}(x)$, i.e.~such
  that $\text{Re(atan}(x))\in{} ]-\pi/2,\pi/2[$.
