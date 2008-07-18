@@ -236,6 +236,8 @@ BA 49- user variables can now be aliased [#790].
    80- no longer export private library function incgam2. Remove it also
        under GP when compatible = 3. Like incgam1 (suppressed), 1.39.15 doc
        stated it was provided "for debugging only".
+   81- addhelp: TABs are now treated properly (would overflow line without
+       wrapping) and \n are no longer ignored
 
   Added
     1- library function pari_calloc, cgetalloc

@@ -1447,9 +1447,6 @@ lim_lines_output(char *s, long n, long max_lin)
   }
 }
 
-#define is_blank(c) ((c) == ' ' || (c) == '\n')
-#define MAX_WORD_LEN 255
-
 static void
 new_line(const char *prefix)
 {
@@ -1459,65 +1456,70 @@ new_line(const char *prefix)
 static long
 strlen_real(const char *s)
 {
-  const char *t = s, *t0;
-  long ctrl_len = 0;
+  const char *t = s;
+  long len = 0;
   while (*t)
   {
-    t0 = t;
-    if (*t++ == ESC && *t++ == '[')
-    {
+    if (t[0] == ESC && t[1] == '[')
+    { /* skip ANSI escape sequence */
+      t += 2;
       while (*t && *t++ != 'm') /* empty */;
-      ctrl_len += t - t0;
+      continue;
     }
+    t++; len++;
   }
-  return strlen(s) - ctrl_len;
+  return len;
 }
 
+#define is_blank(c) ((c) == ' ' || (c) == '\n' || (c) == '\t')
 /* output: <prefix>< s wrapped at EOL >
  *         <prefix>< ... > <str>
  *                         ^---  (no \n at the end)
- * If str is NULL, omit the arrow, assume the text doesn't contain ASCII
- * escape sequences and end the text with '\n'. If prefix is NULL, use ""
- */
+ * If str is NULL, omit the arrow, end the text with '\n'.
+ * If prefix is NULL, use "" */
 void
 print_prefixed_text(const char *s, const char *prefix, const char *str)
 {
-  long prelen = prefix? strlen_real(prefix): 0;
-  long oldwlen=0, linelen=prelen, w = term_width(), ls = strlen(s);
-  char *word, *oldword, *u;
-
-  u = word= stackmalloc(ls + 3);
-  oldword = stackmalloc(ls + 3);
+  const long prelen = prefix? strlen_real(prefix): 0;
+  const long W = term_width(), ls = strlen(s);
+  long linelen = prelen;
+  char *word = stackmalloc(ls + 3);
 
   if (prefix) pari_puts(prefix);
-  *oldword = 0;
-  while ( (*u++ = *s++) )
-    if (!*s || is_blank(*s))
-    {
-      while (is_blank(*s)) s++;
-      linelen += oldwlen;
-      if (linelen >= w) { new_line(prefix); linelen = oldwlen + prelen; }
-      pari_puts(oldword); *u++ = ' '; *u = 0;
-      /* u-word = strlen(word) */
-      oldwlen = str ? strlen_real(word): u - word;
-      if (*s) { strcpy(oldword,word);  u = word; }
+  for(;;)
+  {
+    long len;
+    int blank = 0;
+    char *u = word;
+    while (*s && !is_blank(*s)) *u++ = *s++;
+    *u = 0; /* finish "word" */
+    len = strlen_real(word);
+    linelen += len;
+    if (linelen >= W) { new_line(prefix); linelen = prelen + len; }
+    pari_puts(word);
+    while (is_blank(*s)) {
+      switch (*s) {
+        case ' ': break;
+        case '\t':
+          linelen = (linelen & ~7UL) + 8; pari_putc('\t');
+          blank = 1; break;
+        case '\n':
+          linelen = W;
+          blank = 1; break;
+      }
+      if (linelen >= W) { new_line(prefix); linelen = prelen; }
+      s++;
     }
-  u -= 2; /* last non-null char in word */
-  if (!str)
-  { /* add final period if needed */
-    while (u > word && is_blank(*u)) u--;
-    if (u >= word && isalnum((int)*u)) { u[1] = '.'; u[2] = 0; }
+    if (!*s) break; 
+    if (!blank) { pari_putc(' '); linelen++; }
   }
+  if (!str)
+    pari_putc('\n');
   else
-    { if (u >= word) *u = 0; oldwlen--; }
-  linelen += oldwlen;
-  if (linelen >= w) { new_line(prefix); linelen = prelen + oldwlen; }
-  pari_puts(word);
-  if (str)
   {
     long i,len = strlen_real(str);
     int space = (*str == ' ' && str[1]);
-    if (linelen + len >= w)
+    if (linelen + len >= W)
     {
       new_line(prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
@@ -1530,8 +1532,6 @@ print_prefixed_text(const char *s, const char *prefix, const char *str)
     pari_putc('^');
     for (i=0; i<len; i++) pari_putc('-');
   }
-  else
-    pari_putc('\n');
 }
 
 /********************************************************************/

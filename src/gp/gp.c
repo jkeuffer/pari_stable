@@ -814,14 +814,16 @@ gp_head(void)
     printf("%ccommand:(cas-supports-completions-set! \"pari\")%c\n",
 	   DATA_BEGIN, DATA_END);
 #endif
-  print_version(); pari_puts("\n");
+  print_version();
+  pari_putc('\n');
   center("Copyright (C) 2000-2008 The PARI Group");
-  print_text("\nPARI/GP is free software, covered by the GNU General Public \
+  pari_putc('\n');
+  print_text("PARI/GP is free software, covered by the GNU General Public \
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
-  pari_puts("\n\
-Type ? for help, \\q to quit.\n\
-Type ?12 for how to get moral (and possibly technical) support.\n\n");
-  pari_printf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
+  pari_puts("\nType ? for help, \\q to quit.\n");
+  print_text("Type ?12 for how to get moral (and possibly technical) support.");
+  pari_printf("\nparisize = %lu, primelimit = %lu\n",
+              top-bot, GP_DATA->primelimit);
 }
 
 /********************************************************************/
