@@ -1,0 +1,20 @@
+nf=nfinit(y^3-1009);
+P = primes(20);
+
+pr = idealprimedec(nf,1009)[1]; a = y^11*(y+1)*101; b = y^5*(y+3)*19;
+vector(#P, i, nfhilbert(nf, a, P[i]*b, pr))
+
+pr = idealprimedec(nf,19)[1]; a = 19^11*(y+1)*101; b = 19^5*(y+3)*19;
+vector(#P, i, nfhilbert(nf, a, (1+P[i]*y)*b, pr))
+
+/* old regression cases: */
+nf=nfinit(y^2+1); pr=idealprimedec(nf,2)[1];
+nfhilbert(nf, [1,1]~, 3, pr)
+
+nfhilbert(nf,[1,-2]~,[1,-2]~, pr)
+
+nf=nfinit(y^2+3);
+nfhilbert(nf,[3,0]~,[3,0]~,idealprimedec(nf,2)[1])
+
+
+

@@ -816,6 +816,10 @@ exponent of the group $(\Z_K/f)^*$ as \kbd{expo}; any multiple will also do,
 at the expense of efficiency. Of course if a \var{bid} for $f$ is
 available, if is easy to extract $f$ and the exact value of \kbd{expo} from
 it (the latter is the first elementary divisor in the group structure).
+A useful trick: if you set \kbd{expo} to \emph{any} positive integer, the
+result is correct up to \kbd{expo}-th powers, hence exact if \kbd{expo} is a
+multiple of the exponent; this is useful when trying to decide whether an
+element is a square in a residue field for instance! (take \kbd{expo}$ = 2$).
 
 What to do when the $g[i]$ are not coprime to $f$, but only $\prod
 g[i]^{e[i]}$ is ? Then the situation is more complicated, and we advise to
@@ -825,7 +829,9 @@ associated to a maximal ideal \kbd{pr} and assume $v(f) = k > 0$:
 returns an element in $(\Z_K/\kbd{pr}^k)^*$ congruent to the product 
 $\prod g[i]^{e[i]}$, assumed to be globally coprime to $f$. As above,
 \kbd{expo} is any positive multiple of the exponent of $(\Z_K/\kbd{pr}^k)^*$,
-for instance $(Nv-1)p^{k-1}$, if $p$ is the underlying rational prime.
+for instance $(Nv-1)p^{k-1}$, if $p$ is the underlying rational prime. You
+may use other values of \kbd{expo} (see the useful trick in
+\tet{famat_to_nf_modideal_coprime}).
 
 \subsec{Class field theory}
 

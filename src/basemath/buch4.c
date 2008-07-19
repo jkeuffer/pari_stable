@@ -108,7 +108,7 @@ hyperell_locally_soluble(GEN T,GEN p)
   avma = av; return res;
 }
 
-/* is t a square in (O_K/pr) ? Assume v_pr(t) >= 0 */
+/* is t a square in (O_K/pr) ? Assume v_pr(t) = 0 */
 static long
 quad_char(GEN nf, GEN t, GEN pr)
 {
@@ -127,21 +127,35 @@ quad_char(GEN nf, GEN t, GEN pr)
   }
   return kronecker(t, p);
 }
+/* quad_char(x), x in Z, non-zero mod p */
+static long
+Z_quad_char(GEN x, GEN pr)
+{
+  long f = itos(gel(pr,4));
+  if (!odd(f)) return 1;
+  return kronecker(x, gel(pr,1));
+}
 
 /* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise */
 static long
 psquarenf(GEN nf,GEN x,GEN pr)
 {
   pari_sp av = avma;
+  GEN p = gel(pr,1);
   long v;
 
-  if (gcmp0(x)) return 1;
-  v = nfval(nf,x,pr); if (v&1) return 0;
-  /* v >= 0 */
-  if (v) x = RgC_Rg_div(nfmul(nf, x, nfpow_u(nf, gel(pr,5), v)),
-                        powiu(gel(pr,1), v));
-
-  v = quad_char(nf, x, pr); avma = av; return v;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) == t_INT) {
+    if (!signe(x)) return 1;
+    v = Z_pvalrem(x, p, &x) * itos(gel(pr,3));
+    if (v&1) return 0;
+    v = (Z_quad_char(x, pr) == 1);
+  } else {
+    v = int_elt_val(nf, x, p, gel(pr,5), &x);
+    if (v&1) return 0;
+    v = (quad_char(nf, x, pr) == 1);
+  }
+  avma = av; return v;
 }
 
 /* Is  x a square in (ZK / pr^(1+2e))^* ?  pr | 2 */
@@ -162,10 +176,14 @@ psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
   long v;
   pari_sp av = avma;
 
-  if (gcmp0(x)) return 1;
-  v = nfval(nf,x,pr); if (v&1) return 0;
+  x = nf_to_scalar_or_basis(nf, x);
   /* x /= pi^v, pi a pr-uniformizer. v >= 0 */
-  if (v) x = gmul2n(nfmul(nf, x, nfpow_u(nf, gel(pr,5), v)), -v);
+  if (typ(x) == t_INT) {
+    if (!signe(x)) return 1;
+    v = Z_lvalrem(x, 2, &x) * itos(gel(pr,3));
+  } else
+    v = int_elt_val(nf, x, gel(pr,1), gel(pr,5), &x);
+  if (v&1) return 0;
   /* now (x,pr) = 1 */
   v = check2(nf,x,zinit); avma = av; return v;
 }
@@ -334,12 +352,20 @@ nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
   va = nfval(nf,a,pr);
   vb = nfval(nf,b,pr);
   if (!odd(va) && !odd(vb)) { avma = av; return 1; }
-  t = nfdiv(nf, nfpow(nf,a, stoi(vb)),
-		nfpow(nf,b, stoi(va)));
-  if (odd(va) && odd(vb)) t = ZC_neg(t); /* t mod pr = tame_pr(a,b) */
-
+  /* Trick: pretend the exponent is 2, result is OK up to squares ! */
+  t = famat_makecoprime(nf, mkvec2(a,b), mkvec2(stoi(vb), stoi(-va)),
+                        pr, idealhnf_two(nf, pr), gen_2);
+  if (ZV_isscalar(t)) { /* automatic if pr has degree 1 ! */
+    t = gel(t,1);
+    if (odd(va) && odd(vb)) t = negi(t);
+    /* t = (-1)^(v(a)v(b)) a^v(b) b^(-v(a)) */
+    rep = Z_quad_char(t, pr);
+  } else {
+    if (odd(va) && odd(vb)) t = ZC_neg(t);
+    /* t = (-1)^(v(a)v(b)) a^v(b) b^(-v(a)) */
+    rep = quad_char(nf, t, pr);
+  }
   /* quad. symbol is image of t by the quadratic character  */
-  rep = quad_char(nf, t, pr);
   avma = av; return rep;
 }
 
