@@ -1459,7 +1459,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
   }
 
   f = poleval(f, deg1pol_shallow(p, a, varn(f)));
-  f = gdivexact(f, powiu(p,ggval(f, p)));
+  f = ZX_Z_divexact(f, powiu(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
   R = FpX_roots(f, p);

@@ -404,7 +404,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     if (wpow) a = FpX_FpXQV_compo(g,wpow, T,q);
     else      a = FpX_FpXQ_compo(g,w0, T,q); /* first time */
     /* now, a = 0 (p) */
-    a = gmul(gneg(h0), gdivexact(a, p));
+    a = gmul(gneg(h0), ZX_Z_divexact(a, p));
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
     w1_Q = centermod(gmul(w1, remii(den,q)), q);
@@ -427,7 +427,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
      *     = h0 + h0 * (1 - h0 g'(w1)) */
     a = gmul(gneg(h0), FpX_FpXQV_compo(gp, FpXV_red(wpow,q),T,q));
     a = ZX_Z_add(FpX_rem(a, T,q), gen_1); /* 1 - h0 g'(w1) = 0 (p) */
-    a = gmul(h0, gdivexact(a, p));
+    a = gmul(h0, ZX_Z_divexact(a, p));
     h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }

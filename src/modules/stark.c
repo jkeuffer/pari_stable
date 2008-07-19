@@ -229,7 +229,7 @@ get_Char(GEN chi, GEN initc, GEN U, long prec)
   else
   {
     GEN t = gred_frac2(gel(initc,1), d);
-    chic = gdivexact(chic, d);
+    chic = ZC_Z_divexact(chic, d);
     if (typ(t) == t_INT)
       d = t;
     else

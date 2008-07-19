@@ -1140,7 +1140,7 @@ QM_minors_coprime(GEN x, GEN D)
       if (lM==1) break;
 
       M = FpM_center(M, p, pov2);
-      N = gdivexact(ZM_mul(x,M), p);
+      N = ZM_Z_divexact(ZM_mul(x,M), p);
       for (j=1; j<lM; j++)
       {
 	long k = n; while (!signe(gcoeff(M,k,j))) k--;
@@ -3395,7 +3395,7 @@ ZM_snf_group(GEN H, GEN *newU, GEN *newUi)
     { /* Ui = ZM_inv(U, gen_1); setlg(Ui, l); */
       GEN V = FpM_red(*newUi, gel(D,1));
       GEN Ui = ZM_mul(H, V);
-      for (i = 1; i < l; i++) gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
+      for (i = 1; i < l; i++) gel(Ui,i) = ZC_Z_divexact(gel(Ui,i), gel(D,i));
       *newUi = ZM_hnfrem(Ui, H);
     }
   }

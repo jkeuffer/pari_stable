@@ -137,8 +137,9 @@ psquarenf(GEN nf,GEN x,GEN pr)
 
   if (gcmp0(x)) return 1;
   v = nfval(nf,x,pr); if (v&1) return 0;
-  if (v) x = RgC_Rg_div(nfmul(nf, x, nfpow(nf, gel(pr,5), stoi(v))),
-                        gpowgs(gel(pr,1), v));
+  /* v >= 0 */
+  if (v) x = RgC_Rg_div(nfmul(nf, x, nfpow_u(nf, gel(pr,5), v)),
+                        powiu(gel(pr,1), v));
 
   v = quad_char(nf, x, pr); avma = av; return v;
 }
@@ -163,8 +164,8 @@ psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
 
   if (gcmp0(x)) return 1;
   v = nfval(nf,x,pr); if (v&1) return 0;
-  /* x /= pi^v, pi a pr-uniformizer */
-  if (v) x = gmul2n(nfmul(nf, x, nfpow(nf, gel(pr,5), stoi(v))), -v);
+  /* x /= pi^v, pi a pr-uniformizer. v >= 0 */
+  if (v) x = gmul2n(nfmul(nf, x, nfpow_u(nf, gel(pr,5), v)), -v);
   /* now (x,pr) = 1 */
   v = check2(nf,x,zinit); avma = av; return v;
 }
@@ -216,7 +217,7 @@ lemma7nf(GEN nf,GEN T,GEN pr,long nu,GEN x,GEN zinit)
 
   zinit = Idealstar(nf, idealpows(nf,pr,q), nf_INIT);
   /* gx /= pi^la, pi a pr-uniformizer */
-  gx = gmul2n(nfmul(nf, gx, nfpow(nf, gel(pr,5), stoi(la))), -la);
+  gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, gel(pr,5), la)), -la);
   if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
@@ -327,7 +328,6 @@ nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
   long va, vb, rep;
   pari_sp av = avma;
 
-  if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
   if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
@@ -384,7 +384,11 @@ long
 nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 {
   nf = checknf(nf);
-  if (p) { checkprid(p); return nfhilbertp(nf,a,b,p); }
+  if (p) {
+    checkprid(p);
+    if (gcmp0(a) || gcmp0(b)) pari_err (talker,"0 argument in nfhilbertp");
+    return nfhilbertp(nf,a,b,p);
+  }
   return nfhilbert(nf,a,b);
 }
 

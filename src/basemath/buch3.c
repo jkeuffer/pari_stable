@@ -285,7 +285,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       p  = gel(pr,1);
       pi = get_pi(F, pr, &gel(vecpi,j));
       pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
-      t = nfpow(nf, pinvpi, stoi(v));
+      t = nfpow_u(nf, pinvpi, (ulong)v);
       mulI = mulI? nfmuli(nf, mulI, t): t;
       t = powiu(gel(pr,1), v);
       dmulI = dmulI? mulii(dmulI, t): t;
@@ -308,13 +308,13 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 	if (v > 0)
 	{
 	  pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
-	  t = nfpow(nf,pinvpi,stoi(v));
+	  t = nfpow_u(nf,pinvpi, (ulong)v);
 	  LL = nfmul(nf, LL, t);
 	  LL = RgC_Rg_div(LL, powiu(p, v));
 	}
 	else
 	{
-	  t = nfpow(nf,pi,stoi(-v));
+	  t = nfpow_u(nf,pi,(ulong)(-v));
 	  LL = nfmul(nf, LL, t);
 	}
       }
@@ -332,7 +332,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     }
     G = set_sign_mod_divisor(nf,A,G,module,sarch);
     I = idealmul(nf,I,G);
-    if (dmulI) I = gdivexact(I, dmulI);
+    if (dmulI) I = ZM_Z_divexact(I, dmulI);
     /* more or less useless, but cheap at this point */
     I = idealmoddivisor_aux(nf,I,module,sarch);
     gel(basecl,i) = gerepilecopy(av, I);

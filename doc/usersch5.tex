@@ -3327,6 +3327,9 @@ not be corrupted. (We use \tet{togglesign_safe}.)
 (which can be a column or row vector) by the \typ{INT}~\kbd{y}, returning a
 \kbd{ZC}.
 
+\fun{GEN}{ZC_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
+are exact.
+
 \fun{GEN}{ZV_dotproduct}{GEN x,GEN y} as \kbd{RgV\_dotproduct} assuming $x$
 and $y$ have \typ{INT} entries.
 
@@ -3399,6 +3402,9 @@ $0 < i < \kbd{lg(x[1])}$.
 
 \fun{GEN}{ZV_ZM_mul}{GEN x, GEN y} multiplies the \kbd{ZV}~\kbd{x}
 by the \kbd{ZM}~\kbd{y}. Returns a \typ{VEC}.
+
+\fun{GEN}{ZM_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
+are exact.
 
 \fun{GEN}{ZM_pow}{GEN x, GEN n} returns $\kbd{x}^\kbd{n}$, assuming \kbd{x}
 is a square \kbd{ZM} and $\kbd{n}\geq 0$.
@@ -3639,6 +3645,9 @@ and $0$ otherwise.
 integer \kbd{x}.
 
 \fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the \kbd{ZX} \kbd{x} by the integer \kbd{y}.
+
+\fun{GEN}{ZX_Z_divexact}{GEN x, GEN y} returns $x/y$ assuming all divisions
+are exact.
 
 \fun{GEN}{ZXV_Z_mul}{GEN x,GEN y} multiplies the vector of \kbd{ZX} \kbd{x}
 by the integer \kbd{y}.
@@ -4725,7 +4734,8 @@ comparison function:
 \subsec{Divisibility, Euclidean division}
 
 \fun{GEN}{gdivexact}{GEN x, GEN y} returns the quotient $\kbd{x} / \kbd{y}$,
-assuming $\kbd{y}$ divides $\kbd{x}$.
+assuming $\kbd{y}$ divides $\kbd{x}$. Not stack clean if $y = 1$
+(we return $x$, not a copy).
 
 \fun{int}{gdvd}{GEN x, GEN y}  returns 1 (true) if \kbd{y} divides~\kbd{x},
 0~otherwise.

@@ -628,7 +628,7 @@ dedek(GEN f, long mf, GEN p,GEN g)
   long dk;
 
   h = FpX_div(f,g,p);
-  k = gdivexact(ZX_sub(f, ZX_mul(g,h)), p);
+  k = ZX_Z_divexact(ZX_sub(f, ZX_mul(g,h)), p);
   k = FpX_gcd(k, FpX_gcd(g,h, p), p);
 
   dk = degpol(k);
@@ -709,15 +709,18 @@ respm(GEN x, GEN y, GEN pm)
   return gerepileuptoint(av, icopy(z));
 }
 
+/* *e a ZX, *de, *pp in Z */
 static void
 update_den(GEN *e, GEN *de, GEN *pp)
 {
   GEN ce = Q_content(*e);
-  if (ce != gen_1) {
+  if (!is_pm1(ce)) {
     ce = gcdii(*de, ce);
-    *de = diviiexact(*de, ce);
-    *e  = gdivexact(*e, ce);
-    if (pp) *pp =diviiexact(*pp, ce);
+    if (!is_pm1(ce)) {
+      *de = diviiexact(*de, ce);
+      *e  = ZX_Z_divexact(*e, ce);
+      if (pp) *pp =diviiexact(*pp, ce);
+    }
   }
 }
 
@@ -772,7 +775,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     else
     {
       ha = FpXQ_mul(ha, a, f, D);
-      if (da) ha = gdivexact(ha, da);
+      if (da) ha = ZX_Z_divexact(ha, da);
     }
     gel(b,i) = RgX_to_RgV(ha,n);
   }
@@ -1832,7 +1835,7 @@ _primedec(GEN nf, GEN p)
 
   g = FpXV_prod(F, p);
   h = FpX_div(T,g,p);
-  f = FpX_red(gdivexact(ZX_sub(ZX_mul(g,h), T), p), p);
+  f = FpX_red(ZX_Z_divexact(ZX_sub(ZX_mul(g,h), T), p), p);
 
   N = degpol(T);
   L = cgetg(N+1,t_VEC); iL = 1;
@@ -1953,8 +1956,10 @@ lift_to_zk(GEN v, GEN c, long N)
 GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
-  GEN p = gel(pr,1), e = gel(pr,3);
-  return gdivexact(nfpow(nf,gel(pr,5), e), powiu(p, itou(e)-1));
+  GEN p = gel(pr,1), ge = gel(pr,3);
+  ulong e = (ulong)ge[2];
+  if (e == 1) return gel(pr,5);
+  return ZC_Z_divexact(nfpow_u(nf,gel(pr,5), e), powiu(p, e-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
@@ -2235,8 +2240,8 @@ Rg_to_ff(GEN nf, GEN x, GEN modpr)
     {
       GEN tau = modpr_TAU(modpr);
       if (!tau) pari_err(talker,"modpr initialized for integers only!");
-      x = nfmuli(nf,x, nfpow(nf, tau, utoipos(v)));
-      x = gdivexact(x, gpowgs(p, v));
+      x = nfmuli(nf,x, nfpow_u(nf, tau, v));
+      x = ZC_Z_divexact(x, powiu(p, v));
     }
     if (!is_pm1(den)) x = ZC_Z_mul(x, Fp_inv(den, p));
     x = FpC_red(x, p);
@@ -3065,7 +3070,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (same)
   {
     D = RgX_rescale(A, stoi(1 - k));
-    C = gdivexact(C, D);
+    C = ZX_Z_divexact(C, D);
     if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C), D);
   }
   else

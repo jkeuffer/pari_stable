@@ -246,7 +246,8 @@ BA 49- user variables can now be aliased [#790].
     4- library function shallowextract
     5- library functions ZC_ZV_mul, ZM_copy, ZM_neg, ZM_add, ZM_mul, ZM_pow
        ZM_sub, ZM_ZC_mul, ZV_copy, ZV_neg, ZV_neg_inplace ZV_togglesign
-       ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar
+       ZXV_Z_mul, ZM_Z_mul, ZV_Z_mul, ZV_isscalar, ZM_Z_divexact,
+       ZC_Z_divexact, ZX_Z_divexact,
 BA  6- handle numerical derivation as an operation on closure.
     7- Fp_center, FpM_center, FpV_center
 RB  8- GP functions printf, Strprintf
@@ -331,7 +332,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    33- library function  nfordmax, nfarchstar (was zarchstar), nfsign,
        nfsign_arch, nfsign_units, nfsign_from_logarch, Buchquad, Buchall,
        Idealstar, idealaddtoone_i, idealcoprimefact, hnfmerge_get_1,
-       nfinvmodideal, nfpowmodideal, idealsqr
+       nfinvmodideal, nfpowmodideal, idealsqr, nfpow_u
    34- function bnfcompress() [ to create a "small bnf" from a true
        bnf, to be recoved using bnfinit ]. More consistent than old
        bnfnit(,3) / bnfmake.

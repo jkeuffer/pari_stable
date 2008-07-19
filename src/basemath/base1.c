@@ -996,7 +996,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
       if (den)
       {
 	d = mul_denom(gel(den,i), gel(den,j));
-	if (d) z = gdivexact(z, d);
+	if (d) z = ZC_Z_divexact(z, d);
       }
       gel(mul,j+(i-1)*n) = gel(mul,i+(j-1)*n) = gerepileupto(av,z);
     }

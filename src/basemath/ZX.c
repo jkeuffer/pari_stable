@@ -213,6 +213,15 @@ Z_ZX_sub(GEN x, GEN y)
 /*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
 
 GEN
+ZX_Z_divexact(GEN y,GEN x)
+{
+  long i, l = lg(y);
+  GEN z = cgetg(l,t_POL); z[1] = y[1];
+  for(i=2; i<l; i++) gel(z,i) = diviiexact(gel(y,i),x);
+  return z;
+}
+
+GEN
 ZX_Z_mul(GEN y,GEN x)
 {
   GEN z;

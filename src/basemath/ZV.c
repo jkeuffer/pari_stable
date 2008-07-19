@@ -275,6 +275,23 @@ ZM_sub(GEN x, GEN y)
 /**                         LINEAR COMBINATION                     **/
 /**                                                                **/
 /********************************************************************/
+/* return X/c assuming division is exact */
+GEN
+ZC_Z_divexact(GEN X, GEN c)
+{
+  long i, l = lg(X);
+  GEN A = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(A,i) = diviiexact(gel(X,i), c);
+  return A;
+}
+GEN
+ZM_Z_divexact(GEN X, GEN c)
+{
+  long i, l = lg(X);
+  GEN A = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) gel(A,i) = ZC_Z_divexact(gel(X,i), c);
+  return A;
+}
 /* Return c * X */
 GEN
 ZC_Z_mul(GEN X, GEN c)
