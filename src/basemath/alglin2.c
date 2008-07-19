@@ -1185,7 +1185,7 @@ QC_elem(GEN aj, GEN ak, GEN A, long j, long k)
   if (typ(aj) == t_INT) {
     if (typ(ak) != t_INT) { aj = mulii(aj, gel(ak,2)); ak = gel(ak,1); }
   } else {
-    if (typ(aj) == t_INT) { ak = mulii(ak, gel(aj,2)); aj = gel(aj,1); }
+    if (typ(ak) == t_INT) { ak = mulii(ak, gel(aj,2)); aj = gel(aj,1); }
     else {
       GEN daj = gel(aj,2), dak = gel(ak,2), D = gcdii(daj, dak);
       aj = gel(aj,1); ak = gel(ak,1);
