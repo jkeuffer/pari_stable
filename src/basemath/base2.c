@@ -3070,7 +3070,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (same)
   {
     D = RgX_rescale(A, stoi(1 - k));
-    C = ZX_Z_divexact(C, D);
+    C = RgX_div(C, D);
     if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C), D);
   }
   else

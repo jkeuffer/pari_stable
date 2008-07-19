@@ -1817,7 +1817,7 @@ gdivexact(GEN x, GEN y)
           v = RgX_valrem(y,&y);
           if (v) x = RgX_shift_shallow(x,-v);
           if (!degpol(y)) { y = gel(y,2); break; }
-          return RgX_divrem(x,y, NULL);
+          return RgX_div(x,y);
         }
       }
       return RgX_Rg_divexact(x, y);
