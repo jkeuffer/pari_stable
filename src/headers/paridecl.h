@@ -1739,7 +1739,6 @@ GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 #define ZM_lll(x,D,f) ZM_lll_norms(x,D,f,NULL)
 GEN     ZM_lll_norms(GEN x, double D, long flag, GEN *B);
 GEN     kerint(GEN x);
-GEN     kerint1(GEN x);
 GEN     lll(GEN x);
 GEN     lllfp(GEN x, double D, long flag);
 GEN     lllgen(GEN x);

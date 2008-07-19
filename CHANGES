@@ -405,6 +405,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    36- obsolete library function Mod0. Use gmodulo.
    37- obsolete undocumented library function poldvd. Use 
        RgX_divrem(x,y, ONLY_DIVIDES)
+   38- obsolete library function kerin1. Use kerint or ZM_lll(,0.99,LLL_KER)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.4.2 (released 22/12/2007):

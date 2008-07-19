@@ -188,6 +188,8 @@ This file lists the incompatible changes between Version 2.x and older versions
   - changed prototypes of bnrdisc, bnrconductor, bnrisconductor [ actually
     renamed bnrdisc0, bnrconductor0, bnrisconductor0 ]. Just use the new
     prototype, it's more convenient.
+  - removed obsolete library function kerin1. Use kerint or [simpler if
+    LLL reduction of the returned basis is not deisred] ZM_lll(,0.99,LLL_KER)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

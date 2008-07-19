@@ -778,6 +778,23 @@ qflllgram0(GEN x, long flag)
 /**                   INTEGRAL KERNEL (LLL REDUCED)                **/
 /**                                                                **/
 /********************************************************************/
+/* Horribly slow (coeff explosion in small dimension): never use this */
+static GEN
+kerint1(GEN x)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, ZM_lll(QM_ImQ_hnf(ker(x)), LLLDFT, LLL_INPLACE));
+}
+/* Mostly useless: use ZM_lll(x, 0.99, LLL_KER) directly */
+GEN
+kerint(GEN x)
+{
+  pari_sp av = avma;
+  GEN h = ZM_lll(x, LLLDFT, LLL_KER);
+  if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
+  return gerepilecopy(av, ZM_lll(h, LLLDFT, LLL_INPLACE));
+}
+
 GEN
 matkerint0(GEN x, long flag)
 {
@@ -790,20 +807,4 @@ matkerint0(GEN x, long flag)
     default: pari_err(flagerr,"matkerint");
   }
   return NULL; /* not reached */
-}
-
-GEN
-kerint1(GEN x)
-{
-  pari_sp av = avma;
-  return gerepilecopy(av, ZM_lll(QM_ImQ_hnf(ker(x)), LLLDFT, LLL_INPLACE));
-}
-
-GEN
-kerint(GEN x)
-{
-  pari_sp av = avma;
-  GEN h = ZM_lll(x, LLLDFT, LLL_KER);
-  if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
-  return gerepilecopy(av, ZM_lll(h, LLLDFT, LLL_INPLACE));
 }

@@ -1707,7 +1707,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   if (dx) y = ZM_Z_mul(y, dx);
   if (dy) x = ZM_Z_mul(x, dy);
   dx = mul_denom(dx,dy);
-  z = kerint(shallowconcat(x,y)); lz = lg(z);
+  z = ZM_lll(shallowconcat(x,y), 0.99, LLL_KER); lz = lg(z);
   lx = lg(x);
   for (i=1; i<lz; i++) setlg(z[i], lx);
   z = ZM_hnfmodid(ZM_mul(x,z), lcmii(xZ, yZ));
