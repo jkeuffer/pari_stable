@@ -522,6 +522,9 @@ GEN     vecpermute(GEN A, GEN p);
 
 /* alglin2.c */
 
+GEN     QM_minors_coprime(GEN x, GEN pp);
+GEN     QM_ImZ_hnf(GEN x);
+GEN     QM_ImQ_hnf(GEN x);
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
@@ -534,6 +537,7 @@ GEN     ZM_hnfmodid(GEN x, GEN d);
 GEN     ZM_hnfmodidpart(GEN x, GEN d);
 void    ZM_snfclean(GEN d, GEN u, GEN v);
 GEN     ZM_snf(GEN x);
+GEN     ZM_snf_group(GEN H, GEN *newU, GEN *newUi);
 GEN     ZM_snfall(GEN x, GEN *ptU, GEN *ptV);
 GEN     ZM_snfall_i(GEN x, GEN *ptU, GEN *ptV, int return_vec);
 GEN     adj(GEN x);
@@ -564,10 +568,7 @@ GEN     jacobi(GEN a, long prec);
 GEN     matcompanion(GEN x);
 GEN     matfrobenius(GEN M, long flag, long v);
 GEN     mathnf0(GEN x, long flag);
-GEN     QM_minors_coprime(GEN x, GEN pp);
 GEN     matrixqz0(GEN x, GEN pp);
-GEN     QM_ImZ_hnf(GEN x);
-GEN     QM_ImQ_hnf(GEN x);
 GEN     matsnf0(GEN x, long flag);
 GEN     minpoly(GEN x, long v);
 GEN     qfgaussred(GEN a);
@@ -577,7 +578,6 @@ GEN     rnfcharpoly(GEN nf, GEN T, GEN alpha, long v);
 GEN     smith(GEN x);
 GEN     smithall(GEN x);
 GEN     smithclean(GEN z);
-GEN     smithrel(GEN H, GEN *newU, GEN *newUi);
 
 /* anal.c */
 

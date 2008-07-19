@@ -1088,7 +1088,7 @@ add_fact(struct buch_quad *B, GEN col, GEN F)
 static GEN
 get_clgp(struct buch_quad *B, GEN W, GEN *ptD, long prec)
 {
-  GEN res, init, u1, D = smithrel(W,NULL,&u1), Z = prec? real_0(prec): NULL;
+  GEN res, init, u1, D = ZM_snf_group(W,NULL,&u1), Z = prec? real_0(prec): NULL;
   long i, j, l = lg(W), c = lg(D);
 
   if (DEBUGLEVEL) msgtimer("smith/class group");

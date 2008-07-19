@@ -269,6 +269,7 @@ JD 12- add an optional argument to quit()
    ZC_hnfrem, ZC_hnfremdiv, ZM_det_triangular, ZM_detmult, ZM_equal, ZM_hnf,
    ZM_hnfall, ZM_hnfcenter, ZM_hnflll, ZM_hnfmod, ZM_hnfmodid, ZM_hnfmodidpart,
    ZM_hnfrem, ZM_hnfremdiv, ZM_hnfperm, ZM_snf, ZM_snfall, ZM_snfall_i,
+   ZM_snf_group
    ZM_snfclean, ZMrow_ZC_mul, ZV_ZM_mul, ZV_cmp0, ZV_content, ZV_equal,
    ZV_lincomb, ZXY_max_lg, ZX_copy, ZX_equal, ZX_max_lg, row_Flm, row_zm,
    togglesign_safe, zero_Flm, zero_Flv, zero_zm, zero_zv, zm_copy, zv_cmp0,

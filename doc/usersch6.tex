@@ -1013,6 +1013,37 @@ cleans up the output in place. This means that elementary divisors equal to 1
 are deleted and $U$, $V$ are updated. The output is not suitable for
 \kbd{gerepileupto}.
 
+\fun{GEN}{ZM_snf_group}{GEN H, GEN *U, GEN *Uinv} this function computes data
+to go back and forth between an abelian group (of finite type) given by
+generators and relations, and its canonical SNF form. Given an abstract
+abelian group with generators $g = (g_1,\dots,g_n)$ and a vector
+$X=(x_i)\in\Z^n$, we write $g X$ for the group element $\sum_i x_i g_i$;
+analogously if $M$ is an $n\times r$ integer matrix $g M$ is a vector
+containing $r$ group elements. The group neutral element is $0$; by abuse of
+notation, we still write $0$ for a vector of group elements all equal to the
+neutral element. The input is a full relation matrix $H$ among the
+generators, i.e. a \kbd{ZM} (not necessarily square) such that $gX = 0$ for
+some $X\in\Z^n$ if and only if $X$ is in the integer image of $H$, so that
+the abelian group is isomorphic to $\Z^n/\text{Im} H$. \emph{The routine
+assumes that $H$ is in HNF;} replace it by its HNF if it is not the case. (Of
+course this defines the same group.)
+
+Let $G$ a minimal system of generators in SNF for our abstract group:
+if the $d_i$ are the elementary divisors ($\dots \mid d_2\mid d_1$), each
+$G_i$ has either infinite order ($d_i = 0$) or order $d_i > 1$. Let $D$
+the matrix with diagonal $(d_i)$, then
+$$G D = 0,\quad G = g U_{\text{inv}},\quad g = G U,$$
+for some integer matrices $U$ and $U_{\text{inv}}$. Note that these are not
+even square in general; even if square, there is no guarantee that these are
+unimodular: they are chosen to have minimal entries given the known relations
+in the group and only satisfy $D \mid (U U_{\text{inv}} - \text{Id})$ and $H
+\mid (U_{\text{inv}}U - \text{Id})$.
+
+The function returns the vector of elementary divisors $(d_i)$; if \kbd{U} is
+not \kbd{NULL}, it is set to $U$; if \kbd{Uinv} is not \kbd{NULL} it is
+set to $U_{\text{inv}}$. The function is not memory clean.
+
+
 The following 3 routines underly the various \tet{matrixqz} variants.
 In all case the $m\times n$ \typ{MAT} $x$ is assumed to have rational
 (\typ{INT} and \typ{FRAC}) coefficients

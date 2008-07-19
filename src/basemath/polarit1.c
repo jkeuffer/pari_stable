@@ -1836,7 +1836,7 @@ padicff2(GEN nf,GEN p,long k)
     GEN P = gel(dec_p,i);
     long e = itos(gel(P,3)), ef = e * itos(gel(P,4));
     D = ZM_snfall_i(idealpows(nf,P, k*e), &U, NULL, 1);
-    Ui= ginv(U); setlg(Ui, ef+1); /* cf smithrel */
+    Ui= ginv(U); setlg(Ui, ef+1); /* cf ZM_snf_group */
     U = rowslice(U, 1, ef);
     mat = gmul(U, gmul(mulx, Ui));
     gel(fa,i) = caradj(mat,0,NULL);

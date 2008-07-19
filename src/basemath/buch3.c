@@ -62,7 +62,7 @@ buchnarrow(GEN bnf)
     vconcat(zeromat(ngen, r1-t), scalarmat(gen_2,r1-t))
   );
 
-  met = smithrel(R,NULL,&u1);
+  met = ZM_snf_group(R,NULL,&u1);
   lo = lg(R); c = lg(met);
   if (DEBUGLEVEL>3) msgtimer("smith/class group");
 
@@ -441,7 +441,7 @@ Buchray(GEN bnf, GEN module, long flag)
     vconcat(diagonal_i(cyc), gneg_i(logs)),
     vconcat(zeromat(ngen, Ri), H)
   );
-  met = smithrel(ZM_hnf(h), &U, add_gen? &u1: NULL);
+  met = ZM_snf_group(ZM_hnf(h), &U, add_gen? &u1: NULL);
   clg = cgetg(add_gen? 4: 3, t_VEC);
   gel(clg,1) = detcyc(met, &j);
   gel(clg,2) = met;

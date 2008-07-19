@@ -3373,7 +3373,7 @@ gsmithall(GEN x) { return gsmithall_i(x,1); }
  * Rationale: let (G,0) = g Ui be the new generators then
  * 0 = G U R --> G D = 0,  g = G newU  and  G = g newUi */
 GEN
-smithrel(GEN H, GEN *newU, GEN *newUi)
+ZM_snf_group(GEN H, GEN *newU, GEN *newUi)
 {
   GEN D = ZM_snfall_i(H, newU, newUi, 1);
   long i, j, l;
@@ -3390,13 +3390,12 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     }
     *newU = U;
   }
-  if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
+  if (newUi) { /* UHV=D -> U^-1 = HVD^-1 -> U^-1 = H(VD^-1 mod 1) mod H */
     if (l > 1)
     { /* Ui = ZM_inv(U, gen_1); setlg(Ui, l); */
       GEN V = FpM_red(*newUi, gel(D,1));
       GEN Ui = ZM_mul(H, V);
-      for (i = 1; i < l; i++)
-	gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
+      for (i = 1; i < l; i++) gel(Ui,i) = gdivexact(gel(Ui,i), gel(D,i));
       *newUi = ZM_hnfrem(Ui, H);
     }
   }

@@ -1153,7 +1153,7 @@ zidealij(GEN x, GEN y, GEN *U)
   long j, N;
 
   /* x^(-1) y = relations between the 1 + x_i (HNF) */
-  cyc = smithrel(hnf_gauss(x, y), U, &G);
+  cyc = ZM_snf_group(hnf_gauss(x, y), U, &G);
   N = lg(cyc); G = ZM_mul(x,G); settyp(G, t_VEC); /* new generators */
   for (j=1; j<N; j++)
   {
@@ -1703,7 +1703,7 @@ Idealstar(GEN nf, GEN ideal, long flag)
     }
     /* assert(cp == nbgen) */
     h = ZM_hnfall(h,NULL,0);
-    cyc = smithrel(h, &U, (flag & nf_GEN)? &u1: NULL);
+    cyc = ZM_snf_group(h, &U, (flag & nf_GEN)? &u1: NULL);
   }
   else
   {
@@ -1866,7 +1866,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   cyc2 = gel(G2,2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
-  cyc = smithrel(diagonal_i(shallowconcat(cyc1,cyc2)),
+  cyc = ZM_snf_group(diagonal_i(shallowconcat(cyc1,cyc2)),
 		 &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
@@ -2072,7 +2072,7 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
 
   gen = (lg(G1)>3)? gen_1: NULL;
   cyc = diagonal_i(shallowconcat(gel(G1,2), gel(sarch,1)));
-  cyc = smithrel(cyc, &U, gen? &u1: NULL);
+  cyc = ZM_snf_group(cyc, &U, gen? &u1: NULL);
   if (gen) gen = shallowconcat(gel(G1,3), gel(sarch,2));
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, arch);
