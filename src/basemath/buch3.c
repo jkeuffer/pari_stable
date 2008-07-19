@@ -707,16 +707,14 @@ regulatorbound(GEN bnf)
 GEN
 norm_by_embed(long r1, GEN x)
 {
-  long i, ru = lg(x)-1;
+  long ru = lg(x)-1, i = ru-1;
   GEN p = gel(x,ru);
-  if (r1 == ru)
+  if (r1 != ru)
   {
-    for (i=ru-1; i>0; i--) p = gmul(p, gel(x,i));
-    return p;
+    p = gnorm(p);
+    for (; i>r1; i--) p = gmul(p, gnorm(gel(x,i)));
   }
-  p = gnorm(p);
-  for (i=ru-1; i>r1; i--) p = gmul(p, gnorm(gel(x,i)));
-  for (      ; i>0 ; i--) p = gmul(p, gel(x,i));
+  for (; i>0; i--) p = gmul(p, gel(x,i));
   return p;
 }
 
