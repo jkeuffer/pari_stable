@@ -124,6 +124,16 @@ checkprid(GEN id)
   if (typ(id) != t_VEC || lg(id) != 6 || typ(id[2]) != t_COL)
     pari_err(talker,"incorrect prime ideal");
 }
+GEN
+get_prid(GEN x)
+{
+  long lx;
+  if (typ(x) != t_VEC) return NULL;
+  lx = lg(x);
+  if (lx == 3) { x = gel(x,1); lx = lg(x); }
+  if (lx != 6 || typ(x[3]) != t_INT) return NULL;
+  return x;
+}
 
 GEN
 checknfelt_mod(GEN nf, GEN x, const char *s)
@@ -133,15 +143,6 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
     pari_err(talker, "incompatible modulus in %s:\n  mod = %Ps,\n  nf  = %Ps",
 	     s, a, T);
   return a;
-}
-
-GEN
-checkprid_i(GEN x)
-{
-  if (typ(x) != t_VEC) return NULL;
-  if (lg(x) == 3) x = gel(x,1);
-  if (lg(x) != 6 || typ(x[3]) != t_INT) return NULL;
-  return x;
 }
 
 GEN

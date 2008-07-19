@@ -814,7 +814,7 @@ GEN     get_bnf(GEN x, long *t);
 GEN     get_bnfpol(GEN x, GEN *bnf, GEN *nf);
 GEN     get_nf(GEN x, long *t);
 GEN     get_nfpol(GEN x, GEN *nf);
-GEN     checkprid_i(GEN x);
+GEN     get_prid(GEN x);
 GEN     initalg(GEN x, long prec);
 GEN     initalgred(GEN x, long prec);
 GEN     initalgred2(GEN x, long prec);

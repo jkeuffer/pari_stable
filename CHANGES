@@ -285,7 +285,7 @@ JD 12- add an optional argument to quit()
    18- GP function version() [ current version number ]
    19- library functions scalar_ZX, scalar_ZX_shallow, FpXY_eval, FpXY_evalx,
    FpXY_evaly, Fl_order, init_primepointer, Flx_nbfact_by_degree
-   20- library function galoisinit0, get_nfpol, get_bnfpol, 
+   20- library function galoisinit0, get_nfpol, get_bnfpol, get_prid,
    nf_get_r1, nf_get_r2, nf_get_roots, nf_get_sign, nf_get_prec (was nfgetprec)
    numberofconjugates, mkfraccopy, mkquad, mkvecsmall4, shallowconcat1, concat1,
    ZV_prod, ZV_pval, ZV_pvalrem
