@@ -1555,7 +1555,7 @@ indexpartial(GEN P, GEN DP)
 /*    2-ELT REPRESENTATION FOR PRIME IDEALS (dividing index)       */
 /*                                                                 */
 /*******************************************************************/
-/* to compute norm of elt in algtobasis form */
+/* to compute norm of elt in basis form */
 typedef struct {
   long r1;
   GEN M;  /* via norm_by_embed */
@@ -1576,17 +1576,49 @@ get_norm(norm_S *S, GEN a)
   if (S->w) a = RgV_RgC_mul(S->w, a);
   return ZX_resultant_all(S->T, a, S->D, 0);
 }
+static void
+init_norm(norm_S *S, GEN nf, GEN p)
+{
+  GEN T = gel(nf,1);
+  long N = degpol(T);
 
-/* q = p^(f+1). a/D in pr | p, norm(pr) = pf.
- * Return 1 if (a/D,p) = pr, and 0 otherwise */
+  S->M = NULL;
+  if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
+  {
+    GEN M = gmael(nf,5,1);
+    long ex = gexpo(M) + gexpo(mului(8 * N, p));
+    if (N * ex <= bit_accuracy(gprecision(M)))
+    { /* enough prec to use norm_by_embed */
+      S->M = M;
+      S->r1 = nf_get_r1(nf);
+    }
+  }
+  if (!S->M)
+  {
+    GEN D, w = Q_remove_denom(gel(nf,7), &D), Dp = sqri(p);
+    long i;
+    if (!D) w = shallowcopy(w);
+    else {
+      GEN w1 = D;
+      long v = Z_pval(D, p);
+      D = powiu(p, v);
+      Dp = mulii(D, Dp);
+      gel(w, 1) = remii(w1, Dp);
+    }
+    for (i=2; i<=N; i++) gel(w,i) = FpX_red(gel(w,i), Dp);
+    S->D = D;
+    S->w = w;
+    S->T = T;
+  }
+}
+/* f = f(pr/p), q = p^(f+1), a in pr.
+ * Return 1 if v_pr(a) = 1, and 0 otherwise */
 static int
 is_uniformizer(GEN a, GEN q, norm_S *S)
-{
-  return (remii(get_norm(S,a), q) != gen_0);
-}
+{ return (remii(get_norm(S,a), q) != gen_0); }
 
-/* return x * y, x, y are t_MAT (Fp-basis of in O_K/p), assume (x,y)=1.
- * x or y may be NULL (= ok), not both */
+/* Return x * y, x, y are t_MAT (Fp-basis of in O_K/p), assume (x,y)=1.
+ * Either x or y may be NULL (= O_K), not both */
 static GEN
 mul_intersect(GEN x, GEN y, GEN p)
 {
@@ -1594,13 +1626,15 @@ mul_intersect(GEN x, GEN y, GEN p)
   if (!y) return x;
   return FpM_intersect(x, y, p);
 }
-
+/* Fp-basis of (ZK/pr): applied to the primes found in primedec_aux() */
 static GEN
 Fp_basis(GEN nf, GEN pr)
 {
   long i, j, l;
   GEN x, y;
+  /* already in basis form (from Buchman-Lenstra) ? */
   if (typ(pr) == t_MAT) return pr;
+  /* ordinary prid (from Kummer) */
   x = idealhnf_two(nf, pr);
   l = lg(x);
   y = cgetg(l, t_MAT);
@@ -1608,7 +1642,11 @@ Fp_basis(GEN nf, GEN pr)
     if (gcmp1(gcoeff(x,i,i))) y[j++] = x[i];
   setlg(y, j); return y;
 }
-
+/* Let Ip = prod_{ P | p } P be the p-radical. The list L contains the
+ * P (mod Ip) seen as sub-Fp-vector spaces of ZK/Ip.
+ * Return the list of (Ip / P) (mod Ip).
+ * N.B: All ideal multiplications are computed as intersections of Fp-vector
+ * spaces. */
 static GEN
 get_LV(GEN nf, GEN L, GEN p, long N)
 {
@@ -1621,11 +1659,11 @@ get_LV(GEN nf, GEN L, GEN p, long N)
   for (i=1; i<=l; i++) gel(LW,i) = Fp_basis(nf, gel(L,i));
 
   /* A[i] = L[1]...L[i-1], i = 2..l */
-  A = cgetg(l+1, t_VEC); A[1] = 0;
+  A = cgetg(l+1, t_VEC); gel(A,1) = NULL;
   for (i=1; i < l; i++) gel(A,i+1) = mul_intersect(gel(A,i), gel(LW,i), p);
   /* B[i] = L[i+1]...L[l], i = 1..(l-1) */
-  B = cgetg(l+1, t_VEC); B[l] = 0;
-  for (i=l; i>=2; i--)  gel(B,i-1) = mul_intersect(gel(B,i), gel(LW,i), p);
+  B = cgetg(l+1, t_VEC); gel(B,l) = NULL;
+  for (i=l; i>=2; i--) gel(B,i-1) = mul_intersect(gel(B,i), gel(LW,i), p);
   for (i=1; i<=l; i++) gel(LV,i) = mul_intersect(gel(A,i), gel(B,i), p);
   return LV;
 }
@@ -1665,42 +1703,6 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   }
   errprime(p);
   return NULL; /* not reached */
-}
-
-static void
-init_norm(norm_S *S, GEN nf, GEN p)
-{
-  GEN T = gel(nf,1);
-  long N = degpol(T);
-
-  S->M = NULL;
-  if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
-  {
-    GEN M = gmael(nf,5,1);
-    long ex = gexpo(M) + gexpo(mului(8 * N, p));
-    if (N * ex <= bit_accuracy(gprecision(M)))
-    { /* enough prec to use norm_by_embed */
-      S->M = M;
-      S->r1 = nf_get_r1(nf);
-    }
-  }
-  if (!S->M)
-  {
-    GEN D, w = Q_remove_denom(gel(nf,7), &D), Dp = sqri(p);
-    long i;
-    if (!D) w = shallowcopy(w);
-    else {
-      GEN w1 = D;
-      long v = Z_pval(D, p);
-      D = powiu(p, v);
-      Dp = mulii(D, Dp);
-      gel(w, 1) = remii(w1, Dp);
-    }
-    for (i=2; i<=N; i++) gel(w,i) = FpX_red(gel(w,i), Dp);
-    S->D = D;
-    S->w = w;
-    S->T = T;
-  }
 }
 
 /*******************************************************************/
@@ -1815,7 +1817,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 
 /* prime ideal decomposition of p */
 static GEN
-_primedec(GEN nf, GEN p)
+primedec_aux(GEN nf, GEN p)
 {
   GEN E, F, L, Ip, H, phi, mat1, f, g, h, p1, UN, T = gel(nf,1);
   long i, k, c, iL, N;
@@ -1922,7 +1924,7 @@ primedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
   if (typ(p) != t_INT) pari_err(typeer, "primedec");
-  return gerepileupto(av, gen_sort(_primedec(checknf(nf),p),
+  return gerepileupto(av, gen_sort(primedec_aux(checknf(nf),p),
 				   (void*)&cmp_prime_over_p, &cmp_nodata));
 }
 
