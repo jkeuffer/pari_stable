@@ -403,34 +403,23 @@ mat_ideal_two_elt(GEN nf, GEN x)
 GEN
 idealtwoelt(GEN nf, GEN x)
 {
+  pari_sp av;
   GEN z;
-  long N, tx = idealtyp(&x,&z);
+  long tx = idealtyp(&x,&z);
 
   nf = checknf(nf);
   if (tx == id_MAT) return mat_ideal_two_elt(nf,x);
   if (tx == id_PRIME) return mkvec2copy(gel(x,1), gel(x,2));
   /* id_PRINCIPAL */
-
-  N = degpol(nf[1]); z = cgetg(3,t_VEC);
-  switch(typ(x))
-  {
-    case t_INT: case t_FRAC:
-      gel(z,1) = gcopy(x);
-      gel(z,2) = zerocol(N); return z;
-
-    case t_POLMOD:
-      x = checknfelt_mod(nf, x, "idealtwoelt"); /* fall through */
-    case t_POL:
-      gel(z,1) = gen_0;
-      gel(z,2) = algtobasis(nf,x); return z;
-    case t_COL:
-      if (lg(x)==N+1) {
-        gel(z,1) = gen_0;
-        gel(z,2) = gcopy(x); return z;
-      }
+  z = cgetg(3,t_VEC); av = avma;
+  x = nf_to_scalar_or_basis(nf, x);
+  if (typ(x) != t_COL) {
+    gel(z,1) = gerepilecopy(av, x);
+    gel(z,2) = gen_0; return z;
   }
-  pari_err(typeer,"idealtwoelt");
-  return NULL; /* not reached */
+  gel(z,1) = gen_0;
+  gel(z,2) = x = (avma == av)? gcopy(x): gerepileupto(av, x);
+  return z;
 }
 
 /*******************************************************************/
