@@ -60,7 +60,7 @@ InitRU(GEN den, long prec)
 static GEN
 ComputeImagebyChar(GEN chi, GEN logelt)
 {
-  GEN gn = gmul(gel(chi,1), logelt), x = gel(chi,2);
+  GEN gn = ZV_dotproduct(gel(chi,1), logelt), x = gel(chi,2);
   long d = itos(gel(chi,3)), n = smodis(gn, d);
   /* x^d = 1 and, if d even, x^(d/2) = -1 */
   if ((d & 1) == 0)
@@ -75,7 +75,7 @@ ComputeImagebyChar(GEN chi, GEN logelt)
 static ulong
 EvalChar_n(CHI_t *C, GEN logelt)
 {
-  GEN n = gmul(C->chi, logelt);
+  GEN n = ZV_dotproduct(C->chi, logelt);
   return umodiu(n, C->ord);
 }
 /* return C(elt) */
@@ -189,7 +189,7 @@ ComputeLift(GEN dataC)
   return gerepileupto(av, elt);
 }
 
-/* Return c[1],  [c[1]/c[1] = 1,...,c[n]/c[1]] */
+/* Return c[1],  [c[1]/c[1] = 1,...,c[1]/c[n]] */
 static GEN
 init_get_chic(GEN c)
 {
@@ -603,8 +603,8 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   long ic, i, j, nz, N, nChar = lg(LCHI)-1;
   pari_sp av = avma, av2, lim;
   GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
-  GEN cyc, vN, vB, diff, vt, idg, mu, idh, zid, gen, z, nchi;
-  GEN indW, W, classe, s0, s, den, muslambda, beta2, sarch;
+  GEN cyc, vN, vB, diff, vt, idg, idh, zid, gen, z, nchi;
+  GEN indW, W, classe, s0, s, den, muslambda, sarch;
   CHI_t **lC;
   GROUP_t G;
 
@@ -630,12 +630,10 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   cond1 = vec01_to_indices(gel(cond,2));
   N     = degpol(nf[1]);
 
-  sqrtnc  = gsqrt(idealnorm(nf, cond0), prec);
+  sqrtnc = gsqrt(idealnorm(nf, cond0), prec);
   dc  = idealmul(nf, diff, cond0);
-  den = idealnorm(nf, dc);
-  z   = InitRU(den, prec);
 
-  /* compute a system of elements congru to 1 mod cond0 and giving all
+  /* compute a system of elements congruent to 1 mod cond0 and giving all
      possible signatures for cond1 */
   sarch = nfarchstar(nf, cond0, cond1);
 
@@ -647,24 +645,22 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   /* find mu in idg such that idh=(mu) / idg is coprime with cond0 and
      mu >> 0 at cond1 */
-  if (!gcmp1(gcoeff(idg, 1, 1)))
-  {
+  if (!gcmp1(gcoeff(idg, 1, 1))) {
     GEN P = divcond(bnr);
     GEN f = concat_factor(idealfactor(nf, idg),
 			  mkmat2(P, zerocol(lg(P)-1)));
-
-    mu = set_sign_mod_divisor(nf, NULL, idealapprfact(nf, f), cond,sarch);
+    GEN mu = set_sign_mod_divisor(nf, NULL, idealapprfact(nf, f), cond,sarch);
     idh = idealdivexact(nf, mu, idg);
-  }
-  else
-  {
-    mu  = gen_1;
+    muslambda = nfdiv(nf, mu, lambda);
+  } else { /* mu = 1 */
     idh = idg;
+    muslambda = nfinv(nf, lambda);
   }
+  muslambda = Q_remove_denom(muslambda, &den);
+  z = InitRU(den, prec);
 
-  muslambda = gmul(den, nfdiv(nf, mu, lambda));
-
-  /* compute a system of generators of (Ok/cond)^* cond1-positive */
+  /* compute a system of generators of (Ok/cond)^*, we'll make them
+   * cond1-positive in the main loop */
   zid = Idealstar(nf, cond0, nf_GEN);
   cyc = gel(zid, 2);
   gen = gel(zid, 3);
@@ -688,9 +684,8 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
 
-  vt = cgetg(N + 1, t_VEC); /* Tr(w_i) */
-  for (i = 1; i <= N; i++) gel(vt,i) = gcoeff(T,i,1);
-
+  vt = gel(T,1); /* ( Tr(w_i) )_i */
+  vt = ZV_ZM_mul(vt, zk_multable(nf, muslambda)); /*den (Tr(w_i mu/lambda))_i */
   G.cyc = gtovecsmall(cyc);
   G.r = nz;
   G.j = const_vecsmall(nz, 0);
@@ -700,8 +695,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   av2 = avma; lim = stack_lim(av2, 1);
   vB = const_vec(nz, gen_1);
-
-  s0 = powgi(z, Rg_to_Fp(gmul(vt, muslambda), den)); /* for beta = 1 */
+  s0 = powgi(z, modii(gel(vt,1), den)); /* for beta = 1 */
   s = const_vec(nChar, s0);
 
   while ( (i = NextElt(&G)) )
@@ -717,9 +711,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     }
 
     gel(vB,i) = set_sign_mod_divisor(nf, NULL, gel(vB,i), cond,sarch);
-    beta2 = nfmul(nf, gel(vB,i), muslambda);
-
-    s0 = powgi(z, Rg_to_Fp(gmul(vt, beta2), den));
+    s0 = powgi(z, FpV_dotproduct(vt, gel(vB,i), den));
     for (ic = 1; ic <= nChar; ic++)
     {
       GEN n = gel(vN,ic), val = lC[ic]->val[ n[i] ];
