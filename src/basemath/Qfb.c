@@ -531,6 +531,7 @@ nupow(GEN x, GEN n)
 #define REDBU(a,b,c, u1,u2) { REDB_i(a,b,c); u2 = subii(u2, mulii(q, u1)); }
 #define REDB(a,b,c) { REDB_i(a,b,c); }
 
+/* q t_QFI, return reduced representative and set base change U in Sl2(Z) */
 GEN
 redimagsl2(GEN q, GEN *U)
 {
@@ -575,9 +576,7 @@ redimagsl2(GEN q, GEN *U)
   avma = av;
   v1 = icopy(v1);
   v2 = icopy(v2);
-  *U = cgetg(3, t_MAT);
-  gel(*U,1) = mkcol2(u1,v1);
-  gel(*U,2) = mkcol2(u2,v2); return Q;
+  *U = mkmat2(mkcol2(u1,v1), mkcol2(u2,v2)); return Q;
 }
 
 GEN
@@ -1128,12 +1127,16 @@ qfbimagsolvep(GEN Q, GEN p)
     {
       a = qfbsolve_cornacchia(gel(a,3), p, 0);
       if (a == gen_0) { avma = av; return gen_0; }
-      return gerepileupto(av, gmul(a, shallowtrans(N)));
+      a = ZM_ZC_mul(N, a);
+      a[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
+      return gerepileupto(av, a);
     }
     /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
     if (!cornacchia2(negi(d), p, &x, &y)) { avma = av; return gen_0; }
     x = divis_rem(subii(x,y), 2, &r); if (r) { avma = av; return gen_0; }
-    return gerepileupto(av, gmul(mkvec2(x,y), shallowtrans(N)));
+    a = ZM_ZC_mul(N, mkvec2(x,y));
+    a[0] = evaltyp(t_VEC) | _evallg(3); /* transpose */
+    return gerepileupto(av, a);
   }
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!GL2_qfb_equal(a,b)) { avma = av; return gen_0; }
