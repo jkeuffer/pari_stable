@@ -7,7 +7,7 @@ PERL  = $perl
 
 MACROS= paricfg.tex parimacro.tex
 USERS_TEX=\$(MACROS) appa.tex users.tex usersch1.tex usersch2.tex usersch3.tex
-PARI_TEX=\$(MACROS) libpari.tex appb.tex appc.tex appd.tex usersch4.tex usersch5.tex usersch6.tex
+PARI_TEX=\$(MACROS) libpari.tex appb.tex appc.tex appd.tex usersch4.tex usersch5.tex usersch6.tex usersch7.tex
 
 doc all: develop.dvi libpari.dvi users.dvi refcard.ps tutorial.dvi
 docps: develop.ps libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
@@ -110,17 +110,17 @@ veryclean: clean
 .pod.ipf:
 	pod2ipf \$*.pod > tmp_ipf && mv tmp_ipf \$*.ipf
 
-pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod usersch4.pod usersch5.pod appa.pod appb.pod appc.pod appd.pod
-	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod --file=appd.pod > tmp_ipf && mv tmp_ipf pari.ipf
+pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod appa.pod
+	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --section-name=Appendices --file=appa.pod > tmp_ipf && mv tmp_ipf pari.ipf
 
-dumbpod: appa.dumbpod appb.dumbpod appc.dumbpod appd.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod
+dumbpod: appa.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod
 
 .dumbpod.html:
 	pod2html --title="PARI/GP Manual, part \$*" --infile=\$*.dumbpod --outfile=tmp_html && mv tmp_html \$*.html
 
-manpages: dumbpod appa.3 appb.3 appc.3 appd.3 usersch1.3 usersch2.3 usersch3.3 usersch4.3 usersch5.3
+manpages: dumbpod appa.3 usersch1.3 usersch2.3 usersch3.3
 
-html: dumbpod appa.html appb.html appc.html appd.html usersch1.html usersch2.html usersch3.html usersch4.html usersch5.html
+html: dumbpod appa.html appb.html appc.html appd.html usersch1.html usersch2.html usersch3.html
 
 .dumbpod.3:
 	pod2man --section=3 --center="PARI/GP Manual, part \$*" --release=$version.$patch --lax \$*.dumbpod > tmp_man && mv tmp_man \$*.3
