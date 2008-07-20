@@ -1958,10 +1958,10 @@ lift_to_zk(GEN v, GEN c, long N)
 GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
-  GEN p = gel(pr,1), ge = gel(pr,3);
+  GEN p = gel(pr,1), ge = gel(pr,3), b = gel(pr,5);
   ulong e = (ulong)ge[2];
-  if (e == 1) return gel(pr,5);
-  return ZC_Z_divexact(nfpow_u(nf,gel(pr,5), e), powiu(p, e-1));
+  if (e == 1) return b;
+  return ZC_Z_divexact(nfpow_u(nf, b, e), powiu(p, e-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */

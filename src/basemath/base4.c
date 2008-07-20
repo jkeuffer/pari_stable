@@ -1081,11 +1081,11 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
   return NULL;
 }
 
-/* Compute t = prod g[i]^e[i] mod pr^k, assuming (t, pr) = 1.
+/* Compute A = prod g[i]^e[i] mod pr^k, assuming (A, pr) = 1.
  * Method: modify each g[i] so that it becomes coprime to pr :
  *  x / (p^k u) --> x * (b/p)^v_pr(x) / z^k u, where z = b^e/p^(e-1)
  * b/p = vp^(-1) times something prime to p; both numerator and denominator
- * are integral and coprime to pr.  Globally, we multiply by (b/p)^v_pr(t) = 1.
+ * are integral and coprime to pr.  Globally, we multiply by (b/p)^v_pr(A) = 1.
  *
  * EX = multiple of exponent of (O_K / pr^k)^* used to reduce the product in
  * case the e[i] are large */
@@ -1125,8 +1125,12 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   if (vden == gen_0) setlg(newg, l);
   else
   {
-    gel(newg,i) = FpC_red(special_anti_uniformizer(nf, pr), prkZ);
-    e = shallowconcat(e, negi(vden));
+    GEN t = special_anti_uniformizer(nf, pr);
+    if (typ(t) == t_INT) setlg(newg, l); /* = 1 */
+    else {
+      gel(newg,i) = FpC_red(t, prkZ);
+      e = shallowconcat(e, negi(vden));
+    }
   }
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
