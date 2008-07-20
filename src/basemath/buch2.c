@@ -803,7 +803,7 @@ getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
   for (j=1; j<RU; j++)
     if (!gcmp1(idealnorm(nf, gel(y,j)))) break;
   if (j < RU) { *pte = 0; return not_given(force, fupb_PRECI); }
-  A = gmul(A,u);
+  A = RgM_mul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
   y = coltoliftalg(nf, y);
@@ -1373,8 +1373,7 @@ act_arch(GEN A, GEN x)
   GEN a;
   long i,l = lg(A), tA = typ(A);
   if (tA == t_MAT)
-  {
-    /* assume lg(x) >= l */
+  { /* assume lg(x) >= l */
     a = cgetg(l, t_VEC);
     for (i=1; i<l; i++) gel(a,i) = act_arch(gel(A,i), x);
     return a;
@@ -1406,8 +1405,8 @@ prec_arch(GEN bnf)
   return DEFAULTPREC;
 }
 
-/* col = archimedian components of x, Nx = kNx^e its norm, dx a bound for its
- * denominator. Return x or NULL (fail) */
+/* col = archimedian components of x, Nx = kNx^e its norm (e > 0, usually = 1),
+ * dx a bound for its denominator. Return x or NULL (fail) */
 GEN
 isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 {
@@ -1426,9 +1425,9 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
     GEN u, z = init_red_mod_units(bnf,prec);
     u = red_mod_units(col,z,prec);
     if (!u && z) return NULL;
-    if (u) col = gadd(col, gmul(matunit, u));
+    if (u) col = RgC_add(col, RgM_RgC_mul(matunit, u));
   }
-  s = gdivgs(gmul(e, glog(kNx,prec)), N);
+  s = divrs(mpmul(e, glog(kNx,prec)), N);
   for (i=1; i<=R1; i++) gel(col,i) = gexp(gadd(s, gel(col,i)),prec);
   for (   ; i<=RU; i++) gel(col,i) = gexp(gadd(s, gmul2n(gel(col,i),-1)),prec);
   /* d.alpha such that x = alpha \prod gj^ej */
@@ -1775,13 +1774,14 @@ bnfisunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, e, n, prec;
   pari_sp av = avma;
-  GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
+  GEN tu, p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, emb;
 
-  bnf = checkbnf(bnf); nf=gel(bnf,7);
+  bnf = checkbnf(bnf);
+  nf = gel(bnf,7);
   logunit = gel(bnf,3); RU = lg(logunit);
-  p1 = gmael(bnf,8,4); /* roots of 1 */
-  n = itou(gel(p1,1));
-  z  = algtobasis(nf, gel(p1,2));
+  tu = gmael(bnf,8,4);
+  n = itou(gel(tu,1)); /* # { roots of 1 } */
+  z = algtobasis(nf, gel(tu,2)); /* primitive root of 1 */
   if (tx == t_MAT)
   { /* famat, assumed integral */
     if (lg(x) != 3 || lg(x[1]) != lg(x[2]))
@@ -1839,17 +1839,17 @@ bnfisunit(GEN bnf,GEN x)
     nf = nfnewprec_shallow(nf, prec);
   }
 
-  setlg(ex, RU);
-  p1 = row_i(logunit,1, 1,RU-1);
-  p1 = gneg(imag_i(gmul(p1,ex))); if (!R1) p1 = gmul2n(p1, -1);
-  p1 = gadd(garg(gel(emb,1),prec), p1);
+  setlg(ex, RU); /* ZC */
+  p1 = imag_i( row_i(logunit,1, 1,RU-1) );
+  p1 = RgV_dotproduct(p1, ex); if (!R1) p1 = gmul2n(p1, -1);
+  p1 = gsub(garg(gel(emb,1),prec), p1);
   /* p1 = arg(the missing root of 1) */
 
   pi2_sur_w = divru(mppi(prec), n>>1); /* 2pi / n */
   e = umodiu(roundr(divrr(p1, pi2_sur_w)), n);
   if (n > 2)
   {
-    GEN ro = gmul(row(gmael(nf,5,1), 1), z);
+    GEN ro = RgV_dotproduct(row(gmael(nf,5,1), 1), z);
     GEN p2 = roundr(divrr(garg(ro, prec), pi2_sur_w));
     e *= Fl_inv(umodiu(p2,n), n);
     e %= n;
@@ -1917,9 +1917,9 @@ signunits(GEN bnf)
 static GEN
 red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
-  GEN u = lllint(gmul(G0, *ideal));
+  GEN u = lllint(ZM_mul(G0, *ideal));
   *ideal = ZM_mul(*ideal,u); /* approximate LLL reduction */
-  return Q_from_QR(gmul(G, *ideal), prec);
+  return Q_from_QR(RgM_mul(G, *ideal), prec);
 }
 
 static GEN
@@ -1928,7 +1928,7 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   GEN arch, C;
   long i;
   if (!rel->m) return zerocol(RU);
-  arch = gmul(M, rel->m);
+  arch = RgM_RgC_mul(M, rel->m);
   if (rel->ex)
   {
     GEN t, ex = rel->ex, x = NULL;
@@ -1970,7 +1970,8 @@ powFB_fill(RELCACHE_t *cache, GEN M)
       gel(Arc,i) = z; if (lt == 1) continue;
       z[1] = M[1];  /* leave t[1] = 1 alone ! */
       for (j = 2; j < lt; j++)
-	gel(z,j) = gmul(typ(t[j]) == t_COL? M: gel(M,1), gel(t,j));
+	gel(z,j) = typ(t[j]) == t_COL? RgM_RgC_mul(M, gel(t,j))
+                                     : RgC_Rg_mul(gel(M,1), gel(t,j));
       for (j = 3; j < lt; j++)
 	gel(z,j) = vecmul(gel(z,j), gel(z,j-1));
     }
@@ -2169,7 +2170,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN nf, long nbrelpid,
 	  gx = ZM_zc_mul(IDEAL,x);
 	  if (!ZV_isscalar(gx))
 	  {
-	    GEN Nx, xembed = gmul(M, gx);
+	    GEN Nx, xembed = RgM_RgC_mul(M, gx);
 	    long e;
 	    nbsmallnorm++;
 	    if (++try_factor > maxtry_FACT) goto ENDIDEAL;
@@ -2432,7 +2433,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptL)
   L = RgM_solve(Im_mdet,NULL); /* Im_mdet^(-1) */
   if (!L) { *ptL = NULL; return kR; }
 
-  L = gmul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */
+  L = RgM_mul(rowslice(L, 1, RU-1), xreal); /* approximate rational entries */
   gerepileall(av,2, &L, &kR);
   *ptL = L; return kR;
 }
@@ -2912,7 +2913,7 @@ sbnf2bnf(GEN sbnf, long prec)
 {
   long j, k, l, n;
   pari_sp av = avma;
-  GEN p1, bas, ro, nf, A, fu, L;
+  GEN bas, ro, nf, A, fu, FU, L;
   GEN pfc, C, clgp, clgp2, res, y, W, zu, matal, Vbase;
   nfbasic_t T;
 
@@ -2921,13 +2922,12 @@ sbnf2bnf(GEN sbnf, long prec)
 
   nfbasic_from_sbnf(sbnf, &T);
   ro = gel(sbnf,5);
+  fu = gel(sbnf,11);
   if (prec > gprecision(ro)) ro = get_roots(T.x,T.r1,prec);
   nf = nfbasic_to_nf(&T, ro, prec);
   bas = gel(nf,7);
 
-  p1 = gel(sbnf,11); l = lg(p1); fu = cgetg(l, t_VEC);
-  for (k=1; k < l; k++) gel(fu,k) = gmul(bas, gel(p1,k));
-  A = get_archclean(nf,fu,prec,1);
+  A = get_archclean(nf, fu, prec, 1);
   if (!A) pari_err(precer, "bnfmake");
 
   prec = gprecision(ro);
@@ -2947,7 +2947,9 @@ sbnf2bnf(GEN sbnf, long prec)
   zu = gel(sbnf,10);
   zu = mkvec2(gel(zu,1), nf_to_scalar_or_alg(nf, gel(zu,2)));
 
-  res = get_clfu(clgp, get_regulator(A), zu, fu);
+  l = lg(fu); FU = cgetg(l, t_VEC);
+  for (k=1; k < l; k++) gel(FU,k) = coltoliftalg(nf, gel(fu,k));
+  res = get_clfu(clgp, get_regulator(A), zu, FU);
   y = buchall_end(nf,res,clgp2,W,gel(sbnf,8),A,C,Vbase);
   y[10] = sbnf[12]; return gerepilecopy(av,y);
 }
@@ -3322,7 +3324,7 @@ PRECPB:
     /* arch. components of fund. units */
     H = ZM_hnflll(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
     U = ZM_mul(U, lllint(H));
-    AU = gmul(A, U);
+    AU = RgM_mul(A, U);
     A = cleanarch(AU, N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
     if (!A) {
