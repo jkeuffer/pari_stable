@@ -572,7 +572,7 @@ nftocomplex(GEN nf, GEN x)
   GEN M = gmael(nf,5,1);
   x = nf_to_scalar_or_basis(nf,x);
   if (typ(x) != t_COL) return const_col(lg(M[1])-1, x);
-  return gmul(M, x);
+  return RgM_RgC_mul(M, x);
 }
 /* assume x a square t_MAT, return a t_VEC of embeddings of its columns */
 static GEN
@@ -634,15 +634,15 @@ findmin(GEN nf, GEN x, GEN muf)
   else
   {
     GEN G = gmael(nf,5,2);
-    m = lllfp(gmul(G,x), 0.75, 0);
+    m = lllfp(RgM_mul(G,x), 0.75, 0);
     if (typ(m) != t_MAT)
     {
       x = ZM_lll(x, 0.75, LLL_INPLACE);
-      m = lllfp(gmul(G,x), 0.75, 0);
+      m = lllfp(RgM_mul(G,x), 0.75, 0);
       if (typ(m) != t_MAT) pari_err(precer,"rnflllgram");
     }
     x = ZM_mul(x, m);
-    y = gmul(M, x);
+    y = RgM_mul(M, x);
   }
   m = RgM_solve_realimag(y, muf);
   if (!m) return NULL; /* precision problem */

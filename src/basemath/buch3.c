@@ -457,7 +457,7 @@ Buchray(GEN bnf, GEN module, long flag)
   /* log(Units) U2 = H (mod D)
    * log(Units) U1 = 0 (mod D) */
   u1 = ZM_lll(u1, 0.99, LLL_INPLACE);
-  u2 = gmul(reducemodinvertible(u2,u1), ginv(H)); /* NOT integral */
+  u2 = RgM_mul(reducemodinvertible(u2,u1), ginv(H)); /* NOT integral */
   y = cgetg(7,t_VEC);
   gel(y,1) = bnf;
   gel(y,2) = bid;
@@ -538,7 +538,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   alpha = nffactorback(nf, L, NULL);
   if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
   {
-    GEN u = gel(bnr,6), y = gmul(gel(u,1), ideallog(nf, L, bid));
+    GEN u = gel(bnr,6), y = RgM_RgC_mul(gel(u,1), ideallog(nf, L, bid));
     y = reducemodinvertible(y, gel(u,2));
     alpha = nfdiv(nf, alpha, nffactorback(nf, init_units(bnf), y));
   }
@@ -966,10 +966,10 @@ lowerboundforregulator_i(GEN bnf)
 
   G = gmael(nf,5,2);
   units = matalgtobasis(bnf,units);
-  minunit = gnorml2(gmul(G, gel(units,1))); /* T2(units[1]) */
+  minunit = gnorml2(RgM_RgC_mul(G, gel(units,1))); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
   {
-    newminunit = gnorml2(gmul(G, gel(units,i)));
+    newminunit = gnorml2(RgM_RgC_mul(G, gel(units,i)));
     if (gcmp(newminunit,minunit) < 0) minunit = newminunit;
   }
   if (gexpo(minunit) > 30) return NULL;

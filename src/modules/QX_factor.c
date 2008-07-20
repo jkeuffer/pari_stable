@@ -99,7 +99,7 @@ Mignotte_bound(GEN S)
   GEN C, N2, t, binlS, lS = leading_term(S), bin = vecbinome(d-1);
 
   N2 = sqrtr(QuickNormL2(S,DEFAULTPREC));
-  binlS = is_pm1(lS)? bin: gmul(lS, bin);
+  binlS = is_pm1(lS)? bin: ZC_Z_mul(bin, lS);
 
   /* i = 0 */
   C = gel(binlS,1);
@@ -491,7 +491,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
   list = cgetg(r+1, t_COL);
   lt = absi(leading_term(pol));
   if (is_pm1(lt)) lt = NULL;
-  ltpol = lt? gmul(lt, pol): pol;
+  ltpol = lt? ZX_Z_mul(pol, lt): pol;
   paov2 = shifti(pa,-1);
   for (i = 1;;)
   {
@@ -507,7 +507,7 @@ chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
     {
       pol = RgX_Rg_divexact(pol, leading_term(y));
       lt = absi(leading_term(pol));
-      ltpol = gmul(lt, pol);
+      ltpol = ZX_Z_mul(pol, lt);
     }
     else
       ltpol = pol;
@@ -567,7 +567,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
   Br = root_bound(P);
-  if (lP) Br = gmul(lP, Br);
+  if (lP) Br = mulii(lP, Br);
   logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
 
   n0 = lg(famod) - 1;
