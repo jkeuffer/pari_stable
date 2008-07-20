@@ -238,6 +238,7 @@ BA 49- user variables can now be aliased [#790].
        stated it was provided "for debugging only".
    81- addhelp: TABs are now treated properly (would overflow line without
        wrapping) and \n are no longer ignored
+   82- Rename library functions initell -> ellinit, smallinitell -> smallellinit
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -324,7 +325,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    28- library functions identity_perm, cyclic_perm, perm_mul, perm_commute,
        perm_inv, perm_pow, cyc_pow_perm, cyc_pow, perm_cycles, perm_order,
        vecperm_orbits
-   29- New chapter in Libpari Guide: usersch6.tex
+   29- New chapters in Libpari Guide: usersch6.tex, usersch7.tex
    30- library functions mulreal & RgM_mulreal
    31- library functions Flx_Fl_mul_to_monic, FlxqX_Flxq_mul_to_monic,
        FpX_Fp_mul_to_monic, FqX_Fq_mul_to_monic
@@ -354,6 +355,9 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        bnrsurjection, ABC_to_bnr, idealred, idealred0 (was ideallllred),
        idealred_elt, idealred_elt0
    44- library functions trueeta, exp_Ir, roots_from_deg1, deg1_from_roots
+   45- library functions ellinit_padic, ellinit_real, ellinf, ell_is_inf,
+       ell_is_padic, ell_is_real, checkerr_real, checkell_padic, checksmallell,
+       checkell5, checkellpt
 
   Removed
     1- obsolete library functions extract and matextract

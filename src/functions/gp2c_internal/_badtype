@@ -13,6 +13,6 @@ Description:
  (bnr):void                     checkbnr($1)
  (prid):void                    checkprid($1)
  (@clgp):bool:parens            lg($1) != 3 || typ($(1)[2]) != t_POLMOD
- (ell):void                     checkell($1)
- (bell):void                    checkbell($1)
+ (ell):void                     checksmallell($1)
+ (bell):void                    checkell($1)
  (*gal):gal:parens              $1 = checkgal($1)

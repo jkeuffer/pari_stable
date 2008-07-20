@@ -10,7 +10,7 @@ Description:
 Doc:
  calculates the arithmetic conductor, the global
  minimal model of $E$ and the global \idx{Tamagawa number} $c$.
- $E$ must be an \var{sell} as output by \kbd{ellinit}, \emph{and is supposed
+ $E$ must be a \var{smallell} as output by \kbd{ellinit}, \emph{and is supposed
  to have all its coefficients $a_i$ in} $\Q$. The result is a 3 component
  vector $[N,v,c]$. $N$ is the arithmetic conductor of the curve. $v$ gives the
  coordinate change for $E$ over $\Q$ to the minimal integral model (see

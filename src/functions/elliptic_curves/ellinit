@@ -10,8 +10,8 @@ Help: ellinit(x,{flag=0}): x being the vector [a1,a2,a3,a4,a6] defining the
  x can also be a string, in this case the coefficients of the curve with
  matching name are looked in the elldata database if available.
 Description:
- (gen, ?0):bell:prec    initell($1, prec)
- (gen, 1):ell           smallinitell($1)
+ (gen, ?0):bell:prec    ellinit($1, prec)
+ (gen, 1):ell           smallellinit($1)
  (gen, small):ell:prec  ellinit0($1, $2, prec)
 Doc:
  initialize an \tet{ell} structure,
@@ -20,10 +20,14 @@ Doc:
  equation
  $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
  or a string, in this case the coefficients of the curve with matching name
- are looked in the \tet{elldata} database if available. For the time
- being, only curves over a prime field $\F_p$ and over the $p$-adic or
- real numbers (including rational numbers) are fully supported. Other
- domains are only supported for very basic operations such as point
+ are looked in the \tet{elldata} database if available.
+ \bprog
+ ? E = ellinit([0,0,0,0,1]); \\ y^2 = x^3 + 1
+ ? E = ellinit("36a1");      \\ the same curve, using Cremona's notations
+ @eprog\noindent
+ For the time being, only curves over a prime field $\F_p$ and over the
+ $p$-adic or real numbers (including rational numbers) are fully supported.
+ Other domains are only supported for very basic operations such as point
  addition.
 
  The result of \tet{ellinit} is an \tev{ell} structure by default, and
@@ -77,5 +81,5 @@ Doc:
  \smallskip For all other base fields or rings, the last six components are
  arbitrarily set to zero. See also the description of member functions
  related to elliptic curves at the beginning of this section.
-Variant: Also available are \fun{GEN}{initell}{GEN E, long prec} ($\fl=0$) and
- \fun{GEN}{smallinitell}{GEN E, long prec} ($\fl=1$).
+Variant: Also available are \fun{GEN}{ellinit}{GEN E, long prec} ($\fl=0$) and
+ \fun{GEN}{smallellinit}{GEN E, long prec} ($\fl=1$).

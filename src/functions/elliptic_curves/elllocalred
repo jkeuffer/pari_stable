@@ -9,7 +9,7 @@ Help: elllocalred(E,p): E being an elliptic curve, returns
 Doc:
  calculates the \idx{Kodaira} type of the
  local fiber of the elliptic curve $E$ at the prime $p$.
- $E$ must be an \var{sell} as output by \kbd{ellinit}, and is assumed to have
+ $E$ must be a \var{smallell} as output by \kbd{ellinit}, and is assumed to have
  all its coefficients $a_i$ in $\Z$. The result is a 4-component vector
  $[f,kod,v,c]$. Here $f$ is the exponent of $p$ in the arithmetic conductor of
  $E$, and $kod$ is the Kodaira type which is coded as follows:

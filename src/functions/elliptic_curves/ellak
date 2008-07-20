@@ -9,8 +9,8 @@ Doc:
  $L$-function of the elliptic curve $E$, i.e.~in principle coefficients of a
  newform of weight 2 assuming \idx{Taniyama-Weil conjecture} (which is now
  known to hold in full generality thanks to the work of \idx{Breuil},
- \idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be an
- \var{sell} as output by \kbd{ellinit}. For this function
+ \idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be a
+ \var{smallell} as output by \kbd{ellinit}. For this function
  to work for every $n$ and not just those prime to the conductor, $E$ must
  be a minimal Weierstrass equation. If this is not the case, use the
  function \kbd{ellminimalmodel} before using \kbd{ellak}.

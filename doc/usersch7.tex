@@ -1,0 +1,89 @@
+% $Id: usersch6.tex 10212 2008-05-30 23:21:35Z kb $
+% Copyright (c) 2000  The PARI Group
+%
+% This file is part of the PARI/GP documentation
+%
+% Permission is granted to copy, distribute and/or modify this document
+% under the terms of the GNU General Public License
+\chapter{Technical Reference Guide for Elliptic curves and arithmetic geometry}
+
+This chapter is quite short, but is added as a placeholder, since
+we expect the library to expand in that direction.
+
+\section{Elliptic curves}
+Elliptic curves are represented in the Weierstrass model
+$$ (E): y^2z + a_1xyz + a_3 yz = x^3 + a_2 x^2z + a_4 xz^2 + a_6z^3, $$
+by the $5$-tuple $[a_1,a_2,a_3,a_4,a_6]$. Points in the projective
+plane are represented as follows: the point at infinity $(0:1:0)$ is coded
+as \kbd{[0]}, a finite point $(x:y:1)$ outside the projective line at infinity
+$z = 0$ is coded as $[x,y]$. Note that other points at infinity than $(0:1:0)$
+cannot be represented in this model; this is harmless, since they do not belong
+to any elliptic curve $E$.
+
+\emph{Points on the curve} are just projective points as described above,
+they are not tied to a curve in any way: the same point may be used in
+conjunction with different curves, provided it satisfies their equations (if
+it does not, the result is usually undefined). In particular, the point at
+infinity belongs to all elliptic curves.
+
+As with \tet{factor} for polynomial factorization, the $5$-tuple
+$[a_1,a_2,a_3,a_4,a_6]$ implicitly defines a base ring over which the curve
+is defined. Point coordinates must be operation-compatible with this
+base ring (\kbd{gadd}, \kbd{gmul}, \kbd{gdiv} involving them should not give
+errors).
+
+\subsec{Types of elliptic curves}
+
+There are three types of elliptic curves structures: by increasing order of
+complexity, \kbd{ell5} (a $5$-tuple as above), \kbd{smallell} (small,
+containing algebraic data defined over any domain), and \kbd{ell} (contains
+additional analytic data for curves defined over $\R$ or $\Q_p$). The last
+two types are produced by :
+
+\fun{GEN}{smallellinit}{GEN x}
+
+\fun{GEN}{ellinit}{GEN x, long prec}, where $x$ is an \var{ell5}
+
+The last function \kbd{ellinit} generates a $p$-adic
+curve if and only if one of $a_1$, $a_2$, $a_3$, $a_4$, $a_6$ has type
+\typ{PADIC}, at the accuracy which is the minimum of their $p$-adic accuracy.
+Otherwise a curve over $\R$. You may also call directly the underlying
+functions, which are not memory-clean:
+
+\fun{GEN}{ellinit_padic}{GEN x, GEN p, long e} initializes an \var{ell} over
+$\Q_p$, computing mod $p^e$. In this case the entries of $x$
+may have arbitrary type, provided that they can be converted to \typ{PADIC}s
+of accuracy $e$ (via \kbd{cvtop}). Shallow function.
+
+\fun{GEN}{ellinit_real}{GEN x, long prec} initializes an \var{ell} over
+$\R$. Shallow function.
+
+
+\fun{void}{checkell}{GEN e} raise an error unless $e$ is a \var{ell}.
+
+\fun{void}{checksmallell}{GEN e} raise an error unless $e$ is an \var{ell}
+or a \var{smallell}.
+
+\fun{void}{checkell5}{GEN e} raise an error unless $e$ is an \var{ell},
+a \var{smallell} or an \var{ell5}.
+
+\fun{int}{ell_is_padic}{GEN e} return $1$ if $e$ is an \var{ell} defined
+over $\Q_p$.
+
+\fun{int}{ell_is_real}{GEN e} return $1$ if $e$ is an \var{ell} defined over
+$\R$.
+
+\fun{void}{checkell_real}{GEN e} combines \tet{checkell} and \tet{ell_is_real}.
+
+\fun{void}{checkell_padic}{GEN e} combines \tet{checkell} and
+\tet{ell_is_padic}.
+
+\fun{void}{checkellpt}{GEN z} raise an error unless $z$ is a point
+(either finite or at infinity).
+
+\subsec{Points}
+
+\fun{int}{ell_is_inf}{GEN z} tests whether the point $z$ is the point at
+infinity.
+
+\fun{GEN}{ellinf}{} returns the point at infinity \kbd{[0]}.

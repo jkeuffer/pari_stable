@@ -664,7 +664,6 @@ GEN     subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound);
 /* elliptic.c */
 
 GEN     CM_CardEFp(GEN E, GEN p);
-void    checkpt(GEN z);
 GEN     weipell0(GEN e, long prec, long PREC);
 
 /* ellsea.c */

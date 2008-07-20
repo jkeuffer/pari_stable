@@ -12,9 +12,9 @@ Doc: computes the trace of Frobenius $a_p$ for the elliptic curve $E$ and the
  Cornacchia's algorithm, hence very fast: $O(\log p)^2$). Otherwise, we use
  Shanks-Mestre's baby-step/giant-step method, which runs in time $O(p^{1/4})$
  using $O(p^{1/4})$ storage, hence becomes unreasonable when $p$ has about
- 30~digits. If the \tet{ellsea} package is installed, the \tet{SEA} algorithm
+ 30~digits. If the \tet{seadata} package is installed, the \tet{SEA} algorithm
  becomes available and primes of the order of 200~digits become feasible.
 
- No checking is done that $p$ is indeed prime. $E$ must be an \var{sell} as
+ No checking is done that $p$ is indeed prime. $E$ must be a \var{smallell} as
  output by \kbd{ellinit}, defined over $\Q$, $\F_p$ or $\Q_p$. $E$ must be
  given by a Weierstrass equation \emph{minimal} at $p$.

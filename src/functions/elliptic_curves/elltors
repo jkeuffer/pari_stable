@@ -25,6 +25,6 @@ Doc:
  for small primes of good reduction, then look for torsion points using
  Weierstrass parametrization (and Mazur's classification).
 
- If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be an
- \var{sell}.
+ If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be a
+ \var{smallell}.
 Variant: Also available is \fun{GEN}{elltors}{GEN E} for \kbd{elltors(E, 0)}.

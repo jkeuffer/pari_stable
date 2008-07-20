@@ -6,7 +6,7 @@ Help: ellrootno(E,{p=1}): root number for the L-function of the elliptic
  curve E. p can be 1 (default), global root number, or a prime p (including
  0) for the local root number at p.
 Doc:
- $E$ being an \var{sell} as output by
+ $E$ being a \var{smallell} as output by
  \kbd{ellinit}, this computes the local (if $p\neq 1$) or global (if $p=1$)
  root number of the L-series of the elliptic curve $E$. Note that the global
  root number is the sign of the functional equation and conjecturally is the

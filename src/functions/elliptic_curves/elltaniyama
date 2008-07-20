@@ -6,8 +6,8 @@ Help: elltaniyama(E): modular parametrization of elliptic curve E (minimal
  model).
 Doc:
  computes the modular parametrization of the
- elliptic curve $E$, where $E$ is an \var{sell} as output by \kbd{ellinit}, in
- the form of a two-component vector $[u,v]$ of power series, given to the
+ elliptic curve $E$, where $E$ is a \var{smallell} as output by \kbd{ellinit},
+ in the form of a two-component vector $[u,v]$ of power series, given to the
  current default series precision. This vector is characterized by the
  following two properties. First the point $(x,y)=(u,v)$ satisfies the
  equation of the elliptic curve. Second, the differential $du/(2v+a_1u+a_3)$
