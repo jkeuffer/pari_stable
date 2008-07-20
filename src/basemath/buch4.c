@@ -112,7 +112,7 @@ hyperell_locally_soluble(GEN T,GEN p)
 static long
 quad_char(GEN nf, GEN t, GEN pr)
 {
-  GEN ord, ordp, T, p, modpr = nf_to_Fq_init(nf, &pr,&T,&p);
+  GEN ord, ordp, T, p, modpr = zk_to_Fq_init(nf, &pr,&T,&p);
   t = nf_to_Fq(nf,t,modpr);
   if (T)
   {
@@ -136,9 +136,10 @@ Z_quad_char(GEN x, GEN pr)
   return kronecker(x, gel(pr,1));
 }
 
-/* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise */
+/* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise.
+ * modpr = zkmodprinit(nf,pr) */
 static long
-psquarenf(GEN nf,GEN x,GEN pr)
+psquarenf(GEN nf,GEN x,GEN pr,GEN modpr)
 {
   pari_sp av = avma;
   GEN p = gel(pr,1);
@@ -153,7 +154,7 @@ psquarenf(GEN nf,GEN x,GEN pr)
   } else {
     v = int_elt_val(nf, x, p, gel(pr,5), &x);
     if (v&1) return 0;
-    v = (quad_char(nf, x, pr) == 1);
+    v = (quad_char(nf, x, modpr) == 1);
   }
   avma = av; return v;
 }
@@ -188,14 +189,15 @@ psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
   v = check2(nf,x,zinit); avma = av; return v;
 }
 
+/* pr above an odd prime */
 static long
-lemma6nf(GEN nf,GEN T,GEN pr,long nu,GEN x)
+lemma6nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN modpr)
 {
   pari_sp av = avma;
   long la, mu;
   GEN gpx, gx = poleval(T, x);
 
-  if (psquarenf(nf,gx,pr)) return 1;
+  if (psquarenf(nf,gx,pr,modpr)) return 1;
 
   la = nfval(nf,gx,pr);
   gpx = poleval(RgX_deriv(T), x);
@@ -205,9 +207,9 @@ lemma6nf(GEN nf,GEN T,GEN pr,long nu,GEN x)
   if (la >= nu<<1  && mu >= nu) return 0;
   return -1;
 }
-
+/* pr above 2 */
 static long
-lemma7nf(GEN nf,GEN T,GEN pr,long nu,GEN x,GEN zinit)
+lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
 {
   long res, la, mu, q;
   GEN gpx, gx = poleval(T, x);
@@ -233,13 +235,12 @@ lemma7nf(GEN nf,GEN T,GEN pr,long nu,GEN x,GEN zinit)
   }
   if (q > itos(gel(pr,3))<<1)  return -1;
 
-  zinit = Idealstar(nf, idealpows(nf,pr,q), nf_INIT);
   /* gx /= pi^la, pi a pr-uniformizer */
   gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, gel(pr,5), la)), -la);
   if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
-
+/* zinit either a bid (pr | 2) or a modpr structure (pr | p odd) */
 static long
 zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
@@ -247,8 +248,8 @@ zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   pari_sp av = avma;
   GEN pnup;
 
-  res = zinit? lemma7nf(nf,T,pr,nu,x0,zinit)
-             : lemma6nf(nf,T,pr,nu,x0);
+  res = typ(zinit) == t_VEC? lemma7nf(nf,T,pr,nu,x0,zinit)
+                           : lemma6nf(nf,T,pr,nu,x0,zinit);
   avma = av;
   if (res== 1) return 1;
   if (res==-1) return 0;
@@ -309,9 +310,9 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   }
   else
   {
-    if (psquarenf(nf,constant_term(T),pr)) return 1;
-    if (psquarenf(nf, leading_term(T),pr)) return 1;
-    zinit = NULL;
+    zinit = zkmodprinit(nf, pr);
+    if (psquarenf(nf,constant_term(T),pr,zinit)) return 1;
+    if (psquarenf(nf, leading_term(T),pr,zinit)) return 1;
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,T,pr,0,gen_1,gen_0,repr,zinit)) { avma=av; return 1; }
