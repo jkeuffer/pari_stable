@@ -3145,7 +3145,7 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   else
   {
     PRECREG = max(prec, MEDDEFAULTPREC);
-    nf = initalg(P, PRECREG);
+    nf = nfinit(P, PRECREG);
     if (lg(nf)==3) { /* P non-monic and nfinit CHANGEd it ? */
       pari_warn(warner,"non-monic polynomial. Change of variables discarded");
       nf = gel(nf,1);
@@ -3155,7 +3155,7 @@ Buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
   if (N <= 1) return gerepilecopy(av0, Buchall_deg1(nf));
   zu = rootsof1(nf);
   gel(zu,2) = coltoliftalg(nf, gel(zu,2));
-  if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
+  if (DEBUGLEVEL) msgtimer("nfinit & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
   compute_vecG(nf, &F, min(RU, 9));

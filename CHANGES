@@ -239,6 +239,8 @@ BA 49- user variables can now be aliased [#790].
    81- addhelp: TABs are now treated properly (would overflow line without
        wrapping) and \n are no longer ignored
    82- Rename library functions initell -> ellinit, smallinitell -> smallellinit
+       initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
+   83- Useless nfinit flags 4, 5 (partial polred) removed.
 
   Added
     1- library function pari_calloc, cgetalloc

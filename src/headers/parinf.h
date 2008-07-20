@@ -54,10 +54,8 @@ void remake_GM(GEN nf, nffp_t *F, long prec);
 
 /* for nfinitall */
 #define nf_ROUND2      64
-#define nf_NOROOTS     32
 #define nf_PARTIALFACT 16 /* and nfmaxord */
 #define nf_RED          8
-#define nf_PARTRED      2
 #define nf_ORIG         1
 
 /* for rnfpolredabs */
@@ -102,7 +100,6 @@ typedef struct FP_chk_fun {
   long skipfirst;
 } FP_chk_fun;
 
-GEN nfinitall(GEN x, long flag, long prec);
 GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
 GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
 

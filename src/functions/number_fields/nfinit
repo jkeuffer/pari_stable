@@ -8,8 +8,7 @@ Help: nfinit(pol,{flag=0}): pol being a nonconstant irreducible polynomial,
  integral basis, multiplication table of basis]. flag is optional and can be
  set to 0: default; 1: do not compute different; 2: first use polred to find
  a simpler polynomial; 3: outputs a two-element vector [nf,Mod(a,P)], where
- nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol; 4:
- as 2 but use a partial polred; 5: is to 3 what 4 is to 2.
+ nf is as in 2 and Mod(a,P) is a polmod equal to Mod(x,pol) and P=nf.pol.
 Description:
  (gen, ?0):nf:prec	nfinit0($1, 0, prec)
  (gen, 1):nf:prec	nfinit0($1, 1, prec)
@@ -17,7 +16,6 @@ Description:
  (gen, 3):gen:prec	nfinit0($1, 3, prec)
  (gen, 4):nf:prec	nfinit0($1, 4, prec)
  (gen, 5):gen:prec	nfinit0($1, 5, prec)
- (gen, 6):nf:prec	nfinit0($1, 6, prec)
  (gen, #small):void	$"incorrect flag in nfinit"
  (gen, small):gen:prec	nfinit0($1, $2, prec)
 Doc: \var{pol} being a non-constant,
@@ -147,7 +145,27 @@ Doc: \var{pol} being a non-constant,
  variables. This is implicit when \var{pol} is not monic: first a linear change
  of variables is performed, to get a monic polynomial, then a \kbd{polred}
  reduction.
+Variant: Also available are
+ \fun{GEN}{nfinit}{GEN x, long prec} ($\fl = 0$),
+ \fun{GEN}{nfinitred}{GEN x, long prec} ($\fl = 2$),
+ \fun{GEN}{nfinitred2}{GEN x, long prec} ($\fl = 3$).
+ Instead of the above hardcoded numerical flags in \kbd{nfinit0}, one should
+ rather use
 
- If $\fl=4$, as $2$ but uses a partial \kbd{polred}.
+ \fun{GEN}{nfinitall}{GEN x, long flag, long prec}, where \fl\ is an
+ or-ed combination of
+ 
+ \item \tet{nf_RED}: find a simpler defining polynomial,
 
- If $\fl=5$, as $3$ using a partial \kbd{polred}.
+ \item \tet{nf_ORIG}: if \tet{nf_RED} set, also return the change of variable,
+
+ \item \tet{nf_ROUND2}: slow down the routine by using an obsolete
+ normalization algorithm (do not use this one!),
+ 
+ \item \tet{nf_PARTIALFACT}: lazy factorization of the polynomial discriminant.
+ Result is conditional unless the \emph{field} discriminant obtained
+ is fully factored by
+ \bprog
+   Z_factor_limit(disc, 0)
+ @eprog\noindent Namely the ``maximal order'' may not be maximal at any prime
+ biger than \kbd{primelimit} dividing the field discriminant.

@@ -92,6 +92,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - Change of behaviour for Set(t_STR): Set("1") used to return ["1"], now
     it returns ["\"1\""], i.e returns the set whose element evaluates to the
     character string "1".
+  - Flags 4, 5, 6 (useless) have disappeared in nfinit()
 
 * Specific to the PARI library:
 ===============================
@@ -191,6 +192,7 @@ This file lists the incompatible changes between Version 2.x and older versions
   - removed obsolete library function kerin1. Use kerint or [simpler if
     LLL reduction of the returned basis is not deisred] ZM_lll(,0.99,LLL_KER)
   - rename library functions initell -> ellinit, smallinitell -> smallellinit
+    initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

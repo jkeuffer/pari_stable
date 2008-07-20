@@ -546,7 +546,7 @@ compocyclo(GEN nf, long m, long d)
   polL = gsubst(gel(res,1),0,pol_x(vx)); /* = charpoly(t) */
   a = gsubst(lift(gel(res,2)), 0,pol_x(vx));
   b = gsub(pol_x(vx), gmul(gel(res,3), a));
-  nfL = initalg(polL, DEFAULTPREC);
+  nfL = nfinit(polL, DEFAULTPREC);
   p1 = gcoeff(nffactor(nfL,p1),1,1);
   p2 = gcoeff(nffactor(nfL,p2),1,1);
   p3 = do_compo(p1,p2); /* relative equation over L */
