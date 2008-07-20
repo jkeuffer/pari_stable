@@ -804,31 +804,34 @@ useless in practice. If \kbd{bnr} is associated to some modulus $f$, returns a
 ``small'' ideal in the same class as $x$ in the ray class group modulo $f$.
 The reason why this is useless is that using extended ideals with principal
 part in a computation, there is a simple way to reduce them: simply reduce
-the principal element in $(\Z_K/f)^*$. 
+the generator of the principal part in $(\Z_K/f)^*$. 
 
 \fun{GEN}{famat_to_nf_moddivisor}{GEN nf, GEN g, GEN e, GEN bid}
 given a true \var{nf} associated to a number field $K$, a \var{bid} structure
 associated to a modulus $f$, and an algebraic number in factored form $\prod
-g[i]^e[i]$, such that $(g[i],f) = 1$ for all $i$, returns a small element in
+g[i]^{e[i]}$, such that $(g[i],f) = 1$ for all $i$, returns a small element in
 $\Z_K$ congruent to it mod $f$. Note that if $f$ contains places at infinity,
 this includes sign conditions at the specified places.
 
 A simpler case when the conductor has no place at infinity:
+
 \fun{GEN}{famat_to_nf_modideal_coprime}{GEN nf, GEN g, GEN e, GEN f, GEN expo}
-as above except that the ideal is now integral in HNF, and we pass the
-exponent of the group $(\Z_K/f)^*$ as \kbd{expo}; any multiple will also do,
-at the expense of efficiency. Of course if a \var{bid} for $f$ is
-available, if is easy to extract $f$ and the exact value of \kbd{expo} from
-it (the latter is the first elementary divisor in the group structure).
-A useful trick: if you set \kbd{expo} to \emph{any} positive integer, the
-result is correct up to \kbd{expo}-th powers, hence exact if \kbd{expo} is a
-multiple of the exponent; this is useful when trying to decide whether an
-element is a square in a residue field for instance! (take \kbd{expo}$ = 2$).
+as above except that the ideal $f$ is now integral in HNF (no need for a full
+\var{bid}), and we pass the exponent of the group $(\Z_K/f)^*$ as \kbd{expo};
+any multiple will also do, at the expense of efficiency. Of course if a
+\var{bid} for $f$ is available, if is easy to extract $f$ and the exact value
+of \kbd{expo} from it (the latter is the first elementary divisor in the
+group structure). A useful trick: if you set \kbd{expo} to \emph{any}
+positive integer, the result is correct up to \kbd{expo}-th powers, hence
+exact if \kbd{expo} is a multiple of the exponent; this is useful when trying
+to decide whether an element is a square in a residue field for instance!
+(take \kbd{expo}$ = 2$).
 
 What to do when the $g[i]$ are not coprime to $f$, but only $\prod
 g[i]^{e[i]}$ is ? Then the situation is more complicated, and we advise to
 solve it one prime divisor of $f$ at a time. Let $v$ the valuation
 associated to a maximal ideal \kbd{pr} and assume $v(f) = k > 0$:
+
 \fun{GEN}{famat_makecoprime}{GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN expo}
 returns an element in $(\Z_K/\kbd{pr}^k)^*$ congruent to the product 
 $\prod g[i]^{e[i]}$, assumed to be globally coprime to $f$. As above,
@@ -845,7 +848,7 @@ following forms: $[\var{bnr}]$, $[\var{bnr},\var{subgroup}]$,
 $[\var{bnf},\var{modulus}]$, $[\var{bnf},\var{modulus},\var{subgroup}]$.
 You can still use directly all of (\kbd{libpari}'s routines implementing) GP's
 functions as described in Chapter~3, but they are often awkward in the context
-of \kbd{libpari} programming. In particular, it does not make much sens to
+of \kbd{libpari} programming. In particular, it does not make much sense to
 always input a triple $A,B,C$ because of the fringe
 $[\var{bnf},\var{modulus},\var{subgroup}]$. The first routine to call, is
 thus
@@ -854,17 +857,18 @@ thus
 structure from \kbd{bnf} and modulus \kbd{mod}. \kbd{flag} is an or-ed
 combination of \kbd{nf\_GEN} (include generators) and \kbd{nf\_INIT} (if
 omitted, do not return a \var{bnr}, only the ray class group as an abelian
-group). In fact, only flag really makes sense: \kbd{nf\_GEN | nf\_INIT} to
-initialize a proper \var{bnr}: removing \kbd{nf\_GEN} does not save time, but
-the corresponding crippled \var{bnr} structure will raise errors in most
-class field theoretic functions. Possibly also 0 to quickly compute the ray
-class group structure; \tet{bnrclassno} is faster if we only need the
-\emph{order} of the ray class group.
+group). In fact, a single value of \kbd{flag} actually makes sense:
+\kbd{nf\_GEN | nf\_INIT} to initialize a proper \var{bnr}: removing
+\kbd{nf\_GEN} saves very little time, but the corresponding crippled
+\var{bnr} structure will raise errors in most class field theoretic
+functions. Possibly also 0 to quickly compute the ray class group structure;
+\tet{bnrclassno} is faster if we only need the \emph{order} of the ray class
+group.
 
 Now we have a proper \var{bnr} encoding a \kbd{bnf} and a modulus, we no longer
-need the $[\var{bnf},\var{modulus}]$,
-$[\var{bnf},\var{modulus},\var{subgroup}]$ forms (which would internally call
-\tet{Buchray} anyway). Recall that a subgroup $H$ is given by a matrix in HNF,
+need the $[\var{bnf},\var{modulus}]$ and
+$[\var{bnf},\var{modulus},\var{subgroup}]$ forms, which would internally call
+\tet{Buchray} anyway. Recall that a subgroup $H$ is given by a matrix in HNF,
 whose column express generators of $H$ on the fixed generators of the ray class
 group that stored in our \var{bnr}. You may also code the trivial subgroup by
 \kbd{NULL}.
@@ -878,7 +882,7 @@ has conductor $f$. Returns 0 otherwise.
 
 \fun{GEN}{bnrdisc}{GEN bnr, GEN H, long flag} returns the discriminant and
 signature of the class field defined by \kbd{bnr} and $H$. See the description
-of the GP function for details. \fl is an or-ed combination of the flags
+of the GP function for details. \fl\ is an or-ed combination of the flags
 \tet{nf_REL} (output relative data) and \tet{nf_COND} (return 0 unless the
 modulus is the conductor).
 
