@@ -242,6 +242,8 @@ BA 49- user variables can now be aliased [#790].
        initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
        primedec -> idealprimedec
    83- Useless nfinit flags 4, 5 (partial polred) removed.
+   84- Split off inline functions unrelated to the kernel from
+       src/kernel/level1.h
 
   Added
     1- library function pari_calloc, cgetalloc
@@ -363,6 +365,7 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
        checkell5, checkellpt
    46- library functions pr_get_p, pr_get_gen, pr_get_e, pr_get_f, pr_get_tau
        to access components of prime ideals
+   47- files src/language/pariinl.c, src/headers/pariinl.h.
 
   Removed
     1- obsolete library functions extract and matextract

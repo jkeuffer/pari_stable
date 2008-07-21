@@ -90,7 +90,7 @@ OBJSGP=
 for f in $gp $graph; do
   OBJSGP="$OBJSGP $f\$(_O)"
 done
-HEADERS=pariinl.h
+HEADERS=mpinl.h
 for f in $hlist; do
   HEADERS="$HEADERS $src/headers/$f.h";
 done
@@ -293,7 +293,7 @@ test-kernel:: kerntest
 tune.o: $src/test/tune.c
 	\$(CC) \$(CFLAGS) \$(GMPFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
 
-tune: pariinl.h tune-sta
+tune: mpinl.h tune-sta
 	-\$(RM) tune ../tune
 	-\$(LN) tune-sta tune
 	-\$(LN) $ln_objdir/tune ../tune
@@ -311,7 +311,7 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
-	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* $exec
+	-\$(RM) *\$(_O) mp.c *.s mpinl.h parilvl0.h parilvl1.h libpari* $exec
 cleandesc:
 	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 cleantune:
@@ -328,7 +328,7 @@ install: install-lib-$dft install-include install-bin install-man install-misc i
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)/pari
-	-for i in paricfg.h pariinl.h; do \\
+	-for i in paricfg.h mpinl.h; do \\
 	  \$(INSTALL_DATA) \$\$i \$(INCLUDEDIR)/pari; done
 	-for i in $headerlist; do \\
 	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR)/pari; done
@@ -458,8 +458,8 @@ install-lib-dyn-link: install-lib-dyn-base
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
 
-pariinl.h: parilvl0.h parilvl1.h
-	cat parilvl0.h parilvl1.h > pariinl.h
+mpinl.h: parilvl0.h parilvl1.h
+	cat parilvl0.h parilvl1.h > mpinl.h
 
 bench: $exec
 	@\$(DOTEST) $test_basic

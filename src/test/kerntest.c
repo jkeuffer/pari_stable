@@ -1,7 +1,7 @@
 #include "pari.h"
 #include "anal.h"
 
-GEN   gen_0, gen_1, gen_m1, gen_2;
+GEN   gen_0, gen_1, gen_m1, gen_2, gen_m2;
 pari_sp top, bot, avma;
 size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
@@ -15,6 +15,7 @@ void specinit()
   gen_1 = utoipos(1);
   gen_m1= utoineg(1);
   gen_2 = utoipos(2);
+  gen_m2= utoineg(2);
 }
 
 GEN powuu(ulong p, ulong N) { return 0; }

@@ -53,6 +53,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 BEGINEXTERN
 #include "paridecl.h"
 #include "paritune.h"
-#include "pariinl.h"
+#ifndef PARI_NO_MPINL_H
+#  include "mpinl.h"
+#endif
+#ifndef PARI_NO_PARIINL_H
+#  include "pariinl.h"
+#endif
 ENDEXTERN
 #endif

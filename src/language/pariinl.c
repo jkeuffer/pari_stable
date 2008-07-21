@@ -1,4 +1,4 @@
-/* $Id$
+/* $Id: mpinl.c 7873 2006-04-14 15:56:31Z kb $
 
 Copyright (C) 2000  The PARI group.
 
@@ -12,8 +12,7 @@ ANY WARRANTY WHATSOEVER.
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
-#define PARI_NO_PARIINL_H
+#define PARI_NO_MPINL_H
 #define INLINE
 #define DISABLE_INLINE
 #include "pari.h"
-ulong hiremainder, overflow;
