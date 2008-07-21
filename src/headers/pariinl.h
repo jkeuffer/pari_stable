@@ -2,11 +2,20 @@ INLINE GEN
 mkintmod(GEN x, GEN y) { GEN v = cgetg(3, t_INTMOD);
   gel(v,1) = y; gel(v,2) = x; return v; }
 INLINE GEN
+mkintmodu(ulong x, ulong y) {
+  GEN v = cgetg(3,t_INTMOD);
+  gel(v,1) = utoipos(y);
+  gel(v,2) = utoi(x); return v;
+}
+INLINE GEN
 mkpolmod(GEN x, GEN y) { GEN v = cgetg(3, t_POLMOD);
   gel(v,1) = y; gel(v,2) = x; return v; }
 INLINE GEN
 mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
   gel(v,1) = x; gel(v,2) = y; return v; }
+INLINE GEN
+mkfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
+  gel(v,1) = icopy(x); gel(v,2) = icopy(y); return v; }
 INLINE GEN
 mkrfrac(GEN x, GEN y) { GEN v = cgetg(3, t_RFRAC);
   gel(v,1) = x; gel(v,2) = y; return v; }
@@ -30,8 +39,6 @@ INLINE GEN
 mkvecsmall4(long x,long y,long z,long t) { GEN v = cgetg(5, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; v[4]=t; return v; }
 INLINE GEN
-mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = gcopy(x); return v; }
-INLINE GEN
 mkvec2(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
@@ -45,6 +52,18 @@ INLINE GEN
 mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u) {
   GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; 
   gel(v,4) = t; gel(v,5) = u; return v; }
+INLINE GEN
+mkvecs(long x) { GEN v = cgetg(2, t_VEC); gel(v,1) = stoi(x); return v; }
+INLINE GEN
+mkvec2s(long x, long y) {
+  GEN v = cgetg(3,t_VEC); gel(v,1) = stoi(x); gel(v,2) = stoi(y); return v; }
+INLINE GEN
+mkvec3s(long x, long y, long z) {
+  GEN v=cgetg(4,t_VEC);
+  gel(v,1)=stoi(x); gel(v,2)=stoi(y); gel(v,3)=stoi(z); return v;
+}
+INLINE GEN
+mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = gcopy(x); return v; }
 INLINE GEN
 mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }

@@ -178,9 +178,6 @@ icopy(GEN x)
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }
-INLINE GEN
-mkfraccopy(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
-  gel(v,1) = icopy(x); gel(v,2) = icopy(y); return v; }
 
 /* copy integer x as if we had avma = av */
 INLINE GEN
@@ -256,22 +253,6 @@ stoi(long x)
   if (!x) return gen_0;
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
-INLINE GEN
-mkvecs(long x) { GEN v = cgetg(2, t_VEC); gel(v,1) = stoi(x); return v; }
-INLINE GEN
-mkvec2s(long x, long y) {
-  GEN v = cgetg(3,t_VEC); gel(v,1) = stoi(x); gel(v,2) = stoi(y); return v; }
-INLINE GEN
-mkvec3s(long x, long y, long z) {
-  GEN v=cgetg(4,t_VEC);
-  gel(v,1)=stoi(x); gel(v,2)=stoi(y); gel(v,3)=stoi(z); return v;
-}
-INLINE GEN
-mkintmodu(ulong x, ulong y) {
-  GEN v = cgetg(3,t_INTMOD);
-  gel(v,1) = utoipos(y);
-  gel(v,2) = utoi(x); return v;
-}
 
 INLINE long
 itos(GEN x)
@@ -288,7 +269,6 @@ gtos(GEN x) {
   if (typ(x) != t_INT) pari_err(talker,"gtos expected an integer, got '%Ps'",x);
   return itos(x);
 }
-
 
 /* as itos, but return 0 if too large. Cf is_bigint */
 INLINE long
@@ -975,18 +955,21 @@ shift_right2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
     *tb++ = (l >> sh) | k;
   }
 }
+/* FIXME: adapt/use mpn_[lr]shift instead */
+INLINE void
+shift_left(GEN z2, GEN z1, long imin, long imax, ulong f,  ulong sh)
+{ shift_left2(z2,z1,imin,imax,f,sh, BITS_IN_LONG - sh); }
+
+INLINE void
+shift_right(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh)
+{ shift_right2(z2,z1,imin,imax,f,sh, BITS_IN_LONG - sh); }
 
 /* Backward compatibility. Inefficient && unused */
 extern ulong hiremainder;
 INLINE ulong
 shiftl(ulong x, ulong y)
-{
-  hiremainder=x>>(BITS_IN_LONG-y);
-  return (x<<y);
-}
+{ hiremainder = x>>(BITS_IN_LONG-y); return (x<<y); }
+
 INLINE ulong
 shiftlr(ulong x, ulong y)
-{
-  hiremainder=x<<(BITS_IN_LONG-y);
-  return (x>>y);
-}
+{ hiremainder = x<<(BITS_IN_LONG-y); return (x>>y); }

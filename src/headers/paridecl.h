@@ -2430,6 +2430,8 @@ INLINE GEN    rtor(GEN x, long prec);
 INLINE long   sdivsi(long x, GEN y);
 INLINE long   sdivsi_rem(long x, GEN y, long *rem);
 INLINE long   sdivss_rem(long x, long y, long *rem);
+INLINE void   shift_left(GEN z2, GEN z1, long min, long M, ulong f,  ulong sh);
+INLINE void   shift_right(GEN z2, GEN z1, long min, long M, ulong f, ulong sh);
 INLINE void   shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
 INLINE void   shift_right2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
 INLINE ulong  shiftl(ulong x, ulong y);

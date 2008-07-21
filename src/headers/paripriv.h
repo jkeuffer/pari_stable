@@ -144,15 +144,6 @@ int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);
 int OK_bern(long nb, long prec);
 
-/* FIXME: adapt/use mpn_[lr]shift instead */
-#define shift_left(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - (sh);\
-  shift_left2((z2),(z1),(imin),(imax),(f),(sh),(_m)); }
-
-#define shift_right(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - (sh);\
-  shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m)); }
-
 /* powers */
 #define sqrs(b) mulss((b),(b))
 #define sqru(b) muluu((b),(b))
