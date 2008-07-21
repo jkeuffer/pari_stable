@@ -145,8 +145,6 @@ GEN bernfrac_using_zeta(long n);
 int OK_bern(long nb, long prec);
 
 /* powers */
-#define sqrs(b) mulss((b),(b))
-#define sqru(b) muluu((b),(b))
 GEN    rpowuu(ulong a, ulong n, long prec);
 GEN    powrshalf(GEN x, long s);
 GEN    powrfrac(GEN x, long n, long d);

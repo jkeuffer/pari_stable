@@ -455,6 +455,23 @@ mulss(long x, long y)
   z=cgeti(3); z[1] = evalsigne(s) | evallgefint(3);
   z[2]=p1; return z;
 }
+GEN
+sqrs(long x)
+{
+  long p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x) return gen_0;
+  if (x<0) x = -x;
+  p1 = mulll(x,x);
+  if (hiremainder)
+  {
+    z=cgetipos(4);
+    z[2]=hiremainder; z[3]=p1; return z;
+  }
+  return utoipos(p1);
+}
 
 GEN
 muluu(ulong x, ulong y)
@@ -465,6 +482,22 @@ muluu(ulong x, ulong y)
 
   if (!x || !y) return gen_0;
   p1 = mulll(x,y);
+  if (hiremainder)
+  {
+    z=cgetipos(4);
+    z[2]=hiremainder; z[3]=p1; return z;
+  }
+  return utoipos(p1);
+}
+GEN
+sqru(ulong x)
+{
+  long p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x) return gen_0;
+  p1 = mulll(x,x);
   if (hiremainder)
   {
     z=cgetipos(4);

@@ -1881,6 +1881,8 @@ GEN     remi2n(GEN x, long n);
 double  rtodbl(GEN x);
 GEN     shifti(GEN x, long n);
 GEN     sqri(GEN x);
+GEN     sqrs(long x);
+GEN     sqru(ulong x);
 #define sqrti(x) sqrtremi((x),NULL)
 GEN     sqrtremi(GEN S, GEN *R);
 GEN     subsr(long x, GEN y);
