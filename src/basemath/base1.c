@@ -906,32 +906,17 @@ quicktrace(GEN x, GEN sym)
   return p1;
 }
 
-/* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
+/* assume nf a genuine nf */
 long
-nf_get_r1(GEN nf)
-{
-  GEN x = gel(nf,2);
-  if (typ(x) != t_VEC || lg(x) != 3 || typ(x[1]) != t_INT)
-    pari_err(talker,"false nf in nf_get_r1");
-  return itos(gel(x,1));
-}
+nf_get_r1(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,1)); }
 long
-nf_get_r2(GEN nf)
-{
-  GEN x = gel(nf,2);
-  if (typ(x) != t_VEC || lg(x) != 3 || typ(x[2]) != t_INT)
-    pari_err(talker,"false nf in nf_get_r2");
-  return itos(gel(x,2));
-}
+nf_get_r2(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,2)); }
 void
 nf_get_sign(GEN nf, long *r1, long *r2)
 {
   GEN x = gel(nf,2);
-  if (typ(x) != t_VEC || lg(x) != 3
-      || typ(x[1]) != t_INT || typ(x[2]) != t_INT)
-    pari_err(talker,"false nf in nf_get_sign");
-  *r1 = itos(gel(x,1));
-  *r2 = (degpol(nf[1]) - *r1) >> 1;
+  *r1 = itou(gel(x,1));
+  *r2 = itou(gel(x,2));
 }
 
 static GEN
