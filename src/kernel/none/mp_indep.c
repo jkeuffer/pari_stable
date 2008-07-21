@@ -93,6 +93,76 @@ mulsi(long x, GEN y)
   setsigne(z,s); return z;
 }
 
+GEN
+mulss(long x, long y)
+{
+  long s,p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x || !y) return gen_0;
+  if (x<0) { s = -1; x = -x; } else s=1;
+  if (y<0) { s = -s; y = -y; }
+  p1 = mulll(x,y);
+  if (hiremainder)
+  {
+    z = cgeti(4);
+    z[1] = evalsigne(s) | evallgefint(4);
+    *int_W_lg(z, 1, 4) = hiremainder;
+    *int_W_lg(z, 0, 4) = p1; return z;
+  }
+  z=cgeti(3); z[1] = evalsigne(s) | evallgefint(3); z[2]=p1; return z;
+}
+GEN
+sqrs(long x)
+{
+  long p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x) return gen_0;
+  if (x<0) x = -x;
+  p1 = mulll(x,x);
+  if (hiremainder) {
+    z = cgetipos(4);
+    *int_W_lg(z, 1, 4) = hiremainder;
+    *int_W_lg(z, 0, 4) = p1; return z;
+  }
+  z=cgetipos(3); z[2]=p1; return z;
+}
+GEN
+muluu(ulong x, ulong y)
+{
+  long p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x || !y) return gen_0;
+  p1 = mulll(x,y);
+  if (hiremainder) {
+    z = cgetipos(4); 
+    *int_W_lg(z, 1, 4) = hiremainder;
+    *int_W_lg(z, 0, 4) = p1; return z;
+  }
+  return utoipos(p1);
+}
+GEN
+sqru(ulong x)
+{
+  long p1;
+  GEN z;
+  LOCAL_HIREMAINDER;
+
+  if (!x) return gen_0;
+  p1 = mulll(x,x);
+  if (hiremainder) {
+    z = cgetipos(4); 
+    *int_W_lg(z, 1, 4) = hiremainder;
+    *int_W_lg(z, 0, 4) = p1; return z;
+  }
+  return utoipos(p1);
+}
+
 /* assume x > 1, y != 0. Return u * y with sign s */
 static GEN
 mulur_2(ulong x, GEN y, long s)

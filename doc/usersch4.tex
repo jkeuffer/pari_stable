@@ -1070,6 +1070,11 @@ $\kbd{z}$ may be manipulated via the following interface:
 \kbd{z}, $z_i$. Accessing the $i$-th significant word for $i > n$
 yields unpredictable results.
 
+\fun{GEN}{int_W_lg}{GEN z, long i, long lz} returns the $i$-th significant
+word of \kbd{z}, $z_i$, assuming \kbd{lgefint(z)} is \kbd{lz} ($= n + 3$).
+Accessing the $i$-th significant word for $i > n$ yields unpredictable
+results.
+
 \fun{GEN}{int_precW}{GEN z} returns the previous (less significant) word of
 \kbd{z}, $z_{i-1}$ assuming \kbd{z} points to $z_i$.
 

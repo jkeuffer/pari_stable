@@ -31,5 +31,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define int_W(x,l) ((x)+lgefint((x))-1-(l))
 /*x being a t_INT, return a pointer to the l-th least significant word of x.*/
 
+#define int_W_lg(x,l,lx) ((x)+lx-1-(l))
+/*x being a t_INT, return a pointer to the l-th least significant word of x,
+ * assuming lgefint(x) = lx.*/
+
 #define PARI_KERNEL_NONE
 /*This macro should not be used in libpari itself.*/
