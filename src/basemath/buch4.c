@@ -774,7 +774,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   aux = zerocol(lg(A)-1); gel(aux,itu) = w;
   gel(M,L) = aux;
   H = ZM_hnfall(M, &U, 2);
-  Y = RgM_mul(U, inverseimage(H,A));
+  Y = RgM_RgC_mul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback2(sunitrel, gfloor(Y));
