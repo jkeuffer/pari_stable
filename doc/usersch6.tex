@@ -794,12 +794,12 @@ estimated precision (in words, as usual) that would have been sufficient to
 complete the computation. The point is that \kbd{nf\_FORCE} does exactly this
 internally, but goes on increasing the accuracy of the \kbd{bnf}, then
 discarding it, which is a major inefficiency if you indend to compute lots of
-discrete logs and happend to have selected a precision which is just too low.
+discrete logs and have selected a precision which is just too low.
 (It is sometimes not so bad since most of the really expensive data is cached
 in \kbd{bnf} anyway, if all goes well.)  With this function, the \emph{caller}
 may decide to increase the accuracy using \tet{bnfnewprec} (and keep the
 resulting \kbd{bnf}!), or avoid the computation altogether. In any case the
-decision can be taken at the place where it is most likely to be useful.
+decision can be taken at the place where it is most likely to be correct.
 
 \subsec{Ideal reduction}\label{se:Ideal_reduction}
 
