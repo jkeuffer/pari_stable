@@ -1254,11 +1254,12 @@ random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }
 INLINE ulong
 itou(GEN x)
 {
-  const long s = signe(x);
-
-  if (!s) return 0;
-  if (lgefint(x) > 3) pari_err(affer2);
-  return x[2];
+  switch(lgefint(x)) {
+    case 2: return 0;
+    case 3: return x[2];
+    default: pari_err(affer2);
+      return 0; /* not reached */
+  }
 }
 
 INLINE void
