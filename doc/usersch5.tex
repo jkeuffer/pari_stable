@@ -852,6 +852,9 @@ $\kbd{mo2}  = m >> 1$.
 \fun{ulong}{Fl_mul}{ulong x, ulong y, ulong m} returns the smallest positive
 representative of $x y$ modulo $m$.
 
+\fun{ulong}{Fl_sqr}{ulong x, ulong m} returns the smallest positive
+representative of $x^2$ modulo $m$.
+
 \fun{ulong}{Fl_inv}{ulong x, ulong m} returns the smallest
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod~$m$, raise an exception.
