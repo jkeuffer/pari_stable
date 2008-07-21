@@ -694,7 +694,11 @@ aide0(const char *s0, int flag)
       if (!ep->help) { aide_print(s, "installed function"); return; }
       long_help=0; break;
 
-    case EpNEW: aide_print(s, "new identifier (no valence assigned)"); return;
+    case EpNEW: 
+      if (!ep->help) {
+        aide_print(s, "new identifier (no valence assigned)"); return;
+      };
+      long_help=0; break;
   }
   if (long_help) { external_help(ep->name,3); return; }
   if (ep->help) { print_text(ep->help); return; }
