@@ -1918,9 +1918,13 @@ are \typ{INT}s.
 \fun{ulong}{upowuu}{ulong n, ulong k}, returns $n^k$ modulo $2^\B$. This is
 meant to be used for tiny $k$, where in fact $n^k$ fits into an \kbd{ulong}.
 
-\fun{GEN}{rdivii}{GEN x, GEN y, long prec}, assuming \kbd{x} and \kbd{y}
-are both of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+\fun{GEN}{rdivii}{GEN x, GEN y, long prec}, assuming $x$ and $y$
+are both of type \typ{INT}, return the quotient $x/y$ as a \typ{REAL} of
 precision \kbd{prec}.
+
+\fun{GEN}{rdiviiz}{GEN x, GEN y, GEN z}, assuming $x$ and $y$
+are both of type \typ{INT}, and $z$ is a \typ{REAL}, 
+assign the quotient $x/y$ to $z$.
 
 \fun{GEN}{rdivis}{GEN x, long y, long prec}, assuming \kbd{x}
 is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
