@@ -674,11 +674,8 @@ ZC_galoisapply(GEN nf, GEN x, GEN s, GEN T)
 static GEN
 pr_galoisapply(GEN nf, GEN pr, GEN aut)
 {
-  GEN PR = cgetg(6,t_VEC), p = pr_get_p(pr);
-  GEN b, u, pov2 = shifti(p,-1), s = gel(aut,2), T = gel(aut,1);
-  gel(PR,1) = p;
-  gel(PR,3) = gel(pr,3);
-  gel(PR,4) = gel(pr,4);
+  GEN p = pr_get_p(pr), pov2 = shifti(p,-1);
+  GEN b, u, s = gel(aut,2), T = gel(aut,1);
   b = centermod_i(ZC_galoisapply(nf, pr_get_tau(pr), s,T), p, pov2);
   u = centermod_i(ZC_galoisapply(nf, pr_get_gen(pr), s,T), p, pov2);
   if (pr_get_e(pr) == 1 && int_elt_val(nf, u, p, b, NULL))
@@ -686,8 +683,7 @@ pr_galoisapply(GEN nf, GEN pr, GEN aut)
     GEN t = gel(u,1);
     gel(u,1) =  (signe(t) > 0)? subii(t, p) : addii(t, p);
   }
-  gel(PR,2) = u;
-  gel(PR,5) = b; return PR;
+  return mkvec5(p, u, gel(pr,3), gel(pr,4), b);
 }
 static GEN
 fa_galoisapply(GEN nf, GEN fa, GEN aut)

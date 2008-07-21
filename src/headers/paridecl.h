@@ -2485,6 +2485,7 @@ INLINE GEN    mkvec2copy(GEN x, GEN y);
 INLINE GEN    mkvec3(GEN x, GEN y, GEN z);
 INLINE GEN    mkvec3s(long x, long y, long z);
 INLINE GEN    mkvec4(GEN x, GEN y, GEN z, GEN t);
+INLINE GEN    mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u);
 INLINE GEN    mkveccopy(GEN x);
 INLINE GEN    mkvecs(long x);
 INLINE GEN    mkvecsmall(long x);

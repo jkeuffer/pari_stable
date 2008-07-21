@@ -1712,14 +1712,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
 /*******************************************************************/
 static GEN
 mk_pr(GEN p, GEN u, long e, long f, GEN t)
-{
-  GEN pr = cgetg(6, t_VEC);
-  gel(pr,1) = p;
-  gel(pr,2) = u;
-  gel(pr,3) = utoipos(e);
-  gel(pr,4) = utoipos(f);
-  gel(pr,5) = t; return pr;
-}
+{ return mkvec5(p, u, utoipos(e), utoipos(f), t); }
 
 /* pr = (p,u) of ramification index e */
 GEN

@@ -704,12 +704,7 @@ qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
   long sb = signe(b);
 
   rho_get_BC(&B, &C, b, c, D, isqrtD);
-  y = cgetg(6, t_VEC);
-  gel(y,1) = c;
-  gel(y,2) = B;
-  gel(y,3) = C;
-  y[4] = x[4];
-  y[5] = x[5];
+  y = mkvec5(c,B,C, gel(x,4), gel(x,5));
   if (sb) {
     GEN t = subii(sqri(b), D);
     if (sb < 0)
@@ -725,14 +720,7 @@ qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
 /* Not stack-clean */
 GEN
 qfr_to_qfr5(GEN x, long prec)
-{
-  GEN y = cgetg(6,t_VEC);
-  y[1] = x[1];
-  y[2] = x[2];
-  y[3] = x[3];
-  gel(y,4) = gen_0;
-  gel(y,5) = real_1(prec); return y;
-}
+{ return mkvec5(gel(x,1),gel(x,2),gel(x,3),gen_0,real_1(prec)); }
 
 /* d0 = initial distance, x = [a,b,c, expo(d), d], d = exp(2*distance) */
 static GEN

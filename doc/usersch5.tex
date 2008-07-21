@@ -4267,6 +4267,9 @@ of \kbd{x}. (The name comes from \kbd{RgV\_isscalar}.)
 
 \smallskip
 
+\fun{GEN}{mkintmodu}{ulong x, ulong y} creates the \typ{INTMOD} \kbd{Mod(x, y)}.
+The inputs must satisfy $x < y$.
+
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
 components set to \kbd{gen\_0}. Note that the result allocates a
 \emph{single} column, so modifying an entry in one column modifies it in
@@ -4356,14 +4359,21 @@ or same priority, with $(x,y) = 1$.
 
 \fun{GEN}{mkcol}{GEN x} creates a 1-dimensional \typ{COL} containing \kbd{x}.
 
+\fun{GEN}{mkcol2}{GEN x, GEN y} creates a 2-dimensional \typ{COL} equal to
+\kbd{[x,y]}.
+
 \fun{GEN}{mkintmod}{GEN x, GEN y} creates the \typ{INTMOD} \kbd{Mod(x, y)}.
-The input must be \typ{INT}s satisfying $0 \leq x < y$.
+The inputs must be \typ{INT}s satisfying $0 \leq x < y$.
 
 \fun{GEN}{mkpolmod}{GEN x, GEN y} creates the \typ{POLMOD} \kbd{Mod(x, y)}.
 The input must satisfy $\deg x < \deg y$ with respect to the main variable of
 the \typ{POL} $y$. $x$ may be a scalar.
 
-\fun{GEN}{mkmat}{GEN x} creates a 1-by-1 \typ{MAT} containing \kbd{x}.
+\fun{GEN}{mkmat}{GEN x} creates a 1-column \typ{MAT} with column $x$
+(a \typ{COL}).
+
+\fun{GEN}{mkmat2}{GEN x, GEN y} creates a 2-column \typ{MAT} with columns
+$x$, $y$ (\typ{COL}s of the same length).
 
 \fun{GEN}{mkvec}{GEN x} creates a 1-dimensional \typ{VEC} containing \kbd{x}.
 
@@ -4375,6 +4385,9 @@ equal to \kbd{[x,y,z]}.
 
 \fun{GEN}{mkvec4}{GEN x, GEN y, GEN z, GEN t} creates a 4-dimensional \typ{VEC}
 equal to \kbd{[x,y,z,t]}.
+
+\fun{GEN}{mkvec5}{GEN a1, GEN a2, GEN a3, GEN a4, GEN a5} creates the
+5-dimensional \typ{VEC} equal to $[a_1,a_2,a_3,a_4,a_5]$.
 
 \smallskip
 

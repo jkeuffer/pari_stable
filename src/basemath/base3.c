@@ -1279,12 +1279,12 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   }
 
   list = cget1(e+1, t_VEC);
-  y = cgetg(6,t_VEC); appendL(list, y);
-  gel(y,1) = mkvec(addis(powiu(p,f), -1));
-  gel(y,2) = mkvec(g);
-  gel(y,3) = mkvec(g0);
-  gel(y,4) = mkvec(nfsign_arch(nf,g0,arch));
-  gel(y,5) = gen_1;
+  y = mkvec5(mkvec(addis(powiu(p,f), -1)),
+             mkvec(g),
+             mkvec(g0),
+             mkvec(nfsign_arch(nf,g0,arch)),
+             gen_1);
+  appendL(list, y);
   prb = prh;
   for (a = b = 1; a < e; a = b)
   {
@@ -1304,12 +1304,8 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
       if (x) gel(gen,i) = makeprimetoideal(x,u,v,gel(gen,i));
       gel(s,i) = nfsign_arch(nf,gel(gen,i),arch);
     }
-    y = cgetg(6,t_VEC); appendL(list, y);
-    gel(y,1) = gel(z,1);
-    gel(y,2) = gel(z,2);
-    gel(y,3) = gen;
-    gel(y,4) = s;
-    gel(y,5) = U;
+    y = mkvec5(gel(z,1), gel(z,2), gen, s, U);
+    appendL(list, y);
   }
   return gerepilecopy(av, list);
 }

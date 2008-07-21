@@ -42,6 +42,10 @@ mkvec4(GEN x, GEN y, GEN z, GEN t) {
   GEN v=cgetg(5,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; gel(v,4) = t;
   return v; }
 INLINE GEN
+mkvec5(GEN x, GEN y, GEN z, GEN t, GEN u) {
+  GEN v=cgetg(6,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; 
+  gel(v,4) = t; gel(v,5) = u; return v; }
+INLINE GEN
 mkvec2copy(GEN x, GEN y) {
   GEN v = cgetg(3,t_VEC); gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
 INLINE GEN

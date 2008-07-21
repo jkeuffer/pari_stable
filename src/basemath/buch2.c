@@ -2853,14 +2853,7 @@ nfbasic_from_sbnf(GEN sbnf, nfbasic_t *T)
 
 static GEN
 get_clfu(GEN clgp, GEN reg, GEN zu, GEN fu)
-{
-  GEN z = cgetg(6, t_VEC);
-  gel(z,1) = clgp;
-  gel(z,2) = reg;
-  gel(z,3) = gen_1; /* DUMMY */
-  gel(z,4) = zu;
-  gel(z,5) = fu; return z;
-}
+{ return mkvec5(clgp, reg, gen_1/*DUMMY*/, zu, fu); }
 
 static GEN
 buchall_end(GEN nf,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,GEN Vbase)
