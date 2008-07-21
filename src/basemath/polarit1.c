@@ -1828,7 +1828,7 @@ padicff2(GEN nf,GEN p,long k)
   long i, l;
 
   mulx = zk_scalar_or_multable(nf, gmael(nf,8,2)); /* mul by (x mod T) */
-  dec_p = primedec(nf,p);
+  dec_p = idealprimedec(nf,p);
   l = lg(dec_p); fa = cgetg(l,t_COL);
   D = NULL; /* -Wall */
   for (i=1; i<l; i++)

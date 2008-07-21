@@ -1374,7 +1374,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   pari_sp av = avma;
   GEN bnf = gel(bnr,1), cond = gmael3(bnr,2,1,1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
-  GEN prime, pr, nf = checknf(bnf), dk = gel(nf,3);
+  GEN prime, Lpr, nf = checknf(bnf), dk = gel(nf,3);
   byteptr d = diffptr + 1;
   GEN *gptr[7];
 
@@ -1391,20 +1391,19 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
       if (condZ % p == 0) deg0(R,p); else deg2(R,p);
       break;
     case 1: /* split */
-      pr = primedec(nf, prime);
-      if      (condZ % p != 0) deg12(R, p, bnr, pr);
+      Lpr = idealprimedec(nf, prime);
+      if      (condZ % p != 0) deg12(R, p, bnr, Lpr);
       else if (contZ % p == 0) deg0(R,p);
       else
       {
-	pr = idealval(nf, cond, gel(pr,1))? gel(pr,2): gel(pr,1);
+	GEN pr = idealval(nf, cond, gel(Lpr,1))? gel(Lpr,2): gel(Lpr,1);
 	deg11(R, p, bnr, pr);
       }
       break;
     default: /* ramified */
       if (condZ % p == 0) deg0(R,p);
-      else
-      {
-	pr = gel(primedec(nf, prime),1);
+      else {
+        GEN pr = gel(idealprimedec(nf,prime),1);
 	deg11(R, p, bnr, pr);
       }
       break;
@@ -1440,7 +1439,7 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
   {
     pari_sp av = avma;
     if (DEBUGLEVEL>1 && (p & 2047) == 1) fprintferr("%ld ", p);
-    tabpr = primedec(nf, prime);
+    tabpr = idealprimedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
     {
       pr  = gel(tabpr,j);

@@ -1669,7 +1669,7 @@ get_LV(GEN nf, GEN L, GEN p, long N)
 }
 
 static void
-errprime(GEN p) { pari_err(talker, "primedec: %Ps is not prime", p); }
+errprime(GEN p) { pari_err(talker, "idealprimedec: %Ps is not prime", p); }
 
 /* P = Fp-basis (over O_K/p) for pr.
  * V = Z-basis for I_p/pr. ramif != 0 iff some pr|p is ramified.
@@ -1920,10 +1920,10 @@ primedec_aux(GEN nf, GEN p)
 }
 
 GEN
-primedec(GEN nf, GEN p)
+idealprimedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  if (typ(p) != t_INT) pari_err(typeer, "primedec");
+  if (typ(p) != t_INT) pari_err(typeer, "idealprimedec");
   return gerepileupto(av, gen_sort(primedec_aux(checknf(nf),p),
 				   (void*)&cmp_prime_over_p, &cmp_nodata));
 }
@@ -1958,18 +1958,18 @@ lift_to_zk(GEN v, GEN c, long N)
 GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
-  GEN p = gel(pr,1), ge = gel(pr,3), b = gel(pr,5);
-  ulong e = (ulong)ge[2];
+  GEN b = pr_get_tau(pr);
+  long e = pr_get_e(pr);
   if (e == 1) return b;
-  return ZC_Z_divexact(nfpow_u(nf, b, e), powiu(p, e-1));
+  return ZC_Z_divexact(nfpow_u(nf, b, e), powiu(pr_get_p(pr), e-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
 static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
-  GEN p = gel(pr,1), z;
-  long N = lg(gel(pr,2))-1, e = itou(gel(pr,3)), f = itou(gel(pr,4));
+  GEN p = pr_get_p(pr), z;
+  long N = degpol(gel(nf,1)), e = pr_get_e(pr), f = pr_get_f(pr);
   if (e*f == N) return col_ei(N, 1);
 
   z = FpC_red(special_anti_uniformizer(nf, pr), p);
@@ -2043,11 +2043,11 @@ modprinit(GEN nf, GEN pr, int zk)
   long N, i, k, f;
 
   nf = checknf(nf); checkprid(pr);
-  f = itos( gel(pr,4) );
+  f = pr_get_f(pr);
   N = degpol(nf[1]);
   prh = idealhnf_two(nf, pr);
   tau = zk? gen_0: anti_uniformizer2(nf, pr);
-  p = gel(pr,1);
+  p = pr_get_p(pr);
 
   if (f == 1)
   {
@@ -2073,7 +2073,7 @@ modprinit(GEN nf, GEN pr, int zk)
     if (N == f) T = gel(nf,1); /* pr inert */
     else
     {
-      T = RgV_RgC_mul(Q_primpart(basis), gel(pr,2));
+      T = RgV_RgC_mul(Q_primpart(basis), pr_get_gen(pr));
       T = FpX_normalize(T,p);
       basis = vecpermute(basis, c);
     }
@@ -2183,7 +2183,7 @@ zk_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
 GEN
 zk_to_Fq(GEN x, GEN modpr)
 {
-  GEN pr = gel(modpr,mpr_PR), p = gel(pr,1);
+  GEN pr = gel(modpr,mpr_PR), p = pr_get_p(pr);
   GEN ffproj = gel(modpr,mpr_FFP);
   if (lg(modpr) == SMALLMODPR) return FpV_dotproduct(ffproj,x, p);
   return FpM_FpC_mul_FpX(ffproj,x, p, varn(modpr[mpr_T]));
@@ -2217,7 +2217,7 @@ nfreducemodpr_i(GEN x, GEN prh)
 static GEN
 Rg_to_ff(GEN nf, GEN x, GEN modpr)
 {
-  GEN den, pr = gel(modpr,mpr_PR), p = gel(pr,1);
+  GEN den, pr = gel(modpr,mpr_PR), p = pr_get_p(pr);
   long tx = typ(x);
 
   if (tx == t_POLMOD) { x = gel(x,2); tx = typ(x); }
@@ -2452,7 +2452,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   hzk = FqX_to_nfX(h, modpr);
 
   k = gsub(P, RgXQX_mul(gzk,hzk, nfT));
-  tau = gel(pr,5);
+  tau = pr_get_tau(pr);
   if (typ(tau) == t_INT)
     k = gdiv(k, p);
   else
@@ -2540,7 +2540,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   W = gmael(p1,2,1);
   I = gmael(p1,2,2);
 
-  pip = coltoalg(nf, gel(pr,2));
+  pip = coltoalg(nf, pr_get_gen(pr));
   nfT = gel(nf,1);
   n = degpol(pol); vpol = varn(pol);
   q = T? powiu(p,degpol(T)): p;

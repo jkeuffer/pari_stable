@@ -125,7 +125,7 @@ makenfabs(GEN rnf)
   gel(NF,7) = RgM_to_RgXV(M,varn(pol));
   gel(NF,8) = RgM_inv(M);
   gel(NF,9) = get_mul_table(pol, gel(NF,7), gel(NF,8));
-  /* possibly wrong, but correct prime divisors [for primedec] */
+  /* possibly wrong, but correct prime divisors [for idealprimedec] */
   gel(NF,4) = Q_denom(gel(NF,7));
   return NF;
 }

@@ -453,7 +453,7 @@ GEN
 idealfactor(GEN nf, GEN x)
 {
   pari_sp av;
-  long tx, i, j, k, lf, lc, N, v, vc, e;
+  long tx, i, j, k, lf, lc, N, v, vc;
   GEN X, f, f1, f2, c1, c2, y1, y2, y, p1, cx, P;
 
   tx = idealtyp(&x,&y);
@@ -478,7 +478,7 @@ idealfactor(GEN nf, GEN x)
       settyp(c2, t_VEC); /* for shallowconcat */
       for (i = 1; i < lfa; i++)
       {
-	GEN P = primedec(nf, gel(c1,i)), E = gel(c2,i), z;
+	GEN P = idealprimedec(nf, gel(c1,i)), E = gel(c2,i), z;
 	long lP = lg(P);
 	z = cgetg(lP, t_COL);
 	for (j = 1; j < lP; j++) gel(z,j) = mulii(gmael(P,j,3), E);
@@ -520,14 +520,14 @@ idealfactor(GEN nf, GEN x)
   for (i=1; i<lf; i++)
   {
     long l = f2[i]; /* = v_p(Nx) */
-    p1 = primedec(nf,gel(f1,i));
+    p1 = idealprimedec(nf,gel(f1,i));
     vc = cx? Q_pval(cx,gel(f1,i)): 0;
     for (j=1; j<lg(p1); j++)
     {
-      P = gel(p1,j); e = itos(gel(P,3));
+      P = gel(p1,j);
       v = idealval(nf,x,P);
-      l -= v*itos(gel(P,4));
-      v += vc*e; if (!v) continue;
+      l -= v*pr_get_f(P);
+      v += vc * pr_get_e(P); if (!v) continue;
       gel(y1,k) = P;
       y2[k] = v; k++;
       if (l == 0) break; /* now only the content contributes */
@@ -535,22 +535,22 @@ idealfactor(GEN nf, GEN x)
     if (vc == 0) continue;
     for (j++; j<lg(p1); j++)
     {
-      P = gel(p1,j); e = itos(gel(P,3));
+      P = gel(p1,j); 
       gel(y1,k) = P;
-      y2[k] = vc*e; k++;
+      y2[k++] = vc * pr_get_e(P);
     }
   }
   for (i=1; i<lc; i++)
   {
     /* p | Nx already treated */
     if (dvdii(gcoeff(X,1,1),gel(c1,i))) continue;
-    p1 = primedec(nf,gel(c1,i));
+    p1 = idealprimedec(nf,gel(c1,i));
     vc = itos(gel(c2,i));
     for (j=1; j<lg(p1); j++)
     {
-      P = gel(p1,j); e = itos(gel(P,3));
+      P = gel(p1,j);
       gel(y1,k) = P;
-      y2[k] = vc*e; k++;
+      y2[k++] = vc * pr_get_e(P);
     }
   }
   setlg(y1, k);
@@ -560,7 +560,7 @@ idealfactor(GEN nf, GEN x)
   return sort_factor(y, (void*)&cmp_prime_ideal, &cmp_nodata);
 }
 
-/* P prime ideal in primedec format. Return valuation(ix) at P */
+/* P prime ideal in idealprimedec format. Return valuation(ix) at P */
 long
 idealval(GEN nf, GEN ix, GEN P)
 {
@@ -573,21 +573,21 @@ idealval(GEN nf, GEN ix, GEN P)
   tx = idealtyp(&ix,&a);
   if (tx == id_PRINCIPAL) return nfval(nf,ix,P);
   checkprid(P);
-  p = gel(P,1);
+  p = pr_get_p(P);
   if (tx == id_PRIME) {
-    if (!equalii(p, gel(ix,1))) return 0;
-    return (ZV_equal(gel(P,2), gel(ix,2))
-	 || nfval(nf, gel(ix,2), P))? 1: 0;
+    if (!equalii(p, pr_get_p(ix))) return 0;
+    return (ZV_equal(pr_get_gen(P), pr_get_gen(ix))
+	 || nfval(nf, pr_get_gen(ix), P))? 1: 0;
   }
   /* id_MAT */
   nf = checknf(nf);
   N = lg(ix)-1; if (!N) pari_err(talker,"zero ideal in idealval");
   ix = Q_primitive_part(ix, &cx);
   i = val_norm(ix,p, &k);
-  if (!i) { v = cx? itos(gel(P,3)) * Q_pval(cx,p): 0; avma = av; return v; }
+  if (!i) { v = cx? pr_get_e(P) * Q_pval(cx,p): 0; avma = av; return v; }
 
-  e = itos(gel(P,3));
-  f = itos(gel(P,4));
+  e = pr_get_e(P);
+  f = pr_get_f(P);
   vd = cx? e * Q_pval(cx,p): 0;
   /* 0 <= ceil[v_P(ix) / e] <= v_p(ix \cap Z) --> v_P <= e * v_p */
   j = k * e;
@@ -1084,7 +1084,7 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
 /* Compute A = prod g[i]^e[i] mod pr^k, assuming (A, pr) = 1.
  * Method: modify each g[i] so that it becomes coprime to pr :
  *  x / (p^k u) --> x * (b/p)^v_pr(x) / z^k u, where z = b^e/p^(e-1)
- * b/p = vp^(-1) times something prime to p; both numerator and denominator
+ * b/p = pr^(-1) times something prime to p; both numerator and denominator
  * are integral and coprime to pr.  Globally, we multiply by (b/p)^v_pr(A) = 1.
  *
  * EX = multiple of exponent of (O_K / pr^k)^* used to reduce the product in
@@ -1093,9 +1093,8 @@ GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
-  GEN prkZ, u, p = gel(pr,1), b = gel(pr,5);
-  GEN vden = gen_0;
-  GEN mul = zk_scalar_or_multable(nf, b);
+  GEN prkZ, u, vden = gen_0, p = pr_get_p(pr);
+  GEN mul = zk_scalar_or_multable(nf, pr_get_tau(pr));
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
   prkZ = gcoeff(prk, 1,1);
@@ -1214,7 +1213,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   return cx? ZM_Q_mul(x,cx): x;
 }
 int
-prime_is_inert(GEN P) { GEN f = gel(P,4); return f[2] == lg(gel(P,2))-1; }
+prime_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 
 /* tx <= ty */
 static GEN
@@ -1301,12 +1300,9 @@ idealsqr(GEN nf, GEN x)
   gel(res,2) = ext_sqr(nf, ax); return res;
 }
 
-/* assume pr in primedec format */
+/* assume pr in idealprimedec format */
 GEN
-pr_norm(GEN pr) {
-  GEN F = gel(pr,4), p = gel(pr,1);
-  return powiu(p, (ulong)F[2]);
-}
+pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
 
 /* norm of an ideal */
 GEN
@@ -1407,49 +1403,50 @@ idealinv(GEN nf, GEN x)
   gel(res,2) = ext_inv(nf, ax); return res;
 }
 
-/* Return x such that vp^n = x/d. Assume n != 0 */
+/* Return x, integral in 2-elt form, such that pr^n = x/d. Assume n != 0 */
 static GEN
-idealpowprime(GEN nf, GEN vp, GEN n, GEN *d)
+idealpowprime(GEN nf, GEN pr, GEN n, GEN *d)
 {
-  GEN n1, x, r;
   long s = signe(n);
+  GEN q, gen;
 
   if (s < 0) n = negi(n);
   /* now n > 0 */
-  x = shallowcopy(vp);
   if (is_pm1(n)) /* n = 1 special cased for efficiency */
   {
-    if (s < 0)
-    {
-      gel(x,2) = gel(x,5);
-      *d = gel(x,1);
-    }
-    else
+    q = pr_get_p(pr);
+    if (s < 0) {
+      gen = pr_get_tau(pr);
+      *d = q;
+    } else {
+      gen = pr_get_gen(pr);
       *d = NULL;
+    }
   }
   else
   {
-    n1 = dvmdii(n, gel(x,3), &r);
-    if (signe(r)) n1 = addis(n1,1); /* n1 = ceil(n/e) */
-    gel(x,1) = powgi(gel(x,1),n1);
+    long r;
+    GEN p = pr_get_p(pr);
+    GEN m = divis_rem(n, pr_get_e(pr), &r);
+    if (r) m = addis(m,1); /* m = ceil(n/e) */
+    q = powgi(p,m);
     if (s < 0)
     {
-      GEN q = powgi(gel(vp,1),subii(n,n1));
-      gel(x,2) = RgC_Rg_div(nfpow(nf,gel(x,5),n), q);
-      *d = gel(x,1);
+      gen = ZC_Z_divexact(nfpow(nf, pr_get_tau(pr), n), powgi(p, subii(n,m)));
+      *d = q;
     }
     else
     {
-      gel(x,2) = nfpow(nf,gel(x,2),n);
+      gen = nfpow(nf, pr_get_gen(pr), n);
       *d = NULL;
     }
   }
-  return x;
+  return mkvec2(q, gen);
 }
 
-/* x * vp^n. Assume x in HNF (possibly non-integral) */
+/* x * pr^n. Assume x in HNF (possibly non-integral) */
 GEN
-idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
+idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
 {
   GEN cx,y,dx;
 
@@ -1457,9 +1454,9 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   nf = checknf(nf);
 
   /* inert, special cased for efficiency */
-  if (prime_is_inert(vp)) return RgM_Rg_mul(x, powgi(gel(vp,1), n));
+  if (prime_is_inert(pr)) return RgM_Rg_mul(x, powgi(pr_get_p(pr), n));
 
-  y = idealpowprime(nf, vp, n, &dx);
+  y = idealpowprime(nf, pr, n, &dx);
   x = Q_primitive_part(x, &cx);
   if (cx && dx)
   {
@@ -1474,9 +1471,9 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   return x;
 }
 GEN
-idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n)
+idealdivpowprime(GEN nf, GEN x, GEN pr, GEN n)
 {
-  return idealmulpowprime(nf,x,vp, negi(n));
+  return idealmulpowprime(nf,x,pr, negi(n));
 }
 
 static GEN
@@ -1899,7 +1896,7 @@ static GEN
 nf_coprime_part(GEN nf, GEN x, GEN listpr)
 {
   long v, j, lp = lg(listpr), N = degpol(nf[1]);
-  GEN x1, x2, ex, p, pr;
+  GEN x1, x2, ex;
 
 #if 0 /*1) via many gcds. Expensive ! */
   GEN f = idealprodprime(nf, listpr);
@@ -1916,10 +1913,10 @@ nf_coprime_part(GEN nf, GEN x, GEN listpr)
   x1 = NULL;
   for (j=1; j<lp; j++)
   {
-    pr = gel(listpr,j); p = gel(pr,1);
-    v = Z_pval(x, p); if (!v) continue;
+    GEN pr = gel(listpr,j);
+    v = Z_pval(x, pr_get_p(pr)); if (!v) continue;
 
-    ex = mului(v, gel(pr,3)); /* = v_pr(x) > 0 */
+    ex = muluu(v, pr_get_e(pr)); /* = v_pr(x) > 0 */
     x1 = x1? idealmulpowprime(nf, x1, pr, ex)
 	   : idealpow(nf, pr, ex);
   }
@@ -1988,11 +1985,11 @@ factorbackprime(GEN nf, GEN L, GEN e)
 GEN
 unif_mod_fZ(GEN pr, GEN F)
 {
-  GEN p = gel(pr,1), t = gel(pr,2);
+  GEN p = pr_get_p(pr), t = pr_get_gen(pr);
   if (!equalii(F, p))
   {
-    GEN u, v, q, e = gel(pr,3), a = diviiexact(F,p);
-    q = is_pm1(e)? sqri(p): p;
+    GEN u, v, q, a = diviiexact(F,p);
+    q = (pr_get_e(pr) == 1)? sqri(p): p;
     if (!gcmp1(bezout(q, a, &u,&v))) pari_err(bugparier,"unif_mod_fZ");
     u = mulii(u,q);
     v = mulii(v,a);
@@ -2009,7 +2006,7 @@ init_unif_mod_fZ(GEN L)
   GEN pr, p, F = gen_1;
   for (i = 1; i < r; i++)
   {
-    pr = gel(L,i); p = gel(pr,1);
+    pr = gel(L,i); p = pr_get_p(pr);
     if (!dvdii(F, p)) F = mulii(F,p);
   }
   return F;

@@ -131,9 +131,9 @@ quad_char(GEN nf, GEN t, GEN pr)
 static long
 Z_quad_char(GEN x, GEN pr)
 {
-  long f = itos(gel(pr,4));
+  long f = pr_get_f(pr);
   if (!odd(f)) return 1;
-  return kronecker(x, gel(pr,1));
+  return kronecker(x, pr_get_p(pr));
 }
 
 /* (pr,2) = 1. return 1 if x in Z_K is a square in Z_{K_pr}, 0 otherwise.
@@ -142,17 +142,17 @@ static long
 psquarenf(GEN nf,GEN x,GEN pr,GEN modpr)
 {
   pari_sp av = avma;
-  GEN p = gel(pr,1);
+  GEN p = pr_get_p(pr);
   long v;
 
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) == t_INT) {
     if (!signe(x)) return 1;
-    v = Z_pvalrem(x, p, &x) * itos(gel(pr,3));
+    v = Z_pvalrem(x, p, &x) * pr_get_e(pr);
     if (v&1) return 0;
     v = (Z_quad_char(x, pr) == 1);
   } else {
-    v = int_elt_val(nf, x, p, gel(pr,5), &x);
+    v = int_elt_val(nf, x, p, pr_get_tau(pr), &x);
     if (v&1) return 0;
     v = (quad_char(nf, x, modpr) == 1);
   }
@@ -181,9 +181,9 @@ psquare2nf(GEN nf,GEN x,GEN pr,GEN zinit)
   /* x /= pi^v, pi a pr-uniformizer. v >= 0 */
   if (typ(x) == t_INT) {
     if (!signe(x)) return 1;
-    v = Z_lvalrem(x, 2, &x) * itos(gel(pr,3));
+    v = Z_lvalrem(x, 2, &x) * pr_get_e(pr);
   } else
-    v = int_elt_val(nf, x, gel(pr,1), gel(pr,5), &x);
+    v = int_elt_val(nf, x, pr_get_p(pr), pr_get_tau(pr), &x);
   if (v&1) return 0;
   /* now (x,pr) = 1 */
   v = check2(nf,x,zinit); avma = av; return v;
@@ -233,10 +233,10 @@ lemma7nf(GEN nf, GEN T, GEN pr, long nu, GEN x, GEN zinit)
     if (odd(la)) return -1;
     q = nu2-la; res = 0;
   }
-  if (q > itos(gel(pr,3))<<1)  return -1;
+  if (q > pr_get_e(pr)<<1)  return -1;
 
   /* gx /= pi^la, pi a pr-uniformizer */
-  gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, gel(pr,5), la)), -la);
+  gx = gmul2n(nfmul(nf, gx, nfpow_u(nf, pr_get_tau(pr), la)), -la);
   if (!check2(nf, gx, zinit)) res = -1;
   return res;
 }
@@ -253,7 +253,7 @@ zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma = av;
   if (res== 1) return 1;
   if (res==-1) return 0;
-  pnup = gmul(pnu, coltoalg(nf,gel(pr,2)));
+  pnup = gmul(pnu, coltoalg(nf, pr_get_gen(pr)));
   nu++;
   for (i=1; i<lg(repr); i++)
   {
@@ -267,7 +267,7 @@ zpsolnf(GEN nf,GEN T,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 static GEN
 repres(GEN nf, GEN pr)
 {
-  long i, j, k, f = itos(gel(pr,4)), p, pf, pi;
+  long i, j, k, f = pr_get_f(pr), p, pf, pi;
   GEN fond, rep, bas = gel(nf,7);
 
   fond = cgetg(f+1, t_VEC);
@@ -278,7 +278,7 @@ repres(GEN nf, GEN pr)
       if (!is_pm1(gmael(mat,i,i))) gel(fond,k++) = gel(bas,i);
   }
 
-  p = itos(gel(pr,1));
+  p = itos(pr_get_p(pr));
   pf = upowuu(p, f);
   rep = cgetg(pf+1,t_VEC);
   gel(rep,1) = gen_0; pi=1;
@@ -302,7 +302,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   if (gcmp0(T)) return 1;
   checkprid(pr); nf = checknf(nf);
 
-  if (equaliu(gel(pr,1), 2))
+  if (equaliu(pr_get_p(pr), 2))
   { /* tough case */
     zinit = Idealstar(nf, idealpows(nf,pr,1+2*nfval(nf,gen_2,pr)), nf_INIT);
     if (psquare2nf(nf,constant_term(T),pr,zinit)) return 1;
@@ -316,7 +316,7 @@ nf_hyperell_locally_soluble(GEN nf,GEN T,GEN pr)
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,T,pr,0,gen_1,gen_0,repr,zinit)) { avma=av; return 1; }
-  p1 = coltoalg(nf, gel(pr,2));
+  p1 = coltoalg(nf, pr_get_gen(pr));
   if (zpsolnf(nf,polrecip_i(T),pr,1,p1,gen_0,repr,zinit)) { avma=av; return 1; }
 
   avma = av; return 0;
@@ -343,11 +343,11 @@ hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 static long
 nfhilbertp(GEN nf, GEN a, GEN b, GEN pr)
 {
-  GEN t, p = gel(pr,1);
+  GEN t;
   long va, vb, rep;
   pari_sp av = avma;
 
-  if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
+  if (equaliu(pr_get_p(pr), 2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
   va = nfval(nf,a,pr);
@@ -419,7 +419,7 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   return nfhilbert(nf,a,b);
 }
 
-/* S a list of prime ideal in primedec format. Return res:
+/* S a list of prime ideal in idealprimedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
  * res[3] = [] (was: log. embeddings of res[1])
@@ -551,7 +551,7 @@ make_unit(GEN nf, GEN bnfS, GEN *px)
   for (i=1; i<ls; i++)
   {
     GEN P = gel(S,i);
-    v[i] = (remii(N, gel(P,1)) == gen_0)? nfval(nf,xb,P): 0;
+    v[i] = (remii(N, pr_get_p(P)) == gen_0)? nfval(nf,xb,P): 0;
   }
   /* here, x = S v */
   p1 = vecpermute(v, perm);
@@ -603,8 +603,8 @@ pr_append(GEN nf, GEN rel, GEN p, GEN *prod, GEN *S1, GEN *S2)
 {
   if (dvdii(*prod, p)) return;
   *prod = mulii(*prod, p);
-  *S1 = shallowconcat(*S1, primedec(nf,p));
-  *S2 = shallowconcat(*S2, primedec(rel,p));
+  *S1 = shallowconcat(*S1, idealprimedec(nf,p));
+  *S2 = shallowconcat(*S2, idealprimedec(rel,p));
 }
 
 static void

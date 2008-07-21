@@ -43,7 +43,7 @@ dirzetak0(GEN nf, long N0)
       { vect = gel(FpX_degfact(pol,court),1); lx = lg(vect); }
     else
     {
-      GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_VECSMALL);
+      GEN p1 = idealprimedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_VECSMALL);
       for (i=1; i<lx; i++) vect[i] = itou( gmael(p1,i,4) );
     }
     for (i=1; i<lx; i++)

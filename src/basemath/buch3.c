@@ -181,12 +181,12 @@ static long
 fast_val(GEN nf,GEN L0,GEN cx,GEN pr,GEN tau)
 {
   pari_sp av = avma;
-  GEN p = gel(pr,1);
+  GEN p = pr_get_p(pr);
   long v = typ(L0) == t_INT? 0: int_elt_val(nf,L0,p,tau,NULL);
   if (cx)
   {
     long w = Q_pval(cx, p);
-    if (w) v += w * itos(gel(pr,3));
+    if (w) v += w * pr_get_e(pr);
   }
   avma = av; return v;
 }
@@ -246,7 +246,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     pr = gel(listpr,i);
     gel(vecpi,i)    = NULL; /* to be computed if needed */
     gel(vecpinvpi,i) = NULL; /* to be computed if needed */
-    gel(vectau,i) = zk_scalar_or_multable(nf, gel(pr,5));
+    gel(vectau,i) = zk_scalar_or_multable(nf, pr_get_tau(pr));
   }
 
   l = lg(basecl);
@@ -282,12 +282,12 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       pr = gel(listpr,j);
       v  = idealval(nf, I, pr);
       if (!v) continue;
-      p  = gel(pr,1);
+      p  = pr_get_p(pr);
       pi = get_pi(F, pr, &gel(vecpi,j));
       pinvpi = get_pinvpi(nf, fZ, p, pi, &gel(vecpinvpi,j));
       t = nfpow_u(nf, pinvpi, (ulong)v);
       mulI = mulI? nfmuli(nf, mulI, t): t;
-      t = powiu(gel(pr,1), v);
+      t = powiu(p, v);
       dmulI = dmulI? mulii(dmulI, t): t;
     }
 
@@ -303,7 +303,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 	pr = gel(listpr,j);
 	v  = fast_val(nf, L0,cx, pr,gel(vectau,j)); /* = val_pr(LL) */
 	if (!v) continue;
-	p  = gel(pr,1);
+	p  = pr_get_p(pr);
 	pi = get_pi(F, pr, &gel(vecpi,j));
 	if (v > 0)
 	{
@@ -1028,7 +1028,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
     if (!umodiu(bad,q) || !uisprime(q)) continue;
 
     gq = utoipos(q);
-    LQ = primedec(bnf,gq); nbqq = lg(LQ)-1;
+    LQ = idealprimedec(bnf,gq); nbqq = lg(LQ)-1;
     g = NULL;
     for (i=1; i<=nbqq; i++)
     {
@@ -1407,14 +1407,14 @@ rnfnormgroup(GEN bnr, GEN polrel)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!umodiu(index, p)) continue; /* can't be treated efficiently */
 
-    fa = primedec(nf, utoipos(p)); lfa = lg(fa)-1;
+    fa = idealprimedec(nf, utoipos(p)); lfa = lg(fa)-1;
     for (i=1; i<=lfa; i++)
     {
       GEN pr = gel(fa,i), pp, T, polr, modpr;
       long f;
 
       /* primes of degree 1 are enough, and simpler */
-      if (itos(gel(pr,4)) > 1) break;
+      if (pr_get_f(pr) > 1) break;
 
       modpr = zk_to_Fq_init(nf, &pr, &T, &pp);
       polr = nfX_to_FqX(polrel, nf, modpr);
@@ -1822,8 +1822,8 @@ get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
   long k, nz, clhray = z[2], lP = lg(P);
   for (k=1; k<lP; k++)
   {
-    GEN pr = gel(P,k), p = gel(pr,1);
-    long e, ep = E[k], f = itos(gel(pr,4));
+    GEN pr = gel(P,k), p = pr_get_p(pr);
+    long e, ep = E[k], f = pr_get_f(pr);
     long S = 0, norm = N, Npr, clhss;
     Npr = itos(powiu(p,f));
     for (e=1; e<=ep; e++)
@@ -2017,7 +2017,7 @@ decodemodule(GEN nf, GEN fa)
   for (k=1; k<lg(G); k++)
   {
     long code = itos(gel(G,k)), p = code / nn, j = (code%n)+1;
-    GEN P = primedec(nf, utoipos(p)), e = gel(E,k);
+    GEN P = idealprimedec(nf, utoipos(p)), e = gel(E,k);
     if (lg(P) <= j) pari_err(talker, "incorrect hash code in decodemodule");
     pr = gel(P,j);
     id = id? idealmulpowprime(nf,id, pr,e)
@@ -2102,11 +2102,11 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
       for (i=1; i<=sqbou; i++) bigel(z,i) = bigel(Z,i);
       Z = z;
     }
-    fa = primedec(nf,p);
+    fa = idealprimedec(nf,p);
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j);
-      long prcode, q, f = itos(gel(pr,4)), Q = itos_or_0(powiu(p,f));
+      long prcode, q, f = pr_get_f(pr), Q = itos_or_0(powiu(p,f));
       if (!Q || Q > bound) continue;
 
       /* p, f-1, j-1 as a single integer in "base degk" (f,j <= degk)*/

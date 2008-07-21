@@ -180,12 +180,14 @@ reallocate(RELCACHE_t *M, long len)
   }
 }
 
+#define pr_get_smallp(pr) gel(pr,1)[2]
+
 /* don't take P|p if P ramified, or all other Q|p already there */
 static int
 ok_subFB(FB_t *F, long t, GEN D)
 {
   GEN LP, P = gel(F->LP,t);
-  long p = itos(gel(P,1));
+  long p = pr_get_smallp(P);
   LP = F->LV[p];
   return (!isclone(LP) || t != F->iLP[p] + lg(LP)-1);
 }
@@ -342,7 +344,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   {
     GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
     id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
-    gel(id2,1) = mkvec2(gel(vp,1), gel(vp,2));
+    gel(id2,1) = mkvec2(pr_get_p(vp), pr_get_gen(vp));
     alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
     vp = idealhnf_two(nf,vp);
     for (j=2; j<=a; j++)
@@ -455,7 +457,7 @@ FBgen(FB_t *F, GEN nf, long N, long C2, long C1, GRHcheck_t *S)
     if (p > C2) break;
 
     if (DEBUGLEVEL>1) { fprintferr(" %ld",p); flusherr(); }
-    prim[2] = p; LP = primedec(nf,prim);
+    prim[2] = p; LP = idealprimedec(nf,prim);
 
     av1 = avma; a = b = NULL;
     nbf = countf(LP); l = lg(nbf); k = 0;
@@ -546,7 +548,7 @@ divide_p_elt(FB_t *F, long p, long k, GEN nf, GEN m, FACT *fact)
   for (j=1; j<l; j++)
   {
     P = gel(LP,j);
-    v = int_elt_val(nf, m, gel(P,1), gel(P,5), NULL); /* v_P(m) */
+    v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
     if (!v) continue;
     store(ip + j, v, fact); /* v = v_P(m) > 0 */
     k -= v * itos(gel(P,4));
@@ -578,7 +580,7 @@ divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m, FACT *fact)
   for (j=1; j<l; j++)
   {
     P = gel(LP,j);
-    v = int_elt_val(nf, m, gel(P,1), gel(P,5), NULL); /* v_P(m) */
+    v = int_elt_val(nf, m, pr_get_p(P), gel(P,5), NULL); /* v_P(m) */
     if (!v) continue;
     v -= idealval(nf,I, P);
     if (!v) continue;
@@ -873,14 +875,10 @@ get_norm_fact_primes(GEN G, GEN E, GEN C)
     long s = signe(ex);
     if (!s) continue;
 
-    P = gel(G,i); p = gel(P,1);
+    P = gel(G,i); p = pr_get_p(P);
     N = mulii(N, powgi(p, mulii(gel(P,4), ex)));
   }
-  if (C)
-  {
-    P = C; p = gel(P,1);
-    N = mulii(N, powgi(p, gel(P,4)));
-  }
+  if (C) N = mulii(N, pr_norm(C));
   return N;
 }
 
@@ -912,7 +910,7 @@ get_pr_lists(GEN FB, long N, int list_pr)
   pmax = 0;
   for (i=1; i<l; i++)
   {
-    pr = gel(FB,i); p = itos(gel(pr,1));
+    pr = gel(FB,i); p = pr_get_smallp(pr);
     if (p > pmax) pmax = p;
   }
   L = const_vec(pmax, NULL);
@@ -920,7 +918,7 @@ get_pr_lists(GEN FB, long N, int list_pr)
   {
     for (i=1; i<l; i++)
     {
-      pr = gel(FB,i); p = itos(gel(pr,1));
+      pr = gel(FB,i); p = pr_get_smallp(pr);
       if (!L[p]) gel(L,p) = cget1(N+1, t_VEC);
       appendL(gel(L,p), pr);
     }
@@ -932,7 +930,7 @@ get_pr_lists(GEN FB, long N, int list_pr)
   {
     for (i=1; i<l; i++)
     {
-      pr = gel(FB,i); p = itos(gel(pr,1));
+      pr = gel(FB,i); p = pr_get_smallp(pr);
       if (!L[p]) gel(L,p) = cget1(N+1, t_VECSMALL);
       appendL(gel(L,p), (GEN)i);
     }
@@ -979,9 +977,9 @@ static int
 pr_index(GEN L, GEN pr)
 {
   long j, l = lg(L);
-  GEN al = gel(pr,2);
+  GEN al = pr_get_gen(pr);
   for (j=1; j<l; j++)
-    if (ZV_equal(al, gmael(L,j,2))) return j;
+    if (ZV_equal(al, pr_get_gen(gel(L,j)))) return j;
   pari_err(bugparier,"codeprime");
   return 0; /* not reached */
 }
@@ -989,7 +987,7 @@ pr_index(GEN L, GEN pr)
 static long
 Vbase_to_FB(FB_t *F, GEN pr)
 {
-  long p = itos(gel(pr,1));
+  long p = pr_get_smallp(pr);
   return F->iLP[p] + pr_index(F->LV[p], pr);
 }
 
@@ -1139,7 +1137,7 @@ testprimes(GEN bnf, GEN BOUND)
   if (!bound) bound = maxprime();
   for (av=avma, p=2; p < bound; avma=av)
   {
-    GEN vP = primedec(bnf, utoipos(p));
+    GEN vP = idealprimedec(bnf, utoipos(p));
     long i, l = lg(vP);
     if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
     /* loop through all P | p if ramified, all but one otherwise */
@@ -1169,7 +1167,7 @@ testprimes(GEN bnf, GEN BOUND)
   gp = utoipos(bound);
   for (av=avma;; gp = gerepileuptoint(av, nextprime(addis(gp,1))))
   {
-    GEN vP = primedec(bnf, gp);
+    GEN vP = idealprimedec(bnf, gp);
     long i, l = lg(vP);
     if (DEBUGLEVEL>1) fprintferr("*** p = %Pu\n",gp);
     /* loop through all P | p if ramified, all but one otherwise */
@@ -2632,7 +2630,7 @@ decode_pr_lists(GEN nf, GEN pfc)
   for (i=1; i<l; i++)
   {
     t = gel(pfc,i); p = itos(t) / n;
-    if (!L[p]) gel(L,p) = primedec(nf, utoipos(p));
+    if (!L[p]) gel(L,p) = idealprimedec(nf, utoipos(p));
   }
   return L;
 }
@@ -2646,7 +2644,7 @@ decodeprime(GEN T, GEN L, long n)
 static GEN
 codeprime(GEN L, long N, GEN pr)
 {
-  long p = itos(gel(pr,1));
+  long p = pr_get_smallp(pr);
   return utoipos( N*p + pr_index(gel(L,p), pr)-1 );
 }
 

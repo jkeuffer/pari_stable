@@ -1,6 +1,6 @@
 Function: idealprimedec
 Section: number_fields
-C-Name: primedec
+C-Name: idealprimedec
 Prototype: GG
 Help: idealprimedec(nf,p): prime ideal decomposition of the prime number p
  in the number field nf as a vector of 5 component vectors [p,a,e,f,b]

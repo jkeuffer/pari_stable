@@ -209,7 +209,7 @@ return their result in \typ{COL} form.
 \fun{GEN}{nfsqr}{GEN nf,GEN x} returns $x^2$
 
 \fun{long}{nfval}{GEN nf, GEN x, GEN pr} returns the valuation of $x$ at the
-maximal ideal $\goth{p}$ associated to \kbd{pr}, in \kbd{idealprimedec} form.
+maximal ideal $\goth{p}$ associated to the \var{prid} \kbd{pr}.
 Returns \kbd{LONG\_MAX} is $x$ is $0$.
 
 The following three functions implement trivially functionnalities akin to
@@ -518,6 +518,36 @@ and the second column integral exponents), $y$ a vector of elements in
 $\var{nf}$ indexed by the ideals in $x$, computes an element $b$ such that
 $v_\wp(b - y_\wp) \geq v_\wp(x)$ for all prime ideals in $x$ and $v_\wp(b)\geq
 0$ for all other $\wp$.
+
+\subsec{Maximal ideals}
+
+The PARI structure associated to maximal ideals is a \tev{prid} (for
+\emph{pr}ime \emph{id}eal), usually produced by \tet{idealprimedec}
+and \tet{idealfactor}. In this section, we describe the format; other sections
+will deal with their daily use.
+
+A \var{prid} associated to a maximal ideal $\goth{p}$ stores the following
+data: the underlying rational prime $p$, the ramification degree $e\geq 1$,
+the residue field degree $f\geq 1$, a $p$-uniformizer $\pi$ with valuation
+$1$ at $\goth{p}$ and valuation $0$ at all other primes dividing $p$ and
+a rescaled ``anti-uniformizer'' $\tau$ used to compute valuations. This
+$\tau$ is an algebraic integer such that $\tau/p$ has valuation $-1$ at
+$\goth{p}$ and valuation $0$ at all other primes dividing $p$; in particular,
+the valuation of $x\in\Z_K$ is positive if and only if the algebraic integer
+$x\tau$ is divisible by $p$ (easy to check for elements in \typ{COL} form).
+
+The following functions are shallow and return directly components of the
+\var{prid} \kbd{pr}:
+
+\fun{GEN}{pr_get_p}{GEN pr} returns $p$. Shallow function.
+
+\fun{GEN}{pr_get_gen}{GEN pr} returns $\pi$. Shallow function.
+
+\fun{long}{pr_get_e}{GEN pr} returns $e$.
+
+\fun{long}{pr_get_f}{GEN pr} returns $f$.
+
+\fun{GEN}{pr_get_tau}{GEN pr} returns $\tau$. Shallow function.
 
 \subsec{Reducing modulo maximal ideals}
 

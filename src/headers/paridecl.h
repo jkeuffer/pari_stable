@@ -870,7 +870,7 @@ GEN     nfdisc0(GEN x,long flag, GEN p);
 GEN     nfmodprinit(GEN nf, GEN pr);
 GEN     nfreducemodpr(GEN nf, GEN x, GEN modpr);
 GEN     polcompositum0(GEN pol1, GEN pol2,long flag);
-GEN     primedec(GEN nf,GEN p);
+GEN     idealprimedec(GEN nf,GEN p);
 GEN     rnfbasis(GEN bnf, GEN order);
 GEN     rnfdedekind(GEN nf, GEN T, GEN pr);
 GEN     rnfdet(GEN nf, GEN order);

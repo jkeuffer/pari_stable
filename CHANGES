@@ -240,6 +240,7 @@ BA 49- user variables can now be aliased [#790].
        wrapping) and \n are no longer ignored
    82- Rename library functions initell -> ellinit, smallinitell -> smallellinit
        initalg -> nfinit, initalgred -> nfinitred -> initalgred2 -> nfinitred2
+       primedec -> idealprimedec
    83- Useless nfinit flags 4, 5 (partial polred) removed.
 
   Added
@@ -360,6 +361,8 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    45- library functions ellinit_padic, ellinit_real, ellinf, ell_is_inf,
        ell_is_padic, ell_is_real, checkerr_real, checkell_padic, checksmallell,
        checkell5, checkellpt
+   46- library functions pr_get_p, pr_get_gen, pr_get_e, pr_get_f, pr_get_tau
+       to access components of prime ideals
 
   Removed
     1- obsolete library functions extract and matextract

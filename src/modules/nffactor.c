@@ -1128,7 +1128,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   L->iprk = ZM_inv(PRK, pk);
   L->GSmin= GSmin;
   L->prkHNF = prk;
-  init_proj(L, gel(nf,1), gel(pr,1));
+  init_proj(L, gel(nf,1), pr_get_p(pr));
 }
 
 /* Let X = Tra * M_L, Y = bestlift(X) return V s.t Y = X - PRK V
@@ -1469,7 +1469,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
 
     if (!nbf || anbf < nbf
-	     || (anbf == nbf && cmpii(gel(apr,4), gel(*pr,4)) > 0))
+	     || (anbf == nbf && pr_get_f(apr) > pr_get_f(*pr)))
     {
       nbf = anbf;
       *pr = apr;
@@ -1614,7 +1614,7 @@ nfsqff(GEN nf, GEN pol, long fl, GEN den)
     fprintferr("  3) Final bound: %Ps\n", T.bound);
   }
 
-  L.p = gel(pr,1);
+  L.p = pr_get_p(pr);
   if (L.Tp && degpol(L.Tp) == 1) L.Tp = NULL;
   bestlift_init(0, nf, pr, T.bound, &L);
   if (DEBUGLEVEL>2) TIMERstart(&ti);

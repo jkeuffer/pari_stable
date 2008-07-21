@@ -292,8 +292,8 @@ isprimeidealconj(GEN nfz, GEN pr1, GEN pr2, tau_s *tau)
   GEN b1= gel(pr1,5);
   GEN b2= gel(pr2,5);
   if (!equalii(p, gel(pr2,1))
-   || !equalii(gel(pr1,3), gel(pr2,3))
-   || !equalii(gel(pr1,4), gel(pr2,4))) return 0;
+   || pr_get_e(pr1) != pr_get_e(pr2)
+   || pr_get_f(pr1) != pr_get_f(pr2)) return 0;
   if (ZV_equal(x,gel(pr2,2))) return 1;
   for(;;)
   {
@@ -349,8 +349,8 @@ typedef struct {
 static int
 build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
 {
-  GEN listpr, listex, pr, p, factell;
-  long vd, vp, e, i, l, ell = itos(gell), degKz = degpol(nfz[1]);
+  GEN listpr, listex, pr, factell;
+  long vp, i, l, ell = itos(gell), degKz = degpol(nfz[1]);
 
   if (!fa) fa = idealfactor(nfz, gothf);
   listpr = gel(fa,1);
@@ -362,16 +362,16 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
   L->ESml2=cget1(l,t_VECSMALL);
   for (i=1; i<l; i++)
   {
-    pr = gel(listpr,i); p = gel(pr,1); e = itos(gel(pr,3));
+    pr = gel(listpr,i);
     vp = itos(gel(listex,i));
-    if (!equalii(p,gell))
+    if (!equalii(pr_get_p(pr), gell))
     {
       if (vp != 1) return 1;
       if (!isconjinprimelist(nfz, L->Sm,pr,tau)) appendL(L->Sm,pr);
     }
     else
     {
-      vd = (vp-1)*(ell-1)-ell*e;
+      long e = pr_get_e(pr), vd = (vp-1)*(ell-1)-ell*e;
       if (vd > 0) return 4;
       if (vd==0)
       {
@@ -388,7 +388,7 @@ build_list_Hecke(primlist *L, GEN nfz, GEN fa, GEN gothf, GEN gell, tau_s *tau)
       }
     }
   }
-  factell = primedec(nfz,gell); l = lg(factell);
+  factell = idealprimedec(nfz,gell); l = lg(factell);
   for (i=1; i<l; i++)
   {
     pr = gel(factell,i);
@@ -686,7 +686,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   for (i=1; i<=lSl2; i++)
   {
     GEN pr = gel(listprSp,i);
-    long e = itos(gel(pr,3)), z = ell * (e / (ell-1));
+    long e = pr_get_e(pr), z = ell * (e / (ell-1));
 
     if (i <= lSml2)
     {
@@ -1231,7 +1231,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   for (i=1; i<=lSl2; i++)
   {
     GEN pr = gel(listprSp,i);
-    long e = itos(gel(pr,3)), z = ell * (e / (ell-1));
+    long e = pr_get_e(pr), z = ell * (e / (ell-1));
 
     if (i <= lSml2)
     {

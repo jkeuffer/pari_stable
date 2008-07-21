@@ -1857,7 +1857,8 @@ main(int argc, char **argv)
       if (setjmp(GP_DATA->env))
       {
 	fprintferr("... skipping file '%s'\n", A->v[i]);
-	avma = top; continue;
+        kill_all_buffers(NULL);
+        popinfile(); avma = top; continue;
       }
       (void)read0((char*)A->v[i]);
     }

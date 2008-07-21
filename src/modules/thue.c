@@ -1104,7 +1104,7 @@ get_sol_abs(struct sol_abs *T, GEN bnf, GEN a, GEN *ptPrimes)
   {
     long ldec;
 
-    dec = primedec(bnf,gel(primes,i)); ldec = lg(dec)-1;
+    dec = idealprimedec(bnf,gel(primes,i)); ldec = lg(dec)-1;
     gcd = itos(gmael(dec,1,4));
 
     /* check that gcd_{P|p} f_P | n_p */

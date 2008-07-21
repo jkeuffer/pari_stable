@@ -1597,7 +1597,7 @@ ZV_cmp(GEN x, GEN y)
   return 0;
 }
 
-/* assume x and y come from the same primedec call (uniformizer unique) */
+/* assume x and y come from the same idealprimedec call (uniformizer unique) */
 int
 cmp_prime_over_p(GEN x, GEN y)
 {

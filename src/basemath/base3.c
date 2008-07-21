@@ -601,7 +601,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 }
 
 long
-nfval(GEN nf, GEN x, GEN vp)
+nfval(GEN nf, GEN x, GEN pr)
 {
   pari_sp av = avma;
   long w, e;
@@ -609,13 +609,13 @@ nfval(GEN nf, GEN x, GEN vp)
 
   if (gcmp0(x)) return LONG_MAX;
   nf = checknf(nf);
-  checkprid(vp);
-  p = gel(vp,1);
-  e = itos(gel(vp,3));
+  checkprid(pr);
+  p = pr_get_p(pr);
+  e = pr_get_e(pr);
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL) return e * Q_pval(x,p);
   x = Q_primitive_part(x, &cx);
-  w = int_elt_val(nf,x,p,gel(vp,5),NULL);
+  w = int_elt_val(nf,x,p, pr_get_tau(pr), NULL);
   if (cx) w += e*Q_pval(cx,p);
   avma = av; return w;
 }
@@ -1253,8 +1253,8 @@ static GEN
 zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 {
   pari_sp av = avma;
-  long a, b, e = itos(ep), f = itos(gel(pr,4));
-  GEN p = gel(pr,1), list, g, g0, y, u,v, prh, prb, pre;
+  long a, b, e = itos(ep), f = pr_get_f(pr);
+  GEN p = pr_get_p(pr), list, g, g0, y, u,v, prh, prb, pre;
 
   if(DEBUGLEVEL>3) fprintferr("treating pr^%ld, pr = %Ps\n",e,pr);
   if (f == 1)
@@ -1478,7 +1478,7 @@ famat_zlog(GEN nf, GEN g, GEN e, GEN sgn, GEN bid)
       /* upper bound: gcd(EX, (Nv-1)p^(k-1)) = (Nv-1) p^min(k-1,v_p(EX)) */
       ex = subis(pr_norm(pr),1);
       if (!is_pm1(k)) {
-        GEN p = gel(pr,1), k_1 = subis(k,1);
+        GEN p = pr_get_p(pr), k_1 = subis(k,1);
         long v = Z_pval(EX, p);
         if (cmpui(v, k_1) > 0) v = itos(k_1);
         if (v) ex = mulii(ex, gpowgs(p, v));
@@ -2021,7 +2021,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   {
     NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
-    fa = primedec(nf, p);
+    fa = idealprimedec(nf, p);
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j), z2;
