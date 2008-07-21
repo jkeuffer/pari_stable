@@ -1247,6 +1247,7 @@ GEN     ellinf(void);
 GEN     ellinit(GEN x, long prec);
 GEN     ellinit0(GEN x,long flag,long prec);
 GEN     ellinit_padic(GEN x, GEN p, long prec);
+GEN     ellinit_real(GEN x, long prec);
 GEN     ellisoncurve(GEN e, GEN z);
 GEN     elllseries(GEN e, GEN s, GEN A, long prec);
 GEN     elllocalred(GEN e, GEN p1);
