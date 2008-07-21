@@ -71,7 +71,7 @@ fixlg(GEN z, long ly) {
 }
 /* update lg(z) before affrr(y, z)  [ to cater for precision loss ]*/
 INLINE void
-affr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
+affrr_fixlg(GEN y, GEN z) { fixlg(z, lg(y)); affrr(y, z); }
 
 INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */

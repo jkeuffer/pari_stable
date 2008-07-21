@@ -716,6 +716,13 @@ or to its last \kbd{n} components:
   z += L; setlg(z, L);
 @eprog
 
+The first scenario (safe shortening an existing \kbd{GEN}) is in fact so
+common, that we provide a function for this:
+
+\fun{void}{fixlg}{GEN z, long ly} a safe variant of \kbd{setlg(z, ly)}. If
+\kbd{ly} is larger than \kbd{lg(z)} do nothing. Otherwise, shorten $z$ in
+place, using \kbd{stackdummy} to avoid later \kbd{gerepile} problems.
+
 \subsec{Debugging the PARI stack}
 
 \fun{int}{chk_gerepileupto}{GEN x} returns 1 if \kbd{x} is suitable for
@@ -1053,6 +1060,20 @@ Assumes that $\kbd{lg(z)} > 2$.
 
 \noindent The function \kbd{affrs} and \kbd{affri} do not exist. So don't use
 them.
+
+\fun{void}{affrr_fixlg}{GEN y, GEN z} a variant of \kbd{affrr}. First shorten
+$z$ so that it is no longer than $y$, then assigns $y$ to $z$. This is used
+in the following scenario: room is reserved for the result but, due to
+cancellation, fewer words of accuracy are available than was foreseen;
+instead of appending meaningless $0$s to the mantissa, we store what was
+actualy computed.
+
+Note that shortening $z$ is not quite straightforward, since \kbd{setlg(z, ly)}
+would leave garbage on the stack, which \kbd{gerepile} might later inspect.
+It is done using
+
+\fun{void}{fixlg}{GEN z, long ly} see \tet{stackdummy} and the examples that
+follow.
 
 \subsec{Copy}
 

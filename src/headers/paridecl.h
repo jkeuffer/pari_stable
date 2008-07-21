@@ -2322,7 +2322,7 @@ GEN     weberf2(GEN x, long prec);
 
 /* leve1.h */
 INLINE void   affiz(GEN x, GEN y);
-INLINE void   affr_fixlg(GEN y, GEN z);
+INLINE void   affrr_fixlg(GEN y, GEN z);
 INLINE void   affsz(long x, GEN y);
 INLINE GEN    addii(GEN x, GEN y);
 INLINE GEN    addir(GEN x, GEN y);

@@ -1349,7 +1349,7 @@ exp1r_abs(GEN x)
     setlg(p2,L);
     p2 = mulrr(p2, addsr(2,p2));
   }
-  affr_fixlg(p2,y); avma = av; return y;
+  affrr_fixlg(p2,y); avma = av; return y;
 }
 
 GEN
@@ -1622,7 +1622,7 @@ agm1r_abs(GEN x)
     a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
     b1 = sqrtr_abs(mulrr(a,b1));
   }
-  affr_fixlg(a1,y); avma = av; return y;
+  affrr_fixlg(a1,y); avma = av; return y;
 }
 
 static int
@@ -1844,7 +1844,7 @@ logr_abs(GEN X)
   }
   setexpo(y, expo(y)+m+1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l+1)));
-  affr_fixlg(y, z); avma = ltop; return z;
+  affrr_fixlg(y, z); avma = ltop; return z;
 }
 
 GEN
@@ -1863,7 +1863,7 @@ logagmr_abs(GEN q)
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
   y = divrr(Pi2n(-1, prec), agm1r_abs( divsr(4, Q) ));
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affr_fixlg(y, z); avma = av; return z;
+  affrr_fixlg(y, z); avma = av; return z;
 }
 
 /* assume Im(q) != 0 */
@@ -1883,10 +1883,10 @@ logagmcx(GEN q, long prec)
   a = gel(Q,1);
   b = gel(Q,2);
   if (gcmp0(a)) {
-    affr_fixlg(logr_abs(b), gel(z,1));
+    affrr_fixlg(logr_abs(b), gel(z,1));
     y = Pi2n(-1, prec);
     if (signe(b) < 0) setsigne(y, -1);
-    affr_fixlg(y, gel(z,2)); avma = av; return z;
+    affrr_fixlg(y, gel(z,2)); avma = av; return z;
   }
   ea = expo(a);
   eb = expo(b);
@@ -1909,8 +1909,8 @@ logagmcx(GEN q, long prec)
   if (lg(a) == 3) a = real_0_bit(expo(a));
   if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
 			     : gsub(b, mppi(prec));
-  affr_fixlg(a, gel(z,1));
-  affr_fixlg(b, gel(z,2)); avma = av; return z;
+  affrr_fixlg(a, gel(z,1));
+  affrr_fixlg(b, gel(z,2)); avma = av; return z;
 }
 
 GEN
@@ -2097,7 +2097,7 @@ mpsc1(GEN x, long *ptmod8)
     setexpo(p2, expo(p2)+1);
     if ((i & 31) == 0) p2 = gerepileuptoleaf((pari_sp)y, p2);
   }
-  affr_fixlg(p2,y); return y;
+  affrr_fixlg(p2,y); return y;
 }
 
 /* sqrt (|1 - (1+x)^2|) = sqrt(|x*(x+2)|). Sends cos(x)-1 to |sin(x)| */
@@ -2166,12 +2166,12 @@ gcos(GEN x, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
-      affr_fixlg(gmul(v1,v), gel(y,1));
-      affr_fixlg(gmul(u1,u), gel(y,2)); return y;
+      affrr_fixlg(gmul(v1,v), gel(y,1));
+      affrr_fixlg(gmul(u1,u), gel(y,2)); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      affr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
+      affrr_fixlg(mpcos(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_INTMOD: pari_err(typeer,"gcos");
 
@@ -2231,12 +2231,12 @@ gsin(GEN x, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1),&u,&v,prec);
-      affr_fixlg(gmul(v1,u), gel(y,1));
-      affr_fixlg(gmul(u1,v), gel(y,2)); return y;
+      affrr_fixlg(gmul(v1,u), gel(y,1));
+      affrr_fixlg(gmul(u1,v), gel(y,2)); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      affr_fixlg(mpsin(tofp_safe(x,prec)), y); avma = av; return y;
+      affrr_fixlg(mpsin(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_INTMOD: pari_err(typeer,"gsin");
 
@@ -2313,8 +2313,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       *s = cgetr(prec);
       *c = cgetr(prec); av = avma;
       mpsincos(tofp_safe(x, prec), &ps, &pc);
-      affr_fixlg(ps,*s);
-      affr_fixlg(pc,*c); avma = av; return;
+      affrr_fixlg(ps,*s);
+      affrr_fixlg(pc,*c); avma = av; return;
 
     case t_REAL:
       mpsincos(x,s,c); return;
@@ -2327,10 +2327,10 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos(gel(x,1), &u,&v, prec);
-      affr_fixlg(mulrr(v1,u), gel(ps,1));
-      affr_fixlg(mulrr(u1,v), gel(ps,2));
-      affr_fixlg(mulrr(v1,v), gel(pc,1));
-      affr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2)); return;
+      affrr_fixlg(mulrr(v1,u), gel(ps,1));
+      affrr_fixlg(mulrr(u1,v), gel(ps,2));
+      affrr_fixlg(mulrr(v1,v), gel(pc,1));
+      affrr_fixlg(mulrr(u1,u), gel(pc,2)); togglesign(gel(pc,2)); return;
 
     case t_QUAD:
       av = avma; gsincos(quadtoc(x, prec), s, c, prec);
@@ -2425,7 +2425,7 @@ gtan(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      affr_fixlg(mptan(tofp_safe(x,prec)), y); avma = av; return y;
+      affrr_fixlg(mptan(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_PADIC:
       av = avma;
@@ -2470,7 +2470,7 @@ gcotan(GEN x, long prec)
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
-      affr_fixlg(mpcotan(tofp_safe(x,prec)), y); avma = av; return y;
+      affrr_fixlg(mpcotan(tofp_safe(x,prec)), y); avma = av; return y;
 
     case t_PADIC:
       av = avma;

@@ -116,7 +116,7 @@ long    loop_break(void);
 GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);
 GEN   addumului(ulong a, ulong b, GEN Y);
-void  affr_fixlg(GEN z, GEN y);
+void  affrr_fixlg(GEN z, GEN y);
 GEN   cxnorm(GEN x);
 int   lgcdii(ulong* d, ulong* d1, ulong* u, ulong* u1, ulong* v, ulong* v1, ulong vmax);
 ulong rgcduu(ulong d, ulong d1, ulong vmax, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);

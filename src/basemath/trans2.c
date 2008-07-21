@@ -51,14 +51,14 @@ affc_fixlg(GEN x, GEN res)
 {
   if (typ(x) == t_COMPLEX)
   {
-    affr_fixlg(gel(x,1), gel(res,1));
-    affr_fixlg(gel(x,2), gel(res,2));
+    affrr_fixlg(gel(x,1), gel(res,1));
+    affrr_fixlg(gel(x,2), gel(res,2));
   }
   else
   {
     avma = (pari_sp)(res+3);
     res = cgetr(lg(gel(res,1)));
-    affr_fixlg(x, res);
+    affrr_fixlg(x, res);
   }
   return res;
 }
@@ -153,7 +153,7 @@ mpatan(GEN x)
   p4 = mulrr(p2,p4); setexpo(p4, expo(p4)+m);
   if (inv) p4 = subrr(Pi2n(-1, lp), p4);
   if (sx < 0) togglesign(p4);
-  affr_fixlg(p4,y); avma = av0; return y;
+  affrr_fixlg(p4,y); avma = av0; return y;
 }
 
 GEN
