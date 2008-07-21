@@ -1462,11 +1462,15 @@ prune_history(gp_hist *H, long loc)
 static int
 is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
+enum { gp_ISMAIN = 1, gp_RECOVER = 2 };
+
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
-gp_main_loop(int ismain)
+gp_main_loop(const char *name, long flag)
 {
+  const long ismain = flag & gp_ISMAIN;
+  const long dorecover = flag & gp_RECOVER;
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
   VOLATILE pari_sp av = avma;
@@ -1474,20 +1478,28 @@ gp_main_loop(int ismain)
   Buffer *b = filtered_buffer(&F);
   for(;;)
   {
-    if (ismain)
+    if (dorecover)
     {
       static long tloc, outtyp;
+      long er;
       tloc = H->total;
       outtyp = GP_DATA->fmt->prettyp;
       recover(0);
-      if (setjmp(GP_DATA->env))
-      { /* recover from error or allocatemem */
+      /* jump from error [ > 0 ] or allocatemem [ -1 ]*/
+      if ((er = setjmp(GP_DATA->env)))
+      {
 	char *s = (char*)global_err_data;
 	if (s && *s) fprintferr("%Ps\n", readseq(s));
 	avma = av = top;
 	prune_history(H, tloc);
 	GP_DATA->fmt->prettyp = outtyp;
 	kill_all_buffers(b);
+        if (er > 0 && !ismain)
+        { /* true error & not from main instance. Abort read */
+          if (name) fprintferr("... skipping file '%s'\n", name);
+          (void)popinfile();
+          pop_buffer(); return gnil;
+        }
       }
     }
 
@@ -1637,11 +1649,16 @@ GEN
 read0(const char *s)
 {
   switchin(s);
-  if (file_is_binary(pari_infile)) {
-    int junk;
-    return gpreadbin(s, &junk);
-  }
-  return gp_main_loop(0);
+  if (file_is_binary(pari_infile)) { int junk; return gpreadbin(s, &junk); }
+  return gp_main_loop(s, 0);
+}
+/* as read0 but without a main instance of gp running */
+static void
+read_main(const char *s)
+{
+  switchin(s);
+  if (file_is_binary(pari_infile)) { int junk; (void)gpreadbin(s, &junk); }
+  else (void)gp_main_loop(s, gp_RECOVER);
 }
 
 GEN
@@ -1649,7 +1666,7 @@ extern0(const char *s)
 {
   check_secure(s);
   pari_infile = try_pipe(s, mf_IN)->file;
-  return gp_main_loop(0);
+  return gp_main_loop(NULL, 0);
 }
 
 GEN
@@ -1849,25 +1866,18 @@ main(int argc, char **argv)
   if (!(GP_DATA->flags & QUIET)) gp_head();
   if (A->n)
   {
-    VOLATILE ulong f = GP_DATA->flags;
+    ulong f = GP_DATA->flags;
     FILE *l = pari_logfile;
-    VOLATILE long i;
+    long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); pari_logfile = NULL;
-    for (i = 0; i < A->n;  pari_free(A->v[i]),i++) {
-      if (setjmp(GP_DATA->env))
-      {
-	fprintferr("... skipping file '%s'\n", A->v[i]);
-        kill_all_buffers(NULL);
-        popinfile(); avma = top; continue;
-      }
-      (void)read0((char*)A->v[i]);
-    }
+    for (i = 0; i < A->n;  pari_free(A->v[i]),i++) read_main((char*)A->v[i]);
     GP_DATA->flags = f;
-    /* reading one of the input files above can set it */
+    /* Reading one of the input files above can set pari_logfile.
+     * Don't restore in that case. */
     if (!pari_logfile) pari_logfile = l;
   }
   grow_kill(A);
-  (void)gp_main_loop(1);
+  (void)gp_main_loop(NULL, gp_ISMAIN | gp_RECOVER);
   gp_quit(0); return 0; /* not reached */
 }
 

@@ -96,7 +96,7 @@ allocatemem0(GEN z)
   }
   (void)allocatemoremem(newsize);
   global_err_data = NULL;
-  longjmp(GP_DATA->env,1);
+  longjmp(GP_DATA->env, -1);
 }
 
 /*******************************************************************/
