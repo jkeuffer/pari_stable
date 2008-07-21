@@ -1634,7 +1634,7 @@ GEN     tayl(GEN x, long v, long precdl);
 GEN     toser_i(GEN x);
 GEN     truecoeff(GEN x, long n);
 GEN     trunc0(GEN x, GEN *pte);
-GEN     u2toi(ulong a, ulong b);
+GEN     uu32toi(ulong a, ulong b);
 
 /* groupid.c */
 
@@ -1831,7 +1831,6 @@ GEN     addir_sign(GEN x, long sx, GEN y, long sy);
 GEN     addrr_sign(GEN x, long sx, GEN y, long sy);
 GEN     addsi_sign(long x, GEN y, long sy);
 GEN     addsr(long x, GEN y);
-GEN     addss(long x, long y);
 void    affir(GEN x, GEN y);
 void    affrr(GEN x, GEN y);
 GEN     bezout(GEN a, GEN b, GEN *u, GEN *v);
@@ -2326,10 +2325,12 @@ GEN     weberf2(GEN x, long prec);
 INLINE void   affiz(GEN x, GEN y);
 INLINE void   affrr_fixlg(GEN y, GEN z);
 INLINE void   affsz(long x, GEN y);
+INLINE GEN    adduu(ulong x, ulong y);
 INLINE GEN    addii(GEN x, GEN y);
 INLINE GEN    addir(GEN x, GEN y);
 INLINE GEN    addrr(GEN x, GEN y);
 INLINE GEN    addsi(long x, GEN y);
+INLINE GEN    addss(long x, long y);
 INLINE void   affii(GEN x, GEN y);
 INLINE void   affsi(long s, GEN x);
 INLINE void   affsr(long s, GEN x);
@@ -2452,6 +2453,8 @@ INLINE GEN    subsi(long x, GEN y);
 INLINE GEN    subuu(ulong x, ulong y);
 INLINE ulong  udivui_rem(ulong x, GEN y, ulong *rem);
 INLINE ulong  umodui(ulong x, GEN y);
+INLINE GEN    uutoi(ulong x, ulong y);
+INLINE GEN    uutoineg(ulong x, ulong y);
 INLINE GEN    utoi(ulong x);
 INLINE GEN    utoineg(ulong x);
 INLINE GEN    utoipos(ulong x);

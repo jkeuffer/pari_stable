@@ -2330,18 +2330,12 @@ mkintn(long n, ...)
 
 /* 2^32 a + b */
 GEN
-u2toi(ulong a, ulong b)
+uu32toi(ulong a, ulong b)
 {
 #ifdef LONG_IS_64BIT
   return utoi((a<<32) | b);
 #else
-  if (!a) return utoi(b);
-{
-  GEN x = cgetipos(4);
-  *(int_MSW(x)) = a;
-  *(int_LSW(x)) = b;
-  return x;
-}
+  return uutoi(a, b);
 #endif
 }
 

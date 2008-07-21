@@ -3016,7 +3016,7 @@ ap_bad_red(GEN e, GEN p)
   avma = av; return stoi(s);
 }
 static GEN
-u2tonegi(ulong a, ulong b) { GEN z = u2toi(a,b); setsigne(z, -1); return z; }
+u2tonegi(ulong a, ulong b) { GEN z = uu32toi(a,b); setsigne(z, -1); return z; }
 
 static GEN
 CM_ellap(GEN E, GEN p)

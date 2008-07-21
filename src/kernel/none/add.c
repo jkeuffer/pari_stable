@@ -14,17 +14,6 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-GEN
-addss(long x, long y)
-{
-  if (!x) return stoi(y);
-  if (!y) return stoi(x);
-  if (x > 0) return y > 0? adduu(x,y): subuu(x, -y);
-
-  if (y > 0) return subuu(y, -x);
-  else { GEN z = adduu(-x,-y); togglesign(z); return z; }
-}
-
 INLINE GEN
 icopy_sign(GEN x, long sx)
 {

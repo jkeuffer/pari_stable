@@ -560,7 +560,7 @@ BPSW_isprime_small(GEN x)
   if (l == 4)
   {
     pari_sp av = avma;
-    long t = cmpii(x, u2toi(0x38d7eUL, 0xa4c68000UL)); /* 10^15 */
+    long t = cmpii(x, uu32toi(0x38d7eUL, 0xa4c68000UL)); /* 10^15 */
     avma = av;
     if (t < 0) return 1;
   }

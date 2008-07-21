@@ -147,6 +147,27 @@ cgetineg(long x)
   return z;
 }
 
+/* x 2^BIL + y */
+INLINE GEN
+uutoi(ulong x, ulong y)
+{
+  GEN z;
+  if (!x) return utoi(y);
+  z = cgetipos(4); 
+  *int_W_lg(z, 1, 4) = x;
+  *int_W_lg(z, 0, 4) = y; return z;
+}
+/* - (x 2^BIL + y) */
+INLINE GEN
+uutoineg(ulong x, ulong y)
+{
+  GEN z;
+  if (!x) return y? utoineg(y): gen_0;
+  z = cgetineg(4); 
+  *int_W_lg(z, 1, 4) = x;
+  *int_W_lg(z, 0, 4) = y; return z;
+}
+
 INLINE GEN
 cgetr(long x)
 {
@@ -441,6 +462,21 @@ subuu(ulong x, ulong y)
   LOCAL_OVERFLOW;
   z = subll(x, y);
   return overflow? utoineg(-z): utoi(z);
+}
+INLINE GEN
+adduu(ulong x, ulong y) { ulong t = x+y; return uutoi((t < x), t); }
+
+INLINE GEN
+addss(long x, long y)
+{
+  if (!x) return stoi(y);
+  if (!y) return stoi(x);
+  if (x > 0) return y > 0? adduu(x,y): subuu(x, -y);
+
+  if (y > 0) return subuu(y, -x);
+  else { /* - adduu(-x, -y) */
+    ulong t = (-x)+(-y); return uutoineg((t < (-x)), t);
+  }
 }
 
 INLINE GEN

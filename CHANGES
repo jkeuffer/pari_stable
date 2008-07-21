@@ -245,6 +245,9 @@ BA 49- user variables can now be aliased [#790].
    83- Useless nfinit flags 4, 5 (partial polred) removed.
    84- Split off inline functions unrelated to the kernel from
        src/kernel/level1.h
+   85- Rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]
+       Write uutoi for the more natural operation of pasting two ulongs into
+       a t_INT.
 
   Added
     1- library function pari_calloc, cgetalloc

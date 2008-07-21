@@ -186,18 +186,6 @@ incloop(GEN a)
 }
 
 INLINE GEN
-adduu(ulong x, ulong y)
-{
-  ulong t = x+y;
-  if (t < x)
-  {
-    GEN y = cgetipos(4); y[2] = t; y[3] = 1;
-    return y;
-  }
-  return utoi(t);
-}
-
-INLINE GEN
 adduispec(ulong s, GEN x, long nx)
 {
   GEN  zd;

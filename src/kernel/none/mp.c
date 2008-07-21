@@ -125,18 +125,6 @@ incloop(GEN a)
 }
 
 INLINE GEN
-adduu(ulong x, ulong y)
-{
-  ulong t = x+y;
-  if (t < x)
-  {
-    GEN y = cgetipos(4); y[2] = 1; y[3] = t;
-    return y;
-  }
-  return utoi(t);
-}
-
-INLINE GEN
 adduispec(ulong s, GEN x, long nx)
 {
   GEN xd, zd = (GEN)avma;
@@ -1518,13 +1506,6 @@ xmpn_copy(GEN z, GEN x, long n)
   long k = n;
   while (--k >= 0) z[k] = x[k];
 }
-static GEN
-cat1u(ulong d)
-{
-  GEN R = cgetipos(4);
-  R[2] = 1;
-  R[3] = d; return R;
-}
 /* a[0..la-1] * 2^(lb BIL) | b[0..lb-1] */
 static GEN
 catii(GEN a, long la, GEN b, long lb)
@@ -1543,7 +1524,7 @@ sqrtispec2(GEN n, GEN *pr)
   ulong s, r;
   int hi = p_sqrtu2((ulong*)n, &s, &r);
   GEN S = utoi(s);
-  *pr = hi? cat1u(r): utoi(r);
+  *pr = hi? uutoi(1,r): utoi(r);
   return S;
 }
 
@@ -1600,7 +1581,7 @@ sqrtispec2_sh(GEN n, GEN *pr)
     hi = (hiremainder & (1<<sh));
   }
   S = utoi(s);
-  if (pr) *pr = hi? cat1u(r): utoi(r);
+  if (pr) *pr = hi? uutoi(1,r): utoi(r);
   return S;
 }
 

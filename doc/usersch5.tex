@@ -1137,10 +1137,16 @@ padd with zeroes. Assumes that $\kbd{prec} > 2$.
 \noindent The following function is also available as a special case of
 \tet{mkintn}:
 
-\fun{GEN}{u2toi}{ulong a, ulong b} returns the \kbd{GEN} equal to $2^{32} a +
+\fun{GEN}{uu32toi}{ulong a, ulong b} returns the \kbd{GEN} equal to $2^{32} a +
 b$, \emph{assuming} that $a,b < 2^{32}$. This does not depend on
 \kbd{sizeof(long)}: the behaviour is as above on both $32$ and $64$-bit
 machines.
+
+\fun{GEN}{uutoi}{ulong a, ulong b} returns the \kbd{GEN} equal to
+$2^{\B} a + b$.
+
+\fun{GEN}{uutoineg}{ulong a, ulong b} returns the \kbd{GEN} equal to
+$-(2^{\B} a + b)$.
 
 \subsec{Integer parts}
 The following four functions implement the conversion from \typ{REAL} to
