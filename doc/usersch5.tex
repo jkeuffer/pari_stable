@@ -1617,6 +1617,10 @@ and remainder of the \typ{INT}~\kbd{x} by the \kbd{long}~\kbd{s}. As
 and remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{s}. As
 \kbd{sdivss\_rem} otherwise.
 
+\fun{ulong}{udivui_rem}{ulong s, GEN y, ulong *rem}
+computes the Euclidean quotient and remainder of the $x$ by $y$. As
+\kbd{sdivss\_rem} otherwise.
+
 \fun{GEN}{divsi_rem}{long s, GEN y, long *r} computes the Euclidean quotient
 and remainder of the \typ{long}~\kbd{s} by the \kbd{GEN}~\kbd{y}. As
 \kbd{sdivss\_rem} otherwise.
@@ -4263,6 +4267,10 @@ set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 \fun{GEN}{vec_ei}{long n, long i} creates a \typ{VEC} with \kbd{n} components
 set to \kbd{gen\_0}, but for the \kbd{i}-th one which is set to \kbd{gen\_1}
 (\kbd{i}-th vector in the canonical basis).
+
+\fun{GEN}{vecsmall_ei}{long n, long i} creates a \typ{VECSMALL} with \kbd{n}
+components set to \kbd{0}, but for the \kbd{i}-th one which is set to
+\kbd{1} (\kbd{i}-th vector in the canonical basis).
 
 \fun{GEN}{scalarcol}{GEN x, long n} creates a \typ{COL} with \kbd{n}
 components set to \kbd{gen\_0}, but the first one which is set to a copy
