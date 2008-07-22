@@ -3,10 +3,9 @@ Section: number_fields
 C-Name: polymodrecip
 Prototype: G
 Help: modreverse(z): reverse polmod of the polmod z, if it exists.
-Doc: $z$ being a polmod $A(X)$ modulo $T(X)$, let $Q$ be the minimal
- polynomial of $z$, which must satisfy $\text{deg}(Q) = \text{det}(T)$.
- Returns the ``reverse polmod'' $B(X)$ modulo $Q(X)$, such that the roots of
- $T$ are the $B(\alpha)$, where $\alpha$ runs over the roots of $Q$.
+Doc: let $z = \kbd{Mod(A, T)}$ be a polmod, and $Q$ be its minimal
+ polynomial, which must satisfy $\text{deg}(Q) = \text{deg}(T)$.
+ Returns a ``reverse polmod'' \kbd{Mod(B, Q)}, which is a root of $T$.
 
  This is quite useful when one changes the generating element in algebraic
  extensions:
@@ -18,8 +17,9 @@ Doc: $z$ being a polmod $A(X)$ modulo $T(X)$, let $Q$ be the minimal
  which means that $x^3 - 5x^2 + 4x -1$ is another defining polynomial for the
  cubic field
  $$\Q(u) = \Q[x]/(x^3 - x - 1) = \Q[x]/(x^3 - 5x^2 + 4x - 1) = \Q(v),$$
- and that $u = v^2 - 4v + 1$. From this, it is easy to convert elements
- between the $A(u)\in \Q(u)$ and $B(v)\in \Q(v)$ representations:
+ and that $u \to v^2 - 4v + 1$ gives an explicit isomorphism. From this, it is
+ easy to convert elements between the $A(u)\in \Q(u)$ and $B(v)\in \Q(v)$
+ representations:
  \bprog
  ? A = u^2 + 2*u + 3; subst(lift(A), 'x, w)
  %3 = Mod(x^2 - 3*x + 3, x^3 - 5*x^2 + 4*x - 1)
@@ -32,6 +32,6 @@ Doc: $z$ being a polmod $A(X)$ modulo $T(X)$, let $Q$ be the minimal
  ? u = Mod(-x^3 + 9*x, x^4 - 10*x^2 + 1)
  ? modreverse(u)
    *** modreverse: reverse polmod does not exist: Mod(-x^3+9*x, x^4-10*x^2+1).
- ? u^2
- %6 = Mod(8, x^4 - 10*x^2 + 1)
+ ? minpoly(u)
+ %6 = x^2 - 8
  @eprog
