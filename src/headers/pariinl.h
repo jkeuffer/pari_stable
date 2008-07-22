@@ -271,3 +271,12 @@ togglesign_safe(GEN *px)
   else if (*px == gen_m2) *px = gen_2;
   else togglesign(*px);
 }
+
+/*******************************************************************/
+/*                                                                 */
+/*                    ALGEBRAIC NUMBER THEORY                      */
+/*                                                                 */
+/*******************************************************************/
+INLINE int
+pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
+

@@ -1570,7 +1570,7 @@ bnfisprincipal0(GEN bnf,GEN x,long flag)
       if (gcmp0(x)) pari_err(talker,"zero ideal in isprincipal");
       return triv_gen(bnf, x, flag);
     case id_PRIME:
-      if (prime_is_inert(x))
+      if (pr_is_inert(x))
         return gerepileupto(av, triv_gen(bnf, gel(x,1), flag));
       x = idealhnf_two(gel(bnf,7), x);
       break;

@@ -1017,7 +1017,7 @@ GEN     nfhnfmod(GEN nf, GEN x, GEN d);
 GEN     nfkermodpr(GEN nf, GEN x, GEN modpr);
 GEN     nfsmith(GEN nf, GEN x);
 GEN     nfsolvemodpr(GEN nf, GEN a, GEN b, GEN modpr);
-int     prime_is_inert(GEN P);
+int     pr_is_inert(GEN P);
 GEN     vecdiv(GEN x, GEN y);
 GEN     vecinv(GEN x);
 GEN     vecmul(GEN x, GEN y);
@@ -2516,3 +2516,5 @@ INLINE GEN    zerovec(long n);
 INLINE GEN    col_ei(long n, long i);
 INLINE GEN    vec_ei(long n, long i);
 INLINE GEN    vecsmall_ei(long n, long i);
+
+INLINE int    pr_is_inert(GEN P);

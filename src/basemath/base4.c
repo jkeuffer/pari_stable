@@ -1213,7 +1213,7 @@ idealmulelt(GEN nf, GEN x, GEN v)
   return cx? ZM_Q_mul(x,cx): x;
 }
 int
-prime_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
+pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 
 /* tx <= ty */
 static GEN
@@ -1230,7 +1230,7 @@ idealmul_aux(GEN nf, GEN x, GEN y, long tx, long ty)
 	case id_PRIME:
 	{
 	  GEN p = gel(y,1), pi = gel(y,2), cx;
-          if (prime_is_inert(y)) return RgM_Rg_mul(idealhnf_principal(nf,x),p);
+          if (pr_is_inert(y)) return RgM_Rg_mul(idealhnf_principal(nf,x),p);
 
           x = nf_to_scalar_or_basis(nf, x);
           switch(typ(x))
@@ -1362,7 +1362,7 @@ idealinv_HNF(GEN nf, GEN I)
 GEN
 pidealprimeinv(GEN nf, GEN x)
 {
-  if (prime_is_inert(x)) return matid(lg(gel(x,2)) - 1);
+  if (pr_is_inert(x)) return matid(lg(gel(x,2)) - 1);
   return idealhnf_two(nf, mkvec2(gel(x,1), gel(x,5)));
 }
 
@@ -1454,7 +1454,7 @@ idealmulpowprime(GEN nf, GEN x, GEN pr, GEN n)
   nf = checknf(nf);
 
   /* inert, special cased for efficiency */
-  if (prime_is_inert(pr)) return RgM_Rg_mul(x, powgi(pr_get_p(pr), n));
+  if (pr_is_inert(pr)) return RgM_Rg_mul(x, powgi(pr_get_p(pr), n));
 
   y = idealpowprime(nf, pr, n, &dx);
   x = Q_primitive_part(x, &cx);
@@ -1490,7 +1490,7 @@ idealpow_aux(GEN nf, GEN x, long tx, GEN n)
       return idealhnf_principal(nf,x);
     case id_PRIME: {
       GEN d;
-      if (prime_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
+      if (pr_is_inert(x)) return scalarmat(powgi(gel(x,1), n), N);
       x = idealpowprime(nf, x, n, &d);
       x = idealhnf_two(nf,x);
       return d? RgM_Rg_div(x, d): x;
@@ -1803,7 +1803,7 @@ idealred0(GEN nf, GEN I, GEN vdir)
       if (!aI) return I;
       goto END;
     case id_PRIME:
-      if (prime_is_inert(I)) {
+      if (pr_is_inert(I)) {
         c1 = gel(I,1); I = matid(N);
         if (!aI) return I;
         goto END;
