@@ -25,4 +25,10 @@ Doc: finds polynomials with reasonably
 
  If $fa$ is given, it is assumed that it is the two-column matrix of the
  factorization of the discriminant of the polynomial $x$.
-Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0$).
+Variant: Also available is \fun{GEN}{polred}{GEN x} ($\fl = 0$). The function
+ \kbd{polred0} is provided for backward compatibility; instead of the above
+ hardcoded numerical flags (which happen to be inconsistent), one should rather
+ use 
+ \fun{GEN}{Polred}{GEN x, long flag, GEN fa} where  flag  is  an or-ed
+ combination of \tet{nf_PARTIALFACT} (partial factorization of the
+ discriminant) and \tet{nf_ORIG} (give also elements).

@@ -1323,88 +1323,39 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
   if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
-typedef struct {
-  GEN xbest, dxbest;
-  long ind, indbest;
-} ok_pol_t;
-
-static GEN
-ok_pol(void *TT, GEN x)
-{
-  ok_pol_t *T = (ok_pol_t*)TT;
-  GEN dx;
-
-  T->ind++;
-  if (!ZX_is_squarefree(x)) return NULL;
-  if (DEBUGLEVEL>3) fprintferr("ok_pol: generator %Ps\n", x);
-  dx = ZX_disc(x);
-  if (absi_cmp(dx, T->dxbest) < 0)
-  {
-    T->dxbest = dx;
-    T->xbest = x;
-    T->indbest = T->ind;
-  }
-  return NULL; /* pretend to fail in any case */
-}
-
-/* Choose a canonical polynomial in the pair { z(X), (+/-)z(-X) }.
- * z a ZX with lc(z) > 0. We want to keep that property, while
- * ensuring that the leading coeff of the odd (resp. even) part of z is < 0
- * if deg z is even (resp. odd).
- * Either leave z alone (return 1) or set z <-- (-1)^deg(z) z(-X). In place. */
-static int
-ZX_canon_neg(GEN z)
-{
-  long i,s;
-
-  for (i = lg(z)-2; i >= 2; i -= 2)
-  { /* examine the odd (resp. even) part of z if deg(z) even (resp. odd). */
-    s = signe(z[i]);
-    if (!s) continue;
-    /* non trivial */
-    if (s < 0) break; /* the condition is already satisfied */
-
-    for (; i>=2; i-=2) gel(z,i) = negi(gel(z,i));
-    return 1;
-  }
-  return 0;
-}
-
-static GEN _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK);
-
+static GEN polred_aux(GEN x, GEN a, long orig);
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
 nfpolred(nfbasic_t *T)
 {
-  GEN x = T->x, a = T->bas;
-  GEN phi, xbest, dxbest, mat, d, rev;
-  long i, n = lg(a)-1, v = varn(x);
-  ok_pol_t O;
-  FP_chk_fun chk = { &ok_pol, NULL, NULL, NULL, 0 };
+  GEN x = T->x, dx = T->dx, a = T->bas, z, y, mat, d, rev;
+  long i, best = 0, n = lg(a)-1, v = varn(x);
 
   if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
-  O.dxbest = T->dx; /* best discriminant so far */
-  O.ind = O.indbest = 0;
-  chk.data = (void*)&O;
-  (void)_polred(x, a, NULL, &chk);
-  if (!O.indbest) return NULL; /* no improvement */
-  xbest  = O.xbest;
-  dxbest = O.dxbest;
+  z = polred_aux(x, a, 1);
+  a = gel(z,1);
+  y = gel(z,2);
+  for (i = 1; i < lg(y); i++)
+  {
+    GEN d, yi = gel(y,i);
+    if (degpol(yi) < n) continue;
+    d = ZX_disc(yi); if (absi_cmp(d, dx) < 0) { dx = d; best = i; }
+  }
+  if (!best) return NULL; /* no improvement */
 
+  rev = modreverse_i(gel(a, best), x);
+  x = gel(y, best); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
+  
   /* update T */
-  phi = gel(a, O.indbest);
-  if (ZX_canon_neg(xbest)) phi = RgX_neg(phi);
-  if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",xbest);
-  rev = modreverse_i(phi, x);
-  for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, xbest);
+  for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, x);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   mat = d? RgM_Rg_div(ZM_hnfmodid(mat,d), d): matid(n);
 
-  (void)Z_issquareall(diviiexact(dxbest,T->dK), &(T->index));
+  (void)Z_issquareall(diviiexact(dx,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);
-  T->dx = dxbest;
-  T->x  = xbest; return rev;
+  T->dx = dx;
+  T->x  = x; return rev;
 }
 
 /* let bas a t_VEC of QX giving a Z-basis of O_K. Return the index of the
@@ -1636,10 +1587,30 @@ remove_duplicates(GEN y, GEN a)
   avma = av;
 }
 
-/* if CHECK != NULL, return the first polynomial pol found such that
- * CHECK->f(CHECK->data, pol) != 0; return NULL if there are no such pol */
+/* Choose a canonical polynomial in the pair { z(X), (+/-)z(-X) }.
+ * z a ZX with lc(z) > 0. We want to keep that property, while
+ * ensuring that the leading coeff of the odd (resp. even) part of z is < 0
+ * if deg z is even (resp. odd).
+ * Either leave z alone (return 1) or set z <-- (-1)^deg(z) z(-X). In place. */
+static int
+ZX_canon_neg(GEN z)
+{
+  long i,s;
+
+  for (i = lg(z)-2; i >= 2; i -= 2)
+  { /* examine the odd (resp. even) part of z if deg(z) even (resp. odd). */
+    s = signe(z[i]);
+    if (!s) continue;
+    /* non trivial */
+    if (s < 0) break; /* the condition is already satisfied */
+
+    for (; i>=2; i-=2) gel(z,i) = negi(gel(z,i));
+    return 1;
+  }
+  return 0;
+}
 static GEN
-_polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
+polred_aux(GEN x, GEN a, long orig)
 {
   long i, v = varn(x), l = lg(a);
   GEN ch, y = cgetg(l,t_VEC);
@@ -1648,51 +1619,37 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
   {
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
     ch = ZX_caract(x, gel(a,i), v);
-    if (CHECK)
-    {
-      ch = CHECK->f(CHECK->data, ch);
-      if (!ch) continue;
-      return ch;
-    }
     (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
-    if (ZX_canon_neg(ch) && pta) gel(a,i) = RgX_neg(gel(a,i));
+    if (ZX_canon_neg(ch) && orig) gel(a,i) = RgX_neg(gel(a,i));
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
     gel(y,i) = ch;
   }
-  if (CHECK) return NULL; /* no suitable polynomial found */
   remove_duplicates(y,a);
-  if (pta) *pta = a;
-  return y;
+  return orig? mkmat2(a, y): y;
 }
 
-static GEN
-allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
+GEN
+Polred(GEN x, long flag, GEN fa)
 {
-  GEN ro = NULL;
-  nfbasic_t T;
-  nfbasic_init(x, flag, fa, &T);
-  set_LLL_basis(&T, &ro, 0.99);
+  pari_sp av = avma;
+  GEN ro = NULL, y;
+  nfbasic_t T; nfbasic_init(x, flag, fa, &T);
   if (T.lead) pari_err(impl,"polred for non-monic polynomials");
-  return _polred(T.x, T.bas, pta, CHECK);
+  set_LLL_basis(&T, &ro, 0.99);
+  y = polred_aux(T.x, T.bas, flag & nf_ORIG);
+  return gerepilecopy(av, y);
 }
 
 /* FIXME: backward compatibility */
 #define red_PARTIAL 1
 #define red_ORIG    2
-
 GEN
 polred0(GEN x, long flag, GEN fa)
 {
-  pari_sp av = avma;
-  GEN y, a;
   long fl = 0;
-
-  if (fa && gcmp0(fa)) fa = NULL; /* compatibility */
   if (flag & red_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & red_ORIG)    fl |= nf_ORIG;
-  y = allpolred(x, fl, fa, &a, NULL);
-  if (fl & nf_ORIG) y = mkmat2(a,y);
-  return gerepilecopy(av, y);
+  return Polred(x, fl, fa);
 }
 
 GEN
@@ -1708,9 +1665,6 @@ ordred(GEN x)
   return gerepileupto(av, polred(y));
 }
 
-GEN
-polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK)
-{ return allpolred(x,flag,NULL,NULL,CHECK); }
 GEN
 polred(GEN x) { return polred0(x, 0, NULL); }
 GEN
@@ -2006,7 +1960,7 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
 }
 
 static GEN
-_polredabs(nfbasic_t *T, GEN *u)
+polredabs_aux(nfbasic_t *T, GEN *u)
 {
   long prec, e, n = degpol(T->x);
   GEN v, ro = NULL;
@@ -2061,7 +2015,7 @@ polredabs0(GEN x, long flag)
   }
   else
   {
-    GEN v = _polredabs(&T, &u);
+    GEN v = polredabs_aux(&T, &u);
     y = gel(v,1);
     a = gel(v,2);
     l = lg(a);

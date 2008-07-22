@@ -101,7 +101,6 @@ typedef struct FP_chk_fun {
 } FP_chk_fun;
 
 GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
-GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
 
 /* for ideallog / zlog */
 typedef struct {
