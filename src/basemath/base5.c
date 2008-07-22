@@ -501,11 +501,13 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
   long lA, lB;
   GEN nf, C;
 
-  A = get_nfpol(A, &nf);       lA = lg(A);
+  A = get_nfpol(A, &nf); lA = lg(A);
+  if (!nf) {
+    if (lA<=3) pari_err(constpoler,"rnfequation");
+    RgX_check_ZX(A,"rnfequation");
+  }
   B = fix_relative_pol(A,B,1); lB = lg(B);
-  if (lA<=3 || lB<=3) pari_err(constpoler,"rnfequation");
-
-  RgX_check_ZX(A,"rnfequation");
+  if (lB<=3) pari_err(constpoler,"rnfequation");
   B = Q_primpart(B);
   RgX_check_ZXY(B,"rnfequation");
 
@@ -513,18 +515,17 @@ rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS)
     pari_err(talker,"inseparable relative equation in rnfequation");
 
   *pk = 0; C = ZX_ZXY_resultant_all(A, B, pk, pLPRS);
-  if (gsigne(leading_term(C)) < 0) C = gneg_i(C);
-  *pk = -*pk; return primpart(C);
+  if (gsigne(leading_term(C)) < 0) C = RgX_neg(C);
+  *pk = -*pk; return Q_primpart(C);
 }
 
 GEN
 rnfequation0(GEN A, GEN B, long flall)
 {
   pari_sp av = avma;
+  GEN LPRS, C;
   long k;
-  GEN LPRS, nf, C;
 
-  A = get_nfpol(A, &nf);
   C = rnfequation_i(A, B, &k, flall? &LPRS: NULL);
   if (flall)
   { /* a,b,c root of A,B,C = compositum, c = b + k a */
@@ -534,18 +535,10 @@ rnfequation0(GEN A, GEN B, long flall)
   }
   return gerepilecopy(av, C);
 }
-
 GEN
-rnfequation(GEN nf,GEN pol2)
-{
-  return rnfequation0(nf,pol2,0);
-}
-
+rnfequation(GEN nf, GEN pol) { return rnfequation0(nf,pol,0); }
 GEN
-rnfequation2(GEN nf,GEN pol2)
-{
-  return rnfequation0(nf,pol2,1);
-}
+rnfequation2(GEN nf, GEN pol) { return rnfequation0(nf,pol,1); }
 
 static GEN
 nftau(long r1, GEN x)

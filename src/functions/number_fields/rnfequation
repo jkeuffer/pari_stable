@@ -25,3 +25,6 @@ Doc: given a number field
  only if it is squarefree. If it is reducible but squarefree, the result will
  be the absolute equation of the \'etale algebra defined by \var{pol}. If
  \var{pol} is not squarefree, an error message will be issued.
+Variant: Also available are
+ \fun{GEN}{rnfequation}{GEN nf, GEN pol} ($\fl = 0$) and
+ \fun{GEN}{rnfequation2}{GEN nf, GEN pol} ($\fl = 1$).
