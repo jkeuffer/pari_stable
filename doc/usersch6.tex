@@ -932,6 +932,22 @@ return the associated \var{bnr}, and set $H$ to the associated subgroup. If
 \kbd{addgen} is $1$, make sure that if the \var{bnr} needed to be computed,
 then it contains generators.
 
+\subsec{Miscellaneous routines}
+
+\fun{GEN}{rnfequationall}{GEN A, GEN B, long *pk, GEN *pLPRS} $A$ is either an
+\var{nf} type (corresponding to a number field $K$) or an irreducible \kbd{ZX}
+defining a number field $K$. $B$ is an irreducible polynomial in $K[X]$.
+Returns an absolute equation $C$ (over $\Q$) for the number field $K[X]/(B)$.
+$C$ is the characteristic polynomial of $b + k a$ for some roots $a$ of $A$
+and $b$ of $B$, and $k$ is a small rational integer. Set \kbd{*pk} to $k$.
+
+If \kbd{pLPRS} is not \kbd{NULL} set it to $[h_0, h_1]$, $h_i\in \Q[X]$,
+where $h_0+h_1 Y$ is the last non-constant polynomial in the pseudo-Euclidean
+remainder sequence associated to $A(Y)$ and $B(X-kY)$, leading to $C =
+\text{Res}_Y(A(Y), B(Y-kX))$. In particular $a := -h_0/h_1$ is a root of $A$
+in $\Q[X]/(C)$, and $X - ka$ is a root of $B$.
+
+
 \subsec{Obsolete routines}
 
 Still provided for backward compatibility, but should not be used in new

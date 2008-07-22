@@ -160,7 +160,6 @@ GEN    prodid(GEN nf, GEN I);
 GEN    pr_norm(GEN pr);
 GEN    quadhilbertreal(GEN D, long prec);
 GEN    rnfallbase(GEN nf, GEN *ppol, GEN *pD, GEN *pd, GEN *pfi);
-GEN    rnfequation_i(GEN A, GEN B, long *pk, GEN *pLPRS);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
 GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 GEN    T2_from_embed_norm(GEN x, long r1);
@@ -172,12 +171,6 @@ void   wr_rel(GEN col);
 GEN    ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
 GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
 GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);
-#define pr_get_p(pr) gel(pr,1)
-#define pr_get_gen(pr) gel(pr,2)
-/* .[2] instead of itos works: e and f are small positive integers */
-#define pr_get_e(pr) gel(pr,3)[2]
-#define pr_get_f(pr) gel(pr,4)[2]
-#define pr_get_tau(pr) gel(pr,5)
 
 /* Dedekind zeta */
 GEN  zeta_get_limx(long r1, long r2, long bit);

@@ -277,6 +277,12 @@ togglesign_safe(GEN *px)
 /*                    ALGEBRAIC NUMBER THEORY                      */
 /*                                                                 */
 /*******************************************************************/
+#define pr_get_p(pr) gel(pr,1)
+#define pr_get_gen(pr) gel(pr,2)
+/* .[2] instead of itos works: e and f are small positive integers */
+#define pr_get_e(pr) gel(pr,3)[2]
+#define pr_get_f(pr) gel(pr,4)[2]
+#define pr_get_tau(pr) gel(pr,5)
 INLINE int
 pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 

@@ -2163,11 +2163,11 @@ check_theta(ulong bound) {
 byteptr
 init_modular(ulong *p) { *p = 27449; return diffptr + 3000; }
 
-/* Assume A in Z[X], B in Q[X][Y], and Res_X(A, B) in Z[Y].
+/* Assume A in Z[Y], B in Q[X][Y], and Res_Y(A, B) in Z[X].
  * If lambda = NULL, return Res_Y(A,B).
  * Otherwise, find a small lambda (start from *lambda, use the sequence above)
- * such that R(Y) = Res_X(A, B(Y + lambda X)) is squarefree, reset *lambda to
- * the chosen value and return R
+ * such that R(X) = Res_Y(A(Y), B(X + lambda Y)) is squarefree, reset *lambda
+ * to the chosen value and return R
  *
  * If LERS is non-NULL, set it to the Last non-constant polynomial in the
  * Euclidean Remainder Sequence */
@@ -2207,7 +2207,7 @@ INIT:
   if (av2) { avma = av2; *lambda = next_lambda(*lambda); }
   if (lambda)
   {
-    L = gadd(pol_x(MAXVARN), gmulsg(*lambda, pol_x(vY)));
+    L = deg1pol_shallow(stoi(*lambda), pol_x(MAXVARN), vY);
     if (DEBUGLEVEL>4) fprintferr("Trying lambda = %ld\n",*lambda);
   }
   B = poleval(B0, L); av2 = avma;

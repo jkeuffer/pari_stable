@@ -661,7 +661,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     k = gel(rnfeq,3);
   } else {
     long sk;
-    polabs = rnfequation_i(bnf, relpol, &sk, NULL);
+    polabs = rnfequationall(bnf, relpol, &sk, NULL);
     k = stoi(sk);
   }
   if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nf_get_prec(nf));

@@ -1212,8 +1212,6 @@ idealmulelt(GEN nf, GEN x, GEN v)
   x = ZM_hnfmod(x, ZM_detmult(x));
   return cx? ZM_Q_mul(x,cx): x;
 }
-int
-pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 
 /* tx <= ty */
 static GEN
