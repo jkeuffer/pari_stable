@@ -668,7 +668,7 @@ maxord(GEN p,GEN f,long mf)
 
 /* Sylvester's matrix, mod p^m (assumes f1 monic) */
 static GEN
-sylpm(GEN f1, GEN f2, GEN pm)
+ZpX_sylvester_hnf(GEN f1, GEN f2, GEN pm)
 {
   long j, n = degpol(f1);
   GEN h, a = cgetg(n+1,t_MAT);
@@ -684,10 +684,10 @@ sylpm(GEN f1, GEN f2, GEN pm)
 
 /* polynomial gcd mod p^m (assumes f1 monic) */
 GEN
-gcdpm(GEN f1, GEN f2, GEN pm)
+ZpX_gcd(GEN f1, GEN f2, GEN pm)
 {
   pari_sp av = avma;
-  GEN a = sylpm(f1,f2,pm);
+  GEN a = ZpX_sylvester_hnf(f1,f2,pm);
   long c, l = lg(a), v = varn(f1);
   for (c = 1; c < l; c++)
   {
@@ -700,14 +700,31 @@ gcdpm(GEN f1, GEN f2, GEN pm)
 
 /* reduced resultant mod p^m (assumes x monic) */
 GEN
-respm(GEN x, GEN y, GEN pm)
+ZpX_reduced_resultant(GEN x, GEN y, GEN pm)
 {
   pari_sp av = avma;
-  GEN z = sylpm(x,y,pm);
+  GEN z = ZpX_sylvester_hnf(x,y,pm);
   z = gcoeff(z,1,1);
   if (equalii(z,pm)) { avma = av; return gen_0; }
   return gerepileuptoint(av, icopy(z));
 }
+/* Assume Res(f,g) divides p^M. Return Res(f, g), using dynamic p-adic
+ * precision (until result is non-zero or p^M). */
+GEN
+ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M)
+{
+  long m = 32 / expi(p); /* p^m ~ 2^32 for initial value of m */
+  GEN R, q = NULL;
+  if (!m) m = 1;
+  for(;; m <<= 1) {
+    if (M < 2*m) break;
+    q = q? sqri(q): powiu(p, m); /* p^m */
+    R = ZpX_reduced_resultant(f,g, q); if (signe(R)) return R;
+  }
+  q = powiu(p, M);
+  R = ZpX_reduced_resultant(f,g, q); return signe(R)? R: q;
+}
+
 
 /* *e a ZX, *de, *pp in Z */
 static void
@@ -869,7 +886,7 @@ Decomp(decomp_t *S, long flag)
   fred = centermod(S->f, ph);
   e    = centermod(e, ph);
 
-  f1 = gcdpm(fred, Z_ZX_sub(de, e), ph); /* p-adic gcd(f, 1-e) */
+  f1 = ZpX_gcd(fred, Z_ZX_sub(de, e), ph); /* p-adic gcd(f, 1-e) */
   fred = centermod(fred, pr);
   f1   = centermod(f1,   pr);
   f2 = FpX_div(fred,f1, pr);
@@ -1189,7 +1206,7 @@ update_phi(decomp_t *S, long *ptl, long flag)
   for (k = 1;; k++)
   {
     kill_cache(S);
-    prc = fast_respm(S->chi, ZX_deriv(S->chi), S->p, Z_pval(S->psc, S->p));
+    prc = ZpX_reduced_resultant_fast(S->chi, ZX_deriv(S->chi), S->p, Z_pval(S->psc, S->p));
     if (!equalii(prc, S->psc)) break;
 
     S->psc = gmax(S->psf, mulii(S->psc, S->p)); /* increase precision */
@@ -1471,29 +1488,12 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   return Decomp(S, flag);
 }
 
-/* Assume respm(f,g) divides p^M. Return respm(f, g), using dynamic p-adic
- * precision (until result is non-zero or p^M). */
-GEN
-fast_respm(GEN f, GEN g, GEN p, long M)
-{
-  long m = 32 / expi(p); /* p^m ~ 2^32 for initial value of m */
-  GEN R, q = NULL;
-  if (!m) m = 1;
-  for(;; m <<= 1) {
-    if (M < 2*m) break;
-    q = q? sqri(q): powiu(p, m); /* p^m */
-    R = respm(f,g, q); if (signe(R)) return R;
-  }
-  q = powiu(p, M);
-  R = respm(f,g, q); return signe(R)? R: q;
-}
-
 GEN
 maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
 {
   long l = lg(w)-1;
   GEN h = gel(w,l); /* largest factor */
-  GEN D = fast_respm(f, ZX_deriv(f), p, mf);
+  GEN D = ZpX_reduced_resultant_fast(f, ZX_deriv(f), p, mf);
   decomp_t S;
 
   S.f = f;
@@ -1533,7 +1533,7 @@ indexpartial(GEN P, GEN DP)
     else if (e >= 2)
     {
       if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Ps^%ld ",p,E);
-      q = fast_respm(P, dP, p, e);
+      q = ZpX_reduced_resultant_fast(P, dP, p, e);
       if(DEBUGLEVEL>=5) { fprintferr("--> %Ps : ",q); msgTIMER(&T,""); }
     }
     res = mulii(res, q);

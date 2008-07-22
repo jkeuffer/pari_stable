@@ -604,7 +604,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       a = (long)next2pow((ulong)a);
 
       pa = powiu(p,a);
-      famod = hensel_lift_fact(P,famod,NULL,p,a,pa);
+      famod = ZpX_liftfact(P,famod,NULL,p,a,pa);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
     for (i=1; i<=n0; i++)
@@ -751,7 +751,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim)
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
   if (DEBUGLEVEL>2) (void)TIMER(&T);
-  famod = hensel_lift_fact(target,famod,NULL,p,a,pa);
+  famod = ZpX_liftfact(target,famod,NULL,p,a,pa);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Ps^%ld)", p,a);
   L = cmbf(target, famod, A, p, a, b, maxK, klim);
@@ -800,7 +800,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   { /* many roots */
     z = shallowconcat(deg1_from_roots(z, v),
 		 FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
-    z = hensel_lift_fact(pol, z, NULL, p, e, pe);
+    z = ZpX_liftfact(pol, z, NULL, p, e, pe);
   }
   else
   {

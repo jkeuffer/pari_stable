@@ -270,7 +270,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
 /* Q list of (coprime, monic) factors of pol mod (T,p). Lift mod p^e = pe.
  * T may be NULL */
 GEN
-hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe)
+ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe)
 {
   pari_sp av = avma;
   if (lg(Q) == 2) return mkvec(pol);
@@ -325,7 +325,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   return gerepilecopy(av, E);
 }
 
-/* Front-end for hensel_lift_fact:
+/* Front-end for ZpX_liftfact:
    lift the factorization of pol mod p given by L to p^N (if possible) */
 GEN
 polhensellift(GEN pol, GEN L, GEN p, long N)
@@ -357,6 +357,161 @@ polhensellift(GEN pol, GEN L, GEN p, long N)
       gel(L,i) = scalar_ZX_shallow(gel(L,i), varn(pol));
     RgX_check_ZXY(gel(L,i), "polhensellift");
   }
-  return gerepilecopy(av, hensel_lift_fact(pol, L, T, p, N, powiu(p,N)));
+  return gerepilecopy(av, ZpX_liftfact(pol, L, T, p, N, powiu(p,N)));
 }
 
+/*************************************************************************/
+/*                             rootpadicfast                             */
+/*************************************************************************/
+/* SPEC:
+ * p is a t_INT > 1, e >= 0
+ * f is a ZX with leading term prime to p.
+ * a is a simple root mod l for all l|p.
+ * Return roots of f mod p^e, as integers (implicitly mod p^e)
+ * STANDARD USE: p is a prime power */
+GEN
+ZpX_liftroot(GEN f, GEN a, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN     qold, q, qm1;
+  GEN     W, fr, Wr = gen_0;
+  long    i, nb, mask;
+  qold = q = p; qm1 = gen_1;
+  nb = hensel_lift_accel(e, &mask);
+  fr = FpX_red(f,q);
+  a = modii(a,q);
+  W = FpX_eval(ZX_deriv(fr), a, q);
+  W = Fp_inv(W,q);
+  for(i=0;i<nb;i++)
+  {
+    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
+    q   =  mulii(qm1, p);
+    fr = FpX_red(f,q);
+    if (i)
+    {
+      W = Fp_mul(Wr, FpX_eval(ZX_deriv(fr),a,qold), qold);
+      W = Fp_mul(Wr, subsi(2,W), qold);
+    }
+    Wr = W;
+    a = subii(a, mulii(Wr, FpX_eval(fr, a,q)));
+    a = modii(a,q);
+    qold = q;
+  }
+  return gerepileupto(ltop,a);
+}
+GEN
+ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN     qold, q, qm1;
+  GEN     W, fr, Wr = gen_0;
+  long    i, nb, mask;
+  qold = p ;  q = p; qm1 = gen_1;
+  nb=hensel_lift_accel(e, &mask);
+  fr = FpXQX_red(f, T, q);
+  a = Fq_red(a, T, q);
+  W = FqX_eval(RgX_deriv(fr), a, T, q);
+  W = Fq_inv(W,T,q);
+  for(i=0;i<nb;i++)
+  {
+    qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
+    q   =  mulii(qm1, p);
+    fr = FpXQX_red(f,T,q);
+    if (i)
+    {
+      W = Fq_red(gmul(Wr,FqX_eval(RgX_deriv(fr),a,T,qold)), T, qold);
+      W = Fq_red(gmul(Wr, gadd(gen_2, gneg(W))), T, qold);
+    }
+    Wr = W;
+    a = gsub(a, gmul(Wr, FqX_eval(fr, a, T, q)));
+    a = Fq_red(a, T, q);
+    qold = q;
+  }
+  return gerepileupto(ltop,a);
+}
+/* Apply ZpX_liftroot to all roots in S and trace trick.
+ * Elements of S must be distinct simple roots mod p for all p|q. */
+GEN
+ZpX_liftroots(GEN f, GEN S, GEN q, long e)
+{
+  long i, d, l = lg(S), n = l-1;
+  GEN y = cgetg(l, typ(S));
+  if (!n) return y;
+  for (i=1; i<n; i++)
+    gel(y,i) = ZpX_liftroot(f, gel(S,i), q, e);
+  d = degpol(f);
+  if (n != d) /* not totally split*/
+    gel(y,n) = ZpX_liftroot(f, gel(S,n), q, e);
+  else
+  { /* totally split: use trace trick */
+    pari_sp av = avma;
+    GEN z = gel(f, d+1);/* -trace(roots) */
+    for(i=1; i<n;i++) z = addii(z, gel(y,i));
+    z = modii(negi(z), powiu(q,e));
+    gel(y,n) = gerepileuptoint(av,z);
+  }
+  return y;
+}
+
+/* Same as ZpX_liftroot for the polynomial X^2-T */
+GEN
+padicsqrtlift(GEN T, GEN a, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN q, W;
+  long i, nb, mask;
+
+  if (e == 1) return icopy(a);
+  nb = hensel_lift_accel(e, &mask);
+  W = Fp_inv(modii(shifti(a,1), p), p);
+  q = p;
+  for(i=0;;i++)
+  {
+    q = sqri(q);
+    if (mask & (1<<i)) q = diviiexact(q, p);
+    if (lgefint(q) == 3)
+    {
+      ulong Q = (ulong)q[2];
+      ulong A = umodiu(a, Q);
+      ulong t = umodiu(T, Q);
+      ulong w = umodiu(W, Q);
+      A = Fl_sub(A, Fl_mul(w, Fl_sub(Fl_sqr(A,Q), t, Q), Q), Q);
+      a = utoi(A);
+      if (i == nb-1) break;
+      w = Fl_sub(Fl_add(w,w,Q), Fl_mul(Fl_sqr(w,Q), Fl_add(A,A,Q),Q), Q);
+      W = utoi(w);
+    }
+    else
+    {
+      a = modii(subii(a, mulii(W, subii(Fp_sqr(a,q),T))), q);
+      if (i == nb-1) break;
+      W = subii(shifti(W,1), Fp_mul(Fp_sqr(W,q), shifti(a,1),q));
+    }
+  }
+  return gerepileuptoint(ltop,a);
+}
+/* Same as ZpX_liftroot for the polynomial X^n-T
+ * TODO: generalize to sparse polynomials. */
+GEN
+padicsqrtnlift(GEN T, GEN n, GEN a, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN q, W;
+  long i, nb, mask;
+
+  if (equalii(n, gen_2)) return padicsqrtlift(T,a,p,e);
+  nb = hensel_lift_accel(e, &mask);
+  W = Fp_inv(Fp_mul(n,Fp_pow(a,subis(n,1),p), p), p);
+  q = p;
+  for(i=0;;i++)
+  {
+    q = sqri(q);
+    if (mask & (1<<i)) q = diviiexact(q, p);
+    a = modii(subii(a, mulii(W, subii(Fp_pow(a,n,q),T))), q);
+    if (i == nb-1) break;
+
+    W = subii(shifti(W,1),
+	      Fp_mul(Fp_sqr(W,q), mulii(n,Fp_pow(a,subis(n,1),q)), q));
+  }
+  return gerepileuptoint(ltop,a);
+}

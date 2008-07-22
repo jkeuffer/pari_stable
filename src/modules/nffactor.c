@@ -1072,7 +1072,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
     GEN z = cgetg(3, t_VEC), proj;
     gel(z,1) = L->Tp;
     gel(z,2) = FpX_div(FpX_red(nfT,p), L->Tp, p);
-    z = hensel_lift_fact(nfT, z, NULL, p, L->k, L->pk);
+    z = ZpX_liftfact(nfT, z, NULL, p, L->k, L->pk);
     L->Tpk = gel(z,1);
     proj = get_proj_modT(L->topow, L->Tpk, L->pk);
     if (L->topowden)
@@ -1221,7 +1221,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
       PRKinv = L1.iprk;
       GSmin  = L1.GSmin;
       Tpk    = L1.Tpk;
-      famod = hensel_lift_fact(polred, famod, Tpk, p, k, pk);
+      famod = ZpX_liftfact(polred, famod, Tpk, p, k, pk);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
     for (i=1; i<=n0; i++)
@@ -1321,7 +1321,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   pari_timer ti;
 
   if (DEBUGLEVEL>2) TIMERstart(&ti);
-  T->fact = hensel_lift_fact(polred, famod, T->L->Tpk, p, a, T->L->pk);
+  T->fact = ZpX_liftfact(polred, famod, T->L->Tpk, p, a, T->L->pk);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
 
@@ -1358,7 +1358,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN ltdn, GEN init_fa, long nbf,
   {
     int cof = (degpol(pol) > nbf); /* non trivial cofactor ? */
     z = FqX_split_roots(init_fa, L->Tp, L->p, cof? polred: NULL);
-    z = hensel_lift_fact(polred, z, L->Tpk, L->p, L->k, L->pk);
+    z = ZpX_liftfact(polred, z, L->Tpk, L->p, L->k, L->pk);
     if (cof) setlg(z, lg(z)-1); /* remove cofactor */
     z = roots_from_deg1(z);
   }

@@ -22,6 +22,3 @@ Doc: given a prime $p$, an integral polynomial $A$ whose leading coefficient
  ? lift(lift( r[1] * r[2] * Mod(Mod(1,p^6),T) ))
  %2 = x^2 + (t + 1)
  @eprog 
-Variant: The underlying routine (skipping all consistency checks) is
- \fun{GEN}{hensel_lift_fact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe}
- where \kbd{pe} is $p^e$.

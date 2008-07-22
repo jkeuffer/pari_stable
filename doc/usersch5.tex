@@ -3177,9 +3177,10 @@ $p$. $p$ is odd.
 \typ{INT} which is an $n$-th root of $a$ mod $p^e$, assuming $S$ is an
 $n$-th root mod $p$. Assumes $n > 1$ and $p$ does not divide $n$.
 
-%\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
-%term prime to $p$, and without multiple roots mod $p$. Return a vector
-%of \typ{INT}s which are the roots of $f$ mod $p^e$.
+\fun{GEN}{rootpadicfast}{GEN f, GEN p, long e} $f$ a \kbd{ZX} with leading
+term prime to $p$, and without multiple roots mod $p$. Return a vector
+of \typ{INT}s which are the roots of $f$ mod $p^e$. This is a very important
+special case of \kbd{rootpadic}.
 
 \fun{GEN}{ZpX_liftroot}{GEN f, GEN a, GEN p, long e} $f$ a \kbd{ZX} with
 leading term prime to $p$, and $a$ a simple root mod $p$. Return a \typ{INT}
@@ -3193,6 +3194,41 @@ $S[i]$ mod $p$.
 \fun{GEN}{ZpXQX_liftroot}{GEN f, GEN a, GEN T, GEN p, long e} as
 \tet{ZpX_liftroot}, but $f$ is now a polynomial in $\Z[X,Y]$ and we find
 roots in the unramified extension of $\Q_p$ with residue field $\F_p[Y]/(T)$.
+
+\fun{GEN}{ZpX_liftfact}{GEN A, GEN B, GEN T, GEN p, long e, GEN pe} is
+the routine underlying \tet{polhensellift}. Here, $p$ is prime, $T(Y)$ 
+defines a finite field $\F_q$, either $\F_q = \F_p$ ($T$ is \kbd{NULL})
+or a non-prime finite field ($T$ an \kbd{FpX}). $A$ is a polynomial in 
+$\Z[X]$ ($T$ \kbd{NULL}) or $\Z[X,Y]$, whose leading coefficient 
+is non-zero in $\F_q$. $B$ is a vector of monic \kbd{FpX} ($T$ \kbd{NULL}) or
+\kbd{FqX}, paіrwise coprime in $\F_q[X]$, whose product is congruent to
+$A/\text{lc}(A)$ in $\F_q[X]$. Lifts the elements of $B$ mod $\kbd{pe} =
+p^e$, such that the congruence now holds mod $(T,p^e)$.
+
+\subsec{Other $p$-adic functions}
+
+\fun{GEN}{ZpX_gcd}{GEN f,GEN g, GEN pm} $f$ a monic \kbd{ZX}, $g$ a \kbd{ZX},
+$\kbd{pm} = p^m$ a prime power. There is a unique integer $r\geq 0$
+and a monic $h\in \Q_p[X]$ such that 
+$$p^rh\Z_p[X] + p^m\Z_p[X] = f\Z_p[X] + g\Z_p[X] + p^m\Z_p[X].$$
+Return the $0$ polynomial if $r\geq m$ and a monic $h\in\Z[1/p][X]$ otherwise
+(whose valuation at $p$ is $> -m$).
+
+\fun{GEN}{ZpX_reduced_resultant}{GEN f, GEN g, GEN pm} $f$ a monic
+\kbd{ZX}, $g$ a \kbd{ZX}, $\kbd{pm} = p^m$ a prime power. The $p$-adic 
+\emph{reduced resultant}\varsidx{resultant (reduced)} of $f$ and $g$ is
+$0$ if $f$, $g$ not coprime in $\Z_p[X]$, and otherwise the generator of the
+form $p^d$ of
+$$ (f\Z_p[X] + g\Z_p[X])\cap \Z_p. $$
+Return the reduced resultant modulo $p^m$.
+
+\fun{GEN}{ZpX_reduced_resultant_fast}{GEN f, GEN g, GEN p, long M} $f$
+a monic \kbd{ZX}, $g$ a \kbd{ZX}, $p$ a prime. Returns the 
+the $p$-adic reduced resultant of $f$ and $g$ modulo $p^M$. This function
+computes resultants for a sequence of increasing $p$-adic accuracies
+(up to $M$ $p$-adic digits), returning as soon as it obtains a non-zero
+result. It is very inefficient when the resultant is $0$, but otherwise
+usually more eficient than computations using a priori bounds.
 
 \subsec{Conversions involving single precision objects}
 

@@ -594,12 +594,10 @@ GEN     nftohnfbasis(GEN nf, GEN x);
 
 /* base2.c */
 
-GEN     fast_respm(GEN f, GEN g, GEN p, long M);
 GEN     gen_if_principal(GEN bnf, GEN x);
 int     nfissquarefree(GEN nf, GEN x);
 GEN     nfreducemodpr_i(GEN x, GEN prh);
 GEN     polsymmodp(GEN g, GEN p);
-GEN     respm(GEN x, GEN y, GEN pm);
 
 /* base3.c */
 

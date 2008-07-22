@@ -853,12 +853,14 @@ GEN     Fq_to_nf(GEN x, GEN modpr);
 GEN     FqM_to_nfM(GEN z, GEN modpr);
 GEN     FqV_to_nfV(GEN z, GEN modpr);
 GEN     FqX_to_nfX(GEN x, GEN modpr);
+GEN     ZpX_gcd(GEN f1,GEN f2,GEN pm);
+GEN     ZpX_reduced_resultant(GEN x, GEN y, GEN pm);
+GEN     ZpX_reduced_resultant_fast(GEN f, GEN g, GEN p, long M);
 void    checkmodpr(GEN modpr);
 GEN     compositum(GEN P, GEN Q);
 GEN     compositum2(GEN P, GEN Q);
 GEN     nfdisc(GEN x);
 GEN     fix_relative_pol(GEN nf, GEN x, int lift);
-GEN     gcdpm(GEN f1,GEN f2,GEN pm);
 GEN     indexpartial(GEN P, GEN DP);
 GEN     nf_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 GEN     nf_to_Fq(GEN nf, GEN x, GEN modpr);
@@ -1994,17 +1996,12 @@ long    FqX_is_squarefree(GEN P, GEN T, GEN p);
 long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
 GEN     FqX_roots(GEN f, GEN T, GEN p);
-GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
-GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
-GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
 GEN     factcantor(GEN x, GEN p);
 GEN     factorff(GEN f, GEN p, GEN a);
 GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic(GEN x, GEN p, long r);
 GEN     padicappr(GEN f, GEN a);
-GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
-GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 GEN     poldivrem(GEN x, GEN y, GEN *pr);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootpadic(GEN f, GEN p, long r);
@@ -2013,8 +2010,13 @@ GEN     rootpadicfast(GEN f, GEN p, long e);
 /* Hensel.c */
 
 GEN     Newton_exponents(long e);
+GEN     ZpX_liftroot(GEN f, GEN a, GEN p, long e);
+GEN     ZpX_liftroots(GEN f, GEN S, GEN q, long e);
+GEN     ZpXQX_liftroot(GEN f, GEN a, GEN T, GEN p, long e);
 long    hensel_lift_accel(long n, long *pmask);
-GEN     hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
+GEN     ZpX_liftfact(GEN pol, GEN Q, GEN T, GEN p, long e, GEN pe);
+GEN     padicsqrtlift(GEN T, GEN a, GEN p, long e);
+GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 GEN     polhensellift(GEN pol, GEN fct, GEN p, long exp);
 
 /* QX_factor.c */

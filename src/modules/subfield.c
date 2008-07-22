@@ -683,9 +683,9 @@ compute_data(blockdata *B)
   gel(DATA,2) = pe;
   gel(DATA,4) = roots_from_deg1(fk);
 
-  /* compute fhk = hensel_lift_fact(pol,fk,T,p,e,pe) in 2 steps
+  /* compute fhk = ZpX_liftfact(pol,fk,T,p,e,pe) in 2 steps
    * 1) lift in Zp to precision p^e */
-  ffL = hensel_lift_fact(pol, ff, NULL, p, e, pe);
+  ffL = ZpX_liftfact(pol, ff, NULL, p, e, pe);
   fhk = NULL;
   for (l=i=1; i<lff; i++)
   { /* 2) lift factorization of ff[i] in Qp[X] / T */
@@ -693,7 +693,7 @@ compute_data(blockdata *B)
     long di = degpol(L);
     F = cgetg(di+1, t_VEC);
     for (j=1; j<=di; j++) F[j] = fk[l++];
-    L = hensel_lift_fact(L, F, T, p, e, pe);
+    L = ZpX_liftfact(L, F, T, p, e, pe);
     fhk = fhk? shallowconcat(fhk, L): L;
   }
   gel(DATA,3) = roots_from_deg1(fhk);

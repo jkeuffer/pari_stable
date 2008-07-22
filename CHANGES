@@ -319,6 +319,7 @@ BA 24- new alarm GP function and alarmer error code
        Z_chinese_coprime, Z_chinese_post, Z_chinese_pre, Z_incremental_CRT,
        Z_init_CRT, ZM_incremental_CRT, ZM_init_CRT, ZX_incremental_CRT,
        ZX_init_CRT, RgX_disc, quad_disc, qfb_disc, deg1pol, deg1pol_shallow
+       ZpX_liftfact, ZpX_gcd, ZpX_reduced_resultant, ZpX_reduced_resultant_fast
 RM 26- partitions()
    27- library functions nf_to_Fq_init, nf_to_Fq, Fq_to_nf, zkmodprinit,
        zk_to_Fq_init, zk_to_Fq, nfM_to_FqM, FqM_to_nfM, nfX_to_FqX, FqX_to_nfX
