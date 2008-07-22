@@ -745,11 +745,7 @@ minval(GEN x, GEN p, long first, long lx)
 }
 
 static int
-intdvd(GEN x, GEN y, GEN *z) {
-  GEN r, q = dvmdii(x,y,&r);
-  if (r != gen_0) return 0;
-  *z = q; return 1;
-}
+intdvd(GEN x, GEN y, GEN *z) { GEN r; *z = dvmdii(x,y,&r); return (r==gen_0); }
 
 /* x t_FRAC, p t_INT, return v_p(x) */
 static long
@@ -1083,6 +1079,15 @@ ZV_pvalrem(GEN x, GEN p, GEN *px)
     }
     swap(x, y);
   }
+}
+
+/* return v_p(n!) = [n/p] + [n/p^2] + ... */
+long
+factorial_lval(ulong n, ulong p)
+{
+  ulong q = p, v = 0;
+  do { v += n/q; q *= p; } while (n >= q);
+  return (long)v;
 }
 
 /*******************************************************************/

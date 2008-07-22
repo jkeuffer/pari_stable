@@ -888,7 +888,7 @@ GEN     rnfpolredabs(GEN nf, GEN pol, long flag);
 GEN     rnfpseudobasis(GEN nf, GEN pol);
 GEN     rnfsimplifybasis(GEN bnf, GEN order);
 GEN     rnfsteinitz(GEN nf, GEN order);
-long    val_fact(ulong n, ulong p);
+long    factorial_lval(ulong n, ulong p);
 GEN     zk_to_Fq_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 GEN     zk_to_Fq(GEN x, GEN modpr);
 GEN     zkmodprinit(GEN nf, GEN pr);

@@ -1258,6 +1258,9 @@ except \kbd{x} is now a \kbd{long}.
 \fun{long}{Q_pval}{GEN x, GEN p} valuation at the \typ{INT} \kbd{p}
 of the \typ{INT} or \typ{FRAC}~\kbd{x}.
 
+\fun{long}{factorial_lval}{ulong n, ulong p} returns $v_p(n!)$, assuming
+$p$ is prime.
+
 \subsec{Factorization}
 
 \fun{GEN}{Z_factor}{GEN n} factors the \typ{INT} \kbd{n}. The ``primes''

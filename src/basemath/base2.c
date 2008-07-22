@@ -1049,15 +1049,6 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   return gtopoly(c, 0);
 }
 
-/* return v_p(n!) */
-long
-val_fact(ulong n, ulong p)
-{
-  ulong q = p, v = 0;
-  do { v += n/q; q *= p; } while (n >= q);
-  return (long)v;
-}
-
 static void
 manage_cache(decomp_t *S, GEN f, GEN pp)
 {
@@ -1095,7 +1086,7 @@ mycaract(decomp_t *S, GEN f, GEN a, GEN pp, GEN pdr)
   a = Q_remove_denom(a, &d);
   prec1 = pp;
   if (lgefint(S->p) == 3)
-    prec1 = mulii(prec1, powiu(S->p, val_fact(n, itou(S->p))));
+    prec1 = mulii(prec1, powiu(S->p, factorial_lval(n, itou(S->p))));
   prec2 = prec3 = prec1;
   if (d)
   {
