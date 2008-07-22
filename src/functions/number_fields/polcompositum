@@ -53,3 +53,8 @@ Doc: \sidx{compositum} $P$ and $Q$
  ? a = subst(a.pol, x, z[2])  \\@com \kbd{a} in the new coordinates
  %6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
  @eprog
+Variant: Also available are
+ \fun{GEN}{compositum}{GEN P, GEN Q} ($\fl = 0$) and
+ \fun{GEN}{compositum2}{GEN P, GEN Q} ($\fl = 1$).
+
+

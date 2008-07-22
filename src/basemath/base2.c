@@ -3069,35 +3069,23 @@ polcompositum0(GEN A, GEN B, long flall)
     if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C), D);
   }
   else
-    C = ZX_DDF(C); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
+    C = ZX_DDF(C); /* C = Res_Y (A(Y), B(X + kY)) guaranteed squarefree */
   gen_sort_inplace(C, (void*)&cmpii, &gen_cmp_RgX, NULL);
   if (flall)
-  {
-    long i,l = lg(C);
-    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
+  { /* a,b,c root of A,B,C = compositum, c = b - k a */
+    long i, l = lg(C);
+    GEN a, b, H0 = gel(LPRS,1), H1 = gel(LPRS,2);
     for (i=1; i<l; i++)
     { /* invmod possibly very costly */
-      a = RgXQ_mul(gel(LPRS,1), QXQ_inv(gel(LPRS,2), gel(C,i)), gel(C,i));
-      a = gneg_i(a);
+      GEN D = gel(C,i);
+      a = RgXQ_mul(RgX_neg(H0), QXQ_inv(H1, D), D);
       b = gadd(pol_x(v), gmulsg(k,a));
-      w = cgetg(5,t_VEC); /* [C, a, b, n ] */
-      gel(w,1) = gel(C,i);
-      gel(w,2) = mkpolmod(a, gel(w,1));
-      gel(w,3) = mkpolmod(b, gel(w,1));
-      gel(w,4) = stoi(-k); gel(C,i) = w;
+      gel(C,i) = mkvec4(D, mkpolmod(a,D), mkpolmod(b,D), stoi(-k)); 
     }
   }
   settyp(C, t_VEC); return gerepilecopy(av, C);
 }
-
 GEN
-compositum(GEN pol1,GEN pol2)
-{
-  return polcompositum0(pol1,pol2,0);
-}
-
+compositum(GEN pol1,GEN pol2) { return polcompositum0(pol1,pol2,0); }
 GEN
-compositum2(GEN pol1,GEN pol2)
-{
-  return polcompositum0(pol1,pol2,1);
-}
+compositum2(GEN pol1,GEN pol2) { return polcompositum0(pol1,pol2,1); }
