@@ -723,6 +723,13 @@ entries in the first column be primes; this is useful if only a local  integral
 basis  for  some small set of places is desired: only factors with exponents
 greater or equal to $2$ will be considered.
 
+\fun{GEN}{indexpartial}{GEN T, GEN dT} $T$ a monic separable \kbd{ZX},
+\kbd{dT} is either \kbd{NULL} (no information) or a multiple of the
+discriminant of $T$. Let $K = \Q[X]/(T)$ and $\Z_K$ its maximal order.
+Returns a multiple of the exponent of the quotient group $\Z_K/(\Z[X]/(T))$.
+In other word, a \emph{denominator} $d$ such that $d x\in\Z[X]/(T)$ for all
+$x\in\Z_K$.
+
 \subsec{Computing in the class group}
 
 We compute with arbitrary ideal representatives (in any of the various
