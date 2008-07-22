@@ -2,16 +2,17 @@ Function: polredabs
 Section: number_fields
 C-Name: polredabs0
 Prototype: GD0,L,
-Help: polredabs(x,{flag=0}): a smallest generating polynomial of the number
+Help: polredabs(T,{flag=0}): a smallest generating polynomial of the number
  field for the T2 norm on the roots, with smallest index for the minimal T2
  norm. flag is optional, whose binary digit mean 1: give the element whose
  characteristic polynomial is the given polynomial. 4: give all polynomials
  of minimal T2 norm (give only one of P(x) and P(-x)). 16: partial reduction.
-Doc: finds one of the polynomial defining
- the same number field as the one defined by $x$, and such that the sum of the
- squares of the modulus of the roots (i.e.~the $T_2$-norm) is minimal.
- All $x$ accepted by \tet{nfinit} are also allowed here (e.g. non-monic
- polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
+Doc: returns a canonical defining polynomial $P$ for the same number field 
+ defined by $T$, such that the sum of the squares of the modulus of the
+ roots (i.e.~the $T_2$-norm) is minimal. Different $T$ defining isomorphic
+ number fields will yield the same $P$. 
+ All $T$ accepted by \tet{nfinit} are also allowed here: non-monic
+ polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[T, Z\_K\_basis]}.
 
  \misctitle{Warning:} this routine uses an exponential-time algorithm to
  enumerate all potential generators, and may be exceedingly slow when the
@@ -22,25 +23,33 @@ Doc: finds one of the polynomial defining
  The binary digits of $\fl$ mean
 
  1: outputs a two-component row vector $[P,a]$, where $P$ is the default
- output and \kbd{Mod(a, P)} is a root of the original $x$.
+ output and \kbd{Mod(a, P)} is a root of the original $T$.
 
  4: gives \emph{all} polynomials of minimal $T_2$ norm; of the two polynomials
  $P(x)$ and $\pm P(-x)$, only one is given.
 
  16: possibly use a suborder of the maximal order. The primes dividing the
  index of the order chosen are larger than \tet{primelimit} or divide integers
- stored in the \tet{addprimes} table. In that case it may happen that the
- output polynomial does not have minimal $T_2$ norm.
+ stored in the \tet{addprimes} table. In that case the polynomial $P$ is 
+ no longer canonical, and it may happen that it does not have minimal
+ $T_2$ norm.
 Variant: Instead of the above hardcoded numerical flags, one should use an 
- or-er combination of 
+ or-ed combination of 
 
- \item \tet{nf_ORIG}: 
- 
  \item \tet{nf_PARTIALFACT}: partial factorization of the
  discriminant, possibly work in a non-maximal order,
- 
- \item \tet{nf_ALL}: give all polynomials of minimal norm,
- 
- \item \tet{nf_ADDZK}: return [P,  (incompatible with \tet{nf_ALL}),
- 
- \item \tet{nf_RAW}
+
+ \item \tet{nf_ORIG}: return $[P, a]$, where \kbd{Mod(a, P)} is a root of $T$.
+
+ \item \tet{nf_RAW}: return $[P, b]$, where \kbd{Mod(b, T)} is a root of $P$.
+ The algebraic integer $b$ is the raw result produced by the small vectors
+ enumeration in the maximal order; $P$ was computed as the characteristic
+ polynomial of \kbd{Mod(b, T)}. \kbd{Mod(a, P)} as in \tet{nf_ORIG}
+ is obtained with \tet{modreverse}.
+
+ \item \tet{nf_ADDZK}: if $r$ is the result produced with some of the above
+ flags (of the form $P$ or $[P,c]$), return \kbd{[r,zk]}, where \kbd{zk} is a
+ $\Z$-basis for the maximal order of $\Q[X]/(P)$.
+
+ \item \tet{nf_ALL}: return a vector of results of the above form, for all
+ polynomials of minimal $T_2$-norm.

@@ -1909,48 +1909,38 @@ findmindisc(GEN y, GEN *pa)
   *pa = b; return x;
 }
 
-/* store phi(beta mod z). */
 static GEN
-storeeval(GEN a, GEN x, GEN z, GEN lead)
+rev(GEN a, GEN x, GEN lead)
 {
-  GEN beta = modreverse_i(a, x);
-  if (lead) beta = RgX_Rg_div(beta, lead);
-  return mkvec2(z, mkpolmod(beta,z));
+  GEN b = modreverse_i(a, x);
+  if (lead) b = RgX_Rg_div(b, lead);
+  return b;
 }
+/* z "small" minimal polynomial of Mod(a,x), deg z = deg x */
 static GEN
-storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
+store(GEN x, GEN z, GEN a, nfbasic_t *T, long flag, GEN u)
 {
-  GEN y;
+  GEN y, b = NULL;
+
+  if (u) a = RgV_RgC_mul(T->bas, ZM_ZC_mul(u, a));
   if (flag & nf_RAW)
     y = mkvec2(z, a);
-  else if (flag & nf_ORIG)
-    y = storeeval(a, x, z, lead);
-  else
-    y = z;
-  return y;
-}
-static GEN
-storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
-{
-  GEN y;
-
-  if (flag & nf_RAW)
-  {
-    long i, c = lg(z);
-    y = cgetg(c,t_VEC);
-    for (i=1; i<c; i++) gel(y,i) = mkvec2(gel(z,i), gel(a,i));
-  }
-  else if (flag & nf_ORIG)
-  {
-    long i, c = lg(z);
-    y = cgetg(c,t_VEC);
-    for (i=1; i<c; i++) gel(y,i) = storeeval(gel(a,i), x, gel(z,i), lead);
+  else if (flag & nf_ORIG) { /* store phi(b mod z). */
+    b = rev(a, x, T->lead);
+    y = mkvec2(z, mkpolmod(b,z));
   }
   else
     y = z;
+  if (flag & nf_ADDZK)
+  { /* append integral basis for number field Q[X]/(z) to result */
+    long n = degpol(x);
+    GEN t; 
+    if (!b) b = rev(a, x, T->lead);
+    t = RgV_RgM_mul(RgXQ_powers(b, n-1, z), RgXV_to_RgM(T->bas,n));
+    y = mkvec2(y, t);
+  }
   return y;
 }
-
 static GEN
 polredabs_aux(nfbasic_t *T, GEN *u)
 {
@@ -2016,25 +2006,11 @@ polredabs0(GEN x, long flag)
     l = lg(a);
   }
   if (DEBUGLEVEL) fprintferr("Found %ld minimal polynomials.\n",l-1);
-  if (flag & nf_ALL)
-  {
-    if (u) for (i=1; i<l; i++)
-      gel(a,i) = RgV_RgC_mul(T.bas, ZM_ZC_mul(u, gel(a,i)));
-    y = storeallpol(x, y, a, T.lead, flag);
-    if (flag & nf_ADDZK) pari_err(impl,"nf_ADDZK flag when nf_ALL set (polredabs)");
-  }
-  else
-  {
+  if (flag & nf_ALL) {
+    for (i=1; i<l; i++) gel(y,i) = store(x, gel(y,i), gel(a,i), &T, flag, u);
+  } else {
     GEN z = findmindisc(y, &a);
-    if (u) a = RgV_RgC_mul(T.bas, ZM_ZC_mul(u, a));
-    y = storepol(x, z, a, T.lead, flag);
-    if (flag & nf_ADDZK)
-    {
-      GEN t, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
-      t = (flag & nf_ORIG)? lift_intern(gel(y,2)): modreverse_i(a, x);
-      t = RgV_RgM_mul(RgXQ_powers(t, degpol(z)-1, z), B);
-      y = mkvec2(y, t);
-    }
+    y = store(x, z, a, &T, flag, u);
   }
   return gerepilecopy(av, y);
 }
