@@ -1891,6 +1891,24 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   return bound;
 }
 
+static GEN
+findmindisc(GEN y, GEN *pa)
+{
+  GEN a = *pa, x = gel(y,1), b = gel(a,1), dx;
+  long i, l = lg(y);
+
+  if (l == 2) { *pa = b; return x; }
+  dx = ZX_disc(x);
+  for (i = 2; i < l; i++)
+  {
+    GEN yi = gel(y,i), d = ZX_disc(yi);
+    long cmp = absi_cmp(d, dx);
+    if (cmp < 0) { dx = d; x = yi; b = gel(a,i); continue; }
+    if (cmp == 0 && cmp_abs_ZX(yi, x) < 0) { x = yi; b = gel(a,i); }
+  }
+  *pa = b; return x;
+}
+
 /* store phi(beta mod z). */
 static GEN
 storeeval(GEN a, GEN x, GEN z, GEN lead)
@@ -1899,31 +1917,6 @@ storeeval(GEN a, GEN x, GEN z, GEN lead)
   if (lead) beta = RgX_Rg_div(beta, lead);
   return mkvec2(z, mkpolmod(beta,z));
 }
-
-static void
-findmindisc(GEN *py, GEN *pa)
-{
-  GEN v, dmin, z, b, discs, y = *py, a = *pa;
-  long i,k, l = lg(y);
-
-  if (l == 2) { *py = gel(y,1); *pa = gel(a,1); return; }
-
-  discs = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) gel(discs,i) = ZX_disc(gel(y,i));
-  v = gen_indexsort(discs, (void*)&absi_cmp, &cmp_nodata);
-  k = v[1];
-  dmin = gel(discs,k);
-  z    = gel(y,k);
-  b = gel(a,k);
-  for (i=2; i<l; i++)
-  {
-    k = v[i];
-    if (!absi_equal(gel(discs,k), dmin)) break;
-    if (cmp_abs_ZX(gel(y,k),z) < 0) { z = gel(y,k); b = gel(a,k); }
-  }
-  *py = z; *pa = b;
-}
-
 static GEN
 storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
@@ -1936,7 +1929,6 @@ storepol(GEN x, GEN z, GEN a, GEN lead, long flag)
     y = z;
   return y;
 }
-
 static GEN
 storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
 {
@@ -2017,8 +2009,7 @@ polredabs0(GEN x, long flag)
   {
     GEN v = polredabs_aux(&T, &u);
     y = gel(v,1);
-    a = gel(v,2);
-    l = lg(a);
+    a = gel(v,2); l = lg(a);
     for (i=1; i<l; i++)
       if (ZX_canon_neg(gel(y,i))) gel(a,i) = ZC_neg(gel(a,i));
     remove_duplicates(y,a);
@@ -2034,16 +2025,15 @@ polredabs0(GEN x, long flag)
   }
   else
   {
-    GEN z;
-    findmindisc(&y, &a); z = y;
+    GEN z = findmindisc(y, &a);
     if (u) a = RgV_RgC_mul(T.bas, ZM_ZC_mul(u, a));
-    y = storepol(x, y, a, T.lead, flag);
+    y = storepol(x, z, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
-      GEN t, y0 = y, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
+      GEN t, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern(gel(y,2)): modreverse_i(a, x);
       t = RgV_RgM_mul(RgXQ_powers(t, degpol(z)-1, z), B);
-      y = mkvec2(y0, t);
+      y = mkvec2(y, t);
     }
   }
   return gerepilecopy(av, y);

@@ -22,13 +22,25 @@ Doc: finds one of the polynomial defining
  The binary digits of $\fl$ mean
 
  1: outputs a two-component row vector $[P,a]$, where $P$ is the default
- output and $a$ is an element expressed on a root of the polynomial $P$,
- whose minimal polynomial is equal to $x$.
+ output and \kbd{Mod(a, P)} is a root of the original $x$.
 
- 4: gives \emph{all} polynomials of minimal $T_2$ norm (of the two polynomials
- $P(x)$ and $P(-x)$, only one is given).
+ 4: gives \emph{all} polynomials of minimal $T_2$ norm; of the two polynomials
+ $P(x)$ and $\pm P(-x)$, only one is given.
 
  16: possibly use a suborder of the maximal order. The primes dividing the
  index of the order chosen are larger than \tet{primelimit} or divide integers
  stored in the \tet{addprimes} table. In that case it may happen that the
  output polynomial does not have minimal $T_2$ norm.
+Variant: Instead of the above hardcoded numerical flags, one should use an 
+ or-er combination of 
+
+ \item \tet{nf_ORIG}: 
+ 
+ \item \tet{nf_PARTIALFACT}: partial factorization of the
+ discriminant, possibly work in a non-maximal order,
+ 
+ \item \tet{nf_ALL}: give all polynomials of minimal norm,
+ 
+ \item \tet{nf_ADDZK}: return [P,  (incompatible with \tet{nf_ALL}),
+ 
+ \item \tet{nf_RAW}
