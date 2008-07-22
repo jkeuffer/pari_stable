@@ -1164,13 +1164,13 @@ GEN
 nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 {
   GEN nf = cgetg(10,t_VEC);
-  GEN x = T->x;
-  GEN absdK, invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
+  GEN x = T->x, absdK, invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
+  long n = degpol(T->x);
   nffp_t F;
   get_nf_fp_compo(T, &F, ro, prec);
 
   gel(nf,1) = T->x;
-  gel(nf,2) = get_sign(T->r1, degpol(T->x));
+  gel(nf,2) = get_sign(T->r1, n);
   gel(nf,3) = T->dK;
   gel(nf,4) = T->index;
   gel(nf,6) = F.ro;
@@ -1180,7 +1180,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   gel(mat,1) = F.M;
   gel(mat,2) = F.G;
 
-  invbas = QM_inv(RgXV_to_RgM(T->bas, lg(T->bas)-1), gen_1);
+  invbas = QM_inv(RgXV_to_RgM(T->bas, n), gen_1);
   gel(nf,8) = invbas;
   gel(nf,9) = get_mul_table(x, F.basden, invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
@@ -1323,31 +1323,43 @@ set_LLL_basis(nfbasic_t *T, GEN *pro, double DELTA)
   if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
+/* current best: ZX x of discriminant *dx, is ZX y better than x ?
+ * (if so update *dx) */
+static int
+ZX_is_better(GEN y, GEN x, GEN *dx)
+{
+  GEN d = ZX_disc(y);
+  long cmp = absi_cmp(d, *dx);
+  if (cmp < 0) { *dx = d; return 1; }
+  if (cmp == 0 && cmp_abs_ZX(y, x) < 0) return 1;
+  return 0;
+}
+
 static GEN polred_aux(GEN x, GEN a, long orig);
 /* Seek a simpler, polynomial pol defining the same number field as
  * x (assumed to be monic at this point) */
 static GEN
 nfpolred(nfbasic_t *T)
 {
-  GEN x = T->x, dx = T->dx, a = T->bas, z, y, mat, d, rev;
-  long i, best = 0, n = lg(a)-1, v = varn(x);
+  GEN x = T->x, dx = T->dx, a = T->bas, b, y, z, mat, d, rev;
+  long i, n = degpol(x), v = varn(x);
 
   if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
   z = polred_aux(x, a, 1);
   a = gel(z,1);
   y = gel(z,2);
-  for (i = 1; i < lg(y); i++)
-  {
-    GEN d, yi = gel(y,i);
+  for (i = 1; i < lg(y); i++) {
+    GEN yi = gel(y,i);
     if (degpol(yi) < n) continue;
-    d = ZX_disc(yi); if (absi_cmp(d, dx) < 0) { dx = d; best = i; }
+    if (ZX_is_better(yi, x, &dx)) { x = yi; b = gel(a,i); }
   }
-  if (!best) return NULL; /* no improvement */
+  if (x == T->x) return NULL; /* no improvement */
 
-  rev = modreverse_i(gel(a, best), x);
-  x = gel(y, best); if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
+  rev = modreverse_i(b, T->x);
+  if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
   
   /* update T */
+  a = T->bas;
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, x);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   mat = d? RgM_Rg_div(ZM_hnfmodid(mat,d), d): matid(n);
@@ -1613,19 +1625,22 @@ static GEN
 polred_aux(GEN x, GEN a, long orig)
 {
   long i, v = varn(x), l = lg(a);
-  GEN ch, y = cgetg(l,t_VEC);
+  GEN ch, y = cgetg(l,t_VEC), b = cgetg(l, t_COL);
 
   for (i=1; i<l; i++)
   {
+    GEN ai = gel(a,i);
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
-    ch = ZX_caract(x, gel(a,i), v);
+    ch = ZX_caract(x, ai, v);
     (void)ZX_gcd_all(ch, ZX_deriv(ch), &ch);
-    if (ZX_canon_neg(ch) && orig) gel(a,i) = RgX_neg(gel(a,i));
+    if (ZX_canon_neg(ch) && orig) ai = RgX_neg(ai);
     if (DEBUGLEVEL>3) fprintferr("polred: generator %Ps\n", ch);
     gel(y,i) = ch;
+    gel(b,i) = ai;
   }
-  remove_duplicates(y,a);
-  return orig? mkmat2(a, y): y;
+  remove_duplicates(y,b);
+  if (!orig) return y;
+  settyp(y, t_COL); return mkmat2(b, y);
 }
 
 GEN
@@ -1900,12 +1915,7 @@ findmindisc(GEN y, GEN *pa)
   if (l == 2) { *pa = b; return x; }
   dx = ZX_disc(x);
   for (i = 2; i < l; i++)
-  {
-    GEN yi = gel(y,i), d = ZX_disc(yi);
-    long cmp = absi_cmp(d, dx);
-    if (cmp < 0) { dx = d; x = yi; b = gel(a,i); continue; }
-    if (cmp == 0 && cmp_abs_ZX(yi, x) < 0) { x = yi; b = gel(a,i); }
-  }
+    if (ZX_is_better(gel(y,i), x, &dx)) { x = gel(y,i); b = gel(a,i); }
   *pa = b; return x;
 }
 
