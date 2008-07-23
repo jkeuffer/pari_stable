@@ -74,43 +74,49 @@ typedef struct {
 
 void remake_GM(GEN nf, nffp_t *F, long prec);
 
-/* for nfinitall */
-#define nf_ROUND2      64
-#define nf_PARTIALFACT 16 /* and nfmaxord */
-#define nf_RED          8
-#define nf_ORIG         1
+/* various flags for nf/bnf routines */
+enum {
+  nf_ORIG = 1,
+  nf_GEN = 1,
+  nf_ABSOLUTE = 2,
+  nf_FORCE = 2,
+  nf_ALL = 4,
+  nf_GENMAT = 4,
+  nf_INIT = 4,
+  nf_RAW = 8,
+  nf_RED = 8,
+  nf_PARTIALFACT = 16,
+  nf_ROUND2 = 64, /* obsolete */
+  nf_ADDZK =  256,
+  nf_GEN_IF_PRINCIPAL = 512
+};
 
-/* for rnfpolredabs */
-#define nf_ABSOLUTE     2
-#define nf_ADDZK      256
-
-/* for isprincipal */
-#define nf_GEN   1
-#define nf_FORCE 2
-#define nf_GENMAT 4
-#define nf_GEN_IF_PRINCIPAL 512
-
-/* for buchray */
-#define nf_INIT  4
+enum {
+  rnf_REL = 1,
+  rnf_COND = 2
+};
 
 /* for Buchall */
 enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
 
-/* for discray */
-#define nf_REL  1
-#define nf_COND 2
-
-/* for polredabs */
-#define nf_ALL   4
-#define nf_RAW   8
+/* LLL */
+enum {
+  LLL_KER  = 1, /* only kernel */
+  LLL_IM   = 2, /* only image */
+  LLL_ALL  = 4, /* kernel & image */
+  LLL_GRAM       = 0x100,
+  LLL_KEEP_FIRST = 0x200,
+  LLL_INPLACE    = 0x400
+};
 
 /* for minim */
-#define min_ALL   0
-#define min_FIRST 1
-#define min_PERF  2
-#define min_VECSMALL 3
-#define min_VECSMALL2 4
-
+enum {
+  min_ALL       = 0,
+  min_FIRST     = 1,
+  min_PERF      = 2,
+  min_VECSMALL  = 3,
+  min_VECSMALL2 = 4
+};
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {
   GEN (*f)(void *,GEN);

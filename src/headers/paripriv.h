@@ -173,16 +173,6 @@ GEN hnfspec_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN hnfspec(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
-/* LLL */
-enum {
-  LLL_KER  = 1, /* only kernel */
-  LLL_IM   = 2, /* only image */
-  LLL_ALL  = 4, /* kernel & image */
-  LLL_GRAM       = 0x100,
-  LLL_KEEP_FIRST = 0x200,
-  LLL_INPLACE    = 0x400
-};
-
 GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
 GEN qfgaussred_positive(GEN a);
