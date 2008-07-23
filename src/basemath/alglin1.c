@@ -1014,10 +1014,18 @@ static GEN
 split_realimag_col(GEN z, long r1, long r2)
 {
   long i, ru = r1+r2;
-  GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
-  for (i=1; i<=r1; i++) { a = gel(z,i); gel(x,i) = real_i(a); }
-  for (   ; i<=ru; i++) { a = gel(z,i); gel(x,i) = real_i(a);
-					 gel(y,i) = imag_i(a); }
+  GEN x = cgetg(ru+r2+1,t_COL), y = x + r2;
+  for (i=1; i<=r1; i++) {
+    GEN a = gel(z,i);
+    if (typ(a) == t_COMPLEX) a = gel(a,1); /* paranoia: a should be real */
+    gel(x,i) = a;
+  }
+  for (   ; i<=ru; i++) {
+    GEN b, a = gel(z,i);
+    if (typ(a) == t_COMPLEX) { b = gel(a,2); a = gel(a,1); } else b = gen_0;
+    gel(x,i) = a;
+    gel(y,i) = b;
+  }
   return x;
 }
 GEN
@@ -1031,14 +1039,14 @@ split_realimag(GEN x, long r1, long r2)
 }
 
 /* assume M = (r1+r2) x (r1+2r2) matrix and y compatible vector or matrix
- * r1 first lines of x,y are real. Solve the system obtained by splitting
+ * r1 first lines of M,y are real. Solve the system obtained by splitting
  * real and imaginary parts. */
 GEN
 RgM_solve_realimag(GEN M, GEN y)
 {
   long l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
-  M = split_realimag(M,r1,r2);
-  y = split_realimag(y,r1,r2); return RgM_solve(M, y);
+  return RgM_solve(split_realimag(M, r1,r2),
+                   split_realimag(y, r1,r2));
 }
 
 GEN

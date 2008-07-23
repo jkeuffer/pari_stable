@@ -3647,6 +3647,13 @@ than calling $\kbd{RgM\_solve}(M, b)$ over $\C$. In most applications,
 $M$ approximates the complex embeddings of an integer basis in a number
 field, and $x$ is actually rational.
 
+\fun{GEN}{split_realimag}{GEN x, long r1, long r2} $x$ is a \typ{COL} or
+\typ{MAT} with $r_1 + r_2$ rows, whose first $r_1$ rows have real entries
+(the $r_2$ others are complex). Return an object of the same type as
+$x$ and $r_1 + 2r_2$ rows, such that the first $r_1 + r_2$ rows contain
+the real part of $x$, and the $r_2$ following ones contain the imaginary part
+of the last $r_2$ rows of $x$. Called by \tet{RgM_solve_realimag}.
+
 \fun{GEN}{RgM_det_triangular}{GEN x} returns the product of the diagonal
 entries of $x$ (its determinant if it is indeed triangular).
 
