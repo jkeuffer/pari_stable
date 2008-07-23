@@ -372,8 +372,8 @@ void  var_make_safe(void);
 void  whatnow_new_syntax(const char *f, long n);
 /* gp_colors */
 void decode_color(long n, long *c);
-#define c_NONE 0xffffUL
-enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
+enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST,
+       c_NONE = 0xffffUL };
 extern GEN pari_colormap, pari_graphcolors;
 
 /* defaults */
