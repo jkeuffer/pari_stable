@@ -36,20 +36,15 @@ Doc: $\var{nf}$ being a number field as output by \kbd{nfinit}, computes the
  $K$-automorphism for any base field $K$ as follows:
  \bprog
  rnfgaloisconj(nfK, R) = \\ K-automorphisms of L = K[X] / (R)
- { my(polabs, N, H);
+ { my(polabs, N);
    R *= Mod(1, nfK.pol);             \\ convert coeffs to polmod elts of K
    polabs = rnfequation(nfK, R);
    N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L
-   H = [];
-   for(i=1, #N,                      \\ select the ones that fix K
-     if (subst(R, variable(R), Mod(N[i],R)) == 0,
-       H = concat(H, N[i])
-     )
-   ); H
+   \\ select the ones that fix K
+   select(s->subst(R, variable(R), Mod(s,R)) == 0, N);
  }
  K  = nfinit(y^2 + 7);
- polL = x^4 - y*x^3 - 3*x^2 + y*x + 1;
- rnfgaloisconj(K, polL)             \\ K-automorphisms of L
+ rnfgaloisconj(K, x^4 - y*x^3 - 3*x^2 + y*x + 1)  \\ K-automorphisms of L
  @eprog
 
 Variant:
