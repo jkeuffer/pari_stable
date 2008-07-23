@@ -1337,7 +1337,7 @@ static GEN polred_aux(GEN x, GEN a, long orig);
 static GEN
 nfpolred(nfbasic_t *T)
 {
-  GEN x = T->x, dx = T->dx, a = T->bas, b, y, z, mat, d, rev;
+  GEN x = T->x, dx = T->dx, a = T->bas, b = NULL, y, z, mat, d, rev;
   long i, n = degpol(x), v = varn(x);
 
   if (n == 1) { T->x = deg1pol_shallow(gen_1, gen_m1, v); return pol_1(v); }
@@ -1349,7 +1349,7 @@ nfpolred(nfbasic_t *T)
     if (degpol(yi) < n) continue;
     if (ZX_is_better(yi, x, &dx)) { x = yi; b = gel(a,i); }
   }
-  if (x == T->x) return NULL; /* no improvement */
+  if (!b) return NULL; /* no improvement */
 
   rev = modreverse_i(b, T->x);
   if (DEBUGLEVEL>1) fprintferr("xbest = %Ps\n",x);
