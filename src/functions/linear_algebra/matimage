@@ -7,6 +7,6 @@ Help: matimage(x,{flag=0}): basis of the image of the matrix x. flag is
 Doc: gives a basis for the image of the
  matrix $x$ as columns of a matrix. A priori the matrix can have entries of
  any type. If $\fl=0$, use standard Gauss pivot. If $\fl=1$, use
- \kbd{matsupplement}.
+ \kbd{matsupplement} (much slower: keep the default flag!).
 
 Variant: Also available is \fun{GEN}{image}{GEN x} ($\fl=0$).

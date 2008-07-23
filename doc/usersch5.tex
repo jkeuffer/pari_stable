@@ -3690,6 +3690,14 @@ diagonal matrix, and 0 otherwise.
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
 
+\subsec{Obsolete functions}
+
+The functions in this section are kept for backward compatibility only
+and will eventually disappear.
+
+\fun{GEN}{image2}{GEN x} compute the image of $x$ using a very slow
+algorithm. Use \tet{image} instead.
+
 \section{Integral, rational and generic polynomial arithmetic}
 
 \subsec{\kbd{ZX}, \kbd{QX}}
