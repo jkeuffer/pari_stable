@@ -1140,7 +1140,7 @@ void
 whatnow_new_syntax(const char *f, long n)
 {
   term_color(c_NONE);
-  print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file");
+  print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file.");
   pari_putc('\n');
   (void)whatnow_fun(f, -n);
 }

@@ -342,7 +342,7 @@ community(void)
 reference manual, a tutorial, a reference card and quite a few examples. They \
 should have been installed in the directory '%s'. If not, ask the person \
 who installed PARI on your system where they can be found. You can also \
-download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'",
+download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'.",
 GPDATADIR);
   print_text(s); avma = av;
 
@@ -823,7 +823,7 @@ gp_head(void)
   center("Copyright (C) 2000-2008 The PARI Group");
   pari_putc('\n');
   print_text("PARI/GP is free software, covered by the GNU General Public \
-License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
+License, and comes WITHOUT ANY WARRANTY WHATSOEVER.");
   pari_puts("\nType ? for help, \\q to quit.\n");
   print_text("Type ?12 for how to get moral (and possibly technical) support.");
   pari_printf("\nparisize = %lu, primelimit = %lu\n",
