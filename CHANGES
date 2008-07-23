@@ -248,6 +248,8 @@ BA 49- user variables can now be aliased [#790].
    85- Rename u2toi -> uu32toi [ paste two 32-bit unsigned into a t_INT ]
        Write uutoi for the more natural operation of pasting two ulongs into
        a t_INT.
+   86- Swap the order of the 2 arguments to select(): selection function 
+       now comes first [ as in apply() ]
 
   Added
     1- library function pari_calloc, cgetalloc

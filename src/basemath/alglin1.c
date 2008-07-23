@@ -394,7 +394,7 @@ extract0(GEN x, GEN l1, GEN l2)
 }
 
 GEN
-select0(GEN A, GEN f)
+select0(GEN f, GEN A)
 {
   long i, l, nb = 0, t = typ(A);
   GEN B, v;/* v left on stack for efficiency */
