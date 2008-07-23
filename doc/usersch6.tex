@@ -76,10 +76,17 @@ return \kbd{NULL} otherwise.
 \fun{void}{checkmodpr}{GEN modpr} Raise an exception if the argument is not a
  prime ideal structure.
 
-\fun{GEN}{checknfelt_mod}{GEN nf, GEN x, char *s} Given an \var{nf} structure
-\kbd{nf} and a \typ{POLMOD} \kbd{x}, return the associated polynomial
-representative (shallow) if \kbd{x} and \kbd{nf} are compatible. Raise an
-eception otherwise.
+\fun{GEN}{checknfelt_mod}{GEN nf, GEN x, const char *s} Given an \var{nf}
+structure \kbd{nf} and a \typ{POLMOD} \kbd{x}, return the associated
+polynomial representative (shallow) if \kbd{x} and \kbd{nf} are compatible.
+Raise an eception otherwise. Set $s$ to the name of the caller for a
+meaningful error message.
+
+\fun{void}{check_ZKmodule}{GEN x, const char *s} check whether $x$ looks like
+$\Z_K$-module (a pair $[A,I]$, where $A$ is a matrix and $I$ is a list of
+ideals; $A$ has as many columns as $I$ has elements. Otherwise
+raises an exception. Sset $s$ to the name of the caller for a
+meaningful error message.
 
 \fun{long}{idealtyp}{GEN *ideal, GEN *fa} The input is \kbd{ideal}, a pointer
 to an ideal (or extended ideal), which is usually modified, \kbd{fa} being

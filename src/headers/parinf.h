@@ -153,7 +153,6 @@ GEN    check_and_build_cycgen(GEN bnf);
 double check_bach(double cbach, double B);
 GEN    checkbnf_i(GEN bnf);
 GEN    checknf_i(GEN nf);
-void   check_ZKmodule(GEN x, const char *s);
 GEN    pow_ei_mod_p(GEN nf, long I, GEN n, GEN p);
 GEN    eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 GEN    eltreltoabs(GEN rnfeq, GEN x);

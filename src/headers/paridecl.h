@@ -806,6 +806,7 @@ GEN     dirzetak(GEN nf, GEN b);
 GEN     Polred(GEN x, long flag, GEN fa);
 GEN     T2_from_embed(GEN x, long r1);
 GEN     check_units(GEN x, const char *f);
+void    check_ZKmodule(GEN x, const char *s);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
 void    checkbnr(GEN bnr);

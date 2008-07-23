@@ -2244,15 +2244,6 @@ idealcoprime(GEN nf, GEN x, GEN y)
  * I=[a_1,...,a_k] is a row vector of k fractional ideals given in HNF.
  * A is an n x k matrix (same k) such that if A_j is the j-th column of A then
  * M=a_1 A_1+...+a_k A_k. We say that [A,I] is a pseudo-basis if k=n */
-void
-check_ZKmodule(GEN x, const char *s)
-{
-  if (typ(x) != t_VEC || lg(x) < 3) pari_err(talker,"not a module in %s", s);
-  if (typ(x[1]) != t_MAT) pari_err(talker,"not a matrix in %s", s);
-  if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
-    pari_err(talker,"not a correct ideal list in %s", s);
-}
-
 static GEN
 element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
 {

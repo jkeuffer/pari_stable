@@ -145,6 +145,15 @@ checknfelt_mod(GEN nf, GEN x, const char *s)
   return a;
 }
 
+void
+check_ZKmodule(GEN x, const char *s)
+{
+  if (typ(x) != t_VEC || lg(x) < 3) pari_err(talker,"not a module in %s", s);
+  if (typ(x[1]) != t_MAT) pari_err(talker,"not a matrix in %s", s);
+  if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
+    pari_err(talker,"not a correct ideal list in %s", s);
+}
+
 GEN
 get_bnf(GEN x, long *t)
 {
