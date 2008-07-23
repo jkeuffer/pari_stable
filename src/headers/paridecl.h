@@ -1753,7 +1753,6 @@ GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 
 /* lll.c */
-#define ZM_lll(x,D,f) ZM_lll_norms(x,D,f,NULL)
 GEN     ZM_lll_norms(GEN x, double D, long flag, GEN *B);
 GEN     kerint(GEN x);
 GEN     lll(GEN x);
@@ -1881,7 +1880,6 @@ GEN     shifti(GEN x, long n);
 GEN     sqri(GEN x);
 GEN     sqrs(long x);
 GEN     sqru(ulong x);
-#define sqrti(x) sqrtremi((x),NULL)
 GEN     sqrtremi(GEN S, GEN *R);
 GEN     subsr(long x, GEN y);
 GEN     truedvmdii(GEN x, GEN y, GEN *z);
@@ -2552,6 +2550,11 @@ INLINE long   nf_get_degree(GEN nf);
 INLINE long   nf_get_r1(GEN nf);
 INLINE long   nf_get_r2(GEN nf);
 INLINE void   nf_get_sign(GEN nf, long *r1, long *r2);
+INLINE long   pr_get_e(GEN pr);
+INLINE long   pr_get_f(GEN pr);
+INLINE GEN    pr_get_gen(GEN pr);
+INLINE GEN    pr_get_p(GEN pr);
+INLINE GEN    pr_get_tau(GEN pr);
 INLINE int    pr_is_inert(GEN P);
 
 INLINE int    F2x_cmp1(GEN x);
@@ -2571,6 +2574,7 @@ INLINE GEN    RgX_div(GEN x, GEN y);
 INLINE GEN    RgX_rem(GEN x, GEN y);
 INLINE GEN    ZC_hnfrem(GEN x, GEN y);
 INLINE GEN    ZM_hnfrem(GEN x, GEN y);
+INLINE GEN    ZM_lll(GEN x, double D, long f);
 INLINE GEN    ZV_to_zv(GEN x);
 INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZX_mul(GEN x, GEN y);
@@ -2592,6 +2596,7 @@ INLINE GEN    pol1_F2x(long sv);
 INLINE GEN    polx_zx(long sv);
 INLINE GEN    resultant(GEN x, GEN y);
 INLINE GEN    row_zm(GEN x, long i);
+INLINE GEN    sqrti(GEN x);
 INLINE long   sturm(GEN x);
 INLINE GEN    zc_to_ZC(GEN x);
 INLINE GEN    zero_F2x(long sv);

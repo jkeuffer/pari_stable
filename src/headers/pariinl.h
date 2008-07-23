@@ -277,12 +277,12 @@ togglesign_safe(GEN *px)
 /*                    ALGEBRAIC NUMBER THEORY                      */
 /*                                                                 */
 /*******************************************************************/
-#define pr_get_p(pr) gel(pr,1)
-#define pr_get_gen(pr) gel(pr,2)
+INLINE GEN pr_get_p(GEN pr)  { return gel(pr,1); }
+INLINE GEN pr_get_gen(GEN pr){ return gel(pr,2); }
 /* .[2] instead of itos works: e and f are small positive integers */
-#define pr_get_e(pr) gel(pr,3)[2]
-#define pr_get_f(pr) gel(pr,4)[2]
-#define pr_get_tau(pr) gel(pr,5)
+INLINE long pr_get_e(GEN pr) { return gel(pr,3)[2]; }
+INLINE long pr_get_f(GEN pr) { return gel(pr,4)[2]; }
+INLINE GEN pr_get_tau(GEN pr){ return gel(pr,5); }
 INLINE int
 pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 
@@ -301,6 +301,11 @@ nf_get_sign(GEN nf, long *r1, long *r2)
   *r2 = itou(gel(x,2));
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                         MISCELLANEOUS                           */
+/*                                                                 */
+/*******************************************************************/
 INLINE GEN
 RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
 INLINE GEN
@@ -383,6 +388,12 @@ INLINE int
 F2x_cmp1(GEN x) { return Flx_cmp1(x); }
 
 INLINE GEN
+sqrti(GEN x) { return sqrtremi(x,NULL); }
+
+INLINE GEN
+ZM_lll(GEN x, double D, long f) { return ZM_lll_norms(x,D,f,NULL); }
+
+INLINE GEN
 FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
 INLINE GEN
 FpXX_renormalize(GEN x, long lx)  { return ZX_renormalize(x,lx); }
@@ -403,10 +414,17 @@ gval(GEN x, long v) {
   avma = av; return n;
 }
 
-INLINE GEN gaddgs(GEN y, long s) { return gaddsg(s,y); }
-INLINE int gcmpgs(GEN y, long s) { return -gcmpsg(s,y); }
-INLINE int gequalgs(GEN y, long s) { return gequalsg(s,y); }
-INLINE GEN gmaxsg(long s, GEN y) { return gmaxgs(y,s); }
-INLINE GEN gminsg(long s, GEN y) { return gmings(y,s); }
-INLINE GEN gmulgs(GEN y, long s) { return gmulsg(s,y); }
-INLINE GEN gsubgs(GEN y, long s) { return gaddgs(y, -s); }
+INLINE GEN
+gaddgs(GEN y, long s) { return gaddsg(s,y); }
+INLINE int
+gcmpgs(GEN y, long s) { return -gcmpsg(s,y); }
+INLINE int
+gequalgs(GEN y, long s) { return gequalsg(s,y); }
+INLINE GEN
+gmaxsg(long s, GEN y) { return gmaxgs(y,s); }
+INLINE GEN
+gminsg(long s, GEN y) { return gmings(y,s); }
+INLINE GEN
+gmulgs(GEN y, long s) { return gmulsg(s,y); }
+INLINE GEN
+gsubgs(GEN y, long s) { return gaddgs(y, -s); }
