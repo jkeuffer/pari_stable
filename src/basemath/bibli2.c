@@ -1210,7 +1210,7 @@ polymodrecip(GEN x)
   n = degpol(T); if (n <= 0) return gcopy(x);
   v = varn(T);
   y = cgetg(3,t_POLMOD);
-  gel(y,1) = (n==1)? gsub(pol_x(v), a): caract2(T, a, v);
+  gel(y,1) = (n==1)? gsub(pol_x(v), a): RgXQ_caract(a, T, v);
   gel(y,2) = modreverse_i(a, T); return y;
 }
 

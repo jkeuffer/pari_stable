@@ -893,7 +893,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     p1 = coltoalg(nf,gel(al,n));
     for (i=n-1; i; i--)
       p1 = gadd(coltoalg(nf,gel(al,i)), gmul(pol_x(v),p1));
-    newpol = RgXQX_red(caract2(pol,lift(p1),v), nfpol);
+    newpol = RgXQX_red(RgXQ_caract(lift_intern(p1), pol, v), nfpol);
     newpol = Q_primpart(newpol);
 
     (void)nfgcd_all(newpol, RgX_deriv(newpol), nfpol, gel(nf,4), &newpol);
@@ -1008,7 +1008,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
 
   elt = RgXQX_translate(gel(red,2), deg1pol_shallow(a,gen_0,varn(T)), T);
   elt = fix_relative_pol(T, elt, 0);
-  pol = caract2(relpol, elt, varn(relpol));
+  pol = RgXQ_caract(elt, relpol, varn(relpol));
   pol = lift_if_rational(pol);
   if (flag & nf_ORIG) pol = mkvec2(pol, mkpolmod(modreverse_i(elt,relpol),pol));
   return gerepilecopy(av, pol);

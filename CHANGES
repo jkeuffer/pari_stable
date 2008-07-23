@@ -305,7 +305,7 @@ JD 12- add an optional argument to quit()
    RgX_neg, RgX_add, RgX_sub, RgX_Rg_add, RgX_Rg_sub, Rg_RgX_sub,
    RgX_equal, RgX_equal_var, RgX_translate, RgX_to_nfX, RgX_type,
    RgX_type_decode, RgX_type_is_composite, RgX_Rg_divexact,
-   RgXQ_norm, RgXQ_pow,
+   RgXQ_norm, RgXQ_pow, RgXQ_caract
    RgV_neg, RgV_add, RgV_sub, RgV_Rg_mul,
    RgC_neg, RgC_add, RgC_sub, RgC_Rg_div, RgC_Rg_mul,
    RgM_neg, RgM_add, RgM_sub, RgM_Rg_div, RgM_Rg_mul, RgM_diagonal,

@@ -272,18 +272,18 @@ tschirnhaus(GEN x)
 {
   pari_sp av = avma, av2;
   long a, v = varn(x);
-  GEN u, p1 = cgetg(5,t_POL);
+  GEN u, y = cgetg(5,t_POL);
 
   if (typ(x)!=t_POL) pari_err(notpoler,"tschirnhaus");
   if (lg(x) < 4) pari_err(constpoler,"tschirnhaus");
   if (v) { u=shallowcopy(x); setvarn(u,0); x=u; }
-  p1[1] = evalsigne(1)|evalvarn(0);
+  y[1] = evalsigne(1)|evalvarn(0);
   do
   {
-    a = random_bits(2); if (a==0) a  = 1; gel(p1,4) = stoi(a);
-    a = random_bits(3); if (a>=4) a -= 8; gel(p1,3) = stoi(a);
-    a = random_bits(3); if (a>=4) a -= 8; gel(p1,2) = stoi(a);
-    u = caract2(x,p1,v); av2 = avma;
+    a = random_bits(2); if (a==0) a  = 1; gel(y,4) = stoi(a);
+    a = random_bits(3); if (a>=4) a -= 8; gel(y,3) = stoi(a);
+    a = random_bits(3); if (a>=4) a -= 8; gel(y,2) = stoi(a);
+    u = RgXQ_caract(y,x,v); av2 = avma;
   }
   while (degpol(RgX_gcd(u,RgX_deriv(u)))); /* while u not separable */
   if (DEBUGLEVEL>1)

@@ -2349,6 +2349,86 @@ polresultant0(GEN x, GEN y, long v, long flag)
 
 /*******************************************************************/
 /*                                                                 */
+/*             CHARACTERISTIC POLYNOMIAL USING RESULTANT           */
+/*                                                                 */
+/*******************************************************************/
+
+/* (v - x)^d */
+static GEN
+caract_const(pari_sp av, GEN x, long v, long d)
+{ return gerepileupto(av, gpowgs(deg1pol_shallow(gen_1, gneg_i(x), v), d)); }
+
+/* return caract(Mod(x,T)) in variable v */
+GEN
+RgXQ_caract(GEN x, GEN T, long v)
+{
+  pari_sp av = avma;
+  long d = degpol(T), dx, vx, vp;
+  GEN ch, L;
+
+  if (typ(x) != t_POL) return caract_const(av, x, v, d);
+  vx = varn(x);
+  vp = varn(T);
+  if (varncmp(vx, vp) > 0) return caract_const(av, x, v, d);
+  if (varncmp(vx, vp) < 0)
+    pari_err(talker,"incorrect variable priorities in RgXQ_caract");
+  dx = degpol(x);
+  if (dx <= 0)
+    return dx? monomial(gen_1, d, v): caract_const(av, gel(x,2), v, d);
+
+  x = RgX_neg(x);
+  if (varn(x) == MAXVARN) { setvarn(x, 0); T = shallowcopy(T); setvarn(T, 0); }
+  gel(x,2) = gadd(gel(x,2), pol_x(MAXVARN));
+  ch = resultant_all(T, x, NULL);
+  if (v != MAXVARN)
+  {
+    if (typ(ch) == t_POL && varn(ch) == MAXVARN)
+      setvarn(ch, v);
+    else
+      ch = gsubst(ch, MAXVARN, pol_x(v));
+  }
+  L = leading_term(ch);
+  if (!gcmp1(L)) ch = RgX_Rg_div(ch, L);
+  return gerepileupto(av, ch);
+}
+
+/* characteristic polynomial (in v) of x over nf, where x is an element of the
+ * algebra nf[t]/(Q(t)) */
+GEN
+rnfcharpoly(GEN nf, GEN Q, GEN x, long v)
+{
+  long tx = typ(x), vQ = varn(Q), dQ = degpol(Q), vx, vT;
+  pari_sp av = avma;
+  GEN T;
+
+  if (v < 0) v = 0;
+  nf = checknf(nf); T = gel(nf,1); vT = varn(T);
+  Q = fix_relative_pol(T,Q,0);
+  if (tx == t_POLMOD) {
+    GEN M = gel(x,1);
+    long vM = varn(M);
+    int ok = 1;
+    if      (vM == vQ) { if (!RgX_equal(M, Q)) ok = 0; }
+    else if (vM == vT) { if (!RgX_equal(M, T)) ok = 0; }
+    else ok = 0;
+    if (!ok) pari_err(consister,"rnfcharpoly");
+    x = gel(x, 2); tx = typ(x);
+  }
+  if (tx != t_POL) {
+    if (!is_rational_t(tx)) pari_err(typeer,"rnfcharpoly");
+    return caract_const(av, x, v, dQ);
+  }
+  vx = varn(x);
+  if (vx == vT) return caract_const(av, mkpolmod(x,T), v, dQ);
+  if (vx != vQ) pari_err(typeer,"rnfcharpoly");
+  x = fix_relative_pol(T,x,0);
+  if (degpol(x) >= dQ) x = RgX_rem(x, Q);
+  if (dQ <= 1) return caract_const(av, constant_term(x), v, 1);
+  return gerepilecopy(av, lift_if_rational( RgXQ_caract(x, Q, v) ));
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/

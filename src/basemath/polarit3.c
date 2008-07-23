@@ -2406,7 +2406,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
 GEN
 ZX_caract(GEN A, GEN B, long v)
 {
-  return (degpol(A) < 16) ? caract2(A,B,v): ZX_caract_sqf(A,B, NULL, v);
+  return (degpol(A) < 16) ? RgXQ_caract(B,A,v): ZX_caract_sqf(A,B, NULL, v);
 }
 
 static GEN
