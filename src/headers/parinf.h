@@ -158,7 +158,6 @@ GEN    pow_ei_mod_p(GEN nf, long I, GEN n, GEN p);
 GEN    eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 GEN    eltreltoabs(GEN rnfeq, GEN x);
 GEN    galoisbig(GEN x, long prec);
-GEN    get_arch(GEN nf,GEN x,long prec);
 GEN    get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 GEN    get_bas_den(GEN bas);
 GEN    get_mul_table(GEN x,GEN bas,GEN invbas);

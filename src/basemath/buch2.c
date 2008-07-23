@@ -1192,7 +1192,31 @@ testprimes(GEN bnf, GEN BOUND)
 }
 
 /**** logarithmic embeddings ****/
+static GEN famat_to_arch(GEN nf, GEN fa, long prec);
+static GEN
+mylog(GEN x, long prec)
+{
+  if (gcmp0(x)) pari_err(precer,"get_arch");
+  return glog(x,prec);
+}
 
+/* Get archimedean components: [e_i Log( sigma_i(X) )], where X = primpart(x),
+ * and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
+static GEN
+get_arch(GEN nf,GEN x,long prec)
+{
+  long i, R1, RU;
+  GEN v;
+  if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
+  x = nf_to_scalar_or_basis(nf,x);
+  RU = lg(nf[6]) - 1;
+  if (typ(x) != t_COL) return zerovec(RU);
+  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
+  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
+  for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
+  for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
+  return v;
+}
 static GEN
 famat_to_arch(GEN nf, GEN fa, long prec)
 {
@@ -1214,33 +1238,6 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   }
   return y ? y: zerovec(lg(nf[6])-1);
 }
-
-static GEN
-mylog(GEN x, long prec)
-{
-  if (gcmp0(x)) pari_err(precer,"get_arch");
-  return glog(x,prec);
-}
-
-/* For internal use. Get archimedean components: [e_i Log( sigma_i(X) )],
- * where X = primpart(x), and e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
-GEN
-get_arch(GEN nf,GEN x,long prec)
-{
-  long i, R1, RU;
-  GEN v;
-  if (typ(x) == t_MAT) return famat_to_arch(nf,x,prec);
-  x = nf_to_scalar_or_basis(nf,x);
-  RU = lg(nf[6]) - 1;
-  if (typ(x) != t_COL) return zerovec(RU);
-  x = RgM_RgC_mul(gmael(nf,5,1), Q_primpart(x));
-  v = cgetg(RU+1,t_VEC); R1 = nf_get_r1(nf);
-  for (i=1; i<=R1; i++) gel(v,i) = mylog(gel(x,i),prec);
-  for (   ; i<=RU; i++) gel(v,i) = gmul2n(mylog(gel(x,i),prec),1);
-  return v;
-}
-
-GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 
 static GEN
 famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
