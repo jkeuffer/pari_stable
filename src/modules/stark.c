@@ -1011,7 +1011,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   long N, l, j, prec2;
 
   dk    =  gel(nf,3);
-  N     =  degpol(gel(nf,1));
+  N     =  nf_get_degree(nf);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
   C = sqrtr(divir(absi(dk), gpowgs(mppi(prec2), N)));

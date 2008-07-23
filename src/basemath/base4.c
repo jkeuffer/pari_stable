@@ -78,7 +78,7 @@ GEN
 idealhnf_two(GEN nf, GEN v)
 {
   GEN p = gel(v,1), pi = gel(v,2), m = zk_scalar_or_multable(nf, pi);
-  if (typ(m) == t_INT) return scalarmat(p, degpol(gel(nf,1)));
+  if (typ(m) == t_INT) return scalarmat(p, nf_get_degree(nf));
   return ZM_hnfmodid(m, p);
 }
 
@@ -240,7 +240,7 @@ hnf_QC_QC(GEN nf, GEN a, GEN b)
   return d? RgM_Rg_div(x, d): x;
 }
 static GEN
-hnf_Q_Q(GEN nf, GEN a, GEN b) {return scalarmat(ggcd(a,b), degpol(gel(nf,1)));}
+hnf_Q_Q(GEN nf, GEN a, GEN b) {return scalarmat(ggcd(a,b), nf_get_degree(nf));}
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {

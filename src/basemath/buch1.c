@@ -237,7 +237,7 @@ getallrootsof1(GEN bnf)
   long i, n = itos(gmael3(bnf,8,4,1));
 
   if (n == 2) {
-    long N = degpol(gel(nf,1));
+    long N = nf_get_degree(nf);
     return mkvec2(scalarcol_shallow(gen_m1, N),
 		  scalarcol_shallow(gen_1, N));
   }
@@ -633,7 +633,7 @@ quadray(GEN D, GEN f, long prec)
   {
     GEN nf;
     bnf = checkbnf(D); nf = gel(bnf,7);
-    if (degpol(gel(nf,1)) != 2)
+    if (nf_get_degree(nf) != 2)
       pari_err(talker,"not a polynomial of degree 2 in quadray");
     D = gel(nf,3);
   }

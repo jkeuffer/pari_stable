@@ -1787,7 +1787,7 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
   long e, f, N;
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
-  N = degpol(gel(nf,1));
+  N = nf_get_degree(nf);
   f = N - (lg(P)-1);
   if (f == N)
     return mk_pr(p,scalarcol_shallow(p,N),1,f,gen_1);
@@ -1953,7 +1953,7 @@ static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = pr_get_p(pr), z;
-  long N = degpol(gel(nf,1)), e = pr_get_e(pr), f = pr_get_f(pr);
+  long N = nf_get_degree(nf), e = pr_get_e(pr), f = pr_get_f(pr);
   if (e*f == N) return col_ei(N, 1);
 
   z = FpC_red(special_anti_uniformizer(nf, pr), p);

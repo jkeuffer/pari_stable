@@ -158,7 +158,7 @@ nfadd(GEN nf, GEN x, GEN y)
   if (typ(x) != t_COL) {
     if (typ(y) == t_COL) z = RgC_Rg_add(y, x);
     else {
-      long N = degpol(gel(nf,1));
+      long N = nf_get_degree(nf);
       z = zerocol(N); gel(z,1) = gadd(x,y);
     }
   } else {
@@ -184,7 +184,7 @@ nfmul(GEN nf, GEN x, GEN y)
   {
     if (typ(y) == t_COL) z = RgC_Rg_mul(y, x);
     else {
-      long N = degpol(gel(nf,1));
+      long N = nf_get_degree(nf);
       z = zerocol(N); gel(z,1) = gmul(x,y);
     }
   }
@@ -213,7 +213,7 @@ nfsqr(GEN nf, GEN x)
   x = nf_to_scalar_or_basis(nf, x);
   if (typ(x) != t_COL)
   {
-    long N = degpol(gel(nf,1));
+    long N = nf_get_degree(nf);
     z = zerocol(N); gel(z,1) = gsqr(x);
   }
   else
