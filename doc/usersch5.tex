@@ -345,11 +345,11 @@ respectively.
 or \typ{SER}~\kbd{x} to~\kbd{s} (where $0\le \kbd{s}\le\kbd{MAXVARN}$).
 
 \subsec{Type groups}\label{se:typegroup}.
-In the following macros, \kbd{t} denotes the type of a \kbd{GEN}.
-Some of these macros may evaluate their argument twice. Always use them as in
+In the following functions, \kbd{t} denotes the type of a \kbd{GEN}.
+They used to be implemented as macros, which could evaluate their argument
+twice; \emph{no longer}: it is not inefficient to write
 \bprog
-  long tx = typ(x);
-  if (is_intreal_t(tx)) { }
+  is_intreal_t(typ(x))
 @eprog
 
 \fun{int}{is_recursive_t}{long t} \kbd{true} iff \kbd{t} is a recursive

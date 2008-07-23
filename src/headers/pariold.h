@@ -179,6 +179,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define absrz(x,z)  mpabsz((x),(z))
 #define negrz(x,z)  mpnegz((x),(z))
 
+/* removed GEN subtypes */
+#define t_FRACN  t_FRAC
+#define t_RFRACN t_RFRAC
+#define is_frac_t(t) ( (t) == t_FRAC )
+#define is_rfrac_t(t) ( (t) == t_RFRAC )
+
 /*casts*/
 #define labsi   (long)absi
 #define labsr   (long)absr

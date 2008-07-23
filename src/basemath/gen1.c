@@ -1666,7 +1666,7 @@ gmul(GEN x, GEN y)
 
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
     return mul_polmod_scal(gel(y,1), gel(y,2), x);
-  if is_scalar_t(tx) {
+  if (is_scalar_t(tx)) {
     if (tx == t_POLMOD) {
       vx = varn(x[1]);
       vy = gvar(y);
@@ -1684,10 +1684,9 @@ gmul(GEN x, GEN y)
   /* x and y are not scalars, nor matvec */
   vx = gvar(x);
   vy = gvar(y);
-  if (vx != vy) { /* x or y is treated as a scalar */
+  if (vx != vy) /* x or y is treated as a scalar */
     return (varncmp(vx, vy) < 0)? mul_scal(x, y, tx)
 				: mul_scal(y, x, ty);
-  }
   /* vx = vy */
   switch(tx)
   {

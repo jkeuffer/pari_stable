@@ -138,3 +138,29 @@ typedef unsigned long pari_ulong;
 /* t_LIST */
 #define list_nmax(x) ((GEN)x)[1]
 #define list_data(x) ((GEN*)x)[2]
+
+/* DO NOT REORDER THESE
+ * actual values can be changed. Adapt lontyp in gen2.c */
+enum {
+  t_INT    =  1,
+  t_REAL   =  2,
+  t_INTMOD =  3,
+  t_FRAC   =  4,
+  t_FFELT  =  5,
+  t_COMPLEX=  6,
+  t_PADIC  =  7,
+  t_QUAD   =  8,
+  t_POLMOD =  9,
+  t_POL    =  10,
+  t_SER    =  11,
+  t_RFRAC  =  13,
+  t_QFR    =  15,
+  t_QFI    =  16,
+  t_VEC    =  17,
+  t_COL    =  18,
+  t_MAT    =  19,
+  t_LIST   =  20,
+  t_STR    =  21,
+  t_VECSMALL= 22,
+  t_CLOSURE = 23
+};
