@@ -470,7 +470,10 @@ gnorml1(GEN x,long prec)
   GEN s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_COMPLEX: case t_FRAC: case t_QUAD:
+    case t_INT: case t_REAL:
+      return mpabs(x);
+    
+    case t_COMPLEX: case t_FRAC: case t_QUAD:
       return gabs(x,prec);
 
     case t_POL:
@@ -497,7 +500,10 @@ QuickNormL1(GEN x,long prec)
   GEN p1,p2,s;
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC:
+    case t_INT: case t_REAL:
+      return mpabs(x);
+    
+    case t_FRAC:
       return gabs(x,prec);
 
     case t_INTMOD: case t_PADIC: case t_POLMOD: case t_SER: case t_RFRAC:

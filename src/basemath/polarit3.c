@@ -1885,6 +1885,22 @@ FpXY_eval(GEN Q, GEN y, GEN x, GEN p)
   return gerepileuptoint(av, FpX_eval(FpXY_evalx(Q, x, p), y, p));
 }
 
+static GEN
+ZX_norml1(GEN x)
+{
+  long i, l = lg(x);
+  GEN s;
+
+  if (l == 2) return gen_0;
+  s = gel(x, l-1); /* != 0 */
+  for (i = l-2; i > 1; i--) {
+    GEN xi = gel(x,i);
+    if (!signe(x)) continue;
+    s = addii_sign(s,1, xi,1);
+  }
+  return s;
+}
+
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
  *   bound = N_2(A)^degpol B N_2(B)^degpol(A),  where
  *     N_2(A) = sqrt(sum (N_1(Ai))^2)
@@ -1900,7 +1916,7 @@ ZX_ZXY_ResBound(GEN A, GEN B, GEN dB)
   for (i=2; i<lB; i++)
   {
     GEN t = gel(B,i);
-    if (typ(t) == t_POL) t = gnorml1(t, 0);
+    if (typ(t) == t_POL) t = ZX_norml1(t);
     b = addii(b, sqri(t));
   }
   loga = dbllog2(a);
