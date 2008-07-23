@@ -8,7 +8,8 @@ Help: matsnf(X,{flag=0}): Smith normal form (i.e. elementary divisors) of
  polynomial entries, otherwise assume X is integral, 4: removes all
  information corresponding to entries equal to 1 in d.
 Doc: if $X$ is a (singular or non-singular)
- matrix outputs the vector of elementary divisors of $X$ (i.e.~the diagonal of
+ matrix outputs the vector of \idx{elementary divisors} of $X$
+ (i.e.~the diagonal of
  the \idx{Smith normal form} of $X$).
 
  The binary digits of \fl\ mean:
@@ -25,7 +26,5 @@ Doc: if $X$ is a (singular or non-singular)
  divisors equal to $1$ will be deleted, i.e.~outputs a shortened vector $D'$
  instead of $D$. If complete output was required, returns $[U',V',D']$ so
  that $U'XV' = D'$ holds. If this flag is set, $X$ is allowed to be of the
- form $D$ or $[U,V,D]$ as would normally be output with the cleanup flag
+ form `vector of elementary divisors' or $[U,V,D]$ as would normally be output with the cleanup flag
  unset.
-
-Variant: Also available is \fun{GEN}{smith}{GEN X} ($\fl=0$).
