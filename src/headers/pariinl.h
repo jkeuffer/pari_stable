@@ -286,3 +286,19 @@ togglesign_safe(GEN *px)
 INLINE int
 pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
 
+/* assume nf a genuine nf */
+INLINE long
+nf_get_degree(GEN nf) { return degpol(gel(nf,1)); }
+INLINE long
+nf_get_r1(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,1)); }
+INLINE long
+nf_get_r2(GEN nf) { GEN x = gel(nf,2); return itou(gel(x,2)); }
+INLINE void
+nf_get_sign(GEN nf, long *r1, long *r2)
+{
+  GEN x = gel(nf,2);
+  *r1 = itou(gel(x,1));
+  *r2 = itou(gel(x,2));
+}
+
+
