@@ -475,7 +475,7 @@ addss(long x, long y)
 
   if (y > 0) return subuu(y, -x);
   else { /* - adduu(-x, -y) */
-    ulong t = (-x)+(-y); return uutoineg((t < (-x)), t);
+    ulong t = (-x)+(-y); return uutoineg((t < (ulong)(-x)), t);
   }
 }
 
