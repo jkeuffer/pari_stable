@@ -91,9 +91,6 @@ enum {
   rnf_COND = 2
 };
 
-/* for Buchall */
-enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI, fupb_BACH };
-
 /* LLL */
 enum {
   LLL_KER  = 1, /* only kernel */
@@ -132,7 +129,6 @@ typedef struct {
   GEN U; /* base change matrix from generators to bid.gen */
 } zlog_S;
 
-
 GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
 void remake_GM(GEN nf, nffp_t *F, long prec);
 GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
@@ -158,7 +154,6 @@ double check_bach(double cbach, double B);
 GEN    checkbnf_i(GEN bnf);
 GEN    checknf_i(GEN nf);
 void   check_ZKmodule(GEN x, const char *s);
-void   dbg_rel(long s, GEN col);
 GEN    pow_ei_mod_p(GEN nf, long I, GEN n, GEN p);
 GEN    eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 GEN    eltreltoabs(GEN rnfeq, GEN x);
@@ -192,7 +187,6 @@ void   testprimes(GEN bnf, GEN bound);
 GEN    to_Fp_simple(GEN nf, GEN x, GEN ffproj);
 GEN    unif_mod_fZ(GEN pr, GEN F);
 GEN    unnf_minus_x(GEN x);
-void   wr_rel(GEN col);
 GEN    ideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
 GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
 GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);

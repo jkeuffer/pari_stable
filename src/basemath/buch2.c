@@ -126,6 +126,39 @@ typedef struct RELCACHE_t {
 } RELCACHE_t;
 
 static void
+wr_rel(GEN col)
+{
+  long i, l = lg(col);
+  fprintferr("\nrel = ");
+  for (i=1; i<l; i++)
+    if (col[i]) fprintferr("%ld^%ld ",i,col[i]);
+  fprintferr("\n");
+}
+static void
+dbg_rel(long s, GEN col)
+{
+  if (DEBUGLEVEL == 1) fprintferr("%ld ",s);
+  else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
+  flusherr();
+}
+static void
+dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
+{
+  fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
+	     cache->last - cache->base, cache->end - cache->base);
+  wr_rel(cache->last->R); msgtimer("for this relation");
+}
+
+static void
+dbg_cancelrel(long jid, long jdir, GEN col)
+{
+  fprintferr("relation cancelled: ");
+  if (DEBUGLEVEL>3) fprintferr("(jid=%ld,jdir=%ld)",jid,jdir);
+  wr_rel(col); flusherr();
+}
+
+
+static void
 delete_cache(RELCACHE_t *M)
 {
   REL_t *rel;
@@ -2195,22 +2228,6 @@ pseudomin(GEN I, GEN G)
   if (ZV_isscalar(m) && lg(u) > 2) m = ZM_ZC_mul(I, gel(u,2));
   if (DEBUGLEVEL>5) fprintferr("\nm = %Ps\n",m);
   return m;
-}
-
-static void
-dbg_newrel(RELCACHE_t *cache, long jid, long jdir)
-{
-  fprintferr("\n++++ cglob = %ld: new relation (need %ld)",
-	     cache->last - cache->base, cache->end - cache->base);
-  wr_rel(cache->last->R); msgtimer("for this relation");
-}
-
-static void
-dbg_cancelrel(long jid, long jdir, GEN col)
-{
-  fprintferr("relation cancelled: ");
-  if (DEBUGLEVEL>3) fprintferr("(jid=%ld,jdir=%ld)",jid,jdir);
-  wr_rel(col); flusherr();
 }
 
 /* I integral ideal in HNF form */

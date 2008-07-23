@@ -1146,23 +1146,6 @@ dbg_all(const char *phase, long s, long n)
   fprintferr("\nTime %s rel [#rel/#test = %ld/%ld]: %ld\n", phase,s,n,timer2());
 }
 
-void
-wr_rel(GEN col)
-{
-  long i, l = lg(col);
-  fprintferr("\nrel = ");
-  for (i=1; i<l; i++)
-    if (col[i]) fprintferr("%ld^%ld ",i,col[i]);
-  fprintferr("\n");
-}
-
-void
-dbg_rel(long s, GEN col)
-{
-  if (DEBUGLEVEL == 1) fprintferr("%ld ",s);
-  else { fprintferr("cglob = %ld. ", s); wr_rel(col); }
-  flusherr();
-}
 /* Imaginary Quadratic fields */
 
 static void
