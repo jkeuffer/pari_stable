@@ -1525,7 +1525,7 @@ static GEN
 Discrayrel(GEN bnr, GEN H0, long flag)
 {
   pari_sp av = avma;
-  long j, k, l, nz, flrel = flag & nf_REL, flcond = flag & nf_COND;
+  long j, k, l, nz, flrel = flag & rnf_REL, flcond = flag & rnf_COND;
   GEN bnf, nf, bid, ideal, archp, clhray, clhss, P, e, dlk, H;
   zlog_S S;
 
@@ -1575,7 +1575,7 @@ bnrdisc(GEN bnr, GEN H, long flag)
   GEN z, p1, D, dk, nf, dkabs;
 
   D = Discrayrel(bnr, H, flag);
-  if ((flag & nf_REL) || D == gen_0) return D;
+  if ((flag & rnf_REL) || D == gen_0) return D;
 
   nf = checknf(bnr);
   dkabs = absi(gel(nf,3));
@@ -1598,16 +1598,16 @@ bnrdisc0(GEN A, GEN B, GEN C, long flag)
 }
 GEN
 discrayrel(GEN bnr, GEN H)
-{ return bnrdisc(bnr,H,nf_REL); }
+{ return bnrdisc(bnr,H,rnf_REL); }
 GEN
 discrayrelcond(GEN bnr, GEN H)
-{ return bnrdisc(bnr,H,nf_REL | nf_COND); }
+{ return bnrdisc(bnr,H,rnf_REL | rnf_COND); }
 GEN
 discrayabs(GEN bnr, GEN H)
 { return bnrdisc(bnr,H,0); }
 GEN
 discrayabscond(GEN bnr, GEN H)
-{ return bnrdisc(bnr,H,nf_COND); }
+{ return bnrdisc(bnr,H,rnf_COND); }
 
 /* chi character of abelian G: chi[i] = chi(z_i), where G = \oplus Z/cyc[i] z_i.
  * Return Ker chi [ NULL = trivial subgroup of G ] */
