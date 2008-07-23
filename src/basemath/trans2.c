@@ -46,23 +46,6 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *prec = l; return s;
 }
 
-GEN
-affc_fixlg(GEN x, GEN res)
-{
-  if (typ(x) == t_COMPLEX)
-  {
-    affrr_fixlg(gel(x,1), gel(res,1));
-    affrr_fixlg(gel(x,2), gel(res,2));
-  }
-  else
-  {
-    avma = (pari_sp)(res+3);
-    res = cgetr(lg(gel(res,1)));
-    affrr_fixlg(x, res);
-  }
-  return res;
-}
-
 /********************************************************************/
 /**                                                                **/
 /**                          ARCTANGENT                            **/

@@ -40,7 +40,6 @@ void ellprint(GEN e);
 GEN mpinv(GEN b);
 
 /* generic */
-GEN affc_fixlg(GEN x, GEN res);
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
 GEN sort_factor_pol(GEN y, int (*cmp)(GEN,GEN));

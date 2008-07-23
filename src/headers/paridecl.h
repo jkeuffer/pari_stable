@@ -2580,6 +2580,7 @@ INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZX_mul(GEN x, GEN y);
 INLINE GEN    ZX_sqr(GEN x);
 INLINE long   Z_issquare(GEN x);
+INLINE GEN    affc_fixlg(GEN x, GEN res);
 INLINE GEN    gaddgs(GEN y, long s);
 INLINE int    gcmpgs(GEN y, long s);
 INLINE GEN    gdeuc(GEN x, GEN y);

@@ -1064,9 +1064,9 @@ them.
 \fun{void}{affrr_fixlg}{GEN y, GEN z} a variant of \kbd{affrr}. First shorten
 $z$ so that it is no longer than $y$, then assigns $y$ to $z$. This is used
 in the following scenario: room is reserved for the result but, due to
-cancellation, fewer words of accuracy are available than was foreseen;
-instead of appending meaningless $0$s to the mantissa, we store what was
-actualy computed.
+cancellation, fewer words of accuracy are available than had been
+anticipated; instead of appending meaningless $0$s to the mantissa, we store
+what was actualy computed.
 
 Note that shortening $z$ is not quite straightforward, since \kbd{setlg(z, ly)}
 would leave garbage on the stack, which \kbd{gerepile} might later inspect.
@@ -5822,6 +5822,14 @@ The return type is \typ{COMPLEXE} unless the imaginary part is equal to $0$
 to the current accuracy (its sign is $0$).
 
 \fun{void}{gsincos}{GEN x, GEN *s, GEN *c, long prec} general case.
+
+\noindent A generalization of \tet{affrr_fixlg}
+
+\fun{GEN}{affc_fixlg}{GEN x, GEN res} assume \kbd{res} was allocated using
+\tet{cgetc}, and that $x$ is either a \typ{REAL} or a \typ{COMPLEX}
+with \typ{REAL} components. Assign $x$ to \kbd{res}, first shortening
+the components of \kbd{res} if needed (in a \kbd{gerepile}-safe way). Further
+convert \kbd{res} to a \typ{REAL} if $x$ is a \typ{REAL}.
 
 \section{Permutations }
 
