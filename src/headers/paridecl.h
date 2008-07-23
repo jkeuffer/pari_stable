@@ -1666,20 +1666,12 @@ GEN     smithclean(GEN z);
 
 /* ifactor1.c */
 
-long    BPSW_psp(GEN N);
-long    BPSW_isprime(GEN x);
-GEN     gisprime(GEN x, long flag);
-GEN     gispseudoprime(GEN x, long flag);
 GEN     gnextprime(GEN n);
 GEN     gprecprime(GEN n);
 int     is_357_power(GEN x, GEN *pt, ulong *mask);
 int     is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits);
-long    isprime(GEN x);
-long    ispseudoprime(GEN x, long flag);
-long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
 GEN     precprime(GEN n);
-int     uisprime(ulong n);
 
 /* init.c */
 
@@ -2174,6 +2166,17 @@ GEN     ffinit(GEN p, long n, long v);
 GEN     from_Kronecker(GEN z, GEN pol);
 GEN     init_Fq(GEN p, long n, long v);
 GEN     to_Kronecker(GEN P, GEN Q);
+
+/* prime.c */
+
+long    BPSW_isprime(GEN x);
+long    BPSW_psp(GEN N);
+GEN     gisprime(GEN x, long flag);
+GEN     gispseudoprime(GEN x, long flag);
+long    isprime(GEN x);
+long    ispseudoprime(GEN x, long flag);
+long    millerrabin(GEN n, long k);
+int     uisprime(ulong n);
 
 /* random.c */
 

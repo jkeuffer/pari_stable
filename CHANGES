@@ -270,6 +270,7 @@ BA 11- docpdf and install-doc-pdf targets (toplevel Makefile)
 JD 12- add an optional argument to quit()
    13- library function FqX_roots(), FpX_factorff()
    14- files src/basemath/ RgV.c, FpV.c, ZX.c, ZV.c, concat.c, lll.c, hnf_snf.c
+       prime.c
    15- new benches: 'galoisinit', 'ispower', 'nffactor', 'subfields',
        'resultant', 'partition', 'aurifeuille', 'nfhilbert'
    16- library functions Flc_Fl_div, Flc_Fl_div_inplace, Flc_Fl_mul,

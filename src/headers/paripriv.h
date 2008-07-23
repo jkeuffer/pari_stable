@@ -191,7 +191,6 @@ GEN  detcyc(GEN cyc, long *L);
 GEN merge_factor_i(GEN f, GEN g);
 
 /* integer factorization / discrete log */
-int   MR_Jaeschke(GEN n, long k);
 GEN   coprime_part(GEN x, GEN f);
 GEN   Z_factor_until(GEN n, GEN limit);
 ulong is_kth_power(GEN x, ulong p, GEN *pt, byteptr d);
@@ -708,8 +707,13 @@ GEN     ifac_start(GEN n, long moebius, long hint);
 GEN     pollardbrent(GEN n);
 ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
 GEN     squfof(GEN n);
-int     uisprime_nosmalldiv(ulong n);
+
+/* prime.c */
+
 long    BPSW_psp_nosmalldiv(GEN N);
+int     Fl_MR_Jaeschke(ulong n, long k);
+int     MR_Jaeschke(GEN n, long k);
+int     uisprime_nosmalldiv(ulong n);
 
 /* init.c */
 
