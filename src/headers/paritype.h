@@ -40,7 +40,6 @@ enum {
 };
 #define is_const_t(t) ((t) < t_POLMOD)
 #define is_extscalar_t(t) ((t) <= t_POL)
-#define is_graphicvec_t(t) ( (t) >= t_QFR && (t) <= t_MAT )
 #define is_intreal_t(t) ( (t) <= t_REAL )
 #define is_matvec_t(t) ( (t) >= t_VEC && (t) <= t_MAT )
 #define is_noncalc_t(tx) ((tx) >= t_LIST)

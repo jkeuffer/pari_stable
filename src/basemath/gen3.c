@@ -1316,13 +1316,17 @@ gsubst(GEN x, long v, GEN y)
   pari_sp av, av2, lim;
   GEN X, t, p1, p2, z;
 
-  if (ty==t_MAT)
+  switch(ty)
   {
-    if (ly==1) return cgetg(1,t_MAT);
-    if (ly != lg(y[1]))
-      pari_err(talker,"forbidden substitution by a non square matrix");
-  } else if (is_graphicvec_t(ty))
-    pari_err(talker,"forbidden substitution by a vector");
+    case t_MAT:
+      if (ly==1) return cgetg(1,t_MAT);
+      if (ly != lg(y[1]))
+        pari_err(talker,"forbidden substitution by a non square matrix");
+      break;
+    case t_QFR: case t_QFI: case t_VEC: case t_COL:
+      pari_err(talker,"forbidden substitution by a vector");
+      break; /* not reached */
+  }
 
   if (is_scalar_t(tx))
   {
@@ -2641,12 +2645,6 @@ gtovec(GEN x)
   if (!x) return cgetg(1,t_VEC);
   tx = typ(x);
   if (is_scalar_t(tx)) return mkveccopy(x);
-  if (is_graphicvec_t(tx))
-  {
-    lx=lg(x); y=cgetg(lx,t_VEC);
-    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
-    return y;
-  }
   switch(tx)
   {
     case t_POL:
@@ -2658,6 +2656,10 @@ gtovec(GEN x)
       for (i=1; i<=lx-2; i++) gel(y,i) = gcopy(gel(x,i));
       return y;
     case t_RFRAC: return mkveccopy(x);
+    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+      lx=lg(x); y=cgetg(lx,t_VEC);
+      for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
+      return y;
     case t_LIST:
       x = list_data(x); lx = x? lg(x): 1;
       y = cgetg(lx, t_VEC);
@@ -3244,13 +3246,6 @@ geval_gp(GEN x, GEN t)
   GEN y, z;
 
   if (is_const_t(tx)) return gcopy(x);
-  if (is_graphicvec_t(tx))
-  {
-    lx=lg(x); y=cgetg(lx, tx);
-    for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
-    return y;
-  }
-
   switch(tx)
   {
     case t_STR:
@@ -3277,6 +3272,11 @@ geval_gp(GEN x, GEN t)
     case t_RFRAC:
       av = avma;
       return gerepileupto(av, gdiv(geval_gp(gel(x,1),t), geval_gp(gel(x,2),t)));
+
+    case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
+      lx=lg(x); y=cgetg(lx, tx);
+      for (i=1; i<lx; i++) gel(y,i) = geval_gp(gel(x,i),t);
+      return y;
 
     case t_CLOSURE:
       if (x[1]) pari_err(impl,"eval on functions with parameters");
