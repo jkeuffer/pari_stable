@@ -301,4 +301,104 @@ nf_get_sign(GEN nf, long *r1, long *r2)
   *r2 = itou(gel(x,2));
 }
 
+INLINE GEN
+RgX_div(GEN x, GEN y) { return RgX_divrem(x,y,NULL); }
+INLINE GEN
+RgX_rem(GEN x, GEN y) { return RgX_divrem(x,y,ONLY_REM); }
+INLINE GEN
+RgXQX_div(GEN x, GEN y, GEN T) { return RgXQX_divrem(x,y,T,NULL); }
+INLINE GEN
+RgXQX_rem(GEN x, GEN y, GEN T) { return RgXQX_divrem(x,y,T,ONLY_REM); }
+INLINE GEN
+gdeuc(GEN x, GEN y) { return poldivrem(x,y,NULL); }
+INLINE GEN
+grem(GEN x, GEN y) { return poldivrem(x,y,ONLY_REM); }
+INLINE GEN
+FpX_div(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, NULL); }
+INLINE GEN
+FpX_rem(GEN x, GEN y, GEN p) { return FpX_divrem(x,y,p, ONLY_REM); }
+INLINE GEN
+Flx_div(GEN x, GEN y, ulong p) { return Flx_divrem(x,y,p, NULL); }
+INLINE GEN
+FpV_FpC_mul(GEN x, GEN y, GEN p) { return FpV_dotproduct(x,y,p); }
+INLINE GEN
+F2x_div(GEN x, GEN y) { return F2x_divrem(x,y, NULL); }
+INLINE GEN
+ZC_hnfrem(GEN x, GEN y) { return ZC_hnfremdiv(x,y,NULL); }
+INLINE GEN
+ZM_hnfrem(GEN x, GEN y) { return ZM_hnfremdiv(x,y,NULL); }
 
+INLINE GEN
+ZX_ZXY_resultant(GEN a, GEN b) { return ZX_ZXY_rnfequation(a,b,NULL); }
+
+INLINE GEN
+zv_to_ZV(GEN x) { return vecsmall_to_vec(x); }
+INLINE GEN
+zc_to_ZC(GEN x) { return vecsmall_to_col(x); }
+INLINE GEN
+ZV_to_zv(GEN x) { return vec_to_vecsmall(x); }
+INLINE GEN
+zx_to_zv(GEN x, long N) { return Flx_to_Flv(x,N); }
+INLINE GEN
+zv_to_zx(GEN x, long sv) { return Flv_to_Flx(x,sv); }
+INLINE GEN
+zm_to_zxV(GEN x, long sv) { return Flm_to_FlxV(x,sv); }
+INLINE GEN
+zero_zm(long x, long y) { return zero_Flm(x,y); }
+INLINE GEN
+zero_zv(long x) { return zero_Flv(x); }
+INLINE GEN
+zero_zx(long sv) { return zero_Flx(sv); }
+INLINE GEN
+polx_zx(long sv) { return polx_Flx(sv); }
+INLINE GEN
+zx_shift(GEN x, long n) { return Flx_shift(x,n); }
+INLINE GEN
+zx_renormalize(GEN x, long l) { return Flx_renormalize(x,l); }
+INLINE GEN
+zm_transpose(GEN x) { return Flm_transpose(x); }
+INLINE GEN
+zm_copy(GEN x) { return Flm_copy(x); }
+INLINE GEN
+zv_copy(GEN x) { return Flv_copy(x); }
+INLINE GEN
+row_zm(GEN x, long i) { return row_Flm(x,i); }
+
+INLINE GEN
+matpascal(long n) { return matqpascal(n, NULL); }
+INLINE long
+sturm(GEN x) { return sturmpart(x, NULL, NULL); }
+INLINE long
+Z_issquare(GEN x) { return Z_issquareall(x, NULL); }
+INLINE GEN
+resultant(GEN x, GEN y) { return resultant_all(x,y,NULL); }
+INLINE GEN
+RgM_inv(GEN a) { return RgM_solve(a, NULL); }
+
+INLINE GEN
+zero_F2x(long sv) { return zero_Flx(sv); }
+INLINE GEN
+pol1_F2x(long sv) { return pol1_Flx(sv); }
+INLINE int
+F2x_cmp1(GEN x) { return Flx_cmp1(x); }
+
+INLINE GEN
+FpX_renormalize(GEN x, long lx)   { return ZX_renormalize(x,lx); }
+INLINE GEN
+FpXX_renormalize(GEN x, long lx)  { return ZX_renormalize(x,lx); }
+INLINE GEN
+FpXQX_renormalize(GEN x, long lx) { return ZX_renormalize(x,lx); }
+INLINE GEN
+F2x_renormalize(GEN x, long lx)   { return Flx_renormalize(x,lx); }
+
+INLINE GEN
+ZX_mul(GEN x, GEN y) { return RgX_mul(x, y); }
+INLINE GEN
+ZX_sqr(GEN x) { return RgX_sqr(x); }
+
+INLINE long
+gval(GEN x, long v) {
+  pari_sp av = avma;
+  long n = ggval(x, pol_x(v));
+  avma = av; return n;
+}

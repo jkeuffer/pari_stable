@@ -736,38 +736,6 @@ expgexpo(GEN x)
 }
 
 static GEN
-split_realimag_col(GEN z, long r1, long r2)
-{
-  long i, ru = r1+r2;
-  GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
-  for (i=1; i<=r1; i++) { a = gel(z,i); gel(x,i) = real_i(a); }
-  for (   ; i<=ru; i++) { a = gel(z,i); gel(x,i) = real_i(a);
-					 gel(y,i) = imag_i(a); }
-  return x;
-}
-
-GEN
-split_realimag(GEN x, long r1, long r2)
-{
-  long i,l; GEN y;
-  if (typ(x) == t_COL) return split_realimag_col(x,r1,r2);
-  l = lg(x); y = cgetg(l, t_MAT);
-  for (i=1; i<l; i++) gel(y,i) = split_realimag_col(gel(x,i), r1, r2);
-  return y;
-}
-
-/* assume M = (r1+r2) x (r1+2r2) matrix and y compatible vector or matrix
- * r1 first lines of x,y are real. Solve the system obtained by splitting
- * real and imaginary parts. */
-GEN
-RgM_solve_realimag(GEN M, GEN y)
-{
-  long l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
-  M = split_realimag(M,r1,r2);
-  y = split_realimag(y,r1,r2); return RgM_solve(M, y);
-}
-
-static GEN
 getfu(GEN nf, GEN *ptA, long force, long *pte, long prec)
 {
   GEN p1, p2, u, y, matep, A, vec, T = gel(nf,1), M = gmael(nf,5,1);

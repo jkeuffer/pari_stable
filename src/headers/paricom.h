@@ -143,8 +143,6 @@ enum manage_var_t {
 #define min(a,b) ((a)>(b)?(b):(a))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-#define gval(x,v) (ggval((x),pol_x(v)))
-
 #define absr  mpabs
 #define absi  mpabs
 #define negi  mpneg
@@ -282,61 +280,8 @@ enum manage_var_t {
 #define odd(x) ((x) & 1)
 #define both_odd(x,y) ((x)&(y)&1)
 
-#define mpodd(x) (signe(x) && mod2(x))
-
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
-#define RgX_div(x,y)     (RgX_divrem((x),(y),NULL))
-#define RgX_rem(x,y)     (RgX_divrem((x),(y),ONLY_REM))
-#define RgXQX_div(x,y,T) (RgXQX_divrem((x),(y),(T),NULL))
-#define RgXQX_rem(x,y,T) (RgXQX_divrem((x),(y),(T),ONLY_REM))
-#define gdeuc(x,y)       (poldivrem((x),(y),NULL))
-#define grem(x,y)        (poldivrem((x),(y),ONLY_REM))
-#define FpX_div(x,y,p)   (FpX_divrem((x),(y),(p), NULL))
-#define FpX_rem(x,y,p)   (FpX_divrem((x),(y),(p), ONLY_REM))
-#define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
-#define FpV_FpC_mul(x,y,p) FpV_dotproduct((x),(y),(p))
-#define F2x_div(x,y)     (F2x_divrem((x),(y), NULL))
-#define ZC_hnfrem(x,y)   (ZC_hnfremdiv((x),(y),NULL))
-#define ZM_hnfrem(x,y)   (ZM_hnfremdiv((x),(y),NULL))
-
-#define zero_F2x(x)      (zero_Flx((x)))
-#define pol1_F2x(x)      (pol1_Flx((x)))
-#define F2x_cmp1         Flx_cmp1
-
-#define FpX_renormalize   ZX_renormalize
-#define FpXX_renormalize  ZX_renormalize
-#define FpXQX_renormalize ZX_renormalize
-#define F2x_renormalize   Flx_renormalize
-
-#define ZX_ZXY_resultant(a,b) ZX_ZXY_rnfequation((a),(b),NULL)
-
-#define ZX_mul RgX_mul
-#define ZX_sqr RgX_sqr
-
-#define zv_to_ZV(x)    (vecsmall_to_vec((x)))
-#define zc_to_ZC(x)    (vecsmall_to_col((x)))
-#define ZV_to_zv(x)    (vec_to_vecsmall((x)))
-#define zx_to_zv(x,y)  (Flx_to_Flv((x),(y)))
-#define zv_to_zx(x,y)  (Flv_to_Flx((x),(y)))
-#define zm_to_zxV(x,y) (Flm_to_FlxV((x),(y)))
-#define zero_zm(x,y)   (zero_Flm((x),(y)))
-#define zero_zv(x)     (zero_Flv((x)))
-#define zero_zx(x)     (zero_Flx((x)))
-#define polx_zx(x)     (polx_Flx((x)))
-#define zx_shift(x,y)  (Flx_shift((x),(y)))
-#define zx_renormalize(x,l)  (Flx_renormalize((x),(l)))
-#define zm_transpose(x) (Flm_transpose((x)))
-#define zm_copy(x)     (Flm_copy((x)))
-#define zv_copy(x)     (Flv_copy((x)))
-#define row_zm(x,i)    (row_Flm((x),(i)))
-
-#define matpascal(n) matqpascal((n),NULL)
-#define sturm(x) (sturmpart((x),NULL,NULL))
-#define Z_issquare(x) (Z_issquareall((x),NULL))
-#define resultant(x,y) (resultant_all((x),(y),NULL))
-
-#define RgM_inv(a) (RgM_solve((a),NULL))
 
 /* output of get_nf and get_bnf */
 #define typ_NULL 0

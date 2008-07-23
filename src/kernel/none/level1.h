@@ -823,6 +823,9 @@ dvdiiz(GEN x, GEN y, GEN z)
   affii(p1,z); avma=av; return 1;
 }
 
+INLINE int
+mpodd(GEN x) { return signe(x) && mod2(x); }
+
 /* assume 0 <= k <= BITS_IN_LONG. Return uniform random 0 <= x < (1<<k) */
 INLINE long
 random_bits(long k) { return pari_rand() >> (BITS_IN_LONG - k); }

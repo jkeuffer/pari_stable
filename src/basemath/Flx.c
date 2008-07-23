@@ -98,10 +98,10 @@ Flx_to_Flv(GEN x, long N)
 
 /*Flv_to_Flx=zv_to_zx*/
 GEN
-Flv_to_Flx(GEN x, long vs)
+Flv_to_Flx(GEN x, long sv)
 {
   long i, l=lg(x)+1;
-  GEN z = cgetg(l,t_VECSMALL); z[1]=vs;
+  GEN z = cgetg(l,t_VECSMALL); z[1]=sv;
   x--;
   for (i=2; i<l ; i++) z[i]=x[i];
   return Flx_renormalize(z,l);

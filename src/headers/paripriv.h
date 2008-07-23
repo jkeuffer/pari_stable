@@ -194,10 +194,8 @@ GEN qfgaussred_positive(GEN a);
 
 /* miscellaneous linear algebra */
 GEN  diagonal_i(GEN x);
-GEN  RgM_solve_realimag(GEN x, GEN y);
 GEN  imagecomplspec(GEN x, long *nlze);
 void rowselect_p(GEN A, GEN B, GEN p, long init);
-GEN  split_realimag(GEN x, long r1, long r2);
 GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  vec_setconst(GEN v, GEN x);
@@ -546,7 +544,6 @@ GEN     sqcomprealraw(GEN x);
 
 /* alglin1.c */
 
-GEN     RgM_solve(GEN a, GEN b);
 GEN     matid_intern(long n,GEN myun,GEN myzero);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
 
