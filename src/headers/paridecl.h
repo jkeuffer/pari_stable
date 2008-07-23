@@ -2518,6 +2518,8 @@ INLINE GEN    subri(GEN x, GEN y);
 INLINE GEN    subrr(GEN x, GEN y);
 INLINE GEN    subrs(GEN x, long y);
 INLINE GEN    subsi(long x, GEN y);
+INLINE GEN    subss(long x, long y);
+INLINE void   subssz(long x, long y, GEN z);
 INLINE GEN    subuu(ulong x, ulong y);
 INLINE void   togglesign_safe(GEN *px);
 INLINE GEN    truedivii(GEN a,GEN b);
@@ -2545,8 +2547,6 @@ INLINE GEN    zeroser(long v, long e);
 INLINE GEN    zerovec(long n);
 
 /* pariinl.h */
-
-INLINE double gtodouble(GEN x);
 
 INLINE long   nf_get_degree(GEN nf);
 INLINE long   nf_get_r1(GEN nf);
@@ -2576,8 +2576,16 @@ INLINE GEN    ZX_ZXY_resultant(GEN a, GEN b);
 INLINE GEN    ZX_mul(GEN x, GEN y);
 INLINE GEN    ZX_sqr(GEN x);
 INLINE long   Z_issquare(GEN x);
+INLINE GEN    gaddgs(GEN y, long s);
+INLINE int    gcmpgs(GEN y, long s);
 INLINE GEN    gdeuc(GEN x, GEN y);
+INLINE int    gequalgs(GEN y, long s);
+INLINE GEN    gmaxsg(long s, GEN y);
+INLINE GEN    gminsg(long s, GEN y);
+INLINE GEN    gmulgs(GEN y, long s);
 INLINE GEN    grem(GEN x, GEN y);
+INLINE GEN    gsubgs(GEN y, long s);
+INLINE double gtodouble(GEN x);
 INLINE long   gval(GEN x, long v);
 INLINE GEN    matpascal(long n);
 INLINE GEN    pol1_F2x(long sv);

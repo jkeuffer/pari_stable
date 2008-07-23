@@ -548,6 +548,8 @@ addss(long x, long y)
     ulong t = (-x)+(-y); return uutoineg((t < (ulong)(-x)), t);
   }
 }
+INLINE GEN subss(long x, long y) { return addss(-y,x); }
+INLINE void subssz(long x, long y, GEN z) { addssz(x,-y,z); }
 
 INLINE GEN
 subii(GEN x, GEN y)

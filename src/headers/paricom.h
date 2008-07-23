@@ -117,6 +117,13 @@ enum manage_var_t {
   manage_var_pop
 };
 
+/* pari_init_opts */
+enum {
+  INIT_JMPm = 1,
+  INIT_SIGm = 2,
+  INIT_DFTm = 4
+};
+
 #ifndef HAS_EXP2
 #  undef exp2
 #  ifdef __cplusplus
@@ -168,8 +175,6 @@ enum manage_var_t {
 #define addriz(x,y,z)  gopggz(addir,(y),(x),(z))
 #define addrrz(x,y,z)  gopggz(addrr,(x),(y),(z))
 #define mpsubz(x,y,z)  gopggz(mpsub,(x),(y),(z))
-#define subss(x,y)     (addss(-(y),(x)))
-#define subssz(x,y,z)  (addssz((x),-(y),(z)))
 #define subsiz(s,y,z)  gopsgz(subsi,(s),(y),(z))
 #define subsrz(s,y,z)  gopsgz(subsr,(s),(y),(z))
 #define subisz(y,s,z)  gopsgz(addsi,-(s),(y),(z))
@@ -214,16 +219,9 @@ enum manage_var_t {
 #define gdiventz(x,y,z) gopggz(gdivent,(x),(y),(z))
 #define gmodz(x,y,z)    gopggz(gmod,(x),(y),(z))
 
-#define gaddgs(y,s)     gaddsg((s),(y))
-#define gcmpgs(s,y)     (-gcmpsg(y,s))
 #define gdiventsg(s,y)  (gopsg2(gdivent,(s),(y)))
 #define gdivsg(s,y)     (gopsg2(gdiv,(s),(y)))
-#define gequalgs(s,y)    (gequalsg((y),(s)))
-#define gmaxsg(s,y)     (gmaxgs((y),(s)))
-#define gminsg(s,y)     (gmings((y),(s)))
 #define gmodsg(s,y)     (gopsg2(gmod,(s),(y)))
-#define gmulgs(y,s)     (gmulsg((s),(y)))
-#define gsubgs(y,s)     gaddgs((y), -(s))
 
 #define gmul2nz(x,s,z)  gopgsz(gmul2n,(x),(s),(z))
 #define gshiftz(x,s,z)  gopgsz(gshift,(x),(s),(z))
@@ -257,10 +255,3 @@ enum manage_var_t {
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
-
-/* pari_init_opts */
-enum {
-  INIT_JMPm = 1,
-  INIT_SIGm = 2,
-  INIT_DFTm = 4
-};

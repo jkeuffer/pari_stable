@@ -1386,10 +1386,14 @@ functions {\tt void \op sz(long,GEN)}, {\tt void \op iz(GEN,GEN)} and
 
 \subsec{Comparison operators}
 
-\fun{int}{min}{long a, long b}
+\fun{long}{min}{long a, long b}
 
-\fun{int}{max}{long a, long b} These two functions are implemented as macros
+\fun{long}{max}{long a, long b} These two functions are implemented as macros
 and evaluate twice each of their arguments.
+
+\fun{long}{minss}{long x, long y} safe variant of \kbd{min}.
+
+\fun{long}{maxss}{long x, long y} safe variant of \kbd{max}.
 
 \fun{int}{mpcmp}{GEN x, GEN y} compares the \typ{INT} or \typ{REAL}~\kbd{x}
 to the \typ{INT} or \typ{REAL}~\kbd{y}. The result is the sign of
@@ -1940,10 +1944,6 @@ if no Aurifeuillian factor exists.
 \fun{GEN}{hilbertii}{GEN x, GEN y, GEN p}, returns the Hilbert symbol
 $(x,y)$ at the prime $p$ (\kbd{NULL} for the place at infinity); $x$ and $y$
 are \typ{INT}s.
-
-\fun{long}{maxss}{long x, long y}, return the largest of \kbd{x} and \kbd{y}.
-
-\fun{long}{minss}{long x, long y}, return the smallest of \kbd{x} and \kbd{y}.
 
 \fun{GEN}{powuu}{ulong n, ulong k}, returns $n^k$.
 

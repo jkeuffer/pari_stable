@@ -402,3 +402,11 @@ gval(GEN x, long v) {
   long n = ggval(x, pol_x(v));
   avma = av; return n;
 }
+
+INLINE GEN gaddgs(GEN y, long s) { return gaddsg(s,y); }
+INLINE int gcmpgs(GEN y, long s) { return -gcmpsg(s,y); }
+INLINE int gequalgs(GEN y, long s) { return gequalsg(s,y); }
+INLINE GEN gmaxsg(long s, GEN y) { return gmaxgs(y,s); }
+INLINE GEN gminsg(long s, GEN y) { return gmings(y,s); }
+INLINE GEN gmulgs(GEN y, long s) { return gmulsg(s,y); }
+INLINE GEN gsubgs(GEN y, long s) { return gaddgs(y, -s); }
