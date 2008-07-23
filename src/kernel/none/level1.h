@@ -190,7 +190,8 @@ mpcopy(GEN x)
   while (--lx > 0) y[lx] = x[lx];
   return y;
 }
-
+INLINE GEN
+rcopy(GEN x){ return mpcopy(x); }
 INLINE GEN
 icopy(GEN x)
 {
@@ -231,11 +232,7 @@ gerepileuptoint(pari_sp av, GEN q)
 }
 
 INLINE GEN
-mpneg(GEN x)
-{
-  const GEN y=mpcopy(x);
-  setsigne(y,-signe(x)); return y;
-}
+mpneg(GEN x) { const GEN y=mpcopy(x); togglesign(y); return y; }
 
 INLINE GEN
 mpabs(GEN x)
@@ -244,6 +241,14 @@ mpabs(GEN x)
   if (signe(x)<0) setsigne(y,1);
   return y;
 }
+INLINE GEN
+absr(GEN x) { return mpabs(x); }
+INLINE GEN
+absi(GEN x) { return mpabs(x); }
+INLINE GEN
+negi(GEN x) { return mpneg(x); }
+INLINE GEN
+negr(GEN x) { return mpneg(x); }
 
 INLINE long
 smodis(GEN x, long y)
@@ -438,7 +443,8 @@ cmpir(GEN x, GEN y)
   av=avma; z = itor(x, lg(y)); avma=av;
   return cmprr(z,y); /* cmprr does no memory adjustment */
 }
-
+INLINE int
+cmpri(GEN x, GEN y) { return -cmpir(y,x); }
 INLINE int
 cmpsr(long x, GEN y)
 {
@@ -449,6 +455,70 @@ cmpsr(long x, GEN y)
   av=avma; z = stor(x, 3); avma=av;
   return cmprr(z,y);
 }
+INLINE int
+cmprs(GEN x, long y) { return -cmpsr(y,x); }
+/* compare x and |y| */
+INLINE int
+cmpui(ulong x, GEN y)
+{
+  long l = lgefint(y);
+  ulong p;
+
+  if (!x) return (l > 2)? -1: 0;
+  if (l == 2) return 1;
+  if (l > 3) return -1;
+  p = y[2]; if (p == x) return 0;
+  return p < x ? 1 : -1;
+}
+INLINE int
+cmpiu(GEN x, ulong y) { return -cmpui(y,x); }
+INLINE int
+cmpsi(long x, GEN y)
+{
+  ulong p;
+
+  if (!x) return -signe(y);
+
+  if (x>0)
+  {
+    if (signe(y)<=0) return 1;
+    if (lgefint(y)>3) return -1;
+    p=y[2]; if (p == (ulong)x) return 0;
+    return p < (ulong)x ? 1 : -1;
+  }
+
+  if (signe(y)>=0) return -1;
+  if (lgefint(y)>3) return 1;
+  p=y[2]; if (p == (ulong)-x) return 0;
+  return p < (ulong)(-x) ? -1 : 1;
+}
+INLINE int
+cmpis(GEN x, long y) { return -cmpsi(y,x); }
+
+/* x == y ? */
+INLINE int
+equalsi(long x, GEN y)
+{
+  if (!x) return !signe(y);
+  if (x > 0)
+  {
+    if (signe(y) <= 0 || lgefint(y) != 3) return 0;
+    return ((ulong)y[2] == (ulong)x);
+  }
+  if (signe(y) >= 0 || lgefint(y) != 3) return 0;
+  return ((ulong)y[2] == (ulong)-x);
+}
+/* x == |y| ? */
+INLINE int
+equalui(ulong x, GEN y)
+{
+  if (!x) return !signe(y);
+  return (lgefint(y) == 3 && (ulong)y[2] == x);
+}
+INLINE int
+equaliu(GEN x, ulong y) { return equalui(y,x); }
+INLINE int
+equalis(GEN x, long y) { return equalsi(y,x); }
 
 INLINE long
 maxss(long x, long y) { return x>y?x:y; }
@@ -501,6 +571,17 @@ INLINE GEN
 addsi(long x, GEN y) { return addsi_sign(x, y, signe(y)); }
 INLINE GEN
 subsi(long x, GEN y) { return addsi_sign(x, y, -signe(y)); }
+
+INLINE GEN
+addri(GEN x, GEN y) { return addir(y,x); }
+INLINE GEN
+addis(GEN x, long s) { return addsi(s,x); }
+INLINE GEN
+addrs(GEN x, long s) { return addsr(s,x); }
+INLINE GEN
+subis(GEN x, long y) { return addsi(-y,x); }
+INLINE GEN
+subrs(GEN x, long y) { return addsr(-y,x); }
 
 INLINE long
 vali(GEN x)
@@ -955,6 +1036,26 @@ Fl_div(ulong a, ulong b, ulong p)
   return Fl_mul(a, Fl_inv(b, p), p);
 }
 
+INLINE GEN
+mulis(GEN x, long s) { return mulsi(s,x); }
+INLINE GEN
+muliu(GEN x, ulong s) { return mului(s,x); }
+INLINE GEN
+mulru(GEN x, ulong s) { return mulur(s,x); }
+INLINE GEN
+mulri(GEN x, GEN s) { return mulir(s,x); }
+INLINE GEN
+mulrs(GEN x, long s) { return mulsr(s,x); }
+
+INLINE GEN
+truedivii(GEN a,GEN b) { return truedvmdii(a,b,NULL); }
+INLINE GEN
+truedivis(GEN a, long b) { return truedvmdis(a,b,NULL); }
+INLINE GEN
+divii(GEN a, GEN b) { return dvmdii(a,b,NULL); }
+INLINE GEN
+remii(GEN a, GEN b) { return dvmdii(a,b,ONLY_REM); }
+
 /* assume x > 0 */
 INLINE long
 expu(ulong x) { return (BITS_IN_LONG-1) - (long)bfffo(x); }
@@ -965,6 +1066,9 @@ expi(GEN x)
   const long lx=lgefint(x);
   return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-(long)bfffo(*int_MSW(x))-1;
 }
+
+INLINE GEN
+mpshift(GEN x,long s) { return (typ(x)==t_INT)?shifti(x,s):shiftr(x,s); }
 
 /* z2[imin..imax] := z1[imin..imax].f shifted left sh bits
  * (feeding f from the right). Assume sh > 0 */

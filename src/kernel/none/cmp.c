@@ -23,70 +23,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /*They depend on absi_cmp_lg and absi_equal_lg in mp.c*/
 
-#define MASK(x) (((ulong)(x)) & (LGBITS | SIGNBITS))
 int
 equalii(GEN x, GEN y)
 {
-  if (MASK(x[1]) != MASK(y[1])) return 0;
+  if ((x[1] & (LGBITS|SIGNBITS)) != (y[1] & (LGBITS|SIGNBITS))) return 0;
   return absi_equal_lg(x, y, lgefint(x));
 }
 #undef MASK
-
-/* x == y ? */
-int
-equalsi(long x, GEN y)
-{
-  if (!x) return !signe(y);
-  if (x > 0)
-  {
-    if (signe(y) <= 0 || lgefint(y) != 3) return 0;
-    return ((ulong)y[2] == (ulong)x);
-  }
-  if (signe(y) >= 0 || lgefint(y) != 3) return 0;
-  return ((ulong)y[2] == (ulong)-x);
-}
-/* x == |y| ? */
-int
-equalui(ulong x, GEN y)
-{
-  if (!x) return !signe(y);
-  return (lgefint(y) == 3 && (ulong)y[2] == x);
-}
-
-int
-cmpsi(long x, GEN y)
-{
-  ulong p;
-
-  if (!x) return -signe(y);
-
-  if (x>0)
-  {
-    if (signe(y)<=0) return 1;
-    if (lgefint(y)>3) return -1;
-    p=y[2]; if (p == (ulong)x) return 0;
-    return p < (ulong)x ? 1 : -1;
-  }
-
-  if (signe(y)>=0) return -1;
-  if (lgefint(y)>3) return 1;
-  p=y[2]; if (p == (ulong)-x) return 0;
-  return p < (ulong)(-x) ? -1 : 1;
-}
-
-/* compare x and |y| */
-int
-cmpui(ulong x, GEN y)
-{
-  long l = lgefint(y);
-  ulong p;
-
-  if (!x) return (l > 2)? -1: 0;
-  if (l == 2) return 1;
-  if (l > 3) return -1;
-  p = y[2]; if (p == x) return 0;
-  return p < x ? 1 : -1;
-}
 
 int
 cmpii(GEN x, GEN y)

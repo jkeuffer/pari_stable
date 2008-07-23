@@ -13,6 +13,28 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+/* output of get_nf and get_bnf */
+enum {
+  typ_NULL = 0,
+  typ_POL,
+  typ_Q,
+  typ_NF,
+  typ_BNF,
+  typ_BNR,
+  typ_CLA, /* bnfclassunit   */
+  typ_ELL, /* elliptic curve */
+  typ_QUA, /* quadclassunit  */
+  typ_GAL, /* galoisinit     */
+  typ_BID
+};
+
+/* idealtyp */
+enum {
+  id_PRINCIPAL = 0,
+  id_PRIME,
+  id_MAT
+};
+
 typedef struct {
   GEN x; /* defining polynomial (monic, integral) */
   GEN bas;  /* Z-basis of O_K (t_VEC of t_POL) */

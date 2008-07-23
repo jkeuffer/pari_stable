@@ -142,37 +142,6 @@ enum manage_var_t {
 #endif
 #define min(a,b) ((a)>(b)?(b):(a))
 #define max(a,b) ((a)>(b)?(a):(b))
-
-#define absr  mpabs
-#define absi  mpabs
-#define negi  mpneg
-#define negr  mpneg
-#define rcopy mpcopy
-
-#define addis(x,s)  (addsi((s),(x)))
-#define addrs(x,s)  (addsr((s),(x)))
-#define addri(x,s)  (addir((s),(x)))
-#define mulis(x,s)  (mulsi((s),(x)))
-#define muliu(x,s)  (mului((s),(x)))
-#define mulru(x,s)  (mulur((s),(x)))
-#define mulri(x,s)  (mulir((s),(x)))
-#define mulrs(x,s)  (mulsr((s),(x)))
-
-#define equaliu(x,y)    (equalui((y),(x)))
-#define equalis(x,y)    (equalsi((y),(x)))
-#define cmpiu(x,y)     (-cmpui((y),(x)))
-#define cmpis(x,y)     (-cmpsi((y),(x)))
-#define cmprs(x,y)     (-cmpsr((y),(x)))
-#define cmpri(x,y)     (-cmpir((y),(x)))
-#define subis(x,y)     (addsi(-(y),(x)))
-#define subrs(x,y)     (addsr(-(y),(x)))
-
-#define truedivii(a,b) (truedvmdii((a),(b),NULL))
-#define truedivis(a,b) (truedvmdis((a),(b),NULL))
-#define divii(a,b)     (dvmdii((a),(b),NULL))
-#define remii(a,b)     (dvmdii((a),(b),ONLY_REM))
-#define mpshift(x,s)   ((typ(x)==t_INT)?shifti((x),(s)):shiftr((x),(s)))
-
 /*******************************************************************/
 /*                                                                 */
 /*                    OPERATIONS BY VALUE                          */
@@ -283,31 +252,15 @@ enum manage_var_t {
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 
-/* output of get_nf and get_bnf */
-#define typ_NULL 0
-#define typ_POL  1
-#define typ_Q    2
-#define typ_NF   3
-#define typ_BNF  4
-#define typ_BNR  5
-#define typ_CLA  6 /* bnfclassunit   */
-#define typ_ELL  7 /* elliptic curve */
-#define typ_QUA  8 /* quadclassunit  */
-#define typ_GAL  9 /* galoisinit     */
-#define typ_BID 10
-/* idealtyp */
-#define id_PRINCIPAL 0
-#define id_PRIME     1
-#define id_MAT       2
-
 #define DIFFPTR_SKIP	255		/* Skip these entries */
 #define NEXT_PRIME_VIADIFF(p,d)	 STMT_START \
   { while (*(d) == DIFFPTR_SKIP) (p) += *(d)++; (p) += *(d)++; } STMT_END
 #define NEXT_PRIME_VIADIFF_CHECK(p,d)  STMT_START \
   { if (!*(d)) pari_err(primer1); NEXT_PRIME_VIADIFF(p,d); } STMT_END
 
-/* For use with pari_init_opts */
-
-#define INIT_JMPm 1
-#define INIT_SIGm 2
-#define INIT_DFTm 4
+/* pari_init_opts */
+enum {
+  INIT_JMPm = 1,
+  INIT_SIGm = 2,
+  INIT_DFTm = 4
+};
