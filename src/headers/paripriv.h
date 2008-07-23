@@ -532,11 +532,6 @@ GEN     sqcomprealraw(GEN x);
 
 GEN     matid_intern(long n,GEN myun,GEN myzero);
 void    vecselect_p(GEN A, GEN B, GEN p, long init, long lB);
-
-/* alglin2.c */
-
-GEN     Frobeniusform(GEN V, long n);
-
 /* anal.c */
 
 /* binary I/O */

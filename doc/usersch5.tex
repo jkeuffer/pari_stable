@@ -3703,6 +3703,10 @@ diagonal matrix, and 0 otherwise.
 $v[i] = x$ if it exists, and $0$ otherwise. Naive search in linear time, does
 not assume that \kbd{v} is sorted.
 
+\fun{GEN}{Frobeniusform}{GEN V, long n} given the vector $V$ of elementary
+divisors for $M - x\text{Id}$, where $M$ is an $n\times n$ square matrix.
+Returns the Frobenius form of $M$. Used by \kbd{matfrobenius}.
+
 \subsec{Obsolete functions}
 
 The functions in this section are kept for backward compatibility only

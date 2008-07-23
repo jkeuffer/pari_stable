@@ -1630,6 +1630,7 @@ ulong hash_GEN(GEN x);
 
 /* hnf_snf.c */
 
+GEN     Frobeniusform(GEN V, long n);
 GEN     ZM_hnf(GEN x);
 GEN     ZM_hnfall(GEN A, GEN *ptB, long remove);
 GEN     ZM_hnfcenter(GEN M);
