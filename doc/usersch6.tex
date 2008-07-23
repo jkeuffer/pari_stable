@@ -1059,8 +1059,9 @@ if $\kbd{remove} = 2$, remove $0$ columns from $H$ and update $U$ so that
 $x U = H$. The matrix $U$ is square and invertible unless $\kbd{remove} = 2$.
 
 This routine uses a naive algorithm which is potentially exponential in the
-dimension but is fast in practice, although it may require lots of memory;
-the base change matrix $U$ may be very large (when the kernel is large).
+dimension (due to coefficient explosion) but is fast in practice, although it
+may require lots of memory. The base change matrix $U$ may be very large,
+when the kernel is large.
 
 \fun{GEN}{ZM_hnfperm}{GEN A, GEN *ptU, GEN *ptperm} returns the hnf
 $H = P A U$ of the matrix $P A$, where $P$ is a suitable permutation matrix,
@@ -1180,6 +1181,18 @@ $[H, U, P]$. Normally useless in library mode.
 \fun{GEN}{smithall}{GEN x} checks whether $x$ is a \kbd{ZM}, then calls
 \kbd{ZM\_smithall(x, \&U, \&V)} and returns $[U,V,D]$. Normally useless in
 library mode.
+
+\noindent Some related functions over $K[X]$, $K$ a field: 
+
+\fun{GEN}{gsmith}{GEN A} the input matrix must be square, returns the
+elementary divisors.
+
+\fun{GEN}{gsmithall}{GEN A} the input matrix must be square, returns the
+$[U,V,D]$, $D$ diagonal, such that $UAV = D$.
+
+\fun{GEN}{smithclean}{GEN z} cleanup the output of \kbd{smithall} or
+\kbd{gsmithall} (delete elementary divisors equal to $1$, updating base
+change matrices).
 
 \subsec{The LLL algorithm}\sidx{LLL}
 
