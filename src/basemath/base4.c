@@ -1341,7 +1341,7 @@ idealinv_HNF_aux(GEN nf, GEN I)
   GEN J = idealmul_HNF(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
-  dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
+  dual = shallowtrans( hnf_divscale(J, gmael(nf,5,6), IZ) );
   return ZM_hnfmodid(dual, IZ);
 }
 /* I HNF with rational coefficients (denominator d). */

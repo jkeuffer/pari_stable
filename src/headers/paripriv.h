@@ -167,12 +167,8 @@ GEN logr_abs(GEN x);
 GEN sqrtr_abs(GEN x);
 
 /* hnf */
-GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN hnfadd_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
-GEN hnf_gauss(GEN A, GEN B);
-GEN hnf_invimage(GEN A, GEN b);
-GEN ZM_hnfperm(GEN A, GEN *ptU, GEN *ptperm);
 GEN hnfspec_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN hnfspec(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);

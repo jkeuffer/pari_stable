@@ -2788,6 +2788,106 @@ hnfall(GEN x)
 GEN
 hnf(GEN x) { return mathnf0(x,0); }
 
+/* C = A^(-1)(tB) where A, B, C are integral, A is upper triangular, t t_INT */
+GEN
+hnf_divscale(GEN A, GEN B, GEN t)
+{
+  long n = lg(A)-1, i,j,k;
+  GEN m, c = cgetg(n+1,t_MAT);
+
+  if (!n) return c;
+  for (k=1; k<=n; k++)
+  {
+    GEN u = cgetg(n+1, t_COL), b = gel(B,k);
+    pari_sp av = avma;
+    gel(c,k) = u; m = mulii(gel(b,n),t);
+    gel(u,n) = gerepileuptoint(av, diviiexact(m, gcoeff(A,n,n)));
+    for (i=n-1; i>0; i--)
+    {
+      av = avma; m = mulii(gel(b,i),t);
+      for (j=i+1; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+      gel(u,i) = gerepileuptoint(av, diviiexact(m, gcoeff(A,i,i)));
+    }
+  }
+  return c;
+}
+
+/* A, B integral upper HNF. A^(-1) B integral ? */
+int
+hnfdivide(GEN A, GEN B)
+{
+  pari_sp av = avma;
+  long n = lg(A)-1, i,j,k;
+  GEN u, b, m, r;
+
+  if (!n) return 1;
+  if (lg(B)-1 != n) pari_err(consister,"hnfdivide");
+  u = cgetg(n+1, t_COL);
+  for (k=1; k<=n; k++)
+  {
+    b = gel(B,k);
+    m = gel(b,k);
+    gel(u,k) = dvmdii(m, gcoeff(A,k,k), &r);
+    if (r != gen_0) { avma = av; return 0; }
+    for (i=k-1; i>0; i--)
+    {
+      m = gel(b,i);
+      for (j=i+1; j<=k; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+      m = dvmdii(m, gcoeff(A,i,i), &r);
+      if (r != gen_0) { avma = av; return 0; }
+      gel(u,i) = m;
+    }
+  }
+  avma = av; return 1;
+}
+
+/* A upper HNF, b integral vector. Return A^(-1) b if integral,
+ * NULL otherwise. */
+GEN
+hnf_invimage(GEN A, GEN b)
+{
+  pari_sp av = avma, av2;
+  long n = lg(A)-1, i,j;
+  GEN u, m, r;
+
+  if (!n) return NULL;
+  u = cgetg(n+1, t_COL);
+  m = gel(b,n);
+  if (typ(m) != t_INT) pari_err(typeer,"hnf_invimage");
+  gel(u,n) = dvmdii(m, gcoeff(A,n,n), &r);
+  if (r != gen_0) { avma = av; return NULL; }
+  for (i=n-1; i>0; i--)
+  {
+    av2 = avma;
+    if (typ(b[i]) != t_INT) pari_err(typeer,"hnf_invimage");
+    m = gel(b,i);
+    for (j=i+1; j<=n; j++) m = subii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+    m = dvmdii(m, gcoeff(A,i,i), &r);
+    if (r != gen_0) { avma = av; return NULL; }
+    gel(u,i) = gerepileuptoint(av2, m);
+  }
+  return u;
+}
+
+/* A upper HNF, B integral matrix or column. Return A^(-1) B if integral,
+ * NULL otherwise */
+GEN
+hnf_solve(GEN A, GEN B)
+{
+  pari_sp av;
+  long i, l;
+  GEN C;
+
+  if (typ(B) == t_COL) return hnf_invimage(A, B);
+  av = avma; l = lg(B); C = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++) {
+    GEN c = hnf_invimage(A, gel(B,i));
+    if (!c) { avma = av; return NULL; }
+    gel(C,i) = c;
+  }
+  return C;
+}
+
 /***************************************************************/
 /**							      **/
 /**      	    SMITH NORMAL FORM REDUCTION	              **/

@@ -1270,7 +1270,7 @@ bnr_log_gen_arch(GEN bnr, zlog_S *S, long index)
 /* A \subset H ? Allow H = NULL = trivial subgroup */
 static int
 contains(GEN H, GEN A)
-{ return H? (hnf_gauss(H, A) != NULL): gcmp0(A); }
+{ return H? (hnf_solve(H, A) != NULL): gcmp0(A); }
 
 /* (see also Discrayrel). Given a number field bnf=bnr[1], a ray class
  * group structure bnr (with generators if flag > 0), and a subgroup H of the
@@ -2251,7 +2251,7 @@ subgroup_conductor_ok(GEN H, GEN L)
 { /* test conductor */
   long i, l = lg(L);
   for (i = 1; i < l; i++)
-    if ( hnf_gauss(H, gel(L,i)) ) return 0;
+    if ( hnf_solve(H, gel(L,i)) ) return 0;
   return 1;
 }
 static GEN
@@ -2283,7 +2283,7 @@ subgrouplist_cond_sub(GEN bnr, GEN C, GEN bound)
   GEN D, Mr, U, T, subgrp, L;
 
   Mr = diagonal_i(gmael(bnr, 5, 2));
-  D = ZM_snfall_i(hnf_gauss(C, Mr), &U, NULL, 1);
+  D = ZM_snfall_i(hnf_solve(C, Mr), &U, NULL, 1);
   T = ZM_mul(C, RgM_inv(U));
   L = conductor_elts(bnr);
   subgrp  = subgrouplist(D, bound);

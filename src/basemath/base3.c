@@ -1170,7 +1170,7 @@ zidealij(GEN x, GEN y, GEN *U)
   long j, N;
 
   /* x^(-1) y = relations between the 1 + x_i (HNF) */
-  cyc = ZM_snf_group(hnf_gauss(x, y), U, &G);
+  cyc = ZM_snf_group(hnf_solve(x, y), U, &G);
   N = lg(cyc); G = ZM_mul(x,G); settyp(G, t_VEC); /* new generators */
   for (j=1; j<N; j++)
   {

@@ -1087,6 +1087,26 @@ with respect to the $L_2$ norm.
 place so that non-diagonal entries belong to a system of \emph{centered}
 residues. Not suitable for gerepile.
 
+Some direct applications: the following routines apply to upper triangular
+integral matrices; in practice, these come from HNF algorithms.
+
+\fun{GEN}{hnf_divscale}{GEN A, GEN B,GEN t} $A$ an upper triangular \kbd{ZM},
+$B$ a \kbd{ZM}, $t$ an integer, such that $C := tA^{-1}B$ is integral.
+Return $C$.
+
+\fun{GEN}{hnf_solve}{GEN A, GEN B} $A$ an upper triangular \kbd{ZM},
+$B$ a \kbd{ZM} or \kbd{ZC}. Return $A^{-1}B$ if it is integral, and \kbd{NULL} 
+if it is not.
+
+\fun{GEN}{hnf_invimage}{GEN A, GEN b} $A$ an upper triangular \kbd{ZM},
+$b$ a \kbd{ZC}.  Return $A^{-1}B$ if it is integral, and \kbd{NULL} if it is
+not.
+
+\fun{int}{hnfdivide}{GEN A, GEN B} $A$ and $B$ are two upper triangular
+\kbd{ZM}. Return $1$ if $A^{-1} B$ is integral, and $0$ otherwise.
+
+\misctitle{Smith Normal Form}
+
 \fun{GEN}{ZM_snf}{GEN x} returns the Smith Normal Form (vector of
 elementary divisors) of the \kbd{ZM} $x$.
 
