@@ -1555,6 +1555,19 @@ such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. Assumes that \kbd{y2 = shifti(y,
 
 \fun{GEN}{remi2n}{GEN x, long n} returns \kbd{x} mod $2^n$.
 
+\fun{GEN}{addii_sign}{GEN x, long sx, GEN y, long sy} add the \typ{INT}s
+$x$ and $y$ as if their signs were \kbd{sx} and \kbd{sy}.
+
+\fun{GEN}{addir_sign}{GEN x, long sx, GEN y, long sy}
+add the \typ{INT} $x$ and the \typ{REAL} $y$ as if their signs were \kbd{sx}
+and \kbd{sy}.
+
+\fun{GEN}{addrr_sign}{GEN x, long sx, GEN y, long sy} add the \typ{REAL}s $x$
+and $y$ as if their signs were \kbd{sx} and \kbd{sy}.
+
+\fun{GEN}{addsi_sign}{long x, GEN y, long sy} add $x$ and the \typ{INT} $y$
+as if its sign was \kbd{sy}.
+
 \subsec{Modulo to longs}. The following variants of \kbd{modii} do not
 clutter the stack:
 
