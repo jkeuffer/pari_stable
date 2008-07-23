@@ -2794,7 +2794,7 @@ gen_if_principal(GEN bnf, GEN x)
 {
   pari_sp av = avma;
   GEN z = bnfisprincipal0(bnf,x, nf_GEN_IF_PRINCIPAL | nf_FORCE);
-  if (typ(z) == t_INT) { avma = av; return NULL; }
+  if (z == gen_0) { avma = av; return NULL; }
   return z;
 }
 
