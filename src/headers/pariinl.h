@@ -302,6 +302,8 @@ INLINE long pr_get_f(GEN pr) { return gel(pr,4)[2]; }
 INLINE GEN pr_get_tau(GEN pr){ return gel(pr,5); }
 INLINE int
 pr_is_inert(GEN P) { return pr_get_f(P) == lg(pr_get_gen(P))-1; }
+INLINE GEN
+pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
 
 /* assume nf a genuine nf */
 INLINE long

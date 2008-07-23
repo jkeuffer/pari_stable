@@ -18,6 +18,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                DECLARATIONS of PUBLIC FUNCTIONS                 */
 /*                                                                 */
 /*******************************************************************/
+#include "parinf.h"
+
 /* OBSOLETE */
 GEN     bernvec(long nomb);
 GEN     buchimag(GEN D, GEN c1, GEN c2, GEN gCO);
@@ -872,6 +874,7 @@ GEN     nfX_to_FqX(GEN x, GEN nf,GEN modpr);
 GEN     nfbasis(GEN x, GEN *y,long flag,GEN p);
 GEN     nfbasis0(GEN x,long flag,GEN p);
 GEN     nfdisc0(GEN x,long flag, GEN p);
+void    nfmaxord(nfmaxord_t *S, GEN f, long flag, GEN w);
 GEN     nfmodprinit(GEN nf, GEN pr);
 GEN     nfreducemodpr(GEN nf, GEN x, GEN modpr);
 GEN     polcompositum0(GEN P, GEN Q,long flag);
@@ -2560,6 +2563,7 @@ INLINE GEN    pr_get_gen(GEN pr);
 INLINE GEN    pr_get_p(GEN pr);
 INLINE GEN    pr_get_tau(GEN pr);
 INLINE int    pr_is_inert(GEN P);
+INLINE GEN    pr_norm(GEN pr);
 
 INLINE int    F2x_cmp1(GEN x);
 INLINE GEN    F2x_div(GEN x, GEN y);

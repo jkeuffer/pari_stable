@@ -1298,10 +1298,6 @@ idealsqr(GEN nf, GEN x)
   gel(res,2) = ext_sqr(nf, ax); return res;
 }
 
-/* assume pr in idealprimedec format */
-GEN
-pr_norm(GEN pr) { return powiu(pr_get_p(pr), pr_get_f(pr)); }
-
 /* norm of an ideal */
 GEN
 idealnorm(GEN nf, GEN x)
