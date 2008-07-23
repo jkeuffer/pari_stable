@@ -43,7 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifdef WINCE
 #  include "parice.h"
 #endif
-#include "paritype.h"
 #include "parisys.h"
 #include "parigen.h"
 #include "paricast.h"
