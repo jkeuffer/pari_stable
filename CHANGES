@@ -376,46 +376,48 @@ BA 28- library functions checkgroup, galois_group, cyclicgroup, dicyclicgroup,
    47- files src/language/pariinl.c, src/headers/pariinl.h.
 
   Removed
-    1- obsolete library functions extract and matextract
-    2- obsolete optional argument to quadhilbert(D < 0)
-    3- unused undocumented library functions os_open/os_read/os_close
-    4- obsolete README.DOS and README.WIN
-    5- cant_deflate, elliper1, lllger3 error codes
-    6- obsolete library function bruteall
-    7- useless undocumented library function gkrogs (use krois)
-    8- obsolete library functions roots2 and rootsold are no longer public
-    9- useless library function isnfscalar
-   10- obsolete undocumented library function factpol(), lift_to_pol()
-   11- library function combine_factors() is no longer public
-   12- obsolete undocumented library function rnfdet0, rnfdet2
-   13- obsolete library function discsr(). Use RgX_disc (or quad_disc, qfb_disc)
-   14- obsolete library function element_powmodidele() [use element_powmodideal
+    1- obsolete GP functions printp, printp1. Either replace them by
+       print / print1 [ or the new printf ], or define aliases
+       alias(printp, print); alias(printp1, print1)
+    2- obsolete GP functions bnfclassunit, bnfreg, bnfclgp, bnfunit.
+       Use bnfinit.
+    3- obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
+    4- obsolete GP function idealprincipal. Use number field elements "as is"
+    5- obsolete GP function ideleprincipal. No routine remains that would
+       use the auxiliary "archimedean information"
+    6- obsolete library functions extract and matextract
+    7- obsolete optional argument to quadhilbert(D < 0)
+    8- unused undocumented library functions os_open/os_read/os_close
+    9- obsolete README.DOS and README.WIN
+   10- cant_deflate, elliper1, lllger3 error codes
+   11- obsolete library function bruteall
+   12- useless undocumented library function gkrogs (use krois)
+   13- obsolete library functions roots2 and rootsold are no longer public
+   14- useless library function isnfscalar
+   15- obsolete undocumented library function factpol(), lift_to_pol()
+   16- library function combine_factors() is no longer public
+   17- obsolete undocumented library function rnfdet0, rnfdet2
+   18- obsolete library function discsr(). Use RgX_disc (or quad_disc, qfb_disc)
+   19- obsolete library function element_powmodidele() [use element_powmodideal
        + set_sign_mod_idele], ideleaddone, reducemodmatrix, nfreducemodidele,
        nfreducemodideal, nfreducemodideal_i, elementinv_modpr
-   15- useless macros gaddgsz, gaddsgz, gdiventgsz, gdiventsgz, gdivgsz,
+   20- useless macros gaddgsz, gaddsgz, gdiventgsz, gdiventsgz, gdivgsz,
        gdivsgz, gmaxgsz, gmaxsgz, gmingsz, gminsgz, gmodgsz, gmodsgz, gmulgsz,
        gmulsgz, gsubgsz, gsubsgz, gachz, gacosz, gashz, gasinz, gatanz, gathz,
        gchz, gcosz, gcotanz, gexpz, ggamdz, ggammaz, glngammaz, glogz, gpsiz,
        gshz, gsinz, gsqrtz, gtanz, gthz, gzetaz, gmaxz, gminz, TRgopgz,
        mpfloorz, mptruncz, mpdvmdz
-   16- obsolete library function gmillerrabin, gpolcomp, caradj0
-   17- obsolete library functions allbase, base, base2, factoredbase, smallbase,
+   21- obsolete library function gmillerrabin, gpolcomp, caradj0
+   22- obsolete library functions allbase, base, base2, factoredbase, smallbase,
        discf2, factoreddiscf, smalldiscf. Use nfbasis0 / nfdisc0 / nfmaxord
-   18- obsolete library function pari_rand31  [ use pari_rand ]
-   19- obsolete undocumented library function bruterr
-   20- obsolete GP functions printp, printp1
-   21- obsolete library function smallbuchinit
-   22- obsolete GP functions bnfclassunit, bnfreg, bnfclgp, bnfunit.
-       Use bnfinit.
-   23- obsolete GP functions bnrclass. Use bnrinit or bnrclassno.
-   24- awkward flag '3' for bnfinit. Use bnfcompress().
-   25- badly named bnfmake. Use bnfinit(sbnf).
-   26- useless component v[6] in "small bnfs" (was 'different', is 0)
-   27- obsolete library functions buchray, buchrayinit, buchrayinitgen:
+   23- obsolete library function pari_rand31  [ use pari_rand ]
+   24- obsolete undocumented library function bruterr
+   25- obsolete library function smallbuchinit
+   26- awkward flag '3' for bnfinit. Use bnfcompress().
+   27- badly named bnfmake. Use bnfinit(sbnf).
+   28- useless component v[6] in "small bnfs" (was 'different', is 0)
+   29- obsolete library functions buchray, buchrayinit, buchrayinitgen:
        use Buchray.
-   28- obsolete GP function idealprincipal. Use number field elements "as is"
-   29- obsolete GP function ideleprincipal. No routine remains that would
-       use the auxiliary "archimedean information"
    30- obsolete library function smallfact [ use boundfact or Z_factor_limit ]
    31- obsolete library function gracine [ use sqrtint ]
    32- obsolete library function ispsp, gispsp. Use ispseudoprime or BPSW_psp.
