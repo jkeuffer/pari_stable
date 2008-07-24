@@ -5511,6 +5511,9 @@ next temp variable we can create.
 \fun{void}{pari_var_create}{entree *ep} low-level initialization of an
 \kbd{EpVAR}.
 
+\noindent The obsolete function \fun{long}{manage_var}{long n, entree *ep}
+is kept for backward compatibility only. Don't use it.
+
 \subsec{User variables}
 
 \fun{long}{fetch_user_var}{char *s} returns a user variable whose name

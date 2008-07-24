@@ -251,6 +251,72 @@ auxiliary table containing $O(\sqrt{p})$ group elements.
 computes the order of $x$. If $N$ is not \kbd{NULL} it is a multiple of the
 order, as a \typ{INT} or a factorization matrix.
 
+\section{Public functions useless outside of GP context}
+
+These functions implement GP functionalities for which the C language
+or other libpari routines provide a better equivalent; some may be generated
+by \kbd{gp2c}. We document them here for completess.
+
+\subsec{Output}
+
+\fun{void}{print}{GEN g}
+
+\fun{void}{print1}{GEN g}
+
+\fun{void}{printf0}{GEN fmt, GEN args}
+
+\fun{void}{printf1}{const char *fmt, ...}
+
+\fun{void}{printtex}{GEN g}
+
+\fun{void}{write0}{const char *s, GEN g}
+
+\fun{void}{write1}{const char *s, GEN g}
+
+\fun{void}{writetex}{const char *s, GEN g}
+
+\subsec{Control flow statements}
+
+\fun{GEN}{break0}{long n}. Use the C control statement \kbd{break}. Since
+\kbd{break(2)} is invalid in C, either rework your code or use \kbd{goto}.
+
+\fun{GEN}{next0}{long n}. Use the C control statement \kbd{continue}. Since
+\kbd{continue(2)} is invalid in C, either rework your code or use \kbd{goto}.
+
+\fun{GEN}{return0}{GEN x}. Use \kbd{return}!
+
+\fun{void}{error0}{GEN g}. Use \kbd{pari\_err(user,)}
+
+\subsec{Function related to the GP parser}
+
+The GP parser can generate an opcode saving the current lexical context
+(pairs made of a lexical variable name and its value) in a \kbd{GEN}, called
+\kbd{pack} in the sequel. These can be used from debuggers (e.g. gp's break
+loop) to track values of lexical variable. Indeed, lexical variables have
+disappeared from the compiled code, only their values in a given scope exist
+(on some value stack). Provided the parser generated the proper opcode, there
+remains a trace of lexical variable names and everything can still be
+unravelled.
+
+\fun{void}{localvars_unpack}{GEN pack} for each pair in \kbd{pack}, assign
+the value to the variable.
+
+\fun{long}{localvars_find}{GEN pack, entree *ep} does \kbd{pack} contain
+a pair whose variable corrsesponds to \kbd{ep} ? If so, where is the
+corresponding value ? (returns an offset on the value stack).
+
+\misctitle{Miscellaneous}
+
+\fun{GEN}{gp_default}{const char *a, const char *b}
+
+\fun{GEN}{setdefault}{const char *s, const char *v, long flag}
+
+\fun{char*}{os_getenv}{const char *s}
+
+\fun{long}{allocatemoremem}{size_t newsize}
+
+
+
 \chapter{Regression tests, benches}
 
 This chapter documents how to write an automated test module, say \kbd{fun}, so
