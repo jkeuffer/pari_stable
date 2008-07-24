@@ -1347,7 +1347,6 @@ char*   pari_vsprintf(const char *fmt, va_list ap);
 void    print(GEN g);
 void    print1(GEN g);
 void    printf0(GEN fmt, GEN args);
-void    printf1(const char *fmt, ...);
 void    printtex(GEN g);
 void    sor(GEN g, char fo, long dd);
 char*   stack_strdup(const char *s);

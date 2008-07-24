@@ -5629,6 +5629,102 @@ numerical derivative of the closure \kbd{code}.
 \fun{GEN}{genclosure}{entree *ep} creates a closure associated to a PARI
 function.
 
+\section{Defaults}
+
+\fun{int}{pari_is_default}{const char *s} return $1$ if $s$ is the name
+of a default, $0$ otherwise.
+
+\fun{GEN}{setdefault}{const char *s, const char *v, long flag} low-level
+function underlying \kbd{default0}. If $s$ is empty, call all default ѕetting
+functions with empty string argument and flag \tet{d_ACKNOWLEDGE}. Otherwise,
+check whether $s$ corresponds to a default and call the corresponding default
+setting function with arguments $v$ and \fl.
+
+We shall describe these functions below: an non-empty $v$ means that we change
+the value of the default to $v$, possibly after some translation work. The
+flag is one of
+
+\item \tet{d_INITRC} called while reading the \kbd{gprc} (print and return
+nothing, possibly defer until \kbd{gp} actually starts).
+
+\item \tet{d_RETURN} return the current value, as a \typ{INT} if possible, as
+a \typ{STR} otherwise.
+
+\item \tet{d_ACKNOWLEDGE} print the current value.
+
+\item \tet{d_SILENT} print nothing, return \kbd{gnil}.
+
+\noindent Low-level functions called by \kbd{setdefault}:
+
+\fun{GEN}{sd_TeXstyle}{const char *v, long flag}
+
+\fun{GEN}{sd_colors}{const char *v, long flag}
+
+\fun{GEN}{sd_compatible}{const char *v, long flag}
+
+\fun{GEN}{sd_datadir}{const char *v, long flag}
+
+\fun{GEN}{sd_debug}{const char *v, long flag}
+
+\fun{GEN}{sd_debugfiles}{const char *v, long flag}
+
+\fun{GEN}{sd_debugmem}{const char *v, long flag}
+
+\fun{GEN}{sd_echo}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_add_primes}{const char *v, long flag}
+
+\fun{GEN}{sd_factor_proven}{const char *v, long flag}
+
+\fun{GEN}{sd_format}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolormap}{const char *v, long flag}
+
+\fun{GEN}{sd_graphcolors}{const char *v, long flag}
+
+\fun{GEN}{sd_help}{const char *v, long flag}
+
+\fun{GEN}{sd_histsize}{const char *v, long flag}
+
+\fun{GEN}{sd_lines}{const char *v, long flag}
+
+\fun{GEN}{sd_log}{const char *v, long flag}
+
+\fun{GEN}{sd_logfile}{const char *v, long flag}
+
+\fun{GEN}{sd_new_galois_format}{const char *v, long flag}
+
+\fun{GEN}{sd_output}{const char *v, long flag}
+
+\fun{GEN}{sd_parisize}{const char *v, long flag}
+
+\fun{GEN}{sd_path}{const char *v, long flag}
+
+\fun{GEN}{sd_prettyprinter}{const char *v, long flag}
+
+\fun{GEN}{sd_primelimit}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt}{const char *v, long flag}
+
+\fun{GEN}{sd_prompt_cont}{const char *v, long flag}
+
+\fun{GEN}{sd_psfile}{const char *v, long flag}
+
+\fun{GEN}{sd_realprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_rl}{const char *v, long flag}
+
+\fun{GEN}{sd_secure}{const char *v, long flag}
+
+\fun{GEN}{sd_seriesprecision}{const char *v, long flag}
+
+\fun{GEN}{sd_simplify}{const char *v, long flag}
+
+\fun{GEN}{sd_strictmatch}{const char *v, long flag}
+
+\fun{GEN}{sd_timer}{const char *v, long flag}
+
+
 \section{Hashtables}
 A \tet{hashtable}, or associative array, is a set of pairs $(k,v)$ of keys
 and values. PARI implements general extensible hashtables for fast data
