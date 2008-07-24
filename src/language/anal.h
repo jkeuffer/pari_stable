@@ -132,22 +132,10 @@ void print_prefixed_text(const char *s, const char *prefix, const char *str);
 #define print_text(s) print_prefixed_text((s),NULL,NULL);
 
 /* GP output && output format */
-enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
+enum { f_RAW = 0, f_PRETTYMAT = 1, f_PRETTY = 3, f_TEX = 4 };
 
-void error0(GEN g);
 void gpwritebin(const char *s, GEN x);
-void print   (GEN g);
 void print0(GEN g, long flag);
-void print1  (GEN g);
-void printp  (GEN g);
-void printp1 (GEN g);
-void printtex(GEN g);
-void write0  (const char *s, GEN g);
-void write1  (const char *s, GEN g);
-void writetex(const char *s, GEN g);
-GEN Str(GEN g);
-GEN Strexpand(GEN g);
-GEN Strtex(GEN g);
 
 struct node_loc
 {

@@ -2200,11 +2200,7 @@ qfr(125, 23, 1, 0.E-18)
 ? pprint((x-12*y)/(y+13*x));
 -11/14
 ? pprint([1,2;3,4])
-
-[1 2]
-
-[3 4]
-
+[1, 2; 3, 4]
 ? pprint1(x+y);pprint(x+y);
 2*x2*x
 ? \precision=96
@@ -2706,4 +2702,4 @@ mod(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [608, 115082]
 ? print("Total time spent: ",gettime);
-Total time spent: 376
+Total time spent: 364
