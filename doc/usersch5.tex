@@ -386,6 +386,10 @@ a \typ{POLMOD}.
 \fun{int}{is_const_t}{long t} \kbd{true} iff \kbd{t} is a scalar which is not
 \typ{POLMOD}.
 
+\fun{int}{is_noncalc_t}{long t} true if generic operations (\kbd{gadd},
+\kbd{gmul}) do not make sense for $t$ : corresponds to types
+\typ{LIST}, \typ{STR}, \typ{VECSMALL}, \typ{CLOSURE}
+
 \subsec{Accessors and components}.\label{se:accessors}
 The first two functions return \kbd{GEN} components as copies on the stack:
 
