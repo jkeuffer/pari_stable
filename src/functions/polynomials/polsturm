@@ -7,3 +7,5 @@ Help: polsturm(pol,{a},{b}): number of real roots of the polynomial pol in the
 Doc: number of real roots of the real polynomial \var{pol} in the interval
  $]a,b]$, using Sturm's algorithm. $a$ (resp.~$b$) is taken to be $-\infty$
  (resp.~$+\infty$) if omitted.
+Variant: Also available is \fun{long}{sturm}{GEN pol} (total number of real
+ roots).

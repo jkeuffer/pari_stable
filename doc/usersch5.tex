@@ -2548,6 +2548,8 @@ reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 \fun{GEN}{FpXQ_invsafe}{GEN x,GEN T,GEN p}, as \kbd{FpXQ\_inv}, returning
 \kbd{NULL} if \kbd{x} is not invertible.
 
+\fun{GEN}{FpXQX_renormalize}{GEN x, long lx}
+
 \fun{GEN}{FpXQ_pow}{GEN x, GEN n, GEN T, GEN p} computes $\kbd{x}^\kbd{n}$.
 
 \fun{GEN}{FpXQ_log}{GEN a, GEN g, GEN ord, GEN T, GEN p} Let \kbd{g} be of
@@ -3039,6 +3041,8 @@ in variable \kbd{v}, of degree less than~\kbd{d}.
 \fun{GEN}{F2x_rem}{GEN x, GEN y}
 
 \fun{GEN}{F2x_div}{GEN x, GEN y}
+
+\fun{GEN}{F2x_renormalize}{GEN x, long lx}
 
 \fun{GEN}{F2x_extgcd}{GEN a, GEN b, GEN *ptu, GEN *ptv}
 
