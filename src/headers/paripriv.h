@@ -207,25 +207,6 @@ ulong gcduodd(ulong x, ulong y);
 long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
 long  u_lvalrem_stop(ulong *n, ulong p, int *stop);
 
-/* blackbox group */
-
-struct bb_group
-{
-  GEN (*mul)(void *E, GEN, GEN);
-  GEN (*pow)(void *E, GEN, GEN);
-  GEN (*rand)(void *E);
-  int (*cmp)(GEN, GEN);
-  int (*cmp1)(GEN);
-};
-
-GEN gen_Shanks_log(GEN x,GEN g0,GEN q, void *E, const struct bb_group *grp,
-    GEN easy(void*E, GEN, GEN, GEN));
-GEN gen_PH_log(GEN a, GEN g, GEN ord, void *E, const struct bb_group *grp,
-    GEN easy(void *E, GEN, GEN, GEN));
-GEN gen_eltorder(GEN x, GEN o, void *E, const struct bb_group *grp);
-GEN gen_Shanks_sqrtn(GEN a, GEN n, GEN q, GEN *zetan, void *E,
-    const struct bb_group *grp);
-
 /* quadratic forms, quadratic numbers */
 long cornacchia(GEN d, GEN p, GEN *px, GEN *py);
 long cornacchia2(GEN d, GEN p, GEN *px, GEN *py);

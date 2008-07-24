@@ -69,6 +69,16 @@ typedef struct {
   GEN G;
 } nffp_t;
 
+/* black box groups */
+struct bb_group
+{
+  GEN (*mul)(void *E, GEN, GEN);
+  GEN (*pow)(void *E, GEN, GEN);
+  GEN (*rand)(void *E);
+  int (*cmp)(GEN, GEN);
+  int (*cmp1)(GEN);
+};
+
 /* various flags for nf/bnf routines */
 enum {
   nf_ORIG = 1,
