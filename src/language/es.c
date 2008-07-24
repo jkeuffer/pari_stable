@@ -1248,6 +1248,7 @@ nextch:
           case 'f':
           case 'F':
           {
+            pari_sp av = avma;
             if (arg_vector)
               gvalue = simplify_i( v_get_arg(arg_vector, &index, save_fmt) );
             else {
@@ -1258,7 +1259,7 @@ nextch:
             }
             fmtreal(S, gvalue, GP_DATA->fmt->sp, dosign(print_blank,print_plus),
                     ch, maxwidth, ljust, len, zpad);
-            break;
+            avma = av; break;
           }
           default:
             pari_err(talker, "invalid conversion or specification %c in format `%s'", ch, save_fmt);
