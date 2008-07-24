@@ -14,3 +14,6 @@ Doc:
  (x_i~\kbd{and not}(y_i)) 2^i$$
 
  See \secref{se:bitand} for the behaviour for negative arguments.
+Variant: Also available is
+ \fun{GEN}{ibitnegimply}{GEN x, GEN y}, which returns the bitwise negated
+ imply of $|x|$ and $|y|$, two integers.

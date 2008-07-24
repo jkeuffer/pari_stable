@@ -555,10 +555,6 @@ int     is_gener_Fl(ulong x, ulong p, ulong p_1, GEN L);
 
 /* arith2.c */
 
-GEN     ibitand(GEN x, GEN y);
-GEN     ibitnegimply(GEN x, GEN y);
-GEN     ibitor(GEN x, GEN y);
-GEN     ibitxor(GEN x, GEN y);
 byteptr initprimes0(ulong maxnum, long *lenp, ulong *lastp);
 long    set_optimize(long what, GEN g);
 

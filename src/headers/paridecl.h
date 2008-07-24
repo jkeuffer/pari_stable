@@ -712,8 +712,6 @@ long    Z_issquarefree(GEN x);
 GEN     addprimes(GEN primes);
 GEN     Z_factor_limit(GEN n, long all);
 long    bigomega(GEN n);
-GEN     binaire(GEN x);
-long    bittest(GEN x, long n);
 GEN     boundfact(GEN n, long lim);
 GEN     core(GEN n);
 GEN     corepartial(GEN n, long l);
@@ -730,12 +728,6 @@ GEN     factorint(GEN n, long flag);
 GEN     factoru(ulong n);
 GEN     factoru_pow(ulong n);
 GEN     gbigomega(GEN n);
-GEN     gbitand(GEN x, GEN y);
-GEN     gbitneg(GEN x, long n);
-GEN     gbitnegimply(GEN x, GEN y);
-GEN     gbitor(GEN x, GEN y);
-GEN     gbittest(GEN x, long n);
-GEN     gbitxor(GEN x, GEN y);
 GEN     gissquarefree(GEN x);
 GEN     gmoebius(GEN n);
 GEN     gnumbdiv(GEN n);
@@ -1102,6 +1094,21 @@ GEN     ZV_indexsort(GEN L);
 long    ZV_search(GEN x, GEN y);
 GEN     ZV_sort(GEN L);
 GEN     ZV_sort_uniq(GEN L);
+
+/* bit.c */
+
+GEN     binaire(GEN x);
+long    bittest(GEN x, long n);
+GEN     gbitand(GEN x, GEN y);
+GEN     gbitneg(GEN x, long n);
+GEN     gbitnegimply(GEN x, GEN y);
+GEN     gbitor(GEN x, GEN y);
+GEN     gbittest(GEN x, long n);
+GEN     gbitxor(GEN x, GEN y);
+GEN     ibitand(GEN x, GEN y);
+GEN     ibitnegimply(GEN x, GEN y);
+GEN     ibitor(GEN x, GEN y);
+GEN     ibitxor(GEN x, GEN y);
 
 /* buch1.c */
 

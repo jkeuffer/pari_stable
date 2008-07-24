@@ -25,3 +25,6 @@ Doc:
  ? bitand(-5, -3)
  %3 = -7
  @eprog
+Variant: Also available is
+ \fun{GEN}{ibitand}{GEN x, GEN y}, which returns the bitwise \emph{and}
+ of $|x|$ and $|y|$, two integers.
